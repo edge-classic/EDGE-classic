@@ -50,8 +50,8 @@ std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack);
 // Only populate the pack directory; used for ad-hoc folder/EPK checks
 void Pack_PopulateOnly(data_file_c *df);
 
-// Check pack for valid IWADs. Return associated game_base string if found and set score if provided
-std::string Pack_CheckForIWADs(data_file_c *df, int *score);
+// Check pack for valid IWADs. Return associated game_checker index if found
+int Pack_CheckForIWADs(data_file_c *df);
 
 // Populate pack directory and process appropriate files (COAL, DDF, etc)
 void Pack_ProcessAll(data_file_c *df, size_t file_index);

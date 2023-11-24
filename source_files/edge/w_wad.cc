@@ -76,38 +76,25 @@
 #include "rad_trig.h"
 #include "p_umapinfo.h" //Lobo 2022
 
-typedef struct
-{
-    // used to determine IWAD priority if no -iwad parameter provided
-    // and multiple IWADs are detected in various paths
-    u8_t score;
-
-    // game_base to set if this IWAD is used
-    const std::string base;
-
-    // (usually) unique lumps to check for in a potential IWAD
-    const std::string unique_lumps[2];
-} game_check_t;
-
 // Combination of unique lumps needed to best identify an IWAD
-static const std::vector<game_check_t> game_checker = {{
-    {17, "CUSTOM", {"EDGEGAME", "EDGEGAME"}},
-    {2, "BLASPHEMER", {"BLASPHEM", "E1M1"}},
-    {9, "FREEDOOM1", {"FREEDOOM", "E1M1"}},
-    {14, "FREEDOOM2", {"FREEDOOM", "MAP01"}},
-    {7, "REKKR", {"REKCREDS", "E1M1"}},
-    {6, "HACX", {"HACX-R", "MAP01"}},
-    {5, "HARMONY", {"0HAWK01", "DBIGFONT"}}, // Only the original, not Harmony-Compatible, should have DBIGFONT
-    {4, "CHEX", {"ENDOOM", "_DEUTEX_"}},     // Original Chex Quest, NOT CQ3
-    {3, "HERETIC", {"MUS_E1M1", "E1M1"}},
-    {12, "PLUTONIA", {"CAMO1", "MAP01"}},
-    {13, "TNT", {"REDTNT2", "MAP01"}},
-    {11, "DOOM", {"BFGGA0", "E2M1"}},
-    {10, "DOOM", {"DMENUPIC", "M_MULTI"}}, // BFG Edition
-    {8, "DOOM1", {"SHOTA0", "E1M1"}},
-    {16, "DOOM2", {"BFGGA0", "MAP01"}},
-    {15, "DOOM2", {"DMENUPIC", "MAP33"}}, // BFG Edition
-    {1, "STRIFE", {"VELLOGO", "RGELOGO"}} // Dev/internal use - Definitely nowhwere near playable
+const std::vector<game_check_t> game_checker = {{
+    {"Custom", "CUSTOM", {"EDGEGAME", "EDGEGAME"}},
+    {"Blasphemer", "BLASPHEMER", {"BLASPHEM", "E1M1"}},
+    {"Freedoom 1", "FREEDOOM1", {"FREEDOOM", "E1M1"}},
+    {"Freedoom 2", "FREEDOOM2", {"FREEDOOM", "MAP01"}},
+    {"REKKR", "REKKR", {"REKCREDS", "E1M1"}},
+    {"HacX", "HACX", {"HACX-R", "MAP01"}},
+    {"Harmony", "HARMONY", {"0HAWK01", "DBIGFONT"}}, // Only the original, not Harmony-Compatible, should have DBIGFONT
+    {"Chex Quest", "CHEX", {"ENDOOM", "_DEUTEX_"}},     // Original Chex Quest, NOT CQ3
+    {"Heretic", "HERETIC", {"MUS_E1M1", "E1M1"}},
+    {"Plutonia", "PLUTONIA", {"CAMO1", "MAP01"}},
+    {"Evilution", "TNT", {"REDTNT2", "MAP01"}},
+    {"Doom", "DOOM", {"BFGGA0", "E2M1"}},
+    {"Doom BFG", "DOOM", {"DMENUPIC", "M_MULTI"}}, // BFG Edition
+    {"Doom Demo", "DOOM1", {"SHOTA0", "E1M1"}},
+    {"Doom II", "DOOM2", {"BFGGA0", "MAP01"}},
+    {"Doom II BFG", "DOOM2", {"DMENUPIC", "MAP33"}}, // BFG Edition
+    {"Strife", "STRIFE", {"VELLOGO", "RGELOGO"}} // Dev/internal use - Definitely nowhwere near playable
 }};
 
 class wad_file_c
@@ -837,7 +824,7 @@ static void CheckForLevel(wad_file_c *wad, int lump, const char *name, const raw
     }
 }
 
-std::string W_CheckForUniqueLumps(epi::file_c *file, int *score)
+int W_CheckForUniqueLumps(epi::file_c *file)
 {
     int              length;
     raw_wad_header_t header;
@@ -845,7 +832,7 @@ std::string W_CheckForUniqueLumps(epi::file_c *file, int *score)
     if (!file)
     {
         I_Warning("W_CheckForUniqueLumps: Received null file_c pointer!\n");
-        return "";
+        return -1;
     }
 
     // WAD file
@@ -858,16 +845,18 @@ std::string W_CheckForUniqueLumps(epi::file_c *file, int *score)
     file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
     file->Read(raw_info, length);
 
-    for (auto check : game_checker)
+    for (int check = 0; check < game_checker.size(); check++)
     {
+        game_check_t gamecheck = game_checker[check];
+
         // Do not require IWAD header if loading Harmony, REKKR, BFG Edition WADs, Chex Quest or a custom standalone
         // IWAD
         if (epi::prefix_cmp(header.identification, "IWAD") != 0 &&
-            epi::case_cmp(check.unique_lumps[0], "DMENUPIC") != 0 &&
-            epi::case_cmp(check.unique_lumps[0], "REKCREDS") != 0 &&
-            epi::case_cmp(check.unique_lumps[0], "0HAWK01") != 0 &&
-            epi::case_cmp(check.unique_lumps[0], "EDGEGAME") != 0 &&
-            epi::case_cmp(check.unique_lumps[0], "ENDOOM") != 0)
+            epi::case_cmp(gamecheck.unique_lumps[0], "DMENUPIC") != 0 &&
+            epi::case_cmp(gamecheck.unique_lumps[0], "REKCREDS") != 0 &&
+            epi::case_cmp(gamecheck.unique_lumps[0], "0HAWK01") != 0 &&
+            epi::case_cmp(gamecheck.unique_lumps[0], "EDGEGAME") != 0 &&
+            epi::case_cmp(gamecheck.unique_lumps[0], "ENDOOM") != 0)
         {
             continue;
         }
@@ -879,20 +868,18 @@ std::string W_CheckForUniqueLumps(epi::file_c *file, int *score)
         {
             raw_wad_entry_t &entry = raw_info[i];
 
-            if (epi::strncmp(check.unique_lumps[0], entry.name,
-                             check.unique_lumps[0].size() < 8 ? check.unique_lumps[0].size() : 8) == 0)
+            if (epi::strncmp(gamecheck.unique_lumps[0], entry.name,
+                             gamecheck.unique_lumps[0].size() < 8 ? gamecheck.unique_lumps[0].size() : 8) == 0)
             {
                 // EDGEGAME is the only lump needed for custom standalones
-                if (epi::case_cmp(check.unique_lumps[0], "EDGEGAME") == 0)
+                if (epi::case_cmp(gamecheck.unique_lumps[0], "EDGEGAME") == 0)
                 {
                     delete[] raw_info;
                     file->Seek(0, epi::file_c::SEEKPOINT_START);
-                    if (score)
-                        *score = check.score;
-                    return check.base;
+                    return check;
                 }
                 // Either really smart or really dumb Chex Quest detection method
-                else if (epi::case_cmp(check.unique_lumps[0], "ENDOOM") == 0)
+                else if (epi::case_cmp(gamecheck.unique_lumps[0], "ENDOOM") == 0)
                 {
                     SYS_ASSERT(entry.size == 4000);
                     file->Seek(entry.pos, epi::file_c::SEEKPOINT_START);
@@ -909,8 +896,8 @@ std::string W_CheckForUniqueLumps(epi::file_c *file, int *score)
                 else
                     lump1_found = true;
             }
-            if (epi::strncmp(check.unique_lumps[1], entry.name,
-                             check.unique_lumps[1].size() < 8 ? check.unique_lumps[1].size() : 8) == 0)
+            if (epi::strncmp(gamecheck.unique_lumps[1], entry.name,
+                             gamecheck.unique_lumps[1].size() < 8 ? gamecheck.unique_lumps[1].size() : 8) == 0)
                 lump2_found = true;
         }
 
@@ -918,17 +905,13 @@ std::string W_CheckForUniqueLumps(epi::file_c *file, int *score)
         {
             delete[] raw_info;
             file->Seek(0, epi::file_c::SEEKPOINT_START);
-            if (score)
-                *score = check.score;
-            return check.base;
+            return check;
         }
     }
 
     delete[] raw_info;
     file->Seek(0, epi::file_c::SEEKPOINT_START);
-    if (score)
-        *score = 0;
-    return "";
+    return -1;
 }
 
 void ProcessFixersForWad(data_file_c *df)

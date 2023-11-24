@@ -1118,7 +1118,7 @@ static void PurgeCache(void)
 }
 
 // If a valid IWAD (or EDGEGAME) is found, return the appopriate game_base string ("doom2", "heretic", etc)
-static std::string CheckPackForGameFiles(std::filesystem::path check_pack, filekind_e check_kind, int *check_score)
+static int CheckPackForGameFiles(std::filesystem::path check_pack, filekind_e check_kind)
 {
     data_file_c *check_pack_df = new data_file_c(check_pack, check_kind);
     SYS_ASSERT(check_pack_df);
@@ -1126,13 +1126,11 @@ static std::string CheckPackForGameFiles(std::filesystem::path check_pack, filek
     if (Pack_FindStem(check_pack_df->pack, "EDGEGAME"))
     {
         delete check_pack_df;
-        if (check_score)
-            *check_score = 15;
-        return "CUSTOM";
+        return 0; // Custom game index value in game_checker vector
     }
     else
     {
-        std::string check_base = Pack_CheckForIWADs(check_pack_df, check_score);
+        int check_base = Pack_CheckForIWADs(check_pack_df);
         delete check_pack_df;
         return check_base;
     }
@@ -1169,13 +1167,15 @@ static void IdentifyVersion(void)
         // Treat directories passed via -iwad as a pack file and check accordingly
         if (epi::FS_IsDir(iwad_par))
         {
-            game_base = CheckPackForGameFiles(iwad_par, FLKIND_IFolder, nullptr);
-            if (game_base.empty())
+            int game_check = CheckPackForGameFiles(iwad_par, FLKIND_IFolder);
+            if (game_check < 0)
                 I_Error("Folder %s passed via -iwad parameter, but no IWAD or EDGEGAME file detected!\n",
                         iwad_par.u8string().c_str());
             else
             {
+                game_base = game_checker[game_check].base;
                 W_AddFilename(iwad_par, FLKIND_IFolder);
+                I_Debugf("GAME BASE = [%s]\n", game_base.c_str());
                 return;
             }
         }
@@ -1183,42 +1183,41 @@ static void IdentifyVersion(void)
     else
     {
         // In the absence of the -iwad parameter, check files/dirs added via drag-and-drop for valid IWADs
-        // Even if not the best score, remove them from the arg list if they are valid to
-        // avoid them potentially being added as PWADs
-        int best_score = 0;
-        std::filesystem::path best_match;
-        filekind_e            best_kind = FLKIND_IWad;
+        // Remove them from the arg list if they are valid to avoid them potentially being added as PWADs
+        std::vector<SDL_MessageBoxButtonData> game_buttons;
+        std::unordered_map<int, std::pair<std::filesystem::path, filekind_e>> game_paths;
         for (size_t p = 1; p < int(argv::list.size()) && !argv::IsOption(p); p++)
         {
             std::filesystem::path dnd = std::filesystem::u8path(argv::list[p]);
-            std::string test_base;
-            int test_score = 0;
+            int test_index = -1;
             if (epi::FS_IsDir(dnd))
             {
-                test_base = CheckPackForGameFiles(dnd, FLKIND_IFolder, &test_score);
-                if (test_score)
+                test_index = CheckPackForGameFiles(dnd, FLKIND_IFolder);
+                if (test_index >= 0)
                 {
-                    if (test_score > best_score)
+                    if (!game_paths.count(test_index))
                     {
-                        best_score = test_score;
-                        game_base = test_base;
-                        best_kind = FLKIND_IFolder;
-                        best_match = dnd;
+                        game_paths.try_emplace(test_index, std::make_pair(dnd, FLKIND_IFolder));
+                        SDL_MessageBoxButtonData temp_button;
+                        temp_button.buttonid = test_index;
+                        temp_button.text = game_checker[test_index].display_name.c_str();
+                        game_buttons.push_back(temp_button);
                     }
                     argv::list.erase(argv::list.begin()+p--);
                 }
             }
             else if (epi::case_cmp(epi::PATH_GetExtension(dnd).string(), ".epk") == 0)
             {
-                test_base = CheckPackForGameFiles(dnd, FLKIND_IPK, &test_score);
-                if (test_score)
+                test_index = CheckPackForGameFiles(dnd, FLKIND_IPK);
+                if (test_index >= 0)
                 {
-                    if (test_score > best_score)
+                    if (!game_paths.count(test_index))
                     {
-                        best_score = test_score;
-                        game_base = test_base;
-                        best_kind = FLKIND_IPK;
-                        best_match = dnd;
+                        game_paths.try_emplace(test_index, std::make_pair(dnd, FLKIND_IPK));
+                        SDL_MessageBoxButtonData temp_button;
+                        temp_button.buttonid = test_index;
+                        temp_button.text = game_checker[test_index].display_name.c_str();
+                        game_buttons.push_back(temp_button);
                     }
                     argv::list.erase(argv::list.begin()+p--);
                 }  
@@ -1227,25 +1226,52 @@ static void IdentifyVersion(void)
             {
                 epi::file_c *game_test =
                     epi::FS_Open(dnd, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-                test_base  = W_CheckForUniqueLumps(game_test, &test_score);
+                test_index  = W_CheckForUniqueLumps(game_test);
                 delete game_test;
-                if (test_score)
+                if (test_index >= 0)
                 {
-                    if (test_score > best_score)
+                    if (!game_paths.count(test_index))
                     {
-                        best_score = test_score;
-                        game_base  = test_base;
-                        best_match = dnd;
-                        best_kind  = FLKIND_IWad;
+                        game_paths.try_emplace(test_index, std::make_pair(dnd, FLKIND_IWad));
+                        SDL_MessageBoxButtonData temp_button;
+                        temp_button.buttonid = test_index;
+                        temp_button.text = game_checker[test_index].display_name.c_str();
+                        game_buttons.push_back(temp_button);
                     }
                     argv::list.erase(argv::list.begin()+p--);
                 }
             }
         }
-        if (best_score)
+        if (game_paths.size() == 1)
         {
-            W_AddFilename(best_match, best_kind);
+            auto selected_game = game_paths.begin();
+            game_base = game_checker[selected_game->first].base;
+            W_AddFilename(selected_game->second.first, selected_game->second.second);
+            I_Debugf("GAME BASE = [%s]\n", game_base.c_str());
             return;
+        }
+        else if (!game_paths.empty())
+        {
+            SYS_ASSERT(game_paths.size() == game_buttons.size());
+            SDL_MessageBoxData picker_data;
+            SDL_memset(&picker_data, 0, sizeof(SDL_MessageBoxData));
+            picker_data.title = "EDGE-Classic Game Selector";
+            picker_data.message = "No game was specified, but EDGE-Classic found multiple valid game files. Please select one or press Escape to cancel.";
+            picker_data.numbuttons = game_buttons.size();
+            picker_data.buttons = game_buttons.data();
+            int button_hit = 0;
+            if (SDL_ShowMessageBox(&picker_data, &button_hit) != 0)
+                I_Error("Error in game selection dialog!\n");
+            else if (button_hit == -1)
+                I_Error("Game selection cancelled.\n");
+            else
+            {
+                game_base = game_checker[button_hit].base;
+                auto selected_game = game_paths.at(button_hit);
+                W_AddFilename(selected_game.first, selected_game.second);
+                I_Debugf("GAME BASE = [%s]\n", game_base.c_str());
+                return;
+            }
         }
     }
 
@@ -1339,21 +1365,29 @@ static void IdentifyVersion(void)
 
     foundindoomwadpath:
 
+        int test_score = -1;
+
         if (epi::case_cmp(epi::PATH_GetExtension(iwad_file).string(), ".wad") == 0)
         {
             epi::file_c *game_test = epi::FS_Open(iwad_file, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-            game_base              = W_CheckForUniqueLumps(game_test, nullptr);
+            test_score              = W_CheckForUniqueLumps(game_test);
             delete game_test;
-            if (!game_base.empty())
+            if (test_score >= 0)
+            {
+                game_base = game_checker[test_score].base;
                 W_AddFilename(iwad_file, FLKIND_IWad);
+            }
             else
                 I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.u8string().c_str());
         }
         else
         {
-            game_base = CheckPackForGameFiles(iwad_file, FLKIND_IPK, nullptr);
-            if (!game_base.empty())
+            test_score = CheckPackForGameFiles(iwad_file, FLKIND_IPK);
+            if (test_score >= 0)
+            {
+                game_base = game_checker[test_score].base;
                 W_AddFilename(iwad_file, FLKIND_IPK);
+            }
             else
                 I_Error("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.u8string().c_str());
         }
@@ -1362,10 +1396,8 @@ static void IdentifyVersion(void)
     {
         std::filesystem::path location;
 
-        // Track the "best" game file found throughout the various paths based on scores stored in game_checker
-        int                   best_score = 0;
-        std::filesystem::path best_match;
-        filekind_e            best_kind = FLKIND_IWad;
+        std::vector<SDL_MessageBoxButtonData> game_buttons;
+        std::unordered_map<int, std::pair<std::filesystem::path, filekind_e>> game_paths;
 
         int max = 1;
 
@@ -1402,15 +1434,18 @@ static void IdentifyVersion(void)
                     {
                         epi::file_c *game_test =
                             epi::FS_Open(fsd[j].name, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-                        int         test_score = 0;
-                        std::string test_base  = W_CheckForUniqueLumps(game_test, &test_score);
+                        int         test_score = W_CheckForUniqueLumps(game_test);
                         delete game_test;
-                        if (test_score > best_score)
+                        if (test_score >= 0)
                         {
-                            best_score = test_score;
-                            game_base  = test_base;
-                            best_match = fsd[j].name;
-                            best_kind  = FLKIND_IWad;
+                            if (!game_paths.count(test_score))
+                            {
+                                game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, FLKIND_IWad));
+                                SDL_MessageBoxButtonData temp_button;
+                                temp_button.buttonid = test_score;
+                                temp_button.text = game_checker[test_score].display_name.c_str();
+                                game_buttons.push_back(temp_button);
+                            }
                         }
                     }
                 }
@@ -1425,14 +1460,17 @@ static void IdentifyVersion(void)
                 {
                     if (!fsd[j].is_dir)
                     {
-                        int         test_score = 0;
-                        std::string test_base  = CheckPackForGameFiles(fsd[j].name, FLKIND_IPK, &test_score);
-                        if (test_score > best_score)
+                        int         test_score = CheckPackForGameFiles(fsd[j].name, FLKIND_IPK);
+                        if (test_score >= 0)
                         {
-                            best_score = test_score;
-                            game_base  = test_base;
-                            best_match = fsd[j].name;
-                            best_kind  = FLKIND_IPK;
+                            if (!game_paths.count(test_score))
+                            {
+                                game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, FLKIND_IPK));
+                                SDL_MessageBoxButtonData temp_button;
+                                temp_button.buttonid = test_score;
+                                temp_button.text = game_checker[test_score].display_name.c_str();
+                                game_buttons.push_back(temp_button);
+                            }
                         }
                     }
                 }
@@ -1460,16 +1498,19 @@ static void IdentifyVersion(void)
                         if (!fsd[j].is_dir)
                         {
                             epi::file_c *game_test =
-                                epi::FS_Open(fsd[j].name, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
-                            int         test_score = 0;
-                            std::string test_base  = W_CheckForUniqueLumps(game_test, &test_score);
+                            epi::FS_Open(fsd[j].name, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+                            int         test_score = W_CheckForUniqueLumps(game_test);
                             delete game_test;
-                            if (test_score > best_score)
+                            if (test_score >= 0)
                             {
-                                best_score = test_score;
-                                game_base  = test_base;
-                                best_match = fsd[j].name;
-                                best_kind  = FLKIND_IWad;
+                                if (!game_paths.count(test_score))
+                                {
+                                    game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, FLKIND_IWad));
+                                    SDL_MessageBoxButtonData temp_button;
+                                    temp_button.buttonid = test_score;
+                                    temp_button.text = game_checker[test_score].display_name.c_str();
+                                    game_buttons.push_back(temp_button);
+                                }
                             }
                         }
                     }
@@ -1484,14 +1525,17 @@ static void IdentifyVersion(void)
                     {
                         if (!fsd[j].is_dir)
                         {
-                            int         test_score = 0;
-                            std::string test_base  = CheckPackForGameFiles(fsd[j].name, FLKIND_IPK, &test_score);
-                            if (test_score > best_score)
+                            int         test_score = CheckPackForGameFiles(fsd[j].name, FLKIND_IPK);
+                            if (test_score >= 0)
                             {
-                                best_score = test_score;
-                                game_base  = test_base;
-                                best_match = fsd[j].name;
-                                best_kind  = FLKIND_IPK;
+                                if (!game_paths.count(test_score))
+                                {
+                                    game_paths.try_emplace(test_score, std::make_pair(fsd[j].name, FLKIND_IPK));
+                                    SDL_MessageBoxButtonData temp_button;
+                                    temp_button.buttonid = test_score;
+                                    temp_button.text = game_checker[test_score].display_name.c_str();
+                                    game_buttons.push_back(temp_button);
+                                }
                             }
                         }
                     }
@@ -1499,10 +1543,35 @@ static void IdentifyVersion(void)
             }
         }
 
-        if (best_score == 0)
+        if (game_paths.empty())
             I_Error("IdentifyVersion: No IWADs or standalone packs found!\n");
+        else if (game_paths.size() == 1)
+        {
+            auto selected_game = game_paths.begin();
+            game_base = game_checker[selected_game->first].base;
+            W_AddFilename(selected_game->second.first, selected_game->second.second);
+        }
         else
-            W_AddFilename(best_match, best_kind);
+        {
+            SYS_ASSERT(game_paths.size() == game_buttons.size());
+            SDL_MessageBoxData picker_data;
+            SDL_memset(&picker_data, 0, sizeof(SDL_MessageBoxData));
+            picker_data.title = "EDGE-Classic Game Selector";
+            picker_data.message = "No game was specified, but EDGE-Classic found multiple valid game files. Please select one or press Escape to cancel.";
+            picker_data.numbuttons = game_buttons.size();
+            picker_data.buttons = game_buttons.data();
+            int button_hit = 0;
+            if (SDL_ShowMessageBox(&picker_data, &button_hit) != 0)
+                I_Error("Error in game selection dialog!\n");
+            else if (button_hit == -1)
+                I_Error("Game selection cancelled.\n");
+            else
+            {
+                game_base = game_checker[button_hit].base;
+                auto selected_game = game_paths.at(button_hit);
+                W_AddFilename(selected_game.first, selected_game.second);
+            }
+        }
     }
 
     I_Debugf("GAME BASE = [%s]\n", game_base.c_str());

@@ -44,6 +44,21 @@ class wadtex_resource_c
     int texture2;
 };
 
+typedef struct game_check_s
+{
+    // Friendly string for selector dialog box (if multiple games found)
+    // TODO: Read EDGEGAME file/lump for custom friendly title
+    const std::string display_name;
+
+    // game_base to set if this IWAD is used
+    const std::string base;
+
+    // (usually) unique lumps to check for in a potential IWAD
+    const std::string unique_lumps[2];
+} game_check_t;
+
+extern const std::vector<game_check_t> game_checker;
+
 int W_CheckNumForName(const char *name);
 // Like above, but returns the data file index instead of the sortedlump index
 int W_CheckFileNumForName(const char *name);
@@ -88,7 +103,8 @@ bool W_IsLumpInPwad(const char *name);
 
 bool W_IsLumpInAnyWad(const char *name);
 
-std::string W_CheckForUniqueLumps(epi::file_c *file, int *score);
+// Returns index into game_checker vector if valid game found, else -1
+int W_CheckForUniqueLumps(epi::file_c *file);
 
 void W_BuildNodes(void);
 void W_ReadUMAPINFOLumps(void);

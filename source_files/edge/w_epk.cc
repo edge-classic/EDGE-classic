@@ -1200,10 +1200,8 @@ void Pack_PopulateOnly(data_file_c *df)
     df->pack->SortEntries();
 }
 
-std::string Pack_CheckForIWADs(data_file_c *df, int *score)
+int Pack_CheckForIWADs(data_file_c *df)
 {
-    std::string  check_base  = "";
-    int          check_score = 0;
     pack_file_c *pack        = df->pack;
     for (size_t d = 0; d < pack->dirs.size(); d++)
     {
@@ -1218,21 +1216,17 @@ std::string Pack_CheckForIWADs(data_file_c *df, int *score)
 
             if (pack_wad)
             {
-                int         test_score = 0;
-                std::string test_base  = W_CheckForUniqueLumps(pack_wad, &test_score);
-                if (test_score > check_score)
+                int pack_iwad_check  = W_CheckForUniqueLumps(pack_wad);
+                if (pack_iwad_check >= 0)
                 {
-                    check_score = test_score;
-                    check_base  = test_base;
+                    delete pack_wad;
+                    return pack_iwad_check;
                 }
             }
-
             delete pack_wad;
         }
     }
-    if (score)
-        *score = check_score;
-    return check_base;
+    return -1;
 }
 
 void Pack_ProcessAll(data_file_c *df, size_t file_index)

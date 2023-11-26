@@ -568,6 +568,7 @@ static void RAD_ComputeScriptCRC(rad_script_t *scr)
     scr->crc += (int)I_ROUND(scr->rad_x);
     scr->crc += (int)I_ROUND(scr->rad_y);
     scr->crc += (int)I_ROUND(scr->rad_z);
+    scr->crc += scr->sector_index;
 
     // lastly handle miscellaneous parts
 
@@ -787,6 +788,7 @@ static void RAD_ParseRadiusTrigger(param_set_t &pars)
     this_rad->rad_x                = -1;
     this_rad->rad_y                = -1;
     this_rad->rad_z                = -1;
+    this_rad->sector_index         = -1;
     this_rad->appear               = DEFAULT_APPEAR;
     this_rad->min_players          = 0;
     this_rad->max_players          = MAXPLAYERS;
@@ -855,6 +857,73 @@ static void RAD_ParseRadiusTrigger(param_set_t &pars)
             this_rad->z     = (z1 + z2) / 2.0f;
             this_rad->rad_z = fabs(z1 - z2) / 2.0f;
         }
+    }
+
+    // link it in
+    this_rad->next = r_scripts;
+    this_rad->prev = NULL;
+
+    if (r_scripts)
+        r_scripts->prev = this_rad;
+
+    r_scripts = this_rad;
+
+    rad_cur_level++;
+}
+
+static void RAD_ParseSectorTrigger(param_set_t &pars)
+{
+    // RadiusTrigger <sector index>
+    // RadiusTrigger <sector index> <low z> <high z>
+
+    if (rad_cur_level == 2)
+        RAD_Error("%s found, but previous END_RADIUS_TRIGGER missing !\n", pars[0]);
+
+    if (rad_cur_level == 0)
+        RAD_Error("%s found, but without any START_MAP !\n", pars[0]);
+
+    // Set the node up,..
+
+    this_rad = new rad_script_t;
+
+    // set defaults
+    this_rad->x                    = 0;
+    this_rad->y                    = 0;
+    this_rad->z                    = 0;
+    this_rad->rad_x                = -1;
+    this_rad->rad_y                = -1;
+    this_rad->rad_z                = -1;
+    this_rad->sector_index         = -1;
+    this_rad->appear               = DEFAULT_APPEAR;
+    this_rad->min_players          = 0;
+    this_rad->max_players          = MAXPLAYERS;
+    this_rad->absolute_req_players = 1;
+    this_rad->repeat_count         = -1;
+    this_rad->repeat_delay         = 0;
+
+    pending_wait_tics = 0;
+    pending_label     = NULL;
+
+    if (pars.size() != 2 && pars.size() != 4)
+        RAD_Error("%s: Wrong number of parameters.\n", pars[0]);
+
+    RAD_CheckForInt(pars[1], &this_rad->sector_index);
+
+    if (this_rad->sector_index < 0)
+        RAD_Error("%s: Negative sector index provided.\n", pars[0]);
+
+    if (pars.size() == 4)
+    {
+        float z1, z2;
+
+        RAD_CheckForFloat(pars[2], &z1);
+        RAD_CheckForFloat(pars[3], &z2);
+
+        if (z1 > z2)
+            RAD_WarnError("%s: bad height range %1.1f to %1.1f\n", pars[0], z1, z2);
+
+        this_rad->z     = (z1 + z2) / 2.0f;
+        this_rad->rad_z = fabs(z1 - z2) / 2.0f;
     }
 
     // link it in
@@ -2235,6 +2304,7 @@ static const rts_parser_t radtrig_parsers[] = {
     {-1, "START_MAP", 2, 2, RAD_ParseStartMap},
     {-1, "RADIUS_TRIGGER", 4, 6, RAD_ParseRadiusTrigger},
     {-1, "RECT_TRIGGER", 5, 7, RAD_ParseRadiusTrigger},
+    {-1, "SECTOR_TRIGGER", 2, 4, RAD_ParseSectorTrigger},
     {-1, "END_RADIUS_TRIGGER", 1, 1, RAD_ParseEndRadiusTrigger},
     {-1, "END_MAP", 1, 1, RAD_ParseEndMap},
 

@@ -439,6 +439,17 @@ bool RAD_IsActiveByTag(mobj_t *actor, const char *name)
 
 bool RAD_WithinRadius(mobj_t *mo, rad_script_t *r)
 {
+    int sec_check = r->sector_index;
+
+    if (sec_check >= 0 && sec_check <= numsectors)
+    {
+        if (mo->subsector->sector - sectors != sec_check)
+            return false;
+        if (r->rad_z >= 0 && fabs(r->z - MO_MIDZ(mo)) > r->rad_z + mo->height / 2)
+            return false;
+        return true;
+    }
+
     if (r->rad_x >= 0 && fabs(r->x - mo->x) > r->rad_x + mo->radius)
         return false;
 

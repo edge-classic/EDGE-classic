@@ -514,6 +514,9 @@ typedef struct rad_script_s
     float rad_y = 0;
     float rad_z = 0;
 
+    // Sector Index - Will ignore above X/Y coords and size if >= 0
+    int sector_index = -1;
+
     // Script name (or NULL)
     char *script_name = nullptr;
 

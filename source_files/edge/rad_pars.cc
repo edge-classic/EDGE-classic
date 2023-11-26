@@ -943,7 +943,7 @@ static void RAD_ParseEndRadiusTrigger(param_set_t &pars)
     // End_RadiusTrigger
 
     if (rad_cur_level != 2)
-        RAD_Error("%s found, but without any RADIUS_TRIGGER !\n", pars[0]);
+        RAD_Error("%s found, but without any SECTOR_TRIGGER or RADIUS_TRIGGER !\n", pars[0]);
 
     // --- check stuff ---
 
@@ -2305,6 +2305,7 @@ static const rts_parser_t radtrig_parsers[] = {
     {-1, "RADIUS_TRIGGER", 4, 6, RAD_ParseRadiusTrigger},
     {-1, "RECT_TRIGGER", 5, 7, RAD_ParseRadiusTrigger},
     {-1, "SECTOR_TRIGGER", 2, 4, RAD_ParseSectorTrigger},
+    {-1, "END_SECTOR_TRIGGER", 1, 1, RAD_ParseEndRadiusTrigger},
     {-1, "END_RADIUS_TRIGGER", 1, 1, RAD_ParseEndRadiusTrigger},
     {-1, "END_MAP", 1, 1, RAD_ParseEndMap},
 

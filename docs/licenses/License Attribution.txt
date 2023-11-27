@@ -2,6 +2,8 @@
 BSD 3-Clause License
 ===========================================================================================
 
+"16-Bit Game Station" soundfont (select melodic instruments) - Copyright (c) 2009 Beatnik, Inc
+
 ANGLE (Almost Native Graphics Layer Engine) - Copyright (c) 2018 Google Inc. and ANGLE Project Authors
 
 AlmostEquals Google Test Framework Component - Copyright (c) 2005 Google, Inc.
@@ -91,7 +93,7 @@ MIT License
 
 3dreamEngine Lua Math Libraries - Copyright (c) 2019 Luke100000 
 
-"16-Bit Game Station" soundfont - Copyright (c) 2022 Yingchun Soul
+"16-Bit Game Station" soundfont (percussion and select melodic instruments) - Copyright (c) 2022 Yingchun Soul
 
 base64.lua - Copyright (c) 2018 Ilya Kolbin 
 

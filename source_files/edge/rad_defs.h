@@ -514,7 +514,10 @@ typedef struct rad_script_s
     float rad_y = 0;
     float rad_z = 0;
 
-    // Sector Index - Will ignore above X/Y coords and size if >= 0
+    // Sector Tag - Will ignore above X/Y coords and size if > 0 
+    int sector_tag = 0;
+
+    // Sector Index - Will ignore above X/Y coords and size if >= 0 and Tag is also 0
     int sector_index = -1;
 
     // Script name (or NULL)

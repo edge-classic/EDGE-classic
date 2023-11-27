@@ -568,6 +568,7 @@ static void RAD_ComputeScriptCRC(rad_script_t *scr)
     scr->crc += (int)I_ROUND(scr->rad_x);
     scr->crc += (int)I_ROUND(scr->rad_y);
     scr->crc += (int)I_ROUND(scr->rad_z);
+    scr->crc += scr->sector_tag;
     scr->crc += scr->sector_index;
 
     // lastly handle miscellaneous parts
@@ -788,6 +789,7 @@ static void RAD_ParseRadiusTrigger(param_set_t &pars)
     this_rad->rad_x                = -1;
     this_rad->rad_y                = -1;
     this_rad->rad_z                = -1;
+    this_rad->sector_tag           = 0;
     this_rad->sector_index         = -1;
     this_rad->appear               = DEFAULT_APPEAR;
     this_rad->min_players          = 0;
@@ -873,8 +875,11 @@ static void RAD_ParseRadiusTrigger(param_set_t &pars)
 
 static void RAD_ParseSectorTrigger(param_set_t &pars)
 {
-    // RadiusTrigger <sector index>
-    // RadiusTrigger <sector index> <low z> <high z>
+    // SectorTriggerTag <sector tag>
+    // SectorTriggerTag <sector tag> <low z> <high z>
+
+    // SectorTriggerIndex <sector index>
+    // SectorTriggerIndex <sector index> <low z> <high z>
 
     if (rad_cur_level == 2)
         RAD_Error("%s found, but previous END_RADIUS_TRIGGER missing !\n", pars[0]);
@@ -893,6 +898,7 @@ static void RAD_ParseSectorTrigger(param_set_t &pars)
     this_rad->rad_x                = -1;
     this_rad->rad_y                = -1;
     this_rad->rad_z                = -1;
+    this_rad->sector_tag           = 0;
     this_rad->sector_index         = -1;
     this_rad->appear               = DEFAULT_APPEAR;
     this_rad->min_players          = 0;
@@ -907,10 +913,10 @@ static void RAD_ParseSectorTrigger(param_set_t &pars)
     if (pars.size() != 2 && pars.size() != 4)
         RAD_Error("%s: Wrong number of parameters.\n", pars[0]);
 
-    RAD_CheckForInt(pars[1], &this_rad->sector_index);
-
-    if (this_rad->sector_index < 0)
-        RAD_Error("%s: Negative sector index provided.\n", pars[0]);
+    if (epi::case_cmp(pars[0], "SECTOR_TRIGGER_TAG") == 0)
+        RAD_CheckForInt(pars[1], &this_rad->sector_tag);
+    else
+        RAD_CheckForInt(pars[1], &this_rad->sector_index);
 
     if (pars.size() == 4)
     {
@@ -2304,7 +2310,8 @@ static const rts_parser_t radtrig_parsers[] = {
     {-1, "START_MAP", 2, 2, RAD_ParseStartMap},
     {-1, "RADIUS_TRIGGER", 4, 6, RAD_ParseRadiusTrigger},
     {-1, "RECT_TRIGGER", 5, 7, RAD_ParseRadiusTrigger},
-    {-1, "SECTOR_TRIGGER", 2, 4, RAD_ParseSectorTrigger},
+    {-1, "SECTOR_TRIGGER_TAG", 2, 4, RAD_ParseSectorTrigger},
+    {-1, "SECTOR_TRIGGER_INDEX", 2, 4, RAD_ParseSectorTrigger},
     {-1, "END_SECTOR_TRIGGER", 1, 1, RAD_ParseEndRadiusTrigger},
     {-1, "END_RADIUS_TRIGGER", 1, 1, RAD_ParseEndRadiusTrigger},
     {-1, "END_MAP", 1, 1, RAD_ParseEndMap},

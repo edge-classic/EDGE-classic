@@ -75,7 +75,7 @@ void Movie_AudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 		epi::sound_data_c *movie_buf = S_QueueGetFreeBuffer(avail/2, dev_stereo ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 		if (movie_buf)
 		{
-			movie_buf->length = SDL_AudioStreamGet(movie_audiostream, movie_buf->data_L, avail) / 4;
+			movie_buf->length = SDL_AudioStreamGet(movie_audiostream, movie_buf->data_L, avail) / (dev_stereo ? 4 : 2);
 			if (movie_buf->length > 0)
 				S_QueueAddBuffer(movie_buf, dev_freq);
 			else

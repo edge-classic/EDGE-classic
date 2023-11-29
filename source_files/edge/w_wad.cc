@@ -75,6 +75,7 @@
 
 #include "rad_trig.h"
 #include "p_umapinfo.h" //Lobo 2022
+#include "script/compat/lua_compat.h"
 
 // Combination of unique lumps needed to best identify an IWAD
 const std::vector<game_check_t> game_checker = {{
@@ -127,6 +128,9 @@ class wad_file_c
     // COAL scripts
     int coal_huds;
 
+    // LUA scripts
+    int lua_huds;
+
     // BOOM stuff
     int animated;
     int switches;
@@ -136,7 +140,7 @@ class wad_file_c
   public:
     wad_file_c()
         : sprite_lumps(), flat_lumps(), patch_lumps(), colmap_lumps(), tx_lumps(), hires_lumps(), xgl_lumps(),
-          level_markers(), skin_markers(), wadtex(), deh_lump(-1), coal_huds(-1), animated(-1), switches(-1),
+          level_markers(), skin_markers(), wadtex(), deh_lump(-1), coal_huds(-1), lua_huds(-1), animated(-1), switches(-1),
           md5_string()
     {
         for (int d = 0; d < DDF_NUM_TYPES; d++)
@@ -574,6 +578,13 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
         lump_p->kind = LMKIND_DDFRTS;
         if (wad != NULL)
             wad->coal_huds = lump;
+        return;
+    }
+    else if (strcmp(info.name, "LUAHUDS") == 0)
+    {
+        lump_p->kind = LMKIND_DDFRTS;
+        if (wad != NULL)
+            wad->lua_huds = lump;
         return;
     }
     else if (strcmp(info.name, "ANIMATED") == 0)
@@ -1032,6 +1043,26 @@ static void ProcessCoalInWad(data_file_c *df)
     }
 }
 
+static void ProcessLuaInWad(data_file_c *df)
+{
+    std::string bare_filename = epi::PATH_GetFilename(df->name).string();
+
+    wad_file_c *wad = df->wad;
+
+    if (wad->lua_huds >= 0)
+    {
+        int lump = wad->lua_huds;       
+
+        std::string data   = W_LoadString(lump);
+        std::string source = W_GetLumpName(lump);
+
+        source += " in ";
+        source += bare_filename;
+
+        LUA_AddScript(data, source);
+    }
+}
+
 static void ProcessBoomStuffInWad(data_file_c *df)
 {
     // handle Boom's ANIMATED and SWITCHES lumps
@@ -1164,6 +1195,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
     ProcessBoomStuffInWad(df);
     ProcessDDFInWad(df);
     ProcessCoalInWad(df);
+    ProcessLuaInWad(df);
 }
 
 std::filesystem::path W_BuildNodesForWad(data_file_c *df)

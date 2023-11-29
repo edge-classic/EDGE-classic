@@ -30,7 +30,7 @@
 //
 static int SYS_error(lua_State *L)
 {
-    const char *s = luaL_checkstring(L, 0);
+    const char *s = luaL_checkstring(L, 1);
     I_Error("%s\n", s);
     return 0;
 }
@@ -39,7 +39,7 @@ static int SYS_error(lua_State *L)
 //
 static int SYS_print(lua_State *L)
 {
-    const char *s = luaL_checkstring(L, 0);
+    const char *s = luaL_checkstring(L, 1);
     I_Printf("%s\n", s);
     return 0;
 }
@@ -48,7 +48,7 @@ static int SYS_print(lua_State *L)
 //
 static int SYS_debug_print(lua_State *L)
 {
-    const char *s = luaL_checkstring(L, 0);
+    const char *s = luaL_checkstring(L, 1);
     I_Debugf("%s\n", s);
     return 0;
 }

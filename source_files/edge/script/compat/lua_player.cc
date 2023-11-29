@@ -1417,6 +1417,8 @@ static int MO_count(lua_State *L)
     }
 
     lua_pushinteger(L, thingcount);
+
+    return 1;
 }
 
 // player.query_weapon(maxdistance,whatinfo,[SecAttack])

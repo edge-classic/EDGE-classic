@@ -1022,9 +1022,11 @@ void Pack_ProcessHiresSubstitutions(pack_file_c *pack, int pack_index)
 
 bool Pack_FindFile(pack_file_c *pack, const std::string &name)
 {
-    // when file does not exist, this returns NULL.
+    // when file does not exist, this returns false.
 
-    // disallow absolute names
+    SYS_ASSERT(!name.empty());
+
+    // disallow absolute (real filesystem) paths
     if (epi::PATH_IsAbsolute(name))
         return false;
 
@@ -1032,20 +1034,61 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
     if (epi::PATH_GetExtension(name).empty())
         return false;
 
-    std::string open_stem = epi::PATH_GetBasename(name).string();
-    epi::str_upper(open_stem);
+    // Make a copy in case we need to pop a leading slash
+    std::string find_name = name;
 
-    // quick file stem check to see if it's present at all
-    if (!Pack_FindStem(pack, open_stem))
-        return false;
+    bool root_only = false;
 
-    auto results = pack->search_files.equal_range(open_stem);
-    for (auto file = results.first; file != results.second; ++file)
+    // Check for root-only search
+    if (name[0] == '/')
     {
-        if (epi::case_cmp(name, epi::PATH_GetFilename(file->second).string()) == 0)
-            return true;
+        find_name = name.substr(1);
+        if (find_name == epi::PATH_GetFilename(name).string())
+            root_only = true;
     }
 
+    std::string find_stem = epi::PATH_GetBasename(name).string();
+    epi::str_upper(find_stem);
+
+    // quick file stem check to see if it's present at all
+    if (!Pack_FindStem(pack, find_stem))
+        return false;
+
+    // Specific path given; attempt to find as-is, otherwise return false
+    if (find_name != epi::PATH_GetFilename(find_name).string())
+    {
+        auto results = pack->search_files.equal_range(find_stem);
+        for (auto file = results.first; file != results.second; ++file)
+        {
+            if (epi::case_cmp(find_name, file->second) == 0)
+                return true;
+        }
+        return false;
+    }
+    // Search only the root dir for this filename, return false if not present
+    else if (root_only)
+    {
+        for (auto file : pack->dirs[0].entries)
+        {
+            if (epi::case_cmp(file.name, find_name) == 0)
+                return true;
+        }
+        return false;
+    }
+    // Only filename given; return first full match from search list, if present
+    // Search list is unordered, but realistically identical filename+extensions wouldn't be in the same pack
+    else
+    {
+        auto results = pack->search_files.equal_range(find_stem);
+        for (auto file = results.first; file != results.second; ++file)
+        {
+            if (epi::case_cmp(find_name, epi::PATH_GetFilename(file->second).string()) == 0)
+                return true;
+        }
+        return false;
+    }
+
+    // Fallback
     return false;
 }
 
@@ -1053,24 +1096,51 @@ epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name)
 {
     // when file does not exist, this returns NULL.
 
-    // disallow absolute names
+    SYS_ASSERT(!name.empty());
+
+    // disallow absolute (real filesystem) paths
     if (epi::PATH_IsAbsolute(name))
-        return NULL;
+        return nullptr;
 
     // do not accept filenames without extensions
     if (epi::PATH_GetExtension(name).empty())
-        return NULL;
+        return nullptr;
 
-    std::string open_stem = epi::PATH_GetBasename(name).string();
+    // Make a copy in case we need to pop a leading slash
+    std::string open_name = name;
+
+    bool root_only = false;
+
+    // Check for root-only search
+    if (name[0] == '/')
+    {
+        open_name = name.substr(1);
+        if (open_name == epi::PATH_GetFilename(open_name).string())
+            root_only = true;
+    }
+
+    std::string open_stem = epi::PATH_GetBasename(open_name).string();
     epi::str_upper(open_stem);
 
     // quick file stem check to see if it's present at all
     if (!Pack_FindStem(pack, open_stem))
-        return NULL;
+        return nullptr;
 
     // Specific path given; attempt to open as-is, otherwise return NULL
-    if (name != epi::PATH_GetFilename(name).string())
-        return pack->OpenFileByName(name);
+    if (open_name != epi::PATH_GetFilename(open_name).string())
+    {
+        return pack->OpenFileByName(open_name);
+    }
+    // Search only the root dir for this filename, return NULL if not present
+    else if (root_only)
+    {
+        for (auto file : pack->dirs[0].entries)
+        {
+            if (epi::case_cmp(file.name, open_name) == 0)
+                return pack->OpenFileByName(open_name);
+        }
+        return nullptr;
+    }
     // Only filename given; return first full match from search list, if present
     // Search list is unordered, but realistically identical filename+extensions wouldn't be in the same pack
     else
@@ -1078,12 +1148,14 @@ epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name)
         auto results = pack->search_files.equal_range(open_stem);
         for (auto file = results.first; file != results.second; ++file)
         {
-            if (epi::case_cmp(name, epi::PATH_GetFilename(file->second).string()) == 0)
+            if (epi::case_cmp(open_name, epi::PATH_GetFilename(file->second).string()) == 0)
                 return pack->OpenFileByName(file->second);
         }
+        return nullptr;
     }
 
-    return NULL;
+    // Fallback
+    return nullptr;
 }
 
 // Like the above, but is in the form of a stem + acceptable extensions

@@ -1387,11 +1387,10 @@ void P_ActReplace(struct mobj_s *mo, const mobjtype_c *newThing)
 
         mo->radius = mo->info->radius;
         mo->height = mo->info->height;
-        // MBF21: Use explicit Fast speed if provided
-        if (mo->info->fast_speed > -1)
-            mo->speed = level_flags.fastparm ? mo->info->fast_speed : mo->info->speed;
+        if (mo->info->fast_speed > -1 && level_flags.fastparm)
+            mo->speed = mo->info->fast_speed;
         else
-            mo->speed = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
+            mo->speed = mo->info->speed;
 
         mo->health = mo->info->spawnhealth; // always top up health to full
 

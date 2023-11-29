@@ -1546,7 +1546,11 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
 
     for (int loop_count = 0; loop_count < MAX_THINK_LOOP; loop_count++)
     {
-        mobj->tics -= (1 + mobj->tic_skip);
+        if (level_flags.fastparm)
+            mobj->tics -= (1 * mobj->info->fast + mobj->tic_skip);
+        else
+            mobj->tics -= (1 + mobj->tic_skip);
+            
         mobj->tic_skip = 0;
 
         if (mobj->tics >= 1)
@@ -2206,14 +2210,8 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 
     mobj->morphtimeout = info->morphtimeout;
 
-    if (level_flags.fastparm)
-    {
-        // Use explicit Fast speed value if provided
-        if (info->fast_speed > -1)
-            mobj->speed = info->fast_speed;
-        else
-            mobj->speed *= info->fast;
-    }
+    if (level_flags.fastparm && info->fast_speed > -1)
+        mobj->speed = info->fast_speed;
 
     // -ACB- 1998/06/25 new mobj Stuff (1998/07/11 - invisibility added)
     mobj->extendedflags = info->extendedflags;

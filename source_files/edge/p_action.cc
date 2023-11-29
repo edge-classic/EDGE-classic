@@ -1246,14 +1246,8 @@ static void LaunchSmartProjectile(mobj_t *source, mobj_t *target, const mobjtype
         float dy = source->y - target->y;
 
         float s = type->speed;
-        if (level_flags.fastparm)
-        {
-            // MBF21: Use explicit Fast speed if provided
-            if (type->fast_speed > -1)
-                s = type->fast_speed;
-            else
-                s *= type->fast;
-        }
+        if (level_flags.fastparm && type->fast_speed > -1)
+            s = type->fast_speed;
 
         float a = mx * mx + my * my - s * s;
         float b = 2 * (dx * mx + dy * my);
@@ -2369,16 +2363,6 @@ static void SkullFlyAssault(mobj_t *object)
     }
 
     float speed = object->currentattack->assault_speed;
-
-    // -KM- 1999/01/31 Fix skulls in nightmare mode
-    if (level_flags.fastparm)
-    {
-        // MBF21: Use explicit Fast speed if provided
-        if (object->info->fast_speed > -1)
-            speed = object->info->fast_speed;
-        else
-            speed *= object->info->fast;
-    }
 
     sfx_t *sound = object->currentattack->initsound;
 
@@ -3713,11 +3697,10 @@ void P_ActBecome(struct mobj_s *mo)
         // Note: health is not changed
         mo->radius = mo->info->radius;
         mo->height = mo->info->height;
-        // MBF21: Use explicit Fast speed if provided
-        if (mo->info->fast_speed > -1)
-            mo->speed = level_flags.fastparm ? mo->info->fast_speed : mo->info->speed;
+        if (mo->info->fast_speed > -1 && level_flags.fastparm)
+            mo->speed = mo->info->fast_speed;
         else
-            mo->speed = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
+            mo->speed = mo->info->speed;
 
         if (mo->flags & MF_AMBUSH) // preserve map editor AMBUSH flag
         {
@@ -3788,11 +3771,10 @@ void P_ActUnBecome(struct mobj_s *mo)
 
         mo->radius = mo->info->radius;
         mo->height = mo->info->height;
-        // MBF21: Use explicit Fast speed if provided
-        if (mo->info->fast_speed > -1)
-            mo->speed = level_flags.fastparm ? mo->info->fast_speed : mo->info->speed;
+        if (mo->info->fast_speed > -1 && level_flags.fastparm)
+            mo->speed = mo->info->fast_speed;
         else
-            mo->speed = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
+            mo->speed = mo->info->speed;
 
         // Note: health is not changed
         if (mo->flags & MF_AMBUSH) // preserve map editor AMBUSH flag
@@ -3869,11 +3851,10 @@ void P_ActMorph(struct mobj_s *mo)
 
         mo->radius = mo->info->radius;
         mo->height = mo->info->height;
-        // MBF21: Use explicit Fast speed if provided
-        if (mo->info->fast_speed > -1)
-            mo->speed = level_flags.fastparm ? mo->info->fast_speed : mo->info->speed;
+        if (mo->info->fast_speed > -1 && level_flags.fastparm)
+            mo->speed = mo->info->fast_speed;
         else
-            mo->speed = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
+            mo->speed = mo->info->speed;
 
         if (mo->flags & MF_AMBUSH) // preserve map editor AMBUSH flag
         {
@@ -3947,11 +3928,10 @@ void P_ActUnMorph(struct mobj_s *mo)
 
         mo->radius = mo->info->radius;
         mo->height = mo->info->height;
-        // MBF21: Use explicit Fast speed if provided
-        if (mo->info->fast_speed > -1)
-            mo->speed = level_flags.fastparm ? mo->info->fast_speed : mo->info->speed;
+        if (mo->info->fast_speed > -1 && level_flags.fastparm)
+            mo->speed = mo->info->fast_speed;
         else
-            mo->speed = mo->info->speed * (level_flags.fastparm ? mo->info->fast : 1);
+            mo->speed = mo->info->speed;
 
         // Note: health is not changed
 

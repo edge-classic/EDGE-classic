@@ -43,3 +43,5 @@ Bugs fixed
 - Fixed A_CloseShotgun2 frame only playing the DBCLS sound and not calling A_Refire as well
 - Fixed custom Dehacked weapons that use the chainsaw attack not playing the SAWFUL sfx when attacking (regardless of hitting a target)
 - SKULLFLY attacks that cause zero damage no longer make victim enter painstate
+- Fixed Nightmare/Fast Monster state duration reduction for monsters with a value for the 'FAST' parameter
+  - Speed in fast mode is now governed by the 'FAST_SPEED' parameter in all cases, instead of using 'FAST' as a multiplier against the base speed

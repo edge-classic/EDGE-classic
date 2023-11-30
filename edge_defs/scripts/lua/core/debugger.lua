@@ -568,8 +568,9 @@ function dbg.msgh(...)
 end
 
 -- Assume stdin/out are TTYs unless we can use LuaJIT's FFI to properly check them.
-local stdin_isatty = true
-local stdout_isatty = true
+-- EDGE CLASSIC, setting these to false to avoid linenoise dependency
+local stdin_isatty = false
+local stdout_isatty = false
 
 -- Conditionally enable the LuaJIT FFI.
 local ffi = (jit and require("ffi"))

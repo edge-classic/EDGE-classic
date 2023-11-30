@@ -1026,8 +1026,9 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
 
     SYS_ASSERT(!name.empty());
 
-    // disallow absolute (real filesystem) paths
-    if (epi::PATH_IsAbsolute(name))
+    // disallow absolute (real filesystem) paths,
+    // although we have to let a leading '/' slide to be caught later
+    if (epi::PATH_IsAbsolute(name) && name[0] != '/')
         return false;
 
     // do not accept filenames without extensions
@@ -1098,8 +1099,9 @@ epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name)
 
     SYS_ASSERT(!name.empty());
 
-    // disallow absolute (real filesystem) paths
-    if (epi::PATH_IsAbsolute(name))
+    // disallow absolute (real filesystem) paths,
+    // although we have to let a leading '/' slide to be caught later
+    if (epi::PATH_IsAbsolute(name) && name[0] != '/')
         return nullptr;
 
     // do not accept filenames without extensions

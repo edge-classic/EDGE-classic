@@ -1644,7 +1644,7 @@ static const luaL_Reg mapobjectlib[] = {{"query_tagged", MO_query_tagged}, {"cou
 
 static int luaopen_mapobject(lua_State *L)
 {
-    luaL_newlib(L, playerlib);
+    luaL_newlib(L, mapobjectlib);
     return 1;
 }
 

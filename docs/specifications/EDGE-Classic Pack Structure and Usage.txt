@@ -3,7 +3,7 @@
 EDGE-Classic Pack Structure and Usage
 =======================================
 
-by The EDGE Team.  August 2023.
+by The EDGE Team.  November 2023.
 
 =======================================
 Introduction
@@ -110,16 +110,23 @@ located within a pack.
 
 If a complete path (folder + filename) is used, it should be relative to the root of the pack itself.
 
-Full Path Example (note that there is no leading / - do not start a reference with this character):
+Full Path Example (a leading '/' is optional, and will produce the same result):
 
 [SPR:SNW1A0]
 IMAGE_DATA=PACK:"graphics/snowflakes/SNOW1.png";
+
+or
+
+[SPR:SNW1A0]
+IMAGE_DATA=PACK:"/graphics/snowflakes/SNOW1.png";
 
 This would be valid for a compressed archive that has an entry of /graphics/snowflakes/SNOW1.png, or a folder/file
 path of C:\Users\EDGE-User\Pictures\graphics\snowflakes\SNOW1.png (assuming C:\Users\EDGE-User\Pictures was
 mounted as a folder on startup)
 
-If only a filename is provided, it will return the first matching file within a pack that it can find.
+If only a filename is provided, it will return the first matching file within a pack that it can find. The exception
+to this is if the filename is immediately preceded by '/', in which case it will only search the root directory of the
+pack in question for the filename.
 
 Bare Filename Example:
 
@@ -127,5 +134,12 @@ Bare Filename Example:
 IMAGE_DATA=PACK:"SNOW1.png";
 
 This will use the first SNOW1.png that it encounters unconditionally. The downside to this method is that if there are
-multiple pack entries with the exact same filename, it is not guarnateed which one will be used. It is recommended
+multiple pack entries with the exact same filename, it is not guaranteed which one will be used. It is recommended
 to either avoid identical file names, or to provide a full path if it is intended to use a specific entry.
+
+Root Filename Example:
+
+[SPR:SNW1A0]
+IMAGE_DATA=PACK:"/SNOW1.png";
+
+This will only use SNOW1.png if it is in the root of the pack, even if it is present elsewhere within it.

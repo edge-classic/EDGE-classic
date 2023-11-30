@@ -461,7 +461,7 @@ static void SpecialWadVerify(void)
 {
     E_ProgressMessage("Verifying EDGE_DEFS version...");
 
-    epi::file_c *data = W_OpenPackFile("version.txt");
+    epi::file_c *data = W_OpenPackFile("/version.txt");
 
     if (!data)
         I_Error("Version file not found. Get edge_defs.epk at https://github.com/edge-classic/EDGE-classic");

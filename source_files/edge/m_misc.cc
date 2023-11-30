@@ -302,6 +302,9 @@ void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar)
     // We can't store this as a CVAR default since it is path-dependent
     s_soundfont = epi::PATH_Join(epi::PATH_Join(game_dir, "soundfont"), "Default.sf2").generic_string();
 
+    // Needed so that Smoothing/Upscaling is properly reset
+    W_DeleteAllImages();
+
     done_first_init = true;
 }
 

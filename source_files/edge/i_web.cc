@@ -188,10 +188,12 @@ extern "C"
                 console.log(`Edge command line : $ { args }`);
 
                 const homeIndex = args.indexOf("-home");
-                if (homeIndex == = -1 || homeIndex >= args.length || args[homeIndex + 1].startsWith("-"))
+                // clang-format off
+                if (homeIndex === -1 || homeIndex >= args.length || args[homeIndex + 1].startsWith("-"))
                 {
                     throw "No home command line option specified"
                 }
+                // clang-format on
 
                 const homeDir = args[homeIndex + 1];
 

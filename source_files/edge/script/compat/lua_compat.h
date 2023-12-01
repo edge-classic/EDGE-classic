@@ -35,7 +35,6 @@ void LUA_RegisterHudLibrary(lua_State *L);
 // VM
 
 lua_State* LUA_GetGlobalVM();
-extern cvar_c lua_debug;
 
 inline epi::vec3_c LUA_CheckVector3(lua_State *L, int index)
 {

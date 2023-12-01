@@ -8,7 +8,11 @@
 #include "../lua_debugger.h"
 
 // Enable Lua debugging
-DEF_CVAR(lua_debug, "0", CVAR_ROM)
+#ifdef EDGE_LUA_DEBUG
+static bool lua_debug = true;
+#else
+static bool lua_debug = false;
+#endif
 
 static void LUA_GetRequirePackPath(const char *name, std::string &out)
 {
@@ -127,7 +131,7 @@ void LUA_CallGlobalFunction(lua_State *L, const char *function_name)
 {
     lua_getglobal(L, function_name);
     int status = 0;
-    if (lua_debug.d)
+    if (lua_debug)
     {
         dbg_pcall(L, 0, 0, 0);
     }
@@ -186,7 +190,7 @@ lua_State *LUA_CreateVM()
     // pop package off stack
     lua_pop(L, 1);
 
-    if (lua_debug.d)
+    if (lua_debug)
     {
         luaL_requiref(L, LUA_OSLIBNAME, luaopen_os, 1);
         luaL_requiref(L, LUA_IOLIBNAME, luaopen_io, 1);

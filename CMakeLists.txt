@@ -15,6 +15,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" OFF)
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
+option(EDGE_LUA_DEBUG "Enable Lua debugging support" OFF)
 
 include("cmake/EDGEClassic.cmake")
 
@@ -111,6 +112,10 @@ if (NOT EDGE_GL_ES2)
   find_package(OpenGL REQUIRED)
 else()
   add_definitions(-DEDGE_GL_ES2)
+endif()
+
+if (EDGE_LUA_DEBUG)
+  add_definitions(-DEDGE_LUA_DEBUG)
 endif()
 
 add_subdirectory(libraries)

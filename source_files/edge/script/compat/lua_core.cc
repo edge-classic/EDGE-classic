@@ -110,10 +110,26 @@ static int luaopen_sys(lua_State *L)
 
 static void RegisterGlobal(lua_State *L, const char *name, const char *module_name)
 {
-    LUA_DoString(L, epi::STR_Format("return require \"%s\"", module_name).c_str());
+    int top = lua_gettop(L);
+    int ret = luaL_loadstring(L, epi::STR_Format("return require \"%s\"", module_name).c_str());
+    if (ret != LUA_OK)
+    {        
+        I_Warning("LUA: RegisterGlobal: %s", lua_tostring(L, -1));
+        lua_settop(L, top);
+        return;
+    }
+    
+    ret = lua_pcall(L, 0, LUA_MULTRET, 0);
+    if (ret != LUA_OK)
+    {
+        I_Warning("LUA: RegisterGlobal: %s", lua_tostring(L, -1));
+        lua_settop(L, top);
+        return;
+    }    
     // pop loader data from
     lua_pop(L, 1);
     lua_setglobal(L, name);
+    SYS_ASSERT(top == lua_gettop(L));
 }
 
 const luaL_Reg loadlibs[] = {{"sys", luaopen_sys}, {NULL, NULL}};

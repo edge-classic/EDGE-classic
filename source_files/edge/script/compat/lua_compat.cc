@@ -37,7 +37,9 @@ void LUA_LoadScripts()
     {
         I_Printf("Compiling: %s\n", info.source.c_str());
 
-        LUA_DoString(global_lua_state, info.data.c_str());
+        int top = lua_gettop(global_lua_state);
+        LUA_DoString(global_lua_state, info.source.c_str(), info.data.c_str());
+        lua_settop(global_lua_state, top);
     }
 
     if (W_IsLumpInPwad("STBAR"))

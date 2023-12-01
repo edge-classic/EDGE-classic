@@ -176,9 +176,7 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
     if (flipped)
         dest_ang += ANG180;
 
-    // Lobo: in event of future teleport issues, uncomment and use instead ;)
-    // if (def->special & TELSP_Relative && def->special & TELSP_Line)
-    if (def->special & TELSP_Relative)
+    if (def->special & TELSP_Relative && currline)
         new_ang = thing->angle + (dest_ang - source_ang);
     else if (def->special & TELSP_SameAbsDir)
         new_ang = thing->angle;

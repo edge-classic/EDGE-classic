@@ -807,7 +807,8 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
             sinking = true;
         if (cmd->forwardmove == 0 && cmd->sidemove == 0 && !player->swimming && cmd->upwardmove <= 0 &&
             !(cmd->buttons &
-              (BT_ATTACK | BT_USE | BT_CHANGE | EBT_SECONDATK | EBT_RELOAD | EBT_ACTION1 | EBT_ACTION2 | EBT_INVUSE)) &&
+              (BT_ATTACK | BT_USE | BT_CHANGE | EBT_SECONDATK | EBT_RELOAD | EBT_ACTION1 | EBT_ACTION2 | EBT_INVUSE
+              | EBT_THIRDATK | EBT_FOURTHATK)) &&
             ((AlmostEquals(player->mo->height, player->mo->info->height) ||
               AlmostEquals(player->mo->height, player->mo->info->crouchheight)) &&
              (AlmostEquals(player->deltaviewheight, 0.0f) || sinking)))

@@ -64,7 +64,7 @@ static void gore_cb(cvar_c *self)
     level_flags.more_blood = global_flags.more_blood = self->d;
 }
 
-DEF_CVAR_CB(g_gore, "1", CVAR_ARCHIVE, gore_cb)
+DEF_CVAR_CB(g_gore, "0", CVAR_ARCHIVE, gore_cb)
 
 // Forward declaration for ShootCheckGap
 static bool PTR_ShootTraverse(intercept_t *in, void *dataptr);

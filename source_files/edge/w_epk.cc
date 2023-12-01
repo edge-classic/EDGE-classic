@@ -1058,10 +1058,11 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
     // Specific path given; attempt to find as-is, otherwise return false
     if (find_name != epi::PATH_GetFilename(find_name).string())
     {
+        std::filesystem::path find_comp = find_name;
         auto results = pack->search_files.equal_range(find_stem);
         for (auto file = results.first; file != results.second; ++file)
         {
-            if (epi::case_cmp(find_name, file->second) == 0)
+            if (find_comp == file->second)
                 return true;
         }
         return false;

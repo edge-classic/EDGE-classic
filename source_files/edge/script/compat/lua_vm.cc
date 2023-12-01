@@ -53,7 +53,7 @@ static int LUA_PackSearcher(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
 
     // NOTE: This is the final searcher, so assume the loader will find the file
-    // If not, it will error with a not found.  
+    // If not, it will error with a not found.
     // If need additional searchers, will need to revisit this
     /*
     std::string pack_name;
@@ -111,8 +111,15 @@ void LUA_DoFile(lua_State *L, const std::string &name)
 }
 
 // NOP dbg() for when debugger is disabled and someone has left some breakpoints in code
-static int LUA_DbgNOP(lua_State* L)
+static bool dbg_nop_warn = false;
+static int  LUA_DbgNOP(lua_State *L)
 {
+    if (!dbg_nop_warn)
+    {
+        dbg_nop_warn = true;
+        I_Warning("LUA: dbg() called without lua_debug being set.  Please check that a stray dbg call didn't get left "
+                  "in source.");
+    }
     return 0;
 }
 
@@ -124,12 +131,11 @@ void LUA_CallGlobalFunction(lua_State *L, const char *function_name)
     {
         dbg_pcall(L, 0, 0, 0);
     }
-    else 
+    else
     {
         lua_pcall(L, 0, 0, 0);
     }
-    
-    
+
     if (status != LUA_OK)
     {
         I_Error("LUA: %s\n", lua_tostring(L, -1));
@@ -147,11 +153,10 @@ lua_State *LUA_CreateVM()
     ** these libs are loaded by lua.c and are readily available to any Lua
     ** program
     */
-    const luaL_Reg loadedlibs[] = {
-        {LUA_GNAME, luaopen_base},          {LUA_LOADLIBNAME, luaopen_package}, // todo: remove sandboxing
-        {LUA_COLIBNAME, luaopen_coroutine}, {LUA_TABLIBNAME, luaopen_table},    {LUA_IOLIBNAME, luaopen_io},
-        {LUA_OSLIBNAME, luaopen_os},        {LUA_STRLIBNAME, luaopen_string},   {LUA_MATHLIBNAME, luaopen_math},
-        {LUA_UTF8LIBNAME, luaopen_utf8},    {LUA_DBLIBNAME, luaopen_debug},     {NULL, NULL}};
+    const luaL_Reg loadedlibs[] = {{LUA_GNAME, luaopen_base},          {LUA_LOADLIBNAME, luaopen_package},
+                                   {LUA_COLIBNAME, luaopen_coroutine}, {LUA_TABLIBNAME, luaopen_table},
+                                   {LUA_STRLIBNAME, luaopen_string},   {LUA_MATHLIBNAME, luaopen_math},
+                                   {LUA_UTF8LIBNAME, luaopen_utf8},    {NULL, NULL}};
 
     const luaL_Reg *lib;
     /* "require" functions from 'loadedlibs' and set results to global table */
@@ -170,18 +175,32 @@ lua_State *LUA_CreateVM()
     lua_pushcfunction(L, LUA_PackSearcher);
     lua_seti(L, -2, 2);
     lua_setfield(L, -3, "searchers");
-    // pop package and searchers off stack
-    lua_pop(L, 2);    
+    // pop searchers off stack
+    lua_pop(L, 1);
+
+    // clear out search path and loadlib
+    lua_pushnil(L);
+    lua_setfield(L, -2, "loadlib");
+    lua_pushnil(L);
+    lua_setfield(L, -2, "searchpath");
+    // pop package off stack
+    lua_pop(L, 1);
 
     if (lua_debug.d)
     {
-        dbg_setup_default(L);    
+        luaL_requiref(L, LUA_OSLIBNAME, luaopen_os, 1);
+        luaL_requiref(L, LUA_IOLIBNAME, luaopen_io, 1);
+        luaL_requiref(L, LUA_DBLIBNAME, luaopen_debug, 1);
+        lua_pop(L, 3);
+        dbg_setup_default(L);
     }
-    else 
+    else
     {
         lua_pushcfunction(L, LUA_DbgNOP);
         lua_setglobal(L, "dbg");
     }
-    
+
+    SYS_ASSERT(!lua_gettop(L));
+
     return L;
 }

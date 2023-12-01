@@ -59,7 +59,7 @@ static int LUA_PackSearcher(lua_State *L)
     {
         I_Warning("LUA: Unable to load file %s", pack_name.c_str());
         return 0;
-    }`
+    }
 
     lua_pushcfunction(L, LUA_PackLoader);
     lua_pushstring(L, name);

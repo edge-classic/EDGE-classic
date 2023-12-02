@@ -11,8 +11,7 @@ void LUA_Init();
 void LUA_AddScript(const std::string &data, const std::string &source);
 void LUA_LoadScripts();
 
-void LUA_DoFile(lua_State *L, const std::string &name);
-void LUA_DoString(lua_State *L, const char* filename, const char *source);
+void LUA_DoFile(lua_State *L, const char* filename, const char *source);
 void LUA_CallGlobalFunction(lua_State *L, const char *function_name);
 
 // Game

@@ -32,7 +32,6 @@ static int LUA_PackLoader(lua_State *L)
         return 0;
     }
 
-    // TODO: Fix me ReadText is copying string on return, and should be taking a reference
     std::string source = file->ReadText();
 
     delete file;
@@ -81,8 +80,23 @@ static int LUA_MsgHandler(lua_State *L)
     return 1;                     /* return the traceback */
 }
 
-void LUA_DoString(lua_State *L, const char *filename, const char *source)
+void LUA_DoFile(lua_State *L, const char *filename, const char *source)
 {
+    if (lua_debug.d)
+    {
+        lua_getglobal(L, "__ec_debugger_source");
+        lua_getfield(L, -1, filename);
+        if (lua_isstring(L, -1))
+        {
+            I_Warning("LUA: Redundant execution of %s", filename);
+            lua_pop(L, 2);
+            return;
+        }
+        lua_pop(L, 1);
+        lua_pushstring(L, source);
+        lua_setfield(L, -2, filename);
+        lua_pop(L, 1);
+    }
     int top = lua_gettop(L);
     int ret = luaL_loadbuffer(L, source, strlen(source), (std::string("@") + filename).c_str());
 
@@ -114,29 +128,6 @@ void LUA_DoString(lua_State *L, const char *filename, const char *source)
     }
 
     lua_settop(L, top);
-}
-
-void LUA_DoFile(lua_State *L, const std::string &name)
-{
-    epi::file_c *file = W_OpenPackFile(name);
-
-    if (file)
-    {
-        std::string source = file->ReadText();
-        int         top    = lua_gettop(L);
-        int         ret    = luaL_dostring(L, source.c_str());
-        if (ret != LUA_OK)
-        {
-            I_Warning("LUA: %s\n", lua_tostring(L, -1));
-        }
-
-        lua_settop(L, top);
-        delete file;
-    }
-    else
-    {
-        I_Warning("LUA: LUA_DoFile unable to open file %s\n", name.c_str());
-    }
 }
 
 // NOP dbg() for when debugger is disabled and someone has left some breakpoints in code
@@ -190,7 +181,7 @@ static int LUA_Sandbox_Warning(lua_State *L)
 {
     const char *function_name = luaL_checkstring(L, lua_upvalueindex(1));
 
-    I_Warning("LUA: Called sandboxed function %s\n", function_name);
+    I_Warning("LUA: Called sandbox disabled function %s\n", function_name);
 
     return 0;
 }
@@ -270,6 +261,8 @@ lua_State *LUA_CreateVM()
 
     if (lua_debug.d)
     {
+        lua_newtable(L);
+        lua_setglobal(L, "__ec_debugger_source");
         dbg_setup_default(L);
     }
     else

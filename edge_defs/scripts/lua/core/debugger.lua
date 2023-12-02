@@ -236,7 +236,11 @@ local function where(info, context_lines)
 		source = {}
 		local filename = info.source:match("@(.*)")
 		if filename then
-			pcall(function() for line in io.lines(filename) do table.insert(source, line) end end)
+			-- EDGE CLASSIC
+			local ec_source = __ec_debugger_source[filename]
+			if ec_source then
+				pcall(function() for line in ec_source:gmatch("([^\n]*)\n?") do table.insert(source, line) end end)
+			end
 		elseif info.source then
 			for line in info.source:gmatch("(.-)\n") do table.insert(source, line) end
 		end

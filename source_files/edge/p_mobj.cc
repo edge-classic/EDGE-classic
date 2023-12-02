@@ -637,6 +637,9 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
 
     if (iterate_pushers)
     {
+        int countx = 0;
+        int county = 0;
+        vec2_t cumulative = {0,0};
         // handle push sectors
         for (touch_node_t *tn = mo->touch_sectors; tn ;tn=tn->mo_next)
         {
@@ -661,12 +664,26 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
                     if (tn_flags & SECSP_Proportional)
                         push_mul *= factor;
 
-                    new_p->push.x += push_mul * tn_props.push.x;
-                    new_p->push.y += push_mul * tn_props.push.y;
+                    if (tn_props.push.x)
+                    {
+                        countx++;
+                        cumulative.x += push_mul * tn_props.push.x;
+                    }
+                    if (tn_props.push.y)
+                    {
+                        county++;
+                        cumulative.y += push_mul * tn_props.push.y;
+                    }
                     new_p->push.z += push_mul * tn_props.push.z;
                 }
             }
         }
+        // Average it out a la ZDoom so we aren't getting sent to the shadow realm in certain Boom maps - Dasho
+        // Don't think it is necessary for z push at this time
+        if (countx)
+            new_p->push.x += (cumulative.x/countx);
+        if (county)
+            new_p->push.y += (cumulative.y/county);
     }
     else
     {

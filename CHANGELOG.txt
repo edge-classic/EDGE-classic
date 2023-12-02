@@ -45,3 +45,4 @@ Bugs fixed
 - SKULLFLY attacks that cause zero damage no longer make victim enter painstate
 - Fixed Nightmare/Fast Monster state duration reduction for monsters with a value for the 'FAST' parameter
   - Speed in fast mode is now governed by the 'FAST_SPEED' parameter in all cases, instead of using 'FAST' as a multiplier against the base speed
+- Fixed calculation of scroller push forces when multiple scrollers affect the same mobj

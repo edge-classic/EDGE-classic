@@ -210,8 +210,25 @@ static void LUA_Sandbox(lua_State *L)
     // pop package off stack
     lua_pop(L, 1);
 
+    // os module
     const char *os_functions[] = {"execute", "exit", "getenv", "remove", "rename", "setlocale", "tmpname", NULL};
     LUA_Sandbox_Module(L, "os", os_functions);
+
+    // base/global functions
+    const char *base_functions[] = {"dofile", "loadfile", NULL};
+    LUA_Sandbox_Module(L, "_G", base_functions);
+
+    // if debugging is enabled, load debug/io libs and sandbox
+    if (lua_debug.d)
+    {
+        // open the debug library and io libraries
+        luaL_requiref(L, LUA_DBLIBNAME, luaopen_debug, 1);
+        luaL_requiref(L, LUA_IOLIBNAME, luaopen_io, 1);
+        lua_pop(L, 2);
+
+        const char *io_functions[] = {"close", "input", "lines", "open", "output", "popen", "tmpfile", "type", NULL};
+        LUA_Sandbox_Module(L, "io", io_functions);
+    }
 }
 
 lua_State *LUA_CreateVM()
@@ -225,17 +242,10 @@ lua_State *LUA_CreateVM()
     ** these libs are loaded by lua.c and are readily available to any Lua
     ** program
     */
-    const luaL_Reg loadedlibs[] = {{LUA_GNAME, luaopen_base},
-                                   {LUA_LOADLIBNAME, luaopen_package},
-                                   {LUA_OSLIBNAME, luaopen_os},
-                                   {LUA_IOLIBNAME, luaopen_io},
-                                   {LUA_DBLIBNAME, luaopen_debug},
-                                   {LUA_COLIBNAME, luaopen_coroutine},
-                                   {LUA_TABLIBNAME, luaopen_table},
-                                   {LUA_STRLIBNAME, luaopen_string},
-                                   {LUA_MATHLIBNAME, luaopen_math},
-                                   {LUA_UTF8LIBNAME, luaopen_utf8},
-                                   {NULL, NULL}};
+    const luaL_Reg loadedlibs[] = {
+        {LUA_GNAME, luaopen_base},          {LUA_LOADLIBNAME, luaopen_package}, {LUA_OSLIBNAME, luaopen_os},
+        {LUA_COLIBNAME, luaopen_coroutine}, {LUA_TABLIBNAME, luaopen_table},    {LUA_STRLIBNAME, luaopen_string},
+        {LUA_MATHLIBNAME, luaopen_math},    {LUA_UTF8LIBNAME, luaopen_utf8},    {NULL, NULL}};
 
     const luaL_Reg *lib;
     /* "require" functions from 'loadedlibs' and set results to global table */

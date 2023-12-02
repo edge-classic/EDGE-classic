@@ -756,9 +756,7 @@ static void ProcessLuaAPIInPack(pack_file_c *pack)
     if (bare_filename.empty())
         bare_filename = df->name.string();
 
-    std::string source = "edge_api.lua";
-    source += " in ";
-    source += bare_filename;
+    std::string source = bare_filename + " => " + "edge_api.lua";
 
     for (size_t dir = 0; dir < pack->dirs.size(); dir++)
     {
@@ -776,7 +774,7 @@ static void ProcessLuaAPIInPack(pack_file_c *pack)
             }
         }
     }
-    I_Error("coal_api.ec not found in edge_defs; unable to initialize COAL!\n");
+    I_Error("edge_api.lua not found in edge_defs; unable to initialize LUA!\n");
 }
 
 static void ProcessLuaHUDInPack(pack_file_c *pack)
@@ -787,9 +785,7 @@ static void ProcessLuaHUDInPack(pack_file_c *pack)
     if (bare_filename.empty())
         bare_filename = df->name.string();
 
-    std::string source = "edge_hud.lua";
-    source += " in ";
-    source += bare_filename;
+    std::string source = bare_filename + " => " + "edge_hud.lua";
 
     for (size_t dir = 0; dir < pack->dirs.size(); dir++)
     {

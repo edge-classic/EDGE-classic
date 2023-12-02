@@ -84,11 +84,7 @@ static int LUA_MsgHandler(lua_State *L)
 void LUA_DoString(lua_State *L, const char *filename, const char *source)
 {
     int top = lua_gettop(L);
-    int ret = luaL_loadstring(L, source);
-
-    int base = lua_gettop(L);             // function index
-    lua_pushcfunction(L, LUA_MsgHandler); // push message handler */
-    lua_insert(L, base);                  // put it under function and args */
+    int ret = luaL_loadbuffer(L, source, strlen(source), (std::string("@") + filename).c_str());
 
     if (ret != LUA_OK)
     {
@@ -98,9 +94,13 @@ void LUA_DoString(lua_State *L, const char *filename, const char *source)
         return;
     }
 
-    ret = lua_pcall(L, 0, LUA_MULTRET, base);
+    int base = lua_gettop(L);             // function index
+    lua_pushcfunction(L, LUA_MsgHandler); // push message handler */
+    lua_insert(L, base);                  // put it under function and args */
 
-    if (ret != 0)
+    ret = lua_pcall(L, 0, 0, base);
+
+    if (ret != LUA_OK)
     {
         std::string error(lua_tostring(L, -1));
         std::replace(error.begin(), error.end(), '\t', '>');
@@ -125,13 +125,17 @@ void LUA_DoFile(lua_State *L, const std::string &name)
         std::string source = file->ReadText();
         int         top    = lua_gettop(L);
         int         ret    = luaL_dostring(L, source.c_str());
-        if (ret != 0)
+        if (ret != LUA_OK)
         {
             I_Warning("LUA: %s\n", lua_tostring(L, -1));
         }
 
         lua_settop(L, top);
         delete file;
+    }
+    else
+    {
+        I_Warning("LUA: LUA_DoFile unable to open file %s\n", name.c_str());
     }
 }
 

@@ -99,27 +99,31 @@ int LUA_DoFile(lua_State *L, const char *filename, const char *source)
         lua_pop(L, 1);
     }
     int top = lua_gettop(L);
-    int ret = luaL_loadbuffer(L, source, strlen(source), (std::string("@") + filename).c_str());
+    int status = luaL_loadbuffer(L, source, strlen(source), (std::string("@") + filename).c_str());
 
-    if (ret != LUA_OK)
+    if (status != LUA_OK)
     {
         LUA_Error(epi::STR_Format("LUA: Error compiling %s\n", filename ? filename : "???").c_str(),
                   lua_tostring(L, -1));
     }
 
-    int base = lua_gettop(L);             // function index
-    lua_pushcfunction(L, LUA_MsgHandler); // push message handler */
-    lua_insert(L, base);                  // put it under function and args */
-
-    ret = lua_pcall(L, 0, LUA_MULTRET, base);
-
-    if (ret != LUA_OK)
+    if (lua_debug.d)
     {
-
-        LUA_Error(epi::STR_Format("LUA: Error in %s\n", filename ? filename : "???").c_str(), lua_tostring(L, -1));
+        status = dbg_pcall(L, 0, LUA_MULTRET, 0);
+    }
+    else 
+    {
+        int base = lua_gettop(L);             // function index
+        lua_pushcfunction(L, LUA_MsgHandler); // push message handler */
+        lua_insert(L, base);                  // put it under function and args */
+        status = lua_pcall(L, 0, LUA_MULTRET, base);
+        lua_remove(L, base);
     }
 
-    lua_remove(L, base);
+    if (status != LUA_OK)
+    {
+        LUA_Error(epi::STR_Format("LUA: Error in %s\n", filename ? filename : "???").c_str(), lua_tostring(L, -1));
+    }
 
     return lua_gettop(L) - top;
 }

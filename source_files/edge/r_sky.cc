@@ -725,6 +725,11 @@ void RGL_FinishSky(void)
     if (!r_dumbsky.d)
         glDepthFunc(GL_GREATER);
 
+#if defined(EDGE_GL_ES2)
+    // On ES2 the clip planes seem to maybe be inverting z values, this fixes that
+    glDepthFunc(GL_ALWAYS);
+#endif
+
     if (custom_sky_box)
         RGL_DrawSkyBox();
     else

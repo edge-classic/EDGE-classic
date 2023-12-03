@@ -14,6 +14,9 @@
 extern "C" {
 #endif
 
+// EDGE-Classic for working around any issue needing to flush the GL4ES render list
+void gl4es_flush();
+
 // set driver GetProcAddress implementation. required for hardext detection with NOEGL or when loader is disabled
 void set_getprocaddress(void *(APIENTRY_GL4ES *new_proc_address)(const char *));
 // reguired with NOEGL

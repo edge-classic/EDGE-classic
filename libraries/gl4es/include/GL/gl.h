@@ -27,8 +27,8 @@
 #ifndef __gl_h_
 #define __gl_h_
 
-// edge: Adding _WIN32 here for static library
-#if defined(__EMSCRIPTEN__) || defined(__APPLE__) || defined(_WIN32)
+// edge: Adding _WIN32 and EDGE_GL_ES2
+#if defined(__EMSCRIPTEN__) || defined(__APPLE__) || defined(_WIN32) || defined(EDGE_GL_ES2)
 #define USE_MGL_NAMESPACE    1
 #define GL_GLEXT_PROTOTYPES  1
 #define MANGLE(x)            gl4es_gl##x

@@ -1038,7 +1038,66 @@ static inline void PIT_AddLineIntercept(line_t *ld)
 
 static inline void PIT_AddThingIntercept(mobj_t *thing)
 {
-    float x1;
+    if (!(thing->flags & MF_SHOOTABLE))
+        return;
+
+    // Simple BBox check, if it intersects at all, use the
+    // thing's x/y coords to calculate frac
+
+    vec2_t trace_end = {trace.x+trace.dx, trace.y+trace.dy};
+
+    if (M_SegRectIntersection({trace.x, trace.y}, {trace_end.x, trace_end.y}, 
+        {thing->x - thing->radius, thing->y + thing->radius},
+        {thing->x + thing->radius, thing->y - thing->radius}))
+    {
+        intercept_t in;
+        if (fabs(trace.dx) >= fabs(trace.dy))
+            in.frac = fabs((thing->x - trace.x) / trace.dx);
+        else
+            in.frac = fabs((thing->y - trace.y) / trace.dy);
+        if (in.frac > 1)
+            in.frac = 1;
+        in.thing = thing;
+        in.line  = NULL;
+
+        intercepts.push_back(in);
+    }
+
+    // Complex BBox Check - Actually returns the point of intersection (I think)
+    /*
+     vec2_t intersect = M_SegRectIntersection({trace.x, trace.y}, {trace.x+trace.dx, trace.y+trace.dy}, 
+        {thing->x - thing->radius, thing->y + thing->radius},
+        {thing->x + thing->radius, thing->y - thing->radius});
+
+    if (intersect.x > 40000.0f) // Trace completely inside thing
+    {
+        intercept_t in;
+        in.frac  = 0;
+        in.thing = thing;
+        in.line  = NULL;
+
+        intercepts.push_back(in);
+    }
+    else if (intersect.x < -40000.0f) // Trace completely missed
+    {
+        return;
+    }
+    else
+    {
+        intercept_t in;
+        if (fabs(trace.dx) >= fabs(trace.dy))
+            in.frac = (intersect.x - trace.x) / trace.dx;
+        else
+            in.frac =  (intersect.y - trace.y) / trace.dy;
+        in.thing = thing;
+        in.line  = NULL;
+
+        intercepts.push_back(in);
+    }*/
+
+    // Original version
+
+    /*float x1;
     float y1;
     float x2;
     float y2;
@@ -1098,7 +1157,7 @@ static inline void PIT_AddThingIntercept(mobj_t *thing)
     in.thing = thing;
     in.line  = NULL;
 
-    intercepts.push_back(in);
+    intercepts.push_back(in);*/
 }
 
 struct Compare_Intercept_pred

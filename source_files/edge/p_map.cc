@@ -2220,7 +2220,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
     // hit thing
 
     // Checking sight against target on vertex slope?
-    if (mo->subsector->sector || mo->subsector->sector->ceil_vertex_slope)
+    if (mo->subsector->sector->floor_vertex_slope || mo->subsector->sector->ceil_vertex_slope)
         mo->slopesighthit = true;
 
     // position a bit closer

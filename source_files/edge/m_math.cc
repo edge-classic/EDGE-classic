@@ -50,6 +50,15 @@
 #include <cmath>
 #endif
 
+static enum
+{
+    R_CLIP_INSIDE = 0,
+    R_CLIP_LEFT = 1,
+    R_CLIP_RIGHT = 2,
+    R_CLIP_BOTTOM = 4,
+    R_CLIP_TOP = 8
+};
+
 float M_Sin(angle_t ang)
 {
     return (float)sin((double)ang * M_PI / (float)ANG180);
@@ -184,6 +193,128 @@ void M_Vec2Rotate(vec2_t &vec, const angle_t &ang)
     vec.x = ox * c - oy * s;
     vec.y = oy * c + ox * s;
 }
+
+// Return true if a line segment intersects the given rectangle
+// Uses a simplified version of the Cohen-Sutherland Algorithm
+bool M_SegRectIntersection(vec2_t v1, vec2_t v2, vec2_t r1, vec2_t r2)
+{
+    float x_min = MIN(r1.x, r2.x);
+    float x_max = MAX(r1.x, r2.x);
+    float y_min = MIN(r1.y, r2.y);
+    float y_max = MAX(r1.y, r2.y);
+
+    // Determine region codes for both points in the seg
+    int code1 = R_CLIP_INSIDE;
+    if (v1.x < x_min)       // to the left of rectangle
+        code1 |= R_CLIP_LEFT;
+    else if (v1.x > x_max)  // to the right of rectangle
+        code1 |= R_CLIP_RIGHT;
+    if (v1.y < y_min)       // below the rectangle
+        code1 |= R_CLIP_BOTTOM;
+    else if (v1.y > y_max)  // above the rectangle
+        code1 |= R_CLIP_TOP;
+        
+    int code2 = R_CLIP_INSIDE;
+    if (v2.x < x_min)       // to the left of rectangle
+        code2 |= R_CLIP_LEFT;
+    else if (v2.x > x_max)  // to the right of rectangle
+        code2 |= R_CLIP_RIGHT;
+    if (v2.y < y_min)       // below the rectangle
+        code2 |= R_CLIP_BOTTOM;
+    else if (v1.y > y_max)  // above the rectangle
+        code2 |= R_CLIP_TOP;
+
+    if ((code1 == R_CLIP_INSIDE) && (code2 == R_CLIP_INSIDE)) // Seg completely in rectangle
+        return true;
+    else if (code1 & code2) // Seg completely outside rectangle
+        return false;
+    else
+        return true; // Seg intersects rectangle somewhere
+}
+
+// Return point where a line segment intersects the given rectangle
+// It it does not intersect, return a vec2_t with nonsensical coordinates
+// Uses the Cohen-Sutherland Algorithm
+/*vec2_t M_SegRectIntersection(vec2_t v1, vec2_t v2, vec2_t r1, vec2_t r2)
+{
+    vec2_t intersect = { 45000.0f, 45000.0f };
+    float x_min = MIN(r1.x, r2.x);
+    float x_max = MAX(r1.x, r2.x);
+    float y_min = MIN(r1.y, r2.y);
+    float y_max = MAX(r1.y, r2.y);
+
+    // Determine region codes for both points in the seg
+    int code1 = R_CLIP_INSIDE;
+    if (v1.x < x_min)       // to the left of rectangle
+        code1 |= R_CLIP_LEFT;
+    else if (v1.x > x_max)  // to the right of rectangle
+        code1 |= R_CLIP_RIGHT;
+    if (v1.y < y_min)       // below the rectangle
+        code1 |= R_CLIP_BOTTOM;
+    else if (v1.y > y_max)  // above the rectangle
+        code1 |= R_CLIP_TOP;
+        
+    int code2 = R_CLIP_INSIDE;
+    if (v2.x < x_min)       // to the left of rectangle
+        code2 |= R_CLIP_LEFT;
+    else if (v2.x > x_max)  // to the right of rectangle
+        code2 |= R_CLIP_RIGHT;
+    if (v2.y < y_min)       // below the rectangle
+        code2 |= R_CLIP_BOTTOM;
+    else if (v1.y > y_max)  // above the rectangle
+        code2 |= R_CLIP_TOP;
+
+    if ((code1 == R_CLIP_INSIDE) && (code2 == R_CLIP_INSIDE))
+    {
+        // Line seg completely in rectangle,
+        // nothing needed
+    }
+    else if (code1 & code2)
+    {
+        // Line seg completely outside rectangle
+        // Use -45000 as special value for x and return
+        intersect.x = -45000.0f;
+    }
+    else
+    {
+        // Some segment of line lies within the rectangle
+        int code_out;
+
+        // At least one endpoint is outside the rectangle, pick it.
+        if (code1 != 0)
+            code_out = code1;
+        else
+            code_out = code2;
+
+        // Find intersection point; using formulas y = y1 + slope * (x - x1),
+        // x = x1 + (1 / slope) * (y - y1)
+        if (code_out & R_CLIP_TOP)
+        {
+            // point is above the clip rectangle
+            intersect.x = v1.x + (v2.x - v1.x) * (y_max - v1.y) / (v2.y - v1.y);
+            intersect.y = y_max;
+        }
+        else if (code_out & R_CLIP_BOTTOM)
+        {
+            // point is below the rectangle
+            intersect.x = v1.x + (v2.x - v1.x) * (y_min - v1.y) / (v2.y - v1.y);
+            intersect.y = y_min;
+        }
+        else if (code_out & R_CLIP_RIGHT)
+        {
+            // point is to the right of rectangle
+            intersect.y = v1.y + (v2.y - v1.y) * (x_max - v1.x) / (v2.x - v1.x);
+            intersect.x = x_max;
+        }
+        else if (code_out & R_CLIP_LEFT)
+        {
+            // point is to the left of rectangle
+            intersect.y = v1.y + (v2.y - v1.y) * (x_min - v1.x) / (v2.x - v1.x);
+            intersect.x = x_min;
+        }
+    }
+    return intersect;
+}*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

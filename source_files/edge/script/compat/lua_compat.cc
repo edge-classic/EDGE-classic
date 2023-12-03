@@ -33,19 +33,24 @@ void LUA_AddScript(const std::string &data, const std::string &source)
 
 void LUA_LoadScripts()
 {
+    int top = lua_gettop(global_lua_state);
     for (auto &info : pending_scripts)
     {
         I_Printf("Compiling: %s\n", info.source.c_str());
-
-        int top = lua_gettop(global_lua_state);
-        LUA_DoFile(global_lua_state, info.source.c_str(), info.data.c_str());
-        lua_settop(global_lua_state, top);
+        
+        int results = LUA_DoFile(global_lua_state, info.source.c_str(), info.data.c_str());
+        if (results)
+        {
+            lua_pop(global_lua_state, results);
+        }        
     }
 
     if (W_IsLumpInPwad("STBAR"))
     {
         LUA_SetBoolean(global_lua_state, "hud", "custom_stbar", true);
     }
+
+    SYS_ASSERT(lua_gettop(global_lua_state) == top);
 
 }
 

@@ -10,6 +10,14 @@
 // Enable Lua debugging
 DEF_CVAR(lua_debug, "0", CVAR_ROM)
 
+static void LUA_Error(const char *msg, const char *luaerror)
+{
+    std::string error(luaerror);
+    std::replace(error.begin(), error.end(), '\t', '>');
+
+    I_Error((msg + error).c_str());
+}
+
 static void LUA_GetRequirePackPath(const char *name, std::string &out)
 {
     std::string require_name(name);
@@ -28,7 +36,7 @@ static int LUA_PackLoader(lua_State *L)
 
     if (!file)
     {
-        I_Warning("LUA: %s.lua: NOT FOUND\n", name);
+        I_Error("LUA: %s.lua: NOT FOUND\n", name);
         return 0;
     }
 
@@ -36,15 +44,8 @@ static int LUA_PackLoader(lua_State *L)
 
     delete file;
 
-    int result = luaL_dostring(L, source.c_str());
-    if (result != LUA_OK)
-    {
-        I_Warning("LUA: %s.lua: %s\n", name, lua_tostring(L, -1));
-        lua_pop(L, 1);
-        return 0;
-    }
-
-    return 1;
+    int results = LUA_DoFile(L, pack_name.c_str(), source.c_str());    
+    return results;    
 }
 
 static int LUA_PackSearcher(lua_State *L)
@@ -56,7 +57,7 @@ static int LUA_PackSearcher(lua_State *L)
 
     if (W_CheckPackForName(pack_name) == -1)
     {
-        I_Warning("LUA: Unable to load file %s", pack_name.c_str());
+        I_Error("LUA: Unable to load file %s", pack_name.c_str());
         return 0;
     }
 
@@ -80,7 +81,7 @@ static int LUA_MsgHandler(lua_State *L)
     return 1;                     /* return the traceback */
 }
 
-void LUA_DoFile(lua_State *L, const char *filename, const char *source)
+int LUA_DoFile(lua_State *L, const char *filename, const char *source)
 {
     if (lua_debug.d)
     {
@@ -90,7 +91,7 @@ void LUA_DoFile(lua_State *L, const char *filename, const char *source)
         {
             I_Warning("LUA: Redundant execution of %s", filename);
             lua_pop(L, 2);
-            return;
+            return 0;
         }
         lua_pop(L, 1);
         lua_pushstring(L, source);
@@ -98,36 +99,33 @@ void LUA_DoFile(lua_State *L, const char *filename, const char *source)
         lua_pop(L, 1);
     }
     int top = lua_gettop(L);
-    int ret = luaL_loadbuffer(L, source, strlen(source), (std::string("@") + filename).c_str());
+    int status = luaL_loadbuffer(L, source, strlen(source), (std::string("@") + filename).c_str());
 
-    if (ret != LUA_OK)
+    if (status != LUA_OK)
     {
-        I_Warning("LUA: Error compiling %s\n", filename ? filename : "???");
-        I_Warning("LUA: %s\n", lua_tostring(L, -1));
-        lua_settop(L, top);
-        return;
+        LUA_Error(epi::STR_Format("LUA: Error compiling %s\n", filename ? filename : "???").c_str(),
+                  lua_tostring(L, -1));
     }
 
-    int base = lua_gettop(L);             // function index
-    lua_pushcfunction(L, LUA_MsgHandler); // push message handler */
-    lua_insert(L, base);                  // put it under function and args */
-
-    ret = lua_pcall(L, 0, 0, base);
-
-    if (ret != LUA_OK)
+    if (lua_debug.d)
     {
-        std::string error(lua_tostring(L, -1));
-        std::replace(error.begin(), error.end(), '\t', '>');
-        std::vector<std::string> lines = epi::STR_SepStringVector(error, '\n');
-
-        I_Warning("LUA: Error in %s\n", filename ? filename : "???");
-        for (auto &line : lines)
-        {
-            I_Warning("LUA: %s\n", line.c_str());
-        }
+        status = dbg_pcall(L, 0, LUA_MULTRET, 0);
+    }
+    else 
+    {
+        int base = lua_gettop(L);             // function index
+        lua_pushcfunction(L, LUA_MsgHandler); // push message handler */
+        lua_insert(L, base);                  // put it under function and args */
+        status = lua_pcall(L, 0, LUA_MULTRET, base);
+        lua_remove(L, base);
     }
 
-    lua_settop(L, top);
+    if (status != LUA_OK)
+    {
+        LUA_Error(epi::STR_Format("LUA: Error in %s\n", filename ? filename : "???").c_str(), lua_tostring(L, -1));
+    }
+
+    return lua_gettop(L) - top;
 }
 
 // NOP dbg() for when debugger is disabled and someone has left some breakpoints in code
@@ -163,15 +161,7 @@ void LUA_CallGlobalFunction(lua_State *L, const char *function_name)
 
     if (status != LUA_OK)
     {
-        std::string error(lua_tostring(L, -1));
-        std::replace(error.begin(), error.end(), '\t', '>');
-        std::vector<std::string> lines = epi::STR_SepStringVector(error, '\n');
-
-        I_Warning("LUA: Error running global function %s\n", function_name);
-        for (auto &line : lines)
-        {
-            I_Warning("LUA: %s\n", line.c_str());
-        }
+        LUA_Error(epi::STR_Format("Error calling global function %s\n", function_name).c_str(), lua_tostring(L, -1));
     }
 
     lua_settop(L, top);

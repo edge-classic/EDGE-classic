@@ -188,9 +188,9 @@ function heretic_overlay_status()
         RelX = hud.x_left + (hud.x_right - hud.x_left) * 0.23
         hud.draw_number(RelX, 179, 3, player.total_armor(), 0)
         RelX = hud.x_left + (hud.x_right - hud.x_left) * 0.18
-        if (player.armor(1)) then
+        if (player.armor(1) > 0) then
             hud.stretch_image(RelX, 181, 15, 15, "SHLDA0", 1)
-        elseif (player.armor(2)) then
+        elseif (player.armor(2) > 0) then
             hud.stretch_image(RelX, 181, 15, 15, "SHD2A0", 1)
         end
     end

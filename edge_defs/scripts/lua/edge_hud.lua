@@ -348,27 +348,26 @@ function new_overlay_status()
 
     RelX = hud.x_left + (hud.x_right - hud.x_left) * 0.01
     if (player.total_armor() > 0) then
-        if (player.total_armor() > 0) then
-            hud.text_color(hud.GREEN)
-        end
 
-        if (player.armor(player.GREEN_ARMOR)) then
+        hud.text_color(hud.GREEN)
+
+        if (player.armor(player.GREEN_ARMOR) > 0) then
             hud.stretch_image(RelX, 165, 16, 10, "ARM1A0", 1)
         end
 
-        if (player.armor(player.BLUE_ARMOR)) then
+        if (player.armor(player.BLUE_ARMOR) > 0) then
             hud.stretch_image(RelX, 165, 16, 10, "ARM2A0", 1)
         end
 
-        if (player.armor(player.PURPLE_ARMOR)) then
+        if (player.armor(player.PURPLE_ARMOR) > 0) then
             hud.stretch_image(RelX, 165, 16, 10, "ARM3A0", 1)
         end
 
-        if (player.armor(player.YELLOW_ARMOR)) then
+        if (player.armor(player.YELLOW_ARMOR) > 0) then
             hud.stretch_image(RelX, 165, 16, 10, "ARM4A0", 1)
         end
 
-        if (player.armor(player.RED_ARMOR)) then
+        if (player.armor(player.RED_ARMOR) > 0) then
             hud.stretch_image(RelX, 165, 16, 10, "ARM5A0", 1)
         end
 

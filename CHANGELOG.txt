@@ -8,7 +8,9 @@ CHANGELOG for EDGE-Classic 1.37 (since EDGE-Classic 1.36)
 
 New Features
 ------------
-- Added support for Lua scripting with a COAL compatibility layer to ease porting 
+- Added support for Lua scripting with integrated debugging (https://github.com/slembcke/debugger.lua)  
+  - Includes a COAL compatibility layer to ease porting
+  - Ported DOOM, Heretic, Blasphemer, and Harmony to use Lua
 - Added support for MPEG video playback
   - Files must use MPEG1 video and MP2 audio for proper decoding
   - DDFGAME: TITLE_MOVIE=<wad/packfile name> command added

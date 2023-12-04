@@ -109,7 +109,7 @@ void    M_Angle2Matrix(angle_t ang, vec2_t *x, vec2_t *y);
 int     M_PointInTri(vec2_t v1, vec2_t v2, vec2_t v3, vec2_t test);
 void    M_Vec2Rotate(vec2_t &vec, const angle_t &ang);
 
-// Retunrs if there is an intersection
+// Returns if there is an intersection
 bool    M_SegRectIntersection(vec2_t v1, vec2_t v2, vec2_t r1, vec2_t r2);
 // Returns point of intersection
 //vec2_t   M_SegRectIntersection(vec2_t v1, vec2_t v2, vec2_t r1, vec2_t r2);

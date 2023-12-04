@@ -50,7 +50,7 @@
 #include <cmath>
 #endif
 
-static enum
+enum clip_code_e
 {
     R_CLIP_INSIDE = 0,
     R_CLIP_LEFT = 1,

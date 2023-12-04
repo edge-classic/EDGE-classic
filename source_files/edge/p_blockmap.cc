@@ -820,7 +820,7 @@ bool P_BlockThingsIterator(float x1, float y1, float x2, float y2, bool (*func)(
                 // check whether thing touches the given bbox
                 float r = mo->radius;
 
-                if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2)
+                if (mo->x + r < x1 || mo->x - r > x2 || mo->y + r < y1 || mo->y - r > y2)
                     continue;
 
                 if (!func(mo, data))

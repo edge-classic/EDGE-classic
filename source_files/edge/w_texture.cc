@@ -172,7 +172,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
         texture->scale_x      = mtexture->scale_x;
         texture->scale_y      = mtexture->scale_y;
         texture->file         = file;
-        texture->palette_lump = WT->palette;
+        texture->palette_lump = W_GetPaletteForLump(WT->texture1);
         texture->patchcount   = patchcount;
 
         Z_StrNCpy(texture->name, mtexture->name, 8);
@@ -332,7 +332,7 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
         texture->scale_x      = mtexture->scale_x;
         texture->scale_y      = mtexture->scale_y;
         texture->file         = file;
-        texture->palette_lump = WT->palette;
+        texture->palette_lump = W_GetPaletteForLump(WT->texture1);
         texture->patchcount   = patchcount;
 
         Z_StrNCpy(texture->name, mtexture->name, 8);

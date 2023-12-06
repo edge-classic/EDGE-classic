@@ -1759,18 +1759,6 @@ int W_GetPaletteForLump(int lump)
 {
     SYS_ASSERT(W_VerifyLump(lump));
 
-    int f = lumpinfo[lump].file;
-
-    for (; f > palette_datafile; f--)
-    {
-        data_file_c *df  = data_files[f];
-        wad_file_c  *wad = df->wad;
-
-        if (wad != NULL && wad->wadtex.palette >= 0)
-            return wad->wadtex.palette;
-    }
-
-    // Use last loaded PLAYPAL if no graphic-specific palette is found
     return W_CheckNumForName("PLAYPAL");
 }
 

@@ -1363,11 +1363,10 @@ static void MO_query_tagged(coal::vm_c *vm, int argc)
 
     mobj_t *mo;
 
-    int         index = 0;
     std::string temp_value;
     temp_value.clear();
 
-    for (mo = mobjlisthead; mo; mo = mo->next, index++)
+    for (mo = mobjlisthead; mo; mo = mo->next)
     {
         if (mo->tag == whattag)
         {
@@ -1396,10 +1395,9 @@ static void MO_count(coal::vm_c *vm, int argc)
 
     mobj_t *mo;
 
-    int    index      = 0;
     double thingcount = 0;
 
-    for (mo = mobjlisthead; mo; mo = mo->next, index++)
+    for (mo = mobjlisthead; mo; mo = mo->next)
     {
         if (mo->info->number == thingid && mo->health > 0)
             thingcount++;

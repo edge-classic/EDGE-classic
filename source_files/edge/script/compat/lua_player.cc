@@ -1600,8 +1600,6 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
     {
         if (mo->info->pickup_benefits->type == BENEFIT_Weapon)
             temp_value="WEAPON";
-        if (mo->info->pickup_benefits->sub.weap)
-            temp_value="WEAPON";
     } 
 
     lua_pushstring(L, "type");
@@ -1635,7 +1633,25 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 
 }
 
+// mapobject.object_info(maxdistance) LUA Only
+//
+static int MO_object_info(lua_State *L)
+{
+    int maxdistance = (int)luaL_checknumber(L, 1);
 
+    mobj_t *mo = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
+    if (!mo)
+    {
+        lua_pushstring(L, "");
+        return 1;
+    } 
+    else
+    {
+        CreateLuaTable_Mobj(L, mo); //create table with mobj info
+        return 1;
+    }
+
+}
 
 // mapobject.tagged_info(thing tag) LUA Only
 //
@@ -1910,6 +1926,7 @@ static int luaopen_player(lua_State *L)
 
 static const luaL_Reg mapobjectlib[] = {{"query_tagged", MO_query_tagged},
                                      {"tagged_info", MO_tagged_info},
+                                     {"object_info", MO_object_info},
                                      {"count", MO_count}, {NULL, NULL}};
 
 static int luaopen_mapobject(lua_State *L)

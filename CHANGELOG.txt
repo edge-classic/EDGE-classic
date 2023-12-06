@@ -8,6 +8,9 @@ CHANGELOG for EDGE-Classic 1.37 (since EDGE-Classic 1.36)
 
 New Features
 ------------
+- Added support for Lua scripting with integrated debugging (https://github.com/slembcke/debugger.lua)  
+  - Includes a COAL compatibility layer to ease porting
+  - Ported DOOM, Heretic, Blasphemer, and Harmony to use Lua
 - Added support for MPEG video playback
   - Files must use MPEG1 video and MP2 audio for proper decoding
   - DDFGAME: TITLE_MOVIE=<wad/packfile name> command added
@@ -34,6 +37,7 @@ General Improvements/Changes
 - Improved kerning and sizing when drawing console text with TrueType fonts
 - Removed randomising from IMPACT_OBJECT and EFFECT_OBJECT spawning.
 - Doom Builder 2 Configuration files added, courtesy of akaAgar (https://github.com/edge-classic/EDGE-classic/pull/579)
+- Formatted EDGE Classic sources to have consistent style and included Clang formatting configuration 
 
 
 Bugs fixed
@@ -46,3 +50,5 @@ Bugs fixed
 - Fixed Nightmare/Fast Monster state duration reduction for monsters with a value for the 'FAST' parameter
   - Speed in fast mode is now governed by the 'FAST_SPEED' parameter in all cases, instead of using 'FAST' as a multiplier against the base speed
 - Fixed calculation of scroller push forces when multiple scrollers affect the same mobj
+- Fixed mirror and portal issues with GLES2 renderer 
+- Fixed most compiler warnings under GCC/Clang

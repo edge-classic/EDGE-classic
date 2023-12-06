@@ -13,6 +13,9 @@ sys.gametic            = 0
 -- MATH
 ------------------------------------------------------------------------------
 
+-- make vec3 available globally
+vec3 = require("core.vec3")
+
 -- implemented natively, rounds the provided value using the C round function
 -- math.rint(value)
 

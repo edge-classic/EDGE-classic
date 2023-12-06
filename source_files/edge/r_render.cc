@@ -2061,6 +2061,11 @@ static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, angle_t left, angle_t ri
 
     dsub->mirrors.push_back(mir);
 
+#if defined(EDGE_GL_ES2)
+    // GL4ES mirror fix for renderlist
+    gl4es_flush();
+#endif
+
     // push mirror (translation matrix)
     MIR_Push(mir);
 
@@ -2085,6 +2090,12 @@ static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, angle_t left, angle_t ri
 
     // pop mirror
     MIR_Pop();
+
+#if defined(EDGE_GL_ES2)
+    // GL4ES mirror fix for renderlist
+    gl4es_flush();
+#endif
+
 }
 
 //
@@ -3005,6 +3016,11 @@ static void RGL_DrawMirror(drawmirror_c *mir)
 
     RGL_FinishUnits();
 
+#if defined(EDGE_GL_ES2)
+    // GL4ES mirror fix for renderlist
+    gl4es_flush();
+#endif
+
     MIR_Push(mir);
     {
         RGL_DrawSubList(mir->drawsubs, true);
@@ -3015,6 +3031,11 @@ static void RGL_DrawMirror(drawmirror_c *mir)
         DrawPortalPolygon(mir);
     else
         DrawMirrorPolygon(mir);
+
+#if defined(EDGE_GL_ES2)
+    // GL4ES mirror fix for renderlist
+    gl4es_flush();
+#endif
 
     solid_mode = true;
     RGL_StartUnits(solid_mode);

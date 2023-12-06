@@ -57,6 +57,7 @@
 #include "r_image.h"
 #include "w_texture.h"
 #include "w_wad.h"
+#include "rad_trig.h" // MUSINFO changers
 
 #include "miniz.h" // ZGL3 nodes
 
@@ -138,6 +139,85 @@ static std::string udmf_lump;
 static int *temp_line_sides;
 
 DEF_CVAR(m_goobers, "0", 0)
+
+struct musinfo_mapping_s
+{
+    std::unordered_map<int, int> mappings;
+    bool processed = false;
+};
+
+// This is wonky, but essentially the idea is to not continually create duplicate
+// RTS music changing scripts for the same level if warping back and forth, or
+// using a hub or somesuch that happens to have music changers
+static std::unordered_map<std::string, musinfo_mapping_s> musinfo_tracks;
+
+static void GetMUSINFOTracksForLevel(void)
+{
+    if (musinfo_tracks.count(currmap->name) && musinfo_tracks[currmap->name].processed)
+        return;
+    int   raw_length = 0;
+    byte *raw_musinfo   = W_OpenPackOrLumpInMemory("MUSINFO", {".txt"}, &raw_length);
+    if (!raw_musinfo)
+        return;
+    std::string musinfo;
+    musinfo.resize(raw_length);
+    memcpy(musinfo.data(), raw_musinfo, raw_length);
+    delete[] raw_musinfo;
+    epi::lexer_c lex(musinfo);
+    if (!musinfo_tracks.count(currmap->name))
+        musinfo_tracks.try_emplace({currmap->name, {}});
+    for (;;)
+    {
+        std::string       section;
+        epi::token_kind_e tok = lex.Next(section);
+
+        if (tok != epi::TOK_Number && tok != epi::TOK_Ident)
+            break;
+        
+        if (epi::case_cmp(section, currmap->name.c_str()) != 0)
+            continue;
+        
+        // Parse "block" for current map
+        int mus_number = -1;
+        for (;;)
+        {
+            std::string       value;
+            epi::token_kind_e block_tok = lex.Next(value);
+
+            if (block_tok != epi::TOK_Number && block_tok != epi::TOK_Ident)
+                return;
+
+            // A valid map name should be the end of this block
+            if (mapdefs.Lookup(value.c_str()))
+                return;
+
+            // This does have a bit of faith that the MUSINFO lump isn't malformed
+            if (mus_number == -1)
+                mus_number = epi::LEX_Int(value);
+            else
+            {
+                // This mimics Lobo's ad-hoc playlist stuff for UMAPINFO
+                int ddf_track = playlist.FindLast(value.c_str());
+                if (ddf_track != -1) // Entry exists
+                {
+                    musinfo_tracks[currmap->name].mappings.try_emplace(mus_number, ddf_track);
+                }
+                else
+                {
+                    static pl_entry_c *dynamic_plentry;
+                    dynamic_plentry           = new pl_entry_c;
+                    dynamic_plentry->number   = playlist.FindFree();
+                    dynamic_plentry->info     = value;
+                    dynamic_plentry->type     = MUS_UNKNOWN;
+                    dynamic_plentry->infotype = MUSINF_LUMP;
+                    playlist.Insert(dynamic_plentry);
+                    musinfo_tracks[currmap->name].mappings.try_emplace(mus_number, dynamic_plentry->number);
+                }
+                mus_number = -1;
+            }
+        }
+    }
+}
 
 static void CheckEvilutionBug(byte *data, int length)
 {
@@ -673,6 +753,32 @@ static void LoadThings(int lump)
 
         sector_t *sec = R_PointInSubsector(x, y)->sector;
 
+        if ((objtype->hyperflags & HF_MUSIC_CHANGER) && !musinfo_tracks[currmap->name].processed)
+        {
+            // This really should only be used with the original DoomEd number range
+            if (objtype->number >= 14100 && objtype->number < 14165)
+            {
+                int mus_number = -1;
+
+                if (objtype->number == 14100) // Default for level
+                    mus_number = currmap->music;
+                else if (musinfo_tracks[currmap->name].mappings.count(objtype->number - 14100))
+                    mus_number = musinfo_tracks[currmap->name].mappings[objtype->number - 14100];
+                // Track found; make ad-hoc RTS script for music changing
+                if (mus_number != -1)
+                {
+                    std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
+                    mus_rts.append(epi::STR_Format("START_MAP %s\n", currmap->name.c_str()));
+                    mus_rts.append(epi::STR_Format("  SECTOR_TRIGGER_INDEX %d\n", sec - sectors));
+                    mus_rts.append(epi::STR_Format("    WAIT 30T\n"));
+                    mus_rts.append(epi::STR_Format("    CHANGE_MUSIC %d\n", mus_number));
+                    mus_rts.append("  END_SECTOR_TRIGGER\n");
+                    mus_rts.append("END_MAP\n\n");
+                    RAD_ReadScript(mus_rts, "MUSINFO");
+                }
+            }
+        }
+
         z = sec->f_h;
 
         if (objtype->flags & MF_SPAWNCEILING)
@@ -694,6 +800,10 @@ static void LoadThings(int lump)
 
         SpawnMapThing(objtype, x, y, z, sec, angle, options, 0);
     }
+
+    // Mark MUSINFO for this level as done processing, even if it was empty,
+    // so we can avoid re-checks
+    musinfo_tracks[currmap->name].processed = true;
 
     delete[] data;
 }
@@ -2237,6 +2347,34 @@ static void LoadUDMFThings()
 
             sector_t *sec = R_PointInSubsector(x, y)->sector;
 
+            if ((objtype->hyperflags & HF_MUSIC_CHANGER) && !musinfo_tracks[currmap->name].processed)
+            {
+                // This really should only be used with the original DoomEd number range
+                if (objtype->number >= 14100 && objtype->number < 14165)
+                {
+                    int mus_number = -1;
+
+                    if (objtype->number == 14100) // Default for level
+                        mus_number = currmap->music;
+                    else if (musinfo_tracks[currmap->name].mappings.count(objtype->number - 14100))
+                    {
+                        mus_number = musinfo_tracks[currmap->name].mappings[objtype->number - 14100];
+                    }
+                    // Track found; make ad-hoc RTS script for music changing
+                    if (mus_number != -1)
+                    {
+                        std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
+                        mus_rts.append(epi::STR_Format("START_MAP %s\n", currmap->name.c_str()));
+                        mus_rts.append(epi::STR_Format("  SECTOR_TRIGGER_INDEX %d\n", sec - sectors));
+                        mus_rts.append(epi::STR_Format("    WAIT 30T\n"));
+                        mus_rts.append(epi::STR_Format("    CHANGE_MUSIC %d\n", mus_number));
+                        mus_rts.append("  END_SECTOR_TRIGGER\n");
+                        mus_rts.append("END_MAP\n\n");
+                        RAD_ReadScript(mus_rts, "MUSINFO");
+                    }
+                }
+            }
+
             if (objtype->flags & MF_SPAWNCEILING)
                 z += sec->c_h - objtype->height;
             else
@@ -2303,6 +2441,11 @@ static void LoadUDMFThings()
             }
         }
     }
+
+    // Mark MUSINFO for this level as done processing, even if it was empty,
+    // so we can avoid re-checks
+    musinfo_tracks[currmap->name].processed = true;
+
     I_Debugf("LoadUDMFThings: finished parsing TEXTMAP\n");
 }
 
@@ -3484,6 +3627,9 @@ void P_SetupLevel(void)
     G_ClearPlayerStarts();
 
     unknown_thing_map.clear();
+
+    // Must do before loading things
+    GetMUSINFOTracksForLevel();
 
     if (!udmf_level)
     {

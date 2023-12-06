@@ -1477,6 +1477,7 @@ static specflags_t hyper_specials[] = {{"FORCE_PICKUP", HF_FORCEPICKUP, 0},
                                        {"SPLASH", HF_NOSPLASH, 1},              // Lobo: causes no splash on liquids
                                        {"DEHACKED_COMPAT", HF_DEHACKED_COMPAT, 0},
                                        {"IMMOVABLE", HF_IMMOVABLE, 0},
+                                       {"MUSIC_CHANGER", HF_MUSIC_CHANGER, 0},
                                        {NULL, 0, 0}};
 
 static specflags_t mbf21_specials[] = {{"LOGRAV", MBF21_LOGRAV, 0}, {NULL, 0, 0}};

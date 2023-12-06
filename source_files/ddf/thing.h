@@ -312,6 +312,11 @@ typedef enum
     // -Lobo- 2023/10/19: this thing will not be affected by thrust forces
     HF_IMMOVABLE = (1 << 22),
 
+    // Dasho 2023/12/05: this thing is a MUSINFO Music Changer thing
+    // This flag is present because we cannot assume a thing is a 
+    // music changer just because it has an ID of 14100-14164
+    HF_MUSIC_CHANGER = (1 << 23),
+
 } mobjhyperflag_t;
 
 // MBF21 flags not already covered by extended/hyper flags

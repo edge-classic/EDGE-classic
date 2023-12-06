@@ -26,6 +26,7 @@
 #include "i_defs.h"
 
 #include <map>
+#include <unordered_map>
 
 #include "endianess.h"
 #include "math_crc.h"

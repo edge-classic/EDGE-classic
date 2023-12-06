@@ -1368,6 +1368,7 @@ static int PL_query_object(lua_State *L)
     return 1;
 }
 
+
 // mapobject.query_tagged(thing tag, whatinfo)
 //
 static int MO_query_tagged(lua_State *L)
@@ -1378,11 +1379,10 @@ static int MO_query_tagged(lua_State *L)
 
     mobj_t *mo;
 
-    int         index = 0;
     std::string temp_value;
     temp_value.clear();
 
-    for (mo = mobjlisthead; mo; mo = mo->next, index++)
+    for (mo = mobjlisthead; mo; mo = mo->next)
     {
         if (mo->tag == whattag)
         {
@@ -1399,6 +1399,275 @@ static int MO_query_tagged(lua_State *L)
     return 1;
 }
 
+
+// CreateLuaTable_Benefits(LuaState, mobj, Killbenefits);
+//
+static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits = false)
+{
+
+    benefit_t *list;
+
+    std::string BenefitName;
+    BenefitName.clear();
+    int        BenefitType = 0;
+    int        BenefitAmount = 0;
+    int        BenefitLimit = 0;
+
+    if (KillBenefits)
+        list = obj->info->kill_benefits;
+    else
+        list = obj->info->pickup_benefits;
+    
+    //how many benefits do we have?
+    int NumberOfBenefits = 0;
+    for (; list != NULL; list = list->next)
+    {
+        NumberOfBenefits++;
+    }
+
+    if(NumberOfBenefits < 1)
+        return;
+
+    lua_pushstring(L, "benefits");
+
+    int NumberOfBenefitFields = 4; //how many fields in a row
+    lua_createtable(L, NumberOfBenefits, 0); //create BENEFITS table
+
+    int CurrentBenefit = 1; //counter
+    if (KillBenefits)
+        list = obj->info->kill_benefits; //need to grab these again
+    else
+        list = obj->info->pickup_benefits; //need to grab these again
+
+    for (; list != NULL; list = list->next)
+    {
+        BenefitName.clear();
+        BenefitType = 0;
+        BenefitAmount = 0;
+        BenefitLimit = 0;
+
+        switch (list->type)
+        {
+        case BENEFIT_Weapon:
+            // If it's a weapon all bets are off: we'll want to parse
+            // it differently, not here.
+            BenefitName = "WEAPON";
+            BenefitType = 0;
+            BenefitAmount = 1;
+            break;
+            
+        case BENEFIT_Ammo:
+            BenefitName = "AMMO";
+            BenefitType = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit = (int)list->limit;
+            break;
+
+        case BENEFIT_Health: // only benefit without a sub.type so just give it 1
+            BenefitName = "HEALTH";
+            BenefitType = 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit = (int)list->limit;
+            break;
+
+        case BENEFIT_Armour:
+            BenefitName = "ARMOUR";
+            BenefitType = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit = (int)list->limit;
+            break;
+
+        case BENEFIT_Inventory:
+            BenefitName = "INVENTORY";
+            BenefitType = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit = (int)list->limit;
+            break;
+
+        case BENEFIT_Counter:
+            BenefitName = "COUNTER";
+            BenefitType = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit = (int)list->limit;
+            break;
+
+        case BENEFIT_Key:
+            BenefitName = "KEY";
+            BenefitType = (log2((int)list->sub.type) + 1);
+            BenefitAmount = 1;
+
+            //temp_num = log2((int)list->sub.type);
+            //temp_num++;
+            //temp_string += std::to_string(temp_num);
+            break;
+
+        case BENEFIT_Powerup:
+            BenefitName = "POWERUP";
+            BenefitType = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit = (int)list->limit;
+            break;
+
+        case BENEFIT_AmmoLimit:
+            BenefitName = "AMMOLIMIT";
+            BenefitType = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit = (int)list->limit;
+            break;
+        
+        case BENEFIT_InventoryLimit:
+            BenefitName = "INVENTORYLIMIT";
+            BenefitType = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit = (int)list->limit;
+            break;
+        
+        case BENEFIT_CounterLimit:
+            BenefitName = "COUNTERLIMIT";
+            BenefitType = (int)list->sub.type + 1;
+            BenefitAmount = (int)list->amount;
+            BenefitLimit = (int)list->limit;
+            break;
+
+        default:
+            break;
+        }
+
+        //add it to our table
+        lua_pushnumber(L, CurrentBenefit); //new benefit
+        lua_createtable(L, 0, NumberOfBenefitFields); //create Benefit subItem table
+
+        lua_pushstring(L, "name");
+        lua_pushstring(L, BenefitName.c_str());
+        lua_settable(L,-3); //add to Benefit subItem table
+
+        lua_pushstring(L, "type");
+        lua_pushinteger(L, BenefitType);
+        lua_settable(L,-3); //add to Benefit subItem table
+
+        lua_pushstring(L, "amount");
+        lua_pushinteger(L, BenefitAmount);
+        lua_settable(L,-3); //add to Benefit subItem table
+
+        lua_pushstring(L, "limit");
+        lua_pushinteger(L, BenefitLimit);
+        lua_settable(L,-3); //add to Benefit subItem table
+
+        lua_settable(L,-3); //add to BENEFITS table
+
+        CurrentBenefit++;
+    }
+
+    lua_settable(L,-3); //add to MOBJ Table
+
+}
+
+
+// CreateLuaTable_Mobj(LuaState, mobj)
+//
+static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
+{
+
+    std::string temp_value;
+    temp_value.clear();
+
+    int NumberOfItems = 5; //how many fields in a row
+    lua_createtable(L, 0, NumberOfItems); // our MOBJ table
+
+    //---------------
+    // object.name
+    temp_value = language[mo->info->cast_title];  // try CAST_TITLE first
+    if (temp_value.empty()) // fallback to DDFTHING entry name
+    {
+        temp_value = mo->info->name;
+        temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
+    }
+
+    lua_pushstring(L, "name");
+    lua_pushstring(L, temp_value.c_str());
+    lua_settable(L,-3);   //add to MOBJ Table
+    //---------------
+
+    //---------------
+    // object.type
+    temp_value="SCENERY"; //default to scenery
+
+    if (mo->extendedflags & EF_MONSTER)
+        temp_value="MONSTER";
+    if (mo->flags & MF_SPECIAL)
+        temp_value="PICKUP";
+    if (mo->info->pickup_benefits)
+    {
+        if (mo->info->pickup_benefits->type == BENEFIT_Weapon)
+            temp_value="WEAPON";
+        if (mo->info->pickup_benefits->sub.weap)
+            temp_value="WEAPON";
+    } 
+
+    lua_pushstring(L, "type");
+    lua_pushstring(L, temp_value.c_str());
+    lua_settable(L,-3); //add to MOBJ Table
+    //---------------
+
+    //---------------
+    // object.currenthealth
+    lua_pushstring(L, "currenthealth");
+    lua_pushinteger(L, (int)mo->health);
+    
+    lua_settable(L,-3); //add to MOBJ Table
+    //---------------
+
+    //---------------
+    // object.spawnhealth
+    lua_pushstring(L, "spawnhealth");
+    lua_pushinteger(L, (int)mo->info->spawnhealth);
+    lua_settable(L,-3); //add to MOBJ Table
+    //---------------
+
+    //---------------
+    // object.benefits
+    if (mo->extendedflags & EF_MONSTER)
+        CreateLuaTable_Benefits(L, mo, true); //only want kill benefits
+    else
+        CreateLuaTable_Benefits(L, mo, false); //only want pickup benefits
+     //---------------
+
+
+}
+
+
+
+// mapobject.tagged_info(thing tag) LUA Only
+//
+static int MO_tagged_info(lua_State *L)
+{
+    int whattag  = (int)luaL_checknumber(L, 1);
+    mobj_t *mo;
+    std::string temp_value;
+
+    temp_value.clear();
+    for (mo = mobjlisthead; mo; mo = mo->next)
+    {
+        if (mo->tag == whattag)
+        {
+            temp_value = "FOUNDIT";
+            break;
+        }
+    }
+
+    if (temp_value.empty())
+    {
+        lua_pushstring(L, ""); //Found nothing
+        return 1;
+    }   
+    else
+    {
+        CreateLuaTable_Mobj(L, mo); //create table with mobj info
+        return 1;
+    }
+
+}
+
 // mapobject.count(thing type/id)
 //
 static int MO_count(lua_State *L)
@@ -1407,10 +1676,9 @@ static int MO_count(lua_State *L)
 
     mobj_t *mo;
 
-    int    index      = 0;
     double thingcount = 0;
 
-    for (mo = mobjlisthead; mo; mo = mo->next, index++)
+    for (mo = mobjlisthead; mo; mo = mo->next)
     {
         if (mo->info->number == thingid && mo->health > 0)
             thingcount++;
@@ -1640,7 +1908,9 @@ static int luaopen_player(lua_State *L)
     return 1;
 }
 
-static const luaL_Reg mapobjectlib[] = {{"query_tagged", MO_query_tagged}, {"count", MO_count}, {NULL, NULL}};
+static const luaL_Reg mapobjectlib[] = {{"query_tagged", MO_query_tagged},
+                                     {"tagged_info", MO_tagged_info},
+                                     {"count", MO_count}, {NULL, NULL}};
 
 static int luaopen_mapobject(lua_State *L)
 {

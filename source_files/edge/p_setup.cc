@@ -767,8 +767,11 @@ static void LoadThings(int lump)
                     std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
                     mus_rts.append(epi::STR_Format("START_MAP %s\n", currmap->name.c_str()));
                     mus_rts.append(epi::STR_Format("  SECTOR_TRIGGER_INDEX %d\n", sec - sectors));
-                    mus_rts.append(epi::STR_Format("    WAIT 30T\n"));
+                    mus_rts.append("    TAGGED_INDEPENDENT\n");
+                    mus_rts.append("    TAGGED_REPEATABLE\n");
+                    mus_rts.append("    WAIT 30T\n");
                     mus_rts.append(epi::STR_Format("    CHANGE_MUSIC %d\n", mus_number));
+                    mus_rts.append("    RETRIGGER\n");
                     mus_rts.append("  END_SECTOR_TRIGGER\n");
                     mus_rts.append("END_MAP\n\n");
                     RAD_ReadScript(mus_rts, "MUSINFO");
@@ -2341,8 +2344,11 @@ static void LoadUDMFThings()
                         std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
                         mus_rts.append(epi::STR_Format("START_MAP %s\n", currmap->name.c_str()));
                         mus_rts.append(epi::STR_Format("  SECTOR_TRIGGER_INDEX %d\n", sec - sectors));
-                        mus_rts.append(epi::STR_Format("    WAIT 30T\n"));
+                        mus_rts.append("    TAGGED_INDEPENDENT\n");
+                        mus_rts.append("    TAGGED_REPEATABLE\n");
+                        mus_rts.append("    WAIT 30T\n");
                         mus_rts.append(epi::STR_Format("    CHANGE_MUSIC %d\n", mus_number));
+                        mus_rts.append("    RETRIGGER\n");
                         mus_rts.append("  END_SECTOR_TRIGGER\n");
                         mus_rts.append("END_MAP\n\n");
                         RAD_ReadScript(mus_rts, "MUSINFO");

@@ -736,6 +736,13 @@ static void RAD_ParseClearAll(param_set_t &pars)
     ClearAllScripts();
 }
 
+static void RAD_ParseClearMap(param_set_t &pars)
+{
+    // #CLEAR_MAP <map>
+
+    ClearPreviousScripts(pars[1]);
+}
+
 static void RAD_ParseDefine(param_set_t &pars)
 {
     // #Define <identifier> <num>
@@ -751,7 +758,9 @@ static void RAD_ParseStartMap(param_set_t &pars)
         RAD_Error("%s found, but previous END_MAP missing !\n", pars[0]);
 
     // -AJA- 1999/08/02: New scripts replace old ones.
-    ClearPreviousScripts(pars[1]);
+    // Dasho 2023/12/07: Commented out in lieu of the new
+    // #CLEAR_MAP directive when the modders actually wants this
+    // ClearPreviousScripts(pars[1]);
 
     this_map = Z_StrDup(pars[1]);
     for (size_t i = 0; i < strlen(this_map); i++)
@@ -2305,6 +2314,7 @@ static const rts_parser_t radtrig_parsers[] = {
     {-1, "#DEFINE", 3, 3, RAD_ParseDefine},
     {0, "#VERSION", 2, 2, RAD_ParseVersion},
     {0, "#CLEARALL", 1, 1, RAD_ParseClearAll},
+    {0, "#CLEAR_MAP", 2, 2, RAD_ParseClearMap},
 
     // basics...
     {-1, "START_MAP", 2, 2, RAD_ParseStartMap},

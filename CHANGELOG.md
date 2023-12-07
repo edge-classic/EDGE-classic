@@ -1,6 +1,6 @@
 https://github.com/edge-classic/EDGE-classic
 
-Current as of: October 2023
+Current as of: December 2023
 
 CHANGELOG for EDGE-Classic 1.37 (since EDGE-Classic 1.36)
 ====================================

@@ -49,7 +49,7 @@ General Improvements/Changes
     - SECTOR_TRIGGER_TAG \<tag\>: Script will trigger once any sector with this tag is entered
     - SECTOR_INDEX_TAG \<index\>: Script will trigger once the sector with this index (as viewable via map editor) is entered
   - START_MAP directive will no longer clear existing scripts for the map in question
-  - #CELAR_MAP \<mapname\> directive added for granular clearing of map scripts
+  - #CLEAR_MAP \<mapname\> directive added for granular clearing of map scripts
 
 Bugs fixed
 ----------

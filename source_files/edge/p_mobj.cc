@@ -447,9 +447,11 @@ static void ResurrectRespawn(mobj_t *mobj)
     mobj->extendedflags = info->extendedflags;
     mobj->hyperflags    = info->hyperflags;
     mobj->mbf21flags    = info->mbf21flags;
-    mobj->health        = info->spawnhealth;
+    mobj->health        = mobj->spawnhealth;
 
     mobj->visibility = PERCENT_2_FLOAT(info->translucency);
+    if (!AlmostEquals(mobj->alpha, 1.0f))
+        mobj->vis_target = mobj->alpha;
     mobj->movecount  = 0; // -ACB- 1998/08/03 Don't head off in any direction
 
     mobj->painchance = PERCENT_2_FLOAT(info->painchance);
@@ -2214,13 +2216,18 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
     mobj->y                = y;
     mobj->radius           = info->radius;
     mobj->height           = info->height;
+    mobj->scale            = info->scale;
+    mobj->aspect           = info->aspect;
     mobj->flags            = info->flags;
     mobj->health           = info->spawnhealth;
+    mobj->spawnhealth      = info->spawnhealth;
     mobj->speed            = info->speed;
     mobj->fuse             = info->fuse;
     mobj->side             = info->side;
     mobj->model_skin       = info->model_skin;
     mobj->model_last_frame = -1;
+    mobj->model_aspect     = info->model_aspect;
+    mobj->model_scale      = info->model_scale;
     mobj->wud_tags.clear();
 
     mobj->painchance = PERCENT_2_FLOAT(info->painchance);

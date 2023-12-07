@@ -1067,7 +1067,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
         if (spr_flip)
             side_offset = -side_offset;
 
-        float xscale = mo->info->scale * mo->info->aspect;
+        float xscale = mo->scale * mo->aspect;
 
         pos1 = (sprite_width / -2.0f - side_offset) * xscale;
         pos2 = (sprite_width / +2.0f - side_offset) * xscale;
@@ -1075,13 +1075,13 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
         switch (mo->info->yalign)
         {
         case SPYA_TopDown:
-            gzt = mo->z + mo->height + top_offset * mo->info->scale;
-            gzb = gzt - sprite_height * mo->info->scale;
+            gzt = mo->z + mo->height + top_offset * mo->scale;
+            gzb = gzt - sprite_height * mo->scale;
             break;
 
         case SPYA_Middle: {
-            float _mz = mo->z + mo->height * 0.5 + top_offset * mo->info->scale;
-            float dz  = sprite_height * 0.5 * mo->info->scale;
+            float _mz = mo->z + mo->height * 0.5 + top_offset * mo->scale;
+            float dz  = sprite_height * 0.5 * mo->scale;
 
             gzt = _mz + dz;
             gzb = _mz - dz;
@@ -1090,8 +1090,8 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 
         case SPYA_BottomUp:
         default:
-            gzb = mo->z + top_offset * mo->info->scale;
-            gzt = gzb + sprite_height * mo->info->scale;
+            gzb = mo->z + top_offset * mo->scale;
+            gzt = gzb + sprite_height * mo->scale;
             break;
         }
 
@@ -1233,15 +1233,15 @@ static void RGL_DrawModel(drawthing_t *dthing)
 
     if (md->md2_model)
         MD2_RenderModel(md->md2_model, skin_img, false, last_frame, mo->state->frame, lerp, dthing->mx, dthing->my, z,
-                        mo, mo->props, mo->info->model_scale, mo->info->model_aspect, mo->info->model_bias,
+                        mo, mo->props, mo->model_scale, mo->model_aspect, mo->info->model_bias,
                         mo->info->model_rotate);
     else if (md->mdl_model)
         MDL_RenderModel(md->mdl_model, skin_img, false, last_frame, mo->state->frame, lerp, dthing->mx, dthing->my, z,
-                        mo, mo->props, mo->info->model_scale, mo->info->model_aspect, mo->info->model_bias,
+                        mo, mo->props, mo->model_scale, mo->model_aspect, mo->info->model_bias,
                         mo->info->model_rotate);
     else
-        VXL_RenderModel(md->vxl_model, false, dthing->mx, dthing->my, z, mo, mo->props, mo->info->model_scale,
-                        mo->info->model_aspect, mo->info->model_bias, mo->info->model_rotate);
+        VXL_RenderModel(md->vxl_model, false, dthing->mx, dthing->my, z, mo, mo->props, mo->model_scale,
+                        mo->model_aspect, mo->info->model_bias, mo->info->model_rotate);
 }
 
 typedef struct
@@ -1342,7 +1342,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
     float tex_y1 = dthing->bottom - dthing->orig_bottom;
     float tex_y2 = tex_y1 + (z1t - z1b);
 
-    float yscale = mo->info->scale * MIR_ZScale();
+    float yscale = mo->scale * MIR_ZScale();
 
     SYS_ASSERT(h > 0);
     tex_y1 = top * tex_y1 / (h * yscale);

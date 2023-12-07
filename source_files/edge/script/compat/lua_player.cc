@@ -133,7 +133,7 @@ static int PL_get_mlook(lua_State *L)
 //
 static int PL_health(lua_State *L)
 {
-    float h = ui_player_who->health * 100 / ui_player_who->mo->info->spawnhealth;
+    float h = ui_player_who->health * 100 / ui_player_who->mo->spawnhealth;
 
     if (h < 98)
         h += 0.99f;
@@ -1223,7 +1223,7 @@ static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
     case 3: // spawn health
         if (obj)
         {
-            temp_num    = obj->info->spawnhealth;
+            temp_num    = obj->spawnhealth;
             temp_string = std::to_string(temp_num);
         }
         break;
@@ -1618,7 +1618,7 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
     //---------------
     // object.spawnhealth
     lua_pushstring(L, "spawnhealth");
-    lua_pushinteger(L, (int)mo->info->spawnhealth);
+    lua_pushinteger(L, (int)mo->spawnhealth);
     lua_settable(L,-3); //add to MOBJ Table
     //---------------
 

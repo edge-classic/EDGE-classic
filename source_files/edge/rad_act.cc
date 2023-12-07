@@ -1392,7 +1392,7 @@ void P_ActReplace(struct mobj_s *mo, const mobjtype_c *newThing)
         else
             mo->speed = mo->info->speed;
 
-        mo->health = mo->info->spawnhealth; // always top up health to full
+        mo->health = mo->spawnhealth; // always top up health to full
 
         if (mo->flags & MF_AMBUSH) // preserve map editor AMBUSH flag
         {

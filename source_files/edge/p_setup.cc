@@ -82,10 +82,6 @@ DEF_CVAR(udmf_strict, "0", CVAR_ARCHIVE)
 // Store VERTEXES, LINEDEFS, SIDEDEFS, etc.
 //
 
-// Stores pointers to ad-hoc/derived classes that need to be cleaned up on ending a level
-std::vector<sectortype_c *> adhoc_sectors;
-std::vector<mobjtype_c *>   adhoc_things;
-
 int       numvertexes;
 vertex_t *vertexes = nullptr;
 
@@ -1767,15 +1763,6 @@ static void LoadUDMFSectors()
 
                 if (light_color == RGB_NO_VALUE)
                     light_color ^= RGB_MAKE(1, 1, 1);
-                // If sector special includes colormap, make an ad-hoc version without that
-                if (ss->props.special && ss->props.special->use_colourmap)
-                {
-                    sectortype_c *adhoc = new sectortype_c;
-                    adhoc->CopyDetail(const_cast<sectortype_c &>(*ss->props.special));
-                    adhoc->use_colourmap = nullptr;
-                    ss->props.special    = adhoc;
-                    adhoc_sectors.push_back(adhoc);
-                }
                 // Make colourmap if necessary
                 for (int i = 0; i < colourmaps.GetSize(); i++)
                 {
@@ -2254,7 +2241,6 @@ static void LoadUDMFThings()
             float             alpha     = 1.0f;
             float             scale = 0.0f, scalex = 0.0f, scaley = 0.0f;
             const mobjtype_c *objtype;
-            bool              new_thing = false;
             for (;;)
             {
                 if (lex.Match("}"))
@@ -2314,27 +2300,15 @@ static void LoadUDMFThings()
                 else if (key == "friend")
                     options |= (epi::LEX_Boolean(value) ? MTF_FRIEND : 0);
                 else if (key == "health")
-                {
                     healthfac = epi::LEX_Double(value);
-                    new_thing = true;
-                }
                 else if (key == "alpha")
                     alpha = epi::LEX_Double(value);
                 else if (key == "scale")
-                {
                     scale     = epi::LEX_Double(value);
-                    new_thing = true;
-                }
                 else if (key == "scalex")
-                {
                     scalex    = epi::LEX_Double(value);
-                    new_thing = true;
-                }
                 else if (key == "scaley")
-                {
                     scaley    = epi::LEX_Double(value);
-                    new_thing = true;
-                }
             }
             objtype = mobjtypes.Lookup(typenum);
 
@@ -2387,46 +2361,35 @@ static void LoadUDMFThings()
             if (udmf_thing)
             {
                 udmf_thing->vis_target = alpha;
-                // Process all changes that would require a derived thing mobjtype at once
-                if (new_thing)
+                udmf_thing->alpha = alpha;
+                if (!AlmostEquals(healthfac, 1.0f))
                 {
-                    mobjtype_c *adhoc_info = new mobjtype_c;
-                    adhoc_info->CopyDetail(const_cast<mobjtype_c &>(*udmf_thing->info));
-                    if (!AlmostEquals(healthfac, 1.0f))
+                    if (healthfac < 0)
                     {
-                        if (healthfac < 0)
-                        {
-                            adhoc_info->spawnhealth = fabs(healthfac);
-                            udmf_thing->health      = fabs(healthfac);
-                        }
-                        else
-                        {
-                            adhoc_info->spawnhealth *= healthfac;
-                            udmf_thing->health *= healthfac;
-                        }
+                        udmf_thing->spawnhealth = fabs(healthfac);
+                        udmf_thing->health      = fabs(healthfac);
                     }
-                    // Treat 'scale' and 'scalex/scaley' as one or the other; don't try to juggle both
-                    if (!AlmostEquals(scale, 0.0f))
+                    else
                     {
-                        adhoc_info->scale = adhoc_info->model_scale = scale;
-                        adhoc_info->height *= scale;
-                        adhoc_info->radius *= scale;
-                        udmf_thing->height *= scale;
-                        udmf_thing->radius *= scale;
+                        udmf_thing->spawnhealth *= healthfac;
+                        udmf_thing->health *= healthfac;
                     }
-                    else if (!AlmostEquals(scalex, 0.0f) || !AlmostEquals(scaley, 0.0f))
-                    {
-                        float sx          = AlmostEquals(scalex, 0.0f) ? 1.0f : scalex;
-                        float sy          = AlmostEquals(scaley, 0.0f) ? 1.0f : scaley;
-                        adhoc_info->scale = adhoc_info->model_scale = sy;
-                        adhoc_info->aspect = adhoc_info->model_aspect = (sx / sy);
-                        adhoc_info->height *= sy;
-                        adhoc_info->radius *= sx;
-                        udmf_thing->height *= sy;
-                        udmf_thing->radius *= sx;
-                    }
-                    udmf_thing->info = adhoc_info;
-                    adhoc_things.push_back(adhoc_info);
+                }
+                // Treat 'scale' and 'scalex/scaley' as one or the other; don't try to juggle both
+                if (!AlmostEquals(scale, 0.0f))
+                {
+                    udmf_thing->scale = udmf_thing->model_scale = scale;
+                    udmf_thing->height *= scale;
+                    udmf_thing->radius *= scale;
+                }
+                else if (!AlmostEquals(scalex, 0.0f) || !AlmostEquals(scaley, 0.0f))
+                {
+                    float sx          = AlmostEquals(scalex, 0.0f) ? 1.0f : scalex;
+                    float sy          = AlmostEquals(scaley, 0.0f) ? 1.0f : scaley;
+                    udmf_thing->scale = udmf_thing->model_scale = sy;
+                    udmf_thing->aspect = udmf_thing->model_aspect = (sx / sy);
+                    udmf_thing->height *= sy;
+                    udmf_thing->radius *= sx;
                 }
             }
 
@@ -3485,14 +3448,6 @@ void ShutdownLevel(void)
     P_DestroyBlockMap();
 
     P_RemoveAllMobjs(false);
-
-    for (auto adhoc : adhoc_sectors)
-        delete adhoc;
-    adhoc_sectors.clear();
-
-    for (auto adhoc : adhoc_things)
-        delete adhoc;
-    adhoc_things.clear();
 }
 
 void P_SetupLevel(void)

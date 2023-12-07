@@ -451,12 +451,15 @@ void P_BringCorpseToLife(mobj_t *corpse)
     const mobjtype_c *info = corpse->info;
 
     corpse->flags         = info->flags;
-    corpse->health        = info->spawnhealth;
+    corpse->health        = corpse->spawnhealth;
     corpse->radius        = info->radius;
     corpse->height        = info->height;
     corpse->extendedflags = info->extendedflags;
     corpse->hyperflags    = info->hyperflags;
     corpse->vis_target    = PERCENT_2_FLOAT(info->translucency);
+    // UDMF check
+    if (!AlmostEquals(corpse->alpha, 1.0f))
+        corpse->vis_target = corpse->alpha;
     corpse->tag           = corpse->spawnpoint.tag;
 
     corpse->flags &= ~MF_COUNTKILL; // Lobo 2023: don't add to killcount

@@ -197,6 +197,9 @@ struct mobj_s : public position_c
     // For movement checking.
     float radius = 0;
     float height = 0;
+    float scale  = 1.0f;
+    float aspect = 1.0f;
+    float alpha  = 1.0f;
 
     // Momentum, used to update position.
     vec3_t mom = {0, 0, 0};
@@ -230,6 +233,7 @@ struct mobj_s : public position_c
 
     // Thing's health level
     float health = 0;
+    float spawnhealth = 0;
 
     // state tic counter
     int tics     = 0;
@@ -246,6 +250,8 @@ struct mobj_s : public position_c
 
     int model_skin       = 0;
     int model_last_frame = 0;
+    float model_scale    = 1.0f;
+    float model_aspect   = 1.0f;
 
     // tag ID (for special operations)
     int         tag      = 0;

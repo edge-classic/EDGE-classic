@@ -151,7 +151,7 @@ static void PL_get_mlook(coal::vm_c *vm, int argc)
 //
 static void PL_health(coal::vm_c *vm, int argc)
 {
-    float h = ui_player_who->health * 100 / ui_player_who->mo->info->spawnhealth;
+    float h = ui_player_who->health * 100 / ui_player_who->mo->spawnhealth;
 
     if (h < 98)
         h += 0.99f;
@@ -1187,7 +1187,7 @@ static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
     case 3: // spawn health
         if (obj)
         {
-            temp_num    = obj->info->spawnhealth;
+            temp_num    = obj->spawnhealth;
             temp_string = std::to_string(temp_num);
         }
         break;

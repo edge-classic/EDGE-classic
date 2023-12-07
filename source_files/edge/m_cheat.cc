@@ -239,7 +239,7 @@ bool M_CheatResponder(event_t *ev)
         {
             if (pl->mo)
             {
-                pl->health = pl->mo->health = pl->mo->info->spawnhealth;
+                pl->health = pl->mo->health = pl->mo->spawnhealth;
             }
             CON_MessageLDF("GodModeOn");
         }

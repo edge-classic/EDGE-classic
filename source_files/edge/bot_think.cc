@@ -330,7 +330,7 @@ float bot_t::EvaluateWeapon(int w_num, int &key) const
         if (!weapon->dangerous)
             score += 1000.0f;
     }
-    else if (pl->mo->target->info->spawnhealth > 250)
+    else if (pl->mo->target->spawnhealth > 250)
     {
         if (weapon->priority > 5)
             score += 1000.0f;

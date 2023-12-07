@@ -1121,7 +1121,7 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const damage_c *damtype, bool we
 
     if (target->info->gib_health < 0 && target->health < target->info->gib_health)
         overkill = true;
-    else if (target->health < -target->info->spawnhealth)
+    else if (target->health < -target->spawnhealth)
         overkill = true;
 
     if (weak_spot)
@@ -1600,16 +1600,16 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
     }
 
     // -AJA- 2007/11/06: vampire mode!
-    if (source && source != target && source->health < source->info->spawnhealth &&
+    if (source && source != target && source->health < source->spawnhealth &&
         ((source->hyperflags & HF_VAMPIRE) ||
          (inflictor && inflictor->currentattack && (inflictor->currentattack->flags & AF_Vampire))))
     {
         float qty = (target->player ? 0.5 : 0.25) * damage;
 
-        source->health = MIN(source->health + qty, source->info->spawnhealth);
+        source->health = MIN(source->health + qty, source->spawnhealth);
 
         if (source->player)
-            source->player->health = MIN(source->player->health + qty, source->info->spawnhealth);
+            source->player->health = MIN(source->player->health + qty, source->spawnhealth);
     }
 
     if (target->health <= 0)
@@ -1700,7 +1700,7 @@ void P_TelefragMobj(mobj_t *target, mobj_t *inflictor, const damage_c *damtype)
     {
         target->player->attacker    = inflictor;
         target->player->damagecount = DAMAGE_LIMIT;
-        target->player->damage_pain = target->info->spawnhealth;
+        target->player->damage_pain = target->spawnhealth;
     }
 
     P_KillMobj(inflictor, target, damtype);

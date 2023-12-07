@@ -1870,7 +1870,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
     {
         player->cheats &= ~CF_GODMODE;
 
-        if (player->health < (player->mo->info->spawnhealth * 0.11f))
+        if (player->health < (player->mo->spawnhealth * 0.11f))
         {
             // -KM- 1998/12/16 We don't want to alter the special type,
             //   modify the sector's attributes instead.

@@ -608,13 +608,8 @@ int CenterMenuImage(const image_c *img)
 int CenterMenuImage2(style_c *style, int text_type, const image_c *img)
 {
     float CenterX  = 160;
-    float txtscale = 1.0;
+    float txtscale = style->def->text[text_type].scale;
     float gfxWidth = 0;
-
-    if (style->def->text[text_type].scale)
-    {
-        txtscale = style->def->text[text_type].scale;
-    }
 
     gfxWidth = IM_WIDTH(img) * txtscale;
     CenterX -= gfxWidth / 2;
@@ -626,13 +621,9 @@ int CenterMenuImage2(style_c *style, int text_type, const image_c *img)
 int CenterMenuText(style_c *style, int text_type, const char *str)
 {
     float CenterX  = 160;
-    float txtscale = 1.0;
+    float txtscale = style->def->text[text_type].scale;
     float txtWidth = 0;
 
-    if (style->def->text[text_type].scale)
-    {
-        txtscale = style->def->text[text_type].scale;
-    }
     txtWidth = style->fonts[text_type]->StringWidth(str) * txtscale;
     CenterX -= txtWidth / 2;
     CenterX += style->def->text[text_type].x_offset;
@@ -660,55 +651,53 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 {
     int   y        = 0; // LoadDef.y + LineHeight * row;
     int   x        = 0;
-    float txtscale = 1.0;
+    int text_type = styledef_c::T_TITLE;
+    float txtscale = style->def->text[text_type].scale;
 
     // TITLE.FONT="EDGE3"; // next page text
     // TEXT.FONT="EDGE3"; // save name & slot
     // ALT.FONT="EDGE3";  // when we edit the save name
     // HELP.FONT="EDGE3"; // save info text
 
-    y = style->def->text[styledef_c::T_TITLE].y_offset;
+    y = style->def->text[text_type].y_offset;
     y += style->def->entry_spacing;
-    x = style->def->text[styledef_c::T_TITLE].x_offset;
+    x = style->def->text[text_type].x_offset;
     slot_extra_info_t *info;
 
     char mbuffer[200];
 
     sprintf(mbuffer, "PAGE %d", save_page + 1);
 
-    if (style->def->text[styledef_c::T_TITLE].scale)
-        txtscale = style->def->text[styledef_c::T_TITLE].scale;
-
     if (save_page > 0)
-        HL_WriteText(style, styledef_c::T_TITLE, x - 4, y, "< PREV");
+        HL_WriteText(style, text_type, x - 4, y, "< PREV");
 
-    x += style->fonts[styledef_c::T_TITLE]->StringWidth("< PREV") * txtscale;
+    x += style->fonts[text_type]->StringWidth("< PREV") * txtscale;
     x += 30;
 
-    HL_WriteText(style, styledef_c::T_TITLE, x, y, mbuffer);
+    HL_WriteText(style, text_type, x, y, mbuffer);
 
-    x += style->fonts[styledef_c::T_TITLE]->StringWidth(mbuffer) * txtscale;
+    x += style->fonts[text_type]->StringWidth(mbuffer) * txtscale;
     x += 30;
 
     if (save_page < SAVE_PAGES - 1)
-        HL_WriteText(style, styledef_c::T_TITLE, x, y, "NEXT >");
+        HL_WriteText(style, text_type, x, y, "NEXT >");
 
     info = ex_slots + itemOn;
     SYS_ASSERT(0 <= itemOn && itemOn < SAVE_SLOTS);
 
     // show some info about the savegame
 
+    text_type = styledef_c::T_HELP;
+    txtscale = style->def->text[text_type].scale;
+
     // y = LoadDef.y + LineHeight * (row2 + 1);
-    y = style->def->text[styledef_c::T_HELP].y_offset;
+    y = style->def->text[text_type].y_offset;
     y += style->def->entry_spacing;
-    x = style->def->text[styledef_c::T_HELP].x_offset;
+    x = style->def->text[text_type].x_offset;
 
-    if (style->def->text[styledef_c::T_HELP].scale)
-        txtscale = style->def->text[styledef_c::T_HELP].scale;
+    LineHeight = style->fonts[text_type]->NominalHeight() * txtscale;
 
-    LineHeight = style->fonts[styledef_c::T_HELP]->NominalHeight() * txtscale;
-
-    const colourmap_c *colmap = style->def->text[styledef_c::T_HELP].colmap;
+    const colourmap_c *colmap = style->def->text[text_type].colmap;
     rgbcol_t           col    = V_GetFontColor(colmap);
     // HUD_ThinBox(x - 5, y - 5, x + 95, y + 50, col);
     HUD_ThinBox(x - 5, y - 5, x + 95, y + 115, col);
@@ -718,7 +707,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 
     mbuffer[0] = 0;
     strcat(mbuffer, info->timestr);
-    HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
+    HL_WriteText(style, text_type, x, y, mbuffer);
 
     y += LineHeight + (LineHeight / 2);
     y += style->def->entry_spacing;
@@ -729,13 +718,13 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
     temp_string.clear();
     temp_string.assign(info->gamename);
     temp_string = LoboStringReplaceAll(temp_string, std::string("_"), std::string(" "));
-    HL_WriteText(style, styledef_c::T_HELP, x, y, temp_string.c_str());
+    HL_WriteText(style, text_type, x, y, temp_string.c_str());
 
     y += LineHeight + (LineHeight / 2);
     y += style->def->entry_spacing;
     mbuffer[0] = 0;
     strcat(mbuffer, info->mapname);
-    HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
+    HL_WriteText(style, text_type, x, y, mbuffer);
 
     y += LineHeight + (LineHeight / 2);
     y += style->def->entry_spacing;
@@ -758,7 +747,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
         strcat(mbuffer, language["MenuDifficulty5"]);
         break;
     }
-    HL_WriteText(style, styledef_c::T_HELP, x, y, mbuffer);
+    HL_WriteText(style, text_type, x, y, mbuffer);
 
     /*int BottomY = 0;
     BottomY = style->def->text[styledef_c::T_HELP].y_offset;
@@ -770,7 +759,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
         y += 20;
         // BottomY -= y;
         HUD_StretchFromImageData(x - 3, y, 95,
-                                 (style->def->text[styledef_c::T_HELP].y_offset + style->def->entry_spacing + 114) - y,
+                                 (style->def->text[text_type].y_offset + style->def->entry_spacing + 114) - y,
                                  info->save_imdata, info->save_texid, OPAC_Solid);
     }
 }
@@ -812,11 +801,11 @@ void M_DrawLoad(void)
 
     fontType = styledef_c::T_TEXT;
 
-    TempX += style->def->text[styledef_c::T_TEXT].x_offset;
-    TempY += style->def->text[styledef_c::T_TEXT].y_offset;
+    TempX += style->def->text[fontType].x_offset;
+    TempY += style->def->text[fontType].y_offset;
     TempY += style->def->entry_spacing;
 
-    rgbcol_t col = V_GetFontColor(style->def->text[styledef_c::T_TEXT].colmap);
+    rgbcol_t col = V_GetFontColor(style->def->text[fontType].colmap);
     HUD_ThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
     // 2. draw the save games
@@ -885,7 +874,6 @@ void M_DrawSave(void)
 {
     int   i;
     int   fontType;
-    float txtscale = 1.0;
     float LineHeight;
     int   TempX = 0;
     int   TempY = 0;
@@ -902,8 +890,7 @@ void M_DrawSave(void)
     else
         fontType = styledef_c::T_HEADER;
 
-    if (style->def->text[fontType].scale)
-        txtscale = style->def->text[fontType].scale;
+    float txtscale = style->def->text[fontType].scale;
 
     HUD_SetAlpha(style->def->text[fontType].translucency);
 
@@ -916,24 +903,26 @@ void M_DrawSave(void)
 
     HUD_SetAlpha(old_alpha);
 
+    fontType = styledef_c::T_TEXT;
     TempX = 0;
     TempY = 0;
-    TempX += style->def->text[styledef_c::T_TEXT].x_offset;
-    TempY += style->def->text[styledef_c::T_TEXT].y_offset;
+    TempX += style->def->text[fontType].x_offset;
+    TempY += style->def->text[fontType].y_offset;
     TempY += style->def->entry_spacing;
-    fontType = styledef_c::T_TEXT;
 
-    rgbcol_t col = V_GetFontColor(style->def->text[styledef_c::T_TEXT].colmap);
+    rgbcol_t col = V_GetFontColor(style->def->text[fontType].colmap);
     HUD_ThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
     // 2. draw the save games
     for (i = 0; i < SAVE_SLOTS; i++)
     {
-        fontType = styledef_c::T_TEXT;
         if (i == itemOn)
         {
             if (style->def->text[styledef_c::T_SELECTED].font)
+            {
                 fontType = styledef_c::T_SELECTED;
+                txtscale = style->def->text[fontType].scale;
+            }
         }
 
         LineHeight = style->fonts[fontType]->NominalHeight(); // * txtscale
@@ -941,7 +930,7 @@ void M_DrawSave(void)
         if (fontType == styledef_c::T_SELECTED)
         {
             // ttf_ref_yshift is important for TTF fonts.
-            float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift[current_font_size]; // * txtscale;
+            float y_shift = style->fonts[fontType]->ttf_ref_yshift[current_font_size]; // * txtscale;
 
             HUD_SetAlpha(0.33f);
             HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
@@ -954,12 +943,16 @@ void M_DrawSave(void)
         {
             entering_save = true;
             if (!style->fonts[styledef_c::T_ALT])
+            {
                 fontType = styledef_c::T_TEXT;
-            else
-                fontType = styledef_c::T_ALT;
-
-            if (style->def->text[fontType].scale)
                 txtscale = style->def->text[fontType].scale;
+            }
+            else
+            {
+                fontType = styledef_c::T_ALT;
+                txtscale = style->def->text[fontType].scale;
+            }
+
             len = style->fonts[fontType]->StringWidth(ex_slots[save_slot].desc) * txtscale;
         }
 
@@ -1149,7 +1142,6 @@ void M_DrawNewGame(void)
 {
     int   fontType;
     int   x        = 54;
-    float txtscale = 1.0f;
 
     style_c *style = skill_style;
 
@@ -1158,10 +1150,7 @@ void M_DrawNewGame(void)
     else
         fontType = styledef_c::T_HEADER;
 
-    if (style->def->text[fontType].scale)
-        txtscale = style->def->text[fontType].scale;
-    else
-        txtscale = 1.0f;
+    float txtscale = style->def->text[fontType].scale;
 
     float old_alpha = HUD_GetAlpha();
 
@@ -1178,6 +1167,7 @@ void M_DrawNewGame(void)
 
         HUD_SetAlpha(old_alpha);
         fontType = styledef_c::T_TITLE;
+        txtscale = style->def->text[fontType].scale;
         HUD_SetAlpha(style->def->text[fontType].translucency);
 
         if (style->def->entry_alignment == style->def->C_CENTER)
@@ -1204,12 +1194,8 @@ void M_DrawNewGame(void)
 
         HUD_SetAlpha(old_alpha);
         fontType = styledef_c::T_TITLE;
+        txtscale = style->def->text[fontType].scale;
         HUD_SetAlpha(style->def->text[fontType].translucency);
-
-        if (style->def->text[fontType].scale)
-            txtscale = style->def->text[fontType].scale;
-        else
-            txtscale = 1.0f;
 
         x = 54;
         if (style->def->entry_alignment == style->def->C_CENTER)
@@ -1314,7 +1300,6 @@ void M_DrawEpisode(void)
 {
     int   fontType;
     int   x        = 54;
-    float txtscale = 1.0f;
 
     style_c *style = episode_style;
 
@@ -1323,8 +1308,7 @@ void M_DrawEpisode(void)
     else
         fontType = styledef_c::T_HEADER;
 
-    if (style->def->text[fontType].scale)
-        txtscale = style->def->text[fontType].scale;
+    float txtscale = style->def->text[fontType].scale;
 
     float old_alpha = HUD_GetAlpha();
     HUD_SetAlpha(style->def->text[fontType].translucency);
@@ -2475,7 +2459,6 @@ float WidestLine;
 //
 void M_DrawCursor(style_c *style, bool graphical_item)
 {
-    float txtscale         = 1.0;
     bool  graphical_cursor = false;
     float TempScale        = 0;
     float TempWidth        = 0;
@@ -2489,8 +2472,7 @@ void M_DrawCursor(style_c *style, bool graphical_item)
 
     float old_alpha = HUD_GetAlpha();
 
-    if (style->def->text[styledef_c::T_TEXT].scale)
-        txtscale = style->def->text[styledef_c::T_TEXT].scale;
+    float txtscale = style->def->text[styledef_c::T_TEXT].scale;
 
     // const colourmap_c *colmap = style->def->text[styledef_c::T_TEXT].colmap; // Should we allow a colmap for the
     // cursor?
@@ -2776,7 +2758,6 @@ void M_DrawItems(style_c *style, bool graphical_item)
     int   j;
     int   max;
 
-    float txtscale = 1.0;
     short TempX    = 0;
 
     ShortestLine = 0.0f;
@@ -2790,8 +2771,7 @@ void M_DrawItems(style_c *style, bool graphical_item)
 
     float old_alpha = HUD_GetAlpha();
 
-    if (style->def->text[styledef_c::T_TEXT].scale)
-        txtscale = style->def->text[styledef_c::T_TEXT].scale;
+    float txtscale = style->def->text[styledef_c::T_TEXT].scale;
 
     //---------------------------------------------------
     // 1. For each menu item calculate x, width, height
@@ -2872,6 +2852,7 @@ void M_DrawItems(style_c *style, bool graphical_item)
     }
 
     int textstyle = styledef_c::T_TEXT;
+    txtscale = style->def->text[textstyle].scale;
 
     //---------------------------------------------------
     // 2. Draw each menu item
@@ -2882,10 +2863,14 @@ void M_DrawItems(style_c *style, bool graphical_item)
         // styledef_c::T_TEXT) : 		styledef_c::T_TEXT;
 
         textstyle = styledef_c::T_TEXT;
+        txtscale = style->def->text[textstyle].scale;
         if (j == itemOn)
         {
             if (style->def->text[styledef_c::T_SELECTED].font)
+            {
                 textstyle = styledef_c::T_SELECTED;
+                txtscale = style->def->text[textstyle].scale;
+            }
         }
 
         HUD_SetAlpha(style->def->text[textstyle].translucency);
@@ -2905,10 +2890,14 @@ void M_DrawItems(style_c *style, bool graphical_item)
             //		style->def->text[styledef_c::T_TEXT].colmap;
 
             textstyle = styledef_c::T_TEXT;
+            txtscale = style->def->text[textstyle].scale;
             if (j == itemOn)
             {
                 if (style->def->text[styledef_c::T_SELECTED].colmap)
+                {
                     textstyle = styledef_c::T_SELECTED;
+                    txtscale = style->def->text[textstyle].scale;
+                }
             }
 
             const colourmap_c *colmap = style->def->text[textstyle].colmap;

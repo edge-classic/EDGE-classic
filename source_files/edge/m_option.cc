@@ -924,21 +924,14 @@ void M_OptDrawer()
 
     int   font_h;
     int   CenterX;
-    float TEXTscale;
-
-    TEXTscale = 1.0;
-
-    if (style->def->text[fontType].scale)
-    {
-        TEXTscale = style->def->text[fontType].scale;
-    }
+    float TEXTscale = style->def->text[fontType].scale;
 
     font_h = style->fonts[fontType]->NominalHeight();
     font_h *= TEXTscale;
     menutop = font_h / 2;
 
     CenterX = 160;
-    CenterX -= (style->fonts[fontType]->StringWidth(curr_menu->name) * 1.5) / 2;
+    CenterX -= (style->fonts[fontType]->StringWidth(curr_menu->name) * TEXTscale * 1.5) / 2;
 
     // Lobo 2022
     HL_WriteText(style, fontType, CenterX, menutop, curr_menu->name, 1.5);
@@ -962,22 +955,28 @@ void M_OptDrawer()
 
     if (curr_menu->key_page[0])
     {
+        fontType = styledef_c::T_TITLE;
+        TEXTscale = style->def->text[fontType].scale;
+
         if (curr_key_menu > 0)
-            HL_WriteText(style, styledef_c::T_TITLE, 60, 200 - deltay * 4, "< PREV");
+            HL_WriteText(style, fontType, 60, 200 - deltay * 4, "< PREV");
 
         if (curr_key_menu < NUM_KEY_MENUS - 1)
-            HL_WriteText(style, styledef_c::T_TITLE, 260 - style->fonts[2]->StringWidth("NEXT >"), 200 - deltay * 4,
+            HL_WriteText(style, fontType, 260 - style->fonts[fontType]->StringWidth("NEXT >") * TEXTscale, 200 - deltay * 4,
                          "NEXT >");
 
-        HL_WriteText(style, styledef_c::T_HELP, 160 - style->fonts[3]->StringWidth(curr_menu->key_page) / 2, curry,
+        fontType = styledef_c::T_HELP;
+        TEXTscale = style->def->text[fontType].scale;
+
+        HL_WriteText(style, fontType, 160 - style->fonts[fontType]->StringWidth(curr_menu->key_page) * TEXTscale / 2, curry,
                      curr_menu->key_page);
         curry += font_h * 2;
 
         if (keyscan)
-            HL_WriteText(style, styledef_c::T_HELP, 160 - (style->fonts[3]->StringWidth(keystring2) / 2),
+            HL_WriteText(style, fontType, 160 - (style->fonts[fontType]->StringWidth(keystring2) * TEXTscale / 2),
                          200 - deltay * 2, keystring2);
         else
-            HL_WriteText(style, styledef_c::T_HELP, 160 - (style->fonts[3]->StringWidth(keystring1) / 2),
+            HL_WriteText(style, fontType, 160 - (style->fonts[fontType]->StringWidth(keystring1) * TEXTscale / 2),
                          200 - deltay * 2, keystring1);
     }
     else if (curr_menu == &res_optmenu)
@@ -1002,9 +1001,20 @@ void M_OptDrawer()
             }
         }
 
-        HL_WriteText(style, is_selected ? styledef_c::T_TITLE : styledef_c::T_TEXT,
+        if (is_selected)
+        {
+            fontType  = styledef_c::T_TITLE;
+            TEXTscale = style->def->text[fontType].scale;
+        }
+        else
+        {
+            fontType  = styledef_c::T_TEXT;
+            TEXTscale = style->def->text[fontType].scale;
+        }
+
+        HL_WriteText(style, fontType,
                      (curr_menu->menu_center) -
-                         (style->fonts[is_selected ? styledef_c::T_TITLE : styledef_c::T_TEXT]->StringWidth(
+                         (style->fonts[fontType]->StringWidth(
                               curr_menu->items[i].name) *
                           TEXTscale),
                      curry, curr_menu->items[i].name);
@@ -1012,36 +1022,48 @@ void M_OptDrawer()
         // Draw current soundfont
         if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeSoundfont)
         {
-            HL_WriteText(style, styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry,
+            fontType  = styledef_c::T_ALT;
+            TEXTscale = style->def->text[fontType].scale;
+            HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                          epi::PATH_GetBasename(s_soundfont.s).u8string().c_str());
         }
 
         // Draw current GENMIDI
         if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeGENMIDI)
         {
-            HL_WriteText(style, styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry,
+            fontType  = styledef_c::T_ALT;
+            TEXTscale = style->def->text[fontType].scale;
+            HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                          s_genmidi.s.empty() ? "default" : epi::PATH_GetBasename(s_genmidi.s).u8string().c_str());
         }
 
         // -ACB- 1998/07/15 Menu Cursor is colour indexed.
         if (is_selected)
         {
+            fontType  = styledef_c::T_TITLE;
+            TEXTscale = style->def->text[fontType].scale;
             if (style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image)
             {
                 int cursor = 16;
-                HL_WriteText(style, styledef_c::T_TITLE, (curr_menu->menu_center + 4), curry, (const char *)&cursor);
+                HL_WriteText(style, fontType, (curr_menu->menu_center + 4), curry, (const char *)&cursor);
             }
             else
-                HL_WriteText(style, styledef_c::T_TITLE, (curr_menu->menu_center + 4), curry, "*");
+                HL_WriteText(style, fontType, (curr_menu->menu_center + 4), curry, "*");
 
             if (curr_menu->items[i].help)
             {
+                fontType  = styledef_c::T_HELP;
+                TEXTscale = style->def->text[fontType].scale;
                 const char *help = language[curr_menu->items[i].help];
 
-                HL_WriteText(style, styledef_c::T_HELP, 160 - (style->fonts[3]->StringWidth(help) * TEXTscale / 2),
+                HL_WriteText(style, fontType, 160 - (style->fonts[fontType]->StringWidth(help) * TEXTscale / 2),
                              200 - deltay * 2, help);
             }
         }
+
+        // I believe it's all T_ALT
+        fontType  = styledef_c::T_ALT;
+        TEXTscale = style->def->text[fontType].scale;
 
         switch (curr_menu->items[i].type)
         {
@@ -1051,7 +1073,7 @@ void M_OptDrawer()
             {
                 if (joystick_device == 0)
                 {
-                    HL_WriteText(style, styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, "None");
+                    HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry, "None");
                     break;
                 }
                 else
@@ -1059,13 +1081,13 @@ void M_OptDrawer()
                     const char *joyname = SDL_JoystickNameForIndex(joystick_device - 1);
                     if (joyname)
                     {
-                        HL_WriteText(style, styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry,
+                        HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                                      epi::STR_Format("%d - %s", joystick_device, joyname).c_str());
                         break;
                     }
                     else
                     {
-                        HL_WriteText(style, styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry,
+                        HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                                      epi::STR_Format("%d - Not Connected", joystick_device).c_str());
                         break;
                     }
@@ -1119,7 +1141,7 @@ void M_OptDrawer()
         case OPT_KeyConfig: {
             k = *(int *)(curr_menu->items[i].switchvar);
             M_Key2String(k, tempstring);
-            HL_WriteText(style, styledef_c::T_ALT, (curr_menu->menu_center + 15), curry, tempstring);
+            HL_WriteText(style, fontType, (curr_menu->menu_center + 15), curry, tempstring);
             break;
         }
 
@@ -1148,24 +1170,33 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
     // Draw resolution selection option
     y += (dy * 3);
 
+    int fontType  = styledef_c::T_ALT;
+    float TEXTscale = style->def->text[fontType].scale;
+
     sprintf(tempstring, "%s",
             new_scrmode.display_mode == 2
                 ? "Borderless Fullscreen"
                 : (new_scrmode.display_mode == scrmode_c::SCR_FULLSCREEN ? "Exclusive Fullscreen" : "Windowed"));
-    HL_WriteText(style, styledef_c::T_ALT, centrex + 15, y, tempstring);
+    HL_WriteText(style, fontType, centrex + 15, y, tempstring);
 
     if (new_scrmode.display_mode < 2)
     {
         y += dy;
         sprintf(tempstring, "%dx%d", new_scrmode.width, new_scrmode.height);
-        HL_WriteText(style, styledef_c::T_ALT, centrex + 15, y, tempstring);
+        HL_WriteText(style, fontType, centrex + 15, y, tempstring);
     }
 
     // Draw selected resolution and mode:
     y = bottomy;
 
+    fontType  = styledef_c::T_HELP;
+    TEXTscale = style->def->text[fontType].scale;
+
     sprintf(tempstring, "Current Resolution:");
-    HL_WriteText(style, styledef_c::T_HELP, 160 - (style->fonts[0]->StringWidth(tempstring) / 2), y, tempstring);
+    HL_WriteText(style, fontType, 160 - (style->fonts[fontType]->StringWidth(tempstring) * TEXTscale / 2), y, tempstring);
+
+    fontType  = styledef_c::T_ALT;
+    TEXTscale = style->def->text[fontType].scale;
 
     y += dy;
     y += 5;
@@ -1175,7 +1206,7 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
         sprintf(tempstring, "%d x %d %s", SCREENWIDTH, SCREENHEIGHT,
                 DISPLAYMODE == 1 ? "Exclusive Fullscreen" : "Windowed");
 
-    HL_WriteText(style, styledef_c::T_ALT, 160 - (style->fonts[1]->StringWidth(tempstring) / 2), y, tempstring);
+    HL_WriteText(style, fontType, 160 - (style->fonts[fontType]->StringWidth(tempstring) * TEXTscale / 2), y, tempstring);
 }
 
 //

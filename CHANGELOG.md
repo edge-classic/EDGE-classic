@@ -7,7 +7,7 @@ New Features
   - Includes a COAL compatibility layer to ease porting
   - Ported DOOM, Heretic, Blasphemer, and Harmony stock scripts to use Lua
   - Script debugging capabilities are included (https://github.com/slembcke/debugger.lua)
-  - COAL, for the time being, will still be instantiated if a PWAD or pack file contains a COALHUDS file
+  - COAL, for the time being, will still be instantiated if a PWAD or external pack contains a COALHUDS file
 - Added support for MPEG video playback
   - Files must use MPEG1 video and MP2 audio for proper decoding
   - DDFGAME: TITLE_MOVIE=<wad/packfile name> command added
@@ -47,7 +47,7 @@ General Improvements/Changes
 - RSCRIPT:
   - New sector-based trigger conditions (alternative to using radii)
     - SECTOR_TRIGGER_TAG \<tag\>: Script will trigger once any sector with this tag is entered
-    - SECTOR_INDEX_TAG \<index\>: Script will trigger once the sector with this index (as viewable via map editor) is entered
+    - SECTOR_TRIGGER_INDEX \<index\>: Script will trigger once the sector with this index (as viewable via map editor) is entered
   - START_MAP directive will no longer clear existing scripts for the map in question
   - #CLEAR_MAP \<mapname\> directive added for granular clearing of map scripts
 

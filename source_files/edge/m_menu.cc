@@ -826,7 +826,7 @@ void M_DrawLoad(void)
             float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift[current_font_size]; // * txtscale;
 
             HUD_SetAlpha(0.33f);
-            HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+            HUD_SolidBox(TempX - 3, TempY - 2 + (y_shift/2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
             HUD_SetAlpha(old_alpha);
         }
         HL_WriteText(style, fontType, TempX, TempY - (LineHeight / 2), ex_slots[i].desc);
@@ -916,6 +916,8 @@ void M_DrawSave(void)
     // 2. draw the save games
     for (i = 0; i < SAVE_SLOTS; i++)
     {
+        fontType = styledef_c::T_TEXT;
+        txtscale = style->def->text[fontType].scale;
         if (i == itemOn)
         {
             if (style->def->text[styledef_c::T_SELECTED].font)
@@ -933,7 +935,7 @@ void M_DrawSave(void)
             float y_shift = style->fonts[fontType]->ttf_ref_yshift[current_font_size]; // * txtscale;
 
             HUD_SetAlpha(0.33f);
-            HUD_SolidBox(TempX - 3, TempY - 2 + y_shift, TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+            HUD_SolidBox(TempX - 3, TempY - 2 + (y_shift/2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
             HUD_SetAlpha(old_alpha);
         }
 
@@ -1733,13 +1735,17 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
                     y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
                              ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
                              : 0),
-                    x + 50.0f, y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+                    x + 50.0f, y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight() + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
+                             ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]/2
+                             : 0), slider_color);
         HUD_SolidBox(x,
                      y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
                               ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
                               : 0),
                      x + (((thermDot - min) / increment) * scale_step),
-                     y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+                     y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight() + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
+                             ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]/2
+                             : 0), slider_color);
         if (!actual_val.empty())
             HL_WriteText(opt_style, styledef_c::T_ALT, x + 50.0f + step, y, actual_val.c_str());
     }

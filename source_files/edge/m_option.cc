@@ -1042,11 +1042,13 @@ void M_OptDrawer()
         {
             fontType  = styledef_c::T_TITLE;
             TEXTscale = style->def->text[fontType].scale;
-            if (style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image)
+            if (style->fonts[fontType]->def->type == FNTYP_Image)
             {
                 int cursor = 16;
                 HL_WriteText(style, fontType, (curr_menu->menu_center + 4), curry, (const char *)&cursor);
             }
+            else if (style->fonts[fontType]->def->type == FNTYP_TrueType)
+                HL_WriteText(style, fontType, (curr_menu->menu_center + 4), curry + (style->fonts[fontType]->ttf_ref_yshift[current_font_size]/2), "*");
             else
                 HL_WriteText(style, fontType, (curr_menu->menu_center + 4), curry, "*");
 

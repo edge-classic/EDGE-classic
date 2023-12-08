@@ -20,6 +20,10 @@ New Features
   - Uses same numbering and methodology as detailed in https://doomwiki.org/wiki/MUSINFO
 - Added simple IWAD selection dialog window if multiple valid IWADs are found on startup
   - Previous "best choice" scoring system removed
+- RSCRIPT:
+  - New sector-based trigger conditions (alternative to using radii)
+    - SECTOR_TRIGGER_TAG \<tag\>: Script will trigger once any sector with this tag is entered
+    - SECTOR_TRIGGER_INDEX \<index\>: Script will trigger once the sector with this index (as viewable via map editor) is entered
 
 General Improvements/Changes
 --------------------
@@ -45,9 +49,6 @@ General Improvements/Changes
 - Formatted EDGE Classic sources to have consistent style and included Clang formatting configuration
 - Default Purple and Black splash objects added
 - RSCRIPT:
-  - New sector-based trigger conditions (alternative to using radii)
-    - SECTOR_TRIGGER_TAG \<tag\>: Script will trigger once any sector with this tag is entered
-    - SECTOR_TRIGGER_INDEX \<index\>: Script will trigger once the sector with this index (as viewable via map editor) is entered
   - START_MAP directive will no longer clear existing scripts for the map in question
   - #CLEAR_MAP \<mapname\> directive added for granular clearing of map scripts
 
@@ -68,3 +69,4 @@ Bugs fixed
 - Fixed IWADs being dragged-and-dropped onto the program executable being treated as PWADs
 - Fixed memory leak involving detail slope creation
 - Fixed the "Blood Level" gameplay option defaulting to "Extra"
+- Fixed inconsistent menu item width when non-default text scaling was used

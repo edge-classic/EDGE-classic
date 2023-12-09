@@ -6,6 +6,7 @@
 #include "w_files.h"
 #include "con_var.h"
 #include "../lua_debugger.h"
+#include "edge_profiling.h"
 
 // Enable Lua debugging
 DEF_CVAR(lua_debug, "0", CVAR_ROM)
@@ -143,6 +144,8 @@ static int  LUA_DbgNOP(lua_State *L)
 
 void LUA_CallGlobalFunction(lua_State *L, const char *function_name)
 {
+    EDGE_ZoneScoped;
+
     int top = lua_gettop(L);
     lua_getglobal(L, function_name);
     int status = 0;

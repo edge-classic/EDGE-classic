@@ -28,6 +28,7 @@
 #include "r_modes.h"
 
 #include "str_util.h"
+#include "edge_profiling.h"
 
 SDL_Window *my_vis;
 
@@ -381,6 +382,7 @@ bool I_SetScreenSize(scrmode_c *mode)
 
 void I_StartFrame(void)
 {
+    ecframe_stats.Clear();
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (r_culling.d)
@@ -392,6 +394,15 @@ void I_StartFrame(void)
 void I_FinishFrame(void)
 {
     SDL_GL_SwapWindow(my_vis);
+    
+    EDGE_TracyPlot("draw_runits", (int64_t) ecframe_stats.draw_runits);
+    EDGE_TracyPlot("draw_wallparts", (int64_t) ecframe_stats.draw_wallparts);
+    EDGE_TracyPlot("draw_planes", (int64_t) ecframe_stats.draw_planes);
+    EDGE_TracyPlot("draw_things", (int64_t) ecframe_stats.draw_things);
+    EDGE_TracyPlot("draw_lightiterator", (int64_t) ecframe_stats.draw_lightiterator);
+    EDGE_TracyPlot("draw_sectorglowiterator", (int64_t) ecframe_stats.draw_sectorglowiterator);
+    
+    EDGE_FrameMark;
 
     if (in_grab.CheckModified())
         I_GrabCursor(grab_state);

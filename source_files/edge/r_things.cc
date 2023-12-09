@@ -61,8 +61,9 @@
 
 #include "coal.h"
 #include "vm_coal.h"
-
 #include "script/compat/lua_compat.h"
+
+#include "edge_profiling.h"
 
 extern coal::vm_c *ui_vm;
 extern double      VM_GetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name);
@@ -977,6 +978,8 @@ static void R2_ClipSpriteVertically(drawsub_c *dsub, drawthing_t *dthing)
 
 void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 {
+    EDGE_ZoneScoped;
+
     /* Visit a single thing that exists in the current subsector */
 
     SYS_ASSERT(mo->state);
@@ -1187,6 +1190,8 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 
 static void RGL_DrawModel(drawthing_t *dthing)
 {
+    EDGE_ZoneScoped;
+
     mobj_t *mo = dthing->mo;
 
     modeldef_c *md = W_GetModel(mo->state->sprite);
@@ -1273,6 +1278,10 @@ static void DLIT_Thing(mobj_t *mo, void *dataptr)
 
 void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 {
+    EDGE_ZoneScoped;
+
+    ecframe_stats.draw_things++;
+
     if (dthing->is_model)
     {
         RGL_DrawModel(dthing);
@@ -1541,6 +1550,8 @@ void RGL_DrawSortThings(drawfloor_t *dfloor)
     //
     // -ACB- 2004/08/17
     //
+
+    EDGE_ZoneScoped;
 
     drawthing_t *head_dt;
 

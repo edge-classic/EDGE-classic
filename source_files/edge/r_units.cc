@@ -42,6 +42,7 @@
 #include "r_colormap.h"
 
 #include "AlmostEquals.h"
+#include "edge_profiling.h"
 
 // TODO review if these should be archived
 DEF_CVAR(r_colorlighting, "1", 0)
@@ -258,6 +259,8 @@ struct Compare_Unit_pred
 
 static void EnableCustomEnv(GLuint env, bool enable)
 {
+    EDGE_ZoneScoped;
+    
     switch (env)
     {
     case uint32_t(ENV_SKIP_RGB):
@@ -282,6 +285,8 @@ static void EnableCustomEnv(GLuint env, bool enable)
 
 static inline void RGL_SendRawVector(const local_gl_vert_t *V)
 {
+    EDGE_ZoneScoped;
+
     if (r_colormaterial.d || !r_colorlighting.d)
         glColor4fv(V->rgba);
     else
@@ -304,6 +309,8 @@ static inline void RGL_SendRawVector(const local_gl_vert_t *V)
 //
 void RGL_DrawUnits(void)
 {
+    EDGE_ZoneScoped;
+
     if (cur_unit == 0)
         return;
 
@@ -376,6 +383,8 @@ void RGL_DrawUnits(void)
 
     for (int j = 0; j < cur_unit; j++)
     {
+        ecframe_stats.draw_runits++;
+        
         local_gl_unit_t *unit = local_unit_map[j];
 
         SYS_ASSERT(unit->count > 0);

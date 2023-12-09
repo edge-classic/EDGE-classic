@@ -24,6 +24,8 @@ New Features
   - New sector-based trigger conditions (alternative to using radii)
     - SECTOR_TRIGGER_TAG \<tag\>: Script will trigger once any sector with this tag is entered
     - SECTOR_TRIGGER_INDEX \<index\>: Script will trigger once the sector with this index (as viewable via map editor) is entered
+- Added support for Tracy frame profiler (https://github.com/wolfpld/tracy)
+  - Added frame metrics for runits, wall/planes, things, and light/glow iterators which can also be displayed with: debug_fps 3
 
 General Improvements/Changes
 --------------------

@@ -47,6 +47,7 @@
 #include "r_wipe.h"
 #include "w_files.h"
 #include "w_wad.h"
+#include "edge_profiling.h"
 
 #include <vector>
 
@@ -1647,6 +1648,9 @@ void CON_ShowFPS(void)
     if (abs(debug_fps.d) >= 2)
         y -= FNSZ;
 
+    if (abs(debug_fps.d) >= 3)
+        y -= (FNSZ * 4);
+
     SolidBox(x, y, SCREENWIDTH, SCREENHEIGHT, RGB_MAKE(0, 0, 0), 0.5);
 
     x += XMUL;
@@ -1676,6 +1680,25 @@ void CON_ShowFPS(void)
 
         DrawText(x, y, textbuf, T_GREY176);
     }
+
+    // show frame metrics...
+
+    if (abs(debug_fps.d) >= 3)
+    {
+        y -= FNSZ;        
+        sprintf(textbuf, "%i runit", ecframe_stats.draw_runits);
+        DrawText(x, y, textbuf, T_GREY176);
+        y -= FNSZ;        
+        sprintf(textbuf, "%i wall", ecframe_stats.draw_wallparts);
+        DrawText(x, y, textbuf, T_GREY176);
+        y -= FNSZ;        
+        sprintf(textbuf, "%i plane", ecframe_stats.draw_planes);
+        DrawText(x, y, textbuf, T_GREY176);
+        y -= FNSZ;        
+        sprintf(textbuf, "%i thing", ecframe_stats.draw_things);
+        DrawText(x, y, textbuf, T_GREY176);
+    }
+
 }
 
 void CON_ShowPosition(void)

@@ -42,7 +42,7 @@ typedef struct BW_MidiRtInterface OPLInterface;
 
 OPLPlayer *edge_opl = nullptr;
 
-#define OPL_SAMPLES 512
+#define OPL_SAMPLES 1024
 
 extern bool dev_stereo;
 extern int  dev_freq;

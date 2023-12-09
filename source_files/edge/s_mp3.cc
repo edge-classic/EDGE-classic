@@ -35,7 +35,7 @@
 #define DR_MP3_IMPLEMENTATION
 #include "dr_mp3.h"
 
-#define MP3_SAMPLES 512
+#define MP3_SAMPLES 1024
 
 extern bool dev_stereo; // FIXME: encapsulation
 

@@ -36,7 +36,7 @@ typedef struct BW_MidiRtInterface PrimeInterface;
 
 #include "synthesizer.h"
 
-#define PRIME_SAMPLES 512
+#define PRIME_SAMPLES 1024
 
 extern bool dev_stereo;
 extern int  dev_freq;

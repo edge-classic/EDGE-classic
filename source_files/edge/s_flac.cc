@@ -36,7 +36,7 @@
 #define DR_FLAC_IMPLEMENTATION
 #include "dr_flac.h"
 
-#define FLAC_FRAMES 512
+#define FLAC_FRAMES 1024
 
 extern bool dev_stereo; // FIXME: encapsulation
 extern int  dev_freq;

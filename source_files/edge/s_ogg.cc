@@ -37,7 +37,7 @@
 #include "s_ogg.h"
 #include "w_wad.h"
 
-#define OGGV_NUM_SAMPLES 512
+#define OGGV_NUM_SAMPLES 1024
 
 #define OV_EXCLUDE_STATIC_CALLBACKS
 #define OGG_IMPL

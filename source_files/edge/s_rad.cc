@@ -36,7 +36,7 @@
 extern bool dev_stereo; // FIXME: encapsulation
 extern int  dev_freq;
 
-#define RAD_BLOCK_SIZE 4096
+#define RAD_BLOCK_SIZE 512
 
 // Works better with the RAD code if these are 'global'
 Opal      *edge_opal = nullptr;

@@ -42,7 +42,7 @@ typedef struct BW_MidiRtInterface OPLInterface;
 
 OPLPlayer *edge_opl = nullptr;
 
-#define MID_BUFFER 4096
+#define OPL_SAMPLES 512
 
 extern bool dev_stereo;
 extern int  dev_freq;
@@ -185,7 +185,7 @@ class opl_player_c : public abstract_music_c
   public:
     opl_player_c(bool _looping) : status(NOT_LOADED), looping(_looping)
     {
-        mono_buffer = new s16_t[2 * MID_BUFFER];
+        mono_buffer = new s16_t[2 * OPL_SAMPLES];
         SequencerInit();
     }
 
@@ -374,7 +374,7 @@ class opl_player_c : public abstract_music_c
         while (status == PLAYING && !var_pc_speaker_mode)
         {
             epi::sound_data_c *buf =
-                S_QueueGetFreeBuffer(MID_BUFFER, dev_stereo ? epi::SBUF_Interleaved : epi::SBUF_Mono);
+                S_QueueGetFreeBuffer(OPL_SAMPLES, dev_stereo ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
             if (!buf)
                 break;
@@ -405,7 +405,7 @@ class opl_player_c : public abstract_music_c
         else
             data_buf = buf->data_L;
 
-        int played = opl_seq->playStream(reinterpret_cast<u8_t *>(data_buf), MID_BUFFER);
+        int played = opl_seq->playStream(reinterpret_cast<u8_t *>(data_buf), OPL_SAMPLES);
 
         if (opl_seq->positionAtEnd())
             song_done = true;

@@ -33,7 +33,7 @@
 
 #include "libcRSID.h"
 
-#define SID_BUFFER 4096
+#define SID_BUFFER 512
 extern bool dev_stereo; // FIXME: encapsulation
 extern int  dev_freq;
 

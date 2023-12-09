@@ -35,6 +35,8 @@
 #define DR_MP3_IMPLEMENTATION
 #include "dr_mp3.h"
 
+#define MP3_SAMPLES 512
+
 extern bool dev_stereo; // FIXME: encapsulation
 
 class mp3player_c : public abstract_music_c
@@ -85,7 +87,7 @@ class mp3player_c : public abstract_music_c
 
 mp3player_c::mp3player_c() : status(NOT_LOADED)
 {
-    mono_buffer = new s16_t[DRMP3_MAX_SAMPLES_PER_FRAME * 2];
+    mono_buffer = new s16_t[MP3_SAMPLES * 2];
 }
 
 mp3player_c::~mp3player_c()
@@ -131,7 +133,7 @@ bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
     else
         data_buf = buf->data_L;
 
-    int got_size = drmp3_read_pcm_frames_s16(mp3_dec, DRMP3_MAX_SAMPLES_PER_FRAME, data_buf);
+    int got_size = drmp3_read_pcm_frames_s16(mp3_dec, MP3_SAMPLES, data_buf);
 
     if (got_size == 0) /* EOF */
     {
@@ -248,7 +250,7 @@ void mp3player_c::Ticker()
     while (status == PLAYING && !var_pc_speaker_mode)
     {
         epi::sound_data_c *buf = S_QueueGetFreeBuffer(
-            DRMP3_MAX_SAMPLES_PER_FRAME, (is_stereo && dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
+            MP3_SAMPLES, (is_stereo && dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
         if (!buf)
             break;

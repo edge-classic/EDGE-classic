@@ -36,7 +36,7 @@ typedef struct BW_MidiRtInterface PrimeInterface;
 
 #include "synthesizer.h"
 
-#define PRIME_NUM_SAMPLES 2048
+#define PRIME_SAMPLES 512
 
 extern bool dev_stereo;
 extern int  dev_freq;
@@ -141,7 +141,7 @@ class prime_player_c : public abstract_music_c
   public:
     prime_player_c(byte *_data, int _length, bool _looping) : status(NOT_LOADED), looping(_looping)
     {
-        mono_buffer = new s16_t[PRIME_NUM_SAMPLES * 2];
+        mono_buffer = new s16_t[PRIME_SAMPLES * 2];
         SequencerInit();
     }
 
@@ -326,7 +326,7 @@ class prime_player_c : public abstract_music_c
         while (status == PLAYING && !var_pc_speaker_mode)
         {
             epi::sound_data_c *buf =
-                S_QueueGetFreeBuffer(PRIME_NUM_SAMPLES, dev_stereo ? epi::SBUF_Interleaved : epi::SBUF_Mono);
+                S_QueueGetFreeBuffer(PRIME_SAMPLES, dev_stereo ? epi::SBUF_Interleaved : epi::SBUF_Mono);
 
             if (!buf)
                 break;
@@ -357,7 +357,7 @@ class prime_player_c : public abstract_music_c
         else
             data_buf = buf->data_L;
 
-        int played = prime_seq->playStream(reinterpret_cast<u8_t *>(data_buf), PRIME_NUM_SAMPLES);
+        int played = prime_seq->playStream(reinterpret_cast<u8_t *>(data_buf), PRIME_SAMPLES);
 
         if (prime_seq->positionAtEnd())
             song_done = true;

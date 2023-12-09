@@ -32,7 +32,7 @@
 
 #include "m4p.h"
 
-#define M4P_BUFFER 4096
+#define M4P_BUFFER 512
 
 extern bool dev_stereo; // FIXME: encapsulation
 extern int  dev_freq;

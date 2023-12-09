@@ -42,6 +42,7 @@
 #include "coal.h"
 #include "vm_coal.h" // for coal::vm_c
 #include "script/compat/lua_compat.h"
+#include "edge_profiling.h"
 
 extern coal::vm_c *ui_vm;
 extern void        VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value);
@@ -239,6 +240,8 @@ int N_NetUpdate()
 
 int N_TryRunTics()
 {
+    EDGE_ZoneScoped;
+    
     if (singletics)
     {
         PreInput();

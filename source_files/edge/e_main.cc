@@ -94,10 +94,13 @@
 
 #include "vm_coal.h"
 #include "script/compat/lua_compat.h"
+#include "edge_profiling.h"
 
 extern cvar_c r_doubleframes;
 
 extern cvar_c v_gamma;
+
+ECFrameStats ecframe_stats;
 
 // Application active?
 int app_state = APP_STATE_ACTIVE;
@@ -580,6 +583,8 @@ static bool wipe_gl_active = false;
 
 void E_Display(void)
 {
+    EDGE_ZoneScoped;
+
     if (nodrawers)
         return; // for comparative timing / profiling
 
@@ -2190,6 +2195,8 @@ void E_Idle(void)
 //
 void E_Tick(void)
 {
+    EDGE_ZoneScoped;
+    
     G_BigStuff();
 
     // Update display, next frame, with current state.

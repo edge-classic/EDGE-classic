@@ -51,6 +51,7 @@
 #include "n_network.h" // N_NetUpdate
 
 #include "AlmostEquals.h"
+#include "edge_profiling.h"
 
 #define DEBUG 0
 
@@ -948,6 +949,8 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     // Note: tex_x1 and tex_x2 are in world coordinates.
     //       top, bottom and tex_top_h as well.
 
+    ecframe_stats.draw_wallparts++;
+
     (void)opaque;
 
     // if (! props)
@@ -1343,6 +1346,8 @@ static void DrawGlass(drawfloor_t *dfloor, float c, float f, float tex_top_h, su
 static void DrawTile(seg_t *seg, drawfloor_t *dfloor, float lz1, float lz2, float rz1, float rz2, float tex_z,
                      int flags, surface_t *surf)
 {
+    EDGE_ZoneScoped;
+
     // tex_z = texturing top, in world coordinates
 
     const image_c *image = surf->image;
@@ -1435,6 +1440,8 @@ static inline void AddWallTile2(seg_t *seg, drawfloor_t *dfloor, surface_t *surf
 static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float f_min, float c_max,
                              bool mirror_sub = false)
 {
+    EDGE_ZoneScoped;
+    
     line_t    *ld = seg->linedef;
     side_t    *sd = ld->side[sidenum];
     sector_t  *sec, *other;
@@ -1847,6 +1854,8 @@ static void DLIT_Flood(mobj_t *mo, void *dataptr)
 
 static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_ref, int face_dir, float h1, float h2)
 {
+    EDGE_ZoneScoped; 
+
     (void)dfloor;
 
     if (num_active_mirrors > 0)
@@ -2106,6 +2115,8 @@ static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, angle_t left, angle_t ri
 //
 static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 {
+    EDGE_ZoneScoped;
+    
     // ignore segs sitting on current mirror
     if (MIR_SegOnPortal(seg))
         return;
@@ -2299,6 +2310,8 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 //
 bool RGL_CheckBBox(float *bspcoord)
 {
+    EDGE_ZoneScoped; 
+
     if (num_active_mirrors > 0)
     {
         // a flipped bbox may no longer be axis aligned, hence we
@@ -2413,6 +2426,8 @@ bool RGL_CheckBBox(float *bspcoord)
 
 static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int face_dir)
 {
+    EDGE_ZoneScoped;
+
     float orig_h = h;
 
     MIR_Height(h);
@@ -2425,6 +2440,8 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
     // ignore sky
     if (IS_SKY(*surf))
         return;
+
+    ecframe_stats.draw_planes++;
 
     region_properties_t *props = dfloor->props;
 
@@ -2678,6 +2695,8 @@ static inline void AddNewDrawFloor(drawsub_c *dsub, extrafloor_t *ef, float f_h,
 //
 static void RGL_WalkSubsector(int num)
 {
+    EDGE_ZoneScoped;
+
     subsector_t *sub    = &subsectors[num];
     sector_t    *sector = sub->sector;
 
@@ -3043,6 +3062,8 @@ static void RGL_DrawMirror(drawmirror_c *mir)
 
 static void RGL_DrawSubsector(drawsub_c *dsub, bool mirror_sub)
 {
+    EDGE_ZoneScoped;
+
     subsector_t *sub = dsub->sub;
 
 #if (DEBUG >= 1)
@@ -3115,6 +3136,8 @@ static void DoWeaponModel(void)
 //
 static void RGL_WalkBSPNode(unsigned int bspnum)
 {
+    EDGE_ZoneScoped;
+
     node_t *node;
     int     side;
 
@@ -3173,6 +3196,8 @@ static void RGL_WalkBSPNode(unsigned int bspnum)
 //
 static void RGL_RenderTrueBSP(void)
 {
+    EDGE_ZoneScoped;
+
     // clear extra light on player's weapon
     rgl_weapon_r = rgl_weapon_g = rgl_weapon_b = 0;
 
@@ -3381,6 +3406,8 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 
 void R_Render(int x, int y, int w, int h, mobj_t *camera, bool full_height, float expand_w)
 {
+    EDGE_ZoneScoped;
+    
     viewwindow_x = x;
     viewwindow_y = y;
     viewwindow_w = w;

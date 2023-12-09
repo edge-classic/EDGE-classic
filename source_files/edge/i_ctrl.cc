@@ -28,6 +28,7 @@
 #include "r_modes.h"
 
 #include "str_util.h"
+#include "edge_profiling.h"
 
 #undef DEBUG_KB
 
@@ -819,6 +820,8 @@ void I_StartupControl(void)
 
 void I_ControlGetEvents(void)
 {
+    EDGE_ZoneScoped;
+
     SDL_Event sdl_ev;
 
     while (SDL_PollEvent(&sdl_ev))

@@ -42,6 +42,7 @@
 #include "r_state.h"
 
 #include "AlmostEquals.h"
+#include "edge_profiling.h"
 
 // FIXME: have a proper API
 extern abstract_shader_c *MakeDLightShader(mobj_t *mo);
@@ -834,6 +835,9 @@ bool P_BlockThingsIterator(float x1, float y1, float x2, float y2, bool (*func)(
 void P_DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, float z2, void (*func)(mobj_t *, void *),
                             void *data)
 {
+    EDGE_ZoneScoped;
+    ecframe_stats.draw_lightiterator++;
+
     int lx = LIGHTMAP_GET_X(x1) - 1;
     int ly = LIGHTMAP_GET_Y(y1) - 1;
     int hx = LIGHTMAP_GET_X(x2) + 1;
@@ -889,6 +893,9 @@ void P_DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, fl
 void P_SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2, float y2, float z2,
                           void (*func)(mobj_t *, void *), void *data)
 {
+    EDGE_ZoneScoped;
+    ecframe_stats.draw_sectorglowiterator++;
+    
     for (mobj_t *mo = sec->glow_things; mo; mo = mo->dlnext)
     {
         SYS_ASSERT(mo->state);

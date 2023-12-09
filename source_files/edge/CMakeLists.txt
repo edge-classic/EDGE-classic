@@ -147,6 +147,10 @@ if (WIN32)
   set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} wsock32)
 endif()
 
+if (EDGE_PROFILING)
+  set (EDGE_LINK_LIBRARIES ${EDGE_LINK_LIBRARIES} TracyClient)
+endif()
+
 add_executable(
   edge-classic
   ${EDGE_SOURCE_FILES}

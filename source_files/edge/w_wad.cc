@@ -131,6 +131,9 @@ class wad_file_c
     // LUA scripts
     int lua_huds;
 
+    // UMAPINFO
+    int umapinfo_lump;
+
     // BOOM stuff
     int animated;
     int switches;
@@ -140,7 +143,7 @@ class wad_file_c
   public:
     wad_file_c()
         : sprite_lumps(), flat_lumps(), patch_lumps(), colmap_lumps(), tx_lumps(), hires_lumps(), xgl_lumps(),
-          level_markers(), skin_markers(), wadtex(), deh_lump(-1), coal_huds(-1), lua_huds(-1), animated(-1), switches(-1),
+          level_markers(), skin_markers(), wadtex(), deh_lump(-1), coal_huds(-1), lua_huds(-1), umapinfo_lump(-1), animated(-1), switches(-1),
           md5_string()
     {
         for (int d = 0; d < DDF_NUM_TYPES; d++)
@@ -585,6 +588,13 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
         lump_p->kind = LMKIND_DDFRTS;
         if (wad != NULL)
             wad->lua_huds = lump;
+        return;
+    }
+    else if (strcmp(info.name, "UMAPINFO") == 0)
+    {
+        lump_p->kind = LMKIND_Normal;
+        if (wad != NULL)
+            wad->umapinfo_lump = lump;
         return;
     }
     else if (strcmp(info.name, "ANIMATED") == 0)
@@ -1231,495 +1241,515 @@ std::filesystem::path W_BuildNodesForWad(data_file_c *df)
 
 void W_ReadUMAPINFOLumps(void)
 {
-    int p;
-    p = W_CheckNumForName("UMAPINFO");
-    if (p > -1)
+    for (auto df : data_files)
     {
-        if (W_CheckFileNumForName("UMAPINFO") == W_CheckFileNumForName("DDFLEVL"))
-            return;
-        L_WriteDebug("parsing UMAPINFO lump\n");
-        Parse_UMAPINFO(W_LoadString(p));
-    }
-    if (p == -1) // no UMAPINFO found
-        return;
-
-    unsigned int i;
-    for (i = 0; i < Maps.mapcount; i++)
-    {
-        std::string mapname = Maps.maps[i].mapname;
-        epi::str_upper(mapname);
-        // Check that the name adheres to either EXMX or MAPXX format per the standard
-        if (epi::prefix_case_cmp(mapname, "MAP") == 0)
+        if (df->wad)
         {
-            for (auto c : mapname.substr(3))
-            {
-                if (!isdigit(c))
-                    I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
-            }
-        }
-        else if (mapname.size() > 3 && mapname[0] == 'E' && mapname[2] == 'M')
-        {
-            if (!isdigit(mapname[1]))
-                I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
-            for (auto c : mapname.substr(3))
-            {
-                if (!isdigit(c))
-                    I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
-            }
-        }
-        else
-            I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
-
-        mapdef_c *temp_level = mapdefs.Lookup(mapname.c_str());
-        if (!temp_level)
-        {
-            temp_level       = new mapdef_c;
-            temp_level->name = mapname;
-            temp_level->lump = mapname;
-            mapdefs.Insert(temp_level);
-        }
-
-        if (Maps.maps[i].levelpic[0])
-        {
-            temp_level->namegraphic = Maps.maps[i].levelpic;
-            epi::str_upper(temp_level->namegraphic);
-        }
-
-        if (Maps.maps[i].skytexture[0])
-        {
-            temp_level->sky = Maps.maps[i].skytexture;
-            epi::str_upper(temp_level->sky);
-        }
-
-        if (Maps.maps[i].levelname)
-        {
-            std::string temp_ref   = epi::STR_Format("%sDesc", Maps.maps[i].mapname);
-            std::string temp_value = epi::STR_Format(" %s ", Maps.maps[i].levelname);
-            language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
-            temp_level->description = temp_ref;
-        }
-
-        if (Maps.maps[i].authorname)
-        {
-            temp_level->author = Maps.maps[i].authorname;
-        }
-
-        if (Maps.maps[i].music[0])
-        {
-            int val = 0;
-            val     = playlist.FindLast(Maps.maps[i].music);
-            if (val != -1) // we already have it
-            {
-                temp_level->music = val;
-            }
-            else // we need to add it
-            {
-                static pl_entry_c *dynamic_plentry;
-                dynamic_plentry           = new pl_entry_c;
-                dynamic_plentry->number   = playlist.FindFree();
-                dynamic_plentry->info     = Maps.maps[i].music;
-                dynamic_plentry->type     = MUS_UNKNOWN; // MUS_MUS
-                dynamic_plentry->infotype = MUSINF_LUMP;
-                temp_level->music         = dynamic_plentry->number;
-                playlist.Insert(dynamic_plentry);
-            }
-        }
-
-        if (Maps.maps[i].nextmap[0])
-        {
-            temp_level->nextmapname = Maps.maps[i].nextmap;
-            epi::str_upper(temp_level->nextmapname);
-        }
-
-        if (Maps.maps[i].intertext)
-        {
-            if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP07"))
-            {
-                // Clear out some of our defaults on certain maps
-                mapdef_c *conflict_level = mapdefs.Lookup("MAP07");
-                if (conflict_level)
-                {
-                    conflict_level->f_pre.text.clear();
-                    conflict_level->f_pre.text_flat.clear();
-                }
-            }
-            if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP21"))
-            {
-                // Clear out some of our defaults on certain maps
-                mapdef_c *conflict_level = mapdefs.Lookup("MAP21");
-                if (conflict_level)
-                {
-                    conflict_level->f_pre.text.clear();
-                    conflict_level->f_pre.text_flat.clear();
-                }
-            }
-            if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP31"))
-            {
-                // Clear out some of our defaults on certain maps
-                mapdef_c *conflict_level = mapdefs.Lookup("MAP31");
-                if (conflict_level)
-                {
-                    conflict_level->f_pre.text.clear();
-                    conflict_level->f_pre.text_flat.clear();
-                }
-            }
-            if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP32"))
-            {
-                // Clear out some of our defaults on certain maps
-                mapdef_c *conflict_level = mapdefs.Lookup("MAP32");
-                if (conflict_level)
-                {
-                    conflict_level->f_pre.text.clear();
-                    conflict_level->f_pre.text_flat.clear();
-                }
-            }
-
-            if (epi::case_cmp(Maps.maps[i].intertext, "clear") == 0)
-            {
-                temp_level->f_end.text.clear();
-                temp_level->f_end.text_flat.clear();
-            }
+            if (df->wad->umapinfo_lump < 0)
+                continue;
             else
             {
-                std::string temp_ref   = epi::STR_Format("%sINTERTEXT", Maps.maps[i].mapname);
-                std::string temp_value = epi::STR_Format(" %s ", Maps.maps[i].intertext);
+                L_WriteDebug("Parsing UMAPINFO lump in %s\n", df->name.c_str());
+                Parse_UMAPINFO(W_LoadString(df->wad->umapinfo_lump));
+            }
+        }
+        else if (df->pack)
+        {
+            if (!Pack_FindFile(df->pack, "UMAPINFO.txt"))
+                continue;
+            else
+            {
+                L_WriteDebug("Parsing UMAPINFO.txt in %s\n", df->name.c_str());
+                epi::file_c *uinfo = Pack_OpenFile(df->pack, "UMAPINFO.txt");
+                if (uinfo)
+                {
+                    Parse_UMAPINFO(uinfo->ReadText());
+                    delete uinfo;
+                }
+                else
+                    continue;
+            }
+        }
+        else // ???
+            continue;
+
+        unsigned int i;
+        for (i = 0; i < Maps.mapcount; i++)
+        {
+            std::string mapname = Maps.maps[i].mapname;
+            epi::str_upper(mapname);
+            // Check that the name adheres to either EXMX or MAPXX format per the standard
+            if (epi::prefix_case_cmp(mapname, "MAP") == 0)
+            {
+                for (auto c : mapname.substr(3))
+                {
+                    if (!isdigit(c))
+                        I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
+                }
+            }
+            else if (mapname.size() > 3 && mapname[0] == 'E' && mapname[2] == 'M')
+            {
+                if (!isdigit(mapname[1]))
+                    I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
+                for (auto c : mapname.substr(3))
+                {
+                    if (!isdigit(c))
+                        I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
+                }
+            }
+            else
+                I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
+
+            mapdef_c *temp_level = mapdefs.Lookup(mapname.c_str());
+            if (!temp_level)
+            {
+                temp_level       = new mapdef_c;
+                temp_level->name = mapname;
+                temp_level->lump = mapname;
+                mapdefs.Insert(temp_level);
+            }
+
+            if (Maps.maps[i].levelpic[0])
+            {
+                temp_level->namegraphic = Maps.maps[i].levelpic;
+                epi::str_upper(temp_level->namegraphic);
+            }
+
+            if (Maps.maps[i].skytexture[0])
+            {
+                temp_level->sky = Maps.maps[i].skytexture;
+                epi::str_upper(temp_level->sky);
+            }
+
+            if (Maps.maps[i].levelname)
+            {
+                std::string temp_ref   = epi::STR_Format("%sDesc", Maps.maps[i].mapname);
+                std::string temp_value = epi::STR_Format(" %s ", Maps.maps[i].levelname);
                 language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
-                temp_level->f_end.text    = temp_ref;
-                temp_level->f_end.picwait = 350; // 10 seconds
+                temp_level->description = temp_ref;
             }
 
-            if (Maps.maps[i].interbackdrop[0])
+            if (Maps.maps[i].authorname)
             {
-                const image_c *rim;
+                temp_level->author = Maps.maps[i].authorname;
+            }
 
-                std::string ibd_lookup = Maps.maps[i].interbackdrop;
-                epi::str_upper(ibd_lookup);
-
-                rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
-
-                if (!rim) // no flat
+            if (Maps.maps[i].music[0])
+            {
+                int val = 0;
+                val     = playlist.FindLast(Maps.maps[i].music);
+                if (val != -1) // we already have it
                 {
-                    rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
-
-                    if (!rim)                                     // no graphic
-                        temp_level->f_end.text_flat = "FLOOR4_8"; // should not happen
-                    else                                          // background is a graphic
-                        temp_level->f_end.text_back = ibd_lookup;
+                    temp_level->music = val;
                 }
-                else // background is a flat
+                else // we need to add it
                 {
-                    temp_level->f_end.text_flat = ibd_lookup;
+                    static pl_entry_c *dynamic_plentry;
+                    dynamic_plentry           = new pl_entry_c;
+                    dynamic_plentry->number   = playlist.FindFree();
+                    dynamic_plentry->info     = Maps.maps[i].music;
+                    dynamic_plentry->type     = MUS_UNKNOWN; // MUS_MUS
+                    dynamic_plentry->infotype = MUSINF_LUMP;
+                    temp_level->music         = dynamic_plentry->number;
+                    playlist.Insert(dynamic_plentry);
                 }
             }
-        }
 
-        if (Maps.maps[i].intermusic[0])
-        {
-            int val = 0;
-            val     = playlist.FindLast(Maps.maps[i].intermusic);
-            if (val != -1) // we already have it
+            if (Maps.maps[i].nextmap[0])
             {
-                temp_level->f_end.music = val;
+                temp_level->nextmapname = Maps.maps[i].nextmap;
+                epi::str_upper(temp_level->nextmapname);
             }
-            else // we need to add it
-            {
-                static pl_entry_c *dynamic_plentry;
-                dynamic_plentry           = new pl_entry_c;
-                dynamic_plentry->number   = playlist.FindFree();
-                dynamic_plentry->info     = Maps.maps[i].intermusic;
-                dynamic_plentry->type     = MUS_UNKNOWN; // MUS_MUS
-                dynamic_plentry->infotype = MUSINF_LUMP;
-                temp_level->f_end.music   = dynamic_plentry->number;
-                playlist.Insert(dynamic_plentry);
-            }
-        }
 
-        if (Maps.maps[i].nextsecret[0])
-        {
-            temp_level->secretmapname = Maps.maps[i].nextsecret;
-            epi::str_upper(temp_level->secretmapname);
-            if (Maps.maps[i].intertextsecret)
+            if (Maps.maps[i].intertext)
             {
-
-                if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP07"))
+                if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP07"))
                 {
                     // Clear out some of our defaults on certain maps
                     mapdef_c *conflict_level = mapdefs.Lookup("MAP07");
-                    conflict_level->f_pre.text.clear();
-                    conflict_level->f_pre.text_flat.clear();
+                    if (conflict_level)
+                    {
+                        conflict_level->f_pre.text.clear();
+                        conflict_level->f_pre.text_flat.clear();
+                    }
                 }
-                if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP21"))
+                if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP21"))
                 {
                     // Clear out some of our defaults on certain maps
                     mapdef_c *conflict_level = mapdefs.Lookup("MAP21");
-                    conflict_level->f_pre.text.clear();
-                    conflict_level->f_pre.text_flat.clear();
+                    if (conflict_level)
+                    {
+                        conflict_level->f_pre.text.clear();
+                        conflict_level->f_pre.text_flat.clear();
+                    }
                 }
-                if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP31"))
+                if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP31"))
                 {
                     // Clear out some of our defaults on certain maps
                     mapdef_c *conflict_level = mapdefs.Lookup("MAP31");
-                    conflict_level->f_pre.text.clear();
-                    conflict_level->f_pre.text_flat.clear();
+                    if (conflict_level)
+                    {
+                        conflict_level->f_pre.text.clear();
+                        conflict_level->f_pre.text_flat.clear();
+                    }
                 }
-                if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP32"))
+                if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP32"))
                 {
                     // Clear out some of our defaults on certain maps
                     mapdef_c *conflict_level = mapdefs.Lookup("MAP32");
-                    conflict_level->f_pre.text.clear();
-                    conflict_level->f_pre.text_flat.clear();
+                    if (conflict_level)
+                    {
+                        conflict_level->f_pre.text.clear();
+                        conflict_level->f_pre.text_flat.clear();
+                    }
                 }
 
-                mapdef_c *secret_level = mapdefs.Lookup(temp_level->secretmapname.c_str());
-                if (!secret_level)
+                if (epi::case_cmp(Maps.maps[i].intertext, "clear") == 0)
                 {
-                    secret_level       = new mapdef_c;
-                    secret_level->name = Maps.maps[i].nextsecret;
-                    epi::str_upper(secret_level->name);
-                    secret_level->lump = Maps.maps[i].nextsecret;
-                    epi::str_upper(secret_level->lump);
-                    mapdefs.Insert(secret_level);
-                }
-
-                if (epi::case_cmp(Maps.maps[i].intertextsecret, "clear") == 0)
-                {
-                    secret_level->f_pre.text.clear();
-                    secret_level->f_pre.text_flat.clear();
+                    temp_level->f_end.text.clear();
+                    temp_level->f_end.text_flat.clear();
                 }
                 else
                 {
-                    std::string temp_ref   = epi::STR_Format("%sPRETEXT", secret_level->name.c_str());
-                    std::string temp_value = epi::STR_Format(" %s ", Maps.maps[i].intertextsecret);
+                    std::string temp_ref   = epi::STR_Format("%sINTERTEXT", Maps.maps[i].mapname);
+                    std::string temp_value = epi::STR_Format(" %s ", Maps.maps[i].intertext);
                     language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
+                    temp_level->f_end.text    = temp_ref;
+                    temp_level->f_end.picwait = 350; // 10 seconds
+                }
 
-                    // hack for shitty dbp shennanigans :/
-                    if (temp_level->nextmapname == temp_level->secretmapname)
+                if (Maps.maps[i].interbackdrop[0])
+                {
+                    const image_c *rim;
+
+                    std::string ibd_lookup = Maps.maps[i].interbackdrop;
+                    epi::str_upper(ibd_lookup);
+
+                    rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
+
+                    if (!rim) // no flat
                     {
-                        temp_level->f_end.text    = temp_ref;
-                        temp_level->f_end.picwait = 700; // 20 seconds
+                        rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
 
-                        if (Maps.maps[i].interbackdrop[0])
-                        {
-                            const image_c *rim;
-                            std::string    ibd_lookup = Maps.maps[i].interbackdrop;
-                            epi::str_upper(ibd_lookup);
+                        if (!rim)                                     // no graphic
+                            temp_level->f_end.text_flat = "FLOOR4_8"; // should not happen
+                        else                                          // background is a graphic
+                            temp_level->f_end.text_back = ibd_lookup;
+                    }
+                    else // background is a flat
+                    {
+                        temp_level->f_end.text_flat = ibd_lookup;
+                    }
+                }
+            }
 
-                            rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
+            if (Maps.maps[i].intermusic[0])
+            {
+                int val = 0;
+                val     = playlist.FindLast(Maps.maps[i].intermusic);
+                if (val != -1) // we already have it
+                {
+                    temp_level->f_end.music = val;
+                }
+                else // we need to add it
+                {
+                    static pl_entry_c *dynamic_plentry;
+                    dynamic_plentry           = new pl_entry_c;
+                    dynamic_plentry->number   = playlist.FindFree();
+                    dynamic_plentry->info     = Maps.maps[i].intermusic;
+                    dynamic_plentry->type     = MUS_UNKNOWN; // MUS_MUS
+                    dynamic_plentry->infotype = MUSINF_LUMP;
+                    temp_level->f_end.music   = dynamic_plentry->number;
+                    playlist.Insert(dynamic_plentry);
+                }
+            }
 
-                            if (!rim) // no flat
-                            {
-                                rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
+            if (Maps.maps[i].nextsecret[0])
+            {
+                temp_level->secretmapname = Maps.maps[i].nextsecret;
+                epi::str_upper(temp_level->secretmapname);
+                if (Maps.maps[i].intertextsecret)
+                {
 
-                                if (!rim)                                     // no graphic
-                                    temp_level->f_end.text_flat = "FLOOR4_8"; // should not happen
-                                else                                          // background is a graphic
-                                    temp_level->f_end.text_back = ibd_lookup;
-                            }
-                            else // background is a flat
-                            {
-                                temp_level->f_end.text_flat = ibd_lookup;
-                            }
-                        }
+                    if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP07"))
+                    {
+                        // Clear out some of our defaults on certain maps
+                        mapdef_c *conflict_level = mapdefs.Lookup("MAP07");
+                        conflict_level->f_pre.text.clear();
+                        conflict_level->f_pre.text_flat.clear();
+                    }
+                    if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP21"))
+                    {
+                        // Clear out some of our defaults on certain maps
+                        mapdef_c *conflict_level = mapdefs.Lookup("MAP21");
+                        conflict_level->f_pre.text.clear();
+                        conflict_level->f_pre.text_flat.clear();
+                    }
+                    if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP31"))
+                    {
+                        // Clear out some of our defaults on certain maps
+                        mapdef_c *conflict_level = mapdefs.Lookup("MAP31");
+                        conflict_level->f_pre.text.clear();
+                        conflict_level->f_pre.text_flat.clear();
+                    }
+                    if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP32"))
+                    {
+                        // Clear out some of our defaults on certain maps
+                        mapdef_c *conflict_level = mapdefs.Lookup("MAP32");
+                        conflict_level->f_pre.text.clear();
+                        conflict_level->f_pre.text_flat.clear();
+                    }
+
+                    mapdef_c *secret_level = mapdefs.Lookup(temp_level->secretmapname.c_str());
+                    if (!secret_level)
+                    {
+                        secret_level       = new mapdef_c;
+                        secret_level->name = Maps.maps[i].nextsecret;
+                        epi::str_upper(secret_level->name);
+                        secret_level->lump = Maps.maps[i].nextsecret;
+                        epi::str_upper(secret_level->lump);
+                        mapdefs.Insert(secret_level);
+                    }
+
+                    if (epi::case_cmp(Maps.maps[i].intertextsecret, "clear") == 0)
+                    {
+                        secret_level->f_pre.text.clear();
+                        secret_level->f_pre.text_flat.clear();
                     }
                     else
                     {
-                        secret_level->f_pre.text    = temp_ref;
-                        secret_level->f_pre.picwait = 700; // 20 seconds
-                        if (temp_level->f_end.music)
-                            secret_level->f_pre.music = temp_level->f_end.music;
+                        std::string temp_ref   = epi::STR_Format("%sPRETEXT", secret_level->name.c_str());
+                        std::string temp_value = epi::STR_Format(" %s ", Maps.maps[i].intertextsecret);
+                        language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
 
-                        if (Maps.maps[i].interbackdrop[0])
+                        // hack for shitty dbp shennanigans :/
+                        if (temp_level->nextmapname == temp_level->secretmapname)
                         {
-                            const image_c *rim;
-                            std::string    ibd_lookup = Maps.maps[i].interbackdrop;
-                            epi::str_upper(ibd_lookup);
+                            temp_level->f_end.text    = temp_ref;
+                            temp_level->f_end.picwait = 700; // 20 seconds
 
-                            rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
-
-                            if (!rim) // no flat
+                            if (Maps.maps[i].interbackdrop[0])
                             {
-                                rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
+                                const image_c *rim;
+                                std::string    ibd_lookup = Maps.maps[i].interbackdrop;
+                                epi::str_upper(ibd_lookup);
 
-                                if (!rim)                                       // no graphic
-                                    secret_level->f_pre.text_flat = "FLOOR4_8"; // should not happen
-                                else                                            // background is a graphic
-                                    secret_level->f_pre.text_back = ibd_lookup;
+                                rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
+
+                                if (!rim) // no flat
+                                {
+                                    rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
+
+                                    if (!rim)                                     // no graphic
+                                        temp_level->f_end.text_flat = "FLOOR4_8"; // should not happen
+                                    else                                          // background is a graphic
+                                        temp_level->f_end.text_back = ibd_lookup;
+                                }
+                                else // background is a flat
+                                {
+                                    temp_level->f_end.text_flat = ibd_lookup;
+                                }
                             }
-                            else // background is a flat
+                        }
+                        else
+                        {
+                            secret_level->f_pre.text    = temp_ref;
+                            secret_level->f_pre.picwait = 700; // 20 seconds
+                            if (temp_level->f_end.music)
+                                secret_level->f_pre.music = temp_level->f_end.music;
+
+                            if (Maps.maps[i].interbackdrop[0])
                             {
-                                secret_level->f_pre.text_flat = ibd_lookup;
+                                const image_c *rim;
+                                std::string    ibd_lookup = Maps.maps[i].interbackdrop;
+                                epi::str_upper(ibd_lookup);
+
+                                rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
+
+                                if (!rim) // no flat
+                                {
+                                    rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
+
+                                    if (!rim)                                       // no graphic
+                                        secret_level->f_pre.text_flat = "FLOOR4_8"; // should not happen
+                                    else                                            // background is a graphic
+                                        secret_level->f_pre.text_back = ibd_lookup;
+                                }
+                                else // background is a flat
+                                {
+                                    secret_level->f_pre.text_flat = ibd_lookup;
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        if (Maps.maps[i].exitpic[0])
-        {
-            temp_level->leavingbggraphic = Maps.maps[i].exitpic;
-            epi::str_upper(temp_level->leavingbggraphic);
-        }
-
-        if (Maps.maps[i].enterpic[0])
-        {
-            temp_level->enteringbggraphic = Maps.maps[i].enterpic;
-            epi::str_upper(temp_level->enteringbggraphic);
-        }
-
-        if (Maps.maps[i].endpic[0])
-        {
-            temp_level->nextmapname.clear();
-            temp_level->f_end.pics.clear();
-            temp_level->f_end.pics.push_back(Maps.maps[i].endpic);
-            epi::str_upper(temp_level->f_end.pics.back());
-            temp_level->f_end.picwait = INT_MAX; // Stay on endpic for now
-        }
-
-        if (Maps.maps[i].dobunny)
-        {
-            temp_level->nextmapname.clear();
-            temp_level->f_end.dobunny = true;
-        }
-
-        if (Maps.maps[i].docast)
-        {
-            temp_level->nextmapname.clear();
-            temp_level->f_end.docast = true;
-        }
-
-        if (Maps.maps[i].endgame)
-        {
-            temp_level->nextmapname.clear();
-        }
-
-        if (Maps.maps[i].partime > 0)
-            temp_level->partime = Maps.maps[i].partime;
-
-        if (Maps.maps[i].numbossactions == -1) // "clear" directive
-            RAD_ClearWUDsByMap(Maps.maps[i].mapname);
-        else if (Maps.maps[i].bossactions && Maps.maps[i].numbossactions >= 1)
-        {
-            // The UMAPINFO spec seems to suggest that any custom actions should
-            // invalidate previous death triggers for the map in question
-            RAD_ClearWUDsByMap(Maps.maps[i].mapname);
-            std::string ba_rts = "// UMAPINFO SCRIPTS\n\n";
-            for (int a = 0; a < Maps.maps[i].numbossactions; a++)
+            if (Maps.maps[i].exitpic[0])
             {
-                for (int m = 0; m < mobjtypes.GetSize(); m++)
+                temp_level->leavingbggraphic = Maps.maps[i].exitpic;
+                epi::str_upper(temp_level->leavingbggraphic);
+            }
+
+            if (Maps.maps[i].enterpic[0])
+            {
+                temp_level->enteringbggraphic = Maps.maps[i].enterpic;
+                epi::str_upper(temp_level->enteringbggraphic);
+            }
+
+            if (Maps.maps[i].endpic[0])
+            {
+                temp_level->nextmapname.clear();
+                temp_level->f_end.pics.clear();
+                temp_level->f_end.pics.push_back(Maps.maps[i].endpic);
+                epi::str_upper(temp_level->f_end.pics.back());
+                temp_level->f_end.picwait = INT_MAX; // Stay on endpic for now
+            }
+
+            if (Maps.maps[i].dobunny)
+            {
+                temp_level->nextmapname.clear();
+                temp_level->f_end.dobunny = true;
+            }
+
+            if (Maps.maps[i].docast)
+            {
+                temp_level->nextmapname.clear();
+                temp_level->f_end.docast = true;
+            }
+
+            if (Maps.maps[i].endgame)
+            {
+                temp_level->nextmapname.clear();
+            }
+
+            if (Maps.maps[i].partime > 0)
+                temp_level->partime = Maps.maps[i].partime;
+
+            if (Maps.maps[i].numbossactions == -1) // "clear" directive
+                RAD_ClearWUDsByMap(Maps.maps[i].mapname);
+            else if (Maps.maps[i].bossactions && Maps.maps[i].numbossactions >= 1)
+            {
+                // The UMAPINFO spec seems to suggest that any custom actions should
+                // invalidate previous death triggers for the map in question
+                RAD_ClearWUDsByMap(Maps.maps[i].mapname);
+                std::string ba_rts = "// UMAPINFO SCRIPTS\n\n";
+                for (int a = 0; a < Maps.maps[i].numbossactions; a++)
                 {
-                    if (mobjtypes[m]->number == Maps.maps[i].bossactions[a].type)
+                    for (int m = 0; m < mobjtypes.GetSize(); m++)
                     {
-                        ba_rts.append(epi::STR_Format("START_MAP %s\n", Maps.maps[i].mapname));
-                        ba_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
-                        ba_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
-                        ba_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE %d %d\n",
-                                                      Maps.maps[i].bossactions[a].special,
-                                                      Maps.maps[i].bossactions[a].tag));
-                        ba_rts.append("  END_RADIUS_TRIGGER\n");
-                        ba_rts.append("END_MAP\n\n");
+                        if (mobjtypes[m]->number == Maps.maps[i].bossactions[a].type)
+                        {
+                            ba_rts.append(epi::STR_Format("START_MAP %s\n", Maps.maps[i].mapname));
+                            ba_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
+                            ba_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
+                            ba_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE %d %d\n",
+                                                        Maps.maps[i].bossactions[a].special,
+                                                        Maps.maps[i].bossactions[a].tag));
+                            ba_rts.append("  END_RADIUS_TRIGGER\n");
+                            ba_rts.append("END_MAP\n\n");
+                        }
                     }
                 }
+                RAD_ReadScript(ba_rts, "UMAPINFO");
             }
-            RAD_ReadScript(ba_rts, "UMAPINFO");
-        }
 
-        // If a TEMPEPI gamedef had to be created, grab some details from the
-        // first valid gamedef iterating through gamedefs in reverse order
-        if (temp_level->episode_name == "TEMPEPI")
-        {
-            for (int g = gamedefs.GetSize() - 1; g >= 0; g--)
-            {
-                if (gamedefs[g]->name != "TEMPEPI" && epi::case_cmp_n(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
-                {
-                    if (atoi(gamedefs[g]->firstmap.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
-                        continue;
-                    else
-                    {
-                        temp_level->episode->background = gamedefs[g]->background;
-                        temp_level->episode->music      = gamedefs[g]->music;
-                        temp_level->episode->titlemusic = gamedefs[g]->titlemusic;
-                        temp_level->episode->titlepics  = gamedefs[g]->titlepics;
-                        temp_level->episode->titletics  = gamedefs[g]->titletics;
-                        temp_level->episode->percent    = gamedefs[g]->percent;
-                        temp_level->episode->done       = gamedefs[g]->done;
-                        temp_level->episode->accel_snd  = gamedefs[g]->accel_snd;
-                        break;
-                    }
-                }
-            }
-        }
-        else // Validate episode entry to make sure it wasn't renamed or removed
-        {
-            bool good_epi = false;
-            for (int g = 0; g < gamedefs.GetSize(); g++)
-            {
-                if (temp_level->episode_name == gamedefs[g]->name)
-                {
-                    good_epi = true;
-                    break;
-                }
-            }
-            if (!good_epi) // Find a suitable episode
+            // If a TEMPEPI gamedef had to be created, grab some details from the
+            // first valid gamedef iterating through gamedefs in reverse order
+            if (temp_level->episode_name == "TEMPEPI")
             {
                 for (int g = gamedefs.GetSize() - 1; g >= 0; g--)
                 {
-                    if (epi::case_cmp_n(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
+                    if (gamedefs[g]->name != "TEMPEPI" && epi::case_cmp_n(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
                     {
                         if (atoi(gamedefs[g]->firstmap.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
                             continue;
                         else
                         {
-                            temp_level->episode      = gamedefs[g];
-                            temp_level->episode_name = gamedefs[g]->name;
-                            good_epi                 = true;
+                            temp_level->episode->background = gamedefs[g]->background;
+                            temp_level->episode->music      = gamedefs[g]->music;
+                            temp_level->episode->titlemusic = gamedefs[g]->titlemusic;
+                            temp_level->episode->titlepics  = gamedefs[g]->titlepics;
+                            temp_level->episode->titletics  = gamedefs[g]->titletics;
+                            temp_level->episode->percent    = gamedefs[g]->percent;
+                            temp_level->episode->done       = gamedefs[g]->done;
+                            temp_level->episode->accel_snd  = gamedefs[g]->accel_snd;
                             break;
                         }
                     }
                 }
             }
-            if (!good_epi)
-                I_Error("UMAPINFO: No valid episode found for level %s\n", temp_level->name.c_str());
-        }
-        // Validate important things
-        if (temp_level->sky.empty())
-        {
-            if (epi::prefix_case_cmp(temp_level->name, "MAP") == 0)
+            else // Validate episode entry to make sure it wasn't renamed or removed
             {
-                int levnum = atoi(temp_level->name.substr(3).c_str());
-                if (levnum < 12)
-                    temp_level->sky = "SKY1";
-                else if (levnum < 21)
-                    temp_level->sky = "SKY2";
+                bool good_epi = false;
+                for (int g = 0; g < gamedefs.GetSize(); g++)
+                {
+                    if (temp_level->episode_name == gamedefs[g]->name)
+                    {
+                        good_epi = true;
+                        break;
+                    }
+                }
+                if (!good_epi) // Find a suitable episode
+                {
+                    for (int g = gamedefs.GetSize() - 1; g >= 0; g--)
+                    {
+                        if (epi::case_cmp_n(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
+                        {
+                            if (atoi(gamedefs[g]->firstmap.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
+                                continue;
+                            else
+                            {
+                                temp_level->episode      = gamedefs[g];
+                                temp_level->episode_name = gamedefs[g]->name;
+                                good_epi                 = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!good_epi)
+                    I_Error("UMAPINFO: No valid episode found for level %s\n", temp_level->name.c_str());
+            }
+            // Validate important things
+            if (temp_level->sky.empty())
+            {
+                if (epi::prefix_case_cmp(temp_level->name, "MAP") == 0)
+                {
+                    int levnum = atoi(temp_level->name.substr(3).c_str());
+                    if (levnum < 12)
+                        temp_level->sky = "SKY1";
+                    else if (levnum < 21)
+                        temp_level->sky = "SKY2";
+                    else
+                        temp_level->sky = "SKY3";
+                }
                 else
-                    temp_level->sky = "SKY3";
+                {
+                    int epnum = atoi(temp_level->name.substr(1, 1).c_str());
+                    if (epnum == 1)
+                        temp_level->sky = "SKY1";
+                    else if (epnum == 2)
+                        temp_level->sky = "SKY2";
+                    else if (epnum == 3)
+                        temp_level->sky = "SKY3";
+                    else
+                        temp_level->sky = "SKY4";
+                }
             }
-            else
+            // Clear pre_text for this map if it is an episode's starting map
+            for (int g = gamedefs.GetSize() - 1; g >= 0; g--)
             {
-                int epnum = atoi(temp_level->name.substr(1, 1).c_str());
-                if (epnum == 1)
-                    temp_level->sky = "SKY1";
-                else if (epnum == 2)
-                    temp_level->sky = "SKY2";
-                else if (epnum == 3)
-                    temp_level->sky = "SKY3";
-                else
-                    temp_level->sky = "SKY4";
+                if (epi::case_cmp(gamedefs[g]->firstmap, temp_level->name) == 0)
+                {
+                    temp_level->f_pre.text.clear();
+                    temp_level->f_pre.text_flat.clear();
+                    break;
+                }
             }
         }
-        // Clear pre_text for this map if it is an episode's starting map
-        for (int g = gamedefs.GetSize() - 1; g >= 0; g--)
-        {
-            if (epi::case_cmp(gamedefs[g]->firstmap, temp_level->name) == 0)
-            {
-                temp_level->f_pre.text.clear();
-                temp_level->f_pre.text_flat.clear();
-                break;
-            }
-        }
+        FreeMapList();
     }
-
-    FreeMapList();
 }
 
 epi::file_c *W_OpenLump(int lump)

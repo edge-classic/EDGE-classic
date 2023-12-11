@@ -58,7 +58,7 @@ static int HD_coord_sys(lua_State *L)
     double h = luaL_checknumber(L, 2);
 
     if (w < 64 || h < 64)
-        I_Error("Bad hud.coord_sys size: %dx%d\n", w, h);
+        I_Error("Bad hud.coord_sys size: %fx%f\n", w, h);
 
     HUD_SetCoordSys(w, h);
 

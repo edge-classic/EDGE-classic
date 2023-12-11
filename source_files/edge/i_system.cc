@@ -138,7 +138,7 @@ u32_t I_GetMicros(void)
 
 void I_Sleep(int millisecs)
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(millisecs));
+    SDL_Delay(millisecs);
 }
 
 void I_SystemShutdown(void)

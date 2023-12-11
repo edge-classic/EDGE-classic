@@ -19,7 +19,7 @@
 #ifndef __EPI_SDL_H__
 #define __EPI_SDL_H__
 // SDL2 includes (right now only for FS_OpenDir)
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __MINGW32__
 #include "SDL.h"
 #elif __APPLE__
 #include <SDL.h>

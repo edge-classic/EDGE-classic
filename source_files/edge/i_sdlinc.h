@@ -19,7 +19,7 @@
 #ifndef __SDL_SYSTEM_INTERNAL_H__
 #define __SDL_SYSTEM_INTERNAL_H__
 
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __MINGW32__
 #include "SDL.h"
 #elif __APPLE__
 #include <SDL.h>

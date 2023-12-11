@@ -51,7 +51,7 @@ static bool Movie_SetupAudioStream(int rate)
 
 	if (!movie_audiostream)
 	{
-		I_Warning("E_PlayMovie: Failed to setup audio stream\n", SDL_GetError());
+		I_Warning("E_PlayMovie: Failed to setup audio stream: %s\n", SDL_GetError());
 		return false;
 	}
 

@@ -17,7 +17,7 @@ option(EDGE_GL_ES2 "Enable GLES2 Rendering Backend" OFF)
 option(EDGE_SANITIZE "Enable code sanitizing" OFF)
 option(EDGE_PROFILING "Enable Profiling" OFF)
 
-include("cmake/EDGEClassic.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/EDGEClassic.cmake")
 
 if (WIN32)
   if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -28,7 +28,7 @@ if (WIN32)
 endif()
 
 if (EMSCRIPTEN)
-  include("cmake/Emscripten.cmake")  
+  include("${CMAKE_SOURCE_DIR}/cmake/Emscripten.cmake")  
 endif()
 
 if (MSVC)
@@ -88,8 +88,7 @@ else()
 endif()
 
 
-if (WIN32)
-  set(CMAKE_MODULE_PATH cmake)
+if (WIN32 OR MINGW)
   set(SDL2_DIR "${CMAKE_SOURCE_DIR}/libraries/sdl2")
 endif()
 

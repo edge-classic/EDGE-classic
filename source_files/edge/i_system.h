@@ -46,13 +46,6 @@
 // I_StartupSound).  Does whatever else the platform code needs.
 void I_SystemStartup(void);
 
-// This is called by EDGE to begin the main engine loop, and is not
-// expected to return.  It must call engine::Tick() to perform a
-// single loop in the system, which processes events, updates the play
-// simulation, keeps sound and music playing, and most importantly
-// renders a single frame of graphics.
-//--- void I_Loop(void);
-
 // The generic print function.  If in text mode, the message should be
 // displayed on the text mode screen.  This function should also call
 // I_Debugf() and CON_Printf().
@@ -158,11 +151,6 @@ extern bool nomusic;
 // I_SystemStartup().
 void I_StartupMusic(void);
 
-// Shuts down the music system.  This is the opposite to
-// I_StartupMusic().  Must be called by I_SystemShutdown(), the main
-// code never calls this function.
-void I_ShutdownMusic(void);
-
 //--------------------------------------------------------
 //  SOUND functions.
 //--------------------------------------------------------
@@ -184,61 +172,6 @@ void I_StartupSound(void);
 // I_StartupSound().  This must be called by I_SystemShutdown(), the
 // main code never calls this function.
 void I_ShutdownSound(void);
-
-// Loads the given `handle' with the specified sound data.  Handle is
-// a small integer value from 0 onwards.  If no such handle exists
-// then it is created.  The handle must not already contain any sound
-// data.  The data must be copied, e.g. into memory that the sound
-// device can use.  Returns true if successful, otherwise false.
-//
-// The data format is unsigned, i.e. 0x80 is the zero point, ranging
-// upto 0xFF for the peaks, and down to 0x00 for the valleys.  The
-// sound data is also mono.  There is no support for 16-bit or stereo
-// sounds yet.
-bool I_LoadSfx(const unsigned char *data, unsigned int length, unsigned int freq, unsigned int handle);
-
-// Unloads the sound data for the given handle, previously loaded via
-// I_LoadSfx().  This frees the sound data.  Returns true on success,
-// otherwise false.
-bool I_UnloadSfx(unsigned int handle);
-
-// Starts the sound with the given handle playing, using the
-// paramaters for panning, volume and looping.  Gain ranges from
-// from 0.0 (silent) to 1.0 (loudest).
-//
-// Returns the channel ID where the sound is played, which is used to
-// refer to the sound in the other functions below.  If something goes
-// wrong, especially when there are no free channels, then -1 is
-// returned.
-int I_SoundPlayback(unsigned int handle, float gain, bool looping, bool relative, float *pos, float *veloc);
-
-// Checks that the given sound is still playing (i.e. has not reached
-// the end yet), and returns true if it is, otherwise false.
-bool I_SoundCheck(unsigned int chanid);
-
-// Pauses the sound on the specified channel.  Returns true on
-// success, otherwise false.
-bool I_SoundPause(unsigned int chanid);
-
-// Resumes the previously paused sound on the specified channel.
-// Returns true on success, otherwise false.
-bool I_SoundResume(unsigned int chanid);
-
-// Kills a sound on the specified channel that was started with
-// I_SoundPlayback(), and frees the channel to be used for future
-// sound playbacks.  Note that this function must be called even if
-// the sound finished played (i.e. I_SoundCheck() == false).  Returns
-// true on success, otherwise false.
-bool I_SoundKill(unsigned int chanid);
-
-// Called every tic to keep the sounds playing.
-void I_SoundTicker(void);
-
-// Returns an error message string that describes the error from the
-// last sound function that failed.  It will return an empty string if
-// no errors have yet occurred, but never NULL.  This function may
-// clear the error message.
-const char *I_SoundReturnError(void);
 
 // wrappers around the SDL functions of the same name,
 // however I_UnlockAudio() may be called at any time,

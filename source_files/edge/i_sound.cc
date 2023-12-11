@@ -55,13 +55,6 @@ int  dev_bytes_per_sample;
 int  dev_frag_pairs;
 bool dev_stereo;
 
-#define PRI_NOSOUND  -1
-#define PRI_FINISHED -2
-
-// Error Description
-static char errordesc[256] = "FOO";
-static char scratcherror[256];
-
 static bool audio_is_locked = false;
 
 std::vector<std::filesystem::path> available_soundfonts;
@@ -81,19 +74,12 @@ static bool I_TryOpenSound(int want_freq, bool want_stereo)
     SDL_AudioSpec trydev;
     SDL_zero(trydev);
 
-    int samples = 512;
-
-    if (want_freq < 18000)
-        samples = 256;
-    else if (want_freq >= 40000)
-        samples = 1024;
-
     I_Printf("I_StartupSound: trying %d Hz %s\n", want_freq, want_stereo ? "Stereo" : "Mono");
 
     trydev.freq     = want_freq;
     trydev.format   = AUDIO_S16SYS;
     trydev.channels = want_stereo ? 2 : 1;
-    trydev.samples  = samples;
+    trydev.samples  = 1024;
     trydev.callback = SoundFill_Callback;
 
     mydev_id = SDL_OpenAudioDevice(NULL, 0, &trydev, &mydev, 0);
@@ -139,11 +125,6 @@ void I_StartupSound(void)
 
     int  want_freq   = 44100;
     bool want_stereo = (var_sound_stereo >= 1);
-
-    std::string p = argv::Value("freq");
-
-    if (!p.empty())
-        want_freq = atoi(p.c_str());
 
     if (argv::Find("mono") > 0)
         want_stereo = false;
@@ -221,14 +202,6 @@ void I_ShutdownSound(void)
     nosound = true;
 
     SDL_CloseAudioDevice(mydev_id);
-}
-
-const char *I_SoundReturnError(void)
-{
-    memcpy(scratcherror, errordesc, sizeof(scratcherror));
-    memset(errordesc, '\0', sizeof(errordesc));
-
-    return scratcherror;
 }
 
 void I_LockAudio(void)

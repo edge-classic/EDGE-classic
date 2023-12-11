@@ -19,25 +19,13 @@
 #ifndef __N_NETWORK_H__
 #define __N_NETWORK_H__
 
-#define MP_EDGE_PORT 26710
-
-#define MP_PROTOCOL_VER 1
-
 extern bool netgame;
 
-extern int base_port;
-
 void N_InitNetwork(void);
-
-void N_InitiateNetGame(void);
 
 // Create any new ticcmds and broadcast to other players.
 // returns value of I_GetTime().
 int N_NetUpdate();
-
-// Broadcasts special packets to other players
-//  to notify of game exit
-void N_QuitNetGame(void);
 
 // returns number of ticks to run (always > 0).
 int N_TryRunTics();

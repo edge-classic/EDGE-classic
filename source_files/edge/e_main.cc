@@ -1905,8 +1905,6 @@ static void InitDDF(void)
 
 void E_EngineShutdown(void)
 {
-    N_QuitNetGame();
-
     S_StopMusic();
 
     // Pause to allow sounds to finish

@@ -17,7 +17,6 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
-#include "i_net.h"
 
 #include <limits.h>
 #include <stdlib.h>
@@ -25,8 +24,6 @@
 #include "types.h"
 #include "endianess.h"
 
-#include "n_bcast.h"
-#include "n_reliable.h"
 #include "n_network.h"
 
 #include "dm_state.h"
@@ -52,9 +49,6 @@ extern void        VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char 
 // only true if packets are exchanged with a server
 bool netgame = false;
 
-int base_port;
-
-DEF_CVAR(m_busywait, "1", CVAR_ARCHIVE)
 
 // 70Hz
 DEF_CVAR(r_doubleframes, "1", CVAR_ARCHIVE)
@@ -83,40 +77,6 @@ void N_InitNetwork(void)
     srand(I_PureRandom());
 
     N_ResetTics();
-
-    if (nonet)
-        return;
-
-    base_port = MP_EDGE_PORT;
-
-    std::string str = argv::Value("port");
-
-    if (!str.empty())
-        base_port = atoi(str.c_str());
-
-    I_Printf("Network: base port is %d\n", base_port);
-
-    //??	N_StartupReliableLink (base_port+0);
-    //??	N_StartupBroadcastLink(base_port+1);
-}
-
-static void DoDelay()
-{
-    if (m_busywait.d)
-        return;
-
-    // -AJA- This can make everything a bit "jerky" :-(
-    I_Sleep(5 /* millis */);
-}
-
-static void ReceivePackets()
-{
-    // TODO receive stuff from other computers
-}
-
-static void TransmitStuff(int tic)
-{
-    // TODO send stuff to other computers
 }
 
 static void PreInput()
@@ -157,8 +117,6 @@ static bool N_BuildTiccmds(void)
 
         p->builder(p, p->build_data, &p->in_cmds[buf]);
     }
-
-    TransmitStuff(maketic);
 
     maketic++;
     return true;
@@ -233,8 +191,6 @@ int N_NetUpdate()
 #endif
     }
 
-    ReceivePackets();
-
     return nowtime;
 }
 
@@ -263,7 +219,6 @@ int N_TryRunTics()
     {
         while (realtics <= 0)
         {
-            DoDelay();
             nowtime         = N_NetUpdate();
             realtics        = nowtime - last_tryrun_tic;
             last_tryrun_tic = nowtime;
@@ -296,7 +251,6 @@ int N_TryRunTics()
     // wait for new tics if needed
     while (maketic < gametic + tics)
     {
-        DoDelay();
         N_NetUpdate();
     }
 
@@ -308,17 +262,6 @@ void N_ResetTics(void)
     maketic = gametic = 0;
 
     last_update_tic = last_tryrun_tic = I_GetTime();
-}
-
-void N_QuitNetGame(void)
-{
-    // TODO send a quit message to all peers
-
-    // wait a bit
-    if (false) // have_peers
-        I_Sleep(250);
-
-    // TODO close open sockets
 }
 
 //--- editor settings ---

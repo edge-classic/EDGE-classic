@@ -2929,7 +2929,7 @@ void M_Drawer(void)
         return;
 
     if (menu_backdrop && 
-        (option_menuon || (currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave)))
+        (option_menuon || netgame_menuon || (currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave)))
     {
         if (r_titlescaling.d == 2) // Stretch
             HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, menu_backdrop, 0, 0);

@@ -7,7 +7,6 @@ set (EDGE_SOURCE_FILES
   i_ctrl.cc
   i_video.cc
   i_sound.cc
-  i_net.cc
   am_map.cc
   bot_nav.cc
   bot_think.cc
@@ -36,8 +35,6 @@ set (EDGE_SOURCE_FILES
   m_option.cc
   m_netgame.cc
   m_random.cc
-  n_bcast.cc
-  n_reliable.cc
   n_network.cc
   p_action.cc
   p_blockmap.cc

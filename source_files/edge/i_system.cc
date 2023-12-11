@@ -18,7 +18,6 @@
 
 #include "i_defs.h"
 #include "i_sdlinc.h"
-#include "i_net.h"
 
 #include <chrono>
 #include <thread>
@@ -46,7 +45,6 @@ void I_SystemStartup(void)
     I_StartupGraphics(); // SDL requires this to be called first
     I_StartupControl();
     I_StartupSound();
-    I_StartupNetwork();
 }
 
 void I_CloseProgram(int exitnum)
@@ -146,7 +144,6 @@ void I_SystemShutdown(void)
     // make sure audio is unlocked (e.g. I_Error occurred)
     I_UnlockAudio();
 
-    I_ShutdownNetwork();
     I_ShutdownSound();
     I_ShutdownControl();
     I_ShutdownGraphics();

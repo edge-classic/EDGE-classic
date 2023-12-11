@@ -259,8 +259,6 @@ struct Compare_Unit_pred
 
 static void EnableCustomEnv(GLuint env, bool enable)
 {
-    EDGE_ZoneScoped;
-
     switch (env)
     {
     case uint32_t(ENV_SKIP_RGB):

@@ -230,6 +230,7 @@ void DDF_Init()
     DDF_MusicPlaylistInit();
     DDF_FlatInit();
     DDF_FixInit();
+    DDF_MovieInit();
 }
 
 class define_c
@@ -313,6 +314,7 @@ void DDF_CleanUp()
     DDF_MusicPlaylistCleanUp();
     DDF_FlatCleanUp();
     DDF_FixCleanUp();
+    DDF_MovieCleanUp();
 }
 
 static const char *tag_conversion_table[] = {
@@ -320,6 +322,7 @@ static const char *tag_conversion_table[] = {
     "WADFIXES",   "FONTS",   "DDFFONT",  "GAMES",    "DDFGAME",    "IMAGES",  "DDFIMAGE", "LANGUAGES", "DDFLANG",
     "LEVELS",     "DDFLEVL", "LINES",    "DDFLINE",  "PLAYLISTS",  "DDFPLAY", "SECTORS",  "DDFSECT",   "SOUNDS",
     "DDFSFX",     "STYLES",  "DDFSTYLE", "SWITCHES", "DDFSWTH",    "THINGS",  "DDFTHING", "WEAPONS",   "DDFWEAP",
+    "MOVIES",     "DDFMOVIE",
 
     NULL,         NULL};
 
@@ -2134,6 +2137,7 @@ static ddf_reader_t ddf_readers[DDF_NUM_TYPES] = {
     {DDF_Game, "DDFGAME", "games.ddf", "Games", DDF_ReadGames},
     {DDF_Level, "DDFLEVL", "levels.ddf", "Levels", DDF_ReadLevels},
     {DDF_Flat, "DDFFLAT", "flats.ddf", "Flats", DDF_ReadFlat},
+    {DDF_Movie, "DDFMOVIE", "movies.ddf", "Movies", DDF_ReadMovies},
 
     // RTS scripts are handled differently
     {DDF_RadScript, "RSCRIPT", "rscript.rts", "RadTrig", NULL}};

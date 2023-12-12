@@ -345,6 +345,11 @@ void DDF_FlatCleanUp(void);
 void DDF_FixInit(void);
 void DDF_FixCleanUp(void);
 
+// MOVIES 2023
+void DDF_MovieInit(void);
+void DDF_MovieCleanUp(void);
+
+
 // Miscellaneous stuff needed here & there
 extern const commandlist_t floor_commands[];
 extern const commandlist_t damage_commands[];

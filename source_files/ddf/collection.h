@@ -37,6 +37,7 @@ enum ddf_type_e
     DDF_Language,
     DDF_Level,
     DDF_Line,
+    DDF_Movie,
     DDF_Playlist,
     DDF_SFX,
     DDF_Sector,

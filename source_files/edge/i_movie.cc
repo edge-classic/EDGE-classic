@@ -30,6 +30,7 @@
 #include "s_sound.h"
 #include "s_music.h"
 #include "w_files.h"
+#include "w_wad.h"
 
 #define PL_MPEG_IMPLEMENTATION
 #include "pl_mpeg.h"
@@ -98,15 +99,36 @@ void Movie_VideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
 
 void E_PlayMovie(const std::string &name)
 {
+	moviedef_c *movie = moviedefs.Lookup(name.c_str());
+
+	if (!movie)
+	{
+		I_Warning("E_PlayMovie: Movie definition %s not found!\n", name.c_str());
+		return;
+	}
+
 	playing_movie = false;
 	need_canvas_update = false;
 
 	int length = 0;
-	uint8_t *bytes = W_OpenPackOrLumpInMemory(epi::PATH_GetBasename(name).string(), {".mpg", ".mpeg"}, &length);
+	uint8_t *bytes = nullptr;
+
+	if (movie->type == MOVDT_Lump)
+		bytes = W_LoadLump(movie->info.c_str(), &length);
+	else
+	{
+		epi::file_c *mf = W_OpenPackFile(movie->info.c_str());
+		if (mf)
+		{
+			bytes = mf->LoadIntoMemory();
+			length = mf->GetLength();
+		}
+		delete mf;
+	}
 
 	if (!bytes)
 	{
-		I_Warning("E_PlayMovie: Could not open %s!\n", name.c_str());
+		I_Warning("E_PlayMovie: Could not open %s!\n", movie->info.c_str());
 		return;
 	}
 
@@ -131,7 +153,7 @@ void E_PlayMovie(const std::string &name)
 		return;
 	}
 
-	if (!nosound && plm_get_num_audio_streams(decoder) > 0)
+	if (!nosound && !(movie->special & MOVSP_Mute) && plm_get_num_audio_streams(decoder) > 0)
 	{
 		movie_sample_rate = plm_get_samplerate(decoder);
 		if (!Movie_SetupAudioStream(movie_sample_rate))
@@ -156,15 +178,57 @@ void E_PlayMovie(const std::string &name)
 	int movie_width = plm_get_width(decoder);
 	int movie_height = plm_get_height(decoder);
 	float movie_ratio = (float)movie_width / movie_height;
-	// Size frame to display with correct ratio
+	// Size frame using DDFMOVIE scaling selection
 	// Should only need to be set once unless at some point
 	// we allow menu access/console while a movie is playing
-	int frame_height = SCREENHEIGHT;
-	int frame_width = I_ROUND((float)SCREENHEIGHT * movie_ratio);
-	if (frame_width > SCREENWIDTH)
+	int frame_height = 0;
+	int frame_width = 0;
+	float tx1 = 0.0f;
+	float tx2 = 1.0f;
+	float ty1 = 0.0f;
+	float ty2 = 1.0f;
+	if (movie->scaling == MOVSC_AspectFit)
 	{
+		frame_height = SCREENHEIGHT;
+		frame_width = I_ROUND((float)SCREENHEIGHT * movie_ratio);
+		if (frame_width > SCREENWIDTH)
+		{
+			frame_width = SCREENWIDTH;
+			frame_height = I_ROUND((float)SCREENWIDTH / movie_ratio);
+		}
+	}
+	else if (movie->scaling == MOVSC_NoScale)
+	{
+		frame_height = movie_height;
+		frame_width = movie_width;
+		if (frame_height > SCREENHEIGHT)
+		{
+			float ty_trim = ((float)frame_height / SCREENHEIGHT - 1.0f) / 2;
+			ty1 += ty_trim;
+			ty2 -= ty_trim;
+		}
+		if (frame_width > SCREENWIDTH)
+		{
+			float tx_trim = ((float)frame_width / SCREENWIDTH - 1.0f) / 2;
+			tx1 += tx_trim;
+			tx2 -= tx_trim;
+		}
+	}
+	else if (movie->scaling == MOVSC_Zoom)
+	{
+		frame_height = SCREENHEIGHT;
+		frame_width = I_ROUND((float)SCREENHEIGHT * movie_ratio);
+		if (frame_width > SCREENWIDTH)
+		{
+			float tx_trim = ((float)frame_width / SCREENWIDTH - 1.0f) / 2;
+			tx1 += tx_trim;
+			tx2 -= tx_trim;
+		}
+	}
+	else // Stretch, aspect ratio gets BTFO potentially
+	{
+		frame_height = SCREENHEIGHT;
 		frame_width = SCREENWIDTH;
-		frame_height = I_ROUND((float)SCREENWIDTH / movie_ratio);
 	}
 
 	int num_pixels = movie_width * movie_height * 3;
@@ -224,16 +288,16 @@ void E_PlayMovie(const std::string &name)
 
 			glBegin(GL_QUADS);
 
-			glTexCoord2f(0.0f, 1.0f);
+			glTexCoord2f(tx1, ty2);
 			glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 - frame_height/2);
 
-			glTexCoord2f(1.0f, 1.0f);
+			glTexCoord2f(tx2, ty2);
 			glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 - frame_height/2);
 
-			glTexCoord2f(1.0f, 0.0f);
+			glTexCoord2f(tx2, ty1);
 			glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 + frame_height/2);
 
-			glTexCoord2f(0.0f, 0.0f);
+			glTexCoord2f(tx1, ty1);
 			glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 + frame_height/2);
 
 			glEnd();
@@ -300,16 +364,16 @@ void E_PlayMovie(const std::string &name)
 
 		glBegin(GL_QUADS);
 
-		glTexCoord2f(0.0f, 1.0f);
+		glTexCoord2f(tx1, ty2);
 		glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 - frame_height/2);
 
-		glTexCoord2f(1.0f, 1.0f);
+		glTexCoord2f(tx2, ty2);
 		glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 - frame_height/2);
 
-		glTexCoord2f(1.0f, 0.0f);
+		glTexCoord2f(tx2, ty1);
 		glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 + frame_height/2);
 
-		glTexCoord2f(0.0f, 0.0f);
+		glTexCoord2f(tx1, ty1);
 		glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 + frame_height/2);
 
 		glEnd();

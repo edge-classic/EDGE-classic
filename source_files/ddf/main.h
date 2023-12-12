@@ -55,6 +55,7 @@ class weapondef_c;
 #include "language.h"
 
 #include "flat.h"
+#include "movie.h"
 
 // State updates, number of tics / second.
 #define TICRATE 35

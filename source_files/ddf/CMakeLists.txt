@@ -16,6 +16,7 @@ add_library(
   level.cc
   line.cc
   main.cc
+  movie.cc
   playlist.cc
   sector.cc
   sfx.cc

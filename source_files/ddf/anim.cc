@@ -272,13 +272,17 @@ void DDF_ConvertANIMATED(const byte *data, int size)
         if (speed < 1)
             speed = 1;
 
-        char last[10];
-        char first[10];
+        char last[9];
+        char first[9];
+
+        // Clear to zeroes to prevent garbage from being added
+        memset(last, 0, 9);
+        memset(first, 0, 9);
 
         // make sure names are NUL-terminated
-        memcpy(last, data + 1, 9);
+        memcpy(last, data + 1, 8);
         first[8] = 0;
-        memcpy(first, data + 10, 9);
+        memcpy(first, data + 10, 8);
         last[8] = 0;
 
         I_Debugf("- ANIMATED LUMP: start '%s' : end '%s'\n", first, last);

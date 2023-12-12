@@ -72,3 +72,4 @@ Bugs fixed
 - Fixed memory leak involving detail slope creation
 - Fixed the "Blood Level" gameplay option defaulting to "Extra"
 - Fixed inconsistent menu item width when non-default text scaling was used
+- Fixed incorrect Boom ANIMATED lump parsing causing garbage values to be entered into the DDFANIM conversion

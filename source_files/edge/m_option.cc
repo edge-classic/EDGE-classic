@@ -613,7 +613,7 @@ static optmenuitem_t accessibilityoptions[] = {
      "May help with motion sickness"},
     {OPT_Switch, "Reduce Flashing", YesNo, 2, &reduce_flash, NULL, "May help with epilepsy or photosensitivity"},
     {OPT_Boolean, "Automap: Keyed Doors Pulse", YesNo, 2, &am_keydoorblink, NULL, "Can help locate doors more easily"},
-    {OPT_Switch, "Automap: Keyed Doors Named", "Nothing/Text/Graphic", 3, &am_keydoortext.d, M_UpdateCVARFromInt,
+    {OPT_Switch, "Automap: Keyed Doors Overlay", "Nothing/Text/Graphic", 3, &am_keydoortext.d, M_UpdateCVARFromInt,
      "Required key shown visually", &am_keydoortext},
 };
 

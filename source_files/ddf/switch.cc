@@ -240,13 +240,17 @@ void DDF_ConvertSWITCHES(const byte *data, int size)
         if (data[18] == 0) // end marker
             break;
 
-        char off_name[10];
-        char on_name[10];
+        char off_name[9];
+        char on_name[9];
+
+        // clear to zeroes to prevent garbage being passed to DDF
+        memset(off_name, 0, 9);
+        memset(on_name, 0, 9);
 
         // make sure names are NUL-terminated
-        memcpy(off_name, data + 0, 9);
+        memcpy(off_name, data + 0, 8);
         off_name[8] = 0;
-        memcpy(on_name, data + 9, 9);
+        memcpy(on_name, data + 9, 8);
         on_name[8] = 0;
 
         I_Debugf("- SWITCHES LUMP: off '%s' : on '%s'\n", off_name, on_name);

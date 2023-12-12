@@ -33,7 +33,7 @@ typedef enum
 
 typedef enum
 {
-    MOVSC_AspectFit, // scale movie to display as much as original aspect ratio will allow
+    MOVSC_Autofit, // fit movie to screen as best as possible
     MOVSC_NoScale, // force movie to play at original size regardless of display
     MOVSC_Zoom, // movie will be scaled to fit display height; sides may be clipped
     MOVSC_Stretch, // movie will stretch to fit display; disregards aspect ratio

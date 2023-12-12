@@ -187,14 +187,24 @@ void E_PlayMovie(const std::string &name)
 	float tx2 = 1.0f;
 	float ty1 = 0.0f;
 	float ty2 = 1.0f;
-	if (movie->scaling == MOVSC_AspectFit)
+	if (movie->scaling == MOVSC_Autofit)
 	{
-		frame_height = SCREENHEIGHT;
-		frame_width = I_ROUND((float)SCREENHEIGHT * movie_ratio);
-		if (frame_width > SCREENWIDTH)
+		// If movie and display ratios match (ish), stretch it
+		if (fabs((float)SCREENWIDTH / SCREENHEIGHT / movie_ratio) - 1.0f <= 0.10f)
 		{
+			frame_height = SCREENHEIGHT;
 			frame_width = SCREENWIDTH;
-			frame_height = I_ROUND((float)SCREENWIDTH / movie_ratio);
+		}
+		else // Zoom
+		{
+			frame_height = SCREENHEIGHT;
+			frame_width = I_ROUND((float)SCREENHEIGHT * movie_ratio);
+			if (frame_width > SCREENWIDTH)
+			{
+				float tx_trim = ((float)frame_width / SCREENWIDTH - 1.0f) / 2;
+				tx1 += tx_trim;
+				tx2 -= tx_trim;
+			}
 		}
 	}
 	else if (movie->scaling == MOVSC_NoScale)
@@ -230,6 +240,11 @@ void E_PlayMovie(const std::string &name)
 		frame_height = SCREENHEIGHT;
 		frame_width = SCREENWIDTH;
 	}
+
+	int vx1 = SCREENWIDTH/2 - frame_width/2;
+	int vx2 = SCREENWIDTH/2 + frame_width/2;
+	int vy1 = SCREENHEIGHT/2 + frame_height/2;
+	int vy2 = SCREENHEIGHT/2 - frame_height/2;
 
 	int num_pixels = movie_width * movie_height * 3;
 	rgb_data = new uint8_t[num_pixels];
@@ -289,16 +304,16 @@ void E_PlayMovie(const std::string &name)
 			glBegin(GL_QUADS);
 
 			glTexCoord2f(tx1, ty2);
-			glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 - frame_height/2);
+			glVertex2i(vx1, vy2);
 
 			glTexCoord2f(tx2, ty2);
-			glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 - frame_height/2);
+			glVertex2i(vx2, vy2);
 
 			glTexCoord2f(tx2, ty1);
-			glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 + frame_height/2);
+			glVertex2i(vx2, vy1);
 
 			glTexCoord2f(tx1, ty1);
-			glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 + frame_height/2);
+			glVertex2i(vx1, vy1);
 
 			glEnd();
 
@@ -313,10 +328,10 @@ void E_PlayMovie(const std::string &name)
 
 				glBegin(GL_QUADS);
 
-				glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 - frame_height/2);
-				glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 - frame_height/2);
-				glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 + frame_height/2);
-				glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 + frame_height/2);
+				glVertex2i(vx1, vy2);
+				glVertex2i(vx2, vy2);
+				glVertex2i(vx2, vy1);
+				glVertex2i(vx1, vy1);
 
 				glEnd();
 
@@ -365,16 +380,16 @@ void E_PlayMovie(const std::string &name)
 		glBegin(GL_QUADS);
 
 		glTexCoord2f(tx1, ty2);
-		glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 - frame_height/2);
+		glVertex2i(vx1, vy2);
 
 		glTexCoord2f(tx2, ty2);
-		glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 - frame_height/2);
+		glVertex2i(vx2, vy2);
 
 		glTexCoord2f(tx2, ty1);
-		glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 + frame_height/2);
+		glVertex2i(vx2, vy1);
 
 		glTexCoord2f(tx1, ty1);
-		glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 + frame_height/2);
+		glVertex2i(vx1, vy1);
 
 		glEnd();
 
@@ -386,10 +401,10 @@ void E_PlayMovie(const std::string &name)
 
 		glBegin(GL_QUADS);
 
-		glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 - frame_height/2);
-		glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 - frame_height/2);
-		glVertex2i(SCREENWIDTH/2 + frame_width/2, SCREENHEIGHT/2 + frame_height/2);
-		glVertex2i(SCREENWIDTH/2 - frame_width/2, SCREENHEIGHT/2 + frame_height/2);
+		glVertex2i(vx1, vy2);
+		glVertex2i(vx2, vy2);
+		glVertex2i(vx2, vy1);
+		glVertex2i(vx1, vy1);
 
 		glEnd();
 

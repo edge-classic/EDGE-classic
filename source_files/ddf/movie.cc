@@ -183,6 +183,8 @@ static void DDF_MovieGetScaling(const char *info, void *storage)
 {
     moviescale_type_e *dest = (moviescale_type_e *)storage;
 
+    if (DDF_CompareName(info, "AUTO") == 0)
+        *dest = MOVSC_Autofit;
     if (DDF_CompareName(info, "NONE") == 0)
         *dest = MOVSC_NoScale;
     else if (DDF_CompareName(info, "ZOOM") == 0)
@@ -190,7 +192,10 @@ static void DDF_MovieGetScaling(const char *info, void *storage)
     else if (DDF_CompareName(info, "STRETCH") == 0)
         *dest = MOVSC_Stretch;
     else
-        *dest = MOVSC_AspectFit;
+    {
+        DDF_WarnError("Unknown movie scaling mode: %s\n", info);
+        *dest = MOVSC_Autofit; // Default
+    }
 }
 
 // ---> moviedef_c class
@@ -217,7 +222,7 @@ void moviedef_c::Default()
 
     type   = MOVDT_None;
 
-    scaling = MOVSC_AspectFit;
+    scaling = MOVSC_Autofit;
     special  = MOVSP_None;
 }
 

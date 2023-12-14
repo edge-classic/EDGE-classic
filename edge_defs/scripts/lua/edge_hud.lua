@@ -440,7 +440,7 @@ function doom_automap()
 
     if (#hud.map_author() > 0) then
         hud.draw_text(0, 200 - 32 - 20, hud.map_title())
-        hud.draw_text(0, 200 - 32 - 10, " Author: " + hud.map_author())
+        hud.draw_text(0, 200 - 32 - 10, " Author: " .. hud.map_author())
     else
         hud.draw_text(0, 200 - 32 - 10, hud.map_title())
     end

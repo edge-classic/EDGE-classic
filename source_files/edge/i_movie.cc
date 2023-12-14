@@ -367,13 +367,8 @@ void E_PlayMovie(const std::string &name)
 			case SDL_KEYDOWN:
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_CONTROLLERBUTTONDOWN:
-				{
-					if (movie_length < 4)
-						playing_movie = false;
-					else
-						skip_bar_active = true;
-					break;
-				}
+				skip_bar_active = true;
+				break;
 
 			case SDL_KEYUP:
 			case SDL_MOUSEBUTTONUP:

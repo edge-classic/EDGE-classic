@@ -1571,7 +1571,7 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
     std::string temp_value;
     temp_value.clear();
 
-    int NumberOfItems = 5; //how many fields in a row
+    int NumberOfItems = 10; //how many fields in a row
     lua_createtable(L, 0, NumberOfItems); // our MOBJ table
 
     //---------------
@@ -1619,6 +1619,52 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
     // object.spawnhealth
     lua_pushstring(L, "spawnhealth");
     lua_pushinteger(L, (int)mo->spawnhealth);
+    lua_settable(L,-3); //add to MOBJ Table
+    //---------------
+
+    //---------------
+    // object.x
+    lua_pushstring(L, "x");
+    lua_pushinteger(L, (int)mo->x);
+    lua_settable(L,-3); //add to MOBJ Table
+    //---------------
+
+    //---------------
+    // object.y
+    lua_pushstring(L, "y");
+    lua_pushinteger(L, (int)mo->y);
+    lua_settable(L,-3); //add to MOBJ Table
+    //---------------
+
+    //---------------
+    // object.z
+    lua_pushstring(L, "z");
+    lua_pushinteger(L, (int)mo->z);
+    lua_settable(L,-3); //add to MOBJ Table
+    //---------------
+
+    //---------------
+    // object.angle
+    float value = ANG_2_FLOAT(mo->angle);
+    if (value > 360.0f)
+        value -= 360.0f;
+    if (value < 0)
+        value += 360.0f;
+    
+    lua_pushstring(L, "angle");
+    lua_pushinteger(L, (int)value);
+    lua_settable(L,-3); //add to MOBJ Table
+    //---------------
+
+    //---------------
+    // object.mlook
+    value = ANG_2_FLOAT(mo->vertangle);
+
+    if (value > 180.0f)
+        value -= 360.0f;
+        
+    lua_pushstring(L, "mlook");
+    lua_pushinteger(L, (int)value);
     lua_settable(L,-3); //add to MOBJ Table
     //---------------
 

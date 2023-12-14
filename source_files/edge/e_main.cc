@@ -920,7 +920,7 @@ void E_AdvanceTitle(void)
         {
             if (skip_intros.d)
                 g->movie_played = true;
-            else if (!g->movie_played)
+            else
             {
                 E_PlayMovie(g->titlemovie);
                 g->movie_played = true;

@@ -31,6 +31,7 @@
 #include "s_music.h"
 #include "w_files.h"
 #include "w_wad.h"
+#include "hu_draw.h"
 
 #define PL_MPEG_IMPLEMENTATION
 #include "pl_mpeg.h"
@@ -40,11 +41,13 @@ extern int dev_freq;
 
 bool playing_movie;
 static bool need_canvas_update;
+static bool skip_bar_active;
 static GLuint canvas = 0;
 static uint8_t *rgb_data = nullptr;
 static plm_t *decoder = nullptr;
 static SDL_AudioStream *movie_audiostream = nullptr;
 static int movie_sample_rate = 0;
+static float skip_time;
 
 static bool Movie_SetupAudioStream(int rate)
 {
@@ -109,6 +112,8 @@ void E_PlayMovie(const std::string &name)
 
 	playing_movie = false;
 	need_canvas_update = false;
+	skip_bar_active = false;
+	skip_time = 0;
 
 	int length = 0;
 	uint8_t *bytes = nullptr;
@@ -175,6 +180,7 @@ void E_PlayMovie(const std::string &name)
 		rgb_data = nullptr;
 	}
 
+	float movie_length = plm_get_duration(decoder);
 	int movie_width = plm_get_width(decoder);
 	int movie_height = plm_get_height(decoder);
 	float movie_ratio = (float)movie_width / movie_height;
@@ -338,13 +344,21 @@ void E_PlayMovie(const std::string &name)
 				glDisable(GL_BLEND);
 			}
 
+			if (skip_bar_active)
+			{
+				// Draw black box at bottom of screen
+				HUD_SolidBox(hud_x_left, 196, hud_x_right, 200, 0);
+
+				// Draw progress
+				HUD_SolidBox(hud_x_left, 197, hud_x_right * (skip_time/0.9f), 199, RGB_MAKE(255,255,255));
+			}
+
 			I_FinishFrame();
 
 			need_canvas_update = false;
 		}
 
 		/* check if press key/button */
-		SDL_PumpEvents();
 		SDL_Event sdl_ev;
 		while (SDL_PollEvent(&sdl_ev))
 		{
@@ -353,12 +367,30 @@ void E_PlayMovie(const std::string &name)
 			case SDL_KEYDOWN:
 			case SDL_MOUSEBUTTONDOWN:
 			case SDL_CONTROLLERBUTTONDOWN:
-				playing_movie = false;
+				{
+					if (movie_length < 4)
+						playing_movie = false;
+					else
+						skip_bar_active = true;
+					break;
+				}
+
+			case SDL_KEYUP:
+			case SDL_MOUSEBUTTONUP:
+			case SDL_CONTROLLERBUTTONUP:
+				skip_bar_active = false;
+				skip_time = 0;
 				break;
 
 			default:
 				break;
 			}
+		}
+		if (skip_bar_active)
+		{
+			skip_time += elapsed_time;
+			if (skip_time > 1)
+				playing_movie = false;
 		}
 	}
 	last_time = (double)SDL_GetTicks() / 1000.0;

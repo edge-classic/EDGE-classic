@@ -196,6 +196,8 @@ DEF_CVAR(ddf_strict, "0", CVAR_ARCHIVE)
 DEF_CVAR(ddf_lax, "0", CVAR_ARCHIVE)
 DEF_CVAR(ddf_quiet, "0", CVAR_ARCHIVE)
 
+DEF_CVAR(skip_intros, "0", CVAR_ARCHIVE)
+
 static const image_c *loading_image = nullptr;
 const image_c        *menu_backdrop = nullptr;
 
@@ -916,8 +918,13 @@ void E_AdvanceTitle(void)
         // Only play title movies once
         if (!g->titlemovie.empty() && !g->movie_played)
         {
-            E_PlayMovie(g->titlemovie);
-            g->movie_played = true;
+            if (skip_intros.d)
+                g->movie_played = true;
+            else if (!g->movie_played)
+            {
+                E_PlayMovie(g->titlemovie);
+                g->movie_played = true;
+            }
             continue;
         }
 

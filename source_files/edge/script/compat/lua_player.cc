@@ -1449,9 +1449,15 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
         switch (list->type)
         {
         case BENEFIT_Weapon:
-            // If it's a weapon all bets are off: we'll want to parse
-            // it differently, not here.
+            // If it's a weapon we'll want to parse
+            // it differently to get the name.
             BenefitName = "WEAPON";
+            if (list->sub.weap)
+            {
+                weapondef_c *objWep = list->sub.weap;
+                BenefitName = objWep->name;
+                BenefitName = AuxStringReplaceAll(BenefitName, std::string("_"), std::string(" "));
+            }
             BenefitType = 0;
             BenefitAmount = 1;
             break;
@@ -1495,10 +1501,6 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
             BenefitName = "KEY";
             BenefitType = (log2((int)list->sub.type) + 1);
             BenefitAmount = 1;
-
-            //temp_num = log2((int)list->sub.type);
-            //temp_num++;
-            //temp_string += std::to_string(temp_num);
             break;
 
         case BENEFIT_Powerup:
@@ -1537,21 +1539,17 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
         lua_pushnumber(L, CurrentBenefit); //new benefit
         lua_createtable(L, 0, NumberOfBenefitFields); //create Benefit subItem table
 
-        lua_pushstring(L, "name");
         lua_pushstring(L, BenefitName.c_str());
-        lua_settable(L,-3); //add to Benefit subItem table
+        lua_setfield(L, -2, "name");   //add to Benefit subItem table
 
-        lua_pushstring(L, "type");
         lua_pushinteger(L, BenefitType);
-        lua_settable(L,-3); //add to Benefit subItem table
+        lua_setfield(L, -2, "type");   //add to Benefit subItem table
 
-        lua_pushstring(L, "amount");
         lua_pushinteger(L, BenefitAmount);
-        lua_settable(L,-3); //add to Benefit subItem table
+        lua_setfield(L, -2, "amount");   //add to Benefit subItem table
 
-        lua_pushstring(L, "limit");
         lua_pushinteger(L, BenefitLimit);
-        lua_settable(L,-3); //add to Benefit subItem table
+        lua_setfield(L, -2, "limit");   //add to Benefit subItem table
 
         lua_settable(L,-3); //add to BENEFITS table
 
@@ -1583,9 +1581,8 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
         temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
     }
 
-    lua_pushstring(L, "name");
     lua_pushstring(L, temp_value.c_str());
-    lua_settable(L,-3);   //add to MOBJ Table
+    lua_setfield(L, -2, "name");   //add to MOBJ Table
     //---------------
 
     //---------------
@@ -1602,45 +1599,38 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
             temp_value="WEAPON";
     } 
 
-    lua_pushstring(L, "type");
     lua_pushstring(L, temp_value.c_str());
-    lua_settable(L,-3); //add to MOBJ Table
+    lua_setfield(L, -2, "type");   //add to MOBJ Table
     //---------------
 
     //---------------
     // object.currenthealth
-    lua_pushstring(L, "currenthealth");
     lua_pushinteger(L, (int)mo->health);
-    
-    lua_settable(L,-3); //add to MOBJ Table
+    lua_setfield(L, -2, "currenthealth");   //add to MOBJ Table
     //---------------
 
     //---------------
     // object.spawnhealth
-    lua_pushstring(L, "spawnhealth");
     lua_pushinteger(L, (int)mo->spawnhealth);
-    lua_settable(L,-3); //add to MOBJ Table
+    lua_setfield(L, -2, "spawnhealth");   //add to MOBJ Table
     //---------------
 
     //---------------
     // object.x
-    lua_pushstring(L, "x");
     lua_pushinteger(L, (int)mo->x);
-    lua_settable(L,-3); //add to MOBJ Table
+    lua_setfield(L, -2, "x");   //add to MOBJ Table
     //---------------
 
     //---------------
     // object.y
-    lua_pushstring(L, "y");
     lua_pushinteger(L, (int)mo->y);
-    lua_settable(L,-3); //add to MOBJ Table
+    lua_setfield(L, -2, "y");   //add to MOBJ Table
     //---------------
 
     //---------------
     // object.z
-    lua_pushstring(L, "z");
     lua_pushinteger(L, (int)mo->z);
-    lua_settable(L,-3); //add to MOBJ Table
+    lua_setfield(L, -2, "z");   //add to MOBJ Table
     //---------------
 
     //---------------
@@ -1651,9 +1641,8 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
     if (value < 0)
         value += 360.0f;
     
-    lua_pushstring(L, "angle");
     lua_pushinteger(L, (int)value);
-    lua_settable(L,-3); //add to MOBJ Table
+    lua_setfield(L, -2, "angle");   //add to MOBJ Table
     //---------------
 
     //---------------
@@ -1663,9 +1652,8 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
     if (value > 180.0f)
         value -= 360.0f;
         
-    lua_pushstring(L, "mlook");
     lua_pushinteger(L, (int)value);
-    lua_settable(L,-3); //add to MOBJ Table
+    lua_setfield(L, -2, "mlook");   //add to MOBJ Table
     //---------------
 
     //---------------

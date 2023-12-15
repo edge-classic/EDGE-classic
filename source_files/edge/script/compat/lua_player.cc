@@ -1569,7 +1569,7 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
     std::string temp_value;
     temp_value.clear();
 
-    int NumberOfItems = 10; //how many fields in a row
+    int NumberOfItems = 11; //how many fields in a row
     lua_createtable(L, 0, NumberOfItems); // our MOBJ table
 
     //---------------
@@ -1656,6 +1656,12 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
     lua_setfield(L, -2, "mlook");   //add to MOBJ Table
     //---------------
 
+     //---------------
+    // object.radius
+    lua_pushinteger(L, (int)mo->radius);
+    lua_setfield(L, -2, "radius");   //add to MOBJ Table
+    //---------------
+
     //---------------
     // object.benefits
     if (mo->extendedflags & EF_MONSTER)
@@ -1664,6 +1670,170 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
         CreateLuaTable_Benefits(L, mo, false); //only want pickup benefits
      //---------------
 
+
+}
+
+
+static void CreateLuaTable_Attacks(lua_State *L, weapondef_c *objWep)
+{
+    atkdef_c *objAtck;
+    int         temp_num = 0;
+    std::string temp_string;
+    temp_string.clear();
+
+    
+    //how many benefits do we have?
+    int NumberOfAttacks = 0;
+    for (NumberOfAttacks=0; NumberOfAttacks < 3;  NumberOfAttacks++)
+    {
+        if (!objWep->attack[NumberOfAttacks])
+            break;
+    }
+
+    lua_pushstring(L, "attacks");
+
+    lua_createtable(L, NumberOfAttacks, 0); //create ATTACKS table
+
+    int NumberOfAttackFields = 8; //how many fields in a row
+    int CurrentAttack = 0; //counter
+    for (CurrentAttack=0; CurrentAttack < NumberOfAttacks;  CurrentAttack++)
+    {
+        objAtck = objWep->attack[CurrentAttack];
+        const damage_c *damtype;
+
+         //add it to our table
+        lua_pushnumber(L, CurrentAttack); //new attack
+        lua_createtable(L, 0, NumberOfAttackFields); //create attack subItem table
+
+        // NAME
+        temp_string = objAtck->name;
+        temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
+        lua_pushstring(L, temp_string.c_str());
+        lua_setfield(L, -2, "name");   //add to ATTACK subItem table
+
+        // AMMOTYPE
+        temp_num    = (objWep->ammo[CurrentAttack]) + 1;
+        lua_pushinteger(L, temp_num);
+        lua_setfield(L, -2, "ammotype");   //add to ATTACK subItem table
+
+        // AMMOPERSHOT
+        temp_num    = objWep->ammopershot[CurrentAttack];
+        lua_pushinteger(L, temp_num);
+        lua_setfield(L, -2, "ammopershot");   //add to ATTACK subItem table
+
+        // CLIPSIZE
+        temp_num    = objWep->clip_size[CurrentAttack];
+        lua_pushinteger(L, temp_num);
+        lua_setfield(L, -2, "clipsize");   //add to ATTACK subItem table
+
+        // DAMAGE Nominal
+        damtype     = &objAtck->damage;
+        temp_num    = damtype->nominal;
+        lua_pushnumber(L, temp_num);
+        lua_setfield(L, -2, "damage");   //add to ATTACK subItem table
+
+        // DAMAGE Max
+        temp_num    = damtype->linear_max;
+        lua_pushnumber(L, temp_num);
+        lua_setfield(L, -2, "damagemax");   //add to ATTACK subItem table
+
+        // Range
+        temp_num    = objAtck->range;
+        lua_pushinteger(L, temp_num);
+        lua_setfield(L, -2, "range");   //add to ATTACK subItem table
+
+        // AUTOMATIC
+        lua_pushboolean(L, objWep->autofire[CurrentAttack] ? 1 : 0);
+        lua_setfield(L, -2, "automatic");   //add to ATTACK subItem table
+
+
+        lua_settable(L,-3); //add to ATTACKS table
+    }
+
+    lua_settable(L,-3); //add to WEAPON Table
+
+}
+
+// CreateLuaTable_Weapon(LuaState, mobj)
+//
+static void CreateLuaTable_Weapon(lua_State *L, weapondef_c *objWep)
+{
+
+    std::string temp_value;
+    temp_value.clear();
+
+    int NumberOfItems = 3; //how many fields in a row
+    lua_createtable(L, 0, NumberOfItems); // our WEAPON table
+
+    //---------------
+    // weapon.name
+    temp_value = objWep->name;
+    temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
+
+    lua_pushstring(L, temp_value.c_str());
+    lua_setfield(L, -2, "name");   //add to WEAPON Table
+    //---------------
+
+
+    //---------------
+    // weapon.zoomfactor
+    //float temp_num2   = 90.0f / objWep->zoom_fov;
+    float temp_num2   = objWep->zoom_factor;
+    lua_pushnumber(L, temp_num2);
+    lua_setfield(L, -2, "zoomfactor");   //add to WEAPON Table
+    //---------------
+
+
+    //---------------
+    // weapon.attacks
+    CreateLuaTable_Attacks(L, objWep);
+    //---------------
+
+
+}
+
+// mapobject.weapon_info(maxdistance) LUA Only
+//
+static int MO_weapon_info(lua_State *L)
+{
+    int maxdistance = (int)luaL_checknumber(L, 1);
+
+    mobj_t *mo = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
+    if (!mo)
+    {
+        lua_pushstring(L, "");
+        return 1;
+    } 
+    else
+    {
+        if (!mo->info->pickup_benefits)
+        {
+            lua_pushstring(L, "");
+            return 1;
+        }
+        if (!mo->info->pickup_benefits->sub.weap)
+        {
+            lua_pushstring(L, "");
+            return 1;
+        }
+        if (mo->info->pickup_benefits->type != BENEFIT_Weapon)
+        {
+            lua_pushstring(L, "");
+            return 1;
+        }
+
+        weapondef_c *objWep = mo->info->pickup_benefits->sub.weap;
+        if (!objWep)
+        {
+            lua_pushstring(L, "");
+            return 1;
+        }
+        else
+        {
+            CreateLuaTable_Weapon(L, objWep); //create table with weapon info
+            return 1;
+        }
+    }
 
 }
 
@@ -1961,6 +2131,7 @@ static int luaopen_player(lua_State *L)
 static const luaL_Reg mapobjectlib[] = {{"query_tagged", MO_query_tagged},
                                      {"tagged_info", MO_tagged_info},
                                      {"object_info", MO_object_info},
+                                     {"weapon_info", MO_weapon_info},
                                      {"count", MO_count}, {NULL, NULL}};
 
 static int luaopen_mapobject(lua_State *L)

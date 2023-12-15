@@ -1569,7 +1569,7 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
     std::string temp_value;
     temp_value.clear();
 
-    int NumberOfItems = 11; //how many fields in a row
+    int NumberOfItems = 12; //how many fields in a row
     lua_createtable(L, 0, NumberOfItems); // our MOBJ table
 
     //---------------
@@ -1583,6 +1583,12 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 
     lua_pushstring(L, temp_value.c_str());
     lua_setfield(L, -2, "name");   //add to MOBJ Table
+    //---------------
+
+    //---------------
+    // object.tag
+    lua_pushinteger(L, (int)mo->tag);
+    lua_setfield(L, -2, "tag");   //add to MOBJ Table
     //---------------
 
     //---------------

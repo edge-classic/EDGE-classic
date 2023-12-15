@@ -39,7 +39,9 @@ lua_State* LUA_GetGlobalVM();
 inline epi::vec3_c LUA_CheckVector3(lua_State *L, int index)
 {
     epi::vec3_c v;
-    SYS_ASSERT(lua_istable(L, index));
+
+    luaL_checktype(L, index, LUA_TTABLE);
+        
     lua_geti(L, index, 1);
     v.x = luaL_checknumber(L, -1);
     lua_geti(L, index, 2);

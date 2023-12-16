@@ -1141,7 +1141,10 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
             break;
 
         case BENEFIT_Ammo:
-            temp_string += "AMMO" + std::to_string((int)list->sub.type + 1);
+            temp_string += "AMMO";
+            if ((list->sub.type + 1) < 10)
+                temp_string += "0";
+            temp_string += std::to_string((int)list->sub.type + 1);
             temp_string += "=" + std::to_string((int)list->amount);
             break;
 
@@ -1184,6 +1187,7 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
         default:
             break;
         }
+
     }
     return temp_string;
 }
@@ -1921,8 +1925,8 @@ static int PL_query_weapon(lua_State *L)
 {
 
     int maxdistance   = (int)luaL_checknumber(L, 1);
-    int whatinfo      = (int)luaL_checknumber(L, 1);
-    int secattackinfo = (int)luaL_optnumber(L, 1, 0);
+    int whatinfo      = (int)luaL_checknumber(L, 2);
+    int secattackinfo = (int)luaL_optnumber(L, 3, 0);
 
     if (whatinfo < 1 || whatinfo > 9)
         I_Error("player.query_weapon: bad whatInfo number: %d\n", whatinfo);

@@ -208,35 +208,35 @@ benefit.WEAPON           = "WEAPON"
 -- parse our benefit string to get the type
 benefit.get_type         = function(TheString, BenefitName)
     local tempstr = ""
-    local temppos = 0
-    local equalpos = 0
+    local tempstart = 0
+	local tempend = 0
+	local equalstart = 0 --position of first "="
+	local equalend = 0 --position of last "="
 
-    temppos = string.find(TheString, BenefitName)
-    equalpos = string.find(TheString, "=")
-    if (temppos) then
-        if (equalpos) then --a XXXX99=999 kind of benefit i.e. AMMO, ARMOUR
-            temppos = temppos + 1
-            temppos = temppos + #BenefitName
-            tempstr = string.sub(TheString, temppos, equalpos)
-        elseif (not equalpos) then --a XXXX99 kind of benefit i.e. KEY
-            temppos = temppos + 1
-            temppos = temppos + #BenefitName
-            tempstr = string.sub(TheString, temppos, #TheString)
+    tempstart, tempend = string.find(TheString, BenefitName)
+	equalstart, equalend = string.find(TheString, "=")
+
+    if (tempstart) then
+        if (equalstart) then --a XXXX99=999 kind of benefit i.e. AMMO, ARMOUR
+			tempstr = string.sub(TheString, tempend + 1, equalstart -1)
+        elseif (not equalstart) then --a XXXX99 kind of benefit i.e. KEY
+            tempstr = string.sub(TheString, tempend + 1, #TheString)
         end
     end
-
+	
     return math.tointeger(tempstr)
 end
 
 -- parse our benefit string to get the amount
 benefit.get_amount       = function(TheString)
     local tempstr = ""
-    local equalpos = 0 --position of "="
+    local equalstart = 0 --position of first "="
+	local equalend = 0 --position of last "="
 
-    equalpos = string.find(TheString, "=")
-    if (equalpos) then --its a XXXX99=999 kind of benefit i.e. AMMO, ARMOUR
-        equalpos = equalpos + 2
-        tempstr = string.sub(TheString, equalpos, #TheString)
+    equalstart, equalend = string.find(TheString, "=")
+    if (equalstart) then --its a XXXX99=999 kind of benefit i.e. AMMO, ARMOUR
+        tempstr = string.sub(TheString, equalstart + 1, #TheString)
+		tempstr = string.match(tempstr, "%d+") --grab the first number sequence we find after the "="
     else
         tempstr = "1"
     end
@@ -261,11 +261,13 @@ benefit.get_group        = function(BenefitFull)
         if (loopCounter == 7) then tempbenefitgroup = benefit.HEALTH end
         if (loopCounter == 8) then tempbenefitgroup = benefit.WEAPON end
 
-        BenefitType = get_type(BenefitFull, tempbenefitgroup)
-
-        if (BenefitType > 0) then
-            break
-        end
+        BenefitType = benefit.get_type(BenefitFull, tempbenefitgroup)
+		
+		if (BenefitType ~= nil) then
+			if (BenefitType > 0) then
+				break
+			end
+		end
     end
     return tempbenefitgroup
 end

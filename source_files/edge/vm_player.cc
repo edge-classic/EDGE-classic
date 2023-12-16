@@ -1105,7 +1105,10 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
             break;
 
         case BENEFIT_Ammo:
-            temp_string += "AMMO" + std::to_string((int)list->sub.type + 1);
+            temp_string += "AMMO";
+            if ((list->sub.type + 1) < 10)
+                temp_string += "0";
+            temp_string += std::to_string((int)list->sub.type + 1);
             temp_string += "=" + std::to_string((int)list->amount);
             break;
 

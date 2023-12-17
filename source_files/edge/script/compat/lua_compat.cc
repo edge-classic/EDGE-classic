@@ -5,6 +5,8 @@
 #include "lua_compat.h"
 
 
+bool VM_GetCoalDetected();
+
 lua_State *global_lua_state = nullptr;
 
 struct pending_lua_script_c
@@ -33,6 +35,11 @@ void LUA_AddScript(const std::string &data, const std::string &source)
 
 void LUA_LoadScripts()
 {
+    if (LUA_GetLuaHudDetected() && VM_GetCoalDetected())
+    {
+        I_Warning("Lua and COAL huds detected, selecting Lua hud\n");
+    }
+
     int top = lua_gettop(global_lua_state);
     for (auto &info : pending_scripts)
     {
@@ -57,4 +64,27 @@ void LUA_LoadScripts()
 lua_State* LUA_GetGlobalVM()
 {
     return global_lua_state;
+}
+
+
+static bool lua_detected = false;
+void LUA_SetLuaHudDetected(bool detected)
+{
+    // check whether redundant call, once enabled stays enabled
+    if (lua_detected)
+    {
+        return;
+    }
+
+    lua_detected = detected;    
+}
+
+bool LUA_GetLuaHudDetected()
+{
+    return lua_detected;
+}
+
+bool LUA_UseLuaHud()
+{
+    return lua_detected || !VM_GetCoalDetected();
 }

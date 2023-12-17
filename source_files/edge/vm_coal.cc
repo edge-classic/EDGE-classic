@@ -498,7 +498,7 @@ void VM_LoadScripts()
 }
 
 static bool coal_detected = false;
-void VM_SetCoalEnabled(bool enabled)
+void VM_SetCoalDetected(bool detected)
 {
     // check whether redundant call, once enabled stays enabled
     if (coal_detected)
@@ -506,14 +506,13 @@ void VM_SetCoalEnabled(bool enabled)
         return;
     }
 
-    coal_detected = enabled;    
+    coal_detected = detected;    
 }
 
-bool VM_UseCoal()
+bool VM_GetCoalDetected()
 {
     return coal_detected;
 }
-
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

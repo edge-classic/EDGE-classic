@@ -145,10 +145,10 @@ void G_PlayerFinishLevel(player_t *p, bool keep_cards)
     //  "INTERNAL ERROR: player has a removed attacker"
     p->attacker = NULL;
 
-    if (VM_UseCoal())
-        VM_EndLevel();
+    if (LUA_UseLuaHud())
+        LUA_EndLevel();        
     else
-        LUA_EndLevel();
+        VM_EndLevel();        
 }
 
 //

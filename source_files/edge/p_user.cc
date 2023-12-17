@@ -806,9 +806,8 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
             player->mo->z <= player->mo->floorz)
             sinking = true;
         if (cmd->forwardmove == 0 && cmd->sidemove == 0 && !player->swimming && cmd->upwardmove <= 0 &&
-            !(cmd->buttons &
-              (BT_ATTACK | BT_USE | BT_CHANGE | EBT_SECONDATK | EBT_RELOAD | EBT_ACTION1 | EBT_ACTION2 | EBT_INVUSE
-              | EBT_THIRDATK | EBT_FOURTHATK)) &&
+            !(cmd->buttons & (BT_ATTACK | BT_USE | BT_CHANGE | EBT_SECONDATK | EBT_RELOAD | EBT_ACTION1 | EBT_ACTION2 |
+                              EBT_INVUSE | EBT_THIRDATK | EBT_FOURTHATK)) &&
             ((AlmostEquals(player->mo->height, player->mo->info->height) ||
               AlmostEquals(player->mo->height, player->mo->info->crouchheight)) &&
              (AlmostEquals(player->deltaviewheight, 0.0f) || sinking)))
@@ -879,13 +878,13 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
     player->actiondown[0] = (cmd->extbuttons & EBT_ACTION1) ? true : false;
     player->actiondown[1] = (cmd->extbuttons & EBT_ACTION2) ? true : false;
 
-    if (VM_UseCoal())
-        VM_SetVector(ui_vm, "player", "inventory_event_handler", cmd->extbuttons & EBT_INVPREV ? 1 : 0,
-                     cmd->extbuttons & EBT_INVUSE ? 1 : 0, cmd->extbuttons & EBT_INVNEXT ? 1 : 0);
-    else
+    if (LUA_UseLuaHud())
         LUA_SetVector3(LUA_GetGlobalVM(), "player", "inventory_event_handler",
                        epi::vec3_c(cmd->extbuttons & EBT_INVPREV ? 1 : 0, cmd->extbuttons & EBT_INVUSE ? 1 : 0,
                                    cmd->extbuttons & EBT_INVNEXT ? 1 : 0));
+    else
+        VM_SetVector(ui_vm, "player", "inventory_event_handler", cmd->extbuttons & EBT_INVPREV ? 1 : 0,
+                     cmd->extbuttons & EBT_INVUSE ? 1 : 0, cmd->extbuttons & EBT_INVNEXT ? 1 : 0);
 
     // FIXME separate code more cleanly
     if (extra_tic && r_doubleframes.d)

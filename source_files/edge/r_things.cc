@@ -213,18 +213,18 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
     float ty1 = -psp->sy + IM_OFFSETY(image) - ((h - IM_HEIGHT(image)) * 0.5f);
 
-    if (VM_UseCoal())
-    {
-        // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-        if ((state->flags & SFF_Weapon) && (player->ready_wp >= 0))
-            ty1 += VM_GetFloat(ui_vm, "hud", "universal_y_adjust") + player->weapons[player->ready_wp].info->y_adjust;
-    }
-    else
+    if (LUA_UseLuaHud())
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
         if ((state->flags & SFF_Weapon) && (player->ready_wp >= 0))
             ty1 += LUA_GetFloat(LUA_GetGlobalVM(), "hud", "universal_y_adjust") +
                    player->weapons[player->ready_wp].info->y_adjust;
+    }
+    else
+    {
+        // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
+        if ((state->flags & SFF_Weapon) && (player->ready_wp >= 0))
+            ty1 += VM_GetFloat(ui_vm, "hud", "universal_y_adjust") + player->weapons[player->ready_wp].info->y_adjust;
     }
 
     float ty2 = ty1 + h;
@@ -643,15 +643,15 @@ void RGL_DrawWeaponModel(player_t *p)
 
     float bias = 0.0f;
 
-    if (VM_UseCoal())
-    {
-        bias = VM_GetFloat(ui_vm, "hud", "universal_y_adjust") + p->weapons[p->ready_wp].info->y_adjust;
-    }
-    else
+    if (LUA_UseLuaHud())
     {
         bias = LUA_GetFloat(LUA_GetGlobalVM(), "hud", "universal_y_adjust") + p->weapons[p->ready_wp].info->y_adjust;
     }
-    
+    else
+    {
+        bias = VM_GetFloat(ui_vm, "hud", "universal_y_adjust") + p->weapons[p->ready_wp].info->y_adjust;        
+    }
+
     bias /= 5;
     bias += w->model_bias;
 
@@ -1238,12 +1238,10 @@ static void RGL_DrawModel(drawthing_t *dthing)
 
     if (md->md2_model)
         MD2_RenderModel(md->md2_model, skin_img, false, last_frame, mo->state->frame, lerp, dthing->mx, dthing->my, z,
-                        mo, mo->props, mo->model_scale, mo->model_aspect, mo->info->model_bias,
-                        mo->info->model_rotate);
+                        mo, mo->props, mo->model_scale, mo->model_aspect, mo->info->model_bias, mo->info->model_rotate);
     else if (md->mdl_model)
         MDL_RenderModel(md->mdl_model, skin_img, false, last_frame, mo->state->frame, lerp, dthing->mx, dthing->my, z,
-                        mo, mo->props, mo->model_scale, mo->model_aspect, mo->info->model_bias,
-                        mo->info->model_rotate);
+                        mo, mo->props, mo->model_scale, mo->model_aspect, mo->info->model_bias, mo->info->model_rotate);
     else
         VXL_RenderModel(md->vxl_model, false, dthing->mx, dthing->my, z, mo, mo->props, mo->model_scale,
                         mo->model_aspect, mo->info->model_bias, mo->info->model_rotate);

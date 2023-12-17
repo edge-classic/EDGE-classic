@@ -734,7 +734,7 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
             {
                 if (epi::prefix_case_cmp(bare_filename, "edge_defs") != 0)
                 {
-                    VM_SetCoalEnabled(true);
+                    VM_SetCoalDetected(true);
                 }
 
                 int         length   = -1;
@@ -794,6 +794,11 @@ static void ProcessLuaHUDInPack(pack_file_c *pack)
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
             if (epi::PATH_GetFilename(ent.name) == "EDGE_HUD.LUA")
             {
+                if (epi::prefix_case_cmp(bare_filename, "edge_defs") != 0)
+                {
+                    LUA_SetLuaHudDetected(true);
+                }
+
                 int         length   = -1;
                 const byte *raw_data = pack->LoadEntry(dir, entry, length);
                 std::string data((const char *)raw_data);

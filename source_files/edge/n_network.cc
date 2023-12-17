@@ -148,10 +148,11 @@ void N_GrabTiccmds(void)
 
         memcpy(&p->cmd, p->in_cmds + buf, sizeof(ticcmd_t));
     }
-    if (VM_UseCoal())
-        VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
+    if (LUA_UseLuaHud())
+        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));        
     else
-        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
+        VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
+        
 
     gametic++;
 }

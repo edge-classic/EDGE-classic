@@ -431,22 +431,17 @@ static void DrawLevelFinished(void)
             HUD_TileImage(-240, 0, 820, 200, leaving_bg_image);
         else
         {
-            if (r_titlescaling.d == 2) // Stretch
-                HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, leaving_bg_image, 0, 0);
-            else
+            if (r_titlescaling.d) // Fill Border
             {
-                if (r_titlescaling.d == 3) // Fill Border
+                if ((float)leaving_bg_image->actual_w / leaving_bg_image->actual_h <
+                    (float)SCREENWIDTH / SCREENHEIGHT)
                 {
-                    if ((float)leaving_bg_image->actual_w / leaving_bg_image->actual_h <
-                        (float)SCREENWIDTH / SCREENHEIGHT)
-                    {
-                        if (!leaving_bg_image->blurred_version)
-                            W_ImageStoreBlurred(leaving_bg_image, 0.75f);
-                        HUD_StretchImage(-320, -200, 960, 600, leaving_bg_image->blurred_version, 0, 0);
-                    }
+                    if (!leaving_bg_image->blurred_version)
+                        W_ImageStoreBlurred(leaving_bg_image, 0.75f);
+                    HUD_StretchImage(-320, -200, 960, 600, leaving_bg_image->blurred_version, 0, 0);
                 }
-                HUD_DrawImageTitleWS(leaving_bg_image);
             }
+            HUD_DrawImageTitleWS(leaving_bg_image);
         }
     }
 
@@ -603,22 +598,17 @@ static void DrawEnteringLevel(void)
             HUD_TileImage(-240, 0, 820, 200, entering_bg_image);
         else
         {
-            if (r_titlescaling.d == 2) // Stretch
-                HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, entering_bg_image, 0, 0);
-            else
+            if (r_titlescaling.d) // Fill Border
             {
-                if (r_titlescaling.d == 3) // Fill Border
+                if ((float)entering_bg_image->actual_w / entering_bg_image->actual_h <
+                    (float)SCREENWIDTH / SCREENHEIGHT)
                 {
-                    if ((float)entering_bg_image->actual_w / entering_bg_image->actual_h <
-                        (float)SCREENWIDTH / SCREENHEIGHT)
-                    {
-                        if (!entering_bg_image->blurred_version)
-                            W_ImageStoreBlurred(entering_bg_image, 0.75f);
-                        HUD_StretchImage(-320, -200, 960, 600, entering_bg_image->blurred_version, 0, 0);
-                    }
+                    if (!entering_bg_image->blurred_version)
+                        W_ImageStoreBlurred(entering_bg_image, 0.75f);
+                    HUD_StretchImage(-320, -200, 960, 600, entering_bg_image->blurred_version, 0, 0);
                 }
-                HUD_DrawImageTitleWS(entering_bg_image);
             }
+            HUD_DrawImageTitleWS(entering_bg_image);
         }
     }
 
@@ -1831,21 +1821,16 @@ void WI_Drawer(void)
                 HUD_TileImage(-240, 0, 820, 200, bg_image); // Lobo: Widescreen support
             else
             {
-                if (r_titlescaling.d == 2) // Stretch
-                    HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, bg_image, 0, 0);
-                else
+                if (r_titlescaling.d) // Fill Border
                 {
-                    if (r_titlescaling.d == 3) // Fill Border
+                    if ((float)bg_image->actual_w / bg_image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
                     {
-                        if ((float)bg_image->actual_w / bg_image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
-                        {
-                            if (!bg_image->blurred_version)
-                                W_ImageStoreBlurred(bg_image, 0.75f);
-                            HUD_StretchImage(-320, -200, 960, 600, bg_image->blurred_version, 0, 0);
-                        }
+                        if (!bg_image->blurred_version)
+                            W_ImageStoreBlurred(bg_image, 0.75f);
+                        HUD_StretchImage(-320, -200, 960, 600, bg_image->blurred_version, 0, 0);
                     }
-                    HUD_DrawImageTitleWS(bg_image);
                 }
+                HUD_DrawImageTitleWS(bg_image);
             }
 
             for (int i = 0; i < worldint.numanims; i++)

@@ -53,6 +53,7 @@ General Improvements/Changes
 - RSCRIPT:
   - START_MAP directive will no longer clear existing scripts for the map in question
   - #CLEAR_MAP \<mapname\> directive added for granular clearing of map scripts
+- "Zoom" and "Stretch" choices removed from the "Title/Intermission Scaling" menu option
 
 Bugs fixed
 ----------

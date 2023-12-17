@@ -188,7 +188,7 @@ DEF_CVAR(homepage, "https://edge-classic.github.io", CVAR_NO_RESET)
 
 DEF_CVAR_CLAMPED(r_overlay, "0", CVAR_ARCHIVE, 0, 6)
 
-DEF_CVAR_CLAMPED(r_titlescaling, "0", CVAR_ARCHIVE, 0, 3)
+DEF_CVAR_CLAMPED(r_titlescaling, "0", CVAR_ARCHIVE, 0, 1)
 
 DEF_CVAR(g_aggression, "0", CVAR_ARCHIVE)
 
@@ -230,21 +230,16 @@ class startup_progress_c
         HUD_FrameSetup();
         if (loading_image)
         {
-            if (r_titlescaling.d == 2) // Stretch
-                HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, loading_image, 0, 0);
-            else
+            if (r_titlescaling.d) // Fill Border
             {
-                if (r_titlescaling.d == 3) // Fill Border
+                if ((float)loading_image->actual_w / loading_image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
                 {
-                    if ((float)loading_image->actual_w / loading_image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
-                    {
-                        if (!loading_image->blurred_version)
-                            W_ImageStoreBlurred(loading_image, 0.75f);
-                        HUD_StretchImage(-320, -200, 960, 600, loading_image->blurred_version, 0, 0);
-                    }
+                    if (!loading_image->blurred_version)
+                        W_ImageStoreBlurred(loading_image, 0.75f);
+                    HUD_StretchImage(-320, -200, 960, 600, loading_image->blurred_version, 0, 0);
                 }
-                HUD_DrawImageTitleWS(loading_image);
             }
+            HUD_DrawImageTitleWS(loading_image);
             HUD_SolidBox(25, 25, 295, 175, RGB_MAKE(0, 0, 0));
         }
         int y = 26;
@@ -723,21 +718,16 @@ static void E_TitleDrawer(void)
 {
     if (title_image)
     {
-        if (r_titlescaling.d == 2) // Stretch
-            HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, title_image, 0, 0);
-        else
+        if (r_titlescaling.d) // Fill Border
         {
-            if (r_titlescaling.d == 3) // Fill Border
+            if ((float)title_image->actual_w / title_image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
             {
-                if ((float)title_image->actual_w / title_image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
-                {
-                    if (!title_image->blurred_version)
-                        W_ImageStoreBlurred(title_image, 0.75f);
-                    HUD_StretchImage(-320, -200, 960, 600, title_image->blurred_version, 0, 0);
-                }
+                if (!title_image->blurred_version)
+                    W_ImageStoreBlurred(title_image, 0.75f);
+                HUD_StretchImage(-320, -200, 960, 600, title_image->blurred_version, 0, 0);
             }
-            HUD_DrawImageTitleWS(title_image);
         }
+        HUD_DrawImageTitleWS(title_image);
     }
     else
     {

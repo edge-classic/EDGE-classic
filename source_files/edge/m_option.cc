@@ -226,7 +226,6 @@ static char JpgPng[]         = "JPEG/PNG"; // basic on/off
 static char AAim[]           = "Off/On/Mlook";
 static char Details[]        = "Low/Medium/High";
 static char Hq2xMode[]       = "Off/UI Only/UI & Sprites/All";
-static char TitleScaleMode[] = "Normal/Zoom/Stretch/Fill Border";
 static char SkyScaleMode[]   = "Mirror/Repeat/Stretch/Vanilla";
 static char Invuls[]         = "Simple/Textured";
 static char MonitSiz[]       = "5:4/4:3/3:2/16:10/16:9/21:9";
@@ -397,7 +396,7 @@ static optmenuitem_t vidoptions[] = {
     {OPT_Switch, "Smoothing", YesNo, 2, &var_smoothing, M_ChangeMipMap, NULL},
     {OPT_Switch, "Upscale Textures", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap,
      "Only affects paletted (Doom format) textures"},
-    {OPT_Switch, "Title/Intermission Scaling", TitleScaleMode, 4, &r_titlescaling.d, M_UpdateCVARFromInt, NULL,
+    {OPT_Switch, "Title/Intermission Scaling", "Normal/Fill Border", 2, &r_titlescaling.d, M_UpdateCVARFromInt, NULL,
      &r_titlescaling},
     {OPT_Switch, "Sky Scaling", SkyScaleMode, 4, &r_skystretch.d, M_UpdateCVARFromInt,
      "Vanilla will be forced when Mouselook is Off", &r_skystretch},

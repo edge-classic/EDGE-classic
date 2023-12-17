@@ -389,22 +389,17 @@ static void TextWrite(void)
         }
         else
         {
-            if (r_titlescaling.d == 2) // Stretch
-                HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, finale_textback, 0, 0);
-            else
+            if (r_titlescaling.d) // Fill Border
             {
-                if (r_titlescaling.d == 3) // Fill Border
+                if ((float)finale_textback->actual_w / finale_textback->actual_h <
+                    (float)SCREENWIDTH / SCREENHEIGHT)
                 {
-                    if ((float)finale_textback->actual_w / finale_textback->actual_h <
-                        (float)SCREENWIDTH / SCREENHEIGHT)
-                    {
-                        if (!finale_textback->blurred_version)
-                            W_ImageStoreBlurred(finale_textback, 0.75f);
-                        HUD_StretchImage(-320, -200, 960, 600, finale_textback->blurred_version, 0, 0);
-                    }
+                    if (!finale_textback->blurred_version)
+                        W_ImageStoreBlurred(finale_textback, 0.75f);
+                    HUD_StretchImage(-320, -200, 960, 600, finale_textback->blurred_version, 0, 0);
                 }
-                HUD_DrawImageTitleWS(finale_textback);
             }
+            HUD_DrawImageTitleWS(finale_textback);
         }
 
         // reset coordinate system
@@ -737,21 +732,16 @@ static void CastDrawer(void)
     else
     {
         image = W_ImageLookup("BOSSBACK");
-        if (r_titlescaling.d == 2) // Stretch
-            HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, image, 0, 0);
-        else
+        if (r_titlescaling.d) // Fill Border
         {
-            if (r_titlescaling.d == 3) // Fill Border
+            if ((float)image->actual_w / image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
             {
-                if ((float)image->actual_w / image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
-                {
-                    if (!image->blurred_version)
-                        W_ImageStoreBlurred(image, 0.75f);
-                    HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
-                }
+                if (!image->blurred_version)
+                    W_ImageStoreBlurred(image, 0.75f);
+                HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
             }
-            HUD_DrawImageTitleWS(image);
         }
+        HUD_DrawImageTitleWS(image);
     }
 
     HUD_SetAlignment(0, -1);
@@ -930,21 +920,16 @@ void F_Drawer(void)
     case f_pic:
         {
             const image_c *image = W_ImageLookup(finale->pics[MIN((size_t)picnum, finale->pics.size() - 1)].c_str());
-            if (r_titlescaling.d == 2) // Stretch
-                HUD_StretchImage(hud_x_left, 0, hud_x_right - hud_x_left, 200, image, 0, 0);
-            else
+            if (r_titlescaling.d) // Fill Border
             {
-                if (r_titlescaling.d == 3) // Fill Border
+                if ((float)image->actual_w / image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
                 {
-                    if ((float)image->actual_w / image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
-                    {
-                        if (!image->blurred_version)
-                            W_ImageStoreBlurred(image, 0.75f);
-                        HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
-                    }
+                    if (!image->blurred_version)
+                        W_ImageStoreBlurred(image, 0.75f);
+                    HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
                 }
-                HUD_DrawImageTitleWS(image);
             }
+            HUD_DrawImageTitleWS(image);
             break;
         }
 

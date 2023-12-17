@@ -308,10 +308,10 @@ void G_DoLoadLevel(void)
     LoadLevel_Bits();
 
     SpawnInitialPlayers();
-    if (VM_UseCoal())
-        VM_BeginLevel();
-    else
+    if (LUA_UseLuaHud())
         LUA_BeginLevel();
+    else
+        VM_BeginLevel();
 }
 
 //
@@ -880,10 +880,10 @@ static void G_DoLoadGame(void)
 
     V_SetPalette(PALETTE_NORMAL, 0);
 
-    if (VM_UseCoal())
-        VM_LoadGame(); // Stub for now
+    if (LUA_UseLuaHud())
+        LUA_LoadGame(); 
     else
-        LUA_LoadGame();
+        VM_LoadGame();
 }
 
 //
@@ -980,10 +980,10 @@ static bool G_SaveGameToFile(std::filesystem::path filename, const char *descrip
 
 static void G_DoSaveGame(void)
 {
-    if (VM_UseCoal())
-        VM_SaveGame(); // Stub for now; eventually things like determining if saving is allowed, etc
+    if (LUA_UseLuaHud())
+        LUA_SaveGame(); 
     else
-        LUA_SaveGame();
+        VM_SaveGame();
 
     std::filesystem::path fn(SV_FileName("current", "head"));
 
@@ -1117,10 +1117,10 @@ static void G_DoNewGame(void)
     delete defer_params;
     defer_params = NULL;
 
-    if (VM_UseCoal())
-        VM_NewGame();
-    else
+    if (LUA_UseLuaHud())
         LUA_NewGame();
+    else
+        VM_NewGame();
 
     // -AJA- 2003/10/09: support for pre-level briefing screen on first map.
     //       FIXME: kludgy. All this game logic desperately needs rethinking.

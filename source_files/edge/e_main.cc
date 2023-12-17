@@ -599,11 +599,11 @@ void E_Display(void)
     case GS_LEVEL:
         R_PaletteStuff();
 
-        if (VM_UseCoal())
-            VM_RunHud();
+        if (LUA_UseLuaHud())
+            LUA_RunHud();            
         else
-            LUA_RunHud();
-
+            VM_RunHud();
+            
         if (need_save_screenshot)
         {
             M_MakeSaveScreenShot();
@@ -1999,15 +1999,15 @@ static void E_Startup(void)
     S_Init();
     N_InitNetwork();
     M_CheatInit();
-    if (VM_UseCoal())
-    {
-        VM_InitCoal();
-        VM_LoadScripts();
-    }
-    else
+    if (LUA_UseLuaHud())
     {
         LUA_Init();
         LUA_LoadScripts();
+    }
+    else
+    {
+        VM_InitCoal();
+        VM_LoadScripts();
     }
 }
 

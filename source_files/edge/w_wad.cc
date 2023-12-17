@@ -1041,7 +1041,7 @@ static void ProcessCoalInWad(data_file_c *df)
     {
         int lump = wad->coal_huds;
 
-        VM_SetCoalEnabled(true);
+        VM_SetCoalDetected(true);
 
         std::string data   = W_LoadString(lump);
         std::string source = W_GetLumpName(lump);
@@ -1062,6 +1062,8 @@ static void ProcessLuaInWad(data_file_c *df)
     if (wad->lua_huds >= 0)
     {
         int lump = wad->lua_huds;       
+
+        LUA_SetLuaHudDetected(true);
 
         std::string data   = W_LoadString(lump);
         std::string source = W_GetLumpName(lump);

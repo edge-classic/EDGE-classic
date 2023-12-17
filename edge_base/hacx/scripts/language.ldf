@@ -161,6 +161,4 @@ idmus = "tunes";
 idmypos = "wheream";
 idspispopd = "walk";
 
- 
- 
- 
+ IntermissionFinished="Survived";

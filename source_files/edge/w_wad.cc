@@ -1251,7 +1251,7 @@ void W_ReadUMAPINFOLumps(void)
                 continue;
             else
             {
-                L_WriteDebug("Parsing UMAPINFO lump in %s\n", df->name.c_str());
+                L_WriteDebug("Parsing UMAPINFO lump in %s\n", df->name.u8string().c_str());
                 Parse_UMAPINFO(W_LoadString(df->wad->umapinfo_lump));
             }
         }
@@ -1261,7 +1261,7 @@ void W_ReadUMAPINFOLumps(void)
                 continue;
             else
             {
-                L_WriteDebug("Parsing UMAPINFO.txt in %s\n", df->name.c_str());
+                L_WriteDebug("Parsing UMAPINFO.txt in %s\n", df->name.u8string().c_str());
                 epi::file_c *uinfo = Pack_OpenFile(df->pack, "UMAPINFO.txt");
                 if (uinfo)
                 {

@@ -180,7 +180,6 @@ void E_PlayMovie(const std::string &name)
 		rgb_data = nullptr;
 	}
 
-	float movie_length = plm_get_duration(decoder);
 	int movie_width = plm_get_width(decoder);
 	int movie_height = plm_get_height(decoder);
 	float movie_ratio = (float)movie_width / movie_height;

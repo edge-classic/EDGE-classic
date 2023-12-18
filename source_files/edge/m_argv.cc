@@ -63,7 +63,6 @@ void argv::Init(const int argc, const char *const *argv)
         I_Error("argv::Init: Could not retrieve command line arguments!\n");
 
     list.reserve(win_argc);
-    SYS_ASSERT(argv::list.size() >= 0);
 
     std::vector<std::string> argv_block;
 

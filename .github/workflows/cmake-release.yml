@@ -1,0 +1,79 @@
+name: CMake-Release
+
+on:
+  release:
+    types: [prereleased]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  # The number of days to retain artifacts
+  RETENTION_DAYS: 30
+
+jobs:
+
+  build-mingw32:
+      # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
+      # You can convert this to a matrix build if you need cross-platform coverage.
+      # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+      runs-on: ubuntu-latest
+
+      steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mingw-w64
+
+      - name: Configure CMake
+        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/cmake/Toolchain-mingw32.cmake
+
+      - name: Build
+        # Build your program with the given configuration
+        run: |
+          cmake --build ${{github.workspace}}/build --target GenerateEPKS
+          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+          strip ${{github.workspace}}/edge-classic.exe
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: edge-classic-mingw32
+          path: |
+            ${{github.workspace}}/autoload
+            ${{github.workspace}}/docs
+            ${{github.workspace}}/edge_base/*.epk
+            ${{github.workspace}}/edge_fixes
+            ${{github.workspace}}/soundfont
+            ${{github.workspace}}/edge-classic.exe
+            ${{github.workspace}}/*.dll
+            ${{github.workspace}}/*.epk
+            ${{github.workspace}}/CHANGELOG.md
+          retention-days: ${{env.RETENTION_DAYS}}
+
+  build-msvc:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure CMake MSVC
+        run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G"Visual Studio 16 2019"
+      - name: Build MSVC
+        run: |
+          cmake --build build --target GenerateEPKS
+          cmake --build build --config ${{env.BUILD_TYPE}}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: edge-classic-msvc
+          path: |
+            autoload
+            docs
+            edge_base/*.epk
+            edge_fixes
+            soundfont
+            edge-classic.exe
+            *.dll
+            *.epk
+            CHANGELOG.md
+          retention-days: ${{env.RETENTION_DAYS}}      

@@ -85,8 +85,6 @@ jobs:
             ${{github.workspace}}/soundfont
             ${{github.workspace}}/edge-classic.exe
             ${{github.workspace}}/*.dll
-            !${{github.workspace}}/**/.gitkeep
-            !${{github.workspace}}/**/.gitignore
           retention-days: ${{env.RETENTION_DAYS}}
 
   build-msvc:

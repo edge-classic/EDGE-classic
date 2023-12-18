@@ -391,13 +391,9 @@ static void TextWrite(void)
         {
             if (r_titlescaling.d) // Fill Border
             {
-                if ((float)finale_textback->actual_w / finale_textback->actual_h <
-                    (float)SCREENWIDTH / SCREENHEIGHT)
-                {
-                    if (!finale_textback->blurred_version)
-                        W_ImageStoreBlurred(finale_textback, 0.75f);
-                    HUD_StretchImage(-320, -200, 960, 600, finale_textback->blurred_version, 0, 0);
-                }
+                if (!finale_textback->blurred_version)
+                    W_ImageStoreBlurred(finale_textback, 0.75f);
+                HUD_StretchImage(-320, -200, 960, 600, finale_textback->blurred_version, 0, 0);
             }
             HUD_DrawImageTitleWS(finale_textback);
         }
@@ -734,12 +730,9 @@ static void CastDrawer(void)
         image = W_ImageLookup("BOSSBACK");
         if (r_titlescaling.d) // Fill Border
         {
-            if ((float)image->actual_w / image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
-            {
-                if (!image->blurred_version)
-                    W_ImageStoreBlurred(image, 0.75f);
-                HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
-            }
+            if (!image->blurred_version)
+                W_ImageStoreBlurred(image, 0.75f);
+            HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
         }
         HUD_DrawImageTitleWS(image);
     }
@@ -922,12 +915,9 @@ void F_Drawer(void)
             const image_c *image = W_ImageLookup(finale->pics[MIN((size_t)picnum, finale->pics.size() - 1)].c_str());
             if (r_titlescaling.d) // Fill Border
             {
-                if ((float)image->actual_w / image->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
-                {
-                    if (!image->blurred_version)
-                        W_ImageStoreBlurred(image, 0.75f);
-                    HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
-                }
+                if (!image->blurred_version)
+                    W_ImageStoreBlurred(image, 0.75f);
+                HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0, 0);
             }
             HUD_DrawImageTitleWS(image);
             break;

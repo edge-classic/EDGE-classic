@@ -2965,15 +2965,12 @@ void M_Drawer(void)
     {
         if (r_titlescaling.d) // Fill Border
         {
-            if ((float)menu_backdrop->actual_w / menu_backdrop->actual_h < (float)SCREENWIDTH / SCREENHEIGHT)
+            if (!menu_backdrop->blurred_version)
             {
-                if (!menu_backdrop->blurred_version)
-                {
-                    W_ImageStoreBlurred(menu_backdrop, 0.75f);
-                    menu_backdrop->blurred_version->grayscale = true;
-                }
-                HUD_StretchImage(-320, -200, 960, 600, menu_backdrop->blurred_version, 0, 0);
+                W_ImageStoreBlurred(menu_backdrop, 0.75f);
+                menu_backdrop->blurred_version->grayscale = true;
             }
+            HUD_StretchImage(-320, -200, 960, 600, menu_backdrop->blurred_version, 0, 0);
         }
         else
             HUD_SolidBox(-320, -200, 960, 600, 0);

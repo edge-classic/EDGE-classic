@@ -56,7 +56,6 @@ void std_to_box(int boxes[], float sigma, int n)
 void horizontal_blur_rgb(u8_t *in, u8_t *out, int w, int h, int c, int r)
 {
     float iarr = 1.f / (r + r + 1);
-#pragma omp parallel for
     for (int i = 0; i < h; i++)
     {
         int ti = i * w;
@@ -110,7 +109,6 @@ void total_blur_rgb(u8_t *in, u8_t *out, int w, int h, int c, int r)
 {
     // radius range on either side of a pixel + the pixel itself
     float iarr = 1.f / (r + r + 1);
-#pragma omp parallel for
     for (int i = 0; i < w; i++)
     {
         int ti = i;

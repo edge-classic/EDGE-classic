@@ -5,6 +5,8 @@ set(CMAKE_SYSTEM_NAME Windows)
 set(CMAKE_C_COMPILER /usr/bin/i686-w64-mingw32-gcc)
 set(CMAKE_CXX_COMPILER /usr/bin/i686-w64-mingw32-g++)
 set(CMAKE_RC_COMPILER /usr/bin/i686-w64-mingw32-windres)
+# these next two are defined because when doing the compiler check the linker flags screw it up
+# not sure if there is a better way to handle this - Dasho
 set(CMAKE_C_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER_WORKS 1)
 set(CMAKE_EXE_LINKER_FLAGS

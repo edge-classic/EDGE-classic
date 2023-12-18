@@ -3,16 +3,16 @@
 
 ## Windows Compilation using MSVC Build Tools and VSCode
 
-1. Download the Visual Studio Build Tools Installer and install the 'Desktop Development with C++' Workload
-   - Also select the "C++ CMake tools for Windows" optional component
+Download the Visual Studio Build Tools Installer and install the 'Desktop Development with C++' Workload
+  - Also select the "C++ CMake tools for Windows" optional component
 
-2. Install VSCode as well as the C/C++ and CMake Tools Extensions
+Install VSCode as well as the C/C++ and CMake Tools Extensions
 
-3. After opening the project folder in VSCode, select the 'Visual Studio Build Tools (version) Release - x86_amd64' kit for 64-bit, or the x86 kit for 32-bit
+After opening the project folder in VSCode, select the 'Visual Studio Build Tools (version) Release - x86_amd64' kit for 64-bit, or the x86 kit for 32-bit
 
-4. Select the Release CMake build variant
+Select the Release CMake build variant
 
-5. Click Build
+Click Build
 
 ## Windows Compilation using MSYS2
 
@@ -29,6 +29,24 @@ Then, after navigating to the project directory:
 ```
 > cmake -B build -G "MSYS Makefiles"
 > cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
+```
+
+## Compilation for Windows XP using w64devkit
+
+WARNING: Windows XP support has been deprecated; the steps below may fail with future versions of EDGE-Classic. Issues that prevent EDGE-Classic from running in Windows XP outside of legitimate bugs (i.e., an otherwise good function needs compiler defines and a separate code path to work with XP) will not be addressed by the development team.
+
+This section assumes that you have downloaded an i686 release from https://github.com/skeeto/w64devkit/releases and extracted it to a folder of your choosing.
+
+NOTE: The bundled GNU Make program can sometimes produce a false positive in Windows Defender during extraction; please see https://github.com/skeeto/w64devkit/issues/79 for more information and steps to validate that the Make executable is valid.
+
+Launch w64devkit.exe from your extracted w64devkit folder.
+
+Then, after navigating to the project directory:
+
+```
+> cmake -B build -G "MinGW Makefiles" -DCMAKE_TOOLCHAIN_FILE=./cmake/Toolchain-mingw32-minimal.cmake -DCMAKE_BUILD_TYPE=Release
+> cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
+> strip edge-classic.exe
 ```
 
 ## Linux Compilation

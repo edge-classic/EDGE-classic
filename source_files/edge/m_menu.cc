@@ -664,9 +664,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
     x = style->def->text[text_type].x_offset;
     slot_extra_info_t *info;
 
-    char mbuffer[200];
-
-    sprintf(mbuffer, "PAGE %d", save_page + 1);
+    std::string temp_string = epi::STR_Format("PAGE %d", save_page + 1);
 
     if (save_page > 0)
         HL_WriteText(style, text_type, x - 4, y, "< PREV");
@@ -674,9 +672,9 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
     x += style->fonts[text_type]->StringWidth("< PREV") * txtscale;
     x += 30;
 
-    HL_WriteText(style, text_type, x, y, mbuffer);
+    HL_WriteText(style, text_type, x, y, temp_string.c_str());
 
-    x += style->fonts[text_type]->StringWidth(mbuffer) * txtscale;
+    x += style->fonts[text_type]->StringWidth(temp_string.c_str()) * txtscale;
     x += 30;
 
     if (save_page < SAVE_PAGES - 1)
@@ -705,49 +703,50 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
     if (saveStringEnter || info->empty || info->corrupt)
         return;
 
-    mbuffer[0] = 0;
-    strcat(mbuffer, info->timestr);
-    HL_WriteText(style, text_type, x, y, mbuffer);
-
-    y += LineHeight + (LineHeight / 2);
+    temp_string = info->timestr;
+    if (temp_string[0] == ' ') // Remove beginning space that legacy behavior had sometimes
+        temp_string = temp_string.substr(1);
+    size_t timesplit = temp_string.find("  ");
+    SYS_ASSERT(timesplit != std::string::npos && temp_string.size() > timesplit + 2);
+    HL_WriteText(style, text_type, x, y, temp_string.substr(0, timesplit).c_str());
+    y += LineHeight;
+    y += style->def->entry_spacing;
+    HL_WriteText(style, text_type, x, y, temp_string.substr(timesplit + 2).c_str());
+    y += LineHeight;
     y += style->def->entry_spacing;
 
-    // mbuffer[0] = 0;
-    // strcat(mbuffer, info->gamename);
-    std::string temp_string;
-    temp_string.clear();
-    temp_string.assign(info->gamename);
+    temp_string = info->gamename;
     temp_string = LoboStringReplaceAll(temp_string, std::string("_"), std::string(" "));
     HL_WriteText(style, text_type, x, y, temp_string.c_str());
 
-    y += LineHeight + (LineHeight / 2);
+    y += LineHeight;
     y += style->def->entry_spacing;
-    mbuffer[0] = 0;
-    strcat(mbuffer, info->mapname);
-    HL_WriteText(style, text_type, x, y, mbuffer);
+    
+    temp_string = info->mapname;
+    HL_WriteText(style, text_type, x, y, temp_string.c_str());
 
-    y += LineHeight + (LineHeight / 2);
+    y += LineHeight;
     y += style->def->entry_spacing;
-    mbuffer[0] = 0;
+
     switch (info->skill)
     {
     case 0:
-        strcat(mbuffer, language["MenuDifficulty1"]);
+        temp_string = language["MenuDifficulty1"];
         break;
     case 1:
-        strcat(mbuffer, language["MenuDifficulty2"]);
+        temp_string = language["MenuDifficulty2"];
         break;
     case 2:
-        strcat(mbuffer, language["MenuDifficulty3"]);
+        temp_string = language["MenuDifficulty3"];
         break;
     case 3:
-        strcat(mbuffer, language["MenuDifficulty4"]);
+        temp_string = language["MenuDifficulty4"];
         break;
     default:
-        strcat(mbuffer, language["MenuDifficulty5"]);
+        temp_string = language["MenuDifficulty5"];
         break;
     }
-    HL_WriteText(style, text_type, x, y, mbuffer);
+    HL_WriteText(style, text_type, x, y, temp_string.c_str());
 
     /*int BottomY = 0;
     BottomY = style->def->text[styledef_c::T_HELP].y_offset;
@@ -822,14 +821,26 @@ void M_DrawLoad(void)
 
         if (fontType == styledef_c::T_SELECTED)
         {
-            // ttf_ref_yshift is important for TTF fonts.
-            float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift[current_font_size]; // * txtscale;
+            if (style->fonts[styledef_c::T_SELECTED]->def->type == FNTYP_TrueType)
+            {
+                // ttf_ref_yshift is important for TTF fonts.
+                float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift[current_font_size]; // * txtscale;
 
-            HUD_SetAlpha(0.33f);
-            HUD_SolidBox(TempX - 3, TempY - 2 + (y_shift/2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
-            HUD_SetAlpha(old_alpha);
+                HUD_SetAlpha(0.33f);
+                HUD_SolidBox(TempX - 3, TempY - 2 + (y_shift/2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+                HUD_SetAlpha(old_alpha);
+            }
+            else
+            {
+                HUD_SetAlpha(0.33f);
+                HUD_SolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
+                HUD_SetAlpha(old_alpha);
+            }
         }
-        HL_WriteText(style, fontType, TempX, TempY - (LineHeight / 2), ex_slots[i].desc);
+        if (style->fonts[fontType]->def->type == FNTYP_TrueType)
+            HL_WriteText(style, fontType, TempX, TempY - (LineHeight / 2), ex_slots[i].desc);
+        else
+            HL_WriteText(style, fontType, TempX, TempY - 1, ex_slots[i].desc);
         TempY += LineHeight + (LineHeight / 2);
         TempY += style->def->entry_spacing;
     }
@@ -931,12 +942,21 @@ void M_DrawSave(void)
 
         if (fontType == styledef_c::T_SELECTED)
         {
-            // ttf_ref_yshift is important for TTF fonts.
-            float y_shift = style->fonts[fontType]->ttf_ref_yshift[current_font_size]; // * txtscale;
+            if (style->fonts[fontType]->def->type == FNTYP_TrueType)
+            {
+                // ttf_ref_yshift is important for TTF fonts.
+                float y_shift = style->fonts[fontType]->ttf_ref_yshift[current_font_size]; // * txtscale;
 
-            HUD_SetAlpha(0.33f);
-            HUD_SolidBox(TempX - 3, TempY - 2 + (y_shift/2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
-            HUD_SetAlpha(old_alpha);
+                HUD_SetAlpha(0.33f);
+                HUD_SolidBox(TempX - 3, TempY - 2 + (y_shift/2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+                HUD_SetAlpha(old_alpha);
+            }
+            else
+            {
+                HUD_SetAlpha(0.33f);
+                HUD_SolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
+                HUD_SetAlpha(old_alpha);
+            }
         }
 
         int  len           = 0;
@@ -958,11 +978,23 @@ void M_DrawSave(void)
             len = style->fonts[fontType]->StringWidth(ex_slots[save_slot].desc) * txtscale;
         }
 
-        HL_WriteText(style, fontType, TempX, TempY - (LineHeight / 2), ex_slots[i].desc);
-
-        if (entering_save)
+        if (style->fonts[fontType]->def->type == FNTYP_TrueType)
         {
-            HL_WriteText(style, fontType, TempX + len, TempY - (LineHeight / 2), "_");
+            HL_WriteText(style, fontType, TempX, TempY - (LineHeight / 2), ex_slots[i].desc);
+
+            if (entering_save)
+            {
+                HL_WriteText(style, fontType, TempX + len, TempY - (LineHeight / 2), "_");
+            }
+        }
+        else
+        {
+            HL_WriteText(style, fontType, TempX, TempY - 1, ex_slots[i].desc);
+
+            if (entering_save)
+            {
+                HL_WriteText(style, fontType, TempX + len, TempY - 1, "_");
+            }
         }
 
         TempY += LineHeight + (LineHeight / 2);

@@ -944,10 +944,7 @@ static bool G_SaveGameToFile(std::filesystem::path filename, const char *descrip
     globs->sky_image = sky_image;
 
     time(&cur_time);
-    strftime(timebuf, 99, "%I:%M %p  %d/%b/%Y", localtime(&cur_time));
-
-    if (timebuf[0] == '0' && isdigit(timebuf[1]))
-        timebuf[0] = ' ';
+    strftime(timebuf, 99, "%H:%M  %Y-%m-%d", localtime(&cur_time));
 
     globs->description = SV_DupString(description);
     globs->desc_date   = SV_DupString(timebuf);

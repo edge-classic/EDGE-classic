@@ -1761,7 +1761,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
         player->air_in_lungs -= subtract;
         player->underwater = true;
 
-        if (player->air_in_lungs <= 0 && (leveltime % (1 + player->mo->info->choke_damage.delay)) == 0)
+        if (subtract && player->air_in_lungs <= 0 && (leveltime % (1 + player->mo->info->choke_damage.delay)) == 0)
         {
             DAMAGE_COMPUTE(damage, &player->mo->info->choke_damage);
 

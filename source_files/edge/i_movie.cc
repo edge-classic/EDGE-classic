@@ -195,7 +195,7 @@ void E_PlayMovie(const std::string &name)
 	if (movie->scaling == MOVSC_Autofit)
 	{
 		// If movie and display ratios match (ish), stretch it
-		if (fabs((float)SCREENWIDTH / SCREENHEIGHT / movie_ratio) - 1.0f <= 0.10f)
+		if (fabs((float)SCREENWIDTH / SCREENHEIGHT / movie_ratio - 1.0f) <= 0.10f)
 		{
 			frame_height = SCREENHEIGHT;
 			frame_width = SCREENWIDTH;
@@ -204,41 +204,17 @@ void E_PlayMovie(const std::string &name)
 		{
 			frame_height = SCREENHEIGHT;
 			frame_width = I_ROUND((float)SCREENHEIGHT * movie_ratio);
-			if (frame_width > SCREENWIDTH)
-			{
-				float tx_trim = ((float)frame_width / SCREENWIDTH - 1.0f) / 2;
-				tx1 += tx_trim;
-				tx2 -= tx_trim;
-			}
 		}
 	}
 	else if (movie->scaling == MOVSC_NoScale)
 	{
 		frame_height = movie_height;
 		frame_width = movie_width;
-		if (frame_height > SCREENHEIGHT)
-		{
-			float ty_trim = ((float)frame_height / SCREENHEIGHT - 1.0f) / 2;
-			ty1 += ty_trim;
-			ty2 -= ty_trim;
-		}
-		if (frame_width > SCREENWIDTH)
-		{
-			float tx_trim = ((float)frame_width / SCREENWIDTH - 1.0f) / 2;
-			tx1 += tx_trim;
-			tx2 -= tx_trim;
-		}
 	}
 	else if (movie->scaling == MOVSC_Zoom)
 	{
 		frame_height = SCREENHEIGHT;
 		frame_width = I_ROUND((float)SCREENHEIGHT * movie_ratio);
-		if (frame_width > SCREENWIDTH)
-		{
-			float tx_trim = ((float)frame_width / SCREENWIDTH - 1.0f) / 2;
-			tx1 += tx_trim;
-			tx2 -= tx_trim;
-		}
 	}
 	else // Stretch, aspect ratio gets BTFO potentially
 	{

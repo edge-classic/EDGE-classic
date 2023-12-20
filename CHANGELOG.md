@@ -10,12 +10,22 @@ New Features
   - COAL, for the time being, will still be instantiated if a PWAD or external pack contains a COALHUDS file
 - Added support for MPEG video playback
   - Files must use MPEG1 video and MP2 audio for proper decoding
-  - DDFGAME: TITLE_MOVIE=<wad/packfile name> command added
+  - New DDF filetype added: DDFMOVIE/MOVIES.DDF
+    - MOVIE_DATA = <LUMP or PACK>:<lump or packfile name>
+      - Defines type and location/name of movie file
+    - SPECIAL = <special command list>
+      - MUTE is currently the only special and will suppress audio for the movie
+    - SCALING = <AUTO/NONE/ZOOM/STRETCH>
+      - AUTO: The default option; will fit the movie to the display as much as possible while keeping aspect ratio in mind
+      - NONE: Will not adjust the dimensions of the movie at all, even if this causes portions of it to be unviewable
+      - ZOOM: Will scale the movie's height to match the height of the display; sides of the movie may be clipped
+      - STRETCH: Will match the movie's dimensions to the display without preserving aspect ratio
+  - DDFGAME: TITLE_MOVIE=<movie definition> command added
     - Movies will always play before any defined TITLE_GRAPHIC entry in the same definition
-  - DDFLEVL: PRE.MOVIE=<wad/packfile name> and POST.MOVIE=<wad/packfile name> commands added
+  - DDFLEVL: PRE.MOVIE=<movie definition> and POST.MOVIE=<movie definition> commands added
     - Text will always be printed first, followed by movie playback, followed by any defined graphics
       for a DDFLEVL PRE/POST entry
-  - RSCRIPT: PLAY_MOVIE <wad/packfile name> command added
+  - RSCRIPT: PLAY_MOVIE <movie definition> command added
 - Added support for MUSINFO-based music changer things
   - Uses same numbering and methodology as detailed in https://doomwiki.org/wiki/MUSINFO
 - Added simple IWAD selection dialog window if multiple valid IWADs are found on startup
@@ -75,3 +85,6 @@ Bugs fixed
 - Fixed inconsistent menu item width when non-default text scaling was used
 - Fixed incorrect Boom ANIMATED and SWITCHES lump parsing causing garbage values to be entered into the DDFANIM conversion
 - Fixed CHOKE_DAMAGE being applied during extra rendering tics
+- Fixed malformed Eureka configuration file
+- Fixed "Fill Border" Title/Intermission scaling option not working for all display modes
+- Added corrected Blasphemer/Heretic tome and wings graphics to prevent distortion of the spinning "activated" images

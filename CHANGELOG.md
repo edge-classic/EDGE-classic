@@ -11,21 +11,21 @@ New Features
 - Added support for MPEG video playback
   - Files must use MPEG1 video and MP2 audio for proper decoding
   - New DDF filetype added: DDFMOVIE/MOVIES.DDF
-    - MOVIE_DATA = <LUMP or PACK>:<lump or packfile name>
+    - MOVIE_DATA = \<LUMP or PACK\>:\<lump or packfile name\>
       - Defines type and location/name of movie file
-    - SPECIAL = <special command list>
+    - SPECIAL = \<special command list\>
       - MUTE is currently the only special and will suppress audio for the movie
-    - SCALING = <AUTO/NONE/ZOOM/STRETCH>
+    - SCALING = \<AUTO/NONE/ZOOM/STRETCH\>
       - AUTO: The default option; will fit the movie to the display as much as possible while keeping aspect ratio in mind
       - NONE: Will not adjust the dimensions of the movie at all, even if this causes portions of it to be unviewable
       - ZOOM: Will scale the movie's height to match the height of the display; sides of the movie may be clipped
       - STRETCH: Will match the movie's dimensions to the display without preserving aspect ratio
-  - DDFGAME: TITLE_MOVIE=<movie definition> command added
+  - DDFGAME: TITLE_MOVIE=\<movie definition\> command added
     - Movies will always play before any defined TITLE_GRAPHIC entry in the same definition
-  - DDFLEVL: PRE.MOVIE=<movie definition> and POST.MOVIE=<movie definition> commands added
+  - DDFLEVL: PRE.MOVIE=\<movie definition\> and POST.MOVIE=\<movie definition\> commands added
     - Text will always be printed first, followed by movie playback, followed by any defined graphics
       for a DDFLEVL PRE/POST entry
-  - RSCRIPT: PLAY_MOVIE <movie definition> command added
+  - RSCRIPT: PLAY_MOVIE \<movie definition\> command added
 - Added support for MUSINFO-based music changer things
   - Uses same numbering and methodology as detailed in https://doomwiki.org/wiki/MUSINFO
 - Added simple IWAD selection dialog window if multiple valid IWADs are found on startup

@@ -21,13 +21,14 @@ This section assumes that you have completed the steps at https://www.msys2.org/
 From an MSYS prompt for your target architecture:
 
 Install the following additional packages:
+* `make`
 * `mingw-w64-(arch)-cmake`
 * `mingw-w64-(arch)-SDL2`
 
 Then, after navigating to the project directory:
 
 ```
-> cmake -B build -G "MSYS Makefiles"
+> cmake -B build -G "MSYS Makefiles" -DCMAKE_BUILD_TYPE=Release
 > cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
 ```
 
@@ -61,7 +62,7 @@ Install the following packages with their dependencies (exact names may vary bas
 Then, after navigating to the project directory in a terminal:
 
 ```
-> cmake -B build
+> cmake -B build -DCMAKE_BUILD_TYPE=Release
 > cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
 ```
 
@@ -76,7 +77,7 @@ Install the following packages with their dependencies (exact names may vary bas
 Then, after navigating to the project directory in a terminal:
 
 ```
-> cmake -B build
+> cmake -B build -DCMAKE_BUILD_TYPE=Release
 > cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
 ```
 ## WebGL Compilation
@@ -108,14 +109,18 @@ Open a web browser, navigate to ```http://127.0.0.1:8000```, and play Edge Class
 
 # Launching EDGE-Classic
 
-In all cases, the executable will be copied to the root of the project folder upon success. You can either launch the program in place, or copy the following folders and files to a separate directory if desired:
+In all cases (barring the WebGL build per the previous section), the executable will be copied to the root of the project folder upon success. You can either launch the program in place, or copy the following folders and files to a separate directory if desired:
 * autoload
 * edge_base
 * edge_fixes
 * soundfont
 * edge-classic/edge-classic.exe (OS-dependent)
-* edge-defs.wad
-* libgcc_s_dw2-1.dll (Windows-only, if present; can appear with MSYS2 builds)
-* libstdc++-6.dll (Windows-only, if present; can appear with MSYS2 builds)
-* libwinpthread-1.dll (Windows-only, if present; can appear with MSYS2 builds)
-* SDL2.dll (Windows-only)
+* edge_defs.epk
+* SDL2.dll (Windows-only, with the exception of MSYS builds; see below instructions for details)
+
+MSYS BUILDS: You will need to navigate to the /bin folder for the appropriate architecture in your MSYS2 installation (for example, /mingw64/bin for MinGW 64-bit builds), and copy the following files into the same directory as edge-classic.exe:
+
+* libgcc_s_seh-1.dll
+* libstdc++-6.dll
+* libwinpthread-1.dll
+* SDL2.dll

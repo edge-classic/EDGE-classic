@@ -3,7 +3,7 @@
 EDGE-Classic Pack Structure and Usage
 =======================================
 
-by The EDGE Team.  November 2023.
+by The EDGE Team.  December 2023.
 
 =======================================
 Introduction
@@ -73,14 +73,13 @@ will be considered to come 'after' the pack itself for load order purposes. To a
 only store maps and their associated lumps within pack WADs. The alternative to this would be to store ALL in-game resources within a pack WAD, 
 with documentation and other miscellany outside of it.
 
-COAL, DDF, and RTS scripts can be placed in any location within a pack, but the filenames must adhere to EDGE's historical standards. For ease
+COAL, DDF, Lua and RTS scripts can be placed in any location within a pack, but the filenames must adhere to EDGE's historical standards. For ease
 in converting mods that were previously in WAD form, filenames consisting of the lump name from the table below + any file extension will be
-considered valid as well (i.e., COALAPI.dat, DDFATK.txt, etc.):
+considered valid as well (i.e., COALHUDS.dat, DDFATK.txt, etc.):
 
 Lump Name            Filename Equivalent
 ---------            -------------------
 
-COALAPI              coal_api.ec
 COALHUDS             coal_hud.ec
 DDFANIM              anims.ddf
 DDFATK               attacks.ddf
@@ -92,6 +91,7 @@ DDFIMAGE             images.ddf
 DDFLANG              language.ldf (Note, LDF not DDF!)
 DDFLEVL              levels.ddf
 DDFLINE              lines.ddf
+DDFMOVIE             movies.ddf
 DDFPLAY              playlist.ddf
 DDFSECT              sectors.ddf
 DDFSFX               sounds.ddf
@@ -99,6 +99,7 @@ DDFSTYLE             styles.ddf
 DDFSWTH              switch.ddf
 DDFTHING             things.ddf
 DDFWEAP              weapons.ddf
+LUAHUDS              edge_hud.lua
 RSCRIPT              rscript.rts
 
 =======================================

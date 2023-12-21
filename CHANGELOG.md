@@ -26,6 +26,8 @@ New Features
     - Text will always be printed first, followed by movie playback, followed by any defined graphics
       for a DDFLEVL PRE/POST entry
   - RSCRIPT: PLAY_MOVIE \<movie definition\> command added
+  - `skip_intros` CVAR added to disable movies that play as part of a title sequence if desired
+    - Default is 0 (off)
 - Added support for MUSINFO-based music changer things
   - Uses same numbering and methodology as detailed in https://doomwiki.org/wiki/MUSINFO
 - Added simple IWAD selection dialog window if multiple valid IWADs are found on startup

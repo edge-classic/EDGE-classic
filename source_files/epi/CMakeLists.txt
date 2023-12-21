@@ -33,7 +33,7 @@ target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/stb)
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/libgme/gme)
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/m4p)
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/superfasthash)
-if(MSVC OR WIN32_CLANG OR MINGW)
+if((MSVC OR WIN32_CLANG OR MINGW) AND NOT MSYS)
   target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/include)
 endif()
 

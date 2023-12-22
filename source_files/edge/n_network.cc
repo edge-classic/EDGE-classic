@@ -223,6 +223,10 @@ int N_TryRunTics()
             nowtime         = N_NetUpdate();
             realtics        = nowtime - last_tryrun_tic;
             last_tryrun_tic = nowtime;
+            if (realtics <= 0)
+            {
+                I_Sleep(5);
+            }
         }
 
         // this limit is rather arbitrary
@@ -253,6 +257,11 @@ int N_TryRunTics()
     while (maketic < gametic + tics)
     {
         N_NetUpdate();
+
+        if (maketic < gametic + tics)
+        {
+            I_Sleep(5);
+        }
     }
 
     return tics;

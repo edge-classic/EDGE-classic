@@ -33,6 +33,10 @@
 #include "w_wad.h"
 #include "version.h"
 
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
+    #include <timeapi.h>
+#endif
+
 extern FILE *debugfile;
 extern FILE *logfile;
 
@@ -136,7 +140,21 @@ u32_t I_GetMicros(void)
 
 void I_Sleep(int millisecs)
 {
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
+    if (millisecs < 16)
+    {
+        timeBeginPeriod(1);
+    }
+#endif
+
     SDL_Delay(millisecs);
+
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
+    if (millisecs < 16)
+    {
+        timeEndPeriod(1);
+    }
+#endif
 }
 
 void I_SystemShutdown(void)

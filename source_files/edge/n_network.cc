@@ -225,7 +225,9 @@ int N_TryRunTics()
             last_tryrun_tic = nowtime;
             if (realtics <= 0)
             {
+#ifndef EDGE_WEB                
                 I_Sleep(5);
+#endif
             }
         }
 
@@ -260,7 +262,9 @@ int N_TryRunTics()
 
         if (maketic < gametic + tics)
         {
+#ifndef EDGE_WEB            
             I_Sleep(5);
+#endif
         }
     }
 

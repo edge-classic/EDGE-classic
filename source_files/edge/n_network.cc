@@ -54,7 +54,7 @@ bool netgame = false;
 DEF_CVAR(r_doubleframes, "1", CVAR_ARCHIVE)
 DEF_CVAR(n_busywait, "1", CVAR_ROM)
 
-#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
+#if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
 HANDLE windows_timer = NULL;
 #endif
 
@@ -83,7 +83,7 @@ void N_InitNetwork(void)
 
     N_ResetTics();
 
-#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
+#if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
     windows_timer = CreateWaitableTimerExW(NULL, NULL, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);
     if (windows_timer != NULL)
     {

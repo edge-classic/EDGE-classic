@@ -87,10 +87,7 @@ else()
 
 endif()
 
-if (MSYS)
-  set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-  add_compile_definitions(__MSYS__) # This wasn't being added for me for some reason, even when using the MSYS generator - Dasho
-elseif (WIN32 OR MINGW)
+if (WIN32)
   set(SDL2_DIR "${CMAKE_SOURCE_DIR}/libraries/sdl2")
 endif()
 

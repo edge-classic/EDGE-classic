@@ -1470,6 +1470,10 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
             BenefitName = "AMMO";
             BenefitType = (int)list->sub.type + 1;
             BenefitAmount = (int)list->amount;
+            if ((gameskill == sk_baby) || (gameskill == sk_nightmare))
+                BenefitAmount <<= 1; //double the ammo
+            if(BenefitAmount > 1 && obj->flags & MF_DROPPED)
+                BenefitAmount /= 2; //dropped ammo gives half
             BenefitLimit = (int)list->limit;
             break;
 
@@ -1692,7 +1696,7 @@ static void CreateLuaTable_Attacks(lua_State *L, weapondef_c *objWep)
     temp_string.clear();
 
     
-    //how many benefits do we have?
+    //how many attacks do we have?
     int NumberOfAttacks = 0;
     for (NumberOfAttacks=0; NumberOfAttacks < 3;  NumberOfAttacks++)
     {

@@ -52,6 +52,11 @@ bool netgame = false;
 
 // 70Hz
 DEF_CVAR(r_doubleframes, "1", CVAR_ARCHIVE)
+DEF_CVAR(n_busywait, "1", CVAR_ROM)
+
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
+HANDLE windows_timer = NULL;
+#endif
 
 // gametic is the tic about to (or currently being) run.
 // maketic is the tic that hasn't had control made for it yet.
@@ -77,6 +82,26 @@ void N_InitNetwork(void)
     srand(I_PureRandom());
 
     N_ResetTics();
+
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
+    windows_timer = CreateWaitableTimerExW(NULL, NULL, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);
+    if (windows_timer != NULL)
+    {
+        n_busywait = 0;
+    }
+#endif
+
+}
+
+void N_Shutdown(void)
+{
+    #if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
+    if (windows_timer)
+    {
+        CloseHandle(windows_timer);
+        windows_timer = NULL;
+    }
+    #endif
 }
 
 static void PreInput()
@@ -223,6 +248,11 @@ int N_TryRunTics()
             nowtime         = N_NetUpdate();
             realtics        = nowtime - last_tryrun_tic;
             last_tryrun_tic = nowtime;
+            
+            if (!n_busywait.d && realtics <= 0) 
+            {
+                I_Sleep(5);
+            }
         }
 
         // this limit is rather arbitrary
@@ -253,6 +283,11 @@ int N_TryRunTics()
     while (maketic < gametic + tics)
     {
         N_NetUpdate();
+
+        if (!n_busywait.d && (maketic < gametic + tics)) 
+        {
+            I_Sleep(5);
+        }
     }
 
     return tics;

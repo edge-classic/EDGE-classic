@@ -21,15 +21,16 @@ This section assumes that you have completed the steps at https://www.msys2.org/
 From an MSYS prompt for your target architecture:
 
 Install the following additional packages:
-* `make`
+* `mingw-w64-(arch)-gcc` (if not performed during initial MSYS2 install/setup)
 * `mingw-w64-(arch)-cmake`
 * `mingw-w64-(arch)-SDL2`
 
 Then, after navigating to the project directory:
 
 ```
-> cmake -B build -G "MSYS Makefiles" -DCMAKE_BUILD_TYPE=Release
+> cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXE_LINKER_FLAGS="-static -lmingw32 -lSDL2main -lSDL2.dll -mwindows" -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1
 > cmake --build build (-j# optional, with # being the number of threads/cores you'd like to use)
+> strip edge-classic.exe (if desired)
 ```
 
 ## Compilation for Windows XP using w64devkit
@@ -118,9 +119,4 @@ In all cases (barring the WebGL build per the previous section), the executable 
 * edge_defs.epk
 * SDL2.dll (Windows-only, with the exception of MSYS builds; see below instructions for details)
 
-MSYS BUILDS: You will need to navigate to the /bin folder for the appropriate architecture in your MSYS2 installation (for example, /mingw64/bin for MinGW 64-bit builds), and copy the following files into the same directory as edge-classic.exe:
-
-* libgcc_s_seh-1.dll
-* libstdc++-6.dll
-* libwinpthread-1.dll
-* SDL2.dll
+MSYS BUILDS: You will need to navigate to the /bin folder for the appropriate architecture in your MSYS2 installation (for example, /mingw64/bin for MinGW 64-bit builds), and copy SDL2.dll into the same directory as edge-classic.exe. If the program has errors on startup regarding other .dlls missing, they can be found in this location as well.

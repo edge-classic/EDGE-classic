@@ -49,9 +49,13 @@ extern void        VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char 
 // only true if packets are exchanged with a server
 bool netgame = false;
 
-
 // 70Hz
 DEF_CVAR(r_doubleframes, "1", CVAR_ARCHIVE)
+DEF_CVAR(n_busywait, "1", CVAR_ROM)
+
+#if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
+HANDLE windows_timer = NULL;
+#endif
 
 // gametic is the tic about to (or currently being) run.
 // maketic is the tic that hasn't had control made for it yet.
@@ -77,6 +81,25 @@ void N_InitNetwork(void)
     srand(I_PureRandom());
 
     N_ResetTics();
+
+#if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
+    windows_timer = CreateWaitableTimerExW(NULL, NULL, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);
+    if (windows_timer != NULL)
+    {
+        n_busywait = 0;
+    }
+#endif
+}
+
+void N_Shutdown(void)
+{
+#if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
+    if (windows_timer)
+    {
+        CloseHandle(windows_timer);
+        windows_timer = NULL;
+    }
+#endif
 }
 
 static void PreInput()
@@ -149,10 +172,9 @@ void N_GrabTiccmds(void)
         memcpy(&p->cmd, p->in_cmds + buf, sizeof(ticcmd_t));
     }
     if (LUA_UseLuaHud())
-        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));        
+        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
     else
         VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
-        
 
     gametic++;
 }
@@ -198,7 +220,7 @@ int N_NetUpdate()
 int N_TryRunTics()
 {
     EDGE_ZoneScoped;
-    
+
     if (singletics)
     {
         PreInput();
@@ -223,6 +245,11 @@ int N_TryRunTics()
             nowtime         = N_NetUpdate();
             realtics        = nowtime - last_tryrun_tic;
             last_tryrun_tic = nowtime;
+
+            if (!n_busywait.d && realtics <= 0)
+            {
+                I_Sleep(5);
+            }
         }
 
         // this limit is rather arbitrary
@@ -253,6 +280,11 @@ int N_TryRunTics()
     while (maketic < gametic + tics)
     {
         N_NetUpdate();
+
+        if (!n_busywait.d && (maketic < gametic + tics))
+        {
+            I_Sleep(5);
+        }
     }
 
     return tics;

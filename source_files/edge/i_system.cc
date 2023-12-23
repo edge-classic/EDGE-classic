@@ -36,6 +36,10 @@
 extern FILE *debugfile;
 extern FILE *logfile;
 
+#if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
+extern HANDLE windows_timer;
+#endif
+
 // output string buffer
 #define MSGBUFSIZE 4096
 static char msgbuf[MSGBUFSIZE];
@@ -136,6 +140,22 @@ u32_t I_GetMicros(void)
 
 void I_Sleep(int millisecs)
 {
+
+#if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
+    // On Windows use high resolution timer if available, the Sleep Win32 call defaults to 15.6ms resolution and
+    // timeBeginPeriod is problematic
+    if (windows_timer != NULL)
+    {
+        LARGE_INTEGER due_time;
+        due_time.QuadPart = -((LONGLONG)(millisecs * 1000000) / 100);
+        if (SetWaitableTimerEx(windows_timer, &due_time, 0, NULL, NULL, NULL, 0)) 
+        {
+            WaitForSingleObject(windows_timer, INFINITE);
+        }
+        return;
+    }
+#endif
+
     SDL_Delay(millisecs);
 }
 

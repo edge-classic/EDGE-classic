@@ -97,6 +97,7 @@
 #include "edge_profiling.h"
 
 extern cvar_c r_doubleframes;
+extern cvar_c n_busywait;
 
 extern cvar_c v_gamma;
 
@@ -1909,6 +1910,7 @@ void E_EngineShutdown(void)
 
     S_Shutdown();
     R_Shutdown();
+    N_Shutdown();
 }
 
 // Local Prototypes
@@ -2155,6 +2157,10 @@ void E_Main(int argc, const char **argv)
 
             if (app_state & APP_STATE_ACTIVE)
                 E_Tick();
+            else if (!n_busywait.d)
+            {
+                I_Sleep(5);
+            }
         }
 #else
         return;

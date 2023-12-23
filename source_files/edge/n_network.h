@@ -22,6 +22,7 @@
 extern bool netgame;
 
 void N_InitNetwork(void);
+void N_Shutdown(void);
 
 // Create any new ticcmds and broadcast to other players.
 // returns value of I_GetTime().

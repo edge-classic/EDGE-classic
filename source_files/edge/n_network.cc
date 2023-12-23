@@ -49,7 +49,6 @@ extern void        VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char 
 // only true if packets are exchanged with a server
 bool netgame = false;
 
-
 // 70Hz
 DEF_CVAR(r_doubleframes, "1", CVAR_ARCHIVE)
 DEF_CVAR(n_busywait, "1", CVAR_ROM)
@@ -90,18 +89,17 @@ void N_InitNetwork(void)
         n_busywait = 0;
     }
 #endif
-
 }
 
 void N_Shutdown(void)
 {
-    #if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
+#if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
     if (windows_timer)
     {
         CloseHandle(windows_timer);
         windows_timer = NULL;
     }
-    #endif
+#endif
 }
 
 static void PreInput()
@@ -174,10 +172,9 @@ void N_GrabTiccmds(void)
         memcpy(&p->cmd, p->in_cmds + buf, sizeof(ticcmd_t));
     }
     if (LUA_UseLuaHud())
-        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));        
+        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
     else
         VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
-        
 
     gametic++;
 }
@@ -223,7 +220,7 @@ int N_NetUpdate()
 int N_TryRunTics()
 {
     EDGE_ZoneScoped;
-    
+
     if (singletics)
     {
         PreInput();
@@ -248,8 +245,8 @@ int N_TryRunTics()
             nowtime         = N_NetUpdate();
             realtics        = nowtime - last_tryrun_tic;
             last_tryrun_tic = nowtime;
-            
-            if (!n_busywait.d && realtics <= 0) 
+
+            if (!n_busywait.d && realtics <= 0)
             {
                 I_Sleep(5);
             }
@@ -284,7 +281,7 @@ int N_TryRunTics()
     {
         N_NetUpdate();
 
-        if (!n_busywait.d && (maketic < gametic + tics)) 
+        if (!n_busywait.d && (maketic < gametic + tics))
         {
             I_Sleep(5);
         }

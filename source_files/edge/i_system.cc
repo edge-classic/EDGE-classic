@@ -147,7 +147,7 @@ void I_Sleep(int millisecs)
     if (windows_timer != NULL)
     {
         LARGE_INTEGER due_time;
-        due_time.QuadPart = -((LONGLONG)(millisecs * 1000000 ) / 100);
+        due_time.QuadPart = -((LONGLONG)(millisecs * 1000000) / 100);
         if (SetWaitableTimer(windows_timer, &due_time, 0, NULL, NULL, FALSE))
         {
             WaitForSingleObject(windows_timer, INFINITE);

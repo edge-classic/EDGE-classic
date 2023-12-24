@@ -94,6 +94,14 @@ static int HD_game_name(lua_State *L)
     return 1;
 }
 
+// hud.game_skill()
+// Lobo: December 2023
+static int HD_game_skill(lua_State *L)
+{
+    lua_pushinteger(L, gameskill);
+    return 1;
+}
+
 // hud.map_name()
 //
 static int HD_map_name(lua_State *L)
@@ -936,6 +944,7 @@ static int HD_get_image_height(lua_State *L)
 
 static const luaL_Reg hudlib[] = {{"game_mode", HD_game_mode},
                                   {"game_name", HD_game_name},
+                                  {"game_skill", HD_game_skill},
                                   {"map_name", HD_map_name},
                                   {"map_title", HD_map_title},
                                   {"map_author", HD_map_author},

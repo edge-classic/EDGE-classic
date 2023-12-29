@@ -831,7 +831,7 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
     ddf_reverb_ratio = 0;
 
     if (player->mo->props->special || player->mo->subsector->sector->exfloor_used > 0 || player->underwater ||
-        player->swimming)
+        player->swimming || player->airless)
     {
         P_PlayerInSpecialSector(player, player->mo->subsector->sector, should_think);
     }
@@ -1259,6 +1259,8 @@ void P_GiveInitialBenefits(player_t *p, const mobjtype_c *info)
     p->health       = info->spawnhealth;
     p->air_in_lungs = info->lung_capacity;
     p->underwater   = false;
+    p->airless   = false;
+
 
     for (i = 0; i < NUMARMOUR; i++)
     {

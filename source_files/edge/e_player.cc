@@ -210,6 +210,7 @@ void player_s::Reborn()
     splashwait   = 0;
     air_in_lungs = 0;
     underwater   = false;
+    airless   = false;
     swimming     = false;
     wet_feet     = false;
 

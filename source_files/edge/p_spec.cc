@@ -1770,6 +1770,11 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
         }
     }
 
+    if ((special->special_flags & SECSP_AirLess) && mouth_z >= f_h && mouth_z <= c_h)
+    {
+        player->airless = true;
+    }
+
     if ((special->special_flags & SECSP_Swimming) && mouth_z >= f_h && mouth_z <= c_h)
     {
         player->swimming = true;
@@ -1900,12 +1905,14 @@ void P_PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
     float tz = player->mo->z + player->mo->height;
 
     bool was_underwater = player->underwater;
+    bool was_airless = player->airless;
     bool was_swimming   = player->swimming;
 
     const sectortype_c *swim_special = NULL;
 
     player->swimming   = false;
     player->underwater = false;
+    player->airless = false;
     player->wet_feet   = false;
 
     // traverse extrafloor list
@@ -1948,7 +1955,7 @@ void P_PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
     PlayerInProperties(player, bz, tz, floor_h, ceil_h, sec->p, &swim_special, should_choke);
 
     // breathing support: handle gasping when leaving the water
-    if (was_underwater && !player->underwater)
+    if ((was_underwater && !player->underwater) || (was_airless && !player->airless))
     {
         if (player->air_in_lungs <= (player->mo->info->lung_capacity - player->mo->info->gasp_start))
         {
@@ -1960,6 +1967,8 @@ void P_PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
 
         player->air_in_lungs = player->mo->info->lung_capacity;
     }
+
+
 
     // -AJA- 2008/01/20: water splash sounds for players
     if (!was_swimming && player->swimming)

@@ -112,6 +112,7 @@ static savefield_t sv_fields_player[] = {
     SF(idlewait, "idlewait", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(air_in_lungs, "air_in_lungs", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(underwater, "underwater", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
+    SF(airless, "airless", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
     SF(flash, "flash_b", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
     SF(psprites[0], "psprites", NUMPSPRITES, SVT_STRUCT("psprite_t"), SR_PlayerGetPSprite, SR_PlayerPutPSprite),
 

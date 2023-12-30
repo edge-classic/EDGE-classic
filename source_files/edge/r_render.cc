@@ -28,6 +28,7 @@
 
 #include <math.h>
 #include <unordered_set>
+#include <unordered_map>
 
 #include "dm_data.h"
 #include "dm_defs.h"
@@ -125,6 +126,8 @@ static seg_t       *cur_seg;
 static bool solid_mode;
 
 static std::list<drawsub_c *> drawsubs;
+
+static std::unordered_map<const image_c *, GLuint> frame_texids;
 
 // ========= MIRROR STUFF ===========
 
@@ -449,6 +452,22 @@ static void MIR_Pop()
     num_active_mirrors--;
 
     MIR_SetClippers();
+}
+
+static GLuint R_ImageCache(const image_c *image, bool anim = true, const colourmap_c *trans = NULL)
+{
+    // (need to load the image to know the opacity)
+    auto frameid = frame_texids.find(image);
+    if (frameid == frame_texids.end())
+    {
+        GLuint tex_id = W_ImageCache(image, true, ren_fx_colmap);
+        frame_texids.emplace(image, tex_id);
+        return tex_id;
+    }
+    else
+    {
+        return frameid->second;
+    }
 }
 
 float Slope_GetHeight(slope_plane_t *slope, float x, float y)
@@ -966,7 +985,7 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     SYS_ASSERT(image);
 
     // (need to load the image to know the opacity)
-    GLuint tex_id = W_ImageCache(image, true, ren_fx_colmap);
+    GLuint tex_id = R_ImageCache(image, true, ren_fx_colmap);
 
     // ignore non-solid walls in solid mode (& vice versa)
     if ((trans < 0.99f || image->opacity >= OPAC_Masked) == solid_mode)
@@ -1441,7 +1460,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
                              bool mirror_sub = false)
 {
     EDGE_ZoneScoped;
-    
+
     line_t    *ld = seg->linedef;
     side_t    *sd = ld->side[sidenum];
     sector_t  *sec, *other;
@@ -1854,7 +1873,7 @@ static void DLIT_Flood(mobj_t *mo, void *dataptr)
 
 static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_ref, int face_dir, float h1, float h2)
 {
-    EDGE_ZoneScoped; 
+    EDGE_ZoneScoped;
 
     (void)dfloor;
 
@@ -1884,7 +1903,7 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
 
     flood_emu_data_t data;
 
-    data.tex_id = W_ImageCache(surf->image, true, ren_fx_colmap);
+    data.tex_id = R_ImageCache(surf->image, true, ren_fx_colmap);
     data.pass   = 0;
 
     data.R = data.G = data.B = 1.0f;
@@ -2104,7 +2123,6 @@ static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, angle_t left, angle_t ri
     // GL4ES mirror fix for renderlist
     gl4es_flush();
 #endif
-
 }
 
 //
@@ -2116,7 +2134,7 @@ static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, angle_t left, angle_t ri
 static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 {
     EDGE_ZoneScoped;
-    
+
     // ignore segs sitting on current mirror
     if (MIR_SegOnPortal(seg))
         return;
@@ -2310,7 +2328,7 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 //
 bool RGL_CheckBBox(float *bspcoord)
 {
-    EDGE_ZoneScoped; 
+    EDGE_ZoneScoped;
 
     if (num_active_mirrors > 0)
     {
@@ -2481,7 +2499,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
         return;
 
     // (need to load the image to know the opacity)
-    GLuint tex_id = W_ImageCache(surf->image, true, ren_fx_colmap);
+    GLuint tex_id = R_ImageCache(surf->image, true, ren_fx_colmap);
 
     // ignore non-solid planes in solid_mode (& vice versa)
     if ((trans < 0.99f || surf->image->opacity >= OPAC_Masked) == solid_mode)
@@ -2970,7 +2988,7 @@ static void DrawPortalPolygon(drawmirror_c *mir)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // set texture
-    GLuint tex_id = W_ImageCache(surf->image);
+    GLuint tex_id = R_ImageCache(surf->image);
 
     glBindTexture(GL_TEXTURE_2D, tex_id);
 
@@ -3215,6 +3233,9 @@ static void RGL_RenderTrueBSP(void)
 
     RGL_SetupMatrices3D();
 
+    frame_texids.clear();
+    frame_texids.reserve(1024);
+
     glClear(GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
@@ -3226,7 +3247,12 @@ static void RGL_RenderTrueBSP(void)
 
     RGL_FinishSky();
 
+    gl_state_c *state = RGL_GetState();
+    state->setDefaultStateFull();
+
     RGL_DrawSubList(drawsubs);
+
+    state->setDefaultStateFull();
 
     // Lobo 2022:
     // Allow changing the order of weapon model rendering to be
@@ -3407,7 +3433,7 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 void R_Render(int x, int y, int w, int h, mobj_t *camera, bool full_height, float expand_w)
 {
     EDGE_ZoneScoped;
-    
+
     viewwindow_x = x;
     viewwindow_y = y;
     viewwindow_w = w;

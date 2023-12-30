@@ -1040,19 +1040,9 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
         if (old_clamp != 789)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, old_clamp);
     }
-    glPolygonOffset(0, 0);
-
-    glDisable(GL_TEXTURE_2D);
-
-    glDepthMask(GL_TRUE);
-    glCullFace(GL_BACK);
-
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glAlphaFunc(GL_GREATER, 0);
-
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
-    glDisable(GL_CULL_FACE);
+    
+    gl_state_c *state = RGL_GetState();
+    state->setDefaultStateFull();
 }
 
 void MDL_RenderModel_2D(mdl_model_c *md, const image_c *skin_img, int frame, float x, float y, float xscale,

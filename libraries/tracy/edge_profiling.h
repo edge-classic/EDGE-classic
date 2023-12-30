@@ -11,6 +11,8 @@ struct ECFrameStats
 	int draw_things;
 	int draw_lightiterator;
 	int draw_sectorglowiterator;
+	int draw_statechange;
+	int draw_texchange;
 
 	void Clear()
 	{		
@@ -20,6 +22,8 @@ struct ECFrameStats
 		draw_things = 0;
 		draw_lightiterator  = 0;
 		draw_sectorglowiterator = 0;
+		draw_statechange = 0;
+		draw_texchange = 0;
 	}	
 };
 

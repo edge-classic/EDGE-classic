@@ -23,6 +23,7 @@
 #include "i_defs_gl.h"
 
 #include <vector>
+#include <unordered_map>
 #include <algorithm>
 
 #include "image_data.h"
@@ -66,6 +67,8 @@ DEF_CVAR(r_dumbclamp, DUMB_CLAMP, 0)
 
 extern cvar_c r_culling;
 extern cvar_c r_cullfog;
+
+std::unordered_map<GLuint, GLint> texture_clamp;
 
 // a single unit (polygon, quad, etc) to pass to the GL
 typedef struct local_gl_unit_s
@@ -259,20 +262,21 @@ struct Compare_Unit_pred
 
 static void EnableCustomEnv(GLuint env, bool enable)
 {
+    gl_state_c *state = RGL_GetState();
     switch (env)
     {
     case uint32_t(ENV_SKIP_RGB):
         if (enable)
         {
-            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-            glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_REPLACE);
-            glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PREVIOUS);
+            state->texEnvMode(GL_COMBINE);
+            state->texEnvCombineRGB(GL_REPLACE);
+            state->texEnvSource0RGB(GL_PREVIOUS);
         }
         else
         {
             /* no need to modify TEXTURE_ENV_MODE */
-            glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
-            glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_TEXTURE);
+            state->texEnvCombineRGB(GL_MODULATE);
+            state->texEnvSource0RGB(GL_TEXTURE);
         }
         break;
 
@@ -310,6 +314,8 @@ void RGL_DrawUnits(void)
     if (cur_unit == 0)
         return;
 
+    gl_state_c *state = RGL_GetState();
+
     GLuint active_tex[2] = {0, 0};
     GLuint active_env[2] = {0, 0};
 
@@ -326,14 +332,6 @@ void RGL_DrawUnits(void)
     {
         std::sort(local_unit_map.begin(), local_unit_map.begin() + cur_unit, Compare_Unit_pred());
     }
-
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
-
-    glAlphaFunc(GL_GREATER, 0);
-
-    glPolygonOffset(0, 0);
 
     if (r_culling.d)
     {
@@ -367,15 +365,16 @@ void RGL_DrawUnits(void)
             fogColor[2] = cull_fog_color[2];
             break;
         }
-        glClearColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
-        glFogi(GL_FOG_MODE, GL_LINEAR);
-        glFogfv(GL_FOG_COLOR, fogColor);
-        glFogf(GL_FOG_START, r_farclip.f - 750.0f);
-        glFogf(GL_FOG_END, r_farclip.f - 250.0f);
-        glEnable(GL_FOG);
+
+        state->clearColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
+        state->fogMode(GL_LINEAR);
+        state->fogColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
+        state->fogStart(r_farclip.f - 750.0f);
+        state->fogEnd(r_farclip.f - 250.0f);
+        state->enable(GL_FOG);
     }
     else
-        glFogi(GL_FOG_MODE, GL_EXP); // if needed
+        state->fogMode(GL_EXP); // if needed
 
     for (int j = 0; j < cur_unit; j++)
     {
@@ -397,77 +396,77 @@ void RGL_DrawUnits(void)
                 fc[1] = (float)RGB_GRN(active_fog_rgb) / 255.0f;
                 fc[2] = (float)RGB_BLU(active_fog_rgb) / 255.0f;
                 fc[3] = 1.0f;
-                glClearColor(fc[0], fc[1], fc[2], 1.0f);
-                glFogfv(GL_FOG_COLOR, fc);
+                state->clearColor(fc[0], fc[1], fc[2], 1.0f);
+                state->fogColor(fc[0], fc[1], fc[2], 1.0f);
             }
             if (!AlmostEquals(unit->fog_density, active_fog_density))
             {
                 active_fog_density = unit->fog_density;
-                glFogf(GL_FOG_DENSITY, std::log1p(active_fog_density));
+                state->fogDensity(std::log1p(active_fog_density));
             }
             if (active_fog_density > 0.00009f)
-                glEnable(GL_FOG);
+                state->enable(GL_FOG);
             else
-                glDisable(GL_FOG);
+                state->disable(GL_FOG);
         }
         else if (!r_culling.d)
-            glDisable(GL_FOG);
+            state->disable(GL_FOG);
 
         if (active_pass != unit->pass)
         {
             active_pass = unit->pass;
 
-            glPolygonOffset(0, -active_pass);
+            state->polygonOffset(0, -active_pass);
         }
 
         if ((active_blending ^ unit->blending) & (BL_Masked | BL_Less))
         {
             if (unit->blending & BL_Less)
             {
-                // glAlphaFunc is updated below, because the alpha
+                // state->alphaFunc is updated below, because the alpha
                 // value can change from unit to unit while the
                 // BL_Less flag remains set.
-                glEnable(GL_ALPHA_TEST);
+                state->enable(GL_ALPHA_TEST);
             }
             else if (unit->blending & BL_Masked)
             {
-                glEnable(GL_ALPHA_TEST);
-                glAlphaFunc(GL_GREATER, 0);
+                state->enable(GL_ALPHA_TEST);
+                state->alphaFunc(GL_GREATER, 0);
             }
             else
-                glDisable(GL_ALPHA_TEST);
+                state->disable(GL_ALPHA_TEST);
         }
 
         if ((active_blending ^ unit->blending) & (BL_Alpha | BL_Add))
         {
             if (unit->blending & BL_Add)
             {
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+                state->enable(GL_BLEND);
+                state->blendFunc(GL_SRC_ALPHA, GL_ONE);
             }
             else if (unit->blending & BL_Alpha)
             {
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                state->enable(GL_BLEND);
+                state->blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             }
             else
-                glDisable(GL_BLEND);
+                state->disable(GL_BLEND);
         }
 
         if ((active_blending ^ unit->blending) & BL_CULL_BOTH)
         {
             if (unit->blending & BL_CULL_BOTH)
             {
-                glEnable(GL_CULL_FACE);
-                glCullFace((unit->blending & BL_CullFront) ? GL_FRONT : GL_BACK);
+                state->enable(GL_CULL_FACE);
+                state->cullFace((unit->blending & BL_CullFront) ? GL_FRONT : GL_BACK);
             }
             else
-                glDisable(GL_CULL_FACE);
+                state->disable(GL_CULL_FACE);
         }
 
         if ((active_blending ^ unit->blending) & BL_NoZBuf)
         {
-            glDepthMask((unit->blending & BL_NoZBuf) ? GL_FALSE : GL_TRUE);
+            state->depthMask((unit->blending & BL_NoZBuf) ? true : false);
         }
 
         active_blending = unit->blending;
@@ -476,35 +475,50 @@ void RGL_DrawUnits(void)
         {
             // NOTE: assumes alpha is constant over whole polygon
             float a = local_verts[unit->first].rgba[3];
-            glAlphaFunc(GL_GREATER, a * 0.66f);
+            state->alphaFunc(GL_GREATER, a * 0.66f);
         }
+
+        GLint old_clamp = DUMMY_CLAMP;
 
         for (int t = 1; t >= 0; t--)
         {
             if (active_tex[t] != unit->tex[t] || active_env[t] != unit->env[t])
             {
-                glActiveTexture(GL_TEXTURE0 + t);
+                state->activeTexture(GL_TEXTURE0 + t);
             }
 
             if (r_culling.d)
             {
                 if (unit->pass > 0)
-                    glDisable(GL_FOG);
+                    state->disable(GL_FOG);
                 else
-                    glEnable(GL_FOG);
+                    state->enable(GL_FOG);
             }
 
             if (active_tex[t] != unit->tex[t])
             {
                 if (unit->tex[t] == 0)
-                    glDisable(GL_TEXTURE_2D);
+                    state->disable(GL_TEXTURE_2D);
                 else if (active_tex[t] == 0)
-                    glEnable(GL_TEXTURE_2D);
+                    state->enable(GL_TEXTURE_2D);
 
                 if (unit->tex[t] != 0)
-                    glBindTexture(GL_TEXTURE_2D, unit->tex[t]);
+                    state->bindTexture(unit->tex[t]);
 
-                active_tex[t] = unit->tex[t];
+                active_tex[t] = unit->tex[t];                
+
+                if (!t && (active_blending & BL_ClampY) && active_tex[0] != 0)
+                {
+                    auto existing = texture_clamp.find(active_tex[0]);
+                    if (existing != texture_clamp.end())
+                    {
+                        old_clamp = existing->second;
+                    }
+
+                    // This is very expensive, thus the map
+                    // glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &old_clamp);
+                    state->texWrapT(r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE);
+                }
             }
 
             if (active_env[t] != unit->env[t])
@@ -519,19 +533,10 @@ void RGL_DrawUnits(void)
                     EnableCustomEnv(unit->env[t], true);
                 }
                 else if (unit->env[t] != ENV_NONE)
-                    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, unit->env[t]);
+                    state->texEnvMode(unit->env[t]);
 
                 active_env[t] = unit->env[t];
             }
-        }
-
-        GLint old_clamp = DUMMY_CLAMP;
-
-        if ((active_blending & BL_ClampY) && active_tex[0] != 0)
-        {
-            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &old_clamp);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE);
         }
 
         glBegin(unit->shape);
@@ -545,37 +550,29 @@ void RGL_DrawUnits(void)
 
         // restore the clamping mode
         if (old_clamp != DUMMY_CLAMP)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, old_clamp);
+        {
+            state->texWrapT(old_clamp);
+        }
     }
 
     // all done
     cur_vert = cur_unit = 0;
 
-    glPolygonOffset(0, 0);
+    state->polygonOffset(0, 0);
 
     for (int t = 1; t >= 0; t--)
     {
-        glActiveTexture(GL_TEXTURE0 + t);
+        state->activeTexture(GL_TEXTURE0 + t);
 
         if (active_env[t] >= CUSTOM_ENV_BEGIN && active_env[t] <= CUSTOM_ENV_END)
         {
             EnableCustomEnv(active_env[t], false);
         }
-        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-        glDisable(GL_TEXTURE_2D);
+        state->texEnvMode(GL_MODULATE);
+        state->disable(GL_TEXTURE_2D);
     }
 
-    glDisable(GL_FOG);
-
-    glDepthMask(GL_TRUE);
-    glCullFace(GL_BACK);
-
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glAlphaFunc(GL_GREATER, 0);
-
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_BLEND);
-    glDisable(GL_CULL_FACE);
+    state->resetDefaultState();
 }
 
 //--- editor settings ---

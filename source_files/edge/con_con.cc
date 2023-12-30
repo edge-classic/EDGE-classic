@@ -1697,6 +1697,12 @@ void CON_ShowFPS(void)
         y -= FNSZ;        
         sprintf(textbuf, "%i thing", ecframe_stats.draw_things);
         DrawText(x, y, textbuf, T_GREY176);
+        y -= FNSZ;        
+        sprintf(textbuf, "%i state", ecframe_stats.draw_statechange);
+        DrawText(x, y, textbuf, T_GREY176);
+        y -= FNSZ;        
+        sprintf(textbuf, "%i texture", ecframe_stats.draw_texchange);
+        DrawText(x, y, textbuf, T_GREY176);
     }
 
 }

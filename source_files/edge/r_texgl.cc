@@ -20,6 +20,7 @@
 #include "i_defs_gl.h"
 
 #include <limits.h>
+#include <unordered_map>
 
 #include "image_data.h"
 
@@ -36,6 +37,9 @@
 
 #include "w_texture.h"
 #include "w_wad.h"
+
+// clamp cache used by runits to avoid an extremely expensive gl tex param lookup
+extern std::unordered_map<GLuint, GLint> texture_clamp;
 
 int W_MakeValidSize(int value)
 {
@@ -151,13 +155,15 @@ GLuint R_UploadTexture(epi::image_data_c *img, int flags, int max_pix)
     glGenTextures(1, &id);
     glBindTexture(GL_TEXTURE_2D, id);
 
-    int tmode = GL_REPEAT;
+    GLint tmode = GL_REPEAT;
 
     if (clamp)
         tmode = r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, tmode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, tmode);
+
+    texture_clamp.emplace(id, tmode);
 
     // magnification mode
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, smooth ? GL_LINEAR : GL_NEAREST);

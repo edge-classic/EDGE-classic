@@ -63,7 +63,7 @@ static inline float EffectStrength(player_t *player)
 //
 void RGL_RainbowEffect(player_t *player)
 {
-    ren_extralight = debug_fullbright.d ? 255 : player ? player->extralight * 16 : 0;
+    ren_extralight = debug_fullbright.d ? 255 : player ? player->extralight * 4 : 0;
 
     ren_red_mul = ren_grn_mul = ren_blu_mul = 1.0f;
 

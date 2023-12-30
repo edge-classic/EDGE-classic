@@ -1121,7 +1121,6 @@ static std::string AuxStringReplaceAll(std::string str, const std::string &from,
 static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
 {
     std::string temp_string;
-    temp_string.clear();
     benefit_t *list;
     int        temp_num = 0;
 
@@ -1198,7 +1197,6 @@ static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
 {
     int         temp_num = 0;
     std::string temp_string;
-    temp_string.clear();
 
     switch (whatinfo)
     {
@@ -1259,7 +1257,6 @@ static std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secatt
 {
     int         temp_num = 0;
     std::string temp_string;
-    temp_string.clear();
 
     if (!obj->info->pickup_benefits)
         return "";
@@ -1281,7 +1278,6 @@ static std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secatt
         return ""; // no attack to get info about (only should happen with secondary attacks)
 
     const damage_c *damtype;
-
     float temp_num2;
 
     switch (whatinfo)
@@ -1360,7 +1356,6 @@ static int PL_query_object(lua_State *L)
     }
 
     std::string temp_string;
-    temp_string.clear();
 
     temp_string = GetQueryInfoFromMobj(obj, whatinfo);
 
@@ -1377,14 +1372,11 @@ static int PL_query_object(lua_State *L)
 //
 static int MO_query_tagged(lua_State *L)
 {
-
     int whattag  = (int)luaL_checknumber(L, 1);
     int whatinfo = (int)luaL_checknumber(L, 2);
 
     mobj_t *mo;
-
     std::string temp_value;
-    temp_value.clear();
 
     for (mo = mobjlisthead; mo; mo = mo->next)
     {
@@ -1408,11 +1400,8 @@ static int MO_query_tagged(lua_State *L)
 //
 static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits = false)
 {
-
     benefit_t *list;
-
     std::string BenefitName;
-    BenefitName.clear();
     int        BenefitType = 0;
     int        BenefitAmount = 0;
     int        BenefitLimit = 0;
@@ -1573,10 +1562,7 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
 //
 static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 {
-
     std::string temp_value;
-    temp_value.clear();
-
     int NumberOfItems = 12; //how many fields in a row
     lua_createtable(L, 0, NumberOfItems); // our MOBJ table
 
@@ -1684,7 +1670,6 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
         CreateLuaTable_Benefits(L, mo, false); //only want pickup benefits
      //---------------
 
-
 }
 
 
@@ -1693,8 +1678,6 @@ static void CreateLuaTable_Attacks(lua_State *L, weapondef_c *objWep)
     atkdef_c *objAtck;
     int         temp_num = 0;
     std::string temp_string;
-    temp_string.clear();
-
     
     //how many attacks do we have?
     int NumberOfAttacks = 0;
@@ -1772,10 +1755,7 @@ static void CreateLuaTable_Attacks(lua_State *L, weapondef_c *objWep)
 //
 static void CreateLuaTable_Weapon(lua_State *L, weapondef_c *objWep)
 {
-
     std::string temp_value;
-    temp_value.clear();
-
     int NumberOfItems = 3; //how many fields in a row
     lua_createtable(L, 0, NumberOfItems); // our WEAPON table
 
@@ -1783,11 +1763,9 @@ static void CreateLuaTable_Weapon(lua_State *L, weapondef_c *objWep)
     // weapon.name
     temp_value = objWep->name;
     temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
-
     lua_pushstring(L, temp_value.c_str());
     lua_setfield(L, -2, "name");   //add to WEAPON Table
     //---------------
-
 
     //---------------
     // weapon.zoomfactor
@@ -1797,12 +1775,10 @@ static void CreateLuaTable_Weapon(lua_State *L, weapondef_c *objWep)
     lua_setfield(L, -2, "zoom_factor");   //add to WEAPON Table
     //---------------
 
-
     //---------------
     // weapon.attacks
     CreateLuaTable_Attacks(L, objWep);
     //---------------
-
 
 }
 
@@ -1879,7 +1855,6 @@ static int MO_tagged_info(lua_State *L)
     mobj_t *mo;
     std::string temp_value;
 
-    temp_value.clear();
     for (mo = mobjlisthead; mo; mo = mo->next)
     {
         if (mo->tag == whattag)
@@ -1907,9 +1882,7 @@ static int MO_tagged_info(lua_State *L)
 static int MO_count(lua_State *L)
 {
     int thingid = (int)luaL_checknumber(L, 1);
-
     mobj_t *mo;
-
     double thingcount = 0;
 
     for (mo = mobjlisthead; mo; mo = mo->next)
@@ -1927,7 +1900,6 @@ static int MO_count(lua_State *L)
 //
 static int PL_query_weapon(lua_State *L)
 {
-
     int maxdistance   = (int)luaL_checknumber(L, 1);
     int whatinfo      = (int)luaL_checknumber(L, 2);
     int secattackinfo = (int)luaL_optnumber(L, 3, 0);
@@ -1946,7 +1918,6 @@ static int PL_query_weapon(lua_State *L)
     }
 
     std::string temp_string;
-    temp_string.clear();
 
     if (secattackinfo == 1)
         temp_string = GetQueryInfoFromWeapon(obj, whatinfo, true);
@@ -2058,7 +2029,6 @@ static int PL_is_outside(lua_State *L)
 static int Game_info(lua_State *L)
 {
     std::string temp_value;
-    temp_value.clear();
 
     int NumberOfItems = 3; //how many fields in a row
     lua_createtable(L, 0, NumberOfItems); // our GAME table
@@ -2108,7 +2078,6 @@ static int Game_info(lua_State *L)
 static int Map_info(lua_State *L)
 {
     std::string temp_value;
-    temp_value.clear();
 
     int NumberOfItems = 6; //how many fields in a row
     lua_createtable(L, 0, NumberOfItems); // our MAP table
@@ -2157,7 +2126,6 @@ static int Map_info(lua_State *L)
 static int Sector_info(lua_State *L)
 {
     std::string temp_value;
-    temp_value.clear();
 
     int NumberOfItems = 15; //how many fields in a row
     lua_createtable(L, 0, NumberOfItems); // our SECTOR table
@@ -2210,7 +2178,7 @@ static int Sector_info(lua_State *L)
     lua_setfield(L, -2, "floor_height");   //add to SECTOR Table
     //---------------
 
-     //---------------
+    //---------------
     // SECTOR.floor_flat
     lua_pushstring(L, temp_value.c_str());
     lua_setfield(L, -2, "floor_flat");   //add to MAP Table

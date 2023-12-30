@@ -112,13 +112,41 @@ void R2_FreeupBSP(void);
 // the y (<=x) is scaled and divided by x to get a
 // tangent (slope) value which is looked up in the
 // tantoangle[] table.
+
+static float atan2_approx(float y, float x)
+{
+    //http://pubs.opengroup.org/onlinepubs/009695399/functions/atan2.html
+    //Volkan SALMA
+
+    const float ONEQTR_PI = M_PI / 4.0;
+	const float THRQTR_PI = 3.0 * M_PI / 4.0;
+	float r, angle;
+	float abs_y = fabs(y) + 1e-10f;      // kludge to prevent 0/0 condition
+	if ( x < 0.0f )
+	{
+		r = (x + abs_y) / (abs_y - x);
+		angle = THRQTR_PI;
+	}
+	else
+	{
+		r = (x - abs_y) / (x + abs_y);
+		angle = ONEQTR_PI;
+	}
+	angle += (0.1963f * r * r - 0.9817f) * r;
+	if ( y < 0.0f )
+		return( -angle );     // negate if in quad III or IV
+	else
+		return( angle );
+
+
+}
 //
 angle_t R_PointToAngle(float x1, float y1, float x, float y)
 {
     x -= x1;
     y -= y1;
 
-    return (AlmostEquals(x, 0.0f) && AlmostEquals(y, 0.0f)) ? 0 : FLOAT_2_ANG(atan2(y, x) * (180 / M_PI));
+    return FLOAT_2_ANG(atan2_approx(y, x) * (180 / M_PI));
 }
 
 float R_PointToDist(float x1, float y1, float x2, float y2)
@@ -268,11 +296,18 @@ region_properties_t *R_PointGetProps(subsector_t *sub, float z)
 
 //----------------------------------------------------------------------------
 
-static std::vector<drawthing_t *>  drawthings;
-static std::vector<drawfloor_t *>  drawfloors;
-static std::vector<drawseg_c *>    drawsegs;
-static std::vector<drawsub_c *>    drawsubs;
-static std::vector<drawmirror_c *> drawmirrors;
+// large buffers for cache coherency vs allocating each on heap
+#define MAX_DRAW_THINGS 32768
+#define MAX_DRAW_FLOORS 32768
+#define MAX_DRAW_SEGS 65536
+#define MAX_DRAW_SUBS 65536
+#define MAX_DRAW_MIRRORS 512
+
+static std::vector<drawthing_t>  drawthings;
+static std::vector<drawfloor_t>  drawfloors;
+static std::vector<drawseg_c>    drawsegs;
+static std::vector<drawsub_c>    drawsubs;
+static std::vector<drawmirror_c> drawmirrors;
 
 static int drawthing_pos;
 static int drawfloor_pos;
@@ -287,6 +322,11 @@ static int drawmirror_pos;
 //
 void R2_InitUtil(void)
 {
+    drawthings.resize(MAX_DRAW_THINGS);
+    drawfloors.resize(MAX_DRAW_FLOORS);
+    drawsegs.resize(MAX_DRAW_SEGS);
+    drawsubs.resize(MAX_DRAW_SUBS);
+    drawmirrors.resize(MAX_DRAW_MIRRORS);
 }
 
 // bsp clear function
@@ -302,76 +342,63 @@ void R2_ClearBSP(void)
 
 void R2_FreeupBSP(void)
 {
-    int i;
-
-    for (i = 0; i < (int)drawthings.size(); i++)
-        delete drawthings[i];
-    for (i = 0; i < (int)drawfloors.size(); i++)
-        delete drawfloors[i];
-    for (i = 0; i < (int)drawsegs.size(); i++)
-        delete drawsegs[i];
-    for (i = 0; i < (int)drawsubs.size(); i++)
-        delete drawsubs[i];
-    for (i = 0; i < (int)drawmirrors.size(); i++)
-        delete drawmirrors[i];
-
-    drawthings.erase(drawthings.begin(), drawthings.end());
-    drawfloors.erase(drawfloors.begin(), drawfloors.end());
-    drawsegs.erase(drawsegs.begin(), drawsegs.end());
-    drawsubs.erase(drawsubs.begin(), drawsubs.end());
-    drawmirrors.erase(drawmirrors.begin(), drawmirrors.end());
+    drawthings.clear();
+    drawfloors.clear();
+    drawsegs.clear();
+    drawsubs.clear();
+    drawmirrors.clear();
 
     R2_ClearBSP();
 }
 
 drawthing_t *R_GetDrawThing()
-{
-    if (drawthing_pos >= (int)drawthings.size())
+{    
+    if (drawthing_pos >= MAX_DRAW_THINGS)
     {
-        drawthings.push_back(new drawthing_t);
+        I_Error("Max Draw Things Exceeded");
     }
 
-    return drawthings[drawthing_pos++];
+    return &drawthings[drawthing_pos++];
 }
 
 drawfloor_t *R_GetDrawFloor()
 {
-    if (drawfloor_pos >= (int)drawfloors.size())
+    if (drawfloor_pos >= MAX_DRAW_FLOORS)
     {
-        drawfloors.push_back(new drawfloor_t);
+        I_Error("Max Draw Floors Exceeded");
     }
 
-    return drawfloors[drawfloor_pos++];
+    return &drawfloors[drawfloor_pos++];
 }
 
 drawseg_c *R_GetDrawSeg()
 {
-    if (drawseg_pos >= (int)drawsegs.size())
+    if (drawseg_pos >= MAX_DRAW_SEGS)
     {
-        drawsegs.push_back(new drawseg_c);
+        I_Error("Max Draw Segs Exceeded");
     }
 
-    return drawsegs[drawseg_pos++];
+    return &drawsegs[drawseg_pos++];
 }
 
 drawsub_c *R_GetDrawSub()
 {
-    if (drawsub_pos >= (int)drawsubs.size())
+    if (drawsub_pos >= MAX_DRAW_SUBS)
     {
-        drawsubs.push_back(new drawsub_c);
+        I_Error("Max Draw Subs Exceeded");
     }
 
-    return drawsubs[drawsub_pos++];
+    return &drawsubs[drawsub_pos++];
 }
 
 drawmirror_c *R_GetDrawMirror()
 {
-    if (drawmirror_pos >= (int)drawmirrors.size())
+    if (drawmirror_pos >= MAX_DRAW_MIRRORS)
     {
-        drawmirrors.push_back(new drawmirror_c);
+        I_Error("Max Draw Mirrors Exceeded");
     }
 
-    return drawmirrors[drawmirror_pos++];
+    return &drawmirrors[drawmirror_pos++];
 }
 
 //--- editor settings ---

@@ -129,10 +129,10 @@ int P_PointOnDivlineSide(float x, float y, divline_t *div)
     float dx, dy;
     float left, right;
 
-    if (AlmostEquals(div->dx, 0.0f))
+    if (div->dx == 0.0f)
         return ((x <= div->x) ^ (div->dy > 0)) ? 0 : 1;
 
-    if (AlmostEquals(div->dy, 0.0f))
+    if (div->dy == 0.0f)
         return ((y <= div->y) ^ (div->dx < 0)) ? 0 : 1;
 
     dx = x - div->x;

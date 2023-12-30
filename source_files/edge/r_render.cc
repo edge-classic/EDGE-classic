@@ -3226,7 +3226,12 @@ static void RGL_RenderTrueBSP(void)
 
     RGL_FinishSky();
 
+    gl_state_c *state = RGL_GetState();
+    state->setDefaultStateFull();
+
     RGL_DrawSubList(drawsubs);
+
+    state->setDefaultStateFull();
 
     // Lobo 2022:
     // Allow changing the order of weapon model rendering to be

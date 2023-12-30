@@ -23,6 +23,7 @@
 #include "i_defs_gl.h"
 
 #include <vector>
+#include <unordered_map>
 #include <algorithm>
 
 #include "image_data.h"

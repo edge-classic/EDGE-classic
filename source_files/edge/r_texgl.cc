@@ -20,6 +20,7 @@
 #include "i_defs_gl.h"
 
 #include <limits.h>
+#include <unordered_map>
 
 #include "image_data.h"
 

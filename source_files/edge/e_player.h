@@ -302,6 +302,7 @@ typedef struct player_s
     // hurts), and player drowns when health drops to zero.
     int  air_in_lungs;
     bool underwater;
+    bool airless;
     bool swimming;
     bool wet_feet;
 

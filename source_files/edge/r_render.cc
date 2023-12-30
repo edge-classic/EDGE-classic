@@ -2195,8 +2195,14 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
         }
     }
 
-    angle_t angle_L = R_PointToAngle(viewx, viewy, sx1, sy1);
-    angle_t angle_R = R_PointToAngle(viewx, viewy, sx2, sy2);
+    bool precise = num_active_mirrors > 0;
+    if (!precise && seg->linedef)
+    {
+       precise = (seg->linedef->flags & MLF_Mirror) || (seg->linedef->portal_pair);
+    }
+
+    angle_t angle_L = R_PointToAngle(viewx, viewy, sx1, sy1, precise);
+    angle_t angle_R = R_PointToAngle(viewx, viewy, sx2, sy2, precise);
 
     // Clip to view edges.
 

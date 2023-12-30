@@ -115,38 +115,42 @@ void R2_FreeupBSP(void);
 
 static float atan2_approx(float y, float x)
 {
-    //http://pubs.opengroup.org/onlinepubs/009695399/functions/atan2.html
-    //Volkan SALMA
+    // http://pubs.opengroup.org/onlinepubs/009695399/functions/atan2.html
+    // Volkan SALMA
 
     const float ONEQTR_PI = M_PI / 4.0;
-	const float THRQTR_PI = 3.0 * M_PI / 4.0;
-	float r, angle;
-	float abs_y = fabs(y) + 1e-10f;      // kludge to prevent 0/0 condition
-	if ( x < 0.0f )
-	{
-		r = (x + abs_y) / (abs_y - x);
-		angle = THRQTR_PI;
-	}
-	else
-	{
-		r = (x - abs_y) / (x + abs_y);
-		angle = ONEQTR_PI;
-	}
-	angle += (0.1963f * r * r - 0.9817f) * r;
-	if ( y < 0.0f )
-		return( -angle );     // negate if in quad III or IV
-	else
-		return( angle );
-
-
+    const float THRQTR_PI = 3.0 * M_PI / 4.0;
+    float       r, angle;
+    float       abs_y = fabs(y) + 1e-10f; // kludge to prevent 0/0 condition
+    if (x < 0.0f)
+    {
+        r     = (x + abs_y) / (abs_y - x);
+        angle = THRQTR_PI;
+    }
+    else
+    {
+        r     = (x - abs_y) / (x + abs_y);
+        angle = ONEQTR_PI;
+    }
+    angle += (0.1963f * r * r - 0.9817f) * r;
+    if (y < 0.0f)
+        return (-angle); // negate if in quad III or IV
+    else
+        return (angle);
 }
 //
-angle_t R_PointToAngle(float x1, float y1, float x, float y)
+angle_t R_PointToAngle(float x1, float y1, float x, float y, bool precise)
 {
     x -= x1;
     y -= y1;
 
+    if (precise) 
+    {
+        return (AlmostEquals(x, 0.0f) && AlmostEquals(y, 0.0f)) ? 0 : FLOAT_2_ANG(atan2(y, x) * (180 / M_PI));
+    }
+
     return FLOAT_2_ANG(atan2_approx(y, x) * (180 / M_PI));
+
 }
 
 float R_PointToDist(float x1, float y1, float x2, float y2)
@@ -297,10 +301,10 @@ region_properties_t *R_PointGetProps(subsector_t *sub, float z)
 //----------------------------------------------------------------------------
 
 // large buffers for cache coherency vs allocating each on heap
-#define MAX_DRAW_THINGS 32768
-#define MAX_DRAW_FLOORS 32768
-#define MAX_DRAW_SEGS 65536
-#define MAX_DRAW_SUBS 65536
+#define MAX_DRAW_THINGS  32768
+#define MAX_DRAW_FLOORS  32768
+#define MAX_DRAW_SEGS    65536
+#define MAX_DRAW_SUBS    65536
 #define MAX_DRAW_MIRRORS 512
 
 static std::vector<drawthing_t>  drawthings;
@@ -352,7 +356,7 @@ void R2_FreeupBSP(void)
 }
 
 drawthing_t *R_GetDrawThing()
-{    
+{
     if (drawthing_pos >= MAX_DRAW_THINGS)
     {
         I_Error("Max Draw Things Exceeded");

@@ -84,7 +84,7 @@ extern float *r_triangletable;
 
 //
 // Utility functions.
-angle_t              R_PointToAngle(float x1, float y1, float x2, float y2);
+angle_t              R_PointToAngle(float x1, float y1, float x2, float y2, bool precise = false);
 float                R_PointToDist(float x1, float y1, float x2, float y2);
 float                R_ScaleFromGlobalAngle(angle_t visangle);
 subsector_t         *R_PointInSubsector(float x, float y);

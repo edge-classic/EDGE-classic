@@ -318,7 +318,7 @@ void RGL_DrawUnits(void)
 
     GLuint active_tex[2] = {0, 0};
     GLuint active_env[2] = {0, 0};
-    
+
     int active_pass     = 0;
     int active_blending = 0;
 
@@ -478,6 +478,8 @@ void RGL_DrawUnits(void)
             state->alphaFunc(GL_GREATER, a * 0.66f);
         }
 
+        GLint old_clamp = DUMMY_CLAMP;
+
         for (int t = 1; t >= 0; t--)
         {
             if (active_tex[t] != unit->tex[t] || active_env[t] != unit->env[t])
@@ -503,7 +505,20 @@ void RGL_DrawUnits(void)
                 if (unit->tex[t] != 0)
                     state->bindTexture(unit->tex[t]);
 
-                active_tex[t] = unit->tex[t];
+                active_tex[t] = unit->tex[t];                
+
+                if (!t && (active_blending & BL_ClampY) && active_tex[0] != 0)
+                {
+                    auto existing = texture_clamp.find(active_tex[0]);
+                    if (existing != texture_clamp.end())
+                    {
+                        old_clamp = existing->second;
+                    }
+
+                    // This is very expensive, thus the map
+                    // glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &old_clamp);
+                    state->texWrapT(r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE);
+                }
             }
 
             if (active_env[t] != unit->env[t])
@@ -524,20 +539,6 @@ void RGL_DrawUnits(void)
             }
         }
 
-        GLint old_clamp = DUMMY_CLAMP;
-
-        if ((active_blending & BL_ClampY) && active_tex[0] != 0)
-        {
-            auto existing = texture_clamp.find(active_tex[0]);
-            if (existing != texture_clamp.end())
-            {
-                old_clamp = existing->second;
-            }
-            // This is very expensive, thus the map
-            // glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &old_clamp);
-            state->texWrapT(r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE);
-        }
-
         glBegin(unit->shape);
 
         for (int v_idx = 0; v_idx < unit->count; v_idx++)
@@ -549,7 +550,9 @@ void RGL_DrawUnits(void)
 
         // restore the clamping mode
         if (old_clamp != DUMMY_CLAMP)
-             state->texWrapT(old_clamp, true);
+        {
+            state->texWrapT(old_clamp);
+        }
     }
 
     // all done

@@ -365,11 +365,11 @@ class gl_state_c
         ecframe_stats.draw_statechange++;
     }
 
-    void texWrapT(GLint param, bool force = false)
+    void texWrapT(GLint param)
     {
         GLuint index = activeTexture_ - GL_TEXTURE0;
         
-        if (texWrapT_[index] == param && !force)
+        if (texWrapT_[index] == param)
         {
             return;
         }
@@ -396,7 +396,13 @@ class gl_state_c
 
         polygonOffset(0, 0);
 
-        texWrapT(GL_REPEAT);
+        for (int i = 0; i < 2; i++)
+        {
+            texEnvMode_[i]       = 0;
+            texEnvCombineRGB_[i] = 0;
+            texEnvSource0RGB_[i] = 0;
+            texWrapT_[i] = 0;
+        }
     }
 
     void setDefaultStateFull()
@@ -422,20 +428,10 @@ class gl_state_c
             glDisable(GL_TEXTURE_2D);
             ecframe_stats.draw_statechange++;
 
-            texEnvMode_[i]       = GL_MODULATE;
-            texEnvCombineRGB_[i] = GL_MODULATE;
-            texEnvSource0RGB_[i] = GL_TEXTURE;
-
-            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texEnvMode_[i]);
-            ecframe_stats.draw_statechange++;
-            glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, texEnvCombineRGB_[i]);
-            ecframe_stats.draw_statechange++;
-            glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, texEnvSource0RGB_[i]);
-            ecframe_stats.draw_statechange++;
-
-            texWrapT_[i] = GL_REPEAT;
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texWrapT_[i]);
-            ecframe_stats.draw_statechange++;
+            texEnvMode_[i]       = 0;
+            texEnvCombineRGB_[i] = 0;
+            texEnvSource0RGB_[i] = 0;
+            texWrapT_[i] = 0;
         }
 
         activeTexture_ = GL_TEXTURE0;
@@ -524,6 +520,7 @@ class gl_state_c
 
     // texture
     bool  enableTexture2D_[2];
+
     GLint texEnvMode_[2];
     GLint texEnvCombineRGB_[2];
     GLint texEnvSource0RGB_[2];

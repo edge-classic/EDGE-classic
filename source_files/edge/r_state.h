@@ -325,61 +325,69 @@ class gl_state_c
 
     void texEnvMode(GLint param)
     {
-        if (texEnvMode_ == param)
+        GLuint index = activeTexture_ - GL_TEXTURE0;
+
+        if (texEnvMode_[index] == param)
         {
             return;
         }
 
-        texEnvMode_ = param;
-        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texEnvMode_);
+        texEnvMode_[index] = param;
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texEnvMode_[index]);
         ecframe_stats.draw_statechange++;
     }
 
     void texEnvCombineRGB(GLint param)
     {
-        if (texEnvCombineRGB_ == param)
+        GLuint index = activeTexture_ - GL_TEXTURE0;
+
+        if (texEnvCombineRGB_[index] == param)
         {
             return;
         }
 
-        texEnvCombineRGB_ = param;
-        glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, texEnvCombineRGB_);
+        texEnvCombineRGB_[index] = param;
+        glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, texEnvCombineRGB_[index]);
         ecframe_stats.draw_statechange++;
     }
 
     void texEnvSource0RGB(GLint param)
     {
-        if (texEnvSource0RGB_ == param)
+        GLuint index = activeTexture_ - GL_TEXTURE0;
+
+        if (texEnvSource0RGB_[index] == param)
         {
             return;
         }
 
-        texEnvSource0RGB_ = param;
-        glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, texEnvSource0RGB_);
+        texEnvSource0RGB_[index] = param;
+        glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, texEnvSource0RGB_[index]);
         ecframe_stats.draw_statechange++;
     }
 
     void texWrapT(GLint param, bool force = false)
     {
-        if (texWrapT_ == param && !force)
+        GLuint index = activeTexture_ - GL_TEXTURE0;
+        
+        if (texWrapT_[index] == param && !force)
         {
             return;
         }
 
-        texWrapT_ = param;
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texWrapT_);
+        texWrapT_[index] = param;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texWrapT_[index]);
         ecframe_stats.draw_statechange++;
     }
 
     void resetDefaultState()
     {
         disable(GL_BLEND);
-        
+
         activeTexture(GL_TEXTURE0);
         glDisable(GL_TEXTURE_2D);
 
         disable(GL_ALPHA_TEST);
-  
+
         depthMask(true);
 
         disable(GL_CULL_FACE);
@@ -412,6 +420,21 @@ class gl_state_c
             ecframe_stats.draw_texchange++;
             ecframe_stats.draw_statechange++;
             glDisable(GL_TEXTURE_2D);
+            ecframe_stats.draw_statechange++;
+
+            texEnvMode_[i]       = GL_MODULATE;
+            texEnvCombineRGB_[i] = GL_MODULATE;
+            texEnvSource0RGB_[i] = GL_TEXTURE;
+
+            glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texEnvMode_[i]);
+            ecframe_stats.draw_statechange++;
+            glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, texEnvCombineRGB_[i]);
+            ecframe_stats.draw_statechange++;
+            glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, texEnvSource0RGB_[i]);
+            ecframe_stats.draw_statechange++;
+
+            texWrapT_[i] = GL_REPEAT;
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texWrapT_[i]);
             ecframe_stats.draw_statechange++;
         }
 
@@ -477,21 +500,6 @@ class gl_state_c
         glPolygonOffset(polygonOffsetFactor_, polygonOffsetUnits_);
         ecframe_stats.draw_statechange++;
 
-        texEnvMode_       = GL_MODULATE;
-        texEnvCombineRGB_ = GL_MODULATE;
-        texEnvSource0RGB_ = GL_TEXTURE;
-
-        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texEnvMode_);
-        ecframe_stats.draw_statechange++;
-        glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, texEnvCombineRGB_);
-        ecframe_stats.draw_statechange++;
-        glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, texEnvSource0RGB_);
-        ecframe_stats.draw_statechange++;
-
-        texWrapT_ = GL_REPEAT;
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texWrapT_);
-        ecframe_stats.draw_statechange++;
-
         enableScissorTest_ = false;
         glDisable(GL_SCISSOR_TEST);
         ecframe_stats.draw_statechange++;
@@ -515,7 +523,12 @@ class gl_state_c
     GLfloat clearAlpha_;
 
     // texture
-    bool   enableTexture2D_[2];
+    bool  enableTexture2D_[2];
+    GLint texEnvMode_[2];
+    GLint texEnvCombineRGB_[2];
+    GLint texEnvSource0RGB_[2];
+    GLint texWrapT_[2];
+
     GLuint bindTexture2D_[2];
     GLenum activeTexture_;
 
@@ -534,11 +547,6 @@ class gl_state_c
     GLfloat fogEnd_;
     GLfloat fogDensity_;
     GLfloat fogColor_[4];
-
-    GLint texEnvMode_;
-    GLint texEnvCombineRGB_;
-    GLint texEnvSource0RGB_;
-    GLint texWrapT_;
 };
 
 gl_state_c *RGL_GetState();

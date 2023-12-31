@@ -160,7 +160,7 @@ class gl_state_c
         }
 
         depthMask_ = enable;
-        glDepthMask(enable ? GL_FALSE : GL_TRUE);
+        glDepthMask(enable ? GL_TRUE : GL_FALSE);
         ecframe_stats.draw_statechange++;
     }
 
@@ -381,16 +381,16 @@ class gl_state_c
 
     void resetDefaultState()
     {
-        disable(GL_BLEND);
-
-        activeTexture(GL_TEXTURE0);
-        glDisable(GL_TEXTURE_2D);
+        disable(GL_BLEND);        
+        blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         disable(GL_ALPHA_TEST);
 
         depthMask(true);
 
+        cullFace(GL_BACK);
         disable(GL_CULL_FACE);
+        
 
         disable(GL_FOG);
 
@@ -398,6 +398,7 @@ class gl_state_c
 
         for (int i = 0; i < 2; i++)
         {
+            bindTexture2D_[i]   = 0;
             texEnvMode_[i]       = 0;
             texEnvCombineRGB_[i] = 0;
             texEnvSource0RGB_[i] = 0;

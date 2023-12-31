@@ -306,7 +306,7 @@ class gl_state_c
         }
 
         fogDensity_ = density;
-        glFogf(GL_FOG_END, fogDensity_);
+        glFogf(GL_FOG_DENSITY, fogDensity_);
         ecframe_stats.draw_statechange++;
     }
 

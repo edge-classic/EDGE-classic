@@ -20,7 +20,6 @@
 #define __DDF_COLORMAP_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -88,30 +87,13 @@ class colourmap_c
 };
 
 // Colourmap container
-class colourmap_container_c : public epi::array_c
+class colourmap_container_c : public std::vector<colourmap_c *>
 {
   public:
     colourmap_container_c();
     ~colourmap_container_c();
 
-  private:
-    void CleanupObject(void *obj);
-
   public:
-    // List Management
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(colourmap_c *c)
-    {
-        return InsertObject((void *)&c);
-    }
-    colourmap_c *operator[](int idx)
-    {
-        return *(colourmap_c **)FetchObject(idx);
-    }
-
     // Search Functions
     colourmap_c *Lookup(const char *refname);
 };

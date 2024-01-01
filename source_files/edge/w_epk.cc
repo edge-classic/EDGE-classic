@@ -931,9 +931,8 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 
             bool add_it = true;
 
-            for (int j = 0; j < colourmaps.GetSize(); j++)
+            for (auto colm : colourmaps)
             {
-                colourmap_c *colm = colourmaps[j];
                 if (!colm->lump_name.empty() &&
                     epi::case_cmp(colm->lump_name, epi::PATH_GetBasename(entry.name).string()) == 0 &&
                     W_CheckFileNumForName(colm->lump_name.c_str()) < pack_index)

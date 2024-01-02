@@ -207,7 +207,7 @@ static void GetMUSINFOTracksForLevel(void)
                     dynamic_plentry->info     = value;
                     dynamic_plentry->type     = MUS_UNKNOWN;
                     dynamic_plentry->infotype = MUSINF_LUMP;
-                    playlist.Insert(dynamic_plentry);
+                    playlist.push_back(dynamic_plentry);
                     musinfo_tracks[currmap->name].mappings.try_emplace(mus_number, dynamic_plentry->number);
                 }
                 mus_number = -1;
@@ -1767,11 +1767,11 @@ static void LoadUDMFSectors()
                 if (light_color == RGB_NO_VALUE)
                     light_color ^= RGB_MAKE(1, 1, 1);
                 // Make colourmap if necessary
-                for (int i = 0; i < colourmaps.GetSize(); i++)
+                for (auto cmap : colourmaps)
                 {
-                    if (colourmaps[i]->gl_colour != RGB_NO_VALUE && colourmaps[i]->gl_colour == light_color)
+                    if (cmap->gl_colour != RGB_NO_VALUE && cmap->gl_colour == light_color)
                     {
-                        ss->props.colourmap = colourmaps[i];
+                        ss->props.colourmap = cmap;
                         break;
                     }
                 }
@@ -1781,7 +1781,7 @@ static void LoadUDMFSectors()
                     ad_hoc->name        = epi::STR_Format("UDMF_%d", light_color); // Internal
                     ad_hoc->gl_colour   = light_color;
                     ss->props.colourmap = ad_hoc;
-                    colourmaps.Insert(ad_hoc);
+                    colourmaps.push_back(ad_hoc);
                 }
             }
 

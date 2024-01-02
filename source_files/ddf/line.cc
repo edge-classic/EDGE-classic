@@ -270,7 +270,7 @@ static void LinedefStartEntry(const char *name, bool extend)
     dynamic_line         = new linetype_c;
     dynamic_line->number = number;
 
-    linetypes.Insert(dynamic_line);
+    linetypes.push_back(dynamic_line);
 }
 
 static void LinedefDoTemplate(const char *contents)
@@ -422,13 +422,8 @@ void DDF_LinedefInit(void)
 
 void DDF_LinedefCleanUp(void)
 {
-    epi::array_iterator_c it;
-    linetype_c           *l;
-
-    for (it = linetypes.GetBaseIterator(); it.IsValid(); it++)
+    for (auto l : linetypes)
     {
-        l = ITERATOR_TO_TYPE(it, linetype_c *);
-
         cur_ddf_entryname = epi::STR_Format("[%d]  (lines.ddf)", l->number);
 
         l->t.inspawnobj = l->t.inspawnobj_ref != "" ? mobjtypes.Lookup(l->t.inspawnobj_ref.c_str()) : NULL;
@@ -441,7 +436,7 @@ void DDF_LinedefCleanUp(void)
         cur_ddf_entryname.clear();
     }
 
-    linetypes.Trim();
+    linetypes.shrink_to_fit();
 }
 
 //
@@ -1654,7 +1649,7 @@ void linetype_c::Default(void)
 //
 // linetype_container_c Constructor
 //
-linetype_container_c::linetype_container_c() : epi::array_c(sizeof(linetype_c *))
+linetype_container_c::linetype_container_c()
 {
     Reset();
 }
@@ -1664,20 +1659,12 @@ linetype_container_c::linetype_container_c() : epi::array_c(sizeof(linetype_c *)
 //
 linetype_container_c::~linetype_container_c()
 {
-    Clear();
-}
-
-//
-// linetype_container_c::CleanupObject
-//
-void linetype_container_c::CleanupObject(void *obj)
-{
-    linetype_c *l = *(linetype_c **)obj;
-
-    if (l)
-        delete l;
-
-    return;
+    for (auto iter = begin(); iter != end(); iter++)
+    {
+        linetype_c *line = *iter;
+        delete line;
+        line = nullptr;
+    }
 }
 
 //
@@ -1698,11 +1685,9 @@ linetype_c *linetype_container_c::Lookup(const int id)
         return lookup_cache[slot];
     }
 
-    epi::array_iterator_c it;
-
-    for (it = GetTailIterator(); it.IsValid(); it--)
+    for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        linetype_c *l = ITERATOR_TO_TYPE(it, linetype_c *);
+        linetype_c *l = *iter;
 
         if (l->number == id)
         {
@@ -1722,7 +1707,13 @@ linetype_c *linetype_container_c::Lookup(const int id)
 //
 void linetype_container_c::Reset()
 {
-    Clear();
+    for (auto iter = begin(); iter != end(); iter++)
+    {
+        linetype_c *line = *iter;
+        delete line;
+        line = nullptr;
+    }
+    clear();
     memset(lookup_cache, 0, sizeof(linetype_c *) * LOOKUP_CACHESIZE);
 }
 

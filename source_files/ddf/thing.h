@@ -20,7 +20,6 @@
 #define __DDF_MOBJ_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 #include "states.h"
@@ -1279,31 +1278,17 @@ class mobjtype_c
 // Our mobjdef container
 #define LOOKUP_CACHESIZE 211
 
-class mobjtype_container_c : public epi::array_c
+class mobjtype_container_c : public std::vector<mobjtype_c *>
 {
   public:
     mobjtype_container_c();
     ~mobjtype_container_c();
 
   private:
-    void CleanupObject(void *obj);
-
     mobjtype_c *lookup_cache[LOOKUP_CACHESIZE];
 
   public:
     // List Management
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(mobjtype_c *m)
-    {
-        return InsertObject((void *)&m);
-    }
-    mobjtype_c *operator[](int idx)
-    {
-        return *(mobjtype_c **)FetchObject(idx);
-    }
     bool MoveToEnd(int idx);
 
     // Search Functions

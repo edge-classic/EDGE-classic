@@ -179,12 +179,8 @@ static void M_ChangeMusicCheat(const char *string)
 
 static void CheatGiveWeapons(player_t *pl, int key = -2)
 {
-    epi::array_iterator_c it;
-
-    for (it = weapondefs.GetIterator(0); it.IsValid(); it++)
+    for (auto info : weapondefs)
     {
-        weapondef_c *info = ITERATOR_TO_TYPE(it, weapondef_c *);
-
         if (info && !info->no_cheat && (key < 0 || info->bind_key == key))
         {
             P_AddWeapon(pl, info, NULL);

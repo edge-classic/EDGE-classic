@@ -35,8 +35,6 @@
 
 #include "p_blockmap.h" // HACK!
 
-#include "arrays.h"
-
 #define DEATHVIEWHEIGHT 6.0f
 #define CROUCH_SLOWDOWN 0.5f
 
@@ -226,35 +224,20 @@ exfloor_fit_e P_ExtraFloorFits(sector_t *sec, float z1, float z2);
 //
 
 // --> Line list class
-class linelist_c : public epi::array_c
+class linelist_c : public std::vector<line_t *>
 {
   public:
-    linelist_c() : epi::array_c(sizeof(line_t *))
+    linelist_c()
     {
     }
     ~linelist_c()
     {
-        Clear();
-    }
-
-  private:
-    void CleanupObject(void *obj)
-    { /* ... */
-        (void)obj;
-    }
-
-  public:
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(line_t *l)
-    {
-        return InsertObject((void *)&l);
-    }
-    line_t *operator[](int idx)
-    {
-        return *(line_t **)FetchObject(idx);
+        for (auto iter = begin(); iter != end(); iter++)
+        {
+            line_t *l = *iter;
+            delete l;
+            l = nullptr;
+        }
     }
 };
 

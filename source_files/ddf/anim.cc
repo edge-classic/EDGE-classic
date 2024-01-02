@@ -54,14 +54,11 @@ animdef_container_c animdefs;
 
 static animdef_c *animdefs_Lookup(const char *name)
 {
-    epi::array_iterator_c it;
-
-    for (it = animdefs.GetBaseIterator(); it.IsValid(); it++)
+    for (auto iter = animdefs.begin(); iter != animdefs.end(); iter++)
     {
-        animdef_c *a = ITERATOR_TO_TYPE(it, animdef_c *);
-
-        if (DDF_CompareName(a->name.c_str(), name) == 0)
-            return a;
+        animdef_c *anim = *iter;
+        if (DDF_CompareName(anim->name.c_str(), name) == 0)
+            return anim;
     }
 
     return NULL; // not found
@@ -99,7 +96,7 @@ static void AnimStartEntry(const char *name, bool extend)
 
     dynamic_anim->name = name;
 
-    animdefs.Insert(dynamic_anim);
+    animdefs.push_back(dynamic_anim);
 }
 
 static void AnimParseField(const char *field, const char *contents, int index, bool is_last)
@@ -137,7 +134,12 @@ static void AnimFinishEntry(void)
 static void AnimClearAll(void)
 {
     // 100% safe to delete all animations
-    animdefs.Clear();
+    for (auto anim : animdefs)
+    {
+        delete anim;
+        anim = nullptr;
+    }
+    animdefs.clear();
 }
 
 void DDF_ReadAnims(const std::string &data)
@@ -160,7 +162,7 @@ void DDF_ReadAnims(const std::string &data)
 //
 void DDF_AnimInit(void)
 {
-    animdefs.Clear(); // <-- Consistent with existing behaviour (-ACB- 2004/05/04)
+    AnimClearAll();
 }
 
 //
@@ -168,7 +170,7 @@ void DDF_AnimInit(void)
 //
 void DDF_AnimCleanUp(void)
 {
-    animdefs.Trim(); // <-- Reduce to allocated size
+    animdefs.shrink_to_fit(); // <-- Reduce to allocated size
 }
 
 //
@@ -235,21 +237,6 @@ void animdef_c::Default()
     endname.clear();
 
     speed = 8;
-}
-
-// ---> animdef_container_c class
-
-//
-// animdef_container_c::CleanupObject()
-//
-void animdef_container_c::CleanupObject(void *obj)
-{
-    animdef_c *a = *(animdef_c **)obj;
-
-    if (a)
-        delete a;
-
-    return;
 }
 
 //----------------------------------------------------------------------------

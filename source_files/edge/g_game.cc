@@ -1274,7 +1274,7 @@ mapdef_c *G_LookupMap(const char *refname)
         int num = atoi(refname);
         // first try map names ending in ## (single digit treated as 0#)
         std::string map_check = epi::STR_Format("%02d", num);
-        for (int i = mapdefs.GetSize() - 1; i >= 0; i--)
+        for (int i = mapdefs.size() - 1; i >= 0; i--)
         {
             if (mapdefs[i]->name.size() >= 2)
             {
@@ -1288,7 +1288,7 @@ mapdef_c *G_LookupMap(const char *refname)
         if (1 <= num && num <= 9)
             num = num + 10;
         map_check = epi::STR_Format("E%dM%d", num / 10, num % 10);
-        for (int i = mapdefs.GetSize() - 1; i >= 0; i--)
+        for (int i = mapdefs.size() - 1; i >= 0; i--)
         {
             if (mapdefs[i]->name.size() == 4)
             {

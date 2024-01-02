@@ -82,7 +82,7 @@ static void ColmapStartEntry(const char *name, bool extend)
     if (epi::prefix_case_cmp(name, "TEXT") == 0)
         dynamic_colmap->special = COLSP_Whiten;
 
-    colourmaps.Insert(dynamic_colmap);
+    colourmaps.push_back(dynamic_colmap);
 }
 
 static void ColmapParseField(const char *field, const char *contents, int index, bool is_last)
@@ -124,10 +124,17 @@ static void ColmapFinishEntry(void)
         // colmaps with this name (i.e., "null" it), as the only way to get here
         // is to create an empty entry or use gl_colour=NONE; - Dasho
         std::string doomed_name = dynamic_colmap->name;
-        for (int i = colourmaps.GetSize() - 1; i > 0; i--)
+        for (auto iter = colourmaps.begin(); iter != colourmaps.end();)
         {
-            if (colourmaps[i]->name == doomed_name)
-                colourmaps.RemoveObject(i);
+            colourmap_c *cmap = *iter;
+            if (DDF_CompareName(doomed_name.c_str(), cmap->name.c_str()) == 0)
+            {
+                delete cmap;
+                cmap = nullptr;
+                iter = colourmaps.erase(iter);
+            }
+            else
+                ++iter;
         }
     }
 }
@@ -154,12 +161,17 @@ void DDF_ReadColourMaps(const std::string &data)
 
 void DDF_ColmapInit(void)
 {
-    colourmaps.Clear();
+    for (auto cmap : colourmaps)
+    {
+        delete cmap;
+        cmap = nullptr;
+    }
+    colourmaps.clear();
 }
 
 void DDF_ColmapCleanUp(void)
 {
-    colourmaps.Trim();
+    colourmaps.shrink_to_fit();
 }
 
 specflags_t colmap_specials[] = {{"FLASH", COLSP_NoFlash, true},
@@ -256,7 +268,7 @@ void colourmap_c::Default()
 //
 // colourmap_container_c::colourmap_container_c()
 //
-colourmap_container_c::colourmap_container_c() : epi::array_c(sizeof(atkdef_c *))
+colourmap_container_c::colourmap_container_c()
 {
 }
 
@@ -265,20 +277,12 @@ colourmap_container_c::colourmap_container_c() : epi::array_c(sizeof(atkdef_c *)
 //
 colourmap_container_c::~colourmap_container_c()
 {
-    Clear(); // <-- Destroy self before exiting
-}
-
-//
-// colourmap_container_c::CleanupObject
-//
-void colourmap_container_c::CleanupObject(void *obj)
-{
-    colourmap_c *c = *(colourmap_c **)obj;
-
-    if (c)
-        delete c;
-
-    return;
+    for (auto iter = begin(); iter != end(); iter++)
+    {
+        colourmap_c *cmap = *iter;
+        delete cmap;
+        cmap = nullptr;
+    }
 }
 
 //
@@ -286,17 +290,14 @@ void colourmap_container_c::CleanupObject(void *obj)
 //
 colourmap_c *colourmap_container_c::Lookup(const char *refname)
 {
-    epi::array_iterator_c it;
-    colourmap_c          *c;
-
     if (!refname || !refname[0])
         return NULL;
 
-    for (it = GetIterator(0); it.IsValid(); it++)
+    for (auto iter = begin(); iter != end(); iter++)
     {
-        c = ITERATOR_TO_TYPE(it, colourmap_c *);
-        if (DDF_CompareName(c->name.c_str(), refname) == 0)
-            return c;
+        colourmap_c *cmap = *iter;
+        if (DDF_CompareName(cmap->name.c_str(), refname) == 0)
+            return cmap;
     }
 
     return NULL;

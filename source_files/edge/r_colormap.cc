@@ -978,11 +978,9 @@ void DeleteColourmapTextures(void)
 
     std_cmap_shader = NULL;
 
-    for (int i = 0; i < colourmaps.GetSize(); i++)
+    for (auto cmap : colourmaps)
     {
-        colourmap_c *cmap = colourmaps[i];
-
-        if (cmap && cmap->analysis)
+        if (cmap->analysis)
         {
             colormap_shader_c *shader = (colormap_shader_c *)cmap->analysis;
 

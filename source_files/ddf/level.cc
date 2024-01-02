@@ -148,7 +148,7 @@ static void LevelStartEntry(const char *name, bool extend)
     dynamic_level       = new mapdef_c;
     dynamic_level->name = name;
 
-    mapdefs.Insert(dynamic_level);
+    mapdefs.push_back(dynamic_level);
 }
 
 static void LevelDoTemplate(const char *contents)
@@ -206,7 +206,12 @@ static void LevelFinishEntry(void)
 static void LevelClearAll(void)
 {
     // 100% safe to delete the level entries -- no refs
-    mapdefs.Clear();
+    for (auto map : mapdefs)
+    {
+        delete map;
+        map = nullptr;
+    }
+    mapdefs.clear();
 }
 
 void DDF_ReadLevels(const std::string &data)
@@ -226,23 +231,21 @@ void DDF_ReadLevels(const std::string &data)
 
 void DDF_LevelInit(void)
 {
-    mapdefs.Clear();
+    LevelClearAll();
 }
 
 void DDF_LevelCleanUp(void)
 {
-    if (mapdefs.GetSize() == 0)
+    if (mapdefs.empty())
         I_Error("There are no levels defined in DDF !\n");
 
-    mapdefs.Trim();
+    mapdefs.shrink_to_fit();
 
     // lookup episodes
 
-    epi::array_iterator_c it;
-
-    for (it = mapdefs.GetTailIterator(); it.IsValid(); it--)
+    for (auto iter = mapdefs.rbegin(); iter != mapdefs.rend(); iter++)
     {
-        mapdef_c *m = ITERATOR_TO_TYPE(it, mapdef_c *);
+        mapdef_c *m = *iter;
 
         m->episode = gamedefs.Lookup(m->episode_name.c_str());
 
@@ -486,18 +489,6 @@ void mapdef_c::Default()
     outdoor_fog_density = 0;
 }
 
-// --> map definition container class
-
-void mapdef_container_c::CleanupObject(void *obj)
-{
-    mapdef_c *m = *(mapdef_c **)obj;
-
-    if (m)
-        delete m;
-
-    return;
-}
-
 //
 // mapdef_c* mapdef_container_c::Lookup()
 //
@@ -508,11 +499,9 @@ mapdef_c *mapdef_container_c::Lookup(const char *refname)
     if (!refname || !refname[0])
         return NULL;
 
-    epi::array_iterator_c it;
-
-    for (it = GetTailIterator(); it.IsValid(); it--)
+    for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        mapdef_c *m = ITERATOR_TO_TYPE(it, mapdef_c *);
+        mapdef_c *m = *iter;
 
         // ignore maps with unknown episode_name
         // if (! m->episode)
@@ -565,7 +554,7 @@ mapdef_c *mapdef_container_c::Lookup(const char *refname)
         if (temp_level->sky.empty())
             temp_level->sky = "SKY1";
 
-        mapdefs.Insert(temp_level);
+        mapdefs.push_back(temp_level);
 
         return temp_level;
     }

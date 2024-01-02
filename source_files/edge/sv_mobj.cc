@@ -782,18 +782,21 @@ void SR_MobjPutState(void *storage, int index, void *extra)
     {
         I_Warning("SAVEGAME: object [%s] is in AWOL state %d\n", mo->info->name.c_str(), s_num);
 
-        epi::array_iterator_c it;
+        bool state_found = false;
 
         // look for real object
-        for (it = mobjtypes.GetBaseIterator(); it.IsValid(); it++)
+        for (auto iter = mobjtypes.begin(); iter != mobjtypes.end(); iter++)
         {
-            actual = ITERATOR_TO_TYPE(it, mobjtype_c *);
+            actual = *iter;
 
             if (DDF_StateGroupHasState(actual->state_grp, s_num))
+            {
+                state_found = true;
                 break;
+            }
         }
 
-        if (it.IsValid())
+        if (!state_found)
         {
             I_Warning("-- ARGH: state %d cannot be found !!\n", s_num);
             SV_PutString("*:*:1");

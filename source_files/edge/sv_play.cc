@@ -763,19 +763,17 @@ void SR_PlayerPutState(void *storage, int index, void *extra)
 
     // find the weapon that this state belongs to.
     // Traverses backwards in case #CLEARALL was used.
-    const weapondef_c *actual = NULL;
+    const weapondef_c *actual = nullptr;
 
-    epi::array_iterator_c it;
-
-    for (it = weapondefs.GetIterator(0); it.IsValid(); it++)
+    for (auto iter = weapondefs.rbegin(); iter != weapondefs.rend(); iter++)
     {
-        actual = ITERATOR_TO_TYPE(it, weapondef_c *);
+        actual = *iter;
 
         if (DDF_StateGroupHasState(actual->state_grp, s_num))
             break;
     }
 
-    if (!it.IsValid())
+    if (!actual)
     {
         I_Warning("SAVEGAME: weapon state %d cannot be found !!\n", s_num);
         actual = weapondefs[0];

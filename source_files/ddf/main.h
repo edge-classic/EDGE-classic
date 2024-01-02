@@ -23,7 +23,6 @@
 
 #include "epi.h"
 #include "file.h"
-#include "arrays.h"
 
 #include "types.h"
 

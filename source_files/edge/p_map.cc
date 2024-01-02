@@ -527,7 +527,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
 
     // if contacted a special line, add it to the list
     if (ld->special)
-        spechit.Insert(ld);
+        spechit.push_back(ld);
 
     // check for hitting a sky-hack line
     {
@@ -1030,7 +1030,7 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
     if (tm_I.flags & MF_NOCLIP)
         return true;
 
-    spechit.ZeroiseCount();
+    spechit.clear();
 
     // -KM- 1998/11/25 Corpses aren't supposed to hang in the air...
     if (!(tm_I.flags & (MF_NOCLIP | MF_CORPSE)))
@@ -1144,17 +1144,15 @@ bool P_TryMove(mobj_t *thing, float x, float y)
     thing->SetBelowMo(tm_I.below);
 
     // if any special lines were hit, do the effect
-    if (spechit.GetSize() && !(thing->flags & (MF_TELEPORT | MF_NOCLIP)))
+    if (!spechit.empty() && !(thing->flags & (MF_TELEPORT | MF_NOCLIP)))
     {
         // Thing doesn't change, so we check the notriggerlines flag once..
         if (thing->player || (thing->extendedflags & EF_MONSTER) ||
             !(thing->currentattack && (thing->currentattack->flags & AF_NoTriggerLines)))
         {
-            epi::array_iterator_c it;
-
-            for (it = spechit.GetTailIterator(); it.IsValid(); it--)
+            for (auto iter = spechit.rbegin(); iter != spechit.rend(); iter++)
             {
-                ld = ITERATOR_TO_TYPE(it, line_t *);
+                ld = *iter;
                 if (ld->special) // Shouldn't this always be a special?
                 {
                     int side;
@@ -3296,7 +3294,12 @@ bool P_MapCheckBlockingLine(mobj_t *thing, mobj_t *spawnthing)
 //
 void P_MapInit(void)
 {
-    spechit.Clear();
+    for (auto s : spechit)
+    {
+        delete s;
+        s = nullptr;
+    }
+    spechit.clear();
 }
 
 //--- editor settings ---

@@ -527,21 +527,28 @@ static void ParseUMAPINFOEntry(epi::lexer_c &lex, MapEntry *val)
                 // This should leave the initial [EDGE] episode and nothing else
                 // Since 'clear' is supposed to come before any custom definitions
                 // this should not clear out any UMAPINFO-defined episodes
-                for (int i = gamedefs.GetSize() - 1; i > 0; i--)
+                for (auto iter = gamedefs.begin()+1; iter != gamedefs.end();)
                 {
-                    if (!gamedefs[i]->firstmap.empty())
-                        gamedefs.RemoveObject(i);
+                    gamedef_c *game = *iter;
+                    if (game->firstmap.empty())
+                    {
+                        delete game;
+                        game = nullptr;
+                        iter = gamedefs.erase(iter);
+                    }
+                    else
+                        ++iter;
                 }
             }
             else
             {
                 gamedef_c *new_epi = nullptr;
                 // Check for episode to replace
-                for (int i = 0; i < gamedefs.GetSize(); i++)
+                for (auto game : gamedefs)
                 {
-                    if (epi::case_cmp(gamedefs[i]->firstmap, val->mapname) == 0)
+                    if (epi::case_cmp(game->firstmap, val->mapname) == 0)
                     {
-                        new_epi = gamedefs[i];
+                        new_epi = game;
                         break;
                     }
                 }
@@ -549,11 +556,11 @@ static void ParseUMAPINFOEntry(epi::lexer_c &lex, MapEntry *val)
                 {
                     // Create a new episode from game-specific UMAPINFO template data
                     gamedef_c *um_template = nullptr;
-                    for (int i = 0; i < gamedefs.GetSize(); i++)
+                    for (auto game : gamedefs)
                     {
-                        if (epi::case_cmp(gamedefs[i]->name, "UMAPINFO_TEMPLATE") == 0)
+                        if (epi::case_cmp(game->name, "UMAPINFO_TEMPLATE") == 0)
                         {
-                            um_template = gamedefs[i];
+                            um_template = game;
                             break;
                         }
                     }
@@ -562,7 +569,7 @@ static void ParseUMAPINFOEntry(epi::lexer_c &lex, MapEntry *val)
                     new_epi = new gamedef_c;
                     new_epi->CopyDetail(*um_template);
                     new_epi->firstmap = val->mapname;
-                    gamedefs.Insert(new_epi);
+                    gamedefs.push_back(new_epi);
                 }
                 char        lumpname[9] = {0};
                 std::string alttext;

@@ -20,7 +20,6 @@
 #define __DDF_ATK_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -148,30 +147,13 @@ class atkdef_c
     }
 };
 
-class atkdef_container_c : public epi::array_c
+class atkdef_container_c : public std::vector<atkdef_c *>
 {
   public:
     atkdef_container_c();
     ~atkdef_container_c();
 
-  private:
-    void CleanupObject(void *obj);
-
   public:
-    // List Management
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(atkdef_c *a)
-    {
-        return InsertObject((void *)&a);
-    }
-    atkdef_c *operator[](int idx)
-    {
-        return *(atkdef_c **)FetchObject(idx);
-    }
-
     // Search Functions
     atkdef_c *Lookup(const char *refname);
 };

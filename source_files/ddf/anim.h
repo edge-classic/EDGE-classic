@@ -20,7 +20,6 @@
 #define __DDF_ANIM_H_
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -75,32 +74,20 @@ class animdef_c
 };
 
 // Our animdefs container
-class animdef_container_c : public epi::array_c
+class animdef_container_c : public std::vector<animdef_c *>
 {
   public:
-    animdef_container_c() : epi::array_c(sizeof(animdef_c *))
+    animdef_container_c()
     {
     }
     ~animdef_container_c()
     {
-        Clear();
-    }
-
-  private:
-    void CleanupObject(void *obj);
-
-  public:
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(animdef_c *a)
-    {
-        return InsertObject((void *)&a);
-    }
-    animdef_c *operator[](int idx)
-    {
-        return *(animdef_c **)FetchObject(idx);
+      for (auto iter = begin(); iter != end(); iter++)
+      {
+          animdef_c *anim = *iter;
+          delete anim;
+          anim = nullptr;
+      }
     }
 };
 

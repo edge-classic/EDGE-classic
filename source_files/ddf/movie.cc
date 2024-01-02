@@ -72,7 +72,7 @@ static void MovieStartEntry(const char *name, bool extend)
 
     dynamic_movie->name   = name;
 
-    moviedefs.Insert(dynamic_movie);
+    moviedefs.push_back(dynamic_movie);
 }
 
 static void MovieParseField(const char *field, const char *contents, int index, bool is_last)
@@ -115,12 +115,17 @@ void DDF_ReadMovies(const std::string &data)
 
 void DDF_MovieInit(void)
 {
-    moviedefs.Clear();
+    for (auto movie : moviedefs)
+    {
+        delete movie;
+        movie = nullptr;
+    }
+    moviedefs.clear();
 }
 
 void DDF_MovieCleanUp(void)
 {
-    moviedefs.Trim(); // <-- Reduce to allocated size
+    moviedefs.shrink_to_fit(); // <-- Reduce to allocated size
 }
 
 static void MovieParseInfo(const char *value)
@@ -228,25 +233,13 @@ void moviedef_c::Default()
 
 // ---> moviedef_container_c class
 
-void moviedef_container_c::CleanupObject(void *obj)
-{
-    moviedef_c *a = *(moviedef_c **)obj;
-
-    if (a)
-        delete a;
-}
-
 moviedef_c *moviedef_container_c::Lookup(const char *refname)
 {
     if (!refname || !refname[0])
         return NULL;
 
-    epi::array_iterator_c it;
-
-    for (it = GetBaseIterator(); it.IsValid(); it++)
+    for (auto g : moviedefs)
     {
-        moviedef_c *g = ITERATOR_TO_TYPE(it, moviedef_c *);
-
         if (DDF_CompareName(g->name.c_str(), refname) == 0)
             return g;
     }

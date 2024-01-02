@@ -833,9 +833,6 @@ bool SR_LightGetType(void *storage, int index, void *extra)
 void SR_LightPutType(void *storage, int index, void *extra)
 {
     const lightdef_c     *src = ((const lightdef_c **)storage)[index];
-    epi::array_iterator_c it;
-    linetype_c           *ln;
-    sectortype_c         *sec;
 
     if (!src)
     {
@@ -844,9 +841,8 @@ void SR_LightPutType(void *storage, int index, void *extra)
     }
 
     // look for it in the line types
-    for (it = linetypes.GetBaseIterator(); it.IsValid(); it++)
+    for (auto ln : linetypes)
     {
-        ln = ITERATOR_TO_TYPE(it, linetype_c *);
         if (src == &ln->l)
         {
             std::string s = epi::STR_Format("L:%d", ln->number);
@@ -856,9 +852,8 @@ void SR_LightPutType(void *storage, int index, void *extra)
     }
 
     // look for it in the sector types
-    for (it = sectortypes.GetBaseIterator(); it.IsValid(); it++)
+    for (auto sec : sectortypes)
     {
-        sec = ITERATOR_TO_TYPE(it, sectortype_c *);
         if (src == &sec->l)
         {
             std::string s = epi::STR_Format("S:%d", sec->number);
@@ -1149,10 +1144,6 @@ void SR_PlaneMovePutType(void *storage, int index, void *extra)
 {
     const movplanedef_c *src = ((const movplanedef_c **)storage)[index];
 
-    epi::array_iterator_c it;
-    linetype_c           *ln;
-    sectortype_c         *sec;
-
     if (!src)
     {
         SV_PutString(NULL);
@@ -1180,10 +1171,8 @@ void SR_PlaneMovePutType(void *storage, int index, void *extra)
     }
 
     // check all the line types
-    for (it = linetypes.GetBaseIterator(); it.IsValid(); it++)
+    for (auto ln : linetypes)
     {
-        ln = ITERATOR_TO_TYPE(it, linetype_c *);
-
         if (src == &ln->f)
         {
             std::string s = epi::STR_Format("L:F:%d", ln->number);
@@ -1200,10 +1189,8 @@ void SR_PlaneMovePutType(void *storage, int index, void *extra)
     }
 
     // check all the sector types
-    for (it = sectortypes.GetBaseIterator(); it.IsValid(); it++)
+    for (auto sec : sectortypes)
     {
-        sec = ITERATOR_TO_TYPE(it, sectortype_c *);
-
         if (src == &sec->f)
         {
             std::string s = epi::STR_Format("S:F:%d", sec->number);
@@ -1264,12 +1251,9 @@ void SR_SliderPutInfo(void *storage, int index, void *extra)
     }
 
     // check all the line types
-    epi::array_iterator_c it;
 
-    for (it = linetypes.GetBaseIterator(); it.IsValid(); it++)
+    for (auto ld_type : linetypes)
     {
-        linetype_c *ld_type = ITERATOR_TO_TYPE(it, linetype_c *);
-
         if (src == &ld_type->s)
         {
             std::string s = epi::STR_Format(":%d", ld_type->number);

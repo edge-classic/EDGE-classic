@@ -20,7 +20,6 @@
 #define __DDF_GAME_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -47,7 +46,7 @@ class wi_mapposdef_c
     void Copy(wi_mapposdef_c &src);
 };
 
-class wi_mapposdef_container_c : public epi::array_c
+class wi_mapposdef_container_c : public std::vector<wi_mapposdef_c *>
 {
   public:
     wi_mapposdef_container_c();
@@ -55,23 +54,10 @@ class wi_mapposdef_container_c : public epi::array_c
     ~wi_mapposdef_container_c();
 
   private:
-    void CleanupObject(void *obj);
     void Copy(wi_mapposdef_container_c &src);
 
   public:
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(wi_mapposdef_c *m)
-    {
-        return InsertObject((void *)&m);
-    }
     wi_mapposdef_container_c &operator=(wi_mapposdef_container_c &rhs);
-    wi_mapposdef_c           *operator[](int idx)
-    {
-        return *(wi_mapposdef_c **)FetchObject(idx);
-    }
 };
 
 class wi_framedef_c
@@ -94,7 +80,7 @@ class wi_framedef_c
     void Copy(wi_framedef_c &src);
 };
 
-class wi_framedef_container_c : public epi::array_c
+class wi_framedef_container_c : public std::vector<wi_framedef_c *>
 {
   public:
     wi_framedef_container_c();
@@ -102,23 +88,10 @@ class wi_framedef_container_c : public epi::array_c
     ~wi_framedef_container_c();
 
   private:
-    void CleanupObject(void *obj);
     void Copy(wi_framedef_container_c &rhs);
 
   public:
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(wi_framedef_c *f)
-    {
-        return InsertObject((void *)&f);
-    }
     wi_framedef_container_c &operator=(wi_framedef_container_c &rhs);
-    wi_framedef_c           *operator[](int idx)
-    {
-        return *(wi_framedef_c **)FetchObject(idx);
-    }
 };
 
 class wi_animdef_c
@@ -149,7 +122,7 @@ class wi_animdef_c
     void Copy(wi_animdef_c &rhs);
 };
 
-class wi_animdef_container_c : public epi::array_c
+class wi_animdef_container_c : public std::vector<wi_animdef_c *>
 {
   public:
     wi_animdef_container_c();
@@ -157,23 +130,10 @@ class wi_animdef_container_c : public epi::array_c
     ~wi_animdef_container_c();
 
   private:
-    void CleanupObject(void *obj);
     void Copy(wi_animdef_container_c &src);
 
   public:
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(wi_animdef_c *a)
-    {
-        return InsertObject((void *)&a);
-    }
     wi_animdef_container_c &operator=(wi_animdef_container_c &rhs);
-    wi_animdef_c           *operator[](int idx)
-    {
-        return *(wi_animdef_c **)FetchObject(idx);
-    }
 };
 
 typedef enum
@@ -257,30 +217,13 @@ class gamedef_c
     }
 };
 
-class gamedef_container_c : public epi::array_c
+class gamedef_container_c : public std::vector<gamedef_c *>
 {
   public:
     gamedef_container_c();
     ~gamedef_container_c();
 
-  private:
-    void CleanupObject(void *obj);
-
   public:
-    // List management
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(gamedef_c *g)
-    {
-        return InsertObject((void *)&g);
-    }
-    gamedef_c *operator[](int idx)
-    {
-        return *(gamedef_c **)FetchObject(idx);
-    }
-
     // Search Functions
     gamedef_c *Lookup(const char *refname);
 };

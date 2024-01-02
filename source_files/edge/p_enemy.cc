@@ -211,9 +211,6 @@ bool P_Move(mobj_t *actor, bool path)
 
     if (!P_TryMove(actor, tryx, tryy))
     {
-        epi::array_iterator_c it;
-        line_t               *ld;
-
         // open any specials
         if (actor->flags & MF_FLOAT && floatok)
         {
@@ -228,7 +225,7 @@ bool P_Move(mobj_t *actor, bool path)
             return true;
         }
 
-        if (spechit.GetSize() == 0)
+        if (spechit.empty())
             return false;
 
         actor->movedir = DI_NODIR;
@@ -242,9 +239,9 @@ bool P_Move(mobj_t *actor, bool path)
         bool any_used   = false;
         bool block_used = false;
 
-        for (it = spechit.GetTailIterator(); it.IsValid(); it--)
+        for (auto iter = spechit.rbegin(); iter != spechit.rend(); iter++)
         {
-            ld = ITERATOR_TO_TYPE(it, line_t *);
+            line_t *ld = *iter;
             if (P_UseSpecialLine(actor, ld, 0, -FLT_MAX, FLT_MAX))
             {
                 any_used = true;

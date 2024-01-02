@@ -329,14 +329,11 @@ void W_InitFlats(void)
 //
 void W_InitPicAnims(void)
 {
-    epi::array_iterator_c it;
-    animdef_c            *A;
-
     // loop through animdefs, and add relevant anims.
     // Note: reverse order, give priority to newer anims.
-    for (it = animdefs.GetTailIterator(); it.IsValid(); it--)
+    for (auto iter = animdefs.rbegin(); iter != animdefs.rend(); iter++)
     {
-        A = ITERATOR_TO_TYPE(it, animdef_c *);
+        animdef_c *A = *iter;
 
         SYS_ASSERT(A);
 

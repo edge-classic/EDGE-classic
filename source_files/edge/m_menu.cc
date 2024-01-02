@@ -1256,18 +1256,16 @@ void M_DrawNewGame(void)
 // -KM- 1998/12/16 Generates EpiDef menu dynamically.
 static void CreateEpisodeMenu(void)
 {
-    if (gamedefs.GetSize() == 0)
+    if (gamedefs.empty())
         I_Error("No defined episodes !\n");
 
-    EpisodeMenu          = new menuitem_t[gamedefs.GetSize()];
-    EpisodeMenuSkipSkill = new bool[gamedefs.GetSize()];
+    EpisodeMenu          = new menuitem_t[gamedefs.size()];
+    EpisodeMenuSkipSkill = new bool[gamedefs.size()];
 
     int                   e = 0;
-    epi::array_iterator_c it;
 
-    for (it = gamedefs.GetBaseIterator(); it.IsValid(); it++)
+    for (auto g : gamedefs)
     {
-        gamedef_c *g = ITERATOR_TO_TYPE(it, gamedef_c *);
         if (!g)
             continue;
 
@@ -1411,31 +1409,35 @@ static void DoStartLevel(skill_t skill)
     WI_Clear();
 
     // find episode
-    gamedef_c            *g = NULL;
-    epi::array_iterator_c it;
+    gamedef_c            *g = nullptr;
 
     std::string chosen_episode = epi::STR_Format("%s", EpisodeMenu[chosen_epi].name);
 
-    for (it = gamedefs.GetBaseIterator(); it.IsValid(); it++)
+    for (auto game : gamedefs)
     {
-        g = ITERATOR_TO_TYPE(it, gamedef_c *);
-
         // Lobo 2022: lets use text instead of M_EPIxx graphic
-        if (g->description != "")
+        if (game->description != "")
         {
-            std::string gamedef_episode = epi::STR_Format("%s", language[g->description.c_str()]);
+            std::string gamedef_episode = epi::STR_Format("%s", language[game->description.c_str()]);
             if (DDF_CompareName(gamedef_episode.c_str(), chosen_episode.c_str()) == 0)
+            {
+                g = game;
                 break;
+            }
         }
         else
         {
-            if (DDF_CompareName(g->name.c_str(), chosen_episode.c_str()) == 0)
+            if (DDF_CompareName(game->name.c_str(), chosen_episode.c_str()) == 0)
+            {
+                g = game;
                 break;
+            }
         }
 
         /*
-        if (!strcmp(g->namegraphic.c_str(), EpisodeMenu[chosen_epi].patch_name))
+        if (!strcmp(game->namegraphic.c_str(), EpisodeMenu[chosen_epi].patch_name))
         {
+            g = game;
             break;
         }
         */

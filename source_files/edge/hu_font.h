@@ -134,34 +134,23 @@ public:
     void LoadFontTTF();
 };
 
-class font_container_c : public epi::array_c
+class font_container_c : public std::vector<font_c *>
 {
   public:
-    font_container_c() : epi::array_c(sizeof(font_c *))
+    font_container_c()
     {
     }
     ~font_container_c()
     {
-        Clear();
+        for (auto iter = begin(); iter != end(); iter++)
+        {
+            font_c *f = *iter;
+            delete f;
+            f = nullptr;
+        }
     }
-
-  private:
-    void CleanupObject(void *obj);
 
   public:
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(font_c *a)
-    {
-        return InsertObject((void *)&a);
-    }
-    font_c *operator[](int idx)
-    {
-        return *(font_c **)FetchObject(idx);
-    }
-
     // Search Functions
     font_c *Lookup(fontdef_c *def);
 };

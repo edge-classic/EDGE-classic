@@ -20,7 +20,6 @@
 #define __DDF_LINE_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -827,32 +826,17 @@ class linetype_c
 
 // --> Linetype container class
 
-class linetype_container_c : public epi::array_c
+class linetype_container_c : public std::vector<linetype_c *>
 {
   public:
     linetype_container_c();
     ~linetype_container_c();
 
   private:
-    void CleanupObject(void *obj);
-
     linetype_c *lookup_cache[LOOKUP_CACHESIZE];
 
   public:
-    // List Management
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(linetype_c *l)
-    {
-        return InsertObject((void *)&l);
-    }
     linetype_c *Lookup(int num);
-    linetype_c *operator[](int idx)
-    {
-        return *(linetype_c **)FetchObject(idx);
-    }
     void Reset();
 };
 
@@ -980,32 +964,17 @@ class sectortype_c
 
 // --> Sectortype container class
 
-class sectortype_container_c : public epi::array_c
+class sectortype_container_c : public std::vector<sectortype_c *>
 {
   public:
     sectortype_container_c();
     ~sectortype_container_c();
 
   private:
-    void CleanupObject(void *obj);
-
     sectortype_c *lookup_cache[LOOKUP_CACHESIZE];
 
   public:
-    // List Management
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(sectortype_c *s)
-    {
-        return InsertObject((void *)&s);
-    }
     sectortype_c *Lookup(int num);
-    sectortype_c *operator[](int idx)
-    {
-        return *(sectortype_c **)FetchObject(idx);
-    }
     void Reset();
 };
 

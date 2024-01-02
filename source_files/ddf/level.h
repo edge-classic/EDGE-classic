@@ -20,7 +20,6 @@
 #define __DDF_LEVEL_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -199,34 +198,24 @@ class mapdef_c
 };
 
 // Our mapdefs container
-class mapdef_container_c : public epi::array_c
+class mapdef_container_c : public std::vector<mapdef_c *>
 {
   public:
-    mapdef_container_c() : epi::array_c(sizeof(mapdef_c *))
+    mapdef_container_c()
     {
     }
     ~mapdef_container_c()
     {
-        Clear();
+      for (auto iter = begin(); iter != end(); iter++)
+      {
+          mapdef_c *map = *iter;
+          delete map;
+          map = nullptr;
+      }
     }
-
-  private:
-    void CleanupObject(void *obj);
 
   public:
     mapdef_c *Lookup(const char *name);
-    int       GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(mapdef_c *m)
-    {
-        return InsertObject((void *)&m);
-    }
-    mapdef_c *operator[](int idx)
-    {
-        return *(mapdef_c **)FetchObject(idx);
-    }
 };
 
 // -------EXTERNALISATIONS-------

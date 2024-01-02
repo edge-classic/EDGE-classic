@@ -31,8 +31,6 @@
 
 #include "i_defs.h"
 
-#include "arrays.h"
-
 // Macros
 #define FROM_320(x) ((x) * SCREENWIDTH / 320)
 #define FROM_200(y) ((y) * SCREENHEIGHT / 200)

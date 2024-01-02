@@ -20,7 +20,6 @@
 #define __DDF_WEAPON_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 #include "states.h"
@@ -200,31 +199,13 @@ class weapondef_c
     }
 };
 
-class weapondef_container_c : public epi::array_c
+class weapondef_container_c : public std::vector<weapondef_c *>
 {
   public:
     weapondef_container_c();
     ~weapondef_container_c();
 
-  private:
-    void CleanupObject(void *obj);
-
   public:
-    // List Management
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(weapondef_c *w)
-    {
-        return InsertObject((void *)&w);
-    }
-
-    weapondef_c *operator[](int idx)
-    {
-        return *(weapondef_c **)FetchObject(idx);
-    }
-
     // Search Functions
     int          FindFirst(const char *name, int startpos = -1);
     weapondef_c *Lookup(const char *refname);

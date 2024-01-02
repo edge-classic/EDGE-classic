@@ -1226,9 +1226,6 @@ void P_GiveInitialBenefits(player_t *p, const mobjtype_c *info)
     // (or restart after dying).  Sets up: ammo, ammo-limits, health,
     // armour, keys and weapons.
 
-    epi::array_iterator_c it;
-    weapondef_c          *w;
-
     p->ready_wp   = WPSEL_None;
     p->pending_wp = WPSEL_NoChange;
 
@@ -1276,9 +1273,8 @@ void P_GiveInitialBenefits(player_t *p, const mobjtype_c *info)
 
     // give all free weapons.  Needs to be after ammo, so that
     // clip weapons can get their clips filled.
-    for (it = weapondefs.GetIterator(0); it.IsValid(); it++)
+    for (auto w : weapondefs)
     {
-        w = ITERATOR_TO_TYPE(it, weapondef_c *);
         if (!w->autogive)
             continue;
 

@@ -20,7 +20,6 @@
 #define __DDF_MOVIE_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -80,34 +79,23 @@ class moviedef_c
 };
 
 // Our moviedefs container
-class moviedef_container_c : public epi::array_c
+class moviedef_container_c : public std::vector<moviedef_c *>
 {
   public:
-    moviedef_container_c() : epi::array_c(sizeof(moviedef_c *))
+    moviedef_container_c()
     {
     }
     ~moviedef_container_c()
     {
-        Clear();
+      for (auto iter = begin(); iter != end(); iter++)
+      {
+          moviedef_c *mov = *iter;
+          delete mov;
+          mov = nullptr;
+      }
     }
-
-  private:
-    void CleanupObject(void *obj);
 
   public:
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(moviedef_c *a)
-    {
-        return InsertObject((void *)&a);
-    }
-    moviedef_c *operator[](int idx)
-    {
-        return *(moviedef_c **)FetchObject(idx);
-    }
-
     // Search Functions
     moviedef_c *Lookup(const char *refname);
 };

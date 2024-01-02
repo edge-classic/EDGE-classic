@@ -108,7 +108,7 @@ static void SectorStartEntry(const char *name, bool extend)
     dynamic_sector         = new sectortype_c;
     dynamic_sector->number = number;
 
-    sectortypes.Insert(dynamic_sector);
+    sectortypes.push_back(dynamic_sector);
 }
 
 static void SectorDoTemplate(const char *contents)
@@ -202,7 +202,7 @@ void DDF_SectorInit(void)
 //
 void DDF_SectorCleanUp(void)
 {
-    sectortypes.Trim();
+    sectortypes.shrink_to_fit();
 }
 
 //----------------------------------------------------------------------------
@@ -527,7 +527,7 @@ void sectortype_c::Default()
 //
 // sectortype_container_c Constructor
 //
-sectortype_container_c::sectortype_container_c() : epi::array_c(sizeof(sectortype_c *))
+sectortype_container_c::sectortype_container_c()
 {
     Reset();
 }
@@ -537,20 +537,12 @@ sectortype_container_c::sectortype_container_c() : epi::array_c(sizeof(sectortyp
 //
 sectortype_container_c::~sectortype_container_c()
 {
-    Clear();
-}
-
-//
-// sectortype_container_c::CleanupObject
-//
-void sectortype_container_c::CleanupObject(void *obj)
-{
-    sectortype_c *s = *(sectortype_c **)obj;
-
-    if (s)
-        delete s;
-
-    return;
+    for (auto iter = begin(); iter != end(); iter++)
+    {
+        sectortype_c *sec = *iter;
+        delete sec;
+        sec = nullptr;
+    }
 }
 
 //
@@ -569,11 +561,9 @@ sectortype_c *sectortype_container_c::Lookup(const int id)
         return lookup_cache[slot];
     }
 
-    epi::array_iterator_c it;
-
-    for (it = GetTailIterator(); it.IsValid(); it--)
+    for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        sectortype_c *s = ITERATOR_TO_TYPE(it, sectortype_c *);
+        sectortype_c *s = *iter;
 
         if (s->number == id)
         {
@@ -593,7 +583,13 @@ sectortype_c *sectortype_container_c::Lookup(const int id)
 //
 void sectortype_container_c::Reset()
 {
-    Clear();
+    for (auto iter = begin(); iter != end(); iter++)
+    {
+        sectortype_c *sec = *iter;
+        delete sec;
+        sec = nullptr;
+    }
+    clear();
     memset(lookup_cache, 0, sizeof(sectortype_c *) * LOOKUP_CACHESIZE);
 }
 

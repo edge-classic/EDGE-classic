@@ -838,9 +838,8 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
                 bool add_it = true;
 
                 // Check DDFIMAGE definitions to see if this is replacing a lump type def
-                for (int j = 0; j < imagedefs.GetSize(); j++)
+                for (auto img : imagedefs)
                 {
-                    imagedef_c *img = imagedefs[j];
                     if (img->type == IMGDT_Lump && epi::case_cmp(img->info, texname) == 0 &&
                         W_CheckFileNumForName(texname.c_str()) < pack_index)
                     {
@@ -882,9 +881,8 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
         for (size_t i = 0; i < pack->dirs[d].entries.size(); i++)
         {
             pack_entry_c &entry = pack->dirs[d].entries[i];
-            for (int j = 0; j < sfxdefs.GetSize(); j++)
+            for (auto sfx : sfxdefs)
             {
-                sfxdef_c *sfx = sfxdefs[j];
                 // Assume that same stem name is meant to replace an identically named lump entry
                 if (!sfx->lump_name.empty())
                 {
@@ -904,9 +902,8 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
         for (size_t i = 0; i < pack->dirs[d].entries.size(); i++)
         {
             pack_entry_c &entry = pack->dirs[d].entries[i];
-            for (int j = 0; j < playlist.GetSize(); j++)
+            for (auto song : playlist)
             {
-                pl_entry_c *song = playlist[j];
                 if (epi::PATH_GetExtension(song->info).empty())
                 {
                     if (song->infotype == MUSINF_LUMP &&
@@ -931,9 +928,8 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 
             bool add_it = true;
 
-            for (int j = 0; j < colourmaps.GetSize(); j++)
+            for (auto colm : colourmaps)
             {
-                colourmap_c *colm = colourmaps[j];
                 if (!colm->lump_name.empty() &&
                     epi::case_cmp(colm->lump_name, epi::PATH_GetBasename(entry.name).string()) == 0 &&
                     W_CheckFileNumForName(colm->lump_name.c_str()) < pack_index)
@@ -1218,15 +1214,18 @@ std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)
                 std::string texname;
                 epi::STR_TextureNameFromFilename(texname, stem);
 
+                bool addme = true;
                 // Don't add things already defined in DDFIMAGE
-                for (int j = 0; j < imagedefs.GetSize(); j++)
+                for (auto img : imagedefs)
                 {
-                    imagedef_c *img = imagedefs[j];
                     if (epi::case_cmp(img->name, texname) == 0)
-                        continue;
+                    {
+                        addme = false;
+                        break;
+                    }
                 }
-
-                found_sprites.push_back(entry.packpath);
+                if (addme)
+                    found_sprites.push_back(entry.packpath);
             }
         }
     }

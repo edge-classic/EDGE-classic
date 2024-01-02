@@ -73,7 +73,7 @@ static void SwitchStartEntry(const char *name, bool extend)
 
     dynamic_switchdef->name = name;
 
-    switchdefs.Insert(dynamic_switchdef);
+    switchdefs.push_back(dynamic_switchdef);
 }
 
 static void SwitchParseField(const char *field, const char *contents, int index, bool is_last)
@@ -103,7 +103,12 @@ static void SwitchFinishEntry(void)
 static void SwitchClearAll(void)
 {
     // 100% safe to delete all switchdefs
-    switchdefs.Clear();
+    for (auto s : switchdefs)
+    {
+        delete s;
+        s = nullptr;
+    }
+    switchdefs.clear();
 }
 
 void DDF_ReadSwitch(const std::string &data)
@@ -140,7 +145,7 @@ void DDF_ReadSwitch(const std::string &data)
 //
 void DDF_SwitchInit(void)
 {
-    switchdefs.Clear();
+    SwitchClearAll();
 }
 
 //
@@ -148,7 +153,7 @@ void DDF_SwitchInit(void)
 //
 void DDF_SwitchCleanUp(void)
 {
-    switchdefs.Trim();
+    switchdefs.shrink_to_fit();
 }
 
 // ---> switchdef_c class
@@ -194,29 +199,13 @@ void switchdef_c::Default()
 // --> switchdef_container_c Class
 
 //
-// switchdef_container_c::CleanupObject()
-//
-void switchdef_container_c::CleanupObject(void *obj)
-{
-    switchdef_c *sw = *(switchdef_c **)obj;
-
-    if (sw)
-        delete sw;
-
-    return;
-}
-
-//
 // switchdef_c* switchdef_container_c::Find()
 //
 switchdef_c *switchdef_container_c::Find(const char *name)
 {
-    epi::array_iterator_c it;
-    switchdef_c          *sw;
-
-    for (it = GetBaseIterator(); it.IsValid(); it++)
+    for (auto iter = begin(); iter != end(); iter++)
     {
-        sw = ITERATOR_TO_TYPE(it, switchdef_c *);
+        switchdef_c *sw = *iter;
         if (DDF_CompareName(sw->name.c_str(), name) == 0)
             return sw;
     }

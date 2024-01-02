@@ -20,7 +20,6 @@
 #define __DDF_SWTH_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -71,34 +70,24 @@ class switchdef_c
 };
 
 // Our switchdefs container
-class switchdef_container_c : public epi::array_c
+class switchdef_container_c : public std::vector<switchdef_c *>
 {
   public:
-    switchdef_container_c() : epi::array_c(sizeof(switchdef_c *))
+    switchdef_container_c()
     {
     }
     ~switchdef_container_c()
     {
-        Clear();
+      for (auto iter = begin(); iter != end(); iter++)
+      {
+          switchdef_c *s= *iter;
+          delete s;
+          s = nullptr;
+      }
     }
-
-  private:
-    void CleanupObject(void *obj);
 
   public:
     switchdef_c *Find(const char *name);
-    int          GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(switchdef_c *sw)
-    {
-        return InsertObject((void *)&sw);
-    }
-    switchdef_c *operator[](int idx)
-    {
-        return *(switchdef_c **)FetchObject(idx);
-    }
 };
 
 extern switchdef_container_c switchdefs; // -ACB- 2004/06/04 Implemented

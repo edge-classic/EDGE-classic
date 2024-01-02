@@ -1036,10 +1036,8 @@ void W_ImageCreateUser(void)
 {
     I_Printf("Adding DDFIMAGE definitions...\n");
 
-    for (int i = 0; i < imagedefs.GetSize(); i++)
+    for (auto def : imagedefs)
     {
-        imagedef_c *def = imagedefs[i];
-
         if (def == NULL)
             continue;
 

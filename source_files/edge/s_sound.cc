@@ -302,7 +302,7 @@ sfxdef_c *LookupEffectDef(const sfx_t *s)
     else
         num = s->sounds[0];
 
-    SYS_ASSERT(0 <= num && num < sfxdefs.GetSize());
+    SYS_ASSERT(0 <= num && num < sfxdefs.size());
 
     return sfxdefs[num];
 }
@@ -575,7 +575,7 @@ void S_PrecacheSounds(void)
     if (var_cache_sfx)
     {
         E_ProgressMessage("Precaching SFX...");
-        for (int i = 0; i < sfxdefs.GetSize(); i++)
+        for (int i = 0; i < sfxdefs.size(); i++)
         {
             S_CacheLoad(sfxdefs[i]);
         }

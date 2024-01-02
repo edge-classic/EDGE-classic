@@ -20,7 +20,6 @@
 #define __DDF_MUS_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -89,36 +88,26 @@ class pl_entry_c
 };
 
 // Our playlist entry container
-class pl_entry_container_c : public epi::array_c
+class pl_entry_container_c : public std::vector<pl_entry_c *>
 {
   public:
-    pl_entry_container_c() : epi::array_c(sizeof(pl_entry_c *))
+    pl_entry_container_c()
     {
     }
     ~pl_entry_container_c()
     {
-        Clear();
+      for (auto iter = begin(); iter != end(); iter++)
+      {
+          pl_entry_c *pl = *iter;
+          delete pl;
+          pl = nullptr;
+      }
     }
-
-  private:
-    void CleanupObject(void *obj);
 
   public:
     pl_entry_c *Find(int number);
     int         FindLast(const char *name);
     int         FindFree();
-    int         GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(pl_entry_c *p)
-    {
-        return InsertObject((void *)&p);
-    }
-    pl_entry_c *operator[](int idx)
-    {
-        return *(pl_entry_c **)FetchObject(idx);
-    }
 };
 
 // -------EXTERNALISATIONS-------

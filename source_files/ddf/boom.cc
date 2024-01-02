@@ -220,7 +220,7 @@ sectortype_c *DDF_BoomGetGenSector(int number)
 
         DDF_BoomMakeGenSector(sec, number);
 
-        gensectortypes.Insert(sec);
+        gensectortypes.push_back(sec);
     }
 
     return sec;
@@ -733,7 +733,7 @@ linetype_c *DDF_BoomGetGenLine(int number)
 
         DDF_BoomMakeGenLine(line, number);
 
-        genlinetypes.Insert(line);
+        genlinetypes.push_back(line);
     }
 
     return line;

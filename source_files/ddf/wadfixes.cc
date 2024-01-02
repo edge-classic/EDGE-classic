@@ -65,7 +65,7 @@ static void FixStartEntry(const char *name, bool extend)
 
     dynamic_fixdef->name = name;
 
-    fixdefs.Insert(dynamic_fixdef);
+    fixdefs.push_back(dynamic_fixdef);
 }
 
 static void FixFinishEntry(void)
@@ -88,7 +88,12 @@ static void FixParseField(const char *field, const char *contents, int index, bo
 
 static void FixClearAll(void)
 {
-    fixdefs.Clear();
+    for (auto f : fixdefs)
+    {
+        delete f;
+        f = nullptr;
+    }
+    fixdefs.clear();
 }
 
 void DDF_ReadFixes(const std::string &data)
@@ -111,7 +116,7 @@ void DDF_ReadFixes(const std::string &data)
 //
 void DDF_FixInit(void)
 {
-    fixdefs.Clear();
+    FixClearAll();
 }
 
 //
@@ -119,18 +124,13 @@ void DDF_FixInit(void)
 //
 void DDF_FixCleanUp(void)
 {
-    epi::array_iterator_c it;
-    fixdef_c             *f;
-
-    for (it = fixdefs.GetBaseIterator(); it.IsValid(); it++)
+    for (auto f : fixdefs)
     {
-        f                 = ITERATOR_TO_TYPE(it, fixdef_c *);
         cur_ddf_entryname = epi::STR_Format("[%s]  (wadfixes.ddf)", f->name.c_str());
-
         cur_ddf_entryname.clear();
     }
 
-    fixdefs.Trim();
+    fixdefs.shrink_to_fit();
 }
 
 // ---> fixdef_c class
@@ -164,29 +164,13 @@ void fixdef_c::Default()
 // --> fixdef_container_c Class
 
 //
-// fixdef_container_c::CleanupObject()
-//
-void fixdef_container_c::CleanupObject(void *obj)
-{
-    fixdef_c *fl = *(fixdef_c **)obj;
-
-    if (fl)
-        delete fl;
-
-    return;
-}
-
-//
 // fixdef_c* fixdef_container_c::Find()
 //
 fixdef_c *fixdef_container_c::Find(const char *name)
 {
-    epi::array_iterator_c it;
-    fixdef_c             *fl;
-
-    for (it = GetBaseIterator(); it.IsValid(); it++)
+    for (auto iter = begin(); iter != end(); iter++)
     {
-        fl = ITERATOR_TO_TYPE(it, fixdef_c *);
+        fixdef_c *fl = *iter;
         if (DDF_CompareName(fl->name.c_str(), name) == 0)
             return fl;
     }

@@ -282,7 +282,7 @@ class wi_anim_c
         int size;
 
         // Frames...
-        size = def->frames.GetSize();
+        size = def->frames.size();
         if (size > 0)
         {
             int i;
@@ -356,7 +356,7 @@ class wi_c
     void Load(gamedef_c *_gamedef)
     {
         // Animations
-        int size = _gamedef->anims.GetSize();
+        int size = _gamedef->anims.size();
 
         if (size > 0)
         {
@@ -369,7 +369,7 @@ class wi_c
         }
 
         // Map positions
-        size = _gamedef->mappos.GetSize();
+        size = _gamedef->mappos.size();
         if (size > 0)
         {
             mappos = new wi_mappos_c[size];

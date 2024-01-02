@@ -20,7 +20,6 @@
 #define __DDF_LOCAL_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 #include "main.h"

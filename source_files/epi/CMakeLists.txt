@@ -4,7 +4,6 @@
 
 add_library(
   edge_epi
-  arrays.cc
   file_sub.cc
   file.cc
   file_memory.cc

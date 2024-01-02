@@ -404,7 +404,7 @@ int CMD_ShowMaps(char **argv, int argc)
 
     I_Printf("Warp Name           Description\n");
 
-    for (int i = 0; i < mapdefs.GetSize(); i++)
+    for (int i = 0; i < mapdefs.size(); i++)
     {
         if (G_MapExists(mapdefs[i]) && mapdefs[i]->episode)
             I_Printf("  %s           %s\n", mapdefs[i]->name.c_str(), language[mapdefs[i]->description.c_str()]);

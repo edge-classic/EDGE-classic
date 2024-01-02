@@ -375,7 +375,7 @@ static void WeaponStartEntry(const char *name, bool extend)
         dynamic_weapon       = new weapondef_c;
         dynamic_weapon->name = name;
 
-        weapondefs.Insert(dynamic_weapon);
+        weapondefs.push_back(dynamic_weapon);
     }
 
     DDF_StateBeginRange(dynamic_weapon->state_grp);
@@ -530,12 +530,8 @@ static void WeaponClearAll(void)
 
     // not using SetDisabledCount() since it breaks castle.wad
 
-    epi::array_iterator_c it;
-
-    for (it = weapondefs.GetIterator(0); it.IsValid(); it++)
+    for (auto wd : weapondefs)
     {
-        weapondef_c *wd = ITERATOR_TO_TYPE(it, weapondef_c *);
-
         if (wd)
         {
             wd->no_cheat = true;
@@ -561,13 +557,18 @@ void DDF_ReadWeapons(const std::string &data)
 
 void DDF_WeaponInit(void)
 {
-    weapondefs.Clear();
+    for (auto w : weapondefs)
+    {
+        delete w;
+        w = nullptr;
+    }
+    weapondefs.clear();
 }
 
 void DDF_WeaponCleanUp(void)
 {
     // Trim down the required to size
-    weapondefs.Trim();
+    weapondefs.shrink_to_fit();
 }
 
 static void DDF_WGetAmmo(const char *info, void *storage)
@@ -882,7 +883,7 @@ void weapondef_c::Default(void)
 //
 // weapondef_container_c Constructor
 //
-weapondef_container_c::weapondef_container_c() : epi::array_c(sizeof(weapondef_c *))
+weapondef_container_c::weapondef_container_c()
 {
 }
 
@@ -891,20 +892,12 @@ weapondef_container_c::weapondef_container_c() : epi::array_c(sizeof(weapondef_c
 //
 weapondef_container_c::~weapondef_container_c()
 {
-    Clear();
-}
-
-//
-// weapondef_container_c::CleanupObject()
-//
-void weapondef_container_c::CleanupObject(void *obj)
-{
-    weapondef_c *w = *(weapondef_c **)obj;
-
-    if (w)
+    for (auto iter = begin(); iter != end(); iter++)
+    {
+        weapondef_c *w= *iter;
         delete w;
-
-    return;
+        w = nullptr;
+    }
 }
 
 //
@@ -912,23 +905,13 @@ void weapondef_container_c::CleanupObject(void *obj)
 //
 int weapondef_container_c::FindFirst(const char *name, int startpos)
 {
-    epi::array_iterator_c it;
-    weapondef_c          *w;
+    startpos = MAX(startpos, 0);
 
-    if (startpos > 0)
-        it = GetIterator(startpos);
-    else
-        it = GetBaseIterator();
-
-    while (it.IsValid())
+    for (startpos; startpos < size(); startpos++)
     {
-        w = ITERATOR_TO_TYPE(it, weapondef_c *);
+        weapondef_c *w = at(startpos);
         if (DDF_CompareName(w->name.c_str(), name) == 0)
-        {
-            return it.GetPos();
-        }
-
-        it++;
+            return startpos;
     }
 
     return -1;

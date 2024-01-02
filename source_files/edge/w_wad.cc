@@ -963,7 +963,7 @@ void ProcessFixersForWad(data_file_c *df)
     if (fix_checker.empty())
         return;
 
-    for (int i = 0; i < fixdefs.GetSize(); i++)
+    for (int i = 0; i < fixdefs.size(); i++)
     {
         if (epi::case_cmp(fix_checker, fixdefs[i]->md5_string) == 0)
         {
@@ -1308,7 +1308,7 @@ void W_ReadUMAPINFOLumps(void)
                 temp_level       = new mapdef_c;
                 temp_level->name = mapname;
                 temp_level->lump = mapname;
-                mapdefs.Insert(temp_level);
+                mapdefs.push_back(temp_level);
             }
 
             if (Maps.maps[i].levelpic[0])
@@ -1353,7 +1353,7 @@ void W_ReadUMAPINFOLumps(void)
                     dynamic_plentry->type     = MUS_UNKNOWN; // MUS_MUS
                     dynamic_plentry->infotype = MUSINF_LUMP;
                     temp_level->music         = dynamic_plentry->number;
-                    playlist.Insert(dynamic_plentry);
+                    playlist.push_back(dynamic_plentry);
                 }
             }
 
@@ -1462,7 +1462,7 @@ void W_ReadUMAPINFOLumps(void)
                     dynamic_plentry->type     = MUS_UNKNOWN; // MUS_MUS
                     dynamic_plentry->infotype = MUSINF_LUMP;
                     temp_level->f_end.music   = dynamic_plentry->number;
-                    playlist.Insert(dynamic_plentry);
+                    playlist.push_back(dynamic_plentry);
                 }
             }
 
@@ -1510,7 +1510,7 @@ void W_ReadUMAPINFOLumps(void)
                         epi::str_upper(secret_level->name);
                         secret_level->lump = Maps.maps[i].nextsecret;
                         epi::str_upper(secret_level->lump);
-                        mapdefs.Insert(secret_level);
+                        mapdefs.push_back(secret_level);
                     }
 
                     if (epi::case_cmp(Maps.maps[i].intertextsecret, "clear") == 0)
@@ -1638,7 +1638,7 @@ void W_ReadUMAPINFOLumps(void)
                 std::string ba_rts = "// UMAPINFO SCRIPTS\n\n";
                 for (int a = 0; a < Maps.maps[i].numbossactions; a++)
                 {
-                    for (int m = 0; m < mobjtypes.GetSize(); m++)
+                    for (int m = 0; m < mobjtypes.size(); m++)
                     {
                         if (mobjtypes[m]->number == Maps.maps[i].bossactions[a].type)
                         {
@@ -1660,7 +1660,7 @@ void W_ReadUMAPINFOLumps(void)
             // first valid gamedef iterating through gamedefs in reverse order
             if (temp_level->episode_name == "TEMPEPI")
             {
-                for (int g = gamedefs.GetSize() - 1; g >= 0; g--)
+                for (int g = gamedefs.size() - 1; g >= 0; g--)
                 {
                     if (gamedefs[g]->name != "TEMPEPI" && epi::case_cmp_n(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
                     {
@@ -1684,9 +1684,9 @@ void W_ReadUMAPINFOLumps(void)
             else // Validate episode entry to make sure it wasn't renamed or removed
             {
                 bool good_epi = false;
-                for (int g = 0; g < gamedefs.GetSize(); g++)
+                for (auto g : gamedefs)
                 {
-                    if (temp_level->episode_name == gamedefs[g]->name)
+                    if (temp_level->episode_name == g->name)
                     {
                         good_epi = true;
                         break;
@@ -1694,7 +1694,7 @@ void W_ReadUMAPINFOLumps(void)
                 }
                 if (!good_epi) // Find a suitable episode
                 {
-                    for (int g = gamedefs.GetSize() - 1; g >= 0; g--)
+                    for (int g = gamedefs.size() - 1; g >= 0; g--)
                     {
                         if (epi::case_cmp_n(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
                         {
@@ -1740,7 +1740,7 @@ void W_ReadUMAPINFOLumps(void)
                 }
             }
             // Clear pre_text for this map if it is an episode's starting map
-            for (int g = gamedefs.GetSize() - 1; g >= 0; g--)
+            for (int g = gamedefs.size() - 1; g >= 0; g--)
             {
                 if (epi::case_cmp(gamedefs[g]->firstmap, temp_level->name) == 0)
                 {

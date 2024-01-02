@@ -144,7 +144,7 @@ static void StyleStartEntry(const char *name, bool extend)
     dynamic_style       = new styledef_c;
     dynamic_style->name = name;
 
-    styledefs.Insert(dynamic_style);
+    styledefs.push_back(dynamic_style);
 }
 
 static void StyleParseField(const char *field, const char *contents, int index, bool is_last)
@@ -210,12 +210,17 @@ void DDF_ReadStyles(const std::string &data)
 
 void DDF_StyleInit(void)
 {
-    styledefs.Clear();
+    for (auto s : styledefs)
+    {
+        delete s;
+        s = nullptr;
+    }
+    styledefs.clear();
 }
 
 void DDF_StyleCleanUp(void)
 {
-    if (styledefs.GetSize() == 0)
+    if (styledefs.empty())
         I_Error("There are no styles defined in DDF !\n");
 
     default_style = styledefs.Lookup("DEFAULT");
@@ -225,7 +230,7 @@ void DDF_StyleCleanUp(void)
     else if (!default_style->text[0].font)
         I_Warning("The [DEFAULT] style is missing TEXT.FONT\n");
 
-    styledefs.Trim();
+    styledefs.shrink_to_fit();
 }
 
 static specflags_t style_specials[] = {{"TILED", SYLSP_Tiled, 0},
@@ -557,32 +562,18 @@ void styledef_c::Default()
 // --> map definition container class
 
 //
-// styledef_container_c::CleanupObject()
-//
-void styledef_container_c::CleanupObject(void *obj)
-{
-    styledef_c *m = *(styledef_c **)obj;
-
-    if (m)
-        delete m;
-}
-
-//
 // styledef_container_c::Lookup()
 //
 // Finds a styledef by name, returns NULL if it doesn't exist.
 //
 styledef_c *styledef_container_c::Lookup(const char *refname)
 {
-    epi::array_iterator_c it;
-    styledef_c           *m;
-
     if (!refname || !refname[0])
         return NULL;
 
-    for (it = GetTailIterator(); it.IsValid(); it--)
+    for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        m = ITERATOR_TO_TYPE(it, styledef_c *);
+        styledef_c *m = *iter;
         if (DDF_CompareName(m->name.c_str(), refname) == 0)
             return m;
     }

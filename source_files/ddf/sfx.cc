@@ -84,10 +84,10 @@ static void SoundStartEntry(const char *name, bool extend)
 
     dynamic_sfx->name = name;
 
-    sfxdefs.Insert(dynamic_sfx);
+    sfxdefs.push_back(dynamic_sfx);
 
     // give it a self-referencing ID number
-    dynamic_sfx->normal.sounds[0] = sfxdefs.GetSize() - 1;
+    dynamic_sfx->normal.sounds[0] = sfxdefs.size() - 1;
     dynamic_sfx->normal.num       = 1;
 }
 
@@ -137,12 +137,17 @@ void DDF_ReadSFX(const std::string &data)
 
 void DDF_SFXInit(void)
 {
-    sfxdefs.Clear();
+    for (auto s : sfxdefs)
+    {
+        delete s;
+        s = nullptr;
+    }
+    sfxdefs.clear();
 }
 
 void DDF_SFXCleanUp(void)
 {
-    sfxdefs.Trim();
+    sfxdefs.shrink_to_fit();
 }
 
 //
@@ -226,19 +231,6 @@ void sfxdef_c::Default()
 
 // --> Sound Effect Definition Containter Class
 
-//
-// sfxdef_container_c::CleanupObject()
-//
-void sfxdef_container_c::CleanupObject(void *obj)
-{
-    sfxdef_c *s = *(sfxdef_c **)obj;
-
-    if (s)
-        delete s;
-
-    return;
-}
-
 static int strncasecmpwild(const char *s1, const char *s2, int n)
 {
     int i = 0;
@@ -266,25 +258,26 @@ static int strncasecmpwild(const char *s1, const char *s2, int n)
 //
 sfx_t *sfxdef_container_c::GetEffect(const char *name, bool error)
 {
-    epi::array_iterator_c it, last;
-    int                   count;
+    int                   count = 0;
 
-    sfxdef_c *si;
-    sfx_t    *r;
+    sfxdef_c *si = nullptr;
+    sfxdef_c *last = nullptr;
+    sfx_t    *r = nullptr;
 
     // NULL Sound
     if (!name || !name[0] || DDF_CompareName(name, "NULL") == 0)
         return NULL;
 
     // count them
-    for (count = 0, it = GetTailIterator(); it.IsValid() && it.GetPos() >= 0; it--)
+    for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        si = ITERATOR_TO_TYPE(it, sfxdef_c *);
+        si = *iter;
 
         if (strncasecmpwild(name, si->name.c_str(), 8) == 0)
         {
             count++;
-            last = it;
+            if (!last)
+                last = si;
         }
     }
 
@@ -299,7 +292,7 @@ sfx_t *sfxdef_container_c::GetEffect(const char *name, bool error)
     // -AJA- optimisation to save some memory
     if (count == 1)
     {
-        si = ITERATOR_TO_TYPE(last, sfxdef_c *);
+        si = last;
         r  = &si->normal;
 
         SYS_ASSERT(r->num == 1);
@@ -312,14 +305,15 @@ sfx_t *sfxdef_container_c::GetEffect(const char *name, bool error)
     // the first integer.
     //
     r = (sfx_t *)new byte[sizeof(sfx_t) + ((count - 1) * sizeof(int))];
+    r->num = 0;
 
     // now store them
-    for (r->num = 0, it = GetTailIterator(); it.IsValid() && it.GetPos() >= 0; it--)
+    for (int i = size()-1; i >= 0; i--)
     {
-        si = ITERATOR_TO_TYPE(it, sfxdef_c *);
+        si = at(i);
 
         if (strncasecmpwild(name, si->name.c_str(), 8) == 0)
-            r->sounds[r->num++] = it.GetPos();
+            r->sounds[r->num++] = i;
     }
 
     SYS_ASSERT(r->num == count);
@@ -332,11 +326,9 @@ sfx_t *sfxdef_container_c::GetEffect(const char *name, bool error)
 //
 sfxdef_c *sfxdef_container_c::Lookup(const char *name)
 {
-    epi::array_iterator_c it;
-
-    for (it = GetIterator(0); it.IsValid(); it++)
+    for (auto iter = begin(); iter != end(); iter++)
     {
-        sfxdef_c *s = ITERATOR_TO_TYPE(it, sfxdef_c *);
+        sfxdef_c *s = *iter;
 
         if (DDF_CompareName(s->name.c_str(), name) == 0)
             return s;

@@ -65,8 +65,6 @@
 #include "r_shader.h"
 #include "s_sound.h"
 
-#include "arrays.h"
-
 #include "AlmostEquals.h"
 
 #include <list>
@@ -926,14 +924,11 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
                 // These special lines were not activated in P_TryMove since it
                 // failed.  Ugh !
                 //
-                if (spechit.GetSize() > 0)
+                if (spechit.size() > 0)
                 {
-                    epi::array_iterator_c it;
-                    line_t               *ld;
-
-                    for (it = spechit.GetTailIterator(); it.IsValid(); it--)
+                    for (auto iter = spechit.rbegin(); iter != spechit.rend(); iter++)
                     {
-                        ld = ITERATOR_TO_TYPE(it, line_t *);
+                        line_t *ld = *iter;
 
                         P_ShootSpecialLine(ld, PointOnLineSide(mo->x, mo->y, ld), mo->source);
                     }

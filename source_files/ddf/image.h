@@ -20,7 +20,6 @@
 #define __DDF_IMAGE_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -137,34 +136,26 @@ class imagedef_c
 };
 
 // Our imagedefs container
-class imagedef_container_c : public epi::array_c
+class imagedef_container_c : public std::vector<imagedef_c *>
 {
   public:
-    imagedef_container_c() : epi::array_c(sizeof(imagedef_c *))
+    imagedef_container_c()
     {
     }
     ~imagedef_container_c()
     {
-        Clear();
+      for (auto iter = begin(); iter != end(); iter++)
+      {
+          imagedef_c *img = *iter;
+          delete img;
+          img = nullptr;
+      }
     }
 
   private:
     void CleanupObject(void *obj);
 
   public:
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(imagedef_c *a)
-    {
-        return InsertObject((void *)&a);
-    }
-    imagedef_c *operator[](int idx)
-    {
-        return *(imagedef_c **)FetchObject(idx);
-    }
-
     // Search Functions
     imagedef_c *Lookup(const char *refname, image_namespace_e belong);
 };

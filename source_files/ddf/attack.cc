@@ -160,7 +160,7 @@ static void AttackStartEntry(const char *name, bool extend)
     dynamic_atk       = new atkdef_c;
     dynamic_atk->name = name;
 
-    atkdefs.Insert(dynamic_atk);
+    atkdefs.push_back(dynamic_atk);
 }
 
 static void AttackDoTemplate(const char *contents)
@@ -330,18 +330,18 @@ void DDF_ReadAtks(const std::string &data)
 
 void DDF_AttackInit(void)
 {
-    atkdefs.Clear();
+    for (auto atk : atkdefs)
+    {
+        delete atk;
+        atk = nullptr;
+    }
+    atkdefs.clear();
 }
 
 void DDF_AttackCleanUp(void)
 {
-    epi::array_iterator_c it;
-    atkdef_c             *a;
-
-    for (it = atkdefs.GetIterator(0); it.IsValid(); it++)
+    for (auto a : atkdefs)
     {
-        a = ITERATOR_TO_TYPE(it, atkdef_c *);
-
         cur_ddf_entryname = epi::STR_Format("[%s]  (attacks.ddf)", a->name.c_str());
 
         // lookup thing references
@@ -361,7 +361,7 @@ void DDF_AttackCleanUp(void)
         cur_ddf_entryname.clear();
     }
 
-    atkdefs.Trim();
+    atkdefs.shrink_to_fit();
 }
 
 static const specflags_t attack_specials[] = {{"SMOKING_TRACER", AF_TraceSmoke, 0},
@@ -556,7 +556,7 @@ void atkdef_c::Default()
 //
 // atkdef_container_c::atkdef_container_c()
 //
-atkdef_container_c::atkdef_container_c() : epi::array_c(sizeof(atkdef_c *))
+atkdef_container_c::atkdef_container_c()
 {
 }
 
@@ -565,20 +565,12 @@ atkdef_container_c::atkdef_container_c() : epi::array_c(sizeof(atkdef_c *))
 //
 atkdef_container_c::~atkdef_container_c()
 {
-    Clear(); // <-- Destroy self before exiting
-}
-
-//
-// atkdef_container_c::CleanupObject()
-//
-void atkdef_container_c::CleanupObject(void *obj)
-{
-    atkdef_c *a = *(atkdef_c **)obj;
-
-    if (a)
-        delete a;
-
-    return;
+    for (auto iter = begin(); iter != end(); iter++)
+    {
+        atkdef_c *atk = *iter;
+        delete atk;
+        atk = nullptr;
+    }
 }
 
 //
@@ -588,17 +580,14 @@ void atkdef_container_c::CleanupObject(void *obj)
 //
 atkdef_c *atkdef_container_c::Lookup(const char *refname)
 {
-    epi::array_iterator_c it;
-    atkdef_c             *a;
-
     if (!refname || !refname[0])
         return NULL;
 
-    for (it = GetIterator(0); it.IsValid(); it++)
+    for (auto iter = begin(); iter != end(); iter++)
     {
-        a = ITERATOR_TO_TYPE(it, atkdef_c *);
-        if (DDF_CompareName(a->name.c_str(), refname) == 0)
-            return a;
+        atkdef_c *atk = *iter;
+        if (DDF_CompareName(atk->name.c_str(), refname) == 0)
+            return atk;
     }
 
     return NULL;

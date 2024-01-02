@@ -238,10 +238,8 @@ static void ChangeGame(newgame_params_c *param, int dir)
     gamedef_c *closest  = NULL;
     gamedef_c *furthest = NULL;
 
-    for (int i = 0; i < gamedefs.GetSize(); i++)
+    for (auto def : gamedefs)
     {
-        gamedef_c *def = gamedefs[i];
-
         mapdef_c *first_map = mapdefs.Lookup(def->firstmap.c_str());
 
         if (!first_map || !G_MapExists(first_map))
@@ -291,10 +289,8 @@ static void ChangeLevel(newgame_params_c *param, int dir)
     mapdef_c *closest  = NULL;
     mapdef_c *furthest = NULL;
 
-    for (int i = 0; i < mapdefs.GetSize(); i++)
+    for (auto def : mapdefs)
     {
-        mapdef_c *def = mapdefs[i];
-
         if (def->episode != param->map->episode)
             continue;
 

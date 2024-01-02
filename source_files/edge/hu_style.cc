@@ -131,17 +131,6 @@ void style_c::DrawBackground()
 // ---> style_container_c class
 
 //
-// style_container_c::CleanupObject()
-//
-void style_container_c::CleanupObject(void *obj)
-{
-    style_c *a = *(style_c **)obj;
-
-    if (a)
-        delete a;
-}
-
-//
 // style_container_c::Lookup()
 //
 // Never returns NULL.
@@ -150,9 +139,9 @@ style_c *style_container_c::Lookup(styledef_c *def)
 {
     SYS_ASSERT(def);
 
-    for (epi::array_iterator_c it = GetIterator(0); it.IsValid(); it++)
+    for (auto iter = begin(); iter != end(); iter++)
     {
-        style_c *st = ITERATOR_TO_TYPE(it, style_c *);
+        style_c *st = *iter;
 
         if (def == st->def)
             return st;
@@ -161,7 +150,7 @@ style_c *style_container_c::Lookup(styledef_c *def)
     style_c *new_st = new style_c(def);
 
     new_st->Load();
-    Insert(new_st);
+    push_back(new_st);
 
     return new_st;
 }

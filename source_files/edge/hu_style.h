@@ -44,34 +44,23 @@ class style_c
     void DrawBackground();
 };
 
-class style_container_c : public epi::array_c
+class style_container_c : public std::vector<style_c *>
 {
   public:
-    style_container_c() : epi::array_c(sizeof(style_c *))
+    style_container_c()
     {
     }
     ~style_container_c()
     {
-        Clear();
+      for (auto iter = begin(); iter != end(); iter++)
+      {
+          style_c *s = *iter;
+          delete s;
+          s = nullptr;
+      }
     }
-
-  private:
-    void CleanupObject(void *obj);
 
   public:
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(style_c *a)
-    {
-        return InsertObject((void *)&a);
-    }
-    style_c *operator[](int idx)
-    {
-        return *(style_c **)FetchObject(idx);
-    }
-
     // Search Functions
     style_c *Lookup(styledef_c *def);
 };

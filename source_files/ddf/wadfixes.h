@@ -20,7 +20,6 @@
 #define __DDF_WADFIXES_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -52,34 +51,24 @@ class fixdef_c
 };
 
 // Our fixdefs container
-class fixdef_container_c : public epi::array_c
+class fixdef_container_c : public std::vector<fixdef_c *>
 {
   public:
-    fixdef_container_c() : epi::array_c(sizeof(fixdef_c *))
+    fixdef_container_c()
     {
     }
     ~fixdef_container_c()
     {
-        Clear();
+      for (auto iter = begin(); iter != end(); iter++)
+      {
+          fixdef_c *f= *iter;
+          delete f;
+          f = nullptr;
+      }
     }
-
-  private:
-    void CleanupObject(void *obj);
 
   public:
     fixdef_c *Find(const char *name);
-    int       GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(fixdef_c *sw)
-    {
-        return InsertObject((void *)&sw);
-    }
-    fixdef_c *operator[](int idx)
-    {
-        return *(fixdef_c **)FetchObject(idx);
-    }
 };
 
 extern fixdef_container_c fixdefs; // -DASHO- 2022 Implemented

@@ -207,7 +207,7 @@ static void GetMUSINFOTracksForLevel(void)
                     dynamic_plentry->info     = value;
                     dynamic_plentry->type     = MUS_UNKNOWN;
                     dynamic_plentry->infotype = MUSINF_LUMP;
-                    playlist.Insert(dynamic_plentry);
+                    playlist.push_back(dynamic_plentry);
                     musinfo_tracks[currmap->name].mappings.try_emplace(mus_number, dynamic_plentry->number);
                 }
                 mus_number = -1;

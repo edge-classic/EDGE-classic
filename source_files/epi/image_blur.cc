@@ -163,8 +163,6 @@ void box_blur_rgb(u8_t *&in, u8_t *&out, int w, int h, int c, int r)
     std::swap(in, out);
     horizontal_blur_rgb(out, in, w, h, c, r);
     total_blur_rgb(in, out, w, h, c, r);
-    // Note to myself :
-    // here we could go anisotropic with different radiis rx,ry in HBlur and TBlur
 }
 
 image_data_c *Blur(image_data_c *img, float sigma)

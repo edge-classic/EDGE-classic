@@ -77,7 +77,7 @@ static void FontStartEntry(const char *name, bool extend)
 
     dynamic_font->name = name;
 
-    fontdefs.Insert(dynamic_font);
+    fontdefs.push_back(dynamic_font);
 }
 
 static void FontParseField(const char *field, const char *contents, int index, bool is_last)
@@ -139,15 +139,20 @@ void DDF_ReadFonts(const std::string &data)
 
 void DDF_FontInit(void)
 {
-    fontdefs.Clear(); // <-- Consistent with existing behaviour (-ACB- 2004/05/04)
+    for (auto fnt : fontdefs)
+    {
+        delete fnt;
+        fnt = nullptr;
+    }
+    fontdefs.clear();
 }
 
 void DDF_FontCleanUp(void)
 {
-    if (fontdefs.GetSize() == 0)
+    if (fontdefs.empty())
         I_Error("There are no fonts defined in DDF !\n");
 
-    fontdefs.Trim(); // <-- Reduce to allocated size
+    fontdefs.shrink_to_fit(); // <-- Reduce to allocated size
 }
 
 //
@@ -295,19 +300,6 @@ void fontdef_c::Default()
     ttf_smoothing_string.clear();
 }
 
-// ---> fontdef_container_c class
-
-//
-// fontdef_container_c::CleanupObject()
-//
-void fontdef_container_c::CleanupObject(void *obj)
-{
-    fontdef_c *a = *(fontdef_c **)obj;
-
-    if (a)
-        delete a;
-}
-
 //
 // fontdef_container_c::Lookup()
 //
@@ -316,11 +308,11 @@ fontdef_c *fontdef_container_c::Lookup(const char *refname)
     if (!refname || !refname[0])
         return NULL;
 
-    for (epi::array_iterator_c it = GetIterator(0); it.IsValid(); it++)
+    for (auto iter = begin(); iter != end(); iter++)
     {
-        fontdef_c *f = ITERATOR_TO_TYPE(it, fontdef_c *);
-        if (DDF_CompareName(f->name.c_str(), refname) == 0)
-            return f;
+        fontdef_c *fnt = *iter;
+        if (DDF_CompareName(fnt->name.c_str(), refname) == 0)
+            return fnt;
     }
 
     return NULL;

@@ -314,7 +314,7 @@ void font_c::LoadFontTTF()
             I_Error("LoadFontTTF: No TTF file/lump name provided for font %s!", def->name.c_str());
         }
 
-        for (int i = 0; i < hu_fonts.GetSize(); i++)
+        for (int i = 0; i < hu_fonts.size(); i++)
         {
             if (epi::strcmp(hu_fonts[i]->def->ttf_name, def->ttf_name) == 0)
             {
@@ -702,23 +702,15 @@ int font_c::StringLines(const char *str) const
 //  font_container_c class
 //----------------------------------------------------------------------------
 
-void font_container_c::CleanupObject(void *obj)
-{
-    font_c *a = *(font_c **)obj;
-
-    if (a)
-        delete a;
-}
-
 // Never returns NULL.
 //
 font_c *font_container_c::Lookup(fontdef_c *def)
 {
     SYS_ASSERT(def);
 
-    for (epi::array_iterator_c it = GetIterator(0); it.IsValid(); it++)
+    for (auto iter = begin(); iter != end(); iter++)
     {
-        font_c *f = ITERATOR_TO_TYPE(it, font_c *);
+        font_c *f = *iter;
 
         if (def == f->def)
             return f;
@@ -727,7 +719,7 @@ font_c *font_container_c::Lookup(fontdef_c *def)
     font_c *new_f = new font_c(def);
 
     new_f->Load();
-    Insert(new_f);
+    push_back(new_f);
 
     return new_f;
 }

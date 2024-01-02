@@ -41,13 +41,8 @@ std::vector<button_t *> active_buttons;
 void P_InitSwitchList(void)
 {
     // only called at game initialization.
-
-    epi::array_iterator_c it;
-
-    for (it = switchdefs.GetBaseIterator(); it.IsValid(); it++)
+    for (auto sw : switchdefs)
     {
-        switchdef_c *sw = ITERATOR_TO_TYPE(it, switchdef_c *);
-
         sw->cache.image[0] = W_ImageLookup(sw->on_name.c_str(), INS_Texture, ILF_Null);
         sw->cache.image[1] = W_ImageLookup(sw->off_name.c_str(), INS_Texture, ILF_Null);
     }
@@ -121,12 +116,10 @@ void P_ChangeSwitchTexture(line_t *line, bool useAgain, line_special_e specials,
 
         bwhere_e pos = BWH_None;
 
-        epi::array_iterator_c it;
-
         // Note: reverse order, give priority to newer switches.
-        for (it = switchdefs.GetTailIterator(); it.IsValid() && (pos == BWH_None); it--)
+        for (auto iter = switchdefs.rbegin(); iter != switchdefs.rend() && (pos == BWH_None); iter++)
         {
-            switchdef_c *sw = ITERATOR_TO_TYPE(it, switchdef_c *);
+            switchdef_c *sw = *iter;
 
             if (!sw->cache.image[0] && !sw->cache.image[1])
                 continue;

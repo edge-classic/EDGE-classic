@@ -99,7 +99,7 @@ static void GameStartEntry(const char *name, bool extend)
     dynamic_gamedef       = new gamedef_c;
     dynamic_gamedef->name = name;
 
-    gamedefs.Insert(dynamic_gamedef);
+    gamedefs.push_back(dynamic_gamedef);
 }
 
 static void GameDoTemplate(const char *contents)
@@ -155,7 +155,12 @@ static void GameFinishEntry(void)
 static void GameClearAll(void)
 {
     // 100% safe to delete all game entries
-    gamedefs.Clear();
+    for (auto game : gamedefs)
+    {
+        delete game;
+        game = nullptr;
+    }
+    gamedefs.clear();
 }
 
 void DDF_ReadGames(const std::string &data)
@@ -175,12 +180,12 @@ void DDF_ReadGames(const std::string &data)
 
 void DDF_GameInit(void)
 {
-    gamedefs.Clear(); // <-- Consistent with existing behaviour (-ACB- 2004/05/23)
+    GameClearAll();
 }
 
 void DDF_GameCleanUp(void)
 {
-    if (gamedefs.GetSize() == 0)
+    if (gamedefs.empty())
         I_Error("There are no games defined in DDF !\n");
 }
 
@@ -188,7 +193,7 @@ static void DDF_GameAddFrame(void)
 {
     wi_framedef_c *f = new wi_framedef_c(buffer_framedef);
 
-    buffer_animdef.frames.Insert(f);
+    buffer_animdef.frames.push_back(f);
 
     buffer_framedef.Default();
 }
@@ -202,7 +207,7 @@ static void DDF_GameAddAnim(void)
     else
         a->type = wi_animdef_c::WI_NORMAL;
 
-    dynamic_gamedef->anims.Insert(a);
+    dynamic_gamedef->anims.push_back(a);
 
     buffer_animdef.Default();
 }
@@ -235,7 +240,7 @@ static void DDF_GameGetAnim(const char *info, void *storage)
 
     if (info[0] == '#')
     {
-        if (buffer_animdef.frames.GetSize() > 0)
+        if (buffer_animdef.frames.size() > 0)
             DDF_Error("Invalid # command: '%s'\n", info);
 
         p = strchr(info, ':');
@@ -273,7 +278,7 @@ static void DDF_GameGetMap(const char *info, void *storage)
 
     ParseMap(info, mp);
 
-    dynamic_gamedef->mappos.Insert(mp);
+    dynamic_gamedef->mappos.push_back(mp);
 }
 
 static void DDF_GameGetPic(const char *info, void *storage)
@@ -350,7 +355,7 @@ wi_mapposdef_c &wi_mapposdef_c::operator=(wi_mapposdef_c &rhs)
 //
 // wi_mapposdef_container_c Constructor
 //
-wi_mapposdef_container_c::wi_mapposdef_container_c() : epi::array_c(sizeof(wi_mapposdef_c *))
+wi_mapposdef_container_c::wi_mapposdef_container_c()
 {
 }
 
@@ -358,7 +363,6 @@ wi_mapposdef_container_c::wi_mapposdef_container_c() : epi::array_c(sizeof(wi_ma
 // wi_mapposdef_container_c Copy constructor
 //
 wi_mapposdef_container_c::wi_mapposdef_container_c(wi_mapposdef_container_c &rhs)
-    : epi::array_c(sizeof(wi_mapposdef_c *))
 {
     Copy(rhs);
 }
@@ -368,20 +372,12 @@ wi_mapposdef_container_c::wi_mapposdef_container_c(wi_mapposdef_container_c &rhs
 //
 wi_mapposdef_container_c::~wi_mapposdef_container_c()
 {
-    Clear();
-}
-
-//
-// wi_mapposdef_container_c::CleanupObject()
-//
-void wi_mapposdef_container_c::CleanupObject(void *obj)
-{
-    wi_mapposdef_c *mp = *(wi_mapposdef_c **)obj;
-
-    if (mp)
-        delete mp;
-
-    return;
+    for (auto iter = begin(); iter != end(); iter++)
+    {
+        wi_mapposdef_c *wi = *iter;
+        delete wi;
+        wi = nullptr;
+    }
 }
 
 //
@@ -389,23 +385,14 @@ void wi_mapposdef_container_c::CleanupObject(void *obj)
 //
 void wi_mapposdef_container_c::Copy(wi_mapposdef_container_c &src)
 {
-    epi::array_iterator_c it;
-    wi_mapposdef_c       *wi;
-    wi_mapposdef_c       *wi2;
-
-    Size(src.GetSize());
-
-    for (it = src.GetBaseIterator(); it.IsValid(); it++)
+    for (auto wi : src)
     {
-        wi = ITERATOR_TO_TYPE(it, wi_mapposdef_c *);
         if (wi)
         {
-            wi2 = new wi_mapposdef_c(*wi);
-            Insert(wi2);
+            wi_mapposdef_c *wi2 = new wi_mapposdef_c(*wi);
+            push_back(wi2);
         }
     }
-
-    Trim();
 }
 
 //
@@ -415,7 +402,13 @@ wi_mapposdef_container_c &wi_mapposdef_container_c::operator=(wi_mapposdef_conta
 {
     if (&rhs != this)
     {
-        Clear();
+        for (auto iter = begin(); iter != end(); iter++)
+        {
+            wi_mapposdef_c *wi = *iter;
+            delete wi;
+            wi = nullptr;
+        }
+        clear();
         Copy(rhs);
     }
 
@@ -484,14 +477,14 @@ wi_framedef_c &wi_framedef_c::operator=(wi_framedef_c &rhs)
 //
 // wi_framedef_container_c Constructor
 //
-wi_framedef_container_c::wi_framedef_container_c() : epi::array_c(sizeof(wi_framedef_c *))
+wi_framedef_container_c::wi_framedef_container_c()
 {
 }
 
 //
 // wi_framedef_container_c Copy constructor
 //
-wi_framedef_container_c::wi_framedef_container_c(wi_framedef_container_c &rhs) : epi::array_c(sizeof(wi_framedef_c *))
+wi_framedef_container_c::wi_framedef_container_c(wi_framedef_container_c &rhs)
 {
     Copy(rhs);
 }
@@ -501,20 +494,12 @@ wi_framedef_container_c::wi_framedef_container_c(wi_framedef_container_c &rhs) :
 //
 wi_framedef_container_c::~wi_framedef_container_c()
 {
-    Clear();
-}
-
-//
-// wi_framedef_container_c::CleanupObject()
-//
-void wi_framedef_container_c::CleanupObject(void *obj)
-{
-    wi_framedef_c *f = *(wi_framedef_c **)obj;
-
-    if (f)
-        delete f;
-
-    return;
+    for (auto iter = begin(); iter != end(); iter++)
+    {
+        wi_framedef_c *wi = *iter;
+        delete wi;
+        wi = nullptr;
+    }
 }
 
 //
@@ -522,23 +507,14 @@ void wi_framedef_container_c::CleanupObject(void *obj)
 //
 void wi_framedef_container_c::Copy(wi_framedef_container_c &src)
 {
-    epi::array_iterator_c it;
-    wi_framedef_c        *f;
-    wi_framedef_c        *f2;
-
-    Size(src.GetSize());
-
-    for (it = src.GetBaseIterator(); it.IsValid(); it++)
+    for (auto f : src)
     {
-        f = ITERATOR_TO_TYPE(it, wi_framedef_c *);
         if (f)
         {
-            f2 = new wi_framedef_c(*f);
-            Insert(f2);
+            wi_framedef_c *f2 = new wi_framedef_c(*f);
+            push_back(f2);
         }
     }
-
-    Trim();
 }
 
 //
@@ -548,7 +524,13 @@ wi_framedef_container_c &wi_framedef_container_c::operator=(wi_framedef_containe
 {
     if (&rhs != this)
     {
-        Clear();
+        for (auto iter = begin(); iter != end(); iter++)
+        {
+            wi_framedef_c *wi = *iter;
+            delete wi;
+            wi = nullptr;
+        }
+        clear();
         Copy(rhs);
     }
 
@@ -598,7 +580,12 @@ void wi_animdef_c::Default()
     type = WI_NORMAL;
     level.clear();
 
-    frames.Clear();
+    for (auto frame : frames)
+    {
+        delete frame;
+        frame = nullptr;
+    }
+    frames.clear();
 }
 
 //
@@ -617,14 +604,14 @@ wi_animdef_c &wi_animdef_c::operator=(wi_animdef_c &rhs)
 //
 // wi_animdef_container_c Constructor
 //
-wi_animdef_container_c::wi_animdef_container_c() : epi::array_c(sizeof(wi_animdef_c *))
+wi_animdef_container_c::wi_animdef_container_c()
 {
 }
 
 //
 // wi_animdef_container_c Copy constructor
 //
-wi_animdef_container_c::wi_animdef_container_c(wi_animdef_container_c &rhs) : epi::array_c(sizeof(wi_animdef_c *))
+wi_animdef_container_c::wi_animdef_container_c(wi_animdef_container_c &rhs)
 {
     Copy(rhs);
 }
@@ -634,20 +621,12 @@ wi_animdef_container_c::wi_animdef_container_c(wi_animdef_container_c &rhs) : ep
 //
 wi_animdef_container_c::~wi_animdef_container_c()
 {
-    Clear();
-}
-
-//
-// wi_animdef_container_c::CleanupObject()
-//
-void wi_animdef_container_c::CleanupObject(void *obj)
-{
-    wi_animdef_c *a = *(wi_animdef_c **)obj;
-
-    if (a)
-        delete a;
-
-    return;
+    for (auto iter = begin(); iter != end(); iter++)
+    {
+        wi_animdef_c *wi = *iter;
+        delete wi;
+        wi = nullptr;
+    }
 }
 
 //
@@ -655,23 +634,14 @@ void wi_animdef_container_c::CleanupObject(void *obj)
 //
 void wi_animdef_container_c::Copy(wi_animdef_container_c &src)
 {
-    epi::array_iterator_c it;
-    wi_animdef_c         *a;
-    wi_animdef_c         *a2;
-
-    Size(src.GetSize());
-
-    for (it = src.GetBaseIterator(); it.IsValid(); it++)
+    for (auto a : src)
     {
-        a = ITERATOR_TO_TYPE(it, wi_animdef_c *);
         if (a)
         {
-            a2 = new wi_animdef_c(*a);
-            Insert(a2);
+            wi_animdef_c *a2 = new wi_animdef_c(*a);
+            push_back(a2);
         }
     }
-
-    Trim();
 }
 
 //
@@ -681,7 +651,13 @@ wi_animdef_container_c &wi_animdef_container_c::operator=(wi_animdef_container_c
 {
     if (&rhs != this)
     {
-        Clear();
+        for (auto iter = begin(); iter != end(); iter++)
+        {
+            wi_animdef_c *wi = *iter;
+            delete wi;
+            wi = nullptr;
+        }
+        clear();
         Copy(rhs);
     }
 
@@ -748,8 +724,18 @@ void gamedef_c::CopyDetail(gamedef_c &src)
 //
 void gamedef_c::Default()
 {
-    anims.Clear();
-    mappos.Clear();
+    for (auto a : anims)
+    {
+        delete a;
+        a = nullptr;
+    }
+    anims.clear();
+    for (auto m : mappos)
+    {
+        delete m;
+        m = nullptr;
+    }
+    mappos.clear();
 
     background.clear();
     splatpic.clear();
@@ -787,7 +773,7 @@ void gamedef_c::Default()
 //
 // gamedef_container_c Constructor
 //
-gamedef_container_c::gamedef_container_c() : epi::array_c(sizeof(gamedef_c *))
+gamedef_container_c::gamedef_container_c()
 {
 }
 
@@ -796,20 +782,12 @@ gamedef_container_c::gamedef_container_c() : epi::array_c(sizeof(gamedef_c *))
 //
 gamedef_container_c::~gamedef_container_c()
 {
-    Clear();
-}
-
-//
-// gamedef_container_c::CleanupObject()
-//
-void gamedef_container_c::CleanupObject(void *obj)
-{
-    gamedef_c *g = *(gamedef_c **)obj;
-
-    if (g)
-        delete g;
-
-    return;
+    for (auto iter = begin(); iter != end(); iter++)
+    {
+        gamedef_c *game = *iter;
+        delete game;
+        game = nullptr;
+    }
 }
 
 //
@@ -819,17 +797,14 @@ void gamedef_container_c::CleanupObject(void *obj)
 //
 gamedef_c *gamedef_container_c::Lookup(const char *refname)
 {
-    epi::array_iterator_c it;
-    gamedef_c            *g;
-
     if (!refname || !refname[0])
         return NULL;
 
-    for (it = GetBaseIterator(); it.IsValid(); it++)
+    for (auto iter = begin(); iter != end(); iter++)
     {
-        g = ITERATOR_TO_TYPE(it, gamedef_c *);
-        if (DDF_CompareName(g->name.c_str(), refname) == 0)
-            return g;
+        gamedef_c *game = *iter;
+        if (DDF_CompareName(game->name.c_str(), refname) == 0)
+            return game;
     }
 
     return NULL;

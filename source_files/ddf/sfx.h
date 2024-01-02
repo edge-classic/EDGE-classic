@@ -20,7 +20,6 @@
 #define __DDF_SFX_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -103,36 +102,24 @@ class sfxdef_c
 };
 
 // Our sound effect definition container
-class sfxdef_container_c : public epi::array_c
+class sfxdef_container_c : public std::vector<sfxdef_c *>
 {
   public:
-    sfxdef_container_c() : epi::array_c(sizeof(sfxdef_c *))
+    sfxdef_container_c()
     {
     }
 
     ~sfxdef_container_c()
     {
-        Clear();
+      for (auto iter = begin(); iter != end(); iter++)
+      {
+          sfxdef_c *s= *iter;
+          delete s;
+          s = nullptr;
+      }
     }
-
-  private:
-    void CleanupObject(void *obj);
 
   public:
-    // List management
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(sfxdef_c *s)
-    {
-        return InsertObject((void *)&s);
-    }
-    sfxdef_c *operator[](int idx)
-    {
-        return *(sfxdef_c **)FetchObject(idx);
-    }
-
     // Lookup functions
     sfx_t    *GetEffect(const char *name, bool error = true);
     sfxdef_c *Lookup(const char *name);

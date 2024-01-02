@@ -150,7 +150,7 @@ static void PlaylistStartEntry(const char *name, bool extend)
 
     dynamic_plentry->number = number;
 
-    playlist.Insert(dynamic_plentry);
+    playlist.push_back(dynamic_plentry);
 }
 
 static void PlaylistParseField(const char *field, const char *contents, int index, bool is_last)
@@ -176,7 +176,12 @@ static void PlaylistFinishEntry(void)
 static void PlaylistClearAll(void)
 {
     // 100% safe to just remove all entries
-    playlist.Clear();
+    for (auto pl : playlist)
+    {
+        delete pl;
+        pl = nullptr;
+    }
+    playlist.clear();
 }
 
 void DDF_ReadMusicPlaylist(const std::string &data)
@@ -197,13 +202,13 @@ void DDF_ReadMusicPlaylist(const std::string &data)
 void DDF_MusicPlaylistInit(void)
 {
     // -ACB- 2004/05/04 Use container
-    playlist.Clear();
+    PlaylistClearAll();
 }
 
 void DDF_MusicPlaylistCleanUp(void)
 {
     // -ACB- 2004/05/04 Cut our playlist down to size
-    playlist.Trim();
+    playlist.shrink_to_fit();
 }
 
 // --> pl_entry_c class
@@ -248,29 +253,13 @@ void pl_entry_c::Default()
 // --> pl_entry_containter_c class
 
 //
-// pl_entry_container_c::CleanupObject()
-//
-void pl_entry_container_c::CleanupObject(void *obj)
-{
-    pl_entry_c *p = *(pl_entry_c **)obj;
-
-    if (p)
-        delete p;
-
-    return;
-}
-
-//
 // pl_entry_c* pl_entry_container_c::Find()
 //
 pl_entry_c *pl_entry_container_c::Find(int number)
 {
-    epi::array_iterator_c it;
-    pl_entry_c           *p;
-
-    for (it = GetBaseIterator(); it.IsValid(); it++)
+    for (auto iter = begin(); iter != end(); iter++)
     {
-        p = ITERATOR_TO_TYPE(it, pl_entry_c *);
+        pl_entry_c *p = *iter;
         if (p->number == number)
             return p;
     }
@@ -280,21 +269,11 @@ pl_entry_c *pl_entry_container_c::Find(int number)
 
 int pl_entry_container_c::FindLast(const char *name)
 {
-    epi::array_iterator_c it;
-    pl_entry_c           *p;
-
-    it = GetTailIterator();
-
-    while (it.IsValid())
+    for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        p = ITERATOR_TO_TYPE(it, pl_entry_c *);
+        pl_entry_c *p = *iter;
         if (DDF_CompareName(p->info.c_str(), name) == 0)
-        {
-            // return it.GetPos();
             return p->number;
-        }
-
-        it--;
     }
 
     return -1;
@@ -302,21 +281,15 @@ int pl_entry_container_c::FindLast(const char *name)
 
 int pl_entry_container_c::FindFree()
 {
-    epi::array_iterator_c it;
-    pl_entry_c           *p;
     int                   HighestNum = 0;
 
-    it = GetBaseIterator();
-
-    while (it.IsValid())
+    for (auto iter = begin(); iter != end(); iter++)
     {
-        p = ITERATOR_TO_TYPE(it, pl_entry_c *);
+        pl_entry_c *p = *iter;
         if (p->number > HighestNum)
         {
             HighestNum = p->number;
         }
-
-        it++;
     }
     HighestNum = HighestNum + 1;
     return HighestNum;

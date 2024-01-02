@@ -132,7 +132,7 @@ static void ImageStartEntry(const char *name, bool extend)
     dynamic_image->name   = name;
     dynamic_image->belong = belong;
 
-    imagedefs.Insert(dynamic_image);
+    imagedefs.push_back(dynamic_image);
 }
 
 static void ImageParseField(const char *field, const char *contents, int index, bool is_last)
@@ -193,12 +193,17 @@ void DDF_ReadImages(const std::string &data)
 
 void DDF_ImageInit(void)
 {
-    imagedefs.Clear();
+    for (auto img : imagedefs)
+    {
+        delete img;
+        img = nullptr;
+    }
+    imagedefs.clear();
 }
 
 void DDF_ImageCleanUp(void)
 {
-    imagedefs.Trim(); // <-- Reduce to allocated size
+    imagedefs.shrink_to_fit(); // <-- Reduce to allocated size
 }
 
 static void ImageParseColour(const char *value)
@@ -455,11 +460,9 @@ imagedef_c *imagedef_container_c::Lookup(const char *refname, image_namespace_e 
     if (!refname || !refname[0])
         return NULL;
 
-    epi::array_iterator_c it;
-
-    for (it = GetBaseIterator(); it.IsValid(); it++)
+    for (auto iter = begin(); iter != end(); iter++)
     {
-        imagedef_c *g = ITERATOR_TO_TYPE(it, imagedef_c *);
+        imagedef_c *g = *iter;
 
         if (DDF_CompareName(g->name.c_str(), refname) == 0 && g->belong == belong)
             return g;

@@ -20,7 +20,6 @@
 #define __DDF_FONT__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -98,34 +97,23 @@ class fontdef_c
 };
 
 // Our fontdefs container
-class fontdef_container_c : public epi::array_c
+class fontdef_container_c : public std::vector<fontdef_c *>
 {
   public:
-    fontdef_container_c() : epi::array_c(sizeof(fontdef_c *))
+    fontdef_container_c()
     {
     }
     ~fontdef_container_c()
     {
-        Clear();
+      for (auto iter = begin(); iter != end(); iter++)
+      {
+          fontdef_c *fnt = *iter;
+          delete fnt;
+          fnt = nullptr;
+      }
     }
-
-  private:
-    void CleanupObject(void *obj);
 
   public:
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(fontdef_c *a)
-    {
-        return InsertObject((void *)&a);
-    }
-    fontdef_c *operator[](int idx)
-    {
-        return *(fontdef_c **)FetchObject(idx);
-    }
-
     // Search Functions
     fontdef_c *Lookup(const char *refname);
 };

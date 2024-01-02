@@ -20,7 +20,6 @@
 #define __DDF_FLAT_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -66,34 +65,22 @@ class flatdef_c
 };
 
 // Our flatdefs container
-class flatdef_container_c : public epi::array_c
+class flatdef_container_c : public std::vector<flatdef_c *>
 {
   public:
-    flatdef_container_c() : epi::array_c(sizeof(flatdef_c *))
+    flatdef_container_c()
     {
     }
     ~flatdef_container_c()
     {
-        Clear();
+      for (auto iter = begin(); iter != end(); iter++)
+      {
+          flatdef_c *flt = *iter;
+          delete flt;
+          flt = nullptr;
+      }
     }
-
-  private:
-    void CleanupObject(void *obj);
-
-  public:
     flatdef_c *Find(const char *name);
-    int        GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(flatdef_c *sw)
-    {
-        return InsertObject((void *)&sw);
-    }
-    flatdef_c *operator[](int idx)
-    {
-        return *(flatdef_c **)FetchObject(idx);
-    }
 };
 
 extern flatdef_container_c flatdefs; // -DASHO- 2022 Implemented

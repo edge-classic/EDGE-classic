@@ -20,7 +20,6 @@
 #define __DDF_STYLE_H__
 
 #include "epi.h"
-#include "arrays.h"
 
 #include "types.h"
 
@@ -183,34 +182,23 @@ class styledef_c
 };
 
 // Our styledefs container
-class styledef_container_c : public epi::array_c
+class styledef_container_c : public std::vector<styledef_c *>
 {
   public:
-    styledef_container_c() : epi::array_c(sizeof(styledef_c *))
+    styledef_container_c()
     {
     }
     ~styledef_container_c()
     {
-        Clear();
+      for (auto iter = begin(); iter != end(); iter++)
+      {
+          styledef_c *s= *iter;
+          delete s;
+          s = nullptr;
+      }
     }
-
-  private:
-    void CleanupObject(void *obj);
 
   public:
-    int GetSize()
-    {
-        return array_entries;
-    }
-    int Insert(styledef_c *a)
-    {
-        return InsertObject((void *)&a);
-    }
-    styledef_c *operator[](int idx)
-    {
-        return *(styledef_c **)FetchObject(idx);
-    }
-
     // Search Functions
     styledef_c *Lookup(const char *refname);
 };

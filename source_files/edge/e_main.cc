@@ -737,7 +737,7 @@ static void E_TitleDrawer(void)
 void E_PickLoadingScreen(void)
 {
     // force pic overflow -> first available titlepic
-    title_game = gamedefs.GetSize() - 1;
+    title_game = gamedefs.size() - 1;
     title_pic  = 29999;
 
     // prevent an infinite loop
@@ -748,7 +748,7 @@ void E_PickLoadingScreen(void)
 
         if (title_pic >= (int)g->titlepics.size())
         {
-            title_game = (title_game + 1) % (int)gamedefs.GetSize();
+            title_game = (title_game + 1) % (int)gamedefs.size();
             title_pic  = 0;
             continue;
         }
@@ -757,7 +757,7 @@ void E_PickLoadingScreen(void)
         // like [EDGE].
         if (title_pic == 0 && g->firstmap != "" && W_CheckNumForName(g->firstmap.c_str()) == -1)
         {
-            title_game = (title_game + 1) % gamedefs.GetSize();
+            title_game = (title_game + 1) % gamedefs.size();
             title_pic  = 0;
             continue;
         }
@@ -772,13 +772,13 @@ void E_PickLoadingScreen(void)
         }
 
         // found one !!
-        title_game = gamedefs.GetSize() - 1;
+        title_game = gamedefs.size() - 1;
         title_pic  = 29999;
         return;
     }
 
     // not found
-    title_game    = gamedefs.GetSize() - 1;
+    title_game    = gamedefs.size() - 1;
     title_pic     = 29999;
     loading_image = NULL;
 }
@@ -791,7 +791,7 @@ void E_PickLoadingScreen(void)
 void E_PickMenuScreen(void)
 {
     // force pic overflow -> first available titlepic
-    title_game = gamedefs.GetSize() - 1;
+    title_game = gamedefs.size() - 1;
     title_pic  = 29999;
 
     // prevent an infinite loop
@@ -802,7 +802,7 @@ void E_PickMenuScreen(void)
 
         if (title_pic >= (int)g->titlepics.size())
         {
-            title_game = (title_game + 1) % (int)gamedefs.GetSize();
+            title_game = (title_game + 1) % (int)gamedefs.size();
             title_pic  = 0;
             continue;
         }
@@ -810,7 +810,7 @@ void E_PickMenuScreen(void)
         // ignore non-existing episodes.
         if (title_pic == 0 && (g->firstmap == "" || W_CheckNumForName(g->firstmap.c_str()) == -1))
         {
-            title_game = (title_game + 1) % gamedefs.GetSize();
+            title_game = (title_game + 1) % gamedefs.size();
             title_pic  = 0;
             continue;
         }
@@ -825,7 +825,7 @@ void E_PickMenuScreen(void)
         }
 
         // found one !!
-        title_game                   = gamedefs.GetSize() - 1;
+        title_game                   = gamedefs.size() - 1;
         title_pic                    = 29999;
         image_c *new_backdrop        = new image_c;
         new_backdrop->name           = menu_image->name;
@@ -854,7 +854,7 @@ void E_PickMenuScreen(void)
     }
 
     // if we get here just use the loading image if it exists
-    title_game = gamedefs.GetSize() - 1;
+    title_game = gamedefs.size() - 1;
     title_pic  = 29999;
     if (loading_image)
     {
@@ -915,7 +915,7 @@ void E_AdvanceTitle(void)
 
         if (title_pic >= (int)g->titlepics.size())
         {
-            title_game = (title_game + 1) % (int)gamedefs.GetSize();
+            title_game = (title_game + 1) % (int)gamedefs.size();
             title_pic  = 0;
             continue;
         }
@@ -924,7 +924,7 @@ void E_AdvanceTitle(void)
         // like [EDGE].
         if (title_pic == 0 && g->firstmap != "" && W_CheckNumForName(g->firstmap.c_str()) == -1)
         {
-            title_game = (title_game + 1) % gamedefs.GetSize();
+            title_game = (title_game + 1) % gamedefs.size();
             title_pic  = 0;
             continue;
         }

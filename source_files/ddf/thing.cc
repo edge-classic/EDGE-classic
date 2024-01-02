@@ -509,7 +509,7 @@ static void ThingStartEntry(const char *buffer, bool extend)
     if (idx >= 0)
     {
         mobjtypes.MoveToEnd(idx);
-        dynamic_mobj = mobjtypes[mobjtypes.GetSize() - 1];
+        dynamic_mobj = mobjtypes[mobjtypes.size() - 1];
     }
 
     if (extend)
@@ -537,7 +537,7 @@ static void ThingStartEntry(const char *buffer, bool extend)
         dynamic_mobj->name   = name.c_str();
         dynamic_mobj->number = number;
 
-        mobjtypes.Insert(dynamic_mobj);
+        mobjtypes.push_back(dynamic_mobj);
     }
 
     DDF_StateBeginRange(dynamic_mobj->state_grp);
@@ -742,7 +742,12 @@ void DDF_ReadThings(const std::string &data)
 
 void DDF_MobjInit(void)
 {
-    mobjtypes.Clear();
+    for (auto m : mobjtypes)
+    {
+        delete m;
+        m = nullptr;
+    }
+    mobjtypes.clear();
 
     default_mobjtype         = new mobjtype_c();
     default_mobjtype->name   = "__DEFAULT_MOBJ";
@@ -751,14 +756,9 @@ void DDF_MobjInit(void)
 
 void DDF_MobjCleanUp(void)
 {
-    epi::array_iterator_c it;
-    mobjtype_c           *m;
-
     // lookup references
-    for (it = mobjtypes.GetIterator(0); it.IsValid(); it++)
+    for (auto m : mobjtypes)
     {
-        m = ITERATOR_TO_TYPE(it, mobjtype_c *);
-
         cur_ddf_entryname = epi::STR_Format("[%s]  (things.ddf)", m->name.c_str());
 
         m->dropitem = m->dropitem_ref != "" ? mobjtypes.Lookup(m->dropitem_ref.c_str()) : NULL;
@@ -773,7 +773,7 @@ void DDF_MobjCleanUp(void)
         cur_ddf_entryname.clear();
     }
 
-    mobjtypes.Trim();
+    mobjtypes.shrink_to_fit();
 }
 
 //
@@ -2297,45 +2297,30 @@ void mobjtype_c::DLightCompatibility(void)
 
 // --> mobjtype_container_c class
 
-mobjtype_container_c::mobjtype_container_c() : epi::array_c(sizeof(mobjtype_c *))
+mobjtype_container_c::mobjtype_container_c()
 {
     memset(lookup_cache, 0, sizeof(mobjtype_c *) * LOOKUP_CACHESIZE);
 }
 
 mobjtype_container_c::~mobjtype_container_c()
 {
-    Clear(); // <-- Destroy self before exiting
-}
-
-void mobjtype_container_c::CleanupObject(void *obj)
-{
-    mobjtype_c *m = *(mobjtype_c **)obj;
-
-    if (m)
+    for (auto iter = begin(); iter != end(); iter++)
+    {
+        mobjtype_c *m = *iter;
         delete m;
-
-    return;
+        m = nullptr;
+    }
 }
 
 int mobjtype_container_c::FindFirst(const char *name, int startpos)
 {
-    epi::array_iterator_c it;
-    mobjtype_c           *m;
+    startpos = MAX(startpos, 0);
 
-    if (startpos > 0)
-        it = GetIterator(startpos);
-    else
-        it = GetBaseIterator();
-
-    while (it.IsValid())
+    for (startpos; startpos < size(); startpos++)
     {
-        m = ITERATOR_TO_TYPE(it, mobjtype_c *);
+        mobjtype_c *m = at(startpos);
         if (DDF_CompareName(m->name.c_str(), name) == 0)
-        {
-            return it.GetPos();
-        }
-
-        it++;
+            return startpos;
     }
 
     return -1;
@@ -2343,23 +2328,13 @@ int mobjtype_container_c::FindFirst(const char *name, int startpos)
 
 int mobjtype_container_c::FindLast(const char *name, int startpos)
 {
-    epi::array_iterator_c it;
-    mobjtype_c           *m;
+    startpos = MIN(startpos, size()-1);
 
-    if (startpos >= 0 && startpos < array_entries)
-        it = GetIterator(startpos);
-    else
-        it = GetTailIterator();
-
-    while (it.IsValid())
+    for (startpos; startpos >= 0; startpos--)
     {
-        m = ITERATOR_TO_TYPE(it, mobjtype_c *);
+        mobjtype_c *m = at(startpos);
         if (DDF_CompareName(m->name.c_str(), name) == 0)
-        {
-            return it.GetPos();
-        }
-
-        it--;
+            return startpos;
     }
 
     return -1;
@@ -2369,21 +2344,21 @@ bool mobjtype_container_c::MoveToEnd(int idx)
 {
     // Moves an entry from its current position to end of the list.
 
-    mobjtype_c *m;
+    mobjtype_c *m = nullptr;
 
-    if (idx < 0 || idx >= array_entries)
+    if (idx < 0 || idx >= size())
         return false;
 
-    if (idx == (array_entries - 1))
+    if (idx == (size() - 1))
         return true; // Already at the end
 
     // Get a copy of the pointer
-    m = (*this)[idx];
+    m = at(idx);
 
-    memmove(&array[idx * array_block_objsize], &array[(idx + 1) * array_block_objsize],
-            (array_entries - (idx + 1)) * array_objsize);
+    erase(begin()+idx);
 
-    memcpy(&array[(array_entries - 1) * array_block_objsize], (void *)&m, sizeof(mobjtype_c *));
+    push_back(m);
+
     return true;
 }
 
@@ -2420,11 +2395,9 @@ const mobjtype_c *mobjtype_container_c::Lookup(int id)
         return lookup_cache[slot];
     }
 
-    epi::array_iterator_c it;
-
-    for (it = GetTailIterator(); it.IsValid(); it--)
+    for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        mobjtype_c *m = ITERATOR_TO_TYPE(it, mobjtype_c *);
+        mobjtype_c *m = *iter;
 
         if (m->number == id)
         {
@@ -2442,14 +2415,12 @@ const mobjtype_c *mobjtype_container_c::LookupCastMember(int castpos)
     // Lookup the cast member of the one with the nearest match
     // to the position given.
 
-    epi::array_iterator_c it;
-    mobjtype_c           *best;
-    mobjtype_c           *m;
+    mobjtype_c           *best = nullptr;
+    mobjtype_c           *m = nullptr;
 
-    best = NULL;
-    for (it = GetTailIterator(); it.IsValid(); it--)
+    for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        m = ITERATOR_TO_TYPE(it, mobjtype_c *);
+        m = *iter;
         if (m->castorder > 0)
         {
             if (m->castorder == castpos) // Exact match
@@ -2505,12 +2476,9 @@ const mobjtype_c *mobjtype_container_c::LookupCastMember(int castpos)
 const mobjtype_c *mobjtype_container_c::LookupPlayer(int playernum)
 {
     // Find a player thing (needed by deathmatch code).
-
-    epi::array_iterator_c it;
-
-    for (it = GetTailIterator(); it.IsValid(); it--)
+    for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        mobjtype_c *m = ITERATOR_TO_TYPE(it, mobjtype_c *);
+        mobjtype_c *m = *iter;
 
         if (m->playernum == playernum)
             return m;
@@ -2523,8 +2491,6 @@ const mobjtype_c *mobjtype_container_c::LookupPlayer(int playernum)
 const mobjtype_c *mobjtype_container_c::LookupDoorKey(int theKey)
 {
     // Find a key thing (needed by automap code).
-
-    epi::array_iterator_c it;
 
     /*
         //run through the key flags to get the benefit name
@@ -2543,9 +2509,9 @@ const mobjtype_c *mobjtype_container_c::LookupDoorKey(int theKey)
         }
     */
 
-    for (it = GetTailIterator(); it.IsValid(); it--)
+    for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        mobjtype_c *m = ITERATOR_TO_TYPE(it, mobjtype_c *);
+        mobjtype_c *m = *iter;
 
         benefit_t *list;
         list = m->pickup_benefits;

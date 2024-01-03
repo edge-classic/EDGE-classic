@@ -174,7 +174,7 @@ class dynlight_shader_c : public abstract_shader_c
     }
 
   private:
-    inline float TexCoord(vec2_t *texc, float r, const vec3_t *lit_pos, const vec3_t *normal)
+    inline float TexCoord(HMM_Vec2 *texc, float r, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
     {
         float mx = mo->x;
         float my = mo->y;
@@ -183,19 +183,19 @@ class dynlight_shader_c : public abstract_shader_c
         MIR_Coordinate(mx, my);
         MIR_Height(mz);
 
-        float dx = lit_pos->x - mx;
-        float dy = lit_pos->y - my;
-        float dz = lit_pos->z - mz;
+        float dx = lit_pos->X - mx;
+        float dy = lit_pos->Y - my;
+        float dz = lit_pos->Z - mz;
 
-        float nx = normal->x;
-        float ny = normal->y;
-        float nz = normal->z;
+        float nx = normal->X;
+        float ny = normal->Y;
+        float nz = normal->Z;
 
         if (fabs(nz) > 50 * (fabs(nx) + fabs(ny)))
         {
             /* horizontal plane */
-            texc->x = (1 + dx / r) / 2.0;
-            texc->y = (1 + dy / r) / 2.0;
+            texc->X = (1 + dx / r) / 2.0;
+            texc->Y = (1 + dy / r) / 2.0;
 
             return fabs(dz) / r;
         }
@@ -211,8 +211,8 @@ class dynlight_shader_c : public abstract_shader_c
 
             r /= sqrt(nx * nx + ny * ny); // correct ??
 
-            texc->y = (1 + dz / r) / 2.0;
-            texc->x = (1 + dxy / r) / 2.0;
+            texc->Y = (1 + dz / r) / 2.0;
+            texc->X = (1 + dxy / r) / 2.0;
 
             return fabs(nx * dx + ny * dy + nz * dz) / r;
         }
@@ -357,7 +357,7 @@ class dynlight_shader_c : public abstract_shader_c
             {
                 local_gl_vert_t *dest = glvert + v_idx;
 
-                vec3_t lit_pos;
+                HMM_Vec3 lit_pos;
 
                 (*func)(data, v_idx, &dest->pos, dest->rgba, &dest->texc[0], &dest->normal, &lit_pos);
 
@@ -414,10 +414,10 @@ class plane_glow_c : public abstract_shader_c
             return fabs(sec->c_h - z); // GLOW_Ceiling
     }
 
-    inline void TexCoord(vec2_t *texc, float r, const sector_t *sec, const vec3_t *lit_pos, const vec3_t *normal)
+    inline void TexCoord(HMM_Vec2 *texc, float r, const sector_t *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
     {
-        texc->x = 0.5;
-        texc->y = 0.5 + Dist(sec, lit_pos->z) / r / 2.0;
+        texc->X = 0.5;
+        texc->Y = 0.5 + Dist(sec, lit_pos->Z) / r / 2.0;
     }
 
     inline float WhatRadius(int DL)
@@ -541,7 +541,7 @@ class plane_glow_c : public abstract_shader_c
             {
                 local_gl_vert_t *dest = glvert + v_idx;
 
-                vec3_t lit_pos;
+                HMM_Vec3 lit_pos;
 
                 (*func)(data, v_idx, &dest->pos, dest->rgba, &dest->texc[0], &dest->normal, &lit_pos);
 
@@ -584,10 +584,10 @@ class wall_glow_c : public abstract_shader_c
         return (ld->v1->x - x) * norm_x + (ld->v1->y - y) * norm_y;
     }
 
-    inline void TexCoord(vec2_t *texc, float r, const sector_t *sec, const vec3_t *lit_pos, const vec3_t *normal)
+    inline void TexCoord(HMM_Vec2 *texc, float r, const sector_t *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
     {
-        texc->x = 0.5;
-        texc->y = 0.5 + Dist(lit_pos->x, lit_pos->y) / r / 2.0;
+        texc->X = 0.5;
+        texc->Y = 0.5 + Dist(lit_pos->X, lit_pos->Y) / r / 2.0;
     }
 
     inline float WhatRadius(int DL)
@@ -708,7 +708,7 @@ class wall_glow_c : public abstract_shader_c
             {
                 local_gl_vert_t *dest = glvert + v_idx;
 
-                vec3_t lit_pos;
+                HMM_Vec3 lit_pos;
 
                 (*func)(data, v_idx, &dest->pos, dest->rgba, &dest->texc[0], &dest->normal, &lit_pos);
 
@@ -741,10 +741,10 @@ abstract_shader_c *MakeWallGlow(mobj_t *mo)
 class laser_glow_c : public abstract_shader_c
 {
 private:
-	vec3_t s, e;
+	HMM_Vec3 s, e;
 
 	float length;
-	vec3_t normal;
+	HMM_Vec3 normal;
 
 	const mobjtype_c *info;
 	float bright;
@@ -752,7 +752,7 @@ private:
 	light_image_c *lim[2];
 
 public:
-	laser_glow_c(const vec3_t& _v1, const vec3_t& _v2,
+	laser_glow_c(const HMM_Vec3& _v1, const HMM_Vec3& _v2,
 				 const mobjtype_c *_info, float _intensity) :
 		s(_v1), e(_v2), info(_info), bright(_intensity)
 	{

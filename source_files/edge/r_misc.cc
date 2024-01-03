@@ -58,9 +58,9 @@ int viewwindow_h;
 angle_t viewangle     = 0;
 angle_t viewvertangle = 0;
 
-vec3_t viewforward;
-vec3_t viewup;
-vec3_t viewright;
+HMM_Vec3 viewforward;
+HMM_Vec3 viewup;
+HMM_Vec3 viewright;
 
 angle_t normalfov, zoomedfov;
 bool    viewiszoomed = false;

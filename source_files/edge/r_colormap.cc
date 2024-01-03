@@ -670,21 +670,21 @@ class colormap_shader_c : public abstract_shader_c
   private:
     inline float DistFromViewplane(float x, float y, float z)
     {
-        float dx = (x - viewx) * viewforward.x;
-        float dy = (y - viewy) * viewforward.y;
-        float dz = (z - viewz) * viewforward.z;
+        float dx = (x - viewx) * viewforward.X;
+        float dy = (y - viewy) * viewforward.Y;
+        float dz = (z - viewz) * viewforward.Z;
 
         return dx + dy + dz;
     }
 
-    inline void TexCoord(local_gl_vert_t *v, int t, const vec3_t *lit_pos)
+    inline void TexCoord(local_gl_vert_t *v, int t, const HMM_Vec3 *lit_pos)
     {
-        float dist = DistFromViewplane(lit_pos->x, lit_pos->y, lit_pos->z);
+        float dist = DistFromViewplane(lit_pos->X, lit_pos->Y, lit_pos->Z);
 
         int L = light_lev / 4; // need integer range 0-63
 
-        v->texc[t].x = dist / 1600.0;
-        v->texc[t].y = (L + 0.5) / 64.0;
+        v->texc[t].X = dist / 1600.0;
+        v->texc[t].Y = (L + 0.5) / 64.0;
     }
 
   public:
@@ -757,7 +757,7 @@ class colormap_shader_c : public abstract_shader_c
 
             dest->rgba[3] = alpha;
 
-            vec3_t lit_pos;
+            HMM_Vec3 lit_pos;
 
             (*func)(data, v_idx, &dest->pos, dest->rgba, &dest->texc[0], &dest->normal, &lit_pos);
 

@@ -202,7 +202,7 @@ static void BounceOffWall(mobj_t *mo, line_t *wall)
     divline_t div;
     float     dest_x, dest_y;
 
-    angle      = R_PointToAngle(0, 0, mo->mom.x, mo->mom.y);
+    angle      = R_PointToAngle(0, 0, mo->mom.X, mo->mom.Y);
     wall_angle = R_PointToAngle(0, 0, wall->dx, wall->dy);
 
     diff = wall_angle - angle;
@@ -237,8 +237,8 @@ static void BounceOffWall(mobj_t *mo, line_t *wall)
 
     mo->speed *= mo->info->bounce_speed;
 
-    mo->mom.x = M_Cos(angle) * mo->speed;
-    mo->mom.y = M_Sin(angle) * mo->speed;
+    mo->mom.X = M_Cos(angle) * mo->speed;
+    mo->mom.Y = M_Sin(angle) * mo->speed;
     mo->angle = angle;
 
     EnterBounceStates(mo);
@@ -255,9 +255,9 @@ static void BounceOffPlane(mobj_t *mo, float dir)
 
     mo->speed *= mo->info->bounce_speed;
 
-    mo->mom.x = (float)(M_Cos(mo->angle) * mo->speed);
-    mo->mom.y = (float)(M_Sin(mo->angle) * mo->speed);
-    mo->mom.z = (float)(dir * mo->speed * mo->info->bounce_up);
+    mo->mom.X = (float)(M_Cos(mo->angle) * mo->speed);
+    mo->mom.Y = (float)(M_Sin(mo->angle) * mo->speed);
+    mo->mom.Z = (float)(dir * mo->speed * mo->info->bounce_up);
 
     EnterBounceStates(mo);
 }
@@ -271,7 +271,7 @@ static bool CorpseShouldSlide(mobj_t *mo)
 {
     float floor, ceil;
 
-    if (-0.25f < mo->mom.x && mo->mom.x < 0.25f && -0.25f < mo->mom.y && mo->mom.y < 0.25f)
+    if (-0.25f < mo->mom.X && mo->mom.X < 0.25f && -0.25f < mo->mom.Y && mo->mom.Y < 0.25f)
     {
         return false;
     }
@@ -282,26 +282,26 @@ static bool CorpseShouldSlide(mobj_t *mo)
     // Vertex slope check here?
     if (mo->subsector->sector->floor_vertex_slope)
     {
-        vec3_t line_a{mo->x, mo->y, -40000};
-        vec3_t line_b{mo->x, mo->y, 40000};
+        HMM_Vec3 line_a{mo->x, mo->y, -40000};
+        HMM_Vec3 line_b{mo->x, mo->y, 40000};
         float  z_test =
             M_LinePlaneIntersection(line_a, line_b, mo->subsector->sector->floor_z_verts[0],
                                     mo->subsector->sector->floor_z_verts[1], mo->subsector->sector->floor_z_verts[2],
                                     mo->subsector->sector->floor_vs_normal)
-                .z;
+                .Z;
         if (std::isfinite(z_test))
             f_slope_z = z_test - mo->subsector->sector->f_h;
     }
 
     if (mo->subsector->sector->ceil_vertex_slope)
     {
-        vec3_t line_a{mo->x, mo->y, -40000};
-        vec3_t line_b{mo->x, mo->y, 40000};
+        HMM_Vec3 line_a{mo->x, mo->y, -40000};
+        HMM_Vec3 line_b{mo->x, mo->y, 40000};
         float  z_test =
             M_LinePlaneIntersection(line_a, line_b, mo->subsector->sector->ceil_z_verts[0],
                                     mo->subsector->sector->ceil_z_verts[1], mo->subsector->sector->ceil_z_verts[2],
                                     mo->subsector->sector->ceil_vs_normal)
-                .z;
+                .Z;
         if (std::isfinite(z_test))
             c_slope_z = mo->subsector->sector->c_h - z_test;
     }
@@ -585,11 +585,11 @@ void P_SetMobjDirAndSpeed(mobj_t *mo, angle_t angle, float slope, float speed)
     mo->angle     = angle;
     mo->vertangle = M_ATan(slope);
 
-    mo->mom.z = M_Sin(mo->vertangle) * speed;
+    mo->mom.Z = M_Sin(mo->vertangle) * speed;
     speed *= M_Cos(mo->vertangle);
 
-    mo->mom.x = M_Cos(angle) * speed;
-    mo->mom.y = M_Sin(angle) * speed;
+    mo->mom.X = M_Cos(angle) * speed;
+    mo->mom.Y = M_Sin(angle) * speed;
 }
 
 //
@@ -600,7 +600,7 @@ void P_SetMobjDirAndSpeed(mobj_t *mo, angle_t angle, float slope, float speed)
 //
 void P_MobjExplodeMissile(mobj_t *mo)
 {
-    mo->mom.x = mo->mom.y = mo->mom.z = 0;
+    mo->mom.X = mo->mom.Y = mo->mom.Z = 0;
 
     mo->flags &= ~(MF_MISSILE | MF_TOUCHY);
     mo->extendedflags &= ~(EF_BOUNCE | EF_USABLE);
@@ -639,14 +639,14 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
     {
         int countx = 0;
         int county = 0;
-        vec2_t cumulative = {0,0};
+        HMM_Vec2 cumulative = {0,0};
         // handle push sectors
         for (touch_node_t *tn = mo->touch_sectors; tn ;tn=tn->mo_next)
         {
             if (tn->sec)
             {
                 region_properties_t tn_props = tn->sec->props;
-                if (tn_props.push.x || tn_props.push.y || tn_props.push.z)
+                if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
                 {
                     sector_flag_e tn_flags = tn_props.special ? tn_props.special->special_flags : SECSP_PushConstant;
 
@@ -664,30 +664,30 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
                     if (tn_flags & SECSP_Proportional)
                         push_mul *= factor;
 
-                    if (tn_props.push.x)
+                    if (tn_props.push.X)
                     {
                         countx++;
-                        cumulative.x += push_mul * tn_props.push.x;
+                        cumulative.X += push_mul * tn_props.push.X;
                     }
-                    if (tn_props.push.y)
+                    if (tn_props.push.Y)
                     {
                         county++;
-                        cumulative.y += push_mul * tn_props.push.y;
+                        cumulative.Y += push_mul * tn_props.push.Y;
                     }
-                    new_p->push.z += push_mul * tn_props.push.z;
+                    new_p->push.Z += push_mul * tn_props.push.Z;
                 }
             }
         }
         // Average it out a la ZDoom so we aren't getting sent to the shadow realm in certain Boom maps - Dasho
         // Don't think it is necessary for z push at this time
         if (countx)
-            new_p->push.x += (cumulative.x/countx);
+            new_p->push.X += (cumulative.X/countx);
         if (county)
-            new_p->push.y += (cumulative.y/county);
+            new_p->push.Y += (cumulative.Y/county);
     }
     else
     {
-        if (p->push.x || p->push.y || p->push.z)
+        if (p->push.X || p->push.Y || p->push.Z)
         {        
             if (!(flags & SECSP_WholeRegion) && bz > f_h + 1)
                 return;
@@ -703,9 +703,9 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
             if (flags & SECSP_Proportional)
                 push_mul *= factor;
 
-            new_p->push.x += push_mul * p->push.x;
-            new_p->push.y += push_mul * p->push.y;
-            new_p->push.z += push_mul * p->push.z;
+            new_p->push.X += push_mul * p->push.X;
+            new_p->push.Y += push_mul * p->push.Y;
+            new_p->push.Z += push_mul * p->push.Z;
         }
     }
 }
@@ -734,7 +734,7 @@ void P_CalcFullProperties(const mobj_t *mo, region_properties_t *new_p)
     new_p->viscosity = 0;
     new_p->drag      = 0;
 
-    new_p->push.x = new_p->push.y = new_p->push.z = 0;
+    new_p->push.X = new_p->push.Y = new_p->push.Z = 0;
 
     new_p->type    = 0; // these shouldn't be used
     new_p->special = NULL;
@@ -801,22 +801,22 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
     float absx, absy;
     float maxstep;
 
-    if (fabs(mo->mom.x) > MAXMOVE)
+    if (fabs(mo->mom.X) > MAXMOVE)
     {
-        float factor = MAXMOVE / fabs(mo->mom.x);
-        mo->mom.x *= factor;
-        mo->mom.y *= factor;
+        float factor = MAXMOVE / fabs(mo->mom.X);
+        mo->mom.X *= factor;
+        mo->mom.Y *= factor;
     }
 
-    if (fabs(mo->mom.y) > MAXMOVE)
+    if (fabs(mo->mom.Y) > MAXMOVE)
     {
-        float factor = MAXMOVE / fabs(mo->mom.y);
-        mo->mom.x *= factor;
-        mo->mom.y *= factor;
+        float factor = MAXMOVE / fabs(mo->mom.Y);
+        mo->mom.X *= factor;
+        mo->mom.Y *= factor;
     }
 
-    float xmove = mo->mom.x;
-    float ymove = mo->mom.y;
+    float xmove = mo->mom.X;
+    float ymove = mo->mom.Y;
 
     if (do_extra && r_doubleframes.d) // 70Hz
     {
@@ -827,8 +827,8 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
     // -AJA- 1999/07/31: Ride that rawhide :->
     if (mo->above_mo && !(mo->above_mo->flags & MF_FLOAT) && mo->above_mo->floorz < (mo->z + mo->height + 1))
     {
-        mo->above_mo->mom.x += xmove * mo->info->ride_friction;
-        mo->above_mo->mom.y += ymove * mo->info->ride_friction;
+        mo->above_mo->mom.X += xmove * mo->info->ride_friction;
+        mo->above_mo->mom.Y += ymove * mo->info->ride_friction;
     }
 
     // -AJA- 1999/10/09: Reworked viscosity.
@@ -957,7 +957,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
 
             // -AJA- 2008/01/20: Jumping out of Water
             if (blockline && blockline->backsector && mo->player && mo->player->mo == mo && mo->player->wet_feet &&
-                !mo->player->swimming && mo->player->jumpwait == 0 && mo->z > mo->floorz + 0.5f && mo->mom.z >= 0.0f)
+                !mo->player->swimming && mo->player->jumpwait == 0 && mo->z > mo->floorz + 0.5f && mo->mom.Z >= 0.0f)
             {
                 float ground_h;
 
@@ -1013,7 +1013,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
             else
             {
                 xmove = ymove = 0;
-                mo->mom.x = mo->mom.y = 0;
+                mo->mom.X = mo->mom.Y = 0;
             }
         }
     } while (xmove || ymove);
@@ -1053,10 +1053,10 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
 
     // when we are confident that a mikoportal is being used, do not apply friction or drag
     // to the voodoo doll
-    if (!mo->is_voodoo || !AlmostEquals(mo->floorz, -32768.0f) || AlmostEquals(mo->mom.z, 0.0f))
+    if (!mo->is_voodoo || !AlmostEquals(mo->floorz, -32768.0f) || AlmostEquals(mo->mom.Z, 0.0f))
     {
-        mo->mom.x *= friction;
-        mo->mom.y *= friction;
+        mo->mom.X *= friction;
+        mo->mom.Y *= friction;
     }
 
     if (mo->player)
@@ -1070,10 +1070,10 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
 
         // I_Debugf("Actual speed = %1.4f\n", mo->player->actual_speed);
 
-        if (fabs(mo->mom.x) < STOPSPEED && fabs(mo->mom.y) < STOPSPEED && mo->player->cmd.forwardmove == 0 &&
+        if (fabs(mo->mom.X) < STOPSPEED && fabs(mo->mom.Y) < STOPSPEED && mo->player->cmd.forwardmove == 0 &&
             mo->player->cmd.sidemove == 0)
         {
-            mo->mom.x = mo->mom.y = 0;
+            mo->mom.X = mo->mom.Y = 0;
         }
     }
 }
@@ -1106,7 +1106,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
         mo->player->deltaviewheight = (mo->player->std_viewheight - mo->player->viewheight) / 8.0f;
     }
 
-    zmove = mo->mom.z * (1.0f - props->viscosity);
+    zmove = mo->mom.Z * (1.0f - props->viscosity);
 
     if (do_extra && r_doubleframes.d) // 70 Hz
         zmove *= 0.52;
@@ -1147,9 +1147,9 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
         }
 
         if (mo->flags & MF_SKULLFLY)
-            mo->mom.z = -mo->mom.z;
+            mo->mom.Z = -mo->mom.Z;
 
-        if (mo->mom.z < 0)
+        if (mo->mom.Z < 0)
         {
             float hurt_momz = gravity * mo->info->maxfall;
             bool  fly_or_swim =
@@ -1160,7 +1160,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
                 // Squat down. Decrease viewheight for a moment after hitting the
                 // ground (hard), and utter appropriate sound.
                 mo->player->deltaviewheight = zmove / 8.0f * (r_doubleframes.d ? 2.0 : 1.0); // 70Hz
-                if (mo->info->maxfall > 0 && -mo->mom.z > hurt_momz)
+                if (mo->info->maxfall > 0 && -mo->mom.Z > hurt_momz)
                 {
                     if (!(mo->player->cheats & CF_GODMODE) && mo->player->powers[PW_Invulnerable] < 1)
                         S_StartFX(mo->info->fallpain_sound, P_MobjGetSfxCategory(mo), mo);
@@ -1173,9 +1173,9 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
                 P_HitLiquidFloor(mo);
             }
             // -KM- 1998/12/16 If bigger than max fall, take damage.
-            if (mo->info->maxfall > 0 && gravity > 0 && -mo->mom.z > hurt_momz && (!mo->player || !fly_or_swim))
+            if (mo->info->maxfall > 0 && gravity > 0 && -mo->mom.Z > hurt_momz && (!mo->player || !fly_or_swim))
             {
-                P_DamageMobj(mo, NULL, NULL, (-mo->mom.z - hurt_momz), NULL);
+                P_DamageMobj(mo, NULL, NULL, (-mo->mom.Z - hurt_momz), NULL);
             }
 
             // -KM- 1999/01/31 Bouncy bouncy...
@@ -1185,16 +1185,16 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
 
                 // don't bounce forever on the floor
                 if (!(mo->flags & MF_NOGRAVITY) &&
-                    fabs(mo->mom.z) < STOPSPEED + fabs(gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1)))
+                    fabs(mo->mom.Z) < STOPSPEED + fabs(gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1)))
                 {
-                    mo->mom.x = mo->mom.y = mo->mom.z = 0;
+                    mo->mom.X = mo->mom.Y = mo->mom.Z = 0;
                 }
             }
             else
-                mo->mom.z = 0;
+                mo->mom.Z = 0;
         }
 
-        if (mo->z - mo->mom.z > mo->floorz)
+        if (mo->z - mo->mom.Z > mo->floorz)
         { // Spawn splashes, etc.
             P_HitLiquidFloor(mo);
         }
@@ -1238,7 +1238,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
         {
             // 70 Hz: apply gravity only on real tics
             if (!extra_tic || !r_doubleframes.d)
-                mo->mom.z -= gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
+                mo->mom.Z -= gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
         }
     }
 
@@ -1249,10 +1249,10 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
     if (mo->z + mo->height > mo->ceilingz)
     {
         if (mo->flags & MF_SKULLFLY)
-            mo->mom.z = -mo->mom.z; // the skull slammed into something
+            mo->mom.Z = -mo->mom.Z; // the skull slammed into something
 
         // hit the ceiling
-        if (mo->mom.z > 0)
+        if (mo->mom.Z > 0)
         {
             float hurt_momz = gravity * mo->info->maxfall;
             bool  fly_or_swim =
@@ -1263,9 +1263,9 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
                 mo->player->deltaviewheight = zmove / 8.0f;
                 S_StartFX(mo->info->oof_sound, P_MobjGetSfxCategory(mo), mo);
             }
-            if (mo->info->maxfall > 0 && gravity < 0 && mo->mom.z > hurt_momz && (!mo->player || !fly_or_swim))
+            if (mo->info->maxfall > 0 && gravity < 0 && mo->mom.Z > hurt_momz && (!mo->player || !fly_or_swim))
             {
-                P_DamageMobj(mo, NULL, NULL, (mo->mom.z - hurt_momz), NULL);
+                P_DamageMobj(mo, NULL, NULL, (mo->mom.Z - hurt_momz), NULL);
             }
 
             // -KM- 1999/01/31 More bouncing.
@@ -1275,13 +1275,13 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
 
                 // don't bounce forever on the ceiling
                 if (!(mo->flags & MF_NOGRAVITY) &&
-                    fabs(mo->mom.z) < STOPSPEED + fabs(gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1)))
+                    fabs(mo->mom.Z) < STOPSPEED + fabs(gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1)))
                 {
-                    mo->mom.x = mo->mom.y = mo->mom.z = 0;
+                    mo->mom.X = mo->mom.Y = mo->mom.Z = 0;
                 }
             }
             else
-                mo->mom.z = 0;
+                mo->mom.Z = 0;
         }
 
         mo->z = mo->ceilingz - mo->height;
@@ -1319,7 +1319,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
         {
             // 70 Hz: apply gravity only on real tics
             if (!extra_tic || !r_doubleframes.d)
-                mo->mom.z += -gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
+                mo->mom.Z += -gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
         }
     }
 
@@ -1332,17 +1332,17 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
 
     // ladders have friction
     if (mo->on_ladder >= 0)
-        mo->mom.z *= LADDER_FRICTION;
+        mo->mom.Z *= LADDER_FRICTION;
     else if (mo->player && mo->player->powers[PW_Jetpack] > 0)
-        mo->mom.z *= props->friction;
+        mo->mom.Z *= props->friction;
     else
-        mo->mom.z *= props->drag;
+        mo->mom.Z *= props->drag;
 
     if (mo->player)
     {
-        if (fabs(mo->mom.z) < STOPSPEED && mo->player->cmd.upwardmove == 0)
+        if (fabs(mo->mom.Z) < STOPSPEED && mo->player->cmd.upwardmove == 0)
         {
-            mo->mom.z = 0;
+            mo->mom.Z = 0;
         }
     }
 }
@@ -1389,11 +1389,11 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
         }
 
         // handle SKULLFLY attacks
-        if ((mobj->flags & MF_SKULLFLY) && AlmostEquals(mobj->mom.x, 0.0f) && AlmostEquals(mobj->mom.y, 0.0f))
+        if ((mobj->flags & MF_SKULLFLY) && AlmostEquals(mobj->mom.X, 0.0f) && AlmostEquals(mobj->mom.Y, 0.0f))
         {
             // the skull slammed into something
             mobj->flags &= ~MF_SKULLFLY;
-            mobj->mom.x = mobj->mom.y = mobj->mom.z = 0;
+            mobj->mom.X = mobj->mom.Y = mobj->mom.Z = 0;
 
             P_SetMobjState(mobj, mobj->info->idle_state);
 
@@ -1412,9 +1412,9 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
 
         if (!extra_tic || !r_doubleframes.d)
         {
-            mobj->mom.x += player_props.push.x;
-            mobj->mom.y += player_props.push.y;
-            mobj->mom.z += player_props.push.z;
+            mobj->mom.X += player_props.push.X;
+            mobj->mom.Y += player_props.push.Y;
+            mobj->mom.Z += player_props.push.Z;
         }
 
         props = &player_props;
@@ -1427,7 +1427,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
             if (tn->sec)
             {
                 region_properties_t tn_props = tn->sec->props;
-                if (tn_props.push.x || tn_props.push.y || tn_props.push.z)
+                if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
                 {
                     sector_flag_e flags = tn_props.special ? tn_props.special->special_flags : SECSP_PushConstant;
 
@@ -1442,9 +1442,9 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
                             if (!(flags & SECSP_PushConstant))
                                 push_mul = 100.0f / mobj->info->mass;
 
-                            mobj->mom.x += push_mul * tn_props.push.x;
-                            mobj->mom.y += push_mul * tn_props.push.y;
-                            mobj->mom.z += push_mul * tn_props.push.z;
+                            mobj->mom.X += push_mul * tn_props.push.X;
+                            mobj->mom.Y += push_mul * tn_props.push.Y;
+                            mobj->mom.Z += push_mul * tn_props.push.Z;
                         }
                     }
                 }
@@ -1474,7 +1474,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
                 mobj->on_slope = true;
         }
 
-        if (!AlmostEquals(mobj->mom.x, 0.0f) || !AlmostEquals(mobj->mom.y, 0.0f) || mobj->player)
+        if (!AlmostEquals(mobj->mom.X, 0.0f) || !AlmostEquals(mobj->mom.Y, 0.0f) || mobj->player)
         {
             P_XYMovement(mobj, props, extra_tic);
 
@@ -1482,7 +1482,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
                 return;
         }
 
-        if ((!AlmostEquals(mobj->z, mobj->floorz)) || !AlmostEquals(mobj->mom.z, 0.0f)) //  || mobj->ride_em)
+        if ((!AlmostEquals(mobj->z, mobj->floorz)) || !AlmostEquals(mobj->mom.Z, 0.0f)) //  || mobj->ride_em)
         {
             P_ZMovement(mobj, props, extra_tic);
 
@@ -1959,7 +1959,7 @@ void P_SpawnPuff(float x, float y, float z, const mobjtype_c *puff, angle_t angl
     th = P_MobjCreateObject(x, y, z, puff);
 
     // -AJA- 1999/07/14: DDF-itised.
-    th->mom.z = puff->float_speed;
+    th->mom.Z = puff->float_speed;
 
     // -AJA- 2011/03/14: set the angle
     th->angle = angle;
@@ -2183,7 +2183,7 @@ void P_MobjRemoveMissile(mobj_t *missile)
 {
     P_RemoveMobj(missile);
 
-    missile->mom.x = missile->mom.y = missile->mom.z = 0;
+    missile->mom.X = missile->mom.Y = missile->mom.Z = 0;
 
     missile->flags &= ~(MF_MISSILE | MF_TOUCHY);
     missile->extendedflags &= ~(EF_BOUNCE);
@@ -2302,7 +2302,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
     {
         float sz = M_LinePlaneIntersection({x, y, -40000}, {x, y, 40000}, sec->floor_z_verts[0], sec->floor_z_verts[1],
                                            sec->floor_z_verts[2], sec->floor_vs_normal)
-                       .z;
+                       .Z;
         if (std::isfinite(sz))
             f_slope_z = sz - sec->f_h;
     }
@@ -2310,7 +2310,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
     {
         float sz = M_LinePlaneIntersection({x, y, -40000}, {x, y, 40000}, sec->ceil_z_verts[0], sec->ceil_z_verts[1],
                                            sec->ceil_z_verts[2], sec->ceil_vs_normal)
-                       .z;
+                       .Z;
         if (std::isfinite(sz))
             c_slope_z = sec->c_h - sz;
     }

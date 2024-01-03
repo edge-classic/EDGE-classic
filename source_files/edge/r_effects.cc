@@ -297,10 +297,10 @@ void FUZZ_Update(void)
     fuzz_yoffset = ((framecount * 3) & 1023) / 256.0;
 }
 
-void FUZZ_Adjust(vec2_t *tc, mobj_t *mo)
+void FUZZ_Adjust(HMM_Vec2 *tc, mobj_t *mo)
 {
-    tc->x += fmod(mo->x / 520.0, 1.0);
-    tc->y += fmod(mo->y / 520.0, 1.0) + fuzz_yoffset;
+    tc->X += fmod(mo->x / 520.0, 1.0);
+    tc->Y += fmod(mo->y / 520.0, 1.0) + fuzz_yoffset;
 }
 
 //--- editor settings ---

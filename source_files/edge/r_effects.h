@@ -61,7 +61,7 @@ void RGL_PaletteEffect(player_t *player);
 extern const image_c *fuzz_image;
 
 void FUZZ_Update(void);
-void FUZZ_Adjust(vec2_t *tc, mobj_t *mo);
+void FUZZ_Adjust(HMM_Vec2 *tc, mobj_t *mo);
 
 #endif /* __RGL_FX_H__ */
 

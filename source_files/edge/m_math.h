@@ -28,86 +28,20 @@
 
 #include "types.h"
 
-typedef struct vec2_s
-{
-    float x, y;
+#include "HandmadeMath.h"
 
-    void Set(float _x, float _y)
-    {
-        x = _x;
-        y = _y;
-    }
-} vec2_t;
-
-#define Vec2Add(dest, src)                                                                                             \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        (dest).x += (src).x;                                                                                           \
-        (dest).y += (src).y;                                                                                           \
-    } while (0)
-
-#define Vec2Sub(dest, src)                                                                                             \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        (dest).x -= (src).x;                                                                                           \
-        (dest).y -= (src).y;                                                                                           \
-    } while (0)
-
-#define Vec2Mul(dest, val)                                                                                             \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        (dest).x *= (val);                                                                                             \
-        (dest).y *= (val);                                                                                             \
-    } while (0)
-
-typedef struct vec3_s
-{
-    float x, y, z;
-
-    void Set(float _x, float _y, float _z)
-    {
-        x = _x;
-        y = _y;
-        z = _z;
-    }
-} vec3_t;
-
-#define Vec3Add(dest, src)                                                                                             \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        (dest).x += (src).x;                                                                                           \
-        (dest).y += (src).y;                                                                                           \
-        (dest).z += (src).z;                                                                                           \
-    } while (0)
-
-#define Vec3Sub(dest, src)                                                                                             \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        (dest).x -= (src).x;                                                                                           \
-        (dest).y -= (src).y;                                                                                           \
-        (dest).z -= (src).z;                                                                                           \
-    } while (0)
-
-#define Vec3Mul(dest, val)                                                                                             \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        (dest).x *= (val);                                                                                             \
-        (dest).y *= (val);                                                                                             \
-        (dest).z *= (val);                                                                                             \
-    } while (0)
-
-double  M_PointToSegDistance(vec2_t seg_a, vec2_t seg_b, vec2_t point);
-vec3_t  M_CrossProduct(vec3_t v1, vec3_t v2, vec3_t v3);
-vec3_t  M_LinePlaneIntersection(vec3_t line_a, vec3_t line_b, vec3_t plane_a, vec3_t plane_b, vec3_t plane_c,
-                                vec3_t plane_normal);
-vec3_t  M_LinePlaneIntersection(vec3_t line_a, vec3_t line_b, vec3_t plane_a, vec3_t plane_b, vec3_t plane_c);
+double  M_PointToSegDistance(HMM_Vec2 seg_a, HMM_Vec2 seg_b, HMM_Vec2 point);
+HMM_Vec3  M_CrossProduct(HMM_Vec3 v1, HMM_Vec3 v2, HMM_Vec3 v3);
+HMM_Vec3  M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b, HMM_Vec3 plane_c,
+                                HMM_Vec3 plane_normal);
+HMM_Vec3  M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b, HMM_Vec3 plane_c);
 float   M_Tan(angle_t ang) GCCATTR((const));
 angle_t M_ATan(float slope) GCCATTR((const));
 float   M_Cos(angle_t ang) GCCATTR((const));
 float   M_Sin(angle_t ang) GCCATTR((const));
-void    M_Angle2Matrix(angle_t ang, vec2_t *x, vec2_t *y);
-int     M_PointInTri(vec2_t v1, vec2_t v2, vec2_t v3, vec2_t test);
-void    M_Vec2Rotate(vec2_t &vec, const angle_t &ang);
+void    M_Angle2Matrix(angle_t ang, HMM_Vec2 *x, HMM_Vec2 *y);
+int     M_PointInTri(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test);
+void    M_Vec2Rotate(HMM_Vec2 &vec, const angle_t &ang);
 
 #endif //__M_MATH_H__
 

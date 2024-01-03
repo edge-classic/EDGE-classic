@@ -126,11 +126,11 @@ typedef struct region_properties_s
     float drag;
 
     // pushing sector information (normally all zero)
-    vec3_t push;
+    HMM_Vec3 push;
 
-    vec3_t net_push = {0, 0, 0};
+    HMM_Vec3 net_push = {0, 0, 0};
 
-    vec3_t old_push = {0, 0, 0};
+    HMM_Vec3 old_push = {0, 0, 0};
 
     // sector fog
     rgbcol_t fog_color   = RGB_NO_VALUE;
@@ -158,16 +158,16 @@ typedef struct surface_s
     float translucency;
 
     // texturing matrix (usually identity)
-    vec2_t  x_mat;
-    vec2_t  y_mat;
+    HMM_Vec2  x_mat;
+    HMM_Vec2  y_mat;
     angle_t rotation = 0;
 
     // current offset and scrolling deltas (world coords)
-    vec2_t offset;
-    vec2_t scroll;
+    HMM_Vec2 offset;
+    HMM_Vec2 scroll;
 
-    vec2_t net_scroll = {0, 0};
-    vec2_t old_scroll = {0, 0};
+    HMM_Vec2 net_scroll = {0, 0};
+    HMM_Vec2 old_scroll = {0, 0};
 
     // lighting override (as in BOOM).  Usually NULL.
     region_properties_t *override_p;
@@ -286,12 +286,12 @@ typedef struct sector_s
     // UDMF vertex slope stuff
     bool                floor_vertex_slope;
     bool                ceil_vertex_slope;
-    std::vector<vec3_t> floor_z_verts;
-    std::vector<vec3_t> ceil_z_verts;
-    vec3_t              floor_vs_normal;
-    vec3_t              ceil_vs_normal;
-    vec2_t              floor_vs_hilo;
-    vec2_t              ceil_vs_hilo;
+    std::vector<HMM_Vec3> floor_z_verts;
+    std::vector<HMM_Vec3> ceil_z_verts;
+    HMM_Vec3              floor_vs_normal;
+    HMM_Vec3              ceil_vs_normal;
+    HMM_Vec2              floor_vs_hilo;
+    HMM_Vec2              ceil_vs_hilo;
 
     // linked list of extrafloors that this sector controls.  NULL means
     // that this sector is not a controller.
@@ -569,9 +569,9 @@ typedef struct secanim_s
     struct sector_s  *scroll_sec_ref     = NULL;
     const linetype_c *scroll_special_ref = NULL;
     line_s           *scroll_line_ref    = NULL;
-    vec2_t            floor_scroll       = {0, 0};
-    vec2_t            ceil_scroll        = {0, 0};
-    vec3_t            push               = {0, 0, 0};
+    HMM_Vec2            floor_scroll       = {0, 0};
+    HMM_Vec2            ceil_scroll        = {0, 0};
+    HMM_Vec3            push               = {0, 0, 0};
     bool              permanent          = false;
     float             last_height        = 0.0f;
 } secanim_t;

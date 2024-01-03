@@ -828,8 +828,8 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
         return;
 
     // VOODOO DOLLS: Do not pick up the item if completely still
-    if (toucher->is_voodoo && AlmostEquals(toucher->mom.x, 0.0f) && AlmostEquals(toucher->mom.y, 0.0f) &&
-        AlmostEquals(toucher->mom.z, 0.0f))
+    if (toucher->is_voodoo && AlmostEquals(toucher->mom.X, 0.0f) && AlmostEquals(toucher->mom.Y, 0.0f) &&
+        AlmostEquals(toucher->mom.Z, 0.0f))
         return;
 
     // -KM- 1998/09/27 Sounds.ddf
@@ -1237,15 +1237,15 @@ void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust)
     if (push > 40.0f)
         push = 40.0f;
 
-    target->mom.x += push * M_Cos(angle);
-    target->mom.y += push * M_Sin(angle);
+    target->mom.X += push * M_Cos(angle);
+    target->mom.Y += push * M_Sin(angle);
 
     if (level_flags.true3dgameplay)
     {
         float dz    = MO_MIDZ(target) - MO_MIDZ(inflictor);
         float slope = P_ApproxSlope(dx, dy, dz);
 
-        target->mom.z += push * slope / 2;
+        target->mom.Z += push * slope / 2;
     }
 }
 
@@ -1291,15 +1291,15 @@ void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust)
     if (push > 40.0f)
         push = 40.0f;
 
-    target->mom.x += push * M_Cos(angle);
-    target->mom.y += push * M_Sin(angle);
+    target->mom.X += push * M_Cos(angle);
+    target->mom.Y += push * M_Sin(angle);
 
     if (level_flags.true3dgameplay)
     {
         float dz    = MO_MIDZ(target) - MO_MIDZ(inflictor);
         float slope = P_ApproxSlope(dx, dy, dz);
 
-        target->mom.z += push * slope / 2;
+        target->mom.Z += push * slope / 2;
     }
 }
 
@@ -1368,7 +1368,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
 
     if (target->flags & MF_SKULLFLY)
     {
-        target->mom.x = target->mom.y = target->mom.z = 0;
+        target->mom.X = target->mom.Y = target->mom.Z = 0;
         target->flags &= ~MF_SKULLFLY;
     }
 
@@ -1692,7 +1692,7 @@ void P_TelefragMobj(mobj_t *target, mobj_t *inflictor, const damage_c *damtype)
 
     if (target->flags & MF_SKULLFLY)
     {
-        target->mom.x = target->mom.y = target->mom.z = 0;
+        target->mom.X = target->mom.Y = target->mom.Z = 0;
         target->flags &= ~MF_SKULLFLY;
     }
 

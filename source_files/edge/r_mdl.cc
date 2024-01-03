@@ -483,15 +483,15 @@ typedef struct model_coord_data_s
 
     // fuzzy info
     float  fuzz_mul;
-    vec2_t fuzz_add;
+    HMM_Vec2 fuzz_add;
 
     // mlook vectors
-    vec2_t kx_mat;
-    vec2_t kz_mat;
+    HMM_Vec2 kx_mat;
+    HMM_Vec2 kz_mat;
 
     // rotation vectors
-    vec2_t rx_mat;
-    vec2_t ry_mat;
+    HMM_Vec2 rx_mat;
+    HMM_Vec2 ry_mat;
 
     multi_color_c nm_colors[MD_NUM_NORMALS];
 
@@ -500,36 +500,36 @@ typedef struct model_coord_data_s
     bool is_additive;
 
   public:
-    void CalcPos(vec3_t *pos, float x1, float y1, float z1) const
+    void CalcPos(HMM_Vec3 *pos, float x1, float y1, float z1) const
     {
         x1 *= xy_scale;
         y1 *= xy_scale;
         z1 *= z_scale;
 
-        float x2 = x1 * kx_mat.x + z1 * kx_mat.y;
-        float z2 = x1 * kz_mat.x + z1 * kz_mat.y;
+        float x2 = x1 * kx_mat.X + z1 * kx_mat.Y;
+        float z2 = x1 * kz_mat.X + z1 * kz_mat.Y;
         float y2 = y1;
 
-        pos->x = x + x2 * rx_mat.x + y2 * rx_mat.y;
-        pos->y = y + x2 * ry_mat.x + y2 * ry_mat.y;
-        pos->z = z + z2;
+        pos->X = x + x2 * rx_mat.X + y2 * rx_mat.Y;
+        pos->Y = y + x2 * ry_mat.X + y2 * ry_mat.Y;
+        pos->Z = z + z2;
     }
 
-    void CalcNormal(vec3_t *normal, const mdl_vertex_c *vert) const
+    void CalcNormal(HMM_Vec3 *normal, const mdl_vertex_c *vert) const
     {
         short n = vert->normal_idx;
 
-        float nx1 = md_normals[n].x;
-        float ny1 = md_normals[n].y;
-        float nz1 = md_normals[n].z;
+        float nx1 = md_normals[n].X;
+        float ny1 = md_normals[n].Y;
+        float nz1 = md_normals[n].Z;
 
-        float nx2 = nx1 * kx_mat.x + nz1 * kx_mat.y;
-        float nz2 = nx1 * kz_mat.x + nz1 * kz_mat.y;
+        float nx2 = nx1 * kx_mat.X + nz1 * kx_mat.Y;
+        float nz2 = nx1 * kz_mat.X + nz1 * kz_mat.Y;
         float ny2 = ny1;
 
-        normal->x = nx2 * rx_mat.x + ny2 * rx_mat.y;
-        normal->y = nx2 * ry_mat.x + ny2 * ry_mat.y;
-        normal->z = nz2;
+        normal->X = nx2 * rx_mat.X + ny2 * rx_mat.Y;
+        normal->Y = nx2 * ry_mat.X + ny2 * ry_mat.Y;
+        normal->Z = nz2;
     }
 } model_coord_data_t;
 
@@ -556,16 +556,16 @@ static void ShadeNormals(abstract_shader_c *shader, model_coord_data_t *data, bo
 
         if (!skip_calc)
         {
-            float nx1 = md_normals[n].x;
-            float ny1 = md_normals[n].y;
-            float nz1 = md_normals[n].z;
+            float nx1 = md_normals[n].X;
+            float ny1 = md_normals[n].Y;
+            float nz1 = md_normals[n].Z;
 
-            float nx2 = nx1 * data->kx_mat.x + nz1 * data->kx_mat.y;
-            float nz2 = nx1 * data->kz_mat.x + nz1 * data->kz_mat.y;
+            float nx2 = nx1 * data->kx_mat.X + nz1 * data->kx_mat.Y;
+            float nz2 = nx1 * data->kz_mat.X + nz1 * data->kz_mat.Y;
             float ny2 = ny1;
 
-            nx = nx2 * data->rx_mat.x + ny2 * data->rx_mat.y;
-            ny = nx2 * data->ry_mat.x + ny2 * data->ry_mat.y;
+            nx = nx2 * data->rx_mat.X + ny2 * data->rx_mat.Y;
+            ny = nx2 * data->ry_mat.X + ny2 * data->ry_mat.Y;
             nz = nz2;
         }
 
@@ -623,8 +623,8 @@ static inline float LerpIt(float v1, float v2, float lerp)
     return v1 * (1.0f - lerp) + v2 * lerp;
 }
 
-static inline void ModelCoordFunc(model_coord_data_t *data, int v_idx, vec3_t *pos, float *rgb, vec2_t *texc,
-                                  vec3_t *normal)
+static inline void ModelCoordFunc(model_coord_data_t *data, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc,
+                                  HMM_Vec3 *normal)
 {
     const mdl_model_c *md = data->model;
 
@@ -655,14 +655,14 @@ static inline void ModelCoordFunc(model_coord_data_t *data, int v_idx, vec3_t *p
 
     if (data->is_fuzzy)
     {
-        texc->x = point->skin_s * data->fuzz_mul + data->fuzz_add.x;
-        texc->y = point->skin_t * data->fuzz_mul + data->fuzz_add.y;
+        texc->X = point->skin_s * data->fuzz_mul + data->fuzz_add.X;
+        texc->Y = point->skin_t * data->fuzz_mul + data->fuzz_add.Y;
 
         rgb[0] = rgb[1] = rgb[2] = 0;
         return;
     }
 
-    texc->Set(point->skin_s, point->skin_t);
+    *texc = {point->skin_s, point->skin_t};
 
     multi_color_c *col = &data->nm_colors[n_vert->normal_idx];
 
@@ -758,7 +758,7 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
         skin_tex = W_ImageCache(fuzz_image, false);
 
         data.fuzz_mul = 0.8;
-        data.fuzz_add.Set(0, 0);
+        data.fuzz_add = {0, 0};
 
         data.im_right = 1.0;
         data.im_top   = 1.0;
@@ -1024,9 +1024,9 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
         // setup client state
         glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
         glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), md->gl_verts, GL_STREAM_DRAW);
-        glVertexPointer(3, GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, pos.x)));
+        glVertexPointer(3, GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, pos.X)));
         glColorPointer(4, GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, rgba)));
-        glNormalPointer(GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, normal.x)));
+        glNormalPointer(GL_FLOAT, sizeof(local_gl_vert_t), BUFFER_OFFSET(offsetof(local_gl_vert_t, normal.X)));
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
         glEnableClientState(GL_NORMAL_ARRAY);
@@ -1091,9 +1091,9 @@ void MDL_RenderModel_2D(mdl_model_c *md, const image_c *skin_img, int frame, flo
 
             short n = vert->normal_idx;
 
-            float norm_x = md_normals[n].x;
-            float norm_y = md_normals[n].y;
-            float norm_z = md_normals[n].z;
+            float norm_x = md_normals[n].X;
+            float norm_y = md_normals[n].Y;
+            float norm_z = md_normals[n].Z;
 
             glNormal3f(norm_y, norm_z, norm_x);
 

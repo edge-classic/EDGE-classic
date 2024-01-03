@@ -1202,7 +1202,7 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
         return; // should never happen but who knows...
 
     // 1. Stop the player movement and turn him
-    p->mo->mom.x = p->mo->mom.y = p->mo->mom.z = 0;
+    p->mo->mom.X = p->mo->mom.Y = p->mo->mom.Z = 0;
     p->actual_speed                            = 0;
     p->mo->angle                               = point->angle;
 

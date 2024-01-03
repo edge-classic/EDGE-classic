@@ -91,11 +91,11 @@ static int PL_get_name(lua_State *L)
 //
 static int PL_get_pos(lua_State *L)
 {
-    epi::vec3_c v;
+    HMM_Vec3 v;
 
-    v.x = ui_player_who->mo->x;
-    v.y = ui_player_who->mo->y;
-    v.z = ui_player_who->mo->z;
+    v.X = ui_player_who->mo->x;
+    v.Y = ui_player_who->mo->y;
+    v.Z = ui_player_who->mo->z;
 
     LUA_PushVector3(L, v);
     return 1;
@@ -2272,19 +2272,19 @@ static int Sector_info(lua_State *L)
 
     //---------------
     // SECTOR.fogcolor
-    epi::vec3_c    rgb;
+    HMM_Vec3    rgb;
     rgbcol_t tempcolor = ui_player_who->mo->subsector->sector->props.fog_color;
 
-    rgb.x = -1;
-    rgb.y = -1;
-    rgb.z = -1;
+    rgb.X = -1;
+    rgb.Y = -1;
+    rgb.Z = -1;
     if (tempcolor != 0)
     {
         if (tempcolor != RGB_NO_VALUE)
         {
-            rgb.x = RGB_RED(tempcolor);
-            rgb.y = RGB_GRN(tempcolor);
-            rgb.z = RGB_BLU(tempcolor);
+            rgb.X = RGB_RED(tempcolor);
+            rgb.Y = RGB_GRN(tempcolor);
+            rgb.Z = RGB_BLU(tempcolor);
         }
     }
    

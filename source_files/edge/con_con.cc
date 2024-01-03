@@ -1743,15 +1743,15 @@ void CON_ShowPosition(void)
     DrawText(x, y, textbuf, T_GREY176);
 
     y -= FNSZ;
-    sprintf(textbuf, "x mom: %.4f", p->mo->mom.x);
+    sprintf(textbuf, "x mom: %.4f", p->mo->mom.X);
     DrawText(x, y, textbuf, T_GREY176);
 
     y -= FNSZ;
-    sprintf(textbuf, "y mom: %.4f", p->mo->mom.y);
+    sprintf(textbuf, "y mom: %.4f", p->mo->mom.Y);
     DrawText(x, y, textbuf, T_GREY176);
 
     y -= FNSZ;
-    sprintf(textbuf, "z mom: %.4f", p->mo->mom.z);
+    sprintf(textbuf, "z mom: %.4f", p->mo->mom.Z);
     DrawText(x, y, textbuf, T_GREY176);
 
     y -= FNSZ;

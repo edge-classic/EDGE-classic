@@ -2,7 +2,6 @@
 #include "i_defs.h"
 #include "e_player.h"
 #include "hu_draw.h"
-#include "math_vector.h"
 #include "dm_state.h"
 #include "lua_compat.h"
 #include "g_game.h"
@@ -28,14 +27,14 @@ extern player_t *ui_hud_who;
 static int   ui_hud_automap_flags[2]; // 0 = disabled, 1 = enabled
 static float ui_hud_automap_zoom;
 
-static rgbcol_t HD_VectorToColor(const epi::vec3_c &v)
+static rgbcol_t HD_VectorToColor(const HMM_Vec3 &v)
 {
-    if (v.x < 0)
+    if (v.X < 0)
         return RGB_NO_VALUE;
 
-    int r = CLAMP(0, (int)v.x, 255);
-    int g = CLAMP(0, (int)v.y, 255);
-    int b = CLAMP(0, (int)v.z, 255);
+    int r = CLAMP(0, (int)v.X, 255);
+    int g = CLAMP(0, (int)v.Y, 255);
+    int b = CLAMP(0, (int)v.Z, 255);
 
     rgbcol_t rgb = RGB_MAKE(r, g, b);
 
@@ -716,7 +715,7 @@ static int HD_screen_aspect(lua_State *L)
 
 static int HD_get_average_color(lua_State *L)
 {
-    epi::vec3_c    rgb;
+    HMM_Vec3    rgb;
     const char    *name         = luaL_checkstring(L, 1);
     double         from_x       = luaL_optnumber(L, 2, -1);
     double         to_x         = luaL_optnumber(L, 3, 1000000);
@@ -730,9 +729,9 @@ static int HD_get_average_color(lua_State *L)
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     u8_t temp_rgb[3];
     tmp_img_data->AverageColor(temp_rgb, from_x, to_x, from_y, to_y);
-    rgb.x = temp_rgb[0];
-    rgb.y = temp_rgb[1];
-    rgb.z = temp_rgb[2];
+    rgb.X = temp_rgb[0];
+    rgb.Y = temp_rgb[1];
+    rgb.Z = temp_rgb[2];
     delete tmp_img_data;
 
     LUA_PushVector3(L, rgb);
@@ -742,7 +741,7 @@ static int HD_get_average_color(lua_State *L)
 
 static int HD_get_lightest_color(lua_State *L)
 {
-    epi::vec3_c    rgb;
+    HMM_Vec3    rgb;
     const char    *name         = luaL_checkstring(L, 1);
     double         from_x       = luaL_optnumber(L, 2, -1);
     double         to_x         = luaL_optnumber(L, 3, 1000000);
@@ -756,9 +755,9 @@ static int HD_get_lightest_color(lua_State *L)
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     u8_t temp_rgb[3];
     tmp_img_data->LightestColor(temp_rgb, from_x, to_x, from_y, to_y);
-    rgb.x = temp_rgb[0];
-    rgb.y = temp_rgb[1];
-    rgb.z = temp_rgb[2];
+    rgb.X = temp_rgb[0];
+    rgb.Y = temp_rgb[1];
+    rgb.Z = temp_rgb[2];
     delete tmp_img_data;
 
     LUA_PushVector3(L, rgb);
@@ -767,7 +766,7 @@ static int HD_get_lightest_color(lua_State *L)
 
 static int HD_get_darkest_color(lua_State *L)
 {
-    epi::vec3_c    rgb;
+    HMM_Vec3    rgb;
     const char    *name         = luaL_checkstring(L, 1);
     double         from_x       = luaL_optnumber(L, 2, -1);
     double         to_x         = luaL_optnumber(L, 3, 1000000);
@@ -781,9 +780,9 @@ static int HD_get_darkest_color(lua_State *L)
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     u8_t temp_rgb[3];
     tmp_img_data->DarkestColor(temp_rgb, from_x, to_x, from_y, to_y);
-    rgb.x = temp_rgb[0];
-    rgb.y = temp_rgb[1];
-    rgb.z = temp_rgb[2];
+    rgb.X = temp_rgb[0];
+    rgb.Y = temp_rgb[1];
+    rgb.Z = temp_rgb[2];
     delete tmp_img_data;
 
     LUA_PushVector3(L, rgb);
@@ -792,7 +791,7 @@ static int HD_get_darkest_color(lua_State *L)
 
 static int HD_get_average_hue(lua_State *L)
 {
-    epi::vec3_c    rgb;
+    HMM_Vec3    rgb;
     const char    *name         = luaL_checkstring(L, 1);
     double         from_x       = luaL_optnumber(L, 2, -1);
     double         to_x         = luaL_optnumber(L, 3, 1000000);
@@ -806,9 +805,9 @@ static int HD_get_average_hue(lua_State *L)
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     u8_t temp_rgb[3];
     tmp_img_data->AverageHue(temp_rgb, NULL, from_x, to_x, from_y, to_y);
-    rgb.x = temp_rgb[0];
-    rgb.y = temp_rgb[1];
-    rgb.z = temp_rgb[2];
+    rgb.X = temp_rgb[0];
+    rgb.Y = temp_rgb[1];
+    rgb.Z = temp_rgb[2];
     delete tmp_img_data;
 
     LUA_PushVector3(L, rgb);
@@ -819,7 +818,7 @@ static int HD_get_average_hue(lua_State *L)
 // use them - Dasho
 static int HD_get_average_top_border_color(lua_State *L)
 {
-    epi::vec3_c    rgb;
+    HMM_Vec3    rgb;
     const char    *name         = luaL_checkstring(L, 1);
     const byte    *what_palette = (const byte *)&playpal_data[0];
     const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
@@ -829,9 +828,9 @@ static int HD_get_average_top_border_color(lua_State *L)
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     u8_t temp_rgb[3];
     tmp_img_data->AverageColor(temp_rgb, 0, tmp_img_c->actual_w, tmp_img_c->actual_h - 1, tmp_img_c->actual_h);
-    rgb.x = temp_rgb[0];
-    rgb.y = temp_rgb[1];
-    rgb.z = temp_rgb[2];
+    rgb.X = temp_rgb[0];
+    rgb.Y = temp_rgb[1];
+    rgb.Z = temp_rgb[2];
     delete tmp_img_data;
 
     LUA_PushVector3(L, rgb);
@@ -839,7 +838,7 @@ static int HD_get_average_top_border_color(lua_State *L)
 }
 static int HD_get_average_bottom_border_color(lua_State *L)
 {
-    epi::vec3_c    rgb;
+    HMM_Vec3    rgb;
     const char    *name         = luaL_checkstring(L, 1);
     const byte    *what_palette = (const byte *)&playpal_data[0];
     const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
@@ -849,9 +848,9 @@ static int HD_get_average_bottom_border_color(lua_State *L)
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     u8_t temp_rgb[3];
     tmp_img_data->AverageColor(temp_rgb, 0, tmp_img_c->actual_w, 0, 1);
-    rgb.x = temp_rgb[0];
-    rgb.y = temp_rgb[1];
-    rgb.z = temp_rgb[2];
+    rgb.X = temp_rgb[0];
+    rgb.Y = temp_rgb[1];
+    rgb.Z = temp_rgb[2];
     delete tmp_img_data;
 
     LUA_PushVector3(L, rgb);

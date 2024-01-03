@@ -185,9 +185,7 @@ void P_ActNoiseAlert(mobj_t *actor)
 //
 bool P_Move(mobj_t *actor, bool path)
 {
-    vec3_t orig_pos;
-
-    orig_pos.Set(actor->x, actor->y, actor->z);
+    HMM_Vec3 orig_pos{actor->x, actor->y, actor->z};
 
     float tryx;
     float tryy;
@@ -550,9 +548,9 @@ static void SpawnDeathMissile(mobj_t *source, float x, float y, float z)
 
     th->SetRealSource(source);
 
-    th->mom.x = (x - source->x) / 50.0f;
-    th->mom.y = -0.25f;
-    th->mom.z = (z - source->z) / 50.0f;
+    th->mom.X = (x - source->x) / 50.0f;
+    th->mom.Y = -0.25f;
+    th->mom.Z = (z - source->z) / 50.0f;
 
     th->tics -= M_Random() & 7;
 

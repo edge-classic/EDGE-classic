@@ -141,12 +141,12 @@ typedef struct force_s
     bool is_point;
     bool is_wind;
 
-    vec3_t point;
+    HMM_Vec3 point;
 
     float radius;
     float magnitude;
 
-    vec2_t mag; // wind/current
+    HMM_Vec2 mag; // wind/current
 
     sector_t *sector; // the affected sector
 } force_t;

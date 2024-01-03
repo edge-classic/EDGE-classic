@@ -60,7 +60,7 @@ typedef struct sight_info_s
     subsector_t *src_sub;
 
     // dest position
-    vec2_t       dest;
+    HMM_Vec2       dest;
     float        dest_z;
     subsector_t *dest_sub;
 
@@ -180,7 +180,7 @@ static bool CrossSubsector(subsector_t *sub)
         divl.dy = ld->dy;
 
         s1 = P_PointOnDivlineSide(sight_I.src.x, sight_I.src.y, &divl);
-        s2 = P_PointOnDivlineSide(sight_I.dest.x, sight_I.dest.y, &divl);
+        s2 = P_PointOnDivlineSide(sight_I.dest.X, sight_I.dest.Y, &divl);
 
         if (s1 == s2)
             continue;
@@ -275,7 +275,7 @@ static bool CheckSightBSP(unsigned int bspnum)
 
         // decide which side the src and dest points are on
         s1 = P_PointOnDivlineSide(sight_I.src.x, sight_I.src.y, &node->div);
-        s2 = P_PointOnDivlineSide(sight_I.dest.x, sight_I.dest.y, &node->div);
+        s2 = P_PointOnDivlineSide(sight_I.dest.X, sight_I.dest.Y, &node->div);
 
 #if (DEBUG_SIGHT >= 2)
         L_WriteDebug("  Sides: %d %d\n", s1, s2);
@@ -453,8 +453,8 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
     sight_I.src.dy  = dest->y - src->y;
     sight_I.src_sub = src->subsector;
 
-    sight_I.dest.x   = dest->x;
-    sight_I.dest.y   = dest->y;
+    sight_I.dest.X   = dest->x;
+    sight_I.dest.Y   = dest->y;
     sight_I.dest_sub = dest->subsector;
 
     sight_I.bottom_slope = dest->z - sight_I.src_z;
@@ -491,12 +491,12 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
         return CheckSightSameSubsector(src, dest);
     }
 
-    sight_I.angle = R_PointToAngle(sight_I.src.x, sight_I.src.y, sight_I.dest.x, sight_I.dest.y);
+    sight_I.angle = R_PointToAngle(sight_I.src.x, sight_I.src.y, sight_I.dest.X, sight_I.dest.Y);
 
-    sight_I.bbox[BOXLEFT]   = MIN(sight_I.src.x, sight_I.dest.x);
-    sight_I.bbox[BOXRIGHT]  = MAX(sight_I.src.x, sight_I.dest.x);
-    sight_I.bbox[BOXBOTTOM] = MIN(sight_I.src.y, sight_I.dest.y);
-    sight_I.bbox[BOXTOP]    = MAX(sight_I.src.y, sight_I.dest.y);
+    sight_I.bbox[BOXLEFT]   = MIN(sight_I.src.x, sight_I.dest.X);
+    sight_I.bbox[BOXRIGHT]  = MAX(sight_I.src.x, sight_I.dest.X);
+    sight_I.bbox[BOXBOTTOM] = MIN(sight_I.src.y, sight_I.dest.Y);
+    sight_I.bbox[BOXTOP]    = MAX(sight_I.src.y, sight_I.dest.Y);
 
     wall_icpts.clear(); // FIXME
 
@@ -589,20 +589,20 @@ bool P_CheckSightToPoint(mobj_t *src, float x, float y, float z)
     sight_I.src.dy  = y - src->y;
     sight_I.src_sub = src->subsector;
 
-    sight_I.dest.x   = x;
-    sight_I.dest.y   = y;
+    sight_I.dest.X   = x;
+    sight_I.dest.Y   = y;
     sight_I.dest_z   = z;
     sight_I.dest_sub = dest_sub;
 
     sight_I.bottom_slope = z - 1.0f - sight_I.src_z;
     sight_I.top_slope    = z + 1.0f - sight_I.src_z;
 
-    sight_I.angle = R_PointToAngle(sight_I.src.x, sight_I.src.y, sight_I.dest.x, sight_I.dest.y);
+    sight_I.angle = R_PointToAngle(sight_I.src.x, sight_I.src.y, sight_I.dest.X, sight_I.dest.Y);
 
-    sight_I.bbox[BOXLEFT]   = MIN(sight_I.src.x, sight_I.dest.x);
-    sight_I.bbox[BOXRIGHT]  = MAX(sight_I.src.x, sight_I.dest.x);
-    sight_I.bbox[BOXBOTTOM] = MIN(sight_I.src.y, sight_I.dest.y);
-    sight_I.bbox[BOXTOP]    = MAX(sight_I.src.y, sight_I.dest.y);
+    sight_I.bbox[BOXLEFT]   = MIN(sight_I.src.x, sight_I.dest.X);
+    sight_I.bbox[BOXRIGHT]  = MAX(sight_I.src.x, sight_I.dest.X);
+    sight_I.bbox[BOXBOTTOM] = MIN(sight_I.src.y, sight_I.dest.Y);
+    sight_I.bbox[BOXTOP]    = MAX(sight_I.src.y, sight_I.dest.Y);
 
     wall_icpts.clear();
 

@@ -47,9 +47,9 @@ extern int viewwindow_y;
 extern int viewwindow_w;
 extern int viewwindow_h;
 
-extern vec3_t viewforward;
-extern vec3_t viewup;
-extern vec3_t viewright;
+extern HMM_Vec3 viewforward;
+extern HMM_Vec3 viewup;
+extern HMM_Vec3 viewright;
 
 extern int validcount;
 

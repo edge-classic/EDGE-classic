@@ -202,7 +202,7 @@ struct mobj_s : public position_c
     float alpha  = 1.0f;
 
     // Momentum, used to update position.
-    vec3_t mom = {0, 0, 0};
+    HMM_Vec3 mom = {0, 0, 0};
 
     // Track hover phase for time stop shenanigans
     float phase = 0.0f;
@@ -348,7 +348,7 @@ struct mobj_s : public position_c
     short lerp_num = 0;
     short lerp_pos = 0;
 
-    vec3_t lerp_from = {0, 0, 0};
+    HMM_Vec3 lerp_from = {0, 0, 0};
 
     // touch list: sectors this thing is in or touches
     struct touch_node_s *touch_sectors = nullptr;

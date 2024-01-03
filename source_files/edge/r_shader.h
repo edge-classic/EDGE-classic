@@ -85,8 +85,8 @@ class multi_color_c
     }
 };
 
-typedef void (*shader_coord_func_t)(void *data, int v_idx, vec3_t *pos, float *rgb, vec2_t *texc, vec3_t *normal,
-                                    vec3_t *lit_pos);
+typedef void (*shader_coord_func_t)(void *data, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal,
+                                    HMM_Vec3 *lit_pos);
 
 /* abstract base class */
 class abstract_shader_c

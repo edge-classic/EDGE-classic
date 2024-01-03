@@ -351,18 +351,18 @@ static void AdjustScrollParts(side_t *side, bool left, scroll_part_e parts, floa
 
     if (parts & (left ? SCPT_LeftUpper : SCPT_RightUpper))
     {
-        side->top.scroll.x += x_speed * xmul;
-        side->top.scroll.y += y_speed * ymul;
+        side->top.scroll.X += x_speed * xmul;
+        side->top.scroll.Y += y_speed * ymul;
     }
     if (parts & (left ? SCPT_LeftMiddle : SCPT_RightMiddle))
     {
-        side->middle.scroll.x += x_speed * xmul;
-        side->middle.scroll.y += y_speed * ymul;
+        side->middle.scroll.X += x_speed * xmul;
+        side->middle.scroll.Y += y_speed * ymul;
     }
     if (parts & (left ? SCPT_LeftLower : SCPT_RightLower))
     {
-        side->bottom.scroll.x += x_speed * xmul;
-        side->bottom.scroll.y += y_speed * ymul;
+        side->bottom.scroll.X += x_speed * xmul;
+        side->bottom.scroll.Y += y_speed * ymul;
     }
 }
 
@@ -376,18 +376,18 @@ static void AdjustScaleParts(side_t *side, bool left, scroll_part_e parts, float
 
     if (parts & (left ? SCPT_LeftUpper : SCPT_RightUpper))
     {
-        side->top.x_mat.x *= factor;
-        side->top.y_mat.y *= factor;
+        side->top.x_mat.X *= factor;
+        side->top.y_mat.Y *= factor;
     }
     if (parts & (left ? SCPT_LeftMiddle : SCPT_RightMiddle))
     {
-        side->middle.x_mat.x *= factor;
-        side->middle.y_mat.y *= factor;
+        side->middle.x_mat.X *= factor;
+        side->middle.y_mat.Y *= factor;
     }
     if (parts & (left ? SCPT_LeftLower : SCPT_RightLower))
     {
-        side->bottom.x_mat.x *= factor;
-        side->bottom.y_mat.y *= factor;
+        side->bottom.x_mat.X *= factor;
+        side->bottom.y_mat.Y *= factor;
     }
 }
 
@@ -407,10 +407,10 @@ static void AdjustStretchParts(side_t *side, bool left, scroll_part_e parts, flo
             factor = IM_WIDTH(side->top.image) / linelength;
 
         if (widthOnly)
-            side->top.x_mat.x *= factor;
+            side->top.x_mat.X *= factor;
 
         if (!widthOnly)
-            side->top.y_mat.y *= factor;
+            side->top.y_mat.Y *= factor;
     }
     if (parts & (left ? SCPT_LeftMiddle : SCPT_RightMiddle))
     {
@@ -418,10 +418,10 @@ static void AdjustStretchParts(side_t *side, bool left, scroll_part_e parts, flo
             factor = IM_WIDTH(side->middle.image) / linelength;
 
         if (widthOnly)
-            side->middle.x_mat.x *= factor;
+            side->middle.x_mat.X *= factor;
 
         if (!widthOnly)
-            side->middle.y_mat.y *= factor;
+            side->middle.y_mat.Y *= factor;
     }
     if (parts & (left ? SCPT_LeftLower : SCPT_RightLower))
     {
@@ -429,10 +429,10 @@ static void AdjustStretchParts(side_t *side, bool left, scroll_part_e parts, flo
             factor = IM_WIDTH(side->bottom.image) / linelength;
 
         if (widthOnly)
-            side->bottom.x_mat.x *= factor;
+            side->bottom.x_mat.X *= factor;
 
         if (!widthOnly)
-            side->bottom.y_mat.y *= factor;
+            side->bottom.y_mat.Y *= factor;
     }
 }
 
@@ -445,13 +445,13 @@ static void AdjustSkewParts(side_t *side, bool left, scroll_part_e parts, float 
         parts = (scroll_part_e)(SCPT_LEFT | SCPT_RIGHT);
 
     if (parts & (left ? SCPT_LeftUpper : SCPT_RightUpper))
-        side->top.y_mat.x = skew * side->top.y_mat.y;
+        side->top.y_mat.X = skew * side->top.y_mat.Y;
 
     if (parts & (left ? SCPT_LeftMiddle : SCPT_RightMiddle))
-        side->middle.y_mat.x = skew * side->middle.y_mat.y;
+        side->middle.y_mat.X = skew * side->middle.y_mat.Y;
 
     if (parts & (left ? SCPT_LeftLower : SCPT_RightLower))
-        side->bottom.y_mat.x = skew * side->bottom.y_mat.y;
+        side->bottom.y_mat.X = skew * side->bottom.y_mat.Y;
 }
 
 static void AdjustLightParts(side_t *side, bool left, scroll_part_e parts, region_properties_t *p)
@@ -620,8 +620,8 @@ static void P_LineEffect(line_t *target, line_t *source, const linetype_c *speci
 
     if ((special->line_effect & LINEFX_OffsetScroll) && target->side[0])
     {
-        float x_speed = -target->side[0]->middle.offset.x;
-        float y_speed = target->side[0]->middle.offset.y;
+        float x_speed = -target->side[0]->middle.offset.X;
+        float y_speed = target->side[0]->middle.offset.Y;
 
         AdjustScrollParts(target->side[0], 0, special->line_parts, x_speed, y_speed);
 
@@ -634,8 +634,8 @@ static void P_LineEffect(line_t *target, line_t *source, const linetype_c *speci
         anim.target = target;
         if (special->scroll_type == ScrollType_None)
         {
-            anim.side0_xspeed = -source->side[0]->middle.offset.x / 8.0;
-            anim.side0_yspeed = source->side[0]->middle.offset.y / 8.0;
+            anim.side0_xspeed = -source->side[0]->middle.offset.X / 8.0;
+            anim.side0_yspeed = source->side[0]->middle.offset.Y / 8.0;
         }
         else
         {
@@ -646,8 +646,8 @@ static void P_LineEffect(line_t *target, line_t *source, const linetype_c *speci
                 anim.scroll_sec_ref     = source->frontsector;
                 anim.scroll_special_ref = special;
                 anim.scroll_line_ref    = source;
-                anim.side0_xoffspeed    = -source->side[0]->middle.offset.x / 8.0;
-                anim.side0_yoffspeed    = source->side[0]->middle.offset.y / 8.0;
+                anim.side0_xoffspeed    = -source->side[0]->middle.offset.X / 8.0;
+                anim.side0_yoffspeed    = source->side[0]->middle.offset.Y / 8.0;
                 for (int i = 0; i < numlines; i++)
                 {
                     if (lines[i].tag == source->frontsector->tag)
@@ -762,15 +762,15 @@ static void P_LineEffect(line_t *target, line_t *source, const linetype_c *speci
     // experimental: skew wall texture(s) by sidedef Y offset
     if ((special->line_effect & LINEFX_Skew) && source->side[0])
     {
-        float skew = source->side[0]->top.offset.x / 128.0f;
+        float skew = source->side[0]->top.offset.X / 128.0f;
 
         AdjustSkewParts(target->side[0], 0, special->line_parts, skew);
         AdjustSkewParts(target->side[1], 1, special->line_parts, skew);
 
         if (target == source)
         {
-            source->side[0]->middle.offset.x = 0;
-            source->side[0]->bottom.offset.x = 0;
+            source->side[0]->middle.offset.X = 0;
+            source->side[0]->bottom.offset.X = 0;
         }
     }
 
@@ -830,18 +830,18 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
         {
             if (special->sector_effect & SECTFX_ScrollFloor)
             {
-                anim.floor_scroll.x -= source->dx / 32.0f;
-                anim.floor_scroll.y -= source->dy / 32.0f;
+                anim.floor_scroll.X -= source->dx / 32.0f;
+                anim.floor_scroll.Y -= source->dy / 32.0f;
             }
             if (special->sector_effect & SECTFX_ScrollCeiling)
             {
-                anim.ceil_scroll.x -= source->dx / 32.0f;
-                anim.ceil_scroll.y -= source->dy / 32.0f;
+                anim.ceil_scroll.X -= source->dx / 32.0f;
+                anim.ceil_scroll.Y -= source->dy / 32.0f;
             }
             if (special->sector_effect & SECTFX_PushThings)
             {
-                anim.push.x += source->dx / 32.0f * BOOM_CARRY_FACTOR;
-                anim.push.y += source->dy / 32.0f * BOOM_CARRY_FACTOR;
+                anim.push.X += source->dx / 32.0f * BOOM_CARRY_FACTOR;
+                anim.push.Y += source->dy / 32.0f * BOOM_CARRY_FACTOR;
             }
         }
         else
@@ -898,35 +898,35 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
     if (special->sector_effect & SECTFX_ResetFloor)
     {
         target->floor.override_p = NULL;
-        target->floor.scroll.x = target->floor.scroll.y = 0;
-        target->props.push.x = target->props.push.y = target->props.push.z = 0;
+        target->floor.scroll.X = target->floor.scroll.Y = 0;
+        target->props.push.X = target->props.push.Y = target->props.push.Z = 0;
     }
     if (special->sector_effect & SECTFX_ResetCeiling)
     {
         target->ceil.override_p = NULL;
-        target->ceil.scroll.x = target->ceil.scroll.y = 0;
+        target->ceil.scroll.X = target->ceil.scroll.Y = 0;
     }
 
     // set texture alignment
     if (special->sector_effect & SECTFX_AlignFloor)
     {
-        target->floor.offset.x = -source->v1->x;
-        target->floor.offset.y = -source->v1->y;
+        target->floor.offset.X = -source->v1->x;
+        target->floor.offset.Y = -source->v1->y;
         if (source->side[0]) // Lobo: Experiment to read and apply line offsets to floor offsets
         {
-            target->floor.offset.x += source->side[0]->bottom.offset.x;
-            target->floor.offset.y += source->side[0]->bottom.offset.y;
+            target->floor.offset.X += source->side[0]->bottom.offset.X;
+            target->floor.offset.Y += source->side[0]->bottom.offset.Y;
         }
         target->floor.rotation = angle;
     }
     if (special->sector_effect & SECTFX_AlignCeiling)
     {
-        target->ceil.offset.x = -source->v1->x;
-        target->ceil.offset.y = -source->v1->y;
+        target->ceil.offset.X = -source->v1->x;
+        target->ceil.offset.Y = -source->v1->y;
         if (source->side[0]) // Lobo: Experiment to read and apply line offsets to floor offsets
         {
-            target->ceil.offset.x += source->side[0]->bottom.offset.x;
-            target->ceil.offset.y += source->side[0]->bottom.offset.y;
+            target->ceil.offset.X += source->side[0]->bottom.offset.X;
+            target->ceil.offset.Y += source->side[0]->bottom.offset.Y;
         }
         target->ceil.rotation = angle;
     }
@@ -937,20 +937,20 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
         bool  aligned = (special->sector_effect & SECTFX_AlignFloor) != 0;
         float factor  = ScaleFactorForPlane(target->floor, length, is_vert && !aligned);
 
-        target->floor.x_mat.x *= factor;
-        target->floor.x_mat.y *= factor;
-        target->floor.y_mat.x *= factor;
-        target->floor.y_mat.y *= factor;
+        target->floor.x_mat.X *= factor;
+        target->floor.x_mat.Y *= factor;
+        target->floor.y_mat.X *= factor;
+        target->floor.y_mat.Y *= factor;
     }
     if (special->sector_effect & SECTFX_ScaleCeiling)
     {
         bool  aligned = (special->sector_effect & SECTFX_AlignCeiling) != 0;
         float factor  = ScaleFactorForPlane(target->ceil, length, is_vert && !aligned);
 
-        target->ceil.x_mat.x *= factor;
-        target->ceil.x_mat.y *= factor;
-        target->ceil.y_mat.x *= factor;
-        target->ceil.y_mat.y *= factor;
+        target->ceil.x_mat.X *= factor;
+        target->ceil.x_mat.Y *= factor;
+        target->ceil.y_mat.X *= factor;
+        target->ceil.y_mat.Y *= factor;
     }
 
     // killough 3/7/98 and AJA 2022:
@@ -1989,10 +1989,10 @@ void P_PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
     }
 }
 
-static inline void ApplyScroll(vec2_t &offset, const vec2_t &delta, unsigned short tex_w, unsigned short tex_h)
+static inline void ApplyScroll(HMM_Vec2 &offset, const HMM_Vec2 &delta, unsigned short tex_w, unsigned short tex_h)
 {
-    offset.x = fmod(offset.x + delta.x, tex_w);
-    offset.y = fmod(offset.y + delta.y, tex_h);
+    offset.X = fmod(offset.X + delta.X, tex_w);
+    offset.Y = fmod(offset.Y + delta.Y, tex_h);
 }
 
 //
@@ -2047,36 +2047,36 @@ void P_UpdateSpecials(bool extra_tic)
             {
                 if (ld->side[0]->top.image)
                 {
-                    ld->side[0]->top.net_scroll.x += lineanims[i].side0_xspeed;
-                    ld->side[0]->top.net_scroll.y += lineanims[i].side0_yspeed;
+                    ld->side[0]->top.net_scroll.X += lineanims[i].side0_xspeed;
+                    ld->side[0]->top.net_scroll.Y += lineanims[i].side0_yspeed;
                 }
                 if (ld->side[0]->middle.image)
                 {
-                    ld->side[0]->middle.net_scroll.x += lineanims[i].side0_xspeed;
-                    ld->side[0]->middle.net_scroll.y += lineanims[i].side0_yspeed;
+                    ld->side[0]->middle.net_scroll.X += lineanims[i].side0_xspeed;
+                    ld->side[0]->middle.net_scroll.Y += lineanims[i].side0_yspeed;
                 }
                 if (ld->side[0]->bottom.image)
                 {
-                    ld->side[0]->bottom.net_scroll.x += lineanims[i].side0_xspeed;
-                    ld->side[0]->bottom.net_scroll.y += lineanims[i].side0_yspeed;
+                    ld->side[0]->bottom.net_scroll.X += lineanims[i].side0_xspeed;
+                    ld->side[0]->bottom.net_scroll.Y += lineanims[i].side0_yspeed;
                 }
             }
             if (ld->side[1])
             {
                 if (ld->side[1]->top.image)
                 {
-                    ld->side[1]->top.net_scroll.x += lineanims[i].side1_xspeed;
-                    ld->side[1]->top.net_scroll.y += lineanims[i].side1_yspeed;
+                    ld->side[1]->top.net_scroll.X += lineanims[i].side1_xspeed;
+                    ld->side[1]->top.net_scroll.Y += lineanims[i].side1_yspeed;
                 }
                 if (ld->side[1]->middle.image)
                 {
-                    ld->side[1]->middle.net_scroll.x += lineanims[i].side1_xspeed;
-                    ld->side[1]->middle.net_scroll.y += lineanims[i].side1_yspeed;
+                    ld->side[1]->middle.net_scroll.X += lineanims[i].side1_xspeed;
+                    ld->side[1]->middle.net_scroll.Y += lineanims[i].side1_yspeed;
                 }
                 if (ld->side[1]->bottom.image)
                 {
-                    ld->side[1]->bottom.net_scroll.x += lineanims[i].side1_xspeed;
-                    ld->side[1]->bottom.net_scroll.y += lineanims[i].side1_yspeed;
+                    ld->side[1]->bottom.net_scroll.X += lineanims[i].side1_xspeed;
+                    ld->side[1]->bottom.net_scroll.Y += lineanims[i].side1_yspeed;
                 }
             }
 
@@ -2105,36 +2105,36 @@ void P_UpdateSpecials(bool extra_tic)
                 {
                     if (ld->side[0]->top.image)
                     {
-                        ld->side[0]->top.net_scroll.x += sx;
-                        ld->side[0]->top.net_scroll.y += sy;
+                        ld->side[0]->top.net_scroll.X += sx;
+                        ld->side[0]->top.net_scroll.Y += sy;
                     }
                     if (ld->side[0]->middle.image)
                     {
-                        ld->side[0]->middle.net_scroll.x += sx;
-                        ld->side[0]->middle.net_scroll.y += sy;
+                        ld->side[0]->middle.net_scroll.X += sx;
+                        ld->side[0]->middle.net_scroll.Y += sy;
                     }
                     if (ld->side[0]->bottom.image)
                     {
-                        ld->side[0]->bottom.net_scroll.x += sx;
-                        ld->side[0]->bottom.net_scroll.y += sy;
+                        ld->side[0]->bottom.net_scroll.X += sx;
+                        ld->side[0]->bottom.net_scroll.Y += sy;
                     }
                 }
                 if (ld->side[1])
                 {
                     if (ld->side[1]->top.image)
                     {
-                        ld->side[1]->top.net_scroll.x += sx;
-                        ld->side[1]->top.net_scroll.y += sy;
+                        ld->side[1]->top.net_scroll.X += sx;
+                        ld->side[1]->top.net_scroll.Y += sy;
                     }
                     if (ld->side[1]->middle.image)
                     {
-                        ld->side[1]->middle.net_scroll.x += sx;
-                        ld->side[1]->middle.net_scroll.y += sy;
+                        ld->side[1]->middle.net_scroll.X += sx;
+                        ld->side[1]->middle.net_scroll.Y += sy;
                     }
                     if (ld->side[1]->bottom.image)
                     {
-                        ld->side[1]->bottom.net_scroll.x += sx;
-                        ld->side[1]->bottom.net_scroll.y += sy;
+                        ld->side[1]->bottom.net_scroll.X += sx;
+                        ld->side[1]->bottom.net_scroll.Y += sy;
                     }
                 }
             }
@@ -2155,18 +2155,18 @@ void P_UpdateSpecials(bool extra_tic)
                 {
                     if (ld->side[0]->top.image)
                     {
-                        ld->side[0]->top.net_scroll.x += sx;
-                        ld->side[0]->top.net_scroll.y += sy;
+                        ld->side[0]->top.net_scroll.X += sx;
+                        ld->side[0]->top.net_scroll.Y += sy;
                     }
                     if (ld->side[0]->middle.image)
                     {
-                        ld->side[0]->middle.net_scroll.x += sx;
-                        ld->side[0]->middle.net_scroll.y += sy;
+                        ld->side[0]->middle.net_scroll.X += sx;
+                        ld->side[0]->middle.net_scroll.Y += sy;
                     }
                     if (ld->side[0]->bottom.image)
                     {
-                        ld->side[0]->bottom.net_scroll.x += sx;
-                        ld->side[0]->bottom.net_scroll.y += sy;
+                        ld->side[0]->bottom.net_scroll.X += sx;
+                        ld->side[0]->bottom.net_scroll.Y += sy;
                     }
                 }
             }
@@ -2188,36 +2188,36 @@ void P_UpdateSpecials(bool extra_tic)
             {
                 if (ld->side[0]->top.image)
                 {
-                    ld->side[0]->top.old_scroll.x = ld->side[0]->top.scroll.x;
-                    ld->side[0]->top.old_scroll.y = ld->side[0]->top.scroll.y;
+                    ld->side[0]->top.old_scroll.X = ld->side[0]->top.scroll.X;
+                    ld->side[0]->top.old_scroll.Y = ld->side[0]->top.scroll.Y;
                 }
                 if (ld->side[0]->middle.image)
                 {
-                    ld->side[0]->middle.old_scroll.x = ld->side[0]->middle.scroll.x;
-                    ld->side[0]->middle.old_scroll.y = ld->side[0]->middle.scroll.y;
+                    ld->side[0]->middle.old_scroll.X = ld->side[0]->middle.scroll.X;
+                    ld->side[0]->middle.old_scroll.Y = ld->side[0]->middle.scroll.Y;
                 }
                 if (ld->side[0]->bottom.image)
                 {
-                    ld->side[0]->bottom.old_scroll.x = ld->side[0]->bottom.scroll.x;
-                    ld->side[0]->bottom.old_scroll.y = ld->side[0]->bottom.scroll.y;
+                    ld->side[0]->bottom.old_scroll.X = ld->side[0]->bottom.scroll.X;
+                    ld->side[0]->bottom.old_scroll.Y = ld->side[0]->bottom.scroll.Y;
                 }
             }
             if (ld->side[1])
             {
                 if (ld->side[1]->top.image)
                 {
-                    ld->side[1]->top.old_scroll.x = ld->side[1]->top.scroll.x;
-                    ld->side[1]->top.old_scroll.y = ld->side[1]->top.scroll.y;
+                    ld->side[1]->top.old_scroll.X = ld->side[1]->top.scroll.X;
+                    ld->side[1]->top.old_scroll.Y = ld->side[1]->top.scroll.Y;
                 }
                 if (ld->side[1]->middle.image)
                 {
-                    ld->side[1]->middle.old_scroll.x = ld->side[1]->middle.scroll.x;
-                    ld->side[1]->middle.old_scroll.y = ld->side[1]->middle.scroll.y;
+                    ld->side[1]->middle.old_scroll.X = ld->side[1]->middle.scroll.X;
+                    ld->side[1]->middle.old_scroll.Y = ld->side[1]->middle.scroll.Y;
                 }
                 if (ld->side[1]->bottom.image)
                 {
-                    ld->side[1]->bottom.old_scroll.x = ld->side[1]->bottom.scroll.x;
-                    ld->side[1]->bottom.old_scroll.y = ld->side[1]->bottom.scroll.y;
+                    ld->side[1]->bottom.old_scroll.X = ld->side[1]->bottom.scroll.X;
+                    ld->side[1]->bottom.old_scroll.Y = ld->side[1]->bottom.scroll.Y;
                 }
             }
             ld->old_stored = true;
@@ -2228,36 +2228,36 @@ void P_UpdateSpecials(bool extra_tic)
             {
                 if (ld->side[0]->top.image)
                 {
-                    ld->side[0]->top.scroll.x = ld->side[0]->top.old_scroll.x;
-                    ld->side[0]->top.scroll.y = ld->side[0]->top.old_scroll.y;
+                    ld->side[0]->top.scroll.X = ld->side[0]->top.old_scroll.X;
+                    ld->side[0]->top.scroll.Y = ld->side[0]->top.old_scroll.Y;
                 }
                 if (ld->side[0]->middle.image)
                 {
-                    ld->side[0]->middle.scroll.x = ld->side[0]->middle.old_scroll.x;
-                    ld->side[0]->middle.scroll.y = ld->side[0]->middle.old_scroll.y;
+                    ld->side[0]->middle.scroll.X = ld->side[0]->middle.old_scroll.X;
+                    ld->side[0]->middle.scroll.Y = ld->side[0]->middle.old_scroll.Y;
                 }
                 if (ld->side[0]->bottom.image)
                 {
-                    ld->side[0]->bottom.scroll.x = ld->side[0]->bottom.old_scroll.x;
-                    ld->side[0]->bottom.scroll.y = ld->side[0]->bottom.old_scroll.y;
+                    ld->side[0]->bottom.scroll.X = ld->side[0]->bottom.old_scroll.X;
+                    ld->side[0]->bottom.scroll.Y = ld->side[0]->bottom.old_scroll.Y;
                 }
             }
             if (ld->side[1])
             {
                 if (ld->side[1]->top.image)
                 {
-                    ld->side[1]->top.scroll.x = ld->side[1]->top.old_scroll.x;
-                    ld->side[1]->top.scroll.y = ld->side[1]->top.old_scroll.y;
+                    ld->side[1]->top.scroll.X = ld->side[1]->top.old_scroll.X;
+                    ld->side[1]->top.scroll.Y = ld->side[1]->top.old_scroll.Y;
                 }
                 if (ld->side[1]->middle.image)
                 {
-                    ld->side[1]->middle.scroll.x = ld->side[1]->middle.old_scroll.x;
-                    ld->side[1]->middle.scroll.y = ld->side[1]->middle.old_scroll.y;
+                    ld->side[1]->middle.scroll.X = ld->side[1]->middle.old_scroll.X;
+                    ld->side[1]->middle.scroll.Y = ld->side[1]->middle.old_scroll.Y;
                 }
                 if (ld->side[1]->bottom.image)
                 {
-                    ld->side[1]->bottom.scroll.x = ld->side[1]->bottom.old_scroll.x;
-                    ld->side[1]->bottom.scroll.y = ld->side[1]->bottom.old_scroll.y;
+                    ld->side[1]->bottom.scroll.X = ld->side[1]->bottom.old_scroll.X;
+                    ld->side[1]->bottom.scroll.Y = ld->side[1]->bottom.old_scroll.Y;
                 }
             }
         }
@@ -2268,35 +2268,35 @@ void P_UpdateSpecials(bool extra_tic)
         {
             if (ld->side[0]->top.image)
             {
-                ld->side[0]->top.offset.x = fmod(
-                    ld->side[0]->top.offset.x + (ld->side[0]->top.scroll.x + ld->side[0]->top.net_scroll.x) * factor,
+                ld->side[0]->top.offset.X = fmod(
+                    ld->side[0]->top.offset.X + (ld->side[0]->top.scroll.X + ld->side[0]->top.net_scroll.X) * factor,
                     ld->side[0]->top.image->actual_w);
-                ld->side[0]->top.offset.y = fmod(
-                    ld->side[0]->top.offset.y + (ld->side[0]->top.scroll.y + ld->side[0]->top.net_scroll.y) * factor,
+                ld->side[0]->top.offset.Y = fmod(
+                    ld->side[0]->top.offset.Y + (ld->side[0]->top.scroll.Y + ld->side[0]->top.net_scroll.Y) * factor,
                     ld->side[0]->top.image->actual_h);
                 ld->side[0]->top.net_scroll = {0, 0};
             }
             if (ld->side[0]->middle.image)
             {
-                ld->side[0]->middle.offset.x =
-                    fmod(ld->side[0]->middle.offset.x +
-                             (ld->side[0]->middle.scroll.x + ld->side[0]->middle.net_scroll.x) * factor,
+                ld->side[0]->middle.offset.X =
+                    fmod(ld->side[0]->middle.offset.X +
+                             (ld->side[0]->middle.scroll.X + ld->side[0]->middle.net_scroll.X) * factor,
                          ld->side[0]->middle.image->actual_w);
-                ld->side[0]->middle.offset.y =
-                    fmod(ld->side[0]->middle.offset.y +
-                             (ld->side[0]->middle.scroll.y + ld->side[0]->middle.net_scroll.y) * factor,
+                ld->side[0]->middle.offset.Y =
+                    fmod(ld->side[0]->middle.offset.Y +
+                             (ld->side[0]->middle.scroll.Y + ld->side[0]->middle.net_scroll.Y) * factor,
                          ld->side[0]->middle.image->actual_h);
                 ld->side[0]->middle.net_scroll = {0, 0};
             }
             if (ld->side[0]->bottom.image)
             {
-                ld->side[0]->bottom.offset.x =
-                    fmod(ld->side[0]->bottom.offset.x +
-                             (ld->side[0]->bottom.scroll.x + ld->side[0]->bottom.net_scroll.x) * factor,
+                ld->side[0]->bottom.offset.X =
+                    fmod(ld->side[0]->bottom.offset.X +
+                             (ld->side[0]->bottom.scroll.X + ld->side[0]->bottom.net_scroll.X) * factor,
                          ld->side[0]->bottom.image->actual_w);
-                ld->side[0]->bottom.offset.y =
-                    fmod(ld->side[0]->bottom.offset.y +
-                             (ld->side[0]->bottom.scroll.y + ld->side[0]->bottom.net_scroll.y) * factor,
+                ld->side[0]->bottom.offset.Y =
+                    fmod(ld->side[0]->bottom.offset.Y +
+                             (ld->side[0]->bottom.scroll.Y + ld->side[0]->bottom.net_scroll.Y) * factor,
                          ld->side[0]->bottom.image->actual_h);
                 ld->side[0]->bottom.net_scroll = {0, 0};
             }
@@ -2306,35 +2306,35 @@ void P_UpdateSpecials(bool extra_tic)
         {
             if (ld->side[1]->top.image)
             {
-                ld->side[1]->top.offset.x = fmod(
-                    ld->side[1]->top.offset.x + (ld->side[1]->top.scroll.x + ld->side[1]->top.net_scroll.x) * factor,
+                ld->side[1]->top.offset.X = fmod(
+                    ld->side[1]->top.offset.X + (ld->side[1]->top.scroll.X + ld->side[1]->top.net_scroll.X) * factor,
                     ld->side[1]->top.image->actual_w);
-                ld->side[1]->top.offset.y = fmod(
-                    ld->side[1]->top.offset.y + (ld->side[1]->top.scroll.y + ld->side[1]->top.net_scroll.y) * factor,
+                ld->side[1]->top.offset.Y = fmod(
+                    ld->side[1]->top.offset.Y + (ld->side[1]->top.scroll.Y + ld->side[1]->top.net_scroll.Y) * factor,
                     ld->side[1]->top.image->actual_h);
                 ld->side[1]->top.net_scroll = {0, 0};
             }
             if (ld->side[1]->middle.image)
             {
-                ld->side[1]->middle.offset.x =
-                    fmod(ld->side[1]->middle.offset.x +
-                             (ld->side[1]->middle.scroll.x + ld->side[1]->middle.net_scroll.x) * factor,
+                ld->side[1]->middle.offset.X =
+                    fmod(ld->side[1]->middle.offset.X +
+                             (ld->side[1]->middle.scroll.X + ld->side[1]->middle.net_scroll.X) * factor,
                          ld->side[1]->middle.image->actual_w);
-                ld->side[1]->middle.offset.y =
-                    fmod(ld->side[1]->middle.offset.y +
-                             (ld->side[1]->middle.scroll.y + ld->side[1]->middle.net_scroll.y) * factor,
+                ld->side[1]->middle.offset.Y =
+                    fmod(ld->side[1]->middle.offset.Y +
+                             (ld->side[1]->middle.scroll.Y + ld->side[1]->middle.net_scroll.Y) * factor,
                          ld->side[1]->middle.image->actual_h);
                 ld->side[1]->middle.net_scroll = {0, 0};
             }
             if (ld->side[1]->bottom.image)
             {
-                ld->side[1]->bottom.offset.x =
-                    fmod(ld->side[1]->bottom.offset.x +
-                             (ld->side[1]->bottom.scroll.x + ld->side[1]->bottom.net_scroll.x) * factor,
+                ld->side[1]->bottom.offset.X =
+                    fmod(ld->side[1]->bottom.offset.X +
+                             (ld->side[1]->bottom.scroll.X + ld->side[1]->bottom.net_scroll.X) * factor,
                          ld->side[1]->bottom.image->actual_w);
-                ld->side[1]->bottom.offset.y =
-                    fmod(ld->side[1]->bottom.offset.y +
-                             (ld->side[1]->bottom.scroll.y + ld->side[1]->bottom.net_scroll.y) * factor,
+                ld->side[1]->bottom.offset.Y =
+                    fmod(ld->side[1]->bottom.offset.Y +
+                             (ld->side[1]->bottom.scroll.Y + ld->side[1]->bottom.net_scroll.Y) * factor,
                          ld->side[1]->bottom.image->actual_h);
                 ld->side[1]->bottom.net_scroll = {0, 0};
             }
@@ -2351,12 +2351,12 @@ void P_UpdateSpecials(bool extra_tic)
                 continue;
 
             // Add static values
-            sec->props.net_push.x += secanims[i].push.x;
-            sec->props.net_push.y += secanims[i].push.y;
-            sec->floor.net_scroll.x += secanims[i].floor_scroll.x;
-            sec->floor.net_scroll.y += secanims[i].floor_scroll.y;
-            sec->ceil.net_scroll.x += secanims[i].ceil_scroll.x;
-            sec->ceil.net_scroll.y += secanims[i].ceil_scroll.y;
+            sec->props.net_push.X += secanims[i].push.X;
+            sec->props.net_push.Y += secanims[i].push.Y;
+            sec->floor.net_scroll.X += secanims[i].floor_scroll.X;
+            sec->floor.net_scroll.Y += secanims[i].floor_scroll.Y;
+            sec->ceil.net_scroll.X += secanims[i].ceil_scroll.X;
+            sec->ceil.net_scroll.Y += secanims[i].ceil_scroll.Y;
 
             // Update dynamic values
             struct sector_s  *sec_ref     = secanims[i].scroll_sec_ref;
@@ -2380,18 +2380,18 @@ void P_UpdateSpecials(bool extra_tic)
             }
             if (special_ref->sector_effect & SECTFX_PushThings)
             {
-                sec->props.net_push.y += BOOM_CARRY_FACTOR * sy;
-                sec->props.net_push.x += BOOM_CARRY_FACTOR * sx;
+                sec->props.net_push.Y += BOOM_CARRY_FACTOR * sy;
+                sec->props.net_push.X += BOOM_CARRY_FACTOR * sx;
             }
             if (special_ref->sector_effect & SECTFX_ScrollFloor)
             {
-                sec->floor.net_scroll.y -= sy;
-                sec->floor.net_scroll.x -= sx;
+                sec->floor.net_scroll.Y -= sy;
+                sec->floor.net_scroll.X -= sx;
             }
             if (special_ref->sector_effect & SECTFX_ScrollCeiling)
             {
-                sec->ceil.net_scroll.y -= sy;
-                sec->ceil.net_scroll.x -= sx;
+                sec->ceil.net_scroll.Y -= sy;
+                sec->ceil.net_scroll.X -= sx;
             }
             secanims[i].last_height = sec_ref->f_h + sec_ref->c_h;
         }
@@ -2406,36 +2406,36 @@ void P_UpdateSpecials(bool extra_tic)
 
         if (!sec->old_stored)
         {
-            sec->floor.old_scroll.x = sec->floor.offset.x;
-            sec->floor.old_scroll.y = sec->floor.offset.y;
-            sec->ceil.old_scroll.x  = sec->ceil.offset.x;
-            sec->ceil.old_scroll.y  = sec->ceil.offset.y;
-            sec->props.old_push.x   = sec->props.push.x;
-            sec->props.old_push.y   = sec->props.push.y;
-            sec->props.old_push.z   = sec->props.push.z;
+            sec->floor.old_scroll.X = sec->floor.offset.X;
+            sec->floor.old_scroll.Y = sec->floor.offset.Y;
+            sec->ceil.old_scroll.X  = sec->ceil.offset.X;
+            sec->ceil.old_scroll.Y  = sec->ceil.offset.Y;
+            sec->props.old_push.X   = sec->props.push.X;
+            sec->props.old_push.Y   = sec->props.push.Y;
+            sec->props.old_push.Z   = sec->props.push.Z;
             sec->old_stored         = true;
         }
         else
         {
-            sec->floor.scroll.x = sec->floor.old_scroll.x;
-            sec->floor.scroll.y = sec->floor.old_scroll.y;
-            sec->ceil.scroll.x  = sec->ceil.old_scroll.x;
-            sec->ceil.scroll.y  = sec->ceil.old_scroll.y;
-            sec->props.push.x   = sec->props.old_push.x;
-            sec->props.push.y   = sec->props.old_push.y;
-            sec->props.push.z   = sec->props.old_push.z;
+            sec->floor.scroll.X = sec->floor.old_scroll.X;
+            sec->floor.scroll.Y = sec->floor.old_scroll.Y;
+            sec->ceil.scroll.X  = sec->ceil.old_scroll.X;
+            sec->ceil.scroll.Y  = sec->ceil.old_scroll.Y;
+            sec->props.push.X   = sec->props.old_push.X;
+            sec->props.push.Y   = sec->props.old_push.Y;
+            sec->props.push.Z   = sec->props.old_push.Z;
         }
 
-        sec->floor.offset.x = fmod(sec->floor.offset.x + (sec->floor.scroll.x + sec->floor.net_scroll.x) * factor,
+        sec->floor.offset.X = fmod(sec->floor.offset.X + (sec->floor.scroll.X + sec->floor.net_scroll.X) * factor,
                                    sec->floor.image->actual_w);
-        sec->floor.offset.y = fmod(sec->floor.offset.y + (sec->floor.scroll.y + sec->floor.net_scroll.y) * factor,
+        sec->floor.offset.Y = fmod(sec->floor.offset.Y + (sec->floor.scroll.Y + sec->floor.net_scroll.Y) * factor,
                                    sec->floor.image->actual_h);
-        sec->ceil.offset.x  = fmod(sec->ceil.offset.x + (sec->ceil.scroll.x + sec->ceil.net_scroll.x) * factor,
+        sec->ceil.offset.X  = fmod(sec->ceil.offset.X + (sec->ceil.scroll.X + sec->ceil.net_scroll.X) * factor,
                                    sec->ceil.image->actual_w);
-        sec->ceil.offset.y  = fmod(sec->ceil.offset.y + (sec->ceil.scroll.y + sec->ceil.net_scroll.y) * factor,
+        sec->ceil.offset.Y  = fmod(sec->ceil.offset.Y + (sec->ceil.scroll.Y + sec->ceil.net_scroll.Y) * factor,
                                    sec->ceil.image->actual_h);
-        sec->props.push.x   = sec->props.push.x + sec->props.net_push.x;
-        sec->props.push.y   = sec->props.push.y + sec->props.net_push.y;
+        sec->props.push.X   = sec->props.push.X + sec->props.net_push.X;
+        sec->props.push.Y   = sec->props.push.Y + sec->props.net_push.Y;
 
         // Reset dynamic stuff
         sec->props.net_push   = {0, 0, 0};
@@ -2628,9 +2628,9 @@ void P_SpawnSpecials2(int autotag)
         {
             float mul = secSpecial->push_speed / 100.0f;
 
-            sector->props.push.x += M_Cos(secSpecial->push_angle) * mul;
-            sector->props.push.y += M_Sin(secSpecial->push_angle) * mul;
-            sector->props.push.z += secSpecial->push_zspeed / (r_doubleframes.d ? 89.2f : 100.0f);
+            sector->props.push.X += M_Cos(secSpecial->push_angle) * mul;
+            sector->props.push.Y += M_Sin(secSpecial->push_angle) * mul;
+            sector->props.push.Z += secSpecial->push_zspeed / (r_doubleframes.d ? 89.2f : 100.0f);
         }
 
         // Scrollers
@@ -2642,8 +2642,8 @@ void P_SpawnSpecials2(int autotag)
             float dx = M_Cos(secSpecial->f.scroll_angle);
             float dy = M_Sin(secSpecial->f.scroll_angle);
 
-            anim.floor_scroll.x -= dx * secSpecial->f.scroll_speed / 32.0f;
-            anim.floor_scroll.y -= dy * secSpecial->f.scroll_speed / 32.0f;
+            anim.floor_scroll.X -= dx * secSpecial->f.scroll_speed / 32.0f;
+            anim.floor_scroll.Y -= dy * secSpecial->f.scroll_speed / 32.0f;
 
             anim.last_height = sector->orig_height;
 
@@ -2659,8 +2659,8 @@ void P_SpawnSpecials2(int autotag)
             float dx = M_Cos(secSpecial->c.scroll_angle);
             float dy = M_Sin(secSpecial->c.scroll_angle);
 
-            anim.ceil_scroll.x -= dx * secSpecial->c.scroll_speed / 32.0f;
-            anim.ceil_scroll.y -= dy * secSpecial->c.scroll_speed / 32.0f;
+            anim.ceil_scroll.X -= dx * secSpecial->c.scroll_speed / 32.0f;
+            anim.ceil_scroll.Y -= dy * secSpecial->c.scroll_speed / 32.0f;
 
             anim.last_height = sector->orig_height;
 

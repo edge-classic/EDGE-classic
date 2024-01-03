@@ -507,7 +507,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
         float z1, z2;
         float pz1, pz2;
 
-        z1 = ld->frontsector->f_h + ld->side[0]->middle.offset.y;
+        z1 = ld->frontsector->f_h + ld->side[0]->middle.offset.Y;
         z2 = z1 + ld->special->ladder.height;
 
         pz1 = tm_I.mover->z;
@@ -577,7 +577,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 iz = M_LinePlaneIntersection({ix, iy, -40000}, {ix, iy, 40000}, ld->frontsector->floor_z_verts[0],
                                              ld->frontsector->floor_z_verts[1], ld->frontsector->floor_z_verts[2],
                                              ld->frontsector->floor_vs_normal)
-                         .z;
+                         .Z;
                 if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size)
                 {
                     blockline = ld;
@@ -596,7 +596,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 iz = M_LinePlaneIntersection({ix, iy, -40000}, {ix, iy, 40000}, ld->backsector->floor_z_verts[0],
                                              ld->backsector->floor_z_verts[1], ld->backsector->floor_z_verts[2],
                                              ld->backsector->floor_vs_normal)
-                         .z;
+                         .Z;
                 if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size)
                 {
                     blockline = ld;
@@ -626,7 +626,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                     iz = M_LinePlaneIntersection({ix, iy, -40000}, {ix, iy, 40000}, ld->backsector->floor_z_verts[0],
                                                  ld->backsector->floor_z_verts[1], ld->backsector->floor_z_verts[2],
                                                  ld->backsector->floor_vs_normal)
-                             .z;
+                             .Z;
                     if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size)
                     {
                         blockline = ld;
@@ -657,7 +657,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                     iz = M_LinePlaneIntersection({ix, iy, -40000}, {ix, iy, 40000}, ld->frontsector->floor_z_verts[0],
                                                  ld->frontsector->floor_z_verts[1], ld->frontsector->floor_z_verts[2],
                                                  ld->frontsector->floor_vs_normal)
-                             .z;
+                             .Z;
                     if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size)
                     {
                         blockline = ld;
@@ -677,7 +677,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 float icz = M_LinePlaneIntersection({ix, iy, -40000}, {ix, iy, 40000}, ld->frontsector->ceil_z_verts[0],
                                                     ld->frontsector->ceil_z_verts[1], ld->frontsector->ceil_z_verts[2],
                                                     ld->frontsector->ceil_vs_normal)
-                                .z;
+                                .Z;
                 if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
                 {
                     blockline = ld;
@@ -696,7 +696,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 float icz = M_LinePlaneIntersection({ix, iy, -40000}, {ix, iy, 40000}, ld->backsector->ceil_z_verts[0],
                                                     ld->backsector->ceil_z_verts[1], ld->backsector->ceil_z_verts[2],
                                                     ld->backsector->ceil_vs_normal)
-                                .z;
+                                .Z;
                 if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
                 {
                     blockline = ld;
@@ -726,7 +726,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                         M_LinePlaneIntersection({ix, iy, -40000}, {ix, iy, 40000}, ld->backsector->ceil_z_verts[0],
                                                 ld->backsector->ceil_z_verts[1], ld->backsector->ceil_z_verts[2],
                                                 ld->backsector->ceil_vs_normal)
-                            .z;
+                            .Z;
                     if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
                     {
                         blockline = ld;
@@ -757,7 +757,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                         M_LinePlaneIntersection({ix, iy, -40000}, {ix, iy, 40000}, ld->frontsector->ceil_z_verts[0],
                                                 ld->frontsector->ceil_z_verts[1], ld->frontsector->ceil_z_verts[2],
                                                 ld->frontsector->ceil_vs_normal)
-                            .z;
+                            .Z;
                     if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
                     {
                         blockline = ld;
@@ -987,24 +987,24 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
     // Vertex slope check here?
     if (tm_I.sub->sector->floor_vertex_slope)
     {
-        vec3_t line_a{tm_I.x, tm_I.y, -40000};
-        vec3_t line_b{tm_I.x, tm_I.y, 40000};
+        HMM_Vec3 line_a{tm_I.x, tm_I.y, -40000};
+        HMM_Vec3 line_b{tm_I.x, tm_I.y, 40000};
         float  z_test = M_LinePlaneIntersection(line_a, line_b, tm_I.sub->sector->floor_z_verts[0],
                                                 tm_I.sub->sector->floor_z_verts[1], tm_I.sub->sector->floor_z_verts[2],
                                                 tm_I.sub->sector->floor_vs_normal)
-                           .z;
+                           .Z;
         if (std::isfinite(z_test))
             tm_I.f_slope_z = z_test - tm_I.sub->sector->f_h;
     }
 
     if (tm_I.sub->sector->ceil_vertex_slope)
     {
-        vec3_t line_a{tm_I.x, tm_I.y, -40000};
-        vec3_t line_b{tm_I.x, tm_I.y, 40000};
+        HMM_Vec3 line_a{tm_I.x, tm_I.y, -40000};
+        HMM_Vec3 line_b{tm_I.x, tm_I.y, 40000};
         float  z_test = M_LinePlaneIntersection(line_a, line_b, tm_I.sub->sector->ceil_z_verts[0],
                                                 tm_I.sub->sector->ceil_z_verts[1], tm_I.sub->sector->ceil_z_verts[2],
                                                 tm_I.sub->sector->ceil_vs_normal)
-                           .z;
+                           .Z;
         if (std::isfinite(z_test))
             tm_I.c_slope_z = tm_I.sub->sector->c_h - z_test;
     }
@@ -1633,28 +1633,28 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
 
     if (sec_check && sec_check->floor_vertex_slope)
     {
-        if (sec_check->floor_vs_hilo.x > sec_check->f_h)
+        if (sec_check->floor_vs_hilo.X > sec_check->f_h)
         {
             // Check to see if hitting the side of a vertex slope sector
-            vec3_t tri_v1 = {0, 0, 0};
-            vec3_t tri_v2 = {0, 0, 0};
+            HMM_Vec3 tri_v1 = {0, 0, 0};
+            HMM_Vec3 tri_v2 = {0, 0, 0};
             for (auto v : sec_check->floor_z_verts)
             {
-                if (AlmostEquals(ld->v1->x, v.x) && AlmostEquals(ld->v1->y, v.y))
+                if (AlmostEquals(ld->v1->x, v.X) && AlmostEquals(ld->v1->y, v.Y))
                 {
-                    tri_v1.x = v.x;
-                    tri_v1.y = v.y;
-                    tri_v1.z = v.z;
+                    tri_v1.X = v.X;
+                    tri_v1.Y = v.Y;
+                    tri_v1.Z = v.Z;
                 }
-                else if (AlmostEquals(ld->v2->x, v.x) && AlmostEquals(ld->v2->y, v.y))
+                else if (AlmostEquals(ld->v2->x, v.X) && AlmostEquals(ld->v2->y, v.Y))
                 {
-                    tri_v2.x = v.x;
-                    tri_v2.y = v.y;
-                    tri_v2.z = v.z;
+                    tri_v2.X = v.X;
+                    tri_v2.Y = v.Y;
+                    tri_v2.Z = v.Z;
                 }
             }
-            if (AlmostEquals(tri_v1.z, tri_v2.z) &&
-                AlmostEquals(CLAMP(MIN(sec_check->f_h, tri_v1.z), z, MAX(sec_check->f_h, tri_v1.z)),
+            if (AlmostEquals(tri_v1.Z, tri_v2.Z) &&
+                AlmostEquals(CLAMP(MIN(sec_check->f_h, tri_v1.Z), z, MAX(sec_check->f_h, tri_v1.Z)),
                              z)) // Hitting rectangular side; no fancier check needed
             {
                 if (shoot_I.puff)
@@ -1668,10 +1668,10 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
             else
             {
                 // Test point against 2D projection of the slope side
-                if (std::abs(tri_v1.x - tri_v2.x) > std::abs(tri_v1.y - tri_v2.y))
+                if (std::abs(tri_v1.X - tri_v2.X) > std::abs(tri_v1.Y - tri_v2.Y))
                 {
-                    if (M_PointInTri({tri_v1.x, tri_v1.z}, {tri_v2.x, tri_v2.z},
-                                     {(tri_v1.z > tri_v2.z ? tri_v1.x : tri_v2.x), sec_check->f_h}, {sx, z}))
+                    if (M_PointInTri({tri_v1.X, tri_v1.Z}, {tri_v2.X, tri_v2.Z},
+                                     {(tri_v1.Z > tri_v2.Z ? tri_v1.X : tri_v2.X), sec_check->f_h}, {sx, z}))
                     {
                         if (shoot_I.puff)
                         {
@@ -1684,8 +1684,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 }
                 else
                 {
-                    if (M_PointInTri({tri_v1.y, tri_v1.z}, {tri_v2.y, tri_v2.z},
-                                     {(tri_v1.z > tri_v2.z ? tri_v1.y : tri_v2.y), sec_check->f_h}, {sy, z}))
+                    if (M_PointInTri({tri_v1.Y, tri_v1.Z}, {tri_v2.Y, tri_v2.Z},
+                                     {(tri_v1.Z > tri_v2.Z ? tri_v1.Y : tri_v2.Y), sec_check->f_h}, {sy, z}))
                     {
                         if (shoot_I.puff)
                             P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
@@ -1697,28 +1697,28 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
     }
     if (sec_check && sec_check->ceil_vertex_slope)
     {
-        if (sec_check->ceil_vs_hilo.y < sec_check->c_h)
+        if (sec_check->ceil_vs_hilo.Y < sec_check->c_h)
         {
             // Check to see if hitting the side of a vertex slope sector
-            vec3_t tri_v1 = {0, 0, 0};
-            vec3_t tri_v2 = {0, 0, 0};
+            HMM_Vec3 tri_v1 = {0, 0, 0};
+            HMM_Vec3 tri_v2 = {0, 0, 0};
             for (auto v : sec_check->ceil_z_verts)
             {
-                if (AlmostEquals(ld->v1->x, v.x) && AlmostEquals(ld->v1->y, v.y))
+                if (AlmostEquals(ld->v1->x, v.X) && AlmostEquals(ld->v1->y, v.Y))
                 {
-                    tri_v1.x = v.x;
-                    tri_v1.y = v.y;
-                    tri_v1.z = v.z;
+                    tri_v1.X = v.X;
+                    tri_v1.Y = v.Y;
+                    tri_v1.Z = v.Z;
                 }
-                else if (AlmostEquals(ld->v2->x, v.x) && AlmostEquals(ld->v2->y, v.y))
+                else if (AlmostEquals(ld->v2->x, v.X) && AlmostEquals(ld->v2->y, v.Y))
                 {
-                    tri_v2.x = v.x;
-                    tri_v2.y = v.y;
-                    tri_v2.z = v.z;
+                    tri_v2.X = v.X;
+                    tri_v2.Y = v.Y;
+                    tri_v2.Z = v.Z;
                 }
             }
-            if (AlmostEquals(tri_v1.z, tri_v2.z) &&
-                AlmostEquals(CLAMP(MIN(sec_check->c_h, tri_v1.z), z, MAX(sec_check->c_h, tri_v1.z)),
+            if (AlmostEquals(tri_v1.Z, tri_v2.Z) &&
+                AlmostEquals(CLAMP(MIN(sec_check->c_h, tri_v1.Z), z, MAX(sec_check->c_h, tri_v1.Z)),
                              z)) // Hitting rectangular side; no fancier check needed
             {
                 if (shoot_I.puff)
@@ -1732,10 +1732,10 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
             else
             {
                 // Test point against 2D projection of the slope side
-                if (std::abs(tri_v1.x - tri_v2.x) > std::abs(tri_v1.y - tri_v2.y))
+                if (std::abs(tri_v1.X - tri_v2.X) > std::abs(tri_v1.Y - tri_v2.Y))
                 {
-                    if (M_PointInTri({tri_v1.x, tri_v1.z}, {tri_v2.x, tri_v2.z},
-                                     {(tri_v1.z < tri_v2.z ? tri_v1.x : tri_v2.x), sec_check->c_h}, {sx, z}))
+                    if (M_PointInTri({tri_v1.X, tri_v1.Z}, {tri_v2.X, tri_v2.Z},
+                                     {(tri_v1.Z < tri_v2.Z ? tri_v1.X : tri_v2.X), sec_check->c_h}, {sx, z}))
                     {
                         if (shoot_I.puff)
                         {
@@ -1748,8 +1748,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 }
                 else
                 {
-                    if (M_PointInTri({tri_v1.y, tri_v1.z}, {tri_v2.y, tri_v2.z},
-                                     {(tri_v1.z < tri_v2.z ? tri_v1.y : tri_v2.y), sec_check->c_h}, {sy, z}))
+                    if (M_PointInTri({tri_v1.Y, tri_v1.Z}, {tri_v2.Y, tri_v2.Z},
+                                     {(tri_v1.Z < tri_v2.Z ? tri_v1.Y : tri_v2.Y), sec_check->c_h}, {sy, z}))
                     {
                         if (shoot_I.puff)
                             P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
@@ -1776,19 +1776,19 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
         if (sec_check && sec_check->floor_vertex_slope)
         {
             // Check floor vertex slope intersect from shooter's angle
-            vec3_t shoota = M_LinePlaneIntersection(
+            HMM_Vec3 shoota = M_LinePlaneIntersection(
                 {shoot_I.source->x, shoot_I.source->y, shoot_I.start_z}, {sx, sy, z}, sec_check->floor_z_verts[0],
                 sec_check->floor_z_verts[1], sec_check->floor_z_verts[2], sec_check->floor_vs_normal);
-            sector_t *shoota_sec = R_PointInSubsector(shoota.x, shoota.y)->sector;
-            if (shoota_sec && shoota_sec == sec_check && shoota.z <= sec_check->floor_vs_hilo.x &&
-                shoota.z >= sec_check->floor_vs_hilo.y)
+            sector_t *shoota_sec = R_PointInSubsector(shoota.X, shoota.Y)->sector;
+            if (shoota_sec && shoota_sec == sec_check && shoota.Z <= sec_check->floor_vs_hilo.X &&
+                shoota.Z >= sec_check->floor_vs_hilo.Y)
             {
                 // It will strike the floor slope in this sector; see if it will hit a thing first, otherwise let it hit
                 // the slope
-                if (P_PathTraverse(sx, sy, shoota.x, shoota.y, PT_ADDTHINGS, PTR_ShootTraverse))
+                if (P_PathTraverse(sx, sy, shoota.X, shoota.Y, PT_ADDTHINGS, PTR_ShootTraverse))
                 {
                     if (shoot_I.puff)
-                        P_SpawnPuff(shoota.x, shoota.y, shoota.z, shoot_I.puff, shoot_I.angle + ANG180);
+                        P_SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_I.puff, shoot_I.angle + ANG180);
                     return false;
                 }
             }
@@ -1798,16 +1798,16 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 shoota = M_LinePlaneIntersection({shoot_I.source->x, shoot_I.source->y, shoot_I.start_z}, {sx, sy, z},
                                                  sec_check->ceil_z_verts[0], sec_check->ceil_z_verts[1],
                                                  sec_check->ceil_z_verts[2], sec_check->ceil_vs_normal);
-                shoota_sec = R_PointInSubsector(shoota.x, shoota.y)->sector;
-                if (shoota_sec && shoota_sec == sec_check && shoota.z <= sec_check->ceil_vs_hilo.x &&
-                    shoota.z >= sec_check->ceil_vs_hilo.y)
+                shoota_sec = R_PointInSubsector(shoota.X, shoota.Y)->sector;
+                if (shoota_sec && shoota_sec == sec_check && shoota.Z <= sec_check->ceil_vs_hilo.X &&
+                    shoota.Z >= sec_check->ceil_vs_hilo.Y)
                 {
                     // It will strike the ceiling slope in this sector; see if it will hit a thing first, otherwise let
                     // it hit the slope
-                    if (P_PathTraverse(sx, sy, shoota.x, shoota.y, PT_ADDTHINGS, PTR_ShootTraverse))
+                    if (P_PathTraverse(sx, sy, shoota.X, shoota.Y, PT_ADDTHINGS, PTR_ShootTraverse))
                     {
                         if (shoot_I.puff)
-                            P_SpawnPuff(shoota.x, shoota.y, shoota.z, shoot_I.puff, shoot_I.angle + ANG180);
+                            P_SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_I.puff, shoot_I.angle + ANG180);
                         return false;
                     }
                 }
@@ -1820,19 +1820,19 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
         else if (sec_check && sec_check->ceil_vertex_slope)
         {
             // Check ceiling vertex slope intersect from shooter's angle
-            vec3_t    shoota     = M_LinePlaneIntersection({shoot_I.source->x, shoot_I.source->y, shoot_I.start_z},
+            HMM_Vec3    shoota     = M_LinePlaneIntersection({shoot_I.source->x, shoot_I.source->y, shoot_I.start_z},
                                                            {sx, sy, z}, sec_check->ceil_z_verts[0], sec_check->ceil_z_verts[1],
                                                            sec_check->ceil_z_verts[2], sec_check->ceil_vs_normal);
-            sector_t *shoota_sec = R_PointInSubsector(shoota.x, shoota.y)->sector;
-            if (shoota_sec && shoota_sec == sec_check && shoota.z <= sec_check->ceil_vs_hilo.x &&
-                shoota.z >= sec_check->ceil_vs_hilo.y)
+            sector_t *shoota_sec = R_PointInSubsector(shoota.X, shoota.Y)->sector;
+            if (shoota_sec && shoota_sec == sec_check && shoota.Z <= sec_check->ceil_vs_hilo.X &&
+                shoota.Z >= sec_check->ceil_vs_hilo.Y)
             {
                 // It will strike the ceiling slope in this sector; see if it will hit a thing first, otherwise let it
                 // hit the slope
-                if (P_PathTraverse(sx, sy, shoota.x, shoota.y, PT_ADDTHINGS, PTR_ShootTraverse))
+                if (P_PathTraverse(sx, sy, shoota.X, shoota.Y, PT_ADDTHINGS, PTR_ShootTraverse))
                 {
                     if (shoot_I.puff)
-                        P_SpawnPuff(shoota.x, shoota.y, shoota.z, shoot_I.puff, shoot_I.angle + ANG180);
+                        P_SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_I.puff, shoot_I.angle + ANG180);
                     return false;
                 }
             }
@@ -1866,7 +1866,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
             if (z <= M_LinePlaneIntersection({x, y, -40000}, {x, y, 40000}, last_shoota_sec->floor_z_verts[0],
                                              last_shoota_sec->floor_z_verts[1], last_shoota_sec->floor_z_verts[2],
                                              last_shoota_sec->floor_vs_normal)
-                         .z)
+                         .Z)
                 fs_good = false;
         }
         if (last_shoota_sec->ceil_vertex_slope)
@@ -1874,7 +1874,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
             if (z >= M_LinePlaneIntersection({x, y, -40000}, {x, y, 40000}, last_shoota_sec->ceil_z_verts[0],
                                              last_shoota_sec->ceil_z_verts[1], last_shoota_sec->ceil_z_verts[2],
                                              last_shoota_sec->ceil_vs_normal)
-                         .z)
+                         .Z)
                 cs_good = false;
         }
         if (fs_good && cs_good)
@@ -2136,7 +2136,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
                 if (z <= M_LinePlaneIntersection({x, y, -40000}, {x, y, 40000}, last_shoota_sec->floor_z_verts[0],
                                                  last_shoota_sec->floor_z_verts[1], last_shoota_sec->floor_z_verts[2],
                                                  last_shoota_sec->floor_vs_normal)
-                             .z)
+                             .Z)
                     fs_good = false;
             }
             else
@@ -2149,7 +2149,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
                 if (z >= M_LinePlaneIntersection({x, y, -40000}, {x, y, 40000}, last_shoota_sec->ceil_z_verts[0],
                                                  last_shoota_sec->ceil_z_verts[1], last_shoota_sec->ceil_z_verts[2],
                                                  last_shoota_sec->ceil_vs_normal)
-                             .z)
+                             .Z)
                     cs_good = false;
             }
             else
@@ -2793,8 +2793,8 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
         {
             mo = P_MobjCreateObject(thing->x, thing->y, MO_MIDZ(thing), thing->info->blood);
 
-            mo->mom.x = (float)(M_Random() - 128) / 4.0f;
-            mo->mom.y = (float)(M_Random() - 128) / 4.0f;
+            mo->mom.X = (float)(M_Random() - 128) / 4.0f;
+            mo->mom.Y = (float)(M_Random() - 128) / 4.0f;
         }
     }
 
@@ -3135,7 +3135,7 @@ static bool PIT_CorpseCheck(mobj_t *thing, void *data)
         return true; // doesn't fit here
 
     corpsehit        = thing;
-    corpsehit->mom.x = corpsehit->mom.y = 0;
+    corpsehit->mom.X = corpsehit->mom.Y = 0;
     return false;
 }
 
@@ -3238,7 +3238,7 @@ static bool PIT_CheckBlockingLine(line_t *line, void *data)
             if (mb2 <= M_LinePlaneIntersection({mx2, my2, -40000}, {mx2, my2, 40000}, slope_sec->floor_z_verts[0],
                                                slope_sec->floor_z_verts[1], slope_sec->floor_z_verts[2],
                                                slope_sec->floor_vs_normal)
-                           .z)
+                           .Z)
                 fs_good = false;
         }
         if (slope_sec->ceil_vertex_slope)
@@ -3246,7 +3246,7 @@ static bool PIT_CheckBlockingLine(line_t *line, void *data)
             if (mt2 >= M_LinePlaneIntersection({mx2, my2, -40000}, {mx2, my2, 40000}, slope_sec->ceil_z_verts[0],
                                                slope_sec->ceil_z_verts[1], slope_sec->ceil_z_verts[2],
                                                slope_sec->ceil_vs_normal)
-                           .z)
+                           .Z)
                 cs_good = false;
         }
         if (fs_good && cs_good)

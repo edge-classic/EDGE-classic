@@ -80,81 +80,42 @@ void M_Angle2Matrix(angle_t ang, HMM_Vec2 *x, HMM_Vec2 *y)
     y->Y = x->X;
 }
 
-HMM_Vec3 M_CrossProduct(HMM_Vec3 v1, HMM_Vec3 v2, HMM_Vec3 v3)
+HMM_Vec3 M_TripleCrossProduct(HMM_Vec3 v1, HMM_Vec3 v2, HMM_Vec3 v3)
 {
-    HMM_Vec3 A{v2.X - v1.X, v2.Y - v1.Y, v2.Z - v1.Z};
-    HMM_Vec3 B{v3.X - v1.X, v3.Y - v1.Y, v3.Z - v1.Z};
-    float  x = (A.Y * B.Z) - (A.Z * B.Y);
-    float  y = (A.Z * B.X) - (A.X * B.Z);
-    float  z = (A.X * B.Y) - (A.Y * B.X);
-    return {x, y, z};
-}
-
-static float M_DotProduct(HMM_Vec3 v1, HMM_Vec3 v2)
-{
-    return (v1.X * v2.X) + (v1.Y * v2.Y) + (v1.Z * v2.Z);
+    return HMM_Cross(HMM_SubV3(v2, v1), HMM_SubV3(v3, v1));
 }
 
 // If the plane normal is precalculated; otherwise use the other version
 HMM_Vec3 M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b, HMM_Vec3 plane_c,
                                HMM_Vec3 plane_normal)
 {
-    float  n = M_DotProduct(plane_normal, {plane_c.X - line_a.X, plane_c.Y - line_a.Y, plane_c.Z - line_a.Z});
-    HMM_Vec3 line_subtract{line_b.X - line_a.X, line_b.Y - line_a.Y, line_b.Z - line_a.Z};
-    float  d = M_DotProduct(plane_normal, line_subtract);
-    float  u = n / d;
-    return {line_a.X + u * line_subtract.X, line_a.Y + u * line_subtract.Y, line_a.Z + u * line_subtract.Z};
+    float  n = HMM_DotV3(plane_normal, HMM_SubV3(plane_c, line_a));
+    HMM_Vec3 line_subtract = HMM_SubV3(line_b, line_a);
+    float  d = HMM_DotV3(plane_normal, line_subtract);
+    return HMM_AddV3(line_a, HMM_MulV3F(line_subtract, n/d));
 }
 
 HMM_Vec3 M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b, HMM_Vec3 plane_c)
 {
-    HMM_Vec3 plane_normal = M_CrossProduct(plane_a, plane_b, plane_c);
-    float  n = M_DotProduct(plane_normal, {plane_c.X - line_a.X, plane_c.Y - line_a.Y, plane_c.Z - line_a.Z});
-    HMM_Vec3 line_subtract{line_b.X - line_a.X, line_b.Y - line_a.Y, line_b.Z - line_a.Z};
-    float  d = M_DotProduct(plane_normal, line_subtract);
-    float  u = n / d;
-    return {line_a.X + u * line_subtract.X, line_a.Y + u * line_subtract.Y, line_a.Z + u * line_subtract.Z};
+    HMM_Vec3 plane_normal = M_TripleCrossProduct(plane_a, plane_b, plane_c);
+    float  n = HMM_DotV3(plane_normal, HMM_SubV3(plane_c, line_a));
+    HMM_Vec3 line_subtract = HMM_SubV3(line_b, line_a);
+    float  d = HMM_DotV3(plane_normal, line_subtract);
+    return HMM_AddV3(line_a, HMM_MulV3F(line_subtract, n/d));
 }
 
-double M_PointToSegDistance(HMM_Vec2 seg_a, HMM_Vec2 seg_b, HMM_Vec2 point)
+float M_PointToSegDistance(HMM_Vec2 seg_a, HMM_Vec2 seg_b, HMM_Vec2 point)
 {
+    HMM_Vec2 seg_ab = HMM_SubV2(seg_b, seg_a);
+    HMM_Vec2 seg_bp = HMM_SubV2(point, seg_b);
+    HMM_Vec2 seg_ap = HMM_SubV2(point, seg_a);
 
-    HMM_Vec2 seg_ab;
-    seg_ab.X = seg_b.X - seg_a.X;
-    seg_ab.Y = seg_b.Y - seg_a.Y;
-
-    HMM_Vec2 seg_bp;
-    seg_bp.X = point.X - seg_b.X;
-    seg_bp.Y = point.Y - seg_b.Y;
-
-    HMM_Vec2 seg_ap;
-    seg_ap.X = point.X - seg_a.X;
-    seg_ap.Y = point.Y - seg_a.Y;
-
-    double ab_bp = (seg_ab.X * seg_bp.X + seg_ab.Y * seg_bp.Y);
-    double ab_ap = (seg_ab.X * seg_ap.X + seg_ab.Y * seg_ap.Y);
-
-    if (ab_bp > 0)
-    {
-        double y = point.Y - seg_b.Y;
-        double x = point.X - seg_b.X;
-        return sqrt(x * x + y * y);
-    }
-    else if (ab_ap < 0)
-    {
-        double y = point.Y - seg_a.Y;
-        double x = point.X - seg_a.X;
-        return sqrt(x * x + y * y);
-    }
+    if (HMM_DotV2(seg_ab, seg_bp) > 0)
+        return HMM_LenV2(HMM_SubV2(point, seg_b));
+    else if (HMM_DotV2(seg_ab, seg_ap) < 0)
+        return HMM_LenV2(HMM_SubV2(point, seg_a));
     else
-    {
-        double x1  = seg_ab.X;
-        double y1  = seg_ab.Y;
-        double x2  = seg_ap.X;
-        double y2  = seg_ap.Y;
-        double mod = sqrt(x1 * x1 + y1 * y1);
-        return abs(x1 * y2 - y1 * x2) / mod;
-    }
+        return abs(seg_ab.X * seg_ap.Y - seg_ab.Y * seg_ap.X) / HMM_LenV2(seg_ab);
 }
 
 int M_PointInTri(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test)

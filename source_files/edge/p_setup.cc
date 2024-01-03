@@ -3101,7 +3101,7 @@ void GroupLines(void)
             else
             {
                 sector->floor_vs_normal =
-                    M_CrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
+                    M_TripleCrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
                 if (sector->f_h > sector->floor_vs_hilo.X)
                     sector->floor_vs_hilo.X = sector->f_h;
                 if (sector->f_h < sector->floor_vs_hilo.Y)
@@ -3112,7 +3112,7 @@ void GroupLines(void)
             else
             {
                 sector->ceil_vs_normal =
-                    M_CrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
+                    M_TripleCrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
                 if (sector->c_h < sector->ceil_vs_hilo.Y)
                     sector->ceil_vs_hilo.Y = sector->c_h;
                 if (sector->c_h > sector->ceil_vs_hilo.X)
@@ -3198,7 +3198,7 @@ void GroupLines(void)
             {
                 sector->floor_vertex_slope = true;
                 sector->floor_vs_normal =
-                    M_CrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
+                    M_TripleCrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
                 if (sector->f_h > sector->floor_vs_hilo.X)
                     sector->floor_vs_hilo.X = sector->f_h;
                 if (sector->f_h < sector->floor_vs_hilo.Y)
@@ -3210,7 +3210,7 @@ void GroupLines(void)
             {
                 sector->ceil_vertex_slope = true;
                 sector->ceil_vs_normal =
-                    M_CrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
+                    M_TripleCrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
                 if (sector->c_h < sector->ceil_vs_hilo.Y)
                     sector->ceil_vs_hilo.Y = sector->c_h;
                 if (sector->c_h > sector->ceil_vs_hilo.X)

@@ -32,9 +32,9 @@
 typedef struct local_gl_vert_s
 {
     GLfloat rgba[4];
-    vec3_t  pos;
-    vec2_t  texc[2];
-    vec3_t  normal;
+    HMM_Vec3  pos;
+    HMM_Vec2  texc[2];
+    HMM_Vec3  normal;
 } local_gl_vert_t;
 
 extern rgbcol_t current_fog_rgb;

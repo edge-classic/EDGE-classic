@@ -752,8 +752,8 @@ void P_ActMoveFwd(mobj_t *mo)
         float dx = M_Cos(mo->angle);
         float dy = M_Sin(mo->angle);
 
-        mo->mom.x += dx * amount;
-        mo->mom.y += dy * amount;
+        mo->mom.X += dx * amount;
+        mo->mom.Y += dy * amount;
     }
 }
 
@@ -768,8 +768,8 @@ void P_ActMoveRight(mobj_t *mo)
         float dx = M_Cos(mo->angle - ANG90);
         float dy = M_Sin(mo->angle - ANG90);
 
-        mo->mom.x += dx * amount;
-        mo->mom.y += dy * amount;
+        mo->mom.X += dx * amount;
+        mo->mom.Y += dy * amount;
     }
 }
 
@@ -778,12 +778,12 @@ void P_ActMoveUp(mobj_t *mo)
     const state_t *st = mo->state;
 
     if (st && st->action_par)
-        mo->mom.z += *(float *)st->action_par;
+        mo->mom.Z += *(float *)st->action_par;
 }
 
 void P_ActStopMoving(mobj_t *mo)
 {
-    mo->mom.x = mo->mom.y = mo->mom.z = 0;
+    mo->mom.X = mo->mom.Y = mo->mom.Z = 0;
 }
 
 //-------------------------------------------------------------------
@@ -1044,9 +1044,9 @@ static void CheckMissileSpawn(mobj_t *projectile)
     if (projectile->tics < 1)
         projectile->tics = 1;
 
-    projectile->z += projectile->mom.z / 2;
+    projectile->z += projectile->mom.Z / 2;
 
-    if (!P_TryMove(projectile, projectile->x + projectile->mom.x / 2, projectile->y + projectile->mom.y / 2))
+    if (!P_TryMove(projectile, projectile->x + projectile->mom.X / 2, projectile->y + projectile->mom.Y / 2))
     {
         P_MobjExplodeMissile(projectile);
     }
@@ -1202,9 +1202,9 @@ static mobj_t *DoLaunchProjectile(mobj_t *source, float tx, float ty, float tz, 
     P_SetMobjDirAndSpeed(projectile, angle, slope, projectile->speed);
     if (projectile->flags & MF_PRESERVEMOMENTUM)
     {
-        projectile->mom.x += source->mom.x;
-        projectile->mom.y += source->mom.y;
-        projectile->mom.z += source->mom.z;
+        projectile->mom.X += source->mom.X;
+        projectile->mom.Y += source->mom.Y;
+        projectile->mom.Z += source->mom.Z;
     }
     CheckMissileSpawn(projectile);
 
@@ -1242,8 +1242,8 @@ static void LaunchSmartProjectile(mobj_t *source, mobj_t *target, const mobjtype
 
     if (target)
     {
-        mx = target->mom.x;
-        my = target->mom.y;
+        mx = target->mom.X;
+        my = target->mom.Y;
 
         float dx = source->x - target->x;
         float dy = source->y - target->y;
@@ -1587,10 +1587,10 @@ void P_ActCreateSmokeTrail(mobj_t *projectile)
     }
 
     // spawn a puff of smoke behind the rocket
-    mobj_t *smoke = P_MobjCreateObject(projectile->x - projectile->mom.x / 2.0f,
-                                       projectile->y - projectile->mom.y / 2.0f, projectile->z, attack->puff);
+    mobj_t *smoke = P_MobjCreateObject(projectile->x - projectile->mom.X / 2.0f,
+                                       projectile->y - projectile->mom.Y / 2.0f, projectile->z, attack->puff);
 
-    smoke->mom.z = smoke->info->float_speed;
+    smoke->mom.Z = smoke->info->float_speed;
     smoke->tics -= M_Random() & 3;
 
     if (smoke->tics < 1)
@@ -1671,8 +1671,8 @@ void P_ActHomingProjectile(mobj_t *projectile)
         }
     }
 
-    projectile->mom.x = projectile->speed * M_Cos(projectile->angle);
-    projectile->mom.y = projectile->speed * M_Sin(projectile->angle);
+    projectile->mom.X = projectile->speed * M_Cos(projectile->angle);
+    projectile->mom.Y = projectile->speed * M_Sin(projectile->angle);
 
     // change slope
     float slope = P_ApproxSlope(destination->x - projectile->x, destination->y - projectile->y,
@@ -1680,10 +1680,10 @@ void P_ActHomingProjectile(mobj_t *projectile)
 
     slope *= projectile->speed;
 
-    if (slope < projectile->mom.z)
-        projectile->mom.z -= 0.125f;
+    if (slope < projectile->mom.Z)
+        projectile->mom.Z -= 0.125f;
     else
-        projectile->mom.z += 0.125f;
+        projectile->mom.Z += 0.125f;
 }
 
 //
@@ -1770,8 +1770,8 @@ static void LaunchOrderedSpread(mobj_t *mo)
 
         projectile->angle += spreadorder[count];
 
-        projectile->mom.x = projectile->speed * M_Cos(projectile->angle);
-        projectile->mom.y = projectile->speed * M_Sin(projectile->angle);
+        projectile->mom.X = projectile->speed * M_Cos(projectile->angle);
+        projectile->mom.Y = projectile->speed * M_Sin(projectile->angle);
     }
 
     mo->spreadcount += 2;
@@ -1810,8 +1810,8 @@ static void LaunchRandomSpread(mobj_t *mo)
         projectile->angle += spreadangle;
     }
 
-    projectile->mom.x = projectile->speed * M_Cos(projectile->angle);
-    projectile->mom.y = projectile->speed * M_Sin(projectile->angle);
+    projectile->mom.X = projectile->speed * M_Cos(projectile->angle);
+    projectile->mom.Y = projectile->speed * M_Sin(projectile->angle);
 }
 
 //-------------------------------------------------------------------
@@ -2089,9 +2089,9 @@ void P_ActEffectTracker(mobj_t *object)
 
     // -ACB- 2000/03/11 Check for zero mass
     if (target->info->mass)
-        target->mom.z = 1000 / target->info->mass;
+        target->mom.Z = 1000 / target->info->mass;
     else
-        target->mom.z = 2000;
+        target->mom.Z = 2000;
 
     if (!tracker)
         return;
@@ -2419,7 +2419,7 @@ void P_SlammedIntoObject(mobj_t *object, mobj_t *target)
     }
 
     object->flags &= ~MF_SKULLFLY;
-    object->mom.x = object->mom.y = object->mom.z = 0;
+    object->mom.X = object->mom.Y = object->mom.Z = 0;
 
     P_SetMobjStateDeferred(object, object->info->idle_state, 0);
 }
@@ -3473,9 +3473,9 @@ void P_ActCheckMoving(mobj_t *mo)
         return;
     }
 
-    if (fabs(mo->mom.x) < STOPSPEED && fabs(mo->mom.y) < STOPSPEED)
+    if (fabs(mo->mom.X) < STOPSPEED && fabs(mo->mom.Y) < STOPSPEED)
     {
-        mo->mom.x = mo->mom.y = 0;
+        mo->mom.X = mo->mom.Y = 0;
         P_SetMobjStateDeferred(mo, mo->info->idle_state, 0);
     }
 }
@@ -3637,7 +3637,7 @@ void P_ActJumpStuck(mobj_t * mo)
     //
     // Note: nothing to do with monsters physically jumping.
 
-    if (mo->mom.x > 0.1f && mo->mom.y > 0.1f)
+    if (mo->mom.X > 0.1f && mo->mom.Y > 0.1f)
     {
         return;
     }

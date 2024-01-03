@@ -918,8 +918,8 @@ static void BobWeapon(player_t *p, weapondef_c *info)
 
     pspdef_t *psp = &p->psprites[p->action_psp];
 
-    float new_sx = p->mo->mom.z ? psp->sx : 0;
-    float new_sy = p->mo->mom.z ? psp->sy : 0;
+    float new_sx = p->mo->mom.Z ? psp->sx : 0;
+    float new_sy = p->mo->mom.Z ? psp->sy : 0;
 
     // bob the weapon based on movement speed
     if (p->powers[PW_Jetpack] <= 0) // Don't bob when using jetpack
@@ -1996,8 +1996,8 @@ void A_MoveFwd(mobj_t *mo)
         float dx = M_Cos(mo->angle);
         float dy = M_Sin(mo->angle);
 
-        mo->mom.x += dx * amount;
-        mo->mom.y += dy * amount;
+        mo->mom.X += dx * amount;
+        mo->mom.Y += dy * amount;
     }
 }
 
@@ -2015,8 +2015,8 @@ void A_MoveRight(mobj_t *mo)
         float dx = M_Cos(mo->angle - ANG90);
         float dy = M_Sin(mo->angle - ANG90);
 
-        mo->mom.x += dx * amount;
-        mo->mom.y += dy * amount;
+        mo->mom.X += dx * amount;
+        mo->mom.Y += dy * amount;
     }
 }
 
@@ -2028,12 +2028,12 @@ void A_MoveUp(mobj_t *mo)
     const state_t *st = psp->state;
 
     if (st && st->action_par)
-        mo->mom.z += *(float *)st->action_par;
+        mo->mom.Z += *(float *)st->action_par;
 }
 
 void A_StopMoving(mobj_t *mo)
 {
-    mo->mom.x = mo->mom.y = mo->mom.z = 0;
+    mo->mom.X = mo->mom.Y = mo->mom.Z = 0;
 }
 
 void A_TurnDir(mobj_t *mo)

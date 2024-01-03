@@ -115,9 +115,9 @@ static float GetHoverDZ(mobj_t *mo, float bob_mult = 0)
 
 typedef struct
 {
-    vec3_t vert[4];
-    vec2_t texc[4];
-    vec3_t lit_pos;
+    HMM_Vec3 vert[4];
+    HMM_Vec2 texc[4];
+    HMM_Vec3 lit_pos;
 
     multi_color_c col[4];
 } psprite_coord_data_t;
@@ -128,7 +128,7 @@ static void DLIT_PSprite(mobj_t *mo, void *dataptr)
 
     SYS_ASSERT(mo->dlight.shader);
 
-    mo->dlight.shader->Sample(data->col + 0, data->lit_pos.x, data->lit_pos.y, data->lit_pos.z);
+    mo->dlight.shader->Sample(data->col + 0, data->lit_pos.X, data->lit_pos.Y, data->lit_pos.Z);
 }
 
 static int GetMulticolMaxRGB(multi_color_c *cols, int num, bool additive)
@@ -254,21 +254,21 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
     psprite_coord_data_t data;
 
-    data.vert[0].Set(x1b, y1b, 0);
-    data.vert[1].Set(x1t, y1t, 0);
-    data.vert[2].Set(x2t, y1t, 0);
-    data.vert[3].Set(x2b, y2b, 0);
+    data.vert[0] = {x1b, y1b, 0};
+    data.vert[1] = {x1t, y1t, 0};
+    data.vert[2] = {x2t, y1t, 0};
+    data.vert[3] = {x2b, y2b, 0};
 
-    data.texc[0].Set(tex_x1, tex_bot_h);
-    data.texc[1].Set(tex_x1, tex_top_h);
-    data.texc[2].Set(tex_x2, tex_top_h);
-    data.texc[3].Set(tex_x2, tex_bot_h);
+    data.texc[0] = {tex_x1, tex_bot_h};
+    data.texc[1] = {tex_x1, tex_top_h};
+    data.texc[2] = {tex_x2, tex_top_h};
+    data.texc[3] = {tex_x2, tex_bot_h};
 
     float away = 120.0;
 
-    data.lit_pos.x = player->mo->x + viewcos * away;
-    data.lit_pos.y = player->mo->y + viewsin * away;
-    data.lit_pos.z = player->mo->z + player->mo->height * PERCENT_2_FLOAT(player->mo->info->shotheight);
+    data.lit_pos.X = player->mo->x + viewcos * away;
+    data.lit_pos.Y = player->mo->y + viewsin * away;
+    data.lit_pos.Z = player->mo->z + player->mo->height * PERCENT_2_FLOAT(player->mo->info->shotheight);
 
     data.col[0].Clear();
 
@@ -307,7 +307,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
     {
         abstract_shader_c *shader = R_GetColormapShader(props, state->bright, player->mo->subsector->sector);
 
-        shader->Sample(data.col + 0, data.lit_pos.x, data.lit_pos.y, data.lit_pos.z);
+        shader->Sample(data.col + 0, data.lit_pos.X, data.lit_pos.Y, data.lit_pos.Z);
 
         if (fc_to_use != RGB_NO_VALUE)
         {
@@ -326,16 +326,16 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
         if (use_dlights && ren_extralight < 250)
         {
-            data.lit_pos.x = player->mo->x + viewcos * 24;
-            data.lit_pos.y = player->mo->y + viewsin * 24;
+            data.lit_pos.X = player->mo->x + viewcos * 24;
+            data.lit_pos.Y = player->mo->y + viewsin * 24;
 
             float r = 96;
 
-            P_DynamicLightIterator(data.lit_pos.x - r, data.lit_pos.y - r, player->mo->z, data.lit_pos.x + r,
-                                   data.lit_pos.y + r, player->mo->z + player->mo->height, DLIT_PSprite, &data);
+            P_DynamicLightIterator(data.lit_pos.X - r, data.lit_pos.Y - r, player->mo->z, data.lit_pos.X + r,
+                                   data.lit_pos.Y + r, player->mo->z + player->mo->height, DLIT_PSprite, &data);
 
-            P_SectorGlowIterator(player->mo->subsector->sector, data.lit_pos.x - r, data.lit_pos.y - r, player->mo->z,
-                                 data.lit_pos.x + r, data.lit_pos.y + r, player->mo->z + player->mo->height,
+            P_SectorGlowIterator(player->mo->subsector->sector, data.lit_pos.X - r, data.lit_pos.Y - r, player->mo->z,
+                                 data.lit_pos.X + r, data.lit_pos.Y + r, player->mo->z + player->mo->height,
                                  DLIT_PSprite, &data);
         }
     }
@@ -385,12 +385,12 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
             dest->pos     = data.vert[v_idx];
             dest->texc[0] = data.texc[v_idx];
 
-            dest->normal.Set(0, 0, 1);
+            dest->normal = {0, 0, 1};
 
             if (is_fuzzy)
             {
-                dest->texc[1].x = dest->pos.x / (float)SCREENWIDTH;
-                dest->texc[1].y = dest->pos.y / (float)SCREENHEIGHT;
+                dest->texc[1].X = dest->pos.X / (float)SCREENWIDTH;
+                dest->texc[1].Y = dest->pos.Y / (float)SCREENHEIGHT;
 
                 FUZZ_Adjust(&dest->texc[1], player->mo);
 
@@ -611,21 +611,21 @@ void RGL_DrawWeaponModel(player_t *p)
 
     // I_Debugf("Rendering weapon model!\n");
 
-    float x = viewx + viewright.x * psp->sx / 8.0;
-    float y = viewy + viewright.y * psp->sx / 8.0;
-    float z = viewz + viewright.z * psp->sx / 8.0;
+    float x = viewx + viewright.X * psp->sx / 8.0;
+    float y = viewy + viewright.Y * psp->sx / 8.0;
+    float z = viewz + viewright.Z * psp->sx / 8.0;
 
-    x -= viewup.x * psp->sy / 10.0;
-    y -= viewup.y * psp->sy / 10.0;
-    z -= viewup.z * psp->sy / 10.0;
+    x -= viewup.X * psp->sy / 10.0;
+    y -= viewup.Y * psp->sy / 10.0;
+    z -= viewup.Z * psp->sy / 10.0;
 
-    x += viewforward.x * w->model_forward;
-    y += viewforward.y * w->model_forward;
-    z += viewforward.z * w->model_forward;
+    x += viewforward.X * w->model_forward;
+    y += viewforward.Y * w->model_forward;
+    z += viewforward.Z * w->model_forward;
 
-    x += viewright.x * w->model_side;
-    y += viewright.y * w->model_side;
-    z += viewright.z * w->model_side;
+    x += viewright.X * w->model_side;
+    y += viewright.Y * w->model_side;
+    z += viewright.Z * w->model_side;
 
     int   last_frame = psp->state->frame;
     float lerp       = 0.0;
@@ -1006,9 +1006,9 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
     {
         float along = mo->lerp_pos / (float)mo->lerp_num;
 
-        mx = mo->lerp_from.x + (mx - mo->lerp_from.x) * along;
-        my = mo->lerp_from.y + (my - mo->lerp_from.y) * along;
-        mz = mo->lerp_from.z + (mz - mo->lerp_from.z) * along;
+        mx = mo->lerp_from.X + (mx - mo->lerp_from.X) * along;
+        my = mo->lerp_from.Y + (my - mo->lerp_from.Y) * along;
+        mz = mo->lerp_from.Z + (mz - mo->lerp_from.Z) * along;
     }
 
     MIR_Coordinate(mx, my);
@@ -1251,9 +1251,9 @@ typedef struct
 {
     mobj_t *mo;
 
-    vec3_t vert[4];
-    vec2_t texc[4];
-    vec3_t normal;
+    HMM_Vec3 vert[4];
+    HMM_Vec2 texc[4];
+    HMM_Vec3 normal;
 
     multi_color_c col[4];
 } thing_coord_data_t;
@@ -1270,7 +1270,7 @@ static void DLIT_Thing(mobj_t *mo, void *dataptr)
 
     for (int v = 0; v < 4; v++)
     {
-        mo->dlight.shader->Sample(data->col + v, data->vert[v].x, data->vert[v].y, data->vert[v].z);
+        mo->dlight.shader->Sample(data->col + v, data->vert[v].X, data->vert[v].Y, data->vert[v].Z);
     }
 }
 
@@ -1366,17 +1366,17 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
     data.mo = mo;
 
-    data.vert[0].Set(x1b + dx, y1b + dy, z1b);
-    data.vert[1].Set(x1t + dx, y1t + dy, z1t);
-    data.vert[2].Set(x2t + dx, y2t + dy, z2t);
-    data.vert[3].Set(x2b + dx, y2b + dy, z2b);
+    data.vert[0] = {x1b + dx, y1b + dy, z1b};
+    data.vert[1] = {x1t + dx, y1t + dy, z1t};
+    data.vert[2] = {x2t + dx, y2t + dy, z2t};
+    data.vert[3] = {x2b + dx, y2b + dy, z2b};
 
-    data.texc[0].Set(tex_x1, tex_y1);
-    data.texc[1].Set(tex_x1, tex_y2);
-    data.texc[2].Set(tex_x2, tex_y2);
-    data.texc[3].Set(tex_x2, tex_y1);
+    data.texc[0] = {tex_x1, tex_y1};
+    data.texc[1] = {tex_x1, tex_y2};
+    data.texc[2] = {tex_x2, tex_y2};
+    data.texc[3] = {tex_x2, tex_y1};
 
-    data.normal.Set(-viewcos, -viewsin, 0);
+    data.normal = {-viewcos, -viewsin, 0};
 
     data.col[0].Clear();
     data.col[1].Clear();
@@ -1395,9 +1395,9 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
         blending |= BL_NoZBuf;
 
     float  fuzz_mul = 0;
-    vec2_t fuzz_add;
+    HMM_Vec2 fuzz_add;
 
-    fuzz_add.Set(0, 0);
+    fuzz_add = {0, 0};
 
     if (is_fuzzy)
     {
@@ -1417,7 +1417,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
         for (int v = 0; v < 4; v++)
         {
-            shader->Sample(data.col + v, data.vert[v].x, data.vert[v].y, data.vert[v].z);
+            shader->Sample(data.col + v, data.vert[v].X, data.vert[v].Y, data.vert[v].Z);
         }
 
         if (use_dlights && ren_extralight < 250)
@@ -1493,8 +1493,8 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
                 float ftx = (v_idx >= 2) ? (mo->radius * 2) : 0;
                 float fty = (v_idx == 1 || v_idx == 2) ? (mo->height) : 0;
 
-                dest->texc[1].x = ftx * fuzz_mul + fuzz_add.x;
-                dest->texc[1].y = fty * fuzz_mul + fuzz_add.y;
+                dest->texc[1].X = ftx * fuzz_mul + fuzz_add.X;
+                dest->texc[1].Y = fty * fuzz_mul + fuzz_add.Y;
                 ;
 
                 dest->rgba[0] = dest->rgba[1] = dest->rgba[2] = 0;

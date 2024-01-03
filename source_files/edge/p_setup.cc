@@ -432,10 +432,10 @@ static void LoadSectors(int lump)
         ss->orig_height = (ss->f_h + ss->c_h);
 
         ss->floor.translucency = VISIBLE;
-        ss->floor.x_mat.x      = 1;
-        ss->floor.x_mat.y      = 0;
-        ss->floor.y_mat.x      = 0;
-        ss->floor.y_mat.y      = 1;
+        ss->floor.x_mat.X      = 1;
+        ss->floor.x_mat.Y      = 0;
+        ss->floor.y_mat.X      = 0;
+        ss->floor.y_mat.Y      = 1;
 
         ss->ceil = ss->floor;
 
@@ -1168,7 +1168,7 @@ static void AssignSubsectorsToSectors()
     AssignSubsectorsPass(2);
 }
 
-// Adapted from EDGE 2.x's ZNode loading routine; only handles XGL3/ZGL3 as that is all
+// Adapted from EDGE 2.X's ZNode loading routine; only handles XGL3/ZGL3 as that is all
 // our built-in AJBSP produces now
 static void LoadXGL3Nodes(int lumpnum)
 {
@@ -1668,18 +1668,18 @@ static void LoadUDMFSectors()
             ss->orig_height = (ss->f_h + ss->c_h);
 
             ss->floor.translucency = VISIBLE;
-            ss->floor.x_mat.x      = 1;
-            ss->floor.x_mat.y      = 0;
-            ss->floor.y_mat.x      = 0;
-            ss->floor.y_mat.y      = 1;
+            ss->floor.x_mat.X      = 1;
+            ss->floor.x_mat.Y      = 0;
+            ss->floor.y_mat.X      = 0;
+            ss->floor.y_mat.Y      = 1;
 
             ss->ceil = ss->floor;
 
             // granular offsets
-            ss->floor.offset.x += fx;
-            ss->floor.offset.y += fy;
-            ss->ceil.offset.x += fx;
-            ss->ceil.offset.y += fy;
+            ss->floor.offset.X += fx;
+            ss->floor.offset.Y += fy;
+            ss->ceil.offset.X += fx;
+            ss->ceil.offset.Y += fy;
 
             // rotations
             if (!AlmostEquals(rf, 0.0f))
@@ -1689,10 +1689,10 @@ static void LoadUDMFSectors()
                 ss->ceil.rotation = FLOAT_2_ANG(rc);
 
             // granular scaling
-            ss->floor.x_mat.x = fx_sc;
-            ss->floor.y_mat.y = fy_sc;
-            ss->ceil.x_mat.x  = cx_sc;
-            ss->ceil.y_mat.y  = cy_sc;
+            ss->floor.x_mat.X = fx_sc;
+            ss->floor.y_mat.Y = fy_sc;
+            ss->ceil.x_mat.X  = cx_sc;
+            ss->ceil.y_mat.Y  = cy_sc;
 
             ss->floor.image = W_ImageLookup(floor_tex, INS_Flat);
 
@@ -1925,12 +1925,12 @@ static void LoadUDMFSideDefs()
             side_t *sd = sides + nummapsides - 1;
 
             sd->top.translucency = VISIBLE;
-            sd->top.offset.x     = x;
-            sd->top.offset.y     = y;
-            sd->top.x_mat.x      = 1;
-            sd->top.x_mat.y      = 0;
-            sd->top.y_mat.x      = 0;
-            sd->top.y_mat.y      = 1;
+            sd->top.offset.X     = x;
+            sd->top.offset.Y     = y;
+            sd->top.x_mat.X      = 1;
+            sd->top.x_mat.Y      = 0;
+            sd->top.y_mat.X      = 0;
+            sd->top.y_mat.Y      = 1;
 
             sd->middle = sd->top;
             sd->bottom = sd->top;
@@ -1951,34 +1951,34 @@ static void LoadUDMFSideDefs()
             sd->bottom.image = W_ImageLookup(bottom_tex, INS_Texture);
 
             // granular offsets
-            sd->bottom.offset.x += lowx;
-            sd->middle.offset.x += midx;
-            sd->top.offset.x += highx;
-            sd->bottom.offset.y += lowy;
-            sd->middle.offset.y += midy;
-            sd->top.offset.y += highy;
+            sd->bottom.offset.X += lowx;
+            sd->middle.offset.X += midx;
+            sd->top.offset.X += highx;
+            sd->bottom.offset.Y += lowy;
+            sd->middle.offset.Y += midy;
+            sd->top.offset.Y += highy;
 
             // granular scaling
-            sd->bottom.x_mat.x = low_scx;
-            sd->middle.x_mat.x = mid_scx;
-            sd->top.x_mat.x    = high_scx;
-            sd->bottom.y_mat.y = low_scy;
-            sd->middle.y_mat.y = mid_scy;
-            sd->top.y_mat.y    = high_scy;
+            sd->bottom.x_mat.X = low_scx;
+            sd->middle.x_mat.X = mid_scx;
+            sd->top.x_mat.X    = high_scx;
+            sd->bottom.y_mat.Y = low_scy;
+            sd->middle.y_mat.Y = mid_scy;
+            sd->top.y_mat.Y    = high_scy;
 
             // handle BOOM colourmaps with [242] linetype
             sd->top.boom_colmap    = colourmaps.Lookup(top_tex);
             sd->middle.boom_colmap = colourmaps.Lookup(middle_tex);
             sd->bottom.boom_colmap = colourmaps.Lookup(bottom_tex);
 
-            if (sd->top.image && fabs(sd->top.offset.y) > IM_HEIGHT(sd->top.image))
-                sd->top.offset.y = fmodf(sd->top.offset.y, IM_HEIGHT(sd->top.image));
+            if (sd->top.image && fabs(sd->top.offset.Y) > IM_HEIGHT(sd->top.image))
+                sd->top.offset.Y = fmodf(sd->top.offset.Y, IM_HEIGHT(sd->top.image));
 
-            if (sd->middle.image && fabs(sd->middle.offset.y) > IM_HEIGHT(sd->middle.image))
-                sd->middle.offset.y = fmodf(sd->middle.offset.y, IM_HEIGHT(sd->middle.image));
+            if (sd->middle.image && fabs(sd->middle.offset.Y) > IM_HEIGHT(sd->middle.image))
+                sd->middle.offset.Y = fmodf(sd->middle.offset.Y, IM_HEIGHT(sd->middle.image));
 
-            if (sd->bottom.image && fabs(sd->bottom.offset.y) > IM_HEIGHT(sd->bottom.image))
-                sd->bottom.offset.y = fmodf(sd->bottom.offset.y, IM_HEIGHT(sd->bottom.image));
+            if (sd->bottom.image && fabs(sd->bottom.offset.Y) > IM_HEIGHT(sd->bottom.image))
+                sd->bottom.offset.Y = fmodf(sd->bottom.offset.Y, IM_HEIGHT(sd->bottom.image));
         }
         else // consume other blocks
         {
@@ -2023,8 +2023,8 @@ static void LoadUDMFSideDefs()
         ld->side[0] = sd;
         if (sd->middle.image && (side1 != -1))
         {
-            sd->midmask_offset  = sd->middle.offset.y;
-            sd->middle.offset.y = 0;
+            sd->midmask_offset  = sd->middle.offset.Y;
+            sd->middle.offset.Y = 0;
         }
         ld->frontsector = sd->sector;
         sd++;
@@ -2034,8 +2034,8 @@ static void LoadUDMFSideDefs()
             ld->side[1] = sd;
             if (sd->middle.image)
             {
-                sd->midmask_offset  = sd->middle.offset.y;
-                sd->middle.offset.y = 0;
+                sd->midmask_offset  = sd->middle.offset.Y;
+                sd->middle.offset.Y = 0;
             }
             ld->backsector = sd->sector;
             sd++;
@@ -2495,12 +2495,12 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
     int sec_num = EPI_LE_S16(msd->sector);
 
     sd->top.translucency = VISIBLE;
-    sd->top.offset.x     = EPI_LE_S16(msd->x_offset);
-    sd->top.offset.y     = EPI_LE_S16(msd->y_offset);
-    sd->top.x_mat.x      = 1;
-    sd->top.x_mat.y      = 0;
-    sd->top.y_mat.x      = 0;
-    sd->top.y_mat.y      = 1;
+    sd->top.offset.X     = EPI_LE_S16(msd->x_offset);
+    sd->top.offset.Y     = EPI_LE_S16(msd->y_offset);
+    sd->top.x_mat.X      = 1;
+    sd->top.x_mat.Y      = 0;
+    sd->top.y_mat.X      = 0;
+    sd->top.y_mat.Y      = 1;
 
     sd->middle = sd->top;
     sd->bottom = sd->top;
@@ -2536,18 +2536,18 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
 
     if (sd->middle.image && two_sided)
     {
-        sd->midmask_offset  = sd->middle.offset.y;
-        sd->middle.offset.y = 0;
+        sd->midmask_offset  = sd->middle.offset.Y;
+        sd->middle.offset.Y = 0;
     }
 
-    if (sd->top.image && fabs(sd->top.offset.y) > IM_HEIGHT(sd->top.image))
-        sd->top.offset.y = fmodf(sd->top.offset.y, IM_HEIGHT(sd->top.image));
+    if (sd->top.image && fabs(sd->top.offset.Y) > IM_HEIGHT(sd->top.image))
+        sd->top.offset.Y = fmodf(sd->top.offset.Y, IM_HEIGHT(sd->top.image));
 
-    if (sd->middle.image && fabs(sd->middle.offset.y) > IM_HEIGHT(sd->middle.image))
-        sd->middle.offset.y = fmodf(sd->middle.offset.y, IM_HEIGHT(sd->middle.image));
+    if (sd->middle.image && fabs(sd->middle.offset.Y) > IM_HEIGHT(sd->middle.image))
+        sd->middle.offset.Y = fmodf(sd->middle.offset.Y, IM_HEIGHT(sd->middle.image));
 
-    if (sd->bottom.image && fabs(sd->bottom.offset.y) > IM_HEIGHT(sd->bottom.image))
-        sd->bottom.offset.y = fmodf(sd->bottom.offset.y, IM_HEIGHT(sd->bottom.image));
+    if (sd->bottom.image && fabs(sd->bottom.offset.Y) > IM_HEIGHT(sd->bottom.image))
+        sd->bottom.offset.Y = fmodf(sd->bottom.offset.Y, IM_HEIGHT(sd->bottom.image));
 
 #if 0 // -AJA- 2005/01/13: DISABLED (see my log for explanation) 
 	{
@@ -2555,14 +2555,14 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
 		//       where the texture height is non-POW2 (e.g. 64x72) and
 		//       a negative Y offset was used.
 
-		if (sd->top.offset.y < 0 && sd->top.image)
-			sd->top.offset.y += IM_HEIGHT(sd->top.image);
+		if (sd->top.offset.Y < 0 && sd->top.image)
+			sd->top.offset.Y += IM_HEIGHT(sd->top.image);
 
-		if (sd->middle.offset.y < 0 && sd->middle.image)
-			sd->middle.offset.y += IM_HEIGHT(sd->middle.image);
+		if (sd->middle.offset.Y < 0 && sd->middle.image)
+			sd->middle.offset.Y += IM_HEIGHT(sd->middle.image);
 
-		if (sd->bottom.offset.y < 0 && sd->bottom.image)
-			sd->bottom.offset.y += IM_HEIGHT(sd->bottom.image);
+		if (sd->bottom.offset.Y < 0 && sd->bottom.image)
+			sd->bottom.offset.Y += IM_HEIGHT(sd->bottom.image);
 	}
 #endif
 }
@@ -3038,7 +3038,7 @@ void GroupLines(void)
                 vertex_t *vert   = sector->lines[j]->v1;
                 bool      add_it = true;
                 for (auto v : sector->floor_z_verts)
-                    if (AlmostEquals(v.x, vert->x) && AlmostEquals(v.y, vert->y))
+                    if (AlmostEquals(v.X, vert->x) && AlmostEquals(v.Y, vert->y))
                         add_it = false;
                 if (add_it)
                 {
@@ -3046,10 +3046,10 @@ void GroupLines(void)
                     {
                         sector->floor_vertex_slope = true;
                         sector->floor_z_verts.push_back({vert->x, vert->y, vert->zf});
-                        if (vert->zf > sector->floor_vs_hilo.x)
-                            sector->floor_vs_hilo.x = vert->zf;
-                        if (vert->zf < sector->floor_vs_hilo.y)
-                            sector->floor_vs_hilo.y = vert->zf;
+                        if (vert->zf > sector->floor_vs_hilo.X)
+                            sector->floor_vs_hilo.X = vert->zf;
+                        if (vert->zf < sector->floor_vs_hilo.Y)
+                            sector->floor_vs_hilo.Y = vert->zf;
                     }
                     else
                         sector->floor_z_verts.push_back({vert->x, vert->y, sector->f_h});
@@ -3057,10 +3057,10 @@ void GroupLines(void)
                     {
                         sector->ceil_vertex_slope = true;
                         sector->ceil_z_verts.push_back({vert->x, vert->y, vert->zc});
-                        if (vert->zc > sector->ceil_vs_hilo.x)
-                            sector->ceil_vs_hilo.x = vert->zc;
-                        if (vert->zc < sector->ceil_vs_hilo.y)
-                            sector->ceil_vs_hilo.y = vert->zc;
+                        if (vert->zc > sector->ceil_vs_hilo.X)
+                            sector->ceil_vs_hilo.X = vert->zc;
+                        if (vert->zc < sector->ceil_vs_hilo.Y)
+                            sector->ceil_vs_hilo.Y = vert->zc;
                     }
                     else
                         sector->ceil_z_verts.push_back({vert->x, vert->y, sector->c_h});
@@ -3068,7 +3068,7 @@ void GroupLines(void)
                 vert   = sector->lines[j]->v2;
                 add_it = true;
                 for (auto v : sector->floor_z_verts)
-                    if (AlmostEquals(v.x, vert->x) && AlmostEquals(v.y, vert->y))
+                    if (AlmostEquals(v.X, vert->x) && AlmostEquals(v.Y, vert->y))
                         add_it = false;
                 if (add_it)
                 {
@@ -3076,10 +3076,10 @@ void GroupLines(void)
                     {
                         sector->floor_vertex_slope = true;
                         sector->floor_z_verts.push_back({vert->x, vert->y, vert->zf});
-                        if (vert->zf > sector->floor_vs_hilo.x)
-                            sector->floor_vs_hilo.x = vert->zf;
-                        if (vert->zf < sector->floor_vs_hilo.y)
-                            sector->floor_vs_hilo.y = vert->zf;
+                        if (vert->zf > sector->floor_vs_hilo.X)
+                            sector->floor_vs_hilo.X = vert->zf;
+                        if (vert->zf < sector->floor_vs_hilo.Y)
+                            sector->floor_vs_hilo.Y = vert->zf;
                     }
                     else
                         sector->floor_z_verts.push_back({vert->x, vert->y, sector->f_h});
@@ -3087,10 +3087,10 @@ void GroupLines(void)
                     {
                         sector->ceil_vertex_slope = true;
                         sector->ceil_z_verts.push_back({vert->x, vert->y, vert->zc});
-                        if (vert->zc > sector->ceil_vs_hilo.x)
-                            sector->ceil_vs_hilo.x = vert->zc;
-                        if (vert->zc < sector->ceil_vs_hilo.y)
-                            sector->ceil_vs_hilo.y = vert->zc;
+                        if (vert->zc > sector->ceil_vs_hilo.X)
+                            sector->ceil_vs_hilo.X = vert->zc;
+                        if (vert->zc < sector->ceil_vs_hilo.Y)
+                            sector->ceil_vs_hilo.Y = vert->zc;
                     }
                     else
                         sector->ceil_z_verts.push_back({vert->x, vert->y, sector->c_h});
@@ -3102,10 +3102,10 @@ void GroupLines(void)
             {
                 sector->floor_vs_normal =
                     M_CrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
-                if (sector->f_h > sector->floor_vs_hilo.x)
-                    sector->floor_vs_hilo.x = sector->f_h;
-                if (sector->f_h < sector->floor_vs_hilo.y)
-                    sector->floor_vs_hilo.y = sector->f_h;
+                if (sector->f_h > sector->floor_vs_hilo.X)
+                    sector->floor_vs_hilo.X = sector->f_h;
+                if (sector->f_h < sector->floor_vs_hilo.Y)
+                    sector->floor_vs_hilo.Y = sector->f_h;
             }
             if (!sector->ceil_vertex_slope)
                 sector->ceil_z_verts.clear();
@@ -3113,10 +3113,10 @@ void GroupLines(void)
             {
                 sector->ceil_vs_normal =
                     M_CrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
-                if (sector->c_h < sector->ceil_vs_hilo.y)
-                    sector->ceil_vs_hilo.y = sector->c_h;
-                if (sector->c_h > sector->ceil_vs_hilo.x)
-                    sector->ceil_vs_hilo.x = sector->c_h;
+                if (sector->c_h < sector->ceil_vs_hilo.Y)
+                    sector->ceil_vs_hilo.Y = sector->c_h;
+                if (sector->c_h > sector->ceil_vs_hilo.X)
+                    sector->ceil_vs_hilo.X = sector->c_h;
             }
         }
         if (sector->linecount == 4 && udmf_level)
@@ -3132,30 +3132,30 @@ void GroupLines(void)
                 bool      add_it_v1 = true;
                 bool      add_it_v2 = true;
                 for (auto v : sector->floor_z_verts)
-                    if (AlmostEquals(v.x, vert->x) && AlmostEquals(v.y, vert->y))
+                    if (AlmostEquals(v.X, vert->x) && AlmostEquals(v.Y, vert->y))
                         add_it_v1 = false;
                 for (auto v : sector->floor_z_verts)
-                    if (AlmostEquals(v.x, vert2->x) && AlmostEquals(v.y, vert2->y))
+                    if (AlmostEquals(v.X, vert2->x) && AlmostEquals(v.Y, vert2->y))
                         add_it_v2 = false;
                 if (add_it_v1)
                 {
                     if (vert->zf < 32767.0f && vert->zf > -32768.0f)
                     {
                         sector->floor_z_verts.push_back({vert->x, vert->y, vert->zf});
-                        if (vert->zf > sector->floor_vs_hilo.x)
-                            sector->floor_vs_hilo.x = vert->zf;
-                        if (vert->zf < sector->floor_vs_hilo.y)
-                            sector->floor_vs_hilo.y = vert->zf;
+                        if (vert->zf > sector->floor_vs_hilo.X)
+                            sector->floor_vs_hilo.X = vert->zf;
+                        if (vert->zf < sector->floor_vs_hilo.Y)
+                            sector->floor_vs_hilo.Y = vert->zf;
                     }
                     else
                         sector->floor_z_verts.push_back({vert->x, vert->y, sector->f_h});
                     if (vert->zc < 32767.0f && vert->zc > -32768.0f)
                     {
                         sector->ceil_z_verts.push_back({vert->x, vert->y, vert->zc});
-                        if (vert->zc > sector->ceil_vs_hilo.x)
-                            sector->ceil_vs_hilo.x = vert->zc;
-                        if (vert->zc < sector->ceil_vs_hilo.y)
-                            sector->ceil_vs_hilo.y = vert->zc;
+                        if (vert->zc > sector->ceil_vs_hilo.X)
+                            sector->ceil_vs_hilo.X = vert->zc;
+                        if (vert->zc < sector->ceil_vs_hilo.Y)
+                            sector->ceil_vs_hilo.Y = vert->zc;
                     }
                     else
                         sector->ceil_z_verts.push_back({vert->x, vert->y, sector->c_h});
@@ -3165,20 +3165,20 @@ void GroupLines(void)
                     if (vert2->zf < 32767.0f && vert2->zf > -32768.0f)
                     {
                         sector->floor_z_verts.push_back({vert2->x, vert2->y, vert2->zf});
-                        if (vert2->zf > sector->floor_vs_hilo.x)
-                            sector->floor_vs_hilo.x = vert2->zf;
-                        if (vert2->zf < sector->floor_vs_hilo.y)
-                            sector->floor_vs_hilo.y = vert2->zf;
+                        if (vert2->zf > sector->floor_vs_hilo.X)
+                            sector->floor_vs_hilo.X = vert2->zf;
+                        if (vert2->zf < sector->floor_vs_hilo.Y)
+                            sector->floor_vs_hilo.Y = vert2->zf;
                     }
                     else
                         sector->floor_z_verts.push_back({vert2->x, vert2->y, sector->f_h});
                     if (vert2->zc < 32767.0f && vert2->zc > -32768.0f)
                     {
                         sector->ceil_z_verts.push_back({vert2->x, vert2->y, vert2->zc});
-                        if (vert2->zc > sector->ceil_vs_hilo.x)
-                            sector->ceil_vs_hilo.x = vert2->zc;
-                        if (vert2->zc < sector->ceil_vs_hilo.y)
-                            sector->ceil_vs_hilo.y = vert2->zc;
+                        if (vert2->zc > sector->ceil_vs_hilo.X)
+                            sector->ceil_vs_hilo.X = vert2->zc;
+                        if (vert2->zc < sector->ceil_vs_hilo.Y)
+                            sector->ceil_vs_hilo.Y = vert2->zc;
                     }
                     else
                         sector->ceil_z_verts.push_back({vert2->x, vert2->y, sector->c_h});
@@ -3199,10 +3199,10 @@ void GroupLines(void)
                 sector->floor_vertex_slope = true;
                 sector->floor_vs_normal =
                     M_CrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
-                if (sector->f_h > sector->floor_vs_hilo.x)
-                    sector->floor_vs_hilo.x = sector->f_h;
-                if (sector->f_h < sector->floor_vs_hilo.y)
-                    sector->floor_vs_hilo.y = sector->f_h;
+                if (sector->f_h > sector->floor_vs_hilo.X)
+                    sector->floor_vs_hilo.X = sector->f_h;
+                if (sector->f_h < sector->floor_vs_hilo.Y)
+                    sector->floor_vs_hilo.Y = sector->f_h;
             }
             else
                 sector->floor_z_verts.clear();
@@ -3211,10 +3211,10 @@ void GroupLines(void)
                 sector->ceil_vertex_slope = true;
                 sector->ceil_vs_normal =
                     M_CrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
-                if (sector->c_h < sector->ceil_vs_hilo.y)
-                    sector->ceil_vs_hilo.y = sector->c_h;
-                if (sector->c_h > sector->ceil_vs_hilo.x)
-                    sector->ceil_vs_hilo.x = sector->c_h;
+                if (sector->c_h < sector->ceil_vs_hilo.Y)
+                    sector->ceil_vs_hilo.Y = sector->c_h;
+                if (sector->c_h > sector->ceil_vs_hilo.X)
+                    sector->ceil_vs_hilo.X = sector->c_h;
             }
             else
                 sector->ceil_z_verts.clear();

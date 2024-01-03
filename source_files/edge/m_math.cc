@@ -68,121 +68,121 @@ float M_Tan(angle_t ang)
 angle_t M_ATan(float slope)
 {
     return (s32_t)((float)ANG180 * atan(slope) /
-                   M_PI); // Updated M_ATan from EDGE 2.x branch, works properly with MSVC now
+                   M_PI); // Updated M_ATan from EDGE 2.X branch, works properly with MSVC now
 }
 
-void M_Angle2Matrix(angle_t ang, vec2_t *x, vec2_t *y)
+void M_Angle2Matrix(angle_t ang, HMM_Vec2 *x, HMM_Vec2 *y)
 {
-    x->x = M_Cos(ang);
-    x->y = M_Sin(ang);
+    x->X = M_Cos(ang);
+    x->Y = M_Sin(ang);
 
-    y->x = -x->y;
-    y->y = x->x;
+    y->X = -x->Y;
+    y->Y = x->X;
 }
 
-vec3_t M_CrossProduct(vec3_t v1, vec3_t v2, vec3_t v3)
+HMM_Vec3 M_CrossProduct(HMM_Vec3 v1, HMM_Vec3 v2, HMM_Vec3 v3)
 {
-    vec3_t A{v2.x - v1.x, v2.y - v1.y, v2.z - v1.z};
-    vec3_t B{v3.x - v1.x, v3.y - v1.y, v3.z - v1.z};
-    float  x = (A.y * B.z) - (A.z * B.y);
-    float  y = (A.z * B.x) - (A.x * B.z);
-    float  z = (A.x * B.y) - (A.y * B.x);
+    HMM_Vec3 A{v2.X - v1.X, v2.Y - v1.Y, v2.Z - v1.Z};
+    HMM_Vec3 B{v3.X - v1.X, v3.Y - v1.Y, v3.Z - v1.Z};
+    float  x = (A.Y * B.Z) - (A.Z * B.Y);
+    float  y = (A.Z * B.X) - (A.X * B.Z);
+    float  z = (A.X * B.Y) - (A.Y * B.X);
     return {x, y, z};
 }
 
-static float M_DotProduct(vec3_t v1, vec3_t v2)
+static float M_DotProduct(HMM_Vec3 v1, HMM_Vec3 v2)
 {
-    return (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z);
+    return (v1.X * v2.X) + (v1.Y * v2.Y) + (v1.Z * v2.Z);
 }
 
 // If the plane normal is precalculated; otherwise use the other version
-vec3_t M_LinePlaneIntersection(vec3_t line_a, vec3_t line_b, vec3_t plane_a, vec3_t plane_b, vec3_t plane_c,
-                               vec3_t plane_normal)
+HMM_Vec3 M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b, HMM_Vec3 plane_c,
+                               HMM_Vec3 plane_normal)
 {
-    float  n = M_DotProduct(plane_normal, {plane_c.x - line_a.x, plane_c.y - line_a.y, plane_c.z - line_a.z});
-    vec3_t line_subtract{line_b.x - line_a.x, line_b.y - line_a.y, line_b.z - line_a.z};
+    float  n = M_DotProduct(plane_normal, {plane_c.X - line_a.X, plane_c.Y - line_a.Y, plane_c.Z - line_a.Z});
+    HMM_Vec3 line_subtract{line_b.X - line_a.X, line_b.Y - line_a.Y, line_b.Z - line_a.Z};
     float  d = M_DotProduct(plane_normal, line_subtract);
     float  u = n / d;
-    return {line_a.x + u * line_subtract.x, line_a.y + u * line_subtract.y, line_a.z + u * line_subtract.z};
+    return {line_a.X + u * line_subtract.X, line_a.Y + u * line_subtract.Y, line_a.Z + u * line_subtract.Z};
 }
 
-vec3_t M_LinePlaneIntersection(vec3_t line_a, vec3_t line_b, vec3_t plane_a, vec3_t plane_b, vec3_t plane_c)
+HMM_Vec3 M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b, HMM_Vec3 plane_c)
 {
-    vec3_t plane_normal = M_CrossProduct(plane_a, plane_b, plane_c);
-    float  n = M_DotProduct(plane_normal, {plane_c.x - line_a.x, plane_c.y - line_a.y, plane_c.z - line_a.z});
-    vec3_t line_subtract{line_b.x - line_a.x, line_b.y - line_a.y, line_b.z - line_a.z};
+    HMM_Vec3 plane_normal = M_CrossProduct(plane_a, plane_b, plane_c);
+    float  n = M_DotProduct(plane_normal, {plane_c.X - line_a.X, plane_c.Y - line_a.Y, plane_c.Z - line_a.Z});
+    HMM_Vec3 line_subtract{line_b.X - line_a.X, line_b.Y - line_a.Y, line_b.Z - line_a.Z};
     float  d = M_DotProduct(plane_normal, line_subtract);
     float  u = n / d;
-    return {line_a.x + u * line_subtract.x, line_a.y + u * line_subtract.y, line_a.z + u * line_subtract.z};
+    return {line_a.X + u * line_subtract.X, line_a.Y + u * line_subtract.Y, line_a.Z + u * line_subtract.Z};
 }
 
-double M_PointToSegDistance(vec2_t seg_a, vec2_t seg_b, vec2_t point)
+double M_PointToSegDistance(HMM_Vec2 seg_a, HMM_Vec2 seg_b, HMM_Vec2 point)
 {
 
-    vec2_t seg_ab;
-    seg_ab.x = seg_b.x - seg_a.x;
-    seg_ab.y = seg_b.y - seg_a.y;
+    HMM_Vec2 seg_ab;
+    seg_ab.X = seg_b.X - seg_a.X;
+    seg_ab.Y = seg_b.Y - seg_a.Y;
 
-    vec2_t seg_bp;
-    seg_bp.x = point.x - seg_b.x;
-    seg_bp.y = point.y - seg_b.y;
+    HMM_Vec2 seg_bp;
+    seg_bp.X = point.X - seg_b.X;
+    seg_bp.Y = point.Y - seg_b.Y;
 
-    vec2_t seg_ap;
-    seg_ap.x = point.x - seg_a.x;
-    seg_ap.y = point.y - seg_a.y;
+    HMM_Vec2 seg_ap;
+    seg_ap.X = point.X - seg_a.X;
+    seg_ap.Y = point.Y - seg_a.Y;
 
-    double ab_bp = (seg_ab.x * seg_bp.x + seg_ab.y * seg_bp.y);
-    double ab_ap = (seg_ab.x * seg_ap.x + seg_ab.y * seg_ap.y);
+    double ab_bp = (seg_ab.X * seg_bp.X + seg_ab.Y * seg_bp.Y);
+    double ab_ap = (seg_ab.X * seg_ap.X + seg_ab.Y * seg_ap.Y);
 
     if (ab_bp > 0)
     {
-        double y = point.y - seg_b.y;
-        double x = point.x - seg_b.x;
+        double y = point.Y - seg_b.Y;
+        double x = point.X - seg_b.X;
         return sqrt(x * x + y * y);
     }
     else if (ab_ap < 0)
     {
-        double y = point.y - seg_a.y;
-        double x = point.x - seg_a.x;
+        double y = point.Y - seg_a.Y;
+        double x = point.X - seg_a.X;
         return sqrt(x * x + y * y);
     }
     else
     {
-        double x1  = seg_ab.x;
-        double y1  = seg_ab.y;
-        double x2  = seg_ap.x;
-        double y2  = seg_ap.y;
+        double x1  = seg_ab.X;
+        double y1  = seg_ab.Y;
+        double x2  = seg_ap.X;
+        double y2  = seg_ap.Y;
         double mod = sqrt(x1 * x1 + y1 * y1);
         return abs(x1 * y2 - y1 * x2) / mod;
     }
 }
 
-int M_PointInTri(vec2_t v1, vec2_t v2, vec2_t v3, vec2_t test)
+int M_PointInTri(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test)
 {
-    std::vector<vec2_t> tri_vec = {v1, v2, v3};
+    std::vector<HMM_Vec2> tri_vec = {v1, v2, v3};
     int                 i       = 0;
     int                 j       = 0;
     int                 c       = 0;
     for (i = 0, j = 2; i < 3; j = i++)
     {
-        if (((tri_vec[i].y > test.y) != (tri_vec[j].y > test.y)) &&
-            (test.x <
-             (tri_vec[j].x - tri_vec[i].x) * (test.y - tri_vec[i].y) / (tri_vec[j].y - tri_vec[i].y) + tri_vec[i].x))
+        if (((tri_vec[i].Y > test.Y) != (tri_vec[j].Y > test.Y)) &&
+            (test.X <
+             (tri_vec[j].X - tri_vec[i].X) * (test.Y - tri_vec[i].Y) / (tri_vec[j].Y - tri_vec[i].Y) + tri_vec[i].X))
             c = !c;
     }
     return c;
 }
 
-void M_Vec2Rotate(vec2_t &vec, const angle_t &ang)
+void M_Vec2Rotate(HMM_Vec2 &vec, const angle_t &ang)
 {
     float s = M_Sin(ang);
     float c = M_Cos(ang);
 
-    float ox = vec.x;
-    float oy = vec.y;
+    float ox = vec.X;
+    float oy = vec.Y;
 
-    vec.x = ox * c - oy * s;
-    vec.y = oy * c + ox * s;
+    vec.X = ox * c - oy * s;
+    vec.Y = oy * c + ox * s;
 }
 
 //--- editor settings ---

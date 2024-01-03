@@ -133,21 +133,21 @@ static std::unordered_map<const image_c *, GLuint> frame_texids;
 
 #define MAX_MIRRORS 3
 
-static inline void ClipPlaneHorizontalLine(GLdouble *p, const vec2_t &s, const vec2_t &e)
+static inline void ClipPlaneHorizontalLine(GLdouble *p, const HMM_Vec2 &s, const HMM_Vec2 &e)
 {
-    p[0] = e.y - s.y;
-    p[1] = s.x - e.x;
+    p[0] = e.Y - s.Y;
+    p[1] = s.X - e.X;
     p[2] = 0.0f;
-    p[3] = e.x * s.y - s.x * e.y;
+    p[3] = e.X * s.Y - s.X * e.Y;
 }
 
 static inline void ClipPlaneEyeAngle(GLdouble *p, angle_t ang)
 {
-    vec2_t s, e;
+    HMM_Vec2 s, e;
 
-    s.Set(viewx, viewy);
+    s = {viewx, viewy};
 
-    e.Set(viewx + M_Cos(ang), viewy + M_Sin(ang));
+    e = {viewx + M_Cos(ang), viewy + M_Sin(ang)};
 
     ClipPlaneHorizontalLine(p, s, e);
 }
@@ -401,23 +401,23 @@ static void MIR_SetClippers()
     {
         mirror_info_t &mir = active_mirrors[i];
 
-        vec2_t v1, v2;
+        HMM_Vec2 v1, v2;
 
-        v1.Set(mir.def->seg->v1->x, mir.def->seg->v1->y);
-        v2.Set(mir.def->seg->v2->x, mir.def->seg->v2->y);
+        v1 = {mir.def->seg->v1->x, mir.def->seg->v1->y};
+        v2 = {mir.def->seg->v2->x, mir.def->seg->v2->y};
 
         for (int k = i - 1; k >= 0; k--)
         {
             if (!active_mirrors[k].def->is_portal)
             {
-                vec2_t tmp;
+                HMM_Vec2 tmp;
                 tmp = v1;
                 v1  = v2;
                 v2  = tmp;
             }
 
-            active_mirrors[k].Transform(v1.x, v1.y);
-            active_mirrors[k].Transform(v2.x, v2.y);
+            active_mirrors[k].Transform(v1.X, v1.Y);
+            active_mirrors[k].Transform(v2.X, v2.Y);
         }
 
         GLdouble front_p[4];
@@ -489,7 +489,7 @@ static void DrawLaser(player_t *p)
 	static int countdown = -1;
 	static int last_time = -1;
 
-	static const vec2_t octagon[7] =
+	static const HMM_Vec2 octagon[7] =
 	{
 		{  0.0  , +1.0   },
 		{  0.866, +0.5   },
@@ -517,7 +517,7 @@ static void DrawLaser(player_t *p)
 		return;
 	}
 
-	vec3_t s, e;
+	HMM_Vec3 s, e;
 
 	s.Set(p->mo->x, p->mo->y, p->mo->z + 30.0);
 	e.Set(p->mo->x, p->mo->y, p->mo->z + 30.0);
@@ -527,21 +527,21 @@ static void DrawLaser(player_t *p)
 	float lk_cos = M_Cos(viewvertangle);
 	float lk_sin = M_Sin(viewvertangle);
 
-	s.x += viewsin * 6;
-	s.y -= viewcos * 6;
+	s.X += viewsin * 6;
+	s.Y -= viewcos * 6;
 
 	// view vector
 	float vx = lk_cos * viewcos;
 	float vy = lk_cos * viewsin;
 	float vz = lk_sin;
 
-	s.x += vx * 1;
-	s.y += vy * 1;
-	s.z += vz * 1;
+	s.X += vx * 1;
+	s.Y += vy * 1;
+	s.Z += vz * 1;
 
-	e.x += vx * dist;
-	e.y += vy * dist;
-	e.z += vz * dist;
+	e.X += vx * dist;
+	e.Y += vy * dist;
+	e.Z += vz * dist;
 
 	RGL_StartUnits(false);
 
@@ -568,8 +568,8 @@ static void DrawLaser(player_t *p)
 		float size = 4;
 		if (pass==1) size += ((kk & 1) == 0) ? 1 : sqrt(dist);
 
-		glvert[kk].pos.x += octagon[kk/2].x * size;
-		glvert[kk].pos.z += octagon[kk/2].y * size;
+		glvert[kk].pos.X += octagon[kk/2].X * size;
+		glvert[kk].pos.Z += octagon[kk/2].Y * size;
 
 		glvert[kk].edge = true;
 	}
@@ -589,7 +589,7 @@ static void DrawLaser(player_t *p)
 
 typedef struct wall_plane_data_s
 {
-    vec3_t    normal;
+    HMM_Vec3    normal;
     divline_t div;
 
     int   light;
@@ -603,14 +603,14 @@ typedef struct wall_plane_data_s
     float tx, tdx;
     float ty, ty_mul, ty_skew;
 
-    vec2_t x_mat, y_mat;
+    HMM_Vec2 x_mat, y_mat;
 
     bool  flood_emu;
     float emu_mx, emu_my;
 } wall_plane_data_t;
 
 // Adapted from Quake 3 GPL release - Dasho (not used yet, but might be for future effects)
-/*static void CalcScrollTexCoords( float x_scroll, float y_scroll, vec2_t *texc )
+/*static void CalcScrollTexCoords( float x_scroll, float y_scroll, HMM_Vec2 *texc )
 {
     float timeScale = gametic / (r_doubleframes.d ? 200.0f : 100.0f);
     float adjustedScrollS, adjustedScrollT;
@@ -627,7 +627,7 @@ typedef struct wall_plane_data_s
 }*/
 
 // Adapted from Quake 3 GPL release - Dasho
-static void CalcTurbulentTexCoords(vec2_t *texc, vec3_t *pos)
+static void CalcTurbulentTexCoords(HMM_Vec2 *texc, HMM_Vec3 *pos)
 {
     float amplitude = 0.05;
     float now       = wave_now * (thick_liquid ? 0.5 : 1.0);
@@ -638,21 +638,21 @@ static void CalcTurbulentTexCoords(vec2_t *texc, vec3_t *pos)
         {
             if (swirl_pass == 1)
             {
-                texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z) * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) &
+                texc->X = texc->X + r_sintable[(int)(((pos->X + pos->Z) * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) &
                                                (FUNCTABLE_MASK)] *
                                         amplitude;
-                texc->y = texc->y +
-                          r_sintable[(int)((pos->y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] *
+                texc->Y = texc->Y +
+                          r_sintable[(int)((pos->Y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] *
                               amplitude;
             }
             else
             {
                 amplitude = 0;
-                texc->x = texc->x - r_sintable[(int)(((pos->x + pos->z) * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) &
+                texc->X = texc->X - r_sintable[(int)(((pos->X + pos->Z) * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) &
                                                (FUNCTABLE_MASK)] *
                                         amplitude;
-                texc->y = texc->y -
-                          r_sintable[(int)((pos->y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] *
+                texc->Y = texc->Y -
+                          r_sintable[(int)((pos->Y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] *
                               amplitude;
             }
         }
@@ -661,41 +661,41 @@ static void CalcTurbulentTexCoords(vec2_t *texc, vec3_t *pos)
             if (swirl_pass == 1)
             {
                 amplitude = 0.025;
-                texc->x = texc->x + r_sintable[(int)(((pos->x + pos->z) * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) &
+                texc->X = texc->X + r_sintable[(int)(((pos->X + pos->Z) * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) &
                                                (FUNCTABLE_MASK)] *
                                         amplitude;
-                texc->y = texc->y +
-                          r_sintable[(int)((pos->y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] *
+                texc->Y = texc->Y +
+                          r_sintable[(int)((pos->Y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] *
                               amplitude;
             }
             else
             {
                 amplitude = 0.015;
-                texc->x = texc->x - r_sintable[(int)(((pos->x + pos->z) * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) &
+                texc->X = texc->X - r_sintable[(int)(((pos->X + pos->Z) * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) &
                                                (FUNCTABLE_MASK)] *
                                         amplitude;
-                texc->y = texc->y -
-                          r_sintable[(int)((pos->y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] *
+                texc->Y = texc->Y -
+                          r_sintable[(int)((pos->Y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] *
                               amplitude;
             }
         }
     }
     else
     {
-        texc->x =
-            texc->x +
-            r_sintable[(int)(((pos->x + pos->z) * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] *
+        texc->X =
+            texc->X +
+            r_sintable[(int)(((pos->X + pos->Z) * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] *
                 amplitude;
-        texc->y =
-            texc->y +
-            r_sintable[(int)((pos->y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
+        texc->Y =
+            texc->Y +
+            r_sintable[(int)((pos->Y * WAVETABLE_INCREMENT + now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)] * amplitude;
     }
 }
 
 typedef struct
 {
     int           v_count;
-    const vec3_t *vert;
+    const HMM_Vec3 *vert;
 
     GLuint tex_id;
 
@@ -710,12 +710,12 @@ typedef struct
     float tx0, ty0;
     float tx_mul, ty_mul;
 
-    vec3_t normal;
+    HMM_Vec3 normal;
 
     bool mid_masked;
 } wall_coord_data_t;
 
-static void WallCoordFunc(void *d, int v_idx, vec3_t *pos, float *rgb, vec2_t *texc, vec3_t *normal, vec3_t *lit_pos)
+static void WallCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal, HMM_Vec3 *lit_pos)
 {
     const wall_coord_data_t *data = (wall_coord_data_t *)d;
 
@@ -739,15 +739,15 @@ static void WallCoordFunc(void *d, int v_idx, vec3_t *pos, float *rgb, vec2_t *t
 
     if (fabs(data->div.dx) > fabs(data->div.dy))
     {
-        along = (pos->x - data->div.x) / data->div.dx;
+        along = (pos->X - data->div.x) / data->div.dx;
     }
     else
     {
-        along = (pos->y - data->div.y) / data->div.dy;
+        along = (pos->Y - data->div.y) / data->div.dy;
     }
 
-    texc->x = data->tx0 + along * data->tx_mul;
-    texc->y = data->ty0 + pos->z * data->ty_mul;
+    texc->X = data->tx0 + along * data->tx_mul;
+    texc->Y = data->ty0 + pos->Z * data->ty_mul;
 
     if (swirl_pass > 0)
         CalcTurbulentTexCoords(texc, pos);
@@ -758,7 +758,7 @@ static void WallCoordFunc(void *d, int v_idx, vec3_t *pos, float *rgb, vec2_t *t
 typedef struct
 {
     int           v_count;
-    const vec3_t *vert;
+    const HMM_Vec3 *vert;
 
     GLuint tex_id;
 
@@ -771,10 +771,10 @@ typedef struct
     float tx0, ty0;
     float image_w, image_h;
 
-    vec2_t x_mat;
-    vec2_t y_mat;
+    HMM_Vec2 x_mat;
+    HMM_Vec2 y_mat;
 
-    vec3_t normal;
+    HMM_Vec3 normal;
 
     // multiplier for plane_z_bob
     float bob_amount = 0;
@@ -784,7 +784,7 @@ typedef struct
     angle_t rotation = 0;
 } plane_coord_data_t;
 
-static void PlaneCoordFunc(void *d, int v_idx, vec3_t *pos, float *rgb, vec2_t *texc, vec3_t *normal, vec3_t *lit_pos)
+static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal, HMM_Vec3 *lit_pos)
 {
     plane_coord_data_t *data = (plane_coord_data_t *)d;
 
@@ -804,22 +804,22 @@ static void PlaneCoordFunc(void *d, int v_idx, vec3_t *pos, float *rgb, vec2_t *
         rgb[2] = data->B;
     }
 
-    vec2_t rxy = {(data->tx0 + pos->x), (data->ty0 + pos->y)};
+    HMM_Vec2 rxy = {(data->tx0 + pos->X), (data->ty0 + pos->Y)};
 
     if (data->rotation)
         M_Vec2Rotate(rxy, data->rotation);
 
-    rxy.x /= data->image_w;
-    rxy.y /= data->image_h;
+    rxy.X /= data->image_w;
+    rxy.Y /= data->image_h;
 
-    texc->x = rxy.x * data->x_mat.x + rxy.y * data->x_mat.y;
-    texc->y = rxy.x * data->y_mat.x + rxy.y * data->y_mat.y;
+    texc->X = rxy.X * data->x_mat.X + rxy.Y * data->x_mat.Y;
+    texc->Y = rxy.X * data->y_mat.X + rxy.Y * data->y_mat.Y;
 
     if (swirl_pass > 0)
         CalcTurbulentTexCoords(texc, pos);
 
     if (data->bob_amount > 0)
-        pos->z += (plane_z_bob * data->bob_amount);
+        pos->Z += (plane_z_bob * data->bob_amount);
 
     *lit_pos = *pos;
 }
@@ -871,12 +871,12 @@ static void DLIT_Plane(mobj_t *mo, void *dataptr)
     if (!mo->info->dlight[0].leaky &&
         !(mo->subsector->sector->floor_vertex_slope || mo->subsector->sector->ceil_vertex_slope))
     {
-        float z = data->vert[0].z;
+        float z = data->vert[0].Z;
 
         if (data->slope)
             z += Slope_GetHeight(data->slope, mo->x, mo->y);
 
-        if ((MO_MIDZ(mo) > z) != (data->normal.z > 0))
+        if ((MO_MIDZ(mo) > z) != (data->normal.Z > 0))
             return;
     }
 
@@ -1032,15 +1032,15 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     float total_h = IM_TOTAL_HEIGHT(image);
 
     /* convert tex_x1 and tex_x2 from world coords to texture coords */
-    tex_x1 = (tex_x1 * surf->x_mat.x) / total_w;
-    tex_x2 = (tex_x2 * surf->x_mat.x) / total_w;
+    tex_x1 = (tex_x1 * surf->x_mat.X) / total_w;
+    tex_x2 = (tex_x2 * surf->x_mat.X) / total_w;
 
     float tx0    = tex_x1;
     float tx_mul = tex_x2 - tex_x1;
 
     MIR_Height(tex_top_h);
 
-    float ty_mul = surf->y_mat.y / (total_h * MIR_ZScale());
+    float ty_mul = surf->y_mat.Y / (total_h * MIR_ZScale());
     float ty0    = IM_TOP(image) - tex_top_h * ty_mul;
 
 #if (DEBUG >= 3)
@@ -1084,28 +1084,28 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
 #endif
     }
 
-    vec3_t vertices[MAX_EDGE_VERT * 2];
+    HMM_Vec3 vertices[MAX_EDGE_VERT * 2];
 
     int v_count = 0;
 
     for (int LI = 0; LI < left_num; LI++)
     {
-        vertices[v_count].x = x1;
-        vertices[v_count].y = y1;
-        vertices[v_count].z = left_h[LI];
+        vertices[v_count].X = x1;
+        vertices[v_count].Y = y1;
+        vertices[v_count].Z = left_h[LI];
 
-        MIR_Height(vertices[v_count].z);
+        MIR_Height(vertices[v_count].Z);
 
         v_count++;
     }
 
     for (int RI = right_num - 1; RI >= 0; RI--)
     {
-        vertices[v_count].x = x2;
-        vertices[v_count].y = y2;
-        vertices[v_count].z = right_h[RI];
+        vertices[v_count].X = x2;
+        vertices[v_count].Y = y2;
+        vertices[v_count].Z = right_h[RI];
 
-        MIR_Height(vertices[v_count].z);
+        MIR_Height(vertices[v_count].Z);
 
         v_count++;
     }
@@ -1145,7 +1145,7 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     data.ty_mul = ty_mul;
 
     // TODO: make a unit vector
-    data.normal.Set((y2 - y1), (x1 - x2), 0);
+    data.normal = {(y2 - y1), (x1 - x2), 0};
 
     data.tex_id     = tex_id;
     data.pass       = 0;
@@ -1168,8 +1168,8 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
 
     if (surf->image && surf->image->liquid_type > LIQ_None && swirling_flats == SWIRL_PARALLAX)
     {
-        data.tx0        = surf->offset.x + 25;
-        data.ty0        = surf->offset.y + 25;
+        data.tx0        = surf->offset.X + 25;
+        data.ty0        = surf->offset.Y + 25;
         swirl_pass      = 2;
         int   old_blend = data.blending;
         float old_dt    = data.trans;
@@ -1374,17 +1374,17 @@ static void DrawTile(seg_t *seg, drawfloor_t *dfloor, float lz1, float lz2, floa
     if (!image)
         image = W_ImageForHOMDetect();
 
-    float tex_top_h = tex_z + surf->offset.y;
-    float x_offset  = surf->offset.x;
+    float tex_top_h = tex_z + surf->offset.Y;
+    float x_offset  = surf->offset.X;
 
     if (flags & WTILF_ExtraX)
     {
-        x_offset += seg->sidedef->middle.offset.x;
+        x_offset += seg->sidedef->middle.offset.X;
     }
     if (flags & WTILF_ExtraY)
     {
         // needed separate Y flag to maintain compatibility
-        tex_top_h += seg->sidedef->middle.offset.y;
+        tex_top_h += seg->sidedef->middle.offset.Y;
     }
 
     bool opaque = (!seg->backsector) || (surf->translucency >= 0.99f && image->opacity == OPAC_Solid);
@@ -1555,7 +1555,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
             return;
 
         AddWallTile(seg, dfloor, &sd->middle, slope_fh, slope_ch,
-                    (ld->flags & MLF_LowerUnpegged) ? sec->f_h + (IM_HEIGHT_SAFE(sd->middle.image) / sd->middle.y_mat.y)
+                    (ld->flags & MLF_LowerUnpegged) ? sec->f_h + (IM_HEIGHT_SAFE(sd->middle.image) / sd->middle.y_mat.Y)
                                                     : sec->c_h,
                     0, f_min, c_max);
         return;
@@ -1679,12 +1679,12 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         else if (ld->flags & MLF_LowerUnpegged)
         {
             f2 = f1 + sd->midmask_offset;
-            c2 = f2 + (IM_HEIGHT(sd->middle.image) / sd->middle.y_mat.y);
+            c2 = f2 + (IM_HEIGHT(sd->middle.image) / sd->middle.y_mat.Y);
         }
         else
         {
             c2 = c1 + sd->midmask_offset;
-            f2 = c2 - (IM_HEIGHT(sd->middle.image) / sd->middle.y_mat.y);
+            f2 = c2 - (IM_HEIGHT(sd->middle.image) / sd->middle.y_mat.Y);
         }
 
         tex_z = c2;
@@ -1767,7 +1767,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
                 continue;
 
             tex_z = (C->ef_line->flags & MLF_LowerUnpegged)
-                        ? C->bottom_h + (IM_HEIGHT_SAFE(surf->image) / surf->y_mat.y)
+                        ? C->bottom_h + (IM_HEIGHT_SAFE(surf->image) / surf->y_mat.Y)
                         : C->top_h;
 
             AddWallTile(seg, dfloor, surf, C->bottom_h, C->top_h, tex_z, flags, f_min, c_max);
@@ -1782,7 +1782,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 typedef struct
 {
     int    v_count;
-    vec3_t vert[2 * (MAX_FLOOD_VERT + 1)];
+    HMM_Vec3 vert[2 * (MAX_FLOOD_VERT + 1)];
 
     GLuint tex_id;
     int    pass;
@@ -1794,10 +1794,10 @@ typedef struct
     float tx0, ty0;
     float image_w, image_h;
 
-    vec2_t x_mat;
-    vec2_t y_mat;
+    HMM_Vec2 x_mat;
+    HMM_Vec2 y_mat;
 
-    vec3_t normal;
+    HMM_Vec3 normal;
 
     int piece_row;
     int piece_col;
@@ -1805,7 +1805,7 @@ typedef struct
     float h1, dh;
 } flood_emu_data_t;
 
-static void FloodCoordFunc(void *d, int v_idx, vec3_t *pos, float *rgb, vec2_t *texc, vec3_t *normal, vec3_t *lit_pos)
+static void FloodCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal, HMM_Vec3 *lit_pos)
 {
     const flood_emu_data_t *data = (flood_emu_data_t *)d;
 
@@ -1816,17 +1816,17 @@ static void FloodCoordFunc(void *d, int v_idx, vec3_t *pos, float *rgb, vec2_t *
     rgb[1] = data->G;
     rgb[2] = data->B;
 
-    float along = (viewz - data->plane_h) / (viewz - pos->z);
+    float along = (viewz - data->plane_h) / (viewz - pos->Z);
 
-    lit_pos->x = viewx + along * (pos->x - viewx);
-    lit_pos->y = viewy + along * (pos->y - viewy);
-    lit_pos->z = data->plane_h;
+    lit_pos->X = viewx + along * (pos->X - viewx);
+    lit_pos->Y = viewy + along * (pos->Y - viewy);
+    lit_pos->Z = data->plane_h;
 
-    float rx = (data->tx0 + lit_pos->x) / data->image_w;
-    float ry = (data->ty0 + lit_pos->y) / data->image_h;
+    float rx = (data->tx0 + lit_pos->X) / data->image_w;
+    float ry = (data->ty0 + lit_pos->Y) / data->image_h;
 
-    texc->x = rx * data->x_mat.x + ry * data->x_mat.y;
-    texc->y = rx * data->y_mat.x + ry * data->y_mat.y;
+    texc->X = rx * data->x_mat.X + ry * data->x_mat.Y;
+    texc->Y = rx * data->y_mat.X + ry * data->y_mat.Y;
 }
 
 static void DLIT_Flood(mobj_t *mo, void *dataptr)
@@ -1837,7 +1837,7 @@ static void DLIT_Flood(mobj_t *mo, void *dataptr)
     if (!mo->info->dlight[0].leaky &&
         !(mo->subsector->sector->floor_vertex_slope || mo->subsector->sector->ceil_vertex_slope))
     {
-        if ((MO_MIDZ(mo) > data->plane_h) != (data->normal.z > 0))
+        if ((MO_MIDZ(mo) > data->plane_h) != (data->normal.Z > 0))
             return;
     }
 
@@ -1862,8 +1862,8 @@ static void DLIT_Flood(mobj_t *mo, void *dataptr)
             float x = sx + dx * col / (float)data->piece_col;
             float y = sy + dy * col / (float)data->piece_col;
 
-            data->vert[col * 2 + 0].Set(x, y, z);
-            data->vert[col * 2 + 1].Set(x, y, z + data->dh / data->piece_row);
+            data->vert[col * 2 + 0] = {x, y, z};
+            data->vert[col * 2 + 1] = {x, y, z + data->dh / data->piece_row};
         }
 
         mo->dlight.shader->WorldMix(GL_QUAD_STRIP, data->v_count, data->tex_id, 1.0, &data->pass, blending, false, data,
@@ -1910,15 +1910,15 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
 
     data.plane_h = (face_dir > 0) ? h2 : h1;
 
-    data.tx0     = surf->offset.x;
-    data.ty0     = surf->offset.y;
+    data.tx0     = surf->offset.X;
+    data.ty0     = surf->offset.Y;
     data.image_w = IM_WIDTH(surf->image);
     data.image_h = IM_HEIGHT(surf->image);
 
     data.x_mat = surf->x_mat;
     data.y_mat = surf->y_mat;
 
-    data.normal.Set(0, 0, face_dir);
+    data.normal = {0, 0, (float)face_dir};
 
     // determine number of pieces to subdivide the area into.
     // The more the better, upto a limit of 64 pieces, and
@@ -1977,8 +1977,8 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
             float x = sx + dx * col / (float)piece_col;
             float y = sy + dy * col / (float)piece_col;
 
-            data.vert[col * 2 + 0].Set(x, y, z);
-            data.vert[col * 2 + 1].Set(x, y, z + dh / piece_row);
+            data.vert[col * 2 + 0] = {x, y, z};
+            data.vert[col * 2 + 1] = {x, y, z + dh / piece_row};
         }
 
 #if 0 // DEBUGGING AIDE
@@ -2526,7 +2526,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
     if (num_vert > MAX_PLVERT)
         num_vert = MAX_PLVERT;
 
-    vec3_t vertices[MAX_PLVERT];
+    HMM_Vec3 vertices[MAX_PLVERT];
 
     float v_bbox[4];
 
@@ -2568,9 +2568,9 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
 
             MIR_Coordinate(x, y);
 
-            vertices[v_count].x = x;
-            vertices[v_count].y = y;
-            vertices[v_count].z = z;
+            vertices[v_count].X = x;
+            vertices[v_count].Y = y;
+            vertices[v_count].Z = z;
 
             v_count++;
         }
@@ -2593,18 +2593,18 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
     data.v_count = v_count;
     data.vert    = vertices;
     data.R = data.G = data.B = 1.0f;
-    data.tx0                 = surf->offset.x;
-    data.ty0                 = surf->offset.y;
+    data.tx0                 = surf->offset.X;
+    data.ty0                 = surf->offset.Y;
     data.image_w             = IM_WIDTH(surf->image);
     data.image_h             = IM_HEIGHT(surf->image);
     data.x_mat               = surf->x_mat;
     data.y_mat               = surf->y_mat;
     float mir_scale          = MIR_XYScale();
-    data.x_mat.x /= mir_scale;
-    data.x_mat.y /= mir_scale;
-    data.y_mat.x /= mir_scale;
-    data.y_mat.y /= mir_scale;
-    data.normal.Set(0, 0, (viewz > h) ? +1 : -1);
+    data.x_mat.X /= mir_scale;
+    data.x_mat.Y /= mir_scale;
+    data.y_mat.X /= mir_scale;
+    data.y_mat.Y /= mir_scale;
+    data.normal = {0, 0, (viewz > h) ? 1.0f : -1.0f};
     data.tex_id   = tex_id;
     data.pass     = 0;
     data.blending = blending;
@@ -2636,8 +2636,8 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
     if (surf->image->liquid_type > LIQ_None &&
         swirling_flats == SWIRL_PARALLAX) // Kept as an example for future effects
     {
-        data.tx0        = surf->offset.x + 25;
-        data.ty0        = surf->offset.y + 25;
+        data.tx0        = surf->offset.X + 25;
+        data.ty0        = surf->offset.Y + 25;
         swirl_pass      = 2;
         int   old_blend = data.blending;
         float old_dt    = data.trans;
@@ -3029,11 +3029,11 @@ static void DrawPortalPolygon(drawmirror_c *mir)
     float ty1 = 0;
     float ty2 = (z2 - z1);
 
-    tx1 = tx1 * surf->x_mat.x / total_w;
-    tx2 = tx2 * surf->x_mat.x / total_w;
+    tx1 = tx1 * surf->x_mat.X / total_w;
+    tx2 = tx2 * surf->x_mat.X / total_w;
 
-    ty1 = ty1 * surf->y_mat.y / total_h;
-    ty2 = ty2 * surf->y_mat.y / total_h;
+    ty1 = ty1 * surf->y_mat.Y / total_h;
+    ty2 = ty2 * surf->y_mat.Y / total_h;
 
     glBegin(GL_POLYGON);
 
@@ -3385,18 +3385,18 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
     float lk_sin = M_Sin(viewvertangle);
     float lk_cos = M_Cos(viewvertangle);
 
-    viewforward.x = lk_cos * viewcos;
-    viewforward.y = lk_cos * viewsin;
-    viewforward.z = lk_sin;
+    viewforward.X = lk_cos * viewcos;
+    viewforward.Y = lk_cos * viewsin;
+    viewforward.Z = lk_sin;
 
-    viewup.x = -lk_sin * viewcos;
-    viewup.y = -lk_sin * viewsin;
-    viewup.z = lk_cos;
+    viewup.X = -lk_sin * viewcos;
+    viewup.Y = -lk_sin * viewsin;
+    viewup.Z = lk_cos;
 
     // cross product
-    viewright.x = viewforward.y * viewup.z - viewup.y * viewforward.z;
-    viewright.y = viewforward.z * viewup.x - viewup.z * viewforward.x;
-    viewright.z = viewforward.x * viewup.y - viewup.x * viewforward.y;
+    viewright.X = viewforward.Y * viewup.Z - viewup.Y * viewforward.Z;
+    viewright.Y = viewforward.Z * viewup.X - viewup.Z * viewforward.X;
+    viewright.Z = viewforward.X * viewup.Y - viewup.X * viewforward.Y;
 
     // compute the 1D projection of the view angle
     angle_t oned_side_angle;

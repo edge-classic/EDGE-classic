@@ -13,11 +13,9 @@ add_library(
   image_hq2x.cc
   image_funcs.cc
   math_angle.cc
-  math_bbox.cc
   math_color.cc
   math_crc.cc
   math_md5.cc
-  math_vector.cc
   path.cc
   sound_data.cc
   sound_gather.cc

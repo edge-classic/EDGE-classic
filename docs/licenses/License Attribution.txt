@@ -26,6 +26,8 @@ minivorbis library - Copyright (c) 2020 Eduardo Bart
 CC 1.0 Universal License
 ===========================================================================================
 
+HandmadeMath.h - Ben Visness
+
 "ProtoSquare!" soundfont - Yingchun Soul
 
 ===========================================================================================

@@ -149,8 +149,8 @@ bool SR_GetVec2(void *storage, int index, void *extra)
 {
     (void)extra;
 
-    ((vec2_t *)storage)[index].x = SV_GetFloat();
-    ((vec2_t *)storage)[index].y = SV_GetFloat();
+    ((HMM_Vec2 *)storage)[index].X = SV_GetFloat();
+    ((HMM_Vec2 *)storage)[index].Y = SV_GetFloat();
     return true;
 }
 
@@ -158,9 +158,9 @@ bool SR_GetVec3(void *storage, int index, void *extra)
 {
     (void)extra;
 
-    ((vec3_t *)storage)[index].x = SV_GetFloat();
-    ((vec3_t *)storage)[index].y = SV_GetFloat();
-    ((vec3_t *)storage)[index].z = SV_GetFloat();
+    ((HMM_Vec3 *)storage)[index].X = SV_GetFloat();
+    ((HMM_Vec3 *)storage)[index].Y = SV_GetFloat();
+    ((HMM_Vec3 *)storage)[index].Z = SV_GetFloat();
     return true;
 }
 
@@ -222,15 +222,15 @@ void SR_PutBoolean(void *storage, int index, void *extra)
 
 void SR_PutVec2(void *storage, int index, void *extra)
 {
-    SV_PutFloat(((vec2_t *)storage)[index].x);
-    SV_PutFloat(((vec2_t *)storage)[index].y);
+    SV_PutFloat(((HMM_Vec2 *)storage)[index].X);
+    SV_PutFloat(((HMM_Vec2 *)storage)[index].Y);
 }
 
 void SR_PutVec3(void *storage, int index, void *extra)
 {
-    SV_PutFloat(((vec3_t *)storage)[index].x);
-    SV_PutFloat(((vec3_t *)storage)[index].y);
-    SV_PutFloat(((vec3_t *)storage)[index].z);
+    SV_PutFloat(((HMM_Vec3 *)storage)[index].X);
+    SV_PutFloat(((HMM_Vec3 *)storage)[index].Y);
+    SV_PutFloat(((HMM_Vec3 *)storage)[index].Z);
 }
 
 void SR_PutAngleToSlope(void *storage, int index, void *extra)

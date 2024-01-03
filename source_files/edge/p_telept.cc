@@ -261,8 +261,8 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
 
     if (thing->flags & MF_MISSILE)
     {
-        thing->mom.x = thing->speed * M_Cos(new_ang);
-        thing->mom.y = thing->speed * M_Sin(new_ang);
+        thing->mom.X = thing->speed * M_Cos(new_ang);
+        thing->mom.Y = thing->speed * M_Sin(new_ang);
     }
     else if (def->special & TELSP_SameSpeed)
     {
@@ -272,18 +272,18 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
         float s = M_Sin(mom_ang);
         float c = M_Cos(mom_ang);
 
-        float mx = thing->mom.x;
-        float my = thing->mom.y;
+        float mx = thing->mom.X;
+        float my = thing->mom.Y;
 
-        thing->mom.x = mx * c - my * s;
-        thing->mom.y = my * c + mx * s;
+        thing->mom.X = mx * c - my * s;
+        thing->mom.Y = my * c + mx * s;
     }
     else if (player)
     {
         // don't move for a bit
         thing->reactiontime = def->delay;
 
-        thing->mom.x = thing->mom.y = thing->mom.z = 0;
+        thing->mom.X = thing->mom.Y = thing->mom.Z = 0;
 
         player->actual_speed = 0;
     }

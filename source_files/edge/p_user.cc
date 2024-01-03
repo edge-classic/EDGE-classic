@@ -145,7 +145,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
     if (g_erraticism.d)
         player->bob = 12.0f;
     else
-        player->bob = (player->mo->mom.x * player->mo->mom.x + player->mo->mom.y * player->mo->mom.y) / 8;
+        player->bob = (player->mo->mom.X * player->mo->mom.X + player->mo->mom.Y * player->mo->mom.Y) / 8;
 
     if (player->bob > MAXBOB)
         player->bob = MAXBOB;
@@ -203,7 +203,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
     //  6/7/2011 - Ajaped said to remove FRACUNIT...seeya oldness.
 
     // if ((player->mo->mom.z <= -35.0)&&(player->mo->mom.z >= -40.0))
-    if ((player->mo->mom.z <= -35.0) && (player->mo->mom.z >= -36.0))
+    if ((player->mo->mom.Z <= -35.0) && (player->mo->mom.Z >= -36.0))
         if (player->mo->info->falling_sound)
         {
             int sfx_cat;
@@ -247,7 +247,7 @@ I_Debugf("Jump:%d bob_z:%1.2f  z:%1.2f  height:%1.2f delta:%1.2f --> viewz:%1.3f
 
 void P_PlayerJump(player_t *pl, float dz, int wait)
 {
-    pl->mo->mom.z += dz;
+    pl->mo->mom.Z += dz;
 
     if (pl->jumpwait < wait)
         pl->jumpwait = wait;
@@ -379,13 +379,13 @@ static void MovePlayer(player_t *player, bool extra_tic)
     U_vec[1] = -ev * dy * base_xy_speed;
     U_vec[2] = eh * base_z_speed;
 
-    player->mo->mom.x += F_vec[0] * cmd->forwardmove + S_vec[0] * cmd->sidemove + U_vec[0] * cmd->upwardmove;
+    player->mo->mom.X += F_vec[0] * cmd->forwardmove + S_vec[0] * cmd->sidemove + U_vec[0] * cmd->upwardmove;
 
-    player->mo->mom.y += F_vec[1] * cmd->forwardmove + S_vec[1] * cmd->sidemove + U_vec[1] * cmd->upwardmove;
+    player->mo->mom.Y += F_vec[1] * cmd->forwardmove + S_vec[1] * cmd->sidemove + U_vec[1] * cmd->upwardmove;
 
     if (flying || swimming || !onground || onladder)
     {
-        player->mo->mom.z += F_vec[2] * cmd->forwardmove + S_vec[2] * cmd->sidemove + U_vec[2] * cmd->upwardmove;
+        player->mo->mom.Z += F_vec[2] * cmd->forwardmove + S_vec[2] * cmd->sidemove + U_vec[2] * cmd->upwardmove;
     }
 
     if (flying && !swimming)
@@ -813,10 +813,10 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
              (AlmostEquals(player->deltaviewheight, 0.0f) || sinking)))
         {
             should_think = false;
-            if (!player->mo->mom.z)
+            if (!player->mo->mom.Z)
             {
-                player->mo->mom.x = 0;
-                player->mo->mom.y = 0;
+                player->mo->mom.X = 0;
+                player->mo->mom.Y = 0;
             }
         }
     }
@@ -880,8 +880,8 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
 
     if (LUA_UseLuaHud())
         LUA_SetVector3(LUA_GetGlobalVM(), "player", "inventory_event_handler",
-                       epi::vec3_c(cmd->extbuttons & EBT_INVPREV ? 1 : 0, cmd->extbuttons & EBT_INVUSE ? 1 : 0,
-                                   cmd->extbuttons & EBT_INVNEXT ? 1 : 0));
+                       HMM_Vec3{cmd->extbuttons & EBT_INVPREV ? 1.0f : 0.0f, cmd->extbuttons & EBT_INVUSE ? 1.0f : 0.0f,
+                                   cmd->extbuttons & EBT_INVNEXT ? 1.0f : 0.0f});
     else
         VM_SetVector(ui_vm, "player", "inventory_event_handler", cmd->extbuttons & EBT_INVPREV ? 1 : 0,
                      cmd->extbuttons & EBT_INVUSE ? 1 : 0, cmd->extbuttons & EBT_INVNEXT ? 1 : 0);

@@ -1446,24 +1446,24 @@ void P_RunActivePlanes(void)
                         }
                         if (special_ref->sector_effect & SECTFX_PushThings)
                         {
-                            sec->props.old_push.y += BOOM_CARRY_FACTOR * sy;
-                            sec->props.push.y += BOOM_CARRY_FACTOR * sy;
-                            sec->props.old_push.x += BOOM_CARRY_FACTOR * sx;
-                            sec->props.push.x += BOOM_CARRY_FACTOR * sx;
+                            sec->props.old_push.Y += BOOM_CARRY_FACTOR * sy;
+                            sec->props.push.Y += BOOM_CARRY_FACTOR * sy;
+                            sec->props.old_push.X += BOOM_CARRY_FACTOR * sx;
+                            sec->props.push.X += BOOM_CARRY_FACTOR * sx;
                         }
                         if (special_ref->sector_effect & SECTFX_ScrollFloor)
                         {
-                            sec->floor.old_scroll.y -= sy;
-                            sec->floor.scroll.y -= sy;
-                            sec->floor.old_scroll.x -= sx;
-                            sec->floor.scroll.x -= sx;
+                            sec->floor.old_scroll.Y -= sy;
+                            sec->floor.scroll.Y -= sy;
+                            sec->floor.old_scroll.X -= sx;
+                            sec->floor.scroll.X -= sx;
                         }
                         if (special_ref->sector_effect & SECTFX_ScrollCeiling)
                         {
-                            sec->ceil.old_scroll.y -= sy;
-                            sec->ceil.old_scroll.x -= sx;
-                            sec->ceil.scroll.y -= sy;
-                            sec->ceil.scroll.x -= sx;
+                            sec->ceil.old_scroll.Y -= sy;
+                            sec->ceil.old_scroll.X -= sx;
+                            sec->ceil.scroll.Y -= sy;
+                            sec->ceil.scroll.X -= sx;
                         }
                     }
                 }
@@ -1498,48 +1498,48 @@ void P_RunActivePlanes(void)
                             {
                                 if (ld->side[0]->top.image)
                                 {
-                                    ld->side[0]->top.old_scroll.x += sx;
-                                    ld->side[0]->top.old_scroll.y += sy;
-                                    ld->side[0]->top.scroll.x += sx;
-                                    ld->side[0]->top.scroll.y += sy;
+                                    ld->side[0]->top.old_scroll.X += sx;
+                                    ld->side[0]->top.old_scroll.Y += sy;
+                                    ld->side[0]->top.scroll.X += sx;
+                                    ld->side[0]->top.scroll.Y += sy;
                                 }
                                 if (ld->side[0]->middle.image)
                                 {
-                                    ld->side[0]->middle.old_scroll.x += sx;
-                                    ld->side[0]->middle.old_scroll.y += sy;
-                                    ld->side[0]->middle.scroll.x += sx;
-                                    ld->side[0]->middle.scroll.y += sy;
+                                    ld->side[0]->middle.old_scroll.X += sx;
+                                    ld->side[0]->middle.old_scroll.Y += sy;
+                                    ld->side[0]->middle.scroll.X += sx;
+                                    ld->side[0]->middle.scroll.Y += sy;
                                 }
                                 if (ld->side[0]->bottom.image)
                                 {
-                                    ld->side[0]->bottom.old_scroll.x += sx;
-                                    ld->side[0]->bottom.old_scroll.y += sy;
-                                    ld->side[0]->bottom.scroll.x += sx;
-                                    ld->side[0]->bottom.scroll.y += sy;
+                                    ld->side[0]->bottom.old_scroll.X += sx;
+                                    ld->side[0]->bottom.old_scroll.Y += sy;
+                                    ld->side[0]->bottom.scroll.X += sx;
+                                    ld->side[0]->bottom.scroll.Y += sy;
                                 }
                             }
                             if (ld->side[1])
                             {
                                 if (ld->side[1]->top.image)
                                 {
-                                    ld->side[1]->top.old_scroll.x += sx;
-                                    ld->side[1]->top.old_scroll.y += sy;
-                                    ld->side[1]->top.scroll.x += sx;
-                                    ld->side[1]->top.scroll.y += sy;
+                                    ld->side[1]->top.old_scroll.X += sx;
+                                    ld->side[1]->top.old_scroll.Y += sy;
+                                    ld->side[1]->top.scroll.X += sx;
+                                    ld->side[1]->top.scroll.Y += sy;
                                 }
                                 if (ld->side[1]->middle.image)
                                 {
-                                    ld->side[1]->middle.old_scroll.x += sx;
-                                    ld->side[1]->middle.old_scroll.y += sy;
-                                    ld->side[1]->middle.scroll.x += sx;
-                                    ld->side[1]->middle.scroll.y += sy;
+                                    ld->side[1]->middle.old_scroll.X += sx;
+                                    ld->side[1]->middle.old_scroll.Y += sy;
+                                    ld->side[1]->middle.scroll.X += sx;
+                                    ld->side[1]->middle.scroll.Y += sy;
                                 }
                                 if (ld->side[1]->bottom.image)
                                 {
-                                    ld->side[1]->bottom.old_scroll.x += sx;
-                                    ld->side[1]->bottom.old_scroll.y += sy;
-                                    ld->side[1]->bottom.scroll.x += sx;
-                                    ld->side[1]->bottom.scroll.y += sy;
+                                    ld->side[1]->bottom.old_scroll.X += sx;
+                                    ld->side[1]->bottom.old_scroll.Y += sy;
+                                    ld->side[1]->bottom.scroll.X += sx;
+                                    ld->side[1]->bottom.scroll.Y += sy;
                                 }
                             }
                         }
@@ -1560,24 +1560,24 @@ void P_RunActivePlanes(void)
                             {
                                 if (ld->side[0]->top.image)
                                 {
-                                    ld->side[0]->top.old_scroll.x -= sx;
-                                    ld->side[0]->top.old_scroll.y -= sy;
-                                    ld->side[0]->top.scroll.x -= sx;
-                                    ld->side[0]->top.scroll.y -= sy;
+                                    ld->side[0]->top.old_scroll.X -= sx;
+                                    ld->side[0]->top.old_scroll.Y -= sy;
+                                    ld->side[0]->top.scroll.X -= sx;
+                                    ld->side[0]->top.scroll.Y -= sy;
                                 }
                                 if (ld->side[0]->middle.image)
                                 {
-                                    ld->side[0]->middle.old_scroll.x -= sx;
-                                    ld->side[0]->middle.old_scroll.y -= sy;
-                                    ld->side[0]->middle.scroll.x -= sx;
-                                    ld->side[0]->middle.scroll.y -= sy;
+                                    ld->side[0]->middle.old_scroll.X -= sx;
+                                    ld->side[0]->middle.old_scroll.Y -= sy;
+                                    ld->side[0]->middle.scroll.X -= sx;
+                                    ld->side[0]->middle.scroll.Y -= sy;
                                 }
                                 if (ld->side[0]->bottom.image)
                                 {
-                                    ld->side[0]->bottom.old_scroll.x -= sx;
-                                    ld->side[0]->bottom.old_scroll.y -= sy;
-                                    ld->side[0]->bottom.scroll.x -= sx;
-                                    ld->side[0]->bottom.scroll.y -= sy;
+                                    ld->side[0]->bottom.old_scroll.X -= sx;
+                                    ld->side[0]->bottom.old_scroll.Y -= sy;
+                                    ld->side[0]->bottom.scroll.X -= sx;
+                                    ld->side[0]->bottom.scroll.Y -= sy;
                                 }
                             }
                         }

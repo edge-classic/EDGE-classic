@@ -472,20 +472,20 @@ void SV_LineFinaliseElems(void)
         s2 = ld->side[1];
 
         // check for animation
-        if (s1 && (s1->top.scroll.x || s1->top.scroll.y || s1->middle.scroll.x || s1->middle.scroll.y ||
-                   s1->bottom.scroll.x || s1->bottom.scroll.y || s1->top.net_scroll.x || s1->top.net_scroll.y ||
-                   s1->middle.net_scroll.x || s1->middle.net_scroll.y || s1->bottom.net_scroll.x ||
-                   s1->bottom.net_scroll.y || s1->top.old_scroll.x || s1->top.old_scroll.y || s1->middle.old_scroll.x ||
-                   s1->middle.old_scroll.y || s1->bottom.old_scroll.x || s1->bottom.old_scroll.y))
+        if (s1 && (s1->top.scroll.X || s1->top.scroll.Y || s1->middle.scroll.X || s1->middle.scroll.Y ||
+                   s1->bottom.scroll.X || s1->bottom.scroll.Y || s1->top.net_scroll.X || s1->top.net_scroll.Y ||
+                   s1->middle.net_scroll.X || s1->middle.net_scroll.Y || s1->bottom.net_scroll.X ||
+                   s1->bottom.net_scroll.Y || s1->top.old_scroll.X || s1->top.old_scroll.Y || s1->middle.old_scroll.X ||
+                   s1->middle.old_scroll.Y || s1->bottom.old_scroll.X || s1->bottom.old_scroll.Y))
         {
             P_AddSpecialLine(ld);
         }
 
-        if (s2 && (s2->top.scroll.x || s2->top.scroll.y || s2->middle.scroll.x || s2->middle.scroll.y ||
-                   s2->bottom.scroll.x || s2->bottom.scroll.y || s2->top.net_scroll.x || s2->top.net_scroll.y ||
-                   s2->middle.net_scroll.x || s2->middle.net_scroll.y || s2->bottom.net_scroll.x ||
-                   s2->bottom.net_scroll.y || s2->top.old_scroll.x || s2->top.old_scroll.y || s2->middle.old_scroll.x ||
-                   s2->middle.old_scroll.y || s2->bottom.old_scroll.x || s2->bottom.old_scroll.y))
+        if (s2 && (s2->top.scroll.X || s2->top.scroll.Y || s2->middle.scroll.X || s2->middle.scroll.Y ||
+                   s2->bottom.scroll.X || s2->bottom.scroll.Y || s2->top.net_scroll.X || s2->top.net_scroll.Y ||
+                   s2->middle.net_scroll.X || s2->middle.net_scroll.Y || s2->bottom.net_scroll.X ||
+                   s2->bottom.net_scroll.Y || s2->top.old_scroll.X || s2->top.old_scroll.Y || s2->middle.old_scroll.X ||
+                   s2->middle.old_scroll.Y || s2->bottom.old_scroll.X || s2->bottom.old_scroll.Y))
         {
             P_AddSpecialLine(ld);
         }
@@ -610,9 +610,9 @@ void SV_SectorFinaliseElems(void)
         P_FloodExtraFloors(sec);
 
         // check for animation
-        if (sec->floor.scroll.x || sec->floor.scroll.y || sec->ceil.scroll.x || sec->ceil.scroll.y ||
-            sec->floor.net_scroll.x || sec->floor.net_scroll.y || sec->ceil.net_scroll.x || sec->ceil.net_scroll.y ||
-            sec->floor.old_scroll.x || sec->floor.old_scroll.y || sec->ceil.old_scroll.x || sec->ceil.old_scroll.y)
+        if (sec->floor.scroll.X || sec->floor.scroll.Y || sec->ceil.scroll.X || sec->ceil.scroll.Y ||
+            sec->floor.net_scroll.X || sec->floor.net_scroll.Y || sec->ceil.net_scroll.X || sec->ceil.net_scroll.Y ||
+            sec->floor.old_scroll.X || sec->floor.old_scroll.Y || sec->ceil.old_scroll.X || sec->ceil.old_scroll.Y)
         {
             P_AddSpecialSector(sec);
         }

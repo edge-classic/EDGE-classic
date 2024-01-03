@@ -1,9 +1,9 @@
 #pragma once
 
 #include "epi.h"
-#include "math_vector.h"
 #include "con_var.h"
 #include "lua.hpp"
+#include "HandmadeMath.h"
 
 lua_State *LUA_CreateVM();
 
@@ -36,32 +36,32 @@ void LUA_RegisterHudLibrary(lua_State *L);
 
 lua_State* LUA_GetGlobalVM();
 
-inline epi::vec3_c LUA_CheckVector3(lua_State *L, int index)
+inline HMM_Vec3 LUA_CheckVector3(lua_State *L, int index)
 {
-    epi::vec3_c v;
+    HMM_Vec3 v;
 
     luaL_checktype(L, index, LUA_TTABLE);
         
     lua_geti(L, index, 1);
-    v.x = luaL_checknumber(L, -1);
+    v.X = luaL_checknumber(L, -1);
     lua_geti(L, index, 2);
-    v.y = luaL_checknumber(L, -1);
+    v.Y = luaL_checknumber(L, -1);
     lua_geti(L, index, 3);
-    v.z = luaL_checknumber(L, -1);
+    v.Z = luaL_checknumber(L, -1);
     lua_pop(L, 3);
     return v;
 }
 
-inline void LUA_PushVector3(lua_State*L, epi::vec3_c v)
+inline void LUA_PushVector3(lua_State*L, HMM_Vec3 v)
 {
     lua_getglobal(L, "vec3");
-    lua_pushnumber(L, v.x);
-    lua_pushnumber(L, v.y);
-    lua_pushnumber(L, v.z);
+    lua_pushnumber(L, v.X);
+    lua_pushnumber(L, v.Y);
+    lua_pushnumber(L, v.Z);
     lua_call(L, 3, 1);    
 }
 
-inline void LUA_SetVector3(lua_State* L, const char* module, const char* variable, epi::vec3_c v)
+inline void LUA_SetVector3(lua_State* L, const char* module, const char* variable, HMM_Vec3 v)
 {
     lua_getglobal(L, module);
     LUA_PushVector3(L, v);    

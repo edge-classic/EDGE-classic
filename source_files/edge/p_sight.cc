@@ -165,8 +165,8 @@ static bool CrossSubsector(subsector_t *sub)
             continue;
 
         // does linedef cross LOS ?
-        s1 = P_PointOnDivlineSide(ld->v1->x, ld->v1->y, &sight_I.src);
-        s2 = P_PointOnDivlineSide(ld->v2->x, ld->v2->y, &sight_I.src);
+        s1 = P_PointOnDivlineSide(ld->v1->X, ld->v1->Y, &sight_I.src);
+        s2 = P_PointOnDivlineSide(ld->v2->X, ld->v2->Y, &sight_I.src);
 
         if (s1 == s2)
             continue;
@@ -174,8 +174,8 @@ static bool CrossSubsector(subsector_t *sub)
         // linedef crosses LOS (extended to infinity), now check if the
         // cross point lies within the finite LOS range.
         //
-        divl.x  = ld->v1->x;
-        divl.y  = ld->v1->y;
+        divl.x  = ld->v1->X;
+        divl.y  = ld->v1->Y;
         divl.dx = ld->dx;
         divl.dy = ld->dy;
 

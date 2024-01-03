@@ -50,19 +50,8 @@ class image_c;
 // Your plain vanilla vertex.
 // Note: transformed values not buffered locally, like some
 // DOOM-alikes ("wt", "WebView") did.
-// Dasho: Made new struct type to hold extra info
-typedef struct vertex_s
-{
-    float x, y, zf, zc;
-
-    void Set(float _x, float _y, float _zf, float _zc)
-    {
-        x  = _x;
-        y  = _y;
-        zf = _zf;
-        zc = _zc;
-    }
-} vertex_t;
+// Dasho: Changed to HMM_Vec4
+typedef HMM_Vec4 vertex_t;
 
 // Forward of LineDefs, for Sectors.
 struct line_s;

@@ -150,8 +150,8 @@ static inline int PointOnLineSide(float x, float y, line_t *ld)
 {
     divline_t div;
 
-    div.x  = ld->v1->x;
-    div.y  = ld->v1->y;
+    div.x  = ld->v1->X;
+    div.y  = ld->v1->Y;
     div.dx = ld->dx;
     div.dy = ld->dy;
 
@@ -558,8 +558,8 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
     if (ld->frontsector->floor_vertex_slope || ld->backsector->floor_vertex_slope)
     {
         divline_t divver;
-        divver.x  = ld->v1->x;
-        divver.y  = ld->v1->y;
+        divver.x  = ld->v1->X;
+        divver.y  = ld->v1->Y;
         divver.dx = ld->dx;
         divver.dy = ld->dy;
         float iz  = 0;
@@ -1640,13 +1640,13 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
             HMM_Vec3 tri_v2 = {0, 0, 0};
             for (auto v : sec_check->floor_z_verts)
             {
-                if (AlmostEquals(ld->v1->x, v.X) && AlmostEquals(ld->v1->y, v.Y))
+                if (AlmostEquals(ld->v1->X, v.X) && AlmostEquals(ld->v1->Y, v.Y))
                 {
                     tri_v1.X = v.X;
                     tri_v1.Y = v.Y;
                     tri_v1.Z = v.Z;
                 }
-                else if (AlmostEquals(ld->v2->x, v.X) && AlmostEquals(ld->v2->y, v.Y))
+                else if (AlmostEquals(ld->v2->X, v.X) && AlmostEquals(ld->v2->Y, v.Y))
                 {
                     tri_v2.X = v.X;
                     tri_v2.Y = v.Y;
@@ -1704,13 +1704,13 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
             HMM_Vec3 tri_v2 = {0, 0, 0};
             for (auto v : sec_check->ceil_z_verts)
             {
-                if (AlmostEquals(ld->v1->x, v.X) && AlmostEquals(ld->v1->y, v.Y))
+                if (AlmostEquals(ld->v1->X, v.X) && AlmostEquals(ld->v1->Y, v.Y))
                 {
                     tri_v1.X = v.X;
                     tri_v1.Y = v.Y;
                     tri_v1.Z = v.Z;
                 }
-                else if (AlmostEquals(ld->v2->x, v.X) && AlmostEquals(ld->v2->y, v.Y))
+                else if (AlmostEquals(ld->v2->X, v.X) && AlmostEquals(ld->v2->Y, v.Y))
                 {
                     tri_v2.X = v.X;
                     tri_v2.Y = v.Y;

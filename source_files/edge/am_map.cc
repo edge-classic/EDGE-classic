@@ -231,11 +231,11 @@ static void FindMinMaxBoundaries(void)
 
     for (int i = 0; i < numvertexes; i++)
     {
-        map_min_x = MIN(map_min_x, vertexes[i].x);
-        map_max_x = MAX(map_max_x, vertexes[i].x);
+        map_min_x = MIN(map_min_x, vertexes[i].X);
+        map_max_x = MAX(map_max_x, vertexes[i].X);
 
-        map_min_y = MIN(map_min_y, vertexes[i].y);
-        map_max_y = MAX(map_max_y, vertexes[i].y);
+        map_min_y = MIN(map_min_y, vertexes[i].Y);
+        map_max_y = MAX(map_max_y, vertexes[i].Y);
     }
 
     float map_w = map_max_x - map_min_x;
@@ -883,8 +883,8 @@ static void AM_WalkSeg(seg_t *seg)
     if (line->side[1] == seg->sidedef)
         return;
 
-    GetRotatedCoords(seg->v1->x, seg->v1->y, l.a.x, l.a.y);
-    GetRotatedCoords(seg->v2->x, seg->v2->y, l.b.x, l.b.y);
+    GetRotatedCoords(seg->v1->X, seg->v1->Y, l.a.x, l.a.y);
+    GetRotatedCoords(seg->v2->X, seg->v2->Y, l.b.x, l.b.y);
 
     if ((line->flags & MLF_Mapped) || show_walls)
     {

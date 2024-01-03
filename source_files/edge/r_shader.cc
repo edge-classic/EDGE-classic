@@ -581,7 +581,7 @@ class wall_glow_c : public abstract_shader_c
 
     inline float Dist(float x, float y)
     {
-        return (ld->v1->x - x) * norm_x + (ld->v1->y - y) * norm_y;
+        return (ld->v1->X - x) * norm_x + (ld->v1->Y - y) * norm_y;
     }
 
     inline void TexCoord(HMM_Vec2 *texc, float r, const sector_t *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
@@ -613,8 +613,8 @@ class wall_glow_c : public abstract_shader_c
     {
         SYS_ASSERT(mo->dlight.glow_wall);
         ld     = mo->dlight.glow_wall;
-        norm_x = (ld->v1->y - ld->v2->y) / ld->length;
-        norm_y = (ld->v2->x - ld->v1->x) / ld->length;
+        norm_x = (ld->v1->Y - ld->v2->Y) / ld->length;
+        norm_y = (ld->v2->X - ld->v1->X) / ld->length;
         // Note: these are shared, we must not delete them
         lim[0] = GetLightImage(mo->info, 0);
         lim[1] = GetLightImage(mo->info, 1);

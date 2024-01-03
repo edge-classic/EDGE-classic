@@ -155,8 +155,8 @@ static inline int PointOnLineSide(float x, float y, line_t *ld)
 {
     divline_t div;
 
-    div.x  = ld->v1->x;
-    div.y  = ld->v1->y;
+    div.x  = ld->v1->X;
+    div.y  = ld->v1->Y;
     div.dx = ld->dx;
     div.dy = ld->dy;
 
@@ -215,8 +215,8 @@ static void BounceOffWall(mobj_t *mo, line_t *wall)
     dest_x = mo->x + M_Cos(angle) * (mo->speed + mo->info->radius) * 4.0f;
     dest_y = mo->y + M_Sin(angle) * (mo->speed + mo->info->radius) * 4.0f;
 
-    div.x  = wall->v1->x;
-    div.y  = wall->v1->y;
+    div.x  = wall->v1->X;
+    div.y  = wall->v1->Y;
     div.dx = wall->dx;
     div.dy = wall->dy;
 

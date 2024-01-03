@@ -274,10 +274,10 @@ static void SetPositionBSP(setposbsp_t *info, int nodenum)
         if (seg->miniseg)
             continue;
 
-        div.x  = seg->v1->x;
-        div.y  = seg->v1->y;
-        div.dx = seg->v2->x - div.x;
-        div.dy = seg->v2->y - div.y;
+        div.x  = seg->v1->X;
+        div.y  = seg->v1->Y;
+        div.dx = seg->v2->X - div.x;
+        div.dy = seg->v2->Y - div.y;
 
         if (P_BoxOnDivLineSide(info->bbox, &div) == 1)
             return;
@@ -1003,16 +1003,16 @@ static inline void PIT_AddLineIntercept(line_t *ld)
     float     frac;
     divline_t div;
 
-    div.x  = ld->v1->x;
-    div.y  = ld->v1->y;
+    div.x  = ld->v1->X;
+    div.y  = ld->v1->Y;
     div.dx = ld->dx;
     div.dy = ld->dy;
 
     // avoid precision problems with two routines
     if (trace.dx > 16 || trace.dy > 16 || trace.dx < -16 || trace.dy < -16)
     {
-        s1 = P_PointOnDivlineSide(ld->v1->x, ld->v1->y, &trace);
-        s2 = P_PointOnDivlineSide(ld->v2->x, ld->v2->y, &trace);
+        s1 = P_PointOnDivlineSide(ld->v1->X, ld->v1->Y, &trace);
+        s2 = P_PointOnDivlineSide(ld->v2->X, ld->v2->Y, &trace);
     }
     else
     {
@@ -1308,10 +1308,10 @@ static void BlockAddLine(int line_num)
 
     float slope;
 
-    x0 = (int)(ld->v1->x - bmap_orgx);
-    y0 = (int)(ld->v1->y - bmap_orgy);
-    x1 = (int)(ld->v2->x - bmap_orgx);
-    y1 = (int)(ld->v2->y - bmap_orgy);
+    x0 = (int)(ld->v1->X - bmap_orgx);
+    y0 = (int)(ld->v1->Y - bmap_orgy);
+    x1 = (int)(ld->v2->X - bmap_orgx);
+    y1 = (int)(ld->v2->Y - bmap_orgy);
 
     // swap endpoints if horizontally backward
     if (x1 < x0)

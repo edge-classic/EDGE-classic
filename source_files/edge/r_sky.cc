@@ -759,15 +759,15 @@ void RGL_DrawSkyPlane(subsector_t *sub, float h)
     if (!seg)
         return;
 
-    float x0 = seg->v1->x;
-    float y0 = seg->v1->y;
+    float x0 = seg->v1->X;
+    float y0 = seg->v1->Y;
     MIR_Coordinate(x0, y0);
     seg = seg->sub_next;
     if (!seg)
         return;
 
-    float x1 = seg->v1->x;
-    float y1 = seg->v1->y;
+    float x1 = seg->v1->X;
+    float y1 = seg->v1->Y;
     MIR_Coordinate(x1, y1);
     seg = seg->sub_next;
     if (!seg)
@@ -775,8 +775,8 @@ void RGL_DrawSkyPlane(subsector_t *sub, float h)
 
     while (seg)
     {
-        float x2 = seg->v1->x;
-        float y2 = seg->v1->y;
+        float x2 = seg->v1->X;
+        float y2 = seg->v1->Y;
         MIR_Coordinate(x2, y2);
 
         glVertex3f(x0, y0, h);
@@ -796,10 +796,10 @@ void RGL_DrawSkyWall(seg_t *seg, float h1, float h2)
     if (r_dumbsky.d)
         return;
 
-    float x1 = seg->v1->x;
-    float y1 = seg->v1->y;
-    float x2 = seg->v2->x;
-    float y2 = seg->v2->y;
+    float x1 = seg->v1->X;
+    float y1 = seg->v1->Y;
+    float x2 = seg->v2->X;
+    float y2 = seg->v2->Y;
 
     MIR_Coordinate(x1, y1);
     MIR_Coordinate(x2, y2);

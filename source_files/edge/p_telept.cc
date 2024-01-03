@@ -142,8 +142,8 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
         if (!currline)
             return false;
 
-        new_x = currline->v1->x + currline->dx / 2.0f;
-        new_y = currline->v1->y + currline->dy / 2.0f;
+        new_x = currline->v1->X + currline->dx / 2.0f;
+        new_y = currline->v1->Y + currline->dy / 2.0f;
 
         new_z = currline->frontsector ? currline->frontsector->f_h : -32000;
 
@@ -195,9 +195,9 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
         float pos = 0;
 
         if (fabs(line->dx) > fabs(line->dy))
-            pos = (oldx - line->v1->x) / line->dx;
+            pos = (oldx - line->v1->X) / line->dx;
         else
-            pos = (oldy - line->v1->y) / line->dy;
+            pos = (oldy - line->v1->Y) / line->dy;
 
         if (currline)
         {

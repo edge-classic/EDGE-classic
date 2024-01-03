@@ -208,16 +208,16 @@ int P_BoxOnLineSide(const float *tmbox, line_t *ld)
 
     divline_t div;
 
-    div.x  = ld->v1->x;
-    div.y  = ld->v1->y;
+    div.x  = ld->v1->X;
+    div.y  = ld->v1->Y;
     div.dx = ld->dx;
     div.dy = ld->dy;
 
     switch (ld->slopetype)
     {
     case ST_HORIZONTAL:
-        p1 = tmbox[BOXTOP] > ld->v1->y;
-        p2 = tmbox[BOXBOTTOM] > ld->v1->y;
+        p1 = tmbox[BOXTOP] > ld->v1->Y;
+        p2 = tmbox[BOXBOTTOM] > ld->v1->Y;
         if (ld->dx < 0)
         {
             p1 ^= 1;
@@ -226,8 +226,8 @@ int P_BoxOnLineSide(const float *tmbox, line_t *ld)
         break;
 
     case ST_VERTICAL:
-        p1 = tmbox[BOXRIGHT] < ld->v1->x;
-        p2 = tmbox[BOXLEFT] < ld->v1->x;
+        p1 = tmbox[BOXRIGHT] < ld->v1->X;
+        p2 = tmbox[BOXLEFT] < ld->v1->X;
         if (ld->dy < 0)
         {
             p1 ^= 1;

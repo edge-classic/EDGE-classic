@@ -309,10 +309,10 @@ static void LoadVertexes(int lump)
     // internal representation as fixed.
     for (i = 0; i < numvertexes; i++, li++, ml++)
     {
-        li->x  = EPI_LE_S16(ml->x);
-        li->y  = EPI_LE_S16(ml->y);
-        li->zf = -40000.0f;
-        li->zc = 40000.0f;
+        li->X  = EPI_LE_S16(ml->x);
+        li->Y  = EPI_LE_S16(ml->y);
+        li->Z = -40000.0f;
+        li->W = 40000.0f;
     }
 
     // Free buffer memory.
@@ -335,10 +335,10 @@ static void SegCommonStuff(seg_t *seg, int linedef_in)
         seg->miniseg = false;
         seg->linedef = &lines[linedef_in];
 
-        float sx = seg->side ? seg->linedef->v2->x : seg->linedef->v1->x;
-        float sy = seg->side ? seg->linedef->v2->y : seg->linedef->v1->y;
+        float sx = seg->side ? seg->linedef->v2->X : seg->linedef->v1->X;
+        float sy = seg->side ? seg->linedef->v2->Y : seg->linedef->v1->Y;
 
-        seg->offset = R_PointToDist(sx, sy, seg->v1->x, seg->v1->y);
+        seg->offset = R_PointToDist(sx, sy, seg->v1->X, seg->v1->Y);
 
         seg->sidedef = seg->linedef->side[seg->side];
 
@@ -525,8 +525,8 @@ static void SetupRootNode(void)
 
         for (i = 0, seg = segs; i < numsegs; i++, seg++)
         {
-            M_AddToBox(dummy_bbox, seg->v1->x, seg->v1->y);
-            M_AddToBox(dummy_bbox, seg->v2->x, seg->v2->y);
+            M_AddToBox(dummy_bbox, seg->v1->X, seg->v1->Y);
+            M_AddToBox(dummy_bbox, seg->v2->X, seg->v2->Y);
         }
     }
 }
@@ -873,8 +873,8 @@ static inline void ComputeLinedefData(line_t *ld, int side0, int side1)
     vertex_t *v1 = ld->v1;
     vertex_t *v2 = ld->v2;
 
-    ld->dx = v2->x - v1->x;
-    ld->dy = v2->y - v1->y;
+    ld->dx = v2->X - v1->X;
+    ld->dy = v2->Y - v1->Y;
 
     if (AlmostEquals(ld->dx, 0.0f))
         ld->slopetype = ST_VERTICAL;
@@ -887,26 +887,26 @@ static inline void ComputeLinedefData(line_t *ld, int side0, int side1)
 
     ld->length = R_PointToDist(0, 0, ld->dx, ld->dy);
 
-    if (v1->x < v2->x)
+    if (v1->X < v2->X)
     {
-        ld->bbox[BOXLEFT]  = v1->x;
-        ld->bbox[BOXRIGHT] = v2->x;
+        ld->bbox[BOXLEFT]  = v1->X;
+        ld->bbox[BOXRIGHT] = v2->X;
     }
     else
     {
-        ld->bbox[BOXLEFT]  = v2->x;
-        ld->bbox[BOXRIGHT] = v1->x;
+        ld->bbox[BOXLEFT]  = v2->X;
+        ld->bbox[BOXRIGHT] = v1->X;
     }
 
-    if (v1->y < v2->y)
+    if (v1->Y < v2->Y)
     {
-        ld->bbox[BOXBOTTOM] = v1->y;
-        ld->bbox[BOXTOP]    = v2->y;
+        ld->bbox[BOXBOTTOM] = v1->Y;
+        ld->bbox[BOXTOP]    = v2->Y;
     }
     else
     {
-        ld->bbox[BOXBOTTOM] = v2->y;
-        ld->bbox[BOXTOP]    = v1->y;
+        ld->bbox[BOXBOTTOM] = v2->Y;
+        ld->bbox[BOXTOP]    = v1->Y;
     }
 
     if (!udmf_level && side0 == 0xFFFF)
@@ -1259,12 +1259,12 @@ static void LoadXGL3Nodes(int lumpnum)
     for (i = 0; i < nVerts; i++, vv++)
     {
         // convert signed 16.16 fixed point to float
-        vv->x = (float)epi::GetS32LE(td) / 65536.0f;
+        vv->X = (float)epi::GetS32LE(td) / 65536.0f;
         td += 4;
-        vv->y = (float)epi::GetS32LE(td) / 65536.0f;
+        vv->Y = (float)epi::GetS32LE(td) / 65536.0f;
         td += 4;
-        vv->zf = -40000.0f;
-        vv->zc = 40000.0f;
+        vv->Z = -40000.0f;
+        vv->W = 40000.0f;
     }
 
     // new vertexes is followed by the subsectors
@@ -1358,9 +1358,9 @@ static void LoadXGL3Nodes(int lumpnum)
         {
             seg->v2 = j == (countsegs - 1) ? segs[firstseg].v1 : segs[firstseg + j + 1].v1;
 
-            seg->angle = R_PointToAngle(seg->v1->x, seg->v1->y, seg->v2->x, seg->v2->y);
+            seg->angle = R_PointToAngle(seg->v1->X, seg->v1->Y, seg->v2->X, seg->v2->Y);
 
-            seg->length = R_PointToDist(seg->v1->x, seg->v1->y, seg->v2->x, seg->v2->y);
+            seg->length = R_PointToDist(seg->v1->X, seg->v1->Y, seg->v2->X, seg->v2->Y);
         }
 
         // -AJA- 1999/09/23: New linked list for the segs of a subsector
@@ -1518,7 +1518,7 @@ static void LoadUDMFVertexes()
                 else if (key == "zceiling")
                     zc = epi::LEX_Double(value);
             }
-            vertexes[cur_vertex].Set(x, y, zf, zc);
+            vertexes[cur_vertex] = {x, y, zf, zc};
             cur_vertex++;
         }
         else // consume other blocks
@@ -2937,20 +2937,20 @@ static void DetectDeepWaterTrick(void)
 
 static void DoBlockMap()
 {
-    int min_x = (int)vertexes[0].x;
-    int min_y = (int)vertexes[0].y;
+    int min_x = (int)vertexes[0].X;
+    int min_y = (int)vertexes[0].Y;
 
-    int max_x = (int)vertexes[0].x;
-    int max_y = (int)vertexes[0].y;
+    int max_x = (int)vertexes[0].X;
+    int max_y = (int)vertexes[0].Y;
 
     for (int i = 1; i < numvertexes; i++)
     {
         vertex_t *v = vertexes + i;
 
-        min_x = MIN((int)v->x, min_x);
-        min_y = MIN((int)v->y, min_y);
-        max_x = MAX((int)v->x, max_x);
-        max_y = MAX((int)v->y, max_y);
+        min_x = MIN((int)v->X, min_x);
+        min_y = MIN((int)v->Y, min_y);
+        max_x = MAX((int)v->X, max_x);
+        max_y = MAX((int)v->Y, max_y);
     }
 
     P_GenerateBlockMap(min_x, min_y, max_x, max_y);
@@ -3019,8 +3019,8 @@ void GroupLines(void)
             if (li->frontsector == sector || li->backsector == sector)
             {
                 *line_p++ = li;
-                M_AddToBox(bbox, li->v1->x, li->v1->y);
-                M_AddToBox(bbox, li->v2->x, li->v2->y);
+                M_AddToBox(bbox, li->v1->X, li->v1->Y);
+                M_AddToBox(bbox, li->v2->X, li->v2->Y);
             }
         }
         if (line_p - sector->lines != sector->linecount)
@@ -3038,62 +3038,62 @@ void GroupLines(void)
                 vertex_t *vert   = sector->lines[j]->v1;
                 bool      add_it = true;
                 for (auto v : sector->floor_z_verts)
-                    if (AlmostEquals(v.X, vert->x) && AlmostEquals(v.Y, vert->y))
+                    if (AlmostEquals(v.X, vert->X) && AlmostEquals(v.Y, vert->Y))
                         add_it = false;
                 if (add_it)
                 {
-                    if (vert->zf < 32767.0f && vert->zf > -32768.0f)
+                    if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_verts.push_back({vert->x, vert->y, vert->zf});
-                        if (vert->zf > sector->floor_vs_hilo.X)
-                            sector->floor_vs_hilo.X = vert->zf;
-                        if (vert->zf < sector->floor_vs_hilo.Y)
-                            sector->floor_vs_hilo.Y = vert->zf;
+                        sector->floor_z_verts.push_back({vert->X, vert->Y, vert->Z});
+                        if (vert->Z > sector->floor_vs_hilo.X)
+                            sector->floor_vs_hilo.X = vert->Z;
+                        if (vert->Z < sector->floor_vs_hilo.Y)
+                            sector->floor_vs_hilo.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back({vert->x, vert->y, sector->f_h});
-                    if (vert->zc < 32767.0f && vert->zc > -32768.0f)
+                        sector->floor_z_verts.push_back({vert->X, vert->Y, sector->f_h});
+                    if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
                         sector->ceil_vertex_slope = true;
-                        sector->ceil_z_verts.push_back({vert->x, vert->y, vert->zc});
-                        if (vert->zc > sector->ceil_vs_hilo.X)
-                            sector->ceil_vs_hilo.X = vert->zc;
-                        if (vert->zc < sector->ceil_vs_hilo.Y)
-                            sector->ceil_vs_hilo.Y = vert->zc;
+                        sector->ceil_z_verts.push_back({vert->X, vert->Y, vert->W});
+                        if (vert->W > sector->ceil_vs_hilo.X)
+                            sector->ceil_vs_hilo.X = vert->W;
+                        if (vert->W < sector->ceil_vs_hilo.Y)
+                            sector->ceil_vs_hilo.Y = vert->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back({vert->x, vert->y, sector->c_h});
+                        sector->ceil_z_verts.push_back({vert->X, vert->Y, sector->c_h});
                 }
                 vert   = sector->lines[j]->v2;
                 add_it = true;
                 for (auto v : sector->floor_z_verts)
-                    if (AlmostEquals(v.X, vert->x) && AlmostEquals(v.Y, vert->y))
+                    if (AlmostEquals(v.X, vert->X) && AlmostEquals(v.Y, vert->Y))
                         add_it = false;
                 if (add_it)
                 {
-                    if (vert->zf < 32767.0f && vert->zf > -32768.0f)
+                    if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_verts.push_back({vert->x, vert->y, vert->zf});
-                        if (vert->zf > sector->floor_vs_hilo.X)
-                            sector->floor_vs_hilo.X = vert->zf;
-                        if (vert->zf < sector->floor_vs_hilo.Y)
-                            sector->floor_vs_hilo.Y = vert->zf;
+                        sector->floor_z_verts.push_back({vert->X, vert->Y, vert->Z});
+                        if (vert->Z > sector->floor_vs_hilo.X)
+                            sector->floor_vs_hilo.X = vert->Z;
+                        if (vert->Z < sector->floor_vs_hilo.Y)
+                            sector->floor_vs_hilo.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back({vert->x, vert->y, sector->f_h});
-                    if (vert->zc < 32767.0f && vert->zc > -32768.0f)
+                        sector->floor_z_verts.push_back({vert->X, vert->Y, sector->f_h});
+                    if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
                         sector->ceil_vertex_slope = true;
-                        sector->ceil_z_verts.push_back({vert->x, vert->y, vert->zc});
-                        if (vert->zc > sector->ceil_vs_hilo.X)
-                            sector->ceil_vs_hilo.X = vert->zc;
-                        if (vert->zc < sector->ceil_vs_hilo.Y)
-                            sector->ceil_vs_hilo.Y = vert->zc;
+                        sector->ceil_z_verts.push_back({vert->X, vert->Y, vert->W});
+                        if (vert->W > sector->ceil_vs_hilo.X)
+                            sector->ceil_vs_hilo.X = vert->W;
+                        if (vert->W < sector->ceil_vs_hilo.Y)
+                            sector->ceil_vs_hilo.Y = vert->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back({vert->x, vert->y, sector->c_h});
+                        sector->ceil_z_verts.push_back({vert->X, vert->Y, sector->c_h});
                 }
             }
             if (!sector->floor_vertex_slope)
@@ -3132,64 +3132,64 @@ void GroupLines(void)
                 bool      add_it_v1 = true;
                 bool      add_it_v2 = true;
                 for (auto v : sector->floor_z_verts)
-                    if (AlmostEquals(v.X, vert->x) && AlmostEquals(v.Y, vert->y))
+                    if (AlmostEquals(v.X, vert->X) && AlmostEquals(v.Y, vert->Y))
                         add_it_v1 = false;
                 for (auto v : sector->floor_z_verts)
-                    if (AlmostEquals(v.X, vert2->x) && AlmostEquals(v.Y, vert2->y))
+                    if (AlmostEquals(v.X, vert2->X) && AlmostEquals(v.Y, vert2->Y))
                         add_it_v2 = false;
                 if (add_it_v1)
                 {
-                    if (vert->zf < 32767.0f && vert->zf > -32768.0f)
+                    if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
-                        sector->floor_z_verts.push_back({vert->x, vert->y, vert->zf});
-                        if (vert->zf > sector->floor_vs_hilo.X)
-                            sector->floor_vs_hilo.X = vert->zf;
-                        if (vert->zf < sector->floor_vs_hilo.Y)
-                            sector->floor_vs_hilo.Y = vert->zf;
+                        sector->floor_z_verts.push_back({vert->X, vert->Y, vert->Z});
+                        if (vert->Z > sector->floor_vs_hilo.X)
+                            sector->floor_vs_hilo.X = vert->Z;
+                        if (vert->Z < sector->floor_vs_hilo.Y)
+                            sector->floor_vs_hilo.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back({vert->x, vert->y, sector->f_h});
-                    if (vert->zc < 32767.0f && vert->zc > -32768.0f)
+                        sector->floor_z_verts.push_back({vert->X, vert->Y, sector->f_h});
+                    if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
-                        sector->ceil_z_verts.push_back({vert->x, vert->y, vert->zc});
-                        if (vert->zc > sector->ceil_vs_hilo.X)
-                            sector->ceil_vs_hilo.X = vert->zc;
-                        if (vert->zc < sector->ceil_vs_hilo.Y)
-                            sector->ceil_vs_hilo.Y = vert->zc;
+                        sector->ceil_z_verts.push_back({vert->X, vert->Y, vert->W});
+                        if (vert->W > sector->ceil_vs_hilo.X)
+                            sector->ceil_vs_hilo.X = vert->W;
+                        if (vert->W < sector->ceil_vs_hilo.Y)
+                            sector->ceil_vs_hilo.Y = vert->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back({vert->x, vert->y, sector->c_h});
+                        sector->ceil_z_verts.push_back({vert->X, vert->Y, sector->c_h});
                 }
                 if (add_it_v2)
                 {
-                    if (vert2->zf < 32767.0f && vert2->zf > -32768.0f)
+                    if (vert2->Z < 32767.0f && vert2->Z > -32768.0f)
                     {
-                        sector->floor_z_verts.push_back({vert2->x, vert2->y, vert2->zf});
-                        if (vert2->zf > sector->floor_vs_hilo.X)
-                            sector->floor_vs_hilo.X = vert2->zf;
-                        if (vert2->zf < sector->floor_vs_hilo.Y)
-                            sector->floor_vs_hilo.Y = vert2->zf;
+                        sector->floor_z_verts.push_back({vert2->X, vert2->Y, vert2->Z});
+                        if (vert2->Z > sector->floor_vs_hilo.X)
+                            sector->floor_vs_hilo.X = vert2->Z;
+                        if (vert2->Z < sector->floor_vs_hilo.Y)
+                            sector->floor_vs_hilo.Y = vert2->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back({vert2->x, vert2->y, sector->f_h});
-                    if (vert2->zc < 32767.0f && vert2->zc > -32768.0f)
+                        sector->floor_z_verts.push_back({vert2->X, vert2->Y, sector->f_h});
+                    if (vert2->W < 32767.0f && vert2->W > -32768.0f)
                     {
-                        sector->ceil_z_verts.push_back({vert2->x, vert2->y, vert2->zc});
-                        if (vert2->zc > sector->ceil_vs_hilo.X)
-                            sector->ceil_vs_hilo.X = vert2->zc;
-                        if (vert2->zc < sector->ceil_vs_hilo.Y)
-                            sector->ceil_vs_hilo.Y = vert2->zc;
+                        sector->ceil_z_verts.push_back({vert2->X, vert2->Y, vert2->W});
+                        if (vert2->W > sector->ceil_vs_hilo.X)
+                            sector->ceil_vs_hilo.X = vert2->W;
+                        if (vert2->W < sector->ceil_vs_hilo.Y)
+                            sector->ceil_vs_hilo.Y = vert2->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back({vert2->x, vert2->y, sector->c_h});
+                        sector->ceil_z_verts.push_back({vert2->X, vert2->Y, sector->c_h});
                 }
-                if ((vert->zf < 32767.0f && vert->zf > -32768.0f) && (vert2->zf < 32767.0f && vert2->zf > -32768.0f) &&
-                    AlmostEquals(vert->zf, vert2->zf))
+                if ((vert->Z < 32767.0f && vert->Z > -32768.0f) && (vert2->Z < 32767.0f && vert2->Z > -32768.0f) &&
+                    AlmostEquals(vert->Z, vert2->Z))
                 {
                     floor_z_lines++;
                 }
-                if ((vert->zc < 32767.0f && vert->zc > -32768.0f) && (vert2->zc < 32767.0f && vert2->zc > -32768.0f) &&
-                    AlmostEquals(vert->zc, vert2->zc))
+                if ((vert->W < 32767.0f && vert->W > -32768.0f) && (vert2->W < 32767.0f && vert2->W > -32768.0f) &&
+                    AlmostEquals(vert->W, vert2->W))
                 {
                     ceil_z_lines++;
                 }

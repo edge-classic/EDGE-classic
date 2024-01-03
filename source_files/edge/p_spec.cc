@@ -581,8 +581,8 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const linetype_c *special)
     float midz = 0;
 
     // calculate midpoint
-    midx = (TheLine->v1->x + TheLine->v2->x) / 2;
-    midy = (TheLine->v1->y + TheLine->v2->y) / 2;
+    midx = (TheLine->v1->X + TheLine->v2->X) / 2;
+    midy = (TheLine->v1->Y + TheLine->v2->Y) / 2;
     midz = ONFLOORZ;
 
     float dx = P_Random() * info->radius / 255.0f;
@@ -594,8 +594,8 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const linetype_c *special)
 
     P_SpawnDebris(midx, midy, midz, 0 + ANG180, info);
 
-    midx = (TheLine->v1->x + TheLine->v2->x) / 2;
-    midy = (TheLine->v1->y + TheLine->v2->y) / 2;
+    midx = (TheLine->v1->X + TheLine->v2->X) / 2;
+    midy = (TheLine->v1->Y + TheLine->v2->Y) / 2;
 
     // move slightly backward to spawn the debris
     midx -= dx + info->radius;
@@ -910,8 +910,8 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
     // set texture alignment
     if (special->sector_effect & SECTFX_AlignFloor)
     {
-        target->floor.offset.X = -source->v1->x;
-        target->floor.offset.Y = -source->v1->y;
+        target->floor.offset.X = -source->v1->X;
+        target->floor.offset.Y = -source->v1->Y;
         if (source->side[0]) // Lobo: Experiment to read and apply line offsets to floor offsets
         {
             target->floor.offset.X += source->side[0]->bottom.offset.X;
@@ -921,8 +921,8 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
     }
     if (special->sector_effect & SECTFX_AlignCeiling)
     {
-        target->ceil.offset.X = -source->v1->x;
-        target->ceil.offset.Y = -source->v1->y;
+        target->ceil.offset.X = -source->v1->X;
+        target->ceil.offset.Y = -source->v1->Y;
         if (source->side[0]) // Lobo: Experiment to read and apply line offsets to floor offsets
         {
             target->ceil.offset.X += source->side[0]->bottom.offset.X;
@@ -1109,7 +1109,7 @@ static slope_plane_t *DetailSlope_BoundIt(line_t *ld, sector_t *sec, float dz1, 
         {
             vertex_t *V = (vert == 0) ? sec->lines[k]->v1 : sec->lines[k]->v2;
 
-            float dist = nx * (V->x - ld->v1->x) + ny * (V->y - ld->v1->y);
+            float dist = nx * (V->X - ld->v1->X) + ny * (V->Y - ld->v1->Y);
 
             d_close = MIN(d_close, dist);
             d_far   = MAX(d_far, dist);
@@ -1126,12 +1126,12 @@ static slope_plane_t *DetailSlope_BoundIt(line_t *ld, sector_t *sec, float dz1, 
 
     slope_plane_t *result = new slope_plane_t;
 
-    result->x1  = ld->v1->x + nx * d_close;
-    result->y1  = ld->v1->y + ny * d_close;
+    result->x1  = ld->v1->X + nx * d_close;
+    result->y1  = ld->v1->Y + ny * d_close;
     result->dz1 = dz1;
 
-    result->x2  = ld->v1->x + nx * d_far;
-    result->y2  = ld->v1->y + ny * d_far;
+    result->x2  = ld->v1->X + nx * d_far;
+    result->y2  = ld->v1->Y + ny * d_far;
     result->dz2 = dz2;
 
     return result;

@@ -169,8 +169,8 @@ typedef struct mirror_info_s
     {
         seg_t *seg = def->seg;
 
-        float sdx = seg->v2->x - seg->v1->x;
-        float sdy = seg->v2->y - seg->v1->y;
+        float sdx = seg->v2->X - seg->v1->X;
+        float sdy = seg->v2->Y - seg->v1->Y;
 
         float len_p2 = seg->length * seg->length;
 
@@ -182,8 +182,8 @@ typedef struct mirror_info_s
         yx = B;
         yy = -A;
 
-        xc = seg->v1->x * (1.0 - A) - seg->v1->y * B;
-        yc = seg->v1->y * (1.0 + A) - seg->v1->x * B;
+        xc = seg->v1->X * (1.0 - A) - seg->v1->Y * B;
+        yc = seg->v1->Y * (1.0 + A) - seg->v1->X * B;
 
         // Turn(a) = mir_angle + (0 - (a - mir_angle))
         //         = 2 * mir_angle - a
@@ -198,9 +198,9 @@ typedef struct mirror_info_s
     float GetAlong(const line_t *ld, float x, float y)
     {
         if (fabs(ld->dx) >= fabs(ld->dy))
-            return (x - ld->v1->x) / ld->dx;
+            return (x - ld->v1->X) / ld->dx;
         else
-            return (y - ld->v1->y) / ld->dy;
+            return (y - ld->v1->Y) / ld->dy;
     }
 
     void ComputePortal()
@@ -210,21 +210,21 @@ typedef struct mirror_info_s
 
         SYS_ASSERT(other);
 
-        float ax1 = seg->v1->x;
-        float ay1 = seg->v1->y;
+        float ax1 = seg->v1->X;
+        float ay1 = seg->v1->Y;
 
-        float ax2 = seg->v2->x;
-        float ay2 = seg->v2->y;
+        float ax2 = seg->v2->X;
+        float ay2 = seg->v2->Y;
 
         // find corresponding coords on partner line
         float along1 = GetAlong(seg->linedef, ax1, ay1);
         float along2 = GetAlong(seg->linedef, ax2, ay2);
 
-        float bx1 = other->v2->x - other->dx * along1;
-        float by1 = other->v2->y - other->dy * along1;
+        float bx1 = other->v2->X - other->dx * along1;
+        float by1 = other->v2->Y - other->dy * along1;
 
-        float bx2 = other->v2->x - other->dx * along2;
-        float by2 = other->v2->y - other->dy * along2;
+        float bx2 = other->v2->X - other->dx * along2;
+        float by2 = other->v2->Y - other->dy * along2;
 
         // compute rotation angle
         tc = ANG180 + R_PointToAngle(0, 0, other->dx, other->dy) - seg->angle;
@@ -403,8 +403,8 @@ static void MIR_SetClippers()
 
         HMM_Vec2 v1, v2;
 
-        v1 = {mir.def->seg->v1->x, mir.def->seg->v1->y};
-        v2 = {mir.def->seg->v2->x, mir.def->seg->v2->y};
+        v1 = {mir.def->seg->v1->X, mir.def->seg->v1->Y};
+        v2 = {mir.def->seg->v2->X, mir.def->seg->v2->Y};
 
         for (int k = i - 1; k >= 0; k--)
         {
@@ -519,8 +519,8 @@ static void DrawLaser(player_t *p)
 
 	HMM_Vec3 s, e;
 
-	s.Set(p->mo->x, p->mo->y, p->mo->z + 30.0);
-	e.Set(p->mo->x, p->mo->y, p->mo->z + 30.0);
+	s.Set(p->mo->X, p->mo->Y, p->mo->Z + 30.0);
+	e.Set(p->mo->X, p->mo->Y, p->mo->Z + 30.0);
 
 	float dist = 2000;
 
@@ -622,8 +622,8 @@ typedef struct wall_plane_data_s
     adjustedScrollS = adjustedScrollS - floor( adjustedScrollS );
     adjustedScrollT = adjustedScrollT - floor( adjustedScrollT );
 
-    texc->x += adjustedScrollS;
-    texc->y += adjustedScrollT;
+    texc->X += adjustedScrollS;
+    texc->Y += adjustedScrollT;
 }*/
 
 // Adapted from Quake 3 GPL release - Dasho
@@ -1022,9 +1022,9 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     // do the N/S/W/E bizzo...
     if (!r_forceflatlighting.d && currmap->episode->lighting == LMODEL_Doom && props->lightlevel > 0)
     {
-        if (AlmostEquals(cur_seg->v1->y, cur_seg->v2->y))
+        if (AlmostEquals(cur_seg->v1->Y, cur_seg->v2->Y))
             lit_adjust -= 16;
-        else if (AlmostEquals(cur_seg->v1->x, cur_seg->v2->x))
+        else if (AlmostEquals(cur_seg->v1->X, cur_seg->v2->X))
             lit_adjust += 16;
     }
 
@@ -1291,11 +1291,11 @@ static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f, float tex_top
         if (s_along >= e_along)
             continue;
 
-        float x1 = ld->v1->x + ld->dx * s_along / ld->length;
-        float y1 = ld->v1->y + ld->dy * s_along / ld->length;
+        float x1 = ld->v1->X + ld->dx * s_along / ld->length;
+        float y1 = ld->v1->Y + ld->dy * s_along / ld->length;
 
-        float x2 = ld->v1->x + ld->dx * e_along / ld->length;
-        float y2 = ld->v1->y + ld->dy * e_along / ld->length;
+        float x2 = ld->v1->X + ld->dx * e_along / ld->length;
+        float y2 = ld->v1->Y + ld->dy * e_along / ld->length;
 
         s_tex += x_offset;
         e_tex += x_offset;
@@ -1349,11 +1349,11 @@ static void DrawGlass(drawfloor_t *dfloor, float c, float f, float tex_top_h, su
 
     if (s_along < e_along)
     {
-        float x1 = ld->v1->x + ld->dx * s_along / ld->length;
-        float y1 = ld->v1->y + ld->dy * s_along / ld->length;
+        float x1 = ld->v1->X + ld->dx * s_along / ld->length;
+        float y1 = ld->v1->Y + ld->dy * s_along / ld->length;
 
-        float x2 = ld->v1->x + ld->dx * e_along / ld->length;
-        float y2 = ld->v1->y + ld->dy * e_along / ld->length;
+        float x2 = ld->v1->X + ld->dx * e_along / ld->length;
+        float y2 = ld->v1->Y + ld->dy * e_along / ld->length;
 
         s_tex += x_offset;
         e_tex += x_offset;
@@ -1408,10 +1408,10 @@ static void DrawTile(seg_t *seg, drawfloor_t *dfloor, float lz1, float lz2, floa
         }
     }
 
-    float x1 = seg->v1->x;
-    float y1 = seg->v1->y;
-    float x2 = seg->v2->x;
-    float y2 = seg->v2->y;
+    float x1 = seg->v1->X;
+    float y1 = seg->v1->Y;
+    float x2 = seg->v2->X;
+    float y2 = seg->v2->Y;
 
     float tex_x1 = seg->offset;
     float tex_x2 = tex_x1 + seg->length;
@@ -1567,8 +1567,8 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
     {
         if (!sec->floor_vertex_slope && other->floor_vertex_slope)
         {
-            float zv1 = seg->v1->zf;
-            float zv2 = seg->v2->zf;
+            float zv1 = seg->v1->Z;
+            float zv2 = seg->v2->Z;
             if (mirror_sub)
                 std::swap(zv1, zv2);
             AddWallTile2(seg, dfloor, sd->bottom.image ? &sd->bottom : &other->floor, sec->f_h,
@@ -1578,8 +1578,8 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         }
         else if (sec->floor_vertex_slope && !other->floor_vertex_slope)
         {
-            float zv1 = seg->v1->zf;
-            float zv2 = seg->v2->zf;
+            float zv1 = seg->v1->Z;
+            float zv2 = seg->v2->Z;
             if (mirror_sub)
                 std::swap(zv1, zv2);
             AddWallTile2(seg, dfloor, sd->bottom.image ? &sd->bottom : &sec->floor,
@@ -1596,8 +1596,8 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
             float lz1 = slope_fh;
             float rz1 = slope_fh;
 
-            float lz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v1->x, seg->v1->y);
-            float rz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v2->x, seg->v2->y);
+            float lz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v1->X, seg->v1->Y);
+            float rz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v2->X, seg->v2->Y);
 
             // Test fix for slope walls under 3D floors having 'flickering' light levels - Dasho
             if (dfloor->ef && seg->sidedef->sector->tag == dfloor->ef->sector->tag)
@@ -1621,8 +1621,8 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
     {
         if (!sec->ceil_vertex_slope && other->ceil_vertex_slope)
         {
-            float zv1 = seg->v1->zc;
-            float zv2 = seg->v2->zc;
+            float zv1 = seg->v1->W;
+            float zv2 = seg->v2->W;
             if (mirror_sub)
                 std::swap(zv1, zv2);
             AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &other->ceil, sec->c_h,
@@ -1632,8 +1632,8 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         }
         else if (sec->ceil_vertex_slope && !other->ceil_vertex_slope)
         {
-            float zv1 = seg->v1->zc;
-            float zv2 = seg->v2->zc;
+            float zv1 = seg->v1->W;
+            float zv2 = seg->v2->W;
             if (mirror_sub)
                 std::swap(zv1, zv2);
             AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &sec->ceil, other->c_h,
@@ -1647,8 +1647,8 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         }
         else if (other->c_slope)
         {
-            float lz1 = other->c_h + Slope_GetHeight(other->c_slope, seg->v1->x, seg->v1->y);
-            float rz1 = other->c_h + Slope_GetHeight(other->c_slope, seg->v2->x, seg->v2->y);
+            float lz1 = other->c_h + Slope_GetHeight(other->c_slope, seg->v1->X, seg->v1->Y);
+            float rz1 = other->c_h + Slope_GetHeight(other->c_slope, seg->v2->X, seg->v2->Y);
 
             float lz2 = slope_ch;
             float rz2 = slope_ch;
@@ -1845,11 +1845,11 @@ static void DLIT_Flood(mobj_t *mo, void *dataptr)
 
     SYS_ASSERT(mo->dlight.shader);
 
-    float sx = cur_seg->v1->x;
-    float sy = cur_seg->v1->y;
+    float sx = cur_seg->v1->X;
+    float sy = cur_seg->v1->Y;
 
-    float dx = cur_seg->v2->x - sx;
-    float dy = cur_seg->v2->y - sy;
+    float dx = cur_seg->v2->X - sx;
+    float dy = cur_seg->v2->Y - sy;
 
     int blending = BL_Add;
 
@@ -1952,11 +1952,11 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
 
     SYS_ASSERT(piece_col <= MAX_FLOOD_VERT);
 
-    float sx = cur_seg->v1->x;
-    float sy = cur_seg->v1->y;
+    float sx = cur_seg->v1->X;
+    float sy = cur_seg->v1->Y;
 
-    float dx = cur_seg->v2->x - sx;
-    float dy = cur_seg->v2->y - sy;
+    float dx = cur_seg->v2->X - sx;
+    float dy = cur_seg->v2->Y - sy;
     float dh = h2 - h1;
 
     data.piece_row = piece_row;
@@ -1997,8 +1997,8 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
         //       efficient to handle them here, and duplicate the striping
         //       code in the DLIT_Flood function.
 
-        float ex = cur_seg->v2->x;
-        float ey = cur_seg->v2->y;
+        float ex = cur_seg->v2->X;
+        float ey = cur_seg->v2->Y;
 
         // compute bbox for finding dlights (use 'lit_pos' coords).
         float other_h = (face_dir > 0) ? h1 : h2;
@@ -2139,11 +2139,11 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
     if (MIR_SegOnPortal(seg))
         return;
 
-    float sx1 = seg->v1->x;
-    float sy1 = seg->v1->y;
+    float sx1 = seg->v1->X;
+    float sy1 = seg->v1->Y;
 
-    float sx2 = seg->v2->x;
-    float sy2 = seg->v2->y;
+    float sx2 = seg->v2->X;
+    float sy2 = seg->v2->Y;
 
     // when there are active mirror planes, segs not only need to
     // be flipped across them but also clipped across them.
@@ -2168,10 +2168,10 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
             divline_t div;
 
-            div.x  = clipper->v1->x;
-            div.y  = clipper->v1->y;
-            div.dx = clipper->v2->x - div.x;
-            div.dy = clipper->v2->y - div.y;
+            div.x  = clipper->v1->X;
+            div.y  = clipper->v1->Y;
+            div.dx = clipper->v2->X - div.x;
+            div.dy = clipper->v2->Y - div.y;
 
             int s1 = P_PointOnDivlineSide(sx1, sy1, &div);
             int s2 = P_PointOnDivlineSide(sx2, sy2, &div);
@@ -2538,8 +2538,8 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
     {
         if (v_count < MAX_PLVERT)
         {
-            float x = seg->v1->x;
-            float y = seg->v1->y;
+            float x = seg->v1->X;
+            float y = seg->v1->Y;
             float z = h;
 
             // must do this before mirror adjustment
@@ -2548,15 +2548,15 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
             if (cur_sub->sector->floor_vertex_slope && face_dir > 0)
             {
                 // floor - check vertex heights
-                if (seg->v1->zf < 32767.0f && seg->v1->zf > -32768.0f)
-                    z = seg->v1->zf;
+                if (seg->v1->Z < 32767.0f && seg->v1->Z > -32768.0f)
+                    z = seg->v1->Z;
             }
 
             if (cur_sub->sector->ceil_vertex_slope && face_dir < 0)
             {
                 // ceiling - check vertex heights
-                if (seg->v1->zc < 32767.0f && seg->v1->zc > -32768.0f)
-                    z = seg->v1->zc;
+                if (seg->v1->W < 32767.0f && seg->v1->W > -32768.0f)
+                    z = seg->v1->W;
             }
 
             if (slope)
@@ -2844,11 +2844,11 @@ static void RGL_WalkSubsector(int num)
             if (MIR_SegOnPortal(seg))
                 continue;
 
-            float sx1 = seg->v1->x;
-            float sy1 = seg->v1->y;
+            float sx1 = seg->v1->X;
+            float sy1 = seg->v1->Y;
 
-            float sx2 = seg->v2->x;
-            float sy2 = seg->v2->y;
+            float sx2 = seg->v2->X;
+            float sy2 = seg->v2->Y;
 
             if (M_PointToSegDistance({sx1, sy1}, {sx2, sy2}, {viewx, viewy}) <= (r_farclip.f + 500.0f))
             {
@@ -2952,12 +2952,12 @@ static void DrawMirrorPolygon(drawmirror_c *mir)
     else
         glColor4f(1.0, 0.0, 0.0, alpha);
 
-    float x1 = mir->seg->v1->x;
-    float y1 = mir->seg->v1->y;
+    float x1 = mir->seg->v1->X;
+    float y1 = mir->seg->v1->Y;
     float z1 = ld->frontsector->f_h;
 
-    float x2 = mir->seg->v2->x;
-    float y2 = mir->seg->v2->y;
+    float x2 = mir->seg->v2->X;
+    float y2 = mir->seg->v2->Y;
     float z2 = ld->frontsector->c_h;
 
     MIR_Coordinate(x1, y1);
@@ -3008,12 +3008,12 @@ static void DrawPortalPolygon(drawmirror_c *mir)
     glColor4f(R, G, B, alpha);
 
     // get polygon coordinates
-    float x1 = mir->seg->v1->x;
-    float y1 = mir->seg->v1->y;
+    float x1 = mir->seg->v1->X;
+    float y1 = mir->seg->v1->Y;
     float z1 = ld->frontsector->f_h;
 
-    float x2 = mir->seg->v2->x;
-    float y2 = mir->seg->v2->y;
+    float x2 = mir->seg->v2->X;
+    float y2 = mir->seg->v2->Y;
     float z2 = ld->frontsector->c_h;
 
     MIR_Coordinate(x1, y1);

@@ -244,8 +244,8 @@ void nav_area_c::compute_middle(const subsector_t &sub)
 
     for (const seg_t *seg = sub.segs; seg != NULL; seg = seg->sub_next, total += 1)
     {
-        sum_x += seg->v1->x;
-        sum_y += seg->v1->y;
+        sum_x += seg->v1->X;
+        sum_y += seg->v1->Y;
     }
 
     if (total == 0)
@@ -549,8 +549,8 @@ static void NAV_StoreSegMiddle(bot_path_c *path, int flags, const seg_t *seg)
     // calc middle of the adjoining seg
     position_c pos;
 
-    pos.x = (seg->v1->x + seg->v2->x) * 0.5f;
-    pos.y = (seg->v1->y + seg->v2->y) * 0.5f;
+    pos.x = (seg->v1->X + seg->v2->X) * 0.5f;
+    pos.y = (seg->v1->Y + seg->v2->Y) * 0.5f;
     pos.z = seg->front_sub->sector->f_h;
 
     path->nodes.push_back(path_node_c{pos, flags, seg});

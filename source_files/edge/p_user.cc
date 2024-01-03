@@ -81,16 +81,16 @@ static bool P_RoomPath(intercept_t *in, void *dataptr)
             if ((IS_SKY(ld->backsector->ceil) && !IS_SKY(ld->frontsector->ceil)) ||
                 (!IS_SKY(ld->backsector->ceil) && IS_SKY(ld->frontsector->ceil)))
             {
-                blocker->x = (ld->v1->x + ld->v2->x) / 2;
-                blocker->y = (ld->v1->y + ld->v2->y) / 2;
+                blocker->x = (ld->v1->X + ld->v2->X) / 2;
+                blocker->y = (ld->v1->Y + ld->v2->Y) / 2;
                 return false;
             }
         }
 
         if (ld->blocked)
         {
-            blocker->x = (ld->v1->x + ld->v2->x) / 2;
-            blocker->y = (ld->v1->y + ld->v2->y) / 2;
+            blocker->x = (ld->v1->X + ld->v2->X) / 2;
+            blocker->y = (ld->v1->Y + ld->v2->Y) / 2;
             return false;
         }
     }

@@ -1504,7 +1504,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         else
         {
             sec_fc = currmap->indoor_fog_color;
-            sec_fc = 0.01f * currmap->indoor_fog_density;
+            sec_fd = 0.01f * currmap->indoor_fog_density;
         }
     }
     rgbcol_t other_fc = (other ? other->props.fog_color : RGB_NO_VALUE);

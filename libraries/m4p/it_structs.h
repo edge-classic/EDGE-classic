@@ -87,8 +87,8 @@ enum // 8bb: audio driver flags
 
 // 8bb: do NOT change these, it will only mess things up!
 #define MAX_PATTERNS 200
-#define MAX_SAMPLES 100
-#define MAX_INSTRUMENTS 100
+#define MAX_SAMPLES 200
+#define MAX_INSTRUMENTS 200
 #define MAX_ORDERS 256
 #define MAX_ROWS 200
 #define MAX_HOST_CHANNELS 64

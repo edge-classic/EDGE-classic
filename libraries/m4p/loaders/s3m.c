@@ -171,7 +171,7 @@ bool LoadS3M(MEMFILE *m)
 		{
 			if (s->OffsetInFile != 0) // 8bb: added this check
 			{
-				bool Stereo = false; // !!(s->Flags & SMPF_STEREO); // 8bb: added stereo support for custom HQ driver
+				bool Stereo = !!(s->Flags & SMPF_STEREO); // 8bb: added stereo support
 				bool Sample16Bit = !!(s->Flags & SMPF_16BIT);
 
 				uint32_t SampleBytes = s->Length << Sample16Bit;

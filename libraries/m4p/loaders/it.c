@@ -306,7 +306,7 @@ bool LoadIT(MEMFILE *m)
 		if (meof(m))
 			continue; // This WAS a return false...will I regret this? - Dasho
 		
-		bool Stereo = false; // !!(s->Flags & SMPF_STEREO); // added stereo support for custom HQ driver
+		bool Stereo = !!(s->Flags & SMPF_STEREO); // added stereo support
 		bool Compressed = !!(s->Flags & SMPF_COMPRESSED);
 		bool Sample16Bit = !!(s->Flags & SMPF_16BIT);
 		bool SignedSamples = !!(s->Cvt & 1);
@@ -324,7 +324,7 @@ bool LoadIT(MEMFILE *m)
 		if (!Music_AllocateSample(i, s->Length << Sample16Bit))
 			return false;
 
-		// added stereo support for custom HQ driver
+		// added stereo support
 		if (Stereo)
 		{
 			if (!Music_AllocateRightSample(i, s->Length << Sample16Bit))

@@ -37,7 +37,6 @@ typedef enum
     MUS_MUS,
     MUS_OGG,
     MUS_MP3,
-    MUS_SID,
     MUS_FLAC,
     MUS_M4P,
     MUS_RAD,

@@ -38,7 +38,6 @@
 #include "s_prime.h"
 #include "s_m4p.h"
 #include "s_opl.h"
-#include "s_sid.h"
 #include "s_flac.h"
 #include "s_rad.h"
 #include "m_misc.h"
@@ -194,11 +193,6 @@ void S_ChangeMusic(int entrynum, bool loop)
     case epi::FMT_RAD:
         delete F;
         music_player = S_PlayRADMusic(data, length, loop);
-        break;
-
-    case epi::FMT_SID:
-        delete F;
-        music_player = S_PlaySIDMusic(data, length, loop);
         break;
 
     // IMF writes raw OPL registers, so must use the OPL player unconditionally

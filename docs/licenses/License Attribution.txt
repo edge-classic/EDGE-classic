@@ -67,9 +67,6 @@ DDF library - Copyright (c) 1999-2023 The EDGE Team
 
 DEH_EDGE library - Copyright (c) 2004-2023 The EDGE Team
 
-EC_VOXELIB library - Copyright (c) 2022-2023 The EDGE Team
-					 Copyright (c) 2022 Ketmar Dark
-
 EDGE-Classic - Copyright (c) 1999-2023 The EDGE Team
 
 EPI library - Copyright (c) 2002-2023 The EDGE Team
@@ -158,12 +155,6 @@ WidePix License
 ===========================================================================================
 
 WidePix (various assets) - Copyright (c) 2020-2021 Nash Muhandes
-
-===========================================================================================
-WTF License
-===========================================================================================
-
-crsid library - Copyright (c) 2022 Hermit (Mihaly Horvath)
 
 ===========================================================================================
 zlib License

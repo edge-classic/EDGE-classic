@@ -52,7 +52,6 @@
 #include "r_draw.h"
 #include "r_mdl.h"
 #include "r_md2.h"
-#include "r_voxel.h"
 #include "r_modes.h"
 #include "r_state.h"
 #include "r_gldefs.h"
@@ -791,8 +790,6 @@ static void CastDrawer(void)
             MD2_RenderModel_2D(md->md2_model, skin_img, caststate->frame, pos_x, pos_y, scale_x, scale_y, castorder);
         else if (md->mdl_model)
             MDL_RenderModel_2D(md->mdl_model, skin_img, caststate->frame, pos_x, pos_y, scale_x, scale_y, castorder);
-        else
-            VXL_RenderModel_2D(md->vxl_model, pos_x, pos_y, scale_x, scale_y, castorder);
 
         glDisable(GL_DEPTH_TEST);
         return;

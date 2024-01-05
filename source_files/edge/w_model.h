@@ -23,7 +23,6 @@
 
 class md2_model_c;
 class mdl_model_c;
-class vxl_model_c;
 
 #define MAX_MODEL_SKINS 10
 
@@ -35,7 +34,6 @@ class modeldef_c
 
     md2_model_c *md2_model;
     mdl_model_c *mdl_model;
-    vxl_model_c *vxl_model;
 
     const image_c *skins[MAX_MODEL_SKINS];
 

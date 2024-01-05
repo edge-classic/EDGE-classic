@@ -46,7 +46,6 @@
 #include "r_image.h"
 #include "r_mdl.h"
 #include "r_md2.h"
-#include "r_voxel.h"
 #include "r_misc.h"
 #include "r_modes.h"
 #include "r_shader.h"
@@ -661,9 +660,6 @@ void RGL_DrawWeaponModel(player_t *p)
     else if (md->mdl_model)
         MDL_RenderModel(md->mdl_model, skin_img, true, last_frame, psp->state->frame, lerp, x, y, z, p->mo, view_props,
                         1.0f /* scale */, w->model_aspect, bias, w->model_rotate);
-    else
-        VXL_RenderModel(md->vxl_model, true, x, y, z, p->mo, view_props, 1.0f /* scale */, w->model_aspect, bias,
-                        w->model_rotate);
 }
 
 // ============================================================================
@@ -1242,9 +1238,6 @@ static void RGL_DrawModel(drawthing_t *dthing)
     else if (md->mdl_model)
         MDL_RenderModel(md->mdl_model, skin_img, false, last_frame, mo->state->frame, lerp, dthing->mx, dthing->my, z,
                         mo, mo->props, mo->model_scale, mo->model_aspect, mo->info->model_bias, mo->info->model_rotate);
-    else
-        VXL_RenderModel(md->vxl_model, false, dthing->mx, dthing->my, z, mo, mo->props, mo->model_scale,
-                        mo->model_aspect, mo->info->model_bias, mo->info->model_rotate);
 }
 
 typedef struct

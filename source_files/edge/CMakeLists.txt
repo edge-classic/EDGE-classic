@@ -74,7 +74,6 @@ set (EDGE_SOURCE_FILES
   r_modes.cc
   r_mdl.cc
   r_md2.cc
-  r_voxel.cc
   r_image.cc
   r_doomtex.cc
   r_texgl.cc
@@ -88,7 +87,6 @@ set (EDGE_SOURCE_FILES
   s_m4p.cc
   s_opl.cc
   s_rad.cc
-  s_sid.cc
   s_wav.cc
   s_flac.cc
   sv_chunk.cc
@@ -130,8 +128,6 @@ set (EDGE_LINK_LIBRARIES
   edge_deh
   edge_epi
   ${SDL2_LIBRARIES}
-  crsid
-  ec_voxelib
   libprimesynth
   libRAD
   m4p
@@ -171,11 +167,9 @@ endif()
 
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
 target_include_directories(edge-classic PRIVATE ../ajbsp)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/crsid)
 target_include_directories(edge-classic PRIVATE ../ddf)
 target_include_directories(edge-classic PRIVATE ../dehacked)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/dr_libs)
-target_include_directories(edge-classic PRIVATE ../ec_voxelib)
 target_include_directories(edge-classic PRIVATE ../epi)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/hmm)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/libprimesynth)

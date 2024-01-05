@@ -26,7 +26,6 @@
 #include "r_image.h"
 #include "r_md2.h"
 #include "r_mdl.h"
-#include "r_voxel.h"
 #include "r_things.h"
 #include "w_files.h"
 #include "w_model.h"
@@ -247,60 +246,9 @@ modeldef_c *LoadModelFromLump(int model_num)
     }
 
     if (!f)
-    {
-        // This only needs to be checked once for lumps; all voxel formats use this name
-        lumpname = epi::STR_Format("%sVXL", basename.c_str());
-        lump_num = W_CheckFileNumForName(lumpname.c_str());
-        pack_num = -1;
-
-        std::string vxlname = epi::STR_Format("%s.vxl", basename.c_str());
-        int         vxl_num = W_CheckPackForName(vxlname);
-        if (vxl_num > pack_num)
-            pack_num = vxl_num;
-        std::string kv6name = epi::STR_Format("%s.kv6", basename.c_str());
-        int         kv6_num = W_CheckPackForName(kv6name);
-        if (kv6_num > pack_num)
-            pack_num = kv6_num;
-        std::string kvxname = epi::STR_Format("%s.kvx", basename.c_str());
-        int         kvx_num = W_CheckPackForName(kvxname);
-        if (kvx_num > pack_num)
-            pack_num = kvx_num;
-
-        if (pack_num == vxl_num)
-            packname = vxlname;
-        else if (pack_num == kv6_num)
-            packname = kv6name;
-        else if (pack_num == kvx_num)
-            packname = kvxname;
-        else
-            packname = "";
-
-        if (lump_num > -1 || pack_num > -1)
-        {
-            if (pack_num > lump_num)
-            {
-                f = W_OpenPackFile(packname);
-                if (f)
-                {
-                    I_Debugf("Loading voxel model from pack file : %s\n", packname.c_str());
-                    def->vxl_model = VXL_LoadModel(f, basename.c_str());
-                    pack_file      = true;
-                }
-            }
-            else
-            {
-                I_Debugf("Loading voxel model from lump : %s\n", lumpname.c_str());
-                f = W_OpenLump(lumpname.c_str());
-                if (f)
-                    def->vxl_model = VXL_LoadModel(f, basename.c_str());
-            }
-        }
-    }
-
-    if (!f)
         I_Error("Missing model lump for: %s\n!", basename.c_str());
 
-    SYS_ASSERT(def->md2_model || def->mdl_model || def->vxl_model);
+    SYS_ASSERT(def->md2_model || def->mdl_model);
 
     // close the lump/packfile
     delete f;

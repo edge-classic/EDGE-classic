@@ -46,11 +46,6 @@ sound_format_e Sound_DetectFormat(byte *data, int song_len)
         return FMT_OGG;
     }
 
-    if ((data[0] == 'P' || data[0] == 'R') && data[1] == 'S' && data[2] == 'I' && data[3] == 'D')
-    {
-        return FMT_SID;
-    }
-
     if (data[0] == 'M' && data[1] == 'U' && data[2] == 'S')
     {
         return FMT_MUS;
@@ -142,9 +137,6 @@ sound_format_e Sound_FilenameToFormat(const std::filesystem::path &filename)
 
     if (ext == ".mp3")
         return FMT_MP3;
-
-    if (ext == ".sid" || ext == ".psid")
-        return FMT_SID;
 
     // Test MUS vs EA-MIDI MUS ?
     if (ext == ".mus")

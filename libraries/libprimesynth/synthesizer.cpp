@@ -39,9 +39,8 @@ void Synthesizer::render_s16(int16_t *buffer, size_t samples) {
         for (const auto& channel : channels_) {
             sum += channel->render();
         }
-        sum = sum * volume_;
-        buffer[samp] = (sum.left < -1.00004566f ? (int16_t)-32768 : (sum.left > 1.00001514f ? (int16_t)32767 : (int16_t)(sum.left * 32767.5f)));
-        buffer[samp+1] = (sum.right < -1.00004566f ? (int16_t)-32768 : (sum.right > 1.00001514f ? (int16_t)32767 : (int16_t)(sum.right * 32767.5f)));
+        buffer[samp] = (int16_t)((int)(sum.left * volume_ * 32767.5f) & 0xFFFF);
+        buffer[samp+1] = (int16_t)((int)(sum.right * volume_ * 32767.5f) & 0xFFFF);
     }
 }
 

@@ -6,8 +6,30 @@
 -- SYSTEM
 ------------------------------------------------------------------------------
 
-sys.TICRATE            = 35
-sys.gametic            = 0
+sys.TICRATE     = 35
+sys.gametic     = 0
+
+-- forward declaration for protected table
+_benefit        = {}
+
+local protected = { hud = _hud, player = _player, mapobject = _mapobject, game = _game, map = _map, sector = _sector, benefit =_benefit }
+
+local function protect(globals, name, value)
+    if protected[name] then
+        error(name .. ' is a global read only variable', 2)
+    end
+    rawset(globals, name, value)
+end
+
+local function check(globals, name)
+    local value = protected[name];
+    if value then
+        return value
+    end
+    return rawget(globals, name)
+end
+
+setmetatable(_G, { __index = check, __newindex = protect })
 
 ------------------------------------------------------------------------------
 -- MATH
@@ -30,7 +52,8 @@ math.rand_range        = function(low, high)
     return math.random(low, high)
 end
 
-]]--
+]]
+--
 
 ------------------------------------------------------------------------------
 -- HUD
@@ -192,8 +215,6 @@ mapobject.KILL_BENEFIT   = 5
 ------------------------------------------------------------------------------
 -- BENEFIT
 ------------------------------------------------------------------------------
-
-benefit                  = {}
 
 -- BENEFIT GROUP
 benefit.HEALTH           = "HEALTH"

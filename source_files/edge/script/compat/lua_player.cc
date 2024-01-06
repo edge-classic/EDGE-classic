@@ -2436,14 +2436,14 @@ static int luaopen_sector(lua_State *L)
 
 void LUA_RegisterPlayerLibrary(lua_State *L)
 {
-    luaL_requiref(L, "player", luaopen_player, 1);
+    luaL_requiref(L, "_player", luaopen_player, 1);
     lua_pop(L, 1);
-    luaL_requiref(L, "mapobject", luaopen_mapobject, 1);
+    luaL_requiref(L, "_mapobject", luaopen_mapobject, 1);
     lua_pop(L, 1);
-    luaL_requiref(L, "game", luaopen_game, 1);
+    luaL_requiref(L, "_game", luaopen_game, 1);
     lua_pop(L, 1);
-    luaL_requiref(L, "map", luaopen_map, 1);
+    luaL_requiref(L, "_map", luaopen_map, 1);
     lua_pop(L, 1);
-    luaL_requiref(L, "sector", luaopen_sector, 1);
+    luaL_requiref(L, "_sector", luaopen_sector, 1);
     lua_pop(L, 1);
 }

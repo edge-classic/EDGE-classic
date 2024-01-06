@@ -1016,7 +1016,7 @@ static int luaopen_hud(lua_State *L)
 
 void LUA_RegisterHudLibrary(lua_State *L)
 {
-    luaL_requiref(L, "hud", luaopen_hud, 1);
+    luaL_requiref(L, "_hud", luaopen_hud, 1);
     lua_pop(L, 1);
 }
 

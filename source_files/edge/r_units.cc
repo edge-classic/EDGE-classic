@@ -466,7 +466,7 @@ void RGL_DrawUnits(void)
 
         if ((active_blending ^ unit->blending) & BL_NoZBuf)
         {
-            state->depthMask((unit->blending & BL_NoZBuf) ? true : false);
+            state->depthMask((unit->blending & BL_NoZBuf) ? false : true);
         }
 
         active_blending = unit->blending;

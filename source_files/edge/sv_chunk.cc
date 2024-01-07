@@ -734,14 +734,14 @@ unsigned int SV_GetInt(void)
 //  ANGLES
 //
 
-void SV_PutAngle(angle_t value)
+void SV_PutAngle(bam_angle value)
 {
     SV_PutInt((unsigned int)value);
 }
 
-angle_t SV_GetAngle(void)
+bam_angle SV_GetAngle(void)
 {
-    return (angle_t)SV_GetInt();
+    return (bam_angle)SV_GetInt();
 }
 
 //----------------------------------------------------------------------------

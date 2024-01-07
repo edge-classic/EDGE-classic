@@ -548,7 +548,7 @@ static void UnknownThingWarning(int type, float x, float y)
     unknown_thing_map[type] = count + 1;
 }
 
-static mobj_t *SpawnMapThing(const mobjtype_c *info, float x, float y, float z, sector_t *sec, angle_t angle,
+static mobj_t *SpawnMapThing(const mobjtype_c *info, float x, float y, float z, sector_t *sec, bam_angle angle,
                              int options, int tag)
 {
     spawnpoint_t point;
@@ -680,7 +680,7 @@ static mobj_t *SpawnMapThing(const mobjtype_c *info, float x, float y, float z, 
 static void LoadThings(int lump)
 {
     float   x, y, z;
-    angle_t angle;
+    bam_angle angle;
     int     options, typenum;
     int     i;
 
@@ -722,7 +722,7 @@ static void LoadThings(int lump)
     {
         x       = (float)EPI_LE_S16(mt->x);
         y       = (float)EPI_LE_S16(mt->y);
-        angle   = FLOAT_2_ANG((float)EPI_LE_S16(mt->angle));
+        angle   = epi::BAM_FromDegrees((float)EPI_LE_S16(mt->angle));
         typenum = EPI_LE_U16(mt->type);
         options = EPI_LE_U16(mt->options);
 
@@ -813,7 +813,7 @@ static void LoadHexenThings(int lump)
     // -AJA- 2001/08/04: wrote this, based on the Hexen specs.
 
     float   x, y, z;
-    angle_t angle;
+    bam_angle angle;
     int     options, typenum;
     int     tag;
     int     i;
@@ -839,7 +839,7 @@ static void LoadHexenThings(int lump)
         x     = (float)EPI_LE_S16(mt->x);
         y     = (float)EPI_LE_S16(mt->y);
         z     = (float)EPI_LE_S16(mt->height);
-        angle = FLOAT_2_ANG((float)EPI_LE_S16(mt->angle));
+        angle = epi::BAM_FromDegrees((float)EPI_LE_S16(mt->angle));
 
         tag     = EPI_LE_S16(mt->tid);
         typenum = EPI_LE_U16(mt->type);
@@ -1683,10 +1683,10 @@ static void LoadUDMFSectors()
 
             // rotations
             if (!AlmostEquals(rf, 0.0f))
-                ss->floor.rotation = FLOAT_2_ANG(rf);
+                ss->floor.rotation = epi::BAM_FromDegrees(rf);
 
             if (!AlmostEquals(rc, 0.0f))
-                ss->ceil.rotation = FLOAT_2_ANG(rc);
+                ss->ceil.rotation = epi::BAM_FromDegrees(rc);
 
             // granular scaling
             ss->floor.x_mat.X = fx_sc;
@@ -2236,7 +2236,7 @@ static void LoadUDMFThings()
         if (section == "thing")
         {
             float             x = 0.0f, y = 0.0f, z = 0.0f;
-            angle_t           angle     = ANG0;
+            bam_angle           angle     = ANG0;
             int               options   = MTF_NOT_SINGLE | MTF_NOT_DM | MTF_NOT_COOP;
             int               typenum   = -1;
             int               tag       = 0;
@@ -2279,7 +2279,7 @@ static void LoadUDMFThings()
                 else if (key == "height")
                     z = epi::LEX_Double(value);
                 else if (key == "angle")
-                    angle = FLOAT_2_ANG((float)epi::LEX_Int(value));
+                    angle = epi::BAM_FromDegrees(epi::LEX_Int(value));
                 else if (key == "type")
                     typenum = epi::LEX_Int(value);
                 else if (key == "skill1")

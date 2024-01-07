@@ -812,7 +812,7 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
         return;
 
     float   length  = R_PointToDist(0, 0, source->dx, source->dy);
-    angle_t angle   = ANG360 - R_PointToAngle(0, 0, -source->dx, -source->dy);
+    bam_angle angle   = ANG360 - R_PointToAngle(0, 0, -source->dx, -source->dy);
     bool    is_vert = fabs(source->dy) > fabs(source->dx);
 
     if (special->sector_effect & SECTFX_LightFloor)
@@ -2628,8 +2628,8 @@ void P_SpawnSpecials2(int autotag)
         {
             float mul = secSpecial->push_speed / 100.0f;
 
-            sector->props.push.X += M_Cos(secSpecial->push_angle) * mul;
-            sector->props.push.Y += M_Sin(secSpecial->push_angle) * mul;
+            sector->props.push.X += epi::BAM_Cos(secSpecial->push_angle) * mul;
+            sector->props.push.Y += epi::BAM_Sin(secSpecial->push_angle) * mul;
             sector->props.push.Z += secSpecial->push_zspeed / (r_doubleframes.d ? 89.2f : 100.0f);
         }
 
@@ -2639,8 +2639,8 @@ void P_SpawnSpecials2(int autotag)
             secanim_t anim;
             anim.target = sector;
 
-            float dx = M_Cos(secSpecial->f.scroll_angle);
-            float dy = M_Sin(secSpecial->f.scroll_angle);
+            float dx = epi::BAM_Cos(secSpecial->f.scroll_angle);
+            float dy = epi::BAM_Sin(secSpecial->f.scroll_angle);
 
             anim.floor_scroll.X -= dx * secSpecial->f.scroll_speed / 32.0f;
             anim.floor_scroll.Y -= dy * secSpecial->f.scroll_speed / 32.0f;
@@ -2656,8 +2656,8 @@ void P_SpawnSpecials2(int autotag)
             secanim_t anim;
             anim.target = sector;
 
-            float dx = M_Cos(secSpecial->c.scroll_angle);
-            float dy = M_Sin(secSpecial->c.scroll_angle);
+            float dx = epi::BAM_Cos(secSpecial->c.scroll_angle);
+            float dy = epi::BAM_Sin(secSpecial->c.scroll_angle);
 
             anim.ceil_scroll.X -= dx * secSpecial->c.scroll_speed / 32.0f;
             anim.ceil_scroll.Y -= dy * secSpecial->c.scroll_speed / 32.0f;

@@ -12,7 +12,6 @@ add_library(
   image_blur.cc
   image_hq2x.cc
   image_funcs.cc
-  math_angle.cc
   math_color.cc
   math_crc.cc
   math_md5.cc
@@ -27,7 +26,6 @@ add_library(
 
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/stb)
-target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/libgme/gme)
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/m4p)
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/superfasthash)
 if(MSVC OR WIN32_CLANG)

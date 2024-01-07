@@ -125,7 +125,7 @@ static void PL_get_pos(coal::vm_c *vm, int argc)
 //
 static void PL_get_angle(coal::vm_c *vm, int argc)
 {
-    float value = ANG_2_FLOAT(ui_player_who->mo->angle);
+    float value = epi::Degrees_FromBAM(ui_player_who->mo->angle);
 
     if (value > 360.0f)
         value -= 360.0f;
@@ -139,7 +139,7 @@ static void PL_get_angle(coal::vm_c *vm, int argc)
 //
 static void PL_get_mlook(coal::vm_c *vm, int argc)
 {
-    float value = ANG_2_FLOAT(ui_player_who->mo->vertangle);
+    float value = epi::Degrees_FromBAM(ui_player_who->mo->vertangle);
 
     if (value > 180.0f)
         value -= 360.0f;
@@ -875,7 +875,7 @@ static void PL_hurt_dir(coal::vm_c *vm, int argc)
         mobj_t *badguy = ui_player_who->attacker;
         mobj_t *pmo    = ui_player_who->mo;
 
-        angle_t diff = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle;
+        bam_angle diff = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle;
 
         if (diff >= ANG45 && diff <= ANG135)
         {
@@ -901,9 +901,9 @@ static void PL_hurt_angle(coal::vm_c *vm, int argc)
         mobj_t *badguy = ui_player_who->attacker;
         mobj_t *pmo    = ui_player_who->mo;
 
-        angle_t real_a = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
+        bam_angle real_a = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
 
-        value = ANG_2_FLOAT(real_a);
+        value = epi::Degrees_FromBAM(real_a);
 
         if (value > 360.0f)
             value -= 360.0f;

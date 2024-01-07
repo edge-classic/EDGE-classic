@@ -1007,18 +1007,18 @@ void DDF_StateGetBecomeWeapon(const char *arg, state_t *cur_state)
 
 void DDF_StateGetAngle(const char *arg, state_t *cur_state)
 {
-    angle_t *value;
+    bam_angle *value;
     float    tmp;
 
     if (!arg || !arg[0])
         return;
 
-    value = new angle_t;
+    value = new bam_angle;
 
     if (sscanf(arg, " %f ", &tmp) != 1)
         DDF_Error("DDF_StateGetAngle: bad value: %s\n", arg);
 
-    *value = FLOAT_2_ANG(tmp);
+    *value = epi::BAM_FromDegrees(tmp);
 
     cur_state->action_par = value;
 }

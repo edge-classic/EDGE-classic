@@ -1673,25 +1673,15 @@ static void DDF_MobjGetAngleRange(const char *info, void *storage)
 {
     SYS_ASSERT(info && storage);
 
-    angle_t *dest = (angle_t *)storage;
+    bam_angle *dest = (bam_angle *)storage;
 
     float val1, val2;
 
     if (sscanf(info, "%f:%f", &val1, &val2) != 2)
         DDF_Error("Bad angle range: %s\n", info);
 
-    if ((int)val1 == 360)
-        val1 = 359.5;
-    else if (val1 > 360.0f)
-        DDF_Error("Angle '%1.1f' too large (must be less than 360)\n", val1);
-
-    if ((int)val2 == 360)
-        val2 = 359.5;
-    else if (val2 > 360.0f)
-        DDF_Error("Angle '%1.1f' too large (must be less than 360)\n", val2);
-
-    dest[0] = FLOAT_2_ANG(val1);
-    dest[1] = FLOAT_2_ANG(val2);
+    dest[0] = epi::BAM_FromDegrees(val1);
+    dest[1] = epi::BAM_FromDegrees(val2);
 }
 
 //

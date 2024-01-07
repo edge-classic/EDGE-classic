@@ -102,7 +102,7 @@ void S_MixAllChannels(void *stream, int len);
 // 'len' is the number of samples (for stereo: pairs)
 // to mix into the stream.
 
-void S_UpdateSounds(position_c *listener, angle_t angle);
+void S_UpdateSounds(position_c *listener, bam_angle angle);
 
 //-------- API for Synthesised MUSIC --------------------
 

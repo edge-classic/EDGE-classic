@@ -127,7 +127,7 @@ typedef struct shoot_trav_info_s
 
     float   range;
     float   start_z;
-    angle_t angle;
+    bam_angle angle;
     float   slope;
     float   topslope;
     float   bottomslope;
@@ -1260,23 +1260,23 @@ static void HitSlideLine(line_t *ld)
 
     int side = PointOnLineSide(slidemo->x, slidemo->y, ld);
 
-    angle_t lineangle = R_PointToAngle(0, 0, ld->dx, ld->dy);
+    bam_angle lineangle = R_PointToAngle(0, 0, ld->dx, ld->dy);
 
     if (side == 1)
         lineangle += ANG180;
 
-    angle_t moveangle  = R_PointToAngle(0, 0, tmxmove, tmymove);
-    angle_t deltaangle = moveangle - lineangle;
+    bam_angle moveangle  = R_PointToAngle(0, 0, tmxmove, tmymove);
+    bam_angle deltaangle = moveangle - lineangle;
 
     if (deltaangle > ANG180)
         deltaangle += ANG180;
     // I_Error ("SlideLine: ang>ANG180");
 
     float movelen = P_ApproxDistance(tmxmove, tmymove);
-    float newlen  = movelen * M_Cos(deltaangle);
+    float newlen  = movelen * epi::BAM_Cos(deltaangle);
 
-    tmxmove = newlen * M_Cos(lineangle);
-    tmymove = newlen * M_Sin(lineangle);
+    tmxmove = newlen * epi::BAM_Cos(lineangle);
+    tmymove = newlen * epi::BAM_Sin(lineangle);
 }
 
 static bool PTR_SlideTraverse(intercept_t *in, void *dataptr)
@@ -1891,8 +1891,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
         {
             if (current_flatdef->impactobject)
             {
-                angle_t angle = shoot_I.angle + ANG180;
-                angle += (angle_t)(P_RandomNegPos() * (int)(ANG1 / 2));
+                bam_angle angle = shoot_I.angle + ANG180;
+                angle += (bam_angle)(P_RandomNegPos() * (int)(ANG1 / 2));
 
                 P_SpawnDebris(x, y, z, angle, current_flatdef->impactobject);
                 // don't go any farther
@@ -2260,10 +2260,10 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
     return false;
 }
 
-mobj_t *P_AimLineAttack(mobj_t *t1, angle_t angle, float distance, float *slope)
+mobj_t *P_AimLineAttack(mobj_t *t1, bam_angle angle, float distance, float *slope)
 {
-    float x2 = t1->x + distance * M_Cos(angle);
-    float y2 = t1->y + distance * M_Sin(angle);
+    float x2 = t1->x + distance * epi::BAM_Cos(angle);
+    float y2 = t1->y + distance * epi::BAM_Sin(angle);
 
     Z_Clear(&aim_I, shoot_trav_info_t, 1);
 
@@ -2274,7 +2274,7 @@ mobj_t *P_AimLineAttack(mobj_t *t1, angle_t angle, float distance, float *slope)
 
     if (t1->player)
     {
-        float vertslope = M_Tan(t1->vertangle);
+        float vertslope = epi::BAM_Tan(t1->vertangle);
 
         aim_I.topslope    = (vertslope * 256.0f + 100.0f) / 160.0f;
         aim_I.bottomslope = (vertslope * 256.0f - 100.0f) / 160.0f;
@@ -2299,13 +2299,13 @@ mobj_t *P_AimLineAttack(mobj_t *t1, angle_t angle, float distance, float *slope)
     return aim_I.target;
 }
 
-void P_LineAttack(mobj_t *t1, angle_t angle, float distance, float slope, float damage, const damage_c *damtype,
+void P_LineAttack(mobj_t *t1, bam_angle angle, float distance, float slope, float damage, const damage_c *damtype,
                   const mobjtype_c *puff)
 {
     // Note: Damtype can be NULL.
 
-    float x2 = t1->x + distance * M_Cos(angle);
-    float y2 = t1->y + distance * M_Sin(angle);
+    float x2 = t1->x + distance * epi::BAM_Cos(angle);
+    float y2 = t1->y + distance * epi::BAM_Sin(angle);
 
     Z_Clear(&shoot_I, shoot_trav_info_t, 1);
 
@@ -2351,13 +2351,13 @@ void P_TargetTheory(mobj_t *source, mobj_t *target, float *x, float *y, float *z
         else
             start_z = source->z + source->height / 2 + 8;
 
-        (*x) = source->x + MISSILERANGE * M_Cos(source->angle);
-        (*y) = source->y + MISSILERANGE * M_Sin(source->angle);
-        (*z) = start_z + MISSILERANGE * M_Tan(source->vertangle);
+        (*x) = source->x + MISSILERANGE * epi::BAM_Cos(source->angle);
+        (*y) = source->y + MISSILERANGE * epi::BAM_Sin(source->angle);
+        (*z) = start_z + MISSILERANGE * epi::BAM_Tan(source->vertangle);
     }
 }
 
-mobj_t *GetMapTargetAimInfo(mobj_t *source, angle_t angle, float distance)
+mobj_t *GetMapTargetAimInfo(mobj_t *source, bam_angle angle, float distance)
 {
     float x2, y2;
 
@@ -2366,8 +2366,8 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, angle_t angle, float distance)
     aim_I.source = source;
     aim_I.forced = false;
 
-    x2 = source->x + distance * M_Cos(angle);
-    y2 = source->y + distance * M_Sin(angle);
+    x2 = source->x + distance * epi::BAM_Cos(angle);
+    y2 = source->y + distance * epi::BAM_Sin(angle);
 
     if (source->info)
         aim_I.start_z = source->z + source->height * PERCENT_2_FLOAT(source->info->shotheight);
@@ -2378,7 +2378,7 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, angle_t angle, float distance)
     aim_I.target = NULL;
 
     // Lobo: try and limit the vertical range somewhat
-    float vertslope   = M_Tan(source->vertangle);
+    float vertslope   = epi::BAM_Tan(source->vertangle);
     aim_I.topslope    = (100 + vertslope * 320) / 160.0f;
     aim_I.bottomslope = (-100 + vertslope * 576) / 160.0f;
     // aim_I.topslope = 100.0f / 160.0f;
@@ -2414,7 +2414,7 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, angle_t angle, float distance)
 // -ACB- 1998/09/01
 // -AJA- 1999/08/08: Added `force_aim' to fix chainsaw.
 //
-mobj_t *DoMapTargetAutoAim(mobj_t *source, angle_t angle, float distance, bool force_aim)
+mobj_t *DoMapTargetAutoAim(mobj_t *source, bam_angle angle, float distance, bool force_aim)
 {
     float x2, y2;
 
@@ -2429,8 +2429,8 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, angle_t angle, float distance, bool f
     aim_I.source = source;
     aim_I.forced = force_aim;
 
-    x2 = source->x + distance * M_Cos(angle);
-    y2 = source->y + distance * M_Sin(angle);
+    x2 = source->x + distance * epi::BAM_Cos(angle);
+    y2 = source->y + distance * epi::BAM_Sin(angle);
 
     if (source->info)
         aim_I.start_z = source->z + source->height * PERCENT_2_FLOAT(source->info->shotheight);
@@ -2439,7 +2439,7 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, angle_t angle, float distance, bool f
 
     if (source->player)
     {
-        float vertslope = M_Tan(source->vertangle);
+        float vertslope = epi::BAM_Tan(source->vertangle);
 
         aim_I.topslope    = (100 + vertslope * 256) / 160.0f;
         aim_I.bottomslope = (-100 + vertslope * 256) / 160.0f;
@@ -2467,20 +2467,20 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, angle_t angle, float distance, bool f
 
         slope = CLAMP(-1.0f, slope, 1.0f);
 
-        source->vertangle = M_ATan(slope);
+        source->vertangle = epi::BAM_FromATan(slope);
     }
 
     return aim_I.target;
 }
 
-mobj_t *P_MapTargetAutoAim(mobj_t *source, angle_t angle, float distance, bool force_aim)
+mobj_t *P_MapTargetAutoAim(mobj_t *source, bam_angle angle, float distance, bool force_aim)
 {
     mobj_t *target = DoMapTargetAutoAim(source, angle, distance, force_aim);
 
     // If that is a miss, aim slightly to the left or right
     if (!target)
     {
-        angle_t diff = ANG180 / 32;
+        bam_angle diff = ANG180 / 32;
 
         if (leveltime & 1)
             diff = 0 - diff;
@@ -2589,8 +2589,8 @@ void P_UseLines(player_t *player)
 
     x1 = player->mo->x;
     y1 = player->mo->y;
-    x2 = x1 + USERANGE * M_Cos(angle);
-    y2 = y1 + USERANGE * M_Sin(angle);
+    x2 = x1 + USERANGE * epi::BAM_Cos(angle);
+    y2 = y1 + USERANGE * epi::BAM_Sin(angle);
 
     P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES | PT_ADDTHINGS, PTR_UseTraverse);
 }

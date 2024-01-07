@@ -98,11 +98,11 @@ static float GetHoverDZ(mobj_t *mo, float bob_mult = 0)
         return mo->phase;
 
     // compute a different phase for different objects
-    angle_t phase = (angle_t)(long long)mo;
-    phase ^= (angle_t)(phase << 19);
-    phase += (angle_t)(leveltime << (ANGLEBITS - 6));
+    bam_angle phase = (bam_angle)(long long)mo;
+    phase ^= (bam_angle)(phase << 19);
+    phase += (bam_angle)(leveltime << (ANGLEBITS - 6));
 
-    mo->phase = M_Sin(phase);
+    mo->phase = epi::BAM_Sin(phase);
 
     if (mo->hyperflags & HF_HOVER)
         mo->phase *= 4.0f;
@@ -703,16 +703,16 @@ static const image_c *R2_GetThingSprite2(mobj_t *mo, float mx, float my, bool *f
 
     if (frame->rots >= 8)
     {
-        angle_t ang = mo->angle;
+        bam_angle ang = mo->angle;
 
         MIR_Angle(ang);
 
-        angle_t from_view = R_PointToAngle(viewx, viewy, mx, my);
+        bam_angle from_view = R_PointToAngle(viewx, viewy, mx, my);
 
         ang = from_view - ang + ANG180;
 
         if (MIR_Reflective())
-            ang = (angle_t)0 - ang;
+            ang = (bam_angle)0 - ang;
 
         if (frame->rots == 16)
             rot = (ang + (ANG45 / 4)) >> (ANGLEBITS - 4);

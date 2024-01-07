@@ -1054,7 +1054,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
 
     M_Angle2Matrix(tilt ? ~mo->vertangle : 0, &data.kx_mat, &data.kz_mat);
 
-    angle_t ang = mo->angle + rotation;
+    bam_angle ang = mo->angle + rotation;
 
     MIR_Angle(ang);
 

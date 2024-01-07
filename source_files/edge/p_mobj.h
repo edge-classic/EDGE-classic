@@ -154,8 +154,8 @@ typedef struct
     float x, y, z;
 
     // direction thing faces
-    angle_t angle;
-    angle_t vertangle;
+    bam_angle angle;
+    bam_angle vertangle;
 
     // type of thing
     const mobjtype_c *info;
@@ -191,8 +191,8 @@ struct mobj_s : public position_c
 {
     const mobjtype_c *info = nullptr;
 
-    angle_t angle     = 0; // orientation
-    angle_t vertangle = 0; // looking up or down
+    bam_angle angle     = 0; // orientation
+    bam_angle vertangle = 0; // looking up or down
 
     // For movement checking.
     float radius = 0;

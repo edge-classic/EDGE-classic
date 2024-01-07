@@ -78,7 +78,7 @@ struct botcmd_t
 {
     // desired movement
     int     speed;
-    angle_t direction;
+    bam_angle direction;
 
     // buttons
     bool attack;
@@ -97,7 +97,7 @@ class bot_t
 
     bot_task_e task = TASK_None;
 
-    angle_t look_angle = 0;
+    bam_angle look_angle = 0;
     float   look_slope = 0;
 
     // 0 = go straight, -1 = left, +1 = right
@@ -111,7 +111,7 @@ class bot_t
     // we lose patience for every tic which we cannot see our target
     int     patience    = 0;
     bool    see_enemy   = false;
-    angle_t enemy_angle = 0;
+    bam_angle enemy_angle = 0;
     float   enemy_slope = 0;
     float   enemy_dist  = 0;
 
@@ -200,7 +200,7 @@ class bot_t
     void FinishGetItem();
     void FinishDoorOrLift(bool ok);
 
-    void TurnToward(angle_t angle, float slope, bool fast);
+    void TurnToward(bam_angle angle, float slope, bool fast);
     void TurnToward(const mobj_t *mo, bool fast);
     void ShootTarget();
 

@@ -26,7 +26,7 @@
 #ifndef __M_MATH_H__
 #define __M_MATH_H__
 
-#include "types.h"
+#include "math_bam.h"
 
 #include "HandmadeMath.h"
 
@@ -35,13 +35,9 @@ HMM_Vec3  M_TripleCrossProduct(HMM_Vec3 v1, HMM_Vec3 v2, HMM_Vec3 v3);
 HMM_Vec3  M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b, HMM_Vec3 plane_c,
                                 HMM_Vec3 plane_normal);
 HMM_Vec3  M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b, HMM_Vec3 plane_c);
-float   M_Tan(angle_t ang) GCCATTR((const));
-angle_t M_ATan(float slope) GCCATTR((const));
-float   M_Cos(angle_t ang) GCCATTR((const));
-float   M_Sin(angle_t ang) GCCATTR((const));
-void    M_Angle2Matrix(angle_t ang, HMM_Vec2 *x, HMM_Vec2 *y);
+void    M_Angle2Matrix(bam_angle ang, HMM_Vec2 *x, HMM_Vec2 *y);
 int     M_PointInTri(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test);
-void    M_Vec2Rotate(HMM_Vec2 &vec, const angle_t &ang);
+void    M_Vec2Rotate(HMM_Vec2 &vec, const bam_angle &ang);
 
 #endif //__M_MATH_H__
 

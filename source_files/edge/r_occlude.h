@@ -20,8 +20,8 @@
 #define __RGL_OCCLUDE_H__
 
 void RGL_1DOcclusionClear(void);
-void RGL_1DOcclusionSet(angle_t low, angle_t high);
-bool RGL_1DOcclusionTest(angle_t low, angle_t high);
+void RGL_1DOcclusionSet(bam_angle low, bam_angle high);
+bool RGL_1DOcclusionTest(bam_angle low, bam_angle high);
 
 #endif /* __RGL_OCCLUDE_H__ */
 

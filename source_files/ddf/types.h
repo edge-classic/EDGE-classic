@@ -29,6 +29,8 @@
 #include "epi.h"
 #include "collection.h"
 
+#include "math_bam.h"
+
 class mobjtype_c;
 
 // RGB 8:8:8
@@ -63,34 +65,6 @@ typedef float percent_t;
 
 #define PERCENT_MAKE(val)     ((val) / 100.0f)
 #define PERCENT_2_FLOAT(perc) (perc)
-
-typedef u32_t angle_t;
-
-#define ANGLEBITS 32
-
-// Binary Angle Measument, BAM.
-#define ANG0   0x00000000
-#define ANG1   0x00B60B61
-#define ANG45  0x20000000
-#define ANG90  0x40000000
-#define ANG135 0x60000000
-#define ANG180 0x80000000
-#define ANG225 0xa0000000
-#define ANG270 0xc0000000
-#define ANG315 0xe0000000
-
-#define ANG_MAX 0xffffffff
-
-// Only use this one with float.
-#define ANG360 (4294967296.0)
-
-#define ANG5 (ANG45 / 9)
-
-// Conversion macros:
-
-#define F2AX(n)        (((n) < 0) ? (360.0f + (n)) : (n))
-#define ANG_2_FLOAT(a) ((float)(a) * 0.00000008381903171539306640625f)
-#define FLOAT_2_ANG(n) ((angle_t)(F2AX(n) * 11930464.7111f))
 
 class mobj_strref_c
 {

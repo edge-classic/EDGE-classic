@@ -192,8 +192,8 @@ bool P_Move(mobj_t *actor, bool path)
 
     if (path)
     {
-        tryx = actor->x + actor->speed * M_Cos(actor->angle);
-        tryy = actor->y + actor->speed * M_Sin(actor->angle);
+        tryx = actor->x + actor->speed * epi::BAM_Cos(actor->angle);
+        tryy = actor->y + actor->speed * epi::BAM_Sin(actor->angle);
     }
     else
     {
@@ -453,12 +453,12 @@ void P_NewChaseDir(mobj_t *object)
 //
 // Returns true if a player is targeted.
 //
-bool P_LookForPlayers(mobj_t *actor, angle_t range)
+bool P_LookForPlayers(mobj_t *actor, bam_angle range)
 {
     int       c;
     int       stop;
     player_t *player;
-    angle_t   an;
+    bam_angle   an;
     float     dist;
 
     c    = 0;

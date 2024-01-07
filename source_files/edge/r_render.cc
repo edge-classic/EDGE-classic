@@ -94,8 +94,8 @@ float wave_now;    // value for doing wave table lookups
 float plane_z_bob; // for floor/ceiling bob DDFSECT stuff
 
 // -ES- 1999/03/20 Different right & left side clip angles, for asymmetric FOVs.
-angle_t clip_left, clip_right;
-angle_t clip_scope;
+bam_angle clip_left, clip_right;
+bam_angle clip_scope;
 
 mobj_t *view_cam_mo;
 
@@ -141,13 +141,13 @@ static inline void ClipPlaneHorizontalLine(GLdouble *p, const HMM_Vec2 &s, const
     p[3] = e.X * s.Y - s.X * e.Y;
 }
 
-static inline void ClipPlaneEyeAngle(GLdouble *p, angle_t ang)
+static inline void ClipPlaneEyeAngle(GLdouble *p, bam_angle ang)
 {
     HMM_Vec2 s, e;
 
     s = {viewx, viewy};
 
-    e = {viewx + M_Cos(ang), viewy + M_Sin(ang)};
+    e = {viewx + epi::BAM_Cos(ang), viewy + epi::BAM_Sin(ang)};
 
     ClipPlaneHorizontalLine(p, s, e);
 }
@@ -162,7 +162,7 @@ typedef struct mirror_info_s
 
     float xy_scale;
 
-    angle_t tc;
+    bam_angle tc;
 
   public:
     void ComputeMirror()
@@ -229,10 +229,10 @@ typedef struct mirror_info_s
         // compute rotation angle
         tc = ANG180 + R_PointToAngle(0, 0, other->dx, other->dy) - seg->angle;
 
-        xx = M_Cos(tc);
-        xy = M_Sin(tc);
-        yx = -M_Sin(tc);
-        yy = M_Cos(tc);
+        xx = epi::BAM_Cos(tc);
+        xy = epi::BAM_Sin(tc);
+        yx = -epi::BAM_Sin(tc);
+        yy = epi::BAM_Cos(tc);
 
         // scaling
         float a_len = seg->length;
@@ -278,7 +278,7 @@ typedef struct mirror_info_s
         z = zc + z * z_scale;
     }
 
-    void Turn(angle_t &ang)
+    void Turn(bam_angle &ang)
     {
         ang = (def->is_portal) ? (ang - tc) : (tc - ang);
     }
@@ -300,7 +300,7 @@ void MIR_Height(float &z)
         active_mirrors[i].Z_Adjust(z);
 }
 
-void MIR_Angle(angle_t &ang)
+void MIR_Angle(bam_angle &ang)
 {
     for (int i = num_active_mirrors - 1; i >= 0; i--)
         active_mirrors[i].Turn(ang);
@@ -524,8 +524,8 @@ static void DrawLaser(player_t *p)
 
 	float dist = 2000;
 
-	float lk_cos = M_Cos(viewvertangle);
-	float lk_sin = M_Sin(viewvertangle);
+	float lk_cos = epi::BAM_Cos(viewvertangle);
+	float lk_sin = epi::BAM_Sin(viewvertangle);
 
 	s.X += viewsin * 6;
 	s.Y -= viewcos * 6;
@@ -781,7 +781,7 @@ typedef struct
 
     slope_plane_t *slope;
 
-    angle_t rotation = 0;
+    bam_angle rotation = 0;
 } plane_coord_data_t;
 
 static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal, HMM_Vec3 *lit_pos)
@@ -2078,7 +2078,7 @@ static void RGL_DrawSeg(drawfloor_t *dfloor, seg_t *seg, bool mirror_sub = false
 
 static void RGL_WalkBSPNode(unsigned int bspnum);
 
-static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, angle_t left, angle_t right, bool is_portal)
+static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, bam_angle left, bam_angle right, bool is_portal)
 {
     drawmirror_c *mir = R_GetDrawMirror();
     mir->Clear(seg);
@@ -2099,9 +2099,9 @@ static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, angle_t left, angle_t ri
 
     subsector_t *save_sub = cur_sub;
 
-    angle_t save_clip_L = clip_left;
-    angle_t save_clip_R = clip_right;
-    angle_t save_scope  = clip_scope;
+    bam_angle save_clip_L = clip_left;
+    bam_angle save_clip_R = clip_right;
+    bam_angle save_scope  = clip_scope;
 
     clip_left  = left;
     clip_right = right;
@@ -2201,12 +2201,12 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
        precise = (seg->linedef->flags & MLF_Mirror) || (seg->linedef->portal_pair);
     }
 
-    angle_t angle_L = R_PointToAngle(viewx, viewy, sx1, sy1, precise);
-    angle_t angle_R = R_PointToAngle(viewx, viewy, sx2, sy2, precise);
+    bam_angle angle_L = R_PointToAngle(viewx, viewy, sx1, sy1, precise);
+    bam_angle angle_R = R_PointToAngle(viewx, viewy, sx2, sy2, precise);
 
     // Clip to view edges.
 
-    angle_t span = angle_L - angle_R;
+    bam_angle span = angle_L - angle_R;
 
     // back side ?
     if (span >= ANG180)
@@ -2217,8 +2217,8 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
     if (clip_scope != ANG180)
     {
-        angle_t tspan1 = angle_L - clip_right;
-        angle_t tspan2 = clip_left - angle_R;
+        bam_angle tspan1 = angle_L - clip_right;
+        bam_angle tspan2 = clip_left - angle_R;
 
         if (tspan1 > clip_scope)
         {
@@ -2386,10 +2386,10 @@ bool RGL_CheckBBox(float *bspcoord)
     float y2 = bspcoord[checkcoord[boxpos][3]];
 
     // check clip list for an open space
-    angle_t angle_L = R_PointToAngle(viewx, viewy, x1, y1);
-    angle_t angle_R = R_PointToAngle(viewx, viewy, x2, y2);
+    bam_angle angle_L = R_PointToAngle(viewx, viewy, x1, y1);
+    bam_angle angle_R = R_PointToAngle(viewx, viewy, x2, y2);
 
-    angle_t span = angle_L - angle_R;
+    bam_angle span = angle_L - angle_R;
 
     // Sitting on a line?
     if (span >= ANG180)
@@ -2400,8 +2400,8 @@ bool RGL_CheckBBox(float *bspcoord)
 
     if (clip_scope != ANG180)
     {
-        angle_t tspan1 = angle_L - clip_right;
-        angle_t tspan2 = clip_left - angle_R;
+        bam_angle tspan1 = angle_L - clip_right;
+        bam_angle tspan2 = clip_left - angle_R;
 
         if (tspan1 > clip_scope)
         {
@@ -3367,7 +3367,7 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
         if (!level_flags.mlook)
             viewvertangle = 0;
 
-        viewvertangle += M_ATan(mo->player->kick_offset);
+        viewvertangle += epi::BAM_FromATan(mo->player->kick_offset);
 
         // No heads above the ceiling
         if (viewz > mo->player->mo->ceilingz - 2)
@@ -3379,11 +3379,11 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
     }
 
     // do some more stuff
-    viewsin = M_Sin(viewangle);
-    viewcos = M_Cos(viewangle);
+    viewsin = epi::BAM_Sin(viewangle);
+    viewcos = epi::BAM_Cos(viewangle);
 
-    float lk_sin = M_Sin(viewvertangle);
-    float lk_cos = M_Cos(viewvertangle);
+    float lk_sin = epi::BAM_Sin(viewvertangle);
+    float lk_cos = epi::BAM_Cos(viewvertangle);
 
     viewforward.X = lk_cos * viewcos;
     viewforward.Y = lk_cos * viewsin;
@@ -3399,12 +3399,12 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
     viewright.Z = viewforward.X * viewup.Y - viewup.X * viewforward.Y;
 
     // compute the 1D projection of the view angle
-    angle_t oned_side_angle;
+    bam_angle oned_side_angle;
     {
         float k, d;
 
         // k is just the mlook angle (in radians)
-        k = ANG_2_FLOAT(viewvertangle);
+        k = epi::Degrees_FromBAM(viewvertangle);
         if (k > 180.0)
             k -= 360.0;
         k = k * M_PI / 180.0f;
@@ -3417,7 +3417,7 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
         // the top/bottom edge of the view rectangle.
         d = cos(k) - sin(k) * view_y_slope;
 
-        oned_side_angle = (d <= 0.01f) ? ANG180 : M_ATan(view_x_slope / d);
+        oned_side_angle = (d <= 0.01f) ? ANG180 : epi::BAM_FromATan(view_x_slope / d);
     }
 
     // setup clip angles

@@ -50,31 +50,10 @@
 #include <cmath>
 #endif
 
-float M_Sin(angle_t ang)
+void M_Angle2Matrix(bam_angle ang, HMM_Vec2 *x, HMM_Vec2 *y)
 {
-    return (float)sin((double)ang * M_PI / (float)ANG180);
-}
-
-float M_Cos(angle_t ang)
-{
-    return (float)cos((double)ang * M_PI / (float)ANG180);
-}
-
-float M_Tan(angle_t ang)
-{
-    return (float)tan((double)ang * M_PI / (float)ANG180);
-}
-
-angle_t M_ATan(float slope)
-{
-    return (s32_t)((float)ANG180 * atan(slope) /
-                   M_PI); // Updated M_ATan from EDGE 2.X branch, works properly with MSVC now
-}
-
-void M_Angle2Matrix(angle_t ang, HMM_Vec2 *x, HMM_Vec2 *y)
-{
-    x->X = M_Cos(ang);
-    x->Y = M_Sin(ang);
+    x->X = epi::BAM_Cos(ang);
+    x->Y = epi::BAM_Sin(ang);
 
     y->X = -x->Y;
     y->Y = x->X;
@@ -134,10 +113,10 @@ int M_PointInTri(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test)
     return c;
 }
 
-void M_Vec2Rotate(HMM_Vec2 &vec, const angle_t &ang)
+void M_Vec2Rotate(HMM_Vec2 &vec, const bam_angle &ang)
 {
-    float s = M_Sin(ang);
-    float c = M_Cos(ang);
+    float s = epi::BAM_Sin(ang);
+    float c = epi::BAM_Cos(ang);
 
     float ox = vec.X;
     float oy = vec.Y;

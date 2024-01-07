@@ -414,7 +414,7 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
     mo->spawnpoint.y         = t->y;
     mo->spawnpoint.z         = t->z;
     mo->spawnpoint.angle     = t->angle;
-    mo->spawnpoint.vertangle = M_ATan(t->slope);
+    mo->spawnpoint.vertangle = epi::BAM_FromATan(t->slope);
     mo->spawnpoint.info      = minfo;
     mo->spawnpoint.flags     = t->ambush ? MF_AMBUSH : 0;
     mo->spawnpoint.tag       = t->tag;
@@ -1218,8 +1218,8 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
 
     // spawn teleport fog
     mobj_t *fog;
-    x += 20 * M_Cos(point->angle);
-    y += 20 * M_Sin(point->angle);
+    x += 20 * epi::BAM_Cos(point->angle);
+    y += 20 * epi::BAM_Sin(point->angle);
     fog = P_MobjCreateObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
     // never use this object as a teleport destination
     fog->extendedflags |= EF_NEVERTARGET;

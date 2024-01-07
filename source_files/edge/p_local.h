@@ -40,7 +40,7 @@
 
 #define BOOM_CARRY_FACTOR 0.09375f
 
-#define MLOOK_LIMIT FLOAT_2_ANG(75.0f)
+#define MLOOK_LIMIT 0x53333355 // 75 degree BAM angle
 
 #define MAXMOVE           (200.0f)
 #define STEPMOVE          (16.0f)
@@ -144,11 +144,11 @@ void       P_RemoveMobj(mobj_t *th);
 statenum_t P_MobjFindLabel(mobj_t *mobj, const char *label);
 bool       P_SetMobjState(mobj_t *mobj, statenum_t state);
 bool       P_SetMobjStateDeferred(mobj_t *mobj, statenum_t state, int tic_skip);
-void       P_SetMobjDirAndSpeed(mobj_t *mobj, angle_t angle, float slope, float speed);
+void       P_SetMobjDirAndSpeed(mobj_t *mobj, bam_angle angle, float slope, float speed);
 void       P_RunMobjThinkers(bool extra_tic);
-void       P_SpawnDebris(float x, float y, float z, angle_t angle, const mobjtype_c *debris);
-void       P_SpawnPuff(float x, float y, float z, const mobjtype_c *puff, angle_t angle);
-void       P_SpawnBlood(float x, float y, float z, float damage, angle_t angle, const mobjtype_c *blood);
+void       P_SpawnDebris(float x, float y, float z, bam_angle angle, const mobjtype_c *debris);
+void       P_SpawnPuff(float x, float y, float z, const mobjtype_c *puff, bam_angle angle);
+void       P_SpawnBlood(float x, float y, float z, float damage, bam_angle angle, const mobjtype_c *blood);
 void       P_CalcFullProperties(const mobj_t *mo, region_properties_t *newregp);
 bool       P_HitLiquidFloor(mobj_t *thing);
 
@@ -182,7 +182,7 @@ bool    P_CreateAggression(mobj_t *actor);
 bool    P_CheckMeleeRange(mobj_t *actor);
 bool    P_CheckMissileRange(mobj_t *actor);
 bool    P_Move(mobj_t *actor, bool path);
-bool    P_LookForPlayers(mobj_t *actor, angle_t range);
+bool    P_LookForPlayers(mobj_t *actor, bam_angle range);
 mobj_t *P_LookForShootSpot(const mobjtype_c *spot_type);
 
 //
@@ -253,11 +253,11 @@ extern linelist_c spechit;
 void    P_MapInit(void);
 bool    P_MapCheckBlockingLine(mobj_t *thing, mobj_t *spawnthing);
 mobj_t *P_MapFindCorpse(mobj_t *thing);
-mobj_t *P_MapTargetAutoAim(mobj_t *source, angle_t angle, float distance, bool force_aim);
-mobj_t *DoMapTargetAutoAim(mobj_t *source, angle_t angle, float distance, bool force_aim);
+mobj_t *P_MapTargetAutoAim(mobj_t *source, bam_angle angle, float distance, bool force_aim);
+mobj_t *DoMapTargetAutoAim(mobj_t *source, bam_angle angle, float distance, bool force_aim);
 void    P_TargetTheory(mobj_t *source, mobj_t *target, float *x, float *y, float *z);
 
-mobj_t *P_AimLineAttack(mobj_t *t1, angle_t angle, float distance, float *slope);
+mobj_t *P_AimLineAttack(mobj_t *t1, bam_angle angle, float distance, float *slope);
 void    P_UpdateMultipleFloors(sector_t *sector);
 bool    P_CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh);
 bool    P_SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush = 10, bool nocarething = false);
@@ -272,12 +272,12 @@ bool P_TeleportMove(mobj_t *thing, float x, float y, float z);
 bool P_TryMove(mobj_t *thing, float x, float y);
 void P_SlideMove(mobj_t *mo, float x, float y);
 void P_UseLines(player_t *player);
-void P_LineAttack(mobj_t *t1, angle_t angle, float distance, float slope, float damage, const damage_c *damtype,
+void P_LineAttack(mobj_t *t1, bam_angle angle, float distance, float slope, float damage, const damage_c *damtype,
                   const mobjtype_c *puff);
 
 void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special);
 
-mobj_t *GetMapTargetAimInfo(mobj_t *source, angle_t angle, float distance);
+mobj_t *GetMapTargetAimInfo(mobj_t *source, bam_angle angle, float distance);
 
 bool ReplaceMidTexFromPart(line_t *TheLine, scroll_part_e parts);
 

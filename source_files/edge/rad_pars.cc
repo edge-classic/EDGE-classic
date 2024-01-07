@@ -1479,7 +1479,7 @@ static void HandleSpawnKeyword(const char *par, s_thing_t *t)
         RAD_CheckForInt(par + 6, &val);
 
         if (ABS(val) <= 360)
-            t->angle = FLOAT_2_ANG((float)val);
+            t->angle = epi::BAM_FromDegrees((float)val);
         else
             t->angle = val << 16;
     }
@@ -1565,7 +1565,7 @@ static void RAD_ParseSpawnThing(param_set_t &pars)
         RAD_CheckForInt(angle_str, &val);
 
         if (ABS(val) <= 360)
-            t->angle = FLOAT_2_ANG((float)val);
+            t->angle = epi::BAM_FromDegrees((float)val);
         else
             t->angle = val << 16;
     }

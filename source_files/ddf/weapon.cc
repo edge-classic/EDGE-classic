@@ -855,7 +855,7 @@ void weapondef_c::Default(void)
 
     nothrust     = false;
     bind_key     = -1;
-    zoom_fov     = ANG_MAX;
+    zoom_fov     = ANG360;
     zoom_factor  = 0.0;
     refire_inacc = false;
     show_clip    = false;

@@ -261,8 +261,8 @@ static bool G_CheckSpot(player_t *player, const spawnpoint_t *point)
 
     // spawn a teleport fog
     // (temp fix for teleport effect)
-    x += 20 * M_Cos(point->angle);
-    y += 20 * M_Sin(point->angle);
+    x += 20 * epi::BAM_Cos(point->angle);
+    y += 20 * epi::BAM_Sin(point->angle);
     P_MobjCreateObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
 
     P_SpawnPlayer(player, point, false);

@@ -108,7 +108,7 @@ typedef struct s_thing_s
     float y = 0;
     float z = 0;
 
-    angle_t angle = 0;
+    bam_angle angle = 0;
     float   slope = 0;
     int     tag   = 0;
 

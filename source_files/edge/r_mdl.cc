@@ -108,7 +108,7 @@ typedef struct
 {
     s32_t facesfront;
     s32_t vertex[3];
-} raw_mdl_triangle_t;
+} raw_mdl_tribam_angle;
 
 typedef struct
 {
@@ -309,8 +309,8 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
 
     /* PARSE TRIANGLES */
 
-    raw_mdl_triangle_t *tris = new raw_mdl_triangle_t[num_tris];
-    f->Read(tris, num_tris * sizeof(raw_mdl_triangle_t));
+    raw_mdl_tribam_angle *tris = new raw_mdl_tribam_angle[num_tris];
+    f->Read(tris, num_tris * sizeof(raw_mdl_tribam_angle));
 
     /* PARSE FRAMES */
 
@@ -347,7 +347,7 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
 
         for (int j = 0; j < 3; j++, point++)
         {
-            raw_mdl_triangle_t raw_tri = tris[i];
+            raw_mdl_tribam_angle raw_tri = tris[i];
             point->vert_idx            = EPI_LE_S32(raw_tri.vertex[j]);
             float s                    = (float)EPI_LE_S16(texcoords[point->vert_idx].s);
             float t                    = (float)EPI_LE_S16(texcoords[point->vert_idx].t);
@@ -741,7 +741,7 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
 
     M_Angle2Matrix(tilt ? ~mo->vertangle : 0, &data.kx_mat, &data.kz_mat);
 
-    angle_t ang = mo->angle + rotation;
+    bam_angle ang = mo->angle + rotation;
 
     MIR_Angle(ang);
 

@@ -118,10 +118,10 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
     float new_y;
     float new_z;
 
-    angle_t new_ang;
+    bam_angle new_ang;
 
-    angle_t dest_ang;
-    angle_t source_ang = ANG90 + (line ? R_PointToAngle(0, 0, line->dx, line->dy) : 0);
+    bam_angle dest_ang;
+    bam_angle source_ang = ANG90 + (line ? R_PointToAngle(0, 0, line->dx, line->dy) : 0);
 
     mobj_t *currmobj = NULL;
     line_t *currline = NULL;
@@ -217,8 +217,8 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
             // is special (e.g. another teleporter), in order to prevent it
             // from being triggered.
 
-            new_x += TELE_FUDGE * M_Cos(dest_ang);
-            new_y += TELE_FUDGE * M_Sin(dest_ang);
+            new_x += TELE_FUDGE * epi::BAM_Cos(dest_ang);
+            new_y += TELE_FUDGE * epi::BAM_Sin(dest_ang);
         }
         else if (currmobj)
         {
@@ -226,10 +226,10 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
             dy = line->dy * (pos - 0.5f);
 
             // we need to rotate the offset vector
-            angle_t offset_ang = dest_ang - source_ang;
+            bam_angle offset_ang = dest_ang - source_ang;
 
-            float s = M_Sin(offset_ang);
-            float c = M_Cos(offset_ang);
+            float s = epi::BAM_Sin(offset_ang);
+            float c = epi::BAM_Cos(offset_ang);
 
             new_x += dx * c - dy * s;
             new_y += dy * c + dx * s;
@@ -261,16 +261,16 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
 
     if (thing->flags & MF_MISSILE)
     {
-        thing->mom.X = thing->speed * M_Cos(new_ang);
-        thing->mom.Y = thing->speed * M_Sin(new_ang);
+        thing->mom.X = thing->speed * epi::BAM_Cos(new_ang);
+        thing->mom.Y = thing->speed * epi::BAM_Sin(new_ang);
     }
     else if (def->special & TELSP_SameSpeed)
     {
         // we need to rotate the momentum vector
-        angle_t mom_ang = new_ang - thing->angle;
+        bam_angle mom_ang = new_ang - thing->angle;
 
-        float s = M_Sin(mom_ang);
-        float c = M_Cos(mom_ang);
+        float s = epi::BAM_Sin(mom_ang);
+        float c = epi::BAM_Cos(mom_ang);
 
         float mx = thing->mom.X;
         float my = thing->mom.Y;
@@ -320,7 +320,7 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
             //
             // -ES- 1998/10/29 When fading, we don't want to see the fog.
             //
-            fog = P_MobjCreateObject(new_x + 20.0f * M_Cos(thing->angle), new_y + 20.0f * M_Sin(thing->angle), new_z,
+            fog = P_MobjCreateObject(new_x + 20.0f * epi::BAM_Cos(thing->angle), new_y + 20.0f * epi::BAM_Sin(thing->angle), new_z,
                                      def->outspawnobj);
 
             // never use this object as a teleport destination

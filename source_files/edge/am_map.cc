@@ -496,10 +496,12 @@ void AM_Ticker(void)
 // Rotation in 2D.
 // Used to rotate player arrow line character.
 //
-static inline void Rotate(float &x, float &y, angle_t a)
+static inline void Rotate(float &x, float &y, bam_angle a)
 {
-    float new_x = x * M_Cos(a) - y * M_Sin(a);
-    float new_y = x * M_Sin(a) + y * M_Cos(a);
+    float bam_sin = epi::BAM_Sin(a);
+    float bam_cos = epi::BAM_Cos(a);
+    float new_x = x * bam_cos - y * bam_sin;
+    float new_y = x * bam_sin + y * bam_cos;
 
     x = new_x;
     y = new_y;
@@ -523,7 +525,7 @@ static void GetRotatedCoords(float sx, float sy, float &dx, float &dy)
     }
 }
 
-static inline angle_t GetRotatedAngle(angle_t src)
+static inline bam_angle GetRotatedAngle(bam_angle src)
 {
     if (rotatemap)
         return src + ANG90 - f_focus->angle;
@@ -619,7 +621,7 @@ static mline_t player_dagger[] = {
 
 #define NUMPLYRDGGRLINES (sizeof(player_dagger) / sizeof(mline_t))
 
-static void DrawLineCharacter(mline_t *lineguy, int lineguylines, float radius, angle_t angle, rgbcol_t rgb, float x,
+static void DrawLineCharacter(mline_t *lineguy, int lineguylines, float radius, bam_angle angle, rgbcol_t rgb, float x,
                               float y)
 {
     float cx, cy;

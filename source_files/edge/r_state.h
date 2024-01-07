@@ -75,7 +75,7 @@ extern float viewx;
 extern float viewy;
 extern float viewz;
 
-extern angle_t viewangle;
+extern bam_angle viewangle;
 
 // -ES- 1999/03/20 Added these.
 // Angles that are used for linedef clipping.
@@ -83,11 +83,11 @@ extern angle_t viewangle;
 // viewangletox lookups, and converted to BAM format.
 
 // angles used for clipping
-extern angle_t clip_left, clip_right;
+extern bam_angle clip_left, clip_right;
 
 // the scope of the clipped area (clip_left-clip_right).
 // ANG180 disables polar clipping
-extern angle_t clip_scope;
+extern bam_angle clip_scope;
 
 // the most extreme angles of the view
 extern float view_x_slope, view_y_slope;

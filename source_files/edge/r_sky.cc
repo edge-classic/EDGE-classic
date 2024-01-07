@@ -246,8 +246,8 @@ static void RGL_SetupSkyMatrices(void)
 
         glLoadIdentity();
 
-        glRotatef(270.0f - ANG_2_FLOAT(viewvertangle), 1.0f, 0.0f, 0.0f);
-        glRotatef(90.0f - ANG_2_FLOAT(viewangle), 0.0f, 0.0f, 1.0f);
+        glRotatef(270.0f - epi::Degrees_FromBAM(viewvertangle), 1.0f, 0.0f, 0.0f);
+        glRotatef(90.0f - epi::Degrees_FromBAM(viewangle), 0.0f, 0.0f, 1.0f);
     }
     else
     {
@@ -262,8 +262,8 @@ static void RGL_SetupSkyMatrices(void)
         glPushMatrix();
         glLoadIdentity();
 
-        glRotatef(270.0f - ANG_2_FLOAT(viewvertangle), 1.0f, 0.0f, 0.0f);
-        glRotatef(90.0f - ANG_2_FLOAT(viewangle), 0.0f, 0.0f, 1.0f);
+        glRotatef(270.0f - epi::Degrees_FromBAM(viewvertangle), 1.0f, 0.0f, 0.0f);
+        glRotatef(90.0f - epi::Degrees_FromBAM(viewangle), 0.0f, 0.0f, 1.0f);
         if (current_sky_stretch == SKS_Stretch)
             glTranslatef(0.0f, 0.0f, (r_farclip.f * 2 * 0.15)); // Draw center above horizon a little
         else

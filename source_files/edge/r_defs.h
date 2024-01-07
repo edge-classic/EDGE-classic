@@ -149,7 +149,7 @@ typedef struct surface_s
     // texturing matrix (usually identity)
     HMM_Vec2  x_mat;
     HMM_Vec2  y_mat;
-    angle_t rotation = 0;
+    bam_angle rotation = 0;
 
     // current offset and scrolling deltas (world coords)
     HMM_Vec2 offset;
@@ -485,7 +485,7 @@ typedef struct seg_s
     vertex_t *v1;
     vertex_t *v2;
 
-    angle_t angle;
+    bam_angle angle;
 
     float length;
 

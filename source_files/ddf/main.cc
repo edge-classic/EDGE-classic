@@ -1235,19 +1235,14 @@ void DDF_MainGetAngle(const char *info, void *storage)
 {
     SYS_ASSERT(info && storage);
 
-    angle_t *dest = (angle_t *)storage;
+    bam_angle *dest = (bam_angle *)storage;
 
     float val;
 
     if (sscanf(info, "%f", &val) != 1)
         DDF_Error("Bad angle value: %s\n", info);
 
-    if ((int)val == 360)
-        val = 359.5;
-    else if (val > 360.0f)
-        DDF_WarnError("Angle '%s' too large (must be less than 360)\n", info);
-
-    *dest = FLOAT_2_ANG(val);
+    *dest = epi::BAM_FromDegrees(val);
 }
 
 void DDF_MainGetSlope(const char *info, void *storage)
@@ -2088,7 +2083,7 @@ void weakness_info_c::Default()
     height[1] = PERCENT_MAKE(100);
 
     angle[0] = ANG0;
-    angle[1] = ANG_MAX;
+    angle[1] = ANG360;
 
     classes    = BITSET_EMPTY;
     multiply   = 2.5;

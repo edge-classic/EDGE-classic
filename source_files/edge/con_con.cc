@@ -1739,7 +1739,7 @@ void CON_ShowPosition(void)
     DrawText(x, y, textbuf, T_GREY176);
 
     y -= FNSZ;
-    sprintf(textbuf, "angle: %d", (int)ANG_2_FLOAT(p->mo->angle));
+    sprintf(textbuf, "angle: %d", (int)epi::Degrees_FromBAM(p->mo->angle));
     DrawText(x, y, textbuf, T_GREY176);
 
     y -= FNSZ;

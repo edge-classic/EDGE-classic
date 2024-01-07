@@ -1057,7 +1057,7 @@ class weakness_info_c
     weakness_info_c &operator=(weakness_info_c &rhs);
 
     percent_t height[2];
-    angle_t   angle[2];
+    bam_angle   angle[2];
     bitset_t  classes;
     float     multiply;
     percent_t painchance;
@@ -1147,7 +1147,7 @@ class mobjtype_c
     float     bounce_speed;
     float     bounce_up;
     float     sight_slope;
-    angle_t   sight_angle;
+    bam_angle   sight_angle;
     float     ride_friction;
     percent_t shadow_trans;
 

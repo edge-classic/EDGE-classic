@@ -2,7 +2,7 @@
 //  EDGE Platform Interface Header
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 2002-2023  The EDGE Team.
+//  Copyright (c) 2002-2024 The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License

@@ -1,7 +1,7 @@
 ===============================================================================
 Universal Doom Map Format EDGE-Classic extensions v1.0 - 2023.10.08
 
-    Copyright (c) 2023 The EDGE Team.
+    Copyright (c) 2023-2024 The EDGE Team.
     Permission is granted to copy, distribute and/or modify this document
     under the terms of the GNU Free Documentation License, Version 1.2
     or any later version published by the Free Software Foundation;

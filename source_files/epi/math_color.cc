@@ -2,7 +2,7 @@
 //  EPI Colour types (RGBA and HSV)
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 2004-2023  The EDGE Team.
+//  Copyright (c) 2004-2024 The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License

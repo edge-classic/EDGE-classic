@@ -2,7 +2,7 @@
 //  COAL LOCAL DEFS
 //----------------------------------------------------------------------
 //
-//  Copyright (C) 2021-2023  The EDGE Team
+//  Copyright (C) 2021-2024 The EDGE Team
 //  Copyright (C) 2009-2021  Andrew Apted
 //  Copyright (C) 1996-1997  Id Software, Inc.
 //

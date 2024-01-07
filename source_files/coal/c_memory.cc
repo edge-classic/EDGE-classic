@@ -2,7 +2,7 @@
 //  COAL MEMORY BLOCKS
 //----------------------------------------------------------------------
 //
-//  Copyright (C) 2021-2023  The EDGE Team
+//  Copyright (C) 2021-2024 The EDGE Team
 //  Copyright (C) 2009-2021  Andrew Apted
 //
 //  Coal is free software; you can redistribute it and/or modify

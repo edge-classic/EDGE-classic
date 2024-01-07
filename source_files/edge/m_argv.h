@@ -2,7 +2,7 @@
 //  EDGE Arguments/Parameters Code
 //------------------------------------------------------------------------
 //
-//  Copyright (C) 2023 The EDGE Team
+//  Copyright (C) 2023-2024 The EDGE Team
 //  Copyright (C) 2021-2022 The OBSIDIAN Team
 //  Copyright (C) 2006-2017 Andrew Apted
 //

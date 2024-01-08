@@ -158,7 +158,7 @@ static void CON_AddLine(const char *s, bool partial)
         con_used_lines++;
 }
 
-static void CON_EndoomAddLine(byte endoom_byte, const char *s, bool partial)
+static void CON_EndoomAddLine(uint8_t endoom_byte, const char *s, bool partial)
 {
     if (con_partial_last_line)
     {
@@ -223,7 +223,7 @@ static void CON_QuitAddLine(const char *s, bool partial)
         quit_used_lines++;
 }
 
-static void CON_QuitEndoomAddLine(byte endoom_byte, const char *s, bool partial)
+static void CON_QuitEndoomAddLine(uint8_t endoom_byte, const char *s, bool partial)
 {
     if (quit_partial_last_line)
     {
@@ -359,7 +359,7 @@ static void SplitIntoLines(char *src)
     current_color = T_LGREY;
 }
 
-static void EndoomSplitIntoLines(byte endoom_byte, char *src)
+static void EndoomSplitIntoLines(uint8_t endoom_byte, char *src)
 {
     char *dest = src;
     char *line = dest;
@@ -423,7 +423,7 @@ static void QuitSplitIntoLines(char *src)
     current_color = T_LGREY;
 }
 
-static void QuitEndoomSplitIntoLines(byte endoom_byte, char *src)
+static void QuitEndoomSplitIntoLines(uint8_t endoom_byte, char *src)
 {
     char *dest = src;
     char *line = dest;
@@ -455,7 +455,7 @@ void CON_Printf(const char *message, ...)
     SplitIntoLines(buffer);
 }
 
-void CON_EndoomPrintf(byte endoom_byte, const char *message, ...)
+void CON_EndoomPrintf(uint8_t endoom_byte, const char *message, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -479,7 +479,7 @@ void CON_QuitPrintf(const char *message, ...)
     QuitSplitIntoLines(buffer);
 }
 
-void CON_QuitEndoomPrintf(byte endoom_byte, const char *message, ...)
+void CON_QuitEndoomPrintf(uint8_t endoom_byte, const char *message, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -608,9 +608,9 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
         XMUL           = I_ROUND(chwidth * FNSZ_ratio / v_pixelaspect.f);
         float width    = (chwidth - con_font->spacing) * FNSZ_ratio / v_pixelaspect.f;
         float x_adjust = (XMUL - width) / 2;
-        float y_adjust = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift[current_font_size] * FNSZ_ratio;
-        float height   = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).height[current_font_size] * FNSZ_ratio;
-        stbtt_aligned_quad *q = con_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad[current_font_size];
+        float y_adjust = con_font->ttf_glyph_map.at(static_cast<uint8_t>(ch)).y_shift[current_font_size] * FNSZ_ratio;
+        float height   = con_font->ttf_glyph_map.at(static_cast<uint8_t>(ch)).height[current_font_size] * FNSZ_ratio;
+        stbtt_aligned_quad *q = con_font->ttf_glyph_map.at(static_cast<uint8_t>(ch)).char_quad[current_font_size];
         glBegin(GL_POLYGON);
         glTexCoord2f(q->s0, q->t0);
         glVertex2f(x + x_adjust, y - y_adjust);
@@ -624,8 +624,8 @@ static void DrawChar(int x, int y, char ch, rgbcol_t col)
         return;
     }
 
-    u8_t px = static_cast<u8_t>(ch) % 16;
-    u8_t py = 15 - static_cast<u8_t>(ch) / 16;
+    uint8_t px = static_cast<uint8_t>(ch) % 16;
+    uint8_t py = 15 - static_cast<uint8_t>(ch) / 16;
 
     float tx1 = (px)*con_font->font_image->ratio_w;
     float tx2 = (px + 1) * con_font->font_image->ratio_w;
@@ -680,8 +680,8 @@ static void DrawEndoomChar(float x, float y, char ch, rgbcol_t col, rgbcol_t col
     if (blink && con_cursor >= 16)
         ch = 0x20;
 
-    u8_t px = static_cast<u8_t>(ch) % 16;
-    u8_t py = 15 - static_cast<u8_t>(ch) / 16;
+    uint8_t px = static_cast<uint8_t>(ch) % 16;
+    uint8_t py = 15 - static_cast<uint8_t>(ch) / 16;
 
     float tx1 = (px)*endoom_font->font_image->ratio_w;
     float tx2 = (px + 1) * endoom_font->font_image->ratio_w;
@@ -792,7 +792,7 @@ static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
 
     for (int i = 0; i < 80; i++)
     {
-        byte info = endoom_line->endoom_bytes.at(i);
+        uint8_t info = endoom_line->endoom_bytes.at(i);
 
         DrawEndoomChar(x, y, endoom_line->line.at(i), endoom_colors[info & 15], endoom_colors[(info >> 4) & 7],
                        info & 128, tex_id, enwidth);
@@ -1610,18 +1610,18 @@ void CON_ShowFPS(void)
     // -AJA- 2022: reworked for better accuracy, ability to show WORST time
 
     // get difference since last call
-    static u32_t last_time = 0;
-    u32_t        time      = I_GetMicros();
-    u32_t        diff      = time - last_time;
+    static uint32_t last_time = 0;
+    uint32_t        time      = I_GetMicros();
+    uint32_t        diff      = time - last_time;
     last_time              = time;
 
     // last computed value, state to compute average
     static float avg_shown   = 100.00;
     static float worst_shown = 100.00;
 
-    static u32_t frames = 0;
-    static u32_t total  = 0;
-    static u32_t worst  = 0;
+    static uint32_t frames = 0;
+    static uint32_t total  = 0;
+    static uint32_t worst  = 0;
 
     // ignore a large diff or timer wrap-around
     if (diff < 1000000)
@@ -1766,7 +1766,7 @@ void CON_ShowPosition(void)
 void CON_PrintEndoom()
 {
     int   length = 0;
-    byte *data   = nullptr;
+    uint8_t *data   = nullptr;
 
     data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
     if (!data)
@@ -1807,7 +1807,7 @@ void CON_PrintEndoom()
 void CON_CreateQuitScreen()
 {
     int   length = 0;
-    byte *data   = nullptr;
+    uint8_t *data   = nullptr;
 
     data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
     if (!data)
@@ -1832,7 +1832,7 @@ void CON_CreateQuitScreen()
     {
         CON_QuitEndoomPrintf(
             data[i + 1], "%c",
-            (static_cast<u8_t>(data[i]) == 0 || static_cast<u8_t>(data[i]) == 255) ? 0x20 : static_cast<u8_t>(data[i]));
+            (static_cast<uint8_t>(data[i]) == 0 || static_cast<uint8_t>(data[i]) == 255) ? 0x20 : static_cast<uint8_t>(data[i]));
         row_counter++;
         if (row_counter == 80)
         {

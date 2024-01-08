@@ -212,7 +212,7 @@ static void AttackParseField(const char *field, const char *contents, int index,
     }
 
     // first, check attack commands
-    if (DDF_MainParseField(attack_commands, field, contents, (byte *)dynamic_atk))
+    if (DDF_MainParseField(attack_commands, field, contents, (uint8_t *)dynamic_atk))
         return;
 
     // we need to create an MOBJ for this attack

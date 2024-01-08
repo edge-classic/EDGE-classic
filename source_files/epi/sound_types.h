@@ -41,7 +41,7 @@ typedef enum
 } sound_format_e;
 
 // determine sound format from the file.
-sound_format_e Sound_DetectFormat(byte *data, int song_len);
+sound_format_e Sound_DetectFormat(uint8_t *data, int song_len);
 
 // determine sound format from the filename (by its extension).
 sound_format_e Sound_FilenameToFormat(const std::filesystem::path &filename);

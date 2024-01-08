@@ -116,7 +116,7 @@ static void DEH_ConvertFile(const std::string &filename)
     }
 
     int   length = F->GetLength();
-    byte *data   = F->LoadIntoMemory();
+    uint8_t *data   = F->LoadIntoMemory();
 
     if (data == NULL)
     {
@@ -317,7 +317,7 @@ epi::file_c *W_OpenPackFile(const std::string &name)
 
 //----------------------------------------------------------------------------
 
-byte *W_OpenPackOrLumpInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length)
+uint8_t *W_OpenPackOrLumpInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length)
 {
     int lump_df  = -1;
     int lump_num = W_CheckNumForName(name.c_str());
@@ -335,7 +335,7 @@ byte *W_OpenPackOrLumpInMemory(const std::string &name, const std::vector<std::s
                 epi::file_c *F = Pack_OpenMatch(df->pack, name, extensions);
                 if (F != NULL)
                 {
-                    byte *raw_packfile = F->LoadIntoMemory();
+                    uint8_t *raw_packfile = F->LoadIntoMemory();
                     *length            = F->GetLength();
                     delete F;
                     return raw_packfile;

@@ -48,7 +48,7 @@ extern bool dev_stereo; // FIXME: encapsulation
 
 struct datalump_t
 {
-    const byte *data;
+    const uint8_t *data;
 
     size_t pos;
     size_t size;
@@ -78,10 +78,10 @@ class oggplayer_c : public abstract_music_c
     OggVorbis_File ogg_stream;
     vorbis_info   *vorbis_inf = nullptr;
 
-    s16_t *mono_buffer;
+    int16_t *mono_buffer;
 
   public:
-    bool OpenMemory(byte *data, int length);
+    bool OpenMemory(uint8_t *data, int length);
 
     virtual void Close(void);
 
@@ -175,7 +175,7 @@ long oggplayer_memtell(void *datasource)
 
 oggplayer_c::oggplayer_c() : status(NOT_LOADED), vorbis_inf(NULL)
 {
-    mono_buffer = new s16_t[OGGV_NUM_SAMPLES * 2];
+    mono_buffer = new int16_t[OGGV_NUM_SAMPLES * 2];
 }
 
 oggplayer_c::~oggplayer_c()
@@ -230,9 +230,9 @@ void oggplayer_c::PostOpenInit()
     status = STOPPED;
 }
 
-static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
+static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
 {
-    const s16_t *s_end = src + len * 2;
+    const int16_t *s_end = src + len * 2;
 
     for (; src < s_end; src += 2)
     {
@@ -249,7 +249,7 @@ bool oggplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 
     while (samples < OGGV_NUM_SAMPLES)
     {
-        s16_t *data_buf;
+        int16_t *data_buf;
 
         if (is_stereo && !dev_stereo)
             data_buf = mono_buffer;
@@ -258,8 +258,8 @@ bool oggplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 
         int section;
         int got_size =
-            ov_read(&ogg_stream, (char *)data_buf, (OGGV_NUM_SAMPLES - samples) * (is_stereo ? 2 : 1) * sizeof(s16_t),
-                    ogg_endian, sizeof(s16_t), 1 /* signed data */, &section);
+            ov_read(&ogg_stream, (char *)data_buf, (OGGV_NUM_SAMPLES - samples) * (is_stereo ? 2 : 1) * sizeof(int16_t),
+                    ogg_endian, sizeof(int16_t), 1 /* signed data */, &section);
 
         if (got_size == OV_HOLE) // ignore corruption
             continue;
@@ -285,7 +285,7 @@ bool oggplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
             return false; /* NOT REACHED */
         }
 
-        got_size /= (is_stereo ? 2 : 1) * sizeof(s16_t);
+        got_size /= (is_stereo ? 2 : 1) * sizeof(int16_t);
 
         if (is_stereo && !dev_stereo)
             ConvertToMono(buf->data_L + samples, mono_buffer, got_size);
@@ -296,7 +296,7 @@ bool oggplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
     return (samples > 0);
 }
 
-bool oggplayer_c::OpenMemory(byte *data, int length)
+bool oggplayer_c::OpenMemory(uint8_t *data, int length)
 {
     if (status != NOT_LOADED)
         Close();
@@ -418,7 +418,7 @@ void oggplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c *S_PlayOGGMusic(byte *data, int length, bool looping)
+abstract_music_c *S_PlayOGGMusic(uint8_t *data, int length, bool looping)
 {
     oggplayer_c *player = new oggplayer_c();
 
@@ -434,7 +434,7 @@ abstract_music_c *S_PlayOGGMusic(byte *data, int length, bool looping)
     return player;
 }
 
-bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length)
+bool S_LoadOGGSound(epi::sound_data_c *buf, const uint8_t *data, int length)
 {
     datalump_t ogg_lump;
 
@@ -486,11 +486,11 @@ bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length)
     {
         int want = 2048;
 
-        s16_t *buffer = gather.MakeChunk(want, is_stereo);
+        int16_t *buffer = gather.MakeChunk(want, is_stereo);
 
         int section;
-        int got_size = ov_read(&ogg_stream, (char *)buffer, want * (is_stereo ? 2 : 1) * sizeof(s16_t), ogg_endian,
-                               sizeof(s16_t), 1 /* signed data */, &section);
+        int got_size = ov_read(&ogg_stream, (char *)buffer, want * (is_stereo ? 2 : 1) * sizeof(int16_t), ogg_endian,
+                               sizeof(int16_t), 1 /* signed data */, &section);
 
         if (got_size == OV_HOLE) // ignore corruption
         {
@@ -511,7 +511,7 @@ bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length)
             break;
         }
 
-        got_size /= (is_stereo ? 2 : 1) * sizeof(s16_t);
+        got_size /= (is_stereo ? 2 : 1) * sizeof(int16_t);
 
         gather.CommitChunk(got_size);
     }

@@ -64,10 +64,10 @@
 typedef struct
 {
     // -1 is the last post in a column
-    byte topdelta;
+    uint8_t topdelta;
 
     // length data bytes follows
-    byte length; // length data bytes follows
+    uint8_t length; // length data bytes follows
 } post_t;
 
 // column_t is a list of 0 or more post_t, (byte)-1 terminated
@@ -77,7 +77,7 @@ typedef post_t column_t;
 
 // Dummy image, for when texture/flat/graphic is unknown.  Row major
 // order.  Could be packed, but why bother ?
-static byte dummy_graphic[DUMMY_X * DUMMY_Y] = {
+static uint8_t dummy_graphic[DUMMY_X * DUMMY_Y] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1,
     1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
     0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
@@ -117,8 +117,8 @@ static void DrawColumnIntoEpiBlock(image_c *rim, epi::image_data_c *img, const c
         int delta = patchcol->topdelta;
         int count = patchcol->length;
 
-        const byte *src  = (const byte *)patchcol + 3;
-        byte       *dest = img->pixels + x;
+        const uint8_t *src  = (const uint8_t *)patchcol + 3;
+        uint8_t       *dest = img->pixels + x;
 
         // logic for DeePsea's tall patches
         if (delta <= top)
@@ -144,7 +144,7 @@ static void DrawColumnIntoEpiBlock(image_c *rim, epi::image_data_c *img, const c
         }
 
         // jump to next column
-        patchcol = (const column_t *)((const byte *)patchcol + patchcol->length + 4);
+        patchcol = (const column_t *)((const uint8_t *)patchcol + patchcol->length + 4);
     }
 }
 
@@ -172,7 +172,7 @@ static epi::image_data_c *ReadFlatAsEpiBlock(image_c *rim)
 
     epi::image_data_c *img = new epi::image_data_c(tw, th, 1);
 
-    byte *dest = img->pixels;
+    uint8_t *dest = img->pixels;
 
 #ifdef MAKE_TEXTURES_WHITE
     img->Clear(pal_white);
@@ -183,14 +183,14 @@ static epi::image_data_c *ReadFlatAsEpiBlock(image_c *rim)
     img->Clear(pal_black);
 
     // read in pixels
-    const byte *src = (const byte *)W_LoadLump(rim->source.flat.lump);
+    const uint8_t *src = (const uint8_t *)W_LoadLump(rim->source.flat.lump);
 
     for (int y = 0; y < h; y++)
         for (int x = 0; x < w; x++)
         {
-            byte src_pix = src[y * w + x];
+           uint8_t src_pix = src[y * w + x];
 
-            byte *dest_pix = &dest[(h - 1 - y) * tw + x];
+            uint8_t *dest_pix = &dest[(h - 1 - y) * tw + x];
 
             // make sure TRANS_PIXEL values (which do not occur naturally in
             // Doom images) are properly remapped.
@@ -273,7 +273,7 @@ static epi::image_data_c *ReadTextureAsEpiBlock(image_c *rim)
             if (offset < 0 || offset >= realsize)
                 I_Error("Bad image offset 0x%08x in image [%s]\n", offset, rim->name.c_str());
 
-            const column_t *patchcol = (const column_t *)((const byte *)realpatch + offset);
+            const column_t *patchcol = (const column_t *)((const uint8_t *)realpatch + offset);
 
             DrawColumnIntoEpiBlock(rim, img, patchcol, x, y1);
         }
@@ -384,7 +384,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
         if (offset < 0 || offset >= realsize)
             I_Error("Bad image offset 0x%08x in image [%s]\n", offset, rim->name.c_str());
 
-        const column_t *patchcol = (const column_t *)((const byte *)realpatch + offset);
+        const column_t *patchcol = (const column_t *)((const uint8_t *)realpatch + offset);
 
         DrawColumnIntoEpiBlock(rim, img, patchcol, x, 0);
     }
@@ -413,7 +413,7 @@ static epi::image_data_c *ReadDummyAsEpiBlock(image_c *rim)
     for (int y = 0; y < DUMMY_Y; y++)
         for (int x = 0; x < DUMMY_X; x++)
         {
-            byte *dest_pix = img->PixelAt(x, y);
+            uint8_t *dest_pix = img->PixelAt(x, y);
 
             if (dummy_graphic[(DUMMY_Y - 1 - y) * DUMMY_X + x])
             {
@@ -448,7 +448,7 @@ static epi::image_data_c *CreateUserColourImage(image_c *rim, imagedef_c *def)
 
     epi::image_data_c *img = new epi::image_data_c(tw, th, 3);
 
-    byte *dest = img->pixels;
+    uint8_t *dest = img->pixels;
 
     for (int y = 0; y < img->height; y++)
         for (int x = 0; x < img->width; x++)

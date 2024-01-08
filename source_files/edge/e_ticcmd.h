@@ -33,32 +33,32 @@
 typedef struct
 {
     // horizontal turning, *65536 for angle delta
-    s16_t angleturn;
+    int16_t angleturn;
 
     // vertical angle for mlook, *65536 for angle delta
-    s16_t mlookturn;
+    int16_t mlookturn;
 
-    u16_t unused;
+    uint16_t unused;
 
     // active player number, -1 for "dropped out" player
-    s16_t player_idx;
+    int16_t player_idx;
 
     // /32 for move
-    s8_t forwardmove;
+    int8_t forwardmove;
 
     // /32 for move
-    s8_t sidemove;
+    int8_t sidemove;
 
     // -MH- 1998/08/23 upward movement
-    s8_t upwardmove;
+    int8_t upwardmove;
 
-    byte buttons;
+    uint8_t buttons;
 
-    u16_t extbuttons;
+    uint16_t extbuttons;
 
-    byte chatchar;
+    uint8_t chatchar;
 
-    byte unused2, unused3;
+    uint8_t unused2, unused3;
 } ticcmd_t;
 
 //

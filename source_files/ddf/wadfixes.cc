@@ -80,7 +80,7 @@ static void FixParseField(const char *field, const char *contents, int index, bo
     I_Debugf("FIX_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(fix_commands, field, contents, (byte *)dynamic_fixdef))
+    if (DDF_MainParseField(fix_commands, field, contents, (uint8_t *)dynamic_fixdef))
         return;
 
     DDF_WarnError("Unknown WADFIXES command: %s\n", field);

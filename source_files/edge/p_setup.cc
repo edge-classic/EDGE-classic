@@ -153,7 +153,7 @@ static void GetMUSINFOTracksForLevel(void)
     if (musinfo_tracks.count(currmap->name) && musinfo_tracks[currmap->name].processed)
         return;
     int   raw_length = 0;
-    byte *raw_musinfo   = W_OpenPackOrLumpInMemory("MUSINFO", {".txt"}, &raw_length);
+    uint8_t *raw_musinfo   = W_OpenPackOrLumpInMemory("MUSINFO", {".txt"}, &raw_length);
     if (!raw_musinfo)
         return;
     std::string musinfo;
@@ -216,13 +216,13 @@ static void GetMUSINFOTracksForLevel(void)
     }
 }
 
-static void CheckEvilutionBug(byte *data, int length)
+static void CheckEvilutionBug(uint8_t *data, int length)
 {
     // The IWAD for TNT Evilution has a bug in MAP31 which prevents
     // the yellow keycard from appearing (the "Multiplayer Only" flag
     // is set), and the level cannot be completed.  This fixes it.
 
-    static const byte Y_key_data[] = {0x59, 0xf5, 0x48, 0xf8, 0, 0, 6, 0, 0x17, 0};
+    static const uint8_t Y_key_data[] = {0x59, 0xf5, 0x48, 0xf8, 0, 0, 6, 0, 0x17, 0};
 
     static const int Y_key_offset = 0x125C;
 
@@ -239,15 +239,15 @@ static void CheckEvilutionBug(byte *data, int length)
     data[8] &= ~MTF_NOT_SINGLE;
 }
 
-static void CheckDoom2Map05Bug(byte *data, int length)
+static void CheckDoom2Map05Bug(uint8_t *data, int length)
 {
     // The IWAD for Doom2 has a bug in MAP05 where 2 sectors
     // are incorrectly tagged 9.  This fixes it.
 
-    static const byte sector_4_data[] = {0x60, 0,    0xc8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
+    static const uint8_t sector_4_data[] = {0x60, 0,    0xc8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
                                          0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    0, 0, 9, 0};
 
-    static const byte sector_153_data[] = {0x98, 0,    0xe8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
+    static const uint8_t sector_153_data[] = {0x98, 0,    0xe8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
                                            0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    9, 0, 9, 0};
 
     static const int sector_4_offset   = 0x68; // 104
@@ -282,7 +282,7 @@ static void CheckDoom2Map05Bug(byte *data, int length)
 
 static void LoadVertexes(int lump)
 {
-    const byte         *data;
+    const uint8_t      *data;
     int                 i;
     const raw_vertex_t *ml;
     vertex_t           *li;
@@ -387,7 +387,7 @@ static void GroupSectorTags(sector_t *dest, sector_t *seclist, int numsecs)
 
 static void LoadSectors(int lump)
 {
-    const byte         *data;
+    const uint8_t      *data;
     int                 i;
     const raw_sector_t *ms;
     sector_t           *ss;
@@ -409,9 +409,9 @@ static void LoadSectors(int lump)
     Z_Clear(sectors, sector_t, numsectors);
 
     data = W_LoadLump(lump);
-    mapsector_CRC.AddBlock((const byte *)data, W_LumpLength(lump));
+    mapsector_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
 
-    CheckDoom2Map05Bug((byte *)data, W_LumpLength(lump)); // Lobo: 2023
+    CheckDoom2Map05Bug((uint8_t *)data, W_LumpLength(lump)); // Lobo: 2023
 
     ms = (const raw_sector_t *)data;
     ss = sectors;
@@ -684,7 +684,7 @@ static void LoadThings(int lump)
     int     options, typenum;
     int     i;
 
-    const byte        *data;
+    const uint8_t     *data;
     const raw_thing_t *mt;
     const mobjtype_c  *objtype;
 
@@ -697,9 +697,9 @@ static void LoadThings(int lump)
         I_Error("Bad WAD: level %s contains 0 things.\n", currmap->lump.c_str());
 
     data = W_LoadLump(lump);
-    mapthing_CRC.AddBlock((const byte *)data, W_LumpLength(lump));
+    mapthing_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
 
-    CheckEvilutionBug((byte *)data, W_LumpLength(lump));
+    CheckEvilutionBug((uint8_t *)data, W_LumpLength(lump));
 
     // -AJA- 2004/11/04: check the options in all things to see whether
     // we can use new option flags or not.  Same old wads put 1 bits in
@@ -818,7 +818,7 @@ static void LoadHexenThings(int lump)
     int     tag;
     int     i;
 
-    const byte              *data;
+    const uint8_t           *data;
     const raw_hexen_thing_t *mt;
     const mobjtype_c        *objtype;
 
@@ -831,7 +831,7 @@ static void LoadHexenThings(int lump)
         I_Error("Bad WAD: level %s contains 0 things.\n", currmap->lump.c_str());
 
     data = W_LoadLump(lump);
-    mapthing_CRC.AddBlock((const byte *)data, W_LumpLength(lump));
+    mapthing_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
 
     mt = (const raw_hexen_thing_t *)data;
     for (i = 0; i < mapthing_NUM; i++, mt++)
@@ -958,8 +958,8 @@ static void LoadLineDefs(int lump)
 
     temp_line_sides = new int[numlines * 2];
 
-    const byte *data = W_LoadLump(lump);
-    mapline_CRC.AddBlock((const byte *)data, W_LumpLength(lump));
+    const uint8_t *data = W_LoadLump(lump);
+    mapline_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
 
     line_t              *ld  = lines;
     const raw_linedef_t *mld = (const raw_linedef_t *)data;
@@ -1038,8 +1038,8 @@ static void LoadHexenLineDefs(int lump)
 
     temp_line_sides = new int[numlines * 2];
 
-    const byte *data = W_LoadLump(lump);
-    mapline_CRC.AddBlock((const byte *)data, W_LumpLength(lump));
+    const uint8_t *data = W_LoadLump(lump);
+    mapline_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
 
     line_t                    *ld  = lines;
     const raw_hexen_linedef_t *mld = (const raw_hexen_linedef_t *)data;
@@ -1172,15 +1172,15 @@ static void AssignSubsectorsToSectors()
 // our built-in AJBSP produces now
 static void LoadXGL3Nodes(int lumpnum)
 {
-    int               i, xglen = 0;
-    byte             *xgldata = nullptr;
-    std::vector<byte> zgldata;
-    byte             *td = nullptr;
+    int                 i, xglen = 0;
+    uint8_t             *xgldata = nullptr;
+    std::vector<uint8_t> zgldata;
+    uint8_t             *td = nullptr;
 
     I_Debugf("LoadXGL3Nodes:\n");
 
     xglen   = W_LumpLength(lumpnum);
-    xgldata = (byte *)W_LoadLump(lumpnum);
+    xgldata = (uint8_t *)W_LoadLump(lumpnum);
     if (!xgldata)
         I_Error("LoadXGL3Nodes: Couldn't load lump\n");
 
@@ -2570,7 +2570,7 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
 static void LoadSideDefs(int lump)
 {
     int                  i;
-    const byte          *data;
+    const uint8_t       *data;
     const raw_sidedef_t *msd;
     side_t              *sd;
 
@@ -2855,7 +2855,7 @@ static void SetupVertGaps(void)
 
 static void DetectDeepWaterTrick(void)
 {
-    byte *self_subs = new byte[numsubsectors];
+    uint8_t *self_subs = new uint8_t[numsubsectors];
 
     memset(self_subs, 0, numsubsectors);
 
@@ -3491,10 +3491,10 @@ void P_SetupLevel(void)
     // -CW- 2017/01/29: check for UDMF map lump
     if (W_VerifyLumpName(lumpnum + 1, "TEXTMAP"))
     {
-        udmf_level       = true;
-        udmf_lumpnum     = lumpnum + 1;
-        int   raw_length = 0;
-        byte *raw_udmf   = W_LoadLump(udmf_lumpnum, &raw_length);
+        udmf_level          = true;
+        udmf_lumpnum        = lumpnum + 1;
+        int   raw_length    = 0;
+        uint8_t *raw_udmf   = W_LoadLump(udmf_lumpnum, &raw_length);
         udmf_lump.clear();
         udmf_lump.resize(raw_length);
         memcpy(udmf_lump.data(), raw_udmf, raw_length);

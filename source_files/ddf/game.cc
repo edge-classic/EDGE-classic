@@ -141,7 +141,7 @@ static void GameParseField(const char *field, const char *contents, int index, b
         return;
     }
 
-    if (DDF_MainParseField(gamedef_commands, field, contents, (byte *)dynamic_gamedef))
+    if (DDF_MainParseField(gamedef_commands, field, contents, (uint8_t *)dynamic_gamedef))
         return; // OK
 
     DDF_WarnError("Unknown games.ddf command: %s\n", field);

@@ -34,7 +34,7 @@ namespace Hq2x
 {
 /* ------ Functions ------------------------------------- */
 
-void Setup(const byte *palette, int trans_pixel);
+void Setup(const uint8_t *palette, int trans_pixel);
 // initialises look-up tables based on the given palette.
 // The 'trans_pixel' gives a pixel index which is fully
 // transparent, or none when -1.

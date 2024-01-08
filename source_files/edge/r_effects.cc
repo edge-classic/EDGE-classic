@@ -209,7 +209,7 @@ void RGL_ColourmapEffect(player_t *player)
 //
 void RGL_PaletteEffect(player_t *player)
 {
-    byte rgb_data[3];
+    uint8_t rgb_data[3];
 
     float s = EffectStrength(player);
 

@@ -45,9 +45,9 @@ namespace epi
 /* The core of the MD5 algorithm, this alters an existing MD5 hash to
  * reflect the addition of 16 longwords of new data.
  */
-void md5hash_c::packhash_c::Transform(const u32_t extra[16])
+void md5hash_c::packhash_c::Transform(const uint32_t extra[16])
 {
-    u32_t a, b, c, d;
+    uint32_t a, b, c, d;
 
     a = pack[0];
     b = pack[1];
@@ -136,9 +136,9 @@ md5hash_c::packhash_c::packhash_c()
     pack[3] = 0x10325476;
 }
 
-void md5hash_c::packhash_c::TransformBytes(const byte chunk[64])
+void md5hash_c::packhash_c::TransformBytes(const uint8_t chunk[64])
 {
-    u32_t extra[16];
+    uint32_t extra[16];
 
     for (int pos = 0; pos < 16; pos++, chunk += 4)
     {
@@ -148,7 +148,7 @@ void md5hash_c::packhash_c::TransformBytes(const byte chunk[64])
     Transform(extra);
 }
 
-void md5hash_c::packhash_c::Encode(byte *hash)
+void md5hash_c::packhash_c::Encode(uint8_t *hash)
 {
     for (int pos = 0; pos < 4; pos++)
     {
@@ -166,12 +166,12 @@ md5hash_c::md5hash_c()
     memset(hash, 0, sizeof(hash));
 }
 
-md5hash_c::md5hash_c(const byte *message, unsigned int len)
+md5hash_c::md5hash_c(const uint8_t *message, unsigned int len)
 {
     Compute(message, len);
 }
 
-void md5hash_c::Compute(const byte *message, unsigned int len)
+void md5hash_c::Compute(const uint8_t *message, unsigned int len)
 {
     packhash_c packed;
 
@@ -182,7 +182,7 @@ void md5hash_c::Compute(const byte *message, unsigned int len)
         packed.TransformBytes(message);
     }
 
-    byte buffer[128];
+    uint8_t buffer[128];
 
     if (len > 0)
     {

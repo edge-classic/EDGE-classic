@@ -53,7 +53,7 @@ void std_to_box(int boxes[], float sigma, int n)
         boxes[i] = ((i < m ? wl : wu) - 1) / 2;
 }
 
-void horizontal_blur_rgb(u8_t *in, u8_t *out, int w, int h, int c, int r)
+void horizontal_blur_rgb(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
 {
     float iarr = 1.f / (r + r + 1);
     for (int i = 0; i < h; i++)
@@ -105,7 +105,7 @@ void horizontal_blur_rgb(u8_t *in, u8_t *out, int w, int h, int c, int r)
     }
 }
 
-void total_blur_rgb(u8_t *in, u8_t *out, int w, int h, int c, int r)
+void total_blur_rgb(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
 {
     // radius range on either side of a pixel + the pixel itself
     float iarr = 1.f / (r + r + 1);
@@ -158,7 +158,7 @@ void total_blur_rgb(u8_t *in, u8_t *out, int w, int h, int c, int r)
     }
 }
 
-void box_blur_rgb(u8_t *&in, u8_t *&out, int w, int h, int c, int r)
+void box_blur_rgb(uint8_t *&in, uint8_t *&out, int w, int h, int c, int r)
 {
     std::swap(in, out);
     horizontal_blur_rgb(out, in, w, h, c, r);

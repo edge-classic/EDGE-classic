@@ -58,7 +58,7 @@ extern bool   need_to_draw_sky;
 
 // format uses float pointing values, but to allow for endianness
 // conversions they are represented here as unsigned integers.
-typedef u32_t f32_t;
+typedef uint32_t f32_t;
 
 #define MD2_IDENTIFIER "IDP2"
 #define MD2_VERSION    8
@@ -67,43 +67,43 @@ typedef struct
 {
     char ident[4];
 
-    s32_t version;
+    int32_t version;
 
-    s32_t skin_width;
-    s32_t skin_height;
+    int32_t skin_width;
+    int32_t skin_height;
 
-    s32_t frame_size;
+    int32_t frame_size;
 
-    s32_t num_skins;
-    s32_t num_vertices; // per frame
-    s32_t num_st;
-    s32_t num_tris;
-    s32_t num_glcmds;
-    s32_t num_frames;
+    int32_t num_skins;
+    int32_t num_vertices; // per frame
+    int32_t num_st;
+    int32_t num_tris;
+    int32_t num_glcmds;
+    int32_t num_frames;
 
-    s32_t ofs_skins;
-    s32_t ofs_st;
-    s32_t ofs_tris;
-    s32_t ofs_frames;
-    s32_t ofs_glcmds;
-    s32_t ofs_end;
+    int32_t ofs_skins;
+    int32_t ofs_st;
+    int32_t ofs_tris;
+    int32_t ofs_frames;
+    int32_t ofs_glcmds;
+    int32_t ofs_end;
 } raw_md2_header_t;
 
 typedef struct
 {
-    u16_t s, t;
+    uint16_t s, t;
 } raw_md2_texcoord_t;
 
 typedef struct
 {
-    u16_t index_xyz[3];
-    u16_t index_st[3];
+    uint16_t index_xyz[3];
+    uint16_t index_st[3];
 } raw_md2_triangle_t;
 
 typedef struct
 {
-    u8_t x, y, z;
-    u8_t light_normal;
+    uint8_t x, y, z;
+    uint8_t light_normal;
 } raw_md2_vertex_t;
 
 typedef struct
@@ -130,20 +130,20 @@ typedef struct
 typedef struct
 {
     char  ident[4];
-    s32_t version;
+    int32_t version;
 
     char  name[64];
-    u32_t flags;
+    uint32_t flags;
 
-    s32_t num_frames;
-    s32_t num_tags;
-    s32_t num_meshes;
-    s32_t num_skins;
+    int32_t num_frames;
+    int32_t num_tags;
+    int32_t num_meshes;
+    int32_t num_skins;
 
-    s32_t ofs_frames;
-    s32_t ofs_tags;
-    s32_t ofs_meshes;
-    s32_t ofs_end;
+    int32_t ofs_frames;
+    int32_t ofs_tags;
+    int32_t ofs_meshes;
+    int32_t ofs_end;
 } raw_md3_header_t;
 
 typedef struct
@@ -151,18 +151,18 @@ typedef struct
     char ident[4];
     char name[64];
 
-    u32_t flags;
+    uint32_t flags;
 
-    s32_t num_frames;
-    s32_t num_shaders;
-    s32_t num_verts;
-    s32_t num_tris;
+    int32_t num_frames;
+    int32_t num_shaders;
+    int32_t num_verts;
+    int32_t num_tris;
 
-    s32_t ofs_tris;
-    s32_t ofs_shaders;
-    s32_t ofs_texcoords; // one texcoord per vertex
-    s32_t ofs_verts;
-    s32_t ofs_next_mesh;
+    int32_t ofs_tris;
+    int32_t ofs_shaders;
+    int32_t ofs_texcoords; // one texcoord per vertex
+    int32_t ofs_verts;
+    int32_t ofs_next_mesh;
 } raw_md3_mesh_t;
 
 typedef struct
@@ -172,14 +172,14 @@ typedef struct
 
 typedef struct
 {
-    u32_t index_xyz[3];
+    uint32_t index_xyz[3];
 } raw_md3_triangle_t;
 
 typedef struct
 {
-    s16_t x, y, z;
+    int16_t x, y, z;
 
-    u8_t pitch, yaw;
+    uint8_t pitch, yaw;
 } raw_md3_vertex_t;
 
 typedef struct
@@ -287,7 +287,7 @@ static const char *CopyFrameName(raw_md3_frame_t *frm)
     return str;
 }
 
-static short *CreateNormalList(byte *which_normals)
+static short *CreateNormalList(uint8_t *which_normals)
 {
     int count = 0;
     int i;
@@ -411,7 +411,7 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 
     /* PARSE FRAMES */
 
-    byte which_normals[MD_NUM_NORMALS];
+    uint8_t which_normals[MD_NUM_NORMALS];
 
     raw_md2_vertex_t *raw_verts = new raw_md2_vertex_t[md->verts_per_frame];
 
@@ -516,10 +516,10 @@ short MD2_FindFrame(md2_model_c *md, const char *name)
 
 /*============== MD3 LOADING CODE ====================*/
 
-static byte md3_normal_to_md2[128][128];
+static uint8_t md3_normal_to_md2[128][128];
 static bool md3_normal_map_built = false;
 
-static byte MD2_FindNormal(float x, float y, float z)
+static uint8_t MD2_FindNormal(float x, float y, float z)
 {
     // -AJA- we make the search around SIX times faster by only
     // considering the first quadrant (where x, y, z are >= 0).
@@ -579,7 +579,7 @@ static void MD3_CreateNormalMap(void)
 
     for (int pitch = 0; pitch < 128; pitch++)
     {
-        byte *dest = &md3_normal_to_md2[pitch][0];
+        uint8_t *dest = &md3_normal_to_md2[pitch][0];
 
         for (int yaw = 0; yaw < 128; yaw++)
         {
@@ -705,7 +705,7 @@ md2_model_c *MD3_LoadModel(epi::file_c *f)
 
     f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_verts), epi::file_c::SEEKPOINT_START);
 
-    byte which_normals[MD_NUM_NORMALS];
+    uint8_t which_normals[MD_NUM_NORMALS];
 
     for (i = 0; i < num_frames; i++)
     {

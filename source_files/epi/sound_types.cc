@@ -27,7 +27,7 @@
 namespace epi
 {
 
-sound_format_e Sound_DetectFormat(byte *data, int song_len)
+sound_format_e Sound_DetectFormat(uint8_t *data, int song_len)
 {
     // Start by trying the simple reliable header checks
 

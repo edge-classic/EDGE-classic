@@ -150,7 +150,7 @@ static bool ButtonDown(player_t *p, int ATK)
 
     */
 
-    u16_t tempbuttons = 0;
+    uint16_t tempbuttons = 0;
     switch (ATK)
     {
     case 0:

@@ -39,7 +39,7 @@ typedef enum
 
 typedef struct colmapcache_s
 {
-    byte *data;
+    uint8_t *data;
     int   size;
 } colmapcache_t;
 

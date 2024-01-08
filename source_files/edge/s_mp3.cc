@@ -59,13 +59,13 @@ class mp3player_c : public abstract_music_c
     bool looping;
     bool is_stereo;
 
-    byte  *mp3_data = nullptr;
+    uint8_t  *mp3_data = nullptr;
     drmp3 *mp3_dec  = nullptr;
 
-    s16_t *mono_buffer;
+    int16_t *mono_buffer;
 
   public:
-    bool OpenMemory(byte *data, int length);
+    bool OpenMemory(uint8_t *data, int length);
 
     virtual void Close(void);
 
@@ -87,7 +87,7 @@ class mp3player_c : public abstract_music_c
 
 mp3player_c::mp3player_c() : status(NOT_LOADED)
 {
-    mono_buffer = new s16_t[MP3_SAMPLES * 2];
+    mono_buffer = new int16_t[MP3_SAMPLES * 2];
 }
 
 mp3player_c::~mp3player_c()
@@ -113,9 +113,9 @@ void mp3player_c::PostOpenInit()
     status = STOPPED;
 }
 
-static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
+static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
 {
-    const s16_t *s_end = src + len * 2;
+    const int16_t *s_end = src + len * 2;
 
     for (; src < s_end; src += 2)
     {
@@ -126,7 +126,7 @@ static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
 
 bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
 {
-    s16_t *data_buf;
+    int16_t *data_buf;
 
     if (is_stereo && !dev_stereo)
         data_buf = mono_buffer;
@@ -157,7 +157,7 @@ bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
     return (true);
 }
 
-bool mp3player_c::OpenMemory(byte *data, int length)
+bool mp3player_c::OpenMemory(uint8_t *data, int length)
 {
     if (status != NOT_LOADED)
         Close();
@@ -273,7 +273,7 @@ void mp3player_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c *S_PlayMP3Music(byte *data, int length, bool looping)
+abstract_music_c *S_PlayMP3Music(uint8_t *data, int length, bool looping)
 {
     mp3player_c *player = new mp3player_c();
 
@@ -289,7 +289,7 @@ abstract_music_c *S_PlayMP3Music(byte *data, int length, bool looping)
     return player;
 }
 
-bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length)
+bool S_LoadMP3Sound(epi::sound_data_c *buf, const uint8_t *data, int length)
 {
     drmp3 mp3;
 
@@ -324,7 +324,7 @@ bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length)
 
     epi::sound_gather_c gather;
 
-    s16_t *buffer = gather.MakeChunk(framecount, is_stereo);
+    int16_t *buffer = gather.MakeChunk(framecount, is_stereo);
 
     gather.CommitChunk(drmp3_read_pcm_frames_s16(&mp3, framecount, buffer));
 

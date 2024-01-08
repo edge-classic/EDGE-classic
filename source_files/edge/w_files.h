@@ -92,7 +92,7 @@ epi::file_c *W_OpenPackFile(const std::string &name);
 
 void W_DoPackSubstitutions(void);
 
-byte *W_OpenPackOrLumpInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length);
+uint8_t *W_OpenPackOrLumpInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length);
 
 int W_CheckPackForName(const std::string &name);
 

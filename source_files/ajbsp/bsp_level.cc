@@ -420,7 +420,7 @@ static vertex_t *SafeLookupVertex(int num)
     return lev_vertices[num];
 }
 
-static sector_t *SafeLookupSector(u16_t num)
+static sector_t *SafeLookupSector(uint16_t num)
 {
     if (num == 0xFFFF)
         return NULL;
@@ -431,7 +431,7 @@ static sector_t *SafeLookupSector(u16_t num)
     return lev_sectors[num];
 }
 
-static inline sidedef_t *SafeLookupSidedef(u16_t num)
+static inline sidedef_t *SafeLookupSidedef(uint16_t num)
 {
     if (num == 0xFFFF)
         return NULL;
@@ -653,8 +653,8 @@ void GetLinedefs()
         line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) && (fabs(start->y - end->y) < DIST_EPSILON);
 
         line->type  = LE_U16(raw.type);
-        u16_t flags = LE_U16(raw.flags);
-        s16_t tag   = LE_S16(raw.tag);
+        uint16_t flags = LE_U16(raw.flags);
+        int16_t tag   = LE_S16(raw.tag);
 
         line->two_sided   = (flags & MLF_TwoSided) != 0;
         line->is_precious = (tag >= 900 && tag < 1000); // Why is this the case? Need to investigate - Dasho
@@ -714,8 +714,8 @@ void GetLinedefsHexen()
         // check for zero-length line
         line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) && (fabs(start->y - end->y) < DIST_EPSILON);
 
-        line->type  = (u8_t)raw.type;
-        u16_t flags = LE_U16(raw.flags);
+        line->type  = (uint8_t)raw.type;
+        uint16_t flags = LE_U16(raw.flags);
 
         // -JL- Added missing twosided flag handling that caused a broken reject
         line->two_sided = (flags & MLF_TwoSided) != 0;
@@ -1028,8 +1028,8 @@ void ParseUDMF()
 
 /* ----- writing routines ------------------------------ */
 
-static const u8_t *lev_v2_magic = (u8_t *)"gNd2";
-static const u8_t *lev_v5_magic = (u8_t *)"gNd5";
+static const uint8_t *lev_v2_magic = (uint8_t *)"gNd2";
+static const uint8_t *lev_v5_magic = (uint8_t *)"gNd5";
 
 void MarkOverflow()
 {
@@ -1113,28 +1113,28 @@ void PutGLVertices(int do_v5)
         BugError("PutGLVertices miscounted (%d != %d)\n", count, num_new_vert);
 }
 
-static inline u16_t VertexIndex16Bit(const vertex_t *v)
+static inline uint16_t VertexIndex16Bit(const vertex_t *v)
 {
     if (v->is_new)
-        return (u16_t)(v->index | 0x8000U);
+        return (uint16_t)(v->index | 0x8000U);
 
-    return (u16_t)v->index;
+    return (uint16_t)v->index;
 }
 
-static inline u32_t VertexIndex_V5(const vertex_t *v)
+static inline uint32_t VertexIndex_V5(const vertex_t *v)
 {
     if (v->is_new)
-        return (u32_t)(v->index | 0x80000000U);
+        return (uint32_t)(v->index | 0x80000000U);
 
-    return (u32_t)v->index;
+    return (uint32_t)v->index;
 }
 
-static inline u32_t VertexIndex_XNOD(const vertex_t *v)
+static inline uint32_t VertexIndex_XNOD(const vertex_t *v)
 {
     if (v->is_new)
-        return (u32_t)(num_old_vert + v->index);
+        return (uint32_t)(num_old_vert + v->index);
 
-    return (u32_t)v->index;
+    return (uint32_t)v->index;
 }
 
 void PutSegs()
@@ -1522,17 +1522,17 @@ void SortSegs()
 
 /* ----- ZDoom format writing --------------------------- */
 
-static const u8_t *lev_XNOD_magic = (u8_t *)"XNOD";
-static const u8_t *lev_XGL3_magic = (u8_t *)"XGL3";
-static const u8_t *lev_ZGL3_magic = (u8_t *)"ZGL3";
-static const u8_t *lev_ZNOD_magic = (u8_t *)"ZNOD";
+static const uint8_t *lev_XNOD_magic = (uint8_t *)"XNOD";
+static const uint8_t *lev_XGL3_magic = (uint8_t *)"XGL3";
+static const uint8_t *lev_ZGL3_magic = (uint8_t *)"ZGL3";
+static const uint8_t *lev_ZNOD_magic = (uint8_t *)"ZNOD";
 
 void PutZVertices()
 {
     int count, i;
 
-    u32_t orgverts = LE_U32(num_old_vert);
-    u32_t newverts = LE_U32(num_new_vert);
+    uint32_t orgverts = LE_U32(num_old_vert);
+    uint32_t newverts = LE_U32(num_new_vert);
 
     ZLibAppendLump(&orgverts, 4);
     ZLibAppendLump(&newverts, 4);
@@ -1560,7 +1560,7 @@ void PutZVertices()
 
 void PutZSubsecs()
 {
-    u32_t raw_num = LE_U32(num_subsecs);
+    uint32_t raw_num = LE_U32(num_subsecs);
     ZLibAppendLump(&raw_num, 4);
 
     int cur_seg_index = 0;
@@ -1592,7 +1592,7 @@ void PutZSubsecs()
 
 void PutZSegs()
 {
-    u32_t raw_num = LE_U32(num_segs);
+    uint32_t raw_num = LE_U32(num_segs);
     ZLibAppendLump(&raw_num, 4);
 
     for (int i = 0; i < num_segs; i++)
@@ -1602,11 +1602,11 @@ void PutZSegs()
         if (seg->index != i)
             BugError("PutZSegs: seg index mismatch (%d != %d)\n", seg->index, i);
 
-        u32_t v1 = LE_U32(VertexIndex_XNOD(seg->start));
-        u32_t v2 = LE_U32(VertexIndex_XNOD(seg->end));
+        uint32_t v1 = LE_U32(VertexIndex_XNOD(seg->start));
+        uint32_t v2 = LE_U32(VertexIndex_XNOD(seg->end));
 
-        u16_t line = LE_U16(seg->linedef->index);
-        u8_t  side = (u8_t)seg->side;
+        uint16_t line = LE_U16(seg->linedef->index);
+        uint8_t  side = (uint8_t)seg->side;
 
         ZLibAppendLump(&v1, 4);
         ZLibAppendLump(&v2, 4);
@@ -1617,7 +1617,7 @@ void PutZSegs()
 
 void PutXGL3Segs()
 {
-    u32_t raw_num = LE_U32(num_segs);
+    uint32_t raw_num = LE_U32(num_segs);
     ZLibAppendLump(&raw_num, 4);
 
     for (int i = 0; i < num_segs; i++)
@@ -1627,10 +1627,10 @@ void PutXGL3Segs()
         if (seg->index != i)
             BugError("PutXGL3Segs: seg index mismatch (%d != %d)\n", seg->index, i);
 
-        u32_t v1      = LE_U32(VertexIndex_XNOD(seg->start));
-        u32_t partner = LE_U32(seg->partner ? seg->partner->index : -1);
-        u32_t line    = LE_U32(seg->linedef ? seg->linedef->index : -1);
-        u8_t  side    = (u8_t)seg->side;
+        uint32_t v1      = LE_U32(VertexIndex_XNOD(seg->start));
+        uint32_t partner = LE_U32(seg->partner ? seg->partner->index : -1);
+        uint32_t line    = LE_U32(seg->linedef ? seg->linedef->index : -1);
+        uint8_t  side    = (uint8_t)seg->side;
 
         ZLibAppendLump(&v1, 4);
         ZLibAppendLump(&partner, 4);
@@ -1657,10 +1657,10 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 
     if (do_xgl3)
     {
-        u32_t x  = LE_S32(I_ROUND(node->x * 65536.0));
-        u32_t y  = LE_S32(I_ROUND(node->y * 65536.0));
-        u32_t dx = LE_S32(I_ROUND(node->dx * 65536.0));
-        u32_t dy = LE_S32(I_ROUND(node->dy * 65536.0));
+        uint32_t x  = LE_S32(I_ROUND(node->x * 65536.0));
+        uint32_t y  = LE_S32(I_ROUND(node->y * 65536.0));
+        uint32_t dx = LE_S32(I_ROUND(node->dx * 65536.0));
+        uint32_t dy = LE_S32(I_ROUND(node->dy * 65536.0));
 
         ZLibAppendLump(&x, 4);
         ZLibAppendLump(&y, 4);
@@ -1720,7 +1720,7 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 
 void PutZNodes(node_t *root, bool do_xgl3)
 {
-    u32_t raw_num = LE_U32(num_nodes);
+    uint32_t raw_num = LE_U32(num_nodes);
     ZLibAppendLump(&raw_num, 4);
 
     node_cur_index = 0;
@@ -1879,9 +1879,9 @@ void FreeLevel()
     FreeIntersections();
 }
 
-static u32_t CalcGLChecksum(void)
+static uint32_t CalcGLChecksum(void)
 {
-    u32_t crc;
+    uint32_t crc;
 
     Adler32_Begin(&crc);
 
@@ -1889,7 +1889,7 @@ static u32_t CalcGLChecksum(void)
 
     if (lump && lump->Length() > 0)
     {
-        u8_t *data = new u8_t[lump->Length()];
+        uint8_t *data = new uint8_t[lump->Length()];
 
         if (!lump->Seek(0) || !lump->Read(data, lump->Length()))
             cur_info->FatalError("Error reading vertices (for checksum).\n");
@@ -1902,7 +1902,7 @@ static u32_t CalcGLChecksum(void)
 
     if (lump && lump->Length() > 0)
     {
-        u8_t *data = new u8_t[lump->Length()];
+        uint8_t *data = new uint8_t[lump->Length()];
 
         if (!lump->Seek(0) || !lump->Read(data, lump->Length()))
             cur_info->FatalError("Error reading linedefs (for checksum).\n");
@@ -1921,7 +1921,7 @@ void UpdateGLMarker(Lump_c *marker)
 
     // we *must* compute the checksum BEFORE (re)creating the lump
     // [ otherwise we write data into the wrong part of the file ]
-    u32_t crc = CalcGLChecksum();
+    uint32_t crc = CalcGLChecksum();
 
     cur_wad->RecreateLump(marker, max_size);
 
@@ -2293,7 +2293,7 @@ void OpenWad(std::filesystem::path filename)
         cur_info->FatalError("Cannot open file: %s\n", filename.u8string().c_str());
 }
 
-void OpenMem(std::filesystem::path filename, byte *raw_data, int raw_length)
+void OpenMem(std::filesystem::path filename, uint8_t *raw_data, int raw_length)
 {
     cur_wad = Wad_file::OpenMem(filename, raw_data, raw_length);
     if (cur_wad == NULL)

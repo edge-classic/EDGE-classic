@@ -153,7 +153,7 @@ static void StyleParseField(const char *field, const char *contents, int index, 
     I_Debugf("STYLE_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(style_commands, field, contents, (byte *)dynamic_style))
+    if (DDF_MainParseField(style_commands, field, contents, (uint8_t *)dynamic_style))
         return; // OK
 
     DDF_WarnError("Unknown styles.ddf command: %s\n", field);

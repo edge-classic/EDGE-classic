@@ -116,7 +116,7 @@ bool AJ_BuildNodes(data_file_c *df, std::filesystem::path outname)
     ajbsp::SetInfo(&info);
 
     epi::file_c *mem_wad    = nullptr;
-    byte        *raw_wad    = nullptr;
+    uint8_t        *raw_wad    = nullptr;
     int          raw_length = 0;
 
     if (df->kind == FLKIND_PackWAD)

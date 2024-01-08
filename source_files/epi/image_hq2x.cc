@@ -40,36 +40,36 @@ namespace epi
 namespace Hq2x
 {
 
-u32_t PixelRGB[256];
-u32_t PixelYUV[256];
+uint32_t PixelRGB[256];
+uint32_t PixelYUV[256];
 
-const u32_t Amask = 0xFF000000;
-const u32_t Ymask = 0x00FF0000;
-const u32_t Umask = 0x0000FF00;
-const u32_t Vmask = 0x000000FF;
+const uint32_t Amask = 0xFF000000;
+const uint32_t Ymask = 0x00FF0000;
+const uint32_t Umask = 0x0000FF00;
+const uint32_t Vmask = 0x000000FF;
 
-const u32_t trY = 0x00300000;
-const u32_t trU = 0x00000700;
-const u32_t trV = 0x00000007; // -AJA- changed (was 6)
+const uint32_t trY = 0x00300000;
+const uint32_t trU = 0x00000700;
+const uint32_t trV = 0x00000007; // -AJA- changed (was 6)
 
-inline u32_t GET_R(u32_t col)
+inline uint32_t GET_R(uint32_t col)
 {
     return (col >> 16) & 0xFF;
 }
-inline u32_t GET_G(u32_t col)
+inline uint32_t GET_G(uint32_t col)
 {
     return (col >> 8) & 0xFF;
 }
-inline u32_t GET_B(u32_t col)
+inline uint32_t GET_B(uint32_t col)
 {
     return (col) & 0xFF;
 }
-inline u32_t GET_A(u32_t col)
+inline uint32_t GET_A(uint32_t col)
 {
     return (col >> 24) & 0xFF;
 }
 
-inline void LerpColor(u8_t *dest, u32_t c1, u32_t c2, u32_t c3, u32_t f1, u32_t f2, u32_t f3, u32_t shift)
+inline void LerpColor(uint8_t *dest, uint32_t c1, uint32_t c2, uint32_t c3, uint32_t f1, uint32_t f2, uint32_t f3, uint32_t shift)
 {
     dest[0] = (GET_R(c1) * f1 + GET_R(c2) * f2 + GET_R(c3) * f3) >> shift;
     dest[1] = (GET_G(c1) * f1 + GET_G(c2) * f2 + GET_G(c3) * f3) >> shift;
@@ -77,7 +77,7 @@ inline void LerpColor(u8_t *dest, u32_t c1, u32_t c2, u32_t c3, u32_t f1, u32_t 
     dest[3] = (GET_A(c1) * f1 + GET_A(c2) * f2 + GET_A(c3) * f3) >> shift;
 }
 
-void Interp0(u8_t *dest, u32_t c1)
+void Interp0(uint8_t *dest, uint32_t c1)
 {
     // *dest = c1
     dest[0] = GET_R(c1);
@@ -86,43 +86,43 @@ void Interp0(u8_t *dest, u32_t c1)
     dest[3] = GET_A(c1);
 }
 
-void Interp1(u8_t *dest, u32_t c1, u32_t c2)
+void Interp1(uint8_t *dest, uint32_t c1, uint32_t c2)
 {
     // *dest = (c1*3+c2) >> 2;
     LerpColor(dest, c1, c2, 0, 3, 1, 0, 2);
 }
 
-void Interp2(u8_t *dest, u32_t c1, u32_t c2, u32_t c3)
+void Interp2(uint8_t *dest, uint32_t c1, uint32_t c2, uint32_t c3)
 {
     // *dest = (c1*2+c2+c3) >> 2;
     LerpColor(dest, c1, c2, c3, 2, 1, 1, 2);
 }
 
-void Interp5(u8_t *dest, u32_t c1, u32_t c2)
+void Interp5(uint8_t *dest, uint32_t c1, uint32_t c2)
 {
     // *dest = (c1+c2) >> 1;
     LerpColor(dest, c1, c2, 0, 1, 1, 0, 1);
 }
 
-void Interp6(u8_t *dest, u32_t c1, u32_t c2, u32_t c3)
+void Interp6(uint8_t *dest, uint32_t c1, uint32_t c2, uint32_t c3)
 {
     // *dest = (c1*5+c2*2+c3)/8;
     LerpColor(dest, c1, c2, c3, 5, 2, 1, 3);
 }
 
-void Interp7(u8_t *dest, u32_t c1, u32_t c2, u32_t c3)
+void Interp7(uint8_t *dest, uint32_t c1, uint32_t c2, uint32_t c3)
 {
     // *dest = (c1*6+c2+c3)/8;
     LerpColor(dest, c1, c2, c3, 6, 1, 1, 3);
 }
 
-void Interp9(u8_t *dest, u32_t c1, u32_t c2, u32_t c3)
+void Interp9(uint8_t *dest, uint32_t c1, uint32_t c2, uint32_t c3)
 {
     // *dest = (c1*2+(c2+c3)*3)/8;
     LerpColor(dest, c1, c2, c3, 2, 3, 3, 3);
 }
 
-void Interp10(u8_t *dest, u32_t c1, u32_t c2, u32_t c3)
+void Interp10(uint8_t *dest, uint32_t c1, uint32_t c2, uint32_t c3)
 {
     // *dest = (c1*14+c2+c3)/16;
     LerpColor(dest, c1, c2, c3, 14, 1, 1, 4);
@@ -180,17 +180,17 @@ void Interp10(u8_t *dest, u32_t c1, u32_t c2, u32_t c3)
 #define PIXEL11_90  Interp9(dest + BpL + 4, c[5], c[6], c[8]);
 #define PIXEL11_100 Interp10(dest + BpL + 4, c[5], c[6], c[8]);
 
-inline bool Diff(const u8_t p1, const u8_t p2)
+inline bool Diff(const uint8_t p1, const uint8_t p2)
 {
-    u32_t YUV1 = PixelYUV[p1];
-    u32_t YUV2 = PixelYUV[p2];
+    uint32_t YUV1 = PixelYUV[p1];
+    uint32_t YUV2 = PixelYUV[p2];
 
     return (YUV1 & Amask) != (YUV2 & Amask) || std::abs(static_cast<int>((YUV1 & Ymask) - (YUV2 & Ymask))) > trY ||
            std::abs(static_cast<int>((YUV1 & Umask) - (YUV2 & Umask))) > trU ||
            std::abs(static_cast<int>((YUV1 & Vmask) - (YUV2 & Vmask))) > trV;
 }
 
-void Setup(const u8_t *palette, int trans_pixel)
+void Setup(const uint8_t *palette, int trans_pixel)
 {
     for (int c = 0; c < 256; c++)
     {
@@ -216,7 +216,7 @@ void Setup(const u8_t *palette, int trans_pixel)
     }
 }
 
-void ConvertLine(int y, int w, int h, bool invert, u8_t *dest, const u8_t *src)
+void ConvertLine(int y, int w, int h, bool invert, uint8_t *dest, const uint8_t *src)
 {
     int prevline = (y > 0) ? -w : 0;
     int nextline = (y < h - 1) ? w : 0;
@@ -230,8 +230,8 @@ void ConvertLine(int y, int w, int h, bool invert, u8_t *dest, const u8_t *src)
         BpL = 0 - BpL;
     }
 
-    u8_t  p[10]; // palette pixels
-    u32_t c[10]; // RGBA pixels
+    uint8_t  p[10]; // palette pixels
+    uint32_t c[10]; // RGBA pixels
 
     //   +----+----+----+
     //   |    |    |    |
@@ -279,7 +279,7 @@ void ConvertLine(int y, int w, int h, bool invert, u8_t *dest, const u8_t *src)
         for (int k = 1; k <= 9; k++)
             c[k] = PixelRGB[p[k]];
 
-        u8_t pattern = 0;
+        uint8_t pattern = 0;
 
         if (Diff(p[5], p[1]))
             pattern |= 0x01;
@@ -2782,12 +2782,12 @@ void ConvertLine(int y, int w, int h, bool invert, u8_t *dest, const u8_t *src)
     }     // for (x)
 }
 
-void StripAlpha(u8_t *dest, const u8_t *src, int width)
+void StripAlpha(uint8_t *dest, const uint8_t *src, int width)
 {
     // we don't care about transparent pixels here (on the assumption
     // that the original image didn't have any).
 
-    const u8_t *src_end = src + width * 8;
+    const uint8_t *src_end = src + width * 8;
 
     for (; src < src_end; src += 4, dest += 3)
     {
@@ -2805,16 +2805,16 @@ image_data_c *Convert(image_data_c *img, bool solid, bool invert)
     image_data_c *result = new image_data_c(w * 2, h * 2, solid ? 3 : 4);
 
     // for solid mode, we must strip off the alpha channel
-    u8_t *temp_buffer = NULL;
+    uint8_t *temp_buffer = NULL;
 
     if (solid)
-        temp_buffer = new u8_t[w * 16]; // two lines worth
+        temp_buffer = new uint8_t[w * 16]; // two lines worth
 
     for (int y = 0; y < h; y++)
     {
         int dst_y = invert ? (h - 1 - y) : y;
 
-        u8_t *out_buf = solid ? temp_buffer : result->PixelAt(0, dst_y * 2);
+        uint8_t *out_buf = solid ? temp_buffer : result->PixelAt(0, dst_y * 2);
 
         ConvertLine(y, w, h, invert, out_buf, img->PixelAt(0, y));
 

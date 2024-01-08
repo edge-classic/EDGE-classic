@@ -36,7 +36,7 @@ namespace epi
 
 image_data_c::image_data_c(int _w, int _h, int _bpp) : width(_w), height(_h), bpp(_bpp), used_w(_w), used_h(_h)
 {
-    pixels = new u8_t[width * height * bpp];
+    pixels = new uint8_t[width * height * bpp];
     offset_x = offset_y = 0;
     scale_x = scale_y = 1.0f;
 }
@@ -49,7 +49,7 @@ image_data_c::~image_data_c()
     width = height = 0;
 }
 
-void image_data_c::Clear(u8_t val)
+void image_data_c::Clear(uint8_t val)
 {
     memset(pixels, val, width * height * bpp);
 }
@@ -61,7 +61,7 @@ void image_data_c::Whiten()
     for (int y = 0; y < height; y++)
         for (int x = 0; x < width; x++)
         {
-            u8_t *src = PixelAt(x, y);
+            uint8_t *src = PixelAt(x, y);
 
             int ity = MAX(src[0], MAX(src[1], src[2]));
 
@@ -76,7 +76,7 @@ void image_data_c::Invert()
 {
     int line_size = used_w * bpp;
 
-    u8_t *line_data = new u8_t[line_size + 1];
+    uint8_t *line_data = new uint8_t[line_size + 1];
 
     for (int y = 0; y < used_h / 2; y++)
     {
@@ -103,12 +103,12 @@ void image_data_c::Shrink(int new_w, int new_h)
         for (int dy = 0; dy < new_h; dy++)
             for (int dx = 0; dx < new_w; dx++)
             {
-                u8_t *dest_pix = pixels + (dy * new_w + dx) * 3;
+                uint8_t *dest_pix = pixels + (dy * new_w + dx) * 3;
 
                 int sx = dx * step_x;
                 int sy = dy * step_y;
 
-                const u8_t *src_pix = PixelAt(sx, sy);
+                const uint8_t *src_pix = PixelAt(sx, sy);
 
                 *dest_pix = *src_pix;
             }
@@ -118,7 +118,7 @@ void image_data_c::Shrink(int new_w, int new_h)
         for (int dy = 0; dy < new_h; dy++)
             for (int dx = 0; dx < new_w; dx++)
             {
-                u8_t *dest_pix = pixels + (dy * new_w + dx) * 3;
+                uint8_t *dest_pix = pixels + (dy * new_w + dx) * 3;
 
                 int sx = dx * step_x;
                 int sy = dy * step_y;
@@ -129,7 +129,7 @@ void image_data_c::Shrink(int new_w, int new_h)
                 for (int x = 0; x < step_x; x++)
                     for (int y = 0; y < step_y; y++)
                     {
-                        const u8_t *src_pix = PixelAt(sx + x, sy + y);
+                        const uint8_t *src_pix = PixelAt(sx + x, sy + y);
 
                         r += src_pix[0];
                         g += src_pix[1];
@@ -146,7 +146,7 @@ void image_data_c::Shrink(int new_w, int new_h)
         for (int dy = 0; dy < new_h; dy++)
             for (int dx = 0; dx < new_w; dx++)
             {
-                u8_t *dest_pix = pixels + (dy * new_w + dx) * 4;
+                uint8_t *dest_pix = pixels + (dy * new_w + dx) * 4;
 
                 int sx = dx * step_x;
                 int sy = dy * step_y;
@@ -157,7 +157,7 @@ void image_data_c::Shrink(int new_w, int new_h)
                 for (int x = 0; x < step_x; x++)
                     for (int y = 0; y < step_y; y++)
                     {
-                        const u8_t *src_pix = PixelAt(sx + x, sy + y);
+                        const uint8_t *src_pix = PixelAt(sx + x, sy + y);
 
                         r += src_pix[0];
                         g += src_pix[1];
@@ -196,7 +196,7 @@ void image_data_c::ShrinkMasked(int new_w, int new_h)
     for (int dy = 0; dy < new_h; dy++)
         for (int dx = 0; dx < new_w; dx++)
         {
-            u8_t *dest_pix = pixels + (dy * new_w + dx) * 4;
+            uint8_t *dest_pix = pixels + (dy * new_w + dx) * 4;
 
             int sx = dx * step_x;
             int sy = dy * step_y;
@@ -207,7 +207,7 @@ void image_data_c::ShrinkMasked(int new_w, int new_h)
             for (int x = 0; x < step_x; x++)
                 for (int y = 0; y < step_y; y++)
                 {
-                    const u8_t *src_pix = PixelAt(sx + x, sy + y);
+                    const uint8_t *src_pix = PixelAt(sx + x, sy + y);
 
                     int weight = src_pix[3];
 
@@ -245,7 +245,7 @@ void image_data_c::Grow(int new_w, int new_h)
 {
     SYS_ASSERT(new_w >= width && new_h >= height);
 
-    u8_t *new_pixels = new u8_t[new_w * new_h * bpp];
+    uint8_t *new_pixels = new uint8_t[new_w * new_h * bpp];
 
     for (int dy = 0; dy < new_h; dy++)
         for (int dx = 0; dx < new_w; dx++)
@@ -253,9 +253,9 @@ void image_data_c::Grow(int new_w, int new_h)
             int sx = dx * width / new_w;
             int sy = dy * height / new_h;
 
-            const u8_t *src = PixelAt(sx, sy);
+            const uint8_t *src = PixelAt(sx, sy);
 
-            u8_t *dest = new_pixels + (dy * new_w + dx) * bpp;
+            uint8_t *dest = new_pixels + (dy * new_w + dx) * bpp;
 
             for (int i = 0; i < bpp; i++)
                 *dest++ = *src++;
@@ -276,9 +276,9 @@ void image_data_c::RemoveAlpha()
     if (bpp != 4)
         return;
 
-    u8_t *src   = pixels;
-    u8_t *s_end = src + (width * height * bpp);
-    u8_t *dest  = pixels;
+    uint8_t *src   = pixels;
+    uint8_t *s_end = src + (width * height * bpp);
+    uint8_t *dest  = pixels;
 
     for (; src < s_end; src += 4)
     {
@@ -299,10 +299,10 @@ void image_data_c::SetAlpha(int alphaness)
 
     if (bpp == 3)
     {
-        u8_t *new_pixels = new u8_t[width * height * 4];
-        u8_t *src        = pixels;
-        u8_t *s_end      = src + (width * height * 3);
-        u8_t *dest       = new_pixels;
+        uint8_t *new_pixels = new uint8_t[width * height * 4];
+        uint8_t *src        = pixels;
+        uint8_t *s_end      = src + (width * height * 3);
+        uint8_t *dest       = new_pixels;
         for (; src < s_end; src += 3)
         {
             *dest++ = src[0];
@@ -323,13 +323,13 @@ void image_data_c::SetAlpha(int alphaness)
     }
 }
 
-void image_data_c::ThresholdAlpha(u8_t alpha)
+void image_data_c::ThresholdAlpha(uint8_t alpha)
 {
     if (bpp != 4)
         return;
 
-    u8_t *src   = pixels;
-    u8_t *s_end = src + (width * height * bpp);
+    uint8_t *src   = pixels;
+    uint8_t *s_end = src + (width * height * bpp);
 
     for (; src < s_end; src += 4)
     {
@@ -361,10 +361,10 @@ void image_data_c::RemoveBackground()
 
     if (bpp == 3)
     {
-        u8_t *new_pixels = new u8_t[width * height * 4];
-        u8_t *src        = pixels;
-        u8_t *s_end      = src + (width * height * 3);
-        u8_t *dest       = new_pixels;
+        uint8_t *new_pixels = new uint8_t[width * height * 4];
+        uint8_t *src        = pixels;
+        uint8_t *s_end      = src + (width * height * 3);
+        uint8_t *dest       = new_pixels;
         for (; src < s_end; src += 3)
         {
             *dest++ = src[0];
@@ -407,7 +407,7 @@ void image_data_c::EightWaySymmetry()
 
 int image_data_c::ImageCharacterWidth(int x1, int y1, int x2, int y2)
 {
-    u8_t *src         = pixels;
+    uint8_t *src         = pixels;
     int   last_last   = x1;
     int   first_first = x2;
     for (int i = y1; i < y2; i++)
@@ -418,7 +418,7 @@ int image_data_c::ImageCharacterWidth(int x1, int y1, int x2, int y2)
         int  last        = 0;
         for (int j = x1; j < x2; j++)
         {
-            u8_t *checker = PixelAt(j, i);
+            uint8_t *checker = PixelAt(j, i);
             if (src[0] != checker[0] || src[1] != checker[1] || src[2] != checker[2])
             {
                 if (!found_first)
@@ -441,7 +441,7 @@ int image_data_c::ImageCharacterWidth(int x1, int y1, int x2, int y2)
     return MAX(last_last - first_first, 0) + 3; // Some padding on each side of the letter
 }
 
-void image_data_c::AverageHue(u8_t *hue, u8_t *ity, int from_x, int to_x, int from_y, int to_y)
+void image_data_c::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
     SYS_ASSERT(used_w * used_h <= 2048 * 2048);
@@ -461,7 +461,7 @@ void image_data_c::AverageHue(u8_t *hue, u8_t *ity, int from_x, int to_x, int fr
 
     for (int y = from_y; y < to_y; y++)
     {
-        const u8_t *src = PixelAt(0, y);
+        const uint8_t *src = PixelAt(0, y);
 
         for (int x = from_x; x < to_x; x++, src += bpp)
         {
@@ -526,7 +526,7 @@ void image_data_c::AverageHue(u8_t *hue, u8_t *ity, int from_x, int to_x, int fr
     }
 }
 
-void image_data_c::AverageColor(u8_t *rgb, int from_x, int to_x, int from_y, int to_y)
+void image_data_c::AverageColor(uint8_t *rgb, int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
     SYS_ASSERT(used_w * used_h <= 2048 * 2048);
@@ -541,7 +541,7 @@ void image_data_c::AverageColor(u8_t *rgb, int from_x, int to_x, int from_y, int
 
     for (int y = from_y; y < to_y; y++)
     {
-        const u8_t *src = PixelAt(0, y);
+        const uint8_t *src = PixelAt(0, y);
 
         for (int x = from_x; x < to_x; x++, src += bpp)
         {
@@ -577,7 +577,7 @@ void image_data_c::AverageColor(u8_t *rgb, int from_x, int to_x, int from_y, int
     rgb[2] = RGB_BLU(average_color);
 }
 
-void image_data_c::LightestColor(u8_t *rgb, int from_x, int to_x, int from_y, int to_y)
+void image_data_c::LightestColor(uint8_t *rgb, int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
     SYS_ASSERT(used_w * used_h <= 2048 * 2048);
@@ -595,7 +595,7 @@ void image_data_c::LightestColor(u8_t *rgb, int from_x, int to_x, int from_y, in
 
     for (int y = from_y; y < to_y; y++)
     {
-        const u8_t *src = PixelAt(0, y);
+        const uint8_t *src = PixelAt(0, y);
 
         for (int x = from_x; x < to_x; x++, src += bpp)
         {
@@ -617,7 +617,7 @@ void image_data_c::LightestColor(u8_t *rgb, int from_x, int to_x, int from_y, in
     rgb[2] = lightest_b;
 }
 
-void image_data_c::DarkestColor(u8_t *rgb, int from_x, int to_x, int from_y, int to_y)
+void image_data_c::DarkestColor(uint8_t *rgb, int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
     SYS_ASSERT(used_w * used_h <= 2048 * 2048);
@@ -635,7 +635,7 @@ void image_data_c::DarkestColor(u8_t *rgb, int from_x, int to_x, int from_y, int
 
     for (int y = from_y; y < to_y; y++)
     {
-        const u8_t *src = PixelAt(0, y);
+        const uint8_t *src = PixelAt(0, y);
 
         for (int x = from_x; x < to_x; x++, src += bpp)
         {
@@ -673,7 +673,7 @@ void image_data_c::Swirl(int leveltime, int thickness)
         speed = 10;
     }
 
-    u8_t *new_pixels = new u8_t[width * height * bpp];
+    uint8_t *new_pixels = new uint8_t[width * height * bpp];
 
     int x, y;
 
@@ -698,8 +698,8 @@ void image_data_c::Swirl(int leveltime, int thickness)
             x1 &= width - 1;
             y1 &= height - 1;
 
-            u8_t *src  = pixels + (y1 * width + x1) * bpp;
-            u8_t *dest = new_pixels + (y * width + x) * bpp;
+            uint8_t *src  = pixels + (y1 * width + x1) * bpp;
+            uint8_t *dest = new_pixels + (y * width + x) * bpp;
 
             memcpy(dest, src, bpp);
         }
@@ -743,7 +743,7 @@ void image_data_c::SetHSV(int rotation, int saturation, int value)
     for (int y = 0; y < height; y++)
         for (int x = 0; x < width; x++)
         {
-            u8_t *src = PixelAt(x, y);
+            uint8_t *src = PixelAt(x, y);
 
             color_c col(src[0], src[1], src[2], bpp == 4 ? src[3] : 255);
 

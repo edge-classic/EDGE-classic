@@ -21,12 +21,8 @@
 
 // COMMON STUFF...
 #define FLOAT_IEEE_754
-namespace Deh_Edge
-{
-typedef unsigned char byte;
-}
 
-#include <cstddef>
+#include <stddef.h>
 
 // Windows
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64)

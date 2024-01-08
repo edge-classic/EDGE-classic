@@ -43,8 +43,8 @@ char *StringPrintf(const char *str, ...);
 void  StringFree(const char *str);
 
 // checksum functions
-void Adler32_Begin(u32_t *crc);
-void Adler32_AddBlock(u32_t *crc, const u8_t *data, int length);
+void Adler32_Begin(uint32_t *crc);
+void Adler32_AddBlock(uint32_t *crc, const uint8_t *data, int length);
 
 } // namespace ajbsp
 

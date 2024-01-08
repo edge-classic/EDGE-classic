@@ -63,10 +63,10 @@ static void Load_Silence(epi::sound_data_c *buf)
     buf->freq = dev_freq;
     buf->Allocate(length, epi::SBUF_Mono);
 
-    memset(buf->data_L, 0, length * sizeof(s16_t));
+    memset(buf->data_L, 0, length * sizeof(int16_t));
 }
 
-static bool Load_DOOM(epi::sound_data_c *buf, const byte *lump, int length)
+static bool Load_DOOM(epi::sound_data_c *buf, const uint8_t *lump, int length)
 {
     buf->freq = lump[2] + (lump[3] << 8);
 
@@ -84,10 +84,10 @@ static bool Load_DOOM(epi::sound_data_c *buf, const byte *lump, int length)
     buf->Allocate(length, epi::SBUF_Mono);
 
     // convert to signed 16-bit format
-    const byte *src   = lump + 8;
-    const byte *s_end = src + length;
+    const uint8_t *src   = lump + 8;
+    const uint8_t *s_end = src + length;
 
-    s16_t *dest = buf->data_L;
+    int16_t *dest = buf->data_L;
 
     for (; src < s_end; src++)
         *dest++ = (*src ^ 0x80) << 8;
@@ -95,17 +95,17 @@ static bool Load_DOOM(epi::sound_data_c *buf, const byte *lump, int length)
     return true;
 }
 
-static bool Load_WAV(epi::sound_data_c *buf, byte *lump, int length, bool pc_speaker)
+static bool Load_WAV(epi::sound_data_c *buf, uint8_t *lump, int length, bool pc_speaker)
 {
     return S_LoadWAVSound(buf, lump, length, pc_speaker);
 }
 
-static bool Load_OGG(epi::sound_data_c *buf, const byte *lump, int length)
+static bool Load_OGG(epi::sound_data_c *buf, const uint8_t *lump, int length)
 {
     return S_LoadOGGSound(buf, lump, length);
 }
 
-static bool Load_MP3(epi::sound_data_c *buf, const byte *lump, int length)
+static bool Load_MP3(epi::sound_data_c *buf, const uint8_t *lump, int length)
 {
     return S_LoadMP3Sound(buf, lump, length);
 }
@@ -209,7 +209,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 
     // Load the data into the buffer
     int   length = F->GetLength();
-    byte *data   = F->LoadIntoMemory();
+    uint8_t *data   = F->LoadIntoMemory();
 
     // no longer need the epi::file_c
     delete F;

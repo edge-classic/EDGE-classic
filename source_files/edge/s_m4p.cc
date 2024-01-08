@@ -55,10 +55,10 @@ class m4pplayer_c : public abstract_music_c
     int  status;
     bool looping;
 
-    s16_t *mono_buffer;
+    int16_t *mono_buffer;
 
   public:
-    bool OpenMemory(byte *data, int length);
+    bool OpenMemory(uint8_t *data, int length);
 
     virtual void Close(void);
 
@@ -80,7 +80,7 @@ class m4pplayer_c : public abstract_music_c
 
 m4pplayer_c::m4pplayer_c() : status(NOT_LOADED)
 {
-    mono_buffer = new s16_t[M4P_BUFFER * 2];
+    mono_buffer = new int16_t[M4P_BUFFER * 2];
 }
 
 m4pplayer_c::~m4pplayer_c()
@@ -97,9 +97,9 @@ void m4pplayer_c::PostOpenInit()
     status = STOPPED;
 }
 
-static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
+static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
 {
-    const s16_t *s_end = src + len * 2;
+    const int16_t *s_end = src + len * 2;
 
     for (; src < s_end; src += 2)
     {
@@ -110,7 +110,7 @@ static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
 
 bool m4pplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 {
-    s16_t *data_buf;
+    int16_t *data_buf;
 
     bool song_done = false;
 
@@ -119,7 +119,7 @@ bool m4pplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
     else
         data_buf = buf->data_L;
 
-    m4p_GenerateSamples(data_buf, M4P_BUFFER / sizeof(s16_t));
+    m4p_GenerateSamples(data_buf, M4P_BUFFER / sizeof(int16_t));
 
     buf->length = M4P_BUFFER / 2;
 
@@ -138,7 +138,7 @@ bool m4pplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
     return true;
 }
 
-bool m4pplayer_c::OpenMemory(byte *data, int length)
+bool m4pplayer_c::OpenMemory(uint8_t *data, int length)
 {
     SYS_ASSERT(data);
 
@@ -241,7 +241,7 @@ void m4pplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c *S_PlayM4PMusic(byte *data, int length, bool looping)
+abstract_music_c *S_PlayM4PMusic(uint8_t *data, int length, bool looping)
 {
     m4pplayer_c *player = new m4pplayer_c();
 

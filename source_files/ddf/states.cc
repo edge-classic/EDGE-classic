@@ -503,7 +503,7 @@ void DDF_StateReadState(const char *info, const char *label, state_group_t &grou
     }
 }
 
-bool DDF_MainParseState(byte *object, state_group_t &group, const char *field, const char *contents, int index,
+bool DDF_MainParseState(uint8_t *object, state_group_t &group, const char *field, const char *contents, int index,
                         bool is_last, bool is_weapon, const state_starter_t *starters, const actioncode_t *actions)
 {
     if (epi::prefix_case_cmp(field, "STATES(") != 0)

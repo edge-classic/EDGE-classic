@@ -25,7 +25,7 @@ namespace epi
 class gather_chunk_c
 {
   public:
-    s16_t *samples;
+    int16_t *samples;
 
     int num_samples; // total number is *2 for stereo
 
@@ -36,7 +36,7 @@ class gather_chunk_c
     {
         SYS_ASSERT(num_samples > 0);
 
-        samples = new s16_t[num_samples * (is_stereo ? 2 : 1)];
+        samples = new int16_t[num_samples * (is_stereo ? 2 : 1)];
     }
 
     ~gather_chunk_c()
@@ -60,7 +60,7 @@ sound_gather_c::~sound_gather_c()
         delete chunks[i];
 }
 
-s16_t *sound_gather_c::MakeChunk(int max_samples, bool _stereo)
+int16_t *sound_gather_c::MakeChunk(int max_samples, bool _stereo)
 {
     SYS_ASSERT(!request);
     SYS_ASSERT(max_samples > 0);
@@ -126,10 +126,10 @@ void sound_gather_c::TransferMono(gather_chunk_c *chunk, sound_data_c *buf, int 
 {
     int count = chunk->num_samples;
 
-    s16_t *dest     = buf->data_L + pos;
-    s16_t *dest_end = dest + count;
+    int16_t *dest     = buf->data_L + pos;
+    int16_t *dest_end = dest + count;
 
-    const s16_t *src = chunk->samples;
+    const int16_t *src = chunk->samples;
 
     if (chunk->is_stereo)
     {
@@ -140,7 +140,7 @@ void sound_gather_c::TransferMono(gather_chunk_c *chunk, sound_data_c *buf, int 
     }
     else
     {
-        memcpy(dest, src, count * sizeof(s16_t));
+        memcpy(dest, src, count * sizeof(int16_t));
     }
 }
 
@@ -148,11 +148,11 @@ void sound_gather_c::TransferStereo(gather_chunk_c *chunk, sound_data_c *buf, in
 {
     int count = chunk->num_samples;
 
-    s16_t *dest_L = buf->data_L + pos;
-    s16_t *dest_R = buf->data_R + pos;
+    int16_t *dest_L = buf->data_L + pos;
+    int16_t *dest_R = buf->data_R + pos;
 
-    const s16_t *src     = chunk->samples;
-    const s16_t *src_end = src + count * (chunk->is_stereo ? 2 : 1);
+    const int16_t *src     = chunk->samples;
+    const int16_t *src_end = src + count * (chunk->is_stereo ? 2 : 1);
 
     if (chunk->is_stereo)
     {

@@ -130,7 +130,7 @@ void S_ChangeMusic(int entrynum, bool loop)
     }
 
     int   length = F->GetLength();
-    byte *data   = F->LoadIntoMemory();
+    uint8_t *data   = F->LoadIntoMemory();
 
     if (!data)
     {

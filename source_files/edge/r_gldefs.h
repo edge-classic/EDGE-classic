@@ -66,9 +66,9 @@ void RGL_SetupMatrices3D(void);
 //
 // RGL_TEX
 //
-const byte *RGL_LogoImage(int *w, int *h);
-const byte *RGL_InitImage(int *w, int *h);
-const byte *RGL_BuildImage(int *w, int *h);
+const uint8_t *RGL_LogoImage(int *w, int *h);
+const uint8_t *RGL_InitImage(int *w, int *h);
+const uint8_t *RGL_BuildImage(int *w, int *h);
 
 //
 //  RGL_BSP

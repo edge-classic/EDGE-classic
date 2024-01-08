@@ -75,7 +75,7 @@ static const dehconvfuncs_t edge_dehconv_funcs = {
     DH_PrintMsg,
 };
 
-void DEH_Convert(const byte *data, int length, const std::string &source)
+void DEH_Convert(const uint8_t *data, int length, const std::string &source)
 {
     DehEdgeStartup(&edge_dehconv_funcs);
 

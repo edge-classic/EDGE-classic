@@ -139,7 +139,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
         if (offset < 0 || offset > maxoff)
             I_Error("W_InitTextures: bad texture directory");
 
-        const raw_texture_t *mtexture = (const raw_texture_t *)((const byte *)maptex + offset);
+        const raw_texture_t *mtexture = (const raw_texture_t *)((const uint8_t *)maptex + offset);
 
         // -ES- 2000/02/10 Texture must have patches.
         int patchcount = EPI_LE_S16(mtexture->patch_count);
@@ -160,10 +160,10 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
         // -ES- Allocate texture, patches and columnlump/ofs in one big chunk
         int base_size = sizeof(texturedef_t) + sizeof(texpatch_t) * (patchcount - 1);
 
-        texturedef_t *texture = (texturedef_t *)std::malloc(base_size + width * (sizeof(byte) + sizeof(short)));
+        texturedef_t *texture = (texturedef_t *)malloc(base_size + width * (sizeof(uint8_t) + sizeof(short)));
         cur_set->textures[i]  = texture;
 
-        byte *base = (byte *)texture + base_size;
+        uint8_t *base = (uint8_t *)texture + base_size;
 
         texture->columnofs = (unsigned short *)base;
 
@@ -299,7 +299,7 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
         if (offset < 0 || offset > maxoff)
             I_Error("W_InitTextures: bad texture directory");
 
-        const raw_strife_texture_t *mtexture = (const raw_strife_texture_t *)((const byte *)maptex + offset);
+        const raw_strife_texture_t *mtexture = (const raw_strife_texture_t *)((const uint8_t *)maptex + offset);
 
         // -ES- 2000/02/10 Texture must have patches.
         int patchcount = EPI_LE_S16(mtexture->patch_count);
@@ -320,10 +320,10 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
         // -ES- Allocate texture, patches and columnlump/ofs in one big chunk
         int base_size = sizeof(texturedef_t) + sizeof(texpatch_t) * (patchcount - 1);
 
-        texturedef_t *texture = (texturedef_t *)std::malloc(base_size + width * (sizeof(byte) + sizeof(short)));
+        texturedef_t *texture = (texturedef_t *)malloc(base_size + width * (sizeof(uint8_t) + sizeof(short)));
         cur_set->textures[i]  = texture;
 
-        byte *base = (byte *)texture + base_size;
+        uint8_t *base = (uint8_t *)texture + base_size;
 
         texture->columnofs = (unsigned short *)base;
 

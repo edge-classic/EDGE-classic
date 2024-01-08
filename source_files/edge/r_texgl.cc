@@ -76,7 +76,7 @@ int W_MakeValidSize(int value)
     return -1; /* NOT REACHED */
 }
 
-epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src, const byte *palette, int opacity)
+epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src, const uint8_t *palette, int opacity)
 {
     if (src->bpp == 1)
     {
@@ -87,9 +87,9 @@ epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src, const byte *palette
         for (int y = 0; y < src->height; y++)
             for (int x = 0; x < src->width; x++)
             {
-                byte src_pix = src->PixelAt(x, y)[0];
+                uint8_t src_pix = src->PixelAt(x, y)[0];
 
-                byte *dest_pix = dest->PixelAt(x, y);
+                uint8_t *dest_pix = dest->PixelAt(x, y);
 
                 if (src_pix == TRANS_PIXEL)
                 {
@@ -217,18 +217,18 @@ GLuint R_UploadTexture(epi::image_data_c *img, int flags, int max_pix)
 
 //----------------------------------------------------------------------------
 
-void R_PaletteRemapRGBA(epi::image_data_c *img, const byte *new_pal, const byte *old_pal)
+void R_PaletteRemapRGBA(epi::image_data_c *img, const uint8_t *new_pal, const uint8_t *old_pal)
 {
     const int max_prev = 16;
 
     // cache of previously looked-up colours (in pairs)
-    u8_t previous[max_prev * 6];
+    uint8_t previous[max_prev * 6];
     int  num_prev = 0;
 
     for (int y = 0; y < img->height; y++)
         for (int x = 0; x < img->width; x++)
         {
-            u8_t *cur = img->PixelAt(x, y);
+            uint8_t *cur = img->PixelAt(x, y);
 
             // skip completely transparent pixels
             if (img->bpp == 4 && cur[3] == 0)
@@ -251,7 +251,7 @@ void R_PaletteRemapRGBA(epi::image_data_c *img, const byte *new_pal, const byte 
 #if 1
                 if (i != 0)
                 {
-                    u8_t tmp[6];
+                    uint8_t tmp[6];
 
                     memcpy(tmp, previous, 6);
                     memcpy(previous, previous + i * 6, 6);
@@ -331,7 +331,7 @@ int R_DetermineOpacity(epi::image_data_c *img, bool *is_empty)
         for (int y = 0; y < img->used_h; y++)
             for (int x = 0; x < img->used_w; x++)
             {
-                u8_t pix = img->PixelAt(x, y)[0];
+                uint8_t pix = img->PixelAt(x, y)[0];
 
                 if (pix == TRANS_PIXEL)
                     opacity = OPAC_Masked;
@@ -353,7 +353,7 @@ int R_DetermineOpacity(epi::image_data_c *img, bool *is_empty)
         for (int y = 0; y < img->used_h; y++)
             for (int x = 0; x < img->used_w; x++)
             {
-                u8_t alpha = img->PixelAt(x, y)[3];
+                uint8_t alpha = img->PixelAt(x, y)[3];
 
                 if (alpha == 0)
                     is_masked = true;
@@ -384,7 +384,7 @@ void R_BlackenClearAreas(epi::image_data_c *img)
     // makes sure that any totally transparent pixel (alpha == 0)
     // has a colour of black.
 
-    byte *dest = img->pixels;
+    uint8_t *dest = img->pixels;
 
     int count = img->width * img->height;
 
@@ -417,7 +417,7 @@ void R_DumpImage(epi::image_data_c *img)
     {
         for (int x = 0; x < img->width; x++)
         {
-            u8_t pixel = img->PixelAt(x, y)[0];
+            uint8_t pixel = img->PixelAt(x, y)[0];
 
             // L_WriteDebug("%02x", pixel);
             L_WriteDebug("%c", 'A' + (pixel % 26));

@@ -105,7 +105,7 @@ static void AnimParseField(const char *field, const char *contents, int index, b
     I_Debugf("ANIM_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(anim_commands, field, contents, (byte *)dynamic_anim))
+    if (DDF_MainParseField(anim_commands, field, contents, (uint8_t *)dynamic_anim))
         return;
 
     DDF_WarnError("Unknown anims.ddf command: %s\n", field);
@@ -241,7 +241,7 @@ void animdef_c::Default()
 
 //----------------------------------------------------------------------------
 
-void DDF_ConvertANIMATED(const byte *data, int size)
+void DDF_ConvertANIMATED(const uint8_t *data, int size)
 {
     // handles the Boom ANIMATED lump (in a wad).
 

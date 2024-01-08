@@ -61,12 +61,12 @@ class flacplayer_c : public abstract_music_c
 
     drflac *flac_track; // I had to make it rhyme
 
-    byte *flac_data; // Passed in from s_music; must be deleted on close
+    uint8_t *flac_data; // Passed in from s_music; must be deleted on close
 
-    s16_t *mono_buffer;
+    int16_t *mono_buffer;
 
   public:
-    bool OpenMemory(byte *data, int length);
+    bool OpenMemory(uint8_t *data, int length);
 
     virtual void Close(void);
 
@@ -88,7 +88,7 @@ class flacplayer_c : public abstract_music_c
 
 flacplayer_c::flacplayer_c() : status(NOT_LOADED)
 {
-    mono_buffer = new s16_t[FLAC_FRAMES * 2];
+    mono_buffer = new int16_t[FLAC_FRAMES * 2];
 }
 
 flacplayer_c::~flacplayer_c()
@@ -106,9 +106,9 @@ void flacplayer_c::PostOpenInit()
     status = STOPPED;
 }
 
-static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
+static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
 {
-    const s16_t *s_end = src + len * 2;
+    const int16_t *s_end = src + len * 2;
 
     for (; src < s_end; src += 2)
     {
@@ -119,7 +119,7 @@ static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
 
 bool flacplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 {
-    s16_t *data_buf;
+    int16_t *data_buf;
 
     bool song_done = false;
 
@@ -151,7 +151,7 @@ bool flacplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
     return (true);
 }
 
-bool flacplayer_c::OpenMemory(byte *data, int length)
+bool flacplayer_c::OpenMemory(uint8_t *data, int length)
 {
     SYS_ASSERT(data);
 
@@ -261,7 +261,7 @@ void flacplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c *S_PlayFLACMusic(byte *data, int length, bool looping)
+abstract_music_c *S_PlayFLACMusic(uint8_t *data, int length, bool looping)
 {
     flacplayer_c *player = new flacplayer_c();
 

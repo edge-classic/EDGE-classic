@@ -112,7 +112,7 @@ std::string file_c::ReadText()
 {
     std::string textstring;
     Seek(SEEKPOINT_START, 0);
-    byte *buffer = LoadIntoMemory();
+    uint8_t *buffer = LoadIntoMemory();
     if (buffer)
     {
         textstring.assign((char *)buffer, GetLength());
@@ -122,7 +122,7 @@ std::string file_c::ReadText()
     return textstring;
 }
 
-byte *file_c::LoadIntoMemory(int max_size)
+uint8_t *file_c::LoadIntoMemory(int max_size)
 {
     SYS_ASSERT(max_size >= 0);
 
@@ -140,7 +140,7 @@ byte *file_c::LoadIntoMemory(int max_size)
     if (actual_size > max_size)
         actual_size = max_size;
 
-    byte *buffer        = new byte[actual_size + 1];
+    uint8_t *buffer        = new uint8_t[actual_size + 1];
     buffer[actual_size] = 0;
 
     if ((int)Read(buffer, actual_size) != actual_size)

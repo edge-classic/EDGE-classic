@@ -147,7 +147,7 @@ static void SectorParseField(const char *field, const char *contents, int index,
         return;
     }
 
-    if (DDF_MainParseField(sect_commands, field, contents, (byte *)dynamic_sector))
+    if (DDF_MainParseField(sect_commands, field, contents, (uint8_t *)dynamic_sector))
         return; // OK
 
     DDF_WarnError("Unknown sectors.ddf command: %s\n", field);

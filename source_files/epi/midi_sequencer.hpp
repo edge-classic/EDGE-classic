@@ -695,7 +695,7 @@ class BW_MidiSequencer
      * @param rate For IMF formats, the proper playback rate in Hz
      * @return true if file successfully opened, false on any error
      */
-    bool loadMIDI(const byte *data, size_t size, uint16_t rate = 0);
+    bool loadMIDI(const uint8_t *data, size_t size, uint16_t rate = 0);
 
     /**
      * @brief Load MIDI file by using FileAndMemReader interface

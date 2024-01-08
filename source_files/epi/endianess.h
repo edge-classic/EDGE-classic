@@ -57,83 +57,83 @@
 
 // Byteswap item between the specified endianness to the native endianness
 #if EPI_BYTEORDER == EPI_LIL_ENDIAN
-#define EPI_LE_U16(X) ((u16_t)(X))
-#define EPI_LE_U32(X) ((u32_t)(X))
+#define EPI_LE_U16(X) ((uint16_t)(X))
+#define EPI_LE_U32(X) ((uint32_t)(X))
 #define EPI_BE_U16(X) EPI_Swap16(X)
 #define EPI_BE_U32(X) EPI_Swap32(X)
 #else
 #define EPI_LE_U16(X) EPI_Swap16(X)
 #define EPI_LE_U32(X) EPI_Swap32(X)
-#define EPI_BE_U16(X) ((u16_t)(X))
-#define EPI_BE_U32(X) ((u32_t)(X))
+#define EPI_BE_U16(X) ((uint16_t)(X))
+#define EPI_BE_U32(X) ((uint32_t)(X))
 #endif
 
-#define EPI_LE_S16(X) ((s16_t)EPI_LE_U16((u16_t)(X)))
-#define EPI_LE_S32(X) ((s32_t)EPI_LE_U32((u32_t)(X)))
-#define EPI_BE_S16(X) ((s16_t)EPI_BE_U16((u16_t)(X)))
-#define EPI_BE_S32(X) ((s32_t)EPI_BE_U32((u32_t)(X)))
+#define EPI_LE_S16(X) ((int16_t)EPI_LE_U16((uint16_t)(X)))
+#define EPI_LE_S32(X) ((int32_t)EPI_LE_U32((uint32_t)(X)))
+#define EPI_BE_S16(X) ((int16_t)EPI_BE_U16((uint16_t)(X)))
+#define EPI_BE_S32(X) ((int32_t)EPI_BE_U32((uint32_t)(X)))
 
 namespace epi
 {
 class endian_swapper_c
 {
   public:
-    static u16_t Swap16(u16_t x);
-    static u32_t Swap32(u32_t x);
+    static uint16_t Swap16(uint16_t x);
+    static uint32_t Swap32(uint32_t x);
 };
 
 // Swap 16bit, that is, MSB and LSB byte.
-inline u16_t endian_swapper_c::Swap16(u16_t x)
+inline uint16_t endian_swapper_c::Swap16(uint16_t x)
 {
     // No masking with 0xFF should be necessary.
     return (x >> 8) | (x << 8);
 }
 
 // Swapping 32bit.
-inline u32_t endian_swapper_c::Swap32(u32_t x)
+inline uint32_t endian_swapper_c::Swap32(uint32_t x)
 {
     return (x >> 24) | ((x >> 8) & 0xff00) | ((x << 8) & 0xff0000) | (x << 24);
 }
 
 // Get LE/BE values from pointer regardless of buffer alignment
-inline u16_t GetU16LE(const u8_t *p)
+inline uint16_t GetU16LE(const uint8_t *p)
 {
     return EPI_LE_U16(p[1] << 8 | p[0]);
 }
 
-inline s16_t GetS16LE(const u8_t *p)
+inline int16_t GetS16LE(const uint8_t *p)
 {
-    return (s16_t)GetU16LE(p);
+    return (int16_t)GetU16LE(p);
 }
 
-inline u32_t GetU32LE(const u8_t *p)
+inline uint32_t GetU32LE(const uint8_t *p)
 {
     return EPI_LE_U32(p[3] << 24 | p[2] << 16 | p[1] << 8 | p[0]);
 }
 
-inline s32_t GetS32LE(const u8_t *p)
+inline int32_t GetS32LE(const uint8_t *p)
 {
-    return (s32_t)GetU32LE(p);
+    return (int32_t)GetU32LE(p);
 }
 
-inline u16_t GetU16BE(const u8_t *p)
+inline uint16_t GetU16BE(const uint8_t *p)
 {
     return EPI_BE_U16(p[0] << 8 | p[1]);
 }
 
-inline s16_t GetS16BE(const u8_t *p)
+inline int16_t GetS16BE(const uint8_t *p)
 {
-    return (s16_t)GetU16BE(p);
+    return (int16_t)GetU16BE(p);
 }
 
-inline u32_t GetU32BE(const u8_t *p)
+inline uint32_t GetU32BE(const uint8_t *p)
 {
     return EPI_BE_U32(p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3]);
 }
 
-inline s32_t GetS32BE(const u8_t *p)
+inline int32_t GetS32BE(const uint8_t *p)
 {
-    return (s32_t)GetU32BE(p);
+    return (int32_t)GetU32BE(p);
 }
 
 } // namespace epi

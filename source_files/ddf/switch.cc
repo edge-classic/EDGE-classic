@@ -82,7 +82,7 @@ static void SwitchParseField(const char *field, const char *contents, int index,
     I_Debugf("SWITCH_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(switch_commands, field, contents, (byte *)dynamic_switchdef))
+    if (DDF_MainParseField(switch_commands, field, contents, (uint8_t *)dynamic_switchdef))
         return;
 
     DDF_WarnError("Unknown switch.ddf command: %s\n", field);
@@ -215,7 +215,7 @@ switchdef_c *switchdef_container_c::Find(const char *name)
 
 //----------------------------------------------------------------------------
 
-void DDF_ConvertSWITCHES(const byte *data, int size)
+void DDF_ConvertSWITCHES(const uint8_t *data, int size)
 {
     // handles the Boom SWITCHES lump (in a wad).
 

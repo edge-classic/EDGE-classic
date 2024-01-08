@@ -27,14 +27,14 @@ namespace epi
 class mem_file_c : public file_c
 {
   private:
-    byte *data;
+    uint8_t *data;
 
     int  length;
     int  pos;
     bool copied;
 
   public:
-    mem_file_c(const byte *_block, int _len, bool copy_it = true);
+    mem_file_c(const uint8_t *_block, int _len, bool copy_it = true);
     ~mem_file_c();
 
     int GetLength()

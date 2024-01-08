@@ -52,7 +52,7 @@ static float  cur_wipe_top;
 #define MELT_DIVS 128
 static int melt_yoffs[MELT_DIVS + 1];
 
-static inline byte SpookyAlpha(int x, int y)
+static inline uint8_t SpookyAlpha(int x, int y)
 {
     y += (x & 32) / 2;
 
@@ -78,7 +78,7 @@ static void CaptureScreenAsTexture(bool speckly, bool spooky)
 
     for (int y = 0; y < SCREENHEIGHT; y++)
     {
-        u8_t *dest = img.PixelAt(0, y);
+        uint8_t *dest = img.PixelAt(0, y);
 
         glReadPixels(0, y, SCREENWIDTH, 1, GL_RGBA, GL_UNSIGNED_BYTE, dest);
 
@@ -117,7 +117,7 @@ void RGL_BlackoutWipeTex(void)
 
     for (int y = 0; y < SCREENHEIGHT; y++)
     {
-        u8_t *dest = img.PixelAt(0, y);
+        uint8_t *dest = img.PixelAt(0, y);
 
         dest[0] = dest[1] = dest[2] = 0;
         dest[3] = 1;

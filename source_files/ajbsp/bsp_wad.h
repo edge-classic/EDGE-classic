@@ -168,7 +168,7 @@ class Wad_file
     //
     static Wad_file *Open(std::filesystem::path filename, char mode = 'a');
 
-    static Wad_file *OpenMem(std::filesystem::path filename, byte *raw_wad, int raw_length);
+    static Wad_file *OpenMem(std::filesystem::path filename, uint8_t *raw_wad, int raw_length);
 
     bool IsReadOnly() const
     {

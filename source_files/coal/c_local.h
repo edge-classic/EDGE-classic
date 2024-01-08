@@ -28,8 +28,6 @@
 
 #include "c_memory.h"
 
-typedef unsigned char byte;
-
 typedef int func_t;
 typedef int string_t;
 

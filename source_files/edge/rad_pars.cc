@@ -383,7 +383,7 @@ static bool CheckForBoolean(const char *s)
 }
 
 #if 0 // UNUSED
-static void DoParsePlayerSet(const char *info, u32_t *set)
+static void DoParsePlayerSet(const char *info, uint32_t *set)
 {
 	const char *p = info;
 	const char *next;

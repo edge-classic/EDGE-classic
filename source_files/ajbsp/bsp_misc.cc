@@ -346,8 +346,8 @@ static inline int cmpVertex(const vertex_t *A, const vertex_t *B)
 
 static int VertexCompare(const void *p1, const void *p2)
 {
-    int vert1 = ((const u32_t *)p1)[0];
-    int vert2 = ((const u32_t *)p2)[0];
+    int vert1 = ((const uint32_t *)p1)[0];
+    int vert2 = ((const uint32_t *)p2)[0];
 
     if (vert1 == vert2)
         return 0;
@@ -361,13 +361,13 @@ static int VertexCompare(const void *p1, const void *p2)
 void DetectOverlappingVertices(void)
 {
     int    i;
-    u32_t *array = (u32_t *)UtilCalloc(num_vertices * sizeof(u32_t));
+    uint32_t *array = (uint32_t *)UtilCalloc(num_vertices * sizeof(uint32_t));
 
     // sort array of indices
     for (i = 0; i < num_vertices; i++)
         array[i] = i;
 
-    qsort(array, num_vertices, sizeof(u32_t), VertexCompare);
+    qsort(array, num_vertices, sizeof(uint32_t), VertexCompare);
 
     // now mark them off
     for (i = 0; i < num_vertices - 1; i++)

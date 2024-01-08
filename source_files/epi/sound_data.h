@@ -56,12 +56,12 @@ class sound_data_c
     // For SBUF_Mono, both pointers refer to the same memory.
     // For SBUF_Interleaved, only data_L is used and contains
     // both channels, left samples before right samples.
-    s16_t *data_L;
-    s16_t *data_R;
+    int16_t *data_L;
+    int16_t *data_R;
 
     // Temp buffer for mixed SFX. Will be overwritten as needed.
-    s16_t *fx_data_L;
-    s16_t *fx_data_R;
+    int16_t *fx_data_L;
+    int16_t *fx_data_R;
 
     // values for the engine to use
     void *priv_data;

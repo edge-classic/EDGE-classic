@@ -26,7 +26,7 @@ namespace epi
 //
 // Constructor
 //
-mem_file_c::mem_file_c(const byte *_block, int _len, bool copy_it)
+mem_file_c::mem_file_c(const uint8_t *_block, int _len, bool copy_it)
 {
     SYS_ASSERT(_block);
     SYS_ASSERT(_len >= 0);
@@ -43,7 +43,7 @@ mem_file_c::mem_file_c(const byte *_block, int _len, bool copy_it)
 
     if (copy_it)
     {
-        data   = new byte[_len];
+        data   = new uint8_t[_len];
         length = _len;
 
         memcpy(data, _block, _len);
@@ -51,7 +51,7 @@ mem_file_c::mem_file_c(const byte *_block, int _len, bool copy_it)
     }
     else
     {
-        data   = (byte *)_block;
+        data   = (uint8_t *)_block;
         length = _len;
     }
 }

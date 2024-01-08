@@ -215,7 +215,7 @@ static int WhatRot(spriteframe_c *frame, const char *name, int pos)
     }
 }
 
-static void InstallSpriteLump(spritedef_c *def, int lump, const char *lumpname, int pos, byte flip)
+static void InstallSpriteLump(spritedef_c *def, int lump, const char *lumpname, int pos, uint8_t flip)
 {
     spriteframe_c *frame = WhatFrame(def, lumpname, pos);
     if (!frame)
@@ -244,7 +244,7 @@ static void InstallSpriteLump(spritedef_c *def, int lump, const char *lumpname, 
 }
 
 static void InstallSpritePack(spritedef_c *def, pack_file_c *pack, std::string spritebase, std::string packname,
-                              int pos, byte flip)
+                              int pos, uint8_t flip)
 {
     spriteframe_c *frame = WhatFrame(def, spritebase.c_str(), pos);
     if (!frame)
@@ -272,7 +272,7 @@ static void InstallSpritePack(spritedef_c *def, pack_file_c *pack, std::string s
     frame->flip[rot] = flip;
 }
 
-static void InstallSpriteImage(spritedef_c *def, const image_c *img, const char *img_name, int pos, byte flip)
+static void InstallSpriteImage(spritedef_c *def, const image_c *img, const char *img_name, int pos, uint8_t flip)
 {
     spriteframe_c *frame = WhatFrame(def, img_name, pos);
     if (!frame)
@@ -451,7 +451,7 @@ static void FillSpriteFramesUser()
                 if (!offset_check)
                     I_Error("FillSpriteFramesUser: Error loading %s!\n", images[L]->name.c_str());
 
-                byte header[32];
+                uint8_t header[32];
                 memset(header, 255, sizeof(header));
                 offset_check->Read(header, sizeof(header));
                 delete offset_check;
@@ -736,7 +736,7 @@ void W_PrecacheSprites(void)
 {
     SYS_ASSERT(numsprites > 1);
 
-    byte *sprite_present = new byte[numsprites];
+    uint8_t *sprite_present = new uint8_t[numsprites];
     memset(sprite_present, 0, numsprites);
 
     for (mobj_t *mo = mobjlisthead; mo; mo = mo->next)

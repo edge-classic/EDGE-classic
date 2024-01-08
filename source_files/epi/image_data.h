@@ -44,15 +44,15 @@ class image_data_c
     float scale_x;
     float scale_y;
 
-    u8_t *pixels;
+    uint8_t *pixels;
 
   public:
     image_data_c(int _w, int _h, int _bpp = 3);
     ~image_data_c();
 
-    void Clear(u8_t val = 0);
+    void Clear(uint8_t val = 0);
 
-    inline u8_t *PixelAt(int x, int y) const
+    inline uint8_t *PixelAt(int x, int y) const
     {
         // Note: DOES NOT CHECK COORDS
 
@@ -61,8 +61,8 @@ class image_data_c
 
     inline void CopyPixel(int sx, int sy, int dx, int dy)
     {
-        u8_t *src  = PixelAt(sx, sy);
-        u8_t *dest = PixelAt(dx, dy);
+        uint8_t *src  = PixelAt(sx, sy);
+        uint8_t *dest = PixelAt(dx, dy);
 
         for (int i = 0; i < bpp; i++)
             *dest++ = *src++;
@@ -101,7 +101,7 @@ class image_data_c
 
     // test each alpha value in the RGBA image against the threshold:
     // lesser values become 0, and greater-or-equal values become 255.
-    void ThresholdAlpha(u8_t alpha = 128);
+    void ThresholdAlpha(uint8_t alpha = 128);
 
     // mirror the already-drawn corner (lowest x/y values) into the
     // other three corners.  When width or height is odd, the middle
@@ -128,20 +128,20 @@ class image_data_c
     // compute the average Hue of the RGB(A) image, storing the
     // result in the 'hue' array (r, g, b).  The average intensity
     // will be stored in 'ity' when given.
-    void AverageHue(u8_t *hue, u8_t *ity = NULL, int from_x = -1, int to_x = 1000000, int from_y = -1,
+    void AverageHue(uint8_t *hue, uint8_t *ity = NULL, int from_x = -1, int to_x = 1000000, int from_y = -1,
                     int to_y = 1000000);
 
     // compute the average color of the RGB image, storing the
     // result in the 'rgb' array (r, g, b).
-    void AverageColor(u8_t *rgb, int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    void AverageColor(uint8_t *rgb, int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
     // compute the lightest color in the RGB image, storing the
     // result in the 'rgb' array (r, g, b).
-    void LightestColor(u8_t *rgb, int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    void LightestColor(uint8_t *rgb, int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
     // compute the darkest color in the RGB image, storing the
     // result in the 'rgb' array (r, g, b).
-    void DarkestColor(u8_t *rgb, int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    void DarkestColor(uint8_t *rgb, int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
     // SMMU-style swirling
     void Swirl(int leveltime, int thickness);

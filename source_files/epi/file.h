@@ -69,7 +69,7 @@ class file_c
     // parameter (in bytes).  An extra NUL byte is appended
     // to the result buffer.  Returns NULL on failure.
     // The returned buffer must be freed with delete[].
-    byte *LoadIntoMemory(int max_size = INT_MAX);
+    uint8_t *LoadIntoMemory(int max_size = INT_MAX);
 
     // Reads the file as text
     std::string ReadText();

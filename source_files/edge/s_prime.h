@@ -27,7 +27,7 @@ bool S_StartupPrime(void);
 
 void S_RestartPrime(void);
 
-abstract_music_c *S_PlayPrime(byte *data, int length, bool loop);
+abstract_music_c *S_PlayPrime(uint8_t *data, int length, bool loop);
 
 #endif /* __S_PRIME_H__ */
 

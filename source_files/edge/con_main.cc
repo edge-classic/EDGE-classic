@@ -266,7 +266,7 @@ int CMD_Crc(char **argv, int argc)
         else
         {
             int   length;
-            byte *data = (byte *)W_LoadLump(lump, &length);
+            uint8_t *data = (uint8_t *)W_LoadLump(lump, &length);
 
             epi::crc32_c result;
 
@@ -521,7 +521,7 @@ static int GetArgs(const char *line, char **argv, int max_argc)
 
     for (;;)
     {
-        while (isspace(*(u8_t *)line))
+        while (isspace(*(uint8_t *)line))
             line++;
 
         if (!*line)
@@ -543,7 +543,7 @@ static int GetArgs(const char *line, char **argv, int max_argc)
         }
         else
         {
-            while (*line && !isspace(*(u8_t *)line))
+            while (*line && !isspace(*(uint8_t *)line))
                 line++;
         }
 

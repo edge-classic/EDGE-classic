@@ -700,7 +700,7 @@ void bot_t::StrafeAroundEnemy()
         else
             strafe_dir = (r & 16) ? -1 : +1;
 
-        u8_t wait = 60 - (bot_skill.d * 10);
+        uint8_t wait = 60 - (bot_skill.d * 10);
 
         strafe_time = wait + r % wait;
         return;

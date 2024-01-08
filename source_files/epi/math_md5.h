@@ -36,16 +36,16 @@ class md5hash_c
     /* sealed */
 
   public:
-    byte hash[16];
+    uint8_t hash[16];
 
     md5hash_c();
-    md5hash_c(const byte *message, unsigned int len);
+    md5hash_c(const uint8_t *message, unsigned int len);
 
     ~md5hash_c()
     {
     }
 
-    void Compute(const byte *message, unsigned int len);
+    void Compute(const uint8_t *message, unsigned int len);
 
   private:
     // a class used while computing the MD5 sum.
@@ -54,16 +54,16 @@ class md5hash_c
     class packhash_c
     {
       public:
-        u32_t pack[4];
+        uint32_t pack[4];
 
         packhash_c();
         ~packhash_c()
         {
         }
 
-        void Transform(const u32_t extra[16]);
-        void TransformBytes(const byte chunk[64]);
-        void Encode(byte *hash);
+        void Transform(const uint32_t extra[16]);
+        void TransformBytes(const uint8_t chunk[64]);
+        void Encode(uint8_t *hash);
     };
 };
 

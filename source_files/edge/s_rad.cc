@@ -60,15 +60,15 @@ class radplayer_c : public abstract_music_c
     int  status;
     bool looping;
 
-    s16_t *mono_buffer;
+    int16_t *mono_buffer;
 
     int   samp_count;
     int   samp_update;
     int   samp_rate;
-    byte *tune;
+    uint8_t *tune;
 
   public:
-    bool OpenMemory(byte *data, int length);
+    bool OpenMemory(uint8_t *data, int length);
 
     virtual void Close(void);
 
@@ -90,7 +90,7 @@ class radplayer_c : public abstract_music_c
 
 radplayer_c::radplayer_c() : status(NOT_LOADED), tune(nullptr)
 {
-    mono_buffer = new s16_t[RAD_BLOCK_SIZE * 2];
+    mono_buffer = new int16_t[RAD_BLOCK_SIZE * 2];
 }
 
 radplayer_c::~radplayer_c()
@@ -109,9 +109,9 @@ void radplayer_c::PostOpenInit()
     status = STOPPED;
 }
 
-static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
+static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
 {
-    const s16_t *s_end = src + len * 2;
+    const int16_t *s_end = src + len * 2;
 
     for (; src < s_end; src += 2)
     {
@@ -122,7 +122,7 @@ static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
 
 bool radplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
 {
-    s16_t *data_buf;
+    int16_t *data_buf;
 
     bool song_done = false;
     int  samples   = 0;
@@ -159,7 +159,7 @@ bool radplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
     return true;
 }
 
-bool radplayer_c::OpenMemory(byte *data, int length)
+bool radplayer_c::OpenMemory(uint8_t *data, int length)
 {
     SYS_ASSERT(data);
 
@@ -285,7 +285,7 @@ void radplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c *S_PlayRADMusic(byte *data, int length, bool looping)
+abstract_music_c *S_PlayRADMusic(uint8_t *data, int length, bool looping)
 {
     radplayer_c *player = new radplayer_c();
 

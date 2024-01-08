@@ -320,7 +320,7 @@ static void LinedefParseField(const char *field, const char *contents, int index
         return;
     }
 
-    if (DDF_MainParseField(linedef_commands, field, contents, (byte *)dynamic_line))
+    if (DDF_MainParseField(linedef_commands, field, contents, (uint8_t *)dynamic_line))
         return; // OK
 
     DDF_WarnError("Unknown lines.ddf command: %s\n", field);

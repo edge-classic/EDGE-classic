@@ -95,7 +95,7 @@ static void ColmapParseField(const char *field, const char *contents, int index,
     if (DDF_CompareName(field, "PRIORITY") == 0)
         return;
 
-    if (DDF_MainParseField(colmap_commands, field, contents, (byte *)dynamic_colmap))
+    if (DDF_MainParseField(colmap_commands, field, contents, (uint8_t *)dynamic_colmap))
         return; // OK
 
     DDF_WarnError("Unknown colmap.ddf command: %s\n", field);

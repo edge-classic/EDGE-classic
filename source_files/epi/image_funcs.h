@@ -67,7 +67,7 @@ class image_atlas_c
 // determine image format from the first 32 bytes (or so) of the file.
 // the file_size is the total size of the file or lump, and helps to
 // distinguish DOOM patch format from other things.
-image_format_e Image_DetectFormat(byte *header, int header_len, int file_size);
+image_format_e Image_DetectFormat(uint8_t *header, int header_len, int file_size);
 
 // determine image format from the filename (by its extension).
 image_format_e Image_FilenameToFormat(const std::filesystem::path &filename);

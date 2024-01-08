@@ -52,7 +52,7 @@
 extern cvar_c r_forceflatlighting;
 
 // -AJA- 1999/06/30: added this
-byte playpal_data[14][256][3];
+uint8_t playpal_data[14][256][3];
 
 // -AJA- 1999/09/18: fixes problem with black text etc.
 static bool loaded_playpal = false;
@@ -81,7 +81,7 @@ void V_InitPalette(void)
     int t, i;
 
     int         pal_length = 0;
-    const byte *pal        = (const byte *)W_OpenPackOrLumpInMemory("PLAYPAL", {".pal"}, &pal_length);
+    const uint8_t *pal        = (const uint8_t *)W_OpenPackOrLumpInMemory("PLAYPAL", {".pal"}, &pal_length);
 
     if (!pal)
         I_Error("V_InitPalette: Error opening PLAYPAL!\n");
@@ -230,7 +230,7 @@ void V_SetPalette(int type, float amount)
 static void LoadColourmap(const colourmap_c *colm)
 {
     int   size;
-    byte *data;
+    uint8_t *data;
 
     // we are writing to const marked memory here. Here is the only place
     // the cache struct is touched.
@@ -256,24 +256,24 @@ static void LoadColourmap(const colourmap_c *colm)
     }
 
     cache->size = colm->length * 256;
-    cache->data = new byte[cache->size];
+    cache->data = new uint8_t[cache->size];
 
     memcpy(cache->data, data + (colm->start * 256), cache->size);
 
     delete[] data;
 }
 
-const byte *V_GetTranslationTable(const colourmap_c *colmap)
+const uint8_t *V_GetTranslationTable(const colourmap_c *colmap)
 {
     // Do we need to load or recompute this colourmap ?
 
     if (colmap->cache.data == NULL)
         LoadColourmap(colmap);
 
-    return (const byte *)colmap->cache.data;
+    return (const uint8_t *)colmap->cache.data;
 }
 
-void R_TranslatePalette(byte *new_pal, const byte *old_pal, const colourmap_c *trans)
+void R_TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const colourmap_c *trans)
 {
 
     // is the colormap just using GL_COLOUR?
@@ -293,7 +293,7 @@ void R_TranslatePalette(byte *new_pal, const byte *old_pal, const colourmap_c *t
     else
     {
         // do the actual translation
-        const byte *trans_table = V_GetTranslationTable(trans);
+        const uint8_t *trans_table = V_GetTranslationTable(trans);
 
         for (int j = 0; j < 256; j++)
         {
@@ -306,7 +306,7 @@ void R_TranslatePalette(byte *new_pal, const byte *old_pal, const colourmap_c *t
     }
 }
 
-static int AnalyseColourmap(const byte *table, int alpha, int *r, int *g, int *b)
+static int AnalyseColourmap(const uint8_t *table, int alpha, int *r, int *g, int *b)
 {
     /* analyse whole colourmap */
     int r_tot = 0;
@@ -399,13 +399,13 @@ static int AnalyseColourmap(const byte *table, int alpha, int *r, int *g, int *b
 
 void TransformColourmap(colourmap_c *colmap)
 {
-    const byte *table = colmap->cache.data;
+    const uint8_t *table = colmap->cache.data;
 
     if (table == NULL && (!colmap->lump_name.empty() || !colmap->pack_name.empty()))
     {
         LoadColourmap(colmap);
 
-        table = (byte *)colmap->cache.data;
+        table = (uint8_t *)colmap->cache.data;
     }
 
     if (colmap->font_colour == RGB_NO_VALUE)
@@ -530,7 +530,7 @@ void V_ColourNewFrame(void)
 // Returns an RGB value from an index value - used the current
 // palette.  The byte pointer is assumed to point a 3-byte array.
 //
-void V_IndexColourToRGB(int indexcol, byte *returncol, rgbcol_t last_damage_colour, float damageAmount)
+void V_IndexColourToRGB(int indexcol, uint8_t *returncol, rgbcol_t last_damage_colour, float damageAmount)
 {
     if ((cur_palette == PALETTE_NORMAL) || (cur_palette == PALETTE_PAIN))
     {
@@ -538,9 +538,9 @@ void V_IndexColourToRGB(int indexcol, byte *returncol, rgbcol_t last_damage_colo
         float g = (float)RGB_GRN(last_damage_colour) / 255.0;
         float b = (float)RGB_BLU(last_damage_colour) / 255.0;
 
-        returncol[0] = (byte)MAX(0, MIN(255, r * damageAmount * 2.5));
-        returncol[1] = (byte)MAX(0, MIN(255, g * damageAmount * 2.5));
-        returncol[2] = (byte)MAX(0, MIN(255, b * damageAmount * 2.5));
+        returncol[0] = (uint8_t)MAX(0, MIN(255, r * damageAmount * 2.5));
+        returncol[1] = (uint8_t)MAX(0, MIN(255, g * damageAmount * 2.5));
+        returncol[2] = (uint8_t)MAX(0, MIN(255, b * damageAmount * 2.5));
     }
     else
     {
@@ -774,7 +774,7 @@ class colormap_shader_c : public abstract_shader_c
     {
         epi::image_data_c img(256, 64, 4);
 
-        const byte *map    = NULL;
+        const uint8_t *map    = NULL;
         int         length = 32;
 
         if (colmap && colmap->length > 0)
@@ -787,7 +787,7 @@ class colormap_shader_c : public abstract_shader_c
                 int cmap_idx = length * ci / 32;
 
                 // +4 gets the white pixel -- FIXME: doom specific
-                const byte new_col = map[cmap_idx * 256 + 4];
+                const uint8_t new_col = map[cmap_idx * 256 + 4];
 
                 int r = playpal_data[0][new_col][0];
                 int g = playpal_data[0][new_col][1];
@@ -819,7 +819,7 @@ class colormap_shader_c : public abstract_shader_c
 
         for (int L = 0; L < 64; L++)
         {
-            byte *dest = img.PixelAt(0, L);
+            uint8_t *dest = img.PixelAt(0, L);
 
             for (int x = 0; x < 256; x++, dest += 4)
             {

@@ -2134,7 +2134,7 @@ void BW_MidiSequencer::setTempo(double tempo)
     m_tempoMultiplier = tempo;
 }
 
-bool BW_MidiSequencer::loadMIDI(const byte *data, size_t size, uint16_t rate)
+bool BW_MidiSequencer::loadMIDI(const uint8_t *data, size_t size, uint16_t rate)
 {
     epi::mem_file_c *mfr = new epi::mem_file_c(data, size);
     return loadMIDI(mfr, rate);

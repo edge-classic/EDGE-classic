@@ -85,7 +85,7 @@ static void FlatParseField(const char *field, const char *contents, int index, b
     I_Debugf("FLAT_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(flat_commands, field, contents, (byte *)dynamic_flatdef))
+    if (DDF_MainParseField(flat_commands, field, contents, (uint8_t *)dynamic_flatdef))
         return;
 
     DDF_WarnError("Unknown flat.ddf command: %s\n", field);
@@ -142,7 +142,7 @@ void DDF_FlatCleanUp(void)
     flatdefs.shrink_to_fit();
 }
 
-void DDF_ParseFLATS(const byte *data, int size)
+void DDF_ParseFLATS(const uint8_t *data, int size)
 {
     for (; size >= 20; data += 20, size -= 20)
     {

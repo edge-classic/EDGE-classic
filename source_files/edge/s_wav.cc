@@ -70,7 +70,7 @@ struct SpkSndHeader
     uint16_t samples;
 };
 
-byte *Convert_PCSpeaker(const byte *data, int *length)
+uint8_t *Convert_PCSpeaker(const uint8_t *data, int *length)
 {
     static const double   ORIG_RATE     = 140.0;
     static const int      FACTOR        = 315; // 315*140 = 44100
@@ -185,7 +185,7 @@ byte *Convert_PCSpeaker(const byte *data, int *length)
 
     *length             = 20 + sizeof(WavFmtChunk) + (numsamples * FACTOR);
     int   write_counter = 0;
-    byte *new_data      = new byte[*length];
+    uint8_t *new_data      = new uint8_t[*length];
     memcpy(new_data + write_counter, &whdr, 8);
     write_counter += 8;
     char wave[4] = {'W', 'A', 'V', 'E'};
@@ -201,7 +201,7 @@ byte *Convert_PCSpeaker(const byte *data, int *length)
     return new_data;
 }
 
-bool S_LoadWAVSound(epi::sound_data_c *buf, byte *data, int length, bool pc_speaker)
+bool S_LoadWAVSound(epi::sound_data_c *buf, uint8_t *data, int length, bool pc_speaker)
 {
     drwav wav;
 
@@ -237,7 +237,7 @@ bool S_LoadWAVSound(epi::sound_data_c *buf, byte *data, int length, bool pc_spea
 
     epi::sound_gather_c gather;
 
-    s16_t *buffer = gather.MakeChunk(wav.totalPCMFrameCount, is_stereo);
+    int16_t *buffer = gather.MakeChunk(wav.totalPCMFrameCount, is_stereo);
 
     gather.CommitChunk(drwav_read_pcm_frames_s16(&wav, wav.totalPCMFrameCount, buffer));
 

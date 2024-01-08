@@ -1125,7 +1125,7 @@ void DDF_MainGetString(const char *info, void *storage)
 // Check if the command exists, and call the parser function if it
 // does (and return true), otherwise return false.
 //
-bool DDF_MainParseField(const commandlist_t *commands, const char *field, const char *contents, byte *obj_base)
+bool DDF_MainParseField(const commandlist_t *commands, const char *field, const char *contents, uint8_t *obj_base)
 {
     SYS_ASSERT(obj_base);
 

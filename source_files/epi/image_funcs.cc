@@ -50,7 +50,7 @@ image_atlas_c::~image_atlas_c()
 	data = nullptr;
 }
 
-image_format_e Image_DetectFormat(byte *header, int header_len, int file_size)
+image_format_e Image_DetectFormat(uint8_t *header, int header_len, int file_size)
 {
     // AJA 2022: based on code I wrote for Eureka...
 
@@ -93,9 +93,9 @@ image_format_e Image_DetectFormat(byte *header, int header_len, int file_size)
         int width  = (int)header[12] + ((int)header[13] << 8);
         int height = (int)header[14] + ((int)header[15] << 8);
 
-        byte cmap_type = header[1];
-        byte img_type  = header[2];
-        byte depth     = header[16];
+        uint8_t cmap_type = header[1];
+        uint8_t img_type  = header[2];
+        uint8_t depth     = header[16];
 
         if (width > 0 && width <= 2048 && height > 0 && height <= 2048 && (cmap_type == 0 || cmap_type == 1) &&
             ((img_type | 8) >= 8 && (img_type | 8) <= 11) &&
@@ -155,9 +155,9 @@ image_data_c *Image_Load(file_c *f)
     int bpp    = 0;
 
     int   length    = f->GetLength();
-    byte *raw_image = f->LoadIntoMemory();
+    uint8_t *raw_image = f->LoadIntoMemory();
 
-    unsigned char *decoded_img = stbi_load_from_memory(raw_image, length, &width, &height, &bpp, 0);
+    uint8_t *decoded_img = stbi_load_from_memory(raw_image, length, &width, &height, &bpp, 0);
 
     // we don't want no grayscale here, force STB to convert
     if (decoded_img != NULL && (bpp == 1 || bpp == 2))
@@ -203,7 +203,7 @@ image_data_c *Image_Load(file_c *f)
     // copy the image data, inverting it at the same time
     for (int y = 0; y < height; y++)
     {
-        const byte *source = &decoded_img[(height - 1 - y) * width * bpp];
+        const uint8_t *source = &decoded_img[(height - 1 - y) * width * bpp];
         memcpy(img->PixelAt(0, y), source, width * bpp);
     }
 
@@ -288,7 +288,7 @@ image_atlas_c *Image_Pack(const std::unordered_map<int, image_data_c *> &im_pack
 bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp)
 {
     int   length    = f->GetLength();
-    byte *raw_image = f->LoadIntoMemory();
+    uint8_t *raw_image = f->LoadIntoMemory();
 
     int result = stbi_info_from_memory(raw_image, length, width, height, bpp);
 

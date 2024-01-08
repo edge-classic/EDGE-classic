@@ -33,7 +33,7 @@
 void RGL_DrawImage(float x, float y, float w, float h, const image_c *image, float tx1, float ty1, float tx2, float ty2,
                    const colourmap_c *textmap = NULL, float alpha = 1.0f, const colourmap_c *palremap = NULL);
 
-void RGL_ReadScreen(int x, int y, int w, int h, byte *rgb_buffer);
+void RGL_ReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer);
 
 // This routine should inform the lower level system(s) that the
 // screen has changed size/depth.  New size/depth is given.  Must be

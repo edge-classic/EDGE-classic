@@ -84,17 +84,17 @@ void sound_data_c::Allocate(int samples, int buf_mode)
     switch (buf_mode)
     {
     case SBUF_Mono:
-        data_L = new s16_t[samples];
+        data_L = new int16_t[samples];
         data_R = data_L;
         break;
 
     case SBUF_Stereo:
-        data_L = new s16_t[samples];
-        data_R = new s16_t[samples];
+        data_L = new int16_t[samples];
+        data_R = new int16_t[samples];
         break;
 
     case SBUF_Interleaved:
-        data_L = new s16_t[samples * 2];
+        data_L = new int16_t[samples * 2];
         data_R = data_L;
         break;
 
@@ -124,7 +124,7 @@ void sound_data_c::Mix_Submerged()
         {
         case SBUF_Mono:
             if (!fx_data_L)
-                fx_data_L = new s16_t[length];
+                fx_data_L = new int16_t[length];
             fx_data_R       = fx_data_L;
             reverb_buffer_L = new int[length];
             memset(reverb_buffer_L, 0, length * sizeof(int));
@@ -146,9 +146,9 @@ void sound_data_c::Mix_Submerged()
 
         case SBUF_Stereo:
             if (!fx_data_L)
-                fx_data_L = new s16_t[length];
+                fx_data_L = new int16_t[length];
             if (!fx_data_R)
-                fx_data_R = new s16_t[length];
+                fx_data_R = new int16_t[length];
             reverb_buffer_L = new int[length];
             reverb_buffer_R = new int[length];
             memset(reverb_buffer_L, 0, length * sizeof(int));
@@ -178,7 +178,7 @@ void sound_data_c::Mix_Submerged()
 
         case SBUF_Interleaved:
             if (!fx_data_L)
-                fx_data_L = new s16_t[length * 2];
+                fx_data_L = new int16_t[length * 2];
             fx_data_R       = fx_data_L;
             reverb_buffer_L = new int[length * 2];
             memset(reverb_buffer_L, 0, length * sizeof(int) * 2);
@@ -216,7 +216,7 @@ void sound_data_c::Mix_Vacuum()
         {
         case SBUF_Mono:
             if (!fx_data_L)
-                fx_data_L = new s16_t[length];
+                fx_data_L = new int16_t[length];
             fx_data_R = fx_data_L;
             for (int i = 0; i < length; i++)
             {
@@ -228,9 +228,9 @@ void sound_data_c::Mix_Vacuum()
 
         case SBUF_Stereo:
             if (!fx_data_L)
-                fx_data_L = new s16_t[length];
+                fx_data_L = new int16_t[length];
             if (!fx_data_R)
-                fx_data_R = new s16_t[length];
+                fx_data_R = new int16_t[length];
             for (int i = 0; i < length; i++)
             {
                 fx_data_L[i] = out_L = accum_L >> k;
@@ -243,7 +243,7 @@ void sound_data_c::Mix_Vacuum()
 
         case SBUF_Interleaved:
             if (!fx_data_L)
-                fx_data_L = new s16_t[length * 2];
+                fx_data_L = new int16_t[length * 2];
             fx_data_R = fx_data_L;
             for (int i = 0; i < length * 2; i++)
             {
@@ -275,7 +275,7 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
             {
             case SBUF_Mono:
                 if (!fx_data_L)
-                    fx_data_L = new s16_t[length];
+                    fx_data_L = new int16_t[length];
                 fx_data_R       = fx_data_L;
                 reverb_buffer_L = new int[length];
                 memset(reverb_buffer_L, 0, length * sizeof(int));
@@ -302,9 +302,9 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 
             case SBUF_Stereo:
                 if (!fx_data_L)
-                    fx_data_L = new s16_t[length];
+                    fx_data_L = new int16_t[length];
                 if (!fx_data_R)
-                    fx_data_R = new s16_t[length];
+                    fx_data_R = new int16_t[length];
                 reverb_buffer_L = new int[length];
                 reverb_buffer_R = new int[length];
                 memset(reverb_buffer_L, 0, length * sizeof(int));
@@ -342,7 +342,7 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 
             case SBUF_Interleaved:
                 if (!fx_data_L)
-                    fx_data_L = new s16_t[length * 2];
+                    fx_data_L = new int16_t[length * 2];
                 fx_data_R       = fx_data_L;
                 reverb_buffer_L = new int[length * 2];
                 memset(reverb_buffer_L, 0, length * sizeof(int) * 2);
@@ -403,7 +403,7 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
             {
             case SBUF_Mono:
                 if (!fx_data_L)
-                    fx_data_L = new s16_t[length];
+                    fx_data_L = new int16_t[length];
                 fx_data_R       = fx_data_L;
                 reverb_buffer_L = new int[length];
                 memset(reverb_buffer_L, 0, length * sizeof(int));
@@ -431,9 +431,9 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 
             case SBUF_Stereo:
                 if (!fx_data_L)
-                    fx_data_L = new s16_t[length];
+                    fx_data_L = new int16_t[length];
                 if (!fx_data_R)
-                    fx_data_R = new s16_t[length];
+                    fx_data_R = new int16_t[length];
                 reverb_buffer_L = new int[length];
                 reverb_buffer_R = new int[length];
                 memset(reverb_buffer_L, 0, length * sizeof(int));
@@ -472,7 +472,7 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
 
             case SBUF_Interleaved:
                 if (!fx_data_L)
-                    fx_data_L = new s16_t[length * 2];
+                    fx_data_L = new int16_t[length * 2];
                 fx_data_R       = fx_data_L;
                 reverb_buffer_L = new int[length * 2];
                 memset(reverb_buffer_L, 0, length * sizeof(int) * 2);
@@ -506,27 +506,27 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
         {
         case SBUF_Mono:
             if (!fx_data_L)
-                fx_data_L = new s16_t[length];
+                fx_data_L = new int16_t[length];
             fx_data_R = fx_data_L;
-            memcpy(fx_data_L, data_L, length * sizeof(s16_t));
+            memcpy(fx_data_L, data_L, length * sizeof(int16_t));
             current_mix = SFX_None;
             break;
 
         case SBUF_Stereo:
             if (!fx_data_L)
-                fx_data_L = new s16_t[length];
+                fx_data_L = new int16_t[length];
             if (!fx_data_R)
-                fx_data_R = new s16_t[length];
-            memcpy(fx_data_L, data_L, length * sizeof(s16_t));
-            memcpy(fx_data_R, data_R, length * sizeof(s16_t));
+                fx_data_R = new int16_t[length];
+            memcpy(fx_data_L, data_L, length * sizeof(int16_t));
+            memcpy(fx_data_R, data_R, length * sizeof(int16_t));
             current_mix = SFX_None;
             break;
 
         case SBUF_Interleaved:
             if (!fx_data_L)
-                fx_data_L = new s16_t[length * 2];
+                fx_data_L = new int16_t[length * 2];
             fx_data_R = fx_data_L;
-            memcpy(fx_data_L, data_L, length * 2 * sizeof(s16_t));
+            memcpy(fx_data_L, data_L, length * 2 * sizeof(int16_t));
             current_mix = SFX_None;
             break;
         }

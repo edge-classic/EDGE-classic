@@ -35,7 +35,7 @@ class console_line_c
 
     rgbcol_t color;
 
-    std::vector<byte> endoom_bytes;
+    std::vector<uint8_t> endoom_bytes;
 
   public:
     console_line_c(const std::string &text, rgbcol_t _col = T_LGREY) : line(text), color(_col)
@@ -55,7 +55,7 @@ class console_line_c
         line = line + std::string(text);
     }
 
-    void AppendEndoom(byte endoom_byte)
+    void AppendEndoom(uint8_t endoom_byte)
     {
         endoom_bytes.push_back(endoom_byte);
     }

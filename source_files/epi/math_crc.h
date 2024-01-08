@@ -30,7 +30,7 @@ class crc32_c
     /* sealed */
 
   public:
-    u32_t crc;
+    uint32_t crc;
 
     crc32_c()
     {
@@ -50,15 +50,15 @@ class crc32_c
         return *this;
     }
 
-    crc32_c &operator+=(byte value);
-    crc32_c &operator+=(s32_t value);
-    crc32_c &operator+=(u32_t value);
+    crc32_c &operator+=(uint8_t value);
+    crc32_c &operator+=(int32_t value);
+    crc32_c &operator+=(uint32_t value);
     crc32_c &operator+=(float value);
 
     //		bool operator== (const crc32_c &rhs) const { return crc == rhs.crc; }
     //		bool operator!= (const crc32_c &rhs) const { return crc != rhs.crc; }
 
-    crc32_c &AddBlock(const byte *data, int len);
+    crc32_c &AddBlock(const uint8_t *data, int len);
     crc32_c &AddCStr(const char *str);
 
     void Reset(void)

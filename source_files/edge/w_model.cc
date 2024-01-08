@@ -333,7 +333,7 @@ void W_PrecacheModels(void)
     if (nummodels <= 0)
         return;
 
-    byte *model_present = new byte[nummodels];
+    uint8_t *model_present = new uint8_t[nummodels];
     memset(model_present, 0, nummodels);
 
     // mark all monsters (etc) in the level

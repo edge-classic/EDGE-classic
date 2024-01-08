@@ -27,9 +27,9 @@
 
 /* FUNCTIONS */
 
-abstract_music_c *S_PlayOGGMusic(byte *data, int length, bool looping);
+abstract_music_c *S_PlayOGGMusic(uint8_t *data, int length, bool looping);
 
-bool S_LoadOGGSound(epi::sound_data_c *buf, const byte *data, int length);
+bool S_LoadOGGSound(epi::sound_data_c *buf, const uint8_t *data, int length);
 
 #endif /* __OGGPLAYER_H__ */
 

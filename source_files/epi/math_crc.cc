@@ -27,10 +27,10 @@ namespace epi
 {
 
 // ---- Primitive routines ----
-crc32_c &crc32_c::operator+=(byte data)
+crc32_c &crc32_c::operator+=(uint8_t data)
 {
-    u32_t s1 = crc & 0xFFFF;
-    u32_t s2 = (crc >> 16) & 0xFFFF;
+    uint32_t s1 = crc & 0xFFFF;
+    uint32_t s2 = (crc >> 16) & 0xFFFF;
 
     s1 = (s1 + data) % 65521;
     s2 = (s2 + s1) % 65521;
@@ -40,12 +40,12 @@ crc32_c &crc32_c::operator+=(byte data)
     return *this;
 }
 
-crc32_c &crc32_c::AddBlock(const byte *data, int len)
+crc32_c &crc32_c::AddBlock(const uint8_t *data, int len)
 {
     /// ASSERT(len >= 0);
 
-    u32_t s1 = crc & 0xFFFF;
-    u32_t s2 = (crc >> 16) & 0xFFFF;
+    uint32_t s1 = crc & 0xFFFF;
+    uint32_t s2 = (crc >> 16) & 0xFFFF;
 
     for (; len > 0; data++, len--)
     {
@@ -60,22 +60,22 @@ crc32_c &crc32_c::AddBlock(const byte *data, int len)
 
 // ---- non-primitive routines ----
 
-crc32_c &crc32_c::operator+=(s32_t value)
+crc32_c &crc32_c::operator+=(int32_t value)
 {
-    *this += static_cast<byte>(value >> 24);
-    *this += static_cast<byte>(value >> 16);
-    *this += static_cast<byte>(value >> 8);
-    *this += static_cast<byte>(value);
+    *this += (uint8_t)(value >> 24);
+    *this += (uint8_t)(value >> 16);
+    *this += (uint8_t)(value >> 8);
+    *this += (uint8_t)(value);
 
     return *this;
 }
 
-crc32_c &crc32_c::operator+=(u32_t value)
+crc32_c &crc32_c::operator+=(uint32_t value)
 {
-    *this += static_cast<byte>(value >> 24);
-    *this += static_cast<byte>(value >> 16);
-    *this += static_cast<byte>(value >> 8);
-    *this += static_cast<byte>(value);
+    *this += (uint8_t)(value >> 24);
+    *this += (uint8_t)(value >> 16);
+    *this += (uint8_t)(value >> 8);
+    *this += (uint8_t)(value);
 
     return *this;
 }
@@ -88,7 +88,7 @@ crc32_c &crc32_c::operator+=(float value)
     int exp;
     int mant = static_cast<int>(ldexp(frexp(value, &exp), 30));
 
-    *this += static_cast<byte>(neg ? '-' : '+');
+    *this += (uint8_t)(neg ? '-' : '+');
     *this += exp;
     *this += mant;
 
@@ -99,7 +99,7 @@ crc32_c &crc32_c::AddCStr(const char *str)
 {
     for (; *str; str++)
     {
-        *this += static_cast<byte>(*str);
+        *this += (uint8_t)(*str);
     }
 
     return *this;

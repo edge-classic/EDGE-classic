@@ -277,7 +277,7 @@ typedef struct crc_check_s
     int count;
 
     // CRC computed over all the items
-    u32_t crc;
+    uint32_t crc;
 } crc_check_t;
 
 // this structure contains everything for the top-level [GLOB] chunk.

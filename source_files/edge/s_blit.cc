@@ -177,7 +177,7 @@ void mix_channel_c::ComputeMusicVolume()
 
 //----------------------------------------------------------------------------
 
-static void BlitToS16(const int *src, s16_t *dest, int length)
+static void BlitToS16(const int *src, int16_t *dest, int length)
 {
     const int *s_end = src + length;
 
@@ -190,7 +190,7 @@ static void BlitToS16(const int *src, s16_t *dest, int length)
         else if (val < -CLIP_THRESHHOLD)
             val = -CLIP_THRESHHOLD;
 
-        *dest++ = (s16_t)(val >> (16 - SAFE_BITS));
+        *dest++ = (int16_t)(val >> (16 - SAFE_BITS));
     }
 }
 
@@ -198,7 +198,7 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
 {
     SYS_ASSERT(pairs > 0);
 
-    s16_t *src_L;
+    int16_t *src_L;
 
     if (paused || menuactive)
         src_L = chan->data->data_L;
@@ -232,8 +232,8 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 {
     SYS_ASSERT(pairs > 0);
 
-    s16_t *src_L;
-    s16_t *src_R;
+    int16_t *src_L;
+    int16_t *src_R;
 
     if (paused || menuactive)
     {
@@ -279,7 +279,7 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 
     SYS_ASSERT(pairs > 0);
 
-    s16_t *src_L;
+    int16_t *src_L;
 
     if (paused || menuactive)
         src_L = chan->data->data_L;
@@ -487,7 +487,7 @@ void S_MixAllChannels(void *stream, int len)
     MixQueues(pairs);
 
     // blit to the SDL stream
-    BlitToS16(mix_buffer, (s16_t *)stream, samples);
+    BlitToS16(mix_buffer, (int16_t *)stream, samples);
 }
 
 //----------------------------------------------------------------------------

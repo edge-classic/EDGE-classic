@@ -101,7 +101,7 @@ static void SoundParseField(const char *field, const char *contents, int index, 
     if (DDF_CompareName(field, "BITS") == 0 || DDF_CompareName(field, "STEREO") == 0)
         return;
 
-    if (DDF_MainParseField(sfx_commands, field, contents, (byte *)dynamic_sfx))
+    if (DDF_MainParseField(sfx_commands, field, contents, (uint8_t *)dynamic_sfx))
         return; // OK
 
     DDF_WarnError("Unknown sounds.ddf command: %s\n", field);
@@ -304,7 +304,7 @@ sfx_t *sfxdef_container_c::GetEffect(const char *name, bool error)
     // allocate elements.  Uses (count-1) since sfx_t already includes
     // the first integer.
     //
-    r = (sfx_t *)new byte[sizeof(sfx_t) + ((count - 1) * sizeof(int))];
+    r = (sfx_t *)new uint8_t[sizeof(sfx_t) + ((count - 1) * sizeof(int))];
     r->num = 0;
 
     // now store them

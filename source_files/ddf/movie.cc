@@ -81,7 +81,7 @@ static void MovieParseField(const char *field, const char *contents, int index, 
     I_Debugf("MOVIE_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(movie_commands, field, contents, (byte *)dynamic_movie))
+    if (DDF_MainParseField(movie_commands, field, contents, (uint8_t *)dynamic_movie))
         return; // OK
 
     DDF_Error("Unknown movies.ddf command: %s\n", field);

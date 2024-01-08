@@ -58,7 +58,7 @@ extern bool   need_to_draw_sky;
 
 // format uses float pointing values, but to allow for endianness
 // conversions they are represented here as unsigned integers.
-typedef u32_t f32_t;
+typedef uint32_t f32_t;
 
 #define MDL_IDENTIFIER "IDPO"
 #define MDL_VERSION    6
@@ -67,7 +67,7 @@ typedef struct
 {
     char ident[4];
 
-    s32_t version;
+    int32_t version;
 
     f32_t scale_x;
     f32_t scale_y;
@@ -83,37 +83,37 @@ typedef struct
     f32_t eyepos_y;
     f32_t eyepos_z;
 
-    s32_t num_skins;
+    int32_t num_skins;
 
-    s32_t skin_width;
-    s32_t skin_height;
+    int32_t skin_width;
+    int32_t skin_height;
 
-    s32_t num_vertices; // per frame
-    s32_t num_tris;
-    s32_t num_frames;
+    int32_t num_vertices; // per frame
+    int32_t num_tris;
+    int32_t num_frames;
 
-    s32_t synctype;
-    s32_t flags;
+    int32_t synctype;
+    int32_t flags;
     f32_t size;
 } raw_mdl_header_t;
 
 typedef struct
 {
-    s32_t onseam;
-    s32_t s;
-    s32_t t;
+    int32_t onseam;
+    int32_t s;
+    int32_t t;
 } raw_mdl_texcoord_t;
 
 typedef struct
 {
-    s32_t facesfront;
-    s32_t vertex[3];
+    int32_t facesfront;
+    int32_t vertex[3];
 } raw_mdl_tribam_angle;
 
 typedef struct
 {
-    u8_t x, y, z;
-    u8_t light_normal;
+    uint8_t x, y, z;
+    uint8_t light_normal;
 } raw_mdl_vertex_t;
 
 typedef struct
@@ -126,7 +126,7 @@ typedef struct
 
 typedef struct
 {
-    s32_t                 type;
+    int32_t                 type;
     raw_mdl_simpleframe_t frame;
 } raw_mdl_frame_t;
 
@@ -179,7 +179,7 @@ class mdl_model_c
 
     int verts_per_frame;
 
-    std::vector<u32_t> skin_ids;
+    std::vector<uint32_t> skin_ids;
 
     GLuint vbo;
 
@@ -218,7 +218,7 @@ static const char *CopyFrameName(raw_mdl_simpleframe_t *frm)
     return str;
 }
 
-static short *CreateNormalList(byte *which_normals)
+static short *CreateNormalList(uint8_t *which_normals)
 {
     int count = 0;
     int i;
@@ -278,7 +278,7 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
     for (int i = 0; i < EPI_LE_S32(header.num_skins); i++)
     {
         int   group  = 0;
-        u8_t *pixels = new u8_t[sheight * swidth];
+        uint8_t *pixels = new uint8_t[sheight * swidth];
 
         // Check for single vs. group skins; error if group skin found
         f->Read(&group, sizeof(int));
@@ -288,7 +288,7 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
             return nullptr; // Not reached
         }
 
-        f->Read(pixels, sheight * swidth * sizeof(u8_t));
+        f->Read(pixels, sheight * swidth * sizeof(uint8_t));
         epi::image_data_c *tmp_img = new epi::image_data_c(swidth, sheight, 3);
         // Expand 8 bits paletted image to RGB
         for (int j = 0; j < swidth * sheight; ++j)
@@ -365,10 +365,10 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
 
     /* PARSE FRAMES */
 
-    byte which_normals[MD_NUM_NORMALS];
+    uint8_t which_normals[MD_NUM_NORMALS];
 
-    u32_t raw_scale[3];
-    u32_t raw_translate[3];
+    uint32_t raw_scale[3];
+    uint32_t raw_translate[3];
 
     raw_scale[0]     = EPI_LE_U32(header.scale_x);
     raw_scale[1]     = EPI_LE_U32(header.scale_y);

@@ -145,7 +145,7 @@ static void ImageParseField(const char *field, const char *contents, int index, 
     if (DDF_CompareName(field, "PATCHES") == 0 && index == 0)
         dynamic_image->patches.clear();
 
-    if (DDF_MainParseField(image_commands, field, contents, (byte *)dynamic_image))
+    if (DDF_MainParseField(image_commands, field, contents, (uint8_t *)dynamic_image))
         return; // OK
 
     DDF_Error("Unknown images.ddf command: %s\n", field);

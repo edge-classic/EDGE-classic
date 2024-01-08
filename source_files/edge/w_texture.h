@@ -36,10 +36,10 @@
 
 // Texture cache reference structure, returned by the texture cache system.
 // The actual structure is private.
-typedef byte cached_tex_t;
+typedef uint8_t cached_tex_t;
 
 // Retrieve column data.
-const byte *W_GetColumn(int col, const cached_tex_t *t);
+const uint8_t *W_GetColumn(int col, const cached_tex_t *t);
 
 // Standard cache functions. Call W_CacheTextureNum when you first need
 // the lump, and release it with DoneWithTexture.
@@ -94,8 +94,8 @@ typedef struct texturedef_s
     short height;
 
     // scaling, where 8 is normal and higher is _smaller_
-    byte scale_x;
-    byte scale_y;
+    uint8_t scale_x;
+    uint8_t scale_y;
 
     // which WAD file this texture came from
     short file;

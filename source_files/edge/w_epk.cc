@@ -205,16 +205,16 @@ class pack_file_c
         return length;
     }
 
-    byte *LoadEntry(size_t dir, size_t index, int &length)
+    uint8_t *LoadEntry(size_t dir, size_t index, int &length)
     {
         epi::file_c *f = OpenEntry(dir, index);
         if (f == NULL)
         {
             length = 0;
-            return new byte[1];
+            return new uint8_t[1];
         }
 
-        byte *data = f->LoadIntoMemory();
+        uint8_t *data = f->LoadIntoMemory();
         length     = f->GetLength();
 
         // close file
@@ -223,7 +223,7 @@ class pack_file_c
         if (data == NULL)
         {
             length = 0;
-            return new byte[1];
+            return new uint8_t[1];
         }
 
         return data;
@@ -595,7 +595,7 @@ class epk_file_c : public epi::file_c
 
     void SkipForward(unsigned int count)
     {
-        byte buffer[1024];
+        uint8_t buffer[1024];
 
         while (count > 0)
         {
@@ -657,7 +657,7 @@ static void ProcessDDFInPack(pack_file_c *pack)
             if (type != DDF_UNKNOWN)
             {
                 int         length   = -1;
-                const byte *raw_data = pack->LoadEntry(dir, entry, length);
+                const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
 
                 std::string data((const char *)raw_data);
                 delete[] raw_data;
@@ -671,7 +671,7 @@ static void ProcessDDFInPack(pack_file_c *pack)
                 I_Printf("Converting DEH file%s: %s\n", pack->is_folder ? "" : " in EPK", ent.name.c_str());
 
                 int         length = -1;
-                const byte *data   = pack->LoadEntry(dir, entry, length);
+                const uint8_t *data   = pack->LoadEntry(dir, entry, length);
 
                 DEH_Convert(data, length, source);
                 delete[] data;
@@ -702,7 +702,7 @@ static void ProcessCoalAPIInPack(pack_file_c *pack)
             if (epi::PATH_GetFilename(ent.name) == "COAL_API.EC" || epi::PATH_GetBasename(ent.name) == "COALAPI")
             {
                 int         length   = -1;
-                const byte *raw_data = pack->LoadEntry(dir, entry, length);
+                const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
                 std::string data((const char *)raw_data);
                 delete[] raw_data;
                 VM_AddScript(0, data, source);
@@ -738,7 +738,7 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
                 }
 
                 int         length   = -1;
-                const byte *raw_data = pack->LoadEntry(dir, entry, length);
+                const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
                 std::string data((const char *)raw_data);
                 delete[] raw_data;
                 VM_AddScript(0, data, source);
@@ -766,7 +766,7 @@ static void ProcessLuaAPIInPack(pack_file_c *pack)
             if (epi::PATH_GetFilename(ent.name) == "EDGE_API.LUA")
             {
                 int         length   = -1;
-                const byte *raw_data = pack->LoadEntry(dir, entry, length);
+                const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
                 std::string data((const char *)raw_data);
                 delete[] raw_data;
                 LUA_AddScript(data, source);
@@ -800,7 +800,7 @@ static void ProcessLuaHUDInPack(pack_file_c *pack)
                 }
 
                 int         length   = -1;
-                const byte *raw_data = pack->LoadEntry(dir, entry, length);
+                const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
                 std::string data((const char *)raw_data);
                 delete[] raw_data;
                 LUA_AddScript(data, source);
@@ -1248,7 +1248,7 @@ static void ProcessWADsInPack(pack_file_c *pack)
 
             if (pack_wad)
             {
-                byte            *raw_pack_wad = pack_wad->LoadIntoMemory();
+                uint8_t            *raw_pack_wad = pack_wad->LoadIntoMemory();
                 epi::mem_file_c *pack_wad_mem = new epi::mem_file_c(raw_pack_wad, pack_wad->GetLength(), true);
                 delete[] raw_pack_wad; // copied on pack_wad_mem creation
                 data_file_c *pack_wad_df = new data_file_c(

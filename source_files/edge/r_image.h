@@ -265,7 +265,7 @@ const image_c *W_ImageCreatePackSprite(std::string packname, pack_file_c *pack, 
 void           W_ImageCreateUser(void);
 void           W_ImageAddTX(int lump, const char *name, bool hires);
 void           W_AnimateImageSet(const image_c **images, int number, int speed);
-void           W_DrawSavePic(const byte *pixels);
+void           W_DrawSavePic(const uint8_t *pixels);
 
 void W_MakeEdgeFlat(void);
 void W_MakeEdgeTex(void);

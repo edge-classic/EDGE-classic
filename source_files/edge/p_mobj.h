@@ -342,7 +342,7 @@ struct mobj_s : public position_c
     int shot_count = 0;
 
     // hash values for TUNNEL missiles
-    u32_t tunnel_hash[2] = {0, 0};
+    uint32_t tunnel_hash[2] = {0, 0};
 
     // position interpolation (disabled when lerp_num <= 1)
     short lerp_num = 0;

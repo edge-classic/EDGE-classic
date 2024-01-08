@@ -54,7 +54,7 @@ class spriteframe_c
     int rots;
 
     // Flip bits (1 = flip) to use for each view angle
-    byte flip[16];
+    uint8_t flip[16];
 
     // Images for each view angle
     const image_c *images[16];

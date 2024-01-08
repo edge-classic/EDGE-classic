@@ -992,13 +992,13 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
     {
         if (cur_font->def->type == FNTYP_TrueType)
         {
-            stbtt_aligned_quad *q = cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).char_quad[current_font_size];
-            y                     = top_y + (cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).y_shift[current_font_size] *
+            stbtt_aligned_quad *q = cur_font->ttf_glyph_map.at(static_cast<uint8_t>(ch)).char_quad[current_font_size];
+            y                     = top_y + (cur_font->ttf_glyph_map.at(static_cast<uint8_t>(ch)).y_shift[current_font_size] *
                         (size > 0 ? (size / cur_font->def->default_size) : 1.0) * sc_y);
             w = ((size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->default_size)) : cur_font->CharWidth(ch)) -
                 cur_font->spacing) *
                 sc_x;
-            h = (cur_font->ttf_glyph_map.at(static_cast<u8_t>(ch)).height[current_font_size] *
+            h = (cur_font->ttf_glyph_map.at(static_cast<uint8_t>(ch)).height[current_font_size] *
                 (size > 0 ? (size / cur_font->def->default_size) : 1.0)) *
                 sc_y;
             tx1 = q->s0;
@@ -1010,21 +1010,21 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
         {
             w = (size > 0 ? (size * cur_font->p_cache.ratio) : cur_font->CharWidth(ch)) * sc_x;
             h = (size > 0 ? size : (cur_font->def->default_size > 0.0 ? cur_font->def->default_size : 
-                cur_font->p_cache.atlas_rects.at(cp437_unicode_values[static_cast<u8_t>(ch)]).ih)) * sc_y;
-            x -= (cur_font->p_cache.atlas_rects.at(cp437_unicode_values[static_cast<u8_t>(ch)]).off_x * sc_x);
-            y -= (cur_font->p_cache.atlas_rects.at(cp437_unicode_values[static_cast<u8_t>(ch)]).off_y * sc_y);
-            tx1 = cur_font->p_cache.atlas_rects.at(static_cast<u8_t>(ch)).tx;
-            ty2 = cur_font->p_cache.atlas_rects.at(static_cast<u8_t>(ch)).ty;
-            tx2 = tx1 + cur_font->p_cache.atlas_rects.at(static_cast<u8_t>(ch)).tw;
-            ty1 = ty2 + cur_font->p_cache.atlas_rects.at(static_cast<u8_t>(ch)).th;
+                cur_font->p_cache.atlas_rects.at(cp437_unicode_values[static_cast<uint8_t>(ch)]).ih)) * sc_y;
+            x -= (cur_font->p_cache.atlas_rects.at(cp437_unicode_values[static_cast<uint8_t>(ch)]).off_x * sc_x);
+            y -= (cur_font->p_cache.atlas_rects.at(cp437_unicode_values[static_cast<uint8_t>(ch)]).off_y * sc_y);
+            tx1 = cur_font->p_cache.atlas_rects.at(static_cast<uint8_t>(ch)).tx;
+            ty2 = cur_font->p_cache.atlas_rects.at(static_cast<uint8_t>(ch)).ty;
+            tx2 = tx1 + cur_font->p_cache.atlas_rects.at(static_cast<uint8_t>(ch)).tw;
+            ty1 = ty2 + cur_font->p_cache.atlas_rects.at(static_cast<uint8_t>(ch)).th;
         }
     }
     else // spritesheet font
     {
         w      = ((size > 0 ? (size * cur_font->CharRatio(ch)) : cur_font->CharWidth(ch)) - cur_font->spacing) * sc_x;
         h      = (size > 0 ? size : cur_font->im_char_height) * sc_y;
-        int px = static_cast<u8_t>(ch) % 16;
-        int py = 15 - static_cast<u8_t>(ch) / 16;
+        int px = static_cast<uint8_t>(ch) % 16;
+        int py = 15 - static_cast<uint8_t>(ch) / 16;
         tx1    = (px)*cur_font->font_image->ratio_w;
         tx2    = (px + 1) * cur_font->font_image->ratio_w;
         float char_texcoord_adjust =
@@ -1050,13 +1050,13 @@ void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img
     float w, h;
     float tx1, tx2, ty1, ty2;
 
-    u8_t character = static_cast<u8_t>(ch);
+    uint8_t character = static_cast<uint8_t>(ch);
 
     if (blink && con_cursor >= 16)
         character = 0x20;
 
-    u8_t px = character % 16;
-    u8_t py = 15 - character / 16;
+    uint8_t px = character % 16;
+    uint8_t py = 15 - character / 16;
     tx1     = (px)*endoom_font->font_image->ratio_w;
     tx2     = (px + 1) * endoom_font->font_image->ratio_w;
     ty1     = (py)*endoom_font->font_image->ratio_h;
@@ -1252,7 +1252,7 @@ void HUD_DrawQuitText(int line, float FNX, float FNY, float cx)
 
     for (int i = 0; i < 80; i++)
     {
-        byte info = quit_lines[line]->endoom_bytes.at(i);
+        uint8_t info = quit_lines[line]->endoom_bytes.at(i);
 
         HUD_DrawEndoomChar(cx, cy, FNX, img, quit_lines[line]->line.at(i), endoom_colors[info & 15],
                            endoom_colors[(info >> 4) & 7], info & 128);

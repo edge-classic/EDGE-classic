@@ -35,13 +35,13 @@ class color_c
     // Color components range from 0 to 255.  Alpha is like OpenGL: 0 is
     // totally transparent, and 255 is totally solid/opaque.
 
-    byte r, g, b, a;
+    uint8_t r, g, b, a;
 
     color_c() : r(0), g(0), b(0), a(255)
     {
     }
 
-    color_c(byte nr, byte ng, byte nb, byte na = 255) : r(nr), g(ng), b(nb), a(na)
+    color_c(uint8_t nr, uint8_t ng, uint8_t nb, uint8_t na = 255) : r(nr), g(ng), b(nb), a(na)
     {
     }
 
@@ -80,10 +80,10 @@ class color_c
 
     inline color_c &ClampSet(int _r, int _g, int _b, int _a = 255)
     {
-        r = byte(MAX(0, MIN(255, _r)));
-        g = byte(MAX(0, MIN(255, _g)));
-        b = byte(MAX(0, MIN(255, _b)));
-        a = byte(MAX(0, MIN(255, _a)));
+        r = uint8_t(MAX(0, MIN(255, _r)));
+        g = uint8_t(MAX(0, MIN(255, _g)));
+        b = uint8_t(MAX(0, MIN(255, _b)));
+        a = uint8_t(MAX(0, MIN(255, _a)));
         return *this;
     }
     // set the color value, clamping the given components.
@@ -117,7 +117,7 @@ class color_c
         int nb = int(b) * (255 - qty) + int(other.b) * qty;
         int na = int(a) * (255 - qty) + int(other.a) * qty;
 
-        return color_c(byte(nr / 255), byte(ng / 255), byte(nb / 255), byte(na / 255));
+        return color_c(uint8_t(nr / 255), uint8_t(ng / 255), uint8_t(nb / 255), uint8_t(na / 255));
     }
 
     inline color_c &MixThis(const color_c &other, int qty = 128)
@@ -127,10 +127,10 @@ class color_c
         int nb = int(b) * (255 - qty) + int(other.b) * qty;
         int na = int(a) * (255 - qty) + int(other.a) * qty;
 
-        r = byte(nr / 255);
-        g = byte(ng / 255);
-        b = byte(nb / 255);
-        a = byte(na / 255);
+        r = uint8_t(nr / 255);
+        g = uint8_t(ng / 255);
+        b = uint8_t(nb / 255);
+        a = uint8_t(na / 255);
 
         return *this;
     }
@@ -145,7 +145,7 @@ class color_c
         int ng  = int(g) * (255 - qty) + int(other.g) * qty;
         int nb  = int(b) * (255 - qty) + int(other.b) * qty;
 
-        return color_c(byte(nr / 255), byte(ng / 255), byte(nb / 255), a);
+        return color_c(uint8_t(nr / 255), uint8_t(ng / 255), uint8_t(nb / 255), a);
     }
 
     inline color_c &BlendThis(const color_c &other)
@@ -155,9 +155,9 @@ class color_c
         int ng  = int(g) * (255 - qty) + int(other.g) * qty;
         int nb  = int(b) * (255 - qty) + int(other.b) * qty;
 
-        r = byte(nr / 255);
-        g = byte(ng / 255);
-        b = byte(nb / 255);
+        r = uint8_t(nr / 255);
+        g = uint8_t(ng / 255);
+        b = uint8_t(nb / 255);
 
         return *this;
     }
@@ -172,7 +172,7 @@ class color_c
         int ng  = int(g) * qty + int(other.g) * (255 - qty);
         int nb  = int(b) * qty + int(other.b) * (255 - qty);
 
-        return color_c(byte(nr / 255), byte(ng / 255), byte(nb / 255), 255);
+        return color_c(uint8_t(nr / 255), uint8_t(ng / 255), uint8_t(nb / 255), 255);
     }
     inline color_c &SolidifyThis(const color_c &other)
     {
@@ -181,9 +181,9 @@ class color_c
         int ng  = int(g) * qty + int(other.g) * (255 - qty);
         int nb  = int(b) * qty + int(other.b) * (255 - qty);
 
-        r = byte(nr / 255);
-        g = byte(ng / 255);
-        b = byte(nb / 255);
+        r = uint8_t(nr / 255);
+        g = uint8_t(ng / 255);
+        b = uint8_t(nb / 255);
         a = 255;
 
         return *this;
@@ -311,7 +311,7 @@ class hsv_col_c
     // v is value (0 to 255: 0 = Darkest, 255 = Brightest).
 
     short h;
-    byte  s, v;
+    uint8_t  s, v;
 
     hsv_col_c() : h(0), s(0), v(0)
     {
@@ -328,9 +328,9 @@ class hsv_col_c
 
     inline hsv_col_c &ClampSet(int nh, int ns, int nv)
     {
-        h = byte(MAX(0, MIN(359, nh)));
-        s = byte(MAX(0, MIN(255, ns)));
-        v = byte(MAX(0, MIN(255, nv)));
+        h = uint8_t(MAX(0, MIN(359, nh)));
+        s = uint8_t(MAX(0, MIN(255, ns)));
+        v = uint8_t(MAX(0, MIN(255, nv)));
 
         return *this;
     }

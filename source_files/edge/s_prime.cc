@@ -51,9 +51,9 @@ DEF_CVAR(s_primegain, "0.4", CVAR_ARCHIVE)
 
 extern std::vector<std::filesystem::path> available_soundfonts;
 
-static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
+static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
 {
-    const s16_t *s_end = src + len * 2;
+    const int16_t *s_end = src + len * 2;
 
     for (; src < s_end; src += 2)
     {
@@ -136,12 +136,12 @@ class prime_player_c : public abstract_music_c
 
     PrimeInterface *prime_iface;
 
-    s16_t *mono_buffer;
+    int16_t *mono_buffer;
 
   public:
-    prime_player_c(byte *_data, int _length, bool _looping) : status(NOT_LOADED), looping(_looping)
+    prime_player_c(uint8_t *_data, int _length, bool _looping) : status(NOT_LOADED), looping(_looping)
     {
-        mono_buffer = new s16_t[PRIME_SAMPLES * 2];
+        mono_buffer = new int16_t[PRIME_SAMPLES * 2];
         SequencerInit();
     }
 
@@ -244,7 +244,7 @@ class prime_player_c : public abstract_music_c
         prime_seq->setInterface(prime_iface);
     }
 
-    bool LoadTrack(const byte *data, int length)
+    bool LoadTrack(const uint8_t *data, int length)
     {
         return prime_seq->loadMIDI(data, length);
     }
@@ -348,7 +348,7 @@ class prime_player_c : public abstract_music_c
   private:
     bool StreamIntoBuffer(epi::sound_data_c *buf)
     {
-        s16_t *data_buf;
+        int16_t *data_buf;
 
         bool song_done = false;
 
@@ -357,7 +357,7 @@ class prime_player_c : public abstract_music_c
         else
             data_buf = buf->data_L;
 
-        int played = prime_seq->playStream(reinterpret_cast<u8_t *>(data_buf), PRIME_SAMPLES);
+        int played = prime_seq->playStream(reinterpret_cast<uint8_t *>(data_buf), PRIME_SAMPLES);
 
         if (prime_seq->positionAtEnd())
             song_done = true;
@@ -379,7 +379,7 @@ class prime_player_c : public abstract_music_c
     }
 };
 
-abstract_music_c *S_PlayPrime(byte *data, int length, bool loop)
+abstract_music_c *S_PlayPrime(uint8_t *data, int length, bool loop)
 {
     if (prime_disabled)
     {

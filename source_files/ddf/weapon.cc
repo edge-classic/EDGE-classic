@@ -405,10 +405,10 @@ static void WeaponParseField(const char *field, const char *contents, int index,
         return;
     }
 
-    if (DDF_MainParseField(weapon_commands, field, contents, (byte *)dynamic_weapon))
+    if (DDF_MainParseField(weapon_commands, field, contents, (uint8_t *)dynamic_weapon))
         return;
 
-    if (DDF_MainParseState((byte *)dynamic_weapon, dynamic_weapon->state_grp, field, contents, index, is_last,
+    if (DDF_MainParseState((uint8_t *)dynamic_weapon, dynamic_weapon->state_grp, field, contents, index, is_last,
                            true /* is_weapon */, weapon_starters, weapon_actions))
         return;
 

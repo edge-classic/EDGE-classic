@@ -904,7 +904,7 @@ int W_CheckForUniqueLumps(epi::file_c *file)
                 {
                     SYS_ASSERT(entry.size == 4000);
                     file->Seek(entry.pos, epi::file_c::SEEKPOINT_START);
-                    byte *endoom = new byte[entry.size];
+                    uint8_t *endoom = new uint8_t[entry.size];
                     file->Read(endoom, entry.size);
                     if (endoom[1026] == 'c' && endoom[1028] == 'h' && endoom[1030] == 'e' && endoom[1032] == 'x' &&
                         endoom[1034] == 'q' && endoom[1036] == 'u' && endoom[1038] == 'e' && endoom[1040] == 's' &&
@@ -995,7 +995,7 @@ void ProcessDehackedInWad(data_file_c *df)
     I_Printf("Converting [%s] lump in: %s\n", lump_name, df->name.u8string().c_str());
 
     int         length = -1;
-    const byte *data   = (const byte *)W_LoadLump(deh_lump, &length);
+    const uint8_t *data   = (const uint8_t *)W_LoadLump(deh_lump, &length);
 
     std::string bare_name = epi::PATH_GetFilename(df->name).string();
 
@@ -1087,7 +1087,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
         I_Printf("Loading ANIMATED from: %s\n", df->name.u8string().c_str());
 
         int   length = -1;
-        byte *data   = W_LoadLump(animated, &length);
+        uint8_t *data   = W_LoadLump(animated, &length);
 
         DDF_ConvertANIMATED(data, length);
         delete[] data;
@@ -1098,7 +1098,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
         I_Printf("Loading SWITCHES from: %s\n", df->name.u8string().c_str());
 
         int   length = -1;
-        byte *data   = W_LoadLump(switches, &length);
+        uint8_t *data   = W_LoadLump(switches, &length);
 
         DDF_ConvertSWITCHES(data, length);
         delete[] data;
@@ -1191,7 +1191,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 
     // compute MD5 hash over wad directory
     epi::md5hash_c dir_md5;
-    dir_md5.Compute((const byte *)raw_info, length);
+    dir_md5.Compute((const uint8_t *)raw_info, length);
 
     wad->md5_string =
         epi::STR_Format("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", dir_md5.hash[0],
@@ -2205,14 +2205,14 @@ static void W_RawReadLump(int lump, void *dest)
 //
 // Returns a copy of the lump (it is your responsibility to free it)
 //
-byte *W_LoadLump(int lump, int *length)
+uint8_t *W_LoadLump(int lump, int *length)
 {
     int w_length = W_LumpLength(lump);
 
     if (length != NULL)
         *length = w_length;
 
-    byte *data = new byte[w_length + 1];
+    uint8_t *data = new uint8_t[w_length + 1];
 
     W_RawReadLump(lump, data);
 
@@ -2222,7 +2222,7 @@ byte *W_LoadLump(int lump, int *length)
     return data;
 }
 
-byte *W_LoadLump(const char *name, int *length)
+uint8_t *W_LoadLump(const char *name, int *length)
 {
     return W_LoadLump(W_GetNumForName(name), length);
 }
@@ -2231,7 +2231,7 @@ std::string W_LoadString(int lump)
 {
     // WISH: optimise this to remove temporary buffer
     int   length;
-    byte *data = W_LoadLump(lump, &length);
+    uint8_t *data = W_LoadLump(lump, &length);
 
     std::string result((char *)data, length);
 

@@ -130,7 +130,7 @@ int I_GetMillies(void);
 // Returns a value that increases by 1000000 every second (i.e. each unit
 // is a single microsecond).  Since this value will wrap-around regularly
 // (roughly every 71 minutes), caller *MUST* check for this situation.
-u32_t I_GetMicros(void);
+uint32_t I_GetMicros(void);
 
 //--------------------------------------------------------
 //  MUSIC functions.

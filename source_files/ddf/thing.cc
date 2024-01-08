@@ -584,17 +584,17 @@ void ThingParseField(const char *field, const char *contents, int index, bool is
     // handle the "MODEL_ROTATE" command
     if (DDF_CompareName(field, "MODEL_ROTATE") == 0)
     {
-        if (DDF_MainParseField(thing_commands, field, contents, (byte *)dynamic_mobj))
+        if (DDF_MainParseField(thing_commands, field, contents, (uint8_t *)dynamic_mobj))
         {
             dynamic_mobj->model_rotate *= ANG1; // apply the rotation
             return;
         }
     }
 
-    if (DDF_MainParseField(thing_commands, field, contents, (byte *)dynamic_mobj))
+    if (DDF_MainParseField(thing_commands, field, contents, (uint8_t *)dynamic_mobj))
         return;
 
-    if (DDF_MainParseState((byte *)dynamic_mobj, dynamic_mobj->state_grp, field, contents, index, is_last,
+    if (DDF_MainParseState((uint8_t *)dynamic_mobj, dynamic_mobj->state_grp, field, contents, index, is_last,
                            false /* is_weapon */, thing_starters, thing_actions))
         return;
 

@@ -27,9 +27,9 @@
 
 /* FUNCTIONS */
 
-abstract_music_c *S_PlayMP3Music(byte *data, int length, bool looping);
+abstract_music_c *S_PlayMP3Music(uint8_t *data, int length, bool looping);
 
-bool S_LoadMP3Sound(epi::sound_data_c *buf, const byte *data, int length);
+bool S_LoadMP3Sound(epi::sound_data_c *buf, const uint8_t *data, int length);
 
 #endif /* __MP3PLAYER_H__ */
 

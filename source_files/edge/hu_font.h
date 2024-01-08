@@ -124,7 +124,7 @@ public:
     int               ttf_char_height[3];
     // Only need one of these
     stbtt_fontinfo                     *ttf_info;
-    byte                               *ttf_buffer;
+    uint8_t                            *ttf_buffer;
     std::unordered_map<int, ttf_char_t> ttf_glyph_map;
 
   private:

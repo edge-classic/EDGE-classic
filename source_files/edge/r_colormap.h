@@ -40,14 +40,14 @@ void V_InitPalette(void);
 void V_InitColour(void);
 
 // -ACB- 1999/10/11 Gets an RGB colour from the current palette
-void V_IndexColourToRGB(int indexcol, byte *returncol, rgbcol_t last_damage_colour, float damageAmount);
+void V_IndexColourToRGB(int indexcol, uint8_t *returncol, rgbcol_t last_damage_colour, float damageAmount);
 
 rgbcol_t V_LookupColour(int col);
 
 #define GAMMA_CONV(light) (light)
 
 // -AJA- 1999/07/03: Some palette stuff.
-extern byte playpal_data[14][256][3];
+extern uint8_t playpal_data[14][256][3];
 
 #define PALETTE_NORMAL 0
 #define PALETTE_PAIN   1
@@ -72,9 +72,9 @@ typedef enum
 } vcol_flags_e;
 
 // translation support
-const byte *V_GetTranslationTable(const colourmap_c *colmap);
+const uint8_t *V_GetTranslationTable(const colourmap_c *colmap);
 
-void R_TranslatePalette(byte *new_pal, const byte *old_pal, const colourmap_c *trans);
+void R_TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const colourmap_c *trans);
 
 void V_GetColmapRGB(const colourmap_c *colmap, float *r, float *g, float *b);
 

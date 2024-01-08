@@ -42,7 +42,7 @@ class sound_gather_c
     sound_gather_c();
     ~sound_gather_c();
 
-    s16_t *MakeChunk(int max_samples, bool _stereo);
+    int16_t *MakeChunk(int max_samples, bool _stereo);
     // prepare to add a chunk of sound samples.  Returns a buffer
     // containing the number of samples (* 2 for stereo) which the
     // user can fill up.

@@ -938,7 +938,7 @@ bool SR_TriggerGetScript(void *storage, int index, void *extra)
     char       *map_name;
 
     int   idx_val;
-    u32_t crc;
+    uint32_t crc;
 
     swizzle = SV_GetString();
 
@@ -980,7 +980,7 @@ bool SR_TriggerGetScript(void *storage, int index, void *extra)
 
     // get CRC value
 
-    crc = (u32_t)strtoul(base_p, NULL, 16);
+    crc = (uint32_t)strtoul(base_p, NULL, 16);
 
     // now find the bugger !
     // FIXME: move into RTS code

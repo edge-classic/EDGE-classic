@@ -258,7 +258,7 @@ bool SV_VerifyContents(void)
 
     epi::crc32_c final_crc(current_crc);
 
-    u32_t read_crc = SV_GetInt();
+    uint32_t read_crc = SV_GetInt();
 
     if (read_crc != final_crc.crc)
     {
@@ -293,7 +293,7 @@ unsigned char SV_GetByte(void)
             return 0;
         }
 
-        current_crc += (byte)c;
+        current_crc += (uint8_t)c;
 
 #if (DEBUG_GETBYTE)
         {
@@ -368,14 +368,14 @@ bool SV_PushReadChunk(const char *id)
 
         SYS_ASSERT(file_len <= MAX_COMP_SIZE(orig_len));
 
-        byte *file_data = new byte[file_len + 1];
+        uint8_t *file_data = new uint8_t[file_len + 1];
 
         for (i = 0; (i < file_len) && !last_error; i++)
             file_data[i] = SV_GetByte();
 
         SYS_ASSERT(!last_error);
 
-        cur->start = new byte[orig_len + 1];
+        cur->start = new uint8_t[orig_len + 1];
         cur->end   = cur->start + orig_len;
 
         // decompress data
@@ -543,7 +543,7 @@ bool SV_PushWriteChunk(const char *id)
     }
 
     // create initial buffer
-    cur->start = new byte[1024];
+    cur->start = new uint8_t[1024];
     cur->pos   = cur->start;
     cur->end   = cur->start + 1024;
 
@@ -583,7 +583,7 @@ bool SV_PopWriteChunk(void)
     {
         uLongf out_len = MAX_COMP_SIZE(len);
 
-        byte *out_buf = new byte[out_len + 1];
+        uint8_t *out_buf = new uint8_t[out_len + 1];
 
         int res = compress2(out_buf, &out_len, cur->start, len, Z_BEST_SPEED);
 
@@ -662,7 +662,7 @@ void SV_PutByte(unsigned char value)
             return;
         }
 
-        current_crc += (byte)value;
+        current_crc += (uint8_t)value;
         return;
     }
 
@@ -679,7 +679,7 @@ void SV_PutByte(unsigned char value)
         int new_len = old_len * 2;
         int pos_idx = (cur->pos - cur->start);
 
-        byte *new_start = new byte[new_len];
+        uint8_t *new_start = new uint8_t[new_len];
         memcpy(new_start, cur->start, old_len);
 
         delete[] cur->start;
@@ -714,8 +714,8 @@ unsigned short SV_GetShort(void)
 {
     // -ACB- 2004/02/08 Force the order of execution; otherwise
     // compilr optimisations may reverse the order of execution
-    byte b1 = SV_GetByte();
-    byte b2 = SV_GetByte();
+    uint8_t b1 = SV_GetByte();
+    uint8_t b2 = SV_GetByte();
     return b1 | (b2 << 8);
 }
 

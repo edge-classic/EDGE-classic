@@ -217,7 +217,7 @@ void DDF_MainGetRGB(const char *info, void *storage);
 void DDF_MainGetWhenAppear(const char *info, void *storage);
 void DDF_MainGetBitSet(const char *info, void *storage);
 
-bool DDF_MainParseField(const commandlist_t *commands, const char *field, const char *contents, byte *obj_base);
+bool DDF_MainParseField(const commandlist_t *commands, const char *field, const char *contents, uint8_t *obj_base);
 void DDF_MainLookupSound(const char *info, void *storage);
 void DDF_MainRefAttack(const char *info, void *storage);
 
@@ -291,7 +291,7 @@ void DDF_StateGetAngle(const char *arg, state_t *cur_state);
 void DDF_StateGetSlope(const char *arg, state_t *cur_state);
 void DDF_StateGetRGB(const char *arg, state_t *cur_state);
 
-bool DDF_MainParseState(byte *object, state_group_t &group, const char *field, const char *contents, int index,
+bool DDF_MainParseState(uint8_t *object, state_group_t &group, const char *field, const char *contents, int index,
                         bool is_last, bool is_weapon, const state_starter_t *starters, const actioncode_t *actions);
 
 void DDF_StateBeginRange(state_group_t &group);

@@ -131,9 +131,9 @@ int I_PureRandom(void)
     return (P1 ^ P2) & 0x7FFFFFFF;
 }
 
-u32_t I_GetMicros(void)
+uint32_t I_GetMicros(void)
 {
-    return (u32_t)std::chrono::duration_cast<std::chrono::microseconds>(
+    return (uint32_t)std::chrono::duration_cast<std::chrono::microseconds>(
                std::chrono::system_clock::now().time_since_epoch())
         .count();
 }

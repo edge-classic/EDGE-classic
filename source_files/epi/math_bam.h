@@ -36,7 +36,7 @@
 #define ANG315 0xe0000000
 #define ANG360 0xffffffff
 
-typedef u32_t bam_angle;
+typedef uint32_t bam_angle;
 
 namespace epi
 {

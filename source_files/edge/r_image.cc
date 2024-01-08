@@ -338,7 +338,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
     int packfile_len = f->GetLength();
 
     // determine format and size information
-    byte header[32];
+    uint8_t header[32];
     memset(header, 255, sizeof(header));
 
     f->Read(header, sizeof(header));
@@ -481,7 +481,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
     SYS_ASSERT(f);
 
     // determine format and size information
-    byte header[32];
+    uint8_t header[32];
     memset(header, 255, sizeof(header));
 
     f->Read(header, sizeof(header));
@@ -822,7 +822,7 @@ static image_c *AddImageUser(imagedef_c *def)
 
         if (def->type == IMGDT_Lump)
         {
-            byte header[32];
+            uint8_t header[32];
             memset(header, 255, sizeof(header));
 
             f->Read(header, sizeof(header));
@@ -1310,10 +1310,10 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
             smooth = false;
     }
 
-    const byte *what_palette    = (const byte *)&playpal_data[0];
+    const uint8_t *what_palette    = (const uint8_t *)&playpal_data[0];
     bool        what_pal_cached = false;
 
-    static byte trans_pal[256 * 3];
+    static uint8_t trans_pal[256 * 3];
 
     if (trans != NULL)
     {
@@ -1326,7 +1326,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
     }
     else if (rim->source_palette >= 0)
     {
-        what_palette    = (const byte *)W_LoadLump(rim->source_palette);
+        what_palette    = (const uint8_t *)W_LoadLump(rim->source_palette);
         what_pal_cached = true;
     }
 
@@ -1400,7 +1400,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
             tmp_img = blurred_img;
         }
         if (trans != NULL)
-            R_PaletteRemapRGBA(tmp_img, what_palette, (const byte *)&playpal_data[0]);
+            R_PaletteRemapRGBA(tmp_img, what_palette, (const uint8_t *)&playpal_data[0]);
     }
 
     if (rim->hsv_rotation || rim->hsv_saturation > -1 || rim->hsv_value)

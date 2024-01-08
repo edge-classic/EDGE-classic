@@ -184,7 +184,7 @@ static void LevelParseField(const char *field, const char *contents, int index, 
         return;
     }
 
-    if (DDF_MainParseField(level_commands, field, contents, (byte *)dynamic_level))
+    if (DDF_MainParseField(level_commands, field, contents, (uint8_t *)dynamic_level))
         return; // OK
 
     DDF_WarnError("Unknown levels.ddf command: %s\n", field);

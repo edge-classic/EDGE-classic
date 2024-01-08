@@ -124,7 +124,7 @@ static int mlookturn[3] = {400, 800, 200};
 #define GK_DOWN 0x01
 #define GK_UP   0x02
 
-static byte gamekeydown[NUMKEYS];
+static uint8_t gamekeydown[NUMKEYS];
 
 static int turnheld;  // for accelerative turning
 static int mlookheld; // for accelerative mlooking

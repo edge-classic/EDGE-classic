@@ -33,9 +33,9 @@ typedef enum
 
 GLuint R_UploadTexture(epi::image_data_c *img, int flags = UPL_NONE, int max_pix = (1 << 30));
 
-epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src, const byte *palette, int opacity);
+epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src, const uint8_t *palette, int opacity);
 
-void R_PaletteRemapRGBA(epi::image_data_c *img, const byte *new_pal, const byte *old_pal);
+void R_PaletteRemapRGBA(epi::image_data_c *img, const uint8_t *new_pal, const uint8_t *old_pal);
 
 int R_DetermineOpacity(epi::image_data_c *img, bool *is_empty);
 

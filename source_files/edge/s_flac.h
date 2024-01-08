@@ -25,7 +25,7 @@
 
 /* FUNCTIONS */
 
-abstract_music_c *S_PlayFLACMusic(byte *data, int length, bool looping);
+abstract_music_c *S_PlayFLACMusic(uint8_t *data, int length, bool looping);
 
 #endif /* __FLACPLAYER_H__ */
 

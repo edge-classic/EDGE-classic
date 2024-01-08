@@ -85,7 +85,7 @@ bool S_StartupOPL(void)
     }
 
     int          length;
-    byte        *data = nullptr;
+    uint8_t        *data = nullptr;
     epi::file_c *F    = nullptr;
 
     if (s_genmidi.s == "GENMIDI")
@@ -117,7 +117,7 @@ bool S_StartupOPL(void)
         return false;
     }
 
-    if (!edge_opl->loadPatches((const byte *)data, (size_t)length))
+    if (!edge_opl->loadPatches((const uint8_t *)data, (size_t)length))
     {
         I_Warning("S_StartupOPL: Error loading instruments!\n");
         delete F;
@@ -153,9 +153,9 @@ void S_RestartOPL(void)
     return; // OK!
 }
 
-static void ConvertToMono(s16_t *dest, const s16_t *src, int len)
+static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
 {
-    const s16_t *s_end = src + len * 2;
+    const int16_t *s_end = src + len * 2;
 
     for (; src < s_end; src += 2)
     {
@@ -178,14 +178,14 @@ class opl_player_c : public abstract_music_c
     int  status;
     bool looping;
 
-    s16_t *mono_buffer;
+    int16_t *mono_buffer;
 
     OPLInterface *opl_iface;
 
   public:
     opl_player_c(bool _looping) : status(NOT_LOADED), looping(_looping)
     {
-        mono_buffer = new s16_t[2 * OPL_SAMPLES];
+        mono_buffer = new int16_t[2 * OPL_SAMPLES];
         SequencerInit();
     }
 
@@ -301,7 +301,7 @@ class opl_player_c : public abstract_music_c
         opl_seq->setInterface(opl_iface);
     }
 
-    bool LoadTrack(const byte *data, int length, uint16_t rate)
+    bool LoadTrack(const uint8_t *data, int length, uint16_t rate)
     {
         return opl_seq->loadMIDI(data, length, rate);
     }
@@ -396,7 +396,7 @@ class opl_player_c : public abstract_music_c
   private:
     bool StreamIntoBuffer(epi::sound_data_c *buf)
     {
-        s16_t *data_buf;
+        int16_t *data_buf;
 
         bool song_done = false;
 
@@ -405,12 +405,12 @@ class opl_player_c : public abstract_music_c
         else
             data_buf = buf->data_L;
 
-        int played = opl_seq->playStream(reinterpret_cast<u8_t *>(data_buf), OPL_SAMPLES);
+        int played = opl_seq->playStream(reinterpret_cast<uint8_t *>(data_buf), OPL_SAMPLES);
 
         if (opl_seq->positionAtEnd())
             song_done = true;
 
-        buf->length = played / (2 * sizeof(s16_t));
+        buf->length = played / (2 * sizeof(int16_t));
 
         if (!dev_stereo)
             ConvertToMono(buf->data_L, mono_buffer, buf->length);
@@ -427,7 +427,7 @@ class opl_player_c : public abstract_music_c
     }
 };
 
-abstract_music_c *S_PlayOPL(byte *data, int length, bool loop, int type)
+abstract_music_c *S_PlayOPL(uint8_t *data, int length, bool loop, int type)
 {
 
     if (opl_disabled)

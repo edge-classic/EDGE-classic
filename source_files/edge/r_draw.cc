@@ -106,7 +106,7 @@ void RGL_DrawImage(float x, float y, float w, float h, const image_c *image, flo
     glAlphaFunc(GL_GREATER, 0);
 }
 
-void RGL_ReadScreen(int x, int y, int w, int h, byte *rgb_buffer)
+void RGL_ReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer)
 {
     glFlush();
 

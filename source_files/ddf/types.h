@@ -29,36 +29,10 @@
 #include "epi.h"
 #include "collection.h"
 
+#include "math_color.h"
 #include "math_bam.h"
 
 class mobjtype_c;
-
-// RGB 8:8:8
-typedef unsigned int rgbcol_t;
-
-#define RGB_NO_VALUE 0x01FEFE /* bright CYAN */
-
-#define RGB_MAKE(r, g, b) (((r) << 16) | ((g) << 8) | (b))
-
-#define RGB_RED(rgbcol) (((rgbcol) >> 16) & 0xFF)
-#define RGB_GRN(rgbcol) (((rgbcol) >> 8) & 0xFF)
-#define RGB_BLU(rgbcol) (((rgbcol)) & 0xFF)
-
-// useful colors
-#define T_BLACK RGB_MAKE(0, 0, 0)
-#define T_DGREY RGB_MAKE(64, 64, 64)
-#define T_MGREY RGB_MAKE(128, 128, 128)
-#define T_LGREY RGB_MAKE(208, 208, 208)
-#define T_WHITE RGB_MAKE(255, 255, 255)
-
-#define T_RED    RGB_MAKE(255, 0, 0)
-#define T_GREEN  RGB_MAKE(0, 255, 0)
-#define T_BLUE   RGB_MAKE(0, 0, 255)
-#define T_YELLOW RGB_MAKE(255, 255, 24)
-#define T_PURPLE RGB_MAKE(255, 24, 255)
-#define T_CYAN   RGB_MAKE(24, 255, 255)
-#define T_ORANGE RGB_MAKE(255, 72, 0)
-#define T_LTBLUE RGB_MAKE(128, 128, 255)
 
 // percentage type.  Ranges from 0.0f - 1.0f
 typedef float percent_t;

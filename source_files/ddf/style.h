@@ -39,7 +39,7 @@ class backgroundstyle_c
     void               Default();
     backgroundstyle_c &operator=(const backgroundstyle_c &rhs);
 
-    rgbcol_t  colour;
+    rgbacol_t  colour;
     percent_t translucency;
 
     std::string image_name;

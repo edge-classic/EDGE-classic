@@ -899,7 +899,7 @@ static int PL_hurt_dir(lua_State *L)
         mobj_t *badguy = ui_player_who->attacker;
         mobj_t *pmo    = ui_player_who->mo;
 
-        bam_angle diff = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle;
+        bam_angle_t diff = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle;
 
         if (diff >= ANG45 && diff <= ANG135)
         {
@@ -926,7 +926,7 @@ static int PL_hurt_angle(lua_State *L)
         mobj_t *badguy = ui_player_who->attacker;
         mobj_t *pmo    = ui_player_who->mo;
 
-        bam_angle real_a = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
+        bam_angle_t real_a = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
 
         value = epi::Degrees_FromBAM(real_a);
 
@@ -2273,7 +2273,7 @@ static int Sector_info(lua_State *L)
     //---------------
     // SECTOR.fogcolor
     HMM_Vec3    rgb;
-    rgbcol_t tempcolor = ui_player_who->mo->subsector->sector->props.fog_color;
+    rgbacol_t tempcolor = ui_player_who->mo->subsector->sector->props.fog_color;
 
     rgb.X = -1;
     rgb.Y = -1;
@@ -2282,9 +2282,9 @@ static int Sector_info(lua_State *L)
     {
         if (tempcolor != RGB_NO_VALUE)
         {
-            rgb.X = RGB_RED(tempcolor);
-            rgb.Y = RGB_GRN(tempcolor);
-            rgb.Z = RGB_BLU(tempcolor);
+            rgb.X = epi::RGBA_Red(tempcolor);
+            rgb.Y = epi::RGBA_Green(tempcolor);
+            rgb.Z = epi::RGBA_Blue(tempcolor);
         }
     }
    

@@ -25,24 +25,24 @@
 
 #define ENDOOM_LINES 25
 
-const rgbcol_t endoom_colors[16] = {0x000000, 0x0000AA, 0x00AA00, 0x00AAAA, 0xAA0000, 0xAA00AA, 0xAA5500, 0xAAAAAA,
-                                    0x555555, 0x5555FF, 0x55FF55, 0x55FFFF, 0xFF5555, 0xFF55FF, 0xFFFF55, 0xFFFFFF};
+const rgbacol_t endoom_colors[16] = {0x000000FF, 0x0000AAFF, 0x00AA00FF, 0x00AAAAFF, 0xAA0000FF, 0xAA00AAFF, 0xAA5500FF, 0xAAAAAAFF,
+                                    0x555555FF, 0x5555FFFF, 0x55FF55FF, 0x55FFFFFF, 0xFF5555FF, 0xFF55FFFF, 0xFFFF55FF, 0xFFFFFFFF};
 
 class console_line_c
 {
   public:
     std::string line;
 
-    rgbcol_t color;
+    rgbacol_t color;
 
     std::vector<uint8_t> endoom_bytes;
 
   public:
-    console_line_c(const std::string &text, rgbcol_t _col = T_LGREY) : line(text), color(_col)
+    console_line_c(const std::string &text, rgbacol_t _col = SG_LIGHT_GRAY_RGBA32) : line(text), color(_col)
     {
     }
 
-    console_line_c(const char *text, rgbcol_t _col = T_LGREY) : line(text), color(_col)
+    console_line_c(const char *text, rgbacol_t _col = SG_LIGHT_GRAY_RGBA32) : line(text), color(_col)
     {
     }
 
@@ -96,7 +96,7 @@ void CON_PlayerMessage(int plyr, const char *message, ...) GCCATTR((format(print
 void CON_PlayerMessageLDF(int plyr, const char *message, ...);
 
 // this color will apply to the next CON_Message or CON_Printf call.
-void CON_MessageColor(rgbcol_t col);
+void CON_MessageColor(rgbacol_t col);
 
 typedef enum
 {

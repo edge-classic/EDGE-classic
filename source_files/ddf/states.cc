@@ -1007,13 +1007,13 @@ void DDF_StateGetBecomeWeapon(const char *arg, state_t *cur_state)
 
 void DDF_StateGetAngle(const char *arg, state_t *cur_state)
 {
-    bam_angle *value;
+    bam_angle_t *value;
     float    tmp;
 
     if (!arg || !arg[0])
         return;
 
-    value = new bam_angle;
+    value = new bam_angle_t;
 
     if (sscanf(arg, " %f ", &tmp) != 1)
         DDF_Error("DDF_StateGetAngle: bad value: %s\n", arg);
@@ -1050,7 +1050,7 @@ void DDF_StateGetRGB(const char *arg, state_t *cur_state)
     if (!arg || !arg[0])
         return;
 
-    cur_state->action_par = new rgbcol_t;
+    cur_state->action_par = new rgbacol_t;
 
     DDF_MainGetRGB(arg, cur_state->action_par);
 }

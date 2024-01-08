@@ -372,7 +372,7 @@ bool I_SetScreenSize(scrmode_c *mode)
     signal(SIGSEGV, SIG_DFL);
 #endif
 
-    glClearColor(0, 0, 0, 0);
+    glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     SDL_GL_SwapWindow(my_vis);
@@ -383,7 +383,7 @@ bool I_SetScreenSize(scrmode_c *mode)
 void I_StartFrame(void)
 {
     ecframe_stats.Clear();
-    glClearColor(0, 0, 0, 0);
+    glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (r_culling.d)
         r_farclip.f = r_culldist.f;

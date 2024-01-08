@@ -127,7 +127,7 @@ typedef struct shoot_trav_info_s
 
     float   range;
     float   start_z;
-    bam_angle angle;
+    bam_angle_t angle;
     float   slope;
     float   topslope;
     float   bottomslope;
@@ -1260,13 +1260,13 @@ static void HitSlideLine(line_t *ld)
 
     int side = PointOnLineSide(slidemo->x, slidemo->y, ld);
 
-    bam_angle lineangle = R_PointToAngle(0, 0, ld->dx, ld->dy);
+    bam_angle_t lineangle = R_PointToAngle(0, 0, ld->dx, ld->dy);
 
     if (side == 1)
         lineangle += ANG180;
 
-    bam_angle moveangle  = R_PointToAngle(0, 0, tmxmove, tmymove);
-    bam_angle deltaangle = moveangle - lineangle;
+    bam_angle_t moveangle  = R_PointToAngle(0, 0, tmxmove, tmymove);
+    bam_angle_t deltaangle = moveangle - lineangle;
 
     if (deltaangle > ANG180)
         deltaangle += ANG180;
@@ -1891,8 +1891,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
         {
             if (current_flatdef->impactobject)
             {
-                bam_angle angle = shoot_I.angle + ANG180;
-                angle += (bam_angle)(P_RandomNegPos() * (int)(ANG1 / 2));
+                bam_angle_t angle = shoot_I.angle + ANG180;
+                angle += (bam_angle_t)(P_RandomNegPos() * (int)(ANG1 / 2));
 
                 P_SpawnDebris(x, y, z, angle, current_flatdef->impactobject);
                 // don't go any farther
@@ -2260,7 +2260,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
     return false;
 }
 
-mobj_t *P_AimLineAttack(mobj_t *t1, bam_angle angle, float distance, float *slope)
+mobj_t *P_AimLineAttack(mobj_t *t1, bam_angle_t angle, float distance, float *slope)
 {
     float x2 = t1->x + distance * epi::BAM_Cos(angle);
     float y2 = t1->y + distance * epi::BAM_Sin(angle);
@@ -2299,7 +2299,7 @@ mobj_t *P_AimLineAttack(mobj_t *t1, bam_angle angle, float distance, float *slop
     return aim_I.target;
 }
 
-void P_LineAttack(mobj_t *t1, bam_angle angle, float distance, float slope, float damage, const damage_c *damtype,
+void P_LineAttack(mobj_t *t1, bam_angle_t angle, float distance, float slope, float damage, const damage_c *damtype,
                   const mobjtype_c *puff)
 {
     // Note: Damtype can be NULL.
@@ -2357,7 +2357,7 @@ void P_TargetTheory(mobj_t *source, mobj_t *target, float *x, float *y, float *z
     }
 }
 
-mobj_t *GetMapTargetAimInfo(mobj_t *source, bam_angle angle, float distance)
+mobj_t *GetMapTargetAimInfo(mobj_t *source, bam_angle_t angle, float distance)
 {
     float x2, y2;
 
@@ -2414,7 +2414,7 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, bam_angle angle, float distance)
 // -ACB- 1998/09/01
 // -AJA- 1999/08/08: Added `force_aim' to fix chainsaw.
 //
-mobj_t *DoMapTargetAutoAim(mobj_t *source, bam_angle angle, float distance, bool force_aim)
+mobj_t *DoMapTargetAutoAim(mobj_t *source, bam_angle_t angle, float distance, bool force_aim)
 {
     float x2, y2;
 
@@ -2473,14 +2473,14 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, bam_angle angle, float distance, bool
     return aim_I.target;
 }
 
-mobj_t *P_MapTargetAutoAim(mobj_t *source, bam_angle angle, float distance, bool force_aim)
+mobj_t *P_MapTargetAutoAim(mobj_t *source, bam_angle_t angle, float distance, bool force_aim)
 {
     mobj_t *target = DoMapTargetAutoAim(source, angle, distance, force_aim);
 
     // If that is a miss, aim slightly to the left or right
     if (!target)
     {
-        bam_angle diff = ANG180 / 32;
+        bam_angle_t diff = ANG180 / 32;
 
         if (leveltime & 1)
             diff = 0 - diff;

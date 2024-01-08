@@ -548,7 +548,7 @@ static void UnknownThingWarning(int type, float x, float y)
     unknown_thing_map[type] = count + 1;
 }
 
-static mobj_t *SpawnMapThing(const mobjtype_c *info, float x, float y, float z, sector_t *sec, bam_angle angle,
+static mobj_t *SpawnMapThing(const mobjtype_c *info, float x, float y, float z, sector_t *sec, bam_angle_t angle,
                              int options, int tag)
 {
     spawnpoint_t point;
@@ -680,7 +680,7 @@ static mobj_t *SpawnMapThing(const mobjtype_c *info, float x, float y, float z, 
 static void LoadThings(int lump)
 {
     float   x, y, z;
-    bam_angle angle;
+    bam_angle_t angle;
     int     options, typenum;
     int     i;
 
@@ -813,7 +813,7 @@ static void LoadHexenThings(int lump)
     // -AJA- 2001/08/04: wrote this, based on the Hexen specs.
 
     float   x, y, z;
-    bam_angle angle;
+    bam_angle_t angle;
     int     options, typenum;
     int     tag;
     int     i;
@@ -1574,8 +1574,8 @@ static void LoadUDMFSectors()
             float    rf = 0.0f, rc = 0.0f;
             float    gravfactor = 1.0f;
             int      light = 160, type = 0, tag = 0;
-            rgbcol_t fog_color   = 0;
-            rgbcol_t light_color = T_WHITE;
+            rgbacol_t fog_color   = 0;
+            rgbacol_t light_color = SG_WHITE_RGBA32;
             int      fog_density = 0;
             char     floor_tex[10];
             char     ceil_tex[10];
@@ -1742,7 +1742,7 @@ static void LoadUDMFSectors()
             {
                 // Prevent UDMF-specified fog color from having our internal 'no value'...uh...value
                 if (fog_color == RGB_NO_VALUE)
-                    fog_color ^= RGB_MAKE(1, 1, 1);
+                    fog_color ^= 0x00010100;
                 ss->props.fog_color = fog_color;
                 // Best-effort match for GZDoom's fogdensity values so that UDB, etc
                 // give predictable results
@@ -1761,11 +1761,11 @@ static void LoadUDMFSectors()
                 ss->props.fog_color   = RGB_NO_VALUE;
                 ss->props.fog_density = 0;
             }
-            if (light_color != T_WHITE)
+            if (light_color != SG_WHITE_RGBA32)
             {
 
                 if (light_color == RGB_NO_VALUE)
-                    light_color ^= RGB_MAKE(1, 1, 1);
+                    light_color ^= 0x00010100;
                 // Make colourmap if necessary
                 for (auto cmap : colourmaps)
                 {
@@ -2236,7 +2236,7 @@ static void LoadUDMFThings()
         if (section == "thing")
         {
             float             x = 0.0f, y = 0.0f, z = 0.0f;
-            bam_angle           angle     = ANG0;
+            bam_angle_t           angle     = ANG0;
             int               options   = MTF_NOT_SINGLE | MTF_NOT_DM | MTF_NOT_COOP;
             int               typenum   = -1;
             int               tag       = 0;

@@ -19,6 +19,8 @@
 #ifndef __EPI_IMAGEDATA_H__
 #define __EPI_IMAGEDATA_H__
 
+#include "math_color.h"
+
 namespace epi
 {
 
@@ -131,17 +133,14 @@ class image_data_c
     void AverageHue(uint8_t *hue, uint8_t *ity = NULL, int from_x = -1, int to_x = 1000000, int from_y = -1,
                     int to_y = 1000000);
 
-    // compute the average color of the RGB image, storing the
-    // result in the 'rgb' array (r, g, b).
-    void AverageColor(uint8_t *rgb, int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    // compute the average color of the RGB image, based on modal average
+    rgbacol_t AverageColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
-    // compute the lightest color in the RGB image, storing the
-    // result in the 'rgb' array (r, g, b).
-    void LightestColor(uint8_t *rgb, int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    // compute the lightest color in the RGB image
+    rgbacol_t LightestColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
-    // compute the darkest color in the RGB image, storing the
-    // result in the 'rgb' array (r, g, b).
-    void DarkestColor(uint8_t *rgb, int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    // compute the darkest color in the RGB image
+    rgbacol_t DarkestColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
     // SMMU-style swirling
     void Swirl(int leveltime, int thickness);

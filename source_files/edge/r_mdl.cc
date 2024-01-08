@@ -108,7 +108,7 @@ typedef struct
 {
     int32_t facesfront;
     int32_t vertex[3];
-} raw_mdl_tribam_angle;
+} raw_mdl_tribam_angle_t;
 
 typedef struct
 {
@@ -309,8 +309,8 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
 
     /* PARSE TRIANGLES */
 
-    raw_mdl_tribam_angle *tris = new raw_mdl_tribam_angle[num_tris];
-    f->Read(tris, num_tris * sizeof(raw_mdl_tribam_angle));
+    raw_mdl_tribam_angle_t *tris = new raw_mdl_tribam_angle_t[num_tris];
+    f->Read(tris, num_tris * sizeof(raw_mdl_tribam_angle_t));
 
     /* PARSE FRAMES */
 
@@ -347,7 +347,7 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
 
         for (int j = 0; j < 3; j++, point++)
         {
-            raw_mdl_tribam_angle raw_tri = tris[i];
+            raw_mdl_tribam_angle_t raw_tri = tris[i];
             point->vert_idx            = EPI_LE_S32(raw_tri.vertex[j]);
             float s                    = (float)EPI_LE_S16(texcoords[point->vert_idx].s);
             float t                    = (float)EPI_LE_S16(texcoords[point->vert_idx].t);
@@ -741,7 +741,7 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
 
     M_Angle2Matrix(tilt ? ~mo->vertangle : 0, &data.kx_mat, &data.kz_mat);
 
-    bam_angle ang = mo->angle + rotation;
+    bam_angle_t ang = mo->angle + rotation;
 
     MIR_Angle(ang);
 
@@ -819,7 +819,7 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
 
     int num_pass = data.is_fuzzy ? 1 : (detail_level > 0 ? 4 : 3);
 
-    rgbcol_t fc_to_use = mo->subsector->sector->props.fog_color;
+    rgbacol_t fc_to_use = mo->subsector->sector->props.fog_color;
     float    fd_to_use = mo->subsector->sector->props.fog_density;
     // check for DDFLEVL fog
     if (fc_to_use == RGB_NO_VALUE)
@@ -838,9 +838,9 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
     if (!r_culling.d && fc_to_use != RGB_NO_VALUE)
     {
         GLfloat fc[4];
-        fc[0] = (float)RGB_RED(fc_to_use) / 255.0f;
-        fc[1] = (float)RGB_GRN(fc_to_use) / 255.0f;
-        fc[2] = (float)RGB_BLU(fc_to_use) / 255.0f;
+        fc[0] = (float)epi::RGBA_Red(fc_to_use) / 255.0f;
+        fc[1] = (float)epi::RGBA_Green(fc_to_use) / 255.0f;
+        fc[2] = (float)epi::RGBA_Blue(fc_to_use) / 255.0f;
         fc[3] = 1.0f;
         glClearColor(fc[0], fc[1], fc[2], 1.0f);
         glFogi(GL_FOG_MODE, GL_EXP);
@@ -850,48 +850,36 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
     }
     else if (r_culling.d)
     {
-        GLfloat fogColor[3];
+        sg_color fogColor;
         if (need_to_draw_sky)
         {
             switch (r_cullfog.d)
             {
             case 0:
-                fogColor[0] = cull_fog_color[0];
-                fogColor[1] = cull_fog_color[1];
-                fogColor[2] = cull_fog_color[2];
+                fogColor = cull_fog_color;
                 break;
             case 1:
                 // Not pure white, but 1.0f felt like a little much - Dasho
-                fogColor[0] = 0.75f;
-                fogColor[1] = 0.75f;
-                fogColor[2] = 0.75f;
+                fogColor = sg_silver;
                 break;
             case 2:
-                fogColor[0] = 0.25f;
-                fogColor[1] = 0.25f;
-                fogColor[2] = 0.25f;
+                fogColor = { 0.25f, 0.25f, 0.25f, 1.0f };
                 break;
             case 3:
-                fogColor[0] = 0;
-                fogColor[1] = 0;
-                fogColor[2] = 0;
+                fogColor = sg_black;
                 break;
             default:
-                fogColor[0] = cull_fog_color[0];
-                fogColor[1] = cull_fog_color[1];
-                fogColor[2] = cull_fog_color[2];
+                fogColor = cull_fog_color;
                 break;
             }
         }
         else
         {
-            fogColor[0] = 0;
-            fogColor[1] = 0;
-            fogColor[2] = 0;
+            fogColor = sg_black;
         }
-        glClearColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
+        glClearColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
         glFogi(GL_FOG_MODE, GL_LINEAR);
-        glFogfv(GL_FOG_COLOR, fogColor);
+        glFogfv(GL_FOG_COLOR, &fogColor.r);
         glFogf(GL_FOG_START, r_farclip.f - 750.0f);
         glFogf(GL_FOG_END, r_farclip.f - 250.0f);
         glEnable(GL_FOG);

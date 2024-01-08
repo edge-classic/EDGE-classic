@@ -263,7 +263,6 @@ void R_SoftInitResolution(void)
 
     // -ES- 1999/08/29 Fixes the garbage palettes, and the blank 16-bit console
     V_SetPalette(PALETTE_NORMAL, 0);
-    V_ColourNewFrame();
 
     // re-initialise various bits of GL state
     RGL_SoftInit();

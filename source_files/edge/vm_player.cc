@@ -875,7 +875,7 @@ static void PL_hurt_dir(coal::vm_c *vm, int argc)
         mobj_t *badguy = ui_player_who->attacker;
         mobj_t *pmo    = ui_player_who->mo;
 
-        bam_angle diff = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle;
+        bam_angle_t diff = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle;
 
         if (diff >= ANG45 && diff <= ANG135)
         {
@@ -901,7 +901,7 @@ static void PL_hurt_angle(coal::vm_c *vm, int argc)
         mobj_t *badguy = ui_player_who->attacker;
         mobj_t *pmo    = ui_player_who->mo;
 
-        bam_angle real_a = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
+        bam_angle_t real_a = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
 
         value = epi::Degrees_FromBAM(real_a);
 

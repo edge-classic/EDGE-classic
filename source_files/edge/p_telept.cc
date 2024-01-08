@@ -118,10 +118,10 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
     float new_y;
     float new_z;
 
-    bam_angle new_ang;
+    bam_angle_t new_ang;
 
-    bam_angle dest_ang;
-    bam_angle source_ang = ANG90 + (line ? R_PointToAngle(0, 0, line->dx, line->dy) : 0);
+    bam_angle_t dest_ang;
+    bam_angle_t source_ang = ANG90 + (line ? R_PointToAngle(0, 0, line->dx, line->dy) : 0);
 
     mobj_t *currmobj = NULL;
     line_t *currline = NULL;
@@ -226,7 +226,7 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
             dy = line->dy * (pos - 0.5f);
 
             // we need to rotate the offset vector
-            bam_angle offset_ang = dest_ang - source_ang;
+            bam_angle_t offset_ang = dest_ang - source_ang;
 
             float s = epi::BAM_Sin(offset_ang);
             float c = epi::BAM_Cos(offset_ang);
@@ -267,7 +267,7 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
     else if (def->special & TELSP_SameSpeed)
     {
         // we need to rotate the momentum vector
-        bam_angle mom_ang = new_ang - thing->angle;
+        bam_angle_t mom_ang = new_ang - thing->angle;
 
         float s = epi::BAM_Sin(mom_ang);
         float c = epi::BAM_Cos(mom_ang);

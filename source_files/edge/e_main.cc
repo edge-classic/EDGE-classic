@@ -238,7 +238,7 @@ class startup_progress_c
                 HUD_StretchImage(-320, -200, 960, 600, loading_image->blurred_version, 0, 0);
             }
             HUD_DrawImageTitleWS(loading_image);
-            HUD_SolidBox(25, 25, 295, 175, RGB_MAKE(0, 0, 0));
+            HUD_SolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
         }
         int y = 26;
         for (int i = 0; i < (int)startup_messages.size(); i++)
@@ -263,7 +263,7 @@ class startup_progress_c
             int col = (1.0f + v_gamma.f) * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-            HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, RGB_MAKE(col, col, col));
+            HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::RGBA_Make(col, col, col));
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
@@ -272,7 +272,7 @@ class startup_progress_c
             int col = v_gamma.f * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_DST_COLOR, GL_ONE);
-            HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, RGB_MAKE(col, col, col));
+            HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::RGBA_Make(col, col, col));
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
@@ -495,7 +495,7 @@ static void SpecialWadVerify(void)
 //
 static void ShowNotice(void)
 {
-    CON_MessageColor(RGB_MAKE(64, 192, 255));
+    CON_MessageColor(epi::RGBA_Make(64, 192, 255));
 
     I_Printf("%s", language["Notice"]);
 }
@@ -588,10 +588,6 @@ void E_Display(void)
 
     HUD_FrameSetup();
 
-    // -AJA- 1999/08/02: Make sure palette/gamma is OK. This also should
-    //       fix (finally !) the "gamma too late on walls" bug.
-    V_ColourNewFrame();
-
     switch (gamestate)
     {
     case GS_LEVEL:
@@ -673,7 +669,7 @@ void E_Display(void)
         int col = (1.0f + v_gamma.f) * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-        HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, RGB_MAKE(col, col, col));
+        HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::RGBA_Make(col, col, col));
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }
@@ -682,7 +678,7 @@ void E_Display(void)
         int col = v_gamma.f * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_DST_COLOR, GL_ONE);
-        HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, RGB_MAKE(col, col, col));
+        HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::RGBA_Make(col, col, col));
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }
@@ -726,7 +722,7 @@ static void E_TitleDrawer(void)
     }
     else
     {
-        HUD_SolidBox(0, 0, 320, 200, RGB_MAKE(0, 0, 0));
+        HUD_SolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
     }
 }
 
@@ -2143,7 +2139,7 @@ void E_Main(int argc, const char **argv)
 
         E_InitialState();
 
-        CON_MessageColor(RGB_MAKE(255, 255, 0));
+        CON_MessageColor(SG_YELLOW_RGBA32);
         I_Printf("%s v%s initialisation complete.\n", appname.c_str(), edgeversion.c_str());
 
         I_Debugf("- Entering game loop...\n");

@@ -27,7 +27,7 @@ extern player_t *ui_hud_who;
 static int   ui_hud_automap_flags[2]; // 0 = disabled, 1 = enabled
 static float ui_hud_automap_zoom;
 
-static rgbcol_t HD_VectorToColor(const HMM_Vec3 &v)
+static rgbacol_t HD_VectorToColor(const HMM_Vec3 &v)
 {
     if (v.X < 0)
         return RGB_NO_VALUE;
@@ -36,11 +36,11 @@ static rgbcol_t HD_VectorToColor(const HMM_Vec3 &v)
     int g = CLAMP(0, (int)v.Y, 255);
     int b = CLAMP(0, (int)v.Z, 255);
 
-    rgbcol_t rgb = RGB_MAKE(r, g, b);
+    rgbacol_t rgb = epi::RGBA_Make(r, g, b);
 
     // ensure we don't get the "no color" value by mistake
     if (rgb == RGB_NO_VALUE)
-        rgb ^= 0x000101;
+        rgb ^= 0x00010100;
 
     return rgb;
 }
@@ -177,7 +177,7 @@ static int HD_text_font(lua_State *L)
 //
 static int HD_text_color(lua_State *L)
 {
-    rgbcol_t color = HD_VectorToColor(LUA_CheckVector3(L, 1));
+    rgbacol_t color = HD_VectorToColor(LUA_CheckVector3(L, 1));
 
     HUD_SetTextColor(color);
 
@@ -218,7 +218,7 @@ static int HD_solid_box(lua_State *L)
     float w = luaL_checknumber(L, 3);
     float h = luaL_checknumber(L, 4);
 
-    rgbcol_t rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
+    rgbacol_t rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
 
     HUD_SolidBox(x, y, x + w, y + h, rgb);
 
@@ -234,7 +234,7 @@ static int HD_solid_line(lua_State *L)
     float x2 = luaL_checknumber(L, 3);
     float y2 = luaL_checknumber(L, 4);
 
-    rgbcol_t rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
+    rgbacol_t rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
 
     HUD_SolidLine(x1, y1, x2, y2, rgb);
 
@@ -250,7 +250,7 @@ static int HD_thin_box(lua_State *L)
     float w = luaL_checknumber(L, 3);
     float h = luaL_checknumber(L, 4);
 
-    rgbcol_t rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
+    rgbacol_t rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
 
     HUD_ThinBox(x, y, x + w, y + h, rgb);
 
@@ -266,7 +266,7 @@ static int HD_gradient_box(lua_State *L)
     float w = luaL_checknumber(L, 3);
     float h = luaL_checknumber(L, 4);
 
-    rgbcol_t cols[4];
+    rgbacol_t cols[4];
 
     cols[0] = HD_VectorToColor(LUA_CheckVector3(L, 5));
     cols[1] = HD_VectorToColor(LUA_CheckVector3(L, 6));
@@ -609,7 +609,7 @@ static int HD_automap_color(lua_State *L)
 
     which--;
 
-    rgbcol_t rgb = HD_VectorToColor(LUA_CheckVector3(L, 2));
+    rgbacol_t rgb = HD_VectorToColor(LUA_CheckVector3(L, 2));
 
     AM_SetColor(which, rgb);
 
@@ -727,11 +727,10 @@ static int HD_get_average_color(lua_State *L)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     epi::image_data_c *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    uint8_t temp_rgb[3];
-    tmp_img_data->AverageColor(temp_rgb, from_x, to_x, from_y, to_y);
-    rgb.X = temp_rgb[0];
-    rgb.Y = temp_rgb[1];
-    rgb.Z = temp_rgb[2];
+    rgbacol_t col = tmp_img_data->AverageColor(from_x, to_x, from_y, to_y);
+    rgb.X = epi::RGBA_Red(col);
+    rgb.Y = epi::RGBA_Green(col);
+    rgb.Z = epi::RGBA_Blue(col);
     delete tmp_img_data;
 
     LUA_PushVector3(L, rgb);
@@ -753,11 +752,10 @@ static int HD_get_lightest_color(lua_State *L)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     epi::image_data_c *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    uint8_t temp_rgb[3];
-    tmp_img_data->LightestColor(temp_rgb, from_x, to_x, from_y, to_y);
-    rgb.X = temp_rgb[0];
-    rgb.Y = temp_rgb[1];
-    rgb.Z = temp_rgb[2];
+    rgbacol_t col = tmp_img_data->LightestColor(from_x, to_x, from_y, to_y);
+    rgb.X = epi::RGBA_Red(col);
+    rgb.Y = epi::RGBA_Green(col);
+    rgb.Z = epi::RGBA_Blue(col);
     delete tmp_img_data;
 
     LUA_PushVector3(L, rgb);
@@ -778,11 +776,10 @@ static int HD_get_darkest_color(lua_State *L)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     epi::image_data_c *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    uint8_t temp_rgb[3];
-    tmp_img_data->DarkestColor(temp_rgb, from_x, to_x, from_y, to_y);
-    rgb.X = temp_rgb[0];
-    rgb.Y = temp_rgb[1];
-    rgb.Z = temp_rgb[2];
+    rgbacol_t col = tmp_img_data->DarkestColor(from_x, to_x, from_y, to_y);
+    rgb.X = epi::RGBA_Red(col);
+    rgb.Y = epi::RGBA_Green(col);
+    rgb.Z = epi::RGBA_Blue(col);
     delete tmp_img_data;
 
     LUA_PushVector3(L, rgb);
@@ -826,11 +823,10 @@ static int HD_get_average_top_border_color(lua_State *L)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     epi::image_data_c *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    uint8_t temp_rgb[3];
-    tmp_img_data->AverageColor(temp_rgb, 0, tmp_img_c->actual_w, tmp_img_c->actual_h - 1, tmp_img_c->actual_h);
-    rgb.X = temp_rgb[0];
-    rgb.Y = temp_rgb[1];
-    rgb.Z = temp_rgb[2];
+    rgbacol_t col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, tmp_img_c->actual_h - 1, tmp_img_c->actual_h);
+    rgb.X = epi::RGBA_Red(col);
+    rgb.Y = epi::RGBA_Green(col);
+    rgb.Z = epi::RGBA_Blue(col);
     delete tmp_img_data;
 
     LUA_PushVector3(L, rgb);
@@ -846,11 +842,10 @@ static int HD_get_average_bottom_border_color(lua_State *L)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     epi::image_data_c *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    uint8_t temp_rgb[3];
-    tmp_img_data->AverageColor(temp_rgb, 0, tmp_img_c->actual_w, 0, 1);
-    rgb.X = temp_rgb[0];
-    rgb.Y = temp_rgb[1];
-    rgb.Z = temp_rgb[2];
+    rgbacol_t col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, 0, 1);
+    rgb.X = epi::RGBA_Red(col);
+    rgb.Y = epi::RGBA_Green(col);
+    rgb.Z = epi::RGBA_Blue(col);
     delete tmp_img_data;
 
     LUA_PushVector3(L, rgb);

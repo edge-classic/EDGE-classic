@@ -962,7 +962,7 @@ class damage_c
     bool no_armour;
 
     // Color of the flash when player is hit by this damage type
-    rgbcol_t damage_flash_colour;
+    rgbacol_t damage_flash_colour;
 
     // Apply damange unconditionally
     bool bypass_all;
@@ -1035,7 +1035,7 @@ class dlight_info_c
     dlight_type_e type;
     std::string   shape; // IMAGES.DDF reference
     float         radius;
-    rgbcol_t      colour;
+    rgbacol_t      colour;
     percent_t     height;
     bool          leaky;
 
@@ -1057,7 +1057,7 @@ class weakness_info_c
     weakness_info_c &operator=(weakness_info_c &rhs);
 
     percent_t height[2];
-    bam_angle   angle[2];
+    bam_angle_t   angle[2];
     bitset_t  classes;
     float     multiply;
     percent_t painchance;
@@ -1147,7 +1147,7 @@ class mobjtype_c
     float     bounce_speed;
     float     bounce_up;
     float     sight_slope;
-    bam_angle   sight_angle;
+    bam_angle_t   sight_angle;
     float     ride_friction;
     percent_t shadow_trans;
 

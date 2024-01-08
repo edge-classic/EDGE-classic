@@ -89,7 +89,7 @@ typedef enum
     AM_NUM_COLORS
 } automap_color_e;
 
-void AM_SetColor(int which, rgbcol_t color);
+void AM_SetColor(int which, rgbacol_t color);
 
 // NOTE: the bit numbers here must match the COAL API script
 typedef enum

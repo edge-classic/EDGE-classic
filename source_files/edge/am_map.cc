@@ -53,21 +53,21 @@
 // Automap colors
 
 // NOTE: this order must match the one in the COAL API script
-static rgbcol_t am_colors[AM_NUM_COLORS] = {
-    RGB_MAKE(40, 40, 112),   // AMCOL_Grid
-    RGB_MAKE(112, 112, 112), // AMCOL_Allmap
-    RGB_MAKE(255, 0, 0),     // AMCOL_Wall
-    RGB_MAKE(192, 128, 80),  // AMCOL_Step
-    RGB_MAKE(192, 128, 80),  // AMCOL_Ledge
-    RGB_MAKE(220, 220, 0),   // AMCOL_Ceil
-    RGB_MAKE(0, 200, 200),   // AMCOL_Secret
+static rgbacol_t am_colors[AM_NUM_COLORS] = {
+    epi::RGBA_Make(40, 40, 112),   // AMCOL_Grid
+    epi::RGBA_Make(112, 112, 112), // AMCOL_Allmap
+    epi::RGBA_Make(255, 0, 0),     // AMCOL_Wall
+    epi::RGBA_Make(192, 128, 80),  // AMCOL_Step
+    epi::RGBA_Make(192, 128, 80),  // AMCOL_Ledge
+    epi::RGBA_Make(220, 220, 0),   // AMCOL_Ceil
+    epi::RGBA_Make(0, 200, 200),   // AMCOL_Secret
 
-    RGB_MAKE(255, 255, 255), // AMCOL_Player
-    RGB_MAKE(0, 255, 0),     // AMCOL_Monster
-    RGB_MAKE(220, 0, 0),     // AMCOL_Corpse
-    RGB_MAKE(0, 0, 255),     // AMCOL_Item
-    RGB_MAKE(255, 188, 0),   // AMCOL_Missile
-    RGB_MAKE(120, 60, 30)    // AMCOL_Scenery
+    epi::RGBA_Make(255, 255, 255), // AMCOL_Player
+    epi::RGBA_Make(0, 255, 0),     // AMCOL_Monster
+    epi::RGBA_Make(220, 0, 0),     // AMCOL_Corpse
+    epi::RGBA_Make(0, 0, 255),     // AMCOL_Item
+    epi::RGBA_Make(255, 188, 0),   // AMCOL_Missile
+    epi::RGBA_Make(120, 60, 30)    // AMCOL_Scenery
 };
 
 // Automap keys
@@ -496,7 +496,7 @@ void AM_Ticker(void)
 // Rotation in 2D.
 // Used to rotate player arrow line character.
 //
-static inline void Rotate(float &x, float &y, bam_angle a)
+static inline void Rotate(float &x, float &y, bam_angle_t a)
 {
     float bam_sin = epi::BAM_Sin(a);
     float bam_cos = epi::BAM_Cos(a);
@@ -525,7 +525,7 @@ static void GetRotatedCoords(float sx, float sy, float &dx, float &dy)
     }
 }
 
-static inline bam_angle GetRotatedAngle(bam_angle src)
+static inline bam_angle_t GetRotatedAngle(bam_angle_t src)
 {
     if (rotatemap)
         return src + ANG90 - f_focus->angle;
@@ -536,7 +536,7 @@ static inline bam_angle GetRotatedAngle(bam_angle src)
 //
 // Draw visible parts of lines.
 //
-static void DrawMLine(mline_t *ml, rgbcol_t rgb, bool thick = true)
+static void DrawMLine(mline_t *ml, rgbacol_t rgb, bool thick = true)
 {
     if (hide_lines)
         return;
@@ -558,7 +558,7 @@ static void DrawMLine(mline_t *ml, rgbcol_t rgb, bool thick = true)
 }
 
 // Lobo 2022: keyed doors automap colouring
-static void DrawMLineDoor(mline_t *ml, rgbcol_t rgb)
+static void DrawMLineDoor(mline_t *ml, rgbacol_t rgb)
 {
     if (hide_lines)
         return;
@@ -621,7 +621,7 @@ static mline_t player_dagger[] = {
 
 #define NUMPLYRDGGRLINES (sizeof(player_dagger) / sizeof(mline_t))
 
-static void DrawLineCharacter(mline_t *lineguy, int lineguylines, float radius, bam_angle angle, rgbcol_t rgb, float x,
+static void DrawLineCharacter(mline_t *lineguy, int lineguylines, float radius, bam_angle_t angle, rgbacol_t rgb, float x,
                               float y)
 {
     float cx, cy;
@@ -673,7 +673,7 @@ std::string Aux2StringReplaceAll(std::string str, const std::string &from, const
 }
 
 // Lobo 2023: draw some key info in the middle of a line
-static void DrawKeyOnLine(mline_t *ml, int theKey, rgbcol_t rgb = T_WHITE)
+static void DrawKeyOnLine(mline_t *ml, int theKey, rgbacol_t rgb = SG_WHITE_RGBA32)
 {
     if (hide_lines)
         return;
@@ -750,7 +750,7 @@ static void DrawKeyOnLine(mline_t *ml, int theKey, rgbcol_t rgb = T_WHITE)
 
         DrawLineCharacter(door_key, NUMDOORKEYLINES,
                     5, ANG90,
-                    RGB_MAKE(0,0,255), x2, y2);
+                    epi::RGBA_Make(0,0,255), x2, y2);
     */
 
     return;
@@ -873,7 +873,7 @@ static void AM_WalkSeg(seg_t *seg)
         GetRotatedCoords(seg->v1->x, seg->v1->y, l.a.x, l.a.y);
         GetRotatedCoords(seg->v2->x, seg->v2->y, l.b.x, l.b.y);
 
-        DrawMLine(&l, RGB_MAKE(0, 0, 128), false);
+        DrawMLine(&l, epi::RGBA_Make(0, 0, 128), false);
 #endif
         return;
     }
@@ -906,12 +906,12 @@ static void AM_WalkSeg(seg_t *seg)
                 {
                     if (line->special->keys & KF_STRICTLY_ALL)
                     {
-                        DrawMLineDoor(&l, T_PURPLE); // purple
+                        DrawMLineDoor(&l, SG_PURPLE_RGBA32); // purple
                         DrawKeyOnLine(&l, KF_STRICTLY_ALL);
                     }
                     else if (line->special->keys & KF_BlueCard || line->special->keys & KF_BlueSkull)
                     {
-                        DrawMLineDoor(&l, T_BLUE); // blue
+                        DrawMLineDoor(&l, SG_BLUE_RGBA32); // blue
                         if (line->special->keys & (KF_BlueSkull | KF_BlueCard))
                         {
                             DrawKeyOnLine(&l, KF_BlueCard);
@@ -924,7 +924,7 @@ static void AM_WalkSeg(seg_t *seg)
                     }
                     else if (line->special->keys & KF_YellowCard || line->special->keys & KF_YellowSkull)
                     {
-                        DrawMLineDoor(&l, T_YELLOW); // yellow
+                        DrawMLineDoor(&l, SG_YELLOW_RGBA32); // yellow
                         if (line->special->keys & (KF_YellowSkull | KF_YellowCard))
                         {
                             DrawKeyOnLine(&l, KF_YellowCard);
@@ -937,7 +937,7 @@ static void AM_WalkSeg(seg_t *seg)
                     }
                     else if (line->special->keys & KF_RedCard || line->special->keys & KF_RedSkull)
                     {
-                        DrawMLineDoor(&l, T_RED); // red
+                        DrawMLineDoor(&l, SG_RED_RGBA32); // red
                         if (line->special->keys & (KF_RedSkull | KF_RedCard))
                         {
                             DrawKeyOnLine(&l, KF_RedCard);
@@ -950,7 +950,7 @@ static void AM_WalkSeg(seg_t *seg)
                     }
                     else if (line->special->keys & KF_GreenCard || line->special->keys & KF_GreenSkull)
                     {
-                        DrawMLineDoor(&l, T_GREEN); // green
+                        DrawMLineDoor(&l, SG_GREEN_RGBA32); // green
                         if (line->special->keys & (KF_GreenSkull | KF_GreenCard))
                         {
                             DrawKeyOnLine(&l, KF_GreenCard);
@@ -963,7 +963,7 @@ static void AM_WalkSeg(seg_t *seg)
                     }
                     else
                     {
-                        DrawMLineDoor(&l, T_PURPLE); // purple
+                        DrawMLineDoor(&l, SG_PURPLE_RGBA32); // purple
                     }
                     return;
                 }
@@ -1015,7 +1015,7 @@ static void AM_WalkSeg(seg_t *seg)
 }
 
 #if (DEBUG_COLLIDE == 1)
-static void DrawObjectBounds(mobj_t *mo, rgbcol_t rgb)
+static void DrawObjectBounds(mobj_t *mo, rgbacol_t rgb)
 {
     float R = mo->radius;
 
@@ -1047,15 +1047,15 @@ static void DrawObjectBounds(mobj_t *mo, rgbcol_t rgb)
 }
 #endif
 
-static rgbcol_t player_colors[8] = {
-    RGB_MAKE(5, 255, 5),     // GREEN,
-    RGB_MAKE(80, 80, 80),    // GRAY + GRAY_LEN*2/3,
-    RGB_MAKE(160, 100, 50),  // BROWN,
-    RGB_MAKE(255, 255, 255), // RED + RED_LEN/2,
-    RGB_MAKE(255, 176, 5),   // ORANGE,
-    RGB_MAKE(170, 170, 170), // GRAY + GRAY_LEN*1/3,
-    RGB_MAKE(255, 5, 5),     // RED,
-    RGB_MAKE(255, 185, 225), // PINK
+static rgbacol_t player_colors[8] = {
+    epi::RGBA_Make(5, 255, 5),     // GREEN,
+    epi::RGBA_Make(80, 80, 80),    // GRAY + GRAY_LEN*2/3,
+    epi::RGBA_Make(160, 100, 50),  // BROWN,
+    epi::RGBA_Make(255, 255, 255), // RED + RED_LEN/2,
+    epi::RGBA_Make(255, 176, 5),   // ORANGE,
+    epi::RGBA_Make(170, 170, 170), // GRAY + GRAY_LEN*1/3,
+    epi::RGBA_Make(255, 5, 5),     // RED,
+    epi::RGBA_Make(255, 185, 225), // PINK
 };
 
 //
@@ -1334,7 +1334,7 @@ void AM_Render(float x, float y, float w, float h, mobj_t *focus, int flags)
     DrawMarks();
 }
 
-void AM_SetColor(int which, rgbcol_t color)
+void AM_SetColor(int which, rgbacol_t color)
 {
     SYS_ASSERT(0 <= which && which < AM_NUM_COLORS);
 

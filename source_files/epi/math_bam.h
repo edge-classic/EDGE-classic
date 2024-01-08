@@ -36,60 +36,60 @@
 #define ANG315 0xe0000000
 #define ANG360 0xffffffff
 
-typedef uint32_t bam_angle;
+typedef uint32_t bam_angle_t;
 
 namespace epi
 {
 
-inline bam_angle BAM_FromDegrees(int deg)
+inline bam_angle_t BAM_FromDegrees(int deg)
 {
     return deg * 11930464 + deg * 7 / 10;
 }
 
-inline bam_angle BAM_FromDegrees(float deg)
+inline bam_angle_t BAM_FromDegrees(float deg)
 {
-    return (bam_angle)((deg < 0 ? (deg + 360.0f) : double(deg)) * 11930464.7084f);
+    return (bam_angle_t)((deg < 0 ? (deg + 360.0f) : double(deg)) * 11930464.7084f);
 }
 
-inline bam_angle BAM_FromDegrees(double deg)
+inline bam_angle_t BAM_FromDegrees(double deg)
 {
-    return (bam_angle)((deg < 0 ? (deg + 360.0) : deg) * 11930464.7084);
+    return (bam_angle_t)((deg < 0 ? (deg + 360.0) : deg) * 11930464.7084);
 }
 
-inline bam_angle BAM_FromRadians(double rad)
+inline bam_angle_t BAM_FromRadians(double rad)
 {
     if (rad < 0)
         rad += M_PI * 2.0;
     
-    return (bam_angle)(rad * 683565275.42);
+    return (bam_angle_t)(rad * 683565275.42);
 }
 
-inline float Degrees_FromBAM(bam_angle bam)
+inline float Degrees_FromBAM(bam_angle_t bam)
 {
     return double(bam) * 0.0000000838190156f;
 }
 
-inline double Radians_FromBAM(bam_angle bam)
+inline double Radians_FromBAM(bam_angle_t bam)
 {
     return double(bam) * 0.000000001462918079601944;
 }
 
-inline bam_angle BAM_FromATan(float slope)
+inline bam_angle_t BAM_FromATan(float slope)
 {
     return BAM_FromRadians(atan(slope));
 }
 
-inline float BAM_Sin(bam_angle bam)
+inline float BAM_Sin(bam_angle_t bam)
 {
     return sin(Radians_FromBAM(bam));
 }
 
-inline float BAM_Cos(bam_angle bam)
+inline float BAM_Cos(bam_angle_t bam)
 {
     return cos(Radians_FromBAM(bam));
 }
 
-inline float BAM_Tan(bam_angle bam)
+inline float BAM_Tan(bam_angle_t bam)
 {
     return tan(Radians_FromBAM(bam));
 }

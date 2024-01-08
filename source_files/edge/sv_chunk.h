@@ -59,7 +59,7 @@ unsigned char  SV_GetByte(void);
 unsigned short SV_GetShort(void);
 unsigned int   SV_GetInt(void);
 
-bam_angle SV_GetAngle(void);
+bam_angle_t SV_GetAngle(void);
 float   SV_GetFloat(void);
 
 const char *SV_GetString(void);
@@ -82,7 +82,7 @@ void SV_PutByte(unsigned char value);
 void SV_PutShort(unsigned short value);
 void SV_PutInt(unsigned int value);
 
-void SV_PutAngle(bam_angle value);
+void SV_PutAngle(bam_angle_t value);
 void SV_PutFloat(float value);
 
 void SV_PutString(const char *str);

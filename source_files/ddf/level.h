@@ -178,10 +178,10 @@ class mapdef_c
     skystretch_e forced_skystretch;
 
     colourmap_c *indoor_fog_cmap;
-    rgbcol_t     indoor_fog_color;
+    rgbacol_t     indoor_fog_color;
     float        indoor_fog_density;
     colourmap_c *outdoor_fog_cmap;
-    rgbcol_t     outdoor_fog_color;
+    rgbacol_t     outdoor_fog_color;
     float        outdoor_fog_density;
 
   private:

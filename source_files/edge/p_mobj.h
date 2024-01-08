@@ -154,8 +154,8 @@ typedef struct
     float x, y, z;
 
     // direction thing faces
-    bam_angle angle;
-    bam_angle vertangle;
+    bam_angle_t angle;
+    bam_angle_t vertangle;
 
     // type of thing
     const mobjtype_c *info;
@@ -177,7 +177,7 @@ typedef struct dlight_state_s
 {
     float    r;      // radius
     float    target; // target radius
-    rgbcol_t color;
+    rgbacol_t color;
     ///--- const image_c *image;
     abstract_shader_c *shader;
     line_s            *glow_wall     = nullptr;
@@ -191,8 +191,8 @@ struct mobj_s : public position_c
 {
     const mobjtype_c *info = nullptr;
 
-    bam_angle angle     = 0; // orientation
-    bam_angle vertangle = 0; // looking up or down
+    bam_angle_t angle     = 0; // orientation
+    bam_angle_t vertangle = 0; // looking up or down
 
     // For movement checking.
     float radius = 0;

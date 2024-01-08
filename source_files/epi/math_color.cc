@@ -21,11 +21,15 @@
 namespace epi
 {
 
-hsv_col_c::hsv_col_c(const color_c &col)
+hsv_col_c::hsv_col_c(const rgbacol_t &col)
 {
-    int m = MIN(col.r, MIN(col.b, col.g));
+    uint8_t r = RGBA_Red(col);
+    uint8_t g = RGBA_Green(col);
+    uint8_t b = RGBA_Blue(col);
 
-    v = MAX(col.r, MAX(col.b, col.g));
+    int m = MIN(r, MIN(b, g));
+
+    v = MAX(r, MAX(b, g));
 
     s = (v == 0) ? 0 : (v - m) * 255 / v;
 
@@ -35,21 +39,21 @@ hsv_col_c::hsv_col_c(const color_c &col)
         return;
     }
 
-    int r1 = (v - col.r) * 59 / (v - m);
-    int g1 = (v - col.g) * 59 / (v - m);
-    int b1 = (v - col.b) * 59 / (v - m);
+    int r1 = (v - r) * 59 / (v - m);
+    int g1 = (v - g) * 59 / (v - m);
+    int b1 = (v - b) * 59 / (v - m);
 
-    if (v == col.r && m == col.g)
+    if (v == r && m == g)
         h = 300 + b1;
-    else if (v == col.r)
+    else if (v == r)
         h = 60 - g1;
 
-    else if (v == col.g && m == col.b)
+    else if (v == g && m == b)
         h = 60 + r1;
-    else if (v == col.g)
+    else if (v == g)
         h = 180 - b1;
 
-    else if (m == col.r)
+    else if (m == r)
         h = 180 + g1;
     else
         h = 300 - r1;
@@ -57,7 +61,7 @@ hsv_col_c::hsv_col_c(const color_c &col)
     SYS_ASSERT(0 <= h && h <= 360);
 }
 
-color_c hsv_col_c::GetRGBA() const
+rgbacol_t hsv_col_c::GetRGBA() const
 {
     SYS_ASSERT(0 <= h && h <= 360);
 
@@ -102,7 +106,7 @@ color_c hsv_col_c::GetRGBA() const
     SYS_ASSERT(0 <= g && g <= 255);
     SYS_ASSERT(0 <= b && b <= 255);
 
-    return color_c(r, g, b);
+    return RGBA_Make(r, g, b);
 }
 
 } // namespace epi

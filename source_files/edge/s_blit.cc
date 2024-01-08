@@ -86,7 +86,7 @@ static bool sfxpaused = false;
 float   listen_x;
 float   listen_y;
 float   listen_z;
-bam_angle listen_angle;
+bam_angle_t listen_angle;
 
 // FIXME: extern == hack
 extern int dev_freq;
@@ -125,7 +125,7 @@ void mix_channel_c::ComputeVolume()
     {
         if (dev_stereo)
         {
-            bam_angle angle = R_PointToAngle(listen_x, listen_y, pos->x, pos->y);
+            bam_angle_t angle = R_PointToAngle(listen_x, listen_y, pos->x, pos->y);
 
             // same equation from original DOOM
             sep = 0.5f - 0.38f * epi::BAM_Sin(angle - listen_angle);
@@ -598,7 +598,7 @@ void S_ReallocChannels(int total)
     num_chan = total;
 }
 
-void S_UpdateSounds(position_c *listener, bam_angle angle)
+void S_UpdateSounds(position_c *listener, bam_angle_t angle)
 {
     // NOTE: assume SDL_LockAudio has been called
 

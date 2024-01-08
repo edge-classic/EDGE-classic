@@ -1224,7 +1224,7 @@ void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust)
     if (fabs(dx) < 1.0f && fabs(dy) < 1.0f)
         return;
 
-    bam_angle angle = R_PointToAngle(0, 0, dx, dy);
+    bam_angle_t angle = R_PointToAngle(0, 0, dx, dy);
 
     // -ACB- 2000/03/11 Div-by-zero check...
     SYS_ASSERT(!AlmostEquals(target->info->mass, 0.0f));
@@ -1278,7 +1278,7 @@ void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust)
     if (fabs(dx) < 1.0f && fabs(dy) < 1.0f)
         return;
 
-    bam_angle angle = R_PointToAngle(0, 0, dx, dy);
+    bam_angle_t angle = R_PointToAngle(0, 0, dx, dy);
 
     // -ACB- 2000/03/11 Div-by-zero check...
     SYS_ASSERT(!AlmostEquals(target->info->mass, 0.0f));
@@ -1553,7 +1553,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
                 if (damtype)
                     player->last_damage_colour = damtype->damage_flash_colour;
                 else
-                    player->last_damage_colour = T_RED;
+                    player->last_damage_colour = SG_RED_RGBA32;
             }
 
             player->damagecount += (int)MAX(damage, DAMAGE_ADD_MIN);

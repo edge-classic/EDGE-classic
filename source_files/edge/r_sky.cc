@@ -47,7 +47,7 @@ extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
 
 extern cvar_c r_culling;
 
-static GLfloat sky_cap_color[3];
+static sg_color sky_cap_color;
 
 static skystretch_e current_sky_stretch = SKS_Unset;
 
@@ -400,7 +400,7 @@ static void RGL_DrawSkyCylinder(void)
         solid_sky_h = sky_h_ratio * 0.75f;
     float cap_z = dist * sky_h_ratio;
 
-    rgbcol_t fc_to_use = currmap->outdoor_fog_color;
+    rgbacol_t fc_to_use = currmap->outdoor_fog_color;
     float    fd_to_use = 0.01f * currmap->outdoor_fog_density;
     // check for sector fog
     if (fc_to_use == RGB_NO_VALUE)
@@ -411,20 +411,16 @@ static void RGL_DrawSkyCylinder(void)
 
     if (!r_culling.d && fc_to_use != RGB_NO_VALUE)
     {
-        GLfloat fc[4];
-        fc[0] = (float)RGB_RED(fc_to_use) / 255.0f;
-        fc[1] = (float)RGB_GRN(fc_to_use) / 255.0f;
-        fc[2] = (float)RGB_BLU(fc_to_use) / 255.0f;
-        fc[3] = 1.0f;
-        glClearColor(fc[0], fc[1], fc[2], fc[3]);
+        sg_color fc = sg_make_color_1i(fc_to_use);
+        glClearColor(fc.r, fc.g, fc.b, fc.a);
         glFogi(GL_FOG_MODE, GL_EXP);
-        glFogfv(GL_FOG_COLOR, fc);
+        glFogfv(GL_FOG_COLOR, &fc.r);
         glFogf(GL_FOG_DENSITY, std::log1p(fd_to_use * 0.005f));
         glEnable(GL_FOG);
     }
 
     // Render top cap
-    glColor4f(sky_cap_color[0], sky_cap_color[1], sky_cap_color[2], 1.0);
+    glColor4f(sky_cap_color.r, sky_cap_color.b, sky_cap_color.b, 1.0f);
     glBegin(GL_QUADS);
     glVertex3f(-cap_dist, -cap_dist, cap_z);
     glVertex3f(-cap_dist, cap_dist, cap_z);
@@ -434,7 +430,7 @@ static void RGL_DrawSkyCylinder(void)
 
     // Render bottom cap
     if (current_sky_stretch > SKS_Mirror)
-        glColor4f(cull_fog_color[0], cull_fog_color[1], cull_fog_color[2], 1.0);
+        glColor4f(cull_fog_color.r, cull_fog_color.g, cull_fog_color.b, 1.0f);
     glBegin(GL_QUADS);
     if (current_sky_stretch == SKS_Vanilla)
         cap_z = 0;
@@ -568,7 +564,7 @@ static void RGL_DrawSkyBox(void)
     else
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, col);
 
-    rgbcol_t fc_to_use = currmap->outdoor_fog_color;
+    rgbacol_t fc_to_use = currmap->outdoor_fog_color;
     float    fd_to_use = 0.01f * currmap->outdoor_fog_density;
     // check for sector fog
     if (fc_to_use == RGB_NO_VALUE)
@@ -579,14 +575,10 @@ static void RGL_DrawSkyBox(void)
 
     if (!r_culling.d && fc_to_use != RGB_NO_VALUE)
     {
-        GLfloat fc[4];
-        fc[0] = (float)RGB_RED(fc_to_use) / 255.0f;
-        fc[1] = (float)RGB_GRN(fc_to_use) / 255.0f;
-        fc[2] = (float)RGB_BLU(fc_to_use) / 255.0f;
-        fc[3] = 1.0f;
-        glClearColor(fc[0], fc[1], fc[2], fc[3]);
+        sg_color fc = sg_make_color_1i(fc_to_use);
+        glClearColor(fc.r, fc.g, fc.b, fc.a);
         glFogi(GL_FOG_MODE, GL_EXP);
-        glFogfv(GL_FOG_COLOR, fc);
+        glFogfv(GL_FOG_COLOR, &fc.r);
         glFogf(GL_FOG_DENSITY, std::log1p(fd_to_use * 0.01f));
         glEnable(GL_FOG);
     }
@@ -862,18 +854,9 @@ int RGL_UpdateSkyBoxTextures(void)
         what_palette = (const uint8_t *)W_LoadLump(sky_image->source_palette);
     epi::image_data_c *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)sky_image), what_palette, sky_image->opacity);
-    uint8_t *temp_rgb = new uint8_t[3];
-    tmp_img_data->AverageColor(temp_rgb, 0, sky_image->actual_w, 0, sky_image->actual_h / 2);
-    cull_fog_color[0] = (float)temp_rgb[0] / 255.0f;
-    cull_fog_color[1] = (float)temp_rgb[1] / 255.0f;
-    cull_fog_color[2] = (float)temp_rgb[2] / 255.0f;
-    cull_fog_color[3] = 1.0f;
-    tmp_img_data->AverageColor(temp_rgb, 0, sky_image->actual_w, sky_image->actual_h * 3 / 4, sky_image->actual_h);
-    sky_cap_color[0] = (float)temp_rgb[0] / 255.0f;
-    sky_cap_color[1] = (float)temp_rgb[1] / 255.0f;
-    sky_cap_color[2] = (float)temp_rgb[2] / 255.0f;
+    cull_fog_color = sg_make_color_1i(tmp_img_data->AverageColor(0, sky_image->actual_w, 0, sky_image->actual_h / 2));
+    sky_cap_color = sg_make_color_1i(tmp_img_data->AverageColor(0, sky_image->actual_w, sky_image->actual_h * 3 / 4, sky_image->actual_h));
     delete tmp_img_data;
-    delete[] temp_rgb;
 
     if (info->face[WSKY_North])
     {

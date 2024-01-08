@@ -51,7 +51,7 @@ void RGL_DrawImage(float x, float y, float w, float h, const image_c *image, flo
     if (x1 == x2 || y1 == y2)
         return;
 
-    float r = 1.0f, g = 1.0f, b = 1.0f;
+    sg_color sgcol = sg_white;
 
     GLuint tex_id = W_ImageCache(image, true, (textmap && (textmap->special & COLSP_Whiten)) ? NULL : palremap,
                                  (textmap && (textmap->special & COLSP_Whiten)) ? true : false);
@@ -73,15 +73,9 @@ void RGL_DrawImage(float x, float y, float w, float h, const image_c *image, flo
         glEnable(GL_BLEND);
 
     if (textmap)
-    {
-        rgbcol_t col = V_GetFontColor(textmap);
+        sgcol = sg_make_color_1i(V_GetFontColor(textmap));
 
-        r = RGB_RED(col) / 255.0;
-        g = RGB_GRN(col) / 255.0;
-        b = RGB_BLU(col) / 255.0;
-    }
-
-    glColor4f(r, g, b, alpha);
+    glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
 
     glBegin(GL_QUADS);
 

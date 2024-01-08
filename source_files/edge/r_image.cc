@@ -102,7 +102,7 @@ typedef struct cached_image_s
     const colourmap_c *trans_map;
 
     // general hue of image (skewed towards pure colors)
-    rgbcol_t hue;
+    rgbacol_t hue;
 
     // texture identifier within GL
     GLuint tex_id;
@@ -312,7 +312,7 @@ static image_c *NewImage(int width, int height, int opacity = OPAC_Unknown)
     return rim;
 }
 
-static image_c *CreateDummyImage(const char *name, rgbcol_t fg, rgbcol_t bg)
+static image_c *CreateDummyImage(const char *name, rgbacol_t fg, rgbacol_t bg)
 {
     image_c *rim;
 
@@ -1692,7 +1692,7 @@ const image_c *W_ImageForHOMDetect(void)
     return dummy_hom[(framecount & 0x10) ? 1 : 0];
 }
 
-const image_c *W_ImageForFogWall(rgbcol_t fog_color)
+const image_c *W_ImageForFogWall(rgbacol_t fog_color)
 {
     std::string fogname = epi::STR_Format("FOGWALL_%d", fog_color);
     image_c    *fogwall = (image_c *)W_ImageLookup(fogname.c_str(), INS_Graphic, ILF_Null);
@@ -1925,7 +1925,7 @@ GLuint W_ImageCache(const image_c *image, bool anim, const colourmap_c *trans, b
 }
 
 #if 0
-rgbcol_t W_ImageGetHue(const image_c *img)
+rgbacol_t W_ImageGetHue(const image_c *img)
 {
 	SYS_ASSERT(c);
 

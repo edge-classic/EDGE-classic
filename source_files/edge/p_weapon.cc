@@ -924,7 +924,7 @@ static void BobWeapon(player_t *p, weapondef_c *info)
     // bob the weapon based on movement speed
     if (p->powers[PW_Jetpack] <= 0) // Don't bob when using jetpack
     {
-        bam_angle angle = (128 * (g_erraticism.d ? p->e_bob_ticker++ : leveltime)) << 19;
+        bam_angle_t angle = (128 * (g_erraticism.d ? p->e_bob_ticker++ : leveltime)) << 19;
         new_sx        = p->bob * PERCENT_2_FLOAT(info->swaying) * epi::BAM_Cos(angle);
 
         angle &= (ANG180 - 1);
@@ -2044,7 +2044,7 @@ void A_TurnDir(mobj_t *mo)
     const state_t *st = psp->state;
 
     if (st && st->action_par)
-        mo->angle += *(bam_angle *)st->action_par;
+        mo->angle += *(bam_angle_t *)st->action_par;
 }
 
 void A_TurnRandom(mobj_t *mo)

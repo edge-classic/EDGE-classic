@@ -125,7 +125,7 @@ bool SR_GetAngle(void *storage, int index, void *extra)
 {
     (void)extra;
 
-    ((bam_angle *)storage)[index] = SV_GetAngle();
+    ((bam_angle_t *)storage)[index] = SV_GetAngle();
     return true;
 }
 
@@ -181,7 +181,7 @@ bool SR_GetAngleFromSlope(void *storage, int index, void *extra)
 {
     (void)extra;
 
-    ((bam_angle *)storage)[index] = epi::BAM_FromATan(SV_GetFloat());
+    ((bam_angle_t *)storage)[index] = epi::BAM_FromATan(SV_GetFloat());
     return true;
 }
 
@@ -207,7 +207,7 @@ void SR_PutInt(void *storage, int index, void *extra)
 
 void SR_PutAngle(void *storage, int index, void *extra)
 {
-    SV_PutAngle(((bam_angle *)storage)[index]);
+    SV_PutAngle(((bam_angle_t *)storage)[index]);
 }
 
 void SR_PutFloat(void *storage, int index, void *extra)
@@ -235,7 +235,7 @@ void SR_PutVec3(void *storage, int index, void *extra)
 
 void SR_PutAngleToSlope(void *storage, int index, void *extra)
 {
-    bam_angle val = ((bam_angle *)storage)[index];
+    bam_angle_t val = ((bam_angle_t *)storage)[index];
 
     SYS_ASSERT(val < ANG90 || val > ANG270);
 
@@ -426,7 +426,7 @@ void SV_MainTestPrimitives(void)
 
 	for (i=0; i < 7; i++)
 	{
-		bam_angle val = SV_GetAngle();
+		bam_angle_t val = SV_GetAngle();
 		L_WriteDebug("TEST ANGLE: 0x%08x = %1.6f\n", (unsigned int) val,
 				ANG_2_FLOAT(val));
 	}

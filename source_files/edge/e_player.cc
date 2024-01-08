@@ -139,7 +139,7 @@ void G_PlayerFinishLevel(player_t *p, bool keep_cards)
     p->damage_pain        = 0;
     p->bonuscount         = 0;
     p->grin_count         = 0;
-    p->last_damage_colour = T_RED;
+    p->last_damage_colour = SG_RED_RGBA32;
 
     // Lobo 2023: uncomment if still getting
     //  "INTERNAL ERROR: player has a removed attacker"
@@ -196,7 +196,7 @@ void player_s::Reborn()
     damage_pain        = 0;
     extralight         = 0;
     flash              = false;
-    last_damage_colour = T_RED;
+    last_damage_colour = SG_RED_RGBA32;
 
     attacker = NULL;
 

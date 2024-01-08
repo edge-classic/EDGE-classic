@@ -128,6 +128,7 @@ if (EDGE_PROFILING)
   FetchContent_MakeAvailable (tracy)  
 endif()
 
+include_directories(libraries/sokol)
 include_directories(libraries/tracy)
 
 add_subdirectory(libraries)

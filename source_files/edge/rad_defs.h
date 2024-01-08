@@ -108,7 +108,7 @@ typedef struct s_thing_s
     float y = 0;
     float z = 0;
 
-    bam_angle angle = 0;
+    bam_angle_t angle = 0;
     float   slope = 0;
     int     tag   = 0;
 
@@ -649,7 +649,7 @@ typedef struct drawtip_s
     float scale;
 
     // current colour
-    rgbcol_t color;
+    rgbacol_t color;
 
     // fading fields
     int   fade_time;

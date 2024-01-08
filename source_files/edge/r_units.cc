@@ -91,7 +91,7 @@ typedef struct local_gl_unit_s
     // range of local vertices
     int first, count;
 
-    rgbcol_t fog_color   = RGB_NO_VALUE;
+    rgbacol_t fog_color   = RGB_NO_VALUE;
     float    fog_density = 0;
 } local_gl_unit_t;
 
@@ -105,10 +105,10 @@ static int cur_unit;
 
 static bool batch_sort;
 
-rgbcol_t current_fog_rgb = RGB_NO_VALUE;
-GLfloat  current_fog_color[4];
+rgbacol_t current_fog_rgb = RGB_NO_VALUE;
+sg_color current_fog_color;
 float    current_fog_density = 0;
-GLfloat  cull_fog_color[4];
+sg_color cull_fog_color;
 
 //
 // RGL_InitUnits
@@ -169,7 +169,7 @@ void RGL_FinishUnits(void)
 // texture should be blended (like for translucent water or sprites).
 //
 local_gl_vert_t *RGL_BeginUnit(GLuint shape, int max_vert, GLuint env1, GLuint tex1, GLuint env2, GLuint tex2, int pass,
-                               int blending, rgbcol_t fog_color, float fog_density)
+                               int blending, rgbacol_t fog_color, float fog_density)
 {
     local_gl_unit_t *unit;
 
@@ -322,7 +322,7 @@ void RGL_DrawUnits(void)
     int active_pass     = 0;
     int active_blending = 0;
 
-    rgbcol_t active_fog_rgb     = RGB_NO_VALUE;
+    rgbacol_t active_fog_rgb     = RGB_NO_VALUE;
     float    active_fog_density = 0;
 
     for (int i = 0; i < cur_unit; i++)
@@ -335,40 +335,30 @@ void RGL_DrawUnits(void)
 
     if (r_culling.d)
     {
-        GLfloat fogColor[3];
+        sg_color fogColor;
         switch (r_cullfog.d)
         {
         case 0:
-            fogColor[0] = cull_fog_color[0];
-            fogColor[1] = cull_fog_color[1];
-            fogColor[2] = cull_fog_color[2];
+            fogColor = cull_fog_color;
             break;
         case 1:
             // Not pure white, but 1.0f felt like a little much - Dasho
-            fogColor[0] = 0.75f;
-            fogColor[1] = 0.75f;
-            fogColor[2] = 0.75f;
+            fogColor = sg_silver;
             break;
         case 2:
-            fogColor[0] = 0.25f;
-            fogColor[1] = 0.25f;
-            fogColor[2] = 0.25f;
+            fogColor = { 0.25f, 0.25f, 0.25f, 1.0f };
             break;
         case 3:
-            fogColor[0] = 0;
-            fogColor[1] = 0;
-            fogColor[2] = 0;
+            fogColor = sg_black;
             break;
         default:
-            fogColor[0] = cull_fog_color[0];
-            fogColor[1] = cull_fog_color[1];
-            fogColor[2] = cull_fog_color[2];
+            fogColor = cull_fog_color;
             break;
         }
 
-        state->clearColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
+        state->clearColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
         state->fogMode(GL_LINEAR);
-        state->fogColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
+        state->fogColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
         state->fogStart(r_farclip.f - 750.0f);
         state->fogEnd(r_farclip.f - 250.0f);
         state->enable(GL_FOG);
@@ -391,13 +381,9 @@ void RGL_DrawUnits(void)
             if (unit->fog_color != active_fog_rgb)
             {
                 active_fog_rgb = unit->fog_color;
-                GLfloat fc[4];
-                fc[0] = (float)RGB_RED(active_fog_rgb) / 255.0f;
-                fc[1] = (float)RGB_GRN(active_fog_rgb) / 255.0f;
-                fc[2] = (float)RGB_BLU(active_fog_rgb) / 255.0f;
-                fc[3] = 1.0f;
-                state->clearColor(fc[0], fc[1], fc[2], 1.0f);
-                state->fogColor(fc[0], fc[1], fc[2], 1.0f);
+                sg_color fc = sg_make_color_1i(active_fog_rgb);
+                state->clearColor(fc.r, fc.g, fc.b, 1.0f);
+                state->fogColor(fc.r, fc.g, fc.b, 1.0f);
             }
             if (!AlmostEquals(unit->fog_density, active_fog_density))
             {

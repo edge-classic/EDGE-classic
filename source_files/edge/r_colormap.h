@@ -40,9 +40,9 @@ void V_InitPalette(void);
 void V_InitColour(void);
 
 // -ACB- 1999/10/11 Gets an RGB colour from the current palette
-void V_IndexColourToRGB(int indexcol, uint8_t *returncol, rgbcol_t last_damage_colour, float damageAmount);
+void V_IndexColourToRGB(int indexcol, uint8_t *returncol, rgbacol_t last_damage_colour, float damageAmount);
 
-rgbcol_t V_LookupColour(int col);
+rgbacol_t V_LookupColour(int col);
 
 #define GAMMA_CONV(light) (light)
 
@@ -56,7 +56,6 @@ extern uint8_t playpal_data[14][256][3];
 
 int  V_FindColour(int r, int g, int b);
 void V_SetPalette(int type, float amount);
-void V_ColourNewFrame(void);
 void R_PaletteStuff(void);
 
 #define PAL_RED(pix) ((float)(playpal_data[0][pix][0]) / 255.0f)
@@ -78,8 +77,8 @@ void R_TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const colourma
 
 void V_GetColmapRGB(const colourmap_c *colmap, float *r, float *g, float *b);
 
-rgbcol_t V_GetFontColor(const colourmap_c *colmap);
-rgbcol_t V_ParseFontColor(const char *name, bool strict = false);
+rgbacol_t V_GetFontColor(const colourmap_c *colmap);
+rgbacol_t V_ParseFontColor(const char *name, bool strict = false);
 
 abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props, int light_add = 0,
                                        sector_t *sec = nullptr);

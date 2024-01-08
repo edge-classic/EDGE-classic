@@ -64,24 +64,24 @@ class multi_color_c
         return MAX(add_R, MAX(add_G, add_B));
     }
 
-    void mod_Give(rgbcol_t rgb, float qty)
+    void mod_Give(rgbacol_t rgb, float qty)
     {
         if (qty > 1.0f)
             qty = 1.0f;
 
-        mod_R += (int)(RGB_RED(rgb) * qty);
-        mod_G += (int)(RGB_GRN(rgb) * qty);
-        mod_B += (int)(RGB_BLU(rgb) * qty);
+        mod_R += (int)(epi::RGBA_Red(rgb) * qty);
+        mod_G += (int)(epi::RGBA_Green(rgb) * qty);
+        mod_B += (int)(epi::RGBA_Blue(rgb) * qty);
     }
 
-    void add_Give(rgbcol_t rgb, float qty)
+    void add_Give(rgbacol_t rgb, float qty)
     {
         if (qty > 1.0f)
             qty = 1.0f;
 
-        add_R += (int)(RGB_RED(rgb) * qty);
-        add_G += (int)(RGB_GRN(rgb) * qty);
-        add_B += (int)(RGB_BLU(rgb) * qty);
+        add_R += (int)(epi::RGBA_Red(rgb) * qty);
+        add_G += (int)(epi::RGBA_Green(rgb) * qty);
+        add_B += (int)(epi::RGBA_Blue(rgb) * qty);
     }
 };
 

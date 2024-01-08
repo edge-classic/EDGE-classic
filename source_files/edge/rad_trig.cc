@@ -184,7 +184,7 @@ class rts_menu_c
         }
         else
         {
-            HUD_SetTextColor(T_WHITE);
+            HUD_SetTextColor(SG_WHITE_RGBA32);
         }
 
         HUD_DrawText(160, y, title.c_str());
@@ -205,7 +205,7 @@ class rts_menu_c
         }
         else
         {
-            HUD_SetTextColor(T_LTBLUE);
+            HUD_SetTextColor(SG_LIGHT_BLUE_RGBA32);
         }
 
         for (int c = 0; c < NumChoices(); c++, y += HUD_FontHeight())

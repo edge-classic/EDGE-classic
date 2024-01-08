@@ -426,7 +426,7 @@ void imagedef_c::Default()
     info.clear();
 
     type   = IMGDT_Colour;
-    colour = T_BLACK;
+    colour = SG_BLACK_RGBA32;
     format = LIF_STANDARD;
 
     compose_w = compose_h = 0;

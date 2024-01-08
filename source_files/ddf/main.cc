@@ -1235,7 +1235,7 @@ void DDF_MainGetAngle(const char *info, void *storage)
 {
     SYS_ASSERT(info && storage);
 
-    bam_angle *dest = (bam_angle *)storage;
+    bam_angle_t *dest = (bam_angle_t *)storage;
 
     float val;
 
@@ -1401,8 +1401,10 @@ void DDF_MainGetColourmap(const char *info, void *storage)
 //
 void DDF_MainGetRGB(const char *info, void *storage)
 {
-    rgbcol_t *result = (rgbcol_t *)storage;
-    int       r, g, b;
+    rgbacol_t *result = (rgbacol_t *)storage;
+    int   r = 0;
+    int   g = 0;
+    int   b = 0;
 
     SYS_ASSERT(info && storage);
 
@@ -1415,11 +1417,11 @@ void DDF_MainGetRGB(const char *info, void *storage)
     if (sscanf(info, " #%2x%2x%2x ", &r, &g, &b) != 3)
         DDF_Error("Bad RGB colour value: %s\n", info);
 
-    *result = (r << 16) | (g << 8) | b;
+    *result = epi::RGBA_Make((uint8_t)r, (uint8_t)g, (uint8_t)b);
 
     // silently change if matches the "none specified" value
     if (*result == RGB_NO_VALUE)
-        *result ^= RGB_MAKE(1, 1, 1);
+        *result ^= 0x00010100;
 }
 
 //
@@ -1898,7 +1900,7 @@ void damage_c::Default(damage_c::default_e def)
         damage_unless       = nullptr;
         damage_if           = nullptr;
         grounded_monsters   = false;
-        damage_flash_colour = T_RED;
+        damage_flash_colour = SG_RED_RGBA32;
         all_players         = false;
         break;
     }
@@ -1914,7 +1916,7 @@ void damage_c::Default(damage_c::default_e def)
         damage_unless       = nullptr;
         damage_if           = nullptr;
         grounded_monsters   = false;
-        damage_flash_colour = T_RED;
+        damage_flash_colour = SG_RED_RGBA32;
         all_players         = false;
         break;
     }
@@ -1932,7 +1934,7 @@ void damage_c::Default(damage_c::default_e def)
         damage_unless       = nullptr;
         damage_if           = nullptr;
         grounded_monsters   = false;
-        damage_flash_colour = T_RED;
+        damage_flash_colour = SG_RED_RGBA32;
         all_players         = false;
         break;
     }
@@ -2036,7 +2038,7 @@ void dlight_info_c::Default()
 {
     type   = DLITE_None;
     radius = 32;
-    colour = RGB_MAKE(255, 255, 255);
+    colour = SG_WHITE_RGBA32;
     height = PERCENT_MAKE(50);
     leaky  = false;
     shape  = "DLIGHT_EXP";

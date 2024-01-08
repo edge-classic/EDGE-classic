@@ -279,9 +279,9 @@ void R_TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const colourma
     // is the colormap just using GL_COLOUR?
     if (trans->length == 0)
     {
-        int r = RGB_RED(trans->gl_colour);
-        int g = RGB_GRN(trans->gl_colour);
-        int b = RGB_BLU(trans->gl_colour);
+        int r = epi::RGBA_Red(trans->gl_colour);
+        int g = epi::RGBA_Green(trans->gl_colour);
+        int b = epi::RGBA_Blue(trans->gl_colour);
 
         for (int j = 0; j < 256; j++)
         {
@@ -425,7 +425,7 @@ void TransformColourmap(colourmap_c *colmap)
             g = MIN(255, MAX(0, g));
             b = MIN(255, MAX(0, b));
 
-            colmap->font_colour = RGB_MAKE(r, g, b);
+            colmap->font_colour = epi::RGBA_Make(r, g, b);
         }
     }
 
@@ -447,7 +447,7 @@ void TransformColourmap(colourmap_c *colmap)
         g = MIN(255, MAX(0, g));
         b = MIN(255, MAX(0, b));
 
-        colmap->gl_colour = RGB_MAKE(r, g, b);
+        colmap->gl_colour = epi::RGBA_Make(r, g, b);
     }
 
     L_WriteDebug("TransformColourmap [%s]\n", colmap->name.c_str());
@@ -462,14 +462,14 @@ void V_GetColmapRGB(const colourmap_c *colmap, float *r, float *g, float *b)
         TransformColourmap((colourmap_c *)colmap);
     }
 
-    rgbcol_t col = colmap->gl_colour;
+    rgbacol_t col = colmap->gl_colour;
 
-    (*r) = GAMMA_CONV((col >> 16) & 0xFF) / 255.0f;
-    (*g) = GAMMA_CONV((col >> 8) & 0xFF) / 255.0f;
-    (*b) = GAMMA_CONV((col) & 0xFF) / 255.0f;
+    (*r) = GAMMA_CONV((col >> 24) & 0xFF) / 255.0f;
+    (*g) = GAMMA_CONV((col >> 16) & 0xFF) / 255.0f;
+    (*b) = GAMMA_CONV((col >> 8) & 0xFF) / 255.0f;
 }
 
-rgbcol_t V_GetFontColor(const colourmap_c *colmap)
+rgbacol_t V_GetFontColor(const colourmap_c *colmap)
 {
     if (!colmap)
         return RGB_NO_VALUE;
@@ -483,16 +483,21 @@ rgbcol_t V_GetFontColor(const colourmap_c *colmap)
     return colmap->font_colour;
 }
 
-rgbcol_t V_ParseFontColor(const char *name, bool strict)
+rgbacol_t V_ParseFontColor(const char *name, bool strict)
 {
     if (!name || !name[0])
         return RGB_NO_VALUE;
 
-    rgbcol_t rgb;
+    rgbacol_t rgb;
 
     if (name[0] == '#')
     {
-        rgb = strtol(name + 1, NULL, 16);
+        int       r, g, b;
+
+        if (sscanf(name, " #%2x%2x%2x ", &r, &g, &b) != 3)
+            I_Error("Bad RGB colour value: %s\n", name);
+
+        rgb = epi::RGBA_Make((uint8_t)r, (uint8_t)g, (uint8_t)b);
     }
     else
     {
@@ -505,38 +510,29 @@ rgbcol_t V_ParseFontColor(const char *name, bool strict)
             else
                 I_Debugf("Unknown colormap: '%s'\n", name);
 
-            return RGB_MAKE(255, 0, 255);
+            return SG_MAGENTA_RGBA32;
         }
 
         rgb = V_GetFontColor(colmap);
     }
 
     if (rgb == RGB_NO_VALUE)
-        rgb ^= 0x000101;
+        rgb ^= 0x00010100;
 
     return rgb;
-}
-
-//
-// Call this at the start of each frame (before any rendering or
-// render-related work has been done).  Will update the palette and/or
-// gamma settings if they have changed since the last call.
-//
-void V_ColourNewFrame(void)
-{
 }
 
 //
 // Returns an RGB value from an index value - used the current
 // palette.  The byte pointer is assumed to point a 3-byte array.
 //
-void V_IndexColourToRGB(int indexcol, uint8_t *returncol, rgbcol_t last_damage_colour, float damageAmount)
+void V_IndexColourToRGB(int indexcol, uint8_t *returncol, rgbacol_t last_damage_colour, float damageAmount)
 {
     if ((cur_palette == PALETTE_NORMAL) || (cur_palette == PALETTE_PAIN))
     {
-        float r = (float)RGB_RED(last_damage_colour) / 255.0;
-        float g = (float)RGB_GRN(last_damage_colour) / 255.0;
-        float b = (float)RGB_BLU(last_damage_colour) / 255.0;
+        float r = (float)epi::RGBA_Red(last_damage_colour) / 255.0;
+        float g = (float)epi::RGBA_Green(last_damage_colour) / 255.0;
+        float b = (float)epi::RGBA_Blue(last_damage_colour) / 255.0;
 
         returncol[0] = (uint8_t)MAX(0, MIN(255, r * damageAmount * 2.5));
         returncol[1] = (uint8_t)MAX(0, MIN(255, g * damageAmount * 2.5));
@@ -550,13 +546,13 @@ void V_IndexColourToRGB(int indexcol, uint8_t *returncol, rgbcol_t last_damage_c
     }
 }
 
-rgbcol_t V_LookupColour(int col)
+rgbacol_t V_LookupColour(int col)
 {
     int r = playpal_data[0][col][0];
     int g = playpal_data[0][col][1];
     int b = playpal_data[0][col][2];
 
-    return RGB_MAKE(r, g, b);
+    return epi::RGBA_Make(r, g, b);
 }
 
 #if 0 // OLD BUT POTENTIALLY USEFUL
@@ -647,9 +643,9 @@ class colormap_shader_c : public abstract_shader_c
     bool             simple_cmap;
     lighting_model_e lt_model;
 
-    rgbcol_t whites[32];
+    rgbacol_t whites[32];
 
-    rgbcol_t fog_color;
+    rgbacol_t fog_color;
     float    fog_density;
 
     // for DDFLEVL fog checks
@@ -701,11 +697,11 @@ class colormap_shader_c : public abstract_shader_c
         else
             cmap_idx = R_DoomLightingEquation(light_lev / 4, dist);
 
-        rgbcol_t WH = whites[cmap_idx];
+        rgbacol_t WH = whites[cmap_idx];
 
-        col->mod_R += RGB_RED(WH);
-        col->mod_G += RGB_GRN(WH);
-        col->mod_B += RGB_BLU(WH);
+        col->mod_R += epi::RGBA_Red(WH);
+        col->mod_G += epi::RGBA_Green(WH);
+        col->mod_B += epi::RGBA_Blue(WH);
 
         // FIXME: for foggy maps, need to adjust add_R/G/B too
     }
@@ -730,7 +726,7 @@ class colormap_shader_c : public abstract_shader_c
     virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
                           void *data, shader_coord_func_t func)
     {
-        rgbcol_t fc_to_use = fog_color;
+        rgbacol_t fc_to_use = fog_color;
         float    fd_to_use = fog_density;
         // check for DDFLEVL fog
         if (fc_to_use == RGB_NO_VALUE)
@@ -793,18 +789,18 @@ class colormap_shader_c : public abstract_shader_c
                 int g = playpal_data[0][new_col][1];
                 int b = playpal_data[0][new_col][2];
 
-                whites[ci] = RGB_MAKE(r, g, b);
+                whites[ci] = epi::RGBA_Make(r, g, b);
             }
         }
         else if (colmap) // GL_COLOUR
         {
             for (int ci = 0; ci < 32; ci++)
             {
-                int r = RGB_RED(colmap->gl_colour) * (31 - ci) / 31;
-                int g = RGB_GRN(colmap->gl_colour) * (31 - ci) / 31;
-                int b = RGB_BLU(colmap->gl_colour) * (31 - ci) / 31;
+                int r = epi::RGBA_Red(colmap->gl_colour) * (31 - ci) / 31;
+                int g = epi::RGBA_Green(colmap->gl_colour) * (31 - ci) / 31;
+                int b = epi::RGBA_Blue(colmap->gl_colour) * (31 - ci) / 31;
 
-                whites[ci] = RGB_MAKE(r, g, b);
+                whites[ci] = epi::RGBA_Make(r, g, b);
             }
         }
         else
@@ -813,7 +809,7 @@ class colormap_shader_c : public abstract_shader_c
             {
                 int ity = 255 - ci * 8 - ci / 5;
 
-                whites[ci] = RGB_MAKE(ity, ity, ity);
+                whites[ci] = epi::RGBA_Make(ity, ity, ity);
             }
         }
 
@@ -853,9 +849,9 @@ class colormap_shader_c : public abstract_shader_c
                     // GL_MODULATE mode
                     if (colmap)
                     {
-                        dest[0] = RGB_RED(whites[index]);
-                        dest[1] = RGB_GRN(whites[index]);
-                        dest[2] = RGB_BLU(whites[index]);
+                        dest[0] = epi::RGBA_Red(whites[index]);
+                        dest[1] = epi::RGBA_Green(whites[index]);
+                        dest[2] = epi::RGBA_Blue(whites[index]);
                         dest[3] = 255;
                     }
                     else
@@ -914,7 +910,7 @@ class colormap_shader_c : public abstract_shader_c
         light_lev = _level;
     }
 
-    void SetFog(rgbcol_t _fog_color, float _fog_density)
+    void SetFog(rgbacol_t _fog_color, float _fog_density)
     {
         fog_color   = _fog_color;
         fog_density = _fog_density;

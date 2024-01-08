@@ -52,6 +52,10 @@
 #include "n_network.h" // N_NetUpdate
 
 #include "AlmostEquals.h"
+
+#define SOKOL_COLOR_IMPL // this will likely be somewhere else when sokol_gfx gets folded in
+#include "sokol_color.h"
+
 #include "edge_profiling.h"
 
 #define DEBUG 0
@@ -94,8 +98,8 @@ float wave_now;    // value for doing wave table lookups
 float plane_z_bob; // for floor/ceiling bob DDFSECT stuff
 
 // -ES- 1999/03/20 Different right & left side clip angles, for asymmetric FOVs.
-bam_angle clip_left, clip_right;
-bam_angle clip_scope;
+bam_angle_t clip_left, clip_right;
+bam_angle_t clip_scope;
 
 mobj_t *view_cam_mo;
 
@@ -141,7 +145,7 @@ static inline void ClipPlaneHorizontalLine(GLdouble *p, const HMM_Vec2 &s, const
     p[3] = e.X * s.Y - s.X * e.Y;
 }
 
-static inline void ClipPlaneEyeAngle(GLdouble *p, bam_angle ang)
+static inline void ClipPlaneEyeAngle(GLdouble *p, bam_angle_t ang)
 {
     HMM_Vec2 s, e;
 
@@ -162,7 +166,7 @@ typedef struct mirror_info_s
 
     float xy_scale;
 
-    bam_angle tc;
+    bam_angle_t tc;
 
   public:
     void ComputeMirror()
@@ -278,7 +282,7 @@ typedef struct mirror_info_s
         z = zc + z * z_scale;
     }
 
-    void Turn(bam_angle &ang)
+    void Turn(bam_angle_t &ang)
     {
         ang = (def->is_portal) ? (ang - tc) : (tc - ang);
     }
@@ -300,7 +304,7 @@ void MIR_Height(float &z)
         active_mirrors[i].Z_Adjust(z);
 }
 
-void MIR_Angle(bam_angle &ang)
+void MIR_Angle(bam_angle_t &ang)
 {
     for (int i = num_active_mirrors - 1; i >= 0; i--)
         active_mirrors[i].Turn(ang);
@@ -781,7 +785,7 @@ typedef struct
 
     slope_plane_t *slope;
 
-    bam_angle rotation = 0;
+    bam_angle_t rotation = 0;
 } plane_coord_data_t;
 
 static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec2 *texc, HMM_Vec3 *normal, HMM_Vec3 *lit_pos)
@@ -1491,7 +1495,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
     if (sec->heightsec != nullptr)
         slope_fh = std::min(slope_fh, sec->heightsec->f_h);
 
-    rgbcol_t sec_fc = sec->props.fog_color;
+    rgbacol_t sec_fc = sec->props.fog_color;
     float    sec_fd = sec->props.fog_density;
     // check for DDFLEVL fog
     if (sec_fc == RGB_NO_VALUE)
@@ -1507,7 +1511,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
             sec_fd = 0.01f * currmap->indoor_fog_density;
         }
     }
-    rgbcol_t other_fc = (other ? other->props.fog_color : RGB_NO_VALUE);
+    rgbacol_t other_fc = (other ? other->props.fog_color : RGB_NO_VALUE);
     float    other_fd = (other ? other->props.fog_density : RGB_NO_VALUE);
     if (other_fc == RGB_NO_VALUE)
     {
@@ -2078,7 +2082,7 @@ static void RGL_DrawSeg(drawfloor_t *dfloor, seg_t *seg, bool mirror_sub = false
 
 static void RGL_WalkBSPNode(unsigned int bspnum);
 
-static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, bam_angle left, bam_angle right, bool is_portal)
+static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, bam_angle_t left, bam_angle_t right, bool is_portal)
 {
     drawmirror_c *mir = R_GetDrawMirror();
     mir->Clear(seg);
@@ -2099,9 +2103,9 @@ static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, bam_angle left, bam_angl
 
     subsector_t *save_sub = cur_sub;
 
-    bam_angle save_clip_L = clip_left;
-    bam_angle save_clip_R = clip_right;
-    bam_angle save_scope  = clip_scope;
+    bam_angle_t save_clip_L = clip_left;
+    bam_angle_t save_clip_R = clip_right;
+    bam_angle_t save_scope  = clip_scope;
 
     clip_left  = left;
     clip_right = right;
@@ -2201,12 +2205,12 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
        precise = (seg->linedef->flags & MLF_Mirror) || (seg->linedef->portal_pair);
     }
 
-    bam_angle angle_L = R_PointToAngle(viewx, viewy, sx1, sy1, precise);
-    bam_angle angle_R = R_PointToAngle(viewx, viewy, sx2, sy2, precise);
+    bam_angle_t angle_L = R_PointToAngle(viewx, viewy, sx1, sy1, precise);
+    bam_angle_t angle_R = R_PointToAngle(viewx, viewy, sx2, sy2, precise);
 
     // Clip to view edges.
 
-    bam_angle span = angle_L - angle_R;
+    bam_angle_t span = angle_L - angle_R;
 
     // back side ?
     if (span >= ANG180)
@@ -2217,8 +2221,8 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
     if (clip_scope != ANG180)
     {
-        bam_angle tspan1 = angle_L - clip_right;
-        bam_angle tspan2 = clip_left - angle_R;
+        bam_angle_t tspan1 = angle_L - clip_right;
+        bam_angle_t tspan2 = clip_left - angle_R;
 
         if (tspan1 > clip_scope)
         {
@@ -2386,10 +2390,10 @@ bool RGL_CheckBBox(float *bspcoord)
     float y2 = bspcoord[checkcoord[boxpos][3]];
 
     // check clip list for an open space
-    bam_angle angle_L = R_PointToAngle(viewx, viewy, x1, y1);
-    bam_angle angle_R = R_PointToAngle(viewx, viewy, x2, y2);
+    bam_angle_t angle_L = R_PointToAngle(viewx, viewy, x1, y1);
+    bam_angle_t angle_R = R_PointToAngle(viewx, viewy, x2, y2);
 
-    bam_angle span = angle_L - angle_R;
+    bam_angle_t span = angle_L - angle_R;
 
     // Sitting on a line?
     if (span >= ANG180)
@@ -2400,8 +2404,8 @@ bool RGL_CheckBBox(float *bspcoord)
 
     if (clip_scope != ANG180)
     {
-        bam_angle tspan1 = angle_L - clip_right;
-        bam_angle tspan2 = clip_left - angle_R;
+        bam_angle_t tspan1 = angle_L - clip_right;
+        bam_angle_t tspan2 = clip_left - angle_R;
 
         if (tspan1 > clip_scope)
         {
@@ -2936,18 +2940,16 @@ static void DrawMirrorPolygon(drawmirror_c *mir)
 
     if (ld->special)
     {
-        float R = RGB_RED(ld->special->fx_color) / 255.0;
-        float G = RGB_GRN(ld->special->fx_color) / 255.0;
-        float B = RGB_BLU(ld->special->fx_color) / 255.0;
+        sg_color sgcol = sg_make_color_1i(ld->special->fx_color);
 
         // looks better with reduced color in multiple reflections
         float reduce = 1.0f / (1 + 1.5 * num_active_mirrors);
 
-        R *= reduce;
-        G *= reduce;
-        B *= reduce;
+        sgcol.r *= reduce;
+        sgcol.g *= reduce;
+        sgcol.b *= reduce;
 
-        glColor4f(R, G, B, alpha);
+        glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
     }
     else
         glColor4f(1.0, 0.0, 0.0, alpha);
@@ -3001,11 +3003,9 @@ static void DrawPortalPolygon(drawmirror_c *mir)
     // set colour & alpha
     float alpha = ld->special->translucency * surf->translucency;
 
-    float R = RGB_RED(ld->special->fx_color) / 255.0;
-    float G = RGB_GRN(ld->special->fx_color) / 255.0;
-    float B = RGB_BLU(ld->special->fx_color) / 255.0;
+    sg_color sgcol = sg_make_color_1i(ld->special->fx_color);
 
-    glColor4f(R, G, B, alpha);
+    glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
 
     // get polygon coordinates
     float x1 = mir->seg->v1->X;
@@ -3399,7 +3399,7 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
     viewright.Z = viewforward.X * viewup.Y - viewup.X * viewforward.Y;
 
     // compute the 1D projection of the view angle
-    bam_angle oned_side_angle;
+    bam_angle_t oned_side_angle;
     {
         float k, d;
 

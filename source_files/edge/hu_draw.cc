@@ -70,7 +70,7 @@ float hud_y_bottom;
 
 // current state
 static font_c  *cur_font;
-static rgbcol_t cur_color;
+static rgbacol_t cur_color;
 
 static float cur_scale, cur_alpha;
 static int   cur_x_align, cur_y_align;
@@ -176,7 +176,7 @@ void HUD_SetScale(float scale)
     cur_scale = scale;
 }
 
-void HUD_SetTextColor(rgbcol_t color)
+void HUD_SetTextColor(rgbacol_t color)
 {
     cur_color = color;
 }
@@ -395,7 +395,7 @@ void HUD_CalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
 //----------------------------------------------------------------------------
 
 void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *image, float tx1, float ty1, float tx2,
-                  float ty2, float alpha, rgbcol_t text_col, const colourmap_c *palremap, float sx, float sy, char ch)
+                  float ty2, float alpha, rgbacol_t text_col, const colourmap_c *palremap, float sx, float sy, char ch)
 {
     int x1 = I_ROUND(hx1);
     int y1 = I_ROUND(hy1);
@@ -408,15 +408,14 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
     if (x2 < 0 || x1 > SCREENWIDTH || y2 < 0 || y1 > SCREENHEIGHT)
         return;
 
-    float r = 1.0f, g = 1.0f, b = 1.0f;
+    sg_color sgcol = sg_white;
 
     bool do_whiten = false;
 
     if (text_col != RGB_NO_VALUE)
     {
-        r         = RGB_RED(text_col) / 255.0;
-        g         = RGB_GRN(text_col) / 255.0;
-        b         = RGB_BLU(text_col) / 255.0;
+        sgcol = sg_make_color_1i(text_col);
+        sgcol.a = 1.0f;
         do_whiten = true;
     }
 
@@ -454,7 +453,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
                     glBindTexture(GL_TEXTURE_2D, cur_font->p_cache.atlas_texid);
             }
         }
-        glColor4f(r, g, b, alpha);
+        glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
         glBegin(GL_QUADS);
         glTexCoord2f(tx1, ty2);
         glVertex2f(hx1, hy1);
@@ -519,7 +518,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
     if (image->liquid_type == LIQ_Thick)
         hud_thick_liquid = true;
 
-    glColor4f(r, g, b, alpha);
+    glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
 
     glBegin(GL_QUADS);
 
@@ -555,7 +554,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
         alpha /= 2;
         glEnable(GL_ALPHA_TEST);
 
-        glColor4f(r, g, b, alpha);
+        glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
 
         glEnable(GL_BLEND);
         glBegin(GL_QUADS);
@@ -603,8 +602,6 @@ void HUD_RawFromTexID(float hx1, float hy1, float hx2, float hy2, unsigned int t
     if (x2 < 0 || x1 > SCREENWIDTH || y2 < 0 || y1 > SCREENHEIGHT)
         return;
 
-    float r = 1.0f, g = 1.0f, b = 1.0f;
-
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex_id);
 
@@ -621,7 +618,7 @@ void HUD_RawFromTexID(float hx1, float hy1, float hx2, float hy2, unsigned int t
     if (opacity == OPAC_Complex || alpha < 0.99f)
         glEnable(GL_BLEND);
 
-    glColor4f(r, g, b, alpha);
+    glColor4f(1.0f, 1.0f, 1.0f, alpha);
 
     glBegin(GL_QUADS);
 
@@ -683,7 +680,7 @@ void HUD_StretchImage(float x, float y, float w, float h, const image_c *img, fl
     float y1 = COORD_Y(y + h);
     float y2 = COORD_Y(y);
 
-    rgbcol_t text_col = RGB_NO_VALUE;
+    rgbacol_t text_col = RGB_NO_VALUE;
 
     if (colmap)
     {
@@ -809,7 +806,7 @@ void HUD_TileImage(float x, float y, float w, float h, const image_c *img, float
                  (offset_y + 1) * ty_scale, cur_alpha);
 }
 
-void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col)
+void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbacol_t col)
 {
     // expand to cover wide screens
     if (x1 < hud_x_left && x2 > hud_x_right - 1 && y1 < hud_y_top + 1 && y2 > hud_y_bottom - 1)
@@ -832,7 +829,9 @@ void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col)
     if (cur_alpha < 0.99f)
         glEnable(GL_BLEND);
 
-    glColor4f(RGB_RED(col) / 255.0, RGB_GRN(col) / 255.0, RGB_BLU(col) / 255.0, cur_alpha);
+    sg_color sgcol = sg_make_color_1i(col);
+
+    glColor4f(sgcol.r, sgcol.g, sgcol.b, cur_alpha);
 
     glBegin(GL_QUADS);
 
@@ -846,7 +845,7 @@ void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbcol_t col)
     glDisable(GL_BLEND);
 }
 
-void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col, float thickness, bool smooth, float dx,
+void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbacol_t col, float thickness, bool smooth, float dx,
                    float dy)
 {
     x1 = COORD_X(x1);
@@ -865,7 +864,9 @@ void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col, float t
     if (smooth || cur_alpha < 0.99f)
         glEnable(GL_BLEND);
 
-    glColor4f(RGB_RED(col) / 255.0, RGB_GRN(col) / 255.0, RGB_BLU(col) / 255.0, cur_alpha);
+    sg_color sgcol = sg_make_color_1i(col);
+
+    glColor4f(sgcol.r, sgcol.g, sgcol.b, cur_alpha);
 
     glBegin(GL_LINES);
 
@@ -879,7 +880,7 @@ void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbcol_t col, float t
     glLineWidth(1.0f);
 }
 
-void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col, float thickness)
+void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbacol_t col, float thickness)
 {
     std::swap(y1, y2);
 
@@ -891,7 +892,9 @@ void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col, float thi
     if (cur_alpha < 0.99f)
         glEnable(GL_BLEND);
 
-    glColor4f(RGB_RED(col) / 255.0, RGB_GRN(col) / 255.0, RGB_BLU(col) / 255.0, cur_alpha);
+    sg_color sgcol = sg_make_color_1i(col);
+
+    glColor4f(sgcol.r, sgcol.g, sgcol.b, cur_alpha);
 
     glBegin(GL_QUADS);
     glVertex2f(x1, y1);
@@ -924,7 +927,7 @@ void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbcol_t col, float thi
     glDisable(GL_BLEND);
 }
 
-void HUD_GradientBox(float x1, float y1, float x2, float y2, rgbcol_t *cols)
+void HUD_GradientBox(float x1, float y1, float x2, float y2, rgbacol_t *cols)
 {
     std::swap(y1, y2);
 
@@ -938,16 +941,20 @@ void HUD_GradientBox(float x1, float y1, float x2, float y2, rgbcol_t *cols)
 
     glBegin(GL_QUADS);
 
-    glColor4f(RGB_RED(cols[1]) / 255.0, RGB_GRN(cols[1]) / 255.0, RGB_BLU(cols[1]) / 255.0, cur_alpha);
+    sg_color sgcol = sg_make_color_1i(cols[1]);
+    glColor4f(sgcol.r, sgcol.g, sgcol.b, cur_alpha);
     glVertex2f(x1, y1);
 
-    glColor4f(RGB_RED(cols[0]) / 255.0, RGB_GRN(cols[0]) / 255.0, RGB_BLU(cols[0]) / 255.0, cur_alpha);
+    sgcol = sg_make_color_1i(cols[0]);
+    glColor4f(sgcol.r, sgcol.g, sgcol.b, cur_alpha);
     glVertex2f(x1, y2);
 
-    glColor4f(RGB_RED(cols[2]) / 255.0, RGB_GRN(cols[2]) / 255.0, RGB_BLU(cols[2]) / 255.0, cur_alpha);
+    sgcol = sg_make_color_1i(cols[2]);
+    glColor4f(sgcol.r, sgcol.g, sgcol.b, cur_alpha);
     glVertex2f(x2, y2);
 
-    glColor4f(RGB_RED(cols[3]) / 255.0, RGB_GRN(cols[3]) / 255.0, RGB_BLU(cols[3]) / 255.0, cur_alpha);
+    sgcol = sg_make_color_1i(cols[3]);
+    glColor4f(sgcol.r, sgcol.g, sgcol.b, cur_alpha);
     glVertex2f(x2, y1);
 
     glEnd();
@@ -1044,8 +1051,8 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
     HUD_RawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, cur_alpha, cur_color, NULL, 0.0, 0.0, ch);
 }
 
-void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img, char ch, rgbcol_t color1,
-                        rgbcol_t color2, bool blink)
+void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img, char ch, rgbacol_t color1,
+                        rgbacol_t color2, bool blink)
 {
     float w, h;
     float tx1, tx2, ty1, ty2;
@@ -1065,19 +1072,11 @@ void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img
     w = FNX;
     h = FNX * 2;
 
-    float old_alpha = cur_alpha;
-
-    cur_alpha = 1.0f;
-
-    float r = 1.0f, g = 1.0f, b = 1.0f;
-
-    r = RGB_RED(color2) / 255.0;
-    g = RGB_GRN(color2) / 255.0;
-    b = RGB_BLU(color2) / 255.0;
+    sg_color sgcol = sg_make_color_1i(color2);
 
     glDisable(GL_TEXTURE_2D);
 
-    glColor4f(r, g, b, cur_alpha);
+    glColor4f(sgcol.r, sgcol.g, sgcol.b, cur_alpha);
 
     glBegin(GL_QUADS);
 
@@ -1091,26 +1090,24 @@ void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img
 
     glEnd();
 
-    r = RGB_RED(color1) / 255.0;
-    g = RGB_GRN(color1) / 255.0;
-    b = RGB_BLU(color1) / 255.0;
+    sgcol = sg_make_color_1i(color1);
 
     glEnable(GL_TEXTURE_2D);
 
     GLuint tex_id = W_ImageCache(img, true, (const colourmap_c *)0, true);
     glBindTexture(GL_TEXTURE_2D, tex_id);
 
-    if (cur_alpha >= 0.99f && img->opacity == OPAC_Solid)
+    if (img->opacity == OPAC_Solid)
         glDisable(GL_ALPHA_TEST);
     else
     {
         glEnable(GL_ALPHA_TEST);
 
-        if (!(cur_alpha < 0.11f || img->opacity == OPAC_Complex))
-            glAlphaFunc(GL_GREATER, cur_alpha * 0.66f);
+        if (img->opacity != OPAC_Complex)
+            glAlphaFunc(GL_GREATER, 0.66f);
     }
 
-    glColor4f(r, g, b, cur_alpha);
+    glColor4f(sgcol.r, sgcol.g, sgcol.b, cur_alpha);
 
     glBegin(GL_QUADS);
 
@@ -1135,8 +1132,6 @@ void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img
     glDisable(GL_BLEND);
 
     glAlphaFunc(GL_GREATER, 0);
-
-    cur_alpha = old_alpha;
 }
 
 //

@@ -46,7 +46,7 @@ class light_image_c
 
     const image_c *image;
 
-    rgbcol_t curve[LIM_CURVE_SIZE];
+    rgbacol_t curve[LIM_CURVE_SIZE];
 
   public:
     light_image_c(const char *_name, const image_c *_img) : name(_name), image(_img)
@@ -74,13 +74,13 @@ class light_image_c
             int g = (int)(255 * sq);
             int b = (int)(255 * sq);
 
-            curve[i] = RGB_MAKE(r, g, b);
+            curve[i] = epi::RGBA_Make(r, g, b);
         }
 
-        curve[LIM_CURVE_SIZE - 1] = RGB_MAKE(0, 0, 0);
+        curve[LIM_CURVE_SIZE - 1] = SG_BLACK_RGBA32;
     }
 
-    rgbcol_t CurvePoint(float d, rgbcol_t tint)
+    rgbacol_t CurvePoint(float d, rgbacol_t tint)
     {
         // d is distance away from centre, between 0.0 and 1.0
 
@@ -94,23 +94,23 @@ class light_image_c
         int p1 = (int)floor(d);
         int dd = (int)(256 * (d - p1));
 
-        int r1 = RGB_RED(curve[p1]);
-        int g1 = RGB_GRN(curve[p1]);
-        int b1 = RGB_BLU(curve[p1]);
+        int r1 = epi::RGBA_Red(curve[p1]);
+        int g1 = epi::RGBA_Green(curve[p1]);
+        int b1 = epi::RGBA_Blue(curve[p1]);
 
-        int r2 = RGB_RED(curve[p1 + 1]);
-        int g2 = RGB_GRN(curve[p1 + 1]);
-        int b2 = RGB_BLU(curve[p1 + 1]);
+        int r2 = epi::RGBA_Red(curve[p1 + 1]);
+        int g2 = epi::RGBA_Green(curve[p1 + 1]);
+        int b2 = epi::RGBA_Blue(curve[p1 + 1]);
 
         r1 = (r1 * (256 - dd) + r2 * dd) >> 8;
         g1 = (g1 * (256 - dd) + g2 * dd) >> 8;
         b1 = (b1 * (256 - dd) + b2 * dd) >> 8;
 
-        r1 = r1 * RGB_RED(tint) / 255;
-        g1 = g1 * RGB_GRN(tint) / 255;
-        b1 = b1 * RGB_BLU(tint) / 255;
+        r1 = r1 * epi::RGBA_Red(tint) / 255;
+        g1 = g1 * epi::RGBA_Green(tint) / 255;
+        b1 = b1 * epi::RGBA_Blue(tint) / 255;
 
-        return RGB_MAKE(r1, g1, b1);
+        return epi::RGBA_Make(r1, g1, b1);
     }
 };
 
@@ -226,7 +226,7 @@ class dynlight_shader_c : public abstract_shader_c
         return mo->info->dlight[1].radius * mo->dlight.r / mo->info->dlight[0].radius * MIR_XYScale();
     }
 
-    inline rgbcol_t WhatColor(int DL)
+    inline rgbacol_t WhatColor(int DL)
     {
         return (DL == 0) ? mo->dlight.color : mo->info->dlight[1].colour;
     }
@@ -257,11 +257,11 @@ class dynlight_shader_c : public abstract_shader_c
             if (WhatType(DL) == DLITE_None)
                 break;
 
-            rgbcol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
+            rgbacol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
             float L = mo->state->bright / 255.0;
 
-            if (new_col != RGB_MAKE(0, 0, 0) && L > 1 / 256.0)
+            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
                 if (WhatType(DL) == DLITE_Add)
                     col->add_Give(new_col, L);
@@ -314,9 +314,9 @@ class dynlight_shader_c : public abstract_shader_c
             if (WhatType(DL) == DLITE_None)
                 break;
 
-            rgbcol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
+            rgbacol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
-            if (new_col != RGB_MAKE(0, 0, 0) && L > 1 / 256.0)
+            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
                 if (WhatType(DL) == DLITE_Add)
                     col->add_Give(new_col, L);
@@ -336,13 +336,13 @@ class dynlight_shader_c : public abstract_shader_c
 
             bool is_additive = (WhatType(DL) == DLITE_Add);
 
-            rgbcol_t col = WhatColor(DL);
+            rgbacol_t col = WhatColor(DL);
 
             float L = mo->state->bright / 255.0;
 
-            float R = L * RGB_RED(col) / 255.0;
-            float G = L * RGB_GRN(col) / 255.0;
-            float B = L * RGB_BLU(col) / 255.0;
+            float R = L * epi::RGBA_Red(col) / 255.0;
+            float G = L * epi::RGBA_Green(col) / 255.0;
+            float B = L * epi::RGBA_Blue(col) / 255.0;
 
             local_gl_vert_t *glvert =
                 RGL_BeginUnit(shape, num_vert,
@@ -428,7 +428,7 @@ class plane_glow_c : public abstract_shader_c
         return mo->info->dlight[1].radius * mo->dlight.r / mo->info->dlight[0].radius * MIR_XYScale();
     }
 
-    inline rgbcol_t WhatColor(int DL)
+    inline rgbacol_t WhatColor(int DL)
     {
         return (DL == 0) ? mo->dlight.color : mo->info->dlight[1].colour;
     }
@@ -450,11 +450,11 @@ class plane_glow_c : public abstract_shader_c
             if (WhatType(DL) == DLITE_None)
                 break;
 
-            rgbcol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
+            rgbacol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
             float L = mo->state->bright / 255.0;
 
-            if (new_col != RGB_MAKE(0, 0, 0) && L > 1 / 256.0)
+            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
                 if (WhatType(DL) == DLITE_Add)
                     col->add_Give(new_col, L);
@@ -496,9 +496,9 @@ class plane_glow_c : public abstract_shader_c
             if (WhatType(DL) == DLITE_None)
                 break;
 
-            rgbcol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
+            rgbacol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
-            if (new_col != RGB_MAKE(0, 0, 0) && L > 1 / 256.0)
+            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
                 if (WhatType(DL) == DLITE_Add)
                     col->add_Give(new_col, L);
@@ -520,13 +520,13 @@ class plane_glow_c : public abstract_shader_c
 
             bool is_additive = (WhatType(DL) == DLITE_Add);
 
-            rgbcol_t col = WhatColor(DL);
+            rgbacol_t col = WhatColor(DL);
 
             float L = mo->state->bright / 255.0;
 
-            float R = L * RGB_RED(col) / 255.0;
-            float G = L * RGB_GRN(col) / 255.0;
-            float B = L * RGB_BLU(col) / 255.0;
+            float R = L * epi::RGBA_Red(col) / 255.0;
+            float G = L * epi::RGBA_Green(col) / 255.0;
+            float B = L * epi::RGBA_Blue(col) / 255.0;
 
             local_gl_vert_t *glvert =
                 RGL_BeginUnit(shape, num_vert,
@@ -598,7 +598,7 @@ class wall_glow_c : public abstract_shader_c
         return mo->info->dlight[1].radius * mo->dlight.r / mo->info->dlight[0].radius * MIR_XYScale();
     }
 
-    inline rgbcol_t WhatColor(int DL)
+    inline rgbacol_t WhatColor(int DL)
     {
         return (DL == 0) ? mo->dlight.color : mo->info->dlight[1].colour;
     }
@@ -637,9 +637,9 @@ class wall_glow_c : public abstract_shader_c
             if (WhatType(DL) == DLITE_None)
                 break;
 
-            rgbcol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
+            rgbacol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
-            if (new_col != RGB_MAKE(0, 0, 0) && L > 1 / 256.0)
+            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
                 if (WhatType(DL) == DLITE_Add)
                     col->add_Give(new_col, L);
@@ -663,9 +663,9 @@ class wall_glow_c : public abstract_shader_c
             if (WhatType(DL) == DLITE_None)
                 break;
 
-            rgbcol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
+            rgbacol_t new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
-            if (new_col != RGB_MAKE(0, 0, 0) && L > 1 / 256.0)
+            if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
                 if (WhatType(DL) == DLITE_Add)
                     col->add_Give(new_col, L);
@@ -687,13 +687,13 @@ class wall_glow_c : public abstract_shader_c
 
             bool is_additive = (WhatType(DL) == DLITE_Add);
 
-            rgbcol_t col = WhatColor(DL);
+            rgbacol_t col = WhatColor(DL);
 
             float L = mo->state->bright / 255.0;
 
-            float R = L * RGB_RED(col) / 255.0;
-            float G = L * RGB_GRN(col) / 255.0;
-            float B = L * RGB_BLU(col) / 255.0;
+            float R = L * epi::RGBA_Red(col) / 255.0;
+            float G = L * epi::RGBA_Green(col) / 255.0;
+            float B = L * epi::RGBA_Blue(col) / 255.0;
 
             local_gl_vert_t *glvert =
                 RGL_BeginUnit(shape, num_vert,
@@ -783,7 +783,7 @@ private:
 		return info->dlight[DL].radius * MIR_XYScale();
 	}
 
-	inline rgbcol_t WhatColor(int DL)
+	inline rgbacol_t WhatColor(int DL)
 	{
 		return info->dlight[DL].colour;
 	}
@@ -825,12 +825,12 @@ public:
 			else if (along > length)
 				d += (along - length);
 
-			rgbcol_t new_col = lim[DL]->CurvePoint(d / WhatRadius(DL),
+			rgbacol_t new_col = lim[DL]->CurvePoint(d / WhatRadius(DL),
 					WhatColor(DL));
 
 			float L = bright / 255.0;
 
-			if (new_col != RGB_MAKE(0,0,0) && L > 1/256.0)
+			if (new_col != SG_BLACK_RGBA32 && L > 1/256.0)
 			{
 				if (WhatType(DL) == DLITE_Add)
 					col->add_Give(new_col, L); 

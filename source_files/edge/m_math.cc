@@ -50,7 +50,7 @@
 #include <cmath>
 #endif
 
-void M_Angle2Matrix(bam_angle ang, HMM_Vec2 *x, HMM_Vec2 *y)
+void M_Angle2Matrix(bam_angle_t ang, HMM_Vec2 *x, HMM_Vec2 *y)
 {
     x->X = epi::BAM_Cos(ang);
     x->Y = epi::BAM_Sin(ang);

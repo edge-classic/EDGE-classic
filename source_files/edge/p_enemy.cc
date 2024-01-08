@@ -453,12 +453,12 @@ void P_NewChaseDir(mobj_t *object)
 //
 // Returns true if a player is targeted.
 //
-bool P_LookForPlayers(mobj_t *actor, bam_angle range)
+bool P_LookForPlayers(mobj_t *actor, bam_angle_t range)
 {
     int       c;
     int       stop;
     player_t *player;
-    bam_angle   an;
+    bam_angle_t   an;
     float     dist;
 
     c    = 0;

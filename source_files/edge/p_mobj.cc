@@ -195,9 +195,9 @@ static void EnterBounceStates(mobj_t *mo)
 //
 static void BounceOffWall(mobj_t *mo, line_t *wall)
 {
-    bam_angle angle;
-    bam_angle wall_angle;
-    bam_angle diff;
+    bam_angle_t angle;
+    bam_angle_t wall_angle;
+    bam_angle_t diff;
 
     divline_t div;
     float     dest_x, dest_y;
@@ -580,7 +580,7 @@ statenum_t P_MobjFindLabel(mobj_t *mobj, const char *label)
 //
 // P_SetMobjDirAndSpeed
 //
-void P_SetMobjDirAndSpeed(mobj_t *mo, bam_angle angle, float slope, float speed)
+void P_SetMobjDirAndSpeed(mobj_t *mo, bam_angle_t angle, float slope, float speed)
 {
     mo->angle     = angle;
     mo->vertangle = epi::BAM_FromATan(slope);
@@ -1931,7 +1931,7 @@ void P_RunMobjThinkers(bool extra_tic)
 //
 // P_SpawnDebris
 //
-void P_SpawnDebris(float x, float y, float z, bam_angle angle, const mobjtype_c *debris)
+void P_SpawnDebris(float x, float y, float z, bam_angle_t angle, const mobjtype_c *debris)
 {
     // if (!level_flags.have_extra && (splash->extendedflags & EF_EXTRA)) return;
     // if (! (splash->extendedflags & EF_EXTRA)) return; //Optional extra
@@ -1949,7 +1949,7 @@ void P_SpawnDebris(float x, float y, float z, bam_angle angle, const mobjtype_c 
 //
 // P_SpawnPuff
 //
-void P_SpawnPuff(float x, float y, float z, const mobjtype_c *puff, bam_angle angle)
+void P_SpawnPuff(float x, float y, float z, const mobjtype_c *puff, bam_angle_t angle)
 {
     mobj_t *th;
 
@@ -1976,7 +1976,7 @@ void P_SpawnPuff(float x, float y, float z, const mobjtype_c *puff, bam_angle an
 // -KM- 1998/11/25 Made more violent. :-)
 // -KM- 1999/01/31 Different blood objects for different mobjs.
 //
-void P_SpawnBlood(float x, float y, float z, float damage, bam_angle angle, const mobjtype_c *blood)
+void P_SpawnBlood(float x, float y, float z, float damage, bam_angle_t angle, const mobjtype_c *blood)
 {
     int     num;
     mobj_t *th;
@@ -1989,7 +1989,7 @@ void P_SpawnBlood(float x, float y, float z, float damage, bam_angle angle, cons
     {
         z += (float)(P_RandomNegPos() / 64.0f);
 
-        angle += (bam_angle)(P_RandomNegPos() * (int)(ANG1 / 2));
+        angle += (bam_angle_t)(P_RandomNegPos() * (int)(ANG1 / 2));
 
         th = P_MobjCreateObject(x, y, z, blood);
 
@@ -2074,8 +2074,8 @@ bool P_HitLiquidFloor(mobj_t *thing)
     {
         if (current_flatdef->impactobject)
         {
-            bam_angle angle = thing->angle;
-            angle += (bam_angle)(P_RandomNegPos() * (int)(ANG1 / 2));
+            bam_angle_t angle = thing->angle;
+            angle += (bam_angle_t)(P_RandomNegPos() * (int)(ANG1 / 2));
 
             P_SpawnDebris(thing->x, thing->y, thing->z, angle, current_flatdef->impactobject);
 

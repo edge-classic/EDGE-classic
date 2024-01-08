@@ -153,7 +153,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
     // ----CALCULATE BOB EFFECT----
     if (player->playerstate == PST_LIVE && onground)
     {
-        bam_angle angle = ANG90 / 5 * leveltime;
+        bam_angle_t angle = ANG90 / 5 * leveltime;
 
         bob_z = player->bob / 2 * player->mo->info->bobbing * epi::BAM_Sin(angle);
     }
@@ -297,7 +297,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
     if (player->zoom_fov > 0)
         cmd->angleturn /= ZOOM_ANGLE_DIV;
 
-    player->mo->angle -= (bam_angle)(cmd->angleturn << 16);
+    player->mo->angle -= (bam_angle_t)(cmd->angleturn << 16);
 
     // EDGE Feature: Vertical Look (Mlook)
     //
@@ -309,7 +309,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
         if (player->zoom_fov > 0)
             cmd->mlookturn /= ZOOM_ANGLE_DIV;
 
-        bam_angle V = player->mo->vertangle + (bam_angle)(cmd->mlookturn << 16);
+        bam_angle_t V = player->mo->vertangle + (bam_angle_t)(cmd->mlookturn << 16);
 
         if (V < ANG180 && V > MLOOK_LIMIT)
             V = MLOOK_LIMIT;
@@ -496,8 +496,8 @@ static void DeathThink(player_t *player, bool extra_tic)
 
     float dx, dy, dz;
 
-    bam_angle angle;
-    bam_angle delta, delta_s;
+    bam_angle_t angle;
+    bam_angle_t delta, delta_s;
     float   slope;
 
     // -AJA- 1999/12/07: don't die mid-air.
@@ -530,8 +530,8 @@ static void DeathThink(player_t *player, bool extra_tic)
         slope   = MIN(1.7f, MAX(-1.7f, slope));
         delta_s = epi::BAM_FromATan(slope) - player->mo->vertangle;
 
-        if ((delta <= ANG1 / 2 || delta >= (bam_angle)(0 - ANG1 / 2)) &&
-            (delta_s <= ANG1 / 2 || delta_s >= (bam_angle)(0 - ANG1 / 2)))
+        if ((delta <= ANG1 / 2 || delta >= (bam_angle_t)(0 - ANG1 / 2)) &&
+            (delta_s <= ANG1 / 2 || delta_s >= (bam_angle_t)(0 - ANG1 / 2)))
         {
             // Looking at killer, so fade damage flash down.
             player->mo->angle     = angle;
@@ -546,18 +546,18 @@ static void DeathThink(player_t *player, bool extra_tic)
             if (delta < ANG180)
                 delta /= (5 * factor);
             else
-                delta = (bam_angle)(0 - (bam_angle)(0 - delta) / (5 * factor));
+                delta = (bam_angle_t)(0 - (bam_angle_t)(0 - delta) / (5 * factor));
 
-            if (delta > ANG5 / factor && delta < (bam_angle)(0 - ANG5 / factor))
-                delta = (delta < ANG180) ? ANG5 / factor : (bam_angle)(0 - ANG5 / factor);
+            if (delta > ANG5 / factor && delta < (bam_angle_t)(0 - ANG5 / factor))
+                delta = (delta < ANG180) ? ANG5 / factor : (bam_angle_t)(0 - ANG5 / factor);
 
             if (delta_s < ANG180)
                 delta_s /= (5 * factor);
             else
-                delta_s = (bam_angle)(0 - (bam_angle)(0 - delta_s) / (5 * factor));
+                delta_s = (bam_angle_t)(0 - (bam_angle_t)(0 - delta_s) / (5 * factor));
 
-            if (delta_s > (ANG5 / (factor * 2)) && delta_s < (bam_angle)(0 - ANG5 / (factor * 2)))
-                delta_s = (delta_s < ANG180) ? (ANG5 / (factor * 2)) : (bam_angle)(0 - ANG5 / (factor * 2));
+            if (delta_s > (ANG5 / (factor * 2)) && delta_s < (bam_angle_t)(0 - ANG5 / (factor * 2)))
+                delta_s = (delta_s < ANG180) ? (ANG5 / (factor * 2)) : (bam_angle_t)(0 - ANG5 / (factor * 2));
 
             player->mo->angle += delta;
             player->mo->vertangle += delta_s;

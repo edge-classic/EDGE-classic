@@ -26,7 +26,7 @@
 
 typedef struct angle_range_s
 {
-    bam_angle low, high;
+    bam_angle_t low, high;
 
     struct angle_range_s *next;
     struct angle_range_s *prev;
@@ -92,7 +92,7 @@ void RGL_1DOcclusionClear(void)
 #endif
 }
 
-static inline angle_range_t *GetNewRange(bam_angle low, bam_angle high)
+static inline angle_range_t *GetNewRange(bam_angle_t low, bam_angle_t high)
 {
     angle_range_t *R;
 
@@ -159,7 +159,7 @@ static inline void RemoveRange(angle_range_t *R)
     free_range_chickens = R;
 }
 
-static void DoSet(bam_angle low, bam_angle high)
+static void DoSet(bam_angle_t low, bam_angle_t high)
 {
     for (angle_range_t *AR = occbuf_head; AR; AR = AR->next)
     {
@@ -205,12 +205,12 @@ static void DoSet(bam_angle low, bam_angle high)
     LinkInTail(GetNewRange(low, high));
 }
 
-void RGL_1DOcclusionSet(bam_angle low, bam_angle high)
+void RGL_1DOcclusionSet(bam_angle_t low, bam_angle_t high)
 {
     // Set all angles in the given range, i.e. mark them as blocking.
     // The angles are relative to the VIEW angle.
 
-    SYS_ASSERT((bam_angle)(high - low) < ANG180);
+    SYS_ASSERT((bam_angle_t)(high - low) < ANG180);
 
     if (low <= high)
         DoSet(low, high);
@@ -225,7 +225,7 @@ void RGL_1DOcclusionSet(bam_angle low, bam_angle high)
 #endif
 }
 
-static inline bool DoTest(bam_angle low, bam_angle high)
+static inline bool DoTest(bam_angle_t low, bam_angle_t high)
 {
     for (angle_range_t *AR = occbuf_head; AR; AR = AR->next)
     {
@@ -239,13 +239,13 @@ static inline bool DoTest(bam_angle low, bam_angle high)
     return false;
 }
 
-bool RGL_1DOcclusionTest(bam_angle low, bam_angle high)
+bool RGL_1DOcclusionTest(bam_angle_t low, bam_angle_t high)
 {
     // Check whether all angles in the given range are set (i.e. blocked).
     // Returns true if the entire range is blocked, false otherwise.
     // Angles are relative to the VIEW angle.
 
-    SYS_ASSERT((bam_angle)(high - low) < ANG180);
+    SYS_ASSERT((bam_angle_t)(high - low) < ANG180);
 
     if (low <= high)
         return DoTest(low, high);
@@ -320,9 +320,9 @@ void RGL_1DOcclusionClear(void)
 // Set all angles in the given range, i.e. mark them as blocking.  The
 // angles are relative to the VIEW angle.
 //
-void RGL_1DOcclusionSet(bam_angle low, bam_angle high)
+void RGL_1DOcclusionSet(bam_angle_t low, bam_angle_t high)
 {
-	SYS_ASSERT((bam_angle)(high - low) < ANG180);
+	SYS_ASSERT((bam_angle_t)(high - low) < ANG180);
 
 	unsigned int low_b, high_b;
 
@@ -355,9 +355,9 @@ void RGL_1DOcclusionSet(bam_angle low, bam_angle high)
 // Returns true if the entire range is blocked, false otherwise.
 // Angles are relative to the VIEW angle.
 //
-bool RGL_1DOcclusionTest(bam_angle low, bam_angle high)
+bool RGL_1DOcclusionTest(bam_angle_t low, bam_angle_t high)
 {
-	SYS_ASSERT((bam_angle)(high - low) < ANG180);
+	SYS_ASSERT((bam_angle_t)(high - low) < ANG180);
 
 	unsigned int low_b, high_b;
 

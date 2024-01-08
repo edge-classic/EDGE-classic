@@ -59,7 +59,7 @@ class bot_path_c
     position_c cur_from() const;
 
     float   cur_length() const;
-    bam_angle cur_angle() const;
+    bam_angle_t cur_angle() const;
 
     bool reached_dest(const position_c *pos) const;
 };

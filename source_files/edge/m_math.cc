@@ -113,17 +113,5 @@ int M_PointInTri(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test)
     return c;
 }
 
-void M_Vec2Rotate(HMM_Vec2 &vec, const bam_angle &ang)
-{
-    float s = epi::BAM_Sin(ang);
-    float c = epi::BAM_Cos(ang);
-
-    float ox = vec.X;
-    float oy = vec.Y;
-
-    vec.X = ox * c - oy * s;
-    vec.Y = oy * c + ox * s;
-}
-
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

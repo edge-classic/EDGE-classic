@@ -37,7 +37,6 @@ HMM_Vec3  M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 pla
 HMM_Vec3  M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b, HMM_Vec3 plane_c);
 void    M_Angle2Matrix(bam_angle ang, HMM_Vec2 *x, HMM_Vec2 *y);
 int     M_PointInTri(HMM_Vec2 v1, HMM_Vec2 v2, HMM_Vec2 v3, HMM_Vec2 test);
-void    M_Vec2Rotate(HMM_Vec2 &vec, const bam_angle &ang);
 
 #endif //__M_MATH_H__
 

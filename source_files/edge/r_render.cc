@@ -807,7 +807,7 @@ static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Ve
     HMM_Vec2 rxy = {(data->tx0 + pos->X), (data->ty0 + pos->Y)};
 
     if (data->rotation)
-        M_Vec2Rotate(rxy, data->rotation);
+        HMM_RotateV2(rxy, epi::Degrees_FromBAM(data->rotation));
 
     rxy.X /= data->image_w;
     rxy.Y /= data->image_h;

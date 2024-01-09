@@ -179,7 +179,7 @@ target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/miniv
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/miniz)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/pl_mpeg)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/stb)
-if(MSVC OR WIN32_CLANG)
+if(WIN32 AND (MSVC OR CLANG))
   target_include_directories(edge-classic PRIVATE ${EDGE_LIBRARY_DIR}/sdl2/include)
 endif()
 
@@ -224,7 +224,7 @@ endif()
 
 # Copy appropriate SDL2.dll to local install directory when built with MSVC/Clang
 if (WIN32)
-  if(MSVC OR WIN32_CLANG)
+  if(MSVC OR CLANG)
     if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
       list(APPEND COPY_FILES "${CMAKE_SOURCE_DIR}/libraries/sdl2/lib/x64/SDL2.dll")
     else ()

@@ -19,12 +19,10 @@ option(EDGE_PROFILING "Enable Profiling" OFF)
 
 include("${CMAKE_SOURCE_DIR}/cmake/EDGEClassic.cmake")
 
-if (WIN32)
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(WIN32_CLANG true)
-  else()
-    set(WIN32_CLANG false)
-  endif()
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+  set(CLANG true)
+else()
+  set(CLANG false)
 endif()
 
 if (EMSCRIPTEN)
@@ -62,19 +60,23 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address -fno-omit-frame-pointer")
   endif()
 
-  if (WIN32_CLANG)
+  if (CLANG)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++98-compat -Wno-c++98-compat-pedantic")
   endif()
 
   set(CMAKE_EXE_LINKER_FLAGS "/SUBSYSTEM:WINDOWS")
 else()
 
-  if (WIN32_CLANG)
+  if (WIN32 AND CLANG)
     add_definitions("-D_CRT_SECURE_NO_WARNINGS")
   endif()
 
   # warning level for edge specific source files 
-  set (EDGE_WARNINGS -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-stringop-truncation -Wno-stringop-overflow)
+  set (EDGE_WARNINGS -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-deprecated-declarations)
+
+  if (NOT CLANG)
+    set (EDGE_WARNINGS ${EDGE_WARNINGS} -Wno-stringop-truncation -Wno-stringop-overflow)
+  endif()
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")

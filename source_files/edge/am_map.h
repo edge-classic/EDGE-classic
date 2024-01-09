@@ -59,7 +59,7 @@ bool AM_Responder(event_t *ev);
 void AM_Ticker(void);
 
 // Called to draw the automap on the screen.
-void AM_Render(float x, float y, float w, float h, mobj_t *focus, int flags);
+void AM_Render(float x, float y, float w, float h, mobj_t *focus);
 
 // Called to force the automap to quit
 // if the level is completed while it is up.

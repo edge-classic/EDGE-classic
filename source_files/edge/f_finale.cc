@@ -72,6 +72,7 @@ typedef enum
 
 void operator++(finalestage_e &f, int blah)
 {
+    (void)blah;
     f = (finalestage_e)(f + 1);
 }
 

@@ -649,8 +649,7 @@ static void DrawChar(int x, int y, char ch, rgbacol_t col)
     glEnd();
 }
 
-static void DrawEndoomChar(float x, float y, char ch, rgbacol_t col, rgbacol_t col2, bool blink, GLuint tex_id,
-                           int enwidth)
+static void DrawEndoomChar(float x, float y, char ch, rgbacol_t col, rgbacol_t col2, bool blink, int enwidth)
 {
     if (x + FNSZ < 0)
         return;
@@ -797,7 +796,7 @@ static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
         uint8_t info = endoom_line->endoom_bytes.at(i);
 
         DrawEndoomChar(x, y, endoom_line->line.at(i), endoom_colors[info & 15], endoom_colors[(info >> 4) & 7],
-                       info & 128, tex_id, enwidth);
+                       info & 128, enwidth);
 
         x += enwidth;
 

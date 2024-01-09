@@ -123,7 +123,8 @@ bool mem_file_c::Seek(int offset, int seekpoint)
 
 unsigned int mem_file_c::Write(const void *src, unsigned int size)
 {
-    // FIXME
+    (void)src;
+    (void)size;
 
     I_Error("mem_file_c::Write called.\n");
 

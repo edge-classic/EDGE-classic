@@ -865,7 +865,7 @@ int W_CheckForUniqueLumps(epi::file_c *file)
     file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
     file->Read(raw_info, length);
 
-    for (int check = 0; check < game_checker.size(); check++)
+    for (size_t check = 0; check < game_checker.size(); check++)
     {
         game_check_t gamecheck = game_checker[check];
 
@@ -962,7 +962,7 @@ void ProcessFixersForWad(data_file_c *df)
     if (fix_checker.empty())
         return;
 
-    for (int i = 0; i < fixdefs.size(); i++)
+    for (size_t i = 0; i < fixdefs.size(); i++)
     {
         if (epi::case_cmp(fix_checker, fixdefs[i]->md5_string) == 0)
         {
@@ -1637,7 +1637,7 @@ void W_ReadUMAPINFOLumps(void)
                 std::string ba_rts = "// UMAPINFO SCRIPTS\n\n";
                 for (int a = 0; a < Maps.maps[i].numbossactions; a++)
                 {
-                    for (int m = 0; m < mobjtypes.size(); m++)
+                    for (size_t m = 0; m < mobjtypes.size(); m++)
                     {
                         if (mobjtypes[m]->number == Maps.maps[i].bossactions[a].type)
                         {

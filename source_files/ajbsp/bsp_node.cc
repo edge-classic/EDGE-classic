@@ -662,7 +662,7 @@ bool PickNodeWorker(quadtree_c *part_list, quadtree_c *tree, seg_t **best, doubl
 //
 // Find the best seg in the seg_list to use as a partition line.
 //
-seg_t *PickNode(quadtree_c *tree, int depth)
+seg_t *PickNode(quadtree_c *tree)
 {
     seg_t *best = NULL;
 
@@ -1522,7 +1522,7 @@ build_result_e BuildNodes(seg_t *list, int depth, bbox_t *bounds /* output */, n
     quadtree_c *tree = TreeFromSegList(list, bounds);
 
     /* pick partition line, NONE indicates convexicity */
-    seg_t *part = PickNode(tree, depth);
+    seg_t *part = PickNode(tree);
 
     if (cur_info->cancelled)
         return BUILD_Cancelled;

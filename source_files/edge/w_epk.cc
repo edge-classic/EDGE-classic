@@ -143,7 +143,7 @@ class pack_file_c
     mz_zip_archive *arch;
 
   public:
-    pack_file_c(data_file_c *_par, bool _folder, bool _zip) : parent(_par), is_folder(_folder), dirs(), arch(NULL)
+    pack_file_c(data_file_c *_par, bool _folder) : parent(_par), is_folder(_folder), dirs(), arch(NULL)
     {
     }
 
@@ -342,7 +342,7 @@ static pack_file_c *ProcessFolder(data_file_c *df)
         I_Error("Failed to read dir: %s\n", df->name.u8string().c_str());
     }
 
-    pack_file_c *pack = new pack_file_c(df, true, false);
+    pack_file_c *pack = new pack_file_c(df, true);
 
     // top-level files go in here
     pack->AddDir("");
@@ -399,7 +399,7 @@ epi::file_c *pack_file_c::OpenFile_Folder(const std::string &name)
 
 static pack_file_c *ProcessZip(data_file_c *df)
 {
-    pack_file_c *pack = new pack_file_c(df, false, true);
+    pack_file_c *pack = new pack_file_c(df, false);
 
     pack->arch = new mz_zip_archive;
 
@@ -532,8 +532,11 @@ class epk_file_c : public epi::file_c
 
     unsigned int Write(const void *src, unsigned int count)
     {
+        (void)src;
+        (void)count;
         // not implemented
-        return count;
+        I_Error("epk_file_c::Write called, but this is not implemented!\n");
+        return 0;
     }
 
     bool Seek(int offset, int seekpoint)

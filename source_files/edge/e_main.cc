@@ -1178,7 +1178,7 @@ static void IdentifyVersion(void)
         // Remove them from the arg list if they are valid to avoid them potentially being added as PWADs
         std::vector<SDL_MessageBoxButtonData> game_buttons;
         std::unordered_map<int, std::pair<std::filesystem::path, filekind_e>> game_paths;
-        for (size_t p = 1; p < int(argv::list.size()) && !argv::IsOption(p); p++)
+        for (size_t p = 1; p < argv::list.size() && !argv::IsOption(p); p++)
         {
             std::filesystem::path dnd = std::filesystem::u8path(argv::list[p]);
             int test_index = -1;

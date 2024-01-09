@@ -64,6 +64,7 @@ extern cvar_c                      s_soundfont;
 
 void SoundFill_Callback(void *udata, Uint8 *stream, int len)
 {
+    (void)udata;
     SDL_memset(stream, 0, len);
     S_MixAllChannels(stream, len);
 }

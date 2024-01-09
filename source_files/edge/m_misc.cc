@@ -285,7 +285,8 @@ static void SetToBaseValue(default_t *def)
 
 void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar)
 {
-
+    (void)_dummy;
+    (void)_dummy_cvar;
     for (int i = 0; i < numdefaults; i++)
     {
         // don't reset the first five entries except at startup

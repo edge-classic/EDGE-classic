@@ -70,6 +70,7 @@ static bool Movie_SetupAudioStream(int rate)
 
 void Movie_AudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 {
+	(void)mpeg;
 	(void)user;
 	SDL_AudioStreamPut(movie_audiostream, samples->interleaved, sizeof(float) * samples->count * 2);
 	int avail = SDL_AudioStreamAvailable(movie_audiostream);
@@ -89,6 +90,7 @@ void Movie_AudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
 
 void Movie_VideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user) 
 {
+	(void)mpeg;
 	(void)user;
 	
 	plm_frame_to_rgb(frame, rgb_data, frame->width * 3);

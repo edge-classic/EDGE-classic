@@ -1289,7 +1289,7 @@ static void DrawMarks(void)
     HUD_SetAlignment();
 }
 
-void AM_Render(float x, float y, float w, float h, mobj_t *focus, int flags)
+void AM_Render(float x, float y, float w, float h, mobj_t *focus)
 {
     f_x = x;
     f_y = y;

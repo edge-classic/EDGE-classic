@@ -269,6 +269,8 @@ static void HD_solid_box(coal::vm_c *vm, int argc)
 //
 static void HD_solid_line(coal::vm_c *vm, int argc)
 {
+    (void)argc;
+
     float x1 = *vm->AccessParam(0);
     float y1 = *vm->AccessParam(1);
     float x2 = *vm->AccessParam(2);
@@ -374,6 +376,8 @@ static void HD_scroll_image(coal::vm_c *vm, int argc)
 //
 static void HD_stretch_image(coal::vm_c *vm, int argc)
 {
+    (void)argc;
+
     float x = *vm->AccessParam(0);
     float y = *vm->AccessParam(1);
     float w = *vm->AccessParam(2);

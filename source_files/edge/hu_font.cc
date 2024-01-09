@@ -314,7 +314,7 @@ void font_c::LoadFontTTF()
             I_Error("LoadFontTTF: No TTF file/lump name provided for font %s!", def->name.c_str());
         }
 
-        for (int i = 0; i < hu_fonts.size(); i++)
+        for (size_t i = 0; i < hu_fonts.size(); i++)
         {
             if (epi::strcmp(hu_fonts[i]->def->ttf_name, def->ttf_name) == 0)
             {

@@ -90,6 +90,9 @@ bool sub_file_c::Seek(int offset, int seekpoint)
 
 unsigned int sub_file_c::Write(const void *src, unsigned int size)
 {
+    (void)src;
+    (void)size;
+
     I_Error("sub_file_c::Write called.\n");
 
     return 0; /* read only, cobber */

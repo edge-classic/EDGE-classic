@@ -22,7 +22,6 @@
 
 #include "i_defs.h"
 
-#include "path.h"
 #include "str_util.h"
 #include "filesystem.h"
 
@@ -486,12 +485,12 @@ std::filesystem::path SV_FileName(const char *slot_name, const char *map_name)
 {
     std::string temp(epi::STR_Format("%s/%s.%s", slot_name, map_name, SAVEGAMEEXT));
 
-    return epi::PATH_Join(save_dir, temp);
+    return std::filesystem::path(save_dir).append(temp);
 }
 
 std::filesystem::path SV_DirName(const char *slot_name)
 {
-    return epi::PATH_Join(save_dir, slot_name);
+    return std::filesystem::path(save_dir).append(slot_name);
 }
 
 void SV_ClearSlot(const char *slot_name)
@@ -515,7 +514,7 @@ void SV_ClearSlot(const char *slot_name)
     {
         if (fsd[i].is_dir)
             continue;
-        std::filesystem::path cur_file = epi::PATH_Join(full_dir, epi::PATH_GetFilename(fsd[i].name).string());
+        std::filesystem::path cur_file = std::filesystem::path(full_dir).append(fsd[i].name.filename().string());
         I_Debugf("  Deleting %s\n", cur_file.u8string().c_str());
 
         epi::FS_Delete(cur_file);
@@ -542,8 +541,8 @@ void SV_CopySlot(const char *src_name, const char *dest_name)
         if (fsd[i].is_dir)
             continue;
 
-        std::filesystem::path src_file  = epi::PATH_Join(src_dir, epi::PATH_GetFilename(fsd[i].name).string());
-        std::filesystem::path dest_file = epi::PATH_Join(dest_dir, epi::PATH_GetFilename(fsd[i].name).string());
+        std::filesystem::path src_file  = std::filesystem::path(src_dir).append(fsd[i].name.filename().string());
+        std::filesystem::path dest_file = std::filesystem::path(dest_dir).append(fsd[i].name.filename().string());
 
         I_Debugf("  Copying %s --> %s\n", src_file.u8string().c_str(), dest_file.u8string().c_str());
 

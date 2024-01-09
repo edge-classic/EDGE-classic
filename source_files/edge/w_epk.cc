@@ -29,7 +29,6 @@
 #include "file.h"
 #include "file_memory.h"
 #include "filesystem.h"
-#include "path.h"
 #include "sound_types.h"
 #include "str_util.h"
 
@@ -78,7 +77,7 @@ class pack_entry_c
 
     bool HasExtension(const char *match) const
     {
-        std::string ext = epi::PATH_GetExtension(name).string();
+        std::string ext = std::filesystem::path(name).extension().string();
         return epi::case_cmp(ext, match) == 0;
     }
 };
@@ -305,7 +304,7 @@ void ProcessSubDir(pack_file_c *pack, const std::string &fullpath)
 {
     std::vector<epi::dir_entry_c> fsd;
 
-    std::string dirname = epi::PATH_GetFilename(fullpath).string();
+    std::string dirname = std::filesystem::path(fullpath).filename().string();
 
     if (!epi::FS_ReadDirRecursive(fsd, fullpath, "*.*"))
     {
@@ -319,17 +318,17 @@ void ProcessSubDir(pack_file_c *pack, const std::string &fullpath)
     {
         if (!fsd[i].is_dir)
         {
-            if (epi::PATH_GetExtension(fsd[i].name).empty())
+            if (fsd[i].name.extension().empty())
             {
                 I_Warning("%s has no extension. Bare filenames are not supported for mounted directories.\n",
                           fsd[i].name.u8string().c_str());
                 continue;
             }
-            std::string filename = epi::PATH_GetFilename(fsd[i].name).string();
+            std::string filename = fsd[i].name.filename().string();
             epi::str_upper(filename);
             std::string packpath = fsd[i].name.lexically_relative(pack->parent->name).string();
             pack->dirs[d].AddEntry(filename, fsd[i].name.string(), packpath, 0);
-            pack->search_files.insert({epi::PATH_GetBasename(filename).string(), packpath});
+            pack->search_files.insert({std::filesystem::path(filename).stem().string(), packpath});
         }
     }
 }
@@ -356,17 +355,17 @@ static pack_file_c *ProcessFolder(data_file_c *df)
         }
         else
         {
-            if (epi::PATH_GetExtension(fsd[i].name).empty())
+            if (fsd[i].name.extension().empty())
             {
                 I_Warning("%s has no extension. Bare filenames are not supported for mounted directories.\n",
                           fsd[i].name.u8string().c_str());
                 continue;
             }
-            std::string filename = epi::PATH_GetFilename(fsd[i].name).string();
+            std::string filename = fsd[i].name.filename().string();
             epi::str_upper(filename);
             std::string packpath = fsd[i].name.lexically_relative(df->name).string();
             pack->dirs[0].AddEntry(filename, fsd[i].name.string(), packpath, 0);
-            pack->search_files.insert({epi::PATH_GetBasename(filename).string(), packpath});
+            pack->search_files.insert({std::filesystem::path(filename).stem().string(), packpath});
         }
     }
 
@@ -388,7 +387,7 @@ epi::file_c *pack_file_c::OpenEntry_Folder(size_t dir, size_t index)
 
 epi::file_c *pack_file_c::OpenFile_Folder(const std::string &name)
 {
-    std::filesystem::path fullpath = epi::PATH_Join(parent->name, name);
+    std::filesystem::path fullpath = std::filesystem::path(parent->name).append(name);
 
     // NOTE: it is okay here when file does not exist
     return epi::FS_Open(fullpath, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
@@ -437,7 +436,7 @@ static pack_file_c *ProcessZip(data_file_c *df)
 
         mz_zip_reader_get_filename(pack->arch, idx, filename, sizeof(filename));
 
-        if (epi::PATH_GetExtension(filename).empty())
+        if (std::filesystem::path(filename).extension().empty())
         {
             I_Warning("%s has no extension. Bare EPK filenames are not supported.\n", filename);
             continue;
@@ -468,8 +467,8 @@ static pack_file_c *ProcessZip(data_file_c *df)
         }
         std::string add_name = basename;
         epi::str_upper(add_name);
-        pack->dirs[dir_idx].AddEntry(epi::PATH_GetFilename(add_name).string(), "", packpath, idx);
-        pack->search_files.insert({epi::PATH_GetBasename(add_name).string(), packpath});
+        pack->dirs[dir_idx].AddEntry(std::filesystem::path(add_name).filename().string(), "", packpath, idx);
+        pack->search_files.insert({std::filesystem::path(add_name).stem().string(), packpath});
     }
 
     return pack;
@@ -637,7 +636,7 @@ static void ProcessDDFInPack(pack_file_c *pack)
 {
     data_file_c *df = pack->parent;
 
-    std::string bare_filename = epi::PATH_GetFilename(df->name).string();
+    std::string bare_filename = df->name.filename().string();
     if (bare_filename.empty())
         bare_filename = df->name.string();
 
@@ -686,7 +685,7 @@ static void ProcessCoalAPIInPack(pack_file_c *pack)
 {
     data_file_c *df = pack->parent;
 
-    std::string bare_filename = epi::PATH_GetFilename(df->name).string();
+    std::string bare_filename = df->name.filename().string();
     if (bare_filename.empty())
         bare_filename = df->name.string();
 
@@ -699,7 +698,7 @@ static void ProcessCoalAPIInPack(pack_file_c *pack)
         for (size_t entry = 0; entry < pack->dirs[dir].entries.size(); entry++)
         {
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
-            if (epi::PATH_GetFilename(ent.name) == "COAL_API.EC" || epi::PATH_GetBasename(ent.name) == "COALAPI")
+            if (std::filesystem::path(ent.name).filename() == "COAL_API.EC" || std::filesystem::path(ent.name).stem() == "COALAPI")
             {
                 int         length   = -1;
                 const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
@@ -717,7 +716,7 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
 {
     data_file_c *df = pack->parent;
 
-    std::string bare_filename = epi::PATH_GetFilename(df->name).string();
+    std::string bare_filename = df->name.filename().string();
     if (bare_filename.empty())
         bare_filename = df->name.string();
 
@@ -730,7 +729,7 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
         for (size_t entry = 0; entry < pack->dirs[dir].entries.size(); entry++)
         {
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
-            if (epi::PATH_GetFilename(ent.name) == "COAL_HUD.EC" || epi::PATH_GetBasename(ent.name) == "COALHUDS")
+            if (std::filesystem::path(ent.name).filename() == "COAL_HUD.EC" || std::filesystem::path(ent.name).stem() == "COALHUDS")
             {
                 if (epi::prefix_case_cmp(bare_filename, "edge_defs") != 0)
                 {
@@ -752,7 +751,7 @@ static void ProcessLuaAPIInPack(pack_file_c *pack)
 {
     data_file_c *df = pack->parent;
 
-    std::string bare_filename = epi::PATH_GetFilename(df->name).string();
+    std::string bare_filename = df->name.filename().string();
     if (bare_filename.empty())
         bare_filename = df->name.string();
 
@@ -763,7 +762,7 @@ static void ProcessLuaAPIInPack(pack_file_c *pack)
         for (size_t entry = 0; entry < pack->dirs[dir].entries.size(); entry++)
         {
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
-            if (epi::PATH_GetFilename(ent.name) == "EDGE_API.LUA")
+            if (std::filesystem::path(ent.name).filename() == "EDGE_API.LUA")
             {
                 int         length   = -1;
                 const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
@@ -781,7 +780,7 @@ static void ProcessLuaHUDInPack(pack_file_c *pack)
 {
     data_file_c *df = pack->parent;
 
-    std::string bare_filename = epi::PATH_GetFilename(df->name).string();
+    std::string bare_filename = df->name.filename().string();
     if (bare_filename.empty())
         bare_filename = df->name.string();
 
@@ -792,7 +791,7 @@ static void ProcessLuaHUDInPack(pack_file_c *pack)
         for (size_t entry = 0; entry < pack->dirs[dir].entries.size(); entry++)
         {
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
-            if (epi::PATH_GetFilename(ent.name) == "EDGE_HUD.LUA")
+            if (std::filesystem::path(ent.name).filename() == "EDGE_HUD.LUA")
             {
                 if (epi::prefix_case_cmp(bare_filename, "edge_defs") != 0)
                 {
@@ -823,8 +822,8 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
             pack_entry_c &entry = pack->dirs[d].entries[i];
 
             // split filename in stem + extension
-            std::string stem = epi::PATH_GetBasename(entry.name).string();
-            std::string ext  = epi::PATH_GetExtension(entry.name).string();
+            std::string stem = std::filesystem::path(entry.name).stem().string();
+            std::string ext  = std::filesystem::path(entry.name).extension().string();
 
             epi::str_lower(ext);
 
@@ -886,7 +885,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
                 // Assume that same stem name is meant to replace an identically named lump entry
                 if (!sfx->lump_name.empty())
                 {
-                    if (epi::case_cmp(epi::PATH_GetBasename(entry.name).string(), sfx->lump_name) == 0 &&
+                    if (epi::case_cmp(std::filesystem::path(entry.name).stem().string(), sfx->lump_name) == 0 &&
                         W_CheckFileNumForName(sfx->lump_name.c_str()) < pack_index)
                     {
                         sfx->pack_name = entry.packpath;
@@ -904,10 +903,10 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
             pack_entry_c &entry = pack->dirs[d].entries[i];
             for (auto song : playlist)
             {
-                if (epi::PATH_GetExtension(song->info).empty())
+                if (std::filesystem::path(song->info).extension().empty())
                 {
                     if (song->infotype == MUSINF_LUMP &&
-                        epi::case_cmp(epi::PATH_GetBasename(entry.name).string(), song->info) == 0 &&
+                        epi::case_cmp(std::filesystem::path(entry.name).stem().string(), song->info) == 0 &&
                         W_CheckFileNumForName(song->info.c_str()) < pack_index)
                     {
                         song->info     = entry.packpath;
@@ -924,14 +923,14 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
         {
             pack_entry_c &entry = pack->dirs[d].entries[i];
 
-            std::string stem = epi::PATH_GetBasename(entry.name).string();
+            std::string stem = std::filesystem::path(entry.name).stem().string();
 
             bool add_it = true;
 
             for (auto colm : colourmaps)
             {
                 if (!colm->lump_name.empty() &&
-                    epi::case_cmp(colm->lump_name, epi::PATH_GetBasename(entry.name).string()) == 0 &&
+                    epi::case_cmp(colm->lump_name, std::filesystem::path(entry.name).stem().string()) == 0 &&
                     W_CheckFileNumForName(colm->lump_name.c_str()) < pack_index)
                 {
                     colm->lump_name.clear();
@@ -958,8 +957,8 @@ void Pack_ProcessHiresSubstitutions(pack_file_c *pack, int pack_index)
         pack_entry_c &entry = pack->dirs[d].entries[i];
 
         // split filename in stem + extension
-        std::string stem = epi::PATH_GetBasename(entry.name).string();
-        std::string ext  = epi::PATH_GetExtension(entry.name).string();
+        std::string stem = std::filesystem::path(entry.name).stem().string();
+        std::string ext  = std::filesystem::path(entry.name).extension().string();
 
         epi::str_lower(ext);
 
@@ -1025,11 +1024,11 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
 
     // disallow absolute (real filesystem) paths,
     // although we have to let a leading '/' slide to be caught later
-    if (epi::PATH_IsAbsolute(name) && name[0] != '/')
+    if (std::filesystem::path(name).is_absolute() && name[0] != '/')
         return false;
 
     // do not accept filenames without extensions
-    if (epi::PATH_GetExtension(name).empty())
+    if (std::filesystem::path(name).extension().empty())
         return false;
 
     // Make a copy in case we need to pop a leading slash
@@ -1041,11 +1040,11 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
     if (name[0] == '/')
     {
         find_name = name.substr(1);
-        if (find_name == epi::PATH_GetFilename(name).string())
+        if (find_name == std::filesystem::path(name).filename().string())
             root_only = true;
     }
 
-    std::string find_stem = epi::PATH_GetBasename(name).string();
+    std::string find_stem = std::filesystem::path(name).stem().string();
     epi::str_upper(find_stem);
 
     // quick file stem check to see if it's present at all
@@ -1053,7 +1052,7 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
         return false;
 
     // Specific path given; attempt to find as-is, otherwise return false
-    if (find_name != epi::PATH_GetFilename(find_name).string())
+    if (find_name != std::filesystem::path(find_name).filename().string())
     {
         std::filesystem::path find_comp = find_name;
         auto results = pack->search_files.equal_range(find_stem);
@@ -1081,7 +1080,7 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
         auto results = pack->search_files.equal_range(find_stem);
         for (auto file = results.first; file != results.second; ++file)
         {
-            if (epi::case_cmp(find_name, epi::PATH_GetFilename(file->second).string()) == 0)
+            if (epi::case_cmp(find_name, std::filesystem::path(file->second).filename().string()) == 0)
                 return true;
         }
         return false;
@@ -1099,11 +1098,11 @@ epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name)
 
     // disallow absolute (real filesystem) paths,
     // although we have to let a leading '/' slide to be caught later
-    if (epi::PATH_IsAbsolute(name) && name[0] != '/')
+    if (std::filesystem::path(name).is_absolute() && name[0] != '/')
         return nullptr;
 
     // do not accept filenames without extensions
-    if (epi::PATH_GetExtension(name).empty())
+    if (std::filesystem::path(name).extension().empty())
         return nullptr;
 
     // Make a copy in case we need to pop a leading slash
@@ -1115,11 +1114,11 @@ epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name)
     if (name[0] == '/')
     {
         open_name = name.substr(1);
-        if (open_name == epi::PATH_GetFilename(open_name).string())
+        if (open_name == std::filesystem::path(open_name).string())
             root_only = true;
     }
 
-    std::string open_stem = epi::PATH_GetBasename(open_name).string();
+    std::string open_stem = std::filesystem::path(open_name).stem().string();
     epi::str_upper(open_stem);
 
     // quick file stem check to see if it's present at all
@@ -1127,7 +1126,7 @@ epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name)
         return nullptr;
 
     // Specific path given; attempt to open as-is, otherwise return NULL
-    if (open_name != epi::PATH_GetFilename(open_name).string())
+    if (open_name != std::filesystem::path(open_name).filename().string())
     {
         return pack->OpenFileByName(open_name);
     }
@@ -1148,7 +1147,7 @@ epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name)
         auto results = pack->search_files.equal_range(open_stem);
         for (auto file = results.first; file != results.second; ++file)
         {
-            if (epi::case_cmp(open_name, epi::PATH_GetFilename(file->second).string()) == 0)
+            if (epi::case_cmp(open_name, std::filesystem::path(file->second).filename().string()) == 0)
                 return pack->OpenFileByName(file->second);
         }
         return nullptr;
@@ -1182,7 +1181,7 @@ epi::file_c *Pack_OpenMatch(pack_file_c *pack, const std::string &name, const st
         for (auto ext : extensions)
         {
             stem_match.replace_extension(ext);
-            if (epi::case_cmp(stem_match.string(), epi::PATH_GetFilename(file->second).string()) == 0)
+            if (epi::case_cmp(stem_match.string(), std::filesystem::path(file->second).filename().string()) == 0)
                 return pack->OpenFileByName(file->second);
         }
     }
@@ -1202,8 +1201,8 @@ std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)
             pack_entry_c &entry = pack->dirs[d].entries[i];
 
             // split filename in stem + extension
-            std::string stem = epi::PATH_GetBasename(entry.name).string();
-            std::string ext  = epi::PATH_GetExtension(entry.name).string();
+            std::string stem = std::filesystem::path(entry.name).stem().string();
+            std::string ext  = std::filesystem::path(entry.name).extension().string();
 
             epi::str_lower(ext);
 

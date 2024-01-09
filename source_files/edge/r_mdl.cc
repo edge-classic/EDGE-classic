@@ -662,7 +662,7 @@ static inline void ModelCoordFunc(model_coord_data_t *data, int v_idx, HMM_Vec3 
         return;
     }
 
-    *texc = {point->skin_s, point->skin_t};
+    *texc = {{point->skin_s, point->skin_t}};
 
     multi_color_c *col = &data->nm_colors[n_vert->normal_idx];
 
@@ -758,7 +758,7 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
         skin_tex = W_ImageCache(fuzz_image, false);
 
         data.fuzz_mul = 0.8;
-        data.fuzz_add = {0, 0};
+        data.fuzz_add = {{0, 0}};
 
         data.im_right = 1.0;
         data.im_top   = 1.0;

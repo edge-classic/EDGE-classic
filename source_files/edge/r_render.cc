@@ -149,9 +149,9 @@ static inline void ClipPlaneEyeAngle(GLdouble *p, bam_angle_t ang)
 {
     HMM_Vec2 s, e;
 
-    s = {viewx, viewy};
+    s = {{viewx, viewy}};
 
-    e = {viewx + epi::BAM_Cos(ang), viewy + epi::BAM_Sin(ang)};
+    e = {{viewx + epi::BAM_Cos(ang), viewy + epi::BAM_Sin(ang)}};
 
     ClipPlaneHorizontalLine(p, s, e);
 }
@@ -407,8 +407,8 @@ static void MIR_SetClippers()
 
         HMM_Vec2 v1, v2;
 
-        v1 = {mir.def->seg->v1->X, mir.def->seg->v1->Y};
-        v2 = {mir.def->seg->v2->X, mir.def->seg->v2->Y};
+        v1 = {{mir.def->seg->v1->X, mir.def->seg->v1->Y}};
+        v2 = {{mir.def->seg->v2->X, mir.def->seg->v2->Y}};
 
         for (int k = i - 1; k >= 0; k--)
         {
@@ -759,7 +759,7 @@ static void WallCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec
     *lit_pos = *pos;
 }
 
-typedef struct
+typedef struct plane_coord_data_s
 {
     int           v_count;
     const HMM_Vec3 *vert;
@@ -808,7 +808,7 @@ static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Ve
         rgb[2] = data->B;
     }
 
-    HMM_Vec2 rxy = {(data->tx0 + pos->X), (data->ty0 + pos->Y)};
+    HMM_Vec2 rxy = {{(data->tx0 + pos->X), (data->ty0 + pos->Y)}};
 
     if (data->rotation)
         HMM_RotateV2(rxy, epi::Degrees_FromBAM(data->rotation));
@@ -1149,7 +1149,7 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     data.ty_mul = ty_mul;
 
     // TODO: make a unit vector
-    data.normal = {(y2 - y1), (x1 - x2), 0};
+    data.normal = {{(y2 - y1), (x1 - x2), 0}};
 
     data.tex_id     = tex_id;
     data.pass       = 0;
@@ -1512,7 +1512,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         }
     }
     rgbacol_t other_fc = (other ? other->props.fog_color : RGB_NO_VALUE);
-    float    other_fd = (other ? other->props.fog_density : RGB_NO_VALUE);
+    float    other_fd = (other ? other->props.fog_density : 0.0f);
     if (other_fc == RGB_NO_VALUE)
     {
         if (other)
@@ -1866,8 +1866,8 @@ static void DLIT_Flood(mobj_t *mo, void *dataptr)
             float x = sx + dx * col / (float)data->piece_col;
             float y = sy + dy * col / (float)data->piece_col;
 
-            data->vert[col * 2 + 0] = {x, y, z};
-            data->vert[col * 2 + 1] = {x, y, z + data->dh / data->piece_row};
+            data->vert[col * 2 + 0] = {{x, y, z}};
+            data->vert[col * 2 + 1] = {{x, y, z + data->dh / data->piece_row}};
         }
 
         mo->dlight.shader->WorldMix(GL_QUAD_STRIP, data->v_count, data->tex_id, 1.0, &data->pass, blending, false, data,
@@ -1922,7 +1922,7 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
     data.x_mat = surf->x_mat;
     data.y_mat = surf->y_mat;
 
-    data.normal = {0, 0, (float)face_dir};
+    data.normal = {{0, 0, (float)face_dir}};
 
     // determine number of pieces to subdivide the area into.
     // The more the better, upto a limit of 64 pieces, and
@@ -1981,8 +1981,8 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
             float x = sx + dx * col / (float)piece_col;
             float y = sy + dy * col / (float)piece_col;
 
-            data.vert[col * 2 + 0] = {x, y, z};
-            data.vert[col * 2 + 1] = {x, y, z + dh / piece_row};
+            data.vert[col * 2 + 0] = {{x, y, z}};
+            data.vert[col * 2 + 1] = {{x, y, z + dh / piece_row}};
         }
 
 #if 0 // DEBUGGING AIDE
@@ -2431,16 +2431,16 @@ bool RGL_CheckBBox(float *bspcoord)
         if (r_culling.d)
         {
             float closest = 1000000.0f;
-            float check   = M_PointToSegDistance({x1, y1}, {x2, y1}, {viewx, viewy});
+            float check   = M_PointToSegDistance({{x1, y1}}, {{x2, y1}}, {{viewx, viewy}});
             if (check < closest)
                 closest = check;
-            check = M_PointToSegDistance({x1, y1}, {x1, y2}, {viewx, viewy});
+            check = M_PointToSegDistance({{x1, y1}}, {{x1, y2}}, {{viewx, viewy}});
             if (check < closest)
                 closest = check;
-            check = M_PointToSegDistance({x2, y1}, {x2, y2}, {viewx, viewy});
+            check = M_PointToSegDistance({{x2, y1}}, {{x2, y2}}, {{viewx, viewy}});
             if (check < closest)
                 closest = check;
-            check = M_PointToSegDistance({x1, y2}, {x2, y2}, {viewx, viewy});
+            check = M_PointToSegDistance({{x1, y2}}, {{x2, y2}}, {{viewx, viewy}});
             if (check < closest)
                 closest = check;
 
@@ -2608,7 +2608,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
     data.x_mat.Y /= mir_scale;
     data.y_mat.X /= mir_scale;
     data.y_mat.Y /= mir_scale;
-    data.normal = {0, 0, (viewz > h) ? 1.0f : -1.0f};
+    data.normal = {{0, 0, (viewz > h) ? 1.0f : -1.0f}};
     data.tex_id   = tex_id;
     data.pass     = 0;
     data.blending = blending;
@@ -2854,7 +2854,7 @@ static void RGL_WalkSubsector(int num)
             float sx2 = seg->v2->X;
             float sy2 = seg->v2->Y;
 
-            if (M_PointToSegDistance({sx1, sy1}, {sx2, sy2}, {viewx, viewy}) <= (r_farclip.f + 500.0f))
+            if (M_PointToSegDistance({{sx1, sy1}}, {{sx2, sy2}}, {{viewx, viewy}}) <= (r_farclip.f + 500.0f))
             {
                 skip = false;
                 break;

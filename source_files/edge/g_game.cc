@@ -29,7 +29,6 @@
 #include <limits.h>
 
 #include "endianess.h"
-#include "path.h"
 #include "str_util.h"
 #include "filesystem.h"
 

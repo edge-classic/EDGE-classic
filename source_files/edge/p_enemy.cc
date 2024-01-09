@@ -185,7 +185,7 @@ void P_ActNoiseAlert(mobj_t *actor)
 //
 bool P_Move(mobj_t *actor, bool path)
 {
-    HMM_Vec3 orig_pos{actor->x, actor->y, actor->z};
+    HMM_Vec3 orig_pos{{actor->x, actor->y, actor->z}};
 
     float tryx;
     float tryy;

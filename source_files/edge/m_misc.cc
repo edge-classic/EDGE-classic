@@ -33,7 +33,6 @@
 #include "endianess.h"
 #include "file.h"
 #include "filesystem.h"
-#include "path.h"
 #include "str_lexer.h"
 #include "str_util.h"
 
@@ -300,7 +299,7 @@ void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar)
 
     // Set default SF2 location in s_soundfont CVAR
     // We can't store this as a CVAR default since it is path-dependent
-    s_soundfont = epi::PATH_Join(epi::PATH_Join(game_dir, "soundfont"), "Default.sf2").generic_string();
+    s_soundfont = std::filesystem::path(std::filesystem::path(game_dir).append("soundfont")).append("Default.sf2").generic_string();
 
     // Needed so that Smoothing/Upscaling is properly reset
     W_DeleteAllImages();
@@ -448,7 +447,7 @@ void M_ScreenShot(bool show_msg)
     {
         std::string base(epi::STR_Format("shot%02d.%s", i, extension));
 
-        fn = epi::PATH_Join(shot_dir, base);
+        fn = std::filesystem::path(shot_dir).append(base);
 
         if (!epi::FS_Access(fn, epi::file_c::ACCESS_READ))
         {
@@ -492,7 +491,7 @@ void M_MakeSaveScreenShot(void)
 
     std::filesystem::path filename;
     std::string           temp(epi::STR_Format("%s/%s.%s", "current", "head", extension));
-    filename = epi::PATH_Join(save_dir, temp);
+    filename = std::filesystem::path(save_dir).append(temp);
 
     epi::FS_Delete(filename);
 
@@ -527,10 +526,10 @@ void M_MakeSaveScreenShot(void)
 //
 std::filesystem::path M_ComposeFileName(std::filesystem::path dir, std::filesystem::path file)
 {
-    if (epi::PATH_IsAbsolute(file))
+    if (file.is_absolute())
         return file;
 
-    return epi::PATH_Join(dir, file.string());
+    return std::filesystem::path(dir).append(file.string());
 }
 
 epi::file_c *M_OpenComposedEPIFile(std::filesystem::path dir, std::filesystem::path file)

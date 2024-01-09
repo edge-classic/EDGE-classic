@@ -31,7 +31,6 @@
 
 #include "file.h"
 #include "filesystem.h"
-#include "path.h"
 #include "str_util.h"
 
 #include "m_argv.h"
@@ -229,13 +228,13 @@ void I_StartupMusic(void)
 {
     // Check for soundfonts and instrument banks
     std::vector<epi::dir_entry_c> sfd;
-    std::filesystem::path         soundfont_dir = epi::PATH_Join(game_dir, "soundfont");
+    std::filesystem::path         soundfont_dir = std::filesystem::path(game_dir).append("soundfont");
 
     // Always add the default/internal GENMIDI lump choice
     available_genmidis.push_back("GENMIDI");
     // Set default SF2 location in CVAR if needed
     if (s_soundfont.s.empty())
-        s_soundfont = epi::PATH_Join(soundfont_dir, "Default.sf2").generic_u8string();
+        s_soundfont = std::filesystem::path(soundfont_dir).append("Default.sf2").generic_u8string();
 
     if (!FS_ReadDir(sfd, soundfont_dir, "*.*"))
     {
@@ -247,7 +246,7 @@ void I_StartupMusic(void)
         {
             if (!sfd[i].is_dir)
             {
-                std::string ext = epi::PATH_GetExtension(sfd[i].name).string();
+                std::string ext = sfd[i].name.extension().string();
                 epi::str_lower(ext);
                 if (ext == ".sf2")
                 {
@@ -263,7 +262,7 @@ void I_StartupMusic(void)
     {
         // Check home_dir soundfont folder as well; create it if it doesn't exist (home_dir only)
         sfd.clear();
-        soundfont_dir = epi::PATH_Join(home_dir, "soundfont");
+        soundfont_dir = std::filesystem::path(home_dir).append("soundfont");
         if (!epi::FS_IsDir(soundfont_dir))
             epi::FS_MakeDir(soundfont_dir);
 
@@ -277,7 +276,7 @@ void I_StartupMusic(void)
             {
                 if (!sfd[i].is_dir)
                 {
-                    std::string ext = epi::PATH_GetExtension(sfd[i].name).string();
+                    std::string ext = sfd[i].name.extension().string();
                     epi::str_lower(ext);
                     if (ext == ".sf2")
                         available_soundfonts.push_back(sfd[i].name);

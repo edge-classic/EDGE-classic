@@ -15,7 +15,6 @@ add_library(
   math_color.cc
   math_crc.cc
   math_md5.cc
-  path.cc
   sound_data.cc
   sound_gather.cc
   sound_types.cc

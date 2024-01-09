@@ -21,7 +21,6 @@
 #include "file.h"
 #include "filesystem.h"
 #include "sound_types.h"
-#include "path.h"
 #include "str_util.h"
 #include "playlist.h"
 

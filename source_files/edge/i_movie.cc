@@ -18,7 +18,6 @@
 //  Adapted from the EDGE 2.x RoQ/FFMPEG implementation
 //----------------------------------------------------------------------------
 
-#include "path.h"
 #include "i_defs.h"
 #include "i_defs_gl.h"
 #include "i_sound.h"

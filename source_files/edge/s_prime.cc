@@ -20,7 +20,6 @@
 
 #include "file.h"
 #include "filesystem.h"
-#include "path.h"
 #include "str_util.h"
 
 #include "m_misc.h"
@@ -80,7 +79,7 @@ bool S_StartupPrime(void)
     if (!cvar_good)
     {
         I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
-        s_soundfont = epi::PATH_Join(epi::PATH_Join(game_dir, "soundfont"), "Default.sf2").generic_u8string();
+        s_soundfont = std::filesystem::path(std::filesystem::path(game_dir).append("soundfont")).append("Default.sf2").generic_u8string();
         if (!std::filesystem::exists(std::filesystem::u8path(s_soundfont.s)))
             I_Error("Primesynth: Cannot locate default soundfont (Default.sf2)! Please check the /soundfont directory "
                     "of your EDGE-Classic install!\n");

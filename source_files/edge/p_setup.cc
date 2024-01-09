@@ -1518,7 +1518,7 @@ static void LoadUDMFVertexes()
                 else if (key == "zceiling")
                     zc = epi::LEX_Double(value);
             }
-            vertexes[cur_vertex] = {x, y, zf, zc};
+            vertexes[cur_vertex] = {{{{{x, y, zf}}}, zc}};
             cur_vertex++;
         }
         else // consume other blocks
@@ -3031,8 +3031,8 @@ void GroupLines(void)
         // and the other two have it unset
         if (sector->linecount == 3 && udmf_level)
         {
-            sector->floor_vs_hilo = {-40000, 40000};
-            sector->ceil_vs_hilo  = {-40000, 40000};
+            sector->floor_vs_hilo = {{-40000, 40000}};
+            sector->ceil_vs_hilo  = {{-40000, 40000}};
             for (j = 0; j < 3; j++)
             {
                 vertex_t *vert   = sector->lines[j]->v1;
@@ -3045,25 +3045,25 @@ void GroupLines(void)
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_verts.push_back({vert->X, vert->Y, vert->Z});
+                        sector->floor_z_verts.push_back({{vert->X, vert->Y, vert->Z}});
                         if (vert->Z > sector->floor_vs_hilo.X)
                             sector->floor_vs_hilo.X = vert->Z;
                         if (vert->Z < sector->floor_vs_hilo.Y)
                             sector->floor_vs_hilo.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back({vert->X, vert->Y, sector->f_h});
+                        sector->floor_z_verts.push_back({{vert->X, vert->Y, sector->f_h}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
                         sector->ceil_vertex_slope = true;
-                        sector->ceil_z_verts.push_back({vert->X, vert->Y, vert->W});
+                        sector->ceil_z_verts.push_back({{vert->X, vert->Y, vert->W}});
                         if (vert->W > sector->ceil_vs_hilo.X)
                             sector->ceil_vs_hilo.X = vert->W;
                         if (vert->W < sector->ceil_vs_hilo.Y)
                             sector->ceil_vs_hilo.Y = vert->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back({vert->X, vert->Y, sector->c_h});
+                        sector->ceil_z_verts.push_back({{vert->X, vert->Y, sector->c_h}});
                 }
                 vert   = sector->lines[j]->v2;
                 add_it = true;
@@ -3075,25 +3075,25 @@ void GroupLines(void)
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_verts.push_back({vert->X, vert->Y, vert->Z});
+                        sector->floor_z_verts.push_back({{vert->X, vert->Y, vert->Z}});
                         if (vert->Z > sector->floor_vs_hilo.X)
                             sector->floor_vs_hilo.X = vert->Z;
                         if (vert->Z < sector->floor_vs_hilo.Y)
                             sector->floor_vs_hilo.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back({vert->X, vert->Y, sector->f_h});
+                        sector->floor_z_verts.push_back({{vert->X, vert->Y, sector->f_h}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
                         sector->ceil_vertex_slope = true;
-                        sector->ceil_z_verts.push_back({vert->X, vert->Y, vert->W});
+                        sector->ceil_z_verts.push_back({{vert->X, vert->Y, vert->W}});
                         if (vert->W > sector->ceil_vs_hilo.X)
                             sector->ceil_vs_hilo.X = vert->W;
                         if (vert->W < sector->ceil_vs_hilo.Y)
                             sector->ceil_vs_hilo.Y = vert->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back({vert->X, vert->Y, sector->c_h});
+                        sector->ceil_z_verts.push_back({{vert->X, vert->Y, sector->c_h}});
                 }
             }
             if (!sector->floor_vertex_slope)
@@ -3123,8 +3123,8 @@ void GroupLines(void)
         {
             int floor_z_lines = 0;
             int ceil_z_lines  = 0;
-            sector->floor_vs_hilo = {-40000, 40000};
-            sector->ceil_vs_hilo  = {-40000, 40000};
+            sector->floor_vs_hilo = {{-40000, 40000}};
+            sector->ceil_vs_hilo  = {{-40000, 40000}};
             for (j = 0; j < 4; j++)
             {
                 vertex_t *vert      = sector->lines[j]->v1;
@@ -3141,47 +3141,47 @@ void GroupLines(void)
                 {
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
-                        sector->floor_z_verts.push_back({vert->X, vert->Y, vert->Z});
+                        sector->floor_z_verts.push_back({{vert->X, vert->Y, vert->Z}});
                         if (vert->Z > sector->floor_vs_hilo.X)
                             sector->floor_vs_hilo.X = vert->Z;
                         if (vert->Z < sector->floor_vs_hilo.Y)
                             sector->floor_vs_hilo.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back({vert->X, vert->Y, sector->f_h});
+                        sector->floor_z_verts.push_back({{vert->X, vert->Y, sector->f_h}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
-                        sector->ceil_z_verts.push_back({vert->X, vert->Y, vert->W});
+                        sector->ceil_z_verts.push_back({{vert->X, vert->Y, vert->W}});
                         if (vert->W > sector->ceil_vs_hilo.X)
                             sector->ceil_vs_hilo.X = vert->W;
                         if (vert->W < sector->ceil_vs_hilo.Y)
                             sector->ceil_vs_hilo.Y = vert->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back({vert->X, vert->Y, sector->c_h});
+                        sector->ceil_z_verts.push_back({{vert->X, vert->Y, sector->c_h}});
                 }
                 if (add_it_v2)
                 {
                     if (vert2->Z < 32767.0f && vert2->Z > -32768.0f)
                     {
-                        sector->floor_z_verts.push_back({vert2->X, vert2->Y, vert2->Z});
+                        sector->floor_z_verts.push_back({{vert2->X, vert2->Y, vert2->Z}});
                         if (vert2->Z > sector->floor_vs_hilo.X)
                             sector->floor_vs_hilo.X = vert2->Z;
                         if (vert2->Z < sector->floor_vs_hilo.Y)
                             sector->floor_vs_hilo.Y = vert2->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back({vert2->X, vert2->Y, sector->f_h});
+                        sector->floor_z_verts.push_back({{vert2->X, vert2->Y, sector->f_h}});
                     if (vert2->W < 32767.0f && vert2->W > -32768.0f)
                     {
-                        sector->ceil_z_verts.push_back({vert2->X, vert2->Y, vert2->W});
+                        sector->ceil_z_verts.push_back({{vert2->X, vert2->Y, vert2->W}});
                         if (vert2->W > sector->ceil_vs_hilo.X)
                             sector->ceil_vs_hilo.X = vert2->W;
                         if (vert2->W < sector->ceil_vs_hilo.Y)
                             sector->ceil_vs_hilo.Y = vert2->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back({vert2->X, vert2->Y, sector->c_h});
+                        sector->ceil_z_verts.push_back({{vert2->X, vert2->Y, sector->c_h}});
                 }
                 if ((vert->Z < 32767.0f && vert->Z > -32768.0f) && (vert2->Z < 32767.0f && vert2->Z > -32768.0f) &&
                     AlmostEquals(vert->Z, vert2->Z))

@@ -47,7 +47,6 @@
 #include "file_sub.h"
 #include "filesystem.h"
 #include "math_md5.h"
-#include "path.h"
 #include "str_util.h"
 
 // DDF
@@ -942,8 +941,8 @@ void ProcessFixersForWad(data_file_c *df)
     {
         if (W_CheckNumForName("MAP33") > -1 && W_CheckNumForName("DMENUPIC") > -1)
         {
-            std::filesystem::path fix_path = epi::PATH_Join(game_dir, "edge_fixes");
-            fix_path                       = epi::PATH_Join(fix_path, "doom2_bfg.epk");
+            std::filesystem::path fix_path = std::filesystem::path(game_dir).append("edge_fixes");
+            fix_path.append("doom2_bfg.epk");
             if (epi::FS_Access(fix_path, epi::file_c::ACCESS_READ))
             {
                 W_AddPending(fix_path, FLKIND_EPK);
@@ -967,8 +966,8 @@ void ProcessFixersForWad(data_file_c *df)
     {
         if (epi::case_cmp(fix_checker, fixdefs[i]->md5_string) == 0)
         {
-            std::filesystem::path fix_path = epi::PATH_Join(game_dir, "edge_fixes");
-            fix_path                       = epi::PATH_Join(fix_path, fix_checker.append(".epk"));
+            std::filesystem::path fix_path = std::filesystem::path(game_dir).append("edge_fixes");
+            fix_path.append(fix_checker.append(".epk"));
             if (epi::FS_Access(fix_path, epi::file_c::ACCESS_READ))
             {
                 W_AddPending(fix_path, FLKIND_EPK);
@@ -997,7 +996,7 @@ void ProcessDehackedInWad(data_file_c *df)
     int         length = -1;
     const uint8_t *data   = (const uint8_t *)W_LoadLump(deh_lump, &length);
 
-    std::string bare_name = epi::PATH_GetFilename(df->name).string();
+    std::string bare_name = df->name.filename().string();
 
     std::string source = lump_name;
     source += " in ";
@@ -1010,7 +1009,7 @@ void ProcessDehackedInWad(data_file_c *df)
 
 static void ProcessDDFInWad(data_file_c *df)
 {
-    std::string bare_filename = epi::PATH_GetFilename(df->name).string();
+    std::string bare_filename = df->name.filename().string();
 
     for (size_t d = 0; d < DDF_NUM_TYPES; d++)
     {
@@ -1033,7 +1032,7 @@ static void ProcessDDFInWad(data_file_c *df)
 
 static void ProcessCoalInWad(data_file_c *df)
 {
-    std::string bare_filename = epi::PATH_GetFilename(df->name).string();
+    std::string bare_filename = df->name.filename().string();
 
     wad_file_c *wad = df->wad;
 
@@ -1055,7 +1054,7 @@ static void ProcessCoalInWad(data_file_c *df)
 
 static void ProcessLuaInWad(data_file_c *df)
 {
-    std::string bare_filename = epi::PATH_GetFilename(df->name).string();
+    std::string bare_filename = df->name.filename().string();
 
     wad_file_c *wad = df->wad;
 
@@ -1216,12 +1215,12 @@ std::filesystem::path W_BuildNodesForWad(data_file_c *df)
         return "";
 
     // determine XWA filename in the cache
-    std::filesystem::path cache_name = epi::PATH_GetBasename(df->name);
+    std::filesystem::path cache_name = df->name.stem();
     cache_name += "-";
     cache_name += df->wad->md5_string;
     cache_name += ".xwa";
 
-    std::filesystem::path xwa_filename = epi::PATH_Join(cache_dir, cache_name.string());
+    std::filesystem::path xwa_filename = std::filesystem::path(cache_dir).append(cache_name.string());
 
     I_Debugf("XWA filename: %s\n", xwa_filename.u8string().c_str());
 

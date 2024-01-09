@@ -253,15 +253,15 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
     psprite_coord_data_t data;
 
-    data.vert[0] = {x1b, y1b, 0};
-    data.vert[1] = {x1t, y1t, 0};
-    data.vert[2] = {x2t, y1t, 0};
-    data.vert[3] = {x2b, y2b, 0};
+    data.vert[0] = {{x1b, y1b, 0}};
+    data.vert[1] = {{x1t, y1t, 0}};
+    data.vert[2] = {{x2t, y1t, 0}};
+    data.vert[3] = {{x2b, y2b, 0}};
 
-    data.texc[0] = {tex_x1, tex_bot_h};
-    data.texc[1] = {tex_x1, tex_top_h};
-    data.texc[2] = {tex_x2, tex_top_h};
-    data.texc[3] = {tex_x2, tex_bot_h};
+    data.texc[0] = {{tex_x1, tex_bot_h}};
+    data.texc[1] = {{tex_x1, tex_top_h}};
+    data.texc[2] = {{tex_x2, tex_top_h}};
+    data.texc[3] = {{tex_x2, tex_bot_h}};
 
     float away = 120.0;
 
@@ -382,7 +382,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
             dest->pos     = data.vert[v_idx];
             dest->texc[0] = data.texc[v_idx];
 
-            dest->normal = {0, 0, 1};
+            dest->normal = {{0, 0, 1}};
 
             if (is_fuzzy)
             {
@@ -1357,17 +1357,17 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
     data.mo = mo;
 
-    data.vert[0] = {x1b + dx, y1b + dy, z1b};
-    data.vert[1] = {x1t + dx, y1t + dy, z1t};
-    data.vert[2] = {x2t + dx, y2t + dy, z2t};
-    data.vert[3] = {x2b + dx, y2b + dy, z2b};
+    data.vert[0] = {{x1b + dx, y1b + dy, z1b}};
+    data.vert[1] = {{x1t + dx, y1t + dy, z1t}};
+    data.vert[2] = {{x2t + dx, y2t + dy, z2t}};
+    data.vert[3] = {{x2b + dx, y2b + dy, z2b}};
 
-    data.texc[0] = {tex_x1, tex_y1};
-    data.texc[1] = {tex_x1, tex_y2};
-    data.texc[2] = {tex_x2, tex_y2};
-    data.texc[3] = {tex_x2, tex_y1};
+    data.texc[0] = {{tex_x1, tex_y1}};
+    data.texc[1] = {{tex_x1, tex_y2}};
+    data.texc[2] = {{tex_x2, tex_y2}};
+    data.texc[3] = {{tex_x2, tex_y1}};
 
-    data.normal = {-viewcos, -viewsin, 0};
+    data.normal = {{-viewcos, -viewsin, 0}};
 
     data.col[0].Clear();
     data.col[1].Clear();
@@ -1388,7 +1388,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
     float  fuzz_mul = 0;
     HMM_Vec2 fuzz_add;
 
-    fuzz_add = {0, 0};
+    fuzz_add = {{0, 0}};
 
     if (is_fuzzy)
     {

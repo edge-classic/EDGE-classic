@@ -21,8 +21,6 @@
 
 #include "local.h"
 
-#include "path.h"
-
 #include "image.h"
 
 static imagedef_c *dynamic_image;

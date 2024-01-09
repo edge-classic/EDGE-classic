@@ -880,8 +880,8 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
 
     if (LUA_UseLuaHud())
         LUA_SetVector3(LUA_GetGlobalVM(), "player", "inventory_event_handler",
-                       HMM_Vec3{cmd->extbuttons & EBT_INVPREV ? 1.0f : 0.0f, cmd->extbuttons & EBT_INVUSE ? 1.0f : 0.0f,
-                                   cmd->extbuttons & EBT_INVNEXT ? 1.0f : 0.0f});
+                       HMM_Vec3{{cmd->extbuttons & EBT_INVPREV ? 1.0f : 0.0f, cmd->extbuttons & EBT_INVUSE ? 1.0f : 0.0f,
+                                   cmd->extbuttons & EBT_INVNEXT ? 1.0f : 0.0f}});
     else
         VM_SetVector(ui_vm, "player", "inventory_event_handler", cmd->extbuttons & EBT_INVPREV ? 1 : 0,
                      cmd->extbuttons & EBT_INVUSE ? 1 : 0, cmd->extbuttons & EBT_INVNEXT ? 1 : 0);

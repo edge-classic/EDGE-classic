@@ -77,7 +77,6 @@
 #include "i_sdlinc.h"
 
 #include "font.h"
-#include "path.h"
 #include "str_util.h"
 
 #include "playlist.h"
@@ -1024,7 +1023,7 @@ void M_OptDrawer()
             fontType  = styledef_c::T_ALT;
             TEXTscale = style->def->text[fontType].scale;
             HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
-                         epi::PATH_GetBasename(s_soundfont.s).u8string().c_str());
+                         std::filesystem::path(s_soundfont.s).stem().u8string().c_str());
         }
 
         // Draw current GENMIDI
@@ -1033,7 +1032,7 @@ void M_OptDrawer()
             fontType  = styledef_c::T_ALT;
             TEXTscale = style->def->text[fontType].scale;
             HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
-                         s_genmidi.s.empty() ? "default" : epi::PATH_GetBasename(s_genmidi.s).u8string().c_str());
+                         s_genmidi.s.empty() ? "default" : std::filesystem::path(s_genmidi.s).stem().u8string().c_str());
         }
 
         // -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -2039,7 +2038,7 @@ static void M_ChangeSoundfont(int keypressed, cvar_c *cvar)
     if (sf_pos < 0)
     {
         I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
-        s_soundfont = epi::PATH_Join(game_dir, "soundfont/Default.sf2").generic_u8string();
+        s_soundfont = std::filesystem::path(game_dir).append("soundfont/Default.sf2").generic_u8string();
         return;
     }
 

@@ -282,8 +282,8 @@ static bool CorpseShouldSlide(mobj_t *mo)
     // Vertex slope check here?
     if (mo->subsector->sector->floor_vertex_slope)
     {
-        HMM_Vec3 line_a{mo->x, mo->y, -40000};
-        HMM_Vec3 line_b{mo->x, mo->y, 40000};
+        HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
+        HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
         float  z_test =
             M_LinePlaneIntersection(line_a, line_b, mo->subsector->sector->floor_z_verts[0],
                                     mo->subsector->sector->floor_z_verts[1], mo->subsector->sector->floor_z_verts[2],
@@ -295,8 +295,8 @@ static bool CorpseShouldSlide(mobj_t *mo)
 
     if (mo->subsector->sector->ceil_vertex_slope)
     {
-        HMM_Vec3 line_a{mo->x, mo->y, -40000};
-        HMM_Vec3 line_b{mo->x, mo->y, 40000};
+        HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
+        HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
         float  z_test =
             M_LinePlaneIntersection(line_a, line_b, mo->subsector->sector->ceil_z_verts[0],
                                     mo->subsector->sector->ceil_z_verts[1], mo->subsector->sector->ceil_z_verts[2],
@@ -639,7 +639,7 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
     {
         int countx = 0;
         int county = 0;
-        HMM_Vec2 cumulative = {0,0};
+        HMM_Vec2 cumulative = {{0,0}};
         // handle push sectors
         for (touch_node_t *tn = mo->touch_sectors; tn ;tn=tn->mo_next)
         {
@@ -2300,7 +2300,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 
     if (sec->floor_vertex_slope)
     {
-        float sz = M_LinePlaneIntersection({x, y, -40000}, {x, y, 40000}, sec->floor_z_verts[0], sec->floor_z_verts[1],
+        float sz = M_LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->floor_z_verts[0], sec->floor_z_verts[1],
                                            sec->floor_z_verts[2], sec->floor_vs_normal)
                        .Z;
         if (std::isfinite(sz))
@@ -2308,7 +2308,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
     }
     if (sec->ceil_vertex_slope)
     {
-        float sz = M_LinePlaneIntersection({x, y, -40000}, {x, y, 40000}, sec->ceil_z_verts[0], sec->ceil_z_verts[1],
+        float sz = M_LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->ceil_z_verts[0], sec->ceil_z_verts[1],
                                            sec->ceil_z_verts[2], sec->ceil_vs_normal)
                        .Z;
         if (std::isfinite(sz))

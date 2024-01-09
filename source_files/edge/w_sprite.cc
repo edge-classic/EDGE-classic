@@ -32,7 +32,6 @@
 
 // EPI
 #include "endianess.h"
-#include "path.h"
 #include "str_util.h"
 
 #include "e_main.h"
@@ -366,7 +365,7 @@ static void FillSpriteFrames(int file)
                 for (; L < packsprites.size(); L++)
                 {
                     std::string spritebase;
-                    epi::STR_TextureNameFromFilename(spritebase, epi::PATH_GetBasename(packsprites[L]).string());
+                    epi::STR_TextureNameFromFilename(spritebase, std::filesystem::path(packsprites[L]).stem().string());
 
                     if (spritebase.size() != spr_len + 2 && spritebase.size() != spr_len + 4)
                     {

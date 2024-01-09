@@ -28,7 +28,6 @@
 
 // EPI
 #include "epi.h"
-#include "path.h"
 #include "str_util.h"
 
 // EDGE
@@ -2153,16 +2152,16 @@ ddf_type_e DDF_LumpToType(const std::string &name)
 
 ddf_type_e DDF_FilenameToType(const std::filesystem::path &path)
 {
-    std::filesystem::path check = epi::PATH_GetExtension(path);
+    std::filesystem::path check = path.extension();
 
     if (epi::case_cmp(check.u8string(), ".rts") == 0)
         return DDF_RadScript;
 
-    check = epi::PATH_GetFilename(path);
+    check = path.filename();
 
     for (size_t i = 0; i < DDF_NUM_TYPES; i++)
         if (epi::case_cmp(check.u8string(), ddf_readers[i].pack_name) == 0 ||
-            epi::case_cmp(epi::PATH_GetBasename(check).u8string(), ddf_readers[i].lump_name) == 0)
+            epi::case_cmp(check.stem().u8string(), ddf_readers[i].lump_name) == 0)
             return ddf_readers[i].type;
 
     return DDF_UNKNOWN;

@@ -19,6 +19,8 @@
 #ifndef __EPI_SOUND_TYPES_H__
 #define __EPI_SOUND_TYPES_H__
 
+#include <filesystem>
+
 #include "file.h"
 
 namespace epi

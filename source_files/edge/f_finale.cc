@@ -32,7 +32,6 @@
 #include "i_defs_gl.h"
 
 #include "main.h"
-#include "path.h"
 
 #include "dm_defs.h"
 #include "dm_state.h"

@@ -2274,7 +2274,7 @@ void P_UpdateSpecials(bool extra_tic)
                 ld->side[0]->top.offset.Y = fmod(
                     ld->side[0]->top.offset.Y + (ld->side[0]->top.scroll.Y + ld->side[0]->top.net_scroll.Y) * factor,
                     ld->side[0]->top.image->actual_h);
-                ld->side[0]->top.net_scroll = {0, 0};
+                ld->side[0]->top.net_scroll = {{0, 0}};
             }
             if (ld->side[0]->middle.image)
             {
@@ -2286,7 +2286,7 @@ void P_UpdateSpecials(bool extra_tic)
                     fmod(ld->side[0]->middle.offset.Y +
                              (ld->side[0]->middle.scroll.Y + ld->side[0]->middle.net_scroll.Y) * factor,
                          ld->side[0]->middle.image->actual_h);
-                ld->side[0]->middle.net_scroll = {0, 0};
+                ld->side[0]->middle.net_scroll = {{0, 0}};
             }
             if (ld->side[0]->bottom.image)
             {
@@ -2298,7 +2298,7 @@ void P_UpdateSpecials(bool extra_tic)
                     fmod(ld->side[0]->bottom.offset.Y +
                              (ld->side[0]->bottom.scroll.Y + ld->side[0]->bottom.net_scroll.Y) * factor,
                          ld->side[0]->bottom.image->actual_h);
-                ld->side[0]->bottom.net_scroll = {0, 0};
+                ld->side[0]->bottom.net_scroll = {{0, 0}};
             }
         }
 
@@ -2312,7 +2312,7 @@ void P_UpdateSpecials(bool extra_tic)
                 ld->side[1]->top.offset.Y = fmod(
                     ld->side[1]->top.offset.Y + (ld->side[1]->top.scroll.Y + ld->side[1]->top.net_scroll.Y) * factor,
                     ld->side[1]->top.image->actual_h);
-                ld->side[1]->top.net_scroll = {0, 0};
+                ld->side[1]->top.net_scroll = {{0, 0}};
             }
             if (ld->side[1]->middle.image)
             {
@@ -2324,7 +2324,7 @@ void P_UpdateSpecials(bool extra_tic)
                     fmod(ld->side[1]->middle.offset.Y +
                              (ld->side[1]->middle.scroll.Y + ld->side[1]->middle.net_scroll.Y) * factor,
                          ld->side[1]->middle.image->actual_h);
-                ld->side[1]->middle.net_scroll = {0, 0};
+                ld->side[1]->middle.net_scroll = {{0, 0}};
             }
             if (ld->side[1]->bottom.image)
             {
@@ -2336,7 +2336,7 @@ void P_UpdateSpecials(bool extra_tic)
                     fmod(ld->side[1]->bottom.offset.Y +
                              (ld->side[1]->bottom.scroll.Y + ld->side[1]->bottom.net_scroll.Y) * factor,
                          ld->side[1]->bottom.image->actual_h);
-                ld->side[1]->bottom.net_scroll = {0, 0};
+                ld->side[1]->bottom.net_scroll = {{0, 0}};
             }
         }
     }
@@ -2438,9 +2438,9 @@ void P_UpdateSpecials(bool extra_tic)
         sec->props.push.Y   = sec->props.push.Y + sec->props.net_push.Y;
 
         // Reset dynamic stuff
-        sec->props.net_push   = {0, 0, 0};
-        sec->floor.net_scroll = {0, 0};
-        sec->ceil.net_scroll  = {0, 0};
+        sec->props.net_push   = {{0, 0, 0}};
+        sec->floor.net_scroll = {{0, 0}};
+        sec->ceil.net_scroll  = {{0, 0}};
     }
 
     // DO BUTTONS

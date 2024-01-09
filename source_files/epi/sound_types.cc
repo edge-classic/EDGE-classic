@@ -18,7 +18,6 @@
 
 #include "epi.h"
 
-#include "path.h"
 #include "sound_types.h"
 #include "str_util.h"
 
@@ -122,7 +121,7 @@ sound_format_e Sound_DetectFormat(uint8_t *data, int song_len)
 
 sound_format_e Sound_FilenameToFormat(const std::filesystem::path &filename)
 {
-    std::string ext = epi::PATH_GetExtension(filename).string();
+    std::string ext = filename.extension().string();
 
     str_lower(ext);
 

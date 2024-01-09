@@ -21,8 +21,6 @@
 
 #include "local.h"
 
-#include "path.h"
-
 #include "movie.h"
 
 static moviedef_c *dynamic_movie;

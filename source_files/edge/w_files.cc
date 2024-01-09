@@ -33,7 +33,6 @@
 #include "file.h"
 #include "file_sub.h"
 #include "filesystem.h"
-#include "path.h"
 
 // DDF
 #include "main.h"
@@ -136,7 +135,7 @@ static void W_ExternalDDF(data_file_c *df)
 {
     ddf_type_e type = DDF_FilenameToType(df->name);
 
-    std::string bare_name = epi::PATH_GetFilename(df->name).string();
+    std::string bare_name = df->name.filename().string();
 
     if (type == DDF_UNKNOWN)
         I_Error("Unknown DDF filename: %s\n", bare_name.c_str());

@@ -19,7 +19,6 @@
 #include "epi.h"
 
 #include "image_funcs.h"
-#include "path.h"
 #include "str_util.h"
 
 #define STB_RECT_PACK_IMPLEMENTATION
@@ -126,7 +125,7 @@ image_format_e Image_DetectFormat(uint8_t *header, int header_len, int file_size
 
 image_format_e Image_FilenameToFormat(const std::filesystem::path &filename)
 {
-    std::string ext = epi::PATH_GetExtension(filename).string();
+    std::string ext = filename.extension().string();
 
     str_lower(ext);
 

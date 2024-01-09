@@ -117,9 +117,9 @@ typedef struct region_properties_s
     // pushing sector information (normally all zero)
     HMM_Vec3 push;
 
-    HMM_Vec3 net_push = {0, 0, 0};
+    HMM_Vec3 net_push = {{0, 0, 0}};
 
-    HMM_Vec3 old_push = {0, 0, 0};
+    HMM_Vec3 old_push = {{0, 0, 0}};
 
     // sector fog
     rgbacol_t fog_color   = RGB_NO_VALUE;
@@ -155,8 +155,8 @@ typedef struct surface_s
     HMM_Vec2 offset;
     HMM_Vec2 scroll;
 
-    HMM_Vec2 net_scroll = {0, 0};
-    HMM_Vec2 old_scroll = {0, 0};
+    HMM_Vec2 net_scroll = {{0, 0}};
+    HMM_Vec2 old_scroll = {{0, 0}};
 
     // lighting override (as in BOOM).  Usually NULL.
     region_properties_t *override_p;
@@ -558,9 +558,9 @@ typedef struct secanim_s
     struct sector_s  *scroll_sec_ref     = NULL;
     const linetype_c *scroll_special_ref = NULL;
     line_s           *scroll_line_ref    = NULL;
-    HMM_Vec2            floor_scroll       = {0, 0};
-    HMM_Vec2            ceil_scroll        = {0, 0};
-    HMM_Vec3            push               = {0, 0, 0};
+    HMM_Vec2            floor_scroll       = {{0, 0}};
+    HMM_Vec2            ceil_scroll        = {{0, 0}};
+    HMM_Vec3            push               = {{0, 0, 0}};
     bool              permanent          = false;
     float             last_height        = 0.0f;
 } secanim_t;

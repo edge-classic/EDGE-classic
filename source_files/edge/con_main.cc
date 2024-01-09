@@ -20,7 +20,6 @@
 
 #include "filesystem.h"
 #include "math_crc.h"
-#include "path.h"
 #include "str_util.h"
 
 #include "language.h"
@@ -128,7 +127,7 @@ int CMD_Readme(char **argv, int argc)
         // in the load order
         for (int i = data_files.size() - 1; i > 0; i--)
         {
-            std::filesystem::path readme_check = epi::PATH_GetFilename(data_files[i]->name);
+            std::filesystem::path readme_check = data_files[i]->name.filename();
             readme_check.replace_extension(".txt");
             readme_file = W_OpenPackFile(readme_check.string());
             if (readme_file)
@@ -208,12 +207,12 @@ int CMD_Dir(char **argv, int argc)
         return 0;
     }
 
-    I_Printf("Directory contents for %s matching %s\n", epi::PATH_GetDir(fsd[0].name).u8string().c_str(), mask.c_str());
+    I_Printf("Directory contents for %s matching %s\n", std::filesystem::path(fsd[0].name).remove_filename().u8string().c_str(), mask.c_str());
 
     for (size_t i = 0; i < fsd.size(); i++)
     {
         I_Printf("%4d: %10d  %s  \"%s\"\n", (int)i + 1, (int)fsd[i].size, fsd[i].is_dir ? "DIR" : "   ",
-                 epi::PATH_GetFilename(fsd[i].name).u8string().c_str());
+                 fsd[i].name.filename().u8string().c_str());
     }
 
     return 0;

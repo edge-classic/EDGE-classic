@@ -20,8 +20,8 @@
 #include "str_compare.h"
 #include "str_util.h"
 
-#include <cstring>
-#include <cctype>
+#include <string.h>
+#include <ctype.h>
 #include <locale>
 
 #undef strcmp

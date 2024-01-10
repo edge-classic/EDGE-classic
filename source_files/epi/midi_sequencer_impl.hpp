@@ -25,8 +25,8 @@
 #include "midi_sequencer.hpp"
 #include <stdio.h>
 #include <memory>
-#include <cstring>
-#include <cerrno>
+#include <string.h>
+#include <errno.h>
 #include <iterator>  // std::back_inserter
 #include <algorithm> // std::copy
 #include <set>

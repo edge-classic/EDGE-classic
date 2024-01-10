@@ -24,7 +24,7 @@
 
 #include <sys/types.h>
 #ifdef _MSC_VER
-#include <ctime>
+#include <time.h>
 #else
 #include <sys/time.h>
 #endif

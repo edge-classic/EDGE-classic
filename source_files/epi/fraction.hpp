@@ -11,8 +11,8 @@
 #ifndef bqw_fraction_h
 #define bqw_fraction_h
 
-#include <cmath>
-#include <limits>
+#include <math.h>
+#include <limits.h>
 
 template <typename inttype = int> class fraction
 {

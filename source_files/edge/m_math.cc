@@ -47,7 +47,7 @@
 #include "m_math.h"
 
 #ifdef __APPLE__
-#include <cmath>
+#include <math.h>
 #endif
 
 void M_Angle2Matrix(bam_angle_t ang, HMM_Vec2 *x, HMM_Vec2 *y)
@@ -65,8 +65,7 @@ HMM_Vec3 M_TripleCrossProduct(HMM_Vec3 v1, HMM_Vec3 v2, HMM_Vec3 v3)
 }
 
 // If the plane normal is precalculated; otherwise use the other version
-HMM_Vec3 M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_a, HMM_Vec3 plane_b, HMM_Vec3 plane_c,
-                               HMM_Vec3 plane_normal)
+HMM_Vec3 M_LinePlaneIntersection(HMM_Vec3 line_a, HMM_Vec3 line_b, HMM_Vec3 plane_c, HMM_Vec3 plane_normal)
 {
     float  n = HMM_DotV3(plane_normal, HMM_SubV3(plane_c, line_a));
     HMM_Vec3 line_subtract = HMM_SubV3(line_b, line_a);

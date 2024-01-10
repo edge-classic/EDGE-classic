@@ -35,7 +35,7 @@
 // #include <sys/signal.h>
 
 #include <vector>
-#include <cfloat>
+#include <float.h>
 
 #include "coal.h"
 

@@ -70,7 +70,7 @@
 
 #include "i_sdlinc.h"
 
-#include <cmath>
+#include <math.h>
 
 // Program stuff
 int key_screenshot;

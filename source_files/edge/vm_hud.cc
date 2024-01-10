@@ -41,7 +41,7 @@
 #include "s_sound.h"
 #include "rad_trig.h" //Lobo: need this to access RTS
 
-#include <cmath>
+#include <math.h>
 
 extern cvar_c      r_doubleframes;
 extern coal::vm_c *ui_vm;

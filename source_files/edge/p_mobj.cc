@@ -285,8 +285,7 @@ static bool CorpseShouldSlide(mobj_t *mo)
         HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
         HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
         float  z_test =
-            M_LinePlaneIntersection(line_a, line_b, mo->subsector->sector->floor_z_verts[0],
-                                    mo->subsector->sector->floor_z_verts[1], mo->subsector->sector->floor_z_verts[2],
+            M_LinePlaneIntersection(line_a, line_b, mo->subsector->sector->floor_z_verts[2],
                                     mo->subsector->sector->floor_vs_normal)
                 .Z;
         if (std::isfinite(z_test))
@@ -298,8 +297,7 @@ static bool CorpseShouldSlide(mobj_t *mo)
         HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
         HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
         float  z_test =
-            M_LinePlaneIntersection(line_a, line_b, mo->subsector->sector->ceil_z_verts[0],
-                                    mo->subsector->sector->ceil_z_verts[1], mo->subsector->sector->ceil_z_verts[2],
+            M_LinePlaneIntersection(line_a, line_b, mo->subsector->sector->ceil_z_verts[2],
                                     mo->subsector->sector->ceil_vs_normal)
                 .Z;
         if (std::isfinite(z_test))
@@ -2300,16 +2298,14 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
 
     if (sec->floor_vertex_slope)
     {
-        float sz = M_LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->floor_z_verts[0], sec->floor_z_verts[1],
-                                           sec->floor_z_verts[2], sec->floor_vs_normal)
+        float sz = M_LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->floor_z_verts[2], sec->floor_vs_normal)
                        .Z;
         if (std::isfinite(sz))
             f_slope_z = sz - sec->f_h;
     }
     if (sec->ceil_vertex_slope)
     {
-        float sz = M_LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->ceil_z_verts[0], sec->ceil_z_verts[1],
-                                           sec->ceil_z_verts[2], sec->ceil_vs_normal)
+        float sz = M_LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->ceil_z_verts[2], sec->ceil_vs_normal)
                        .Z;
         if (std::isfinite(sz))
             c_slope_z = sec->c_h - sz;

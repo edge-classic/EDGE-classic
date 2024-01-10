@@ -113,7 +113,7 @@
 
 #include "defaults.h"
 
-#include <cmath>
+#include <math.h>
 
 int  option_menuon = 0;
 bool fkey_menu     = false;

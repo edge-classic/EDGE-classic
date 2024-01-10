@@ -29,8 +29,8 @@
 
 #include "epi.h"
 #include "image_blur.h"
-#include <cmath>
-#include <cstring>
+#include <math.h>
+#include <string.h>
 
 namespace epi
 {
@@ -40,14 +40,14 @@ namespace Blur
 void std_to_box(int boxes[], float sigma, int n)
 {
     // ideal filter width
-    float wi = std::sqrt((12 * sigma * sigma / n) + 1);
-    int   wl = std::floor(wi);
+    float wi = sqrt((12 * sigma * sigma / n) + 1);
+    int   wl = floor(wi);
     if (wl % 2 == 0)
         wl--;
     int wu = wl + 2;
 
     float mi = (12 * sigma * sigma - n * wl * wl - 4 * n * wl - 3 * n) / (-4 * wl - 4);
-    int   m  = std::round(mi);
+    int   m  = round(mi);
 
     for (int i = 0; i < n; i++)
         boxes[i] = ((i < m ? wl : wu) - 1) / 2;
@@ -78,9 +78,9 @@ void horizontal_blur_rgb(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
             val[0] += in[ri * c + 0] - fv[0];
             val[1] += in[ri * c + 1] - fv[1];
             val[2] += in[ri * c + 2] - fv[2];
-            out[ti * c + 0] = std::round(val[0] * iarr);
-            out[ti * c + 1] = std::round(val[1] * iarr);
-            out[ti * c + 2] = std::round(val[2] * iarr);
+            out[ti * c + 0] = round(val[0] * iarr);
+            out[ti * c + 1] = round(val[1] * iarr);
+            out[ti * c + 2] = round(val[2] * iarr);
         }
 
         for (int j = r + 1; j < w - r; j++, ri++, ti++, li++)
@@ -88,9 +88,9 @@ void horizontal_blur_rgb(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
             val[0] += in[ri * c + 0] - in[li * c + 0];
             val[1] += in[ri * c + 1] - in[li * c + 1];
             val[2] += in[ri * c + 2] - in[li * c + 2];
-            out[ti * c + 0] = std::round(val[0] * iarr);
-            out[ti * c + 1] = std::round(val[1] * iarr);
-            out[ti * c + 2] = std::round(val[2] * iarr);
+            out[ti * c + 0] = round(val[0] * iarr);
+            out[ti * c + 1] = round(val[1] * iarr);
+            out[ti * c + 2] = round(val[2] * iarr);
         }
 
         for (int j = w - r; j < w; j++, ti++, li++)
@@ -98,9 +98,9 @@ void horizontal_blur_rgb(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
             val[0] += lv[0] - in[li * c + 0];
             val[1] += lv[1] - in[li * c + 1];
             val[2] += lv[2] - in[li * c + 2];
-            out[ti * c + 0] = std::round(val[0] * iarr);
-            out[ti * c + 1] = std::round(val[1] * iarr);
-            out[ti * c + 2] = std::round(val[2] * iarr);
+            out[ti * c + 0] = round(val[0] * iarr);
+            out[ti * c + 1] = round(val[1] * iarr);
+            out[ti * c + 2] = round(val[2] * iarr);
         }
     }
 }
@@ -131,9 +131,9 @@ void total_blur_rgb(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
             val[0] += in[ri * c + 0] - fv[0];
             val[1] += in[ri * c + 1] - fv[1];
             val[2] += in[ri * c + 2] - fv[2];
-            out[ti * c + 0] = std::round(val[0] * iarr);
-            out[ti * c + 1] = std::round(val[1] * iarr);
-            out[ti * c + 2] = std::round(val[2] * iarr);
+            out[ti * c + 0] = round(val[0] * iarr);
+            out[ti * c + 1] = round(val[1] * iarr);
+            out[ti * c + 2] = round(val[2] * iarr);
         }
 
         for (int j = r + 1; j < h - r; j++, ri += w, ti += w, li += w)
@@ -141,9 +141,9 @@ void total_blur_rgb(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
             val[0] += in[ri * c + 0] - in[li * c + 0];
             val[1] += in[ri * c + 1] - in[li * c + 1];
             val[2] += in[ri * c + 2] - in[li * c + 2];
-            out[ti * c + 0] = std::round(val[0] * iarr);
-            out[ti * c + 1] = std::round(val[1] * iarr);
-            out[ti * c + 2] = std::round(val[2] * iarr);
+            out[ti * c + 0] = round(val[0] * iarr);
+            out[ti * c + 1] = round(val[1] * iarr);
+            out[ti * c + 2] = round(val[2] * iarr);
         }
 
         for (int j = h - r; j < h; j++, ti += w, li += w)
@@ -151,9 +151,9 @@ void total_blur_rgb(uint8_t *in, uint8_t *out, int w, int h, int c, int r)
             val[0] += lv[0] - in[li * c + 0];
             val[1] += lv[1] - in[li * c + 1];
             val[2] += lv[2] - in[li * c + 2];
-            out[ti * c + 0] = std::round(val[0] * iarr);
-            out[ti * c + 1] = std::round(val[1] * iarr);
-            out[ti * c + 2] = std::round(val[2] * iarr);
+            out[ti * c + 0] = round(val[0] * iarr);
+            out[ti * c + 1] = round(val[1] * iarr);
+            out[ti * c + 2] = round(val[2] * iarr);
         }
     }
 }

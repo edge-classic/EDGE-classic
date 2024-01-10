@@ -29,7 +29,7 @@
 #include <string.h>
 #include <assert.h>
 #if defined __arm__ || defined __aarch64__
-#include <cstddef> // offsetof
+#include <stddef.h> // offsetof
 #endif
 
 #include "deh_i_defs.h"

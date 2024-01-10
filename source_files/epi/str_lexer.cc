@@ -19,8 +19,8 @@
 #include "epi.h"
 #include "str_lexer.h"
 
-#include <cstdlib>
-#include <cctype>
+#include <stdlib.h>
+#include <ctype.h>
 
 namespace epi
 {

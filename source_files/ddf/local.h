@@ -25,7 +25,7 @@
 #include "main.h"
 #include "states.h"
 
-#include <cstddef>
+#include <stddef.h>
 
 //
 // This structure forms the basis for the command checking, it hands back a code

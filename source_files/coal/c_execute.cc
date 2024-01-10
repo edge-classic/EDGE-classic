@@ -32,7 +32,7 @@
 #include <errno.h>
 #include <assert.h>
 
-#include <cfloat>
+#include <float.h>
 
 #include "coal.h"
 

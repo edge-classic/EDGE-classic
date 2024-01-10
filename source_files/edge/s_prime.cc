@@ -192,7 +192,7 @@ class prime_player_c : public abstract_music_c
 
     static void rtSysEx(void *userdata, const uint8_t *msg, size_t size)
     {
-        edge_synth->processSysEx(reinterpret_cast<const char *>(msg), size);
+        edge_synth->processSysEx((const char *)(msg), size);
     }
 
     static void rtDeviceSwitch(void *userdata, size_t track, const char *data, size_t length)
@@ -212,7 +212,7 @@ class prime_player_c : public abstract_music_c
 
     static void playSynth(void *userdata, uint8_t *stream, size_t length)
     {
-        edge_synth->render_s16(reinterpret_cast<int16_t *>(stream), length / 2);
+        edge_synth->render_s16((int16_t *)(stream), length / 2);
     }
 
     void SequencerInit()
@@ -356,7 +356,7 @@ class prime_player_c : public abstract_music_c
         else
             data_buf = buf->data_L;
 
-        int played = prime_seq->playStream(reinterpret_cast<uint8_t *>(data_buf), PRIME_SAMPLES);
+        int played = prime_seq->playStream((uint8_t *)(data_buf), PRIME_SAMPLES);
 
         if (prime_seq->positionAtEnd())
             song_done = true;

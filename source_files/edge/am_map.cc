@@ -1272,7 +1272,7 @@ static void DrawMarks(void)
 
     for (int i = 0; i < AM_NUMMARKPOINTS; i++)
     {
-        if (AlmostEquals(markpoints[i].x, static_cast<float>(NO_MARK_X)))
+        if (AlmostEquals(markpoints[i].x, (float)NO_MARK_X))
             continue;
 
         float mx, my;

@@ -41,7 +41,6 @@
 #include <sys/types.h>
 #include <time.h>
 #include <algorithm>
-#include <array>
 #include <vector>
 #include <chrono> // PurgeCache
 

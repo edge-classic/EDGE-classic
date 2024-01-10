@@ -95,7 +95,7 @@ __inline int c99_snprintf(char *outBuf, size_t size, const char *format, ...)
 static inline uint64_t readBEint(const void *buffer, size_t nbytes)
 {
     uint64_t       result = 0;
-    const uint8_t *data   = reinterpret_cast<const uint8_t *>(buffer);
+    const uint8_t *data   = (const uint8_t *)(buffer);
 
     for (size_t n = 0; n < nbytes; ++n)
         result = (result << 8) + data[n];
@@ -112,10 +112,10 @@ static inline uint64_t readBEint(const void *buffer, size_t nbytes)
 static inline uint64_t readLEint(const void *buffer, size_t nbytes)
 {
     uint64_t       result = 0;
-    const uint8_t *data   = reinterpret_cast<const uint8_t *>(buffer);
+    const uint8_t *data   = (const uint8_t *)(buffer);
 
     for (size_t n = 0; n < nbytes; ++n)
-        result = result + static_cast<uint64_t>(data[n] << (n * 8));
+        result = result + (uint64_t)(data[n] << (n * 8));
 
     return result;
 }
@@ -224,7 +224,7 @@ void BW_MidiSequencer::MidiTrackRow::sortEvents(bool *noteStates)
             const MidiEvent e = anyOther[i];
             if (e.type == MidiEvent::T_NOTEON)
             {
-                const size_t note_i = static_cast<size_t>(e.channel * 255) + (e.data[0] & 0x7F);
+                const size_t note_i = (size_t)(e.channel * 255) + (e.data[0] & 0x7F);
                 // Check, was previously note is on or off
                 bool wasOn = noteStates[note_i];
                 markAsOn.insert(note_i);
@@ -259,7 +259,7 @@ void BW_MidiSequencer::MidiTrackRow::sortEvents(bool *noteStates)
         // Mark other notes as released
         for (EvtArr::iterator j = noteOffs.begin(); j != noteOffs.end(); j++)
         {
-            size_t note_i      = static_cast<size_t>(j->channel * 255) + (j->data[0] & 0x7F);
+            size_t note_i      = (size_t)(j->channel * 255) + (j->data[0] & 0x7F);
             noteStates[note_i] = false;
         }
 
@@ -285,7 +285,7 @@ BW_MidiSequencer::BW_MidiSequencer()
     : m_interface(NULL), m_format(Format_MIDI), m_smfFormat(0), m_loopFormat(Loop_Default), m_loopEnabled(false),
       m_loopHooksOnly(false), m_fullSongTimeLength(0.0), m_postSongWaitDelay(1.0), m_loopStartTime(-1.0),
       m_loopEndTime(-1.0), m_tempoMultiplier(1.0), m_atEnd(false), m_loopCount(-1), m_loadTrackNumber(0),
-      m_trackSolo(~static_cast<size_t>(0)), m_triggerHandler(NULL), m_triggerUserData(NULL)
+      m_trackSolo(~(size_t)(0)), m_triggerHandler(NULL), m_triggerUserData(NULL)
 {
     m_loop.reset();
     m_loop.invalidLoop = false;
@@ -331,7 +331,7 @@ void BW_MidiSequencer::setInterface(const BW_MidiRtInterface *intrf)
 int BW_MidiSequencer::playStream(uint8_t *stream, size_t length)
 {
     int      count      = 0;
-    size_t   samples    = static_cast<size_t>(length / static_cast<size_t>(m_time.frameSize));
+    size_t   samples    = (size_t)(length / (size_t)(m_time.frameSize));
     size_t   left       = samples;
     size_t   periodSize = 0;
     uint8_t *stream_pos = stream;
@@ -346,11 +346,11 @@ int BW_MidiSequencer::playStream(uint8_t *stream, size_t length)
             break; // Stop to fetch samples at reaching the song end with disabled loop
 
         m_time.timeRest -= maxDelay;
-        periodSize = static_cast<size_t>(static_cast<double>(m_time.sampleRate) * maxDelay);
+        periodSize = (size_t)((double)(m_time.sampleRate) * maxDelay);
 
         if (stream)
         {
-            size_t generateSize = periodSize > left ? static_cast<size_t>(left) : static_cast<size_t>(periodSize);
+            size_t generateSize = periodSize > left ? (size_t)(left) : (size_t)(periodSize);
             m_interface->onPcmRender(m_interface->onPcmRender_userData, stream_pos, generateSize * m_time.frameSize);
             stream_pos += generateSize * m_time.frameSize;
             count += generateSize;
@@ -365,7 +365,7 @@ int BW_MidiSequencer::playStream(uint8_t *stream, size_t length)
         }
     }
 
-    return count * static_cast<int>(m_time.frameSize);
+    return count * (int)(m_time.frameSize);
 }
 
 BW_MidiSequencer::FileFormat BW_MidiSequencer::getFormat()
@@ -394,7 +394,7 @@ bool BW_MidiSequencer::setChannelEnabled(size_t channel, bool enable)
 
     if (!enable && m_channelDisable[channel] != !enable)
     {
-        uint8_t ch = static_cast<uint8_t>(channel);
+        uint8_t ch = (uint8_t)(channel);
 
         // Releae all pedals
         m_interface->rt_controllerChange(m_interface->rtUserData, ch, 64, 0);
@@ -695,7 +695,7 @@ bool BW_MidiSequencer::buildSmfTrackData(const std::vector<std::vector<uint8_t>>
                     }
 
                     m_loop.stackUp();
-                    if (m_loop.stackLevel >= static_cast<int>(m_loop.stack.size()))
+                    if (m_loop.stackLevel >= (int)(m_loop.stack.size()))
                     {
                         LoopStackEntry e;
                         e.loops    = event.data[0];
@@ -1490,7 +1490,7 @@ BW_MidiSequencer::MidiEvent BW_MidiSequencer::parseEvent(const uint8_t **pptr, c
             for (size_t i = 0; i < data.size(); i++)
             {
                 if (data[i] <= 'Z' && data[i] >= 'A')
-                    data[i] = static_cast<char>(data[i] - ('Z' - 'z'));
+                    data[i] = (char)(data[i] - ('Z' - 'z'));
             }
 
             if (data == "loopstart")
@@ -1513,7 +1513,7 @@ BW_MidiSequencer::MidiEvent BW_MidiSequencer::parseEvent(const uint8_t **pptr, c
             {
                 evt.type      = MidiEvent::T_SPECIAL;
                 evt.subtype   = MidiEvent::ST_LOOPSTACK_BEGIN;
-                uint8_t loops = static_cast<uint8_t>(atoi(data.substr(10).c_str()));
+                uint8_t loops = (uint8_t)(atoi(data.substr(10).c_str()));
                 evt.data.clear();
                 evt.data.push_back(loops);
 
@@ -1552,7 +1552,7 @@ BW_MidiSequencer::MidiEvent BW_MidiSequencer::parseEvent(const uint8_t **pptr, c
     // Any normal event (80..EF)
     if (byte < 0x80)
     {
-        byte = static_cast<uint8_t>(status | 0x80);
+        byte = (uint8_t)(status | 0x80);
         ptr--;
     }
 
@@ -1773,7 +1773,7 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
     }
     else
     {
-        if (m_trackSolo != ~static_cast<size_t>(0) && track != m_trackSolo)
+        if (m_trackSolo != ~(size_t)(0) && track != m_trackSolo)
             return;
         if (m_trackDisable[track])
             return;
@@ -1795,11 +1795,11 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
     {
         // Special event FF
         uint_fast16_t evtype = evt.subtype;
-        uint64_t      length = static_cast<uint64_t>(evt.data.size());
-        const char   *data(length ? reinterpret_cast<const char *>(evt.data.data()) : "\0\0\0\0\0\0\0\0");
+        uint64_t      length = (uint64_t)(evt.data.size());
+        const char   *data(length ? (const char *)(evt.data.data()) : "\0\0\0\0\0\0\0\0");
 
         if (m_interface->rt_metaEvent) // Meta event hook
-            m_interface->rt_metaEvent(m_interface->rtUserData, evtype, reinterpret_cast<const uint8_t *>(data),
+            m_interface->rt_metaEvent(m_interface->rtUserData, evtype, (const uint8_t *)(data),
                                       size_t(length));
 
         if (evtype == MidiEvent::ST_ENDTRACK) // End Of Track
@@ -1853,7 +1853,7 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
                 }
 
                 char   x      = data[0];
-                size_t slevel = static_cast<size_t>(m_loop.stackLevel + 1);
+                size_t slevel = (size_t)(m_loop.stackLevel + 1);
                 while (slevel >= m_loop.stack.size())
                 {
                     LoopStackEntry e;
@@ -1865,7 +1865,7 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
                 }
 
                 LoopStackEntry &s       = m_loop.stack[slevel];
-                s.loops                 = static_cast<int>(x);
+                s.loops                 = (int)(x);
                 s.infinity              = (x == 0);
                 m_loop.caughtStackStart = true;
                 return;
@@ -1891,15 +1891,15 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
                 m_interface->onDebugMessage(m_interface->onDebugMessage_userData, "Callback Trigger: %02X", evt.data[0]);
 #endif
             if (m_triggerHandler)
-                m_triggerHandler(m_triggerUserData, static_cast<unsigned>(data[0]), track);
+                m_triggerHandler(m_triggerUserData, (unsigned)(data[0]), track);
             return;
         }
 
         if (evtype == MidiEvent::ST_RAWOPL) // Special non-spec ADLMIDI special for IMF playback: Direct poke to AdLib
         {
             if (m_interface->rt_rawOPL)
-                m_interface->rt_rawOPL(m_interface->rtUserData, static_cast<uint8_t>(data[0]),
-                                       static_cast<uint8_t>(data[1]));
+                m_interface->rt_rawOPL(m_interface->rtUserData, (uint8_t)(data[0]),
+                                       (uint8_t)(data[1]));
             return;
         }
 
@@ -1930,9 +1930,9 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
         uint8_t note = evt.data[0];
         uint8_t vol  = evt.data[1];
         if (m_interface->rt_noteOff)
-            m_interface->rt_noteOff(m_interface->rtUserData, static_cast<uint8_t>(midCh), note);
+            m_interface->rt_noteOff(m_interface->rtUserData, (uint8_t)(midCh), note);
         if (m_interface->rt_noteOffVel)
-            m_interface->rt_noteOffVel(m_interface->rtUserData, static_cast<uint8_t>(midCh), note, vol);
+            m_interface->rt_noteOffVel(m_interface->rtUserData, (uint8_t)(midCh), note, vol);
         break;
     }
 
@@ -1942,7 +1942,7 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
             break; // Disabled channel
         uint8_t note = evt.data[0];
         uint8_t vol  = evt.data[1];
-        m_interface->rt_noteOn(m_interface->rtUserData, static_cast<uint8_t>(midCh), note, vol);
+        m_interface->rt_noteOn(m_interface->rtUserData, (uint8_t)(midCh), note, vol);
         break;
     }
 
@@ -1950,7 +1950,7 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
     {
         uint8_t note = evt.data[0];
         uint8_t vol  = evt.data[1];
-        m_interface->rt_noteAfterTouch(m_interface->rtUserData, static_cast<uint8_t>(midCh), note, vol);
+        m_interface->rt_noteAfterTouch(m_interface->rtUserData, (uint8_t)(midCh), note, vol);
         break;
     }
 
@@ -1958,20 +1958,20 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
     {
         uint8_t ctrlno = evt.data[0];
         uint8_t value  = evt.data[1];
-        m_interface->rt_controllerChange(m_interface->rtUserData, static_cast<uint8_t>(midCh), ctrlno, value);
+        m_interface->rt_controllerChange(m_interface->rtUserData, (uint8_t)(midCh), ctrlno, value);
         break;
     }
 
     case MidiEvent::T_PATCHCHANGE: // Patch change
     {
-        m_interface->rt_patchChange(m_interface->rtUserData, static_cast<uint8_t>(midCh), evt.data[0]);
+        m_interface->rt_patchChange(m_interface->rtUserData, (uint8_t)(midCh), evt.data[0]);
         break;
     }
 
     case MidiEvent::T_CHANAFTTOUCH: // Channel after-touch
     {
         uint8_t chanat = evt.data[0];
-        m_interface->rt_channelAfterTouch(m_interface->rtUserData, static_cast<uint8_t>(midCh), chanat);
+        m_interface->rt_channelAfterTouch(m_interface->rtUserData, (uint8_t)(midCh), chanat);
         break;
     }
 
@@ -1979,7 +1979,7 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
     {
         uint8_t a = evt.data[0];
         uint8_t b = evt.data[1];
-        m_interface->rt_pitchBend(m_interface->rtUserData, static_cast<uint8_t>(midCh), b, a);
+        m_interface->rt_pitchBend(m_interface->rtUserData, (uint8_t)(midCh), b, a);
         break;
     }
 
@@ -2195,7 +2195,7 @@ static bool detectRSXX(const char *head, epi::mem_file_c *mfr)
 static bool detectIMF(const char *head, epi::mem_file_c *mfr)
 {
     uint8_t raw[4];
-    size_t  end = static_cast<size_t>(head[0]) + 256 * static_cast<size_t>(head[1]);
+    size_t  end = (size_t)(head[0]) + 256 * (size_t)(head[1]);
 
     if (end & 3)
         return false;
@@ -2216,7 +2216,7 @@ static bool detectIMF(const char *head, epi::mem_file_c *mfr)
         sum2 += value2;
     }
 
-    mfr->Seek(static_cast<long>(backup_pos), epi::file_c::SEEKPOINT_START);
+    mfr->Seek((long)(backup_pos), epi::file_c::SEEKPOINT_START);
 
     return (sum1 > sum2);
 }
@@ -2334,8 +2334,8 @@ bool BW_MidiSequencer::parseIMF(epi::mem_file_c *mfr, uint16_t rate)
 
     buildSmfSetupReset(trackCount);
 
-    m_invDeltaTicks = fraction<uint64_t>(1, 1000000l * static_cast<uint64_t>(deltaTicks));
-    m_tempo         = fraction<uint64_t>(1, static_cast<uint64_t>(deltaTicks) * 2);
+    m_invDeltaTicks = fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
+    m_tempo         = fraction<uint64_t>(1, (uint64_t)(deltaTicks) * 2);
 
     mfr->Seek(0, epi::file_c::SEEKPOINT_START);
     if (mfr->Read(imfRaw, 2) != 2)
@@ -2345,17 +2345,17 @@ bool BW_MidiSequencer::parseIMF(epi::mem_file_c *mfr, uint16_t rate)
         return false;
     }
 
-    imfEnd = static_cast<size_t>(imfRaw[0]) + 256 * static_cast<size_t>(imfRaw[1]);
+    imfEnd = (size_t)(imfRaw[0]) + 256 * (size_t)(imfRaw[1]);
 
     // Define the playing tempo
     event.type        = MidiEvent::T_SPECIAL;
     event.subtype     = MidiEvent::ST_TEMPOCHANGE;
     event.absPosition = 0;
     event.data.resize(4);
-    event.data[0] = static_cast<uint8_t>((imfTempo >> 24) & 0xFF);
-    event.data[1] = static_cast<uint8_t>((imfTempo >> 16) & 0xFF);
-    event.data[2] = static_cast<uint8_t>((imfTempo >> 8) & 0xFF);
-    event.data[3] = static_cast<uint8_t>((imfTempo & 0xFF));
+    event.data[0] = (uint8_t)((imfTempo >> 24) & 0xFF);
+    event.data[1] = (uint8_t)((imfTempo >> 16) & 0xFF);
+    event.data[2] = (uint8_t)((imfTempo >> 8) & 0xFF);
+    event.data[3] = (uint8_t)((imfTempo & 0xFF));
     evtPos.events.push_back(event);
     temposList.push_back(event);
 
@@ -2381,7 +2381,7 @@ bool BW_MidiSequencer::parseIMF(epi::mem_file_c *mfr, uint16_t rate)
         event.isValid     = 1;
 
         evtPos.events.push_back(event);
-        evtPos.delay = static_cast<uint64_t>(imfRaw[2]) + 256 * static_cast<uint64_t>(imfRaw[3]);
+        evtPos.delay = (uint64_t)(imfRaw[2]) + 256 * (uint64_t)(imfRaw[3]);
 
         if (evtPos.delay > 0)
         {
@@ -2452,8 +2452,8 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
 
     rawTrackData.clear();
     rawTrackData.resize(trackCount, std::vector<uint8_t>());
-    m_invDeltaTicks = fraction<uint64_t>(1, 1000000l * static_cast<uint64_t>(deltaTicks));
-    m_tempo         = fraction<uint64_t>(1, static_cast<uint64_t>(deltaTicks));
+    m_invDeltaTicks = fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
+    m_tempo         = fraction<uint64_t>(1, (uint64_t)(deltaTicks));
 
     size_t totalGotten = 0;
 
@@ -2465,7 +2465,7 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
         size_t pos = mfr->GetPosition();
         mfr->Seek(0, epi::file_c::SEEKPOINT_END);
         trackLength = mfr->GetPosition() - pos;
-        mfr->Seek(static_cast<long>(pos), epi::file_c::SEEKPOINT_START);
+        mfr->Seek((long)(pos), epi::file_c::SEEKPOINT_START);
 
         // Read track data
         rawTrackData[tk].resize(trackLength);
@@ -2531,12 +2531,12 @@ bool BW_MidiSequencer::parseGMF(epi::mem_file_c *mfr)
         return false;
     }
 
-    mfr->Seek(7 - static_cast<long>(headerSize), epi::file_c::SEEKPOINT_CURRENT);
+    mfr->Seek(7 - (long)(headerSize), epi::file_c::SEEKPOINT_CURRENT);
 
     rawTrackData.clear();
     rawTrackData.resize(trackCount, std::vector<uint8_t>());
-    m_invDeltaTicks                        = fraction<uint64_t>(1, 1000000l * static_cast<uint64_t>(deltaTicks));
-    m_tempo                                = fraction<uint64_t>(1, static_cast<uint64_t>(deltaTicks) * 2);
+    m_invDeltaTicks                        = fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
+    m_tempo                                = fraction<uint64_t>(1, (uint64_t)(deltaTicks) * 2);
     static const unsigned char EndTag[4]   = {0xFF, 0x2F, 0x00, 0x00};
     size_t                     totalGotten = 0;
 
@@ -2547,7 +2547,7 @@ bool BW_MidiSequencer::parseGMF(epi::mem_file_c *mfr)
         size_t pos = mfr->GetPosition();
         mfr->Seek(0, epi::file_c::SEEKPOINT_END);
         trackLength = mfr->GetPosition() - pos;
-        mfr->Seek(static_cast<long>(pos), epi::file_c::SEEKPOINT_START);
+        mfr->Seek((long)(pos), epi::file_c::SEEKPOINT_START);
 
         // Read track data
         rawTrackData[tk].resize(trackLength);
@@ -2610,17 +2610,17 @@ bool BW_MidiSequencer::parseSMF(epi::mem_file_c *mfr)
         return false;
     }
 
-    smfFormat  = static_cast<unsigned>(readBEint(headerBuf + 8, 2));
-    TrackCount = static_cast<size_t>(readBEint(headerBuf + 10, 2));
-    deltaTicks = static_cast<size_t>(readBEint(headerBuf + 12, 2));
+    smfFormat  = (unsigned)(readBEint(headerBuf + 8, 2));
+    TrackCount = (size_t)(readBEint(headerBuf + 10, 2));
+    deltaTicks = (size_t)(readBEint(headerBuf + 12, 2));
 
     if (smfFormat > 2)
         smfFormat = 1;
 
     rawTrackData.clear();
     rawTrackData.resize(TrackCount, std::vector<uint8_t>());
-    m_invDeltaTicks = fraction<uint64_t>(1, 1000000l * static_cast<uint64_t>(deltaTicks));
-    m_tempo         = fraction<uint64_t>(1, static_cast<uint64_t>(deltaTicks) * 2);
+    m_invDeltaTicks = fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
+    m_tempo         = fraction<uint64_t>(1, (uint64_t)(deltaTicks) * 2);
 
     size_t totalGotten = 0;
 
@@ -2750,7 +2750,7 @@ bool BW_MidiSequencer::parseMUS(epi::mem_file_c *mfr)
 
     uint8_t *mid     = NULL;
     uint32_t mid_len = 0;
-    int      m2mret  = Convert_mus2midi(mus, static_cast<uint32_t>(mus_len), &mid, &mid_len, 0);
+    int      m2mret  = Convert_mus2midi(mus, (uint32_t)(mus_len), &mid, &mid_len, 0);
 
     if (mus)
         free(mus);
@@ -2765,7 +2765,7 @@ bool BW_MidiSequencer::parseMUS(epi::mem_file_c *mfr)
     cvt_buf.set(mid);
 
     // Open converted MIDI file
-    mfr = new epi::mem_file_c(mid, static_cast<size_t>(mid_len));
+    mfr = new epi::mem_file_c(mid, (size_t)(mid_len));
 
     return parseSMF(mfr);
 }
@@ -2827,7 +2827,7 @@ bool BW_MidiSequencer::parseXMI(epi::mem_file_c *mfr)
     delete mfr;
     mfr = nullptr;
 
-    int m2mret = Convert_xmi2midi_multi(mus, static_cast<uint32_t>(mus_len + 20), song_buf, XMIDI_CONVERT_NOCONVERSION);
+    int m2mret = Convert_xmi2midi_multi(mus, (uint32_t)(mus_len + 20), song_buf, XMIDI_CONVERT_NOCONVERSION);
     if (mus)
         free(mus);
     if (m2mret < 0)

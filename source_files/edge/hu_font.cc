@@ -130,7 +130,7 @@ void font_c::LoadPatches()
 
 	if (missing)
 	{
-		epi::image_data_c *tmp_img = ReadAsEpiBlock(const_cast<image_c *>(missing));
+		epi::image_data_c *tmp_img = ReadAsEpiBlock((image_c *)(missing));
 		if (tmp_img->bpp == 1)
 		{
 			epi::image_data_c *rgb_img = R_PalettisedToRGB(tmp_img, (const uint8_t *) &playpal_data[0], missing->opacity);
@@ -166,7 +166,7 @@ void font_c::LoadPatches()
 
 			if (images[idx])
 			{
-				epi::image_data_c *tmp_img = ReadAsEpiBlock(const_cast<image_c *>(images[idx]));
+				epi::image_data_c *tmp_img = ReadAsEpiBlock((image_c *)(images[idx]));
 				if (tmp_img->bpp == 1)
 				{
 					epi::image_data_c *rgb_img = R_PalettisedToRGB(tmp_img, (const uint8_t *) &playpal_data[0], images[idx]->opacity);
@@ -177,7 +177,7 @@ void font_c::LoadPatches()
                 tmp_img->offset_y = images[idx]->offset_y;
                 tmp_img->scale_x = images[idx]->scale_x;
                 tmp_img->scale_y = images[idx]->scale_y;
-				patch_data.try_emplace(cp437_unicode_values[static_cast<uint8_t>(ch)], tmp_img);
+				patch_data.try_emplace(cp437_unicode_values[(uint8_t)ch], tmp_img);
                 temp_imdata.push_back(tmp_img);
 			}
 		}
@@ -186,12 +186,12 @@ void font_c::LoadPatches()
 	// Second pass to try lower->uppercase fallbacks, or failing that add the missing image (if present)
 	for (int ch = 0; ch < 256; ch++)
 	{
-        if (!patch_data.count(cp437_unicode_values[static_cast<uint8_t>(ch)]))
+        if (!patch_data.count(cp437_unicode_values[(uint8_t)ch]))
         {
-            if ('a' <= ch && ch <= 'z' && patch_data.count(cp437_unicode_values[static_cast<uint8_t>(toupper(ch))]))
-                patch_data.try_emplace(cp437_unicode_values[static_cast<uint8_t>(ch)], patch_data.at(cp437_unicode_values[static_cast<uint8_t>(toupper(ch))]));
+            if ('a' <= ch && ch <= 'z' && patch_data.count(cp437_unicode_values[(uint8_t)(toupper(ch))]))
+                patch_data.try_emplace(cp437_unicode_values[(uint8_t)ch], patch_data.at(cp437_unicode_values[(uint8_t)(toupper(ch))]));
             else if (missing_imdata)
-                patch_data.try_emplace(cp437_unicode_values[static_cast<uint8_t>(ch)], missing_imdata);  
+                patch_data.try_emplace(cp437_unicode_values[(uint8_t)ch], missing_imdata);  
         }
 	}
 
@@ -243,12 +243,12 @@ void font_c::LoadPatches()
 
     epi::image_rect_c Nom;
 
-	if (p_cache.atlas_rects.count(cp437_unicode_values[static_cast<uint8_t>('M')]))
-		Nom = p_cache.atlas_rects.at(cp437_unicode_values[static_cast<uint8_t>('M')]);
-    else if (p_cache.atlas_rects.count(cp437_unicode_values[static_cast<uint8_t>('m')]))
-		Nom = p_cache.atlas_rects.at(cp437_unicode_values[static_cast<uint8_t>('m')]);
-    else if (p_cache.atlas_rects.count(cp437_unicode_values[static_cast<uint8_t>('0')]))
-		Nom = p_cache.atlas_rects.at(cp437_unicode_values[static_cast<uint8_t>('0')]);
+	if (p_cache.atlas_rects.count(cp437_unicode_values[(uint8_t)('M')]))
+		Nom = p_cache.atlas_rects.at(cp437_unicode_values[(uint8_t)('M')]);
+    else if (p_cache.atlas_rects.count(cp437_unicode_values[(uint8_t)('m')]))
+		Nom = p_cache.atlas_rects.at(cp437_unicode_values[(uint8_t)('m')]);
+    else if (p_cache.atlas_rects.count(cp437_unicode_values[(uint8_t)('0')]))
+		Nom = p_cache.atlas_rects.at(cp437_unicode_values[(uint8_t)('0')]);
     else // backup plan: just use first patch found
         Nom = p_cache.atlas_rects.begin()->second;
 
@@ -355,29 +355,29 @@ void font_c::LoadFontTTF()
 
         char ch = 0;
 
-        if (stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<uint8_t>('M')]) > 0)
+        if (stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[(uint8_t)('M')]) > 0)
         {
             ch              = 'M';
-            ref.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<uint8_t>(ch)]);
+            ref.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[(uint8_t)ch]);
         }
-        else if (stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<uint8_t>('O')]) > 0)
+        else if (stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[(uint8_t)('O')]) > 0)
         {
             ch              = 'O';
-            ref.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<uint8_t>(ch)]);
+            ref.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[(uint8_t)ch]);
         }
-        else if (stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<uint8_t>('W')]) > 0)
+        else if (stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[(uint8_t)('W')]) > 0)
         {
             ch              = 'W';
-            ref.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<uint8_t>(ch)]);
+            ref.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[(uint8_t)ch]);
         }
         else
         {
             for (char c = 32; c < 127; c++)
             {
-                if (stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<uint8_t>(c)]) > 0)
+                if (stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[(uint8_t)(c)]) > 0)
                 {
                     ch              = c;
-                    ref.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<uint8_t>(ch)]);
+                    ref.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[(uint8_t)ch]);
                     break;
                 }
             }
@@ -427,7 +427,7 @@ void font_c::LoadFontTTF()
             float linegap    = 0.0f;
             ref.char_quad[i] = new stbtt_aligned_quad;
             stbtt_GetPackedQuad(ttf_atlas[i]->chardata_for_range, res_font_bitmap_sizes[i], res_font_bitmap_sizes[i],
-                                static_cast<uint8_t>(ch), &x, &y, ref.char_quad[i], 0);
+                                (uint8_t)ch, &x, &y, ref.char_quad[i], 0);
             stbtt_GetScaledFontVMetrics(ttf_buffer, 0, res_font_sizes[i], &ascent, &descent, &linegap);
             ref.width[i]      = (ref.char_quad[i]->x1 - ref.char_quad[i]->x0) * (def->default_size / res_font_sizes[i]);
             ref.height[i]     = (ref.char_quad[i]->y1 - ref.char_quad[i]->y0) * (def->default_size / res_font_sizes[i]);
@@ -438,7 +438,7 @@ void font_c::LoadFontTTF()
             ttf_ref_yshift[i] = ref.y_shift[i];
             ttf_ref_height[i] = ref.height[i];
         }
-        ttf_glyph_map.try_emplace(static_cast<uint8_t>(ch), ref);
+        ttf_glyph_map.try_emplace((uint8_t)ch, ref);
         spacing = def->spacing + 0.5; // + 0.5 for at least a minimal buffer between letters by default
     }
 }
@@ -502,7 +502,7 @@ const image_c *font_c::CharImage(char ch) const
 
     if (def->type == FNTYP_TrueType)
     {
-        if (ttf_glyph_map.find(static_cast<uint8_t>(ch)) != ttf_glyph_map.end())
+        if (ttf_glyph_map.find((uint8_t)ch) != ttf_glyph_map.end())
             // Create or return dummy image
             return W_ImageLookup("FONT_DUMMY_IMAGE", INS_Graphic, ILF_Font);
         else
@@ -514,7 +514,7 @@ const image_c *font_c::CharImage(char ch) const
     if (ch == ' ')
         return NULL;
 
-    if (p_cache.atlas_rects.count(cp437_unicode_values[static_cast<uint8_t>(ch)]))
+    if (p_cache.atlas_rects.count(cp437_unicode_values[(uint8_t)ch]))
         return W_ImageLookup("FONT_DUMMY_IMAGE", INS_Graphic, ILF_Font);
     else
         return NULL;
@@ -527,7 +527,7 @@ float font_c::CharRatio(char ch)
     if (ch == ' ')
         return 0.4f;
     else
-        return individual_char_ratios[static_cast<uint8_t>(ch)];
+        return individual_char_ratios[(uint8_t)ch];
 }
 
 //
@@ -540,12 +540,12 @@ float font_c::CharWidth(char ch)
         if (ch == ' ')
             return im_char_width * 2 / 5 + spacing;
         else
-            return individual_char_widths[static_cast<uint8_t>(ch)] + spacing;
+            return individual_char_widths[(uint8_t)ch] + spacing;
     }
 
     if (def->type == FNTYP_TrueType)
     {
-        auto find_glyph = ttf_glyph_map.find(static_cast<uint8_t>(ch));
+        auto find_glyph = ttf_glyph_map.find((uint8_t)ch);
         if (find_glyph != ttf_glyph_map.end())
             return (find_glyph->second.width[current_font_size] + spacing) * v_pixelaspect.f;
         else
@@ -557,7 +557,7 @@ float font_c::CharWidth(char ch)
                 float x                = 0.0f;
                 float y                = 0.0f;
                 stbtt_GetPackedQuad(ttf_atlas[i]->chardata_for_range, res_font_bitmap_sizes[i],
-                                    res_font_bitmap_sizes[i], static_cast<uint8_t>(ch), &x, &y, character.char_quad[i], 0);
+                                    res_font_bitmap_sizes[i], (uint8_t)ch, &x, &y, character.char_quad[i], 0);
                 if (ch == ' ')
                     character.width[i] = ttf_char_width[i] * 3 / 5;
                 else
@@ -568,8 +568,8 @@ float font_c::CharWidth(char ch)
                 character.y_shift[i] = (ttf_char_height[i] - character.height[i]) +
                                        (character.char_quad[i]->y1 * (def->default_size / res_font_sizes[i]));
             }
-            character.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<uint8_t>(ch)]);
-            ttf_glyph_map.try_emplace(static_cast<uint8_t>(ch), character);
+            character.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[(uint8_t)ch]);
+            ttf_glyph_map.try_emplace((uint8_t)ch, character);
             return (character.width[current_font_size] + spacing) * v_pixelaspect.f;
         }
     }
@@ -580,10 +580,10 @@ float font_c::CharWidth(char ch)
         return p_cache.width * 3 / 5 + spacing;
 
 
-    if (!p_cache.atlas_rects.count(cp437_unicode_values[static_cast<uint8_t>(ch)]))
+    if (!p_cache.atlas_rects.count(cp437_unicode_values[(uint8_t)ch]))
         return DUMMY_WIDTH;
 
-    epi::image_rect_c rect = p_cache.atlas_rects.at(cp437_unicode_values[static_cast<uint8_t>(ch)]);
+    epi::image_rect_c rect = p_cache.atlas_rects.at(cp437_unicode_values[(uint8_t)ch]);
 
     if (def->default_size > 0.0)
         return (def->default_size * ((float)rect.iw) / rect.ih) + spacing;
@@ -630,7 +630,7 @@ int font_c::GetGlyphIndex(char ch)
 {
     assert(def->type == FNTYP_TrueType);
 
-    auto find_glyph = ttf_glyph_map.find(static_cast<uint8_t>(ch));
+    auto find_glyph = ttf_glyph_map.find((uint8_t)ch);
     if (find_glyph != ttf_glyph_map.end())
         return find_glyph->second.glyph_index;
     else
@@ -642,7 +642,7 @@ int font_c::GetGlyphIndex(char ch)
             float x                = 0.0f;
             float y                = 0.0f;
             stbtt_GetPackedQuad(ttf_atlas[i]->chardata_for_range, res_font_bitmap_sizes[i], res_font_bitmap_sizes[i],
-                                static_cast<uint8_t>(ch), &x, &y, character.char_quad[i], 0);
+                                (uint8_t)ch, &x, &y, character.char_quad[i], 0);
             if (ch == ' ')
                 character.width[i] = ttf_char_width[i] * 3 / 5;
             else
@@ -653,8 +653,8 @@ int font_c::GetGlyphIndex(char ch)
             character.y_shift[i] = (ttf_char_height[i] - character.height[i]) +
                                    (character.char_quad[i]->y1 * (def->default_size / res_font_sizes[i]));
         }
-        character.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[static_cast<uint8_t>(ch)]);
-        ttf_glyph_map.try_emplace(static_cast<uint8_t>(ch), character);
+        character.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[(uint8_t)ch]);
+        ttf_glyph_map.try_emplace((uint8_t)ch, character);
         return character.glyph_index;
     }
 }

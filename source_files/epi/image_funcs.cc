@@ -271,10 +271,10 @@ image_atlas_c *Image_Pack(const std::unordered_map<int, image_data_c *> &im_pack
 			}
 		}
         image_rect_c atlas_rect;
-		atlas_rect.tx = static_cast<float>(rect_x) / atlas_w;
-		atlas_rect.ty = static_cast<float>(rect_y) / atlas_h;
-		atlas_rect.tw = static_cast<float>(im->used_w) / atlas_w;
-		atlas_rect.th = static_cast<float>(im->used_h) / atlas_h;
+		atlas_rect.tx = (float)rect_x / atlas_w;
+		atlas_rect.ty = (float)rect_y / atlas_h;
+		atlas_rect.tw = (float)im->used_w / atlas_w;
+		atlas_rect.th = (float)im->used_h / atlas_h;
         atlas_rect.iw = im->used_w * im->scale_x;
         atlas_rect.ih = im->used_h * im->scale_y;
         atlas_rect.off_x = im->offset_x;

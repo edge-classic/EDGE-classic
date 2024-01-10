@@ -267,7 +267,7 @@ class opl_player_c : public abstract_music_c
     static void playSynth(void *userdata, uint8_t *stream, size_t length)
     {
         (void)userdata;
-        edge_opl->generate(reinterpret_cast<int16_t *>(stream), length / (2 * sizeof(int16_t)));
+        edge_opl->generate((int16_t *)(stream), length / (2 * sizeof(int16_t)));
     }
 
     void SequencerInit()
@@ -404,7 +404,7 @@ class opl_player_c : public abstract_music_c
         else
             data_buf = buf->data_L;
 
-        int played = opl_seq->playStream(reinterpret_cast<uint8_t *>(data_buf), OPL_SAMPLES);
+        int played = opl_seq->playStream((uint8_t *)(data_buf), OPL_SAMPLES);
 
         if (opl_seq->positionAtEnd())
             song_done = true;

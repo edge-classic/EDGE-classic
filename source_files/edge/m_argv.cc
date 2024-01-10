@@ -69,7 +69,7 @@ void argv::Init(const int argc, const char *const *argv)
     for (i = 0; i < win_argc; i++)
     {
         SYS_ASSERT(win_argv[i] != nullptr);
-        std::u16string arg = reinterpret_cast<char16_t *>(win_argv[i]);
+        std::u16string arg = (char16_t *)(win_argv[i]);
         argv_block.push_back(epi::to_u8string(arg));
     }
 
@@ -365,7 +365,7 @@ void env::Init()
             }
         }
         else
-            raw_var.push_back(*reinterpret_cast<char16_t *>(win_env));
+            raw_var.push_back(*(char16_t *)(win_env));
     }
 
     FreeEnvironmentStringsW(orig_env);

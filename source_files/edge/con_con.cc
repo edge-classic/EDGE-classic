@@ -608,9 +608,9 @@ static void DrawChar(int x, int y, char ch, rgbacol_t col)
         XMUL           = I_ROUND(chwidth * FNSZ_ratio / v_pixelaspect.f);
         float width    = (chwidth - con_font->spacing) * FNSZ_ratio / v_pixelaspect.f;
         float x_adjust = (XMUL - width) / 2;
-        float y_adjust = con_font->ttf_glyph_map.at(static_cast<uint8_t>(ch)).y_shift[current_font_size] * FNSZ_ratio;
-        float height   = con_font->ttf_glyph_map.at(static_cast<uint8_t>(ch)).height[current_font_size] * FNSZ_ratio;
-        stbtt_aligned_quad *q = con_font->ttf_glyph_map.at(static_cast<uint8_t>(ch)).char_quad[current_font_size];
+        float y_adjust = con_font->ttf_glyph_map.at((uint8_t)ch).y_shift[current_font_size] * FNSZ_ratio;
+        float height   = con_font->ttf_glyph_map.at((uint8_t)ch).height[current_font_size] * FNSZ_ratio;
+        stbtt_aligned_quad *q = con_font->ttf_glyph_map.at((uint8_t)ch).char_quad[current_font_size];
         glBegin(GL_POLYGON);
         glTexCoord2f(q->s0, q->t0);
         glVertex2f(x + x_adjust, y - y_adjust);
@@ -624,8 +624,8 @@ static void DrawChar(int x, int y, char ch, rgbacol_t col)
         return;
     }
 
-    uint8_t px = static_cast<uint8_t>(ch) % 16;
-    uint8_t py = 15 - static_cast<uint8_t>(ch) / 16;
+    uint8_t px = (uint8_t)ch % 16;
+    uint8_t py = 15 - (uint8_t)ch / 16;
 
     float tx1 = (px)*con_font->font_image->ratio_w;
     float tx2 = (px + 1) * con_font->font_image->ratio_w;
@@ -681,8 +681,8 @@ static void DrawEndoomChar(float x, float y, char ch, rgbacol_t col, rgbacol_t c
     if (blink && con_cursor >= 16)
         ch = 0x20;
 
-    uint8_t px = static_cast<uint8_t>(ch) % 16;
-    uint8_t py = 15 - static_cast<uint8_t>(ch) / 16;
+    uint8_t px = (uint8_t)ch % 16;
+    uint8_t py = 15 - (uint8_t)ch / 16;
 
     float tx1 = (px)*endoom_font->font_image->ratio_w;
     float tx2 = (px + 1) * endoom_font->font_image->ratio_w;
@@ -1833,7 +1833,7 @@ void CON_CreateQuitScreen()
     {
         CON_QuitEndoomPrintf(
             data[i + 1], "%c",
-            (static_cast<uint8_t>(data[i]) == 0 || static_cast<uint8_t>(data[i]) == 255) ? 0x20 : static_cast<uint8_t>(data[i]));
+            ((uint8_t)data[i] == 0 || (uint8_t)data[i] == 255) ? 0x20 : (uint8_t)data[i]);
         row_counter++;
         if (row_counter == 80)
         {

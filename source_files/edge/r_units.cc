@@ -292,13 +292,13 @@ static inline void RGL_SendRawVector(const local_gl_vert_t *V)
     else
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, V->rgba);
 
-    glMultiTexCoord2fv(GL_TEXTURE0, reinterpret_cast<const GLfloat *>(&V->texc[0]));
-    glMultiTexCoord2fv(GL_TEXTURE1, reinterpret_cast<const GLfloat *>(&V->texc[1]));
+    glMultiTexCoord2fv(GL_TEXTURE0, (const GLfloat *)(&V->texc[0]));
+    glMultiTexCoord2fv(GL_TEXTURE1, (const GLfloat *)(&V->texc[1]));
 
-    glNormal3fv(reinterpret_cast<const GLfloat *>(&V->normal));
+    glNormal3fv((const GLfloat *)(&V->normal));
 
     // vertex must be last
-    glVertex3fv(reinterpret_cast<const GLfloat *>(&V->pos));
+    glVertex3fv((const GLfloat *)(&V->pos));
 }
 
 //

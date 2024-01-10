@@ -185,9 +185,9 @@ inline bool Diff(const uint8_t p1, const uint8_t p2)
     uint32_t YUV1 = PixelYUV[p1];
     uint32_t YUV2 = PixelYUV[p2];
 
-    return (YUV1 & Amask) != (YUV2 & Amask) || std::abs(static_cast<int>((YUV1 & Ymask) - (YUV2 & Ymask))) > trY ||
-           std::abs(static_cast<int>((YUV1 & Umask) - (YUV2 & Umask))) > trU ||
-           std::abs(static_cast<int>((YUV1 & Vmask) - (YUV2 & Vmask))) > trV;
+    return (YUV1 & Amask) != (YUV2 & Amask) || std::abs((int)((YUV1 & Ymask) - (YUV2 & Ymask))) > trY ||
+           std::abs((int)((YUV1 & Umask) - (YUV2 & Umask))) > trU ||
+           std::abs((int)((YUV1 & Vmask) - (YUV2 & Vmask))) > trV;
 }
 
 void Setup(const uint8_t *palette, int trans_pixel)

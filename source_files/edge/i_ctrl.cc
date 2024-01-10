@@ -497,7 +497,7 @@ int I_JoyGetAxis(int n) // n begins at 0
     if (nojoy || !joy_info || !gamepad_info)
         return 0;
 
-    return SDL_GameControllerGetAxis(gamepad_info, static_cast<SDL_GameControllerAxis>(n));
+    return SDL_GameControllerGetAxis(gamepad_info, (SDL_GameControllerAxis)n);
 }
 
 static void I_OpenJoystick(int index)
@@ -545,7 +545,7 @@ static void I_OpenJoystick(int index)
         gp_num_triggers++;
     for (int i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++)
     {
-        if (SDL_GameControllerHasButton(gamepad_info, static_cast<SDL_GameControllerButton>(i)))
+        if (SDL_GameControllerHasButton(gamepad_info, (SDL_GameControllerButton)i))
             gp_num_buttons++;
     }
 

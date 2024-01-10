@@ -462,9 +462,9 @@ class BW_MidiSequencer
 
         bool isStackEnd()
         {
-            if (caughtStackEnd && (stackLevel >= 0) && (stackLevel < static_cast<int>(stack.size())))
+            if (caughtStackEnd && (stackLevel >= 0) && (stackLevel < (int)(stack.size())))
             {
-                const LoopStackEntry &e = stack[static_cast<size_t>(stackLevel)];
+                const LoopStackEntry &e = stack[(size_t)(stackLevel)];
                 if (e.infinity || (!e.infinity && e.loops > 0))
                     return true;
             }
@@ -483,8 +483,8 @@ class BW_MidiSequencer
 
         LoopStackEntry &getCurStack()
         {
-            if ((stackLevel >= 0) && (stackLevel < static_cast<int>(stack.size())))
-                return stack[static_cast<size_t>(stackLevel)];
+            if ((stackLevel >= 0) && (stackLevel < (int)(stack.size())))
+                return stack[(size_t)(stackLevel)];
             if (stack.empty())
             {
                 LoopStackEntry d;
@@ -546,7 +546,7 @@ class BW_MidiSequencer
         void reset()
         {
             timeRest = 0.0;
-            minDelay = 1.0 / static_cast<double>(sampleRate);
+            minDelay = 1.0 / (double)(sampleRate);
             delay    = 0.0;
         }
     } m_time;

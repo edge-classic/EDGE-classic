@@ -22,7 +22,6 @@
 #include "file.h"
 #include "image_data.h"
 #include <filesystem>
-#include <array>
 #include <unordered_map>
 
 namespace epi

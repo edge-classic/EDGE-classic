@@ -147,7 +147,7 @@ double *real_vm_c::AccessParam(int p)
     if (p >= functions[exec.func]->parm_num)
         RunError("PR_Parameter: p=%d out of range\n", p);
 
-    if (AlmostEquals(exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]], static_cast<double>(-FLT_MAX)))
+    if (AlmostEquals(exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]], (double)(-FLT_MAX)))
         return NULL;
     else
         return &exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]];

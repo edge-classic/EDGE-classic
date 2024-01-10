@@ -66,7 +66,7 @@ static int XMI2MID_TRACE(const char *fmt, int n, ...)
     snprintf(ff, 49, "XMI2MID: %s\n", fmt);
     va_list args;
     va_start(args, n);
-    ret = vfprintf(stderr, const_cast<const char *>(ff), args);
+    ret = vfprintf(stderr, (const char *)(ff), args);
     va_end(args);
     return ret;
 }

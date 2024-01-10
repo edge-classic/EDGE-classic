@@ -86,7 +86,7 @@ crc32_c &crc32_c::operator+=(float value)
     value    = (float)fabs(value);
 
     int exp;
-    int mant = static_cast<int>(ldexp(frexp(value, &exp), 30));
+    int mant = (int)(ldexp(frexp(value, &exp), 30));
 
     *this += (uint8_t)(neg ? '-' : '+');
     *this += exp;

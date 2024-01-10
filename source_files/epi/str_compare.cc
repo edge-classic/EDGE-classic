@@ -135,7 +135,23 @@ int STR_CaseCmp(const std::string &A, const std::string &B)
 int STR_CaseCmpMax(const char *A, const char *B, size_t n)
 {
     SYS_ASSERT(A && B);
-    return epi::STR_CaseCmp(std::string(A).substr(0, n), std::string(B).substr(0, n));
+    SYS_ASSERT(n != 0);
+	for (;;)
+	{
+		if (n == 0)
+			return 0;
+
+		int AC = tolower((unsigned char)*A++);
+        int BC = tolower((unsigned char)*B++);
+
+		if (AC != BC)
+			return AC - BC;
+
+		if (AC == 0)
+			return 0;
+
+		n--;
+	}
 }
 
 int STR_CaseCmpMax(const char *A, const std::string &B, size_t n)

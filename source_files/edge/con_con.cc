@@ -145,7 +145,7 @@ static void CON_AddLine(const char *s, bool partial)
 
     rgbacol_t col = current_color;
 
-    if (col == SG_GRAY_RGBA32 && (epi::prefix_case_cmp(s, "WARNING") == 0))
+    if (col == SG_GRAY_RGBA32 && (epi::STR_PrefixCaseCmp(s, "WARNING") == 0))
         col = SG_DARK_ORANGE_RGBA32;
 
     console_lines[0] = new console_line_c(s, col);
@@ -179,7 +179,7 @@ static void CON_EndoomAddLine(uint8_t endoom_byte, const char *s, bool partial)
 
     rgbacol_t col = current_color;
 
-    if (col == SG_GRAY_RGBA32 && (epi::prefix_case_cmp(s, "WARNING") == 0))
+    if (col == SG_GRAY_RGBA32 && (epi::STR_PrefixCaseCmp(s, "WARNING") == 0))
         col = SG_DARK_ORANGE_RGBA32;
 
     console_lines[0] = new console_line_c(s, col);
@@ -910,7 +910,7 @@ void CON_Drawer(void)
         if (!CL)
             break;
 
-        if (epi::prefix_case_cmp(CL->line.c_str(), "--------") == 0)
+        if (epi::STR_PrefixCmp(CL->line.c_str(), "--------") == 0)
             HorizontalLine(y + FNSZ / 2, CL->color);
         else if (CL->endoom_bytes.size() == 80 && CL->line.size() == 80) // 80 ENDOOM characters + newline
             EndoomDrawText(0, y, CL);

@@ -72,7 +72,7 @@ bool S_StartupOPL(void)
     {
         for (size_t i = 0; i < available_genmidis.size(); i++)
         {
-            if (epi::case_cmp(s_genmidi.s, available_genmidis.at(i).generic_u8string()) == 0)
+            if (epi::STR_CaseCmp(s_genmidi.s, available_genmidis.at(i).generic_u8string()) == 0)
                 cvar_good = true;
         }
     }

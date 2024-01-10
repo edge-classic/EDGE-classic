@@ -304,13 +304,13 @@ void DDF_LevelGetSkyStretch(const char *info, void *storage)
 {
     skystretch_e *stretch = (skystretch_e *)storage;
 
-    if (epi::case_cmp(info, "MIRROR") == 0)
+    if (epi::STR_CaseCmp(info, "MIRROR") == 0)
         *stretch = SKS_Mirror;
-    else if (epi::case_cmp(info, "REPEAT") == 0)
+    else if (epi::STR_CaseCmp(info, "REPEAT") == 0)
         *stretch = SKS_Repeat;
-    else if (epi::case_cmp(info, "STRETCH") == 0)
+    else if (epi::STR_CaseCmp(info, "STRETCH") == 0)
         *stretch = SKS_Stretch;
-    else if (epi::case_cmp(info, "VANILLA") == 0)
+    else if (epi::STR_CaseCmp(info, "VANILLA") == 0)
         *stretch = SKS_Vanilla;
     else // Unknown
         *stretch = SKS_Unset;

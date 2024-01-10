@@ -337,7 +337,7 @@ static void FillSpriteFrames(int file)
                     continue;
                 }
 
-                if (epi::strncmp(sprname, lumpname, spr_len) != 0)
+                if (epi::STR_CmpMax(sprname, lumpname, spr_len) != 0)
                     continue;
 
                 // we have a match
@@ -379,7 +379,7 @@ static void FillSpriteFrames(int file)
                         continue;
                     }
 
-                    if (epi::strncmp(sprname, spritebase, spr_len) != 0)
+                    if (epi::STR_CmpMax(sprname, spritebase, spr_len) != 0)
                         continue;
 
                     // we have a match
@@ -432,7 +432,7 @@ static void FillSpriteFramesUser()
                 continue;
             }
 
-            if (epi::strncmp(sprname, img_name, spr_len) != 0)
+            if (epi::STR_CmpMax(sprname, img_name, spr_len) != 0)
                 continue;
 
             // Fix offsets if Doom formatted
@@ -656,7 +656,7 @@ void W_InitSprites(void)
     for (int n = 0; n < sprite_map_len; n++)
         sprite_map[n] = sprites[n + 1];
 
-#define CMP(a, b) (epi::strcmp(a->name, b->name) < 0)
+#define CMP(a, b) (epi::STR_Cmp(a->name, b->name) < 0)
     QSORT(spritedef_c *, sprite_map, sprite_map_len, CUTOFF);
 #undef CMP
 

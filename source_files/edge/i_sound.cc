@@ -109,7 +109,7 @@ void I_StartupSound(void)
     if (driver.empty())
         driver = "default";
 
-    if (epi::case_cmp(driver, "default") != 0)
+    if (epi::STR_CaseCmp(driver, "default") != 0)
     {
         SDL_setenv("SDL_AUDIODRIVER", driver.c_str(), 1);
     }
@@ -248,7 +248,7 @@ void I_StartupMusic(void)
             if (!sfd[i].is_dir)
             {
                 std::string ext = sfd[i].name.extension().string();
-                epi::str_lower(ext);
+                epi::STR_Lower(ext);
                 if (ext == ".sf2")
                 {
                     available_soundfonts.push_back(sfd[i].name);
@@ -278,7 +278,7 @@ void I_StartupMusic(void)
                 if (!sfd[i].is_dir)
                 {
                     std::string ext = sfd[i].name.extension().string();
-                    epi::str_lower(ext);
+                    epi::STR_Lower(ext);
                     if (ext == ".sf2")
                         available_soundfonts.push_back(sfd[i].name);
                     else if (ext == ".op2" || ext == ".ad" || ext == ".opl" || ext == ".tmb")

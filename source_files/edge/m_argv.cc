@@ -142,7 +142,7 @@ int argv::Find(std::string longName, int *numParams)
 
         const std::string &str = list[p];
 
-        if (epi::case_cmp(longName, std::string{&str[1], (str.size() - 1)}) == 0)
+        if (epi::STR_CaseCmp(longName, std::string{&str[1], (str.size() - 1)}) == 0)
             break;
     }
 
@@ -384,7 +384,7 @@ std::string env::Value(std::string key)
 {
     for (auto var : list)
     {
-        if (epi::case_cmp(key, var.first) == 0)
+        if (epi::STR_CaseCmp(key, var.first) == 0)
             return var.second;
     }
     return "";

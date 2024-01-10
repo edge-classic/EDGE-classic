@@ -19,45 +19,38 @@
 #ifndef __EPI_STR_COMPARE_H__
 #define __EPI_STR_COMPARE_H__
 
-#undef strcmp
-#undef strncmp
-#undef stricmp
-#undef strnicmp
-#undef strcasecmp
-#undef strncasecmp
-
 namespace epi
 {
 
-int strcmp(const char *A, const char *B);
-int strcmp(const char *A, const std::string &B);
-int strcmp(const std::string &A, const char *B);
-int strcmp(const std::string &A, const std::string &B);
+int STR_Cmp(const char *A, const char *B);
+int STR_Cmp(const char *A, const std::string &B);
+int STR_Cmp(const std::string &A, const char *B);
+int STR_Cmp(const std::string &A, const std::string &B);
 
-int strncmp(const char *A, const char *B, size_t n);
-int strncmp(const char *A, const std::string &B, size_t n);
-int strncmp(const std::string &A, const char *B, size_t n);
-int strncmp(const std::string &A, const std::string &B, size_t n);
+int STR_CmpMax(const char *A, const char *B, size_t n);
+int STR_CmpMax(const char *A, const std::string &B, size_t n);
+int STR_CmpMax(const std::string &A, const char *B, size_t n);
+int STR_CmpMax(const std::string &A, const std::string &B, size_t n);
 
-int case_cmp(const char *A, const char *B);
-int case_cmp(const char *A, const std::string &B);
-int case_cmp(const std::string &A, const char *B);
-int case_cmp(const std::string &A, const std::string &B);
+int STR_CaseCmp(const char *A, const char *B);
+int STR_CaseCmp(const char *A, const std::string &B);
+int STR_CaseCmp(const std::string &A, const char *B);
+int STR_CaseCmp(const std::string &A, const std::string &B);
 
-int case_cmp_n(const char *A, const char *B, size_t n);
-int case_cmp_n(const char *A, const std::string &B, size_t n);
-int case_cmp_n(const std::string &A, const char *B, size_t n);
-int case_cmp_n(const std::string &A, const std::string &B, size_t n);
+int STR_CaseCmpMax(const char *A, const char *B, size_t n);
+int STR_CaseCmpMax(const char *A, const std::string &B, size_t n);
+int STR_CaseCmpMax(const std::string &A, const char *B, size_t n);
+int STR_CaseCmpMax(const std::string &A, const std::string &B, size_t n);
 
-int prefix_cmp(const char *A, const char *B);
-int prefix_cmp(const char *A, const std::string &B);
-int prefix_cmp(const std::string &A, const char *B);
-int prefix_cmp(const std::string &A, const std::string &B);
+int STR_PrefixCmp(const char *A, const char *B);
+int STR_PrefixCmp(const char *A, const std::string &B);
+int STR_PrefixCmp(const std::string &A, const char *B);
+int STR_PrefixCmp(const std::string &A, const std::string &B);
 
-int prefix_case_cmp(const char *A, const char *B);
-int prefix_case_cmp(const char *A, const std::string &B);
-int prefix_case_cmp(const std::string &A, const char *B);
-int prefix_case_cmp(const std::string &A, const std::string &B);
+int STR_PrefixCaseCmp(const char *A, const char *B);
+int STR_PrefixCaseCmp(const char *A, const std::string &B);
+int STR_PrefixCaseCmp(const std::string &A, const char *B);
+int STR_PrefixCaseCmp(const std::string &A, const std::string &B);
 
 } // namespace epi
 

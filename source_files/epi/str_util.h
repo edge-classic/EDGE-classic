@@ -26,8 +26,8 @@
 namespace epi
 {
 
-void str_lower(std::string &s);
-void str_upper(std::string &s);
+void STR_Lower(std::string &s);
+void STR_Upper(std::string &s);
 
 void STR_TextureNameFromFilename(std::string &buf, const std::string &stem);
 

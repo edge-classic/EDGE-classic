@@ -688,12 +688,12 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
                     plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
                     plane->newspecial = model->props.special ? model->props.special->number : 0;
                 }
-                else if (epi::case_cmp(def->tex.substr(1), "changezero") == 0)
+                else if (epi::STR_CaseCmp(def->tex.substr(1), "changezero") == 0)
                 {
                     plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
                     plane->newspecial = 0;
                 }
-                else if (epi::case_cmp(def->tex.substr(1), "changetexonly") == 0)
+                else if (epi::STR_CaseCmp(def->tex.substr(1), "changetexonly") == 0)
                 {
                     plane->new_image = SECPIC(model, def->is_ceiling, NULL);
                 }
@@ -726,12 +726,12 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
                     plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
                     plane->newspecial = model->props.special ? model->props.special->number : 0;
                 }
-                else if (epi::case_cmp(def->tex.substr(1), "changezero") == 0)
+                else if (epi::STR_CaseCmp(def->tex.substr(1), "changezero") == 0)
                 {
                     plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
                     plane->newspecial = 0;
                 }
-                else if (epi::case_cmp(def->tex.substr(1), "changetexonly") == 0)
+                else if (epi::STR_CaseCmp(def->tex.substr(1), "changetexonly") == 0)
                 {
                     plane->new_image = SECPIC(model, def->is_ceiling, NULL);
                 }
@@ -792,12 +792,12 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
                 plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
                 plane->newspecial = model->props.special ? model->props.special->number : 0;
             }
-            else if (epi::case_cmp(def->tex.substr(1), "changezero") == 0)
+            else if (epi::STR_CaseCmp(def->tex.substr(1), "changezero") == 0)
             {
                 plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
                 plane->newspecial = 0;
             }
-            else if (epi::case_cmp(def->tex.substr(1), "changetexonly") == 0)
+            else if (epi::STR_CaseCmp(def->tex.substr(1), "changetexonly") == 0)
             {
                 plane->new_image = SECPIC(model, def->is_ceiling, NULL);
             }
@@ -834,12 +834,12 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
                 plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
                 plane->newspecial = model->props.special ? model->props.special->number : 0;
             }
-            else if (epi::case_cmp(def->tex.substr(1), "changezero") == 0)
+            else if (epi::STR_CaseCmp(def->tex.substr(1), "changezero") == 0)
             {
                 plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
                 plane->newspecial = 0;
             }
-            else if (epi::case_cmp(def->tex.substr(1), "changetexonly") == 0)
+            else if (epi::STR_CaseCmp(def->tex.substr(1), "changetexonly") == 0)
             {
                 plane->new_image = SECPIC(model, def->is_ceiling, NULL);
             }

@@ -1197,7 +1197,7 @@ static void IdentifyVersion(void)
                     argv::list.erase(argv::list.begin()+p--);
                 }
             }
-            else if (epi::case_cmp(dnd.extension().string(), ".epk") == 0)
+            else if (epi::STR_CaseCmp(dnd.extension().string(), ".epk") == 0)
             {
                 test_index = CheckPackForGameFiles(dnd, FLKIND_IPK);
                 if (test_index >= 0)
@@ -1213,7 +1213,7 @@ static void IdentifyVersion(void)
                     argv::list.erase(argv::list.begin()+p--);
                 }  
             }
-            else if (epi::case_cmp(dnd.extension().string(), ".wad") == 0)
+            else if (epi::STR_CaseCmp(dnd.extension().string(), ".wad") == 0)
             {
                 epi::file_c *game_test =
                     epi::FS_Open(dnd, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
@@ -1358,7 +1358,7 @@ static void IdentifyVersion(void)
 
         int test_score = -1;
 
-        if (epi::case_cmp(iwad_file.extension().string(), ".wad") == 0)
+        if (epi::STR_CaseCmp(iwad_file.extension().string(), ".wad") == 0)
         {
             epi::file_c *game_test = epi::FS_Open(iwad_file, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
             test_score              = W_CheckForUniqueLumps(game_test);
@@ -1571,11 +1571,11 @@ static void IdentifyVersion(void)
 // Add game-specific base EPKs (widepix, skyboxes, etc) - Dasho
 static void Add_Base(void)
 {
-    if (epi::case_cmp("CUSTOM", game_base) == 0)
+    if (epi::STR_CaseCmp("CUSTOM", game_base) == 0)
         return; // Standalone EDGE IWADs/EPKs should already contain their necessary resources and definitions - Dasho
     std::filesystem::path base_path = std::filesystem::path(game_dir).append("edge_base");
     std::string           base_wad  = game_base;
-    epi::str_lower(base_wad);
+    epi::STR_Lower(base_wad);
     base_path = std::filesystem::path(base_path).append(base_wad);
     if (epi::FS_IsDir(base_path))
         W_AddFilename(base_path, FLKIND_EFolder);
@@ -1677,7 +1677,7 @@ static void AddSingleCmdLineFile(std::filesystem::path name, bool ignore_unknown
 
     std::string ext = name.extension().string();
 
-    epi::str_lower(ext);
+    epi::STR_Lower(ext);
 
     if (ext == ".edm")
         I_Error("Demos are not supported\n");
@@ -1720,7 +1720,7 @@ static void AddCommandLineFiles(void)
 
     p = argv::Find("file");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-file") == 0))
+    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::STR_Cmp(argv::list[p], "-file") == 0))
     {
         // the parms after p are wadfile/lump names,
         // go until end of parms or another '-' preceded parm
@@ -1734,7 +1734,7 @@ static void AddCommandLineFiles(void)
 
     p = argv::Find("script");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-script") == 0))
+    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::STR_Cmp(argv::list[p], "-script") == 0))
     {
         // the parms after p are script filenames,
         // go until end of parms or another '-' preceded parm
@@ -1742,9 +1742,9 @@ static void AddCommandLineFiles(void)
         {
             std::string ext = std::filesystem::path(argv::list[p]).extension().string();
             // sanity check...
-            if (epi::case_cmp(ext, ".wad") == 0 || epi::case_cmp(ext, ".pk3") == 0 || epi::case_cmp(ext, ".zip") == 0 ||
-                epi::case_cmp(ext, ".epk") == 0 || epi::case_cmp(ext, ".vwad") == 0 ||
-                epi::case_cmp(ext, ".ddf") == 0 || epi::case_cmp(ext, ".deh") == 0 || epi::case_cmp(ext, ".bex") == 0)
+            if (epi::STR_CaseCmp(ext, ".wad") == 0 || epi::STR_CaseCmp(ext, ".pk3") == 0 || epi::STR_CaseCmp(ext, ".zip") == 0 ||
+                epi::STR_CaseCmp(ext, ".epk") == 0 || epi::STR_CaseCmp(ext, ".vwad") == 0 ||
+                epi::STR_CaseCmp(ext, ".ddf") == 0 || epi::STR_CaseCmp(ext, ".deh") == 0 || epi::STR_CaseCmp(ext, ".bex") == 0)
             {
                 I_Error("Illegal filename for -script: %s\n", argv::list[p].c_str());
             }
@@ -1760,7 +1760,7 @@ static void AddCommandLineFiles(void)
 
     p = argv::Find("deh");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-deh") == 0))
+    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::STR_Cmp(argv::list[p], "-deh") == 0))
     {
         // the parms after p are Dehacked/BEX filenames,
         // go until end of parms or another '-' preceded parm
@@ -1768,9 +1768,9 @@ static void AddCommandLineFiles(void)
         {
             std::string ext = std::filesystem::path(argv::list[p]).extension().string();
             // sanity check...
-            if (epi::case_cmp(ext, ".wad") == 0 || epi::case_cmp(ext, ".epk") == 0 || epi::case_cmp(ext, ".pk3") == 0 ||
-                epi::case_cmp(ext, ".zip") == 0 || epi::case_cmp(ext, ".vwad") == 0 ||
-                epi::case_cmp(ext, ".ddf") == 0 || epi::case_cmp(ext, ".rts") == 0)
+            if (epi::STR_CaseCmp(ext, ".wad") == 0 || epi::STR_CaseCmp(ext, ".epk") == 0 || epi::STR_CaseCmp(ext, ".pk3") == 0 ||
+                epi::STR_CaseCmp(ext, ".zip") == 0 || epi::STR_CaseCmp(ext, ".vwad") == 0 ||
+                epi::STR_CaseCmp(ext, ".ddf") == 0 || epi::STR_CaseCmp(ext, ".rts") == 0)
             {
                 I_Error("Illegal filename for -deh: %s\n", argv::list[p].c_str());
             }
@@ -1786,7 +1786,7 @@ static void AddCommandLineFiles(void)
 
     p = argv::Find("dir");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::strcmp(argv::list[p], "-dir") == 0))
+    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::STR_Cmp(argv::list[p], "-dir") == 0))
     {
         // the parms after p are directory names,
         // go until end of parms or another '-' preceded parm
@@ -1830,7 +1830,7 @@ static void Add_Autoload(void)
     }
     fsd.clear();
     std::string lowercase_base = game_base;
-    epi::str_lower(lowercase_base);
+    epi::STR_Lower(lowercase_base);
     folder = std::filesystem::path(folder).append(lowercase_base);
     if (!FS_ReadDir(fsd, folder, "*.*"))
     {

@@ -112,8 +112,8 @@ bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::filesystem::path dir, std::s
 
     for (auto const &entry : std::filesystem::directory_iterator{dir})
     {
-        if (epi::case_cmp(mask_ext.string(), ".*") != 0 &&
-            epi::case_cmp(mask_ext.string(), entry.path().extension().string()) != 0)
+        if (epi::STR_CaseCmp(mask_ext.string(), ".*") != 0 &&
+            epi::STR_CaseCmp(mask_ext.string(), entry.path().extension().string()) != 0)
             continue;
 
         bool   is_dir = entry.is_directory();
@@ -138,8 +138,8 @@ bool FS_ReadDirRecursive(std::vector<dir_entry_c> &fsd, std::filesystem::path di
 
     for (auto const &entry : std::filesystem::recursive_directory_iterator{dir})
     {
-        if (epi::case_cmp(mask_ext.string(), ".*") != 0 &&
-            epi::case_cmp(mask_ext.string(), entry.path().extension().string()) != 0)
+        if (epi::STR_CaseCmp(mask_ext.string(), ".*") != 0 &&
+            epi::STR_CaseCmp(mask_ext.string(), entry.path().extension().string()) != 0)
             continue;
 
         bool   is_dir = entry.is_directory();

@@ -130,7 +130,7 @@ image_c *W_ImageDoLookup(real_image_container_c &bucket, const char *name, int s
         if (source_type >= 0 && source_type != (int)rim->source_type)
             continue;
 
-        if (epi::case_cmp(name, rim->name) == 0)
+        if (epi::STR_CaseCmp(name, rim->name) == 0)
             return rim;
     }
 
@@ -436,9 +436,9 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
 
     if (current_flatdef && !current_flatdef->liquid.empty())
     {
-        if (epi::case_cmp(current_flatdef->liquid, "THIN") == 0)
+        if (epi::STR_CaseCmp(current_flatdef->liquid, "THIN") == 0)
             rim->liquid_type = LIQ_Thin;
-        else if (epi::case_cmp(current_flatdef->liquid, "THICK") == 0)
+        else if (epi::STR_CaseCmp(current_flatdef->liquid, "THICK") == 0)
             rim->liquid_type = LIQ_Thick;
     }
 
@@ -578,9 +578,9 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
 
     if (current_flatdef && !current_flatdef->liquid.empty())
     {
-        if (epi::case_cmp(current_flatdef->liquid, "THIN") == 0)
+        if (epi::STR_CaseCmp(current_flatdef->liquid, "THIN") == 0)
             rim->liquid_type = LIQ_Thin;
-        else if (epi::case_cmp(current_flatdef->liquid, "THICK") == 0)
+        else if (epi::STR_CaseCmp(current_flatdef->liquid, "THICK") == 0)
             rim->liquid_type = LIQ_Thick;
     }
 
@@ -683,9 +683,9 @@ static image_c *AddImageFlat(const char *name, int lump)
 
     if (current_flatdef && !current_flatdef->liquid.empty())
     {
-        if (epi::case_cmp(current_flatdef->liquid, "THIN") == 0)
+        if (epi::STR_CaseCmp(current_flatdef->liquid, "THIN") == 0)
             rim->liquid_type = LIQ_Thin;
-        else if (epi::case_cmp(current_flatdef->liquid, "THICK") == 0)
+        else if (epi::STR_CaseCmp(current_flatdef->liquid, "THICK") == 0)
             rim->liquid_type = LIQ_Thick;
     }
 
@@ -1189,7 +1189,7 @@ static bool IM_ShouldClamp(const image_c *rim)
 static bool IM_ShouldMipmap(image_c *rim)
 {
     // the "SKY" check here is a hack...
-    if (epi::prefix_case_cmp(rim->name, "SKY") == 0)
+    if (epi::STR_PrefixCaseCmp(rim->name, "SKY") == 0)
         return false;
 
     switch (rim->source_type)
@@ -1244,7 +1244,7 @@ static bool IM_ShouldHQ2X(image_c *rim)
 #if 0
 		case IMSRC_Texture:
 			// the "SKY" check here is a hack...
-			if (epi::prefix_case_cmp(rim->name, "SKY") == 0)
+			if (epi::STR_PrefixCaseCmp(rim->name, "SKY") == 0)
 				return true;
 			break;
 #endif
@@ -1511,7 +1511,7 @@ static const image_c *BackupTexture(const char *tex_name, int flags)
 
     image_c *dummy;
 
-    if (epi::prefix_case_cmp(tex_name, "SKY") == 0)
+    if (epi::STR_PrefixCaseCmp(tex_name, "SKY") == 0)
         dummy = CreateDummyImage(tex_name, 0x0000AA, 0x55AADD);
     else
         dummy = CreateDummyImage(tex_name, 0xAA5511, 0x663300);
@@ -1640,14 +1640,14 @@ const image_c *W_ImageLookup(const char *name, image_namespace_e type, int flags
         return NULL;
 
     // "Sky" marker.
-    if (type == INS_Flat && (epi::case_cmp(name, "F_SKY1") == 0 || epi::case_cmp(name, "F_SKY") == 0))
+    if (type == INS_Flat && (epi::STR_CaseCmp(name, "F_SKY1") == 0 || epi::STR_CaseCmp(name, "F_SKY") == 0))
     {
         return skyflatimage;
     }
 
     // compatibility hack (first texture in IWAD is a dummy)
-    if (type == INS_Texture && ((epi::case_cmp(name, "AASTINKY") == 0) || (epi::case_cmp(name, "AASHITTY") == 0) ||
-                                (epi::case_cmp(name, "BADPATCH") == 0) || (epi::case_cmp(name, "ABADONE") == 0)))
+    if (type == INS_Texture && ((epi::STR_CaseCmp(name, "AASTINKY") == 0) || (epi::STR_CaseCmp(name, "AASHITTY") == 0) ||
+                                (epi::STR_CaseCmp(name, "BADPATCH") == 0) || (epi::STR_CaseCmp(name, "ABADONE") == 0)))
     {
         return NULL;
     }
@@ -1711,7 +1711,7 @@ const image_c *W_ImageParseSaveString(char type, const char *name)
     // Used by the savegame code.
 
     // this name represents the sky (historical reasons)
-    if (type == 'd' && epi::case_cmp(name, "DUMMY__2") == 0)
+    if (type == 'd' && epi::STR_CaseCmp(name, "DUMMY__2") == 0)
     {
         return skyflatimage;
     }
@@ -1946,7 +1946,7 @@ void W_ImagePreCache(const image_c *image)
 
     // pre-cache alternative images for switches too
     if (rim->name.size() >= 4 &&
-        (epi::prefix_case_cmp(rim->name, "SW1") == 0 || epi::prefix_case_cmp(rim->name, "SW2") == 0))
+        (epi::STR_PrefixCaseCmp(rim->name, "SW1") == 0 || epi::STR_PrefixCaseCmp(rim->name, "SW2") == 0))
     {
         std::string alt_name = rim->name;
 

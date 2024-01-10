@@ -67,7 +67,7 @@ static void ColmapStartEntry(const char *name, bool extend)
     {
         dynamic_colmap->Default();
 
-        if (epi::prefix_case_cmp(name, "TEXT") == 0)
+        if (epi::STR_PrefixCaseCmp(name, "TEXT") == 0)
             dynamic_colmap->special = COLSP_Whiten;
 
         return;
@@ -79,7 +79,7 @@ static void ColmapStartEntry(const char *name, bool extend)
     dynamic_colmap->name = name;
 
     // make sure fonts get whitened properly (as the default)
-    if (epi::prefix_case_cmp(name, "TEXT") == 0)
+    if (epi::STR_PrefixCaseCmp(name, "TEXT") == 0)
         dynamic_colmap->special = COLSP_Whiten;
 
     colourmaps.push_back(dynamic_colmap);

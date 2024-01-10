@@ -108,11 +108,11 @@ static void FontFinishEntry(void)
 
     if (dynamic_font->type == FNTYP_TrueType && !dynamic_font->ttf_smoothing_string.empty())
     {
-        if (epi::strcmp(dynamic_font->ttf_smoothing_string, "NEVER") == 0)
+        if (epi::STR_CaseCmp(dynamic_font->ttf_smoothing_string, "NEVER") == 0)
             dynamic_font->ttf_smoothing = dynamic_font->TTF_SMOOTH_NEVER;
-        else if (epi::strcmp(dynamic_font->ttf_smoothing_string, "ALWAYS") == 0)
+        else if (epi::STR_CaseCmp(dynamic_font->ttf_smoothing_string, "ALWAYS") == 0)
             dynamic_font->ttf_smoothing = dynamic_font->TTF_SMOOTH_ALWAYS;
-        else if (epi::strcmp(dynamic_font->ttf_smoothing_string, "ON_DEMAND") == 0)
+        else if (epi::STR_CaseCmp(dynamic_font->ttf_smoothing_string, "ON_DEMAND") == 0)
             dynamic_font->ttf_smoothing = dynamic_font->TTF_SMOOTH_ON_DEMAND;
     }
 }

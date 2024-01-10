@@ -26,11 +26,11 @@
 namespace epi
 {
 
-void str_lower(std::string &s)
+void STR_Lower(std::string &s)
 {
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 }
-void str_upper(std::string &s)
+void STR_Upper(std::string &s)
 {
     std::transform(s.begin(), s.end(), s.begin(), ::toupper);
 }
@@ -52,7 +52,7 @@ void STR_TextureNameFromFilename(std::string &buf, const std::string &stem)
         buf.push_back((char)ch);
     }
 
-    epi::str_upper(buf);
+    epi::STR_Upper(buf);
 }
 
 std::string STR_Format(const char *fmt, ...)

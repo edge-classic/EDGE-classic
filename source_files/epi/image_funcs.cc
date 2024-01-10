@@ -127,7 +127,7 @@ image_format_e Image_FilenameToFormat(const std::filesystem::path &filename)
 {
     std::string ext = filename.extension().string();
 
-    str_lower(ext);
+    STR_Lower(ext);
 
     if (ext == ".png")
         return FMT_PNG;

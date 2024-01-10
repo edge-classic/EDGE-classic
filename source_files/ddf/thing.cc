@@ -1629,11 +1629,11 @@ static void DDF_MobjGetGlowType(const char *info, void *storage)
 {
     glow_sector_type_e *glow = (glow_sector_type_e *)storage;
 
-    if (epi::case_cmp(info, "FLOOR") == 0)
+    if (epi::STR_CaseCmp(info, "FLOOR") == 0)
         *glow = GLOW_Floor;
-    else if (epi::case_cmp(info, "CEILING") == 0)
+    else if (epi::STR_CaseCmp(info, "CEILING") == 0)
         *glow = GLOW_Ceiling;
-    else if (epi::case_cmp(info, "WALL") == 0)
+    else if (epi::STR_CaseCmp(info, "WALL") == 0)
         *glow = GLOW_Wall;
     else // Unknown/None
         *glow = GLOW_None;
@@ -1896,13 +1896,13 @@ bool DDF_MainParseCondition(const char *info, condition_check_t *cond)
 
     // check for negation
     t_off = 0;
-    if (epi::prefix_case_cmp(typebuf, "NOT_") == 0)
+    if (epi::STR_PrefixCaseCmp(typebuf, "NOT_") == 0)
     {
         cond->negate = true;
         t_off        = 4;
     }
 
-    if (epi::prefix_case_cmp(typebuf, "EXACT_") == 0)
+    if (epi::STR_PrefixCaseCmp(typebuf, "EXACT_") == 0)
     {
         cond->exact = true;
         t_off       = 6;

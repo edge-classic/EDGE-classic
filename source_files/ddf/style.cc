@@ -165,13 +165,13 @@ static void StyleFinishEntry(void)
     {
         const char *pos_str = dynamic_style->cursor.pos_string.c_str();
 
-        if (epi::case_cmp(pos_str, "LEFT") == 0)
+        if (epi::STR_CaseCmp(pos_str, "LEFT") == 0)
             dynamic_style->cursor.position = dynamic_style->C_LEFT;
-        else if (epi::case_cmp(pos_str, "CENTER") == 0)
+        else if (epi::STR_CaseCmp(pos_str, "CENTER") == 0)
             dynamic_style->cursor.position = dynamic_style->C_CENTER;
-        else if (epi::case_cmp(pos_str, "RIGHT") == 0)
+        else if (epi::STR_CaseCmp(pos_str, "RIGHT") == 0)
             dynamic_style->cursor.position = dynamic_style->C_RIGHT;
-        else if (epi::case_cmp(pos_str, "BOTH") == 0)
+        else if (epi::STR_CaseCmp(pos_str, "BOTH") == 0)
             dynamic_style->cursor.position = dynamic_style->C_BOTH;
     }
 
@@ -179,11 +179,11 @@ static void StyleFinishEntry(void)
     {
         const char *align_str = dynamic_style->entry_align_string.c_str();
 
-        if (epi::case_cmp(align_str, "LEFT") == 0)
+        if (epi::STR_CaseCmp(align_str, "LEFT") == 0)
             dynamic_style->entry_alignment = dynamic_style->C_LEFT;
-        else if (epi::case_cmp(align_str, "CENTER") == 0)
+        else if (epi::STR_CaseCmp(align_str, "CENTER") == 0)
             dynamic_style->entry_alignment = dynamic_style->C_CENTER;
-        else if (epi::case_cmp(align_str, "RIGHT") == 0)
+        else if (epi::STR_CaseCmp(align_str, "RIGHT") == 0)
             dynamic_style->entry_alignment = dynamic_style->C_RIGHT;
     }
 }

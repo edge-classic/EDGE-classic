@@ -69,7 +69,7 @@ bool S_StartupPrime(void)
     bool cvar_good = false;
     for (size_t i = 0; i < available_soundfonts.size(); i++)
     {
-        if (epi::case_cmp(s_soundfont.s, available_soundfonts.at(i).generic_u8string()) == 0)
+        if (epi::STR_CaseCmp(s_soundfont.s, available_soundfonts.at(i).generic_u8string()) == 0)
         {
             cvar_good = true;
             break;

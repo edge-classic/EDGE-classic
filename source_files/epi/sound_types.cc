@@ -123,7 +123,7 @@ sound_format_e Sound_FilenameToFormat(const std::filesystem::path &filename)
 {
     std::string ext = filename.extension().string();
 
-    str_lower(ext);
+    STR_Lower(ext);
 
     if (ext == ".wav" || ext == ".wave")
         return FMT_WAV;

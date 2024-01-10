@@ -24,62 +24,84 @@
 #include <ctype.h>
 #include <locale>
 
-#undef strcmp
-#undef strncmp
-
 namespace epi
 {
 
-int strcmp(const char *A, const char *B)
+int STR_Cmp(const char *A, const char *B)
 {
     SYS_ASSERT(A && B);
-    return strcmp(A, B);
+    for (;;)
+	{
+		int AC = (int)(unsigned char)*A++;
+        int BC = (int)(unsigned char)*B++;
+
+		if (AC != BC)
+			return AC - BC;
+
+		if (AC == 0)
+			return 0;
+	}
 }
 
-int strcmp(const char *A, const std::string &B)
+int STR_Cmp(const char *A, const std::string &B)
 {
-    return epi::strcmp(A, B.c_str());
+    return epi::STR_Cmp(A, B.c_str());
 }
 
-int strcmp(const std::string &A, const char *B)
+int STR_Cmp(const std::string &A, const char *B)
 {
-    return epi::strcmp(A.c_str(), B);
+    return epi::STR_Cmp(A.c_str(), B);
 }
 
-int strcmp(const std::string &A, const std::string &B)
+int STR_Cmp(const std::string &A, const std::string &B)
 {
-    return epi::strcmp(A.c_str(), B.c_str());
+    return epi::STR_Cmp(A.c_str(), B.c_str());
 }
 
 //----------------------------------------------------------------------------
 
-int strncmp(const char *A, const char *B, size_t n)
+int STR_CmpMax(const char *A, const char *B, size_t n)
 {
     SYS_ASSERT(A && B);
-    return strncmp(A, B, n);
+    SYS_ASSERT(n != 0);
+	for (;;)
+	{
+		if (n == 0)
+			return 0;
+
+		int AC = (int)(unsigned char)*A++;
+        int BC = (int)(unsigned char)*B++;
+
+		if (AC != BC)
+			return AC - BC;
+
+		if (AC == 0)
+			return 0;
+
+		n--;
+	}
 }
 
-int strncmp(const char *A, const std::string &B, size_t n)
+int STR_CmpMax(const char *A, const std::string &B, size_t n)
 {
-    return epi::strncmp(A, B.c_str(), n);
+    return epi::STR_CmpMax(A, B.c_str(), n);
 }
 
-int strncmp(const std::string &A, const char *B, size_t n)
+int STR_CmpMax(const std::string &A, const char *B, size_t n)
 {
-    return epi::strncmp(A.c_str(), B, n);
+    return epi::STR_CmpMax(A.c_str(), B, n);
 }
 
-int strncmp(const std::string &A, const std::string &B, size_t n)
+int STR_CmpMax(const std::string &A, const std::string &B, size_t n)
 {
-    return epi::strncmp(A.c_str(), B.c_str(), n);
+    return epi::STR_CmpMax(A.c_str(), B.c_str(), n);
 }
 
 //----------------------------------------------------------------------------
 
-int case_cmp(const char *A, const char *B)
+int STR_CaseCmp(const char *A, const char *B)
 {
     SYS_ASSERT(A && B);
-
     for (;;)
     {
         int AC = tolower((unsigned char)*A++);
@@ -93,50 +115,49 @@ int case_cmp(const char *A, const char *B)
     }
 }
 
-int case_cmp(const char *A, const std::string &B)
+int STR_CaseCmp(const char *A, const std::string &B)
 {
-    return epi::case_cmp(A, B.c_str());
+    return epi::STR_CaseCmp(A, B.c_str());
 }
 
-int case_cmp(const std::string &A, const char *B)
+int STR_CaseCmp(const std::string &A, const char *B)
 {
-    return epi::case_cmp(A.c_str(), B);
+    return epi::STR_CaseCmp(A.c_str(), B);
 }
 
-int case_cmp(const std::string &A, const std::string &B)
+int STR_CaseCmp(const std::string &A, const std::string &B)
 {
-    return epi::case_cmp(A.c_str(), B.c_str());
-}
-
-//----------------------------------------------------------------------------
-
-int case_cmp_n(const char *A, const char *B, size_t n)
-{
-    SYS_ASSERT(A && B);
-    return epi::case_cmp(std::string(A).substr(0, n), std::string(B).substr(0, n));
-}
-
-int case_cmp_n(const char *A, const std::string &B, size_t n)
-{
-    return epi::case_cmp_n(A, B.c_str(), n);
-}
-
-int case_cmp_n(const std::string &A, const char *B, size_t n)
-{
-    return epi::case_cmp_n(A.c_str(), B, n);
-}
-
-int case_cmp_n(const std::string &A, const std::string &B, size_t n)
-{
-    return epi::case_cmp_n(A.c_str(), B.c_str(), n);
+    return epi::STR_CaseCmp(A.c_str(), B.c_str());
 }
 
 //----------------------------------------------------------------------------
 
-int prefix_cmp(const char *A, const char *B)
+int STR_CaseCmpMax(const char *A, const char *B, size_t n)
 {
     SYS_ASSERT(A && B);
+    return epi::STR_CaseCmp(std::string(A).substr(0, n), std::string(B).substr(0, n));
+}
 
+int STR_CaseCmpMax(const char *A, const std::string &B, size_t n)
+{
+    return epi::STR_CaseCmpMax(A, B.c_str(), n);
+}
+
+int STR_CaseCmpMax(const std::string &A, const char *B, size_t n)
+{
+    return epi::STR_CaseCmpMax(A.c_str(), B, n);
+}
+
+int STR_CaseCmpMax(const std::string &A, const std::string &B, size_t n)
+{
+    return epi::STR_CaseCmpMax(A.c_str(), B.c_str(), n);
+}
+
+//----------------------------------------------------------------------------
+
+int STR_PrefixCmp(const char *A, const char *B)
+{
+    SYS_ASSERT(A && B);
     for (;;)
     {
         int AC = (int)(unsigned char)*A++;
@@ -150,24 +171,24 @@ int prefix_cmp(const char *A, const char *B)
     }
 }
 
-int prefix_cmp(const char *A, const std::string &B)
+int STR_PrefixCmp(const char *A, const std::string &B)
 {
-    return epi::prefix_cmp(A, B.c_str());
+    return epi::STR_PrefixCmp(A, B.c_str());
 }
 
-int prefix_cmp(const std::string &A, const char *B)
+int STR_PrefixCmp(const std::string &A, const char *B)
 {
-    return epi::prefix_cmp(A.c_str(), B);
+    return epi::STR_PrefixCmp(A.c_str(), B);
 }
 
-int prefix_cmp(const std::string &A, const std::string &B)
+int STR_PrefixCmp(const std::string &A, const std::string &B)
 {
-    return epi::prefix_cmp(A.c_str(), B.c_str());
+    return epi::STR_PrefixCmp(A.c_str(), B.c_str());
 }
 
 //----------------------------------------------------------------------------
 
-int prefix_case_cmp(const char *A, const char *B)
+int STR_PrefixCaseCmp(const char *A, const char *B)
 {
     SYS_ASSERT(A && B);
 
@@ -184,19 +205,19 @@ int prefix_case_cmp(const char *A, const char *B)
     }
 }
 
-int prefix_case_cmp(const char *A, const std::string &B)
+int STR_PrefixCaseCmp(const char *A, const std::string &B)
 {
-    return epi::prefix_case_cmp(A, B.c_str());
+    return epi::STR_PrefixCaseCmp(A, B.c_str());
 }
 
-int prefix_case_cmp(const std::string &A, const char *B)
+int STR_PrefixCaseCmp(const std::string &A, const char *B)
 {
-    return epi::prefix_case_cmp(A.c_str(), B);
+    return epi::STR_PrefixCaseCmp(A.c_str(), B);
 }
 
-int prefix_case_cmp(const std::string &A, const std::string &B)
+int STR_PrefixCaseCmp(const std::string &A, const std::string &B)
 {
-    return epi::prefix_case_cmp(A.c_str(), B.c_str());
+    return epi::STR_PrefixCaseCmp(A.c_str(), B.c_str());
 }
 
 } // namespace epi

@@ -871,12 +871,12 @@ int W_CheckForUniqueLumps(epi::file_c *file)
 
         // Do not require IWAD header if loading Harmony, REKKR, BFG Edition WADs, Chex Quest or a custom standalone
         // IWAD
-        if (epi::prefix_cmp(header.identification, "IWAD") != 0 &&
-            epi::case_cmp(gamecheck.unique_lumps[0], "DMENUPIC") != 0 &&
-            epi::case_cmp(gamecheck.unique_lumps[0], "REKCREDS") != 0 &&
-            epi::case_cmp(gamecheck.unique_lumps[0], "0HAWK01") != 0 &&
-            epi::case_cmp(gamecheck.unique_lumps[0], "EDGEGAME") != 0 &&
-            epi::case_cmp(gamecheck.unique_lumps[0], "ENDOOM") != 0)
+        if (epi::STR_PrefixCmp(header.identification, "IWAD") != 0 &&
+            epi::STR_CaseCmp(gamecheck.unique_lumps[0], "DMENUPIC") != 0 &&
+            epi::STR_CaseCmp(gamecheck.unique_lumps[0], "REKCREDS") != 0 &&
+            epi::STR_CaseCmp(gamecheck.unique_lumps[0], "0HAWK01") != 0 &&
+            epi::STR_CaseCmp(gamecheck.unique_lumps[0], "EDGEGAME") != 0 &&
+            epi::STR_CaseCmp(gamecheck.unique_lumps[0], "ENDOOM") != 0)
         {
             continue;
         }
@@ -888,18 +888,18 @@ int W_CheckForUniqueLumps(epi::file_c *file)
         {
             raw_wad_entry_t &entry = raw_info[i];
 
-            if (epi::strncmp(gamecheck.unique_lumps[0], entry.name,
+            if (epi::STR_CmpMax(gamecheck.unique_lumps[0], entry.name,
                              gamecheck.unique_lumps[0].size() < 8 ? gamecheck.unique_lumps[0].size() : 8) == 0)
             {
                 // EDGEGAME is the only lump needed for custom standalones
-                if (epi::case_cmp(gamecheck.unique_lumps[0], "EDGEGAME") == 0)
+                if (epi::STR_CaseCmp(gamecheck.unique_lumps[0], "EDGEGAME") == 0)
                 {
                     delete[] raw_info;
                     file->Seek(0, epi::file_c::SEEKPOINT_START);
                     return check;
                 }
                 // Either really smart or really dumb Chex Quest detection method
-                else if (epi::case_cmp(gamecheck.unique_lumps[0], "ENDOOM") == 0)
+                else if (epi::STR_CaseCmp(gamecheck.unique_lumps[0], "ENDOOM") == 0)
                 {
                     SYS_ASSERT(entry.size == 4000);
                     file->Seek(entry.pos, epi::file_c::SEEKPOINT_START);
@@ -916,7 +916,7 @@ int W_CheckForUniqueLumps(epi::file_c *file)
                 else
                     lump1_found = true;
             }
-            if (epi::strncmp(gamecheck.unique_lumps[1], entry.name,
+            if (epi::STR_CmpMax(gamecheck.unique_lumps[1], entry.name,
                              gamecheck.unique_lumps[1].size() < 8 ? gamecheck.unique_lumps[1].size() : 8) == 0)
                 lump2_found = true;
         }
@@ -964,7 +964,7 @@ void ProcessFixersForWad(data_file_c *df)
 
     for (size_t i = 0; i < fixdefs.size(); i++)
     {
-        if (epi::case_cmp(fix_checker, fixdefs[i]->md5_string) == 0)
+        if (epi::STR_CaseCmp(fix_checker, fixdefs[i]->md5_string) == 0)
         {
             std::filesystem::path fix_path = std::filesystem::path(game_dir).append("edge_fixes");
             fix_path.append(fix_checker.append(".epk"));
@@ -1155,7 +1155,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
         raw_wad_entry_t &entry = raw_info[i];
 
         bool allow_ddf =
-            (df->kind == FLKIND_EWad || (df->kind == FLKIND_IWad && epi::strcmp(game_base, "CUSTOM") == 0) ||
+            (df->kind == FLKIND_EWad || (df->kind == FLKIND_IWad && epi::STR_Cmp(game_base, "CUSTOM") == 0) ||
              df->kind == FLKIND_PWad || df->kind == FLKIND_PackWAD || df->kind == FLKIND_IPK ||
              df->kind == FLKIND_IFolder);
 
@@ -1278,9 +1278,9 @@ void W_ReadUMAPINFOLumps(void)
         for (i = 0; i < Maps.mapcount; i++)
         {
             std::string mapname = Maps.maps[i].mapname;
-            epi::str_upper(mapname);
+            epi::STR_Upper(mapname);
             // Check that the name adheres to either EXMX or MAPXX format per the standard
-            if (epi::prefix_case_cmp(mapname, "MAP") == 0)
+            if (epi::STR_PrefixCaseCmp(mapname, "MAP") == 0)
             {
                 for (auto c : mapname.substr(3))
                 {
@@ -1313,13 +1313,13 @@ void W_ReadUMAPINFOLumps(void)
             if (Maps.maps[i].levelpic[0])
             {
                 temp_level->namegraphic = Maps.maps[i].levelpic;
-                epi::str_upper(temp_level->namegraphic);
+                epi::STR_Upper(temp_level->namegraphic);
             }
 
             if (Maps.maps[i].skytexture[0])
             {
                 temp_level->sky = Maps.maps[i].skytexture;
-                epi::str_upper(temp_level->sky);
+                epi::STR_Upper(temp_level->sky);
             }
 
             if (Maps.maps[i].levelname)
@@ -1359,12 +1359,12 @@ void W_ReadUMAPINFOLumps(void)
             if (Maps.maps[i].nextmap[0])
             {
                 temp_level->nextmapname = Maps.maps[i].nextmap;
-                epi::str_upper(temp_level->nextmapname);
+                epi::STR_Upper(temp_level->nextmapname);
             }
 
             if (Maps.maps[i].intertext)
             {
-                if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP07"))
+                if (!epi::STR_CaseCmp(temp_level->nextmapname.c_str(), "MAP07"))
                 {
                     // Clear out some of our defaults on certain maps
                     mapdef_c *conflict_level = mapdefs.Lookup("MAP07");
@@ -1374,7 +1374,7 @@ void W_ReadUMAPINFOLumps(void)
                         conflict_level->f_pre.text_flat.clear();
                     }
                 }
-                if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP21"))
+                if (!epi::STR_CaseCmp(temp_level->nextmapname.c_str(), "MAP21"))
                 {
                     // Clear out some of our defaults on certain maps
                     mapdef_c *conflict_level = mapdefs.Lookup("MAP21");
@@ -1384,7 +1384,7 @@ void W_ReadUMAPINFOLumps(void)
                         conflict_level->f_pre.text_flat.clear();
                     }
                 }
-                if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP31"))
+                if (!epi::STR_CaseCmp(temp_level->nextmapname.c_str(), "MAP31"))
                 {
                     // Clear out some of our defaults on certain maps
                     mapdef_c *conflict_level = mapdefs.Lookup("MAP31");
@@ -1394,7 +1394,7 @@ void W_ReadUMAPINFOLumps(void)
                         conflict_level->f_pre.text_flat.clear();
                     }
                 }
-                if (!epi::case_cmp(temp_level->nextmapname.c_str(), "MAP32"))
+                if (!epi::STR_CaseCmp(temp_level->nextmapname.c_str(), "MAP32"))
                 {
                     // Clear out some of our defaults on certain maps
                     mapdef_c *conflict_level = mapdefs.Lookup("MAP32");
@@ -1405,7 +1405,7 @@ void W_ReadUMAPINFOLumps(void)
                     }
                 }
 
-                if (epi::case_cmp(Maps.maps[i].intertext, "clear") == 0)
+                if (epi::STR_CaseCmp(Maps.maps[i].intertext, "clear") == 0)
                 {
                     temp_level->f_end.text.clear();
                     temp_level->f_end.text_flat.clear();
@@ -1424,7 +1424,7 @@ void W_ReadUMAPINFOLumps(void)
                     const image_c *rim;
 
                     std::string ibd_lookup = Maps.maps[i].interbackdrop;
-                    epi::str_upper(ibd_lookup);
+                    epi::STR_Upper(ibd_lookup);
 
                     rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
 
@@ -1468,32 +1468,32 @@ void W_ReadUMAPINFOLumps(void)
             if (Maps.maps[i].nextsecret[0])
             {
                 temp_level->secretmapname = Maps.maps[i].nextsecret;
-                epi::str_upper(temp_level->secretmapname);
+                epi::STR_Upper(temp_level->secretmapname);
                 if (Maps.maps[i].intertextsecret)
                 {
 
-                    if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP07"))
+                    if (!epi::STR_CaseCmp(temp_level->secretmapname.c_str(), "MAP07"))
                     {
                         // Clear out some of our defaults on certain maps
                         mapdef_c *conflict_level = mapdefs.Lookup("MAP07");
                         conflict_level->f_pre.text.clear();
                         conflict_level->f_pre.text_flat.clear();
                     }
-                    if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP21"))
+                    if (!epi::STR_CaseCmp(temp_level->secretmapname.c_str(), "MAP21"))
                     {
                         // Clear out some of our defaults on certain maps
                         mapdef_c *conflict_level = mapdefs.Lookup("MAP21");
                         conflict_level->f_pre.text.clear();
                         conflict_level->f_pre.text_flat.clear();
                     }
-                    if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP31"))
+                    if (!epi::STR_CaseCmp(temp_level->secretmapname.c_str(), "MAP31"))
                     {
                         // Clear out some of our defaults on certain maps
                         mapdef_c *conflict_level = mapdefs.Lookup("MAP31");
                         conflict_level->f_pre.text.clear();
                         conflict_level->f_pre.text_flat.clear();
                     }
-                    if (!epi::case_cmp(temp_level->secretmapname.c_str(), "MAP32"))
+                    if (!epi::STR_CaseCmp(temp_level->secretmapname.c_str(), "MAP32"))
                     {
                         // Clear out some of our defaults on certain maps
                         mapdef_c *conflict_level = mapdefs.Lookup("MAP32");
@@ -1506,13 +1506,13 @@ void W_ReadUMAPINFOLumps(void)
                     {
                         secret_level       = new mapdef_c;
                         secret_level->name = Maps.maps[i].nextsecret;
-                        epi::str_upper(secret_level->name);
+                        epi::STR_Upper(secret_level->name);
                         secret_level->lump = Maps.maps[i].nextsecret;
-                        epi::str_upper(secret_level->lump);
+                        epi::STR_Upper(secret_level->lump);
                         mapdefs.push_back(secret_level);
                     }
 
-                    if (epi::case_cmp(Maps.maps[i].intertextsecret, "clear") == 0)
+                    if (epi::STR_CaseCmp(Maps.maps[i].intertextsecret, "clear") == 0)
                     {
                         secret_level->f_pre.text.clear();
                         secret_level->f_pre.text_flat.clear();
@@ -1533,7 +1533,7 @@ void W_ReadUMAPINFOLumps(void)
                             {
                                 const image_c *rim;
                                 std::string    ibd_lookup = Maps.maps[i].interbackdrop;
-                                epi::str_upper(ibd_lookup);
+                                epi::STR_Upper(ibd_lookup);
 
                                 rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
 
@@ -1563,7 +1563,7 @@ void W_ReadUMAPINFOLumps(void)
                             {
                                 const image_c *rim;
                                 std::string    ibd_lookup = Maps.maps[i].interbackdrop;
-                                epi::str_upper(ibd_lookup);
+                                epi::STR_Upper(ibd_lookup);
 
                                 rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
 
@@ -1589,13 +1589,13 @@ void W_ReadUMAPINFOLumps(void)
             if (Maps.maps[i].exitpic[0])
             {
                 temp_level->leavingbggraphic = Maps.maps[i].exitpic;
-                epi::str_upper(temp_level->leavingbggraphic);
+                epi::STR_Upper(temp_level->leavingbggraphic);
             }
 
             if (Maps.maps[i].enterpic[0])
             {
                 temp_level->enteringbggraphic = Maps.maps[i].enterpic;
-                epi::str_upper(temp_level->enteringbggraphic);
+                epi::STR_Upper(temp_level->enteringbggraphic);
             }
 
             if (Maps.maps[i].endpic[0])
@@ -1603,7 +1603,7 @@ void W_ReadUMAPINFOLumps(void)
                 temp_level->nextmapname.clear();
                 temp_level->f_end.pics.clear();
                 temp_level->f_end.pics.push_back(Maps.maps[i].endpic);
-                epi::str_upper(temp_level->f_end.pics.back());
+                epi::STR_Upper(temp_level->f_end.pics.back());
                 temp_level->f_end.picwait = INT_MAX; // Stay on endpic for now
             }
 
@@ -1661,7 +1661,7 @@ void W_ReadUMAPINFOLumps(void)
             {
                 for (int g = gamedefs.size() - 1; g >= 0; g--)
                 {
-                    if (gamedefs[g]->name != "TEMPEPI" && epi::case_cmp_n(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
+                    if (gamedefs[g]->name != "TEMPEPI" && epi::STR_CaseCmpMax(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
                     {
                         if (atoi(gamedefs[g]->firstmap.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
                             continue;
@@ -1695,7 +1695,7 @@ void W_ReadUMAPINFOLumps(void)
                 {
                     for (int g = gamedefs.size() - 1; g >= 0; g--)
                     {
-                        if (epi::case_cmp_n(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
+                        if (epi::STR_CaseCmpMax(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
                         {
                             if (atoi(gamedefs[g]->firstmap.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
                                 continue;
@@ -1715,7 +1715,7 @@ void W_ReadUMAPINFOLumps(void)
             // Validate important things
             if (temp_level->sky.empty())
             {
-                if (epi::prefix_case_cmp(temp_level->name, "MAP") == 0)
+                if (epi::STR_PrefixCaseCmp(temp_level->name, "MAP") == 0)
                 {
                     int levnum = atoi(temp_level->name.substr(3).c_str());
                     if (levnum < 12)
@@ -1741,7 +1741,7 @@ void W_ReadUMAPINFOLumps(void)
             // Clear pre_text for this map if it is an episode's starting map
             for (int g = gamedefs.size() - 1; g >= 0; g--)
             {
-                if (epi::case_cmp(gamedefs[g]->firstmap, temp_level->name) == 0)
+                if (epi::STR_CaseCmp(gamedefs[g]->firstmap, temp_level->name) == 0)
                 {
                     temp_level->f_pre.text.clear();
                     temp_level->f_pre.text_flat.clear();

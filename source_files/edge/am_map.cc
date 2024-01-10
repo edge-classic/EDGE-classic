@@ -730,7 +730,7 @@ static void DrawKeyOnLine(mline_t *ml, int theKey, rgbacol_t rgb = SG_WHITE_RGBA
                     bool           flip;
                     const image_c *img = R2_GetOtherSprite(idlestate->sprite, idlestate->frame, &flip);
 
-                    if (epi::case_cmp("DUMMY_SPRITE", img->name) != 0)
+                    if (epi::STR_CaseCmp("DUMMY_SPRITE", img->name) != 0)
                         HUD_DrawImageNoOffset(x1, y1, img);
                     // HUD_StretchImage(x1, y1, 16, 16, img, 0.0, 0.0);
                 }

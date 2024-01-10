@@ -72,13 +72,13 @@ class pack_entry_c
 
     bool operator==(const std::string &other) const
     {
-        return epi::case_cmp(name, other.c_str()) == 0;
+        return epi::STR_CaseCmp(name, other.c_str()) == 0;
     }
 
     bool HasExtension(const char *match) const
     {
         std::string ext = std::filesystem::path(name).extension().string();
-        return epi::case_cmp(ext, match) == 0;
+        return epi::STR_CaseCmp(ext, match) == 0;
     }
 };
 
@@ -120,7 +120,7 @@ class pack_dir_c
 
     bool operator==(const std::string &other) const
     {
-        return epi::case_cmp(name, other) == 0;
+        return epi::STR_CaseCmp(name, other) == 0;
     }
 };
 
@@ -325,7 +325,7 @@ void ProcessSubDir(pack_file_c *pack, const std::string &fullpath)
                 continue;
             }
             std::string filename = fsd[i].name.filename().string();
-            epi::str_upper(filename);
+            epi::STR_Upper(filename);
             std::string packpath = fsd[i].name.lexically_relative(pack->parent->name).string();
             pack->dirs[d].AddEntry(filename, fsd[i].name.string(), packpath, 0);
             pack->search_files.insert({std::filesystem::path(filename).stem().string(), packpath});
@@ -362,7 +362,7 @@ static pack_file_c *ProcessFolder(data_file_c *df)
                 continue;
             }
             std::string filename = fsd[i].name.filename().string();
-            epi::str_upper(filename);
+            epi::STR_Upper(filename);
             std::string packpath = fsd[i].name.lexically_relative(df->name).string();
             pack->dirs[0].AddEntry(filename, fsd[i].name.string(), packpath, 0);
             pack->search_files.insert({std::filesystem::path(filename).stem().string(), packpath});
@@ -466,7 +466,7 @@ static pack_file_c *ProcessZip(data_file_c *df)
             dir_idx = pack->AddDir(filename);
         }
         std::string add_name = basename;
-        epi::str_upper(add_name);
+        epi::STR_Upper(add_name);
         pack->dirs[dir_idx].AddEntry(std::filesystem::path(add_name).filename().string(), "", packpath, idx);
         pack->search_files.insert({std::filesystem::path(add_name).stem().string(), packpath});
     }
@@ -734,7 +734,7 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
             if (std::filesystem::path(ent.name).filename() == "COAL_HUD.EC" || std::filesystem::path(ent.name).stem() == "COALHUDS")
             {
-                if (epi::prefix_case_cmp(bare_filename, "edge_defs") != 0)
+                if (epi::STR_PrefixCaseCmp(bare_filename, "edge_defs") != 0)
                 {
                     VM_SetCoalDetected(true);
                 }
@@ -796,7 +796,7 @@ static void ProcessLuaHUDInPack(pack_file_c *pack)
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
             if (std::filesystem::path(ent.name).filename() == "EDGE_HUD.LUA")
             {
-                if (epi::prefix_case_cmp(bare_filename, "edge_defs") != 0)
+                if (epi::STR_PrefixCaseCmp(bare_filename, "edge_defs") != 0)
                 {
                     LUA_SetLuaHudDetected(true);
                 }
@@ -828,7 +828,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
             std::string stem = std::filesystem::path(entry.name).stem().string();
             std::string ext  = std::filesystem::path(entry.name).extension().string();
 
-            epi::str_lower(ext);
+            epi::STR_Lower(ext);
 
             if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
                 ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
@@ -842,7 +842,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
                 // Check DDFIMAGE definitions to see if this is replacing a lump type def
                 for (auto img : imagedefs)
                 {
-                    if (img->type == IMGDT_Lump && epi::case_cmp(img->info, texname) == 0 &&
+                    if (img->type == IMGDT_Lump && epi::STR_CaseCmp(img->info, texname) == 0 &&
                         W_CheckFileNumForName(texname.c_str()) < pack_index)
                     {
                         img->type = IMGDT_Package;
@@ -888,7 +888,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
                 // Assume that same stem name is meant to replace an identically named lump entry
                 if (!sfx->lump_name.empty())
                 {
-                    if (epi::case_cmp(std::filesystem::path(entry.name).stem().string(), sfx->lump_name) == 0 &&
+                    if (epi::STR_CaseCmp(std::filesystem::path(entry.name).stem().string(), sfx->lump_name) == 0 &&
                         W_CheckFileNumForName(sfx->lump_name.c_str()) < pack_index)
                     {
                         sfx->pack_name = entry.packpath;
@@ -909,7 +909,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
                 if (std::filesystem::path(song->info).extension().empty())
                 {
                     if (song->infotype == MUSINF_LUMP &&
-                        epi::case_cmp(std::filesystem::path(entry.name).stem().string(), song->info) == 0 &&
+                        epi::STR_CaseCmp(std::filesystem::path(entry.name).stem().string(), song->info) == 0 &&
                         W_CheckFileNumForName(song->info.c_str()) < pack_index)
                     {
                         song->info     = entry.packpath;
@@ -933,7 +933,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
             for (auto colm : colourmaps)
             {
                 if (!colm->lump_name.empty() &&
-                    epi::case_cmp(colm->lump_name, std::filesystem::path(entry.name).stem().string()) == 0 &&
+                    epi::STR_CaseCmp(colm->lump_name, std::filesystem::path(entry.name).stem().string()) == 0 &&
                     W_CheckFileNumForName(colm->lump_name.c_str()) < pack_index)
                 {
                     colm->lump_name.clear();
@@ -963,7 +963,7 @@ void Pack_ProcessHiresSubstitutions(pack_file_c *pack, int pack_index)
         std::string stem = std::filesystem::path(entry.name).stem().string();
         std::string ext  = std::filesystem::path(entry.name).extension().string();
 
-        epi::str_lower(ext);
+        epi::STR_Lower(ext);
 
         if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
             ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
@@ -1048,7 +1048,7 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
     }
 
     std::string find_stem = std::filesystem::path(name).stem().string();
-    epi::str_upper(find_stem);
+    epi::STR_Upper(find_stem);
 
     // quick file stem check to see if it's present at all
     if (!Pack_FindStem(pack, find_stem))
@@ -1071,7 +1071,7 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
     {
         for (auto file : pack->dirs[0].entries)
         {
-            if (epi::case_cmp(file.name, find_name) == 0)
+            if (epi::STR_CaseCmp(file.name, find_name) == 0)
                 return true;
         }
         return false;
@@ -1083,7 +1083,7 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
         auto results = pack->search_files.equal_range(find_stem);
         for (auto file = results.first; file != results.second; ++file)
         {
-            if (epi::case_cmp(find_name, std::filesystem::path(file->second).filename().string()) == 0)
+            if (epi::STR_CaseCmp(find_name, std::filesystem::path(file->second).filename().string()) == 0)
                 return true;
         }
         return false;
@@ -1122,7 +1122,7 @@ epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name)
     }
 
     std::string open_stem = std::filesystem::path(open_name).stem().string();
-    epi::str_upper(open_stem);
+    epi::STR_Upper(open_stem);
 
     // quick file stem check to see if it's present at all
     if (!Pack_FindStem(pack, open_stem))
@@ -1138,7 +1138,7 @@ epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name)
     {
         for (auto file : pack->dirs[0].entries)
         {
-            if (epi::case_cmp(file.name, open_name) == 0)
+            if (epi::STR_CaseCmp(file.name, open_name) == 0)
                 return pack->OpenFileByName(open_name);
         }
         return nullptr;
@@ -1150,7 +1150,7 @@ epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name)
         auto results = pack->search_files.equal_range(open_stem);
         for (auto file = results.first; file != results.second; ++file)
         {
-            if (epi::case_cmp(open_name, std::filesystem::path(file->second).filename().string()) == 0)
+            if (epi::STR_CaseCmp(open_name, std::filesystem::path(file->second).filename().string()) == 0)
                 return pack->OpenFileByName(file->second);
         }
         return nullptr;
@@ -1170,7 +1170,7 @@ epi::file_c *Pack_OpenMatch(pack_file_c *pack, const std::string &name, const st
         return NULL;
 
     std::string open_stem = name;
-    epi::str_upper(open_stem);
+    epi::STR_Upper(open_stem);
 
     // quick file stem check to see if it's present at all
     if (!Pack_FindStem(pack, open_stem))
@@ -1184,7 +1184,7 @@ epi::file_c *Pack_OpenMatch(pack_file_c *pack, const std::string &name, const st
         for (auto ext : extensions)
         {
             stem_match.replace_extension(ext);
-            if (epi::case_cmp(stem_match.string(), std::filesystem::path(file->second).filename().string()) == 0)
+            if (epi::STR_CaseCmp(stem_match.string(), std::filesystem::path(file->second).filename().string()) == 0)
                 return pack->OpenFileByName(file->second);
         }
     }
@@ -1207,7 +1207,7 @@ std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)
             std::string stem = std::filesystem::path(entry.name).stem().string();
             std::string ext  = std::filesystem::path(entry.name).extension().string();
 
-            epi::str_lower(ext);
+            epi::STR_Lower(ext);
 
             if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
                 ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
@@ -1220,7 +1220,7 @@ std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)
                 // Don't add things already defined in DDFIMAGE
                 for (auto img : imagedefs)
                 {
-                    if (epi::case_cmp(img->name, texname) == 0)
+                    if (epi::STR_CaseCmp(img->name, texname) == 0)
                     {
                         addme = false;
                         break;

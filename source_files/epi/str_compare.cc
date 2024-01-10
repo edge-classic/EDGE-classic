@@ -33,7 +33,7 @@ namespace epi
 int strcmp(const char *A, const char *B)
 {
     SYS_ASSERT(A && B);
-    return std::strcmp(A, B);
+    return strcmp(A, B);
 }
 
 int strcmp(const char *A, const std::string &B)
@@ -56,7 +56,7 @@ int strcmp(const std::string &A, const std::string &B)
 int strncmp(const char *A, const char *B, size_t n)
 {
     SYS_ASSERT(A && B);
-    return std::strncmp(A, B, n);
+    return strncmp(A, B, n);
 }
 
 int strncmp(const char *A, const std::string &B, size_t n)
@@ -82,8 +82,8 @@ int case_cmp(const char *A, const char *B)
 
     for (;;)
     {
-        int AC = std::tolower((unsigned char)*A++);
-        int BC = std::tolower((unsigned char)*B++);
+        int AC = tolower((unsigned char)*A++);
+        int BC = tolower((unsigned char)*B++);
 
         if (AC != BC)
             return AC - BC;
@@ -173,8 +173,8 @@ int prefix_case_cmp(const char *A, const char *B)
 
     for (;;)
     {
-        int AC = std::tolower((unsigned char)*A++);
-        int BC = std::tolower((unsigned char)*B++);
+        int AC = tolower((unsigned char)*A++);
+        int BC = tolower((unsigned char)*B++);
 
         if (BC == 0)
             return 0;

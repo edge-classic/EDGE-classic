@@ -274,7 +274,7 @@ class opl_player_c : public abstract_music_c
     {
         opl_seq   = new OPLSequencer;
         opl_iface = new OPLInterface;
-        std::memset(opl_iface, 0, sizeof(BW_MidiRtInterface));
+        memset(opl_iface, 0, sizeof(BW_MidiRtInterface));
 
         opl_iface->rtUserData           = this;
         opl_iface->rt_noteOn            = rtNoteOn;

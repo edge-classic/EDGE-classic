@@ -528,7 +528,7 @@ void BW_MidiSequencer::buildSmfSetupReset(size_t trackCount)
     m_loopEndTime        = -1.0;
     m_loopFormat         = Loop_Default;
     m_trackDisable.clear();
-    std::memset(m_channelDisable, 0, sizeof(m_channelDisable));
+    memset(m_channelDisable, 0, sizeof(m_channelDisable));
     m_trackSolo = ~(size_t)0;
     m_musTitle.clear();
     m_musCopyright.clear();
@@ -588,7 +588,7 @@ bool BW_MidiSequencer::buildSmfTrackData(const std::vector<std::vector<uint8_t>>
         bool           ok       = false;
         const uint8_t *end      = trackData[tk].data() + trackData[tk].size();
         const uint8_t *trackPtr = trackData[tk].data();
-        std::memset(noteStates, 0, sizeof(noteStates));
+        memset(noteStates, 0, sizeof(noteStates));
 
         // Time delay that follows the first event in the track
         {
@@ -1030,8 +1030,8 @@ void BW_MidiSequencer::buildTimeLine(const std::vector<MidiEvent> &tempos, uint6
 
         for(size_t tk = 0; tk < trackCount; ++tk)
         {
-            std::memset(drNotes, 0, sizeof(drNotes));
-            std::memset(banks, 0, sizeof(banks));
+            memset(drNotes, 0, sizeof(drNotes));
+            memset(banks, 0, sizeof(banks));
             MidiTrackQueue &track = m_trackData[tk];
             if(track.empty())
                 continue; // Empty track is useless!
@@ -2178,7 +2178,7 @@ static bool detectRSXX(const char *head, epi::mem_file_c *mfr)
     {
         mfr->Seek(head[0] - 0x10, epi::file_c::SEEKPOINT_START);
         mfr->Read(headerBuf, 6);
-        if (std::memcmp(headerBuf, "rsxx}u", 6) == 0)
+        if (memcmp(headerBuf, "rsxx}u", 6) == 0)
             ret = true;
     }
 
@@ -2249,26 +2249,26 @@ bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr, uint16_t rate)
         return false;
     }
 
-    if (std::memcmp(headerBuf, "MThd\0\0\0\6", 8) == 0)
+    if (memcmp(headerBuf, "MThd\0\0\0\6", 8) == 0)
     {
         mfr->Seek(0, epi::file_c::SEEKPOINT_START);
         return parseSMF(mfr);
     }
 
-    if (std::memcmp(headerBuf, "RIFF", 4) == 0)
+    if (memcmp(headerBuf, "RIFF", 4) == 0)
     {
         mfr->Seek(0, epi::file_c::SEEKPOINT_START);
         return parseRMI(mfr);
     }
 
-    if (std::memcmp(headerBuf, "GMF\x1", 4) == 0)
+    if (memcmp(headerBuf, "GMF\x1", 4) == 0)
     {
         mfr->Seek(0, epi::file_c::SEEKPOINT_START);
         return parseGMF(mfr);
     }
 
 #ifndef BWMIDI_DISABLE_MUS_SUPPORT
-    if (std::memcmp(headerBuf, "MUS\x1A", 4) == 0)
+    if (memcmp(headerBuf, "MUS\x1A", 4) == 0)
     {
         mfr->Seek(0, epi::file_c::SEEKPOINT_START);
         return parseMUS(mfr);
@@ -2276,7 +2276,7 @@ bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr, uint16_t rate)
 #endif
 
 #ifndef BWMIDI_DISABLE_XMI_SUPPORT
-    if ((std::memcmp(headerBuf, "FORM", 4) == 0) && (std::memcmp(headerBuf + 8, "XDIR", 4) == 0))
+    if ((memcmp(headerBuf, "FORM", 4) == 0) && (memcmp(headerBuf + 8, "XDIR", 4) == 0))
     {
         mfr->Seek(0, epi::file_c::SEEKPOINT_START);
         return parseXMI(mfr);
@@ -2435,7 +2435,7 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
     {
         mfr->Seek(headerBuf[0] - 0x10, epi::file_c::SEEKPOINT_START);
         mfr->Read(headerBuf, 6);
-        if (std::memcmp(headerBuf, "rsxx}u", 6) == 0)
+        if (memcmp(headerBuf, "rsxx}u", 6) == 0)
         {
             m_format = Format_RSXX;
             mfr->Seek(start, epi::file_c::SEEKPOINT_START);
@@ -2524,7 +2524,7 @@ bool BW_MidiSequencer::parseGMF(epi::mem_file_c *mfr)
         return false;
     }
 
-    if (std::memcmp(headerBuf, "GMF\x1", 4) != 0)
+    if (memcmp(headerBuf, "GMF\x1", 4) != 0)
     {
         m_errorString = "MIDI Loader: Invalid format, GMF\\x1 signature is not found!\n";
         delete mfr;
@@ -2603,7 +2603,7 @@ bool BW_MidiSequencer::parseSMF(epi::mem_file_c *mfr)
         return false;
     }
 
-    if (std::memcmp(headerBuf, "MThd\0\0\0\6", 8) != 0)
+    if (memcmp(headerBuf, "MThd\0\0\0\6", 8) != 0)
     {
         m_errorString = "MIDI Loader: Invalid format, MThd signature is not found!\n";
         delete mfr;
@@ -2630,7 +2630,7 @@ bool BW_MidiSequencer::parseSMF(epi::mem_file_c *mfr)
         size_t trackLength;
 
         fsize = mfr->Read(headerBuf, 8);
-        if ((fsize < 8) || (std::memcmp(headerBuf, "MTrk", 4) != 0))
+        if ((fsize < 8) || (memcmp(headerBuf, "MTrk", 4) != 0))
         {
             m_errorString = "MIDI Loader: Invalid format, MTrk signature is not found!\n";
             delete mfr;
@@ -2690,7 +2690,7 @@ bool BW_MidiSequencer::parseRMI(epi::mem_file_c *mfr)
         return false;
     }
 
-    if (std::memcmp(headerBuf, "RIFF", 4) != 0)
+    if (memcmp(headerBuf, "RIFF", 4) != 0)
     {
         m_errorString = "MIDI Loader: Invalid format, RIFF signature is not found!\n";
         delete mfr;
@@ -2719,7 +2719,7 @@ bool BW_MidiSequencer::parseMUS(epi::mem_file_c *mfr)
         return false;
     }
 
-    if (std::memcmp(headerBuf, "MUS\x1A", 4) != 0)
+    if (memcmp(headerBuf, "MUS\x1A", 4) != 0)
     {
         m_errorString = "MIDI Loader: Invalid format, MUS\\x1A signature is not found!\n";
         delete mfr;
@@ -2788,14 +2788,14 @@ bool BW_MidiSequencer::parseXMI(epi::mem_file_c *mfr)
         return false;
     }
 
-    if (std::memcmp(headerBuf, "FORM", 4) != 0)
+    if (memcmp(headerBuf, "FORM", 4) != 0)
     {
         m_errorString = "MIDI Loader: Invalid format, FORM signature is not found!\n";
         delete mfr;
         return false;
     }
 
-    if (std::memcmp(headerBuf + 8, "XDIR", 4) != 0)
+    if (memcmp(headerBuf + 8, "XDIR", 4) != 0)
     {
         m_errorString = "MIDI Loader: Invalid format\n";
         delete mfr;
@@ -2813,7 +2813,7 @@ bool BW_MidiSequencer::parseXMI(epi::mem_file_c *mfr)
         return false;
     }
 
-    std::memset(mus, 0, mus_len + 20);
+    memset(mus, 0, mus_len + 20);
 
     fsize = mfr->Read(mus, mus_len);
     if (fsize < mus_len)

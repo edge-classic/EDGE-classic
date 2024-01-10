@@ -219,7 +219,7 @@ class prime_player_c : public abstract_music_c
     {
         prime_seq   = new PrimeSequencer;
         prime_iface = new PrimeInterface;
-        std::memset(prime_iface, 0, sizeof(BW_MidiRtInterface));
+        memset(prime_iface, 0, sizeof(BW_MidiRtInterface));
 
         prime_iface->rtUserData           = this;
         prime_iface->rt_noteOn            = rtNoteOn;

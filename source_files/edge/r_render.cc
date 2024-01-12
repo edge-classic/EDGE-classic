@@ -1520,12 +1520,12 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
             if (IS_SKY(other->ceil))
             {
                 other_fc = currmap->outdoor_fog_color;
-                other_fd = currmap->outdoor_fog_density;
+                other_fd = 0.01f * currmap->outdoor_fog_density;
             }
             else
             {
                 other_fc = currmap->indoor_fog_color;
-                other_fd = currmap->indoor_fog_density;
+                other_fd = 0.01f * currmap->indoor_fog_density;
             }
         }
     }

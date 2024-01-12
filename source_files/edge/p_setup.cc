@@ -1574,7 +1574,7 @@ static void LoadUDMFSectors()
             float    rf = 0.0f, rc = 0.0f;
             float    gravfactor = 1.0f;
             int      light = 160, type = 0, tag = 0;
-            rgbacol_t fog_color   = 0;
+            rgbacol_t fog_color   = SG_BLACK_RGBA32;
             rgbacol_t light_color = SG_WHITE_RGBA32;
             int      fog_density = 0;
             char     floor_tex[10];
@@ -1622,9 +1622,9 @@ static void LoadUDMFSectors()
                 else if (key == "id")
                     tag = epi::LEX_Int(value);
                 else if (key == "lightcolor")
-                    light_color = epi::LEX_Int(value);
+                    light_color = ((uint32_t)epi::LEX_Int(value) << 8 | 0xFF);
                 else if (key == "fadecolor")
-                    fog_color = epi::LEX_Int(value);
+                    fog_color = ((uint32_t)epi::LEX_Int(value) << 8 | 0xFF);
                 else if (key == "fogdensity")
                     fog_density = CLAMP(0, epi::LEX_Int(value), 1020);
                 else if (key == "xpanningfloor")
@@ -1738,7 +1738,7 @@ static void LoadUDMFSectors()
             ss->props.drag      = DRAG;
 
             // Allow UDMF sector light/fog information to override DDFSECT types
-            if (fog_color != 0) // All black is the established UDMF "no fog" color
+            if (fog_color != SG_BLACK_RGBA32) // All black is the established UDMF "no fog" color
             {
                 // Prevent UDMF-specified fog color from having our internal 'no value'...uh...value
                 if (fog_color == RGB_NO_VALUE)

@@ -420,7 +420,7 @@ static void RGL_DrawSkyCylinder(void)
     }
 
     // Render top cap
-    glColor4f(sky_cap_color.r, sky_cap_color.b, sky_cap_color.b, 1.0f);
+    glColor4f(sky_cap_color.r, sky_cap_color.g, sky_cap_color.b, 1.0f);
     glBegin(GL_QUADS);
     glVertex3f(-cap_dist, -cap_dist, cap_z);
     glVertex3f(-cap_dist, cap_dist, cap_z);

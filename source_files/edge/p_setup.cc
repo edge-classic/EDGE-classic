@@ -1569,7 +1569,7 @@ static void LoadUDMFSectors()
         if (section == "sector")
         {
             int      cz = 0, fz = 0;
-            float    fx = 0.0f, fy = 0.0f;
+            float    fx = 0.0f, fy = 0.0f, cx = 0.0f, cy = 0.0f;
             float    fx_sc = 1.0f, fy_sc = 1.0f, cx_sc = 1.0f, cy_sc = 1.0f;
             float    rf = 0.0f, rc = 0.0f;
             float    gravfactor = 1.0f;
@@ -1632,13 +1632,9 @@ static void LoadUDMFSectors()
                 else if (key == "ypanningfloor")
                     fy = epi::LEX_Double(value);
                 else if (key == "xpanningceiling")
-                {
-                    // cx = epi::LEX_Double(value);
-                }
+                    cx = epi::LEX_Double(value);
                 else if (key == "ypanningceiling")
-                {
-                    // cy = epi::LEX_Double(value);
-                }
+                    cy = epi::LEX_Double(value);
                 else if (key == "xscalefloor")
                     fx_sc = epi::LEX_Double(value);
                 else if (key == "yscalefloor")
@@ -1678,8 +1674,8 @@ static void LoadUDMFSectors()
             // granular offsets
             ss->floor.offset.X += fx;
             ss->floor.offset.Y += fy;
-            ss->ceil.offset.X += fx;
-            ss->ceil.offset.Y += fy;
+            ss->ceil.offset.X += cx;
+            ss->ceil.offset.Y += cy;
 
             // rotations
             if (!AlmostEquals(rf, 0.0f))

@@ -1677,8 +1677,22 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 
         if (sd->middle.fogwall)
         {
-            f2 = f1;
-            c2 = c1;
+            float ofh = other->f_h;
+            if (other->f_slope)
+            {
+                float lz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v1->X, seg->v1->Y);
+                float rz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v2->X, seg->v2->Y);
+                ofh = MIN(ofh, MIN(lz2, rz2));
+            }
+            f2 = f1 = MAX(MIN(sec->f_h, slope_fh), ofh);
+            float och = other->c_h;
+            if (other->c_slope)
+            {
+                float lz2 = other->c_h + Slope_GetHeight(other->c_slope, seg->v1->X, seg->v1->Y);
+                float rz2 = other->c_h + Slope_GetHeight(other->c_slope, seg->v2->X, seg->v2->Y);
+                och = MAX(och, MAX(lz2, rz2));
+            }
+            c2 = c1 = MIN(MAX(sec->c_h, slope_ch), och);
         }
         else if (ld->flags & MLF_LowerUnpegged)
         {

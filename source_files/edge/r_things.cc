@@ -422,7 +422,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 }
 
 static const rgbacol_t crosshair_colors[8] = {
-    0xCCCCCC, 0x0000FF, 0x00DD00, 0x00DDDD, 0xFF0000, 0xFF00FF, 0xDDDD00, 0xFF9922,
+    SG_LIGHT_GRAY_RGBA32, SG_BLUE_RGBA32, SG_GREEN_RGBA32, SG_CYAN_RGBA32, SG_RED_RGBA32, SG_FUCHSIA_RGBA32, SG_YELLOW_RGBA32, SG_DARK_ORANGE_RGBA32,
 };
 
 static void DrawStdCrossHair(void)

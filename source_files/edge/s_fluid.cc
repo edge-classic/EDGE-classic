@@ -233,7 +233,7 @@ class fluid_player_c : public abstract_music_c
 	{
 		fluid_seq = new FluidSequencer;
 		fluid_iface = new FluidInterface;
-		std::memset(fluid_iface, 0, sizeof(BW_MidiRtInterface));
+		memset(fluid_iface, 0, sizeof(BW_MidiRtInterface));
 
 		fluid_iface->rtUserData = this;
 		fluid_iface->rt_noteOn  = rtNoteOn;

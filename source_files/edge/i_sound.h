@@ -16,7 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_sdlinc.h"
+#include "epi_sdl.h"
 
 extern std::vector<std::filesystem::path> available_soundfonts;
 

@@ -18,7 +18,7 @@
 
 #ifndef __EPI_SDL_H__
 #define __EPI_SDL_H__
-// SDL2 includes (right now only for FS_OpenDir)
+
 #ifdef _MSC_VER
 #include "SDL.h"
 #elif __APPLE__
@@ -26,4 +26,5 @@
 #else
 #include <SDL2/SDL.h>
 #endif
+
 #endif /*__EPI_SDL_H__*/

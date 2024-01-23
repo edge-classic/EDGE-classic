@@ -68,7 +68,7 @@
 
 #include "font.h"
 
-#include "i_sdlinc.h"
+#include "epi_sdl.h"
 
 #include <math.h>
 

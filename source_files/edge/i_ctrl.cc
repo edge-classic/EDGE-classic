@@ -17,7 +17,7 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
-#include "i_video.h" // i_sdlinc.h is also covered here - Dasho
+#include "i_video.h" // epi_sdl.h is also covered here - Dasho
 
 #include "dm_defs.h"
 #include "dm_state.h"

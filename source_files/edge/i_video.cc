@@ -126,11 +126,11 @@ void I_StartupGraphics(void)
     std::string driver = argv::Value("videodriver");
 
     if (driver.empty())
-#ifdef _WIN32
-        driver = env::Value("SDL_VIDEODRIVER");
-#else
-        driver = SDL_getenv("SDL_VIDEODRIVER") ? SDL_getenv("SDL_VIDEODRIVER") : "";
-#endif
+    {
+        const char *check = SDL_getenv("SDL_VIDEODRIVER");
+        if (check)
+            driver = check;
+    }
 
     if (driver.empty())
         driver = "default";

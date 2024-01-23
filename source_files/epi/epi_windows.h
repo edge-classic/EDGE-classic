@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------------
-//  EDGE SDL System Internal header
+//  EDGE Platform Interface Header - Windows
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 2005-2024 The EDGE Team.
+//  Copyright (c) 2024 The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -16,18 +16,18 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __SDL_SYSTEM_INTERNAL_H__
-#define __SDL_SYSTEM_INTERNAL_H__
+#ifndef __EPI_WIN_H__
+#define __EPI_WIN_H__
 
-#ifdef _MSC_VER
-#include "SDL.h"
-#elif __APPLE__
-#include <SDL.h>
-#else
-#include <SDL2/SDL.h>
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
+#ifndef _WINDOWS
+#define _WINDOWS
+#endif
+#define WIN32_LEAN_AND_MEAN
+#ifndef WIN32
+#define WIN32
+#endif
+#include <windows.h>
 #endif
 
-#endif /* __SDL_SYSTEM_INTERNAL_H__ */
-
-//--- editor settings ---
-// vi:ts=4:sw=4:noexpandtab
+#endif

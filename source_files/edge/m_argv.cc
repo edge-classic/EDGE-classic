@@ -22,15 +22,12 @@
 #include "m_argv.h"
 #include "str_util.h"
 #include "filesystem.h"
+#include "epi_windows.h"
 #ifdef _WIN32
 #include <shellapi.h>
-#include <processenv.h>
 #endif
 
 std::vector<std::string> argv::list;
-#ifdef _WIN32
-std::unordered_map<std::string, std::string> env::list;
-#endif
 
 // this one is here to avoid infinite recursion of param files.
 typedef struct added_parm_s
@@ -331,65 +328,6 @@ bool argv::IsOption(const int index)
 {
     return list.at(index)[0] == '-';
 }
-
-#ifdef _WIN32
-//
-// EnvInit
-//
-// Initialise environment variable list. The strings are copied.
-//
-//
-void env::Init()
-{
-
-    wchar_t *win_env = GetEnvironmentStringsW();
-
-    if (!win_env)
-        I_Error("env::Init: Could not retrieve environment variables!\n");
-
-    std::vector<std::string> block_vars;
-    std::u16string           raw_var;
-
-    wchar_t *orig_env = win_env; // For cleanup
-
-    for (; win_env; win_env++)
-    {
-        if (*win_env == '\0')
-        {
-            if (win_env + 1 != nullptr && *(win_env + 1) == '\0')
-                break;
-            else
-            {
-                block_vars.push_back(epi::to_u8string(raw_var));
-                raw_var.clear();
-            }
-        }
-        else
-            raw_var.push_back(*(char16_t *)(win_env));
-    }
-
-    FreeEnvironmentStringsW(orig_env);
-
-    for (auto var : block_vars)
-    {
-        std::vector<std::string> kv = epi::STR_SepStringVector(var, '=');
-        if (kv.size() < 2) // Sanity check
-            continue;
-        else
-            list.try_emplace(kv[0], kv[1]);
-    }
-}
-
-std::string env::Value(std::string key)
-{
-    for (auto var : list)
-    {
-        if (epi::STR_CaseCmp(key, var.first) == 0)
-            return var.second;
-    }
-    return "";
-}
-#endif
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

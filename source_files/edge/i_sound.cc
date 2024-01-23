@@ -100,11 +100,11 @@ void I_StartupSound(void)
     std::string driver = argv::Value("audiodriver");
 
     if (driver.empty())
-#ifdef _WIN32
-        driver = env::Value("SDL_AUDIODRIVER");
-#else
-        driver = SDL_getenv("SDL_AUDIODRIVER") ? SDL_getenv("SDL_AUDIODRIVER") : "";
-#endif
+    {
+        const char *check = SDL_getenv("SDL_AUDIODRIVER");
+        if (check)
+            driver = check;
+    }
 
     if (driver.empty())
         driver = "default";

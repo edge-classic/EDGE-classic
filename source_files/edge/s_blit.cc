@@ -24,7 +24,7 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
-#include "i_sdlinc.h"
+#include "epi_sdl.h"
 
 #include <list>
 

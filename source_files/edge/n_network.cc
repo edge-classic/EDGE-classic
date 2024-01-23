@@ -41,6 +41,8 @@
 #include "script/compat/lua_compat.h"
 #include "edge_profiling.h"
 
+#include "epi_windows.h"
+
 extern coal::vm_c *ui_vm;
 extern void        VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value);
 
@@ -270,7 +272,7 @@ int N_TryRunTics()
     if (tics > realtics + 1)
         tics = realtics + 1;
     else
-        tics = std::max(std::min(tics, realtics), 1);
+        tics = HMM_MAX(HMM_MIN(tics, realtics), 1);
 
 #ifdef DEBUG_TICS
     I_Debugf("=== maketic %d gametic %d | real %d using %d\n", maketic, gametic, realtics, tics);

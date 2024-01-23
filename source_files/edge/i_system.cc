@@ -17,7 +17,8 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
-#include "i_sdlinc.h"
+#include "epi_sdl.h"
+#include "epi_windows.h"
 
 #include <chrono>
 #include <thread>

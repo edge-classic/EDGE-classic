@@ -20,18 +20,6 @@
 #define __AJBSP_SYSTEM_H__
 
 /*
- *  Windows support
- */
-
-#if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#ifndef WIN32
-#define WIN32
-#endif
-#endif
-
-/*
  *  Standard headers
  */
 
@@ -50,14 +38,6 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-
-#ifndef WIN32
-#include <unistd.h>
-#endif
-
-// allow using std::min, std::max with MSVC
-#undef min
-#undef max
 
 // misc constants
 

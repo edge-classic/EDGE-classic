@@ -32,7 +32,7 @@
 //
 
 #include "i_defs.h"
-#include "i_sdlinc.h"
+#include "epi_sdl.h"
 #include "e_main.h"
 #include "i_defs_gl.h"
 #include "i_movie.h"
@@ -1132,6 +1132,9 @@ static int CheckPackForGameFiles(std::filesystem::path check_pack, filekind_e ch
 //
 static void IdentifyVersion(void)
 {
+    // For env checks
+    const char *check = nullptr;
+
     if (epi::FS_IsDir(epkfile))
         W_AddFilename(epkfile, FLKIND_EFolder);
     else
@@ -1268,12 +1271,8 @@ static void IdentifyVersion(void)
 
     // If we haven't yet set the IWAD directory, then we check
     // the DOOMWADDIR environment variable
-#ifdef _WIN32
-    s = env::Value("DOOMWADDIR");
-#else
-    if (getenv("DOOMWADDIR"))
-        s = getenv("DOOMWADDIR");
-#endif
+    check = SDL_getenv("DOOMWADDIR");
+    if (check) s = check;
 
     if (!s.empty() && epi::FS_IsDir(s))
         iwad_dir_vector.push_back(s);
@@ -1285,12 +1284,9 @@ static void IdentifyVersion(void)
 
     // Add DOOMWADPATH directories if they exist
     s.clear();
-#ifdef _WIN32
-    s = env::Value("DOOMWADPATH");
-#else
-    if (getenv("DOOMWADPATH"))
-        s = getenv("DOOMWADPATH");
-#endif
+    check = SDL_getenv("DOOMWADPATH");
+    if (check) s = check;
+
     if (!s.empty())
     {
         for (auto dir : epi::STR_SepStringVector(s.string(), ':'))
@@ -2126,10 +2122,6 @@ void E_Main(int argc, const char **argv)
     // Implemented here - since we need to bring the memory manager up first
     // -ACB- 2004/05/31
     argv::Init(argc, argv);
-
-#ifdef _WIN32
-    env::Init();
-#endif
 
     E_Startup();
 

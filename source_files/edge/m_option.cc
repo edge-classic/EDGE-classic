@@ -74,7 +74,7 @@
 //
 
 #include "i_defs.h"
-#include "i_sdlinc.h"
+#include "epi_sdl.h"
 
 #include "font.h"
 #include "str_util.h"

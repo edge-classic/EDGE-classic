@@ -23,7 +23,7 @@
 #define __I_MOVIE__
 
 #include <string>
-#include "i_sdlinc.h"
+#include "epi_sdl.h"
 
 void E_PlayMovie(const std::string &name);
 

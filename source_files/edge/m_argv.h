@@ -24,9 +24,6 @@
 #include <string>
 #include <vector>
 #include <filesystem>
-#ifdef _WIN32
-#include <unordered_map>
-#endif
 
 namespace argv
 {
@@ -51,20 +48,6 @@ void DebugDumpArgs(void);
 bool IsOption(int index);
 
 } // namespace argv
-
-#ifdef _WIN32
-namespace env
-{
-
-extern std::unordered_map<std::string, std::string> list;
-
-void Init(void);
-
-//  Same as above, but return the value of position + 1 if valid, else an empty string
-std::string Value(std::string key);
-
-} // namespace env
-#endif
 
 #endif /* __LIB_ARGV_H__ */
 

@@ -17,7 +17,7 @@
 //----------------------------------------------------------------------------
 
 #include "i_defs.h"
-#include "i_sdlinc.h" // needed for proper SDL main linkage
+#include "epi_sdl.h" // needed for proper SDL main linkage
 #include "filesystem.h"
 #include "str_util.h"
 

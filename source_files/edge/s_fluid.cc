@@ -101,6 +101,7 @@ bool S_StartupFluid(void)
     fluid_settings_setstr(edge_fluid_settings, "synth.chorus.active", "no");
     fluid_settings_setnum(edge_fluid_settings, "synth.gain", s_fluidgain.f);
     fluid_settings_setnum(edge_fluid_settings, "synth.sample-rate", dev_freq);
+    fluid_settings_setnum(edge_fluid_settings, "synth.polyphony", 64);
 	edge_fluid = new_fluid_synth(edge_fluid_settings);
 
     // Register loader that uses our custom function to provide

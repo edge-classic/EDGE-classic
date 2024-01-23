@@ -40,7 +40,7 @@
 #include "s_cache.h"
 #include "s_blit.h"
 #include "s_opl.h"
-#include "s_prime.h"
+#include "s_fluid.h"
 #include "w_wad.h"
 
 // If true, sound system is off/not working. Changed to false if sound init ok.
@@ -288,10 +288,8 @@ void I_StartupMusic(void)
         }
     }
 
-    // Startup both Primesynth and OPL, as some formats require OPL now (IMF, possibly CMF/DRO/etc in the future)
-
-    if (!S_StartupPrime())
-        prime_disabled = true;
+    if (!S_StartupFluid())
+        fluid_disabled = true;
 
     if (!S_StartupOPL())
         opl_disabled = true;

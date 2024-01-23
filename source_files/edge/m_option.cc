@@ -109,7 +109,7 @@
 #include "w_wad.h"
 #include "r_wipe.h"
 #include "s_opl.h"
-#include "s_prime.h"
+#include "s_fluid.h"
 
 #include "defaults.h"
 
@@ -496,8 +496,8 @@ static optmenuitem_t soundoptions[] = {
     {OPT_Plain, "", NULL, 0, NULL, NULL, NULL},
     {OPT_Switch, "Stereo", StereoNess, 3, &var_sound_stereo, NULL, "NeedRestart"},
     {OPT_Plain, "", NULL, 0, NULL, NULL, NULL},
-    {OPT_Switch, "MIDI Player", "Primesynth/Opal", 2, &var_midi_player, M_ChangeMIDIPlayer, NULL},
-    {OPT_Function, "Primesynth Soundfont", NULL, 0, NULL, M_ChangeSoundfont, NULL},
+    {OPT_Switch, "MIDI Player", "Fluidlite/Opal", 2, &var_midi_player, M_ChangeMIDIPlayer, NULL},
+    {OPT_Function, "Fluidlite Soundfont", NULL, 0, NULL, M_ChangeSoundfont, NULL},
     {OPT_Function, "Opal Instrument Bank", NULL, 0, NULL, M_ChangeGENMIDI, NULL},
     {OPT_Boolean, "PC Speaker Mode", YesNo, 2, &var_pc_speaker_mode, M_ChangePCSpeakerMode,
      "Music will be Off while this is enabled"},
@@ -2016,7 +2016,7 @@ static void M_ChangeMIDIPlayer(int keypressed, cvar_c *cvar)
         (playing && (playing->type == MUS_IMF280 || playing->type == MUS_IMF560 || playing->type == MUS_IMF700)))
         S_RestartOPL();
     else
-        S_RestartPrime();
+        S_RestartFluid();
 }
 
 //
@@ -2059,7 +2059,7 @@ static void M_ChangeSoundfont(int keypressed, cvar_c *cvar)
 
     // update cvar
     s_soundfont = available_soundfonts.at(sf_pos).generic_u8string();
-    S_RestartPrime();
+    S_RestartFluid();
 }
 
 //

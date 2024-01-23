@@ -83,7 +83,7 @@ set (EDGE_SOURCE_FILES
   s_mp3.cc
   s_music.cc
   s_ogg.cc
-  s_prime.cc
+  s_fluid.cc
   s_m4p.cc
   s_opl.cc
   s_rad.cc
@@ -128,7 +128,7 @@ set (EDGE_LINK_LIBRARIES
   edge_deh
   edge_epi
   ${SDL2_LIBRARIES}
-  libprimesynth
+  fluidlite
   libRAD
   m4p
   miniz
@@ -171,8 +171,8 @@ target_include_directories(edge-classic PRIVATE ../ddf)
 target_include_directories(edge-classic PRIVATE ../dehacked)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/dr_libs)
 target_include_directories(edge-classic PRIVATE ../epi)
+target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/fluidlite/include)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/hmm)
-target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/libprimesynth)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/libRAD)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/m4p)
 target_include_directories(edge-classic SYSTEM PRIVATE ${EDGE_LIBRARY_DIR}/minivorbis)

@@ -31,12 +31,20 @@ endif()
 
 if (MSVC)
 
-  # get the number of logical cores for parallel build
-  cmake_host_system_information(RESULT LOGICAL_CORES QUERY NUMBER_OF_LOGICAL_CORES)
-  math(EXPR COMPILE_CORES "${LOGICAL_CORES} - 1")  
+  # These are needed for MSVC to play ball as much as possible
+  # with the /EHs- flag
+  add_definitions("-D_HAS_EXCEPTIONS=0 -D_STATIC_CPPLIB")
 
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:fast /MP${COMPILE_CORES}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs /MP${COMPILE_CORES}")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fp:fast /EHs- /GR-")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /EHs- /GR-")
+
+  if (NOT CLANG)
+    # get the number of logical cores for parallel build
+    cmake_host_system_information(RESULT LOGICAL_CORES QUERY NUMBER_OF_LOGICAL_CORES)
+    math(EXPR COMPILE_CORES "${LOGICAL_CORES} - 1")  
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP${COMPILE_CORES}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP${COMPILE_CORES}")
+  endif()
 
   # Disable some very noisy warnings from the MSVC build
   # CRT security and POSIX deprecation warnings
@@ -78,8 +86,8 @@ else()
     set (EDGE_WARNINGS ${EDGE_WARNINGS} -Wno-stringop-truncation -Wno-stringop-overflow)
   endif()
 
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-aliasing")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-exceptions -fno-strict-aliasing")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti -fno-strict-aliasing")
 
   if (EDGE_SANITIZE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")

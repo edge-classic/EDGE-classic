@@ -69,15 +69,16 @@ std::filesystem::path FS_GetCurrDir()
 bool FS_SetCurrDir(std::filesystem::path dir)
 {
     SYS_ASSERT(!dir.empty());
-    try
+    std::error_code ec;
+
+    std::filesystem::current_path(dir, ec);
+
+    if (ec.value())
     {
-        std::filesystem::current_path(dir);
-    }
-    catch (std::filesystem::filesystem_error const &ex)
-    {
-        I_Warning("Failed to set current directory! Error: %s\n", ex.what());
+        I_Warning("Failed to set current directory! Error: %s\n", ec.message().c_str());
         return false;
     }
+
     return true;
 }
 
@@ -182,15 +183,16 @@ bool FS_Rename(const char *oldname, const char *newname)
 {
     SYS_ASSERT(oldname);
     SYS_ASSERT(newname);
-    try
+    std::error_code ec;
+
+    std::filesystem::rename(oldname, newname, ec);
+
+    if (ec.value())
     {
-        std::filesystem::rename(oldname, newname);
-    }
-    catch (std::filesystem::filesystem_error const &ex)
-    {
-        I_Warning("Failed to rename file! Error: %s\n", ex.what());
+        I_Warning("Failed to rename file! Error: %s\n", ec.message().c_str());
         return false;
     }
+
     return true;
 }
 

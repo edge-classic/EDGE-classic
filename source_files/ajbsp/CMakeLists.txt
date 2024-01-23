@@ -3,7 +3,7 @@
 ##########################################
 
 if (NOT MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fwrapv -fno-rtti -fno-exceptions")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fwrapv")
 endif()
 
 add_library(edge_ajbsp

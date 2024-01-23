@@ -174,32 +174,6 @@ typedef int gofs_t;
 #define G_VECTOR(ofs) REF_GLOBAL(ofs)
 #define G_STRING(ofs) REF_STRING((int)G_FLOAT(ofs))
 
-class parse_error_x
-{
-  public:
-    int foo;
-
-    parse_error_x()
-    {
-    }
-    ~parse_error_x()
-    {
-    }
-};
-
-class exec_error_x
-{
-  public:
-    int foo;
-
-    exec_error_x()
-    {
-    }
-    ~exec_error_x()
-    {
-    }
-};
-
 typedef struct
 {
     const char   *name;
@@ -318,8 +292,7 @@ class real_vm_c : public vm_c
     void LEX_Next();
     void LEX_Whitespace();
     void LEX_NewLine();
-    void LEX_SkipPastError();
-
+ 
     bool LEX_Check(const char *str);
     void LEX_Expect(const char *str);
 

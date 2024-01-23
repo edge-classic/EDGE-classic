@@ -41,13 +41,13 @@
 
 #include "AlmostEquals.h"
 
+extern void I_Error(const char *error, ...);
+
 namespace coal
 {
 
 #include "c_local.h"
 #include "c_compile.h"
-
-#define MAX_ERRORS 200
 
 compiling_c::compiling_c()
     : source_file(NULL), source_line(0), asm_dump(false), parse_p(NULL), line_start(NULL), error_count(0),
@@ -167,10 +167,7 @@ void real_vm_c::CompileError(const char *error, ...)
     vsprintf(buffer, error, argptr);
     va_end(argptr);
 
-    printer("%s:%i: %s", comp.source_file, comp.source_line, buffer);
-
-    //  raise(11);
-    throw parse_error_x();
+    I_Error("%s:%i: %s", comp.source_file, comp.source_line, buffer);
 }
 
 void real_vm_c::LEX_String()
@@ -442,33 +439,6 @@ bool real_vm_c::LEX_Check(const char *str)
     LEX_Next();
 
     return true;
-}
-
-//
-// ERROR RECOVERY
-//
-// This is very simple, we just jump to the end of the line.
-// The error may have occured inside a string, making checks for
-// other stuff (like semicolons and comments) unreliable.
-//
-// We cannot use LEX_Next() here because it can throw another
-// error exception.
-//
-void real_vm_c::LEX_SkipPastError()
-{
-    for (; *comp.parse_p && *comp.parse_p != '\n'; comp.parse_p++)
-    {
-#if 0
-		if (*parse_p == ';' || *parse_p == '}' ||
-			(parse_p[0] == '/' && parse_p[1] == '/') ||
-			(parse_p[0] == '/' && parse_p[1] == '*'))
-			break;
-#endif
-    }
-
-    comp.token_type     = tt_error;
-    comp.token_buf[0]   = 0;
-    comp.token_is_first = false;
 }
 
 //
@@ -1445,19 +1415,10 @@ int real_vm_c::GLOB_FunctionBody(def_t *func_def, type_t *type, const char *func
 
     while (!LEX_Check("}"))
     {
-        try
-        {
-            // handle a previous error
-            if (comp.token_type == tt_error)
-                LEX_Next();
-            else
-                STAT_Statement(true);
-        }
-        catch (parse_error_x err)
-        {
-            comp.error_count++;
-            LEX_SkipPastError();
-        }
+        if (comp.token_type == tt_error)
+            LEX_Next();
+        else
+            STAT_Statement(true);
 
         if (comp.token_type == tt_eof)
             CompileError("unfinished function body (hit EOF)\n");
@@ -1717,20 +1678,12 @@ void real_vm_c::GLOB_Module()
 
     while (!LEX_Check("}"))
     {
-        try
-        {
-            // handle a previous error
-            if (comp.token_type == tt_error)
-                LEX_Next();
-            else
-                GLOB_Globals();
-        }
-        catch (parse_error_x err)
-        {
-            comp.error_count++;
-            LEX_SkipPastError();
-        }
-
+        // handle a previous error
+        if (comp.token_type == tt_error)
+            LEX_Next();
+        else
+            GLOB_Globals();
+            
         if (comp.token_type == tt_eof)
             CompileError("unfinished module (hit EOF)\n");
     }
@@ -1783,24 +1736,15 @@ bool real_vm_c::CompileFile(char *buffer, const char *filename)
 
     LEX_Next(); // read first token
 
-    while (comp.token_type != tt_eof && comp.error_count < MAX_ERRORS)
+    while (comp.token_type != tt_eof)
     {
-        try
-        {
-            comp.scope = &comp.global_scope;
+        comp.scope = &comp.global_scope;
 
-            // handle a previous error
-            if (comp.token_type == tt_error)
-                LEX_Next();
-            else
-                GLOB_Globals();
-        }
-        catch (parse_error_x err)
-        {
-            comp.error_count++;
-
-            LEX_SkipPastError();
-        }
+        // handle a previous error
+        if (comp.token_type == tt_error)
+            LEX_Next();
+        else
+            GLOB_Globals();
     }
 
     comp.source_file = NULL;

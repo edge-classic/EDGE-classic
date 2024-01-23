@@ -2131,39 +2131,32 @@ void E_Main(int argc, const char **argv)
     env::Init();
 #endif
 
-    try
-    {
-        E_Startup();
+    E_Startup();
 
-        E_InitialState();
+    E_InitialState();
 
-        CON_MessageColor(SG_YELLOW_RGBA32);
-        I_Printf("%s v%s initialisation complete.\n", appname.c_str(), edgeversion.c_str());
+    CON_MessageColor(SG_YELLOW_RGBA32);
+    I_Printf("%s v%s initialisation complete.\n", appname.c_str(), edgeversion.c_str());
 
-        I_Debugf("- Entering game loop...\n");
+    I_Debugf("- Entering game loop...\n");
 
 #ifndef EDGE_WEB
-        while (!(app_state & APP_STATE_PENDING_QUIT))
-        {
-            // We always do this once here, although the engine may
-            // makes in own calls to keep on top of the event processing
-            I_ControlGetEvents();
-
-            if (app_state & APP_STATE_ACTIVE)
-                E_Tick();
-            else if (!n_busywait.d)
-            {
-                I_Sleep(5);
-            }
-        }
-#else
-        return;
-#endif
-    }
-    catch (const std::exception &e)
+    while (!(app_state & APP_STATE_PENDING_QUIT))
     {
-        I_Error("Unexpected internal failure occurred: %s\n", e.what());
+        // We always do this once here, although the engine may
+        // makes in own calls to keep on top of the event processing
+        I_ControlGetEvents();
+
+        if (app_state & APP_STATE_ACTIVE)
+            E_Tick();
+        else if (!n_busywait.d)
+        {
+            I_Sleep(5);
+        }
     }
+#else
+    return;
+#endif
 
     E_Shutdown(); // Shutdown whatever at this point
 }

@@ -40,6 +40,8 @@
 
 #include "AlmostEquals.h"
 
+extern void I_Error(const char *error, ...);
+
 namespace coal
 {
 
@@ -213,7 +215,7 @@ void real_vm_c::RunError(const char *error, ...)
     vsnprintf(buffer, sizeof(buffer), error, argptr);
     va_end(argptr);
 
-    printer("ERROR: %s\n", buffer);
+    printer("COAL ERROR: %s\n", buffer);
 
     if (exec.call_depth > 0)
         StackTrace();
@@ -221,8 +223,7 @@ void real_vm_c::RunError(const char *error, ...)
     /* clear the stack so SV/Host_Error can shutdown functions */
     exec.call_depth = 0;
 
-    //  raise(11);
-    throw exec_error_x();
+    I_Error(buffer);
 }
 
 int real_vm_c::STR_Concat(const char *s1, const char *s2)
@@ -638,21 +639,12 @@ int real_vm_c::Execute(int func_id)
     // re-use the temporary string space
     temp_strings.reset();
 
-    try
+    if (func_id < 1 || func_id >= (int)functions.size())
     {
-        if (func_id < 1 || func_id >= (int)functions.size())
-        {
-            RunError("vm_c::Execute: NULL function");
-        }
-
-        DoExecute(func_id);
-    }
-    catch (exec_error_x err)
-    {
-        return 9;
+        RunError("vm_c::Execute: NULL function");
     }
 
-    // printer("TEMP_STRINGs: %d / %d\n", temp_strings.usedMemory(), temp_strings.totalMemory());
+    DoExecute(func_id);
 
     return 0;
 }

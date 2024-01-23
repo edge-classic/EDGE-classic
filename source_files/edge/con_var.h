@@ -26,7 +26,7 @@
 #define DEF_CVAR(name, value, flags)                   cvar_c name(#name, value, flags);
 #define DEF_CVAR_CLAMPED(name, value, flags, min, max) cvar_c name(#name, value, flags, min, max);
 #define DEF_CVAR_CB(name, value, flags, cb)                                                                            \
-    cvar_c name(#name, value, flags, std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), cb);
+    cvar_c name(#name, value, flags, FLT_MIN, FLT_MAX, cb);
 
 class cvar_c
 {

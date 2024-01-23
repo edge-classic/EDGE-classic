@@ -1629,7 +1629,7 @@ void CON_ShowFPS(void)
     {
         frames += 1;
         total += diff;
-        worst = std::max(worst, diff);
+        worst = HMM_MAX(worst, diff);
 
         // update every second
         if (total > 999999)

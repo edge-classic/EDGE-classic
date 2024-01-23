@@ -1493,7 +1493,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 
     // Boom compatibility -- invisible walkways
     if (sec->heightsec != nullptr)
-        slope_fh = std::min(slope_fh, sec->heightsec->f_h);
+        slope_fh = HMM_MIN(slope_fh, sec->heightsec->f_h);
 
     rgbacol_t sec_fc = sec->props.fog_color;
     float    sec_fd = sec->props.fog_density;

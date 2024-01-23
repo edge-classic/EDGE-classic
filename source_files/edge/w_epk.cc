@@ -601,7 +601,7 @@ class epk_file_c : public epi::file_c
 
         while (count > 0)
         {
-            size_t want = std::min((size_t)count, sizeof(buffer));
+            size_t want = HMM_MIN((size_t)count, sizeof(buffer));
             size_t got  = mz_zip_reader_extract_iter_read(iter, buffer, want);
 
             // reached end of file?

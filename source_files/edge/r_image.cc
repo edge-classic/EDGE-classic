@@ -349,7 +349,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
     bool is_patch = false;
     bool solid    = false;
 
-    int  header_len = std::min((int)sizeof(header), packfile_len);
+    int  header_len = HMM_MIN((int)sizeof(header), packfile_len);
     auto fmt        = epi::Image_DetectFormat(header, header_len, packfile_len);
 
     if (fmt == epi::FMT_OTHER)
@@ -492,7 +492,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
     bool is_patch = false;
     bool solid    = false;
 
-    int  header_len = std::min((int)sizeof(header), lump_len);
+    int  header_len = HMM_MIN((int)sizeof(header), lump_len);
     auto fmt        = epi::Image_DetectFormat(header, header_len, lump_len);
 
     if (fmt == epi::FMT_OTHER)
@@ -827,7 +827,7 @@ static image_c *AddImageUser(imagedef_c *def)
             f->Read(header, sizeof(header));
             f->Seek(0, epi::file_c::SEEKPOINT_START);
 
-            int header_len = std::min((int)sizeof(header), file_size);
+            int header_len = HMM_MIN((int)sizeof(header), file_size);
             fmt            = epi::Image_DetectFormat(header, header_len, file_size);
         }
         else

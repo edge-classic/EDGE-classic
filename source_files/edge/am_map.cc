@@ -1216,11 +1216,11 @@ static bool AM_CheckBBox(float *bspcoord)
         GetRotatedCoords(L, B, x3, y3);
         GetRotatedCoords(R, B, x4, y4);
 
-        L = std::min(std::min(x1, x2), std::min(x3, x4));
-        B = std::min(std::min(y1, y2), std::min(y3, y4));
+        L = HMM_MIN(HMM_MIN(x1, x2), HMM_MIN(x3, x4));
+        B = HMM_MIN(HMM_MIN(y1, y2), HMM_MIN(y3, y4));
 
-        R = std::max(std::max(x1, x2), std::max(x3, x4));
-        T = std::max(std::max(y1, y2), std::max(y3, y4));
+        R = HMM_MAX(HMM_MAX(x1, x2), HMM_MAX(x3, x4));
+        T = HMM_MAX(HMM_MAX(y1, y2), HMM_MAX(y3, y4));
     }
 
     // convert from map to hud coordinates

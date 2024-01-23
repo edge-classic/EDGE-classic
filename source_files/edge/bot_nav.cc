@@ -470,8 +470,8 @@ static float NAV_TraverseLinkCost(int cur, const nav_link_c &link, bool allow_do
         else
         {
             // enough vertical space?
-            float high_f = std::max(s1->f_h, s2->f_h);
-            float low_c  = std::min(s1->c_h, s2->c_h);
+            float high_f = HMM_MAX(s1->f_h, s2->f_h);
+            float low_c  = HMM_MIN(s1->c_h, s2->c_h);
 
             if (low_c - high_f < 56.0f)
                 return -1;

@@ -634,7 +634,7 @@ void bot_t::RetreatFrom(const mobj_t *enemy)
 {
     float dx   = pl->mo->x - enemy->x;
     float dy   = pl->mo->y - enemy->y;
-    float dlen = std::max(hypotf(dx, dy), 1.0f);
+    float dlen = HMM_MAX(hypotf(dx, dy), 1.0f);
 
     position_c pos{pl->mo->x, pl->mo->y, pl->mo->z};
 
@@ -738,7 +738,7 @@ void bot_t::ShootTarget()
 
     // the further away we are, the more accurate our shot must be.
     // e.g. at point-blank range, even 45 degrees away can hit.
-    float acc_dist = std::max(enemy_dist, 32.0f);
+    float acc_dist = HMM_MAX(enemy_dist, 32.0f);
     float adjust   = acc_dist / 32.0f;
 
     if (delta > (bam_angle_t)(ANG90 / adjust / (11 - (2.5 * bot_skill.d))))
@@ -804,14 +804,14 @@ void bot_t::Think_Fight()
     // handle slope, equation is: `slope = dz / dist`
     float dz = fabs(pl->mo->z - enemy->z);
 
-    float min_dist = std::min(dz * 2.0f, 480.0f);
+    float min_dist = HMM_MIN(dz * 2.0f, 480.0f);
     float max_dist = 640.0f;
 
     // handle dangerous weapons
     const weapondef_c *weapon = pl->weapons[pl->ready_wp].info;
 
     if (weapon->dangerous)
-        min_dist = std::max(min_dist, 224.0f);
+        min_dist = HMM_MAX(min_dist, 224.0f);
 
     // approach if too far away
     if (enemy_dist > max_dist)
@@ -838,7 +838,7 @@ void bot_t::WeaveNearLeader(const mobj_t *leader)
     float dx = pl->mo->x - leader->x;
     float dy = pl->mo->y - leader->y;
 
-    float dlen = std::max(1.0f, hypotf(dx, dy));
+    float dlen = HMM_MAX(1.0f, hypotf(dx, dy));
 
     dx = dx * 96.0f / dlen;
     dy = dy * 96.0f / dlen;

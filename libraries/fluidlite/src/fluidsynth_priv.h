@@ -19,8 +19,8 @@
  */
 
 
-#ifndef _FLUIDSYNTH_PRIV_H
-#define _FLUIDSYNTH_PRIV_H
+#ifndef _FLUIDLITE_PRIV_H
+#define _FLUIDLITE_PRIV_H
 
 #include "fluid_config.h"
 
@@ -78,63 +78,74 @@ typedef enum {
 
 /** Integer types  */
 
-typedef signed char       sint8;
-typedef unsigned char     uint8;
+#if 1 /**/
+typedef signed char        sint8;
+typedef unsigned char      uint8;
 typedef signed short       sint16;
 typedef unsigned short     uint16;
 typedef signed int         sint32;
 typedef unsigned int       uint32;
+typedef signed long long   sint64;
+typedef unsigned long long uint64;
 
-//#if defined(MINGW32)
+#if defined(__LP64__) || defined(_WIN64)
+typedef uint64             uintptr;
+#else
+typedef uint32             uintptr;
+#endif
 
-///* Windows using MinGW32 */
-//typedef int8_t             sint8;
-//typedef uint8_t            uint8;
-//typedef int16_t            sint16;
-//typedef uint16_t           uint16;
-//typedef int32_t            sint32;
-//typedef uint32_t           uint32;
-//typedef int64_t            sint64;
-//typedef uint64_t           uint64;
+#else /**/
+#if defined(MINGW32)
 
-//#elif defined(_WIN32)
+/* Windows using MinGW32 */
+typedef int8_t             sint8;
+typedef uint8_t            uint8;
+typedef int16_t            sint16;
+typedef uint16_t           uint16;
+typedef int32_t            sint32;
+typedef uint32_t           uint32;
+typedef int64_t            sint64;
+typedef uint64_t           uint64;
 
-///* Windows */
-//typedef signed __int8      sint8;
-//typedef unsigned __int8    uint8;
-//typedef signed __int16     sint16;
-//typedef unsigned __int16   uint16;
-//typedef signed __int32     sint32;
-//typedef unsigned __int32   uint32;
-//typedef signed __int64     sint64;
-//typedef unsigned __int64   uint64;
+#elif defined(_WIN32)
 
-//#elif defined(MACOS9)
+/* Windows */
+typedef signed __int8      sint8;
+typedef unsigned __int8    uint8;
+typedef signed __int16     sint16;
+typedef unsigned __int16   uint16;
+typedef signed __int32     sint32;
+typedef unsigned __int32   uint32;
+typedef signed __int64     sint64;
+typedef unsigned __int64   uint64;
 
-///* Macintosh */
-//typedef signed char        sint8;
-//typedef unsigned char      uint8;
-//typedef signed short       sint16;
-//typedef unsigned short     uint16;
-//typedef signed int         sint32;
-//typedef unsigned int       uint32;
-///* FIXME: needs to be verified */
-//typedef long long          sint64;
-//typedef unsigned long long uint64;
+#elif defined(MACOS9)
 
-//#else
+/* Macintosh */
+typedef signed char        sint8;
+typedef unsigned char      uint8;
+typedef signed short       sint16;
+typedef unsigned short     uint16;
+typedef signed int         sint32;
+typedef unsigned int       uint32;
+/* FIXME: needs to be verified */
+typedef long long          sint64;
+typedef unsigned long long uint64;
 
-///* Linux & Darwin */
-//typedef int8_t             sint8;
-//typedef u_int8_t           uint8;
-//typedef int16_t            sint16;
-//typedef u_int16_t          uint16;
-//typedef int32_t            sint32;
-//typedef u_int32_t          uint32;
-//typedef int64_t            sint64;
-//typedef u_int64_t          uint64;
+#else
 
-//#endif
+/* Linux & Darwin */
+typedef int8_t             sint8;
+typedef u_int8_t           uint8;
+typedef int16_t            sint16;
+typedef u_int16_t          uint16;
+typedef int32_t            sint32;
+typedef u_int32_t          uint32;
+typedef int64_t            sint64;
+typedef u_int64_t          uint64;
+
+#endif
+#endif /* */
 
 
 /***************************************************************
@@ -174,6 +185,7 @@ typedef FILE*  fluid_file;
 #define FLUID_FCLOSE(_f)             fclose(_f)
 #define FLUID_FREAD(_p,_s,_n,_f)     fread(_p,_s,_n,_f)
 #define FLUID_FSEEK(_f,_n,_set)      fseek(_f,_n,_set)
+#define FLUID_FTELL(_f)              ftell(_f)
 #define FLUID_MEMCPY(_dst,_src,_n)   memcpy(_dst,_src,_n)
 #define FLUID_MEMSET(_s,_c,_n)       memset(_s,_c,_n)
 #define FLUID_STRLEN(_s)             strlen(_s)
@@ -181,11 +193,7 @@ typedef FILE*  fluid_file;
 #define FLUID_STRNCMP(_s,_t,_n)      strncmp(_s,_t,_n)
 #define FLUID_STRCPY(_dst,_src)      strcpy(_dst,_src)
 #define FLUID_STRCHR(_s,_c)          strchr(_s,_c)
-#ifdef strdup
-#define FLUID_STRDUP(s)              strdup(s)
-#else
-#define FLUID_STRDUP(s) 		    FLUID_STRCPY(FLUID_MALLOC(FLUID_STRLEN(s) + 1), s)
-#endif
+#define FLUID_STRDUP(s)              FLUID_STRCPY((char*)FLUID_MALLOC(FLUID_STRLEN(s) + 1), s)
 #define FLUID_SPRINTF                sprintf
 #define FLUID_FPRINTF                fprintf
 
@@ -217,4 +225,4 @@ char* fluid_error(void);
 #define _(s) s
 
 
-#endif /* _FLUIDSYNTH_PRIV_H */
+#endif /* _FLUIDLITE_PRIV_H */

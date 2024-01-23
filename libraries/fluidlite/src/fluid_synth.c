@@ -131,25 +131,6 @@ void fluid_synth_settings(fluid_settings_t* settings)
 }
 
 /*
- * fluid_version
- */
-void fluid_version(int *major, int *minor, int *micro)
-{
-  *major = FLUIDSYNTH_VERSION_MAJOR;
-  *minor = FLUIDSYNTH_VERSION_MINOR;
-  *micro = FLUIDSYNTH_VERSION_MICRO;
-}
-
-/*
- * fluid_version_str
- */
-char* fluid_version_str(void)
-{
-  return FLUIDSYNTH_VERSION;
-}
-
-
-/*
  * void fluid_synth_init
  *
  * Does all the initialization for this module.
@@ -731,7 +712,7 @@ delete_fluid_synth(fluid_synth_t* synth)
 /*
  * fluid_synth_error
  *
- * The error messages are not thread-save, yet. They are still stored
+ * The error messages are not thread-safe, yet. They are still stored
  * in a global message buffer (see fluid_sys.c).
  * */
 char*
@@ -747,7 +728,6 @@ int
 fluid_synth_noteon(fluid_synth_t* synth, int chan, int key, int vel)
 {
   fluid_channel_t* channel;
-  int r = FLUID_FAILED;
 
   /* check the ranges of the arguments */
   if ((chan < 0) || (chan >= synth->midi_channels)) {
@@ -1208,6 +1188,50 @@ fluid_synth_all_sounds_off(fluid_synth_t* synth, int chan)
 }
 
 /*
+ * fluid_synth_all_voices_stop
+ *
+ * Purpose:
+ * Immediately stop all voices without any other funny business
+ */
+int
+fluid_synth_all_voices_stop(fluid_synth_t* synth)
+{
+  int i;
+  fluid_voice_t* voice;
+
+  for (i = 0; i < synth->polyphony; i++) {
+    voice = synth->voice[i];
+    if (_PLAYING(voice)) {
+      fluid_voice_off(voice);
+    }
+  }
+
+  return FLUID_OK;
+}
+
+/*
+ * fluid_synth_all_voices_pause
+ *
+ * Purpose:
+ * Immediately stop all notes without any other funny business
+ */
+int
+fluid_synth_all_voices_pause(fluid_synth_t* synth)
+{
+  int i;
+  fluid_voice_t* voice;
+
+  for (i = 0; i < synth->polyphony; i++) {
+    voice = synth->voice[i];
+    if (_PLAYING(voice)) {
+      fluid_voice_noteoff(voice);
+    }
+  }
+
+  return FLUID_OK;
+}
+
+/*
  * fluid_synth_system_reset
  *
  * Purpose:
@@ -1319,6 +1343,49 @@ fluid_synth_channel_pressure(fluid_synth_t* synth, int chan, int val)
 }
 
 /**
+ * Set the MIDI polyphonic key pressure controller value.
+ * @param synth FluidSynth instance
+ * @param chan MIDI channel number (0 to MIDI channel count - 1)
+ * @param key MIDI key number (0-127)
+ * @param val MIDI key pressure value (0-127)
+ * @return FLUID_OK on success, FLUID_FAILED otherwise
+ */
+int
+fluid_synth_key_pressure(fluid_synth_t* synth, int chan, int key, int val)
+{
+  int result = FLUID_OK;
+  if (key < 0 || key > 127) {
+    return FLUID_FAILED;
+  }
+  if (val < 0 || val > 127) {
+    return FLUID_FAILED;
+  }
+
+  if (synth->verbose)
+    FLUID_LOG(FLUID_INFO, "keypressure\t%d\t%d\t%d", chan, key, val);
+
+  fluid_channel_set_key_pressure (synth->channel[chan], key, val);
+
+  // fluid_synth_update_key_pressure_LOCAL
+  {
+    fluid_voice_t* voice;
+    int i;
+
+    for (i = 0; i < synth->polyphony; i++) {
+      voice = synth->voice[i];
+
+      if (voice->chan == chan && voice->key == key) {
+        result = fluid_voice_modulate(voice, 0, FLUID_MOD_KEYPRESSURE);
+        if (result != FLUID_OK)
+          break;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
  * Set the MIDI pitch bend controller value.
  * @param synth FluidSynth instance
  * @param chan MIDI channel number
@@ -1423,7 +1490,6 @@ fluid_synth_get_preset(fluid_synth_t* synth, unsigned int sfontnum,
 {
   fluid_preset_t* preset = NULL;
   fluid_sfont_t* sfont = NULL;
-  fluid_list_t* list = synth->sfont;
   int offset;
 
   sfont = fluid_synth_get_sfont_by_id(synth, sfontnum);
@@ -1512,6 +1578,7 @@ fluid_synth_program_change(fluid_synth_t* synth, int chan, int prognum)
 
   /* inform the channel of the new program number */
   fluid_channel_set_prognum(channel, prognum);
+
   if (synth->verbose)
     FLUID_LOG(FLUID_INFO, "prog\t%d\t%d\t%d", chan, banknum, prognum);
 
@@ -1530,7 +1597,7 @@ fluid_synth_program_change(fluid_synth_t* synth, int chan, int prognum)
     subst_prog = prognum;
 
     /* Melodic instrument? */
-    if (channel->channum != 9 && banknum != DRUM_INST_BANK)
+    if (banknum != DRUM_INST_BANK)
     {
       subst_bank = 0;
 
@@ -1540,8 +1607,8 @@ fluid_synth_program_change(fluid_synth_t* synth, int chan, int prognum)
       /* Fallback to first preset in bank 0 */
       if (!preset && prognum != 0)
       {
-        preset = fluid_synth_find_preset(synth, 0, 0);
-        subst_prog = 0;
+	preset = fluid_synth_find_preset(synth, 0, 0);
+	subst_prog = 0;
       }
     }
     else /* Percussion: Fallback to preset 0 in percussion bank */
@@ -1552,7 +1619,7 @@ fluid_synth_program_change(fluid_synth_t* synth, int chan, int prognum)
 
     if (preset)
       FLUID_LOG(FLUID_WARN, "Instrument not found on channel %d [bank=%d prog=%d], substituted [bank=%d prog=%d]",
-                chan, banknum, prognum, subst_bank, subst_prog);
+		chan, banknum, prognum, subst_bank, subst_prog);
   }
 
   sfont_id = preset? fluid_sfont_get_id(preset->sfont) : 0;
@@ -2305,10 +2372,7 @@ fluid_synth_free_voice_by_kill(fluid_synth_t* synth)
      * Typically, drum notes are triggered only very briefly, they run most
      * of the time in release phase.
      */
-    if (voice->chan == 9){
-      this_voice_prio += 4000;
-
-    } else if (_RELEASED(voice)){
+    if (_RELEASED(voice)){
       /* The key for this voice has been released. Consider it much less important
        * than a voice, which is still held.
        */
@@ -2402,6 +2466,9 @@ fluid_synth_alloc_voice(fluid_synth_t* synth, fluid_sample_t* sample, int chan, 
 
   if (chan >= 0) {
 	  channel = synth->channel[chan];
+  } else {
+    FLUID_LOG(FLUID_WARN, "Channel should be valid");
+    return NULL;
   }
 
   if (fluid_voice_init(voice, sample, channel, key, vel,
@@ -2485,7 +2552,7 @@ void fluid_synth_kill_by_exclusive_class(fluid_synth_t* synth, fluid_voice_t* ne
 
     fluid_voice_kill_excl(existing_voice);
   };
-};
+}
 
 /*
  * fluid_synth_start_voice
@@ -2536,14 +2603,12 @@ fluid_synth_sfload(fluid_synth_t* synth, const char* filename, int reset_presets
   for (list = synth->loaders; list; list = fluid_list_next(list)) {
     loader = (fluid_sfloader_t*) fluid_list_get(list);
 
-    sfont = FLUID_NEW(fluid_sfont_t);
+    sfont = fluid_sfloader_load(loader, filename);
+    if (sfont == NULL)
+        return -1;
+
     sfont->id = ++synth->sfont_id;
     synth->sfont = fluid_list_prepend(synth->sfont, sfont);
-
-    loader->data = sfont;
-    fluid_sfloader_load(loader, filename);
-    loader->data = NULL;
-
 
     if (reset_presets) {
         fluid_synth_program_reset(synth);
@@ -2911,7 +2976,7 @@ int fluid_synth_set_interp_method(fluid_synth_t* synth, int chan, int interp_met
     };
   };
   return FLUID_OK;
-};
+}
 
 /* Purpose:
  * Returns the number of allocated midi channels

@@ -52,6 +52,14 @@ DEF_CVAR(s_fluidgain, "0.3", CVAR_ARCHIVE)
 
 extern std::vector<std::filesystem::path> available_soundfonts;
 
+void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
+{
+	FILE *fp = EPIFOPEN(std::filesystem::u8path(filename), "rb");
+	if (!fp)
+		return NULL;
+    return fp;
+}
+
 static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
 {
     const int16_t *s_end = src + len * 2;
@@ -87,12 +95,21 @@ bool S_StartupFluid(void)
                     "of your EDGE-Classic install!\n");
     }
 
+    // Initialize settings and change values from default if needed
     edge_fluid_settings = new_fluid_settings();
     fluid_settings_setstr(edge_fluid_settings, "synth.reverb.active", "no");
     fluid_settings_setstr(edge_fluid_settings, "synth.chorus.active", "no");
     fluid_settings_setnum(edge_fluid_settings, "synth.gain", s_fluidgain.f);
     fluid_settings_setnum(edge_fluid_settings, "synth.sample-rate", dev_freq);
 	edge_fluid = new_fluid_synth(edge_fluid_settings);
+
+    // Register loader that uses our custom function to provide
+    // a FILE pointer
+    edge_fluid_sfloader = new_fluid_defsfloader();
+	edge_fluid_sfloader->fileapi = new fluid_fileapi_t;
+	fluid_init_default_fileapi(edge_fluid_sfloader->fileapi);
+	edge_fluid_sfloader->fileapi->fopen = edge_fluid_fopen;
+	fluid_synth_add_sfloader(edge_fluid, edge_fluid_sfloader);
 
     if (fluid_synth_sfload(edge_fluid, s_soundfont.c_str(), 1) == -1)
 	{
@@ -185,7 +202,7 @@ class fluid_player_c : public abstract_music_c
 
 	static void rtNoteAfterTouch(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal)
 	{
-		(void)userdata; (void)channel; (void)note; (void)atVal;
+		fluid_synth_key_pressure(edge_fluid, channel, note, atVal);
 	}
 
 	static void rtChannelAfterTouch(void *userdata, uint8_t channel, uint8_t atVal)
@@ -302,8 +319,7 @@ class fluid_player_c : public abstract_music_c
         if (!(status == PLAYING || status == PAUSED))
             return;
 
-        for (int i = 0; i < 16; i++)
-            fluid_synth_all_notes_off(edge_fluid, i);
+        fluid_synth_all_voices_stop(edge_fluid);
 
         fluid_synth_system_reset(edge_fluid);
         fluid_synth_program_reset(edge_fluid);
@@ -317,6 +333,8 @@ class fluid_player_c : public abstract_music_c
     {
         if (status != PLAYING)
             return;
+
+        fluid_synth_all_voices_pause(edge_fluid);
 
         status = PAUSED;
     }

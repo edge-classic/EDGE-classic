@@ -110,6 +110,7 @@ FLUIDSYNTH_API int fluid_synth_get_pitch_wheel_sens(fluid_synth_t* synth, int ch
 FLUIDSYNTH_API int fluid_synth_program_change(fluid_synth_t* synth, int chan, int program);
 
 FLUIDSYNTH_API int fluid_synth_channel_pressure(fluid_synth_t* synth, int chan, int val);
+FLUIDSYNTH_API int fluid_synth_key_pressure(fluid_synth_t* synth, int chan, int key, int val);
 FLUIDSYNTH_API int fluid_synth_sysex(fluid_synth_t *synth, const char *data, int len,
                                      char *response, int *response_len, int *handled, int dryrun);
 
@@ -157,6 +158,11 @@ FLUIDSYNTH_API int fluid_synth_program_reset(fluid_synth_t* synth);
       controller values. */
 FLUIDSYNTH_API int fluid_synth_system_reset(fluid_synth_t* synth);
 
+/** Stop all voices without any other modifications to the synth */
+FLUIDSYNTH_API int fluid_synth_all_voices_stop(fluid_synth_t* synth);
+
+/** Stop all notes without any other modifications to the synth */
+FLUIDSYNTH_API int fluid_synth_all_voices_pause(fluid_synth_t* synth);
 
   /*
    * 
@@ -699,13 +705,13 @@ FLUIDSYNTH_API void fluid_synth_start_voice(fluid_synth_t* synth, fluid_voice_t*
 FLUIDSYNTH_API void fluid_synth_get_voicelist(fluid_synth_t* synth, 
 					    fluid_voice_t* buf[], int bufsize, int ID);
 
-FLUIDSYNTH_API int fluid_synth_all_notes_off(fluid_synth_t* synth, int chan);
-FLUIDSYNTH_API int fluid_synth_all_sounds_off(fluid_synth_t* synth, int chan);
 
-//midi router disabled
-//  /** This is a hack to get command handlers working */
-//FLUIDSYNTH_API void fluid_synth_set_midi_router(fluid_synth_t* synth,
-//					      fluid_midi_router_t* router);
+/* midi router disabled */
+#if 0
+  /** This is a hack to get command handlers working */
+FLUIDSYNTH_API void fluid_synth_set_midi_router(fluid_synth_t* synth,
+					      fluid_midi_router_t* router);
+#endif
 
 #ifdef __cplusplus
 }

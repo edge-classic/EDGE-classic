@@ -54,6 +54,7 @@ typedef struct _fluid_event_t fluid_event_t;
 typedef struct _fluid_sequencer_t fluid_sequencer_t;
 typedef struct _fluid_ramsfont_t fluid_ramsfont_t;
 typedef struct _fluid_rampreset_t fluid_rampreset_t;
+typedef struct _fluid_fileapi_t fluid_fileapi_t;
 
 typedef int fluid_istream_t;
 typedef int fluid_ostream_t;

@@ -251,8 +251,6 @@ fluid_voice_write(fluid_voice_t* voice,
   fluid_real_t target_amp;	/* target amplitude */
   int count;
 
-  int dsp_interp_method = voice->interp_method;
-
   fluid_real_t dsp_buf[FLUID_BUFSIZE];
   fluid_env_data_t* env_data;
   fluid_real_t x;
@@ -352,7 +350,7 @@ fluid_voice_write(fluid_voice_t* voice,
   if (voice->ticks >= voice->modlfo_delay)
   {
     voice->modlfo_val += voice->modlfo_incr;
-  
+
     if (voice->modlfo_val > 1.0)
     {
       voice->modlfo_incr = -voice->modlfo_incr;
@@ -491,7 +489,7 @@ fluid_voice_write(fluid_voice_t* voice,
     fres = 5;
 
   /* if filter enabled and there is a significant frequency change.. */
-  if ((abs (fres - voice->last_fres) > 0.01))
+  if ((fabs(fres - voice->last_fres) > 0.01))
   {
     /* The filter coefficients have to be recalculated (filter
     * parameters have changed). Recalculation for various reasons is
@@ -638,7 +636,7 @@ fluid_voice_write(fluid_voice_t* voice,
  * - dsp_hist2: same
  *
  */
-static __inline void
+static void
 fluid_voice_effects (fluid_voice_t *voice, int count,
 		     fluid_real_t* dsp_left_buf, fluid_real_t* dsp_right_buf,
 		     fluid_real_t* dsp_reverb_buf, fluid_real_t* dsp_chorus_buf)
@@ -1951,16 +1949,17 @@ int fluid_voice_optimize_sample(fluid_sample_t* s)
   int i;
 
   /* ignore ROM and other(?) invalid samples */
-  if (!s->valid || s->sampletype == FLUID_SAMPLETYPE_OGG_VORBIS) return (FLUID_OK);
+  if (!s->valid || (s->sampletype & FLUID_SAMPLETYPE_OGG_VORBIS))
+    return (FLUID_OK);
 
   if (!s->amplitude_that_reaches_noise_floor_is_valid){ /* Only once */
     /* Scan the loop */
     for (i = (int)s->loopstart; i < (int) s->loopend; i ++){
       signed short val = s->data[i];
       if (val > peak_max) {
-	peak_max = val;
+        peak_max = val;
       } else if (val < peak_min) {
-	peak_min = val;
+        peak_min = val;
       }
     }
 

@@ -230,7 +230,7 @@ static int fluid_settings_get(fluid_settings_t* settings,
 {
   fluid_hashtable_t* table = settings;
   int t;
-  void* v;
+  void* v = NULL;
   int n;
 
   for (n = 0; n < len; n++) {
@@ -820,8 +820,3 @@ fluid_settings_getint_default(fluid_settings_t* settings, const char* name)
     return 0.0f;
   }
 }
-
-
-
-
-

@@ -530,7 +530,7 @@ static void ParseUMAPINFOEntry(epi::lexer_c &lex, MapEntry *val)
                 for (auto iter = gamedefs.begin()+1; iter != gamedefs.end();)
                 {
                     gamedef_c *game = *iter;
-                    if (game->firstmap.empty())
+                    if (game->firstmap.empty() && epi::STR_CaseCmp(game->name, "UMAPINFO_TEMPLATE") != 0)
                     {
                         delete game;
                         game = nullptr;
@@ -546,7 +546,8 @@ static void ParseUMAPINFOEntry(epi::lexer_c &lex, MapEntry *val)
                 // Check for episode to replace
                 for (auto game : gamedefs)
                 {
-                    if (epi::STR_CaseCmp(game->firstmap, val->mapname) == 0)
+                    if (epi::STR_CaseCmp(game->firstmap, val->mapname) == 0 &&
+                        epi::STR_CaseCmp(game->name, "UMAPINFO_TEMPLATE") != 0)
                     {
                         new_epi = game;
                         break;

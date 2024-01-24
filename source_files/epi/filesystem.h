@@ -24,9 +24,9 @@
 #include "str_util.h"
 
 #ifdef _WIN32
-#define EPIFOPEN(name, mode) _wfopen(name.c_str(), (const wchar_t *)epi::to_u16string(mode).c_str())
+#define EPIFOPEN(name, mode) _wfopen(name.c_str(), epi::utf8_to_wstring(mode).c_str())
 #else
-#define EPIFOPEN(name, mode) std::fopen(name.c_str(), mode)
+#define EPIFOPEN(name, mode) fopen(name.c_str(), mode)
 #endif
 
 namespace epi
@@ -45,12 +45,12 @@ class dir_entry_c
 };
 
 // Directory Functions
-std::filesystem::path FS_GetCurrDir();
+#ifdef _WIN32
 bool                  FS_SetCurrDir(std::filesystem::path dir);
+#endif
 
 bool FS_IsDir(std::filesystem::path dir);
 bool FS_MakeDir(std::filesystem::path dir);
-bool FS_RemoveDir(const char *dir);
 bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::filesystem::path dir, std::string mask);
 bool FS_ReadDirRecursive(std::vector<dir_entry_c> &fsd, std::filesystem::path dir, std::string mask);
 // File Functions
@@ -64,7 +64,6 @@ bool FS_OpenDir(const std::filesystem::path &src);
 
 bool FS_Copy(std::filesystem::path src, std::filesystem::path dest);
 bool FS_Delete(std::filesystem::path name);
-bool FS_Rename(const char *oldname, const char *newname);
 // Performs a sync for platforms with virtualized file systems
 void FS_Sync(bool populate = false);
 

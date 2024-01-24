@@ -40,7 +40,8 @@ extern "C"
 
 #ifdef _WIN32
         // -AJA- change current dir to match executable
-        epi::FS_SetCurrDir(exe_path);
+        if (!epi::FS_SetCurrDir(exe_path))
+            I_Error("Couldn't set program directory to %s!!\n", exe_path.u8string().c_str());
 #endif
 
         // Run EDGE. it never returns

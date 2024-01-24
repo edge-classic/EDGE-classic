@@ -66,8 +66,7 @@ void argv::Init(const int argc, const char *const *argv)
     for (i = 0; i < win_argc; i++)
     {
         SYS_ASSERT(win_argv[i] != nullptr);
-        std::u16string arg = (char16_t *)(win_argv[i]);
-        argv_block.push_back(epi::to_u8string(arg));
+        argv_block.push_back(epi::wstring_to_utf8(win_argv[i]));
     }
 
     LocalFree(win_argv);

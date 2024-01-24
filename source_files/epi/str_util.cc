@@ -21,10 +21,52 @@
 
 #include "superfasthash.h"
 
+#include "grapheme.h"
+
 #include <algorithm>
 
 namespace epi
 {
+
+#ifdef _WIN32
+std::wstring utf8_to_wstring(const char *instring)
+{
+    size_t utf8pos = 0;
+    size_t utf8len = strlen(instring);
+	std::wstring outstring;
+    uint32_t u32c;
+    while (utf8pos < utf8len)
+    {
+        u32c = 0;
+        utf8pos += grapheme_decode_utf8(instring+utf8pos, utf8len, &u32c);
+        if (u32c < 0x10000)
+            outstring.push_back((wchar_t)u32c);
+        else
+        {
+            u32c -= 0x10000;
+            outstring.push_back((wchar_t)(u32c >> 10) + 0xD800);
+            outstring.push_back((wchar_t)(u32c & 0x3FF) + 0xDC00);
+        }
+    }
+    return outstring;
+}
+std::string wstring_to_utf8(const wchar_t *instring)
+{
+    std::string outstring;
+    char u8c[4];
+    while (*instring)
+    {
+        memset(u8c, 0, 4);
+        grapheme_encode_utf8((uint_least32_t)(*instring), &u8c[0], 4);
+        if (u8c[0]) outstring.push_back(u8c[0]);
+        if (u8c[1]) outstring.push_back(u8c[1]);
+        if (u8c[2]) outstring.push_back(u8c[2]);
+        if (u8c[3]) outstring.push_back(u8c[3]);
+        instring++;
+    }
+    return outstring;
+}
+#endif
 
 void STR_Lower(std::string &s)
 {
@@ -113,63 +155,6 @@ uint32_t STR_Hash32(std::string str_to_hash)
     }
 
     return SFH_MakeKey(str_to_hash.c_str(), str_to_hash.length());
-}
-
-// The following string conversion classes/code are adapted from public domain
-// code by Andrew Choi originally found at
-// https://web.archive.org/web/20151209032329/http://members.shaw.ca/akochoi/articles/unicode-processing-c++0x/
-
-template <> int storageMultiplier<UTF8, UTF32>()
-{
-    return 4;
-}
-
-template <> int storageMultiplier<UTF8, UTF16>()
-{
-    return 3;
-}
-
-template <> int storageMultiplier<UTF16, UTF8>()
-{
-    return 1;
-}
-
-template <> int storageMultiplier<UTF32, UTF8>()
-{
-    return 1;
-}
-
-std::string to_u8string(const std::string &s)
-{
-    return s;
-}
-
-std::string to_u8string(const std::u16string &s)
-{
-    static str_converter<UTF8, UTF16, UTF16> converter;
-
-    return converter.out(s);
-}
-
-std::string to_u8string(const std::u32string &s)
-{
-    static str_converter<UTF8, UTF32, UTF32> converter;
-
-    return converter.out(s);
-}
-
-std::u16string to_u16string(const std::string &s)
-{
-    static str_converter<UTF16, UTF8, UTF16> converter;
-
-    return converter.in(s);
-}
-
-std::u32string to_u32string(const std::string &s)
-{
-    static str_converter<UTF32, UTF8, UTF32> converter;
-
-    return converter.in(s);
 }
 
 } // namespace epi

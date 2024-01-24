@@ -129,6 +129,7 @@ set (EDGE_LINK_LIBRARIES
   edge_epi
   ${SDL2_LIBRARIES}
   fluidlite
+  libgrapheme
   libRAD
   m4p
   miniz

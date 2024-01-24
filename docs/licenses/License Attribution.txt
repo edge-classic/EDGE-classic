@@ -89,6 +89,12 @@ HacX License
 HacX 1.2/2.0 (various assets) - Copyright (c) 1997-2012 Banjo Software, et al
 
 ===========================================================================================
+ISC License
+===========================================================================================
+
+libgrapheme - Copyright (c) 2019-2022 Laslo Hunhold <dev@frign.de>
+
+===========================================================================================
 MIT License
 ===========================================================================================
 
@@ -135,8 +141,6 @@ libRAD (opal.cpp/radplay.cpp) - Reality Productions
 "sf_GMbank" soundfont (renamed to Default.sf2) - The Csound Developers
 
 stb_image, stb_image_write, stb_rect_pack and stb_truetype libraries - Sean Barrett
-
-"Unicode Processing with C++0x" Conversion Classes - Andrew Choi
 
 ===========================================================================================
 SIL Open Font License

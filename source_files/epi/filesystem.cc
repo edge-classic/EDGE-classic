@@ -20,6 +20,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "epi_sdl.h"
+#include "epi_windows.h"
 
 #define MAX_MODE_CHARS 32
 
@@ -61,26 +62,13 @@ file_c *FS_Open(std::filesystem::path name, unsigned int flags)
     return new ansi_file_c(fp);
 }
 
-std::filesystem::path FS_GetCurrDir()
-{
-    return std::filesystem::current_path();
-}
-
+#ifdef _WIN32
 bool FS_SetCurrDir(std::filesystem::path dir)
 {
     SYS_ASSERT(!dir.empty());
-    std::error_code ec;
-
-    std::filesystem::current_path(dir, ec);
-
-    if (ec.value())
-    {
-        I_Warning("Failed to set current directory! Error: %s\n", ec.message().c_str());
-        return false;
-    }
-
-    return true;
+    return SetCurrentDirectoryW(dir.c_str());
 }
+#endif
 
 bool FS_IsDir(std::filesystem::path dir)
 {
@@ -92,12 +80,6 @@ bool FS_MakeDir(std::filesystem::path dir)
 {
     SYS_ASSERT(!dir.empty());
     return std::filesystem::create_directory(dir);
-}
-
-bool FS_RemoveDir(const char *dir)
-{
-    SYS_ASSERT(dir);
-    return std::filesystem::remove(dir);
 }
 
 bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::filesystem::path dir, std::string mask)
@@ -177,23 +159,6 @@ bool FS_Delete(std::filesystem::path name)
     SYS_ASSERT(!name.empty());
 
     return std::filesystem::remove(name);
-}
-
-bool FS_Rename(const char *oldname, const char *newname)
-{
-    SYS_ASSERT(oldname);
-    SYS_ASSERT(newname);
-    std::error_code ec;
-
-    std::filesystem::rename(oldname, newname, ec);
-
-    if (ec.value())
-    {
-        I_Warning("Failed to rename file! Error: %s\n", ec.message().c_str());
-        return false;
-    }
-
-    return true;
 }
 
 #ifdef EDGE_WEB

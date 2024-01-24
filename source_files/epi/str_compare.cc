@@ -22,7 +22,6 @@
 
 #include <string.h>
 #include <ctype.h>
-#include <locale>
 
 namespace epi
 {

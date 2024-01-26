@@ -313,7 +313,7 @@ bool FS_IsDir(std::string_view dir)
 static std::string FS_GetCurrDir()
 {
     std::string directory;
-    const char *dir = get_current_dir_name();
+    const char *dir = getcwd(nullptr, 0);
     if (dir) directory = dir;
 	return directory;
 }

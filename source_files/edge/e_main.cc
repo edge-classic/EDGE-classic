@@ -42,7 +42,6 @@
 #include <time.h>
 #include <algorithm>
 #include <vector>
-#include <chrono> // PurgeCache
 
 #include "file.h"
 #include "filesystem.h"

@@ -31,7 +31,7 @@
 
 static cvar_c *all_cvars = NULL;
 
-cvar_c::cvar_c(const char *_name, const char *_def, int _flags, float _min, float _max, cvar_callback _cb)
+cvar_c::cvar_c(const char *_name, const char *_def, int _flags, cvar_callback _cb, float _min, float _max)
     : d(), f(), s(_def), name(_name), def(_def), flags(_flags), min(_min), max(_max), cvar_cb(_cb), modified(0)
 {
     ParseString();

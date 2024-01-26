@@ -21,12 +21,13 @@
 
 #include <vector>
 #include <string>
-#include <limits>
 
 #define DEF_CVAR(name, value, flags)                   cvar_c name(#name, value, flags);
-#define DEF_CVAR_CLAMPED(name, value, flags, min, max) cvar_c name(#name, value, flags, min, max);
+#define DEF_CVAR_CLAMPED(name, value, flags, min, max) cvar_c name(#name, value, flags, nullptr, min, max);
 #define DEF_CVAR_CB(name, value, flags, cb)                                                                            \
-    cvar_c name(#name, value, flags, FLT_MIN, FLT_MAX, cb);
+    cvar_c name(#name, value, flags, cb);
+#define DEF_CVAR_CB_CLAMPED(name, value, flags, cb, min, max)                                                                            \
+    cvar_c name(#name, value, flags, cb, min, max);
 
 class cvar_c
 {
@@ -60,8 +61,8 @@ class cvar_c
     int modified;
 
   public:
-    cvar_c(const char *_name, const char *_def, int _flags = 0, float _min = std::numeric_limits<float>::lowest(),
-           float _max = std::numeric_limits<float>::max(), cvar_callback _cb = nullptr);
+    cvar_c(const char *_name, const char *_def, int _flags = 0, cvar_callback _cb = nullptr,
+      float _min = -256000.0f, float _max = 256000.0f);
 
     ~cvar_c();
 

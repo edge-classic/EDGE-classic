@@ -32,7 +32,7 @@ std::vector<std::string> argv::list;
 // this one is here to avoid infinite recursion of param files.
 typedef struct added_parm_s
 {
-    std::filesystem::path name;
+    std::string name;
     struct added_parm_s  *next;
 } added_parm_t;
 
@@ -250,7 +250,7 @@ static int ParseOneFilename(FILE *fp, char *buf)
 //
 // Adds a response file
 //
-void argv::ApplyResponseFile(std::filesystem::path name)
+void argv::ApplyResponseFile(std::string name)
 {
     char          buf[1024];
     FILE         *f;
@@ -269,30 +269,16 @@ void argv::ApplyResponseFile(std::filesystem::path name)
     p = this_parm.next = added_parms;
 
     // add arguments from the given file
-    f = EPIFOPEN(name, "rb");
+    f = epi::FS_OpenRawFile(name, epi::kFileAccessRead | epi::kFileAccessBinary);
     if (!f)
-        I_Error("Couldn't open \"%s\" for reading!", name.u8string().c_str());
+        I_Error("Couldn't open \"%s\" for reading!", name.c_str());
 
     for (; EOF != ParseOneFilename(f, buf);)
     {
 #ifdef _WIN32
-        // Can't really guarantee that a response file will have a certain encoding,
-        // so try to detect paths in the response file and make them UTF-8
-        std::filesystem::path path_check = buf;
-        if (std::filesystem::exists(path_check))
-        {
-            list.push_back(path_check.u8string());
-        }
-        else
-        {
-            path_check = std::filesystem::u8path(buf);
-            if (std::filesystem::exists(path_check))
-            {
-                list.push_back(path_check.u8string());
-            }
-            else
-                list.push_back(strdup(buf));
-        }
+        // Can't really guarantee that a response file will have a certain encoding
+        // on Windows, so treat them as wide strings and see what sticks
+        list.push_back(epi::wstring_to_utf8((wchar_t *)buf));
 #else
         list.push_back(strdup(buf));
 #endif

@@ -2150,18 +2150,20 @@ ddf_type_e DDF_LumpToType(const std::string &name)
     return DDF_UNKNOWN;
 }
 
-ddf_type_e DDF_FilenameToType(const std::filesystem::path &path)
+ddf_type_e DDF_FilenameToType(const std::string &path)
 {
-    std::filesystem::path check = path.extension();
+    std::string check = epi::FS_GetExtension(path);
 
-    if (epi::STR_CaseCmp(check.u8string(), ".rts") == 0)
+    if (epi::STR_CaseCmp(check, ".rts") == 0)
         return DDF_RadScript;
 
-    check = path.filename();
+    check = epi::FS_GetFilename(path);
+    
+    std::string stem = epi::FS_GetStem(check);
 
     for (size_t i = 0; i < DDF_NUM_TYPES; i++)
-        if (epi::STR_CaseCmp(check.u8string(), ddf_readers[i].pack_name) == 0 ||
-            epi::STR_CaseCmp(check.stem().u8string(), ddf_readers[i].lump_name) == 0)
+        if (epi::STR_CaseCmp(check, ddf_readers[i].pack_name) == 0 ||
+            epi::STR_CaseCmp(stem, ddf_readers[i].lump_name) == 0)
             return ddf_readers[i].type;
 
     return DDF_UNKNOWN;

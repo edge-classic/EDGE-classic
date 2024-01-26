@@ -24,7 +24,6 @@ set (EDGE_SOURCE_FILES
   hu_stuff.cc
   hu_style.cc
   i_system.cc
-  l_ajbsp.cc
   l_deh.cc
   m_argv.cc
   m_bbox.cc

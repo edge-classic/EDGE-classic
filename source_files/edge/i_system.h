@@ -26,14 +26,6 @@
 #ifndef __I_SYSTEM_H__
 #define __I_SYSTEM_H__
 
-// Allow use of std::min and std::max across the board
-#ifdef _WIN32
-#undef min
-#undef max
-#endif
-
-#include <filesystem>
-
 //--------------------------------------------------------
 //  SYSTEM functions.
 //--------------------------------------------------------
@@ -87,7 +79,7 @@ void I_Sleep(int millisecs);
 // given message (typically a serious error message).
 void I_MessageBox(const char *message, const char *title);
 
-extern std::filesystem::path exe_path;
+extern std::string exe_path;
 
 //--------------------------------------------------------
 //  INPUT functions.

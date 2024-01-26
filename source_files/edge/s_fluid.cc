@@ -46,15 +46,15 @@ fluid_synth_t *edge_fluid = nullptr;
 fluid_settings_t *edge_fluid_settings = nullptr;
 fluid_sfloader_t *edge_fluid_sfloader = nullptr;
 
-DEF_CVAR(s_soundfont, "", (CVAR_ARCHIVE | CVAR_PATH))
+DEF_CVAR(s_soundfont, "", CVAR_ARCHIVE)
 
 DEF_CVAR(s_fluidgain, "0.3", CVAR_ARCHIVE)
 
-extern std::vector<std::filesystem::path> available_soundfonts;
+extern std::vector<std::string> available_soundfonts;
 
 void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
 {
-	FILE *fp = EPIFOPEN(std::filesystem::u8path(filename), "rb");
+	FILE *fp = epi::FS_OpenRawFile(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
 	if (!fp)
 		return NULL;
     return fp;
@@ -79,7 +79,7 @@ bool S_StartupFluid(void)
     bool cvar_good = false;
     for (size_t i = 0; i < available_soundfonts.size(); i++)
     {
-        if (epi::STR_CaseCmp(s_soundfont.s, available_soundfonts.at(i).generic_u8string()) == 0)
+        if (epi::STR_CaseCmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
         {
             cvar_good = true;
             break;
@@ -89,8 +89,8 @@ bool S_StartupFluid(void)
     if (!cvar_good)
     {
         I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
-        s_soundfont = std::filesystem::path(std::filesystem::path(game_dir).append("soundfont")).append("Default.sf2").generic_u8string();
-        if (!std::filesystem::exists(std::filesystem::u8path(s_soundfont.s)))
+        s_soundfont = epi::FS_PathAppend(game_dir, "soundfont/Default.sf2");
+        if (!epi::FS_Exists(s_soundfont.s))
             I_Error("Fluidlite: Cannot locate default soundfont (Default.sf2)! Please check the /soundfont directory "
                     "of your EDGE-Classic install!\n");
     }

@@ -18,7 +18,6 @@
 //
 //------------------------------------------------------------------------
 
-#include "bsp_system.h"
 #include "bsp_local.h"
 #include "bsp_raw_def.h"
 #include "bsp_utility.h"
@@ -31,50 +30,6 @@
 
 namespace ajbsp
 {
-
-#define SYS_MSG_BUFLEN 4000
-
-static char message_buf[SYS_MSG_BUFLEN];
-
-void Failure(const char *fmt, ...)
-{
-    va_list args;
-
-    va_start(args, fmt);
-    vsnprintf(message_buf, sizeof(message_buf), fmt, args);
-    va_end(args);
-
-    cur_info->Print(1, "    FAILURE: %s", message_buf);
-}
-
-void Warning(const char *fmt, ...)
-{
-    va_list args;
-
-    va_start(args, fmt);
-    vsnprintf(message_buf, sizeof(message_buf), fmt, args);
-    va_end(args);
-
-    cur_info->Print(1, "    WARNING: %s", message_buf);
-
-    cur_info->total_warnings++;
-}
-
-void MinorIssue(const char *fmt, ...)
-{
-    if (cur_info->verbosity >= 3)
-    {
-        va_list args;
-
-        va_start(args, fmt);
-        vsnprintf(message_buf, sizeof(message_buf), fmt, args);
-        va_end(args);
-
-        cur_info->Print(1, "    ISSUE: %s", message_buf);
-    }
-
-    cur_info->total_minor_issues++;
-}
 
 //------------------------------------------------------------------------
 // ANALYZE : Analyzing level structures
@@ -90,7 +45,7 @@ void MarkPolyobjSector(sector_t *sector)
         return;
 
 #if DEBUG_POLYOBJ
-    cur_info->Debug("  Marking SECTOR %d\n", sector->index);
+    I_Debugf("  Marking SECTOR %d\n", sector->index);
 #endif
 
     /* already marked ? */
@@ -138,7 +93,7 @@ void MarkPolyobjPoint(double x, double y)
                                   (int)L->end->y))
         {
 #if DEBUG_POLYOBJ
-            cur_info->Debug("  Touching line was %d\n", L->index);
+            I_Debugf("  Touching line was %d\n", L->index);
 #endif
 
             if (L->left != NULL)
@@ -190,7 +145,8 @@ void MarkPolyobjPoint(double x, double y)
 
     if (best_match == NULL)
     {
-        Warning("Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
+        I_Printf("Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
+        cur_info.total_warnings++;
         return;
     }
 
@@ -198,14 +154,14 @@ void MarkPolyobjPoint(double x, double y)
     double y2 = best_match->end->y;
 
 #if DEBUG_POLYOBJ
-    cur_info->Debug("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n", best_match->index, y1, y2, best_dist);
+    I_Debugf("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n", best_match->index, y1, y2, best_dist);
 #endif
 
     /* sanity check: shouldn't be directly on the line */
 #if DEBUG_POLYOBJ
     if (fabs(best_dist) < DIST_EPSILON)
     {
-        cur_info->Debug("  Polyobj FAILURE: directly on the line (%d)\n", best_match->index);
+        I_Debugf("  Polyobj FAILURE: directly on the line (%d)\n", best_match->index);
     }
 #endif
 
@@ -218,12 +174,13 @@ void MarkPolyobjPoint(double x, double y)
         sector = best_match->left ? best_match->left->sector : NULL;
 
 #if DEBUG_POLYOBJ
-    cur_info->Debug("  Sector %d contains the polyobj.\n", sector ? sector->index : -1);
+    I_Debugf("  Sector %d contains the polyobj.\n", sector ? sector->index : -1);
 #endif
 
     if (sector == NULL)
     {
-        Warning("Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
+        I_Printf("Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
+        cur_info.total_warnings++;
         return;
     }
 
@@ -288,7 +245,7 @@ void DetectPolyobjSectors(bool is_udmf)
     }
 
 #if DEBUG_POLYOBJ
-    cur_info->Debug("Using %s style polyobj things\n", hexen_style ? "HEXEN" : "ZDOOM");
+    I_Debugf("Using %s style polyobj things\n", hexen_style ? "HEXEN" : "ZDOOM");
 #endif
 
     for (i = 0; i < num_things; i++)
@@ -313,7 +270,7 @@ void DetectPolyobjSectors(bool is_udmf)
         }
 
 #if DEBUG_POLYOBJ
-        cur_info->Debug("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
+        I_Debugf("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
 #endif
 
         MarkPolyobjPoint(x, y);
@@ -430,7 +387,7 @@ void PruneVerticesAtEnd(void)
 
     if (unused > 0)
     {
-        cur_info->Print(2, "    Pruned %d unused vertices at end\n", unused);
+        I_Debugf("    Pruned %d unused vertices at end\n", unused);
     }
 
     num_old_vert = num_vertices;
@@ -596,11 +553,11 @@ void CalculateWallTips()
     {
         vertex_t *V = lev_vertices[k];
 
-        cur_info->Debug("WallTips for vertex %d:\n", k);
+        I_Debugf("WallTips for vertex %d:\n", k);
 
         for (walltip_t *tip = V->tip_set; tip; tip = tip->next)
         {
-            cur_info->Debug("  Angle=%1.1f left=%d right=%d\n", tip->angle, tip->open_left ? 1 : 0,
+            I_Debugf("  Angle=%1.1f left=%d right=%d\n", tip->angle, tip->open_left ? 1 : 0,
                             tip->open_right ? 1 : 0);
         }
     }
@@ -666,7 +623,7 @@ vertex_t *NewVertexDegenerate(vertex_t *start, vertex_t *end)
     vert->y = start->x;
 
     if (AlmostEquals(dlen, 0.0))
-        BugError("NewVertexDegenerate: bad delta!\n");
+        I_Error("AJBSP: NewVertexDegenerate: bad delta!\n");
 
     dx /= dlen;
     dy /= dlen;

@@ -40,7 +40,7 @@ uint32_t STR_Hash32(std::string str_to_hash);
 // Technically these are to and from UTF-16, but since these are only for 
 // Windows "wide" APIs I think we'll be ok - Dasho
 std::string wstring_to_utf8(const wchar_t *instring);
-std::wstring utf8_to_wstring(const char *instring);
+std::wstring utf8_to_wstring(std::string_view instring);
 #endif
 
 } // namespace epi

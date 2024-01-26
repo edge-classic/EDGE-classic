@@ -20,6 +20,7 @@
 #include "i_defs_gl.h"
 
 #include "main.h"
+#include "filesystem.h"
 #include "font.h"
 #include "image_data.h"
 #include "str_util.h"
@@ -202,10 +203,10 @@ void font_c::LoadPatches()
 	if (atlas)
 	{
         // Uncomment this to save the generated atlas. Note: will be inverted.
-        /*std::filesystem::path atlas_png = home_dir;
+        /*std::string atlas_png = home_dir;
         atlas_png.append(epi::STR_Format("atlas_%s.png", def->name.c_str()));
-        if (std::filesystem::exists(atlas_png))
-            std::filesystem::remove(atlas_png);
+        if (epi::FS_Exists(atlas_png))
+            epi::FS_Remove(atlas_png);
         epi::PNG_Save(atlas_png, atlas->data);*/
 		p_cache.atlas_rects = atlas->rects;
 		glGenTextures(1, &p_cache.atlas_texid);
@@ -329,7 +330,7 @@ void font_c::LoadFontTTF()
         {
             epi::file_c *F;
 
-            if (std::filesystem::path(def->ttf_name).has_extension()) // check for pack file
+            if (!epi::FS_GetExtension(def->ttf_name).empty()) // check for pack file
                 F = W_OpenPackFile(def->ttf_name);
             else
                 F = W_OpenLump(W_CheckNumForName(def->ttf_name.c_str()));

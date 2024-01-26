@@ -65,6 +65,11 @@ class crc32_c
     {
         crc = 1;
     }
+
+    uint32_t GetCRC(void) const
+    {
+        return crc;
+    }
 };
 };     // namespace epi
 #endif /* __EPI_CRC_H__ */

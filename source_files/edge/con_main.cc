@@ -65,7 +65,7 @@ int CMD_Exec(char **argv, int argc)
         return 1;
     }
 
-    FILE *script = EPIFOPEN(std::filesystem::path(argv[1]), "rb");
+    FILE *script = epi::FS_OpenRawFile(argv[1], epi::kFileAccessRead|epi::kFileAccessBinary);
     if (!script)
     {
         CON_Printf("Unable to open file: %s\n", argv[1]);
@@ -94,7 +94,7 @@ int CMD_Type(char **argv, int argc)
         return 2;
     }
 
-    script = EPIFOPEN(std::filesystem::path(argv[1]), "r");
+    script = epi::FS_OpenRawFile(argv[1], epi::kFileAccessRead);
     if (!script)
     {
         CON_Printf("Unable to open \'%s\'!\n", argv[1]);
@@ -127,9 +127,9 @@ int CMD_Readme(char **argv, int argc)
         // in the load order
         for (int i = data_files.size() - 1; i > 0; i--)
         {
-            std::filesystem::path readme_check = data_files[i]->name.filename();
-            readme_check.replace_extension(".txt");
-            readme_file = W_OpenPackFile(readme_check.string());
+            std::string readme_check = data_files[i]->name;
+            epi::FS_ReplaceExtension(readme_check, ".txt");
+            readme_file = W_OpenPackFile(readme_check);
             if (readme_file)
                 break;
         }
@@ -178,7 +178,7 @@ int CMD_Readme(char **argv, int argc)
 
 int CMD_Dir(char **argv, int argc)
 {
-    std::filesystem::path path = ".";
+    std::string path = ".";
     std::string           mask = "*.*";
 
     if (argc >= 2)
@@ -195,24 +195,24 @@ int CMD_Dir(char **argv, int argc)
 
     std::vector<epi::dir_entry_c> fsd;
 
-    if (!FS_ReadDir(fsd, path, mask))
+    if (!FS_ReadDir(fsd, path, mask.c_str()))
     {
-        I_Printf("Failed to read dir: %s\n", path.u8string().c_str());
+        I_Printf("Failed to read dir: %s\n", path.c_str());
         return 1;
     }
 
     if (fsd.empty())
     {
-        I_Printf("No files found in provided path %s\n", path.u8string().c_str());
+        I_Printf("No files found in provided path %s\n", path.c_str());
         return 0;
     }
 
-    I_Printf("Directory contents for %s matching %s\n", std::filesystem::path(fsd[0].name).remove_filename().u8string().c_str(), mask.c_str());
+    I_Printf("Directory contents for %s matching %s\n", epi::FS_GetDirectory(fsd[0].name).c_str(), mask.c_str());
 
     for (size_t i = 0; i < fsd.size(); i++)
     {
         I_Printf("%4d: %10d  %s  \"%s\"\n", (int)i + 1, (int)fsd[i].size, fsd[i].is_dir ? "DIR" : "   ",
-                 fsd[i].name.filename().u8string().c_str());
+                 epi::FS_GetFilename(fsd[i].name).c_str());
     }
 
     return 0;
@@ -655,10 +655,7 @@ void CON_TryCommand(const char *cmd)
     {
         if (argc <= 1)
         {
-            if (var->flags & CVAR_PATH)
-                I_Printf("%s \"%s\"\n", argv[0], std::filesystem::u8path(var->s).generic_u8string().c_str());
-            else
-                I_Printf("%s \"%s\"\n", argv[0], var->c_str());
+            I_Printf("%s \"%s\"\n", argv[0], var->c_str());
         }
         else if (argc - 1 >= 2) // Assume string with spaces; concat args into one string and try it
         {
@@ -668,20 +665,12 @@ void CON_TryCommand(const char *cmd)
                 // preserve spaces in original string
                 concatter.append(" ").append(argv[i]);
             }
-            if (var->flags & CVAR_PATH)
-                *var = std::filesystem::u8path(concatter).generic_u8string().c_str();
-            else
-                *var = concatter.c_str();
+            *var = concatter.c_str();
         }
         else if ((var->flags & CVAR_ROM) != 0)
             I_Printf("The cvar '%s' is read only.\n", var->name);
         else
-        {
-            if (var->flags & CVAR_PATH)
-                *var = std::filesystem::u8path(argv[1]).generic_u8string().c_str();
-            else
-                *var = argv[1];
-        }
+            *var = argv[1];
 
         KillArgs(argv, argc);
         return;

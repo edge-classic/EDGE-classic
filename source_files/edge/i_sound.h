@@ -18,8 +18,8 @@
 
 #include "epi_sdl.h"
 
-extern std::vector<std::filesystem::path> available_soundfonts;
+extern std::vector<std::string> available_soundfonts;
 
-extern std::vector<std::filesystem::path> available_genmidis;
+extern std::vector<std::string> available_genmidis;
 
 extern SDL_AudioDeviceID mydev_id;

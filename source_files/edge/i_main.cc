@@ -26,7 +26,7 @@
 #include "e_main.h"
 #include "version.h"
 
-std::filesystem::path exe_path = ".";
+std::string exe_path = ".";
 
 extern "C"
 {
@@ -36,12 +36,12 @@ extern "C"
         if (SDL_Init(0) < 0)
             I_Error("Couldn't init SDL!!\n%s\n", SDL_GetError());
 
-        exe_path = std::filesystem::u8path(SDL_GetBasePath());
+        exe_path = SDL_GetBasePath();
 
 #ifdef _WIN32
         // -AJA- change current dir to match executable
         if (!epi::FS_SetCurrDir(exe_path))
-            I_Error("Couldn't set program directory to %s!!\n", exe_path.u8string().c_str());
+            I_Error("Couldn't set program directory to %s!!\n", exe_path.c_str());
 #endif
 
         // Run EDGE. it never returns

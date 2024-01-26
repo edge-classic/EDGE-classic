@@ -34,7 +34,7 @@
 // Event reference
 // https://github.com/emscripten-ports/SDL2/blob/master/src/video/emscripten/SDL_emscriptenevents.c
 
-std::filesystem::path exe_path = ".";
+std::string exe_path = ".";
 
 static int web_deferred_screen_width  = -1;
 static int web_deferred_screen_height = -1;
@@ -163,7 +163,7 @@ extern "C"
         if (SDL_Init(0) < 0)
             I_Error("Couldn't init SDL!!\n%s\n", SDL_GetError());
 
-        exe_path = std::filesystem::u8path(SDL_GetBasePath());
+        exe_path = SDL_GetBasePath();
 
         E_Main(argc, argv);
 

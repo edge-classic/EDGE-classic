@@ -21,8 +21,8 @@
 #ifndef __AJBSP_BSP_H__
 #define __AJBSP_BSP_H__
 
+#include "epi.h"
 #include "AlmostEquals.h"
-#include <filesystem>
 
 #define AJBSP_VERSION "1.04"
 
@@ -34,7 +34,7 @@
 #define SPLIT_COST_DEFAULT 11
 #define SPLIT_COST_MAX     32
 
-class buildinfo_t
+typedef struct buildinfo_s
 {
   public:
     // use a faster method to pick nodes
@@ -47,9 +47,6 @@ class buildinfo_t
     bool force_xnod;
     bool force_compress;
 
-    // the GUI can set this to tell the node builder to stop
-    bool cancelled;
-
     int split_cost;
 
     // this affects how some messages are shown
@@ -58,41 +55,12 @@ class buildinfo_t
     // from here on, various bits of internal state
     int total_warnings;
     int total_minor_issues;
-
-  public:
-    buildinfo_t()
-        : fast(true),
-
-          gl_nodes(true),
-
-          force_v5(false), force_xnod(false), force_compress(true),
-
-          cancelled(false),
-
-          split_cost(SPLIT_COST_DEFAULT), verbosity(0),
-
-          total_warnings(0), total_minor_issues(0)
-    {
-    }
-
-    ~buildinfo_t()
-    {
-    }
-
-  public:
-    virtual void Print(int level, const char *msg, ...) = 0;
-    virtual void Debug(const char *msg, ...)            = 0;
-    virtual void ShowMap(const char *name)              = 0;
-    virtual void FatalError(const char *fmt, ...)       = 0;
-};
+} buildinfo_t;
 
 typedef enum
 {
     // everything went peachy keen
     BUILD_OK = 0,
-
-    // building was cancelled
-    BUILD_Cancelled,
 
     // when saving the map, one or more lumps overflowed
     BUILD_LumpOverflow
@@ -102,21 +70,21 @@ namespace ajbsp
 {
 
 // set the build information.  must be done before anything else.
-void SetInfo(buildinfo_t *info);
+void ResetInfo();
 
 // attempt to open a wad.  on failure, the FatalError method in the
 // buildinfo_t interface is called.
-void OpenWad(std::filesystem::path filename);
+void OpenWad(std::string filename);
 
 // attempt to open a wad from memory; only intended for the use
 // of WAD files inside archives
-void OpenMem(std::filesystem::path filename, uint8_t *raw_wad, int raw_length);
+void OpenMem(std::string filename, uint8_t *raw_wad, int raw_length);
 
 // close a previously opened wad.
 void CloseWad();
 
 // create/finish an XWA file
-void CreateXWA(std::filesystem::path filename);
+void CreateXWA(std::string filename);
 void FinishXWA();
 
 // give the number of levels detected in the wad.

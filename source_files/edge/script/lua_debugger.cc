@@ -24,7 +24,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include <filesystem>
 #include "lua.hpp"
 #include "lua_debugger.h"
 

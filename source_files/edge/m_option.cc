@@ -76,6 +76,7 @@
 #include "i_defs.h"
 #include "epi_sdl.h"
 
+#include "filesystem.h"
 #include "font.h"
 #include "str_util.h"
 
@@ -245,8 +246,8 @@ static char DLightMax[] = "Unlimited/20/40/60/80/100";
 // Screen resolution changes
 static scrmode_c new_scrmode;
 
-extern std::vector<std::filesystem::path> available_soundfonts;
-extern std::vector<std::filesystem::path> available_genmidis;
+extern std::vector<std::string> available_soundfonts;
+extern std::vector<std::string> available_genmidis;
 
 //
 //  OPTION STRUCTURES
@@ -1023,7 +1024,7 @@ void M_OptDrawer()
             fontType  = styledef_c::T_ALT;
             TEXTscale = style->def->text[fontType].scale;
             HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
-                         std::filesystem::path(s_soundfont.s).stem().u8string().c_str());
+                         epi::FS_GetStem(s_soundfont.s).c_str());
         }
 
         // Draw current GENMIDI
@@ -1032,7 +1033,7 @@ void M_OptDrawer()
             fontType  = styledef_c::T_ALT;
             TEXTscale = style->def->text[fontType].scale;
             HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
-                         s_genmidi.s.empty() ? "default" : std::filesystem::path(s_genmidi.s).stem().u8string().c_str());
+                         s_genmidi.s.empty() ? "Default" : epi::FS_GetStem(s_genmidi.s).c_str());
         }
 
         // -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -2028,7 +2029,7 @@ static void M_ChangeSoundfont(int keypressed, cvar_c *cvar)
     int sf_pos = -1;
     for (int i = 0; i < (int)available_soundfonts.size(); i++)
     {
-        if (epi::STR_CaseCmp(s_soundfont.s, available_soundfonts.at(i).generic_u8string()) == 0)
+        if (epi::STR_CaseCmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
         {
             sf_pos = i;
             break;
@@ -2038,7 +2039,7 @@ static void M_ChangeSoundfont(int keypressed, cvar_c *cvar)
     if (sf_pos < 0)
     {
         I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
-        s_soundfont = std::filesystem::path(game_dir).append("soundfont/Default.sf2").generic_u8string();
+        s_soundfont = std::string(game_dir).append("soundfont/Default.sf2");
         return;
     }
 
@@ -2058,7 +2059,7 @@ static void M_ChangeSoundfont(int keypressed, cvar_c *cvar)
     }
 
     // update cvar
-    s_soundfont = available_soundfonts.at(sf_pos).generic_u8string();
+    s_soundfont = available_soundfonts.at(sf_pos);
     S_RestartFluid();
 }
 
@@ -2071,7 +2072,7 @@ static void M_ChangeGENMIDI(int keypressed, cvar_c *cvar)
     int op2_pos = -1;
     for (int i = 0; i < (int)available_genmidis.size(); i++)
     {
-        if (epi::STR_CaseCmp(s_genmidi.s, available_genmidis.at(i).generic_u8string()) == 0)
+        if (epi::STR_CaseCmp(s_genmidi.s, available_genmidis.at(i)) == 0)
         {
             op2_pos = i;
             break;
@@ -2101,7 +2102,7 @@ static void M_ChangeGENMIDI(int keypressed, cvar_c *cvar)
     }
 
     // update cvar
-    s_genmidi = available_genmidis.at(op2_pos).generic_u8string();
+    s_genmidi = available_genmidis.at(op2_pos);
     S_RestartOPL();
 }
 

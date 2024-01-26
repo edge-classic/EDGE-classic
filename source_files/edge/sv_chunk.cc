@@ -130,16 +130,16 @@ int SV_GetError(void)
 //  READING PRIMITIVES
 //----------------------------------------------------------------------------
 
-bool SV_OpenReadFile(std::filesystem::path filename)
+bool SV_OpenReadFile(std::string filename)
 {
-    L_WriteDebug("Opening savegame file (R): %s\n", filename.u8string().c_str());
+    L_WriteDebug("Opening savegame file (R): %s\n", filename.c_str());
 
     chunk_stack_size = 0;
     last_error       = 0;
 
     current_crc.Reset();
 
-    current_fp = EPIFOPEN(filename, "rb");
+    current_fp = epi::FS_OpenRawFile(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
 
     if (!current_fp)
         return false;
@@ -474,20 +474,20 @@ bool SV_SkipReadChunk(const char *id)
 //  WRITING PRIMITIVES
 //----------------------------------------------------------------------------
 
-bool SV_OpenWriteFile(std::filesystem::path filename, int version)
+bool SV_OpenWriteFile(std::string filename, int version)
 {
-    L_WriteDebug("Opening savegame file (W): %s\n", filename.u8string().c_str());
+    L_WriteDebug("Opening savegame file (W): %s\n", filename.c_str());
 
     chunk_stack_size = 0;
     last_error       = 0;
 
     current_crc.Reset();
 
-    current_fp = EPIFOPEN(filename, "wb");
+    current_fp = epi::FS_OpenRawFile(filename, epi::kFileAccessWrite | epi::kFileAccessBinary);
 
     if (!current_fp)
     {
-        I_Warning("SAVEGAME: Couldn't open file: %s\n", filename.u8string().c_str());
+        I_Warning("SAVEGAME: Couldn't open file: %s\n", filename.c_str());
         return false;
     }
 

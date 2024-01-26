@@ -56,10 +56,10 @@ bool dev_stereo;
 
 static bool audio_is_locked = false;
 
-std::vector<std::filesystem::path> available_soundfonts;
-std::vector<std::filesystem::path> available_genmidis;
-extern std::filesystem::path       game_dir;
-extern std::filesystem::path       home_dir;
+std::vector<std::string> available_soundfonts;
+std::vector<std::string> available_genmidis;
+extern std::string       game_dir;
+extern std::string       home_dir;
 extern cvar_c                      s_soundfont;
 
 void SoundFill_Callback(void *udata, Uint8 *stream, int len)
@@ -229,17 +229,17 @@ void I_StartupMusic(void)
 {
     // Check for soundfonts and instrument banks
     std::vector<epi::dir_entry_c> sfd;
-    std::filesystem::path         soundfont_dir = std::filesystem::path(game_dir).append("soundfont");
+    std::string         soundfont_dir = std::string(game_dir).append("soundfont");
 
     // Always add the default/internal GENMIDI lump choice
     available_genmidis.push_back("GENMIDI");
     // Set default SF2 location in CVAR if needed
     if (s_soundfont.s.empty())
-        s_soundfont = std::filesystem::path(soundfont_dir).append("Default.sf2").generic_u8string();
+        s_soundfont = std::string(soundfont_dir).append("Default.sf2");
 
     if (!FS_ReadDir(sfd, soundfont_dir, "*.*"))
     {
-        I_Warning("I_StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
+        I_Warning("I_StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.c_str());
     }
     else
     {
@@ -247,7 +247,7 @@ void I_StartupMusic(void)
         {
             if (!sfd[i].is_dir)
             {
-                std::string ext = sfd[i].name.extension().string();
+                std::string ext = epi::FS_GetExtension(sfd[i].name);
                 epi::STR_Lower(ext);
                 if (ext == ".sf2")
                 {
@@ -263,13 +263,13 @@ void I_StartupMusic(void)
     {
         // Check home_dir soundfont folder as well; create it if it doesn't exist (home_dir only)
         sfd.clear();
-        soundfont_dir = std::filesystem::path(home_dir).append("soundfont");
+        soundfont_dir = std::string(home_dir).append("soundfont");
         if (!epi::FS_IsDir(soundfont_dir))
             epi::FS_MakeDir(soundfont_dir);
 
         if (!FS_ReadDir(sfd, soundfont_dir, "*.*"))
         {
-            I_Warning("I_StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.u8string().c_str());
+            I_Warning("I_StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.c_str());
         }
         else
         {
@@ -277,7 +277,7 @@ void I_StartupMusic(void)
             {
                 if (!sfd[i].is_dir)
                 {
-                    std::string ext = sfd[i].name.extension().string();
+                    std::string ext = epi::FS_GetExtension(sfd[i].name);
                     epi::STR_Lower(ext);
                     if (ext == ".sf2")
                         available_soundfonts.push_back(sfd[i].name);

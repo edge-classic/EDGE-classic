@@ -19,10 +19,9 @@
 #ifndef __DDF_MAIN_H__
 #define __DDF_MAIN_H__
 
-#include <filesystem>
-
 #include "epi.h"
 #include "file.h"
+#include "filesystem.h"
 
 #include "types.h"
 
@@ -160,7 +159,7 @@ linetype_c   *DDF_BoomGetGenLine(int number);
 sectortype_c *DDF_BoomGetGenSector(int number);
 
 ddf_type_e DDF_LumpToType(const std::string &name);
-ddf_type_e DDF_FilenameToType(const std::filesystem::path &path);
+ddf_type_e DDF_FilenameToType(const std::string &path);
 
 void DDF_AddFile(ddf_type_e type, std::string &data, const std::string &source);
 void DDF_AddCollection(ddf_collection_c *col, const std::string &source);

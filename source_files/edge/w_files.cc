@@ -59,7 +59,7 @@
 
 std::vector<data_file_c *> data_files;
 
-data_file_c::data_file_c(std::filesystem::path _name, filekind_e _kind)
+data_file_c::data_file_c(std::string _name, filekind_e _kind)
     : name(_name), kind(_kind), file(NULL), wad(NULL), pack(NULL)
 {
 }
@@ -73,9 +73,9 @@ int W_GetNumFiles()
     return (int)data_files.size();
 }
 
-size_t W_AddFilename(std::filesystem::path file, filekind_e kind)
+size_t W_AddFilename(std::string file, filekind_e kind)
 {
-    I_Debugf("Added filename: %s\n", file.u8string().c_str());
+    I_Debugf("Added filename: %s\n", file.c_str());
 
     size_t index = data_files.size();
 
@@ -89,7 +89,7 @@ size_t W_AddFilename(std::filesystem::path file, filekind_e kind)
 
 std::vector<data_file_c *> pending_files;
 
-size_t W_AddPending(std::filesystem::path file, filekind_e kind)
+size_t W_AddPending(std::string file, filekind_e kind)
 {
     size_t index = pending_files.size();
 
@@ -103,11 +103,11 @@ size_t W_AddPending(std::filesystem::path file, filekind_e kind)
 extern void ProcessFixersForWad(data_file_c *df);
 extern void ProcessWad(data_file_c *df, size_t file_index);
 
-extern std::filesystem::path W_BuildNodesForWad(data_file_c *df);
+extern std::string W_BuildNodesForWad(data_file_c *df);
 
-static void DEH_ConvertFile(const std::string &filename)
+static void DEH_ConvertFile(std::string &filename)
 {
-    epi::file_c *F = epi::FS_Open(filename.c_str(), epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+    epi::file_c *F = epi::FS_Open(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
     if (F == NULL)
     {
         I_Printf("FAILED to open file: %s\n", filename.c_str());
@@ -135,47 +135,47 @@ static void W_ExternalDDF(data_file_c *df)
 {
     ddf_type_e type = DDF_FilenameToType(df->name);
 
-    std::string bare_name = df->name.filename().string();
+    std::string bare_name = epi::FS_GetFilename(df->name);
 
     if (type == DDF_UNKNOWN)
         I_Error("Unknown DDF filename: %s\n", bare_name.c_str());
 
-    I_Printf("Reading DDF file: %s\n", df->name.u8string().c_str());
+    I_Printf("Reading DDF file: %s\n", df->name.c_str());
 
-    epi::file_c *F = epi::FS_Open(df->name, epi::file_c::ACCESS_READ);
+    epi::file_c *F = epi::FS_Open(df->name, epi::kFileAccessRead);
     if (F == NULL)
-        I_Error("Couldn't open file: %s\n", df->name.u8string().c_str());
+        I_Error("Couldn't open file: %s\n", df->name.c_str());
 
     // WISH: load directly into a std::string
 
     char *raw_data = (char *)F->LoadIntoMemory();
     if (raw_data == NULL)
-        I_Error("Couldn't read file: %s\n", df->name.u8string().c_str());
+        I_Error("Couldn't read file: %s\n", df->name.c_str());
 
     std::string data(raw_data);
     delete[] raw_data;
 
-    DDF_AddFile(type, data, df->name.string());
+    DDF_AddFile(type, data, df->name);
 }
 
 static void W_ExternalRTS(data_file_c *df)
 {
-    I_Printf("Reading RTS script: %s\n", df->name.u8string().c_str());
+    I_Printf("Reading RTS script: %s\n", df->name.c_str());
 
-    epi::file_c *F = epi::FS_Open(df->name, epi::file_c::ACCESS_READ);
+    epi::file_c *F = epi::FS_Open(df->name, epi::kFileAccessRead);
     if (F == NULL)
-        I_Error("Couldn't open file: %s\n", df->name.u8string().c_str());
+        I_Error("Couldn't open file: %s\n", df->name.c_str());
 
     // WISH: load directly into a std::string
 
     char *raw_data = (char *)F->LoadIntoMemory();
     if (raw_data == NULL)
-        I_Error("Couldn't read file: %s\n", df->name.u8string().c_str());
+        I_Error("Couldn't read file: %s\n", df->name.c_str());
 
     std::string data(raw_data);
     delete[] raw_data;
 
-    DDF_AddFile(DDF_RadScript, data, df->name.string());
+    DDF_AddFile(DDF_RadScript, data, df->name);
 }
 
 void ProcessFile(data_file_c *df)
@@ -184,16 +184,16 @@ void ProcessFile(data_file_c *df)
     data_files.push_back(df);
 
     // open a WAD/PK3 file and add contents to directory
-    std::filesystem::path filename = df->name;
+    std::string filename = df->name;
 
-    I_Printf("  Processing: %s\n", filename.u8string().c_str());
+    I_Printf("  Processing: %s\n", filename.c_str());
 
     if (df->kind <= FLKIND_XWad)
     {
-        epi::file_c *file = epi::FS_Open(filename, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+        epi::file_c *file = epi::FS_Open(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (file == NULL)
         {
-            I_Error("Couldn't open file: %s\n", filename.u8string().c_str());
+            I_Error("Couldn't open file: %s\n", filename.c_str());
             return;
         }
 
@@ -224,9 +224,9 @@ void ProcessFile(data_file_c *df)
     else if (df->kind == FLKIND_Deh)
     {
         // handle stand-alone DeHackEd patches
-        I_Printf("Converting DEH file: %s\n", df->name.u8string().c_str());
+        I_Printf("Converting DEH file: %s\n", df->name.c_str());
 
-        DEH_ConvertFile(df->name.string());
+        DEH_ConvertFile(df->name);
     }
 
     // handle fixer-uppers   [ TODO support it for EPK files too ]
@@ -265,7 +265,7 @@ void W_BuildNodes(void)
         if (df->kind == FLKIND_IWad || df->kind == FLKIND_PWad || df->kind == FLKIND_PackWAD ||
             df->kind == FLKIND_IPackWAD)
         {
-            std::filesystem::path xwa_filename = W_BuildNodesForWad(df);
+            std::string xwa_filename = W_BuildNodesForWad(df);
 
             if (!xwa_filename.empty())
             {
@@ -413,7 +413,7 @@ void W_ShowFiles()
     {
         data_file_c *df = data_files[i];
 
-        I_Printf(" %2d: %-4s \"%s\"\n", i + 1, FileKindString(df->kind), df->name.u8string().c_str());
+        I_Printf(" %2d: %-4s \"%s\"\n", i + 1, FileKindString(df->kind), df->name.c_str());
     }
 }
 

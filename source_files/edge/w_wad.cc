@@ -49,6 +49,9 @@
 #include "math_md5.h"
 #include "str_util.h"
 
+// AJBSP
+#include "bsp.h"
+
 // DDF
 #include "main.h"
 #include "switch.h"
@@ -63,7 +66,6 @@
 #include "e_main.h"
 #include "e_search.h"
 #include "l_deh.h"
-#include "l_ajbsp.h"
 #include "m_misc.h"
 #include "r_image.h"
 #include "vm_coal.h"
@@ -78,23 +80,23 @@
 
 // Combination of unique lumps needed to best identify an IWAD
 const std::vector<game_check_t> game_checker = {{
-    {"Custom", "CUSTOM", {"EDGEGAME", "EDGEGAME"}},
-    {"Blasphemer", "BLASPHEMER", {"BLASPHEM", "E1M1"}},
-    {"Freedoom 1", "FREEDOOM1", {"FREEDOOM", "E1M1"}},
-    {"Freedoom 2", "FREEDOOM2", {"FREEDOOM", "MAP01"}},
-    {"REKKR", "REKKR", {"REKCREDS", "E1M1"}},
-    {"HacX", "HACX", {"HACX-R", "MAP01"}},
-    {"Harmony", "HARMONY", {"0HAWK01", "DBIGFONT"}}, // Only the original, not Harmony-Compatible, should have DBIGFONT
-    {"Chex Quest", "CHEX", {"ENDOOM", "_DEUTEX_"}},     // Original Chex Quest, NOT CQ3
-    {"Heretic", "HERETIC", {"MUS_E1M1", "E1M1"}},
-    {"Plutonia", "PLUTONIA", {"CAMO1", "MAP01"}},
-    {"Evilution", "TNT", {"REDTNT2", "MAP01"}},
-    {"Doom", "DOOM", {"BFGGA0", "E2M1"}},
-    {"Doom BFG", "DOOM", {"DMENUPIC", "M_MULTI"}}, // BFG Edition
-    {"Doom Demo", "DOOM1", {"SHOTA0", "E1M1"}},
-    {"Doom II", "DOOM2", {"BFGGA0", "MAP01"}},
-    {"Doom II BFG", "DOOM2", {"DMENUPIC", "MAP33"}}, // BFG Edition
-    {"Strife", "STRIFE", {"VELLOGO", "RGELOGO"}} // Dev/internal use - Definitely nowhwere near playable
+    {"Custom", "custom", {"EDGEGAME", "EDGEGAME"}},
+    {"Blasphemer", "blasphemer", {"BLASPHEM", "E1M1"}},
+    {"Freedoom 1", "freedoom1", {"FREEDOOM", "E1M1"}},
+    {"Freedoom 2", "freedoom2", {"FREEDOOM", "MAP01"}},
+    {"REKKR", "rekkr", {"REKCREDS", "E1M1"}},
+    {"HacX", "hacx", {"HACX-R", "MAP01"}},
+    {"Harmony", "harmony", {"0HAWK01", "DBIGFONT"}}, // Only the original, not Harmony-Compatible, should have DBIGFONT
+    {"Chex Quest", "chex", {"ENDOOM", "_DEUTEX_"}},     // Original Chex Quest, NOT CQ3
+    {"Heretic", "heretic", {"MUS_E1M1", "E1M1"}},
+    {"Plutonia", "plutonia", {"CAMO1", "MAP01"}},
+    {"Evilution", "tnt", {"REDTNT2", "MAP01"}},
+    {"Doom", "doom", {"BFGGA0", "E2M1"}},
+    {"Doom BFG", "doom", {"DMENUPIC", "M_MULTI"}}, // BFG Edition
+    {"Doom Demo", "doom1", {"SHOTA0", "E1M1"}},
+    {"Doom II", "doom2", {"BFGGA0", "MAP01"}},
+    {"Doom II BFG", "doom2", {"DMENUPIC", "MAP33"}}, // BFG Edition
+    {"Strife", "strife", {"VELLOGO", "RGELOGO"}} // Dev/internal use - Definitely nowhwere near playable
 }};
 
 class wad_file_c
@@ -941,9 +943,8 @@ void ProcessFixersForWad(data_file_c *df)
     {
         if (W_CheckNumForName("MAP33") > -1 && W_CheckNumForName("DMENUPIC") > -1)
         {
-            std::filesystem::path fix_path = std::filesystem::path(game_dir).append("edge_fixes");
-            fix_path.append("doom2_bfg.epk");
-            if (epi::FS_Access(fix_path, epi::file_c::ACCESS_READ))
+            std::string fix_path = epi::FS_PathAppend(game_dir, "edge_fixes/doom2_bfg.epk");
+            if (epi::FS_Access(fix_path))
             {
                 W_AddPending(fix_path, FLKIND_EPK);
 
@@ -966,9 +967,9 @@ void ProcessFixersForWad(data_file_c *df)
     {
         if (epi::STR_CaseCmp(fix_checker, fixdefs[i]->md5_string) == 0)
         {
-            std::filesystem::path fix_path = std::filesystem::path(game_dir).append("edge_fixes");
-            fix_path.append(fix_checker.append(".epk"));
-            if (epi::FS_Access(fix_path, epi::file_c::ACCESS_READ))
+            std::string fix_path = epi::FS_PathAppend(game_dir, "edge_fixes");
+            fix_path = epi::FS_PathAppend(fix_path, fix_checker.append(".epk"));
+            if (epi::FS_Access(fix_path))
             {
                 W_AddPending(fix_path, FLKIND_EPK);
 
@@ -991,12 +992,12 @@ void ProcessDehackedInWad(data_file_c *df)
 
     const char *lump_name = lumpinfo[deh_lump].name;
 
-    I_Printf("Converting [%s] lump in: %s\n", lump_name, df->name.u8string().c_str());
+    I_Printf("Converting [%s] lump in: %s\n", lump_name, df->name.c_str());
 
     int         length = -1;
     const uint8_t *data   = (const uint8_t *)W_LoadLump(deh_lump, &length);
 
-    std::string bare_name = df->name.filename().string();
+    std::string bare_name = epi::FS_GetFilename(df->name);
 
     std::string source = lump_name;
     source += " in ";
@@ -1009,7 +1010,7 @@ void ProcessDehackedInWad(data_file_c *df)
 
 static void ProcessDDFInWad(data_file_c *df)
 {
-    std::string bare_filename = df->name.filename().string();
+    std::string bare_filename = epi::FS_GetFilename(df->name);
 
     for (size_t d = 0; d < DDF_NUM_TYPES; d++)
     {
@@ -1032,7 +1033,7 @@ static void ProcessDDFInWad(data_file_c *df)
 
 static void ProcessCoalInWad(data_file_c *df)
 {
-    std::string bare_filename = df->name.filename().string();
+    std::string bare_filename = epi::FS_GetFilename(df->name);
 
     wad_file_c *wad = df->wad;
 
@@ -1054,7 +1055,7 @@ static void ProcessCoalInWad(data_file_c *df)
 
 static void ProcessLuaInWad(data_file_c *df)
 {
-    std::string bare_filename = df->name.filename().string();
+    std::string bare_filename = epi::FS_GetFilename(df->name);
 
     wad_file_c *wad = df->wad;
 
@@ -1083,7 +1084,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 
     if (animated >= 0)
     {
-        I_Printf("Loading ANIMATED from: %s\n", df->name.u8string().c_str());
+        I_Printf("Loading ANIMATED from: %s\n", df->name.c_str());
 
         int   length = -1;
         uint8_t *data   = W_LoadLump(animated, &length);
@@ -1094,7 +1095,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 
     if (switches >= 0)
     {
-        I_Printf("Loading SWITCHES from: %s\n", df->name.u8string().c_str());
+        I_Printf("Loading SWITCHES from: %s\n", df->name.c_str());
 
         int   length = -1;
         uint8_t *data   = W_LoadLump(switches, &length);
@@ -1133,7 +1134,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
         // Homebrew levels?
         if (strncmp(header.identification, "PWAD", 4) != 0)
         {
-            I_Error("Wad file %s doesn't have IWAD or PWAD id\n", df->name.u8string().c_str());
+            I_Error("Wad file %s doesn't have IWAD or PWAD id\n", df->name.c_str());
         }
     }
 
@@ -1168,7 +1169,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
     }
 
     // check for unclosed sprite/flat/patch lists
-    const char *filename = df->name.u8string().c_str();
+    const char *filename = df->name.c_str();
     if (within_sprite_list)
         I_Warning("Missing S_END marker in %s.\n", filename);
     if (within_flat_list)
@@ -1209,30 +1210,62 @@ void ProcessWad(data_file_c *df, size_t file_index)
     ProcessLuaInWad(df);
 }
 
-std::filesystem::path W_BuildNodesForWad(data_file_c *df)
+std::string W_BuildNodesForWad(data_file_c *df)
 {
     if (df->wad->level_markers.empty())
         return "";
 
     // determine XWA filename in the cache
-    std::filesystem::path cache_name = df->name.stem();
+    std::string cache_name = epi::FS_GetStem(df->name);
     cache_name += "-";
     cache_name += df->wad->md5_string;
     cache_name += ".xwa";
 
-    std::filesystem::path xwa_filename = std::filesystem::path(cache_dir).append(cache_name.string());
+    std::string xwa_filename = epi::FS_PathAppend(cache_dir, cache_name);
 
-    I_Debugf("XWA filename: %s\n", xwa_filename.u8string().c_str());
+    I_Debugf("XWA filename: %s\n", xwa_filename.c_str());
 
     // check whether an XWA file for this map exists in the cache
-    bool exists = epi::FS_Access(xwa_filename, epi::file_c::ACCESS_READ);
+    bool exists = epi::FS_Access(xwa_filename);
 
     if (!exists)
     {
-        I_Printf("Building XGL nodes for: %s\n", df->name.u8string().c_str());
+        I_Printf("Building XGL nodes for: %s\n", df->name.c_str());
 
-        if (!AJ_BuildNodes(df, xwa_filename))
-            I_Error("Failed to build XGL nodes for: %s\n", df->name.u8string().c_str());
+        I_Debugf("# source: '%s'\n", df->name.c_str());
+        I_Debugf("#   dest: '%s'\n", xwa_filename.c_str());
+
+        ajbsp::ResetInfo();
+
+        epi::file_c *mem_wad    = nullptr;
+        uint8_t     *raw_wad    = nullptr;
+        int          raw_length = 0;
+
+        if (df->kind == FLKIND_PackWAD)
+        {
+            mem_wad    = W_OpenPackFile(df->name);
+            raw_length = mem_wad->GetLength();
+            raw_wad    = mem_wad->LoadIntoMemory();
+            ajbsp::OpenMem(df->name, raw_wad, raw_length);
+        }
+        else
+            ajbsp::OpenWad(df->name);
+
+        ajbsp::CreateXWA(xwa_filename);
+
+        for (int i = 0; i < ajbsp::LevelsInWad(); i++)
+            ajbsp::BuildLevel(i);
+
+        ajbsp::FinishXWA();
+        ajbsp::CloseWad();
+
+        if (df->kind == FLKIND_PackWAD)
+        {
+            delete[] raw_wad;
+            delete mem_wad;
+        }
+
+        I_Debugf("AJ_BuildNodes: FINISHED\n");
 
         epi::FS_Sync();
     }
@@ -1250,7 +1283,7 @@ void W_ReadUMAPINFOLumps(void)
                 continue;
             else
             {
-                L_WriteDebug("Parsing UMAPINFO lump in %s\n", df->name.u8string().c_str());
+                L_WriteDebug("Parsing UMAPINFO lump in %s\n", df->name.c_str());
                 Parse_UMAPINFO(W_LoadString(df->wad->umapinfo_lump));
             }
         }
@@ -1260,7 +1293,7 @@ void W_ReadUMAPINFOLumps(void)
                 continue;
             else
             {
-                L_WriteDebug("Parsing UMAPINFO.txt in %s\n", df->name.u8string().c_str());
+                L_WriteDebug("Parsing UMAPINFO.txt in %s\n", df->name.c_str());
                 epi::file_c *uinfo = Pack_OpenFile(df->pack, "UMAPINFO.txt");
                 if (uinfo)
                 {

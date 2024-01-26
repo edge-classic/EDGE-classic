@@ -17,7 +17,6 @@
 //
 //------------------------------------------------------------------------
 
-#include "bsp_system.h"
 #include "bsp_local.h"
 #include "bsp_utility.h"
 
@@ -28,49 +27,6 @@ namespace ajbsp
 // STRINGS
 //------------------------------------------------------------------------
 
-//
-// a case-insensitive strcmp()
-//
-int StringCaseCmp(const char *s1, const char *s2)
-{
-    for (;;)
-    {
-        int A = tolower(*s1++);
-        int B = tolower(*s2++);
-
-        if (A != B)
-            return A - B;
-
-        if (A == 0)
-            return 0;
-    }
-}
-
-//
-// a case-insensitive strncmp()
-//
-int StringCaseCmpMax(const char *s1, const char *s2, size_t len)
-{
-    SYS_ASSERT(len != 0);
-
-    for (;;)
-    {
-        if (len == 0)
-            return 0;
-
-        int A = tolower(*s1++);
-        int B = tolower(*s2++);
-
-        if (A != B)
-            return A - B;
-
-        if (A == 0)
-            return 0;
-
-        len--;
-    }
-}
-
 char *StringNew(int length)
 {
     // length does not include the trailing NUL.
@@ -78,7 +34,7 @@ char *StringNew(int length)
     char *s = (char *)calloc(length + 1, 1);
 
     if (!s)
-        cur_info->FatalError("Out of memory (%d bytes for string)\n", length);
+        I_Error("AJBSP: Out of memory (%d bytes for string)\n", length);
 
     return s;
 }
@@ -93,7 +49,7 @@ char *StringDup(const char *orig, int limit)
         char *s = strdup(orig);
 
         if (!s)
-            cur_info->FatalError("Out of memory (copy string)\n");
+            I_Error("AJBSP: Out of memory (copy string)\n");
 
         return s;
     }
@@ -132,7 +88,7 @@ char *StringPrintf(const char *str, ...)
 
         buf = (char *)realloc(buf, buf_size);
         if (!buf)
-            cur_info->FatalError("Out of memory (formatting string)\n");
+            I_Error("AJBSP: Out of memory (formatting string)\n");
 
         va_start(args, str);
         out_len = vsnprintf(buf, buf_size, str, args);
@@ -167,7 +123,7 @@ void *UtilCalloc(int size)
     void *ret = calloc(1, size);
 
     if (!ret)
-        cur_info->FatalError("Out of memory (cannot allocate %d bytes)\n", size);
+        I_Error("AJBSP: Out of memory (cannot allocate %d bytes)\n", size);
 
     return ret;
 }
@@ -180,7 +136,7 @@ void *UtilRealloc(void *old, int size)
     void *ret = realloc(old, size);
 
     if (!ret)
-        cur_info->FatalError("Out of memory (cannot reallocate %d bytes)\n", size);
+        I_Error("AJBSP: Out of memory (cannot reallocate %d bytes)\n", size);
 
     return ret;
 }
@@ -191,7 +147,7 @@ void *UtilRealloc(void *old, int size)
 void UtilFree(void *data)
 {
     if (data == NULL)
-        BugError("Trying to free a NULL pointer\n");
+        I_Error("AJBSP: Trying to free a NULL pointer\n");
 
     free(data);
 }
@@ -233,29 +189,6 @@ double ComputeAngle(double dx, double dy)
         angle += 360.0;
 
     return angle;
-}
-
-//------------------------------------------------------------------------
-//  Adler-32 CHECKSUM Code
-//------------------------------------------------------------------------
-
-void Adler32_Begin(uint32_t *crc)
-{
-    *crc = 1;
-}
-
-void Adler32_AddBlock(uint32_t *crc, const uint8_t *data, int length)
-{
-    uint32_t s1 = (*crc) & 0xFFFF;
-    uint32_t s2 = ((*crc) >> 16) & 0xFFFF;
-
-    for (; length > 0; data++, length--)
-    {
-        s1 = (s1 + *data) % 65521;
-        s2 = (s2 + s1) % 65521;
-    }
-
-    *crc = (s2 << 16) | s1;
 }
 
 } // namespace ajbsp

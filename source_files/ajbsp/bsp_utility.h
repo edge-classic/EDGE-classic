@@ -33,18 +33,11 @@ int    RoundPOW2(int x);
 double ComputeAngle(double dx, double dy);
 
 // string utilities
-int StringCaseCmp(const char *s1, const char *s2);
-int StringCaseCmpMax(const char *s1, const char *s2, size_t len);
-
 char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
 char *StringUpper(const char *name);
 char *StringPrintf(const char *str, ...);
 void  StringFree(const char *str);
-
-// checksum functions
-void Adler32_Begin(uint32_t *crc);
-void Adler32_AddBlock(uint32_t *crc, const uint8_t *data, int length);
 
 } // namespace ajbsp
 

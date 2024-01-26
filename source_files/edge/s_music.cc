@@ -91,12 +91,12 @@ void S_ChangeMusic(int entrynum, bool loop)
     switch (play->infotype)
     {
     case MUSINF_FILE: {
-        std::filesystem::path fn = M_ComposeFileName(game_dir, play->info);
+        std::string fn = M_ComposeFileName(game_dir, play->info);
 
-        F = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+        F = epi::FS_Open(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (!F)
         {
-            I_Warning("S_ChangeMusic: Can't Find File '%s'\n", fn.u8string().c_str());
+            I_Warning("S_ChangeMusic: Can't Find File '%s'\n", fn.c_str());
             return;
         }
         break;

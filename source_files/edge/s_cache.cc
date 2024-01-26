@@ -140,12 +140,14 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
 
     if (var_pc_speaker_mode)
     {
-        if (std::filesystem::path(def->pc_speaker_sound).has_extension())
+        if (epi::FS_GetExtension(def->pc_speaker_sound).empty())
         {
             F = W_OpenPackFile(def->pc_speaker_sound);
             if (!F)
-                F = epi::FS_Open(M_ComposeFileName(game_dir, def->pc_speaker_sound),
-                                 epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+            {
+                std::string open_name = M_ComposeFileName(game_dir, def->pc_speaker_sound);
+                F = epi::FS_Open(open_name, epi::kFileAccessRead | epi::kFileAccessBinary);
+            }
             if (!F)
             {
                 M_DebugError("SFX Loader: Missing sound: '%s'\n", def->pc_speaker_sound.c_str());
@@ -181,13 +183,12 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
         }
         else if (def->file_name != "")
         {
-            std::filesystem::path fn;
             // Why is this composed with the app dir? - Dasho
-            fn = M_ComposeFileName(game_dir, def->file_name);
-            F  = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+            std::string fn = M_ComposeFileName(game_dir, def->file_name);
+            F  = epi::FS_Open(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
             if (!F)
             {
-                M_DebugError("SFX Loader: Can't Find File '%s'\n", fn.u8string().c_str());
+                M_DebugError("SFX Loader: Can't Find File '%s'\n", fn.c_str());
                 return false;
             }
             fmt = epi::Sound_FilenameToFormat(def->file_name);
@@ -227,7 +228,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
         return false;
     }
 
-    if ((var_pc_speaker_mode && !std::filesystem::path(def->pc_speaker_sound).has_extension()) ||
+    if ((var_pc_speaker_mode && epi::FS_GetExtension(def->pc_speaker_sound).empty()) ||
         (def->pack_name == "" && def->file_name == ""))
     {
         // for lumps, we must detect the format from the lump contents

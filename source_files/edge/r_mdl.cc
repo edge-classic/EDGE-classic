@@ -46,6 +46,7 @@
 #include "p_blockmap.h"
 #include "r_texgl.h"
 
+#include <stddef.h>
 #include <vector>
 
 extern float P_ApproxDistance(float dx, float dy, float dz);

@@ -17,7 +17,7 @@
 //----------------------------------------------------------------------------
 
 #include "epi.h"
-
+#include "filesystem.h"
 #include "image_funcs.h"
 #include "str_util.h"
 
@@ -27,10 +27,11 @@
 #define STBI_ONLY_PNG
 #define STBI_ONLY_TGA
 #define STBI_ONLY_JPEG
-#define STBI_NO_STDIO // only loading from file_c memory blocks, not directly from file
+#define STBI_NO_STDIO
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#define STBI_WRITE_NO_STDIO
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
@@ -123,9 +124,9 @@ image_format_e Image_DetectFormat(uint8_t *header, int header_len, int file_size
     return FMT_Unknown; // uh oh!
 }
 
-image_format_e Image_FilenameToFormat(const std::filesystem::path &filename)
+image_format_e Image_FilenameToFormat(const std::string &filename)
 {
-    std::string ext = filename.extension().string();
+    std::string ext = epi::FS_GetExtension(filename);
 
     STR_Lower(ext);
 
@@ -298,24 +299,55 @@ bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp)
 
 //------------------------------------------------------------------------
 
-bool JPEG_Save(std::filesystem::path fn, image_data_c *img)
+static void stbi_file_c_write(void *context, void *data, int size)
+{
+    SYS_ASSERT(context && data && size);
+    file_c *dest = (file_c *)context;
+    dest->Write(data, size);
+}
+
+bool JPEG_Save(std::string fn, image_data_c *img)
 {
     SYS_ASSERT(img->bpp == 3);
 
-    // zero means failure here
-    int result = stbi_write_jpg(fn.string().c_str(), img->used_w, img->used_h, img->bpp, img->pixels, 95);
+    file_c *dest = epi::FS_Open(fn, kFileAccessBinary | kFileAccessWrite);
 
-    return result != 0;
+    if (!dest) return false;
+
+    // zero means failure here
+    int result = stbi_write_jpg_to_func(stbi_file_c_write, dest, img->used_w, img->used_h, img->bpp, img->pixels, 95);
+    
+    delete dest;
+
+    if (result == 0)
+    {
+        epi::FS_Delete(fn);
+        return false;
+    }
+    else
+        return true;
 }
 
-bool PNG_Save(std::filesystem::path fn, image_data_c *img)
+bool PNG_Save(std::string fn, image_data_c *img)
 {
     SYS_ASSERT(img->bpp >= 3);
 
-    // zero means failure here
-    int result = stbi_write_png(fn.string().c_str(), img->used_w, img->used_h, img->bpp, img->pixels, 0);
+    file_c *dest = epi::FS_Open(fn, kFileAccessBinary | kFileAccessWrite);
 
-    return result != 0;
+    if (!dest) return false;
+
+    // zero means failure here
+    int result = stbi_write_png_to_func(stbi_file_c_write, dest, img->used_w, img->used_h, img->bpp, img->pixels, 0);
+    
+    delete dest;
+
+    if (result == 0)
+    {
+        epi::FS_Delete(fn);
+        return false;
+    }
+    else
+        return true;
 }
 
 } // namespace epi

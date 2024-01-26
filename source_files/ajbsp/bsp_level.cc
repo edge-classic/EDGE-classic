@@ -18,22 +18,28 @@
 //
 //------------------------------------------------------------------------
 
-#include "bsp_system.h"
 #include "bsp_local.h"
 #include "bsp_raw_def.h"
 #include "bsp_utility.h"
 #include "bsp_wad.h"
 
 // EPI
+#include "endianess.h"
+#include "math_crc.h"
 #include "str_lexer.h"
 
 #include "miniz.h"
+
+#include <algorithm>
 
 #define DEBUG_BLOCKMAP 0
 #define DEBUG_REJECT   0
 
 #define DEBUG_LOAD 0
 #define DEBUG_BSP  0
+
+// Startup Messages
+extern void E_ProgressMessage(const char *message);
 
 namespace ajbsp
 {
@@ -188,7 +194,7 @@ static void FindBlockmapLimits(bbox_t *bbox)
     }
 
 #if DEBUG_BLOCKMAP
-    cur_info->Debug("Blockmap lines centered at (%d,%d)\n", block_mid_x, block_mid_y);
+    I_Debugf("Blockmap lines centered at (%d,%d)\n", block_mid_x, block_mid_y);
 #endif
 }
 
@@ -199,7 +205,7 @@ void InitBlockmap()
     // find limits of linedefs, and store as map limits
     FindBlockmapLimits(&map_bbox);
 
-    cur_info->Print(2, "    Map limits: (%d,%d) to (%d,%d)\n", map_bbox.minx, map_bbox.miny, map_bbox.maxx,
+    I_Debugf("    Map limits: (%d,%d) to (%d,%d)\n", map_bbox.minx, map_bbox.miny, map_bbox.maxx,
                     map_bbox.maxy);
 
     block_x = map_bbox.minx - (map_bbox.minx & 0x7);
@@ -415,7 +421,7 @@ void FreeWallTips()
 static vertex_t *SafeLookupVertex(int num)
 {
     if (num >= num_vertices)
-        cur_info->FatalError("illegal vertex number #%d\n", num);
+        I_Error("AJBSP: illegal vertex number #%d\n", num);
 
     return lev_vertices[num];
 }
@@ -426,7 +432,7 @@ static sector_t *SafeLookupSector(uint16_t num)
         return NULL;
 
     if (num >= num_sectors)
-        cur_info->FatalError("illegal sector number #%d\n", (int)num);
+        I_Error("AJBSP: illegal sector number #%d\n", (int)num);
 
     return lev_sectors[num];
 }
@@ -453,26 +459,26 @@ void GetVertices()
         count = lump->Length() / (int)sizeof(raw_vertex_t);
 
 #if DEBUG_LOAD
-    cur_info->Debug("GetVertices: num = %d\n", count);
+    I_Debugf("GetVertices: num = %d\n", count);
 #endif
 
     if (lump == NULL || count == 0)
         return;
 
     if (!lump->Seek(0))
-        cur_info->FatalError("Error seeking to vertices.\n");
+        I_Error("AJBSP: Error seeking to vertices.\n");
 
     for (int i = 0; i < count; i++)
     {
         raw_vertex_t raw;
 
         if (!lump->Read(&raw, sizeof(raw)))
-            cur_info->FatalError("Error reading vertices.\n");
+            I_Error("AJBSP: Error reading vertices.\n");
 
         vertex_t *vert = NewVertex();
 
-        vert->x = (double)LE_S16(raw.x);
-        vert->y = (double)LE_S16(raw.y);
+        vert->x = (double)EPI_LE_S16(raw.x);
+        vert->y = (double)EPI_LE_S16(raw.y);
     }
 
     num_old_vert = num_vertices;
@@ -491,10 +497,10 @@ void GetSectors()
         return;
 
     if (!lump->Seek(0))
-        cur_info->FatalError("Error seeking to sectors.\n");
+        I_Error("AJBSP: Error seeking to sectors.\n");
 
 #if DEBUG_LOAD
-    cur_info->Debug("GetSectors: num = %d\n", count);
+    I_Debugf("GetSectors: num = %d\n", count);
 #endif
 
     for (int i = 0; i < count; i++)
@@ -502,7 +508,7 @@ void GetSectors()
         raw_sector_t raw;
 
         if (!lump->Read(&raw, sizeof(raw)))
-            cur_info->FatalError("Error reading sectors.\n");
+            I_Error("AJBSP: Error reading sectors.\n");
 
         sector_t *sector = NewSector();
 
@@ -523,10 +529,10 @@ void GetThings()
         return;
 
     if (!lump->Seek(0))
-        cur_info->FatalError("Error seeking to things.\n");
+        I_Error("AJBSP: Error seeking to things.\n");
 
 #if DEBUG_LOAD
-    cur_info->Debug("GetThings: num = %d\n", count);
+    I_Debugf("GetThings: num = %d\n", count);
 #endif
 
     for (int i = 0; i < count; i++)
@@ -534,13 +540,13 @@ void GetThings()
         raw_thing_t raw;
 
         if (!lump->Read(&raw, sizeof(raw)))
-            cur_info->FatalError("Error reading things.\n");
+            I_Error("AJBSP: Error reading things.\n");
 
         thing_t *thing = NewThing();
 
-        thing->x    = LE_S16(raw.x);
-        thing->y    = LE_S16(raw.y);
-        thing->type = LE_U16(raw.type);
+        thing->x    = EPI_LE_S16(raw.x);
+        thing->y    = EPI_LE_S16(raw.y);
+        thing->type = EPI_LE_U16(raw.type);
     }
 }
 
@@ -557,10 +563,10 @@ void GetThingsHexen()
         return;
 
     if (!lump->Seek(0))
-        cur_info->FatalError("Error seeking to things.\n");
+        I_Error("AJBSP: Error seeking to things.\n");
 
 #if DEBUG_LOAD
-    cur_info->Debug("GetThingsHexen: num = %d\n", count);
+    I_Debugf("GetThingsHexen: num = %d\n", count);
 #endif
 
     for (int i = 0; i < count; i++)
@@ -568,13 +574,13 @@ void GetThingsHexen()
         raw_hexen_thing_t raw;
 
         if (!lump->Read(&raw, sizeof(raw)))
-            cur_info->FatalError("Error reading things.\n");
+            I_Error("AJBSP: Error reading things.\n");
 
         thing_t *thing = NewThing();
 
-        thing->x    = LE_S16(raw.x);
-        thing->y    = LE_S16(raw.y);
-        thing->type = LE_U16(raw.type);
+        thing->x    = EPI_LE_S16(raw.x);
+        thing->y    = EPI_LE_S16(raw.y);
+        thing->type = EPI_LE_U16(raw.type);
     }
 }
 
@@ -591,10 +597,10 @@ void GetSidedefs()
         return;
 
     if (!lump->Seek(0))
-        cur_info->FatalError("Error seeking to sidedefs.\n");
+        I_Error("AJBSP: Error seeking to sidedefs.\n");
 
 #if DEBUG_LOAD
-    cur_info->Debug("GetSidedefs: num = %d\n", count);
+    I_Debugf("GetSidedefs: num = %d\n", count);
 #endif
 
     for (int i = 0; i < count; i++)
@@ -602,11 +608,11 @@ void GetSidedefs()
         raw_sidedef_t raw;
 
         if (!lump->Read(&raw, sizeof(raw)))
-            cur_info->FatalError("Error reading sidedefs.\n");
+            I_Error("AJBSP: Error reading sidedefs.\n");
 
         sidedef_t *side = NewSidedef();
 
-        side->sector = SafeLookupSector(LE_S16(raw.sector));
+        side->sector = SafeLookupSector(EPI_LE_S16(raw.sector));
     }
 }
 
@@ -623,10 +629,10 @@ void GetLinedefs()
         return;
 
     if (!lump->Seek(0))
-        cur_info->FatalError("Error seeking to linedefs.\n");
+        I_Error("AJBSP: Error seeking to linedefs.\n");
 
 #if DEBUG_LOAD
-    cur_info->Debug("GetLinedefs: num = %d\n", count);
+    I_Debugf("GetLinedefs: num = %d\n", count);
 #endif
 
     for (int i = 0; i < count; i++)
@@ -634,12 +640,12 @@ void GetLinedefs()
         raw_linedef_t raw;
 
         if (!lump->Read(&raw, sizeof(raw)))
-            cur_info->FatalError("Error reading linedefs.\n");
+            I_Error("AJBSP: Error reading linedefs.\n");
 
         linedef_t *line;
 
-        vertex_t *start = SafeLookupVertex(LE_U16(raw.start));
-        vertex_t *end   = SafeLookupVertex(LE_U16(raw.end));
+        vertex_t *start = SafeLookupVertex(EPI_LE_U16(raw.start));
+        vertex_t *end   = SafeLookupVertex(EPI_LE_U16(raw.end));
 
         start->is_used = true;
         end->is_used   = true;
@@ -652,15 +658,15 @@ void GetLinedefs()
         // check for zero-length line
         line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) && (fabs(start->y - end->y) < DIST_EPSILON);
 
-        line->type  = LE_U16(raw.type);
-        uint16_t flags = LE_U16(raw.flags);
-        int16_t tag   = LE_S16(raw.tag);
+        line->type  = EPI_LE_U16(raw.type);
+        uint16_t flags = EPI_LE_U16(raw.flags);
+        int16_t tag   = EPI_LE_S16(raw.tag);
 
         line->two_sided   = (flags & MLF_TwoSided) != 0;
         line->is_precious = (tag >= 900 && tag < 1000); // Why is this the case? Need to investigate - Dasho
 
-        line->right = SafeLookupSidedef(LE_U16(raw.right));
-        line->left  = SafeLookupSidedef(LE_U16(raw.left));
+        line->right = SafeLookupSidedef(EPI_LE_U16(raw.right));
+        line->left  = SafeLookupSidedef(EPI_LE_U16(raw.left));
 
         if (line->right || line->left)
             num_real_lines++;
@@ -685,10 +691,10 @@ void GetLinedefsHexen()
         return;
 
     if (!lump->Seek(0))
-        cur_info->FatalError("Error seeking to linedefs.\n");
+        I_Error("AJBSP: Error seeking to linedefs.\n");
 
 #if DEBUG_LOAD
-    cur_info->Debug("GetLinedefsHexen: num = %d\n", count);
+    I_Debugf("GetLinedefsHexen: num = %d\n", count);
 #endif
 
     for (int i = 0; i < count; i++)
@@ -696,12 +702,12 @@ void GetLinedefsHexen()
         raw_hexen_linedef_t raw;
 
         if (!lump->Read(&raw, sizeof(raw)))
-            cur_info->FatalError("Error reading linedefs.\n");
+            I_Error("AJBSP: Error reading linedefs.\n");
 
         linedef_t *line;
 
-        vertex_t *start = SafeLookupVertex(LE_U16(raw.start));
-        vertex_t *end   = SafeLookupVertex(LE_U16(raw.end));
+        vertex_t *start = SafeLookupVertex(EPI_LE_U16(raw.start));
+        vertex_t *end   = SafeLookupVertex(EPI_LE_U16(raw.end));
 
         start->is_used = true;
         end->is_used   = true;
@@ -715,13 +721,13 @@ void GetLinedefsHexen()
         line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) && (fabs(start->y - end->y) < DIST_EPSILON);
 
         line->type  = (uint8_t)raw.type;
-        uint16_t flags = LE_U16(raw.flags);
+        uint16_t flags = EPI_LE_U16(raw.flags);
 
         // -JL- Added missing twosided flag handling that caused a broken reject
         line->two_sided = (flags & MLF_TwoSided) != 0;
 
-        line->right = SafeLookupSidedef(LE_U16(raw.right));
-        line->left  = SafeLookupSidedef(LE_U16(raw.left));
+        line->right = SafeLookupSidedef(EPI_LE_U16(raw.right));
+        line->left  = SafeLookupSidedef(EPI_LE_U16(raw.left));
 
         if (line->right || line->left)
             num_real_lines++;
@@ -800,7 +806,7 @@ void ParseSidedefField(sidedef_t *side, const std::string &key, const std::strin
         int num = epi::LEX_Int(value);
 
         if (num < 0 || num >= num_sectors)
-            cur_info->FatalError("illegal sector number #%d\n", (int)num);
+            I_Error("AJBSP: illegal sector number #%d\n", (int)num);
 
         side->sector = lev_sectors[num];
     }
@@ -880,21 +886,21 @@ void ParseUDMF_Block(epi::lexer_c &lex, int cur_type)
         epi::token_kind_e tok = lex.Next(key);
 
         if (tok == epi::TOK_EOF)
-            cur_info->FatalError("Malformed TEXTMAP lump: unclosed block\n");
+            I_Error("AJBSP: Malformed TEXTMAP lump: unclosed block\n");
 
         if (tok != epi::TOK_Ident)
-            cur_info->FatalError("Malformed TEXTMAP lump: missing key\n");
+            I_Error("AJBSP: Malformed TEXTMAP lump: missing key\n");
 
         if (!lex.Match("="))
-            cur_info->FatalError("Malformed TEXTMAP lump: missing '='\n");
+            I_Error("AJBSP: Malformed TEXTMAP lump: missing '='\n");
 
         tok = lex.Next(value);
 
         if (tok == epi::TOK_EOF || tok == epi::TOK_ERROR || value == "}")
-            cur_info->FatalError("Malformed TEXTMAP lump: missing value\n");
+            I_Error("AJBSP: Malformed TEXTMAP lump: missing value\n");
 
         if (!lex.Match(";"))
-            cur_info->FatalError("Malformed TEXTMAP lump: missing ';'\n");
+            I_Error("AJBSP: Malformed TEXTMAP lump: missing ';'\n");
 
         switch (cur_type)
         {
@@ -922,7 +928,7 @@ void ParseUDMF_Block(epi::lexer_c &lex, int cur_type)
     if (line != NULL)
     {
         if (line->start == NULL || line->end == NULL)
-            cur_info->FatalError("Linedef #%d is missing a vertex!\n", line->index);
+            I_Error("AJBSP: Linedef #%d is missing a vertex!\n", line->index);
 
         if (line->right || line->left)
             num_real_lines++;
@@ -952,7 +958,7 @@ void ParseUDMF_Pass(const std::string &data, int pass)
 
         if (tok != epi::TOK_Ident)
         {
-            cur_info->FatalError("Malformed TEXTMAP lump.\n");
+            I_Error("AJBSP: Malformed TEXTMAP lump.\n");
             return;
         }
 
@@ -961,12 +967,12 @@ void ParseUDMF_Pass(const std::string &data, int pass)
         {
             lex.Next(section);
             if (!lex.Match(";"))
-                cur_info->FatalError("Malformed TEXTMAP lump: missing ';'\n");
+                I_Error("AJBSP: Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
         if (!lex.Match("{"))
-            cur_info->FatalError("Malformed TEXTMAP lump: missing '{'\n");
+            I_Error("AJBSP: Malformed TEXTMAP lump: missing '{'\n");
 
         int cur_type = 0;
 
@@ -1006,12 +1012,12 @@ void ParseUDMF()
     Lump_c *lump = FindLevelLump("TEXTMAP");
 
     if (lump == NULL || !lump->Seek(0))
-        cur_info->FatalError("Error finding TEXTMAP lump.\n");
+        I_Error("AJBSP: Error finding TEXTMAP lump.\n");
 
     // load the lump into this string
     std::string data(lump->Length(), 0);
     if (!lump->Read(data.data(), lump->Length()))
-        cur_info->FatalError("Error reading TEXTMAP lump.\n");
+        I_Error("AJBSP: Error reading TEXTMAP lump.\n");
 
     // now parse it...
 
@@ -1056,8 +1062,8 @@ void PutVertices(const char *name, int do_gl)
             continue;
         }
 
-        raw.x = LE_S16(I_ROUND(vert->x));
-        raw.y = LE_S16(I_ROUND(vert->y));
+        raw.x = EPI_LE_S16(I_ROUND(vert->x));
+        raw.y = EPI_LE_S16(I_ROUND(vert->y));
 
         lump->Write(&raw, sizeof(raw));
 
@@ -1067,11 +1073,11 @@ void PutVertices(const char *name, int do_gl)
     lump->Finish();
 
     if (count != (do_gl ? num_new_vert : num_old_vert))
-        BugError("PutVertices miscounted (%d != %d)\n", count, do_gl ? num_new_vert : num_old_vert);
+        I_Error("AJBSP: PutVertices miscounted (%d != %d)\n", count, do_gl ? num_new_vert : num_old_vert);
 
     if (!do_gl && count > 65534)
     {
-        Failure("Number of vertices has overflowed.\n");
+        I_Printf("Number of vertices has overflowed.\n");
         MarkOverflow();
     }
 }
@@ -1099,8 +1105,8 @@ void PutGLVertices(int do_v5)
         if (!vert->is_new)
             continue;
 
-        raw.x = LE_S32(I_ROUND(vert->x * 65536.0));
-        raw.y = LE_S32(I_ROUND(vert->y * 65536.0));
+        raw.x = EPI_LE_S32(I_ROUND(vert->x * 65536.0));
+        raw.y = EPI_LE_S32(I_ROUND(vert->y * 65536.0));
 
         lump->Write(&raw, sizeof(raw));
 
@@ -1110,7 +1116,7 @@ void PutGLVertices(int do_v5)
     lump->Finish();
 
     if (count != num_new_vert)
-        BugError("PutGLVertices miscounted (%d != %d)\n", count, num_new_vert);
+        I_Error("AJBSP: PutGLVertices miscounted (%d != %d)\n", count, num_new_vert);
 }
 
 static inline uint16_t VertexIndex16Bit(const vertex_t *v)
@@ -1150,20 +1156,20 @@ void PutSegs()
 
         const seg_t *seg = lev_segs[i];
 
-        raw.start   = LE_U16(VertexIndex16Bit(seg->start));
-        raw.end     = LE_U16(VertexIndex16Bit(seg->end));
-        raw.angle   = LE_U16(VanillaSegAngle(seg));
-        raw.linedef = LE_U16(seg->linedef->index);
-        raw.flip    = LE_U16(seg->side);
-        raw.dist    = LE_U16(VanillaSegDist(seg));
+        raw.start   = EPI_LE_U16(VertexIndex16Bit(seg->start));
+        raw.end     = EPI_LE_U16(VertexIndex16Bit(seg->end));
+        raw.angle   = EPI_LE_U16(VanillaSegAngle(seg));
+        raw.linedef = EPI_LE_U16(seg->linedef->index);
+        raw.flip    = EPI_LE_U16(seg->side);
+        raw.dist    = EPI_LE_U16(VanillaSegDist(seg));
 
         lump->Write(&raw, sizeof(raw));
 
 #if DEBUG_BSP
-        cur_info->Debug("PUT SEG: %04X  Vert %04X->%04X  Line %04X %s  "
+        I_Debugf("PUT SEG: %04X  Vert %04X->%04X  Line %04X %s  "
                         "Angle %04X  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-                        seg->index, LE_U16(raw.start), LE_U16(raw.end), LE_U16(raw.linedef), seg->side ? "L" : "R",
-                        LE_U16(raw.angle), seg->start->x, seg->start->y, seg->end->x, seg->end->y);
+                        seg->index, EPI_LE_U16(raw.start), EPI_LE_U16(raw.end), EPI_LE_U16(raw.linedef), seg->side ? "L" : "R",
+                        EPI_LE_U16(raw.angle), seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 #endif
     }
 
@@ -1171,7 +1177,7 @@ void PutSegs()
 
     if (num_segs > 65534)
     {
-        Failure("Number of segs has overflowed.\n");
+        I_Printf("Number of segs has overflowed.\n");
         MarkOverflow();
     }
 }
@@ -1192,26 +1198,26 @@ void PutGLSegs_V2()
 
         const seg_t *seg = lev_segs[i];
 
-        raw.start = LE_U16(VertexIndex16Bit(seg->start));
-        raw.end   = LE_U16(VertexIndex16Bit(seg->end));
-        raw.side  = LE_U16(seg->side);
+        raw.start = EPI_LE_U16(VertexIndex16Bit(seg->start));
+        raw.end   = EPI_LE_U16(VertexIndex16Bit(seg->end));
+        raw.side  = EPI_LE_U16(seg->side);
 
         if (seg->linedef != NULL)
-            raw.linedef = LE_U16(seg->linedef->index);
+            raw.linedef = EPI_LE_U16(seg->linedef->index);
         else
-            raw.linedef = LE_U16(0xFFFF);
+            raw.linedef = EPI_LE_U16(0xFFFF);
 
         if (seg->partner != NULL)
-            raw.partner = LE_U16(seg->partner->index);
+            raw.partner = EPI_LE_U16(seg->partner->index);
         else
-            raw.partner = LE_U16(0xFFFF);
+            raw.partner = EPI_LE_U16(0xFFFF);
 
         lump->Write(&raw, sizeof(raw));
 
 #if DEBUG_BSP
-        cur_info->Debug("PUT GL SEG: %04X  Line %04X %s  Partner %04X  "
+        I_Debugf("PUT GL SEG: %04X  Line %04X %s  Partner %04X  "
                         "(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-                        seg->index, LE_U16(raw.linedef), seg->side ? "L" : "R", LE_U16(raw.partner), seg->start->x,
+                        seg->index, EPI_LE_U16(raw.linedef), seg->side ? "L" : "R", EPI_LE_U16(raw.partner), seg->start->x,
                         seg->start->y, seg->end->x, seg->end->y);
 #endif
     }
@@ -1232,26 +1238,26 @@ void PutGLSegs_V5()
 
         const seg_t *seg = lev_segs[i];
 
-        raw.start = LE_U32(VertexIndex_V5(seg->start));
-        raw.end   = LE_U32(VertexIndex_V5(seg->end));
-        raw.side  = LE_U16(seg->side);
+        raw.start = EPI_LE_U32(VertexIndex_V5(seg->start));
+        raw.end   = EPI_LE_U32(VertexIndex_V5(seg->end));
+        raw.side  = EPI_LE_U16(seg->side);
 
         if (seg->linedef != NULL)
-            raw.linedef = LE_U16(seg->linedef->index);
+            raw.linedef = EPI_LE_U16(seg->linedef->index);
         else
-            raw.linedef = LE_U16(0xFFFF);
+            raw.linedef = EPI_LE_U16(0xFFFF);
 
         if (seg->partner != NULL)
-            raw.partner = LE_U32(seg->partner->index);
+            raw.partner = EPI_LE_U32(seg->partner->index);
         else
-            raw.partner = LE_U32(0xFFFFFFFF);
+            raw.partner = EPI_LE_U32(0xFFFFFFFF);
 
         lump->Write(&raw, sizeof(raw));
 
 #if DEBUG_BSP
-        cur_info->Debug("PUT V3 SEG: %06X  Line %04X %s  Partner %06X  "
+        I_Debugf("PUT V3 SEG: %06X  Line %04X %s  Partner %06X  "
                         "(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-                        seg->index, LE_U16(raw.linedef), seg->side ? "L" : "R", LE_U32(raw.partner), seg->start->x,
+                        seg->index, EPI_LE_U16(raw.linedef), seg->side ? "L" : "R", EPI_LE_U32(raw.partner), seg->start->x,
                         seg->start->y, seg->end->x, seg->end->y);
 #endif
     }
@@ -1271,19 +1277,19 @@ void PutSubsecs(const char *name, int do_gl)
 
         const subsec_t *sub = lev_subsecs[i];
 
-        raw.first = LE_U16(sub->seg_list->index);
-        raw.num   = LE_U16(sub->seg_count);
+        raw.first = EPI_LE_U16(sub->seg_list->index);
+        raw.num   = EPI_LE_U16(sub->seg_count);
 
         lump->Write(&raw, sizeof(raw));
 
 #if DEBUG_BSP
-        cur_info->Debug("PUT SUBSEC %04X  First %04X  Num %04X\n", sub->index, LE_U16(raw.first), LE_U16(raw.num));
+        I_Debugf("PUT SUBSEC %04X  First %04X  Num %04X\n", sub->index, EPI_LE_U16(raw.first), EPI_LE_U16(raw.num));
 #endif
     }
 
     if (num_subsecs > 32767)
     {
-        Failure("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
+        I_Printf("Number of %s has overflowed.\n", do_gl ? "GL subsectors" : "subsectors");
         MarkOverflow();
     }
 
@@ -1302,13 +1308,13 @@ void PutGLSubsecs_V5()
 
         const subsec_t *sub = lev_subsecs[i];
 
-        raw.first = LE_U32(sub->seg_list->index);
-        raw.num   = LE_U32(sub->seg_count);
+        raw.first = EPI_LE_U32(sub->seg_list->index);
+        raw.num   = EPI_LE_U32(sub->seg_count);
 
         lump->Write(&raw, sizeof(raw));
 
 #if DEBUG_BSP
-        cur_info->Debug("PUT V3 SUBSEC %06X  First %06X  Num %06X\n", sub->index, LE_U32(raw.first), LE_U32(raw.num));
+        I_Debugf("PUT V3 SUBSEC %06X  First %06X  Num %06X\n", sub->index, EPI_LE_U32(raw.first), EPI_LE_U32(raw.num));
 #endif
     }
 
@@ -1330,41 +1336,41 @@ static void PutOneNode(node_t *node, Lump_c *lump)
     raw_node_t raw;
 
     // note that x/y/dx/dy are always integral in non-UDMF maps
-    raw.x  = LE_S16(I_ROUND(node->x));
-    raw.y  = LE_S16(I_ROUND(node->y));
-    raw.dx = LE_S16(I_ROUND(node->dx));
-    raw.dy = LE_S16(I_ROUND(node->dy));
+    raw.x  = EPI_LE_S16(I_ROUND(node->x));
+    raw.y  = EPI_LE_S16(I_ROUND(node->y));
+    raw.dx = EPI_LE_S16(I_ROUND(node->dx));
+    raw.dy = EPI_LE_S16(I_ROUND(node->dy));
 
-    raw.b1.minx = LE_S16(node->r.bounds.minx);
-    raw.b1.miny = LE_S16(node->r.bounds.miny);
-    raw.b1.maxx = LE_S16(node->r.bounds.maxx);
-    raw.b1.maxy = LE_S16(node->r.bounds.maxy);
+    raw.b1.minx = EPI_LE_S16(node->r.bounds.minx);
+    raw.b1.miny = EPI_LE_S16(node->r.bounds.miny);
+    raw.b1.maxx = EPI_LE_S16(node->r.bounds.maxx);
+    raw.b1.maxy = EPI_LE_S16(node->r.bounds.maxy);
 
-    raw.b2.minx = LE_S16(node->l.bounds.minx);
-    raw.b2.miny = LE_S16(node->l.bounds.miny);
-    raw.b2.maxx = LE_S16(node->l.bounds.maxx);
-    raw.b2.maxy = LE_S16(node->l.bounds.maxy);
+    raw.b2.minx = EPI_LE_S16(node->l.bounds.minx);
+    raw.b2.miny = EPI_LE_S16(node->l.bounds.miny);
+    raw.b2.maxx = EPI_LE_S16(node->l.bounds.maxx);
+    raw.b2.maxy = EPI_LE_S16(node->l.bounds.maxy);
 
     if (node->r.node)
-        raw.right = LE_U16(node->r.node->index);
+        raw.right = EPI_LE_U16(node->r.node->index);
     else if (node->r.subsec)
-        raw.right = LE_U16(node->r.subsec->index | 0x8000);
+        raw.right = EPI_LE_U16(node->r.subsec->index | 0x8000);
     else
-        BugError("Bad right child in node %d\n", node->index);
+        I_Error("AJBSP: Bad right child in node %d\n", node->index);
 
     if (node->l.node)
-        raw.left = LE_U16(node->l.node->index);
+        raw.left = EPI_LE_U16(node->l.node->index);
     else if (node->l.subsec)
-        raw.left = LE_U16(node->l.subsec->index | 0x8000);
+        raw.left = EPI_LE_U16(node->l.subsec->index | 0x8000);
     else
-        BugError("Bad left child in node %d\n", node->index);
+        I_Error("AJBSP: Bad left child in node %d\n", node->index);
 
     lump->Write(&raw, sizeof(raw));
 
 #if DEBUG_BSP
-    cur_info->Debug("PUT NODE %04X  Left %04X  Right %04X  "
+    I_Debugf("PUT NODE %04X  Left %04X  Right %04X  "
                     "(%d,%d) -> (%d,%d)\n",
-                    node->index, LE_U16(raw.left), LE_U16(raw.right), node->x, node->y, node->x + node->dx,
+                    node->index, EPI_LE_U16(raw.left), EPI_LE_U16(raw.right), node->x, node->y, node->x + node->dx,
                     node->y + node->dy);
 #endif
 }
@@ -1381,41 +1387,41 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 
     raw_v5_node_t raw;
 
-    raw.x  = LE_S16(I_ROUND(node->x));
-    raw.y  = LE_S16(I_ROUND(node->y));
-    raw.dx = LE_S16(I_ROUND(node->dx));
-    raw.dy = LE_S16(I_ROUND(node->dy));
+    raw.x  = EPI_LE_S16(I_ROUND(node->x));
+    raw.y  = EPI_LE_S16(I_ROUND(node->y));
+    raw.dx = EPI_LE_S16(I_ROUND(node->dx));
+    raw.dy = EPI_LE_S16(I_ROUND(node->dy));
 
-    raw.b1.minx = LE_S16(node->r.bounds.minx);
-    raw.b1.miny = LE_S16(node->r.bounds.miny);
-    raw.b1.maxx = LE_S16(node->r.bounds.maxx);
-    raw.b1.maxy = LE_S16(node->r.bounds.maxy);
+    raw.b1.minx = EPI_LE_S16(node->r.bounds.minx);
+    raw.b1.miny = EPI_LE_S16(node->r.bounds.miny);
+    raw.b1.maxx = EPI_LE_S16(node->r.bounds.maxx);
+    raw.b1.maxy = EPI_LE_S16(node->r.bounds.maxy);
 
-    raw.b2.minx = LE_S16(node->l.bounds.minx);
-    raw.b2.miny = LE_S16(node->l.bounds.miny);
-    raw.b2.maxx = LE_S16(node->l.bounds.maxx);
-    raw.b2.maxy = LE_S16(node->l.bounds.maxy);
+    raw.b2.minx = EPI_LE_S16(node->l.bounds.minx);
+    raw.b2.miny = EPI_LE_S16(node->l.bounds.miny);
+    raw.b2.maxx = EPI_LE_S16(node->l.bounds.maxx);
+    raw.b2.maxy = EPI_LE_S16(node->l.bounds.maxy);
 
     if (node->r.node)
-        raw.right = LE_U32(node->r.node->index);
+        raw.right = EPI_LE_U32(node->r.node->index);
     else if (node->r.subsec)
-        raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
+        raw.right = EPI_LE_U32(node->r.subsec->index | 0x80000000U);
     else
-        BugError("Bad right child in V5 node %d\n", node->index);
+        I_Error("AJBSP: Bad right child in V5 node %d\n", node->index);
 
     if (node->l.node)
-        raw.left = LE_U32(node->l.node->index);
+        raw.left = EPI_LE_U32(node->l.node->index);
     else if (node->l.subsec)
-        raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
+        raw.left = EPI_LE_U32(node->l.subsec->index | 0x80000000U);
     else
-        BugError("Bad left child in V5 node %d\n", node->index);
+        I_Error("AJBSP: Bad left child in V5 node %d\n", node->index);
 
     lump->Write(&raw, sizeof(raw));
 
 #if DEBUG_BSP
-    cur_info->Debug("PUT V5 NODE %08X  Left %08X  Right %08X  "
+    I_Debugf("PUT V5 NODE %08X  Left %08X  Right %08X  "
                     "(%d,%d) -> (%d,%d)\n",
-                    node->index, LE_U32(raw.left), LE_U32(raw.right), node->x, node->y, node->x + node->dx,
+                    node->index, EPI_LE_U32(raw.left), EPI_LE_U32(raw.right), node->x, node->y, node->x + node->dx,
                     node->y + node->dy);
 #endif
 }
@@ -1442,11 +1448,11 @@ void PutNodes(const char *name, int do_v5, node_t *root)
     lump->Finish();
 
     if (node_cur_index != num_nodes)
-        BugError("PutNodes miscounted (%d != %d)\n", node_cur_index, num_nodes);
+        I_Error("AJBSP: PutNodes miscounted (%d != %d)\n", node_cur_index, num_nodes);
 
     if (!do_v5 && node_cur_index > 32767)
     {
-        Failure("Number of nodes has overflowed.\n");
+        I_Printf("Number of nodes has overflowed.\n");
         MarkOverflow();
     }
 }
@@ -1459,36 +1465,38 @@ void CheckLimits()
     // the other checks below, like the vertex counts).
     if (num_sectors > 65535)
     {
-        Failure("Map has too many sectors.\n");
+        I_Printf("Map has too many sectors.\n");
         MarkOverflow();
     }
     // the sidedef 0xFFFF is reserved to mean "no side" in DOOM map format
     if (num_sidedefs > 65535)
     {
-        Failure("Map has too many sidedefs.\n");
+        I_Printf("Map has too many sidedefs.\n");
         MarkOverflow();
     }
     // the linedef 0xFFFF is reserved for minisegs in GL nodes
     if (num_linedefs > 65535)
     {
-        Failure("Map has too many linedefs.\n");
+        I_Printf("Map has too many linedefs.\n");
         MarkOverflow();
     }
 
-    if (cur_info->gl_nodes && !cur_info->force_v5)
+    if (cur_info.gl_nodes && !cur_info.force_v5)
     {
         if (num_old_vert > 32767 || num_new_vert > 32767 || num_segs > 65535 || num_nodes > 32767)
         {
-            Warning("Forcing V5 of GL-Nodes due to overflows.\n");
+            I_Printf("Forcing V5 of GL-Nodes due to overflows.\n");
+            cur_info.total_warnings++;
             lev_force_v5 = true;
         }
     }
 
-    if (!cur_info->force_xnod)
+    if (!cur_info.force_xnod)
     {
         if (num_old_vert > 32767 || num_new_vert > 32767 || num_segs > 32767 || num_nodes > 32767)
         {
-            Warning("Forcing XNOD format nodes due to overflows.\n");
+            I_Printf("Forcing XNOD format nodes due to overflows.\n");
+            cur_info.total_warnings++;
             lev_force_xnod = true;
         }
     }
@@ -1507,7 +1515,7 @@ void SortSegs()
     // do a sanity check
     for (int i = 0; i < num_segs; i++)
         if (lev_segs[i]->index < 0)
-            BugError("Seg %p never reached a subsector!\n", i);
+            I_Error("AJBSP: Seg %p never reached a subsector!\n", i);
 
     // sort segs into ascending index
     std::sort(lev_segs.begin(), lev_segs.end(), Compare_seg_pred());
@@ -1531,8 +1539,8 @@ void PutZVertices()
 {
     int count, i;
 
-    uint32_t orgverts = LE_U32(num_old_vert);
-    uint32_t newverts = LE_U32(num_new_vert);
+    uint32_t orgverts = EPI_LE_U32(num_old_vert);
+    uint32_t newverts = EPI_LE_U32(num_new_vert);
 
     ZLibAppendLump(&orgverts, 4);
     ZLibAppendLump(&newverts, 4);
@@ -1546,8 +1554,8 @@ void PutZVertices()
         if (!vert->is_new)
             continue;
 
-        raw.x = LE_S32(I_ROUND(vert->x * 65536.0));
-        raw.y = LE_S32(I_ROUND(vert->y * 65536.0));
+        raw.x = EPI_LE_S32(I_ROUND(vert->x * 65536.0));
+        raw.y = EPI_LE_S32(I_ROUND(vert->y * 65536.0));
 
         ZLibAppendLump(&raw, sizeof(raw));
 
@@ -1555,12 +1563,12 @@ void PutZVertices()
     }
 
     if (count != num_new_vert)
-        BugError("PutZVertices miscounted (%d != %d)\n", count, num_new_vert);
+        I_Error("AJBSP: PutZVertices miscounted (%d != %d)\n", count, num_new_vert);
 }
 
 void PutZSubsecs()
 {
-    uint32_t raw_num = LE_U32(num_subsecs);
+    uint32_t raw_num = EPI_LE_U32(num_subsecs);
     ZLibAppendLump(&raw_num, 4);
 
     int cur_seg_index = 0;
@@ -1569,7 +1577,7 @@ void PutZSubsecs()
     {
         const subsec_t *sub = lev_subsecs[i];
 
-        raw_num = LE_U32(sub->seg_count);
+        raw_num = EPI_LE_U32(sub->seg_count);
         ZLibAppendLump(&raw_num, 4);
 
         // sanity check the seg index values
@@ -1577,22 +1585,22 @@ void PutZSubsecs()
         for (const seg_t *seg = sub->seg_list; seg; seg = seg->next, cur_seg_index++)
         {
             if (cur_seg_index != seg->index)
-                BugError("PutZSubsecs: seg index mismatch in sub %d (%d != %d)\n", i, cur_seg_index, seg->index);
+                I_Error("AJBSP: PutZSubsecs: seg index mismatch in sub %d (%d != %d)\n", i, cur_seg_index, seg->index);
 
             count++;
         }
 
         if (count != sub->seg_count)
-            BugError("PutZSubsecs: miscounted segs in sub %d (%d != %d)\n", i, count, sub->seg_count);
+            I_Error("AJBSP: PutZSubsecs: miscounted segs in sub %d (%d != %d)\n", i, count, sub->seg_count);
     }
 
     if (cur_seg_index != num_segs)
-        BugError("PutZSubsecs miscounted segs (%d != %d)\n", cur_seg_index, num_segs);
+        I_Error("AJBSP: PutZSubsecs miscounted segs (%d != %d)\n", cur_seg_index, num_segs);
 }
 
 void PutZSegs()
 {
-    uint32_t raw_num = LE_U32(num_segs);
+    uint32_t raw_num = EPI_LE_U32(num_segs);
     ZLibAppendLump(&raw_num, 4);
 
     for (int i = 0; i < num_segs; i++)
@@ -1600,12 +1608,12 @@ void PutZSegs()
         const seg_t *seg = lev_segs[i];
 
         if (seg->index != i)
-            BugError("PutZSegs: seg index mismatch (%d != %d)\n", seg->index, i);
+            I_Error("AJBSP: PutZSegs: seg index mismatch (%d != %d)\n", seg->index, i);
 
-        uint32_t v1 = LE_U32(VertexIndex_XNOD(seg->start));
-        uint32_t v2 = LE_U32(VertexIndex_XNOD(seg->end));
+        uint32_t v1 = EPI_LE_U32(VertexIndex_XNOD(seg->start));
+        uint32_t v2 = EPI_LE_U32(VertexIndex_XNOD(seg->end));
 
-        uint16_t line = LE_U16(seg->linedef->index);
+        uint16_t line = EPI_LE_U16(seg->linedef->index);
         uint8_t  side = (uint8_t)seg->side;
 
         ZLibAppendLump(&v1, 4);
@@ -1617,7 +1625,7 @@ void PutZSegs()
 
 void PutXGL3Segs()
 {
-    uint32_t raw_num = LE_U32(num_segs);
+    uint32_t raw_num = EPI_LE_U32(num_segs);
     ZLibAppendLump(&raw_num, 4);
 
     for (int i = 0; i < num_segs; i++)
@@ -1625,11 +1633,11 @@ void PutXGL3Segs()
         const seg_t *seg = lev_segs[i];
 
         if (seg->index != i)
-            BugError("PutXGL3Segs: seg index mismatch (%d != %d)\n", seg->index, i);
+            I_Error("AJBSP: PutXGL3Segs: seg index mismatch (%d != %d)\n", seg->index, i);
 
-        uint32_t v1      = LE_U32(VertexIndex_XNOD(seg->start));
-        uint32_t partner = LE_U32(seg->partner ? seg->partner->index : -1);
-        uint32_t line    = LE_U32(seg->linedef ? seg->linedef->index : -1);
+        uint32_t v1      = EPI_LE_U32(VertexIndex_XNOD(seg->start));
+        uint32_t partner = EPI_LE_U32(seg->partner ? seg->partner->index : -1);
+        uint32_t line    = EPI_LE_U32(seg->linedef ? seg->linedef->index : -1);
         uint8_t  side    = (uint8_t)seg->side;
 
         ZLibAppendLump(&v1, 4);
@@ -1657,10 +1665,10 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 
     if (do_xgl3)
     {
-        uint32_t x  = LE_S32(I_ROUND(node->x * 65536.0));
-        uint32_t y  = LE_S32(I_ROUND(node->y * 65536.0));
-        uint32_t dx = LE_S32(I_ROUND(node->dx * 65536.0));
-        uint32_t dy = LE_S32(I_ROUND(node->dy * 65536.0));
+        uint32_t x  = EPI_LE_S32(I_ROUND(node->x * 65536.0));
+        uint32_t y  = EPI_LE_S32(I_ROUND(node->y * 65536.0));
+        uint32_t dx = EPI_LE_S32(I_ROUND(node->dx * 65536.0));
+        uint32_t dy = EPI_LE_S32(I_ROUND(node->dy * 65536.0));
 
         ZLibAppendLump(&x, 4);
         ZLibAppendLump(&y, 4);
@@ -1669,10 +1677,10 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
     }
     else
     {
-        raw.x  = LE_S16(I_ROUND(node->x));
-        raw.y  = LE_S16(I_ROUND(node->y));
-        raw.dx = LE_S16(I_ROUND(node->dx));
-        raw.dy = LE_S16(I_ROUND(node->dy));
+        raw.x  = EPI_LE_S16(I_ROUND(node->x));
+        raw.y  = EPI_LE_S16(I_ROUND(node->y));
+        raw.dx = EPI_LE_S16(I_ROUND(node->dx));
+        raw.dy = EPI_LE_S16(I_ROUND(node->dy));
 
         ZLibAppendLump(&raw.x, 2);
         ZLibAppendLump(&raw.y, 2);
@@ -1680,47 +1688,47 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
         ZLibAppendLump(&raw.dy, 2);
     }
 
-    raw.b1.minx = LE_S16(node->r.bounds.minx);
-    raw.b1.miny = LE_S16(node->r.bounds.miny);
-    raw.b1.maxx = LE_S16(node->r.bounds.maxx);
-    raw.b1.maxy = LE_S16(node->r.bounds.maxy);
+    raw.b1.minx = EPI_LE_S16(node->r.bounds.minx);
+    raw.b1.miny = EPI_LE_S16(node->r.bounds.miny);
+    raw.b1.maxx = EPI_LE_S16(node->r.bounds.maxx);
+    raw.b1.maxy = EPI_LE_S16(node->r.bounds.maxy);
 
-    raw.b2.minx = LE_S16(node->l.bounds.minx);
-    raw.b2.miny = LE_S16(node->l.bounds.miny);
-    raw.b2.maxx = LE_S16(node->l.bounds.maxx);
-    raw.b2.maxy = LE_S16(node->l.bounds.maxy);
+    raw.b2.minx = EPI_LE_S16(node->l.bounds.minx);
+    raw.b2.miny = EPI_LE_S16(node->l.bounds.miny);
+    raw.b2.maxx = EPI_LE_S16(node->l.bounds.maxx);
+    raw.b2.maxy = EPI_LE_S16(node->l.bounds.maxy);
 
     ZLibAppendLump(&raw.b1, sizeof(raw.b1));
     ZLibAppendLump(&raw.b2, sizeof(raw.b2));
 
     if (node->r.node)
-        raw.right = LE_U32(node->r.node->index);
+        raw.right = EPI_LE_U32(node->r.node->index);
     else if (node->r.subsec)
-        raw.right = LE_U32(node->r.subsec->index | 0x80000000U);
+        raw.right = EPI_LE_U32(node->r.subsec->index | 0x80000000U);
     else
-        BugError("Bad right child in V5 node %d\n", node->index);
+        I_Error("AJBSP: Bad right child in V5 node %d\n", node->index);
 
     if (node->l.node)
-        raw.left = LE_U32(node->l.node->index);
+        raw.left = EPI_LE_U32(node->l.node->index);
     else if (node->l.subsec)
-        raw.left = LE_U32(node->l.subsec->index | 0x80000000U);
+        raw.left = EPI_LE_U32(node->l.subsec->index | 0x80000000U);
     else
-        BugError("Bad left child in V5 node %d\n", node->index);
+        I_Error("AJBSP: Bad left child in V5 node %d\n", node->index);
 
     ZLibAppendLump(&raw.right, 4);
     ZLibAppendLump(&raw.left, 4);
 
 #if DEBUG_BSP
-    cur_info->Debug("PUT Z NODE %08X  Left %08X  Right %08X  "
+    I_Debugf("PUT Z NODE %08X  Left %08X  Right %08X  "
                     "(%d,%d) -> (%d,%d)\n",
-                    node->index, LE_U32(raw.left), LE_U32(raw.right), node->x, node->y, node->x + node->dx,
+                    node->index, EPI_LE_U32(raw.left), EPI_LE_U32(raw.right), node->x, node->y, node->x + node->dx,
                     node->y + node->dy);
 #endif
 }
 
 void PutZNodes(node_t *root, bool do_xgl3)
 {
-    uint32_t raw_num = LE_U32(num_nodes);
+    uint32_t raw_num = EPI_LE_U32(num_nodes);
     ZLibAppendLump(&raw_num, 4);
 
     node_cur_index = 0;
@@ -1729,7 +1737,7 @@ void PutZNodes(node_t *root, bool do_xgl3)
         PutOneZNode(root, do_xgl3);
 
     if (node_cur_index != num_nodes)
-        BugError("PutZNodes miscounted (%d != %d)\n", node_cur_index, num_nodes);
+        I_Error("AJBSP: PutZNodes miscounted (%d != %d)\n", node_cur_index, num_nodes);
 }
 
 static int CalcZDoomNodesSize()
@@ -1745,7 +1753,7 @@ static int CalcZDoomNodesSize()
     size += 4 + num_segs * 11;
     size += 4 + num_nodes * sizeof(raw_v5_node_t);
 
-    if (cur_info->force_compress)
+    if (cur_info.force_compress)
     {
         // according to RFC1951, the zlib compression worst-case
         // scenario is 5 extra bytes per 32KB (0.015% increase).
@@ -1767,7 +1775,7 @@ void SaveZDFormat(node_t *root_node)
 
     Lump_c *lump = CreateLevelLump("NODES", max_size);
 
-    if (cur_info->force_compress)
+    if (cur_info.force_compress)
         lump->Write(lev_ZNOD_magic, 4);
     else
         lump->Write(lev_XNOD_magic, 4);
@@ -1787,7 +1795,7 @@ void SaveXGL3Format(Lump_c *lump, node_t *root_node)
 {
     // WISH : compute a max_size
 
-    if (cur_info->force_compress)
+    if (cur_info.force_compress)
         lump->Write(lev_ZGL3_magic, 4);
     else
         lump->Write(lev_XGL3_magic, 4);
@@ -1812,7 +1820,7 @@ void LoadLevel()
     lev_long_name    = false;
     lev_overflows    = false;
 
-    cur_info->ShowMap(lev_current_name);
+    E_ProgressMessage(StringPrintf("Building nodes for %s\n", lev_current_name));
 
     num_new_vert   = 0;
     num_real_lines = 0;
@@ -1843,7 +1851,7 @@ void LoadLevel()
         PruneVerticesAtEnd();
     }
 
-    cur_info->Print(2, "    Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n", num_vertices, num_sectors,
+    I_Debugf("    Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n", num_vertices, num_sectors,
                     num_sidedefs, num_linedefs, num_things);
 
     DetectOverlappingVertices();
@@ -1881,9 +1889,7 @@ void FreeLevel()
 
 static uint32_t CalcGLChecksum(void)
 {
-    uint32_t crc;
-
-    Adler32_Begin(&crc);
+    epi::crc32_c crc;
 
     Lump_c *lump = FindLevelLump("VERTEXES");
 
@@ -1892,9 +1898,9 @@ static uint32_t CalcGLChecksum(void)
         uint8_t *data = new uint8_t[lump->Length()];
 
         if (!lump->Seek(0) || !lump->Read(data, lump->Length()))
-            cur_info->FatalError("Error reading vertices (for checksum).\n");
+            I_Error("AJBSP: Error reading vertices (for checksum).\n");
 
-        Adler32_AddBlock(&crc, data, lump->Length());
+        crc.AddBlock(data, lump->Length());
         delete[] data;
     }
 
@@ -1905,13 +1911,13 @@ static uint32_t CalcGLChecksum(void)
         uint8_t *data = new uint8_t[lump->Length()];
 
         if (!lump->Seek(0) || !lump->Read(data, lump->Length()))
-            cur_info->FatalError("Error reading linedefs (for checksum).\n");
+            I_Error("AJBSP: Error reading linedefs (for checksum).\n");
 
-        Adler32_AddBlock(&crc, data, lump->Length());
+        crc.AddBlock(data, lump->Length());
         delete[] data;
     }
 
-    return crc;
+    return crc.GetCRC();
 }
 
 void UpdateGLMarker(Lump_c *marker)
@@ -1946,8 +1952,8 @@ static void AddMissingLump(const char *name, const char *after)
     // if this happens, the level structure is very broken
     if (exist < 0)
     {
-        Warning("Missing %s lump -- level structure is broken\n", after);
-
+        I_Printf("Missing %s lump -- level structure is broken\n", after);
+        cur_info.total_warnings++;
         exist = cur_wad->LevelLastLump(lev_current_idx);
     }
 
@@ -1973,8 +1979,8 @@ build_result_e SaveLevel(node_t *root_node)
     AddMissingLump("BLOCKMAP", "REJECT");
 
     // user preferences
-    lev_force_v5   = cur_info->force_v5;
-    lev_force_xnod = cur_info->force_xnod;
+    lev_force_v5   = cur_info.force_v5;
+    lev_force_xnod = cur_info.force_xnod;
 
     // check for overflows...
     // this sets the force_xxx vars if certain limits are breached
@@ -1984,7 +1990,7 @@ build_result_e SaveLevel(node_t *root_node)
 
     Lump_c *gl_marker = NULL;
 
-    if (cur_info->gl_nodes && num_real_lines > 0)
+    if (cur_info.gl_nodes && num_real_lines > 0)
     {
         // this also removes minisegs and degenerate segs
         SortSegs();
@@ -2117,7 +2123,7 @@ void ZLibBeginLump(Lump_c *lump)
 {
     zout_lump = lump;
 
-    if (!cur_info->force_compress)
+    if (!cur_info.force_compress)
         return;
 
     zout_stream.zalloc = (alloc_func)0;
@@ -2125,7 +2131,7 @@ void ZLibBeginLump(Lump_c *lump)
     zout_stream.opaque = (voidpf)0;
 
     if (Z_OK != deflateInit(&zout_stream, Z_DEFAULT_COMPRESSION))
-        cur_info->FatalError("Trouble setting up zlib compression\n");
+        I_Error("AJBSP: Trouble setting up zlib compression\n");
 
     zout_stream.next_out  = zout_buffer;
     zout_stream.avail_out = sizeof(zout_buffer);
@@ -2136,7 +2142,7 @@ void ZLibAppendLump(const void *data, int length)
     // ASSERT(zout_lump)
     // ASSERT(length > 0)
 
-    if (!cur_info->force_compress)
+    if (!cur_info.force_compress)
     {
         zout_lump->Write(data, length);
         return;
@@ -2150,7 +2156,7 @@ void ZLibAppendLump(const void *data, int length)
         int err = deflate(&zout_stream, Z_NO_FLUSH);
 
         if (err != Z_OK)
-            cur_info->FatalError("Trouble compressing %d bytes (zlib)\n", length);
+            I_Error("AJBSP: Trouble compressing %d bytes (zlib)\n", length);
 
         if (zout_stream.avail_out == 0)
         {
@@ -2164,7 +2170,7 @@ void ZLibAppendLump(const void *data, int length)
 
 void ZLibFinishLump(void)
 {
-    if (!cur_info->force_compress)
+    if (!cur_info.force_compress)
     {
         zout_lump->Finish();
         zout_lump = NULL;
@@ -2186,7 +2192,7 @@ void ZLibFinishLump(void)
             break;
 
         if (err != Z_OK)
-            cur_info->FatalError("Trouble finishing compression (zlib)\n");
+            I_Error("AJBSP: Trouble finishing compression (zlib)\n");
 
         if (zout_stream.avail_out == 0)
         {
@@ -2279,32 +2285,40 @@ Lump_c *CreateGLMarker()
 // MAIN STUFF
 //------------------------------------------------------------------------
 
-buildinfo_t *cur_info = NULL;
+buildinfo_t cur_info;
 
-void SetInfo(buildinfo_t *info)
+void ResetInfo()
 {
-    cur_info = info;
+    cur_info.total_minor_issues = 0;
+    cur_info.total_warnings = 0;
+    cur_info.fast = true;
+    cur_info.gl_nodes = true;
+    cur_info.force_v5 = false;
+    cur_info.force_xnod = false;
+    cur_info.force_compress = true;
+    cur_info.split_cost = SPLIT_COST_DEFAULT;
+    cur_info.verbosity = 0;
 }
 
-void OpenWad(std::filesystem::path filename)
+void OpenWad(std::string filename)
 {
     cur_wad = Wad_file::Open(filename, 'r');
     if (cur_wad == NULL)
-        cur_info->FatalError("Cannot open file: %s\n", filename.u8string().c_str());
+        I_Error("AJBSP: Cannot open file: %s\n", filename.c_str());
 }
 
-void OpenMem(std::filesystem::path filename, uint8_t *raw_data, int raw_length)
+void OpenMem(std::string filename, uint8_t *raw_data, int raw_length)
 {
     cur_wad = Wad_file::OpenMem(filename, raw_data, raw_length);
     if (cur_wad == NULL)
-        cur_info->FatalError("Cannot open file from memory: %s\n", filename.u8string().c_str());
+        I_Error("AJBSP: Cannot open file from memory: %s\n", filename.c_str());
 }
 
-void CreateXWA(std::filesystem::path filename)
+void CreateXWA(std::string filename)
 {
     xwa_wad = Wad_file::Open(filename, 'w');
     if (xwa_wad == NULL)
-        cur_info->FatalError("Cannot create file: %s\n", filename.u8string().c_str());
+        I_Error("AJBSP: Cannot create file: %s\n", filename.c_str());
 
     xwa_wad->BeginWrite();
     xwa_wad->AddLump("XG_START")->Finish();
@@ -2355,9 +2369,6 @@ const char *GetLevelName(int lev_idx)
 
 build_result_e BuildLevel(int lev_idx)
 {
-    if (cur_info->cancelled)
-        return BUILD_Cancelled;
-
     node_t   *root_node = NULL;
     subsec_t *root_sub  = NULL;
 
@@ -2384,12 +2395,12 @@ build_result_e BuildLevel(int lev_idx)
 
     if (ret == BUILD_OK)
     {
-        cur_info->Print(2, "    Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n", num_nodes, num_subsecs, num_segs,
+        I_Debugf("    Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n", num_nodes, num_subsecs, num_segs,
                         num_old_vert + num_new_vert);
 
         if (root_node != NULL)
         {
-            cur_info->Print(2, "    Heights of subtrees: %d / %d\n", ComputeBspHeight(root_node->r.node),
+            I_Debugf("    Heights of subtrees: %d / %d\n", ComputeBspHeight(root_node->r.node),
                             ComputeBspHeight(root_node->l.node));
         }
 

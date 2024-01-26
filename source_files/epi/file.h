@@ -28,15 +28,6 @@ namespace epi
 class file_c
 {
   public:
-    // Access Types
-    enum access_e
-    {
-        ACCESS_READ   = 0x1,
-        ACCESS_WRITE  = 0x2,
-        ACCESS_APPEND = 0x4,
-        ACCESS_BINARY = 0x8
-    };
-
     // Seek reference points
     enum seek_e
     {
@@ -94,9 +85,6 @@ class ansi_file_c : public file_c
 
     bool Seek(int offset, int seekpoint);
 };
-
-// utility function:
-bool FS_FlagsToAnsiMode(int flags, char *mode);
 
 } // namespace epi
 

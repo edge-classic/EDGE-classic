@@ -325,17 +325,8 @@ void CON_WriteVars(FILE *f)
     {
         if ((var->flags & CVAR_ARCHIVE) != 0)
         {
-            if (var->flags & CVAR_PATH)
-            {
-                std::string line = epi::STR_Format("/%s\t\"%s\"\n", var->name,
-                                                   std::filesystem::u8path(var->s).generic_u8string().c_str());
-                fwrite(line.data(), line.size(), 1, f);
-            }
-            else
-            {
-                std::string line = epi::STR_Format("/%s\t\"%s\"\n", var->name, var->c_str());
-                fwrite(line.data(), line.size(), 1, f);
-            }
+            std::string line = epi::STR_Format("/%s\t\"%s\"\n", var->name, var->c_str());
+            fwrite(line.data(), line.size(), 1, f);
         }
     }
 }

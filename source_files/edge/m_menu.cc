@@ -490,7 +490,7 @@ void M_ReadSaveStrings(void)
         ex_slots[i].gamename[0] = 0;
 
         int                   slot = save_page * SAVE_SLOTS + i;
-        std::filesystem::path fn(SV_FileName(SV_SlotName(slot), "head"));
+        std::string fn(SV_FileName(SV_SlotName(slot), "head"));
 
         if (!SV_OpenReadFile(fn))
         {
@@ -536,8 +536,8 @@ void M_ReadSaveStrings(void)
 
         SV_FreeGLOB(globs);
 
-        fn.replace_extension(".replace");
-        if (std::filesystem::exists(fn))
+        epi::FS_ReplaceExtension(fn, ".replace");
+        if (epi::FS_Exists(fn))
         {
             delete ex_slots[i].save_imdata;
             ex_slots[i].save_imdata = nullptr;
@@ -549,14 +549,14 @@ void M_ReadSaveStrings(void)
         }
 
         // Save screenshot
-        fn.replace_extension(".jpg");
+        epi::FS_ReplaceExtension(fn, ".jpg");
 
-        if (std::filesystem::exists(fn) && (!ex_slots[i].save_imdata || save_page != ex_slots[i].save_impage))
+        if (epi::FS_Exists(fn) && (!ex_slots[i].save_imdata || save_page != ex_slots[i].save_impage))
         {
             delete ex_slots[i].save_imdata;
             if (ex_slots[i].save_texid)
                 glDeleteTextures(1, &ex_slots[i].save_texid);
-            epi::file_c *svimg_file = epi::FS_Open(fn, epi::file_c::ACCESS_READ | epi::file_c::ACCESS_BINARY);
+            epi::file_c *svimg_file = epi::FS_Open(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
             if (svimg_file)
             {
                 ex_slots[i].save_imdata = epi::Image_Load(svimg_file);
@@ -568,7 +568,7 @@ void M_ReadSaveStrings(void)
                 }
                 else
                 {
-                    I_Warning("Error reading savegame screenshot %s!\n", fn.u8string().c_str());
+                    I_Warning("Error reading savegame screenshot %s!\n", fn.c_str());
                     ex_slots[i].save_imdata = nullptr;
                     ex_slots[i].save_texid  = 0; // just in case
                     ex_slots[i].save_impage = save_page;

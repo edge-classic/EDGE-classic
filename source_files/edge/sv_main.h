@@ -358,7 +358,7 @@ void SV_SaveEverything(void);
 const char *SV_SlotName(int slot);
 const char *SV_MapName(const mapdef_c *map);
 
-std::filesystem::path SV_FileName(const char *slot_name, const char *map_name);
+std::string SV_FileName(const char *slot_name, const char *map_name);
 
 void SV_ClearSlot(const char *slot_name);
 void SV_CopySlot(const char *src_name, const char *dest_name);

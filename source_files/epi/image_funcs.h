@@ -21,7 +21,6 @@
 
 #include "file.h"
 #include "image_data.h"
-#include <filesystem>
 #include <unordered_map>
 
 namespace epi
@@ -69,7 +68,7 @@ class image_atlas_c
 image_format_e Image_DetectFormat(uint8_t *header, int header_len, int file_size);
 
 // determine image format from the filename (by its extension).
-image_format_e Image_FilenameToFormat(const std::filesystem::path &filename);
+image_format_e Image_FilenameToFormat(const std::string &filename);
 
 // loads the given image, which must be PNG, TGA or JPEG format.
 // Returns NULL if something went wrong.  The result image will be RGB
@@ -96,12 +95,12 @@ bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp);
 
 // saves the image (in JPEG format) to the given file.  Returns false if
 // something went wrong.  The image _MUST_ be RGB (bpp == 3).
-bool JPEG_Save(std::filesystem::path fn, image_data_c *img);
+bool JPEG_Save(std::string fn, image_data_c *img);
 
 // saves the image (in PNG format) to the given file.
 // Returns false if failed to save (e.g. file already exists).
 // The image _MUST_ be RGB or RGBA.
-bool PNG_Save(std::filesystem::path fn, image_data_c *img);
+bool PNG_Save(std::string fn, image_data_c *img);
 
 } // namespace epi
 

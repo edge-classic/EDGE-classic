@@ -41,7 +41,6 @@
 #include "dm_structs.h"
 #include "e_main.h"
 #include "g_game.h"
-#include "l_ajbsp.h"
 #include "m_argv.h"
 #include "m_bbox.h"
 #include "m_math.h"
@@ -57,6 +56,7 @@
 #include "sv_main.h"
 #include "r_image.h"
 #include "w_texture.h"
+#include "w_files.h"
 #include "w_wad.h"
 #include "rad_trig.h" // MUSINFO changers
 

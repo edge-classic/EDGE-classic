@@ -19,8 +19,6 @@
 #ifndef __AJBSP_WAD_H__
 #define __AJBSP_WAD_H__
 
-#include <filesystem>
-
 // EPI
 #include "file_memory.h"
 
@@ -117,7 +115,7 @@ class Wad_file
     friend void W_LoadTextures_TX_START(Wad_file *wf);
 
   private:
-    std::filesystem::path filename;
+    std::string filename;
 
     char mode; // mode value passed to ::Open()
 
@@ -151,7 +149,7 @@ class Wad_file
     int insert_point;
 
     // constructor is private
-    Wad_file(std::filesystem::path _name, char _mode, FILE *_fp, epi::mem_file_c *_mem_fp);
+    Wad_file(std::string _name, char _mode, FILE *_fp, epi::mem_file_c *_mem_fp);
 
   public:
     ~Wad_file();
@@ -166,9 +164,9 @@ class Wad_file
     // Note: if 'a' is used and the file is read-only, it will be
     //       silently opened in 'r' mode instead.
     //
-    static Wad_file *Open(std::filesystem::path filename, char mode = 'a');
+    static Wad_file *Open(std::string filename, char mode = 'a');
 
-    static Wad_file *OpenMem(std::filesystem::path filename, uint8_t *raw_wad, int raw_length);
+    static Wad_file *OpenMem(std::string filename, uint8_t *raw_wad, int raw_length);
 
     bool IsReadOnly() const
     {
@@ -261,7 +259,7 @@ class Wad_file
     void InsertPoint(int index = -1);
 
   private:
-    static Wad_file *Create(std::filesystem::path filename, char mode);
+    static Wad_file *Create(std::string filename, char mode);
 
     // read the existing directory.
     void ReadDirectory();

@@ -44,6 +44,7 @@
 #include "r_units.h"
 #include "p_blockmap.h"
 
+#include <stddef.h>
 #include <vector>
 
 extern float P_ApproxDistance(float dx, float dy, float dz);

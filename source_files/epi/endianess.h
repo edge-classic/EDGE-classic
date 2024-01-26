@@ -15,10 +15,6 @@
 //  GNU General Public License for more details.
 //
 //----------------------------------------------------------------------------
-//
-//  Based on SDL_byteorder.h and SDL_endian.h.
-//
-//------------------------------------------------------------------------
 
 #ifndef __EPI_ENDIAN_H__
 #define __EPI_ENDIAN_H__
@@ -37,41 +33,64 @@
 
 // The macros used to swap values.  Try to use superfast macros on systems
 // that support them, otherwise use C++ inline functions.
-#ifdef __linux__
-#include <endian.h>
-#ifdef __arch__swab16
-#define EPI_Swap16 __arch__swab16
-#endif
-#ifdef __arch__swab32
-#define EPI_Swap32 __arch__swab32
-#endif
-#endif /* LINUX */
+#if defined(__GNUC__) || defined(__clang__)
+#define __Swap16 __builtin_bswap16
+#define __Swap32 __builtin_bswap32
+#define __Swap64 __builtin_bswap64
 
-#ifndef EPI_Swap16
-#define EPI_Swap16 epi::endian_swapper_c::Swap16
-#endif
+#elif defined(_MSC_VER)
+#define __Swap16 _byteswap_ushort
+#define __Swap32 _byteswap_ulong
+#define __Swap64 _byteswap_uint64
 
-#ifndef EPI_Swap32
-#define EPI_Swap32 epi::endian_swapper_c::Swap32
+#else
+static inline uint16_t __Swap16(uint16_t n)
+{
+    uint16_t a;
+    a = (n & 0xFF) << 8;
+    a |= (n >> 8) & 0xFF;
+    return a;
+}
+static inline uint32_t __Swap32(uint32_t n)
+{
+    uint32_t a;
+    a = (n & 0xFFU) << 24;
+    a |= (n & 0xFF00U) << 8;
+    a |= (n >> 8) & 0xFF00U;
+    a |= (n >> 24) & 0xFFU;
+    return a;
+}
+static inline uint64_t __Swap64(uint64_t n)
+{
+    uint64_t a;
+    a = (n & 0xFFULL) << 56;
+    a |= (n & 0xFF00ULL) << 40;
+    a |= (n & 0xFF0000ULL) << 24;
+    a |= (n & 0xFF000000ULL) << 8;
+    a |= (n >> 8) & 0xFF000000ULL;
+    a |= (n >> 24) & 0xFF0000ULL;
+    a |= (n >> 40) & 0xFF00ULL;
+    a |= (n >> 56) & 0xFFULL;
+    return a;
+}
 #endif
 
 // Byteswap item between the specified endianness to the native endianness
 #if EPI_BYTEORDER == EPI_LIL_ENDIAN
-#define EPI_LE_U16(X) ((uint16_t)(X))
-#define EPI_LE_U32(X) ((uint32_t)(X))
-#define EPI_BE_U16(X) EPI_Swap16(X)
-#define EPI_BE_U32(X) EPI_Swap32(X)
+#define EPI_LE_U16(x) ((uint16_t)(x))
+#define EPI_LE_U32(x) ((uint32_t)(x))
+#define EPI_LE_U64(x) ((u64_t)(x))
+#define EPI_BE_U16(x) __Swap16(x)
+#define EPI_BE_U32(x) __Swap32(x)
+#define EPI_BE_U64(x) __Swap64(x)
 #else
-#define EPI_LE_U16(X) EPI_Swap16(X)
-#define EPI_LE_U32(X) EPI_Swap32(X)
-#define EPI_BE_U16(X) ((uint16_t)(X))
-#define EPI_BE_U32(X) ((uint32_t)(X))
+#define EPI_LE_U16(x) __Swap16(x)
+#define EPI_LE_U32(x) __Swap32(x)
+#define EPI_LE_U64(x) __Swap64(x)
+#define EPI_BE_U16(x) ((uint16_t)(x))
+#define EPI_BE_U32(x) ((uint32_t)(x))
+#define EPI_BE_U64(x) ((u64_t)(x))
 #endif
-
-#define EPI_LE_S16(X) ((int16_t)EPI_LE_U16((uint16_t)(X)))
-#define EPI_LE_S32(X) ((int32_t)EPI_LE_U32((uint32_t)(X)))
-#define EPI_BE_S16(X) ((int16_t)EPI_BE_U16((uint16_t)(X)))
-#define EPI_BE_S32(X) ((int32_t)EPI_BE_U32((uint32_t)(X)))
 
 namespace epi
 {
@@ -137,6 +156,16 @@ inline int32_t GetS32BE(const uint8_t *p)
 }
 
 } // namespace epi
+
+
+// signed versions of the above
+#define EPI_LE_S16(x) ((int16_t)EPI_LE_U16((uint16_t)(x)))
+#define EPI_LE_S32(x) ((int32_t)EPI_LE_U32((uint32_t)(x)))
+#define EPI_LE_S64(x) ((s64_t)EPI_LE_U64((u64_t)(x)))
+
+#define EPI_BE_S16(x) ((int16_t)EPI_BE_U16((uint16_t)(x)))
+#define EPI_BE_S32(x) ((int32_t)EPI_BE_U32((uint32_t)(x)))
+#define EPI_BE_S64(x) ((s64_t)EPI_BE_U64((u64_t)(x)))
 
 #endif /* __EPI_ENDIAN_H__ */
 

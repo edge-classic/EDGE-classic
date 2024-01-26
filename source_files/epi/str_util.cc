@@ -29,16 +29,17 @@ namespace epi
 {
 
 #ifdef _WIN32
-std::wstring utf8_to_wstring(const char *instring)
+std::wstring utf8_to_wstring(std::string_view instring)
 {
     size_t utf8pos = 0;
-    size_t utf8len = strlen(instring);
+    const char *utf8ptr = instring.data();
+    size_t utf8len = instring.size();
 	std::wstring outstring;
     uint32_t u32c;
     while (utf8pos < utf8len)
     {
         u32c = 0;
-        utf8pos += grapheme_decode_utf8(instring+utf8pos, utf8len, &u32c);
+        utf8pos += grapheme_decode_utf8(utf8ptr+utf8pos, utf8len, &u32c);
         if (u32c < 0x10000)
             outstring.push_back((wchar_t)u32c);
         else

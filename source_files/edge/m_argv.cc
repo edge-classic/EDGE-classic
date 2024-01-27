@@ -274,15 +274,7 @@ void argv::ApplyResponseFile(std::string name)
         I_Error("Couldn't open \"%s\" for reading!", name.c_str());
 
     for (; EOF != ParseOneFilename(f, buf);)
-    {
-#ifdef _WIN32
-        // Can't really guarantee that a response file will have a certain encoding
-        // on Windows, so treat them as wide strings and see what sticks
-        list.push_back(epi::wstring_to_utf8((wchar_t *)buf));
-#else
         list.push_back(strdup(buf));
-#endif
-    }
 
     // unlink from list
     added_parms = p;

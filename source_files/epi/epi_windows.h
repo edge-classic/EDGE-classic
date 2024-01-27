@@ -27,6 +27,12 @@
 #ifndef WIN32
 #define WIN32
 #endif
+#ifndef UNICODE
+#define UNICODE
+#endif
+#ifndef _UNICODE
+#define UNICODE
+#endif
 #include <windows.h>
 #endif
 

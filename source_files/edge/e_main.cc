@@ -1299,7 +1299,7 @@ static void IdentifyVersion(void)
         // If no directory given use the IWAD directory
         std::string dir = epi::FS_GetDirectory(fn);
         if (dir.empty())
-            iwad_file = std::string(iwad_dir).append(fn);
+            iwad_file = epi::FS_PathAppend(iwad_dir, fn);
         else
             iwad_file = fn;
 
@@ -1310,7 +1310,7 @@ static void IdentifyVersion(void)
             {
                 for (size_t i = 0; i < iwad_dir_vector.size(); i++)
                 {
-                    iwad_file = std::string(iwad_dir_vector[i]).append(fn);
+                    iwad_file = epi::FS_PathAppend(iwad_dir_vector[i], fn);
                     if (epi::FS_Access(iwad_file))
                         goto foundindoomwadpath;
                 }
@@ -1329,7 +1329,7 @@ static void IdentifyVersion(void)
             {
                 for (size_t i = 0; i < iwad_dir_vector.size(); i++)
                 {
-                    iwad_file = std::string(iwad_dir_vector[i]).append(fn);
+                    iwad_file = epi::FS_PathAppend(iwad_dir_vector[i], fn);
                     if (epi::FS_Access(iwad_file))
                         goto foundindoomwadpath;
                 }
@@ -1625,8 +1625,9 @@ static void SetupLogAndDebugFiles(void)
     // -AJA- 2003/11/08 The log file gets all CON_Printfs, I_Printfs,
     //                  I_Warnings and I_Errors.
 
-    std::string log_fn(std::string(home_dir).append(logfilename.s));
-    std::string debug_fn(std::string(home_dir).append(debugfilename.s));
+    std::string log_fn = epi::FS_PathAppend(home_dir, logfilename.s);
+    std::string debug_fn = epi::FS_PathAppend(home_dir, debugfilename.s);
+
 
     logfile   = NULL;
     debugfile = NULL;

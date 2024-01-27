@@ -229,13 +229,13 @@ void I_StartupMusic(void)
 {
     // Check for soundfonts and instrument banks
     std::vector<epi::dir_entry_c> sfd;
-    std::string         soundfont_dir = std::string(game_dir).append("soundfont");
+    std::string         soundfont_dir = epi::FS_PathAppend(game_dir, "soundfont");
 
     // Always add the default/internal GENMIDI lump choice
     available_genmidis.push_back("GENMIDI");
     // Set default SF2 location in CVAR if needed
     if (s_soundfont.s.empty())
-        s_soundfont = std::string(soundfont_dir).append("Default.sf2");
+        s_soundfont = epi::FS_PathAppend(soundfont_dir, "Default.sf2");
 
     if (!FS_ReadDir(sfd, soundfont_dir, "*.*"))
     {
@@ -263,7 +263,7 @@ void I_StartupMusic(void)
     {
         // Check home_dir soundfont folder as well; create it if it doesn't exist (home_dir only)
         sfd.clear();
-        soundfont_dir = std::string(home_dir).append("soundfont");
+        soundfont_dir = epi::FS_PathAppend(home_dir, "soundfont");
         if (!epi::FS_IsDir(soundfont_dir))
             epi::FS_MakeDir(soundfont_dir);
 

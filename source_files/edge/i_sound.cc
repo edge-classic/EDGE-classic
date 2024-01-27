@@ -251,10 +251,10 @@ void I_StartupMusic(void)
                 epi::STR_Lower(ext);
                 if (ext == ".sf2")
                 {
-                    available_soundfonts.push_back(sfd[i].name);
+                    available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
                 }
                 else if (ext == ".op2" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
-                    available_genmidis.push_back(sfd[i].name);
+                    available_genmidis.push_back(epi::SanitizePath(sfd[i].name));
             }
         }
     }
@@ -280,9 +280,9 @@ void I_StartupMusic(void)
                     std::string ext = epi::FS_GetExtension(sfd[i].name);
                     epi::STR_Lower(ext);
                     if (ext == ".sf2")
-                        available_soundfonts.push_back(sfd[i].name);
+                        available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
                     else if (ext == ".op2" || ext == ".ad" || ext == ".opl" || ext == ".tmb")
-                        available_genmidis.push_back(sfd[i].name);
+                        available_genmidis.push_back(epi::SanitizePath(sfd[i].name));
                 }
             }
         }

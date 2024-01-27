@@ -48,7 +48,7 @@ fluid_sfloader_t *edge_fluid_sfloader = nullptr;
 
 DEF_CVAR(s_soundfont, "", CVAR_ARCHIVE)
 
-DEF_CVAR(s_fluidgain, "0.3", CVAR_ARCHIVE)
+DEF_CVAR(s_fluidgain, "0.3", CVAR_ARCHIVE|CVAR_PATH)
 
 extern std::vector<std::string> available_soundfonts;
 

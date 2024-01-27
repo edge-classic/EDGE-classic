@@ -48,7 +48,7 @@ extern int  dev_freq;
 
 bool opl_disabled = false;
 
-DEF_CVAR(s_genmidi, "GENMIDI", CVAR_ARCHIVE)
+DEF_CVAR(s_genmidi, "GENMIDI", CVAR_ARCHIVE|CVAR_PATH)
 
 extern std::vector<std::string> available_genmidis;
 

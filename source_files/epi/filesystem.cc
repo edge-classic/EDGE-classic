@@ -530,6 +530,19 @@ std::string FS_MakeRelative(std::string_view parent, std::string_view child)
     return relpath;
 }
 
+std::string SanitizePath(std::string_view path)
+{
+    std::string sani_path;
+    for (const char ch : path)
+    {
+        if (ch == '\\') 
+            sani_path.push_back('/');
+        else
+            sani_path.push_back(ch);
+    }
+    return sani_path;
+}
+
 std::string FS_PathAppend(std::string_view parent, std::string_view child)
 {
     SYS_ASSERT(!parent.empty() && !child.empty());

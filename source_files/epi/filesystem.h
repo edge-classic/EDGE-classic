@@ -53,6 +53,7 @@ std::string FS_GetDirectory(std::string_view path);
 std::string FS_GetExtension(std::string_view path);
 std::string FS_MakeRelative(std::string_view parent, std::string_view child);
 std::string FS_PathAppend(std::string_view parent, std::string_view child);
+std::string SanitizePath(std::string_view path);
 bool FS_IsAbsolute(std::string_view path);
 void FS_ReplaceExtension(std::string &path, std::string_view ext);
 

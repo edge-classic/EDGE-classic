@@ -23,6 +23,7 @@
 
 #include "m_argv.h"
 
+#include "filesystem.h"
 #include "str_util.h"
 
 // NOTE: we must use a plain linked list (and not std::vector) here,
@@ -323,9 +324,13 @@ void CON_WriteVars(FILE *f)
 {
     for (cvar_c *var = all_cvars; var != NULL; var = var->next)
     {
-        if ((var->flags & CVAR_ARCHIVE) != 0)
+        if (var->flags & CVAR_ARCHIVE)
         {
-            std::string line = epi::STR_Format("/%s\t\"%s\"\n", var->name, var->c_str());
+            std::string line;
+            if (var->flags & CVAR_PATH)
+                line = epi::SanitizePath(epi::STR_Format("/%s\t\"%s\"\n", var->name, var->c_str()));
+            else
+                line = epi::STR_Format("/%s\t\"%s\"\n", var->name, var->c_str());
             fwrite(line.data(), line.size(), 1, f);
         }
     }

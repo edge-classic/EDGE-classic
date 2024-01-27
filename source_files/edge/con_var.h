@@ -100,6 +100,7 @@ enum
     CVAR_CHEAT    = (1 << 1), // disabled in multi-player games
     CVAR_NO_RESET = (1 << 2), // do not reset to default
     CVAR_ROM      = (1 << 3), // read-only
+    CVAR_PATH     = (1 << 4), // a filesystem path and needs to be sanitized for certain characters
 };
 
 // called by CON_InitConsole.

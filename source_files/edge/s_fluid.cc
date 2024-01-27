@@ -120,7 +120,6 @@ bool S_StartupFluid(void)
         return false;
 	}
 
-    fluid_synth_system_reset(edge_fluid);
 	fluid_synth_program_reset(edge_fluid);
 
     return true; // OK!
@@ -321,9 +320,6 @@ class fluid_player_c : public abstract_music_c
             return;
 
         fluid_synth_all_voices_stop(edge_fluid);
-
-        fluid_synth_system_reset(edge_fluid);
-        fluid_synth_program_reset(edge_fluid);
 
         S_QueueStop();
 

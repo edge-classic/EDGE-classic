@@ -329,7 +329,7 @@ void FreeMapList()
     Maps.mapcount = 0;
 }
 
-static void SkipToNextLine(epi::lexer_c &lex, epi::token_kind_e &tok, std::string &value)
+static void SkipToNextLine(epi::Lexer &lex, epi::TokenKind &tok, std::string &value)
 {
     int skip_line = lex.LastLine();
     for (;;)
@@ -338,7 +338,7 @@ static void SkipToNextLine(epi::lexer_c &lex, epi::token_kind_e &tok, std::strin
         if (lex.LastLine() == skip_line)
         {
             tok = lex.Next(value);
-            if (tok == epi::TOK_EOF)
+            if (tok == epi::kTokenEOF)
                 break;
         }
         else
@@ -352,7 +352,7 @@ static void SkipToNextLine(epi::lexer_c &lex, epi::token_kind_e &tok, std::strin
 //
 // -----------------------------------------------
 
-static void ParseUMAPINFOEntry(epi::lexer_c &lex, MapEntry *val)
+static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
 {
     for (;;)
     {
@@ -362,12 +362,12 @@ static void ParseUMAPINFOEntry(epi::lexer_c &lex, MapEntry *val)
         std::string key;
         std::string value;
 
-        epi::token_kind_e tok = lex.Next(key);
+        epi::TokenKind tok = lex.Next(key);
 
-        if (tok == epi::TOK_EOF)
+        if (tok == epi::kTokenEOF)
             I_Error("Malformed UMAPINFO lump: unclosed block\n");
 
-        if (tok != epi::TOK_Ident)
+        if (tok != epi::kTokenIdentifier)
             I_Error("Malformed UMAPINFO lump: missing key\n");
 
         if (!lex.Match("="))
@@ -375,7 +375,7 @@ static void ParseUMAPINFOEntry(epi::lexer_c &lex, MapEntry *val)
 
         tok = lex.Next(value);
 
-        if (tok == epi::TOK_EOF || tok == epi::TOK_ERROR || value == "}")
+        if (tok == epi::kTokenEOF || tok == epi::kTokenError || value == "}")
             I_Error("Malformed UMAPINFO lump: missing value\n");
 
         if (epi::STR_CaseCmp(key, "levelname") == 0)
@@ -446,15 +446,15 @@ static void ParseUMAPINFOEntry(epi::lexer_c &lex, MapEntry *val)
         }
         else if (epi::STR_CaseCmp(key, "endcast") == 0)
         {
-            val->docast = epi::LEX_Boolean(value);
+            val->docast = epi::LexBoolean(value);
         }
         else if (epi::STR_CaseCmp(key, "endbunny") == 0)
         {
-            val->dobunny = epi::LEX_Boolean(value);
+            val->dobunny = epi::LexBoolean(value);
         }
         else if (epi::STR_CaseCmp(key, "endgame") == 0)
         {
-            val->endgame = epi::LEX_Boolean(value);
+            val->endgame = epi::LexBoolean(value);
         }
         else if (epi::STR_CaseCmp(key, "exitpic") == 0)
         {
@@ -472,11 +472,11 @@ static void ParseUMAPINFOEntry(epi::lexer_c &lex, MapEntry *val)
         }
         else if (epi::STR_CaseCmp(key, "nointermission") == 0)
         {
-            val->nointermission = epi::LEX_Boolean(value);
+            val->nointermission = epi::LexBoolean(value);
         }
         else if (epi::STR_CaseCmp(key, "partime") == 0)
         {
-            val->partime = 35 * epi::LEX_Int(value);
+            val->partime = 35 * epi::LexInteger(value);
         }
         else if (epi::STR_CaseCmp(key, "intertext") == 0)
         {
@@ -623,11 +623,11 @@ static void ParseUMAPINFOEntry(epi::lexer_c &lex, MapEntry *val)
                     if (!lex.Match(","))
                         I_Error("UMAPINFO: \"bossaction\" key missing line special!\n");
                     lex.Next(value);
-                    special = epi::LEX_Int(value);
+                    special = epi::LexInteger(value);
                     if (!lex.Match(","))
                         I_Error("UMAPINFO: \"bossaction\" key missing tag!\n");
                     lex.Next(value);
-                    tag = epi::LEX_Int(value);
+                    tag = epi::LexInteger(value);
                     if (tag != 0 || special == 11 || special == 51 || special == 52 || special == 124)
                     {
                         if (val->numbossactions == -1)
@@ -679,22 +679,22 @@ static void ParseUMAPINFOEntry(epi::lexer_c &lex, MapEntry *val)
 
 void Parse_UMAPINFO(const std::string &buffer)
 {
-    epi::lexer_c lex(buffer);
+    epi::Lexer lex(buffer);
 
     for (;;)
     {
         std::string       section;
-        epi::token_kind_e tok = lex.Next(section);
+        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::TOK_EOF)
+        if (tok == epi::kTokenEOF)
             break;
 
-        if (tok != epi::TOK_Ident || epi::STR_CaseCmp(section, "MAP") != 0)
+        if (tok != epi::kTokenIdentifier || epi::STR_CaseCmp(section, "MAP") != 0)
             I_Error("Malformed UMAPINFO lump.\n");
 
         tok = lex.Next(section);
 
-        if (tok != epi::TOK_Ident)
+        if (tok != epi::kTokenIdentifier)
             I_Error("UMAPINFO: No mapname for map entry!\n");
 
         unsigned int i      = 0;

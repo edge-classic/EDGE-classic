@@ -308,40 +308,40 @@ void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar)
     done_first_init = true;
 }
 
-static void ParseConfigBlock(epi::lexer_c &lex)
+static void ParseConfigBlock(epi::Lexer &lex)
 {
     for (;;)
     {
         std::string key;
         std::string value;
 
-        epi::token_kind_e tok = lex.Next(key);
+        epi::TokenKind tok = lex.Next(key);
 
         if (key == "/") // CVAR keys will start with this, but we need to discard it
             continue;
 
-        if (tok == epi::TOK_EOF)
+        if (tok == epi::kTokenEOF)
             return;
 
-        if (tok == epi::TOK_ERROR)
+        if (tok == epi::kTokenError)
             I_Error("ParseConfig: error parsing file!\n");
 
         tok = lex.Next(value);
 
         // The last line of the config writer causes a weird blank key with an EOF value, so just return here
-        if (tok == epi::TOK_EOF)
+        if (tok == epi::kTokenEOF)
             return;
 
-        if (tok == epi::TOK_ERROR)
+        if (tok == epi::kTokenError)
             I_Error("ParseConfig: malformed value for key %s!\n", key.c_str());
 
-        if (tok == epi::TOK_String)
+        if (tok == epi::kTokenString)
         {
             std::string try_cvar = key;
             try_cvar.append(" ").append(value);
             CON_TryCommand(try_cvar.c_str());
         }
-        else if (tok == epi::TOK_Number)
+        else if (tok == epi::kTokenNumber)
         {
             for (int i = 0; i < numdefaults; i++)
             {
@@ -349,11 +349,11 @@ static void ParseConfigBlock(epi::lexer_c &lex)
                 {
                     if (defaults[i].type == CFGT_Boolean)
                     {
-                        *(bool *)defaults[i].location = epi::LEX_Int(value) ? true : false;
+                        *(bool *)defaults[i].location = epi::LexInteger(value) ? true : false;
                     }
                     else /* CFGT_Int and CFGT_Key */
                     {
-                        *(int *)defaults[i].location = epi::LEX_Int(value);
+                        *(int *)defaults[i].location = epi::LexInteger(value);
                     }
                     break;
                 }
@@ -364,14 +364,14 @@ static void ParseConfigBlock(epi::lexer_c &lex)
 
 static void ParseConfig(const std::string &data)
 {
-    epi::lexer_c lex(data);
+    epi::Lexer lex(data);
 
     for (;;)
     {
         std::string       section;
-        epi::token_kind_e tok = lex.Next(section);
+        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::TOK_EOF)
+        if (tok == epi::kTokenEOF)
             return;
 
         // process the block

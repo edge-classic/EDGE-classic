@@ -160,15 +160,15 @@ static void GetMUSINFOTracksForLevel(void)
     musinfo.resize(raw_length);
     memcpy(musinfo.data(), raw_musinfo, raw_length);
     delete[] raw_musinfo;
-    epi::lexer_c lex(musinfo);
+    epi::Lexer lex(musinfo);
     if (!musinfo_tracks.count(currmap->name))
         musinfo_tracks.try_emplace({currmap->name, {}});
     for (;;)
     {
         std::string       section;
-        epi::token_kind_e tok = lex.Next(section);
+        epi::TokenKind tok = lex.Next(section);
 
-        if (tok != epi::TOK_Number && tok != epi::TOK_Ident)
+        if (tok != epi::kTokenNumber && tok != epi::kTokenIdentifier)
             break;
         
         if (epi::STR_CaseCmp(section, currmap->name.c_str()) != 0)
@@ -179,9 +179,9 @@ static void GetMUSINFOTracksForLevel(void)
         for (;;)
         {
             std::string       value;
-            epi::token_kind_e block_tok = lex.Next(value);
+            epi::TokenKind block_tok = lex.Next(value);
 
-            if (block_tok != epi::TOK_Number && block_tok != epi::TOK_Ident)
+            if (block_tok != epi::kTokenNumber && block_tok != epi::kTokenIdentifier)
                 return;
 
             // A valid map name should be the end of this block
@@ -190,7 +190,7 @@ static void GetMUSINFOTracksForLevel(void)
 
             // This does have a bit of faith that the MUSINFO lump isn't malformed
             if (mus_number == -1)
-                mus_number = epi::LEX_Int(value);
+                mus_number = epi::LexInteger(value);
             else
             {
                 // This mimics Lobo's ad-hoc playlist stuff for UMAPINFO
@@ -1451,7 +1451,7 @@ static void LoadXGL3Nodes(int lumpnum)
 
 static void LoadUDMFVertexes()
 {
-    epi::lexer_c lex(udmf_lump);
+    epi::Lexer lex(udmf_lump);
 
     I_Debugf("LoadUDMFVertexes: parsing TEXTMAP\n");
     int cur_vertex = 0;
@@ -1459,12 +1459,12 @@ static void LoadUDMFVertexes()
     for (;;)
     {
         std::string       section;
-        epi::token_kind_e tok = lex.Next(section);
+        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::TOK_EOF)
+        if (tok == epi::kTokenEOF)
             break;
 
-        if (tok != epi::TOK_Ident)
+        if (tok != epi::kTokenIdentifier)
             I_Error("Malformed TEXTMAP lump.\n");
 
         // check namespace
@@ -1490,12 +1490,12 @@ static void LoadUDMFVertexes()
 
                 std::string       key;
                 std::string       value;
-                epi::token_kind_e block_tok = lex.Next(key);
+                epi::TokenKind block_tok = lex.Next(key);
 
-                if (block_tok == epi::TOK_EOF)
+                if (block_tok == epi::kTokenEOF)
                     I_Error("Malformed TEXTMAP lump: unclosed block\n");
 
-                if (block_tok != epi::TOK_Ident)
+                if (block_tok != epi::kTokenIdentifier)
                     I_Error("Malformed TEXTMAP lump: missing key\n");
 
                 if (!lex.Match("="))
@@ -1503,20 +1503,20 @@ static void LoadUDMFVertexes()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::TOK_EOF || block_tok == epi::TOK_ERROR || value == "}")
+                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
                     I_Error("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
                     I_Error("Malformed TEXTMAP lump: missing ';'\n");
 
                 if (key == "x")
-                    x = epi::LEX_Double(value);
+                    x = epi::LexDouble(value);
                 else if (key == "y")
-                    y = epi::LEX_Double(value);
+                    y = epi::LexDouble(value);
                 else if (key == "zfloor")
-                    zf = epi::LEX_Double(value);
+                    zf = epi::LexDouble(value);
                 else if (key == "zceiling")
-                    zc = epi::LEX_Double(value);
+                    zc = epi::LexDouble(value);
             }
             vertexes[cur_vertex] = {{{{{x, y, zf}}}, zc}};
             cur_vertex++;
@@ -1526,7 +1526,7 @@ static void LoadUDMFVertexes()
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::TOK_EOF)
+                if (lex.Match("}") || tok == epi::kTokenEOF)
                     break;
             }
         }
@@ -1538,7 +1538,7 @@ static void LoadUDMFVertexes()
 
 static void LoadUDMFSectors()
 {
-    epi::lexer_c lex(udmf_lump);
+    epi::Lexer lex(udmf_lump);
 
     I_Debugf("LoadUDMFSectors: parsing TEXTMAP\n");
     int cur_sector = 0;
@@ -1546,12 +1546,12 @@ static void LoadUDMFSectors()
     for (;;)
     {
         std::string       section;
-        epi::token_kind_e tok = lex.Next(section);
+        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::TOK_EOF)
+        if (tok == epi::kTokenEOF)
             break;
 
-        if (tok != epi::TOK_Ident)
+        if (tok != epi::kTokenIdentifier)
             I_Error("Malformed TEXTMAP lump.\n");
 
         // check namespace
@@ -1588,12 +1588,12 @@ static void LoadUDMFSectors()
 
                 std::string       key;
                 std::string       value;
-                epi::token_kind_e block_tok = lex.Next(key);
+                epi::TokenKind block_tok = lex.Next(key);
 
-                if (block_tok == epi::TOK_EOF)
+                if (block_tok == epi::kTokenEOF)
                     I_Error("Malformed TEXTMAP lump: unclosed block\n");
 
-                if (block_tok != epi::TOK_Ident)
+                if (block_tok != epi::kTokenIdentifier)
                     I_Error("Malformed TEXTMAP lump: missing key\n");
 
                 if (!lex.Match("="))
@@ -1601,54 +1601,54 @@ static void LoadUDMFSectors()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::TOK_EOF || block_tok == epi::TOK_ERROR || value == "}")
+                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
                     I_Error("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
                     I_Error("Malformed TEXTMAP lump: missing ';'\n");
 
                 if (key == "heightfloor")
-                    fz = epi::LEX_Int(value);
+                    fz = epi::LexInteger(value);
                 else if (key == "heightceiling")
-                    cz = epi::LEX_Int(value);
+                    cz = epi::LexInteger(value);
                 else if (key == "texturefloor")
                     Z_StrNCpy(floor_tex, value.c_str(), 8);
                 else if (key == "textureceiling")
                     Z_StrNCpy(ceil_tex, value.c_str(), 8);
                 else if (key == "lightlevel")
-                    light = epi::LEX_Int(value);
+                    light = epi::LexInteger(value);
                 else if (key == "special")
-                    type = epi::LEX_Int(value);
+                    type = epi::LexInteger(value);
                 else if (key == "id")
-                    tag = epi::LEX_Int(value);
+                    tag = epi::LexInteger(value);
                 else if (key == "lightcolor")
-                    light_color = ((uint32_t)epi::LEX_Int(value) << 8 | 0xFF);
+                    light_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
                 else if (key == "fadecolor")
-                    fog_color = ((uint32_t)epi::LEX_Int(value) << 8 | 0xFF);
+                    fog_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
                 else if (key == "fogdensity")
-                    fog_density = CLAMP(0, epi::LEX_Int(value), 1020);
+                    fog_density = CLAMP(0, epi::LexInteger(value), 1020);
                 else if (key == "xpanningfloor")
-                    fx = epi::LEX_Double(value);
+                    fx = epi::LexDouble(value);
                 else if (key == "ypanningfloor")
-                    fy = epi::LEX_Double(value);
+                    fy = epi::LexDouble(value);
                 else if (key == "xpanningceiling")
-                    cx = epi::LEX_Double(value);
+                    cx = epi::LexDouble(value);
                 else if (key == "ypanningceiling")
-                    cy = epi::LEX_Double(value);
+                    cy = epi::LexDouble(value);
                 else if (key == "xscalefloor")
-                    fx_sc = epi::LEX_Double(value);
+                    fx_sc = epi::LexDouble(value);
                 else if (key == "yscalefloor")
-                    fy_sc = epi::LEX_Double(value);
+                    fy_sc = epi::LexDouble(value);
                 else if (key == "xscaleceiling")
-                    cx_sc = epi::LEX_Double(value);
+                    cx_sc = epi::LexDouble(value);
                 else if (key == "yscaleceiling")
-                    cy_sc = epi::LEX_Double(value);
+                    cy_sc = epi::LexDouble(value);
                 else if (key == "rotationfloor")
-                    rf = epi::LEX_Double(value);
+                    rf = epi::LexDouble(value);
                 else if (key == "rotationceiling")
-                    rc = epi::LEX_Double(value);
+                    rc = epi::LexDouble(value);
                 else if (key == "gravity")
-                    gravfactor = epi::LEX_Double(value);
+                    gravfactor = epi::LexDouble(value);
             }
             sector_t *ss = sectors + cur_sector;
             ss->f_h      = fz;
@@ -1794,7 +1794,7 @@ static void LoadUDMFSectors()
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::TOK_EOF)
+                if (lex.Match("}") || tok == epi::kTokenEOF)
                     break;
             }
         }
@@ -1806,7 +1806,7 @@ static void LoadUDMFSectors()
 
 static void LoadUDMFSideDefs()
 {
-    epi::lexer_c lex(udmf_lump);
+    epi::Lexer lex(udmf_lump);
 
     I_Debugf("LoadUDMFSectors: parsing TEXTMAP\n");
 
@@ -1818,12 +1818,12 @@ static void LoadUDMFSideDefs()
     for (;;)
     {
         std::string       section;
-        epi::token_kind_e tok = lex.Next(section);
+        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::TOK_EOF)
+        if (tok == epi::kTokenEOF)
             break;
 
-        if (tok != epi::TOK_Ident)
+        if (tok != epi::kTokenIdentifier)
             I_Error("Malformed TEXTMAP lump.\n");
 
         // check namespace
@@ -1860,12 +1860,12 @@ static void LoadUDMFSideDefs()
 
                 std::string       key;
                 std::string       value;
-                epi::token_kind_e block_tok = lex.Next(key);
+                epi::TokenKind block_tok = lex.Next(key);
 
-                if (block_tok == epi::TOK_EOF)
+                if (block_tok == epi::kTokenEOF)
                     I_Error("Malformed TEXTMAP lump: unclosed block\n");
 
-                if (block_tok != epi::TOK_Ident)
+                if (block_tok != epi::kTokenIdentifier)
                     I_Error("Malformed TEXTMAP lump: missing key\n");
 
                 if (!lex.Match("="))
@@ -1873,40 +1873,40 @@ static void LoadUDMFSideDefs()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::TOK_EOF || block_tok == epi::TOK_ERROR || value == "}")
+                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
                     I_Error("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
                     I_Error("Malformed TEXTMAP lump: missing ';'\n");
 
                 if (key == "offsetx")
-                    x = epi::LEX_Int(value);
+                    x = epi::LexInteger(value);
                 else if (key == "offsety")
-                    y = epi::LEX_Int(value);
+                    y = epi::LexInteger(value);
                 else if (key == "offsetx_bottom")
-                    lowx = epi::LEX_Double(value);
+                    lowx = epi::LexDouble(value);
                 else if (key == "offsetx_mid")
-                    midx = epi::LEX_Double(value);
+                    midx = epi::LexDouble(value);
                 else if (key == "offsetx_top")
-                    highx = epi::LEX_Double(value);
+                    highx = epi::LexDouble(value);
                 else if (key == "offsety_bottom")
-                    lowy = epi::LEX_Double(value);
+                    lowy = epi::LexDouble(value);
                 else if (key == "offsety_mid")
-                    midy = epi::LEX_Double(value);
+                    midy = epi::LexDouble(value);
                 else if (key == "offsety_top")
-                    highy = epi::LEX_Double(value);
+                    highy = epi::LexDouble(value);
                 else if (key == "scalex_bottom")
-                    low_scx = epi::LEX_Double(value);
+                    low_scx = epi::LexDouble(value);
                 else if (key == "scalex_mid")
-                    mid_scx = epi::LEX_Double(value);
+                    mid_scx = epi::LexDouble(value);
                 else if (key == "scalex_top")
-                    high_scx = epi::LEX_Double(value);
+                    high_scx = epi::LexDouble(value);
                 else if (key == "scaley_bottom")
-                    low_scy = epi::LEX_Double(value);
+                    low_scy = epi::LexDouble(value);
                 else if (key == "scaley_mid")
-                    mid_scy = epi::LEX_Double(value);
+                    mid_scy = epi::LexDouble(value);
                 else if (key == "scaley_top")
-                    high_scy = epi::LEX_Double(value);
+                    high_scy = epi::LexDouble(value);
                 else if (key == "texturetop")
                     Z_StrNCpy(top_tex, value.c_str(), 8);
                 else if (key == "texturebottom")
@@ -1914,7 +1914,7 @@ static void LoadUDMFSideDefs()
                 else if (key == "texturemiddle")
                     Z_StrNCpy(middle_tex, value.c_str(), 8);
                 else if (key == "sector")
-                    sec_num = epi::LEX_Int(value);
+                    sec_num = epi::LexInteger(value);
             }
             SYS_ASSERT(nummapsides <= numsides); // sanity check
 
@@ -1981,7 +1981,7 @@ static void LoadUDMFSideDefs()
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::TOK_EOF)
+                if (lex.Match("}") || tok == epi::kTokenEOF)
                     break;
             }
         }
@@ -2047,7 +2047,7 @@ static void LoadUDMFSideDefs()
 
 static void LoadUDMFLineDefs()
 {
-    epi::lexer_c lex(udmf_lump);
+    epi::Lexer lex(udmf_lump);
 
     I_Debugf("LoadUDMFLineDefs: parsing TEXTMAP\n");
 
@@ -2056,12 +2056,12 @@ static void LoadUDMFLineDefs()
     for (;;)
     {
         std::string       section;
-        epi::token_kind_e tok = lex.Next(section);
+        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::TOK_EOF)
+        if (tok == epi::kTokenEOF)
             break;
 
-        if (tok != epi::TOK_Ident)
+        if (tok != epi::kTokenIdentifier)
             I_Error("Malformed TEXTMAP lump.\n");
 
         // check namespace
@@ -2088,12 +2088,12 @@ static void LoadUDMFLineDefs()
 
                 std::string       key;
                 std::string       value;
-                epi::token_kind_e block_tok = lex.Next(key);
+                epi::TokenKind block_tok = lex.Next(key);
 
-                if (block_tok == epi::TOK_EOF)
+                if (block_tok == epi::kTokenEOF)
                     I_Error("Malformed TEXTMAP lump: unclosed block\n");
 
-                if (block_tok != epi::TOK_Ident)
+                if (block_tok != epi::kTokenIdentifier)
                     I_Error("Malformed TEXTMAP lump: missing key\n");
 
                 if (!lex.Match("="))
@@ -2101,48 +2101,48 @@ static void LoadUDMFLineDefs()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::TOK_EOF || block_tok == epi::TOK_ERROR || value == "}")
+                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
                     I_Error("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
                     I_Error("Malformed TEXTMAP lump: missing ';'\n");
 
                 if (key == "id")
-                    tag = epi::LEX_Int(value);
+                    tag = epi::LexInteger(value);
                 else if (key == "v1")
-                    v1 = epi::LEX_Int(value);
+                    v1 = epi::LexInteger(value);
                 else if (key == "v2")
-                    v2 = epi::LEX_Int(value);
+                    v2 = epi::LexInteger(value);
                 else if (key == "special")
-                    special = epi::LEX_Int(value);
+                    special = epi::LexInteger(value);
                 else if (key == "sidefront")
-                    side0 = epi::LEX_Int(value);
+                    side0 = epi::LexInteger(value);
                 else if (key == "sideback")
-                    side1 = epi::LEX_Int(value);
+                    side1 = epi::LexInteger(value);
                 else if (key == "blocking")
-                    flags |= (epi::LEX_Boolean(value) ? MLF_Blocking : 0);
+                    flags |= (epi::LexBoolean(value) ? MLF_Blocking : 0);
                 else if (key == "blockmonsters")
-                    flags |= (epi::LEX_Boolean(value) ? MLF_BlockMonsters : 0);
+                    flags |= (epi::LexBoolean(value) ? MLF_BlockMonsters : 0);
                 else if (key == "twosided")
-                    flags |= (epi::LEX_Boolean(value) ? MLF_TwoSided : 0);
+                    flags |= (epi::LexBoolean(value) ? MLF_TwoSided : 0);
                 else if (key == "dontpegtop")
-                    flags |= (epi::LEX_Boolean(value) ? MLF_UpperUnpegged : 0);
+                    flags |= (epi::LexBoolean(value) ? MLF_UpperUnpegged : 0);
                 else if (key == "dontpegbottom")
-                    flags |= (epi::LEX_Boolean(value) ? MLF_LowerUnpegged : 0);
+                    flags |= (epi::LexBoolean(value) ? MLF_LowerUnpegged : 0);
                 else if (key == "secret")
-                    flags |= (epi::LEX_Boolean(value) ? MLF_Secret : 0);
+                    flags |= (epi::LexBoolean(value) ? MLF_Secret : 0);
                 else if (key == "blocksound")
-                    flags |= (epi::LEX_Boolean(value) ? MLF_SoundBlock : 0);
+                    flags |= (epi::LexBoolean(value) ? MLF_SoundBlock : 0);
                 else if (key == "dontdraw")
-                    flags |= (epi::LEX_Boolean(value) ? MLF_DontDraw : 0);
+                    flags |= (epi::LexBoolean(value) ? MLF_DontDraw : 0);
                 else if (key == "mapped")
-                    flags |= (epi::LEX_Boolean(value) ? MLF_Mapped : 0);
+                    flags |= (epi::LexBoolean(value) ? MLF_Mapped : 0);
                 else if (key == "passuse")
-                    flags |= (epi::LEX_Boolean(value) ? MLF_PassThru : 0);
+                    flags |= (epi::LexBoolean(value) ? MLF_PassThru : 0);
                 else if (key == "blockplayers")
-                    flags |= (epi::LEX_Boolean(value) ? MLF_BlockPlayers : 0);
+                    flags |= (epi::LexBoolean(value) ? MLF_BlockPlayers : 0);
                 else if (key == "blocksight")
-                    flags |= (epi::LEX_Boolean(value) ? MLF_SightBlock : 0);
+                    flags |= (epi::LexBoolean(value) ? MLF_SightBlock : 0);
             }
             line_t *ld = lines + cur_line;
 
@@ -2191,7 +2191,7 @@ static void LoadUDMFLineDefs()
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::TOK_EOF)
+                if (lex.Match("}") || tok == epi::kTokenEOF)
                     break;
             }
         }
@@ -2203,18 +2203,18 @@ static void LoadUDMFLineDefs()
 
 static void LoadUDMFThings()
 {
-    epi::lexer_c lex(udmf_lump);
+    epi::Lexer lex(udmf_lump);
 
     I_Debugf("LoadUDMFThings: parsing TEXTMAP\n");
     for (;;)
     {
         std::string       section;
-        epi::token_kind_e tok = lex.Next(section);
+        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::TOK_EOF)
+        if (tok == epi::kTokenEOF)
             break;
 
-        if (tok != epi::TOK_Ident)
+        if (tok != epi::kTokenIdentifier)
             I_Error("Malformed TEXTMAP lump.\n");
 
         // check namespace
@@ -2247,12 +2247,12 @@ static void LoadUDMFThings()
 
                 std::string       key;
                 std::string       value;
-                epi::token_kind_e block_tok = lex.Next(key);
+                epi::TokenKind block_tok = lex.Next(key);
 
-                if (block_tok == epi::TOK_EOF)
+                if (block_tok == epi::kTokenEOF)
                     I_Error("Malformed TEXTMAP lump: unclosed block\n");
 
-                if (block_tok != epi::TOK_Ident)
+                if (block_tok != epi::kTokenIdentifier)
                     I_Error("Malformed TEXTMAP lump: missing key\n");
 
                 if (!lex.Match("="))
@@ -2260,54 +2260,54 @@ static void LoadUDMFThings()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::TOK_EOF || block_tok == epi::TOK_ERROR || value == "}")
+                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
                     I_Error("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
                     I_Error("Malformed TEXTMAP lump: missing ';'\n");
 
                 if (key == "id")
-                    tag = epi::LEX_Int(value);
+                    tag = epi::LexInteger(value);
                 else if (key == "x")
-                    x = epi::LEX_Double(value);
+                    x = epi::LexDouble(value);
                 else if (key == "y")
-                    y = epi::LEX_Double(value);
+                    y = epi::LexDouble(value);
                 else if (key == "height")
-                    z = epi::LEX_Double(value);
+                    z = epi::LexDouble(value);
                 else if (key == "angle")
-                    angle = epi::BAM_FromDegrees(epi::LEX_Int(value));
+                    angle = epi::BAM_FromDegrees(epi::LexInteger(value));
                 else if (key == "type")
-                    typenum = epi::LEX_Int(value);
+                    typenum = epi::LexInteger(value);
                 else if (key == "skill1")
-                    options |= (epi::LEX_Boolean(value) ? MTF_EASY : 0);
+                    options |= (epi::LexBoolean(value) ? MTF_EASY : 0);
                 else if (key == "skill2")
-                    options |= (epi::LEX_Boolean(value) ? MTF_EASY : 0);
+                    options |= (epi::LexBoolean(value) ? MTF_EASY : 0);
                 else if (key == "skill3")
-                    options |= (epi::LEX_Boolean(value) ? MTF_NORMAL : 0);
+                    options |= (epi::LexBoolean(value) ? MTF_NORMAL : 0);
                 else if (key == "skill4")
-                    options |= (epi::LEX_Boolean(value) ? MTF_HARD : 0);
+                    options |= (epi::LexBoolean(value) ? MTF_HARD : 0);
                 else if (key == "skill5")
-                    options |= (epi::LEX_Boolean(value) ? MTF_HARD : 0);
+                    options |= (epi::LexBoolean(value) ? MTF_HARD : 0);
                 else if (key == "ambush")
-                    options |= (epi::LEX_Boolean(value) ? MTF_AMBUSH : 0);
+                    options |= (epi::LexBoolean(value) ? MTF_AMBUSH : 0);
                 else if (key == "single")
-                    options &= (epi::LEX_Boolean(value) ? ~MTF_NOT_SINGLE : options);
+                    options &= (epi::LexBoolean(value) ? ~MTF_NOT_SINGLE : options);
                 else if (key == "dm")
-                    options &= (epi::LEX_Boolean(value) ? ~MTF_NOT_DM : options);
+                    options &= (epi::LexBoolean(value) ? ~MTF_NOT_DM : options);
                 else if (key == "coop")
-                    options &= (epi::LEX_Boolean(value) ? ~MTF_NOT_COOP : options);
+                    options &= (epi::LexBoolean(value) ? ~MTF_NOT_COOP : options);
                 else if (key == "friend")
-                    options |= (epi::LEX_Boolean(value) ? MTF_FRIEND : 0);
+                    options |= (epi::LexBoolean(value) ? MTF_FRIEND : 0);
                 else if (key == "health")
-                    healthfac = epi::LEX_Double(value);
+                    healthfac = epi::LexDouble(value);
                 else if (key == "alpha")
-                    alpha = epi::LEX_Double(value);
+                    alpha = epi::LexDouble(value);
                 else if (key == "scale")
-                    scale     = epi::LEX_Double(value);
+                    scale     = epi::LexDouble(value);
                 else if (key == "scalex")
-                    scalex    = epi::LEX_Double(value);
+                    scalex    = epi::LexDouble(value);
                 else if (key == "scaley")
-                    scaley    = epi::LEX_Double(value);
+                    scaley    = epi::LexDouble(value);
             }
             objtype = mobjtypes.Lookup(typenum);
 
@@ -2402,7 +2402,7 @@ static void LoadUDMFThings()
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::TOK_EOF)
+                if (lex.Match("}") || tok == epi::kTokenEOF)
                     break;
             }
         }
@@ -2417,17 +2417,17 @@ static void LoadUDMFThings()
 
 static void LoadUDMFCounts()
 {
-    epi::lexer_c lex(udmf_lump);
+    epi::Lexer lex(udmf_lump);
 
     for (;;)
     {
         std::string       section;
-        epi::token_kind_e tok = lex.Next(section);
+        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::TOK_EOF)
+        if (tok == epi::kTokenEOF)
             break;
 
-        if (tok != epi::TOK_Ident)
+        if (tok != epi::kTokenIdentifier)
             I_Error("Malformed TEXTMAP lump.\n");
 
         // check namespace
@@ -2468,7 +2468,7 @@ static void LoadUDMFCounts()
         for (;;)
         {
             tok = lex.Next(section);
-            if (lex.Match("}") || tok == epi::TOK_EOF)
+            if (lex.Match("}") || tok == epi::kTokenEOF)
                 break;
         }
     }

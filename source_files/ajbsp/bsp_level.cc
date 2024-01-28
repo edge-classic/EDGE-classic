@@ -781,29 +781,29 @@ void ParseThingField(thing_t *thing, const std::string &key, const std::string &
     // an issue if/when polyobjects happen, as I think other thing types are ignored - Dasho
 
     if (key == "x")
-        thing->x = I_ROUND(epi::LEX_Double(value));
+        thing->x = I_ROUND(epi::LexDouble(value));
 
     if (key == "y")
-        thing->y = I_ROUND(epi::LEX_Double(value));
+        thing->y = I_ROUND(epi::LexDouble(value));
 
     if (key == "type")
-        thing->type = epi::LEX_Int(value);
+        thing->type = epi::LexInteger(value);
 }
 
 void ParseVertexField(vertex_t *vertex, const std::string &key, const std::string &value)
 {
     if (key == "x")
-        vertex->x = epi::LEX_Double(value);
+        vertex->x = epi::LexDouble(value);
 
     if (key == "y")
-        vertex->y = epi::LEX_Double(value);
+        vertex->y = epi::LexDouble(value);
 }
 
 void ParseSidedefField(sidedef_t *side, const std::string &key, const std::string &value)
 {
     if (key == "sector")
     {
-        int num = epi::LEX_Int(value);
+        int num = epi::LexInteger(value);
 
         if (num < 0 || num >= num_sectors)
             I_Error("AJBSP: illegal sector number #%d\n", (int)num);
@@ -815,20 +815,20 @@ void ParseSidedefField(sidedef_t *side, const std::string &key, const std::strin
 void ParseLinedefField(linedef_t *line, const std::string &key, const std::string &value)
 {
     if (key == "v1")
-        line->start = SafeLookupVertex(epi::LEX_Int(value));
+        line->start = SafeLookupVertex(epi::LexInteger(value));
 
     if (key == "v2")
-        line->end = SafeLookupVertex(epi::LEX_Int(value));
+        line->end = SafeLookupVertex(epi::LexInteger(value));
 
     if (key == "special")
-        line->type = epi::LEX_Int(value);
+        line->type = epi::LexInteger(value);
 
     if (key == "twosided")
-        line->two_sided = epi::LEX_Boolean(value);
+        line->two_sided = epi::LexBoolean(value);
 
     if (key == "sidefront")
     {
-        int num = epi::LEX_Int(value);
+        int num = epi::LexInteger(value);
 
         if (num < 0 || num >= (int)num_sidedefs)
             line->right = NULL;
@@ -838,7 +838,7 @@ void ParseLinedefField(linedef_t *line, const std::string &key, const std::strin
 
     if (key == "sideback")
     {
-        int num = epi::LEX_Int(value);
+        int num = epi::LexInteger(value);
 
         if (num < 0 || num >= (int)num_sidedefs)
             line->left = NULL;
@@ -847,7 +847,7 @@ void ParseLinedefField(linedef_t *line, const std::string &key, const std::strin
     }
 }
 
-void ParseUDMF_Block(epi::lexer_c &lex, int cur_type)
+void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
 {
     vertex_t  *vertex = NULL;
     thing_t   *thing  = NULL;
@@ -883,12 +883,12 @@ void ParseUDMF_Block(epi::lexer_c &lex, int cur_type)
         std::string key;
         std::string value;
 
-        epi::token_kind_e tok = lex.Next(key);
+        epi::TokenKind tok = lex.Next(key);
 
-        if (tok == epi::TOK_EOF)
+        if (tok == epi::kTokenEOF)
             I_Error("AJBSP: Malformed TEXTMAP lump: unclosed block\n");
 
-        if (tok != epi::TOK_Ident)
+        if (tok != epi::kTokenIdentifier)
             I_Error("AJBSP: Malformed TEXTMAP lump: missing key\n");
 
         if (!lex.Match("="))
@@ -896,7 +896,7 @@ void ParseUDMF_Block(epi::lexer_c &lex, int cur_type)
 
         tok = lex.Next(value);
 
-        if (tok == epi::TOK_EOF || tok == epi::TOK_ERROR || value == "}")
+        if (tok == epi::kTokenEOF || tok == epi::kTokenError || value == "}")
             I_Error("AJBSP: Malformed TEXTMAP lump: missing value\n");
 
         if (!lex.Match(";"))
@@ -946,17 +946,17 @@ void ParseUDMF_Pass(const std::string &data, int pass)
     // pass = 2 : sidedefs
     // pass = 3 : linedefs
 
-    epi::lexer_c lex(data);
+    epi::Lexer lex(data);
 
     for (;;)
     {
         std::string       section;
-        epi::token_kind_e tok = lex.Next(section);
+        epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::TOK_EOF)
+        if (tok == epi::kTokenEOF)
             return;
 
-        if (tok != epi::TOK_Ident)
+        if (tok != epi::kTokenIdentifier)
         {
             I_Error("AJBSP: Malformed TEXTMAP lump.\n");
             return;

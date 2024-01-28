@@ -22,32 +22,31 @@
 namespace epi
 {
 
-enum token_kind_e
+enum TokenKind
 {
-    TOK_EOF = 0,
-    TOK_ERROR,
-
-    TOK_Ident,
-    TOK_Symbol,
-    TOK_Number,
-    TOK_String
+    kTokenEOF = 0,
+    kTokenError,
+    kTokenIdentifier,
+    kTokenSymbol,
+    kTokenNumber,
+    kTokenString
 };
 
-class lexer_c
+class Lexer
 {
   public:
-    lexer_c(const std::string &_data) : data(_data), pos(0), line(1)
+    Lexer(const std::string &data) : data_(data), pos_(0), line_(1)
     {
     }
 
-    ~lexer_c()
+    ~Lexer()
     {
     }
 
     // parse the next token, storing contents into given string.
-    // returns TOK_EOF at the end of the data, and TOK_ERROR when a
+    // returns kTokenEOF at the end of the data, and kTokenERROR when a
     // problem is encountered (s will be an error message).
-    token_kind_e Next(std::string &s);
+    TokenKind Next(std::string &s);
 
     // check if the next token is an identifier or symbol matching the
     // given string.  the match is not case sensitive.  if it matches,
@@ -66,25 +65,28 @@ class lexer_c
     // rewind to the very beginning.
     void Rewind();
 
-  private:
-    const std::string &data;
+    // get current lexer position
+    size_t GetPos();
 
-    size_t pos;
-    int    line;
+  private:
+    const std::string &data_;
+
+    size_t pos_;
+    int    line_;
 
     void SkipToNext();
 
-    token_kind_e ParseIdentifier(std::string &s);
-    token_kind_e ParseNumber(std::string &s);
-    token_kind_e ParseString(std::string &s);
+    TokenKind ParseIdentifier(std::string &s);
+    TokenKind ParseNumber(std::string &s);
+    TokenKind ParseString(std::string &s);
 
     void ParseEscape(std::string &s);
 };
 
 // helpers for converting numeric tokens.
-int    LEX_Int(const std::string &s);
-double LEX_Double(const std::string &s);
-bool   LEX_Boolean(const std::string &s);
+int    LexInteger(const std::string &s);
+double LexDouble(const std::string &s);
+bool   LexBoolean(const std::string &s);
 
 } // namespace epi
 

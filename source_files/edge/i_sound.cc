@@ -235,7 +235,7 @@ void I_StartupMusic(void)
     available_genmidis.push_back("GENMIDI");
     // Set default SF2 location in CVAR if needed
     if (s_soundfont.s.empty())
-        s_soundfont = epi::FS_PathAppend(soundfont_dir, "Default.sf2");
+        s_soundfont = epi::SanitizePath(epi::FS_PathAppend(soundfont_dir, "Default.sf2"));
 
     if (!FS_ReadDir(sfd, soundfont_dir, "*.*"))
     {

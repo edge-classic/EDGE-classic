@@ -89,7 +89,7 @@ bool S_StartupFluid(void)
     if (!cvar_good)
     {
         I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
-        s_soundfont = epi::FS_PathAppend(game_dir, "soundfont/Default.sf2");
+        s_soundfont = epi::SanitizePath(epi::FS_PathAppend(game_dir, "soundfont/Default.sf2"));
         if (!epi::FS_Exists(s_soundfont.s))
             I_Error("Fluidlite: Cannot locate default soundfont (Default.sf2)! Please check the /soundfont directory "
                     "of your EDGE-Classic install!\n");

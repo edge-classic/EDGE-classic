@@ -300,7 +300,7 @@ void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar)
 
     // Set default SF2 location in s_soundfont CVAR
     // We can't store this as a CVAR default since it is path-dependent
-    s_soundfont = epi::FS_PathAppend(game_dir, "soundfont/Default.sf2");
+    s_soundfont = epi::SanitizePath(epi::FS_PathAppend(game_dir, "soundfont/Default.sf2"));
 
     // Needed so that Smoothing/Upscaling is properly reset
     W_DeleteAllImages();

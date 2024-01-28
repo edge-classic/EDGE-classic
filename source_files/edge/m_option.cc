@@ -2039,7 +2039,7 @@ static void M_ChangeSoundfont(int keypressed, cvar_c *cvar)
     if (sf_pos < 0)
     {
         I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
-        s_soundfont = epi::FS_PathAppend(game_dir, "soundfont/Default.sf2");
+        s_soundfont = epi::SanitizePath(epi::FS_PathAppend(game_dir, "soundfont/Default.sf2"));
         return;
     }
 

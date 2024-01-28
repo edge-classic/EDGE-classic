@@ -655,7 +655,10 @@ void CON_TryCommand(const char *cmd)
     {
         if (argc <= 1)
         {
-            I_Printf("%s \"%s\"\n", argv[0], var->c_str());
+            if (var->flags & CVAR_PATH)
+                I_Printf("%s \"%s\"\n", argv[0], epi::SanitizePath(var->s).c_str());
+            else
+                I_Printf("%s \"%s\"\n", argv[0], var->c_str());
         }
         else if (argc - 1 >= 2) // Assume string with spaces; concat args into one string and try it
         {
@@ -665,12 +668,20 @@ void CON_TryCommand(const char *cmd)
                 // preserve spaces in original string
                 concatter.append(" ").append(argv[i]);
             }
-            *var = concatter.c_str();
+            if (var->flags & CVAR_PATH)
+                *var = epi::SanitizePath(concatter).c_str();
+            else
+                *var = concatter.c_str();
         }
         else if ((var->flags & CVAR_ROM) != 0)
             I_Printf("The cvar '%s' is read only.\n", var->name);
         else
-            *var = argv[1];
+        {
+            if (var->flags & CVAR_PATH)
+                *var = epi::SanitizePath(argv[1]).c_str();
+            else
+                *var = argv[1];
+        }
 
         KillArgs(argv, argc);
         return;

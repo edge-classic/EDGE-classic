@@ -200,7 +200,7 @@ void HandleFrames(const mobjinfo_t *info, int mt_num)
         count += Frames::BeginGroup('S', info->spawnstate);
 
         if (count != 2)
-            PrintWarn("Brain cube is missing spawn/fire states.\n");
+            I_Debugf("Dehacked: Warning - Brain cube is missing spawn/fire states.\n");
 
         if (count == 0)
         {
@@ -227,7 +227,7 @@ void HandleFrames(const mobjinfo_t *info, int mt_num)
 
     if (count == 0)
     {
-        PrintWarn("Attack [%s] has no states.\n", Things::GetMobjName(mt_num) + 1);
+        I_Debugf("Dehacked: Warning - Attack [%s] has no states.\n", Things::GetMobjName(mt_num) + 1);
         Frames::force_fullbright = false;
         return;
     }
@@ -405,7 +405,7 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
         }
 
     if (!ext)
-        InternalError("Missing attack %s in extra table.\n", Things::GetMobjName(mt_num) + 1);
+        I_Error("Dehacked: Error - Missing attack %s in extra table.\n", Things::GetMobjName(mt_num) + 1);
 
     WAD::Printf("ATTACKTYPE = %s;\n", ext->atk_type);
 
@@ -479,7 +479,7 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 
     if (Frames::attack_slot[0] || Frames::attack_slot[1] || Frames::attack_slot[2])
     {
-        PrintWarn("Attack [%s] contained an attacking action.\n", Things::GetMobjName(mt_num) + 1);
+        I_Debugf("Dehacked: Warning - Attack [%s] contained an attacking action.\n", Things::GetMobjName(mt_num) + 1);
         Things::HandleAttacks(info, mt_num);
     }
 
@@ -812,7 +812,7 @@ int ParseBits(const flagname_t *list, char *bit_str)
             if (sscanf(token, " %i ", &flags) == 1)
                 new_flags |= flags;
             else
-                PrintWarn("Line %d: unreadable BITS value: %s\n", Patch::line_num, token);
+                I_Debugf("Dehacked: Warning - Line %d: unreadable BITS value: %s\n", Patch::line_num, token);
 
             continue;
         }
@@ -825,7 +825,7 @@ int ParseBits(const flagname_t *list, char *bit_str)
 
         if (list[i].bex == NULL)
         {
-            PrintWarn("Line %d: unknown BITS mnemonic: %s\n", Patch::line_num, token);
+            I_Debugf("Dehacked: Warning - Line %d: unknown BITS mnemonic: %s\n", Patch::line_num, token);
             continue;
         }
 
@@ -1224,7 +1224,7 @@ void HandleFrames(const mobjinfo_t *info, int mt_num)
 
         if (0 == Frames::BeginGroup('E', tfog->spawnstate))
         {
-            PrintWarn("Teleport fog has no spawn states.\n");
+            I_Debugf("Dehacked: Warning - Teleport fog has no spawn states.\n");
             return;
         }
 
@@ -1254,7 +1254,7 @@ void HandleFrames(const mobjinfo_t *info, int mt_num)
         // with teleport target (handled above) and brain spit targets.
 
         if (mt_num != MT_BOSSTARGET)
-            PrintWarn("Mobj [%s:%d] has no states.\n", GetMobjName(mt_num), info->doomednum);
+            I_Debugf("Dehacked: Warning - Mobj [%s:%d] has no states.\n", GetMobjName(mt_num), info->doomednum);
 
         WAD::Printf("TRANSLUCENCY = 0%%;\n");
 
@@ -1445,7 +1445,7 @@ void HandleItem(const mobjinfo_t *info, int mt_num)
 
     if (pu->benefit == NULL) // not found
     {
-        PrintWarn("Unknown pickup sprite \"%s\" for item [%s]\n", Sprites::GetOriginalName(spr_num),
+        I_Debugf("Dehacked: Warning - Unknown pickup sprite \"%s\" for item [%s]\n", Sprites::GetOriginalName(spr_num),
                   GetMobjName(mt_num));
         return;
     }
@@ -1620,7 +1620,7 @@ void Things::HandleAttacks(const mobjinfo_t *info, int mt_num)
     }
     else if (info->meleestate && info->name[0] != '*')
     {
-        PrintWarn("No close attack in melee states of [%s].\n", GetMobjName(mt_num));
+        I_Debugf("Dehacked: Warning - No close attack in melee states of [%s].\n", GetMobjName(mt_num));
         WAD::Printf("CLOSE_ATTACK = DEMON_CLOSECOMBAT; // dummy attack\n");
     }
 
@@ -1845,7 +1845,7 @@ void Things::AlterThing(int new_val)
 
     if (!Field_Alter(mobj_field, field_name, raw_obj, new_val))
     {
-        PrintWarn("UNKNOWN THING FIELD: %s\n", field_name);
+        I_Debugf("Dehacked: Warning - UNKNOWN THING FIELD: %s\n", field_name);
     }
 }
 

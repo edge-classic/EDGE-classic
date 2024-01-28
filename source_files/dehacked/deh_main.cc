@@ -123,7 +123,7 @@ dehret_e Convert(void)
     Sounds::ConvertSFX();
     Music ::ConvertMUS();
 
-    PrintMsg("\n");
+    I_Printf("\n");
 
     return DEH_OK;
 }
@@ -142,8 +142,6 @@ void Shutdown()
     Weapons::Shutdown();
 
     FreeInputBuffers();
-
-    System_Shutdown();
 }
 
 } // namespace Deh_Edge
@@ -155,7 +153,7 @@ void DehEdgeStartup(const dehconvfuncs_t *funcs)
     Deh_Edge::Init();
     Deh_Edge::cur_funcs = funcs;
 
-    Deh_Edge::PrintMsg("*** DeHackEd -> EDGE Conversion ***\n");
+    I_Printf("*** DeHackEd -> EDGE Conversion ***\n");
 }
 
 const char *DehEdgeGetError(void)

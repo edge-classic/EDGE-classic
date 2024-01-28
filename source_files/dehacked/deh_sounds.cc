@@ -338,7 +338,7 @@ void Sounds::AlterSound(int new_val)
 
     if (StrCaseCmp(deh_field, "Offset") == 0)
     {
-        PrintWarn("Line %d: raw sound Offset not supported.\n", Patch::line_num);
+        I_Debugf("Dehacked: Warning - Line %d: raw sound Offset not supported.\n", Patch::line_num);
         return;
     }
 
@@ -346,7 +346,7 @@ void Sounds::AlterSound(int new_val)
     {
         if (new_val < 0)
         {
-            PrintWarn("Line %d: bad sound priority value: %d.\n", Patch::line_num, new_val);
+            I_Debugf("Dehacked: Warning - Line %d: bad sound priority value: %d.\n", Patch::line_num, new_val);
             new_val = 0;
         }
 
@@ -356,7 +356,7 @@ void Sounds::AlterSound(int new_val)
         return;
     }
 
-    PrintWarn("UNKNOWN SOUND FIELD: %s\n", deh_field);
+    I_Debugf("Dehacked: Warning - UNKNOWN SOUND FIELD: %s\n", deh_field);
 }
 
 const char *Sounds::GetEdgeSfxName(int sound_id)
@@ -460,7 +460,7 @@ void Sounds::WriteSound(int sound_id)
 
     const char *ddf_name = GetEdgeSfxName(sound_id);
     if (ddf_name == NULL)
-        InternalError("No DDF name for sound %d ??\n", sound_id);
+        I_Error("Dehacked: Error - No DDF name for sound %d ??\n", sound_id);
 
     WAD::Printf("[%s]\n", ddf_name);
 
@@ -552,7 +552,7 @@ void Sounds::AlterBexSound(const char *new_val)
 
     if (strlen(new_val) < 1 || strlen(new_val) > 6)
     {
-        PrintWarn("Bad length for sound name '%s'.\n", new_val);
+        I_Debugf("Dehacked: Warning - Bad length for sound name '%s'.\n", new_val);
         return;
     }
 
@@ -562,7 +562,7 @@ void Sounds::AlterBexSound(const char *new_val)
         int num = atoi(old_val);
         if (num < 1 || num > 32767)
         {
-            PrintWarn("Line %d: illegal sound number '%s'.\n", Patch::line_num, old_val);
+            I_Debugf("Dehacked: Warning - Line %d: illegal sound number '%s'.\n", Patch::line_num, old_val);
         }
         else
         {
@@ -574,12 +574,12 @@ void Sounds::AlterBexSound(const char *new_val)
 
     if (strlen(old_val) < 1 || strlen(old_val) > 6)
     {
-        PrintWarn("Bad length for sound name '%s'.\n", old_val);
+        I_Debugf("Dehacked: Warning - Bad length for sound name '%s'.\n", old_val);
         return;
     }
 
     if (!ReplaceSound(old_val, new_val))
-        PrintWarn("Line %d: unknown sound name '%s'.\n", Patch::line_num, old_val);
+        I_Debugf("Dehacked: Warning - Line %d: unknown sound name '%s'.\n", Patch::line_num, old_val);
 }
 
 } // namespace Deh_Edge

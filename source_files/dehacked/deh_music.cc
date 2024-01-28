@@ -262,7 +262,7 @@ void Music::AlterBexMusic(const char *new_val)
 
     if (strlen(new_val) < 1 || strlen(new_val) > 6)
     {
-        PrintWarn("Bad length for music name '%s'.\n", new_val);
+        I_Debugf("Dehacked: Warning - Bad length for music name '%s'.\n", new_val);
         return;
     }
 
@@ -272,7 +272,7 @@ void Music::AlterBexMusic(const char *new_val)
         int num = atoi(old_val);
         if (num < 1 || num > 32767)
         {
-            PrintWarn("Line %d: illegal music entry '%s'.\n", Patch::line_num, old_val);
+            I_Debugf("Dehacked: Warning - Line %d: illegal music entry '%s'.\n", Patch::line_num, old_val);
         }
         else
         {
@@ -284,12 +284,12 @@ void Music::AlterBexMusic(const char *new_val)
 
     if (strlen(old_val) < 1 || strlen(old_val) > 6)
     {
-        PrintWarn("Bad length for music name '%s'.\n", old_val);
+        I_Debugf("Dehacked: Warning - Bad length for music name '%s'.\n", old_val);
         return;
     }
 
     if (!ReplaceMusic(old_val, new_val))
-        PrintWarn("Line %d: unknown music name '%s'.\n", Patch::line_num, old_val);
+        I_Debugf("Dehacked: Warning - Line %d: unknown music name '%s'.\n", Patch::line_num, old_val);
 }
 
 } // namespace Deh_Edge

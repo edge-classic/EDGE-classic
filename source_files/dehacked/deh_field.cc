@@ -61,7 +61,7 @@ bool Field_ValidateValue(const fieldreference_t *ref, int new_val)
 
     if (new_val < 0 || (new_val == 0 && ref->field_type == FT_GTEQ1))
     {
-        PrintWarn("Line %d: bad value '%d' for %s\n", Patch::line_num, new_val, ref->deh_name);
+        I_Debugf("Dehacked: Warning - Line %d: bad value '%d' for %s\n", Patch::line_num, new_val, ref->deh_name);
         return false;
     }
 
@@ -95,7 +95,7 @@ bool Field_ValidateValue(const fieldreference_t *ref, int new_val)
             break;
 
         default:
-            InternalError("Bad field type %d\n", ref->field_type);
+            I_Error("Dehacked: Error - Bad field type %d\n", ref->field_type);
         }
     }
     else /* patch_fmt == 6, allow BOOM/MBF stuff */
@@ -121,13 +121,13 @@ bool Field_ValidateValue(const fieldreference_t *ref, int new_val)
             break;
 
         default:
-            InternalError("Bad field type %d\n", ref->field_type);
+            I_Error("Dehacked: Error - Bad field type %d\n", ref->field_type);
         }
     }
 
     if (new_val < min_obj || new_val > max_obj)
     {
-        PrintWarn("Line %d: bad value '%d' for %s\n", Patch::line_num, new_val, ref->deh_name);
+        I_Debugf("Dehacked: Warning - Line %d: bad value '%d' for %s\n", Patch::line_num, new_val, ref->deh_name);
 
         return false;
     }

@@ -41,7 +41,7 @@ namespace Deh_Edge
 input_buffer_c::input_buffer_c(const char *_data, int _length) : data(_data), ptr(_data), length(_length)
 {
     if (length < 0)
-        FatalError("Illegal length of lump (%d bytes)\n", length);
+        I_Error("Dehacked: Error - Illegal length of lump (%d bytes)\n", length);
 }
 
 input_buffer_c::~input_buffer_c()

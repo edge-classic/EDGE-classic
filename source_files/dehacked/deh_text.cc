@@ -569,7 +569,7 @@ void TextStr::AlterCheat(const char *new_val)
 
     if (!ReplaceCheat(deh_field, new_val))
     {
-        PrintWarn("UNKNOWN CHEAT FIELD: %s\n", deh_field);
+        I_Debugf("Dehacked: Warning - UNKNOWN CHEAT FIELD: %s\n", deh_field);
     }
 }
 

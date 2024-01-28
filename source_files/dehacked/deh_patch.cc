@@ -79,12 +79,12 @@ typedef enum
 
 void DetectMsg(const char *kind)
 {
-    PrintMsg("Detected %s patch file from DEHACKED v%d.%d\n", kind, dhe_ver / 10, dhe_ver % 10);
+    I_Printf("Detected %s patch file from DEHACKED v%d.%d\n", kind, dhe_ver / 10, dhe_ver % 10);
 }
 
 void VersionMsg(void)
 {
-    PrintMsg("Patch format %d, for DOOM EXE %d.%d%s\n", patch_fmt, doom_ver / 10, doom_ver % 10,
+    I_Printf("Patch format %d, for DOOM EXE %d.%d%s\n", patch_fmt, doom_ver / 10, doom_ver % 10,
              (doom_ver == 16) ? "66" : "");
 }
 
@@ -130,7 +130,7 @@ void GetRawString(char *buf, int max_len)
 
         if (len >= max_len)
         {
-            FatalError("Text string exceeds internal buffer length.\n"
+            I_Error("Dehacked: Error - Text string exceeds internal buffer length.\n"
                        "[> %d characters, from binary patch file]\n",
                        MAX_TEXT_STR);
         }
@@ -161,7 +161,7 @@ const char *ObjectName(int o_kind)
         return "sprite";
 
     default:
-        InternalError("Illegal O_KIND: %d\n", o_kind);
+        I_Error("Dehacked: Error - Illegal O_KIND: %d\n", o_kind);
     }
 
     return NULL; // not reached
@@ -169,7 +169,7 @@ const char *ObjectName(int o_kind)
 
 void MarkObject(int o_kind, int o_num)
 {
-    Debug_PrintMsg("[%d] MODIFIED\n", o_num);
+    I_Printf("[%d] MODIFIED\n", o_num);
 
     switch (o_kind)
     {
@@ -193,7 +193,7 @@ void MarkObject(int o_kind, int o_num)
         break;
 
     default:
-        InternalError("Illegal O_KIND: %d\n", o_kind);
+        I_Error("Dehacked: Error - Illegal O_KIND: %d\n", o_kind);
     }
 }
 
@@ -201,7 +201,7 @@ void GetInt(int o_kind, int o_num, int *dest)
 {
     int temp = GetRawInt();
 
-    Debug_PrintMsg("Int: %d\n", temp);
+    I_Printf("Int: %d\n", temp);
 
     if (*dest == temp)
         return;
@@ -215,7 +215,7 @@ void GetFlags(int o_kind, int o_num, int *dest)
 {
     int temp = GetRawInt();
 
-    Debug_PrintMsg("Flags: 0x%08x\n", temp);
+    I_Printf("Flags: 0x%08x\n", temp);
 
     // prevent the BOOM/MBF specific flags from being set
     // from binary patch files.
@@ -233,13 +233,13 @@ void GetFrame(int o_kind, int o_num, int *dest)
 {
     int temp = GetRawInt();
 
-    Debug_PrintMsg("Frame: %d\n", temp);
+    I_Printf("Frame: %d\n", temp);
 
     if (doom_ver == 12)
     {
         if (temp < 0 || temp >= FRAMES_1_2)
         {
-            PrintWarn("Found illegal V1.2 frame number: %d\n", temp);
+            I_Debugf("Dehacked: Warning - Found illegal V1.2 frame number: %d\n", temp);
             return;
         }
 
@@ -248,7 +248,7 @@ void GetFrame(int o_kind, int o_num, int *dest)
 
     if (temp < 0 || temp >= NUMSTATES)
     {
-        PrintWarn("Found illegal frame number: %d\n", temp);
+        I_Debugf("Dehacked: Warning - Found illegal frame number: %d\n", temp);
         return;
     }
 
@@ -261,13 +261,13 @@ void GetSprite(int o_kind, int o_num, int *dest)
 {
     int temp = GetRawInt();
 
-    Debug_PrintMsg("Sprite: %d\n", temp);
+    I_Printf("Sprite: %d\n", temp);
 
     if (doom_ver == 12)
     {
         if (temp < 0 || temp >= SPRITES_1_2)
         {
-            PrintWarn("Found illegal V1.2 sprite number: %d\n", temp);
+            I_Debugf("Dehacked: Warning - Found illegal V1.2 sprite number: %d\n", temp);
             return;
         }
 
@@ -276,7 +276,7 @@ void GetSprite(int o_kind, int o_num, int *dest)
 
     if (temp < 0 || temp >= NUMSPRITES)
     {
-        PrintWarn("Found illegal sprite number: %d\n", temp);
+        I_Debugf("Dehacked: Warning - Found illegal sprite number: %d\n", temp);
         return;
     }
 
@@ -287,13 +287,13 @@ void GetSound(int o_kind, int o_num, int *dest)
 {
     int temp = GetRawInt();
 
-    Debug_PrintMsg("Sound: %d\n", temp);
+    I_Printf("Sound: %d\n", temp);
 
     if (doom_ver == 12)
     {
         if (temp < 0 || temp >= SOUNDS_1_2)
         {
-            PrintWarn("Found illegal V1.2 sound number: %d\n", temp);
+            I_Debugf("Dehacked: Warning - Found illegal V1.2 sound number: %d\n", temp);
             return;
         }
 
@@ -302,7 +302,7 @@ void GetSound(int o_kind, int o_num, int *dest)
 
     if (temp < 0 || temp >= NUMSFX)
     {
-        PrintWarn("Found illegal sound number: %d\n", temp);
+        I_Debugf("Dehacked: Warning - Found illegal sound number: %d\n", temp);
         return;
     }
 
@@ -315,11 +315,11 @@ void GetAmmoType(int o_kind, int o_num, int *dest)
 {
     int temp = GetRawInt();
 
-    Debug_PrintMsg("AmmoType: %d\n", temp);
+    I_Printf("AmmoType: %d\n", temp);
 
     if (temp < 0 || temp > 5)
     {
-        PrintWarn("Found illegal ammo type: %d\n", temp);
+        I_Debugf("Dehacked: Warning - Found illegal ammo type: %d\n", temp);
         return;
     }
 
@@ -379,10 +379,10 @@ const char *PrettyTextString(const char *t)
 
 void ReadBinaryThing(int mt_num)
 {
-    Debug_PrintMsg("\n--- ReadBinaryThing %d ---\n", mt_num);
+    I_Printf("\n--- ReadBinaryThing %d ---\n", mt_num);
 
     if (file_error)
-        FatalError("File error reading binary thing table.\n");
+        I_Error("Dehacked: Error - File error reading binary thing table.\n");
 
     mobjinfo_t *mobj = Things::GetModifiedMobj(mt_num);
 
@@ -417,10 +417,10 @@ void ReadBinaryThing(int mt_num)
 
 void ReadBinaryAmmo(void)
 {
-    Debug_PrintMsg("\n--- ReadBinaryAmmo ---\n");
+    I_Printf("\n--- ReadBinaryAmmo ---\n");
 
     if (file_error)
-        FatalError("File error reading binary ammo table.\n");
+        I_Error("Dehacked: Error - File error reading binary ammo table.\n");
 
     GetInt(O_AMMO, 0, Ammo::plr_max + 0);
     GetInt(O_AMMO, 1, Ammo::plr_max + 1);
@@ -435,10 +435,10 @@ void ReadBinaryAmmo(void)
 
 void ReadBinaryWeapon(int wp_num)
 {
-    Debug_PrintMsg("\n--- ReadBinaryWeapon %d ---\n", wp_num);
+    I_Printf("\n--- ReadBinaryWeapon %d ---\n", wp_num);
 
     if (file_error)
-        FatalError("File error reading binary weapon table.\n");
+        I_Error("Dehacked: Error - File error reading binary weapon table.\n");
 
     weaponinfo_t *weap = weapon_info + wp_num;
 
@@ -453,10 +453,10 @@ void ReadBinaryWeapon(int wp_num)
 
 void ReadBinaryFrame(int st_num)
 {
-    Debug_PrintMsg("\n--- ReadBinaryFrame %d ---\n", st_num);
+    I_Printf("\n--- ReadBinaryFrame %d ---\n", st_num);
 
     if (file_error)
-        FatalError("File error reading binary frame table.\n");
+        I_Error("Dehacked: Error - File error reading binary frame table.\n");
 
     state_t *state = Frames::GetModifiedState(st_num);
 
@@ -474,10 +474,10 @@ void ReadBinaryFrame(int st_num)
 
 void ReadBinarySound(int s_num)
 {
-    Debug_PrintMsg("\n--- ReadBinarySound %d ---\n", s_num);
+    I_Printf("\n--- ReadBinarySound %d ---\n", s_num);
 
     if (file_error)
-        FatalError("File error reading binary sound table.\n");
+        I_Error("Dehacked: Error - File error reading binary sound table.\n");
 
     GetRawInt(); // ignore sound name pointer
     GetRawInt(); // ignore singularity
@@ -494,26 +494,26 @@ void ReadBinarySound(int s_num)
 
 void ReadBinarySprite(int spr_num)
 {
-    Debug_PrintMsg("\n--- ReadBinarySprite %d ---\n", spr_num);
+    I_Printf("\n--- ReadBinarySprite %d ---\n", spr_num);
 
     if (file_error)
-        FatalError("File error reading binary sprite table.\n");
+        I_Error("Dehacked: Error - File error reading binary sprite table.\n");
 
     GetRawInt(); // ignore sprite name pointer
 }
 
 void ReadBinaryText(int tx_num)
 {
-    Debug_PrintMsg("\n--- ReadBinaryText %d ---\n", tx_num);
+    I_Printf("\n--- ReadBinaryText %d ---\n", tx_num);
 
     if (file_error)
-        FatalError("File error reading binary text table.\n");
+        I_Error("Dehacked: Error - File error reading binary text table.\n");
 
     static char text_buf[MAX_TEXT_STR + 8];
 
     GetRawString(text_buf, MAX_TEXT_STR);
 
-    // Debug_PrintMsg("\"%s\"\n", PrettyTextString(text_buf));
+    // I_Printf("\"%s\"\n", PrettyTextString(text_buf));
 
     TextStr::ReplaceBinaryString(tx_num, text_buf);
 }
@@ -722,7 +722,7 @@ void GetNextLine(void)
         if (ch == EOF)
         {
             if (pat_buf->error())
-                PrintWarn("Read error on input file.\n");
+                I_Debugf("Dehacked: Warning - Read error on input file.\n");
 
             break;
         }
@@ -754,7 +754,7 @@ void GetNextLine(void)
         line_buf[len++] = (char)ch;
 
         if (len == MAX_LINE)
-            PrintWarn("Truncating very long line (#%d).\n", line_num);
+            I_Debugf("Dehacked: Warning - Truncating very long line (#%d).\n", line_num);
     }
 
     line_buf[len] = 0;
@@ -807,7 +807,7 @@ bool ValidateObject(void)
             break;
 
         default:
-            InternalError("Bad active_section value %d\n", active_section);
+            I_Error("Dehacked: Error - Bad active_section value %d\n", active_section);
         }
     }
     else /* patch_fmt == 6, allow BOOM/MBF stuff */
@@ -837,13 +837,13 @@ bool ValidateObject(void)
             break;
 
         default:
-            InternalError("Bad active_section value %d\n", active_section);
+            I_Error("Dehacked: Error - Bad active_section value %d\n", active_section);
         }
     }
 
     if (active_obj < min_obj || active_obj > max_obj)
     {
-        PrintWarn("Line %d: Illegal %s number: %d.\n", line_num, section_name[active_section], active_obj);
+        I_Debugf("Dehacked: Warning - Line %d: Illegal %s number: %d.\n", line_num, section_name[active_section], active_obj);
 
         syncing = true;
         return false;
@@ -875,7 +875,7 @@ bool CheckNewSection(void)
 
             if (active_section == BEX_PARS || active_section == BEX_HELPER)
             {
-                PrintWarn("Ignoring BEX %s section.\n", section_name[i]);
+                I_Debugf("Dehacked: Warning - Ignoring BEX %s section.\n", section_name[i]);
             }
 
             return true;
@@ -921,7 +921,7 @@ void ReadTextString(char *dest, int len)
     {
         if ((dest - begin) >= MAX_TEXT_STR)
         {
-            FatalError("Text string exceeds internal buffer length.\n"
+            I_Error("Dehacked: Error - Text string exceeds internal buffer length.\n"
                        "[> %d characters, starting on line %d]\n",
                        MAX_TEXT_STR, start_line);
         }
@@ -934,7 +934,7 @@ void ReadTextString(char *dest, int len)
         }
 
         if (pat_buf->eof())
-            FatalError("End of file while reading Text replacement.\n");
+            I_Error("Dehacked: Error - End of file while reading Text replacement.\n");
 
         GetNextLine();
         cur_txt_ptr = line_buf;
@@ -948,7 +948,7 @@ void ReadTextString(char *dest, int len)
 
 void ProcessTextSection(int len1, int len2)
 {
-    Debug_PrintMsg("TEXT REPLACE: %d %d\n", len1, len2);
+    I_Printf("TEXT REPLACE: %d %d\n", len1, len2);
 
     static char text_1[MAX_TEXT_STR + 8];
     static char text_2[MAX_TEXT_STR + 8];
@@ -960,8 +960,8 @@ void ProcessTextSection(int len1, int len2)
     ReadTextString(text_1, len1);
     ReadTextString(text_2, len2);
 
-    Debug_PrintMsg("- Before <%s>\n", text_1);
-    Debug_PrintMsg("- After  <%s>\n", text_2);
+    I_Printf("- Before <%s>\n", text_1);
+    I_Printf("- After  <%s>\n", text_2);
 
     if (len1 == 4 && len2 == 4)
         if (Sprites::ReplaceSprite(text_1, text_2))
@@ -979,7 +979,7 @@ void ProcessTextSection(int len1, int len2)
     if (TextStr::ReplaceString(text_1, text_2))
         return;
 
-    PrintWarn("Cannot match text: \"%s\"\n", PrettyTextString(text_1));
+    I_Debugf("Dehacked: Warning - Cannot match text: \"%s\"\n", PrettyTextString(text_1));
 }
 
 void ReadBexTextString(char *dest) // upto MAX_TEXT_STR chars
@@ -994,7 +994,7 @@ void ReadBexTextString(char *dest) // upto MAX_TEXT_STR chars
     {
         if ((dest - begin) >= MAX_TEXT_STR)
         {
-            FatalError("Bex String exceeds internal buffer length.\n"
+            I_Error("Dehacked: Error - Bex String exceeds internal buffer length.\n"
                        "[> %d characters, starting on line %d]\n",
                        MAX_TEXT_STR, start_line);
         }
@@ -1015,7 +1015,7 @@ void ReadBexTextString(char *dest) // upto MAX_TEXT_STR chars
             do // need a loop to ignore comment lines
             {
                 if (pat_buf->eof())
-                    FatalError("End of file while reading Bex String replacement.\n");
+                    I_Error("Dehacked: Error - End of file while reading Bex String replacement.\n");
 
                 GetNextLine();
                 StripTrailingSpace();
@@ -1038,10 +1038,10 @@ void ReadBexTextString(char *dest) // upto MAX_TEXT_STR chars
 
 void ProcessBexString(void)
 {
-    Debug_PrintMsg("BEX STRING REPLACE: %s\n", line_buf);
+    I_Printf("BEX STRING REPLACE: %s\n", line_buf);
 
     if (strlen(line_buf) >= 100)
-        FatalError("Bex string name too long !\nLine %d: %s\n", line_num, line_buf);
+        I_Error("Dehacked: Error - Bex string name too long !\nLine %d: %s\n", line_num, line_buf);
 
     char bex_field[104];
 
@@ -1053,24 +1053,24 @@ void ProcessBexString(void)
 
     ReadBexTextString(text_buf);
 
-    Debug_PrintMsg("- Replacement <%s>\n", text_buf);
+    I_Printf("- Replacement <%s>\n", text_buf);
 
     if (!TextStr::ReplaceBexString(bex_field, text_buf))
-        PrintWarn("Line %d: unknown BEX string name: %s\n", line_num, bex_field);
+        I_Debugf("Dehacked: Warning - Line %d: unknown BEX string name: %s\n", line_num, bex_field);
 }
 
 void ProcessLine(void)
 {
     assert(active_section >= 0);
 
-    Debug_PrintMsg("Section %d Object %d : <%s>\n", active_section, active_obj, line_buf);
+    I_Printf("Section %d Object %d : <%s>\n", active_section, active_obj, line_buf);
 
     if (active_section == BEX_PARS || active_section == BEX_HELPER)
         return;
 
     if (!equal_pos)
     {
-        PrintWarn("Ignoring line: %s\n", line_buf);
+        I_Debugf("Dehacked: Warning - Ignoring line: %s\n", line_buf);
         return;
     }
 
@@ -1096,12 +1096,12 @@ void ProcessLine(void)
 
     if (line_buf[0] == 0)
     {
-        PrintWarn("Line %d: No field name before equal sign.\n", line_num);
+        I_Debugf("Dehacked: Warning - Line %d: No field name before equal sign.\n", line_num);
         return;
     }
     else if (equal_pos[0] == 0)
     {
-        PrintWarn("Line %d: No value after equal sign.\n", line_num);
+        I_Debugf("Dehacked: Warning - Line %d: No value after equal sign.\n", line_num);
         return;
     }
 
@@ -1123,7 +1123,7 @@ void ProcessLine(void)
     {
         if (sscanf(equal_pos, " %i ", &num_value) != 1)
         {
-            PrintWarn("Line %d: unreadable %s value: %s\n", line_num, section_name[active_section], equal_pos);
+            I_Debugf("Dehacked: Warning - Line %d: unreadable %s value: %s\n", line_num, section_name[active_section], equal_pos);
             return;
         }
     }
@@ -1176,7 +1176,7 @@ void ProcessLine(void)
         break;
 
     default:
-        InternalError("Bad active_section value %d\n", active_section);
+        I_Error("Dehacked: Error - Bad active_section value %d\n", active_section);
     }
 }
 
@@ -1199,7 +1199,7 @@ dehret_e LoadDiff(bool no_header)
         if (line_buf[0] == 0 || line_buf[0] == '#')
             continue;
 
-        // Debug_PrintMsg("LINE %d: <%s>\n", line_num, line_buf);
+        // I_Printf("LINE %d: <%s>\n", line_num, line_buf);
 
         if (StrCaseCmpPartial(line_buf, "Doom version") == 0)
         {
@@ -1254,7 +1254,7 @@ dehret_e LoadDiff(bool no_header)
 
         if (StrCaseCmpPartial(line_buf, "include") == 0)
         {
-            Deh_Edge::PrintMsg("- Warning: BEX INCLUDE directive not supported!\n");
+            I_Printf("- Warning: BEX INCLUDE directive not supported!\n");
             continue;
         }
 
@@ -1353,7 +1353,7 @@ dehret_e Patch::Load(input_buffer_c *buf)
     {
         pat_buf->ungetch(tempver);
 
-        PrintMsg("Missing header -- assuming text-based BEX patch !\n");
+        I_Printf("Missing header -- assuming text-based BEX patch !\n");
         dhe_ver = 31;
         result  = LoadDiff(true);
     }
@@ -1363,7 +1363,7 @@ dehret_e Patch::Load(input_buffer_c *buf)
         result = DEH_E_ParseError;
     }
 
-    PrintMsg("\n");
+    I_Printf("\n");
     pat_buf = NULL;
 
     return result;

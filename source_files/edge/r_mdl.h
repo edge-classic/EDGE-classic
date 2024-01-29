@@ -27,7 +27,7 @@
 // opaque handle for rest of the engine
 class mdl_model_c;
 
-mdl_model_c *MDL_LoadModel(epi::file_c *f);
+mdl_model_c *MDL_LoadModel(epi::File *f);
 
 short MDL_FindFrame(mdl_model_c *md, const char *name);
 

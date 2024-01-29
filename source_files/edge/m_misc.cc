@@ -231,7 +231,7 @@ void M_SaveDefaults(void)
     // -ACB- 1999/09/24 idiot proof checking as required by MSVC
     SYS_ASSERT(!cfgfile.empty());
 
-    FILE *f = epi::FS_OpenRawFile(cfgfile, epi::kFileAccessWrite | epi::kFileAccessBinary);
+    FILE *f = epi::FileOpenRaw(cfgfile, epi::kFileAccessWrite | epi::kFileAccessBinary);
     if (!f)
     {
         I_Warning("Couldn't open config file %s for writing.", cfgfile.c_str());
@@ -263,7 +263,7 @@ void M_SaveDefaults(void)
         }
     }
 
-    epi::FS_Sync();
+    epi::SyncFilesystem();
 
     fclose(f);
 }
@@ -300,7 +300,7 @@ void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar)
 
     // Set default SF2 location in s_soundfont CVAR
     // We can't store this as a CVAR default since it is path-dependent
-    s_soundfont = epi::SanitizePath(epi::FS_PathAppend(game_dir, "soundfont/Default.sf2"));
+    s_soundfont = epi::SanitizePath(epi::PathAppend(game_dir, "soundfont/Default.sf2"));
 
     // Needed so that Smoothing/Upscaling is properly reset
     W_DeleteAllImages();
@@ -386,7 +386,7 @@ void M_LoadDefaults(void)
 
     I_Printf("M_LoadDefaults from %s\n", cfgfile.c_str());
 
-    epi::file_c *file = epi::FS_Open(cfgfile, epi::kFileAccessRead);
+    epi::File *file = epi::FileOpen(cfgfile, epi::kFileAccessRead);
 
     if (!file)
     {
@@ -406,7 +406,7 @@ void M_LoadDefaults(void)
 
 void M_LoadBranding(void)
 {
-    epi::file_c *file = FS_Open(brandingfile, epi::kFileAccessRead);
+    epi::File *file = FileOpen(brandingfile, epi::kFileAccessRead);
 
     // Just use hardcoded values if no branding file present
     if (!file)
@@ -448,9 +448,9 @@ void M_ScreenShot(bool show_msg)
     {
         std::string base(epi::StringFormat("shot%02d.%s", i, extension));
 
-        fn = epi::FS_PathAppend(shot_dir, base);
+        fn = epi::PathAppend(shot_dir, base);
 
-        if (!epi::FS_Access(fn))
+        if (!epi::TestFileAccess(fn))
         {
             break; // file doesn't exist
         }
@@ -491,9 +491,9 @@ void M_MakeSaveScreenShot(void)
     const char *extension = "jpg";
 
     std::string           temp(epi::StringFormat("%s/%s.%s", "current", "head", extension));
-    std::string filename = epi::FS_PathAppend(save_dir, temp);
+    std::string filename = epi::PathAppend(save_dir, temp);
 
-    epi::FS_Delete(filename);
+    epi::FileDelete(filename);
 
     image_data_c *img = new image_data_c(SCREENWIDTH, SCREENHEIGHT, 3);
 
@@ -512,9 +512,9 @@ void M_MakeSaveScreenShot(void)
 
     delete img;
 
-    epi::FS_ReplaceExtension(filename, ".replace");
+    epi::ReplaceExtension(filename, ".replace");
 
-    epi::file_c *replace_touch = epi::FS_Open(filename, epi::kFileAccessWrite);
+    epi::File *replace_touch = epi::FileOpen(filename, epi::kFileAccessWrite);
 
     delete replace_touch;
 }
@@ -526,17 +526,17 @@ void M_MakeSaveScreenShot(void)
 //
 std::string M_ComposeFileName(std::string dir, std::string file)
 {
-    if (epi::FS_IsAbsolute(file))
+    if (epi::IsPathAbsolute(file))
         return file;
 
-    return epi::FS_PathAppend(dir, file);
+    return epi::PathAppend(dir, file);
 }
 
-epi::file_c *M_OpenComposedEPIFile(std::string dir, std::string file)
+epi::File *M_OpenComposedEPIFile(std::string dir, std::string file)
 {
     std::string fullname = M_ComposeFileName(dir, file);
 
-    return epi::FS_Open(fullname, epi::kFileAccessRead | epi::kFileAccessBinary);
+    return epi::FileOpen(fullname, epi::kFileAccessRead | epi::kFileAccessBinary);
 }
 
 void M_WarnError(const char *error, ...)

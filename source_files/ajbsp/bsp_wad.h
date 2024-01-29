@@ -121,7 +121,7 @@ class Wad_file
 
     FILE *fp;
 
-    epi::mem_file_c *mem_fp;
+    epi::MemFile *mem_fp;
 
     char kind; // 'P' for PWAD, 'I' for IWAD
 
@@ -149,7 +149,7 @@ class Wad_file
     int insert_point;
 
     // constructor is private
-    Wad_file(std::string _name, char _mode, FILE *_fp, epi::mem_file_c *_mem_fp);
+    Wad_file(std::string _name, char _mode, FILE *_fp, epi::MemFile *_mem_fp);
 
   public:
     ~Wad_file();

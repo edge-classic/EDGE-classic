@@ -23,106 +23,98 @@
 namespace epi
 {
 
-ansi_file_c::ansi_file_c(FILE *_filep) : fp(_filep)
+ANSIFile::ANSIFile(FILE *filep) : fp_(filep)
 {
 }
 
-ansi_file_c::~ansi_file_c()
+ANSIFile::~ANSIFile()
 {
-    if (fp)
+    if (fp_)
     {
-        fclose(fp);
-        fp = NULL;
+        fclose(fp_);
+        fp_ = nullptr;
     }
 }
 
-int ansi_file_c::GetLength()
+int ANSIFile::GetLength()
 {
-    SYS_ASSERT(fp);
+    SYS_ASSERT(fp_);
 
-    long cur_pos = ftell(fp); // Get existing position
+    long cur_pos = ftell(fp_); // Get existing position
 
-    fseek(fp, 0, SEEK_END); // Seek to the end of file
-    long len = ftell(fp);   // Get the position - it our length
+    fseek(fp_, 0, SEEK_END); // Seek to the end of file
+    long len = ftell(fp_);   // Get the position - it our length
 
-    fseek(fp, cur_pos, SEEK_SET); // Reset existing position
+    fseek(fp_, cur_pos, SEEK_SET); // Reset existing position
     return (int)len;
 }
 
-int ansi_file_c::GetPosition()
+int ANSIFile::GetPosition()
 {
-    SYS_ASSERT(fp);
+    SYS_ASSERT(fp_);
 
-    return (int)ftell(fp);
+    return (int)ftell(fp_);
 }
 
-unsigned int ansi_file_c::Read(void *dest, unsigned int size)
+unsigned int ANSIFile::Read(void *dest, unsigned int size)
 {
-    SYS_ASSERT(fp);
+    SYS_ASSERT(fp_);
     SYS_ASSERT(dest);
 
-    int result = fread(dest, 1, size, fp);
-
-    // I_Debugf("Reading %d bytes  --->  %d  %s %s\n", size, result,
-    //		 feof(fp) ? "EOF" : "-", ferror(fp) ? "ERROR" : "-");
-
-    return result;
+    return fread(dest, 1, size, fp_);
 }
 
-unsigned int ansi_file_c::Write(const void *src, unsigned int size)
+unsigned int ANSIFile::Write(const void *src, unsigned int size)
 {
-    SYS_ASSERT(fp);
+    SYS_ASSERT(fp_);
     SYS_ASSERT(src);
 
-    return fwrite(src, 1, size, fp);
+    return fwrite(src, 1, size, fp_);
 }
 
-bool ansi_file_c::Seek(int offset, int seekpoint)
+bool ANSIFile::Seek(int offset, int seekpoint)
 {
     int whence;
 
     switch (seekpoint)
     {
-    case SEEKPOINT_START: {
+    case kSeekpointStart: {
         whence = SEEK_SET;
         break;
     }
-    case SEEKPOINT_CURRENT: {
+    case kSeekpointCurrent: {
         whence = SEEK_CUR;
         break;
     }
-    case SEEKPOINT_END: {
+    case kSeekpointEnd: {
         whence = SEEK_END;
         break;
     }
 
     default:
-        I_Error("ansi_file_c::Seek : illegal seekpoint value.\n");
+        I_Error("ANSIFile::Seek : illegal seekpoint value.\n");
         return false; /* NOT REACHED */
     }
 
-    int result = fseek(fp, offset, whence);
-
-    // I_Debugf("Seek to: 0x%08x whence:%d  --->  %d\n", offset, whence, result);
+    int result = fseek(fp_, offset, whence);
 
     return (result == 0);
 }
 
-std::string file_c::ReadText()
+std::string File::ReadText()
 {
     std::string textstring;
-    Seek(SEEKPOINT_START, 0);
+    Seek(kSeekpointStart, 0);
     uint8_t *buffer = LoadIntoMemory();
     if (buffer)
     {
         textstring.assign((char *)buffer, GetLength());
         delete[] buffer;
     }
-
     return textstring;
 }
 
-uint8_t *file_c::LoadIntoMemory(int max_size)
+uint8_t *File::LoadIntoMemory(int max_size)
 {
     SYS_ASSERT(max_size >= 0);
 
@@ -133,7 +125,7 @@ uint8_t *file_c::LoadIntoMemory(int max_size)
 
     if (actual_size < 0)
     {
-        I_Warning("file_c::LoadIntoMemory : position > length.\n");
+        I_Warning("File::LoadIntoMemory : position > length.\n");
         actual_size = 0;
     }
 
@@ -146,7 +138,7 @@ uint8_t *file_c::LoadIntoMemory(int max_size)
     if ((int)Read(buffer, actual_size) != actual_size)
     {
         delete[] buffer;
-        return NULL;
+        return nullptr;
     }
 
     return buffer; // success!

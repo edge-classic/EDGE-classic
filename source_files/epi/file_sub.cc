@@ -20,56 +20,58 @@
 
 #include "file_sub.h"
 
+#include "HandmadeMath.h"
+
 namespace epi
 {
 
-sub_file_c::sub_file_c(file_c *_parent, int _start, int _len) : parent(_parent), start(_start), length(_len), pos(0)
+SubFile::SubFile(File *parent, int start, int len) : parent_(parent), start_(start), length_(len), pos_(0)
 {
-    SYS_ASSERT(parent != NULL);
-    SYS_ASSERT(start >= 0);
-    SYS_ASSERT(length >= 0);
+    SYS_ASSERT(parent_ != nullptr);
+    SYS_ASSERT(start_ >= 0);
+    SYS_ASSERT(length_ >= 0);
 }
 
-sub_file_c::~sub_file_c()
+SubFile::~SubFile()
 {
-    parent = NULL;
+    parent_ = nullptr;
 }
 
-unsigned int sub_file_c::Read(void *dest, unsigned int size)
+unsigned int SubFile::Read(void *dest, unsigned int size)
 {
     // EOF ?
-    if (pos >= length)
+    if (pos_ >= length_)
         return 0;
 
-    size = std::min(size, (unsigned int)(length - pos));
+    size = HMM_MIN(size, (unsigned int)(length_ - pos_));
 
     // we must always seek before a read, because other things may also be
     // reading the parent file.
-    parent->Seek(start + pos, SEEKPOINT_START);
+    parent_->Seek(start_ + pos_, kSeekpointStart);
 
-    unsigned int got = parent->Read(dest, size);
+    unsigned int got = parent_->Read(dest, size);
 
-    pos += (int)got;
+    pos_ += (int)got;
 
     return got;
 }
 
-bool sub_file_c::Seek(int offset, int seekpoint)
+bool SubFile::Seek(int offset, int seekpoint)
 {
     int new_pos = 0;
 
     switch (seekpoint)
     {
-    case SEEKPOINT_START: {
+    case kSeekpointStart: {
         new_pos = 0;
         break;
     }
-    case SEEKPOINT_CURRENT: {
-        new_pos = pos;
+    case kSeekpointCurrent: {
+        new_pos = pos_;
         break;
     }
-    case SEEKPOINT_END: {
-        new_pos = length;
+    case kSeekpointEnd: {
+        new_pos = length_;
         break;
     }
 
@@ -80,20 +82,20 @@ bool sub_file_c::Seek(int offset, int seekpoint)
     new_pos += offset;
 
     // NOTE: we allow position at the very end (last byte + 1).
-    if (new_pos < 0 || new_pos > length)
+    if (new_pos < 0 || new_pos > length_)
         return false;
 
-    pos = new_pos;
+    pos_ = new_pos;
 
     return true;
 }
 
-unsigned int sub_file_c::Write(const void *src, unsigned int size)
+unsigned int SubFile::Write(const void *src, unsigned int size)
 {
     (void)src;
     (void)size;
 
-    I_Error("sub_file_c::Write called.\n");
+    I_Error("SubFile::Write called.\n");
 
     return 0; /* read only, cobber */
 }

@@ -139,7 +139,7 @@ bool SV_OpenReadFile(std::string filename)
 
     current_crc.Reset();
 
-    current_fp = epi::FS_OpenRawFile(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
+    current_fp = epi::FileOpenRaw(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
 
     if (!current_fp)
         return false;
@@ -483,7 +483,7 @@ bool SV_OpenWriteFile(std::string filename, int version)
 
     current_crc.Reset();
 
-    current_fp = epi::FS_OpenRawFile(filename, epi::kFileAccessWrite | epi::kFileAccessBinary);
+    current_fp = epi::FileOpenRaw(filename, epi::kFileAccessWrite | epi::kFileAccessBinary);
 
     if (!current_fp)
     {

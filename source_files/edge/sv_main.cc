@@ -485,12 +485,12 @@ std::string SV_FileName(const char *slot_name, const char *map_name)
 {
     std::string temp(epi::StringFormat("%s/%s.%s", slot_name, map_name, SAVEGAMEEXT));
 
-    return epi::FS_PathAppend(save_dir, temp);
+    return epi::PathAppend(save_dir, temp);
 }
 
 std::string SV_DirName(const char *slot_name)
 {
-    return epi::FS_PathAppend(save_dir, slot_name);
+    return epi::PathAppend(save_dir, slot_name);
 }
 
 void SV_ClearSlot(const char *slot_name)
@@ -498,11 +498,11 @@ void SV_ClearSlot(const char *slot_name)
     std::string full_dir = SV_DirName(slot_name);
 
     // make sure the directory exists
-    epi::FS_MakeDir(full_dir);
+    epi::MakeDirectory(full_dir);
 
-    std::vector<epi::dir_entry_c> fsd;
+    std::vector<epi::DirectoryEntry> fsd;
 
-    if (!FS_ReadDir(fsd, full_dir, "*.*"))
+    if (!ReadDirectory(fsd, full_dir, "*.*"))
     {
         I_Debugf("Failed to read directory: %s\n", full_dir.c_str());
         return;
@@ -514,10 +514,10 @@ void SV_ClearSlot(const char *slot_name)
     {
         if (fsd[i].is_dir)
             continue;
-        std::string cur_file = epi::FS_PathAppend(full_dir, epi::FS_GetFilename(fsd[i].name));
+        std::string cur_file = epi::PathAppend(full_dir, epi::GetFilename(fsd[i].name));
         I_Debugf("  Deleting %s\n", cur_file.c_str());
 
-        epi::FS_Delete(cur_file);
+        epi::FileDelete(cur_file);
     }
 }
 
@@ -526,9 +526,9 @@ void SV_CopySlot(const char *src_name, const char *dest_name)
     std::string src_dir  = SV_DirName(src_name);
     std::string dest_dir = SV_DirName(dest_name);
 
-    std::vector<epi::dir_entry_c> fsd;
+    std::vector<epi::DirectoryEntry> fsd;
 
-    if (!FS_ReadDir(fsd, src_dir, "*.*"))
+    if (!ReadDirectory(fsd, src_dir, "*.*"))
     {
         I_Error("SV_CopySlot: failed to read dir: %s\n", src_dir.c_str());
         return;
@@ -541,13 +541,13 @@ void SV_CopySlot(const char *src_name, const char *dest_name)
         if (fsd[i].is_dir)
             continue;
 
-        std::string fn = epi::FS_GetFilename(fsd[i].name);
-        std::string src_file  = epi::FS_PathAppend(src_dir, fn);
-        std::string dest_file = epi::FS_PathAppend(dest_dir, fn);
+        std::string fn = epi::GetFilename(fsd[i].name);
+        std::string src_file  = epi::PathAppend(src_dir, fn);
+        std::string dest_file = epi::PathAppend(dest_dir, fn);
 
         I_Debugf("  Copying %s --> %s\n", src_file.c_str(), dest_file.c_str());
 
-        if (!epi::FS_Copy(src_file, dest_file))
+        if (!epi::FileCopy(src_file, dest_file))
             I_Error("SV_CopySlot: failed to copy '%s' to '%s'\n", src_file.c_str(),
                     dest_file.c_str());
     }

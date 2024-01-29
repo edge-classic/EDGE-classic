@@ -24,25 +24,25 @@
 namespace epi
 {
 
-// base class of the EDGE Platform Inferface File
-class file_c
+// base class
+class File
 {
   public:
     // Seek reference points
-    enum seek_e
+    enum Seek
     {
-        SEEKPOINT_START,
-        SEEKPOINT_CURRENT,
-        SEEKPOINT_END,
-        SEEKPOINT_NUMTYPES
+        kSeekpointStart,
+        kSeekpointCurrent,
+        kSeekpointEnd,
+        kSeekpointNumTypes
     };
 
   protected:
   public:
-    file_c()
+    File()
     {
     }
-    virtual ~file_c()
+    virtual ~File()
     {
     }
 
@@ -67,14 +67,14 @@ class file_c
 };
 
 // standard File class using ANSI C functions
-class ansi_file_c : public file_c
+class ANSIFile : public File
 {
   private:
-    FILE *fp;
+    FILE *fp_;
 
   public:
-    ansi_file_c(FILE *_filep);
-    ~ansi_file_c();
+    ANSIFile(FILE *filep);
+    ~ANSIFile();
 
   public:
     int GetLength();

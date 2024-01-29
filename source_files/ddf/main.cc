@@ -1028,7 +1028,7 @@ void DDF_MainReadFile(readinfo_t *readinfo, const std::string &data)
 #if 0
 static XXX *parse_type;
 
-bool DDF_Load(epi::file_c *f)
+bool DDF_Load(epi::File *f)
 {
 	byte *data = f->LoadIntoMemory();
 	if (! data)
@@ -2152,14 +2152,14 @@ ddf_type_e DDF_LumpToType(const std::string &name)
 
 ddf_type_e DDF_FilenameToType(const std::string &path)
 {
-    std::string check = epi::FS_GetExtension(path);
+    std::string check = epi::GetExtension(path);
 
     if (epi::StringCaseCompareASCII(check, ".rts") == 0)
         return DDF_RadScript;
 
-    check = epi::FS_GetFilename(path);
+    check = epi::GetFilename(path);
     
-    std::string stem = epi::FS_GetStem(check);
+    std::string stem = epi::GetStem(check);
 
     for (size_t i = 0; i < DDF_NUM_TYPES; i++)
         if (epi::StringCaseCompareASCII(check, ddf_readers[i].pack_name) == 0 ||

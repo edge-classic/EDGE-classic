@@ -85,7 +85,7 @@ bool S_StartupOPL(void)
 
     int          length;
     uint8_t        *data = nullptr;
-    epi::file_c *F    = nullptr;
+    epi::File *F    = nullptr;
 
     if (s_genmidi.s == "GENMIDI")
     {
@@ -98,7 +98,7 @@ bool S_StartupOPL(void)
     }
     else
     {
-        F = epi::FS_Open(s_genmidi.s, epi::kFileAccessRead | epi::kFileAccessBinary);
+        F = epi::FileOpen(s_genmidi.s, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (!F)
         {
             I_Warning("S_StartupOPL: Error opening GENMIDI!\n");

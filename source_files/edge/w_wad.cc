@@ -846,7 +846,7 @@ static void CheckForLevel(wad_file_c *wad, int lump, const char *name, const raw
     }
 }
 
-int W_CheckForUniqueLumps(epi::file_c *file)
+int W_CheckForUniqueLumps(epi::File *file)
 {
     int              length;
     raw_wad_header_t header;
@@ -864,7 +864,7 @@ int W_CheckForUniqueLumps(epi::file_c *file)
     header.dir_start          = EPI_LE_S32(header.dir_start);
     length                    = header.num_entries * sizeof(raw_wad_entry_t);
     raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
-    file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
+    file->Seek(header.dir_start, epi::File::kSeekpointStart);
     file->Read(raw_info, length);
 
     for (size_t check = 0; check < game_checker.size(); check++)
@@ -897,14 +897,14 @@ int W_CheckForUniqueLumps(epi::file_c *file)
                 if (epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "EDGEGAME") == 0)
                 {
                     delete[] raw_info;
-                    file->Seek(0, epi::file_c::SEEKPOINT_START);
+                    file->Seek(0, epi::File::kSeekpointStart);
                     return check;
                 }
                 // Either really smart or really dumb Chex Quest detection method
                 else if (epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "ENDOOM") == 0)
                 {
                     SYS_ASSERT(entry.size == 4000);
-                    file->Seek(entry.pos, epi::file_c::SEEKPOINT_START);
+                    file->Seek(entry.pos, epi::File::kSeekpointStart);
                     uint8_t *endoom = new uint8_t[entry.size];
                     file->Read(endoom, entry.size);
                     if (endoom[1026] == 'c' && endoom[1028] == 'h' && endoom[1030] == 'e' && endoom[1032] == 'x' &&
@@ -926,13 +926,13 @@ int W_CheckForUniqueLumps(epi::file_c *file)
         if (lump1_found && lump2_found)
         {
             delete[] raw_info;
-            file->Seek(0, epi::file_c::SEEKPOINT_START);
+            file->Seek(0, epi::File::kSeekpointStart);
             return check;
         }
     }
 
     delete[] raw_info;
-    file->Seek(0, epi::file_c::SEEKPOINT_START);
+    file->Seek(0, epi::File::kSeekpointStart);
     return -1;
 }
 
@@ -943,8 +943,8 @@ void ProcessFixersForWad(data_file_c *df)
     {
         if (W_CheckNumForName("MAP33") > -1 && W_CheckNumForName("DMENUPIC") > -1)
         {
-            std::string fix_path = epi::FS_PathAppend(game_dir, "edge_fixes/doom2_bfg.epk");
-            if (epi::FS_Access(fix_path))
+            std::string fix_path = epi::PathAppend(game_dir, "edge_fixes/doom2_bfg.epk");
+            if (epi::TestFileAccess(fix_path))
             {
                 W_AddPending(fix_path, FLKIND_EPK);
 
@@ -967,9 +967,9 @@ void ProcessFixersForWad(data_file_c *df)
     {
         if (epi::StringCaseCompareASCII(fix_checker, fixdefs[i]->md5_string) == 0)
         {
-            std::string fix_path = epi::FS_PathAppend(game_dir, "edge_fixes");
-            fix_path = epi::FS_PathAppend(fix_path, fix_checker.append(".epk"));
-            if (epi::FS_Access(fix_path))
+            std::string fix_path = epi::PathAppend(game_dir, "edge_fixes");
+            fix_path = epi::PathAppend(fix_path, fix_checker.append(".epk"));
+            if (epi::TestFileAccess(fix_path))
             {
                 W_AddPending(fix_path, FLKIND_EPK);
 
@@ -997,7 +997,7 @@ void ProcessDehackedInWad(data_file_c *df)
     int         length = -1;
     const uint8_t *data   = (const uint8_t *)W_LoadLump(deh_lump, &length);
 
-    std::string bare_name = epi::FS_GetFilename(df->name);
+    std::string bare_name = epi::GetFilename(df->name);
 
     std::string source = lump_name;
     source += " in ";
@@ -1010,7 +1010,7 @@ void ProcessDehackedInWad(data_file_c *df)
 
 static void ProcessDDFInWad(data_file_c *df)
 {
-    std::string bare_filename = epi::FS_GetFilename(df->name);
+    std::string bare_filename = epi::GetFilename(df->name);
 
     for (size_t d = 0; d < DDF_NUM_TYPES; d++)
     {
@@ -1033,7 +1033,7 @@ static void ProcessDDFInWad(data_file_c *df)
 
 static void ProcessCoalInWad(data_file_c *df)
 {
-    std::string bare_filename = epi::FS_GetFilename(df->name);
+    std::string bare_filename = epi::GetFilename(df->name);
 
     wad_file_c *wad = df->wad;
 
@@ -1055,7 +1055,7 @@ static void ProcessCoalInWad(data_file_c *df)
 
 static void ProcessLuaInWad(data_file_c *df)
 {
-    std::string bare_filename = epi::FS_GetFilename(df->name);
+    std::string bare_filename = epi::GetFilename(df->name);
 
     wad_file_c *wad = df->wad;
 
@@ -1124,7 +1124,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 
     raw_wad_header_t header;
 
-    epi::file_c *file = df->file;
+    epi::File *file = df->file;
 
     // TODO: handle Read failure
     file->Read(&header, sizeof(raw_wad_header_t));
@@ -1145,7 +1145,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 
     raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
 
-    file->Seek(header.dir_start, epi::file_c::SEEKPOINT_START);
+    file->Seek(header.dir_start, epi::File::kSeekpointStart);
     // TODO: handle Read failure
     file->Read(raw_info, length);
 
@@ -1212,17 +1212,17 @@ std::string W_BuildNodesForWad(data_file_c *df)
         return "";
 
     // determine XWA filename in the cache
-    std::string cache_name = epi::FS_GetStem(df->name);
+    std::string cache_name = epi::GetStem(df->name);
     cache_name += "-";
     cache_name += df->wad->md5_string;
     cache_name += ".xwa";
 
-    std::string xwa_filename = epi::FS_PathAppend(cache_dir, cache_name);
+    std::string xwa_filename = epi::PathAppend(cache_dir, cache_name);
 
     I_Debugf("XWA filename: %s\n", xwa_filename.c_str());
 
     // check whether an XWA file for this map exists in the cache
-    bool exists = epi::FS_Access(xwa_filename);
+    bool exists = epi::TestFileAccess(xwa_filename);
 
     if (!exists)
     {
@@ -1233,7 +1233,7 @@ std::string W_BuildNodesForWad(data_file_c *df)
 
         ajbsp::ResetInfo();
 
-        epi::file_c *mem_wad    = nullptr;
+        epi::File *mem_wad    = nullptr;
         uint8_t     *raw_wad    = nullptr;
         int          raw_length = 0;
 
@@ -1263,7 +1263,7 @@ std::string W_BuildNodesForWad(data_file_c *df)
 
         I_Debugf("AJ_BuildNodes: FINISHED\n");
 
-        epi::FS_Sync();
+        epi::SyncFilesystem();
     }
 
     return xwa_filename;
@@ -1290,7 +1290,7 @@ void W_ReadUMAPINFOLumps(void)
             else
             {
                 L_WriteDebug("Parsing UMAPINFO.txt in %s\n", df->name.c_str());
-                epi::file_c *uinfo = Pack_OpenFile(df->pack, "UMAPINFO.txt");
+                epi::File *uinfo = Pack_FileOpen(df->pack, "UMAPINFO.txt");
                 if (uinfo)
                 {
                     Parse_UMAPINFO(uinfo->ReadText());
@@ -1782,7 +1782,7 @@ void W_ReadUMAPINFOLumps(void)
     }
 }
 
-epi::file_c *W_OpenLump(int lump)
+epi::File *W_OpenLump(int lump)
 {
     SYS_ASSERT(W_VerifyLump(lump));
 
@@ -1792,10 +1792,10 @@ epi::file_c *W_OpenLump(int lump)
 
     SYS_ASSERT(df->file);
 
-    return new epi::sub_file_c(df->file, l->position, l->size);
+    return new epi::SubFile(df->file, l->position, l->size);
 }
 
-epi::file_c *W_OpenLump(const char *name)
+epi::File *W_OpenLump(const char *name)
 {
     return W_OpenLump(W_GetNumForName(name));
 }
@@ -2220,7 +2220,7 @@ static void W_RawReadLump(int lump, void *dest)
     lumpinfo_t  *L  = &lumpinfo[lump];
     data_file_c *df = data_files[L->file];
 
-    df->file->Seek(L->position, epi::file_c::SEEKPOINT_START);
+    df->file->Seek(L->position, epi::File::kSeekpointStart);
 
     int c = df->file->Read(dest, L->size);
 

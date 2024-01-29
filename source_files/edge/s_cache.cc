@@ -135,18 +135,18 @@ void S_CacheClearAll(void)
 static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
 {
     // open the file or lump, and read it into memory
-    epi::file_c        *F;
+    epi::File        *F;
     sound_format_e fmt = kUnknownImage;
 
     if (var_pc_speaker_mode)
     {
-        if (epi::FS_GetExtension(def->pc_speaker_sound).empty())
+        if (epi::GetExtension(def->pc_speaker_sound).empty())
         {
             F = W_OpenPackFile(def->pc_speaker_sound);
             if (!F)
             {
                 std::string open_name = M_ComposeFileName(game_dir, def->pc_speaker_sound);
-                F = epi::FS_Open(open_name, epi::kFileAccessRead | epi::kFileAccessBinary);
+                F = epi::FileOpen(open_name, epi::kFileAccessRead | epi::kFileAccessBinary);
             }
             if (!F)
             {
@@ -185,7 +185,7 @@ static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
         {
             // Why is this composed with the app dir? - Dasho
             std::string fn = M_ComposeFileName(game_dir, def->file_name);
-            F  = epi::FS_Open(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
+            F  = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
             if (!F)
             {
                 M_DebugError("SFX Loader: Can't Find File '%s'\n", fn.c_str());
@@ -212,7 +212,7 @@ static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
     int   length = F->GetLength();
     uint8_t *data   = F->LoadIntoMemory();
 
-    // no longer need the epi::file_c
+    // no longer need the epi::File
     delete F;
     F = NULL;
 
@@ -228,7 +228,7 @@ static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
         return false;
     }
 
-    if ((var_pc_speaker_mode && epi::FS_GetExtension(def->pc_speaker_sound).empty()) ||
+    if ((var_pc_speaker_mode && epi::GetExtension(def->pc_speaker_sound).empty()) ||
         (def->pack_name == "" && def->file_name == ""))
     {
         // for lumps, we must detect the format from the lump contents

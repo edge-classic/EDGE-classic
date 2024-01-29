@@ -203,8 +203,8 @@ void font_c::LoadPatches()
 	if (atlas)
 	{
         // Uncomment this to save the generated atlas. Note: will be inverted.
-        /*std::string atlas_png = epi::FS_PathAppend(home_dir, epi::StringFormat("atlas_%s.png", def->name.c_str()));
-        if (epi::FS_Exists(atlas_png))
+        /*std::string atlas_png = epi::PathAppend(home_dir, epi::StringFormat("atlas_%s.png", def->name.c_str()));
+        if (epi::FileExists(atlas_png))
             epi::FS_Remove(atlas_png);
         PNG_Save(atlas_png, atlas->data);*/
 		p_cache.atlas_rects = atlas->rects;
@@ -327,9 +327,9 @@ void font_c::LoadFontTTF()
 
         if (!ttf_buffer)
         {
-            epi::file_c *F;
+            epi::File *F;
 
-            if (!epi::FS_GetExtension(def->ttf_name).empty()) // check for pack file
+            if (!epi::GetExtension(def->ttf_name).empty()) // check for pack file
                 F = W_OpenPackFile(def->ttf_name);
             else
                 F = W_OpenLump(W_CheckNumForName(def->ttf_name.c_str()));

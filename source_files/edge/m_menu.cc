@@ -536,8 +536,8 @@ void M_ReadSaveStrings(void)
 
         SV_FreeGLOB(globs);
 
-        epi::FS_ReplaceExtension(fn, ".replace");
-        if (epi::FS_Exists(fn))
+        epi::ReplaceExtension(fn, ".replace");
+        if (epi::FileExists(fn))
         {
             delete ex_slots[i].save_imdata;
             ex_slots[i].save_imdata = nullptr;
@@ -545,18 +545,18 @@ void M_ReadSaveStrings(void)
                 glDeleteTextures(1, &ex_slots[i].save_texid);
             ex_slots[i].save_texid  = 0;
             ex_slots[i].save_impage = save_page;
-            epi::FS_Delete(fn);
+            epi::FileDelete(fn);
         }
 
         // Save screenshot
-        epi::FS_ReplaceExtension(fn, ".jpg");
+        epi::ReplaceExtension(fn, ".jpg");
 
-        if (epi::FS_Exists(fn) && (!ex_slots[i].save_imdata || save_page != ex_slots[i].save_impage))
+        if (epi::FileExists(fn) && (!ex_slots[i].save_imdata || save_page != ex_slots[i].save_impage))
         {
             delete ex_slots[i].save_imdata;
             if (ex_slots[i].save_texid)
                 glDeleteTextures(1, &ex_slots[i].save_texid);
-            epi::file_c *svimg_file = epi::FS_Open(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
+            epi::File *svimg_file = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
             if (svimg_file)
             {
                 ex_slots[i].save_imdata = Image_Load(svimg_file);

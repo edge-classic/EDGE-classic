@@ -71,7 +71,7 @@ ImageFormat Image_FilenameToFormat(const std::string &filename);
 // Returns NULL if something went wrong.  The result image will be RGB
 // or RGBA (never paletted).  The image size (width and height) will be
 // rounded to the next power-of-two.
-image_data_c *Image_Load(epi::file_c *f);
+image_data_c *Image_Load(epi::File *f);
 
 // given a collection of loaded images, pack and return the image data
 // for an atlas containing all of them. Does not assume that the incoming
@@ -88,7 +88,7 @@ image_atlas_c *Image_Pack(const std::unordered_map<int, image_data_c *> &im_pack
 //
 // NOTE: size returned here is the real size, and may be different
 // from the image returned by Load() which rounds to power-of-two.
-bool Image_GetInfo(epi::file_c *f, int *width, int *height, int *bpp);
+bool Image_GetInfo(epi::File *f, int *width, int *height, int *bpp);
 
 // saves the image (in JPEG format) to the given file.  Returns false if
 // something went wrong.  The image _MUST_ be RGB (bpp == 3).

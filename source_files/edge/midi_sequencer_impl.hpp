@@ -440,8 +440,8 @@ void BW_MidiSequencer::setSongNum(int track)
 
         m_smfFormat = 0;
 
-        epi::mem_file_c *mfr =
-            new epi::mem_file_c(m_rawSongsData[m_loadTrackNumber].data(), m_rawSongsData[m_loadTrackNumber].size());
+        epi::MemFile *mfr =
+            new epi::MemFile(m_rawSongsData[m_loadTrackNumber].data(), m_rawSongsData[m_loadTrackNumber].size());
         parseSMF(mfr);
 
         m_format = Format_XMIDI;
@@ -2136,7 +2136,7 @@ void BW_MidiSequencer::setTempo(double tempo)
 
 bool BW_MidiSequencer::loadMIDI(const uint8_t *data, size_t size, uint16_t rate)
 {
-    epi::mem_file_c *mfr = new epi::mem_file_c(data, size);
+    epi::MemFile *mfr = new epi::MemFile(data, size);
     return loadMIDI(mfr, rate);
 }
 
@@ -2168,7 +2168,7 @@ template <class T> class BufferGuard
  * @param fr Context with opened file data
  * @return true if given file was identified as EA-MUS
  */
-static bool detectRSXX(const char *head, epi::mem_file_c *mfr)
+static bool detectRSXX(const char *head, epi::MemFile *mfr)
 {
     char headerBuf[7] = "";
     bool ret          = false;
@@ -2176,13 +2176,13 @@ static bool detectRSXX(const char *head, epi::mem_file_c *mfr)
     // Try to identify RSXX format
     if (head[0] >= 0x5D)
     {
-        mfr->Seek(head[0] - 0x10, epi::file_c::SEEKPOINT_START);
+        mfr->Seek(head[0] - 0x10, epi::File::kSeekpointStart);
         mfr->Read(headerBuf, 6);
         if (memcmp(headerBuf, "rsxx}u", 6) == 0)
             ret = true;
     }
 
-    mfr->Seek(0, epi::file_c::SEEKPOINT_START);
+    mfr->Seek(0, epi::File::kSeekpointStart);
     return ret;
 }
 
@@ -2192,7 +2192,7 @@ static bool detectRSXX(const char *head, epi::mem_file_c *mfr)
  * @param fr Context with opened file data
  * @return true if given file was identified as IMF
  */
-static bool detectIMF(const char *head, epi::mem_file_c *mfr)
+static bool detectIMF(const char *head, epi::MemFile *mfr)
 {
     uint8_t raw[4];
     size_t  end = (size_t)(head[0]) + 256 * (size_t)(head[1]);
@@ -2202,7 +2202,7 @@ static bool detectIMF(const char *head, epi::mem_file_c *mfr)
 
     size_t  backup_pos = mfr->GetPosition();
     int64_t sum1 = 0, sum2 = 0;
-    mfr->Seek((end > 0 ? 2 : 0), epi::file_c::SEEKPOINT_START);
+    mfr->Seek((end > 0 ? 2 : 0), epi::File::kSeekpointStart);
 
     for (size_t n = 0; n < 16383; ++n)
     {
@@ -2216,12 +2216,12 @@ static bool detectIMF(const char *head, epi::mem_file_c *mfr)
         sum2 += value2;
     }
 
-    mfr->Seek((long)(backup_pos), epi::file_c::SEEKPOINT_START);
+    mfr->Seek((long)(backup_pos), epi::File::kSeekpointStart);
 
     return (sum1 > sum2);
 }
 
-bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr, uint16_t rate)
+bool BW_MidiSequencer::loadMIDI(epi::MemFile *mfr, uint16_t rate)
 {
     size_t fsize = 0;
     BW_MidiSequencer_UNUSED(fsize);
@@ -2251,26 +2251,26 @@ bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr, uint16_t rate)
 
     if (memcmp(headerBuf, "MThd\0\0\0\6", 8) == 0)
     {
-        mfr->Seek(0, epi::file_c::SEEKPOINT_START);
+        mfr->Seek(0, epi::File::kSeekpointStart);
         return parseSMF(mfr);
     }
 
     if (memcmp(headerBuf, "RIFF", 4) == 0)
     {
-        mfr->Seek(0, epi::file_c::SEEKPOINT_START);
+        mfr->Seek(0, epi::File::kSeekpointStart);
         return parseRMI(mfr);
     }
 
     if (memcmp(headerBuf, "GMF\x1", 4) == 0)
     {
-        mfr->Seek(0, epi::file_c::SEEKPOINT_START);
+        mfr->Seek(0, epi::File::kSeekpointStart);
         return parseGMF(mfr);
     }
 
 #ifndef BWMIDI_DISABLE_MUS_SUPPORT
     if (memcmp(headerBuf, "MUS\x1A", 4) == 0)
     {
-        mfr->Seek(0, epi::file_c::SEEKPOINT_START);
+        mfr->Seek(0, epi::File::kSeekpointStart);
         return parseMUS(mfr);
     }
 #endif
@@ -2278,20 +2278,20 @@ bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr, uint16_t rate)
 #ifndef BWMIDI_DISABLE_XMI_SUPPORT
     if ((memcmp(headerBuf, "FORM", 4) == 0) && (memcmp(headerBuf + 8, "XDIR", 4) == 0))
     {
-        mfr->Seek(0, epi::file_c::SEEKPOINT_START);
+        mfr->Seek(0, epi::File::kSeekpointStart);
         return parseXMI(mfr);
     }
 #endif
 
     if (detectIMF(headerBuf, mfr))
     {
-        mfr->Seek(0, epi::file_c::SEEKPOINT_START);
+        mfr->Seek(0, epi::File::kSeekpointStart);
         return parseIMF(mfr, rate);
     }
 
     if (detectRSXX(headerBuf, mfr))
     {
-        mfr->Seek(0, epi::file_c::SEEKPOINT_START);
+        mfr->Seek(0, epi::File::kSeekpointStart);
         return parseRSXX(mfr);
     }
 
@@ -2300,7 +2300,7 @@ bool BW_MidiSequencer::loadMIDI(epi::mem_file_c *mfr, uint16_t rate)
     return false;
 }
 
-bool BW_MidiSequencer::parseIMF(epi::mem_file_c *mfr, uint16_t rate)
+bool BW_MidiSequencer::parseIMF(epi::MemFile *mfr, uint16_t rate)
 {
     const size_t deltaTicks   = 1;
     const size_t trackCount   = 1;
@@ -2337,7 +2337,7 @@ bool BW_MidiSequencer::parseIMF(epi::mem_file_c *mfr, uint16_t rate)
     m_invDeltaTicks = fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
     m_tempo         = fraction<uint64_t>(1, (uint64_t)(deltaTicks) * 2);
 
-    mfr->Seek(0, epi::file_c::SEEKPOINT_START);
+    mfr->Seek(0, epi::File::kSeekpointStart);
     if (mfr->Read(imfRaw, 2) != 2)
     {
         m_errorString = "Unexpected end of file at header!\n";
@@ -2365,7 +2365,7 @@ bool BW_MidiSequencer::parseIMF(epi::mem_file_c *mfr, uint16_t rate)
     event.absPosition = 0;
     event.data.resize(2);
 
-    mfr->Seek((imfEnd > 0) ? 2 : 0, epi::file_c::SEEKPOINT_START);
+    mfr->Seek((imfEnd > 0) ? 2 : 0, epi::File::kSeekpointStart);
 
     if (imfEnd == 0) // IMF Type 0 with unlimited file length
         imfEnd = mfr->GetLength();
@@ -2407,7 +2407,7 @@ bool BW_MidiSequencer::parseIMF(epi::mem_file_c *mfr, uint16_t rate)
     return true;
 }
 
-bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
+bool BW_MidiSequencer::parseRSXX(epi::MemFile *mfr)
 {
     const size_t                      headerSize            = 14;
     char                              headerBuf[headerSize] = "";
@@ -2433,12 +2433,12 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
     }
     else
     {
-        mfr->Seek(headerBuf[0] - 0x10, epi::file_c::SEEKPOINT_START);
+        mfr->Seek(headerBuf[0] - 0x10, epi::File::kSeekpointStart);
         mfr->Read(headerBuf, 6);
         if (memcmp(headerBuf, "rsxx}u", 6) == 0)
         {
             m_format = Format_RSXX;
-            mfr->Seek(start, epi::file_c::SEEKPOINT_START);
+            mfr->Seek(start, epi::File::kSeekpointStart);
             trackCount = 1;
             deltaTicks = 60;
         }
@@ -2463,9 +2463,9 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
         size_t trackLength;
 
         size_t pos = mfr->GetPosition();
-        mfr->Seek(0, epi::file_c::SEEKPOINT_END);
+        mfr->Seek(0, epi::File::kSeekpointEnd);
         trackLength = mfr->GetPosition() - pos;
-        mfr->Seek((long)(pos), epi::file_c::SEEKPOINT_START);
+        mfr->Seek((long)(pos), epi::File::kSeekpointStart);
 
         // Read track data
         rawTrackData[tk].resize(trackLength);
@@ -2508,7 +2508,7 @@ bool BW_MidiSequencer::parseRSXX(epi::mem_file_c *mfr)
     return true;
 }
 
-bool BW_MidiSequencer::parseGMF(epi::mem_file_c *mfr)
+bool BW_MidiSequencer::parseGMF(epi::MemFile *mfr)
 {
     const size_t                      headerSize            = 14;
     char                              headerBuf[headerSize] = "";
@@ -2531,7 +2531,7 @@ bool BW_MidiSequencer::parseGMF(epi::mem_file_c *mfr)
         return false;
     }
 
-    mfr->Seek(7 - (long)(headerSize), epi::file_c::SEEKPOINT_CURRENT);
+    mfr->Seek(7 - (long)(headerSize), epi::File::kSeekpointCurrent);
 
     rawTrackData.clear();
     rawTrackData.resize(trackCount, std::vector<uint8_t>());
@@ -2545,9 +2545,9 @@ bool BW_MidiSequencer::parseGMF(epi::mem_file_c *mfr)
         // Read track header
         size_t trackLength;
         size_t pos = mfr->GetPosition();
-        mfr->Seek(0, epi::file_c::SEEKPOINT_END);
+        mfr->Seek(0, epi::File::kSeekpointEnd);
         trackLength = mfr->GetPosition() - pos;
-        mfr->Seek((long)(pos), epi::file_c::SEEKPOINT_START);
+        mfr->Seek((long)(pos), epi::File::kSeekpointStart);
 
         // Read track data
         rawTrackData[tk].resize(trackLength);
@@ -2586,7 +2586,7 @@ bool BW_MidiSequencer::parseGMF(epi::mem_file_c *mfr)
     return true;
 }
 
-bool BW_MidiSequencer::parseSMF(epi::mem_file_c *mfr)
+bool BW_MidiSequencer::parseSMF(epi::MemFile *mfr)
 {
     const size_t                      headerSize            = 14; // 4 + 4 + 2 + 2 + 2
     char                              headerBuf[headerSize] = "";
@@ -2677,7 +2677,7 @@ bool BW_MidiSequencer::parseSMF(epi::mem_file_c *mfr)
     return true;
 }
 
-bool BW_MidiSequencer::parseRMI(epi::mem_file_c *mfr)
+bool BW_MidiSequencer::parseRMI(epi::MemFile *mfr)
 {
     const size_t headerSize            = 4 + 4 + 2 + 2 + 2; // 14
     char         headerBuf[headerSize] = "";
@@ -2699,12 +2699,12 @@ bool BW_MidiSequencer::parseRMI(epi::mem_file_c *mfr)
 
     m_format = Format_MIDI;
 
-    mfr->Seek(6l, epi::file_c::SEEKPOINT_CURRENT);
+    mfr->Seek(6l, epi::File::kSeekpointCurrent);
     return parseSMF(mfr);
 }
 
 #ifndef BWMIDI_DISABLE_MUS_SUPPORT
-bool BW_MidiSequencer::parseMUS(epi::mem_file_c *mfr)
+bool BW_MidiSequencer::parseMUS(epi::MemFile *mfr)
 {
     const size_t         headerSize            = 14;
     char                 headerBuf[headerSize] = "";
@@ -2728,7 +2728,7 @@ bool BW_MidiSequencer::parseMUS(epi::mem_file_c *mfr)
 
     size_t mus_len = mfr->GetLength();
 
-    mfr->Seek(0, epi::file_c::SEEKPOINT_START);
+    mfr->Seek(0, epi::File::kSeekpointStart);
     uint8_t *mus = (uint8_t *)malloc(mus_len);
     if (!mus)
     {
@@ -2765,14 +2765,14 @@ bool BW_MidiSequencer::parseMUS(epi::mem_file_c *mfr)
     cvt_buf.set(mid);
 
     // Open converted MIDI file
-    mfr = new epi::mem_file_c(mid, (size_t)(mid_len));
+    mfr = new epi::MemFile(mid, (size_t)(mid_len));
 
     return parseSMF(mfr);
 }
 #endif // BWMIDI_DISABLE_MUS_SUPPORT
 
 #ifndef BWMIDI_DISABLE_XMI_SUPPORT
-bool BW_MidiSequencer::parseXMI(epi::mem_file_c *mfr)
+bool BW_MidiSequencer::parseXMI(epi::MemFile *mfr)
 {
     const size_t                      headerSize            = 14;
     char                              headerBuf[headerSize] = "";
@@ -2803,7 +2803,7 @@ bool BW_MidiSequencer::parseXMI(epi::mem_file_c *mfr)
     }
 
     size_t mus_len = mfr->GetLength();
-    mfr->Seek(0, epi::file_c::SEEKPOINT_START);
+    mfr->Seek(0, epi::File::kSeekpointStart);
 
     uint8_t *mus = (uint8_t *)std::malloc(mus_len + 20);
     if (!mus)
@@ -2848,7 +2848,7 @@ bool BW_MidiSequencer::parseXMI(epi::mem_file_c *mfr)
     song_buf.clear();
 
     // Open converted MIDI file
-    mfr = new epi::mem_file_c(m_rawSongsData[m_loadTrackNumber].data(), m_rawSongsData[m_loadTrackNumber].size());
+    mfr = new epi::MemFile(m_rawSongsData[m_loadTrackNumber].data(), m_rawSongsData[m_loadTrackNumber].size());
     // Set format as XMIDI
     m_format = Format_XMIDI;
 

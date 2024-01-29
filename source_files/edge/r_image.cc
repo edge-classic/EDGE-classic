@@ -75,7 +75,7 @@ swirl_type_e swirling_flats = SWIRL_Vanilla;
 
 extern image_data_c *ReadAsEpiBlock(image_c *rim);
 
-extern epi::file_c *OpenUserFileOrLump(imagedef_c *def);
+extern epi::File *OpenUserFileOrLump(imagedef_c *def);
 
 extern cvar_c r_doubleframes;
 
@@ -332,7 +332,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
                             real_image_container_c &container, const image_c *replaces)
 {
     /* used for Graphics, Sprites and TX/HI stuff */
-    epi::file_c *f = W_OpenPackFile(packfile_name);
+    epi::File *f = W_OpenPackFile(packfile_name);
     SYS_ASSERT(f);
     int packfile_len = f->GetLength();
 
@@ -341,7 +341,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
     memset(header, 255, sizeof(header));
 
     f->Read(header, sizeof(header));
-    f->Seek(0, epi::file_c::SEEKPOINT_START);
+    f->Seek(0, epi::File::kSeekpointStart);
 
     int width = 0, height = 0, bpp = 0;
     int offset_x = 0, offset_y = 0;
@@ -476,7 +476,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
 
     int lump_len = W_LumpLength(lump);
 
-    epi::file_c *f = W_OpenLump(lump);
+    epi::File *f = W_OpenLump(lump);
     SYS_ASSERT(f);
 
     // determine format and size information
@@ -484,7 +484,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
     memset(header, 255, sizeof(header));
 
     f->Read(header, sizeof(header));
-    f->Seek(0, epi::file_c::SEEKPOINT_START);
+    f->Seek(0, epi::File::kSeekpointStart);
 
     int width = 0, height = 0, bpp = 0;
     int offset_x = 0, offset_y = 0;
@@ -805,7 +805,7 @@ static image_c *AddImageUser(imagedef_c *def)
     case IMGDT_Package: {
         const char *filename = def->info.c_str();
 
-        epi::file_c *f = OpenUserFileOrLump(def);
+        epi::File *f = OpenUserFileOrLump(def);
         if (f == NULL)
         {
             I_Warning("Unable to open image %s: %s\n", (def->type == IMGDT_Lump) ? "lump" : "file", filename);
@@ -825,7 +825,7 @@ static image_c *AddImageUser(imagedef_c *def)
             memset(header, 255, sizeof(header));
 
             f->Read(header, sizeof(header));
-            f->Seek(0, epi::file_c::SEEKPOINT_START);
+            f->Seek(0, epi::File::kSeekpointStart);
 
             int header_len = HMM_MIN((int)sizeof(header), file_size);
             fmt            = Image_DetectFormat(header, header_len, file_size);
@@ -1007,7 +1007,7 @@ const image_c *W_ImageCreatePackSprite(std::string packname, pack_file_c *pack, 
 {
     SYS_ASSERT(pack);
 
-    image_c *rim = AddImage_SmartPack(epi::FS_GetStem(packname).c_str(), IMSRC_Sprite, packname.c_str(),
+    image_c *rim = AddImage_SmartPack(epi::GetStem(packname).c_str(), IMSRC_Sprite, packname.c_str(),
                                       real_sprites);
     if (!rim)
         return NULL;

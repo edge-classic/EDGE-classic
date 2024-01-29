@@ -24,26 +24,26 @@
 namespace epi
 {
 
-class mem_file_c : public file_c
+class MemFile : public File
 {
   private:
-    uint8_t *data;
+    uint8_t *data_;
 
-    int  length;
-    int  pos;
-    bool copied;
+    int  length_;
+    int  pos_;
+    bool copied_;
 
   public:
-    mem_file_c(const uint8_t *_block, int _len, bool copy_it = true);
-    ~mem_file_c();
+    MemFile(const uint8_t *block, int len, bool copy_it = true);
+    ~MemFile();
 
     int GetLength()
     {
-        return length;
+        return length_;
     }
     int GetPosition()
     {
-        return pos;
+        return pos_;
     }
 
     unsigned int Read(void *dest, unsigned int size);

@@ -61,7 +61,7 @@ void M_ScreenShot(bool show_msg);
 void M_MakeSaveScreenShot(void);
 
 std::string M_ComposeFileName(std::string dir, std::string file);
-epi::file_c          *M_OpenComposedEPIFile(std::string dir, std::string file);
+epi::File          *M_OpenComposedEPIFile(std::string dir, std::string file);
 void                  M_WarnError(const char *error, ...) GCCATTR((format(printf, 1, 2)));
 void                  M_DebugError(const char *error, ...) GCCATTR((format(printf, 1, 2)));
 

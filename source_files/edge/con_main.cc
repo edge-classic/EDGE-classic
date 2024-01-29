@@ -65,7 +65,7 @@ int CMD_Exec(char **argv, int argc)
         return 1;
     }
 
-    FILE *script = epi::FS_OpenRawFile(argv[1], epi::kFileAccessRead|epi::kFileAccessBinary);
+    FILE *script = epi::FileOpenRaw(argv[1], epi::kFileAccessRead|epi::kFileAccessBinary);
     if (!script)
     {
         CON_Printf("Unable to open file: %s\n", argv[1]);
@@ -94,7 +94,7 @@ int CMD_Type(char **argv, int argc)
         return 2;
     }
 
-    script = epi::FS_OpenRawFile(argv[1], epi::kFileAccessRead);
+    script = epi::FileOpenRaw(argv[1], epi::kFileAccessRead);
     if (!script)
     {
         CON_Printf("Unable to open \'%s\'!\n", argv[1]);
@@ -111,7 +111,7 @@ int CMD_Type(char **argv, int argc)
 
 int CMD_Readme(char **argv, int argc)
 {
-    epi::file_c *readme_file = nullptr;
+    epi::File *readme_file = nullptr;
 
     // Check well known readme filenames
     for (auto name : readme_names)
@@ -128,7 +128,7 @@ int CMD_Readme(char **argv, int argc)
         for (int i = data_files.size() - 1; i > 0; i--)
         {
             std::string readme_check = data_files[i]->name;
-            epi::FS_ReplaceExtension(readme_check, ".txt");
+            epi::ReplaceExtension(readme_check, ".txt");
             readme_file = W_OpenPackFile(readme_check);
             if (readme_file)
                 break;
@@ -193,9 +193,9 @@ int CMD_Dir(char **argv, int argc)
     if (argc >= 3)
         mask = argv[2];
 
-    std::vector<epi::dir_entry_c> fsd;
+    std::vector<epi::DirectoryEntry> fsd;
 
-    if (!FS_ReadDir(fsd, path, mask.c_str()))
+    if (!ReadDirectory(fsd, path, mask.c_str()))
     {
         I_Printf("Failed to read dir: %s\n", path.c_str());
         return 1;
@@ -207,12 +207,12 @@ int CMD_Dir(char **argv, int argc)
         return 0;
     }
 
-    I_Printf("Directory contents for %s matching %s\n", epi::FS_GetDirectory(fsd[0].name).c_str(), mask.c_str());
+    I_Printf("Directory contents for %s matching %s\n", epi::GetDirectory(fsd[0].name).c_str(), mask.c_str());
 
     for (size_t i = 0; i < fsd.size(); i++)
     {
         I_Printf("%4d: %10d  %s  \"%s\"\n", (int)i + 1, (int)fsd[i].size, fsd[i].is_dir ? "DIR" : "   ",
-                 epi::FS_GetFilename(fsd[i].name).c_str());
+                 epi::GetFilename(fsd[i].name).c_str());
     }
 
     return 0;
@@ -319,7 +319,7 @@ int CMD_ShowFiles(char **argv, int argc)
 
 int CMD_OpenHome(char **argv, int argc)
 {
-    epi::FS_OpenDir(home_dir);
+    epi::OpenDirectory(home_dir);
     return 0;
 }
 

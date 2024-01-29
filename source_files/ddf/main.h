@@ -134,7 +134,7 @@ extern bool no_warnings;
 void DDF_Init();
 void DDF_CleanUp();
 
-void DDF_Load(epi::file_c *f);
+void DDF_Load(epi::File *f);
 
 bool        DDF_MainParseCondition(const char *str, condition_check_t *cond);
 void        DDF_MainGetWhenAppear(const char *info, void *storage);

@@ -27,8 +27,8 @@
 // opaque handle for rest of the engine
 class md2_model_c;
 
-md2_model_c *MD2_LoadModel(epi::file_c *f);
-md2_model_c *MD3_LoadModel(epi::file_c *f);
+md2_model_c *MD2_LoadModel(epi::File *f);
+md2_model_c *MD3_LoadModel(epi::File *f);
 
 short MD2_FindFrame(md2_model_c *md, const char *name);
 

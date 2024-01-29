@@ -26,55 +26,55 @@ namespace epi
 //
 // Constructor
 //
-mem_file_c::mem_file_c(const uint8_t *_block, int _len, bool copy_it)
+MemFile::MemFile(const uint8_t *block, int len, bool copy_it)
 {
-    SYS_ASSERT(_block);
-    SYS_ASSERT(_len >= 0);
+    SYS_ASSERT(block);
+    SYS_ASSERT(len >= 0);
 
-    pos    = 0;
-    copied = false;
+    pos_    = 0;
+    copied_ = false;
 
-    if (_len == 0)
+    if (len == 0)
     {
-        data   = NULL;
-        length = 0;
+        data_   = nullptr;
+        length_ = 0;
         return;
     }
 
     if (copy_it)
     {
-        data   = new uint8_t[_len];
-        length = _len;
+        data_   = new uint8_t[len];
+        length_ = len;
 
-        memcpy(data, _block, _len);
-        copied = true;
+        memcpy(data_, block, len);
+        copied_ = true;
     }
     else
     {
-        data   = (uint8_t *)_block;
-        length = _len;
+        data_   = (uint8_t *)block;
+        length_ = len;
     }
 }
 
 //
 // Destructor
 //
-mem_file_c::~mem_file_c()
+MemFile::~MemFile()
 {
-    if (data && copied)
+    if (data_ && copied_)
     {
-        delete[] data;
-        data = NULL;
+        delete[] data_;
+        data_ = nullptr;
     }
 
-    length = 0;
+    length_ = 0;
 }
 
-unsigned int mem_file_c::Read(void *dest, unsigned int size)
+unsigned int MemFile::Read(void *dest, unsigned int size)
 {
     SYS_ASSERT(dest);
 
-    unsigned int avail = length - pos;
+    unsigned int avail = length_ - pos_;
 
     if (size > avail)
         size = avail;
@@ -82,28 +82,28 @@ unsigned int mem_file_c::Read(void *dest, unsigned int size)
     if (size == 0)
         return 0; // EOF
 
-    memcpy(dest, data + pos, size);
-    pos += size;
+    memcpy(dest, data_ + pos_, size);
+    pos_ += size;
 
     return size;
 }
 
-bool mem_file_c::Seek(int offset, int seekpoint)
+bool MemFile::Seek(int offset, int seekpoint)
 {
     int new_pos = 0;
 
     switch (seekpoint)
     {
-    case SEEKPOINT_START: {
+    case kSeekpointStart: {
         new_pos = 0;
         break;
     }
-    case SEEKPOINT_CURRENT: {
-        new_pos = pos;
+    case kSeekpointCurrent: {
+        new_pos = pos_;
         break;
     }
-    case SEEKPOINT_END: {
-        new_pos = length;
+    case kSeekpointEnd: {
+        new_pos = length_;
         break;
     }
 
@@ -114,19 +114,19 @@ bool mem_file_c::Seek(int offset, int seekpoint)
     new_pos += offset;
 
     // Note: allow position at the very end (last byte + 1).
-    if (new_pos < 0 || new_pos > length)
+    if (new_pos < 0 || new_pos > length_)
         return false;
 
-    pos = new_pos;
+    pos_ = new_pos;
     return true;
 }
 
-unsigned int mem_file_c::Write(const void *src, unsigned int size)
+unsigned int MemFile::Write(const void *src, unsigned int size)
 {
     (void)src;
     (void)size;
 
-    I_Error("mem_file_c::Write called.\n");
+    I_Error("MemFile::Write called.\n");
 
     return 0; /* read only, cobber */
 }

@@ -82,8 +82,8 @@ bool        W_VerifyLump(int lump);
 bool        W_VerifyLumpName(int lump, const char *name);
 const char *W_GetLumpName(int lump);
 
-epi::file_c *W_OpenLump(int lump);
-epi::file_c *W_OpenLump(const char *name);
+epi::File *W_OpenLump(int lump);
+epi::File *W_OpenLump(const char *name);
 
 int               W_GetPaletteForLump(int lump);
 int               W_FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_offset);
@@ -104,7 +104,7 @@ bool W_IsLumpInPwad(const char *name);
 bool W_IsLumpInAnyWad(const char *name);
 
 // Returns index into game_checker vector if valid game found, else -1
-int W_CheckForUniqueLumps(epi::file_c *file);
+int W_CheckForUniqueLumps(epi::File *file);
 
 void W_BuildNodes(void);
 void W_ReadUMAPINFOLumps(void);

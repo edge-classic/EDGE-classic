@@ -65,7 +65,7 @@ class data_file_c
     filekind_e kind;
 
     // file object   [ TODO review when active ]
-    epi::file_c *file;
+    epi::File *file;
 
     // for FLKIND_IWad, PWad, EWad, GWad.
     wad_file_c *wad;
@@ -88,7 +88,7 @@ void   W_ProcessMultipleFiles();
 size_t W_AddPending(std::string file, filekind_e kind);
 void   ProcessFile(data_file_c *df);
 
-epi::file_c *W_OpenPackFile(const std::string &name);
+epi::File *W_OpenPackFile(const std::string &name);
 
 void W_DoPackSubstitutions(void);
 

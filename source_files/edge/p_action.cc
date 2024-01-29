@@ -1741,8 +1741,8 @@ static void LaunchOrderedSpread(mobj_t *mo)
 {
     // left side = angle modifier
     // right side = object or projectile (true for object).
-    static int spreadorder[] = {(kBAMAngle90 / 8),  true,  (kBAMAngle90 / 8),   false, -(kBAMAngle90 / 8), true,
-                                -(kBAMAngle90 / 4), false, -(kBAMAngle90 / 16), false, (kBAMAngle90 / 16), false};
+    static int spreadorder[] = {(int)(kBAMAngle90 / 8),  true,  (int)(kBAMAngle90 / 8),   false, -(int)(kBAMAngle90 / 8), true,
+                                -(int)(kBAMAngle90 / 4), false, -(int)(kBAMAngle90 / 16), false, (int)(kBAMAngle90 / 16), false};
 
     const atkdef_c *attack = mo->currentattack;
 

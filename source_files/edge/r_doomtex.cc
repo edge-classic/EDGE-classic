@@ -310,7 +310,7 @@ static image_data_c *ReadPatchAsEpiBlock(image_c *rim)
     // handle PNG/JPEG/TGA images
     if (!rim->source.graphic.is_patch)
     {
-        epi::file_c *f;
+        epi::File *f;
 
         if (packfile_name)
             f = W_OpenPackFile(packfile_name);
@@ -351,7 +351,7 @@ static image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 
     if (packfile_name)
     {
-        epi::file_c *f = W_OpenPackFile(packfile_name);
+        epi::File *f = W_OpenPackFile(packfile_name);
         if (f)
         {
             realpatch = (const patch_t *)f->LoadIntoMemory();
@@ -461,7 +461,7 @@ static image_data_c *CreateUserColourImage(image_c *rim, imagedef_c *def)
     return img;
 }
 
-epi::file_c *OpenUserFileOrLump(imagedef_c *def)
+epi::File *OpenUserFileOrLump(imagedef_c *def)
 {
     switch (def->type)
     {
@@ -487,7 +487,7 @@ epi::file_c *OpenUserFileOrLump(imagedef_c *def)
 
 static image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 {
-    epi::file_c *f = OpenUserFileOrLump(def);
+    epi::File *f = OpenUserFileOrLump(def);
 
     if (!f)
         I_Error("Missing image file: %s\n", def->info.c_str());

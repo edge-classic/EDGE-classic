@@ -241,7 +241,7 @@ static short *CreateNormalList(uint8_t *which_normals)
     return n_list;
 }
 
-mdl_model_c *MDL_LoadModel(epi::file_c *f)
+mdl_model_c *MDL_LoadModel(epi::File *f)
 {
     raw_mdl_header_t header;
 

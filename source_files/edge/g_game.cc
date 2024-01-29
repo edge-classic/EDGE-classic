@@ -286,7 +286,7 @@ void G_DoLoadLevel(void)
 
         std::string fn(SV_FileName("current", mapname));
 
-        if (epi::FS_Access(fn))
+        if (epi::TestFileAccess(fn))
         {
             I_Printf("Loading HUB...\n");
 
@@ -902,7 +902,7 @@ static bool G_SaveGameToFile(std::string filename, const char *description)
     time_t cur_time;
     char   timebuf[100];
 
-    epi::FS_Delete(filename);
+    epi::FileDelete(filename);
 
     if (!SV_OpenWriteFile(filename, 0xEC))
     {
@@ -963,7 +963,7 @@ static bool G_SaveGameToFile(std::string filename, const char *description)
     SV_FinishSave();
     SV_CloseWriteFile();
 
-    epi::FS_Sync();
+    epi::SyncFilesystem();
 
 #ifdef EDGE_WEB
     S_ResumeAudioDevice();

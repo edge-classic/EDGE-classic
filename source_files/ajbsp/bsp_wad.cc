@@ -102,7 +102,7 @@ bool Lump_c::Seek(int offset)
     SYS_ASSERT(offset >= 0);
 
     if (parent->mem_fp)
-        return (parent->mem_fp->Seek(l_start + offset, epi::file_c::SEEKPOINT_START));
+        return (parent->mem_fp->Seek(l_start + offset, epi::File::kSeekpointStart));
     else
         return (fseek(parent->fp, l_start + offset, SEEK_SET) == 0);
 }
@@ -199,7 +199,7 @@ bool Lump_c::Finish()
 //  WAD Reading Interface
 //------------------------------------------------------------------------
 
-Wad_file::Wad_file(std::string _name, char _mode, FILE *_fp, epi::mem_file_c *_mem_fp)
+Wad_file::Wad_file(std::string _name, char _mode, FILE *_fp, epi::MemFile *_mem_fp)
     : mode(_mode), fp(_fp), mem_fp(_mem_fp), kind('P'), total_size(0), directory(), dir_start(0), dir_count(0),
       levels(), patches(), sprites(), flats(), tx_tex(), begun_write(false), insert_point(-1)
 {
@@ -237,9 +237,9 @@ Wad_file *Wad_file::Open(std::string filename, char mode)
 
 retry:
     if (mode == 'r')
-        fp = epi::FS_OpenRawFile(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
-    else if (epi::FS_Exists(filename))
-        fp = epi::FS_OpenRawFile(filename, epi::kFileAccessRead | epi::kFileAccessWrite | epi::kFileAccessBinary);
+        fp = epi::FileOpenRaw(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
+    else if (epi::FileExists(filename))
+        fp = epi::FileOpenRaw(filename, epi::kFileAccessRead | epi::kFileAccessWrite | epi::kFileAccessBinary);
 
     if (!fp)
     {
@@ -288,7 +288,7 @@ Wad_file *Wad_file::OpenMem(std::string filename, uint8_t *raw_wad, int raw_leng
 
     FileMessage("Opening WAD from memory: %s\n", filename.c_str());
 
-    epi::mem_file_c *mem_fp = new epi::mem_file_c(raw_wad, raw_length, false);
+    epi::MemFile *mem_fp = new epi::MemFile(raw_wad, raw_length, false);
 
     if (!mem_fp)
     {
@@ -314,7 +314,7 @@ Wad_file *Wad_file::Create(std::string filename, char mode)
 {
     FileMessage("Creating new WAD file: %s\n", filename.c_str());
 
-    FILE *fp = epi::FS_OpenRawFile(filename, epi::kFileAccessWrite | epi::kFileAccessBinary);
+    FILE *fp = epi::FileOpenRaw(filename, epi::kFileAccessWrite | epi::kFileAccessBinary);
     if (!fp)
         return NULL;
 
@@ -569,7 +569,7 @@ void Wad_file::ReadDirectory()
     // WISH: no fatal errors
 
     if (mem_fp)
-        mem_fp->Seek(0, epi::file_c::SEEKPOINT_START);
+        mem_fp->Seek(0, epi::File::kSeekpointStart);
     else
         rewind(fp);
 
@@ -590,7 +590,7 @@ void Wad_file::ReadDirectory()
     if (dir_count < 0 || dir_count > 32000)
         I_Error("AJBSP: Bad WAD header, too many entries (%d)\n", dir_count);
 
-    if (mem_fp && !mem_fp->Seek(dir_start, epi::file_c::SEEKPOINT_START))
+    if (mem_fp && !mem_fp->Seek(dir_start, epi::File::kSeekpointStart))
         I_Error("AJBSP: Error seeking to WAD directory.\n");
     else if (fp && fseek(fp, dir_start, SEEK_SET) != 0)
         I_Error("AJBSP: Error seeking to WAD directory.\n");

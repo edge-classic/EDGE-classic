@@ -142,7 +142,7 @@ modeldef_c *LoadModelFromLump(int model_num)
 
     int          lump_num  = -1;
     int          pack_num  = -1;
-    epi::file_c *f         = nullptr;
+    epi::File *f         = nullptr;
     bool         pack_file = false;
 
     // try MD3 first, then MD2, then MDL, then voxels

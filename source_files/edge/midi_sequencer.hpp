@@ -703,7 +703,7 @@ class BW_MidiSequencer
      * @param rate For IMF formats, the proper playback rate in Hz
      * @return true if file successfully opened, false on any error
      */
-    bool loadMIDI(epi::mem_file_c *mfr, uint16_t rate);
+    bool loadMIDI(epi::MemFile *mfr, uint16_t rate);
 
     /**
      * @brief Periodic tick handler.
@@ -769,35 +769,35 @@ class BW_MidiSequencer
      * @param rate For IMF formats, the proper playback rate in Hz
      * @return true on successful load
      */
-    bool parseIMF(epi::mem_file_c *mfr, uint16_t rate);
+    bool parseIMF(epi::MemFile *mfr, uint16_t rate);
 
     /**
      * @brief Load file as EA MUS
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
-    bool parseRSXX(epi::mem_file_c *mfr);
+    bool parseRSXX(epi::MemFile *mfr);
 
     /**
      * @brief Load file as GMD/MUS files (ScummVM)
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
-    bool parseGMF(epi::mem_file_c *mfr);
+    bool parseGMF(epi::MemFile *mfr);
 
     /**
      * @brief Load file as Standard MIDI file
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
-    bool parseSMF(epi::mem_file_c *mfr);
+    bool parseSMF(epi::MemFile *mfr);
 
     /**
      * @brief Load file as RIFF MIDI
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
-    bool parseRMI(epi::mem_file_c *mfr);
+    bool parseRMI(epi::MemFile *mfr);
 
 #ifndef BWMIDI_DISABLE_MUS_SUPPORT
     /**
@@ -805,7 +805,7 @@ class BW_MidiSequencer
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
-    bool parseMUS(epi::mem_file_c *mfr);
+    bool parseMUS(epi::MemFile *mfr);
 #endif
 
 #ifndef BWMIDI_DISABLE_XMI_SUPPORT
@@ -814,7 +814,7 @@ class BW_MidiSequencer
      * @param mfr mem_file_c with opened source file
      * @return true on successful load
      */
-    bool parseXMI(epi::mem_file_c *mfr);
+    bool parseXMI(epi::MemFile *mfr);
 #endif
 };
 

@@ -24,26 +24,26 @@
 namespace epi
 {
 
-class sub_file_c : public file_c
+class SubFile : public File
 {
   private:
-    file_c *parent;
+    File *parent_;
 
-    int start;
-    int length;
-    int pos;
+    int start_;
+    int length_;
+    int pos_;
 
   public:
-    sub_file_c(file_c *_parent, int _start, int _len);
-    ~sub_file_c();
+    SubFile(File *parent, int start, int len);
+    ~SubFile();
 
     int GetLength()
     {
-        return length;
+        return length_;
     }
     int GetPosition()
     {
-        return pos;
+        return pos_;
     }
 
     unsigned int Read(void *dest, unsigned int size);

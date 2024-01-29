@@ -86,14 +86,14 @@ void S_ChangeMusic(int entrynum, bool loop)
     }
 
     // open the file or lump, and read it into memory
-    epi::file_c *F;
+    epi::File *F;
 
     switch (play->infotype)
     {
     case MUSINF_FILE: {
         std::string fn = M_ComposeFileName(game_dir, play->info);
 
-        F = epi::FS_Open(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
+        F = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (!F)
         {
             I_Warning("S_ChangeMusic: Can't Find File '%s'\n", fn.c_str());

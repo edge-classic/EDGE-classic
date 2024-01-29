@@ -36,7 +36,7 @@ static inline bool IsDirectorySeparator(const char c)
 {
     return (c == '\\' || c == '/' || c == ':'); // Kester added ':'
 }
-bool FS_IsAbsolute(std::string_view path)
+bool IsPathAbsolute(std::string_view path)
 {
 	SYS_ASSERT(!path.empty());
 
@@ -83,20 +83,20 @@ static const wchar_t *FlagsToANSIMode(int flags)
             return nullptr; // Invalid
     }
 }
-FILE *FS_OpenRawFile(std::string_view name, unsigned int flags)
+FILE *FileOpenRaw(std::string_view name, unsigned int flags)
 {
     const wchar_t *mode = FlagsToANSIMode(flags);
     if (!mode) return nullptr;
     std::wstring wname = epi::UTF8ToWString(name);
     return _wfopen(wname.c_str(), mode);
 }
-bool FS_Delete(std::string_view name)
+bool FileDelete(std::string_view name)
 {
     SYS_ASSERT(!name.empty());
     std::wstring wname = epi::UTF8ToWString(name);
     return _wremove(wname.c_str()) == 0;
 }
-bool FS_IsDir(std::string_view dir)
+bool IsDirectory(std::string_view dir)
 {
     SYS_ASSERT(!dir.empty());
     std::wstring wide_dir = epi::UTF8ToWString(dir);
@@ -105,7 +105,7 @@ bool FS_IsDir(std::string_view dir)
         return false;
     return(dircheck.st_mode & _S_IFDIR);
 }
-static std::string FS_GetCurrDir()
+static std::string CurrentDirectoryGet()
 {
     std::string directory;
     const wchar_t *dir = _wgetcwd(nullptr, 0);
@@ -113,25 +113,25 @@ static std::string FS_GetCurrDir()
         directory = epi::WStringToUTF8(dir);
 	return directory; // can be empty
 }
-bool FS_SetCurrDir(std::string_view dir)
+bool CurrentDirectorySet(std::string_view dir)
 {
     SYS_ASSERT(!dir.empty());
     std::wstring wdir = epi::UTF8ToWString(dir);
     return _wchdir(wdir.c_str()) == 0;
 }
-bool FS_MakeDir(std::string_view dir)
+bool MakeDirectory(std::string_view dir)
 {
     SYS_ASSERT(!dir.empty());
     std::wstring wdirectory = epi::UTF8ToWString(dir);
     return _wmkdir(wdirectory.c_str()) == 0;
 }
-bool FS_Exists(std::string_view name)
+bool FileExists(std::string_view name)
 {
     SYS_ASSERT(!name.empty());
     std::wstring wname = epi::UTF8ToWString(name);
     return _waccess(wname.c_str(), 0) == 0;
 }
-bool FS_Access(std::string_view name)
+bool TestFileAccess(std::string_view name)
 {
     // The codebase only seems to use this to test read access, so we
     // shouldn't need to pass any modes as a parameter
@@ -144,17 +144,17 @@ bool FS_Access(std::string_view name)
     else
         return false;
 }
-bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::string &dir, const char *mask)
+bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir, const char *mask)
 {
-    if (dir.empty() || !FS_Exists(dir) || !mask)
+    if (dir.empty() || !FileExists(dir) || !mask)
         return false;
 
-    std::string prev_dir = FS_GetCurrDir();
+    std::string prev_dir = CurrentDirectoryGet();
 
     if (prev_dir.empty()) // Something goofed up, don't make it worse
         return false;
 
-    if (!FS_SetCurrDir(dir))
+    if (!CurrentDirectorySet(dir))
         return false;
 
     std::wstring fmask = epi::UTF8ToWString(mask);
@@ -163,7 +163,7 @@ bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::string &dir, const char *mas
 
     if (fhandle == INVALID_HANDLE_VALUE)
 	{
-		FS_SetCurrDir(prev_dir);
+		CurrentDirectorySet(prev_dir);
 		return false;
 	}
 
@@ -178,7 +178,7 @@ bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::string &dir, const char *mas
 		}
 		else
 		{
-            epi::dir_entry_c new_entry;
+            epi::DirectoryEntry new_entry;
             new_entry.name = dir;
             new_entry.is_dir = (fdataw.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? true : false;
             new_entry.size = new_entry.is_dir ? 0 : fdataw.nFileSizeLow;
@@ -190,20 +190,20 @@ bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::string &dir, const char *mas
 	while (FindNextFileW(fhandle, &fdataw));
 
 	FindClose(fhandle);
-	FS_SetCurrDir(prev_dir);
+	CurrentDirectorySet(prev_dir);
 	return true;
 }
-bool FS_WalkDir(std::vector<dir_entry_c> &fsd, std::string &dir)
+bool WalkDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir)
 {
-    if (dir.empty() || !FS_Exists(dir))
+    if (dir.empty() || !FileExists(dir))
         return false;
 
-    std::string prev_dir = FS_GetCurrDir();
+    std::string prev_dir = CurrentDirectoryGet();
 
     if (prev_dir.empty()) // Something goofed up, don't make it worse
         return false;
 
-    if (!FS_SetCurrDir(dir))
+    if (!CurrentDirectorySet(dir))
         return false;
 
     WIN32_FIND_DATAW fdataw;
@@ -211,7 +211,7 @@ bool FS_WalkDir(std::vector<dir_entry_c> &fsd, std::string &dir)
 
     if (fhandle == INVALID_HANDLE_VALUE)
 	{
-		FS_SetCurrDir(prev_dir);
+		CurrentDirectorySet(prev_dir);
 		return false;
 	}
 
@@ -227,12 +227,12 @@ bool FS_WalkDir(std::vector<dir_entry_c> &fsd, std::string &dir)
             std::string subdir = dir;
             subdir.push_back('/');
             subdir.append(filename);
-            if (!FS_WalkDir(fsd, subdir))
+            if (!WalkDirectory(fsd, subdir))
                 return false;
         }
 		else
 		{
-            epi::dir_entry_c new_entry;
+            epi::DirectoryEntry new_entry;
             new_entry.name = dir;
             new_entry.is_dir = false;
             new_entry.size = fdataw.nFileSizeLow;
@@ -244,7 +244,7 @@ bool FS_WalkDir(std::vector<dir_entry_c> &fsd, std::string &dir)
 	while (FindNextFileW(fhandle, &fdataw));
 
 	FindClose(fhandle);
-	FS_SetCurrDir(prev_dir);
+	CurrentDirectorySet(prev_dir);
 	return true;
 }
 #else // POSIX API
@@ -252,7 +252,7 @@ static inline bool IsDirectorySeparator(const char c)
 {
     return (c == '\\' || c == '/');
 }
-bool FS_IsAbsolute(std::string_view path)
+bool IsPathAbsolute(std::string_view path)
 {
 	SYS_ASSERT(!path.empty());
 
@@ -290,19 +290,19 @@ static const char *FlagsToANSIMode(int flags)
             return nullptr; // Invalid
     }
 }
-FILE *FS_OpenRawFile(std::string_view name, unsigned int flags)
+FILE *FileOpenRaw(std::string_view name, unsigned int flags)
 {
     const char *mode = FlagsToANSIMode(flags);
     if (!mode) return nullptr;
     SYS_ASSERT(!name.empty());
     return fopen(std::string(name).c_str(), mode);
 }
-bool FS_Delete(std::string_view name)
+bool FileDelete(std::string_view name)
 {
     SYS_ASSERT(!name.empty());
     return remove(std::string(name).c_str()) == 0;
 }
-bool FS_IsDir(std::string_view dir)
+bool IsDirectory(std::string_view dir)
 {
     SYS_ASSERT(!dir.empty());
     struct stat dircheck;
@@ -310,48 +310,48 @@ bool FS_IsDir(std::string_view dir)
         return false;
     return S_ISDIR(dircheck.st_mode);
 }
-static std::string FS_GetCurrDir()
+static std::string CurrentDirectoryGet()
 {
     std::string directory;
     const char *dir = getcwd(nullptr, 0);
     if (dir) directory = dir;
 	return directory;
 }
-bool FS_SetCurrDir(std::string_view dir)
+bool CurrentDirectorySet(std::string_view dir)
 {
     SYS_ASSERT(!dir.empty());
     return chdir(std::string(dir).c_str()) == 0;
 }
-bool FS_MakeDir(std::string_view dir)
+bool MakeDirectory(std::string_view dir)
 {
 	SYS_ASSERT(!dir.empty());
 	return (mkdir(std::string(dir).c_str(), 0664) == 0);
 }
-bool FS_Exists(std::string_view name)
+bool FileExists(std::string_view name)
 {
     SYS_ASSERT(!name.empty());
     return access(std::string(name).c_str(), F_OK) == 0;
 }
-bool FS_Access(std::string_view name)
+bool TestFileAccess(std::string_view name)
 {
     // The codebase only seems to use this to test read access, so we
     // shouldn't need to pass any modes as a parameter
     SYS_ASSERT(!name.empty());
     return access(std::string(name).c_str(), R_OK) == 0;
 }
-bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::string &dir, const char *mask)
+bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir, const char *mask)
 {
-    if (dir.empty() || !FS_Exists(dir) || !mask)
+    if (dir.empty() || !FileExists(dir) || !mask)
         return false;
 
-    std::string prev_dir = FS_GetCurrDir();
+    std::string prev_dir = CurrentDirectoryGet();
 
-    std::string mask_ext = epi::FS_GetExtension(mask); // Allows us to retain "*.*" style syntax
+    std::string mask_ext = epi::GetExtension(mask); // Allows us to retain "*.*" style syntax
 
     if (prev_dir.empty()) // Something goofed up, don't make it worse
         return false;
 
-    if (!FS_SetCurrDir(dir))
+    if (!CurrentDirectorySet(dir))
         return false;
 
     DIR *handle = opendir(dir.c_str());
@@ -377,7 +377,7 @@ bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::string &dir, const char *mas
 
         // I though fnmatch should handle this, but ran into case sensitivity issues when 
         // using WSL for some reason - Dasho
-        if (mask_ext != ".*" && epi::StringCaseCompareASCII(mask_ext, epi::FS_GetExtension(filename)) != 0)
+        if (mask_ext != ".*" && epi::StringCaseCompareASCII(mask_ext, epi::GetExtension(filename)) != 0)
             continue;
 
 		struct stat finfo;
@@ -385,7 +385,7 @@ bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::string &dir, const char *mas
 		if (stat(filename.c_str(), &finfo) != 0)
 			continue;
 		
-		epi::dir_entry_c new_entry;
+		epi::DirectoryEntry new_entry;
         new_entry.name = dir;
         new_entry.is_dir = S_ISDIR(finfo.st_mode) ? true : false;
         new_entry.size = finfo.st_size;
@@ -394,22 +394,22 @@ bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::string &dir, const char *mas
         fsd.push_back(new_entry);
 	}
 
-	FS_SetCurrDir(prev_dir);
+	CurrentDirectorySet(prev_dir);
 	closedir(handle);
 	return true;
 }
 // Naive implementation; switch to nftw - Dasho
-bool FS_WalkDir(std::vector<dir_entry_c> &fsd, std::string &dir)
+bool WalkDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir)
 {
-    if (dir.empty() || !FS_Exists(dir))
+    if (dir.empty() || !FileExists(dir))
         return false;
 
-    std::string prev_dir = FS_GetCurrDir();
+    std::string prev_dir = CurrentDirectoryGet();
 
     if (prev_dir.empty()) // Something goofed up, don't make it worse
         return false;
 
-    if (!FS_SetCurrDir(dir))
+    if (!CurrentDirectorySet(dir))
         return false;
 
     DIR *handle = opendir(dir.c_str());
@@ -441,12 +441,12 @@ bool FS_WalkDir(std::vector<dir_entry_c> &fsd, std::string &dir)
             std::string subdir = dir;
             subdir.push_back('/');
             subdir.append(filename);
-            if (!FS_WalkDir(fsd, subdir))
+            if (!WalkDirectory(fsd, subdir))
                 return false;
         }
 		else
 		{
-            epi::dir_entry_c new_entry;
+            epi::DirectoryEntry new_entry;
             new_entry.name = dir;
             new_entry.is_dir = false;
             new_entry.size = finfo.st_size;
@@ -456,7 +456,7 @@ bool FS_WalkDir(std::vector<dir_entry_c> &fsd, std::string &dir)
 		}
 	}
 
-	FS_SetCurrDir(prev_dir);
+	CurrentDirectorySet(prev_dir);
 	closedir(handle);
 	return true;
 }
@@ -464,7 +464,7 @@ bool FS_WalkDir(std::vector<dir_entry_c> &fsd, std::string &dir)
 
 // Universal Functions
 
-std::string FS_GetStem(std::string_view path)
+std::string GetStem(std::string_view path)
 {
 	SYS_ASSERT(!path.empty());
 	// back up until a slash or the start
@@ -498,7 +498,7 @@ std::string FS_GetStem(std::string_view path)
     return filename;
 }
 
-std::string FS_GetFilename(std::string_view path)
+std::string GetFilename(std::string_view path)
 {
 	SYS_ASSERT(!path.empty());
 	// back up until a slash or the start
@@ -516,7 +516,7 @@ std::string FS_GetFilename(std::string_view path)
 
 // This should only be for EPK entry use; essentially it strips the parent
 // path from the child path assuming the parent is actually in the child path
-std::string FS_MakeRelative(std::string_view parent, std::string_view child)
+std::string MakePathRelative(std::string_view parent, std::string_view child)
 {
     SYS_ASSERT(!parent.empty() && !child.empty() && child.size() > parent.size());
     size_t parent_check = child.find(parent);
@@ -543,7 +543,7 @@ std::string SanitizePath(std::string_view path)
     return sani_path;
 }
 
-std::string FS_PathAppend(std::string_view parent, std::string_view child)
+std::string PathAppend(std::string_view parent, std::string_view child)
 {
     SYS_ASSERT(!parent.empty() && !child.empty());
 
@@ -562,7 +562,7 @@ std::string FS_PathAppend(std::string_view parent, std::string_view child)
     return new_path;
 }
 
-std::string FS_GetDirectory(std::string_view path)
+std::string GetDirectory(std::string_view path)
 {
 	SYS_ASSERT(!path.empty());
     std::string directory;
@@ -579,7 +579,7 @@ std::string FS_GetDirectory(std::string_view path)
     return directory;  // nothing
 }
 
-std::string FS_GetExtension(std::string_view path)
+std::string GetExtension(std::string_view path)
 {
 	SYS_ASSERT(!path.empty());
     std::string extension;
@@ -604,7 +604,7 @@ std::string FS_GetExtension(std::string_view path)
     return extension;  // can be empty
 }
 
-void FS_ReplaceExtension(std::string &path, std::string_view ext)
+void ReplaceExtension(std::string &path, std::string_view ext)
 {
 	SYS_ASSERT(!path.empty() && !ext.empty());
     int extpos = -1;
@@ -638,46 +638,46 @@ void FS_ReplaceExtension(std::string &path, std::string_view ext)
     }
 }
 
-file_c *FS_Open(std::string_view name, unsigned int flags)
+File *FileOpen(std::string_view name, unsigned int flags)
 {
     SYS_ASSERT(!name.empty());
-    FILE *fp = FS_OpenRawFile(name, flags);
+    FILE *fp = FileOpenRaw(name, flags);
     if (!fp)
         return NULL;
-    return new ansi_file_c(fp);
+    return new ANSIFile(fp);
 }
 
-bool FS_OpenDir(const std::string &src)
+bool OpenDirectory(const std::string &src)
 {
     // A result of 0 is 'success', but that only means SDL was able to launch some kind of process
     // to attempt to handle the path. -1 is the only result that is guaranteed to be an 'error'
     if (SDL_OpenURL(StringFormat("file:///%s", src.c_str()).c_str()) == -1)
     {
-        I_Warning("FS_OpenDir failed to open requested path %s\nError: %s\n", src.c_str(), SDL_GetError());
+        I_Warning("OpenDirectory failed to open requested path %s\nError: %s\n", src.c_str(), SDL_GetError());
         return false;
     }
     return true;
 }
 
-bool FS_Copy(std::string_view src, std::string_view dest)
+bool FileCopy(std::string_view src, std::string_view dest)
 {
     SYS_ASSERT(!src.empty() && !dest.empty());
 
-    if (!epi::FS_Access(src))
+    if (!epi::TestFileAccess(src))
         return false;
 
-    if (epi::FS_Exists(dest))
+    if (epi::FileExists(dest))
     {
         // overwrite dest if it exists
-        if (!epi::FS_Delete(dest))
+        if (!epi::FileDelete(dest))
             return false;
     }
 
-    file_c *srcfile = epi::FS_Open(src, kFileAccessRead | kFileAccessBinary);
+    File *srcfile = epi::FileOpen(src, kFileAccessRead | kFileAccessBinary);
 
     if (!srcfile) return false;
 
-    file_c *destfile = epi::FS_Open(dest, kFileAccessWrite | kFileAccessBinary);
+    File *destfile = epi::FileOpen(dest, kFileAccessWrite | kFileAccessBinary);
 
     if (!destfile)
     {
@@ -697,7 +697,7 @@ bool FS_Copy(std::string_view src, std::string_view dest)
 
     if (copied != srcsize)
     {
-        epi::FS_Delete(dest);
+        epi::FileDelete(dest);
         return false;
     }
     else
@@ -706,7 +706,7 @@ bool FS_Copy(std::string_view src, std::string_view dest)
 
 // Emscripten-specific
 #ifdef EDGE_WEB
-void FS_Sync(bool populate)
+void SyncFilesystem(bool populate)
 {
     EM_ASM_(
         {
@@ -725,7 +725,7 @@ void FS_Sync(bool populate)
         populate);
 }
 #else
-void FS_Sync(bool populate)
+void SyncFilesystem(bool populate)
 {
     (void)populate;
 }

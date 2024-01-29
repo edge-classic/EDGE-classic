@@ -228,16 +228,16 @@ void I_UnlockAudio(void)
 void I_StartupMusic(void)
 {
     // Check for soundfonts and instrument banks
-    std::vector<epi::dir_entry_c> sfd;
-    std::string         soundfont_dir = epi::FS_PathAppend(game_dir, "soundfont");
+    std::vector<epi::DirectoryEntry> sfd;
+    std::string         soundfont_dir = epi::PathAppend(game_dir, "soundfont");
 
     // Always add the default/internal GENMIDI lump choice
     available_genmidis.push_back("GENMIDI");
     // Set default SF2 location in CVAR if needed
     if (s_soundfont.s.empty())
-        s_soundfont = epi::SanitizePath(epi::FS_PathAppend(soundfont_dir, "Default.sf2"));
+        s_soundfont = epi::SanitizePath(epi::PathAppend(soundfont_dir, "Default.sf2"));
 
-    if (!FS_ReadDir(sfd, soundfont_dir, "*.*"))
+    if (!ReadDirectory(sfd, soundfont_dir, "*.*"))
     {
         I_Warning("I_StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.c_str());
     }
@@ -247,7 +247,7 @@ void I_StartupMusic(void)
         {
             if (!sfd[i].is_dir)
             {
-                std::string ext = epi::FS_GetExtension(sfd[i].name);
+                std::string ext = epi::GetExtension(sfd[i].name);
                 epi::StringLowerASCII(ext);
                 if (ext == ".sf2")
                 {
@@ -263,11 +263,11 @@ void I_StartupMusic(void)
     {
         // Check home_dir soundfont folder as well; create it if it doesn't exist (home_dir only)
         sfd.clear();
-        soundfont_dir = epi::FS_PathAppend(home_dir, "soundfont");
-        if (!epi::FS_IsDir(soundfont_dir))
-            epi::FS_MakeDir(soundfont_dir);
+        soundfont_dir = epi::PathAppend(home_dir, "soundfont");
+        if (!epi::IsDirectory(soundfont_dir))
+            epi::MakeDirectory(soundfont_dir);
 
-        if (!FS_ReadDir(sfd, soundfont_dir, "*.*"))
+        if (!ReadDirectory(sfd, soundfont_dir, "*.*"))
         {
             I_Warning("I_StartupMusic: Failed to read '%s' directory!\n", soundfont_dir.c_str());
         }
@@ -277,7 +277,7 @@ void I_StartupMusic(void)
             {
                 if (!sfd[i].is_dir)
                 {
-                    std::string ext = epi::FS_GetExtension(sfd[i].name);
+                    std::string ext = epi::GetExtension(sfd[i].name);
                     epi::StringLowerASCII(ext);
                     if (ext == ".sf2")
                         available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));

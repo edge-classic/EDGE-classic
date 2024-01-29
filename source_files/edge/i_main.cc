@@ -40,7 +40,7 @@ extern "C"
 
 #ifdef _WIN32
         // -AJA- change current dir to match executable
-        if (!epi::FS_SetCurrDir(exe_path))
+        if (!epi::CurrentDirectorySet(exe_path))
             I_Error("Couldn't set program directory to %s!!\n", exe_path.c_str());
 #endif
 

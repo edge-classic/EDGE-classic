@@ -153,7 +153,7 @@ static void ImageFinishEntry(void)
 {
     if (dynamic_image->type == IMGDT_File || dynamic_image->type == IMGDT_Package)
     {
-        if (epi::FS_GetExtension(dynamic_image->info) == ".lmp")
+        if (epi::GetExtension(dynamic_image->info) == ".lmp")
             dynamic_image->format = LIF_DOOM;
         else
             dynamic_image->format = LIF_STANDARD;

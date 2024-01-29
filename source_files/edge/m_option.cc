@@ -1024,7 +1024,7 @@ void M_OptDrawer()
             fontType  = styledef_c::T_ALT;
             TEXTscale = style->def->text[fontType].scale;
             HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
-                         epi::FS_GetStem(s_soundfont.s).c_str());
+                         epi::GetStem(s_soundfont.s).c_str());
         }
 
         // Draw current GENMIDI
@@ -1033,7 +1033,7 @@ void M_OptDrawer()
             fontType  = styledef_c::T_ALT;
             TEXTscale = style->def->text[fontType].scale;
             HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
-                         s_genmidi.s.empty() ? "Default" : epi::FS_GetStem(s_genmidi.s).c_str());
+                         s_genmidi.s.empty() ? "Default" : epi::GetStem(s_genmidi.s).c_str());
         }
 
         // -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -2039,7 +2039,7 @@ static void M_ChangeSoundfont(int keypressed, cvar_c *cvar)
     if (sf_pos < 0)
     {
         I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
-        s_soundfont = epi::SanitizePath(epi::FS_PathAppend(game_dir, "soundfont/Default.sf2"));
+        s_soundfont = epi::SanitizePath(epi::PathAppend(game_dir, "soundfont/Default.sf2"));
         return;
     }
 

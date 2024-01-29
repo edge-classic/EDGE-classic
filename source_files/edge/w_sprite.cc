@@ -366,7 +366,7 @@ static void FillSpriteFrames(int file)
                 for (; L < packsprites.size(); L++)
                 {
                     std::string spritebase;
-                    epi::TextureNameFromFilename(spritebase, epi::FS_GetStem(packsprites[L]));
+                    epi::TextureNameFromFilename(spritebase, epi::GetStem(packsprites[L]));
 
                     if (spritebase.size() != spr_len + 2 && spritebase.size() != spr_len + 4)
                     {
@@ -442,7 +442,7 @@ static void FillSpriteFramesUser()
             {
                 // const override
                 image_c     *change_img   = (image_c *)images[L];
-                epi::file_c *offset_check = nullptr;
+                epi::File *offset_check = nullptr;
                 if (images[L]->source.graphic.packfile_name)
                     offset_check = W_OpenPackFile(images[L]->source.graphic.packfile_name);
                 else

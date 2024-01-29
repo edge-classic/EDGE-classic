@@ -267,7 +267,7 @@ void argv::ApplyResponseFile(std::string name)
     p = this_parm.next = added_parms;
 
     // add arguments from the given file
-    f = epi::FS_OpenRawFile(name, epi::kFileAccessRead | epi::kFileAccessBinary);
+    f = epi::FileOpenRaw(name, epi::kFileAccessRead | epi::kFileAccessBinary);
     if (!f)
         I_Error("Couldn't open \"%s\" for reading!", name.c_str());
 

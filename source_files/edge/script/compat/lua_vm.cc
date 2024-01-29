@@ -33,7 +33,7 @@ static int LUA_PackLoader(lua_State *L)
     std::string pack_name;
     LUA_GetRequirePackPath(name, pack_name);
 
-    epi::file_c *file = W_OpenPackFile(pack_name);
+    epi::File *file = W_OpenPackFile(pack_name);
 
     if (!file)
     {

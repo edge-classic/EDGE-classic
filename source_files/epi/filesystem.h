@@ -35,10 +35,10 @@ enum Access
 };
 
 // Forward declarations
-class file_c;
+class File;
 
 // A Filesystem directory entry
-class dir_entry_c
+struct DirectoryEntry
 {
   public:
     std::string           name;
@@ -47,36 +47,36 @@ class dir_entry_c
 };
 
 // Path and Filename Functions
-std::string FS_GetFilename(std::string_view path);
-std::string FS_GetStem(std::string_view path);
-std::string FS_GetDirectory(std::string_view path);
-std::string FS_GetExtension(std::string_view path);
-std::string FS_MakeRelative(std::string_view parent, std::string_view child);
-std::string FS_PathAppend(std::string_view parent, std::string_view child);
+std::string GetFilename(std::string_view path);
+std::string GetStem(std::string_view path);
+std::string GetDirectory(std::string_view path);
+std::string GetExtension(std::string_view path);
+std::string MakePathRelative(std::string_view parent, std::string_view child);
+std::string PathAppend(std::string_view parent, std::string_view child);
 std::string SanitizePath(std::string_view path);
-bool FS_IsAbsolute(std::string_view path);
-void FS_ReplaceExtension(std::string &path, std::string_view ext);
+bool IsPathAbsolute(std::string_view path);
+void ReplaceExtension(std::string &path, std::string_view ext);
 
 // Directory Functions
-bool FS_SetCurrDir(std::string_view dir);
-bool FS_IsDir(std::string_view dir);
-bool FS_MakeDir(std::string_view dir);
-bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::string &dir, const char *mask);
-bool FS_WalkDir(std::vector<dir_entry_c> &fsd, std::string &dir);
-bool FS_OpenDir(const std::string &src); // Opens a directory in explorer, finder, etc
+bool CurrentDirectorySet(std::string_view dir);
+bool IsDirectory(std::string_view dir);
+bool MakeDirectory(std::string_view dir);
+bool ReadDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir, const char *mask);
+bool WalkDirectory(std::vector<DirectoryEntry> &fsd, std::string &dir);
+bool OpenDirectory(const std::string &src); // Opens a directory in explorer, finder, etc
 
 // File Functions
-bool    FS_Exists(std::string_view name);
-bool    FS_Access(std::string_view name);
-file_c *FS_Open(std::string_view name, unsigned int flags);
-FILE   *FS_OpenRawFile(std::string_view name, unsigned int flags);
-// NOTE: there's no FS_Close() function, just delete the object.
-bool FS_Copy(std::string_view src, std::string_view dest);
-bool FS_Delete(std::string_view name);
+bool    FileExists(std::string_view name);
+bool    TestFileAccess(std::string_view name);
+File *FileOpen(std::string_view name, unsigned int flags);
+FILE   *FileOpenRaw(std::string_view name, unsigned int flags);
+// NOTE: there's no CloseFile function, just delete the object.
+bool FileCopy(std::string_view src, std::string_view dest);
+bool FileDelete(std::string_view name);
 
 // General Filesystem Functions
 // Performs a sync for platforms with virtualized file systems
-void FS_Sync(bool populate = false);
+void SyncFilesystem(bool populate = false);
 
 } // namespace epi
 

@@ -123,7 +123,7 @@ void E_PlayMovie(const std::string &name)
 		bytes = W_LoadLump(movie->info.c_str(), &length);
 	else
 	{
-		epi::file_c *mf = W_OpenPackFile(movie->info.c_str());
+		epi::File *mf = W_OpenPackFile(movie->info.c_str());
 		if (mf)
 		{
 			bytes = mf->LoadIntoMemory();

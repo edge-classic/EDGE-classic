@@ -61,7 +61,7 @@ static void FluidError(int level, char* message, void* data)
 
 static void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
 {
-	FILE *fp = epi::FS_OpenRawFile(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
+	FILE *fp = epi::FileOpenRaw(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
 	if (!fp)
 		return NULL;
     return fp;
@@ -96,8 +96,8 @@ bool S_StartupFluid(void)
     if (!cvar_good)
     {
         I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
-        s_soundfont = epi::SanitizePath(epi::FS_PathAppend(game_dir, "soundfont/Default.sf2"));
-        if (!epi::FS_Exists(s_soundfont.s))
+        s_soundfont = epi::SanitizePath(epi::PathAppend(game_dir, "soundfont/Default.sf2"));
+        if (!epi::FileExists(s_soundfont.s))
             I_Error("Fluidlite: Cannot locate default soundfont (Default.sf2)! Please check the /soundfont directory "
                     "of your EDGE-Classic install!\n");
     }

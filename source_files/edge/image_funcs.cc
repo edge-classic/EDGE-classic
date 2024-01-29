@@ -123,7 +123,7 @@ ImageFormat Image_DetectFormat(uint8_t *header, int header_len, int file_size)
 
 ImageFormat Image_FilenameToFormat(const std::string &filename)
 {
-    std::string ext = epi::FS_GetExtension(filename);
+    std::string ext = epi::GetExtension(filename);
 
     epi::StringLowerASCII(ext);
 
@@ -145,7 +145,7 @@ ImageFormat Image_FilenameToFormat(const std::string &filename)
     return kUnknownImage;
 }
 
-image_data_c *Image_Load(epi::file_c *f)
+image_data_c *Image_Load(epi::File *f)
 {
     int width  = 0;
     int height = 0;
@@ -282,7 +282,7 @@ image_atlas_c *Image_Pack(const std::unordered_map<int, image_data_c *> &im_pack
 	return atlas;
 }
 
-bool Image_GetInfo(epi::file_c *f, int *width, int *height, int *bpp)
+bool Image_GetInfo(epi::File *f, int *width, int *height, int *bpp)
 {
     int   length    = f->GetLength();
     uint8_t *raw_image = f->LoadIntoMemory();
@@ -299,7 +299,7 @@ bool Image_GetInfo(epi::file_c *f, int *width, int *height, int *bpp)
 static void stbi_file_c_write(void *context, void *data, int size)
 {
     SYS_ASSERT(context && data && size);
-    epi::file_c *dest = (epi::file_c *)context;
+    epi::File *dest = (epi::File *)context;
     dest->Write(data, size);
 }
 
@@ -307,7 +307,7 @@ bool JPEG_Save(std::string fn, image_data_c *img)
 {
     SYS_ASSERT(img->bpp == 3);
 
-    epi::file_c *dest = epi::FS_Open(fn, epi::kFileAccessBinary | epi::kFileAccessWrite);
+    epi::File *dest = epi::FileOpen(fn, epi::kFileAccessBinary | epi::kFileAccessWrite);
 
     if (!dest) return false;
 
@@ -318,7 +318,7 @@ bool JPEG_Save(std::string fn, image_data_c *img)
 
     if (result == 0)
     {
-        epi::FS_Delete(fn);
+        epi::FileDelete(fn);
         return false;
     }
     else
@@ -329,7 +329,7 @@ bool PNG_Save(std::string fn, image_data_c *img)
 {
     SYS_ASSERT(img->bpp >= 3);
 
-    epi::file_c *dest = epi::FS_Open(fn, epi::kFileAccessBinary | epi::kFileAccessWrite);
+    epi::File *dest = epi::FileOpen(fn, epi::kFileAccessBinary | epi::kFileAccessWrite);
 
     if (!dest) return false;
 
@@ -340,7 +340,7 @@ bool PNG_Save(std::string fn, image_data_c *img)
 
     if (result == 0)
     {
-        epi::FS_Delete(fn);
+        epi::FileDelete(fn);
         return false;
     }
     else

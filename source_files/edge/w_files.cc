@@ -107,7 +107,7 @@ extern std::string W_BuildNodesForWad(data_file_c *df);
 
 static void DEH_ConvertFile(std::string &filename)
 {
-    epi::file_c *F = epi::FS_Open(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
+    epi::File *F = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
     if (F == NULL)
     {
         I_Printf("FAILED to open file: %s\n", filename.c_str());
@@ -135,14 +135,14 @@ static void W_ExternalDDF(data_file_c *df)
 {
     ddf_type_e type = DDF_FilenameToType(df->name);
 
-    std::string bare_name = epi::FS_GetFilename(df->name);
+    std::string bare_name = epi::GetFilename(df->name);
 
     if (type == DDF_UNKNOWN)
         I_Error("Unknown DDF filename: %s\n", bare_name.c_str());
 
     I_Printf("Reading DDF file: %s\n", df->name.c_str());
 
-    epi::file_c *F = epi::FS_Open(df->name, epi::kFileAccessRead);
+    epi::File *F = epi::FileOpen(df->name, epi::kFileAccessRead);
     if (F == NULL)
         I_Error("Couldn't open file: %s\n", df->name.c_str());
 
@@ -162,7 +162,7 @@ static void W_ExternalRTS(data_file_c *df)
 {
     I_Printf("Reading RTS script: %s\n", df->name.c_str());
 
-    epi::file_c *F = epi::FS_Open(df->name, epi::kFileAccessRead);
+    epi::File *F = epi::FileOpen(df->name, epi::kFileAccessRead);
     if (F == NULL)
         I_Error("Couldn't open file: %s\n", df->name.c_str());
 
@@ -190,7 +190,7 @@ void ProcessFile(data_file_c *df)
 
     if (df->kind <= FLKIND_XWad)
     {
-        epi::file_c *file = epi::FS_Open(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
+        epi::File *file = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (file == NULL)
         {
             I_Error("Couldn't open file: %s\n", filename.c_str());
@@ -295,7 +295,7 @@ int W_CheckPackForName(const std::string &name)
 
 //----------------------------------------------------------------------------
 
-epi::file_c *W_OpenPackFile(const std::string &name)
+epi::File *W_OpenPackFile(const std::string &name)
 {
     // search from newest file to oldest
     for (int i = (int)data_files.size() - 1; i >= 0; i--)
@@ -304,7 +304,7 @@ epi::file_c *W_OpenPackFile(const std::string &name)
         if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK ||
             df->kind == FLKIND_EEPK || df->kind == FLKIND_IFolder || df->kind == FLKIND_IPK)
         {
-            epi::file_c *F = Pack_OpenFile(df->pack, name);
+            epi::File *F = Pack_FileOpen(df->pack, name);
             if (F != NULL)
                 return F;
         }
@@ -331,7 +331,7 @@ uint8_t *W_OpenPackOrLumpInMemory(const std::string &name, const std::vector<std
             if (df->kind == FLKIND_Folder || df->kind == FLKIND_EFolder || df->kind == FLKIND_EPK ||
                 df->kind == FLKIND_EEPK || df->kind == FLKIND_IFolder || df->kind == FLKIND_IPK)
             {
-                epi::file_c *F = Pack_OpenMatch(df->pack, name, extensions);
+                epi::File *F = Pack_OpenMatch(df->pack, name, extensions);
                 if (F != NULL)
                 {
                     uint8_t *raw_packfile = F->LoadIntoMemory();

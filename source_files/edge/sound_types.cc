@@ -118,7 +118,7 @@ sound_format_e Sound_DetectFormat(uint8_t *data, int song_len)
 
 sound_format_e Sound_FilenameToFormat(const std::string &filename)
 {
-    std::string ext = epi::FS_GetExtension(filename);
+    std::string ext = epi::GetExtension(filename);
 
     epi::StringLowerASCII(ext);
 

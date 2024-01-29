@@ -310,7 +310,7 @@ static short *CreateNormalList(uint8_t *which_normals)
     return n_list;
 }
 
-md2_model_c *MD2_LoadModel(epi::file_c *f)
+md2_model_c *MD2_LoadModel(epi::File *f)
 {
     int i;
 
@@ -345,7 +345,7 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 
     raw_md2_triangle_t *md2_tris = new raw_md2_triangle_t[num_tris];
 
-    f->Seek(EPI_LE_S32(header.ofs_tris), epi::file_c::SEEKPOINT_START);
+    f->Seek(EPI_LE_S32(header.ofs_tris), epi::File::kSeekpointStart);
     f->Read(md2_tris, num_tris * sizeof(raw_md2_triangle_t));
 
     for (int tri = 0; tri < num_tris; tri++)
@@ -361,7 +361,7 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 
     raw_md2_texcoord_t *md2_sts = new raw_md2_texcoord_t[num_sts];
 
-    f->Seek(EPI_LE_S32(header.ofs_st), epi::file_c::SEEKPOINT_START);
+    f->Seek(EPI_LE_S32(header.ofs_st), epi::File::kSeekpointStart);
     f->Read(md2_sts, num_sts * sizeof(raw_md2_texcoord_t));
 
     for (int st = 0; st < num_sts; st++)
@@ -416,7 +416,7 @@ md2_model_c *MD2_LoadModel(epi::file_c *f)
 
     raw_md2_vertex_t *raw_verts = new raw_md2_vertex_t[md->verts_per_frame];
 
-    f->Seek(EPI_LE_S32(header.ofs_frames), epi::file_c::SEEKPOINT_START);
+    f->Seek(EPI_LE_S32(header.ofs_frames), epi::File::kSeekpointStart);
 
     for (i = 0; i < num_frames; i++)
     {
@@ -597,7 +597,7 @@ static void MD3_CreateNormalMap(void)
     md3_normal_map_built = true;
 }
 
-md2_model_c *MD3_LoadModel(epi::file_c *f)
+md2_model_c *MD3_LoadModel(epi::File *f)
 {
     int    i;
     float *ff;
@@ -634,7 +634,7 @@ md2_model_c *MD3_LoadModel(epi::file_c *f)
 
     int mesh_base = EPI_LE_S32(header.ofs_meshes);
 
-    f->Seek(mesh_base, epi::file_c::SEEKPOINT_START);
+    f->Seek(mesh_base, epi::File::kSeekpointStart);
 
     raw_md3_mesh_t mesh;
 
@@ -654,7 +654,7 @@ md2_model_c *MD3_LoadModel(epi::file_c *f)
 
     md2_point_c *temp_TEXC = new md2_point_c[num_verts];
 
-    f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_texcoords), epi::file_c::SEEKPOINT_START);
+    f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_texcoords), epi::File::kSeekpointStart);
 
     for (i = 0; i < num_verts; i++)
     {
@@ -675,7 +675,7 @@ md2_model_c *MD3_LoadModel(epi::file_c *f)
 
     /* PARSE TRIANGLES */
 
-    f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_tris), epi::file_c::SEEKPOINT_START);
+    f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_tris), epi::File::kSeekpointStart);
 
     for (i = 0; i < num_tris; i++)
     {
@@ -704,7 +704,7 @@ md2_model_c *MD3_LoadModel(epi::file_c *f)
 
     /* PARSE VERTEX FRAMES */
 
-    f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_verts), epi::file_c::SEEKPOINT_START);
+    f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_verts), epi::File::kSeekpointStart);
 
     uint8_t which_normals[MD_NUM_NORMALS];
 
@@ -736,7 +736,7 @@ md2_model_c *MD3_LoadModel(epi::file_c *f)
 
     /* PARSE FRAME INFO */
 
-    f->Seek(EPI_LE_S32(header.ofs_frames), epi::file_c::SEEKPOINT_START);
+    f->Seek(EPI_LE_S32(header.ofs_frames), epi::File::kSeekpointStart);
 
     for (i = 0; i < num_frames; i++)
     {

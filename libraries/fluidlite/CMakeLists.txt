@@ -12,7 +12,6 @@ add_library(fluidlite
     src/fluid_hash.c
     src/fluid_list.c
     src/fluid_mod.c
-    src/fluid_ramsfont.c
     src/fluid_rev.c
     src/fluid_settings.c
     src/fluid_synth.c

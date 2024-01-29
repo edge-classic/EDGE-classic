@@ -52,7 +52,14 @@ DEF_CVAR(s_fluidgain, "0.3", CVAR_ARCHIVE|CVAR_PATH)
 
 extern std::vector<std::string> available_soundfonts;
 
-void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
+static void FluidError(int level, char* message, void* data)
+{
+    (void)level;
+    (void)data;
+    I_Error("Fluidlite: %s\n", message);
+}
+
+static void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
 {
 	FILE *fp = epi::FS_OpenRawFile(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
 	if (!fp)
@@ -96,6 +103,10 @@ bool S_StartupFluid(void)
     }
 
     // Initialize settings and change values from default if needed
+    fluid_set_log_function(FLUID_PANIC, FluidError, NULL);
+    fluid_set_log_function(FLUID_ERR, NULL, NULL);
+    fluid_set_log_function(FLUID_WARN, NULL, NULL);
+    fluid_set_log_function(FLUID_DBG, NULL, NULL);
     edge_fluid_settings = new_fluid_settings();
     fluid_settings_setstr(edge_fluid_settings, "synth.reverb.active", "no");
     fluid_settings_setstr(edge_fluid_settings, "synth.chorus.active", "no");

@@ -126,7 +126,7 @@ void DDF_FixCleanUp(void)
 {
     for (auto f : fixdefs)
     {
-        cur_ddf_entryname = epi::STR_Format("[%s]  (wadfixes.ddf)", f->name.c_str());
+        cur_ddf_entryname = epi::StringFormat("[%s]  (wadfixes.ddf)", f->name.c_str());
         cur_ddf_entryname.clear();
     }
 

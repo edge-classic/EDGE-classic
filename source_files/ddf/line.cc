@@ -424,7 +424,7 @@ void DDF_LinedefCleanUp(void)
 {
     for (auto l : linetypes)
     {
-        cur_ddf_entryname = epi::STR_Format("[%d]  (lines.ddf)", l->number);
+        cur_ddf_entryname = epi::StringFormat("[%d]  (lines.ddf)", l->number);
 
         l->t.inspawnobj = l->t.inspawnobj_ref != "" ? mobjtypes.Lookup(l->t.inspawnobj_ref.c_str()) : NULL;
 

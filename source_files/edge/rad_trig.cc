@@ -374,7 +374,7 @@ void RAD_EnableByTag(mobj_t *actor, const char *name, bool disable)
 {
     rad_trigger_t *trig;
 
-    uint32_t tag = epi::STR_Hash32(name);
+    uint32_t tag = epi::StringHash32(name);
 
     // if (tag <= 0)
     // I_Error("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
@@ -407,7 +407,7 @@ bool RAD_IsActiveByTag(mobj_t *actor, const char *name)
 {
     rad_trigger_t *trig;
 
-    uint32_t tag = epi::STR_Hash32(name);
+    uint32_t tag = epi::StringHash32(name);
 
     // if (tag <= 0)
     // I_Error("INTERNAL ERROR: RAD_IsActiveByTag: bad tag %d\n", tag);
@@ -837,7 +837,7 @@ void RAD_MonsterIsDead(mobj_t *mo)
 
         for (trig = active_triggers; trig; trig = trig->next)
         {
-            for (auto tag : epi::STR_SepStringVector(mo->wud_tags, ','))
+            for (auto tag : epi::SeparatedStringVector(mo->wud_tags, ','))
             {
                 if (trig->wud_tag == atoi(tag.c_str()))
                     trig->wud_count--;

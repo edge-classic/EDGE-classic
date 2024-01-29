@@ -845,7 +845,7 @@ void SR_LightPutType(void *storage, int index, void *extra)
     {
         if (src == &ln->l)
         {
-            std::string s = epi::STR_Format("L:%d", ln->number);
+            std::string s = epi::StringFormat("L:%d", ln->number);
             SV_PutString(s.c_str());
             return;
         }
@@ -856,7 +856,7 @@ void SR_LightPutType(void *storage, int index, void *extra)
     {
         if (src == &sec->l)
         {
-            std::string s = epi::STR_Format("S:%d", sec->number);
+            std::string s = epi::StringFormat("S:%d", sec->number);
             SV_PutString(s.c_str());
             return;
         }
@@ -1157,13 +1157,13 @@ void SR_PlaneMovePutType(void *storage, int index, void *extra)
         {
             if (src == &donut[i].f)
             {
-                std::string s = epi::STR_Format("D:F:%d", i);
+                std::string s = epi::StringFormat("D:F:%d", i);
                 SV_PutString(s.c_str());
                 return;
             }
             else if (src == &donut[i].c)
             {
-                std::string s = epi::STR_Format("D:C:%d", i);
+                std::string s = epi::StringFormat("D:C:%d", i);
                 SV_PutString(s.c_str());
                 return;
             }
@@ -1175,14 +1175,14 @@ void SR_PlaneMovePutType(void *storage, int index, void *extra)
     {
         if (src == &ln->f)
         {
-            std::string s = epi::STR_Format("L:F:%d", ln->number);
+            std::string s = epi::StringFormat("L:F:%d", ln->number);
             SV_PutString(s.c_str());
             return;
         }
 
         if (src == &ln->c)
         {
-            std::string s = epi::STR_Format("L:C:%d", ln->number);
+            std::string s = epi::StringFormat("L:C:%d", ln->number);
             SV_PutString(s.c_str());
             return;
         }
@@ -1193,14 +1193,14 @@ void SR_PlaneMovePutType(void *storage, int index, void *extra)
     {
         if (src == &sec->f)
         {
-            std::string s = epi::STR_Format("S:F:%d", sec->number);
+            std::string s = epi::StringFormat("S:F:%d", sec->number);
             SV_PutString(s.c_str());
             return;
         }
 
         if (src == &sec->c)
         {
-            std::string s = epi::STR_Format("S:C:%d", sec->number);
+            std::string s = epi::StringFormat("S:C:%d", sec->number);
             SV_PutString(s.c_str());
             return;
         }
@@ -1256,7 +1256,7 @@ void SR_SliderPutInfo(void *storage, int index, void *extra)
     {
         if (src == &ld_type->s)
         {
-            std::string s = epi::STR_Format(":%d", ld_type->number);
+            std::string s = epi::StringFormat(":%d", ld_type->number);
             SV_PutString(s.c_str());
             return;
         }

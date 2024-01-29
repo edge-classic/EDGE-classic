@@ -898,7 +898,7 @@ void DDF_MainReadFile(readinfo_t *readinfo, const std::string &data)
             break;
 
         case def_stop:
-            cur_ddf_entryname = epi::STR_Format("[%s]", token.c_str());
+            cur_ddf_entryname = epi::StringFormat("[%s]", token.c_str());
 
             // -AJA- 2009/07/27: extend an existing entry
             if (token[0] == '+' && token[1] == '+')
@@ -2141,7 +2141,7 @@ static ddf_reader_t ddf_readers[DDF_NUM_TYPES] = {
 ddf_type_e DDF_LumpToType(const std::string &name)
 {
     std::string up_name(name);
-    epi::STR_Upper(up_name);
+    epi::StringUpperASCII(up_name);
 
     for (size_t i = 0; i < DDF_NUM_TYPES; i++)
         if (up_name == ddf_readers[i].lump_name)

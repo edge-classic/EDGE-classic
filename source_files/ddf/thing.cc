@@ -759,7 +759,7 @@ void DDF_MobjCleanUp(void)
     // lookup references
     for (auto m : mobjtypes)
     {
-        cur_ddf_entryname = epi::STR_Format("[%s]  (things.ddf)", m->name.c_str());
+        cur_ddf_entryname = epi::StringFormat("[%s]  (things.ddf)", m->name.c_str());
 
         m->dropitem = m->dropitem_ref != "" ? mobjtypes.Lookup(m->dropitem_ref.c_str()) : NULL;
         m->blood    = m->blood_ref != "" ? mobjtypes.Lookup(m->blood_ref.c_str()) : mobjtypes.Lookup("BLOOD");
@@ -1705,7 +1705,7 @@ static void DDF_MobjStateGetRADTrigger(const char *arg, state_t *cur_state)
     // Is the value an integer?
     if (length != count)
     {
-        *val_ptr                = epi::STR_Hash32(arg);
+        *val_ptr                = epi::StringHash32(arg);
         cur_state->rts_tag_type = 1;
     }
     else
@@ -2492,7 +2492,7 @@ const mobjtype_c *mobjtype_container_c::LookupDoorKey(int theKey)
         {
             if (keytype_names[k].flags == theKey)
             {
-                std::string temp_ref = epi::STR_Format("%s", keytype_names[k].name);
+                std::string temp_ref = epi::StringFormat("%s", keytype_names[k].name);
                 KeyName = temp_ref;
                 break;
             }

@@ -1089,7 +1089,7 @@ static void PurgeCache(void)
             if (!fsd[i].is_dir)
             {
                 std::string ext = epi::FS_GetExtension(fsd[i].name);
-                epi::STR_Lower(ext);
+                epi::StringLowerASCII(ext);
                 if (ext == ".gwa" || ext == ".hwa")
                     epi::FS_Delete(fsd[i].name);
             }
@@ -1278,7 +1278,7 @@ static void IdentifyVersion(void)
 
     if (!s.empty())
     {
-        for (auto dir : epi::STR_SepStringVector(s, ':'))
+        for (auto dir : epi::SeparatedStringVector(s, ':'))
             iwad_dir_vector.push_back(dir);
     }
 
@@ -1560,7 +1560,7 @@ static void Add_Base(void)
         return; // Standalone EDGE IWADs/EPKs should already contain their necessary resources and definitions - Dasho
     std::string base_path = epi::FS_PathAppend(game_dir, "edge_base");
     std::string base_wad  = game_base;
-    epi::STR_Lower(base_wad);
+    epi::StringLowerASCII(base_wad);
     base_path = epi::FS_PathAppend(base_path, base_wad);
     if (epi::FS_IsDir(base_path))
         W_AddFilename(base_path, FLKIND_EFolder);
@@ -1669,7 +1669,7 @@ static void AddSingleCmdLineFile(std::string name, bool ignore_unknown)
 
     std::string ext = epi::FS_GetExtension(name);
 
-    epi::STR_Lower(ext);
+    epi::StringLowerASCII(ext);
 
     if (ext == ".edm")
         I_Error("Demos are not supported\n");

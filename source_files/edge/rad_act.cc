@@ -1165,9 +1165,9 @@ void RAD_ActWaitUntilDead(rad_trigger_t *R, void *param)
         // mark the monster
         mo->hyperflags |= HF_WAIT_UNTIL_DEAD;
         if (mo->wud_tags.empty())
-            mo->wud_tags = epi::STR_Format("%d", wud->tag);
+            mo->wud_tags = epi::StringFormat("%d", wud->tag);
         else
-            mo->wud_tags = epi::STR_Format("%s,%d", mo->wud_tags.c_str(), wud->tag);
+            mo->wud_tags = epi::StringFormat("%s,%d", mo->wud_tags.c_str(), wud->tag);
 
         R->wud_count++;
     }

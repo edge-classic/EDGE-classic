@@ -1693,7 +1693,7 @@ const image_c *W_ImageForHOMDetect(void)
 
 const image_c *W_ImageForFogWall(rgbacol_t fog_color)
 {
-    std::string fogname = epi::STR_Format("FOGWALL_%d", fog_color);
+    std::string fogname = epi::StringFormat("FOGWALL_%d", fog_color);
     image_c    *fogwall = (image_c *)W_ImageLookup(fogname.c_str(), INS_Graphic, ILF_Null);
     if (fogwall)
         return fogwall;

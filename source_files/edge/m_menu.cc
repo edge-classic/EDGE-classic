@@ -664,7 +664,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
     x = style->def->text[text_type].x_offset;
     slot_extra_info_t *info;
 
-    std::string temp_string = epi::STR_Format("PAGE %d", save_page + 1);
+    std::string temp_string = epi::StringFormat("PAGE %d", save_page + 1);
 
     if (save_page > 0)
         HL_WriteText(style, text_type, x - 4, y, "< PREV");
@@ -1106,7 +1106,7 @@ void M_QuickSave(void)
         return;
     }
 
-    std::string s(epi::STR_Format(language["QuickSaveOver"], ex_slots[quickSaveSlot].desc));
+    std::string s(epi::StringFormat(language["QuickSaveOver"], ex_slots[quickSaveSlot].desc));
 
     M_StartMessage(s.c_str(), QuickSaveResponse, true);
 }
@@ -1139,7 +1139,7 @@ void M_QuickLoad(void)
         return;
     }
 
-    std::string s(epi::STR_Format(language["QuickLoad"], ex_slots[quickSaveSlot].desc));
+    std::string s(epi::StringFormat(language["QuickLoad"], ex_slots[quickSaveSlot].desc));
 
     M_StartMessage(s.c_str(), QuickLoadResponse, true);
 }
@@ -1411,14 +1411,14 @@ static void DoStartLevel(skill_t skill)
     // find episode
     gamedef_c            *g = nullptr;
 
-    std::string chosen_episode = epi::STR_Format("%s", EpisodeMenu[chosen_epi].name);
+    std::string chosen_episode = epi::StringFormat("%s", EpisodeMenu[chosen_epi].name);
 
     for (auto game : gamedefs)
     {
         // Lobo 2022: lets use text instead of M_EPIxx graphic
         if (game->description != "")
         {
-            std::string gamedef_episode = epi::STR_Format("%s", language[game->description.c_str()]);
+            std::string gamedef_episode = epi::StringFormat("%s", language[game->description.c_str()]);
             if (DDF_CompareName(gamedef_episode.c_str(), chosen_episode.c_str()) == 0)
             {
                 g = game;
@@ -1653,7 +1653,7 @@ void M_QuitEDGE(int choice)
         sprintf(ref, "QUITMSG%d", 1 + (M_Random() % num_quitmessages));
 
         // Construct the quit message in full
-        msg = epi::STR_Format("%s\n\n%s", language[ref], language["PressToQuit"]);
+        msg = epi::StringFormat("%s\n\n%s", language[ref], language["PressToQuit"]);
     }
     else
     {
@@ -1746,7 +1746,7 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
     float scale_step = 50.0f / ((max - min) / increment);
 
     // Capture actual value first since it will be aligned to the slider increment
-    std::string actual_val = fmt_string.empty() ? "" : epi::STR_Format(fmt_string.c_str(), thermDot);
+    std::string actual_val = fmt_string.empty() ? "" : epi::StringFormat(fmt_string.c_str(), thermDot);
 
     thermDot = CLAMP(min, thermDot, max);
 
@@ -1998,7 +1998,7 @@ bool M_Responder(event_t *ev)
             }
             else
             {
-                std::string default_name = epi::STR_Format("SAVE-%d", save_page * SAVE_SLOTS + save_slot + 1);
+                std::string default_name = epi::StringFormat("SAVE-%d", save_page * SAVE_SLOTS + save_slot + 1);
                 for (; (size_t)saveCharIndex < default_name.size(); saveCharIndex++)
                 {
                     ex_slots[save_slot].desc[saveCharIndex] = default_name[saveCharIndex];

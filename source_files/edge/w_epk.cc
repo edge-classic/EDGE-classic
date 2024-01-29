@@ -326,7 +326,7 @@ void ProcessSubDir(pack_file_c *pack, std::string &fullpath)
             std::string filename = epi::FS_GetFilename(fsd[i].name);
             std::string packpath = epi::FS_MakeRelative(pack->parent->name, fsd[i].name);
             std::string stem = epi::FS_GetStem(filename);
-            epi::STR_Upper(stem);
+            epi::StringUpperASCII(stem);
             pack->dirs[d].AddEntry(filename, fsd[i].name, packpath, 0);
             pack->search_files.insert({stem, packpath});
         }
@@ -364,7 +364,7 @@ static pack_file_c *ProcessFolder(data_file_c *df)
             std::string filename = fsd[i].name;
             std::string packpath = epi::FS_MakeRelative(df->name, fsd[i].name);
             std::string stem = epi::FS_GetStem(filename);
-            epi::STR_Upper(stem);
+            epi::StringUpperASCII(stem);
             pack->dirs[0].AddEntry(filename, fsd[i].name, packpath, 0);
             pack->search_files.insert({stem, packpath});
         }
@@ -470,7 +470,7 @@ static pack_file_c *ProcessZip(data_file_c *df)
         }
         std::string add_name = basename;
         std::string stem = epi::FS_GetStem(basename);
-        epi::STR_Upper(stem);
+        epi::StringUpperASCII(stem);
         pack->dirs[dir_idx].AddEntry(epi::FS_GetFilename(add_name), "", packpath, idx);
         pack->search_files.insert({stem, packpath});
     }
@@ -833,14 +833,14 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
             std::string stem = epi::FS_GetStem(entry.name);
             std::string ext  = epi::FS_GetExtension(entry.name);
 
-            epi::STR_Lower(ext);
+            epi::StringLowerASCII(ext);
 
             if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
                 ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
             {
                 std::string texname;
 
-                epi::STR_TextureNameFromFilename(texname, stem);
+                epi::TextureNameFromFilename(texname, stem);
 
                 bool add_it = true;
 
@@ -968,14 +968,14 @@ void Pack_ProcessHiresSubstitutions(pack_file_c *pack, int pack_index)
         std::string stem = epi::FS_GetStem(entry.name);
         std::string ext  = epi::FS_GetExtension(entry.name);
 
-        epi::STR_Lower(ext);
+        epi::StringLowerASCII(ext);
 
         if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
             ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
         {
             std::string texname;
 
-            epi::STR_TextureNameFromFilename(texname, stem);
+            epi::TextureNameFromFilename(texname, stem);
 
             // See if a bare lump with the same name comes later
             if (W_CheckFileNumForName(texname.c_str()) > pack_index)
@@ -1053,7 +1053,7 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
     }
 
     std::string find_stem = epi::FS_GetStem(name);
-    epi::STR_Upper(find_stem);
+    epi::StringUpperASCII(find_stem);
 
     // quick file stem check to see if it's present at all
     if (!Pack_FindStem(pack, find_stem))
@@ -1127,7 +1127,7 @@ epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name)
     } 
 
     std::string open_stem = epi::FS_GetStem(open_name);
-    epi::STR_Upper(open_stem);
+    epi::StringUpperASCII(open_stem);
 
     // quick file stem check to see if it's present at all
     if (!Pack_FindStem(pack, open_stem))
@@ -1175,7 +1175,7 @@ epi::file_c *Pack_OpenMatch(pack_file_c *pack, const std::string &name, const st
         return NULL;
 
     std::string open_stem = name;
-    epi::STR_Upper(open_stem);
+    epi::StringUpperASCII(open_stem);
 
     // quick file stem check to see if it's present at all
     if (!Pack_FindStem(pack, open_stem))
@@ -1212,14 +1212,14 @@ std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)
             std::string stem = epi::FS_GetStem(entry.name);
             std::string ext  = epi::FS_GetExtension(entry.name);
 
-            epi::STR_Lower(ext);
+            epi::StringLowerASCII(ext);
 
             if (ext == ".png" || ext == ".tga" || ext == ".jpg" || ext == ".jpeg" ||
                 ext == ".lmp") // Note: .lmp is assumed to be Doom-format image
             {
 
                 std::string texname;
-                epi::STR_TextureNameFromFilename(texname, stem);
+                epi::TextureNameFromFilename(texname, stem);
 
                 bool addme = true;
                 // Don't add things already defined in DDFIMAGE

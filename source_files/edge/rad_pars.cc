@@ -1026,7 +1026,7 @@ static void RAD_ParseTag(param_set_t &pars)
     // Is the value an integer?
     if (length != count)
     {
-        this_rad->tag[1] = epi::STR_Hash32(pars[1]);
+        this_rad->tag[1] = epi::StringHash32(pars[1]);
         parsed_string_tags.try_emplace(this_rad->tag[1], pars[1]);
     }
     else
@@ -1275,7 +1275,7 @@ static void RAD_ParseEnableTagged(param_set_t &pars)
 
     // Is the value an integer?
     if (length != count)
-        t->tag[1] = epi::STR_Hash32(pars[1]);
+        t->tag[1] = epi::StringHash32(pars[1]);
     else
         t->tag[0] = atoi(pars[1]);
 

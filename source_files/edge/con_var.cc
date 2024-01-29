@@ -328,9 +328,9 @@ void CON_WriteVars(FILE *f)
         {
             std::string line;
             if (var->flags & CVAR_PATH)
-                line = epi::SanitizePath(epi::STR_Format("/%s\t\"%s\"\n", var->name, var->c_str()));
+                line = epi::SanitizePath(epi::StringFormat("/%s\t\"%s\"\n", var->name, var->c_str()));
             else
-                line = epi::STR_Format("/%s\t\"%s\"\n", var->name, var->c_str());
+                line = epi::StringFormat("/%s\t\"%s\"\n", var->name, var->c_str());
             fwrite(line.data(), line.size(), 1, f);
         }
     }

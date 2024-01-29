@@ -128,7 +128,7 @@ image_format_e Image_FilenameToFormat(const std::string &filename)
 {
     std::string ext = epi::FS_GetExtension(filename);
 
-    STR_Lower(ext);
+    StringLowerASCII(ext);
 
     if (ext == ".png")
         return FMT_PNG;

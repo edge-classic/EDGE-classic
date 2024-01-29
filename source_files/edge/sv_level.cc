@@ -877,7 +877,7 @@ void SR_LinePutSpecial(void *storage, int index, void *extra)
         return;
     }
 
-    std::string s = epi::STR_Format(":%d", src->number);
+    std::string s = epi::StringFormat(":%d", src->number);
 
     SV_PutString(s.c_str());
 }
@@ -920,7 +920,7 @@ void SR_SectorPutSpecial(void *storage, int index, void *extra)
         return;
     }
 
-    std::string s = epi::STR_Format(":%d", src->number);
+    std::string s = epi::StringFormat(":%d", src->number);
 
     SV_PutString(s.c_str());
 }

@@ -446,7 +446,7 @@ void M_ScreenShot(bool show_msg)
     // find a file name to save it to
     for (int i = 1; i <= 9999; i++)
     {
-        std::string base(epi::STR_Format("shot%02d.%s", i, extension));
+        std::string base(epi::StringFormat("shot%02d.%s", i, extension));
 
         fn = epi::FS_PathAppend(shot_dir, base);
 
@@ -490,7 +490,7 @@ void M_MakeSaveScreenShot(void)
 
     const char *extension = "jpg";
 
-    std::string           temp(epi::STR_Format("%s/%s.%s", "current", "head", extension));
+    std::string           temp(epi::StringFormat("%s/%s.%s", "current", "head", extension));
     std::string filename = epi::FS_PathAppend(save_dir, temp);
 
     epi::FS_Delete(filename);

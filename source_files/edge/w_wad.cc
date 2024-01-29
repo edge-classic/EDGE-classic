@@ -1194,7 +1194,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
     dir_md5.Compute((const uint8_t *)raw_info, length);
 
     wad->md5_string =
-        epi::STR_Format("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", dir_md5.hash[0],
+        epi::StringFormat("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", dir_md5.hash[0],
                         dir_md5.hash[1], dir_md5.hash[2], dir_md5.hash[3], dir_md5.hash[4], dir_md5.hash[5],
                         dir_md5.hash[6], dir_md5.hash[7], dir_md5.hash[8], dir_md5.hash[9], dir_md5.hash[10],
                         dir_md5.hash[11], dir_md5.hash[12], dir_md5.hash[13], dir_md5.hash[14], dir_md5.hash[15]);
@@ -1311,7 +1311,7 @@ void W_ReadUMAPINFOLumps(void)
         for (i = 0; i < Maps.mapcount; i++)
         {
             std::string mapname = Maps.maps[i].mapname;
-            epi::STR_Upper(mapname);
+            epi::StringUpperASCII(mapname);
             // Check that the name adheres to either EXMX or MAPXX format per the standard
             if (epi::STR_PrefixCaseCmp(mapname, "MAP") == 0)
             {
@@ -1346,19 +1346,19 @@ void W_ReadUMAPINFOLumps(void)
             if (Maps.maps[i].levelpic[0])
             {
                 temp_level->namegraphic = Maps.maps[i].levelpic;
-                epi::STR_Upper(temp_level->namegraphic);
+                epi::StringUpperASCII(temp_level->namegraphic);
             }
 
             if (Maps.maps[i].skytexture[0])
             {
                 temp_level->sky = Maps.maps[i].skytexture;
-                epi::STR_Upper(temp_level->sky);
+                epi::StringUpperASCII(temp_level->sky);
             }
 
             if (Maps.maps[i].levelname)
             {
-                std::string temp_ref   = epi::STR_Format("%sDesc", Maps.maps[i].mapname);
-                std::string temp_value = epi::STR_Format(" %s ", Maps.maps[i].levelname);
+                std::string temp_ref   = epi::StringFormat("%sDesc", Maps.maps[i].mapname);
+                std::string temp_value = epi::StringFormat(" %s ", Maps.maps[i].levelname);
                 language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
                 temp_level->description = temp_ref;
             }
@@ -1392,7 +1392,7 @@ void W_ReadUMAPINFOLumps(void)
             if (Maps.maps[i].nextmap[0])
             {
                 temp_level->nextmapname = Maps.maps[i].nextmap;
-                epi::STR_Upper(temp_level->nextmapname);
+                epi::StringUpperASCII(temp_level->nextmapname);
             }
 
             if (Maps.maps[i].intertext)
@@ -1445,8 +1445,8 @@ void W_ReadUMAPINFOLumps(void)
                 }
                 else
                 {
-                    std::string temp_ref   = epi::STR_Format("%sINTERTEXT", Maps.maps[i].mapname);
-                    std::string temp_value = epi::STR_Format(" %s ", Maps.maps[i].intertext);
+                    std::string temp_ref   = epi::StringFormat("%sINTERTEXT", Maps.maps[i].mapname);
+                    std::string temp_value = epi::StringFormat(" %s ", Maps.maps[i].intertext);
                     language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
                     temp_level->f_end.text    = temp_ref;
                     temp_level->f_end.picwait = 350; // 10 seconds
@@ -1457,7 +1457,7 @@ void W_ReadUMAPINFOLumps(void)
                     const image_c *rim;
 
                     std::string ibd_lookup = Maps.maps[i].interbackdrop;
-                    epi::STR_Upper(ibd_lookup);
+                    epi::StringUpperASCII(ibd_lookup);
 
                     rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
 
@@ -1501,7 +1501,7 @@ void W_ReadUMAPINFOLumps(void)
             if (Maps.maps[i].nextsecret[0])
             {
                 temp_level->secretmapname = Maps.maps[i].nextsecret;
-                epi::STR_Upper(temp_level->secretmapname);
+                epi::StringUpperASCII(temp_level->secretmapname);
                 if (Maps.maps[i].intertextsecret)
                 {
 
@@ -1539,9 +1539,9 @@ void W_ReadUMAPINFOLumps(void)
                     {
                         secret_level       = new mapdef_c;
                         secret_level->name = Maps.maps[i].nextsecret;
-                        epi::STR_Upper(secret_level->name);
+                        epi::StringUpperASCII(secret_level->name);
                         secret_level->lump = Maps.maps[i].nextsecret;
-                        epi::STR_Upper(secret_level->lump);
+                        epi::StringUpperASCII(secret_level->lump);
                         mapdefs.push_back(secret_level);
                     }
 
@@ -1552,8 +1552,8 @@ void W_ReadUMAPINFOLumps(void)
                     }
                     else
                     {
-                        std::string temp_ref   = epi::STR_Format("%sPRETEXT", secret_level->name.c_str());
-                        std::string temp_value = epi::STR_Format(" %s ", Maps.maps[i].intertextsecret);
+                        std::string temp_ref   = epi::StringFormat("%sPRETEXT", secret_level->name.c_str());
+                        std::string temp_value = epi::StringFormat(" %s ", Maps.maps[i].intertextsecret);
                         language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
 
                         // hack for shitty dbp shennanigans :/
@@ -1566,7 +1566,7 @@ void W_ReadUMAPINFOLumps(void)
                             {
                                 const image_c *rim;
                                 std::string    ibd_lookup = Maps.maps[i].interbackdrop;
-                                epi::STR_Upper(ibd_lookup);
+                                epi::StringUpperASCII(ibd_lookup);
 
                                 rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
 
@@ -1596,7 +1596,7 @@ void W_ReadUMAPINFOLumps(void)
                             {
                                 const image_c *rim;
                                 std::string    ibd_lookup = Maps.maps[i].interbackdrop;
-                                epi::STR_Upper(ibd_lookup);
+                                epi::StringUpperASCII(ibd_lookup);
 
                                 rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
 
@@ -1622,13 +1622,13 @@ void W_ReadUMAPINFOLumps(void)
             if (Maps.maps[i].exitpic[0])
             {
                 temp_level->leavingbggraphic = Maps.maps[i].exitpic;
-                epi::STR_Upper(temp_level->leavingbggraphic);
+                epi::StringUpperASCII(temp_level->leavingbggraphic);
             }
 
             if (Maps.maps[i].enterpic[0])
             {
                 temp_level->enteringbggraphic = Maps.maps[i].enterpic;
-                epi::STR_Upper(temp_level->enteringbggraphic);
+                epi::StringUpperASCII(temp_level->enteringbggraphic);
             }
 
             if (Maps.maps[i].endpic[0])
@@ -1636,7 +1636,7 @@ void W_ReadUMAPINFOLumps(void)
                 temp_level->nextmapname.clear();
                 temp_level->f_end.pics.clear();
                 temp_level->f_end.pics.push_back(Maps.maps[i].endpic);
-                epi::STR_Upper(temp_level->f_end.pics.back());
+                epi::StringUpperASCII(temp_level->f_end.pics.back());
                 temp_level->f_end.picwait = INT_MAX; // Stay on endpic for now
             }
 
@@ -1674,10 +1674,10 @@ void W_ReadUMAPINFOLumps(void)
                     {
                         if (mobjtypes[m]->number == Maps.maps[i].bossactions[a].type)
                         {
-                            ba_rts.append(epi::STR_Format("START_MAP %s\n", Maps.maps[i].mapname));
+                            ba_rts.append(epi::StringFormat("START_MAP %s\n", Maps.maps[i].mapname));
                             ba_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
-                            ba_rts.append(epi::STR_Format("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
-                            ba_rts.append(epi::STR_Format("    ACTIVATE_LINETYPE %d %d\n",
+                            ba_rts.append(epi::StringFormat("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
+                            ba_rts.append(epi::StringFormat("    ACTIVATE_LINETYPE %d %d\n",
                                                         Maps.maps[i].bossactions[a].special,
                                                         Maps.maps[i].bossactions[a].tag));
                             ba_rts.append("  END_RADIUS_TRIGGER\n");

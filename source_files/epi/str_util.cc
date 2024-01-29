@@ -23,13 +23,11 @@
 
 #include "grapheme.h"
 
-#include <algorithm>
-
 namespace epi
 {
 
 #ifdef _WIN32
-std::wstring utf8_to_wstring(std::string_view instring)
+std::wstring UTF8ToWString(std::string_view instring)
 {
     size_t utf8pos = 0;
     const char *utf8ptr = instring.data();
@@ -51,7 +49,7 @@ std::wstring utf8_to_wstring(std::string_view instring)
     }
     return outstring;
 }
-std::string wstring_to_utf8(const wchar_t *instring)
+std::string WStringToUTF8(const wchar_t *instring)
 {
     std::string outstring;
     char u8c[4];
@@ -69,16 +67,43 @@ std::string wstring_to_utf8(const wchar_t *instring)
 }
 #endif
 
-void STR_Lower(std::string &s)
+void StringLowerASCII(std::string &s)
 {
-    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+    for (char &ch : s)
+    {
+        if (ch > '@' && ch < '[')
+            ch ^= 0x20;
+    }
 }
-void STR_Upper(std::string &s)
+void StringUpperASCII(std::string &s)
 {
-    std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+    for (char &ch : s)
+    {
+        if (ch > '`' && ch < '{')
+            ch ^= 0x20;
+    }
 }
 
-void STR_TextureNameFromFilename(std::string &buf, const std::string &stem)
+void StringLowerUTF8(std::string &s)
+{
+    const char *sc = s.c_str();
+    size_t ss = s.size()+1;
+    size_t needed = grapheme_to_lowercase_utf8(sc, ss, nullptr, 0);
+    char *c = (char *)calloc(needed, sizeof(char));
+    grapheme_to_lowercase_utf8(sc, ss, c, needed);
+    s = c;
+}
+void StringUpperUTF8(std::string &s)
+{
+    const char *sc = s.c_str();
+    size_t ss = s.size()+1;
+    size_t needed = grapheme_to_uppercase_utf8(sc, ss, nullptr, 0);
+    char *c = (char *)calloc(needed, sizeof(char));
+    grapheme_to_uppercase_utf8(sc, ss, c, needed);
+    s = c;
+}
+
+void TextureNameFromFilename(std::string &buf, std::string_view stem)
 {
     size_t pos = 0;
 
@@ -91,14 +116,14 @@ void STR_TextureNameFromFilename(std::string &buf, const std::string &stem)
         // remap caret --> backslash
         if (ch == '^')
             ch = '\\';
+        else if (ch > '`' && ch < '{')
+            ch ^= 0x20;
 
         buf.push_back((char)ch);
     }
-
-    epi::STR_Upper(buf);
 }
 
-std::string STR_Format(const char *fmt, ...)
+std::string StringFormat(const char *fmt, ...)
 {
     /* Algorithm: keep doubling the allocated buffer size
      * until the output fits. Based on code by Darren Salt.
@@ -131,31 +156,31 @@ std::string STR_Format(const char *fmt, ...)
     }
 }
 
-std::vector<std::string> STR_SepStringVector(std::string str, char separator)
+std::vector<std::string> SeparatedStringVector(std::string_view str, char separator)
 {
     std::vector<std::string> vec;
-    std::string::size_type   oldpos = 0;
-    std::string::size_type   pos    = 0;
-    while (pos != std::string::npos)
+    std::string_view::size_type   oldpos = 0;
+    std::string_view::size_type   pos    = 0;
+    while (pos != std::string_view::npos)
     {
         pos                    = str.find(separator, oldpos);
-        std::string sub_string = str.substr(oldpos, (pos == std::string::npos ? str.size() : pos) - oldpos);
+        std::string sub_string(str.substr(oldpos, (pos == std::string::npos ? str.size() : pos) - oldpos));
         if (!sub_string.empty())
             vec.push_back(sub_string);
-        if (pos != std::string::npos)
+        if (pos != std::string_view::npos)
             oldpos = pos + 1;
     }
     return vec;
 }
 
-uint32_t STR_Hash32(std::string str_to_hash)
+uint32_t StringHash32(std::string_view str_to_hash)
 {
-    if (!str_to_hash.length())
+    if (str_to_hash.empty())
     {
         return 0;
     }
 
-    return SFH_MakeKey(str_to_hash.c_str(), str_to_hash.length());
+    return SFH_MakeKey(str_to_hash.data(), str_to_hash.length());
 }
 
 } // namespace epi

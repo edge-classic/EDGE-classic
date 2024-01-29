@@ -466,7 +466,7 @@ void M_DrawHostMenu(void)
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, ng_host_style, y, "Bots", epi::STR_Format("%d", host_want_bots).c_str());
+    DrawKeyword(idx, ng_host_style, y, "Bots", epi::StringFormat("%d", host_want_bots).c_str());
     y += deltay;
     idx++;
 
@@ -593,12 +593,12 @@ void M_DrawPlayerList(void)
                 bots_here++;
         }
 
-        HL_WriteText(ng_list_style, (flags & PFL_Network) ? 0 : 3, 20, y, epi::STR_Format("PLAYER %d", humans).c_str());
+        HL_WriteText(ng_list_style, (flags & PFL_Network) ? 0 : 3, 20, y, epi::StringFormat("PLAYER %d", humans).c_str());
 
         HL_WriteText(ng_list_style, 1, 100, y, "Local");
 
         HL_WriteText(ng_list_style, (flags & PFL_Network) ? 0 : 3, 200, y,
-                     epi::STR_Format("%d BOTS", bots_here).c_str());
+                     epi::StringFormat("%d BOTS", bots_here).c_str());
         y += 10;
     }
 

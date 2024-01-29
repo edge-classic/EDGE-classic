@@ -342,7 +342,7 @@ void DDF_AttackCleanUp(void)
 {
     for (auto a : atkdefs)
     {
-        cur_ddf_entryname = epi::STR_Format("[%s]  (attacks.ddf)", a->name.c_str());
+        cur_ddf_entryname = epi::StringFormat("[%s]  (attacks.ddf)", a->name.c_str());
 
         // lookup thing references
 

@@ -128,7 +128,7 @@ void DDF_FlatCleanUp(void)
 {
     for (auto f : flatdefs)
     {
-        cur_ddf_entryname = epi::STR_Format("[%s]  (flats.ddf)", f->name.c_str());
+        cur_ddf_entryname = epi::StringFormat("[%s]  (flats.ddf)", f->name.c_str());
 
         f->impactobject = f->impactobject_ref != "" ? mobjtypes.Lookup(f->impactobject_ref.c_str()) : NULL;
 

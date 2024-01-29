@@ -586,7 +586,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 }
                 new_epi->namegraphic = lumpname;
                 new_epi->description = alttext;
-                new_epi->name        = epi::STR_Format("UMAPINFO_%s\n", val->mapname); // Internal
+                new_epi->name        = epi::StringFormat("UMAPINFO_%s\n", val->mapname); // Internal
             }
         }
         else if (epi::STR_CaseCmp(key, "bossaction") == 0)

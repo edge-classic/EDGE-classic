@@ -437,7 +437,7 @@ static void DrawStdCrossHair(void)
     {
         crosshair_which = r_crosshair.d;
 
-        crosshair_image = W_ImageLookup(epi::STR_Format("STANDARD_CROSSHAIR_%d", crosshair_which).c_str());
+        crosshair_image = W_ImageLookup(epi::StringFormat("STANDARD_CROSSHAIR_%d", crosshair_which).c_str());
     }
 
     GLuint tex_id = W_ImageCache(crosshair_image);

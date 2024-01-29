@@ -23,7 +23,7 @@ static void LUA_GetRequirePackPath(const char *name, std::string &out)
 {
     std::string require_name(name);
     std::replace(require_name.begin(), require_name.end(), '.', '/');
-    out = epi::STR_Format("scripts/lua/%s.lua", require_name.c_str());
+    out = epi::StringFormat("scripts/lua/%s.lua", require_name.c_str());
 }
 
 static int LUA_PackLoader(lua_State *L)
@@ -104,7 +104,7 @@ int LUA_DoFile(lua_State *L, const char *filename, const char *source)
 
     if (status != LUA_OK)
     {
-        LUA_Error(epi::STR_Format("LUA: Error compiling %s\n", filename ? filename : "???").c_str(),
+        LUA_Error(epi::StringFormat("LUA: Error compiling %s\n", filename ? filename : "???").c_str(),
                   lua_tostring(L, -1));
     }
 
@@ -123,7 +123,7 @@ int LUA_DoFile(lua_State *L, const char *filename, const char *source)
 
     if (status != LUA_OK)
     {
-        LUA_Error(epi::STR_Format("LUA: Error in %s\n", filename ? filename : "???").c_str(), lua_tostring(L, -1));
+        LUA_Error(epi::StringFormat("LUA: Error in %s\n", filename ? filename : "???").c_str(), lua_tostring(L, -1));
     }
 
     return lua_gettop(L) - top;
@@ -164,7 +164,7 @@ void LUA_CallGlobalFunction(lua_State *L, const char *function_name)
 
     if (status != LUA_OK)
     {
-        LUA_Error(epi::STR_Format("Error calling global function %s\n", function_name).c_str(), lua_tostring(L, -1));
+        LUA_Error(epi::StringFormat("Error calling global function %s\n", function_name).c_str(), lua_tostring(L, -1));
     }
 
     lua_settop(L, top);

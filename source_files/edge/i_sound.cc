@@ -248,7 +248,7 @@ void I_StartupMusic(void)
             if (!sfd[i].is_dir)
             {
                 std::string ext = epi::FS_GetExtension(sfd[i].name);
-                epi::STR_Lower(ext);
+                epi::StringLowerASCII(ext);
                 if (ext == ".sf2")
                 {
                     available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
@@ -278,7 +278,7 @@ void I_StartupMusic(void)
                 if (!sfd[i].is_dir)
                 {
                     std::string ext = epi::FS_GetExtension(sfd[i].name);
-                    epi::STR_Lower(ext);
+                    epi::StringLowerASCII(ext);
                     if (ext == ".sf2")
                         available_soundfonts.push_back(epi::SanitizePath(sfd[i].name));
                     else if (ext == ".op2" || ext == ".ad" || ext == ".opl" || ext == ".tmb")

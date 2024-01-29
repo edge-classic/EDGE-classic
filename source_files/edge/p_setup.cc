@@ -765,12 +765,12 @@ static void LoadThings(int lump)
                 if (mus_number != -1)
                 {
                     std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
-                    mus_rts.append(epi::STR_Format("START_MAP %s\n", currmap->name.c_str()));
-                    mus_rts.append(epi::STR_Format("  SECTOR_TRIGGER_INDEX %d\n", sec - sectors));
+                    mus_rts.append(epi::StringFormat("START_MAP %s\n", currmap->name.c_str()));
+                    mus_rts.append(epi::StringFormat("  SECTOR_TRIGGER_INDEX %d\n", sec - sectors));
                     mus_rts.append("    TAGGED_INDEPENDENT\n");
                     mus_rts.append("    TAGGED_REPEATABLE\n");
                     mus_rts.append("    WAIT 30T\n");
-                    mus_rts.append(epi::STR_Format("    CHANGE_MUSIC %d\n", mus_number));
+                    mus_rts.append(epi::StringFormat("    CHANGE_MUSIC %d\n", mus_number));
                     mus_rts.append("    RETRIGGER\n");
                     mus_rts.append("  END_SECTOR_TRIGGER\n");
                     mus_rts.append("END_MAP\n\n");
@@ -1774,7 +1774,7 @@ static void LoadUDMFSectors()
                 if (!ss->props.colourmap || ss->props.colourmap->gl_colour != light_color)
                 {
                     colourmap_c *ad_hoc = new colourmap_c;
-                    ad_hoc->name        = epi::STR_Format("UDMF_%d", light_color); // Internal
+                    ad_hoc->name        = epi::StringFormat("UDMF_%d", light_color); // Internal
                     ad_hoc->gl_colour   = light_color;
                     ss->props.colourmap = ad_hoc;
                     colourmaps.push_back(ad_hoc);
@@ -2338,12 +2338,12 @@ static void LoadUDMFThings()
                     if (mus_number != -1)
                     {
                         std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
-                        mus_rts.append(epi::STR_Format("START_MAP %s\n", currmap->name.c_str()));
-                        mus_rts.append(epi::STR_Format("  SECTOR_TRIGGER_INDEX %d\n", sec - sectors));
+                        mus_rts.append(epi::StringFormat("START_MAP %s\n", currmap->name.c_str()));
+                        mus_rts.append(epi::StringFormat("  SECTOR_TRIGGER_INDEX %d\n", sec - sectors));
                         mus_rts.append("    TAGGED_INDEPENDENT\n");
                         mus_rts.append("    TAGGED_REPEATABLE\n");
                         mus_rts.append("    WAIT 30T\n");
-                        mus_rts.append(epi::STR_Format("    CHANGE_MUSIC %d\n", mus_number));
+                        mus_rts.append(epi::StringFormat("    CHANGE_MUSIC %d\n", mus_number));
                         mus_rts.append("    RETRIGGER\n");
                         mus_rts.append("  END_SECTOR_TRIGGER\n");
                         mus_rts.append("END_MAP\n\n");

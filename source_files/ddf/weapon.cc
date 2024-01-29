@@ -631,7 +631,7 @@ static void DDF_WStateGetRADTrigger(const char *arg, state_t *cur_state)
     // Is the value an integer?
     if (length != count)
     {
-        *val_ptr                = epi::STR_Hash32(arg);
+        *val_ptr                = epi::StringHash32(arg);
         cur_state->rts_tag_type = 1;
     }
     else

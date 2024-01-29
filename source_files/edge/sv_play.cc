@@ -788,7 +788,7 @@ void SR_PlayerPutState(void *storage, int index, void *extra)
         base--;
     }
 
-    std::string buf(epi::STR_Format("%s:%s:%d", actual->name.c_str(), states[base].label ? states[base].label : "*",
+    std::string buf(epi::StringFormat("%s:%s:%d", actual->name.c_str(), states[base].label ? states[base].label : "*",
                                     1 + s_num - base));
 
 #if 0

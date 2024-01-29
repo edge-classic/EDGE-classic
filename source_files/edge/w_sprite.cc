@@ -366,7 +366,7 @@ static void FillSpriteFrames(int file)
                 for (; L < packsprites.size(); L++)
                 {
                     std::string spritebase;
-                    epi::STR_TextureNameFromFilename(spritebase, epi::FS_GetStem(packsprites[L]));
+                    epi::TextureNameFromFilename(spritebase, epi::FS_GetStem(packsprites[L]));
 
                     if (spritebase.size() != spr_len + 2 && spritebase.size() != spr_len + 4)
                     {

@@ -203,7 +203,7 @@ void font_c::LoadPatches()
 	if (atlas)
 	{
         // Uncomment this to save the generated atlas. Note: will be inverted.
-        /*std::string atlas_png = epi::FS_PathAppend(home_dir, epi::STR_Format("atlas_%s.png", def->name.c_str()));
+        /*std::string atlas_png = epi::FS_PathAppend(home_dir, epi::StringFormat("atlas_%s.png", def->name.c_str()));
         if (epi::FS_Exists(atlas_png))
             epi::FS_Remove(atlas_png);
         epi::PNG_Save(atlas_png, atlas->data);*/

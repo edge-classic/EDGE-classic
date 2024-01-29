@@ -1083,13 +1083,13 @@ void M_OptDrawer()
                     if (joyname)
                     {
                         HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
-                                     epi::STR_Format("%d - %s", joystick_device, joyname).c_str());
+                                     epi::StringFormat("%d - %s", joystick_device, joyname).c_str());
                         break;
                     }
                     else
                     {
                         HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
-                                     epi::STR_Format("%d - Not Connected", joystick_device).c_str());
+                                     epi::StringFormat("%d - Not Connected", joystick_device).c_str());
                         break;
                     }
                 }
@@ -2165,7 +2165,7 @@ static void M_OptionSetResolution(int keypressed, cvar_c *cvar)
     }
     else
     {
-        std::string msg(epi::STR_Format(language["ModeSelErr"], new_scrmode.width, new_scrmode.height,
+        std::string msg(epi::StringFormat(language["ModeSelErr"], new_scrmode.width, new_scrmode.height,
                                         (new_scrmode.depth < 20) ? 16 : 32));
 
         M_StartMessage(msg.c_str(), NULL, false);

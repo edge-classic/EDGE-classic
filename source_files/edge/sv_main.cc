@@ -483,7 +483,7 @@ const char *SV_MapName(const mapdef_c *map)
 
 std::string SV_FileName(const char *slot_name, const char *map_name)
 {
-    std::string temp(epi::STR_Format("%s/%s.%s", slot_name, map_name, SAVEGAMEEXT));
+    std::string temp(epi::StringFormat("%s/%s.%s", slot_name, map_name, SAVEGAMEEXT));
 
     return epi::FS_PathAppend(save_dir, temp);
 }

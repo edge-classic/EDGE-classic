@@ -87,19 +87,19 @@ FILE *FS_OpenRawFile(std::string_view name, unsigned int flags)
 {
     const wchar_t *mode = FlagsToANSIMode(flags);
     if (!mode) return nullptr;
-    std::wstring wname = epi::utf8_to_wstring(name);
+    std::wstring wname = epi::UTF8ToWString(name);
     return _wfopen(wname.c_str(), mode);
 }
 bool FS_Delete(std::string_view name)
 {
     SYS_ASSERT(!name.empty());
-    std::wstring wname = epi::utf8_to_wstring(name);
+    std::wstring wname = epi::UTF8ToWString(name);
     return _wremove(wname.c_str()) == 0;
 }
 bool FS_IsDir(std::string_view dir)
 {
     SYS_ASSERT(!dir.empty());
-    std::wstring wide_dir = epi::utf8_to_wstring(dir);
+    std::wstring wide_dir = epi::UTF8ToWString(dir);
     struct _stat dircheck;
     if (_wstat(wide_dir.c_str(), &dircheck) != 0)
         return false;
@@ -110,25 +110,25 @@ static std::string FS_GetCurrDir()
     std::string directory;
     const wchar_t *dir = _wgetcwd(nullptr, 0);
     if (dir)
-        directory = epi::wstring_to_utf8(dir);
+        directory = epi::WStringToUTF8(dir);
 	return directory; // can be empty
 }
 bool FS_SetCurrDir(std::string_view dir)
 {
     SYS_ASSERT(!dir.empty());
-    std::wstring wdir = epi::utf8_to_wstring(dir);
+    std::wstring wdir = epi::UTF8ToWString(dir);
     return _wchdir(wdir.c_str()) == 0;
 }
 bool FS_MakeDir(std::string_view dir)
 {
     SYS_ASSERT(!dir.empty());
-    std::wstring wdirectory = epi::utf8_to_wstring(dir);
+    std::wstring wdirectory = epi::UTF8ToWString(dir);
     return _wmkdir(wdirectory.c_str()) == 0;
 }
 bool FS_Exists(std::string_view name)
 {
     SYS_ASSERT(!name.empty());
-    std::wstring wname = epi::utf8_to_wstring(name);
+    std::wstring wname = epi::UTF8ToWString(name);
     return _waccess(wname.c_str(), 0) == 0;
 }
 bool FS_Access(std::string_view name)
@@ -136,7 +136,7 @@ bool FS_Access(std::string_view name)
     // The codebase only seems to use this to test read access, so we
     // shouldn't need to pass any modes as a parameter
     SYS_ASSERT(!name.empty());
-    std::wstring wname = epi::utf8_to_wstring(name);
+    std::wstring wname = epi::UTF8ToWString(name);
     if (_waccess(wname.c_str(), 4) == 0) // Read-only
         return true;
     else if (_waccess(wname.c_str(), 6) == 0) // Read/write
@@ -157,7 +157,7 @@ bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::string &dir, const char *mas
     if (!FS_SetCurrDir(dir))
         return false;
 
-    std::wstring fmask = epi::utf8_to_wstring(mask);
+    std::wstring fmask = epi::UTF8ToWString(mask);
     WIN32_FIND_DATAW fdataw;
     HANDLE fhandle = FindFirstFileW(fmask.c_str(), &fdataw);
 
@@ -171,7 +171,7 @@ bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::string &dir, const char *mas
 
 	do
 	{
-        std::string filename = epi::wstring_to_utf8(fdataw.cFileName);
+        std::string filename = epi::WStringToUTF8(fdataw.cFileName);
 	    if (filename == "." || filename == "..")
 		{
 		  // skip the funky "." and ".." dirs 
@@ -217,7 +217,7 @@ bool FS_WalkDir(std::vector<dir_entry_c> &fsd, std::string &dir)
 
 	do
 	{
-        std::string filename = epi::wstring_to_utf8(fdataw.cFileName);
+        std::string filename = epi::WStringToUTF8(fdataw.cFileName);
 	    if (filename == "." || filename == "..")
 		{
 		  // skip the funky "." and ".." dirs 
@@ -651,7 +651,7 @@ bool FS_OpenDir(const std::string &src)
 {
     // A result of 0 is 'success', but that only means SDL was able to launch some kind of process
     // to attempt to handle the path. -1 is the only result that is guaranteed to be an 'error'
-    if (SDL_OpenURL(STR_Format("file:///%s", src.c_str()).c_str()) == -1)
+    if (SDL_OpenURL(StringFormat("file:///%s", src.c_str()).c_str()) == -1)
     {
         I_Warning("FS_OpenDir failed to open requested path %s\nError: %s\n", src.c_str(), SDL_GetError());
         return false;

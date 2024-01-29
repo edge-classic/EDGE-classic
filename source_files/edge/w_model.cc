@@ -148,13 +148,13 @@ modeldef_c *LoadModelFromLump(int model_num)
     // try MD3 first, then MD2, then MDL, then voxels
 
     // This section is going to get kinda weird with the introduction of EPKs
-    lumpname = epi::STR_Format("%sMD3", basename.c_str());
+    lumpname = epi::StringFormat("%sMD3", basename.c_str());
     lump_num = W_CheckFileNumForName(lumpname.c_str());
-    packname = epi::STR_Format("%s.md3", basename.c_str());
+    packname = epi::StringFormat("%s.md3", basename.c_str());
     pack_num = W_CheckPackForName(packname);
     if (pack_num == -1)
     {
-        packname = epi::STR_Format("%sMD3.md3", basename.c_str());
+        packname = epi::StringFormat("%sMD3.md3", basename.c_str());
         pack_num = W_CheckPackForName(packname);
     }
 
@@ -181,13 +181,13 @@ modeldef_c *LoadModelFromLump(int model_num)
 
     if (!f)
     {
-        lumpname = epi::STR_Format("%sMD2", basename.c_str());
+        lumpname = epi::StringFormat("%sMD2", basename.c_str());
         lump_num = W_CheckFileNumForName(lumpname.c_str());
-        packname = epi::STR_Format("%s.md2", basename.c_str());
+        packname = epi::StringFormat("%s.md2", basename.c_str());
         pack_num = W_CheckPackForName(packname);
         if (pack_num == -1)
         {
-            packname = epi::STR_Format("%sMD2.md2", basename.c_str());
+            packname = epi::StringFormat("%sMD2.md2", basename.c_str());
             pack_num = W_CheckPackForName(packname);
         }
         if (lump_num > -1 || pack_num > -1)
@@ -214,13 +214,13 @@ modeldef_c *LoadModelFromLump(int model_num)
 
     if (!f)
     {
-        lumpname = epi::STR_Format("%sMDL", basename.c_str());
+        lumpname = epi::StringFormat("%sMDL", basename.c_str());
         lump_num = W_CheckFileNumForName(lumpname.c_str());
-        packname = epi::STR_Format("%s.mdl", basename.c_str());
+        packname = epi::StringFormat("%s.mdl", basename.c_str());
         pack_num = W_CheckPackForName(packname);
         if (pack_num == -1)
         {
-            packname = epi::STR_Format("%sMDL.mdl", basename.c_str());
+            packname = epi::StringFormat("%sMDL.mdl", basename.c_str());
             pack_num = W_CheckPackForName(packname);
         }
         if (lump_num > -1 || pack_num > -1)
@@ -259,17 +259,17 @@ modeldef_c *LoadModelFromLump(int model_num)
         {
             if (pack_file)
             {
-                skinname      = epi::STR_Format("%s%d", basename.c_str(), i);
+                skinname      = epi::StringFormat("%s%d", basename.c_str(), i);
                 def->skins[i] = W_ImageLookup(skinname.c_str(), INS_Sprite, ILF_Null);
                 if (!def->skins[i])
                 {
-                    skinname      = epi::STR_Format("%sSKN%d", basename.c_str(), i);
+                    skinname      = epi::StringFormat("%sSKN%d", basename.c_str(), i);
                     def->skins[i] = W_ImageLookup(skinname.c_str(), INS_Sprite, ILF_Null);
                 }
             }
             else
             {
-                skinname      = epi::STR_Format("%sSKN%d", basename.c_str(), i);
+                skinname      = epi::StringFormat("%sSKN%d", basename.c_str(), i);
                 def->skins[i] = W_ImageLookup(skinname.c_str(), INS_Sprite, ILF_Null);
             }
         }

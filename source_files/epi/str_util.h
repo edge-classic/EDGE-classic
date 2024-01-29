@@ -25,22 +25,26 @@
 namespace epi
 {
 
-void STR_Lower(std::string &s);
-void STR_Upper(std::string &s);
+// Use the faster ASCII version if we are confident that no characters
+// will fall outside of this range (WAD lumps, etc)
+void StringLowerASCII(std::string &s);
+void StringUpperASCII(std::string &s);
+void StringLowerUTF8(std::string &s);
+void StringUpperUTF8(std::string &s);
 
-void STR_TextureNameFromFilename(std::string &buf, const std::string &stem);
+void TextureNameFromFilename(std::string &buf, std::string_view stem);
 
-std::string STR_Format(const char *fmt, ...) GCCATTR((format(printf, 1, 2)));
+std::string StringFormat(const char *fmt, ...) GCCATTR((format(printf, 1, 2)));
 
-std::vector<std::string> STR_SepStringVector(std::string str, char separator);
+std::vector<std::string> SeparatedStringVector(std::string_view str, char separator);
 
-uint32_t STR_Hash32(std::string str_to_hash);
+uint32_t StringHash32(std::string_view str_to_hash);
 
 #ifdef _WIN32
 // Technically these are to and from UTF-16, but since these are only for 
 // Windows "wide" APIs I think we'll be ok - Dasho
-std::string wstring_to_utf8(const wchar_t *instring);
-std::wstring utf8_to_wstring(std::string_view instring);
+std::string WStringToUTF8(const wchar_t *instring);
+std::wstring UTF8ToWString(std::string_view instring);
 #endif
 
 } // namespace epi

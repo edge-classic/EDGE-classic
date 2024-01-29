@@ -73,7 +73,7 @@ swirl_type_e swirling_flats = SWIRL_Vanilla;
 // LIGHTING DEBUGGING
 // #define MAKE_TEXTURES_WHITE  1
 
-extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
+extern image_data_c *ReadAsEpiBlock(image_c *rim);
 
 extern epi::file_c *OpenUserFileOrLump(imagedef_c *def);
 
@@ -350,9 +350,9 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
     bool solid    = false;
 
     int  header_len = HMM_MIN((int)sizeof(header), packfile_len);
-    auto fmt        = epi::Image_DetectFormat(header, header_len, packfile_len);
+    auto fmt        = Image_DetectFormat(header, header_len, packfile_len);
 
-    if (fmt == epi::FMT_OTHER)
+    if (fmt == kOtherImage)
     {
         // close it
         delete f;
@@ -360,7 +360,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
         I_Warning("Unsupported image format in '%s'\n", packfile_name);
         return NULL;
     }
-    else if (fmt == epi::FMT_Unknown)
+    else if (fmt == kUnknownImage)
     {
         // close it
         delete f;
@@ -396,7 +396,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
             return nullptr;
         }
     }
-    else if (fmt == epi::FMT_DOOM)
+    else if (fmt == kDoomImage)
     {
         // close it
         delete f;
@@ -493,9 +493,9 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
     bool solid    = false;
 
     int  header_len = HMM_MIN((int)sizeof(header), lump_len);
-    auto fmt        = epi::Image_DetectFormat(header, header_len, lump_len);
+    auto fmt        = Image_DetectFormat(header, header_len, lump_len);
 
-    if (fmt == epi::FMT_OTHER)
+    if (fmt == kOtherImage)
     {
         // close it
         delete f;
@@ -503,7 +503,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
         I_Warning("Unsupported image format in '%s' lump\n", W_GetLumpName(lump));
         return NULL;
     }
-    else if (fmt == epi::FMT_Unknown)
+    else if (fmt == kUnknownImage)
     {
         // close it
         delete f;
@@ -538,7 +538,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
             return nullptr;
         }
     }
-    else if (fmt == epi::FMT_DOOM)
+    else if (fmt == kDoomImage)
     {
         // close it
         delete f;
@@ -817,7 +817,7 @@ static image_c *AddImageUser(imagedef_c *def)
         // determine format and size information.
         // for FILE and PACK get format from filename, but note that when
         // it is wrong (like a PNG called "foo.jpeg"), it can still work.
-        epi::image_format_e fmt = epi::FMT_Unknown;
+        ImageFormat fmt = kUnknownImage;
 
         if (def->type == IMGDT_Lump)
         {
@@ -828,33 +828,33 @@ static image_c *AddImageUser(imagedef_c *def)
             f->Seek(0, epi::file_c::SEEKPOINT_START);
 
             int header_len = HMM_MIN((int)sizeof(header), file_size);
-            fmt            = epi::Image_DetectFormat(header, header_len, file_size);
+            fmt            = Image_DetectFormat(header, header_len, file_size);
         }
         else
-            fmt = epi::Image_FilenameToFormat(def->info);
+            fmt = Image_FilenameToFormat(def->info);
 
         // when a lump uses DOOM patch format, use the other method.
-        // for lumps, assume FMT_Unknown is a mis-detection of DOOM patch
+        // for lumps, assume kUnknownImage is a mis-detection of DOOM patch
         // and hope for the best.
-        if (fmt == epi::FMT_DOOM || fmt == epi::FMT_Unknown)
+        if (fmt == kDoomImage || fmt == kUnknownImage)
         {
             delete f; // close file
 
-            if (fmt == epi::FMT_DOOM)
+            if (fmt == kDoomImage)
                 return AddImage_DOOM(def, true);
 
             I_Warning("Unknown image format in: %s\n", filename);
             return NULL;
         }
 
-        if (fmt == epi::FMT_OTHER)
+        if (fmt == kOtherImage)
         {
             delete f;
             I_Warning("Unsupported image format in: %s\n", filename);
             return NULL;
         }
 
-        if (!epi::Image_GetInfo(f, &width, &height, &bpp))
+        if (!Image_GetInfo(f, &width, &height, &bpp))
         {
             delete f;
             I_Warning("Error occurred scanning image: %s\n", filename);
@@ -1329,7 +1329,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
         what_pal_cached = true;
     }
 
-    epi::image_data_c *tmp_img = ReadAsEpiBlock(rim);
+    image_data_c *tmp_img = ReadAsEpiBlock(rim);
 
     if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
     {
@@ -1345,9 +1345,9 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
     {
         bool solid = (rim->opacity == OPAC_Solid);
 
-        epi::Hq2x::Setup(what_palette, solid ? -1 : TRANS_PIXEL);
+        Hq2x::Setup(what_palette, solid ? -1 : TRANS_PIXEL);
 
-        epi::image_data_c *scaled_img = epi::Hq2x::Convert(tmp_img, solid, false /* invert */);
+        image_data_c *scaled_img = Hq2x::Convert(tmp_img, solid, false /* invert */);
 
         if (rim->is_font)
         {
@@ -1357,7 +1357,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 
         if (rim->blur_sigma > 0.0f)
         {
-            epi::image_data_c *blurred_img = epi::Blur::Blur(scaled_img, rim->blur_sigma);
+            image_data_c *blurred_img = Blur::Blur(scaled_img, rim->blur_sigma);
             delete scaled_img;
             scaled_img = blurred_img;
         }
@@ -1367,7 +1367,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
     }
     else if (tmp_img->bpp == 1)
     {
-        epi::image_data_c *rgb_img = R_PalettisedToRGB(tmp_img, what_palette, rim->opacity);
+        image_data_c *rgb_img = R_PalettisedToRGB(tmp_img, what_palette, rim->opacity);
 
         if (rim->is_font)
         {
@@ -1377,7 +1377,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 
         if (rim->blur_sigma > 0.0f)
         {
-            epi::image_data_c *blurred_img = epi::Blur::Blur(rgb_img, rim->blur_sigma);
+            image_data_c *blurred_img = Blur::Blur(rgb_img, rim->blur_sigma);
             delete rgb_img;
             rgb_img = blurred_img;
         }
@@ -1394,7 +1394,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
         }
         if (rim->blur_sigma > 0.0f)
         {
-            epi::image_data_c *blurred_img = epi::Blur::Blur(tmp_img, rim->blur_sigma);
+            image_data_c *blurred_img = Blur::Blur(tmp_img, rim->blur_sigma);
             delete tmp_img;
             tmp_img = blurred_img;
         }

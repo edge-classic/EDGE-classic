@@ -24,6 +24,10 @@ set (EDGE_SOURCE_FILES
   hu_stuff.cc
   hu_style.cc
   i_system.cc
+  image_blur.cc
+  image_data.cc
+  image_funcs.cc
+  image_hq2x.cc
   l_deh.cc
   m_argv.cc
   m_bbox.cc

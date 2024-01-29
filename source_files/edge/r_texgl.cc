@@ -76,12 +76,12 @@ int W_MakeValidSize(int value)
     return -1; /* NOT REACHED */
 }
 
-epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src, const uint8_t *palette, int opacity)
+image_data_c *R_PalettisedToRGB(image_data_c *src, const uint8_t *palette, int opacity)
 {
     if (src->bpp == 1)
     {
         int                bpp  = (opacity == OPAC_Solid) ? 3 : 4;
-        epi::image_data_c *dest = new epi::image_data_c(src->width, src->height, bpp);
+        image_data_c *dest = new image_data_c(src->width, src->height, bpp);
         dest->used_w            = src->used_w;
         dest->used_h            = src->used_h;
         for (int y = 0; y < src->height; y++)
@@ -114,7 +114,7 @@ epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src, const uint8_t *pale
         return src;
 }
 
-GLuint R_UploadTexture(epi::image_data_c *img, int flags, int max_pix)
+GLuint R_UploadTexture(image_data_c *img, int flags, int max_pix)
 {
     /* Send the texture data to the GL, and returns the texture ID
      * assigned to it.
@@ -217,7 +217,7 @@ GLuint R_UploadTexture(epi::image_data_c *img, int flags, int max_pix)
 
 //----------------------------------------------------------------------------
 
-void R_PaletteRemapRGBA(epi::image_data_c *img, const uint8_t *new_pal, const uint8_t *old_pal)
+void R_PaletteRemapRGBA(image_data_c *img, const uint8_t *new_pal, const uint8_t *old_pal)
 {
     const int max_prev = 16;
 
@@ -314,7 +314,7 @@ void R_PaletteRemapRGBA(epi::image_data_c *img, const uint8_t *new_pal, const ui
         }
 }
 
-int R_DetermineOpacity(epi::image_data_c *img, bool *is_empty)
+int R_DetermineOpacity(image_data_c *img, bool *is_empty)
 {
     if (img->bpp == 3)
     {
@@ -379,7 +379,7 @@ int R_DetermineOpacity(epi::image_data_c *img, bool *is_empty)
     }
 }
 
-void R_BlackenClearAreas(epi::image_data_c *img)
+void R_BlackenClearAreas(image_data_c *img)
 {
     // makes sure that any totally transparent pixel (alpha == 0)
     // has a colour of black.
@@ -408,7 +408,7 @@ void R_BlackenClearAreas(epi::image_data_c *img)
     }
 }
 
-void R_DumpImage(epi::image_data_c *img)
+void R_DumpImage(image_data_c *img)
 {
     L_WriteDebug("DUMP IMAGE: size=%dx%d [%dx%d] bpp=%d\n", img->used_w, img->used_h, img->width, img->height,
                  img->bpp);

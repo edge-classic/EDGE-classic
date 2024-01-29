@@ -32,8 +32,6 @@
 #include <math.h>
 #include <string.h>
 
-namespace epi
-{
 namespace Blur
 {
 
@@ -183,7 +181,6 @@ image_data_c *Blur(image_data_c *img, float sigma)
 }
 
 } // namespace Blur
-} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

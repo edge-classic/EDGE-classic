@@ -89,7 +89,7 @@ extern bool E_MatchesKey(int keyvar, int key);
 
 extern cvar_c v_secbright;
 
-extern unsigned int R_UploadTexture(epi::image_data_c *img, int flags, int max_pix);
+extern unsigned int R_UploadTexture(image_data_c *img, int flags, int max_pix);
 
 extern const image_c *menu_backdrop;
 
@@ -198,7 +198,7 @@ typedef struct slot_extra_info_s
     float y;
     float width;
 
-    epi::image_data_c *save_imdata = nullptr;
+    image_data_c *save_imdata = nullptr;
     unsigned int       save_texid  = 0;
     int                save_impage = 0;
 } slot_extra_info_t;
@@ -559,7 +559,7 @@ void M_ReadSaveStrings(void)
             epi::file_c *svimg_file = epi::FS_Open(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
             if (svimg_file)
             {
-                ex_slots[i].save_imdata = epi::Image_Load(svimg_file);
+                ex_slots[i].save_imdata = Image_Load(svimg_file);
                 if (ex_slots[i].save_imdata)
                 {
                     ex_slots[i].save_texid  = R_UploadTexture(ex_slots[i].save_imdata, 2, (1 << 30));

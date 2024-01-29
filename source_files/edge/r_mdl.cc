@@ -290,7 +290,7 @@ mdl_model_c *MDL_LoadModel(epi::file_c *f)
         }
 
         f->Read(pixels, sheight * swidth * sizeof(uint8_t));
-        epi::image_data_c *tmp_img = new epi::image_data_c(swidth, sheight, 3);
+        image_data_c *tmp_img = new image_data_c(swidth, sheight, 3);
         // Expand 8 bits paletted image to RGB
         for (int j = 0; j < swidth * sheight; ++j)
         {

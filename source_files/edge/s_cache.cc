@@ -136,7 +136,7 @@ static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
 {
     // open the file or lump, and read it into memory
     epi::file_c        *F;
-    sound_format_e fmt = FMT_Unknown;
+    sound_format_e fmt = kUnknownImage;
 
     if (var_pc_speaker_mode)
     {
@@ -260,7 +260,7 @@ static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
             OK = Load_WAV(buf, data, length, true);
         break;
 
-    case FMT_DOOM:
+    case kDoomImage:
         OK = Load_DOOM(buf, data, length);
         break;
 

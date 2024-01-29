@@ -768,7 +768,7 @@ class colormap_shader_c : public abstract_shader_c
   private:
     void MakeColormapTexture(int mode)
     {
-        epi::image_data_c img(256, 64, 4);
+        image_data_c img(256, 64, 4);
 
         const uint8_t *map    = NULL;
         int         length = 32;

@@ -41,7 +41,7 @@
 
 #define DUMMY_WIDTH 8
 
-extern epi::image_data_c *ReadAsEpiBlock(image_c *rim);
+extern image_data_c *ReadAsEpiBlock(image_c *rim);
 
 // all the fonts that's fit to print
 font_container_c hu_fonts;
@@ -122,19 +122,19 @@ void font_c::LoadPatches()
 	memset(images, 0, sizeof(const image_c *) * total);
 
 	// Atlas Stuff
-	std::unordered_map<int, epi::image_data_c *> patch_data;
-    std::vector<epi::image_data_c *> temp_imdata;
+	std::unordered_map<int, image_data_c *> patch_data;
+    std::vector<image_data_c *> temp_imdata;
 
 	missing = def->missing_patch != "" ?
 		W_ImageLookup(def->missing_patch.c_str(), INS_Graphic, ILF_Font|ILF_Null) : nullptr;
-	epi::image_data_c *missing_imdata = nullptr;
+	image_data_c *missing_imdata = nullptr;
 
 	if (missing)
 	{
-		epi::image_data_c *tmp_img = ReadAsEpiBlock((image_c *)(missing));
+		image_data_c *tmp_img = ReadAsEpiBlock((image_c *)(missing));
 		if (tmp_img->bpp == 1)
 		{
-			epi::image_data_c *rgb_img = R_PalettisedToRGB(tmp_img, (const uint8_t *) &playpal_data[0], missing->opacity);
+			image_data_c *rgb_img = R_PalettisedToRGB(tmp_img, (const uint8_t *) &playpal_data[0], missing->opacity);
 			delete tmp_img;
 			missing_imdata = rgb_img;
 		}
@@ -167,10 +167,10 @@ void font_c::LoadPatches()
 
 			if (images[idx])
 			{
-				epi::image_data_c *tmp_img = ReadAsEpiBlock((image_c *)(images[idx]));
+				image_data_c *tmp_img = ReadAsEpiBlock((image_c *)(images[idx]));
 				if (tmp_img->bpp == 1)
 				{
-					epi::image_data_c *rgb_img = R_PalettisedToRGB(tmp_img, (const uint8_t *) &playpal_data[0], images[idx]->opacity);
+					image_data_c *rgb_img = R_PalettisedToRGB(tmp_img, (const uint8_t *) &playpal_data[0], images[idx]->opacity);
 					delete tmp_img;
 					tmp_img = rgb_img;
 				}
@@ -196,7 +196,7 @@ void font_c::LoadPatches()
         }
 	}
 
-	epi::image_atlas_c *atlas = epi::Image_Pack(patch_data);
+	image_atlas_c *atlas = Image_Pack(patch_data);
 	for (auto patch : temp_imdata)
         delete patch;
 	delete missing_imdata;
@@ -206,7 +206,7 @@ void font_c::LoadPatches()
         /*std::string atlas_png = epi::FS_PathAppend(home_dir, epi::StringFormat("atlas_%s.png", def->name.c_str()));
         if (epi::FS_Exists(atlas_png))
             epi::FS_Remove(atlas_png);
-        epi::PNG_Save(atlas_png, atlas->data);*/
+        PNG_Save(atlas_png, atlas->data);*/
 		p_cache.atlas_rects = atlas->rects;
 		glGenTextures(1, &p_cache.atlas_texid);
 		glBindTexture(GL_TEXTURE_2D, p_cache.atlas_texid);
@@ -241,7 +241,7 @@ void font_c::LoadPatches()
         return;
     }
 
-    epi::image_rect_c Nom;
+    image_rect_c Nom;
 
 	if (p_cache.atlas_rects.count(cp437_unicode_values[(uint8_t)('M')]))
 		Nom = p_cache.atlas_rects.at(cp437_unicode_values[(uint8_t)('M')]);
@@ -286,7 +286,7 @@ void font_c::LoadFontImage()
         // Determine individual character widths and ratios
         individual_char_widths       = new float[256];
         individual_char_ratios       = new float[256];
-        epi::image_data_c *char_data = ReadAsEpiBlock((image_c *)font_image);
+        image_data_c *char_data = ReadAsEpiBlock((image_c *)font_image);
         for (int i = 0; i < 256; i++)
         {
             int px = i % 16;
@@ -583,7 +583,7 @@ float font_c::CharWidth(char ch)
     if (!p_cache.atlas_rects.count(cp437_unicode_values[(uint8_t)ch]))
         return DUMMY_WIDTH;
 
-    epi::image_rect_c rect = p_cache.atlas_rects.at(cp437_unicode_values[(uint8_t)ch]);
+    image_rect_c rect = p_cache.atlas_rects.at(cp437_unicode_values[(uint8_t)ch]);
 
     if (def->default_size > 0.0)
         return (def->default_size * ((float)rect.iw) / rect.ih) + spacing;

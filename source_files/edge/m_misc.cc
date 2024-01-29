@@ -456,7 +456,7 @@ void M_ScreenShot(bool show_msg)
         }
     }
 
-    epi::image_data_c *img = new epi::image_data_c(SCREENWIDTH, SCREENHEIGHT, 3);
+    image_data_c *img = new image_data_c(SCREENWIDTH, SCREENHEIGHT, 3);
 
     RGL_ReadScreen(0, 0, SCREENWIDTH, SCREENHEIGHT, img->PixelAt(0, 0));
 
@@ -467,11 +467,11 @@ void M_ScreenShot(bool show_msg)
 
     if (png_scrshots)
     {
-        result = epi::PNG_Save(fn, img);
+        result = PNG_Save(fn, img);
     }
     else
     {
-        result = epi::JPEG_Save(fn, img);
+        result = JPEG_Save(fn, img);
     }
 
     if (show_msg)
@@ -495,7 +495,7 @@ void M_MakeSaveScreenShot(void)
 
     epi::FS_Delete(filename);
 
-    epi::image_data_c *img = new epi::image_data_c(SCREENWIDTH, SCREENHEIGHT, 3);
+    image_data_c *img = new image_data_c(SCREENWIDTH, SCREENHEIGHT, 3);
 
     RGL_ReadScreen(0, 0, SCREENWIDTH, SCREENHEIGHT, img->PixelAt(0, 0));
 
@@ -503,7 +503,7 @@ void M_MakeSaveScreenShot(void)
     img->Invert();
 
     bool result;
-    result = epi::JPEG_Save(filename, img);
+    result = JPEG_Save(filename, img);
 
     if (result)
         I_Printf("Captured to file: %s\n", filename.c_str());

@@ -21,9 +21,6 @@
 
 #include "math_color.h"
 
-namespace epi
-{
-
 class image_data_c
 {
   public:
@@ -154,8 +151,6 @@ class image_data_c
     // Change various HSV color values if needed
     void SetHSV(int rotation, int saturation, int value);
 };
-
-} // namespace epi
 
 #endif /* __EPI_IMAGEDATA_H__ */
 

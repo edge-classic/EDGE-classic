@@ -98,7 +98,7 @@ static uint8_t dummy_graphic[DUMMY_X * DUMMY_Y] = {
 #define GAMMA_GRN(pix) GAMMA_CONV(PIXEL_GRN(pix))
 #define GAMMA_BLU(pix) GAMMA_CONV(PIXEL_BLU(pix))
 
-static void DrawColumnIntoEpiBlock(image_c *rim, epi::image_data_c *img, const column_t *patchcol, int x, int y)
+static void DrawColumnIntoEpiBlock(image_c *rim, image_data_c *img, const column_t *patchcol, int x, int y)
 {
     SYS_ASSERT(patchcol);
 
@@ -160,7 +160,7 @@ static void DrawColumnIntoEpiBlock(image_c *rim, epi::image_data_c *img, const c
 // Loads a flat from the wad and returns the image block for it.
 // Doesn't do any mipmapping (this is too "raw" if you follow).
 //
-static epi::image_data_c *ReadFlatAsEpiBlock(image_c *rim)
+static image_data_c *ReadFlatAsEpiBlock(image_c *rim)
 {
     SYS_ASSERT(rim->source_type == IMSRC_Flat || rim->source_type == IMSRC_Raw320x200);
 
@@ -170,7 +170,7 @@ static epi::image_data_c *ReadFlatAsEpiBlock(image_c *rim)
     int w = rim->actual_w;
     int h = rim->actual_h;
 
-    epi::image_data_c *img = new epi::image_data_c(tw, th, 1);
+    image_data_c *img = new image_data_c(tw, th, 1);
 
     uint8_t *dest = img->pixels;
 
@@ -219,7 +219,7 @@ static epi::image_data_c *ReadFlatAsEpiBlock(image_c *rim)
 //---- This routine will also update the `solid' flag
 //---- if texture turns out to be solid.
 //
-static epi::image_data_c *ReadTextureAsEpiBlock(image_c *rim)
+static image_data_c *ReadTextureAsEpiBlock(image_c *rim)
 {
     SYS_ASSERT(rim->source_type == IMSRC_Texture);
 
@@ -229,7 +229,7 @@ static epi::image_data_c *ReadTextureAsEpiBlock(image_c *rim)
     int tw = rim->total_w;
     int th = rim->total_h;
 
-    epi::image_data_c *img = new epi::image_data_c(tw, th, 1);
+    image_data_c *img = new image_data_c(tw, th, 1);
 
 #ifdef MAKE_TEXTURES_WHITE
     img->Clear(pal_white);
@@ -299,7 +299,7 @@ static epi::image_data_c *ReadTextureAsEpiBlock(image_c *rim)
 //---- This routine will also update the `solid' flag
 //---- if it turns out to be 100% solid.
 //
-static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
+static image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 {
     SYS_ASSERT(rim->source_type == IMSRC_Graphic || rim->source_type == IMSRC_Sprite ||
                rim->source_type == IMSRC_TX_HI);
@@ -317,7 +317,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
         else
             f = W_OpenLump(lump);
 
-        epi::image_data_c *img = epi::Image_Load(f);
+        image_data_c *img = Image_Load(f);
 
         // close it
         delete f;
@@ -331,7 +331,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
     int tw = rim->total_w;
     int th = rim->total_h;
 
-    epi::image_data_c *img = new epi::image_data_c(tw, th, 1);
+    image_data_c *img = new image_data_c(tw, th, 1);
 
     // Clear initial pixels to either totally transparent, or totally
     // black (if we know the image should be solid).
@@ -399,7 +399,7 @@ static epi::image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 //
 // Creates a dummy image.
 //
-static epi::image_data_c *ReadDummyAsEpiBlock(image_c *rim)
+static image_data_c *ReadDummyAsEpiBlock(image_c *rim)
 {
     SYS_ASSERT(rim->source_type == IMSRC_Dummy);
     SYS_ASSERT(rim->actual_w == rim->total_w);
@@ -407,7 +407,7 @@ static epi::image_data_c *ReadDummyAsEpiBlock(image_c *rim)
     SYS_ASSERT(rim->total_w == DUMMY_X);
     SYS_ASSERT(rim->total_h == DUMMY_Y);
 
-    epi::image_data_c *img = new epi::image_data_c(DUMMY_X, DUMMY_Y, 4);
+    image_data_c *img = new image_data_c(DUMMY_X, DUMMY_Y, 4);
 
     // copy pixels
     for (int y = 0; y < DUMMY_Y; y++)
@@ -441,12 +441,12 @@ static epi::image_data_c *ReadDummyAsEpiBlock(image_c *rim)
     return img;
 }
 
-static epi::image_data_c *CreateUserColourImage(image_c *rim, imagedef_c *def)
+static image_data_c *CreateUserColourImage(image_c *rim, imagedef_c *def)
 {
     int tw = MAX(rim->total_w, 1);
     int th = MAX(rim->total_h, 1);
 
-    epi::image_data_c *img = new epi::image_data_c(tw, th, 3);
+    image_data_c *img = new image_data_c(tw, th, 3);
 
     uint8_t *dest = img->pixels;
 
@@ -485,14 +485,14 @@ epi::file_c *OpenUserFileOrLump(imagedef_c *def)
     }
 }
 
-static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
+static image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 {
     epi::file_c *f = OpenUserFileOrLump(def);
 
     if (!f)
         I_Error("Missing image file: %s\n", def->info.c_str());
 
-    epi::image_data_c *img = epi::Image_Load(f);
+    image_data_c *img = Image_Load(f);
 
     // close it
     delete f;
@@ -538,7 +538,7 @@ static epi::image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
 // Loads or Creates the user defined image.
 // Doesn't do any mipmapping (this is too "raw" if you follow).
 //
-static epi::image_data_c *ReadUserAsEpiBlock(image_c *rim)
+static image_data_c *ReadUserAsEpiBlock(image_c *rim)
 {
     SYS_ASSERT(rim->source_type == IMSRC_User);
 
@@ -574,7 +574,7 @@ static epi::image_data_c *ReadUserAsEpiBlock(image_c *rim)
 //
 // Never returns NULL.
 //
-epi::image_data_c *ReadAsEpiBlock(image_c *rim)
+image_data_c *ReadAsEpiBlock(image_c *rim)
 {
     switch (rim->source_type)
     {

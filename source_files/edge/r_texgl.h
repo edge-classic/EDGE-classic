@@ -31,17 +31,17 @@ typedef enum
     UPL_Thresh = (1 << 3), // threshhold alpha (to 0 or 255)
 } upload_texture_flag_e;
 
-GLuint R_UploadTexture(epi::image_data_c *img, int flags = UPL_NONE, int max_pix = (1 << 30));
+GLuint R_UploadTexture(image_data_c *img, int flags = UPL_NONE, int max_pix = (1 << 30));
 
-epi::image_data_c *R_PalettisedToRGB(epi::image_data_c *src, const uint8_t *palette, int opacity);
+image_data_c *R_PalettisedToRGB(image_data_c *src, const uint8_t *palette, int opacity);
 
-void R_PaletteRemapRGBA(epi::image_data_c *img, const uint8_t *new_pal, const uint8_t *old_pal);
+void R_PaletteRemapRGBA(image_data_c *img, const uint8_t *new_pal, const uint8_t *old_pal);
 
-int R_DetermineOpacity(epi::image_data_c *img, bool *is_empty);
+int R_DetermineOpacity(image_data_c *img, bool *is_empty);
 
-void R_BlackenClearAreas(epi::image_data_c *img);
+void R_BlackenClearAreas(image_data_c *img);
 
-void R_DumpImage(epi::image_data_c *img);
+void R_DumpImage(image_data_c *img);
 
 #endif /* __RGL_TEXGL_H__ */
 

@@ -28,8 +28,6 @@
 
 #include "image_data.h"
 
-namespace epi
-{
 namespace Hq2x
 {
 /* ------ Functions ------------------------------------- */
@@ -46,8 +44,6 @@ image_data_c *Convert(image_data_c *img, bool solid, bool invert = false);
 // function, and this determines the palette of the input
 // image.
 } // namespace Hq2x
-
-} // namespace epi
 
 #endif /* __EPI_IMAGE_HQ2X_H__ */
 

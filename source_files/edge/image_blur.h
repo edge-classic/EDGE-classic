@@ -32,16 +32,12 @@
 
 #include "image_data.h"
 
-namespace epi
-{
 namespace Blur
 {
 /* ------ Functions ------------------------------------- */
 
 image_data_c *Blur(image_data_c *img, float sigma);
 } // namespace Blur
-
-} // namespace epi
 
 #endif /* __EPI_IMAGE_BLUR_H__ */
 

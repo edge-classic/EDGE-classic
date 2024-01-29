@@ -23,18 +23,15 @@
 #include "image_data.h"
 #include <unordered_map>
 
-namespace epi
+enum ImageFormat
 {
-
-typedef enum
-{
-    FMT_Unknown = 0,
-    FMT_PNG,
-    FMT_TGA,
-    FMT_JPEG,
-    FMT_DOOM,
-    FMT_OTHER // e.g. gif, dds, bmp
-} image_format_e;
+    kUnknownImage = 0,
+    kPNGImage,
+    kTGAImage,
+    kJPEGImage,
+    kDoomImage,
+    kOtherImage // e.g. gif, dds, bmp
+};
 
 class image_rect_c
 {
@@ -65,16 +62,16 @@ class image_atlas_c
 // determine image format from the first 32 bytes (or so) of the file.
 // the file_size is the total size of the file or lump, and helps to
 // distinguish DOOM patch format from other things.
-image_format_e Image_DetectFormat(uint8_t *header, int header_len, int file_size);
+ImageFormat Image_DetectFormat(uint8_t *header, int header_len, int file_size);
 
 // determine image format from the filename (by its extension).
-image_format_e Image_FilenameToFormat(const std::string &filename);
+ImageFormat Image_FilenameToFormat(const std::string &filename);
 
 // loads the given image, which must be PNG, TGA or JPEG format.
 // Returns NULL if something went wrong.  The result image will be RGB
 // or RGBA (never paletted).  The image size (width and height) will be
 // rounded to the next power-of-two.
-image_data_c *Image_Load(file_c *f);
+image_data_c *Image_Load(epi::file_c *f);
 
 // given a collection of loaded images, pack and return the image data
 // for an atlas containing all of them. Does not assume that the incoming
@@ -91,7 +88,7 @@ image_atlas_c *Image_Pack(const std::unordered_map<int, image_data_c *> &im_pack
 //
 // NOTE: size returned here is the real size, and may be different
 // from the image returned by Load() which rounds to power-of-two.
-bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp);
+bool Image_GetInfo(epi::file_c *f, int *width, int *height, int *bpp);
 
 // saves the image (in JPEG format) to the given file.  Returns false if
 // something went wrong.  The image _MUST_ be RGB (bpp == 3).
@@ -101,8 +98,6 @@ bool JPEG_Save(std::string fn, image_data_c *img);
 // Returns false if failed to save (e.g. file already exists).
 // The image _MUST_ be RGB or RGBA.
 bool PNG_Save(std::string fn, image_data_c *img);
-
-} // namespace epi
 
 #endif /* __EPI_IMAGE_JPEG_H__ */
 

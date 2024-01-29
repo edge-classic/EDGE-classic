@@ -21,7 +21,7 @@
 
 typedef enum
 {
-    FMT_Unknown = 0,
+    kUnknownImage = 0,
     FMT_WAV,
     FMT_FLAC,
     FMT_OGG,
@@ -31,7 +31,7 @@ typedef enum
     FMT_MUS,
     FMT_MIDI,
     FMT_IMF, // Used with DDFPLAY; not in auto-detection
-    FMT_DOOM,
+    kDoomImage,
     FMT_SPK
 } sound_format_e;
 

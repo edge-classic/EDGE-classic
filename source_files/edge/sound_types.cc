@@ -105,7 +105,7 @@ sound_format_e Sound_DetectFormat(uint8_t *data, int song_len)
 
     if (data[0] == 0x3)
     {
-        return FMT_DOOM;
+        return kDoomImage;
     }
 
     if (data[0] == 0x0)
@@ -113,7 +113,7 @@ sound_format_e Sound_DetectFormat(uint8_t *data, int song_len)
         return FMT_SPK;
     }
 
-    return FMT_Unknown;
+    return kUnknownImage;
 }
 
 sound_format_e Sound_FilenameToFormat(const std::string &filename)
@@ -150,14 +150,14 @@ sound_format_e Sound_FilenameToFormat(const std::string &filename)
     // Not sure if these will ever be encountered in the wild, but according to the VGMPF Wiki
     // they are valid DMX file extensions
     if (ext == ".dsp" || ext == ".pcs" || ext == ".gsp" || ext == ".gsw")
-        return FMT_DOOM;
+        return kDoomImage;
 
     // Will actually result in checking the first byte to further determine if it's Doom or PC Speaker format;
-    // the above FMT_DOOM stuff is unconditional which is why I didn't throw it up there
+    // the above kDoomImage stuff is unconditional which is why I didn't throw it up there
     if (ext == ".lmp")
         return FMT_SPK;
 
-    return FMT_Unknown;
+    return kUnknownImage;
 }
 
 //--- editor settings ---

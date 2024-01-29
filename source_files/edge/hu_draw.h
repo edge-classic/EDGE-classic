@@ -101,7 +101,7 @@ void HUD_TileImage(float x, float y, float w, float h, const image_c *image, flo
                    float offset_y = 0.0f);
 
 // Functions for when we want to draw without having an image_c
-void HUD_StretchFromImageData(float x, float y, float w, float h, const epi::image_data_c *img, unsigned int tex_id,
+void HUD_StretchFromImageData(float x, float y, float w, float h, const image_data_c *img, unsigned int tex_id,
                               image_opacity_e opacity);
 
 extern int hudtic;

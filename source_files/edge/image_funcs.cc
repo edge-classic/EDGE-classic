@@ -35,9 +35,6 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-namespace epi
-{
-
 image_atlas_c::image_atlas_c(int _w, int _h)
 {
 	data = new image_data_c(_w, _h, 4);
@@ -50,19 +47,19 @@ image_atlas_c::~image_atlas_c()
 	data = nullptr;
 }
 
-image_format_e Image_DetectFormat(uint8_t *header, int header_len, int file_size)
+ImageFormat Image_DetectFormat(uint8_t *header, int header_len, int file_size)
 {
     // AJA 2022: based on code I wrote for Eureka...
 
     if (header_len < 12)
-        return FMT_Unknown;
+        return kUnknownImage;
 
     // PNG is clearly marked in the header, so check it first.
 
     if (header[0] == 0x89 && header[1] == 'P' && header[2] == 'N' && header[3] == 'G' && header[4] == 0x0D &&
         header[5] == 0x0A)
     {
-        return FMT_PNG;
+        return kPNGImage;
     }
 
     // check some other common image formats....
@@ -70,19 +67,19 @@ image_format_e Image_DetectFormat(uint8_t *header, int header_len, int file_size
     if (header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF && header[3] >= 0xE0 &&
         ((header[6] == 'J' && header[7] == 'F') || (header[6] == 'E' && header[7] == 'x')))
     {
-        return FMT_JPEG;
+        return kJPEGImage;
     }
 
     if (header[0] == 'G' && header[1] == 'I' && header[2] == 'F' && header[3] == '8' && header[4] >= '7' &&
         header[4] <= '9' && header[5] == 'a')
     {
-        return FMT_OTHER; /* GIF */
+        return kOtherImage; /* GIF */
     }
 
     if (header[0] == 'D' && header[1] == 'D' && header[2] == 'S' && header[3] == 0x20 && header[4] == 124 &&
         header[5] == 0 && header[6] == 0)
     {
-        return FMT_OTHER; /* DDS (DirectDraw Surface) */
+        return kOtherImage; /* DDS (DirectDraw Surface) */
     }
 
     // TGA (Targa) is not clearly marked, but better than Doom patches,
@@ -101,7 +98,7 @@ image_format_e Image_DetectFormat(uint8_t *header, int header_len, int file_size
             ((img_type | 8) >= 8 && (img_type | 8) <= 11) &&
             (depth == 8 || depth == 15 || depth == 16 || depth == 24 || depth == 32))
         {
-            return FMT_TGA;
+            return kTGAImage;
         }
     }
 
@@ -117,38 +114,38 @@ image_format_e Image_DetectFormat(uint8_t *header, int header_len, int file_size
         if (width > 0 && width <= 4096 && abs(ofs_x) <= 4096 && height > 0 && height <= 1024 && abs(ofs_y) <= 4096 &&
             file_size > width * 4 /* columnofs */)
         {
-            return FMT_DOOM;
+            return kDoomImage;
         }
     }
 
-    return FMT_Unknown; // uh oh!
+    return kUnknownImage; // uh oh!
 }
 
-image_format_e Image_FilenameToFormat(const std::string &filename)
+ImageFormat Image_FilenameToFormat(const std::string &filename)
 {
     std::string ext = epi::FS_GetExtension(filename);
 
-    StringLowerASCII(ext);
+    epi::StringLowerASCII(ext);
 
     if (ext == ".png")
-        return FMT_PNG;
+        return kPNGImage;
 
     if (ext == ".tga")
-        return FMT_TGA;
+        return kTGAImage;
 
     if (ext == ".jpg" || ext == ".jpeg")
-        return FMT_JPEG;
+        return kJPEGImage;
 
     if (ext == ".lmp") // Kind of a gamble, but whatever
-        return FMT_DOOM;
+        return kDoomImage;
 
     if (ext == ".gif" || ext == ".bmp" || ext == ".dds")
-        return FMT_OTHER;
+        return kOtherImage;
 
-    return FMT_Unknown;
+    return kUnknownImage;
 }
 
-image_data_c *Image_Load(file_c *f)
+image_data_c *Image_Load(epi::file_c *f)
 {
     int width  = 0;
     int height = 0;
@@ -285,7 +282,7 @@ image_atlas_c *Image_Pack(const std::unordered_map<int, image_data_c *> &im_pack
 	return atlas;
 }
 
-bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp)
+bool Image_GetInfo(epi::file_c *f, int *width, int *height, int *bpp)
 {
     int   length    = f->GetLength();
     uint8_t *raw_image = f->LoadIntoMemory();
@@ -302,7 +299,7 @@ bool Image_GetInfo(file_c *f, int *width, int *height, int *bpp)
 static void stbi_file_c_write(void *context, void *data, int size)
 {
     SYS_ASSERT(context && data && size);
-    file_c *dest = (file_c *)context;
+    epi::file_c *dest = (epi::file_c *)context;
     dest->Write(data, size);
 }
 
@@ -310,7 +307,7 @@ bool JPEG_Save(std::string fn, image_data_c *img)
 {
     SYS_ASSERT(img->bpp == 3);
 
-    file_c *dest = epi::FS_Open(fn, kFileAccessBinary | kFileAccessWrite);
+    epi::file_c *dest = epi::FS_Open(fn, epi::kFileAccessBinary | epi::kFileAccessWrite);
 
     if (!dest) return false;
 
@@ -332,7 +329,7 @@ bool PNG_Save(std::string fn, image_data_c *img)
 {
     SYS_ASSERT(img->bpp >= 3);
 
-    file_c *dest = epi::FS_Open(fn, kFileAccessBinary | kFileAccessWrite);
+    epi::file_c *dest = epi::FS_Open(fn, epi::kFileAccessBinary | epi::kFileAccessWrite);
 
     if (!dest) return false;
 
@@ -349,8 +346,6 @@ bool PNG_Save(std::string fn, image_data_c *img)
     else
         return true;
 }
-
-} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

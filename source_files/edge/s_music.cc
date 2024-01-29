@@ -146,7 +146,7 @@ void S_ChangeMusic(int entrynum, bool loop)
         return;
     }
 
-    sound_format_e fmt = FMT_Unknown;
+    sound_format_e fmt = kUnknownImage;
 
     // IMF Music is the outlier in that it must be predefined in DDFPLAY with the appropriate
     // IMF frequency, as there is no way of determining this from file information alone

@@ -8,10 +8,6 @@ add_library(
   file.cc
   file_memory.cc
   filesystem.cc
-  image_data.cc
-  image_blur.cc
-  image_hq2x.cc
-  image_funcs.cc
   math_color.cc
   math_crc.cc
   math_md5.cc
@@ -21,7 +17,6 @@ add_library(
 )
 
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
-target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/stb)
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/libgrapheme)
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/superfasthash)
 if(WIN32 AND (MSVC OR CLANG))

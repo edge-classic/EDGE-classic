@@ -67,7 +67,7 @@ static void CaptureScreenAsTexture(bool speckly, bool spooky)
     int total_w = W_MakeValidSize(SCREENWIDTH);
     int total_h = W_MakeValidSize(SCREENHEIGHT);
 
-    epi::image_data_c img(total_w, total_h, 4);
+    image_data_c img(total_w, total_h, 4);
 
     img.Clear();
 
@@ -108,7 +108,7 @@ void RGL_BlackoutWipeTex(void)
     int total_w = W_MakeValidSize(SCREENWIDTH);
     int total_h = W_MakeValidSize(SCREENHEIGHT);
 
-    epi::image_data_c img(total_w, total_h, 4);
+    image_data_c img(total_w, total_h, 4);
 
     img.Clear();
 

@@ -60,7 +60,7 @@ typedef struct
 typedef struct patchcache_s
 {
 	// Atlas stuff; will eventually replace the above images/missing stuff
-	std::unordered_map<int, epi::image_rect_c> atlas_rects;
+	std::unordered_map<int, image_rect_c> atlas_rects;
 	unsigned int atlas_texid = 0;
 	unsigned int atlas_smoothed_texid = 0;
     // Since we track our own atlas textures, need a whitened version for color remaps

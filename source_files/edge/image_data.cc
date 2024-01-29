@@ -26,9 +26,6 @@
 
 #include <unordered_map>
 
-namespace epi
-{
-
 image_data_c::image_data_c(int _w, int _h, int _bpp) : width(_w), height(_h), bpp(_bpp), used_w(_w), used_h(_h)
 {
     pixels = new uint8_t[width * height * bpp];
@@ -542,7 +539,7 @@ rgbacol_t image_data_c::AverageColor(int from_x, int to_x, int from_y, int to_y)
         {
             if (bpp == 4 && src[3] == 0)
                 continue;
-            rgbacol_t color = RGBA_Make(src[0], src[1], src[2]);
+            rgbacol_t color = epi::RGBA_Make(src[0], src[1], src[2]);
             auto         res   = seen_colors.try_emplace(color, 0);
             // If color already seen, increment the hit counter
             if (!res.second)
@@ -605,7 +602,7 @@ rgbacol_t image_data_c::LightestColor(int from_x, int to_x, int from_y, int to_y
         }
     }
 
-    return RGBA_Make(lightest_r, lightest_g, lightest_b);
+    return epi::RGBA_Make(lightest_r, lightest_g, lightest_b);
 }
 
 rgbacol_t image_data_c::DarkestColor(int from_x, int to_x, int from_y, int to_y)
@@ -643,7 +640,7 @@ rgbacol_t image_data_c::DarkestColor(int from_x, int to_x, int from_y, int to_y)
         }
     }
 
-    return RGBA_Make(darkest_r, darkest_g, darkest_b);
+    return epi::RGBA_Make(darkest_r, darkest_g, darkest_b);
 }
 
 void image_data_c::Swirl(int leveltime, int thickness)
@@ -734,9 +731,9 @@ void image_data_c::SetHSV(int rotation, int saturation, int value)
         {
             uint8_t *src = PixelAt(x, y);
 
-            rgbacol_t col = RGBA_Make(src[0], src[1], src[2], bpp == 4 ? src[3] : 255);
+            rgbacol_t col = epi::RGBA_Make(src[0], src[1], src[2], bpp == 4 ? src[3] : 255);
 
-            hsv_col_c hue(col);
+            epi::hsv_col_c hue(col);
 
             if (rotation)
                 hue.Rotate(rotation);
@@ -749,13 +746,11 @@ void image_data_c::SetHSV(int rotation, int saturation, int value)
 
             col = hue.GetRGBA();
 
-            src[0] = RGBA_Red(col);
-            src[1] = RGBA_Green(col);
-            src[2] = RGBA_Blue(col);
+            src[0] = epi::RGBA_Red(col);
+            src[1] = epi::RGBA_Green(col);
+            src[2] = epi::RGBA_Blue(col);
         }
 }
-
-} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -643,7 +643,7 @@ void HUD_RawFromTexID(float hx1, float hy1, float hx2, float hy2, unsigned int t
     glAlphaFunc(GL_GREATER, 0);
 }
 
-void HUD_StretchFromImageData(float x, float y, float w, float h, const epi::image_data_c *img, unsigned int tex_id,
+void HUD_StretchFromImageData(float x, float y, float w, float h, const image_data_c *img, unsigned int tex_id,
                               image_opacity_e opacity)
 {
     if (cur_x_align >= 0)

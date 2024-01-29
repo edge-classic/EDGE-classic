@@ -258,7 +258,7 @@ static void RAD_CheckForTime(const char *info, void *storage)
     SYS_ASSERT(info && storage);
 
     // -ES- 1999/09/14 MAXT means that time should be maximal.
-    if (!epi::STR_CaseCmp(info, "maxt"))
+    if (!epi::StringCaseCompareASCII(info, "maxt"))
     {
         *dest = INT_MAX; // -ACB- 1999/09/22 Standards, Please.
         return;
@@ -371,10 +371,10 @@ static char *RAD_UnquoteString(const char *s)
 
 static bool CheckForBoolean(const char *s)
 {
-    if (epi::STR_CaseCmp(s, "TRUE") == 0 || epi::STR_CaseCmp(s, "1") == 0)
+    if (epi::StringCaseCompareASCII(s, "TRUE") == 0 || epi::StringCaseCompareASCII(s, "1") == 0)
         return true;
 
-    if (epi::STR_CaseCmp(s, "FALSE") == 0 || epi::STR_CaseCmp(s, "0") == 0)
+    if (epi::StringCaseCompareASCII(s, "FALSE") == 0 || epi::StringCaseCompareASCII(s, "0") == 0)
         return false;
 
     // Nope, it's an error.
@@ -508,7 +508,7 @@ static void ClearPreviousScripts(const char *mapid)
     {
         next = scr->next;
 
-        if (epi::STR_CaseCmp(scr->mapid, mapid) == 0)
+        if (epi::StringCaseCompareASCII(scr->mapid, mapid) == 0)
         {
             // unlink and free it
             if (scr->next)
@@ -922,7 +922,7 @@ static void RAD_ParseSectorTrigger(param_set_t &pars)
     if (pars.size() != 2 && pars.size() != 4)
         RAD_Error("%s: Wrong number of parameters.\n", pars[0]);
 
-    if (epi::STR_CaseCmp(pars[0], "SECTOR_TRIGGER_TAG") == 0)
+    if (epi::StringCaseCompareASCII(pars[0], "SECTOR_TRIGGER_TAG") == 0)
         RAD_CheckForInt(pars[1], &this_rad->sector_tag);
     else
         RAD_CheckForInt(pars[1], &this_rad->sector_index);
@@ -1465,15 +1465,15 @@ static void RAD_ParseTipAlign(param_set_t &pars)
 
 static void HandleSpawnKeyword(const char *par, s_thing_t *t)
 {
-    if (epi::STR_PrefixCaseCmp(par, "X=") == 0)
+    if (epi::StringPrefixCaseCompareASCII(par, "X=") == 0)
         RAD_CheckForFloat(par + 2, &t->x);
-    else if (epi::STR_PrefixCaseCmp(par, "Y=") == 0)
+    else if (epi::StringPrefixCaseCompareASCII(par, "Y=") == 0)
         RAD_CheckForFloat(par + 2, &t->y);
-    else if (epi::STR_PrefixCaseCmp(par, "Z=") == 0)
+    else if (epi::StringPrefixCaseCompareASCII(par, "Z=") == 0)
         RAD_CheckForFloat(par + 2, &t->z);
-    else if (epi::STR_PrefixCaseCmp(par, "TAG=") == 0)
+    else if (epi::StringPrefixCaseCompareASCII(par, "TAG=") == 0)
         RAD_CheckForInt(par + 4, &t->tag);
-    else if (epi::STR_PrefixCaseCmp(par, "ANGLE=") == 0)
+    else if (epi::StringPrefixCaseCompareASCII(par, "ANGLE=") == 0)
     {
         int val;
         RAD_CheckForInt(par + 6, &val);
@@ -1483,12 +1483,12 @@ static void HandleSpawnKeyword(const char *par, s_thing_t *t)
         else
             t->angle = val << 16;
     }
-    else if (epi::STR_PrefixCaseCmp(par, "SLOPE=") == 0)
+    else if (epi::StringPrefixCaseCompareASCII(par, "SLOPE=") == 0)
     {
         RAD_CheckForFloat(par + 6, &t->slope);
         t->slope /= 45.0f;
     }
-    else if (epi::STR_PrefixCaseCmp(par, "WHEN=") == 0)
+    else if (epi::StringPrefixCaseCompareASCII(par, "WHEN=") == 0)
     {
         DDF_MainGetWhenAppear(par + 5, &t->appear);
     }
@@ -1768,7 +1768,7 @@ static void RAD_ParseDamageMonsters(param_set_t &pars)
     // parse the tag value
     if (pars.size() >= 4)
     {
-        if (epi::STR_PrefixCaseCmp(pars[3], "TAG=") != 0)
+        if (epi::StringPrefixCaseCompareASCII(pars[3], "TAG=") != 0)
             RAD_Error("%s: Bad keyword parameter: %s\n", pars[0], pars[3]);
 
         RAD_CheckForInt(pars[3] + 4, &mon->thing_tag);
@@ -1815,7 +1815,7 @@ static void RAD_ParseThingEvent(param_set_t &pars)
     // parse the tag value
     if (pars.size() >= 4)
     {
-        if (epi::STR_PrefixCaseCmp(pars[3], "TAG=") != 0)
+        if (epi::StringPrefixCaseCompareASCII(pars[3], "TAG=") != 0)
             RAD_Error("%s: Bad keyword parameter: %s\n", pars[0], pars[3]);
 
         RAD_CheckForInt(pars[3] + 4, &tev->thing_tag);

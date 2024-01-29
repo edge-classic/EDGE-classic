@@ -2029,7 +2029,7 @@ static void M_ChangeSoundfont(int keypressed, cvar_c *cvar)
     int sf_pos = -1;
     for (int i = 0; i < (int)available_soundfonts.size(); i++)
     {
-        if (epi::STR_CaseCmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
+        if (epi::StringCaseCompareASCII(s_soundfont.s, available_soundfonts.at(i)) == 0)
         {
             sf_pos = i;
             break;
@@ -2072,7 +2072,7 @@ static void M_ChangeGENMIDI(int keypressed, cvar_c *cvar)
     int op2_pos = -1;
     for (int i = 0; i < (int)available_genmidis.size(); i++)
     {
-        if (epi::STR_CaseCmp(s_genmidi.s, available_genmidis.at(i)) == 0)
+        if (epi::StringCaseCompareASCII(s_genmidi.s, available_genmidis.at(i)) == 0)
         {
             op2_pos = i;
             break;

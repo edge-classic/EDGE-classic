@@ -136,9 +136,7 @@ int argv::Find(std::string longName, int *numParams)
         if (!IsOption(p))
             continue;
 
-        const std::string &str = list[p];
-
-        if (epi::STR_CaseCmp(longName, std::string{&str[1], (str.size() - 1)}) == 0)
+        if (epi::StringCaseCompareASCII(longName, list[p].substr(1)) == 0)
             break;
     }
 

@@ -1277,7 +1277,7 @@ mapdef_c *G_LookupMap(const char *refname)
         {
             if (mapdefs[i]->name.size() >= 2)
             {
-                if (epi::STR_CaseCmp(map_check, mapdefs[i]->name.substr(mapdefs[i]->name.size() - 2)) == 0 &&
+                if (epi::StringCaseCompareASCII(map_check, mapdefs[i]->name.substr(mapdefs[i]->name.size() - 2)) == 0 &&
                     G_MapExists(mapdefs[i]) && mapdefs[i]->episode)
                     return mapdefs[i];
             }

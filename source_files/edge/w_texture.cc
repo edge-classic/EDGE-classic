@@ -184,7 +184,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
         const raw_patchdef_t *mpatch = &mtexture->patches[0];
         texpatch_t           *patch  = &texture->patches[0];
 
-        bool is_sky = (epi::STR_PrefixCaseCmp(texture->name, "SKY") == 0);
+        bool is_sky = (epi::StringPrefixCaseCompareASCII(texture->name, "SKY") == 0);
 
         for (int k = 0; k < texture->patchcount; k++, mpatch++, patch++)
         {
@@ -344,7 +344,7 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
         const raw_strife_patchdef_t *mpatch = &mtexture->patches[0];
         texpatch_t                  *patch  = &texture->patches[0];
 
-        bool is_sky = (epi::STR_PrefixCaseCmp(texture->name, "SKY") == 0);
+        bool is_sky = (epi::StringPrefixCaseCompareASCII(texture->name, "SKY") == 0);
 
         for (int k = 0; k < texture->patchcount; k++, mpatch++, patch++)
         {
@@ -513,7 +513,7 @@ int W_FindTextureSequence(const char *start, const char *end, int *s_offset, int
     {
         // look for start name
         for (j = 0; j < tex_sets[i]->num_tex; j++)
-            if (epi::STR_CaseCmp(start, tex_sets[i]->textures[j]->name) == 0)
+            if (epi::StringCaseCompareASCII(start, tex_sets[i]->textures[j]->name) == 0)
                 break;
 
         if (j >= tex_sets[i]->num_tex)
@@ -524,7 +524,7 @@ int W_FindTextureSequence(const char *start, const char *end, int *s_offset, int
         // look for end name
         for (j++; j < tex_sets[i]->num_tex; j++)
         {
-            if (epi::STR_CaseCmp(end, tex_sets[i]->textures[j]->name) == 0)
+            if (epi::StringCaseCompareASCII(end, tex_sets[i]->textures[j]->name) == 0)
             {
                 (*e_offset) = j;
                 return i;

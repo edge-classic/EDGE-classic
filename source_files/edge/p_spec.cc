@@ -1795,9 +1795,9 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
     if (special->special_flags & SECSP_ReverbSFX)
     {
         ddf_reverb = true;
-        if (epi::STR_CaseCmp(special->reverb_type, "REVERB") == 0)
+        if (epi::StringCaseCompareASCII(special->reverb_type, "REVERB") == 0)
             ddf_reverb_type = 1;
-        else if (epi::STR_CaseCmp(special->reverb_type, "ECHO") == 0)
+        else if (epi::StringCaseCompareASCII(special->reverb_type, "ECHO") == 0)
             ddf_reverb_type = 2;
         ddf_reverb_delay = MAX(0, special->reverb_delay);
         ddf_reverb_ratio = CLAMP(0, special->reverb_ratio, 100);

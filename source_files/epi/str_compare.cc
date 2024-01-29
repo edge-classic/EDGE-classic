@@ -26,159 +26,171 @@
 namespace epi
 {
 
-int STR_Cmp(const char *A, const char *B)
+int StringCompare(std::string_view A, std::string_view B)
 {
-    SYS_ASSERT(A && B);
-    for (;;)
+    size_t A_pos = 0;
+    size_t B_pos = 0;
+    size_t A_end = A.size();
+    size_t B_end = B.size();
+    unsigned char AC = 0;
+    unsigned char BC = 0;
+
+    for (;;A_pos++, B_pos++)
 	{
-		int AC = (int)(unsigned char)*A++;
-        int BC = (int)(unsigned char)*B++;
+		if (A_pos >= A_end)
+            AC = 0;
+        else
+            AC = (int)(unsigned char)A[A_pos];
+        if (B_pos >= B_end)
+            BC = 0;
+        else
+            BC = (int)(unsigned char)B[B_pos];
 
 		if (AC != BC)
 			return AC - BC;
 
-		if (AC == 0)
+		if (A_pos == A_end)
 			return 0;
 	}
 }
 
-int STR_Cmp(const char *A, const std::string &B)
-{
-    return epi::STR_Cmp(A, B.c_str());
-}
-
-int STR_Cmp(const std::string &A, const char *B)
-{
-    return epi::STR_Cmp(A.c_str(), B);
-}
-
-int STR_Cmp(const std::string &A, const std::string &B)
-{
-    return epi::STR_Cmp(A.c_str(), B.c_str());
-}
-
 //----------------------------------------------------------------------------
 
-int STR_CmpMax(const char *A, const char *B, size_t n)
+int StringCompareMax(std::string_view A, std::string_view B, size_t n)
 {
-    SYS_ASSERT(A && B);
     SYS_ASSERT(n != 0);
-	for (;;)
+    size_t A_pos = 0;
+    size_t B_pos = 0;
+    size_t A_end = A.size();
+    size_t B_end = B.size();
+    unsigned char AC = 0;
+    unsigned char BC = 0;
+
+	for (;;A_pos++, B_pos++)
 	{
 		if (n == 0)
 			return 0;
 
-		int AC = (int)(unsigned char)*A++;
-        int BC = (int)(unsigned char)*B++;
+        if (A_pos >= A_end)
+            AC = 0;
+        else
+            AC = (int)(unsigned char)A[A_pos];
+        if (B_pos >= B_end)
+            BC = 0;
+        else
+            BC = (int)(unsigned char)B[B_pos];
 
 		if (AC != BC)
 			return AC - BC;
 
-		if (AC == 0)
+		if (A_pos == A_end)
 			return 0;
 
 		n--;
 	}
 }
 
-int STR_CmpMax(const char *A, const std::string &B, size_t n)
-{
-    return epi::STR_CmpMax(A, B.c_str(), n);
-}
-
-int STR_CmpMax(const std::string &A, const char *B, size_t n)
-{
-    return epi::STR_CmpMax(A.c_str(), B, n);
-}
-
-int STR_CmpMax(const std::string &A, const std::string &B, size_t n)
-{
-    return epi::STR_CmpMax(A.c_str(), B.c_str(), n);
-}
-
 //----------------------------------------------------------------------------
 
-int STR_CaseCmp(const char *A, const char *B)
+int StringCaseCompareASCII(std::string_view A, std::string_view B)
 {
-    SYS_ASSERT(A && B);
-    for (;;)
+    size_t A_pos = 0;
+    size_t B_pos = 0;
+    size_t A_end = A.size();
+    size_t B_end = B.size();
+    unsigned char AC = 0;
+    unsigned char BC = 0;
+
+    for (;;A_pos++, B_pos++)
     {
-        int AC = tolower((unsigned char)*A++);
-        int BC = tolower((unsigned char)*B++);
+        if (A_pos >= A_end)
+            AC = 0;
+        else
+        {
+            AC = (int)(unsigned char)A[A_pos];
+            if (AC > '@' && AC < '[') AC ^= 0x20;
+        }
+        if (B_pos >= B_end)
+            BC = 0;
+        else
+        {
+            BC = (int)(unsigned char)B[B_pos];
+            if (BC > '@' && BC < '[') BC ^= 0x20;
+        }
 
         if (AC != BC)
             return AC - BC;
 
-        if (AC == 0)
+        if (A_pos == A_end)
             return 0;
     }
 }
 
-int STR_CaseCmp(const char *A, const std::string &B)
-{
-    return epi::STR_CaseCmp(A, B.c_str());
-}
-
-int STR_CaseCmp(const std::string &A, const char *B)
-{
-    return epi::STR_CaseCmp(A.c_str(), B);
-}
-
-int STR_CaseCmp(const std::string &A, const std::string &B)
-{
-    return epi::STR_CaseCmp(A.c_str(), B.c_str());
-}
-
 //----------------------------------------------------------------------------
 
-int STR_CaseCmpMax(const char *A, const char *B, size_t n)
+int StringCaseCompareMaxASCII(std::string_view A, std::string_view B, size_t n)
 {
-    SYS_ASSERT(A && B);
     SYS_ASSERT(n != 0);
-	for (;;)
+    size_t A_pos = 0;
+    size_t B_pos = 0;
+    size_t A_end = A.size();
+    size_t B_end = B.size();
+    unsigned char AC = 0;
+    unsigned char BC = 0;
+
+	for (;;A_pos++, B_pos++)
 	{
 		if (n == 0)
 			return 0;
 
-		int AC = tolower((unsigned char)*A++);
-        int BC = tolower((unsigned char)*B++);
+		if (A_pos >= A_end)
+            AC = 0;
+        else
+        {
+            AC = (int)(unsigned char)A[A_pos];
+            if (AC > '@' && AC < '[') AC ^= 0x20;
+        }
+        if (B_pos >= B_end)
+            BC = 0;
+        else
+        {
+            BC = (int)(unsigned char)B[B_pos];
+            if (BC > '@' && BC < '[') BC ^= 0x20;
+        }
 
 		if (AC != BC)
 			return AC - BC;
 
-		if (AC == 0)
+		if (A_pos == A_end)
 			return 0;
 
 		n--;
 	}
 }
 
-int STR_CaseCmpMax(const char *A, const std::string &B, size_t n)
-{
-    return epi::STR_CaseCmpMax(A, B.c_str(), n);
-}
-
-int STR_CaseCmpMax(const std::string &A, const char *B, size_t n)
-{
-    return epi::STR_CaseCmpMax(A.c_str(), B, n);
-}
-
-int STR_CaseCmpMax(const std::string &A, const std::string &B, size_t n)
-{
-    return epi::STR_CaseCmpMax(A.c_str(), B.c_str(), n);
-}
-
 //----------------------------------------------------------------------------
 
-int STR_PrefixCmp(const char *A, const char *B)
+int StringPrefixCompare(std::string_view A, std::string_view B)
 {
-    SYS_ASSERT(A && B);
-    for (;;)
-    {
-        int AC = (int)(unsigned char)*A++;
-        int BC = (int)(unsigned char)*B++;
+    size_t A_pos = 0;
+    size_t B_pos = 0;
+    size_t A_end = A.size();
+    size_t B_end = B.size();
+    unsigned char AC = 0;
+    unsigned char BC = 0;
 
-        if (BC == 0)
+    for (;;A_pos++, B_pos++)
+    {
+        if (A_pos >= A_end)
+            AC = 0;
+        else
+            AC = (int)(unsigned char)A[A_pos];
+        if (B_pos >= B_end)
+            BC = 0;
+        else
+            BC = (int)(unsigned char)B[B_pos];
+
+        if (B_pos == B_end)
             return 0;
 
         if (AC != BC)
@@ -186,53 +198,40 @@ int STR_PrefixCmp(const char *A, const char *B)
     }
 }
 
-int STR_PrefixCmp(const char *A, const std::string &B)
-{
-    return epi::STR_PrefixCmp(A, B.c_str());
-}
-
-int STR_PrefixCmp(const std::string &A, const char *B)
-{
-    return epi::STR_PrefixCmp(A.c_str(), B);
-}
-
-int STR_PrefixCmp(const std::string &A, const std::string &B)
-{
-    return epi::STR_PrefixCmp(A.c_str(), B.c_str());
-}
-
 //----------------------------------------------------------------------------
 
-int STR_PrefixCaseCmp(const char *A, const char *B)
+int StringPrefixCaseCompareASCII(std::string_view A, std::string_view B)
 {
-    SYS_ASSERT(A && B);
+    size_t A_pos = 0;
+    size_t B_pos = 0;
+    size_t A_end = A.size();
+    size_t B_end = B.size();
+    unsigned char AC = 0;
+    unsigned char BC = 0;
 
-    for (;;)
+    for (;;A_pos++, B_pos++)
     {
-        int AC = tolower((unsigned char)*A++);
-        int BC = tolower((unsigned char)*B++);
+        if (A_pos >= A_end)
+            AC = 0;
+        else
+        {
+            AC = (int)(unsigned char)A[A_pos];
+            if (AC > '@' && AC < '[') AC ^= 0x20;
+        }
+        if (B_pos >= B_end)
+            BC = 0;
+        else
+        {
+            BC = (int)(unsigned char)B[B_pos];
+            if (BC > '@' && BC < '[') BC ^= 0x20;
+        }
 
-        if (BC == 0)
+        if (B_pos == B_end)
             return 0;
 
         if (AC != BC)
             return AC - BC;
     }
-}
-
-int STR_PrefixCaseCmp(const char *A, const std::string &B)
-{
-    return epi::STR_PrefixCaseCmp(A, B.c_str());
-}
-
-int STR_PrefixCaseCmp(const std::string &A, const char *B)
-{
-    return epi::STR_PrefixCaseCmp(A.c_str(), B);
-}
-
-int STR_PrefixCaseCmp(const std::string &A, const std::string &B)
-{
-    return epi::STR_PrefixCaseCmp(A.c_str(), B.c_str());
 }
 
 } // namespace epi

@@ -336,15 +336,15 @@ Wad_file *Wad_file::Create(std::string filename, char mode)
 
 static int WhatLevelPart(const char *name)
 {
-    if (epi::STR_CaseCmp(name, "THINGS") == 0)
+    if (epi::StringCaseCompareASCII(name, "THINGS") == 0)
         return 1;
-    if (epi::STR_CaseCmp(name, "LINEDEFS") == 0)
+    if (epi::StringCaseCompareASCII(name, "LINEDEFS") == 0)
         return 2;
-    if (epi::STR_CaseCmp(name, "SIDEDEFS") == 0)
+    if (epi::StringCaseCompareASCII(name, "SIDEDEFS") == 0)
         return 3;
-    if (epi::STR_CaseCmp(name, "VERTEXES") == 0)
+    if (epi::StringCaseCompareASCII(name, "VERTEXES") == 0)
         return 4;
-    if (epi::STR_CaseCmp(name, "SECTORS") == 0)
+    if (epi::StringCaseCompareASCII(name, "SECTORS") == 0)
         return 5;
 
     return 0;
@@ -352,19 +352,19 @@ static int WhatLevelPart(const char *name)
 
 static bool IsLevelLump(const char *name)
 {
-    if (epi::STR_CaseCmp(name, "SEGS") == 0)
+    if (epi::StringCaseCompareASCII(name, "SEGS") == 0)
         return true;
-    if (epi::STR_CaseCmp(name, "SSECTORS") == 0)
+    if (epi::StringCaseCompareASCII(name, "SSECTORS") == 0)
         return true;
-    if (epi::STR_CaseCmp(name, "NODES") == 0)
+    if (epi::StringCaseCompareASCII(name, "NODES") == 0)
         return true;
-    if (epi::STR_CaseCmp(name, "REJECT") == 0)
+    if (epi::StringCaseCompareASCII(name, "REJECT") == 0)
         return true;
-    if (epi::STR_CaseCmp(name, "BLOCKMAP") == 0)
+    if (epi::StringCaseCompareASCII(name, "BLOCKMAP") == 0)
         return true;
-    if (epi::STR_CaseCmp(name, "BEHAVIOR") == 0)
+    if (epi::StringCaseCompareASCII(name, "BEHAVIOR") == 0)
         return true;
-    if (epi::STR_CaseCmp(name, "SCRIPTS") == 0)
+    if (epi::StringCaseCompareASCII(name, "SCRIPTS") == 0)
         return true;
 
     return WhatLevelPart(name) != 0;
@@ -372,7 +372,7 @@ static bool IsLevelLump(const char *name)
 
 static bool IsGLNodeLump(const char *name)
 {
-    if (epi::STR_CaseCmpMax(name, "GL_", 3) == 0)
+    if (epi::StringCaseCompareMaxASCII(name, "GL_", 3) == 0)
         return true;
 
     return false;
@@ -389,7 +389,7 @@ Lump_c *Wad_file::GetLump(int index)
 Lump_c *Wad_file::FindLump(const char *name)
 {
     for (int k = 0; k < NumLumps(); k++)
-        if (epi::STR_CaseCmp(directory[k]->name, name) == 0)
+        if (epi::StringCaseCompareASCII(directory[k]->name, name) == 0)
             return directory[k];
 
     return NULL; // not found
@@ -398,7 +398,7 @@ Lump_c *Wad_file::FindLump(const char *name)
 int Wad_file::FindLumpNum(const char *name)
 {
     for (int k = 0; k < NumLumps(); k++)
-        if (epi::STR_CaseCmp(directory[k]->name, name) == 0)
+        if (epi::StringCaseCompareASCII(directory[k]->name, name) == 0)
             return k;
 
     return -1; // not found
@@ -415,7 +415,7 @@ int Wad_file::LevelLookupLump(int lev_num, const char *name)
     {
         SYS_ASSERT(0 <= k && k < NumLumps());
 
-        if (epi::STR_CaseCmp(directory[k]->name, name) == 0)
+        if (epi::StringCaseCompareASCII(directory[k]->name, name) == 0)
             return k;
     }
 
@@ -431,7 +431,7 @@ int Wad_file::LevelFind(const char *name)
         SYS_ASSERT(0 <= index && index < NumLumps());
         SYS_ASSERT(directory[index]);
 
-        if (epi::STR_CaseCmp(directory[index]->name, name) == 0)
+        if (epi::StringCaseCompareASCII(directory[index]->name, name) == 0)
             return k;
     }
 
@@ -448,7 +448,7 @@ int Wad_file::LevelLastLump(int lev_num)
     {
         while (count < MAX_LUMPS_IN_A_LEVEL && start + count < NumLumps())
         {
-            if (epi::STR_CaseCmp(directory[start + count]->name, "ENDMAP") == 0)
+            if (epi::StringCaseCompareASCII(directory[start + count]->name, "ENDMAP") == 0)
             {
                 count++;
                 break;
@@ -518,7 +518,7 @@ map_format_e Wad_file::LevelFormat(int lev_num)
     {
         const char *name = GetLump(start + 1)->Name();
 
-        if (epi::STR_CaseCmp(name, "TEXTMAP") == 0)
+        if (epi::StringCaseCompareASCII(name, "TEXTMAP") == 0)
             return MAPF_UDMF;
     }
 
@@ -526,7 +526,7 @@ map_format_e Wad_file::LevelFormat(int lev_num)
     {
         const char *name = GetLump(start + LL_BEHAVIOR)->Name();
 
-        if (epi::STR_CaseCmp(name, "BEHAVIOR") == 0)
+        if (epi::StringCaseCompareASCII(name, "BEHAVIOR") == 0)
             return MAPF_Hexen;
     }
 
@@ -541,19 +541,19 @@ Lump_c *Wad_file::FindLumpInNamespace(const char *name, char group)
     {
     case 'P':
         for (k = 0; k < (int)patches.size(); k++)
-            if (epi::STR_CaseCmp(directory[patches[k]]->name, name) == 0)
+            if (epi::StringCaseCompareASCII(directory[patches[k]]->name, name) == 0)
                 return directory[patches[k]];
         break;
 
     case 'S':
         for (k = 0; k < (int)sprites.size(); k++)
-            if (epi::STR_CaseCmp(directory[sprites[k]]->name, name) == 0)
+            if (epi::StringCaseCompareASCII(directory[sprites[k]]->name, name) == 0)
                 return directory[sprites[k]];
         break;
 
     case 'F':
         for (k = 0; k < (int)flats.size(); k++)
-            if (epi::STR_CaseCmp(directory[flats[k]]->name, name) == 0)
+            if (epi::StringCaseCompareASCII(directory[flats[k]]->name, name) == 0)
                 return directory[flats[k]];
         break;
 
@@ -625,7 +625,7 @@ void Wad_file::DetectLevels()
         int part_count = 0;
 
         // check for UDMF levels
-        if (epi::STR_CaseCmp(directory[k + 1]->name, "TEXTMAP") == 0)
+        if (epi::StringCaseCompareASCII(directory[k + 1]->name, "TEXTMAP") == 0)
         {
             levels.push_back(k);
 #if DEBUG_WAD
@@ -685,7 +685,7 @@ static bool IsDummyMarker(const char *name)
     if (!isdigit(name[1]))
         return false;
 
-    if (epi::STR_CaseCmp(name + 2, "_START") == 0 || epi::STR_CaseCmp(name + 2, "_END") == 0)
+    if (epi::StringCaseCompareASCII(name + 2, "_START") == 0 || epi::StringCaseCompareASCII(name + 2, "_END") == 0)
         return true;
 
     return false;
@@ -703,7 +703,7 @@ void Wad_file::ProcessNamespaces()
         if (IsDummyMarker(name))
             continue;
 
-        if (epi::STR_CaseCmp(name, "P_START") == 0 || epi::STR_CaseCmp(name, "PP_START") == 0)
+        if (epi::StringCaseCompareASCII(name, "P_START") == 0 || epi::StringCaseCompareASCII(name, "PP_START") == 0)
         {
             if (active && active != 'P')
                 LumpWarning("missing %c_END marker.\n", active);
@@ -711,7 +711,7 @@ void Wad_file::ProcessNamespaces()
             active = 'P';
             continue;
         }
-        else if (epi::STR_CaseCmp(name, "P_END") == 0 || epi::STR_CaseCmp(name, "PP_END") == 0)
+        else if (epi::StringCaseCompareASCII(name, "P_END") == 0 || epi::StringCaseCompareASCII(name, "PP_END") == 0)
         {
             if (active != 'P')
                 LumpWarning("stray P_END marker found.\n");
@@ -720,7 +720,7 @@ void Wad_file::ProcessNamespaces()
             continue;
         }
 
-        if (epi::STR_CaseCmp(name, "S_START") == 0 || epi::STR_CaseCmp(name, "SS_START") == 0)
+        if (epi::StringCaseCompareASCII(name, "S_START") == 0 || epi::StringCaseCompareASCII(name, "SS_START") == 0)
         {
             if (active && active != 'S')
                 LumpWarning("missing %c_END marker.\n", active);
@@ -728,7 +728,7 @@ void Wad_file::ProcessNamespaces()
             active = 'S';
             continue;
         }
-        else if (epi::STR_CaseCmp(name, "S_END") == 0 || epi::STR_CaseCmp(name, "SS_END") == 0)
+        else if (epi::StringCaseCompareASCII(name, "S_END") == 0 || epi::StringCaseCompareASCII(name, "SS_END") == 0)
         {
             if (active != 'S')
                 LumpWarning("stray S_END marker found.\n");
@@ -737,7 +737,7 @@ void Wad_file::ProcessNamespaces()
             continue;
         }
 
-        if (epi::STR_CaseCmp(name, "F_START") == 0 || epi::STR_CaseCmp(name, "FF_START") == 0)
+        if (epi::StringCaseCompareASCII(name, "F_START") == 0 || epi::StringCaseCompareASCII(name, "FF_START") == 0)
         {
             if (active && active != 'F')
                 LumpWarning("missing %c_END marker.\n", active);
@@ -745,7 +745,7 @@ void Wad_file::ProcessNamespaces()
             active = 'F';
             continue;
         }
-        else if (epi::STR_CaseCmp(name, "F_END") == 0 || epi::STR_CaseCmp(name, "FF_END") == 0)
+        else if (epi::StringCaseCompareASCII(name, "F_END") == 0 || epi::StringCaseCompareASCII(name, "FF_END") == 0)
         {
             if (active != 'F')
                 LumpWarning("stray F_END marker found.\n");
@@ -754,7 +754,7 @@ void Wad_file::ProcessNamespaces()
             continue;
         }
 
-        if (epi::STR_CaseCmp(name, "TX_START") == 0)
+        if (epi::StringCaseCompareASCII(name, "TX_START") == 0)
         {
             if (active && active != 'T')
                 LumpWarning("missing %c_END marker.\n", active);
@@ -762,7 +762,7 @@ void Wad_file::ProcessNamespaces()
             active = 'T';
             continue;
         }
-        else if (epi::STR_CaseCmp(name, "TX_END") == 0)
+        else if (epi::StringCaseCompareASCII(name, "TX_END") == 0)
         {
             if (active != 'T')
                 LumpWarning("stray TX_END marker found.\n");
@@ -934,7 +934,7 @@ void Wad_file::RemoveZNodes(int lev_num)
 
     for (; start <= finish; start++)
     {
-        if (epi::STR_CaseCmp(directory[start]->name, "ZNODES") == 0)
+        if (epi::StringCaseCompareASCII(directory[start]->name, "ZNODES") == 0)
         {
             RemoveLumps(start, 1);
             break;

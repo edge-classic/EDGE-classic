@@ -819,7 +819,7 @@ bool SR_LevelGetColmap(void *storage, int index, void *extra)
         (*dest) = NULL;
 
     // -AJA- 2008/03/15: backwards compatibility
-    if (*dest && epi::STR_CaseCmp((*dest)->name.c_str(), "NORMAL") == 0)
+    if (*dest && epi::StringCaseCompareASCII((*dest)->name, "NORMAL") == 0)
         *dest = NULL;
 
     SV_FreeString(str);

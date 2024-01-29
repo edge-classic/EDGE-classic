@@ -72,7 +72,7 @@ bool S_StartupOPL(void)
     {
         for (size_t i = 0; i < available_genmidis.size(); i++)
         {
-            if (epi::STR_CaseCmp(s_genmidi.s, available_genmidis.at(i)) == 0)
+            if (epi::StringCaseCompareASCII(s_genmidi.s, available_genmidis.at(i)) == 0)
                 cvar_good = true;
         }
     }

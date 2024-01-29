@@ -237,7 +237,7 @@ int CMD_ScreenShot(char **argv, int argc)
 
 int CMD_QuitEDGE(char **argv, int argc)
 {
-    if (argc >= 2 && epi::STR_CaseCmp(argv[1], "now") == 0)
+    if (argc >= 2 && epi::StringCaseCompareASCII(argv[1], "now") == 0)
         // this never returns
         M_ImmediateQuit();
     else
@@ -351,7 +351,7 @@ int CMD_ShowVars(char **argv, int argc)
 
     char *match = NULL;
 
-    if (argc >= 2 && epi::STR_CaseCmp(argv[1], "-l") == 0)
+    if (argc >= 2 && epi::StringCaseCompareASCII(argv[1], "-l") == 0)
     {
         show_default = true;
         argv++;
@@ -603,7 +603,7 @@ static int FindCommand(const char *name)
 {
     for (int i = 0; builtin_commands[i].name; i++)
     {
-        if (epi::STR_CaseCmp(name, builtin_commands[i].name) == 0)
+        if (epi::StringCaseCompareASCII(name, builtin_commands[i].name) == 0)
             return i;
     }
 
@@ -615,7 +615,7 @@ static void ProcessBind(key_link_t *link, char **argv, int argc)
 {
 	for (int i = 1; i < argc; i++)
 	{
-		if (epi::STR_CaseCmp(argv[i], "-c") == 0)
+		if (epi::StringCaseCompareASCII(argv[i], "-c") == 0)
 		{
 			link->bind->Clear();
 			continue;

@@ -355,7 +355,7 @@ void W_PrecacheModels(void)
         {
             for (int i = 1; i < nummodels; i++)
             {
-                if (epi::STR_CaseCmpMax(model_name, ddf_model_names[i].c_str(), 4) == 0)
+                if (epi::StringCaseCompareMaxASCII(model_name, ddf_model_names[i], 4) == 0)
                     model_present[i] = 1;
             }
         }
@@ -378,7 +378,7 @@ void W_PrecacheModels(void)
         {
             for (int i = 1; i < nummodels; i++)
             {
-                if (epi::STR_CaseCmpMax(model_name, ddf_model_names[i].c_str(), 4) == 0)
+                if (epi::StringCaseCompareMaxASCII(model_name, ddf_model_names[i], 4) == 0)
                     model_present[i] = 1;
             }
         }

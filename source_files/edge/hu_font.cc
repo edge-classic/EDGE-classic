@@ -316,7 +316,7 @@ void font_c::LoadFontTTF()
 
         for (size_t i = 0; i < hu_fonts.size(); i++)
         {
-            if (epi::STR_CaseCmp(hu_fonts[i]->def->ttf_name, def->ttf_name) == 0)
+            if (epi::StringCaseCompareASCII(hu_fonts[i]->def->ttf_name, def->ttf_name) == 0)
             {
                 if (hu_fonts[i]->ttf_buffer)
                     ttf_buffer = hu_fonts[i]->ttf_buffer;

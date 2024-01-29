@@ -274,7 +274,7 @@ const char *DDF_MainGetDefine(const char *name)
 {
     // search backwards, to allow redefinitions to work
     for (int i = (int)all_defines.size() - 1; i >= 0; i--)
-        if (epi::STR_CaseCmp(all_defines[i].name.c_str(), name) == 0)
+        if (epi::StringCaseCompareASCII(all_defines[i].name, name) == 0)
             return all_defines[i].value.c_str();
 
     // undefined, so use the token as-is
@@ -728,7 +728,7 @@ void DDF_MainReadFile(readinfo_t *readinfo, const std::string &data)
     while (memfileptr < &memfile[memsize])
     {
         // -KM- 1998/12/16 Added #define command to ddf files.
-        if (epi::STR_PrefixCaseCmp(memfileptr, "#DEFINE") == 0)
+        if (epi::StringPrefixCaseCompareASCII(std::string_view(memfileptr, 7), "#DEFINE") == 0)
         {
             bool line = false;
 
@@ -807,7 +807,7 @@ void DDF_MainReadFile(readinfo_t *readinfo, const std::string &data)
             // This code is more hackitude -- to be fixed when the whole
             // parsing code gets the overhaul it needs.
 
-            if (epi::STR_PrefixCaseCmp(memfileptr, "#CLEARALL") == 0)
+            if (epi::StringPrefixCaseCompareASCII(std::string_view(memfileptr, 9), "#CLEARALL") == 0)
             {
                 if (!firstgo)
                     DDF_Error("#CLEARALL cannot be used inside an entry !\n");
@@ -818,7 +818,7 @@ void DDF_MainReadFile(readinfo_t *readinfo, const std::string &data)
                 continue;
             }
 
-            if (epi::STR_PrefixCaseCmp(memfileptr, "#VERSION") == 0)
+            if (epi::StringPrefixCaseCompareASCII(std::string_view(memfileptr, 8), "#VERSION") == 0)
             {
                 // just ignore it
                 memfileptr += l_len;
@@ -864,7 +864,7 @@ void DDF_MainReadFile(readinfo_t *readinfo, const std::string &data)
             break;
 
         case tag_stop:
-            if (epi::STR_CaseCmp(token.c_str(), readinfo->tag) != 0)
+            if (epi::StringCaseCompareASCII(token, readinfo->tag) != 0)
                 DDF_Error("Start tag <%s> expected, found <%s>!\n", readinfo->tag, token.c_str());
 
             status = waiting_newdef;
@@ -1089,13 +1089,13 @@ void DDF_MainGetBoolean(const char *info, void *storage)
 
     SYS_ASSERT(info && storage);
 
-    if ((epi::STR_CaseCmp(info, "TRUE") == 0) || (epi::STR_CaseCmp(info, "1") == 0))
+    if ((epi::StringCaseCompareASCII(info, "TRUE") == 0) || (epi::StringCaseCompareASCII(info, "1") == 0))
     {
         *dest = true;
         return;
     }
 
-    if ((epi::STR_CaseCmp(info, "FALSE") == 0) || (epi::STR_CaseCmp(info, "0") == 0))
+    if ((epi::StringCaseCompareASCII(info, "FALSE") == 0) || (epi::StringCaseCompareASCII(info, "0") == 0))
     {
         *dest = false;
         return;
@@ -1355,7 +1355,7 @@ void DDF_MainGetTime(const char *info, void *storage)
     SYS_ASSERT(info && storage);
 
     // -ES- 1999/09/14 MAXT means that time should be maximal.
-    if (epi::STR_CaseCmp(info, "maxt") == 0)
+    if (epi::StringCaseCompareASCII(info, "maxt") == 0)
     {
         *dest = INT_MAX; // -ACB- 1999/09/22 Standards, Please.
         return;
@@ -2154,7 +2154,7 @@ ddf_type_e DDF_FilenameToType(const std::string &path)
 {
     std::string check = epi::FS_GetExtension(path);
 
-    if (epi::STR_CaseCmp(check, ".rts") == 0)
+    if (epi::StringCaseCompareASCII(check, ".rts") == 0)
         return DDF_RadScript;
 
     check = epi::FS_GetFilename(path);
@@ -2162,8 +2162,8 @@ ddf_type_e DDF_FilenameToType(const std::string &path)
     std::string stem = epi::FS_GetStem(check);
 
     for (size_t i = 0; i < DDF_NUM_TYPES; i++)
-        if (epi::STR_CaseCmp(check, ddf_readers[i].pack_name) == 0 ||
-            epi::STR_CaseCmp(stem, ddf_readers[i].lump_name) == 0)
+        if (epi::StringCaseCompareASCII(check, ddf_readers[i].pack_name) == 0 ||
+            epi::StringCaseCompareASCII(stem, ddf_readers[i].lump_name) == 0)
             return ddf_readers[i].type;
 
     return DDF_UNKNOWN;

@@ -22,35 +22,14 @@
 namespace epi
 {
 
-int STR_Cmp(const char *A, const char *B);
-int STR_Cmp(const char *A, const std::string &B);
-int STR_Cmp(const std::string &A, const char *B);
-int STR_Cmp(const std::string &A, const std::string &B);
+int StringCompare(std::string_view A, std::string_view B);
+int StringCompareMax(std::string_view A, std::string_view B, size_t n);
+int StringPrefixCompare(std::string_view A, std::string_view B);
 
-int STR_CmpMax(const char *A, const char *B, size_t n);
-int STR_CmpMax(const char *A, const std::string &B, size_t n);
-int STR_CmpMax(const std::string &A, const char *B, size_t n);
-int STR_CmpMax(const std::string &A, const std::string &B, size_t n);
+int StringCaseCompareASCII(std::string_view A, std::string_view B);
+int StringCaseCompareMaxASCII(std::string_view A, std::string_view B, size_t n);
+int StringPrefixCaseCompareASCII(std::string_view A, std::string_view B);
 
-int STR_CaseCmp(const char *A, const char *B);
-int STR_CaseCmp(const char *A, const std::string &B);
-int STR_CaseCmp(const std::string &A, const char *B);
-int STR_CaseCmp(const std::string &A, const std::string &B);
-
-int STR_CaseCmpMax(const char *A, const char *B, size_t n);
-int STR_CaseCmpMax(const char *A, const std::string &B, size_t n);
-int STR_CaseCmpMax(const std::string &A, const char *B, size_t n);
-int STR_CaseCmpMax(const std::string &A, const std::string &B, size_t n);
-
-int STR_PrefixCmp(const char *A, const char *B);
-int STR_PrefixCmp(const char *A, const std::string &B);
-int STR_PrefixCmp(const std::string &A, const char *B);
-int STR_PrefixCmp(const std::string &A, const std::string &B);
-
-int STR_PrefixCaseCmp(const char *A, const char *B);
-int STR_PrefixCaseCmp(const char *A, const std::string &B);
-int STR_PrefixCaseCmp(const std::string &A, const char *B);
-int STR_PrefixCaseCmp(const std::string &A, const std::string &B);
 
 } // namespace epi
 

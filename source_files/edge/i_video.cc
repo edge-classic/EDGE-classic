@@ -135,7 +135,7 @@ void I_StartupGraphics(void)
     if (driver.empty())
         driver = "default";
 
-    if (epi::STR_CaseCmp(driver, "default") != 0)
+    if (epi::StringCaseCompareASCII(driver, "default") != 0)
     {
         SDL_setenv("SDL_VIDEODRIVER", driver.c_str(), 1);
     }

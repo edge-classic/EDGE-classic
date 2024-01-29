@@ -419,7 +419,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
         do_whiten = true;
     }
 
-    if (epi::STR_CaseCmp(image->name, "FONT_DUMMY_IMAGE") == 0)
+    if (epi::StringCaseCompareASCII(image->name, "FONT_DUMMY_IMAGE") == 0)
     {
         if (cur_font->def->type == FNTYP_TrueType)
         {
@@ -501,7 +501,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
         HUD_CalcScrollTexCoords(sx, sy, &tx1, &ty1, &tx2, &ty2);
     }
 
-    if (epi::STR_CaseCmp(image->name, hud_overlays.at(r_overlay.d)) == 0)
+    if (epi::StringCaseCompareASCII(image->name, hud_overlays.at(r_overlay.d)) == 0)
     {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -995,7 +995,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
     float w, h;
     float tx1, tx2, ty1, ty2;
 
-    if (epi::STR_CaseCmp(img->name, "FONT_DUMMY_IMAGE") == 0)
+    if (epi::StringCaseCompareASCII(img->name, "FONT_DUMMY_IMAGE") == 0)
     {
         if (cur_font->def->type == FNTYP_TrueType)
         {

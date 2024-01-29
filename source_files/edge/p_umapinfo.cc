@@ -378,16 +378,16 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         if (tok == epi::kTokenEOF || tok == epi::kTokenError || value == "}")
             I_Error("Malformed UMAPINFO lump: missing value\n");
 
-        if (epi::STR_CaseCmp(key, "levelname") == 0)
+        if (epi::StringCaseCompareASCII(key, "levelname") == 0)
         {
             if (val->levelname)
                 free(val->levelname);
             val->levelname = (char *)calloc(value.size() + 1, sizeof(char));
             Z_StrNCpy(val->levelname, value.c_str(), value.size());
         }
-        else if (epi::STR_CaseCmp(key, "label") == 0)
+        else if (epi::StringCaseCompareASCII(key, "label") == 0)
         {
-            if (epi::STR_CaseCmp(value, "clear") == 0)
+            if (epi::StringCaseCompareASCII(value, "clear") == 0)
             {
                 if (val->label)
                     free(val->label);
@@ -402,83 +402,83 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 Z_StrNCpy(val->label, value.c_str(), value.size());
             }
         }
-        else if (epi::STR_CaseCmp(key, "next") == 0)
+        else if (epi::StringCaseCompareASCII(key, "next") == 0)
         {
             Z_Clear(val->nextmap, char, 9);
             if (value.size() > 8)
                 I_Error("UMAPINFO: Mapname for \"next\" over 8 characters!\n");
             Z_StrNCpy(val->nextmap, value.data(), 8);
         }
-        else if (epi::STR_CaseCmp(key, "nextsecret") == 0)
+        else if (epi::StringCaseCompareASCII(key, "nextsecret") == 0)
         {
             Z_Clear(val->nextsecret, char, 9);
             if (value.size() > 8)
                 I_Error("UMAPINFO: Mapname for \"nextsecret\" over 8 characters!\n");
             Z_StrNCpy(val->nextsecret, value.data(), 8);
         }
-        else if (epi::STR_CaseCmp(key, "levelpic") == 0)
+        else if (epi::StringCaseCompareASCII(key, "levelpic") == 0)
         {
             Z_Clear(val->levelpic, char, 9);
             if (value.size() > 8)
                 I_Error("UMAPINFO: Entry for \"levelpic\" over 8 characters!\n");
             Z_StrNCpy(val->levelpic, value.data(), 8);
         }
-        else if (epi::STR_CaseCmp(key, "skytexture") == 0)
+        else if (epi::StringCaseCompareASCII(key, "skytexture") == 0)
         {
             Z_Clear(val->skytexture, char, 9);
             if (value.size() > 8)
                 I_Error("UMAPINFO: Entry for \"skytexture\" over 8 characters!\n");
             Z_StrNCpy(val->skytexture, value.data(), 8);
         }
-        else if (epi::STR_CaseCmp(key, "music") == 0)
+        else if (epi::StringCaseCompareASCII(key, "music") == 0)
         {
             Z_Clear(val->music, char, 9);
             if (value.size() > 8)
                 I_Error("UMAPINFO: Entry for \"music\" over 8 characters!\n");
             Z_StrNCpy(val->music, value.data(), 8);
         }
-        else if (epi::STR_CaseCmp(key, "endpic") == 0)
+        else if (epi::StringCaseCompareASCII(key, "endpic") == 0)
         {
             Z_Clear(val->endpic, char, 9);
             if (value.size() > 8)
                 I_Error("UMAPINFO: Entry for \"endpic\" over 8 characters!\n");
             Z_StrNCpy(val->endpic, value.data(), 8);
         }
-        else if (epi::STR_CaseCmp(key, "endcast") == 0)
+        else if (epi::StringCaseCompareASCII(key, "endcast") == 0)
         {
             val->docast = epi::LexBoolean(value);
         }
-        else if (epi::STR_CaseCmp(key, "endbunny") == 0)
+        else if (epi::StringCaseCompareASCII(key, "endbunny") == 0)
         {
             val->dobunny = epi::LexBoolean(value);
         }
-        else if (epi::STR_CaseCmp(key, "endgame") == 0)
+        else if (epi::StringCaseCompareASCII(key, "endgame") == 0)
         {
             val->endgame = epi::LexBoolean(value);
         }
-        else if (epi::STR_CaseCmp(key, "exitpic") == 0)
+        else if (epi::StringCaseCompareASCII(key, "exitpic") == 0)
         {
             Z_Clear(val->exitpic, char, 9);
             if (value.size() > 8)
                 I_Error("UMAPINFO: Entry for \"exitpic\" over 8 characters!\n");
             Z_StrNCpy(val->exitpic, value.data(), 8);
         }
-        else if (epi::STR_CaseCmp(key, "enterpic") == 0)
+        else if (epi::StringCaseCompareASCII(key, "enterpic") == 0)
         {
             Z_Clear(val->enterpic, char, 9);
             if (value.size() > 8)
                 I_Error("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
             Z_StrNCpy(val->enterpic, value.data(), 8);
         }
-        else if (epi::STR_CaseCmp(key, "nointermission") == 0)
+        else if (epi::StringCaseCompareASCII(key, "nointermission") == 0)
         {
             val->nointermission = epi::LexBoolean(value);
         }
-        else if (epi::STR_CaseCmp(key, "partime") == 0)
+        else if (epi::StringCaseCompareASCII(key, "partime") == 0)
         {
             val->partime = 35 * epi::LexInteger(value);
         }
-        else if (epi::STR_CaseCmp(key, "intertext") == 0)
+        else if (epi::StringCaseCompareASCII(key, "intertext") == 0)
         {
             std::string it_builder = value;
             while (lex.Match(","))
@@ -492,7 +492,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
             val->intertext = (char *)calloc(it_builder.size() + 1, sizeof(char));
             Z_StrNCpy(val->intertext, it_builder.c_str(), it_builder.size());
         }
-        else if (epi::STR_CaseCmp(key, "intertextsecret") == 0)
+        else if (epi::StringCaseCompareASCII(key, "intertextsecret") == 0)
         {
             std::string it_builder = value;
             while (lex.Match(","))
@@ -506,23 +506,23 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
             val->intertextsecret = (char *)calloc(it_builder.size() + 1, sizeof(char));
             Z_StrNCpy(val->intertextsecret, it_builder.c_str(), it_builder.size());
         }
-        else if (epi::STR_CaseCmp(key, "interbackdrop") == 0)
+        else if (epi::StringCaseCompareASCII(key, "interbackdrop") == 0)
         {
             Z_Clear(val->interbackdrop, char, 9);
             if (value.size() > 8)
                 I_Error("UMAPINFO: Entry for \"interbackdrop\" over 8 characters!\n");
             Z_StrNCpy(val->interbackdrop, value.data(), 8);
         }
-        else if (epi::STR_CaseCmp(key, "intermusic") == 0)
+        else if (epi::StringCaseCompareASCII(key, "intermusic") == 0)
         {
             Z_Clear(val->intermusic, char, 9);
             if (value.size() > 8)
                 I_Error("UMAPINFO: Entry for \"intermusic\" over 8 characters!\n");
             Z_StrNCpy(val->intermusic, value.data(), 8);
         }
-        else if (epi::STR_CaseCmp(key, "episode") == 0)
+        else if (epi::StringCaseCompareASCII(key, "episode") == 0)
         {
-            if (epi::STR_CaseCmp(value, "clear") == 0)
+            if (epi::StringCaseCompareASCII(value, "clear") == 0)
             {
                 // This should leave the initial [EDGE] episode and nothing else
                 // Since 'clear' is supposed to come before any custom definitions
@@ -530,7 +530,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 for (auto iter = gamedefs.begin()+1; iter != gamedefs.end();)
                 {
                     gamedef_c *game = *iter;
-                    if (game->firstmap.empty() && epi::STR_CaseCmp(game->name, "UMAPINFO_TEMPLATE") != 0)
+                    if (game->firstmap.empty() && epi::StringCaseCompareASCII(game->name, "UMAPINFO_TEMPLATE") != 0)
                     {
                         delete game;
                         game = nullptr;
@@ -546,8 +546,8 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 // Check for episode to replace
                 for (auto game : gamedefs)
                 {
-                    if (epi::STR_CaseCmp(game->firstmap, val->mapname) == 0 &&
-                        epi::STR_CaseCmp(game->name, "UMAPINFO_TEMPLATE") != 0)
+                    if (epi::StringCaseCompareASCII(game->firstmap, val->mapname) == 0 &&
+                        epi::StringCaseCompareASCII(game->name, "UMAPINFO_TEMPLATE") != 0)
                     {
                         new_epi = game;
                         break;
@@ -559,7 +559,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     gamedef_c *um_template = nullptr;
                     for (auto game : gamedefs)
                     {
-                        if (epi::STR_CaseCmp(game->name, "UMAPINFO_TEMPLATE") == 0)
+                        if (epi::StringCaseCompareASCII(game->name, "UMAPINFO_TEMPLATE") == 0)
                         {
                             um_template = game;
                             break;
@@ -589,11 +589,11 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 new_epi->name        = epi::StringFormat("UMAPINFO_%s\n", val->mapname); // Internal
             }
         }
-        else if (epi::STR_CaseCmp(key, "bossaction") == 0)
+        else if (epi::StringCaseCompareASCII(key, "bossaction") == 0)
         {
             int special = 0;
             int tag     = 0;
-            if (epi::STR_CaseCmp(value, "clear") == 0)
+            if (epi::StringCaseCompareASCII(value, "clear") == 0)
             {
                 special = tag = -1;
                 if (val->bossactions)
@@ -607,7 +607,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 bool found_actor = false;
                 for (auto actor : ActorNames)
                 {
-                    if (epi::STR_CaseCmp(actor.first, value.c_str()) == 0)
+                    if (epi::StringCaseCompareASCII(actor.first, value.c_str()) == 0)
                     {
                         found_actor = true;
                         actor_num   = actor.second;
@@ -643,7 +643,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 }
             }
         }
-        else if (epi::STR_CaseCmp(key, "author") == 0)
+        else if (epi::StringCaseCompareASCII(key, "author") == 0)
         {
             if (val->authorname)
                 free(val->authorname);
@@ -689,7 +689,7 @@ void Parse_UMAPINFO(const std::string &buffer)
         if (tok == epi::kTokenEOF)
             break;
 
-        if (tok != epi::kTokenIdentifier || epi::STR_CaseCmp(section, "MAP") != 0)
+        if (tok != epi::kTokenIdentifier || epi::StringCaseCompareASCII(section, "MAP") != 0)
             I_Error("Malformed UMAPINFO lump.\n");
 
         tok = lex.Next(section);
@@ -709,7 +709,7 @@ void Parse_UMAPINFO(const std::string &buffer)
         // Does this map entry already exist? If yes, replace it.
         for (i = 0; i < Maps.mapcount; i++)
         {
-            if (epi::STR_CaseCmp(parsed.mapname, Maps.maps[i].mapname) == 0)
+            if (epi::StringCaseCompareASCII(parsed.mapname, Maps.maps[i].mapname) == 0)
             {
                 FreeMap(&Maps.maps[i]);
                 Maps.maps[i] = parsed;

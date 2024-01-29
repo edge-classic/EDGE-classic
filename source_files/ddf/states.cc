@@ -68,15 +68,15 @@ static int last_model  = -1;
 
 static int AddSpriteName(const char *name)
 {
-    if (epi::STR_CaseCmp(name, "NULL") == 0)
+    if (epi::StringCaseCompareASCII(name, "NULL") == 0)
         return SPR_NULL;
 
-    if (last_sprite >= 0 && epi::STR_CaseCmp(ddf_sprite_names[last_sprite], name) == 0)
+    if (last_sprite >= 0 && epi::StringCaseCompareASCII(ddf_sprite_names[last_sprite], name) == 0)
         return last_sprite;
 
     // look backwards, assuming a recent sprite is more likely
     for (int i = (int)ddf_sprite_names.size() - 1; i > SPR_NULL; i--)
-        if (epi::STR_CaseCmp(ddf_sprite_names[i], name) == 0)
+        if (epi::StringCaseCompareASCII(ddf_sprite_names[i], name) == 0)
             return ((last_sprite = i));
 
     last_sprite = (int)ddf_sprite_names.size();
@@ -89,15 +89,15 @@ static int AddSpriteName(const char *name)
 
 static int AddModelName(const char *name)
 {
-    if (epi::STR_CaseCmp(name, "NULL") == 0)
+    if (epi::StringCaseCompareASCII(name, "NULL") == 0)
         return SPR_NULL;
 
-    if (last_model >= 0 && epi::STR_CaseCmp(ddf_model_names[last_model], name) == 0)
+    if (last_model >= 0 && epi::StringCaseCompareASCII(ddf_model_names[last_model], name) == 0)
         return last_model;
 
     // look backwards, assuming a recent model is more likely
     for (int i = (int)ddf_model_names.size() - 1; i > SPR_NULL; i--)
-        if (epi::STR_CaseCmp(ddf_model_names[i], name) == 0)
+        if (epi::StringCaseCompareASCII(ddf_model_names[i], name) == 0)
             return ((last_model = i));
 
     last_model = (int)ddf_model_names.size();
@@ -452,11 +452,11 @@ void DDF_StateReadState(const char *info, const char *label, state_group_t &grou
     //------------STATE BRIGHTNESS LEVEL----------------
     //--------------------------------------------------
 
-    if (epi::STR_CaseCmp(stateinfo[3].c_str(), "NORMAL") == 0)
+    if (epi::StringCaseCompareASCII(stateinfo[3], "NORMAL") == 0)
         cur->bright = 0;
-    else if (epi::STR_CaseCmp(stateinfo[3].c_str(), "BRIGHT") == 0)
+    else if (epi::StringCaseCompareASCII(stateinfo[3], "BRIGHT") == 0)
         cur->bright = 255;
-    else if (epi::STR_PrefixCaseCmp(stateinfo[3].c_str(), "LIT") == 0)
+    else if (epi::StringPrefixCaseCompareASCII(stateinfo[3], "LIT") == 0)
     {
         cur->bright = strtol(stateinfo[3].c_str() + 3, NULL, 10);
         cur->bright = CLAMP(0, cur->bright * 255 / 99, 255);
@@ -506,7 +506,7 @@ void DDF_StateReadState(const char *info, const char *label, state_group_t &grou
 bool DDF_MainParseState(uint8_t *object, state_group_t &group, const char *field, const char *contents, int index,
                         bool is_last, bool is_weapon, const state_starter_t *starters, const actioncode_t *actions)
 {
-    if (epi::STR_PrefixCaseCmp(field, "STATES(") != 0)
+    if (epi::StringPrefixCaseCompareASCII(field, "STATES(") != 0)
         return false;
 
     // extract label name

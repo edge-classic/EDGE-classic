@@ -523,7 +523,7 @@ bool SR_MobjGetType(void *storage, int index, void *extra)
     }
 
     // special handling for projectiles (attacks)
-    if (epi::STR_PrefixCaseCmp(name, "atk:") == 0)
+    if (epi::StringPrefixCaseCompareASCII(name, "atk:") == 0)
     {
         const atkdef_c *atk = atkdefs.Lookup(name + 4);
 

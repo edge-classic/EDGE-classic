@@ -377,7 +377,7 @@ bool FS_ReadDir(std::vector<dir_entry_c> &fsd, std::string &dir, const char *mas
 
         // I though fnmatch should handle this, but ran into case sensitivity issues when 
         // using WSL for some reason - Dasho
-        if (mask_ext != ".*" && epi::STR_CaseCmp(mask_ext, epi::FS_GetExtension(filename)) != 0)
+        if (mask_ext != ".*" && epi::StringCaseCompareASCII(mask_ext, epi::FS_GetExtension(filename)) != 0)
             continue;
 
 		struct stat finfo;

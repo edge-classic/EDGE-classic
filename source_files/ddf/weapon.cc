@@ -511,11 +511,11 @@ static void WeaponFinishEntry(void)
     // Check MBF21 weapon flags that don't correlate to DDFWEAP flags
     for (auto flag : flag_tests)
     {
-        if (epi::STR_CaseCmp(flag, "NOTHRUST") == 0)
+        if (epi::StringCaseCompareASCII(flag, "NOTHRUST") == 0)
             dynamic_weapon->nothrust = true;
-        else if (epi::STR_CaseCmp(flag, "DANGEROUS") == 0)
+        else if (epi::StringCaseCompareASCII(flag, "DANGEROUS") == 0)
             dynamic_weapon->dangerous = true;
-        else if (epi::STR_CaseCmp(flag, "FLEEMELEE") == 0)
+        else if (epi::StringCaseCompareASCII(flag, "FLEEMELEE") == 0)
             continue; // We don't implement FLEEMELEE, but don't present the
                       // user with an error as it's a valid MBF21 flag
         else

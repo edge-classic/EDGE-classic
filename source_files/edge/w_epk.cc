@@ -72,13 +72,13 @@ class pack_entry_c
 
     bool operator==(const std::string &other) const
     {
-        return epi::STR_CaseCmp(name, other.c_str()) == 0;
+        return epi::StringCaseCompareASCII(name, other) == 0;
     }
 
     bool HasExtension(const char *match) const
     {
         std::string ext = epi::FS_GetExtension(name);
-        return epi::STR_CaseCmp(ext, match) == 0;
+        return epi::StringCaseCompareASCII(ext, match) == 0;
     }
 };
 
@@ -120,7 +120,7 @@ class pack_dir_c
 
     bool operator==(const std::string &other) const
     {
-        return epi::STR_CaseCmp(name, other) == 0;
+        return epi::StringCaseCompareASCII(name, other) == 0;
     }
 };
 
@@ -737,9 +737,9 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
         {
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
             std::string ent_fn = epi::FS_GetFilename(ent.name);
-            if (epi::STR_CaseCmp(ent_fn, "coal_hud.ec") == 0 || epi::STR_CaseCmp(epi::FS_GetStem(ent_fn), "COALHUDS") == 0)
+            if (epi::StringCaseCompareASCII(ent_fn, "coal_hud.ec") == 0 || epi::StringCaseCompareASCII(epi::FS_GetStem(ent_fn), "COALHUDS") == 0)
             {
-                if (epi::STR_PrefixCaseCmp(bare_filename, "edge_defs") != 0)
+                if (epi::StringPrefixCaseCompareASCII(bare_filename, "edge_defs") != 0)
                 {
                     VM_SetCoalDetected(true);
                 }
@@ -799,9 +799,9 @@ static void ProcessLuaHUDInPack(pack_file_c *pack)
         for (size_t entry = 0; entry < pack->dirs[dir].entries.size(); entry++)
         {
             pack_entry_c &ent = pack->dirs[dir].entries[entry];
-            if (epi::STR_CaseCmp(epi::FS_GetFilename(ent.name), "edge_hud.lua") == 0)
+            if (epi::StringCaseCompareASCII(epi::FS_GetFilename(ent.name), "edge_hud.lua") == 0)
             {
-                if (epi::STR_PrefixCaseCmp(bare_filename, "edge_defs") != 0)
+                if (epi::StringPrefixCaseCompareASCII(bare_filename, "edge_defs") != 0)
                 {
                     LUA_SetLuaHudDetected(true);
                 }
@@ -847,7 +847,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
                 // Check DDFIMAGE definitions to see if this is replacing a lump type def
                 for (auto img : imagedefs)
                 {
-                    if (img->type == IMGDT_Lump && epi::STR_CaseCmp(img->info, texname) == 0 &&
+                    if (img->type == IMGDT_Lump && epi::StringCaseCompareASCII(img->info, texname) == 0 &&
                         W_CheckFileNumForName(texname.c_str()) < pack_index)
                     {
                         img->type = IMGDT_Package;
@@ -893,7 +893,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
                 // Assume that same stem name is meant to replace an identically named lump entry
                 if (!sfx->lump_name.empty())
                 {
-                    if (epi::STR_CaseCmp(epi::FS_GetStem(entry.name), sfx->lump_name) == 0 &&
+                    if (epi::StringCaseCompareASCII(epi::FS_GetStem(entry.name), sfx->lump_name) == 0 &&
                         W_CheckFileNumForName(sfx->lump_name.c_str()) < pack_index)
                     {
                         sfx->pack_name = entry.packpath;
@@ -914,7 +914,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
                 if (epi::FS_GetExtension(song->info).empty())
                 {
                     if (song->infotype == MUSINF_LUMP &&
-                        epi::STR_CaseCmp(epi::FS_GetStem(entry.name), song->info) == 0 &&
+                        epi::StringCaseCompareASCII(epi::FS_GetStem(entry.name), song->info) == 0 &&
                         W_CheckFileNumForName(song->info.c_str()) < pack_index)
                     {
                         song->info     = entry.packpath;
@@ -938,7 +938,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
             for (auto colm : colourmaps)
             {
                 if (!colm->lump_name.empty() &&
-                    epi::STR_CaseCmp(colm->lump_name, epi::FS_GetStem(entry.name)) == 0 &&
+                    epi::StringCaseCompareASCII(colm->lump_name, epi::FS_GetStem(entry.name)) == 0 &&
                     W_CheckFileNumForName(colm->lump_name.c_str()) < pack_index)
                 {
                     colm->lump_name.clear();
@@ -1076,7 +1076,7 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
     {
         for (auto file : pack->dirs[0].entries)
         {
-            if (epi::STR_CaseCmp(file.name, find_name) == 0)
+            if (epi::StringCaseCompareASCII(file.name, find_name) == 0)
                 return true;
         }
         return false;
@@ -1088,7 +1088,7 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
         auto results = pack->search_files.equal_range(find_stem);
         for (auto file = results.first; file != results.second; ++file)
         {
-            if (epi::STR_CaseCmp(find_name, epi::FS_GetFilename(file->second)) == 0)
+            if (epi::StringCaseCompareASCII(find_name, epi::FS_GetFilename(file->second)) == 0)
                 return true;
         }
         return false;
@@ -1143,7 +1143,7 @@ epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name)
     {
         for (auto file : pack->dirs[0].entries)
         {
-            if (epi::STR_CaseCmp(file.packpath, open_name) == 0)
+            if (epi::StringCaseCompareASCII(file.packpath, open_name) == 0)
                 return pack->OpenFileByName(open_name);
         }
         return nullptr;
@@ -1155,7 +1155,7 @@ epi::file_c *Pack_OpenFile(pack_file_c *pack, const std::string &name)
         auto results = pack->search_files.equal_range(open_stem);
         for (auto file = results.first; file != results.second; ++file)
         {
-            if (epi::STR_CaseCmp(open_name, epi::FS_GetFilename(file->second)) == 0)
+            if (epi::StringCaseCompareASCII(open_name, epi::FS_GetFilename(file->second)) == 0)
                 return pack->OpenFileByName(file->second);
         }
         return nullptr;
@@ -1189,7 +1189,7 @@ epi::file_c *Pack_OpenMatch(pack_file_c *pack, const std::string &name, const st
         for (auto ext : extensions)
         {
             epi::FS_ReplaceExtension(stem_match, ext);
-            if (epi::STR_CaseCmp(stem_match, epi::FS_GetFilename(file->second)) == 0)
+            if (epi::StringCaseCompareASCII(stem_match, epi::FS_GetFilename(file->second)) == 0)
                 return pack->OpenFileByName(file->second);
         }
     }
@@ -1225,7 +1225,7 @@ std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)
                 // Don't add things already defined in DDFIMAGE
                 for (auto img : imagedefs)
                 {
-                    if (epi::STR_CaseCmp(img->name, texname) == 0)
+                    if (epi::StringCaseCompareASCII(img->name, texname) == 0)
                     {
                         addme = false;
                         break;

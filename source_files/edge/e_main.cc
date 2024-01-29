@@ -1189,7 +1189,7 @@ static void IdentifyVersion(void)
                     argv::list.erase(argv::list.begin()+p--);
                 }
             }
-            else if (epi::STR_CaseCmp(epi::FS_GetExtension(dnd), ".epk") == 0)
+            else if (epi::StringCaseCompareASCII(epi::FS_GetExtension(dnd), ".epk") == 0)
             {
                 test_index = CheckPackForGameFiles(dnd, FLKIND_IPK);
                 if (test_index >= 0)
@@ -1205,7 +1205,7 @@ static void IdentifyVersion(void)
                     argv::list.erase(argv::list.begin()+p--);
                 }  
             }
-            else if (epi::STR_CaseCmp(epi::FS_GetExtension(dnd), ".wad") == 0)
+            else if (epi::StringCaseCompareASCII(epi::FS_GetExtension(dnd), ".wad") == 0)
             {
                 epi::file_c *game_test =
                     epi::FS_Open(dnd, epi::kFileAccessRead | epi::kFileAccessBinary);
@@ -1343,7 +1343,7 @@ static void IdentifyVersion(void)
 
         int test_score = -1;
 
-        if (epi::STR_CaseCmp(epi::FS_GetExtension(iwad_file), ".wad") == 0)
+        if (epi::StringCaseCompareASCII(epi::FS_GetExtension(iwad_file), ".wad") == 0)
         {
             epi::file_c *game_test = epi::FS_Open(iwad_file, epi::kFileAccessRead | epi::kFileAccessBinary);
             test_score              = W_CheckForUniqueLumps(game_test);
@@ -1556,7 +1556,7 @@ static void IdentifyVersion(void)
 // Add game-specific base EPKs (widepix, skyboxes, etc) - Dasho
 static void Add_Base(void)
 {
-    if (epi::STR_CaseCmp("CUSTOM", game_base) == 0)
+    if (epi::StringCaseCompareASCII("CUSTOM", game_base) == 0)
         return; // Standalone EDGE IWADs/EPKs should already contain their necessary resources and definitions - Dasho
     std::string base_path = epi::FS_PathAppend(game_dir, "edge_base");
     std::string base_wad  = game_base;
@@ -1712,7 +1712,7 @@ static void AddCommandLineFiles(void)
 
     p = argv::Find("file");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::STR_Cmp(argv::list[p], "-file") == 0))
+    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::StringCompare(argv::list[p], "-file") == 0))
     {
         // the parms after p are wadfile/lump names,
         // go until end of parms or another '-' preceded parm
@@ -1726,7 +1726,7 @@ static void AddCommandLineFiles(void)
 
     p = argv::Find("script");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::STR_Cmp(argv::list[p], "-script") == 0))
+    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::StringCompare(argv::list[p], "-script") == 0))
     {
         // the parms after p are script filenames,
         // go until end of parms or another '-' preceded parm
@@ -1734,9 +1734,9 @@ static void AddCommandLineFiles(void)
         {
             std::string ext = epi::FS_GetExtension(argv::list[p]);
             // sanity check...
-            if (epi::STR_CaseCmp(ext, ".wad") == 0 || epi::STR_CaseCmp(ext, ".pk3") == 0 || epi::STR_CaseCmp(ext, ".zip") == 0 ||
-                epi::STR_CaseCmp(ext, ".epk") == 0 || epi::STR_CaseCmp(ext, ".vwad") == 0 ||
-                epi::STR_CaseCmp(ext, ".ddf") == 0 || epi::STR_CaseCmp(ext, ".deh") == 0 || epi::STR_CaseCmp(ext, ".bex") == 0)
+            if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".pk3") == 0 || epi::StringCaseCompareASCII(ext, ".zip") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".epk") == 0 || epi::StringCaseCompareASCII(ext, ".vwad") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".deh") == 0 || epi::StringCaseCompareASCII(ext, ".bex") == 0)
             {
                 I_Error("Illegal filename for -script: %s\n", argv::list[p].c_str());
             }
@@ -1752,7 +1752,7 @@ static void AddCommandLineFiles(void)
 
     p = argv::Find("deh");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::STR_Cmp(argv::list[p], "-deh") == 0))
+    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::StringCompare(argv::list[p], "-deh") == 0))
     {
         // the parms after p are Dehacked/BEX filenames,
         // go until end of parms or another '-' preceded parm
@@ -1760,9 +1760,9 @@ static void AddCommandLineFiles(void)
         {
             std::string ext = epi::FS_GetExtension(argv::list[p]);
             // sanity check...
-            if (epi::STR_CaseCmp(ext, ".wad") == 0 || epi::STR_CaseCmp(ext, ".epk") == 0 || epi::STR_CaseCmp(ext, ".pk3") == 0 ||
-                epi::STR_CaseCmp(ext, ".zip") == 0 || epi::STR_CaseCmp(ext, ".vwad") == 0 ||
-                epi::STR_CaseCmp(ext, ".ddf") == 0 || epi::STR_CaseCmp(ext, ".rts") == 0)
+            if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 || epi::StringCaseCompareASCII(ext, ".pk3") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".zip") == 0 || epi::StringCaseCompareASCII(ext, ".vwad") == 0 ||
+                epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".rts") == 0)
             {
                 I_Error("Illegal filename for -deh: %s\n", argv::list[p].c_str());
             }
@@ -1778,7 +1778,7 @@ static void AddCommandLineFiles(void)
 
     p = argv::Find("dir");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::STR_Cmp(argv::list[p], "-dir") == 0))
+    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::StringCompare(argv::list[p], "-dir") == 0))
     {
         // the parms after p are directory names,
         // go until end of parms or another '-' preceded parm

@@ -171,7 +171,7 @@ static void GetMUSINFOTracksForLevel(void)
         if (tok != epi::kTokenNumber && tok != epi::kTokenIdentifier)
             break;
         
-        if (epi::STR_CaseCmp(section, currmap->name.c_str()) != 0)
+        if (epi::StringCaseCompareASCII(section, currmap->name) != 0)
             continue;
         
         // Parse "block" for current map

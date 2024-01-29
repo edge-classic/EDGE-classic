@@ -318,7 +318,7 @@ void RAD_ClearWUDsByMap(const std::string &mapname)
 {
     for (rad_script_t *scr = r_scripts; scr; scr = scr->next)
     {
-        if (epi::STR_CaseCmp(scr->mapid, mapname) == 0)
+        if (epi::StringCaseCompareASCII(scr->mapid, mapname) == 0)
         {
             for (rts_state_t *state = scr->first_state; state; state = state->next)
             {

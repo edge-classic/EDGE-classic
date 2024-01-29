@@ -873,12 +873,12 @@ int W_CheckForUniqueLumps(epi::file_c *file)
 
         // Do not require IWAD header if loading Harmony, REKKR, BFG Edition WADs, Chex Quest or a custom standalone
         // IWAD
-        if (epi::STR_PrefixCmp(header.identification, "IWAD") != 0 &&
-            epi::STR_CaseCmp(gamecheck.unique_lumps[0], "DMENUPIC") != 0 &&
-            epi::STR_CaseCmp(gamecheck.unique_lumps[0], "REKCREDS") != 0 &&
-            epi::STR_CaseCmp(gamecheck.unique_lumps[0], "0HAWK01") != 0 &&
-            epi::STR_CaseCmp(gamecheck.unique_lumps[0], "EDGEGAME") != 0 &&
-            epi::STR_CaseCmp(gamecheck.unique_lumps[0], "ENDOOM") != 0)
+        if (epi::StringPrefixCompare(header.identification, "IWAD") != 0 &&
+            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "DMENUPIC") != 0 &&
+            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "REKCREDS") != 0 &&
+            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "0HAWK01") != 0 &&
+            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "EDGEGAME") != 0 &&
+            epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "ENDOOM") != 0)
         {
             continue;
         }
@@ -890,18 +890,18 @@ int W_CheckForUniqueLumps(epi::file_c *file)
         {
             raw_wad_entry_t &entry = raw_info[i];
 
-            if (epi::STR_CmpMax(gamecheck.unique_lumps[0], entry.name,
+            if (epi::StringCompareMax(gamecheck.unique_lumps[0], entry.name,
                              gamecheck.unique_lumps[0].size() < 8 ? gamecheck.unique_lumps[0].size() : 8) == 0)
             {
                 // EDGEGAME is the only lump needed for custom standalones
-                if (epi::STR_CaseCmp(gamecheck.unique_lumps[0], "EDGEGAME") == 0)
+                if (epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "EDGEGAME") == 0)
                 {
                     delete[] raw_info;
                     file->Seek(0, epi::file_c::SEEKPOINT_START);
                     return check;
                 }
                 // Either really smart or really dumb Chex Quest detection method
-                else if (epi::STR_CaseCmp(gamecheck.unique_lumps[0], "ENDOOM") == 0)
+                else if (epi::StringCaseCompareASCII(gamecheck.unique_lumps[0], "ENDOOM") == 0)
                 {
                     SYS_ASSERT(entry.size == 4000);
                     file->Seek(entry.pos, epi::file_c::SEEKPOINT_START);
@@ -918,7 +918,7 @@ int W_CheckForUniqueLumps(epi::file_c *file)
                 else
                     lump1_found = true;
             }
-            if (epi::STR_CmpMax(gamecheck.unique_lumps[1], entry.name,
+            if (epi::StringCompareMax(gamecheck.unique_lumps[1], entry.name,
                              gamecheck.unique_lumps[1].size() < 8 ? gamecheck.unique_lumps[1].size() : 8) == 0)
                 lump2_found = true;
         }
@@ -965,7 +965,7 @@ void ProcessFixersForWad(data_file_c *df)
 
     for (size_t i = 0; i < fixdefs.size(); i++)
     {
-        if (epi::STR_CaseCmp(fix_checker, fixdefs[i]->md5_string) == 0)
+        if (epi::StringCaseCompareASCII(fix_checker, fixdefs[i]->md5_string) == 0)
         {
             std::string fix_path = epi::FS_PathAppend(game_dir, "edge_fixes");
             fix_path = epi::FS_PathAppend(fix_path, fix_checker.append(".epk"));
@@ -1156,7 +1156,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
         raw_wad_entry_t &entry = raw_info[i];
 
         bool allow_ddf =
-            (df->kind == FLKIND_EWad || (df->kind == FLKIND_IWad && epi::STR_Cmp(game_base, "CUSTOM") == 0) ||
+            (df->kind == FLKIND_EWad || (df->kind == FLKIND_IWad && epi::StringCompare(game_base, "CUSTOM") == 0) ||
              df->kind == FLKIND_PWad || df->kind == FLKIND_PackWAD || df->kind == FLKIND_IPK ||
              df->kind == FLKIND_IFolder);
 
@@ -1313,7 +1313,7 @@ void W_ReadUMAPINFOLumps(void)
             std::string mapname = Maps.maps[i].mapname;
             epi::StringUpperASCII(mapname);
             // Check that the name adheres to either EXMX or MAPXX format per the standard
-            if (epi::STR_PrefixCaseCmp(mapname, "MAP") == 0)
+            if (epi::StringPrefixCaseCompareASCII(mapname, "MAP") == 0)
             {
                 for (auto c : mapname.substr(3))
                 {
@@ -1397,7 +1397,7 @@ void W_ReadUMAPINFOLumps(void)
 
             if (Maps.maps[i].intertext)
             {
-                if (!epi::STR_CaseCmp(temp_level->nextmapname.c_str(), "MAP07"))
+                if (!epi::StringCaseCompareASCII(temp_level->nextmapname, "MAP07"))
                 {
                     // Clear out some of our defaults on certain maps
                     mapdef_c *conflict_level = mapdefs.Lookup("MAP07");
@@ -1407,7 +1407,7 @@ void W_ReadUMAPINFOLumps(void)
                         conflict_level->f_pre.text_flat.clear();
                     }
                 }
-                if (!epi::STR_CaseCmp(temp_level->nextmapname.c_str(), "MAP21"))
+                if (!epi::StringCaseCompareASCII(temp_level->nextmapname, "MAP21"))
                 {
                     // Clear out some of our defaults on certain maps
                     mapdef_c *conflict_level = mapdefs.Lookup("MAP21");
@@ -1417,7 +1417,7 @@ void W_ReadUMAPINFOLumps(void)
                         conflict_level->f_pre.text_flat.clear();
                     }
                 }
-                if (!epi::STR_CaseCmp(temp_level->nextmapname.c_str(), "MAP31"))
+                if (!epi::StringCaseCompareASCII(temp_level->nextmapname, "MAP31"))
                 {
                     // Clear out some of our defaults on certain maps
                     mapdef_c *conflict_level = mapdefs.Lookup("MAP31");
@@ -1427,7 +1427,7 @@ void W_ReadUMAPINFOLumps(void)
                         conflict_level->f_pre.text_flat.clear();
                     }
                 }
-                if (!epi::STR_CaseCmp(temp_level->nextmapname.c_str(), "MAP32"))
+                if (!epi::StringCaseCompareASCII(temp_level->nextmapname, "MAP32"))
                 {
                     // Clear out some of our defaults on certain maps
                     mapdef_c *conflict_level = mapdefs.Lookup("MAP32");
@@ -1438,7 +1438,7 @@ void W_ReadUMAPINFOLumps(void)
                     }
                 }
 
-                if (epi::STR_CaseCmp(Maps.maps[i].intertext, "clear") == 0)
+                if (epi::StringCaseCompareASCII(Maps.maps[i].intertext, "clear") == 0)
                 {
                     temp_level->f_end.text.clear();
                     temp_level->f_end.text_flat.clear();
@@ -1505,28 +1505,28 @@ void W_ReadUMAPINFOLumps(void)
                 if (Maps.maps[i].intertextsecret)
                 {
 
-                    if (!epi::STR_CaseCmp(temp_level->secretmapname.c_str(), "MAP07"))
+                    if (!epi::StringCaseCompareASCII(temp_level->secretmapname, "MAP07"))
                     {
                         // Clear out some of our defaults on certain maps
                         mapdef_c *conflict_level = mapdefs.Lookup("MAP07");
                         conflict_level->f_pre.text.clear();
                         conflict_level->f_pre.text_flat.clear();
                     }
-                    if (!epi::STR_CaseCmp(temp_level->secretmapname.c_str(), "MAP21"))
+                    if (!epi::StringCaseCompareASCII(temp_level->secretmapname, "MAP21"))
                     {
                         // Clear out some of our defaults on certain maps
                         mapdef_c *conflict_level = mapdefs.Lookup("MAP21");
                         conflict_level->f_pre.text.clear();
                         conflict_level->f_pre.text_flat.clear();
                     }
-                    if (!epi::STR_CaseCmp(temp_level->secretmapname.c_str(), "MAP31"))
+                    if (!epi::StringCaseCompareASCII(temp_level->secretmapname, "MAP31"))
                     {
                         // Clear out some of our defaults on certain maps
                         mapdef_c *conflict_level = mapdefs.Lookup("MAP31");
                         conflict_level->f_pre.text.clear();
                         conflict_level->f_pre.text_flat.clear();
                     }
-                    if (!epi::STR_CaseCmp(temp_level->secretmapname.c_str(), "MAP32"))
+                    if (!epi::StringCaseCompareASCII(temp_level->secretmapname, "MAP32"))
                     {
                         // Clear out some of our defaults on certain maps
                         mapdef_c *conflict_level = mapdefs.Lookup("MAP32");
@@ -1545,7 +1545,7 @@ void W_ReadUMAPINFOLumps(void)
                         mapdefs.push_back(secret_level);
                     }
 
-                    if (epi::STR_CaseCmp(Maps.maps[i].intertextsecret, "clear") == 0)
+                    if (epi::StringCaseCompareASCII(Maps.maps[i].intertextsecret, "clear") == 0)
                     {
                         secret_level->f_pre.text.clear();
                         secret_level->f_pre.text_flat.clear();
@@ -1694,7 +1694,7 @@ void W_ReadUMAPINFOLumps(void)
             {
                 for (int g = gamedefs.size() - 1; g >= 0; g--)
                 {
-                    if (gamedefs[g]->name != "TEMPEPI" && epi::STR_CaseCmpMax(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
+                    if (gamedefs[g]->name != "TEMPEPI" && epi::StringCaseCompareMaxASCII(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
                     {
                         if (atoi(gamedefs[g]->firstmap.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
                             continue;
@@ -1728,7 +1728,7 @@ void W_ReadUMAPINFOLumps(void)
                 {
                     for (int g = gamedefs.size() - 1; g >= 0; g--)
                     {
-                        if (epi::STR_CaseCmpMax(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
+                        if (epi::StringCaseCompareMaxASCII(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
                         {
                             if (atoi(gamedefs[g]->firstmap.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
                                 continue;
@@ -1748,7 +1748,7 @@ void W_ReadUMAPINFOLumps(void)
             // Validate important things
             if (temp_level->sky.empty())
             {
-                if (epi::STR_PrefixCaseCmp(temp_level->name, "MAP") == 0)
+                if (epi::StringPrefixCaseCompareASCII(temp_level->name, "MAP") == 0)
                 {
                     int levnum = atoi(temp_level->name.substr(3).c_str());
                     if (levnum < 12)
@@ -1774,7 +1774,7 @@ void W_ReadUMAPINFOLumps(void)
             // Clear pre_text for this map if it is an episode's starting map
             for (int g = gamedefs.size() - 1; g >= 0; g--)
             {
-                if (epi::STR_CaseCmp(gamedefs[g]->firstmap, temp_level->name) == 0)
+                if (epi::StringCaseCompareASCII(gamedefs[g]->firstmap, temp_level->name) == 0)
                 {
                     temp_level->f_pre.text.clear();
                     temp_level->f_pre.text_flat.clear();

@@ -86,7 +86,7 @@ bool S_StartupFluid(void)
     bool cvar_good = false;
     for (size_t i = 0; i < available_soundfonts.size(); i++)
     {
-        if (epi::STR_CaseCmp(s_soundfont.s, available_soundfonts.at(i)) == 0)
+        if (epi::StringCaseCompareASCII(s_soundfont.s, available_soundfonts.at(i)) == 0)
         {
             cvar_good = true;
             break;

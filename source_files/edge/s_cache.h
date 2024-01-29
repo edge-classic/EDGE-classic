@@ -38,12 +38,12 @@ void S_CacheClearAll(void);
 // Must be called if the audio system parameters (sample_bits,
 // stereoness) are changed.
 
-epi::sound_data_c *S_CacheLoad(sfxdef_c *def);
+sound_data_c *S_CacheLoad(sfxdef_c *def);
 // load a sound into the cache.  If the sound has already
 // been loaded, then it is simply returned (increasing the
 // reference count).  Returns NULL if the lump doesn't exist.
 
-void S_CacheRelease(epi::sound_data_c *data);
+void S_CacheRelease(sound_data_c *data);
 // we are finished with this data.  The cache system may
 // free the memory when the number of references drops to 0.
 // Typically though the sound is kept, as it will likely

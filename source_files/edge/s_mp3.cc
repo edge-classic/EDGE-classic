@@ -80,7 +80,7 @@ class mp3player_c : public abstract_music_c
   private:
     void PostOpenInit(void);
 
-    bool StreamIntoBuffer(epi::sound_data_c *buf);
+    bool StreamIntoBuffer(sound_data_c *buf);
 };
 
 //----------------------------------------------------------------------------
@@ -124,7 +124,7 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
     }
 }
 
-bool mp3player_c::StreamIntoBuffer(epi::sound_data_c *buf)
+bool mp3player_c::StreamIntoBuffer(sound_data_c *buf)
 {
     int16_t *data_buf;
 
@@ -249,8 +249,8 @@ void mp3player_c::Ticker()
 {
     while (status == PLAYING && !var_pc_speaker_mode)
     {
-        epi::sound_data_c *buf = S_QueueGetFreeBuffer(
-            MP3_SAMPLES, (is_stereo && dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
+        sound_data_c *buf = S_QueueGetFreeBuffer(
+            MP3_SAMPLES, (is_stereo && dev_stereo) ? SBUF_Interleaved : SBUF_Mono);
 
         if (!buf)
             break;
@@ -289,7 +289,7 @@ abstract_music_c *S_PlayMP3Music(uint8_t *data, int length, bool looping)
     return player;
 }
 
-bool S_LoadMP3Sound(epi::sound_data_c *buf, const uint8_t *data, int length)
+bool S_LoadMP3Sound(sound_data_c *buf, const uint8_t *data, int length)
 {
     drmp3 mp3;
 
@@ -322,7 +322,7 @@ bool S_LoadMP3Sound(epi::sound_data_c *buf, const uint8_t *data, int length)
 
     buf->freq = mp3.sampleRate;
 
-    epi::sound_gather_c gather;
+    sound_gather_c gather;
 
     int16_t *buffer = gather.MakeChunk(framecount, is_stereo);
 

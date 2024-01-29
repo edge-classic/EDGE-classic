@@ -19,11 +19,6 @@
 #ifndef __EPI_SOUND_TYPES_H__
 #define __EPI_SOUND_TYPES_H__
 
-#include "file.h"
-
-namespace epi
-{
-
 typedef enum
 {
     FMT_Unknown = 0,
@@ -45,8 +40,6 @@ sound_format_e Sound_DetectFormat(uint8_t *data, int song_len);
 
 // determine sound format from the filename (by its extension).
 sound_format_e Sound_FilenameToFormat(const std::string &filename);
-
-} // namespace epi
 
 #endif /* __EPI_SOUND_TYPES_H__ */
 

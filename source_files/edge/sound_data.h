@@ -19,8 +19,7 @@
 #ifndef __EPI_SOUNDDATA_H__
 #define __EPI_SOUNDDATA_H__
 
-namespace epi
-{
+#include <stdint.h>
 
 typedef enum
 {
@@ -92,8 +91,6 @@ class sound_data_c
     void Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor_reverb, int ddf_reverb_type,
                     int ddf_reverb_ratio, int ddf_reverb_delay);
 };
-
-} // namespace epi
 
 #endif /* __EPI_SOUNDDATA_H__ */
 

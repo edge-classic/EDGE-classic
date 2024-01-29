@@ -81,7 +81,7 @@ class flacplayer_c : public abstract_music_c
     void PostOpenInit(void);
 
   private:
-    bool StreamIntoBuffer(epi::sound_data_c *buf);
+    bool StreamIntoBuffer(sound_data_c *buf);
 };
 
 //----------------------------------------------------------------------------
@@ -117,7 +117,7 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
     }
 }
 
-bool flacplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
+bool flacplayer_c::StreamIntoBuffer(sound_data_c *buf)
 {
     int16_t *data_buf;
 
@@ -233,8 +233,8 @@ void flacplayer_c::Ticker()
 {
     while (status == PLAYING && !var_pc_speaker_mode)
     {
-        epi::sound_data_c *buf =
-            S_QueueGetFreeBuffer(FLAC_FRAMES, (dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
+        sound_data_c *buf =
+            S_QueueGetFreeBuffer(FLAC_FRAMES, (dev_stereo) ? SBUF_Interleaved : SBUF_Mono);
 
         if (!buf)
             break;

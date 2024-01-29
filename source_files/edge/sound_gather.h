@@ -23,9 +23,6 @@
 
 #include "sound_data.h"
 
-namespace epi
-{
-
 // private stuff
 class gather_chunk_c;
 
@@ -69,8 +66,6 @@ class sound_gather_c
     void TransferMono(gather_chunk_c *chunk, sound_data_c *buf, int pos);
     void TransferStereo(gather_chunk_c *chunk, sound_data_c *buf, int pos);
 };
-
-} // namespace epi
 
 #endif /* __EPI_SOUND_GATHER_H__ */
 

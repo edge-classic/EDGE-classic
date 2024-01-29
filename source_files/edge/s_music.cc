@@ -146,23 +146,23 @@ void S_ChangeMusic(int entrynum, bool loop)
         return;
     }
 
-    epi::sound_format_e fmt = epi::FMT_Unknown;
+    sound_format_e fmt = FMT_Unknown;
 
     // IMF Music is the outlier in that it must be predefined in DDFPLAY with the appropriate
     // IMF frequency, as there is no way of determining this from file information alone
     if (play->type == MUS_IMF280 || play->type == MUS_IMF560 || play->type == MUS_IMF700)
-        fmt = epi::FMT_IMF;
+        fmt = FMT_IMF;
     else
     {
         if (play->infotype == MUSINF_LUMP)
         {
             // lumps must use auto-detection based on their contents
-            fmt = epi::Sound_DetectFormat(data, length);
+            fmt = Sound_DetectFormat(data, length);
         }
         else
         {
             // for FILE and PACK, use the file extension
-            fmt = epi::Sound_FilenameToFormat(play->info);
+            fmt = Sound_FilenameToFormat(play->info);
         }
     }
 
@@ -170,40 +170,40 @@ void S_ChangeMusic(int entrynum, bool loop)
 
     switch (fmt)
     {
-    case epi::FMT_OGG:
+    case FMT_OGG:
         delete F;
         music_player = S_PlayOGGMusic(data, length, loop);
         break;
 
-    case epi::FMT_MP3:
+    case FMT_MP3:
         delete F;
         music_player = S_PlayMP3Music(data, length, loop);
         break;
 
-    case epi::FMT_FLAC:
+    case FMT_FLAC:
         delete F;
         music_player = S_PlayFLACMusic(data, length, loop);
         break;
 
-    case epi::FMT_M4P:
+    case FMT_M4P:
         delete F;
         music_player = S_PlayM4PMusic(data, length, loop);
         break;
 
-    case epi::FMT_RAD:
+    case FMT_RAD:
         delete F;
         music_player = S_PlayRADMusic(data, length, loop);
         break;
 
     // IMF writes raw OPL registers, so must use the OPL player unconditionally
-    case epi::FMT_IMF:
+    case FMT_IMF:
         delete F;
         music_player = S_PlayOPL(data, length, loop, play->type);
         break;
 
-    case epi::FMT_MIDI:
-    case epi::FMT_MUS:
-    case epi::FMT_WAV: // RIFF MIDI has the same header as WAV
+    case FMT_MIDI:
+    case FMT_MUS:
+    case FMT_WAV: // RIFF MIDI has the same header as WAV
         delete F;
         if (var_midi_player == 0)
         {

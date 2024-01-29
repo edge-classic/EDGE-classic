@@ -25,7 +25,7 @@
 
 /* FUNCTIONS */
 
-bool S_LoadWAVSound(epi::sound_data_c *buf, uint8_t *data, int length, bool pc_speaker);
+bool S_LoadWAVSound(sound_data_c *buf, uint8_t *data, int length, bool pc_speaker);
 
 #endif /* __WAVLOADER_H__ */
 

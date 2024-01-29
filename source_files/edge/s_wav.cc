@@ -201,7 +201,7 @@ uint8_t *Convert_PCSpeaker(const uint8_t *data, int *length)
     return new_data;
 }
 
-bool S_LoadWAVSound(epi::sound_data_c *buf, uint8_t *data, int length, bool pc_speaker)
+bool S_LoadWAVSound(sound_data_c *buf, uint8_t *data, int length, bool pc_speaker)
 {
     drwav wav;
 
@@ -235,7 +235,7 @@ bool S_LoadWAVSound(epi::sound_data_c *buf, uint8_t *data, int length, bool pc_s
 
     buf->freq = wav.sampleRate;
 
-    epi::sound_gather_c gather;
+    sound_gather_c gather;
 
     int16_t *buffer = gather.MakeChunk(wav.totalPCMFrameCount, is_stereo);
 

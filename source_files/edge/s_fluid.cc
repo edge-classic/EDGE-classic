@@ -366,8 +366,8 @@ class fluid_player_c : public abstract_music_c
 
         while (status == PLAYING && !var_pc_speaker_mode)
         {
-            epi::sound_data_c *buf = S_QueueGetFreeBuffer(FLUID_NUM_SAMPLES, 
-					dev_stereo ? epi::SBUF_Interleaved : epi::SBUF_Mono);
+            sound_data_c *buf = S_QueueGetFreeBuffer(FLUID_NUM_SAMPLES, 
+					dev_stereo ? SBUF_Interleaved : SBUF_Mono);
 
             if (!buf)
                 break;
@@ -387,7 +387,7 @@ class fluid_player_c : public abstract_music_c
     }
 
   private:
-    bool StreamIntoBuffer(epi::sound_data_c *buf)
+    bool StreamIntoBuffer(sound_data_c *buf)
     {
         int16_t *data_buf;
 

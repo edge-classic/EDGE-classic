@@ -15,9 +15,6 @@ add_library(
   math_color.cc
   math_crc.cc
   math_md5.cc
-  sound_data.cc
-  sound_gather.cc
-  sound_types.cc
   str_compare.cc
   str_lexer.cc
   str_util.cc
@@ -25,7 +22,6 @@ add_library(
 
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/almostequals)
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/stb)
-target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/m4p)
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/libgrapheme)
 target_include_directories(edge_epi PRIVATE ${EDGE_LIBRARY_DIR}/superfasthash)
 if(WIN32 AND (MSVC OR CLANG))

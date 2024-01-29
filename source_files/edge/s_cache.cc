@@ -54,19 +54,19 @@
 extern int  dev_freq;
 extern bool var_pc_speaker_mode;
 
-static std::vector<epi::sound_data_c *> fx_cache;
+static std::vector<sound_data_c *> fx_cache;
 
-static void Load_Silence(epi::sound_data_c *buf)
+static void Load_Silence(sound_data_c *buf)
 {
     int length = 256;
 
     buf->freq = dev_freq;
-    buf->Allocate(length, epi::SBUF_Mono);
+    buf->Allocate(length, SBUF_Mono);
 
     memset(buf->data_L, 0, length * sizeof(int16_t));
 }
 
-static bool Load_DOOM(epi::sound_data_c *buf, const uint8_t *lump, int length)
+static bool Load_DOOM(sound_data_c *buf, const uint8_t *lump, int length)
 {
     buf->freq = lump[2] + (lump[3] << 8);
 
@@ -81,7 +81,7 @@ static bool Load_DOOM(epi::sound_data_c *buf, const uint8_t *lump, int length)
     if (length <= 0)
         return false;
 
-    buf->Allocate(length, epi::SBUF_Mono);
+    buf->Allocate(length, SBUF_Mono);
 
     // convert to signed 16-bit format
     const uint8_t *src   = lump + 8;
@@ -95,17 +95,17 @@ static bool Load_DOOM(epi::sound_data_c *buf, const uint8_t *lump, int length)
     return true;
 }
 
-static bool Load_WAV(epi::sound_data_c *buf, uint8_t *lump, int length, bool pc_speaker)
+static bool Load_WAV(sound_data_c *buf, uint8_t *lump, int length, bool pc_speaker)
 {
     return S_LoadWAVSound(buf, lump, length, pc_speaker);
 }
 
-static bool Load_OGG(epi::sound_data_c *buf, const uint8_t *lump, int length)
+static bool Load_OGG(sound_data_c *buf, const uint8_t *lump, int length)
 {
     return S_LoadOGGSound(buf, lump, length);
 }
 
-static bool Load_MP3(epi::sound_data_c *buf, const uint8_t *lump, int length)
+static bool Load_MP3(sound_data_c *buf, const uint8_t *lump, int length)
 {
     return S_LoadMP3Sound(buf, lump, length);
 }
@@ -117,7 +117,7 @@ void S_CacheInit(void)
     // nothing to do
 }
 
-void S_FlushData(epi::sound_data_c *fx)
+void S_FlushData(sound_data_c *fx)
 {
     SYS_ASSERT(fx->ref_count == 0);
 
@@ -132,11 +132,11 @@ void S_CacheClearAll(void)
     fx_cache.erase(fx_cache.begin(), fx_cache.end());
 }
 
-static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
+static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
 {
     // open the file or lump, and read it into memory
     epi::file_c        *F;
-    epi::sound_format_e fmt = epi::FMT_Unknown;
+    sound_format_e fmt = FMT_Unknown;
 
     if (var_pc_speaker_mode)
     {
@@ -153,7 +153,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
                 M_DebugError("SFX Loader: Missing sound: '%s'\n", def->pc_speaker_sound.c_str());
                 return false;
             }
-            fmt = epi::Sound_FilenameToFormat(def->pc_speaker_sound);
+            fmt = Sound_FilenameToFormat(def->pc_speaker_sound);
         }
         else // Assume bare name is a lump reference
         {
@@ -179,7 +179,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
                 M_DebugError("SFX Loader: Missing sound in EPK: '%s'\n", def->pack_name.c_str());
                 return false;
             }
-            fmt = epi::Sound_FilenameToFormat(def->pack_name);
+            fmt = Sound_FilenameToFormat(def->pack_name);
         }
         else if (def->file_name != "")
         {
@@ -191,7 +191,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
                 M_DebugError("SFX Loader: Can't Find File '%s'\n", fn.c_str());
                 return false;
             }
-            fmt = epi::Sound_FilenameToFormat(def->file_name);
+            fmt = Sound_FilenameToFormat(def->file_name);
         }
         else
         {
@@ -232,35 +232,35 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
         (def->pack_name == "" && def->file_name == ""))
     {
         // for lumps, we must detect the format from the lump contents
-        fmt = epi::Sound_DetectFormat(data, length);
+        fmt = Sound_DetectFormat(data, length);
     }
 
     bool OK = false;
 
     switch (fmt)
     {
-    case epi::FMT_WAV:
+    case FMT_WAV:
         OK = Load_WAV(buf, data, length, false);
         break;
 
-    case epi::FMT_OGG:
+    case FMT_OGG:
         OK = Load_OGG(buf, data, length);
         break;
 
-    case epi::FMT_MP3:
+    case FMT_MP3:
         OK = Load_MP3(buf, data, length);
         break;
 
     // Double-check first byte here because pack filename detection could
     // return FMT_SPK for either
-    case epi::FMT_SPK:
+    case FMT_SPK:
         if (data[0] == 0x3)
             OK = Load_DOOM(buf, data, length);
         else
             OK = Load_WAV(buf, data, length, true);
         break;
 
-    case epi::FMT_DOOM:
+    case FMT_DOOM:
         OK = Load_DOOM(buf, data, length);
         break;
 
@@ -276,7 +276,7 @@ static bool DoCacheLoad(sfxdef_c *def, epi::sound_data_c *buf)
     return OK;
 }
 
-epi::sound_data_c *S_CacheLoad(sfxdef_c *def)
+sound_data_c *S_CacheLoad(sfxdef_c *def)
 {
     bool pc_speaker_skip = false;
 
@@ -296,7 +296,7 @@ epi::sound_data_c *S_CacheLoad(sfxdef_c *def)
     }
 
     // create data structure
-    epi::sound_data_c *buf = new epi::sound_data_c();
+    sound_data_c *buf = new sound_data_c();
 
     fx_cache.push_back(buf);
 
@@ -311,7 +311,7 @@ epi::sound_data_c *S_CacheLoad(sfxdef_c *def)
     return buf;
 }
 
-void S_CacheRelease(epi::sound_data_c *data)
+void S_CacheRelease(sound_data_c *data)
 {
     SYS_ASSERT(data->ref_count >= 1);
 

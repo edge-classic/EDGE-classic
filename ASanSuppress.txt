@@ -33,8 +33,8 @@ leak:font_c::GetGlyphIndex
 leak:font_c::CharImage
 
 # These are cached it appears, S_CacheClearAll would delete instances, though is never called and not sure if frees members
-leak:epi::sound_data_c::Mix_Reverb
-leak:epi::sound_data_c::Mix_Submerged
+leak:sound_data_c::Mix_Reverb
+leak:sound_data_c::Mix_Submerged
 
 # assuming cached, should be investigated
 leak:HD_draw_image

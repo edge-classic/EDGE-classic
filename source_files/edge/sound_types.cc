@@ -23,9 +23,6 @@
 
 #include "m4p.h"
 
-namespace epi
-{
-
 sound_format_e Sound_DetectFormat(uint8_t *data, int song_len)
 {
     // Start by trying the simple reliable header checks
@@ -123,7 +120,7 @@ sound_format_e Sound_FilenameToFormat(const std::string &filename)
 {
     std::string ext = epi::FS_GetExtension(filename);
 
-    StringLowerASCII(ext);
+    epi::StringLowerASCII(ext);
 
     if (ext == ".wav" || ext == ".wave")
         return FMT_WAV;
@@ -162,8 +159,6 @@ sound_format_e Sound_FilenameToFormat(const std::string &filename)
 
     return FMT_Unknown;
 }
-
-} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

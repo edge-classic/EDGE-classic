@@ -98,7 +98,7 @@ class oggplayer_c : public abstract_music_c
 
     void PostOpenInit(void);
 
-    bool StreamIntoBuffer(epi::sound_data_c *buf);
+    bool StreamIntoBuffer(sound_data_c *buf);
 };
 
 //----------------------------------------------------------------------------
@@ -241,7 +241,7 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
     }
 }
 
-bool oggplayer_c::StreamIntoBuffer(epi::sound_data_c *buf)
+bool oggplayer_c::StreamIntoBuffer(sound_data_c *buf)
 {
     int ogg_endian = (EPI_BYTEORDER == EPI_LIL_ENDIAN) ? 0 : 1;
 
@@ -397,8 +397,8 @@ void oggplayer_c::Ticker()
 {
     while (status == PLAYING && !var_pc_speaker_mode)
     {
-        epi::sound_data_c *buf =
-            S_QueueGetFreeBuffer(OGGV_NUM_SAMPLES, (is_stereo && dev_stereo) ? epi::SBUF_Interleaved : epi::SBUF_Mono);
+        sound_data_c *buf =
+            S_QueueGetFreeBuffer(OGGV_NUM_SAMPLES, (is_stereo && dev_stereo) ? SBUF_Interleaved : SBUF_Mono);
 
         if (!buf)
             break;
@@ -434,7 +434,7 @@ abstract_music_c *S_PlayOGGMusic(uint8_t *data, int length, bool looping)
     return player;
 }
 
-bool S_LoadOGGSound(epi::sound_data_c *buf, const uint8_t *data, int length)
+bool S_LoadOGGSound(sound_data_c *buf, const uint8_t *data, int length)
 {
     datalump_t ogg_lump;
 
@@ -480,7 +480,7 @@ bool S_LoadOGGSound(epi::sound_data_c *buf, const uint8_t *data, int length)
 
     buf->freq = vorbis_inf->rate;
 
-    epi::sound_gather_c gather;
+    sound_gather_c gather;
 
     for (;;)
     {

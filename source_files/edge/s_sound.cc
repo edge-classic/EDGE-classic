@@ -307,7 +307,7 @@ sfxdef_c *LookupEffectDef(const sfx_t *s)
     return sfxdefs[num];
 }
 
-static void S_PlaySound(int idx, sfxdef_c *def, int category, position_c *pos, int flags, epi::sound_data_c *buf)
+static void S_PlaySound(int idx, sfxdef_c *def, int category, position_c *pos, int flags, sound_data_c *buf)
 {
     // I_Printf("S_PlaySound on idx #%d DEF:%p\n", idx, def);
 
@@ -339,7 +339,7 @@ static void S_PlaySound(int idx, sfxdef_c *def, int category, position_c *pos, i
     // I_Printf("FINISHED: delta=0x%lx\n", chan->delta);
 }
 
-static void DoStartFX(sfxdef_c *def, int category, position_c *pos, int flags, epi::sound_data_c *buf)
+static void DoStartFX(sfxdef_c *def, int category, position_c *pos, int flags, sound_data_c *buf)
 {
     CountPlayingCats();
 
@@ -445,7 +445,7 @@ void S_StartFX(sfx_t *sfx, int category, position_c *pos, int flags)
     while (cat_limits[category] == 0)
         category++;
 
-    epi::sound_data_c *buf = S_CacheLoad(def);
+    sound_data_c *buf = S_CacheLoad(def);
     if (!buf)
         return;
 

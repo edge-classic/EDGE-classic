@@ -51,7 +51,7 @@ class mix_channel_c
   public:
     int state; // CHAN_xxx
 
-    epi::sound_data_c *data;
+    sound_data_c *data;
 
     int         category;
     sfxdef_c   *def;
@@ -117,16 +117,16 @@ void S_QueueStop(void);
 // stop the currently playing queue.  All playing buffers
 // are moved into the free list.
 
-epi::sound_data_c *S_QueueGetFreeBuffer(int samples, int buf_mode);
+sound_data_c *S_QueueGetFreeBuffer(int samples, int buf_mode);
 // returns the next unused (or finished) buffer, or NULL
 // if there are none.  The data_L/data_R fields will be
 // updated to ensure they hold the requested number of
 // samples and conform to the wanted buffer mode.
 
-void S_QueueAddBuffer(epi::sound_data_c *buf, int freq);
+void S_QueueAddBuffer(sound_data_c *buf, int freq);
 // add a new buffer to be end of the queue.
 
-void S_QueueReturnBuffer(epi::sound_data_c *buf);
+void S_QueueReturnBuffer(sound_data_c *buf);
 // if something goes wrong and you cannot add the buffer,
 // then this call will return the buffer to the free list.
 

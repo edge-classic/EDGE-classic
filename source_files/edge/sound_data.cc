@@ -21,9 +21,6 @@
 
 #include <vector>
 
-namespace epi
-{
-
 sound_data_c::sound_data_c()
     : length(0), freq(0), mode(0), data_L(NULL), data_R(NULL), fx_data_L(NULL), fx_data_R(NULL), priv_data(NULL),
       ref_count(0), is_sfx(false), current_mix(SFX_None), reverbed_room_size(RM_None), current_ddf_ratio(0),
@@ -532,8 +529,6 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
         }
     }
 }
-
-} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

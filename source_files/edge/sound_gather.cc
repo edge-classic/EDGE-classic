@@ -19,9 +19,6 @@
 #include "epi.h"
 #include "sound_gather.h"
 
-namespace epi
-{
-
 class gather_chunk_c
 {
   public:
@@ -171,8 +168,6 @@ void sound_gather_c::TransferStereo(gather_chunk_c *chunk, sound_data_c *buf, in
         }
     }
 }
-
-} // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

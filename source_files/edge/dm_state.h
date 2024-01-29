@@ -68,8 +68,8 @@ extern bool nodrawers;
 extern bool noblit;
 
 // This one is related to the 3-screen display mode.
-// ANG90 = left side, ANG270 = right
-extern bam_angle_t viewanglebaseoffset;
+// kBAMAngle90 = left side, kBAMAngle270 = right
+extern BAMAngle viewanglebaseoffset;
 
 // Timer, for scores.
 extern int  leveltime; // tics in game play for par

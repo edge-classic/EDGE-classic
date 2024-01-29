@@ -31,33 +31,35 @@
 namespace epi
 {
 
-class md5hash_c
+class MD5Hash
 {
     /* sealed */
+  private:
+    uint8_t hash_[16];
 
   public:
-    uint8_t hash[16];
+    MD5Hash();
+    MD5Hash(const uint8_t *message, unsigned int len);
 
-    md5hash_c();
-    md5hash_c(const uint8_t *message, unsigned int len);
-
-    ~md5hash_c()
+    ~MD5Hash()
     {
     }
 
     void Compute(const uint8_t *message, unsigned int len);
 
+    std::string ToString();
+
   private:
     // a class used while computing the MD5 sum.
     // Not actually used with a member variable.
 
-    class packhash_c
+    class PackHash
     {
       public:
-        uint32_t pack[4];
+        uint32_t pack_[4];
 
-        packhash_c();
-        ~packhash_c()
+        PackHash();
+        ~PackHash()
         {
         }
 
@@ -68,18 +70,6 @@ class md5hash_c
 };
 
 } // namespace epi
-
-//------------------------------------------------------------------------
-//
-//  DEBUG STUFF
-//
-
-#ifdef DEBUG_EPI
-namespace debugepi
-{
-void TestMd5Hash();
-};
-#endif // DEBUG_EPI
 
 #endif /* __EPI_MD5_H__ */
 

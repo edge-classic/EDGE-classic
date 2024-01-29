@@ -1055,7 +1055,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
 
     M_Angle2Matrix(tilt ? ~mo->vertangle : 0, &data.kx_mat, &data.kz_mat);
 
-    bam_angle_t ang = mo->angle + rotation;
+    BAMAngle ang = mo->angle + rotation;
 
     MIR_Angle(ang);
 
@@ -1118,10 +1118,10 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
 
     int num_pass = data.is_fuzzy ? 1 : (detail_level > 0 ? 4 : 3);
 
-    rgbacol_t fc_to_use = mo->subsector->sector->props.fog_color;
+    RGBAColor fc_to_use = mo->subsector->sector->props.fog_color;
     float    fd_to_use = mo->subsector->sector->props.fog_density;
     // check for DDFLEVL fog
-    if (fc_to_use == RGB_NO_VALUE)
+    if (fc_to_use == kRGBANoValue)
     {
         if (IS_SKY(mo->subsector->sector->ceil))
         {
@@ -1135,12 +1135,12 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
         }
     }
 
-    if (!r_culling.d && fc_to_use != RGB_NO_VALUE)
+    if (!r_culling.d && fc_to_use != kRGBANoValue)
     {
         GLfloat fc[4];
-        fc[0] = (float)epi::RGBA_Red(fc_to_use) / 255.0f;
-        fc[1] = (float)epi::RGBA_Green(fc_to_use) / 255.0f;
-        fc[2] = (float)epi::RGBA_Blue(fc_to_use) / 255.0f;
+        fc[0] = (float)epi::GetRGBARed(fc_to_use) / 255.0f;
+        fc[1] = (float)epi::GetRGBAGreen(fc_to_use) / 255.0f;
+        fc[2] = (float)epi::GetRGBABlue(fc_to_use) / 255.0f;
         fc[3] = 1.0f;
         glClearColor(fc[0], fc[1], fc[2], 1.0f);
         glFogi(GL_FOG_MODE, GL_EXP);

@@ -91,7 +91,7 @@ typedef struct local_gl_unit_s
     // range of local vertices
     int first, count;
 
-    rgbacol_t fog_color   = RGB_NO_VALUE;
+    RGBAColor fog_color   = kRGBANoValue;
     float    fog_density = 0;
 } local_gl_unit_t;
 
@@ -105,7 +105,7 @@ static int cur_unit;
 
 static bool batch_sort;
 
-rgbacol_t current_fog_rgb = RGB_NO_VALUE;
+RGBAColor current_fog_rgb = kRGBANoValue;
 sg_color current_fog_color;
 float    current_fog_density = 0;
 sg_color cull_fog_color;
@@ -169,7 +169,7 @@ void RGL_FinishUnits(void)
 // texture should be blended (like for translucent water or sprites).
 //
 local_gl_vert_t *RGL_BeginUnit(GLuint shape, int max_vert, GLuint env1, GLuint tex1, GLuint env2, GLuint tex2, int pass,
-                               int blending, rgbacol_t fog_color, float fog_density)
+                               int blending, RGBAColor fog_color, float fog_density)
 {
     local_gl_unit_t *unit;
 
@@ -322,7 +322,7 @@ void RGL_DrawUnits(void)
     int active_pass     = 0;
     int active_blending = 0;
 
-    rgbacol_t active_fog_rgb     = RGB_NO_VALUE;
+    RGBAColor active_fog_rgb     = kRGBANoValue;
     float    active_fog_density = 0;
 
     for (int i = 0; i < cur_unit; i++)
@@ -376,7 +376,7 @@ void RGL_DrawUnits(void)
 
         // detect changes in texture/alpha/blending state
 
-        if (!r_culling.d && unit->fog_color != RGB_NO_VALUE)
+        if (!r_culling.d && unit->fog_color != kRGBANoValue)
         {
             if (unit->fog_color != active_fog_rgb)
             {

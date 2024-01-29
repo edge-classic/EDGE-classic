@@ -37,7 +37,7 @@ typedef struct local_gl_vert_s
     HMM_Vec3  normal;
 } local_gl_vert_t;
 
-extern rgbacol_t current_fog_rgb;
+extern RGBAColor current_fog_rgb;
 extern sg_color  current_fog_color;
 extern float     current_fog_density;
 extern sg_color  cull_fog_color;
@@ -82,7 +82,7 @@ typedef enum
 } edge_environment_e;
 
 local_gl_vert_t *RGL_BeginUnit(GLuint shape, int max_vert, GLuint env1, GLuint tex1, GLuint env2, GLuint tex2, int pass,
-                               int blending, rgbacol_t fog_color = RGB_NO_VALUE, float fog_density = 0);
+                               int blending, RGBAColor fog_color = kRGBANoValue, float fog_density = 0);
 void             RGL_EndUnit(int actual_vert);
 
 #endif /* __R_UNITS_H__ */

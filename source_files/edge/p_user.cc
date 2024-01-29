@@ -153,9 +153,9 @@ static void CalcHeight(player_t *player, bool extra_tic)
     // ----CALCULATE BOB EFFECT----
     if (player->playerstate == PST_LIVE && onground)
     {
-        bam_angle_t angle = ANG90 / 5 * leveltime;
+        BAMAngle angle = kBAMAngle90 / 5 * leveltime;
 
-        bob_z = player->bob / 2 * player->mo->info->bobbing * epi::BAM_Sin(angle);
+        bob_z = player->bob / 2 * player->mo->info->bobbing * epi::BAMSin(angle);
     }
 
     // ----CALCULATE VIEWHEIGHT----
@@ -297,7 +297,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
     if (player->zoom_fov > 0)
         cmd->angleturn /= ZOOM_ANGLE_DIV;
 
-    player->mo->angle -= (bam_angle_t)(cmd->angleturn << 16);
+    player->mo->angle -= (BAMAngle)(cmd->angleturn << 16);
 
     // EDGE Feature: Vertical Look (Mlook)
     //
@@ -309,12 +309,12 @@ static void MovePlayer(player_t *player, bool extra_tic)
         if (player->zoom_fov > 0)
             cmd->mlookturn /= ZOOM_ANGLE_DIV;
 
-        bam_angle_t V = player->mo->vertangle + (bam_angle_t)(cmd->mlookturn << 16);
+        BAMAngle V = player->mo->vertangle + (BAMAngle)(cmd->mlookturn << 16);
 
-        if (V < ANG180 && V > MLOOK_LIMIT)
+        if (V < kBAMAngle180 && V > MLOOK_LIMIT)
             V = MLOOK_LIMIT;
-        else if (V >= ANG180 && V < (ANG360 - MLOOK_LIMIT))
-            V = (ANG360 - MLOOK_LIMIT);
+        else if (V >= kBAMAngle180 && V < (kBAMAngle360 - MLOOK_LIMIT))
+            V = (kBAMAngle360 - MLOOK_LIMIT);
 
         player->mo->vertangle = V;
     }
@@ -349,15 +349,15 @@ static void MovePlayer(player_t *player, bool extra_tic)
     if (crouching)
         base_xy_speed *= CROUCH_SLOWDOWN;
 
-    dx = epi::BAM_Cos(player->mo->angle);
-    dy = epi::BAM_Sin(player->mo->angle);
+    dx = epi::BAMCos(player->mo->angle);
+    dy = epi::BAMSin(player->mo->angle);
 
     eh = 1;
     ev = 0;
 
     if (swimming || flying || onladder)
     {
-        float slope = epi::BAM_Tan(player->mo->vertangle);
+        float slope = epi::BAMTan(player->mo->vertangle);
 
         float hyp = (float)sqrt((double)(1.0f + slope * slope));
 
@@ -477,7 +477,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
             if (!(player->ready_wp < 0 || player->pending_wp >= 0))
                 fov = player->weapons[player->ready_wp].info->zoom_fov;
 
-            if (fov == int(ANG360))
+            if (fov == int(kBAMAngle360))
                 fov = 0;
         }
 
@@ -496,8 +496,8 @@ static void DeathThink(player_t *player, bool extra_tic)
 
     float dx, dy, dz;
 
-    bam_angle_t angle;
-    bam_angle_t delta, delta_s;
+    BAMAngle angle;
+    BAMAngle delta, delta_s;
     float   slope;
 
     // -AJA- 1999/12/07: don't die mid-air.
@@ -528,14 +528,14 @@ static void DeathThink(player_t *player, bool extra_tic)
 
         slope   = P_ApproxSlope(dx, dy, dz);
         slope   = MIN(1.7f, MAX(-1.7f, slope));
-        delta_s = epi::BAM_FromATan(slope) - player->mo->vertangle;
+        delta_s = epi::BAMFromATan(slope) - player->mo->vertangle;
 
-        if ((delta <= ANG1 / 2 || delta >= (bam_angle_t)(0 - ANG1 / 2)) &&
-            (delta_s <= ANG1 / 2 || delta_s >= (bam_angle_t)(0 - ANG1 / 2)))
+        if ((delta <= kBAMAngle1 / 2 || delta >= (BAMAngle)(0 - kBAMAngle1 / 2)) &&
+            (delta_s <= kBAMAngle1 / 2 || delta_s >= (BAMAngle)(0 - kBAMAngle1 / 2)))
         {
             // Looking at killer, so fade damage flash down.
             player->mo->angle     = angle;
-            player->mo->vertangle = epi::BAM_FromATan(slope);
+            player->mo->vertangle = epi::BAMFromATan(slope);
 
             if (player->damagecount > 0)
                 player->damagecount -= subtract;
@@ -543,21 +543,21 @@ static void DeathThink(player_t *player, bool extra_tic)
         else
         {
             unsigned int factor = r_doubleframes.d ? 2 : 1;
-            if (delta < ANG180)
+            if (delta < kBAMAngle180)
                 delta /= (5 * factor);
             else
-                delta = (bam_angle_t)(0 - (bam_angle_t)(0 - delta) / (5 * factor));
+                delta = (BAMAngle)(0 - (BAMAngle)(0 - delta) / (5 * factor));
 
-            if (delta > ANG5 / factor && delta < (bam_angle_t)(0 - ANG5 / factor))
-                delta = (delta < ANG180) ? ANG5 / factor : (bam_angle_t)(0 - ANG5 / factor);
+            if (delta > kBAMAngle5 / factor && delta < (BAMAngle)(0 - kBAMAngle5 / factor))
+                delta = (delta < kBAMAngle180) ? kBAMAngle5 / factor : (BAMAngle)(0 - kBAMAngle5 / factor);
 
-            if (delta_s < ANG180)
+            if (delta_s < kBAMAngle180)
                 delta_s /= (5 * factor);
             else
-                delta_s = (bam_angle_t)(0 - (bam_angle_t)(0 - delta_s) / (5 * factor));
+                delta_s = (BAMAngle)(0 - (BAMAngle)(0 - delta_s) / (5 * factor));
 
-            if (delta_s > (ANG5 / (factor * 2)) && delta_s < (bam_angle_t)(0 - ANG5 / (factor * 2)))
-                delta_s = (delta_s < ANG180) ? (ANG5 / (factor * 2)) : (bam_angle_t)(0 - ANG5 / (factor * 2));
+            if (delta_s > (kBAMAngle5 / (factor * 2)) && delta_s < (BAMAngle)(0 - kBAMAngle5 / (factor * 2)))
+                delta_s = (delta_s < kBAMAngle180) ? (kBAMAngle5 / (factor * 2)) : (BAMAngle)(0 - kBAMAngle5 / (factor * 2));
 
             player->mo->angle += delta;
             player->mo->vertangle += delta_s;

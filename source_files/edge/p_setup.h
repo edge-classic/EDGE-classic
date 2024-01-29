@@ -30,9 +30,9 @@
 
 #include "math_crc.h"
 
-extern epi::crc32_c mapsector_CRC;
-extern epi::crc32_c mapline_CRC;
-extern epi::crc32_c mapthing_CRC;
+extern epi::CRC32 mapsector_CRC;
+extern epi::CRC32 mapline_CRC;
+extern epi::CRC32 mapthing_CRC;
 
 extern int mapthing_NUM;
 

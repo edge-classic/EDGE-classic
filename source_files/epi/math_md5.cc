@@ -26,18 +26,37 @@
 //------------------------------------------------------------------------
 
 #include "epi.h"
+#include "str_util.h"
 #include "math_md5.h"
 
 /* The four core functions - F1 is optimized somewhat */
 
-#define F1(x, y, z) (z ^ (x & (y ^ z)))
-#define F2(x, y, z) F1(z, x, y)
-#define F3(x, y, z) (x ^ y ^ z)
-#define F4(x, y, z) (y ^ (x | ~z))
+static inline uint32_t MD5Function1(uint32_t x, uint32_t y, uint32_t z)
+{
+    return (z ^ (x & (y ^ z)));
+}
+
+static inline uint32_t MD5Function2(uint32_t x, uint32_t y, uint32_t z)
+{
+    return MD5Function1(z, x, y);
+}
+
+static inline uint32_t MD5Function3(uint32_t x, uint32_t y, uint32_t z)
+{
+    return (x ^ y ^ z);
+}
+
+static inline uint32_t MD5Function4(uint32_t x, uint32_t y, uint32_t z)
+{
+    return (y ^ (x | ~z));
+}
 
 /* This is the central step in the MD5 algorithm. */
 
-#define MD5_STEP(f, w, x, y, z, data, s) (w += f(x, y, z) + (data), w = (w << s) | (w >> (32 - s)), w += x)
+static inline void MD5Step(uint32_t (*func)(uint32_t, uint32_t, uint32_t), uint32_t &w, uint32_t x, uint32_t y, uint32_t z, uint32_t data, uint8_t s)
+{
+    w += func(x, y, z) + data, w = (w << s) | (w >> (32 - s)), w += x;
+}
 
 namespace epi
 {
@@ -45,98 +64,98 @@ namespace epi
 /* The core of the MD5 algorithm, this alters an existing MD5 hash to
  * reflect the addition of 16 longwords of new data.
  */
-void md5hash_c::packhash_c::Transform(const uint32_t extra[16])
+void MD5Hash::PackHash::Transform(const uint32_t extra[16])
 {
     uint32_t a, b, c, d;
 
-    a = pack[0];
-    b = pack[1];
-    c = pack[2];
-    d = pack[3];
+    a = pack_[0];
+    b = pack_[1];
+    c = pack_[2];
+    d = pack_[3];
 
-    MD5_STEP(F1, a, b, c, d, extra[0] + 0xd76aa478, 7);
-    MD5_STEP(F1, d, a, b, c, extra[1] + 0xe8c7b756, 12);
-    MD5_STEP(F1, c, d, a, b, extra[2] + 0x242070db, 17);
-    MD5_STEP(F1, b, c, d, a, extra[3] + 0xc1bdceee, 22);
-    MD5_STEP(F1, a, b, c, d, extra[4] + 0xf57c0faf, 7);
-    MD5_STEP(F1, d, a, b, c, extra[5] + 0x4787c62a, 12);
-    MD5_STEP(F1, c, d, a, b, extra[6] + 0xa8304613, 17);
-    MD5_STEP(F1, b, c, d, a, extra[7] + 0xfd469501, 22);
-    MD5_STEP(F1, a, b, c, d, extra[8] + 0x698098d8, 7);
-    MD5_STEP(F1, d, a, b, c, extra[9] + 0x8b44f7af, 12);
-    MD5_STEP(F1, c, d, a, b, extra[10] + 0xffff5bb1, 17);
-    MD5_STEP(F1, b, c, d, a, extra[11] + 0x895cd7be, 22);
-    MD5_STEP(F1, a, b, c, d, extra[12] + 0x6b901122, 7);
-    MD5_STEP(F1, d, a, b, c, extra[13] + 0xfd987193, 12);
-    MD5_STEP(F1, c, d, a, b, extra[14] + 0xa679438e, 17);
-    MD5_STEP(F1, b, c, d, a, extra[15] + 0x49b40821, 22);
+    MD5Step(MD5Function1, a, b, c, d, extra[0] + 0xd76aa478, 7);
+    MD5Step(MD5Function1, d, a, b, c, extra[1] + 0xe8c7b756, 12);
+    MD5Step(MD5Function1, c, d, a, b, extra[2] + 0x242070db, 17);
+    MD5Step(MD5Function1, b, c, d, a, extra[3] + 0xc1bdceee, 22);
+    MD5Step(MD5Function1, a, b, c, d, extra[4] + 0xf57c0faf, 7);
+    MD5Step(MD5Function1, d, a, b, c, extra[5] + 0x4787c62a, 12);
+    MD5Step(MD5Function1, c, d, a, b, extra[6] + 0xa8304613, 17);
+    MD5Step(MD5Function1, b, c, d, a, extra[7] + 0xfd469501, 22);
+    MD5Step(MD5Function1, a, b, c, d, extra[8] + 0x698098d8, 7);
+    MD5Step(MD5Function1, d, a, b, c, extra[9] + 0x8b44f7af, 12);
+    MD5Step(MD5Function1, c, d, a, b, extra[10] + 0xffff5bb1, 17);
+    MD5Step(MD5Function1, b, c, d, a, extra[11] + 0x895cd7be, 22);
+    MD5Step(MD5Function1, a, b, c, d, extra[12] + 0x6b901122, 7);
+    MD5Step(MD5Function1, d, a, b, c, extra[13] + 0xfd987193, 12);
+    MD5Step(MD5Function1, c, d, a, b, extra[14] + 0xa679438e, 17);
+    MD5Step(MD5Function1, b, c, d, a, extra[15] + 0x49b40821, 22);
 
-    MD5_STEP(F2, a, b, c, d, extra[1] + 0xf61e2562, 5);
-    MD5_STEP(F2, d, a, b, c, extra[6] + 0xc040b340, 9);
-    MD5_STEP(F2, c, d, a, b, extra[11] + 0x265e5a51, 14);
-    MD5_STEP(F2, b, c, d, a, extra[0] + 0xe9b6c7aa, 20);
-    MD5_STEP(F2, a, b, c, d, extra[5] + 0xd62f105d, 5);
-    MD5_STEP(F2, d, a, b, c, extra[10] + 0x02441453, 9);
-    MD5_STEP(F2, c, d, a, b, extra[15] + 0xd8a1e681, 14);
-    MD5_STEP(F2, b, c, d, a, extra[4] + 0xe7d3fbc8, 20);
-    MD5_STEP(F2, a, b, c, d, extra[9] + 0x21e1cde6, 5);
-    MD5_STEP(F2, d, a, b, c, extra[14] + 0xc33707d6, 9);
-    MD5_STEP(F2, c, d, a, b, extra[3] + 0xf4d50d87, 14);
-    MD5_STEP(F2, b, c, d, a, extra[8] + 0x455a14ed, 20);
-    MD5_STEP(F2, a, b, c, d, extra[13] + 0xa9e3e905, 5);
-    MD5_STEP(F2, d, a, b, c, extra[2] + 0xfcefa3f8, 9);
-    MD5_STEP(F2, c, d, a, b, extra[7] + 0x676f02d9, 14);
-    MD5_STEP(F2, b, c, d, a, extra[12] + 0x8d2a4c8a, 20);
+    MD5Step(MD5Function2, a, b, c, d, extra[1] + 0xf61e2562, 5);
+    MD5Step(MD5Function2, d, a, b, c, extra[6] + 0xc040b340, 9);
+    MD5Step(MD5Function2, c, d, a, b, extra[11] + 0x265e5a51, 14);
+    MD5Step(MD5Function2, b, c, d, a, extra[0] + 0xe9b6c7aa, 20);
+    MD5Step(MD5Function2, a, b, c, d, extra[5] + 0xd62f105d, 5);
+    MD5Step(MD5Function2, d, a, b, c, extra[10] + 0x02441453, 9);
+    MD5Step(MD5Function2, c, d, a, b, extra[15] + 0xd8a1e681, 14);
+    MD5Step(MD5Function2, b, c, d, a, extra[4] + 0xe7d3fbc8, 20);
+    MD5Step(MD5Function2, a, b, c, d, extra[9] + 0x21e1cde6, 5);
+    MD5Step(MD5Function2, d, a, b, c, extra[14] + 0xc33707d6, 9);
+    MD5Step(MD5Function2, c, d, a, b, extra[3] + 0xf4d50d87, 14);
+    MD5Step(MD5Function2, b, c, d, a, extra[8] + 0x455a14ed, 20);
+    MD5Step(MD5Function2, a, b, c, d, extra[13] + 0xa9e3e905, 5);
+    MD5Step(MD5Function2, d, a, b, c, extra[2] + 0xfcefa3f8, 9);
+    MD5Step(MD5Function2, c, d, a, b, extra[7] + 0x676f02d9, 14);
+    MD5Step(MD5Function2, b, c, d, a, extra[12] + 0x8d2a4c8a, 20);
 
-    MD5_STEP(F3, a, b, c, d, extra[5] + 0xfffa3942, 4);
-    MD5_STEP(F3, d, a, b, c, extra[8] + 0x8771f681, 11);
-    MD5_STEP(F3, c, d, a, b, extra[11] + 0x6d9d6122, 16);
-    MD5_STEP(F3, b, c, d, a, extra[14] + 0xfde5380c, 23);
-    MD5_STEP(F3, a, b, c, d, extra[1] + 0xa4beea44, 4);
-    MD5_STEP(F3, d, a, b, c, extra[4] + 0x4bdecfa9, 11);
-    MD5_STEP(F3, c, d, a, b, extra[7] + 0xf6bb4b60, 16);
-    MD5_STEP(F3, b, c, d, a, extra[10] + 0xbebfbc70, 23);
-    MD5_STEP(F3, a, b, c, d, extra[13] + 0x289b7ec6, 4);
-    MD5_STEP(F3, d, a, b, c, extra[0] + 0xeaa127fa, 11);
-    MD5_STEP(F3, c, d, a, b, extra[3] + 0xd4ef3085, 16);
-    MD5_STEP(F3, b, c, d, a, extra[6] + 0x04881d05, 23);
-    MD5_STEP(F3, a, b, c, d, extra[9] + 0xd9d4d039, 4);
-    MD5_STEP(F3, d, a, b, c, extra[12] + 0xe6db99e5, 11);
-    MD5_STEP(F3, c, d, a, b, extra[15] + 0x1fa27cf8, 16);
-    MD5_STEP(F3, b, c, d, a, extra[2] + 0xc4ac5665, 23);
+    MD5Step(MD5Function3, a, b, c, d, extra[5] + 0xfffa3942, 4);
+    MD5Step(MD5Function3, d, a, b, c, extra[8] + 0x8771f681, 11);
+    MD5Step(MD5Function3, c, d, a, b, extra[11] + 0x6d9d6122, 16);
+    MD5Step(MD5Function3, b, c, d, a, extra[14] + 0xfde5380c, 23);
+    MD5Step(MD5Function3, a, b, c, d, extra[1] + 0xa4beea44, 4);
+    MD5Step(MD5Function3, d, a, b, c, extra[4] + 0x4bdecfa9, 11);
+    MD5Step(MD5Function3, c, d, a, b, extra[7] + 0xf6bb4b60, 16);
+    MD5Step(MD5Function3, b, c, d, a, extra[10] + 0xbebfbc70, 23);
+    MD5Step(MD5Function3, a, b, c, d, extra[13] + 0x289b7ec6, 4);
+    MD5Step(MD5Function3, d, a, b, c, extra[0] + 0xeaa127fa, 11);
+    MD5Step(MD5Function3, c, d, a, b, extra[3] + 0xd4ef3085, 16);
+    MD5Step(MD5Function3, b, c, d, a, extra[6] + 0x04881d05, 23);
+    MD5Step(MD5Function3, a, b, c, d, extra[9] + 0xd9d4d039, 4);
+    MD5Step(MD5Function3, d, a, b, c, extra[12] + 0xe6db99e5, 11);
+    MD5Step(MD5Function3, c, d, a, b, extra[15] + 0x1fa27cf8, 16);
+    MD5Step(MD5Function3, b, c, d, a, extra[2] + 0xc4ac5665, 23);
 
-    MD5_STEP(F4, a, b, c, d, extra[0] + 0xf4292244, 6);
-    MD5_STEP(F4, d, a, b, c, extra[7] + 0x432aff97, 10);
-    MD5_STEP(F4, c, d, a, b, extra[14] + 0xab9423a7, 15);
-    MD5_STEP(F4, b, c, d, a, extra[5] + 0xfc93a039, 21);
-    MD5_STEP(F4, a, b, c, d, extra[12] + 0x655b59c3, 6);
-    MD5_STEP(F4, d, a, b, c, extra[3] + 0x8f0ccc92, 10);
-    MD5_STEP(F4, c, d, a, b, extra[10] + 0xffeff47d, 15);
-    MD5_STEP(F4, b, c, d, a, extra[1] + 0x85845dd1, 21);
-    MD5_STEP(F4, a, b, c, d, extra[8] + 0x6fa87e4f, 6);
-    MD5_STEP(F4, d, a, b, c, extra[15] + 0xfe2ce6e0, 10);
-    MD5_STEP(F4, c, d, a, b, extra[6] + 0xa3014314, 15);
-    MD5_STEP(F4, b, c, d, a, extra[13] + 0x4e0811a1, 21);
-    MD5_STEP(F4, a, b, c, d, extra[4] + 0xf7537e82, 6);
-    MD5_STEP(F4, d, a, b, c, extra[11] + 0xbd3af235, 10);
-    MD5_STEP(F4, c, d, a, b, extra[2] + 0x2ad7d2bb, 15);
-    MD5_STEP(F4, b, c, d, a, extra[9] + 0xeb86d391, 21);
+    MD5Step(MD5Function4, a, b, c, d, extra[0] + 0xf4292244, 6);
+    MD5Step(MD5Function4, d, a, b, c, extra[7] + 0x432aff97, 10);
+    MD5Step(MD5Function4, c, d, a, b, extra[14] + 0xab9423a7, 15);
+    MD5Step(MD5Function4, b, c, d, a, extra[5] + 0xfc93a039, 21);
+    MD5Step(MD5Function4, a, b, c, d, extra[12] + 0x655b59c3, 6);
+    MD5Step(MD5Function4, d, a, b, c, extra[3] + 0x8f0ccc92, 10);
+    MD5Step(MD5Function4, c, d, a, b, extra[10] + 0xffeff47d, 15);
+    MD5Step(MD5Function4, b, c, d, a, extra[1] + 0x85845dd1, 21);
+    MD5Step(MD5Function4, a, b, c, d, extra[8] + 0x6fa87e4f, 6);
+    MD5Step(MD5Function4, d, a, b, c, extra[15] + 0xfe2ce6e0, 10);
+    MD5Step(MD5Function4, c, d, a, b, extra[6] + 0xa3014314, 15);
+    MD5Step(MD5Function4, b, c, d, a, extra[13] + 0x4e0811a1, 21);
+    MD5Step(MD5Function4, a, b, c, d, extra[4] + 0xf7537e82, 6);
+    MD5Step(MD5Function4, d, a, b, c, extra[11] + 0xbd3af235, 10);
+    MD5Step(MD5Function4, c, d, a, b, extra[2] + 0x2ad7d2bb, 15);
+    MD5Step(MD5Function4, b, c, d, a, extra[9] + 0xeb86d391, 21);
 
-    pack[0] += a;
-    pack[1] += b;
-    pack[2] += c;
-    pack[3] += d;
+    pack_[0] += a;
+    pack_[1] += b;
+    pack_[2] += c;
+    pack_[3] += d;
 }
 
-md5hash_c::packhash_c::packhash_c()
+MD5Hash::PackHash::PackHash()
 {
-    pack[0] = 0x67452301;
-    pack[1] = 0xefcdab89;
-    pack[2] = 0x98badcfe;
-    pack[3] = 0x10325476;
+    pack_[0] = 0x67452301;
+    pack_[1] = 0xefcdab89;
+    pack_[2] = 0x98badcfe;
+    pack_[3] = 0x10325476;
 }
 
-void md5hash_c::packhash_c::TransformBytes(const uint8_t chunk[64])
+void MD5Hash::PackHash::TransformBytes(const uint8_t chunk[64])
 {
     uint32_t extra[16];
 
@@ -148,32 +167,32 @@ void md5hash_c::packhash_c::TransformBytes(const uint8_t chunk[64])
     Transform(extra);
 }
 
-void md5hash_c::packhash_c::Encode(uint8_t *hash)
+void MD5Hash::PackHash::Encode(uint8_t *hash)
 {
     for (int pos = 0; pos < 4; pos++)
     {
-        *hash++ = (pack[pos]) & 0xff;
-        *hash++ = (pack[pos] >> 8) & 0xff;
-        *hash++ = (pack[pos] >> 16) & 0xff;
-        *hash++ = (pack[pos] >> 24) & 0xff;
+        *hash++ = (pack_[pos]) & 0xff;
+        *hash++ = (pack_[pos] >> 8) & 0xff;
+        *hash++ = (pack_[pos] >> 16) & 0xff;
+        *hash++ = (pack_[pos] >> 24) & 0xff;
     }
 }
 
 //------------------------------------------------------------------------
 
-md5hash_c::md5hash_c()
+MD5Hash::MD5Hash()
 {
-    memset(hash, 0, sizeof(hash));
+    memset(hash_, 0, sizeof(hash_));
 }
 
-md5hash_c::md5hash_c(const uint8_t *message, unsigned int len)
+MD5Hash::MD5Hash(const uint8_t *message, unsigned int len)
 {
     Compute(message, len);
 }
 
-void md5hash_c::Compute(const uint8_t *message, unsigned int len)
+void MD5Hash::Compute(const uint8_t *message, unsigned int len)
 {
-    packhash_c packed;
+    PackHash packed;
 
     int bit_length = len * 8;
 
@@ -225,64 +244,18 @@ void md5hash_c::Compute(const uint8_t *message, unsigned int len)
         packed.TransformBytes(buffer + 64);
     }
 
-    packed.Encode(hash);
+    packed.Encode(hash_);
+}
+
+std::string MD5Hash::ToString()
+{
+    return StringFormat("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", hash_[0],
+                        hash_[1], hash_[2], hash_[3], hash_[4], hash_[5],
+                        hash_[6], hash_[7], hash_[8], hash_[9], hash_[10],
+                        hash_[11], hash_[12], hash_[13], hash_[14], hash_[15]);
 }
 
 } // namespace epi
-
-//------------------------------------------------------------------------
-//
-//  DEBUG STUFF
-//
-
-#ifdef DEBUG_EPI
-
-#include <iostream>
-
-namespace debugepi
-{
-void Test_Md5Hash_Write(const epi::md5hash_c &hash);
-void Test_Md5Hash_DoString(const char *str);
-
-void Test_Md5Hash_Write(const epi::md5hash_c &hash)
-{
-    char num_buf[40];
-
-    for (int pos = 0; pos < 16; pos++)
-    {
-        sprintf(num_buf, "%02x", hash.hash[pos]);
-
-        cout << num_buf;
-    }
-}
-
-void Test_Md5Hash_DoString(const char *str)
-{
-    cout << "MD5 (\"" << str << "\") = ";
-
-    /// ASSERT(sizeof(char) == sizeof(byte));
-
-    epi::md5hash_c hash((const byte *)str, (unsigned int)strlen(str));
-
-    Test_Md5Hash_Write(hash);
-
-    cout << "\n";
-}
-
-void Test_Md5Hash()
-{
-    cout << "\n===TEST-MD5-HASH==========================\n\n";
-
-    Test_Md5Hash_DoString("");
-    Test_Md5Hash_DoString("a");
-    Test_Md5Hash_DoString("abc");
-    Test_Md5Hash_DoString("message digest");
-
-    cout << "\n==========================================\n\n";
-}
-}; // namespace debugepi
-
-#endif // DEBUG_EPI
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

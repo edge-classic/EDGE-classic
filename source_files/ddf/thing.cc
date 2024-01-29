@@ -586,7 +586,7 @@ void ThingParseField(const char *field, const char *contents, int index, bool is
     {
         if (DDF_MainParseField(thing_commands, field, contents, (uint8_t *)dynamic_mobj))
         {
-            dynamic_mobj->model_rotate *= ANG1; // apply the rotation
+            dynamic_mobj->model_rotate *= kBAMAngle1; // apply the rotation
             return;
         }
     }
@@ -1673,15 +1673,15 @@ static void DDF_MobjGetAngleRange(const char *info, void *storage)
 {
     SYS_ASSERT(info && storage);
 
-    bam_angle_t *dest = (bam_angle_t *)storage;
+    BAMAngle *dest = (BAMAngle *)storage;
 
     float val1, val2;
 
     if (sscanf(info, "%f:%f", &val1, &val2) != 2)
         DDF_Error("Bad angle range: %s\n", info);
 
-    dest[0] = epi::BAM_FromDegrees(val1);
-    dest[1] = epi::BAM_FromDegrees(val2);
+    dest[0] = epi::BAMFromDegrees(val1);
+    dest[1] = epi::BAMFromDegrees(val2);
 }
 
 //
@@ -2172,7 +2172,7 @@ void mobjtype_c::Default()
     bounce_speed  = 0.5f;
     bounce_up     = 0.5f;
     sight_slope   = 16.0f;
-    sight_angle   = ANG90;
+    sight_angle   = kBAMAngle90;
     ride_friction = RIDE_FRICTION;
     shadow_trans  = PERCENT_MAKE(50);
     glow_type     = GLOW_None;
@@ -2251,9 +2251,9 @@ void mobjtype_c::DLightCompatibility(void)
 {
     for (int DL = 0; DL < 2; DL++)
     {
-        int r = epi::RGBA_Red(dlight[DL].colour);
-        int g = epi::RGBA_Green(dlight[DL].colour);
-        int b = epi::RGBA_Blue(dlight[DL].colour);
+        int r = epi::GetRGBARed(dlight[DL].colour);
+        int g = epi::GetRGBAGreen(dlight[DL].colour);
+        int b = epi::GetRGBABlue(dlight[DL].colour);
 
         // dim the colour
         r = int(r * DLIT_COMPAT_ITY);
@@ -2265,7 +2265,7 @@ void mobjtype_c::DLightCompatibility(void)
         case DLITE_Compat_QUAD:
             dlight[DL].type   = DLITE_Modulate;
             dlight[DL].radius = DLIT_COMPAT_RAD(dlight[DL].radius);
-            dlight[DL].colour = epi::RGBA_Make(r, g, b);
+            dlight[DL].colour = epi::MakeRGBA(r, g, b);
 
             hyperflags |= HF_QUADRATIC_COMPAT;
             break;
@@ -2273,7 +2273,7 @@ void mobjtype_c::DLightCompatibility(void)
         case DLITE_Compat_LIN:
             dlight[DL].type = DLITE_Modulate;
             dlight[DL].radius *= 1.3;
-            dlight[DL].colour = epi::RGBA_Make(r, g, b);
+            dlight[DL].colour = epi::MakeRGBA(r, g, b);
             break;
 
         default: // nothing to do

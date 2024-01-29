@@ -105,7 +105,7 @@ static int PL_get_pos(lua_State *L)
 //
 static int PL_get_angle(lua_State *L)
 {
-    float value = epi::Degrees_FromBAM(ui_player_who->mo->angle);
+    float value = epi::DegreesFromBAM(ui_player_who->mo->angle);
 
     if (value > 360.0f)
         value -= 360.0f;
@@ -120,7 +120,7 @@ static int PL_get_angle(lua_State *L)
 //
 static int PL_get_mlook(lua_State *L)
 {
-    float value = epi::Degrees_FromBAM(ui_player_who->mo->vertangle);
+    float value = epi::DegreesFromBAM(ui_player_who->mo->vertangle);
 
     if (value > 180.0f)
         value -= 360.0f;
@@ -899,13 +899,13 @@ static int PL_hurt_dir(lua_State *L)
         mobj_t *badguy = ui_player_who->attacker;
         mobj_t *pmo    = ui_player_who->mo;
 
-        bam_angle_t diff = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle;
+        BAMAngle diff = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle;
 
-        if (diff >= ANG45 && diff <= ANG135)
+        if (diff >= kBAMAngle45 && diff <= kBAMAngle135)
         {
             dir = -1;
         }
-        else if (diff >= ANG225 && diff <= ANG315)
+        else if (diff >= kBAMAngle225 && diff <= kBAMAngle315)
         {
             dir = +1;
         }
@@ -926,9 +926,9 @@ static int PL_hurt_angle(lua_State *L)
         mobj_t *badguy = ui_player_who->attacker;
         mobj_t *pmo    = ui_player_who->mo;
 
-        bam_angle_t real_a = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
+        BAMAngle real_a = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
 
-        value = epi::Degrees_FromBAM(real_a);
+        value = epi::DegreesFromBAM(real_a);
 
         if (value > 360.0f)
             value -= 360.0f;
@@ -1635,7 +1635,7 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 
     //---------------
     // object.angle
-    float value = epi::Degrees_FromBAM(mo->angle);
+    float value = epi::DegreesFromBAM(mo->angle);
     if (value > 360.0f)
         value -= 360.0f;
     if (value < 0)
@@ -1647,7 +1647,7 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 
     //---------------
     // object.mlook
-    value = epi::Degrees_FromBAM(mo->vertangle);
+    value = epi::DegreesFromBAM(mo->vertangle);
 
     if (value > 180.0f)
         value -= 360.0f;
@@ -2273,18 +2273,18 @@ static int Sector_info(lua_State *L)
     //---------------
     // SECTOR.fogcolor
     HMM_Vec3    rgb;
-    rgbacol_t tempcolor = ui_player_who->mo->subsector->sector->props.fog_color;
+    RGBAColor tempcolor = ui_player_who->mo->subsector->sector->props.fog_color;
 
     rgb.X = -1;
     rgb.Y = -1;
     rgb.Z = -1;
     if (tempcolor != 0)
     {
-        if (tempcolor != RGB_NO_VALUE)
+        if (tempcolor != kRGBANoValue)
         {
-            rgb.X = epi::RGBA_Red(tempcolor);
-            rgb.Y = epi::RGBA_Green(tempcolor);
-            rgb.Z = epi::RGBA_Blue(tempcolor);
+            rgb.X = epi::GetRGBARed(tempcolor);
+            rgb.Y = epi::GetRGBAGreen(tempcolor);
+            rgb.Z = epi::GetRGBABlue(tempcolor);
         }
     }
    

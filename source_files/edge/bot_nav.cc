@@ -896,7 +896,7 @@ float bot_path_c::cur_length() const
     return hypotf(dest.x - src.x, dest.y - src.y);
 }
 
-bam_angle_t bot_path_c::cur_angle() const
+BAMAngle bot_path_c::cur_angle() const
 {
     position_c src  = nodes.at(along - 1).pos;
     position_c dest = nodes.at(along + 0).pos;

@@ -70,7 +70,7 @@ float hud_y_bottom;
 
 // current state
 static font_c  *cur_font;
-static rgbacol_t cur_color;
+static RGBAColor cur_color;
 
 static float cur_scale, cur_alpha;
 static int   cur_x_align, cur_y_align;
@@ -176,7 +176,7 @@ void HUD_SetScale(float scale)
     cur_scale = scale;
 }
 
-void HUD_SetTextColor(rgbacol_t color)
+void HUD_SetTextColor(RGBAColor color)
 {
     cur_color = color;
 }
@@ -202,7 +202,7 @@ void HUD_Reset()
     HUD_SetCoordSys(320, 200);
 
     cur_font    = default_font;
-    cur_color   = RGB_NO_VALUE;
+    cur_color   = kRGBANoValue;
     cur_scale   = 1.0f;
     cur_alpha   = 1.0f;
     cur_x_align = -1;
@@ -395,7 +395,7 @@ void HUD_CalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
 //----------------------------------------------------------------------------
 
 void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *image, float tx1, float ty1, float tx2,
-                  float ty2, float alpha, rgbacol_t text_col, const colourmap_c *palremap, float sx, float sy, char ch)
+                  float ty2, float alpha, RGBAColor text_col, const colourmap_c *palremap, float sx, float sy, char ch)
 {
     int x1 = I_ROUND(hx1);
     int y1 = I_ROUND(hy1);
@@ -412,7 +412,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
 
     bool do_whiten = false;
 
-    if (text_col != RGB_NO_VALUE)
+    if (text_col != kRGBANoValue)
     {
         sgcol = sg_make_color_1i(text_col);
         sgcol.a = 1.0f;
@@ -680,7 +680,7 @@ void HUD_StretchImage(float x, float y, float w, float h, const image_c *img, fl
     float y1 = COORD_Y(y + h);
     float y2 = COORD_Y(y);
 
-    rgbacol_t text_col = RGB_NO_VALUE;
+    RGBAColor text_col = kRGBANoValue;
 
     if (colmap)
     {
@@ -708,7 +708,7 @@ void HUD_StretchImageNoOffset(float x, float y, float w, float h, const image_c 
     float y1 = COORD_Y(y + h);
     float y2 = COORD_Y(y);
 
-    HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha, RGB_NO_VALUE, NULL, sx, sy);
+    HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha, kRGBANoValue, NULL, sx, sy);
 }
 
 void HUD_DrawImageTitleWS(const image_c *title_image)
@@ -806,7 +806,7 @@ void HUD_TileImage(float x, float y, float w, float h, const image_c *img, float
                  (offset_y + 1) * ty_scale, cur_alpha);
 }
 
-void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbacol_t col)
+void HUD_SolidBox(float x1, float y1, float x2, float y2, RGBAColor col)
 {
     // expand to cover wide screens
     if (x1 < hud_x_left && x2 > hud_x_right - 1 && y1 < hud_y_top + 1 && y2 > hud_y_bottom - 1)
@@ -845,7 +845,7 @@ void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbacol_t col)
     glDisable(GL_BLEND);
 }
 
-void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbacol_t col, float thickness, bool smooth, float dx,
+void HUD_SolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float thickness, bool smooth, float dx,
                    float dy)
 {
     x1 = COORD_X(x1);
@@ -880,7 +880,7 @@ void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbacol_t col, float 
     glLineWidth(1.0f);
 }
 
-void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbacol_t col, float thickness)
+void HUD_ThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thickness)
 {
     std::swap(y1, y2);
 
@@ -927,7 +927,7 @@ void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbacol_t col, float th
     glDisable(GL_BLEND);
 }
 
-void HUD_GradientBox(float x1, float y1, float x2, float y2, rgbacol_t *cols)
+void HUD_GradientBox(float x1, float y1, float x2, float y2, RGBAColor *cols)
 {
     std::swap(y1, y2);
 
@@ -1051,8 +1051,8 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
     HUD_RawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, cur_alpha, cur_color, NULL, 0.0, 0.0, ch);
 }
 
-void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img, char ch, rgbacol_t color1,
-                        rgbacol_t color2, bool blink)
+void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img, char ch, RGBAColor color1,
+                        RGBAColor color2, bool blink)
 {
     float w, h;
     float tx1, tx2, ty1, ty2;

@@ -72,7 +72,7 @@ static chunk_t chunk_stack[MAX_CHUNK_DEPTH];
 static int     chunk_stack_size = 0;
 
 static FILE        *current_fp = NULL;
-static epi::crc32_c current_crc;
+static epi::CRC32 current_crc;
 
 static bool CheckMagic(void)
 {
@@ -256,13 +256,13 @@ bool SV_VerifyContents(void)
 
     // CRC is now computed
 
-    epi::crc32_c final_crc(current_crc);
+    epi::CRC32 final_crc(current_crc);
 
     uint32_t read_crc = SV_GetInt();
 
-    if (read_crc != final_crc.crc)
+    if (read_crc != final_crc.GetCRC())
     {
-        I_Warning("LOADGAME: Verify failed: Bad CRC: %08X != %08X\n", current_crc.crc, read_crc);
+        I_Warning("LOADGAME: Verify failed: Bad CRC: %08X != %08X\n", current_crc.GetCRC(), read_crc);
         return false;
     }
 
@@ -512,9 +512,9 @@ bool SV_CloseWriteFile(void)
     SV_PutMarker(DATA_END_MARKER);
     PutMagic();
 
-    epi::crc32_c final_crc(current_crc);
+    epi::CRC32 final_crc(current_crc);
 
-    SV_PutInt(final_crc.crc);
+    SV_PutInt(final_crc.GetCRC());
 
     if (last_error)
         I_Warning("SAVEGAME: Error(s) occurred during writing.\n");
@@ -734,14 +734,14 @@ unsigned int SV_GetInt(void)
 //  ANGLES
 //
 
-void SV_PutAngle(bam_angle_t value)
+void SV_PutAngle(BAMAngle value)
 {
     SV_PutInt((unsigned int)value);
 }
 
-bam_angle_t SV_GetAngle(void)
+BAMAngle SV_GetAngle(void)
 {
-    return (bam_angle_t)SV_GetInt();
+    return (BAMAngle)SV_GetInt();
 }
 
 //----------------------------------------------------------------------------

@@ -296,7 +296,7 @@ class movplanedef_c
     struct sfx_s *sfxstart, *sfxup, *sfxdown, *sfxstop;
 
     // Scrolling. -AJA- 2000/04/16
-    bam_angle_t scroll_angle;
+    BAMAngle scroll_angle;
     float   scroll_speed;
 
     // Boom compatibility bits
@@ -809,7 +809,7 @@ class linetype_c
     slope_type_e slope_type;
 
     // -AJA- 2007/07/05: color for effects (e.g. MIRRORs)
-    rgbacol_t fx_color;
+    RGBAColor fx_color;
 
   private:
     // disable copy construct and assignment operator
@@ -935,7 +935,7 @@ class sectortype_c
     // -AJA- 2000/04/16: Pushing (fixed direction).
     float   push_speed;
     float   push_zspeed;
-    bam_angle_t push_angle;
+    BAMAngle push_angle;
 
     // Dasho 2022 - Params for user-defined reverb in sectors
     std::string reverb_type;
@@ -946,7 +946,7 @@ class sectortype_c
     float ceiling_bob;
 
     colourmap_c *fog_cmap;
-    rgbacol_t     fog_color;
+    RGBAColor     fog_color;
     float        fog_density;
 
   private:

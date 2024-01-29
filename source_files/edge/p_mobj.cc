@@ -195,9 +195,9 @@ static void EnterBounceStates(mobj_t *mo)
 //
 static void BounceOffWall(mobj_t *mo, line_t *wall)
 {
-    bam_angle_t angle;
-    bam_angle_t wall_angle;
-    bam_angle_t diff;
+    BAMAngle angle;
+    BAMAngle wall_angle;
+    BAMAngle diff;
 
     divline_t div;
     float     dest_x, dest_y;
@@ -207,13 +207,13 @@ static void BounceOffWall(mobj_t *mo, line_t *wall)
 
     diff = wall_angle - angle;
 
-    if (diff > ANG90 && diff < ANG270)
-        diff -= ANG180;
+    if (diff > kBAMAngle90 && diff < kBAMAngle270)
+        diff -= kBAMAngle180;
 
     // -AJA- Prevent getting stuck at some walls...
 
-    dest_x = mo->x + epi::BAM_Cos(angle) * (mo->speed + mo->info->radius) * 4.0f;
-    dest_y = mo->y + epi::BAM_Sin(angle) * (mo->speed + mo->info->radius) * 4.0f;
+    dest_x = mo->x + epi::BAMCos(angle) * (mo->speed + mo->info->radius) * 4.0f;
+    dest_y = mo->y + epi::BAMSin(angle) * (mo->speed + mo->info->radius) * 4.0f;
 
     div.x  = wall->v1->X;
     div.y  = wall->v1->Y;
@@ -226,7 +226,7 @@ static void BounceOffWall(mobj_t *mo, line_t *wall)
         // random angle to bounce away.  And don't attenuate the speed (so
         // we can get far enough away).
 
-        angle = P_Random() << (ANGLEBITS - 8);
+        angle = P_Random() << (kBAMAngleBits - 8);
     }
     else
     {
@@ -237,8 +237,8 @@ static void BounceOffWall(mobj_t *mo, line_t *wall)
 
     mo->speed *= mo->info->bounce_speed;
 
-    mo->mom.X = epi::BAM_Cos(angle) * mo->speed;
-    mo->mom.Y = epi::BAM_Sin(angle) * mo->speed;
+    mo->mom.X = epi::BAMCos(angle) * mo->speed;
+    mo->mom.Y = epi::BAMSin(angle) * mo->speed;
     mo->angle = angle;
 
     EnterBounceStates(mo);
@@ -255,8 +255,8 @@ static void BounceOffPlane(mobj_t *mo, float dir)
 
     mo->speed *= mo->info->bounce_speed;
 
-    mo->mom.X = (float)(epi::BAM_Cos(mo->angle) * mo->speed);
-    mo->mom.Y = (float)(epi::BAM_Sin(mo->angle) * mo->speed);
+    mo->mom.X = (float)(epi::BAMCos(mo->angle) * mo->speed);
+    mo->mom.Y = (float)(epi::BAMSin(mo->angle) * mo->speed);
     mo->mom.Z = (float)(dir * mo->speed * mo->info->bounce_up);
 
     EnterBounceStates(mo);
@@ -578,16 +578,16 @@ statenum_t P_MobjFindLabel(mobj_t *mobj, const char *label)
 //
 // P_SetMobjDirAndSpeed
 //
-void P_SetMobjDirAndSpeed(mobj_t *mo, bam_angle_t angle, float slope, float speed)
+void P_SetMobjDirAndSpeed(mobj_t *mo, BAMAngle angle, float slope, float speed)
 {
     mo->angle     = angle;
-    mo->vertangle = epi::BAM_FromATan(slope);
+    mo->vertangle = epi::BAMFromATan(slope);
 
-    mo->mom.Z = epi::BAM_Sin(mo->vertangle) * speed;
-    speed *= epi::BAM_Cos(mo->vertangle);
+    mo->mom.Z = epi::BAMSin(mo->vertangle) * speed;
+    speed *= epi::BAMCos(mo->vertangle);
 
-    mo->mom.X = epi::BAM_Cos(angle) * speed;
-    mo->mom.Y = epi::BAM_Sin(angle) * speed;
+    mo->mom.X = epi::BAMCos(angle) * speed;
+    mo->mom.Y = epi::BAMSin(angle) * speed;
 }
 
 //
@@ -947,7 +947,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
                         if (tempspecial->effectobject)
                         {
                             DebrisThing = tempspecial->effectobject;
-                            P_SpawnDebris(mo->x, mo->y, mo->z, mo->angle + ANG180, DebrisThing);
+                            P_SpawnDebris(mo->x, mo->y, mo->z, mo->angle + kBAMAngle180, DebrisThing);
                         }
                     }
                 }
@@ -1929,7 +1929,7 @@ void P_RunMobjThinkers(bool extra_tic)
 //
 // P_SpawnDebris
 //
-void P_SpawnDebris(float x, float y, float z, bam_angle_t angle, const mobjtype_c *debris)
+void P_SpawnDebris(float x, float y, float z, BAMAngle angle, const mobjtype_c *debris)
 {
     // if (!level_flags.have_extra && (splash->extendedflags & EF_EXTRA)) return;
     // if (! (splash->extendedflags & EF_EXTRA)) return; //Optional extra
@@ -1947,7 +1947,7 @@ void P_SpawnDebris(float x, float y, float z, bam_angle_t angle, const mobjtype_
 //
 // P_SpawnPuff
 //
-void P_SpawnPuff(float x, float y, float z, const mobjtype_c *puff, bam_angle_t angle)
+void P_SpawnPuff(float x, float y, float z, const mobjtype_c *puff, BAMAngle angle)
 {
     mobj_t *th;
 
@@ -1974,12 +1974,12 @@ void P_SpawnPuff(float x, float y, float z, const mobjtype_c *puff, bam_angle_t 
 // -KM- 1998/11/25 Made more violent. :-)
 // -KM- 1999/01/31 Different blood objects for different mobjs.
 //
-void P_SpawnBlood(float x, float y, float z, float damage, bam_angle_t angle, const mobjtype_c *blood)
+void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const mobjtype_c *blood)
 {
     int     num;
     mobj_t *th;
 
-    angle += ANG180;
+    angle += kBAMAngle180;
 
     num = (int)(!level_flags.more_blood ? 1.0f : (M_Random() % 7) + (float)((MAX(damage / 4.0f, 7.0f))));
 
@@ -1987,7 +1987,7 @@ void P_SpawnBlood(float x, float y, float z, float damage, bam_angle_t angle, co
     {
         z += (float)(P_RandomNegPos() / 64.0f);
 
-        angle += (bam_angle_t)(P_RandomNegPos() * (int)(ANG1 / 2));
+        angle += (BAMAngle)(P_RandomNegPos() * (int)(kBAMAngle1 / 2));
 
         th = P_MobjCreateObject(x, y, z, blood);
 
@@ -2072,8 +2072,8 @@ bool P_HitLiquidFloor(mobj_t *thing)
     {
         if (current_flatdef->impactobject)
         {
-            bam_angle_t angle = thing->angle;
-            angle += (bam_angle_t)(P_RandomNegPos() * (int)(ANG1 / 2));
+            BAMAngle angle = thing->angle;
+            angle += (BAMAngle)(P_RandomNegPos() * (int)(kBAMAngle1 / 2));
 
             P_SpawnDebris(thing->x, thing->y, thing->z, angle, current_flatdef->impactobject);
 

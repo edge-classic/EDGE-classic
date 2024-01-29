@@ -526,7 +526,7 @@ void atkdef_c::Default()
     yoffset        = 0;
     angle_offset   = 0;
     slope_offset   = 0;
-    trace_angle    = (ANG270 / 16);
+    trace_angle    = (kBAMAngle270 / 16);
     assault_speed  = 0;
     height         = 0;
     range          = 0;

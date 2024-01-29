@@ -87,7 +87,7 @@ void RAD_InitTips(void)
         current->p = fixed_props[i % FIXEDSLOTS];
 
         current->delay = -1;
-        current->color = RGB_NO_VALUE;
+        current->color = kRGBANoValue;
 
         current->p.slot_num = i;
     }
@@ -114,7 +114,7 @@ static void SetupTip(drawtip_t *cur)
     if (cur->tip_graphic)
         return;
 
-    if (cur->color == RGB_NO_VALUE)
+    if (cur->color == kRGBANoValue)
         cur->color = V_ParseFontColor(cur->p.color_name);
 }
 
@@ -414,7 +414,7 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
     mo->spawnpoint.y         = t->y;
     mo->spawnpoint.z         = t->z;
     mo->spawnpoint.angle     = t->angle;
-    mo->spawnpoint.vertangle = epi::BAM_FromATan(t->slope);
+    mo->spawnpoint.vertangle = epi::BAMFromATan(t->slope);
     mo->spawnpoint.info      = minfo;
     mo->spawnpoint.flags     = t->ambush ? MF_AMBUSH : 0;
     mo->spawnpoint.tag       = t->tag;
@@ -912,7 +912,7 @@ void RAD_ActFogSector(rad_trigger_t *R, void *param)
                 if (t->colmap_color)
                     sectors[i].props.fog_color = V_ParseFontColor(t->colmap_color);
                 else // should only happen with a CLEAR directive
-                    sectors[i].props.fog_color = RGB_NO_VALUE;
+                    sectors[i].props.fog_color = kRGBANoValue;
             }
             if (!t->leave_density)
             {
@@ -1218,8 +1218,8 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
 
     // spawn teleport fog
     mobj_t *fog;
-    x += 20 * epi::BAM_Cos(point->angle);
-    y += 20 * epi::BAM_Sin(point->angle);
+    x += 20 * epi::BAMCos(point->angle);
+    y += 20 * epi::BAMSin(point->angle);
     fog = P_MobjCreateObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
     // never use this object as a teleport destination
     fog->extendedflags |= EF_NEVERTARGET;

@@ -291,7 +291,7 @@ backgroundstyle_c::~backgroundstyle_c()
 //
 void backgroundstyle_c::Default()
 {
-    colour       = RGB_NO_VALUE;
+    colour       = kRGBANoValue;
     translucency = PERCENT_MAKE(100);
 
     image_name.clear();

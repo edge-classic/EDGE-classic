@@ -122,7 +122,7 @@ typedef struct region_properties_s
     HMM_Vec3 old_push = {{0, 0, 0}};
 
     // sector fog
-    rgbacol_t fog_color   = RGB_NO_VALUE;
+    RGBAColor fog_color   = kRGBANoValue;
     float    fog_density = 0;
 } region_properties_t;
 
@@ -149,7 +149,7 @@ typedef struct surface_s
     // texturing matrix (usually identity)
     HMM_Vec2  x_mat;
     HMM_Vec2  y_mat;
-    bam_angle_t rotation = 0;
+    BAMAngle rotation = 0;
 
     // current offset and scrolling deltas (world coords)
     HMM_Vec2 offset;
@@ -485,7 +485,7 @@ typedef struct seg_s
     vertex_t *v1;
     vertex_t *v2;
 
-    bam_angle_t angle;
+    BAMAngle angle;
 
     float length;
 

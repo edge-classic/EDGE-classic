@@ -400,7 +400,7 @@ bool M_CheatResponder(event_t *ev)
     // 'mypos' for player position
     else if (M_CheckCheat(&cheat_mypos, key))
     {
-        CON_Message("ang=%f;x,y=(%f,%f)", epi::Degrees_FromBAM(pl->mo->angle), pl->mo->x, pl->mo->y);
+        CON_Message("ang=%f;x,y=(%f,%f)", epi::DegreesFromBAM(pl->mo->angle), pl->mo->x, pl->mo->y);
     }
 
     if (M_CheckCheat(&cheat_clev, key))

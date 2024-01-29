@@ -119,9 +119,9 @@ static line_t **linebuffer = NULL;
 // bbox used
 static float dummy_bbox[4];
 
-epi::crc32_c mapsector_CRC;
-epi::crc32_c mapline_CRC;
-epi::crc32_c mapthing_CRC;
+epi::CRC32 mapsector_CRC;
+epi::CRC32 mapline_CRC;
+epi::CRC32 mapthing_CRC;
 
 int mapthing_NUM;
 
@@ -485,14 +485,14 @@ static void LoadSectors(int lump)
         ss->props.viscosity = VISCOSITY;
         ss->props.drag      = DRAG;
 
-        if (ss->props.special && ss->props.special->fog_color != RGB_NO_VALUE)
+        if (ss->props.special && ss->props.special->fog_color != kRGBANoValue)
         {
             ss->props.fog_color   = ss->props.special->fog_color;
             ss->props.fog_density = 0.01f * ss->props.special->fog_density;
         }
         else
         {
-            ss->props.fog_color   = RGB_NO_VALUE;
+            ss->props.fog_color   = kRGBANoValue;
             ss->props.fog_density = 0;
         }
 
@@ -548,7 +548,7 @@ static void UnknownThingWarning(int type, float x, float y)
     unknown_thing_map[type] = count + 1;
 }
 
-static mobj_t *SpawnMapThing(const mobjtype_c *info, float x, float y, float z, sector_t *sec, bam_angle_t angle,
+static mobj_t *SpawnMapThing(const mobjtype_c *info, float x, float y, float z, sector_t *sec, BAMAngle angle,
                              int options, int tag)
 {
     spawnpoint_t point;
@@ -680,7 +680,7 @@ static mobj_t *SpawnMapThing(const mobjtype_c *info, float x, float y, float z, 
 static void LoadThings(int lump)
 {
     float   x, y, z;
-    bam_angle_t angle;
+    BAMAngle angle;
     int     options, typenum;
     int     i;
 
@@ -722,7 +722,7 @@ static void LoadThings(int lump)
     {
         x       = (float)EPI_LE_S16(mt->x);
         y       = (float)EPI_LE_S16(mt->y);
-        angle   = epi::BAM_FromDegrees((float)EPI_LE_S16(mt->angle));
+        angle   = epi::BAMFromDegrees((float)EPI_LE_S16(mt->angle));
         typenum = EPI_LE_U16(mt->type);
         options = EPI_LE_U16(mt->options);
 
@@ -813,7 +813,7 @@ static void LoadHexenThings(int lump)
     // -AJA- 2001/08/04: wrote this, based on the Hexen specs.
 
     float   x, y, z;
-    bam_angle_t angle;
+    BAMAngle angle;
     int     options, typenum;
     int     tag;
     int     i;
@@ -839,7 +839,7 @@ static void LoadHexenThings(int lump)
         x     = (float)EPI_LE_S16(mt->x);
         y     = (float)EPI_LE_S16(mt->y);
         z     = (float)EPI_LE_S16(mt->height);
-        angle = epi::BAM_FromDegrees((float)EPI_LE_S16(mt->angle));
+        angle = epi::BAMFromDegrees((float)EPI_LE_S16(mt->angle));
 
         tag     = EPI_LE_S16(mt->tid);
         typenum = EPI_LE_U16(mt->type);
@@ -1574,8 +1574,8 @@ static void LoadUDMFSectors()
             float    rf = 0.0f, rc = 0.0f;
             float    gravfactor = 1.0f;
             int      light = 160, type = 0, tag = 0;
-            rgbacol_t fog_color   = SG_BLACK_RGBA32;
-            rgbacol_t light_color = SG_WHITE_RGBA32;
+            RGBAColor fog_color   = SG_BLACK_RGBA32;
+            RGBAColor light_color = SG_WHITE_RGBA32;
             int      fog_density = 0;
             char     floor_tex[10];
             char     ceil_tex[10];
@@ -1679,10 +1679,10 @@ static void LoadUDMFSectors()
 
             // rotations
             if (!AlmostEquals(rf, 0.0f))
-                ss->floor.rotation = epi::BAM_FromDegrees(rf);
+                ss->floor.rotation = epi::BAMFromDegrees(rf);
 
             if (!AlmostEquals(rc, 0.0f))
-                ss->ceil.rotation = epi::BAM_FromDegrees(rc);
+                ss->ceil.rotation = epi::BAMFromDegrees(rc);
 
             // granular scaling
             ss->floor.x_mat.X = fx_sc;
@@ -1737,7 +1737,7 @@ static void LoadUDMFSectors()
             if (fog_color != SG_BLACK_RGBA32) // All black is the established UDMF "no fog" color
             {
                 // Prevent UDMF-specified fog color from having our internal 'no value'...uh...value
-                if (fog_color == RGB_NO_VALUE)
+                if (fog_color == kRGBANoValue)
                     fog_color ^= 0x00010100;
                 ss->props.fog_color = fog_color;
                 // Best-effort match for GZDoom's fogdensity values so that UDB, etc
@@ -1747,25 +1747,25 @@ static void LoadUDMFSectors()
                 else
                     ss->props.fog_density = 0.01f * ((float)fog_density / 1020.0f);
             }
-            else if (ss->props.special && ss->props.special->fog_color != RGB_NO_VALUE)
+            else if (ss->props.special && ss->props.special->fog_color != kRGBANoValue)
             {
                 ss->props.fog_color   = ss->props.special->fog_color;
                 ss->props.fog_density = 0.01f * ss->props.special->fog_density;
             }
             else
             {
-                ss->props.fog_color   = RGB_NO_VALUE;
+                ss->props.fog_color   = kRGBANoValue;
                 ss->props.fog_density = 0;
             }
             if (light_color != SG_WHITE_RGBA32)
             {
 
-                if (light_color == RGB_NO_VALUE)
+                if (light_color == kRGBANoValue)
                     light_color ^= 0x00010100;
                 // Make colourmap if necessary
                 for (auto cmap : colourmaps)
                 {
-                    if (cmap->gl_colour != RGB_NO_VALUE && cmap->gl_colour == light_color)
+                    if (cmap->gl_colour != kRGBANoValue && cmap->gl_colour == light_color)
                     {
                         ss->props.colourmap = cmap;
                         break;
@@ -2232,7 +2232,7 @@ static void LoadUDMFThings()
         if (section == "thing")
         {
             float             x = 0.0f, y = 0.0f, z = 0.0f;
-            bam_angle_t           angle     = ANG0;
+            BAMAngle           angle     = kBAMAngle0;
             int               options   = MTF_NOT_SINGLE | MTF_NOT_DM | MTF_NOT_COOP;
             int               typenum   = -1;
             int               tag       = 0;
@@ -2275,7 +2275,7 @@ static void LoadUDMFThings()
                 else if (key == "height")
                     z = epi::LexDouble(value);
                 else if (key == "angle")
-                    angle = epi::BAM_FromDegrees(epi::LexInteger(value));
+                    angle = epi::BAMFromDegrees(epi::LexInteger(value));
                 else if (key == "type")
                     typenum = epi::LexInteger(value);
                 else if (key == "skill1")

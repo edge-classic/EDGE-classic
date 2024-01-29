@@ -482,10 +482,10 @@ void mapdef_c::Default()
     forced_skystretch = SKS_Unset;
 
     indoor_fog_cmap     = nullptr;
-    indoor_fog_color    = RGB_NO_VALUE;
+    indoor_fog_color    = kRGBANoValue;
     indoor_fog_density  = 0;
     outdoor_fog_cmap    = nullptr;
-    outdoor_fog_color   = RGB_NO_VALUE;
+    outdoor_fog_color   = kRGBANoValue;
     outdoor_fog_density = 0;
 }
 

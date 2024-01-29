@@ -1234,14 +1234,14 @@ void DDF_MainGetAngle(const char *info, void *storage)
 {
     SYS_ASSERT(info && storage);
 
-    bam_angle_t *dest = (bam_angle_t *)storage;
+    BAMAngle *dest = (BAMAngle *)storage;
 
     float val;
 
     if (sscanf(info, "%f", &val) != 1)
         DDF_Error("Bad angle value: %s\n", info);
 
-    *dest = epi::BAM_FromDegrees(val);
+    *dest = epi::BAMFromDegrees(val);
 }
 
 void DDF_MainGetSlope(const char *info, void *storage)
@@ -1400,7 +1400,7 @@ void DDF_MainGetColourmap(const char *info, void *storage)
 //
 void DDF_MainGetRGB(const char *info, void *storage)
 {
-    rgbacol_t *result = (rgbacol_t *)storage;
+    RGBAColor *result = (RGBAColor *)storage;
     int   r = 0;
     int   g = 0;
     int   b = 0;
@@ -1409,17 +1409,17 @@ void DDF_MainGetRGB(const char *info, void *storage)
 
     if (DDF_CompareName(info, "NONE") == 0)
     {
-        *result = RGB_NO_VALUE;
+        *result = kRGBANoValue;
         return;
     }
 
     if (sscanf(info, " #%2x%2x%2x ", &r, &g, &b) != 3)
         DDF_Error("Bad RGB colour value: %s\n", info);
 
-    *result = epi::RGBA_Make((uint8_t)r, (uint8_t)g, (uint8_t)b);
+    *result = epi::MakeRGBA((uint8_t)r, (uint8_t)g, (uint8_t)b);
 
     // silently change if matches the "none specified" value
-    if (*result == RGB_NO_VALUE)
+    if (*result == kRGBANoValue)
         *result ^= 0x00010100;
 }
 
@@ -2083,8 +2083,8 @@ void weakness_info_c::Default()
     height[0] = PERCENT_MAKE(0);
     height[1] = PERCENT_MAKE(100);
 
-    angle[0] = ANG0;
-    angle[1] = ANG360;
+    angle[0] = kBAMAngle0;
+    angle[1] = kBAMAngle360;
 
     classes    = BITSET_EMPTY;
     multiply   = 2.5;

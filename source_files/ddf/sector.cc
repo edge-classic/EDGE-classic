@@ -518,7 +518,7 @@ void sectortype_c::Default()
     ceiling_bob = 0.0f;
 
     fog_cmap    = nullptr;
-    fog_color   = RGB_NO_VALUE;
+    fog_color   = kRGBANoValue;
     fog_density = 0;
 }
 

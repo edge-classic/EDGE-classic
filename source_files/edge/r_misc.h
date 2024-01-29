@@ -37,7 +37,7 @@
 //
 extern float   viewcos;
 extern float   viewsin;
-extern bam_angle_t viewvertangle;
+extern BAMAngle viewvertangle;
 
 extern subsector_t         *viewsubsector;
 extern region_properties_t *view_props;
@@ -56,7 +56,7 @@ extern int validcount;
 extern int linecount;
 
 // -ES- 1999/03/29 Added these
-extern bam_angle_t normalfov, zoomedfov;
+extern BAMAngle normalfov, zoomedfov;
 extern bool    viewiszoomed;
 
 extern cvar_c r_fov;
@@ -84,9 +84,9 @@ extern float *r_triangletable;
 
 //
 // Utility functions.
-bam_angle_t              R_PointToAngle(float x1, float y1, float x2, float y2, bool precise = false);
+BAMAngle              R_PointToAngle(float x1, float y1, float x2, float y2, bool precise = false);
 float                R_PointToDist(float x1, float y1, float x2, float y2);
-float                R_ScaleFromGlobalAngle(bam_angle_t visangle);
+float                R_ScaleFromGlobalAngle(BAMAngle visangle);
 subsector_t         *R_PointInSubsector(float x, float y);
 region_properties_t *R_PointGetProps(subsector_t *sub, float z);
 void                 R_InitShaderTables();

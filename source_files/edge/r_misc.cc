@@ -55,14 +55,14 @@ int viewwindow_y;
 int viewwindow_w;
 int viewwindow_h;
 
-bam_angle_t viewangle     = 0;
-bam_angle_t viewvertangle = 0;
+BAMAngle viewangle     = 0;
+BAMAngle viewvertangle = 0;
 
 HMM_Vec3 viewforward;
 HMM_Vec3 viewup;
 HMM_Vec3 viewright;
 
-bam_angle_t normalfov, zoomedfov;
+BAMAngle normalfov, zoomedfov;
 bool    viewiszoomed = false;
 
 // increment every time a check is made
@@ -90,8 +90,8 @@ mobj_t *background_camera_mo = NULL;
 // precalculated math tables
 //
 
-bam_angle_t viewanglebaseoffset;
-bam_angle_t viewangleoffset;
+BAMAngle viewanglebaseoffset;
+BAMAngle viewangleoffset;
 
 int reduce_flash = 0;
 
@@ -139,23 +139,23 @@ static float atan2_approx(float y, float x)
         return (angle);
 }
 //
-bam_angle_t R_PointToAngle(float x1, float y1, float x, float y, bool precise)
+BAMAngle R_PointToAngle(float x1, float y1, float x, float y, bool precise)
 {
     x -= x1;
     y -= y1;
 
     if (precise) 
     {
-        return (AlmostEquals(x, 0.0f) && AlmostEquals(y, 0.0f)) ? 0 : epi::BAM_FromDegrees(atan2(y, x) * (180 / M_PI));
+        return (AlmostEquals(x, 0.0f) && AlmostEquals(y, 0.0f)) ? 0 : epi::BAMFromDegrees(atan2(y, x) * (180 / M_PI));
     }
 
-    return epi::BAM_FromDegrees(atan2_approx(y, x) * (180 / M_PI));
+    return epi::BAMFromDegrees(atan2_approx(y, x) * (180 / M_PI));
 
 }
 
 float R_PointToDist(float x1, float y1, float x2, float y2)
 {
-    bam_angle_t angle;
+    BAMAngle angle;
     float   dx;
     float   dy;
     float   temp;
@@ -176,10 +176,10 @@ float R_PointToDist(float x1, float y1, float x2, float y2)
         dy   = temp;
     }
 
-    angle = epi::BAM_FromATan(dy / dx) + ANG90;
+    angle = epi::BAMFromATan(dy / dx) + kBAMAngle90;
 
     // use as cosine
-    dist = dx / epi::BAM_Sin(angle);
+    dist = dx / epi::BAMSin(angle);
 
     return dist;
 }

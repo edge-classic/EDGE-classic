@@ -195,7 +195,7 @@ void RGL_ColourmapEffect(player_t *player)
             HUD_SetAlpha(0.0f);
             s = MAX(0.5f, s);
             HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                        epi::RGBA_Make(I_ROUND(s * 255), I_ROUND(s * 255), I_ROUND(s * 255)), 25.0f);
+                        epi::MakeRGBA(I_ROUND(s * 255), I_ROUND(s * 255), I_ROUND(s * 255)), 25.0f);
             HUD_SetAlpha(old_alpha);
         }
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -230,7 +230,7 @@ void RGL_PaletteEffect(player_t *player)
         {
             HUD_SetAlpha(0.20f * s);
             HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                        epi::RGBA_Make(I_ROUND(r * 255), I_ROUND(g * 255), I_ROUND(b * 255)), 25.0f);
+                        epi::MakeRGBA(I_ROUND(r * 255), I_ROUND(g * 255), I_ROUND(b * 255)), 25.0f);
         }
     }
     else
@@ -251,7 +251,7 @@ void RGL_PaletteEffect(player_t *player)
         {
             HUD_SetAlpha((float)rgb_max / 255.0f);
             HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                        epi::RGBA_Make(I_ROUND((float)rgb_data[0] / rgb_max * 255),
+                        epi::MakeRGBA(I_ROUND((float)rgb_data[0] / rgb_max * 255),
                                  I_ROUND((float)rgb_data[1] / rgb_max * 255),
                                  I_ROUND((float)rgb_data[2] / rgb_max * 255)),
                         25.0f);

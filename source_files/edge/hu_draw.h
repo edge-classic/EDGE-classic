@@ -46,7 +46,7 @@ void HUD_SetCoordSys(int width, int height);
 
 void  HUD_SetFont(font_c *font = NULL);
 void  HUD_SetScale(float scale = 1.0f);
-void  HUD_SetTextColor(rgbacol_t color = RGB_NO_VALUE);
+void  HUD_SetTextColor(RGBAColor color = kRGBANoValue);
 void  HUD_SetAlpha(float alpha = 1.0f);
 float HUD_GetAlpha(void);
 
@@ -68,26 +68,26 @@ void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand = false
 void HUD_PopScissor();
 
 void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *image, float tx1, float ty1, float tx2,
-                  float ty2, float alpha = 1.0f, rgbacol_t text_col = RGB_NO_VALUE, const colourmap_c *palremap = NULL,
+                  float ty2, float alpha = 1.0f, RGBAColor text_col = kRGBANoValue, const colourmap_c *palremap = NULL,
                   float sx = 0.0, float sy = 0.0, char ch = -1);
 
 // Draw a solid colour box (possibly translucent) in the given
 // rectangle.
-void HUD_SolidBox(float x1, float y1, float x2, float y2, rgbacol_t col);
+void HUD_SolidBox(float x1, float y1, float x2, float y2, RGBAColor col);
 
 // Draw a solid colour line (possibly translucent) between the two
 // end points.  Coordinates are inclusive.  Drawing will be clipped
 // to the current scissor rectangle.  The dx/dy fields are used by
 // the automap code to reduce the wobblies.
-void HUD_SolidLine(float x1, float y1, float x2, float y2, rgbacol_t col, float thickness = 1, bool smooth = true,
+void HUD_SolidLine(float x1, float y1, float x2, float y2, RGBAColor col, float thickness = 1, bool smooth = true,
                    float dx = 0, float dy = 0);
 
 // Draw a thin outline of a box.
-void HUD_ThinBox(float x1, float y1, float x2, float y2, rgbacol_t col, float thickness = 0.0f);
+void HUD_ThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float thickness = 0.0f);
 
 // Like HUD_SolidBox but the colors of each corner (TL, BL, TR, BR) can
 // be specified individually.
-void HUD_GradientBox(float x1, float y1, float x2, float y2, rgbacol_t *cols);
+void HUD_GradientBox(float x1, float y1, float x2, float y2, RGBAColor *cols);
 
 void HUD_DrawImage(float x, float y, const image_c *image, const colourmap_c *colmap = nullptr);
 void HUD_DrawImageNoOffset(float x, float y, const image_c *image);

@@ -24,49 +24,49 @@
 #include "sokol_color.h"
 
 // RGBA 8:8:8:8
-typedef uint32_t rgbacol_t;
+typedef uint32_t RGBAColor;
 
-#define RGB_NO_VALUE 0x01FEFEFF /* bright CYAN */
+constexpr uint32_t kRGBANoValue = 0x01FEFEFF; /* bright CYAN */
 
 namespace epi
 {
 
-inline rgbacol_t RGBA_Make(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
+inline RGBAColor MakeRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
 {
-    return (rgbacol_t)(((uint32_t)r << 24) | ((uint32_t)g << 16) | ((uint32_t)b << 8) | ((uint32_t)a << 0));
+    return (RGBAColor)(((uint32_t)r << 24) | ((uint32_t)g << 16) | ((uint32_t)b << 8) | ((uint32_t)a << 0));
 }
 
-inline uint8_t RGBA_Red(rgbacol_t rgba)
+inline uint8_t GetRGBARed(RGBAColor rgba)
 {
     return (uint8_t)(rgba >> 24);
 }
 
-inline uint8_t RGBA_Green(rgbacol_t rgba)
+inline uint8_t GetRGBAGreen(RGBAColor rgba)
 {
     return (uint8_t)(rgba >> 16);
 }
 
-inline uint8_t RGBA_Blue(rgbacol_t rgba)
+inline uint8_t GetRGBABlue(RGBAColor rgba)
 {
     return (uint8_t)(rgba >> 8);
 }
 
-inline uint8_t RGBA_Alpha(rgbacol_t rgba)
+inline uint8_t GetRGBAAlpha(RGBAColor rgba)
 {
     return (uint8_t)(rgba >> 0);
 }
 
-inline rgbacol_t RGBA_Mix(const rgbacol_t &mix1, const rgbacol_t &mix2, int qty = 128)
+inline RGBAColor MixRGBA(const RGBAColor &mix1, const RGBAColor &mix2, int qty = 128)
 {
-    int nr = int(RGBA_Red(mix1)) * (255 - qty) + int(RGBA_Red(mix2)) * qty;
-    int ng = int(RGBA_Green(mix1)) * (255 - qty) + int(RGBA_Green(mix2)) * qty;
-    int nb = int(RGBA_Blue(mix1)) * (255 - qty) + int(RGBA_Blue(mix2)) * qty;
-    int na = int(RGBA_Alpha(mix1)) * (255 - qty) + int(RGBA_Alpha(mix2)) * qty;
+    int nr = int(GetRGBARed(mix1)) * (255 - qty) + int(GetRGBARed(mix2)) * qty;
+    int ng = int(GetRGBAGreen(mix1)) * (255 - qty) + int(GetRGBAGreen(mix2)) * qty;
+    int nb = int(GetRGBABlue(mix1)) * (255 - qty) + int(GetRGBABlue(mix2)) * qty;
+    int na = int(GetRGBAAlpha(mix1)) * (255 - qty) + int(GetRGBAAlpha(mix2)) * qty;
 
-    return RGBA_Make(uint8_t(nr / 255), uint8_t(ng / 255), uint8_t(nb / 255), uint8_t(na / 255));
+    return MakeRGBA(uint8_t(nr / 255), uint8_t(ng / 255), uint8_t(nb / 255), uint8_t(na / 255));
 }
 
-class hsv_col_c
+class HSVColor
 {
   public:
     // sealed, value semantics.
@@ -75,31 +75,32 @@ class hsv_col_c
     // s is saturation (0 to 255: 0 = White, 255 = Pure color).
     // v is value (0 to 255: 0 = Darkest, 255 = Brightest).
 
-    short h;
-    uint8_t  s, v;
+    short h_;
+    uint8_t  s_, v_;
 
-    hsv_col_c(const rgbacol_t &col); // conversion from RGBA
+    HSVColor(const RGBAColor &col); // conversion from RGBA
 
-    rgbacol_t GetRGBA() const; // conversion to RGBA
+    RGBAColor ToRGBA() const; // conversion to RGBA
 
-    inline hsv_col_c &Rotate(int delta)
+    inline HSVColor &Rotate(int delta)
     {
-        int bam = int(h + delta) * 372827;
+        int bam = int(h_ + delta) * 372827;
 
-        h = short((bam & 0x7FFFFFF) / 372827);
+        h_ = short((bam & 0x7FFFFFF) / 372827);
 
         return *this;
     } // usable range: -1800 to +1800
-    inline hsv_col_c &SetSaturation(int sat)
+
+    inline HSVColor &SetSaturation(int sat)
     {
-        s = sat;
+        s_ = sat;
 
         return *this;
     }
 
-    inline hsv_col_c &SetValue(int val)
+    inline HSVColor &SetValue(int val)
     {
-        v = val;
+        v_ = val;
 
         return *this;
     }

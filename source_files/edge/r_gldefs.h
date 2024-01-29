@@ -202,7 +202,7 @@ class drawmirror_c
   public:
     seg_t *seg;
 
-    bam_angle_t left, right;
+    BAMAngle left, right;
 
     bool is_portal;
 
@@ -305,7 +305,7 @@ extern int num_active_mirrors;
 
 void MIR_Coordinate(float &x, float &y);
 void MIR_Height(float &z);
-void MIR_Angle(bam_angle_t &ang);
+void MIR_Angle(BAMAngle &ang);
 
 bool  MIR_Reflective(void);
 float MIR_XYScale(void);

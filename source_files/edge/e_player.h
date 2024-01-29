@@ -272,7 +272,7 @@ typedef struct player_s
     float damage_pain;
 
     // damage flash colour of last damage type inflicted
-    rgbacol_t last_damage_colour;
+    RGBAColor last_damage_colour;
 
     // So gun flashes light up the screen.
     int  extralight;

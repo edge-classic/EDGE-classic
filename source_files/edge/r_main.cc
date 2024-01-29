@@ -114,8 +114,8 @@ void RGL_SetupMatrices3D(void)
     glMatrixMode(GL_MODELVIEW);
 
     glLoadIdentity();
-    glRotatef(270.0f - epi::Degrees_FromBAM(viewvertangle), 1.0f, 0.0f, 0.0f);
-    glRotatef(90.0f - epi::Degrees_FromBAM(viewangle), 0.0f, 0.0f, 1.0f);
+    glRotatef(270.0f - epi::DegreesFromBAM(viewvertangle), 1.0f, 0.0f, 0.0f);
+    glRotatef(90.0f - epi::DegreesFromBAM(viewangle), 0.0f, 0.0f, 1.0f);
     glTranslatef(-viewx, -viewy, -viewz);
 
     // turn on lighting.  Some drivers (e.g. TNT2) don't work properly

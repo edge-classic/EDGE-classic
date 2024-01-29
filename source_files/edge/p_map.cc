@@ -127,7 +127,7 @@ typedef struct shoot_trav_info_s
 
     float   range;
     float   start_z;
-    bam_angle_t angle;
+    BAMAngle angle;
     float   slope;
     float   topslope;
     float   bottomslope;
@@ -1240,23 +1240,23 @@ static void HitSlideLine(line_t *ld)
 
     int side = PointOnLineSide(slidemo->x, slidemo->y, ld);
 
-    bam_angle_t lineangle = R_PointToAngle(0, 0, ld->dx, ld->dy);
+    BAMAngle lineangle = R_PointToAngle(0, 0, ld->dx, ld->dy);
 
     if (side == 1)
-        lineangle += ANG180;
+        lineangle += kBAMAngle180;
 
-    bam_angle_t moveangle  = R_PointToAngle(0, 0, tmxmove, tmymove);
-    bam_angle_t deltaangle = moveangle - lineangle;
+    BAMAngle moveangle  = R_PointToAngle(0, 0, tmxmove, tmymove);
+    BAMAngle deltaangle = moveangle - lineangle;
 
-    if (deltaangle > ANG180)
-        deltaangle += ANG180;
-    // I_Error ("SlideLine: ang>ANG180");
+    if (deltaangle > kBAMAngle180)
+        deltaangle += kBAMAngle180;
+    // I_Error ("SlideLine: ang>kBAMAngle180");
 
     float movelen = P_ApproxDistance(tmxmove, tmymove);
-    float newlen  = movelen * epi::BAM_Cos(deltaangle);
+    float newlen  = movelen * epi::BAMCos(deltaangle);
 
-    tmxmove = newlen * epi::BAM_Cos(lineangle);
-    tmymove = newlen * epi::BAM_Sin(lineangle);
+    tmxmove = newlen * epi::BAMCos(lineangle);
+    tmymove = newlen * epi::BAMSin(lineangle);
 }
 
 static bool PTR_SlideTraverse(intercept_t *in, void *dataptr)
@@ -1641,7 +1641,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 {
                     sx -= trace.dx * 6.0f / shoot_I.range;
                     sy -= trace.dy * 6.0f / shoot_I.range;
-                    P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
+                    P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
                 }
                 return false;
             }
@@ -1657,7 +1657,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                         {
                             sx -= trace.dx * 6.0f / shoot_I.range;
                             sy -= trace.dy * 6.0f / shoot_I.range;
-                            P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
+                            P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
                         }
                         return false;
                     }
@@ -1668,7 +1668,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                                      {{(tri_v1.Z > tri_v2.Z ? tri_v1.Y : tri_v2.Y), sec_check->f_h}}, {{sy, z}}))
                     {
                         if (shoot_I.puff)
-                            P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
+                            P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
                         return false;
                     }
                 }
@@ -1705,7 +1705,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 {
                     sx -= trace.dx * 6.0f / shoot_I.range;
                     sy -= trace.dy * 6.0f / shoot_I.range;
-                    P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
+                    P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
                 }
                 return false;
             }
@@ -1721,7 +1721,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                         {
                             sx -= trace.dx * 6.0f / shoot_I.range;
                             sy -= trace.dy * 6.0f / shoot_I.range;
-                            P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
+                            P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
                         }
                         return false;
                     }
@@ -1732,7 +1732,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                                      {{(tri_v1.Z < tri_v2.Z ? tri_v1.Y : tri_v2.Y), sec_check->c_h}}, {{sy, z}}))
                     {
                         if (shoot_I.puff)
-                            P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + ANG180);
+                            P_SpawnPuff(sx, sy, z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
                         return false;
                     }
                 }
@@ -1767,7 +1767,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 if (P_PathTraverse(sx, sy, shoota.X, shoota.Y, PT_ADDTHINGS, PTR_ShootTraverse))
                 {
                     if (shoot_I.puff)
-                        P_SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_I.puff, shoot_I.angle + ANG180);
+                        P_SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
                     return false;
                 }
             }
@@ -1785,7 +1785,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                     if (P_PathTraverse(sx, sy, shoota.X, shoota.Y, PT_ADDTHINGS, PTR_ShootTraverse))
                     {
                         if (shoot_I.puff)
-                            P_SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_I.puff, shoot_I.angle + ANG180);
+                            P_SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
                         return false;
                     }
                 }
@@ -1809,7 +1809,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 if (P_PathTraverse(sx, sy, shoota.X, shoota.Y, PT_ADDTHINGS, PTR_ShootTraverse))
                 {
                     if (shoot_I.puff)
-                        P_SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_I.puff, shoot_I.angle + ANG180);
+                        P_SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
                     return false;
                 }
             }
@@ -1866,8 +1866,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
         {
             if (current_flatdef->impactobject)
             {
-                bam_angle_t angle = shoot_I.angle + ANG180;
-                angle += (bam_angle_t)(P_RandomNegPos() * (int)(ANG1 / 2));
+                BAMAngle angle = shoot_I.angle + kBAMAngle180;
+                angle += (BAMAngle)(P_RandomNegPos() * (int)(kBAMAngle1 / 2));
 
                 P_SpawnDebris(x, y, z, angle, current_flatdef->impactobject);
                 // don't go any farther
@@ -1878,7 +1878,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
 
     // Spawn bullet puff
     if (shoot_I.puff)
-        P_SpawnPuff(x, y, z, shoot_I.puff, shoot_I.angle + ANG180);
+        P_SpawnPuff(x, y, z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
 
     // don't go any farther
     return false;
@@ -2140,7 +2140,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
 
         // Spawn bullet puffs.
         if (shoot_I.puff)
-            P_SpawnPuff(x, y, z, shoot_I.puff, shoot_I.angle + ANG180);
+            P_SpawnPuff(x, y, z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
 
         // Lobo:2022
         // Check if we're using EFFECT_OBJECT for this line
@@ -2153,7 +2153,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
 
             if (info && tempspecial->type == line_shootable)
             {
-                P_SpawnDebris(x, y, z, shoot_I.angle + ANG180, info);
+                P_SpawnDebris(x, y, z, shoot_I.angle + kBAMAngle180, info);
             }
             P_UnblockLineEffectDebris(ld, tempspecial);
         }
@@ -2226,17 +2226,17 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
     else
     {
         if (shoot_I.puff)
-            P_SpawnPuff(x, y, z, shoot_I.puff, shoot_I.angle + ANG180);
+            P_SpawnPuff(x, y, z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
     }
 
     // don't go any farther
     return false;
 }
 
-mobj_t *P_AimLineAttack(mobj_t *t1, bam_angle_t angle, float distance, float *slope)
+mobj_t *P_AimLineAttack(mobj_t *t1, BAMAngle angle, float distance, float *slope)
 {
-    float x2 = t1->x + distance * epi::BAM_Cos(angle);
-    float y2 = t1->y + distance * epi::BAM_Sin(angle);
+    float x2 = t1->x + distance * epi::BAMCos(angle);
+    float y2 = t1->y + distance * epi::BAMSin(angle);
 
     Z_Clear(&aim_I, shoot_trav_info_t, 1);
 
@@ -2247,7 +2247,7 @@ mobj_t *P_AimLineAttack(mobj_t *t1, bam_angle_t angle, float distance, float *sl
 
     if (t1->player)
     {
-        float vertslope = epi::BAM_Tan(t1->vertangle);
+        float vertslope = epi::BAMTan(t1->vertangle);
 
         aim_I.topslope    = (vertslope * 256.0f + 100.0f) / 160.0f;
         aim_I.bottomslope = (vertslope * 256.0f - 100.0f) / 160.0f;
@@ -2272,13 +2272,13 @@ mobj_t *P_AimLineAttack(mobj_t *t1, bam_angle_t angle, float distance, float *sl
     return aim_I.target;
 }
 
-void P_LineAttack(mobj_t *t1, bam_angle_t angle, float distance, float slope, float damage, const damage_c *damtype,
+void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float damage, const damage_c *damtype,
                   const mobjtype_c *puff)
 {
     // Note: Damtype can be NULL.
 
-    float x2 = t1->x + distance * epi::BAM_Cos(angle);
-    float y2 = t1->y + distance * epi::BAM_Sin(angle);
+    float x2 = t1->x + distance * epi::BAMCos(angle);
+    float y2 = t1->y + distance * epi::BAMSin(angle);
 
     Z_Clear(&shoot_I, shoot_trav_info_t, 1);
 
@@ -2324,13 +2324,13 @@ void P_TargetTheory(mobj_t *source, mobj_t *target, float *x, float *y, float *z
         else
             start_z = source->z + source->height / 2 + 8;
 
-        (*x) = source->x + MISSILERANGE * epi::BAM_Cos(source->angle);
-        (*y) = source->y + MISSILERANGE * epi::BAM_Sin(source->angle);
-        (*z) = start_z + MISSILERANGE * epi::BAM_Tan(source->vertangle);
+        (*x) = source->x + MISSILERANGE * epi::BAMCos(source->angle);
+        (*y) = source->y + MISSILERANGE * epi::BAMSin(source->angle);
+        (*z) = start_z + MISSILERANGE * epi::BAMTan(source->vertangle);
     }
 }
 
-mobj_t *GetMapTargetAimInfo(mobj_t *source, bam_angle_t angle, float distance)
+mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance)
 {
     float x2, y2;
 
@@ -2339,8 +2339,8 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, bam_angle_t angle, float distance)
     aim_I.source = source;
     aim_I.forced = false;
 
-    x2 = source->x + distance * epi::BAM_Cos(angle);
-    y2 = source->y + distance * epi::BAM_Sin(angle);
+    x2 = source->x + distance * epi::BAMCos(angle);
+    y2 = source->y + distance * epi::BAMSin(angle);
 
     if (source->info)
         aim_I.start_z = source->z + source->height * PERCENT_2_FLOAT(source->info->shotheight);
@@ -2351,7 +2351,7 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, bam_angle_t angle, float distance)
     aim_I.target = NULL;
 
     // Lobo: try and limit the vertical range somewhat
-    float vertslope   = epi::BAM_Tan(source->vertangle);
+    float vertslope   = epi::BAMTan(source->vertangle);
     aim_I.topslope    = (100 + vertslope * 320) / 160.0f;
     aim_I.bottomslope = (-100 + vertslope * 576) / 160.0f;
     // aim_I.topslope = 100.0f / 160.0f;
@@ -2387,7 +2387,7 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, bam_angle_t angle, float distance)
 // -ACB- 1998/09/01
 // -AJA- 1999/08/08: Added `force_aim' to fix chainsaw.
 //
-mobj_t *DoMapTargetAutoAim(mobj_t *source, bam_angle_t angle, float distance, bool force_aim)
+mobj_t *DoMapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool force_aim)
 {
     float x2, y2;
 
@@ -2402,8 +2402,8 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, bam_angle_t angle, float distance, bo
     aim_I.source = source;
     aim_I.forced = force_aim;
 
-    x2 = source->x + distance * epi::BAM_Cos(angle);
-    y2 = source->y + distance * epi::BAM_Sin(angle);
+    x2 = source->x + distance * epi::BAMCos(angle);
+    y2 = source->y + distance * epi::BAMSin(angle);
 
     if (source->info)
         aim_I.start_z = source->z + source->height * PERCENT_2_FLOAT(source->info->shotheight);
@@ -2412,7 +2412,7 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, bam_angle_t angle, float distance, bo
 
     if (source->player)
     {
-        float vertslope = epi::BAM_Tan(source->vertangle);
+        float vertslope = epi::BAMTan(source->vertangle);
 
         aim_I.topslope    = (100 + vertslope * 256) / 160.0f;
         aim_I.bottomslope = (-100 + vertslope * 256) / 160.0f;
@@ -2440,20 +2440,20 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, bam_angle_t angle, float distance, bo
 
         slope = CLAMP(-1.0f, slope, 1.0f);
 
-        source->vertangle = epi::BAM_FromATan(slope);
+        source->vertangle = epi::BAMFromATan(slope);
     }
 
     return aim_I.target;
 }
 
-mobj_t *P_MapTargetAutoAim(mobj_t *source, bam_angle_t angle, float distance, bool force_aim)
+mobj_t *P_MapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool force_aim)
 {
     mobj_t *target = DoMapTargetAutoAim(source, angle, distance, force_aim);
 
     // If that is a miss, aim slightly to the left or right
     if (!target)
     {
-        bam_angle_t diff = ANG180 / 32;
+        BAMAngle diff = kBAMAngle180 / 32;
 
         if (leveltime & 1)
             diff = 0 - diff;
@@ -2562,8 +2562,8 @@ void P_UseLines(player_t *player)
 
     x1 = player->mo->x;
     y1 = player->mo->y;
-    x2 = x1 + USERANGE * epi::BAM_Cos(angle);
-    y2 = y1 + USERANGE * epi::BAM_Sin(angle);
+    x2 = x1 + USERANGE * epi::BAMCos(angle);
+    y2 = y1 + USERANGE * epi::BAMSin(angle);
 
     P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES | PT_ADDTHINGS, PTR_UseTraverse);
 }

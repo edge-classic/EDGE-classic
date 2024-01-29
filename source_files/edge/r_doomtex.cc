@@ -453,9 +453,9 @@ static image_data_c *CreateUserColourImage(image_c *rim, imagedef_c *def)
     for (int y = 0; y < img->height; y++)
         for (int x = 0; x < img->width; x++)
         {
-            *dest++ = epi::RGBA_Red(def->colour);
-            *dest++ = epi::RGBA_Green(def->colour);
-            *dest++ = epi::RGBA_Blue(def->colour);
+            *dest++ = epi::GetRGBARed(def->colour);
+            *dest++ = epi::GetRGBAGreen(def->colour);
+            *dest++ = epi::GetRGBABlue(def->colour);
         }
 
     return img;

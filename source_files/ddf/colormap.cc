@@ -117,7 +117,7 @@ static void ColmapFinishEntry(void)
     }
 
     if (dynamic_colmap->lump_name.empty() && dynamic_colmap->pack_name.empty() &&
-        dynamic_colmap->gl_colour == RGB_NO_VALUE)
+        dynamic_colmap->gl_colour == kRGBANoValue)
     {
         DDF_WarnError("Colourmap entry missing LUMP, PACK or GL_COLOUR.\n");
         // We are now assuming that the intent is to remove all
@@ -256,8 +256,8 @@ void colourmap_c::Default()
     length  = 0;
     special = COLSP_None;
 
-    gl_colour   = RGB_NO_VALUE;
-    font_colour = RGB_NO_VALUE;
+    gl_colour   = kRGBANoValue;
+    font_colour = kRGBANoValue;
 
     cache.data = NULL;
     analysis   = NULL;

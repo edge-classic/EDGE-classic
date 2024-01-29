@@ -518,12 +518,12 @@ void image_data_c::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, 
     }
 }
 
-rgbacol_t image_data_c::AverageColor(int from_x, int to_x, int from_y, int to_y)
+RGBAColor image_data_c::AverageColor(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
     SYS_ASSERT(used_w * used_h <= 2048 * 2048);
 
-    std::unordered_map<rgbacol_t, unsigned int> seen_colors;
+    std::unordered_map<RGBAColor, unsigned int> seen_colors;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
     from_x = CLAMP(0, from_x, used_w - 1);
@@ -539,7 +539,7 @@ rgbacol_t image_data_c::AverageColor(int from_x, int to_x, int from_y, int to_y)
         {
             if (bpp == 4 && src[3] == 0)
                 continue;
-            rgbacol_t color = epi::RGBA_Make(src[0], src[1], src[2]);
+            RGBAColor color = epi::MakeRGBA(src[0], src[1], src[2]);
             auto         res   = seen_colors.try_emplace(color, 0);
             // If color already seen, increment the hit counter
             if (!res.second)
@@ -548,7 +548,7 @@ rgbacol_t image_data_c::AverageColor(int from_x, int to_x, int from_y, int to_y)
     }
 
     unsigned int highest_count = 0;
-    rgbacol_t average_color = SG_BLACK_RGBA32;
+    RGBAColor average_color = SG_BLACK_RGBA32;
     for (auto color : seen_colors)
     {
         if (color.second > highest_count)
@@ -567,7 +567,7 @@ rgbacol_t image_data_c::AverageColor(int from_x, int to_x, int from_y, int to_y)
     return average_color;
 }
 
-rgbacol_t image_data_c::LightestColor(int from_x, int to_x, int from_y, int to_y)
+RGBAColor image_data_c::LightestColor(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
     SYS_ASSERT(used_w * used_h <= 2048 * 2048);
@@ -602,10 +602,10 @@ rgbacol_t image_data_c::LightestColor(int from_x, int to_x, int from_y, int to_y
         }
     }
 
-    return epi::RGBA_Make(lightest_r, lightest_g, lightest_b);
+    return epi::MakeRGBA(lightest_r, lightest_g, lightest_b);
 }
 
-rgbacol_t image_data_c::DarkestColor(int from_x, int to_x, int from_y, int to_y)
+RGBAColor image_data_c::DarkestColor(int from_x, int to_x, int from_y, int to_y)
 {
     // make sure we don't overflow
     SYS_ASSERT(used_w * used_h <= 2048 * 2048);
@@ -640,7 +640,7 @@ rgbacol_t image_data_c::DarkestColor(int from_x, int to_x, int from_y, int to_y)
         }
     }
 
-    return epi::RGBA_Make(darkest_r, darkest_g, darkest_b);
+    return epi::MakeRGBA(darkest_r, darkest_g, darkest_b);
 }
 
 void image_data_c::Swirl(int leveltime, int thickness)
@@ -731,9 +731,9 @@ void image_data_c::SetHSV(int rotation, int saturation, int value)
         {
             uint8_t *src = PixelAt(x, y);
 
-            rgbacol_t col = epi::RGBA_Make(src[0], src[1], src[2], bpp == 4 ? src[3] : 255);
+            RGBAColor col = epi::MakeRGBA(src[0], src[1], src[2], bpp == 4 ? src[3] : 255);
 
-            epi::hsv_col_c hue(col);
+            epi::HSVColor hue(col);
 
             if (rotation)
                 hue.Rotate(rotation);
@@ -742,13 +742,13 @@ void image_data_c::SetHSV(int rotation, int saturation, int value)
                 hue.SetSaturation(saturation);
 
             if (value)
-                hue.SetValue(CLAMP(0, hue.v+value, 255));
+                hue.SetValue(CLAMP(0, hue.v_+value, 255));
 
-            col = hue.GetRGBA();
+            col = hue.ToRGBA();
 
-            src[0] = epi::RGBA_Red(col);
-            src[1] = epi::RGBA_Green(col);
-            src[2] = epi::RGBA_Blue(col);
+            src[0] = epi::GetRGBARed(col);
+            src[1] = epi::GetRGBAGreen(col);
+            src[2] = epi::GetRGBABlue(col);
         }
 }
 

@@ -50,10 +50,10 @@
 #include <math.h>
 #endif
 
-void M_Angle2Matrix(bam_angle_t ang, HMM_Vec2 *x, HMM_Vec2 *y)
+void M_Angle2Matrix(BAMAngle ang, HMM_Vec2 *x, HMM_Vec2 *y)
 {
-    x->X = epi::BAM_Cos(ang);
-    x->Y = epi::BAM_Sin(ang);
+    x->X = epi::BAMCos(ang);
+    x->Y = epi::BAMSin(ang);
 
     y->X = -x->Y;
     y->Y = x->X;

@@ -81,7 +81,7 @@ void style_c::DrawBackground()
             WS_w = 319; // cannot be 320 or WS is invoked
         }
 
-        if (def->bg.colour != RGB_NO_VALUE)
+        if (def->bg.colour != kRGBANoValue)
             HUD_SolidBox(WS_x, 0, WS_w, 200, def->bg.colour);
         /*else
             HUD_SolidBox(WS_x, 0, WS_w, 200, T_BLACK);

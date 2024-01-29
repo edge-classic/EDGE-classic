@@ -1889,7 +1889,7 @@ void FreeLevel()
 
 static uint32_t CalcGLChecksum(void)
 {
-    epi::crc32_c crc;
+    epi::CRC32 crc;
 
     Lump_c *lump = FindLevelLump("VERTEXES");
 

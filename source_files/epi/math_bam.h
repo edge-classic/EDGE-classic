@@ -19,79 +19,81 @@
 #ifndef __EPI_BAM__
 #define __EPI_BAM__
 
-#define ANGLEBITS 32
+#include "HandmadeMath.h"
 
-#define ANG0   0x00000000
-#define ANG1   0x00B60B61
-#define ANG5   0x038E38E3
-#define ANG15  0x0AAAAAAA
-#define ANG30  0x15555555
-#define ANG45  0x20000000
-#define ANG60  0x2AAAAAAA
-#define ANG90  0x40000000
-#define ANG135 0x60000000
-#define ANG180 0x80000000
-#define ANG225 0xa0000000
-#define ANG270 0xc0000000
-#define ANG315 0xe0000000
-#define ANG360 0xffffffff
+constexpr uint8_t kBAMAngleBits = 32;
 
-typedef uint32_t bam_angle_t;
+constexpr uint32_t kBAMAngle0 = 0x00000000;
+constexpr uint32_t kBAMAngle1 = 0x00B60B61;
+constexpr uint32_t kBAMAngle5 = 0x038E38E3;
+constexpr uint32_t kBAMAngle15 = 0x0AAAAAAA;
+constexpr uint32_t kBAMAngle30 = 0x15555555;
+constexpr uint32_t kBAMAngle45 = 0x20000000;
+constexpr uint32_t kBAMAngle60 = 0x2AAAAAAA;
+constexpr uint32_t kBAMAngle90 = 0x40000000;
+constexpr uint32_t kBAMAngle135 = 0x60000000;
+constexpr uint32_t kBAMAngle180 = 0x80000000;
+constexpr uint32_t kBAMAngle225 = 0xa0000000;
+constexpr uint32_t kBAMAngle270 = 0xc0000000;
+constexpr uint32_t kBAMAngle315 = 0xe0000000;
+constexpr uint32_t kBAMAngle360 = 0xffffffff;
+
+typedef uint32_t BAMAngle;
 
 namespace epi
 {
 
-inline bam_angle_t BAM_FromDegrees(int deg)
+inline BAMAngle BAMFromDegrees(int deg)
 {
     return deg * 11930464 + deg * 7 / 10;
 }
 
-inline bam_angle_t BAM_FromDegrees(float deg)
+inline BAMAngle BAMFromDegrees(float deg)
 {
-    return (bam_angle_t)((deg < 0 ? (deg + 360.0f) : double(deg)) * 11930464.7084f);
+    return (BAMAngle)((deg < 0 ? (deg + 360.0f) : double(deg)) * 11930464.7084f);
 }
 
-inline bam_angle_t BAM_FromDegrees(double deg)
+inline BAMAngle BAMFromDegrees(double deg)
 {
-    return (bam_angle_t)((deg < 0 ? (deg + 360.0) : deg) * 11930464.7084);
+    return (BAMAngle)((deg < 0 ? (deg + 360.0) : deg) * 11930464.7084);
 }
 
-inline bam_angle_t BAM_FromRadians(double rad)
+inline BAMAngle BAMFromRadians(double rad)
 {
     if (rad < 0)
-        rad += M_PI * 2.0;
+        rad += HMM_PI * 2.0;
     
-    return (bam_angle_t)(rad * 683565275.42);
+    return (BAMAngle)(rad * 683565275.42);
 }
 
-inline float Degrees_FromBAM(bam_angle_t bam)
+inline float DegreesFromBAM(BAMAngle bam)
 {
     return double(bam) * 0.0000000838190156f;
 }
 
-inline double Radians_FromBAM(bam_angle_t bam)
+inline double RadiansFromBAM(BAMAngle bam)
 {
     return double(bam) * 0.000000001462918079601944;
 }
 
-inline bam_angle_t BAM_FromATan(float slope)
+inline BAMAngle BAMFromATan(float slope)
 {
-    return BAM_FromRadians(atan(slope));
+    return BAMFromRadians(atan(slope));
 }
 
-inline float BAM_Sin(bam_angle_t bam)
+inline float BAMSin(BAMAngle bam)
 {
-    return sin(Radians_FromBAM(bam));
+    return HMM_SINF(RadiansFromBAM(bam));
 }
 
-inline float BAM_Cos(bam_angle_t bam)
+inline float BAMCos(BAMAngle bam)
 {
-    return cos(Radians_FromBAM(bam));
+    return HMM_COSF(RadiansFromBAM(bam));
 }
 
-inline float BAM_Tan(bam_angle_t bam)
+inline float BAMTan(BAMAngle bam)
 {
-    return tan(Radians_FromBAM(bam));
+    return HMM_TANF(RadiansFromBAM(bam));
 }
 
 } // namespace epi

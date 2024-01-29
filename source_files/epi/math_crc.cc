@@ -27,25 +27,23 @@ namespace epi
 {
 
 // ---- Primitive routines ----
-crc32_c &crc32_c::operator+=(uint8_t data)
+CRC32 &CRC32::operator+=(uint8_t data)
 {
-    uint32_t s1 = crc & 0xFFFF;
-    uint32_t s2 = (crc >> 16) & 0xFFFF;
+    uint32_t s1 = crc_ & 0xFFFF;
+    uint32_t s2 = (crc_ >> 16) & 0xFFFF;
 
     s1 = (s1 + data) % 65521;
     s2 = (s2 + s1) % 65521;
 
-    crc = (s2 << 16) | s1;
+    crc_ = (s2 << 16) | s1;
 
     return *this;
 }
 
-crc32_c &crc32_c::AddBlock(const uint8_t *data, int len)
+CRC32 &CRC32::AddBlock(const uint8_t *data, int len)
 {
-    /// ASSERT(len >= 0);
-
-    uint32_t s1 = crc & 0xFFFF;
-    uint32_t s2 = (crc >> 16) & 0xFFFF;
+    uint32_t s1 = crc_ & 0xFFFF;
+    uint32_t s2 = (crc_ >> 16) & 0xFFFF;
 
     for (; len > 0; data++, len--)
     {
@@ -53,14 +51,14 @@ crc32_c &crc32_c::AddBlock(const uint8_t *data, int len)
         s2 = (s2 + s1) % 65521;
     }
 
-    crc = (s2 << 16) | s1;
+    crc_ = (s2 << 16) | s1;
 
     return *this;
 }
 
 // ---- non-primitive routines ----
 
-crc32_c &crc32_c::operator+=(int32_t value)
+CRC32 &CRC32::operator+=(int32_t value)
 {
     *this += (uint8_t)(value >> 24);
     *this += (uint8_t)(value >> 16);
@@ -70,7 +68,7 @@ crc32_c &crc32_c::operator+=(int32_t value)
     return *this;
 }
 
-crc32_c &crc32_c::operator+=(uint32_t value)
+CRC32 &CRC32::operator+=(uint32_t value)
 {
     *this += (uint8_t)(value >> 24);
     *this += (uint8_t)(value >> 16);
@@ -80,7 +78,7 @@ crc32_c &crc32_c::operator+=(uint32_t value)
     return *this;
 }
 
-crc32_c &crc32_c::operator+=(float value)
+CRC32 &CRC32::operator+=(float value)
 {
     bool neg = (value < 0.0f);
     value    = (float)fabs(value);
@@ -95,7 +93,7 @@ crc32_c &crc32_c::operator+=(float value)
     return *this;
 }
 
-crc32_c &crc32_c::AddCStr(const char *str)
+CRC32 &CRC32::AddCString(const char *str)
 {
     for (; *str; str++)
     {

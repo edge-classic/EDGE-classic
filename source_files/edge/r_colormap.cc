@@ -279,9 +279,9 @@ void R_TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const colourma
     // is the colormap just using GL_COLOUR?
     if (trans->length == 0)
     {
-        int r = epi::RGBA_Red(trans->gl_colour);
-        int g = epi::RGBA_Green(trans->gl_colour);
-        int b = epi::RGBA_Blue(trans->gl_colour);
+        int r = epi::GetRGBARed(trans->gl_colour);
+        int g = epi::GetRGBAGreen(trans->gl_colour);
+        int b = epi::GetRGBABlue(trans->gl_colour);
 
         for (int j = 0; j < 256; j++)
         {
@@ -408,9 +408,9 @@ void TransformColourmap(colourmap_c *colmap)
         table = (uint8_t *)colmap->cache.data;
     }
 
-    if (colmap->font_colour == RGB_NO_VALUE)
+    if (colmap->font_colour == kRGBANoValue)
     {
-        if (colmap->gl_colour != RGB_NO_VALUE)
+        if (colmap->gl_colour != kRGBANoValue)
             colmap->font_colour = colmap->gl_colour;
         else
         {
@@ -425,11 +425,11 @@ void TransformColourmap(colourmap_c *colmap)
             g = MIN(255, MAX(0, g));
             b = MIN(255, MAX(0, b));
 
-            colmap->font_colour = epi::RGBA_Make(r, g, b);
+            colmap->font_colour = epi::MakeRGBA(r, g, b);
         }
     }
 
-    if (colmap->gl_colour == RGB_NO_VALUE)
+    if (colmap->gl_colour == kRGBANoValue)
     {
         SYS_ASSERT(table);
 
@@ -447,7 +447,7 @@ void TransformColourmap(colourmap_c *colmap)
         g = MIN(255, MAX(0, g));
         b = MIN(255, MAX(0, b));
 
-        colmap->gl_colour = epi::RGBA_Make(r, g, b);
+        colmap->gl_colour = epi::MakeRGBA(r, g, b);
     }
 
     L_WriteDebug("TransformColourmap [%s]\n", colmap->name.c_str());
@@ -456,25 +456,25 @@ void TransformColourmap(colourmap_c *colmap)
 
 void V_GetColmapRGB(const colourmap_c *colmap, float *r, float *g, float *b)
 {
-    if (colmap->gl_colour == RGB_NO_VALUE)
+    if (colmap->gl_colour == kRGBANoValue)
     {
         // Intention Const Override
         TransformColourmap((colourmap_c *)colmap);
     }
 
-    rgbacol_t col = colmap->gl_colour;
+    RGBAColor col = colmap->gl_colour;
 
     (*r) = GAMMA_CONV((col >> 24) & 0xFF) / 255.0f;
     (*g) = GAMMA_CONV((col >> 16) & 0xFF) / 255.0f;
     (*b) = GAMMA_CONV((col >> 8) & 0xFF) / 255.0f;
 }
 
-rgbacol_t V_GetFontColor(const colourmap_c *colmap)
+RGBAColor V_GetFontColor(const colourmap_c *colmap)
 {
     if (!colmap)
-        return RGB_NO_VALUE;
+        return kRGBANoValue;
 
-    if (colmap->font_colour == RGB_NO_VALUE)
+    if (colmap->font_colour == kRGBANoValue)
     {
         // Intention Const Override
         TransformColourmap((colourmap_c *)colmap);
@@ -483,12 +483,12 @@ rgbacol_t V_GetFontColor(const colourmap_c *colmap)
     return colmap->font_colour;
 }
 
-rgbacol_t V_ParseFontColor(const char *name, bool strict)
+RGBAColor V_ParseFontColor(const char *name, bool strict)
 {
     if (!name || !name[0])
-        return RGB_NO_VALUE;
+        return kRGBANoValue;
 
-    rgbacol_t rgb;
+    RGBAColor rgb;
 
     if (name[0] == '#')
     {
@@ -497,7 +497,7 @@ rgbacol_t V_ParseFontColor(const char *name, bool strict)
         if (sscanf(name, " #%2x%2x%2x ", &r, &g, &b) != 3)
             I_Error("Bad RGB colour value: %s\n", name);
 
-        rgb = epi::RGBA_Make((uint8_t)r, (uint8_t)g, (uint8_t)b);
+        rgb = epi::MakeRGBA((uint8_t)r, (uint8_t)g, (uint8_t)b);
     }
     else
     {
@@ -516,7 +516,7 @@ rgbacol_t V_ParseFontColor(const char *name, bool strict)
         rgb = V_GetFontColor(colmap);
     }
 
-    if (rgb == RGB_NO_VALUE)
+    if (rgb == kRGBANoValue)
         rgb ^= 0x00010100;
 
     return rgb;
@@ -526,13 +526,13 @@ rgbacol_t V_ParseFontColor(const char *name, bool strict)
 // Returns an RGB value from an index value - used the current
 // palette.  The byte pointer is assumed to point a 3-byte array.
 //
-void V_IndexColourToRGB(int indexcol, uint8_t *returncol, rgbacol_t last_damage_colour, float damageAmount)
+void V_IndexColourToRGB(int indexcol, uint8_t *returncol, RGBAColor last_damage_colour, float damageAmount)
 {
     if ((cur_palette == PALETTE_NORMAL) || (cur_palette == PALETTE_PAIN))
     {
-        float r = (float)epi::RGBA_Red(last_damage_colour) / 255.0;
-        float g = (float)epi::RGBA_Green(last_damage_colour) / 255.0;
-        float b = (float)epi::RGBA_Blue(last_damage_colour) / 255.0;
+        float r = (float)epi::GetRGBARed(last_damage_colour) / 255.0;
+        float g = (float)epi::GetRGBAGreen(last_damage_colour) / 255.0;
+        float b = (float)epi::GetRGBABlue(last_damage_colour) / 255.0;
 
         returncol[0] = (uint8_t)MAX(0, MIN(255, r * damageAmount * 2.5));
         returncol[1] = (uint8_t)MAX(0, MIN(255, g * damageAmount * 2.5));
@@ -546,13 +546,13 @@ void V_IndexColourToRGB(int indexcol, uint8_t *returncol, rgbacol_t last_damage_
     }
 }
 
-rgbacol_t V_LookupColour(int col)
+RGBAColor V_LookupColour(int col)
 {
     int r = playpal_data[0][col][0];
     int g = playpal_data[0][col][1];
     int b = playpal_data[0][col][2];
 
-    return epi::RGBA_Make(r, g, b);
+    return epi::MakeRGBA(r, g, b);
 }
 
 #if 0 // OLD BUT POTENTIALLY USEFUL
@@ -643,9 +643,9 @@ class colormap_shader_c : public abstract_shader_c
     bool             simple_cmap;
     lighting_model_e lt_model;
 
-    rgbacol_t whites[32];
+    RGBAColor whites[32];
 
-    rgbacol_t fog_color;
+    RGBAColor fog_color;
     float    fog_density;
 
     // for DDFLEVL fog checks
@@ -653,7 +653,7 @@ class colormap_shader_c : public abstract_shader_c
 
   public:
     colormap_shader_c(const colourmap_c *CM)
-        : colmap(CM), light_lev(255), fade_tex(0), simple_cmap(true), lt_model(LMODEL_Doom), fog_color(RGB_NO_VALUE),
+        : colmap(CM), light_lev(255), fade_tex(0), simple_cmap(true), lt_model(LMODEL_Doom), fog_color(kRGBANoValue),
           fog_density(0), sec(nullptr)
     {
     }
@@ -697,11 +697,11 @@ class colormap_shader_c : public abstract_shader_c
         else
             cmap_idx = R_DoomLightingEquation(light_lev / 4, dist);
 
-        rgbacol_t WH = whites[cmap_idx];
+        RGBAColor WH = whites[cmap_idx];
 
-        col->mod_R += epi::RGBA_Red(WH);
-        col->mod_G += epi::RGBA_Green(WH);
-        col->mod_B += epi::RGBA_Blue(WH);
+        col->mod_R += epi::GetRGBARed(WH);
+        col->mod_G += epi::GetRGBAGreen(WH);
+        col->mod_B += epi::GetRGBABlue(WH);
 
         // FIXME: for foggy maps, need to adjust add_R/G/B too
     }
@@ -726,10 +726,10 @@ class colormap_shader_c : public abstract_shader_c
     virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
                           void *data, shader_coord_func_t func)
     {
-        rgbacol_t fc_to_use = fog_color;
+        RGBAColor fc_to_use = fog_color;
         float    fd_to_use = fog_density;
         // check for DDFLEVL fog
-        if (fc_to_use == RGB_NO_VALUE)
+        if (fc_to_use == kRGBANoValue)
         {
             if (IS_SKY(sec->ceil))
             {
@@ -789,18 +789,18 @@ class colormap_shader_c : public abstract_shader_c
                 int g = playpal_data[0][new_col][1];
                 int b = playpal_data[0][new_col][2];
 
-                whites[ci] = epi::RGBA_Make(r, g, b);
+                whites[ci] = epi::MakeRGBA(r, g, b);
             }
         }
         else if (colmap) // GL_COLOUR
         {
             for (int ci = 0; ci < 32; ci++)
             {
-                int r = epi::RGBA_Red(colmap->gl_colour) * (31 - ci) / 31;
-                int g = epi::RGBA_Green(colmap->gl_colour) * (31 - ci) / 31;
-                int b = epi::RGBA_Blue(colmap->gl_colour) * (31 - ci) / 31;
+                int r = epi::GetRGBARed(colmap->gl_colour) * (31 - ci) / 31;
+                int g = epi::GetRGBAGreen(colmap->gl_colour) * (31 - ci) / 31;
+                int b = epi::GetRGBABlue(colmap->gl_colour) * (31 - ci) / 31;
 
-                whites[ci] = epi::RGBA_Make(r, g, b);
+                whites[ci] = epi::MakeRGBA(r, g, b);
             }
         }
         else
@@ -809,7 +809,7 @@ class colormap_shader_c : public abstract_shader_c
             {
                 int ity = 255 - ci * 8 - ci / 5;
 
-                whites[ci] = epi::RGBA_Make(ity, ity, ity);
+                whites[ci] = epi::MakeRGBA(ity, ity, ity);
             }
         }
 
@@ -849,9 +849,9 @@ class colormap_shader_c : public abstract_shader_c
                     // GL_MODULATE mode
                     if (colmap)
                     {
-                        dest[0] = epi::RGBA_Red(whites[index]);
-                        dest[1] = epi::RGBA_Green(whites[index]);
-                        dest[2] = epi::RGBA_Blue(whites[index]);
+                        dest[0] = epi::GetRGBARed(whites[index]);
+                        dest[1] = epi::GetRGBAGreen(whites[index]);
+                        dest[2] = epi::GetRGBABlue(whites[index]);
                         dest[3] = 255;
                     }
                     else
@@ -910,7 +910,7 @@ class colormap_shader_c : public abstract_shader_c
         light_lev = _level;
     }
 
-    void SetFog(rgbacol_t _fog_color, float _fog_density)
+    void SetFog(RGBAColor _fog_color, float _fog_density)
     {
         fog_color   = _fog_color;
         fog_density = _fog_density;

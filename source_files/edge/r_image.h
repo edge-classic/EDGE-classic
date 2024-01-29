@@ -156,8 +156,8 @@ class image_c
         // case IMSRC_Dummy:
         struct
         {
-            rgbacol_t fg;
-            rgbacol_t bg;
+            RGBAColor fg;
+            RGBAColor bg;
         } dummy;
 
         // case IMSRC_User:
@@ -232,7 +232,7 @@ const image_c *W_ImageLookup(const char *name, image_namespace_e = INS_Graphic, 
 const image_c *W_ImageForDummySprite(void);
 const image_c *W_ImageForDummySkin(void);
 const image_c *W_ImageForHOMDetect(void);
-const image_c *W_ImageForFogWall(rgbacol_t fog_color);
+const image_c *W_ImageForFogWall(RGBAColor fog_color);
 
 // savegame code (Only)
 const image_c *W_ImageParseSaveString(char type, const char *name);
@@ -276,7 +276,7 @@ GLuint W_ImageCache(const image_c *image, bool anim = true, const colourmap_c *t
 void W_ImagePreCache(const image_c *image);
 
 // -AJA- planned....
-// rgbacol_t W_ImageGetHue(const image_c *c);
+// RGBAColor W_ImageGetHue(const image_c *c);
 
 const char *W_ImageGetName(const image_c *image);
 

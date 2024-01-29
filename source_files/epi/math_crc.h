@@ -25,52 +25,56 @@
 
 namespace epi
 {
-class crc32_c
+
+class CRC32
 {
     /* sealed */
+  private:
+    uint32_t crc_;
 
   public:
-    uint32_t crc;
-
-    crc32_c()
+    CRC32()
     {
         Reset();
     }
-    crc32_c(const crc32_c &rhs)
+    CRC32(const CRC32 &rhs)
     {
-        crc = rhs.crc;
+        crc_ = rhs.crc_;
     }
-    ~crc32_c()
+    ~CRC32()
     {
     }
 
-    crc32_c &operator=(const crc32_c &rhs)
+    bool operator==(const CRC32 &other) const
     {
-        crc = rhs.crc;
+        return crc_ == other.crc_;
+    }
+
+    CRC32 &operator=(const CRC32 &rhs)
+    {
+        crc_ = rhs.crc_;
         return *this;
     }
 
-    crc32_c &operator+=(uint8_t value);
-    crc32_c &operator+=(int32_t value);
-    crc32_c &operator+=(uint32_t value);
-    crc32_c &operator+=(float value);
+    CRC32 &operator+=(uint8_t value);
+    CRC32 &operator+=(int32_t value);
+    CRC32 &operator+=(uint32_t value);
+    CRC32 &operator+=(float value);
 
-    //		bool operator== (const crc32_c &rhs) const { return crc == rhs.crc; }
-    //		bool operator!= (const crc32_c &rhs) const { return crc != rhs.crc; }
-
-    crc32_c &AddBlock(const uint8_t *data, int len);
-    crc32_c &AddCStr(const char *str);
+    CRC32 &AddBlock(const uint8_t *data, int len);
+    CRC32 &AddCString(const char *str);
 
     void Reset(void)
     {
-        crc = 1;
+        crc_ = 1;
     }
 
     uint32_t GetCRC(void) const
     {
-        return crc;
+        return crc_;
     }
 };
+
 };     // namespace epi
 #endif /* __EPI_CRC_H__ */
 

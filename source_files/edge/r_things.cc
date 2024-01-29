@@ -98,11 +98,11 @@ static float GetHoverDZ(mobj_t *mo, float bob_mult = 0)
         return mo->phase;
 
     // compute a different phase for different objects
-    bam_angle_t phase = (bam_angle_t)(long long)mo;
-    phase ^= (bam_angle_t)(phase << 19);
-    phase += (bam_angle_t)(leveltime << (ANGLEBITS - 6));
+    BAMAngle phase = (BAMAngle)(long long)mo;
+    phase ^= (BAMAngle)(phase << 19);
+    phase += (BAMAngle)(leveltime << (kBAMAngleBits - 6));
 
-    mo->phase = epi::BAM_Sin(phase);
+    mo->phase = epi::BAMSin(phase);
 
     if (mo->hyperflags & HF_HOVER)
         mo->phase *= 4.0f;
@@ -285,10 +285,10 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
         trans    = 1.0f;
     }
 
-    rgbacol_t fc_to_use = player->mo->subsector->sector->props.fog_color;
+    RGBAColor fc_to_use = player->mo->subsector->sector->props.fog_color;
     float    fd_to_use = player->mo->subsector->sector->props.fog_density;
     // check for DDFLEVL fog
-    if (fc_to_use == RGB_NO_VALUE)
+    if (fc_to_use == kRGBANoValue)
     {
         if (IS_SKY(player->mo->subsector->sector->ceil))
         {
@@ -308,17 +308,17 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
         shader->Sample(data.col + 0, data.lit_pos.X, data.lit_pos.Y, data.lit_pos.Z);
 
-        if (fc_to_use != RGB_NO_VALUE)
+        if (fc_to_use != kRGBANoValue)
         {
             int          mix_factor = I_ROUND(255.0f * (fd_to_use * 75));
-            rgbacol_t mixme = epi::RGBA_Mix(epi::RGBA_Make(data.col[0].mod_R, data.col[0].mod_G, data.col[0].mod_B), fc_to_use, mix_factor);
-            data.col[0].mod_R = epi::RGBA_Red(mixme);
-            data.col[0].mod_G = epi::RGBA_Green(mixme);
-            data.col[0].mod_B = epi::RGBA_Blue(mixme);
-            mixme = epi::RGBA_Mix(epi::RGBA_Make(data.col[0].add_R, data.col[0].add_G, data.col[0].add_B), fc_to_use, mix_factor);
-            data.col[0].add_R = epi::RGBA_Red(mixme);
-            data.col[0].add_G = epi::RGBA_Green(mixme);
-            data.col[0].add_B = epi::RGBA_Blue(mixme);
+            RGBAColor mixme = epi::MixRGBA(epi::MakeRGBA(data.col[0].mod_R, data.col[0].mod_G, data.col[0].mod_B), fc_to_use, mix_factor);
+            data.col[0].mod_R = epi::GetRGBARed(mixme);
+            data.col[0].mod_G = epi::GetRGBAGreen(mixme);
+            data.col[0].mod_B = epi::GetRGBABlue(mixme);
+            mixme = epi::MixRGBA(epi::MakeRGBA(data.col[0].add_R, data.col[0].add_G, data.col[0].add_B), fc_to_use, mix_factor);
+            data.col[0].add_R = epi::GetRGBARed(mixme);
+            data.col[0].add_G = epi::GetRGBAGreen(mixme);
+            data.col[0].add_B = epi::GetRGBABlue(mixme);
         }
 
         if (use_dlights && ren_extralight < 250)
@@ -373,7 +373,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
         local_gl_vert_t *glvert = RGL_BeginUnit(GL_POLYGON, 4, is_additive ? (GLuint)ENV_SKIP_RGB : GL_MODULATE, tex_id,
                                                 is_fuzzy ? GL_MODULATE : (GLuint)ENV_NONE, fuzz_tex, pass, blending,
-                                                pass > 0 ? RGB_NO_VALUE : fc_to_use, fd_to_use);
+                                                pass > 0 ? kRGBANoValue : fc_to_use, fd_to_use);
 
         for (int v_idx = 0; v_idx < 4; v_idx++)
         {
@@ -421,7 +421,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
     glDisable(GL_SCISSOR_TEST);
 }
 
-static const rgbacol_t crosshair_colors[8] = {
+static const RGBAColor crosshair_colors[8] = {
     SG_LIGHT_GRAY_RGBA32, SG_BLUE_RGBA32, SG_GREEN_RGBA32, SG_CYAN_RGBA32, SG_RED_RGBA32, SG_FUCHSIA_RGBA32, SG_YELLOW_RGBA32, SG_DARK_ORANGE_RGBA32,
 };
 
@@ -453,14 +453,14 @@ static void DrawStdCrossHair(void)
 
     xh_count += xh_dir;
 
-    rgbacol_t color     = crosshair_colors[r_crosscolor.d & 7];
+    RGBAColor color     = crosshair_colors[r_crosscolor.d & 7];
     float    intensity = 1.0f - xh_count / 100.0f;
 
     intensity *= r_crossbright.f;
 
-    float r = epi::RGBA_Red(color) * intensity / 255.0f;
-    float g = epi::RGBA_Green(color) * intensity / 255.0f;
-    float b = epi::RGBA_Blue(color) * intensity / 255.0f;
+    float r = epi::GetRGBARed(color) * intensity / 255.0f;
+    float g = epi::GetRGBAGreen(color) * intensity / 255.0f;
+    float b = epi::GetRGBABlue(color) * intensity / 255.0f;
 
     float x = viewwindow_x + viewwindow_w / 2;
     float y = viewwindow_y + viewwindow_h / 2;
@@ -701,21 +701,21 @@ static const image_c *R2_GetThingSprite2(mobj_t *mo, float mx, float my, bool *f
 
     if (frame->rots >= 8)
     {
-        bam_angle_t ang = mo->angle;
+        BAMAngle ang = mo->angle;
 
         MIR_Angle(ang);
 
-        bam_angle_t from_view = R_PointToAngle(viewx, viewy, mx, my);
+        BAMAngle from_view = R_PointToAngle(viewx, viewy, mx, my);
 
-        ang = from_view - ang + ANG180;
+        ang = from_view - ang + kBAMAngle180;
 
         if (MIR_Reflective())
-            ang = (bam_angle_t)0 - ang;
+            ang = (BAMAngle)0 - ang;
 
         if (frame->rots == 16)
-            rot = (ang + (ANG45 / 4)) >> (ANGLEBITS - 4);
+            rot = (ang + (kBAMAngle45 / 4)) >> (kBAMAngleBits - 4);
         else
-            rot = (ang + (ANG45 / 2)) >> (ANGLEBITS - 3);
+            rot = (ang + (kBAMAngle45 / 2)) >> (kBAMAngleBits - 3);
     }
 
     SYS_ASSERT(0 <= rot && rot < 16);
@@ -1013,7 +1013,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
     float tz = tr_x * viewcos + tr_y * viewsin;
 
     // thing is behind view plane?
-    if (clip_scope != ANG180 && tz <= 0) // && !is_model)
+    if (clip_scope != kBAMAngle180 && tz <= 0) // && !is_model)
         return;
 
     float tx = tr_x * viewsin - tr_y * viewcos;
@@ -1427,10 +1427,10 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
     int num_pass = is_fuzzy ? 1 : (detail_level > 0 ? 4 : 3);
 
-    rgbacol_t fc_to_use = dthing->mo->subsector->sector->props.fog_color;
+    RGBAColor fc_to_use = dthing->mo->subsector->sector->props.fog_color;
     float    fd_to_use = dthing->mo->subsector->sector->props.fog_density;
     // check for DDFLEVL fog
-    if (fc_to_use == RGB_NO_VALUE)
+    if (fc_to_use == kRGBANoValue)
     {
         if (IS_SKY(mo->subsector->sector->ceil))
         {
@@ -1469,7 +1469,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
         local_gl_vert_t *glvert = RGL_BeginUnit(GL_POLYGON, 4, is_additive ? (GLuint)ENV_SKIP_RGB : GL_MODULATE, tex_id,
                                                 is_fuzzy ? GL_MODULATE : (GLuint)ENV_NONE, fuzz_tex, pass, blending,
-                                                pass > 0 ? RGB_NO_VALUE : fc_to_use, fd_to_use);
+                                                pass > 0 ? kRGBANoValue : fc_to_use, fd_to_use);
 
         for (int v_idx = 0; v_idx < 4; v_idx++)
         {

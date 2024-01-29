@@ -99,7 +99,7 @@ static void CastSkip(void);
 
 static const image_c *finale_textback;
 static float          finale_textbackscale = 1.0f;
-static rgbacol_t       finale_textcol;
+static RGBAColor       finale_textcol;
 
 static style_c *wi_leveltext_style;
 static style_c *wi_cast_style;

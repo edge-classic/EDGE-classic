@@ -124,7 +124,7 @@ bool SR_GetAngle(void *storage, int index, void *extra)
 {
     (void)extra;
 
-    ((bam_angle_t *)storage)[index] = SV_GetAngle();
+    ((BAMAngle *)storage)[index] = SV_GetAngle();
     return true;
 }
 
@@ -180,7 +180,7 @@ bool SR_GetAngleFromSlope(void *storage, int index, void *extra)
 {
     (void)extra;
 
-    ((bam_angle_t *)storage)[index] = epi::BAM_FromATan(SV_GetFloat());
+    ((BAMAngle *)storage)[index] = epi::BAMFromATan(SV_GetFloat());
     return true;
 }
 
@@ -206,7 +206,7 @@ void SR_PutInt(void *storage, int index, void *extra)
 
 void SR_PutAngle(void *storage, int index, void *extra)
 {
-    SV_PutAngle(((bam_angle_t *)storage)[index]);
+    SV_PutAngle(((BAMAngle *)storage)[index]);
 }
 
 void SR_PutFloat(void *storage, int index, void *extra)
@@ -234,11 +234,11 @@ void SR_PutVec3(void *storage, int index, void *extra)
 
 void SR_PutAngleToSlope(void *storage, int index, void *extra)
 {
-    bam_angle_t val = ((bam_angle_t *)storage)[index];
+    BAMAngle val = ((BAMAngle *)storage)[index];
 
-    SYS_ASSERT(val < ANG90 || val > ANG270);
+    SYS_ASSERT(val < kBAMAngle90 || val > kBAMAngle270);
 
-    SV_PutFloat(epi::BAM_Tan(val));
+    SV_PutFloat(epi::BAMTan(val));
 }
 
 //----------------------------------------------------------------------------
@@ -365,13 +365,13 @@ void SV_MainTestPrimitives(void)
 	SV_PutInt(0xbbccddee);
 	SV_PutInt(0xffffffff);
 
-	SV_PutAngle(ANG1);
-	SV_PutAngle(ANG45);
-	SV_PutAngle(ANG135);
-	SV_PutAngle(ANG180);
-	SV_PutAngle(ANG270);
-	SV_PutAngle(ANG315);
-	SV_PutAngle(0 - ANG1);
+	SV_PutAngle(kBAMAngle1);
+	SV_PutAngle(kBAMAngle45);
+	SV_PutAngle(kBAMAngle135);
+	SV_PutAngle(kBAMAngle180);
+	SV_PutAngle(kBAMAngle270);
+	SV_PutAngle(kBAMAngle315);
+	SV_PutAngle(0 - kBAMAngle1);
 
 	SV_PutFloat(0.0f);
 	SV_PutFloat(0.001f);   SV_PutFloat(-0.001f);
@@ -425,7 +425,7 @@ void SV_MainTestPrimitives(void)
 
 	for (i=0; i < 7; i++)
 	{
-		bam_angle_t val = SV_GetAngle();
+		BAMAngle val = SV_GetAngle();
 		L_WriteDebug("TEST ANGLE: 0x%08x = %1.6f\n", (unsigned int) val,
 				ANG_2_FLOAT(val));
 	}

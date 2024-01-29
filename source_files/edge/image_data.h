@@ -131,13 +131,13 @@ class image_data_c
                     int to_y = 1000000);
 
     // compute the average color of the RGB image, based on modal average
-    rgbacol_t AverageColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    RGBAColor AverageColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
     // compute the lightest color in the RGB image
-    rgbacol_t LightestColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    RGBAColor LightestColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
     // compute the darkest color in the RGB image
-    rgbacol_t DarkestColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
+    RGBAColor DarkestColor(int from_x = -1, int to_x = 1000000, int from_y = -1, int to_y = 1000000);
 
     // SMMU-style swirling
     void Swirl(int leveltime, int thickness);

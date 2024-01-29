@@ -506,7 +506,7 @@ static void WeaponFinishEntry(void)
     if (dynamic_weapon->zoom_factor > 0.0)
         dynamic_weapon->zoom_fov = I_ROUND(90 / dynamic_weapon->zoom_factor);
 
-    dynamic_weapon->model_rotate *= ANG1;
+    dynamic_weapon->model_rotate *= kBAMAngle1;
 
     // Check MBF21 weapon flags that don't correlate to DDFWEAP flags
     for (auto flag : flag_tests)
@@ -855,7 +855,7 @@ void weapondef_c::Default(void)
 
     nothrust     = false;
     bind_key     = -1;
-    zoom_fov     = ANG360;
+    zoom_fov     = kBAMAngle360;
     zoom_factor  = 0.0;
     refire_inacc = false;
     show_clip    = false;

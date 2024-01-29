@@ -53,21 +53,21 @@
 // Automap colors
 
 // NOTE: this order must match the one in the COAL API script
-static rgbacol_t am_colors[AM_NUM_COLORS] = {
-    epi::RGBA_Make(40, 40, 112),   // AMCOL_Grid
-    epi::RGBA_Make(112, 112, 112), // AMCOL_Allmap
-    epi::RGBA_Make(255, 0, 0),     // AMCOL_Wall
-    epi::RGBA_Make(192, 128, 80),  // AMCOL_Step
-    epi::RGBA_Make(192, 128, 80),  // AMCOL_Ledge
-    epi::RGBA_Make(220, 220, 0),   // AMCOL_Ceil
-    epi::RGBA_Make(0, 200, 200),   // AMCOL_Secret
+static RGBAColor am_colors[AM_NUM_COLORS] = {
+    epi::MakeRGBA(40, 40, 112),   // AMCOL_Grid
+    epi::MakeRGBA(112, 112, 112), // AMCOL_Allmap
+    epi::MakeRGBA(255, 0, 0),     // AMCOL_Wall
+    epi::MakeRGBA(192, 128, 80),  // AMCOL_Step
+    epi::MakeRGBA(192, 128, 80),  // AMCOL_Ledge
+    epi::MakeRGBA(220, 220, 0),   // AMCOL_Ceil
+    epi::MakeRGBA(0, 200, 200),   // AMCOL_Secret
 
-    epi::RGBA_Make(255, 255, 255), // AMCOL_Player
-    epi::RGBA_Make(0, 255, 0),     // AMCOL_Monster
-    epi::RGBA_Make(220, 0, 0),     // AMCOL_Corpse
-    epi::RGBA_Make(0, 0, 255),     // AMCOL_Item
-    epi::RGBA_Make(255, 188, 0),   // AMCOL_Missile
-    epi::RGBA_Make(120, 60, 30)    // AMCOL_Scenery
+    epi::MakeRGBA(255, 255, 255), // AMCOL_Player
+    epi::MakeRGBA(0, 255, 0),     // AMCOL_Monster
+    epi::MakeRGBA(220, 0, 0),     // AMCOL_Corpse
+    epi::MakeRGBA(0, 0, 255),     // AMCOL_Item
+    epi::MakeRGBA(255, 188, 0),   // AMCOL_Missile
+    epi::MakeRGBA(120, 60, 30)    // AMCOL_Scenery
 };
 
 // Automap keys
@@ -496,10 +496,10 @@ void AM_Ticker(void)
 // Rotation in 2D.
 // Used to rotate player arrow line character.
 //
-static inline void Rotate(float &x, float &y, bam_angle_t a)
+static inline void Rotate(float &x, float &y, BAMAngle a)
 {
-    float bam_sin = epi::BAM_Sin(a);
-    float bam_cos = epi::BAM_Cos(a);
+    float bam_sin = epi::BAMSin(a);
+    float bam_cos = epi::BAMCos(a);
     float new_x = x * bam_cos - y * bam_sin;
     float new_y = x * bam_sin + y * bam_cos;
 
@@ -518,17 +518,17 @@ static void GetRotatedCoords(float sx, float sy, float &dx, float &dy)
         dx -= f_focus->x;
         dy -= f_focus->y;
 
-        Rotate(dx, dy, ANG90 - f_focus->angle);
+        Rotate(dx, dy, kBAMAngle90 - f_focus->angle);
 
         dx += f_focus->x;
         dy += f_focus->y;
     }
 }
 
-static inline bam_angle_t GetRotatedAngle(bam_angle_t src)
+static inline BAMAngle GetRotatedAngle(BAMAngle src)
 {
     if (rotatemap)
-        return src + ANG90 - f_focus->angle;
+        return src + kBAMAngle90 - f_focus->angle;
 
     return src;
 }
@@ -536,7 +536,7 @@ static inline bam_angle_t GetRotatedAngle(bam_angle_t src)
 //
 // Draw visible parts of lines.
 //
-static void DrawMLine(mline_t *ml, rgbacol_t rgb, bool thick = true)
+static void DrawMLine(mline_t *ml, RGBAColor rgb, bool thick = true)
 {
     if (hide_lines)
         return;
@@ -558,7 +558,7 @@ static void DrawMLine(mline_t *ml, rgbacol_t rgb, bool thick = true)
 }
 
 // Lobo 2022: keyed doors automap colouring
-static void DrawMLineDoor(mline_t *ml, rgbacol_t rgb)
+static void DrawMLineDoor(mline_t *ml, RGBAColor rgb)
 {
     if (hide_lines)
         return;
@@ -621,7 +621,7 @@ static mline_t player_dagger[] = {
 
 #define NUMPLYRDGGRLINES (sizeof(player_dagger) / sizeof(mline_t))
 
-static void DrawLineCharacter(mline_t *lineguy, int lineguylines, float radius, bam_angle_t angle, rgbacol_t rgb, float x,
+static void DrawLineCharacter(mline_t *lineguy, int lineguylines, float radius, BAMAngle angle, RGBAColor rgb, float x,
                               float y)
 {
     float cx, cy;
@@ -673,7 +673,7 @@ std::string Aux2StringReplaceAll(std::string str, const std::string &from, const
 }
 
 // Lobo 2023: draw some key info in the middle of a line
-static void DrawKeyOnLine(mline_t *ml, int theKey, rgbacol_t rgb = SG_WHITE_RGBA32)
+static void DrawKeyOnLine(mline_t *ml, int theKey, RGBAColor rgb = SG_WHITE_RGBA32)
 {
     if (hide_lines)
         return;
@@ -749,8 +749,8 @@ static void DrawKeyOnLine(mline_t *ml, int theKey, rgbacol_t rgb = SG_WHITE_RGBA
         float y2 = ml->a.y;
 
         DrawLineCharacter(door_key, NUMDOORKEYLINES,
-                    5, ANG90,
-                    epi::RGBA_Make(0,0,255), x2, y2);
+                    5, kBAMAngle90,
+                    epi::MakeRGBA(0,0,255), x2, y2);
     */
 
     return;
@@ -873,7 +873,7 @@ static void AM_WalkSeg(seg_t *seg)
         GetRotatedCoords(seg->v1->x, seg->v1->y, l.a.x, l.a.y);
         GetRotatedCoords(seg->v2->x, seg->v2->y, l.b.x, l.b.y);
 
-        DrawMLine(&l, epi::RGBA_Make(0, 0, 128), false);
+        DrawMLine(&l, epi::MakeRGBA(0, 0, 128), false);
 #endif
         return;
     }
@@ -1015,7 +1015,7 @@ static void AM_WalkSeg(seg_t *seg)
 }
 
 #if (DEBUG_COLLIDE == 1)
-static void DrawObjectBounds(mobj_t *mo, rgbacol_t rgb)
+static void DrawObjectBounds(mobj_t *mo, RGBAColor rgb)
 {
     float R = mo->radius;
 
@@ -1047,15 +1047,15 @@ static void DrawObjectBounds(mobj_t *mo, rgbacol_t rgb)
 }
 #endif
 
-static rgbacol_t player_colors[8] = {
-    epi::RGBA_Make(5, 255, 5),     // GREEN,
-    epi::RGBA_Make(80, 80, 80),    // GRAY + GRAY_LEN*2/3,
-    epi::RGBA_Make(160, 100, 50),  // BROWN,
-    epi::RGBA_Make(255, 255, 255), // RED + RED_LEN/2,
-    epi::RGBA_Make(255, 176, 5),   // ORANGE,
-    epi::RGBA_Make(170, 170, 170), // GRAY + GRAY_LEN*1/3,
-    epi::RGBA_Make(255, 5, 5),     // RED,
-    epi::RGBA_Make(255, 185, 225), // PINK
+static RGBAColor player_colors[8] = {
+    epi::MakeRGBA(5, 255, 5),     // GREEN,
+    epi::MakeRGBA(80, 80, 80),    // GRAY + GRAY_LEN*2/3,
+    epi::MakeRGBA(160, 100, 50),  // BROWN,
+    epi::MakeRGBA(255, 255, 255), // RED + RED_LEN/2,
+    epi::MakeRGBA(255, 176, 5),   // ORANGE,
+    epi::MakeRGBA(170, 170, 170), // GRAY + GRAY_LEN*1/3,
+    epi::MakeRGBA(255, 5, 5),     // RED,
+    epi::MakeRGBA(255, 185, 225), // PINK
 };
 
 //
@@ -1317,7 +1317,7 @@ void AM_Render(float x, float y, float w, float h, mobj_t *focus)
             HUD_TileImage(-90, 0, 500, 200, automap_style->bg_image, 0.0, 0.0);
         HUD_SetAlpha(old_alpha);
     }
-    else if (automap_style->def->bg.colour != RGB_NO_VALUE)
+    else if (automap_style->def->bg.colour != kRGBANoValue)
     {
         float old_alpha = HUD_GetAlpha();
         HUD_SetAlpha(automap_style->def->bg.translucency);
@@ -1334,7 +1334,7 @@ void AM_Render(float x, float y, float w, float h, mobj_t *focus)
     DrawMarks();
 }
 
-void AM_SetColor(int which, rgbacol_t color)
+void AM_SetColor(int which, RGBAColor color)
 {
     SYS_ASSERT(0 <= which && which < AM_NUM_COLORS);
 

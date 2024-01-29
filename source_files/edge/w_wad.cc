@@ -1190,14 +1190,10 @@ void ProcessWad(data_file_c *df, size_t file_index)
     SortSpriteLumps(wad);
 
     // compute MD5 hash over wad directory
-    epi::md5hash_c dir_md5;
+    epi::MD5Hash dir_md5;
     dir_md5.Compute((const uint8_t *)raw_info, length);
 
-    wad->md5_string =
-        epi::StringFormat("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", dir_md5.hash[0],
-                        dir_md5.hash[1], dir_md5.hash[2], dir_md5.hash[3], dir_md5.hash[4], dir_md5.hash[5],
-                        dir_md5.hash[6], dir_md5.hash[7], dir_md5.hash[8], dir_md5.hash[9], dir_md5.hash[10],
-                        dir_md5.hash[11], dir_md5.hash[12], dir_md5.hash[13], dir_md5.hash[14], dir_md5.hash[15]);
+    wad->md5_string = dir_md5.ToString();
 
     I_Debugf("   md5hash = %s\n", wad->md5_string.c_str());
 

@@ -108,7 +108,7 @@ typedef struct s_thing_s
     float y = 0;
     float z = 0;
 
-    bam_angle_t angle = 0;
+    BAMAngle angle = 0;
     float   slope = 0;
     int     tag   = 0;
 
@@ -562,7 +562,7 @@ typedef struct rad_script_s
     rts_state_t *last_state  = nullptr;
 
     // CRC of the important parts of this RTS script.
-    epi::crc32_c crc;
+    epi::CRC32 crc;
 } rad_script_t;
 
 #define REPEAT_FOREVER 0
@@ -649,7 +649,7 @@ typedef struct drawtip_s
     float scale;
 
     // current colour
-    rgbacol_t color;
+    RGBAColor color;
 
     // fading fields
     int   fade_time;

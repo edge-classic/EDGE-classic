@@ -549,15 +549,15 @@ void bot_t::WalkToward(const position_c &pos)
     cmd.direction = R_PointToAngle(pl->mo->x, pl->mo->y, pos.x, pos.y);
 }
 
-void bot_t::TurnToward(bam_angle_t want_angle, float want_slope, bool fast)
+void bot_t::TurnToward(BAMAngle want_angle, float want_slope, bool fast)
 {
     // horizontal (yaw) angle
-    bam_angle_t delta = want_angle - pl->mo->angle;
+    BAMAngle delta = want_angle - pl->mo->angle;
 
-    if (delta < ANG180)
+    if (delta < kBAMAngle180)
         delta = delta / (fast ? 3 : 8);
     else
-        delta = ANG360 - (ANG360 - delta) / (fast ? 3 : 8);
+        delta = kBAMAngle360 - (kBAMAngle360 - delta) / (fast ? 3 : 8);
 
     look_angle = pl->mo->angle + delta;
 
@@ -567,7 +567,7 @@ void bot_t::TurnToward(bam_angle_t want_angle, float want_slope, bool fast)
     if (want_slope > +2.0)
         want_slope = +2.0;
 
-    float diff = want_slope - epi::BAM_Tan(pl->mo->vertangle);
+    float diff = want_slope - epi::BAMTan(pl->mo->vertangle);
 
     if (fabs(diff) < (fast ? (0.04 + (0.02 * bot_skill.f)) : 0.04))
         look_slope = want_slope;
@@ -583,7 +583,7 @@ void bot_t::TurnToward(const mobj_t *mo, bool fast)
     float dy = mo->y - pl->mo->y;
     float dz = mo->z - pl->mo->z;
 
-    bam_angle_t want_angle = R_PointToAngle(0, 0, dx, dy);
+    BAMAngle want_angle = R_PointToAngle(0, 0, dx, dy);
     float   want_slope = P_ApproxSlope(dx, dy, dz);
 
     TurnToward(want_angle, want_slope, fast);
@@ -614,13 +614,13 @@ void bot_t::WeaveToward(const position_c &pos)
     MoveToward(pos);
 
     if (weave == -2)
-        cmd.direction -= ANG5 * 12;
+        cmd.direction -= kBAMAngle5 * 12;
     if (weave == -1)
-        cmd.direction -= ANG5 * 3;
+        cmd.direction -= kBAMAngle5 * 3;
     if (weave == +1)
-        cmd.direction += ANG5 * 3;
+        cmd.direction += kBAMAngle5 * 3;
     if (weave == +2)
-        cmd.direction += ANG5 * 12;
+        cmd.direction += kBAMAngle5 * 12;
 }
 
 void bot_t::WeaveToward(const mobj_t *mo)
@@ -647,7 +647,7 @@ void bot_t::RetreatFrom(const mobj_t *enemy)
 void bot_t::Strafe(bool right)
 {
     cmd.speed     = MOVE_SPEED + (6.25 * bot_skill.d);
-    cmd.direction = pl->mo->angle + (right ? ANG270 : ANG90);
+    cmd.direction = pl->mo->angle + (right ? kBAMAngle270 : kBAMAngle90);
 }
 
 void bot_t::DetectObstacle()
@@ -730,18 +730,18 @@ void bot_t::ShootTarget()
         return;
 
     // check that we are facing the enemy
-    bam_angle_t delta   = enemy_angle - pl->mo->angle;
-    float   sl_diff = fabs(enemy_slope - epi::BAM_Tan(pl->mo->vertangle));
+    BAMAngle delta   = enemy_angle - pl->mo->angle;
+    float   sl_diff = fabs(enemy_slope - epi::BAMTan(pl->mo->vertangle));
 
-    if (delta > ANG180)
-        delta = ANG360 - delta;
+    if (delta > kBAMAngle180)
+        delta = kBAMAngle360 - delta;
 
     // the further away we are, the more accurate our shot must be.
     // e.g. at point-blank range, even 45 degrees away can hit.
     float acc_dist = HMM_MAX(enemy_dist, 32.0f);
     float adjust   = acc_dist / 32.0f;
 
-    if (delta > (bam_angle_t)(ANG90 / adjust / (11 - (2.5 * bot_skill.d))))
+    if (delta > (BAMAngle)(kBAMAngle90 / adjust / (11 - (2.5 * bot_skill.d))))
         return;
 
     if (sl_diff > (8.0f / adjust))
@@ -1009,7 +1009,7 @@ bot_follow_path_e bot_t::FollowPath(bool do_look)
         float dy = dest.y - pl->mo->y;
         float dz = dest.z - pl->mo->z;
 
-        bam_angle_t want_angle = R_PointToAngle(0, 0, dx, dy);
+        BAMAngle want_angle = R_PointToAngle(0, 0, dx, dy);
         float   want_slope = P_ApproxSlope(dx, dy, dz);
 
         TurnToward(want_angle, want_slope, false);
@@ -1192,13 +1192,13 @@ void bot_t::Think_OpenDoor()
         }
 
         float   dist = DistTo(path->cur_dest());
-        bam_angle_t ang  = path->nodes[path->along].seg->angle + ANG90;
-        bam_angle_t diff = ang - pl->mo->angle;
+        BAMAngle ang  = path->nodes[path->along].seg->angle + kBAMAngle90;
+        BAMAngle diff = ang - pl->mo->angle;
 
-        if (diff > ANG180)
-            diff = ANG360 - diff;
+        if (diff > kBAMAngle180)
+            diff = kBAMAngle360 - diff;
 
-        if (diff < ANG5 && dist < (USERANGE - 16))
+        if (diff < kBAMAngle5 && dist < (USERANGE - 16))
         {
             door_stage = TKDOOR_Use;
             door_time  = TICRATE * 5;
@@ -1259,13 +1259,13 @@ void bot_t::Think_UseLift()
         }
 
         float   dist = DistTo(path->cur_dest());
-        bam_angle_t ang  = path->nodes[path->along].seg->angle + ANG90;
-        bam_angle_t diff = ang - pl->mo->angle;
+        BAMAngle ang  = path->nodes[path->along].seg->angle + kBAMAngle90;
+        BAMAngle diff = ang - pl->mo->angle;
 
-        if (diff > ANG180)
-            diff = ANG360 - diff;
+        if (diff > kBAMAngle180)
+            diff = kBAMAngle360 - diff;
 
-        if (diff < ANG5 && dist < (USERANGE - 16))
+        if (diff < kBAMAngle5 && dist < (USERANGE - 16))
         {
             lift_stage = TKLIFT_Use;
             lift_time  = TICRATE * 5;
@@ -1479,15 +1479,15 @@ void bot_t::ConvertTiccmd(ticcmd_t *dest)
     dest->player_idx = pl->pnum;
 
     dest->angleturn = (mo->angle - look_angle) >> 16;
-    dest->mlookturn = (epi::BAM_FromATan(look_slope) - mo->vertangle) >> 16;
+    dest->mlookturn = (epi::BAMFromATan(look_slope) - mo->vertangle) >> 16;
 
     if (cmd.speed != 0)
     {
         // get angle relative the player.
-        bam_angle_t a = cmd.direction - look_angle;
+        BAMAngle a = cmd.direction - look_angle;
 
-        float fwd  = epi::BAM_Cos(a) * cmd.speed;
-        float side = epi::BAM_Sin(a) * cmd.speed;
+        float fwd  = epi::BAMCos(a) * cmd.speed;
+        float side = epi::BAMSin(a) * cmd.speed;
 
         dest->forwardmove = (int)fwd;
         dest->sidemove    = -(int)side;

@@ -467,7 +467,7 @@ static void P_BringUpWeapon(player_t *p)
 
     if (p->zoom_fov > 0)
     {
-        if (info->zoom_fov < int(ANG360))
+        if (info->zoom_fov < int(kBAMAngle360))
             p->zoom_fov = info->zoom_fov;
         else
             p->zoom_fov = 0;
@@ -924,11 +924,11 @@ static void BobWeapon(player_t *p, weapondef_c *info)
     // bob the weapon based on movement speed
     if (p->powers[PW_Jetpack] <= 0) // Don't bob when using jetpack
     {
-        bam_angle_t angle = (128 * (g_erraticism.d ? p->e_bob_ticker++ : leveltime)) << 19;
-        new_sx        = p->bob * PERCENT_2_FLOAT(info->swaying) * epi::BAM_Cos(angle);
+        BAMAngle angle = (128 * (g_erraticism.d ? p->e_bob_ticker++ : leveltime)) << 19;
+        new_sx        = p->bob * PERCENT_2_FLOAT(info->swaying) * epi::BAMCos(angle);
 
-        angle &= (ANG180 - 1);
-        new_sy = p->bob * PERCENT_2_FLOAT(info->bobbing) * epi::BAM_Sin(angle);
+        angle &= (kBAMAngle180 - 1);
+        new_sy = p->bob * PERCENT_2_FLOAT(info->bobbing) * epi::BAMSin(angle);
     }
 
     psp->sx = new_sx;
@@ -1965,7 +1965,7 @@ void A_WeaponZoom(mobj_t *mo)
         if (!(p->ready_wp < 0 || p->pending_wp >= 0))
             fov = p->weapons[p->ready_wp].info->zoom_fov;
 
-        if (fov == int(ANG360))
+        if (fov == int(kBAMAngle360))
             fov = 0;
     }
 
@@ -1993,8 +1993,8 @@ void A_MoveFwd(mobj_t *mo)
     {
         float amount = *(float *)st->action_par;
 
-        float dx = epi::BAM_Cos(mo->angle);
-        float dy = epi::BAM_Sin(mo->angle);
+        float dx = epi::BAMCos(mo->angle);
+        float dy = epi::BAMSin(mo->angle);
 
         mo->mom.X += dx * amount;
         mo->mom.Y += dy * amount;
@@ -2012,8 +2012,8 @@ void A_MoveRight(mobj_t *mo)
     {
         float amount = *(float *)st->action_par;
 
-        float dx = epi::BAM_Cos(mo->angle - ANG90);
-        float dy = epi::BAM_Sin(mo->angle - ANG90);
+        float dx = epi::BAMCos(mo->angle - kBAMAngle90);
+        float dy = epi::BAMSin(mo->angle - kBAMAngle90);
 
         mo->mom.X += dx * amount;
         mo->mom.Y += dy * amount;
@@ -2044,7 +2044,7 @@ void A_TurnDir(mobj_t *mo)
     const state_t *st = psp->state;
 
     if (st && st->action_par)
-        mo->angle += *(bam_angle_t *)st->action_par;
+        mo->angle += *(BAMAngle *)st->action_par;
 }
 
 void A_TurnRandom(mobj_t *mo)
@@ -2055,7 +2055,7 @@ void A_TurnRandom(mobj_t *mo)
     const state_t *st            = psp->state;
     int            turn          = 359;
     int            random_angle  = 0;
-    int            current_angle = (int)epi::Degrees_FromBAM(mo->angle);
+    int            current_angle = (int)epi::DegreesFromBAM(mo->angle);
 
     if (current_angle >= 360)
         current_angle -= 360;
@@ -2075,7 +2075,7 @@ void A_TurnRandom(mobj_t *mo)
         random_angle = 0 + (turn - 0) * (C_Random() / double(0x10000));
 
     turn      = current_angle + random_angle;
-    mo->angle = epi::BAM_FromDegrees(turn);
+    mo->angle = epi::BAMFromDegrees(turn);
 }
 
 void A_MlookTurn(mobj_t *mo)
@@ -2086,7 +2086,7 @@ void A_MlookTurn(mobj_t *mo)
     const state_t *st = psp->state;
 
     if (st && st->action_par)
-        mo->vertangle += epi::BAM_FromATan(*(float *)st->action_par);
+        mo->vertangle += epi::BAMFromATan(*(float *)st->action_par);
 }
 
 //--- editor settings ---

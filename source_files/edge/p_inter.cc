@@ -1224,7 +1224,7 @@ void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust)
     if (fabs(dx) < 1.0f && fabs(dy) < 1.0f)
         return;
 
-    bam_angle_t angle = R_PointToAngle(0, 0, dx, dy);
+    BAMAngle angle = R_PointToAngle(0, 0, dx, dy);
 
     // -ACB- 2000/03/11 Div-by-zero check...
     SYS_ASSERT(!AlmostEquals(target->info->mass, 0.0f));
@@ -1237,8 +1237,8 @@ void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust)
     if (push > 40.0f)
         push = 40.0f;
 
-    target->mom.X += push * epi::BAM_Cos(angle);
-    target->mom.Y += push * epi::BAM_Sin(angle);
+    target->mom.X += push * epi::BAMCos(angle);
+    target->mom.Y += push * epi::BAMSin(angle);
 
     if (level_flags.true3dgameplay)
     {
@@ -1278,7 +1278,7 @@ void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust)
     if (fabs(dx) < 1.0f && fabs(dy) < 1.0f)
         return;
 
-    bam_angle_t angle = R_PointToAngle(0, 0, dx, dy);
+    BAMAngle angle = R_PointToAngle(0, 0, dx, dy);
 
     // -ACB- 2000/03/11 Div-by-zero check...
     SYS_ASSERT(!AlmostEquals(target->info->mass, 0.0f));
@@ -1291,8 +1291,8 @@ void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust)
     if (push > 40.0f)
         push = 40.0f;
 
-    target->mom.X += push * epi::BAM_Cos(angle);
-    target->mom.Y += push * epi::BAM_Sin(angle);
+    target->mom.X += push * epi::BAMCos(angle);
+    target->mom.Y += push * epi::BAMSin(angle);
 
     if (level_flags.true3dgameplay)
     {

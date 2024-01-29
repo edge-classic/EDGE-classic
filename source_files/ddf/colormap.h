@@ -65,9 +65,9 @@ class colourmap_c
     colourspecial_e special;
 
     // colours for GL renderer
-    rgbacol_t gl_colour;
+    RGBAColor gl_colour;
 
-    rgbacol_t font_colour; // (computed only, not in DDF)
+    RGBAColor font_colour; // (computed only, not in DDF)
 
     colmapcache_t cache;
 

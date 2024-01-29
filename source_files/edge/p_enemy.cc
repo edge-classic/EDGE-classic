@@ -192,8 +192,8 @@ bool P_Move(mobj_t *actor, bool path)
 
     if (path)
     {
-        tryx = actor->x + actor->speed * epi::BAM_Cos(actor->angle);
-        tryy = actor->y + actor->speed * epi::BAM_Sin(actor->angle);
+        tryx = actor->x + actor->speed * epi::BAMCos(actor->angle);
+        tryy = actor->y + actor->speed * epi::BAMSin(actor->angle);
     }
     else
     {
@@ -453,12 +453,12 @@ void P_NewChaseDir(mobj_t *object)
 //
 // Returns true if a player is targeted.
 //
-bool P_LookForPlayers(mobj_t *actor, bam_angle_t range)
+bool P_LookForPlayers(mobj_t *actor, BAMAngle range)
 {
     int       c;
     int       stop;
     player_t *player;
-    bam_angle_t   an;
+    BAMAngle   an;
     float     dist;
 
     c    = 0;
@@ -485,7 +485,7 @@ bool P_LookForPlayers(mobj_t *actor, bam_angle_t range)
         if ((actor->side & player->mo->side) != 0)
             continue;
 
-        if (range < ANG180)
+        if (range < kBAMAngle180)
         {
             an = R_PointToAngle(actor->x, actor->y, player->mo->x, player->mo->y) - actor->angle;
 
@@ -657,7 +657,7 @@ void P_ActCubeSpawn(mobj_t *cube)
 
     newmobj = P_MobjCreateObject(targ->x, targ->y, targ->z, type);
 
-    if (P_LookForPlayers(newmobj, ANG180))
+    if (P_LookForPlayers(newmobj, kBAMAngle180))
     {
         if (newmobj->info->chase_state)
             P_SetMobjState(newmobj, newmobj->info->chase_state);

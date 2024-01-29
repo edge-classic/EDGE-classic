@@ -804,12 +804,10 @@ static bool G_LoadGameFromFile(std::string filename, bool is_hub)
     LoadLevel_Bits();
 
     // -- Check LEVEL consistency (crc) --
-    //
-    // FIXME: ideally we shouldn't bomb out, just display an error box
 
-    if (globs->mapsector.count != numsectors || globs->mapsector.crc != mapsector_CRC.crc ||
-        globs->mapline.count != numlines || globs->mapline.crc != mapline_CRC.crc ||
-        globs->mapthing.count != mapthing_NUM || globs->mapthing.crc != mapthing_CRC.crc)
+    if (globs->mapsector.count != numsectors || globs->mapsector.crc != mapsector_CRC.GetCRC() ||
+        globs->mapline.count != numlines || globs->mapline.crc != mapline_CRC.GetCRC() ||
+        globs->mapthing.count != mapthing_NUM || globs->mapthing.crc != mapthing_CRC.GetCRC())
     {
         SV_CloseReadFile();
 
@@ -949,11 +947,11 @@ static bool G_SaveGameToFile(std::string filename, const char *description)
     globs->desc_date   = SV_DupString(timebuf);
 
     globs->mapsector.count = numsectors;
-    globs->mapsector.crc   = mapsector_CRC.crc;
+    globs->mapsector.crc   = mapsector_CRC.GetCRC();
     globs->mapline.count   = numlines;
-    globs->mapline.crc     = mapline_CRC.crc;
+    globs->mapline.crc     = mapline_CRC.GetCRC();
     globs->mapthing.count  = mapthing_NUM;
-    globs->mapthing.crc    = mapthing_CRC.crc;
+    globs->mapthing.crc    = mapthing_CRC.GetCRC();
 
     SV_BeginSave();
 

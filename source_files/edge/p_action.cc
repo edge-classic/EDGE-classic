@@ -367,29 +367,29 @@ void P_ActFaceTarget(mobj_t *object)
     {
         float dz = MO_MIDZ(target) - MO_MIDZ(object);
 
-        object->vertangle = epi::BAM_FromATan(dz / dist);
+        object->vertangle = epi::BAMFromATan(dz / dist);
     }
 
     if (target->flags & MF_FUZZY)
     {
-        object->angle += P_RandomNegPos() << (ANGLEBITS - 11);
-        object->vertangle += epi::BAM_FromATan(P_RandomNegPos() / 1024.0f);
+        object->angle += P_RandomNegPos() << (kBAMAngleBits - 11);
+        object->vertangle += epi::BAMFromATan(P_RandomNegPos() / 1024.0f);
     }
 
     if (target->visibility < VISIBLE)
     {
         float amount = (VISIBLE - target->visibility);
 
-        object->angle += (bam_angle_t)(P_RandomNegPos() * (ANGLEBITS - 12) * amount);
-        object->vertangle += epi::BAM_FromATan(P_RandomNegPos() * amount / 2048.0f);
+        object->angle += (BAMAngle)(P_RandomNegPos() * (kBAMAngleBits - 12) * amount);
+        object->vertangle += epi::BAMFromATan(P_RandomNegPos() * amount / 2048.0f);
     }
 
     // don't look up/down too far...
-    if (object->vertangle < ANG180 && object->vertangle > ANG45)
-        object->vertangle = ANG45;
+    if (object->vertangle < kBAMAngle180 && object->vertangle > kBAMAngle45)
+        object->vertangle = kBAMAngle45;
 
-    if (object->vertangle >= ANG180 && object->vertangle < ANG315)
-        object->vertangle = ANG315;
+    if (object->vertangle >= kBAMAngle180 && object->vertangle < kBAMAngle315)
+        object->vertangle = kBAMAngle315;
 }
 
 //
@@ -417,15 +417,15 @@ void P_ForceFaceTarget(mobj_t *object)
     {
         float dz = MO_MIDZ(target) - MO_MIDZ(object);
 
-        object->vertangle = epi::BAM_FromATan(dz / dist);
+        object->vertangle = epi::BAMFromATan(dz / dist);
     }
 
     // don't look up/down too far...
-    if (object->vertangle < ANG180 && object->vertangle > ANG45)
-        object->vertangle = ANG45;
+    if (object->vertangle < kBAMAngle180 && object->vertangle > kBAMAngle45)
+        object->vertangle = kBAMAngle45;
 
-    if (object->vertangle >= ANG180 && object->vertangle < ANG315)
-        object->vertangle = ANG315;
+    if (object->vertangle >= kBAMAngle180 && object->vertangle < kBAMAngle315)
+        object->vertangle = kBAMAngle315;
 }
 
 void P_ActMakeIntoCorpse(mobj_t *mo)
@@ -660,7 +660,7 @@ void P_ActDLightColour(struct mobj_s *mo)
 
     if (st && st->action_par)
     {
-        mo->dlight.color = ((rgbacol_t *)st->action_par)[0];
+        mo->dlight.color = ((RGBAColor *)st->action_par)[0];
     }
 }
 
@@ -688,7 +688,7 @@ void P_ActFaceDir(mobj_t *mo)
     const state_t *st = mo->state;
 
     if (st && st->action_par)
-        mo->angle = *(bam_angle_t *)st->action_par;
+        mo->angle = *(BAMAngle *)st->action_par;
     else
         mo->angle = 0;
 }
@@ -697,10 +697,10 @@ void P_ActTurnDir(mobj_t *mo)
 {
     const state_t *st = mo->state;
 
-    bam_angle_t turn = ANG180;
+    BAMAngle turn = kBAMAngle180;
 
     if (st && st->action_par)
-        turn = *(bam_angle_t *)st->action_par;
+        turn = *(BAMAngle *)st->action_par;
 
     mo->angle += turn;
 }
@@ -712,15 +712,15 @@ void P_ActTurnRandom(mobj_t *mo)
 
     if (st && st->action_par)
     {
-        turn = (int)epi::Degrees_FromBAM(*(bam_angle_t *)st->action_par);
+        turn = (int)epi::DegreesFromBAM(*(BAMAngle *)st->action_par);
     }
 
     turn = turn * P_Random() / 90; // 10 bits of angle
 
     if (turn < 0)
-        mo->angle -= (bam_angle_t)((-turn) << (ANGLEBITS - 10));
+        mo->angle -= (BAMAngle)((-turn) << (kBAMAngleBits - 10));
     else
-        mo->angle += (bam_angle_t)(turn << (ANGLEBITS - 10));
+        mo->angle += (BAMAngle)(turn << (kBAMAngleBits - 10));
 }
 
 void P_ActMlookFace(mobj_t *mo)
@@ -728,7 +728,7 @@ void P_ActMlookFace(mobj_t *mo)
     const state_t *st = mo->state;
 
     if (st && st->action_par)
-        mo->vertangle = epi::BAM_FromATan(*(float *)st->action_par);
+        mo->vertangle = epi::BAMFromATan(*(float *)st->action_par);
     else
         mo->vertangle = 0;
 }
@@ -738,7 +738,7 @@ void P_ActMlookTurn(mobj_t *mo)
     const state_t *st = mo->state;
 
     if (st && st->action_par)
-        mo->vertangle = epi::BAM_FromATan(*(float *)st->action_par);
+        mo->vertangle = epi::BAMFromATan(*(float *)st->action_par);
 }
 
 void P_ActMoveFwd(mobj_t *mo)
@@ -749,8 +749,8 @@ void P_ActMoveFwd(mobj_t *mo)
     {
         float amount = *(float *)st->action_par;
 
-        float dx = epi::BAM_Cos(mo->angle);
-        float dy = epi::BAM_Sin(mo->angle);
+        float dx = epi::BAMCos(mo->angle);
+        float dy = epi::BAMSin(mo->angle);
 
         mo->mom.X += dx * amount;
         mo->mom.Y += dy * amount;
@@ -765,8 +765,8 @@ void P_ActMoveRight(mobj_t *mo)
     {
         float amount = *(float *)st->action_par;
 
-        float dx = epi::BAM_Cos(mo->angle - ANG90);
-        float dy = epi::BAM_Sin(mo->angle - ANG90);
+        float dx = epi::BAMCos(mo->angle - kBAMAngle90);
+        float dy = epi::BAMSin(mo->angle - kBAMAngle90);
 
         mo->mom.X += dx * amount;
         mo->mom.Y += dy * amount;
@@ -1103,10 +1103,10 @@ static mobj_t *DoLaunchProjectile(mobj_t *source, float tx, float ty, float tz, 
              abs(source->z - cur_source_sec->f_h) < 1)
         projz -= (source->height * 0.5 * cur_source_sec->sink_depth);
 
-    bam_angle_t angle = source->angle;
+    BAMAngle angle = source->angle;
 
-    projx += attack->xoffset * epi::BAM_Cos(angle + ANG90);
-    projy += attack->xoffset * epi::BAM_Sin(angle + ANG90);
+    projx += attack->xoffset * epi::BAMCos(angle + kBAMAngle90);
+    projy += attack->xoffset * epi::BAMSin(angle + kBAMAngle90);
 
     float yoffset;
 
@@ -1115,9 +1115,9 @@ static mobj_t *DoLaunchProjectile(mobj_t *source, float tx, float ty, float tz, 
     else
         yoffset = source->radius - 0.5f;
 
-    projx += yoffset * epi::BAM_Cos(angle) * epi::BAM_Cos(source->vertangle);
-    projy += yoffset * epi::BAM_Sin(angle) * epi::BAM_Cos(source->vertangle);
-    projz += yoffset * epi::BAM_Sin(source->vertangle);
+    projx += yoffset * epi::BAMCos(angle) * epi::BAMCos(source->vertangle);
+    projy += yoffset * epi::BAMSin(angle) * epi::BAMCos(source->vertangle);
+    projz += yoffset * epi::BAMSin(source->vertangle);
 
     mobj_t *projectile = P_MobjCreateObject(projx, projy, projz, type);
 
@@ -1169,10 +1169,10 @@ static mobj_t *DoLaunchProjectile(mobj_t *source, float tx, float ty, float tz, 
         if (!(attack->flags & AF_Player))
         {
             if (target->flags & MF_FUZZY)
-                angle += P_RandomNegPos() << (ANGLEBITS - 12);
+                angle += P_RandomNegPos() << (kBAMAngleBits - 12);
 
             if (target->visibility < VISIBLE)
-                angle += (bam_angle_t)(P_RandomNegPos() * 64 * (VISIBLE - target->visibility));
+                angle += (BAMAngle)(P_RandomNegPos() * 64 * (VISIBLE - target->visibility));
         }
 
         sector_t *cur_target_sec = target->subsector->sector;
@@ -1330,7 +1330,7 @@ static inline bool Weakness_CheckHit(mobj_t *target, const atkdef_c *attack, flo
     if (z < weak->height[0] || z > weak->height[1])
         return false;
 
-    bam_angle_t ang = R_PointToAngle(target->x, target->y, x, y);
+    BAMAngle ang = R_PointToAngle(target->x, target->y, x, y);
 
     ang -= target->angle;
 
@@ -1651,28 +1651,28 @@ void P_ActHomingProjectile(mobj_t *projectile)
         return;
 
     // change angle
-    bam_angle_t exact = R_PointToAngle(projectile->x, projectile->y, destination->x, destination->y);
+    BAMAngle exact = R_PointToAngle(projectile->x, projectile->y, destination->x, destination->y);
 
     if (exact != projectile->angle)
     {
-        if (exact - projectile->angle > ANG180)
+        if (exact - projectile->angle > kBAMAngle180)
         {
             projectile->angle -= attack->trace_angle;
 
-            if (exact - projectile->angle < ANG180)
+            if (exact - projectile->angle < kBAMAngle180)
                 projectile->angle = exact;
         }
         else
         {
             projectile->angle += attack->trace_angle;
 
-            if (exact - projectile->angle > ANG180)
+            if (exact - projectile->angle > kBAMAngle180)
                 projectile->angle = exact;
         }
     }
 
-    projectile->mom.X = projectile->speed * epi::BAM_Cos(projectile->angle);
-    projectile->mom.Y = projectile->speed * epi::BAM_Sin(projectile->angle);
+    projectile->mom.X = projectile->speed * epi::BAMCos(projectile->angle);
+    projectile->mom.Y = projectile->speed * epi::BAMSin(projectile->angle);
 
     // change slope
     float slope = P_ApproxSlope(destination->x - projectile->x, destination->y - projectile->y,
@@ -1717,7 +1717,7 @@ void P_ActHomeToSpot(mobj_t *projectile)
     }
 
     // calculate new angles
-    bam_angle_t angle = R_PointToAngle(0, 0, dx, dy);
+    BAMAngle angle = R_PointToAngle(0, 0, dx, dy);
     float   slope = P_ApproxSlope(dx, dy, dz);
 
     P_SetMobjDirAndSpeed(projectile, angle, slope, projectile->speed);
@@ -1741,8 +1741,8 @@ static void LaunchOrderedSpread(mobj_t *mo)
 {
     // left side = angle modifier
     // right side = object or projectile (true for object).
-    static int spreadorder[] = {(ANG90 / 8),  true,  (ANG90 / 8),   false, -(ANG90 / 8), true,
-                                -(ANG90 / 4), false, -(ANG90 / 16), false, (ANG90 / 16), false};
+    static int spreadorder[] = {(kBAMAngle90 / 8),  true,  (kBAMAngle90 / 8),   false, -(kBAMAngle90 / 8), true,
+                                -(kBAMAngle90 / 4), false, -(kBAMAngle90 / 16), false, (kBAMAngle90 / 16), false};
 
     const atkdef_c *attack = mo->currentattack;
 
@@ -1770,8 +1770,8 @@ static void LaunchOrderedSpread(mobj_t *mo)
 
         projectile->angle += spreadorder[count];
 
-        projectile->mom.X = projectile->speed * epi::BAM_Cos(projectile->angle);
-        projectile->mom.Y = projectile->speed * epi::BAM_Sin(projectile->angle);
+        projectile->mom.X = projectile->speed * epi::BAMCos(projectile->angle);
+        projectile->mom.Y = projectile->speed * epi::BAMSin(projectile->angle);
     }
 
     mo->spreadcount += 2;
@@ -1783,7 +1783,7 @@ static void LaunchOrderedSpread(mobj_t *mo)
 // This is a the generic function that should be used for a spreader like
 // mancubus, although its random nature would certainly be a change to the
 // ordered method used now. The random number is bit shifted to the right
-// and then the ANG90 is divided by it, the first bit of the RN is checked
+// and then the kBAMAngle90 is divided by it, the first bit of the RN is checked
 // to detemine if the angle is change is negative or not (approx 50% chance).
 // The result is the modifier for the projectile's angle.
 //
@@ -1802,7 +1802,7 @@ static void LaunchRandomSpread(mobj_t *mo)
 
     if (i >> 1)
     {
-        bam_angle_t spreadangle = (ANG90 / (i >> 1));
+        BAMAngle spreadangle = (kBAMAngle90 / (i >> 1));
 
         if (i & 1)
             spreadangle -= spreadangle << 1;
@@ -1810,8 +1810,8 @@ static void LaunchRandomSpread(mobj_t *mo)
         projectile->angle += spreadangle;
     }
 
-    projectile->mom.X = projectile->speed * epi::BAM_Cos(projectile->angle);
-    projectile->mom.Y = projectile->speed * epi::BAM_Sin(projectile->angle);
+    projectile->mom.X = projectile->speed * epi::BAMCos(projectile->angle);
+    projectile->mom.Y = projectile->speed * epi::BAMSin(projectile->angle);
 }
 
 //-------------------------------------------------------------------
@@ -1829,11 +1829,11 @@ static void ShotAttack(mobj_t *mo)
     float range = (attack->range > 0) ? attack->range : MISSILERANGE;
 
     // -ACB- 1998/09/05 Remember to use the object angle, fool!
-    bam_angle_t objangle = mo->angle;
+    BAMAngle objangle = mo->angle;
     float   objslope;
 
     if ((mo->player && !mo->target) || (attack->flags & AF_NoTarget))
-        objslope = epi::BAM_Tan(mo->vertangle);
+        objslope = epi::BAMTan(mo->vertangle);
     else
         P_AimLineAttack(mo, objangle, range, &objslope);
 
@@ -1846,7 +1846,7 @@ static void ShotAttack(mobj_t *mo)
 
     for (int i = 0; i < attack->count; i++)
     {
-        bam_angle_t angle = objangle;
+        BAMAngle angle = objangle;
         float   slope = objslope;
 
         // is the attack not accurate?
@@ -1883,7 +1883,7 @@ static void SprayAttack(mobj_t *mo)
     // offset angles from its attack angle
     for (int i = 0; i < 40; i++)
     {
-        bam_angle_t an = mo->angle - ANG90 / 2 + (ANG90 / 40) * i;
+        BAMAngle an = mo->angle - kBAMAngle90 / 2 + (kBAMAngle90 / 40) * i;
 
         // mo->source is the originator (player) of the missile
         mobj_t *target = P_AimLineAttack(mo->source ? mo->source : mo, an, range, NULL);
@@ -1931,7 +1931,7 @@ static void DoMeleeAttack(mobj_t *mo)
 
     if (!DecideMeleeAttack(mo, attack))
     {
-        P_LineAttack(mo, mo->angle, range, epi::BAM_Tan(mo->vertangle), damage, &attack->damage, attack->puff);
+        P_LineAttack(mo, mo->angle, range, epi::BAMTan(mo->vertangle), damage, &attack->damage, attack->puff);
         return;
     }
 
@@ -1974,9 +1974,9 @@ void P_ActTrackerFollow(mobj_t *tracker)
     if (!P_CheckSight(tracker->source, destination))
         return;
 
-    bam_angle_t angle = destination->angle;
+    BAMAngle angle = destination->angle;
 
-    P_ChangeThingPosition(tracker, destination->x + 24 * epi::BAM_Cos(angle), destination->y + 24 * epi::BAM_Sin(angle),
+    P_ChangeThingPosition(tracker, destination->x + 24 * epi::BAMCos(angle), destination->y + 24 * epi::BAMSin(angle),
                           destination->z);
 }
 
@@ -2054,7 +2054,7 @@ void P_ActEffectTracker(mobj_t *object)
     mobj_t         *tracker;
     mobj_t         *target;
     const atkdef_c *attack;
-    bam_angle_t         angle;
+    BAMAngle         angle;
     float           damage;
 
     if (!object->target || !object->currentattack)
@@ -2098,7 +2098,7 @@ void P_ActEffectTracker(mobj_t *object)
 
     // move the tracker between the object and the object's target
 
-    P_ChangeThingPosition(tracker, target->x - 24 * epi::BAM_Cos(angle), target->y - 24 * epi::BAM_Sin(angle), target->z);
+    P_ChangeThingPosition(tracker, target->x - 24 * epi::BAMCos(angle), target->y - 24 * epi::BAMSin(angle), target->z);
 
 #ifdef DEVELOPERS
     if (!tracker->info->explode_damage.nominal)
@@ -2198,7 +2198,7 @@ static void ShootToSpot(mobj_t *object)
 //
 // -ACB- 1998/08/23
 //
-static void ObjectSpawning(mobj_t *parent, bam_angle_t angle)
+static void ObjectSpawning(mobj_t *parent, BAMAngle angle)
 {
     float           slope;
     const atkdef_c *attack;
@@ -2227,7 +2227,7 @@ static void ObjectSpawning(mobj_t *parent, bam_angle_t angle)
 
     // -AJA- 1999/09/10: apply the angle offset of the attack.
     angle -= attack->angle_offset;
-    slope = epi::BAM_Tan(parent->vertangle) + attack->slope_offset;
+    slope = epi::BAMTan(parent->vertangle) + attack->slope_offset;
 
     float spawnx = parent->x;
     float spawny = parent->y;
@@ -2237,8 +2237,8 @@ static void ObjectSpawning(mobj_t *parent, bam_angle_t angle)
     {
         float prestep = 4.0f + 1.5f * parent->radius + shoottype->radius;
 
-        spawnx += prestep * epi::BAM_Cos(angle);
-        spawny += prestep * epi::BAM_Sin(angle);
+        spawnx += prestep * epi::BAMCos(angle);
+        spawny += prestep * epi::BAMSin(angle);
     }
 
     mobj_t *child = P_MobjCreateObject(spawnx, spawny, spawnz, shoottype);
@@ -2317,9 +2317,9 @@ static void ObjectSpawning(mobj_t *parent, bam_angle_t angle)
 
 static void ObjectTripleSpawn(mobj_t *object)
 {
-    ObjectSpawning(object, object->angle + ANG90);
-    ObjectSpawning(object, object->angle + ANG180);
-    ObjectSpawning(object, object->angle + ANG270);
+    ObjectSpawning(object, object->angle + kBAMAngle90);
+    ObjectSpawning(object, object->angle + kBAMAngle180);
+    ObjectSpawning(object, object->angle + kBAMAngle270);
 }
 
 //
@@ -2334,9 +2334,9 @@ static void ObjectTripleSpawn(mobj_t *object)
 
 static void ObjectDoubleSpawn(mobj_t *object)
 {
-    ObjectSpawning(object, object->angle + ANG90);
-    // ObjectSpawning(object, object->angle + ANG180);
-    ObjectSpawning(object, object->angle + ANG270);
+    ObjectSpawning(object, object->angle + kBAMAngle90);
+    // ObjectSpawning(object, object->angle + kBAMAngle180);
+    ObjectSpawning(object, object->angle + kBAMAngle270);
 }
 
 //-------------------------------------------------------------------
@@ -2591,7 +2591,7 @@ void P_ActPathFollow(mobj_t *mo)
     float dx = mo->path_trigger->x - mo->x;
     float dy = mo->path_trigger->y - mo->y;
 
-    bam_angle_t diff = R_PointToAngle(0, 0, dx, dy) - mo->angle;
+    BAMAngle diff = R_PointToAngle(0, 0, dx, dy) - mo->angle;
 
     // movedir value:
     //   0 for slow turning.
@@ -2603,11 +2603,11 @@ void P_ActPathFollow(mobj_t *mo)
 
     if (mo->movedir == DI_SLOWTURN || mo->movedir == DI_FASTTURN)
     {
-        if (diff > ANG15 && diff < (ANG360 - ANG15))
+        if (diff > kBAMAngle15 && diff < (kBAMAngle360 - kBAMAngle15))
         {
-            bam_angle_t step = ANG30;
+            BAMAngle step = kBAMAngle30;
 
-            if (diff < ANG180)
+            if (diff < kBAMAngle180)
                 mo->angle += P_Random() * (step >> 8);
             else
                 mo->angle -= P_Random() * (step >> 8);
@@ -2624,17 +2624,17 @@ void P_ActPathFollow(mobj_t *mo)
 
     if (mo->movedir == DI_WALKING)
     {
-        if (diff < ANG30)
-            mo->angle += ANG1 * 2;
-        else if (diff > (ANG360 - ANG30))
-            mo->angle -= ANG1 * 2;
+        if (diff < kBAMAngle30)
+            mo->angle += kBAMAngle1 * 2;
+        else if (diff > (kBAMAngle360 - kBAMAngle30))
+            mo->angle -= kBAMAngle1 * 2;
         else
             mo->movedir = DI_SLOWTURN;
 
         if (!P_Move(mo, true))
         {
             mo->movedir   = DI_EVASIVE;
-            mo->angle     = P_Random() << (ANGLEBITS - 8);
+            mo->angle     = P_Random() << (kBAMAngleBits - 8);
             mo->movecount = 1 + (P_Random() & 7);
         }
         return;
@@ -3204,9 +3204,9 @@ void P_ActStandardMeander(mobj_t *object)
         delta = object->angle - (object->movedir << 29);
 
         if (delta > 0)
-            object->angle -= ANG45;
+            object->angle -= kBAMAngle45;
         else if (delta < 0)
-            object->angle += ANG45;
+            object->angle += kBAMAngle45;
     }
 }
 
@@ -3230,9 +3230,9 @@ void P_ActPlayerSupportMeander(mobj_t *object)
         delta = object->angle - (object->movedir << 29);
 
         if (delta > 0)
-            object->angle -= ANG45;
+            object->angle -= kBAMAngle45;
         else if (delta < 0)
-            object->angle += ANG45;
+            object->angle += kBAMAngle45;
     }
 
     //
@@ -3286,9 +3286,9 @@ void P_ActStandardChase(mobj_t *object)
         delta = object->angle - (object->movedir << 29);
 
         if (delta > 0)
-            object->angle -= ANG45;
+            object->angle -= kBAMAngle45;
         else if (delta < 0)
-            object->angle += ANG45;
+            object->angle += kBAMAngle45;
     }
 
     if (!object->target || !(object->target->flags & MF_SHOOTABLE))

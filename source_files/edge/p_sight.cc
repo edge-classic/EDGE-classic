@@ -65,7 +65,7 @@ typedef struct sight_info_s
     subsector_t *dest_sub;
 
     // angle from src->dest, for fast seg check
-    bam_angle_t angle;
+    BAMAngle angle;
 
     // slopes from source to top/bottom of destination.  They will be
     // updated when one or two-sided lines are encountered.  If they
@@ -148,7 +148,7 @@ static bool CrossSubsector(subsector_t *sub)
         // ignore segs that face away from the source.  We only want to
         // process linedefs on the _far_ side of each subsector.
         //
-        if ((bam_angle_t)(seg->angle - sight_I.angle) < ANG180)
+        if ((BAMAngle)(seg->angle - sight_I.angle) < kBAMAngle180)
             continue;
 
         ld = seg->linedef;

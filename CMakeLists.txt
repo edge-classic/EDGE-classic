@@ -138,6 +138,7 @@ if (EDGE_PROFILING)
   FetchContent_MakeAvailable (tracy)  
 endif()
 
+include_directories(libraries/hmm)
 include_directories(libraries/sokol)
 include_directories(libraries/tracy)
 

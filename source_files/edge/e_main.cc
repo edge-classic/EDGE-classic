@@ -259,7 +259,7 @@ class startup_progress_c
             int col = (1.0f + v_gamma.f) * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-            HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::RGBA_Make(col, col, col));
+            HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
@@ -268,7 +268,7 @@ class startup_progress_c
             int col = v_gamma.f * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_DST_COLOR, GL_ONE);
-            HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::RGBA_Make(col, col, col));
+            HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
@@ -491,7 +491,7 @@ static void SpecialWadVerify(void)
 //
 static void ShowNotice(void)
 {
-    CON_MessageColor(epi::RGBA_Make(64, 192, 255));
+    CON_MessageColor(epi::MakeRGBA(64, 192, 255));
 
     I_Printf("%s", language["Notice"]);
 }
@@ -665,7 +665,7 @@ void E_Display(void)
         int col = (1.0f + v_gamma.f) * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-        HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::RGBA_Make(col, col, col));
+        HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }
@@ -674,7 +674,7 @@ void E_Display(void)
         int col = v_gamma.f * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_DST_COLOR, GL_ONE);
-        HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::RGBA_Make(col, col, col));
+        HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }

@@ -553,7 +553,7 @@ static void RAD_ComputeScriptCRC(rad_script_t *scr)
     // Note: the mapid doesn't belong in the CRC
 
     if (scr->script_name)
-        scr->crc.AddCStr(scr->script_name);
+        scr->crc.AddCString(scr->script_name);
 
     scr->crc += (int)scr->tag[0];
     scr->crc += (int)scr->tag[1];
@@ -1479,7 +1479,7 @@ static void HandleSpawnKeyword(const char *par, s_thing_t *t)
         RAD_CheckForInt(par + 6, &val);
 
         if (ABS(val) <= 360)
-            t->angle = epi::BAM_FromDegrees((float)val);
+            t->angle = epi::BAMFromDegrees((float)val);
         else
             t->angle = val << 16;
     }
@@ -1565,7 +1565,7 @@ static void RAD_ParseSpawnThing(param_set_t &pars)
         RAD_CheckForInt(angle_str, &val);
 
         if (ABS(val) <= 360)
-            t->angle = epi::BAM_FromDegrees((float)val);
+            t->angle = epi::BAMFromDegrees((float)val);
         else
             t->angle = val << 16;
     }

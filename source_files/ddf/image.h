@@ -95,7 +95,7 @@ class imagedef_c
 
     imagedata_type_e type;
 
-    rgbacol_t colour; // IMGDT_Colour
+    RGBAColor colour; // IMGDT_Colour
 
     std::string      info;   // IMGDT_Package, IMGDT_File, IMGDT_Lump
     L_image_format_e format; //

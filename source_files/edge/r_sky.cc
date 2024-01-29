@@ -246,8 +246,8 @@ static void RGL_SetupSkyMatrices(void)
 
         glLoadIdentity();
 
-        glRotatef(270.0f - epi::Degrees_FromBAM(viewvertangle), 1.0f, 0.0f, 0.0f);
-        glRotatef(90.0f - epi::Degrees_FromBAM(viewangle), 0.0f, 0.0f, 1.0f);
+        glRotatef(270.0f - epi::DegreesFromBAM(viewvertangle), 1.0f, 0.0f, 0.0f);
+        glRotatef(90.0f - epi::DegreesFromBAM(viewangle), 0.0f, 0.0f, 1.0f);
     }
     else
     {
@@ -262,8 +262,8 @@ static void RGL_SetupSkyMatrices(void)
         glPushMatrix();
         glLoadIdentity();
 
-        glRotatef(270.0f - epi::Degrees_FromBAM(viewvertangle), 1.0f, 0.0f, 0.0f);
-        glRotatef(90.0f - epi::Degrees_FromBAM(viewangle), 0.0f, 0.0f, 1.0f);
+        glRotatef(270.0f - epi::DegreesFromBAM(viewvertangle), 1.0f, 0.0f, 0.0f);
+        glRotatef(90.0f - epi::DegreesFromBAM(viewangle), 0.0f, 0.0f, 1.0f);
         if (current_sky_stretch == SKS_Stretch)
             glTranslatef(0.0f, 0.0f, (r_farclip.f * 2 * 0.15)); // Draw center above horizon a little
         else
@@ -400,16 +400,16 @@ static void RGL_DrawSkyCylinder(void)
         solid_sky_h = sky_h_ratio * 0.75f;
     float cap_z = dist * sky_h_ratio;
 
-    rgbacol_t fc_to_use = currmap->outdoor_fog_color;
+    RGBAColor fc_to_use = currmap->outdoor_fog_color;
     float    fd_to_use = 0.01f * currmap->outdoor_fog_density;
     // check for sector fog
-    if (fc_to_use == RGB_NO_VALUE)
+    if (fc_to_use == kRGBANoValue)
     {
         fc_to_use = view_props->fog_color;
         fd_to_use = view_props->fog_density;
     }
 
-    if (!r_culling.d && fc_to_use != RGB_NO_VALUE)
+    if (!r_culling.d && fc_to_use != kRGBANoValue)
     {
         sg_color fc = sg_make_color_1i(fc_to_use);
         glClearColor(fc.r, fc.g, fc.b, fc.a);
@@ -523,7 +523,7 @@ static void RGL_DrawSkyCylinder(void)
 
     glDisable(GL_BLEND);
     glDisable(GL_ALPHA_TEST);
-    if (!r_culling.d && current_fog_rgb != RGB_NO_VALUE)
+    if (!r_culling.d && current_fog_rgb != kRGBANoValue)
         glDisable(GL_FOG);
 
     RGL_RevertSkyMatrices();
@@ -564,16 +564,16 @@ static void RGL_DrawSkyBox(void)
     else
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, col);
 
-    rgbacol_t fc_to_use = currmap->outdoor_fog_color;
+    RGBAColor fc_to_use = currmap->outdoor_fog_color;
     float    fd_to_use = 0.01f * currmap->outdoor_fog_density;
     // check for sector fog
-    if (fc_to_use == RGB_NO_VALUE)
+    if (fc_to_use == kRGBANoValue)
     {
         fc_to_use = view_props->fog_color;
         fd_to_use = view_props->fog_density;
     }
 
-    if (!r_culling.d && fc_to_use != RGB_NO_VALUE)
+    if (!r_culling.d && fc_to_use != kRGBANoValue)
     {
         sg_color fc = sg_make_color_1i(fc_to_use);
         glClearColor(fc.r, fc.g, fc.b, fc.a);
@@ -692,7 +692,7 @@ static void RGL_DrawSkyBox(void)
     glEnd();
 
     glDisable(GL_TEXTURE_2D);
-    if (!r_culling.d && current_fog_rgb != RGB_NO_VALUE)
+    if (!r_culling.d && current_fog_rgb != kRGBANoValue)
         glDisable(GL_FOG);
 
     RGL_RevertSkyMatrices();

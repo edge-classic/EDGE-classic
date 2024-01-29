@@ -91,12 +91,12 @@ class atkdef_c
     struct sfx_s *initsound;
     struct sfx_s *sound;
     float         accuracy_slope;
-    bam_angle_t   accuracy_angle;
+    BAMAngle   accuracy_angle;
     float         xoffset;
     float         yoffset;
-    bam_angle_t   angle_offset; // -AJA- 1999/09/10.
+    BAMAngle   angle_offset; // -AJA- 1999/09/10.
     float         slope_offset; //
-    bam_angle_t   trace_angle;  // -AJA- 2005/02/08.
+    BAMAngle   trace_angle;  // -AJA- 2005/02/08.
     float         assault_speed;
     float         height;
     float         range;

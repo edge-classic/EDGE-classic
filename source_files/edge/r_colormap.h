@@ -40,9 +40,9 @@ void V_InitPalette(void);
 void V_InitColour(void);
 
 // -ACB- 1999/10/11 Gets an RGB colour from the current palette
-void V_IndexColourToRGB(int indexcol, uint8_t *returncol, rgbacol_t last_damage_colour, float damageAmount);
+void V_IndexColourToRGB(int indexcol, uint8_t *returncol, RGBAColor last_damage_colour, float damageAmount);
 
-rgbacol_t V_LookupColour(int col);
+RGBAColor V_LookupColour(int col);
 
 #define GAMMA_CONV(light) (light)
 
@@ -77,8 +77,8 @@ void R_TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const colourma
 
 void V_GetColmapRGB(const colourmap_c *colmap, float *r, float *g, float *b);
 
-rgbacol_t V_GetFontColor(const colourmap_c *colmap);
-rgbacol_t V_ParseFontColor(const char *name, bool strict = false);
+RGBAColor V_GetFontColor(const colourmap_c *colmap);
+RGBAColor V_ParseFontColor(const char *name, bool strict = false);
 
 abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props, int light_add = 0,
                                        sector_t *sec = nullptr);

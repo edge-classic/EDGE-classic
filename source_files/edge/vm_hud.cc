@@ -67,19 +67,19 @@ static float ui_hud_automap_zoom;
 
 //------------------------------------------------------------------------
 
-rgbacol_t VM_VectorToColor(double *v)
+RGBAColor VM_VectorToColor(double *v)
 {
     if (v[0] < 0)
-        return RGB_NO_VALUE;
+        return kRGBANoValue;
 
     int r = CLAMP(0, (int)v[0], 255);
     int g = CLAMP(0, (int)v[1], 255);
     int b = CLAMP(0, (int)v[2], 255);
 
-    rgbacol_t rgb = epi::RGBA_Make(r, g, b);
+    RGBAColor rgb = epi::MakeRGBA(r, g, b);
 
     // ensure we don't get the "no color" value by mistake
-    if (rgb == RGB_NO_VALUE)
+    if (rgb == kRGBANoValue)
         rgb ^= 0x00010100;
 
     return rgb;
@@ -219,7 +219,7 @@ static void HD_text_color(coal::vm_c *vm, int argc)
 
     double *v = vm->AccessParam(0);
 
-    rgbacol_t color = VM_VectorToColor(v);
+    RGBAColor color = VM_VectorToColor(v);
 
     HUD_SetTextColor(color);
 }
@@ -260,7 +260,7 @@ static void HD_solid_box(coal::vm_c *vm, int argc)
     float w = *vm->AccessParam(2);
     float h = *vm->AccessParam(3);
 
-    rgbacol_t rgb = VM_VectorToColor(vm->AccessParam(4));
+    RGBAColor rgb = VM_VectorToColor(vm->AccessParam(4));
 
     HUD_SolidBox(x, y, x + w, y + h, rgb);
 }
@@ -276,7 +276,7 @@ static void HD_solid_line(coal::vm_c *vm, int argc)
     float x2 = *vm->AccessParam(2);
     float y2 = *vm->AccessParam(3);
 
-    rgbacol_t rgb = VM_VectorToColor(vm->AccessParam(4));
+    RGBAColor rgb = VM_VectorToColor(vm->AccessParam(4));
 
     HUD_SolidLine(x1, y1, x2, y2, rgb);
 }
@@ -292,7 +292,7 @@ static void HD_thin_box(coal::vm_c *vm, int argc)
     float w = *vm->AccessParam(2);
     float h = *vm->AccessParam(3);
 
-    rgbacol_t rgb = VM_VectorToColor(vm->AccessParam(4));
+    RGBAColor rgb = VM_VectorToColor(vm->AccessParam(4));
 
     HUD_ThinBox(x, y, x + w, y + h, rgb);
 }
@@ -308,7 +308,7 @@ static void HD_gradient_box(coal::vm_c *vm, int argc)
     float w = *vm->AccessParam(2);
     float h = *vm->AccessParam(3);
 
-    rgbacol_t cols[4];
+    RGBAColor cols[4];
 
     cols[0] = VM_VectorToColor(vm->AccessParam(4));
     cols[1] = VM_VectorToColor(vm->AccessParam(5));
@@ -655,7 +655,7 @@ static void HD_automap_color(coal::vm_c *vm, int argc)
 
     which--;
 
-    rgbacol_t rgb = VM_VectorToColor(vm->AccessParam(1));
+    RGBAColor rgb = VM_VectorToColor(vm->AccessParam(1));
 
     AM_SetColor(which, rgb);
 }
@@ -776,11 +776,11 @@ static void HD_get_average_color(coal::vm_c *vm, int argc)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    rgbacol_t col = tmp_img_data->AverageColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+    RGBAColor col = tmp_img_data->AverageColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                                to_y ? *to_y : 1000000);
-    rgb[0] = epi::RGBA_Red(col);
-    rgb[1] = epi::RGBA_Green(col);
-    rgb[2] = epi::RGBA_Blue(col);
+    rgb[0] = epi::GetRGBARed(col);
+    rgb[1] = epi::GetRGBAGreen(col);
+    rgb[2] = epi::GetRGBABlue(col);
     delete tmp_img_data;
     vm->ReturnVector(rgb);
 }
@@ -801,11 +801,11 @@ static void HD_get_lightest_color(coal::vm_c *vm, int argc)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    rgbacol_t col = tmp_img_data->LightestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+    RGBAColor col = tmp_img_data->LightestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                                 to_y ? *to_y : 1000000);
-    rgb[0] = epi::RGBA_Red(col);
-    rgb[1] = epi::RGBA_Green(col);
-    rgb[2] = epi::RGBA_Blue(col);
+    rgb[0] = epi::GetRGBARed(col);
+    rgb[1] = epi::GetRGBAGreen(col);
+    rgb[2] = epi::GetRGBABlue(col);
     delete tmp_img_data;
     vm->ReturnVector(rgb);
 }
@@ -826,11 +826,11 @@ static void HD_get_darkest_color(coal::vm_c *vm, int argc)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    rgbacol_t col = tmp_img_data->DarkestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+    RGBAColor col = tmp_img_data->DarkestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                                to_y ? *to_y : 1000000);
-    rgb[0] = epi::RGBA_Red(col);
-    rgb[1] = epi::RGBA_Green(col);
-    rgb[2] = epi::RGBA_Blue(col);
+    rgb[0] = epi::GetRGBARed(col);
+    rgb[1] = epi::GetRGBAGreen(col);
+    rgb[2] = epi::GetRGBABlue(col);
     delete tmp_img_data;
     vm->ReturnVector(rgb);
 }
@@ -876,10 +876,10 @@ static void HD_get_average_top_border_color(coal::vm_c *vm, int argc)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    rgbacol_t col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, tmp_img_c->actual_h - 1, tmp_img_c->actual_h);
-    rgb[0] = epi::RGBA_Red(col);
-    rgb[1] = epi::RGBA_Green(col);
-    rgb[2] = epi::RGBA_Blue(col);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, tmp_img_c->actual_h - 1, tmp_img_c->actual_h);
+    rgb[0] = epi::GetRGBARed(col);
+    rgb[1] = epi::GetRGBAGreen(col);
+    rgb[2] = epi::GetRGBABlue(col);
     delete tmp_img_data;
     vm->ReturnVector(rgb);
 }
@@ -895,10 +895,10 @@ static void HD_get_average_bottom_border_color(coal::vm_c *vm, int argc)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    rgbacol_t col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, 0, 1);
-    rgb[0] = epi::RGBA_Red(col);
-    rgb[1] = epi::RGBA_Green(col);
-    rgb[2] = epi::RGBA_Blue(col);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, 0, 1);
+    rgb[0] = epi::GetRGBARed(col);
+    rgb[1] = epi::GetRGBAGreen(col);
+    rgb[2] = epi::GetRGBABlue(col);
     delete tmp_img_data;
     vm->ReturnVector(rgb);
 }

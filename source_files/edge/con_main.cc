@@ -267,14 +267,14 @@ int CMD_Crc(char **argv, int argc)
             int   length;
             uint8_t *data = (uint8_t *)W_LoadLump(lump, &length);
 
-            epi::crc32_c result;
+            epi::CRC32 result;
 
             result.Reset();
             result.AddBlock(data, length);
 
             delete[] data;
 
-            CON_Printf("  %s  %d bytes  crc = %08x\n", argv[i], length, result.crc);
+            CON_Printf("  %s  %d bytes  crc = %08x\n", argv[i], length, result.GetCRC());
         }
     }
 

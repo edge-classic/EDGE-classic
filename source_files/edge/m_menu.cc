@@ -696,7 +696,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
     LineHeight = style->fonts[text_type]->NominalHeight() * txtscale;
 
     const colourmap_c *colmap = style->def->text[text_type].colmap;
-    rgbacol_t           col    = V_GetFontColor(colmap);
+    RGBAColor           col    = V_GetFontColor(colmap);
     // HUD_ThinBox(x - 5, y - 5, x + 95, y + 50, col);
     HUD_ThinBox(x - 5, y - 5, x + 95, y + 115, col);
 
@@ -804,7 +804,7 @@ void M_DrawLoad(void)
     TempY += style->def->text[fontType].y_offset;
     TempY += style->def->entry_spacing;
 
-    rgbacol_t col = V_GetFontColor(style->def->text[fontType].colmap);
+    RGBAColor col = V_GetFontColor(style->def->text[fontType].colmap);
     HUD_ThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
     // 2. draw the save games
@@ -921,7 +921,7 @@ void M_DrawSave(void)
     TempY += style->def->text[fontType].y_offset;
     TempY += style->def->entry_spacing;
 
-    rgbacol_t col = V_GetFontColor(style->def->text[fontType].colmap);
+    RGBAColor col = V_GetFontColor(style->def->text[fontType].colmap);
     HUD_ThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
     // 2. draw the save games
@@ -1699,7 +1699,7 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
     if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image ||
         opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
     {
-        rgbacol_t slider_color = SG_WHITE_RGBA32;
+        RGBAColor slider_color = SG_WHITE_RGBA32;
 
         const colourmap_c *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
 
@@ -1758,7 +1758,7 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
     if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image ||
         opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
     {
-        rgbacol_t slider_color = SG_WHITE_RGBA32;
+        RGBAColor slider_color = SG_WHITE_RGBA32;
 
         const colourmap_c *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
 

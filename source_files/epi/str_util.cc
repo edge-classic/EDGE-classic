@@ -21,7 +21,8 @@
 
 #include "superfasthash.h"
 
-#include "grapheme.h"
+#define UTF8PROC_STATIC
+#include "utf8proc.h"
 
 namespace epi
 {
@@ -30,15 +31,15 @@ namespace epi
 std::wstring UTF8ToWString(std::string_view instring)
 {
     size_t utf8pos = 0;
-    const char *utf8ptr = instring.data();
+    const utf8proc_uint8_t *utf8ptr = (const utf8proc_uint8_t *)instring.data();
     size_t utf8len = instring.size();
 	std::wstring outstring;
-    uint32_t u32c;
+    utf8proc_int32_t u32c;
     while (utf8pos < utf8len)
     {
         u32c = 0;
-        size_t res = grapheme_decode_utf8(utf8ptr+utf8pos, utf8len, &u32c);
-        if (res == 0)
+        size_t res = utf8proc_iterate(utf8ptr+utf8pos, utf8len-utf8pos, &u32c);
+        if (res < 0)
             I_Error("Failed to convert %s to a wide string!\n", std::string(instring).c_str());
         else
             utf8pos += res;
@@ -59,10 +60,10 @@ std::string WStringToUTF8(std::wstring_view instring)
     size_t inpos = 0;
     size_t inlen = instring.size();
     const wchar_t *inptr = instring.data();
-    char u8c[4];
+    utf8proc_uint8_t u8c[4];
     while (inpos < inlen)
     {
-        uint32_t u32c = 0;
+        utf8proc_int32_t u32c = 0;
         if ((*(inptr+inpos) & 0xD800) == 0xD800) // High surrogate
         {
             if (inpos+1 < inlen && (*(inptr+inpos+1) & 0xDC00) == 0xDC00) // Low surrogate
@@ -85,7 +86,14 @@ std::string WStringToUTF8(std::wstring_view instring)
             inpos++;
         }
         memset(u8c, 0, 4);
-        grapheme_encode_utf8((uint_least32_t)u32c, &u8c[0], 4);
+        if (utf8proc_encode_char(u32c, u8c) == 0)
+        {
+            // print what was safely converted if present
+            if (!outstring.empty())
+                I_Error("Failure to convert %s from a wide string!\n", outstring.c_str());
+            else
+                I_Error("Wide string to UTF-8 conversion failure!\n");
+        }
         if (u8c[0]) outstring.push_back(u8c[0]);
         if (u8c[1]) outstring.push_back(u8c[1]);
         if (u8c[2]) outstring.push_back(u8c[2]);
@@ -110,25 +118,6 @@ void StringUpperASCII(std::string &s)
         if (ch > '`' && ch < '{')
             ch ^= 0x20;
     }
-}
-
-void StringLowerUTF8(std::string &s)
-{
-    const char *sc = s.c_str();
-    size_t ss = s.size()+1;
-    size_t needed = grapheme_to_lowercase_utf8(sc, ss, nullptr, 0);
-    char *c = (char *)calloc(needed, sizeof(char));
-    grapheme_to_lowercase_utf8(sc, ss, c, needed);
-    s = c;
-}
-void StringUpperUTF8(std::string &s)
-{
-    const char *sc = s.c_str();
-    size_t ss = s.size()+1;
-    size_t needed = grapheme_to_uppercase_utf8(sc, ss, nullptr, 0);
-    char *c = (char *)calloc(needed, sizeof(char));
-    grapheme_to_uppercase_utf8(sc, ss, c, needed);
-    s = c;
 }
 
 void TextureNameFromFilename(std::string &buf, std::string_view stem)

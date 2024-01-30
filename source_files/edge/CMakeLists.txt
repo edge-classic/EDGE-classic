@@ -135,12 +135,12 @@ set (EDGE_LINK_LIBRARIES
   edge_epi
   ${SDL2_LIBRARIES}
   fluidlite
-  libgrapheme
   libRAD
   m4p
   miniz
   edge_coal
   lua
+  utf8proc
 )
 
 if (WIN32)

@@ -25,12 +25,8 @@
 namespace epi
 {
 
-// Use the faster ASCII version if we are confident that no characters
-// will fall outside of this range (WAD lumps, etc)
 void StringLowerASCII(std::string &s);
 void StringUpperASCII(std::string &s);
-void StringLowerUTF8(std::string &s);
-void StringUpperUTF8(std::string &s);
 
 void TextureNameFromFilename(std::string &buf, std::string_view stem);
 

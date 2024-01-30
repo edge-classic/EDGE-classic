@@ -966,7 +966,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
                 }
                 else
                 {
-                    ground_h = MAX(blockline->frontsector->f_h, blockline->backsector->f_h);
+                    ground_h = HMM_MAX(blockline->frontsector->f_h, blockline->backsector->f_h);
                 }
 
                 // I_Debugf("ground_h: %1.0f  mo_Z: %1.0f\n", ground_h, mo->z);
@@ -1981,7 +1981,7 @@ void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const
 
     angle += kBAMAngle180;
 
-    num = (int)(!level_flags.more_blood ? 1.0f : (M_Random() % 7) + (float)((MAX(damage / 4.0f, 7.0f))));
+    num = (int)(!level_flags.more_blood ? 1.0f : (M_Random() % 7) + (float)((HMM_MAX(damage / 4.0f, 7.0f))));
 
     while (num--)
     {

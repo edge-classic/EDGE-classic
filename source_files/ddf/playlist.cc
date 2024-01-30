@@ -124,7 +124,7 @@ static void DDF_MusicParseInfo(const char *info)
 
 static void PlaylistStartEntry(const char *name, bool extend)
 {
-    int number = MAX(0, atoi(name));
+    int number = HMM_MAX(0, atoi(name));
 
     if (number == 0)
         DDF_Error("Bad music number in playlist.ddf: %s\n", name);

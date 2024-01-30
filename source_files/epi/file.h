@@ -86,6 +86,62 @@ class ANSIFile : public File
     bool Seek(int offset, int seekpoint);
 };
 
+class SubFile : public File
+{
+  private:
+    File *parent_;
+
+    int start_;
+    int length_;
+    int pos_;
+
+  public:
+    SubFile(File *parent, int start, int len);
+    ~SubFile();
+
+    int GetLength()
+    {
+        return length_;
+    }
+    int GetPosition()
+    {
+        return pos_;
+    }
+
+    unsigned int Read(void *dest, unsigned int size);
+    unsigned int Write(const void *src, unsigned int size);
+
+    bool Seek(int offset, int seekpoint);
+};
+
+class MemFile : public File
+{
+  private:
+    uint8_t *data_;
+
+    int  length_;
+    int  pos_;
+    bool copied_;
+
+  public:
+    MemFile(const uint8_t *block, int len, bool copy_it = true);
+    ~MemFile();
+
+    int GetLength()
+    {
+        return length_;
+    }
+    int GetPosition()
+    {
+        return pos_;
+    }
+
+    unsigned int Read(void *dest, unsigned int size);
+    unsigned int Write(const void *src, unsigned int size);
+
+    bool Seek(int offset, int seekpoint);
+};
+
 } // namespace epi
 
 #endif /* __EPI_FILE_CLASS__ */

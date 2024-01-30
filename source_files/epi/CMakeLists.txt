@@ -4,9 +4,7 @@
 
 add_library(
   edge_epi
-  file_sub.cc
   file.cc
-  file_memory.cc
   filesystem.cc
   math_color.cc
   math_crc.cc

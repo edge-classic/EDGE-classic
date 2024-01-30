@@ -164,8 +164,8 @@ static image_data_c *ReadFlatAsEpiBlock(image_c *rim)
 {
     SYS_ASSERT(rim->source_type == IMSRC_Flat || rim->source_type == IMSRC_Raw320x200);
 
-    int tw = MAX(rim->total_w, 1);
-    int th = MAX(rim->total_h, 1);
+    int tw = HMM_MAX(rim->total_w, 1);
+    int th = HMM_MAX(rim->total_h, 1);
 
     int w = rim->actual_w;
     int h = rim->actual_h;
@@ -262,9 +262,9 @@ static image_data_c *ReadTextureAsEpiBlock(image_c *rim)
         int y1 = patch->originy;
         int x2 = x1 + AlignedLittleEndianS16(realpatch->width);
 
-        int x = MAX(0, x1);
+        int x = HMM_MAX(0, x1);
 
-        x2 = MIN(tdef->width, x2);
+        x2 = HMM_MIN(tdef->width, x2);
 
         for (; x < x2; x++)
         {
@@ -443,8 +443,8 @@ static image_data_c *ReadDummyAsEpiBlock(image_c *rim)
 
 static image_data_c *CreateUserColourImage(image_c *rim, imagedef_c *def)
 {
-    int tw = MAX(rim->total_w, 1);
-    int th = MAX(rim->total_h, 1);
+    int tw = HMM_MAX(rim->total_w, 1);
+    int th = HMM_MAX(rim->total_h, 1);
 
     image_data_c *img = new image_data_c(tw, th, 3);
 

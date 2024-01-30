@@ -323,7 +323,7 @@ static void PL_air_in_lungs(coal::vm_c *vm, int argc)
 
     float value = ui_player_who->air_in_lungs * 100.0f / ui_player_who->mo->info->lung_capacity;
 
-    value = CLAMP(0.0f, value, 100.0f);
+    value = HMM_Clamp(0.0f, value, 100.0f);
 
     vm->ReturnFloat(value);
 }

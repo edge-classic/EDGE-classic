@@ -467,13 +467,13 @@ static void LoadSectors(int lump)
         }
 
         // convert negative tags to zero
-        ss->tag = MAX(0, AlignedLittleEndianS16(ms->tag));
+        ss->tag = HMM_MAX(0, AlignedLittleEndianS16(ms->tag));
 
         ss->props.lightlevel = AlignedLittleEndianS16(ms->light);
 
         int type = AlignedLittleEndianS16(ms->special);
 
-        ss->props.type    = MAX(0, type);
+        ss->props.type    = HMM_MAX(0, type);
         ss->props.special = P_LookupSectorType(ss->props.type);
 
         ss->exfloor_max = 0;
@@ -967,7 +967,7 @@ static void LoadLineDefs(int lump)
     for (int i = 0; i < numlines; i++, mld++, ld++)
     {
         ld->flags = AlignedLittleEndianU16(mld->flags);
-        ld->tag   = MAX(0, AlignedLittleEndianS16(mld->tag));
+        ld->tag   = HMM_MAX(0, AlignedLittleEndianS16(mld->tag));
         ld->v1    = &vertexes[AlignedLittleEndianU16(mld->start)];
         ld->v2    = &vertexes[AlignedLittleEndianU16(mld->end)];
 
@@ -976,7 +976,7 @@ static void LoadLineDefs(int lump)
         if (ld->flags & MLF_ClearBoom)
             ld->flags &= ~(MLF_PassThru | MLF_BlockGrounded | MLF_BlockPlayers);
 
-        ld->special = P_LookupLineType(MAX(0, AlignedLittleEndianS16(mld->special)));
+        ld->special = P_LookupLineType(HMM_MAX(0, AlignedLittleEndianS16(mld->special)));
 
         if (ld->special && ld->special->type == line_walkable)
             ld->flags |= MLF_PassThru;
@@ -1626,7 +1626,7 @@ static void LoadUDMFSectors()
                 else if (key == "fadecolor")
                     fog_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
                 else if (key == "fogdensity")
-                    fog_density = CLAMP(0, epi::LexInteger(value), 1020);
+                    fog_density = HMM_Clamp(0, epi::LexInteger(value), 1020);
                 else if (key == "xpanningfloor")
                     fx = epi::LexDouble(value);
                 else if (key == "ypanningfloor")
@@ -1716,12 +1716,12 @@ static void LoadUDMFSectors()
             }
 
             // convert negative tags to zero
-            ss->tag = MAX(0, tag);
+            ss->tag = HMM_MAX(0, tag);
 
             ss->props.lightlevel = light;
 
             // convert negative types to zero
-            ss->props.type    = MAX(0, type);
+            ss->props.type    = HMM_MAX(0, type);
             ss->props.special = P_LookupSectorType(ss->props.type);
 
             ss->exfloor_max = 0;
@@ -2147,11 +2147,11 @@ static void LoadUDMFLineDefs()
             line_t *ld = lines + cur_line;
 
             ld->flags = flags;
-            ld->tag   = MAX(0, tag);
+            ld->tag   = HMM_MAX(0, tag);
             ld->v1    = &vertexes[v1];
             ld->v2    = &vertexes[v2];
 
-            ld->special = P_LookupLineType(MAX(0, special));
+            ld->special = P_LookupLineType(HMM_MAX(0, special));
 
             if (ld->special && ld->special->type == line_walkable)
                 ld->flags |= MLF_PassThru;
@@ -2943,10 +2943,10 @@ static void DoBlockMap()
     {
         vertex_t *v = vertexes + i;
 
-        min_x = MIN((int)v->X, min_x);
-        min_y = MIN((int)v->Y, min_y);
-        max_x = MAX((int)v->X, max_x);
-        max_y = MAX((int)v->Y, max_y);
+        min_x = HMM_MIN((int)v->X, min_x);
+        min_y = HMM_MIN((int)v->Y, min_y);
+        max_x = HMM_MAX((int)v->X, max_x);
+        max_y = HMM_MAX((int)v->Y, max_y);
     }
 
     P_GenerateBlockMap(min_x, min_y, max_x, max_y);

@@ -148,7 +148,7 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
         new_z = currline->frontsector ? currline->frontsector->f_h : -32000;
 
         if (currline->backsector)
-            new_z = MAX(new_z, currline->backsector->f_h);
+            new_z = HMM_MAX(new_z, currline->backsector->f_h);
 
         dest_ang = R_PointToAngle(0, 0, currline->dx, currline->dy) + kBAMAngle90;
 

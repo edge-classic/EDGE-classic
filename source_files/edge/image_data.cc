@@ -55,7 +55,7 @@ void image_data_c::Whiten()
         {
             uint8_t *src = PixelAt(x, y);
 
-            int ity = MAX(src[0], MAX(src[1], src[2]));
+            int ity = HMM_MAX(src[0], HMM_MAX(src[1], src[2]));
 
             // soften the above equation, take average into account
             ity = (ity * 196 + src[0] * 20 + src[1] * 20 + src[2] * 20) >> 8;
@@ -164,8 +164,8 @@ void image_data_c::Shrink(int new_w, int new_h)
             }
     }
 
-    used_w = MAX(1, used_w * new_w / width);
-    used_h = MAX(1, used_h * new_h / height);
+    used_w = HMM_MAX(1, used_w * new_w / width);
+    used_h = HMM_MAX(1, used_h * new_h / height);
 
     width  = new_w;
     height = new_h;
@@ -226,8 +226,8 @@ void image_data_c::ShrinkMasked(int new_w, int new_h)
             }
         }
 
-    used_w = MAX(1, used_w * new_w / width);
-    used_h = MAX(1, used_h * new_h / height);
+    used_w = HMM_MAX(1, used_w * new_w / width);
+    used_h = HMM_MAX(1, used_h * new_h / height);
 
     width  = new_w;
     height = new_h;
@@ -430,7 +430,7 @@ int image_data_c::ImageCharacterWidth(int x1, int y1, int x2, int y2)
         if (found_last && last <= x2 && last > last_last)
             last_last = last;
     }
-    return MAX(last_last - first_first, 0) + 3; // Some padding on each side of the letter
+    return HMM_MAX(last_last - first_first, 0) + 3; // Some padding on each side of the letter
 }
 
 void image_data_c::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, int from_y, int to_y)
@@ -446,10 +446,10 @@ void image_data_c::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, 
     int weight = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = CLAMP(0, from_x, used_w - 1);
-    to_x   = CLAMP(1, to_x, used_h);
-    from_y = CLAMP(0, from_y, used_h - 1);
-    to_y   = CLAMP(1, to_y, used_h);
+    from_x = HMM_Clamp(0, from_x, used_w - 1);
+    to_x   = HMM_Clamp(1, to_x, used_h);
+    from_y = HMM_Clamp(0, from_y, used_h - 1);
+    to_y   = HMM_Clamp(1, to_y, used_h);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -462,7 +462,7 @@ void image_data_c::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, 
             int b = src[2];
             int a = (bpp == 4) ? src[3] : 255;
 
-            int v = MAX(r, MAX(g, b));
+            int v = HMM_MAX(r, HMM_MAX(g, b));
 
             i_sum += (v * (1 + a)) >> 9;
 
@@ -479,7 +479,7 @@ void image_data_c::AverageHue(uint8_t *hue, uint8_t *ity, int from_x, int to_x, 
             // compute weighting (based on saturation)
             if (v > 0)
             {
-                int m = MIN(r, MIN(g, b));
+                int m = HMM_MIN(r, HMM_MIN(g, b));
 
                 v = 4 + 12 * (v - m) / v;
             }
@@ -526,10 +526,10 @@ RGBAColor image_data_c::AverageColor(int from_x, int to_x, int from_y, int to_y)
     std::unordered_map<RGBAColor, unsigned int> seen_colors;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = CLAMP(0, from_x, used_w - 1);
-    to_x   = CLAMP(1, to_x, used_h);
-    from_y = CLAMP(0, from_y, used_h - 1);
-    to_y   = CLAMP(1, to_y, used_h);
+    from_x = HMM_Clamp(0, from_x, used_w - 1);
+    to_x   = HMM_Clamp(1, to_x, used_h);
+    from_y = HMM_Clamp(0, from_y, used_h - 1);
+    to_y   = HMM_Clamp(1, to_y, used_h);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -578,10 +578,10 @@ RGBAColor image_data_c::LightestColor(int from_x, int to_x, int from_y, int to_y
     int lightest_b     = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = CLAMP(0, from_x, used_w - 1);
-    to_x   = CLAMP(1, to_x, used_h);
-    from_y = CLAMP(0, from_y, used_h - 1);
-    to_y   = CLAMP(1, to_y, used_h);
+    from_x = HMM_Clamp(0, from_x, used_w - 1);
+    to_x   = HMM_Clamp(1, to_x, used_h);
+    from_y = HMM_Clamp(0, from_y, used_h - 1);
+    to_y   = HMM_Clamp(1, to_y, used_h);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -616,10 +616,10 @@ RGBAColor image_data_c::DarkestColor(int from_x, int to_x, int from_y, int to_y)
     int darkest_b     = 0;
 
     // Sanity checking; at a minimum sample a 1x1 portion of the image
-    from_x = CLAMP(0, from_x, used_w - 1);
-    to_x   = CLAMP(1, to_x, used_h);
-    from_y = CLAMP(0, from_y, used_h - 1);
-    to_y   = CLAMP(1, to_y, used_h);
+    from_x = HMM_Clamp(0, from_x, used_w - 1);
+    to_x   = HMM_Clamp(1, to_x, used_h);
+    from_y = HMM_Clamp(0, from_y, used_h - 1);
+    to_y   = HMM_Clamp(1, to_y, used_h);
 
     for (int y = from_y; y < to_y; y++)
     {
@@ -723,8 +723,8 @@ void image_data_c::SetHSV(int rotation, int saturation, int value)
 {
     SYS_ASSERT(bpp >= 3);
 
-    rotation   = CLAMP(-1800, rotation, 1800);
-    saturation = CLAMP(-1, saturation, 255);
+    rotation   = HMM_Clamp(-1800, rotation, 1800);
+    saturation = HMM_Clamp(-1, saturation, 255);
 
     for (int y = 0; y < height; y++)
         for (int x = 0; x < width; x++)
@@ -742,7 +742,7 @@ void image_data_c::SetHSV(int rotation, int saturation, int value)
                 hue.SetSaturation(saturation);
 
             if (value)
-                hue.SetValue(CLAMP(0, hue.v_+value, 255));
+                hue.SetValue(HMM_Clamp(0, hue.v_+value, 255));
 
             col = hue.ToRGBA();
 

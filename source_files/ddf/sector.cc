@@ -83,7 +83,7 @@ static const commandlist_t sect_commands[] = {
 //
 static void SectorStartEntry(const char *name, bool extend)
 {
-    int number = MAX(0, atoi(name));
+    int number = HMM_MAX(0, atoi(name));
 
     if (number == 0)
         DDF_Error("Bad sectortype number in sectors.ddf: %s\n", name);
@@ -113,7 +113,7 @@ static void SectorStartEntry(const char *name, bool extend)
 
 static void SectorDoTemplate(const char *contents)
 {
-    int number = MAX(0, atoi(contents));
+    int number = HMM_MAX(0, atoi(contents));
     if (number == 0)
         DDF_Error("Bad sectortype number for template: %s\n", contents);
 

@@ -493,7 +493,7 @@ static void ThingStartEntry(const char *buffer, bool extend)
     {
         name = std::string(buffer, pos - buffer);
 
-        number = MAX(0, atoi(pos + 1));
+        number = HMM_MAX(0, atoi(pos + 1));
 
         if (name.empty())
         {
@@ -2304,7 +2304,7 @@ mobjtype_container_c::~mobjtype_container_c()
 
 int mobjtype_container_c::FindFirst(const char *name, int startpos)
 {
-    startpos = MAX(startpos, 0);
+    startpos = HMM_MAX(startpos, 0);
 
     for (startpos; startpos < size(); startpos++)
     {
@@ -2318,7 +2318,7 @@ int mobjtype_container_c::FindFirst(const char *name, int startpos)
 
 int mobjtype_container_c::FindLast(const char *name, int startpos)
 {
-    startpos = MIN(startpos, size()-1);
+    startpos = HMM_MIN(startpos, size()-1);
 
     for (startpos; startpos >= 0; startpos--)
     {

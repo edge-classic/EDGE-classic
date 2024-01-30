@@ -180,8 +180,8 @@ class weapondef_c
   public:
     inline int KeyPri(int idx) const // next/prev order value
     {
-        int key = 1 + MAX(-1, MIN(10, bind_key));
-        int pri = 1 + MAX(-1, MIN(900, priority));
+        int key = 1 + HMM_MAX(-1, HMM_MIN(10, bind_key));
+        int pri = 1 + HMM_MAX(-1, HMM_MIN(900, priority));
 
         return (pri * 20 + key) * 100 + idx;
     }

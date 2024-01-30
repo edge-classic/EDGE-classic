@@ -148,7 +148,7 @@ void HUD_SetCoordSys(int width, int height)
         // compensate for Doom's 5:6 pixel aspect ratio.
         if (true)
         {
-            side_dist = side_dist / DOOM_PIXEL_ASPECT;
+            side_dist = side_dist / DOOHMM_PIXEL_ASPECT;
         }
 
         hud_x_left  = hud_x_mid - side_dist;
@@ -261,22 +261,22 @@ void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand)
     {
         glEnable(GL_SCISSOR_TEST);
 
-        sx1 = MAX(sx1, 0);
-        sy1 = MAX(sy1, 0);
+        sx1 = HMM_MAX(sx1, 0);
+        sy1 = HMM_MAX(sy1, 0);
 
-        sx2 = MIN(sx2, SCREENWIDTH);
-        sy2 = MIN(sy2, SCREENHEIGHT);
+        sx2 = HMM_MIN(sx2, SCREENWIDTH);
+        sy2 = HMM_MIN(sy2, SCREENHEIGHT);
     }
     else
     {
         // clip to previous scissor
         int *xy = scissor_stack[sci_stack_top - 1];
 
-        sx1 = MAX(sx1, xy[0]);
-        sy1 = MAX(sy1, xy[1]);
+        sx1 = HMM_MAX(sx1, xy[0]);
+        sy1 = HMM_MAX(sy1, xy[1]);
 
-        sx2 = MIN(sx2, xy[2]);
-        sy2 = MIN(sy2, xy[3]);
+        sx2 = HMM_MIN(sx2, xy[2]);
+        sy2 = HMM_MIN(sy2, xy[3]);
     }
 
     SYS_ASSERT(sx2 >= sx1);
@@ -1266,9 +1266,9 @@ void HUD_DrawQuitScreen()
 
     if (quit_lines[0])
     {
-        float FNX = MIN((float)SCREENWIDTH / 80.0f, 320.0f / 80.0f * ((float)SCREENHEIGHT * 0.90f / 200.0f));
+        float FNX = HMM_MIN((float)SCREENWIDTH / 80.0f, 320.0f / 80.0f * ((float)SCREENHEIGHT * 0.90f / 200.0f));
         float FNY = FNX * 2;
-        float cx  = MAX(0, (((float)SCREENWIDTH - (FNX * 80.0f)) / 2.0f));
+        float cx  = HMM_MAX(0, (((float)SCREENWIDTH - (FNX * 80.0f)) / 2.0f));
         for (int i = 0; i < ENDOOM_LINES; i++)
         {
             HUD_DrawQuitText(i, FNX, FNY, cx);

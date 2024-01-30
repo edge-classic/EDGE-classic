@@ -359,7 +359,7 @@ class fluid_player_c : public abstract_music_c
     {
         if (s_fluidgain.CheckModified())
 		{
-			s_fluidgain.f = CLAMP(0.0, s_fluidgain.f, 2.0f);
+			s_fluidgain.f = HMM_Clamp(0.0, s_fluidgain.f, 2.0f);
 			s_fluidgain = s_fluidgain.f;
 			fluid_synth_set_gain(edge_fluid, s_fluidgain.f);
 		}

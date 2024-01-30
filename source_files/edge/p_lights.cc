@@ -68,7 +68,7 @@ static void DoLight(light_t *light)
     case LITE_Fade: {
         int diff = light->maxlight - light->minlight;
 
-        if (ABS(diff) < type->step)
+        if (HMM_ABS(diff) < type->step)
         {
             light->sector->props.lightlevel = light->maxlight;
 

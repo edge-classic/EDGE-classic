@@ -238,7 +238,7 @@ static void MATH_cos(coal::vm_c *vm, int argc)
     (void)argc;
 
     double val = *vm->AccessParam(0);
-    vm->ReturnFloat(cos(val * M_PI / 180.0));
+    vm->ReturnFloat(cos(val * HMM_PI / 180.0));
 }
 
 // math.sin(val)
@@ -247,7 +247,7 @@ static void MATH_sin(coal::vm_c *vm, int argc)
     (void)argc;
 
     double val = *vm->AccessParam(0);
-    vm->ReturnFloat(sin(val * M_PI / 180.0));
+    vm->ReturnFloat(sin(val * HMM_PI / 180.0));
 }
 
 // math.tan(val)
@@ -256,7 +256,7 @@ static void MATH_tan(coal::vm_c *vm, int argc)
     (void)argc;
 
     double val = *vm->AccessParam(0);
-    vm->ReturnFloat(tan(val * M_PI / 180.0));
+    vm->ReturnFloat(tan(val * HMM_PI / 180.0));
 }
 
 // math.acos(val)
@@ -265,7 +265,7 @@ static void MATH_acos(coal::vm_c *vm, int argc)
     (void)argc;
 
     double val = *vm->AccessParam(0);
-    vm->ReturnFloat(acos(val) * 180.0 / M_PI);
+    vm->ReturnFloat(acos(val) * 180.0 / HMM_PI);
 }
 
 // math.asin(val)
@@ -274,7 +274,7 @@ static void MATH_asin(coal::vm_c *vm, int argc)
     (void)argc;
 
     double val = *vm->AccessParam(0);
-    vm->ReturnFloat(asin(val) * 180.0 / M_PI);
+    vm->ReturnFloat(asin(val) * 180.0 / HMM_PI);
 }
 
 // math.atan(val)
@@ -283,7 +283,7 @@ static void MATH_atan(coal::vm_c *vm, int argc)
     (void)argc;
 
     double val = *vm->AccessParam(0);
-    vm->ReturnFloat(atan(val) * 180.0 / M_PI);
+    vm->ReturnFloat(atan(val) * 180.0 / HMM_PI);
 }
 
 // math.atan2(x, y)
@@ -294,7 +294,7 @@ static void MATH_atan2(coal::vm_c *vm, int argc)
     double x = *vm->AccessParam(0);
     double y = *vm->AccessParam(1);
 
-    vm->ReturnFloat(atan2(y, x) * 180.0 / M_PI);
+    vm->ReturnFloat(atan2(y, x) * 180.0 / HMM_PI);
 }
 
 // math.log(val)

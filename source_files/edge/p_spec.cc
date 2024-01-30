@@ -190,9 +190,9 @@ float P_FindSurroundingHeight(const heightref_e ref, const sector_t *sec)
         count++;
 
         if (ref & REF_HIGHEST)
-            height = MAX(height, other_h);
+            height = HMM_MAX(height, other_h);
         else
-            height = MIN(height, other_h);
+            height = HMM_MIN(height, other_h);
     }
 
     if ((ref & REF_NEXT) && count == 0)
@@ -671,14 +671,14 @@ static void P_LineEffect(line_t *target, line_t *source, const linetype_c *speci
         float dy    = source->dy / 32.0f;
         float ldx   = target->dx;
         float ldy   = target->dy;
-        float x     = std::fabs(ldx);
-        float y     = std::fabs(ldy);
+        float x     = HMM_ABS(ldx);
+        float y     = HMM_ABS(ldy);
         if (y > x)
             std::swap(x, y);
         if (x)
         {
-            float d = x / std::sin(std::atan(y / x) + M_PI / 2.0);
-            if (std::isfinite(d))
+            float d = x / HMM_SINF(atan(y / x) + HMM_PI / 2.0);
+            if (isfinite(d))
             {
                 x = -(dy * ldy + dx * ldx) / d;
                 y = -(dx * ldy - dy * ldx) / d;
@@ -876,9 +876,9 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
         if (target->props.type & MSF_Friction)
         {
             if (length > 100)
-                target->props.friction = MIN(1.0f, 0.8125f + length / 1066.7f);
+                target->props.friction = HMM_MIN(1.0f, 0.8125f + length / 1066.7f);
             else
-                target->props.friction = MAX(0.2f, length / 100.0f);
+                target->props.friction = HMM_MAX(0.2f, length / 100.0f);
         }
     }
 
@@ -1111,8 +1111,8 @@ static slope_plane_t *DetailSlope_BoundIt(line_t *ld, sector_t *sec, float dz1, 
 
             float dist = nx * (V->X - ld->v1->X) + ny * (V->Y - ld->v1->Y);
 
-            d_close = MIN(d_close, dist);
-            d_far   = MAX(d_far, dist);
+            d_close = HMM_MIN(d_close, dist);
+            d_far   = HMM_MAX(d_far, dist);
         }
     }
 
@@ -1173,7 +1173,7 @@ static void DetailSlope_Floor(line_t *ld)
     ld->blocked = false;
 
     // limit height difference to no more than player step
-    z1 = MAX(z1, z2 - 24.0);
+    z1 = HMM_MAX(z1, z2 - 24.0);
 
     sec->f_slope = DetailSlope_BoundIt(ld, sec, z1 - sec->f_h, z2 - sec->f_h);
 }
@@ -1212,7 +1212,7 @@ static void DetailSlope_Ceiling(line_t *ld)
 
 #if 0
 	// limit height difference to no more than this
-	z2 = MIN(z2, z1 + 16.0);
+	z2 = HMM_MIN(z2, z1 + 16.0);
 #endif
 
     sec->c_slope = DetailSlope_BoundIt(ld, sec, z2 - sec->c_h, z1 - sec->c_h);
@@ -1799,8 +1799,8 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
             ddf_reverb_type = 1;
         else if (epi::StringCaseCompareASCII(special->reverb_type, "ECHO") == 0)
             ddf_reverb_type = 2;
-        ddf_reverb_delay = MAX(0, special->reverb_delay);
-        ddf_reverb_ratio = CLAMP(0, special->reverb_ratio, 100);
+        ddf_reverb_delay = HMM_MAX(0, special->reverb_delay);
+        ddf_reverb_ratio = HMM_Clamp(0, special->reverb_ratio, 100);
     }
 
     factor = 1.0f;
@@ -2752,7 +2752,7 @@ static bool P_DoSectorsFromTag(int tag, const void *p1, void *p2, bool (*func)(s
 
 void P_SectorChangeSpecial(sector_t *sec, int new_type)
 {
-    sec->props.type = MAX(0, new_type);
+    sec->props.type = HMM_MAX(0, new_type);
 
     sec->props.special = P_LookupSectorType(sec->props.type);
 }

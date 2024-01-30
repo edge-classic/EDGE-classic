@@ -65,10 +65,10 @@ bool R_DepthIsEquivalent(int depth1, int depth2)
     if (depth1 == depth2)
         return true;
 
-    if (MIN(depth1, depth2) == 15 && MAX(depth1, depth2) == 16)
+    if (HMM_MIN(depth1, depth2) == 15 && HMM_MAX(depth1, depth2) == 16)
         return true;
 
-    if (MIN(depth1, depth2) == 24 && MAX(depth1, depth2) == 32)
+    if (HMM_MIN(depth1, depth2) == 24 && HMM_MAX(depth1, depth2) == 32)
         return true;
 
     return false;
@@ -199,7 +199,7 @@ bool R_IncrementResolution(scrmode_c *mode, int what, int dir)
                 continue;
         }
 
-        diff = ABS(diff);
+        diff = HMM_ABS(diff);
 
         if (diff < best_diff)
         {
@@ -326,15 +326,15 @@ struct Compare_Res_pred
 
         if (A->width != B->width)
         {
-            int a_diff_w = ABS(SCREENWIDTH - A->width);
-            int b_diff_w = ABS(SCREENWIDTH - B->width);
+            int a_diff_w = HMM_ABS(SCREENWIDTH - A->width);
+            int b_diff_w = HMM_ABS(SCREENWIDTH - B->width);
 
             return (a_diff_w < b_diff_w);
         }
         else
         {
-            int a_diff_h = ABS(SCREENHEIGHT - A->height);
-            int b_diff_h = ABS(SCREENHEIGHT - B->height);
+            int a_diff_h = HMM_ABS(SCREENHEIGHT - A->height);
+            int b_diff_h = HMM_ABS(SCREENHEIGHT - B->height);
 
             return (a_diff_h < b_diff_h);
         }

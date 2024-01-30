@@ -228,7 +228,7 @@ static bool CrossSubsector(subsector_t *sub)
 
         if (!AlmostEquals(front->f_h, back->f_h))
         {
-            float openbottom = MAX(ld->frontsector->f_h, ld->backsector->f_h);
+            float openbottom = HMM_MAX(ld->frontsector->f_h, ld->backsector->f_h);
             slope            = (openbottom - sight_I.src_z) / frac;
             if (slope > sight_I.bottom_slope)
                 sight_I.bottom_slope = slope;
@@ -236,7 +236,7 @@ static bool CrossSubsector(subsector_t *sub)
 
         if (!AlmostEquals(front->c_h, back->c_h))
         {
-            float opentop = MIN(ld->frontsector->c_h, ld->backsector->c_h);
+            float opentop = HMM_MIN(ld->frontsector->c_h, ld->backsector->c_h);
             slope         = (opentop - sight_I.src_z) / frac;
             if (slope < sight_I.top_slope)
                 sight_I.top_slope = slope;
@@ -493,10 +493,10 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
 
     sight_I.angle = R_PointToAngle(sight_I.src.x, sight_I.src.y, sight_I.dest.X, sight_I.dest.Y);
 
-    sight_I.bbox[BOXLEFT]   = MIN(sight_I.src.x, sight_I.dest.X);
-    sight_I.bbox[BOXRIGHT]  = MAX(sight_I.src.x, sight_I.dest.X);
-    sight_I.bbox[BOXBOTTOM] = MIN(sight_I.src.y, sight_I.dest.Y);
-    sight_I.bbox[BOXTOP]    = MAX(sight_I.src.y, sight_I.dest.Y);
+    sight_I.bbox[BOXLEFT]   = HMM_MIN(sight_I.src.x, sight_I.dest.X);
+    sight_I.bbox[BOXRIGHT]  = HMM_MAX(sight_I.src.x, sight_I.dest.X);
+    sight_I.bbox[BOXBOTTOM] = HMM_MIN(sight_I.src.y, sight_I.dest.Y);
+    sight_I.bbox[BOXTOP]    = HMM_MAX(sight_I.src.y, sight_I.dest.Y);
 
     wall_icpts.clear(); // FIXME
 
@@ -599,10 +599,10 @@ bool P_CheckSightToPoint(mobj_t *src, float x, float y, float z)
 
     sight_I.angle = R_PointToAngle(sight_I.src.x, sight_I.src.y, sight_I.dest.X, sight_I.dest.Y);
 
-    sight_I.bbox[BOXLEFT]   = MIN(sight_I.src.x, sight_I.dest.X);
-    sight_I.bbox[BOXRIGHT]  = MAX(sight_I.src.x, sight_I.dest.X);
-    sight_I.bbox[BOXBOTTOM] = MIN(sight_I.src.y, sight_I.dest.Y);
-    sight_I.bbox[BOXTOP]    = MAX(sight_I.src.y, sight_I.dest.Y);
+    sight_I.bbox[BOXLEFT]   = HMM_MIN(sight_I.src.x, sight_I.dest.X);
+    sight_I.bbox[BOXRIGHT]  = HMM_MAX(sight_I.src.x, sight_I.dest.X);
+    sight_I.bbox[BOXBOTTOM] = HMM_MIN(sight_I.src.y, sight_I.dest.Y);
+    sight_I.bbox[BOXTOP]    = HMM_MAX(sight_I.src.y, sight_I.dest.Y);
 
     wall_icpts.clear();
 

@@ -909,7 +909,7 @@ void F_Drawer(void)
 
     case f_pic:
         {
-            const image_c *image = W_ImageLookup(finale->pics[MIN((size_t)picnum, finale->pics.size() - 1)].c_str());
+            const image_c *image = W_ImageLookup(finale->pics[HMM_MIN((size_t)picnum, finale->pics.size() - 1)].c_str());
             if (r_titlescaling.d) // Fill Border
             {
                 if (!image->blurred_version)

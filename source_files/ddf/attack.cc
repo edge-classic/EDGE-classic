@@ -451,7 +451,7 @@ static void DDF_AtkGetLabel(const char *info, void *storage)
         DDF_Error("Bad State `%s'.\n", info);
 
     lab->label  = std::string(info, i);
-    lab->offset = div ? MAX(0, atoi(div + 1) - 1) : 0;
+    lab->offset = div ? HMM_MAX(0, atoi(div + 1) - 1) : 0;
 }
 
 // Attack definition class

@@ -903,7 +903,7 @@ void CON_Drawer(void)
 
     // -- text lines --
 
-    for (int i = MAX(0, bottomrow); i < MAX_CON_LINES; i++)
+    for (int i = HMM_MAX(0, bottomrow); i < MAX_CON_LINES; i++)
     {
         console_line_c *CL = console_lines[i];
 
@@ -1023,7 +1023,7 @@ static char KeyToCharacter(int key, bool shift, bool ctrl)
 static void ListCompletions(std::vector<const char *> &list, int word_len, int max_row, RGBAColor color)
 {
     int max_col = SCREENWIDTH / XMUL - 4;
-    max_col     = CLAMP(24, max_col, 78);
+    max_col     = HMM_Clamp(24, max_col, 78);
 
     char buffer[200];
     int  buf_len = 0;
@@ -1228,7 +1228,7 @@ void CON_HandleKey(int key, bool shift, bool ctrl)
     case KEYD_PGUP:
         if (shift)
             // Move to top of console buffer
-            bottomrow = MAX(-1, con_used_lines - 10);
+            bottomrow = HMM_MAX(-1, con_used_lines - 10);
         else
             // Start scrolling console buffer up
             scroll_dir = +1;
@@ -1245,8 +1245,8 @@ void CON_HandleKey(int key, bool shift, bool ctrl)
 
     case KEYD_WHEEL_UP:
         bottomrow += 4;
-        if (bottomrow > MAX(-1, con_used_lines - 10))
-            bottomrow = MAX(-1, con_used_lines - 10);
+        if (bottomrow > HMM_MAX(-1, con_used_lines - 10))
+            bottomrow = HMM_MAX(-1, con_used_lines - 10);
         break;
 
     case KEYD_WHEEL_DN:

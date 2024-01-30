@@ -231,17 +231,17 @@ static void FindMinMaxBoundaries(void)
 
     for (int i = 0; i < numvertexes; i++)
     {
-        map_min_x = MIN(map_min_x, vertexes[i].X);
-        map_max_x = MAX(map_max_x, vertexes[i].X);
+        map_min_x = HMM_MIN(map_min_x, vertexes[i].X);
+        map_max_x = HMM_MAX(map_max_x, vertexes[i].X);
 
-        map_min_y = MIN(map_min_y, vertexes[i].Y);
-        map_max_y = MAX(map_max_y, vertexes[i].Y);
+        map_min_y = HMM_MIN(map_min_y, vertexes[i].Y);
+        map_max_y = HMM_MAX(map_max_y, vertexes[i].Y);
     }
 
     float map_w = map_max_x - map_min_x;
     float map_h = map_max_y - map_min_y;
 
-    map_size = MAX(map_w, map_h);
+    map_size = HMM_MAX(map_w, map_h);
 
     m_cx = (map_min_x + map_max_x) / 2.0;
     m_cy = (map_min_y + map_max_y) / 2.0;
@@ -318,8 +318,8 @@ static void ChangeWindowScale(float factor)
 {
     m_scale *= factor;
 
-    m_scale = MAX(m_scale, MIN_MSCALE);
-    m_scale = MIN(m_scale, MAX_MSCALE);
+    m_scale = HMM_MAX(m_scale, MIN_MSCALE);
+    m_scale = HMM_MIN(m_scale, MAX_MSCALE);
 }
 
 //
@@ -480,11 +480,11 @@ void AM_Ticker(void)
         m_cy += panning_y;
 
         // limit position, don't go outside of the map
-        m_cx = MIN(m_cx, map_max_x);
-        m_cx = MAX(m_cx, map_min_x);
+        m_cx = HMM_MIN(m_cx, map_max_x);
+        m_cx = HMM_MAX(m_cx, map_min_x);
 
-        m_cy = MIN(m_cy, map_max_y);
-        m_cy = MAX(m_cy, map_min_y);
+        m_cy = HMM_MIN(m_cy, map_max_y);
+        m_cy = HMM_MAX(m_cy, map_min_y);
     }
 
     // Change the zoom if necessary
@@ -763,7 +763,7 @@ static void DrawGrid()
 {
     mline_t ml;
 
-    int grid_size = MAX(4, am_gridsize.d);
+    int grid_size = HMM_MAX(4, am_gridsize.d);
 
     int mx0 = int(m_cx);
     int my0 = int(m_cy);
@@ -1296,7 +1296,7 @@ void AM_Render(float x, float y, float w, float h, mobj_t *focus)
     f_w = w;
     f_h = h;
 
-    f_scale = MAX(f_w, f_h) / map_size / 2.0f;
+    f_scale = HMM_MAX(f_w, f_h) / map_size / 2.0f;
     f_focus = focus;
 
     if (followplayer)

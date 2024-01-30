@@ -187,14 +187,14 @@ static bool PIT_StompThing(mobj_t *thing, void *data)
         if (tm_I.z >= thing->z + thing->height)
         {
             // went over
-            tm_I.floorz = MAX(tm_I.floorz, thing->z + thing->height);
+            tm_I.floorz = HMM_MAX(tm_I.floorz, thing->z + thing->height);
             return true;
         }
 
         if (tm_I.z + tm_I.mover->height <= thing->z)
         {
             // went under
-            tm_I.ceilnz = MIN(tm_I.ceilnz, thing->z);
+            tm_I.ceilnz = HMM_MIN(tm_I.ceilnz, thing->z);
             return true;
         }
     }
@@ -540,13 +540,13 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
         c2 = ld->backsector->c_h;
 
         if (!AlmostEquals(c1, c2) && IS_SKY(ld->frontsector->ceil) && IS_SKY(ld->backsector->ceil) &&
-            tm_I.z > MIN(c1, c2))
+            tm_I.z > HMM_MIN(c1, c2))
         {
             mobj_hit_sky = true;
         }
 
         if (!AlmostEquals(f1, f2) && IS_SKY(ld->frontsector->floor) && IS_SKY(ld->backsector->floor) &&
-            tm_I.z + tm_I.mover->height < MAX(f1, f2))
+            tm_I.z + tm_I.mover->height < HMM_MAX(f1, f2))
         {
             mobj_hit_sky = true;
         }
@@ -1437,7 +1437,7 @@ static bool PTR_AimTraverse(intercept_t *in, void *dataptr)
 
         if (!AlmostEquals(ld->frontsector->f_h, ld->backsector->f_h))
         {
-            float maxfloor = MAX(ld->frontsector->f_h, ld->backsector->f_h);
+            float maxfloor = HMM_MAX(ld->frontsector->f_h, ld->backsector->f_h);
             float slope    = (maxfloor - aim_I.start_z) / dist;
 
             if (slope > aim_I.bottomslope)
@@ -1446,7 +1446,7 @@ static bool PTR_AimTraverse(intercept_t *in, void *dataptr)
 
         if (!AlmostEquals(ld->frontsector->c_h, ld->backsector->c_h))
         {
-            float minceil = MIN(ld->frontsector->c_h, ld->backsector->c_h);
+            float minceil = HMM_MIN(ld->frontsector->c_h, ld->backsector->c_h);
             float slope   = (minceil - aim_I.start_z) / dist;
 
             if (slope < aim_I.topslope)
@@ -1529,7 +1529,7 @@ static bool PTR_AimTraverse2(intercept_t *in, void *dataptr)
 
         if (!AlmostEquals(ld->frontsector->f_h, ld->backsector->f_h))
         {
-            float maxfloor = MAX(ld->frontsector->f_h, ld->backsector->f_h);
+            float maxfloor = HMM_MAX(ld->frontsector->f_h, ld->backsector->f_h);
             float slope    = (maxfloor - aim_I.start_z) / dist;
 
             if (slope > aim_I.bottomslope)
@@ -1538,7 +1538,7 @@ static bool PTR_AimTraverse2(intercept_t *in, void *dataptr)
 
         if (!AlmostEquals(ld->frontsector->c_h, ld->backsector->c_h))
         {
-            float minceil = MIN(ld->frontsector->c_h, ld->backsector->c_h);
+            float minceil = HMM_MIN(ld->frontsector->c_h, ld->backsector->c_h);
             float slope   = (minceil - aim_I.start_z) / dist;
 
             if (slope < aim_I.topslope)
@@ -1634,7 +1634,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 }
             }
             if (AlmostEquals(tri_v1.Z, tri_v2.Z) &&
-                AlmostEquals(CLAMP(MIN(sec_check->f_h, tri_v1.Z), z, MAX(sec_check->f_h, tri_v1.Z)),
+                AlmostEquals(HMM_Clamp(HMM_MIN(sec_check->f_h, tri_v1.Z), z, HMM_MAX(sec_check->f_h, tri_v1.Z)),
                              z)) // Hitting rectangular side; no fancier check needed
             {
                 if (shoot_I.puff)
@@ -1698,7 +1698,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 }
             }
             if (AlmostEquals(tri_v1.Z, tri_v2.Z) &&
-                AlmostEquals(CLAMP(MIN(sec_check->c_h, tri_v1.Z), z, MAX(sec_check->c_h, tri_v1.Z)),
+                AlmostEquals(HMM_Clamp(HMM_MIN(sec_check->c_h, tri_v1.Z), z, HMM_MAX(sec_check->c_h, tri_v1.Z)),
                              z)) // Hitting rectangular side; no fancier check needed
             {
                 if (shoot_I.puff)
@@ -2084,7 +2084,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
                 float c1 = ld->frontsector->c_h;
                 float c2 = ld->backsector->c_h;
 
-                if (MIN(c1, c2) <= z && z <= MAX(c1, c2))
+                if (HMM_MIN(c1, c2) <= z && z <= HMM_MAX(c1, c2))
                     return false;
             }
 
@@ -2093,7 +2093,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
                 float f1 = ld->frontsector->f_h;
                 float f2 = ld->backsector->f_h;
 
-                if (MIN(f1, f2) <= z && z <= MAX(f1, f2))
+                if (HMM_MIN(f1, f2) <= z && z <= HMM_MAX(f1, f2))
                     return false;
             }
         }
@@ -2370,7 +2370,7 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance)
             float slope = P_ApproxSlope(source->x - aim_I.target->x,
                     source->y - aim_I.target->y, aim_I.target->z - source->z);
 
-            slope = CLAMP(-1.0f, slope, 1.0f);
+            slope = HMM_Clamp(-1.0f, slope, 1.0f);
 
             source->vertangle = M_ATan(slope);
         }
@@ -2438,7 +2438,7 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool 
         float slope =
             P_ApproxSlope(source->x - aim_I.target->x, source->y - aim_I.target->y, aim_I.target->z - source->z);
 
-        slope = CLAMP(-1.0f, slope, 1.0f);
+        slope = HMM_Clamp(-1.0f, slope, 1.0f);
 
         source->vertangle = epi::BAMFromATan(slope);
     }
@@ -2506,8 +2506,8 @@ static bool PTR_UseTraverse(intercept_t *in, void *dataptr)
     // update open vertical range (extrafloors are NOT checked)
     if (side)
     {
-        use_lower = MAX(use_lower, side->sector->f_h);
-        use_upper = MIN(use_upper, side->sector->c_h);
+        use_lower = HMM_MAX(use_lower, side->sector->f_h);
+        use_upper = HMM_MIN(use_upper, side->sector->c_h);
     }
 
     if (!ld->special || ld->special->type == line_shootable || ld->special->type == line_walkable)
@@ -2643,10 +2643,10 @@ static bool PIT_RadiusAttack(mobj_t *thing, void *data)
     dz = (float)fabs(MO_MIDZ(thing) - MO_MIDZ(bomb_I.spot));
 
     // dist is the distance to the *edge* of the thing
-    dist = MAX(dx, dy) - thing->radius;
+    dist = HMM_MAX(dx, dy) - thing->radius;
 
     if (bomb_I.use_3d)
-        dist = MAX(dist, dz - thing->height / 2);
+        dist = HMM_MAX(dist, dz - thing->height / 2);
 
     if (dist < 0)
         dist = 0;
@@ -3252,7 +3252,7 @@ bool P_MapCheckBlockingLine(mobj_t *thing, mobj_t *spawnthing)
     blockline    = NULL;
     mobj_hit_sky = false;
 
-    if (!P_BlockLinesIterator(MIN(mx1, mx2), MIN(my1, my2), MAX(mx1, mx2), MAX(my1, my2), PIT_CheckBlockingLine))
+    if (!P_BlockLinesIterator(HMM_MIN(mx1, mx2), HMM_MIN(my1, my2), HMM_MAX(mx1, mx2), HMM_MAX(my1, my2), PIT_CheckBlockingLine))
     {
         return true;
     }

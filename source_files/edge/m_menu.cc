@@ -1748,7 +1748,7 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
     // Capture actual value first since it will be aligned to the slider increment
     std::string actual_val = fmt_string.empty() ? "" : epi::StringFormat(fmt_string.c_str(), thermDot);
 
-    thermDot = CLAMP(min, thermDot, max);
+    thermDot = HMM_Clamp(min, thermDot, max);
 
     thermDot = thermDot - remainderf(thermDot, increment);
 

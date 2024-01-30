@@ -302,7 +302,7 @@ static move_result_e AttemptMoveSector(sector_t *sector, plane_move_t *pmov, flo
 
     if (pmov->direction == DIRECTION_UP)
     {
-        AttemptMovePlane(sector, 32768.0, MIN(sector->f_h + pmov->speed, dest) + pmov->elev_height, false, true,
+        AttemptMovePlane(sector, 32768.0, HMM_MIN(sector->f_h + pmov->speed, dest) + pmov->elev_height, false, true,
                          DIRECTION_UP);
     }
 
@@ -331,7 +331,7 @@ static bool MovePlane(plane_move_t *plane)
         break;
 
     case DIRECTION_DOWN:
-        res = AttemptMoveSector(plane->sector, plane, MIN(plane->startheight, plane->destheight),
+        res = AttemptMoveSector(plane->sector, plane, HMM_MIN(plane->startheight, plane->destheight),
                                 plane->is_ceiling ? plane->crush : 0);
 
         if (!AlmostEquals(plane->destheight, plane->startheight))
@@ -440,7 +440,7 @@ static bool MovePlane(plane_move_t *plane)
         break;
 
     case DIRECTION_UP:
-        res = AttemptMoveSector(plane->sector, plane, MAX(plane->startheight, plane->destheight),
+        res = AttemptMoveSector(plane->sector, plane, HMM_MAX(plane->startheight, plane->destheight),
                                 plane->is_ceiling ? 0 : plane->crush);
 
         if (!AlmostEquals(plane->destheight, plane->startheight))

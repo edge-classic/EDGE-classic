@@ -242,7 +242,7 @@ s_keys[] = {{"NONE", KF_NONE},
 
 static void LinedefStartEntry(const char *name, bool extend)
 {
-    int number = MAX(0, atoi(name));
+    int number = HMM_MAX(0, atoi(name));
 
     if (number == 0)
         DDF_Error("Bad linetype number in lines.ddf: %s\n", name);
@@ -275,7 +275,7 @@ static void LinedefStartEntry(const char *name, bool extend)
 
 static void LinedefDoTemplate(const char *contents)
 {
-    int number = MAX(0, atoi(contents));
+    int number = HMM_MAX(0, atoi(contents));
     if (number == 0)
         DDF_Error("Bad linetype number for template: %s\n", contents);
 

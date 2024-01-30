@@ -372,13 +372,13 @@ static void HostChangeOption(int opt, int key)
 
     case 5: // Bot Skill
         bot_skill = bot_skill.d + dir;
-        bot_skill = CLAMP(0, bot_skill.d, 4);
+        bot_skill = HMM_Clamp(0, bot_skill.d, 4);
 
         break;
 
     case 6:
         player_dm_dr = player_dm_dr.d + dir;
-        player_dm_dr = CLAMP(0, player_dm_dr.d, 18);
+        player_dm_dr = HMM_Clamp(0, player_dm_dr.d, 18);
 
         break;
 
@@ -470,12 +470,12 @@ void M_DrawHostMenu(void)
     y += deltay;
     idx++;
 
-    int skill = CLAMP(0, bot_skill.d, 4);
+    int skill = HMM_Clamp(0, bot_skill.d, 4);
     DrawKeyword(idx, ng_host_style, y, "Bot Skill", GetBotSkillName(skill));
     y += deltay;
     idx++;
 
-    int dm_damage_resistance = CLAMP(0, player_dm_dr.d, 18);
+    int dm_damage_resistance = HMM_Clamp(0, player_dm_dr.d, 18);
     DrawKeyword(idx, ng_host_style, y, "Player Damage Resistance", GetPlayerDamResName(dm_damage_resistance));
     y += deltay;
     idx++;

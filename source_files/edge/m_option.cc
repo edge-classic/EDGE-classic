@@ -1791,7 +1791,7 @@ static void M_ChangeMonitorSize(int key, cvar_c *cvar)
         1.60000, 1.77777, 2.33333  // 16:10  16:9  21:9
     };
 
-    monitor_size = CLAMP(0, monitor_size, 5);
+    monitor_size = HMM_Clamp(0, monitor_size, 5);
 
     v_monitorsize = ratios[monitor_size];
 }

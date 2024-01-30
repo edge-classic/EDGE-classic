@@ -303,7 +303,7 @@ class dynlight_shader_c : public abstract_shader_c
         dy /= dist;
         dz /= dist;
 
-        dist = MAX(1.0, dist - mod_pos->radius * MIR_XYScale());
+        dist = HMM_MAX(1.0, dist - mod_pos->radius * MIR_XYScale());
 
         float L = 0.6 - 0.7 * (dx * nx + dy * ny + dz * nz);
 
@@ -485,7 +485,7 @@ class plane_glow_c : public abstract_shader_c
         else
             dist = sec->c_h - (mod_pos->z + mod_pos->height);
 
-        dist = MAX(1.0, fabs(dist));
+        dist = HMM_MAX(1.0, fabs(dist));
 
         float L = 0.6 - 0.7 * (dz * nz);
 

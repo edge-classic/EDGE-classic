@@ -1102,7 +1102,7 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const damage_c *damtype, bool we
 
         target->flags &= ~MF_SOLID;
         target->player->playerstate    = PST_DEAD;
-        target->player->std_viewheight = MIN(DEATHVIEWHEIGHT, target->height / 3);
+        target->player->std_viewheight = HMM_MIN(DEATHVIEWHEIGHT, target->height / 3);
         target->player->actual_speed   = 0;
 
         P_DropWeapon(target->player);
@@ -1358,7 +1358,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
     if (!weak_spot && damage >= 0.1f && inflictor && inflictor->currentattack &&
         BITSET_EMPTY == (inflictor->currentattack->attack_class & ~target->info->resistance))
     {
-        damage = MAX(0.1f, damage * target->info->resist_multiply);
+        damage = HMM_MAX(0.1f, damage * target->info->resist_multiply);
     }
 
     // -ACB- 1998/07/12 Use Visibility Enum
@@ -1450,7 +1450,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
 
             if (damage > 0.1f && BITSET_EMPTY == (inflictor->currentattack->attack_class & ~arm_info->resistance))
             {
-                damage = MAX(0.1f, damage * arm_info->resist_multiply);
+                damage = HMM_MAX(0.1f, damage * arm_info->resist_multiply);
             }
         }
 
@@ -1465,7 +1465,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
             else if (player_dm_dr.d > 9)
             {
                 float mul = 0.10f + ((18 - player_dm_dr.d) * 0.10f);
-                damage    = MAX(0.1f, damage * mul);
+                damage    = HMM_MAX(0.1f, damage * mul);
             }
         }
 
@@ -1556,7 +1556,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
                     player->last_damage_colour = SG_RED_RGBA32;
             }
 
-            player->damagecount += (int)MAX(damage, DAMAGE_ADD_MIN);
+            player->damagecount += (int)HMM_MAX(damage, DAMAGE_ADD_MIN);
             player->damage_pain += damage;
         }
 
@@ -1577,12 +1577,12 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
     if (player)
     {
         // mirror mobj health here for Dave
-        // player->health = MAX(0, target->health);
+        // player->health = HMM_MAX(0, target->health);
 
         // Dasho 2023.09.05: The above behavior caused inconsistencies when multiple
         // voodoo dolls were present in a level (i.e., heavily damaging one and then
         // lightly damaging another one that was previously at full health would "heal" the player)
-        player->health = MAX(0, player->health - damage);
+        player->health = HMM_MAX(0, player->health - damage);
     }
 
     // Lobo 2023: Handle attack flagged with the "PLAYER_ATTACK" special.
@@ -1606,10 +1606,10 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
     {
         float qty = (target->player ? 0.5 : 0.25) * damage;
 
-        source->health = MIN(source->health + qty, source->spawnhealth);
+        source->health = HMM_MIN(source->health + qty, source->spawnhealth);
 
         if (source->player)
-            source->player->health = MIN(source->player->health + qty, source->spawnhealth);
+            source->player->health = HMM_MIN(source->player->health + qty, source->spawnhealth);
     }
 
     if (target->health <= 0)

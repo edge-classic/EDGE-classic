@@ -2052,7 +2052,7 @@ static void E_InitialState(void)
         warp_deathmatch = 1;
 
         if (pp + 1 < int(argv::list.size()) && !argv::IsOption(pp + 1))
-            warp_deathmatch = MAX(1, atoi(argv::list[pp + 1].c_str()));
+            warp_deathmatch = HMM_MAX(1, atoi(argv::list[pp + 1].c_str()));
 
         warp = true;
     }

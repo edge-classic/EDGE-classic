@@ -59,16 +59,9 @@ void RGL_SetupMatrices2D(void);
 void RGL_SetupMatricesWorld2D(void);
 void RGL_SetupMatrices3D(void);
 
-#define LT_RED(light) (MIN(255, light) * ren_red_mul / 255.0f)
-#define LT_GRN(light) (MIN(255, light) * ren_grn_mul / 255.0f)
-#define LT_BLU(light) (MIN(255, light) * ren_blu_mul / 255.0f)
-
-//
-// RGL_TEX
-//
-const uint8_t *RGL_LogoImage(int *w, int *h);
-const uint8_t *RGL_InitImage(int *w, int *h);
-const uint8_t *RGL_BuildImage(int *w, int *h);
+#define LT_RED(light) (HMM_MIN(255, light) * ren_red_mul / 255.0f)
+#define LT_GRN(light) (HMM_MIN(255, light) * ren_grn_mul / 255.0f)
+#define LT_BLU(light) (HMM_MIN(255, light) * ren_blu_mul / 255.0f)
 
 //
 //  RGL_BSP
@@ -85,7 +78,7 @@ extern const colourmap_c *ren_fx_colmap;
 extern cvar_c r_nearclip;
 extern cvar_c r_farclip;
 
-#define APPROX_DIST2(dx, dy) ((dx) + (dy)-0.5f * MIN((dx), (dy)))
+#define APPROX_DIST2(dx, dy) ((dx) + (dy)-0.5f * HMM_MIN((dx), (dy)))
 
 #define APPROX_DIST3(dx, dy, dz) APPROX_DIST2(APPROX_DIST2(dx, dy), dz)
 

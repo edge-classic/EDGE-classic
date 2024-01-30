@@ -1155,7 +1155,7 @@ static void RAD_ParsePathEvent(param_set_t &pars)
     this_rad->path_event_label = new char[i + 1];
     Z_StrNCpy((char *)this_rad->path_event_label, pars[1], i);
 
-    this_rad->path_event_offset = div ? MAX(0, atoi(div + 1) - 1) : 0;
+    this_rad->path_event_offset = div ? HMM_MAX(0, atoi(div + 1) - 1) : 0;
 }
 
 static void RAD_ParseOnDeath(param_set_t &pars)
@@ -1478,7 +1478,7 @@ static void HandleSpawnKeyword(const char *par, s_thing_t *t)
         int val;
         RAD_CheckForInt(par + 6, &val);
 
-        if (ABS(val) <= 360)
+        if (HMM_ABS(val) <= 360)
             t->angle = epi::BAMFromDegrees((float)val);
         else
             t->angle = val << 16;
@@ -1564,7 +1564,7 @@ static void RAD_ParseSpawnThing(param_set_t &pars)
 
         RAD_CheckForInt(angle_str, &val);
 
-        if (ABS(val) <= 360)
+        if (HMM_ABS(val) <= 360)
             t->angle = epi::BAMFromDegrees((float)val);
         else
             t->angle = val << 16;
@@ -1810,7 +1810,7 @@ static void RAD_ParseThingEvent(param_set_t &pars)
     tev->label = new char[i + 1];
     Z_StrNCpy((char *)tev->label, pars[2], i);
 
-    tev->offset = div ? MAX(0, atoi(div + 1) - 1) : 0;
+    tev->offset = div ? HMM_MAX(0, atoi(div + 1) - 1) : 0;
 
     // parse the tag value
     if (pars.size() >= 4)
@@ -2276,7 +2276,7 @@ static void RAD_ParseWeaponEvent(param_set_t &pars)
     tev->label = new char[i + 1];
     Z_StrNCpy((char *)tev->label, pars[2], i);
 
-    tev->offset = div ? MAX(0, atoi(div + 1) - 1) : 0;
+    tev->offset = div ? HMM_MAX(0, atoi(div + 1) - 1) : 0;
 
     AddStateToScript(this_rad, 0, RAD_ActWeaponEvent, tev);
 }

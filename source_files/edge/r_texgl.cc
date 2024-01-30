@@ -169,14 +169,14 @@ GLuint R_UploadTexture(image_data_c *img, int flags, int max_pix)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, smooth ? GL_LINEAR : GL_NEAREST);
 
     // minification mode
-    int mip_level = CLAMP(0, detail_level, 2);
+    int mip_level = HMM_Clamp(0, detail_level, 2);
 
     // special logic for mid-masked textures.  The UPL_Thresh flag
     // guarantees that each texture level has simple alpha (0 or 255),
     // but we must also disable Trilinear Mipmapping because it will
     // produce partial alpha values when interpolating between mips.
     if (flags & UPL_Thresh)
-        mip_level = CLAMP(0, mip_level, 1);
+        mip_level = HMM_Clamp(0, mip_level, 1);
 
     static GLuint minif_modes[2 * 3] = {GL_NEAREST, GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR,
 
@@ -201,8 +201,8 @@ GLuint R_UploadTexture(image_data_c *img, int flags, int max_pix)
         if (nomip || !detail_level || (new_w == 1 && new_h == 1))
             break;
 
-        new_w = MAX(1, new_w / 2);
-        new_h = MAX(1, new_h / 2);
+        new_w = HMM_MAX(1, new_w / 2);
+        new_h = HMM_MAX(1, new_h / 2);
 
         // -AJA- 2003/12/05: workaround for Radeon 7500 driver bug, which
         //       incorrectly draws the 1x1 mip texture as black.

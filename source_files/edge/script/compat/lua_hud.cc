@@ -32,9 +32,9 @@ static RGBAColor HD_VectorToColor(const HMM_Vec3 &v)
     if (v.X < 0)
         return kRGBANoValue;
 
-    int r = CLAMP(0, (int)v.X, 255);
-    int g = CLAMP(0, (int)v.Y, 255);
-    int b = CLAMP(0, (int)v.Z, 255);
+    int r = HMM_Clamp(0, (int)v.X, 255);
+    int g = HMM_Clamp(0, (int)v.Y, 255);
+    int b = HMM_Clamp(0, (int)v.Z, 255);
 
     RGBAColor rgb = epi::MakeRGBA(r, g, b);
 
@@ -643,7 +643,7 @@ static int HD_automap_zoom(lua_State *L)
     float zoom = luaL_checknumber(L, 1);
 
     // impose a very broad limit
-    ui_hud_automap_zoom = CLAMP(0.2f, zoom, 100.0f);
+    ui_hud_automap_zoom = HMM_Clamp(0.2f, zoom, 100.0f);
 
     return 0;
 }

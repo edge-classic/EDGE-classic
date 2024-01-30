@@ -332,7 +332,7 @@ static bool DecideRangeAttack(mobj_t *object)
     // we inverse the result (since its one in 255) to get the chance that
     // the attack will not happen.
     chance = 1.0f - object->info->minatkchance;
-    chance = MIN(distance / 255.0f, chance);
+    chance = HMM_MIN(distance / 255.0f, chance);
 
     // now after modifing distance where applicable, we get the random number and
     // check if it is less than distance, if so no attack is made.
@@ -506,7 +506,7 @@ void P_ActTransSet(mobj_t *mo)
     if (st && st->action_par)
     {
         value = ((percent_t *)st->action_par)[0];
-        value = MAX(0.0f, MIN(1.0f, value));
+        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
     }
 
     mo->visibility = mo->vis_target = value;
@@ -521,7 +521,7 @@ void P_ActTransFade(mobj_t *mo)
     if (st && st->action_par)
     {
         value = ((percent_t *)st->action_par)[0];
-        value = MAX(0.0f, MIN(1.0f, value));
+        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
     }
 
     mo->vis_target = value;
@@ -536,7 +536,7 @@ void P_ActTransLess(mobj_t *mo)
     if (st && st->action_par)
     {
         value = ((percent_t *)st->action_par)[0];
-        value = MAX(0.0f, MIN(1.0f, value));
+        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
     }
 
     mo->vis_target -= value;
@@ -554,7 +554,7 @@ void P_ActTransMore(mobj_t *mo)
     if (st && st->action_par)
     {
         value = ((percent_t *)st->action_par)[0];
-        value = MAX(0.0f, MIN(1.0f, value));
+        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
     }
 
     mo->vis_target += value;
@@ -583,7 +583,7 @@ void P_ActTransAlternate(mobj_t *object)
     if (st && st->action_par)
     {
         value = ((percent_t *)st->action_par)[0];
-        value = MAX(0.0f, MIN(1.0f, value));
+        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
     }
 
     if (object->extendedflags & EF_LESSVIS)
@@ -612,7 +612,7 @@ void P_ActDLightSet(mobj_t *mo)
 
     if (st && st->action_par)
     {
-        mo->dlight.r = MAX(0.0f, ((int *)st->action_par)[0]);
+        mo->dlight.r = HMM_MAX(0.0f, ((int *)st->action_par)[0]);
 
         if (mo->info->hyperflags & HF_QUADRATIC_COMPAT)
             mo->dlight.r = DLIT_COMPAT_RAD(mo->dlight.r);
@@ -627,7 +627,7 @@ void P_ActDLightFade(mobj_t *mo)
 
     if (st && st->action_par)
     {
-        mo->dlight.target = MAX(0.0f, ((int *)st->action_par)[0]);
+        mo->dlight.target = HMM_MAX(0.0f, ((int *)st->action_par)[0]);
 
         if (mo->info->hyperflags & HF_QUADRATIC_COMPAT)
             mo->dlight.target = DLIT_COMPAT_RAD(mo->dlight.target);
@@ -649,7 +649,7 @@ void P_ActDLightRandom(mobj_t *mo)
         if (mo->info->hyperflags & HF_QUADRATIC_COMPAT)
             qty = DLIT_COMPAT_RAD(qty);
 
-        mo->dlight.r      = MAX(0.0f, qty);
+        mo->dlight.r      = HMM_MAX(0.0f, qty);
         mo->dlight.target = mo->dlight.r;
     }
 }
@@ -1322,7 +1322,7 @@ static inline bool Weakness_CheckHit(mobj_t *target, const atkdef_c *attack, flo
     // which hits the target on the head (coming sharply down) will
     // still register as a head-shot.
     z = (z - target->z) / target->height;
-    z = CLAMP(0.01f, z, 0.99f);
+    z = HMM_Clamp(0.01f, z, 0.99f);
 
     // I_Debugf("HEIGHT CHECK: %1.2f < %1.2f < %1.2f\n",
     //		  weak->height[0], z, weak->height[1]);
@@ -2435,8 +2435,8 @@ bool P_UseThing(mobj_t *user, mobj_t *thing, float open_bottom, float open_top)
         return false;
 
     // can be reached ?
-    open_top    = MIN(open_top, thing->z + thing->height);
-    open_bottom = MAX(open_bottom, thing->z);
+    open_top    = HMM_MIN(open_top, thing->z + thing->height);
+    open_bottom = HMM_MAX(open_bottom, thing->z);
 
     if (user->z >= open_top || (user->z + user->height + USE_Z_RANGE < open_bottom))
         return false;
@@ -4131,7 +4131,7 @@ void P_ActPainChanceSet(mobj_t *mo)
     if (st && st->action_par)
     {
         value = ((percent_t *)st->action_par)[0];
-        value = MAX(0.0f, MIN(1.0f, value));
+        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
     }
     mo->painchance = value;
 }

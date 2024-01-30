@@ -144,6 +144,184 @@ uint8_t *File::LoadIntoMemory(int max_size)
     return buffer; // success!
 }
 
+SubFile::SubFile(File *parent, int start, int len) : parent_(parent), start_(start), length_(len), pos_(0)
+{
+    SYS_ASSERT(parent_ != nullptr);
+    SYS_ASSERT(start_ >= 0);
+    SYS_ASSERT(length_ >= 0);
+}
+
+SubFile::~SubFile()
+{
+    parent_ = nullptr;
+}
+
+unsigned int SubFile::Read(void *dest, unsigned int size)
+{
+    // EOF ?
+    if (pos_ >= length_)
+        return 0;
+
+    size = HMM_MIN(size, (unsigned int)(length_ - pos_));
+
+    // we must always seek before a read, because other things may also be
+    // reading the parent file.
+    parent_->Seek(start_ + pos_, kSeekpointStart);
+
+    unsigned int got = parent_->Read(dest, size);
+
+    pos_ += (int)got;
+
+    return got;
+}
+
+bool SubFile::Seek(int offset, int seekpoint)
+{
+    int new_pos = 0;
+
+    switch (seekpoint)
+    {
+    case kSeekpointStart: {
+        new_pos = 0;
+        break;
+    }
+    case kSeekpointCurrent: {
+        new_pos = pos_;
+        break;
+    }
+    case kSeekpointEnd: {
+        new_pos = length_;
+        break;
+    }
+
+    default:
+        return false;
+    }
+
+    new_pos += offset;
+
+    // NOTE: we allow position at the very end (last byte + 1).
+    if (new_pos < 0 || new_pos > length_)
+        return false;
+
+    pos_ = new_pos;
+
+    return true;
+}
+
+unsigned int SubFile::Write(const void *src, unsigned int size)
+{
+    (void)src;
+    (void)size;
+
+    I_Error("SubFile::Write called.\n");
+
+    return 0; /* read only, cobber */
+}
+
+MemFile::MemFile(const uint8_t *block, int len, bool copy_it)
+{
+    SYS_ASSERT(block);
+    SYS_ASSERT(len >= 0);
+
+    pos_    = 0;
+    copied_ = false;
+
+    if (len == 0)
+    {
+        data_   = nullptr;
+        length_ = 0;
+        return;
+    }
+
+    if (copy_it)
+    {
+        data_   = new uint8_t[len];
+        length_ = len;
+
+        memcpy(data_, block, len);
+        copied_ = true;
+    }
+    else
+    {
+        data_   = (uint8_t *)block;
+        length_ = len;
+    }
+}
+
+MemFile::~MemFile()
+{
+    if (data_ && copied_)
+    {
+        delete[] data_;
+        data_ = nullptr;
+    }
+
+    length_ = 0;
+}
+
+unsigned int MemFile::Read(void *dest, unsigned int size)
+{
+    SYS_ASSERT(dest);
+
+    unsigned int avail = length_ - pos_;
+
+    if (size > avail)
+        size = avail;
+
+    if (size == 0)
+        return 0; // EOF
+
+    memcpy(dest, data_ + pos_, size);
+    pos_ += size;
+
+    return size;
+}
+
+bool MemFile::Seek(int offset, int seekpoint)
+{
+    int new_pos = 0;
+
+    switch (seekpoint)
+    {
+    case kSeekpointStart: {
+        new_pos = 0;
+        break;
+    }
+    case kSeekpointCurrent: {
+        new_pos = pos_;
+        break;
+    }
+    case kSeekpointEnd: {
+        new_pos = length_;
+        break;
+    }
+
+    default:
+        return false;
+    }
+
+    new_pos += offset;
+
+    // Note: allow position at the very end (last byte + 1).
+    if (new_pos < 0 || new_pos > length_)
+        return false;
+
+    pos_ = new_pos;
+    return true;
+}
+
+unsigned int MemFile::Write(const void *src, unsigned int size)
+{
+    (void)src;
+    (void)size;
+
+    I_Error("MemFile::Write called.\n");
+
+    return 0; /* read only, cobber */
+}
+
+
 } // namespace epi
 
 //--- editor settings ---

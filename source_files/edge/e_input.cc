@@ -371,7 +371,7 @@ void E_BuildTiccmd(ticcmd_t *cmd)
         // -ACB- 1998/09/06 Forward Move Speed Control
         forward += forwardmove[speed] * ball_deltas[AXIS_FORWARD] / 64.0;
 
-        forward = CLAMP(-MAXPLMOVE, forward, MAXPLMOVE);
+        forward = HMM_Clamp(-MAXPLMOVE, forward, MAXPLMOVE);
 
         cmd->forwardmove = I_ROUND(forward);
     }
@@ -391,7 +391,7 @@ void E_BuildTiccmd(ticcmd_t *cmd)
         if (strafe)
             side += sidemove[speed] * ball_deltas[AXIS_TURN] / 64.0;
 
-        side = CLAMP(-MAXPLMOVE, side, MAXPLMOVE);
+        side = HMM_Clamp(-MAXPLMOVE, side, MAXPLMOVE);
 
         cmd->sidemove = I_ROUND(side);
     }
@@ -404,7 +404,7 @@ void E_BuildTiccmd(ticcmd_t *cmd)
 
         upward += upwardmove[speed] * ball_deltas[AXIS_FLY] / 64.0;
 
-        upward = CLAMP(-MAXPLMOVE, upward, MAXPLMOVE);
+        upward = HMM_Clamp(-MAXPLMOVE, upward, MAXPLMOVE);
 
         cmd->upwardmove = I_ROUND(upward);
     }

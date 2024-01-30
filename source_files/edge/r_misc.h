@@ -66,7 +66,7 @@ extern int framecount;
 extern struct mobj_s *background_camera_mo;
 
 #define DOOM_SCREEN_ASPECT (320.0f / 200.0f)
-#define DOOM_PIXEL_ASPECT  (5.0f / 6.0f)
+#define DOOHMM_PIXEL_ASPECT  (5.0f / 6.0f)
 
 extern cvar_c v_pixelaspect;
 extern cvar_c v_monitorsize;
@@ -74,7 +74,7 @@ extern cvar_c v_monitorsize;
 // Values/tables adapted from Quake 3 GPL release
 #define FUNCTABLE_SIZE 1024
 #define FUNCTABLE_MASK FUNCTABLE_SIZE - 1
-#define DEG2RAD(a)     ((a * M_PI) / 180.0f)
+#define DEG2RAD(a)     ((a * HMM_PI) / 180.0f)
 
 extern float *r_sintable;
 extern float *r_squaretable;

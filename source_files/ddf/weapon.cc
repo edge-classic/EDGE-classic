@@ -905,7 +905,7 @@ weapondef_container_c::~weapondef_container_c()
 //
 int weapondef_container_c::FindFirst(const char *name, int startpos)
 {
-    startpos = MAX(startpos, 0);
+    startpos = HMM_MAX(startpos, 0);
 
     for (startpos; startpos < size(); startpos++)
     {

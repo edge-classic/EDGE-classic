@@ -137,7 +137,7 @@ static void RGL_Init_Melt(void)
         r = (M_Random() % 3) - 1;
 
         melt_yoffs[x] = melt_yoffs[x - 1] + r;
-        melt_yoffs[x] = MAX(-15, MIN(0, melt_yoffs[x]));
+        melt_yoffs[x] = HMM_MAX(-15, HMM_MIN(0, melt_yoffs[x]));
     }
 }
 
@@ -260,7 +260,7 @@ static void RGL_Wipe_Melt(void)
 
     for (int x = 0; x <= MELT_DIVS; x++)
     {
-        int yoffs = MAX(0, melt_yoffs[x]);
+        int yoffs = HMM_MAX(0, melt_yoffs[x]);
 
         float sx = (float)x * SCREENWIDTH / MELT_DIVS;
         float sy = (float)(200 - yoffs) * SCREENHEIGHT / 200.0f;
@@ -310,8 +310,8 @@ static void RGL_Wipe_Slide(float how_far, float dx, float dy)
 
 static void RGL_Wipe_Doors(float how_far)
 {
-    float dx = cos(how_far * M_PI / 2) * (SCREENWIDTH / 2);
-    float dy = sin(how_far * M_PI / 2) * (SCREENHEIGHT / 3);
+    float dx = cos(how_far * HMM_PI / 2) * (SCREENWIDTH / 2);
+    float dy = sin(how_far * HMM_PI / 2) * (SCREENHEIGHT / 3);
 
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
@@ -374,12 +374,12 @@ bool RGL_DoWipe(void)
     int tics    = 0;
 
     if (cur_wipe_lasttime >= 0)
-        tics = MAX(0, nowtime - cur_wipe_lasttime);
+        tics = HMM_MAX(0, nowtime - cur_wipe_lasttime);
 
     cur_wipe_lasttime = nowtime;
 
     // hack for large delays (like when loading a level)
-    tics = MIN(6, tics);
+    tics = HMM_MIN(6, tics);
 
     cur_wipe_progress += tics;
 

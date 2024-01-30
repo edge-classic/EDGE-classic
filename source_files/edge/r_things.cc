@@ -138,7 +138,7 @@ static int GetMulticolMaxRGB(multi_color_c *cols, int num, bool additive)
     {
         int mx = additive ? cols->add_MAX() : cols->mod_MAX();
 
-        result = MAX(result, mx);
+        result = HMM_MAX(result, mx);
     }
 
     return result;
@@ -635,7 +635,7 @@ void RGL_DrawWeaponModel(player_t *p)
         last_frame = p->weapon_last_frame;
 
         lerp = (psp->state->tics - psp->tics + 1) / (float)(psp->state->tics);
-        lerp = CLAMP(0, lerp, 1);
+        lerp = HMM_Clamp(0, lerp, 1);
     }
 
     float bias = 0.0f;
@@ -1227,7 +1227,7 @@ static void RGL_DrawModel(drawthing_t *dthing)
         SYS_ASSERT(mo->state->tics > 1);
 
         lerp = (mo->state->tics - mo->tics + 1) / (float)(mo->state->tics);
-        lerp = CLAMP(0, lerp, 1);
+        lerp = HMM_Clamp(0, lerp, 1);
     }
 
     if (md->md2_model)
@@ -1397,7 +1397,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
         float dist = P_ApproxDistance(mo->x - viewx, mo->y - viewy, mo->z - viewz);
 
-        fuzz_mul = 0.8 / CLAMP(20, dist, 700);
+        fuzz_mul = 0.8 / HMM_Clamp(20, dist, 700);
 
         FUZZ_Adjust(&fuzz_add, mo);
     }

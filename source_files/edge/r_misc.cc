@@ -118,8 +118,8 @@ static float atan2_approx(float y, float x)
     // http://pubs.opengroup.org/onlinepubs/009695399/functions/atan2.html
     // Volkan SALMA
 
-    const float ONEQTR_PI = M_PI / 4.0;
-    const float THRQTR_PI = 3.0 * M_PI / 4.0;
+    const float ONEQTR_PI = HMM_PI / 4.0;
+    const float THRQTR_PI = 3.0 * HMM_PI / 4.0;
     float       r, angle;
     float       abs_y = fabs(y) + 1e-10f; // kludge to prevent 0/0 condition
     if (x < 0.0f)
@@ -146,10 +146,10 @@ BAMAngle R_PointToAngle(float x1, float y1, float x, float y, bool precise)
 
     if (precise) 
     {
-        return (AlmostEquals(x, 0.0f) && AlmostEquals(y, 0.0f)) ? 0 : epi::BAMFromDegrees(atan2(y, x) * (180 / M_PI));
+        return (AlmostEquals(x, 0.0f) && AlmostEquals(y, 0.0f)) ? 0 : epi::BAMFromDegrees(atan2(y, x) * (180 / HMM_PI));
     }
 
-    return epi::BAMFromDegrees(atan2_approx(y, x) * (180 / M_PI));
+    return epi::BAMFromDegrees(atan2_approx(y, x) * (180 / HMM_PI));
 
 }
 

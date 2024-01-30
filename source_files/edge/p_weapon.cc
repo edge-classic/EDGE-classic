@@ -1811,7 +1811,7 @@ void A_WeaponTransSet(mobj_t *mo)
     if (psp->state && psp->state->action_par)
     {
         value = ((percent_t *)psp->state->action_par)[0];
-        value = MAX(0.0f, MIN(1.0f, value));
+        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
     }
 
     psp->visibility = psp->vis_target = value;
@@ -1827,7 +1827,7 @@ void A_WeaponTransFade(mobj_t *mo)
     if (psp->state && psp->state->action_par)
     {
         value = ((percent_t *)psp->state->action_par)[0];
-        value = MAX(0.0f, MIN(1.0f, value));
+        value = HMM_MAX(0.0f, HMM_MIN(1.0f, value));
     }
 
     psp->vis_target = value;

@@ -193,7 +193,7 @@ void RGL_ColourmapEffect(player_t *player)
         {
             float old_alpha = HUD_GetAlpha();
             HUD_SetAlpha(0.0f);
-            s = MAX(0.5f, s);
+            s = HMM_MAX(0.5f, s);
             HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
                         epi::MakeRGBA(I_ROUND(s * 255), I_ROUND(s * 255), I_ROUND(s * 255)), 25.0f);
             HUD_SetAlpha(old_alpha);
@@ -237,12 +237,12 @@ void RGL_PaletteEffect(player_t *player)
     {
         V_IndexColourToRGB(pal_black, rgb_data, player->last_damage_colour, player->damagecount);
 
-        int rgb_max = MAX(rgb_data[0], MAX(rgb_data[1], rgb_data[2]));
+        int rgb_max = HMM_MAX(rgb_data[0], HMM_MAX(rgb_data[1], rgb_data[2]));
 
         if (rgb_max == 0)
             return;
 
-        rgb_max = MIN(200, rgb_max);
+        rgb_max = HMM_MIN(200, rgb_max);
 
         if (!reduce_flash)
             glColor4f((float)rgb_data[0] / (float)rgb_max, (float)rgb_data[1] / (float)rgb_max,

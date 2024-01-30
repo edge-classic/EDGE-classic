@@ -242,7 +242,7 @@ typedef struct mirror_info_s
         float a_len = seg->length;
         float b_len = R_PointToDist(bx1, by1, bx2, by2);
 
-        xy_scale = a_len / MAX(1, b_len);
+        xy_scale = a_len / HMM_MAX(1, b_len);
 
         xx *= xy_scale;
         xy *= xy_scale;
@@ -257,7 +257,7 @@ typedef struct mirror_info_s
         float a_h = (seg->frontsector->c_h - seg->frontsector->f_h);
         float b_h = (other->frontsector->c_h - other->frontsector->f_h);
 
-        z_scale = a_h / MAX(1, b_h);
+        z_scale = a_h / HMM_MAX(1, b_h);
         zc      = seg->frontsector->f_h - other->frontsector->f_h * z_scale;
     }
 
@@ -1188,8 +1188,8 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
 
     if (use_dlights && ren_extralight < 250)
     {
-        float bottom = MIN(lz1, rz1);
-        float top    = MAX(lz2, rz2);
+        float bottom = HMM_MIN(lz1, rz1);
+        float top    = HMM_MAX(lz2, rz2);
 
         P_DynamicLightIterator(v_bbox[BOXLEFT], v_bbox[BOXBOTTOM], bottom, v_bbox[BOXRIGHT], v_bbox[BOXTOP], top,
                                DLIT_Wall, &data);
@@ -1443,8 +1443,8 @@ static void DrawTile(seg_t *seg, drawfloor_t *dfloor, float lz1, float lz2, floa
 static inline void AddWallTile(seg_t *seg, drawfloor_t *dfloor, surface_t *surf, float z1, float z2, float tex_z,
                                int flags, float f_min, float c_max)
 {
-    z1 = MAX(f_min, z1);
-    z2 = MIN(c_max, z2);
+    z1 = HMM_MAX(f_min, z1);
+    z2 = HMM_MIN(c_max, z2);
 
     if (z1 >= z2 - 0.01)
         return;
@@ -1485,11 +1485,11 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 
     float slope_fh = sec->f_h;
     if (sec->f_slope)
-        slope_fh += MIN(sec->f_slope->dz1, sec->f_slope->dz2);
+        slope_fh += HMM_MIN(sec->f_slope->dz1, sec->f_slope->dz2);
 
     float slope_ch = sec->c_h;
     if (sec->c_slope)
-        slope_ch += MAX(sec->c_slope->dz1, sec->c_slope->dz2);
+        slope_ch += HMM_MAX(sec->c_slope->dz1, sec->c_slope->dz2);
 
     // Boom compatibility -- invisible walkways
     if (sec->heightsec != nullptr)
@@ -1578,7 +1578,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
             AddWallTile2(seg, dfloor, sd->bottom.image ? &sd->bottom : &other->floor, sec->f_h,
                          (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->f_h, sec->f_h,
                          (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->f_h,
-                         (ld->flags & MLF_LowerUnpegged) ? sec->c_h : MAX(sec->f_h, MAX(zv1, zv2)), 0);
+                         (ld->flags & MLF_LowerUnpegged) ? sec->c_h : HMM_MAX(sec->f_h, HMM_MAX(zv1, zv2)), 0);
         }
         else if (sec->floor_vertex_slope && !other->floor_vertex_slope)
         {
@@ -1589,7 +1589,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
             AddWallTile2(seg, dfloor, sd->bottom.image ? &sd->bottom : &sec->floor,
                          (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->f_h, other->f_h,
                          (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->f_h, other->f_h,
-                         (ld->flags & MLF_LowerUnpegged) ? other->c_h : MAX(other->f_h, MAX(zv1, zv2)), 0);
+                         (ld->flags & MLF_LowerUnpegged) ? other->c_h : HMM_MAX(other->f_h, HMM_MAX(zv1, zv2)), 0);
         }
         else if (!sd->bottom.image && !debug_hom.d)
         {
@@ -1632,7 +1632,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
             AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &other->ceil, sec->c_h,
                          (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->c_h, sec->c_h,
                          (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->c_h,
-                         (ld->flags & MLF_UpperUnpegged) ? sec->f_h : MIN(zv1, zv2), 0);
+                         (ld->flags & MLF_UpperUnpegged) ? sec->f_h : HMM_MIN(zv1, zv2), 0);
         }
         else if (sec->ceil_vertex_slope && !other->ceil_vertex_slope)
         {
@@ -1643,7 +1643,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
             AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &sec->ceil, other->c_h,
                          (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->c_h, other->c_h,
                          (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->c_h,
-                         (ld->flags & MLF_UpperUnpegged) ? other->f_h : MIN(zv1, zv2), 0);
+                         (ld->flags & MLF_UpperUnpegged) ? other->f_h : HMM_MIN(zv1, zv2), 0);
         }
         else if (!sd->top.image && !debug_hom.d)
         {
@@ -1670,8 +1670,8 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 
     if (sd->middle.image)
     {
-        float f1 = MAX(sec->f_h, other->f_h);
-        float c1 = MIN(sec->c_h, other->c_h);
+        float f1 = HMM_MAX(sec->f_h, other->f_h);
+        float c1 = HMM_MIN(sec->c_h, other->c_h);
 
         float f2, c2;
 
@@ -1682,17 +1682,17 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
             {
                 float lz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v1->X, seg->v1->Y);
                 float rz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v2->X, seg->v2->Y);
-                ofh = MIN(ofh, MIN(lz2, rz2));
+                ofh = HMM_MIN(ofh, HMM_MIN(lz2, rz2));
             }
-            f2 = f1 = MAX(MIN(sec->f_h, slope_fh), ofh);
+            f2 = f1 = HMM_MAX(HMM_MIN(sec->f_h, slope_fh), ofh);
             float och = other->c_h;
             if (other->c_slope)
             {
                 float lz2 = other->c_h + Slope_GetHeight(other->c_slope, seg->v1->X, seg->v1->Y);
                 float rz2 = other->c_h + Slope_GetHeight(other->c_slope, seg->v2->X, seg->v2->Y);
-                och = MAX(och, MAX(lz2, rz2));
+                och = HMM_MAX(och, HMM_MAX(lz2, rz2));
             }
-            c2 = c1 = MIN(MAX(sec->c_h, slope_ch), och);
+            c2 = c1 = HMM_MIN(HMM_MAX(sec->c_h, slope_ch), och);
         }
         else if (ld->flags & MLF_LowerUnpegged)
         {
@@ -1718,8 +1718,8 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         // hack for "see-through" lines (same sector on both sides)
         if (sec != other)
         {
-            f2 = MAX(f2, f1);
-            c2 = MIN(c2, c1);
+            f2 = HMM_MAX(f2, f1);
+            c2 = HMM_MIN(c2, c1);
         }
 
         if (c2 > f2)
@@ -2028,10 +2028,10 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
         float ex2 = viewx + along * (ex - viewx);
         float ey2 = viewy + along * (ey - viewy);
 
-        float lx1 = MIN(MIN(sx, sx2), MIN(ex, ex2));
-        float ly1 = MIN(MIN(sy, sy2), MIN(ey, ey2));
-        float lx2 = MAX(MAX(sx, sx2), MAX(ex, ex2));
-        float ly2 = MAX(MAX(sy, sy2), MAX(ey, ey2));
+        float lx1 = HMM_MIN(HMM_MIN(sx, sx2), HMM_MIN(ex, ex2));
+        float ly1 = HMM_MIN(HMM_MIN(sy, sy2), HMM_MIN(ey, ey2));
+        float lx2 = HMM_MAX(HMM_MAX(sx, sx2), HMM_MAX(ex, ex2));
+        float ly2 = HMM_MAX(HMM_MAX(sy, sy2), HMM_MAX(ey, ey2));
 
         //		I_Debugf("Flood BBox size: %1.0f x %1.0f\n", lx2-lx1, ly2-ly1);
 
@@ -2325,7 +2325,7 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
         }
         else if (bsector && IS_SKY(bsector->ceil) && fsector->heightsec == NULL && bsector->heightsec == NULL)
         {
-            float max_f = MAX(fsector->f_h, bsector->f_h);
+            float max_f = HMM_MAX(fsector->f_h, bsector->f_h);
 
             if (bsector->c_h <= max_f && max_f < fsector->sky_h)
             {
@@ -3325,12 +3325,12 @@ static void RGL_RenderTrueBSP(void)
 
 static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 {
-    float fov = CLAMP(5, r_fov.f, 175);
+    float fov = HMM_Clamp(5, r_fov.f, 175);
 
     wave_now    = leveltime / 100.0f;
     plane_z_bob = r_sintable[(int)((WAVETABLE_INCREMENT + wave_now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)];
 
-    view_x_slope = tan(90.0f * M_PI / 360.0);
+    view_x_slope = tan(90.0f * HMM_PI / 360.0);
 
     if (full_height)
         view_y_slope = DOOM_YSLOPE_FULL;
@@ -3339,7 +3339,7 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 
     if (!AlmostEquals(fov, 90.0f))
     {
-        float new_slope = tan(fov * M_PI / 360.0);
+        float new_slope = tan(fov * HMM_PI / 360.0);
 
         view_y_slope *= new_slope / view_x_slope;
         view_x_slope = new_slope;
@@ -3351,7 +3351,7 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
     {
         viewiszoomed = true;
 
-        float new_slope = tan(mo->player->zoom_fov * M_PI / 360.0);
+        float new_slope = tan(mo->player->zoom_fov * HMM_PI / 360.0);
 
         view_y_slope *= new_slope / view_x_slope;
         view_x_slope = new_slope;
@@ -3421,7 +3421,7 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
         k = epi::DegreesFromBAM(viewvertangle);
         if (k > 180.0)
             k -= 360.0;
-        k = k * M_PI / 180.0f;
+        k = k * HMM_PI / 180.0f;
 
         sprite_skew = tan((-k) / 2.0);
 

@@ -136,9 +136,9 @@ int V_FindColour(int r, int g, int b)
 
     for (i = 0; i < 256; i++)
     {
-        int d_r = ABS(r - playpal_data[0][i][0]);
-        int d_g = ABS(g - playpal_data[0][i][1]);
-        int d_b = ABS(b - playpal_data[0][i][2]);
+        int d_r = HMM_ABS(r - playpal_data[0][i][0]);
+        int d_g = HMM_ABS(g - playpal_data[0][i][1]);
+        int d_b = HMM_ABS(b - playpal_data[0][i][2]);
 
         int dist = d_r * d_r + d_g * d_g + d_b * d_b;
 
@@ -171,7 +171,7 @@ static int V_FindPureColour(int which)
         int a = playpal_data[0][i][which];
         int b = playpal_data[0][i][(which + 1) % 3];
         int c = playpal_data[0][i][(which + 2) % 3];
-        int d = MAX(b, c);
+        int d = HMM_MAX(b, c);
 
         int dist = 255 - (a - d);
 
@@ -331,13 +331,13 @@ static int AnalyseColourmap(const uint8_t *table, int alpha, int *r, int *g, int
         int g1 = playpal_data[0][table[j]][1];
         int b1 = playpal_data[0][table[j]][2];
 
-        int r_div = 255 * MAX(4, r1) / MAX(4, r0);
-        int g_div = 255 * MAX(4, g1) / MAX(4, g0);
-        int b_div = 255 * MAX(4, b1) / MAX(4, b0);
+        int r_div = 255 * HMM_MAX(4, r1) / HMM_MAX(4, r0);
+        int g_div = 255 * HMM_MAX(4, g1) / HMM_MAX(4, g0);
+        int b_div = 255 * HMM_MAX(4, b1) / HMM_MAX(4, b0);
 
-        r_div = MAX(4, MIN(4096, r_div));
-        g_div = MAX(4, MIN(4096, g_div));
-        b_div = MAX(4, MIN(4096, b_div));
+        r_div = HMM_MAX(4, HMM_MIN(4096, r_div));
+        g_div = HMM_MAX(4, HMM_MIN(4096, g_div));
+        b_div = HMM_MAX(4, HMM_MIN(4096, b_div));
 
 #if 0 // DEBUGGING
 		I_Printf("#%02x%02x%02x / #%02x%02x%02x = (%d,%d,%d)\n",
@@ -354,7 +354,7 @@ static int AnalyseColourmap(const uint8_t *table, int alpha, int *r, int *g, int
     (*b) = b_tot / total;
 
     // scale down when too large to fit
-    int ity = MAX(*r, MAX(*g, *b));
+    int ity = HMM_MAX(*r, HMM_MAX(*g, *b));
 
     if (ity > 255)
     {
@@ -379,9 +379,9 @@ static int AnalyseColourmap(const uint8_t *table, int alpha, int *r, int *g, int
 
         // FIXME: this is the INVULN function
 #if 0
-		sr = (MAX(0, (*r /2 + 128) - r0) * (255 - alpha) + (*r) * alpha) / 255;
-		sg = (MAX(0, (*g /2 + 128) - g0) * (255 - alpha) + (*g) * alpha) / 255;
-		sb = (MAX(0, (*b /2 + 128) - b0) * (255 - alpha) + (*b) * alpha) / 255;
+		sr = (HMM_MAX(0, (*r /2 + 128) - r0) * (255 - alpha) + (*r) * alpha) / 255;
+		sg = (HMM_MAX(0, (*g /2 + 128) - g0) * (255 - alpha) + (*g) * alpha) / 255;
+		sb = (HMM_MAX(0, (*b /2 + 128) - b0) * (255 - alpha) + (*b) * alpha) / 255;
 #endif
 
         int r1 = playpal_data[0][table[k]][0];
@@ -421,9 +421,9 @@ void TransformColourmap(colourmap_c *colmap)
             int g = playpal_data[0][table[pal_gray239]][1] * 255 / 239;
             int b = playpal_data[0][table[pal_gray239]][2] * 255 / 239;
 
-            r = MIN(255, MAX(0, r));
-            g = MIN(255, MAX(0, g));
-            b = MIN(255, MAX(0, b));
+            r = HMM_MIN(255, HMM_MAX(0, r));
+            g = HMM_MIN(255, HMM_MAX(0, g));
+            b = HMM_MIN(255, HMM_MAX(0, b));
 
             colmap->font_colour = epi::MakeRGBA(r, g, b);
         }
@@ -443,9 +443,9 @@ void TransformColourmap(colourmap_c *colmap)
 				 colmap->name.c_str(), 0, r, g, b);
 #endif
 
-        r = MIN(255, MAX(0, r));
-        g = MIN(255, MAX(0, g));
-        b = MIN(255, MAX(0, b));
+        r = HMM_MIN(255, HMM_MAX(0, r));
+        g = HMM_MIN(255, HMM_MAX(0, g));
+        b = HMM_MIN(255, HMM_MAX(0, b));
 
         colmap->gl_colour = epi::MakeRGBA(r, g, b);
     }
@@ -534,9 +534,9 @@ void V_IndexColourToRGB(int indexcol, uint8_t *returncol, RGBAColor last_damage_
         float g = (float)epi::GetRGBAGreen(last_damage_colour) / 255.0;
         float b = (float)epi::GetRGBABlue(last_damage_colour) / 255.0;
 
-        returncol[0] = (uint8_t)MAX(0, MIN(255, r * damageAmount * 2.5));
-        returncol[1] = (uint8_t)MAX(0, MIN(255, g * damageAmount * 2.5));
-        returncol[2] = (uint8_t)MAX(0, MIN(255, b * damageAmount * 2.5));
+        returncol[0] = (uint8_t)HMM_MAX(0, HMM_MIN(255, r * damageAmount * 2.5));
+        returncol[1] = (uint8_t)HMM_MAX(0, HMM_MIN(255, g * damageAmount * 2.5));
+        returncol[2] = (uint8_t)HMM_MAX(0, HMM_MIN(255, b * damageAmount * 2.5));
     }
     else
     {
@@ -623,12 +623,12 @@ int R_DoomLightingEquation(int L, float dist)
 {
     /* L in the range 0 to 63 */
 
-    int min_L = CLAMP(0, 36 - L, 31);
+    int min_L = HMM_Clamp(0, 36 - L, 31);
 
-    int index = (59 - L) - int(1280 / MAX(1, dist));
+    int index = (59 - L) - int(1280 / HMM_MAX(1, dist));
 
     /* result is colormap index (0 bright .. 31 dark) */
-    return CLAMP(min_L, index, 31);
+    return HMM_Clamp(min_L, index, 31);
 }
 
 class colormap_shader_c : public abstract_shader_c
@@ -693,7 +693,7 @@ class colormap_shader_c : public abstract_shader_c
         int cmap_idx;
 
         if (lt_model >= LMODEL_Flat)
-            cmap_idx = CLAMP(0, 42 - light_lev / 6, 31);
+            cmap_idx = HMM_Clamp(0, 42 - light_lev / 6, 31);
         else
             cmap_idx = R_DoomLightingEquation(light_lev / 4, dist);
 
@@ -826,7 +826,7 @@ class colormap_shader_c : public abstract_shader_c
                 if (lt_model >= LMODEL_Flat)
                 {
                     // FLAT lighting
-                    index = CLAMP(0, 42 - (L * 2 / 3), 31);
+                    index = HMM_Clamp(0, 42 - (L * 2 / 3), 31);
                 }
                 else
                 {
@@ -956,7 +956,7 @@ abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props, 
         lit_Nom += ren_extralight;
     }
 
-    lit_Nom = CLAMP(0, lit_Nom, 255);
+    lit_Nom = HMM_Clamp(0, lit_Nom, 255);
 
     shader->SetLight(lit_Nom);
 

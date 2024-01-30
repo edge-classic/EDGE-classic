@@ -131,7 +131,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
     player->std_viewheight = player->mo->height * PERCENT_2_FLOAT(player->mo->info->viewheight);
 
     if (sink_mult < 1.0f)
-        player->deltaviewheight = MAX(player->deltaviewheight - 1.0f, -1.0f);
+        player->deltaviewheight = HMM_MAX(player->deltaviewheight - 1.0f, -1.0f);
 
     // calculate the walking / running height adjustment.
 
@@ -179,7 +179,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
         {
             float thresh = player->std_viewheight / 2;
             if (sink_mult < 1.0f)
-                thresh = MIN(thresh, player->std_viewheight * sink_mult);
+                thresh = HMM_MIN(thresh, player->std_viewheight * sink_mult);
             if (player->viewheight < thresh)
             {
                 player->viewheight = thresh;
@@ -447,7 +447,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
     {
         if (mo->height > mo->info->crouchheight)
         {
-            mo->height = MAX(mo->height - 2.0f / (r_doubleframes.d ? 2.0 : 1.0), mo->info->crouchheight);
+            mo->height = HMM_MAX(mo->height - 2.0f / (r_doubleframes.d ? 2.0 : 1.0), mo->info->crouchheight);
             mo->player->deltaviewheight = -1.0f;
         }
     }
@@ -455,7 +455,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
     {
         if (mo->height < mo->info->height)
         {
-            float new_height = MIN(mo->height + 2 / (r_doubleframes.d ? 2 : 1), mo->info->height);
+            float new_height = HMM_MIN(mo->height + 2 / (r_doubleframes.d ? 2 : 1), mo->info->height);
 
             // prevent standing up inside a solid area
             if ((mo->flags & MF_NOCLIP) || mo->z + new_height <= mo->ceilingz)
@@ -527,7 +527,7 @@ static void DeathThink(player_t *player, bool extra_tic)
         delta = angle - player->mo->angle;
 
         slope   = P_ApproxSlope(dx, dy, dz);
-        slope   = MIN(1.7f, MAX(-1.7f, slope));
+        slope   = HMM_MIN(1.7f, HMM_MAX(-1.7f, slope));
         delta_s = epi::BAMFromATan(slope) - player->mo->vertangle;
 
         if ((delta <= kBAMAngle1 / 2 || delta >= (BAMAngle)(0 - kBAMAngle1 / 2)) &&
@@ -633,13 +633,13 @@ static void P_UpdatePowerups(player_t *player)
 
         // -ACB- FIXME!!! Catch lookup failure!
         player->effect_colourmap = colourmaps.Lookup("ALLWHITE");
-        player->effect_left      = (s <= 0) ? 0 : MIN(int(s), EFFECT_MAX_TIME);
+        player->effect_left      = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
     }
     else if (player->powers[PW_Infrared] > 0)
     {
         float s = player->powers[PW_Infrared];
 
-        player->effect_left = (s <= 0) ? 0 : MIN(int(s), EFFECT_MAX_TIME);
+        player->effect_left = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
     }
     else if (player->powers[PW_NightVision] > 0) // -ACB- 1998/07/15 NightVision Code
     {
@@ -647,14 +647,14 @@ static void P_UpdatePowerups(player_t *player)
 
         // -ACB- FIXME!!! Catch lookup failure!
         player->effect_colourmap = colourmaps.Lookup("ALLGREEN");
-        player->effect_left      = (s <= 0) ? 0 : MIN(int(s), EFFECT_MAX_TIME);
+        player->effect_left      = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
     }
     else if (player->powers[PW_Berserk] > 0) // Lobo 2021: Un-Hardcode Berserk colour tint
     {
         float s = player->powers[PW_Berserk];
 
         player->effect_colourmap = colourmaps.Lookup("BERSERK");
-        player->effect_left      = (s <= 0) ? 0 : MIN(int(s), EFFECT_MAX_TIME);
+        player->effect_left      = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
     }
 }
 

@@ -111,7 +111,7 @@ static bool PIT_PushThing(mobj_t *mo, void *dataptr)
     if (dist >= 1.0f)
         speed = (2.0f - dist);
     else
-        speed = 1.0 / MAX(0.05f, dist);
+        speed = 1.0 / HMM_MAX(0.05f, dist);
 
     // the speed factor is squared, giving similar results to BOOM.
     // NOTE: magnitude is negative for PULL mode.

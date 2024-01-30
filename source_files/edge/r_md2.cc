@@ -576,7 +576,7 @@ static void MD3_CreateNormalMap(void)
     float sintab[160];
 
     for (int i = 0; i < 160; i++)
-        sintab[i] = sin(i * M_PI / 64.0);
+        sintab[i] = sin(i * HMM_PI / 64.0);
 
     for (int pitch = 0; pitch < 128; pitch++)
     {
@@ -902,7 +902,7 @@ static int MD2_MulticolMaxRGB(model_coord_data_t *data, bool additive)
 
         int mx = additive ? col->add_MAX() : col->mod_MAX();
 
-        result = MAX(result, mx);
+        result = HMM_MAX(result, mx);
     }
 
     return result;
@@ -1081,7 +1081,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
         {
             float dist = P_ApproxDistance(mo->x - viewx, mo->y - viewy, mo->z - viewz);
 
-            data.fuzz_mul = 70.0 / CLAMP(35, dist, 700);
+            data.fuzz_mul = 70.0 / HMM_Clamp(35, dist, 700);
         }
 
         FUZZ_Adjust(&data.fuzz_add, mo);

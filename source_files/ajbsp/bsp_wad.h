@@ -20,7 +20,7 @@
 #define __AJBSP_WAD_H__
 
 // EPI
-#include "file_memory.h"
+#include "file.h"
 
 namespace ajbsp
 {

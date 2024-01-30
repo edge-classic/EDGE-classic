@@ -138,9 +138,9 @@ void mix_channel_c::ComputeVolume()
             if (players[consoleplayer] && players[consoleplayer]->mo)
             {
                 if (P_CheckSightToPoint(players[consoleplayer]->mo, pos->x, pos->y, pos->z))
-                    dist = MAX(1.25f, dist / 100.0f);
+                    dist = HMM_MAX(1.25f, dist / 100.0f);
                 else
-                    dist = MAX(1.25f, dist / 75.0f);
+                    dist = HMM_MAX(1.25f, dist / 75.0f);
             }
         }
     }

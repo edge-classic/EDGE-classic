@@ -757,10 +757,10 @@ bool P_BlockLinesIterator(float x1, float y1, float x2, float y2, bool (*func)(l
     int hx = BLOCKMAP_GET_X(x2);
     int hy = BLOCKMAP_GET_Y(y2);
 
-    lx = MAX(0, lx);
-    hx = MIN(bmap_width - 1, hx);
-    ly = MAX(0, ly);
-    hy = MIN(bmap_height - 1, hy);
+    lx = HMM_MAX(0, lx);
+    hx = HMM_MIN(bmap_width - 1, hx);
+    ly = HMM_MAX(0, ly);
+    hy = HMM_MIN(bmap_height - 1, hy);
 
     for (int by = ly; by <= hy; by++)
         for (int bx = lx; bx <= hx; bx++)
@@ -808,10 +808,10 @@ bool P_BlockThingsIterator(float x1, float y1, float x2, float y2, bool (*func)(
     int hx = BLOCKMAP_GET_X(x2) + 1;
     int hy = BLOCKMAP_GET_Y(y2) + 1;
 
-    lx = MAX(0, lx);
-    hx = MIN(bmap_width - 1, hx);
-    ly = MAX(0, ly);
-    hy = MIN(bmap_height - 1, hy);
+    lx = HMM_MAX(0, lx);
+    hx = HMM_MIN(bmap_width - 1, hx);
+    ly = HMM_MAX(0, ly);
+    hy = HMM_MIN(bmap_height - 1, hy);
 
     for (int by = ly; by <= hy; by++)
         for (int bx = lx; bx <= hx; bx++)
@@ -843,10 +843,10 @@ void P_DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, fl
     int hx = LIGHTMAP_GET_X(x2) + 1;
     int hy = LIGHTMAP_GET_Y(y2) + 1;
 
-    lx = MAX(0, lx);
-    hx = MIN(dlmap_width - 1, hx);
-    ly = MAX(0, ly);
-    hy = MIN(dlmap_height - 1, hy);
+    lx = HMM_MAX(0, lx);
+    hx = HMM_MIN(dlmap_width - 1, hx);
+    ly = HMM_MAX(0, ly);
+    hy = HMM_MIN(dlmap_height - 1, hy);
 
     for (int by = ly; by <= hy; by++)
         for (int bx = lx; bx <= hx; bx++)
@@ -1333,8 +1333,8 @@ static void BlockAddLine(int line_num)
 
     // check if this line spans multiple blocks.
 
-    x_dist = ABS((x1 / BLOCKMAP_UNIT) - (x0 / BLOCKMAP_UNIT));
-    y_dist = ABS((y1 / BLOCKMAP_UNIT) - (y0 / BLOCKMAP_UNIT));
+    x_dist = HMM_ABS((x1 / BLOCKMAP_UNIT) - (x0 / BLOCKMAP_UNIT));
+    y_dist = HMM_ABS((y1 / BLOCKMAP_UNIT) - (y0 / BLOCKMAP_UNIT));
 
     y_sign = (y1 >= y0) ? 1 : -1;
 
@@ -1376,7 +1376,7 @@ static void BlockAddLine(int line_num)
 
         SYS_ASSERT(sx <= ex);
 
-        y_dist = ABS((ey / 128) - (sy / 128));
+        y_dist = HMM_ABS((ey / 128) - (sy / 128));
 
         for (j = 0; j <= y_dist; j++)
         {

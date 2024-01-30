@@ -1206,7 +1206,7 @@ int DDF_MainLookupDirector(const mobjtype_c *info, const char *ref)
     std::string director(ref, len);
 
     int state  = DDF_StateFindLabel(info->state_grp, director.c_str());
-    int offset = p ? MAX(0, atoi(p + 1) - 1) : 0;
+    int offset = p ? HMM_MAX(0, atoi(p + 1) - 1) : 0;
 
     // FIXME: check for overflow
     return state + offset;
@@ -1259,7 +1259,7 @@ void DDF_MainGetSlope(const char *info, void *storage)
     if (val < -89.5f)
         val = -89.5f;
 
-    *dest = tan(val * M_PI / 180.0);
+    *dest = tan(val * HMM_PI / 180.0);
 }
 
 static void DoGetFloat(const char *info, void *storage)
@@ -1296,7 +1296,7 @@ void DDF_MainGetPercent(const char *info, void *storage)
         DDF_WarnError("Bad percent value '%s': Should be a number followed by %%\n", info);
         // -AJA- 2001/01/27: backwards compatibility
         DoGetFloat(s, &f);
-        *dest = MAX(0, MIN(1, f));
+        *dest = HMM_MAX(0, HMM_MIN(1, f));
         return;
     }
 

@@ -1008,7 +1008,7 @@ void RAD_FinishMenu(int result)
     SYS_ASSERT(rts_curr_menu);
 
     // zero is cancelled, otherwise result is 1..N
-    if (result < 0 || result > MAX(1, rts_curr_menu->NumChoices()))
+    if (result < 0 || result > HMM_MAX(1, rts_curr_menu->NumChoices()))
         return;
 
     rts_curr_menu->NotifyResult(result);

@@ -47,7 +47,7 @@
 #define PACKEDATTR /* nothing */
 #endif
 
-// string comparisons
+#include "HandmadeMath.h"
 #include "str_compare.h"
 
 /* Important functions provided by Engine code */
@@ -63,30 +63,8 @@ void I_Debugf(const char *message, ...) GCCATTR((format(printf, 1, 2)));
 #define NULL nullptr
 #endif
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-// TODO replace these with std::max() and std::min()
-#ifndef MAX
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#endif
-
-#ifndef MIN
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#endif
-
-// TODO replace this with plain abs() for integer, fabs() for float
-#ifndef ABS
-#define ABS(a) ((a) < 0 ? -(a) : (a))
-#endif
-
 #ifndef I_ROUND
 #define I_ROUND(x) ((int)round(x))
-#endif
-
-#ifndef CLAMP
-#define CLAMP(low, x, high) ((x) < (low) ? (low) : (x) > (high) ? (high) : (x))
 #endif
 
 // assertion macro

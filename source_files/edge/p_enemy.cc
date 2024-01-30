@@ -267,7 +267,7 @@ bool P_Move(mobj_t *actor, bool path)
     // -AJA- 2008/01/16: position interpolation
     if ((actor->state->flags & SFF_Model) || (actor->flags & MF_FLOAT))
     {
-        actor->lerp_num = CLAMP(2, actor->state->tics, 10);
+        actor->lerp_num = HMM_Clamp(2, actor->state->tics, 10);
         actor->lerp_pos = 1;
 
         actor->lerp_from = orig_pos;

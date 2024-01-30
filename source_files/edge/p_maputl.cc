@@ -452,8 +452,8 @@ static int GAP_Restrict(vgap_t *dest, int d_num, vgap_t *src, int s_num)
             if (dest[d].c <= dest[d].f)
                 continue;
 
-            f = MAX(src[s].f, dest[d].f);
-            c = MIN(src[s].c, dest[d].c);
+            f = HMM_MAX(src[s].f, dest[d].f);
+            c = HMM_MIN(src[s].c, dest[d].c);
 
             if (f < c)
             {
@@ -534,7 +534,7 @@ int P_FindThingGap(vgap_t *gaps, int gap_num, float z1, float z2)
             return i;
         }
 
-        dist = ABS(z1 - gaps[i].f);
+        dist = HMM_ABS(z1 - gaps[i].f);
 
         if (z2 - z1 <= gaps[i].c - gaps[i].f)
         { // [2]

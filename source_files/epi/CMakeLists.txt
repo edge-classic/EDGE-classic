@@ -10,6 +10,7 @@ add_library(
   math_crc.cc
   math_md5.cc
   str_compare.cc
+  str_ename.cc
   str_lexer.cc
   str_util.cc
 )

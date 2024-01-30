@@ -248,7 +248,7 @@ mdl_model_c *MDL_LoadModel(epi::File *f)
     /* read header */
     f->Read(&header, sizeof(raw_mdl_header_t));
 
-    int version = EPI_LE_S32(header.version);
+    int version = AlignedLittleEndianS32(header.version);
 
     I_Debugf("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
              version);
@@ -265,25 +265,25 @@ mdl_model_c *MDL_LoadModel(epi::File *f)
         return NULL; /* NOT REACHED */
     }
 
-    int num_frames = EPI_LE_S32(header.num_frames);
-    int num_tris   = EPI_LE_S32(header.num_tris);
-    int num_verts  = EPI_LE_S32(header.num_vertices);
-    int swidth     = EPI_LE_S32(header.skin_width);
-    int sheight    = EPI_LE_S32(header.skin_height);
+    int num_frames = AlignedLittleEndianS32(header.num_frames);
+    int num_tris   = AlignedLittleEndianS32(header.num_tris);
+    int num_verts  = AlignedLittleEndianS32(header.num_vertices);
+    int swidth     = AlignedLittleEndianS32(header.skin_width);
+    int sheight    = AlignedLittleEndianS32(header.skin_height);
     int num_points = num_tris * 3;
 
     mdl_model_c *md = new mdl_model_c(num_frames, num_points, num_tris, swidth, sheight);
 
     /* PARSE SKINS */
 
-    for (int i = 0; i < EPI_LE_S32(header.num_skins); i++)
+    for (int i = 0; i < AlignedLittleEndianS32(header.num_skins); i++)
     {
         int   group  = 0;
         uint8_t *pixels = new uint8_t[sheight * swidth];
 
         // Check for single vs. group skins; error if group skin found
         f->Read(&group, sizeof(int));
-        if (EPI_LE_S32(group))
+        if (AlignedLittleEndianS32(group))
         {
             I_Error("MDL_LoadModel: Group skins unsupported!\n");
             return nullptr; // Not reached
@@ -349,10 +349,10 @@ mdl_model_c *MDL_LoadModel(epi::File *f)
         for (int j = 0; j < 3; j++, point++)
         {
             raw_mdl_triBAMAngle raw_tri = tris[i];
-            point->vert_idx            = EPI_LE_S32(raw_tri.vertex[j]);
-            float s                    = (float)EPI_LE_S16(texcoords[point->vert_idx].s);
-            float t                    = (float)EPI_LE_S16(texcoords[point->vert_idx].t);
-            if (!EPI_LE_S32(raw_tri.facesfront) && EPI_LE_S32(texcoords[point->vert_idx].onseam))
+            point->vert_idx            = AlignedLittleEndianS32(raw_tri.vertex[j]);
+            float s                    = (float)AlignedLittleEndianS16(texcoords[point->vert_idx].s);
+            float t                    = (float)AlignedLittleEndianS16(texcoords[point->vert_idx].t);
+            if (!AlignedLittleEndianS32(raw_tri.facesfront) && AlignedLittleEndianS32(texcoords[point->vert_idx].onseam))
                 s += (float)swidth * 0.5f;
             point->skin_s = (s + 0.5f) / (float)swidth;
             point->skin_t = (t + 0.5f) / (float)sheight;
@@ -371,12 +371,12 @@ mdl_model_c *MDL_LoadModel(epi::File *f)
     uint32_t raw_scale[3];
     uint32_t raw_translate[3];
 
-    raw_scale[0]     = EPI_LE_U32(header.scale_x);
-    raw_scale[1]     = EPI_LE_U32(header.scale_y);
-    raw_scale[2]     = EPI_LE_U32(header.scale_z);
-    raw_translate[0] = EPI_LE_U32(header.trans_x);
-    raw_translate[1] = EPI_LE_U32(header.trans_y);
-    raw_translate[2] = EPI_LE_U32(header.trans_z);
+    raw_scale[0]     = AlignedLittleEndianU32(header.scale_x);
+    raw_scale[1]     = AlignedLittleEndianU32(header.scale_y);
+    raw_scale[2]     = AlignedLittleEndianU32(header.scale_z);
+    raw_translate[0] = AlignedLittleEndianU32(header.trans_x);
+    raw_translate[1] = AlignedLittleEndianU32(header.trans_y);
+    raw_translate[2] = AlignedLittleEndianU32(header.trans_z);
 
     float *f_ptr = (float *)raw_scale;
     float  scale[3];

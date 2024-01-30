@@ -40,7 +40,6 @@ class File;
 // A Filesystem directory entry
 struct DirectoryEntry
 {
-  public:
     std::string           name;
     size_t                size   = 0;
     bool                  is_dir = false;

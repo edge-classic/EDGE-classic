@@ -19,30 +19,40 @@
 #ifndef __EPI_ENDIAN_H__
 #define __EPI_ENDIAN_H__
 
-// the two types of endianness
-#define EPI_LIL_ENDIAN 1234
-#define EPI_BIG_ENDIAN 4321
+enum Endianness
+{
+    kLittleEndian,
+    kBigEndian
+};
 
-#if defined(__LITTLE_ENDIAN__) || defined(__i386__) || defined(__ia64__) || defined(WIN32) || defined(__alpha__) ||    \
-    defined(__alpha) || defined(__arm__) || (defined(__mips__) && defined(__MIPSEL__)) || defined(__SYMBIAN32__) ||    \
-    defined(__x86_64__) || defined(__arm64__) || defined(__aarch64__)
-#define EPI_BYTEORDER EPI_LIL_ENDIAN
-#else
-#define EPI_BYTEORDER EPI_BIG_ENDIAN
-#endif
-
-// The macros used to swap values.  Try to use superfast macros on systems
-// that support them, otherwise use C++ inline functions.
+// Used to swap values.  Try to use superfast macros on systems
+// that support them, otherwise use regular C++ functions.
 #if defined(__GNUC__) || defined(__clang__)
-#define __Swap16 __builtin_bswap16
-#define __Swap32 __builtin_bswap32
-#define __Swap64 __builtin_bswap64
-
+static inline uint16_t __Swap16(uint16_t n)
+{
+    return __builtin_bswap16(n);
+}
+static inline uint32_t __Swap32(uint32_t n)
+{
+    return __builtin_bswap32(n);
+}
+static inline uint64_t __Swap64(uint64_t n)
+{
+    return __builtin_bswap64(n);
+}
 #elif defined(_MSC_VER)
-#define __Swap16 _byteswap_ushort
-#define __Swap32 _byteswap_ulong
-#define __Swap64 _byteswap_uint64
-
+static inline uint16_t __Swap16(uint16_t n)
+{
+    return _byteswap_ushort(n);
+}
+static inline uint32_t __Swap32(uint32_t n)
+{
+    return _byteswap_ulong(n);
+}
+static inline uint64_t __Swap64(uint64_t n)
+{
+    return _byteswap_uint64(n);
+}
 #else
 static inline uint16_t __Swap16(uint16_t n)
 {
@@ -75,97 +85,155 @@ static inline uint64_t __Swap64(uint64_t n)
 }
 #endif
 
-// Byteswap item between the specified endianness to the native endianness
-#if EPI_BYTEORDER == EPI_LIL_ENDIAN
-#define EPI_LE_U16(x) ((uint16_t)(x))
-#define EPI_LE_U32(x) ((uint32_t)(x))
-#define EPI_LE_U64(x) ((u64_t)(x))
-#define EPI_BE_U16(x) __Swap16(x)
-#define EPI_BE_U32(x) __Swap32(x)
-#define EPI_BE_U64(x) __Swap64(x)
+#if defined(__LITTLE_ENDIAN__) || defined(__i386__) || defined(__ia64__) || defined(WIN32) || defined(__alpha__) ||    \
+    defined(__alpha) || defined(__arm__) || (defined(__mips__) && defined(__MIPSEL__)) || defined(__SYMBIAN32__) ||    \
+    defined(__x86_64__) || defined(__arm64__) || defined(__aarch64__)
+constexpr Endianness kByteOrder = kLittleEndian;
+
+inline uint16_t AlignedLittleEndianU16(const uint16_t x)
+{
+    return x;
+}
+inline int16_t AlignedLittleEndianS16(const uint16_t x)
+{
+    return (int16_t)x;
+}
+inline uint32_t AlignedLittleEndianU32(const uint32_t x)
+{
+    return x;
+}
+inline int32_t AlignedLittleEndianS32(const uint32_t x)
+{
+    return (int32_t)x;
+}
+inline uint64_t AlignedLittleEndianU64(const uint64_t x)
+{
+    return x;
+}
+inline int64_t AlignedLittleEndianS64(const uint64_t x)
+{
+    return (int64_t)x;
+}
+
+inline uint16_t AlignedBigEndianU16(const uint16_t x)
+{
+    return __Swap16(x);
+}
+inline int16_t AlignedBigEndianS16(const uint16_t x)
+{
+    return (int16_t)__Swap16(x);
+}
+inline uint32_t AlignedBigEndianU32(const uint32_t x)
+{
+    return __Swap32(x);
+}
+inline int32_t AlignedBigEndianS32(const uint32_t x)
+{
+    return (int32_t)__Swap32(x);
+}
+inline uint64_t AlignedBigEndianU64(const uint64_t x)
+{
+    return __Swap64(x);
+}
+inline int64_t AlignedBigEndianS64(const uint64_t x)
+{
+    return (int64_t)__Swap64(x);
+}
 #else
-#define EPI_LE_U16(x) __Swap16(x)
-#define EPI_LE_U32(x) __Swap32(x)
-#define EPI_LE_U64(x) __Swap64(x)
-#define EPI_BE_U16(x) ((uint16_t)(x))
-#define EPI_BE_U32(x) ((uint32_t)(x))
-#define EPI_BE_U64(x) ((u64_t)(x))
+constexpr Endianness kByteOrder = kBigEndian;
+
+inline uint16_t AlignedLittleEndianU16(const uint16_t x)
+{
+    return __Swap16(x);
+}
+inline int16_t AlignedLittleEndianS16(const uint16_t x)
+{
+    return (int16_t)__Swap16(x);
+}
+inline uint32_t AlignedLittleEndianU32(const uint32_t x)
+{
+    return __Swap32(x);
+}
+inline int32_t AlignedLittleEndianS32(const uint32_t x)
+{
+    return (int32_t)__Swap32(x);
+}
+inline uint64_t AlignedLittleEndianU64(const uint64_t x)
+{
+    return __Swap64(x);
+}
+inline int64_t AlignedLittleEndianS64(const uint64_t x)
+{
+    return (int64_t)__Swap64(x);
+}
+
+inline uint16_t AlignedBigEndianU16(const uint16_t x)
+{
+    return x;
+}
+inline int16_t AlignedBigEndianS16(const uint16_t x)
+{
+    return (int16_t)x;
+}
+inline uint32_t AlignedBigEndianU32(const uint32_t x)
+{
+    return x;
+}
+inline int32_t AlignedBigEndianS32(const uint32_t x)
+{
+    return (int32_t)x;
+}
+inline uint64_t AlignedBigEndianU64(const uint64_t x)
+{
+    return x;
+}
+inline int64_t AlignedBigEndianS64(const uint64_t x)
+{
+    return (int64_t)x;
+}
 #endif
 
 namespace epi
 {
-class endian_swapper_c
-{
-  public:
-    static uint16_t Swap16(uint16_t x);
-    static uint32_t Swap32(uint32_t x);
-};
-
-// Swap 16bit, that is, MSB and LSB byte.
-inline uint16_t endian_swapper_c::Swap16(uint16_t x)
-{
-    // No masking with 0xFF should be necessary.
-    return (x >> 8) | (x << 8);
-}
-
-// Swapping 32bit.
-inline uint32_t endian_swapper_c::Swap32(uint32_t x)
-{
-    return (x >> 24) | ((x >> 8) & 0xff00) | ((x << 8) & 0xff0000) | (x << 24);
-}
 
 // Get LE/BE values from pointer regardless of buffer alignment
-inline uint16_t GetU16LE(const uint8_t *p)
+inline uint16_t UnalignedLittleEndianU16(const uint8_t *p)
 {
-    return EPI_LE_U16(p[1] << 8 | p[0]);
+    return AlignedLittleEndianU16(p[1] << 8 | p[0]);
 }
 
-inline int16_t GetS16LE(const uint8_t *p)
+inline int16_t UnalignedLittleEndianS16(const uint8_t *p)
 {
-    return (int16_t)GetU16LE(p);
+    return (int16_t)UnalignedLittleEndianU16(p);
+}
+inline uint32_t UnalignedLittleEndianU32(const uint8_t *p)
+{
+    return AlignedLittleEndianU32(p[3] << 24 | p[2] << 16 | p[1] << 8 | p[0]);
+}
+inline int32_t UnalignedLittleEndianS32(const uint8_t *p)
+{
+    return (int32_t)UnalignedLittleEndianU32(p);
 }
 
-inline uint32_t GetU32LE(const uint8_t *p)
+inline uint16_t UnalignedBigEndianU16(const uint8_t *p)
 {
-    return EPI_LE_U32(p[3] << 24 | p[2] << 16 | p[1] << 8 | p[0]);
+    return AlignedBigEndianU16(p[0] << 8 | p[1]);
 }
 
-inline int32_t GetS32LE(const uint8_t *p)
+inline int16_t GetUnalignedS16BE(const uint8_t *p)
 {
-    return (int32_t)GetU32LE(p);
+    return (int16_t)UnalignedBigEndianU16(p);
 }
-
-inline uint16_t GetU16BE(const uint8_t *p)
+inline uint32_t UnalignedBigEndianU32(const uint8_t *p)
 {
-    return EPI_BE_U16(p[0] << 8 | p[1]);
+    return AlignedBigEndianU32(p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3]);
 }
-
-inline int16_t GetS16BE(const uint8_t *p)
+inline int32_t UnalignedBigEndianS32(const uint8_t *p)
 {
-    return (int16_t)GetU16BE(p);
-}
-
-inline uint32_t GetU32BE(const uint8_t *p)
-{
-    return EPI_BE_U32(p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3]);
-}
-
-inline int32_t GetS32BE(const uint8_t *p)
-{
-    return (int32_t)GetU32BE(p);
+    return (int32_t)UnalignedBigEndianU32(p);
 }
 
 } // namespace epi
-
-
-// signed versions of the above
-#define EPI_LE_S16(x) ((int16_t)EPI_LE_U16((uint16_t)(x)))
-#define EPI_LE_S32(x) ((int32_t)EPI_LE_U32((uint32_t)(x)))
-#define EPI_LE_S64(x) ((s64_t)EPI_LE_U64((u64_t)(x)))
-
-#define EPI_BE_S16(x) ((int16_t)EPI_BE_U16((uint16_t)(x)))
-#define EPI_BE_S32(x) ((int32_t)EPI_BE_U32((uint32_t)(x)))
-#define EPI_BE_S64(x) ((s64_t)EPI_BE_U64((u64_t)(x)))
 
 #endif /* __EPI_ENDIAN_H__ */
 

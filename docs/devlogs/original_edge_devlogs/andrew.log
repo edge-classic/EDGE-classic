@@ -2999,7 +2999,7 @@ Maxim Stepin) into the EPI.  Updated the code to directly
 handle palettised images (removes the unnecessarily loss of
 precision that the intermediate RGB-16 table caused, not to
 mention using less memory).  Made it handle transparent
-pixels (based on Jaakko Keränen's Doomsday modification),
+pixels (based on Jaakko Kerï¿½nen's Doomsday modification),
 and improved the YUV calculation.
 
 2005/05/05:
@@ -4147,7 +4147,7 @@ Improved the "DOORS" wipe (split vertical quads into 5 pieces).
 2004/10/19:
 
 Replaced old m_swap endianness handling (SHORT and LONG macros) with
-the new EPI versions EPI_LE_S16, EPI_LE_U32, and so forth.
+the new EPI versions AlignedLittleEndianS16, AlignedLittleEndianU32, and so forth.
 
 Wrote EPI assertion code (epiassert.cpp/h).
 
@@ -9882,7 +9882,7 @@ tend to start paging on Win32.  This must have been it.
 OK, reworked GL texture conversion code to (a) apply gamma, and (b)
 shrink textures that are larger than MAX_TEXTURE_SIZE.
 
-Noticed a nice idea in Jaakko Keränen's JHexen code: use translucent
+Noticed a nice idea in Jaakko Kerï¿½nen's JHexen code: use translucent
 quads covering the screen to simulate palette and/or colourmap
 effects.  Will copy that technique in EDGE :).  Including for
 invulnerability, seeing that TexEnv(GL_BLEND) is not generally

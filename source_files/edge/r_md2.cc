@@ -319,7 +319,7 @@ md2_model_c *MD2_LoadModel(epi::File *f)
     /* read header */
     f->Read(&header, sizeof(raw_md2_header_t));
 
-    int version = EPI_LE_S32(header.version);
+    int version = AlignedLittleEndianS32(header.version);
 
     I_Debugf("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
              version);
@@ -336,45 +336,45 @@ md2_model_c *MD2_LoadModel(epi::File *f)
         return NULL; /* NOT REACHED */
     }
 
-    int num_frames = EPI_LE_S32(header.num_frames);
-    int num_tris   = EPI_LE_S32(header.num_tris);
-    int num_sts    = EPI_LE_S32(header.num_st);
+    int num_frames = AlignedLittleEndianS32(header.num_frames);
+    int num_tris   = AlignedLittleEndianS32(header.num_tris);
+    int num_sts    = AlignedLittleEndianS32(header.num_st);
     int num_points = num_tris * 3;
 
     /* PARSE TRIANGLES */
 
     raw_md2_triangle_t *md2_tris = new raw_md2_triangle_t[num_tris];
 
-    f->Seek(EPI_LE_S32(header.ofs_tris), epi::File::kSeekpointStart);
+    f->Seek(AlignedLittleEndianS32(header.ofs_tris), epi::File::kSeekpointStart);
     f->Read(md2_tris, num_tris * sizeof(raw_md2_triangle_t));
 
     for (int tri = 0; tri < num_tris; tri++)
     {
-        md2_tris[tri].index_xyz[0] = EPI_LE_U16(md2_tris[tri].index_xyz[0]);
-        md2_tris[tri].index_xyz[1] = EPI_LE_U16(md2_tris[tri].index_xyz[1]);
-        md2_tris[tri].index_xyz[2] = EPI_LE_U16(md2_tris[tri].index_xyz[2]);
-        md2_tris[tri].index_st[0]  = EPI_LE_U16(md2_tris[tri].index_st[0]);
-        md2_tris[tri].index_st[1]  = EPI_LE_U16(md2_tris[tri].index_st[1]);
+        md2_tris[tri].index_xyz[0] = AlignedLittleEndianU16(md2_tris[tri].index_xyz[0]);
+        md2_tris[tri].index_xyz[1] = AlignedLittleEndianU16(md2_tris[tri].index_xyz[1]);
+        md2_tris[tri].index_xyz[2] = AlignedLittleEndianU16(md2_tris[tri].index_xyz[2]);
+        md2_tris[tri].index_st[0]  = AlignedLittleEndianU16(md2_tris[tri].index_st[0]);
+        md2_tris[tri].index_st[1]  = AlignedLittleEndianU16(md2_tris[tri].index_st[1]);
     }
 
     /* PARSE TEXCOORDS */
 
     raw_md2_texcoord_t *md2_sts = new raw_md2_texcoord_t[num_sts];
 
-    f->Seek(EPI_LE_S32(header.ofs_st), epi::File::kSeekpointStart);
+    f->Seek(AlignedLittleEndianS32(header.ofs_st), epi::File::kSeekpointStart);
     f->Read(md2_sts, num_sts * sizeof(raw_md2_texcoord_t));
 
     for (int st = 0; st < num_sts; st++)
     {
-        md2_sts[st].s = EPI_LE_U16(md2_sts[st].s);
-        md2_sts[st].t = EPI_LE_U16(md2_sts[st].t);
+        md2_sts[st].s = AlignedLittleEndianU16(md2_sts[st].s);
+        md2_sts[st].t = AlignedLittleEndianU16(md2_sts[st].t);
     }
 
     I_Debugf("  frames:%d  points:%d  triangles: %d\n", num_frames, num_tris * 3, num_tris);
 
     md2_model_c *md = new md2_model_c(num_frames, num_points, num_tris);
 
-    md->verts_per_frame = EPI_LE_S32(header.num_vertices);
+    md->verts_per_frame = AlignedLittleEndianS32(header.num_vertices);
 
     I_Debugf("  verts_per_frame:%d\n", md->verts_per_frame);
 
@@ -416,7 +416,7 @@ md2_model_c *MD2_LoadModel(epi::File *f)
 
     raw_md2_vertex_t *raw_verts = new raw_md2_vertex_t[md->verts_per_frame];
 
-    f->Seek(EPI_LE_S32(header.ofs_frames), epi::File::kSeekpointStart);
+    f->Seek(AlignedLittleEndianS32(header.ofs_frames), epi::File::kSeekpointStart);
 
     for (i = 0; i < num_frames; i++)
     {
@@ -426,8 +426,8 @@ md2_model_c *MD2_LoadModel(epi::File *f)
 
         for (int j = 0; j < 3; j++)
         {
-            raw_frame.scale[j]     = EPI_LE_U32(raw_frame.scale[j]);
-            raw_frame.translate[j] = EPI_LE_U32(raw_frame.translate[j]);
+            raw_frame.scale[j]     = AlignedLittleEndianU32(raw_frame.scale[j]);
+            raw_frame.translate[j] = AlignedLittleEndianU32(raw_frame.translate[j]);
         }
 
         float *f_ptr = (float *)raw_frame.scale;
@@ -610,7 +610,7 @@ md2_model_c *MD3_LoadModel(epi::File *f)
     /* read header */
     f->Read(&header, sizeof(raw_md3_header_t));
 
-    int version = EPI_LE_S32(header.version);
+    int version = AlignedLittleEndianS32(header.version);
 
     I_Debugf("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
              version);
@@ -627,12 +627,12 @@ md2_model_c *MD3_LoadModel(epi::File *f)
         return NULL; /* NOT REACHED */
     }
 
-    if (EPI_LE_S32(header.num_meshes) > 1)
+    if (AlignedLittleEndianS32(header.num_meshes) > 1)
         I_Warning("Ignoring extra meshes in MD3 model.\n");
 
     /* LOAD MESH #1 */
 
-    int mesh_base = EPI_LE_S32(header.ofs_meshes);
+    int mesh_base = AlignedLittleEndianS32(header.ofs_meshes);
 
     f->Seek(mesh_base, epi::File::kSeekpointStart);
 
@@ -640,9 +640,9 @@ md2_model_c *MD3_LoadModel(epi::File *f)
 
     f->Read(&mesh, sizeof(raw_md3_mesh_t));
 
-    int num_frames = EPI_LE_S32(mesh.num_frames);
-    int num_verts  = EPI_LE_S32(mesh.num_verts);
-    int num_tris   = EPI_LE_S32(mesh.num_tris);
+    int num_frames = AlignedLittleEndianS32(mesh.num_frames);
+    int num_verts  = AlignedLittleEndianS32(mesh.num_verts);
+    int num_tris   = AlignedLittleEndianS32(mesh.num_tris);
 
     I_Debugf("  frames:%d  verts:%d  triangles: %d\n", num_frames, num_verts, num_tris);
 
@@ -654,7 +654,7 @@ md2_model_c *MD3_LoadModel(epi::File *f)
 
     md2_point_c *temp_TEXC = new md2_point_c[num_verts];
 
-    f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_texcoords), epi::File::kSeekpointStart);
+    f->Seek(mesh_base + AlignedLittleEndianS32(mesh.ofs_texcoords), epi::File::kSeekpointStart);
 
     for (i = 0; i < num_verts; i++)
     {
@@ -662,8 +662,8 @@ md2_model_c *MD3_LoadModel(epi::File *f)
 
         f->Read(&texc, sizeof(raw_md3_texcoord_t));
 
-        texc.s = EPI_LE_U32(texc.s);
-        texc.t = EPI_LE_U32(texc.t);
+        texc.s = AlignedLittleEndianU32(texc.s);
+        texc.t = AlignedLittleEndianU32(texc.t);
 
         ff                  = (float *)&texc.s;
         temp_TEXC[i].skin_s = *ff;
@@ -675,7 +675,7 @@ md2_model_c *MD3_LoadModel(epi::File *f)
 
     /* PARSE TRIANGLES */
 
-    f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_tris), epi::File::kSeekpointStart);
+    f->Seek(mesh_base + AlignedLittleEndianS32(mesh.ofs_tris), epi::File::kSeekpointStart);
 
     for (i = 0; i < num_tris; i++)
     {
@@ -683,9 +683,9 @@ md2_model_c *MD3_LoadModel(epi::File *f)
 
         f->Read(&tri, sizeof(raw_md3_triangle_t));
 
-        int a = EPI_LE_U32(tri.index_xyz[0]);
-        int b = EPI_LE_U32(tri.index_xyz[1]);
-        int c = EPI_LE_U32(tri.index_xyz[2]);
+        int a = AlignedLittleEndianU32(tri.index_xyz[0]);
+        int b = AlignedLittleEndianU32(tri.index_xyz[1]);
+        int c = AlignedLittleEndianU32(tri.index_xyz[2]);
 
         SYS_ASSERT(a < num_verts);
         SYS_ASSERT(b < num_verts);
@@ -704,7 +704,7 @@ md2_model_c *MD3_LoadModel(epi::File *f)
 
     /* PARSE VERTEX FRAMES */
 
-    f->Seek(mesh_base + EPI_LE_S32(mesh.ofs_verts), epi::File::kSeekpointStart);
+    f->Seek(mesh_base + AlignedLittleEndianS32(mesh.ofs_verts), epi::File::kSeekpointStart);
 
     uint8_t which_normals[MD_NUM_NORMALS];
 
@@ -722,9 +722,9 @@ md2_model_c *MD3_LoadModel(epi::File *f)
 
             f->Read(&vert, sizeof(raw_md3_vertex_t));
 
-            good_V->x = EPI_LE_S16(vert.x) / 64.0;
-            good_V->y = EPI_LE_S16(vert.y) / 64.0;
-            good_V->z = EPI_LE_S16(vert.z) / 64.0;
+            good_V->x = AlignedLittleEndianS16(vert.x) / 64.0;
+            good_V->y = AlignedLittleEndianS16(vert.y) / 64.0;
+            good_V->z = AlignedLittleEndianS16(vert.z) / 64.0;
 
             good_V->normal_idx = md3_normal_to_md2[vert.pitch >> 1][vert.yaw >> 1];
 
@@ -736,7 +736,7 @@ md2_model_c *MD3_LoadModel(epi::File *f)
 
     /* PARSE FRAME INFO */
 
-    f->Seek(EPI_LE_S32(header.ofs_frames), epi::File::kSeekpointStart);
+    f->Seek(AlignedLittleEndianS32(header.ofs_frames), epi::File::kSeekpointStart);
 
     for (i = 0; i < num_frames; i++)
     {

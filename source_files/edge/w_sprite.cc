@@ -457,8 +457,8 @@ static void FillSpriteFramesUser()
                 delete offset_check;
 
                 const patch_t *pat   = (patch_t *)header;
-                change_img->offset_x = EPI_LE_S16(pat->leftoffset);
-                change_img->offset_y = EPI_LE_S16(pat->topoffset);
+                change_img->offset_x = AlignedLittleEndianS16(pat->leftoffset);
+                change_img->offset_y = AlignedLittleEndianS16(pat->topoffset);
                 // adjust sprite offsets so that (0,0) is normal
                 if (sprite_map[S]->HasWeapon())
                 {

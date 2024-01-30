@@ -243,7 +243,7 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
 
 bool oggplayer_c::StreamIntoBuffer(sound_data_c *buf)
 {
-    int ogg_endian = (EPI_BYTEORDER == EPI_LIL_ENDIAN) ? 0 : 1;
+    int ogg_endian = (kByteOrder == kLittleEndian) ? 0 : 1;
 
     int samples = 0;
 
@@ -476,7 +476,7 @@ bool S_LoadOGGSound(sound_data_c *buf, const uint8_t *data, int length)
     }
 
     bool is_stereo  = (vorbis_inf->channels > 1);
-    int  ogg_endian = (EPI_BYTEORDER == EPI_LIL_ENDIAN) ? 0 : 1;
+    int  ogg_endian = (kByteOrder == kLittleEndian) ? 0 : 1;
 
     buf->freq = vorbis_inf->rate;
 

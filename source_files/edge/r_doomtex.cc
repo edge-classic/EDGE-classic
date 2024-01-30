@@ -260,7 +260,7 @@ static image_data_c *ReadTextureAsEpiBlock(image_c *rim)
 
         int x1 = patch->originx;
         int y1 = patch->originy;
-        int x2 = x1 + EPI_LE_S16(realpatch->width);
+        int x2 = x1 + AlignedLittleEndianS16(realpatch->width);
 
         int x = MAX(0, x1);
 
@@ -268,7 +268,7 @@ static image_data_c *ReadTextureAsEpiBlock(image_c *rim)
 
         for (; x < x2; x++)
         {
-            int offset = EPI_LE_S32(realpatch->columnofs[x - x1]);
+            int offset = AlignedLittleEndianS32(realpatch->columnofs[x - x1]);
 
             if (offset < 0 || offset >= realsize)
                 I_Error("Bad image offset 0x%08x in image [%s]\n", offset, rim->name.c_str());
@@ -368,8 +368,8 @@ static image_data_c *ReadPatchAsEpiBlock(image_c *rim)
     }
 
     SYS_ASSERT(realpatch);
-    SYS_ASSERT(rim->actual_w == EPI_LE_S16(realpatch->width));
-    SYS_ASSERT(rim->actual_h == EPI_LE_S16(realpatch->height));
+    SYS_ASSERT(rim->actual_w == AlignedLittleEndianS16(realpatch->width));
+    SYS_ASSERT(rim->actual_h == AlignedLittleEndianS16(realpatch->height));
 
     // 2023.11.07 - These were previously left as total_w/h, which accounts
     // for power-of-two sizing and was messing up patch font atlas generation.
@@ -379,7 +379,7 @@ static image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 
     for (int x = 0; x < rim->actual_w; x++)
     {
-        int offset = EPI_LE_S32(realpatch->columnofs[x]);
+        int offset = AlignedLittleEndianS32(realpatch->columnofs[x]);
 
         if (offset < 0 || offset >= realsize)
             I_Error("Bad image offset 0x%08x in image [%s]\n", offset, rim->name.c_str());

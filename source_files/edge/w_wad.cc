@@ -860,8 +860,8 @@ int W_CheckForUniqueLumps(epi::File *file)
     // WAD file
     // TODO: handle Read failure
     file->Read(&header, sizeof(raw_wad_header_t));
-    header.num_entries        = EPI_LE_S32(header.num_entries);
-    header.dir_start          = EPI_LE_S32(header.dir_start);
+    header.num_entries        = AlignedLittleEndianS32(header.num_entries);
+    header.dir_start          = AlignedLittleEndianS32(header.dir_start);
     length                    = header.num_entries * sizeof(raw_wad_entry_t);
     raw_wad_entry_t *raw_info = new raw_wad_entry_t[header.num_entries];
     file->Seek(header.dir_start, epi::File::kSeekpointStart);
@@ -1138,8 +1138,8 @@ void ProcessWad(data_file_c *df, size_t file_index)
         }
     }
 
-    header.num_entries = EPI_LE_S32(header.num_entries);
-    header.dir_start   = EPI_LE_S32(header.dir_start);
+    header.num_entries = AlignedLittleEndianS32(header.num_entries);
+    header.dir_start   = AlignedLittleEndianS32(header.dir_start);
 
     size_t length = header.num_entries * sizeof(raw_wad_entry_t);
 
@@ -1160,7 +1160,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
              df->kind == FLKIND_PWad || df->kind == FLKIND_PackWAD || df->kind == FLKIND_IPK ||
              df->kind == FLKIND_IFolder);
 
-        AddLump(df, entry.name, EPI_LE_S32(entry.pos), EPI_LE_S32(entry.size), (int)file_index, allow_ddf);
+        AddLump(df, entry.name, AlignedLittleEndianS32(entry.pos), AlignedLittleEndianS32(entry.size), (int)file_index, allow_ddf);
 
         // this will be uppercase
         const char *level_name = lumpinfo[startlump + i].name;

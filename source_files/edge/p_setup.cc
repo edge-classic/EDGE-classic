@@ -309,8 +309,8 @@ static void LoadVertexes(int lump)
     // internal representation as fixed.
     for (i = 0; i < numvertexes; i++, li++, ml++)
     {
-        li->X  = EPI_LE_S16(ml->x);
-        li->Y  = EPI_LE_S16(ml->y);
+        li->X  = AlignedLittleEndianS16(ml->x);
+        li->Y  = AlignedLittleEndianS16(ml->y);
         li->Z = -40000.0f;
         li->W = 40000.0f;
     }
@@ -419,8 +419,8 @@ static void LoadSectors(int lump)
     {
         char buffer[10];
 
-        ss->f_h = EPI_LE_S16(ms->floor_h);
-        ss->c_h = EPI_LE_S16(ms->ceil_h);
+        ss->f_h = AlignedLittleEndianS16(ms->floor_h);
+        ss->c_h = AlignedLittleEndianS16(ms->ceil_h);
 
         // return to wolfenstein?
         if (m_goobers.d)
@@ -467,11 +467,11 @@ static void LoadSectors(int lump)
         }
 
         // convert negative tags to zero
-        ss->tag = MAX(0, EPI_LE_S16(ms->tag));
+        ss->tag = MAX(0, AlignedLittleEndianS16(ms->tag));
 
-        ss->props.lightlevel = EPI_LE_S16(ms->light);
+        ss->props.lightlevel = AlignedLittleEndianS16(ms->light);
 
-        int type = EPI_LE_S16(ms->special);
+        int type = AlignedLittleEndianS16(ms->special);
 
         ss->props.type    = MAX(0, type);
         ss->props.special = P_LookupSectorType(ss->props.type);
@@ -712,7 +712,7 @@ static void LoadThings(int lump)
 
     for (i = 0; i < mapthing_NUM; i++)
     {
-        options = EPI_LE_U16(mt[i].options);
+        options = AlignedLittleEndianU16(mt[i].options);
 
         if (options & MTF_RESERVED)
             limit_options = true;
@@ -720,11 +720,11 @@ static void LoadThings(int lump)
 
     for (i = 0; i < mapthing_NUM; i++, mt++)
     {
-        x       = (float)EPI_LE_S16(mt->x);
-        y       = (float)EPI_LE_S16(mt->y);
-        angle   = epi::BAMFromDegrees((float)EPI_LE_S16(mt->angle));
-        typenum = EPI_LE_U16(mt->type);
-        options = EPI_LE_U16(mt->options);
+        x       = (float)AlignedLittleEndianS16(mt->x);
+        y       = (float)AlignedLittleEndianS16(mt->y);
+        angle   = epi::BAMFromDegrees((float)AlignedLittleEndianS16(mt->angle));
+        typenum = AlignedLittleEndianU16(mt->type);
+        options = AlignedLittleEndianU16(mt->options);
 
         if (limit_options)
             options &= 0x001F;
@@ -836,14 +836,14 @@ static void LoadHexenThings(int lump)
     mt = (const raw_hexen_thing_t *)data;
     for (i = 0; i < mapthing_NUM; i++, mt++)
     {
-        x     = (float)EPI_LE_S16(mt->x);
-        y     = (float)EPI_LE_S16(mt->y);
-        z     = (float)EPI_LE_S16(mt->height);
-        angle = epi::BAMFromDegrees((float)EPI_LE_S16(mt->angle));
+        x     = (float)AlignedLittleEndianS16(mt->x);
+        y     = (float)AlignedLittleEndianS16(mt->y);
+        z     = (float)AlignedLittleEndianS16(mt->height);
+        angle = epi::BAMFromDegrees((float)AlignedLittleEndianS16(mt->angle));
 
-        tag     = EPI_LE_S16(mt->tid);
-        typenum = EPI_LE_U16(mt->type);
-        options = EPI_LE_U16(mt->options) & 0x000F;
+        tag     = AlignedLittleEndianS16(mt->tid);
+        typenum = AlignedLittleEndianU16(mt->type);
+        options = AlignedLittleEndianU16(mt->options) & 0x000F;
 
         objtype = mobjtypes.Lookup(typenum);
 
@@ -966,17 +966,17 @@ static void LoadLineDefs(int lump)
 
     for (int i = 0; i < numlines; i++, mld++, ld++)
     {
-        ld->flags = EPI_LE_U16(mld->flags);
-        ld->tag   = MAX(0, EPI_LE_S16(mld->tag));
-        ld->v1    = &vertexes[EPI_LE_U16(mld->start)];
-        ld->v2    = &vertexes[EPI_LE_U16(mld->end)];
+        ld->flags = AlignedLittleEndianU16(mld->flags);
+        ld->tag   = MAX(0, AlignedLittleEndianS16(mld->tag));
+        ld->v1    = &vertexes[AlignedLittleEndianU16(mld->start)];
+        ld->v2    = &vertexes[AlignedLittleEndianU16(mld->end)];
 
         // Check for BoomClear flag bit and clear applicable specials
         // (PassThru may still be intentionally readded further down)
         if (ld->flags & MLF_ClearBoom)
             ld->flags &= ~(MLF_PassThru | MLF_BlockGrounded | MLF_BlockPlayers);
 
-        ld->special = P_LookupLineType(MAX(0, EPI_LE_S16(mld->special)));
+        ld->special = P_LookupLineType(MAX(0, AlignedLittleEndianS16(mld->special)));
 
         if (ld->special && ld->special->type == line_walkable)
             ld->flags |= MLF_PassThru;
@@ -996,8 +996,8 @@ static void LoadLineDefs(int lump)
         if (ld->special && ld->special == linetypes.Lookup(0)) // Add passthru to unknown/templated
             ld->flags |= MLF_PassThru;
 
-        int side0 = EPI_LE_U16(mld->side_R);
-        int side1 = EPI_LE_U16(mld->side_L);
+        int side0 = AlignedLittleEndianU16(mld->side_R);
+        int side1 = AlignedLittleEndianU16(mld->side_L);
 
         ComputeLinedefData(ld, side0, side1);
 
@@ -1046,16 +1046,16 @@ static void LoadHexenLineDefs(int lump)
 
     for (int i = 0; i < numlines; i++, mld++, ld++)
     {
-        ld->flags = EPI_LE_U16(mld->flags) & 0x00FF;
+        ld->flags = AlignedLittleEndianU16(mld->flags) & 0x00FF;
         ld->tag   = 0;
-        ld->v1    = &vertexes[EPI_LE_U16(mld->start)];
-        ld->v2    = &vertexes[EPI_LE_U16(mld->end)];
+        ld->v1    = &vertexes[AlignedLittleEndianU16(mld->start)];
+        ld->v2    = &vertexes[AlignedLittleEndianU16(mld->end)];
 
         // this ignores the activation bits -- oh well
         ld->special = (mld->args[0] == 0) ? NULL : linetypes.Lookup(1000 + mld->args[0]);
 
-        int side0 = EPI_LE_U16(mld->side_R);
-        int side1 = EPI_LE_U16(mld->side_L);
+        int side0 = AlignedLittleEndianU16(mld->side_R);
+        int side1 = AlignedLittleEndianU16(mld->side_L);
 
         ComputeLinedefData(ld, side0, side1);
     }
@@ -1238,7 +1238,7 @@ static void LoadXGL3Nodes(int lumpnum)
         td = &xgldata[4];
 
     // after signature, 1st u32 is number of original vertexes - should be <= numvertexes
-    int oVerts = epi::GetU32LE(td);
+    int oVerts = epi::UnalignedLittleEndianU32(td);
     td += 4;
     if (oVerts > numvertexes)
     {
@@ -1247,7 +1247,7 @@ static void LoadXGL3Nodes(int lumpnum)
     }
 
     // 2nd u32 is the number of extra vertexes added by ajbsp
-    int nVerts = epi::GetU32LE(td);
+    int nVerts = epi::UnalignedLittleEndianU32(td);
     td += 4;
     I_Debugf("LoadXGL3Nodes: Orig Verts = %d, New Verts = %d, Map Verts = %d\n", oVerts, nVerts, numvertexes);
 
@@ -1259,16 +1259,16 @@ static void LoadXGL3Nodes(int lumpnum)
     for (i = 0; i < nVerts; i++, vv++)
     {
         // convert signed 16.16 fixed point to float
-        vv->X = (float)epi::GetS32LE(td) / 65536.0f;
+        vv->X = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
-        vv->Y = (float)epi::GetS32LE(td) / 65536.0f;
+        vv->Y = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
         vv->Z = -40000.0f;
         vv->W = 40000.0f;
     }
 
     // new vertexes is followed by the subsectors
-    numsubsectors = epi::GetS32LE(td);
+    numsubsectors = epi::UnalignedLittleEndianS32(td);
     td += 4;
     if (numsubsectors <= 0)
     {
@@ -1284,14 +1284,14 @@ static void LoadXGL3Nodes(int lumpnum)
     int  xglSegs = 0;
     for (i = 0; i < numsubsectors; i++)
     {
-        int countsegs = epi::GetS32LE(td);
+        int countsegs = epi::UnalignedLittleEndianS32(td);
         td += 4;
         ss_temp[i] = countsegs;
         xglSegs += countsegs;
     }
 
     // subsectors are followed by the segs
-    numsegs = epi::GetS32LE(td);
+    numsegs = epi::UnalignedLittleEndianS32(td);
     td += 4;
     if (numsegs != xglSegs)
     {
@@ -1309,11 +1309,11 @@ static void LoadXGL3Nodes(int lumpnum)
         unsigned int v1num;
         int          slinedef, partner, side;
 
-        v1num = epi::GetU32LE(td);
+        v1num = epi::UnalignedLittleEndianU32(td);
         td += 4;
-        partner = epi::GetS32LE(td);
+        partner = epi::UnalignedLittleEndianS32(td);
         td += 4;
-        slinedef = epi::GetS32LE(td);
+        slinedef = epi::UnalignedLittleEndianS32(td);
         td += 4;
         side = (int)(*td);
         td += 1;
@@ -1397,7 +1397,7 @@ static void LoadXGL3Nodes(int lumpnum)
     I_Debugf("LoadXGL3Nodes: Read GL nodes\n");
     // finally, read the nodes
     // NOTE: no nodes is okay (a basic single sector map). -AJA-
-    numnodes = epi::GetU32LE(td);
+    numnodes = epi::UnalignedLittleEndianU32(td);
     td += 4;
     I_Debugf("LoadXGL3Nodes: Num nodes = %d\n", numnodes);
 
@@ -1407,13 +1407,13 @@ static void LoadXGL3Nodes(int lumpnum)
 
     for (i = 0; i < numnodes; i++, nd++)
     {
-        nd->div.x = (float)epi::GetS32LE(td) / 65536.0f;
+        nd->div.x = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
-        nd->div.y = (float)epi::GetS32LE(td) / 65536.0f;
+        nd->div.y = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
-        nd->div.dx = (float)epi::GetS32LE(td) / 65536.0f;
+        nd->div.dx = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
-        nd->div.dy = (float)epi::GetS32LE(td) / 65536.0f;
+        nd->div.dy = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
 
         nd->div_len = R_PointToDist(0, 0, nd->div.dx, nd->div.dy);
@@ -1421,13 +1421,13 @@ static void LoadXGL3Nodes(int lumpnum)
         for (int j = 0; j < 2; j++)
             for (int k = 0; k < 4; k++)
             {
-                nd->bbox[j][k] = (float)epi::GetS16LE(td);
+                nd->bbox[j][k] = (float)epi::UnalignedLittleEndianS16(td);
                 td += 2;
             }
 
         for (int j = 0; j < 2; j++)
         {
-            nd->children[j] = epi::GetU32LE(td);
+            nd->children[j] = epi::UnalignedLittleEndianU32(td);
             td += 4;
 
             // update bbox pointers in subsector
@@ -2488,11 +2488,11 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
     char middle_tex[10];
     char lower_tex[10];
 
-    int sec_num = EPI_LE_S16(msd->sector);
+    int sec_num = AlignedLittleEndianS16(msd->sector);
 
     sd->top.translucency = VISIBLE;
-    sd->top.offset.X     = EPI_LE_S16(msd->x_offset);
-    sd->top.offset.Y     = EPI_LE_S16(msd->y_offset);
+    sd->top.offset.X     = AlignedLittleEndianS16(msd->x_offset);
+    sd->top.offset.Y     = AlignedLittleEndianS16(msd->y_offset);
     sd->top.x_mat.X      = 1;
     sd->top.x_mat.Y      = 0;
     sd->top.y_mat.X      = 0;

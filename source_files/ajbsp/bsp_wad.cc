@@ -66,8 +66,8 @@ Lump_c::Lump_c(Wad_file *_par, const struct raw_wad_entry_s *entry) : parent(_pa
 
     name = StringDup(buffer);
 
-    l_start  = EPI_LE_U32(entry->pos);
-    l_length = EPI_LE_U32(entry->size);
+    l_start  = AlignedLittleEndianU32(entry->pos);
+    l_length = AlignedLittleEndianU32(entry->size);
 
 #if DEBUG_WAD
     I_Debugf("new lump '%s' @ %d len:%d\n", name, l_start, l_length);
@@ -85,8 +85,8 @@ void Lump_c::MakeEntry(struct raw_wad_entry_s *entry)
     memset(entry->name, 0, 8);
     memcpy(entry->name, name, strlen(name));
 
-    entry->pos  = EPI_LE_U32(l_start);
-    entry->size = EPI_LE_U32(l_length);
+    entry->pos  = AlignedLittleEndianU32(l_start);
+    entry->size = AlignedLittleEndianU32(l_length);
 }
 
 void Lump_c::Rename(const char *new_name)
@@ -584,8 +584,8 @@ void Wad_file::ReadDirectory()
 
     kind = header.ident[0];
 
-    dir_start = EPI_LE_S32(header.dir_start);
-    dir_count = EPI_LE_S32(header.num_entries);
+    dir_start = AlignedLittleEndianS32(header.dir_start);
+    dir_count = AlignedLittleEndianS32(header.num_entries);
 
     if (dir_count < 0 || dir_count > 32000)
         I_Error("AJBSP: Bad WAD header, too many entries (%d)\n", dir_count);
@@ -1240,8 +1240,8 @@ void Wad_file::WriteDirectory()
 
     memcpy(header.ident, (kind == 'I') ? "IWAD" : "PWAD", 4);
 
-    header.dir_start   = EPI_LE_U32(dir_start);
-    header.num_entries = EPI_LE_U32(dir_count);
+    header.dir_start   = AlignedLittleEndianU32(dir_start);
+    header.num_entries = AlignedLittleEndianU32(dir_count);
 
     if (fwrite(&header, sizeof(header), 1, fp) != 1)
         I_Error("AJBSP: Error writing WAD header.\n");

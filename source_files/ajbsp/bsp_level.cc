@@ -477,8 +477,8 @@ void GetVertices()
 
         vertex_t *vert = NewVertex();
 
-        vert->x = (double)EPI_LE_S16(raw.x);
-        vert->y = (double)EPI_LE_S16(raw.y);
+        vert->x = (double)AlignedLittleEndianS16(raw.x);
+        vert->y = (double)AlignedLittleEndianS16(raw.y);
     }
 
     num_old_vert = num_vertices;
@@ -544,9 +544,9 @@ void GetThings()
 
         thing_t *thing = NewThing();
 
-        thing->x    = EPI_LE_S16(raw.x);
-        thing->y    = EPI_LE_S16(raw.y);
-        thing->type = EPI_LE_U16(raw.type);
+        thing->x    = AlignedLittleEndianS16(raw.x);
+        thing->y    = AlignedLittleEndianS16(raw.y);
+        thing->type = AlignedLittleEndianU16(raw.type);
     }
 }
 
@@ -578,9 +578,9 @@ void GetThingsHexen()
 
         thing_t *thing = NewThing();
 
-        thing->x    = EPI_LE_S16(raw.x);
-        thing->y    = EPI_LE_S16(raw.y);
-        thing->type = EPI_LE_U16(raw.type);
+        thing->x    = AlignedLittleEndianS16(raw.x);
+        thing->y    = AlignedLittleEndianS16(raw.y);
+        thing->type = AlignedLittleEndianU16(raw.type);
     }
 }
 
@@ -612,7 +612,7 @@ void GetSidedefs()
 
         sidedef_t *side = NewSidedef();
 
-        side->sector = SafeLookupSector(EPI_LE_S16(raw.sector));
+        side->sector = SafeLookupSector(AlignedLittleEndianS16(raw.sector));
     }
 }
 
@@ -644,8 +644,8 @@ void GetLinedefs()
 
         linedef_t *line;
 
-        vertex_t *start = SafeLookupVertex(EPI_LE_U16(raw.start));
-        vertex_t *end   = SafeLookupVertex(EPI_LE_U16(raw.end));
+        vertex_t *start = SafeLookupVertex(AlignedLittleEndianU16(raw.start));
+        vertex_t *end   = SafeLookupVertex(AlignedLittleEndianU16(raw.end));
 
         start->is_used = true;
         end->is_used   = true;
@@ -658,15 +658,15 @@ void GetLinedefs()
         // check for zero-length line
         line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) && (fabs(start->y - end->y) < DIST_EPSILON);
 
-        line->type  = EPI_LE_U16(raw.type);
-        uint16_t flags = EPI_LE_U16(raw.flags);
-        int16_t tag   = EPI_LE_S16(raw.tag);
+        line->type  = AlignedLittleEndianU16(raw.type);
+        uint16_t flags = AlignedLittleEndianU16(raw.flags);
+        int16_t tag   = AlignedLittleEndianS16(raw.tag);
 
         line->two_sided   = (flags & MLF_TwoSided) != 0;
         line->is_precious = (tag >= 900 && tag < 1000); // Why is this the case? Need to investigate - Dasho
 
-        line->right = SafeLookupSidedef(EPI_LE_U16(raw.right));
-        line->left  = SafeLookupSidedef(EPI_LE_U16(raw.left));
+        line->right = SafeLookupSidedef(AlignedLittleEndianU16(raw.right));
+        line->left  = SafeLookupSidedef(AlignedLittleEndianU16(raw.left));
 
         if (line->right || line->left)
             num_real_lines++;
@@ -706,8 +706,8 @@ void GetLinedefsHexen()
 
         linedef_t *line;
 
-        vertex_t *start = SafeLookupVertex(EPI_LE_U16(raw.start));
-        vertex_t *end   = SafeLookupVertex(EPI_LE_U16(raw.end));
+        vertex_t *start = SafeLookupVertex(AlignedLittleEndianU16(raw.start));
+        vertex_t *end   = SafeLookupVertex(AlignedLittleEndianU16(raw.end));
 
         start->is_used = true;
         end->is_used   = true;
@@ -721,13 +721,13 @@ void GetLinedefsHexen()
         line->zero_len = (fabs(start->x - end->x) < DIST_EPSILON) && (fabs(start->y - end->y) < DIST_EPSILON);
 
         line->type  = (uint8_t)raw.type;
-        uint16_t flags = EPI_LE_U16(raw.flags);
+        uint16_t flags = AlignedLittleEndianU16(raw.flags);
 
         // -JL- Added missing twosided flag handling that caused a broken reject
         line->two_sided = (flags & MLF_TwoSided) != 0;
 
-        line->right = SafeLookupSidedef(EPI_LE_U16(raw.right));
-        line->left  = SafeLookupSidedef(EPI_LE_U16(raw.left));
+        line->right = SafeLookupSidedef(AlignedLittleEndianU16(raw.right));
+        line->left  = SafeLookupSidedef(AlignedLittleEndianU16(raw.left));
 
         if (line->right || line->left)
             num_real_lines++;
@@ -1062,8 +1062,8 @@ void PutVertices(const char *name, int do_gl)
             continue;
         }
 
-        raw.x = EPI_LE_S16(I_ROUND(vert->x));
-        raw.y = EPI_LE_S16(I_ROUND(vert->y));
+        raw.x = AlignedLittleEndianS16(I_ROUND(vert->x));
+        raw.y = AlignedLittleEndianS16(I_ROUND(vert->y));
 
         lump->Write(&raw, sizeof(raw));
 
@@ -1105,8 +1105,8 @@ void PutGLVertices(int do_v5)
         if (!vert->is_new)
             continue;
 
-        raw.x = EPI_LE_S32(I_ROUND(vert->x * 65536.0));
-        raw.y = EPI_LE_S32(I_ROUND(vert->y * 65536.0));
+        raw.x = AlignedLittleEndianS32(I_ROUND(vert->x * 65536.0));
+        raw.y = AlignedLittleEndianS32(I_ROUND(vert->y * 65536.0));
 
         lump->Write(&raw, sizeof(raw));
 
@@ -1156,20 +1156,20 @@ void PutSegs()
 
         const seg_t *seg = lev_segs[i];
 
-        raw.start   = EPI_LE_U16(VertexIndex16Bit(seg->start));
-        raw.end     = EPI_LE_U16(VertexIndex16Bit(seg->end));
-        raw.angle   = EPI_LE_U16(VanillaSegAngle(seg));
-        raw.linedef = EPI_LE_U16(seg->linedef->index);
-        raw.flip    = EPI_LE_U16(seg->side);
-        raw.dist    = EPI_LE_U16(VanillaSegDist(seg));
+        raw.start   = AlignedLittleEndianU16(VertexIndex16Bit(seg->start));
+        raw.end     = AlignedLittleEndianU16(VertexIndex16Bit(seg->end));
+        raw.angle   = AlignedLittleEndianU16(VanillaSegAngle(seg));
+        raw.linedef = AlignedLittleEndianU16(seg->linedef->index);
+        raw.flip    = AlignedLittleEndianU16(seg->side);
+        raw.dist    = AlignedLittleEndianU16(VanillaSegDist(seg));
 
         lump->Write(&raw, sizeof(raw));
 
 #if DEBUG_BSP
         I_Debugf("PUT SEG: %04X  Vert %04X->%04X  Line %04X %s  "
                         "Angle %04X  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-                        seg->index, EPI_LE_U16(raw.start), EPI_LE_U16(raw.end), EPI_LE_U16(raw.linedef), seg->side ? "L" : "R",
-                        EPI_LE_U16(raw.angle), seg->start->x, seg->start->y, seg->end->x, seg->end->y);
+                        seg->index, AlignedLittleEndianU16(raw.start), AlignedLittleEndianU16(raw.end), AlignedLittleEndianU16(raw.linedef), seg->side ? "L" : "R",
+                        AlignedLittleEndianU16(raw.angle), seg->start->x, seg->start->y, seg->end->x, seg->end->y);
 #endif
     }
 
@@ -1198,26 +1198,26 @@ void PutGLSegs_V2()
 
         const seg_t *seg = lev_segs[i];
 
-        raw.start = EPI_LE_U16(VertexIndex16Bit(seg->start));
-        raw.end   = EPI_LE_U16(VertexIndex16Bit(seg->end));
-        raw.side  = EPI_LE_U16(seg->side);
+        raw.start = AlignedLittleEndianU16(VertexIndex16Bit(seg->start));
+        raw.end   = AlignedLittleEndianU16(VertexIndex16Bit(seg->end));
+        raw.side  = AlignedLittleEndianU16(seg->side);
 
         if (seg->linedef != NULL)
-            raw.linedef = EPI_LE_U16(seg->linedef->index);
+            raw.linedef = AlignedLittleEndianU16(seg->linedef->index);
         else
-            raw.linedef = EPI_LE_U16(0xFFFF);
+            raw.linedef = AlignedLittleEndianU16(0xFFFF);
 
         if (seg->partner != NULL)
-            raw.partner = EPI_LE_U16(seg->partner->index);
+            raw.partner = AlignedLittleEndianU16(seg->partner->index);
         else
-            raw.partner = EPI_LE_U16(0xFFFF);
+            raw.partner = AlignedLittleEndianU16(0xFFFF);
 
         lump->Write(&raw, sizeof(raw));
 
 #if DEBUG_BSP
         I_Debugf("PUT GL SEG: %04X  Line %04X %s  Partner %04X  "
                         "(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-                        seg->index, EPI_LE_U16(raw.linedef), seg->side ? "L" : "R", EPI_LE_U16(raw.partner), seg->start->x,
+                        seg->index, AlignedLittleEndianU16(raw.linedef), seg->side ? "L" : "R", AlignedLittleEndianU16(raw.partner), seg->start->x,
                         seg->start->y, seg->end->x, seg->end->y);
 #endif
     }
@@ -1238,26 +1238,26 @@ void PutGLSegs_V5()
 
         const seg_t *seg = lev_segs[i];
 
-        raw.start = EPI_LE_U32(VertexIndex_V5(seg->start));
-        raw.end   = EPI_LE_U32(VertexIndex_V5(seg->end));
-        raw.side  = EPI_LE_U16(seg->side);
+        raw.start = AlignedLittleEndianU32(VertexIndex_V5(seg->start));
+        raw.end   = AlignedLittleEndianU32(VertexIndex_V5(seg->end));
+        raw.side  = AlignedLittleEndianU16(seg->side);
 
         if (seg->linedef != NULL)
-            raw.linedef = EPI_LE_U16(seg->linedef->index);
+            raw.linedef = AlignedLittleEndianU16(seg->linedef->index);
         else
-            raw.linedef = EPI_LE_U16(0xFFFF);
+            raw.linedef = AlignedLittleEndianU16(0xFFFF);
 
         if (seg->partner != NULL)
-            raw.partner = EPI_LE_U32(seg->partner->index);
+            raw.partner = AlignedLittleEndianU32(seg->partner->index);
         else
-            raw.partner = EPI_LE_U32(0xFFFFFFFF);
+            raw.partner = AlignedLittleEndianU32(0xFFFFFFFF);
 
         lump->Write(&raw, sizeof(raw));
 
 #if DEBUG_BSP
         I_Debugf("PUT V3 SEG: %06X  Line %04X %s  Partner %06X  "
                         "(%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
-                        seg->index, EPI_LE_U16(raw.linedef), seg->side ? "L" : "R", EPI_LE_U32(raw.partner), seg->start->x,
+                        seg->index, AlignedLittleEndianU16(raw.linedef), seg->side ? "L" : "R", AlignedLittleEndianU32(raw.partner), seg->start->x,
                         seg->start->y, seg->end->x, seg->end->y);
 #endif
     }
@@ -1277,13 +1277,13 @@ void PutSubsecs(const char *name, int do_gl)
 
         const subsec_t *sub = lev_subsecs[i];
 
-        raw.first = EPI_LE_U16(sub->seg_list->index);
-        raw.num   = EPI_LE_U16(sub->seg_count);
+        raw.first = AlignedLittleEndianU16(sub->seg_list->index);
+        raw.num   = AlignedLittleEndianU16(sub->seg_count);
 
         lump->Write(&raw, sizeof(raw));
 
 #if DEBUG_BSP
-        I_Debugf("PUT SUBSEC %04X  First %04X  Num %04X\n", sub->index, EPI_LE_U16(raw.first), EPI_LE_U16(raw.num));
+        I_Debugf("PUT SUBSEC %04X  First %04X  Num %04X\n", sub->index, AlignedLittleEndianU16(raw.first), AlignedLittleEndianU16(raw.num));
 #endif
     }
 
@@ -1308,13 +1308,13 @@ void PutGLSubsecs_V5()
 
         const subsec_t *sub = lev_subsecs[i];
 
-        raw.first = EPI_LE_U32(sub->seg_list->index);
-        raw.num   = EPI_LE_U32(sub->seg_count);
+        raw.first = AlignedLittleEndianU32(sub->seg_list->index);
+        raw.num   = AlignedLittleEndianU32(sub->seg_count);
 
         lump->Write(&raw, sizeof(raw));
 
 #if DEBUG_BSP
-        I_Debugf("PUT V3 SUBSEC %06X  First %06X  Num %06X\n", sub->index, EPI_LE_U32(raw.first), EPI_LE_U32(raw.num));
+        I_Debugf("PUT V3 SUBSEC %06X  First %06X  Num %06X\n", sub->index, AlignedLittleEndianU32(raw.first), AlignedLittleEndianU32(raw.num));
 #endif
     }
 
@@ -1336,32 +1336,32 @@ static void PutOneNode(node_t *node, Lump_c *lump)
     raw_node_t raw;
 
     // note that x/y/dx/dy are always integral in non-UDMF maps
-    raw.x  = EPI_LE_S16(I_ROUND(node->x));
-    raw.y  = EPI_LE_S16(I_ROUND(node->y));
-    raw.dx = EPI_LE_S16(I_ROUND(node->dx));
-    raw.dy = EPI_LE_S16(I_ROUND(node->dy));
+    raw.x  = AlignedLittleEndianS16(I_ROUND(node->x));
+    raw.y  = AlignedLittleEndianS16(I_ROUND(node->y));
+    raw.dx = AlignedLittleEndianS16(I_ROUND(node->dx));
+    raw.dy = AlignedLittleEndianS16(I_ROUND(node->dy));
 
-    raw.b1.minx = EPI_LE_S16(node->r.bounds.minx);
-    raw.b1.miny = EPI_LE_S16(node->r.bounds.miny);
-    raw.b1.maxx = EPI_LE_S16(node->r.bounds.maxx);
-    raw.b1.maxy = EPI_LE_S16(node->r.bounds.maxy);
+    raw.b1.minx = AlignedLittleEndianS16(node->r.bounds.minx);
+    raw.b1.miny = AlignedLittleEndianS16(node->r.bounds.miny);
+    raw.b1.maxx = AlignedLittleEndianS16(node->r.bounds.maxx);
+    raw.b1.maxy = AlignedLittleEndianS16(node->r.bounds.maxy);
 
-    raw.b2.minx = EPI_LE_S16(node->l.bounds.minx);
-    raw.b2.miny = EPI_LE_S16(node->l.bounds.miny);
-    raw.b2.maxx = EPI_LE_S16(node->l.bounds.maxx);
-    raw.b2.maxy = EPI_LE_S16(node->l.bounds.maxy);
+    raw.b2.minx = AlignedLittleEndianS16(node->l.bounds.minx);
+    raw.b2.miny = AlignedLittleEndianS16(node->l.bounds.miny);
+    raw.b2.maxx = AlignedLittleEndianS16(node->l.bounds.maxx);
+    raw.b2.maxy = AlignedLittleEndianS16(node->l.bounds.maxy);
 
     if (node->r.node)
-        raw.right = EPI_LE_U16(node->r.node->index);
+        raw.right = AlignedLittleEndianU16(node->r.node->index);
     else if (node->r.subsec)
-        raw.right = EPI_LE_U16(node->r.subsec->index | 0x8000);
+        raw.right = AlignedLittleEndianU16(node->r.subsec->index | 0x8000);
     else
         I_Error("AJBSP: Bad right child in node %d\n", node->index);
 
     if (node->l.node)
-        raw.left = EPI_LE_U16(node->l.node->index);
+        raw.left = AlignedLittleEndianU16(node->l.node->index);
     else if (node->l.subsec)
-        raw.left = EPI_LE_U16(node->l.subsec->index | 0x8000);
+        raw.left = AlignedLittleEndianU16(node->l.subsec->index | 0x8000);
     else
         I_Error("AJBSP: Bad left child in node %d\n", node->index);
 
@@ -1370,7 +1370,7 @@ static void PutOneNode(node_t *node, Lump_c *lump)
 #if DEBUG_BSP
     I_Debugf("PUT NODE %04X  Left %04X  Right %04X  "
                     "(%d,%d) -> (%d,%d)\n",
-                    node->index, EPI_LE_U16(raw.left), EPI_LE_U16(raw.right), node->x, node->y, node->x + node->dx,
+                    node->index, AlignedLittleEndianU16(raw.left), AlignedLittleEndianU16(raw.right), node->x, node->y, node->x + node->dx,
                     node->y + node->dy);
 #endif
 }
@@ -1387,32 +1387,32 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 
     raw_v5_node_t raw;
 
-    raw.x  = EPI_LE_S16(I_ROUND(node->x));
-    raw.y  = EPI_LE_S16(I_ROUND(node->y));
-    raw.dx = EPI_LE_S16(I_ROUND(node->dx));
-    raw.dy = EPI_LE_S16(I_ROUND(node->dy));
+    raw.x  = AlignedLittleEndianS16(I_ROUND(node->x));
+    raw.y  = AlignedLittleEndianS16(I_ROUND(node->y));
+    raw.dx = AlignedLittleEndianS16(I_ROUND(node->dx));
+    raw.dy = AlignedLittleEndianS16(I_ROUND(node->dy));
 
-    raw.b1.minx = EPI_LE_S16(node->r.bounds.minx);
-    raw.b1.miny = EPI_LE_S16(node->r.bounds.miny);
-    raw.b1.maxx = EPI_LE_S16(node->r.bounds.maxx);
-    raw.b1.maxy = EPI_LE_S16(node->r.bounds.maxy);
+    raw.b1.minx = AlignedLittleEndianS16(node->r.bounds.minx);
+    raw.b1.miny = AlignedLittleEndianS16(node->r.bounds.miny);
+    raw.b1.maxx = AlignedLittleEndianS16(node->r.bounds.maxx);
+    raw.b1.maxy = AlignedLittleEndianS16(node->r.bounds.maxy);
 
-    raw.b2.minx = EPI_LE_S16(node->l.bounds.minx);
-    raw.b2.miny = EPI_LE_S16(node->l.bounds.miny);
-    raw.b2.maxx = EPI_LE_S16(node->l.bounds.maxx);
-    raw.b2.maxy = EPI_LE_S16(node->l.bounds.maxy);
+    raw.b2.minx = AlignedLittleEndianS16(node->l.bounds.minx);
+    raw.b2.miny = AlignedLittleEndianS16(node->l.bounds.miny);
+    raw.b2.maxx = AlignedLittleEndianS16(node->l.bounds.maxx);
+    raw.b2.maxy = AlignedLittleEndianS16(node->l.bounds.maxy);
 
     if (node->r.node)
-        raw.right = EPI_LE_U32(node->r.node->index);
+        raw.right = AlignedLittleEndianU32(node->r.node->index);
     else if (node->r.subsec)
-        raw.right = EPI_LE_U32(node->r.subsec->index | 0x80000000U);
+        raw.right = AlignedLittleEndianU32(node->r.subsec->index | 0x80000000U);
     else
         I_Error("AJBSP: Bad right child in V5 node %d\n", node->index);
 
     if (node->l.node)
-        raw.left = EPI_LE_U32(node->l.node->index);
+        raw.left = AlignedLittleEndianU32(node->l.node->index);
     else if (node->l.subsec)
-        raw.left = EPI_LE_U32(node->l.subsec->index | 0x80000000U);
+        raw.left = AlignedLittleEndianU32(node->l.subsec->index | 0x80000000U);
     else
         I_Error("AJBSP: Bad left child in V5 node %d\n", node->index);
 
@@ -1421,7 +1421,7 @@ static void PutOneNode_V5(node_t *node, Lump_c *lump)
 #if DEBUG_BSP
     I_Debugf("PUT V5 NODE %08X  Left %08X  Right %08X  "
                     "(%d,%d) -> (%d,%d)\n",
-                    node->index, EPI_LE_U32(raw.left), EPI_LE_U32(raw.right), node->x, node->y, node->x + node->dx,
+                    node->index, AlignedLittleEndianU32(raw.left), AlignedLittleEndianU32(raw.right), node->x, node->y, node->x + node->dx,
                     node->y + node->dy);
 #endif
 }
@@ -1539,8 +1539,8 @@ void PutZVertices()
 {
     int count, i;
 
-    uint32_t orgverts = EPI_LE_U32(num_old_vert);
-    uint32_t newverts = EPI_LE_U32(num_new_vert);
+    uint32_t orgverts = AlignedLittleEndianU32(num_old_vert);
+    uint32_t newverts = AlignedLittleEndianU32(num_new_vert);
 
     ZLibAppendLump(&orgverts, 4);
     ZLibAppendLump(&newverts, 4);
@@ -1554,8 +1554,8 @@ void PutZVertices()
         if (!vert->is_new)
             continue;
 
-        raw.x = EPI_LE_S32(I_ROUND(vert->x * 65536.0));
-        raw.y = EPI_LE_S32(I_ROUND(vert->y * 65536.0));
+        raw.x = AlignedLittleEndianS32(I_ROUND(vert->x * 65536.0));
+        raw.y = AlignedLittleEndianS32(I_ROUND(vert->y * 65536.0));
 
         ZLibAppendLump(&raw, sizeof(raw));
 
@@ -1568,7 +1568,7 @@ void PutZVertices()
 
 void PutZSubsecs()
 {
-    uint32_t raw_num = EPI_LE_U32(num_subsecs);
+    uint32_t raw_num = AlignedLittleEndianU32(num_subsecs);
     ZLibAppendLump(&raw_num, 4);
 
     int cur_seg_index = 0;
@@ -1577,7 +1577,7 @@ void PutZSubsecs()
     {
         const subsec_t *sub = lev_subsecs[i];
 
-        raw_num = EPI_LE_U32(sub->seg_count);
+        raw_num = AlignedLittleEndianU32(sub->seg_count);
         ZLibAppendLump(&raw_num, 4);
 
         // sanity check the seg index values
@@ -1600,7 +1600,7 @@ void PutZSubsecs()
 
 void PutZSegs()
 {
-    uint32_t raw_num = EPI_LE_U32(num_segs);
+    uint32_t raw_num = AlignedLittleEndianU32(num_segs);
     ZLibAppendLump(&raw_num, 4);
 
     for (int i = 0; i < num_segs; i++)
@@ -1610,10 +1610,10 @@ void PutZSegs()
         if (seg->index != i)
             I_Error("AJBSP: PutZSegs: seg index mismatch (%d != %d)\n", seg->index, i);
 
-        uint32_t v1 = EPI_LE_U32(VertexIndex_XNOD(seg->start));
-        uint32_t v2 = EPI_LE_U32(VertexIndex_XNOD(seg->end));
+        uint32_t v1 = AlignedLittleEndianU32(VertexIndex_XNOD(seg->start));
+        uint32_t v2 = AlignedLittleEndianU32(VertexIndex_XNOD(seg->end));
 
-        uint16_t line = EPI_LE_U16(seg->linedef->index);
+        uint16_t line = AlignedLittleEndianU16(seg->linedef->index);
         uint8_t  side = (uint8_t)seg->side;
 
         ZLibAppendLump(&v1, 4);
@@ -1625,7 +1625,7 @@ void PutZSegs()
 
 void PutXGL3Segs()
 {
-    uint32_t raw_num = EPI_LE_U32(num_segs);
+    uint32_t raw_num = AlignedLittleEndianU32(num_segs);
     ZLibAppendLump(&raw_num, 4);
 
     for (int i = 0; i < num_segs; i++)
@@ -1635,9 +1635,9 @@ void PutXGL3Segs()
         if (seg->index != i)
             I_Error("AJBSP: PutXGL3Segs: seg index mismatch (%d != %d)\n", seg->index, i);
 
-        uint32_t v1      = EPI_LE_U32(VertexIndex_XNOD(seg->start));
-        uint32_t partner = EPI_LE_U32(seg->partner ? seg->partner->index : -1);
-        uint32_t line    = EPI_LE_U32(seg->linedef ? seg->linedef->index : -1);
+        uint32_t v1      = AlignedLittleEndianU32(VertexIndex_XNOD(seg->start));
+        uint32_t partner = AlignedLittleEndianU32(seg->partner ? seg->partner->index : -1);
+        uint32_t line    = AlignedLittleEndianU32(seg->linedef ? seg->linedef->index : -1);
         uint8_t  side    = (uint8_t)seg->side;
 
         ZLibAppendLump(&v1, 4);
@@ -1665,10 +1665,10 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 
     if (do_xgl3)
     {
-        uint32_t x  = EPI_LE_S32(I_ROUND(node->x * 65536.0));
-        uint32_t y  = EPI_LE_S32(I_ROUND(node->y * 65536.0));
-        uint32_t dx = EPI_LE_S32(I_ROUND(node->dx * 65536.0));
-        uint32_t dy = EPI_LE_S32(I_ROUND(node->dy * 65536.0));
+        uint32_t x  = AlignedLittleEndianS32(I_ROUND(node->x * 65536.0));
+        uint32_t y  = AlignedLittleEndianS32(I_ROUND(node->y * 65536.0));
+        uint32_t dx = AlignedLittleEndianS32(I_ROUND(node->dx * 65536.0));
+        uint32_t dy = AlignedLittleEndianS32(I_ROUND(node->dy * 65536.0));
 
         ZLibAppendLump(&x, 4);
         ZLibAppendLump(&y, 4);
@@ -1677,10 +1677,10 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
     }
     else
     {
-        raw.x  = EPI_LE_S16(I_ROUND(node->x));
-        raw.y  = EPI_LE_S16(I_ROUND(node->y));
-        raw.dx = EPI_LE_S16(I_ROUND(node->dx));
-        raw.dy = EPI_LE_S16(I_ROUND(node->dy));
+        raw.x  = AlignedLittleEndianS16(I_ROUND(node->x));
+        raw.y  = AlignedLittleEndianS16(I_ROUND(node->y));
+        raw.dx = AlignedLittleEndianS16(I_ROUND(node->dx));
+        raw.dy = AlignedLittleEndianS16(I_ROUND(node->dy));
 
         ZLibAppendLump(&raw.x, 2);
         ZLibAppendLump(&raw.y, 2);
@@ -1688,30 +1688,30 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
         ZLibAppendLump(&raw.dy, 2);
     }
 
-    raw.b1.minx = EPI_LE_S16(node->r.bounds.minx);
-    raw.b1.miny = EPI_LE_S16(node->r.bounds.miny);
-    raw.b1.maxx = EPI_LE_S16(node->r.bounds.maxx);
-    raw.b1.maxy = EPI_LE_S16(node->r.bounds.maxy);
+    raw.b1.minx = AlignedLittleEndianS16(node->r.bounds.minx);
+    raw.b1.miny = AlignedLittleEndianS16(node->r.bounds.miny);
+    raw.b1.maxx = AlignedLittleEndianS16(node->r.bounds.maxx);
+    raw.b1.maxy = AlignedLittleEndianS16(node->r.bounds.maxy);
 
-    raw.b2.minx = EPI_LE_S16(node->l.bounds.minx);
-    raw.b2.miny = EPI_LE_S16(node->l.bounds.miny);
-    raw.b2.maxx = EPI_LE_S16(node->l.bounds.maxx);
-    raw.b2.maxy = EPI_LE_S16(node->l.bounds.maxy);
+    raw.b2.minx = AlignedLittleEndianS16(node->l.bounds.minx);
+    raw.b2.miny = AlignedLittleEndianS16(node->l.bounds.miny);
+    raw.b2.maxx = AlignedLittleEndianS16(node->l.bounds.maxx);
+    raw.b2.maxy = AlignedLittleEndianS16(node->l.bounds.maxy);
 
     ZLibAppendLump(&raw.b1, sizeof(raw.b1));
     ZLibAppendLump(&raw.b2, sizeof(raw.b2));
 
     if (node->r.node)
-        raw.right = EPI_LE_U32(node->r.node->index);
+        raw.right = AlignedLittleEndianU32(node->r.node->index);
     else if (node->r.subsec)
-        raw.right = EPI_LE_U32(node->r.subsec->index | 0x80000000U);
+        raw.right = AlignedLittleEndianU32(node->r.subsec->index | 0x80000000U);
     else
         I_Error("AJBSP: Bad right child in V5 node %d\n", node->index);
 
     if (node->l.node)
-        raw.left = EPI_LE_U32(node->l.node->index);
+        raw.left = AlignedLittleEndianU32(node->l.node->index);
     else if (node->l.subsec)
-        raw.left = EPI_LE_U32(node->l.subsec->index | 0x80000000U);
+        raw.left = AlignedLittleEndianU32(node->l.subsec->index | 0x80000000U);
     else
         I_Error("AJBSP: Bad left child in V5 node %d\n", node->index);
 
@@ -1721,14 +1721,14 @@ static void PutOneZNode(node_t *node, bool do_xgl3)
 #if DEBUG_BSP
     I_Debugf("PUT Z NODE %08X  Left %08X  Right %08X  "
                     "(%d,%d) -> (%d,%d)\n",
-                    node->index, EPI_LE_U32(raw.left), EPI_LE_U32(raw.right), node->x, node->y, node->x + node->dx,
+                    node->index, AlignedLittleEndianU32(raw.left), AlignedLittleEndianU32(raw.right), node->x, node->y, node->x + node->dx,
                     node->y + node->dy);
 #endif
 }
 
 void PutZNodes(node_t *root, bool do_xgl3)
 {
-    uint32_t raw_num = EPI_LE_U32(num_nodes);
+    uint32_t raw_num = AlignedLittleEndianU32(num_nodes);
     ZLibAppendLump(&raw_num, 4);
 
     node_cur_index = 0;

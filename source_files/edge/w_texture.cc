@@ -75,7 +75,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 
     // Load the patch names from pnames.lmp.
     const char *names         = (const char *)W_LoadLump(WT->pnames);
-    int         nummappatches = EPI_LE_S32(*((const int *)names)); // Eww...
+    int         nummappatches = AlignedLittleEndianS32(*((const int *)names)); // Eww...
 
     const char *name_p = names + 4;
 
@@ -104,14 +104,14 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
     //   TEXTURE2 for commercial.
     //
     maptex = maptex1 = (const int *)W_LoadLump(WT->texture1);
-    numtextures1     = EPI_LE_S32(*maptex);
+    numtextures1     = AlignedLittleEndianS32(*maptex);
     maxoff           = W_LumpLength(WT->texture1);
     directory        = maptex + 1;
 
     if (WT->texture2 != -1)
     {
         maptex2      = (const int *)W_LoadLump(WT->texture2);
-        numtextures2 = EPI_LE_S32(*maptex2);
+        numtextures2 = AlignedLittleEndianS32(*maptex2);
         maxoff2      = W_LumpLength(WT->texture2);
     }
     else
@@ -135,14 +135,14 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
             directory = maptex + 1;
         }
 
-        int offset = EPI_LE_S32(*directory);
+        int offset = AlignedLittleEndianS32(*directory);
         if (offset < 0 || offset > maxoff)
             I_Error("W_InitTextures: bad texture directory");
 
         const raw_texture_t *mtexture = (const raw_texture_t *)((const uint8_t *)maptex + offset);
 
         // -ES- 2000/02/10 Texture must have patches.
-        int patchcount = EPI_LE_S16(mtexture->patch_count);
+        int patchcount = AlignedLittleEndianS16(mtexture->patch_count);
 
         // Lobo 2021: Changed this to a warning. Allows us to run several DBPs
         //  which have this issue
@@ -153,7 +153,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
             patchcount = 0; // mark it as a dud
         }
 
-        int width = EPI_LE_S16(mtexture->width);
+        int width = AlignedLittleEndianS16(mtexture->width);
         if (width == 0)
             I_Error("W_InitTextures: Texture '%.8s' has zero width", mtexture->name);
 
@@ -168,7 +168,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
         texture->columnofs = (unsigned short *)base;
 
         texture->width        = width;
-        texture->height       = EPI_LE_S16(mtexture->height);
+        texture->height       = AlignedLittleEndianS16(mtexture->height);
         texture->scale_x      = mtexture->scale_x;
         texture->scale_y      = mtexture->scale_y;
         texture->file         = file;
@@ -188,10 +188,10 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 
         for (int k = 0; k < texture->patchcount; k++, mpatch++, patch++)
         {
-            int pname = EPI_LE_S16(mpatch->pname);
+            int pname = AlignedLittleEndianS16(mpatch->pname);
 
-            patch->originx = EPI_LE_S16(mpatch->x_origin);
-            patch->originy = EPI_LE_S16(mpatch->y_origin);
+            patch->originx = AlignedLittleEndianS16(mpatch->x_origin);
+            patch->originy = AlignedLittleEndianS16(mpatch->y_origin);
             patch->patch   = patchlookup[pname];
 
             // work-around for strange Y offset in SKY1 of DOOM 1
@@ -235,7 +235,7 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
 
     // Load the patch names from pnames.lmp.
     const char *names         = (const char *)W_LoadLump(WT->pnames);
-    int         nummappatches = EPI_LE_S32(*((const int *)names)); // Eww...
+    int         nummappatches = AlignedLittleEndianS32(*((const int *)names)); // Eww...
 
     const char *name_p = names + 4;
 
@@ -264,14 +264,14 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
     //   TEXTURE2 for commercial.
     //
     maptex = maptex1 = (const int *)W_LoadLump(WT->texture1);
-    numtextures1     = EPI_LE_S32(*maptex);
+    numtextures1     = AlignedLittleEndianS32(*maptex);
     maxoff           = W_LumpLength(WT->texture1);
     directory        = maptex + 1;
 
     if (WT->texture2 != -1)
     {
         maptex2      = (const int *)W_LoadLump(WT->texture2);
-        numtextures2 = EPI_LE_S32(*maptex2);
+        numtextures2 = AlignedLittleEndianS32(*maptex2);
         maxoff2      = W_LumpLength(WT->texture2);
     }
     else
@@ -295,14 +295,14 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
             directory = maptex + 1;
         }
 
-        int offset = EPI_LE_S32(*directory);
+        int offset = AlignedLittleEndianS32(*directory);
         if (offset < 0 || offset > maxoff)
             I_Error("W_InitTextures: bad texture directory");
 
         const raw_strife_texture_t *mtexture = (const raw_strife_texture_t *)((const uint8_t *)maptex + offset);
 
         // -ES- 2000/02/10 Texture must have patches.
-        int patchcount = EPI_LE_S16(mtexture->patch_count);
+        int patchcount = AlignedLittleEndianS16(mtexture->patch_count);
 
         // Lobo 2021: Changed this to a warning. Allows us to run several DBPs
         //  which have this issue
@@ -313,7 +313,7 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
             patchcount = 0; // mark it as a dud
         }
 
-        int width = EPI_LE_S16(mtexture->width);
+        int width = AlignedLittleEndianS16(mtexture->width);
         if (width == 0)
             I_Error("W_InitTextures: Texture '%.8s' has zero width", mtexture->name);
 
@@ -328,7 +328,7 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
         texture->columnofs = (unsigned short *)base;
 
         texture->width        = width;
-        texture->height       = EPI_LE_S16(mtexture->height);
+        texture->height       = AlignedLittleEndianS16(mtexture->height);
         texture->scale_x      = mtexture->scale_x;
         texture->scale_y      = mtexture->scale_y;
         texture->file         = file;
@@ -348,10 +348,10 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
 
         for (int k = 0; k < texture->patchcount; k++, mpatch++, patch++)
         {
-            int pname = EPI_LE_S16(mpatch->pname);
+            int pname = AlignedLittleEndianS16(mpatch->pname);
 
-            patch->originx = EPI_LE_S16(mpatch->x_origin);
-            patch->originy = EPI_LE_S16(mpatch->y_origin);
+            patch->originx = AlignedLittleEndianS16(mpatch->x_origin);
+            patch->originy = AlignedLittleEndianS16(mpatch->y_origin);
             patch->patch   = patchlookup[pname];
 
             // work-around for strange Y offset in SKY1 of DOOM 1

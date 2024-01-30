@@ -403,10 +403,10 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
 
         const patch_t *pat = (patch_t *)header;
 
-        width    = EPI_LE_S16(pat->width);
-        height   = EPI_LE_S16(pat->height);
-        offset_x = EPI_LE_S16(pat->leftoffset);
-        offset_y = EPI_LE_S16(pat->topoffset);
+        width    = AlignedLittleEndianS16(pat->width);
+        height   = AlignedLittleEndianS16(pat->height);
+        offset_x = AlignedLittleEndianS16(pat->leftoffset);
+        offset_y = AlignedLittleEndianS16(pat->topoffset);
 
         is_patch = true;
     }
@@ -545,10 +545,10 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
 
         const patch_t *pat = (patch_t *)header;
 
-        width    = EPI_LE_S16(pat->width);
-        height   = EPI_LE_S16(pat->height);
-        offset_x = EPI_LE_S16(pat->leftoffset);
-        offset_y = EPI_LE_S16(pat->topoffset);
+        width    = AlignedLittleEndianS16(pat->width);
+        height   = AlignedLittleEndianS16(pat->height);
+        offset_x = AlignedLittleEndianS16(pat->leftoffset);
+        offset_y = AlignedLittleEndianS16(pat->topoffset);
 
         is_patch = true;
     }

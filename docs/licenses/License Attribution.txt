@@ -17,10 +17,13 @@ Freedoom (various assets) - Copyright (c) 2001-2019 Contributors to the Freedoom
 
 libRAD (patches.cpp/radmidi.cpp, adapted from YMFMIDI) - Copyright (c) 2021-2023 Devin Acker
 
-Mod4Play library - Copyright (c) 2022 Olav Sørensen
+Mod4Play library - 	Copyright (c) 2024 dashodanger
+					Copyright (c) 2022 Olav Sørensen
 
 minivorbis library - Copyright (c) 2020 Eduardo Bart
 		     		 Copyright (c) 2002-2020 Xiph.org Foundation
+
+ZDoom FName implementation - Copyright (c) 2005-2007 Randy Heit
 
 ===========================================================================================
 CC 1.0 Universal License
@@ -77,22 +80,16 @@ SLADE (IMF->WAV conversion and sky drawing routines) - Copyright (c) 2008 - 2023
 
 SuperFastHash - Copyright (c) 2004-2010 Paul Hsieh
 
-XMIDI library - Copyright (c) 2015-2022 Vitaly Novichkov
-	        	Copyright (c) 2015-2016 WildMIDI Developers
-				Copyright (c) 2014 Bret Curtis
-				Copyright (c) 2001 Ryan Nunn
+XMIDI library (MIDI conversion) - Copyright (c) 2015-2022 Vitaly Novichkov
+								  Copyright (c) 2015-2016 WildMIDI Developers
+								  Copyright (c) 2014 Bret Curtis
+								  Copyright (c) 2001 Ryan Nunn
 
 ===========================================================================================
 HacX License
 ===========================================================================================
 
 HacX 1.2/2.0 (various assets) - Copyright (c) 1997-2012 Banjo Software, et al
-
-===========================================================================================
-ISC License
-===========================================================================================
-
-libgrapheme - Copyright (c) 2019-2022 Laslo Hunhold <dev@frign.de>
 
 ===========================================================================================
 MIT License
@@ -127,6 +124,9 @@ miniz library - Copyright (c) 2013-2014 RAD Game Tools and Valve Software
 PL_MPEG library - Copyright(c) 2019 Dominic Szablewski
 
 PNPOLY algorithm - Copyright (c) 1970-2003 Wm. Randolph Franklin
+
+utf8proc library - Copyright (c) 2014-2021 Steven G. Johnson, Jiahao Chen, Tony Kelman, 
+				   Jonas Fonseca, et al
 
 ===========================================================================================
 Public Domain

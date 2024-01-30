@@ -16,10 +16,10 @@
 //
 //----------------------------------------------------------------------------
 //
-//  Based on the UMAPINFO reference implementation, released by Christoph Oelckers under the
-//  following copyright:
+//  Based on the UMAPINFO reference implementation, released by Christoph 
+//  Oelckers under the following copyright:
 //
-//    Copyright 2017 Christoph Oelckers
+//  Copyright 2017 Christoph Oelckers
 //
 //----------------------------------------------------------------------------
 

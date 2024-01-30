@@ -54,8 +54,8 @@ namespace epi
 
 enum KnownEName
 {
-#define xx(n) kEName_##n,
-#define xy(n, s) kEName_##n,
+#define xx(n) kEName##n,
+#define xy(n, s) kEName##n,
 #include "str_known_enames.h"
 #undef xx
 #undef xy

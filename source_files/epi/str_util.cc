@@ -37,10 +37,14 @@ std::wstring UTF8ToWString(std::string_view instring)
     while (utf8pos < utf8len)
     {
         u32c = 0;
-        utf8pos += grapheme_decode_utf8(utf8ptr+utf8pos, utf8len, &u32c);
+        size_t res = grapheme_decode_utf8(utf8ptr+utf8pos, utf8len, &u32c);
+        if (res == 0)
+            I_Error("Failed to convert %s to a wide string!\n", std::string(instring).c_str());
+        else
+            utf8pos += res;
         if (u32c < 0x10000)
             outstring.push_back((wchar_t)u32c);
-        else
+        else // Make into surrogate pair if needed
         {
             u32c -= 0x10000;
             outstring.push_back((wchar_t)(u32c >> 10) + 0xD800);
@@ -49,19 +53,43 @@ std::wstring UTF8ToWString(std::string_view instring)
     }
     return outstring;
 }
-std::string WStringToUTF8(const wchar_t *instring)
+std::string WStringToUTF8(std::wstring_view instring)
 {
     std::string outstring;
+    size_t inpos = 0;
+    size_t inlen = instring.size();
+    const wchar_t *inptr = instring.data();
     char u8c[4];
-    while (*instring)
+    while (inpos < inlen)
     {
+        uint32_t u32c = 0;
+        if ((*(inptr+inpos) & 0xD800) == 0xD800) // High surrogate
+        {
+            if (inpos+1 < inlen && (*(inptr+inpos+1) & 0xDC00) == 0xDC00) // Low surrogate
+            {
+                u32c = ((*(inptr+inpos) - 0xD800) * 0x400) + (*(inptr+inpos+1) - 0xDC00) + 0x10000;
+                inpos += 2;
+            }
+            else // Assume an unpaired surrogate is malformed
+            {
+                // print what was safely converted if present
+                if (!outstring.empty())
+                    I_Error("Failure to convert %s from a wide string!\n", outstring.c_str());
+                else
+                    I_Error("Wide string to UTF-8 conversion failure!\n");
+            }
+        }
+        else
+        {
+            u32c = *(inptr+inpos);
+            inpos++;
+        }
         memset(u8c, 0, 4);
-        grapheme_encode_utf8((uint_least32_t)(*instring), &u8c[0], 4);
+        grapheme_encode_utf8((uint_least32_t)u32c, &u8c[0], 4);
         if (u8c[0]) outstring.push_back(u8c[0]);
         if (u8c[1]) outstring.push_back(u8c[1]);
         if (u8c[2]) outstring.push_back(u8c[2]);
         if (u8c[3]) outstring.push_back(u8c[3]);
-        instring++;
     }
     return outstring;
 }

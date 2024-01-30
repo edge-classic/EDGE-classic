@@ -1400,7 +1400,7 @@ static void IdentifyVersion(void)
 
             if (!ReadDirectory(fsd, location, "*.wad"))
             {
-                I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location.c_str());
+                I_Debugf("IdentifyVersion: No WADs found in '%s' directory!\n", location.c_str());
             }
             else
             {
@@ -1428,7 +1428,7 @@ static void IdentifyVersion(void)
             }
             if (!ReadDirectory(fsd, location, "*.epk"))
             {
-                I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location.c_str());
+                I_Debugf("IdentifyVersion: No EPKs found in '%s' directory!\n", location.c_str());
             }
             else
             {
@@ -1465,7 +1465,7 @@ static void IdentifyVersion(void)
 
                 if (!ReadDirectory(fsd, location, "*.wad"))
                 {
-                    I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location.c_str());
+                    I_Debugf("IdentifyVersion: No WADs found in '%s' directory!\n", location.c_str());
                 }
                 else
                 {
@@ -1493,7 +1493,7 @@ static void IdentifyVersion(void)
                 }
                 if (!ReadDirectory(fsd, location, "*.epk"))
                 {
-                    I_Warning("IdenfityVersion: Failed to read '%s' directory!\n", location.c_str());
+                    I_Debugf("IdentifyVersion: No EPKs found in '%s' directory!\n", location.c_str());
                 }
                 else
                 {

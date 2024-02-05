@@ -24,19 +24,16 @@
 #include "epi.h"
 #include "AlmostEquals.h"
 
-#define AJBSP_VERSION "1.04"
+constexpr char *kAJBSPVersion = "1.04";
 
 //
 // Node Build Information Structure
 //
 
-#define SPLIT_COST_MIN     1
-#define SPLIT_COST_DEFAULT 11
-#define SPLIT_COST_MAX     32
+constexpr uint8_t kSplitCostDefault = 11;
 
-typedef struct buildinfo_s
+struct BuildInfo
 {
-  public:
     // use a faster method to pick nodes
     bool fast;
 
@@ -55,16 +52,16 @@ typedef struct buildinfo_s
     // from here on, various bits of internal state
     int total_warnings;
     int total_minor_issues;
-} buildinfo_t;
+};
 
-typedef enum
+enum BuildResult
 {
     // everything went peachy keen
-    BUILD_OK = 0,
+    kBuildOK = 0,
 
     // when saving the map, one or more lumps overflowed
-    BUILD_LumpOverflow
-} build_result_e;
+    kBuildLumpOverflow
+};
 
 namespace ajbsp
 {
@@ -73,7 +70,7 @@ namespace ajbsp
 void ResetInfo();
 
 // attempt to open a wad.  on failure, the FatalError method in the
-// buildinfo_t interface is called.
+// BuildInfo interface is called.
 void OpenWad(std::string filename);
 
 // attempt to open a wad from memory; only intended for the use
@@ -95,9 +92,9 @@ const char *GetLevelName(int lev_idx);
 
 // build the nodes of a particular level.  if cancelled, returns the
 // BUILD_Cancelled result and the wad is unchanged.  otherwise the wad
-// is updated to store the new lumps and returns either BUILD_OK or
-// BUILD_LumpOverflow if some limits were exceeded.
-build_result_e BuildLevel(int lev_idx);
+// is updated to store the new lumps and returns either kBuildOK or
+// kBuildLumpOverflow if some limits were exceeded.
+BuildResult BuildLevel(int lev_idx);
 
 } // namespace ajbsp
 

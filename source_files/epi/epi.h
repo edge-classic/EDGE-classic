@@ -41,10 +41,8 @@
 
 #ifdef __GNUC__
 #define GCCATTR(xyz) __attribute__(xyz)
-#define PACKEDATTR __attribute__((packed))
 #else
 #define GCCATTR(xyz) /* nothing */
-#define PACKEDATTR /* nothing */
 #endif
 
 #include "HandmadeMath.h"

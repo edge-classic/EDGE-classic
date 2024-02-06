@@ -808,12 +808,6 @@ void WadFile::ProcessNamespaces()
         LumpWarning("Missing %c_END marker (at EOF)\n", active);
 }
 
-bool WadFile::WasExternallyModified()
-{
-    // this method is an unused stub
-    return false;
-}
-
 //------------------------------------------------------------------------
 //  WAD Writing Interface
 //------------------------------------------------------------------------

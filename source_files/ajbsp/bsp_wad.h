@@ -204,12 +204,6 @@ class WadFile
 
     void SortLevels();
 
-    // check whether another program has modified this WAD, and return
-    // either true or false.  We test for change in file size, change
-    // in directory size or location, and directory contents (CRC).
-    // [ NOT USED YET.... ]
-    bool WasExternallyModified();
-
     // all changes to the wad must occur between calls to BeginWrite()
     // and EndWrite() methods.  the on-disk wad directory may be trashed
     // during this period, it will be re-written by EndWrite().

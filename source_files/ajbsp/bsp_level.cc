@@ -1419,7 +1419,7 @@ BuildResult BuildLevel(int level_idx)
         if (xwa_wad != NULL)
             ret = SaveXWA(root_node);
         else
-            I_Error("AJBSP: Cannot save nodes to XWA files!\n");
+            I_Error("AJBSP: Cannot save nodes to XWA file!\n");
     }
     else
     {

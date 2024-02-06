@@ -19,9 +19,6 @@
 
 /* ----- The wad structures ---------------------- */
 
-constexpr uint8_t kWadTextureName = 8;
-constexpr uint8_t kWadFlatName = 8;
-
 // wad header
 #pragma pack(push, 1)
 struct RawWadHeader

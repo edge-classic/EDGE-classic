@@ -384,21 +384,6 @@ void ZLibBeginLump(Lump *lump);
 void ZLibAppendLump(const void *data, int length);
 void ZLibFinishLump(void);
 
-/* limit flags, to show what went wrong */
-constexpr uint8_t kVertexesLimit = 0x000001;
-constexpr uint8_t kSectorsLimit = 0x000002;
-constexpr uint8_t kSidedefsLimit = 0x000004;
-constexpr uint8_t kLinedefsLimit = 0x000008;
-
-constexpr uint8_t kSegsLimit =    0x000010;
-constexpr uint8_t kSubsectorsLimit = 0x000020;
-constexpr uint8_t kNodesLimit =    0x000040;
-
-constexpr int16_t kGLVertexLimit =  0x000100;
-constexpr int16_t kGLSegsLimit =  0x000200;
-constexpr int16_t kGLSubsectorsLimit = 0x000400;
-constexpr int16_t kGLNodesLimit = 0x000800;
-
 //------------------------------------------------------------------------
 // ANALYZE : Analyzing level structures
 //------------------------------------------------------------------------
@@ -485,7 +470,6 @@ Seg *CreateSegs(void);
 // two halves, a node is created by calling this routine recursively,
 // and '*N' is the new node (and '*S' is set to NULL).  Normally
 // returns kBuildOK, or BUILD_Cancelled if user stopped it.
-
 BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */, Node **N, Subsector **S);
 
 // compute the height of the bsp tree, starting at 'node'.

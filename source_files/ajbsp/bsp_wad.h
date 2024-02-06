@@ -210,23 +210,6 @@ class WadFile
     void BeginWrite();
     void EndWrite();
 
-    // change name of a lump (can be a level marker too)
-    void RenameLump(int index, const char *new_name);
-
-    // remove the given lump(s)
-    // this will change index numbers on existing lumps
-    // (previous results of FindLumpNum or LevelHeader are invalidated).
-    void RemoveLumps(int index, int count = 1);
-
-    // this removes the level marker PLUS all associated level lumps
-    // which follow it.
-    void RemoveLevel(int lev_num);
-
-    // removes any GL-Nodes lumps that are associated with the given level.
-    void RemoveGLNodes(int lev_num);
-
-    // removes any ZNODES lump from a UDMF level.
-    void RemoveZNodes(int lev_num);
 
     // insert a new lump.
     // The second form is for a level marker.

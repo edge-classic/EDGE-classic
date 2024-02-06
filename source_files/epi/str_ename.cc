@@ -73,7 +73,7 @@ EName::NameManager EName::name_data_;
 bool EName::NameManager::inited_;
 size_t EName::NameManager::known_name_count_;
 
-static const char *predefined_names[] =
+const char *predefined_names[] =
 {
 #define xx(n) #n,
 #define xy(n, s) s,
@@ -92,7 +92,7 @@ int EName::NameManager::FindName(std::string_view text, bool no_create)
 		InitBuckets();
 	}
 
-	if (text == nullptr)
+	if (text.empty())
 	{
 		return 0;
 	}

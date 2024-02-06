@@ -24,8 +24,6 @@
 #include "epi.h"
 #include "AlmostEquals.h"
 
-constexpr char *kAJBSPVersion = "1.04";
-
 //
 // Node Build Information Structure
 //

@@ -259,9 +259,6 @@ class Subsector
     void ClockwiseOrder();
     void RenumberSegs(int &cur_seg_index);
 
-    void RoundOff();
-    void Normalise();
-
     void SanityCheckClosed() const;
     void SanityCheckHasRealSeg() const;
 };
@@ -482,11 +479,6 @@ int ComputeBspHeight(const Node *node);
 //   a partner will insert another seg into that partner's list, usually
 //   in the wrong place order-wise. ]
 void ClockwiseBspTree();
-
-// traverse the BSP tree, doing whatever is necessary to round
-// vertices to integer coordinates (for example, removing segs whose
-// rounded coordinates degenerate to the same point).
-void RoundOffBspTree();
 
 } // namespace ajbsp
 

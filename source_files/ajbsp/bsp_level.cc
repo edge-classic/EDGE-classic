@@ -25,7 +25,9 @@
 
 // EPI
 #include "endianess.h"
+#include "str_ename.h"
 #include "str_lexer.h"
+#include "str_util.h"
 
 #include "miniz.h"
 
@@ -555,60 +557,32 @@ void GetLinedefsHexen()
     }
 }
 
-static inline int VanillaSegDist(const Seg *seg)
-{
-    double lx = seg->side_ ? seg->linedef_->end->x_ : seg->linedef_->start->x_;
-    double ly = seg->side_ ? seg->linedef_->end->y_ : seg->linedef_->start->y_;
-
-    // use the "true" starting coord (as stored in the wad)
-    double sx = round(seg->start_->x_);
-    double sy = round(seg->start_->y_);
-
-    return (int)floor(hypot(sx - lx, sy - ly) + 0.5);
-}
-
-static inline int VanillaSegAngle(const Seg *seg)
-{
-    // compute the "true" delta
-    double dx = round(seg->end_->x_) - round(seg->start_->x_);
-    double dy = round(seg->end_->y_) - round(seg->start_->y_);
-
-    double angle = ComputeAngle(dx, dy);
-
-    if (angle < 0)
-        angle += 360.0;
-
-    int result = (int)floor(angle * 65536.0 / 360.0 + 0.5);
-
-    return (result & 0xFFFF);
-}
-
 /* ----- UDMF reading routines ------------------------- */
 
-void ParseThingField(Thing *thing, const std::string &key, const std::string &value)
+void ParseThingField(Thing *thing, const int &key, const std::string &value)
 {
     // Do we need more precision than an int for things? I think this would only be
     // an issue if/when polyobjects happen, as I think other thing types are ignored - Dasho
 
-    if (key == "x")
+    if (key == epi::kENameX)
         thing->x = I_ROUND(epi::LexDouble(value));
-    else if (key == "y")
+    else if (key == epi::kENameY)
         thing->y = I_ROUND(epi::LexDouble(value));
-    else if (key == "type")
+    else if (key == epi::kENameType)
         thing->type = epi::LexInteger(value);
 }
 
-void ParseVertexField(Vertex *vertex, const std::string &key, const std::string &value)
+void ParseVertexField(Vertex *vertex, const int &key, const std::string &value)
 {
-    if (key == "x")
+    if (key == epi::kENameX)
         vertex->x_ = epi::LexDouble(value);
-    else if (key == "y")
+    else if (key == epi::kENameY)
         vertex->y_ = epi::LexDouble(value);
 }
 
-void ParseSidedefField(Sidedef *side, const std::string &key, const std::string &value)
+void ParseSidedefField(Sidedef *side, const int &key, const std::string &value)
 {
-    if (key == "sector")
+    if (key == epi::kENameSector)
     {
         int num = epi::LexInteger(value);
 
@@ -619,33 +593,44 @@ void ParseSidedefField(Sidedef *side, const std::string &key, const std::string 
     }
 }
 
-void ParseLinedefField(Linedef *line, const std::string &key, const std::string &value)
+void ParseLinedefField(Linedef *line, const int &key, const std::string &value)
 {
-    if (key == "v1")
-        line->start = SafeLookupVertex(epi::LexInteger(value));
-    else if (key == "v2")
-        line->end = SafeLookupVertex(epi::LexInteger(value));
-    else if (key == "special")
-        line->type = epi::LexInteger(value);
-    else if (key == "twosided")
-        line->two_sided = epi::LexBoolean(value);
-    else if (key == "sidefront")
+    switch(key)
     {
-        int num = epi::LexInteger(value);
+        case epi::kENameV1:
+            line->start = SafeLookupVertex(epi::LexInteger(value));
+            break;
+        case epi::kENameV2:
+            line->end = SafeLookupVertex(epi::LexInteger(value));
+            break;
+        case epi::kENameSpecial:
+            line->type = epi::LexInteger(value);
+            break;
+        case epi::kENameTwosided:
+            line->two_sided = epi::LexBoolean(value);
+            break;
+        case epi::kENameSidefront:
+            {
+                int num = epi::LexInteger(value);
 
-        if (num < 0 || num >= (int)level_sidedefs.size())
-            line->right = NULL;
-        else
-            line->right = level_sidedefs[num];
-    }
-    else if (key == "sideback")
-    {
-        int num = epi::LexInteger(value);
+                if (num < 0 || num >= (int)level_sidedefs.size())
+                    line->right = NULL;
+                else
+                    line->right = level_sidedefs[num];
+            }
+            break;
+        case epi::kENameSideback:
+            {
+                int num = epi::LexInteger(value);
 
-        if (num < 0 || num >= (int)level_sidedefs.size())
-            line->left = NULL;
-        else
-            line->left = level_sidedefs[num];
+                if (num < 0 || num >= (int)level_sidedefs.size())
+                    line->left = NULL;
+                else
+                    line->left = level_sidedefs[num];
+            }
+            break;
+        default:
+            break;
     }
 }
 
@@ -704,21 +689,22 @@ void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
         if (!lex.Match(";"))
             I_Error("AJBSP: Malformed TEXTMAP lump: missing ';'\n");
 
+        epi::EName key_ename(key, true);
+
         switch (cur_type)
         {
         case kUDMFVertex:
-            ParseVertexField(vertex, key, value);
+            ParseVertexField(vertex, key_ename.GetIndex(), value);
             break;
         case kUDMFThing:
-            ParseThingField(thing, key, value);
+            ParseThingField(thing, key_ename.GetIndex(), value);
             break;
         case kUDMFSidedef:
-            ParseSidedefField(side, key, value);
+            ParseSidedefField(side, key_ename.GetIndex(), value);
             break;
         case kUDMFLinedef:
-            ParseLinedefField(line, key, value);
+            ParseLinedefField(line, key_ename.GetIndex(), value);
             break;
-
         case kUDMFSector:
         default: /* just skip it */
             break;
@@ -778,30 +764,27 @@ void ParseUDMF_Pass(const std::string &data, int pass)
 
         int cur_type = 0;
 
-        if (section == "thing")
+        epi::EName section_ename(section, true);
+
+        switch (section_ename.GetIndex())
         {
-            if (pass == 1)
-                cur_type = kUDMFThing;
-        }
-        else if (section == "vertex")
-        {
-            if (pass == 1)
-                cur_type = kUDMFVertex;
-        }
-        else if (section == "sector")
-        {
-            if (pass == 1)
-                cur_type = kUDMFSector;
-        }
-        else if (section == "sidedef")
-        {
-            if (pass == 2)
-                cur_type = kUDMFSidedef;
-        }
-        else if (section == "linedef")
-        {
-            if (pass == 3)
-                cur_type = kUDMFLinedef;
+            case epi::kENameThing:
+                if (pass == 1) cur_type = kUDMFThing;
+                break;
+            case epi::kENameVertex:
+                if (pass == 1) cur_type = kUDMFVertex;
+                break;
+            case epi::kENameSector:
+                if (pass == 1) cur_type = kUDMFSector;
+                break;
+            case epi::kENameSidedef:
+                if (pass == 2) cur_type = kUDMFSidedef;
+                break;
+            case epi::kENameLinedef:
+                if (pass == 3) cur_type = kUDMFLinedef;
+                break;
+            default:
+                break;
         }
 
         // process the block
@@ -1095,7 +1078,7 @@ void LoadLevel()
     level_current_name = LEV->Name();
     level_long_name    = false;
 
-    E_ProgressMessage(StringPrintf("Building nodes for %s\n", level_current_name));
+    E_ProgressMessage(epi::StringFormat("Building nodes for %s\n", level_current_name).c_str());
 
     num_new_vert   = 0;
     num_real_lines = 0;

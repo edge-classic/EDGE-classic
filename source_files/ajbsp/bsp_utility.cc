@@ -71,38 +71,6 @@ char *StringUpper(const char *name)
     return copy;
 }
 
-char *StringPrintf(const char *str, ...)
-{
-    // Algorithm: keep doubling the allocated buffer size
-    // until the output fits. Based on code by Darren Salt.
-
-    char *buf      = NULL;
-    int   buf_size = 128;
-
-    for (;;)
-    {
-        va_list args;
-        int     out_len;
-
-        buf_size *= 2;
-
-        buf = (char *)realloc(buf, buf_size);
-        if (!buf)
-            I_Error("AJBSP: Out of memory (formatting string)\n");
-
-        va_start(args, str);
-        out_len = vsnprintf(buf, buf_size, str, args);
-        va_end(args);
-
-        // old versions of vsnprintf() simply return -1 when
-        // the output doesn't fit.
-        if (out_len < 0 || out_len >= buf_size)
-            continue;
-
-        return buf;
-    }
-}
-
 void StringFree(const char *str)
 {
     if (str)
@@ -155,22 +123,6 @@ void UtilFree(void *data)
 //------------------------------------------------------------------------
 // MATH STUFF
 //------------------------------------------------------------------------
-
-//
-// rounds the value _up_ to the nearest power of two.
-//
-int RoundPOW2(int x)
-{
-    if (x <= 2)
-        return x;
-
-    x--;
-
-    for (int tmp = x >> 1; tmp; tmp >>= 1)
-        x |= tmp;
-
-    return x + 1;
-}
 
 //
 // Compute angle of line from (0,0) to (dx,dy).

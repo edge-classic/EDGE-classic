@@ -29,14 +29,12 @@ void *UtilRealloc(void *old, int size);
 void  UtilFree(void *data);
 
 // math stuff
-int    RoundPOW2(int x);
 double ComputeAngle(double dx, double dy);
 
 // string utilities
 char *StringNew(int length);
 char *StringDup(const char *orig, int limit = -1);
 char *StringUpper(const char *name);
-char *StringPrintf(const char *str, ...);
 void  StringFree(const char *str);
 
 } // namespace ajbsp

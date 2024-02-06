@@ -32,7 +32,7 @@ constexpr uint8_t kSplitCostDefault = 11;
 
 struct BuildInfo
 {
-    bool force_compress;
+    bool compress_nodes;
 
     int split_cost;
 
@@ -40,8 +40,6 @@ struct BuildInfo
     int total_warnings;
     int total_minor_issues;
 };
-
-
 
 enum BuildResult
 {
@@ -76,14 +74,11 @@ void FinishXWA();
 // give the number of levels detected in the wad.
 int LevelsInWad();
 
-// retrieve the name of a particular level.
-const char *GetLevelName(int lev_idx);
-
 // build the nodes of a particular level.  if cancelled, returns the
 // BUILD_Cancelled result and the wad is unchanged.  otherwise the wad
 // is updated to store the new lumps and returns either kBuildOK or
-// kBuildLumpOverflow if some limits were exceeded.
-BuildResult BuildLevel(int lev_idx);
+// kBuildError
+BuildResult BuildLevel(int level_index);
 
 } // namespace ajbsp
 

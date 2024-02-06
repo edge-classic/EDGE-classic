@@ -36,14 +36,14 @@ namespace ajbsp
 #define FileMessage I_Debugf
 #define LumpWarning I_Debugf
 #else
-void FileMessage(const char *fmt, ...)
+void FileMessage(const char *format, ...)
 {
-    (void)fmt;
+    (void)format;
 }
 
-void LumpWarning(const char *fmt, ...)
+void LumpWarning(const char *format, ...)
 {
-    (void)fmt;
+    (void)format;
 }
 #endif
 
@@ -53,13 +53,13 @@ static constexpr uint8_t kMaxLevelLumps = 21;
 //  LUMP Handling
 //------------------------------------------------------------------------
 
-Lump::Lump(WadFile *par, const char *name, int start, int len) : parent_(par), lump_start_(start), lump_length_(len)
+Lump::Lump(WadFile *parent, const char *name, int start, int length) : parent_(parent), lump_start_(start), lump_length_(length)
 {
     // ensure lump name is uppercase
     name_ = StringUpper(name);
 }
 
-Lump::Lump(WadFile *par, const struct RawWadEntry *entry) : parent_(par)
+Lump::Lump(WadFile *parent, const struct RawWadEntry *entry) : parent_(parent)
 {
     // handle the entry name, which can lack a terminating NUL
     char buffer[10];
@@ -103,30 +103,30 @@ bool Lump::Seek(int offset)
 {
     SYS_ASSERT(offset >= 0);
 
-    if (parent_->memory_fp_)
-        return (parent_->memory_fp_->Seek(lump_start_ + offset, epi::File::kSeekpointStart));
+    if (parent_->memory_file_pointer_)
+        return (parent_->memory_file_pointer_->Seek(lump_start_ + offset, epi::File::kSeekpointStart));
     else
-        return (fseek(parent_->fp_, lump_start_ + offset, SEEK_SET) == 0);
+        return (fseek(parent_->file_pointer_, lump_start_ + offset, SEEK_SET) == 0);
 }
 
-bool Lump::Read(void *data, size_t len)
+bool Lump::Read(void *data, size_t length)
 {
-    SYS_ASSERT(data && len > 0);
+    SYS_ASSERT(data && length > 0);
 
-    if (parent_->memory_fp_)
-        return (parent_->memory_fp_->Read(data, len) == len);
+    if (parent_->memory_file_pointer_)
+        return (parent_->memory_file_pointer_->Read(data, length) == length);
     else
-        return (fread(data, len, 1, parent_->fp_) == 1);
+        return (fread(data, length, 1, parent_->file_pointer_) == 1);
 }
 
-bool Lump::GetLine(char *buffer, size_t buf_size)
+bool Lump::GetLine(char *buffer, size_t buffer_size)
 {
     int cur_pos = -1;
 
-    if (parent_->memory_fp_)
-        cur_pos = parent_->memory_fp_->GetPosition();
+    if (parent_->memory_file_pointer_)
+        cur_pos = parent_->memory_file_pointer_->GetPosition();
     else
-        cur_pos = (int)ftell(parent_->fp_);
+        cur_pos = (int)ftell(parent_->file_pointer_);
 
     if (cur_pos < 0)
         return false;
@@ -137,26 +137,26 @@ bool Lump::GetLine(char *buffer, size_t buf_size)
         return false; // EOF
 
     char *dest     = buffer;
-    char *dest_end = buffer + buf_size - 1;
+    char *dest_end = buffer + buffer_size - 1;
 
     for (; cur_pos < lump_length_ && dest < dest_end; cur_pos++)
     {
         int mem_pos = 0;
-        if (parent_->memory_fp_)
+        if (parent_->memory_file_pointer_)
         {
-            mem_pos = parent_->memory_fp_->Read(dest, 1);
+            mem_pos = parent_->memory_file_pointer_->Read(dest, 1);
             dest++;
         }
         else
-            *dest++ = fgetc(parent_->fp_);
+            *dest++ = fgetc(parent_->file_pointer_);
 
         if (dest[-1] == '\n')
             break;
 
-        if (parent_->fp_ && ferror(parent_->fp_))
+        if (parent_->file_pointer_ && ferror(parent_->file_pointer_))
             return false;
 
-        if ((parent_->memory_fp_ && mem_pos == 0) || (parent_->fp_ && feof(parent_->fp_)))
+        if ((parent_->memory_file_pointer_ && mem_pos == 0) || (parent_->file_pointer_ && feof(parent_->file_pointer_)))
             break;
     }
 
@@ -165,23 +165,23 @@ bool Lump::GetLine(char *buffer, size_t buf_size)
     return true; // OK
 }
 
-bool Lump::Write(const void *data, int len)
+bool Lump::Write(const void *data, int length)
 {
-    SYS_ASSERT(data && len > 0);
+    SYS_ASSERT(data && length > 0);
 
-    lump_length_ += len;
+    lump_length_ += length;
 
-    return (fwrite(data, len, 1, parent_->fp_) == 1);
+    return (fwrite(data, length, 1, parent_->file_pointer_) == 1);
 }
 
-void Lump::Printf(const char *msg, ...)
+void Lump::Printf(const char *message, ...)
 {
     static char buffer[1024];
 
     va_list args;
 
-    va_start(args, msg);
-    vsnprintf(buffer, sizeof(buffer), msg, args);
+    va_start(args, message);
+    vsnprintf(buffer, sizeof(buffer), message, args);
     va_end(args);
 
     buffer[sizeof(buffer) - 1] = 0;
@@ -201,9 +201,9 @@ bool Lump::Finish()
 //  WAD Reading Interface
 //------------------------------------------------------------------------
 
-WadFile::WadFile(std::string name, char mode, FILE *fp, epi::MemFile *memory_fp)
-    : mode_(mode), fp_(fp), memory_fp_(memory_fp), kind_('P'), total_size_(0), directory_(), dir_start_(0), dir_count_(0),
-      levels_(), patches_(), sprites_(), flats_(), tx_tex_(), begun_write_(false), insert_point_(-1)
+WadFile::WadFile(std::string name, char mode, FILE *file_pointer, epi::MemFile *memory_file_pointer)
+    : mode_(mode), file_pointer_(file_pointer), memory_file_pointer_(memory_file_pointer), kind_('P'), total_size_(0), directory_(), directory_start_(0), directory_count_(0),
+      levels_(), patches_(), sprites_(), flats_(), tx_textures_(), begun_write_(false), insert_point_(-1)
 {
     filename_ = name;
 }
@@ -212,10 +212,10 @@ WadFile::~WadFile()
 {
     FileMessage("Closing WAD file: %s\n", filename_.c_str());
 
-    if (fp_)
-        fclose(fp_);
-    if (memory_fp_)
-        delete memory_fp_;
+    if (file_pointer_)
+        fclose(file_pointer_);
+    if (memory_file_pointer_)
+        delete memory_file_pointer_;
 
     // free the directory_
     for (int k = 0; k < NumLumps(); k++)
@@ -290,15 +290,15 @@ WadFile *WadFile::OpenMem(std::string filename, uint8_t *raw_wad, int raw_length
 
     FileMessage("Opening WAD from memory: %s\n", filename.c_str());
 
-    epi::MemFile *memory_fp_ = new epi::MemFile(raw_wad, raw_length, false);
+    epi::MemFile *memory_file_pointer_ = new epi::MemFile(raw_wad, raw_length, false);
 
-    if (!memory_fp_)
+    if (!memory_file_pointer_)
     {
         FileMessage("Open memfile failed: %s\n", filename.c_str());
         return NULL;
     }
 
-    WadFile *w = new WadFile(filename, 'r', nullptr, memory_fp_);
+    WadFile *w = new WadFile(filename, 'r', nullptr, memory_file_pointer_);
 
     w->total_size_ = raw_length;
 
@@ -406,10 +406,10 @@ int WadFile::FindLumpNumber(const char *name)
     return -1; // not found
 }
 
-int WadFile::LevelLookupLump(int lev_num, const char *name)
+int WadFile::LevelLookupLump(int level_number, const char *name)
 {
-    int start  = LevelHeader(lev_num);
-    int finish = LevelLastLump(lev_num);
+    int start  = LevelHeader(level_number);
+    int finish = LevelLastLump(level_number);
 
     for (int k = start + 1; k <= finish; k++)
     {
@@ -438,13 +438,13 @@ int WadFile::LevelFind(const char *name)
     return -1; // not found
 }
 
-int WadFile::LevelLastLump(int lev_num)
+int WadFile::LevelLastLump(int level_number)
 {
-    int start = LevelHeader(lev_num);
+    int start = LevelHeader(level_number);
     int count = 1;
 
     // UDMF level?
-    if (LevelFormat(lev_num) == kMapFormatUDMF)
+    if (LevelFormat(level_number) == kMapFormatUDMF)
     {
         while (count < kMaxLevelLumps && start + count < NumLumps())
         {
@@ -503,16 +503,16 @@ int WadFile::LevelFindFirst()
         return -1; // none
 }
 
-int WadFile::LevelHeader(int lev_num)
+int WadFile::LevelHeader(int level_number)
 {
-    SYS_ASSERT(0 <= lev_num && lev_num < LevelCount());
+    SYS_ASSERT(0 <= level_number && level_number < LevelCount());
 
-    return levels_[lev_num];
+    return levels_[level_number];
 }
 
-MapFormat WadFile::LevelFormat(int lev_num)
+MapFormat WadFile::LevelFormat(int level_number)
 {
-    int start = LevelHeader(lev_num);
+    int start = LevelHeader(level_number);
 
     if (start + 2 < (int)NumLumps())
     {
@@ -568,40 +568,40 @@ void WadFile::ReadDirectory()
 {
     // WISH: no fatal errors
 
-    if (memory_fp_)
-        memory_fp_->Seek(0, epi::File::kSeekpointStart);
+    if (memory_file_pointer_)
+        memory_file_pointer_->Seek(0, epi::File::kSeekpointStart);
     else
-        rewind(fp_);
+        rewind(file_pointer_);
 
     RawWadHeader header;
 
-    if (memory_fp_ && memory_fp_->Read(&header, sizeof(header)) != sizeof(header))
+    if (memory_file_pointer_ && memory_file_pointer_->Read(&header, sizeof(header)) != sizeof(header))
         I_Error("AJBSP: Error reading WAD header.\n");
-    else if (fp_ && fread(&header, sizeof(header), 1, fp_) != 1)
+    else if (file_pointer_ && fread(&header, sizeof(header), 1, file_pointer_) != 1)
         I_Error("AJBSP: Error reading WAD header.\n");
 
     // WISH: check ident for PWAD or IWAD
 
     kind_ = header.ident[0];
 
-    dir_start_ = AlignedLittleEndianS32(header.dir_start);
-    dir_count_ = AlignedLittleEndianS32(header.num_entries);
+    directory_start_ = AlignedLittleEndianS32(header.dir_start);
+    directory_count_ = AlignedLittleEndianS32(header.num_entries);
 
-    if (dir_count_ < 0 || dir_count_ > 32000)
-        I_Error("AJBSP: Bad WAD header, too many entries (%d)\n", dir_count_);
+    if (directory_count_ < 0 || directory_count_ > 32000)
+        I_Error("AJBSP: Bad WAD header, too many entries (%d)\n", directory_count_);
 
-    if (memory_fp_ && !memory_fp_->Seek(dir_start_, epi::File::kSeekpointStart))
+    if (memory_file_pointer_ && !memory_file_pointer_->Seek(directory_start_, epi::File::kSeekpointStart))
         I_Error("AJBSP: Error seeking to WAD directory_.\n");
-    else if (fp_ && fseek(fp_, dir_start_, SEEK_SET) != 0)
+    else if (file_pointer_ && fseek(file_pointer_, directory_start_, SEEK_SET) != 0)
         I_Error("AJBSP: Error seeking to WAD directory_.\n");
 
-    for (int i = 0; i < dir_count_; i++)
+    for (int i = 0; i < directory_count_; i++)
     {
         RawWadEntry entry;
 
-        if (memory_fp_ && memory_fp_->Read(&entry, sizeof(entry)) != sizeof(entry))
+        if (memory_file_pointer_ && memory_file_pointer_->Read(&entry, sizeof(entry)) != sizeof(entry))
             I_Error("AJBSP: Error reading WAD directory_.\n");
-        else if (fp_ && fread(&entry, sizeof(entry), 1, fp_) != 1)
+        else if (file_pointer_ && fread(&entry, sizeof(entry), 1, file_pointer_) != 1)
             I_Error("AJBSP: Error reading WAD directory_.\n");
 
         Lump *lump = new Lump(this, &entry);
@@ -795,7 +795,7 @@ void WadFile::ProcessNamespaces()
                 flats_.push_back(k);
                 break;
             case 'T':
-                tx_tex_.push_back(k);
+                tx_textures_.push_back(k);
                 break;
 
             default:
@@ -839,7 +839,7 @@ void WadFile::EndWrite()
     insert_point_ = -1;
 }
 
-void WadFile::FixGroup(std::vector<int> &group, int index, int num_added, int num_removed)
+void WadFile::FixGroup(std::vector<int> &group, int index, int number_added, int number_removed)
 {
     bool did_remove = false;
 
@@ -848,15 +848,15 @@ void WadFile::FixGroup(std::vector<int> &group, int index, int num_added, int nu
         if (group[k] < index)
             continue;
 
-        if (group[k] < index + num_removed)
+        if (group[k] < index + number_removed)
         {
             group[k]   = -1;
             did_remove = true;
             continue;
         }
 
-        group[k] += num_added;
-        group[k] -= num_removed;
+        group[k] += number_added;
+        group[k] -= number_removed;
     }
 
     if (did_remove)
@@ -888,7 +888,7 @@ Lump *WadFile::AddLump(const char *name, int max_size)
         FixGroup(patches_, insert_point_, 1, 0);
         FixGroup(sprites_, insert_point_, 1, 0);
         FixGroup(flats_, insert_point_, 1, 0);
-        FixGroup(tx_tex_, insert_point_, 1, 0);
+        FixGroup(tx_textures_, insert_point_, 1, 0);
 
         directory_.insert(directory_.begin() + insert_point_, lump);
 
@@ -914,7 +914,7 @@ void WadFile::RecreateLump(Lump *lump, int max_size)
     lump->lump_length_ = 0;
 }
 
-Lump *WadFile::AddLevel(const char *name, int max_size, int *lev_num)
+Lump *WadFile::AddLevel(const char *name, int max_size, int *level_number)
 {
     int actual_point = insert_point_;
 
@@ -923,9 +923,9 @@ Lump *WadFile::AddLevel(const char *name, int max_size, int *lev_num)
 
     Lump *lump = AddLump(name, max_size);
 
-    if (lev_num)
+    if (level_number)
     {
-        *lev_num = (int)levels_.size();
+        *level_number = (int)levels_.size();
     }
 
     levels_.push_back(actual_point);
@@ -1020,10 +1020,10 @@ int WadFile::PositionForWrite(int max_size)
     //       but trying to optimise it away will just make the code
     //       needlessly complex and hard to follow.
 
-    if (fseek(fp_, 0, SEEK_END) < 0)
+    if (fseek(file_pointer_, 0, SEEK_END) < 0)
         I_Error("AJBSP: Error seeking to new write position.\n");
 
-    total_size_ = (int)ftell(fp_);
+    total_size_ = (int)ftell(file_pointer_);
 
     if (total_size_ < 0)
         I_Error("AJBSP: Error seeking to new write position.\n");
@@ -1040,7 +1040,7 @@ int WadFile::PositionForWrite(int max_size)
     }
     else
     {
-        if (fseek(fp_, want_pos, SEEK_SET) < 0)
+        if (fseek(file_pointer_, want_pos, SEEK_SET) < 0)
             I_Error("AJBSP: Error seeking to new write position.\n");
     }
 
@@ -1053,21 +1053,21 @@ int WadFile::PositionForWrite(int max_size)
 
 bool WadFile::FinishLump(int final_size)
 {
-    fflush(fp_);
+    fflush(file_pointer_);
 
     // sanity check
     if (begun_max_size_ >= 0)
         if (final_size > begun_max_size_)
             I_Error("AJBSP: Internal Error: wrote too much in lump (%d > %d)\n", final_size, begun_max_size_);
 
-    int pos = (int)ftell(fp_);
+    int pos = (int)ftell(file_pointer_);
 
     if (pos & 3)
     {
         WritePadding(4 - (pos & 3));
     }
 
-    fflush(fp_);
+    fflush(file_pointer_);
     return true;
 }
 
@@ -1077,7 +1077,7 @@ int WadFile::WritePadding(int count)
 
     SYS_ASSERT(1 <= count && count <= 8);
 
-    fwrite(zeros, count, 1, fp_);
+    fwrite(zeros, count, 1, file_pointer_);
 
     return count;
 }
@@ -1097,15 +1097,15 @@ int WadFile::WritePadding(int count)
 
 void WadFile::WriteDirectory()
 {
-    dir_start_ = PositionForWrite();
-    dir_count_ = NumLumps();
+    directory_start_ = PositionForWrite();
+    directory_count_ = NumLumps();
 
 #if DEBUG_WAD
     I_Debugf("WriteDirectory...\n");
     I_Debugf("dir_start:%d  dir_count:%d\n", dir_start, dir_count);
 #endif
 
-    for (int k = 0; k < dir_count_; k++)
+    for (int k = 0; k < directory_count_; k++)
     {
         Lump *lump = directory_[k];
         SYS_ASSERT(lump);
@@ -1114,13 +1114,13 @@ void WadFile::WriteDirectory()
 
         lump->MakeEntry(&entry);
 
-        if (fwrite(&entry, sizeof(entry), 1, fp_) != 1)
+        if (fwrite(&entry, sizeof(entry), 1, file_pointer_) != 1)
             I_Error("AJBSP: Error writing WAD directory_.\n");
     }
 
-    fflush(fp_);
+    fflush(file_pointer_);
 
-    total_size_ = (int)ftell(fp_);
+    total_size_ = (int)ftell(file_pointer_);
 
 #if DEBUG_WAD
     I_Debugf("total_size: %d\n", total_size);
@@ -1131,19 +1131,19 @@ void WadFile::WriteDirectory()
 
     // update header at start of file
 
-    rewind(fp_);
+    rewind(file_pointer_);
 
     RawWadHeader header;
 
     memcpy(header.ident, (kind_ == 'I') ? "IWAD" : "PWAD", 4);
 
-    header.dir_start   = AlignedLittleEndianU32(dir_start_);
-    header.num_entries = AlignedLittleEndianU32(dir_count_);
+    header.dir_start   = AlignedLittleEndianU32(directory_start_);
+    header.num_entries = AlignedLittleEndianU32(directory_count_);
 
-    if (fwrite(&header, sizeof(header), 1, fp_) != 1)
+    if (fwrite(&header, sizeof(header), 1, file_pointer_) != 1)
         I_Error("AJBSP: Error writing WAD header.\n");
 
-    fflush(fp_);
+    fflush(file_pointer_);
 }
 
 } // namespace ajbsp

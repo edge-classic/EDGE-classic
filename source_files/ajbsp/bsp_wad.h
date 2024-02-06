@@ -48,8 +48,8 @@ class Lump
     int lump_length_;
 
     // constructor is private
-    Lump(WadFile *par, const char *name, int start, int len);
-    Lump(WadFile *par, const struct RawWadEntry *entry);
+    Lump(WadFile *parent, const char *name, int start, int length);
+    Lump(WadFile *parent, const struct RawWadEntry *entry);
 
     void MakeEntry(struct RawWadEntry *entry);
 
@@ -73,18 +73,18 @@ class Lump
     bool Seek(int offset);
 
     // read some data from the lump, returning true if OK.
-    bool Read(void *data, size_t len);
+    bool Read(void *data, size_t length);
 
     // read a line of text, returns true if OK, false on EOF
-    bool GetLine(char *buffer, size_t buf_size);
+    bool GetLine(char *buffer, size_t buffer_size);
 
     // write some data to the lump.  Only the lump which had just
     // been created with WadFile::AddLump() or RecreateLump() can be
     // written to.
-    bool Write(const void *data, int len);
+    bool Write(const void *data, int length);
 
     // write some text to the lump
-    void Printf(const char *msg, ...);
+    void Printf(const char *message, ...);
 
     // mark the lump as finished (after writing data to it).
     bool Finish();
@@ -116,9 +116,9 @@ class WadFile
 
     char mode_; // mode value passed to ::Open()
 
-    FILE *fp_;
+    FILE *file_pointer_;
 
-    epi::MemFile *memory_fp_;
+    epi::MemFile *memory_file_pointer_;
 
     char kind_; // 'P' for PWAD, 'I' for IWAD
 
@@ -129,15 +129,15 @@ class WadFile
 
     std::vector<Lump *> directory_;
 
-    int dir_start_;
-    int dir_count_;
+    int directory_start_;
+    int directory_count_;
 
     // these are lump indices (into 'directory' vector)
     std::vector<int> levels_;
     std::vector<int> patches_;
     std::vector<int> sprites_;
     std::vector<int> flats_;
-    std::vector<int> tx_tex_;
+    std::vector<int> tx_textures_;
 
     bool begun_write_;
     int  begun_max_size_;
@@ -146,7 +146,7 @@ class WadFile
     int insert_point_;
 
     // constructor is private
-    WadFile(std::string name, char mode, FILE *fp, epi::MemFile *memory_fp);
+    WadFile(std::string name, char mode, FILE *file_pointer, epi::MemFile *memory_file_pointer);
 
   public:
     ~WadFile();
@@ -189,8 +189,8 @@ class WadFile
     {
         return (int)levels_.size();
     }
-    int LevelHeader(int lev_num);
-    int LevelLastLump(int lev_num);
+    int LevelHeader(int level_number);
+    int LevelLastLump(int level_number);
 
     // these return a level number (0 .. count-1)
     int LevelFind(const char *name);
@@ -198,9 +198,9 @@ class WadFile
     int LevelFindFirst();
 
     // returns a lump index, -1 if not found
-    int LevelLookupLump(int lev_num, const char *name);
+    int LevelLookupLump(int level_number, const char *name);
 
-    MapFormat LevelFormat(int lev_num);
+    MapFormat LevelFormat(int level_number);
 
     void SortLevels();
 
@@ -217,7 +217,7 @@ class WadFile
     // you will write into the lump -- writing more will corrupt
     // something else in the WAD.
     Lump *AddLump(const char *name, int max_size = -1);
-    Lump *AddLevel(const char *name, int max_size = -1, int *lev_num = NULL);
+    Lump *AddLevel(const char *name, int max_size = -1, int *level_number = NULL);
 
     // setup lump to write new data to it.
     // the old contents are lost.
@@ -265,7 +265,7 @@ class WadFile
     // (including the CRC).
     void WriteDirectory();
 
-    void FixGroup(std::vector<int> &group, int index, int num_added, int num_removed);
+    void FixGroup(std::vector<int> &group, int index, int number_added, int number_removed);
 
   private:
     // deliberately don't implement these

@@ -122,12 +122,12 @@ void MarkPolyobjSector(Sector *sector)
 #endif
 
     /* already marked ? */
-    if (sector->has_polyobj)
+    if (sector->has_polyobject)
         return;
 
     // mark all lines of this sector as precious, to prevent (ideally)
     // the sector from being split.
-    sector->has_polyobj = true;
+    sector->has_polyobject = true;
 
     for (int i = 0; i < level_linedefs.size(); i++)
     {
@@ -575,23 +575,23 @@ void Vertex::AddWallTip(double dx, double dy, bool open_left, bool open_right)
     }
 
     while (after && tip->angle + kEpsilon < after->angle)
-        after = after->prev;
+        after = after->previous;
 
     // link it in
     tip->next = after ? after->next : tip_set_;
-    tip->prev = after;
+    tip->previous = after;
 
     if (after)
     {
         if (after->next)
-            after->next->prev = tip;
+            after->next->previous = tip;
 
         after->next = tip;
     }
     else
     {
         if (tip_set_ != NULL)
-            tip_set_->prev = tip;
+            tip_set_->previous = tip;
 
         tip_set_ = tip;
     }

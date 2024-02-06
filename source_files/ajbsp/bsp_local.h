@@ -46,7 +46,7 @@ struct WallTip
 {
     // link in list.  List is kept in ANTI-clockwise order.
     WallTip *next;
-    WallTip *prev;
+    WallTip *previous;
 
     // angle that line makes at vertex (degrees).
     double angle;
@@ -101,7 +101,7 @@ struct Sector
     // write the SECTORS lump, only read it.
 
     // -JL- non-zero if this sector contains a polyobj.
-    bool has_polyobj;
+    bool has_polyobject;
 };
 
 struct Sidedef
@@ -116,7 +116,7 @@ struct Sidedef
 struct Linedef
 {
     // link for list
-    Linedef *Next;
+    Linedef *next;
 
     Vertex *start; // from this vertex...
     Vertex *end;   // ... to this vertex

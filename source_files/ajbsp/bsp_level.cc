@@ -236,6 +236,15 @@ void FreeWallTips()
 
 /* ----- reading routines ------------------------------ */
 
+static const char *GetLevelName(int level_index)
+{
+    SYS_ASSERT(cur_wad != NULL);
+
+    int lump_idx = cur_wad->LevelHeader(level_index);
+
+    return cur_wad->GetLump(lump_idx)->Name();
+}
+
 static Vertex *SafeLookupVertex(int num)
 {
     if (num >= level_vertices.size())
@@ -1054,7 +1063,7 @@ void SaveXGL3Format(Lump *lump, Node *root_node)
 {
     // WISH : compute a max_size
 
-    if (current_build_info.force_compress)
+    if (current_build_info.compress_nodes)
         lump->Write(level_ZGL3_magic, 4);
     else
         lump->Write(level_XGL3_magic, 4);
@@ -1178,7 +1187,7 @@ void ZLibBeginLump(Lump *lump)
 {
     zout_lump = lump;
 
-    if (!current_build_info.force_compress)
+    if (!current_build_info.compress_nodes)
         return;
 
     zout_stream.zalloc = (alloc_func)0;
@@ -1194,10 +1203,7 @@ void ZLibBeginLump(Lump *lump)
 
 void ZLibAppendLump(const void *data, int length)
 {
-    // ASSERT(zout_lump)
-    // ASSERT(length > 0)
-
-    if (!current_build_info.force_compress)
+    if (!current_build_info.compress_nodes)
     {
         zout_lump->Write(data, length);
         return;
@@ -1225,7 +1231,7 @@ void ZLibAppendLump(const void *data, int length)
 
 void ZLibFinishLump(void)
 {
-    if (!current_build_info.force_compress)
+    if (!current_build_info.compress_nodes)
     {
         zout_lump->Finish();
         zout_lump = NULL;
@@ -1291,7 +1297,7 @@ void ResetInfo()
 {
     current_build_info.total_minor_issues = 0;
     current_build_info.total_warnings = 0;
-    current_build_info.force_compress = true;
+    current_build_info.compress_nodes = true;
     current_build_info.split_cost = kSplitCostDefault;
 }
 
@@ -1351,25 +1357,16 @@ int LevelsInWad()
     return cur_wad->LevelCount();
 }
 
-const char *GetLevelName(int level_idx)
-{
-    SYS_ASSERT(cur_wad != NULL);
-
-    int lump_idx = cur_wad->LevelHeader(level_idx);
-
-    return cur_wad->GetLump(lump_idx)->Name();
-}
-
 /* ----- build nodes for a single level ----- */
 
-BuildResult BuildLevel(int level_idx)
+BuildResult BuildLevel(int level_index)
 {
     Node   *root_node = NULL;
     Subsector *root_sub  = NULL;
 
-    level_current_idx   = level_idx;
-    level_current_start = cur_wad->LevelHeader(level_idx);
-    level_format        = cur_wad->LevelFormat(level_idx);
+    level_current_idx   = level_index;
+    level_current_start = cur_wad->LevelHeader(level_index);
+    level_format        = cur_wad->LevelFormat(level_index);
 
     LoadLevel();
 

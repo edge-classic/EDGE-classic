@@ -345,7 +345,7 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, eval_info_
         }
 
         /* check for being on the same line */
-        if (fa <= DIST_EPSILON && fb <= DIST_EPSILON)
+        if (fa <= kEpsilon && fb <= kEpsilon)
         {
             // this seg runs along the same line as the partition.  Check
             // whether it goes in the same direction or the opposite.
@@ -364,20 +364,20 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, eval_info_
         //       may fail to detect the sector being cut in half.  Thanks
         //       to Janis Legzdinsh for spotting this obscure bug.
 
-        if (fa <= DIST_EPSILON || fb <= DIST_EPSILON)
+        if (fa <= kEpsilon || fb <= kEpsilon)
         {
             if (check->linedef_ != NULL && check->linedef_->is_precious)
                 info->cost += 40.0 * split_cost * kPreciousCostMultiplier;
         }
 
         /* check for right side */
-        if (a > -DIST_EPSILON && b > -DIST_EPSILON)
+        if (a > -kEpsilon && b > -kEpsilon)
         {
             info->BumpRight(check->linedef_);
 
             /* check for a near miss */
-            if ((a >= kIffySegLength && b >= kIffySegLength) || (a <= DIST_EPSILON && b >= kIffySegLength) ||
-                (b <= DIST_EPSILON && a >= kIffySegLength))
+            if ((a >= kIffySegLength && b >= kIffySegLength) || (a <= kEpsilon && b >= kIffySegLength) ||
+                (b <= kEpsilon && a >= kIffySegLength))
             {
                 continue;
             }
@@ -389,7 +389,7 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, eval_info_
             //       processing.  Thus the closer the near miss, the higher
             //       the cost.
 
-            if (a <= DIST_EPSILON || b <= DIST_EPSILON)
+            if (a <= kEpsilon || b <= kEpsilon)
                 qnty = kIffySegLength / HMM_MAX(a, b);
             else
                 qnty = kIffySegLength / HMM_MIN(a, b);
@@ -399,13 +399,13 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, eval_info_
         }
 
         /* check for left side */
-        if (a < DIST_EPSILON && b < DIST_EPSILON)
+        if (a < kEpsilon && b < kEpsilon)
         {
             info->BumpLeft(check->linedef_);
 
             /* check for a near miss */
-            if ((a <= -kIffySegLength && b <= -kIffySegLength) || (a >= -DIST_EPSILON && b <= -kIffySegLength) ||
-                (b >= -DIST_EPSILON && a <= -kIffySegLength))
+            if ((a <= -kIffySegLength && b <= -kIffySegLength) || (a >= -kEpsilon && b <= -kIffySegLength) ||
+                (b >= -kEpsilon && a <= -kIffySegLength))
             {
                 continue;
             }
@@ -413,7 +413,7 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost, eval_info_
             info->near_miss++;
 
             // the closer the miss, the higher the cost (see note above)
-            if (a >= -DIST_EPSILON || b >= -DIST_EPSILON)
+            if (a >= -kEpsilon || b >= -kEpsilon)
                 qnty = kIffySegLength / -HMM_MIN(a, b);
             else
                 qnty = kIffySegLength / -HMM_MAX(a, b);
@@ -657,7 +657,7 @@ bool PickNodeWorker(QuadTree *part_list, QuadTree *tree, Seg **best, double *bes
 //
 // Find the best seg in the seg_list to use as a partition line.
 //
-Seg *PickNode(QuadTree *tree)
+static Seg *PickNode(QuadTree *tree)
 {
     Seg *best = NULL;
 
@@ -671,7 +671,7 @@ Seg *PickNode(QuadTree *tree)
      *       are axis-aligned and roughly divide the current group into
      *       two halves.  This can save *heaps* of times on large levels.
      */
-    if (current_build_info.fast && tree->real_num_ >= kSegFastModeThreshold)
+    if (tree->real_num_ >= kSegFastModeThreshold)
     {
 #if DEBUG_PICKNODE
         I_Debugf("PickNode: Looking for Fast node...\n");
@@ -709,7 +709,7 @@ Seg *PickNode(QuadTree *tree)
 //       same logic when determining which segs should go left, right
 //       or be split.
 //
-void DivideOneSeg(Seg *seg, Seg *part, Seg **left_list, Seg **right_list, Intersection **cut_list)
+static void DivideOneSeg(Seg *seg, Seg *part, Seg **left_list, Seg **right_list, Intersection **cut_list)
 {
     /* get state of lines' relation to each other */
     double a = part->PerpendicularDistance(seg->psx_, seg->psy_);
@@ -721,7 +721,7 @@ void DivideOneSeg(Seg *seg, Seg *part, Seg **left_list, Seg **right_list, Inters
         a = b = 0;
 
     /* check for being on the same line */
-    if (fabs(a) <= DIST_EPSILON && fabs(b) <= DIST_EPSILON)
+    if (fabs(a) <= kEpsilon && fabs(b) <= kEpsilon)
     {
         AddIntersection(cut_list, seg->start_, part, self_ref);
         AddIntersection(cut_list, seg->end_, part, self_ref);
@@ -738,11 +738,11 @@ void DivideOneSeg(Seg *seg, Seg *part, Seg **left_list, Seg **right_list, Inters
     }
 
     /* check for right side */
-    if (a > -DIST_EPSILON && b > -DIST_EPSILON)
+    if (a > -kEpsilon && b > -kEpsilon)
     {
-        if (a < DIST_EPSILON)
+        if (a < kEpsilon)
             AddIntersection(cut_list, seg->start_, part, self_ref);
-        else if (b < DIST_EPSILON)
+        else if (b < kEpsilon)
             AddIntersection(cut_list, seg->end_, part, self_ref);
 
         ListAddSeg(right_list, seg);
@@ -750,11 +750,11 @@ void DivideOneSeg(Seg *seg, Seg *part, Seg **left_list, Seg **right_list, Inters
     }
 
     /* check for left side */
-    if (a < DIST_EPSILON && b < DIST_EPSILON)
+    if (a < kEpsilon && b < kEpsilon)
     {
-        if (a > -DIST_EPSILON)
+        if (a > -kEpsilon)
             AddIntersection(cut_list, seg->start_, part, self_ref);
-        else if (b > -DIST_EPSILON)
+        else if (b > -kEpsilon)
             AddIntersection(cut_list, seg->end_, part, self_ref);
 
         ListAddSeg(left_list, seg);
@@ -783,7 +783,7 @@ void DivideOneSeg(Seg *seg, Seg *part, Seg **left_list, Seg **right_list, Inters
     }
 }
 
-void SeparateSegs(QuadTree *tree, Seg *part, Seg **left_list, Seg **right_list, Intersection **cut_list)
+static void SeparateSegs(QuadTree *tree, Seg *part, Seg **left_list, Seg **right_list, Intersection **cut_list)
 {
     while (tree->list_ != NULL)
     {
@@ -804,7 +804,7 @@ void SeparateSegs(QuadTree *tree, Seg *part, Seg **left_list, Seg **right_list, 
     // this QuadTree is empty now
 }
 
-void FindLimits2(Seg *list, BoundingBox *bbox)
+static void FindLimits2(Seg *list, BoundingBox *bbox)
 {
     // empty list?
     if (list == NULL)
@@ -842,7 +842,7 @@ void FindLimits2(Seg *list, BoundingBox *bbox)
     }
 }
 
-void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list, Seg **right_list)
+static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list, Seg **right_list)
 {
     Intersection *cut, *next;
 
@@ -980,7 +980,7 @@ int Seg::PointOnLineSide(double x, double y) const
 {
     double perp = PerpendicularDistance(x, y);
 
-    if (fabs(perp) <= DIST_EPSILON)
+    if (fabs(perp) <= kEpsilon)
         return 0;
 
     return (perp < 0) ? -1 : +1;
@@ -1253,7 +1253,7 @@ Seg *CreateSegs()
     return list;
 }
 
-QuadTree *TreeFromSegList(Seg *list, const BoundingBox *bounds)
+static QuadTree *TreeFromSegList(Seg *list, const BoundingBox *bounds)
 {
     QuadTree *tree = new QuadTree(bounds->minx, bounds->miny, bounds->maxx, bounds->maxy);
 
@@ -1404,7 +1404,7 @@ void Subsector::SanityCheckClosed() const
         double dx = seg->end_->x_ - next->start_->x_;
         double dy = seg->end_->y_ - next->start_->y_;
 
-        if (fabs(dx) > DIST_EPSILON || fabs(dy) > DIST_EPSILON)
+        if (fabs(dx) > kEpsilon || fabs(dy) > kEpsilon)
             gaps++;
 
         total++;
@@ -1651,21 +1651,6 @@ void Subsector::Normalise()
         I_Error("AJBSP: Subsector %d normalised to being EMPTY\n", index_);
 
     seg_list_ = new_head;
-}
-
-void NormaliseBspTree()
-{
-    // unlinks all minisegs from each subsector
-
-    int cur_seg_index = 0;
-
-    for (int i = 0; i < level_subsecs.size(); i++)
-    {
-        Subsector *sub = level_subsecs[i];
-
-        sub->Normalise();
-        sub->RenumberSegs(cur_seg_index);
-    }
 }
 
 void RoundOffVertices()

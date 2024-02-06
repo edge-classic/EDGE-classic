@@ -34,33 +34,24 @@ constexpr uint8_t kSplitCostDefault = 11;
 
 struct BuildInfo
 {
-    // use a faster method to pick nodes
-    bool fast;
-
-    // create GL Nodes?
-    bool gl_nodes;
-
-    bool force_v5;
-    bool force_xnod;
     bool force_compress;
 
     int split_cost;
-
-    // this affects how some messages are shown
-    int verbosity;
 
     // from here on, various bits of internal state
     int total_warnings;
     int total_minor_issues;
 };
 
+
+
 enum BuildResult
 {
     // everything went peachy keen
     kBuildOK = 0,
 
-    // when saving the map, one or more lumps overflowed
-    kBuildLumpOverflow
+    // not used at the moment, I think we just throw I_Error if needed - Dasho
+    kBuildError
 };
 
 namespace ajbsp

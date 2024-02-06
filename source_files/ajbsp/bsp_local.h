@@ -33,10 +33,6 @@ class WadFile;
 
 extern BuildInfo current_build_info;
 
-// current WAD file
-
-extern WadFile *current_wad;
-
 //------------------------------------------------------------------------
 // LEVEL : Level structures & read/write functions.
 //------------------------------------------------------------------------
@@ -106,16 +102,6 @@ struct Sector
 
     // -JL- non-zero if this sector contains a polyobj.
     bool has_polyobj;
-
-    // used when building REJECT table.  Each set of sectors that are
-    // isolated from other sectors will have a different group number.
-    // Thus: on every 2-sided linedef, the sectors on both sides will be
-    // in the same group.  The rej_next, rej_prev fields are a link in a
-    // RING, containing all sectors of the same group.
-    int rej_group;
-
-    Sector *rej_next;
-    Sector *rej_prev;
 };
 
 struct Sidedef
@@ -391,8 +377,6 @@ Subsector  *NewSubsec();
 Node    *NewNode();
 WallTip *NewWallTip();
 
-Lump *CreateGLMarker();
-Lump *CreateLevelLump(const char *name, int max_size = -1);
 Lump *FindLevelLump(const char *name);
 
 // Zlib compression support
@@ -446,10 +430,8 @@ Vertex *NewVertexDegenerate(Vertex *start, Vertex *end);
 constexpr float kIffySegLength = 4.0f;
 
 // smallest distance between two points before being considered equal
-#define DIST_EPSILON (1.0 / 1024.0)
-
-// smallest degrees between two angles before being considered equal
-#define ANG_EPSILON (1.0 / 1024.0)
+// also used for smallest degree between two angles
+constexpr double kEpsilon = (1.0 / 1024.0);
 
 inline void ListAddSeg(Seg **list_ptr, Seg *seg)
 {
@@ -487,33 +469,6 @@ struct Intersection
 
 /* -------- functions ---------------------------- */
 
-// scan all the segs in the list, and choose the best seg to use as a
-// partition line, returning it.  If no seg can be used, returns NULL.
-// The 'depth' parameter is the current depth in the tree, used for
-// computing the current progress.
-Seg *PickNode(QuadTree *tree, int depth);
-
-// compute the boundary of the list of segs
-void FindLimits2(Seg *list, BoundingBox *bbox);
-
-// take the given seg 'cur', compare it with the partition line, and
-// determine it's fate: moving it into either the left or right lists
-// (perhaps both, when splitting it in two).  Handles partners as
-// well.  Updates the intersection list if the seg lies on or crosses
-// the partition line.
-void DivideOneSeg(Seg *cur, Seg *part, QuadTree *left_list, QuadTree *right_list, Intersection **cut_list);
-
-// remove all the segs from the list, partitioning them into the left
-// or right lists based on the given partition line.  Adds any
-// intersections into the intersection list as it goes.
-void SeparateSegs(QuadTree *seg_list, Seg *part, QuadTree *left_list, QuadTree *right_list,
-                  Intersection **cut_list);
-
-// analyse the intersection list, and add any needed minisegs to the
-// given seg lists (one miniseg on each side).  All the intersection
-// structures will be freed back into a quick-alloc list.
-void AddMinisegs(Seg *part, QuadTree *left_list, QuadTree *right_list, Intersection *cut_list);
-
 void FreeIntersections(void);
 
 //------------------------------------------------------------------------
@@ -523,8 +478,6 @@ void FreeIntersections(void);
 // scan all the linedef of the level and convert each sidedef into a
 // seg (or seg pair).  Returns the list of segs.
 Seg *CreateSegs(void);
-
-QuadTree *TreeFromSegList(Seg *list);
 
 // takes the seg list and determines if it is convex.  When it is, the
 // segs are converted to a subsector, and '*S' is the new subsector
@@ -545,11 +498,6 @@ int ComputeBspHeight(const Node *node);
 //   a partner will insert another seg into that partner's list, usually
 //   in the wrong place order-wise. ]
 void ClockwiseBspTree();
-
-// traverse the BSP tree and do whatever is necessary to convert the
-// node information from GL standard to normal standard (for example,
-// removing minisegs).
-void NormaliseBspTree();
 
 // traverse the BSP tree, doing whatever is necessary to round
 // vertices to integer coordinates (for example, removing segs whose

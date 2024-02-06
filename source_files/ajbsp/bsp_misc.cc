@@ -198,11 +198,11 @@ void MarkPolyobjPoint(double x, double y)
         double y2 = L->end->y_;
 
         /* check vertical range */
-        if (fabs(y2 - y1) < DIST_EPSILON)
+        if (fabs(y2 - y1) < kEpsilon)
             continue;
 
-        if ((y > (y1 + DIST_EPSILON) && y > (y2 + DIST_EPSILON)) ||
-            (y < (y1 - DIST_EPSILON) && y < (y2 - DIST_EPSILON)))
+        if ((y > (y1 + kEpsilon) && y > (y2 + kEpsilon)) ||
+            (y < (y1 - kEpsilon) && y < (y2 - kEpsilon)))
             continue;
 
         double x_cut = x1 + (x2 - x1) * (y - y1) / (y2 - y1) - x;
@@ -232,7 +232,7 @@ void MarkPolyobjPoint(double x, double y)
 
     /* sanity check: shouldn't be directly on the line */
 #if DEBUG_POLYOBJ
-    if (fabs(best_dist) < DIST_EPSILON)
+    if (fabs(best_dist) < kEpsilon)
     {
         I_Debugf("  Polyobj FAILURE: directly on the line (%d)\n", best_match->index);
     }
@@ -357,7 +357,7 @@ bool Vertex::Overlaps(const Vertex *other) const
     double dx = fabs(other->x_ - x_);
     double dy = fabs(other->y_ - y_);
 
-    return (dx < DIST_EPSILON) && (dy < DIST_EPSILON);
+    return (dx < kEpsilon) && (dy < kEpsilon);
 }
 
 // cmpVertex and revised *Compare functions adapted from k8vavoom
@@ -574,7 +574,7 @@ void Vertex::AddWallTip(double dx, double dy, bool open_left, bool open_right)
     {
     }
 
-    while (after && tip->angle + ANG_EPSILON < after->angle)
+    while (after && tip->angle + kEpsilon < after->angle)
         after = after->prev;
 
     // link it in
@@ -722,7 +722,7 @@ bool Vertex::CheckOpen(double dx, double dy) const
 
     for (tip = tip_set_; tip; tip = tip->next)
     {
-        if (fabs(tip->angle - angle) < ANG_EPSILON || fabs(tip->angle - angle) > (360.0 - ANG_EPSILON))
+        if (fabs(tip->angle - angle) < kEpsilon || fabs(tip->angle - angle) > (360.0 - kEpsilon))
         {
             // found one, hence closed
             return false;
@@ -735,7 +735,7 @@ bool Vertex::CheckOpen(double dx, double dy) const
 
     for (tip = tip_set_; tip; tip = tip->next)
     {
-        if (angle + ANG_EPSILON < tip->angle)
+        if (angle + kEpsilon < tip->angle)
         {
             // found it
             return tip->open_right;

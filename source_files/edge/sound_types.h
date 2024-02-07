@@ -31,7 +31,7 @@ typedef enum
     FMT_MUS,
     FMT_MIDI,
     FMT_IMF, // Used with DDFPLAY; not in auto-detection
-    kDoomImage,
+    FMT_DOOM,
     FMT_SPK
 } sound_format_e;
 

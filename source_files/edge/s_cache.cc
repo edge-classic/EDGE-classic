@@ -260,7 +260,7 @@ static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
             OK = Load_WAV(buf, data, length, true);
         break;
 
-    case kDoomImage:
+    case FMT_DOOM:
         OK = Load_DOOM(buf, data, length);
         break;
 

@@ -70,7 +70,7 @@ void font_c::BumpPatchName(char *name)
     for (char *s = name + strlen(name) - 1; s >= name; s--)
     {
         // only handle digits and letters
-        if (!isalnum(*s))
+        if (!epi::IsAlphanumericASCII(*s))
             break;
 
         if (*s == '9')
@@ -189,8 +189,8 @@ void font_c::LoadPatches()
 	{
         if (!patch_data.count(cp437_unicode_values[(uint8_t)ch]))
         {
-            if ('a' <= ch && ch <= 'z' && patch_data.count(cp437_unicode_values[(uint8_t)(toupper(ch))]))
-                patch_data.try_emplace(cp437_unicode_values[(uint8_t)ch], patch_data.at(cp437_unicode_values[(uint8_t)(toupper(ch))]));
+            if ('a' <= ch && ch <= 'z' && patch_data.count(cp437_unicode_values[(uint8_t)(epi::ToUpperASCII(ch))]))
+                patch_data.try_emplace(cp437_unicode_values[(uint8_t)ch], patch_data.at(cp437_unicode_values[(uint8_t)(epi::ToUpperASCII(ch))]));
             else if (missing_imdata)
                 patch_data.try_emplace(cp437_unicode_values[(uint8_t)ch], missing_imdata);  
         }

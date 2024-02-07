@@ -1266,7 +1266,7 @@ mapdef_c *G_LookupMap(const char *refname)
         return m;
 
     // -AJA- handle numbers (like original DOOM)
-    if (strlen(refname) <= 2 && isdigit(refname[0]) && (!refname[1] || isdigit(refname[1])))
+    if (strlen(refname) <= 2 && epi::IsDigitASCII(refname[0]) && (!refname[1] || epi::IsDigitASCII(refname[1])))
     {
         int num = atoi(refname);
         // first try map names ending in ## (single digit treated as 0#)

@@ -142,7 +142,7 @@ void Sprites::AlterBexSprite(const char *new_val)
     }
 
     // for DSDehacked, support a numeric target
-    if (isdigit(old_val[0]))
+    if (epi::IsDigitASCII(old_val[0]))
     {
         int num = atoi(old_val);
         if (num < 0 || num > 32767)

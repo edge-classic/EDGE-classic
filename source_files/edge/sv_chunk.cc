@@ -105,7 +105,7 @@ static void PutPadding(void)
 
 static inline bool VerifyMarker(const char *id)
 {
-    return isalnum(id[0]) && isalnum(id[1]) && isalnum(id[2]) && isalnum(id[3]);
+    return epi::IsAlphanumericASCII(id[0]) && epi::IsAlphanumericASCII(id[1]) && epi::IsAlphanumericASCII(id[2]) && epi::IsAlphanumericASCII(id[3]);
 }
 
 void SV_ChunkInit(void)
@@ -352,7 +352,7 @@ bool SV_PushReadChunk(const char *id)
     strcpy(cur->e_mark, id);
     for (size_t i = 0; i < strlen(cur->e_mark); i++)
     {
-        cur->e_mark[i] = toupper(cur->e_mark[i]);
+        cur->e_mark[i] = epi::ToUpperASCII(cur->e_mark[i]);
     }
 
     // top level chunk ?
@@ -539,7 +539,7 @@ bool SV_PushWriteChunk(const char *id)
     strcpy(cur->e_mark, id);
     for (size_t i = 0; i < strlen(cur->e_mark); i++)
     {
-        cur->e_mark[i] = toupper(cur->e_mark[i]);
+        cur->e_mark[i] = epi::ToUpperASCII(cur->e_mark[i]);
     }
 
     // create initial buffer

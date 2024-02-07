@@ -940,7 +940,7 @@ static std::string PatternSubst(const char *format, const std::vector<std::strin
         if (!key[0])
             break;
 
-        if (isalpha(key[0]))
+        if (epi::IsAlphaASCII(key[0]))
         {
             for (int i = 0; i + 1 < (int)keywords.size(); i += 2)
             {

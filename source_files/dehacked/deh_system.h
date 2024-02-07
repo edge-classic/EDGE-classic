@@ -20,6 +20,7 @@
 #define __DEH_SYSTEM_HDR__
 
 #include "epi.h"
+#include "str_util.h"
 
 #define F_FIXED(n) ((float)(n) / 65536.0)
 

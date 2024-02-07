@@ -557,7 +557,7 @@ void Sounds::AlterBexSound(const char *new_val)
     }
 
     // for DSDehacked, support a numeric target
-    if (isdigit(old_val[0]))
+    if (epi::IsDigitASCII(old_val[0]))
     {
         int num = atoi(old_val);
         if (num < 1 || num > 32767)

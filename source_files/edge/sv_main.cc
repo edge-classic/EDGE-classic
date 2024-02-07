@@ -476,7 +476,7 @@ const char *SV_MapName(const mapdef_c *map)
     strcpy(buffer, map->name.c_str());
 
     for (char *pos = buffer; *pos; pos++)
-        *pos = tolower(*pos);
+        *pos = epi::ToLowerASCII(*pos);
 
     return buffer;
 }

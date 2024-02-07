@@ -224,7 +224,7 @@ int TranslateSDLKey(SDL_Scancode key)
     }
 
     if (key <= 0x7f)
-        return tolower(SDL_GetKeyFromScancode(key));
+        return epi::ToLowerASCII(SDL_GetKeyFromScancode(key));
 
     return -1;
 }

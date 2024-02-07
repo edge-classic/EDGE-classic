@@ -19,6 +19,7 @@
 
 #include "bsp_local.h"
 #include "bsp_utility.h"
+#include "str_util.h"
 
 namespace ajbsp
 {
@@ -66,7 +67,7 @@ char *StringUpper(const char *name)
     char *copy = StringDup(name);
 
     for (char *p = copy; *p; p++)
-        *p = toupper(*p);
+        *p = epi::ToUpperASCII(*p);
 
     return copy;
 }

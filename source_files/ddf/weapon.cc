@@ -625,7 +625,7 @@ static void DDF_WStateGetRADTrigger(const char *arg, state_t *cur_state)
     int         count  = 0;
     int         length = strlen(arg);
 
-    while (isdigit(*pos++))
+    while (epi::IsDigitASCII(*pos++))
         count++;
 
     // Is the value an integer?

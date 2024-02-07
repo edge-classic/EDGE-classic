@@ -329,7 +329,7 @@ int CMD_ShowLumps(char **argv, int argc)
 
     char *match = NULL;
 
-    if (argc >= 2 && isdigit(argv[1][0]))
+    if (argc >= 2 && epi::IsDigitASCII(argv[1][0]))
         for_file = atoi(argv[1]);
 
     if (argc >= 3)
@@ -337,7 +337,7 @@ int CMD_ShowLumps(char **argv, int argc)
         match = argv[2];
         for (size_t i = 0; i < strlen(match); i++)
         {
-            match[i] = toupper(match[i]);
+            match[i] = epi::ToUpperASCII(match[i]);
         }
     }
 
@@ -520,7 +520,7 @@ static int GetArgs(const char *line, char **argv, int max_argc)
 
     for (;;)
     {
-        while (isspace(*(uint8_t *)line))
+        while (epi::IsSpaceASCII(*(uint8_t *)line))
             line++;
 
         if (!*line)
@@ -542,7 +542,7 @@ static int GetArgs(const char *line, char **argv, int max_argc)
         }
         else
         {
-            while (*line && !isspace(*(uint8_t *)line))
+            while (*line && !epi::IsSpaceASCII(*(uint8_t *)line))
                 line++;
         }
 

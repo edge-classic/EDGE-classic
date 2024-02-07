@@ -716,7 +716,7 @@ static float PercentWidth(std::string &s)
         {
             perc_width += IM_WIDTH(percent);
         }
-        else if (std::isdigit(c))
+        else if (epi::IsDigitASCII(c))
         {
             perc_width += IM_WIDTH(digits[c - 48]);
         }
@@ -733,7 +733,7 @@ static void DrawPercent(float x, float y, std::string &s)
             HUD_DrawImage(x, y, percent);
             x += IM_WIDTH(percent);
         }
-        else if (std::isdigit(c))
+        else if (epi::IsDigitASCII(c))
         {
             HUD_DrawImage(x, y, digits[c - 48]);
             x += IM_WIDTH(digits[c - 48]);
@@ -810,7 +810,7 @@ static float TimeWidth(int t, bool drawText = false)
                 {
                     time_width += IM_WIDTH(colon);
                 }
-                else if (std::isdigit(c))
+                else if (epi::IsDigitASCII(c))
                 {
                     time_width += IM_WIDTH(digits[c - 48]);
                 }
@@ -888,7 +888,7 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
                     HUD_DrawImage(x, y, colon);
                     x += IM_WIDTH(colon);
                 }
-                else if (std::isdigit(c))
+                else if (epi::IsDigitASCII(c))
                 {
                     HUD_DrawImage(x, y, digits[c - 48]);
                     x += IM_WIDTH(digits[c - 48]);

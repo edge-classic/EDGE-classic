@@ -465,7 +465,7 @@ static void SpecialWadVerify(void)
     const char *s         = verstring.data();
     int         epk_ver   = atoi(s) * 100;
 
-    while (isdigit(*s))
+    while (epi::IsDigitASCII(*s))
         s++;
     s++;
     epk_ver += atoi(s);

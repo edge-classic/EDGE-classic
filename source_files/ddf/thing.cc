@@ -459,14 +459,14 @@ int DDF_CompareName(const char *A, const char *B)
         if (*B == 0)
             return +1;
 
-        if (toupper(*A) == toupper(*B))
+        if (epi::ToUpperASCII(*A) == epi::ToUpperASCII(*B))
         {
             A++;
             B++;
             continue;
         }
 
-        return toupper(*A) - toupper(*B);
+        return epi::ToUpperASCII(*A) - epi::ToUpperASCII(*B);
     }
 }
 
@@ -1699,7 +1699,7 @@ static void DDF_MobjStateGetRADTrigger(const char *arg, state_t *cur_state)
     int         count  = 0;
     int         length = strlen(arg);
 
-    while (isdigit(*pos++))
+    while (epi::IsDigitASCII(*pos++))
         count++;
 
     // Is the value an integer?

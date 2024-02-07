@@ -52,7 +52,7 @@ std::string DDF_SanitizeName(const std::string &s)
         if (s[i] == ' ' || s[i] == '_')
             continue;
 
-        out.push_back((char)toupper(s[i]));
+        out.push_back((char)epi::ToUpperASCII(s[i]));
     }
 
     if (out.empty())

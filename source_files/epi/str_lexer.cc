@@ -18,6 +18,7 @@
 
 #include "epi.h"
 #include "str_lexer.h"
+#include "str_util.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -39,10 +40,10 @@ TokenKind Lexer::Next(std::string &s)
     if (ch == '"')
         return ParseString(s);
 
-    if (ch == '-' || ch == '+' || isdigit(ch))
+    if (ch == '-' || ch == '+' || IsDigitASCII(ch))
         return ParseNumber(s);
 
-    if (isalpha(ch) || ch == '_' || ch >= 128)
+    if (IsAlphaASCII(ch) || ch == '_' || ch >= 128)
         return ParseIdentifier(s);
 
     // anything else is a single-character symbol
@@ -56,7 +57,7 @@ bool Lexer::Match(const char *s)
     SYS_ASSERT(s);
     SYS_ASSERT(s[0]);
 
-    bool is_keyword = std::isalnum(s[0]);
+    bool is_keyword = IsAlphanumericASCII(s[0]);
 
     SkipToNext();
 
@@ -72,9 +73,9 @@ bool Lexer::Match(const char *s)
 
         // don't change a char when high-bit is set (for UTF-8)
         if (A < 128)
-            A = tolower(A);
+            A = ToLowerASCII(A);
         if (B < 128)
-            B = tolower(B);
+            B = ToLowerASCII(B);
 
         if (A != B)
             return false;
@@ -87,7 +88,7 @@ bool Lexer::Match(const char *s)
     {
         unsigned char ch = (unsigned char)data_[pos_];
 
-        if (isalnum(ch) || ch >= 128)
+        if (IsAlphanumericASCII(ch) || ch >= 128)
             return false;
     }
 
@@ -99,7 +100,7 @@ bool Lexer::MatchKeep(const char *s)
     SYS_ASSERT(s);
     SYS_ASSERT(s[0]);
 
-    bool is_keyword = isalnum(s[0]);
+    bool is_keyword = IsAlphanumericASCII(s[0]);
 
     SkipToNext();
 
@@ -115,9 +116,9 @@ bool Lexer::MatchKeep(const char *s)
 
         // don't change a char when high-bit is set (for UTF-8)
         if (A < 128)
-            A = tolower(A);
+            A = ToLowerASCII(A);
         if (B < 128)
-            B = tolower(B);
+            B = ToLowerASCII(B);
 
         if (A != B)
             return false;
@@ -128,7 +129,7 @@ bool Lexer::MatchKeep(const char *s)
     {
         unsigned char ch = (unsigned char)data_[pos_ + ofs];
 
-        if (isalnum(ch) || ch >= 128)
+        if (IsAlphanumericASCII(ch) || ch >= 128)
             return false;
     }
 
@@ -239,9 +240,9 @@ TokenKind Lexer::ParseIdentifier(std::string &s)
 
         // don't change a char when high-bit is set (for UTF-8)
         if (ch < 128)
-            ch = tolower(ch);
+            ch = ToLowerASCII(ch);
 
-        if (!(isalnum(ch) || ch == '_' || ch >= 128))
+        if (!(IsAlphanumericASCII(ch) || ch == '_' || ch >= 128))
             break;
 
         s.push_back((char)ch);
@@ -258,7 +259,7 @@ TokenKind Lexer::ParseNumber(std::string &s)
     if (data_[pos_] == '-' || data_[pos_] == '+')
     {
         // no digits after the sign?
-        if (pos_ + 1 >= data_.size() || !isdigit(data_[pos_ + 1]))
+        if (pos_ + 1 >= data_.size() || !IsDigitASCII(data_[pos_ + 1]))
         {
             s.push_back(data_[pos_++]);
             return kTokenSymbol;
@@ -275,7 +276,7 @@ TokenKind Lexer::ParseNumber(std::string &s)
         unsigned char ch = (unsigned char)data_[pos_];
 
         // this is fairly lax, but adequate for our purposes
-        if (!(std::isalnum(ch) || ch == '+' || ch == '-' || ch == '.'))
+        if (!(IsAlphanumericASCII(ch) || ch == '+' || ch == '-' || ch == '.'))
             break;
     }
 
@@ -372,14 +373,14 @@ void Lexer::ParseEscape(std::string &s)
         *p++ = '0';
 
         ch = (unsigned char)data_[pos_];
-        if (isxdigit(ch))
+        if (IsXDigitASCII(ch))
         {
             *p++ = ch;
             pos_++;
         }
 
         ch = (unsigned char)data_[pos_];
-        if (isxdigit(ch))
+        if (IsXDigitASCII(ch))
         {
             *p++ = ch;
             pos_++;

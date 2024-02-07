@@ -227,7 +227,7 @@ class rts_menu_c
             ChoiceUp();
 
         if ('a' <= key && key <= 'z')
-            key = toupper(key);
+            key = epi::ToUpperASCII(key);
 
         if (key == 'Q' || key == 'X' || key == KEYD_GP_B || key == KEYD_MOUSE2 || key == KEYD_MOUSE3)
             return 0;

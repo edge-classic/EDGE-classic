@@ -43,7 +43,7 @@ bool IsPathAbsolute(std::string_view path)
     // Check for Drive letter, colon and slash...
     if (path.size() > 2 && path[1] == ':' && 
         (path[2] == '\\' || path[2] == '/') && 
-        isalpha(path[0]))
+        IsAlphaASCII(path[0]))
     {
         return true;
     }

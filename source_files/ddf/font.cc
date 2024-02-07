@@ -177,7 +177,7 @@ static void DDF_FontGetType(const char *info, void *storage)
 static int FontParseCharacter(const char *buf)
 {
 #if 0 // the main parser strips out all the " quotes
-	while (isspace(*buf))
+	while (epi::IsSpaceASCII(*buf))
 		buf++;
 
 	if (buf[0] == '"')
@@ -190,7 +190,7 @@ static int FontParseCharacter(const char *buf)
 	}
 #endif
 
-    if (buf[0] > 0 && isdigit(buf[0]) && isdigit(buf[1]))
+    if (buf[0] > 0 && epi::IsDigitASCII(buf[0]) && epi::IsDigitASCII(buf[1]))
         return atoi(buf);
 
     return buf[0];

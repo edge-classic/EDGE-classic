@@ -173,7 +173,7 @@ static void RAD_CheckForInt(const char *value, int *retvalue)
         count++;
         pos++;
     }
-    while (isdigit(*pos++))
+    while (epi::IsDigitASCII(*pos++))
         count++;
 
     // Is the value an integer?
@@ -205,7 +205,7 @@ static void RAD_CheckForPercent(const char *info, void *storage)
 
     // just check that the string is valid
     Z_StrNCpy(s, info, 100);
-    for (p = s; isdigit(*p) || *p == '.'; p++)
+    for (p = s; epi::IsDigitASCII(*p) || *p == '.'; p++)
     { /* nothing here */
     }
 
@@ -234,7 +234,7 @@ static void RAD_CheckForPercentAny(const char *info, void *storage)
 
     // just check that the string is valid
     Z_StrNCpy(s, info, 100);
-    for (p = s; isdigit(*p) || *p == '-' || *p == '.'; p++)
+    for (p = s; epi::IsDigitASCII(*p) || *p == '-' || *p == '.'; p++)
     { /* nothing here */
     }
 
@@ -355,7 +355,7 @@ static char *RAD_UnquoteString(const char *s)
 #endif
 
         // -AJA- 1999/09/07: check for \n
-        if (s[0] == '\\' && tolower(s[1]) == 'n')
+        if (s[0] == '\\' && epi::ToLowerASCII(s[1]) == 'n')
         {
             new_str += '\n';
             s += 2;
@@ -398,7 +398,7 @@ static void DoParsePlayerSet(const char *info, uint32_t *set)
 
 	for (;;)
 	{
-		if (! isdigit(p[0]))
+		if (! epi::IsDigitASCII(p[0]))
 			RAD_Error("Bad number in set of players: %s\n", info);
 
 		int num = strtol(p, (char **) &next, 10);
@@ -640,7 +640,7 @@ static void RAD_TokenizeLine(param_set_t &pars)
             if (ch == 0 || comment)
                 return;
 
-            if (isspace(ch))
+            if (epi::IsSpaceASCII(ch))
                 continue;
 
             // string ? or expression ?
@@ -685,7 +685,7 @@ static void RAD_TokenizeLine(param_set_t &pars)
                 end_token = true;
             }
         }
-        else if (!in_expr && !in_string && (ch == 0 || comment || isspace(ch)))
+        else if (!in_expr && !in_string && (ch == 0 || comment || epi::IsSpaceASCII(ch)))
         {
             end_token = true;
         }
@@ -765,7 +765,7 @@ static void RAD_ParseStartMap(param_set_t &pars)
     this_map = Z_StrDup(pars[1]);
     for (size_t i = 0; i < strlen(this_map); i++)
     {
-        this_map[i] = toupper(this_map[i]);
+        this_map[i] = epi::ToUpperASCII(this_map[i]);
     }
 
     rad_cur_level++;
@@ -1020,7 +1020,7 @@ static void RAD_ParseTag(param_set_t &pars)
     int         count  = 0;
     int         length = strlen(pars[1]);
 
-    while (isdigit(*pos++))
+    while (epi::IsDigitASCII(*pos++))
         count++;
 
     // Is the value an integer?
@@ -1166,7 +1166,7 @@ static void RAD_ParseOnDeath(param_set_t &pars)
     s_ondeath_t *cond = new s_ondeath_t;
 
     // get map thing
-    if (pars[1][0] == '-' || pars[1][0] == '+' || isdigit(pars[1][0]))
+    if (pars[1][0] == '-' || pars[1][0] == '+' || epi::IsDigitASCII(pars[1][0]))
     {
         RAD_CheckForInt(pars[1], &cond->thing_type);
     }
@@ -1270,7 +1270,7 @@ static void RAD_ParseEnableTagged(param_set_t &pars)
     int         count  = 0;
     int         length = strlen(pars[1]);
 
-    while (isdigit(*pos++))
+    while (epi::IsDigitASCII(*pos++))
         count++;
 
     // Is the value an integer?
@@ -1541,7 +1541,7 @@ static void RAD_ParseSpawnThing(param_set_t &pars)
     t->spawn_effect = DDF_CompareName("SPAWNTHING_FLASH", pars[0]) == 0;
 
     // get map thing
-    if (pars[1][0] == '-' || pars[1][0] == '+' || isdigit(pars[1][0]))
+    if (pars[1][0] == '-' || pars[1][0] == '+' || epi::IsDigitASCII(pars[1][0]))
     {
         RAD_CheckForInt(pars[1], &t->thing_type);
     }
@@ -1754,7 +1754,7 @@ static void RAD_ParseDamageMonsters(param_set_t &pars)
     s_damage_monsters_t *mon = new s_damage_monsters_t;
 
     // get monster type
-    if (pars[1][0] == '-' || pars[1][0] == '+' || isdigit(pars[1][0]))
+    if (pars[1][0] == '-' || pars[1][0] == '+' || epi::IsDigitASCII(pars[1][0]))
     {
         RAD_CheckForInt(pars[1], &mon->thing_type);
     }
@@ -1792,7 +1792,7 @@ static void RAD_ParseThingEvent(param_set_t &pars)
 
     tev = new s_thing_event_t;
 
-    if (pars[1][0] == '-' || pars[1][0] == '+' || isdigit(pars[1][0]))
+    if (pars[1][0] == '-' || pars[1][0] == '+' || epi::IsDigitASCII(pars[1][0]))
         RAD_CheckForInt(pars[1], &tev->thing_type);
     else if (DDF_CompareName(pars[1], "ANY") == 0)
         tev->thing_type = -1;
@@ -2289,7 +2289,7 @@ static void RAD_ParseReplaceThing(param_set_t &pars)
     s_thing_replace_t *thingarg = new s_thing_replace_t;
 
     // get old monster name
-    if (isdigit(pars[1][0]))
+    if (epi::IsDigitASCII(pars[1][0]))
     {
         RAD_CheckForInt(pars[1], &thingarg->old_thing_type);
     }
@@ -2297,7 +2297,7 @@ static void RAD_ParseReplaceThing(param_set_t &pars)
         thingarg->old_thing_name = Z_StrDup(pars[1]);
 
     // get new monster name
-    if (isdigit(pars[2][0]))
+    if (epi::IsDigitASCII(pars[2][0]))
     {
         RAD_CheckForInt(pars[2], &thingarg->new_thing_type);
     }

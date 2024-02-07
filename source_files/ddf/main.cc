@@ -372,7 +372,7 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
             if (ch == EOF || ferror(fp) || ch == '>')
                 break;
 
-            tag_buf[len++] = toupper(ch);
+            tag_buf[len++] = epi::ToUpperASCII(ch);
 
             if (len + 2 >= (int)sizeof(tag_buf))
                 break;
@@ -503,7 +503,7 @@ static readchar_t DDF_MainProcessChar(char character, std::string &token, int st
     // With the exception of reading_string, whitespace is ignored.
     if (status != reading_string)
     {
-        if (isspace(character))
+        if (epi::IsSpaceASCII(character))
             return nothing;
     }
     else // check for formatting char in a string
@@ -558,9 +558,9 @@ static readchar_t DDF_MainProcessChar(char character, std::string &token, int st
         {
             return def_stop;
         }
-        else if ((isalnum(character)) || (character == '_') || (character == ':') || (character == '+'))
+        else if ((epi::IsAlphanumericASCII(character)) || (character == '_') || (character == ':') || (character == '+'))
         {
-            token += toupper(character);
+            token += epi::ToUpperASCII(character);
             return ok_char;
         }
         return nothing;
@@ -578,9 +578,9 @@ static readchar_t DDF_MainProcessChar(char character, std::string &token, int st
         {
             return def_start;
         }
-        else if (isalnum(character) || character == '_' || character == '(' || character == ')' || character == '.')
+        else if (epi::IsAlphanumericASCII(character) || character == '_' || character == '(' || character == ')' || character == '.')
         {
-            token += toupper(character);
+            token += epi::ToUpperASCII(character);
             return ok_char;
         }
         return nothing;
@@ -609,14 +609,14 @@ static readchar_t DDF_MainProcessChar(char character, std::string &token, int st
         }
 
         // Sprite Data - more than a few exceptions....
-        if (isalnum(character) || character == '_' || character == '-' || character == ':' || character == '.' ||
+        if (epi::IsAlphanumericASCII(character) || character == '_' || character == '-' || character == ':' || character == '.' ||
             character == '[' || character == ']' || character == '\\' || character == '!' || character == '#' ||
             character == '%' || character == '+' || character == '@' || character == '?')
         {
-            token += toupper(character);
+            token += epi::ToUpperASCII(character);
             return ok_char;
         }
-        else if (isprint(character))
+        else if (epi::IsPrintASCII(character))
             DDF_WarnError("DDF: Illegal character '%c' found.\n", character);
 
         break;
@@ -1066,7 +1066,7 @@ void DDF_MainGetNumeric(const char *info, void *storage)
 
     SYS_ASSERT(info && storage);
 
-    if (isalpha(info[0]))
+    if (epi::IsAlphaASCII(info[0]))
     {
         DDF_WarnError("Bad numeric value: %s\n", info);
         return;
@@ -1143,7 +1143,7 @@ bool DDF_MainParseField(const commandlist_t *commands, const char *field, const 
             int len = strlen(name);
             SYS_ASSERT(len > 0);
 
-            if (strncmp(field, name, len) == 0 && field[len] == '.' && isalnum(field[len + 1]))
+            if (strncmp(field, name, len) == 0 && field[len] == '.' && epi::IsAlphanumericASCII(field[len + 1]))
             {
                 // recursively parse the sub-field
                 return DDF_MainParseField(commands[i].sub_comms, field + len + 1, contents,
@@ -1286,7 +1286,7 @@ void DDF_MainGetPercent(const char *info, void *storage)
 
     // check that the string is valid
     Z_StrNCpy(s, info, 100);
-    for (p = s; isdigit(*p) || *p == '.'; p++)
+    for (p = s; epi::IsDigitASCII(*p) || *p == '.'; p++)
     { /* do nothing */
     }
 
@@ -1324,7 +1324,7 @@ void DDF_MainGetPercentAny(const char *info, void *storage)
 
     // check that the string is valid
     Z_StrNCpy(s, info, 100);
-    for (p = s; isdigit(*p) || *p == '.'; p++)
+    for (p = s; epi::IsDigitASCII(*p) || *p == '.'; p++)
     { /* do nothing */
     }
 

@@ -237,7 +237,7 @@ static int strncasecmpwild(const char *s1, const char *s2, int n)
 
     for (i = 0; s1[i] && s2[i] && i < n; i++)
     {
-        if ((toupper(s1[i]) != toupper(s2[i])) && (s1[i] != '?') && (s2[i] != '?'))
+        if ((epi::ToUpperASCII(s1[i]) != epi::ToUpperASCII(s2[i])) && (s1[i] != '?') && (s2[i] != '?'))
             break;
     }
     // -KM- 1999/01/29 If strings are equal return equal.

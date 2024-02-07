@@ -264,16 +264,16 @@ struct Compare_packentry_pred
             int yc = (int)(unsigned char)B[y++];
 
             // handle a sequence of digits
-            if (isdigit(xc))
+            if (epi::IsDigitASCII(xc))
             {
                 xc = 200 + (xc - '0');
-                while (x < A.size() && isdigit(A[x]) && xc < 214'000'000)
+                while (x < A.size() && epi::IsDigitASCII(A[x]) && xc < 214'000'000)
                     xc = (xc * 10) + (int)(A[x++] - '0');
             }
-            if (isdigit(yc))
+            if (epi::IsDigitASCII(yc))
             {
                 yc = 200 + (yc - '0');
-                while (y < B.size() && isdigit(B[y]) && yc < 214'000'000)
+                while (y < B.size() && epi::IsDigitASCII(B[y]) && yc < 214'000'000)
                     yc = (yc * 10) + (int)(B[y++] - '0');
             }
 

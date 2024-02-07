@@ -1944,7 +1944,7 @@ bool M_Responder(event_t *ev)
         }
 
         if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
-            ch = toupper(ch);
+            ch = epi::ToUpperASCII(ch);
         if (ch == '-')
             ch = '_';
 
@@ -2010,7 +2010,7 @@ bool M_Responder(event_t *ev)
 
         default:
             if (mod & KMOD_SHIFT || mod & KMOD_CAPS)
-                ch = toupper(ch);
+                ch = epi::ToUpperASCII(ch);
             SYS_ASSERT(save_style);
             if (ch >= 32 && ch <= 127 && saveCharIndex < SAVESTRINGSIZE - 1 &&
                 save_style->fonts[1]->StringWidth(ex_slots[save_slot].desc) < (SAVESTRINGSIZE - 2) * 8)

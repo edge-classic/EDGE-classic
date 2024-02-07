@@ -528,7 +528,7 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
 
     for (size_t i = 0; i < strlen(info.name); i++)
     {
-        info.name[i] = toupper(info.name[i]);
+        info.name[i] = epi::ToUpperASCII(info.name[i]);
     }
 
     lumpinfo.push_back(info);
@@ -1312,17 +1312,17 @@ void W_ReadUMAPINFOLumps(void)
             {
                 for (auto c : mapname.substr(3))
                 {
-                    if (!isdigit(c))
+                    if (!epi::IsDigitASCII(c))
                         I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
                 }
             }
             else if (mapname.size() > 3 && mapname[0] == 'E' && mapname[2] == 'M')
             {
-                if (!isdigit(mapname[1]))
+                if (!epi::IsDigitASCII(mapname[1]))
                     I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
                 for (auto c : mapname.substr(3))
                 {
-                    if (!isdigit(c))
+                    if (!epi::IsDigitASCII(c))
                         I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
                 }
             }
@@ -1879,7 +1879,7 @@ int W_CheckNumForName(const char *name)
 
     for (i = 0; name[i]; i++)
     {
-        buf[i] = toupper(name[i]);
+        buf[i] = epi::ToUpperASCII(name[i]);
     }
     buf[i] = 0;
 
@@ -1910,7 +1910,7 @@ int W_CheckFileNumForName(const char *name)
 
     for (i = 0; name[i]; i++)
     {
-        buf[i] = toupper(name[i]);
+        buf[i] = epi::ToUpperASCII(name[i]);
     }
     buf[i] = 0;
 
@@ -1938,7 +1938,7 @@ int W_CheckNumForName_GFX(const char *name)
 
     for (i = 0; name[i]; i++)
     {
-        buf[i] = toupper(name[i]);
+        buf[i] = epi::ToUpperASCII(name[i]);
     }
     buf[i] = 0;
 
@@ -1970,7 +1970,7 @@ int W_CheckNumForName_XGL(const char *name)
 
     for (i = 0; name[i]; i++)
     {
-        buf[i] = toupper(name[i]);
+        buf[i] = epi::ToUpperASCII(name[i]);
     }
     buf[i] = 0;
 
@@ -2000,7 +2000,7 @@ int W_CheckNumForName_MAP(const char *name)
 
     for (i = 0; name[i]; i++)
     {
-        buf[i] = toupper(name[i]);
+        buf[i] = epi::ToUpperASCII(name[i]);
     }
     buf[i] = 0;
 
@@ -2050,7 +2050,7 @@ int W_CheckNumForTexPatch(const char *name)
         if (i > 8)
             I_Error("W_CheckNumForTexPatch: '%s' longer than 8 chars!", name);
 #endif
-        buf[i] = toupper(name[i]);
+        buf[i] = epi::ToUpperASCII(name[i]);
     }
     buf[i] = 0;
 

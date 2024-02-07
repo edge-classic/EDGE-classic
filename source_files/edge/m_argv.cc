@@ -219,7 +219,7 @@ static int ParseOneFilename(FILE *fp, char *buf)
 
         if (ch == EOF)
             return EOF;
-    } while (isspace(ch));
+    } while (epi::IsSpaceASCII(ch));
 
     bool quoting = false;
 
@@ -232,7 +232,7 @@ static int ParseOneFilename(FILE *fp, char *buf)
             continue;
         }
 
-        if (ch == EOF || (isspace(ch) && !quoting))
+        if (ch == EOF || (epi::IsSpaceASCII(ch) && !quoting))
             break;
 
         *buf++ = ch;

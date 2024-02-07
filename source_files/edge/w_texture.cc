@@ -178,7 +178,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
         Z_StrNCpy(texture->name, mtexture->name, 8);
         for (size_t j = 0; j < strlen(texture->name); j++)
         {
-            texture->name[j] = toupper(texture->name[j]);
+            texture->name[j] = epi::ToUpperASCII(texture->name[j]);
         }
 
         const raw_patchdef_t *mpatch = &mtexture->patches[0];
@@ -338,7 +338,7 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
         Z_StrNCpy(texture->name, mtexture->name, 8);
         for (size_t j = 0; j < strlen(texture->name); j++)
         {
-            texture->name[j] = toupper(texture->name[j]);
+            texture->name[j] = epi::ToUpperASCII(texture->name[j]);
         }
 
         const raw_strife_patchdef_t *mpatch = &mtexture->patches[0];

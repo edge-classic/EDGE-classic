@@ -416,12 +416,12 @@ void DDF_StateReadState(const char *info, const char *label, state_group_t &grou
 
         char first_ch = sprite_x[1];
 
-        if (isdigit(first_ch))
+        if (epi::IsDigitASCII(first_ch))
         {
             cur->flags = SFF_Model;
             cur->frame = atol(sprite_x + 1) - 1;
         }
-        else if (isalpha(first_ch) || (first_ch == '_'))
+        else if (epi::IsAlphaASCII(first_ch) || (first_ch == '_'))
         {
             cur->flags       = SFF_Model | SFF_Unmapped;
             cur->frame       = 0;

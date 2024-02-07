@@ -48,8 +48,8 @@ int StrCaseCmp(const char *A, const char *B)
     for (; *A || *B; A++, B++)
     {
         // this test also catches end-of-string conditions
-        if (toupper(*A) != toupper(*B))
-            return (toupper(*A) - toupper(*B));
+        if (epi::ToUpperASCII(*A) != epi::ToUpperASCII(*B))
+            return (epi::ToUpperASCII(*A) - epi::ToUpperASCII(*B));
     }
 
     return 0;
@@ -67,8 +67,8 @@ int StrCaseCmpPartial(const char *A, const char *B)
     for (; *B; A++, B++)
     {
         // this test also catches end-of-string conditions
-        if (toupper(*A) != toupper(*B))
-            return (toupper(*A) - toupper(*B));
+        if (epi::ToUpperASCII(*A) != epi::ToUpperASCII(*B))
+            return (epi::ToUpperASCII(*A) - epi::ToUpperASCII(*B));
     }
 
     return 0;
@@ -99,7 +99,7 @@ const char *StrUpper(const char *name)
     char *dest = up_buf;
 
     while (*name)
-        *dest++ = toupper(*name++);
+        *dest++ = epi::ToUpperASCII(*name++);
 
     *dest = 0;
 
@@ -120,7 +120,7 @@ const char *StrSanitize(const char *name)
     while (*name)
     {
         char ch = *name++;
-        if (isalnum(ch) || ch == '_')
+        if (epi::IsAlphanumericASCII(ch) || ch == '_')
             *dest++ = ch;
     }
 

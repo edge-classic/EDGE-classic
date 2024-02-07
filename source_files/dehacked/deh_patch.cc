@@ -335,7 +335,7 @@ const char *PrettyTextString(const char *t)
 {
     static char buf[PRETTY_LEN * 2 + 10];
 
-    while (isspace(*t))
+    while (epi::IsSpaceASCII(*t))
         t++;
 
     if (!*t)
@@ -765,7 +765,7 @@ void StripTrailingSpace(void)
 {
     int len = strlen(line_buf);
 
-    while (len > 0 && isspace(line_buf[len - 1]))
+    while (len > 0 && epi::IsSpaceASCII(line_buf[len - 1]))
         len--;
 
     line_buf[len] = 0;
@@ -883,7 +883,7 @@ bool CheckNewSection(void)
 
         int sec_len = strlen(section_name[i]);
 
-        if (!isspace(line_buf[sec_len]))
+        if (!epi::IsSpaceASCII(line_buf[sec_len]))
             continue;
 
         // for the "Pointer" section, MBF and other source ports don't use
@@ -1003,7 +1003,7 @@ void ReadBexTextString(char *dest) // upto MAX_TEXT_STR chars
             break;
 
         // handle the newline sequence
-        if (cur_txt_ptr[0] == '\\' && tolower(cur_txt_ptr[1]) == 'n')
+        if (cur_txt_ptr[0] == '\\' && epi::ToLowerASCII(cur_txt_ptr[1]) == 'n')
         {
             cur_txt_ptr += 2;
             *dest++ = '\n';
@@ -1024,7 +1024,7 @@ void ReadBexTextString(char *dest) // upto MAX_TEXT_STR chars
             cur_txt_ptr = line_buf;
 
             // strip leading whitespace from continuing lines
-            while (isspace(*cur_txt_ptr))
+            while (epi::IsSpaceASCII(*cur_txt_ptr))
                 cur_txt_ptr++;
 
             continue;
@@ -1084,14 +1084,14 @@ void ProcessLine(void)
 
     char *final = equal_pos;
 
-    while (final > line_buf && isspace(final[-1]))
+    while (final > line_buf && epi::IsSpaceASCII(final[-1]))
         final--;
 
     *final = 0;
 
     equal_pos++;
 
-    while (*equal_pos && isspace(*equal_pos))
+    while (*equal_pos && epi::IsSpaceASCII(*equal_pos))
         equal_pos++;
 
     if (line_buf[0] == 0)
@@ -1258,7 +1258,7 @@ dehret_e LoadDiff(bool no_header)
             continue;
         }
 
-        if (StrCaseCmpPartial(line_buf, "Text") == 0 && isspace(line_buf[4]))
+        if (StrCaseCmpPartial(line_buf, "Text") == 0 && epi::IsSpaceASCII(line_buf[4]))
         {
             int len1, len2;
 
@@ -1304,7 +1304,7 @@ dehret_e LoadNormal(void)
 
     pat_buf->read(idstr, 3);
 
-    if (!isdigit(idstr[0]) || idstr[1] != '.' || !isdigit(idstr[2]))
+    if (!epi::IsDigitASCII(idstr[0]) || idstr[1] != '.' || !epi::IsDigitASCII(idstr[2]))
     {
         SetErrorMsg("Bad version string in DeHackEd patch file.\n"
                     "[String %s is not digit . digit]\n",

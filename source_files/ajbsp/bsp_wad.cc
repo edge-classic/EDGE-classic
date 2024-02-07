@@ -679,10 +679,10 @@ static bool IsDummyMarker(const char *name)
     if (strlen(name) < 3)
         return false;
 
-    if (!strchr("PSF", toupper(name[0])))
+    if (!strchr("PSF", epi::ToUpperASCII(name[0])))
         return false;
 
-    if (!isdigit(name[1]))
+    if (!epi::IsDigitASCII(name[1]))
         return false;
 
     if (epi::StringCaseCompareASCII(name + 2, "_START") == 0 || epi::StringCaseCompareASCII(name + 2, "_END") == 0)

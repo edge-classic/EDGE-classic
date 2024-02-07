@@ -309,12 +309,12 @@ static void StripWhitespace(char *src)
 {
     const char *start = src;
 
-    while (*start && isspace(*start))
+    while (*start && epi::IsSpaceASCII(*start))
         start++;
 
     const char *end = src + strlen(src);
 
-    while (end > start && isspace(end[-1]))
+    while (end > start && epi::IsSpaceASCII(end[-1]))
         end--;
 
     while (start < end)
@@ -1017,7 +1017,7 @@ static char KeyToCharacter(int key, bool shift, bool ctrl)
         return '\'';
     }
 
-    return toupper(key);
+    return epi::ToUpperASCII(key);
 }
 
 static void ListCompletions(std::vector<const char *> &list, int word_len, int max_row, RGBAColor color)
@@ -1106,14 +1106,14 @@ static void TabComplete(void)
         if (input_pos == 0)
             return;
 
-        if (isdigit(input_line[0]))
+        if (epi::IsDigitASCII(input_line[0]))
             return;
 
         for (int i = 0; i < input_pos; i++)
         {
             char ch = input_line[i];
 
-            if (!(isalnum(ch) || ch == '_' || ch == '.'))
+            if (!(epi::IsAlphanumericASCII(ch) || ch == '_' || ch == '.'))
                 return;
         }
     }

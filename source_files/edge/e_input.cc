@@ -809,7 +809,7 @@ const char *E_GetKeyName(int key)
 {
     static char buffer[32];
 
-    if (toupper(key) >= ',' && toupper(key) <= ']')
+    if (epi::ToUpperASCII(key) >= ',' && epi::ToUpperASCII(key) <= ']')
     {
         buffer[0] = key;
         buffer[1] = 0;

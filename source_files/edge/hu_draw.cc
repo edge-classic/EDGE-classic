@@ -39,7 +39,7 @@
 #define DUMMY_WIDTH(font) (4)
 #define DUMMY_CLAMP       789
 
-#define HU_CHAR(ch) (islower(ch) ? toupper(ch) : (ch))
+#define HU_CHAR(ch) (islower(ch) ? epi::ToUpperASCII(ch) : (ch))
 #define HU_INDEX(c) ((unsigned char)HU_CHAR(c))
 
 // FIXME: this seems totally arbitrary, review it.

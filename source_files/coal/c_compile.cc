@@ -187,7 +187,7 @@ void real_vm_c::LEX_String()
         if (c == '\\') // escape char
         {
             c = *comp.parse_p++;
-            if (!c || !isprint(c))
+            if (!c || !(c > 0x1F && c < 0x7F))
                 CompileError("bad escape in string\n");
 
             if (c == 'n')
@@ -242,7 +242,7 @@ void real_vm_c::LEX_Vector()
 
         comp.literal_value[i] = LEX_Number();
 
-        while (isspace(*comp.parse_p) && *comp.parse_p != '\n')
+        while (((*comp.parse_p > 0x8 && *comp.parse_p < 0xE) || *comp.parse_p == 0x20) && *comp.parse_p != '\n')
             comp.parse_p++;
     }
 
@@ -265,7 +265,8 @@ void real_vm_c::LEX_Name()
 
         comp.parse_p++;
         c = *comp.parse_p;
-    } while (isalnum(c) || c == '_');
+    } while (((c > '@' && c < '[') || (c > '`' && c < '{') ||
+            (c > '/' && c < ':')) || c == '_');
 
     comp.token_buf[len] = 0;
     comp.token_type     = tt_name;

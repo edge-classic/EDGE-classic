@@ -31,7 +31,7 @@
 #define UNICODE
 #endif
 #ifndef _UNICODE
-#define UNICODE
+#define _UNICODE
 #endif
 #include <windows.h>
 #endif

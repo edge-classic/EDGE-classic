@@ -32,6 +32,7 @@
 #include "math_crc.h"
 #include "str_lexer.h"
 #include "str_util.h"
+#include "str_ename.h"
 
 #include "main.h"
 #include "colormap.h"
@@ -1509,14 +1510,25 @@ static void LoadUDMFVertexes()
                 if (!lex.Match(";"))
                     I_Error("Malformed TEXTMAP lump: missing ';'\n");
 
-                if (key == "x")
-                    x = epi::LexDouble(value);
-                else if (key == "y")
-                    y = epi::LexDouble(value);
-                else if (key == "zfloor")
-                    zf = epi::LexDouble(value);
-                else if (key == "zceiling")
-                    zc = epi::LexDouble(value);
+                epi::EName key_ename(key, true);
+
+                switch(key_ename.GetIndex())
+                {
+                    case epi::kENameX:
+                        x = epi::LexDouble(value);
+                        break;
+                    case epi::kENameY:
+                        y = epi::LexDouble(value);
+                        break;
+                    case epi::kENameZfloor:
+                        zf = epi::LexDouble(value);
+                        break;
+                    case epi::kENameZceiling:
+                        zc = epi::LexDouble(value);
+                        break;
+                    default:
+                        break;
+                }
             }
             vertexes[cur_vertex] = {{{{{x, y, zf}}}, zc}};
             cur_vertex++;
@@ -1607,48 +1619,76 @@ static void LoadUDMFSectors()
                 if (!lex.Match(";"))
                     I_Error("Malformed TEXTMAP lump: missing ';'\n");
 
-                if (key == "heightfloor")
-                    fz = epi::LexInteger(value);
-                else if (key == "heightceiling")
-                    cz = epi::LexInteger(value);
-                else if (key == "texturefloor")
-                    Z_StrNCpy(floor_tex, value.c_str(), 8);
-                else if (key == "textureceiling")
-                    Z_StrNCpy(ceil_tex, value.c_str(), 8);
-                else if (key == "lightlevel")
-                    light = epi::LexInteger(value);
-                else if (key == "special")
-                    type = epi::LexInteger(value);
-                else if (key == "id")
-                    tag = epi::LexInteger(value);
-                else if (key == "lightcolor")
-                    light_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
-                else if (key == "fadecolor")
-                    fog_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
-                else if (key == "fogdensity")
-                    fog_density = HMM_Clamp(0, epi::LexInteger(value), 1020);
-                else if (key == "xpanningfloor")
-                    fx = epi::LexDouble(value);
-                else if (key == "ypanningfloor")
-                    fy = epi::LexDouble(value);
-                else if (key == "xpanningceiling")
-                    cx = epi::LexDouble(value);
-                else if (key == "ypanningceiling")
-                    cy = epi::LexDouble(value);
-                else if (key == "xscalefloor")
-                    fx_sc = epi::LexDouble(value);
-                else if (key == "yscalefloor")
-                    fy_sc = epi::LexDouble(value);
-                else if (key == "xscaleceiling")
-                    cx_sc = epi::LexDouble(value);
-                else if (key == "yscaleceiling")
-                    cy_sc = epi::LexDouble(value);
-                else if (key == "rotationfloor")
-                    rf = epi::LexDouble(value);
-                else if (key == "rotationceiling")
-                    rc = epi::LexDouble(value);
-                else if (key == "gravity")
-                    gravfactor = epi::LexDouble(value);
+                epi::EName key_ename(key, true);
+
+                switch(key_ename.GetIndex())
+                {
+                    case epi::kENameHeightfloor:
+                        fz = epi::LexInteger(value);
+                        break;
+                    case epi::kENameHeightceiling:
+                        cz = epi::LexInteger(value);
+                        break;
+                    case epi::kENameTexturefloor:
+                        Z_StrNCpy(floor_tex, value.c_str(), 8);
+                        break;
+                    case epi::kENameTextureceiling:
+                        Z_StrNCpy(ceil_tex, value.c_str(), 8);
+                        break;
+                    case epi::kENameLightlevel:
+                        light = epi::LexInteger(value);
+                        break;
+                    case epi::kENameSpecial:
+                        type = epi::LexInteger(value);
+                        break;
+                    case epi::kENameId:
+                        tag = epi::LexInteger(value);
+                        break;
+                    case epi::kENameLightcolor:
+                        light_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
+                        break;
+                    case epi::kENameFadecolor:
+                        fog_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
+                        break;
+                    case epi::kENameFogdensity:
+                        fog_density = HMM_Clamp(0, epi::LexInteger(value), 1020);
+                        break;
+                    case epi::kENameXpanningfloor:
+                        fx = epi::LexDouble(value);
+                        break;
+                    case epi::kENameYpanningfloor:
+                        fy = epi::LexDouble(value);
+                        break;
+                    case epi::kENameXpanningceiling:
+                        cx = epi::LexDouble(value);
+                        break;
+                    case epi::kENameYpanningceiling:
+                        cy = epi::LexDouble(value);
+                        break;
+                    case epi::kENameXscalefloor:
+                        fx_sc = epi::LexDouble(value);
+                        break;
+                    case epi::kENameYscalefloor:
+                        fy_sc = epi::LexDouble(value);
+                        break;
+                    case epi::kENameXscaleceiling:
+                        cx_sc = epi::LexDouble(value);
+                        break;
+                    case epi::kENameYscaleceiling:
+                        cy_sc = epi::LexDouble(value);
+                        break;
+                    case epi::kENameRotationfloor:
+                        rf = epi::LexDouble(value);
+                        break;
+                    case epi::kENameRotationceiling:
+                        rc = epi::LexDouble(value);
+                        break;
+                    case epi::kENameGravity:
+                        gravfactor = epi::LexDouble(value);
+                        break;
+                    default:
+                        break;
+                }
             }
             sector_t *ss = sectors + cur_sector;
             ss->f_h      = fz;
@@ -1879,42 +1919,67 @@ static void LoadUDMFSideDefs()
                 if (!lex.Match(";"))
                     I_Error("Malformed TEXTMAP lump: missing ';'\n");
 
-                if (key == "offsetx")
-                    x = epi::LexInteger(value);
-                else if (key == "offsety")
-                    y = epi::LexInteger(value);
-                else if (key == "offsetx_bottom")
-                    lowx = epi::LexDouble(value);
-                else if (key == "offsetx_mid")
-                    midx = epi::LexDouble(value);
-                else if (key == "offsetx_top")
-                    highx = epi::LexDouble(value);
-                else if (key == "offsety_bottom")
-                    lowy = epi::LexDouble(value);
-                else if (key == "offsety_mid")
-                    midy = epi::LexDouble(value);
-                else if (key == "offsety_top")
-                    highy = epi::LexDouble(value);
-                else if (key == "scalex_bottom")
-                    low_scx = epi::LexDouble(value);
-                else if (key == "scalex_mid")
-                    mid_scx = epi::LexDouble(value);
-                else if (key == "scalex_top")
-                    high_scx = epi::LexDouble(value);
-                else if (key == "scaley_bottom")
-                    low_scy = epi::LexDouble(value);
-                else if (key == "scaley_mid")
-                    mid_scy = epi::LexDouble(value);
-                else if (key == "scaley_top")
-                    high_scy = epi::LexDouble(value);
-                else if (key == "texturetop")
-                    Z_StrNCpy(top_tex, value.c_str(), 8);
-                else if (key == "texturebottom")
-                    Z_StrNCpy(bottom_tex, value.c_str(), 8);
-                else if (key == "texturemiddle")
-                    Z_StrNCpy(middle_tex, value.c_str(), 8);
-                else if (key == "sector")
-                    sec_num = epi::LexInteger(value);
+                epi::EName key_ename(key, true);
+
+                switch(key_ename.GetIndex())
+                {
+                    case epi::kENameOffsetx:
+                        x = epi::LexInteger(value);
+                        break;
+                    case epi::kENameOffsety:
+                        y = epi::LexInteger(value);
+                        break;
+                    case epi::kENameOffsetx_bottom:
+                        lowx = epi::LexDouble(value);
+                        break;
+                    case epi::kENameOffsetx_mid:
+                        midx = epi::LexDouble(value);
+                        break;
+                    case epi::kENameOffsetx_top:
+                        highx = epi::LexDouble(value);
+                        break;
+                    case epi::kENameOffsety_bottom:
+                        lowy = epi::LexDouble(value);
+                        break;
+                    case epi::kENameOffsety_mid:
+                        midy = epi::LexDouble(value);
+                        break;
+                    case epi::kENameOffsety_top:
+                        highy = epi::LexDouble(value);
+                        break;
+                    case epi::kENameScalex_bottom:
+                        low_scx = epi::LexDouble(value);
+                        break;
+                    case epi::kENameScalex_mid:
+                        mid_scx = epi::LexDouble(value);
+                        break;
+                    case epi::kENameScalex_top:
+                        high_scx = epi::LexDouble(value);
+                        break;
+                    case epi::kENameScaley_bottom:
+                        low_scy = epi::LexDouble(value);
+                        break;
+                    case epi::kENameScaley_mid:
+                        mid_scy = epi::LexDouble(value);
+                        break;
+                    case epi::kENameScaley_top:
+                        high_scy = epi::LexDouble(value);
+                        break;
+                    case epi::kENameTexturetop:
+                        Z_StrNCpy(top_tex, value.c_str(), 8);
+                        break;
+                    case epi::kENameTexturebottom:
+                        Z_StrNCpy(bottom_tex, value.c_str(), 8);
+                        break;
+                    case epi::kENameTexturemiddle:
+                        Z_StrNCpy(middle_tex, value.c_str(), 8);
+                        break;
+                    case epi::kENameSector:
+                        sec_num = epi::LexInteger(value);
+                        break;
+                    default:
+                        break;
+                }
             }
             SYS_ASSERT(nummapsides <= numsides); // sanity check
 
@@ -2107,42 +2172,67 @@ static void LoadUDMFLineDefs()
                 if (!lex.Match(";"))
                     I_Error("Malformed TEXTMAP lump: missing ';'\n");
 
-                if (key == "id")
-                    tag = epi::LexInteger(value);
-                else if (key == "v1")
-                    v1 = epi::LexInteger(value);
-                else if (key == "v2")
-                    v2 = epi::LexInteger(value);
-                else if (key == "special")
-                    special = epi::LexInteger(value);
-                else if (key == "sidefront")
-                    side0 = epi::LexInteger(value);
-                else if (key == "sideback")
-                    side1 = epi::LexInteger(value);
-                else if (key == "blocking")
-                    flags |= (epi::LexBoolean(value) ? MLF_Blocking : 0);
-                else if (key == "blockmonsters")
-                    flags |= (epi::LexBoolean(value) ? MLF_BlockMonsters : 0);
-                else if (key == "twosided")
-                    flags |= (epi::LexBoolean(value) ? MLF_TwoSided : 0);
-                else if (key == "dontpegtop")
-                    flags |= (epi::LexBoolean(value) ? MLF_UpperUnpegged : 0);
-                else if (key == "dontpegbottom")
-                    flags |= (epi::LexBoolean(value) ? MLF_LowerUnpegged : 0);
-                else if (key == "secret")
-                    flags |= (epi::LexBoolean(value) ? MLF_Secret : 0);
-                else if (key == "blocksound")
-                    flags |= (epi::LexBoolean(value) ? MLF_SoundBlock : 0);
-                else if (key == "dontdraw")
-                    flags |= (epi::LexBoolean(value) ? MLF_DontDraw : 0);
-                else if (key == "mapped")
-                    flags |= (epi::LexBoolean(value) ? MLF_Mapped : 0);
-                else if (key == "passuse")
-                    flags |= (epi::LexBoolean(value) ? MLF_PassThru : 0);
-                else if (key == "blockplayers")
-                    flags |= (epi::LexBoolean(value) ? MLF_BlockPlayers : 0);
-                else if (key == "blocksight")
-                    flags |= (epi::LexBoolean(value) ? MLF_SightBlock : 0);
+                epi::EName key_ename(key, true);
+
+                switch(key_ename.GetIndex())
+                {
+                    case epi::kENameId:
+                        tag = epi::LexInteger(value);
+                        break;
+                    case epi::kENameV1:
+                        v1 = epi::LexInteger(value);
+                        break;
+                    case epi::kENameV2:
+                        v2 = epi::LexInteger(value);
+                        break;
+                    case epi::kENameSpecial:
+                        special = epi::LexInteger(value);
+                        break;
+                    case epi::kENameSidefront:
+                        side0 = epi::LexInteger(value);
+                        break;
+                    case epi::kENameSideback:
+                        side1 = epi::LexInteger(value);
+                        break;
+                    case epi::kENameBlocking:
+                        flags |= (epi::LexBoolean(value) ? MLF_Blocking : 0);
+                        break;
+                    case epi::kENameBlockmonsters:
+                        flags |= (epi::LexBoolean(value) ? MLF_BlockMonsters : 0);
+                        break;
+                    case epi::kENameTwosided:
+                        flags |= (epi::LexBoolean(value) ? MLF_TwoSided : 0);
+                        break;
+                    case epi::kENameDontpegtop:
+                        flags |= (epi::LexBoolean(value) ? MLF_UpperUnpegged : 0);
+                        break;
+                    case epi::kENameDontpegbottom:
+                        flags |= (epi::LexBoolean(value) ? MLF_LowerUnpegged : 0);
+                        break;
+                    case epi::kENameSecret:
+                        flags |= (epi::LexBoolean(value) ? MLF_Secret : 0);
+                        break;
+                    case epi::kENameBlocksound:
+                        flags |= (epi::LexBoolean(value) ? MLF_SoundBlock : 0);
+                        break;
+                    case epi::kENameDontdraw:
+                        flags |= (epi::LexBoolean(value) ? MLF_DontDraw : 0);
+                        break;
+                    case epi::kENameMapped:
+                        flags |= (epi::LexBoolean(value) ? MLF_Mapped : 0);
+                        break;
+                    case epi::kENamePassuse:
+                        flags |= (epi::LexBoolean(value) ? MLF_PassThru : 0);
+                        break;
+                    case epi::kENameBlockplayers:
+                        flags |= (epi::LexBoolean(value) ? MLF_BlockPlayers : 0);
+                        break;
+                    case epi::kENameBlocksight:
+                        flags |= (epi::LexBoolean(value) ? MLF_SightBlock : 0);
+                        break;
+                    default:
+                        break;
+                }
             }
             line_t *ld = lines + cur_line;
 
@@ -2266,48 +2356,76 @@ static void LoadUDMFThings()
                 if (!lex.Match(";"))
                     I_Error("Malformed TEXTMAP lump: missing ';'\n");
 
-                if (key == "id")
-                    tag = epi::LexInteger(value);
-                else if (key == "x")
-                    x = epi::LexDouble(value);
-                else if (key == "y")
-                    y = epi::LexDouble(value);
-                else if (key == "height")
-                    z = epi::LexDouble(value);
-                else if (key == "angle")
-                    angle = epi::BAMFromDegrees(epi::LexInteger(value));
-                else if (key == "type")
-                    typenum = epi::LexInteger(value);
-                else if (key == "skill1")
-                    options |= (epi::LexBoolean(value) ? MTF_EASY : 0);
-                else if (key == "skill2")
-                    options |= (epi::LexBoolean(value) ? MTF_EASY : 0);
-                else if (key == "skill3")
-                    options |= (epi::LexBoolean(value) ? MTF_NORMAL : 0);
-                else if (key == "skill4")
-                    options |= (epi::LexBoolean(value) ? MTF_HARD : 0);
-                else if (key == "skill5")
-                    options |= (epi::LexBoolean(value) ? MTF_HARD : 0);
-                else if (key == "ambush")
-                    options |= (epi::LexBoolean(value) ? MTF_AMBUSH : 0);
-                else if (key == "single")
-                    options &= (epi::LexBoolean(value) ? ~MTF_NOT_SINGLE : options);
-                else if (key == "dm")
-                    options &= (epi::LexBoolean(value) ? ~MTF_NOT_DM : options);
-                else if (key == "coop")
-                    options &= (epi::LexBoolean(value) ? ~MTF_NOT_COOP : options);
-                else if (key == "friend")
-                    options |= (epi::LexBoolean(value) ? MTF_FRIEND : 0);
-                else if (key == "health")
-                    healthfac = epi::LexDouble(value);
-                else if (key == "alpha")
-                    alpha = epi::LexDouble(value);
-                else if (key == "scale")
-                    scale     = epi::LexDouble(value);
-                else if (key == "scalex")
-                    scalex    = epi::LexDouble(value);
-                else if (key == "scaley")
-                    scaley    = epi::LexDouble(value);
+                epi::EName key_ename(key, true);
+
+                switch (key_ename.GetIndex())
+                {
+                    case epi::kENameId:
+                        tag = epi::LexInteger(value);
+                        break;
+                    case epi::kENameX:
+                        x = epi::LexDouble(value);
+                        break;
+                    case epi::kENameY:
+                        y = epi::LexDouble(value);
+                        break;
+                    case epi::kENameHeight:
+                        z = epi::LexDouble(value);
+                        break;
+                    case epi::kENameAngle:
+                        angle = epi::BAMFromDegrees(epi::LexInteger(value));
+                        break;
+                    case epi::kENameType:
+                        typenum = epi::LexInteger(value);
+                        break;
+                    case epi::kENameSkill1:
+                        options |= (epi::LexBoolean(value) ? MTF_EASY : 0);
+                        break;
+                    case epi::kENameSkill2:
+                        options |= (epi::LexBoolean(value) ? MTF_EASY : 0);
+                        break;
+                    case epi::kENameSkill3:
+                        options |= (epi::LexBoolean(value) ? MTF_NORMAL : 0);
+                        break;
+                    case epi::kENameSkill4:
+                        options |= (epi::LexBoolean(value) ? MTF_HARD : 0);
+                        break;
+                    case epi::kENameSkill5:
+                        options |= (epi::LexBoolean(value) ? MTF_HARD : 0);
+                        break;
+                    case epi::kENameAmbush:
+                        options |= (epi::LexBoolean(value) ? MTF_AMBUSH : 0);
+                        break;
+                    case epi::kENameSingle:
+                        options &= (epi::LexBoolean(value) ? ~MTF_NOT_SINGLE : options);
+                        break;
+                    case epi::kENameDm:
+                        options &= (epi::LexBoolean(value) ? ~MTF_NOT_DM : options);
+                        break;
+                    case epi::kENameCoop:
+                        options &= (epi::LexBoolean(value) ? ~MTF_NOT_COOP : options);
+                        break;
+                    case epi::kENameFriend:
+                        options |= (epi::LexBoolean(value) ? MTF_FRIEND : 0);
+                        break;
+                    case epi::kENameHealth:
+                        healthfac = epi::LexDouble(value);
+                        break;
+                    case epi::kENameAlpha:
+                        alpha = epi::LexDouble(value);
+                        break;
+                    case epi::kENameScale:
+                        scale     = epi::LexDouble(value);
+                        break;
+                    case epi::kENameScalex:
+                        scalex    = epi::LexDouble(value);
+                        break;
+                    case epi::kENameScaley:
+                        scaley    = epi::LexDouble(value);
+                        break;
+                    default:
+                        break;
+                }
             }
             objtype = mobjtypes.Lookup(typenum);
 
@@ -2454,15 +2572,26 @@ static void LoadUDMFCounts()
         if (!lex.Match("{"))
             I_Error("Malformed TEXTMAP lump: missing '{'\n");
 
+        epi::EName section_ename(section, true);
+
         // side counts are computed during linedef loading
-        if (section == "thing")
-            mapthing_NUM++;
-        else if (section == "vertex")
-            numvertexes++;
-        else if (section == "sector")
-            numsectors++;
-        else if (section == "linedef")
-            numlines++;
+        switch (section_ename.GetIndex())
+        {
+            case epi::kENameThing:
+                mapthing_NUM++;
+                break;
+            case epi::kENameVertex:
+                numvertexes++;
+                break;
+            case epi::kENameSector:
+                numsectors++;
+                break;
+            case epi::kENameLinedef:
+                numlines++;
+                break;
+            default:
+                break;
+        }
 
         // ignore block contents
         for (;;)

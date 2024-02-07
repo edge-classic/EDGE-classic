@@ -38,8 +38,6 @@
 #include "version.h"
 #include "filesystem.h"
 
-#include <sstream>
-
 #define MAX_CON_ARGS 64
 
 static std::string readme_names[4] = {"readme.txt", "readme.1st", "read.me", "readme.md"};
@@ -166,8 +164,8 @@ int CMD_Readme(char **argv, int argc)
     {
         std::string readme = readme_file->ReadText();
         delete readme_file;
-        std::istringstream readme_strings(readme);
-        for (std::string line; std::getline(readme_strings, line);)
+        std::vector<std::string> readme_strings = epi::SeparatedStringVector(readme, '\n');
+        for (std::string &line : readme_strings)
         {
             CON_Printf("%s\n", line.c_str());
         }

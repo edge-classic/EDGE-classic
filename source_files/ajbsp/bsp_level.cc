@@ -652,23 +652,23 @@ void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
 
     switch (cur_type)
     {
-    case kUDMFVertex:
-        vertex = NewVertex();
-        break;
-    case kUDMFThing:
-        thing = NewThing();
-        break;
-    case kUDMFSector:
-        NewSector(); // We don't use the returned pointer in this function
-        break;
-    case kUDMFSidedef:
-        side = NewSidedef();
-        break;
-    case kUDMFLinedef:
-        line = NewLinedef();
-        break;
-    default:
-        break;
+        case kUDMFVertex:
+            vertex = NewVertex();
+            break;
+        case kUDMFThing:
+            thing = NewThing();
+            break;
+        case kUDMFSector:
+            NewSector(); // We don't use the returned pointer in this function
+            break;
+        case kUDMFSidedef:
+            side = NewSidedef();
+            break;
+        case kUDMFLinedef:
+            line = NewLinedef();
+            break;
+        default:
+            break;
     }
 
     for (;;)
@@ -702,21 +702,21 @@ void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
 
         switch (cur_type)
         {
-        case kUDMFVertex:
-            ParseVertexField(vertex, key_ename.GetIndex(), value);
-            break;
-        case kUDMFThing:
-            ParseThingField(thing, key_ename.GetIndex(), value);
-            break;
-        case kUDMFSidedef:
-            ParseSidedefField(side, key_ename.GetIndex(), value);
-            break;
-        case kUDMFLinedef:
-            ParseLinedefField(line, key_ename.GetIndex(), value);
-            break;
-        case kUDMFSector:
-        default: /* just skip it */
-            break;
+            case kUDMFVertex:
+                ParseVertexField(vertex, key_ename.GetIndex(), value);
+                break;
+            case kUDMFThing:
+                ParseThingField(thing, key_ename.GetIndex(), value);
+                break;
+            case kUDMFSidedef:
+                ParseSidedefField(side, key_ename.GetIndex(), value);
+                break;
+            case kUDMFLinedef:
+                ParseLinedefField(line, key_ename.GetIndex(), value);
+                break;
+            case kUDMFSector:
+            default: /* just skip it */
+                break;
         }
     }
 

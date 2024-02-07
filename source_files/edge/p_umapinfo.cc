@@ -33,268 +33,264 @@
 
 #include <unordered_map> // ZDoom Actor Name <-> Doomednum lookups
 
+#include "str_ename.h"
+
 MapList Maps;
 
-//==========================================================================
-//
-// The Doom actors in their original order
-//
-//==========================================================================
-
-static std::unordered_map<const char *, int> ActorNames = {
-    {"DoomPlayer", -1},
-    {"ZombieMan", 3004},
-    {"ShotgunGuy", 9},
-    {"Archvile", 64},
-    {"ArchvileFire", -1},
-    {"Revenant", 66},
-    {"RevenantTracer", -1},
-    {"RevenantTracerSmoke", -1},
-    {"Fatso", 67},
-    {"FatShot", -1},
-    {"ChaingunGuy", 65},
-    {"DoomImp", 3001},
-    {"Demon", 3002},
-    {"Spectre", 58},
-    {"Cacodemon", 3005},
-    {"BaronOfHell", 3003},
-    {"BaronBall", -1},
-    {"HellKnight", 69},
-    {"LostSoul", 3006},
-    {"SpiderMastermind", 7},
-    {"Arachnotron", 68},
-    {"Cyberdemon", 16},
-    {"PainElemental", 71},
-    {"WolfensteinSS", 84},
-    {"CommanderKeen", 72},
-    {"BossBrain", 88},
-    {"BossEye", 89},
-    {"BossTarget", 87},
-    {"SpawnShot", -1},
-    {"SpawnFire", -1},
-    {"ExplosiveBarrel", 2035},
-    {"DoomImpBall", -1},
-    {"CacodemonBall", -1},
-    {"Rocket", -1},
-    {"PlasmaBall", -1},
-    {"BFGBall", -1},
-    {"ArachnotronPlasma", -1},
-    {"BulletPuff", -1},
-    {"Blood", -1},
-    {"TeleportFog", -1},
-    {"ItemFog", -1},
-    {"TeleportDest", 14},
-    {"BFGExtra", -1},
-    {"GreenArmor", 2018},
-    {"BlueArmor", 2019},
-    {"HealthBonus", 2014},
-    {"ArmorBonus", 2015},
-    {"BlueCard", 5},
-    {"RedCard", 13},
-    {"YellowCard", 6},
-    {"YellowSkull", 39},
-    {"RedSkull", 38},
-    {"BlueSkull", 40},
-    {"Stimpack", 2011},
-    {"Medikit", 2012},
-    {"Soulsphere", 2013},
-    {"InvulnerabilitySphere", 2022},
-    {"Berserk", 2023},
-    {"BlurSphere", 2024},
-    {"RadSuit", 2025},
-    {"Allmap", 2026},
-    {"Infrared", 2045},
-    {"Megasphere", 83},
-    {"Clip", 2007},
-    {"ClipBox", 2048},
-    {"RocketAmmo", 2010},
-    {"RocketBox", 2046},
-    {"Cell", 2047},
-    {"CellPack", 17},
-    {"Shell", 2008},
-    {"ShellBox", 2049},
-    {"Backpack", 8},
-    {"BFG9000", 2006},
-    {"Chaingun", 2002},
-    {"Chainsaw", 2005},
-    {"RocketLauncher", 2003},
-    {"PlasmaRifle", 2004},
-    {"Shotgun", 2001},
-    {"SuperShotgun", 82},
-    {"TechLamp", 85},
-    {"TechLamp2", 86},
-    {"Column", 2028},
-    {"TallGreenColumn", 30},
-    {"ShortGreenColumn", 31},
-    {"TallRedColumn", 32},
-    {"ShortRedColumn", 33},
-    {"SkullColumn", 37},
-    {"HeartColumn", 36},
-    {"EvilEye", 41},
-    {"FloatingSkull", 42},
-    {"TorchTree", 43},
-    {"BlueTorch", 44},
-    {"GreenTorch", 45},
-    {"RedTorch", 46},
-    {"ShortBlueTorch", 55},
-    {"ShortGreenTorch", 56},
-    {"ShortRedTorch", 57},
-    {"Stalagtite", 47},
-    {"TechPillar", 48},
-    {"CandleStick", 34},
-    {"Candelabra", 35},
-    {"BloodyTwitch", 49},
-    {"Meat2", 50},
-    {"Meat3", 51},
-    {"Meat4", 52},
-    {"Meat5", 53},
-    {"NonsolidMeat2", 59},
-    {"NonsolidMeat4", 60},
-    {"NonsolidMeat3", 61},
-    {"NonsolidMeat5", 62},
-    {"NonsolidTwitch", 63},
-    {"DeadCacodemon", 22},
-    {"DeadMarine", 15},
-    {"DeadZombieMan", 18},
-    {"DeadDemon", 21},
-    {"DeadLostSoul", 23},
-    {"DeadDoomImp", 20},
-    {"DeadShotgunGuy", 19},
-    {"GibbedMarine", 10},
-    {"GibbedMarineExtra", 12},
-    {"HeadsOnAStick", 28},
-    {"Gibs", 24},
-    {"HeadOnAStick", 27},
-    {"HeadCandles", 29},
-    {"DeadStick", 25},
-    {"LiveStick", 26},
-    {"BigTree", 54},
-    {"BurningBarrel", 70},
-    {"HangNoGuts", 73},
-    {"HangBNoBrain", 74},
-    {"HangTLookingDown", 75},
-    {"HangTSkull", 76},
-    {"HangTLookingUp", 77},
-    {"HangTNoBrain", 78},
-    {"ColonGibs", 79},
-    {"SmallBloodPool", 80},
-    {"BrainStem", 81},
+static std::unordered_map<int, int16_t> ActorNames = {
+    {epi::kENameDoomPlayer, -1},
+    {epi::kENameZombieMan, 3004},
+    {epi::kENameShotgunGuy, 9},
+    {epi::kENameArchvile, 64},
+    {epi::kENameArchvileFire, -1},
+    {epi::kENameRevenant, 66},
+    {epi::kENameRevenantTracer, -1},
+    {epi::kENameRevenantTracerSmoke, -1},
+    {epi::kENameFatso, 67},
+    {epi::kENameFatShot, -1},
+    {epi::kENameChaingunGuy, 65},
+    {epi::kENameDoomImp, 3001},
+    {epi::kENameDemon, 3002},
+    {epi::kENameSpectre, 58},
+    {epi::kENameCacodemon, 3005},
+    {epi::kENameBaronOfHell, 3003},
+    {epi::kENameBaronBall, -1},
+    {epi::kENameHellKnight, 69},
+    {epi::kENameLostSoul, 3006},
+    {epi::kENameSpiderMastermind, 7},
+    {epi::kENameArachnotron, 68},
+    {epi::kENameCyberdemon, 16},
+    {epi::kENamePainElemental, 71},
+    {epi::kENameWolfensteinSS, 84},
+    {epi::kENameCommanderKeen, 72},
+    {epi::kENameBossBrain, 88},
+    {epi::kENameBossEye, 89},
+    {epi::kENameBossTarget, 87},
+    {epi::kENameSpawnShot, -1},
+    {epi::kENameSpawnFire, -1},
+    {epi::kENameExplosiveBarrel, 2035},
+    {epi::kENameDoomImpBall, -1},
+    {epi::kENameCacodemonBall, -1},
+    {epi::kENameRocket, -1},
+    {epi::kENamePlasmaBall, -1},
+    {epi::kENameBFGBall, -1},
+    {epi::kENameArachnotronPlasma, -1},
+    {epi::kENameBulletPuff, -1},
+    {epi::kENameBlood, -1},
+    {epi::kENameTeleportFog, -1},
+    {epi::kENameItemFog, -1},
+    {epi::kENameTeleportDest, 14},
+    {epi::kENameBFGExtra, -1},
+    {epi::kENameGreenArmor, 2018},
+    {epi::kENameBlueArmor, 2019},
+    {epi::kENameHealthBonus, 2014},
+    {epi::kENameArmorBonus, 2015},
+    {epi::kENameBlueCard, 5},
+    {epi::kENameRedCard, 13},
+    {epi::kENameYellowCard, 6},
+    {epi::kENameYellowSkull, 39},
+    {epi::kENameRedSkull, 38},
+    {epi::kENameBlueSkull, 40},
+    {epi::kENameStimpack, 2011},
+    {epi::kENameMedikit, 2012},
+    {epi::kENameSoulsphere, 2013},
+    {epi::kENameInvulnerabilitySphere, 2022},
+    {epi::kENameBerserk, 2023},
+    {epi::kENameBlurSphere, 2024},
+    {epi::kENameRadSuit, 2025},
+    {epi::kENameAllmap, 2026},
+    {epi::kENameInfrared, 2045},
+    {epi::kENameMegasphere, 83},
+    {epi::kENameClip, 2007},
+    {epi::kENameClipBox, 2048},
+    {epi::kENameRocketAmmo, 2010},
+    {epi::kENameRocketBox, 2046},
+    {epi::kENameCell, 2047},
+    {epi::kENameCellPack, 17},
+    {epi::kENameShell, 2008},
+    {epi::kENameShellBox, 2049},
+    {epi::kENameBackpack, 8},
+    {epi::kENameBFG9000, 2006},
+    {epi::kENameChaingun, 2002},
+    {epi::kENameChainsaw, 2005},
+    {epi::kENameRocketLauncher, 2003},
+    {epi::kENamePlasmaRifle, 2004},
+    {epi::kENameShotgun, 2001},
+    {epi::kENameSuperShotgun, 82},
+    {epi::kENameTechLamp, 85},
+    {epi::kENameTechLamp2, 86},
+    {epi::kENameColumn, 2028},
+    {epi::kENameTallGreenColumn, 30},
+    {epi::kENameShortGreenColumn, 31},
+    {epi::kENameTallRedColumn, 32},
+    {epi::kENameShortRedColumn, 33},
+    {epi::kENameSkullColumn, 37},
+    {epi::kENameHeartColumn, 36},
+    {epi::kENameEvilEye, 41},
+    {epi::kENameFloatingSkull, 42},
+    {epi::kENameTorchTree, 43},
+    {epi::kENameBlueTorch, 44},
+    {epi::kENameGreenTorch, 45},
+    {epi::kENameRedTorch, 46},
+    {epi::kENameShortBlueTorch, 55},
+    {epi::kENameShortGreenTorch, 56},
+    {epi::kENameShortRedTorch, 57},
+    {epi::kENameStalagtite, 47},
+    {epi::kENameTechPillar, 48},
+    {epi::kENameCandleStick, 34},
+    {epi::kENameCandelabra, 35},
+    {epi::kENameBloodyTwitch, 49},
+    {epi::kENameMeat2, 50},
+    {epi::kENameMeat3, 51},
+    {epi::kENameMeat4, 52},
+    {epi::kENameMeat5, 53},
+    {epi::kENameNonsolidMeat2, 59},
+    {epi::kENameNonsolidMeat4, 60},
+    {epi::kENameNonsolidMeat3, 61},
+    {epi::kENameNonsolidMeat5, 62},
+    {epi::kENameNonsolidTwitch, 63},
+    {epi::kENameDeadCacodemon, 22},
+    {epi::kENameDeadMarine, 15},
+    {epi::kENameDeadZombieMan, 18},
+    {epi::kENameDeadDemon, 21},
+    {epi::kENameDeadLostSoul, 23},
+    {epi::kENameDeadDoomImp, 20},
+    {epi::kENameDeadShotgunGuy, 19},
+    {epi::kENameGibbedMarine, 10},
+    {epi::kENameGibbedMarineExtra, 12},
+    {epi::kENameHeadsOnAStick, 28},
+    {epi::kENameGibs, 24},
+    {epi::kENameHeadOnAStick, 27},
+    {epi::kENameHeadCandles, 29},
+    {epi::kENameDeadStick, 25},
+    {epi::kENameLiveStick, 26},
+    {epi::kENameBigTree, 54},
+    {epi::kENameBurningBarrel, 70},
+    {epi::kENameHangNoGuts, 73},
+    {epi::kENameHangBNoBrain, 74},
+    {epi::kENameHangTLookingDown, 75},
+    {epi::kENameHangTSkull, 76},
+    {epi::kENameHangTLookingUp, 77},
+    {epi::kENameHangTNoBrain, 78},
+    {epi::kENameColonGibs, 79},
+    {epi::kENameSmallBloodPool, 80},
+    {epi::kENameBrainStem, 81},
     // Boom/MBF additions
-    {"PointPusher", 5001},
-    {"PointPuller", 5002},
-    {"MBFHelperDog", 888},
-    {"PlasmaBall1", -1},
-    {"PlasmaBall2", -1},
-    {"EvilSceptre", -1},
-    {"UnholyBible", -1},
-    {"MusicChanger", -1}, // Doomednums 14101-14165, but I don't think we need this
-                          // I'm guessing below here
-    {"Deh_Actor_145", 145},
-    {"Deh_Actor_146", 146},
-    {"Deh_Actor_147", 147},
-    {"Deh_Actor_148", 148},
-    {"Deh_Actor_149", 149},
+    {epi::kENamePointPusher, 5001},
+    {epi::kENamePointPuller, 5002},
+    {epi::kENameMBFHelperDog, 888},
+    {epi::kENamePlasmaBall1, -1},
+    {epi::kENamePlasmaBall2, -1},
+    {epi::kENameEvilSceptre, -1},
+    {epi::kENameUnholyBible, -1},
+    {epi::kENameMusicChanger, -1}, // Doomednums 14101-14165, but I don't think we need this
+    // I'm guessing below here
+    {epi::kENameDeh_Actor_145, 145},
+    {epi::kENameDeh_Actor_146, 146},
+    {epi::kENameDeh_Actor_147, 147},
+    {epi::kENameDeh_Actor_148, 148},
+    {epi::kENameDeh_Actor_149, 149},
     // DEHEXTRA Actors start here
-    {"Deh_Actor_150", 150}, // Extra thing 0
-    {"Deh_Actor_151", 151}, // Extra thing 1
-    {"Deh_Actor_152", 152}, // Extra thing 2
-    {"Deh_Actor_153", 153}, // Extra thing 3
-    {"Deh_Actor_154", 154}, // Extra thing 4
-    {"Deh_Actor_155", 155}, // Extra thing 5
-    {"Deh_Actor_156", 156}, // Extra thing 6
-    {"Deh_Actor_157", 157}, // Extra thing 7
-    {"Deh_Actor_158", 158}, // Extra thing 8
-    {"Deh_Actor_159", 159}, // Extra thing 9
-    {"Deh_Actor_160", 160}, // Extra thing 10
-    {"Deh_Actor_161", 161}, // Extra thing 11
-    {"Deh_Actor_162", 162}, // Extra thing 12
-    {"Deh_Actor_163", 163}, // Extra thing 13
-    {"Deh_Actor_164", 164}, // Extra thing 14
-    {"Deh_Actor_165", 165}, // Extra thing 15
-    {"Deh_Actor_166", 166}, // Extra thing 16
-    {"Deh_Actor_167", 167}, // Extra thing 17
-    {"Deh_Actor_168", 168}, // Extra thing 18
-    {"Deh_Actor_169", 169}, // Extra thing 19
-    {"Deh_Actor_170", 170}, // Extra thing 20
-    {"Deh_Actor_171", 171}, // Extra thing 21
-    {"Deh_Actor_172", 172}, // Extra thing 22
-    {"Deh_Actor_173", 173}, // Extra thing 23
-    {"Deh_Actor_174", 174}, // Extra thing 24
-    {"Deh_Actor_175", 175}, // Extra thing 25
-    {"Deh_Actor_176", 176}, // Extra thing 26
-    {"Deh_Actor_177", 177}, // Extra thing 27
-    {"Deh_Actor_178", 178}, // Extra thing 28
-    {"Deh_Actor_179", 179}, // Extra thing 29
-    {"Deh_Actor_180", 180}, // Extra thing 30
-    {"Deh_Actor_181", 181}, // Extra thing 31
-    {"Deh_Actor_182", 182}, // Extra thing 32
-    {"Deh_Actor_183", 183}, // Extra thing 33
-    {"Deh_Actor_184", 184}, // Extra thing 34
-    {"Deh_Actor_185", 185}, // Extra thing 35
-    {"Deh_Actor_186", 186}, // Extra thing 36
-    {"Deh_Actor_187", 187}, // Extra thing 37
-    {"Deh_Actor_188", 188}, // Extra thing 38
-    {"Deh_Actor_189", 189}, // Extra thing 39
-    {"Deh_Actor_190", 190}, // Extra thing 40
-    {"Deh_Actor_191", 191}, // Extra thing 41
-    {"Deh_Actor_192", 192}, // Extra thing 42
-    {"Deh_Actor_193", 193}, // Extra thing 43
-    {"Deh_Actor_194", 194}, // Extra thing 44
-    {"Deh_Actor_195", 195}, // Extra thing 45
-    {"Deh_Actor_196", 196}, // Extra thing 46
-    {"Deh_Actor_197", 197}, // Extra thing 47
-    {"Deh_Actor_198", 198}, // Extra thing 48
-    {"Deh_Actor_199", 199}, // Extra thing 49
-    {"Deh_Actor_200", 200}, // Extra thing 50
-    {"Deh_Actor_201", 201}, // Extra thing 51
-    {"Deh_Actor_202", 202}, // Extra thing 52
-    {"Deh_Actor_203", 203}, // Extra thing 53
-    {"Deh_Actor_204", 204}, // Extra thing 54
-    {"Deh_Actor_205", 205}, // Extra thing 55
-    {"Deh_Actor_206", 206}, // Extra thing 56
-    {"Deh_Actor_207", 207}, // Extra thing 57
-    {"Deh_Actor_208", 208}, // Extra thing 58
-    {"Deh_Actor_209", 209}, // Extra thing 59
-    {"Deh_Actor_210", 210}, // Extra thing 60
-    {"Deh_Actor_211", 211}, // Extra thing 61
-    {"Deh_Actor_212", 212}, // Extra thing 62
-    {"Deh_Actor_213", 213}, // Extra thing 63
-    {"Deh_Actor_214", 214}, // Extra thing 64
-    {"Deh_Actor_215", 215}, // Extra thing 65
-    {"Deh_Actor_216", 216}, // Extra thing 66
-    {"Deh_Actor_217", 217}, // Extra thing 67
-    {"Deh_Actor_218", 218}, // Extra thing 68
-    {"Deh_Actor_219", 219}, // Extra thing 69
-    {"Deh_Actor_220", 220}, // Extra thing 70
-    {"Deh_Actor_221", 221}, // Extra thing 71
-    {"Deh_Actor_222", 222}, // Extra thing 72
-    {"Deh_Actor_223", 223}, // Extra thing 73
-    {"Deh_Actor_224", 224}, // Extra thing 74
-    {"Deh_Actor_225", 225}, // Extra thing 75
-    {"Deh_Actor_226", 226}, // Extra thing 76
-    {"Deh_Actor_227", 227}, // Extra thing 77
-    {"Deh_Actor_228", 228}, // Extra thing 78
-    {"Deh_Actor_229", 229}, // Extra thing 79
-    {"Deh_Actor_230", 230}, // Extra thing 80
-    {"Deh_Actor_231", 231}, // Extra thing 81
-    {"Deh_Actor_232", 232}, // Extra thing 82
-    {"Deh_Actor_233", 233}, // Extra thing 83
-    {"Deh_Actor_234", 234}, // Extra thing 84
-    {"Deh_Actor_235", 235}, // Extra thing 85
-    {"Deh_Actor_236", 236}, // Extra thing 86
-    {"Deh_Actor_237", 237}, // Extra thing 87
-    {"Deh_Actor_238", 238}, // Extra thing 88
-    {"Deh_Actor_239", 239}, // Extra thing 89
-    {"Deh_Actor_240", 240}, // Extra thing 90
-    {"Deh_Actor_241", 241}, // Extra thing 91
-    {"Deh_Actor_242", 242}, // Extra thing 92
-    {"Deh_Actor_243", 243}, // Extra thing 93
-    {"Deh_Actor_244", 244}, // Extra thing 94
-    {"Deh_Actor_245", 245}, // Extra thing 95
-    {"Deh_Actor_246", 246}, // Extra thing 96
-    {"Deh_Actor_247", 247}, // Extra thing 97
-    {"Deh_Actor_248", 248}, // Extra thing 98
-    {"Deh_Actor_249", 249}, // Extra thing 99
+    {epi::kENameDeh_Actor_150, 150}, // Extra thing 0
+    {epi::kENameDeh_Actor_151, 151}, // Extra thing 1
+    {epi::kENameDeh_Actor_152, 152}, // Extra thing 2
+    {epi::kENameDeh_Actor_153, 153}, // Extra thing 3
+    {epi::kENameDeh_Actor_154, 154}, // Extra thing 4
+    {epi::kENameDeh_Actor_155, 155}, // Extra thing 5
+    {epi::kENameDeh_Actor_156, 156}, // Extra thing 6
+    {epi::kENameDeh_Actor_157, 157}, // Extra thing 7
+    {epi::kENameDeh_Actor_158, 158}, // Extra thing 8
+    {epi::kENameDeh_Actor_159, 159}, // Extra thing 9
+    {epi::kENameDeh_Actor_160, 160}, // Extra thing 10
+    {epi::kENameDeh_Actor_161, 161}, // Extra thing 11
+    {epi::kENameDeh_Actor_162, 162}, // Extra thing 12
+    {epi::kENameDeh_Actor_163, 163}, // Extra thing 13
+    {epi::kENameDeh_Actor_164, 164}, // Extra thing 14
+    {epi::kENameDeh_Actor_165, 165}, // Extra thing 15
+    {epi::kENameDeh_Actor_166, 166}, // Extra thing 16
+    {epi::kENameDeh_Actor_167, 167}, // Extra thing 17
+    {epi::kENameDeh_Actor_168, 168}, // Extra thing 18
+    {epi::kENameDeh_Actor_169, 169}, // Extra thing 19
+    {epi::kENameDeh_Actor_170, 170}, // Extra thing 20
+    {epi::kENameDeh_Actor_171, 171}, // Extra thing 21
+    {epi::kENameDeh_Actor_172, 172}, // Extra thing 22
+    {epi::kENameDeh_Actor_173, 173}, // Extra thing 23
+    {epi::kENameDeh_Actor_174, 174}, // Extra thing 24
+    {epi::kENameDeh_Actor_175, 175}, // Extra thing 25
+    {epi::kENameDeh_Actor_176, 176}, // Extra thing 26
+    {epi::kENameDeh_Actor_177, 177}, // Extra thing 27
+    {epi::kENameDeh_Actor_178, 178}, // Extra thing 28
+    {epi::kENameDeh_Actor_179, 179}, // Extra thing 29
+    {epi::kENameDeh_Actor_180, 180}, // Extra thing 30
+    {epi::kENameDeh_Actor_181, 181}, // Extra thing 31
+    {epi::kENameDeh_Actor_182, 182}, // Extra thing 32
+    {epi::kENameDeh_Actor_183, 183}, // Extra thing 33
+    {epi::kENameDeh_Actor_184, 184}, // Extra thing 34
+    {epi::kENameDeh_Actor_185, 185}, // Extra thing 35
+    {epi::kENameDeh_Actor_186, 186}, // Extra thing 36
+    {epi::kENameDeh_Actor_187, 187}, // Extra thing 37
+    {epi::kENameDeh_Actor_188, 188}, // Extra thing 38
+    {epi::kENameDeh_Actor_189, 189}, // Extra thing 39
+    {epi::kENameDeh_Actor_190, 190}, // Extra thing 40
+    {epi::kENameDeh_Actor_191, 191}, // Extra thing 41
+    {epi::kENameDeh_Actor_192, 192}, // Extra thing 42
+    {epi::kENameDeh_Actor_193, 193}, // Extra thing 43
+    {epi::kENameDeh_Actor_194, 194}, // Extra thing 44
+    {epi::kENameDeh_Actor_195, 195}, // Extra thing 45
+    {epi::kENameDeh_Actor_196, 196}, // Extra thing 46
+    {epi::kENameDeh_Actor_197, 197}, // Extra thing 47
+    {epi::kENameDeh_Actor_198, 198}, // Extra thing 48
+    {epi::kENameDeh_Actor_199, 199}, // Extra thing 49
+    {epi::kENameDeh_Actor_200, 200}, // Extra thing 50
+    {epi::kENameDeh_Actor_201, 201}, // Extra thing 51
+    {epi::kENameDeh_Actor_202, 202}, // Extra thing 52
+    {epi::kENameDeh_Actor_203, 203}, // Extra thing 53
+    {epi::kENameDeh_Actor_204, 204}, // Extra thing 54
+    {epi::kENameDeh_Actor_205, 205}, // Extra thing 55
+    {epi::kENameDeh_Actor_206, 206}, // Extra thing 56
+    {epi::kENameDeh_Actor_207, 207}, // Extra thing 57
+    {epi::kENameDeh_Actor_208, 208}, // Extra thing 58
+    {epi::kENameDeh_Actor_209, 209}, // Extra thing 59
+    {epi::kENameDeh_Actor_210, 210}, // Extra thing 60
+    {epi::kENameDeh_Actor_211, 211}, // Extra thing 61
+    {epi::kENameDeh_Actor_212, 212}, // Extra thing 62
+    {epi::kENameDeh_Actor_213, 213}, // Extra thing 63
+    {epi::kENameDeh_Actor_214, 214}, // Extra thing 64
+    {epi::kENameDeh_Actor_215, 215}, // Extra thing 65
+    {epi::kENameDeh_Actor_216, 216}, // Extra thing 66
+    {epi::kENameDeh_Actor_217, 217}, // Extra thing 67
+    {epi::kENameDeh_Actor_218, 218}, // Extra thing 68
+    {epi::kENameDeh_Actor_219, 219}, // Extra thing 69
+    {epi::kENameDeh_Actor_220, 220}, // Extra thing 70
+    {epi::kENameDeh_Actor_221, 221}, // Extra thing 71
+    {epi::kENameDeh_Actor_222, 222}, // Extra thing 72
+    {epi::kENameDeh_Actor_223, 223}, // Extra thing 73
+    {epi::kENameDeh_Actor_224, 224}, // Extra thing 74
+    {epi::kENameDeh_Actor_225, 225}, // Extra thing 75
+    {epi::kENameDeh_Actor_226, 226}, // Extra thing 76
+    {epi::kENameDeh_Actor_227, 227}, // Extra thing 77
+    {epi::kENameDeh_Actor_228, 228}, // Extra thing 78
+    {epi::kENameDeh_Actor_229, 229}, // Extra thing 79
+    {epi::kENameDeh_Actor_230, 230}, // Extra thing 80
+    {epi::kENameDeh_Actor_231, 231}, // Extra thing 81
+    {epi::kENameDeh_Actor_232, 232}, // Extra thing 82
+    {epi::kENameDeh_Actor_233, 233}, // Extra thing 83
+    {epi::kENameDeh_Actor_234, 234}, // Extra thing 84
+    {epi::kENameDeh_Actor_235, 235}, // Extra thing 85
+    {epi::kENameDeh_Actor_236, 236}, // Extra thing 86
+    {epi::kENameDeh_Actor_237, 237}, // Extra thing 87
+    {epi::kENameDeh_Actor_238, 238}, // Extra thing 88
+    {epi::kENameDeh_Actor_239, 239}, // Extra thing 89
+    {epi::kENameDeh_Actor_240, 240}, // Extra thing 90
+    {epi::kENameDeh_Actor_241, 241}, // Extra thing 91
+    {epi::kENameDeh_Actor_242, 242}, // Extra thing 92
+    {epi::kENameDeh_Actor_243, 243}, // Extra thing 93
+    {epi::kENameDeh_Actor_244, 244}, // Extra thing 94
+    {epi::kENameDeh_Actor_245, 245}, // Extra thing 95
+    {epi::kENameDeh_Actor_246, 246}, // Extra thing 96
+    {epi::kENameDeh_Actor_247, 247}, // Extra thing 97
+    {epi::kENameDeh_Actor_248, 248}, // Extra thing 98
+    {epi::kENameDeh_Actor_249, 249}, // Extra thing 99
 };
 
 static void FreeMap(MapEntry *mape)
@@ -378,277 +374,289 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         if (tok == epi::kTokenEOF || tok == epi::kTokenError || value == "}")
             I_Error("Malformed UMAPINFO lump: missing value\n");
 
-        if (epi::StringCaseCompareASCII(key, "levelname") == 0)
+        epi::EName key_ename(key, true);
+
+        switch (key_ename.GetIndex())
         {
-            if (val->levelname)
-                free(val->levelname);
-            val->levelname = (char *)calloc(value.size() + 1, sizeof(char));
-            Z_StrNCpy(val->levelname, value.c_str(), value.size());
-        }
-        else if (epi::StringCaseCompareASCII(key, "label") == 0)
-        {
-            if (epi::StringCaseCompareASCII(value, "clear") == 0)
-            {
-                if (val->label)
-                    free(val->label);
-                val->label    = (char *)calloc(2, sizeof(char));
-                val->label[0] = '-';
-            }
-            else
-            {
-                if (val->label)
-                    free(val->label);
-                val->label = (char *)calloc(value.size() + 1, sizeof(char));
-                Z_StrNCpy(val->label, value.c_str(), value.size());
-            }
-        }
-        else if (epi::StringCaseCompareASCII(key, "next") == 0)
-        {
-            Z_Clear(val->nextmap, char, 9);
-            if (value.size() > 8)
-                I_Error("UMAPINFO: Mapname for \"next\" over 8 characters!\n");
-            Z_StrNCpy(val->nextmap, value.data(), 8);
-        }
-        else if (epi::StringCaseCompareASCII(key, "nextsecret") == 0)
-        {
-            Z_Clear(val->nextsecret, char, 9);
-            if (value.size() > 8)
-                I_Error("UMAPINFO: Mapname for \"nextsecret\" over 8 characters!\n");
-            Z_StrNCpy(val->nextsecret, value.data(), 8);
-        }
-        else if (epi::StringCaseCompareASCII(key, "levelpic") == 0)
-        {
-            Z_Clear(val->levelpic, char, 9);
-            if (value.size() > 8)
-                I_Error("UMAPINFO: Entry for \"levelpic\" over 8 characters!\n");
-            Z_StrNCpy(val->levelpic, value.data(), 8);
-        }
-        else if (epi::StringCaseCompareASCII(key, "skytexture") == 0)
-        {
-            Z_Clear(val->skytexture, char, 9);
-            if (value.size() > 8)
-                I_Error("UMAPINFO: Entry for \"skytexture\" over 8 characters!\n");
-            Z_StrNCpy(val->skytexture, value.data(), 8);
-        }
-        else if (epi::StringCaseCompareASCII(key, "music") == 0)
-        {
-            Z_Clear(val->music, char, 9);
-            if (value.size() > 8)
-                I_Error("UMAPINFO: Entry for \"music\" over 8 characters!\n");
-            Z_StrNCpy(val->music, value.data(), 8);
-        }
-        else if (epi::StringCaseCompareASCII(key, "endpic") == 0)
-        {
-            Z_Clear(val->endpic, char, 9);
-            if (value.size() > 8)
-                I_Error("UMAPINFO: Entry for \"endpic\" over 8 characters!\n");
-            Z_StrNCpy(val->endpic, value.data(), 8);
-        }
-        else if (epi::StringCaseCompareASCII(key, "endcast") == 0)
-        {
-            val->docast = epi::LexBoolean(value);
-        }
-        else if (epi::StringCaseCompareASCII(key, "endbunny") == 0)
-        {
-            val->dobunny = epi::LexBoolean(value);
-        }
-        else if (epi::StringCaseCompareASCII(key, "endgame") == 0)
-        {
-            val->endgame = epi::LexBoolean(value);
-        }
-        else if (epi::StringCaseCompareASCII(key, "exitpic") == 0)
-        {
-            Z_Clear(val->exitpic, char, 9);
-            if (value.size() > 8)
-                I_Error("UMAPINFO: Entry for \"exitpic\" over 8 characters!\n");
-            Z_StrNCpy(val->exitpic, value.data(), 8);
-        }
-        else if (epi::StringCaseCompareASCII(key, "enterpic") == 0)
-        {
-            Z_Clear(val->enterpic, char, 9);
-            if (value.size() > 8)
-                I_Error("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
-            Z_StrNCpy(val->enterpic, value.data(), 8);
-        }
-        else if (epi::StringCaseCompareASCII(key, "nointermission") == 0)
-        {
-            val->nointermission = epi::LexBoolean(value);
-        }
-        else if (epi::StringCaseCompareASCII(key, "partime") == 0)
-        {
-            val->partime = 35 * epi::LexInteger(value);
-        }
-        else if (epi::StringCaseCompareASCII(key, "intertext") == 0)
-        {
-            std::string it_builder = value;
-            while (lex.Match(","))
-            {
-                it_builder.append("\n");
-                lex.Next(value);
-                it_builder.append(value);
-            }
-            if (val->intertext)
-                free(val->intertext);
-            val->intertext = (char *)calloc(it_builder.size() + 1, sizeof(char));
-            Z_StrNCpy(val->intertext, it_builder.c_str(), it_builder.size());
-        }
-        else if (epi::StringCaseCompareASCII(key, "intertextsecret") == 0)
-        {
-            std::string it_builder = value;
-            while (lex.Match(","))
-            {
-                it_builder.append("\n");
-                lex.Next(value);
-                it_builder.append(value);
-            }
-            if (val->intertextsecret)
-                free(val->intertextsecret);
-            val->intertextsecret = (char *)calloc(it_builder.size() + 1, sizeof(char));
-            Z_StrNCpy(val->intertextsecret, it_builder.c_str(), it_builder.size());
-        }
-        else if (epi::StringCaseCompareASCII(key, "interbackdrop") == 0)
-        {
-            Z_Clear(val->interbackdrop, char, 9);
-            if (value.size() > 8)
-                I_Error("UMAPINFO: Entry for \"interbackdrop\" over 8 characters!\n");
-            Z_StrNCpy(val->interbackdrop, value.data(), 8);
-        }
-        else if (epi::StringCaseCompareASCII(key, "intermusic") == 0)
-        {
-            Z_Clear(val->intermusic, char, 9);
-            if (value.size() > 8)
-                I_Error("UMAPINFO: Entry for \"intermusic\" over 8 characters!\n");
-            Z_StrNCpy(val->intermusic, value.data(), 8);
-        }
-        else if (epi::StringCaseCompareASCII(key, "episode") == 0)
-        {
-            if (epi::StringCaseCompareASCII(value, "clear") == 0)
-            {
-                // This should leave the initial [EDGE] episode and nothing else
-                // Since 'clear' is supposed to come before any custom definitions
-                // this should not clear out any UMAPINFO-defined episodes
-                for (auto iter = gamedefs.begin()+1; iter != gamedefs.end();)
+            case epi::kENameLevelname:
                 {
-                    gamedef_c *game = *iter;
-                    if (game->firstmap.empty() && epi::StringCaseCompareASCII(game->name, "UMAPINFO_TEMPLATE") != 0)
+                    if (val->levelname)
+                        free(val->levelname);
+                    val->levelname = (char *)calloc(value.size() + 1, sizeof(char));
+                    Z_StrNCpy(val->levelname, value.c_str(), value.size());
+                }
+                break;
+            case epi::kENameLabel:
+                {
+                    if (epi::StringCaseCompareASCII(value, "clear") == 0)
                     {
-                        delete game;
-                        game = nullptr;
-                        iter = gamedefs.erase(iter);
+                        if (val->label)
+                            free(val->label);
+                        val->label    = (char *)calloc(2, sizeof(char));
+                        val->label[0] = '-';
                     }
                     else
-                        ++iter;
-                }
-            }
-            else
-            {
-                gamedef_c *new_epi = nullptr;
-                // Check for episode to replace
-                for (auto game : gamedefs)
-                {
-                    if (epi::StringCaseCompareASCII(game->firstmap, val->mapname) == 0 &&
-                        epi::StringCaseCompareASCII(game->name, "UMAPINFO_TEMPLATE") != 0)
                     {
-                        new_epi = game;
-                        break;
+                        if (val->label)
+                            free(val->label);
+                        val->label = (char *)calloc(value.size() + 1, sizeof(char));
+                        Z_StrNCpy(val->label, value.c_str(), value.size());
                     }
                 }
-                if (!new_epi)
+                break;
+            case epi::kENameNext:
                 {
-                    // Create a new episode from game-specific UMAPINFO template data
-                    gamedef_c *um_template = nullptr;
-                    for (auto game : gamedefs)
+                    Z_Clear(val->nextmap, char, 9);
+                    if (value.size() > 8)
+                        I_Error("UMAPINFO: Mapname for \"next\" over 8 characters!\n");
+                    Z_StrNCpy(val->nextmap, value.data(), 8);
+                }
+                break;
+            case epi::kENameNextsecret:
+                {
+                    Z_Clear(val->nextsecret, char, 9);
+                    if (value.size() > 8)
+                        I_Error("UMAPINFO: Mapname for \"nextsecret\" over 8 characters!\n");
+                    Z_StrNCpy(val->nextsecret, value.data(), 8);
+                }
+                break;
+            case epi::kENameLevelpic:
+                {
+                    Z_Clear(val->levelpic, char, 9);
+                    if (value.size() > 8)
+                        I_Error("UMAPINFO: Entry for \"levelpic\" over 8 characters!\n");
+                    Z_StrNCpy(val->levelpic, value.data(), 8);
+                }
+                break;
+            case epi::kENameSkytexture:
+                {
+                    Z_Clear(val->skytexture, char, 9);
+                    if (value.size() > 8)
+                        I_Error("UMAPINFO: Entry for \"skytexture\" over 8 characters!\n");
+                    Z_StrNCpy(val->skytexture, value.data(), 8);
+                }
+                break;
+            case epi::kENameMusic:
+                {
+                    Z_Clear(val->music, char, 9);
+                    if (value.size() > 8)
+                        I_Error("UMAPINFO: Entry for \"music\" over 8 characters!\n");
+                    Z_StrNCpy(val->music, value.data(), 8);
+                }
+                break;
+            case epi::kENameEndpic:
+                {
+                    Z_Clear(val->endpic, char, 9);
+                    if (value.size() > 8)
+                        I_Error("UMAPINFO: Entry for \"endpic\" over 8 characters!\n");
+                    Z_StrNCpy(val->endpic, value.data(), 8);
+                }
+                break;
+            case epi::kENameEndcast:
+                val->docast = epi::LexBoolean(value);
+                break;
+            case epi::kENameEndbunny:
+                val->dobunny = epi::LexBoolean(value);
+                break;
+            case epi::kENameEndgame:
+                val->endgame = epi::LexBoolean(value);
+                break;
+            case epi::kENameExitpic:
+                {
+                    Z_Clear(val->exitpic, char, 9);
+                    if (value.size() > 8)
+                        I_Error("UMAPINFO: Entry for \"exitpic\" over 8 characters!\n");
+                    Z_StrNCpy(val->exitpic, value.data(), 8);
+                }
+                break;
+            case epi::kENameEnterpic:
+                {
+                    Z_Clear(val->enterpic, char, 9);
+                    if (value.size() > 8)
+                        I_Error("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
+                    Z_StrNCpy(val->enterpic, value.data(), 8);
+                }
+                break;
+            case epi::kENameNointermission:
+                val->nointermission = epi::LexBoolean(value);
+                break;
+            case epi::kENamePartime:
+                val->partime = 35 * epi::LexInteger(value);
+                break;
+            case epi::kENameIntertext:
+                {
+                    std::string it_builder = value;
+                    while (lex.Match(","))
                     {
-                        if (epi::StringCaseCompareASCII(game->name, "UMAPINFO_TEMPLATE") == 0)
+                        it_builder.append("\n");
+                        lex.Next(value);
+                        it_builder.append(value);
+                    }
+                    if (val->intertext)
+                        free(val->intertext);
+                    val->intertext = (char *)calloc(it_builder.size() + 1, sizeof(char));
+                    Z_StrNCpy(val->intertext, it_builder.c_str(), it_builder.size());
+                }
+                break;
+            case epi::kENameIntertextsecret:
+                {
+                    std::string it_builder = value;
+                    while (lex.Match(","))
+                    {
+                        it_builder.append("\n");
+                        lex.Next(value);
+                        it_builder.append(value);
+                    }
+                    if (val->intertextsecret)
+                        free(val->intertextsecret);
+                    val->intertextsecret = (char *)calloc(it_builder.size() + 1, sizeof(char));
+                    Z_StrNCpy(val->intertextsecret, it_builder.c_str(), it_builder.size());
+                }
+                break;
+            case epi::kENameInterbackdrop:
+                {
+                    Z_Clear(val->interbackdrop, char, 9);
+                    if (value.size() > 8)
+                        I_Error("UMAPINFO: Entry for \"interbackdrop\" over 8 characters!\n");
+                    Z_StrNCpy(val->interbackdrop, value.data(), 8);
+                }
+                break;
+            case epi::kENameIntermusic:
+                {
+                    Z_Clear(val->intermusic, char, 9);
+                    if (value.size() > 8)
+                        I_Error("UMAPINFO: Entry for \"intermusic\" over 8 characters!\n");
+                    Z_StrNCpy(val->intermusic, value.data(), 8);
+                }
+                break;
+            case epi::kENameEpisode:
+                {
+                    if (epi::StringCaseCompareASCII(value, "clear") == 0)
+                    {
+                        // This should leave the initial [EDGE] episode and nothing else
+                        // Since 'clear' is supposed to come before any custom definitions
+                        // this should not clear out any UMAPINFO-defined episodes
+                        for (auto iter = gamedefs.begin()+1; iter != gamedefs.end();)
                         {
-                            um_template = game;
-                            break;
+                            gamedef_c *game = *iter;
+                            if (game->firstmap.empty() && epi::StringCaseCompareASCII(game->name, "UMAPINFO_TEMPLATE") != 0)
+                            {
+                                delete game;
+                                game = nullptr;
+                                iter = gamedefs.erase(iter);
+                            }
+                            else
+                                ++iter;
                         }
                     }
-                    if (!um_template)
-                        I_Error("UMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
-                    new_epi = new gamedef_c;
-                    new_epi->CopyDetail(*um_template);
-                    new_epi->firstmap = val->mapname;
-                    gamedefs.push_back(new_epi);
-                }
-                char        lumpname[9] = {0};
-                std::string alttext;
-                std::string epikey; // Do we use this?
-                if (value.size() > 8)
-                    I_Error("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
-                Z_StrNCpy(lumpname, value.data(), 8);
-                if (lex.Match(","))
-                {
-                    lex.Next(alttext);
-                    if (lex.Match(","))
-                        lex.Next(epikey);
-                }
-                new_epi->namegraphic = lumpname;
-                new_epi->description = alttext;
-                new_epi->name        = epi::StringFormat("UMAPINFO_%s\n", val->mapname); // Internal
-            }
-        }
-        else if (epi::StringCaseCompareASCII(key, "bossaction") == 0)
-        {
-            int special = 0;
-            int tag     = 0;
-            if (epi::StringCaseCompareASCII(value, "clear") == 0)
-            {
-                special = tag = -1;
-                if (val->bossactions)
-                    free(val->bossactions);
-                val->bossactions    = NULL;
-                val->numbossactions = -1;
-            }
-            else
-            {
-                int  actor_num   = -1;
-                bool found_actor = false;
-                for (auto actor : ActorNames)
-                {
-                    if (epi::StringCaseCompareASCII(actor.first, value.c_str()) == 0)
+                    else
                     {
-                        found_actor = true;
-                        actor_num   = actor.second;
-                        break;
+                        gamedef_c *new_epi = nullptr;
+                        // Check for episode to replace
+                        for (auto game : gamedefs)
+                        {
+                            if (epi::StringCaseCompareASCII(game->firstmap, val->mapname) == 0 &&
+                                epi::StringCaseCompareASCII(game->name, "UMAPINFO_TEMPLATE") != 0)
+                            {
+                                new_epi = game;
+                                break;
+                            }
+                        }
+                        if (!new_epi)
+                        {
+                            // Create a new episode from game-specific UMAPINFO template data
+                            gamedef_c *um_template = nullptr;
+                            for (auto game : gamedefs)
+                            {
+                                if (epi::StringCaseCompareASCII(game->name, "UMAPINFO_TEMPLATE") == 0)
+                                {
+                                    um_template = game;
+                                    break;
+                                }
+                            }
+                            if (!um_template)
+                                I_Error("UMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
+                            new_epi = new gamedef_c;
+                            new_epi->CopyDetail(*um_template);
+                            new_epi->firstmap = val->mapname;
+                            gamedefs.push_back(new_epi);
+                        }
+                        char        lumpname[9] = {0};
+                        std::string alttext;
+                        std::string epikey; // Do we use this?
+                        if (value.size() > 8)
+                            I_Error("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
+                        Z_StrNCpy(lumpname, value.data(), 8);
+                        if (lex.Match(","))
+                        {
+                            lex.Next(alttext);
+                            if (lex.Match(","))
+                                lex.Next(epikey);
+                        }
+                        new_epi->namegraphic = lumpname;
+                        new_epi->description = alttext;
+                        new_epi->name        = epi::StringFormat("UMAPINFO_%s\n", val->mapname); // Internal
                     }
                 }
-                if (!found_actor)
-                    I_Error("UMAPINFO: Unknown thing type %s\n", value.c_str());
-                if (actor_num == -1)
-                    SkipToNextLine(lex, tok, value);
-                else
+                break;
+            case epi::kENameBossaction:
                 {
-                    if (!lex.Match(","))
-                        I_Error("UMAPINFO: \"bossaction\" key missing line special!\n");
-                    lex.Next(value);
-                    special = epi::LexInteger(value);
-                    if (!lex.Match(","))
-                        I_Error("UMAPINFO: \"bossaction\" key missing tag!\n");
-                    lex.Next(value);
-                    tag = epi::LexInteger(value);
-                    if (tag != 0 || special == 11 || special == 51 || special == 52 || special == 124)
+                    int special = 0;
+                    int tag     = 0;
+                    if (epi::StringCaseCompareASCII(value, "clear") == 0)
                     {
-                        if (val->numbossactions == -1)
-                            val->numbossactions = 1;
+                        special = tag = -1;
+                        if (val->bossactions)
+                            free(val->bossactions);
+                        val->bossactions    = NULL;
+                        val->numbossactions = -1;
+                    }
+                    else
+                    {
+                        int  actor_num   = -1;
+                        int  actor_check = epi::EName(value, true).GetIndex();
+                        if (!ActorNames.count(actor_check))
+                            I_Error("UMAPINFO: Unknown thing type %s\n", value.c_str());
                         else
-                            val->numbossactions++;
-                        val->bossactions = (struct BossAction *)realloc(val->bossactions, sizeof(struct BossAction) *
-                                                                                              val->numbossactions);
-                        val->bossactions[val->numbossactions - 1].type    = actor_num;
-                        val->bossactions[val->numbossactions - 1].special = special;
-                        val->bossactions[val->numbossactions - 1].tag     = tag;
+                            actor_num = ActorNames[actor_check];
+                        if (actor_num == -1)
+                            SkipToNextLine(lex, tok, value);
+                        else
+                        {
+                            if (!lex.Match(","))
+                                I_Error("UMAPINFO: \"bossaction\" key missing line special!\n");
+                            lex.Next(value);
+                            special = epi::LexInteger(value);
+                            if (!lex.Match(","))
+                                I_Error("UMAPINFO: \"bossaction\" key missing tag!\n");
+                            lex.Next(value);
+                            tag = epi::LexInteger(value);
+                            if (tag != 0 || special == 11 || special == 51 || special == 52 || special == 124)
+                            {
+                                if (val->numbossactions == -1)
+                                    val->numbossactions = 1;
+                                else
+                                    val->numbossactions++;
+                                val->bossactions = (struct BossAction *)realloc(val->bossactions, sizeof(struct BossAction) *
+                                                                                                    val->numbossactions);
+                                val->bossactions[val->numbossactions - 1].type    = actor_num;
+                                val->bossactions[val->numbossactions - 1].special = special;
+                                val->bossactions[val->numbossactions - 1].tag     = tag;
+                            }
+                        }
                     }
                 }
-            }
-        }
-        else if (epi::StringCaseCompareASCII(key, "author") == 0)
-        {
-            if (val->authorname)
-                free(val->authorname);
-            val->authorname = (char *)calloc(value.size() + 1, sizeof(char));
-            Z_StrNCpy(val->authorname, value.c_str(), value.size());
+                break;
+            case epi::kENameAuthor:
+                {
+                    if (val->authorname)
+                        free(val->authorname);
+                    val->authorname = (char *)calloc(value.size() + 1, sizeof(char));
+                    Z_StrNCpy(val->authorname, value.c_str(), value.size());
+                }
+                break;
+            default:
+                break;
         }
     }
     // Some fallback handling

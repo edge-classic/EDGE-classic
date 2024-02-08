@@ -27,9 +27,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#if defined __arm__ || defined __aarch64__
 #include <stddef.h> // offsetof
-#endif
 
 #include "deh_edge.h"
 

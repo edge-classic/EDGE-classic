@@ -34,7 +34,6 @@
 #include "deh_things.h"
 #include "deh_util.h"
 
-#include <assert.h>
 #include <string.h>
 
 namespace dehacked
@@ -73,7 +72,7 @@ void ammo::Shutdown()
 
 void ammo::MarkAmmo(int a_num)
 {
-    assert(0 <= a_num && a_num < kAmmoTypeTotal && a_num != kAmmoTypeUnused);
+   SYS_ASSERT(0 <= a_num && a_num < kTotalAmmoTypes && a_num != kAmmoTypeUnused);
 
     ammo_modified[a_num] = true;
 }
@@ -138,7 +137,7 @@ void ammo::AlterAmmo(int new_val)
     int         a_num     = patch::active_obj;
     const char *deh_field = patch::line_buf;
 
-    assert(0 <= a_num && a_num < kAmmoTypeTotal && a_num != kAmmoTypeUnused);
+    SYS_ASSERT(0 <= a_num && a_num < kTotalAmmoTypes && a_num != kAmmoTypeUnused);
 
     bool max_m = (0 == StrCaseCmp(deh_field, "Max ammo"));
     bool per_m = (0 == StrCaseCmp(deh_field, "Per ammo"));

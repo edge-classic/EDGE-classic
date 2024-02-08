@@ -25,9 +25,6 @@
 //
 //------------------------------------------------------------------------
 
-#include <assert.h>
-
-#include "deh_i_defs.h"
 #include "deh_edge.h"
 
 #include "deh_buffer.h"
@@ -41,10 +38,10 @@
 #include "deh_util.h"
 #include "deh_weapons.h"
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-namespace Misc
+namespace miscellaneous
 {
 int init_ammo;
 int max_armour;
@@ -59,9 +56,9 @@ int soul_limit;
 int mega_health;
 
 int monster_infight;
-} // namespace Misc
+} // namespace miscellaneous
 
-struct miscinfo_t
+struct MiscellaneousInfo
 {
     const char *deh_name;
     int         minimum;
@@ -69,18 +66,18 @@ struct miscinfo_t
     const int  *affected_mobjs;
 };
 
-namespace Misc
+namespace miscellaneous
 {
 // mobjtypes which are affected by a setting
-const int init_ammo_mobj[]   = {MT_PLAYER, -1};
-const int max_heal_mobj[]    = {MT_MISC2, -1};
-const int max_arm_mobj[]     = {MT_MISC0, MT_MISC1, MT_MISC3, MT_MEGA, -1};
-const int green_class_mobj[] = {MT_MISC0, -1};
-const int blue_class_mobj[]  = {MT_MISC1, -1};
-const int soulsphere_mobj[]  = {MT_MISC12, -1};
-const int megasphere_mobj[]  = {MT_MEGA, -1};
+const int init_ammo_mobj[]   = {kMT_PLAYER, -1};
+const int max_heal_mobj[]    = {kMT_MISC2, -1};
+const int max_arm_mobj[]     = {kMT_MISC0, kMT_MISC1, kMT_MISC3, kMT_MEGA, -1};
+const int green_class_mobj[] = {kMT_MISC0, -1};
+const int blue_class_mobj[]  = {kMT_MISC1, -1};
+const int soulsphere_mobj[]  = {kMT_MISC12, -1};
+const int megasphere_mobj[]  = {kMT_MEGA, -1};
 
-const miscinfo_t misc_info[] = {
+const MiscellaneousInfo misc_info[] = {
     {"Initial Bullets", 0, &init_ammo, init_ammo_mobj},
     {"Max Health", 1, &max_health, max_heal_mobj},
     {"Max Armor", 1, &max_armour, max_arm_mobj},
@@ -98,9 +95,9 @@ const miscinfo_t misc_info[] = {
 
     {NULL, 0, NULL, 0} // End sentinel
 };
-} // namespace Misc
+} // namespace miscellaneous
 
-void Misc::Init()
+void miscellaneous::Init()
 {
     init_ammo  = 50;
     max_armour = 200;
@@ -117,13 +114,13 @@ void Misc::Init()
     monster_infight = 202;
 }
 
-void Misc::Shutdown()
+void miscellaneous::Shutdown()
 {
 }
 
-void Misc::AlterMisc(int new_val)
+void miscellaneous::AlterMisc(int new_val)
 {
-    const char *misc_name = Patch::line_buf;
+    const char *misc_name = patch::line_buf;
 
     // --- special cases ---
 
@@ -135,7 +132,7 @@ void Misc::AlterMisc(int new_val)
             return;
         }
 
-        Things::SetPlayerHealth(new_val);
+        things::SetPlayerHealth(new_val);
         return;
     }
 
@@ -149,7 +146,7 @@ void Misc::AlterMisc(int new_val)
 
         bfg_cells_per_shot = new_val;
 
-        Weapons::MarkWeapon(wp_bfg);
+        weapons::MarkWeapon(kwp_bfg);
         return;
     }
 
@@ -164,7 +161,7 @@ void Misc::AlterMisc(int new_val)
         monster_infight = new_val;
 
         if (monster_infight == 221)
-            Things::MarkAllMonsters();
+            things::MarkAllMonsters();
 
         return;
     }
@@ -179,7 +176,7 @@ void Misc::AlterMisc(int new_val)
             break;
     }
 
-    const miscinfo_t *info = misc_info + j;
+    const MiscellaneousInfo *info = misc_info + j;
 
     if (!info->deh_name)
     {
@@ -204,12 +201,12 @@ void Misc::AlterMisc(int new_val)
     // mark mobjs that have been modified
 
     const int *affect = info->affected_mobjs;
-    assert(affect);
+    SYS_ASSERT(affect);
 
     for (; *affect >= 0; affect++)
     {
-        Things::MarkThing(*affect);
+        things::MarkThing(*affect);
     }
 }
 
-} // namespace Deh_Edge
+} // namespace dehacked

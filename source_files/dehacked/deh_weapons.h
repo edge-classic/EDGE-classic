@@ -19,35 +19,35 @@
 #ifndef __DEH_WEAPONS_HDR__
 #define __DEH_WEAPONS_HDR__
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-//
-// MBF21 weapon flags
-//
-typedef enum
+// This file diverges slightly from the style guide with enum member naming
+// as these reflect the historical code pointer/state/flag/etc names - Dasho
+
+enum WeaponFlagMBF21
 {
     // Doesn't thrust things
-    MBF21_NOTHRUST = 1,
+    kMBF21_NOTHRUST = 1,
 
     // Weapon is silent
-    MBF21_SILENT = 2,
+    kMBF21_SILENT = 2,
 
     // Weapon won't autofire when swapped to
-    MBF21_NOAUTOFIRE = 4,
+    kMBF21_NOAUTOFIRE = 4,
 
     // Monsters consider it a melee weapon (currently unused)
-    MBF21_FLEEMELEE = 8,
+    kMBF21_FLEEMELEE = 8,
 
     // Can be switched away from when ammo is picked up
-    MBF21_AUTOSWITCHFROM = 16,
+    kMBF21_AUTOSWITCHFROM = 16,
 
     // Cannot be switched to when ammo is picked up
-    MBF21_NOAUTOSWITCHTO = 32,
-} weapmbf21flag_t;
+    kMBF21_NOAUTOSWITCHTO = 32,
+};
 
 // Weapon info: sprite frames, ammunition use.
-typedef struct
+struct WeaponInfo
 {
     const char *ddf_name;
 
@@ -62,38 +62,38 @@ typedef struct
     int atkstate;
     int flashstate;
     int mbf21_flags;
-} weaponinfo_t;
+};
 
 // The defined weapons...
-typedef enum
+enum WeaponType
 {
-    wp_fist,
-    wp_pistol,
-    wp_shotgun,
-    wp_chaingun,
-    wp_missile,
-    wp_plasma,
-    wp_bfg,
-    wp_chainsaw,
-    wp_supershotgun,
+    kwp_fist,
+    kwp_pistol,
+    kwp_shotgun,
+    kwp_chaingun,
+    kwp_missile,
+    kwp_plasma,
+    kwp_bfg,
+    kwp_chainsaw,
+    kwp_supershotgun,
 
-    NUMWEAPONS
-} weapontype_e;
+    kTotalWeapons
+};
 
-extern weaponinfo_t weapon_info[NUMWEAPONS];
+extern WeaponInfo weapon_info[kTotalWeapons];
 
-namespace Weapons
+namespace weapons
 {
 void Init();
 void Shutdown();
 
-void MarkWeapon(int wp_num);
+void MarkWeapon(int kwp_num);
 
 void AlterWeapon(int new_val);
 
 void ConvertWEAP(void);
-} // namespace Weapons
+} // namespace weapons
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_WEAPONS_HDR__ */

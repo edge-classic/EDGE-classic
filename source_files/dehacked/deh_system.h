@@ -22,9 +22,7 @@
 #include "epi.h"
 #include "str_util.h"
 
-#define F_FIXED(n) ((float)(n) / 65536.0)
-
-namespace Deh_Edge
+namespace dehacked
 {
 
 extern bool quiet_mode;
@@ -36,6 +34,6 @@ void System_Startup(void);
 void        SetErrorMsg(const char *str, ...) GCCATTR((format(printf, 1, 2)));
 const char *GetErrorMsg(void);
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_SYSTEM_HDR__ */

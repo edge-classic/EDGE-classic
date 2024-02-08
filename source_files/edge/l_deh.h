@@ -26,7 +26,7 @@
 #ifndef __L_DEH__
 #define __L_DEH__
 
-void DEH_Convert(const uint8_t *data, int length, const std::string &source);
+void ConvertDehacked(const uint8_t *data, int length, const std::string &source);
 
 #endif // __L_DEH__
 

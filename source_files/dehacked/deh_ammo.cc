@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------
 
-#include "deh_i_defs.h"
 #include "deh_ammo.h"
 
 #include "deh_buffer.h"
@@ -38,26 +37,26 @@
 #include <assert.h>
 #include <string.h>
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-namespace Ammo
+namespace ammo
 {
-int plr_max[4];
+int player_max[4];
 int pickups[4];
 
 bool ammo_modified[4];
 
 void MarkAmmo(int a_num);
-} // namespace Ammo
+} // namespace ammo
 
-void Ammo::Init()
+void ammo::Init()
 {
     // doubled for backpack
-    plr_max[0] = 200;
-    plr_max[1] = 50;
-    plr_max[2] = 300;
-    plr_max[3] = 50;
+    player_max[0] = 200;
+    player_max[1] = 50;
+    player_max[2] = 300;
+    player_max[3] = 50;
 
     // multiplied by 5 for boxes
     pickups[0] = 10;
@@ -68,65 +67,65 @@ void Ammo::Init()
     memset(ammo_modified, 0, sizeof(ammo_modified));
 }
 
-void Ammo::Shutdown()
+void ammo::Shutdown()
 {
 }
 
-void Ammo::MarkAmmo(int a_num)
+void ammo::MarkAmmo(int a_num)
 {
-    assert(0 <= a_num && a_num < NUMAMMO && a_num != am_unused);
+    assert(0 <= a_num && a_num < kAmmoTypeTotal && a_num != kAmmoTypeUnused);
 
     ammo_modified[a_num] = true;
 }
 
-void Ammo::AmmoDependencies()
+void ammo::AmmoDependencies()
 {
     bool any = ammo_modified[0] || ammo_modified[1] || ammo_modified[2] || ammo_modified[3];
 
     if (any)
     {
-        Things::MarkThing(MT_PLAYER);
-        Things::MarkThing(MT_MISC24); // backpack
+        things::MarkThing(kMT_PLAYER);
+        things::MarkThing(kMT_MISC24); // backpack
     }
 
-    if (ammo_modified[am_bullet])
+    if (ammo_modified[kAmmoTypeBullet])
     {
-        Things::MarkThing(MT_CLIP);   // "CLIP"
-        Things::MarkThing(MT_MISC17); // "BOX_OF_BULLETS"
+        things::MarkThing(kMT_CLIP);   // "CLIP"
+        things::MarkThing(kMT_MISC17); // "BOX_OF_BULLETS"
     }
 
-    if (ammo_modified[am_shell])
+    if (ammo_modified[kAmmoTypeShell])
     {
-        Things::MarkThing(MT_MISC22); // "SHELLS"
-        Things::MarkThing(MT_MISC23); // "BOX_OF_SHELLS"
+        things::MarkThing(kMT_MISC22); // "SHELLS"
+        things::MarkThing(kMT_MISC23); // "BOX_OF_SHELLS"
     }
 
-    if (ammo_modified[am_rocket])
+    if (ammo_modified[kAmmoTypeRocket])
     {
-        Things::MarkThing(MT_MISC18); // "ROCKET"
-        Things::MarkThing(MT_MISC19); // "BOX_OF_ROCKETS"
+        things::MarkThing(kMT_MISC18); // "ROCKET"
+        things::MarkThing(kMT_MISC19); // "BOX_OF_ROCKETS"
     }
 
-    if (ammo_modified[am_cell])
+    if (ammo_modified[kAmmoTypeCell])
     {
-        Things::MarkThing(MT_MISC20); // "CELLS"
-        Things::MarkThing(MT_MISC21); // "CELL_PACK"
+        things::MarkThing(kMT_MISC20); // "CELLS"
+        things::MarkThing(kMT_MISC21); // "CELL_PACK"
     }
 }
 
-const char *Ammo::GetAmmo(int type)
+const char *ammo::GetAmmo(int type)
 {
     switch (type)
     {
-    case am_bullet:
+    case kAmmoTypeBullet:
         return "BULLETS";
-    case am_shell:
+    case kAmmoTypeShell:
         return "SHELLS";
-    case am_rocket:
+    case kAmmoTypeRocket:
         return "ROCKETS";
-    case am_cell:
+    case kAmmoTypeCell:
         return "CELLS";
-    case am_noammo:
+    case kAmmoTypeNoAmmo:
         return "NOAMMO";
     }
 
@@ -134,12 +133,12 @@ const char *Ammo::GetAmmo(int type)
     return NULL;
 }
 
-void Ammo::AlterAmmo(int new_val)
+void ammo::AlterAmmo(int new_val)
 {
-    int         a_num     = Patch::active_obj;
-    const char *deh_field = Patch::line_buf;
+    int         a_num     = patch::active_obj;
+    const char *deh_field = patch::line_buf;
 
-    assert(0 <= a_num && a_num < NUMAMMO && a_num != am_unused);
+    assert(0 <= a_num && a_num < kAmmoTypeTotal && a_num != kAmmoTypeUnused);
 
     bool max_m = (0 == StrCaseCmp(deh_field, "Max ammo"));
     bool per_m = (0 == StrCaseCmp(deh_field, "Per ammo"));
@@ -160,11 +159,11 @@ void Ammo::AlterAmmo(int new_val)
     }
 
     if (max_m)
-        plr_max[a_num] = new_val;
+        player_max[a_num] = new_val;
     if (per_m)
         pickups[a_num] = new_val;
 
     MarkAmmo(a_num);
 }
 
-} // namespace Deh_Edge
+} // namespace dehacked

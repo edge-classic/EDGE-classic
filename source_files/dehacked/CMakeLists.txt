@@ -6,7 +6,6 @@ add_library(
   edge_deh
   deh_ammo.cc
   deh_buffer.cc
-  deh_convert.cc
   deh_field.cc
   deh_frames.cc
   deh_info.cc

@@ -19,10 +19,10 @@
 #ifndef __DEH_PATCH_HDR__
 #define __DEH_PATCH_HDR__
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-namespace Patch
+namespace patch
 {
 extern char line_buf[];
 extern int  line_num;
@@ -31,9 +31,9 @@ extern int active_obj;
 extern int patch_fmt;
 extern int doom_ver;
 
-dehret_e Load(input_buffer_c *buf);
-} // namespace Patch
+DehackedResult Load(InputBuffer *buf);
+} // namespace patch
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_PATCH_HDR__ */

@@ -25,84 +25,83 @@
 //
 //------------------------------------------------------------------------
 
-#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "deh_i_defs.h"
 #include "deh_edge.h"
 
 #include "deh_buffer.h"
 #include "deh_system.h"
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-input_buffer_c::input_buffer_c(const char *_data, int _length) : data(_data), ptr(_data), length(_length)
+InputBuffer::InputBuffer(const char *data, int length) : data_(data), pointer_(data), length_(length)
 {
-    if (length < 0)
-        I_Error("Dehacked: Error - Illegal length of lump (%d bytes)\n", length);
+    if (length_ < 0)
+        I_Error("Dehacked: Error - Illegal length of lump (%d bytes)\n", length_);
 }
 
-input_buffer_c::~input_buffer_c()
+InputBuffer::~InputBuffer()
 {
 }
 
-bool input_buffer_c::eof()
+bool InputBuffer::EndOfFile()
 {
-    return (ptr >= data + length);
+    return (pointer_ >= data_ + length_);
 }
 
-bool input_buffer_c::error()
+bool InputBuffer::Error()
 {
     return false;
 }
 
-int input_buffer_c::read(void *buf, int count)
+int InputBuffer::Read(void *buffer, int count)
 {
-    int avail = data + length - ptr;
+    int available = data_ + length_ - pointer_;
 
-    if (avail < count)
-        count = avail;
+    if (available < count)
+        count = available;
 
     if (count <= 0)
         return 0;
 
-    memcpy(buf, ptr, count);
+    memcpy(buffer, pointer_, count);
 
-    ptr += count;
+    pointer_ += count;
 
     return count;
 }
 
-int input_buffer_c::getch()
+int InputBuffer::GetCharacter()
 {
-    if (eof())
+    if (EndOfFile())
         return EOF;
 
-    return *ptr++;
+    return *pointer_++;
 }
 
-void input_buffer_c::ungetch(int c)
+void InputBuffer::UngetCharacter(int character)
 {
     // NOTE: assumes c == last character read
+    (void)character; // what was supposed to be done with this? - Dasho
 
-    if (ptr > data)
-        ptr--;
+    if (pointer_ > data_)
+        pointer_--;
 }
 
-bool input_buffer_c::isBinary() const
+bool InputBuffer::IsBinary() const
 {
-    if (length == 0)
+    if (length_ == 0)
         return false;
 
-    int test_len = (length > 260) ? 256 : ((length * 3 + 1) / 4);
+    int test_length = (length_ > 260) ? 256 : ((length_ * 3 + 1) / 4);
 
-    for (; test_len > 0; test_len--)
-        if (data[test_len - 1] == 0)
+    for (; test_length > 0; test_length--)
+        if (data_[test_length - 1] == 0)
             return true;
 
     return false;
 }
 
-} // namespace Deh_Edge
+} // namespace dehacked

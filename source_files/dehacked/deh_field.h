@@ -21,36 +21,35 @@
 
 #include "deh_mobj.h"
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-typedef enum
+enum FieldType
 {
-    FT_ANY,   // no checking
-    FT_NONEG, // must be >= 0
-    FT_GTEQ1, // must be >= 1
+    kFieldTypeAny,
+    kFieldTypeZeroOrGreater,
+    kFieldTypeOneOrGreater,
+    kFieldTypeFrameNumber,
+    kFieldTypeSoundNumber,
+    kFieldTypeSpriteNumber,
+    kFieldTypeSubspriteNumber,
+    kFieldTypeAmmoNumber,
+    kFieldTypeBitflags,
+};
 
-    FT_FRAME,  // frame number
-    FT_SOUND,  // sound number
-    FT_SPRITE, // sprite number
-    FT_SUBSPR, // subsprite number
-    FT_AMMO,   // ammo number
-    FT_BITS,   // mobj bitflags
-} fieldtype_e;
-
-typedef struct
+struct FieldReference
 {
-    const char *deh_name;
+    const char *dehacked_name;
 
     // offset into the structure (like an mobjtype_t).
     size_t offset;
 
-    fieldtype_e field_type;
-} fieldreference_t;
+    FieldType field_type;
+};
 
 // returns false if name not found
-bool Field_Alter(const fieldreference_t *refs, const char *deh_field, int *object, int new_val);
+bool FieldAlter(const FieldReference *references, const char *dehacked_field, int *object, int new_value);
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_FIELD_HDR__ */

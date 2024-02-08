@@ -123,7 +123,7 @@ static void DEH_ConvertFile(std::string &filename)
         return;
     }
 
-    DEH_Convert(data, length, filename);
+    ConvertDehacked(data, length, filename);
 
     // close file, free that data
     delete F;

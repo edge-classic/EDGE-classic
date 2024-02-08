@@ -21,10 +21,10 @@
 
 #include "deh_mobj.h"
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-namespace Things
+namespace things
 {
 void Init();
 void Shutdown();
@@ -33,7 +33,7 @@ void UseThing(int mt_num);
 void MarkThing(int mt_num); // attacks too
 void MarkAllMonsters();
 
-mobjinfo_t *GetModifiedMobj(int mt_num);
+MobjInfo *GetModifiedMobj(int mt_num);
 const char *GetMobjName(int mt_num);
 int         GetMobjMBF21Flags(int mt_num);
 
@@ -45,16 +45,16 @@ const char *AddScratchAttack(int damage, const char *sfx);
 void ConvertTHING();
 void ConvertATK();
 
-void HandleFlags(const mobjinfo_t *info, int mt_num, int player);
-void HandleAttacks(const mobjinfo_t *info, int mt_num);
+void HandleFlags(const MobjInfo *info, int mt_num, int player);
+void HandleAttacks(const MobjInfo *info, int mt_num);
 
 const char *GetSpeed(int speed);
 
 void AlterThing(int new_val);
 void AlterBexBits(char *bit_str);
 void AlterMBF21Bits(char *bit_str);
-} // namespace Things
+} // namespace things
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_THINGS_HDR__ */

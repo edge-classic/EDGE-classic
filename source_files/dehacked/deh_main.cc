@@ -30,7 +30,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "deh_i_defs.h"
 #include "deh_edge.h"
 
 #include "deh_ammo.h"
@@ -50,30 +49,28 @@
 #include "deh_wad.h"
 #include "deh_weapons.h"
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-std::vector<input_buffer_c *> input_bufs;
+std::vector<InputBuffer *> input_buffers;
 
 bool quiet_mode;
 bool all_mode;
-
-const dehconvfuncs_t *cur_funcs = NULL;
 
 void Init()
 {
     System_Startup();
 
-    Ammo ::Init();
-    Frames ::Init();
-    Misc ::Init();
-    Rscript::Init();
-    Sounds ::Init();
-    Music ::Init();
-    Sprites::Init();
-    TextStr::Init();
-    Things ::Init();
-    Weapons::Init();
+    ammo ::Init();
+    frames ::Init();
+    miscellaneous ::Init();
+    rscript::Init();
+    sounds ::Init();
+    music ::Init();
+    sprites::Init();
+    text_strings::Init();
+    things ::Init();
+    weapons::Init();
 
     /* reset parameters */
 
@@ -83,110 +80,108 @@ void Init()
 
 void FreeInputBuffers(void)
 {
-    for (size_t i = 0; i < input_bufs.size(); i++)
+    for (size_t i = 0; i < input_buffers.size(); i++)
     {
-        delete input_bufs[i];
+        delete input_buffers[i];
     }
 
-    input_bufs.clear();
+    input_buffers.clear();
 }
 
-dehret_e Convert(void)
+DehackedResult Convert(void)
 {
-    dehret_e result;
+    DehackedResult result;
 
     // load DEH patch file(s)
-    for (size_t i = 0; i < input_bufs.size(); i++)
+    for (size_t i = 0; i < input_buffers.size(); i++)
     {
-        result = Patch::Load(input_bufs[i]);
+        result = patch::Load(input_buffers[i]);
 
-        if (result != DEH_OK)
+        if (result != kDehackedConversionOK)
             return result;
     }
 
     // do conversions into DDF...
 
-    Sprites::SpriteDependencies();
-    Frames ::StateDependencies();
-    Ammo ::AmmoDependencies();
+    sprites::SpriteDependencies();
+    frames ::StateDependencies();
+    ammo ::AmmoDependencies();
 
     // things and weapons must be before attacks
-    Weapons::ConvertWEAP();
-    Things ::ConvertTHING();
-    Things ::ConvertATK();
+    weapons::ConvertWEAP();
+    things ::ConvertTHING();
+    things ::ConvertATK();
 
     // rscript must be after things (for A_BossDeath)
-    TextStr::ConvertLDF();
-    Rscript::ConvertRAD();
+    text_strings::ConvertLDF();
+    rscript::ConvertRAD();
 
     // sounds must be after things/weapons/attacks
-    Sounds::ConvertSFX();
-    Music ::ConvertMUS();
+    sounds::ConvertSFX();
+    music ::ConvertMUS();
 
     I_Printf("\n");
 
-    return DEH_OK;
+    return kDehackedConversionOK;
 }
 
 void Shutdown()
 {
-    Ammo ::Shutdown();
-    Frames ::Shutdown();
-    Misc ::Shutdown();
-    Rscript::Shutdown();
-    Sounds ::Shutdown();
-    Music ::Shutdown();
-    Sprites::Shutdown();
-    TextStr::Shutdown();
-    Things ::Shutdown();
-    Weapons::Shutdown();
+    ammo ::Shutdown();
+    frames ::Shutdown();
+    miscellaneous ::Shutdown();
+    rscript::Shutdown();
+    sounds ::Shutdown();
+    music ::Shutdown();
+    sprites::Shutdown();
+    text_strings::Shutdown();
+    things ::Shutdown();
+    weapons::Shutdown();
 
     FreeInputBuffers();
 }
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 //------------------------------------------------------------------------
 
-void DehEdgeStartup(const dehconvfuncs_t *funcs)
+void DehackedStartup()
 {
-    Deh_Edge::Init();
-    Deh_Edge::cur_funcs = funcs;
+    dehacked::Init();
 
     I_Printf("*** DeHackEd -> EDGE Conversion ***\n");
 }
 
-const char *DehEdgeGetError(void)
+const char *DehackedGetError(void)
 {
-    return Deh_Edge::GetErrorMsg();
+    return dehacked::GetErrorMsg();
 }
 
-dehret_e DehEdgeSetQuiet(int quiet)
+DehackedResult DehackedSetQuiet(int quiet)
 {
-    Deh_Edge::quiet_mode = (quiet != 0);
+    dehacked::quiet_mode = (quiet != 0);
 
-    return DEH_OK;
+    return kDehackedConversionOK;
 }
 
-dehret_e DehEdgeAddLump(const char *data, int length)
+DehackedResult DehackedAddLump(const char *data, int length)
 {
-    auto buf = new Deh_Edge::input_buffer_c(data, length);
+    dehacked::InputBuffer *buffer = new dehacked::InputBuffer(data, length);
 
-    Deh_Edge::input_bufs.push_back(buf);
+    dehacked::input_buffers.push_back(buffer);
 
-    return DEH_OK;
+    return kDehackedConversionOK;
 }
 
-dehret_e DehEdgeRunConversion(ddf_collection_c *dest)
+DehackedResult DehackedRunConversion(ddf_collection_c *dest)
 {
-    Deh_Edge::WAD::dest_container = dest;
+    dehacked::wad::dest_container = dest;
 
-    return Deh_Edge::Convert();
+    return dehacked::Convert();
 }
 
-void DehEdgeShutdown(void)
+void DehackedShutdown(void)
 {
-    Deh_Edge::Shutdown();
-    Deh_Edge::WAD::dest_container = NULL;
-    Deh_Edge::cur_funcs           = NULL;
+    dehacked::Shutdown();
+    dehacked::wad::dest_container = NULL;
 }

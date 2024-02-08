@@ -28,16 +28,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <assert.h>
-#include <errno.h>
 
-#include "deh_i_defs.h"
 #include "deh_edge.h"
 
 #include "deh_system.h"
 #include "deh_util.h"
 
-namespace Deh_Edge
+namespace dehacked
 {
 
 //
@@ -94,7 +91,7 @@ const char *StrUpper(const char *name)
 {
     static char up_buf[512];
 
-    assert(strlen(name) < sizeof(up_buf) - 1);
+    SYS_ASSERT(strlen(name) < sizeof(up_buf) - 1);
 
     char *dest = up_buf;
 
@@ -113,7 +110,7 @@ const char *StrSanitize(const char *name)
 {
     static char clean_buf[512];
 
-    assert(strlen(name) < sizeof(clean_buf) - 1);
+    SYS_ASSERT(strlen(name) < sizeof(clean_buf) - 1);
 
     char *dest = clean_buf;
 
@@ -155,4 +152,4 @@ char *StringDup(const char *orig)
     return s;
 }
 
-} // namespace Deh_Edge
+} // namespace dehacked

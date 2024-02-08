@@ -19,26 +19,24 @@
 #ifndef __DEH_AMMO_HDR__
 #define __DEH_AMMO_HDR__
 
-namespace Deh_Edge
+namespace dehacked
 {
 
 // Ammunition types defined.
-typedef enum
+enum AmmoType
 {
-    am_bullet, // Pistol / chaingun ammo.
-    am_shell,  // Shotgun / double barreled shotgun.
-    am_cell,   // Plasma rifle, BFG.
-    am_rocket, // Missile launcher.
+    kAmmoTypeBullet, // Pistol / chaingun ammo.
+    kAmmoTypeShell,  // Shotgun / double barreled shotgun.
+    kAmmoTypeCell,   // Plasma rifle, BFG.
+    kAmmoTypeRocket, // Missile launcher.
+    kAmmoTypeUnused, // Not used
+    kAmmoTypeNoAmmo, // Fist / chainsaw
+    kTotalAmmoTypes
+};
 
-    am_unused, // Not used
-
-    am_noammo, // Fist / chainsaw
-    NUMAMMO
-} ammotype_e;
-
-namespace Ammo
+namespace ammo
 {
-extern int plr_max[4];
+extern int player_max[4];
 extern int pickups[4];
 
 void Init();
@@ -50,8 +48,8 @@ void AmmoDependencies();
 const char *GetAmmo(int type);
 
 void AlterAmmo(int new_val);
-} // namespace Ammo
+} // namespace ammo
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_AMMO_HDR__ */

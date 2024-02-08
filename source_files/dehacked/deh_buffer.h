@@ -19,29 +19,29 @@
 #ifndef __DEH_BUFFER_HDR__
 #define __DEH_BUFFER_HDR__
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-class input_buffer_c
+class InputBuffer
 {
   public:
-    input_buffer_c(const char *_data, int _length);
-    ~input_buffer_c();
+    InputBuffer(const char *data, int length);
+    ~InputBuffer();
 
-    bool eof();
-    bool error();
-    int  read(void *buf, int count);
-    int  getch();
-    void ungetch(int c);
-    bool isBinary() const;
+    bool EndOfFile();
+    bool Error();
+    int  Read(void *buffer, int count);
+    int  GetCharacter();
+    void UngetCharacter(int character);
+    bool IsBinary() const;
 
   private:
-    const char *data; // base pointer
-    const char *ptr;  // current read pointer
+    const char *data_; // base pointer
+    const char *pointer_;  // current read pointer
 
-    int length;
+    int length_;
 };
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_BUFFER_HDR__ */

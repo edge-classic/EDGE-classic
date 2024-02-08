@@ -19,10 +19,10 @@
 #ifndef __DEH_TEXT_HDR__
 #define __DEH_TEXT_HDR__
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-namespace TextStr
+namespace text_strings
 {
 void Init();
 void Shutdown();
@@ -38,8 +38,8 @@ void AlterCheat(const char *new_val);
 const char *GetLDFForBex(const char *bex_name);
 
 void ConvertLDF(void);
-} // namespace TextStr
+} // namespace text_strings
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_TEXT_HDR__ */

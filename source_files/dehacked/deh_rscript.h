@@ -19,10 +19,10 @@
 #ifndef __DEH_RSCRIPT_HDR__
 #define __DEH_RSCRIPT_HDR__
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-namespace Rscript
+namespace rscript
 {
 void Init();
 void Shutdown();
@@ -30,8 +30,8 @@ void Shutdown();
 void MarkKeenDie(int mt_num);
 
 void ConvertRAD();
-} // namespace Rscript
+} // namespace rscript
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_RSCRIPT_HDR__ */

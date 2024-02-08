@@ -25,11 +25,9 @@
 //
 //------------------------------------------------------------------------
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "deh_i_defs.h"
 #include "deh_edge.h"
 
 #include "deh_buffer.h"
@@ -39,13 +37,10 @@
 #include "deh_util.h"
 #include "deh_wad.h"
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-//
-// SoundFX struct.
-//
-struct sfxinfo_t
+struct SoundEffectInfo
 {
     // up to 6-character name
     char name[8];
@@ -62,7 +57,7 @@ struct sfxinfo_t
 // Information about all the sfx
 //
 
-const sfxinfo_t S_sfx_orig[NUMSFX_COMPAT] = {
+const SoundEffectInfo S_sfx_orig[kTotalSoundEffectsPortCompatibility] = {
     // S_sfx[0] needs to be a dummy for odd reasons.
     {"", 0, 127},
 
@@ -189,7 +184,7 @@ const sfxinfo_t S_sfx_orig[NUMSFX_COMPAT] = {
 };
 
 // DEHEXTRA : 500 to 699
-const sfxinfo_t S_sfx_dehextra[200] = {
+const SoundEffectInfo S_sfx_dehextra[200] = {
     {"fre000", 0, 127}, {"fre001", 0, 127}, {"fre002", 0, 127}, {"fre003", 0, 127}, {"fre004", 0, 127},
     {"fre005", 0, 127}, {"fre006", 0, 127}, {"fre007", 0, 127}, {"fre008", 0, 127}, {"fre009", 0, 127},
     {"fre010", 0, 127}, {"fre011", 0, 127}, {"fre012", 0, 127}, {"fre013", 0, 127}, {"fre014", 0, 127},
@@ -242,27 +237,27 @@ const sfxinfo_t S_sfx_dehextra[200] = {
 // all the modified entries.
 // NOTE: some pointers may be NULL!
 //
-std::vector<sfxinfo_t *> S_sfx;
+std::vector<SoundEffectInfo *> S_sfx;
 
 //------------------------------------------------------------------------
 
-namespace Sounds
+namespace sounds
 {
 void BeginLump();
 void FinishLump();
 
 void             MarkSound(int s_num);
-const sfxinfo_t *GetOriginalSFX(int num);
+const SoundEffectInfo *GetOriginalSFX(int num);
 const char      *GetEdgeSfxName(int sound_id);
 void             WriteSound(int s_num);
-} // namespace Sounds
+} // namespace sounds
 
-void Sounds::Init()
+void sounds::Init()
 {
     S_sfx.clear();
 }
 
-void Sounds::Shutdown()
+void sounds::Shutdown()
 {
     for (size_t i = 0; i < S_sfx.size(); i++)
         if (S_sfx[i] != NULL)
@@ -271,34 +266,34 @@ void Sounds::Shutdown()
     S_sfx.clear();
 }
 
-void Sounds::BeginLump()
+void sounds::BeginLump()
 {
-    WAD::NewLump(DDF_SFX);
+    wad::NewLump(DDF_SFX);
 
-    WAD::Printf("<SOUNDS>\n\n");
+    wad::Printf("<SOUNDS>\n\n");
 }
 
-void Sounds::FinishLump()
+void sounds::FinishLump()
 {
-    WAD::Printf("\n");
+    wad::Printf("\n");
 }
 
-const sfxinfo_t *Sounds::GetOriginalSFX(int num)
+const SoundEffectInfo *sounds::GetOriginalSFX(int num)
 {
-    if (0 <= num && num < NUMSFX_COMPAT)
+    if (0 <= num && num < kTotalSoundEffectsPortCompatibility)
         return &S_sfx_orig[num];
 
-    if (sfx_fre000 <= num && num <= sfx_fre199)
-        return &S_sfx_dehextra[num - sfx_fre000];
+    if (ksfx_fre000 <= num && num <= ksfx_fre199)
+        return &S_sfx_dehextra[num - ksfx_fre000];
 
     // no actual original, return the dummy template
     return &S_sfx_orig[0];
 }
 
-void Sounds::MarkSound(int num)
+void sounds::MarkSound(int num)
 {
     // can happen since the binary patches contain the dummy sound
-    if (num == sfx_None)
+    if (num == ksfx_None)
         return;
 
     // fill any missing slots with NULLs, including the one we want
@@ -311,11 +306,11 @@ void Sounds::MarkSound(int num)
     if (S_sfx[num] != NULL)
         return;
 
-    sfxinfo_t *entry = new sfxinfo_t;
+    SoundEffectInfo *entry = new SoundEffectInfo;
     S_sfx[num]       = entry;
 
     // copy the original info
-    const sfxinfo_t *orig = GetOriginalSFX(num);
+    const SoundEffectInfo *orig = GetOriginalSFX(num);
 
     strcpy(entry->name, orig->name);
 
@@ -323,12 +318,12 @@ void Sounds::MarkSound(int num)
     entry->priority    = orig->priority;
 }
 
-void Sounds::AlterSound(int new_val)
+void sounds::AlterSound(int new_val)
 {
-    int         s_num     = Patch::active_obj;
-    const char *deh_field = Patch::line_buf;
+    int         s_num     = patch::active_obj;
+    const char *deh_field = patch::line_buf;
 
-    assert(s_num >= 0);
+    SYS_ASSERT(s_num >= 0);
 
     if (StrCaseCmpPartial(deh_field, "Zero") == 0 || StrCaseCmpPartial(deh_field, "Neg. One") == 0)
         return;
@@ -338,7 +333,7 @@ void Sounds::AlterSound(int new_val)
 
     if (StrCaseCmp(deh_field, "Offset") == 0)
     {
-        I_Debugf("Dehacked: Warning - Line %d: raw sound Offset not supported.\n", Patch::line_num);
+        I_Debugf("Dehacked: Warning - Line %d: raw sound Offset not supported.\n", patch::line_num);
         return;
     }
 
@@ -346,7 +341,7 @@ void Sounds::AlterSound(int new_val)
     {
         if (new_val < 0)
         {
-            I_Debugf("Dehacked: Warning - Line %d: bad sound priority value: %d.\n", Patch::line_num, new_val);
+            I_Debugf("Dehacked: Warning - Line %d: bad sound priority value: %d.\n", patch::line_num, new_val);
             new_val = 0;
         }
 
@@ -359,30 +354,30 @@ void Sounds::AlterSound(int new_val)
     I_Debugf("Dehacked: Warning - UNKNOWN SOUND FIELD: %s\n", deh_field);
 }
 
-const char *Sounds::GetEdgeSfxName(int sound_id)
+const char *sounds::GetEdgeSfxName(int sound_id)
 {
-    if (sound_id == sfx_None)
+    if (sound_id == ksfx_None)
         return NULL;
 
     switch (sound_id)
     {
     // EDGE uses different names for the DOG sounds
-    case sfx_dgsit:
+    case ksfx_dgsit:
         return "DOG_SIGHT";
-    case sfx_dgatk:
+    case ksfx_dgatk:
         return "DOG_BITE";
-    case sfx_dgact:
+    case ksfx_dgact:
         return "DOG_LOOK";
-    case sfx_dgdth:
+    case ksfx_dgdth:
         return "DOG_DIE";
-    case sfx_dgpain:
+    case ksfx_dgpain:
         return "DOG_PAIN";
 
     default:
         break;
     }
 
-    const sfxinfo_t *orig = GetOriginalSFX(sound_id);
+    const SoundEffectInfo *orig = GetOriginalSFX(sound_id);
 
     if (orig->name[0] != 0)
         return StrUpper(orig->name);
@@ -393,7 +388,7 @@ const char *Sounds::GetEdgeSfxName(int sound_id)
     if (sound_id >= (int)S_sfx.size())
         return NULL;
 
-    const sfxinfo_t *mod = S_sfx[sound_id];
+    const SoundEffectInfo *mod = S_sfx[sound_id];
     if (mod == NULL || mod->name[0] == 0)
         return NULL;
 
@@ -403,30 +398,30 @@ const char *Sounds::GetEdgeSfxName(int sound_id)
     return name_buf;
 }
 
-const char *Sounds::GetSound(int sound_id)
+const char *sounds::GetSound(int sound_id)
 {
-    if (sound_id == sfx_None)
+    if (sound_id == ksfx_None)
         return "NULL";
 
     // handle random sounds
     switch (sound_id)
     {
-    case sfx_podth1:
-    case sfx_podth2:
-    case sfx_podth3:
+    case ksfx_podth1:
+    case ksfx_podth2:
+    case ksfx_podth3:
         return "PODTH?";
 
-    case sfx_posit1:
-    case sfx_posit2:
-    case sfx_posit3:
+    case ksfx_posit1:
+    case ksfx_posit2:
+    case ksfx_posit3:
         return "POSIT?";
 
-    case sfx_bgdth1:
-    case sfx_bgdth2:
+    case ksfx_bgdth1:
+    case ksfx_bgdth2:
         return "BGDTH?";
 
-    case sfx_bgsit1:
-    case sfx_bgsit2:
+    case ksfx_bgsit1:
+    case ksfx_bgsit2:
         return "BGSIT?";
 
     default:
@@ -435,7 +430,7 @@ const char *Sounds::GetSound(int sound_id)
 
     // if something uses DEHEXTRA sounds (+ a few others), ensure we
     // generate DDFSFX entries for them.
-    if ((sfx_fre000 <= sound_id && sound_id <= sfx_fre199) || (sound_id == sfx_gibdth) || (sound_id == sfx_scrsht))
+    if ((ksfx_fre000 <= sound_id && sound_id <= ksfx_fre199) || (sound_id == ksfx_gibdth) || (sound_id == ksfx_scrsht))
     {
         MarkSound(sound_id);
     }
@@ -447,9 +442,9 @@ const char *Sounds::GetSound(int sound_id)
     return name;
 }
 
-void Sounds::WriteSound(int sound_id)
+void sounds::WriteSound(int sound_id)
 {
-    const sfxinfo_t *sound = S_sfx[sound_id];
+    const SoundEffectInfo *sound = S_sfx[sound_id];
 
     // in the unlikely event the sound did not get a name (which is
     // only possible with DSDehacked / MBF21), just skip it.
@@ -462,42 +457,42 @@ void Sounds::WriteSound(int sound_id)
     if (ddf_name == NULL)
         I_Error("Dehacked: Error - No DDF name for sound %d ??\n", sound_id);
 
-    WAD::Printf("[%s]\n", ddf_name);
+    wad::Printf("[%s]\n", ddf_name);
 
     // only one sound has a `link` field in standard DOOM.
     // we emulate that here.
-    if (sound_id == sfx_chgun)
+    if (sound_id == ksfx_chgun)
     {
-        const sfxinfo_t *link = &S_sfx_orig[sfx_pistol];
+        const SoundEffectInfo *link = &S_sfx_orig[ksfx_pistol];
 
-        if (sfx_pistol < (int)S_sfx.size() && S_sfx[sfx_pistol] != NULL)
-            link = S_sfx[sfx_pistol];
+        if (ksfx_pistol < (int)S_sfx.size() && S_sfx[ksfx_pistol] != NULL)
+            link = S_sfx[ksfx_pistol];
 
         if (link->name[0] != 0)
             lump = link->name;
     }
 
-    WAD::Printf("LUMP_NAME = \"DS%s\";\n", StrUpper(lump));
-    WAD::Printf("PRIORITY = %d;\n", sound->priority);
+    wad::Printf("LUMP_NAME = \"DS%s\";\n", StrUpper(lump));
+    wad::Printf("PRIORITY = %d;\n", sound->priority);
 
     if (sound->singularity != 0)
-        WAD::Printf("SINGULAR = %d;\n", sound->singularity);
+        wad::Printf("SINGULAR = %d;\n", sound->singularity);
 
-    if (sound_id == sfx_stnmov)
-        WAD::Printf("LOOP = TRUE;\n");
+    if (sound_id == ksfx_stnmov)
+        wad::Printf("LOOP = TRUE;\n");
 
-    WAD::Printf("\n");
+    wad::Printf("\n");
 }
 
-void Sounds::ConvertSFX(void)
+void sounds::ConvertSFX(void)
 {
     if (all_mode)
     {
-        for (int i = 1; i < NUMSFX_COMPAT; i++)
+        for (int i = 1; i < kTotalSoundEffectsPortCompatibility; i++)
             MarkSound(i);
 
         /* this is debatable....
-        for (int i = sfx_fre000 ; i <= sfx_fre199 ; i++)
+        for (int i = ksfx_fre000 ; i <= ksfx_fre199 ; i++)
             MarkSound(i);
         */
     }
@@ -522,14 +517,14 @@ void Sounds::ConvertSFX(void)
         FinishLump();
 }
 
-bool Sounds::ReplaceSound(const char *before, const char *after)
+bool sounds::ReplaceSound(const char *before, const char *after)
 {
-    assert(strlen(before) <= 6);
-    assert(strlen(after) <= 6);
+    SYS_ASSERT(strlen(before) <= 6);
+    SYS_ASSERT(strlen(after) <= 6);
 
-    for (int i = 1; i < NUMSFX_DEHEXTRA; i++)
+    for (int i = 1; i < kTotalSoundEffectsDEHEXTRA; i++)
     {
-        const sfxinfo_t *orig = GetOriginalSFX(i);
+        const SoundEffectInfo *orig = GetOriginalSFX(i);
 
         if (orig->name[0] == 0)
             continue;
@@ -546,9 +541,9 @@ bool Sounds::ReplaceSound(const char *before, const char *after)
     return false;
 }
 
-void Sounds::AlterBexSound(const char *new_val)
+void sounds::AlterBexSound(const char *new_val)
 {
-    const char *old_val = Patch::line_buf;
+    const char *old_val = patch::line_buf;
 
     if (strlen(new_val) < 1 || strlen(new_val) > 6)
     {
@@ -562,7 +557,7 @@ void Sounds::AlterBexSound(const char *new_val)
         int num = atoi(old_val);
         if (num < 1 || num > 32767)
         {
-            I_Debugf("Dehacked: Warning - Line %d: illegal sound number '%s'.\n", Patch::line_num, old_val);
+            I_Debugf("Dehacked: Warning - Line %d: illegal sound number '%s'.\n", patch::line_num, old_val);
         }
         else
         {
@@ -579,7 +574,7 @@ void Sounds::AlterBexSound(const char *new_val)
     }
 
     if (!ReplaceSound(old_val, new_val))
-        I_Debugf("Dehacked: Warning - Line %d: unknown sound name '%s'.\n", Patch::line_num, old_val);
+        I_Debugf("Dehacked: Warning - Line %d: unknown sound name '%s'.\n", patch::line_num, old_val);
 }
 
-} // namespace Deh_Edge
+} // namespace dehacked

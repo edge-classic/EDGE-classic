@@ -28,11 +28,9 @@
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
-#include <assert.h>
 
 #include <string>
 
-#include "deh_i_defs.h"
 #include "deh_edge.h"
 
 #include "deh_ammo.h"
@@ -51,83 +49,83 @@
 #include "deh_util.h"
 #include "deh_weapons.h"
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-bool Field_ValidateValue(const fieldreference_t *ref, int new_val)
+static bool FieldValidateValue(const FieldReference *reference, int new_val)
 {
-    if (ref->field_type == FT_ANY || ref->field_type == FT_BITS)
+    if (reference->field_type == kFieldTypeAny || reference->field_type == kFieldTypeBitflags)
         return true;
 
-    if (new_val < 0 || (new_val == 0 && ref->field_type == FT_GTEQ1))
+    if (new_val < 0 || (new_val == 0 && reference->field_type == kFieldTypeOneOrGreater))
     {
-        I_Debugf("Dehacked: Warning - Line %d: bad value '%d' for %s\n", Patch::line_num, new_val, ref->deh_name);
+        I_Debugf("Dehacked: Warning - Line %d: bad value '%d' for %s\n", patch::line_num, new_val, reference->dehacked_name);
         return false;
     }
 
-    if (ref->field_type == FT_NONEG || ref->field_type == FT_GTEQ1)
+    if (reference->field_type == kFieldTypeZeroOrGreater || reference->field_type == kFieldTypeOneOrGreater)
         return true;
 
-    if (ref->field_type == FT_SUBSPR) // ignore the bright bit
+    if (reference->field_type == kFieldTypeSubspriteNumber) // ignore the bright bit
         new_val &= ~32768;
 
     int min_obj = 0;
     int max_obj = 0;
 
-    if (Patch::patch_fmt <= 5)
+    if (patch::patch_fmt <= 5)
     {
-        switch (ref->field_type)
+        switch (reference->field_type)
         {
-        case FT_AMMO:
-            max_obj = NUMAMMO - 1;
+        case kFieldTypeAmmoNumber:
+            max_obj = kTotalAmmoTypes - 1;
             break;
-        case FT_FRAME:
-            max_obj = NUMSTATES - 1;
+        case kFieldTypeFrameNumber:
+            max_obj = kTotalStates - 1;
             break;
-        case FT_SOUND:
-            max_obj = NUMSFX - 1;
+        case kFieldTypeSoundNumber:
+            max_obj = kTotalSoundEffects - 1;
             break;
-        case FT_SPRITE:
-            max_obj = NUMSPRITES - 1;
+        case kFieldTypeSpriteNumber:
+            max_obj = kTotalSprites - 1;
             break;
-        case FT_SUBSPR:
+        case kFieldTypeSubspriteNumber:
             max_obj = 31;
             break;
 
         default:
-            I_Error("Dehacked: Error - Bad field type %d\n", ref->field_type);
+            I_Error("Dehacked: Error - Bad field type %d\n", reference->field_type);
         }
     }
     else /* patch_fmt == 6, allow BOOM/MBF stuff */
     {
-        switch (ref->field_type)
+        switch (reference->field_type)
         {
-        case FT_AMMO:
-            max_obj = NUMAMMO - 1;
+        case kFieldTypeAmmoNumber:
+            max_obj = kTotalAmmoTypes - 1;
             break;
-        case FT_SUBSPR:
+        case kFieldTypeSubspriteNumber:
             max_obj = 31;
             break;
 
         // for DSDehacked, allow very high values
-        case FT_FRAME:
+        case kFieldTypeFrameNumber:
             max_obj = 32767;
             break;
-        case FT_SPRITE:
+        case kFieldTypeSpriteNumber:
             max_obj = 32767;
             break;
-        case FT_SOUND:
+        case kFieldTypeSoundNumber:
             max_obj = 32767;
             break;
 
         default:
-            I_Error("Dehacked: Error - Bad field type %d\n", ref->field_type);
+            I_Error("Dehacked: Error - Bad field type %d\n", reference->field_type);
         }
     }
 
     if (new_val < min_obj || new_val > max_obj)
     {
-        I_Debugf("Dehacked: Warning - Line %d: bad value '%d' for %s\n", Patch::line_num, new_val, ref->deh_name);
+        I_Debugf("Dehacked: Warning - Line %d: bad value '%d' for %s\n", patch::line_num, new_val, reference->dehacked_name);
 
         return false;
     }
@@ -135,24 +133,24 @@ bool Field_ValidateValue(const fieldreference_t *ref, int new_val)
     return true;
 }
 
-bool Field_Alter(const fieldreference_t *refs, const char *deh_field, int *object, int new_value)
+bool FieldAlter(const FieldReference *references, const char *dehacked_field, int *object, int new_value)
 {
-    for (; refs->deh_name; refs++)
+    for (; references->dehacked_name; references++)
     {
-        if (StrCaseCmp(refs->deh_name, deh_field) != 0)
+        if (StrCaseCmp(references->dehacked_name, dehacked_field) != 0)
             continue;
 
         // found it...
 
-        if (Field_ValidateValue(refs, new_value))
+        if (FieldValidateValue(references, new_value))
         {
             // prevent BOOM/MBF specific flags from being set using
             // numeric notation.  Only settable via AA+BB+CC notation.
-            if (refs->field_type == FT_BITS)
+            if (references->field_type == kFieldTypeBitflags)
                 new_value &= ~ALL_BEX_FLAGS;
 
             // Yup, we play a bit dirty here
-            int *field = (int *)((char *)object + refs->offset);
+            int *field = (int *)((char *)object + references->offset);
             *field     = new_value;
         }
 
@@ -162,4 +160,4 @@ bool Field_Alter(const fieldreference_t *refs, const char *deh_field, int *objec
     return false;
 }
 
-} // namespace Deh_Edge
+} // namespace dehacked

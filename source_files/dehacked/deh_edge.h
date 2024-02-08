@@ -34,52 +34,35 @@
 #include <vector>
 #include <string>
 
-// Callback functions
-typedef struct dehconvfuncs_s
-{
-    // Fatal errors are called as a last resort when something serious
-    // goes wrong, e.g. out of memory.  This routine should show the
-    // error to the user and abort the program.
-    //
-    void (*fatal_error)(const char *str, ...);
-
-    // The print_msg routine is used to display informational messages
-    // and warning messages (when enabled).
-    //
-    void (*print_msg)(const char *str, ...);
-} dehconvfuncs_t;
-
-typedef enum
+enum DehackedResult
 {
     // everything was ship-shape.
-    DEH_OK = 0,
-
+    kDehackedConversionOK = 0,
     // an unknown error occurred (this is the catch-all value).
-    DEH_E_Unknown,
-
+    kDehackedConversionError,
     // problem parsing input file (maybe it wasn't a DeHackEd patch).
-    DEH_E_ParseError
-} dehret_e;
+    kDehackedConversionParseError
+};
 
 /* ------------ interface functions ------------ */
 
 // startup: set the interface functions, reset static vars, etc..
-void DehEdgeStartup(const dehconvfuncs_t *funcs);
+void DehackedStartup();
 
 // return the message for the last error, or an empty string if there
 // was none.  Also clears the current error.  Never returns NULL.
-const char *DehEdgeGetError(void);
+const char *DehackedGetError(void);
 
 // set quiet mode (disables warnings).
-dehret_e DehEdgeSetQuiet(int quiet);
+DehackedResult DehackedSetQuiet(int quiet);
 
 // add a single patch file (possibly from a WAD lump).
-dehret_e DehEdgeAddLump(const char *data, int length);
+DehackedResult DehackedAddLump(const char *data, int length);
 
 // convert all the DeHackEd patch files into DDF.
-dehret_e DehEdgeRunConversion(ddf_collection_c *dest);
+DehackedResult DehackedRunConversion(ddf_collection_c *dest);
 
 // shut down: free all memory, close all files, etc..
-void DehEdgeShutdown(void);
+void DehackedShutdown(void);
 
 #endif /* __DEH_EDGE_PLUGIN_H__ */

@@ -27,9 +27,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
-#include "deh_i_defs.h"
 #include "deh_edge.h"
 
 #include "deh_buffer.h"
@@ -42,10 +40,10 @@
 #include "deh_util.h"
 #include "deh_wad.h"
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-const char *sprnames_orig[NUMSPRITES_DEHEXTRA] = {
+const char *sprnames_orig[kTotalSpritesDEHEXTRA] = {
     "TROO", "SHTG", "PUNG", "PISG", "PISF", "SHTF", "SHT2", "CHGG", "CHGF", "MISG", "MISF", "SAWG", "PLSG", "PLSF",
     "BFGG", "BFGF", "BLUD", "PUFF", "BAL1", "BAL2", "PLSS", "PLSE", "MISL", "BFS1", "BFE1", "BFE2", "TFOG", "IFOG",
     "PLAY", "POSS", "SPOS", "VILE", "FIRE", "FATB", "FBXP", "SKEL", "MANF", "FATT", "CPOS", "SARG", "HEAD", "BAL7",
@@ -75,22 +73,22 @@ std::vector<std::string> sprnames;
 
 //------------------------------------------------------------------------
 
-namespace Sprites
+namespace sprites
 {
 void MarkEntry(int num);
 }
 
-void Sprites::Init()
+void sprites::Init()
 {
     sprnames.clear();
 }
 
-void Sprites::Shutdown()
+void sprites::Shutdown()
 {
     sprnames.clear();
 }
 
-void Sprites::MarkEntry(int num)
+void sprites::MarkEntry(int num)
 {
     // fill any missing slots with "", including the one we want.
     while ((int)sprnames.size() < num + 1)
@@ -101,23 +99,23 @@ void Sprites::MarkEntry(int num)
         sprnames[num] = GetOriginalName(num);
 }
 
-void Sprites::SpriteDependencies()
+void sprites::SpriteDependencies()
 {
     for (size_t i = 0; i < sprnames.size(); i++)
     {
         if (sprnames[i] != "" && sprnames[i] != GetOriginalName(i))
         {
-            Frames::MarkStatesWithSprite((int)i);
+            frames::MarkStatesWithSprite((int)i);
         }
     }
 }
 
-bool Sprites::ReplaceSprite(const char *before, const char *after)
+bool sprites::ReplaceSprite(const char *before, const char *after)
 {
-    assert(strlen(before) == 4);
-    assert(strlen(after) == 4);
+    SYS_ASSERT(strlen(before) == 4);
+    SYS_ASSERT(strlen(after) == 4);
 
-    for (int i = 0; i < NUMSPRITES_DEHEXTRA; i++)
+    for (int i = 0; i < kTotalSpritesDEHEXTRA; i++)
     {
         if (StrCaseCmp(before, sprnames_orig[i]) == 0)
         {
@@ -131,9 +129,9 @@ bool Sprites::ReplaceSprite(const char *before, const char *after)
     return false;
 }
 
-void Sprites::AlterBexSprite(const char *new_val)
+void sprites::AlterBexSprite(const char *new_val)
 {
-    const char *old_val = Patch::line_buf;
+    const char *old_val = patch::line_buf;
 
     if (strlen(new_val) != 4)
     {
@@ -147,7 +145,7 @@ void Sprites::AlterBexSprite(const char *new_val)
         int num = atoi(old_val);
         if (num < 0 || num > 32767)
         {
-            I_Debugf("Dehacked: Warning - Line %d: illegal sprite entry '%s'.\n", Patch::line_num, old_val);
+            I_Debugf("Dehacked: Warning - Line %d: illegal sprite entry '%s'.\n", patch::line_num, old_val);
         }
         else
         {
@@ -164,10 +162,10 @@ void Sprites::AlterBexSprite(const char *new_val)
     }
 
     if (!ReplaceSprite(old_val, new_val))
-        I_Debugf("Dehacked: Warning - Line %d: unknown sprite name '%s'.\n", Patch::line_num, old_val);
+        I_Debugf("Dehacked: Warning - Line %d: unknown sprite name '%s'.\n", patch::line_num, old_val);
 }
 
-const char *Sprites::GetSprite(int spr_num)
+const char *sprites::GetSprite(int spr_num)
 {
     if (spr_num < 0 || spr_num > 32767)
         return "XXXX";
@@ -187,12 +185,12 @@ const char *Sprites::GetSprite(int spr_num)
     return name;
 }
 
-const char *Sprites::GetOriginalName(int spr_num)
+const char *sprites::GetOriginalName(int spr_num)
 {
-    if (spr_num < NUMSPRITES_DEHEXTRA)
+    if (spr_num < kTotalSpritesDEHEXTRA)
         return sprnames_orig[spr_num];
 
     return "NULL";
 }
 
-} // namespace Deh_Edge
+} // namespace dehacked

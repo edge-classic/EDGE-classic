@@ -678,7 +678,7 @@ static void ProcessDDFInPack(pack_file_c *pack)
                 int         length = -1;
                 const uint8_t *data   = pack->LoadEntry(dir, entry, length);
 
-                DEH_Convert(data, length, source);
+                ConvertDehacked(data, length, source);
                 delete[] data;
 
                 continue;

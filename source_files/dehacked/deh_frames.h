@@ -19,42 +19,40 @@
 #ifndef __DEH_FRAMES_HDR__
 #define __DEH_FRAMES_HDR__
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-struct state_t;
+struct State;
 
-typedef enum
+enum ActionFlags
 {
-    AF_EXPLODE   = (1 << 0), // uses A_Explode
-    AF_BOSSDEATH = (1 << 1), // uses A_BossDeath
-    AF_KEENDIE   = (1 << 2), // uses A_KeenDie
-    AF_LOOK      = (1 << 3), // uses A_Look
-    AF_DETONATE  = (1 << 4), // uses A_Detonate
+    kActionFlagExplode       = (1 << 0), // uses A_Explode
+    kActionFlagBossDeath     = (1 << 1), // uses A_BossDeath
+    kActionFlagKeenDie       = (1 << 2), // uses A_KeenDie
+    kActionFlagLook          = (1 << 3), // uses A_Look
+    kActionFlagDetonate      = (1 << 4), // uses A_Detonate
+    kActionFlagSpread        = (1 << 6), // uses A_FatAttack1/2/3
+    kActionFlagChase         = (1 << 7), // uses A_Chase
+    kActionFlagFall          = (1 << 8), // uses A_Fall
+    kActionFlagRaise         = (1 << 9), // uses A_ResChase
+    kActionFlagFlash         = (1 << 14), // weapon will go into flash state
+    kActionFlagMakeDead      = (1 << 15), // action needs an extra MAKEDEAD state
+    kActionFlagFaceTarget    = (1 << 16), // action needs FACE_TARGET state
+    kActionFlagSpecial       = (1 << 17), // special action (uses misc1/2)
+    kActionFlagUnimplemented = (1 << 18), // not yet supported
+    kActionFlagWeaponState   = (1 << 20), // uses a weapon state
+    kActionFlagThingState    = (1 << 21)  // uses a thing state
+};
 
-    AF_SPREAD = (1 << 6), // uses A_FatAttack1/2/3
-    AF_CHASER = (1 << 7), // uses A_Chase
-    AF_FALLER = (1 << 8), // uses A_Fall
-    AF_RAISER = (1 << 9), // uses A_ResChase
-
-    AF_FLASH    = (1 << 14), // weapon will go into flash state
-    AF_MAKEDEAD = (1 << 15), // action needs an extra MAKEDEAD state
-    AF_FACE     = (1 << 16), // action needs FACE_TARGET state
-    AF_SPECIAL  = (1 << 17), // special action (uses misc1/2)
-    AF_UNIMPL   = (1 << 18), // not yet supported
-
-    AF_WEAPON_ST = (1 << 20), // uses a weapon state
-    AF_THING_ST  = (1 << 21)  // uses a thing state
-} actflags_e;
-
-namespace Frames
+namespace frames
 {
-typedef enum
+
+enum AttackMethod
 {
-    RANGE  = 0,
-    COMBAT = 1,
-    SPARE  = 2
-} atkmethod_e;
+    kAttackMethodRanged  = 0,
+    kAttackMethodCombat  = 1,
+    kAttackMethodSpare   = 2
+};
 
 extern const char *attack_slot[3];
 extern int         act_flags;
@@ -67,7 +65,7 @@ void MarkState(int st_num);
 void MarkStatesWithSprite(int spr_num);
 void StateDependencies();
 
-state_t *GetModifiedState(int st_num);
+State *GetModifiedState(int st_num);
 int      GetStateSprite(int st_num);
 
 void AlterFrame(int new_val);
@@ -81,11 +79,8 @@ void SpreadGroups();
 bool CheckWeaponFlash(int first);
 bool CheckMissileState(int first);
 void OutputGroup(char group);
+} // namespace frames
 
-// debugging stuff
-void DebugRange(const char *kind, const char *entry);
-} // namespace Frames
-
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_FRAMES_HDR__ */

@@ -29,19 +29,16 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <assert.h>
-#include <errno.h>
 
-#include "deh_i_defs.h"
 #include "deh_edge.h"
 
 #include "deh_system.h"
 #include "deh_wad.h"
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-namespace WAD
+namespace wad
 {
 
 ddf_collection_c *dest_container = NULL;
@@ -74,6 +71,6 @@ void Printf(const char *str, ...)
     cur_lump->data += (const char *)wad_msg_buf;
 }
 
-} // namespace WAD
+} // namespace wad
 
-} // namespace Deh_Edge
+} // namespace dehacked

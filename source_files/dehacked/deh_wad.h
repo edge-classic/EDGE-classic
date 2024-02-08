@@ -21,18 +21,18 @@
 
 #include "deh_system.h"
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-namespace WAD
+namespace wad
 {
 extern ddf_collection_c *dest_container;
 
 void NewLump(ddf_type_e type);
 
 void Printf(const char *str, ...) GCCATTR((format(printf, 1, 2)));
-} // namespace WAD
+} // namespace wad
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_WAD_HDR__ */

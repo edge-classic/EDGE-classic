@@ -19,10 +19,10 @@
 #ifndef __DEH_MISC_HDR__
 #define __DEH_MISC_HDR__
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-namespace Misc
+namespace miscellaneous
 {
 extern int init_ammo;
 /* NOTE: initial health is set in mobjinfo[MT_PLAYER] */
@@ -47,8 +47,8 @@ void Init();
 void Shutdown();
 
 void AlterMisc(int new_val);
-} // namespace Misc
+} // namespace miscellaneous
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_MISC_HDR__ */

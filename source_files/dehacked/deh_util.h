@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 
-namespace Deh_Edge
+namespace dehacked
 {
 
 // string utilities
@@ -33,6 +33,6 @@ const char *StrSanitize(const char *name);
 char       *StringNew(int length);
 char       *StringDup(const char *orig);
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_UTIL_HDR__ */

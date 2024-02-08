@@ -21,90 +21,86 @@
 
 #include <string>
 
-namespace Deh_Edge
+namespace dehacked
 {
 
-//
-// Identifiers for all music in game.
-//
+// This file diverges slightly from the style guide with enum member naming
+// as these reflect the historical code pointer/state/flag/etc names - Dasho
 
-typedef enum
+enum MusicType
 {
-    mus_None,
+    kmus_None,
+    kmus_e1m1,
+    kmus_e1m2,
+    kmus_e1m3,
+    kmus_e1m4,
+    kmus_e1m5,
+    kmus_e1m6,
+    kmus_e1m7,
+    kmus_e1m8,
+    kmus_e1m9,
+    kmus_e2m1,
+    kmus_e2m2,
+    kmus_e2m3,
+    kmus_e2m4,
+    kmus_e2m5,
+    kmus_e2m6,
+    kmus_e2m7,
+    kmus_e2m8,
+    kmus_e2m9,
+    kmus_e3m1,
+    kmus_e3m2,
+    kmus_e3m3,
+    kmus_e3m4,
+    kmus_e3m5,
+    kmus_e3m6,
+    kmus_e3m7,
+    kmus_e3m8,
+    kmus_e3m9,
+    kmus_inter,
+    kmus_intro,
+    kmus_bunny,
+    kmus_victor,
+    kmus_introa,
+    kmus_runnin,
+    kmus_stalks,
+    kmus_countd,
+    kmus_betwee,
+    kmus_doom,
+    kmus_the_da,
+    kmus_shawn,
+    kmus_ddtblu,
+    kmus_in_cit,
+    kmus_dead,
+    kmus_stlks2,
+    kmus_theda2,
+    kmus_doom2,
+    kmus_ddtbl2,
+    kmus_runni2,
+    kmus_dead2,
+    kmus_stlks3,
+    kmus_romero,
+    kmus_shawn2,
+    kmus_messag,
+    kmus_count2,
+    kmus_ddtbl3,
+    kmus_ampie,
+    kmus_theda3,
+    kmus_adrian,
+    kmus_messg2,
+    kmus_romer2,
+    kmus_tense,
+    kmus_shawn3,
+    kmus_openin,
+    kmus_evil,
+    kmus_ultima,
+    kmus_read_m,
+    kmus_dm2ttl,
+    kmus_dm2int,
+    kTotalMusicTypes
+};
 
-    mus_e1m1,
-    mus_e1m2,
-    mus_e1m3,
-    mus_e1m4,
-    mus_e1m5,
-    mus_e1m6,
-    mus_e1m7,
-    mus_e1m8,
-    mus_e1m9,
-    mus_e2m1,
-    mus_e2m2,
-    mus_e2m3,
-    mus_e2m4,
-    mus_e2m5,
-    mus_e2m6,
-    mus_e2m7,
-    mus_e2m8,
-    mus_e2m9,
-    mus_e3m1,
-    mus_e3m2,
-    mus_e3m3,
-    mus_e3m4,
-    mus_e3m5,
-    mus_e3m6,
-    mus_e3m7,
-    mus_e3m8,
-    mus_e3m9,
-
-    mus_inter,
-    mus_intro,
-    mus_bunny,
-    mus_victor,
-    mus_introa,
-    mus_runnin,
-    mus_stalks,
-    mus_countd,
-    mus_betwee,
-    mus_doom,
-    mus_the_da,
-    mus_shawn,
-    mus_ddtblu,
-    mus_in_cit,
-    mus_dead,
-    mus_stlks2,
-    mus_theda2,
-    mus_doom2,
-    mus_ddtbl2,
-    mus_runni2,
-    mus_dead2,
-    mus_stlks3,
-    mus_romero,
-    mus_shawn2,
-    mus_messag,
-    mus_count2,
-    mus_ddtbl3,
-    mus_ampie,
-    mus_theda3,
-    mus_adrian,
-    mus_messg2,
-    mus_romer2,
-    mus_tense,
-    mus_shawn3,
-    mus_openin,
-    mus_evil,
-    mus_ultima,
-    mus_read_m,
-    mus_dm2ttl,
-    mus_dm2int,
-
-    NUMMUSIC
-} musictype_e;
-
-namespace Music
+namespace music
 {
 void Init();
 void Shutdown();
@@ -115,8 +111,8 @@ bool ReplaceMusic(const char *before, const char *after);
 void AlterBexMusic(const char *new_val);
 
 void ConvertMUS();
-} // namespace Music
+} // namespace music
 
-} // namespace Deh_Edge
+} // namespace dehacked
 
 #endif /* __DEH_MUSIC_HDR__ */

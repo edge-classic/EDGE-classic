@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------
 
-#include "deh_i_defs.h"
 #include "deh_edge.h"
 
 #include "deh_info.h"
@@ -36,116 +35,114 @@
 #include "deh_util.h"
 #include "deh_wad.h"
 
-#include <assert.h>
-
-namespace Deh_Edge
+namespace dehacked
 {
 
-namespace Rscript
+namespace rscript
 {
 std::vector<int> keen_mobjs;
 
 void BeginLump();
 void FinishLump();
 
-bool IsKeen(int mt_num);
+bool IsKeen(int kMT_num);
 
 void CollectMatchingBosses(std::vector<int> &list, int flag);
 void OutputTrigger(const std::string &map, const std::vector<int> &list, bool boss2);
 void HandleLevel(const std::string &map, int flag1, int mt1, int flag2, int mt2);
-} // namespace Rscript
+} // namespace rscript
 
-void Rscript::Init()
+void rscript::Init()
 {
     keen_mobjs.clear();
 }
 
-void Rscript::Shutdown()
+void rscript::Shutdown()
 {
     keen_mobjs.clear();
 }
 
-void Rscript::BeginLump()
+void rscript::BeginLump()
 {
-    WAD::NewLump(DDF_RadScript);
+    wad::NewLump(DDF_RadScript);
 
-    WAD::Printf("// <SCRIPTS>\n\n");
+    wad::Printf("// <SCRIPTS>\n\n");
 }
 
-void Rscript::FinishLump()
+void rscript::FinishLump()
 {
-    WAD::Printf("\n");
+    wad::Printf("\n");
 }
 
-bool Rscript::IsKeen(int mt_num)
+bool rscript::IsKeen(int kMT_num)
 {
     for (int num : keen_mobjs)
-        if (num == mt_num)
+        if (num == kMT_num)
             return true; // peachy keen!
 
     return false; // not so keen
 }
 
-void Rscript::MarkKeenDie(int mt_num)
+void rscript::MarkKeenDie(int kMT_num)
 {
-    if (!IsKeen(mt_num))
-        keen_mobjs.push_back(mt_num);
+    if (!IsKeen(kMT_num))
+        keen_mobjs.push_back(kMT_num);
 }
 
-void Rscript::CollectMatchingBosses(std::vector<int> &list, int flag)
+void rscript::CollectMatchingBosses(std::vector<int> &list, int flag)
 {
     for (int i = 1; i <= 32767; i++)
     {
-        // Note: we skip MT_PLAYER (index == 0)
+        // Note: we skip kMT_PLAYER (index == 0)
 
         // skip monsters using A_KeenDie, since the KEEN_DIE action already
         // handles their death and we don't want to intefere with that.
         if (IsKeen(i))
             continue;
 
-        if (0 != (Things::GetMobjMBF21Flags(i) & flag))
+        if (0 != (things::GetMobjMBF21Flags(i) & flag))
             list.push_back(i);
     }
 }
 
-void Rscript::OutputTrigger(const std::string &map, const std::vector<int> &list, bool boss2)
+void rscript::OutputTrigger(const std::string &map, const std::vector<int> &list, bool boss2)
 {
     // when there is no monsters, that is okay, we just don't output any
     // radius trigger (there is nothing it could do).
     if (list.empty())
         return;
 
-    WAD::Printf("  radiustrigger 0 0 -1\n");
-    WAD::Printf("    wait_until_dead");
+    wad::Printf("  radiustrigger 0 0 -1\n");
+    wad::Printf("    wait_until_dead");
 
-    for (int mt_num : list)
+    for (int kMT_num : list)
     {
-        WAD::Printf(" %s", Things::GetMobjName(mt_num));
+        wad::Printf(" %s", things::GetMobjName(kMT_num));
     }
 
-    WAD::Printf("\n");
+    wad::Printf("\n");
 
     // the command to execute depends on the map...
 
     if (map == "E1M8")
-        WAD::Printf("    activate_linetype 38 666\n");
+        wad::Printf("    activate_linetype 38 666\n");
     else if (map == "E2M8")
-        WAD::Printf("    exit_level 5\n");
+        wad::Printf("    exit_level 5\n");
     else if (map == "E3M8")
-        WAD::Printf("    exit_level 5\n");
+        wad::Printf("    exit_level 5\n");
     else if (map == "E4M6")
-        WAD::Printf("    activate_linetype 2 666\n");
+        wad::Printf("    activate_linetype 2 666\n");
     else if (map == "E4M8")
-        WAD::Printf("    activate_linetype 38 666\n");
+        wad::Printf("    activate_linetype 38 666\n");
     else if (!boss2)
-        WAD::Printf("    activate_linetype 38 666\n"); // MAP07 Mancubus
+        wad::Printf("    activate_linetype 38 666\n"); // MAP07 Mancubus
     else
-        WAD::Printf("    activate_linetype 30 667\n"); // MAP07 Arachnotron
+        wad::Printf("    activate_linetype 30 667\n"); // MAP07 Arachnotron
 
-    WAD::Printf("  end_radiustrigger\n");
+    wad::Printf("  end_radiustrigger\n");
 }
 
-void Rscript::HandleLevel(const std::string &map, int flag1, int mt1, int flag2, int mt2)
+void rscript::HandleLevel(const std::string &map, int flag1, int mt1, int flag2, int mt2)
 {
     std::vector<int> list1;
     std::vector<int> list2;
@@ -167,33 +164,33 @@ void Rscript::HandleLevel(const std::string &map, int flag1, int mt1, int flag2,
     if (!different && !all_mode)
         return;
 
-    WAD::Printf("START_MAP %s\n", map.c_str());
+    wad::Printf("START_MAP %s\n", map.c_str());
 
     if (flag1 != 0)
         OutputTrigger(map, list1, false);
     if (flag2 != 0)
         OutputTrigger(map, list2, true);
 
-    WAD::Printf("END_MAP\n\n\n");
+    wad::Printf("END_MAP\n\n\n");
 }
 
-void Rscript::ConvertRAD()
+void rscript::ConvertRAD()
 {
     BeginLump();
 
-    WAD::Printf("// --- DOOM I Scripts ---\n\n");
+    wad::Printf("// --- DOOM I Scripts ---\n\n");
 
-    HandleLevel("E1M8", MBF21_E1M8BOSS, MT_BRUISER, 0, 0);
-    HandleLevel("E2M8", MBF21_E2M8BOSS, MT_CYBORG, 0, 0);
-    HandleLevel("E3M8", MBF21_E3M8BOSS, MT_SPIDER, 0, 0);
-    HandleLevel("E4M6", MBF21_E4M6BOSS, MT_CYBORG, 0, 0);
-    HandleLevel("E4M8", MBF21_E4M8BOSS, MT_SPIDER, 0, 0);
+    HandleLevel("E1M8", kMBF21_E1M8BOSS, kMT_BRUISER, 0, 0);
+    HandleLevel("E2M8", kMBF21_E2M8BOSS, kMT_CYBORG, 0, 0);
+    HandleLevel("E3M8", kMBF21_E3M8BOSS, kMT_SPIDER, 0, 0);
+    HandleLevel("E4M6", kMBF21_E4M6BOSS, kMT_CYBORG, 0, 0);
+    HandleLevel("E4M8", kMBF21_E4M8BOSS, kMT_SPIDER, 0, 0);
 
-    WAD::Printf("// --- DOOM II Scripts ---\n\n");
+    wad::Printf("// --- DOOM II Scripts ---\n\n");
 
-    HandleLevel("MAP07", MBF21_MAP07BOSS1, MT_FATSO, MBF21_MAP07BOSS2, MT_BABY);
+    HandleLevel("MAP07", kMBF21_MAP07BOSS1, kMT_FATSO, kMBF21_MAP07BOSS2, kMT_BABY);
 
     FinishLump();
 }
 
-} // namespace Deh_Edge
+} // namespace dehacked

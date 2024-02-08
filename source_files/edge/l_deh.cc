@@ -38,68 +38,31 @@
 
 DEF_CVAR(debug_dehacked, "0", CVAR_ARCHIVE)
 
-static char dh_message[1024];
-
-//
-// DH_PrintMsg
-//
-static void GCCATTR((format(printf, 1, 2))) DH_PrintMsg(const char *str, ...)
+void ConvertDehacked(const uint8_t *data, int length, const std::string &source)
 {
-    va_list args;
+    DehackedStartup();
 
-    va_start(args, str);
-    vsprintf(dh_message, str, args);
-    va_end(args);
+    DehackedResult ret = DehackedAddLump((const char *)data, length);
 
-    I_Printf("DEH_EDGE: %s", dh_message);
-}
-
-//
-// DH_FatalError
-//
-// Terminates the program reporting an error.
-//
-static void GCCATTR((format(printf, 1, 2))) DH_FatalError(const char *str, ...)
-{
-    va_list args;
-
-    va_start(args, str);
-    vsprintf(dh_message, str, args);
-    va_end(args);
-
-    I_Error("Converting DEH patch failed: %s\n", dh_message);
-}
-
-static const dehconvfuncs_t edge_dehconv_funcs = {
-    DH_FatalError,
-    DH_PrintMsg,
-};
-
-void DEH_Convert(const uint8_t *data, int length, const std::string &source)
-{
-    DehEdgeStartup(&edge_dehconv_funcs);
-
-    dehret_e ret = DehEdgeAddLump((const char *)data, length);
-
-    if (ret != DEH_OK)
+    if (ret != kDehackedConversionOK)
     {
-        DH_PrintMsg("FAILED to add lump:\n");
-        DH_PrintMsg("- %s\n", DehEdgeGetError());
+        I_Printf("Dehacked: FAILED to add lump:\n");
+        I_Printf("- %s\n", DehackedGetError());
 
-        DehEdgeShutdown();
+        DehackedShutdown();
 
-        I_Error("Failed to convert DeHackEd file: %s\n", source.c_str());
+        I_Error("Failed to convert Dehacked file: %s\n", source.c_str());
     }
 
     ddf_collection_c col;
 
-    ret = DehEdgeRunConversion(&col);
+    ret = DehackedRunConversion(&col);
 
-    DehEdgeShutdown();
+    DehackedShutdown();
 
-    if (ret != DEH_OK)
+    if (ret != kDehackedConversionOK)
     {
-        I_Error("Failed to convert DeHackEd file: %s\n", source.c_str());
+        I_Error("Failed to convert Dehacked file: %s\n", source.c_str());
     }
 
     if (debug_dehacked.d > 0)

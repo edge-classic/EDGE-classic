@@ -28,11 +28,9 @@
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
-#include <assert.h>
 
 #include <string>
 
-#include "deh_i_defs.h"
 #include "deh_edge.h"
 
 #include "deh_ammo.h"
@@ -53,33 +51,38 @@
 #include "deh_wad.h"
 #include "deh_weapons.h"
 
-namespace Deh_Edge
+namespace dehacked
 {
 
 #define DEBUG_MONST 0
 
-#define EF_DISLOYAL   'D'
-#define EF_TRIG_HAPPY 'H'
-#define EF_BOSSMAN    'B'
-#define EF_LOUD       'L'
-#define EF_NO_RAISE   'R'
-#define EF_NO_GRUDGE  'G'
-#define EF_NO_ITEM_BK 'I'
+static constexpr char kExtraFlagDisloyal = 'D';
+static constexpr char kExtraFlagTriggerHappy = 'H';
+static constexpr char kExtraFlagBossMan = 'B';
+static constexpr char kExtraFlagLoud = 'L';
+static constexpr char kExtraFlagNoRaise = 'R';
+static constexpr char kExtraFlagNoGrudge = 'G';
+static constexpr char kExtraFlagNoItemBk = 'I';
 
-#define CAST_MAX 20
+static constexpr uint8_t kCastMaximum = 20;
 
-extern mobjinfo_t mobjinfo[NUMMOBJTYPES_COMPAT];
+extern MobjInfo mobjinfo[kTotalMobjTypesPortCompatibility];
 
-extern mobjinfo_t brain_explode_mobj;
+extern MobjInfo brain_explode_mobj;
 
-std::vector<mobjinfo_t *> new_mobjinfo;
+std::vector<MobjInfo *> new_mobjinfo;
 
-namespace Things
+static inline float FixedToFloat(int fixed)
 {
-mobjinfo_t       *NewMobj(int mt_num);
-const mobjinfo_t *OldMobj(int mt_num);
-const mobjinfo_t *NewMobjElseOld(int mt_num);
-} // namespace Things
+    return (float)fixed / 65536.0f;
+}
+
+namespace things
+{
+MobjInfo       *NewMobj(int mt_num);
+const MobjInfo *OldMobj(int mt_num);
+const MobjInfo *NewMobjElseOld(int mt_num);
+} // namespace things
 
 //----------------------------------------------------------------------------
 //
@@ -87,133 +90,124 @@ const mobjinfo_t *NewMobjElseOld(int mt_num);
 //
 //----------------------------------------------------------------------------
 
-#define KF_FACE_TARG 'F'
-#define KF_SIGHT     'S'
-#define KF_KILL_FAIL 'K'
-#define KF_NO_TRACE  't'
-#define KF_TOO_CLOSE 'c'
-#define KF_KEEP_FIRE 'e'
-#define KF_PUFF_SMK  'p'
+static constexpr char kAttackFlagFaceTarget = 'F';
+static constexpr char kAttackFlagSight = 'S';
+static constexpr char kAttackFlagKillFail = 'K';
+static constexpr char kAttackFlagNoTrace = 't';
+static constexpr char kAttackFlagTooClose = 'c';
+static constexpr char kAttackFlagKeepFire = 'e';
+static constexpr char kAttackFlagPuffSmoke = 'p';
 
 namespace Attacks
 {
 bool got_one;
 bool flag_got_one;
 
-class scratch_atk_c
+struct ScratchAttack
 {
-  public:
     int         damage;
     std::string sfx;
     std::string fullname;
-
-    scratch_atk_c(int _damage, const char *_sfx, const char *_name) : damage(_damage), sfx(_sfx), fullname(_name)
-    {
-    }
-
-    ~scratch_atk_c()
-    {
-    }
 };
 
-std::vector<scratch_atk_c *> scratchers;
+std::vector<ScratchAttack> scratchers;
 
 const char *AddScratchAttack(int damage, const char *sfx);
 
 void BeginLump(void)
 {
-    WAD::NewLump(DDF_Attack);
+    wad::NewLump(DDF_Attack);
 
-    WAD::Printf("<ATTACKS>\n\n");
+    wad::Printf("<ATTACKS>\n\n");
 }
 
 void FinishLump(void)
 {
-    WAD::Printf("\n");
+    wad::Printf("\n");
 }
 
-typedef struct
+struct ExtraAttack
 {
     int         mt_num;
     const char *atk_type;
     int         atk_height;
     int         translucency;
     const char *flags;
-} attackextra_t;
+};
 
-const attackextra_t attack_extra[] = {{MT_FIRE, "TRACKER", 0, 75, "FS"},
-                                      {MT_TRACER, "PROJECTILE", 48, 75, "cptF"},
-                                      {MT_FATSHOT, "FIXED_SPREADER", 32, 75, ""},
-                                      {MT_TROOPSHOT, "PROJECTILE", 32, 75, "F"},
-                                      {MT_BRUISERSHOT, "PROJECTILE", 32, 75, "F"},
-                                      {MT_HEADSHOT, "PROJECTILE", 32, 75, "F"},
-                                      {MT_ARACHPLAZ, "PROJECTILE", 16, 50, "eF"},
-                                      {MT_ROCKET, "PROJECTILE", 44, 75, "FK"},
-                                      {MT_PLASMA, "PROJECTILE", 32, 75, "eK"},
-                                      {MT_BFG, "PROJECTILE", 32, 50, "K"},
-                                      {MT_EXTRABFG, "SPRAY", 0, 75, ""},
-                                      {MT_SPAWNSHOT, "SHOOTTOSPOT", 16, 100, ""},
+const ExtraAttack attack_extra[] =   {{kMT_FIRE, "TRACKER", 0, 75, "FS"},
+                                      {kMT_TRACER, "PROJECTILE", 48, 75, "cptF"},
+                                      {kMT_FATSHOT, "FIXED_SPREADER", 32, 75, ""},
+                                      {kMT_TROOPSHOT, "PROJECTILE", 32, 75, "F"},
+                                      {kMT_BRUISERSHOT, "PROJECTILE", 32, 75, "F"},
+                                      {kMT_HEADSHOT, "PROJECTILE", 32, 75, "F"},
+                                      {kMT_ARACHPLAZ, "PROJECTILE", 16, 50, "eF"},
+                                      {kMT_ROCKET, "PROJECTILE", 44, 75, "FK"},
+                                      {kMT_PLASMA, "PROJECTILE", 32, 75, "eK"},
+                                      {kMT_BFG, "PROJECTILE", 32, 50, "K"},
+                                      {kMT_EXTRABFG, "SPRAY", 0, 75, ""},
+                                      {kMT_SPAWNSHOT, "SHOOTTOSPOT", 16, 100, ""},
 
                                       {-1, NULL, 0, 0, ""}};
 
-void HandleSounds(const mobjinfo_t *info, int mt_num)
+void HandleSounds(const MobjInfo *info, int mt_num)
 {
-    if (info->seesound != sfx_None)
-        WAD::Printf("LAUNCH_SOUND = \"%s\";\n", Sounds::GetSound(info->seesound));
+    if (info->seesound != ksfx_None)
+        wad::Printf("LAUNCH_SOUND = \"%s\";\n", sounds::GetSound(info->seesound));
 
-    if (info->deathsound != sfx_None)
-        WAD::Printf("DEATH_SOUND = \"%s\";\n", Sounds::GetSound(info->deathsound));
+    if (info->deathsound != ksfx_None)
+        wad::Printf("DEATH_SOUND = \"%s\";\n", sounds::GetSound(info->deathsound));
 
-    if (info->rip_sound != sfx_None)
-        WAD::Printf("RIP_SOUND = \"%s\";\n", Sounds::GetSound(info->rip_sound));
+    if (info->rip_sound != ksfx_None)
+        wad::Printf("RIP_SOUND = \"%s\";\n", sounds::GetSound(info->rip_sound));
 
-    if (mt_num == MT_FIRE)
+    if (mt_num == kMT_FIRE)
     {
-        WAD::Printf("ATTEMPT_SOUND = \"%s\";\n", Sounds::GetSound(sfx_vilatk));
-        WAD::Printf("ENGAGED_SOUND = \"%s\";\n", Sounds::GetSound(sfx_barexp));
+        wad::Printf("ATTEMPT_SOUND = \"%s\";\n", sounds::GetSound(ksfx_vilatk));
+        wad::Printf("ENGAGED_SOUND = \"%s\";\n", sounds::GetSound(ksfx_barexp));
     }
 
-    if (mt_num == MT_FATSHOT)
-        WAD::Printf("ATTEMPT_SOUND = \"%s\";\n", Sounds::GetSound(sfx_manatk));
+    if (mt_num == kMT_FATSHOT)
+        wad::Printf("ATTEMPT_SOUND = \"%s\";\n", sounds::GetSound(ksfx_manatk));
 }
 
-void HandleFrames(const mobjinfo_t *info, int mt_num)
+void HandleFrames(const MobjInfo *info, int mt_num)
 {
-    Frames::ResetGroups();
+    frames::ResetGroups();
 
     if (info->fullbright)
-        Frames::force_fullbright = true;
+        frames::force_fullbright = true;
 
     // special cases...
 
-    if (mt_num == MT_SPAWNSHOT)
+    if (mt_num == kMT_SPAWNSHOT)
     {
-        // EDGE merges MT_SPAWNSHOT and MT_SPAWNFIRE into a single
+        // EDGE merges kMT_SPAWNSHOT and kMT_SPAWNFIRE into a single
         // attack ("BRAIN_CUBE").
 
         int count = 0;
 
-        const mobjinfo_t *spawnfire = Things::NewMobjElseOld(MT_SPAWNFIRE);
-        assert(spawnfire);
+        const MobjInfo *spawnfire = things::NewMobjElseOld(kMT_SPAWNFIRE);
+        SYS_ASSERT(spawnfire);
 
-        count += Frames::BeginGroup('D', spawnfire->spawnstate);
-        count += Frames::BeginGroup('S', info->spawnstate);
+        count += frames::BeginGroup('D', spawnfire->spawnstate);
+        count += frames::BeginGroup('S', info->spawnstate);
 
         if (count != 2)
             I_Debugf("Dehacked: Warning - Brain cube is missing spawn/fire states.\n");
 
         if (count == 0)
         {
-            Frames::force_fullbright = false;
+            frames::force_fullbright = false;
             return;
         }
 
-        Frames::SpreadGroups();
+        frames::SpreadGroups();
 
-        Frames::OutputGroup('S');
-        Frames::OutputGroup('D');
+        frames::OutputGroup('S');
+        frames::OutputGroup('D');
 
-        Frames::force_fullbright = false;
+        frames::force_fullbright = false;
         return;
     }
 
@@ -221,25 +215,25 @@ void HandleFrames(const mobjinfo_t *info, int mt_num)
 
     int count = 0;
 
-    count += Frames::BeginGroup('D', info->deathstate);
-    count += Frames::BeginGroup('E', info->seestate);
-    count += Frames::BeginGroup('S', info->spawnstate);
+    count += frames::BeginGroup('D', info->deathstate);
+    count += frames::BeginGroup('E', info->seestate);
+    count += frames::BeginGroup('S', info->spawnstate);
 
     if (count == 0)
     {
-        I_Debugf("Dehacked: Warning - Attack [%s] has no states.\n", Things::GetMobjName(mt_num) + 1);
-        Frames::force_fullbright = false;
+        I_Debugf("Dehacked: Warning - Attack [%s] has no states.\n", things::GetMobjName(mt_num) + 1);
+        frames::force_fullbright = false;
         return;
     }
 
-    Frames::SpreadGroups();
+    frames::SpreadGroups();
 
-    Frames::OutputGroup('S');
-    Frames::OutputGroup('E');
-    Frames::OutputGroup('D');
+    frames::OutputGroup('S');
+    frames::OutputGroup('E');
+    frames::OutputGroup('D');
 
     // reset fullbright
-    Frames::force_fullbright = false;
+    frames::force_fullbright = false;
 }
 
 void AddAtkSpecial(const char *name)
@@ -247,32 +241,32 @@ void AddAtkSpecial(const char *name)
     if (!flag_got_one)
     {
         flag_got_one = true;
-        WAD::Printf("ATTACK_SPECIAL = ");
+        wad::Printf("ATTACK_SPECIAL = ");
     }
     else
-        WAD::Printf(",");
+        wad::Printf(",");
 
-    WAD::Printf("%s", name);
+    wad::Printf("%s", name);
 }
 
-void HandleAtkSpecials(const mobjinfo_t *info, int mt_num, const attackextra_t *ext, bool plr_rocket)
+void HandleAtkSpecials(const MobjInfo *info, int mt_num, const ExtraAttack *ext, bool plr_rocket)
 {
     flag_got_one = false;
 
-    if (strchr(ext->flags, KF_FACE_TARG) && !plr_rocket)
+    if (strchr(ext->flags, kAttackFlagFaceTarget) && !plr_rocket)
         AddAtkSpecial("FACE_TARGET");
 
-    if (strchr(ext->flags, KF_SIGHT))
+    if (strchr(ext->flags, kAttackFlagSight))
         AddAtkSpecial("NEED_SIGHT");
 
-    if (strchr(ext->flags, KF_KILL_FAIL))
+    if (strchr(ext->flags, kAttackFlagKillFail))
         AddAtkSpecial("KILL_FAILED_SPAWN");
 
-    if (strchr(ext->flags, KF_PUFF_SMK))
+    if (strchr(ext->flags, kAttackFlagPuffSmoke))
         AddAtkSpecial("SMOKING_TRACER");
 
     if (flag_got_one)
-        WAD::Printf(";\n");
+        wad::Printf(";\n");
 }
 
 void CheckPainElemental(void)
@@ -281,10 +275,10 @@ void CheckPainElemental(void)
     // (ELEMENTAL_SPAWNER and ELEMENTAL_DEATHSPAWN).  check if
     // those states are still valid, recreate attacks if not.
 
-    const mobjinfo_t *skull = Things::NewMobjElseOld(MT_SKULL);
-    assert(skull);
+    const MobjInfo *skull = things::NewMobjElseOld(kMT_SKULL);
+    SYS_ASSERT(skull);
 
-    if (Frames::CheckMissileState(skull->missilestate))
+    if (frames::CheckMissileState(skull->missilestate))
         return;
 
     // need to write out new versions
@@ -297,35 +291,35 @@ void CheckPainElemental(void)
 
     const char *spawn_at = NULL;
 
-    if (skull->seestate != S_NULL)
+    if (skull->seestate != kS_NULL)
         spawn_at = "CHASE:1";
-    else if (skull->missilestate != S_NULL)
+    else if (skull->missilestate != kS_NULL)
         spawn_at = "MISSILE:1";
-    else if (skull->meleestate != S_NULL)
+    else if (skull->meleestate != kS_NULL)
         spawn_at = "MELEE:1";
     else
         spawn_at = "IDLE:1";
 
-    WAD::Printf("[ELEMENTAL_SPAWNER]\n");
-    WAD::Printf("ATTACKTYPE = SPAWNER;\n");
-    WAD::Printf("ATTACK_HEIGHT = 8;\n");
-    WAD::Printf("ATTACK_SPECIAL = PRESTEP_SPAWN,FACE_TARGET;\n");
-    WAD::Printf("SPAWNED_OBJECT = LOST_SOUL;\n");
-    WAD::Printf("SPAWN_OBJECT_STATE = %s;\n", spawn_at);
+    wad::Printf("[ELEMENTAL_SPAWNER]\n");
+    wad::Printf("ATTACKTYPE = SPAWNER;\n");
+    wad::Printf("ATTACK_HEIGHT = 8;\n");
+    wad::Printf("ATTACK_SPECIAL = PRESTEP_SPAWN,FACE_TARGET;\n");
+    wad::Printf("SPAWNED_OBJECT = LOST_SOUL;\n");
+    wad::Printf("SPAWN_OBJECT_STATE = %s;\n", spawn_at);
 
-    WAD::Printf("SPAWN_LIMIT = 21;\n");
+    wad::Printf("SPAWN_LIMIT = 21;\n");
 
-    WAD::Printf("\n");
-    WAD::Printf("[ELEMENTAL_DEATHSPAWN]\n");
-    WAD::Printf("ATTACKTYPE = TRIPLE_SPAWNER;\n");
-    WAD::Printf("ATTACK_HEIGHT = 8;\n");
-    WAD::Printf("ATTACK_SPECIAL = PRESTEP_SPAWN,FACE_TARGET;\n");
-    WAD::Printf("SPAWNED_OBJECT = LOST_SOUL;\n");
-    WAD::Printf("SPAWN_OBJECT_STATE = %s;\n", spawn_at);
+    wad::Printf("\n");
+    wad::Printf("[ELEMENTAL_DEATHSPAWN]\n");
+    wad::Printf("ATTACKTYPE = TRIPLE_SPAWNER;\n");
+    wad::Printf("ATTACK_HEIGHT = 8;\n");
+    wad::Printf("ATTACK_SPECIAL = PRESTEP_SPAWN,FACE_TARGET;\n");
+    wad::Printf("SPAWNED_OBJECT = LOST_SOUL;\n");
+    wad::Printf("SPAWN_OBJECT_STATE = %s;\n", spawn_at);
 }
 
-void ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket);
-void ConvertScratch(const scratch_atk_c *atk);
+void ConvertAttack(const MobjInfo *info, int mt_num, bool plr_rocket);
+void ConvertScratch(const ScratchAttack *atk);
 } // namespace Attacks
 
 const char *Attacks::AddScratchAttack(int damage, const char *sfx)
@@ -340,17 +334,16 @@ const char *Attacks::AddScratchAttack(int damage, const char *sfx)
     // already have it?
     for (size_t i = 0; i < scratchers.size(); i++)
     {
-        if (strcmp(scratchers[i]->fullname.c_str(), namebuf) == 0)
+        if (strcmp(scratchers[i].fullname.c_str(), namebuf) == 0)
             return namebuf;
     }
 
-    scratch_atk_c *atk = new scratch_atk_c(damage, sfx ? sfx : "", namebuf);
-    scratchers.push_back(atk);
+    scratchers.push_back({damage, sfx ? sfx : "", namebuf});
 
     return namebuf;
 }
 
-void Attacks::ConvertScratch(const scratch_atk_c *atk)
+void Attacks::ConvertScratch(const ScratchAttack *atk)
 {
     if (!got_one)
     {
@@ -358,29 +351,29 @@ void Attacks::ConvertScratch(const scratch_atk_c *atk)
         BeginLump();
     }
 
-    WAD::Printf("[%s]\n", atk->fullname.c_str());
+    wad::Printf("[%s]\n", atk->fullname.c_str());
 
-    WAD::Printf("ATTACKTYPE=CLOSECOMBAT;\n");
-    WAD::Printf("DAMAGE.VAL=%d;\n", atk->damage);
-    WAD::Printf("DAMAGE.MAX=%d;\n", atk->damage);
-    WAD::Printf("ATTACKRANGE=80;\n");
-    WAD::Printf("ATTACK_SPECIAL=FACE_TARGET;\n");
+    wad::Printf("ATTACKTYPE=CLOSECOMBAT;\n");
+    wad::Printf("DAMAGE.VAL=%d;\n", atk->damage);
+    wad::Printf("DAMAGE.MAX=%d;\n", atk->damage);
+    wad::Printf("ATTACKRANGE=80;\n");
+    wad::Printf("ATTACK_SPECIAL=FACE_TARGET;\n");
 
     if (atk->sfx != "")
     {
-        WAD::Printf("ENGAGED_SOUND=%s;\n", atk->sfx.c_str());
+        wad::Printf("ENGAGED_SOUND=%s;\n", atk->sfx.c_str());
     }
 
-    WAD::Printf("\n");
+    wad::Printf("\n");
 }
 
-void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
+void Attacks::ConvertAttack(const MobjInfo *info, int mt_num, bool plr_rocket)
 {
     if (info->name[0] != '*') // thing?
         return;
 
-    // MT_SPAWNFIRE is handled specially (in other code)
-    if (mt_num == MT_SPAWNFIRE)
+    // kMT_SPAWNFIRE is handled specially (in other code)
+    if (mt_num == kMT_SPAWNFIRE)
         return;
 
     if (!got_one)
@@ -390,12 +383,12 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
     }
 
     if (plr_rocket)
-        WAD::Printf("[%s]\n", "PLAYER_MISSILE");
+        wad::Printf("[%s]\n", "PLAYER_MISSILE");
     else
-        WAD::Printf("[%s]\n", Things::GetMobjName(mt_num) + 1);
+        wad::Printf("[%s]\n", things::GetMobjName(mt_num) + 1);
 
     // find attack in the extra table...
-    const attackextra_t *ext = NULL;
+    const ExtraAttack *ext = NULL;
 
     for (int j = 0; attack_extra[j].atk_type; j++)
         if (attack_extra[j].mt_num == mt_num)
@@ -405,90 +398,90 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
         }
 
     if (!ext)
-        I_Error("Dehacked: Error - Missing attack %s in extra table.\n", Things::GetMobjName(mt_num) + 1);
+        I_Error("Dehacked: Error - Missing attack %s in extra table.\n", things::GetMobjName(mt_num) + 1);
 
-    WAD::Printf("ATTACKTYPE = %s;\n", ext->atk_type);
+    wad::Printf("ATTACKTYPE = %s;\n", ext->atk_type);
 
-    WAD::Printf("RADIUS = %1.1f;\n", F_FIXED(info->radius));
-    WAD::Printf("HEIGHT = %1.1f;\n", F_FIXED(info->height));
+    wad::Printf("RADIUS = %1.1f;\n", FixedToFloat(info->radius));
+    wad::Printf("HEIGHT = %1.1f;\n", FixedToFloat(info->height));
 
     if (info->spawnhealth != 1000)
-        WAD::Printf("SPAWNHEALTH = %d;\n", info->spawnhealth);
+        wad::Printf("SPAWNHEALTH = %d;\n", info->spawnhealth);
 
     if (info->speed != 0)
-        WAD::Printf("SPEED = %s;\n", Things::GetSpeed(info->speed));
+        wad::Printf("SPEED = %s;\n", things::GetSpeed(info->speed));
 
     if (info->mass != 100)
-        WAD::Printf("MASS = %d;\n", info->mass);
+        wad::Printf("MASS = %d;\n", info->mass);
 
-    if (mt_num == MT_BRUISERSHOT)
-        WAD::Printf("FAST = 1.4;\n");
-    else if (mt_num == MT_TROOPSHOT || mt_num == MT_HEADSHOT)
-        WAD::Printf("FAST = 2.0;\n");
+    if (mt_num == kMT_BRUISERSHOT)
+        wad::Printf("FAST = 1.4;\n");
+    else if (mt_num == kMT_TROOPSHOT || mt_num == kMT_HEADSHOT)
+        wad::Printf("FAST = 2.0;\n");
 
     if (plr_rocket)
-        WAD::Printf("ATTACK_HEIGHT = 32;\n");
+        wad::Printf("ATTACK_HEIGHT = 32;\n");
     else if (ext->atk_height != 0)
-        WAD::Printf("ATTACK_HEIGHT = %d;\n", ext->atk_height);
+        wad::Printf("ATTACK_HEIGHT = %d;\n", ext->atk_height);
 
-    if (mt_num == MT_FIRE)
+    if (mt_num == kMT_FIRE)
     {
-        WAD::Printf("DAMAGE.VAL = 20;\n");
-        WAD::Printf("EXPLODE_DAMAGE.VAL = 70;\n");
+        wad::Printf("DAMAGE.VAL = 20;\n");
+        wad::Printf("EXPLODE_DAMAGE.VAL = 70;\n");
     }
-    else if (mt_num == MT_EXTRABFG)
+    else if (mt_num == kMT_EXTRABFG)
     {
-        WAD::Printf("DAMAGE.VAL   = 65;\n");
-        WAD::Printf("DAMAGE.ERROR = 50;\n");
+        wad::Printf("DAMAGE.VAL   = 65;\n");
+        wad::Printf("DAMAGE.ERROR = 50;\n");
     }
     else if (info->damage > 0)
     {
-        WAD::Printf("DAMAGE.VAL = %d;\n", info->damage);
-        WAD::Printf("DAMAGE.MAX = %d;\n", info->damage * 8);
+        wad::Printf("DAMAGE.VAL = %d;\n", info->damage);
+        wad::Printf("DAMAGE.MAX = %d;\n", info->damage * 8);
     }
 
-    if (mt_num == MT_BFG)
-        WAD::Printf("SPARE_ATTACK = BFG9000_SPRAY;\n");
+    if (mt_num == kMT_BFG)
+        wad::Printf("SPARE_ATTACK = BFG9000_SPRAY;\n");
 
     if (ext->translucency != 100)
-        WAD::Printf("TRANSLUCENCY = %d%%;\n", ext->translucency);
+        wad::Printf("TRANSLUCENCY = %d%%;\n", ext->translucency);
 
-    if (strchr(ext->flags, KF_PUFF_SMK))
-        WAD::Printf("PUFF = SMOKE;\n");
+    if (strchr(ext->flags, kAttackFlagPuffSmoke))
+        wad::Printf("PUFF = SMOKE;\n");
 
-    if (strchr(ext->flags, KF_TOO_CLOSE))
-        WAD::Printf("TOO_CLOSE_RANGE = 196;\n");
+    if (strchr(ext->flags, kAttackFlagTooClose))
+        wad::Printf("TOO_CLOSE_RANGE = 196;\n");
 
-    if (strchr(ext->flags, KF_NO_TRACE))
+    if (strchr(ext->flags, kAttackFlagNoTrace))
     {
-        WAD::Printf("NO_TRACE_CHANCE = 50%%;\n");
+        wad::Printf("NO_TRACE_CHANCE = 50%%;\n");
 
-        WAD::Printf("TRACE_ANGLE = 9;\n");
+        wad::Printf("TRACE_ANGLE = 9;\n");
     }
 
-    if (strchr(ext->flags, KF_KEEP_FIRE))
-        WAD::Printf("KEEP_FIRING_CHANCE = 4%%;\n");
+    if (strchr(ext->flags, kAttackFlagKeepFire))
+        wad::Printf("KEEP_FIRING_CHANCE = 4%%;\n");
 
     HandleAtkSpecials(info, mt_num, ext, plr_rocket);
     HandleSounds(info, mt_num);
     HandleFrames(info, mt_num);
 
-    WAD::Printf("\n");
+    wad::Printf("\n");
 
-    Things::HandleFlags(info, mt_num, 0);
+    things::HandleFlags(info, mt_num, 0);
 
-    if (Frames::attack_slot[0] || Frames::attack_slot[1] || Frames::attack_slot[2])
+    if (frames::attack_slot[0] || frames::attack_slot[1] || frames::attack_slot[2])
     {
-        I_Debugf("Dehacked: Warning - Attack [%s] contained an attacking action.\n", Things::GetMobjName(mt_num) + 1);
-        Things::HandleAttacks(info, mt_num);
+        I_Debugf("Dehacked: Warning - Attack [%s] contained an attacking action.\n", things::GetMobjName(mt_num) + 1);
+        things::HandleAttacks(info, mt_num);
     }
 
-    if (Frames::act_flags & AF_EXPLODE)
-        WAD::Printf("EXPLODE_DAMAGE.VAL = 128;\n");
-    else if (Frames::act_flags & AF_DETONATE)
-        WAD::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
+    if (frames::act_flags & kActionFlagExplode)
+        wad::Printf("EXPLODE_DAMAGE.VAL = 128;\n");
+    else if (frames::act_flags & kActionFlagDetonate)
+        wad::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
 
-    WAD::Printf("\n");
+    wad::Printf("\n");
 }
 
 //----------------------------------------------------------------------------
@@ -498,33 +491,33 @@ void Attacks::ConvertAttack(const mobjinfo_t *info, int mt_num, bool plr_rocket)
 //----------------------------------------------------------------------------
 
 const int height_fixes[] = {
-    MT_MISC14, 60, MT_MISC29, 78, MT_MISC30, 58, MT_MISC31, 46,  MT_MISC33, 38, MT_MISC34, 50,  MT_MISC38, 56,
-    MT_MISC39, 48, MT_MISC41, 96, MT_MISC42, 96, MT_MISC43, 96,  MT_MISC44, 72, MT_MISC45, 72,  MT_MISC46, 72,
-    MT_MISC70, 64, MT_MISC72, 52, MT_MISC73, 40, MT_MISC74, 64,  MT_MISC75, 64, MT_MISC76, 120,
+    kMT_MISC14, 60, kMT_MISC29, 78, kMT_MISC30, 58, kMT_MISC31, 46,  kMT_MISC33, 38, kMT_MISC34, 50,  kMT_MISC38, 56,
+    kMT_MISC39, 48, kMT_MISC41, 96, kMT_MISC42, 96, kMT_MISC43, 96,  kMT_MISC44, 72, kMT_MISC45, 72,  kMT_MISC46, 72,
+    kMT_MISC70, 64, kMT_MISC72, 52, kMT_MISC73, 40, kMT_MISC74, 64,  kMT_MISC75, 64, kMT_MISC76, 120,
 
-    MT_MISC36, 56, MT_MISC37, 56, MT_MISC47, 56, MT_MISC48, 128, MT_MISC35, 56, MT_MISC40, 56,  MT_MISC50, 56,
-    MT_MISC77, 42,
+    kMT_MISC36, 56, kMT_MISC37, 56, kMT_MISC47, 56, kMT_MISC48, 128, kMT_MISC35, 56, kMT_MISC40, 56,  kMT_MISC50, 56,
+    kMT_MISC77, 42,
 
     -1,        -1 /* the end */
 };
 
-namespace Things
+namespace things
 {
-int cast_mobjs[CAST_MAX];
+int cast_mobjs[kCastMaximum];
 
 void BeginLump();
 void FinishLump();
 
-bool CheckIsMonster(const mobjinfo_t *info, int mt_num, int player, bool use_act_flags);
-} // namespace Things
+bool CheckIsMonster(const MobjInfo *info, int mt_num, int player, bool use_act_flags);
+} // namespace things
 
-void Things::Init()
+void things::Init()
 {
     new_mobjinfo.clear();
     Attacks::scratchers.clear();
 }
 
-void Things::Shutdown()
+void things::Shutdown()
 {
     for (size_t i = 0; i < new_mobjinfo.size(); i++)
         if (new_mobjinfo[i] != NULL)
@@ -532,34 +525,31 @@ void Things::Shutdown()
 
     new_mobjinfo.clear();
 
-    for (size_t k = 0; k < Attacks::scratchers.size(); k++)
-        delete Attacks::scratchers[k];
-
     Attacks::scratchers.clear();
 }
 
-void Things::BeginLump()
+void things::BeginLump()
 {
-    WAD::NewLump(DDF_Thing);
+    wad::NewLump(DDF_Thing);
 
-    WAD::Printf("<THINGS>\n\n");
+    wad::Printf("<THINGS>\n\n");
 }
 
-void Things::FinishLump(void)
+void things::FinishLump(void)
 {
-    WAD::Printf("\n");
+    wad::Printf("\n");
 }
 
-void Things::MarkThing(int mt_num)
+void things::MarkThing(int mt_num)
 {
-    assert(mt_num >= 0);
+    SYS_ASSERT(mt_num >= 0);
 
     // handle merged things/attacks
-    if (mt_num == MT_TFOG)
-        MarkThing(MT_TELEPORTMAN);
+    if (mt_num == kMT_TFOG)
+        MarkThing(kMT_TELEPORTMAN);
 
-    if (mt_num == MT_SPAWNFIRE)
-        MarkThing(MT_SPAWNSHOT);
+    if (mt_num == kMT_SPAWNFIRE)
+        MarkThing(kMT_SPAWNSHOT);
 
     // fill any missing slots with NULLs, including the one we want
     while ((int)new_mobjinfo.size() < mt_num + 1)
@@ -572,89 +562,89 @@ void Things::MarkThing(int mt_num)
         return;
 
     // create new entry, copy original info if we have it
-    mobjinfo_t *entry    = new mobjinfo_t;
+    MobjInfo *entry    = new MobjInfo;
     new_mobjinfo[mt_num] = entry;
 
-    if (mt_num < NUMMOBJTYPES_COMPAT)
+    if (mt_num < kTotalMobjTypesPortCompatibility)
     {
-        memcpy(entry, &mobjinfo[mt_num], sizeof(mobjinfo_t));
+        memcpy(entry, &mobjinfo[mt_num], sizeof(MobjInfo));
     }
     else
     {
-        memset(entry, 0, sizeof(mobjinfo_t));
+        memset(entry, 0, sizeof(MobjInfo));
 
         entry->name      = "X"; // only needed to differentiate from an attack
         entry->doomednum = -1;
 
         // DEHEXTRA things have a default doomednum
-        if (MT_EXTRA00 <= mt_num && mt_num <= MT_EXTRA99)
+        if (kMT_EXTRA00 <= mt_num && mt_num <= kMT_EXTRA99)
         {
             entry->doomednum = mt_num;
         }
     }
 }
 
-void Things::UseThing(int mt_num)
+void things::UseThing(int mt_num)
 {
     // only create something when our standard DDF lacks it
-    if (mt_num >= MT_DOGS)
+    if (mt_num >= kMT_DOGS)
         MarkThing(mt_num);
 }
 
-void Things::MarkAllMonsters()
+void things::MarkAllMonsters()
 {
-    for (int i = 0; i < NUMMOBJTYPES_COMPAT; i++)
+    for (int i = 0; i < kTotalMobjTypesPortCompatibility; i++)
     {
-        if (i == MT_PLAYER)
+        if (i == kMT_PLAYER)
             continue;
 
-        const mobjinfo_t *mobj = &mobjinfo[i];
+        const MobjInfo *mobj = &mobjinfo[i];
 
         if (CheckIsMonster(mobj, i, 0, false))
             MarkThing(i);
     }
 }
 
-mobjinfo_t *Things::GetModifiedMobj(int mt_num)
+MobjInfo *things::GetModifiedMobj(int mt_num)
 {
     MarkThing(mt_num);
 
     return &mobjinfo[mt_num];
 }
 
-const char *Things::GetMobjName(int mt_num)
+const char *things::GetMobjName(int mt_num)
 {
-    assert(mt_num >= 0);
+    SYS_ASSERT(mt_num >= 0);
 
-    if (mt_num < NUMMOBJTYPES_COMPAT)
+    if (mt_num < kTotalMobjTypesPortCompatibility)
         return mobjinfo[mt_num].name;
 
     static char buffer[64];
 
-    if (MT_EXTRA00 <= mt_num && mt_num <= MT_EXTRA99)
-        snprintf(buffer, sizeof(buffer), "MT_EXTRA%02d", mt_num - MT_EXTRA00);
+    if (kMT_EXTRA00 <= mt_num && mt_num <= kMT_EXTRA99)
+        snprintf(buffer, sizeof(buffer), "kMT_EXTRA%02d", mt_num - kMT_EXTRA00);
     else
         snprintf(buffer, sizeof(buffer), "DEHACKED_%d", mt_num + 1);
 
     return buffer;
 }
 
-void Things::SetPlayerHealth(int new_value)
+void things::SetPlayerHealth(int new_value)
 {
-    MarkThing(MT_PLAYER);
+    MarkThing(kMT_PLAYER);
 
-    new_mobjinfo[MT_PLAYER]->spawnhealth = new_value;
+    new_mobjinfo[kMT_PLAYER]->spawnhealth = new_value;
 }
 
-const mobjinfo_t *Things::OldMobj(int mt_num)
+const MobjInfo *things::OldMobj(int mt_num)
 {
-    if (mt_num < NUMMOBJTYPES_COMPAT)
+    if (mt_num < kTotalMobjTypesPortCompatibility)
         return &mobjinfo[mt_num];
 
     return NULL;
 }
 
-mobjinfo_t *Things::NewMobj(int mt_num)
+MobjInfo *things::NewMobj(int mt_num)
 {
     if (mt_num < (int)new_mobjinfo.size())
         return new_mobjinfo[mt_num];
@@ -662,138 +652,138 @@ mobjinfo_t *Things::NewMobj(int mt_num)
     return NULL;
 }
 
-const mobjinfo_t *Things::NewMobjElseOld(int mt_num)
+const MobjInfo *things::NewMobjElseOld(int mt_num)
 {
-    const mobjinfo_t *info = NewMobj(mt_num);
+    const MobjInfo *info = NewMobj(mt_num);
     if (info != NULL)
         return info;
 
     return OldMobj(mt_num);
 }
 
-int Things::GetMobjMBF21Flags(int mt_num)
+int things::GetMobjMBF21Flags(int mt_num)
 {
-    const mobjinfo_t *info = NewMobjElseOld(mt_num);
+    const MobjInfo *info = NewMobjElseOld(mt_num);
     if (info == NULL)
         return 0;
     return info->mbf21_flags;
 }
 
-bool Things::IsSpawnable(int mt_num)
+bool things::IsSpawnable(int mt_num)
 {
     // attacks are not spawnable via A_Spawn
-    if (mt_num < NUMMOBJTYPES_COMPAT && mobjinfo[mt_num].name[0] == '*')
+    if (mt_num < kTotalMobjTypesPortCompatibility && mobjinfo[mt_num].name[0] == '*')
         return false;
 
-    const mobjinfo_t *info = NewMobjElseOld(mt_num);
+    const MobjInfo *info = NewMobjElseOld(mt_num);
     if (info == NULL)
         return false;
 
     return info->doomednum > 0;
 }
 
-const char *Things::AddScratchAttack(int damage, const char *sfx)
+const char *things::AddScratchAttack(int damage, const char *sfx)
 {
     return Attacks::AddScratchAttack(damage, sfx);
 }
 
-namespace Things
+namespace things
 {
-typedef struct
+struct FlagName
 {
-    long long int flag; // flag in mobjinfo_t (MF_XXX), 0 if ignored
+    long long int flag; // flag in MobjInfo (kMF_XXX), 0 if ignored
     const char   *bex;  // name in a DEHACKED or BEX file
     const char   *conv; // edge name, NULL if none, can be multiple
-} flagname_t;
+};
 
-const flagname_t flag_list[] = {
-    {MF_SPECIAL, "SPECIAL", "SPECIAL"},
-    {MF_SOLID, "SOLID", "SOLID"},
-    {MF_SHOOTABLE, "SHOOTABLE", "SHOOTABLE"},
-    {MF_NOSECTOR, "NOSECTOR", "NOSECTOR"},
-    {MF_NOBLOCKMAP, "NOBLOCKMAP", "NOBLOCKMAP"},
-    {MF_AMBUSH, "AMBUSH", "AMBUSH"},
+const FlagName flag_list[] = {
+    {kMF_SPECIAL, "SPECIAL", "SPECIAL"},
+    {kMF_SOLID, "SOLID", "SOLID"},
+    {kMF_SHOOTABLE, "SHOOTABLE", "SHOOTABLE"},
+    {kMF_NOSECTOR, "NOSECTOR", "NOSECTOR"},
+    {kMF_NOBLOCKMAP, "NOBLOCKMAP", "NOBLOCKMAP"},
+    {kMF_AMBUSH, "AMBUSH", "AMBUSH"},
     {0, "JUSTHIT", NULL},
     {0, "JUSTATTACKED", NULL},
-    {MF_SPAWNCEILING, "SPAWNCEILING", "SPAWNCEILING"},
-    {MF_NOGRAVITY, "NOGRAVITY", "NOGRAVITY"},
-    {MF_DROPOFF, "DROPOFF", "DROPOFF"},
-    {MF_PICKUP, "PICKUP", "PICKUP"},
-    {MF_NOCLIP, "NOCLIP", "NOCLIP"},
-    {MF_SLIDE, "SLIDE", "SLIDER"},
-    {MF_FLOAT, "FLOAT", "FLOAT"},
-    {MF_TELEPORT, "TELEPORT", "TELEPORT"},
-    {MF_MISSILE, "MISSILE", "MISSILE"},
-    {MF_DROPPED, "DROPPED", "DROPPED"},
-    {MF_SHADOW, "SHADOW", "FUZZY"},
-    {MF_NOBLOOD, "NOBLOOD", "DAMAGESMOKE"},
-    {MF_CORPSE, "CORPSE", "CORPSE"},
+    {kMF_SPAWNCEILING, "SPAWNCEILING", "SPAWNCEILING"},
+    {kMF_NOGRAVITY, "NOGRAVITY", "NOGRAVITY"},
+    {kMF_DROPOFF, "DROPOFF", "DROPOFF"},
+    {kMF_PICKUP, "PICKUP", "PICKUP"},
+    {kMF_NOCLIP, "NOCLIP", "NOCLIP"},
+    {kMF_SLIDE, "SLIDE", "SLIDER"},
+    {kMF_FLOAT, "FLOAT", "FLOAT"},
+    {kMF_TELEPORT, "TELEPORT", "TELEPORT"},
+    {kMF_MISSILE, "MISSILE", "MISSILE"},
+    {kMF_DROPPED, "DROPPED", "DROPPED"},
+    {kMF_SHADOW, "SHADOW", "FUZZY"},
+    {kMF_NOBLOOD, "NOBLOOD", "DAMAGESMOKE"},
+    {kMF_CORPSE, "CORPSE", "CORPSE"},
     {0, "INFLOAT", NULL},
-    {MF_COUNTKILL, "COUNTKILL", "COUNT_AS_KILL"},
-    {MF_COUNTITEM, "COUNTITEM", "COUNT_AS_ITEM"},
-    {MF_SKULLFLY, "SKULLFLY", "SKULLFLY"},
-    {MF_NOTDMATCH, "NOTDMATCH", "NODEATHMATCH"},
-    {MF_TRANSLATION1, "TRANSLATION1", NULL},
-    {MF_TRANSLATION2, "TRANSLATION2", NULL},
-    {MF_TRANSLATION1, "TRANSLATION", NULL}, // bug compat
-    {MF_TOUCHY, "TOUCHY", "TOUCHY"},
-    {MF_BOUNCES, "BOUNCES", "BOUNCE"},
-    {MF_FRIEND, "FRIEND", NULL},
-    {MF_TRANSLUCENT, "TRANSLUCENT", NULL},
-    {MF_TRANSLUCENT, "TRANSLUC50", NULL},
+    {kMF_COUNTKILL, "COUNTKILL", "COUNT_AS_KILL"},
+    {kMF_COUNTITEM, "COUNTITEM", "COUNT_AS_ITEM"},
+    {kMF_SKULLFLY, "SKULLFLY", "SKULLFLY"},
+    {kMF_NOTDMATCH, "NOTDMATCH", "NODEATHMATCH"},
+    {kMF_TRANSLATION1, "TRANSLATION1", NULL},
+    {kMF_TRANSLATION2, "TRANSLATION2", NULL},
+    {kMF_TRANSLATION1, "TRANSLATION", NULL}, // bug compat
+    {kMF_TOUCHY, "TOUCHY", "TOUCHY"},
+    {kMF_BOUNCES, "BOUNCES", "BOUNCE"},
+    {kMF_FRIEND, "FRIEND", NULL},
+    {kMF_TRANSLUCENT, "TRANSLUCENT", NULL},
+    {kMF_TRANSLUCENT, "TRANSLUC50", NULL},
     // BOOM and MBF flags...
-    //{ MF_STEALTH,      "STEALTH",       "STEALTH" },
+    //{ kMF_STEALTH,      "STEALTH",       "STEALTH" },
 
-    {MF_UNUSED1, "UNUSED1", NULL},
-    {MF_UNUSED2, "UNUSED2", NULL},
-    {MF_UNUSED3, "UNUSED3", NULL},
-    {MF_UNUSED4, "UNUSED4", NULL},
+    {kMF_UNUSED1, "UNUSED1", NULL},
+    {kMF_UNUSED2, "UNUSED2", NULL},
+    {kMF_UNUSED3, "UNUSED3", NULL},
+    {kMF_UNUSED4, "UNUSED4", NULL},
 
     {0, NULL, NULL} // End sentinel
 };
 
-const flagname_t mbf21flag_list[] = {
-    {MBF21_LOGRAV, "LOGRAV", "LOGRAV"},
-    {MBF21_DMGIGNORED, "DMGIGNORED", "NEVERTARGETED"},
-    {MBF21_NORADIUSDMG, "NORADIUSDMG", "EXPLODE_IMMUNE"},
-    {MBF21_HIGHERMPROB, "HIGHERMPROB", "TRIGGER_HAPPY"}, // FIXME: not quite the same
-    {MBF21_RANGEHALF, "RANGEHALF", "TRIGGER_HAPPY"},
-    {MBF21_NOTHRESHOLD, "NOTHRESHOLD", "NOGRUDGE"},
-    {MBF21_BOSS, "BOSS", "BOSSMAN"},
-    {MBF21_RIP, "RIP", "TUNNEL"},
-    {MBF21_FULLVOLSOUNDS, "FULLVOLSOUNDS", "ALWAYS_LOUD"},
+const FlagName mbf21flag_list[] = {
+    {kMBF21_LOGRAV, "LOGRAV", "LOGRAV"},
+    {kMBF21_DMGIGNORED, "DMGIGNORED", "NEVERTARGETED"},
+    {kMBF21_NORADIUSDMG, "NORADIUSDMG", "EXPLODE_IMMUNE"},
+    {kMBF21_HIGHERMPROB, "HIGHERMPROB", "TRIGGER_HAPPY"}, // FIXME: not quite the same
+    {kMBF21_RANGEHALF, "RANGEHALF", "TRIGGER_HAPPY"},
+    {kMBF21_NOTHRESHOLD, "NOTHRESHOLD", "NOGRUDGE"},
+    {kMBF21_BOSS, "BOSS", "BOSSMAN"},
+    {kMBF21_RIP, "RIP", "TUNNEL"},
+    {kMBF21_FULLVOLSOUNDS, "FULLVOLSOUNDS", "ALWAYS_LOUD"},
 
     // flags which don't produce an Edge special
-    {MBF21_SHORTMRANGE, "SHORTMRANGE", NULL},
-    {MBF21_LONGMELEE, "LONGMELEE", NULL},
-    {MBF21_FORCERADIUSDMG, "FORCERADIUSDMG", NULL},
+    {kMBF21_SHORTMRANGE, "SHORTMRANGE", NULL},
+    {kMBF21_LONGMELEE, "LONGMELEE", NULL},
+    {kMBF21_FORCERADIUSDMG, "FORCERADIUSDMG", NULL},
 
-    {MBF21_MAP07BOSS1, "MAP07BOSS1", NULL},
-    {MBF21_MAP07BOSS2, "MAP07BOSS2", NULL},
-    {MBF21_E1M8BOSS, "E1M8BOSS", NULL},
-    {MBF21_E2M8BOSS, "E2M8BOSS", NULL},
-    {MBF21_E3M8BOSS, "E3M8BOSS", NULL},
-    {MBF21_E4M6BOSS, "E4M6BOSS", NULL},
-    {MBF21_E4M8BOSS, "E4M8BOSS", NULL},
+    {kMBF21_MAP07BOSS1, "MAP07BOSS1", NULL},
+    {kMBF21_MAP07BOSS2, "MAP07BOSS2", NULL},
+    {kMBF21_E1M8BOSS, "E1M8BOSS", NULL},
+    {kMBF21_E2M8BOSS, "E2M8BOSS", NULL},
+    {kMBF21_E3M8BOSS, "E3M8BOSS", NULL},
+    {kMBF21_E4M6BOSS, "E4M6BOSS", NULL},
+    {kMBF21_E4M8BOSS, "E4M8BOSS", NULL},
 
     {0, NULL, NULL} // End sentinel
 };
 
 // these are extra flags we add for certain monsters.
 // they do not correspond to anything in DEHACKED / BEX / MBF21.
-const flagname_t extflaglist[] = {
-    {EF_DISLOYAL, NULL, "DISLOYAL,ATTACK_HURTS"}, // must be first
-    {EF_TRIG_HAPPY, NULL, "TRIGGER_HAPPY"},
-    {EF_BOSSMAN, NULL, "BOSSMAN"},
-    {EF_LOUD, NULL, "ALWAYS_LOUD"},
-    {EF_NO_RAISE, NULL, "NO_RESURRECT"},
-    {EF_NO_GRUDGE, NULL, "NO_GRUDGE,NEVERTARGETED"},
-    {EF_NO_ITEM_BK, NULL, "NO_RESPAWN"},
+const FlagName extflaglist[] = {
+    {kExtraFlagDisloyal, NULL, "DISLOYAL,ATTACK_HURTS"}, // must be first
+    {kExtraFlagTriggerHappy, NULL, "TRIGGER_HAPPY"},
+    {kExtraFlagBossMan, NULL, "BOSSMAN"},
+    {kExtraFlagLoud, NULL, "ALWAYS_LOUD"},
+    {kExtraFlagNoRaise, NULL, "NO_RESURRECT"},
+    {kExtraFlagNoGrudge, NULL, "NO_GRUDGE,NEVERTARGETED"},
+    {kExtraFlagNoItemBk, NULL, "NO_RESPAWN"},
 
     {0, NULL, NULL} // End sentinel
 };
 
-int ParseBits(const flagname_t *list, char *bit_str)
+int ParseBits(const FlagName *list, char *bit_str)
 {
     int new_flags = 0;
 
@@ -803,7 +793,7 @@ int ParseBits(const flagname_t *list, char *bit_str)
     for (char *token = strtok(bit_str, delims); token != NULL; token = strtok(NULL, delims))
     {
         // tokens should be non-empty
-        assert(token[0] != 0);
+        SYS_ASSERT(token[0] != 0);
 
         if (epi::IsDigitASCII(token[0]) || token[0] == '-')
         {
@@ -812,7 +802,7 @@ int ParseBits(const flagname_t *list, char *bit_str)
             if (sscanf(token, " %i ", &flags) == 1)
                 new_flags |= flags;
             else
-                I_Debugf("Dehacked: Warning - Line %d: unreadable BITS value: %s\n", Patch::line_num, token);
+                I_Debugf("Dehacked: Warning - Line %d: unreadable BITS value: %s\n", patch::line_num, token);
 
             continue;
         }
@@ -825,7 +815,7 @@ int ParseBits(const flagname_t *list, char *bit_str)
 
         if (list[i].bex == NULL)
         {
-            I_Debugf("Dehacked: Warning - Line %d: unknown BITS mnemonic: %s\n", Patch::line_num, token);
+            I_Debugf("Dehacked: Warning - Line %d: unknown BITS mnemonic: %s\n", patch::line_num, token);
             continue;
         }
 
@@ -835,7 +825,7 @@ int ParseBits(const flagname_t *list, char *bit_str)
     return new_flags;
 }
 
-bool CheckIsMonster(const mobjinfo_t *info, int mt_num, int player, bool use_act_flags)
+bool CheckIsMonster(const MobjInfo *info, int mt_num, int player, bool use_act_flags)
 {
     if (player > 0)
         return false;
@@ -846,10 +836,10 @@ bool CheckIsMonster(const mobjinfo_t *info, int mt_num, int player, bool use_act
     if (info->name[0] == '*')
         return false;
 
-    if (info->flags & MF_COUNTKILL)
+    if (info->flags & kMF_COUNTKILL)
         return true;
 
-    if (info->flags & (MF_SPECIAL | MF_COUNTITEM))
+    if (info->flags & (kMF_SPECIAL | kMF_COUNTITEM))
         return false;
 
     int score = 0;
@@ -857,9 +847,9 @@ bool CheckIsMonster(const mobjinfo_t *info, int mt_num, int player, bool use_act
     // values determined by statistical analysis of major DEH patches
     // (Standard DOOM, Batman, Mordeth, Wheel-of-Time, Osiris).
 
-    if (info->flags & MF_SOLID)
+    if (info->flags & kMF_SOLID)
         score += 25;
-    if (info->flags & MF_SHOOTABLE)
+    if (info->flags & kMF_SHOOTABLE)
         score += 72;
 
     if (info->painstate)
@@ -873,9 +863,9 @@ bool CheckIsMonster(const mobjinfo_t *info, int mt_num, int player, bool use_act
 
     if (use_act_flags)
     {
-        if (Frames::act_flags & AF_CHASER)
+        if (frames::act_flags & kActionFlagChase)
             score += 78;
-        if (Frames::act_flags & AF_FALLER)
+        if (frames::act_flags & kActionFlagFall)
             score += 61;
     }
 
@@ -884,12 +874,12 @@ bool CheckIsMonster(const mobjinfo_t *info, int mt_num, int player, bool use_act
 
 #if (DEBUG_MONST)
     Debug_PrintMsg("[%20.20s:%-4d] %c%c%c%c%c %c%c%c%c %c%c %d = %d\n", GetMobjName(mt_num), info->doomednum,
-                   (info->flags & MF_SOLID) ? 'S' : '-', (info->flags & MF_SHOOTABLE) ? 'H' : '-',
-                   (info->flags & MF_FLOAT) ? 'F' : '-', (info->flags & MF_MISSILE) ? 'M' : '-',
-                   (info->flags & MF_NOBLOOD) ? 'B' : '-', (info->painstate) ? 'p' : '-',
+                   (info->flags & kMF_SOLID) ? 'S' : '-', (info->flags & kMF_SHOOTABLE) ? 'H' : '-',
+                   (info->flags & kMF_FLOAT) ? 'F' : '-', (info->flags & kMF_MISSILE) ? 'M' : '-',
+                   (info->flags & kMF_NOBLOOD) ? 'B' : '-', (info->painstate) ? 'p' : '-',
                    (info->deathstate) ? 'd' : '-', (info->raisestate) ? 'r' : '-',
-                   (info->missilestate || info->meleestate) ? 'm' : '-', (Frames::act_flags & AF_CHASER) ? 'C' : '-',
-                   (Frames::act_flags & AF_FALLER) ? 'F' : '-', info->speed, score);
+                   (info->missilestate || info->meleestate) ? 'm' : '-', (frames::act_flags & AF_CHASER) ? 'C' : '-',
+                   (frames::act_flags & AF_FALLER) ? 'F' : '-', info->speed, score);
 #endif
 
     return score >= (use_act_flags ? 370 : 300);
@@ -902,30 +892,30 @@ const char *GetExtFlags(int mt_num, int player)
 
     switch (mt_num)
     {
-    case MT_INS:
-    case MT_INV:
+    case kMT_INS:
+    case kMT_INV:
         return "I";
 
-    case MT_POSSESSED:
-    case MT_SHOTGUY:
-    case MT_CHAINGUY:
+    case kMT_POSSESSED:
+    case kMT_SHOTGUY:
+    case kMT_CHAINGUY:
         return "D";
 
-    case MT_SKULL:
+    case kMT_SKULL:
         return "DHM";
-    case MT_UNDEAD:
+    case kMT_UNDEAD:
         return "H";
 
-    case MT_VILE:
+    case kMT_VILE:
         return "GR";
-    case MT_CYBORG:
+    case kMT_CYBORG:
         return "BHR";
-    case MT_SPIDER:
+    case kMT_SPIDER:
         return "BHR";
 
-    case MT_BOSSSPIT:
+    case kMT_BOSSSPIT:
         return "B";
-    case MT_BOSSBRAIN:
+    case kMT_BOSSBRAIN:
         return "L";
 
     default:
@@ -935,47 +925,47 @@ const char *GetExtFlags(int mt_num, int player)
     return "";
 }
 
-void AddOneFlag(const mobjinfo_t *info, const char *name, bool &got_a_flag)
+void AddOneFlag(const MobjInfo *info, const char *name, bool &got_a_flag)
 {
     if (!got_a_flag)
     {
         got_a_flag = true;
 
         if (info->name[0] == '*')
-            WAD::Printf("PROJECTILE_SPECIAL = ");
+            wad::Printf("PROJECTILE_SPECIAL = ");
         else
-            WAD::Printf("SPECIAL = ");
+            wad::Printf("SPECIAL = ");
     }
     else
-        WAD::Printf(",");
+        wad::Printf(",");
 
-    WAD::Printf("%s", name);
+    wad::Printf("%s", name);
 }
 
-void HandleFlags(const mobjinfo_t *info, int mt_num, int player)
+void HandleFlags(const MobjInfo *info, int mt_num, int player)
 {
     int  i;
     int  cur_f      = info->flags;
     bool got_a_flag = false;
 
-    // strangely absent from MT_PLAYER
+    // strangely absent from kMT_PLAYER
     if (player)
-        cur_f |= MF_SLIDE;
+        cur_f |= kMF_SLIDE;
 
     // this can cause EDGE 1.27 to crash
     if (!player)
-        cur_f &= ~MF_PICKUP;
+        cur_f &= ~kMF_PICKUP;
 
     // EDGE requires teleportman in sector. (DOOM uses thinker list)
-    if (mt_num == MT_TELEPORTMAN)
-        cur_f &= ~MF_NOSECTOR;
+    if (mt_num == kMT_TELEPORTMAN)
+        cur_f &= ~kMF_NOSECTOR;
 
     // special workaround for negative MASS values
     if (info->mass < 0)
-        cur_f |= MF_SPAWNCEILING | MF_NOGRAVITY;
+        cur_f |= kMF_SPAWNCEILING | kMF_NOGRAVITY;
 
     bool is_monster     = CheckIsMonster(info, mt_num, player, true);
-    bool force_disloyal = (is_monster && Misc::monster_infight == 221);
+    bool force_disloyal = (is_monster && miscellaneous::monster_infight == 221);
 
     for (i = 0; flag_list[i].bex != NULL; i++)
     {
@@ -995,7 +985,7 @@ void HandleFlags(const mobjinfo_t *info, int mt_num, int player)
         if (!strchr(eflags, ch))
             continue;
 
-        if (ch == EF_DISLOYAL)
+        if (ch == kExtraFlagDisloyal)
         {
             force_disloyal = true;
             continue;
@@ -1026,26 +1016,26 @@ void HandleFlags(const mobjinfo_t *info, int mt_num, int player)
     AddOneFlag(info, "DEHACKED_COMPAT", got_a_flag);
 
     if (got_a_flag)
-        WAD::Printf(";\n");
+        wad::Printf(";\n");
 
-    if (cur_f & MF_TRANSLATION)
+    if (cur_f & kMF_TRANSLATION)
     {
-        if ((cur_f & MF_TRANSLATION) == 0x4000000)
-            WAD::Printf("PALETTE_REMAP = PLAYER_DK_GREY;\n");
-        else if ((cur_f & MF_TRANSLATION) == 0x8000000)
-            WAD::Printf("PALETTE_REMAP = PLAYER_BROWN;\n");
+        if ((cur_f & kMF_TRANSLATION) == 0x4000000)
+            wad::Printf("PALETTE_REMAP = PLAYER_DK_GREY;\n");
+        else if ((cur_f & kMF_TRANSLATION) == 0x8000000)
+            wad::Printf("PALETTE_REMAP = PLAYER_BROWN;\n");
         else
-            WAD::Printf("PALETTE_REMAP = PLAYER_DULL_RED;\n");
+            wad::Printf("PALETTE_REMAP = PLAYER_DULL_RED;\n");
     }
 
-    if (cur_f & MF_TRANSLUCENT)
+    if (cur_f & kMF_TRANSLUCENT)
     {
-        WAD::Printf("TRANSLUCENCY = 50%%;\n");
+        wad::Printf("TRANSLUCENCY = 50%%;\n");
     }
 
-    if ((cur_f & MF_FRIEND) && !player)
+    if ((cur_f & kMF_FRIEND) && !player)
     {
-        WAD::Printf("SIDE = 16777215;\n");
+        wad::Printf("SIDE = 16777215;\n");
     }
 }
 
@@ -1056,95 +1046,95 @@ void FixHeights()
         int mt_num = height_fixes[i];
         int new_h  = height_fixes[i + 1];
 
-        assert(mt_num < NUMMOBJTYPES_COMPAT);
+        SYS_ASSERT(mt_num < kTotalMobjTypesPortCompatibility);
 
         // if the thing was not modified, nothing to do here
         if (mt_num >= (int)new_mobjinfo.size())
             continue;
 
-        mobjinfo_t *info = new_mobjinfo[mt_num];
+        MobjInfo *info = new_mobjinfo[mt_num];
         if (info == NULL)
             continue;
 
         /* Kludge for Aliens TC (and others) that put these things on
          * the ceiling -- they need the 16 height for correct display,
          */
-        if (info->flags & MF_SPAWNCEILING)
+        if (info->flags & kMF_SPAWNCEILING)
             continue;
 
-        if (info->height != 16 * FRACUNIT)
+        if (info->height != 16 * kFracUnit)
             continue;
 
-        info->height = new_h * FRACUNIT;
+        info->height = new_h * kFracUnit;
     }
 }
 
 void CollectTheCast()
 {
-    for (int i = 0; i < CAST_MAX; i++)
+    for (int i = 0; i < kCastMaximum; i++)
         cast_mobjs[i] = -1;
 
-    for (int mt_num = 0; mt_num < NUMMOBJTYPES_COMPAT; mt_num++)
+    for (int mt_num = 0; mt_num < kTotalMobjTypesPortCompatibility; mt_num++)
     {
         int order = 0;
 
         // cast objects are required to have CHASE and DEATH states
-        const mobjinfo_t *info = NewMobjElseOld(mt_num);
+        const MobjInfo *info = NewMobjElseOld(mt_num);
 
-        if (info->seestate == S_NULL || info->deathstate == S_NULL)
+        if (info->seestate == kS_NULL || info->deathstate == kS_NULL)
             continue;
 
         switch (mt_num)
         {
-        case MT_PLAYER:
+        case kMT_PLAYER:
             order = 1;
             break;
-        case MT_POSSESSED:
+        case kMT_POSSESSED:
             order = 2;
             break;
-        case MT_SHOTGUY:
+        case kMT_SHOTGUY:
             order = 3;
             break;
-        case MT_CHAINGUY:
+        case kMT_CHAINGUY:
             order = 4;
             break;
-        case MT_TROOP:
+        case kMT_TROOP:
             order = 5;
             break;
-        case MT_SERGEANT:
+        case kMT_SERGEANT:
             order = 6;
             break;
-        case MT_SKULL:
+        case kMT_SKULL:
             order = 7;
             break;
-        case MT_HEAD:
+        case kMT_HEAD:
             order = 8;
             break;
-        case MT_KNIGHT:
+        case kMT_KNIGHT:
             order = 9;
             break;
-        case MT_BRUISER:
+        case kMT_BRUISER:
             order = 10;
             break;
-        case MT_BABY:
+        case kMT_BABY:
             order = 11;
             break;
-        case MT_PAIN:
+        case kMT_PAIN:
             order = 12;
             break;
-        case MT_UNDEAD:
+        case kMT_UNDEAD:
             order = 13;
             break;
-        case MT_FATSO:
+        case kMT_FATSO:
             order = 14;
             break;
-        case MT_VILE:
+        case kMT_VILE:
             order = 15;
             break;
-        case MT_SPIDER:
+        case kMT_SPIDER:
             order = 16;
             break;
-        case MT_CYBORG:
+        case kMT_CYBORG:
             order = 17;
             break;
 
@@ -1164,72 +1154,72 @@ const char *GetSpeed(int speed)
     static char num_buf[128];
 
     if (speed >= 1024)
-        sprintf(num_buf, "%1.2f", F_FIXED(speed));
+        sprintf(num_buf, "%1.2f", FixedToFloat(speed));
     else
         sprintf(num_buf, "%d", speed);
 
     return num_buf;
 }
 
-void HandleSounds(const mobjinfo_t *info, int mt_num)
+void HandleSounds(const MobjInfo *info, int mt_num)
 {
-    if (info->activesound != sfx_None)
+    if (info->activesound != ksfx_None)
     {
-        if (info->flags & MF_PICKUP)
-            WAD::Printf("PICKUP_SOUND = \"%s\";\n", Sounds::GetSound(info->activesound));
+        if (info->flags & kMF_PICKUP)
+            wad::Printf("PICKUP_SOUND = \"%s\";\n", sounds::GetSound(info->activesound));
         else
-            WAD::Printf("ACTIVE_SOUND = \"%s\";\n", Sounds::GetSound(info->activesound));
+            wad::Printf("ACTIVE_SOUND = \"%s\";\n", sounds::GetSound(info->activesound));
     }
-    else if (mt_num == MT_TELEPORTMAN)
-        WAD::Printf("ACTIVE_SOUND = \"%s\";\n", Sounds::GetSound(sfx_telept));
+    else if (mt_num == kMT_TELEPORTMAN)
+        wad::Printf("ACTIVE_SOUND = \"%s\";\n", sounds::GetSound(ksfx_telept));
 
-    if (info->seesound != sfx_None)
-        WAD::Printf("SIGHTING_SOUND = \"%s\";\n", Sounds::GetSound(info->seesound));
-    else if (mt_num == MT_BOSSSPIT)
-        WAD::Printf("SIGHTING_SOUND = \"%s\";\n", Sounds::GetSound(sfx_bossit));
+    if (info->seesound != ksfx_None)
+        wad::Printf("SIGHTING_SOUND = \"%s\";\n", sounds::GetSound(info->seesound));
+    else if (mt_num == kMT_BOSSSPIT)
+        wad::Printf("SIGHTING_SOUND = \"%s\";\n", sounds::GetSound(ksfx_bossit));
 
-    if (info->attacksound != sfx_None && info->meleestate != S_NULL)
+    if (info->attacksound != ksfx_None && info->meleestate != kS_NULL)
     {
-        WAD::Printf("STARTCOMBAT_SOUND = \"%s\";\n", Sounds::GetSound(info->attacksound));
+        wad::Printf("STARTCOMBAT_SOUND = \"%s\";\n", sounds::GetSound(info->attacksound));
     }
 
-    if (info->painsound != sfx_None)
-        WAD::Printf("PAIN_SOUND = \"%s\";\n", Sounds::GetSound(info->painsound));
+    if (info->painsound != ksfx_None)
+        wad::Printf("PAIN_SOUND = \"%s\";\n", sounds::GetSound(info->painsound));
 
-    if (info->deathsound != sfx_None)
-        WAD::Printf("DEATH_SOUND = \"%s\";\n", Sounds::GetSound(info->deathsound));
+    if (info->deathsound != ksfx_None)
+        wad::Printf("DEATH_SOUND = \"%s\";\n", sounds::GetSound(info->deathsound));
 
-    if (info->rip_sound != sfx_None)
-        WAD::Printf("RIP_SOUND = \"%s\";\n", Sounds::GetSound(info->rip_sound));
+    if (info->rip_sound != ksfx_None)
+        wad::Printf("RIP_SOUND = \"%s\";\n", sounds::GetSound(info->rip_sound));
 }
 
-void HandleFrames(const mobjinfo_t *info, int mt_num)
+void HandleFrames(const MobjInfo *info, int mt_num)
 {
-    Frames::ResetGroups();
+    frames::ResetGroups();
 
     // special cases...
 
-    if (mt_num == MT_TELEPORTMAN)
+    if (mt_num == kMT_TELEPORTMAN)
     {
-        WAD::Printf("TRANSLUCENCY = 50%%;\n");
-        WAD::Printf("\n");
-        WAD::Printf("STATES(IDLE) = %s:A:-1:NORMAL:TRANS_SET(0%%);\n", Sprites::GetSprite(SPR_TFOG));
+        wad::Printf("TRANSLUCENCY = 50%%;\n");
+        wad::Printf("\n");
+        wad::Printf("STATES(IDLE) = %s:A:-1:NORMAL:TRANS_SET(0%%);\n", sprites::GetSprite(kSPR_TFOG));
 
         // EDGE doesn't use the TELEPORT_FOG object, instead it uses
         // the CHASE states of the TELEPORT_FLASH object (i.e. the one
         // used to find the destination in the target sector).
 
-        const mobjinfo_t *tfog = NewMobjElseOld(MT_TFOG);
-        assert(tfog);
+        const MobjInfo *tfog = NewMobjElseOld(kMT_TFOG);
+        SYS_ASSERT(tfog);
 
-        if (0 == Frames::BeginGroup('E', tfog->spawnstate))
+        if (0 == frames::BeginGroup('E', tfog->spawnstate))
         {
             I_Debugf("Dehacked: Warning - Teleport fog has no spawn states.\n");
             return;
         }
 
-        Frames::SpreadGroups();
-        Frames::OutputGroup('E');
+        frames::SpreadGroups();
+        frames::OutputGroup('E');
 
         return;
     }
@@ -1239,49 +1229,49 @@ void HandleFrames(const mobjinfo_t *info, int mt_num)
     int count = 0;
 
     // do more important states AFTER less important ones
-    count += Frames::BeginGroup('R', info->raisestate);
-    count += Frames::BeginGroup('X', info->xdeathstate);
-    count += Frames::BeginGroup('D', info->deathstate);
-    count += Frames::BeginGroup('P', info->painstate);
-    count += Frames::BeginGroup('M', info->missilestate);
-    count += Frames::BeginGroup('L', info->meleestate);
-    count += Frames::BeginGroup('E', info->seestate);
-    count += Frames::BeginGroup('S', info->spawnstate);
+    count += frames::BeginGroup('R', info->raisestate);
+    count += frames::BeginGroup('X', info->xdeathstate);
+    count += frames::BeginGroup('D', info->deathstate);
+    count += frames::BeginGroup('P', info->painstate);
+    count += frames::BeginGroup('M', info->missilestate);
+    count += frames::BeginGroup('L', info->meleestate);
+    count += frames::BeginGroup('E', info->seestate);
+    count += frames::BeginGroup('S', info->spawnstate);
 
     if (count == 0)
     {
         // only occurs with special/invisible objects, currently only
         // with teleport target (handled above) and brain spit targets.
 
-        if (mt_num != MT_BOSSTARGET)
+        if (mt_num != kMT_BOSSTARGET)
             I_Debugf("Dehacked: Warning - Mobj [%s:%d] has no states.\n", GetMobjName(mt_num), info->doomednum);
 
-        WAD::Printf("TRANSLUCENCY = 0%%;\n");
+        wad::Printf("TRANSLUCENCY = 0%%;\n");
 
-        WAD::Printf("\n");
-        WAD::Printf("STATES(IDLE) = %s:A:-1:NORMAL:NOTHING;\n", Sprites::GetSprite(SPR_CAND));
+        wad::Printf("\n");
+        wad::Printf("STATES(IDLE) = %s:A:-1:NORMAL:NOTHING;\n", sprites::GetSprite(kSPR_CAND));
 
         return;
     }
 
-    Frames::SpreadGroups();
+    frames::SpreadGroups();
 
-    Frames::OutputGroup('S');
-    Frames::OutputGroup('E');
-    Frames::OutputGroup('L');
-    Frames::OutputGroup('M');
-    Frames::OutputGroup('P');
-    Frames::OutputGroup('D');
-    Frames::OutputGroup('X');
-    Frames::OutputGroup('R');
+    frames::OutputGroup('S');
+    frames::OutputGroup('E');
+    frames::OutputGroup('L');
+    frames::OutputGroup('M');
+    frames::OutputGroup('P');
+    frames::OutputGroup('D');
+    frames::OutputGroup('X');
+    frames::OutputGroup('R');
 
     // the A_VileChase action is another special case
-    if (Frames::act_flags & AF_RAISER)
+    if (frames::act_flags & kActionFlagRaise)
     {
-        if (Frames::BeginGroup('H', S_VILE_HEAL1) > 0)
+        if (frames::BeginGroup('H', kS_VILE_HEAL1) > 0)
         {
-            Frames::SpreadGroups();
-            Frames::OutputGroup('H');
+            frames::SpreadGroups();
+            frames::OutputGroup('H');
         }
     }
 }
@@ -1300,39 +1290,39 @@ const playerinfo_t player_info[NUMPLAYERS] = {{"OUR_HERO", 1, "PLAYER_GREEN"},  
                                               {"PLAYER5", 4001, "PLAYER_ORANGE"}, {"PLAYER6", 4002, "PLAYER_LT_GREY"},
                                               {"PLAYER7", 4003, "PLAYER_LT_RED"}, {"PLAYER8", 4004, "PLAYER_PINK"}};
 
-void HandlePlayer(const mobjinfo_t *info, int player)
+void HandlePlayer(const MobjInfo *info, int player)
 {
     if (player <= 0)
         return;
 
-    assert(player <= NUMPLAYERS);
+    SYS_ASSERT(player <= NUMPLAYERS);
 
     const playerinfo_t *pi = player_info + (player - 1);
 
-    WAD::Printf("PLAYER = %d;\n", player);
-    WAD::Printf("SIDE = %d;\n", 1 << (player - 1));
-    WAD::Printf("PALETTE_REMAP = %s;\n", pi->remap);
+    wad::Printf("PLAYER = %d;\n", player);
+    wad::Printf("SIDE = %d;\n", 1 << (player - 1));
+    wad::Printf("PALETTE_REMAP = %s;\n", pi->remap);
 
-    WAD::Printf("INITIAL_BENEFIT = \n");
-    WAD::Printf("    BULLETS.LIMIT(%d), ", Ammo::plr_max[am_bullet]);
-    WAD::Printf("SHELLS.LIMIT(%d), ", Ammo::plr_max[am_shell]);
-    WAD::Printf("ROCKETS.LIMIT(%d), ", Ammo::plr_max[am_rocket]);
-    WAD::Printf("CELLS.LIMIT(%d),\n", Ammo::plr_max[am_cell]);
-    WAD::Printf("    PELLETS.LIMIT(%d), ", 200);
-    WAD::Printf("NAILS.LIMIT(%d), ", 100);
-    WAD::Printf("GRENADES.LIMIT(%d), ", 50);
-    WAD::Printf("GAS.LIMIT(%d),\n", 300);
+    wad::Printf("INITIAL_BENEFIT = \n");
+    wad::Printf("    BULLETS.LIMIT(%d), ", ammo::player_max[kAmmoTypeBullet]);
+    wad::Printf("SHELLS.LIMIT(%d), ", ammo::player_max[kAmmoTypeShell]);
+    wad::Printf("ROCKETS.LIMIT(%d), ", ammo::player_max[kAmmoTypeRocket]);
+    wad::Printf("CELLS.LIMIT(%d),\n", ammo::player_max[kAmmoTypeCell]);
+    wad::Printf("    PELLETS.LIMIT(%d), ", 200);
+    wad::Printf("NAILS.LIMIT(%d), ", 100);
+    wad::Printf("GRENADES.LIMIT(%d), ", 50);
+    wad::Printf("GAS.LIMIT(%d),\n", 300);
 
-    WAD::Printf("    AMMO9.LIMIT(%d), ", 100);
-    WAD::Printf("AMMO10.LIMIT(%d), ", 200);
-    WAD::Printf("AMMO11.LIMIT(%d), ", 50);
-    WAD::Printf("AMMO12.LIMIT(%d),\n", 300);
-    WAD::Printf("    AMMO13.LIMIT(%d), ", 100);
-    WAD::Printf("AMMO14.LIMIT(%d), ", 200);
-    WAD::Printf("AMMO15.LIMIT(%d), ", 50);
-    WAD::Printf("AMMO16.LIMIT(%d),\n", 300);
+    wad::Printf("    AMMO9.LIMIT(%d), ", 100);
+    wad::Printf("AMMO10.LIMIT(%d), ", 200);
+    wad::Printf("AMMO11.LIMIT(%d), ", 50);
+    wad::Printf("AMMO12.LIMIT(%d),\n", 300);
+    wad::Printf("    AMMO13.LIMIT(%d), ", 100);
+    wad::Printf("AMMO14.LIMIT(%d), ", 200);
+    wad::Printf("AMMO15.LIMIT(%d), ", 50);
+    wad::Printf("AMMO16.LIMIT(%d),\n", 300);
 
-    WAD::Printf("    BULLETS(%d);\n", Misc::init_ammo);
+    wad::Printf("    BULLETS(%d);\n", miscellaneous::init_ammo);
 }
 
 typedef struct
@@ -1347,89 +1337,89 @@ typedef struct
 
 const pickupitem_t pickup_item[] = {
     // Health & Armor....
-    {SPR_BON1, "HEALTH", 2, 1, 200, "GotHealthPotion", sfx_itemup},
-    {SPR_STIM, "HEALTH", 2, 10, 100, "GotStim", sfx_itemup},
-    {SPR_MEDI, "HEALTH", 2, 25, 100, "GotMedi", sfx_itemup},
-    {SPR_BON2, "GREEN_ARMOUR", 2, 1, 200, "GotArmourHelmet", sfx_itemup},
-    {SPR_ARM1, "GREEN_ARMOUR", 2, 100, 100, "GotArmour", sfx_itemup},
-    {SPR_ARM2, "BLUE_ARMOUR", 2, 200, 200, "GotMegaArmour", sfx_itemup},
+    {kSPR_BON1, "HEALTH", 2, 1, 200, "GotHealthPotion", ksfx_itemup},
+    {kSPR_STIM, "HEALTH", 2, 10, 100, "GotStim", ksfx_itemup},
+    {kSPR_MEDI, "HEALTH", 2, 25, 100, "GotMedi", ksfx_itemup},
+    {kSPR_BON2, "GREEN_ARMOUR", 2, 1, 200, "GotArmourHelmet", ksfx_itemup},
+    {kSPR_ARM1, "GREEN_ARMOUR", 2, 100, 100, "GotArmour", ksfx_itemup},
+    {kSPR_ARM2, "BLUE_ARMOUR", 2, 200, 200, "GotMegaArmour", ksfx_itemup},
 
     // Keys....
-    {SPR_BKEY, "KEY_BLUECARD", 0, 0, 0, "GotBlueCard", sfx_itemup},
-    {SPR_YKEY, "KEY_YELLOWCARD", 0, 0, 0, "GotYellowCard", sfx_itemup},
-    {SPR_RKEY, "KEY_REDCARD", 0, 0, 0, "GotRedCard", sfx_itemup},
-    {SPR_BSKU, "KEY_BLUESKULL", 0, 0, 0, "GotBlueSkull", sfx_itemup},
-    {SPR_YSKU, "KEY_YELLOWSKULL", 0, 0, 0, "GotYellowSkull", sfx_itemup},
-    {SPR_RSKU, "KEY_REDSKULL", 0, 0, 0, "GotRedSkull", sfx_itemup},
+    {kSPR_BKEY, "KEY_BLUECARD", 0, 0, 0, "GotBlueCard", ksfx_itemup},
+    {kSPR_YKEY, "KEY_YELLOWCARD", 0, 0, 0, "GotYellowCard", ksfx_itemup},
+    {kSPR_RKEY, "KEY_REDCARD", 0, 0, 0, "GotRedCard", ksfx_itemup},
+    {kSPR_BSKU, "KEY_BLUESKULL", 0, 0, 0, "GotBlueSkull", ksfx_itemup},
+    {kSPR_YSKU, "KEY_YELLOWSKULL", 0, 0, 0, "GotYellowSkull", ksfx_itemup},
+    {kSPR_RSKU, "KEY_REDSKULL", 0, 0, 0, "GotRedSkull", ksfx_itemup},
 
     // Ammo....
-    {SPR_CLIP, "BULLETS", 1, 10, 0, "GotClip", sfx_itemup},
-    {SPR_AMMO, "BULLETS", 1, 50, 0, "GotClipBox", sfx_itemup},
-    {SPR_SHEL, "SHELLS", 1, 4, 0, "GotShells", sfx_itemup},
-    {SPR_SBOX, "SHELLS", 1, 20, 0, "GotShellBox", sfx_itemup},
-    {SPR_ROCK, "ROCKETS", 1, 1, 0, "GotRocket", sfx_itemup},
-    {SPR_BROK, "ROCKETS", 1, 5, 0, "GotRocketBox", sfx_itemup},
-    {SPR_CELL, "CELLS", 1, 20, 0, "GotCell", sfx_itemup},
-    {SPR_CELP, "CELLS", 1, 100, 0, "GotCellPack", sfx_itemup},
+    {kSPR_CLIP, "BULLETS", 1, 10, 0, "GotClip", ksfx_itemup},
+    {kSPR_AMMO, "BULLETS", 1, 50, 0, "GotClipBox", ksfx_itemup},
+    {kSPR_SHEL, "SHELLS", 1, 4, 0, "GotShells", ksfx_itemup},
+    {kSPR_SBOX, "SHELLS", 1, 20, 0, "GotShellBox", ksfx_itemup},
+    {kSPR_ROCK, "ROCKETS", 1, 1, 0, "GotRocket", ksfx_itemup},
+    {kSPR_BROK, "ROCKETS", 1, 5, 0, "GotRocketBox", ksfx_itemup},
+    {kSPR_CELL, "CELLS", 1, 20, 0, "GotCell", ksfx_itemup},
+    {kSPR_CELP, "CELLS", 1, 100, 0, "GotCellPack", ksfx_itemup},
 
     // Powerups....
-    {SPR_SOUL, "HEALTH", 2, 100, 200, "GotSoul", sfx_getpow},
-    {SPR_PMAP, "POWERUP_AUTOMAP", 0, 0, 0, "GotMap", sfx_getpow},
-    {SPR_PINS, "POWERUP_PARTINVIS", 2, 100, 100, "GotInvis", sfx_getpow},
-    {SPR_PINV, "POWERUP_INVULNERABLE", 2, 30, 30, "GotInvulner", sfx_getpow},
-    {SPR_PVIS, "POWERUP_LIGHTGOGGLES", 2, 120, 120, "GotVisor", sfx_getpow},
-    {SPR_SUIT, "POWERUP_ACIDSUIT", 2, 60, 60, "GotSuit", sfx_getpow},
+    {kSPR_SOUL, "HEALTH", 2, 100, 200, "GotSoul", ksfx_getpow},
+    {kSPR_PMAP, "POWERUP_AUTOMAP", 0, 0, 0, "GotMap", ksfx_getpow},
+    {kSPR_PINS, "POWERUP_PARTINVIS", 2, 100, 100, "GotInvis", ksfx_getpow},
+    {kSPR_PINV, "POWERUP_INVULNERABLE", 2, 30, 30, "GotInvulner", ksfx_getpow},
+    {kSPR_PVIS, "POWERUP_LIGHTGOGGLES", 2, 120, 120, "GotVisor", ksfx_getpow},
+    {kSPR_SUIT, "POWERUP_ACIDSUIT", 2, 60, 60, "GotSuit", ksfx_getpow},
 
     // Weapons....
-    {SPR_CSAW, "CHAINSAW", 0, 0, 0, "GotChainSaw", sfx_wpnup},
-    {SPR_SHOT, "SHOTGUN,SHELLS", 1, 8, 0, "GotShotGun", sfx_wpnup},
-    {SPR_SGN2, "SUPERSHOTGUN,SHELLS", 1, 8, 0, "GotDoubleBarrel", sfx_wpnup},
-    {SPR_MGUN, "CHAINGUN,BULLETS", 1, 20, 0, "GotChainGun", sfx_wpnup},
-    {SPR_LAUN, "ROCKET_LAUNCHER,ROCKETS", 1, 2, 0, "GotRocketLauncher", sfx_wpnup},
-    {SPR_PLAS, "PLASMA_RIFLE,CELLS", 1, 40, 0, "GotPlasmaGun", sfx_wpnup},
-    {SPR_BFUG, "BFG9000,CELLS", 1, 40, 0, "GotBFG", sfx_wpnup},
+    {kSPR_CSAW, "CHAINSAW", 0, 0, 0, "GotChainSaw", ksfx_wpnup},
+    {kSPR_SHOT, "SHOTGUN,SHELLS", 1, 8, 0, "GotShotGun", ksfx_wpnup},
+    {kSPR_SGN2, "SUPERSHOTGUN,SHELLS", 1, 8, 0, "GotDoubleBarrel", ksfx_wpnup},
+    {kSPR_MGUN, "CHAINGUN,BULLETS", 1, 20, 0, "GotChainGun", ksfx_wpnup},
+    {kSPR_LAUN, "ROCKET_LAUNCHER,ROCKETS", 1, 2, 0, "GotRocketLauncher", ksfx_wpnup},
+    {kSPR_PLAS, "PLASMA_RIFLE,CELLS", 1, 40, 0, "GotPlasmaGun", ksfx_wpnup},
+    {kSPR_BFUG, "BFG9000,CELLS", 1, 40, 0, "GotBFG", ksfx_wpnup},
 
     {-1, NULL, 0, 0, 0, NULL}};
 
-void HandleItem(const mobjinfo_t *info, int mt_num)
+void HandleItem(const MobjInfo *info, int mt_num)
 {
-    if (!(info->flags & MF_SPECIAL))
+    if (!(info->flags & kMF_SPECIAL))
         return;
 
-    if (info->spawnstate == S_NULL)
+    if (info->spawnstate == kS_NULL)
         return;
 
-    int spr_num = Frames::GetStateSprite(info->spawnstate);
+    int spr_num = frames::GetStateSprite(info->spawnstate);
 
     // special cases:
 
-    if (spr_num == SPR_PSTR) // Berserk
+    if (spr_num == kSPR_PSTR) // Berserk
     {
-        WAD::Printf("PICKUP_BENEFIT = POWERUP_BERSERK(60:60),HEALTH(100:100);\n");
-        WAD::Printf("PICKUP_MESSAGE = GotBerserk;\n");
-        WAD::Printf("PICKUP_SOUND = %s;\n", Sounds::GetSound(sfx_getpow));
-        WAD::Printf("PICKUP_EFFECT = SWITCH_WEAPON(FIST);\n");
+        wad::Printf("PICKUP_BENEFIT = POWERUP_BERSERK(60:60),HEALTH(100:100);\n");
+        wad::Printf("PICKUP_MESSAGE = GotBerserk;\n");
+        wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(ksfx_getpow));
+        wad::Printf("PICKUP_EFFECT = SWITCH_WEAPON(FIST);\n");
         return;
     }
-    else if (spr_num == SPR_MEGA) // Megasphere
+    else if (spr_num == kSPR_MEGA) // Megasphere
     {
-        WAD::Printf("PICKUP_BENEFIT = ");
-        WAD::Printf("HEALTH(%d:%d),", Misc::mega_health, Misc::mega_health);
-        WAD::Printf("BLUE_ARMOUR(%d:%d);\n", Misc::max_armour, Misc::max_armour);
-        WAD::Printf("PICKUP_MESSAGE = GotMega;\n");
-        WAD::Printf("PICKUP_SOUND = %s;\n", Sounds::GetSound(sfx_getpow));
+        wad::Printf("PICKUP_BENEFIT = ");
+        wad::Printf("HEALTH(%d:%d),", miscellaneous::mega_health, miscellaneous::mega_health);
+        wad::Printf("BLUE_ARMOUR(%d:%d);\n", miscellaneous::max_armour, miscellaneous::max_armour);
+        wad::Printf("PICKUP_MESSAGE = GotMega;\n");
+        wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(ksfx_getpow));
         return;
     }
-    else if (spr_num == SPR_BPAK) // Backpack full of AMMO
+    else if (spr_num == kSPR_BPAK) // Backpack full of AMMO
     {
-        WAD::Printf("PICKUP_BENEFIT = \n");
-        WAD::Printf("    BULLETS.LIMIT(%d), ", 2 * Ammo::plr_max[am_bullet]);
-        WAD::Printf("    SHELLS.LIMIT(%d),\n", 2 * Ammo::plr_max[am_shell]);
-        WAD::Printf("    ROCKETS.LIMIT(%d), ", 2 * Ammo::plr_max[am_rocket]);
-        WAD::Printf("    CELLS.LIMIT(%d),\n", 2 * Ammo::plr_max[am_cell]);
-        WAD::Printf("    BULLETS(10), SHELLS(4), ROCKETS(1), CELLS(20);\n");
-        WAD::Printf("PICKUP_MESSAGE = GotBackpack;\n");
-        WAD::Printf("PICKUP_SOUND = %s;\n", Sounds::GetSound(sfx_itemup));
+        wad::Printf("PICKUP_BENEFIT = \n");
+        wad::Printf("    BULLETS.LIMIT(%d), ", 2 * ammo::player_max[kAmmoTypeBullet]);
+        wad::Printf("    SHELLS.LIMIT(%d),\n", 2 * ammo::player_max[kAmmoTypeShell]);
+        wad::Printf("    ROCKETS.LIMIT(%d), ", 2 * ammo::player_max[kAmmoTypeRocket]);
+        wad::Printf("    CELLS.LIMIT(%d),\n", 2 * ammo::player_max[kAmmoTypeCell]);
+        wad::Printf("    BULLETS(10), SHELLS(4), ROCKETS(1), CELLS(20);\n");
+        wad::Printf("PICKUP_MESSAGE = GotBackpack;\n");
+        wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(ksfx_itemup));
         return;
     }
 
@@ -1445,7 +1435,7 @@ void HandleItem(const mobjinfo_t *info, int mt_num)
 
     if (pu->benefit == NULL) // not found
     {
-        I_Debugf("Dehacked: Warning - Unknown pickup sprite \"%s\" for item [%s]\n", Sprites::GetOriginalName(spr_num),
+        I_Debugf("Dehacked: Warning - Unknown pickup sprite \"%s\" for item [%s]\n", sprites::GetOriginalName(spr_num),
                   GetMobjName(mt_num));
         return;
     }
@@ -1458,48 +1448,48 @@ void HandleItem(const mobjinfo_t *info, int mt_num)
     switch (spr_num)
     {
     // Armor & health...
-    case SPR_BON2: // "ARMOUR_HELMET"
-        limit = Misc::max_armour;
+    case kSPR_BON2: // "ARMOUR_HELMET"
+        limit = miscellaneous::max_armour;
         break;
 
-    case SPR_ARM1: // "GREEN_ARMOUR"
-        amount = Misc::green_armour_class * 100;
-        limit  = Misc::max_armour;
+    case kSPR_ARM1: // "GREEN_ARMOUR"
+        amount = miscellaneous::green_armour_class * 100;
+        limit  = miscellaneous::max_armour;
         break;
 
-    case SPR_ARM2: // "BLUE_ARMOUR"
-        amount = Misc::blue_armour_class * 100;
-        limit  = Misc::max_armour;
+    case kSPR_ARM2: // "BLUE_ARMOUR"
+        amount = miscellaneous::blue_armour_class * 100;
+        limit  = miscellaneous::max_armour;
         break;
 
-    case SPR_BON1:                // "HEALTH_POTION"
-        limit = Misc::max_health; // Note: *not* MEDIKIT
+    case kSPR_BON1:                // "HEALTH_POTION"
+        limit = miscellaneous::max_health; // Note: *not* MEDIKIT
         break;
 
-    case SPR_SOUL: // "SOULSPHERE"
-        amount = Misc::soul_health;
-        limit  = Misc::soul_limit;
+    case kSPR_SOUL: // "SOULSPHERE"
+        amount = miscellaneous::soul_health;
+        limit  = miscellaneous::soul_limit;
         break;
 
     // Ammo...
-    case SPR_CLIP: // "CLIP"
-    case SPR_AMMO: // "BOX_OF_BULLETS"
-        amount = Ammo::pickups[am_bullet];
+    case kSPR_CLIP: // "CLIP"
+    case kSPR_AMMO: // "BOX_OF_BULLETS"
+        amount = ammo::pickups[kAmmoTypeBullet];
         break;
 
-    case SPR_SHEL: // "SHELLS"
-    case SPR_SBOX: // "BOX_OF_SHELLS"
-        amount = Ammo::pickups[am_shell];
+    case kSPR_SHEL: // "SHELLS"
+    case kSPR_SBOX: // "BOX_OF_SHELLS"
+        amount = ammo::pickups[kAmmoTypeShell];
         break;
 
-    case SPR_ROCK: // "ROCKET"
-    case SPR_BROK: // "BOX_OF_ROCKETS"
-        amount = Ammo::pickups[am_rocket];
+    case kSPR_ROCK: // "ROCKET"
+    case kSPR_BROK: // "BOX_OF_ROCKETS"
+        amount = ammo::pickups[kAmmoTypeRocket];
         break;
 
-    case SPR_CELL: // "CELLS"
-    case SPR_CELP: // "CELL_PACK"
-        amount = Ammo::pickups[am_cell];
+    case kSPR_CELL: // "CELLS"
+    case kSPR_CELP: // "CELL_PACK"
+        amount = ammo::pickups[kAmmoTypeCell];
         break;
 
     default:
@@ -1507,7 +1497,7 @@ void HandleItem(const mobjinfo_t *info, int mt_num)
     }
 
     // big boxes of ammo
-    if (spr_num == SPR_AMMO || spr_num == SPR_BROK || spr_num == SPR_CELP || spr_num == SPR_SBOX)
+    if (spr_num == kSPR_AMMO || spr_num == kSPR_BROK || spr_num == kSPR_CELP || spr_num == kSPR_SBOX)
     {
         amount *= 5;
     }
@@ -1515,18 +1505,18 @@ void HandleItem(const mobjinfo_t *info, int mt_num)
     if (pu->par_num == 2 && amount > limit)
         amount = limit;
 
-    WAD::Printf("PICKUP_BENEFIT = %s", pu->benefit);
+    wad::Printf("PICKUP_BENEFIT = %s", pu->benefit);
 
     if (pu->par_num == 1)
-        WAD::Printf("(%d)", amount);
+        wad::Printf("(%d)", amount);
     else if (pu->par_num == 2)
-        WAD::Printf("(%d:%d)", amount, limit);
+        wad::Printf("(%d:%d)", amount, limit);
 
-    WAD::Printf(";\n");
-    WAD::Printf("PICKUP_MESSAGE = %s;\n", pu->ldf);
+    wad::Printf(";\n");
+    wad::Printf("PICKUP_MESSAGE = %s;\n", pu->ldf);
 
-    if (info->activesound == sfx_None)
-        WAD::Printf("PICKUP_SOUND = %s;\n", Sounds::GetSound(pu->sound));
+    if (info->activesound == ksfx_None)
+        wad::Printf("PICKUP_SOUND = %s;\n", sounds::GetSound(pu->sound));
 }
 
 const char *cast_titles[17] = {
@@ -1534,7 +1524,7 @@ const char *cast_titles[17] = {
     "LostSoulName", "CacodemonName", "HellKnightName", "BaronOfHellName",      "ArachnotronName", "PainElementalName",
     "RevenantName", "MancubusName",  "ArchVileName",   "SpiderMastermindName", "CyberdemonName"};
 
-void HandleCastOrder(const mobjinfo_t *info, int mt_num, int player)
+void HandleCastOrder(const MobjInfo *info, int mt_num, int player)
 {
     if (player >= 2)
         return;
@@ -1542,7 +1532,7 @@ void HandleCastOrder(const mobjinfo_t *info, int mt_num, int player)
     int pos   = 1;
     int order = 1;
 
-    for (; pos < CAST_MAX; pos++)
+    for (; pos < kCastMaximum; pos++)
     {
         // ignore missing members (ensure real order is contiguous)
         if (cast_mobjs[pos] < 0)
@@ -1554,19 +1544,19 @@ void HandleCastOrder(const mobjinfo_t *info, int mt_num, int player)
         order++;
     }
 
-    if (pos >= CAST_MAX) // not found
+    if (pos >= kCastMaximum) // not found
         return;
 
-    WAD::Printf("CASTORDER = %d;\n", order);
-    WAD::Printf("CAST_TITLE = %s;\n", cast_titles[pos - 1]);
+    wad::Printf("CASTORDER = %d;\n", order);
+    wad::Printf("CAST_TITLE = %s;\n", cast_titles[pos - 1]);
 }
 
-void HandleDropItem(const mobjinfo_t *info, int mt_num);
-void HandleAttacks(const mobjinfo_t *info, int mt_num);
-void ConvertMobj(const mobjinfo_t *info, int mt_num, int player, bool brain_missile, bool &got_one);
-} // namespace Things
+void HandleDropItem(const MobjInfo *info, int mt_num);
+void HandleAttacks(const MobjInfo *info, int mt_num);
+void ConvertMobj(const MobjInfo *info, int mt_num, int player, bool brain_missile, bool &got_one);
+} // namespace things
 
-void Things::HandleDropItem(const mobjinfo_t *info, int mt_num)
+void things::HandleDropItem(const MobjInfo *info, int mt_num)
 {
     const char *item = NULL;
 
@@ -1574,7 +1564,7 @@ void Things::HandleDropItem(const mobjinfo_t *info, int mt_num)
     {
         return; // I think '0' is used to clear out normal drops
     }
-    else if (info->dropped_item - 1 > MT_PLAYER)
+    else if (info->dropped_item - 1 > kMT_PLAYER)
     {
         item = GetMobjName(info->dropped_item - 1);
         if (!item)
@@ -1584,15 +1574,15 @@ void Things::HandleDropItem(const mobjinfo_t *info, int mt_num)
     {
         switch (mt_num)
         {
-        case MT_WOLFSS:
-        case MT_POSSESSED:
+        case kMT_WOLFSS:
+        case kMT_POSSESSED:
             item = "CLIP";
             break;
 
-        case MT_SHOTGUY:
+        case kMT_SHOTGUY:
             item = "SHOTGUN";
             break;
-        case MT_CHAINGUY:
+        case kMT_CHAINGUY:
             item = "CHAINGUN";
             break;
 
@@ -1601,34 +1591,34 @@ void Things::HandleDropItem(const mobjinfo_t *info, int mt_num)
         }
     }
 
-    assert(item);
+    SYS_ASSERT(item);
 
-    WAD::Printf("DROPITEM = \"%s\";\n", item);
+    wad::Printf("DROPITEM = \"%s\";\n", item);
 }
 
-void Things::HandleAttacks(const mobjinfo_t *info, int mt_num)
+void things::HandleAttacks(const MobjInfo *info, int mt_num)
 {
-    if (Frames::attack_slot[Frames::RANGE])
+    if (frames::attack_slot[frames::kAttackMethodRanged])
     {
-        WAD::Printf("RANGE_ATTACK = %s;\n", Frames::attack_slot[Frames::RANGE]);
-        WAD::Printf("MINATTACK_CHANCE = 25%%;\n");
+        wad::Printf("RANGE_ATTACK = %s;\n", frames::attack_slot[frames::kAttackMethodRanged]);
+        wad::Printf("MINATTACK_CHANCE = 25%%;\n");
     }
 
-    if (Frames::attack_slot[Frames::COMBAT])
+    if (frames::attack_slot[frames::kAttackMethodCombat])
     {
-        WAD::Printf("CLOSE_ATTACK = %s;\n", Frames::attack_slot[Frames::COMBAT]);
+        wad::Printf("CLOSE_ATTACK = %s;\n", frames::attack_slot[frames::kAttackMethodCombat]);
     }
     else if (info->meleestate && info->name[0] != '*')
     {
         I_Debugf("Dehacked: Warning - No close attack in melee states of [%s].\n", GetMobjName(mt_num));
-        WAD::Printf("CLOSE_ATTACK = DEMON_CLOSECOMBAT; // dummy attack\n");
+        wad::Printf("CLOSE_ATTACK = DEMON_CLOSECOMBAT; // dummy attack\n");
     }
 
-    if (Frames::attack_slot[Frames::SPARE])
-        WAD::Printf("SPARE_ATTACK = %s;\n", Frames::attack_slot[Frames::SPARE]);
+    if (frames::attack_slot[frames::kAttackMethodSpare])
+        wad::Printf("SPARE_ATTACK = %s;\n", frames::attack_slot[frames::kAttackMethodSpare]);
 }
 
-void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player, bool brain_missile, bool &got_one)
+void things::ConvertMobj(const MobjInfo *info, int mt_num, int player, bool brain_missile, bool &got_one)
 {
     if (info->name[0] == '*') // attack
         return;
@@ -1645,46 +1635,46 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player, bool br
         ddf_name = info->name;
 
     if (player > 0)
-        WAD::Printf("[%s:%d]\n", player_info[player - 1].name, player_info[player - 1].num);
+        wad::Printf("[%s:%d]\n", player_info[player - 1].name, player_info[player - 1].num);
     else if (info->doomednum < 0)
-        WAD::Printf("[%s]\n", ddf_name);
+        wad::Printf("[%s]\n", ddf_name);
     else
-        WAD::Printf("[%s:%d]\n", ddf_name, info->doomednum);
+        wad::Printf("[%s:%d]\n", ddf_name, info->doomednum);
 
     if (info->pickup_width != 0)
-        WAD::Printf("RADIUS = %1.1f;\n", F_FIXED(info->pickup_width));
+        wad::Printf("RADIUS = %1.1f;\n", FixedToFloat(info->pickup_width));
     else
-        WAD::Printf("RADIUS = %1.1f;\n", F_FIXED(info->radius));
+        wad::Printf("RADIUS = %1.1f;\n", FixedToFloat(info->radius));
 
     if (info->projectile_pass_height != 0)
-        WAD::Printf("HEIGHT = %1.1f;\n", F_FIXED(info->projectile_pass_height));
+        wad::Printf("HEIGHT = %1.1f;\n", FixedToFloat(info->projectile_pass_height));
     else
-        WAD::Printf("HEIGHT = %1.1f;\n", F_FIXED(info->height));
+        wad::Printf("HEIGHT = %1.1f;\n", FixedToFloat(info->height));
 
     if (info->spawnhealth != 1000)
-        WAD::Printf("SPAWNHEALTH = %d;\n", info->spawnhealth);
+        wad::Printf("SPAWNHEALTH = %d;\n", info->spawnhealth);
 
     if (player > 0)
-        WAD::Printf("SPEED = 1;\n");
+        wad::Printf("SPEED = 1;\n");
     else if (info->speed != 0)
-        WAD::Printf("SPEED = %s;\n", GetSpeed(info->speed));
+        wad::Printf("SPEED = %s;\n", GetSpeed(info->speed));
 
     if (info->mass != 100 && info->mass > 0)
-        WAD::Printf("MASS = %d;\n", info->mass);
+        wad::Printf("MASS = %d;\n", info->mass);
 
     if (info->reactiontime != 0)
-        WAD::Printf("REACTION_TIME = %dT;\n", info->reactiontime);
+        wad::Printf("REACTION_TIME = %dT;\n", info->reactiontime);
 
     if (info->painchance >= 256)
-        WAD::Printf("PAINCHANCE = 100%%;\n");
+        wad::Printf("PAINCHANCE = 100%%;\n");
     else if (info->painchance > 0)
-        WAD::Printf("PAINCHANCE = %1.1f%%;\n", (float)info->painchance * 100.0 / 256.0);
+        wad::Printf("PAINCHANCE = %1.1f%%;\n", (float)info->painchance * 100.0 / 256.0);
 
     if (info->gib_health != 0)
-        WAD::Printf("GIB_HEALTH = %d;\n", info->gib_health);
+        wad::Printf("GIB_HEALTH = %d;\n", info->gib_health);
 
-    if (mt_num == MT_BOSSSPIT)
-        WAD::Printf("SPIT_SPOT = BRAIN_SPAWNSPOT;\n");
+    if (mt_num == kMT_BOSSSPIT)
+        wad::Printf("SPIT_SPOT = BRAIN_SPAWNSPOT;\n");
 
     HandleCastOrder(info, mt_num, player);
     HandleDropItem(info, mt_num);
@@ -1693,23 +1683,23 @@ void Things::ConvertMobj(const mobjinfo_t *info, int mt_num, int player, bool br
     HandleSounds(info, mt_num);
     HandleFrames(info, mt_num);
 
-    WAD::Printf("\n");
+    wad::Printf("\n");
 
     HandleFlags(info, mt_num, player);
     HandleAttacks(info, mt_num);
 
-    if (Frames::act_flags & AF_EXPLODE)
-        WAD::Printf("EXPLODE_DAMAGE.VAL = 128;\n");
-    else if (Frames::act_flags & AF_DETONATE)
-        WAD::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
+    if (frames::act_flags & kActionFlagExplode)
+        wad::Printf("EXPLODE_DAMAGE.VAL = 128;\n");
+    else if (frames::act_flags & kActionFlagDetonate)
+        wad::Printf("EXPLODE_DAMAGE.VAL = %d;\n", info->damage);
 
-    if ((Frames::act_flags & AF_KEENDIE))
-        Rscript::MarkKeenDie(mt_num);
+    if ((frames::act_flags & kActionFlagKeenDie))
+        rscript::MarkKeenDie(mt_num);
 
-    WAD::Printf("\n");
+    wad::Printf("\n");
 }
 
-void Things::ConvertTHING(void)
+void things::ConvertTHING(void)
 {
     FixHeights();
 
@@ -1717,11 +1707,11 @@ void Things::ConvertTHING(void)
 
     if (all_mode)
     {
-        for (int i = 0; i < NUMMOBJTYPES_COMPAT; i++)
+        for (int i = 0; i < kTotalMobjTypesPortCompatibility; i++)
             MarkThing(i);
 
         /* this is debatable...
-        for (int i = MT_EXTRA00 ; i <= MT_EXTRA99 ; i++)
+        for (int i = kMT_EXTRA00 ; i <= kMT_EXTRA99 ; i++)
             MarkThing(i);
         */
     }
@@ -1730,12 +1720,12 @@ void Things::ConvertTHING(void)
 
     for (int i = 0; i < (int)new_mobjinfo.size(); i++)
     {
-        const mobjinfo_t *info = new_mobjinfo[i];
+        const MobjInfo *info = new_mobjinfo[i];
 
         if (info == NULL)
             continue;
 
-        if (i == MT_PLAYER)
+        if (i == kMT_PLAYER)
         {
             for (int p = 1; p <= NUMPLAYERS; p++)
                 ConvertMobj(info, i, p, false, got_one);
@@ -1748,33 +1738,33 @@ void Things::ConvertTHING(void)
 
     // TODO we don't always need this, figure out WHEN WE DO
     if (true)
-        ConvertMobj(&brain_explode_mobj, MT_ROCKET, 0, true, got_one);
+        ConvertMobj(&brain_explode_mobj, kMT_ROCKET, 0, true, got_one);
 
     if (got_one)
         FinishLump();
 }
 
-void Things::ConvertATK()
+void things::ConvertATK()
 {
     Attacks::got_one = false;
 
     for (size_t k = 0; k < Attacks::scratchers.size(); k++)
     {
-        Attacks::ConvertScratch(Attacks::scratchers[k]);
+        Attacks::ConvertScratch(&Attacks::scratchers[k]);
     }
 
     // Note: all_mode was handled by ConvertTHING
 
     for (int i = 0; i < (int)new_mobjinfo.size(); i++)
     {
-        const mobjinfo_t *info = new_mobjinfo[i];
+        const MobjInfo *info = new_mobjinfo[i];
 
         if (info == NULL)
             continue;
 
         Attacks::ConvertAttack(info, i, false);
 
-        if (i == MT_ROCKET)
+        if (i == kMT_ROCKET)
             Attacks::ConvertAttack(info, i, true);
     }
 
@@ -1786,87 +1776,85 @@ void Things::ConvertATK()
 
 //------------------------------------------------------------------------
 
-namespace Things
+namespace things
 {
-#define FIELD_OFS(xxx) offsetof(mobjinfo_t, xxx)
+const FieldReference mobj_field[] = {
+    {"ID #", offsetof(MobjInfo, doomednum), kFieldTypeAny},
+    {"Initial frame", offsetof(MobjInfo, spawnstate), kFieldTypeFrameNumber},
+    {"Hit points", offsetof(MobjInfo, spawnhealth), kFieldTypeOneOrGreater},
+    {"First moving frame", offsetof(MobjInfo, seestate), kFieldTypeFrameNumber},
+    {"Alert sound", offsetof(MobjInfo, seesound), kFieldTypeSoundNumber},
+    {"Reaction time", offsetof(MobjInfo, reactiontime), kFieldTypeZeroOrGreater},
+    {"Attack sound", offsetof(MobjInfo, attacksound), kFieldTypeSoundNumber},
+    {"Injury frame", offsetof(MobjInfo, painstate), kFieldTypeFrameNumber},
+    {"Pain chance", offsetof(MobjInfo, painchance), kFieldTypeZeroOrGreater},
+    {"Pain sound", offsetof(MobjInfo, painsound), kFieldTypeSoundNumber},
+    {"Close attack frame", offsetof(MobjInfo, meleestate), kFieldTypeFrameNumber},
+    {"Far attack frame", offsetof(MobjInfo, missilestate), kFieldTypeFrameNumber},
+    {"Death frame", offsetof(MobjInfo, deathstate), kFieldTypeFrameNumber},
+    {"Exploding frame", offsetof(MobjInfo, xdeathstate), kFieldTypeFrameNumber},
+    {"Death sound", offsetof(MobjInfo, deathsound), kFieldTypeSoundNumber},
+    {"Speed", offsetof(MobjInfo, speed), kFieldTypeZeroOrGreater},
+    {"Width", offsetof(MobjInfo, radius), kFieldTypeZeroOrGreater},
+    {"Height", offsetof(MobjInfo, height), kFieldTypeZeroOrGreater},
+    {"Mass", offsetof(MobjInfo, mass), kFieldTypeZeroOrGreater},
+    {"Missile damage", offsetof(MobjInfo, damage), kFieldTypeZeroOrGreater},
+    {"Action sound", offsetof(MobjInfo, activesound), kFieldTypeSoundNumber},
+    {"Bits", offsetof(MobjInfo, flags), kFieldTypeBitflags},
+    {"MBF21 Bits", offsetof(MobjInfo, mbf21_flags), kFieldTypeBitflags},
+    {"Infighting group", offsetof(MobjInfo, infight_group), kFieldTypeZeroOrGreater},
+    {"Projectile group", offsetof(MobjInfo, proj_group), kFieldTypeAny},
+    {"Splash group", offsetof(MobjInfo, splash_group), kFieldTypeZeroOrGreater},
+    {"Rip sound", offsetof(MobjInfo, rip_sound), kFieldTypeSoundNumber},
+    {"Fast speed", offsetof(MobjInfo, fast_speed), kFieldTypeZeroOrGreater},
+    {"Melee range", offsetof(MobjInfo, melee_range), kFieldTypeZeroOrGreater},
+    {"Gib health", offsetof(MobjInfo, gib_health), kFieldTypeAny},
+    {"Dropped item", offsetof(MobjInfo, dropped_item), kFieldTypeZeroOrGreater},
+    {"Pickup width", offsetof(MobjInfo, pickup_width), kFieldTypeZeroOrGreater},
+    {"Projectile pass height", offsetof(MobjInfo, projectile_pass_height), kFieldTypeZeroOrGreater},
+    {"Fullbright", offsetof(MobjInfo, fullbright), kFieldTypeZeroOrGreater},
+    {"Respawn frame", offsetof(MobjInfo, raisestate), kFieldTypeFrameNumber},
 
-const fieldreference_t mobj_field[] = {
-    {"ID #", FIELD_OFS(doomednum), FT_ANY},
-    {"Initial frame", FIELD_OFS(spawnstate), FT_FRAME},
-    {"Hit points", FIELD_OFS(spawnhealth), FT_GTEQ1},
-    {"First moving frame", FIELD_OFS(seestate), FT_FRAME},
-    {"Alert sound", FIELD_OFS(seesound), FT_SOUND},
-    {"Reaction time", FIELD_OFS(reactiontime), FT_NONEG},
-    {"Attack sound", FIELD_OFS(attacksound), FT_SOUND},
-    {"Injury frame", FIELD_OFS(painstate), FT_FRAME},
-    {"Pain chance", FIELD_OFS(painchance), FT_NONEG},
-    {"Pain sound", FIELD_OFS(painsound), FT_SOUND},
-    {"Close attack frame", FIELD_OFS(meleestate), FT_FRAME},
-    {"Far attack frame", FIELD_OFS(missilestate), FT_FRAME},
-    {"Death frame", FIELD_OFS(deathstate), FT_FRAME},
-    {"Exploding frame", FIELD_OFS(xdeathstate), FT_FRAME},
-    {"Death sound", FIELD_OFS(deathsound), FT_SOUND},
-    {"Speed", FIELD_OFS(speed), FT_NONEG},
-    {"Width", FIELD_OFS(radius), FT_NONEG},
-    {"Height", FIELD_OFS(height), FT_NONEG},
-    {"Mass", FIELD_OFS(mass), FT_NONEG},
-    {"Missile damage", FIELD_OFS(damage), FT_NONEG},
-    {"Action sound", FIELD_OFS(activesound), FT_SOUND},
-    {"Bits", FIELD_OFS(flags), FT_BITS},
-    {"MBF21 Bits", FIELD_OFS(mbf21_flags), FT_BITS},
-    {"Infighting group", FIELD_OFS(infight_group), FT_NONEG},
-    {"Projectile group", FIELD_OFS(proj_group), FT_ANY},
-    {"Splash group", FIELD_OFS(splash_group), FT_NONEG},
-    {"Rip sound", FIELD_OFS(rip_sound), FT_SOUND},
-    {"Fast speed", FIELD_OFS(fast_speed), FT_NONEG},
-    {"Melee range", FIELD_OFS(melee_range), FT_NONEG},
-    {"Gib health", FIELD_OFS(gib_health), FT_ANY},
-    {"Dropped item", FIELD_OFS(dropped_item), FT_NONEG},
-    {"Pickup width", FIELD_OFS(pickup_width), FT_NONEG},
-    {"Projectile pass height", FIELD_OFS(projectile_pass_height), FT_NONEG},
-    {"Fullbright", FIELD_OFS(fullbright), FT_NONEG},
-    {"Respawn frame", FIELD_OFS(raisestate), FT_FRAME},
-
-    {NULL, 0, FT_ANY} // End sentinel
+    {NULL, 0, kFieldTypeAny} // End sentinel
 };
-} // namespace Things
+} // namespace things
 
-void Things::AlterThing(int new_val)
+void things::AlterThing(int new_val)
 {
-    int mt_num = Patch::active_obj - 1; // NOTE WELL
-    assert(mt_num >= 0);
+    int mt_num = patch::active_obj - 1; // NOTE WELL
+    SYS_ASSERT(mt_num >= 0);
 
-    const char *field_name = Patch::line_buf;
+    const char *field_name = patch::line_buf;
 
     MarkThing(mt_num);
 
     int *raw_obj = (int *)new_mobjinfo[mt_num];
-    assert(raw_obj != NULL);
+    SYS_ASSERT(raw_obj != NULL);
 
-    if (!Field_Alter(mobj_field, field_name, raw_obj, new_val))
+    if (!FieldAlter(mobj_field, field_name, raw_obj, new_val))
     {
         I_Debugf("Dehacked: Warning - UNKNOWN THING FIELD: %s\n", field_name);
     }
 }
 
-void Things::AlterBexBits(char *bit_str)
+void things::AlterBexBits(char *bit_str)
 {
-    int mt_num = Patch::active_obj - 1; /* NOTE WELL */
-    assert(mt_num >= 0);
+    int mt_num = patch::active_obj - 1; /* NOTE WELL */
+    SYS_ASSERT(mt_num >= 0);
 
     MarkThing(mt_num);
 
     new_mobjinfo[mt_num]->flags = ParseBits(flag_list, bit_str);
 }
 
-void Things::AlterMBF21Bits(char *bit_str)
+void things::AlterMBF21Bits(char *bit_str)
 {
-    int mt_num = Patch::active_obj - 1; /* NOTE WELL */
-    assert(mt_num >= 0);
+    int mt_num = patch::active_obj - 1; /* NOTE WELL */
+    SYS_ASSERT(mt_num >= 0);
 
     MarkThing(mt_num);
 
     new_mobjinfo[mt_num]->mbf21_flags = ParseBits(mbf21flag_list, bit_str);
 }
 
-} // namespace Deh_Edge
+} // namespace dehacked

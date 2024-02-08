@@ -30,12 +30,11 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "deh_i_defs.h"
 #include "deh_edge.h"
 
 #include "deh_system.h"
 
-namespace Deh_Edge
+namespace dehacked
 {
 
 char global_error_buf[1024];
@@ -72,4 +71,4 @@ const char *GetErrorMsg(void)
     return global_error_buf;
 }
 
-} // namespace Deh_Edge
+} // namespace dehacked

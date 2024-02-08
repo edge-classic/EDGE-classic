@@ -1002,7 +1002,7 @@ void ProcessDehackedInWad(data_file_c *df)
     source += " in ";
     source += bare_name;
 
-    DEH_Convert(data, length, source);
+    ConvertDehacked(data, length, source);
 
     delete[] data;
 }

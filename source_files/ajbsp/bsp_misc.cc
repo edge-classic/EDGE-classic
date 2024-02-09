@@ -33,70 +33,74 @@ static constexpr uint8_t kPolyObjectBoxSize = 10;
 static int CheckLinedefInsideBox(int xmin, int ymin, int xmax, int ymax, int x1,
                                  int y1, int x2, int y2)
 {
-  int count = 2;
-  int tmp;
+    int count = 2;
+    int tmp;
 
-  for (;;)
-  {
-    if (y1 > ymax)
+    for (;;)
     {
-      if (y2 > ymax) return false;
+        if (y1 > ymax)
+        {
+            if (y2 > ymax) return false;
 
-      x1 = x1 + (int)((x2 - x1) * (double)(ymax - y1) / (double)(y2 - y1));
-      y1 = ymax;
+            x1 =
+                x1 + (int)((x2 - x1) * (double)(ymax - y1) / (double)(y2 - y1));
+            y1 = ymax;
 
-      count = 2;
-      continue;
+            count = 2;
+            continue;
+        }
+
+        if (y1 < ymin)
+        {
+            if (y2 < ymin) return false;
+
+            x1 =
+                x1 + (int)((x2 - x1) * (double)(ymin - y1) / (double)(y2 - y1));
+            y1 = ymin;
+
+            count = 2;
+            continue;
+        }
+
+        if (x1 > xmax)
+        {
+            if (x2 > xmax) return false;
+
+            y1 =
+                y1 + (int)((y2 - y1) * (double)(xmax - x1) / (double)(x2 - x1));
+            x1 = xmax;
+
+            count = 2;
+            continue;
+        }
+
+        if (x1 < xmin)
+        {
+            if (x2 < xmin) return false;
+
+            y1 =
+                y1 + (int)((y2 - y1) * (double)(xmin - x1) / (double)(x2 - x1));
+            x1 = xmin;
+
+            count = 2;
+            continue;
+        }
+
+        count--;
+
+        if (count == 0) break;
+
+        // swap end points
+        tmp = x1;
+        x1  = x2;
+        x2  = tmp;
+        tmp = y1;
+        y1  = y2;
+        y2  = tmp;
     }
 
-    if (y1 < ymin)
-    {
-      if (y2 < ymin) return false;
-
-      x1 = x1 + (int)((x2 - x1) * (double)(ymin - y1) / (double)(y2 - y1));
-      y1 = ymin;
-
-      count = 2;
-      continue;
-    }
-
-    if (x1 > xmax)
-    {
-      if (x2 > xmax) return false;
-
-      y1 = y1 + (int)((y2 - y1) * (double)(xmax - x1) / (double)(x2 - x1));
-      x1 = xmax;
-
-      count = 2;
-      continue;
-    }
-
-    if (x1 < xmin)
-    {
-      if (x2 < xmin) return false;
-
-      y1 = y1 + (int)((y2 - y1) * (double)(xmin - x1) / (double)(x2 - x1));
-      x1 = xmin;
-
-      count = 2;
-      continue;
-    }
-
-    count--;
-
-    if (count == 0) break;
-
-    // swap end points
-    tmp = x1;
-    x1  = x2;
-    x2  = tmp;
-    tmp = y1;
-    y1  = y2;
-    y2  = tmp;
-  }
-
-  // linedef touches block
-  return true;
+    // linedef touches block
+    return true;
 }
 
 namespace ajbsp
@@ -110,148 +114,149 @@ namespace ajbsp
 
 void MarkPolyobjSector(Sector *sector)
 {
-  if (sector == NULL) return;
+    if (sector == NULL) return;
 
 #if DEBUG_POLYOBJ
-  I_Debugf("  Marking SECTOR %d\n", sector->index);
+    I_Debugf("  Marking SECTOR %d\n", sector->index);
 #endif
 
-  /* already marked ? */
-  if (sector->has_polyobject) return;
+    /* already marked ? */
+    if (sector->has_polyobject) return;
 
-  // mark all lines of this sector as precious, to prevent (ideally)
-  // the sector from being split.
-  sector->has_polyobject = true;
+    // mark all lines of this sector as precious, to prevent (ideally)
+    // the sector from being split.
+    sector->has_polyobject = true;
 
-  for (int i = 0; i < level_linedefs.size(); i++)
-  {
-    Linedef *L = level_linedefs[i];
-
-    if ((L->right != NULL && L->right->sector == sector) ||
-        (L->left != NULL && L->left->sector == sector))
+    for (int i = 0; i < level_linedefs.size(); i++)
     {
-      L->is_precious = true;
+        Linedef *L = level_linedefs[i];
+
+        if ((L->right != NULL && L->right->sector == sector) ||
+            (L->left != NULL && L->left->sector == sector))
+        {
+            L->is_precious = true;
+        }
     }
-  }
 }
 
 void MarkPolyobjPoint(double x, double y)
 {
-  int i;
-  int inside_count = 0;
+    int i;
+    int inside_count = 0;
 
-  double         best_dist  = 999999;
-  const Linedef *best_match = NULL;
-  Sector        *sector     = NULL;
+    double         best_dist  = 999999;
+    const Linedef *best_match = NULL;
+    Sector        *sector     = NULL;
 
-  // -AJA- First we handle the "awkward" cases where the polyobj sits
-  //       directly on a linedef or even a vertex.  We check all lines
-  //       that intersect a small box around the spawn point.
+    // -AJA- First we handle the "awkward" cases where the polyobj sits
+    //       directly on a linedef or even a vertex.  We check all lines
+    //       that intersect a small box around the spawn point.
 
-  int bminx = (int)(x - kPolyObjectBoxSize);
-  int bminy = (int)(y - kPolyObjectBoxSize);
-  int bmaxx = (int)(x + kPolyObjectBoxSize);
-  int bmaxy = (int)(y + kPolyObjectBoxSize);
+    int bminx = (int)(x - kPolyObjectBoxSize);
+    int bminy = (int)(y - kPolyObjectBoxSize);
+    int bmaxx = (int)(x + kPolyObjectBoxSize);
+    int bmaxy = (int)(y + kPolyObjectBoxSize);
 
-  for (i = 0; i < level_linedefs.size(); i++)
-  {
-    const Linedef *L = level_linedefs[i];
-
-    if (CheckLinedefInsideBox(bminx, bminy, bmaxx, bmaxy, (int)L->start->x_,
-                              (int)L->start->y_, (int)L->end->x_,
-                              (int)L->end->y_))
+    for (i = 0; i < level_linedefs.size(); i++)
     {
+        const Linedef *L = level_linedefs[i];
+
+        if (CheckLinedefInsideBox(bminx, bminy, bmaxx, bmaxy, (int)L->start->x_,
+                                  (int)L->start->y_, (int)L->end->x_,
+                                  (int)L->end->y_))
+        {
 #if DEBUG_POLYOBJ
-      I_Debugf("  Touching line was %d\n", L->index);
+            I_Debugf("  Touching line was %d\n", L->index);
 #endif
 
-      if (L->left != NULL) MarkPolyobjSector(L->left->sector);
+            if (L->left != NULL) MarkPolyobjSector(L->left->sector);
 
-      if (L->right != NULL) MarkPolyobjSector(L->right->sector);
+            if (L->right != NULL) MarkPolyobjSector(L->right->sector);
 
-      inside_count++;
+            inside_count++;
+        }
     }
-  }
 
-  if (inside_count > 0) return;
+    if (inside_count > 0) return;
 
-  // -AJA- Algorithm is just like in DEU: we cast a line horizontally
-  //       from the given (x,y) position and find all linedefs that
-  //       intersect it, choosing the one with the closest distance.
-  //       If the point is sitting directly on a (two-sided) line,
-  //       then we mark the sectors on both sides.
+    // -AJA- Algorithm is just like in DEU: we cast a line horizontally
+    //       from the given (x,y) position and find all linedefs that
+    //       intersect it, choosing the one with the closest distance.
+    //       If the point is sitting directly on a (two-sided) line,
+    //       then we mark the sectors on both sides.
 
-  for (i = 0; i < level_linedefs.size(); i++)
-  {
-    const Linedef *L = level_linedefs[i];
-
-    double x1 = L->start->x_;
-    double y1 = L->start->y_;
-    double x2 = L->end->x_;
-    double y2 = L->end->y_;
-
-    /* check vertical range */
-    if (fabs(y2 - y1) < kEpsilon) continue;
-
-    if ((y > (y1 + kEpsilon) && y > (y2 + kEpsilon)) ||
-        (y < (y1 - kEpsilon) && y < (y2 - kEpsilon)))
-      continue;
-
-    double x_cut = x1 + (x2 - x1) * (y - y1) / (y2 - y1) - x;
-
-    if (fabs(x_cut) < fabs(best_dist))
+    for (i = 0; i < level_linedefs.size(); i++)
     {
-      /* found a closer linedef */
+        const Linedef *L = level_linedefs[i];
 
-      best_match = L;
-      best_dist  = x_cut;
+        double x1 = L->start->x_;
+        double y1 = L->start->y_;
+        double x2 = L->end->x_;
+        double y2 = L->end->y_;
+
+        /* check vertical range */
+        if (fabs(y2 - y1) < kEpsilon) continue;
+
+        if ((y > (y1 + kEpsilon) && y > (y2 + kEpsilon)) ||
+            (y < (y1 - kEpsilon) && y < (y2 - kEpsilon)))
+            continue;
+
+        double x_cut = x1 + (x2 - x1) * (y - y1) / (y2 - y1) - x;
+
+        if (fabs(x_cut) < fabs(best_dist))
+        {
+            /* found a closer linedef */
+
+            best_match = L;
+            best_dist  = x_cut;
+        }
     }
-  }
 
-  if (best_match == NULL)
-  {
-    I_Printf("Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
-    current_build_info.total_warnings++;
-    return;
-  }
+    if (best_match == NULL)
+    {
+        I_Printf("Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
+        current_build_info.total_warnings++;
+        return;
+    }
 
-  double y1 = best_match->start->y_;
-  double y2 = best_match->end->y_;
-
-#if DEBUG_POLYOBJ
-  I_Debugf("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
-           best_match->index, y1, y2, best_dist);
-#endif
-
-  /* sanity check: shouldn't be directly on the line */
-#if DEBUG_POLYOBJ
-  if (fabs(best_dist) < kEpsilon)
-  {
-    I_Debugf("  Polyobj FAILURE: directly on the line (%d)\n",
-             best_match->index);
-  }
-#endif
-
-  /* check orientation of line, to determine which side the polyobj is
-   * actually on.
-   */
-  if ((y1 > y2) == (best_dist > 0))
-    sector = best_match->right ? best_match->right->sector : NULL;
-  else
-    sector = best_match->left ? best_match->left->sector : NULL;
+    double y1 = best_match->start->y_;
+    double y2 = best_match->end->y_;
 
 #if DEBUG_POLYOBJ
-  I_Debugf("  Sector %d contains the polyobj.\n", sector ? sector->index : -1);
+    I_Debugf("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
+             best_match->index, y1, y2, best_dist);
 #endif
 
-  if (sector == NULL)
-  {
-    I_Printf("Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
-    current_build_info.total_warnings++;
-    return;
-  }
+    /* sanity check: shouldn't be directly on the line */
+#if DEBUG_POLYOBJ
+    if (fabs(best_dist) < kEpsilon)
+    {
+        I_Debugf("  Polyobj FAILURE: directly on the line (%d)\n",
+                 best_match->index);
+    }
+#endif
 
-  MarkPolyobjSector(sector);
+    /* check orientation of line, to determine which side the polyobj is
+     * actually on.
+     */
+    if ((y1 > y2) == (best_dist > 0))
+        sector = best_match->right ? best_match->right->sector : NULL;
+    else
+        sector = best_match->left ? best_match->left->sector : NULL;
+
+#if DEBUG_POLYOBJ
+    I_Debugf("  Sector %d contains the polyobj.\n",
+             sector ? sector->index : -1);
+#endif
+
+    if (sector == NULL)
+    {
+        I_Printf("Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
+        current_build_info.total_warnings++;
+        return;
+    }
+
+    MarkPolyobjSector(sector);
 }
 
 //
@@ -259,480 +264,483 @@ void MarkPolyobjPoint(double x, double y)
 //
 void DetectPolyobjSectors(bool is_udmf)
 {
-  int i;
+    int i;
 
-  // -JL- There's a conflict between Hexen polyobj thing types and Doom thing
-  //      types. In Doom type 3001 is for Imp and 3002 for Demon. To solve
-  //      this problem, first we are going through all lines to see if the
-  //      level has any polyobjs. If found, we also must detect what polyobj
-  //      thing types are used - Hexen ones or ZDoom ones. That's why we
-  //      are going through all things searching for ZDoom polyobj thing
-  //      types. If any found, we assume that ZDoom polyobj thing types are
-  //      used, otherwise Hexen polyobj thing types are used.
+    // -JL- There's a conflict between Hexen polyobj thing types and Doom thing
+    //      types. In Doom type 3001 is for Imp and 3002 for Demon. To solve
+    //      this problem, first we are going through all lines to see if the
+    //      level has any polyobjs. If found, we also must detect what polyobj
+    //      thing types are used - Hexen ones or ZDoom ones. That's why we
+    //      are going through all things searching for ZDoom polyobj thing
+    //      types. If any found, we assume that ZDoom polyobj thing types are
+    //      used, otherwise Hexen polyobj thing types are used.
 
-  // -AJA- With UDMF there is an additional ambiguity, as line type 1 is a
-  //       very common door in Doom and Heretic namespaces, but it is also
-  //       the HEXTYPE_POLY_EXPLICIT special in Hexen and ZDoom namespaces.
-  //
-  //       Since the plain "Hexen" namespace is rare for UDMF maps, and ZDoom
-  //       ports prefer their own polyobj things, we disable the Hexen polyobj
-  //       things in UDMF maps.
+    // -AJA- With UDMF there is an additional ambiguity, as line type 1 is a
+    //       very common door in Doom and Heretic namespaces, but it is also
+    //       the HEXTYPE_POLY_EXPLICIT special in Hexen and ZDoom namespaces.
+    //
+    //       Since the plain "Hexen" namespace is rare for UDMF maps, and ZDoom
+    //       ports prefer their own polyobj things, we disable the Hexen polyobj
+    //       things in UDMF maps.
 
-  // -JL- First go through all lines to see if level contains any polyobjs
-  for (i = 0; i < level_linedefs.size(); i++)
-  {
-    Linedef *L = level_linedefs[i];
-
-    if (L->type == kHexenPolyobjectStart || L->type == kHexenPolyobjectExplicit)
-      break;
-  }
-
-  if (i == level_linedefs.size())
-  {
-    // -JL- No polyobjs in this level
-    return;
-  }
-
-  // -JL- Detect what polyobj thing types are used - Hexen ones or ZDoom ones
-  bool hexen_style = true;
-
-  if (is_udmf) hexen_style = false;
-
-  for (i = 0; i < level_things.size(); i++)
-  {
-    Thing *T = level_things[i];
-
-    if (T->type == kZDoomPolyobjectSpawnType ||
-        T->type == kZDoomPolyobjectSpawnCrushType)
+    // -JL- First go through all lines to see if level contains any polyobjs
+    for (i = 0; i < level_linedefs.size(); i++)
     {
-      // -JL- A ZDoom style polyobj thing found
-      hexen_style = false;
-      break;
+        Linedef *L = level_linedefs[i];
+
+        if (L->type == kHexenPolyobjectStart ||
+            L->type == kHexenPolyobjectExplicit)
+            break;
     }
-  }
 
-#if DEBUG_POLYOBJ
-  I_Debugf("Using %s style polyobj things\n", hexen_style ? "HEXEN" : "ZDOOM");
-#endif
-
-  for (i = 0; i < level_things.size(); i++)
-  {
-    Thing *T = level_things[i];
-
-    double x = (double)T->x;
-    double y = (double)T->y;
-
-    // ignore everything except polyobj start spots
-    if (hexen_style)
+    if (i == level_linedefs.size())
     {
-      // -JL- Hexen style polyobj things
-      if (T->type != kPolyobjectSpawnType &&
-          T->type != kPolyobjectSpawnCrushType)
-        continue;
+        // -JL- No polyobjs in this level
+        return;
     }
-    else
+
+    // -JL- Detect what polyobj thing types are used - Hexen ones or ZDoom ones
+    bool hexen_style = true;
+
+    if (is_udmf) hexen_style = false;
+
+    for (i = 0; i < level_things.size(); i++)
     {
-      // -JL- ZDoom style polyobj things
-      if (T->type != kZDoomPolyobjectSpawnType &&
-          T->type != kZDoomPolyobjectSpawnCrushType)
-        continue;
+        Thing *T = level_things[i];
+
+        if (T->type == kZDoomPolyobjectSpawnType ||
+            T->type == kZDoomPolyobjectSpawnCrushType)
+        {
+            // -JL- A ZDoom style polyobj thing found
+            hexen_style = false;
+            break;
+        }
     }
 
 #if DEBUG_POLYOBJ
-    I_Debugf("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
+    I_Debugf("Using %s style polyobj things\n",
+             hexen_style ? "HEXEN" : "ZDOOM");
 #endif
 
-    MarkPolyobjPoint(x, y);
-  }
+    for (i = 0; i < level_things.size(); i++)
+    {
+        Thing *T = level_things[i];
+
+        double x = (double)T->x;
+        double y = (double)T->y;
+
+        // ignore everything except polyobj start spots
+        if (hexen_style)
+        {
+            // -JL- Hexen style polyobj things
+            if (T->type != kPolyobjectSpawnType &&
+                T->type != kPolyobjectSpawnCrushType)
+                continue;
+        }
+        else
+        {
+            // -JL- ZDoom style polyobj things
+            if (T->type != kZDoomPolyobjectSpawnType &&
+                T->type != kZDoomPolyobjectSpawnCrushType)
+                continue;
+        }
+
+#if DEBUG_POLYOBJ
+        I_Debugf("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
+#endif
+
+        MarkPolyobjPoint(x, y);
+    }
 }
 
 /* ----- analysis routines ----------------------------- */
 
 bool Vertex::Overlaps(const Vertex *other) const
 {
-  double dx = fabs(other->x_ - x_);
-  double dy = fabs(other->y_ - y_);
+    double dx = fabs(other->x_ - x_);
+    double dy = fabs(other->y_ - y_);
 
-  return (dx < kEpsilon) && (dy < kEpsilon);
+    return (dx < kEpsilon) && (dy < kEpsilon);
 }
 
 // cmpVertex and revised *Compare functions adapted from k8vavoom
 static inline int cmpVertex(const Vertex *A, const Vertex *B)
 {
-  const double xdiff = (A->x_ - B->x_);
-  if (fabs(xdiff) > 0.0001) return (xdiff < 0 ? -1 : 1);
+    const double xdiff = (A->x_ - B->x_);
+    if (fabs(xdiff) > 0.0001) return (xdiff < 0 ? -1 : 1);
 
-  const double ydiff = (A->y_ - B->y_);
-  if (fabs(ydiff) > 0.0001) return (ydiff < 0 ? -1 : 1);
+    const double ydiff = (A->y_ - B->y_);
+    if (fabs(ydiff) > 0.0001) return (ydiff < 0 ? -1 : 1);
 
-  return 0;
+    return 0;
 }
 
 static int VertexCompare(const void *p1, const void *p2)
 {
-  int vert1 = ((const uint32_t *)p1)[0];
-  int vert2 = ((const uint32_t *)p2)[0];
+    int vert1 = ((const uint32_t *)p1)[0];
+    int vert2 = ((const uint32_t *)p2)[0];
 
-  if (vert1 == vert2) return 0;
+    if (vert1 == vert2) return 0;
 
-  Vertex *A = level_vertices[vert1];
-  Vertex *B = level_vertices[vert2];
+    Vertex *A = level_vertices[vert1];
+    Vertex *B = level_vertices[vert2];
 
-  return cmpVertex(A, B);
+    return cmpVertex(A, B);
 }
 
 void DetectOverlappingVertices(void)
 {
-  int       i;
-  uint32_t *array =
-      (uint32_t *)UtilCalloc(level_vertices.size() * sizeof(uint32_t));
+    int       i;
+    uint32_t *array =
+        (uint32_t *)UtilCalloc(level_vertices.size() * sizeof(uint32_t));
 
-  // sort array of indices
-  for (i = 0; i < level_vertices.size(); i++) array[i] = i;
+    // sort array of indices
+    for (i = 0; i < level_vertices.size(); i++) array[i] = i;
 
-  qsort(array, level_vertices.size(), sizeof(uint32_t), VertexCompare);
+    qsort(array, level_vertices.size(), sizeof(uint32_t), VertexCompare);
 
-  // now mark them off
-  for (i = 0; i < level_vertices.size() - 1; i++)
-  {
-    // duplicate ?
-    if (VertexCompare(array + i, array + i + 1) == 0)
+    // now mark them off
+    for (i = 0; i < level_vertices.size() - 1; i++)
     {
-      Vertex *A = level_vertices[array[i]];
-      Vertex *B = level_vertices[array[i + 1]];
+        // duplicate ?
+        if (VertexCompare(array + i, array + i + 1) == 0)
+        {
+            Vertex *A = level_vertices[array[i]];
+            Vertex *B = level_vertices[array[i + 1]];
 
-      // found an overlap !
-      B->overlap_ = A->overlap_ ? A->overlap_ : A;
+            // found an overlap !
+            B->overlap_ = A->overlap_ ? A->overlap_ : A;
+        }
     }
-  }
 
-  UtilFree(array);
+    UtilFree(array);
 
-  // update the linedefs
+    // update the linedefs
 
-  // update all in-memory linedefs.
-  // DOES NOT affect the on-disk linedefs.
-  // this is mainly to help the miniseg creation code.
+    // update all in-memory linedefs.
+    // DOES NOT affect the on-disk linedefs.
+    // this is mainly to help the miniseg creation code.
 
-  for (i = 0; i < level_linedefs.size(); i++)
-  {
-    Linedef *L = level_linedefs[i];
+    for (i = 0; i < level_linedefs.size(); i++)
+    {
+        Linedef *L = level_linedefs[i];
 
-    while (L->start->overlap_) { L->start = L->start->overlap_; }
+        while (L->start->overlap_) { L->start = L->start->overlap_; }
 
-    while (L->end->overlap_) { L->end = L->end->overlap_; }
-  }
+        while (L->end->overlap_) { L->end = L->end->overlap_; }
+    }
 }
 
 void PruneVerticesAtEnd(void)
 {
-  int old_num = level_vertices.size();
+    int old_num = level_vertices.size();
 
-  // scan all vertices.
-  // only remove from the end, so stop when hit a used one.
+    // scan all vertices.
+    // only remove from the end, so stop when hit a used one.
 
-  for (int i = level_vertices.size() - 1; i >= 0; i--)
-  {
-    Vertex *V = level_vertices[i];
+    for (int i = level_vertices.size() - 1; i >= 0; i--)
+    {
+        Vertex *V = level_vertices[i];
 
-    if (V->is_used_) break;
+        if (V->is_used_) break;
 
-    UtilFree(V);
+        UtilFree(V);
 
-    level_vertices.pop_back();
-  }
+        level_vertices.pop_back();
+    }
 
-  int unused = old_num - level_vertices.size();
+    int unused = old_num - level_vertices.size();
 
-  if (unused > 0)
-  {
-    I_Debugf("    Pruned %d unused vertices at end\n", unused);
-  }
+    if (unused > 0)
+    {
+        I_Debugf("    Pruned %d unused vertices at end\n", unused);
+    }
 
-  num_old_vert = level_vertices.size();
+    num_old_vert = level_vertices.size();
 }
 
 static inline int LineVertexLowest(const Linedef *L)
 {
-  // returns the "lowest" vertex (normally the left-most, but if the
-  // line is vertical, then the bottom-most) => 0 for start, 1 for end.
+    // returns the "lowest" vertex (normally the left-most, but if the
+    // line is vertical, then the bottom-most) => 0 for start, 1 for end.
 
-  return ((int)L->start->x_ < (int)L->end->x_ ||
-          ((int)L->start->x_ == (int)L->end->x_ &&
-           (int)L->start->y_ < (int)L->end->y_))
-             ? 0
-             : 1;
+    return ((int)L->start->x_ < (int)L->end->x_ ||
+            ((int)L->start->x_ == (int)L->end->x_ &&
+             (int)L->start->y_ < (int)L->end->y_))
+               ? 0
+               : 1;
 }
 
 static int LineStartCompare(const void *p1, const void *p2)
 {
-  int line1 = ((const int *)p1)[0];
-  int line2 = ((const int *)p2)[0];
+    int line1 = ((const int *)p1)[0];
+    int line2 = ((const int *)p2)[0];
 
-  if (line1 == line2) return 0;
+    if (line1 == line2) return 0;
 
-  Linedef *A = level_linedefs[line1];
-  Linedef *B = level_linedefs[line2];
+    Linedef *A = level_linedefs[line1];
+    Linedef *B = level_linedefs[line2];
 
-  // determine left-most vertex of each line
-  Vertex *C = LineVertexLowest(A) ? A->end : A->start;
-  Vertex *D = LineVertexLowest(B) ? B->end : B->start;
+    // determine left-most vertex of each line
+    Vertex *C = LineVertexLowest(A) ? A->end : A->start;
+    Vertex *D = LineVertexLowest(B) ? B->end : B->start;
 
-  return cmpVertex(C, D);
+    return cmpVertex(C, D);
 }
 
 static int LineEndCompare(const void *p1, const void *p2)
 {
-  int line1 = ((const int *)p1)[0];
-  int line2 = ((const int *)p2)[0];
+    int line1 = ((const int *)p1)[0];
+    int line2 = ((const int *)p2)[0];
 
-  if (line1 == line2) return 0;
+    if (line1 == line2) return 0;
 
-  Linedef *A = level_linedefs[line1];
-  Linedef *B = level_linedefs[line2];
+    Linedef *A = level_linedefs[line1];
+    Linedef *B = level_linedefs[line2];
 
-  // determine right-most vertex of each line
-  Vertex *C = LineVertexLowest(A) ? A->start : A->end;
-  Vertex *D = LineVertexLowest(B) ? B->start : B->end;
+    // determine right-most vertex of each line
+    Vertex *C = LineVertexLowest(A) ? A->start : A->end;
+    Vertex *D = LineVertexLowest(B) ? B->start : B->end;
 
-  return cmpVertex(C, D);
+    return cmpVertex(C, D);
 }
 
 void DetectOverlappingLines(void)
 {
-  // Algorithm:
-  //   Sort all lines by left-most vertex.
-  //   Overlapping lines will then be near each other in this set.
-  //   Note: does not detect partially overlapping lines.
+    // Algorithm:
+    //   Sort all lines by left-most vertex.
+    //   Overlapping lines will then be near each other in this set.
+    //   Note: does not detect partially overlapping lines.
 
-  int  i;
-  int *array = (int *)UtilCalloc(level_linedefs.size() * sizeof(int));
-  int  count = 0;
+    int  i;
+    int *array = (int *)UtilCalloc(level_linedefs.size() * sizeof(int));
+    int  count = 0;
 
-  // sort array of indices
-  for (i = 0; i < level_linedefs.size(); i++) array[i] = i;
+    // sort array of indices
+    for (i = 0; i < level_linedefs.size(); i++) array[i] = i;
 
-  qsort(array, level_linedefs.size(), sizeof(int), LineStartCompare);
+    qsort(array, level_linedefs.size(), sizeof(int), LineStartCompare);
 
-  for (i = 0; i < level_linedefs.size() - 1; i++)
-  {
-    int j;
-
-    for (j = i + 1; j < level_linedefs.size(); j++)
+    for (i = 0; i < level_linedefs.size() - 1; i++)
     {
-      if (LineStartCompare(array + i, array + j) != 0) break;
+        int j;
 
-      if (LineEndCompare(array + i, array + j) == 0)
-      {
-        // found an overlap !
+        for (j = i + 1; j < level_linedefs.size(); j++)
+        {
+            if (LineStartCompare(array + i, array + j) != 0) break;
 
-        Linedef *A = level_linedefs[array[i]];
-        Linedef *B = level_linedefs[array[j]];
+            if (LineEndCompare(array + i, array + j) == 0)
+            {
+                // found an overlap !
 
-        B->overlap = A->overlap ? A->overlap : A;
+                Linedef *A = level_linedefs[array[i]];
+                Linedef *B = level_linedefs[array[j]];
 
-        count++;
-      }
+                B->overlap = A->overlap ? A->overlap : A;
+
+                count++;
+            }
+        }
     }
-  }
 
-  UtilFree(array);
+    UtilFree(array);
 }
 
 /* ----- vertex routines ------------------------------- */
 
 void Vertex::AddWallTip(double dx, double dy, bool open_left, bool open_right)
 {
-  SYS_ASSERT(overlap_ == NULL);
+    SYS_ASSERT(overlap_ == NULL);
 
-  WallTip *tip = NewWallTip();
-  WallTip *after;
+    WallTip *tip = NewWallTip();
+    WallTip *after;
 
-  tip->angle      = ComputeAngle(dx, dy);
-  tip->open_left  = open_left;
-  tip->open_right = open_right;
+    tip->angle      = ComputeAngle(dx, dy);
+    tip->open_left  = open_left;
+    tip->open_right = open_right;
 
-  // find the correct place (order is increasing angle)
-  for (after = tip_set_; after && after->next; after = after->next) {}
+    // find the correct place (order is increasing angle)
+    for (after = tip_set_; after && after->next; after = after->next) {}
 
-  while (after && tip->angle + kEpsilon < after->angle) after = after->previous;
+    while (after && tip->angle + kEpsilon < after->angle)
+        after = after->previous;
 
-  // link it in
-  tip->next     = after ? after->next : tip_set_;
-  tip->previous = after;
+    // link it in
+    tip->next     = after ? after->next : tip_set_;
+    tip->previous = after;
 
-  if (after)
-  {
-    if (after->next) after->next->previous = tip;
+    if (after)
+    {
+        if (after->next) after->next->previous = tip;
 
-    after->next = tip;
-  }
-  else
-  {
-    if (tip_set_ != NULL) tip_set_->previous = tip;
+        after->next = tip;
+    }
+    else
+    {
+        if (tip_set_ != NULL) tip_set_->previous = tip;
 
-    tip_set_ = tip;
-  }
+        tip_set_ = tip;
+    }
 }
 
 void CalculateWallTips()
 {
-  for (int i = 0; i < level_linedefs.size(); i++)
-  {
-    const Linedef *L = level_linedefs[i];
+    for (int i = 0; i < level_linedefs.size(); i++)
+    {
+        const Linedef *L = level_linedefs[i];
 
-    if (L->overlap || L->zero_length) continue;
+        if (L->overlap || L->zero_length) continue;
 
-    double x1 = L->start->x_;
-    double y1 = L->start->y_;
-    double x2 = L->end->x_;
-    double y2 = L->end->y_;
+        double x1 = L->start->x_;
+        double y1 = L->start->y_;
+        double x2 = L->end->x_;
+        double y2 = L->end->y_;
 
-    bool left  = (L->left != NULL) && (L->left->sector != NULL);
-    bool right = (L->right != NULL) && (L->right->sector != NULL);
+        bool left  = (L->left != NULL) && (L->left->sector != NULL);
+        bool right = (L->right != NULL) && (L->right->sector != NULL);
 
-    // note that start->overlap and end->overlap should be NULL
-    // due to logic in DetectOverlappingVertices.
+        // note that start->overlap and end->overlap should be NULL
+        // due to logic in DetectOverlappingVertices.
 
-    L->start->AddWallTip(x2 - x1, y2 - y1, left, right);
-    L->end->AddWallTip(x1 - x2, y1 - y2, right, left);
-  }
+        L->start->AddWallTip(x2 - x1, y2 - y1, left, right);
+        L->end->AddWallTip(x1 - x2, y1 - y2, right, left);
+    }
 
 #if DEBUG_WALLTIPS
-  for (int k = 0; k < level_vertices.size(); k++)
-  {
-    Vertex *V = level_vertices[k];
-
-    I_Debugf("WallTips for vertex %d:\n", k);
-
-    for (WallTip *tip = V->tip_set; tip; tip = tip->next)
+    for (int k = 0; k < level_vertices.size(); k++)
     {
-      I_Debugf("  Angle=%1.1f left=%d right=%d\n", tip->angle,
-               tip->open_left ? 1 : 0, tip->open_right ? 1 : 0);
+        Vertex *V = level_vertices[k];
+
+        I_Debugf("WallTips for vertex %d:\n", k);
+
+        for (WallTip *tip = V->tip_set; tip; tip = tip->next)
+        {
+            I_Debugf("  Angle=%1.1f left=%d right=%d\n", tip->angle,
+                     tip->open_left ? 1 : 0, tip->open_right ? 1 : 0);
+        }
     }
-  }
 #endif
 }
 
 Vertex *NewVertexFromSplitSeg(Seg *seg, double x, double y)
 {
-  Vertex *vert = NewVertex();
+    Vertex *vert = NewVertex();
 
-  vert->x_ = x;
-  vert->y_ = y;
+    vert->x_ = x;
+    vert->y_ = y;
 
-  vert->is_new_  = true;
-  vert->is_used_ = true;
+    vert->is_new_  = true;
+    vert->is_used_ = true;
 
-  vert->index_ = num_new_vert;
-  num_new_vert++;
+    vert->index_ = num_new_vert;
+    num_new_vert++;
 
-  // compute wall-tip info
-  if (seg->linedef_ == NULL)
-  {
-    vert->AddWallTip(seg->pdx_, seg->pdy_, true, true);
-    vert->AddWallTip(-seg->pdx_, -seg->pdy_, true, true);
-  }
-  else
-  {
-    const Sidedef *front =
-        seg->side_ ? seg->linedef_->left : seg->linedef_->right;
-    const Sidedef *back =
-        seg->side_ ? seg->linedef_->right : seg->linedef_->left;
+    // compute wall-tip info
+    if (seg->linedef_ == NULL)
+    {
+        vert->AddWallTip(seg->pdx_, seg->pdy_, true, true);
+        vert->AddWallTip(-seg->pdx_, -seg->pdy_, true, true);
+    }
+    else
+    {
+        const Sidedef *front =
+            seg->side_ ? seg->linedef_->left : seg->linedef_->right;
+        const Sidedef *back =
+            seg->side_ ? seg->linedef_->right : seg->linedef_->left;
 
-    bool left  = (back != NULL) && (back->sector != NULL);
-    bool right = (front != NULL) && (front->sector != NULL);
+        bool left  = (back != NULL) && (back->sector != NULL);
+        bool right = (front != NULL) && (front->sector != NULL);
 
-    vert->AddWallTip(seg->pdx_, seg->pdy_, left, right);
-    vert->AddWallTip(-seg->pdx_, -seg->pdy_, right, left);
-  }
+        vert->AddWallTip(seg->pdx_, seg->pdy_, left, right);
+        vert->AddWallTip(-seg->pdx_, -seg->pdy_, right, left);
+    }
 
-  return vert;
+    return vert;
 }
 
 Vertex *NewVertexDegenerate(Vertex *start, Vertex *end)
 {
-  // this is only called when rounding off the BSP tree and
-  // all the segs are degenerate (zero length), hence we need
-  // to create at least one seg which won't be zero length.
+    // this is only called when rounding off the BSP tree and
+    // all the segs are degenerate (zero length), hence we need
+    // to create at least one seg which won't be zero length.
 
-  double dx = end->x_ - start->x_;
-  double dy = end->y_ - start->y_;
+    double dx = end->x_ - start->x_;
+    double dy = end->y_ - start->y_;
 
-  double dlen = hypot(dx, dy);
+    double dlen = hypot(dx, dy);
 
-  Vertex *vert = NewVertex();
+    Vertex *vert = NewVertex();
 
-  vert->is_new_  = false;
-  vert->is_used_ = true;
+    vert->is_new_  = false;
+    vert->is_used_ = true;
 
-  vert->index_ = num_old_vert;
-  num_old_vert++;
+    vert->index_ = num_old_vert;
+    num_old_vert++;
 
-  // compute new coordinates
+    // compute new coordinates
 
-  vert->x_ = start->x_;
-  vert->y_ = start->x_;
+    vert->x_ = start->x_;
+    vert->y_ = start->x_;
 
-  if (AlmostEquals(dlen, 0.0))
-    I_Error("AJBSP: NewVertexDegenerate: bad delta!\n");
+    if (AlmostEquals(dlen, 0.0))
+        I_Error("AJBSP: NewVertexDegenerate: bad delta!\n");
 
-  dx /= dlen;
-  dy /= dlen;
+    dx /= dlen;
+    dy /= dlen;
 
-  while (I_ROUND(vert->x_) == I_ROUND(start->x_) &&
-         I_ROUND(vert->y_) == I_ROUND(start->y_))
-  {
-    vert->x_ += dx;
-    vert->y_ += dy;
-  }
+    while (I_ROUND(vert->x_) == I_ROUND(start->x_) &&
+           I_ROUND(vert->y_) == I_ROUND(start->y_))
+    {
+        vert->x_ += dx;
+        vert->y_ += dy;
+    }
 
-  return vert;
+    return vert;
 }
 
 bool Vertex::CheckOpen(double dx, double dy) const
 {
-  const WallTip *tip;
+    const WallTip *tip;
 
-  double angle = ComputeAngle(dx, dy);
+    double angle = ComputeAngle(dx, dy);
 
-  // first check whether there's a wall-tip that lies in the exact
-  // direction of the given direction (which is relative to the
-  // vertex).
+    // first check whether there's a wall-tip that lies in the exact
+    // direction of the given direction (which is relative to the
+    // vertex).
 
-  for (tip = tip_set_; tip; tip = tip->next)
-  {
-    if (fabs(tip->angle - angle) < kEpsilon ||
-        fabs(tip->angle - angle) > (360.0 - kEpsilon))
+    for (tip = tip_set_; tip; tip = tip->next)
     {
-      // found one, hence closed
-      return false;
-    }
-  }
-
-  // OK, now just find the first wall-tip whose angle is greater than
-  // the angle we're interested in.  Therefore we'll be on the RIGHT
-  // side of that wall-tip.
-
-  for (tip = tip_set_; tip; tip = tip->next)
-  {
-    if (angle + kEpsilon < tip->angle)
-    {
-      // found it
-      return tip->open_right;
+        if (fabs(tip->angle - angle) < kEpsilon ||
+            fabs(tip->angle - angle) > (360.0 - kEpsilon))
+        {
+            // found one, hence closed
+            return false;
+        }
     }
 
-    if (!tip->next)
+    // OK, now just find the first wall-tip whose angle is greater than
+    // the angle we're interested in.  Therefore we'll be on the RIGHT
+    // side of that wall-tip.
+
+    for (tip = tip_set_; tip; tip = tip->next)
     {
-      // no more tips, thus we must be on the LEFT side of the tip
-      // with the largest angle.
+        if (angle + kEpsilon < tip->angle)
+        {
+            // found it
+            return tip->open_right;
+        }
 
-      return tip->open_left;
+        if (!tip->next)
+        {
+            // no more tips, thus we must be on the LEFT side of the tip
+            // with the largest angle.
+
+            return tip->open_left;
+        }
     }
-  }
 
-  // usually won't get here
-  return true;
+    // usually won't get here
+    return true;
 }
 
 }  // namespace ajbsp

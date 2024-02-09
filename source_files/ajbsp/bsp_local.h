@@ -43,191 +43,191 @@ class QuadTree;
 // a wall-tip is where a wall meets a vertex
 struct WallTip
 {
-  // link in list.  List is kept in ANTI-clockwise order.
-  WallTip *next;
-  WallTip *previous;
+    // link in list.  List is kept in ANTI-clockwise order.
+    WallTip *next;
+    WallTip *previous;
 
-  // angle that line makes at vertex (degrees).
-  double angle;
+    // angle that line makes at vertex (degrees).
+    double angle;
 
-  // whether each side of wall is OPEN or CLOSED.
-  // left is the side of increasing angles, whereas
-  // right is the side of decreasing angles.
-  bool open_left;
-  bool open_right;
+    // whether each side of wall is OPEN or CLOSED.
+    // left is the side of increasing angles, whereas
+    // right is the side of decreasing angles.
+    bool open_left;
+    bool open_right;
 };
 
 class Vertex
 {
- public:
-  // coordinates
-  double x_, y_;
+   public:
+    // coordinates
+    double x_, y_;
 
-  // vertex index.  Always valid after loading and pruning of unused
-  // vertices has occurred.
-  int index_;
+    // vertex index.  Always valid after loading and pruning of unused
+    // vertices has occurred.
+    int index_;
 
-  // vertex is newly created (from a seg split)
-  bool is_new_;
+    // vertex is newly created (from a seg split)
+    bool is_new_;
 
-  // when building normal nodes, unused vertices will be pruned.
-  bool is_used_;
+    // when building normal nodes, unused vertices will be pruned.
+    bool is_used_;
 
-  // usually NULL, unless this vertex occupies the same location as a
-  // previous vertex.
-  Vertex *overlap_;
+    // usually NULL, unless this vertex occupies the same location as a
+    // previous vertex.
+    Vertex *overlap_;
 
-  // list of wall-tips
-  WallTip *tip_set_;
+    // list of wall-tips
+    WallTip *tip_set_;
 
- public:
-  // check whether a line with the given delta coordinates from this
-  // vertex is open or closed.  If there exists a walltip at same
-  // angle, it is closed, likewise if line is in void space.
-  bool CheckOpen(double dx, double dy) const;
+   public:
+    // check whether a line with the given delta coordinates from this
+    // vertex is open or closed.  If there exists a walltip at same
+    // angle, it is closed, likewise if line is in void space.
+    bool CheckOpen(double dx, double dy) const;
 
-  void AddWallTip(double dx, double dy, bool open_left, bool open_right);
+    void AddWallTip(double dx, double dy, bool open_left, bool open_right);
 
-  bool Overlaps(const Vertex *other) const;
+    bool Overlaps(const Vertex *other) const;
 };
 
 struct Sector
 {
-  // sector index.  Always valid after loading & pruning.
-  int index;
+    // sector index.  Always valid after loading & pruning.
+    int index;
 
-  // most info (floor_h, floor_tex, etc) omitted.  We don't need to
-  // write the SECTORS lump, only read it.
+    // most info (floor_h, floor_tex, etc) omitted.  We don't need to
+    // write the SECTORS lump, only read it.
 
-  // -JL- non-zero if this sector contains a polyobj.
-  bool has_polyobject;
+    // -JL- non-zero if this sector contains a polyobj.
+    bool has_polyobject;
 };
 
 struct Sidedef
 {
-  // adjacent sector.  Can be NULL (invalid sidedef)
-  Sector *sector;
+    // adjacent sector.  Can be NULL (invalid sidedef)
+    Sector *sector;
 
-  // sidedef index.  Always valid after loading & pruning.
-  int index;
+    // sidedef index.  Always valid after loading & pruning.
+    int index;
 };
 
 struct Linedef
 {
-  // link for list
-  Linedef *next;
+    // link for list
+    Linedef *next;
 
-  Vertex *start;  // from this vertex...
-  Vertex *end;    // ... to this vertex
+    Vertex *start;  // from this vertex...
+    Vertex *end;    // ... to this vertex
 
-  Sidedef *right;  // right sidedef
-  Sidedef *left;   // left sidede, or NULL if none
+    Sidedef *right;  // right sidedef
+    Sidedef *left;   // left sidede, or NULL if none
 
-  int type;
+    int type;
 
-  // line is marked two-sided
-  bool two_sided;
+    // line is marked two-sided
+    bool two_sided;
 
-  // prefer not to split
-  bool is_precious;
+    // prefer not to split
+    bool is_precious;
 
-  // zero length (line should be totally ignored)
-  bool zero_length;
+    // zero length (line should be totally ignored)
+    bool zero_length;
 
-  // sector is the same on both sides
-  bool self_referencing;
+    // sector is the same on both sides
+    bool self_referencing;
 
-  // normally NULL, except when this linedef directly overlaps an earlier
-  // one (a rarely-used trick to create higher mid-masked textures).
-  // No segs should be created for these overlapping linedefs.
-  Linedef *overlap;
+    // normally NULL, except when this linedef directly overlaps an earlier
+    // one (a rarely-used trick to create higher mid-masked textures).
+    // No segs should be created for these overlapping linedefs.
+    Linedef *overlap;
 
-  // linedef index.  Always valid after loading & pruning of zero
-  // length lines has occurred.
-  int index;
+    // linedef index.  Always valid after loading & pruning of zero
+    // length lines has occurred.
+    int index;
 };
 
 struct Thing
 {
-  int x, y;
-  int type;
+    int x, y;
+    int type;
 
-  // other info (angle, and hexen stuff) omitted.  We don't need to
-  // write the THINGS lump, only read it.
+    // other info (angle, and hexen stuff) omitted.  We don't need to
+    // write the THINGS lump, only read it.
 
-  // Always valid (thing indices never change).
-  int index;
+    // Always valid (thing indices never change).
+    int index;
 };
 
 class Seg
 {
- public:
-  // link for list
-  Seg *next_;
+   public:
+    // link for list
+    Seg *next_;
 
-  Vertex *start_;  // from this vertex...
-  Vertex *end_;    // ... to this vertex
+    Vertex *start_;  // from this vertex...
+    Vertex *end_;    // ... to this vertex
 
-  // linedef that this seg goes along, or NULL if miniseg
-  Linedef *linedef_;
+    // linedef that this seg goes along, or NULL if miniseg
+    Linedef *linedef_;
 
-  // 0 for right, 1 for left
-  int side_;
+    // 0 for right, 1 for left
+    int side_;
 
-  // seg on other side, or NULL if one-sided.  This relationship is
-  // always one-to-one -- if one of the segs is split, the partner seg
-  // must also be split.
-  Seg *partner_;
+    // seg on other side, or NULL if one-sided.  This relationship is
+    // always one-to-one -- if one of the segs is split, the partner seg
+    // must also be split.
+    Seg *partner_;
 
-  // seg index.  Only valid once the seg has been added to a
-  // subsector.  A negative value means it is invalid -- there
-  // shouldn't be any of these once the BSP tree has been built.
-  int index_;
+    // seg index.  Only valid once the seg has been added to a
+    // subsector.  A negative value means it is invalid -- there
+    // shouldn't be any of these once the BSP tree has been built.
+    int index_;
 
-  // when true, this seg has become zero length (integer rounding of the
-  // start and end vertices produces the same location).  It should be
-  // ignored when writing the SEGS or V1 GL_SEGS lumps.  [Note: there
-  // won't be any of these when writing the V2 GL_SEGS lump].
-  bool is_degenerate_;
+    // when true, this seg has become zero length (integer rounding of the
+    // start and end vertices produces the same location).  It should be
+    // ignored when writing the SEGS or V1 GL_SEGS lumps.  [Note: there
+    // won't be any of these when writing the V2 GL_SEGS lump].
+    bool is_degenerate_;
 
-  // the quad-tree node that contains this seg, or NULL if the seg
-  // is now in a subsector.
-  QuadTree *quad_;
+    // the quad-tree node that contains this seg, or NULL if the seg
+    // is now in a subsector.
+    QuadTree *quad_;
 
-  // precomputed data for faster calculations
-  double psx_, psy_;
-  double pex_, pey_;
-  double pdx_, pdy_;
+    // precomputed data for faster calculations
+    double psx_, psy_;
+    double pex_, pey_;
+    double pdx_, pdy_;
 
-  double p_length_;
-  double p_para_;
-  double p_perp_;
+    double p_length_;
+    double p_para_;
+    double p_perp_;
 
-  // linedef that this seg initially comes from.  For "real" segs,
-  // this is just the same as the 'linedef' field above.  For
-  // "minisegs", this is the linedef of the partition line.
-  Linedef *source_line_;
+    // linedef that this seg initially comes from.  For "real" segs,
+    // this is just the same as the 'linedef' field above.  For
+    // "minisegs", this is the linedef of the partition line.
+    Linedef *source_line_;
 
-  // this only used by ClockwiseOrder()
-  double cmp_angle_;
+    // this only used by ClockwiseOrder()
+    double cmp_angle_;
 
- public:
-  // compute the seg private info (psx/y, pex/y, pdx/y, etc).
-  void Recompute();
+   public:
+    // compute the seg private info (psx/y, pex/y, pdx/y, etc).
+    void Recompute();
 
-  int PointOnLineSide(double x, double y) const;
+    int PointOnLineSide(double x, double y) const;
 
-  // compute the parallel and perpendicular distances from a partition
-  // line to a point.
-  inline double ParallelDistance(double x, double y) const
-  {
-    return (x * pdx_ + y * pdy_ + p_para_) / p_length_;
-  }
+    // compute the parallel and perpendicular distances from a partition
+    // line to a point.
+    inline double ParallelDistance(double x, double y) const
+    {
+        return (x * pdx_ + y * pdy_ + p_para_) / p_length_;
+    }
 
-  inline double PerpendicularDistance(double x, double y) const
-  {
-    return (x * pdy_ - y * pdx_ + p_perp_) / p_length_;
-  }
+    inline double PerpendicularDistance(double x, double y) const
+    {
+        return (x * pdy_ - y * pdx_ + p_perp_) / p_length_;
+    }
 };
 
 // a seg with this index is removed by SortSegs().
@@ -236,108 +236,109 @@ constexpr uint32_t kSegIsGarbage = (1 << 29);
 
 class Subsector
 {
- public:
-  // list of segs
-  Seg *seg_list_;
+   public:
+    // list of segs
+    Seg *seg_list_;
 
-  // count of segs -- only valid after RenumberSegs() is called
-  int seg_count_;
+    // count of segs -- only valid after RenumberSegs() is called
+    int seg_count_;
 
-  // subsector index.  Always valid, set when the subsector is
-  // initially created.
-  int index_;
+    // subsector index.  Always valid, set when the subsector is
+    // initially created.
+    int index_;
 
-  // approximate middle point
-  double mid_x_;
-  double mid_y_;
+    // approximate middle point
+    double mid_x_;
+    double mid_y_;
 
- public:
-  void AddToTail(Seg *seg);
+   public:
+    void AddToTail(Seg *seg);
 
-  void DetermineMiddle();
-  void ClockwiseOrder();
-  void RenumberSegs(int &cur_seg_index);
+    void DetermineMiddle();
+    void ClockwiseOrder();
+    void RenumberSegs(int &cur_seg_index);
 
-  void SanityCheckClosed() const;
-  void SanityCheckHasRealSeg() const;
+    void SanityCheckClosed() const;
+    void SanityCheckHasRealSeg() const;
 };
 
 struct BoundingBox
 {
-  int minx, miny;
-  int maxx, maxy;
+    int minx, miny;
+    int maxx, maxy;
 };
 
 struct Child
 {
-  // child node or subsector (one must be NULL)
-  Node      *node;
-  Subsector *subsec;
+    // child node or subsector (one must be NULL)
+    Node      *node;
+    Subsector *subsec;
 
-  // child bounding box
-  BoundingBox bounds;
+    // child bounding box
+    BoundingBox bounds;
 };
 
 class Node
 {
- public:
-  // these coordinates are high precision to support UDMF.
-  // in non-UDMF maps, they will actually be integral since a
-  // partition line *always* comes from a normal linedef.
+   public:
+    // these coordinates are high precision to support UDMF.
+    // in non-UDMF maps, they will actually be integral since a
+    // partition line *always* comes from a normal linedef.
 
-  double x_, y_;    // starting point
-  double dx_, dy_;  // offset to ending point
+    double x_, y_;    // starting point
+    double dx_, dy_;  // offset to ending point
 
-  // right & left children
-  Child r_;
-  Child l_;
+    // right & left children
+    Child r_;
+    Child l_;
 
-  // node index.  Only valid once the NODES or GL_NODES lump has been
-  // created.
-  int index_;
+    // node index.  Only valid once the NODES or GL_NODES lump has been
+    // created.
+    int index_;
 
- public:
-  void SetPartition(const Seg *part);
+   public:
+    void SetPartition(const Seg *part);
 };
 
 class QuadTree
 {
-  // NOTE: not a real quadtree, division is always binary.
+    // NOTE: not a real quadtree, division is always binary.
 
- public:
-  // coordinates on map for this block, from lower-left corner to
-  // upper-right corner.  Fully inclusive, i.e (x,y) is inside this
-  // block when x1 < x < x2 and y1 < y < y2.
-  int x1_, y1_;
-  int x2_, y2_;
+   public:
+    // coordinates on map for this block, from lower-left corner to
+    // upper-right corner.  Fully inclusive, i.e (x,y) is inside this
+    // block when x1 < x < x2 and y1 < y < y2.
+    int x1_, y1_;
+    int x2_, y2_;
 
-  // sub-trees.  NULL for leaf nodes.
-  // [0] has the lower coordinates, and [1] has the higher coordinates.
-  // Division of a square always occurs horizontally (e.g. 512x512 -> 256x512).
-  QuadTree *subs_[2];
+    // sub-trees.  NULL for leaf nodes.
+    // [0] has the lower coordinates, and [1] has the higher coordinates.
+    // Division of a square always occurs horizontally (e.g. 512x512 ->
+    // 256x512).
+    QuadTree *subs_[2];
 
-  // count of real/mini segs contained in this node AND ALL CHILDREN.
-  int real_num_;
-  int mini_num_;
+    // count of real/mini segs contained in this node AND ALL CHILDREN.
+    int real_num_;
+    int mini_num_;
 
-  // list of segs completely contained in this node.
-  Seg *list_;
+    // list of segs completely contained in this node.
+    Seg *list_;
 
- public:
-  QuadTree(int _x1, int _y1, int _x2, int _y2);
-  ~QuadTree();
+   public:
+    QuadTree(int _x1, int _y1, int _x2, int _y2);
+    ~QuadTree();
 
-  void AddSeg(Seg *seg);
-  void AddList(Seg *list);
+    void AddSeg(Seg *seg);
+    void AddList(Seg *list);
 
-  inline bool Empty() const { return (real_num_ + mini_num_) == 0; }
+    inline bool Empty() const { return (real_num_ + mini_num_) == 0; }
 
-  void ConvertToList(Seg **list);
+    void ConvertToList(Seg **list);
 
-  // check relationship between this box and the partition line.
-  // returns -1 or +1 if box is definitively on a particular side,
-  // or 0 if the line intersects or touches the box.
-  int OnLineSide(const Seg *part) const;
+    // check relationship between this box and the partition line.
+    // returns -1 or +1 if box is definitively on a particular side,
+    // or 0 if the line intersects or touches the box.
+    int OnLineSide(const Seg *part) const;
 };
 
 /* ----- Level data arrays ----------------------- */
@@ -413,8 +414,8 @@ constexpr double kEpsilon = (1.0 / 1024.0);
 
 inline void ListAddSeg(Seg **list_ptr, Seg *seg)
 {
-  seg->next_ = *list_ptr;
-  *list_ptr  = seg;
+    seg->next_ = *list_ptr;
+    *list_ptr  = seg;
 }
 
 // an "intersection" remembers the vertex that touches a BSP divider
@@ -422,27 +423,27 @@ inline void ListAddSeg(Seg **list_ptr, Seg *seg)
 
 struct Intersection
 {
-  // link in list.  The intersection list is kept sorted by
-  // along_dist, in ascending order.
-  Intersection *next;
-  Intersection *prev;
+    // link in list.  The intersection list is kept sorted by
+    // along_dist, in ascending order.
+    Intersection *next;
+    Intersection *prev;
 
-  // vertex in question
-  Vertex *vertex;
+    // vertex in question
+    Vertex *vertex;
 
-  // how far along the partition line the vertex is.  Zero is at the
-  // partition seg's start point, positive values move in the same
-  // direction as the partition's direction, and negative values move
-  // in the opposite direction.
-  double along_dist;
+    // how far along the partition line the vertex is.  Zero is at the
+    // partition seg's start point, positive values move in the same
+    // direction as the partition's direction, and negative values move
+    // in the opposite direction.
+    double along_dist;
 
-  // true if this intersection was on a self-referencing linedef
-  bool self_ref;
+    // true if this intersection was on a self-referencing linedef
+    bool self_ref;
 
-  // status of each side of the vertex (along the partition),
-  // true if OPEN and false if CLOSED.
-  bool open_before;
-  bool open_after;
+    // status of each side of the vertex (along the partition),
+    // true if OPEN and false if CLOSED.
+    bool open_before;
+    bool open_after;
 };
 
 /* -------- functions ---------------------------- */

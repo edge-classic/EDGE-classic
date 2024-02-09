@@ -34,11 +34,12 @@ namespace ajbsp
 //
 void *UtilCalloc(int size)
 {
-  void *ret = calloc(1, size);
+    void *ret = calloc(1, size);
 
-  if (!ret) I_Error("AJBSP: Out of memory (cannot allocate %d bytes)\n", size);
+    if (!ret)
+        I_Error("AJBSP: Out of memory (cannot allocate %d bytes)\n", size);
 
-  return ret;
+    return ret;
 }
 
 //
@@ -46,12 +47,12 @@ void *UtilCalloc(int size)
 //
 void *UtilRealloc(void *old, int size)
 {
-  void *ret = realloc(old, size);
+    void *ret = realloc(old, size);
 
-  if (!ret)
-    I_Error("AJBSP: Out of memory (cannot reallocate %d bytes)\n", size);
+    if (!ret)
+        I_Error("AJBSP: Out of memory (cannot reallocate %d bytes)\n", size);
 
-  return ret;
+    return ret;
 }
 
 //
@@ -59,9 +60,9 @@ void *UtilRealloc(void *old, int size)
 //
 void UtilFree(void *data)
 {
-  if (data == NULL) I_Error("AJBSP: Trying to free a NULL pointer\n");
+    if (data == NULL) I_Error("AJBSP: Trying to free a NULL pointer\n");
 
-  free(data);
+    free(data);
 }
 
 //------------------------------------------------------------------------
@@ -74,15 +75,15 @@ void UtilFree(void *data)
 //
 double ComputeAngle(double dx, double dy)
 {
-  double angle;
+    double angle;
 
-  if (AlmostEquals(dx, 0.0)) return (dy > 0) ? 90.0 : 270.0;
+    if (AlmostEquals(dx, 0.0)) return (dy > 0) ? 90.0 : 270.0;
 
-  angle = atan2((double)dy, (double)dx) * 180.0 / HMM_PI;
+    angle = atan2((double)dy, (double)dx) * 180.0 / HMM_PI;
 
-  if (angle < 0) angle += 360.0;
+    if (angle < 0) angle += 360.0;
 
-  return angle;
+    return angle;
 }
 
 }  // namespace ajbsp

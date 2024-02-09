@@ -9,3 +9,5 @@ AlignTrailingComments: true
 SortIncludes: true
 BreakBeforeBraces: Allman
 EmptyLineBeforeAccessModifier: LogicalBlock
+IndentWidth: 4
+UseTab: Never

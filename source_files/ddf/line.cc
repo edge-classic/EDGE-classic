@@ -20,7 +20,8 @@
 //
 // -KM- 1998/09/01 Written.
 // -ACB- 1998/09/06 Beautification: cleaned up so I can read it :).
-// -KM- 1998/10/29 New types of linedefs added: colourmap, sound, friction, gravity
+// -KM- 1998/10/29 New types of linedefs added: colourmap, sound, friction,
+// gravity
 //                  auto, singlesided, music, lumpcheck
 //                  Removed sector movement to ddf_main.c, so can be accesed by
 //                  ddf_sect.c
@@ -28,34 +29,30 @@
 // -ACB- 2001/02/04 DDF_GetSecHeightReference moved to p_plane.c
 //
 
-#include "local.h"
 #include "line.h"
 
-#include "str_util.h"
+#include <limits.h>
+#include <string.h>
 
 #include "AlmostEquals.h"
-
-#include <limits.h>
-
-#undef DF
-#define DF DDF_FIELD
-
-#define DDF_LineHashFunc(x) (((x) + LOOKUP_CACHESIZE) % LOOKUP_CACHESIZE)
+#include "local.h"
+#include "sokol_color.h"
+#include "str_util.h"
 
 // -KM- 1999/01/29 Improved scrolling.
 // Scrolling
-typedef enum
+enum ScrollDirections
 {
-    dir_none  = 0,
-    dir_vert  = 1,
-    dir_up    = 2,
-    dir_horiz = 4,
-    dir_left  = 8
-} scrolldirs_e;
+    kScrollDirectionNone       = 0,
+    kScrollDirectionVertical   = 1,
+    kScrollDirectionUp         = 2,
+    kScrollDirectionHorizontal = 4,
+    kScrollDirectionLeft       = 8
+};
 
-linetype_container_c linetypes; // <-- User-defined
+LineTypeContainer linetypes;  // <-- User-defined
 
-static linetype_c *default_linetype;
+static LineType *default_linetype;
 
 static void DDF_LineGetTrigType(const char *info, void *storage);
 static void DDF_LineGetActivators(const char *info, void *storage);
@@ -76,162 +73,203 @@ static void DDF_LineGetSlopeType(const char *info, void *storage);
 
 static void DDF_LineMakeCrush(const char *info);
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_floor
-static movplanedef_c dummy_floor;
+static PlaneMoverDefinition dummy_floor;
 
-const commandlist_t floor_commands[] = {DF("TYPE", type, DDF_SectGetMType),
-                                        DF("SPEED_UP", speed_up, DDF_MainGetFloat),
-                                        DF("SPEED_DOWN", speed_down, DDF_MainGetFloat),
-                                        DF("DEST_REF", destref, DDF_SectGetDestRef),
-                                        DF("DEST_OFFSET", dest, DDF_MainGetFloat),
-                                        DF("OTHER_REF", otherref, DDF_SectGetDestRef),
-                                        DF("OTHER_OFFSET", other, DDF_MainGetFloat),
-                                        DF("CRUSH_DAMAGE", crush_damage, DDF_MainGetNumeric),
-                                        DF("TEXTURE", tex, DDF_MainGetLumpName),
-                                        DF("PAUSE_TIME", wait, DDF_MainGetTime),
-                                        DF("WAIT_TIME", prewait, DDF_MainGetTime),
-                                        DF("SFX_START", sfxstart, DDF_MainLookupSound),
-                                        DF("SFX_UP", sfxup, DDF_MainLookupSound),
-                                        DF("SFX_DOWN", sfxdown, DDF_MainLookupSound),
-                                        DF("SFX_STOP", sfxstop, DDF_MainLookupSound),
-                                        DF("SCROLL_ANGLE", scroll_angle, DDF_MainGetAngle),
-                                        DF("SCROLL_SPEED", scroll_speed, DDF_MainGetFloat),
-                                        DF("IGNORE_TEXTURE", ignore_texture, DDF_MainGetBoolean),
+const DDFCommandList floor_commands[] = {
+    DDF_FIELD("TYPE", dummy_floor, type_, DDF_SectGetMType),
+    DDF_FIELD("SPEED_UP", dummy_floor, speed_up_, DDF_MainGetFloat),
+    DDF_FIELD("SPEED_DOWN", dummy_floor, speed_down_, DDF_MainGetFloat),
+    DDF_FIELD("DEST_REF", dummy_floor, destref_, DDF_SectGetDestRef),
+    DDF_FIELD("DEST_OFFSET", dummy_floor, dest_, DDF_MainGetFloat),
+    DDF_FIELD("OTHER_REF", dummy_floor, otherref_, DDF_SectGetDestRef),
+    DDF_FIELD("OTHER_OFFSET", dummy_floor, other_, DDF_MainGetFloat),
+    DDF_FIELD("CRUSH_DAMAGE", dummy_floor, crush_damage_, DDF_MainGetNumeric),
+    DDF_FIELD("TEXTURE", dummy_floor, tex_, DDF_MainGetLumpName),
+    DDF_FIELD("PAUSE_TIME", dummy_floor, wait_, DDF_MainGetTime),
+    DDF_FIELD("WAIT_TIME", dummy_floor, prewait_, DDF_MainGetTime),
+    DDF_FIELD("SFX_START", dummy_floor, sfxstart_, DDF_MainLookupSound),
+    DDF_FIELD("SFX_UP", dummy_floor, sfxup_, DDF_MainLookupSound),
+    DDF_FIELD("SFX_DOWN", dummy_floor, sfxdown_, DDF_MainLookupSound),
+    DDF_FIELD("SFX_STOP", dummy_floor, sfxstop_, DDF_MainLookupSound),
+    DDF_FIELD("SCROLL_ANGLE", dummy_floor, scroll_angle_, DDF_MainGetAngle),
+    DDF_FIELD("SCROLL_SPEED", dummy_floor, scroll_speed_, DDF_MainGetFloat),
+    DDF_FIELD("IGNORE_TEXTURE", dummy_floor, ignore_texture_,
+              DDF_MainGetBoolean),
 
-                                        DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_ladder
-static ladderdef_c dummy_ladder;
+static LadderDefinition dummy_ladder;
 
-const commandlist_t ladder_commands[] = {DF("HEIGHT", height, DDF_MainGetFloat), DDF_CMD_END};
+const DDFCommandList ladder_commands[] = {
+    DDF_FIELD("HEIGHT", dummy_ladder, height_, DDF_MainGetFloat),
+    {nullptr, nullptr, 0, nullptr}};
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_slider
-static sliding_door_c dummy_slider;
+static SlidingDoor dummy_slider;
 
-const commandlist_t slider_commands[] = {DF("TYPE", type, DDF_LineGetSlideType),
-                                         DF("SPEED", speed, DDF_MainGetFloat),
-                                         DF("PAUSE_TIME", wait, DDF_MainGetTime),
-                                         DF("SEE_THROUGH", see_through, DDF_MainGetBoolean),
-                                         DF("DISTANCE", distance, DDF_MainGetPercent),
-                                         DF("SFX_START", sfx_start, DDF_MainLookupSound),
-                                         DF("SFX_OPEN", sfx_open, DDF_MainLookupSound),
-                                         DF("SFX_CLOSE", sfx_close, DDF_MainLookupSound),
-                                         DF("SFX_STOP", sfx_stop, DDF_MainLookupSound),
+const DDFCommandList slider_commands[] = {
+    DDF_FIELD("TYPE", dummy_slider, type_, DDF_LineGetSlideType),
+    DDF_FIELD("SPEED", dummy_slider, speed_, DDF_MainGetFloat),
+    DDF_FIELD("PAUSE_TIME", dummy_slider, wait_, DDF_MainGetTime),
+    DDF_FIELD("SEE_THROUGH", dummy_slider, see_through_, DDF_MainGetBoolean),
+    DDF_FIELD("DISTANCE", dummy_slider, distance_, DDF_MainGetPercent),
+    DDF_FIELD("SFX_START", dummy_slider, sfx_start_, DDF_MainLookupSound),
+    DDF_FIELD("SFX_OPEN", dummy_slider, sfx_open_, DDF_MainLookupSound),
+    DDF_FIELD("SFX_CLOSE", dummy_slider, sfx_close_, DDF_MainLookupSound),
+    DDF_FIELD("SFX_STOP", dummy_slider, sfx_stop_, DDF_MainLookupSound),
 
-                                         DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
-static linetype_c *dynamic_line;
+static LineType *dynamic_line;
 
 // these bits logically belong with buffer_line:
-static float        scrolling_speed;
-static scrolldirs_e scrolling_dir;
+static float            scrolling_speed;
+static ScrollDirections scrolling_dir;
 
-#undef DDF_CMD_BASE
-#define DDF_CMD_BASE dummy_line
-static linetype_c dummy_line;
+static LineType dummy_line;
 
-static const commandlist_t linedef_commands[] = {
+static const DDFCommandList linedef_commands[] = {
     // sub-commands
-    DDF_SUB_LIST("FLOOR", f, floor_commands), DDF_SUB_LIST("CEILING", c, floor_commands),
-    DDF_SUB_LIST("SLIDER", s, slider_commands), DDF_SUB_LIST("LADDER", ladder, ladder_commands),
+    DDF_SUB_LIST("FLOOR", dummy_line, f_, floor_commands),
+    DDF_SUB_LIST("CEILING", dummy_line, c_, floor_commands),
+    DDF_SUB_LIST("SLIDER", dummy_line, s_, slider_commands),
+    DDF_SUB_LIST("LADDER", dummy_line, ladder_, ladder_commands),
 
-    DF("NEWTRIGGER", newtrignum, DDF_MainGetNumeric), DF("ACTIVATORS", obj, DDF_LineGetActivators),
-    DF("TYPE", type, DDF_LineGetTrigType), DF("KEYS", keys, DDF_LineGetSecurity),
-    DF("FAILED_MESSAGE", failedmessage, DDF_MainGetString), DF("FAILED_SFX", failed_sfx, DDF_MainLookupSound),
-    DF("COUNT", count, DDF_MainGetNumeric),
+    DDF_FIELD("NEWTRIGGER", dummy_line, newtrignum_, DDF_MainGetNumeric),
+    DDF_FIELD("ACTIVATORS", dummy_line, obj_, DDF_LineGetActivators),
+    DDF_FIELD("TYPE", dummy_line, type_, DDF_LineGetTrigType),
+    DDF_FIELD("KEYS", dummy_line, keys_, DDF_LineGetSecurity),
+    DDF_FIELD("FAILED_MESSAGE", dummy_line, failedmessage_, DDF_MainGetString),
+    DDF_FIELD("FAILED_SFX", dummy_line, failed_sfx_, DDF_MainLookupSound),
+    DDF_FIELD("COUNT", dummy_line, count_, DDF_MainGetNumeric),
 
-    DF("DONUT", d.dodonut, DDF_MainGetBoolean), DF("DONUT_IN_SFX", d.d_sfxin, DDF_MainLookupSound),
-    DF("DONUT_IN_SFXSTOP", d.d_sfxinstop, DDF_MainLookupSound), DF("DONUT_OUT_SFX", d.d_sfxout, DDF_MainLookupSound),
-    DF("DONUT_OUT_SFXSTOP", d.d_sfxoutstop, DDF_MainLookupSound),
+    DDF_FIELD("DONUT", dummy_line, d_.dodonut_, DDF_MainGetBoolean),
+    DDF_FIELD("DONUT_IN_SFX", dummy_line, d_.d_sfxin_, DDF_MainLookupSound),
+    DDF_FIELD("DONUT_IN_SFXSTOP", dummy_line, d_.d_sfxinstop_,
+              DDF_MainLookupSound),
+    DDF_FIELD("DONUT_OUT_SFX", dummy_line, d_.d_sfxout_, DDF_MainLookupSound),
+    DDF_FIELD("DONUT_OUT_SFXSTOP", dummy_line, d_.d_sfxoutstop_,
+              DDF_MainLookupSound),
 
-    DF("TELEPORT", t.teleport, DDF_MainGetBoolean), DF("TELEPORT_DELAY", t.delay, DDF_MainGetTime),
-    DF("TELEIN_EFFECTOBJ", t.inspawnobj_ref, DDF_MainGetString),
-    DF("TELEOUT_EFFECTOBJ", t.outspawnobj_ref, DDF_MainGetString),
-    DF("TELEPORT_SPECIAL", t.special, DDF_LineGetTeleportSpecial),
+    DDF_FIELD("TELEPORT", dummy_line, t_.teleport_, DDF_MainGetBoolean),
+    DDF_FIELD("TELEPORT_DELAY", dummy_line, t_.delay_, DDF_MainGetTime),
+    DDF_FIELD("TELEIN_EFFECTOBJ", dummy_line, t_.inspawnobj_ref_,
+              DDF_MainGetString),
+    DDF_FIELD("TELEOUT_EFFECTOBJ", dummy_line, t_.outspawnobj_ref_,
+              DDF_MainGetString),
+    DDF_FIELD("TELEPORT_SPECIAL", dummy_line, t_.special_,
+              DDF_LineGetTeleportSpecial),
 
-    DF("LIGHT_TYPE", l.type, DDF_SectGetLighttype), DF("LIGHT_LEVEL", l.level, DDF_MainGetNumeric),
-    DF("LIGHT_DARK_TIME", l.darktime, DDF_MainGetTime), DF("LIGHT_BRIGHT_TIME", l.brighttime, DDF_MainGetTime),
-    DF("LIGHT_CHANCE", l.chance, DDF_MainGetPercent), DF("LIGHT_SYNC", l.sync, DDF_MainGetTime),
-    DF("LIGHT_STEP", l.step, DDF_MainGetNumeric), DF("EXIT", e_exit, DDF_SectGetExit),
-    DF("HUB_EXIT", hub_exit, DDF_MainGetNumeric),
+    DDF_FIELD("LIGHT_TYPE", dummy_line, l_.type_, DDF_SectGetLighttype),
+    DDF_FIELD("LIGHT_LEVEL", dummy_line, l_.level_, DDF_MainGetNumeric),
+    DDF_FIELD("LIGHT_DARK_TIME", dummy_line, l_.darktime_, DDF_MainGetTime),
+    DDF_FIELD("LIGHT_BRIGHT_TIME", dummy_line, l_.brighttime_, DDF_MainGetTime),
+    DDF_FIELD("LIGHT_CHANCE", dummy_line, l_.chance_, DDF_MainGetPercent),
+    DDF_FIELD("LIGHT_SYNC", dummy_line, l_.sync_, DDF_MainGetTime),
+    DDF_FIELD("LIGHT_STEP", dummy_line, l_.step_, DDF_MainGetNumeric),
+    DDF_FIELD("EXIT", dummy_line, e_exit_, DDF_SectGetExit),
+    DDF_FIELD("HUB_EXIT", dummy_line, hub_exit_, DDF_MainGetNumeric),
 
-    DF("SCROLL_XSPEED", s_xspeed, DDF_MainGetFloat), DF("SCROLL_YSPEED", s_yspeed, DDF_MainGetFloat),
-    DF("SCROLL_PARTS", scroll_parts, DDF_LineGetScrollPart), DF("USE_COLOURMAP", use_colourmap, DDF_MainGetColourmap),
-    DF("GRAVITY", gravity, DDF_MainGetFloat), DF("FRICTION", friction, DDF_MainGetFloat),
-    DF("VISCOSITY", viscosity, DDF_MainGetFloat), DF("DRAG", drag, DDF_MainGetFloat),
-    DF("AMBIENT_SOUND", ambient_sfx, DDF_MainLookupSound), DF("ACTIVATE_SOUND", activate_sfx, DDF_MainLookupSound),
-    DF("MUSIC", music, DDF_MainGetNumeric), DF("AUTO", autoline, DDF_MainGetBoolean),
-    DF("SINGLESIDED", singlesided, DDF_MainGetBoolean), DF("EXTRAFLOOR_TYPE", ef.type, DDF_LineGetExtraFloor),
-    DF("EXTRAFLOOR_CONTROL", ef.control, DDF_LineGetEFControl), DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
-    DF("WHEN_APPEAR", appear, DDF_MainGetWhenAppear), DF("SPECIAL", special_flags, DDF_LineGetSpecialFlags),
-    DF("RADIUS_TRIGGER", trigger_effect, DDF_LineGetRadTrig), DF("LINE_EFFECT", line_effect, DDF_LineGetLineEffect),
-    DF("SCROLL_TYPE", scroll_type, DDF_LineGetScrollType), DF("LINE_PARTS", line_parts, DDF_LineGetScrollPart),
-    DF("SECTOR_EFFECT", sector_effect, DDF_LineGetSectorEffect),
-    DF("PORTAL_TYPE", portal_effect, DDF_LineGetPortalEffect), DF("SLOPE_TYPE", slope_type, DDF_LineGetSlopeType),
-    DF("COLOUR", fx_color, DDF_MainGetRGB),
+    DDF_FIELD("SCROLL_XSPEED", dummy_line, s_xspeed_, DDF_MainGetFloat),
+    DDF_FIELD("SCROLL_YSPEED", dummy_line, s_yspeed_, DDF_MainGetFloat),
+    DDF_FIELD("SCROLL_PARTS", dummy_line, scroll_parts_, DDF_LineGetScrollPart),
+    DDF_FIELD("USE_COLOURMAP", dummy_line, use_colourmap_,
+              DDF_MainGetColourmap),
+    DDF_FIELD("GRAVITY", dummy_line, gravity_, DDF_MainGetFloat),
+    DDF_FIELD("FRICTION", dummy_line, friction_, DDF_MainGetFloat),
+    DDF_FIELD("VISCOSITY", dummy_line, viscosity_, DDF_MainGetFloat),
+    DDF_FIELD("DRAG", dummy_line, drag_, DDF_MainGetFloat),
+    DDF_FIELD("AMBIENT_SOUND", dummy_line, ambient_sfx_, DDF_MainLookupSound),
+    DDF_FIELD("ACTIVATE_SOUND", dummy_line, activate_sfx_, DDF_MainLookupSound),
+    DDF_FIELD("MUSIC", dummy_line, music_, DDF_MainGetNumeric),
+    DDF_FIELD("AUTO", dummy_line, autoline_, DDF_MainGetBoolean),
+    DDF_FIELD("SINGLESIDED", dummy_line, singlesided_, DDF_MainGetBoolean),
+    DDF_FIELD("EXTRAFLOOR_TYPE", dummy_line, ef_.type_, DDF_LineGetExtraFloor),
+    DDF_FIELD("EXTRAFLOOR_CONTROL", dummy_line, ef_.control_,
+              DDF_LineGetEFControl),
+    DDF_FIELD("TRANSLUCENCY", dummy_line, translucency_, DDF_MainGetPercent),
+    DDF_FIELD("WHEN_APPEAR", dummy_line, appear_, DDF_MainGetWhenAppear),
+    DDF_FIELD("SPECIAL", dummy_line, special_flags_, DDF_LineGetSpecialFlags),
+    DDF_FIELD("RADIUS_TRIGGER", dummy_line, trigger_effect_,
+              DDF_LineGetRadTrig),
+    DDF_FIELD("LINE_EFFECT", dummy_line, line_effect_, DDF_LineGetLineEffect),
+    DDF_FIELD("SCROLL_TYPE", dummy_line, scroll_type_, DDF_LineGetScrollType),
+    DDF_FIELD("LINE_PARTS", dummy_line, line_parts_, DDF_LineGetScrollPart),
+    DDF_FIELD("SECTOR_EFFECT", dummy_line, sector_effect_,
+              DDF_LineGetSectorEffect),
+    DDF_FIELD("PORTAL_TYPE", dummy_line, portal_effect_,
+              DDF_LineGetPortalEffect),
+    DDF_FIELD("SLOPE_TYPE", dummy_line, slope_type_, DDF_LineGetSlopeType),
+    DDF_FIELD("COLOUR", dummy_line, fx_color_, DDF_MainGetRGB),
 
     // -AJA- backwards compatibility cruft...
-    DF("EXTRAFLOOR_TRANSLUCENCY", translucency, DDF_MainGetPercent),
+    DDF_FIELD("EXTRAFLOOR_TRANSLUCENCY", dummy_line, translucency_,
+              DDF_MainGetPercent),
 
     // Lobo: 2022
-    DF("EFFECT_OBJECT", effectobject_ref, DDF_MainGetString), DF("GLASS", glass, DDF_MainGetBoolean),
-    DF("BROKEN_TEXTURE", brokentex, DDF_MainGetLumpName),
+    DDF_FIELD("EFFECT_OBJECT", dummy_line, effectobject_ref_,
+              DDF_MainGetString),
+    DDF_FIELD("GLASS", dummy_line, glass_, DDF_MainGetBoolean),
+    DDF_FIELD("BROKEN_TEXTURE", dummy_line, brokentex_, DDF_MainGetLumpName),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
-typedef struct
+struct ScrollKludge
 {
-    const char  *s;
-    scrolldirs_e dir;
-} scroll_kludge_t;
+    const char      *s;
+    ScrollDirections dir;
+};
 
-static scroll_kludge_t s_scroll[] = {{"NONE", dir_none},   {"UP", (scrolldirs_e)(dir_vert | dir_up)},
-                                     {"DOWN", dir_vert},   {"LEFT", (scrolldirs_e)(dir_horiz | dir_left)},
-                                     {"RIGHT", dir_horiz}, {NULL, dir_none}};
+static ScrollKludge s_scroll[] = {
+    {"NONE", kScrollDirectionNone},
+    {"UP", (ScrollDirections)(kScrollDirectionVertical | kScrollDirectionUp)},
+    {"DOWN", kScrollDirectionVertical},
+    {"LEFT",
+     (ScrollDirections)(kScrollDirectionHorizontal | kScrollDirectionLeft)},
+    {"RIGHT", kScrollDirectionHorizontal},
+    {nullptr, kScrollDirectionNone}};
 
-static struct // FIXME: APPLIES TO NEXT 3 TABLES !
+static struct  // FIXME: APPLIES TO NEXT 3 TABLES !
 {
     const char *s;
     int         n;
 }
 
 // FIXME: use keytype_names (in ddf_mobj.c)
-s_keys[] = {{"NONE", KF_NONE},
+s_keys[] = {{"NONE", kDoorKeyNone},
 
-            {"BLUE_CARD", KF_BlueCard},
-            {"YELLOW_CARD", KF_YellowCard},
-            {"RED_CARD", KF_RedCard},
-            {"BLUE_SKULL", KF_BlueSkull},
-            {"YELLOW_SKULL", KF_YellowSkull},
-            {"RED_SKULL", KF_RedSkull},
-            {"GREEN_CARD", KF_GreenCard},
-            {"GREEN_SKULL", KF_GreenSkull},
+            {"BLUE_CARD", kDoorKeyBlueCard},
+            {"YELLOW_CARD", kDoorKeyYellowCard},
+            {"RED_CARD", kDoorKeyRedCard},
+            {"BLUE_SKULL", kDoorKeyBlueSkull},
+            {"YELLOW_SKULL", kDoorKeyYellowSkull},
+            {"RED_SKULL", kDoorKeyRedSkull},
+            {"GREEN_CARD", kDoorKeyGreenCard},
+            {"GREEN_SKULL", kDoorKeyGreenSkull},
 
-            {"GOLD_KEY", KF_GoldKey},
-            {"SILVER_KEY", KF_SilverKey},
-            {"BRASS_KEY", KF_BrassKey},
-            {"COPPER_KEY", KF_CopperKey},
-            {"STEEL_KEY", KF_SteelKey},
-            {"WOODEN_KEY", KF_WoodenKey},
-            {"FIRE_KEY", KF_FireKey},
-            {"WATER_KEY", KF_WaterKey},
+            {"GOLD_KEY", kDoorKeyGoldKey},
+            {"SILVER_KEY", kDoorKeySilverKey},
+            {"BRASS_KEY", kDoorKeyBrassKey},
+            {"COPPER_KEY", kDoorKeyCopperKey},
+            {"STEEL_KEY", kDoorKeySteelKey},
+            {"WOODEN_KEY", kDoorKeyWoodenKey},
+            {"FIRE_KEY", kDoorKeyFireKey},
+            {"WATER_KEY", kDoorKeyWaterKey},
 
             // backwards compatibility
-            {"REQUIRES_ALL",
-             KF_STRICTLY_ALL | KF_BlueCard | KF_YellowCard | KF_RedCard | KF_BlueSkull | KF_YellowSkull | KF_RedSkull}},
+            {"REQUIRES_ALL", kDoorKeyStrictlyAllKeys | kDoorKeyBlueCard |
+                                 kDoorKeyYellowCard | kDoorKeyRedCard |
+                                 kDoorKeyBlueSkull | kDoorKeyYellowSkull |
+                                 kDoorKeyRedSkull}},
 
-    s_trigger[] = {{"WALK", line_walkable},
-                   {"PUSH", line_pushable},
-                   {"SHOOT", line_shootable},
-                   {"MANUAL", line_manual}},
+    s_trigger[] = {{"WALK", kLineTriggerWalkable},
+                   {"PUSH", kLineTriggerPushable},
+                   {"SHOOT", kLineTriggerShootable},
+                   {"MANUAL", kLineTriggerManual}},
 
-    s_activators[] = {{"PLAYER", trig_player},
-                      {"MONSTER", trig_monster},
-                      {"OTHER", trig_other},
-                      {"NOBOT", trig_nobot},
+    s_activators[] = {{"PLAYER", kTriggerActivatorPlayer},
+                      {"MONSTER", kTriggerActivatorMonster},
+                      {"OTHER", kTriggerActivatorOther},
+                      {"NOBOT", kTriggerActivatorNoBot},
 
                       // obsolete stuff
                       {"MISSILE", 0}};
@@ -244,18 +282,16 @@ static void LinedefStartEntry(const char *name, bool extend)
 {
     int number = HMM_MAX(0, atoi(name));
 
-    if (number == 0)
-        DDF_Error("Bad linetype number in lines.ddf: %s\n", name);
+    if (number == 0) DDF_Error("Bad linetype number in lines.ddf: %s\n", name);
 
-    scrolling_dir   = dir_none;
+    scrolling_dir   = kScrollDirectionNone;
     scrolling_speed = 1.0f;
 
     dynamic_line = linetypes.Lookup(number);
 
     if (extend)
     {
-        if (!dynamic_line)
-            DDF_Error("Unknown linetype to extend: %s\n", name);
+        if (!dynamic_line) DDF_Error("Unknown linetype to extend: %s\n", name);
         return;
     }
 
@@ -267,8 +303,8 @@ static void LinedefStartEntry(const char *name, bool extend)
     }
 
     // not found, create a new one
-    dynamic_line         = new linetype_c;
-    dynamic_line->number = number;
+    dynamic_line          = new LineType;
+    dynamic_line->number_ = number;
 
     linetypes.push_back(dynamic_line);
 }
@@ -279,7 +315,7 @@ static void LinedefDoTemplate(const char *contents)
     if (number == 0)
         DDF_Error("Bad linetype number for template: %s\n", contents);
 
-    linetype_c *other = linetypes.Lookup(number);
+    LineType *other = linetypes.Lookup(number);
 
     if (!other || other == dynamic_line)
         DDF_Error("Unknown linetype template: '%s'\n", contents);
@@ -287,10 +323,11 @@ static void LinedefDoTemplate(const char *contents)
     dynamic_line->CopyDetail(*other);
 }
 
-static void LinedefParseField(const char *field, const char *contents, int index, bool is_last)
+static void LinedefParseField(const char *field, const char *contents,
+                              int index, bool is_last)
 {
 #if (DEBUG_DDF)
-    I_Debugf("LINEDEF_PARSE: %s = %s;\n", field, contents);
+    LogDebug("LINEDEF_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_CompareName(field, "TEMPLATE") == 0)
@@ -300,8 +337,7 @@ static void LinedefParseField(const char *field, const char *contents, int index
     }
 
     // ignored for backwards compatibility
-    if (DDF_CompareName(field, "SECSPECIAL") == 0)
-        return;
+    if (DDF_CompareName(field, "SECSPECIAL") == 0) return;
 
     // -AJA- backwards compatibility cruft...
     if (DDF_CompareName(field, "CRUSH") == 0)
@@ -320,8 +356,9 @@ static void LinedefParseField(const char *field, const char *contents, int index
         return;
     }
 
-    if (DDF_MainParseField(linedef_commands, field, contents, (uint8_t *)dynamic_line))
-        return; // OK
+    if (DDF_MainParseField(linedef_commands, field, contents,
+                           (uint8_t *)dynamic_line))
+        return;  // OK
 
     DDF_WarnError("Unknown lines.ddf command: %s\n", field);
 }
@@ -329,63 +366,68 @@ static void LinedefParseField(const char *field, const char *contents, int index
 static void LinedefFinishEntry(void)
 {
     // -KM- 1999/01/29 Convert old style scroller to new.
-    if (scrolling_dir & dir_vert)
+    if (scrolling_dir & kScrollDirectionVertical)
     {
-        if (scrolling_dir & dir_up)
-            dynamic_line->s_yspeed = scrolling_speed;
+        if (scrolling_dir & kScrollDirectionUp)
+            dynamic_line->s_yspeed_ = scrolling_speed;
         else
-            dynamic_line->s_yspeed = -scrolling_speed;
+            dynamic_line->s_yspeed_ = -scrolling_speed;
     }
 
-    if (scrolling_dir & dir_horiz)
+    if (scrolling_dir & kScrollDirectionHorizontal)
     {
-        if (scrolling_dir & dir_left)
-            dynamic_line->s_xspeed = scrolling_speed;
+        if (scrolling_dir & kScrollDirectionLeft)
+            dynamic_line->s_xspeed_ = scrolling_speed;
         else
-            dynamic_line->s_xspeed = -scrolling_speed;
+            dynamic_line->s_xspeed_ = -scrolling_speed;
     }
 
     // backwards compat: COUNT=0 means no limit on triggering
-    if (dynamic_line->count == 0)
-        dynamic_line->count = -1;
+    if (dynamic_line->count_ == 0) dynamic_line->count_ = -1;
 
-    if (dynamic_line->hub_exit > 0)
-        dynamic_line->e_exit = EXIT_Hub;
+    if (dynamic_line->hub_exit_ > 0) dynamic_line->e_exit_ = kExitTypeHub;
 
     // check stuff...
 
-    if (dynamic_line->ef.type != EXFL_None)
+    if (dynamic_line->ef_.type_ != kExtraFloorTypeNone)
     {
         // AUTO is no longer needed for extrafloors
-        dynamic_line->autoline = false;
+        dynamic_line->autoline_ = false;
 
-        if ((dynamic_line->ef.type & EXFL_Flooder) && (dynamic_line->ef.type & EXFL_NoShade))
+        if ((dynamic_line->ef_.type_ & kExtraFloorTypeFlooder) &&
+            (dynamic_line->ef_.type_ & kExtraFloorTypeNoShade))
         {
-            DDF_WarnError("FLOODER and NOSHADE tags cannot be used together.\n");
-            dynamic_line->ef.type = (extrafloor_type_e)(dynamic_line->ef.type & ~EXFL_Flooder);
+            DDF_WarnError(
+                "FLOODER and NOSHADE tags cannot be used together.\n");
+            dynamic_line->ef_.type_ = (ExtraFloorType)(dynamic_line->ef_.type_ &
+                                                       ~kExtraFloorTypeFlooder);
         }
 
-        if (!(dynamic_line->ef.type & EXFL_Present))
+        if (!(dynamic_line->ef_.type_ & kExtraFloorTypePresent))
         {
             DDF_WarnError("Extrafloor type missing THIN, THICK or LIQUID.\n");
-            dynamic_line->ef.type = EXFL_None;
+            dynamic_line->ef_.type_ = kExtraFloorTypeNone;
         }
     }
 
-    if (!AlmostEquals(dynamic_line->friction, FLO_UNUSED) && dynamic_line->friction < 0.05f)
+    if (!AlmostEquals(dynamic_line->friction_, kFloatUnused) &&
+        dynamic_line->friction_ < 0.05f)
     {
-        DDF_WarnError("Friction value too low (%1.2f), it would prevent "
-                      "all movement.\n",
-                      dynamic_line->friction);
-        dynamic_line->friction = 0.05f;
+        DDF_WarnError(
+            "Friction value too low (%1.2f), it would prevent "
+            "all movement.\n",
+            dynamic_line->friction_);
+        dynamic_line->friction_ = 0.05f;
     }
 
-    if (!AlmostEquals(dynamic_line->viscosity, FLO_UNUSED) && dynamic_line->viscosity > 0.95f)
+    if (!AlmostEquals(dynamic_line->viscosity_, kFloatUnused) &&
+        dynamic_line->viscosity_ > 0.95f)
     {
-        DDF_WarnError("Viscosity value too high (%1.2f), it would prevent "
-                      "all movement.\n",
-                      dynamic_line->viscosity);
-        dynamic_line->viscosity = 0.95f;
+        DDF_WarnError(
+            "Viscosity value too high (%1.2f), it would prevent "
+            "all movement.\n",
+            dynamic_line->viscosity_);
+        dynamic_line->viscosity_ = 0.95f;
     }
 
     // TODO: check more stuff...
@@ -399,7 +441,7 @@ static void LinedefClearAll(void)
 
 void DDF_ReadLines(const std::string &data)
 {
-    readinfo_t lines;
+    DDFReadInfo lines;
 
     lines.tag      = "LINES";
     lines.lumpname = "DDFLINE";
@@ -416,22 +458,30 @@ void DDF_LinedefInit(void)
 {
     linetypes.Reset();
 
-    default_linetype         = new linetype_c();
-    default_linetype->number = 0;
+    default_linetype          = new LineType();
+    default_linetype->number_ = 0;
 }
 
 void DDF_LinedefCleanUp(void)
 {
     for (auto l : linetypes)
     {
-        cur_ddf_entryname = epi::StringFormat("[%d]  (lines.ddf)", l->number);
+        cur_ddf_entryname = epi::StringFormat("[%d]  (lines.ddf)", l->number_);
 
-        l->t.inspawnobj = l->t.inspawnobj_ref != "" ? mobjtypes.Lookup(l->t.inspawnobj_ref.c_str()) : NULL;
+        l->t_.inspawnobj_ =
+            l->t_.inspawnobj_ref_ != ""
+                ? mobjtypes.Lookup(l->t_.inspawnobj_ref_.c_str())
+                : nullptr;
 
-        l->t.outspawnobj = l->t.outspawnobj_ref != "" ? mobjtypes.Lookup(l->t.outspawnobj_ref.c_str()) : NULL;
+        l->t_.outspawnobj_ =
+            l->t_.outspawnobj_ref_ != ""
+                ? mobjtypes.Lookup(l->t_.outspawnobj_ref_.c_str())
+                : nullptr;
 
         // Lobo: 2021
-        l->effectobject = l->effectobject_ref != "" ? mobjtypes.Lookup(l->effectobject_ref.c_str()) : NULL;
+        l->effectobject_ = l->effectobject_ref_ != ""
+                               ? mobjtypes.Lookup(l->effectobject_ref_.c_str())
+                               : nullptr;
 
         cur_ddf_entryname.clear();
     }
@@ -450,7 +500,7 @@ void DDF_LineGetScroller(const char *info, void *storage)
     {
         if (DDF_CompareName(info, s_scroll[i].s) == 0)
         {
-            scrolling_dir = (scrolldirs_e)(scrolling_dir | s_scroll[i].dir);
+            scrolling_dir = (ScrollDirections)(scrolling_dir | s_scroll[i].dir);
             return;
         }
     }
@@ -464,7 +514,7 @@ void DDF_LineGetScroller(const char *info, void *storage)
 //
 void DDF_LineGetSecurity(const char *info, void *storage)
 {
-    keys_e *var = (keys_e *)storage;
+    DoorKeyType *var = (DoorKeyType *)storage;
 
     bool required = false;
 
@@ -473,7 +523,7 @@ void DDF_LineGetSecurity(const char *info, void *storage)
         required = true;
         info++;
     }
-    else if (*var & KF_STRICTLY_ALL)
+    else if (*var & kDoorKeyStrictlyAllKeys)
     {
         // -AJA- when there is at least one required key, then the
         // non-required keys don't have any effect.
@@ -484,10 +534,9 @@ void DDF_LineGetSecurity(const char *info, void *storage)
     {
         if (DDF_CompareName(info, s_keys[i].s) == 0)
         {
-            *var = (keys_e)(*var | s_keys[i].n);
+            *var = (DoorKeyType)(*var | s_keys[i].n);
 
-            if (required)
-                *var = (keys_e)(*var | KF_STRICTLY_ALL);
+            if (required) *var = (DoorKeyType)(*var | kDoorKeyStrictlyAllKeys);
 
             return;
         }
@@ -503,13 +552,13 @@ void DDF_LineGetSecurity(const char *info, void *storage)
 //
 void DDF_LineGetTrigType(const char *info, void *storage)
 {
-    trigger_e *var = (trigger_e *)storage;
+    LineTrigger *var = (LineTrigger *)storage;
 
     for (int i = sizeof(s_trigger) / sizeof(s_trigger[0]); i--;)
     {
         if (DDF_CompareName(info, s_trigger[i].s) == 0)
         {
-            *var = (trigger_e)s_trigger[i].n;
+            *var = (LineTrigger)s_trigger[i].n;
             return;
         }
     }
@@ -524,13 +573,13 @@ void DDF_LineGetTrigType(const char *info, void *storage)
 //
 void DDF_LineGetActivators(const char *info, void *storage)
 {
-    trigacttype_e *var = (trigacttype_e *)storage;
+    TriggerActivator *var = (TriggerActivator *)storage;
 
     for (int i = sizeof(s_activators) / sizeof(s_activators[0]); i--;)
     {
         if (DDF_CompareName(info, s_activators[i].s) == 0)
         {
-            *var = (trigacttype_e)(*var | s_activators[i].n);
+            *var = (TriggerActivator)(*var | s_activators[i].n);
             return;
         }
     }
@@ -538,26 +587,26 @@ void DDF_LineGetActivators(const char *info, void *storage)
     DDF_WarnError("Unknown Activator type %s\n", info);
 }
 
-static specflags_t extrafloor_types[] = {
+static DDFSpecialFlags extrafloor_types[] = {
     // definers:
-    {"THIN", EF_DEF_THIN, 0},
-    {"THICK", EF_DEF_THICK, 0},
-    {"LIQUID", EF_DEF_LIQUID, 0},
+    {"THIN", kExtraFloorThinDefaults, 0},
+    {"THICK", kExtraFloorThickDefaults, 0},
+    {"LIQUID", kExtraFloorLiquidDefaults, 0},
 
     // modifiers:
-    {"SEE_THROUGH", EXFL_SeeThrough, 0},
-    {"WATER", EXFL_Water, 0},
-    {"SHADE", EXFL_NoShade, 1},
-    {"FLOODER", EXFL_Flooder, 0},
-    {"SIDE_UPPER", EXFL_SideUpper, 0},
-    {"SIDE_LOWER", EXFL_SideLower, 0},
-    {"SIDE_MIDY", EXFL_SideMidY, 0},
-    {"BOOMTEX", EXFL_BoomTex, 0},
+    {"SEE_THROUGH", kExtraFloorTypeSeeThrough, 0},
+    {"WATER", kExtraFloorTypeWater, 0},
+    {"SHADE", kExtraFloorTypeNoShade, 1},
+    {"FLOODER", kExtraFloorTypeFlooder, 0},
+    {"SIDE_UPPER", kExtraFloorTypeSideUpper, 0},
+    {"SIDE_LOWER", kExtraFloorTypeSideLower, 0},
+    {"SIDE_MIDY", kExtraFloorTypeSideMidY, 0},
+    {"BOOMTEX", kExtraFloorTypeBoomTex, 0},
 
     // backwards compatibility...
-    {"FALL_THROUGH", EXFL_Liquid, 0},
+    {"FALL_THROUGH", kExtraFloorTypeLiquid, 0},
     {"SHOOT_THROUGH", 0, 0},
-    {NULL, 0, 0}};
+    {nullptr, 0, 0}};
 
 //
 // DDF_LineGetExtraFloor
@@ -569,78 +618,88 @@ static specflags_t extrafloor_types[] = {
 //
 void DDF_LineGetExtraFloor(const char *info, void *storage)
 {
-    extrafloor_type_e *var = (extrafloor_type_e *)storage;
+    ExtraFloorType *var = (ExtraFloorType *)storage;
 
     if (DDF_CompareName(info, "NONE") == 0)
     {
-        *var = EXFL_None;
+        *var = kExtraFloorTypeNone;
         return;
     }
 
     int flag_value;
 
-    switch (DDF_MainCheckSpecialFlag(info, extrafloor_types, &flag_value, true, false))
+    switch (DDF_MainCheckSpecialFlag(info, extrafloor_types, &flag_value, true,
+                                     false))
     {
-    case CHKF_Positive:
-        *var = (extrafloor_type_e)(*var | flag_value);
-        break;
+        case kDDFCheckFlagPositive:
+            *var = (ExtraFloorType)(*var | flag_value);
+            break;
 
-    case CHKF_Negative:
-        *var = (extrafloor_type_e)(*var & ~flag_value);
-        break;
+        case kDDFCheckFlagNegative:
+            *var = (ExtraFloorType)(*var & ~flag_value);
+            break;
 
-    case CHKF_User:
-    case CHKF_Unknown:
-        DDF_WarnError("Unknown Extrafloor Type: %s\n", info);
-        break;
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
+            DDF_WarnError("Unknown Extrafloor Type: %s\n", info);
+            break;
     }
 }
 
-static specflags_t ef_control_types[] = {{"NONE", EFCTL_None, 0}, {"REMOVE", EFCTL_Remove, 0}, {NULL, 0, 0}};
+static DDFSpecialFlags ef_control_types[] = {
+    {"NONE", kExtraFloorControlNone, 0},
+    {"REMOVE", kExtraFloorControlRemove, 0},
+    {nullptr, 0, 0}};
 
 //
 // DDF_LineGetEFControl
 //
 void DDF_LineGetEFControl(const char *info, void *storage)
 {
-    extrafloor_control_e *var = (extrafloor_control_e *)storage;
+    ExtraFloorControl *var = (ExtraFloorControl *)storage;
 
     int flag_value;
 
-    switch (DDF_MainCheckSpecialFlag(info, ef_control_types, &flag_value, false, false))
+    switch (DDF_MainCheckSpecialFlag(info, ef_control_types, &flag_value, false,
+                                     false))
     {
-    case CHKF_Positive:
-    case CHKF_Negative:
-        *var = (extrafloor_control_e)flag_value;
-        break;
+        case kDDFCheckFlagPositive:
+        case kDDFCheckFlagNegative:
+            *var = (ExtraFloorControl)flag_value;
+            break;
 
-    case CHKF_User:
-    case CHKF_Unknown:
-        DDF_WarnError("Unknown CONTROL_EXTRAFLOOR tag: %s", info);
-        break;
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
+            DDF_WarnError("Unknown CONTROL_EXTRAFLOOR tag: %s", info);
+            break;
     }
 }
 
-#define TELSP_AllSame ((teleportspecial_e)(TELSP_Relative | TELSP_SameHeight | TELSP_SameSpeed | TELSP_SameOffset))
+static constexpr int kTeleportSpecialAllSame =
+    ((TeleportSpecial)(kTeleportSpecialRelative | kTeleportSpecialSameHeight |
+                       kTeleportSpecialSameSpeed | kTeleportSpecialSameOffset));
 
-#define TELSP_Preserve ((teleportspecial_e)(TELSP_SameAbsDir | TELSP_SameHeight | TELSP_SameSpeed))
+static constexpr int kTeleportSpecialPreserve =
+    ((TeleportSpecial)(kTeleportSpecialSameAbsDir | kTeleportSpecialSameHeight |
+                       kTeleportSpecialSameSpeed));
 
-static specflags_t teleport_specials[] = {{"RELATIVE", TELSP_Relative, 0},
-                                          {"SAME_HEIGHT", TELSP_SameHeight, 0},
-                                          {"SAME_SPEED", TELSP_SameSpeed, 0},
-                                          {"SAME_OFFSET", TELSP_SameOffset, 0},
-                                          {"ALL_SAME", TELSP_AllSame, 0},
+static DDFSpecialFlags teleport_specials[] = {
+    {"RELATIVE", kTeleportSpecialRelative, 0},
+    {"SAME_HEIGHT", kTeleportSpecialSameHeight, 0},
+    {"SAME_SPEED", kTeleportSpecialSameSpeed, 0},
+    {"SAME_OFFSET", kTeleportSpecialSameOffset, 0},
+    {"ALL_SAME", kTeleportSpecialAllSame, 0},
 
-                                          {"LINE", TELSP_Line, 0},
-                                          {"FLIPPED", TELSP_Flipped, 0},
-                                          {"SILENT", TELSP_Silent, 0},
+    {"LINE", kTeleportSpecialLine, 0},
+    {"FLIPPED", kTeleportSpecialFlipped, 0},
+    {"SILENT", kTeleportSpecialSilent, 0},
 
-                                          // these modes are deprecated (kept for B.C.)
-                                          {"SAME_DIR", TELSP_SameAbsDir, 0},
-                                          {"ROTATE", TELSP_Rotate, 0},
-                                          {"PRESERVE", TELSP_Preserve, 0},
+    // these modes are deprecated (kept for B.C.)
+    {"SAME_DIR", kTeleportSpecialSameAbsDir, 0},
+    {"ROTATE", kTeleportSpecialRotate, 0},
+    {"PRESERVE", kTeleportSpecialPreserve, 0},
 
-                                          {NULL, 0, 0}};
+    {nullptr, 0, 0}};
 
 //
 // DDF_LineGetTeleportSpecial
@@ -651,38 +710,41 @@ static specflags_t teleport_specials[] = {{"RELATIVE", TELSP_Relative, 0},
 //
 void DDF_LineGetTeleportSpecial(const char *info, void *storage)
 {
-    teleportspecial_e *var = (teleportspecial_e *)storage;
+    TeleportSpecial *var = (TeleportSpecial *)storage;
 
     int flag_value;
 
-    switch (DDF_MainCheckSpecialFlag(info, teleport_specials, &flag_value, true, false))
+    switch (DDF_MainCheckSpecialFlag(info, teleport_specials, &flag_value, true,
+                                     false))
     {
-    case CHKF_Positive:
-        *var = (teleportspecial_e)(*var | flag_value);
-        break;
+        case kDDFCheckFlagPositive:
+            *var = (TeleportSpecial)(*var | flag_value);
+            break;
 
-    case CHKF_Negative:
-        *var = (teleportspecial_e)(*var & ~flag_value);
-        break;
+        case kDDFCheckFlagNegative:
+            *var = (TeleportSpecial)(*var & ~flag_value);
+            break;
 
-    case CHKF_User:
-    case CHKF_Unknown:
-        DDF_WarnError("DDF_LineGetTeleportSpecial: Unknown Special: %s\n", info);
-        break;
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
+            DDF_WarnError("DDF_LineGetTeleportSpecial: Unknown Special: %s\n",
+                          info);
+            break;
     }
 }
 
-static specflags_t scrollpart_specials[] = {{"RIGHT_UPPER", SCPT_RightUpper, 0},
-                                            {"RIGHT_MIDDLE", SCPT_RightMiddle, 0},
-                                            {"RIGHT_LOWER", SCPT_RightLower, 0},
-                                            {"RIGHT", SCPT_RIGHT, 0},
-                                            {"LEFT_UPPER", SCPT_LeftUpper, 0},
-                                            {"LEFT_MIDDLE", SCPT_LeftMiddle, 0},
-                                            {"LEFT_LOWER", SCPT_LeftLower, 0},
-                                            {"LEFT", SCPT_LEFT, 0},
-                                            {"LEFT_REVERSE_X", SCPT_LeftRevX, 0},
-                                            {"LEFT_REVERSE_Y", SCPT_LeftRevY, 0},
-                                            {NULL, 0, 0}};
+static DDFSpecialFlags scrollpart_specials[] = {
+    {"RIGHT_UPPER", kScrollingPartRightUpper, 0},
+    {"RIGHT_MIDDLE", kScrollingPartRightMiddle, 0},
+    {"RIGHT_LOWER", kScrollingPartRightLower, 0},
+    {"RIGHT", kScrollingPartRight, 0},
+    {"LEFT_UPPER", kScrollingPartLeftUpper, 0},
+    {"LEFT_MIDDLE", kScrollingPartLeftMiddle, 0},
+    {"LEFT_LOWER", kScrollingPartLeftLower, 0},
+    {"LEFT", kScrollingPartLeft, 0},
+    {"LEFT_REVERSE_X", kScrollingPartLeftRevX, 0},
+    {"LEFT_REVERSE_Y", kScrollingPartLeftRevY, 0},
+    {nullptr, 0, 0}};
 
 //
 // DDF_LineGetScrollPart
@@ -694,37 +756,39 @@ static specflags_t scrollpart_specials[] = {{"RIGHT_UPPER", SCPT_RightUpper, 0},
 void DDF_LineGetScrollPart(const char *info, void *storage)
 {
     int            flag_value;
-    scroll_part_e *dest = (scroll_part_e *)storage;
+    ScrollingPart *dest = (ScrollingPart *)storage;
 
     if (DDF_CompareName(info, "NONE") == 0)
     {
-        (*dest) = SCPT_None;
+        (*dest) = kScrollingPartNone;
         return;
     }
 
-    switch (DDF_MainCheckSpecialFlag(info, scrollpart_specials, &flag_value, true, false))
+    switch (DDF_MainCheckSpecialFlag(info, scrollpart_specials, &flag_value,
+                                     true, false))
     {
-    case CHKF_Positive:
-        (*dest) = (scroll_part_e)((*dest) | flag_value);
-        break;
+        case kDDFCheckFlagPositive:
+            (*dest) = (ScrollingPart)((*dest) | flag_value);
+            break;
 
-    case CHKF_Negative:
-        (*dest) = (scroll_part_e)((*dest) & ~flag_value);
-        break;
+        case kDDFCheckFlagNegative:
+            (*dest) = (ScrollingPart)((*dest) & ~flag_value);
+            break;
 
-    case CHKF_User:
-    case CHKF_Unknown:
-        DDF_WarnError("DDF_LineGetScrollPart: Unknown Part: %s", info);
-        break;
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
+            DDF_WarnError("DDF_LineGetScrollPart: Unknown Part: %s", info);
+            break;
     }
 }
 
 //----------------------------------------------------------------------------
 
-static specflags_t line_specials[] = {{"MUST_REACH", LINSP_MustReach, 0},
-                                      {"SWITCH_SEPARATE", LINSP_SwitchSeparate, 0},
-                                      {"BACK_SECTOR", LINSP_BackSector, 0},
-                                      {NULL, 0, 0}};
+static DDFSpecialFlags line_specials[] = {
+    {"MUST_REACH", kLineSpecialMustReach, 0},
+    {"SWITCH_SEPARATE", kLineSpecialSwitchSeparate, 0},
+    {"BACK_SECTOR", kLineSpecialBackSector, 0},
+    {nullptr, 0, 0}};
 
 //
 // DDF_LineGetSpecialFlags
@@ -733,24 +797,25 @@ static specflags_t line_specials[] = {{"MUST_REACH", LINSP_MustReach, 0},
 //
 void DDF_LineGetSpecialFlags(const char *info, void *storage)
 {
-    line_special_e *var = (line_special_e *)storage;
+    LineSpecial *var = (LineSpecial *)storage;
 
     int flag_value;
 
-    switch (DDF_MainCheckSpecialFlag(info, line_specials, &flag_value, true, false))
+    switch (
+        DDF_MainCheckSpecialFlag(info, line_specials, &flag_value, true, false))
     {
-    case CHKF_Positive:
-        *var = (line_special_e)(*var | flag_value);
-        break;
+        case kDDFCheckFlagPositive:
+            *var = (LineSpecial)(*var | flag_value);
+            break;
 
-    case CHKF_Negative:
-        *var = (line_special_e)(*var & ~flag_value);
-        break;
+        case kDDFCheckFlagNegative:
+            *var = (LineSpecial)(*var & ~flag_value);
+            break;
 
-    case CHKF_User:
-    case CHKF_Unknown:
-        DDF_WarnError("Unknown line special: %s", info);
-        break;
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
+            DDF_WarnError("Unknown line special: %s", info);
+            break;
     }
 }
 
@@ -777,232 +842,253 @@ static void DDF_LineGetRadTrig(const char *info, void *storage)
     DDF_WarnError("DDF_LineGetRadTrig: Unknown effect: %s\n", info);
 }
 
-static const specflags_t slidingdoor_names[] = {{"NONE", SLIDE_None, 0},
-                                                {"LEFT", SLIDE_Left, 0},
-                                                {"RIGHT", SLIDE_Right, 0},
-                                                {"CENTER", SLIDE_Center, 0},
-                                                {"CENTRE", SLIDE_Center, 0}, // synonym
-                                                {NULL, 0, 0}};
+static const DDFSpecialFlags slidingdoor_names[] = {
+    {"NONE", kSlidingDoorTypeNone, 0},
+    {"LEFT", kSlidingDoorTypeLeft, 0},
+    {"RIGHT", kSlidingDoorTypeRight, 0},
+    {"CENTER", kSlidingDoorTypeCenter, 0},
+    {"CENTRE", kSlidingDoorTypeCenter, 0},  // synonym
+    {nullptr, 0, 0}};
 
 //
 // DDF_LineGetSlideType
 //
 static void DDF_LineGetSlideType(const char *info, void *storage)
 {
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(info, slidingdoor_names, (int *)storage, false, false))
+    if (kDDFCheckFlagPositive !=
+        DDF_MainCheckSpecialFlag(info, slidingdoor_names, (int *)storage, false,
+                                 false))
     {
         DDF_WarnError("DDF_LineGetSlideType: Unknown slider: %s\n", info);
     }
 }
 
-static specflags_t line_effect_names[] = {{"TRANSLUCENT", LINEFX_Translucency, 0},
-                                          {"VECTOR_SCROLL", LINEFX_VectorScroll, 0},
-                                          {"OFFSET_SCROLL", LINEFX_OffsetScroll, 0},
+static DDFSpecialFlags line_effect_names[] = {
+    {"TRANSLUCENT", kLineEffectTypeTranslucency, 0},
+    {"VECTOR_SCROLL", kLineEffectTypeVectorScroll, 0},
+    {"OFFSET_SCROLL", kLineEffectTypeOffsetScroll, 0},
 
-                                          {"SCALE_TEX", LINEFX_Scale, 0},
-                                          {"SKEW_TEX", LINEFX_Skew, 0},
-                                          {"LIGHT_WALL", LINEFX_LightWall, 0},
+    {"SCALE_TEX", kLineEffectTypeScale, 0},
+    {"SKEW_TEX", kLineEffectTypeSkew, 0},
+    {"LIGHT_WALL", kLineEffectTypeLightWall, 0},
 
-                                          {"UNBLOCK_THINGS", LINEFX_UnblockThings, 0},
-                                          {"BLOCK_SHOTS", LINEFX_BlockShots, 0},
-                                          {"BLOCK_SIGHT", LINEFX_BlockSight, 0},
-                                          {"SKY_TRANSFER", LINEFX_SkyTransfer, 0},                  // Lobo 2022
-                                          {"TAGGED_OFFSET_SCROLL", LINEFX_TaggedOffsetScroll, 0},   // MBF21
-                                          {"BLOCK_LAND_MONSTERS", LINEFX_BlockGroundedMonsters, 0}, // MBF21
-                                          {"BLOCK_PLAYERS", LINEFX_BlockPlayers, 0},                // MBF21
-                                          {"STRETCH_TEX_WIDTH", LINEFX_StretchWidth, 0},            // Lobo 2023
-                                          {"STRETCH_TEX_HEIGHT", LINEFX_StretchHeight, 0},          // Lobo 2023
-                                          {NULL, 0, 0}};
+    {"UNBLOCK_THINGS", kLineEffectTypeUnblockThings, 0},
+    {"BLOCK_SHOTS", kLineEffectTypeBlockShots, 0},
+    {"BLOCK_SIGHT", kLineEffectTypeBlockSight, 0},
+    {"SKY_TRANSFER", kLineEffectTypeSkyTransfer, 0},  // Lobo 2022
+    {"TAGGED_OFFSET_SCROLL", kLineEffectTypeTaggedOffsetScroll, 0},    // MBF21
+    {"BLOCK_LAND_MONSTERS", kLineEffectTypeBlockGroundedMonsters, 0},  // MBF21
+    {"BLOCK_PLAYERS", kLineEffectTypeBlockPlayers, 0},                 // MBF21
+    {"STRETCH_TEX_WIDTH", kLineEffectTypeStretchWidth, 0},    // Lobo 2023
+    {"STRETCH_TEX_HEIGHT", kLineEffectTypeStretchHeight, 0},  // Lobo 2023
+    {nullptr, 0, 0}};
 
 //
 // Gets the line effect flags.
 //
 static void DDF_LineGetLineEffect(const char *info, void *storage)
 {
-    line_effect_type_e *var = (line_effect_type_e *)storage;
+    LineEffectType *var = (LineEffectType *)storage;
 
     int flag_value;
 
     if (DDF_CompareName(info, "NONE") == 0)
     {
-        *var = LINEFX_NONE;
+        *var = kLineEffectTypeNONE;
         return;
     }
 
-    switch (DDF_MainCheckSpecialFlag(info, line_effect_names, &flag_value, true, false))
+    switch (DDF_MainCheckSpecialFlag(info, line_effect_names, &flag_value, true,
+                                     false))
     {
-    case CHKF_Positive:
-        *var = (line_effect_type_e)(*var | flag_value);
-        break;
+        case kDDFCheckFlagPositive:
+            *var = (LineEffectType)(*var | flag_value);
+            break;
 
-    case CHKF_Negative:
-        *var = (line_effect_type_e)(*var & ~flag_value);
-        break;
+        case kDDFCheckFlagNegative:
+            *var = (LineEffectType)(*var & ~flag_value);
+            break;
 
-    case CHKF_User:
-    case CHKF_Unknown:
-        DDF_WarnError("Unknown line effect type: %s", info);
-        break;
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
+            DDF_WarnError("Unknown line effect type: %s", info);
+            break;
     }
 }
 
-static specflags_t scroll_type_names[] = {
-    {"DISPLACE", ScrollType_Displace, 0}, {"ACCEL", ScrollType_Accel, 0}, {NULL, 0, 0}};
+static DDFSpecialFlags scroll_type_names[] = {
+    {"DISPLACE", BoomScrollerTypeDisplace, 0},
+    {"ACCEL", BoomScrollerTypeAccel, 0},
+    {nullptr, 0, 0}};
 
 //
 // Gets the scroll type flags.
 //
 static void DDF_LineGetScrollType(const char *info, void *storage)
 {
-    scroll_type_e *var = (scroll_type_e *)storage;
+    BoomScrollerType *var = (BoomScrollerType *)storage;
 
     int flag_value;
 
     if (DDF_CompareName(info, "NONE") == 0)
     {
-        *var = ScrollType_None;
+        *var = BoomScrollerTypeNone;
         return;
     }
 
-    switch (DDF_MainCheckSpecialFlag(info, scroll_type_names, &flag_value, true, false))
+    switch (DDF_MainCheckSpecialFlag(info, scroll_type_names, &flag_value, true,
+                                     false))
     {
-    case CHKF_Positive:
-        *var = (scroll_type_e)(*var | flag_value);
-        break;
+        case kDDFCheckFlagPositive:
+            *var = (BoomScrollerType)(*var | flag_value);
+            break;
 
-    case CHKF_Negative:
-        *var = (scroll_type_e)(*var & ~flag_value);
-        break;
+        case kDDFCheckFlagNegative:
+            *var = (BoomScrollerType)(*var & ~flag_value);
+            break;
 
-    case CHKF_User:
-    case CHKF_Unknown:
-        DDF_WarnError("Unknown scroll type: %s", info);
-        break;
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
+            DDF_WarnError("Unknown scroll type: %s", info);
+            break;
     }
 }
 
-static specflags_t sector_effect_names[] = {
-    {"LIGHT_FLOOR", SECTFX_LightFloor, 0},   {"LIGHT_CEILING", SECTFX_LightCeiling, 0},
-    {"SCROLL_FLOOR", SECTFX_ScrollFloor, 0}, {"SCROLL_CEILING", SECTFX_ScrollCeiling, 0},
+static DDFSpecialFlags sector_effect_names[] = {
+    {"LIGHT_FLOOR", kSectorEffectTypeLightFloor, 0},
+    {"LIGHT_CEILING", kSectorEffectTypeLightCeiling, 0},
+    {"SCROLL_FLOOR", kSectorEffectTypeScrollFloor, 0},
+    {"SCROLL_CEILING", kSectorEffectTypeScrollCeiling, 0},
 
-    {"PUSH_THINGS", SECTFX_PushThings, 0},   {"SET_FRICTION", SECTFX_SetFriction, 0},
-    {"WIND_FORCE", SECTFX_WindForce, 0},     {"CURRENT_FORCE", SECTFX_CurrentForce, 0},
-    {"POINT_FORCE", SECTFX_PointForce, 0},
+    {"PUSH_THINGS", kSectorEffectTypePushThings, 0},
+    {"SET_FRICTION", kSectorEffectTypeSetFriction, 0},
+    {"WIND_FORCE", kSectorEffectTypeWindForce, 0},
+    {"CURRENT_FORCE", kSectorEffectTypeCurrentForce, 0},
+    {"POINT_FORCE", kSectorEffectTypePointForce, 0},
 
-    {"RESET_FLOOR", SECTFX_ResetFloor, 0},   {"RESET_CEILING", SECTFX_ResetCeiling, 0},
-    {"ALIGN_FLOOR", SECTFX_AlignFloor, 0},   {"ALIGN_CEILING", SECTFX_AlignCeiling, 0},
-    {"SCALE_FLOOR", SECTFX_ScaleFloor, 0},   {"SCALE_CEILING", SECTFX_ScaleCeiling, 0},
+    {"RESET_FLOOR", kSectorEffectTypeResetFloor, 0},
+    {"RESET_CEILING", kSectorEffectTypeResetCeiling, 0},
+    {"ALIGN_FLOOR", kSectorEffectTypeAlignFloor, 0},
+    {"ALIGN_CEILING", kSectorEffectTypeAlignCeiling, 0},
+    {"SCALE_FLOOR", kSectorEffectTypeScaleFloor, 0},
+    {"SCALE_CEILING", kSectorEffectTypeScaleCeiling, 0},
 
-    {"BOOM_HEIGHTS", SECTFX_BoomHeights, 0}, {NULL, 0, 0}};
+    {"BOOM_HEIGHTS", kSectorEffectTypeBoomHeights, 0},
+    {nullptr, 0, 0}};
 
 //
 // Gets the sector effect flags.
 //
 static void DDF_LineGetSectorEffect(const char *info, void *storage)
 {
-    sector_effect_type_e *var = (sector_effect_type_e *)storage;
+    SectorEffectType *var = (SectorEffectType *)storage;
 
     int flag_value;
 
     if (DDF_CompareName(info, "NONE") == 0)
     {
-        *var = SECTFX_None;
+        *var = kSectorEffectTypeNone;
         return;
     }
 
-    switch (DDF_MainCheckSpecialFlag(info, sector_effect_names, &flag_value, true, false))
+    switch (DDF_MainCheckSpecialFlag(info, sector_effect_names, &flag_value,
+                                     true, false))
     {
-    case CHKF_Positive:
-        *var = (sector_effect_type_e)(*var | flag_value);
-        break;
+        case kDDFCheckFlagPositive:
+            *var = (SectorEffectType)(*var | flag_value);
+            break;
 
-    case CHKF_Negative:
-        *var = (sector_effect_type_e)(*var & ~flag_value);
-        break;
+        case kDDFCheckFlagNegative:
+            *var = (SectorEffectType)(*var & ~flag_value);
+            break;
 
-    case CHKF_User:
-    case CHKF_Unknown:
-        DDF_WarnError("Unknown sector effect type: %s", info);
-        break;
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
+            DDF_WarnError("Unknown sector effect type: %s", info);
+            break;
     }
 }
 
-static specflags_t portal_effect_names[] = {{"STANDARD", PORTFX_Standard, 0},
-                                            {"MIRROR", PORTFX_Mirror, 0},
-                                            {"CAMERA", PORTFX_Camera, 0},
+static DDFSpecialFlags portal_effect_names[] = {
+    {"STANDARD", kPortalEffectTypeStandard, 0},
+    {"MIRROR", kPortalEffectTypeMirror, 0},
+    {"CAMERA", kPortalEffectTypeCamera, 0},
 
-                                            {NULL, 0, 0}};
+    {nullptr, 0, 0}};
 
 //
 // Gets the portal effect flags.
 //
 static void DDF_LineGetPortalEffect(const char *info, void *storage)
 {
-    portal_effect_type_e *var = (portal_effect_type_e *)storage;
+    PortalEffectType *var = (PortalEffectType *)storage;
 
     int flag_value;
 
     if (DDF_CompareName(info, "NONE") == 0)
     {
-        *var = PORTFX_None;
+        *var = kPortalEffectTypeNone;
         return;
     }
 
-    switch (DDF_MainCheckSpecialFlag(info, portal_effect_names, &flag_value, true, false))
+    switch (DDF_MainCheckSpecialFlag(info, portal_effect_names, &flag_value,
+                                     true, false))
     {
-    case CHKF_Positive:
-        *var = (portal_effect_type_e)(*var | flag_value);
-        break;
+        case kDDFCheckFlagPositive:
+            *var = (PortalEffectType)(*var | flag_value);
+            break;
 
-    case CHKF_Negative:
-        *var = (portal_effect_type_e)(*var & ~flag_value);
-        break;
+        case kDDFCheckFlagNegative:
+            *var = (PortalEffectType)(*var & ~flag_value);
+            break;
 
-    case CHKF_User:
-    case CHKF_Unknown:
-        DDF_WarnError("Unknown portal type: %s", info);
-        break;
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
+            DDF_WarnError("Unknown portal type: %s", info);
+            break;
     }
 }
 
-static specflags_t slope_type_names[] = {{"FAKE_FLOOR", SLP_DetailFloor, 0},
-                                         {"FAKE_CEILING", SLP_DetailCeiling, 0},
+static DDFSpecialFlags slope_type_names[] = {
+    {"FAKE_FLOOR", kSlopeTypeDetailFloor, 0},
+    {"FAKE_CEILING", kSlopeTypeDetailCeiling, 0},
 
-                                         {NULL, 0, 0}};
+    {nullptr, 0, 0}};
 
 static void DDF_LineGetSlopeType(const char *info, void *storage)
 {
-    slope_type_e *var = (slope_type_e *)storage;
+    SlopeType *var = (SlopeType *)storage;
 
     int flag_value;
 
     if (DDF_CompareName(info, "NONE") == 0)
     {
-        *var = SLP_NONE;
+        *var = kSlopeTypeNONE;
         return;
     }
 
-    switch (DDF_MainCheckSpecialFlag(info, slope_type_names, &flag_value, true, false))
+    switch (DDF_MainCheckSpecialFlag(info, slope_type_names, &flag_value, true,
+                                     false))
     {
-    case CHKF_Positive:
-        *var = (slope_type_e)(*var | flag_value);
-        break;
+        case kDDFCheckFlagPositive:
+            *var = (SlopeType)(*var | flag_value);
+            break;
 
-    case CHKF_Negative:
-        *var = (slope_type_e)(*var & ~flag_value);
-        break;
+        case kDDFCheckFlagNegative:
+            *var = (SlopeType)(*var & ~flag_value);
+            break;
 
-    case CHKF_User:
-    case CHKF_Unknown:
-        DDF_WarnError("Unknown slope type: %s", info);
-        break;
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
+            DDF_WarnError("Unknown slope type: %s", info);
+            break;
     }
 }
 
 static void DDF_LineMakeCrush(const char *info)
 {
-    dynamic_line->f.crush_damage = 10;
-    dynamic_line->c.crush_damage = 10;
+    dynamic_line->f_.crush_damage_ = 10;
+    dynamic_line->c_.crush_damage_ = 10;
 }
 
 //----------------------------------------------------------------------------
@@ -1012,59 +1098,51 @@ static void DDF_LineMakeCrush(const char *info)
 //
 // donutdef_c Constructor
 //
-donutdef_c::donutdef_c()
-{
-}
+DonutDefinition::DonutDefinition() {}
 
 //
 // donutdef_c Copy constructor
 //
-donutdef_c::donutdef_c(donutdef_c &rhs)
-{
-    Copy(rhs);
-}
+DonutDefinition::DonutDefinition(DonutDefinition &rhs) { Copy(rhs); }
 
 //
 // donutdef_c Destructor
 //
-donutdef_c::~donutdef_c()
-{
-}
+DonutDefinition::~DonutDefinition() {}
 
 //
 // donutdef_c::Copy()
 //
-void donutdef_c::Copy(donutdef_c &src)
+void DonutDefinition::Copy(DonutDefinition &src)
 {
-    dodonut = src.dodonut;
+    dodonut_ = src.dodonut_;
 
     // FIXME! Strip out the d_ since we're not trying to
     // to differentiate them now?
-    d_sfxin      = src.d_sfxin;
-    d_sfxinstop  = src.d_sfxinstop;
-    d_sfxout     = src.d_sfxout;
-    d_sfxoutstop = src.d_sfxoutstop;
+    d_sfxin_      = src.d_sfxin_;
+    d_sfxinstop_  = src.d_sfxinstop_;
+    d_sfxout_     = src.d_sfxout_;
+    d_sfxoutstop_ = src.d_sfxoutstop_;
 }
 
 //
 // donutdef_c::Default()
 //
-void donutdef_c::Default()
+void DonutDefinition::Default()
 {
-    dodonut      = false;
-    d_sfxin      = NULL;
-    d_sfxinstop  = NULL;
-    d_sfxout     = NULL;
-    d_sfxoutstop = NULL;
+    dodonut_      = false;
+    d_sfxin_      = nullptr;
+    d_sfxinstop_  = nullptr;
+    d_sfxout_     = nullptr;
+    d_sfxoutstop_ = nullptr;
 }
 
 //
 // donutdef_c assignment operator
 //
-donutdef_c &donutdef_c::operator=(donutdef_c &rhs)
+DonutDefinition &DonutDefinition::operator=(DonutDefinition &rhs)
 {
-    if (&rhs != this)
-        Copy(rhs);
+    if (&rhs != this) Copy(rhs);
 
     return *this;
 }
@@ -1074,14 +1152,12 @@ donutdef_c &donutdef_c::operator=(donutdef_c &rhs)
 //
 // extrafloordef_c Constructor
 //
-extrafloordef_c::extrafloordef_c()
-{
-}
+ExtraFloorDefinition::ExtraFloorDefinition() {}
 
 //
 // extrafloordef_c Copy constructor
 //
-extrafloordef_c::extrafloordef_c(extrafloordef_c &rhs)
+ExtraFloorDefinition::ExtraFloorDefinition(ExtraFloorDefinition &rhs)
 {
     Copy(rhs);
 }
@@ -1089,35 +1165,32 @@ extrafloordef_c::extrafloordef_c(extrafloordef_c &rhs)
 //
 // extrafloordef_c Destructor
 //
-extrafloordef_c::~extrafloordef_c()
-{
-}
+ExtraFloorDefinition::~ExtraFloorDefinition() {}
 
 //
 // extrafloordef_c::Copy()
 //
-void extrafloordef_c::Copy(extrafloordef_c &src)
+void ExtraFloorDefinition::Copy(ExtraFloorDefinition &src)
 {
-    control = src.control;
-    type    = src.type;
+    control_ = src.control_;
+    type_    = src.type_;
 }
 
 //
 // extrafloordef_c::Default()
 //
-void extrafloordef_c::Default()
+void ExtraFloorDefinition::Default()
 {
-    control = EFCTL_None;
-    type    = EXFL_None;
+    control_ = kExtraFloorControlNone;
+    type_    = kExtraFloorTypeNone;
 }
 
 //
 // extrafloordef_c assignment operator
 //
-extrafloordef_c &extrafloordef_c::operator=(extrafloordef_c &rhs)
+ExtraFloorDefinition &ExtraFloorDefinition::operator=(ExtraFloorDefinition &rhs)
 {
-    if (&rhs != this)
-        Copy(rhs);
+    if (&rhs != this) Copy(rhs);
 
     return *this;
 }
@@ -1127,48 +1200,34 @@ extrafloordef_c &extrafloordef_c::operator=(extrafloordef_c &rhs)
 //
 // ladderdef_c Constructor
 //
-ladderdef_c::ladderdef_c()
-{
-}
+LadderDefinition::LadderDefinition() {}
 
 //
 // ladderdef_c Copy constructor
 //
-ladderdef_c::ladderdef_c(ladderdef_c &rhs)
-{
-    Copy(rhs);
-}
+LadderDefinition::LadderDefinition(LadderDefinition &rhs) { Copy(rhs); }
 
 //
 // ladderdef_c Destructor
 //
-ladderdef_c::~ladderdef_c()
-{
-}
+LadderDefinition::~LadderDefinition() {}
 
 //
 // ladderdef_c::Copy()
 //
-void ladderdef_c::Copy(ladderdef_c &src)
-{
-    height = src.height;
-}
+void LadderDefinition::Copy(LadderDefinition &src) { height_ = src.height_; }
 
 //
 // ladderdef_c::Default()
 //
-void ladderdef_c::Default()
-{
-    height = 0.0f;
-}
+void LadderDefinition::Default() { height_ = 0.0f; }
 
 //
 // ladderdef_c assignment operator
 //
-ladderdef_c &ladderdef_c::operator=(ladderdef_c &rhs)
+LadderDefinition &LadderDefinition::operator=(LadderDefinition &rhs)
 {
-    if (&rhs != this)
-        Copy(rhs);
+    if (&rhs != this) Copy(rhs);
 
     return *this;
 }
@@ -1178,14 +1237,12 @@ ladderdef_c &ladderdef_c::operator=(ladderdef_c &rhs)
 //
 // lightdef_c Constructor
 //
-lightdef_c::lightdef_c()
-{
-}
+LightSpecialDefinition::LightSpecialDefinition() {}
 
 //
 // lightdef_c Copy constructor
 //
-lightdef_c::lightdef_c(lightdef_c &rhs)
+LightSpecialDefinition::LightSpecialDefinition(LightSpecialDefinition &rhs)
 {
     Copy(rhs);
 }
@@ -1193,45 +1250,43 @@ lightdef_c::lightdef_c(lightdef_c &rhs)
 //
 // lightdef_c Destructor
 //
-lightdef_c::~lightdef_c()
-{
-}
+LightSpecialDefinition::~LightSpecialDefinition() {}
 
 //
 // lightdef_c::Copy()
 //
-void lightdef_c::Copy(lightdef_c &src)
+void LightSpecialDefinition::Copy(LightSpecialDefinition &src)
 {
-    type       = src.type;
-    level      = src.level;
-    chance     = src.chance;
-    darktime   = src.darktime;
-    brighttime = src.brighttime;
-    sync       = src.sync;
-    step       = src.step;
+    type_       = src.type_;
+    level_      = src.level_;
+    chance_     = src.chance_;
+    darktime_   = src.darktime_;
+    brighttime_ = src.brighttime_;
+    sync_       = src.sync_;
+    step_       = src.step_;
 }
 
 //
 // lightdef_c::Default()
 //
-void lightdef_c::Default()
+void LightSpecialDefinition::Default()
 {
-    type       = LITE_None;
-    level      = 64;
-    chance     = PERCENT_MAKE(50);
-    darktime   = 0;
-    brighttime = 0;
-    sync       = 0;
-    step       = 8;
+    type_       = kLightSpecialTypeNone;
+    level_      = 64;
+    chance_     = 0.5f;
+    darktime_   = 0;
+    brighttime_ = 0;
+    sync_       = 0;
+    step_       = 8;
 }
 
 //
 // lightdef_c assignment operator
 //
-lightdef_c &lightdef_c::operator=(lightdef_c &rhs)
+LightSpecialDefinition &LightSpecialDefinition::operator=(
+    LightSpecialDefinition &rhs)
 {
-    if (&rhs != this)
-        Copy(rhs);
+    if (&rhs != this) Copy(rhs);
 
     return *this;
 }
@@ -1241,14 +1296,12 @@ lightdef_c &lightdef_c::operator=(lightdef_c &rhs)
 //
 // movplanedef_c Constructor
 //
-movplanedef_c::movplanedef_c()
-{
-}
+PlaneMoverDefinition::PlaneMoverDefinition() {}
 
 //
 // movplanedef_c Copy constructor
 //
-movplanedef_c::movplanedef_c(movplanedef_c &rhs)
+PlaneMoverDefinition::PlaneMoverDefinition(PlaneMoverDefinition &rhs)
 {
     Copy(rhs);
 }
@@ -1256,121 +1309,130 @@ movplanedef_c::movplanedef_c(movplanedef_c &rhs)
 //
 // movplanedef_c Destructor
 //
-movplanedef_c::~movplanedef_c()
-{
-}
+PlaneMoverDefinition::~PlaneMoverDefinition() {}
 
 //
 // movplanedef_c::Copy()
 //
-void movplanedef_c::Copy(movplanedef_c &src)
+void PlaneMoverDefinition::Copy(PlaneMoverDefinition &src)
 {
-    type           = src.type;
-    is_ceiling     = src.is_ceiling;
-    speed_up       = src.speed_up;
-    speed_down     = src.speed_down;
-    destref        = src.destref;
-    dest           = src.dest;
-    otherref       = src.otherref;
-    other          = src.other;
-    crush_damage   = src.crush_damage;
-    tex            = src.tex;
-    wait           = src.wait;
-    prewait        = src.prewait;
-    sfxstart       = src.sfxstart;
-    sfxup          = src.sfxup;
-    sfxdown        = src.sfxdown;
-    sfxstop        = src.sfxstop;
-    scroll_angle   = src.scroll_angle;
-    scroll_speed   = src.scroll_speed;
-    ignore_texture = src.ignore_texture;
+    type_           = src.type_;
+    is_ceiling_     = src.is_ceiling_;
+    speed_up_       = src.speed_up_;
+    speed_down_     = src.speed_down_;
+    destref_        = src.destref_;
+    dest_           = src.dest_;
+    otherref_       = src.otherref_;
+    other_          = src.other_;
+    crush_damage_   = src.crush_damage_;
+    tex_            = src.tex_;
+    wait_           = src.wait_;
+    prewait_        = src.prewait_;
+    sfxstart_       = src.sfxstart_;
+    sfxup_          = src.sfxup_;
+    sfxdown_        = src.sfxdown_;
+    sfxstop_        = src.sfxstop_;
+    scroll_angle_   = src.scroll_angle_;
+    scroll_speed_   = src.scroll_speed_;
+    ignore_texture_ = src.ignore_texture_;
 }
 
 //
 // movplanedef_c::Default()
 //
-void movplanedef_c::Default(movplanedef_c::default_e def)
+void PlaneMoverDefinition::Default(PlaneMoverDefinition::PlaneMoverDefault def)
 {
-    type = mov_undefined;
+    type_ = kPlaneMoverUndefined;
 
-    if (def == DEFAULT_CeilingLine || def == DEFAULT_CeilingSect)
-        is_ceiling = true;
+    if (def == kPlaneMoverDefaultCeilingLine ||
+        def == kPlaneMoverDefaultCeilingSect)
+        is_ceiling_ = true;
     else
-        is_ceiling = false;
+        is_ceiling_ = false;
 
     switch (def)
     {
-    case DEFAULT_CeilingLine:
-    case DEFAULT_FloorLine: {
-        speed_up   = -1;
-        speed_down = -1;
-        break;
+        case kPlaneMoverDefaultCeilingLine:
+        case kPlaneMoverDefaultFloorLine:
+        {
+            speed_up_   = -1;
+            speed_down_ = -1;
+            break;
+        }
+
+        case kPlaneMoverDefaultDonutFloor:
+        {
+            speed_up_   = kFloorSpeedDefault / 2;
+            speed_down_ = kFloorSpeedDefault / 2;
+            break;
+        }
+
+        default:
+        {
+            speed_up_   = 0;
+            speed_down_ = 0;
+            break;
+        }
     }
 
-    case DEFAULT_DonutFloor: {
-        speed_up   = FLOORSPEED / 2;
-        speed_down = FLOORSPEED / 2;
-        break;
-    }
-
-    default: {
-        speed_up   = 0;
-        speed_down = 0;
-        break;
-    }
-    }
-
-    destref = REF_Absolute;
+    destref_ = kTriggerHeightReferenceAbsolute;
 
     // FIXME!!! Why are we using INT_MAX with a fp number?
-    dest = (def != DEFAULT_DonutFloor) ? 0.0f : (float)INT_MAX;
+    dest_ = (def != kPlaneMoverDefaultDonutFloor) ? 0.0f : (float)INT_MAX;
 
     switch (def)
     {
-    case DEFAULT_CeilingLine: {
-        otherref = (heightref_e)(REF_Current | REF_CEILING);
-        break;
-    }
+        case kPlaneMoverDefaultCeilingLine:
+        {
+            otherref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceCurrent |
+                                         kTriggerHeightReferenceCeiling);
+            break;
+        }
 
-    case DEFAULT_FloorLine: {
-        otherref = (heightref_e)(REF_Surrounding | REF_HIGHEST | REF_INCLUDE);
-        break;
-    }
+        case kPlaneMoverDefaultFloorLine:
+        {
+            otherref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceHighest |
+                                         kTriggerHeightReferenceInclude);
+            break;
+        }
 
-    default: {
-        otherref = REF_Absolute;
-        break;
-    }
+        default:
+        {
+            otherref_ = kTriggerHeightReferenceAbsolute;
+            break;
+        }
     }
 
     // FIXME!!! Why are we using INT_MAX with a fp number?
-    other = (def != DEFAULT_DonutFloor) ? 0.0f : (float)INT_MAX;
+    other_ = (def != kPlaneMoverDefaultDonutFloor) ? 0.0f : (float)INT_MAX;
 
-    crush_damage = 0;
+    crush_damage_ = 0;
 
-    tex.clear();
+    tex_.clear();
 
-    wait    = 0;
-    prewait = 0;
+    wait_    = 0;
+    prewait_ = 0;
 
-    sfxstart = NULL;
-    sfxup    = NULL;
-    sfxdown  = NULL;
-    sfxstop  = NULL;
+    sfxstart_ = nullptr;
+    sfxup_    = nullptr;
+    sfxdown_  = nullptr;
+    sfxstop_  = nullptr;
 
-    scroll_angle = 0;
-    scroll_speed = 0.0f;
+    scroll_angle_ = 0;
+    scroll_speed_ = 0.0f;
 
-    ignore_texture = false;
+    ignore_texture_ = false;
 }
 
 //
 // movplanedef_c assignment operator
 //
-movplanedef_c &movplanedef_c::operator=(movplanedef_c &rhs)
+PlaneMoverDefinition &PlaneMoverDefinition::operator=(PlaneMoverDefinition &rhs)
 {
-    if (&rhs != this)
-        Copy(rhs);
+    if (&rhs != this) Copy(rhs);
 
     return *this;
 }
@@ -1380,64 +1442,56 @@ movplanedef_c &movplanedef_c::operator=(movplanedef_c &rhs)
 //
 // sliding_door_c Constructor
 //
-sliding_door_c::sliding_door_c()
-{
-}
+SlidingDoor::SlidingDoor() {}
 
 //
 // sliding_door_c Copy constructor
 //
-sliding_door_c::sliding_door_c(sliding_door_c &rhs)
-{
-    Copy(rhs);
-}
+SlidingDoor::SlidingDoor(SlidingDoor &rhs) { Copy(rhs); }
 
 //
 // sliding_door_c Destructor
 //
-sliding_door_c::~sliding_door_c()
-{
-}
+SlidingDoor::~SlidingDoor() {}
 
 //
 // sliding_door_c::Copy()
 //
-void sliding_door_c::Copy(sliding_door_c &src)
+void SlidingDoor::Copy(SlidingDoor &src)
 {
-    type        = src.type;
-    speed       = src.speed;
-    wait        = src.wait;
-    see_through = src.see_through;
-    distance    = src.distance;
-    sfx_start   = src.sfx_start;
-    sfx_open    = src.sfx_open;
-    sfx_close   = src.sfx_close;
-    sfx_stop    = src.sfx_stop;
+    type_        = src.type_;
+    speed_       = src.speed_;
+    wait_        = src.wait_;
+    see_through_ = src.see_through_;
+    distance_    = src.distance_;
+    sfx_start_   = src.sfx_start_;
+    sfx_open_    = src.sfx_open_;
+    sfx_close_   = src.sfx_close_;
+    sfx_stop_    = src.sfx_stop_;
 }
 
 //
 // sliding_door_c::Default()
 //
-void sliding_door_c::Default()
+void SlidingDoor::Default()
 {
-    type        = SLIDE_None;
-    speed       = 4.0f;
-    wait        = 150;
-    see_through = false;
-    distance    = PERCENT_MAKE(90);
-    sfx_start   = sfx_None;
-    sfx_open    = sfx_None;
-    sfx_close   = sfx_None;
-    sfx_stop    = sfx_None;
+    type_        = kSlidingDoorTypeNone;
+    speed_       = 4.0f;
+    wait_        = 150;
+    see_through_ = false;
+    distance_    = 0.9f;
+    sfx_start_   = nullptr;
+    sfx_open_    = nullptr;
+    sfx_close_   = nullptr;
+    sfx_stop_    = nullptr;
 }
 
 //
 // sliding_door_c assignment operator
 //
-sliding_door_c &sliding_door_c::operator=(sliding_door_c &rhs)
+SlidingDoor &SlidingDoor::operator=(SlidingDoor &rhs)
 {
-    if (&rhs != this)
-        Copy(rhs);
+    if (&rhs != this) Copy(rhs);
 
     return *this;
 }
@@ -1447,66 +1501,58 @@ sliding_door_c &sliding_door_c::operator=(sliding_door_c &rhs)
 //
 // teleportdef_c Constructor
 //
-teleportdef_c::teleportdef_c()
-{
-}
+TeleportDefinition::TeleportDefinition() {}
 
 //
 // teleportdef_c Copy constructor
 //
-teleportdef_c::teleportdef_c(teleportdef_c &rhs)
-{
-    Copy(rhs);
-}
+TeleportDefinition::TeleportDefinition(TeleportDefinition &rhs) { Copy(rhs); }
 
 //
 // teleportdef_c Destructor
 //
-teleportdef_c::~teleportdef_c()
-{
-}
+TeleportDefinition::~TeleportDefinition() {}
 
 //
 // teleportdef_c::Copy()
 //
-void teleportdef_c::Copy(teleportdef_c &src)
+void TeleportDefinition::Copy(TeleportDefinition &src)
 {
-    teleport = src.teleport;
+    teleport_ = src.teleport_;
 
-    inspawnobj     = src.inspawnobj;
-    inspawnobj_ref = src.inspawnobj_ref;
+    inspawnobj_     = src.inspawnobj_;
+    inspawnobj_ref_ = src.inspawnobj_ref_;
 
-    outspawnobj     = src.outspawnobj;
-    outspawnobj_ref = src.outspawnobj_ref;
+    outspawnobj_     = src.outspawnobj_;
+    outspawnobj_ref_ = src.outspawnobj_ref_;
 
-    special = src.special;
-    delay   = src.delay;
+    special_ = src.special_;
+    delay_   = src.delay_;
 }
 
 //
 // teleportdef_c::Default()
 //
-void teleportdef_c::Default()
+void TeleportDefinition::Default()
 {
-    teleport = false;
+    teleport_ = false;
 
-    inspawnobj = NULL;
-    inspawnobj_ref.clear();
+    inspawnobj_ = nullptr;
+    inspawnobj_ref_.clear();
 
-    outspawnobj = NULL;
-    outspawnobj_ref.clear();
+    outspawnobj_ = nullptr;
+    outspawnobj_ref_.clear();
 
-    delay   = 0;
-    special = TELSP_None;
+    delay_   = 0;
+    special_ = kTeleportSpecialNone;
 }
 
 //
 // teleportdef_c assignment operator
 //
-teleportdef_c &teleportdef_c::operator=(teleportdef_c &rhs)
+TeleportDefinition &TeleportDefinition::operator=(TeleportDefinition &rhs)
 {
-    if (&rhs != this)
-        Copy(rhs);
+    if (&rhs != this) Copy(rhs);
 
     return *this;
 }
@@ -1514,207 +1560,198 @@ teleportdef_c &teleportdef_c::operator=(teleportdef_c &rhs)
 // --> Line definition type class
 
 //
-// linetype_c Constructor
+// LineType Constructor
 //
-linetype_c::linetype_c() : number(0)
-{
-    Default();
-}
+LineType::LineType() : number_(0) { Default(); }
 
 //
-// linetype_c Destructor
+// LineType Destructor
 //
-linetype_c::~linetype_c()
+LineType::~LineType() {}
+
+void LineType::CopyDetail(LineType &src)
 {
-}
+    newtrignum_ = src.newtrignum_;
+    type_       = src.type_;
+    obj_        = src.obj_;
+    keys_       = src.keys_;
+    count_      = src.count_;
 
-void linetype_c::CopyDetail(linetype_c &src)
-{
-    newtrignum = src.newtrignum;
-    type       = src.type;
-    obj        = src.obj;
-    keys       = src.keys;
-    count      = src.count;
+    f_ = src.f_;
+    c_ = src.c_;
+    d_ = src.d_;
+    s_ = src.s_;
+    t_ = src.t_;
+    l_ = src.l_;
 
-    f = src.f;
-    c = src.c;
-    d = src.d;
-    s = src.s;
-    t = src.t;
-    l = src.l;
+    ladder_       = src.ladder_;
+    e_exit_       = src.e_exit_;
+    hub_exit_     = src.hub_exit_;
+    s_xspeed_     = src.s_xspeed_;
+    s_yspeed_     = src.s_yspeed_;
+    scroll_parts_ = src.scroll_parts_;
 
-    ladder       = src.ladder;
-    e_exit       = src.e_exit;
-    hub_exit     = src.hub_exit;
-    s_xspeed     = src.s_xspeed;
-    s_yspeed     = src.s_yspeed;
-    scroll_parts = src.scroll_parts;
+    failedmessage_ = src.failedmessage_;
+    failed_sfx_    = src.failed_sfx_;
 
-    failedmessage = src.failedmessage;
-    failed_sfx    = src.failed_sfx;
+    use_colourmap_ = src.use_colourmap_;
+    gravity_       = src.gravity_;
+    friction_      = src.friction_;
+    viscosity_     = src.viscosity_;
+    drag_          = src.drag_;
+    ambient_sfx_   = src.ambient_sfx_;
+    activate_sfx_  = src.activate_sfx_;
+    music_         = src.music_;
+    autoline_      = src.autoline_;
+    singlesided_   = src.singlesided_;
+    ef_            = src.ef_;
+    translucency_  = src.translucency_;
+    appear_        = src.appear_;
 
-    use_colourmap = src.use_colourmap;
-    gravity       = src.gravity;
-    friction      = src.friction;
-    viscosity     = src.viscosity;
-    drag          = src.drag;
-    ambient_sfx   = src.ambient_sfx;
-    activate_sfx  = src.activate_sfx;
-    music         = src.music;
-    autoline      = src.autoline;
-    singlesided   = src.singlesided;
-    ef            = src.ef;
-    translucency  = src.translucency;
-    appear        = src.appear;
-
-    special_flags  = src.special_flags;
-    trigger_effect = src.trigger_effect;
-    line_effect    = src.line_effect;
-    line_parts     = src.line_parts;
-    scroll_type    = src.scroll_type;
-    sector_effect  = src.sector_effect;
-    portal_effect  = src.portal_effect;
-    slope_type     = src.slope_type;
-    fx_color       = src.fx_color;
+    special_flags_  = src.special_flags_;
+    trigger_effect_ = src.trigger_effect_;
+    line_effect_    = src.line_effect_;
+    line_parts_     = src.line_parts_;
+    scroll_type_    = src.scroll_type_;
+    sector_effect_  = src.sector_effect_;
+    portal_effect_  = src.portal_effect_;
+    slope_type_     = src.slope_type_;
+    fx_color_       = src.fx_color_;
 
     // lobo 2022
-    effectobject     = src.effectobject;
-    effectobject_ref = src.effectobject_ref;
-    glass            = src.glass;
-    brokentex        = src.brokentex;
+    effectobject_     = src.effectobject_;
+    effectobject_ref_ = src.effectobject_ref_;
+    glass_            = src.glass_;
+    brokentex_        = src.brokentex_;
 }
 
-void linetype_c::Default(void)
+void LineType::Default(void)
 {
-    newtrignum = 0;
-    type       = line_none;
-    obj        = trig_none;
-    keys       = KF_NONE;
-    count      = -1;
+    newtrignum_ = 0;
+    type_       = kLineTriggerNone;
+    obj_        = kTriggerActivatorNone;
+    keys_       = kDoorKeyNone;
+    count_      = -1;
 
-    f.Default(movplanedef_c::DEFAULT_FloorLine);
-    c.Default(movplanedef_c::DEFAULT_CeilingLine);
+    f_.Default(PlaneMoverDefinition::kPlaneMoverDefaultFloorLine);
+    c_.Default(PlaneMoverDefinition::kPlaneMoverDefaultCeilingLine);
 
-    d.Default(); // Donut
-    s.Default(); // Sliding Door
+    d_.Default();  // Donut
+    s_.Default();  // Sliding Door
 
-    t.Default(); // Teleport
-    l.Default(); // Light definition
+    t_.Default();  // Teleport
+    l_.Default();  // Light definition
 
-    ladder.Default(); // Ladder
+    ladder_.Default();  // Ladder
 
-    e_exit       = EXIT_None;
-    hub_exit     = 0;
-    s_xspeed     = 0.0f;
-    s_yspeed     = 0.0f;
-    scroll_parts = SCPT_None;
+    e_exit_       = kExitTypeNone;
+    hub_exit_     = 0;
+    s_xspeed_     = 0.0f;
+    s_yspeed_     = 0.0f;
+    scroll_parts_ = kScrollingPartNone;
 
-    failedmessage.clear();
-    failed_sfx = NULL;
+    failedmessage_.clear();
+    failed_sfx_ = nullptr;
 
-    use_colourmap = NULL;
-    gravity       = FLO_UNUSED;
-    friction      = FLO_UNUSED;
-    viscosity     = FLO_UNUSED;
-    drag          = FLO_UNUSED;
-    ambient_sfx   = sfx_None;
-    activate_sfx  = sfx_None;
-    music         = 0;
-    autoline      = false;
-    singlesided   = false;
+    use_colourmap_ = nullptr;
+    gravity_       = kFloatUnused;
+    friction_      = kFloatUnused;
+    viscosity_     = kFloatUnused;
+    drag_          = kFloatUnused;
+    ambient_sfx_   = nullptr;
+    activate_sfx_  = nullptr;
+    music_         = 0;
+    autoline_      = false;
+    singlesided_   = false;
 
-    ef.Default();
+    ef_.Default();
 
-    translucency   = PERCENT_MAKE(100);
-    appear         = DEFAULT_APPEAR;
-    special_flags  = LINSP_None;
-    trigger_effect = 0;
-    line_effect    = LINEFX_NONE;
-    line_parts     = SCPT_None;
-    scroll_type    = ScrollType_None;
-    sector_effect  = SECTFX_None;
-    portal_effect  = PORTFX_None;
-    slope_type     = SLP_NONE;
-    fx_color       = SG_BLACK_RGBA32;
+    translucency_   = 1.0f;
+    appear_         = kAppearsWhenDefault;
+    special_flags_  = kLineSpecialNone;
+    trigger_effect_ = 0;
+    line_effect_    = kLineEffectTypeNONE;
+    line_parts_     = kScrollingPartNone;
+    scroll_type_    = BoomScrollerTypeNone;
+    sector_effect_  = kSectorEffectTypeNone;
+    portal_effect_  = kPortalEffectTypeNone;
+    slope_type_     = kSlopeTypeNONE;
+    fx_color_       = SG_BLACK_RGBA32;
 
     // lobo 2022
-    effectobject = NULL;
-    effectobject_ref.clear();
-    glass = false;
-    brokentex.clear();
+    effectobject_ = nullptr;
+    effectobject_ref_.clear();
+    glass_ = false;
+    brokentex_.clear();
 }
 
 // --> Line definition type container class
 
 //
-// linetype_container_c Constructor
+// LineTypeContainer Constructor
 //
-linetype_container_c::linetype_container_c()
-{
-    Reset();
-}
+LineTypeContainer::LineTypeContainer() { Reset(); }
 
 //
-// linetype_container_c Destructor
+// LineTypeContainer Destructor
 //
-linetype_container_c::~linetype_container_c()
+LineTypeContainer::~LineTypeContainer()
 {
     for (auto iter = begin(); iter != end(); iter++)
     {
-        linetype_c *line = *iter;
+        LineType *line = *iter;
         delete line;
         line = nullptr;
     }
 }
 
 //
-// linetype_c* linetype_container_c::Lookup()
+// LineType* LineTypeContainer::Lookup()
 //
-// Looks an linetype by id, returns NULL if line can't be found.
+// Looks an linetype by id, returns nullptr if line can't be found.
 //
-linetype_c *linetype_container_c::Lookup(const int id)
+LineType *LineTypeContainer::Lookup(const int id)
 {
-    if (id == 0)
-        return default_linetype;
+    if (id == 0) return default_linetype;
 
-    int slot = DDF_LineHashFunc(id);
+    int slot = (((id) + kLookupCacheSize) % kLookupCacheSize);
 
     // check the cache
-    if (lookup_cache[slot] && lookup_cache[slot]->number == id)
+    if (lookup_cache_[slot] && lookup_cache_[slot]->number_ == id)
     {
-        return lookup_cache[slot];
+        return lookup_cache_[slot];
     }
 
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        linetype_c *l = *iter;
+        LineType *l = *iter;
 
-        if (l->number == id)
+        if (l->number_ == id)
         {
             // update the cache
-            lookup_cache[slot] = l;
+            lookup_cache_[slot] = l;
             return l;
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //
-// linetype_container_c::Reset()
+// LineTypeContainer::Reset()
 //
 // Clears down both the data and the cache
 //
-void linetype_container_c::Reset()
+void LineTypeContainer::Reset()
 {
     for (auto iter = begin(); iter != end(); iter++)
     {
-        linetype_c *line = *iter;
+        LineType *line = *iter;
         delete line;
         line = nullptr;
     }
     clear();
-    memset(lookup_cache, 0, sizeof(linetype_c *) * LOOKUP_CACHESIZE);
+    memset(lookup_cache_, 0, sizeof(LineType *) * kLookupCacheSize);
 }
 
 //--- editor settings ---

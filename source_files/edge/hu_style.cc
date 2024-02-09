@@ -16,138 +16,141 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
 #include "hu_style.h"
-#include "hu_draw.h"
 
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "r_local.h"
+#include "epi.h"
+#include "hu_draw.h"
 #include "r_colormap.h"
 #include "r_draw.h"
-#include "r_modes.h"
 #include "r_image.h"
+#include "r_modes.h"
 
 // Edge has lots of style
-style_container_c hu_styles;
+StyleContainer hud_styles;
 
-style_c::style_c(styledef_c *_def) : def(_def), bg_image(NULL)
+Style::Style(StyleDefinition *definition)
+    : definition_(definition), background_image_(nullptr)
 {
-    for (int T = 0; T < styledef_c::NUM_TXST; T++)
-        fonts[T] = NULL;
+    for (int T = 0; T < StyleDefinition::kTotalTextSections; T++)
+        fonts_[T] = nullptr;
 }
 
-style_c::~style_c()
-{
-    /* nothing to do */
+Style::~Style()
+{ /* nothing to do */
 }
 
-void style_c::Load()
+void Style::Load()
 {
-    if (def->bg.image_name.c_str())
+    if (definition_->bg_.image_name_.c_str())
     {
-        const char *name = def->bg.image_name.c_str();
+        const char *name = definition_->bg_.image_name_.c_str();
 
-        bg_image = W_ImageLookup(name, INS_Flat, ILF_Null);
+        background_image_ =
+            ImageLookup(name, kImageNamespaceFlat, kImageLookupNull);
 
-        if (!bg_image)
-            bg_image = W_ImageLookup(name, INS_Graphic);
+        if (!background_image_)
+            background_image_ = ImageLookup(name, kImageNamespaceGraphic);
     }
 
-    for (int T = 0; T < styledef_c::NUM_TXST; T++)
+    for (int T = 0; T < StyleDefinition::kTotalTextSections; T++)
     {
-        if (def->text[T].font)
-            fonts[T] = hu_fonts.Lookup(def->text[T].font);
+        if (definition_->text_[T].font_)
+            fonts_[T] = hud_fonts.Lookup(definition_->text_[T].font_);
     }
 }
 
-void style_c::DrawBackground()
+void Style::DrawBackground()
 {
-    float alpha = PERCENT_2_FLOAT(def->bg.translucency);
+    float alpha = definition_->bg_.translucency_;
 
-    if (alpha < 0.02)
-        return;
+    if (alpha < 0.02) return;
 
-    HUD_SetAlpha(alpha);
+    HudSetAlpha(alpha);
 
-    float WS_x = -130;        // Lobo: fixme, this should be calculated, not arbitrary hardcoded ;)
-    float WS_w = SCREENWIDTH; // 580;
+    float WS_x = -130;  // Lobo: fixme, this should be calculated, not arbitrary
+                        // hardcoded ;)
+    float WS_w = current_screen_width;  // 580;
 
-    if (!bg_image)
+    if (!background_image_)
     {
-        if (!(def->special & SYLSP_StretchFullScreen))
+        if (!(definition_->special_ & kStyleSpecialStretchFullScreen))
         {
-            WS_x = 1;   // cannot be 0 or WS is invoked
-            WS_w = 319; // cannot be 320 or WS is invoked
+            WS_x = 1;    // cannot be 0 or WS is invoked
+            WS_w = 319;  // cannot be 320 or WS is invoked
         }
 
-        if (def->bg.colour != kRGBANoValue)
-            HUD_SolidBox(WS_x, 0, WS_w, 200, def->bg.colour);
+        if (definition_->bg_.colour_ != kRGBANoValue)
+            HudSolidBox(WS_x, 0, WS_w, 200, definition_->bg_.colour_);
         /*else
-            HUD_SolidBox(WS_x, 0, WS_w, 200, T_BLACK);
+            HudSolidBox(WS_x, 0, WS_w, 200, T_BLACK);
 */
-        HUD_SetAlpha();
+        HudSetAlpha();
         return;
     }
 
-    if (def->special & (SYLSP_Tiled | SYLSP_TiledNoScale))
+    if (definition_->special_ &
+        (kStyleSpecialTiled | kStyleSpecialTiledNoScale))
     {
-        HUD_SetScale(def->bg.scale);
+        HudSetScale(definition_->bg_.scale_);
 
-        // HUD_TileImage(0, 0, 320, 200, bg_image);
-        HUD_TileImage(WS_x, 0, WS_w, 200, bg_image, 0.0, 0.0);
-        HUD_SetScale();
+        // HudTileImage(0, 0, 320, 200, background_image_);
+        HudTileImage(WS_x, 0, WS_w, 200, background_image_, 0.0, 0.0);
+        HudSetScale();
     }
     // Lobo: handle our new special
-    if (def->special & SYLSP_StretchFullScreen)
+    if (definition_->special_ & kStyleSpecialStretchFullScreen)
     {
-        HUD_SetScale(def->bg.scale);
+        HudSetScale(definition_->bg_.scale_);
 
-        HUD_StretchImage(WS_x, 0, WS_w, 200, bg_image, 0.0, 0.0);
-        // HUD_DrawImage(CenterX, 0, bg_image);
+        HudStretchImage(WS_x, 0, WS_w, 200, background_image_, 0.0, 0.0);
+        // HudDrawImage(CenterX, 0, background_image_);
 
-        HUD_SetScale();
+        HudSetScale();
     }
 
     // Lobo: positioning and size will be determined by images.ddf
-    if (def->special == 0)
+    if (definition_->special_ == 0)
     {
         // Lobo: calculate centering on screen
         float CenterX = 0;
 
         CenterX = 160;
-        CenterX -= (bg_image->actual_w * bg_image->scale_x) / 2;
+        CenterX -=
+            (background_image_->actual_width_ * background_image_->scale_x_) /
+            2;
 
-        HUD_SetScale(def->bg.scale);
-        // HUD_StretchImage(0, 0, 320, 200, bg_image);
-        HUD_DrawImage(CenterX, 0, bg_image);
+        HudSetScale(definition_->bg_.scale_);
+        // HudStretchImage(0, 0, 320, 200, background_image_);
+        HudDrawImage(CenterX, 0, background_image_);
 
-        HUD_SetScale();
+        HudSetScale();
     }
 
-    HUD_SetAlpha();
+    HudSetAlpha();
 }
 
-// ---> style_container_c class
+// ---> StyleContainer class
 
 //
-// style_container_c::Lookup()
+// StyleContainer::Lookup()
 //
-// Never returns NULL.
+// Never returns nullptr.
 //
-style_c *style_container_c::Lookup(styledef_c *def)
+Style *StyleContainer::Lookup(StyleDefinition *definition)
 {
-    SYS_ASSERT(def);
+    EPI_ASSERT(definition);
 
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<Style *>::iterator iter = begin(), iter_end = end();
+         iter != iter_end; iter++)
     {
-        style_c *st = *iter;
+        Style *st = *iter;
 
-        if (def == st->def)
-            return st;
+        if (definition == st->definition_) return st;
     }
 
-    style_c *new_st = new style_c(def);
+    Style *new_st = new Style(definition);
 
     new_st->Load();
     push_back(new_st);
@@ -156,23 +159,23 @@ style_c *style_container_c::Lookup(styledef_c *def)
 }
 
 //
-// HL_WriteText
+// HudWriteText
 //
-void HL_WriteText(style_c *style, int text_type, int x, int y, const char *str, float scale)
+void HudWriteText(Style *style, int text_type, int x, int y, const char *str,
+                  float scale)
 {
-    HUD_SetFont(style->fonts[text_type]);
-    HUD_SetScale(scale * style->def->text[text_type].scale);
+    HudSetFont(style->fonts_[text_type]);
+    HudSetScale(scale * style->definition_->text_[text_type].scale_);
 
-    const colourmap_c *colmap = style->def->text[text_type].colmap;
+    const Colormap *colmap = style->definition_->text_[text_type].colmap_;
 
-    if (colmap)
-        HUD_SetTextColor(V_GetFontColor(colmap));
+    if (colmap) HudSetTextColor(GetFontColor(colmap));
 
-    HUD_DrawText(x, y, str);
+    HudDrawText(x, y, str);
 
-    HUD_SetFont();
-    HUD_SetScale();
-    HUD_SetTextColor();
+    HudSetFont();
+    HudSetScale();
+    HudSetTextColor();
 }
 
 //--- editor settings ---

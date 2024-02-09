@@ -24,12 +24,12 @@ namespace dehacked
 // Ammunition types defined.
 enum AmmoType
 {
-    kAmmoTypeBullet, // Pistol / chaingun ammo.
-    kAmmoTypeShell,  // Shotgun / double barreled shotgun.
-    kAmmoTypeCell,   // Plasma rifle, BFG.
-    kAmmoTypeRocket, // Missile launcher.
-    kAmmoTypeUnused, // Not used
-    kAmmoTypeNoAmmo, // Fist / chainsaw
+    kAmmoTypeBullet,  // Pistol / chaingun ammo.
+    kAmmoTypeShell,   // Shotgun / double barreled shotgun.
+    kAmmoTypeCell,    // Plasma rifle, BFG.
+    kAmmoTypeRocket,  // Missile launcher.
+    kAmmoTypeUnused,  // Not used
+    kAmmoTypeNoAmmo,  // Fist / chainsaw
     kTotalAmmoTypes
 };
 
@@ -47,6 +47,6 @@ void AmmoDependencies();
 const char *GetAmmo(int type);
 
 void AlterAmmo(int new_val);
-} // namespace ammo
+}  // namespace ammo
 
-} // namespace dehacked
+}  // namespace dehacked

@@ -16,18 +16,11 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __RAD_PLAYER_H__
-#define __RAD_PLAYER_H__
+#pragma once
 
-#include "i_defs.h"
+#include "s_music.h"
 
-#include "sound_data.h"
-
-/* FUNCTIONS */
-
-abstract_music_c *S_PlayRADMusic(uint8_t *data, int length, bool looping);
-
-#endif /* __RAD_PLAYER_H__ */
+AbstractMusicPlayer *PlayRadMusic(uint8_t *data, int length, bool looping);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

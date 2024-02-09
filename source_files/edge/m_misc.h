@@ -23,61 +23,57 @@
 //
 //----------------------------------------------------------------------------
 //
-// 1998/07/02 -MH- Added key_flyup and key_flydown
+// 1998/07/02 -MH- Added key_fly_up and key_fly_down
 //
 
-#ifndef __M_MISC__
-#define __M_MISC__
+#pragma once
 
-#include "file.h"
+#include "con_var.h"
 
 //
 // MISC
 //
-typedef enum
+enum ConfigurationValueType
 {
-    CFGT_Int     = 0,
-    CFGT_Boolean = 1,
-    CFGT_Key     = 2,
-} cfg_type_e;
+    kConfigInteger = 0,
+    kConfigEnum    = 0,
+    kConfigBoolean = 1,
+    kConfigKey     = 2,
+};
 
-#define CFGT_Enum CFGT_Int
-
-typedef struct
+struct ConfigurationDefault
 {
     int         type;
     const char *name;
     void       *location;
-    int         defaultvalue;
-} default_t;
+    int         default_value;
+};
 
-void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar = nullptr);
-void M_LoadDefaults(void);
-void M_LoadBranding(void);
-void M_SaveDefaults(void);
+void ConfigurationResetDefaults(int              dummy,
+                                ConsoleVariable *dummy_cvar = nullptr);
+void ConfigurationLoadDefaults(void);
+void ConfigurationLoadBranding(void);
+void ConfigurationSaveDefaults(void);
 
-void M_InitMiscConVars(void);
-void M_ScreenShot(bool show_msg);
-void M_MakeSaveScreenShot(void);
+void TakeScreenshot(bool show_msg);
+void CreateSaveScreenshot(void);
 
-std::string M_ComposeFileName(std::string dir, std::string file);
-epi::File          *M_OpenComposedEPIFile(std::string dir, std::string file);
-void                  M_WarnError(const char *error, ...) GCCATTR((format(printf, 1, 2)));
-void                  M_DebugError(const char *error, ...) GCCATTR((format(printf, 1, 2)));
+#ifdef __GNUC__
+void PrintWarningOrError(const char *error, ...)
+    __attribute__((format(printf, 1, 2)));
+void PrintDebugOrError(const char *error, ...)
+    __attribute__((format(printf, 1, 2)));
+#else
+void PrintWarningOrError(const char *error, ...);
+void PrintDebugOrError(const char *error, ...);
+#endif
 
 extern bool save_screenshot_valid;
-
-extern int display_desync;
-
-extern bool var_obituaries;
-
-extern int var_midi_player;
-extern int var_sound_stereo;
-extern int var_mix_channels;
-
-extern bool var_cache_sfx;
-
-#endif /* __M_MISC__ */
+extern bool show_obituaries;
+extern int  var_midi_player;
+extern int  var_sound_stereo;
+extern int  sound_mixing_channels;
+extern bool precache_sound_effects;
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

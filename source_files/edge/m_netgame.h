@@ -23,19 +23,16 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __M_NETGAME_H__
-#define __M_NETGAME_H__
+#pragma once
 
 #include "e_event.h"
 
-extern int netgame_menuon; // 1 = HOST, 2 = JOIN, 3 = PLAYERS
+extern int network_game_menu_on;  // 1 = HOST, 2 = JOIN, 3 = PLAYERS
 
-void M_NetGameInit(void);
-void M_NetGameDrawer(void);
-void M_NetGameTicker(void);
-bool M_NetGameResponder(event_t *ev, int ch);
-
-#endif /* __M_NETGAME_H__ */
+void NetworkGameInitialize(void);
+void NetworkGameDrawer(void);
+void NetworkGameTicker(void);
+bool NetworkGameResponder(InputEvent *ev, int ch);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

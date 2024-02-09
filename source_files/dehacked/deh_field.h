@@ -18,6 +18,9 @@
 
 #pragma once
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include "deh_mobj.h"
 
 namespace dehacked
@@ -47,6 +50,7 @@ struct FieldReference
 };
 
 // returns false if name not found
-bool FieldAlter(const FieldReference *references, const char *dehacked_field, int *object, int new_value);
+bool FieldAlter(const FieldReference *references, const char *dehacked_field,
+                int *object, int new_value);
 
-} // namespace dehacked
+}  // namespace dehacked

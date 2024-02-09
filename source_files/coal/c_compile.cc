@@ -41,7 +41,7 @@
 
 #include "AlmostEquals.h"
 
-extern void I_Error(const char *error, ...);
+extern void FatalError(const char *error, ...);
 
 namespace coal
 {
@@ -50,7 +50,7 @@ namespace coal
 #include "c_compile.h"
 
 compiling_c::compiling_c()
-    : source_file(NULL), source_line(0), asm_dump(false), parse_p(NULL), line_start(NULL), error_count(0),
+    : source_file(nullptr), source_line(0), asm_dump(false), parse_p(nullptr), line_start(nullptr), error_count(0),
       global_scope(), all_modules(), all_types(), all_literals(), temporaries()
 {
 }
@@ -62,7 +62,7 @@ compiling_c::~compiling_c()
 const char *punctuation[] =
     // longer symbols must be before a shorter partial match
     {"&&", "||", "<=", ">=", "==", "!=", "++", "--", "...", "..", ":", ";", ",", "!", "*", "/", "%",
-     "^",  "(",  ")",  "-",  "+",  "=",  "[",  "]",  "{",   "}",  ".", "<", ">", "#", "&", "|", NULL};
+     "^",  "(",  ")",  "-",  "+",  "=",  "[",  "]",  "{",   "}",  ".", "<", ">", "#", "&", "|", nullptr};
 
 // simple types.  function types are dynamically allocated
 static type_t type_void     = {ev_void};
@@ -138,7 +138,7 @@ static opcode_t all_operators[] = {
     {"&", OP_BITAND, 2, &type_float, &type_float, &type_float},
     {"|", OP_BITOR, 2, &type_float, &type_float, &type_float},
 
-    {NULL} // end of list
+    {nullptr} // end of list
 };
 
 #define TOP_PRIORITY 6
@@ -167,7 +167,7 @@ void real_vm_c::CompileError(const char *error, ...)
     vsprintf(buffer, error, argptr);
     va_end(argptr);
 
-    I_Error("%s:%i: %s", comp.source_file, comp.source_line, buffer);
+    FatalError("%s:%i: %s", comp.source_file, comp.source_line, buffer);
 }
 
 void real_vm_c::LEX_String()
@@ -280,7 +280,7 @@ void real_vm_c::LEX_Punctuation()
 
     char ch = *comp.parse_p;
 
-    for (int i = 0; (p = punctuation[i]) != NULL; i++)
+    for (int i = 0; (p = punctuation[i]) != nullptr; i++)
     {
         int len = strlen(p);
 
@@ -696,7 +696,7 @@ def_t *real_vm_c::FindLiteral()
         }
     }
 
-    return NULL; // not found
+    return nullptr; // not found
 }
 
 void real_vm_c::StoreLiteral(int ofs)
@@ -732,7 +732,7 @@ def_t *real_vm_c::EXP_Literal()
         cn->name = "CONSTANT VALUE";
 
         cn->flags |= DF_Constant;
-        cn->scope = NULL; // literals are "scope-less"
+        cn->scope = nullptr; // literals are "scope-less"
 
         // copy the literal to the global area
         StoreLiteral(cn->ofs);
@@ -796,7 +796,7 @@ def_t *real_vm_c::EXP_FunctionCall(def_t *func)
         }
     }
 
-    def_t *result = NULL;
+    def_t *result = nullptr;
 
     if (t->aux_type->type != ev_void)
     {
@@ -882,7 +882,7 @@ def_t *real_vm_c::FindDef(type_t *type, char *name, scope_c *scope)
         return def;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 def_t *real_vm_c::DeclareDef(type_t *type, char *name, scope_c *scope)
@@ -919,7 +919,7 @@ def_t *real_vm_c::EXP_VarValue()
 
     for (;;)
     {
-        def_t *d = FindDef(NULL, name, scope);
+        def_t *d = FindDef(nullptr, name, scope);
         if (d)
             return d;
 
@@ -978,7 +978,7 @@ def_t *real_vm_c::EXP_Term()
     }
 
     CompileError("expected value, got %s\n", comp.token_buf);
-    return NULL; /* NOT REACHED */
+    return nullptr; /* NOT REACHED */
 }
 
 def_t *real_vm_c::EXP_ShortCircuit(def_t *e, int n)
@@ -1048,7 +1048,7 @@ def_t *real_vm_c::EXP_FieldQuery(def_t *e, bool lvalue)
     {
         scope_c *mod = comp.all_modules[e->ofs];
 
-        def_t *d = FindDef(NULL, name, mod);
+        def_t *d = FindDef(nullptr, name, mod);
         if (!d)
             CompileError("unknown identifier: %s.%s\n", e->name, name);
 
@@ -1056,7 +1056,7 @@ def_t *real_vm_c::EXP_FieldQuery(def_t *e, bool lvalue)
     }
 
     CompileError("type mismatch with . operator\n");
-    return NULL; // NOT REACHED
+    return nullptr; // NOT REACHED
 }
 
 def_t *real_vm_c::EXP_Expression(int priority, bool *lvalue)
@@ -1378,7 +1378,7 @@ int real_vm_c::GLOB_FunctionBody(def_t *func_def, type_t *type, const char *func
     //
     if (LEX_Check("native"))
     {
-        const char *module = NULL;
+        const char *module = nullptr;
         if (func_def->scope->kind == 'm')
             module = func_def->scope->def->name;
 
@@ -1748,7 +1748,7 @@ bool real_vm_c::CompileFile(char *buffer, const char *filename)
             GLOB_Globals();
     }
 
-    comp.source_file = NULL;
+    comp.source_file = nullptr;
 
     return (comp.error_count == 0);
 }
@@ -1787,7 +1787,7 @@ real_vm_c::real_vm_c()
         RunError("statement #0 is never used\n");
     }
 
-    // global #0 is never used (equivalent to NULL)
+    // global #0 is never used (equivalent to nullptr)
     // global #1-#3 are reserved for function return values
     // global #4-#6 are reserved for a zero value
     ofs = global_mem.alloc(7 * sizeof(double));

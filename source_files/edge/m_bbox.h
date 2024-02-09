@@ -23,27 +23,18 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __M_BBOX_H__
-#define __M_BBOX_H__
+#pragma once
 
-#include <limits.h>
-
-// Bounding box coordinate storage.
-enum
+enum BoundingBoxCoordinates
 {
-    BOXTOP,
-    BOXBOTTOM,
-    BOXLEFT,
-    BOXRIGHT
-}; // bbox coordinates
+    kBoundingBoxTop,
+    kBoundingBoxBottom,
+    kBoundingBoxLeft,
+    kBoundingBoxRight
+};
 
-// Bounding box functions.
-void M_ClearBox(float *box);
-void M_AddToBox(float *box, float x, float y);
-void M_CopyBox(float *box, float *other);
-void M_UnionBox(float *box, float *other);
-
-#endif /* __M_BBOX_H__ */
+void BoundingBoxClear(float *box);
+void BoundingBoxAddPoint(float *box, float x, float y);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

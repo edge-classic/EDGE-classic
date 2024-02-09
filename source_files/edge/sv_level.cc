@@ -29,64 +29,59 @@
 //    sector_t             [SECT]
 //
 
-#include "i_defs.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "str_util.h"
-
 #include "colormap.h"
-
+#include "epi.h"
 #include "r_image.h"
+#include "str_compare.h"
+#include "str_util.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 
-#undef SF
-#define SF SVFIELD
-
 // forward decls.
 int   SV_SideCountElems(void);
-int   SV_SideFindElem(side_t *elem);
-void *SV_SideGetElem(int index);
+int   SV_SideGetIndex(Side *elem);
+void *SV_SideFindByIndex(int index);
 void  SV_SideCreateElems(int num_elems);
 void  SV_SideFinaliseElems(void);
 
 int   SV_LineCountElems(void);
-int   SV_LineFindElem(line_t *elem);
-void *SV_LineGetElem(int index);
+int   SV_LineGetIndex(Line *elem);
+void *SV_LineFindByIndex(int index);
 void  SV_LineCreateElems(int num_elems);
 void  SV_LineFinaliseElems(void);
 
 int   SV_ExfloorCountElems(void);
-int   SV_ExfloorFindElem(extrafloor_t *elem);
-void *SV_ExfloorGetElem(int index);
+int   SV_ExfloorGetIndex(Extrafloor *elem);
+void *SV_ExfloorFindByIndex(int index);
 void  SV_ExfloorCreateElems(int num_elems);
 void  SV_ExfloorFinaliseElems(void);
 
 int   SV_SectorCountElems(void);
-int   SV_SectorFindElem(sector_t *elem);
-void *SV_SectorGetElem(int index);
+int   SV_SectorGetIndex(Sector *elem);
+void *SV_SectorFindByIndex(int index);
 void  SV_SectorCreateElems(int num_elems);
 void  SV_SectorFinaliseElems(void);
 
-bool SR_LevelGetImage(void *storage, int index, void *extra);
-bool SR_LevelGetColmap(void *storage, int index, void *extra);
-bool SR_LevelGetSurface(void *storage, int index, void *extra);
-bool SR_LevelGetSurfPtr(void *storage, int index, void *extra);
-bool SR_LineGetSpecial(void *storage, int index, void *extra);
-bool SR_SectorGetSpecial(void *storage, int index, void *extra);
-bool SR_SectorGetProps(void *storage, int index, void *extra);
-bool SR_SectorGetPropRef(void *storage, int index, void *extra);
+bool SaveGameLevelGetImage(void *storage, int index, void *extra);
+bool SaveGameLevelGetColormap(void *storage, int index, void *extra);
+bool SaveGameLevelGetSurface(void *storage, int index, void *extra);
+bool SaveGameLevelGetSurfPtr(void *storage, int index, void *extra);
+bool SaveGameLineGetSpecial(void *storage, int index, void *extra);
+bool SaveGameSectorGetSpecial(void *storage, int index, void *extra);
+bool SaveGameSectorGetProps(void *storage, int index, void *extra);
+bool SaveGameSectorGetPropRef(void *storage, int index, void *extra);
 
-void SR_LevelPutImage(void *storage, int index, void *extra);
-void SR_LevelPutColmap(void *storage, int index, void *extra);
-void SR_LevelPutSurface(void *storage, int index, void *extra);
-void SR_LevelPutSurfPtr(void *storage, int index, void *extra);
-void SR_LinePutSpecial(void *storage, int index, void *extra);
-void SR_SectorPutSpecial(void *storage, int index, void *extra);
-void SR_SectorPutProps(void *storage, int index, void *extra);
-void SR_SectorPutPropRef(void *storage, int index, void *extra);
+void SaveGameLevelPutImage(void *storage, int index, void *extra);
+void SaveGameLevelPutColormap(void *storage, int index, void *extra);
+void SaveGameLevelPutSurface(void *storage, int index, void *extra);
+void SaveGameLevelPutSurfPtr(void *storage, int index, void *extra);
+void SaveGameLinePutSpecial(void *storage, int index, void *extra);
+void SaveGameSectorPutSpecial(void *storage, int index, void *extra);
+void SaveGameSectorPutProps(void *storage, int index, void *extra);
+void SaveGameSectorPutPropRef(void *storage, int index, void *extra);
 
 bool SR_SideGetSide(void *storage, int index, void *extra);
 void SR_SidePutSide(void *storage, int index, void *extra);
@@ -95,316 +90,411 @@ void SR_SidePutSide(void *storage, int index, void *extra);
 //
 //  SURFACE STRUCTURE
 //
-static surface_t sv_dummy_surface;
+static MapSurface dummy_map_surface;
 
-#define SV_F_BASE sv_dummy_surface
+static SaveField sv_fields_surface[] = {
+    EDGE_SAVE_FIELD(dummy_map_surface, image, "image", 1, kSaveFieldString, 0,
+                    nullptr, SaveGameLevelGetImage, SaveGameLevelPutImage),
+    EDGE_SAVE_FIELD(dummy_map_surface, translucency, "translucency", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_map_surface, offset, "offset", 1, kSaveFieldNumeric,
+                    8, nullptr, SaveGameGetVec2, SaveGamePutVec2),
+    EDGE_SAVE_FIELD(dummy_map_surface, scroll, "scroll", 1, kSaveFieldNumeric,
+                    8, nullptr, SaveGameGetVec2, SaveGamePutVec2),
+    EDGE_SAVE_FIELD(dummy_map_surface, x_matrix, "x_mat", 1, kSaveFieldNumeric,
+                    8, nullptr, SaveGameGetVec2, SaveGamePutVec2),
+    EDGE_SAVE_FIELD(dummy_map_surface, y_matrix, "y_mat", 1, kSaveFieldNumeric,
+                    8, nullptr, SaveGameGetVec2, SaveGamePutVec2),
+    EDGE_SAVE_FIELD(dummy_map_surface, net_scroll, "net_scroll", 1,
+                    kSaveFieldNumeric, 8, nullptr, SaveGameGetVec2,
+                    SaveGamePutVec2),
+    EDGE_SAVE_FIELD(dummy_map_surface, old_scroll, "old_scroll", 1,
+                    kSaveFieldNumeric, 8, nullptr, SaveGameGetVec2,
+                    SaveGamePutVec2),
+    EDGE_SAVE_FIELD(dummy_map_surface, override_properties, "override_p", 1,
+                    kSaveFieldString, 0, nullptr, SaveGameSectorGetPropRef,
+                    SaveGameSectorPutPropRef),
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
-static savefield_t sv_fields_surface[] = {
-    SF(image, "image", 1, SVT_STRING, SR_LevelGetImage, SR_LevelPutImage),
-    SF(translucency, "translucency", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-
-    SF(offset, "offset", 1, SVT_VEC2, SR_GetVec2, SR_PutVec2),
-    SF(scroll, "scroll", 1, SVT_VEC2, SR_GetVec2, SR_PutVec2),
-    SF(x_mat, "x_mat", 1, SVT_VEC2, SR_GetVec2, SR_PutVec2),
-    SF(y_mat, "y_mat", 1, SVT_VEC2, SR_GetVec2, SR_PutVec2),
-
-    SF(net_scroll, "net_scroll", 1, SVT_VEC2, SR_GetVec2, SR_PutVec2),
-    SF(old_scroll, "old_scroll", 1, SVT_VEC2, SR_GetVec2, SR_PutVec2),
-
-    SF(override_p, "override_p", 1, SVT_STRING, SR_SectorGetPropRef, SR_SectorPutPropRef),
-
-    SVFIELD_END};
-
-savestruct_t sv_struct_surface = {
-    NULL,              // link in list
-    "surface_t",       // structure name
-    "surf",            // start marker
-    sv_fields_surface, // field descriptions
-    SVDUMMY,           // dummy base
-    true,              // define_me
-    NULL               // pointer to known struct
+SaveStruct sv_struct_surface = {
+    nullptr,                           // link in list
+    "surface_t",                       // structure name
+    "surf",                            // start marker
+    sv_fields_surface,                 // field descriptions
+    (const char *)&dummy_map_surface,  // dummy base
+    true,                              // define_me
+    nullptr                            // pointer to known struct
 };
-
-#undef SV_F_BASE
 
 //----------------------------------------------------------------------------
 //
 //  SIDE STRUCTURE
 //
-static side_t sv_dummy_side;
+static Side dummy_side;
 
-#define SV_F_BASE sv_dummy_side
-
-static savefield_t sv_fields_side[] = {
-    SF(top, "top", 1, SVT_STRUCT("surface_t"), SR_LevelGetSurface, SR_LevelPutSurface),
-    SF(middle, "middle", 1, SVT_STRUCT("surface_t"), SR_LevelGetSurface, SR_LevelPutSurface),
-    SF(bottom, "bottom", 1, SVT_STRUCT("surface_t"), SR_LevelGetSurface, SR_LevelPutSurface),
+static SaveField sv_fields_side[] = {
+    EDGE_SAVE_FIELD(dummy_side, top, "top", 1, kSaveFieldStruct, 0, "surface_t",
+                    SaveGameLevelGetSurface, SaveGameLevelPutSurface),
+    EDGE_SAVE_FIELD(dummy_side, middle, "middle", 1, kSaveFieldStruct, 0,
+                    "surface_t", SaveGameLevelGetSurface,
+                    SaveGameLevelPutSurface),
+    EDGE_SAVE_FIELD(dummy_side, bottom, "bottom", 1, kSaveFieldStruct, 0,
+                    "surface_t", SaveGameLevelGetSurface,
+                    SaveGameLevelPutSurface),
 
     // NOT HERE:
     //   sector: value is kept from level load.
 
-    SVFIELD_END};
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
-savestruct_t sv_struct_side = {
-    NULL,           // link in list
-    "side_t",       // structure name
-    "side",         // start marker
-    sv_fields_side, // field descriptions
-    SVDUMMY,        // dummy base
-    true,           // define_me
-    NULL            // pointer to known struct
+SaveStruct sv_struct_side = {
+    nullptr,                    // link in list
+    "side_t",                   // structure name
+    "side",                     // start marker
+    sv_fields_side,             // field descriptions
+    (const char *)&dummy_side,  // dummy base
+    true,                       // define_me
+    nullptr                     // pointer to known struct
 };
 
-#undef SV_F_BASE
+SaveArray sv_array_side = {
+    nullptr,          // link in list
+    "sides",          // array name
+    &sv_struct_side,  // array type
+    true,             // define_me
+    true,             // allow_hub
 
-savearray_t sv_array_side = {
-    NULL,            // link in list
-    "sides",         // array name
-    &sv_struct_side, // array type
-    true,            // define_me
-    true,            // allow_hub
+    SV_SideCountElems,     // count routine
+    SV_SideFindByIndex,    // index routine
+    SV_SideCreateElems,    // creation routine
+    SV_SideFinaliseElems,  // finalisation routine
 
-    SV_SideCountElems,    // count routine
-    SV_SideGetElem,       // index routine
-    SV_SideCreateElems,   // creation routine
-    SV_SideFinaliseElems, // finalisation routine
-
-    NULL, // pointer to known array
-    0     // loaded size
+    nullptr,  // pointer to known array
+    0         // loaded size
 };
 
 //----------------------------------------------------------------------------
 //
 //  LINE STRUCTURE
 //
-static line_t sv_dummy_line;
+static Line dummy_line;
 
-#define SV_F_BASE sv_dummy_line
-
-static savefield_t sv_fields_line[] = {
-    SF(flags, "flags", 1, SVT_INT, SR_GetInt, SR_PutInt), SF(tag, "tag", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(count, "count", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(side, "side", 1, SVT_INDEX("sides"), SR_SideGetSide, SR_SidePutSide),
-    SF(special, "special", 1, SVT_STRING, SR_LineGetSpecial, SR_LinePutSpecial),
-    SF(slide_door, "slide_door", 1, SVT_STRING, SR_LineGetSpecial, SR_LinePutSpecial),
-    SF(old_stored, "old_stored", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
+static SaveField sv_fields_line[] = {
+    EDGE_SAVE_FIELD(dummy_line, flags, "flags", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_line, tag, "tag", 1, kSaveFieldNumeric, 4, nullptr,
+                    SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_line, count, "count", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_line, side, "side", 1, kSaveFieldIndex, 4, "sides",
+                    SR_SideGetSide, SR_SidePutSide),
+    EDGE_SAVE_FIELD(dummy_line, special, "special", 1, kSaveFieldString, 0,
+                    nullptr, SaveGameLineGetSpecial, SaveGameLinePutSpecial),
+    EDGE_SAVE_FIELD(dummy_line, slide_door, "slide_door", 1, kSaveFieldString,
+                    0, nullptr, SaveGameLineGetSpecial, SaveGameLinePutSpecial),
+    EDGE_SAVE_FIELD(dummy_line, old_stored, "old_stored", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetBoolean, SaveGamePutBoolean),
 
     // NOT HERE:
     //   (many): values are kept from level load.
     //   gap stuff: regenerated from sector heights.
-    //   validcount: only a temporary value for some routines.
+    //   valid_count: only a temporary value for some routines.
     //   slider_move: regenerated by a pass of the active part list.
 
-    SVFIELD_END};
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
-savestruct_t sv_struct_line = {
-    NULL,           // link in list
-    "line_t",       // structure name
-    "line",         // start marker
-    sv_fields_line, // field descriptions
-    SVDUMMY,        // dummy base
-    true,           // define_me
-    NULL            // pointer to known struct
+SaveStruct sv_struct_line = {
+    nullptr,                    // link in list
+    "line_t",                   // structure name
+    "line",                     // start marker
+    sv_fields_line,             // field descriptions
+    (const char *)&dummy_line,  // dummy base
+    true,                       // define_me
+    nullptr                     // pointer to known struct
 };
 
-#undef SV_F_BASE
+SaveArray sv_array_line = {
+    nullptr,          // link in list
+    "lines",          // array name
+    &sv_struct_line,  // array type
+    true,             // define_me
+    true,             // allow_hub
 
-savearray_t sv_array_line = {
-    NULL,            // link in list
-    "lines",         // array name
-    &sv_struct_line, // array type
-    true,            // define_me
-    true,            // allow_hub
+    SV_LineCountElems,     // count routine
+    SV_LineFindByIndex,    // index routine
+    SV_LineCreateElems,    // creation routine
+    SV_LineFinaliseElems,  // finalisation routine
 
-    SV_LineCountElems,    // count routine
-    SV_LineGetElem,       // index routine
-    SV_LineCreateElems,   // creation routine
-    SV_LineFinaliseElems, // finalisation routine
-
-    NULL, // pointer to known array
-    0     // loaded size
+    nullptr,  // pointer to known array
+    0         // loaded size
 };
 
 //----------------------------------------------------------------------------
 //
 //  REGION_PROPERTIES STRUCTURE
 //
-static region_properties_t sv_dummy_regprops;
+static RegionProperties dummy_region_properties;
 
-#define SV_F_BASE sv_dummy_regprops
+static SaveField sv_fields_regprops[] = {
+    EDGE_SAVE_FIELD(dummy_region_properties, light_level, "lightlevel_i", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_region_properties, colourmap, "colourmap", 1,
+                    kSaveFieldString, 0, nullptr, SaveGameLevelGetColormap,
+                    SaveGameLevelPutColormap),
+    EDGE_SAVE_FIELD(dummy_region_properties, type, "type", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetInteger, SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_region_properties, special, "special", 1,
+                    kSaveFieldString, 0, nullptr, SaveGameSectorGetSpecial,
+                    SaveGameSectorPutSpecial),
+    EDGE_SAVE_FIELD(dummy_region_properties, secret_found, "secret_found", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
+                    SaveGamePutBoolean),
+    EDGE_SAVE_FIELD(dummy_region_properties, gravity, "gravity", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_region_properties, friction, "friction", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_region_properties, viscosity, "viscosity", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_region_properties, drag, "drag", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetFloat, SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_region_properties, push, "push", 1, kSaveFieldNumeric,
+                    12, nullptr, SaveGameGetVec3, SaveGamePutVec3),
+    EDGE_SAVE_FIELD(dummy_region_properties, net_push, "net_push", 1,
+                    kSaveFieldNumeric, 12, nullptr, SaveGameGetVec3,
+                    SaveGamePutVec3),
+    EDGE_SAVE_FIELD(dummy_region_properties, old_push, "old_push", 1,
+                    kSaveFieldNumeric, 12, nullptr, SaveGameGetVec3,
+                    SaveGamePutVec3),
+    EDGE_SAVE_FIELD(dummy_region_properties, fog_color, "fog_color", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_region_properties, fog_density, "fog_density", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
 
-static savefield_t sv_fields_regprops[] = {
-    SF(lightlevel, "lightlevel_i", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(colourmap, "colourmap", 1, SVT_STRING, SR_LevelGetColmap, SR_LevelPutColmap),
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
-    SF(type, "type", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(special, "special", 1, SVT_STRING, SR_SectorGetSpecial, SR_SectorPutSpecial),
-    SF(secret_found, "secret_found", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
-
-    SF(gravity, "gravity", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(friction, "friction", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(viscosity, "viscosity", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(drag, "drag", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(push, "push", 1, SVT_VEC3, SR_GetVec3, SR_PutVec3),
-    SF(net_push, "net_push", 1, SVT_VEC3, SR_GetVec3, SR_PutVec3),
-    SF(old_push, "old_push", 1, SVT_VEC3, SR_GetVec3, SR_PutVec3),
-    SF(fog_color, "fog_color", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(fog_density, "fog_density", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-
-    SVFIELD_END};
-
-savestruct_t sv_struct_regprops = {
-    NULL,                  // link in list
-    "region_properties_t", // structure name
-    "rprp",                // start marker
-    sv_fields_regprops,    // field descriptions
-    SVDUMMY,               // dummy base
-    true,                  // define_me
-    NULL                   // pointer to known struct
+SaveStruct sv_struct_regprops = {
+    nullptr,                                 // link in list
+    "region_properties_t",                   // structure name
+    "rprp",                                  // start marker
+    sv_fields_regprops,                      // field descriptions
+    (const char *)&dummy_region_properties,  // dummy base
+    true,                                    // define_me
+    nullptr                                  // pointer to known struct
 };
-
-#undef SV_F_BASE
 
 //----------------------------------------------------------------------------
 //
 //  EXTRAFLOOR STRUCTURE
 //
-static extrafloor_t sv_dummy_exfloor;
+static Extrafloor dummy_extrafloor;
 
-#define SV_F_BASE sv_dummy_exfloor
-
-static savefield_t sv_fields_exfloor[] = {
-    SF(higher, "higher", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(lower, "lower", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(sector, "sector", 1, SVT_INDEX("sectors"), SR_SectorGetSector, SR_SectorPutSector),
-
-    SF(top_h, "top_h", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(bottom_h, "bottom_h", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(top, "top", 1, SVT_STRING, SR_LevelGetSurfPtr, SR_LevelPutSurfPtr),
-    SF(bottom, "bottom", 1, SVT_STRING, SR_LevelGetSurfPtr, SR_LevelPutSurfPtr),
-
-    SF(p, "p", 1, SVT_STRING, SR_SectorGetPropRef, SR_SectorPutPropRef),
-    SF(ef_line, "ef_line", 1, SVT_INDEX("lines"), SR_LineGetLine, SR_LinePutLine),
-    SF(ctrl_next, "ctrl_next", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+static SaveField sv_fields_exfloor[] = {
+    EDGE_SAVE_FIELD(dummy_extrafloor, higher, "higher", 1, kSaveFieldIndex, 4,
+                    "extrafloors", SaveGameSectorGetExtrafloor,
+                    SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_extrafloor, lower, "lower", 1, kSaveFieldIndex, 4,
+                    "extrafloors", SaveGameSectorGetExtrafloor,
+                    SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_extrafloor, sector, "sector", 1, kSaveFieldIndex, 4,
+                    "sectors", SaveGameGetSector, SaveGamePutSector),
+    EDGE_SAVE_FIELD(dummy_extrafloor, top_height, "top_h", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetFloat, SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_extrafloor, bottom_height, "bottom_h", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetFloat,
+                    SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_extrafloor, top, "top", 1, kSaveFieldString, 0,
+                    nullptr, SaveGameLevelGetSurfPtr, SaveGameLevelPutSurfPtr),
+    EDGE_SAVE_FIELD(dummy_extrafloor, bottom, "bottom", 1, kSaveFieldString, 0,
+                    nullptr, SaveGameLevelGetSurfPtr, SaveGameLevelPutSurfPtr),
+    EDGE_SAVE_FIELD(dummy_extrafloor, properties, "p", 1, kSaveFieldString, 0,
+                    nullptr, SaveGameSectorGetPropRef,
+                    SaveGameSectorPutPropRef),
+    EDGE_SAVE_FIELD(dummy_extrafloor, extrafloor_line, "ef_line", 1,
+                    kSaveFieldIndex, 4, "lines", SaveGameGetLine,
+                    SaveGamePutLine),
+    EDGE_SAVE_FIELD(dummy_extrafloor, control_sector_next, "ctrl_next", 1,
+                    kSaveFieldIndex, 4, "extrafloors",
+                    SaveGameSectorGetExtrafloor, SaveGameSectorPutExtrafloor),
 
     // NOT HERE:
     //   - sector: can be regenerated.
-    //   - ef_info: cached value, regenerated from ef_line.
+    //   - ef_info: cached value, regenerated from extrafloor_line.
 
-    SVFIELD_END};
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
-savestruct_t sv_struct_exfloor = {
-    NULL,              // link in list
-    "extrafloor_t",    // structure name
-    "exfl",            // start marker
-    sv_fields_exfloor, // field descriptions
-    SVDUMMY,           // dummy base
-    true,              // define_me
-    NULL               // pointer to known struct
+SaveStruct sv_struct_exfloor = {
+    nullptr,                          // link in list
+    "extrafloor_t",                   // structure name
+    "exfl",                           // start marker
+    sv_fields_exfloor,                // field descriptions
+    (const char *)&dummy_extrafloor,  // dummy base
+    true,                             // define_me
+    nullptr                           // pointer to known struct
 };
 
-#undef SV_F_BASE
+SaveArray sv_array_exfloor = {
+    nullptr,             // link in list
+    "extrafloors",       // array name
+    &sv_struct_exfloor,  // array type
+    true,                // define_me
+    true,                // allow_hub
 
-savearray_t sv_array_exfloor = {
-    NULL,               // link in list
-    "extrafloors",      // array name
-    &sv_struct_exfloor, // array type
-    true,               // define_me
-    true,               // allow_hub
+    SV_ExfloorCountElems,     // count routine
+    SV_ExfloorFindByIndex,    // index routine
+    SV_ExfloorCreateElems,    // creation routine
+    SV_ExfloorFinaliseElems,  // finalisation routine
 
-    SV_ExfloorCountElems,    // count routine
-    SV_ExfloorGetElem,       // index routine
-    SV_ExfloorCreateElems,   // creation routine
-    SV_ExfloorFinaliseElems, // finalisation routine
-
-    NULL, // pointer to known array
-    0     // loaded size
+    nullptr,  // pointer to known array
+    0         // loaded size
 };
 
 //----------------------------------------------------------------------------
 //
 //  SECTOR STRUCTURE
 //
-static sector_t sv_dummy_sector;
+static Sector dummy_sector;
 
-#define SV_F_BASE sv_dummy_sector
+static SaveField sv_fields_sector[] = {
+    EDGE_SAVE_FIELD(dummy_sector, floor, "floor", 1, kSaveFieldStruct, 0,
+                    "surface_t", SaveGameLevelGetSurface,
+                    SaveGameLevelPutSurface),
+    EDGE_SAVE_FIELD(dummy_sector, ceiling, "ceil", 1, kSaveFieldStruct, 0,
+                    "surface_t", SaveGameLevelGetSurface,
+                    SaveGameLevelPutSurface),
+    EDGE_SAVE_FIELD(dummy_sector, floor_height, "f_h", 1, kSaveFieldNumeric, 4,
+                    nullptr, SaveGameGetFloat, SaveGamePutFloat),
+    EDGE_SAVE_FIELD(dummy_sector, ceiling_height, "c_h", 1, kSaveFieldNumeric,
+                    4, nullptr, SaveGameGetFloat, SaveGamePutFloat),
 
-static savefield_t sv_fields_sector[] = {
-    SF(floor, "floor", 1, SVT_STRUCT("surface_t"), SR_LevelGetSurface, SR_LevelPutSurface),
-    SF(ceil, "ceil", 1, SVT_STRUCT("surface_t"), SR_LevelGetSurface, SR_LevelPutSurface),
-    SF(f_h, "f_h", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), SF(c_h, "c_h", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    EDGE_SAVE_FIELD(dummy_sector, properties, "props", 1, kSaveFieldStruct, 0,
+                    "region_properties_t", SaveGameSectorGetProps,
+                    SaveGameSectorPutProps),
+    EDGE_SAVE_FIELD(dummy_sector, active_properties, "p", 1, kSaveFieldString,
+                    0, nullptr, SaveGameSectorGetPropRef,
+                    SaveGameSectorPutPropRef),
 
-    SF(props, "props", 1, SVT_STRUCT("region_properties_t"), SR_SectorGetProps, SR_SectorPutProps),
-    SF(p, "p", 1, SVT_STRING, SR_SectorGetPropRef, SR_SectorPutPropRef),
+    EDGE_SAVE_FIELD(dummy_sector, extrafloor_used, "exfloor_used", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
+    EDGE_SAVE_FIELD(dummy_sector, control_floors, "control_floors", 1,
+                    kSaveFieldIndex, 4, "extrafloors",
+                    SaveGameSectorGetExtrafloor, SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_sector, sound_player, "sound_player", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetInteger,
+                    SaveGamePutInteger),
 
-    SF(exfloor_used, "exfloor_used", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(control_floors, "control_floors", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(sound_player, "sound_player", 1, SVT_INT, SR_GetInt, SR_PutInt),
-
-    SF(bottom_ef, "bottom_ef", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(top_ef, "top_ef", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(bottom_liq, "bottom_liq", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(top_liq, "top_liq", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(old_stored, "old_stored", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
+    EDGE_SAVE_FIELD(dummy_sector, bottom_extrafloor, "bottom_ef", 1,
+                    kSaveFieldIndex, 4, "extrafloors",
+                    SaveGameSectorGetExtrafloor, SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_sector, top_extrafloor, "top_ef", 1, kSaveFieldIndex,
+                    4, "extrafloors", SaveGameSectorGetExtrafloor,
+                    SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_sector, bottom_liquid, "bottom_liq", 1,
+                    kSaveFieldIndex, 4, "extrafloors",
+                    SaveGameSectorGetExtrafloor, SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_sector, top_liquid, "top_liq", 1, kSaveFieldIndex, 4,
+                    "extrafloors", SaveGameSectorGetExtrafloor,
+                    SaveGameSectorPutExtrafloor),
+    EDGE_SAVE_FIELD(dummy_sector, old_stored, "old_stored", 1,
+                    kSaveFieldNumeric, 4, nullptr, SaveGameGetBoolean,
+                    SaveGamePutBoolean),
 
     // NOT HERE:
-    //   - floor_move, ceil_move: can be regenerated
+    //   - floor_move, ceiling_move: can be regenerated
     //   - (many): values remaining from level load are OK
-    //   - soundtraversed & validcount: temp values, don't need saving
+    //   - soundtraversed & valid_count: temp values, don't need saving
 
-    SVFIELD_END};
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
-savestruct_t sv_struct_sector = {
-    NULL,             // link in list
-    "sector_t",       // structure name
-    "sect",           // start marker
-    sv_fields_sector, // field descriptions
-    SVDUMMY,          // dummy base
-    true,             // define_me
-    NULL              // pointer to known struct
+SaveStruct sv_struct_sector = {
+    nullptr,                      // link in list
+    "sector_t",                   // structure name
+    "sect",                       // start marker
+    sv_fields_sector,             // field descriptions
+    (const char *)&dummy_sector,  // dummy base
+    true,                         // define_me
+    nullptr                       // pointer to known struct
 };
 
-#undef SV_F_BASE
+SaveArray sv_array_sector = {
+    nullptr,            // link in list
+    "sectors",          // array name
+    &sv_struct_sector,  // array type
+    true,               // define_me
+    true,               // allow_hub
 
-savearray_t sv_array_sector = {
-    NULL,              // link in list
-    "sectors",         // array name
-    &sv_struct_sector, // array type
-    true,              // define_me
-    true,              // allow_hub
+    SV_SectorCountElems,     // count routine
+    SV_SectorFindByIndex,    // index routine
+    SV_SectorCreateElems,    // creation routine
+    SV_SectorFinaliseElems,  // finalisation routine
 
-    SV_SectorCountElems,    // count routine
-    SV_SectorGetElem,       // index routine
-    SV_SectorCreateElems,   // creation routine
-    SV_SectorFinaliseElems, // finalisation routine
-
-    NULL, // pointer to known array
-    0     // loaded size
+    nullptr,  // pointer to known array
+    0         // loaded size
 };
 
 //----------------------------------------------------------------------------
 
-int SV_SideCountElems(void)
-{
-    return numsides;
-}
+int SV_SideCountElems(void) { return total_level_sides; }
 
-void *SV_SideGetElem(int index)
+void *SV_SideFindByIndex(int index)
 {
-    if (index < 0 || index >= numsides)
+    if (index < 0 || index >= total_level_sides)
     {
-        I_Warning("LOADGAME: Invalid Side: %d\n", index);
+        LogWarning("LOADGAME: Invalid Side: %d\n", index);
         index = 0;
     }
 
-    return sides + index;
+    return level_sides + index;
 }
 
-int SV_SideFindElem(side_t *elem)
+int SV_SideGetIndex(Side *elem)
 {
-    SYS_ASSERT(sides <= elem && elem < (sides + numsides));
+    EPI_ASSERT(level_sides <= elem && elem < (level_sides + total_level_sides));
 
-    return elem - sides;
+    return elem - level_sides;
 }
 
 void SV_SideCreateElems(int num_elems)
@@ -413,40 +503,37 @@ void SV_SideCreateElems(int num_elems)
      * are initialised there.
      */
 
-    if (num_elems != numsides)
-        I_Error("LOADGAME: SIDE MISMATCH !  (%d != %d)\n", num_elems, numsides);
+    if (num_elems != total_level_sides)
+        FatalError("LOADGAME: SIDE MISMATCH !  (%d != %d)\n", num_elems,
+                   total_level_sides);
 }
 
 void SV_SideFinaliseElems(void)
-{
-    /* nothing to do */
+{ /* nothing to do */
 }
 
 //----------------------------------------------------------------------------
 
-extern std::vector<slider_move_t *> active_sliders;
+extern std::vector<SlidingDoorMover *> active_sliders;
 
-int SV_LineCountElems(void)
-{
-    return numlines;
-}
+int SV_LineCountElems(void) { return total_level_lines; }
 
-void *SV_LineGetElem(int index)
+void *SV_LineFindByIndex(int index)
 {
-    if (index < 0 || index >= numlines)
+    if (index < 0 || index >= total_level_lines)
     {
-        I_Warning("LOADGAME: Invalid Line: %d\n", index);
+        LogWarning("LOADGAME: Invalid Line: %d\n", index);
         index = 0;
     }
 
-    return lines + index;
+    return level_lines + index;
 }
 
-int SV_LineFindElem(line_t *elem)
+int SV_LineGetIndex(Line *elem)
 {
-    SYS_ASSERT(lines <= elem && elem < (lines + numlines));
+    EPI_ASSERT(level_lines <= elem && elem < (level_lines + total_level_lines));
 
-    return elem - lines;
+    return elem - level_lines;
 }
 
 void SV_LineCreateElems(int num_elems)
@@ -454,8 +541,9 @@ void SV_LineCreateElems(int num_elems)
     // nothing much to do -- lines are created from level load,
     // and defaults are initialised there.
 
-    if (num_elems != numlines)
-        I_Error("LOADGAME: LINE MISMATCH !  (%d != %d)\n", num_elems, numlines);
+    if (num_elems != total_level_lines)
+        FatalError("LOADGAME: LINE MISMATCH !  (%d != %d)\n", num_elems,
+                   total_level_lines);
 }
 
 //
@@ -463,40 +551,48 @@ void SV_LineCreateElems(int num_elems)
 //
 void SV_LineFinaliseElems(void)
 {
-    for (int i = 0; i < numlines; i++)
+    for (int i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = lines + i;
-        side_t *s1, *s2;
+        Line *ld = level_lines + i;
+        Side *s1, *s2;
 
         s1 = ld->side[0];
         s2 = ld->side[1];
 
         // check for animation
-        if (s1 && (s1->top.scroll.X || s1->top.scroll.Y || s1->middle.scroll.X || s1->middle.scroll.Y ||
-                   s1->bottom.scroll.X || s1->bottom.scroll.Y || s1->top.net_scroll.X || s1->top.net_scroll.Y ||
-                   s1->middle.net_scroll.X || s1->middle.net_scroll.Y || s1->bottom.net_scroll.X ||
-                   s1->bottom.net_scroll.Y || s1->top.old_scroll.X || s1->top.old_scroll.Y || s1->middle.old_scroll.X ||
-                   s1->middle.old_scroll.Y || s1->bottom.old_scroll.X || s1->bottom.old_scroll.Y))
+        if (s1 && (s1->top.scroll.X || s1->top.scroll.Y ||
+                   s1->middle.scroll.X || s1->middle.scroll.Y ||
+                   s1->bottom.scroll.X || s1->bottom.scroll.Y ||
+                   s1->top.net_scroll.X || s1->top.net_scroll.Y ||
+                   s1->middle.net_scroll.X || s1->middle.net_scroll.Y ||
+                   s1->bottom.net_scroll.X || s1->bottom.net_scroll.Y ||
+                   s1->top.old_scroll.X || s1->top.old_scroll.Y ||
+                   s1->middle.old_scroll.X || s1->middle.old_scroll.Y ||
+                   s1->bottom.old_scroll.X || s1->bottom.old_scroll.Y))
         {
-            P_AddSpecialLine(ld);
+            AddSpecialLine(ld);
         }
 
-        if (s2 && (s2->top.scroll.X || s2->top.scroll.Y || s2->middle.scroll.X || s2->middle.scroll.Y ||
-                   s2->bottom.scroll.X || s2->bottom.scroll.Y || s2->top.net_scroll.X || s2->top.net_scroll.Y ||
-                   s2->middle.net_scroll.X || s2->middle.net_scroll.Y || s2->bottom.net_scroll.X ||
-                   s2->bottom.net_scroll.Y || s2->top.old_scroll.X || s2->top.old_scroll.Y || s2->middle.old_scroll.X ||
-                   s2->middle.old_scroll.Y || s2->bottom.old_scroll.X || s2->bottom.old_scroll.Y))
+        if (s2 && (s2->top.scroll.X || s2->top.scroll.Y ||
+                   s2->middle.scroll.X || s2->middle.scroll.Y ||
+                   s2->bottom.scroll.X || s2->bottom.scroll.Y ||
+                   s2->top.net_scroll.X || s2->top.net_scroll.Y ||
+                   s2->middle.net_scroll.X || s2->middle.net_scroll.Y ||
+                   s2->bottom.net_scroll.X || s2->bottom.net_scroll.Y ||
+                   s2->top.old_scroll.X || s2->top.old_scroll.Y ||
+                   s2->middle.old_scroll.X || s2->middle.old_scroll.Y ||
+                   s2->bottom.old_scroll.X || s2->bottom.old_scroll.Y))
         {
-            P_AddSpecialLine(ld);
+            AddSpecialLine(ld);
         }
     }
 
     // scan active parts, regenerate slider_move field
-    std::vector<slider_move_t *>::iterator SMI;
+    std::vector<SlidingDoorMover *>::iterator SMI;
 
     for (SMI = active_sliders.begin(); SMI != active_sliders.end(); SMI++)
     {
-        SYS_ASSERT((*SMI)->line);
+        EPI_ASSERT((*SMI)->line);
 
         (*SMI)->line->slider_move = (*SMI);
     }
@@ -504,27 +600,25 @@ void SV_LineFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-int SV_ExfloorCountElems(void)
-{
-    return numextrafloors;
-}
+int SV_ExfloorCountElems(void) { return total_level_extrafloors; }
 
-void *SV_ExfloorGetElem(int index)
+void *SV_ExfloorFindByIndex(int index)
 {
-    if (index < 0 || index >= numextrafloors)
+    if (index < 0 || index >= total_level_extrafloors)
     {
-        I_Warning("LOADGAME: Invalid Extrafloor: %d\n", index);
+        LogWarning("LOADGAME: Invalid Extrafloor: %d\n", index);
         index = 0;
     }
 
-    return extrafloors + index;
+    return level_extrafloors + index;
 }
 
-int SV_ExfloorFindElem(extrafloor_t *elem)
+int SV_ExfloorGetIndex(Extrafloor *elem)
 {
-    SYS_ASSERT(extrafloors <= elem && elem < (extrafloors + numextrafloors));
+    EPI_ASSERT(level_extrafloors <= elem &&
+               elem < (level_extrafloors + total_level_extrafloors));
 
-    return elem - extrafloors;
+    return elem - level_extrafloors;
 }
 
 void SV_ExfloorCreateElems(int num_elems)
@@ -533,8 +627,9 @@ void SV_ExfloorCreateElems(int num_elems)
      * defaults are initialised there.
      */
 
-    if (num_elems != numextrafloors)
-        I_Error("LOADGAME: Extrafloor MISMATCH !  (%d != %d)\n", num_elems, numextrafloors);
+    if (num_elems != total_level_extrafloors)
+        FatalError("LOADGAME: Extrafloor MISMATCH !  (%d != %d)\n", num_elems,
+                   total_level_extrafloors);
 }
 
 void SV_ExfloorFinaliseElems(void)
@@ -542,50 +637,48 @@ void SV_ExfloorFinaliseElems(void)
     int i;
 
     // need to regenerate the ef_info fields
-    for (i = 0; i < numextrafloors; i++)
+    for (i = 0; i < total_level_extrafloors; i++)
     {
-        extrafloor_t *ef = extrafloors + i;
+        Extrafloor *ef = level_extrafloors + i;
 
         // skip unused extrafloors
-        if (ef->ef_line == NULL)
-            continue;
+        if (ef->extrafloor_line == nullptr) continue;
 
-        if (!ef->ef_line->special || !(ef->ef_line->special->ef.type & EXFL_Present))
+        if (!ef->extrafloor_line->special ||
+            !(ef->extrafloor_line->special->ef_.type_ & kExtraFloorTypePresent))
         {
-            I_Warning("LOADGAME: Missing Extrafloor Special !\n");
-            ef->ef_info = &linetypes.Lookup(0)->ef;
+            LogWarning("LOADGAME: Missing Extrafloor Special !\n");
+            ef->extrafloor_definition = &linetypes.Lookup(0)->ef_;
             continue;
         }
 
-        ef->ef_info = &ef->ef_line->special->ef;
+        ef->extrafloor_definition = &ef->extrafloor_line->special->ef_;
     }
 }
 
 //----------------------------------------------------------------------------
 
-extern std::vector<plane_move_t *> active_planes;
+extern std::vector<PlaneMover *> active_planes;
 
-int SV_SectorCountElems(void)
-{
-    return numsectors;
-}
+int SV_SectorCountElems(void) { return total_level_sectors; }
 
-void *SV_SectorGetElem(int index)
+void *SV_SectorFindByIndex(int index)
 {
-    if (index < 0 || index >= numsectors)
+    if (index < 0 || index >= total_level_sectors)
     {
-        I_Warning("LOADGAME: Invalid Sector: %d\n", index);
+        LogWarning("LOADGAME: Invalid Sector: %d\n", index);
         index = 0;
     }
 
-    return sectors + index;
+    return level_sectors + index;
 }
 
-int SV_SectorFindElem(sector_t *elem)
+int SV_SectorGetIndex(Sector *elem)
 {
-    SYS_ASSERT(sectors <= elem && elem < (sectors + numsectors));
+    EPI_ASSERT(level_sectors <= elem &&
+               elem < (level_sectors + total_level_sectors));
 
-    return elem - sectors;
+    return elem - level_sectors;
 }
 
 void SV_SectorCreateElems(int num_elems)
@@ -593,63 +686,67 @@ void SV_SectorCreateElems(int num_elems)
     // nothing much to do -- sectors are created from level load,
     // and defaults are initialised there.
 
-    if (num_elems != numsectors)
-        I_Error("LOADGAME: SECTOR MISMATCH !  (%d != %d)\n", num_elems, numsectors);
+    if (num_elems != total_level_sectors)
+        FatalError("LOADGAME: SECTOR MISMATCH !  (%d != %d)\n", num_elems,
+                   total_level_sectors);
 
     // clear animate list
 }
 
 void SV_SectorFinaliseElems(void)
 {
-    for (int i = 0; i < numsectors; i++)
+    for (int i = 0; i < total_level_sectors; i++)
     {
-        sector_t *sec = sectors + i;
+        Sector *sec = level_sectors + i;
 
-        P_RecomputeGapsAroundSector(sec);
+        RecomputeGapsAroundSector(sec);
         ///---	P_RecomputeTilesInSector(sec);
-        P_FloodExtraFloors(sec);
+        FloodExtraFloors(sec);
 
         // check for animation
-        if (sec->floor.scroll.X || sec->floor.scroll.Y || sec->ceil.scroll.X || sec->ceil.scroll.Y ||
-            sec->floor.net_scroll.X || sec->floor.net_scroll.Y || sec->ceil.net_scroll.X || sec->ceil.net_scroll.Y ||
-            sec->floor.old_scroll.X || sec->floor.old_scroll.Y || sec->ceil.old_scroll.X || sec->ceil.old_scroll.Y)
+        if (sec->floor.scroll.X || sec->floor.scroll.Y ||
+            sec->ceiling.scroll.X || sec->ceiling.scroll.Y ||
+            sec->floor.net_scroll.X || sec->floor.net_scroll.Y ||
+            sec->ceiling.net_scroll.X || sec->ceiling.net_scroll.Y ||
+            sec->floor.old_scroll.X || sec->floor.old_scroll.Y ||
+            sec->ceiling.old_scroll.X || sec->ceiling.old_scroll.Y)
         {
-            P_AddSpecialSector(sec);
+            AddSpecialSector(sec);
         }
     }
 
-    extern std::vector<lineanim_t> lineanims;
+    extern std::vector<LineAnimation> line_animations;
 
-    for (size_t i = 0; i < lineanims.size(); i++)
+    for (size_t i = 0; i < line_animations.size(); i++)
     {
-        if (lineanims[i].scroll_sec_ref)
+        if (line_animations[i].scroll_sector_reference)
         {
-            lineanims[i].scroll_sec_ref->ceil_move  = NULL;
-            lineanims[i].scroll_sec_ref->floor_move = NULL;
+            line_animations[i].scroll_sector_reference->ceiling_move = nullptr;
+            line_animations[i].scroll_sector_reference->floor_move   = nullptr;
         }
     }
 
-    extern std::vector<lightanim_t> lightanims;
+    extern std::vector<LightAnimation> light_animations;
 
-    for (size_t i = 0; i < lightanims.size(); i++)
+    for (size_t i = 0; i < light_animations.size(); i++)
     {
-        if (lightanims[i].light_sec_ref)
+        if (light_animations[i].light_sector_reference)
         {
-            lightanims[i].light_sec_ref->ceil_move = NULL;
+            light_animations[i].light_sector_reference->ceiling_move = nullptr;
         }
     }
 
-    // scan active parts, regenerate floor_move and ceil_move
-    std::vector<plane_move_t *>::iterator PMI;
+    // scan active parts, regenerate floor_move and ceiling_move
+    std::vector<PlaneMover *>::iterator PMI;
 
     for (PMI = active_planes.begin(); PMI != active_planes.end(); PMI++)
     {
-        plane_move_t *pmov = *PMI;
+        PlaneMover *pmov = *PMI;
 
-        SYS_ASSERT(pmov->sector);
+        EPI_ASSERT(pmov->sector);
 
         if (pmov->is_ceiling)
-            pmov->sector->ceil_move = pmov;
+            pmov->sector->ceiling_move = pmov;
         else
             pmov->sector->floor_move = pmov;
     }
@@ -657,61 +754,61 @@ void SV_SectorFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-bool SR_LevelGetSurface(void *storage, int index, void *extra)
+bool SaveGameLevelGetSurface(void *storage, int index, void *extra)
 {
-    surface_t *dest = (surface_t *)storage + index;
+    MapSurface *dest = (MapSurface *)storage + index;
 
-    if (!sv_struct_surface.counterpart)
-        return true;
+    if (!sv_struct_surface.counterpart) return true;
 
-    return SV_LoadStruct(dest, sv_struct_surface.counterpart);
+    return SaveGameStructLoad(dest, sv_struct_surface.counterpart);
 }
 
-void SR_LevelPutSurface(void *storage, int index, void *extra)
+void SaveGameLevelPutSurface(void *storage, int index, void *extra)
 {
-    surface_t *src = (surface_t *)storage + index;
+    MapSurface *src = (MapSurface *)storage + index;
 
     // force fogwall recreation when loading a save
-    if (src->fogwall)
-        src->image = nullptr;
+    if (src->fog_wall) src->image = nullptr;
 
-    SV_SaveStruct(src, &sv_struct_surface);
+    SaveGameStructSave(src, &sv_struct_surface);
 }
 
-bool SR_LevelGetSurfPtr(void *storage, int index, void *extra)
+bool SaveGameLevelGetSurfPtr(void *storage, int index, void *extra)
 {
-    surface_t **dest = (surface_t **)storage + index;
+    MapSurface **dest = (MapSurface **)storage + index;
 
     const char *str;
     int         num;
 
-    str = SV_GetString();
+    str = SaveChunkGetString();
 
     if (!str)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
     if (str[1] != ':')
-        I_Error("SR_LevelGetSurfPtr: invalid surface string `%s'\n", str);
+        FatalError("SaveGameLevelGetSurfPtr: invalid surface string `%s'\n",
+                   str);
 
-    num = strtol(str + 2, NULL, 0);
+    num = strtol(str + 2, nullptr, 0);
 
-    if (num < 0 || num >= numsectors)
+    if (num < 0 || num >= total_level_sectors)
     {
-        I_Warning("SR_LevelGetSurfPtr: bad sector ref %d\n", num);
+        LogWarning("SaveGameLevelGetSurfPtr: bad sector ref %d\n", num);
         num = 0;
     }
 
     if (str[0] == 'F')
-        (*dest) = &sectors[num].floor;
+        (*dest) = &level_sectors[num].floor;
     else if (str[0] == 'C')
-        (*dest) = &sectors[num].ceil;
+        (*dest) = &level_sectors[num].ceiling;
     else
-        I_Error("SR_LevelGetSurfPtr: invalid surface plane `%s'\n", str);
+        FatalError("SaveGameLevelGetSurfPtr: invalid surface plane `%s'\n",
+                   str);
 
-    SV_FreeString(str);
+    SaveChunkFreeString(str);
     return true;
 }
 
@@ -723,59 +820,59 @@ bool SR_LevelGetSurfPtr(void *storage, int index, void *extra)
 // The first character is `F' for the floor surface of the sector,
 // otherwise `C' for its ceiling.
 //
-void SR_LevelPutSurfPtr(void *storage, int index, void *extra)
+void SaveGameLevelPutSurfPtr(void *storage, int index, void *extra)
 {
-    surface_t *src = ((surface_t **)storage)[index];
+    MapSurface *src = ((MapSurface **)storage)[index];
 
     char buffer[64];
     int  i;
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SaveChunkPutString(nullptr);
         return;
     }
 
     // not optimal, but safe
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        if (src == &sectors[i].floor)
+        if (src == &level_sectors[i].floor)
         {
             sprintf(buffer, "F:%d", i);
-            SV_PutString(buffer);
+            SaveChunkPutString(buffer);
             return;
         }
-        else if (src == &sectors[i].ceil)
+        else if (src == &level_sectors[i].ceiling)
         {
             sprintf(buffer, "C:%d", i);
-            SV_PutString(buffer);
+            SaveChunkPutString(buffer);
             return;
         }
     }
 
-    I_Warning("SR_LevelPutSurfPtr: surface %p not found !\n", src);
-    SV_PutString("F:0");
+    LogWarning("SaveGameLevelPutSurfPtr: surface %p not found !\n", src);
+    SaveChunkPutString("F:0");
 }
 
-bool SR_LevelGetImage(void *storage, int index, void *extra)
+bool SaveGameLevelGetImage(void *storage, int index, void *extra)
 {
-    const image_c **dest = (const image_c **)storage + index;
-    const char     *str;
+    const Image **dest = (const Image **)storage + index;
+    const char   *str;
 
-    str = SV_GetString();
+    str = SaveChunkGetString();
 
     if (!str)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
     if (str[1] != ':')
-        I_Warning("SR_LevelGetImage: invalid image string `%s'\n", str);
+        LogWarning("SaveGameLevelGetImage: invalid image string `%s'\n", str);
 
-    (*dest) = W_ImageParseSaveString(str[0], str + 2);
+    (*dest) = ImageParseSaveString(str[0], str + 2);
 
-    SV_FreeString(str);
+    SaveChunkFreeString(str);
     return true;
 }
 
@@ -788,76 +885,76 @@ bool SR_LevelGetImage(void *storage, int index, void *extra)
 // Also `*' is valid and means that type is not important.  Some
 // examples: "F:FLAT10" and "T:STARTAN3".
 //
-void SR_LevelPutImage(void *storage, int index, void *extra)
+void SaveGameLevelPutImage(void *storage, int index, void *extra)
 {
-    const image_c *src = ((const image_c **)storage)[index];
+    const Image *src = ((const Image **)storage)[index];
 
     char buffer[64];
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SaveChunkPutString(nullptr);
         return;
     }
 
-    W_ImageMakeSaveString(src, buffer, buffer + 2);
+    ImageMakeSaveString(src, buffer, buffer + 2);
     buffer[1] = ':';
 
-    SV_PutString(buffer);
+    SaveChunkPutString(buffer);
 }
 
-bool SR_LevelGetColmap(void *storage, int index, void *extra)
+bool SaveGameLevelGetColormap(void *storage, int index, void *extra)
 {
-    const colourmap_c **dest = (const colourmap_c **)storage + index;
-    const char         *str;
+    const Colormap **dest = (const Colormap **)storage + index;
+    const char      *str;
 
-    str = SV_GetString();
+    str = SaveChunkGetString();
 
     if (str)
-        (*dest) = colourmaps.Lookup(str);
+        (*dest) = colormaps.Lookup(str);
     else
-        (*dest) = NULL;
+        (*dest) = nullptr;
 
     // -AJA- 2008/03/15: backwards compatibility
-    if (*dest && epi::StringCaseCompareASCII((*dest)->name, "NORMAL") == 0)
-        *dest = NULL;
+    if (*dest && epi::StringCaseCompareASCII((*dest)->name_, "NORMAL") == 0)
+        *dest = nullptr;
 
-    SV_FreeString(str);
+    SaveChunkFreeString(str);
     return true;
 }
 
 //
 // The string is the name of the colourmap.
 //
-void SR_LevelPutColmap(void *storage, int index, void *extra)
+void SaveGameLevelPutColormap(void *storage, int index, void *extra)
 {
-    const colourmap_c *src = ((const colourmap_c **)storage)[index];
+    const Colormap *src = ((const Colormap **)storage)[index];
 
     if (src)
-        SV_PutString(src->name.c_str());
+        SaveChunkPutString(src->name_.c_str());
     else
-        SV_PutString(NULL);
+        SaveChunkPutString(nullptr);
 }
 
-bool SR_LineGetSpecial(void *storage, int index, void *extra)
+bool SaveGameLineGetSpecial(void *storage, int index, void *extra)
 {
-    const linetype_c **dest = (const linetype_c **)storage + index;
-    const char        *str;
+    const LineType **dest = (const LineType **)storage + index;
+    const char      *str;
 
-    str = SV_GetString();
+    str = SaveChunkGetString();
 
     if (!str)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
     if (str[0] != ':')
-        I_Error("SR_LineGetSpecial: invalid special `%s'\n", str);
+        FatalError("SaveGameLineGetSpecial: invalid special `%s'\n", str);
 
-    (*dest) = P_LookupLineType(strtol(str + 1, NULL, 0));
+    (*dest) = LookupLineType(strtol(str + 1, nullptr, 0));
 
-    SV_FreeString(str);
+    SaveChunkFreeString(str);
     return true;
 }
 
@@ -867,40 +964,40 @@ bool SR_LineGetSpecial(void *storage, int index, void *extra)
 // name, but this shouldn't be needed currently (reserved for future
 // use).
 //
-void SR_LinePutSpecial(void *storage, int index, void *extra)
+void SaveGameLinePutSpecial(void *storage, int index, void *extra)
 {
-    const linetype_c *src = ((const linetype_c **)storage)[index];
+    const LineType *src = ((const LineType **)storage)[index];
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SaveChunkPutString(nullptr);
         return;
     }
 
-    std::string s = epi::StringFormat(":%d", src->number);
+    std::string s = epi::StringFormat(":%d", src->number_);
 
-    SV_PutString(s.c_str());
+    SaveChunkPutString(s.c_str());
 }
 
-bool SR_SectorGetSpecial(void *storage, int index, void *extra)
+bool SaveGameSectorGetSpecial(void *storage, int index, void *extra)
 {
-    const sectortype_c **dest = (const sectortype_c **)storage + index;
-    const char          *str;
+    const SectorType **dest = (const SectorType **)storage + index;
+    const char        *str;
 
-    str = SV_GetString();
+    str = SaveChunkGetString();
 
     if (!str)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
     if (str[0] != ':')
-        I_Error("SR_SectorGetSpecial: invalid special `%s'\n", str);
+        FatalError("SaveGameSectorGetSpecial: invalid special `%s'\n", str);
 
-    (*dest) = P_LookupSectorType(strtol(str + 1, NULL, 0));
+    (*dest) = LookupSectorType(strtol(str + 1, nullptr, 0));
 
-    SV_FreeString(str);
+    SaveChunkFreeString(str);
     return true;
 }
 
@@ -910,66 +1007,65 @@ bool SR_SectorGetSpecial(void *storage, int index, void *extra)
 // name, but this shouldn't be needed currently (reserved for future
 // use).
 //
-void SR_SectorPutSpecial(void *storage, int index, void *extra)
+void SaveGameSectorPutSpecial(void *storage, int index, void *extra)
 {
-    const sectortype_c *src = ((const sectortype_c **)storage)[index];
+    const SectorType *src = ((const SectorType **)storage)[index];
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SaveChunkPutString(nullptr);
         return;
     }
 
-    std::string s = epi::StringFormat(":%d", src->number);
+    std::string s = epi::StringFormat(":%d", src->number_);
 
-    SV_PutString(s.c_str());
+    SaveChunkPutString(s.c_str());
 }
 
 //----------------------------------------------------------------------------
 
-bool SR_SectorGetProps(void *storage, int index, void *extra)
+bool SaveGameSectorGetProps(void *storage, int index, void *extra)
 {
-    region_properties_t *dest = (region_properties_t *)storage + index;
+    RegionProperties *dest = (RegionProperties *)storage + index;
 
-    if (!sv_struct_regprops.counterpart)
-        return true;
+    if (!sv_struct_regprops.counterpart) return true;
 
-    return SV_LoadStruct(dest, sv_struct_regprops.counterpart);
+    return SaveGameStructLoad(dest, sv_struct_regprops.counterpart);
 }
 
-void SR_SectorPutProps(void *storage, int index, void *extra)
+void SaveGameSectorPutProps(void *storage, int index, void *extra)
 {
-    region_properties_t *src = (region_properties_t *)storage + index;
+    RegionProperties *src = (RegionProperties *)storage + index;
 
-    SV_SaveStruct(src, &sv_struct_regprops);
+    SaveGameStructSave(src, &sv_struct_regprops);
 }
 
-bool SR_SectorGetPropRef(void *storage, int index, void *extra)
+bool SaveGameSectorGetPropRef(void *storage, int index, void *extra)
 {
-    region_properties_t **dest = (region_properties_t **)storage + index;
+    RegionProperties **dest = (RegionProperties **)storage + index;
 
     const char *str;
     int         num;
 
-    str = SV_GetString();
+    str = SaveChunkGetString();
 
     if (!str)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
-    num = strtol(str, NULL, 0);
+    num = strtol(str, nullptr, 0);
 
-    if (num < 0 || num >= numsectors)
+    if (num < 0 || num >= total_level_sectors)
     {
-        I_Warning("SR_SectorGetPropRef: bad sector ref %d\n", num);
+        LogWarning("SaveGameSectorGetPropRef: bad sector ref %d\n", num);
         num = 0;
     }
 
-    (*dest) = &sectors[num].props;
+    (*dest) = &level_sectors[num].properties;
 
-    SV_FreeString(str);
+    SaveChunkFreeString(str);
     return true;
 }
 
@@ -977,110 +1073,114 @@ bool SR_SectorGetPropRef(void *storage, int index, void *extra)
 // Format of the string is just the sector number containing the
 // properties.
 //
-void SR_SectorPutPropRef(void *storage, int index, void *extra)
+void SaveGameSectorPutPropRef(void *storage, int index, void *extra)
 {
-    region_properties_t *src = ((region_properties_t **)storage)[index];
+    RegionProperties *src = ((RegionProperties **)storage)[index];
 
     char buffer[64];
     int  i;
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SaveChunkPutString(nullptr);
         return;
     }
 
     // not optimal, but safe
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        if (&sectors[i].props == src)
-            break;
+        if (&level_sectors[i].properties == src) break;
     }
 
-    if (i >= numsectors)
+    if (i >= total_level_sectors)
     {
-        I_Warning("SR_SectorPutPropRef: properties %p not found !\n", src);
+        LogWarning("SaveGameSectorPutPropRef: properties %p not found !\n",
+                   src);
         i = 0;
     }
 
     sprintf(buffer, "%d", i);
-    SV_PutString(buffer);
+    SaveChunkPutString(buffer);
 }
 
-bool SR_LineGetLine(void *storage, int index, void *extra)
+bool SaveGameGetLine(void *storage, int index, void *extra)
 {
-    line_t **dest = (line_t **)storage + index;
+    Line **dest = (Line **)storage + index;
 
-    int swizzle = SV_GetInt();
+    int swizzle = SaveChunkGetInteger();
 
-    *dest = (line_t *)((swizzle == 0) ? NULL : SV_LineGetElem(swizzle - 1));
+    *dest =
+        (Line *)((swizzle == 0) ? nullptr : SV_LineFindByIndex(swizzle - 1));
     return true;
 }
 
-void SR_LinePutLine(void *storage, int index, void *extra)
+void SaveGamePutLine(void *storage, int index, void *extra)
 {
-    line_t *elem = ((line_t **)storage)[index];
+    Line *elem = ((Line **)storage)[index];
 
-    int swizzle = (elem == NULL) ? 0 : SV_LineFindElem(elem) + 1;
+    int swizzle = (elem == nullptr) ? 0 : SV_LineGetIndex(elem) + 1;
 
-    SV_PutInt(swizzle);
+    SaveChunkPutInteger(swizzle);
 }
 
 bool SR_SideGetSide(void *storage, int index, void *extra)
 {
-    side_t **dest = (side_t **)storage + index;
+    Side **dest = (Side **)storage + index;
 
-    int swizzle = SV_GetInt();
+    int swizzle = SaveChunkGetInteger();
 
-    *dest = (side_t *)((swizzle == 0) ? NULL : SV_SideGetElem(swizzle - 1));
+    *dest =
+        (Side *)((swizzle == 0) ? nullptr : SV_SideFindByIndex(swizzle - 1));
     return true;
 }
 
 void SR_SidePutSide(void *storage, int index, void *extra)
 {
-    side_t *elem = ((side_t **)storage)[index];
+    Side *elem = ((Side **)storage)[index];
 
-    int swizzle = (elem == NULL) ? 0 : SV_SideFindElem(elem) + 1;
+    int swizzle = (elem == nullptr) ? 0 : SV_SideGetIndex(elem) + 1;
 
-    SV_PutInt(swizzle);
+    SaveChunkPutInteger(swizzle);
 }
 
-bool SR_SectorGetSector(void *storage, int index, void *extra)
+bool SaveGameGetSector(void *storage, int index, void *extra)
 {
-    sector_t **dest = (sector_t **)storage + index;
+    Sector **dest = (Sector **)storage + index;
 
-    int swizzle = SV_GetInt();
+    int swizzle = SaveChunkGetInteger();
 
-    *dest = (sector_t *)((swizzle == 0) ? NULL : SV_SectorGetElem(swizzle - 1));
+    *dest = (Sector *)((swizzle == 0) ? nullptr
+                                      : SV_SectorFindByIndex(swizzle - 1));
     return true;
 }
 
-void SR_SectorPutSector(void *storage, int index, void *extra)
+void SaveGamePutSector(void *storage, int index, void *extra)
 {
-    sector_t *elem = ((sector_t **)storage)[index];
+    Sector *elem = ((Sector **)storage)[index];
 
-    int swizzle = (elem == NULL) ? 0 : SV_SectorFindElem(elem) + 1;
+    int swizzle = (elem == nullptr) ? 0 : SV_SectorGetIndex(elem) + 1;
 
-    SV_PutInt(swizzle);
+    SaveChunkPutInteger(swizzle);
 }
 
-bool SR_SectorGetEF(void *storage, int index, void *extra)
+bool SaveGameSectorGetExtrafloor(void *storage, int index, void *extra)
 {
-    extrafloor_t **dest = (extrafloor_t **)storage + index;
+    Extrafloor **dest = (Extrafloor **)storage + index;
 
-    int swizzle = SV_GetInt();
+    int swizzle = SaveChunkGetInteger();
 
-    *dest = (extrafloor_t *)((swizzle == 0) ? NULL : SV_ExfloorGetElem(swizzle - 1));
+    *dest = (Extrafloor *)((swizzle == 0) ? nullptr
+                                          : SV_ExfloorFindByIndex(swizzle - 1));
     return true;
 }
 
-void SR_SectorPutEF(void *storage, int index, void *extra)
+void SaveGameSectorPutExtrafloor(void *storage, int index, void *extra)
 {
-    extrafloor_t *elem = ((extrafloor_t **)storage)[index];
+    Extrafloor *elem = ((Extrafloor **)storage)[index];
 
-    int swizzle = (elem == NULL) ? 0 : SV_ExfloorFindElem(elem) + 1;
+    int swizzle = (elem == nullptr) ? 0 : SV_ExfloorGetIndex(elem) + 1;
 
-    SV_PutInt(swizzle);
+    SaveChunkPutInteger(swizzle);
 }
 
 //--- editor settings ---

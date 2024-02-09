@@ -23,19 +23,16 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __S_MUSIC_H__
-#define __S_MUSIC_H__
+#pragma once
+
+#include "con_var.h"
 
 /* abstract base class */
-class abstract_music_c
+class AbstractMusicPlayer
 {
-  public:
-    abstract_music_c()
-    {
-    }
-    virtual ~abstract_music_c()
-    {
-    }
+   public:
+    AbstractMusicPlayer() {}
+    virtual ~AbstractMusicPlayer() {}
 
     virtual void Close(void) = 0;
 
@@ -50,19 +47,17 @@ class abstract_music_c
 
 /* VARIABLES */
 
-extern cvar_c mus_volume;
-extern int    entry_playing;
-extern bool   var_pc_speaker_mode;
+extern ConsoleVariable music_volume;
+extern int             entry_playing;
+extern bool            pc_speaker_mode;
 
 /* FUNCTIONS */
 
-void S_ChangeMusic(int entrynum, bool loop);
-void S_ResumeMusic(void);
-void S_PauseMusic(void);
-void S_StopMusic(void);
-void S_MusicTicker(void);
-
-#endif /* __S_MUSIC_H__ */
+void ChangeMusic(int entry_number, bool loop);
+void ResumeMusic(void);
+void PauseMusic(void);
+void StopMusic(void);
+void MusicTicker(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

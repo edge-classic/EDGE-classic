@@ -16,88 +16,73 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_SWTH_H__
-#define __DDF_SWTH_H__
-
-#include "epi.h"
+#pragma once
 
 #include "types.h"
 
-class image_c;
+class Image;
 
-//
-// SWITCHES
-//
-#define BUTTONTIME 35
-
-typedef struct switchcache_s
+struct SwitchCache
 {
-    const image_c *image[2];
-} switchcache_t;
+    const Image *image[2];
+};
 
-class switchdef_c
+class SwitchDefinition
 {
-  public:
-    switchdef_c();
-    ~switchdef_c(){};
+   public:
+    SwitchDefinition();
+    ~SwitchDefinition(){};
 
-  public:
+   public:
     void Default(void);
-    void CopyDetail(switchdef_c &src);
+    void CopyDetail(SwitchDefinition &src);
 
     // Member vars....
-    std::string name;
+    std::string name_;
 
-    std::string on_name;
-    std::string off_name;
+    std::string on_name_;
+    std::string off_name_;
 
-    struct sfx_s *on_sfx;
-    struct sfx_s *off_sfx;
+    struct SoundEffect *on_sfx_;
+    struct SoundEffect *off_sfx_;
 
-    int time;
+    int time_;
 
-    switchcache_t cache;
+    SwitchCache cache_;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit switchdef_c(switchdef_c &rhs)
-    {
-    }
-    switchdef_c &operator=(switchdef_c &rhs)
-    {
-        return *this;
-    }
+    explicit SwitchDefinition(SwitchDefinition &rhs) {}
+    SwitchDefinition &operator=(SwitchDefinition &rhs) { return *this; }
 };
 
 // Our switchdefs container
-class switchdef_container_c : public std::vector<switchdef_c *>
+class SwitchDefinitionContainer : public std::vector<SwitchDefinition *>
 {
-  public:
-    switchdef_container_c()
+   public:
+    SwitchDefinitionContainer() {}
+    ~SwitchDefinitionContainer()
     {
-    }
-    ~switchdef_container_c()
-    {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          switchdef_c *s= *iter;
-          delete s;
-          s = nullptr;
-      }
+        for (std::vector<SwitchDefinition *>::iterator iter     = begin(),
+                                                       iter_end = end();
+             iter != iter_end; iter++)
+        {
+            SwitchDefinition *s = *iter;
+            delete s;
+            s = nullptr;
+        }
     }
 
-  public:
-    switchdef_c *Find(const char *name);
+   public:
+    SwitchDefinition *Find(const char *name);
 };
 
-extern switchdef_container_c switchdefs; // -ACB- 2004/06/04 Implemented
+extern SwitchDefinitionContainer switchdefs;  // -ACB- 2004/06/04 Implemented
 
 void DDF_ReadSwitch(const std::string &data);
 
 // handle the BOOM lump
 void DDF_ConvertSWITCHES(const uint8_t *data, int size);
-
-#endif /*__DDF_SWTH_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

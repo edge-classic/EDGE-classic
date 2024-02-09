@@ -23,32 +23,28 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __E_MAIN__
-#define __E_MAIN__
+#pragma once
 
-#include "e_event.h"
+#include "con_var.h"
 
-void E_Main(int argc, const char **argv);
-void E_Idle(void);
-void E_Tick(void);
+void EdgeMain(int argc, const char **argv);
+void EdgeIdle(void);
+void EdgeTicker(void);
+void EdgeDisplay(void);
 
-void E_TitleTicker(void);
-void E_PickLoadingScreen(void);
-void E_AdvanceTitle(void);
-void E_StartTitle(void);
-void E_EngineShutdown(void);
-void E_ForceWipe(void);
-void E_Display(void);
+void TitleTicker(void);
+void PickLoadingScreen(void);
+void AdvanceTitle(void);
+void StartTitle(void);
+void ForceWipe(void);
 
-// startup progress stuff
+void StartupProgressMessage(const char *message);
 
-void E_ProgressMessage(const char *message);
-
-typedef enum
+enum ApplicationStateFlag
 {
-    APP_STATE_ACTIVE       = 0x1,
-    APP_STATE_PENDING_QUIT = 0x2
-} app_state_flags_e;
+    kApplicationActive      = 0x1,
+    kApplicationPendingQuit = 0x2
+};
 
 extern int app_state;
 
@@ -59,9 +55,7 @@ extern bool custom_MenuMain;
 extern bool custom_MenuEpisode;
 extern bool custom_MenuDifficulty;
 
-extern cvar_c r_titlescaling;
-
-#endif // __E_MAIN__
+extern ConsoleVariable title_scaling;
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

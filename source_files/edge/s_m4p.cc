@@ -16,48 +16,44 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
-
 #include "endianess.h"
+#include "epi.h"
 #include "file.h"
 #include "filesystem.h"
-#include "sound_gather.h"
-
-#include "playlist.h"
-
-#include "s_cache.h"
-#include "s_blit.h"
-#include "s_music.h"
-#include "w_wad.h"
-
 #include "m4p.h"
+#include "playlist.h"
+#include "s_blit.h"
+#include "s_cache.h"
+#include "s_music.h"
+#include "snd_gather.h"
+#include "w_wad.h"
 
 #define M4P_BUFFER 1024
 
-extern bool dev_stereo; // FIXME: encapsulation
-extern int  dev_freq;
+extern bool sound_device_stereo;  // FIXME: encapsulation
+extern int  sound_device_frequency;
 
-class m4pplayer_c : public abstract_music_c
+class M4pPlayer : public AbstractMusicPlayer
 {
-  public:
-    m4pplayer_c();
-    ~m4pplayer_c();
+   public:
+    M4pPlayer();
+    ~M4pPlayer();
 
-  private:
-    enum status_e
+   private:
+    enum Status
     {
-        NOT_LOADED,
-        PLAYING,
-        PAUSED,
-        STOPPED
+        kNotLoaded,
+        kPlaying,
+        kPaused,
+        kStopped
     };
 
-    int  status;
-    bool looping;
+    int  status_;
+    bool looping_;
 
-    int16_t *mono_buffer;
+    int16_t *mono_buffer_;
 
-  public:
+   public:
     bool OpenMemory(uint8_t *data, int length);
 
     virtual void Close(void);
@@ -70,31 +66,30 @@ class m4pplayer_c : public abstract_music_c
 
     virtual void Ticker(void);
 
-  private:
-    void PostOpenInit(void);
+   private:
+    void PostOpen(void);
 
-    bool StreamIntoBuffer(sound_data_c *buf);
+    bool StreamIntoBuffer(SoundData *buf);
 };
 
 //----------------------------------------------------------------------------
 
-m4pplayer_c::m4pplayer_c() : status(NOT_LOADED)
+M4pPlayer::M4pPlayer() : status_(kNotLoaded)
 {
-    mono_buffer = new int16_t[M4P_BUFFER * 2];
+    mono_buffer_ = new int16_t[M4P_BUFFER * 2];
 }
 
-m4pplayer_c::~m4pplayer_c()
+M4pPlayer::~M4pPlayer()
 {
     Close();
 
-    if (mono_buffer)
-        delete[] mono_buffer;
+    if (mono_buffer_) delete[] mono_buffer_;
 }
 
-void m4pplayer_c::PostOpenInit()
+void M4pPlayer::PostOpen()
 {
     // Loaded, but not playing
-    status = STOPPED;
+    status_ = kStopped;
 }
 
 static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
@@ -108,28 +103,27 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
     }
 }
 
-bool m4pplayer_c::StreamIntoBuffer(sound_data_c *buf)
+bool M4pPlayer::StreamIntoBuffer(SoundData *buf)
 {
     int16_t *data_buf;
 
     bool song_done = false;
 
-    if (!dev_stereo)
-        data_buf = mono_buffer;
+    if (!sound_device_stereo)
+        data_buf = mono_buffer_;
     else
-        data_buf = buf->data_L;
+        data_buf = buf->data_left_;
 
     m4p_GenerateSamples(data_buf, M4P_BUFFER / sizeof(int16_t));
 
-    buf->length = M4P_BUFFER / 2;
+    buf->length_ = M4P_BUFFER / 2;
 
-    if (!dev_stereo)
-        ConvertToMono(buf->data_L, mono_buffer, buf->length);
+    if (!sound_device_stereo)
+        ConvertToMono(buf->data_left_, mono_buffer_, buf->length_);
 
     if (song_done) /* EOF */
     {
-        if (!looping)
-            return false;
+        if (!looping_) return false;
         m4p_Stop();
         m4p_PlaySong();
         return true;
@@ -138,58 +132,53 @@ bool m4pplayer_c::StreamIntoBuffer(sound_data_c *buf)
     return true;
 }
 
-bool m4pplayer_c::OpenMemory(uint8_t *data, int length)
+bool M4pPlayer::OpenMemory(uint8_t *data, int length)
 {
-    SYS_ASSERT(data);
+    EPI_ASSERT(data);
 
-    if (!m4p_LoadFromData(data, length, dev_freq, M4P_BUFFER))
+    if (!m4p_LoadFromData(data, length, sound_device_frequency, M4P_BUFFER))
     {
-        I_Warning("M4P: failure to load song!\n");
+        LogWarning("M4P: failure to load song!\n");
         return false;
     }
 
-    PostOpenInit();
+    PostOpen();
     return true;
 }
 
-void m4pplayer_c::Close()
+void M4pPlayer::Close()
 {
-    if (status == NOT_LOADED)
-        return;
+    if (status_ == kNotLoaded) return;
 
     // Stop playback
-    if (status != STOPPED)
-        Stop();
+    if (status_ != kStopped) Stop();
 
     m4p_Close();
     m4p_FreeSong();
 
-    status = NOT_LOADED;
+    status_ = kNotLoaded;
 }
 
-void m4pplayer_c::Pause()
+void M4pPlayer::Pause()
 {
-    if (status != PLAYING)
-        return;
+    if (status_ != kPlaying) return;
 
-    status = PAUSED;
+    status_ = kPaused;
 }
 
-void m4pplayer_c::Resume()
+void M4pPlayer::Resume()
 {
-    if (status != PAUSED)
-        return;
+    if (status_ != kPaused) return;
 
-    status = PLAYING;
+    status_ = kPlaying;
 }
 
-void m4pplayer_c::Play(bool loop)
+void M4pPlayer::Play(bool loop)
 {
-    if (status != NOT_LOADED && status != STOPPED)
-        return;
+    if (status_ != kNotLoaded && status_ != kStopped) return;
 
-    status  = PLAYING;
-    looping = loop;
+    status_  = kPlaying;
+    looping_ = loop;
 
     m4p_PlaySong();
 
@@ -197,43 +186,38 @@ void m4pplayer_c::Play(bool loop)
     Ticker();
 }
 
-void m4pplayer_c::Stop()
+void M4pPlayer::Stop()
 {
-    if (status != PLAYING && status != PAUSED)
-        return;
+    if (status_ != kPlaying && status_ != kPaused) return;
 
-    S_QueueStop();
+    SoundQueueStop();
 
     m4p_Stop();
 
-    status = STOPPED;
+    status_ = kStopped;
 }
 
-void m4pplayer_c::Ticker()
+void M4pPlayer::Ticker()
 {
-    while (status == PLAYING && !var_pc_speaker_mode)
+    while (status_ == kPlaying && !pc_speaker_mode)
     {
-        sound_data_c *buf =
-            S_QueueGetFreeBuffer(M4P_BUFFER, (dev_stereo) ? SBUF_Interleaved : SBUF_Mono);
+        SoundData *buf = SoundQueueGetFreeBuffer(
+            M4P_BUFFER, (sound_device_stereo) ? kMixInterleaved : kMixMono);
 
-        if (!buf)
-            break;
+        if (!buf) break;
 
         if (StreamIntoBuffer(buf))
         {
-            if (buf->length > 0)
+            if (buf->length_ > 0)
             {
-                S_QueueAddBuffer(buf, dev_freq);
+                SoundQueueAddBuffer(buf, sound_device_frequency);
             }
-            else
-            {
-                S_QueueReturnBuffer(buf);
-            }
+            else { SoundQueueReturnBuffer(buf); }
         }
         else
         {
             // finished playing
-            S_QueueReturnBuffer(buf);
+            SoundQueueReturnBuffer(buf);
             Stop();
         }
     }
@@ -241,15 +225,15 @@ void m4pplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c *S_PlayM4PMusic(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *S_PlayM4PMusic(uint8_t *data, int length, bool looping)
 {
-    m4pplayer_c *player = new m4pplayer_c();
+    M4pPlayer *player = new M4pPlayer();
 
     if (!player->OpenMemory(data, length))
     {
         delete[] data;
         delete player;
-        return NULL;
+        return nullptr;
     }
 
     delete[] data;

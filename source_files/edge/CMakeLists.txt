@@ -24,10 +24,9 @@ set (EDGE_SOURCE_FILES
   hu_stuff.cc
   hu_style.cc
   i_system.cc
-  image_blur.cc
-  image_data.cc
-  image_funcs.cc
-  image_hq2x.cc
+  im_filter.cc
+  im_data.cc
+  im_funcs.cc
   l_deh.cc
   m_argv.cc
   m_bbox.cc
@@ -101,9 +100,9 @@ set (EDGE_SOURCE_FILES
   sv_mobj.cc
   sv_play.cc
   sv_save.cc
-  sound_data.cc
-  sound_gather.cc
-  sound_types.cc
+  snd_data.cc
+  snd_gather.cc
+  snd_types.cc
   w_files.cc
   w_flat.cc
   w_model.cc

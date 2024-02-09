@@ -23,57 +23,47 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __WI_STUFF__
-#define __WI_STUFF__
+#pragma once
 
-#include "dm_defs.h"
+#include "level.h"
 
-// States for the intermission
-
-typedef enum
+enum IntermissionState
 {
-    NoState = -1,
-    StatCount,
-    ShowNextLoc
-} stateenum_t;
+    kIntermissionStateNone = -1,
+    kIntermissionStateStatScreen,
+    kIntermissionStateShowNextLocation
+};
 
-//
-// INTERMISSION STATS
-//
-typedef struct wistats_s
+struct IntermissionInfo
 {
-    const char *level; // episode # (0-2)
+    const char *level;  // episode # (0-2)
 
-    // current and next levels
-    const mapdef_c *cur;
-    const mapdef_c *next;
+    const MapDefinition *current_level;
+    const MapDefinition *next_level;
 
     int kills;
     int items;
-    int secret;
+    int secrets;
 
-    // the par time
-    int partime;
-} wistats_t;
+    int par_time;
+};
 
-extern wistats_t wi_stats;
+extern IntermissionInfo intermission_stats;
 
 // Called by main loop, animate the intermission.
-void WI_Ticker(void);
+void IntermissionTicker(void);
 
 // Called by main loop,
 // draws the intermission directly into the screen buffer.
-void WI_Drawer(void);
+void IntermissionDrawer(void);
 
 // Setup for an intermission screen.
-void WI_Start(void);
+void IntermissionStart(void);
 
 // Clear Intermission Data
-void WI_Clear(void);
+void IntermissionClear(void);
 
-bool WI_CheckForAccelerate(void);
-
-#endif // __WI_STUFF__
+bool IntermissionCheckForAccelerate(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

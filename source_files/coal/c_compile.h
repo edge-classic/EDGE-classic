@@ -74,7 +74,7 @@ class scope_c
     def_t *def; // parent scope is def->scope
 
   public:
-    scope_c() : kind('g'), names(NULL), def(NULL)
+    scope_c() : kind('g'), names(nullptr), def(nullptr)
     {
     }
     ~scope_c()
@@ -127,7 +127,7 @@ class compiling_c
     // all temporaries for current function
     std::vector<def_t *> temporaries;
 
-    // the function/module being parsed, or NULL
+    // the function/module being parsed, or nullptr
     scope_c *scope;
 
     // for tracking local variables vs temps

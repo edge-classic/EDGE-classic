@@ -23,28 +23,23 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __W_WAD__
-#define __W_WAD__
+#pragma once
+
+#include <vector>
 
 #include "dm_defs.h"
-
 #include "file.h"
 
-class wadtex_resource_c
+struct WadTextureResource
 {
-  public:
-    wadtex_resource_c() : palette(-1), pnames(-1), texture1(-1), texture2(-1)
-    {
-    }
-
     // lump numbers, or -1 if nonexistent
-    int palette;
-    int pnames;
-    int texture1;
-    int texture2;
+    int palette  = -1;
+    int pnames   = -1;
+    int texture1 = -1;
+    int texture2 = -1;
 };
 
-typedef struct game_check_s
+struct GameCheck
 {
     // Friendly string for selector dialog box (if multiple games found)
     // TODO: Read EDGEGAME file/lump for custom friendly title
@@ -55,63 +50,62 @@ typedef struct game_check_s
 
     // (usually) unique lumps to check for in a potential IWAD
     const std::string unique_lumps[2];
-} game_check_t;
+};
 
-extern const std::vector<game_check_t> game_checker;
+extern const std::vector<GameCheck> game_checker;
 
-int W_CheckNumForName(const char *name);
+int CheckLumpNumberForName(const char *name);
 // Like above, but returns the data file index instead of the sortedlump index
-int W_CheckFileNumForName(const char *name);
+int CheckDataFileIndexForName(const char *name);
 
-int W_CheckNumForName_GFX(const char *name);
-int W_CheckNumForName_XGL(const char *name);
-int W_CheckNumForName_MAP(const char *name);
-int W_CheckNumForTexPatch(const char *name);
+int CheckGraphicLumpNumberForName(const char *name);
+int CheckXglLumpNumberForName(const char *name);
+int CheckMapLumpNumberForName(const char *name);
+int CheckPatchLumpNumberForName(const char *name);
 
-int W_GetNumForName(const char *name);
+// Unlike check, will FatalError if not present
+int GetLumpNumberForName(const char *name);
 
-int W_LumpLength(int lump);
+int GetLumpLength(int lump);
 
-uint8_t *W_LoadLump(int lump, int *length = NULL);
-uint8_t *W_LoadLump(const char *name, int *length = NULL);
+uint8_t *LoadLumpIntoMemory(int lump, int *length = nullptr);
+uint8_t *LoadLumpIntoMemory(const char *name, int *length = nullptr);
 
-std::string W_LoadString(int lump);
-std::string W_LoadString(const char *name);
+std::string LoadLumpAsString(int lump);
+std::string LoadLumpAsString(const char *name);
 
-bool        W_VerifyLump(int lump);
-bool        W_VerifyLumpName(int lump, const char *name);
-const char *W_GetLumpName(int lump);
+bool        IsLumpIndexValid(int lump);
+bool        VerifyLump(int lump, const char *name);
+const char *GetLumpNameFromIndex(int lump);
 
-epi::File *W_OpenLump(int lump);
-epi::File *W_OpenLump(const char *name);
+epi::File *LoadLumpAsFile(int lump);
+epi::File *LoadLumpAsFile(const char *name);
 
-int               W_GetPaletteForLump(int lump);
-int               W_FindFlatSequence(const char *start, const char *end, int *s_offset, int *e_offset);
-std::vector<int> *W_GetFlatList(int file);
-std::vector<int> *W_GetSpriteList(int file);
-std::vector<int> *W_GetPatchList(int file);
-void              W_GetTextureLumps(int file, wadtex_resource_c *res);
-void              W_ProcessTX_HI(void);
-int               W_GetFileForLump(int lump);
-void              W_ShowLumps(int for_file, const char *match);
+int GetPaletteForLump(int lump);
+int FindFlatSequence(const char *start, const char *end, int *s_offset,
+                     int *e_offset);
+std::vector<int> *GetFlatListForWad(int file);
+std::vector<int> *GetSpriteListForWad(int file);
+std::vector<int> *GetPatchListForWad(int file);
+void              GetTextureLumpsForWad(int file, WadTextureResource *res);
+void              ProcessTxHiNamespaces(void);
+int               GetDataFileIndexForLump(int lump);
+void              ShowLoadedLumps(int for_file, const char *match);
 
 // auxiliary functions to help us deal with when to use skyboxes
-int  W_LoboFindSkyImage(int for_file, const char *match);
-bool W_LoboDisableSkybox(const char *ActualSky);
+bool DisableStockSkybox(const char *ActualSky);
 
-bool W_IsLumpInPwad(const char *name);
+bool IsLumpInPwad(const char *name);
 
-bool W_IsLumpInAnyWad(const char *name);
+bool IsLumpInAnyWad(const char *name);
 
 // Returns index into game_checker vector if valid game found, else -1
-int W_CheckForUniqueLumps(epi::File *file);
+int CheckForUniqueGameLumps(epi::File *file);
 
-void W_BuildNodes(void);
-void W_ReadUMAPINFOLumps(void);
+void BuildXglNodes(void);
+void ReadUmapinfoLumps(void);
 
-int W_GetKindForLump(int lump);
-
-#endif // __W_WAD__
+int GetKindForLump(int lump);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

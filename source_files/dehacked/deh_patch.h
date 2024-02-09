@@ -18,6 +18,9 @@
 
 #pragma once
 
+#include "deh_buffer.h"
+#include "deh_edge.h"
+
 namespace dehacked
 {
 
@@ -31,6 +34,6 @@ extern int patch_fmt;
 extern int doom_ver;
 
 DehackedResult Load(InputBuffer *buf);
-} // namespace patch
+}  // namespace patch
 
-} // namespace dehacked
+}  // namespace dehacked

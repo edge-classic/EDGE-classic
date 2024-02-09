@@ -18,18 +18,23 @@
 
 #pragma once
 
-#include "deh_system.h"
+#include <vector>
+
+#include "collection.h"
 
 namespace dehacked
 {
 
 namespace wad
 {
-extern ddf_collection_c *dest_container;
+extern std::vector<DDFFile> *dest_container;
 
-void NewLump(ddf_type_e type);
+void NewLump(DDFType type);
+#ifdef __GNUC__
+void Printf(const char *str, ...) __attribute__((format(printf, 1, 2)));
+#else
+void Printf(const char *str, ...);
+#endif
+}  // namespace wad
 
-void Printf(const char *str, ...) GCCATTR((format(printf, 1, 2)));
-} // namespace wad
-
-} // namespace dehacked
+}  // namespace dehacked

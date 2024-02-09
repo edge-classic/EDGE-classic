@@ -16,71 +16,64 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __P_NAVIGATE_H__
-#define __P_NAVIGATE_H__
+#pragma once
 
-#include "types.h"
 #include "p_mobj.h"
 #include "r_defs.h"
 
-class bot_t;
+class DeathBot;
 
-enum path_node_flags_e
+enum BotPathNodeFlag
 {
-    PNODE_Normal   = 0,
-    PNODE_Door     = (1 << 0), // manual door (press USE to open)
-    PNODE_Lift     = (1 << 1), // manual lift (press USE to lower)
-    PNODE_Teleport = (1 << 2), // teleporter line, walk over it
+    kBotPathNodeNormal   = 0,
+    kBotPathNodeDoor     = (1 << 0),  // manual door (press USE to open)
+    kBotPathNodeLift     = (1 << 1),  // manual lift (press USE to lower)
+    kBotPathNodeTeleport = (1 << 2),  // teleporter line, walk over it
 };
 
-class path_node_c
+struct BotPathNode
 {
-  public:
-    position_c   pos{0, 0, 0};
-    int          flags = PNODE_Normal;
-    const seg_t *seg   = NULL;
+    Position   pos{0, 0, 0};
+    int        flags = kBotPathNodeNormal;
+    const Seg *seg   = nullptr;
 };
 
 // a path from a start point to a finish one.
 // includes both start and finish (at least two entries).
-class bot_path_c
+class BotPath
 {
-  public:
-    std::vector<path_node_c> nodes;
+   public:
+    std::vector<BotPathNode> nodes_;
 
-    size_t along = 1;
+    size_t along_ = 1;
 
-    bool finished() const
-    {
-        return along == nodes.size();
-    }
+    bool Finished() const { return along_ == nodes_.size(); }
 
-    position_c cur_dest() const;
-    position_c cur_from() const;
+    Position CurrentDestination() const;
+    Position CurrentFrom() const;
 
-    float   cur_length() const;
-    BAMAngle cur_angle() const;
+    float    CurrentLength() const;
+    BAMAngle CurrentAngle() const;
 
-    bool reached_dest(const position_c *pos) const;
+    bool ReachedDestination(const Position *pos) const;
 };
 
-void NAV_AnalyseLevel();
-void NAV_FreeLevel();
+void BotNavigateAnalyseLevel();
+void BotNavigateFreeLevel();
 
-float NAV_EvaluateBigItem(const mobj_t *mo);
-bool  NAV_NextRoamPoint(position_c &out);
+float BotNavigateEvaluateBigItem(const MapObject *mo);
+bool  BotNavigateNextRoamPoint(Position &out);
 
-// attempt to find a traversible path, returns NULL if failed.
-bot_path_c *NAV_FindPath(const position_c *start, const position_c *finish, int flags);
+// attempt to find a traversible path, returns nullptr if failed.
+BotPath *BotNavigateFindPath(const Position *start, const Position *finish,
+                             int flags);
 
-// find an pickup item in a nearby area, returns NULL if none found.
-bot_path_c *NAV_FindThing(bot_t *bot, float radius, mobj_t *&best);
+// find an pickup item in a nearby area, returns nullptr if none found.
+BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best);
 
-// find an enemy to fight, or NULL if none found.
+// find an enemy to fight, or nullptr if none found.
 // caller is responsible to do a sight checks.
-mobj_t *NAV_FindEnemy(bot_t *bot, float radius);
-
-#endif /*__P_NAVIGATE_H__*/
+MapObject *BotNavigateFindEnemy(DeathBot *bot, float radius);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

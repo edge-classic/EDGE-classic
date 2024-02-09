@@ -16,6 +16,8 @@
 //
 //----------------------------------------------------------------------------
 
+// clang-format off
+
 //------------ General Names ---------------------------
 
 // 'None' must always be the first name.
@@ -451,3 +453,4 @@ xx(Deh_Actor_246)
 xx(Deh_Actor_247)
 xx(Deh_Actor_248)
 xx(Deh_Actor_249)
+    // clang-format on

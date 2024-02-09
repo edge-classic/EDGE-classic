@@ -23,21 +23,18 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __RGL_THING__
-#define __RGL_THING__
+#pragma once
 
+#include "e_player.h"
 #include "r_defs.h"
 #include "r_gldefs.h"
-#include "w_sprite.h"
 
-void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo);
-void RGL_DrawSortThings(drawfloor_t *dfloor);
+void RendererWalkThing(DrawSubsector *dsub, MapObject *mo);
+void RendererDrawSortThings(DrawFloor *dfloor);
 
-void RGL_DrawWeaponSprites(player_t *p);
-void RGL_DrawWeaponModel(player_t *p);
-void RGL_DrawCrosshair(player_t *p);
-
-#endif /* __RGL_THING__ */
+void RendererDrawWeaponSprites(Player *p);
+void RendererDrawWeaponModel(Player *p);
+void RendererDrawCrosshair(Player *p);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

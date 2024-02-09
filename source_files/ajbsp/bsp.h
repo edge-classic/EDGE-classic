@@ -18,12 +18,14 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __AJBSP_BSP_H__
-#define __AJBSP_BSP_H__
+#pragma once
 
-#include "epi.h"
+#include <stdint.h>
+
+#include <string>
+
 #include "AlmostEquals.h"
-
+#include "epi.h"
 //
 // Node Build Information Structure
 //
@@ -46,7 +48,8 @@ enum BuildResult
     // everything went peachy keen
     kBuildOK = 0,
 
-    // not used at the moment, I think we just throw I_Error if needed - Dasho
+    // not used at the moment, I think we just throw FatalError if needed -
+    // Dasho
     kBuildError
 };
 
@@ -80,9 +83,7 @@ int LevelsInWad();
 // kBuildError
 BuildResult BuildLevel(int level_index);
 
-} // namespace ajbsp
-
-#endif /* __AJBSP_BSP_H__ */
+}  // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -16,64 +16,67 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
-#include "i_defs_gl.h"
-
-#include "g_game.h"
-#include "r_misc.h"
-#include "r_gldefs.h"
-#include "r_units.h"
-#include "r_colormap.h"
 #include "r_draw.h"
-#include "r_modes.h"
-#include "r_image.h"
 
 #include <vector>
 
-void RGL_NewScreenSize(int width, int height, int bits)
+#include "epi.h"
+#include "g_game.h"
+#include "i_defs_gl.h"
+#include "r_colormap.h"
+#include "r_gldefs.h"
+#include "r_image.h"
+#include "r_misc.h"
+#include "r_modes.h"
+#include "r_units.h"
+#include "sokol_color.h"
+
+void RendererNewScreenSize(int width, int height, int bits)
 {
     //!!! quick hack
-    RGL_SetupMatrices2D();
+    RendererSetupMatrices2D();
 
     // prevent a visible border with certain cards/drivers
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void RGL_DrawImage(float x, float y, float w, float h, const image_c *image, float tx1, float ty1, float tx2, float ty2,
-                   const colourmap_c *textmap, float alpha, const colourmap_c *palremap)
+void RendererDrawImage(float x, float y, float w, float h, const Image *image,
+                       float tx1, float ty1, float tx2, float ty2,
+                       const Colormap *textmap, float alpha,
+                       const Colormap *palremap)
 {
-    int x1 = I_ROUND(x);
-    int y1 = I_ROUND(y);
-    int x2 = I_ROUND(x + w + 0.25f);
-    int y2 = I_ROUND(y + h + 0.25f);
+    int x1 = RoundToInteger(x);
+    int y1 = RoundToInteger(y);
+    int x2 = RoundToInteger(x + w + 0.25f);
+    int y2 = RoundToInteger(y + h + 0.25f);
 
-    if (x1 == x2 || y1 == y2)
-        return;
+    if (x1 == x2 || y1 == y2) return;
 
     sg_color sgcol = sg_white;
 
-    GLuint tex_id = W_ImageCache(image, true, (textmap && (textmap->special & COLSP_Whiten)) ? NULL : palremap,
-                                 (textmap && (textmap->special & COLSP_Whiten)) ? true : false);
+    GLuint tex_id = ImageCache(
+        image, true,
+        (textmap && (textmap->special_ & kColorSpecialWhiten)) ? nullptr
+                                                               : palremap,
+        (textmap && (textmap->special_ & kColorSpecialWhiten)) ? true : false);
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex_id);
 
-    if (alpha >= 0.99f && image->opacity == OPAC_Solid)
+    if (alpha >= 0.99f && image->opacity_ == kOpacitySolid)
         glDisable(GL_ALPHA_TEST);
     else
     {
         glEnable(GL_ALPHA_TEST);
 
-        if (!(alpha < 0.11f || image->opacity == OPAC_Complex))
+        if (!(alpha < 0.11f || image->opacity_ == kOpacityComplex))
             glAlphaFunc(GL_GREATER, alpha * 0.66f);
     }
 
-    if (image->opacity == OPAC_Complex || alpha < 0.99f)
-        glEnable(GL_BLEND);
+    if (image->opacity_ == kOpacityComplex || alpha < 0.99f) glEnable(GL_BLEND);
 
-    if (textmap)
-        sgcol = sg_make_color_1i(V_GetFontColor(textmap));
+    if (textmap) sgcol = sg_make_color_1i(GetFontColor(textmap));
 
     glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
 
@@ -100,7 +103,7 @@ void RGL_DrawImage(float x, float y, float w, float h, const image_c *image, flo
     glAlphaFunc(GL_GREATER, 0);
 }
 
-void RGL_ReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer)
+void RendererReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer)
 {
     glFlush();
 

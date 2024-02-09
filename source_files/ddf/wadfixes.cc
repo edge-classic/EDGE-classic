@@ -16,21 +16,21 @@
 //
 //----------------------------------------------------------------------------
 
-#include "local.h"
 #include "wadfixes.h"
 
+#include "local.h"
 #include "str_util.h"
 
-static fixdef_c *dynamic_fixdef;
+static WadFixDefinition *dynamic_fixdef;
 
-fixdef_container_c fixdefs;
+WadFixDefinitionContainer fixdefs;
 
-#define DDF_CMD_BASE dummy_fixdef
-static fixdef_c dummy_fixdef;
+static WadFixDefinition dummy_fixdef;
 
-static const commandlist_t fix_commands[] = {DDF_FIELD("MD5", md5_string, DDF_MainGetString),
+static const DDFCommandList fix_commands[] = {
+    DDF_FIELD("MD5", dummy_fixdef, md5_string_, DDF_MainGetString),
 
-                                             DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES
@@ -48,8 +48,7 @@ static void FixStartEntry(const char *name, bool extend)
 
     if (extend)
     {
-        if (!dynamic_fixdef)
-            DDF_Error("Unknown fix to extend: %s\n", name);
+        if (!dynamic_fixdef) DDF_Error("Unknown fix to extend: %s\n", name);
         return;
     }
 
@@ -61,26 +60,29 @@ static void FixStartEntry(const char *name, bool extend)
     }
 
     // not found, create a new one
-    dynamic_fixdef = new fixdef_c;
+    dynamic_fixdef = new WadFixDefinition;
 
-    dynamic_fixdef->name = name;
+    dynamic_fixdef->name_ = name;
 
     fixdefs.push_back(dynamic_fixdef);
 }
 
 static void FixFinishEntry(void)
 {
-    if (dynamic_fixdef->md5_string.empty())
-        DDF_Warning("WADFIXES: No MD5 hash defined for %s.\n", dynamic_fixdef->name.c_str());
+    if (dynamic_fixdef->md5_string_.empty())
+        DDF_Warning("WADFIXES: No MD5 hash defined for %s.\n",
+                    dynamic_fixdef->name_.c_str());
 }
 
-static void FixParseField(const char *field, const char *contents, int index, bool is_last)
+static void FixParseField(const char *field, const char *contents, int index,
+                          bool is_last)
 {
 #if (DEBUG_DDF)
-    I_Debugf("FIX_PARSE: %s = %s;\n", field, contents);
+    LogDebug("FIX_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(fix_commands, field, contents, (uint8_t *)dynamic_fixdef))
+    if (DDF_MainParseField(fix_commands, field, contents,
+                           (uint8_t *)dynamic_fixdef))
         return;
 
     DDF_WarnError("Unknown WADFIXES command: %s\n", field);
@@ -88,7 +90,7 @@ static void FixParseField(const char *field, const char *contents, int index, bo
 
 static void FixClearAll(void)
 {
-    for (auto f : fixdefs)
+    for (WadFixDefinition *f : fixdefs)
     {
         delete f;
         f = nullptr;
@@ -98,7 +100,7 @@ static void FixClearAll(void)
 
 void DDF_ReadFixes(const std::string &data)
 {
-    readinfo_t fixes;
+    DDFReadInfo fixes;
 
     fixes.tag      = "FIXES";
     fixes.lumpname = "WADFIXES";
@@ -114,68 +116,61 @@ void DDF_ReadFixes(const std::string &data)
 //
 // DDF_FixInit
 //
-void DDF_FixInit(void)
-{
-    FixClearAll();
-}
+void DDF_FixInit(void) { FixClearAll(); }
 
 //
 // DDF_FixCleanUp
 //
 void DDF_FixCleanUp(void)
 {
-    for (auto f : fixdefs)
+    for (WadFixDefinition *f : fixdefs)
     {
-        cur_ddf_entryname = epi::StringFormat("[%s]  (wadfixes.ddf)", f->name.c_str());
+        cur_ddf_entryname =
+            epi::StringFormat("[%s]  (wadfixes.ddf)", f->name_.c_str());
         cur_ddf_entryname.clear();
     }
 
     fixdefs.shrink_to_fit();
 }
 
-// ---> fixdef_c class
+// ---> WadFixDefinition class
 
 //
-// fixdef_c Constructor
+// WadFixDefinition Constructor
 //
-fixdef_c::fixdef_c() : name()
-{
-    Default();
-}
+WadFixDefinition::WadFixDefinition() : name_() { Default(); }
 
 //
-// fixdef_c::CopyDetail()
+// WadFixDefinition::CopyDetail()
 //
 // Copies all the detail with the exception of ddf info
 //
-void fixdef_c::CopyDetail(fixdef_c &src)
+void WadFixDefinition::CopyDetail(WadFixDefinition &src)
 {
-    md5_string = src.md5_string;
+    md5_string_ = src.md5_string_;
 }
 
 //
-// fixdef_c::Default()
+// WadFixDefinition::Default()
 //
-void fixdef_c::Default()
-{
-    md5_string = "";
-}
+void WadFixDefinition::Default() { md5_string_ = ""; }
 
-// --> fixdef_container_c Class
+// --> WadFixDefinitionContainer Class
 
 //
-// fixdef_c* fixdef_container_c::Find()
+// WadFixDefinition* WadFixDefinitionContainer::Find()
 //
-fixdef_c *fixdef_container_c::Find(const char *name)
+WadFixDefinition *WadFixDefinitionContainer::Find(const char *name)
 {
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<WadFixDefinition *>::iterator iter     = begin(),
+                                                   iter_end = end();
+         iter != iter_end; iter++)
     {
-        fixdef_c *fl = *iter;
-        if (DDF_CompareName(fl->name.c_str(), name) == 0)
-            return fl;
+        WadFixDefinition *fl = *iter;
+        if (DDF_CompareName(fl->name_.c_str(), name) == 0) return fl;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--- editor settings ---

@@ -23,57 +23,55 @@
 //
 //----------------------------------------------------------------------------
 //
-// IMPORTANT NOTE: Altering anything within the mobj_t will most likely
+// IMPORTANT NOTE: Altering anything within the MapObject will most likely
 //                 require changes to p_saveg.c and the save-game object
 //                 (savegmobj_t); if you experience any problems with
 //                 savegames, check here!
 //
 
-#ifndef __P_MOBJ_H__
-#define __P_MOBJ_H__
-
-#include "types.h"
-#include "m_math.h"
+#pragma once
 
 #include <unordered_set>
 
+#include "con_var.h"
+#include "m_math.h"
+#include "types.h"
+
 // forward decl.
-class atkdef_c;
-class mobjtype_c;
-class image_c;
-class abstract_shader_c;
+class AttackDefinition;
+class MapObjectDefinition;
+class Image;
+class AbstractShader;
 
-struct mobj_s;
-struct player_s;
-struct rad_script_s;
-struct region_properties_s;
-struct state_s;
-struct subsector_s;
-struct touch_node_s;
-struct line_s;
+class Player;
+struct TriggerScript;
+struct RegionProperties;
+struct State;
+struct Subsector;
+struct TouchNode;
+struct Line;
 
-extern std::unordered_set<const mobjtype_c *> seen_monsters;
+extern std::unordered_set<const MapObjectDefinition *> seen_monsters;
 
 extern bool time_stop_active;
 
-extern cvar_c g_gravity;
+extern ConsoleVariable gravity_factor;
 
-#define STOPSPEED 0.07f
-#define OOF_SPEED 9.0f // Lobo: original value 20.0f too high, almost never played oof
+constexpr float kStopSpeed = 0.07f;
 
 //
-// NOTES: mobj_t
+// NOTES: MapObject
 //
-// mobj_ts are used to tell the refresh where to draw an image,
+// MapObjects are used to tell the refresh where to draw an image,
 // tell the world simulation when objects are contacted,
 // and tell the sound driver how to position a sound.
 //
 // The refresh uses the next and prev links to follow
 // lists of things in sectors as they are being drawn.
-// The sprite, frame, and angle elements determine which patch_t
+// The sprite, frame, and angle elements determine which Patch
 // is used to draw the sprite if it is visible.
 // The sprite and frame values are allmost always set
-// from state_t structures.
+// from State structures.
 //
 // The statescr.exe utility generates the states.h and states.c
 // files that contain the sprite/frame numbers from the
@@ -81,29 +79,29 @@ extern cvar_c g_gravity;
 //
 // The xyz origin point represents a point at the bottom middle
 // of the sprite (between the feet of a biped).
-// This is the default origin position for patch_ts grabbed
+// This is the default origin position for Patchs grabbed
 // with lumpy.exe.
 // A walking creature will have its z equal to the floor
 // it is standing on.
 //
 // The sound code uses the x,y, and subsector fields
-// to do stereo positioning of any sound effited by the mobj_t.
+// to do stereo positioning of any sound effited by the MapObject.
 //
 // The play simulation uses the blocklinks, x,y,z, radius, height
-// to determine when mobj_ts are touching each other,
+// to determine when MapObjects are touching each other,
 // touching lines in the map, or hit by trace lines (gunshots,
 // lines of sight, etc).
-// The mobj_t->flags element has various bit flags
+// The MapObject->flags element has various bit flags
 // used by the simulation.
 //
-// Every mobj_t is linked into a single sector
+// Every MapObject is linked into a single sector
 // based on its origin coordinates.
-// The subsector_t is found with R_PointInSubsector(x,y),
+// The subsector_t is found with RendererPointInSubsector(x,y),
 // and the sector_t can be found with subsector->sector.
 // The sector links are only used by the rendering code,
 // the play simulation does not care about them at all.
 //
-// Any mobj_t that needs to be acted upon by something else
+// Any MapObject that needs to be acted upon by something else
 // in the play world (block movement, be shot, etc) will also
 // need to be linked into the blockmap.
 // If the thing has the MF_NOBLOCK flag set, it will not use
@@ -112,14 +110,14 @@ extern cvar_c g_gravity;
 // things, but nothing can run into a missile).
 // Each block in the grid is 128*128 units, and knows about
 // every line_t that it contains a piece of, and every
-// interactable mobj_t that has its origin contained.
+// interactable MapObject that has its origin contained.
 //
-// A valid mobj_t is a mobj_t that has the proper subsector_t
+// A valid MapObject is a MapObject that has the proper subsector_t
 // filled in for its xy coordinates and is linked into the
 // sector from which the subsector was made, or has the
-// MF_NOSECTOR flag set (the subsector_t needs to be valid
-// even if MF_NOSECTOR is set), and is linked into a blockmap
-// block or has the MF_NOBLOCKMAP flag set.
+// kMapObjectFlagNoSector flag set (the subsector_t needs to be valid
+// even if kMapObjectFlagNoSector is set), and is linked into a blockmap
+// block or has the kMapObjectFlagNoBlockmap flag set.
 // Links should only be modified by the P_[Un]SetThingPosition()
 // functions.
 // Do not change the MF_NO? flags while a thing is valid.
@@ -128,287 +126,281 @@ extern cvar_c g_gravity;
 //
 
 // Directions
-typedef enum
+enum DirectionType
 {
-    DI_EAST,
-    DI_NORTHEAST,
-    DI_NORTH,
-    DI_NORTHWEST,
-    DI_WEST,
-    DI_SOUTHWEST,
-    DI_SOUTH,
-    DI_SOUTHEAST,
+    kDirectionEast,
+    kDirectionNorthEast,
+    kDirectionNorth,
+    kDirectionNorthWest,
+    kDirectionWest,
+    kDirectionSouthwest,
+    kDirectionSouth,
+    kDirectionSoutheast,
 
-    DI_NODIR,
+    kDirectionNone,
 
-    DI_SLOWTURN,
-    DI_FASTTURN,
-    DI_WALKING,
-    DI_EVASIVE
-} dirtype_e;
+    kDirectionSlowTurn,
+    kDirectionFastTurn,
+    kDirectionWalking,
+    kDirectionEvasive
+};
 
-typedef struct
+struct SpawnPoint
 {
-    // location on the map.  `z' can take the special values ONFLOORZ
-    // and ONCEILINGZ.
+    // location on the map.  `z' can take the special values kOnFloorZ
+    // and kOnCeilingZ.
     float x, y, z;
 
     // direction thing faces
     BAMAngle angle;
-    BAMAngle vertangle;
+    BAMAngle vertical_angle;
 
     // type of thing
-    const mobjtype_c *info;
+    const MapObjectDefinition *info;
 
-    // certain flags (mainly MF_AMBUSH).
+    // certain flags (mainly kMapObjectFlagAmbush).
     int flags;
 
-    // tag number (from Hexen map format)
+    // tag number
     int tag;
-} spawnpoint_t;
+};
 
-struct position_c
+struct DynamicLightState
 {
-  public:
+    float           r;       // radius
+    float           target;  // target radius
+    RGBAColor       color;
+    AbstractShader *shader;
+    Line           *glow_wall     = nullptr;
+    bool            bad_wall_glow = false;
+};
+
+// Map Object definition.
+struct Position
+{
     float x, y, z;
 };
 
-typedef struct dlight_state_s
+class MapObject : public Position
 {
-    float    r;      // radius
-    float    target; // target radius
-    RGBAColor color;
-    ///--- const image_c *image;
-    abstract_shader_c *shader;
-    line_s            *glow_wall     = nullptr;
-    bool               bad_wall_glow = false;
-} dlight_state_t;
+   public:
+    const MapObjectDefinition *info_ = nullptr;
 
-// Map Object definition.
-typedef struct mobj_s mobj_t;
-
-struct mobj_s : public position_c
-{
-    const mobjtype_c *info = nullptr;
-
-    BAMAngle angle     = 0; // orientation
-    BAMAngle vertangle = 0; // looking up or down
+    BAMAngle angle_          = 0;  // orientation
+    BAMAngle vertical_angle_ = 0;  // looking up or down
 
     // For movement checking.
-    float radius = 0;
-    float height = 0;
-    float scale  = 1.0f;
-    float aspect = 1.0f;
-    float alpha  = 1.0f;
+    float radius_ = 0;
+    float height_ = 0;
+    float scale_  = 1.0f;
+    float aspect_ = 1.0f;
+    float alpha_  = 1.0f;
 
     // Momentum, used to update position.
-    HMM_Vec3 mom = {{0, 0, 0}};
+    HMM_Vec3 momentum_ = {{0, 0, 0}};
 
     // Track hover phase for time stop shenanigans
-    float phase = 0.0f;
+    float phase_ = 0.0f;
 
     // current subsector
-    struct subsector_s *subsector = nullptr;
+    struct Subsector *subsector_ = nullptr;
 
     // properties from extrafloor the thing is in
-    struct region_properties_s *props = nullptr;
+    struct RegionProperties *region_properties_ = nullptr;
 
     // Vert slope stuff maybe
-    float old_z      = 0;
-    float old_floorz = 0;
-    bool  on_slope   = false;
+    float old_z_       = 0;
+    float old_floor_z_ = 0;
+    bool  on_slope_    = false;
 
     // The closest interval over all contacted Sectors.
-    float floorz   = 0;
-    float ceilingz = 0;
-    float dropoffz = 0;
+    float floor_z_   = 0;
+    float ceiling_z_ = 0;
+    float dropoff_z_ = 0;
 
     // This is the current speed of the object.
-    // if fastparm, it is already calculated.
-    float speed = 0;
-    int   fuse  = 0;
+    // if fast_monsters, it is already calculated.
+    float speed_ = 0;
+    int   fuse_  = 0;
 
     // When this times out we go to "MORPH" state
-    int morphtimeout = 0;
+    int morph_timeout_ = 0;
 
     // Thing's health level
-    float health = 0;
-    float spawnhealth = 0;
+    float health_       = 0;
+    float spawn_health_ = 0;
 
     // state tic counter
-    int tics     = 0;
-    int tic_skip = 0;
+    int tics_     = 0;
+    int tic_skip_ = 0;
 
-    const struct state_s *state      = nullptr;
-    const struct state_s *next_state = nullptr;
+    const struct State *state_      = nullptr;
+    const struct State *next_state_ = nullptr;
 
     // flags (Old and New)
-    int flags         = 0;
-    int extendedflags = 0;
-    int hyperflags    = 0;
-    int mbf21flags    = 0;
+    int flags_          = 0;
+    int extended_flags_ = 0;
+    int hyper_flags_    = 0;
+    int mbf21_flags_    = 0;
 
-    int model_skin       = 0;
-    int model_last_frame = 0;
-    float model_scale    = 1.0f;
-    float model_aspect   = 1.0f;
+    int   model_skin_       = 0;
+    int   model_last_frame_ = 0;
+    float model_scale_      = 1.0f;
+    float model_aspect_     = 1.0f;
 
     // tag ID (for special operations)
-    int         tag      = 0;
-    std::string wud_tags = "";
+    int         tag_                  = 0;
+    std::string wait_until_dead_tags_ = "";
 
     // Movement direction, movement generation (zig-zagging).
-    dirtype_e movedir = DI_EAST; // 0-7
+    DirectionType move_direction_ = kDirectionEast;  // 0-7
 
     // when 0, select a new dir
-    int movecount = 0;
+    int move_count_ = 0;
 
     // Reaction time: if non 0, don't attack yet.
     // Used by player to freeze a bit after teleporting.
-    int reactiontime = 0;
+    int reaction_time_ = 0;
 
     // If >0, the target will be chased
     // no matter what (even if shot)
-    int threshold = 0;
+    int threshold_ = 0;
 
     // Additional info record for player avatars only.
-    struct player_s *player = nullptr;
+    class Player *player_ = nullptr;
 
     // Player number last looked for.
-    int lastlook = 0;
+    int last_look_ = 0;
 
     // For respawning.
-    spawnpoint_t spawnpoint = {0, 0, 0, 0, 0, nullptr, 0, 0};
+    SpawnPoint spawnpoint_ = {0, 0, 0, 0, 0, nullptr, 0, 0};
 
-    float origheight = 0;
+    float original_height_ = 0;
 
     // current visibility and target visibility
-    float visibility = 0;
-    float vis_target = 0;
+    float visibility_        = 0;
+    float target_visibility_ = 0;
 
-    float painchance = 0;
+    float pain_chance_ = 0;
 
     // current attack to be made
-    const atkdef_c *currentattack = nullptr;
+    const AttackDefinition *current_attack_ = nullptr;
 
     // spread count for Ordered spreaders
-    int spreadcount = 0;
+    int spread_count_ = 0;
 
-    // If == validcount, already checked.
-    int validcount = 0;
+    // If == valid_count, already checked.
+    int valid_count_ = 0;
 
     // -ES- 1999/10/25 Reference Count.
     // All the following mobj references should be set *only* via the
     // SetXX() methods, where XX is the field name. This is useful because
-    // it sets the pointer to NULL if the mobj is removed, which protects
+    // it sets the pointer to nullptr if the mobj is removed, which protects
     // us from a crash.
-    int refcount = 0;
+    int reference_count_ = 0;
 
     // source of the mobj, used for projectiles (i.e. the shooter)
-    mobj_t *source = nullptr;
+    MapObject *source_ = nullptr;
 
     // target of the mobj
-    mobj_t *target = nullptr;
+    MapObject *target_ = nullptr;
 
     // current spawned fire of the mobj
-    mobj_t *tracer = nullptr;
+    MapObject *tracer_ = nullptr;
 
     // if exists, we are supporting/helping this object
-    mobj_t *supportobj = nullptr;
-    int     side       = 0;
+    MapObject *support_object_ = nullptr;
+    int        side_           = 0;
 
     // objects that is above and below this one.  If there were several,
     // then the closest one (in Z) is chosen.  We are riding the below
     // object if the head height == our foot height.  We are being
     // ridden if our head == the above object's foot height.
     //
-    mobj_t *above_mo = nullptr;
-    mobj_t *below_mo = nullptr;
+    MapObject *above_object_ = nullptr;
+    MapObject *below_object_ = nullptr;
 
     // these delta values give what position from the ride_em thing's
     // center that we are sitting on.
-    float ride_dx = 0;
-    float ride_dy = 0;
+    float ride_delta_x_ = 0;
+    float ride_delta_y_ = 0;
 
     // -AJA- 1999/09/25: Path support.
-    struct rad_script_s *path_trigger = nullptr;
+    struct TriggerScript *path_trigger_ = nullptr;
 
     // if we're on a ladder, this is the linedef #, otherwise -1.
-    int on_ladder = -1;
+    int on_ladder_ = -1;
 
-    dlight_state_t dlight = {0, 0, 0, nullptr};
+    DynamicLightState dynamic_light_ = {0, 0, 0, nullptr};
 
     // monster reload support: count the number of shots
-    int shot_count = 0;
+    int shot_count_ = 0;
 
     // hash values for TUNNEL missiles
-    uint32_t tunnel_hash[2] = {0, 0};
+    uint32_t tunnel_hash_[2] = {0, 0};
 
     // position interpolation (disabled when lerp_num <= 1)
-    short lerp_num = 0;
-    short lerp_pos = 0;
+    short interpolation_number_   = 0;
+    short interpolation_position_ = 0;
 
-    HMM_Vec3 lerp_from = {{0, 0, 0}};
+    HMM_Vec3 interpolation_from_ = {{0, 0, 0}};
 
     // touch list: sectors this thing is in or touches
-    struct touch_node_s *touch_sectors = nullptr;
+    struct TouchNode *touch_sectors_ = nullptr;
 
-    // linked list (mobjlisthead)
-    mobj_t *next = nullptr;
-    mobj_t *prev = nullptr;
+    // linked list (map_object_list_head)
+    MapObject *next_     = nullptr;
+    MapObject *previous_ = nullptr;
 
     // Interaction info, by BLOCKMAP.
     // Links in blocks (if needed).
-    mobj_t *bnext = nullptr;
-    mobj_t *bprev = nullptr;
+    MapObject *blockmap_next_     = nullptr;
+    MapObject *blockmap_previous_ = nullptr;
 
     // More list: links in subsector (if needed)
-    mobj_t *snext = nullptr;
-    mobj_t *sprev = nullptr;
+    MapObject *subsector_next_     = nullptr;
+    MapObject *subsector_previous_ = nullptr;
 
     // One more: link in dynamic light blockmap
-    mobj_t *dlnext = nullptr;
-    mobj_t *dlprev = nullptr;
+    MapObject *dynamic_light_next_     = nullptr;
+    MapObject *dynamic_light_previous_ = nullptr;
 
     // Player number last heard.
-    int lastheard = 0;
+    int last_heard_ = 0;
 
-    bool is_voodoo = false;
+    bool is_voodoo_ = false;
 
-    bool slopesighthit = false;
+    bool slope_sight_hit_ = false;
 
-    int teleport_tic = 0;
+    int teleport_tic_ = 0;
 
-  public:
-    bool isRemoved() const;
+   public:
+    bool IsRemoved() const;
 
-    void SetTracer(mobj_t *ref);
-    void SetSource(mobj_t *ref);
-    void SetTarget(mobj_t *ref);
-    void SetSupportObj(mobj_t *ref);
-    void SetAboveMo(mobj_t *ref);
-    void SetBelowMo(mobj_t *ref);
-    void SetRealSource(mobj_t *ref);
+    void SetTracer(MapObject *ref);
+    void SetSource(MapObject *ref);
+    void SetTarget(MapObject *ref);
+    void SetSupportObject(MapObject *ref);
+    void SetAboveObject(MapObject *ref);
+    void SetBelowObject(MapObject *ref);
+    void SetRealSource(MapObject *ref);
 
-    void ClearStaleRefs();
+    void ClearStaleReferences();
 
     // Stores what this mobj was before being MORPHed/BECOMEing
-    const mobjtype_c *preBecome = nullptr;
+    const MapObjectDefinition *pre_become_ = nullptr;
 };
 
 // Item-in-Respawn-que Structure -ACB- 1998/07/30
-typedef struct iteminque_s
+struct RespawnQueueItem
 {
-    spawnpoint_t        spawnpoint = {0, 0, 0, 0, 0, nullptr, 0, 0};
-    int                 time       = 0;
-    struct iteminque_s *next       = nullptr;
-    struct iteminque_s *prev       = nullptr;
-} iteminque_t;
+    SpawnPoint               spawnpoint = {0, 0, 0, 0, 0, nullptr, 0, 0};
+    int                      time       = 0;
+    struct RespawnQueueItem *next       = nullptr;
+    struct RespawnQueueItem *previous   = nullptr;
+};
 
-// useful macro for the vertical center of an object
-#define MO_MIDZ(mo) ((mo)->z + (mo)->height / 2)
-
-#endif /*__P_MOBJ_H__*/
+inline float MapObjectMidZ(MapObject *mo) { return (mo->z + mo->height_ / 2); }
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

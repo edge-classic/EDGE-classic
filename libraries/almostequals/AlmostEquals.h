@@ -36,8 +36,9 @@
 
 #pragma once
 
+#include <stddef.h>
 #include <limits>
-#include <cfloat>
+#include <float.h>
 
 // This template class serves as a compile-time function from size to
 // type.  It maps a size in bytes to a primitive type with that

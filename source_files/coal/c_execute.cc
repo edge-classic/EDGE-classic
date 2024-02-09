@@ -40,7 +40,7 @@
 
 #include "AlmostEquals.h"
 
-extern void I_Error(const char *error, ...);
+extern void FatalError(const char *error, ...);
 
 namespace coal
 {
@@ -89,7 +89,7 @@ int real_vm_c::GetNativeFunc(const char *name, const char *module)
 void real_vm_c::AddNativeFunction(const char *name, native_func_t func)
 {
     // already registered?
-    int prev = GetNativeFunc(name, NULL);
+    int prev = GetNativeFunc(name, nullptr);
 
     if (prev >= 0)
     {
@@ -150,7 +150,7 @@ double *real_vm_c::AccessParam(int p)
         RunError("PR_Parameter: p=%d out of range\n", p);
 
     if (AlmostEquals(exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]], (double)(-FLT_MAX)))
-        return NULL;
+        return nullptr;
     else
         return &exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]];
 }
@@ -162,7 +162,7 @@ const char *real_vm_c::AccessParamString(int p)
     if (d)
         return REF_STRING((int)*d);
     else
-        return NULL;
+        return nullptr;
 }
 
 void real_vm_c::ReturnFloat(double f)
@@ -223,7 +223,7 @@ void real_vm_c::RunError(const char *error, ...)
     /* clear the stack so SV/Host_Error can shutdown functions */
     exec.call_depth = 0;
 
-    I_Error(buffer);
+    FatalError(buffer);
 }
 
 int real_vm_c::STR_Concat(const char *s1, const char *s2)
@@ -337,7 +337,7 @@ void real_vm_c::EnterNative(int func, int argc)
     exec.stack_depth -= functions[exec.func]->locals_end;
 }
 
-#define Operand(a) (((a) > 0) ? REF_GLOBAL(a) : ((a) < 0) ? &exec.stack[exec.stack_depth - ((a) + 1)] : NULL)
+#define Operand(a) (((a) > 0) ? REF_GLOBAL(a) : ((a) < 0) ? &exec.stack[exec.stack_depth - ((a) + 1)] : nullptr)
 
 void real_vm_c::DoExecute(int fnum)
 {
@@ -678,100 +678,6 @@ static const char *OpcodeName(short op)
 
     return opcode_names[op];
 }
-
-//
-// Returns a string suitable for printing (no newlines, max 60 chars length)
-// TODO: reimplement this
-#if 0
-char *DebugString(char *string)
-{
-	static char buf[80];
-	char	*s;
-
-	s = buf;
-	*s++ = '"';
-	while (string && *string)
-	{
-		if (s == buf + sizeof(buf) - 2)
-			break;
-		if (*string == '\n')
-		{
-			*s++ = '\\';
-			*s++ = 'n';
-		}
-		else if (*string == '"')
-		{
-			*s++ = '\\';
-			*s++ = '"';
-		}
-		else
-			*s++ = *string;
-		string++;
-		if (s - buf > 60)
-		{
-			*s++ = '.';
-			*s++ = '.';
-			*s++ = '.';
-			break;
-		}
-	}
-	*s++ = '"';
-	*s++ = 0;
-	return buf;
-}
-#endif
-
-//
-// Returns a string describing *data in a type specific manner
-// TODO: reimplement this
-#if 0
-char *Debug_ValueString(etype_t type, double *val)
-{
-	static char	line[256];
-	def_t		*def;
-	function_t	*f;
-
-	line[0] = 0;
-
-	switch (type)
-	{
-	case ev_string:
-//!!!!		sprintf(line, "%s", PR_String(REF_STRING((int)*val)));
-		break;
-//	case ev_entity:
-//		sprintf (line, "entity %i", *(int *)val);
-//		break;
-	case ev_function:
-		f = functions + (int)*val;
-		if (!f)
-			sprintf(line, "undefined function");
-//!!!!		else
-//!!!!			sprintf(line, "%s()", REF_STRING(f->s_name));
-		break;
-//	case ev_field:
-//		def = PR_DefForFieldOfs ( *(int *)val );
-//		sprintf (line, ".%s", def->name);
-//		break;
-	case ev_void:
-		sprintf(line, "void");
-		break;
-	case ev_float:
-		sprintf(line, "%5.1f", (float) *val);
-		break;
-	case ev_vector:
-		sprintf(line, "'%5.1f %5.1f %5.1f'", val[0], val[1], val[2]);
-		break;
-	case ev_pointer:
-		sprintf(line, "pointer");
-		break;
-	default:
-		sprintf(line, "bad type %i", type);
-		break;
-	}
-
-	return line;
-}
-#endif
 
 void real_vm_c::StackTrace()
 {

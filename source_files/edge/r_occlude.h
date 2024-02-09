@@ -16,14 +16,13 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __RGL_OCCLUDE_H__
-#define __RGL_OCCLUDE_H__
+#pragma once
 
-void RGL_1DOcclusionClear(void);
-void RGL_1DOcclusionSet(BAMAngle low, BAMAngle high);
-bool RGL_1DOcclusionTest(BAMAngle low, BAMAngle high);
+#include "math_bam.h"
 
-#endif /* __RGL_OCCLUDE_H__ */
+void RendererOcclusionClear(void);
+void RendererOcclusionSet(BAMAngle low, BAMAngle high);
+bool RendererOcclusionTest(BAMAngle low, BAMAngle high);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

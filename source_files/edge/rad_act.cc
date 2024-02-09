@@ -19,72 +19,80 @@
 // -AJA- 1999/10/24: Split these off from the rad_trig.c file.
 //
 
-#include "i_defs.h"
+#include "rad_act.h"
 
 #include <limits.h>
 
+#include "AlmostEquals.h"
+#include "common_doomdefs.h"
+#include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "con_main.h"
-#include "hu_draw.h"
-#include "hu_style.h"
-#include "hu_stuff.h"
+#include "epi.h"
 #include "g_game.h"
+#include "hu_draw.h"
+#include "hu_stuff.h"
+#include "hu_style.h"
 #include "i_movie.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_menu.h"
 #include "m_random.h"
 #include "p_local.h"
 #include "p_spec.h"
-#include "rad_trig.h"
-#include "rad_act.h"
-#include "r_defs.h"
-#include "r_sky.h"
-#include "s_sound.h"
-#include "s_music.h"
-#include "sv_chunk.h"
-#include "r_draw.h"
 #include "r_colormap.h"
-#include "r_modes.h"
+#include "r_defs.h"
+#include "r_draw.h"
 #include "r_image.h"
-#include "w_wad.h"
-#include "w_texture.h"
-
+#include "r_misc.h"
+#include "r_modes.h"
+#include "r_sky.h"
+#include "rad_trig.h"
+#include "s_music.h"
+#include "s_sound.h"
 #include "str_util.h"
+#include "sv_chunk.h"
+#include "w_texture.h"
+#include "w_wad.h"
 
-#include "AlmostEquals.h"
-
-static style_c *rts_tip_style;
+static Style *rts_tip_style;
 
 // current tip slots
-drawtip_t tip_slots[MAXTIPSLOT];
+ScriptDrawTip tip_slots[kMaximumTipSlots];
 
 // properties for fixed slots
-#define FIXEDSLOTS 15
+static constexpr uint8_t kFixedSlots = 15;
 
-static s_tip_prop_t fixed_props[FIXEDSLOTS] = {
-    {1, 0.50f, 0.50f, 0, "#FFFFFF", 1.0f},  {2, 0.20f, 0.25f, 1, "#FFFFFF", 1.0f},
-    {3, 0.20f, 0.75f, 1, "#FFFFFF", 1.0f},  {4, 0.50f, 0.50f, 0, "#3333FF", 1.0f},
-    {5, 0.20f, 0.25f, 1, "#3333FF", 1.0f},  {6, 0.20f, 0.75f, 1, "#3333FF", 1.0f},
-    {7, 0.50f, 0.50f, 0, "#FFFF00", 1.0f},  {8, 0.20f, 0.25f, 1, "#FFFF00", 1.0f},
-    {9, 0.20f, 0.75f, 1, "#FFFF00", 1.0f},  {10, 0.50f, 0.50f, 0, "", 1.0f},
-    {11, 0.20f, 0.25f, 1, "", 1.0f},        {12, 0.20f, 0.75f, 1, "", 1.0f},
-    {13, 0.50f, 0.50f, 0, "#33FF33", 1.0f}, {14, 0.20f, 0.25f, 1, "#33FF33", 1.0f},
+static constexpr ScriptTipProperties fixed_props[kFixedSlots] = {
+    {1, 0.50f, 0.50f, 0, "#FFFFFF", 1.0f},
+    {2, 0.20f, 0.25f, 1, "#FFFFFF", 1.0f},
+    {3, 0.20f, 0.75f, 1, "#FFFFFF", 1.0f},
+    {4, 0.50f, 0.50f, 0, "#3333FF", 1.0f},
+    {5, 0.20f, 0.25f, 1, "#3333FF", 1.0f},
+    {6, 0.20f, 0.75f, 1, "#3333FF", 1.0f},
+    {7, 0.50f, 0.50f, 0, "#FFFF00", 1.0f},
+    {8, 0.20f, 0.25f, 1, "#FFFF00", 1.0f},
+    {9, 0.20f, 0.75f, 1, "#FFFF00", 1.0f},
+    {10, 0.50f, 0.50f, 0, "", 1.0f},
+    {11, 0.20f, 0.25f, 1, "", 1.0f},
+    {12, 0.20f, 0.75f, 1, "", 1.0f},
+    {13, 0.50f, 0.50f, 0, "#33FF33", 1.0f},
+    {14, 0.20f, 0.25f, 1, "#33FF33", 1.0f},
     {15, 0.20f, 0.75f, 1, "#33FF33", 1.0f}};
 
 //
 // Once-only initialisation.
 //
-void RAD_InitTips(void)
+void InitializeScriptTips(void)
 {
-    for (int i = 0; i < MAXTIPSLOT; i++)
+    for (int i = 0; i < kMaximumTipSlots; i++)
     {
-        drawtip_t *current = tip_slots + i;
+        ScriptDrawTip *current = tip_slots + i;
 
         // initial properties
-        Z_Clear(current, drawtip_t, 1);
+        EPI_CLEAR_MEMORY(current, ScriptDrawTip, 1);
 
-        current->p = fixed_props[i % FIXEDSLOTS];
+        current->p = fixed_props[i % kFixedSlots];
 
         current->delay = -1;
         current->color = kRGBANoValue;
@@ -96,56 +104,56 @@ void RAD_InitTips(void)
 //
 // Used when changing levels to clear any tips.
 //
-void RAD_ResetTips(void)
+void ResetScriptTips(void)
 {
     // free any text strings
-    for (int i = 0; i < MAXTIPSLOT; i++)
+    for (int i = 0; i < kMaximumTipSlots; i++)
     {
-        drawtip_t *current = tip_slots + i;
+        ScriptDrawTip *current = tip_slots + i;
 
-        SV_FreeString(current->tip_text);
+        SaveChunkFreeString(current->tip_text);
     }
 
-    RAD_InitTips();
+    InitializeScriptTips();
 }
 
-static void SetupTip(drawtip_t *cur)
+static void SetupTip(ScriptDrawTip *cur)
 {
-    if (cur->tip_graphic)
-        return;
+    if (cur->tip_graphic) return;
 
     if (cur->color == kRGBANoValue)
-        cur->color = V_ParseFontColor(cur->p.color_name);
+        cur->color = ParseFontColor(cur->p.color_name);
 }
 
-static void SendTip(rad_trigger_t *R, s_tip_t *tip, int slot)
+static void SendTip(TriggerScriptTrigger *R, ScriptTip *tip, int slot)
 {
-    drawtip_t *current;
+    ScriptDrawTip *current;
 
-    SYS_ASSERT(0 <= slot && slot < MAXTIPSLOT);
+    EPI_ASSERT(0 <= slot && slot < kMaximumTipSlots);
 
     current = tip_slots + slot;
 
     current->delay = tip->display_time;
 
-    SV_FreeString(current->tip_text);
+    SaveChunkFreeString(current->tip_text);
 
     if (tip->tip_ldf)
-        current->tip_text = SV_DupString(language[tip->tip_ldf]);
+        current->tip_text = SaveChunkCopyString(language[tip->tip_ldf]);
     else if (tip->tip_text)
-        current->tip_text = SV_DupString(tip->tip_text);
+        current->tip_text = SaveChunkCopyString(tip->tip_text);
     else
-        current->tip_text = NULL;
+        current->tip_text = nullptr;
 
     // send message to the console (unless it would clog it up)
     if (current->tip_text && current->tip_text != R->last_con_message)
     {
-        CON_Printf("%s\n", current->tip_text);
+        ConsolePrint("%s\n", current->tip_text);
         R->last_con_message = current->tip_text;
     }
 
-    current->tip_graphic = tip->tip_graphic ? W_ImageLookup(tip->tip_graphic) : NULL;
-    current->playsound   = tip->playsound ? true : false;
+    current->tip_graphic =
+        tip->tip_graphic ? ImageLookup(tip->tip_graphic) : nullptr;
+    current->playsound = tip->playsound ? true : false;
     // current->scale       = tip->tip_graphic ? tip->gfx_scale : 1.0f;
     current->scale     = tip->gfx_scale;
     current->fade_time = 0;
@@ -157,25 +165,23 @@ static void SendTip(rad_trigger_t *R, s_tip_t *tip, int slot)
 //
 // -AJA- 1999/09/07: Reworked to handle tips with multiple lines.
 //
-void RAD_DisplayTips(void)
+void DisplayScriptTips(void)
 {
-    HUD_Reset();
+    HudReset();
 
     // lookup styles
-    styledef_c *def;
+    StyleDefinition *def;
 
     def = styledefs.Lookup("RTS_TIP");
-    if (!def)
-        def = default_style;
-    rts_tip_style = hu_styles.Lookup(def);
+    if (!def) def = default_style;
+    rts_tip_style = hud_styles.Lookup(def);
 
-    for (int slot = 0; slot < MAXTIPSLOT; slot++)
+    for (int slot = 0; slot < kMaximumTipSlots; slot++)
     {
-        drawtip_t *current = tip_slots + slot;
+        ScriptDrawTip *current = tip_slots + slot;
 
         // Is there actually a tip to display ?
-        if (current->delay < 0)
-            continue;
+        if (current->delay < 0) continue;
 
         if (current->dirty)
         {
@@ -196,56 +202,54 @@ void RAD_DisplayTips(void)
         if (current->playsound)
         {
             // SFX_FIXME: Use new form
-            S_StartFX(sfxdefs.GetEffect("TINK"));
+            StartSoundEffect(sfxdefs.GetEffect("TINK"));
             current->playsound = false;
         }
 
         float alpha = current->p.translucency;
 
-        if (alpha < 0.02f)
-            continue;
+        if (alpha < 0.02f) continue;
 
-        HUD_SetScale(current->scale);
-        HUD_SetTextColor(current->color);
-        HUD_SetAlpha(alpha);
+        HudSetScale(current->scale);
+        HudSetTextColor(current->color);
+        HudSetAlpha(alpha);
 
         if (current->p.left_just)
-            HUD_SetAlignment(-1, 0);
+            HudSetAlignment(-1, 0);
         else
-            HUD_SetAlignment(0, 0);
+            HudSetAlignment(0, 0);
 
         float x = current->p.x_pos * 320.0f;
         float y = current->p.y_pos * 200.0f;
 
-        if (rts_tip_style->fonts[styledef_c::T_TEXT])
-            HUD_SetFont(rts_tip_style->fonts[styledef_c::T_TEXT]);
+        if (rts_tip_style->fonts_[StyleDefinition::kTextSectionText])
+            HudSetFont(
+                rts_tip_style->fonts_[StyleDefinition::kTextSectionText]);
 
         if (current->tip_graphic)
-            HUD_DrawImage(x, y, current->tip_graphic);
+            HudDrawImage(x, y, current->tip_graphic);
         else
-            HUD_DrawText(x, y, current->tip_text);
+            HudDrawText(x, y, current->tip_text);
 
-        HUD_SetAlignment();
-        HUD_SetAlpha();
-        HUD_SetScale();
-        HUD_SetTextColor();
+        HudSetAlignment();
+        HudSetAlpha();
+        HudSetScale();
+        HudSetTextColor();
     }
 }
 
 //
 // Does any tic-related RTS stuff.  For now, just update the tips.
 //
-void RAD_Ticker(void)
+void ScriptTicker(void)
 {
-    for (int i = 0; i < MAXTIPSLOT; i++)
+    for (int i = 0; i < kMaximumTipSlots; i++)
     {
-        drawtip_t *current = tip_slots + i;
+        ScriptDrawTip *current = tip_slots + i;
 
-        if (current->delay < 0)
-            continue;
+        if (current->delay < 0) continue;
 
-        if (current->delay > 0)
-            current->delay--;
+        if (current->delay > 0) current->delay--;
 
         // handle fading
         if (current->fade_time > 0)
@@ -264,9 +268,9 @@ void RAD_Ticker(void)
 
 // --- Radius Trigger Actions -----------------------------------------------
 
-static player_t *GetWhoDunnit(rad_trigger_t *R)
+static Player *GetWhoDunnit(TriggerScriptTrigger *R)
 {
-    return players[consoleplayer];
+    return players[console_player];
 
     /*
     // this IS NOT CORRECT, but matches old behavior
@@ -274,69 +278,64 @@ static player_t *GetWhoDunnit(rad_trigger_t *R)
         return players[consoleplayer];
 
     if (R->acti_players == 0)
-        return NULL;
+        return nullptr;
 
     // does the activator list have only one player?
     // if so, return that one.
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
         if (R->acti_players == (1 << pnum))
             return players[pnum];
 
     // there are multiple players who triggered the script.
     // one option: select one of them (round robin style).
     // However the following is probably more correct.
-    //return NULL;
+    //return nullptr;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
         if (R->acti_players & (1 << pnum))
             return players[pnum];
     */
 }
 
-void RAD_ActNOP(rad_trigger_t *R, void *param)
+void ScriptNoOperation(TriggerScriptTrigger *R, void *param)
 {
     // No Operation
 }
 
-void RAD_ActTip(rad_trigger_t *R, void *param)
+void ScriptShowTip(TriggerScriptTrigger *R, void *param)
 {
-    s_tip_t *tip = (s_tip_t *)param;
+    ScriptTip *tip = (ScriptTip *)param;
 
     // Only display the tip to the player that stepped into the radius
     // trigger.
 
-    if (numplayers > 1 && (R->acti_players & (1 << consoleplayer)) == 0)
+    if (total_players > 1 && (R->acti_players & (1 << console_player)) == 0)
         return;
 
     SendTip(R, tip, R->tip_slot);
 }
 
-void RAD_ActTipProps(rad_trigger_t *R, void *param)
+void ScriptUpdateTipProperties(TriggerScriptTrigger *R, void *param)
 {
-    s_tip_prop_t *tp = (s_tip_prop_t *)param;
-    drawtip_t    *current;
+    ScriptTipProperties *tp = (ScriptTipProperties *)param;
+    ScriptDrawTip       *current;
 
-    if (numplayers > 1 && (R->acti_players & (1 << consoleplayer)) == 0)
+    if (total_players > 1 && (R->acti_players & (1 << console_player)) == 0)
         return;
 
-    if (tp->slot_num >= 0)
-        R->tip_slot = tp->slot_num;
+    if (tp->slot_num >= 0) R->tip_slot = tp->slot_num;
 
-    SYS_ASSERT(0 <= R->tip_slot && R->tip_slot < MAXTIPSLOT);
+    EPI_ASSERT(0 <= R->tip_slot && R->tip_slot < kMaximumTipSlots);
 
     current = tip_slots + R->tip_slot;
 
-    if (tp->x_pos >= 0)
-        current->p.x_pos = tp->x_pos;
+    if (tp->x_pos >= 0) current->p.x_pos = tp->x_pos;
 
-    if (tp->y_pos >= 0)
-        current->p.y_pos = tp->y_pos;
+    if (tp->y_pos >= 0) current->p.y_pos = tp->y_pos;
 
-    if (tp->left_just >= 0)
-        current->p.left_just = tp->left_just;
+    if (tp->left_just >= 0) current->p.left_just = tp->left_just;
 
-    if (tp->color_name)
-        current->color = V_ParseFontColor(tp->color_name);
+    if (tp->color_name) current->color = ParseFontColor(tp->color_name);
 
     if (tp->translucency >= 0)
     {
@@ -353,12 +352,12 @@ void RAD_ActTipProps(rad_trigger_t *R, void *param)
     current->dirty = true;
 }
 
-void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
+void ScriptSpawnThing(TriggerScriptTrigger *R, void *param)
 {
-    s_thing_t *t = (s_thing_t *)param;
+    ScriptThingParameter *t = (ScriptThingParameter *)param;
 
-    mobj_t           *mo;
-    const mobjtype_c *minfo;
+    MapObject                 *mo;
+    const MapObjectDefinition *minfo;
 
     // Spawn a new map object.
 
@@ -367,370 +366,360 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
     else
         minfo = mobjtypes.Lookup(t->thing_type);
 
-    if (minfo == NULL)
+    if (minfo == nullptr)
     {
         if (t->thing_name)
-            I_Warning("Unknown thing type: %s in RTS trigger.\n", t->thing_name);
+            LogWarning("Unknown thing type: %s in RTS trigger.\n",
+                       t->thing_name);
         else
-            I_Warning("Unknown thing type: %d in RTS trigger.\n", t->thing_type);
+            LogWarning("Unknown thing type: %d in RTS trigger.\n",
+                       t->thing_type);
 
         return;
     }
 
     // -AJA- 2007/09/04: allow individual when_appear flags
-    if (!G_CheckWhenAppear(t->appear))
-        return;
+    if (!GameCheckWhenAppear(t->appear)) return;
 
     // -AJA- 1999/10/02: -nomonsters check.
-    if (level_flags.nomonsters && (minfo->extendedflags & EF_MONSTER))
+    if (level_flags.no_monsters &&
+        (minfo->extended_flags_ & kExtendedFlagMonster))
         return;
 
     // -AJA- 1999/10/07: -noextra check.
-    if (!level_flags.have_extra && (minfo->extendedflags & EF_EXTRA))
+    if (!level_flags.have_extra &&
+        (minfo->extended_flags_ & kExtendedFlagExtra))
         return;
 
     // -AJA- 1999/09/11: Support for supplying Z value.
 
     if (t->spawn_effect)
     {
-        mo = P_MobjCreateObject(t->x, t->y, t->z, minfo->respawneffect);
+        mo = CreateMapObject(t->x, t->y, t->z, minfo->respawneffect_);
     }
 
-    mo = P_MobjCreateObject(t->x, t->y, t->z, minfo);
+    mo = CreateMapObject(t->x, t->y, t->z, minfo);
 
     // -ACB- 1998/07/10 New Check, so that spawned mobj's don't
     //                  spawn somewhere where they should not.
-    if (!P_CheckAbsPosition(mo, mo->x, mo->y, mo->z))
+    if (!CheckAbsolutePosition(mo, mo->x, mo->y, mo->z))
     {
-        P_RemoveMobj(mo);
+        RemoveMapObject(mo);
         return;
     }
 
-    P_SetMobjDirAndSpeed(mo, t->angle, t->slope, 0);
+    MapObjectSetDirectionAndSpeed(mo, t->angle, t->slope, 0);
 
-    mo->tag = t->tag;
+    mo->tag_ = t->tag;
 
-    mo->spawnpoint.x         = t->x;
-    mo->spawnpoint.y         = t->y;
-    mo->spawnpoint.z         = t->z;
-    mo->spawnpoint.angle     = t->angle;
-    mo->spawnpoint.vertangle = epi::BAMFromATan(t->slope);
-    mo->spawnpoint.info      = minfo;
-    mo->spawnpoint.flags     = t->ambush ? MF_AMBUSH : 0;
-    mo->spawnpoint.tag       = t->tag;
+    mo->spawnpoint_.x              = t->x;
+    mo->spawnpoint_.y              = t->y;
+    mo->spawnpoint_.z              = t->z;
+    mo->spawnpoint_.angle          = t->angle;
+    mo->spawnpoint_.vertical_angle = epi::BAMFromATan(t->slope);
+    mo->spawnpoint_.info           = minfo;
+    mo->spawnpoint_.flags          = t->ambush ? kMapObjectFlagAmbush : 0;
+    mo->spawnpoint_.tag            = t->tag;
 
-    if (t->ambush)
-        mo->flags |= MF_AMBUSH;
+    if (t->ambush) mo->flags_ |= kMapObjectFlagAmbush;
 
     // -AJA- 1999/09/25: If radius trigger is a path node, then
     //       setup the thing to follow the path.
 
-    if (R->info->next_in_path)
-        mo->path_trigger = R->info;
+    if (R->info->next_in_path) mo->path_trigger_ = R->info;
 }
 
-void RAD_ActDamagePlayers(rad_trigger_t *R, void *param)
+void ScriptDamagePlayers(TriggerScriptTrigger *R, void *param)
 {
-    s_damagep_t *damage = (s_damagep_t *)param;
+    ScriptDamagePlayerParameter *damage = (ScriptDamagePlayerParameter *)param;
 
     // Make sure these can happen to everyone within the radius.
     // Damage the player(s)
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
-        if (!p)
-            continue;
+        Player *p = players[pnum];
+        if (!p) continue;
 
-        if (!RAD_WithinRadius(p->mo, R->info))
-            continue;
+        if (!ScriptRadiusCheck(p->map_object_, R->info)) continue;
 
-        P_DamageMobj(p->mo, NULL, NULL, damage->damage_amount, NULL);
+        DamageMapObject(p->map_object_, nullptr, nullptr, damage->damage_amount,
+                        nullptr);
     }
 }
 
-void RAD_ActHealPlayers(rad_trigger_t *R, void *param)
+void ScriptHealPlayers(TriggerScriptTrigger *R, void *param)
 {
-    s_healp_t *heal = (s_healp_t *)param;
+    ScriptHealParameter *heal = (ScriptHealParameter *)param;
 
     // Heal the player(s)
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
-        if (!p)
-            continue;
+        Player *p = players[pnum];
+        if (!p) continue;
 
-        if (!RAD_WithinRadius(p->mo, R->info))
-            continue;
+        if (!ScriptRadiusCheck(p->map_object_, R->info)) continue;
 
-        if (p->health >= heal->limit)
-            continue;
+        if (p->health_ >= heal->limit) continue;
 
-        if (p->health + heal->heal_amount >= heal->limit)
-            p->health = heal->limit;
+        if (p->health_ + heal->heal_amount >= heal->limit)
+            p->health_ = heal->limit;
         else
-            p->health += heal->heal_amount;
+            p->health_ += heal->heal_amount;
 
-        p->mo->health = p->health;
+        p->map_object_->health_ = p->health_;
     }
 }
 
-void RAD_ActArmourPlayers(rad_trigger_t *R, void *param)
+void ScriptArmourPlayers(TriggerScriptTrigger *R, void *param)
 {
-    s_armour_t *armour = (s_armour_t *)param;
+    ScriptArmourParameter *armour = (ScriptArmourParameter *)param;
 
     // Armour for player(s)
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
-        if (!p)
-            continue;
+        Player *p = players[pnum];
+        if (!p) continue;
 
-        if (!RAD_WithinRadius(p->mo, R->info))
-            continue;
+        if (!ScriptRadiusCheck(p->map_object_, R->info)) continue;
 
-        float slack = armour->limit - p->totalarmour;
+        float slack = armour->limit - p->total_armour_;
 
-        if (slack <= 0)
-            continue;
+        if (slack <= 0) continue;
 
-        p->armours[armour->type] += armour->armour_amount;
+        p->armours_[armour->type] += armour->armour_amount;
 
-        if (p->armours[armour->type] > slack)
-            p->armours[armour->type] = slack;
+        if (p->armours_[armour->type] > slack)
+            p->armours_[armour->type] = slack;
 
-        P_UpdateTotalArmour(p);
+        UpdateTotalArmour(p);
     }
 }
 
-void RAD_ActBenefitPlayers(rad_trigger_t *R, void *param)
+void ScriptBenefitPlayers(TriggerScriptTrigger *R, void *param)
 {
-    s_benefit_t *be = (s_benefit_t *)param;
+    ScriptBenefitParameter *be = (ScriptBenefitParameter *)param;
 
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        player_t *p = players[pnum];
-        if (!p)
-            continue;
+        Player *p = players[pnum];
+        if (!p) continue;
 
-        if (!RAD_WithinRadius(p->mo, R->info))
-            continue;
+        if (!ScriptRadiusCheck(p->map_object_, R->info)) continue;
 
-        P_GiveBenefitList(p, NULL, be->benefit, be->lose_it);
+        GiveBenefitList(p, nullptr, be->benefit, be->lose_it);
     }
 }
 
-void RAD_ActDamageMonsters(rad_trigger_t *R, void *param)
+void ScriptDamageMonsters(TriggerScriptTrigger *R, void *param)
 {
-    s_damage_monsters_t *mon = (s_damage_monsters_t *)param;
+    ScriptDamangeMonstersParameter *mon =
+        (ScriptDamangeMonstersParameter *)param;
 
-    const mobjtype_c *info = NULL;
-    int               tag  = mon->thing_tag;
+    const MapObjectDefinition *info = nullptr;
+    int                        tag  = mon->thing_tag;
 
-    if (mon->thing_name)
-    {
-        info = mobjtypes.Lookup(mon->thing_name);
-    }
+    if (mon->thing_name) { info = mobjtypes.Lookup(mon->thing_name); }
     else if (mon->thing_type > 0)
     {
         info = mobjtypes.Lookup(mon->thing_type);
 
-        if (info == NULL)
-            I_Error("RTS DAMAGE_MONSTERS: Unknown thing type %d.\n", mon->thing_type);
+        if (info == nullptr)
+            FatalError("RTS DAMAGE_MONSTERS: Unknown thing type %d.\n",
+                       mon->thing_type);
     }
 
     // scan the mobj list
     // FIXME: optimise for fixed-sized triggers
 
-    mobj_t *mo;
-    mobj_t *next;
+    MapObject *mo;
+    MapObject *next;
 
-    player_t *player = GetWhoDunnit(R);
+    Player *player = GetWhoDunnit(R);
 
-    for (mo = mobjlisthead; mo != NULL; mo = next)
+    for (mo = map_object_list_head; mo != nullptr; mo = next)
     {
-        next = mo->next;
+        next = mo->next_;
 
-        if (info && mo->info != info)
+        if (info && mo->info_ != info) continue;
+
+        if (tag && (mo->tag_ != tag)) continue;
+
+        if (!(mo->extended_flags_ & kExtendedFlagMonster) || mo->health_ <= 0)
             continue;
 
-        if (tag && (mo->tag != tag))
-            continue;
+        if (!ScriptRadiusCheck(mo, R->info)) continue;
 
-        if (!(mo->extendedflags & EF_MONSTER) || mo->health <= 0)
-            continue;
-
-        if (!RAD_WithinRadius(mo, R->info))
-            continue;
-
-        P_DamageMobj(mo, NULL, player ? player->mo : NULL, mon->damage_amount, NULL);
+        DamageMapObject(mo, nullptr, player ? player->map_object_ : nullptr,
+                        mon->damage_amount, nullptr);
     }
 }
 
-void RAD_ActThingEvent(rad_trigger_t *R, void *param)
+void ScriptThingEvent(TriggerScriptTrigger *R, void *param)
 {
-    s_thing_event_t *tev = (s_thing_event_t *)param;
+    ScriptThingEventParameter *tev = (ScriptThingEventParameter *)param;
 
-    const mobjtype_c *info = NULL;
-    int               tag  = tev->thing_tag;
+    const MapObjectDefinition *info = nullptr;
+    int                        tag  = tev->thing_tag;
 
     if (tev->thing_name)
     {
         info = mobjtypes.Lookup(tev->thing_name);
 
-        if (info == NULL)
-            I_Error("RTS THING_EVENT: Unknown thing name '%s'.\n", tev->thing_name);
+        if (info == nullptr)
+            FatalError("RTS THING_EVENT: Unknown thing name '%s'.\n",
+                       tev->thing_name);
     }
     else if (tev->thing_type > 0)
     {
         info = mobjtypes.Lookup(tev->thing_type);
 
-        if (info == NULL)
-            I_Error("RTS THING_EVENT: Unknown thing type %d.\n", tev->thing_type);
+        if (info == nullptr)
+            FatalError("RTS THING_EVENT: Unknown thing type %d.\n",
+                       tev->thing_type);
     }
 
     // scan the mobj list
     // FIXME: optimise for fixed-sized triggers
 
-    mobj_t *mo;
-    mobj_t *next;
+    MapObject *mo;
+    MapObject *next;
 
-    for (mo = mobjlisthead; mo != NULL; mo = next)
+    for (mo = map_object_list_head; mo != nullptr; mo = next)
     {
-        next = mo->next;
+        next = mo->next_;
 
-        if (info && (mo->info != info))
-            continue;
+        if (info && (mo->info_ != info)) continue;
 
-        if (tag && (mo->tag != tag))
-            continue;
+        if (tag && (mo->tag_ != tag)) continue;
 
         // ignore certain things (e.g. corpses)
-        if (mo->health <= 0)
-            continue;
+        if (mo->health_ <= 0) continue;
 
-        if (!RAD_WithinRadius(mo, R->info))
-            continue;
+        if (!ScriptRadiusCheck(mo, R->info)) continue;
 
-        statenum_t state = P_MobjFindLabel(mo, tev->label);
+        int state = MapObjectFindLabel(mo, tev->label);
 
-        if (state)
-            P_SetMobjStateDeferred(mo, state + tev->offset, 0);
+        if (state) MapObjectSetStateDeferred(mo, state + tev->offset, 0);
     }
 }
 
-void RAD_ActGotoMap(rad_trigger_t *R, void *param)
+void ScriptGotoMap(TriggerScriptTrigger *R, void *param)
 {
-    s_gotomap_t *go = (s_gotomap_t *)param;
+    ScriptGoToMapParameter *go = (ScriptGoToMapParameter *)param;
 
     // Warp to level n
     if (go->is_hub)
-        G_ExitToHub(go->map_name, go->tag);
+        GameExitToHub(go->map_name, go->tag);
     else
-        G_ExitToLevel(go->map_name, 5, go->skip_all);
+        GameExitToLevel(go->map_name, 5, go->skip_all);
 }
 
-void RAD_ActExitLevel(rad_trigger_t *R, void *param)
+void ScriptExitLevel(TriggerScriptTrigger *R, void *param)
 {
-    s_exit_t *exit = (s_exit_t *)param;
+    ScriptExitParameter *exit = (ScriptExitParameter *)param;
 
     if (exit->is_secret)
-        G_SecretExitLevel(exit->exittime);
+        GameSecretExitLevel(exit->exit_time);
     else
-        G_ExitLevel(exit->exittime);
+        GameExitLevel(exit->exit_time);
 }
 
 // Lobo November 2021
-void RAD_ActExitGame(rad_trigger_t *R, void *param)
+void ScriptExitGame(TriggerScriptTrigger *R, void *param)
 {
-    G_DeferredEndGame();
+    GameDeferredEndGame();
 }
 
-void RAD_ActPlaySound(rad_trigger_t *R, void *param)
+void ScriptPlaySound(TriggerScriptTrigger *R, void *param)
 {
-    s_sound_t *ambient = (s_sound_t *)param;
+    ScriptSoundParameter *ambient = (ScriptSoundParameter *)param;
 
     int flags = 0;
 
-    if (ambient->kind == PSOUND_BossMan)
-        flags |= FX_Boss;
+    if (ambient->kind == kScriptSoundBossMan) flags |= kSoundEffectBoss;
 
     // Ambient sound
-    R->sfx_origin.x = ambient->x;
-    R->sfx_origin.y = ambient->y;
+    R->sound_effects_origin.x = ambient->x;
+    R->sound_effects_origin.y = ambient->y;
 
-    if (AlmostEquals(ambient->z, ONFLOORZ))
-        R->sfx_origin.z = R_PointInSubsector(ambient->x, ambient->y)->sector->f_h;
+    if (AlmostEquals(ambient->z, kOnFloorZ))
+        R->sound_effects_origin.z =
+            RendererPointInSubsector(ambient->x, ambient->y)
+                ->sector->floor_height;
     else
-        R->sfx_origin.z = ambient->z;
+        R->sound_effects_origin.z = ambient->z;
 
-    if (ambient->kind == PSOUND_BossMan)
-    { // Lobo: want BOSSMAN to sound from the player
-        player_t *player = GetWhoDunnit(R);
-        S_StartFX(ambient->sfx, SNCAT_Player, player->mo);
+    if (ambient->kind == kScriptSoundBossMan)
+    {  // Lobo: want BOSSMAN to sound from the player
+        Player *player = GetWhoDunnit(R);
+        StartSoundEffect(ambient->sfx, kCategoryPlayer, player->map_object_);
     }
     else
     {
-        S_StartFX(ambient->sfx, SNCAT_Level, &R->sfx_origin, flags);
+        StartSoundEffect(ambient->sfx, kCategoryLevel, &R->sound_effects_origin,
+                         flags);
     }
 }
 
-void RAD_ActKillSound(rad_trigger_t *R, void *param)
+void ScriptKillSound(TriggerScriptTrigger *R, void *param)
 {
-    S_StopFX(&R->sfx_origin);
+    StopSoundEffect(&R->sound_effects_origin);
 }
 
-void RAD_ActChangeMusic(rad_trigger_t *R, void *param)
+void ScriptChangeMusic(TriggerScriptTrigger *R, void *param)
 {
-    s_music_t *music = (s_music_t *)param;
+    ScriptMusicParameter *music = (ScriptMusicParameter *)param;
 
-    S_ChangeMusic(music->playnum, music->looping);
+    ChangeMusic(music->playnum, music->looping);
 }
 
-void RAD_ActPlayMovie(rad_trigger_t *R, void *param)
+void ScriptPlayMovie(TriggerScriptTrigger *R, void *param)
 {
-    s_movie_t *mov = (s_movie_t *)param;
+    ScriptMovieParameter *mov = (ScriptMovieParameter *)param;
 
-    E_PlayMovie(mov->movie);
+    PlayMovie(mov->movie);
 }
 
-void RAD_ActChangeTex(rad_trigger_t *R, void *param)
+void ScriptChangeTexture(TriggerScriptTrigger *R, void *param)
 {
-    s_changetex_t *ctex = (s_changetex_t *)param;
+    ScriptChangeTexturetureParameter *ctex =
+        (ScriptChangeTexturetureParameter *)param;
 
-    const image_c *image = nullptr;
+    const Image *image = nullptr;
 
-    SYS_ASSERT(param);
+    EPI_ASSERT(param);
 
     // find texture or flat
-    if (ctex->what >= CHTEX_Floor)
-        image = W_ImageLookup(ctex->texname, INS_Flat);
+    if (ctex->what >= kChangeTextureFloor)
+        image = ImageLookup(ctex->texname, kImageNamespaceFlat);
     else
-        image = W_ImageLookup(ctex->texname, INS_Texture);
+        image = ImageLookup(ctex->texname, kImageNamespaceTexture);
 
-    if (ctex->what == CHTEX_Sky)
+    if (ctex->what == kChangeTextureSky)
     {
         if (image)
         {
             sky_image = image;
-            RGL_UpdateSkyBoxTextures();
+            RendererUpdateSkyBoxTextures();
         }
         return;
     }
 
     // handle the floor/ceiling case
-    if (ctex->what >= CHTEX_Floor)
+    if (ctex->what >= kChangeTextureFloor)
     {
         bool must_recompute_sky = false;
 
-        sector_t *tsec;
+        Sector *tsec;
 
-        for (tsec = P_FindSectorFromTag(ctex->tag); tsec != NULL; tsec = tsec->tag_next)
+        for (tsec = FindSectorFromTag(ctex->tag); tsec != nullptr;
+             tsec = tsec->tag_next)
         {
             if (ctex->subtag)
             {
                 bool valid = false;
 
-                for (int i = 0; i < tsec->linecount; i++)
+                for (int i = 0; i < tsec->line_count; i++)
                 {
                     if (tsec->lines[i]->tag == ctex->subtag)
                     {
@@ -739,21 +728,21 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
                     }
                 }
 
-                if (!valid)
-                    continue;
+                if (!valid) continue;
             }
 
-            if (ctex->what == CHTEX_Floor)
+            if (ctex->what == kChangeTextureFloor)
             {
                 tsec->floor.image = image;
                 // update sink/bob depth
                 if (image)
                 {
-                    flatdef_c *current_flatdef = flatdefs.Find(image->name.c_str());
+                    FlatDefinition *current_flatdef =
+                        flatdefs.Find(image->name_.c_str());
                     if (current_flatdef)
                     {
-                        tsec->bob_depth  = current_flatdef->bob_depth;
-                        tsec->sink_depth = current_flatdef->sink_depth;
+                        tsec->bob_depth  = current_flatdef->bob_depth_;
+                        tsec->sink_depth = current_flatdef->sink_depth_;
                     }
                     else
                         tsec->bob_depth = 0;
@@ -766,177 +755,177 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
                 }
             }
             else
-                tsec->ceil.image = image;
+                tsec->ceiling.image = image;
 
-            if (image == skyflatimage)
-                must_recompute_sky = true;
+            if (image == sky_flat_image) must_recompute_sky = true;
         }
 
-        if (must_recompute_sky)
-            R_ComputeSkyHeights();
+        if (must_recompute_sky) ComputeSkyHeights();
 
         return;
     }
 
     // handle the line changers
-    SYS_ASSERT(ctex->what < CHTEX_Sky);
+    EPI_ASSERT(ctex->what < kChangeTextureSky);
 
-    for (int i = 0; i < numlines; i++)
+    for (int i = 0; i < total_level_lines; i++)
     {
-        side_t *side = (ctex->what <= CHTEX_RightLower) ? lines[i].side[0] : lines[i].side[1];
+        Side *side = (ctex->what <= kChangeTextureRightLower)
+                         ? level_lines[i].side[0]
+                         : level_lines[i].side[1];
 
-        if (lines[i].tag != ctex->tag || !side)
-            continue;
+        if (level_lines[i].tag != ctex->tag || !side) continue;
 
-        if (ctex->subtag && side->sector->tag != ctex->subtag)
-            continue;
+        if (ctex->subtag && side->sector->tag != ctex->subtag) continue;
 
         switch (ctex->what)
         {
-        case CHTEX_RightUpper:
-        case CHTEX_LeftUpper:
-            side->top.image = image;
-            break;
+            case kChangeTextureRightUpper:
+            case kChangeTextureLeftUpper:
+                side->top.image = image;
+                break;
 
-        case CHTEX_RightMiddle:
-        case CHTEX_LeftMiddle:
-            side->middle.image = image;
-            break;
+            case kChangeTextureRightMiddle:
+            case kChangeTextureLeftMiddle:
+                side->middle.image = image;
+                break;
 
-        case CHTEX_RightLower:
-        case CHTEX_LeftLower:
-            side->bottom.image = image;
+            case kChangeTextureRightLower:
+            case kChangeTextureLeftLower:
+                side->bottom.image = image;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 }
 
-void RAD_ActSkill(rad_trigger_t *R, void *param)
+void ScriptSkill(TriggerScriptTrigger *R, void *param)
 {
-    s_skill_t *skill = (s_skill_t *)param;
+    ScriptSkillParameter *skill = (ScriptSkillParameter *)param;
 
     // Skill selection trigger function
     // -ACB- 1998/07/30 replaced respawnmonsters with respawnsetting.
-    // -ACB- 1998/08/27 removed fastparm temporaryly.
+    // -ACB- 1998/08/27 removed fast_monsters temporaryly.
 
-    gameskill = skill->skill;
+    game_skill = skill->skill;
 
-    level_flags.fastparm = skill->fastmonsters;
-    level_flags.respawn  = skill->respawn;
+    level_flags.fast_monsters   = skill->fastmonsters;
+    level_flags.enemies_respawn = skill->respawn;
 }
 
-static void MoveOneSector(sector_t *sec, s_movesector_t *t)
+static void MoveOneSector(Sector *sec, ScriptMoveSectorParameter *t)
 {
     float dh;
 
     if (t->relative)
         dh = t->value;
     else if (t->is_ceiling)
-        dh = t->value - sec->c_h;
+        dh = t->value - sec->ceiling_height;
     else
-        dh = t->value - sec->f_h;
+        dh = t->value - sec->floor_height;
 
-    if (!P_CheckSolidSectorMove(sec, t->is_ceiling, dh))
-        return;
+    if (!CheckSolidSectorMove(sec, t->is_ceiling, dh)) return;
 
-    P_SolidSectorMove(sec, t->is_ceiling, dh);
+    SolidSectorMove(sec, t->is_ceiling, dh);
 }
 
-void RAD_ActMoveSector(rad_trigger_t *R, void *param)
+void ScriptMoveSector(TriggerScriptTrigger *R, void *param)
 {
-    s_movesector_t *t = (s_movesector_t *)param;
-    int             i;
+    ScriptMoveSectorParameter *t = (ScriptMoveSectorParameter *)param;
+    int                        i;
 
     // SectorV compatibility
     if (t->tag == 0)
     {
-        if (t->secnum < 0 || t->secnum >= numsectors)
-            I_Error("RTS SECTORV: no such sector %d.\n", t->secnum);
+        if (t->secnum < 0 || t->secnum >= total_level_sectors)
+            FatalError("RTS SECTORV: no such sector %d.\n", t->secnum);
 
-        MoveOneSector(sectors + t->secnum, t);
+        MoveOneSector(level_sectors + t->secnum, t);
         return;
     }
 
     // OPTIMISE !
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        if (sectors[i].tag == t->tag)
-            MoveOneSector(sectors + i, t);
+        if (level_sectors[i].tag == t->tag) MoveOneSector(level_sectors + i, t);
     }
 }
 
-static void LightOneSector(sector_t *sec, s_lightsector_t *t)
+static void LightOneSector(Sector *sec, ScriptSectorLightParameter *t)
 {
     if (t->relative)
-        sec->props.lightlevel += I_ROUND(t->value);
+        sec->properties.light_level += RoundToInteger(t->value);
     else
-        sec->props.lightlevel = I_ROUND(t->value);
+        sec->properties.light_level = RoundToInteger(t->value);
 }
 
-void RAD_ActLightSector(rad_trigger_t *R, void *param)
+void ScriptLightSector(TriggerScriptTrigger *R, void *param)
 {
-    s_lightsector_t *t = (s_lightsector_t *)param;
-    int              i;
+    ScriptSectorLightParameter *t = (ScriptSectorLightParameter *)param;
+    int                         i;
 
     // SectorL compatibility
     if (t->tag == 0)
     {
-        if (t->secnum < 0 || t->secnum >= numsectors)
-            I_Error("RTS SECTORL: no such sector %d.\n", t->secnum);
+        if (t->secnum < 0 || t->secnum >= total_level_sectors)
+            FatalError("RTS SECTORL: no such sector %d.\n", t->secnum);
 
-        LightOneSector(sectors + t->secnum, t);
+        LightOneSector(level_sectors + t->secnum, t);
         return;
     }
 
     // OPTIMISE !
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        if (sectors[i].tag == t->tag)
-            LightOneSector(sectors + i, t);
+        if (level_sectors[i].tag == t->tag)
+            LightOneSector(level_sectors + i, t);
     }
 }
 
-void RAD_ActFogSector(rad_trigger_t *R, void *param)
+void ScriptFogSector(TriggerScriptTrigger *R, void *param)
 {
-    s_fogsector_t *t = (s_fogsector_t *)param;
-    int            i;
+    ScriptFogSectorParameter *t = (ScriptFogSectorParameter *)param;
+    int                       i;
 
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        if (sectors[i].tag == t->tag)
+        if (level_sectors[i].tag == t->tag)
         {
             if (!t->leave_color)
             {
                 if (t->colmap_color)
-                    sectors[i].props.fog_color = V_ParseFontColor(t->colmap_color);
-                else // should only happen with a CLEAR directive
-                    sectors[i].props.fog_color = kRGBANoValue;
+                    level_sectors[i].properties.fog_color =
+                        ParseFontColor(t->colmap_color);
+                else  // should only happen with a CLEAR directive
+                    level_sectors[i].properties.fog_color = kRGBANoValue;
             }
             if (!t->leave_density)
             {
                 if (t->relative)
                 {
-                    sectors[i].props.fog_density += (0.01f * t->density);
-                    if (sectors[i].props.fog_density < 0.0001f)
-                        sectors[i].props.fog_density = 0;
-                    if (sectors[i].props.fog_density > 0.01f)
-                        sectors[i].props.fog_density = 0.01f;
+                    level_sectors[i].properties.fog_density +=
+                        (0.01f * t->density);
+                    if (level_sectors[i].properties.fog_density < 0.0001f)
+                        level_sectors[i].properties.fog_density = 0;
+                    if (level_sectors[i].properties.fog_density > 0.01f)
+                        level_sectors[i].properties.fog_density = 0.01f;
                 }
                 else
-                    sectors[i].props.fog_density = 0.01f * t->density;
+                    level_sectors[i].properties.fog_density =
+                        0.01f * t->density;
             }
-            for (int j = 0; j < sectors[i].linecount; j++)
+            for (int j = 0; j < level_sectors[i].line_count; j++)
             {
                 for (int k = 0; k < 2; k++)
                 {
-                    side_t *side_check = sectors[i].lines[j]->side[k];
-                    if (side_check && side_check->middle.fogwall)
+                    Side *side_check = level_sectors[i].lines[j]->side[k];
+                    if (side_check && side_check->middle.fog_wall)
                     {
                         side_check->middle.image =
-                            nullptr; // will be rebuilt with proper color later
-                                     // don't delete the image in case other fogwalls use the same color
+                            nullptr;  // will be rebuilt with proper color later
+                                      // don't delete the image in case other
+                                      // fogwalls use the same color
                     }
                 }
             }
@@ -944,95 +933,95 @@ void RAD_ActFogSector(rad_trigger_t *R, void *param)
     }
 }
 
-void RAD_ActEnableScript(rad_trigger_t *R, void *param)
+void ScriptEnableScript(TriggerScriptTrigger *R, void *param)
 {
-    s_enabler_t   *t = (s_enabler_t *)param;
-    rad_trigger_t *other;
+    ScriptEnablerParameter *t = (ScriptEnablerParameter *)param;
+    TriggerScriptTrigger   *other;
 
     // Enable/Disable Scripts
     if (t->script_name)
     {
-        other = RAD_FindTriggerByName(t->script_name);
+        other = FindScriptTriggerByName(t->script_name);
 
-        if (!other)
-            return;
+        if (!other) return;
 
         other->disabled = t->new_disabled;
     }
     else
     {
         if (t->tag[0] != 0)
-            RAD_EnableByTag(NULL, t->tag[0], t->new_disabled, RTS_TAG_NUMBER);
+            ScriptEnableByTag(nullptr, t->tag[0], t->new_disabled,
+                              kTriggerTagNumber);
         else
-            RAD_EnableByTag(NULL, t->tag[1], t->new_disabled, RTS_TAG_HASH);
+            ScriptEnableByTag(nullptr, t->tag[1], t->new_disabled,
+                              kTriggerTagHash);
     }
 }
 
-void RAD_ActActivateLinetype(rad_trigger_t *R, void *param)
+void ScriptActivateLinetype(TriggerScriptTrigger *R, void *param)
 {
-    s_lineactivator_t *t = (s_lineactivator_t *)param;
+    ScriptActivateLineParameter *t = (ScriptActivateLineParameter *)param;
 
-    player_t *player = GetWhoDunnit(R);
+    Player *player = GetWhoDunnit(R);
 
-    P_RemoteActivation(player ? player->mo : NULL, t->typenum, t->tag, 0, line_Any);
+    RemoteActivation(player ? player->map_object_ : nullptr, t->typenum, t->tag,
+                     0, kLineTriggerAny);
 }
 
-void RAD_ActUnblockLines(rad_trigger_t *R, void *param)
+void ScriptUnblockLines(TriggerScriptTrigger *R, void *param)
 {
-    s_lineunblocker_t *ub = (s_lineunblocker_t *)param;
+    ScriptLineBlockParameter *ub = (ScriptLineBlockParameter *)param;
 
     int i;
 
-    for (i = 0; i < numlines; i++)
+    for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = lines + i;
+        Line *ld = level_lines + i;
 
-        if (ld->tag != ub->tag)
-            continue;
+        if (ld->tag != ub->tag) continue;
 
-        if (!ld->side[0] || !ld->side[1])
-            continue;
+        if (!ld->side[0] || !ld->side[1]) continue;
 
         // clear standard flags
-        ld->flags &= ~(MLF_Blocking | MLF_BlockMonsters | MLF_BlockGrounded | MLF_BlockPlayers);
+        ld->flags &= ~(kLineFlagBlocking | kLineFlagBlockMonsters |
+                       kLineFlagBlockGroundedMonsters | kLineFlagBlockPlayers);
 
         // clear EDGE's extended lineflags too
-        ld->flags &= ~(MLF_SightBlock | MLF_ShootBlock);
+        ld->flags &= ~(kLineFlagSightBlock | kLineFlagShootBlock);
     }
 }
 
-void RAD_ActBlockLines(rad_trigger_t *R, void *param)
+void ScriptBlockLines(TriggerScriptTrigger *R, void *param)
 {
-    s_lineunblocker_t *ub = (s_lineunblocker_t *)param;
+    ScriptLineBlockParameter *ub = (ScriptLineBlockParameter *)param;
 
     int i;
 
-    for (i = 0; i < numlines; i++)
+    for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = lines + i;
+        Line *ld = level_lines + i;
 
-        if (ld->tag != ub->tag)
-            continue;
+        if (ld->tag != ub->tag) continue;
 
         // set standard flags
-        ld->flags |= (MLF_Blocking | MLF_BlockMonsters);
+        ld->flags |= (kLineFlagBlocking | kLineFlagBlockMonsters);
     }
 }
 
-void RAD_ActJump(rad_trigger_t *R, void *param)
+void ScriptJump(TriggerScriptTrigger *R, void *param)
 {
-    s_jump_t *t = (s_jump_t *)param;
+    ScriptJumpParameter *t = (ScriptJumpParameter *)param;
 
-    if (!P_RandomTest(t->random_chance))
-        return;
+    if (!RandomByteTestDeterministic(t->random_chance)) return;
 
     if (!t->cache_state)
     {
         // FIXME: do this in a post-parsing analysis
-        t->cache_state = RAD_FindStateByLabel(R->info, t->label);
+        t->cache_state = FindScriptStateByLabel(R->info, t->label);
 
         if (!t->cache_state)
-            I_Error("RTS: No such label `%s' for JUMP primitive.\n", t->label);
+            FatalError("RTS: No such label `%s' for JUMP primitive.\n",
+                       t->label);
     }
 
     R->state = t->cache_state;
@@ -1042,25 +1031,22 @@ void RAD_ActJump(rad_trigger_t *R, void *param)
     R->wait_tics += 1;
 }
 
-void RAD_ActSleep(rad_trigger_t *R, void *param)
-{
-    R->disabled = true;
-}
+void ScriptSleep(TriggerScriptTrigger *R, void *param) { R->disabled = true; }
 
-void RAD_ActRetrigger(rad_trigger_t *R, void *param)
+void ScriptRetrigger(TriggerScriptTrigger *R, void *param)
 {
     R->activated    = false;
     R->acti_players = 0;
 }
 
-void RAD_ActShowMenu(rad_trigger_t *R, void *param)
+void ScriptShowMenu(TriggerScriptTrigger *R, void *param)
 {
-    s_show_menu_t *menu = (s_show_menu_t *)param;
+    ScriptShowMenuParameter *menu = (ScriptShowMenuParameter *)param;
 
-    if (numplayers > 1 && (R->acti_players & (1 << consoleplayer)) == 0)
+    if (total_players > 1 && (R->acti_players & (1 << console_player)) == 0)
         return;
 
-    if (rts_menuactive)
+    if (rts_menu_active)
     {
         // this is very unlikely, since RTS triggers do not run while
         // an RTS menu is active.  This menu simply fails.
@@ -1068,39 +1054,37 @@ void RAD_ActShowMenu(rad_trigger_t *R, void *param)
         return;
     }
 
-    RAD_StartMenu(R, menu);
+    ScriptMenuStart(R, menu);
 }
 
-void RAD_ActMenuStyle(rad_trigger_t *R, void *param)
+void ScriptUpdateMenuStyle(TriggerScriptTrigger *R, void *param)
 {
-    s_menu_style_t *mm = (s_menu_style_t *)param;
+    ScriptMenuStyle *mm = (ScriptMenuStyle *)param;
 
-    SV_FreeString(R->menu_style_name);
+    SaveChunkFreeString(R->menu_style_name);
 
-    R->menu_style_name = SV_DupString(mm->style);
+    R->menu_style_name = SaveChunkCopyString(mm->style);
 }
 
-void RAD_ActJumpOn(rad_trigger_t *R, void *param)
+void ScriptJumpOn(TriggerScriptTrigger *R, void *param)
 {
-    s_jump_on_t *jm = (s_jump_on_t *)param;
+    ScriptJumpOnParameter *jm = (ScriptJumpOnParameter *)param;
 
     int count = 0;
 
-    while ((count < 9) && jm->labels[count])
-        count++;
+    while ((count < 9) && jm->labels[count]) count++;
 
-    if (R->menu_result < 0 || R->menu_result > count)
-        return;
+    if (R->menu_result < 0 || R->menu_result > count) return;
 
-    rts_state_t *cache_state;
-    char        *label = NULL;
+    TriggerScriptState *cache_state;
+    char               *label = nullptr;
 
     if (R->menu_result > 0)
     {
         label = jm->labels[R->menu_result - 1];
 
         // FIXME: do this in a post-parsing analysis
-        cache_state = RAD_FindStateByLabel(R->info, label);
+        cache_state = FindScriptStateByLabel(R->info, label);
         R->state    = cache_state;
     }
     else
@@ -1111,105 +1095,96 @@ void RAD_ActJumpOn(rad_trigger_t *R, void *param)
     }
 
     if (!cache_state && label)
-        I_Error("RTS: No such label `%s' for JUMP_ON primitive.\n", label);
+        FatalError("RTS: No such label `%s' for JUMP_ON primitive.\n", label);
 
-    if (!cache_state)
-        I_Error("RTS: No state to jump to!\n");
+    if (!cache_state) FatalError("RTS: No state to jump to!\n");
 
     // Jumps have a one tic surcharge, to prevent accidental infinite
     // loops within radius scripts.
     R->wait_tics += 1;
 }
 
-static bool WUD_Match(s_wait_until_dead_s *wud, const char *name)
+static bool WUD_Match(ScriptWaitUntilDeadParameter *wud, const char *name)
 {
     for (int i = 0; i < 10; i++)
     {
-        if (!wud->mon_names[i])
-            continue;
+        if (!wud->mon_names[i]) continue;
 
-        if (DDF_CompareName(name, wud->mon_names[i]) == 0)
-            return true;
+        if (DDF_CompareName(name, wud->mon_names[i]) == 0) return true;
     }
 
     return false;
 }
 
-void RAD_ActWaitUntilDead(rad_trigger_t *R, void *param)
+void ScriptWaitUntilDead(TriggerScriptTrigger *R, void *param)
 {
-    s_wait_until_dead_s *wud = (s_wait_until_dead_s *)param;
+    ScriptWaitUntilDeadParameter *wud = (ScriptWaitUntilDeadParameter *)param;
 
     R->wud_tag   = wud->tag;
     R->wud_count = 0;
 
     // find all matching monsters
-    mobj_t *mo;
-    mobj_t *next;
+    MapObject *mo;
+    MapObject *next;
 
-    for (mo = mobjlisthead; mo != NULL; mo = next)
+    for (mo = map_object_list_head; mo != nullptr; mo = next)
     {
-        next = mo->next;
+        next = mo->next_;
 
-        if (!mo->info)
-            continue;
+        if (!mo->info_) continue;
 
-        if (mo->health <= 0)
-            continue;
+        if (mo->health_ <= 0) continue;
 
-        if (!WUD_Match(wud, mo->info->name.c_str()))
-            continue;
+        if (!WUD_Match(wud, mo->info_->name_.c_str())) continue;
 
-        if (!RAD_WithinRadius(mo, R->info))
-            continue;
+        if (!ScriptRadiusCheck(mo, R->info)) continue;
 
         // mark the monster
-        mo->hyperflags |= HF_WAIT_UNTIL_DEAD;
-        if (mo->wud_tags.empty())
-            mo->wud_tags = epi::StringFormat("%d", wud->tag);
+        mo->hyper_flags_ |= kHyperFlagWaitUntilDead;
+        if (mo->wait_until_dead_tags_.empty())
+            mo->wait_until_dead_tags_ = epi::StringFormat("%d", wud->tag);
         else
-            mo->wud_tags = epi::StringFormat("%s,%d", mo->wud_tags.c_str(), wud->tag);
+            mo->wait_until_dead_tags_ = epi::StringFormat(
+                "%s,%d", mo->wait_until_dead_tags_.c_str(), wud->tag);
 
         R->wud_count++;
     }
 
     if (R->wud_count == 0)
     {
-        L_WriteDebug("RTS: waiting forever, no %s found\n", wud->mon_names[0]);
+        LogDebug("RTS: waiting forever, no %s found\n", wud->mon_names[0]);
         R->wud_count = 1;
     }
 }
 
-void RAD_ActSwitchWeapon(rad_trigger_t *R, void *param)
+void ScriptSwitchWeapon(TriggerScriptTrigger *R, void *param)
 {
-    s_weapon_t *weaparg = (s_weapon_t *)param;
+    ScriptWeaponParameter *weaparg = (ScriptWeaponParameter *)param;
 
-    player_t    *player = GetWhoDunnit(R);
-    weapondef_c *weap   = weapondefs.Lookup(weaparg->name);
+    Player           *player = GetWhoDunnit(R);
+    WeaponDefinition *weap   = weapondefs.Lookup(weaparg->name);
 
-    if (weap)
-    {
-        P_PlayerSwitchWeapon(player, weap);
-    }
+    if (weap) { PlayerSwitchWeapon(player, weap); }
 }
 
-void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
+void ScriptTeleportToStart(TriggerScriptTrigger *R, void *param)
 {
-    player_t *p = GetWhoDunnit(R);
+    Player *p = GetWhoDunnit(R);
 
-    spawnpoint_t *point = G_FindCoopPlayer(1); // start 1
+    SpawnPoint *point = FindCoopPlayer(1);  // start 1
 
-    if (!point)
-        return; // should never happen but who knows...
+    if (!point) return;  // should never happen but who knows...
 
     // 1. Stop the player movement and turn him
-    p->mo->mom.X = p->mo->mom.Y = p->mo->mom.Z = 0;
-    p->actual_speed                            = 0;
-    p->mo->angle                               = point->angle;
+    p->map_object_->momentum_.X     = p->map_object_->momentum_.Y =
+        p->map_object_->momentum_.Z = 0;
+    p->actual_speed_                = 0;
+    p->map_object_->angle_          = point->angle;
 
     // 2. Don't move for a bit
     int waitAbit = 30;
 
-    p->mo->reactiontime = waitAbit;
+    p->map_object_->reaction_time_ = waitAbit;
 
     // 3. Do our teleport fog effect
     float x = point->x;
@@ -1217,81 +1192,82 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
     float z = point->z;
 
     // spawn teleport fog
-    mobj_t *fog;
+    MapObject *fog;
     x += 20 * epi::BAMCos(point->angle);
     y += 20 * epi::BAMSin(point->angle);
-    fog = P_MobjCreateObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
+    fog = CreateMapObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
     // never use this object as a teleport destination
-    fog->extendedflags |= EF_NEVERTARGET;
+    fog->extended_flags_ |= kExtendedFlagNeverTarget;
 
-    if (fog->info->chase_state)
-        P_SetMobjStateDeferred(fog, fog->info->chase_state, 0);
+    if (fog->info_->chase_state_)
+        MapObjectSetStateDeferred(fog, fog->info_->chase_state_, 0);
 
     // 4. Teleport him
     //  Don't get stuck spawned in things: telefrag them.
-    P_TeleportMove(p->mo, point->x, point->y, point->z);
+    TeleportMove(p->map_object_, point->x, point->y, point->z);
 }
 
-static void RAD_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info = NULL)
+static void ScriptSetPlayerSprite(Player *p, int position, int stnum,
+                                  WeaponDefinition *info = nullptr)
 {
-    pspdef_t *psp = &p->psprites[position];
+    PlayerSprite *psp = &p->player_sprites_[position];
 
-    if (stnum == S_NULL)
+    if (stnum == 0)
     {
         // object removed itself
-        psp->state = psp->next_state = NULL;
+        psp->state = psp->next_state = nullptr;
         return;
     }
 
     // state is old? -- Mundo hack for DDF inheritance
-    if (info && stnum < info->state_grp.back().first)
+    if (info && stnum < info->state_grp_.back().first)
     {
-        state_t *st = &states[stnum];
+        State *st = &states[stnum];
 
         if (st->label)
         {
-            statenum_t new_state = DDF_StateFindLabel(info->state_grp, st->label, true /* quiet */);
-            if (new_state != S_NULL)
-                stnum = new_state;
+            int new_state = DDF_StateFindLabel(info->state_grp_, st->label,
+                                               true /* quiet */);
+            if (new_state != 0) stnum = new_state;
         }
     }
 
-    state_t *st = &states[stnum];
+    State *st = &states[stnum];
 
     // model interpolation stuff
-    if (psp->state && (st->flags & SFF_Model) && (psp->state->flags & SFF_Model) &&
+    if (psp->state && (st->flags & kStateFrameFlagModel) &&
+        (psp->state->flags & kStateFrameFlagModel) &&
         (st->sprite == psp->state->sprite) && st->tics > 1)
     {
-        p->weapon_last_frame = psp->state->frame;
+        p->weapon_last_frame_ = psp->state->frame;
     }
     else
-        p->weapon_last_frame = -1;
+        p->weapon_last_frame_ = -1;
 
     psp->state      = st;
     psp->tics       = st->tics;
-    psp->next_state = (st->nextstate == S_NULL) ? NULL : (states + st->nextstate);
+    psp->next_state = (st->nextstate == 0) ? nullptr : (states + st->nextstate);
 
     // call action routine
 
-    p->action_psp = position;
+    p->action_player_sprite_ = position;
 
-    if (st->action)
-        (*st->action)(p->mo);
+    if (st->action) (*st->action)(p->map_object_);
 }
 
 //
-// P_SetPspriteDeferred
+// SetPlayerSpriteDeferred
 //
 // -AJA- 2004/11/05: This is preferred method, doesn't run any actions,
-//       which (ideally) should only happen during P_MovePsprites().
+//       which (ideally) should only happen during MovePlayerSprites().
 //
-void RAD_SetPspriteDeferred(player_t *p, int position, int stnum)
+static void ScriptSetPlayerSpriteDeferred(Player *p, int position, int stnum)
 {
-    pspdef_t *psp = &p->psprites[position];
+    PlayerSprite *psp = &p->player_sprites_[position];
 
-    if (stnum == S_NULL || psp->state == NULL)
+    if (stnum == 0 || psp->state == nullptr)
     {
-        RAD_SetPsprite(p, position, stnum);
+        ScriptSetPlayerSprite(p, position, stnum);
         return;
     }
 
@@ -1301,149 +1277,157 @@ void RAD_SetPspriteDeferred(player_t *p, int position, int stnum)
 
 // Replace one weapon with another instantly (no up/down states run)
 // It doesnt matter if we have the old one currently selected or not.
-void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param)
+void ScriptReplaceWeapon(TriggerScriptTrigger *R, void *param)
 {
-    s_weapon_replace_t *weaparg = (s_weapon_replace_t *)param;
+    ScriptWeaponReplaceParameter *weaparg =
+        (ScriptWeaponReplaceParameter *)param;
 
-    player_t    *p      = GetWhoDunnit(R);
-    weapondef_c *oldWep = weapondefs.Lookup(weaparg->old_weapon);
-    weapondef_c *newWep = weapondefs.Lookup(weaparg->new_weapon);
+    Player           *p      = GetWhoDunnit(R);
+    WeaponDefinition *oldWep = weapondefs.Lookup(weaparg->old_weapon);
+    WeaponDefinition *newWep = weapondefs.Lookup(weaparg->new_weapon);
 
     if (!oldWep)
     {
-        I_Error("RTS: No such weapon `%s' for REPLACE_WEAPON.\n", weaparg->old_weapon);
+        FatalError("RTS: No such weapon `%s' for REPLACE_WEAPON.\n",
+                   weaparg->old_weapon);
     }
     if (!newWep)
     {
-        I_Error("RTS: No such weapon `%s' for REPLACE_WEAPON.\n", weaparg->new_weapon);
+        FatalError("RTS: No such weapon `%s' for REPLACE_WEAPON.\n",
+                   weaparg->new_weapon);
     }
 
     int i;
-    for (i = 0; i < MAXWEAPONS; i++)
+    for (i = 0; i < kMaximumWeapons; i++)
     {
-        if (p->weapons[i].info == oldWep)
-        {
-            p->weapons[i].info = newWep;
-        }
+        if (p->weapons_[i].info == oldWep) { p->weapons_[i].info = newWep; }
     }
 
     // refresh the sprite
-    if (p->weapons[p->ready_wp].info == newWep)
+    if (p->weapons_[p->ready_weapon_].info == newWep)
     {
-        RAD_SetPspriteDeferred(p, ps_weapon, p->weapons[p->ready_wp].info->ready_state);
+        ScriptSetPlayerSpriteDeferred(
+            p, kPlayerSpriteWeapon,
+            p->weapons_[p->ready_weapon_].info->ready_state_);
 
-        P_FixWeaponClip(p, p->ready_wp); // handle the potential clip_size difference
-        P_UpdateAvailWeapons(p);
+        FixWeaponClip(
+            p, p->ready_weapon_);  // handle the potential clip_size difference
+        UpdateAvailWeapons(p);
     }
 }
 
 // If we have the weapon we insta-switch to it and
 // go to the STATE we indicated.
-void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
+void ScriptWeaponEvent(TriggerScriptTrigger *R, void *param)
 {
-    s_weapon_event_t *tev = (s_weapon_event_t *)param;
+    ScriptWeaponEventParameter *tev = (ScriptWeaponEventParameter *)param;
 
-    player_t    *p      = GetWhoDunnit(R);
-    weapondef_c *oldWep = weapondefs.Lookup(tev->weapon_name);
+    Player           *p      = GetWhoDunnit(R);
+    WeaponDefinition *oldWep = weapondefs.Lookup(tev->weapon_name);
 
     if (!oldWep)
     {
-        I_Error("RTS WEAPON_EVENT: Unknown weapon name '%s'.\n", tev->weapon_name);
+        FatalError("RTS WEAPON_EVENT: Unknown weapon name '%s'.\n",
+                   tev->weapon_name);
     }
 
     int pw_index;
 
     // see if player owns this kind of weapon
-    for (pw_index = 0; pw_index < MAXWEAPONS; pw_index++)
+    for (pw_index = 0; pw_index < kMaximumWeapons; pw_index++)
     {
-        if (!p->weapons[pw_index].owned)
-            continue;
+        if (!p->weapons_[pw_index].owned) continue;
 
-        if (p->weapons[pw_index].info == oldWep)
-            break;
+        if (p->weapons_[pw_index].info == oldWep) break;
     }
 
-    if (pw_index == MAXWEAPONS) // we dont have the weapon
+    if (pw_index == kMaximumWeapons)  // we dont have the weapon
         return;
 
-    p->ready_wp = (weapon_selection_e)pw_index; // insta-switch to it
+    p->ready_weapon_ = (WeaponSelection)pw_index;  // insta-switch to it
 
-    statenum_t state = DDF_StateFindLabel(oldWep->state_grp, tev->label, true /* quiet */);
-    if (state == S_NULL)
-        I_Error("RTS WEAPON_EVENT: frame '%s' in [%s] not found!\n", tev->label, tev->weapon_name);
+    int state =
+        DDF_StateFindLabel(oldWep->state_grp_, tev->label, true /* quiet */);
+    if (state == 0)
+        FatalError("RTS WEAPON_EVENT: frame '%s' in [%s] not found!\n",
+                   tev->label, tev->weapon_name);
     state += tev->offset;
 
-    RAD_SetPspriteDeferred(p, ps_weapon, state); // refresh the sprite
+    ScriptSetPlayerSpriteDeferred(p, kPlayerSpriteWeapon,
+                                  state);  // refresh the sprite
 }
 
-void P_ActReplace(struct mobj_s *mo, const mobjtype_c *newThing)
+void P_ActReplace(MapObject *mo, const MapObjectDefinition *newThing)
 {
-
     // DO THE DEED !!
 
-    // P_UnsetThingPosition(mo);
+    // UnsetThingPosition(mo);
     {
-        mo->info = newThing;
+        mo->info_ = newThing;
 
-        mo->radius = mo->info->radius;
-        mo->height = mo->info->height;
-        if (mo->info->fast_speed > -1 && level_flags.fastparm)
-            mo->speed = mo->info->fast_speed;
+        mo->radius_ = mo->info_->radius_;
+        mo->height_ = mo->info_->height_;
+        if (mo->info_->fast_speed_ > -1 && level_flags.fast_monsters)
+            mo->speed_ = mo->info_->fast_speed_;
         else
-            mo->speed = mo->info->speed;
+            mo->speed_ = mo->info_->speed_;
 
-        mo->health = mo->spawnhealth; // always top up health to full
+        mo->health_ = mo->spawn_health_;  // always top up health to full
 
-        if (mo->flags & MF_AMBUSH) // preserve map editor AMBUSH flag
+        if (mo->flags_ &
+            kMapObjectFlagAmbush)  // preserve map editor AMBUSH flag
         {
-            mo->flags = mo->info->flags;
-            mo->flags |= MF_AMBUSH;
+            mo->flags_ = mo->info_->flags_;
+            mo->flags_ |= kMapObjectFlagAmbush;
         }
         else
-            mo->flags = mo->info->flags;
+            mo->flags_ = mo->info_->flags_;
 
-        mo->extendedflags = mo->info->extendedflags;
-        mo->hyperflags    = mo->info->hyperflags;
+        mo->extended_flags_ = mo->info_->extended_flags_;
+        mo->hyper_flags_    = mo->info_->hyper_flags_;
 
-        mo->vis_target       = PERCENT_2_FLOAT(mo->info->translucency);
-        mo->currentattack    = NULL;
-        mo->model_skin       = mo->info->model_skin;
-        mo->model_last_frame = -1;
+        mo->target_visibility_ = mo->info_->translucency_;
+        mo->current_attack_    = nullptr;
+        mo->model_skin_        = mo->info_->model_skin_;
+        mo->model_last_frame_  = -1;
 
         // handle dynamic lights
         {
-            const dlight_info_c *dinfo = &mo->info->dlight[0];
+            const DynamicLightDefinition *dinfo = &mo->info_->dlight_[0];
 
-            if (dinfo->type != DLITE_None)
+            if (dinfo->type_ != kDynamicLightTypeNone)
             {
-                mo->dlight.target = dinfo->radius;
-                mo->dlight.color  = dinfo->colour;
+                mo->dynamic_light_.target = dinfo->radius_;
+                mo->dynamic_light_.color  = dinfo->colour_;
 
                 // make renderer re-create shader info
-                if (mo->dlight.shader)
+                if (mo->dynamic_light_.shader)
                 {
-                    // FIXME: delete mo->dlight.shader;
-                    mo->dlight.shader = NULL;
+                    // FIXME: delete mo->dynamic_light_.shader;
+                    mo->dynamic_light_.shader = nullptr;
                 }
             }
         }
     }
-    // P_SetThingPosition(mo);
+    // SetThingPosition(mo);
 
-    statenum_t state = P_MobjFindLabel(mo, "IDLE"); // nothing fancy, always default to idle
-    if (state == S_NULL)
-        I_Error("RTS REPLACE_THING: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name.c_str());
+    int state = MapObjectFindLabel(
+        mo, "IDLE");  // nothing fancy, always default to idle
+    if (state == 0)
+        FatalError("RTS REPLACE_THING: frame '%s' in [%s] not found!\n", "IDLE",
+                   mo->info_->name_.c_str());
 
-    P_SetMobjStateDeferred(mo, state, 0);
+    MapObjectSetStateDeferred(mo, state, 0);
 }
 
 // Replace one thing with another.
-void RAD_ActReplaceThing(rad_trigger_t *R, void *param)
+void ScriptReplaceThing(TriggerScriptTrigger *R, void *param)
 {
-    s_thing_replace_t *thingarg = (s_thing_replace_t *)param;
+    ScriptThingReplaceParameter *thingarg =
+        (ScriptThingReplaceParameter *)param;
 
-    const mobjtype_c *oldThing = NULL;
-    const mobjtype_c *newThing = NULL;
+    const MapObjectDefinition *oldThing = nullptr;
+    const MapObjectDefinition *newThing = nullptr;
 
     // Prioritize number lookup. It's faster and more permissive
     if (thingarg->old_thing_type > -1)
@@ -1456,37 +1440,40 @@ void RAD_ActReplaceThing(rad_trigger_t *R, void *param)
     else
         newThing = mobjtypes.Lookup(thingarg->new_thing_name);
 
-    // Will only get this far if the previous lookups were for numbers and failed
+    // Will only get this far if the previous lookups were for numbers and
+    // failed
     if (!oldThing)
     {
         if (thingarg->old_thing_type > -1)
-            I_Error("RTS: No such old thing %d for REPLACE_THING.\n", thingarg->old_thing_type);
-        else // never get this far
-            I_Error("RTS: No such old thing '%s' for REPLACE_THING.\n", thingarg->old_thing_name);
+            FatalError("RTS: No such old thing %d for REPLACE_THING.\n",
+                       thingarg->old_thing_type);
+        else  // never get this far
+            FatalError("RTS: No such old thing '%s' for REPLACE_THING.\n",
+                       thingarg->old_thing_name);
     }
     if (!newThing)
     {
         if (thingarg->new_thing_type > -1)
-            I_Error("RTS: No such new thing %d for REPLACE_THING.\n", thingarg->new_thing_type);
-        else // never get this far
-            I_Error("RTS: No such new thing '%s' for REPLACE_THING.\n", thingarg->new_thing_name);
+            FatalError("RTS: No such new thing %d for REPLACE_THING.\n",
+                       thingarg->new_thing_type);
+        else  // never get this far
+            FatalError("RTS: No such new thing '%s' for REPLACE_THING.\n",
+                       thingarg->new_thing_name);
     }
 
     // scan the mobj list
     // FIXME: optimise for fixed-sized triggers
 
-    mobj_t *mo;
-    mobj_t *next;
+    MapObject *mo;
+    MapObject *next;
 
-    for (mo = mobjlisthead; mo != NULL; mo = next)
+    for (mo = map_object_list_head; mo != nullptr; mo = next)
     {
-        next = mo->next;
+        next = mo->next_;
 
-        if (oldThing && mo->info != oldThing)
-            continue;
+        if (oldThing && mo->info_ != oldThing) continue;
 
-        if (!RAD_WithinRadius(mo, R->info))
-            continue;
+        if (!ScriptRadiusCheck(mo, R->info)) continue;
 
         P_ActReplace(mo, newThing);
     }

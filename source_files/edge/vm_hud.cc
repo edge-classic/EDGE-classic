@@ -16,61 +16,58 @@
 //
 //------------------------------------------------------------------------
 
-#include "i_defs.h"
-
-#include "coal.h"
-
-#include "main.h"
-#include "font.h"
-
-#include "image_data.h"
-
-#include "vm_coal.h"
-#include "dm_state.h"
-#include "e_main.h"
-#include "g_game.h"
-#include "w_wad.h"
-
-#include "e_player.h"
-#include "hu_font.h"
-#include "hu_draw.h"
-#include "r_misc.h"
-#include "r_modes.h"
-#include "am_map.h" // AM_Drawer
-#include "r_colormap.h"
-#include "s_sound.h"
-#include "rad_trig.h" //Lobo: need this to access RTS
-
 #include <math.h>
 
-extern cvar_c      r_doubleframes;
-extern coal::vm_c *ui_vm;
+#include "am_map.h"  // AutomapDrawer
+#include "coal.h"
+#include "dm_state.h"
+#include "e_main.h"
+#include "e_player.h"
+#include "epi.h"
+#include "font.h"
+#include "g_game.h"
+#include "hu_draw.h"
+#include "hu_font.h"
+#include "i_system.h"
+#include "im_data.h"
+#include "main.h"
+#include "r_colormap.h"
+#include "r_misc.h"
+#include "r_modes.h"
+#include "rad_trig.h"  //Lobo: need this to access RTS
+#include "s_sound.h"
+#include "vm_coal.h"
+#include "w_wad.h"
 
-extern void VM_SetFloat(coal::vm_c *vm, const char *mod, const char *name, double value);
-extern void VM_CallFunction(coal::vm_c *vm, const char *name);
+extern ConsoleVariable double_framerate;
+extern coal::vm_c     *ui_vm;
+
+extern void CoalSetFloat(coal::vm_c *vm, const char *mod, const char *name,
+                         double value);
+extern void CoalCallFunction(coal::vm_c *vm, const char *name);
 
 // Needed for color functions
-extern image_data_c *ReadAsEpiBlock(image_c *rim);
+extern ImageData *ReadAsEpiBlock(Image *rim);
 
-extern image_data_c *R_PalettisedToRGB(image_data_c *src, const uint8_t *palette, int opacity);
+extern ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette,
+                                    int opacity);
 
-player_t *ui_hud_who = NULL;
+Player *ui_hud_who = nullptr;
 
-extern player_t *ui_player_who;
+extern Player *ui_player_who;
 
-extern std::string w_map_title;
+extern std::string current_map_title;
 
 extern bool erraticism_active;
 
-static int   ui_hud_automap_flags[2]; // 0 = disabled, 1 = enabled
+static int   ui_hud_automap_flags[2];  // 0 = disabled, 1 = enabled
 static float ui_hud_automap_zoom;
 
 //------------------------------------------------------------------------
 
-RGBAColor VM_VectorToColor(double *v)
+RGBAColor CoalVectorToColor(double *v)
 {
-    if (v[0] < 0)
-        return kRGBANoValue;
+    if (v[0] < 0) return kRGBANoValue;
 
     int r = HMM_Clamp(0, (int)v[0], 255);
     int g = HMM_Clamp(0, (int)v[1], 255);
@@ -79,8 +76,7 @@ RGBAColor VM_VectorToColor(double *v)
     RGBAColor rgb = epi::MakeRGBA(r, g, b);
 
     // ensure we don't get the "no color" value by mistake
-    if (rgb == kRGBANoValue)
-        rgb ^= 0x00010100;
+    if (rgb == kRGBANoValue) rgb ^= 0x00010100;
 
     return rgb;
 }
@@ -98,13 +94,12 @@ static void HD_coord_sys(coal::vm_c *vm, int argc)
     int w = (int)*vm->AccessParam(0);
     int h = (int)*vm->AccessParam(1);
 
-    if (w < 64 || h < 64)
-        I_Error("Bad hud.coord_sys size: %dx%d\n", w, h);
+    if (w < 64 || h < 64) FatalError("Bad hud.coord_sys size: %dx%d\n", w, h);
 
-    HUD_SetCoordSys(w, h);
+    HudSetCoordinateSystem(w, h);
 
-    VM_SetFloat(ui_vm, "hud", "x_left", hud_x_left);
-    VM_SetFloat(ui_vm, "hud", "x_right", hud_x_right);
+    CoalSetFloat(ui_vm, "hud", "x_left", hud_x_left);
+    CoalSetFloat(ui_vm, "hud", "x_right", hud_x_right);
 }
 
 // hud.game_mode()
@@ -113,9 +108,9 @@ static void HD_game_mode(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    if (DEATHMATCH())
+    if (InDeathmatch())
         vm->ReturnString("dm");
-    else if (COOP_MATCH())
+    else if (InCooperativeMatch())
         vm->ReturnString("coop");
     else
         vm->ReturnString("sp");
@@ -127,10 +122,10 @@ static void HD_game_name(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    gamedef_c *g = currmap->episode;
-    SYS_ASSERT(g);
+    GameDefinition *g = current_map->episode_;
+    EPI_ASSERT(g);
 
-    vm->ReturnString(g->name.c_str());
+    vm->ReturnString(g->name_.c_str());
 }
 
 // hud.map_name()
@@ -139,7 +134,7 @@ static void HD_map_name(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnString(currmap->name.c_str());
+    vm->ReturnString(current_map->name_.c_str());
 }
 
 // hud.map_title()
@@ -148,7 +143,7 @@ static void HD_map_title(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnString(w_map_title.c_str());
+    vm->ReturnString(current_map_title.c_str());
 }
 
 // hud.map_author()
@@ -157,7 +152,7 @@ static void HD_map_author(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnString(currmap->author.c_str());
+    vm->ReturnString(current_map->author_.c_str());
 }
 
 // hud.which_hud()
@@ -175,7 +170,7 @@ static void HD_check_automap(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnFloat(automapactive ? 1 : 0);
+    vm->ReturnFloat(automap_active ? 1 : 0);
 }
 
 // hud.get_time()
@@ -184,7 +179,7 @@ static void HD_get_time(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    int time = I_GetTime() / (r_doubleframes.d ? 2 : 1);
+    int time = GetTime() / (double_framerate.d_ ? 2 : 1);
     vm->ReturnFloat((double)time);
 }
 
@@ -196,19 +191,17 @@ static void HD_text_font(coal::vm_c *vm, int argc)
 
     const char *font_name = vm->AccessParamString(0);
 
-    fontdef_c *DEF = fontdefs.Lookup(font_name);
-    SYS_ASSERT(DEF);
+    FontDefinition *DEF = fontdefs.Lookup(font_name);
+    EPI_ASSERT(DEF);
 
-    if (!DEF)
-        I_Error("hud.text_font: Bad font name: %s\n", font_name);
+    if (!DEF) FatalError("hud.text_font: Bad font name: %s\n", font_name);
 
-    font_c *font = hu_fonts.Lookup(DEF);
-    SYS_ASSERT(font);
+    Font *font = hud_fonts.Lookup(DEF);
+    EPI_ASSERT(font);
 
-    if (!font)
-        I_Error("hud.text_font: Bad font name: %s\n", font_name);
+    if (!font) FatalError("hud.text_font: Bad font name: %s\n", font_name);
 
-    HUD_SetFont(font);
+    HudSetFont(font);
 }
 
 // hud.text_color(rgb)
@@ -219,9 +212,9 @@ static void HD_text_color(coal::vm_c *vm, int argc)
 
     double *v = vm->AccessParam(0);
 
-    RGBAColor color = VM_VectorToColor(v);
+    RGBAColor color = CoalVectorToColor(v);
 
-    HUD_SetTextColor(color);
+    HudSetTextColor(color);
 }
 
 // hud.set_scale(value)
@@ -233,9 +226,9 @@ static void HD_set_scale(coal::vm_c *vm, int argc)
     float scale = *vm->AccessParam(0);
 
     if (scale <= 0)
-        I_Error("hud.set_scale: Bad scale value: %1.3f\n", scale);
+        FatalError("hud.set_scale: Bad scale value: %1.3f\n", scale);
 
-    HUD_SetScale(scale);
+    HudSetScale(scale);
 }
 
 // hud.set_alpha(value)
@@ -246,7 +239,7 @@ static void HD_set_alpha(coal::vm_c *vm, int argc)
 
     float alpha = *vm->AccessParam(0);
 
-    HUD_SetAlpha(alpha);
+    HudSetAlpha(alpha);
 }
 
 // hud.solid_box(x, y, w, h, color)
@@ -260,9 +253,9 @@ static void HD_solid_box(coal::vm_c *vm, int argc)
     float w = *vm->AccessParam(2);
     float h = *vm->AccessParam(3);
 
-    RGBAColor rgb = VM_VectorToColor(vm->AccessParam(4));
+    RGBAColor rgb = CoalVectorToColor(vm->AccessParam(4));
 
-    HUD_SolidBox(x, y, x + w, y + h, rgb);
+    HudSolidBox(x, y, x + w, y + h, rgb);
 }
 
 // hud.solid_line(x1, y1, x2, y2, color)
@@ -276,9 +269,9 @@ static void HD_solid_line(coal::vm_c *vm, int argc)
     float x2 = *vm->AccessParam(2);
     float y2 = *vm->AccessParam(3);
 
-    RGBAColor rgb = VM_VectorToColor(vm->AccessParam(4));
+    RGBAColor rgb = CoalVectorToColor(vm->AccessParam(4));
 
-    HUD_SolidLine(x1, y1, x2, y2, rgb);
+    HudSolidLine(x1, y1, x2, y2, rgb);
 }
 
 // hud.thin_box(x, y, w, h, color)
@@ -292,9 +285,9 @@ static void HD_thin_box(coal::vm_c *vm, int argc)
     float w = *vm->AccessParam(2);
     float h = *vm->AccessParam(3);
 
-    RGBAColor rgb = VM_VectorToColor(vm->AccessParam(4));
+    RGBAColor rgb = CoalVectorToColor(vm->AccessParam(4));
 
-    HUD_ThinBox(x, y, x + w, y + h, rgb);
+    HudThinBox(x, y, x + w, y + h, rgb);
 }
 
 // hud.gradient_box(x, y, w, h, TL, BL, TR, BR)
@@ -310,12 +303,12 @@ static void HD_gradient_box(coal::vm_c *vm, int argc)
 
     RGBAColor cols[4];
 
-    cols[0] = VM_VectorToColor(vm->AccessParam(4));
-    cols[1] = VM_VectorToColor(vm->AccessParam(5));
-    cols[2] = VM_VectorToColor(vm->AccessParam(6));
-    cols[3] = VM_VectorToColor(vm->AccessParam(7));
+    cols[0] = CoalVectorToColor(vm->AccessParam(4));
+    cols[1] = CoalVectorToColor(vm->AccessParam(5));
+    cols[2] = CoalVectorToColor(vm->AccessParam(6));
+    cols[3] = CoalVectorToColor(vm->AccessParam(7));
 
-    HUD_GradientBox(x, y, x + w, y + h, cols);
+    HudGradientBox(x, y, x + w, y + h, cols);
 }
 
 // hud.draw_image(x, y, name, [noOffset])
@@ -330,16 +323,16 @@ static void HD_draw_image(coal::vm_c *vm, int argc)
     float       y    = *vm->AccessParam(1);
     const char *name = vm->AccessParamString(2);
 
-    const image_c *img = W_ImageLookup(name, INS_Graphic);
+    const Image *img = ImageLookup(name, kImageNamespaceGraphic);
 
     double *noOffset = vm->AccessParam(3);
 
     if (img)
     {
         if (noOffset)
-            HUD_DrawImageNoOffset(x, y, img);
+            HudDrawImageNoOffset(x, y, img);
         else
-            HUD_DrawImage(x, y, img);
+            HudDrawImage(x, y, img);
     }
 }
 
@@ -356,17 +349,20 @@ static void HD_scroll_image(coal::vm_c *vm, int argc)
     float       sx   = *vm->AccessParam(3);
     float       sy   = *vm->AccessParam(4);
 
-    const image_c *img      = W_ImageLookup(name, INS_Graphic);
-    double        *noOffset = vm->AccessParam(5);
+    const Image *img      = ImageLookup(name, kImageNamespaceGraphic);
+    double      *noOffset = vm->AccessParam(5);
 
     if (img)
     {
         if (noOffset)
-            HUD_ScrollImageNoOffset(
-                x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
+            HudScrollImageNoOffset(
+                x, y, img, -sx,
+                -sy);  // Invert sx/sy so that user can enter positive X for
+                       // right and positive Y for up
         else
-            HUD_ScrollImage(x, y, img, -sx,
-                            -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
+            HudScrollImage(x, y, img, -sx,
+                           -sy);  // Invert sx/sy so that user can enter
+                                  // positive X for right and positive Y for up
     }
 }
 
@@ -385,15 +381,15 @@ static void HD_stretch_image(coal::vm_c *vm, int argc)
 
     const char *name = vm->AccessParamString(4);
 
-    const image_c *img      = W_ImageLookup(name, INS_Graphic);
-    double        *noOffset = vm->AccessParam(5);
+    const Image *img      = ImageLookup(name, kImageNamespaceGraphic);
+    double      *noOffset = vm->AccessParam(5);
 
     if (img)
     {
         if (noOffset)
-            HUD_StretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
+            HudStretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
         else
-            HUD_StretchImage(x, y, w, h, img, 0.0, 0.0);
+            HudStretchImage(x, y, w, h, img, 0.0, 0.0);
     }
 }
 
@@ -413,12 +409,9 @@ static void HD_tile_image(coal::vm_c *vm, int argc)
     float offset_x = *vm->AccessParam(5);
     float offset_y = *vm->AccessParam(6);
 
-    const image_c *img = W_ImageLookup(name, INS_Texture);
+    const Image *img = ImageLookup(name, kImageNamespaceTexture);
 
-    if (img)
-    {
-        HUD_TileImage(x, y, w, h, img, offset_x, offset_y);
-    }
+    if (img) { HudTileImage(x, y, w, h, img, offset_x, offset_y); }
 }
 
 // hud.draw_text(x, y, str, [size])
@@ -434,7 +427,7 @@ static void HD_draw_text(coal::vm_c *vm, int argc)
 
     double *size = vm->AccessParam(3);
 
-    HUD_DrawText(x, y, str, size ? *size : 0);
+    HudDrawText(x, y, str, size ? *size : 0);
 }
 
 // hud.draw_num2(x, y, len, num, [size])
@@ -452,7 +445,7 @@ static void HD_draw_num2(coal::vm_c *vm, int argc)
     double *size = vm->AccessParam(4);
 
     if (len < 1 || len > 20)
-        I_Error("hud.draw_number: bad field length: %d\n", len);
+        FatalError("hud.draw_number: bad field length: %d\n", len);
 
     bool is_neg = false;
 
@@ -469,22 +462,17 @@ static void HD_draw_num2(coal::vm_c *vm, int argc)
 
     *--pos = 0;
 
-    if (num == 0)
-    {
-        *--pos = '0';
-    }
+    if (num == 0) { *--pos = '0'; }
     else
     {
-        for (; num > 0 && len > 0; num /= 10, len--)
-            *--pos = '0' + (num % 10);
+        for (; num > 0 && len > 0; num /= 10, len--) *--pos = '0' + (num % 10);
 
-        if (is_neg)
-            *--pos = '-';
+        if (is_neg) *--pos = '-';
     }
 
-    HUD_SetAlignment(+1, -1);
-    HUD_DrawText(x, y, pos, size ? *size : 0);
-    HUD_SetAlignment();
+    HudSetAlignment(+1, -1);
+    HudDrawText(x, y, pos, size ? *size : 0);
+    HudSetAlignment();
 }
 
 // Lobo November 2021:
@@ -503,7 +491,7 @@ static void HD_draw_number(coal::vm_c *vm, int argc)
     double *size        = vm->AccessParam(5);
 
     if (len < 1 || len > 20)
-        I_Error("hud.draw_number: bad field length: %d\n", len);
+        FatalError("hud.draw_number: bad field length: %d\n", len);
 
     bool is_neg = false;
 
@@ -520,28 +508,20 @@ static void HD_draw_number(coal::vm_c *vm, int argc)
 
     *--pos = 0;
 
-    if (num == 0)
-    {
-        *--pos = '0';
-    }
+    if (num == 0) { *--pos = '0'; }
     else
     {
-        for (; num > 0 && len > 0; num /= 10, len--)
-            *--pos = '0' + (num % 10);
+        for (; num > 0 && len > 0; num /= 10, len--) *--pos = '0' + (num % 10);
 
-        if (is_neg)
-            *--pos = '-';
+        if (is_neg) *--pos = '-';
     }
 
-    if (align_right == 0)
-    {
-        HUD_DrawText(x, y, pos, size ? *size : 0);
-    }
+    if (align_right == 0) { HudDrawText(x, y, pos, size ? *size : 0); }
     else
     {
-        HUD_SetAlignment(+1, -1);
-        HUD_DrawText(x, y, pos, size ? *size : 0);
-        HUD_SetAlignment();
+        HudSetAlignment(+1, -1);
+        HudDrawText(x, y, pos, size ? *size : 0);
+        HudSetAlignment();
     }
 }
 
@@ -551,14 +531,12 @@ static void HD_game_paused(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    if (paused || menuactive || rts_menuactive || time_stop_active || erraticism_active)
+    if (paused || menu_active || rts_menu_active || time_stop_active ||
+        erraticism_active)
     {
         vm->ReturnFloat(1);
     }
-    else
-    {
-        vm->ReturnFloat(0);
-    }
+    else { vm->ReturnFloat(0); }
 }
 
 // hud.erraticism_active()
@@ -567,14 +545,8 @@ static void HD_erraticism_active(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    if (erraticism_active)
-    {
-        vm->ReturnFloat(1);
-    }
-    else
-    {
-        vm->ReturnFloat(0);
-    }
+    if (erraticism_active) { vm->ReturnFloat(1); }
+    else { vm->ReturnFloat(0); }
 }
 
 // hud.time_stop_active()
@@ -583,14 +555,8 @@ static void HD_time_stop_active(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    if (time_stop_active)
-    {
-        vm->ReturnFloat(1);
-    }
-    else
-    {
-        vm->ReturnFloat(0);
-    }
+    if (time_stop_active) { vm->ReturnFloat(1); }
+    else { vm->ReturnFloat(0); }
 }
 
 // hud.render_world(x, y, w, h, [flags])
@@ -606,7 +572,8 @@ static void HD_render_world(coal::vm_c *vm, int argc)
 
     double *flags = vm->AccessParam(4);
 
-    HUD_RenderWorld(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
+    HudRenderWorld(x, y, w, h, ui_hud_who->map_object_,
+                   flags ? (int)*flags : 0);
 }
 
 // hud.render_automap(x, y, w, h, [flags])
@@ -625,21 +592,21 @@ static void HD_render_automap(coal::vm_c *vm, int argc)
     int   old_state;
     float old_zoom;
 
-    AM_GetState(&old_state, &old_zoom);
+    AutomapGetState(&old_state, &old_zoom);
 
     int new_state = old_state;
     new_state &= ~ui_hud_automap_flags[0];
     new_state |= ui_hud_automap_flags[1];
 
     float new_zoom = old_zoom;
-    if (ui_hud_automap_zoom > 0.1)
-        new_zoom = ui_hud_automap_zoom;
+    if (ui_hud_automap_zoom > 0.1) new_zoom = ui_hud_automap_zoom;
 
-    AM_SetState(new_state, new_zoom);
+    AutomapSetState(new_state, new_zoom);
 
-    HUD_RenderAutomap(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
+    HudRenderAutomap(x, y, w, h, ui_hud_who->map_object_,
+                     flags ? (int)*flags : 0);
 
-    AM_SetState(old_state, old_zoom);
+    AutomapSetState(old_state, old_zoom);
 }
 
 // hud.automap_color(which, color)
@@ -650,14 +617,14 @@ static void HD_automap_color(coal::vm_c *vm, int argc)
 
     int which = (int)*vm->AccessParam(0);
 
-    if (which < 1 || which > AM_NUM_COLORS)
-        I_Error("hud.automap_color: bad color number: %d\n", which);
+    if (which < 1 || which > kTotalAutomapColors)
+        FatalError("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
-    RGBAColor rgb = VM_VectorToColor(vm->AccessParam(1));
+    RGBAColor rgb = CoalVectorToColor(vm->AccessParam(1));
 
-    AM_SetColor(which, rgb);
+    AutomapSetColor(which, rgb);
 }
 
 // hud.automap_option(which, value)
@@ -670,7 +637,7 @@ static void HD_automap_option(coal::vm_c *vm, int argc)
     int value = (int)*vm->AccessParam(1);
 
     if (which < 1 || which > 7)
-        I_Error("hud.automap_color: bad color number: %d\n", which);
+        FatalError("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
@@ -700,7 +667,7 @@ static void HD_automap_player_arrow(coal::vm_c *vm, int argc)
 
     int arrow = (int)*vm->AccessParam(0);
 
-    AM_SetArrow((automap_arrow_e)arrow);
+    AutomapSetArrow((AutomapArrowStyle)arrow);
 }
 
 // hud.set_render_who(index)
@@ -711,23 +678,23 @@ static void HD_set_render_who(coal::vm_c *vm, int argc)
 
     int index = (int)*vm->AccessParam(0);
 
-    if (index < 0 || index >= numplayers)
-        I_Error("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
+    if (index < 0 || index >= total_players)
+        FatalError("hud.set_render_who: bad index value: %d (numplayers=%d)\n",
+                   index, total_players);
 
     if (index == 0)
     {
-        ui_hud_who = players[consoleplayer];
+        ui_hud_who = players[console_player];
         return;
     }
 
-    int who = displayplayer;
+    int who = display_player;
 
     for (; index > 1; index--)
     {
-        do
-        {
-            who = (who + 1) % MAXPLAYERS;
-        } while (players[who] == NULL);
+        do {
+            who = (who + 1) % kMaximumPlayers;
+        } while (players[who] == nullptr);
     }
 
     ui_hud_who = players[who];
@@ -741,12 +708,12 @@ static void HD_play_sound(coal::vm_c *vm, int argc)
 
     const char *name = vm->AccessParamString(0);
 
-    sfx_t *fx = sfxdefs.GetEffect(name);
+    SoundEffect *fx = sfxdefs.GetEffect(name);
 
     if (fx)
-        S_StartFX(fx);
+        StartSoundEffect(fx);
     else
-        I_Warning("hud.play_sound: unknown sfx '%s'\n", name);
+        LogWarning("hud.play_sound: unknown sfx '%s'\n", name);
 }
 
 // hud.screen_aspect()
@@ -755,7 +722,7 @@ static void HD_screen_aspect(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    float TempAspect = std::ceil(v_pixelaspect.f * 100.0) / 100.0;
+    float TempAspect = std::ceil(pixel_aspect_ratio.f_ * 100.0) / 100.0;
 
     vm->ReturnFloat(TempAspect);
 }
@@ -770,14 +737,16 @@ static void HD_get_average_color(coal::vm_c *vm, int argc)
     double        *to_x         = vm->AccessParam(2);
     double        *from_y       = vm->AccessParam(3);
     double        *to_y         = vm->AccessParam(4);
-    const uint8_t    *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    RGBAColor col = tmp_img_data->AverageColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
-                               to_y ? *to_y : 1000000);
+    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
+    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette =
+            (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+    ImageData *tmp_img_data = RgbFromPalettised(
+        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor col = tmp_img_data->AverageColor(
+        from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+        to_y ? *to_y : 1000000);
     rgb[0] = epi::GetRGBARed(col);
     rgb[1] = epi::GetRGBAGreen(col);
     rgb[2] = epi::GetRGBABlue(col);
@@ -795,14 +764,16 @@ static void HD_get_lightest_color(coal::vm_c *vm, int argc)
     double        *to_x         = vm->AccessParam(2);
     double        *from_y       = vm->AccessParam(3);
     double        *to_y         = vm->AccessParam(4);
-    const uint8_t    *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    RGBAColor col = tmp_img_data->LightestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
-                                to_y ? *to_y : 1000000);
+    const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
+    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette =
+            (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+    ImageData *tmp_img_data = RgbFromPalettised(
+        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor col = tmp_img_data->LightestColor(
+        from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+        to_y ? *to_y : 1000000);
     rgb[0] = epi::GetRGBARed(col);
     rgb[1] = epi::GetRGBAGreen(col);
     rgb[2] = epi::GetRGBABlue(col);
@@ -821,13 +792,15 @@ static void HD_get_darkest_color(coal::vm_c *vm, int argc)
     double        *from_y       = vm->AccessParam(3);
     double        *to_y         = vm->AccessParam(4);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    RGBAColor col = tmp_img_data->DarkestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
-                               to_y ? *to_y : 1000000);
+    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette =
+            (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+    ImageData *tmp_img_data = RgbFromPalettised(
+        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor col = tmp_img_data->DarkestColor(
+        from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+        to_y ? *to_y : 1000000);
     rgb[0] = epi::GetRGBARed(col);
     rgb[1] = epi::GetRGBAGreen(col);
     rgb[2] = epi::GetRGBABlue(col);
@@ -846,13 +819,15 @@ static void HD_get_average_hue(coal::vm_c *vm, int argc)
     double        *from_y       = vm->AccessParam(3);
     double        *to_y         = vm->AccessParam(4);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette =
+            (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+    ImageData *tmp_img_data = RgbFromPalettised(
+        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     uint8_t *temp_rgb = new uint8_t[3];
-    tmp_img_data->AverageHue(temp_rgb, NULL, from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+    tmp_img_data->AverageHue(temp_rgb, nullptr, from_x ? *from_x : -1,
+                             to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                              to_y ? *to_y : 1000000);
     rgb[0] = temp_rgb[0];
     rgb[1] = temp_rgb[1];
@@ -862,8 +837,8 @@ static void HD_get_average_hue(coal::vm_c *vm, int argc)
     vm->ReturnVector(rgb);
 }
 
-// These two aren't really needed anymore with the AverageColor rework, but keeping them in case COALHUDS in the wild
-// use them - Dasho
+// These two aren't really needed anymore with the AverageColor rework, but
+// keeping them in case COALHUDS in the wild use them - Dasho
 static void HD_get_average_top_border_color(coal::vm_c *vm, int argc)
 {
     (void)argc;
@@ -871,15 +846,18 @@ static void HD_get_average_top_border_color(coal::vm_c *vm, int argc)
     double         rgb[3];
     const char    *name         = vm->AccessParamString(0);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, tmp_img_c->actual_h - 1, tmp_img_c->actual_h);
-    rgb[0] = epi::GetRGBARed(col);
-    rgb[1] = epi::GetRGBAGreen(col);
-    rgb[2] = epi::GetRGBABlue(col);
+    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette =
+            (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+    ImageData *tmp_img_data = RgbFromPalettised(
+        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_,
+                                               tmp_img_c->actual_height_ - 1,
+                                               tmp_img_c->actual_height_);
+    rgb[0]        = epi::GetRGBARed(col);
+    rgb[1]        = epi::GetRGBAGreen(col);
+    rgb[2]        = epi::GetRGBABlue(col);
     delete tmp_img_data;
     vm->ReturnVector(rgb);
 }
@@ -890,12 +868,14 @@ static void HD_get_average_bottom_border_color(coal::vm_c *vm, int argc)
     double         rgb[3];
     const char    *name         = vm->AccessParamString(0);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, 0, 1);
+    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette =
+            (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+    ImageData *tmp_img_data = RgbFromPalettised(
+        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor col =
+        tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, 0, 1);
     rgb[0] = epi::GetRGBARed(col);
     rgb[1] = epi::GetRGBAGreen(col);
     rgb[2] = epi::GetRGBABlue(col);
@@ -911,8 +891,7 @@ static void HD_rts_enable(coal::vm_c *vm, int argc)
 
     std::string name = vm->AccessParamString(0);
 
-    if (!name.empty())
-        RAD_EnableByTag(NULL, name.c_str(), false);
+    if (!name.empty()) ScriptEnableByTag(nullptr, name.c_str(), false);
 }
 
 // hud.rts_disable(tag)
@@ -923,8 +902,7 @@ static void HD_rts_disable(coal::vm_c *vm, int argc)
 
     std::string name = vm->AccessParamString(0);
 
-    if (!name.empty())
-        RAD_EnableByTag(NULL, name.c_str(), true);
+    if (!name.empty()) ScriptEnableByTag(nullptr, name.c_str(), true);
 }
 
 // hud.rts_isactive(tag)
@@ -937,7 +915,7 @@ static void HD_rts_isactive(coal::vm_c *vm, int argc)
 
     if (!name.empty())
     {
-        if (RAD_IsActiveByTag(NULL, name.c_str()))
+        if (CheckActiveScriptByTag(nullptr, name.c_str()))
             vm->ReturnFloat(1);
         else
             vm->ReturnFloat(0);
@@ -951,16 +929,10 @@ static void HD_get_image_width(coal::vm_c *vm, int argc)
     (void)argc;
     const char *name = vm->AccessParamString(0);
 
-    const image_c *img = W_ImageLookup(name, INS_Graphic);
+    const Image *img = ImageLookup(name, kImageNamespaceGraphic);
 
-    if (img)
-    {
-        vm->ReturnFloat(HUD_GetImageWidth(img));
-    }
-    else
-    {
-        vm->ReturnFloat(0);
-    }
+    if (img) { vm->ReturnFloat(HudGetImageWidth(img)); }
+    else { vm->ReturnFloat(0); }
 }
 
 // hud.get_image_height(name)
@@ -970,23 +942,17 @@ static void HD_get_image_height(coal::vm_c *vm, int argc)
     (void)argc;
     const char *name = vm->AccessParamString(0);
 
-    const image_c *img = W_ImageLookup(name, INS_Graphic);
+    const Image *img = ImageLookup(name, kImageNamespaceGraphic);
 
-    if (img)
-    {
-        vm->ReturnFloat(HUD_GetImageHeight(img));
-    }
-    else
-    {
-        vm->ReturnFloat(0);
-    }
+    if (img) { vm->ReturnFloat(HudGetImageHeight(img)); }
+    else { vm->ReturnFloat(0); }
 }
 
 //------------------------------------------------------------------------
 // HUD Functions
 //------------------------------------------------------------------------
 
-void VM_RegisterHUD()
+void CoalRegisterHud()
 {
     // query functions
     ui_vm->AddNativeFunction("hud.game_mode", HD_game_mode);
@@ -1011,7 +977,8 @@ void VM_RegisterHUD()
     ui_vm->AddNativeFunction("hud.automap_color", HD_automap_color);
     ui_vm->AddNativeFunction("hud.automap_option", HD_automap_option);
     ui_vm->AddNativeFunction("hud.automap_zoom", HD_automap_zoom);
-    ui_vm->AddNativeFunction("hud.automap_player_arrow", HD_automap_player_arrow);
+    ui_vm->AddNativeFunction("hud.automap_player_arrow",
+                             HD_automap_player_arrow);
 
     // drawing functions
     ui_vm->AddNativeFunction("hud.solid_box", HD_solid_box);
@@ -1041,8 +1008,10 @@ void VM_RegisterHUD()
 
     // image color functions
     ui_vm->AddNativeFunction("hud.get_average_color", HD_get_average_color);
-    ui_vm->AddNativeFunction("hud.get_average_top_border_color", HD_get_average_top_border_color);
-    ui_vm->AddNativeFunction("hud.get_average_bottom_border_color", HD_get_average_bottom_border_color);
+    ui_vm->AddNativeFunction("hud.get_average_top_border_color",
+                             HD_get_average_top_border_color);
+    ui_vm->AddNativeFunction("hud.get_average_bottom_border_color",
+                             HD_get_average_bottom_border_color);
     ui_vm->AddNativeFunction("hud.get_lightest_color", HD_get_lightest_color);
     ui_vm->AddNativeFunction("hud.get_darkest_color", HD_get_darkest_color);
     ui_vm->AddNativeFunction("hud.get_average_hue", HD_get_average_hue);
@@ -1055,52 +1024,45 @@ void VM_RegisterHUD()
     ui_vm->AddNativeFunction("hud.get_image_height", HD_get_image_height);
 }
 
-void VM_NewGame(void)
+void CoalNewGame(void) { CoalCallFunction(ui_vm, "new_game"); }
+
+void CoalLoadGame(void)
 {
-    VM_CallFunction(ui_vm, "new_game");
+    // Need to set these to prevent nullptr references if using any player.xxx
+    // in the load_level hook
+    ui_hud_who    = players[display_player];
+    ui_player_who = players[display_player];
+
+    CoalCallFunction(ui_vm, "load_game");
 }
 
-void VM_LoadGame(void)
-{
-    // Need to set these to prevent NULL references if using any player.xxx in the load_level hook
-    ui_hud_who    = players[displayplayer];
-    ui_player_who = players[displayplayer];
+void CoalSaveGame(void) { CoalCallFunction(ui_vm, "save_game"); }
 
-    VM_CallFunction(ui_vm, "load_game");
+void CoalBeginLevel(void)
+{
+    // Need to set these to prevent nullptr references if using player.xxx in
+    // the begin_level hook
+    ui_hud_who    = players[display_player];
+    ui_player_who = players[display_player];
+    CoalCallFunction(ui_vm, "begin_level");
 }
 
-void VM_SaveGame(void)
-{
-    VM_CallFunction(ui_vm, "save_game");
-}
+void CoalEndLevel(void) { CoalCallFunction(ui_vm, "end_level"); }
 
-void VM_BeginLevel(void)
+void CoalRunHud(void)
 {
-    // Need to set these to prevent NULL references if using player.xxx in the begin_level hook
-    ui_hud_who    = players[displayplayer];
-    ui_player_who = players[displayplayer];
-    VM_CallFunction(ui_vm, "begin_level");
-}
+    HudReset();
 
-void VM_EndLevel(void)
-{
-    VM_CallFunction(ui_vm, "end_level");
-}
-
-void VM_RunHud(void)
-{
-    HUD_Reset();
-
-    ui_hud_who    = players[displayplayer];
-    ui_player_who = players[displayplayer];
+    ui_hud_who    = players[display_player];
+    ui_player_who = players[display_player];
 
     ui_hud_automap_flags[0] = 0;
     ui_hud_automap_flags[1] = 0;
     ui_hud_automap_zoom     = -1;
 
-    VM_CallFunction(ui_vm, "draw_all");
+    CoalCallFunction(ui_vm, "draw_all");
 
-    HUD_Reset();
+    HudReset();
 }
 
 //--- editor settings ---

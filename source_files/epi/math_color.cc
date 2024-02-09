@@ -18,6 +18,8 @@
 
 #include "math_color.h"
 
+#include "HandmadeMath.h"
+#include "epi.h"
 namespace epi
 {
 
@@ -58,12 +60,12 @@ HSVColor::HSVColor(const RGBAColor &col)
     else
         h_ = 300 - r1;
 
-    SYS_ASSERT(0 <= h_ && h_ <= 360);
+    EPI_ASSERT(0 <= h_ && h_ <= 360);
 }
 
 RGBAColor HSVColor::ToRGBA() const
 {
-    SYS_ASSERT(0 <= h_ && h_ <= 360);
+    EPI_ASSERT(0 <= h_ && h_ <= 360);
 
     int sextant = (h_ % 360) / 60;
     int frac    = h_ % 60;
@@ -78,38 +80,38 @@ RGBAColor HSVColor::ToRGBA() const
 
     int r, g, b;
 
-    SYS_ASSERT(0 <= sextant && sextant <= 5);
+    EPI_ASSERT(0 <= sextant && sextant <= 5);
 
     switch (sextant)
     {
-    case 0:
-        r = v_, g = p3, b = p1;
-        break;
-    case 1:
-        r = p2, g = v_, b = p1;
-        break;
-    case 2:
-        r = p1, g = v_, b = p3;
-        break;
-    case 3:
-        r = p1, g = p2, b = v_;
-        break;
-    case 4:
-        r = p3, g = p1, b = v_;
-        break;
-    default:
-        r = v_, g = p1, b = p2;
-        break;
+        case 0:
+            r = v_, g = p3, b = p1;
+            break;
+        case 1:
+            r = p2, g = v_, b = p1;
+            break;
+        case 2:
+            r = p1, g = v_, b = p3;
+            break;
+        case 3:
+            r = p1, g = p2, b = v_;
+            break;
+        case 4:
+            r = p3, g = p1, b = v_;
+            break;
+        default:
+            r = v_, g = p1, b = p2;
+            break;
     }
 
-    SYS_ASSERT(0 <= r && r <= 255);
-    SYS_ASSERT(0 <= g && g <= 255);
-    SYS_ASSERT(0 <= b && b <= 255);
+    EPI_ASSERT(0 <= r && r <= 255);
+    EPI_ASSERT(0 <= g && g <= 255);
+    EPI_ASSERT(0 <= b && b <= 255);
 
     return MakeRGBA(r, g, b);
 }
 
-} // namespace epi
+}  // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -25,8 +25,11 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __EPI_MD5_H__
-#define __EPI_MD5_H__
+#pragma once
+
+#include <stdint.h>
+
+#include <string>
 
 namespace epi
 {
@@ -34,34 +37,30 @@ namespace epi
 class MD5Hash
 {
     /* sealed */
-  private:
+   private:
     uint8_t hash_[16];
 
-  public:
+   public:
     MD5Hash();
     MD5Hash(const uint8_t *message, unsigned int len);
 
-    ~MD5Hash()
-    {
-    }
+    ~MD5Hash() {}
 
     void Compute(const uint8_t *message, unsigned int len);
 
     std::string ToString();
 
-  private:
+   private:
     // a class used while computing the MD5 sum.
     // Not actually used with a member variable.
 
     class PackHash
     {
-      public:
+       public:
         uint32_t pack_[4];
 
         PackHash();
-        ~PackHash()
-        {
-        }
+        ~PackHash() {}
 
         void Transform(const uint32_t extra[16]);
         void TransformBytes(const uint8_t chunk[64]);
@@ -69,9 +68,7 @@ class MD5Hash
     };
 };
 
-} // namespace epi
-
-#endif /* __EPI_MD5_H__ */
+}  // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

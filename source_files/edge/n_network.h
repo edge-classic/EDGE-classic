@@ -16,27 +16,25 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __N_NETWORK_H__
-#define __N_NETWORK_H__
+#pragma once
 
-extern bool netgame;
+extern bool network_game;
+extern int  game_tic;
 
-void N_InitNetwork(void);
-void N_Shutdown(void);
+void NetworkInitialize(void);
+void NetworkShutdown(void);
 
 // Create any new ticcmds and broadcast to other players.
-// returns value of I_GetTime().
-int N_NetUpdate();
+// returns value of GetTime().
+int NetworkUpdate();
 
 // returns number of ticks to run (always > 0).
-int N_TryRunTics();
+int NetworkTryRunTicCommands();
 
-// restart tic counters (maketic, gametic) at zero.
-void N_ResetTics(void);
+// restart tic counters (make_tic, game_tic) at zero.
+void NetworkResetTics(void);
 
-void N_GrabTiccmds(void);
-
-#endif /* __N_NETWORK_H__ */
+void NetworkGrabTicCommands(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

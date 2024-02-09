@@ -16,66 +16,39 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EDGE_PLATFORM_INTERFACE__
-#define __EDGE_PLATFORM_INTERFACE__
+#pragma once
 
-#ifdef EDGE_WEB
-#include <emscripten.h>
-#endif
-
-// standard C headers
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-#include <string.h>
-#include <ctype.h>
 #include <math.h>
-
-// common C++ headers
-#include <string>
-#include <vector>
-
-// basic types
-#include <stdint.h>
-
-#ifdef __GNUC__
-#define GCCATTR(xyz) __attribute__(xyz)
-#else
-#define GCCATTR(xyz) /* nothing */
-#endif
-
-#include "HandmadeMath.h"
-#include "str_compare.h"
+#include <string.h>
 
 /* Important functions provided by Engine code */
-
-void I_Error(const char *error, ...) GCCATTR((format(printf, 1, 2)));
-void I_Warning(const char *warning, ...) GCCATTR((format(printf, 1, 2)));
-void I_Printf(const char *message, ...) GCCATTR((format(printf, 1, 2)));
-void I_Debugf(const char *message, ...) GCCATTR((format(printf, 1, 2)));
-
-// basic macros
-
-#ifndef NULL
-#define NULL nullptr
+#ifdef __GNUC__
+void FatalError(const char *error, ...) __attribute__((format(printf, 1, 2)));
+void LogWarning(const char *warning, ...) __attribute__((format(printf, 1, 2)));
+void LogPrint(const char *message, ...) __attribute__((format(printf, 1, 2)));
+void LogDebug(const char *message, ...) __attribute__((format(printf, 1, 2)));
+#else
+void FatalError(const char *error, ...);
+void LogWarning(const char *warning, ...);
+void LogPrint(const char *message, ...);
+void LogDebug(const char *message, ...);
 #endif
 
-#ifndef I_ROUND
-#define I_ROUND(x) ((int)round(x))
-#endif
+// Move these to dedicated EPI math file - Dasho
+inline int RoundToInteger(float x) { return (int)roundf(x); }
+inline int RoundToInteger(double x) { return (int)round(x); }
 
 // assertion macro
-#define SYS_ASSERT(cond) ((cond) ? (void)0 : I_Error("Assertion '%s' failed (%s:%d).\n", #cond, __FILE__, __LINE__))
+#define EPI_ASSERT(cond)                                                      \
+    ((cond) ? (void)0                                                         \
+            : FatalError("Assertion '%s' failed (%s:%d).\n", #cond, __FILE__, \
+                         __LINE__))
 
-//
-// Z_Clear
 //
 // Clears memory to zero.
 //
-#define Z_Clear(ptr, type, num) memset((void *)(ptr), ((ptr) - ((type *)(ptr))), (num) * sizeof(type))
-
-#endif /* __EDGE_PLATFORM_INTERFACE__ */
+#define EPI_CLEAR_MEMORY(ptr, type, num) \
+    memset((void *)(ptr), ((ptr) - ((type *)(ptr))), (num) * sizeof(type))
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

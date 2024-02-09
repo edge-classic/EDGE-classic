@@ -28,20 +28,11 @@
 //  by name.
 //
 
-#ifndef __R_DATA__
-#define __R_DATA__
+#pragma once
 
-#include "r_defs.h"
-#include "r_state.h"
-
-#include "main.h"
-#include "anim.h"
-
-void W_InitFlats(void);
-void W_InitPicAnims(void);
-void W_PrecacheLevel(void);
-
-#endif /* __R_DATA__ */
+void InitializeFlats(void);
+void InitializeAnimations(void);
+void PrecacheLevelGraphics(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

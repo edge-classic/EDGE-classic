@@ -26,99 +26,72 @@
 // Original Author: Chi Hoang
 //
 
-#ifndef __VIDEORES_H__
-#define __VIDEORES_H__
+#pragma once
 
-#include "i_defs.h"
+#include "con_var.h"
 
-// Macros
-#define FROM_320(x) ((x) * SCREENWIDTH / 320)
-#define FROM_200(y) ((y) * SCREENHEIGHT / 200)
+enum WindowMode
+{
+    kWindowModeInvalid = -1,
+    kWindowModeWindowed,
+    kWindowModeFullscreen,
+    kWindowModeBorderless
+};
 
 // Screen mode information
-class scrmode_c
+struct DisplayMode
 {
-  public:
-    int width;
-    int height;
-    int depth;
-    int display_mode;
-
-    enum
-    {
-        SCR_INVALID = -1,
-        SCR_WINDOW,
-        SCR_FULLSCREEN,
-        SCR_BORDERLESS
-    };
-
-  public:
-    scrmode_c() : width(0), height(0), depth(0), display_mode(SCR_WINDOW)
-    {
-    }
-
-    scrmode_c(int _w, int _h, int _depth, int _display_mode)
-        : width(_w), height(_h), depth(_depth), display_mode(_display_mode)
-    {
-    }
-
-    scrmode_c(const scrmode_c &other)
-        : width(other.width), height(other.height), depth(other.depth), display_mode(other.display_mode)
-    {
-    }
-
-    ~scrmode_c()
-    {
-    }
+    int width       = 0;
+    int height      = 0;
+    int depth       = 0;
+    int window_mode = kWindowModeWindowed;
 };
 
 // Exported Vars
-extern int                      SCREENWIDTH;
-extern int                      SCREENHEIGHT;
-extern int                      SCREENBITS;
-extern int                      DISPLAYMODE;
-extern scrmode_c                borderless_mode;
-extern std::vector<scrmode_c *> screen_modes;
+extern int                        current_screen_width;
+extern int                        current_screen_height;
+extern int                        current_screen_depth;
+extern int                        current_window_mode;
+extern DisplayMode                borderless_mode;
+extern std::vector<DisplayMode *> screen_modes;
 // CVARs related to Alt+Enter toggling
-extern cvar_c tf_screenwidth;
-extern cvar_c tf_screenheight;
-extern cvar_c tf_screendepth;
-extern cvar_c tf_displaymode;
-extern cvar_c tw_screenwidth;
-extern cvar_c tw_screenheight;
-extern cvar_c tw_screendepth;
-extern cvar_c tw_displaymode;
+extern ConsoleVariable toggle_fullscreen_width;
+extern ConsoleVariable toggle_fullscreen_height;
+extern ConsoleVariable toggle_fullscreen_depth;
+extern ConsoleVariable toggle_fullscreen_window_mode;
+extern ConsoleVariable toggle_windowed_width;
+extern ConsoleVariable toggle_windowed_height;
+extern ConsoleVariable toggle_windowed_depth;
+extern ConsoleVariable toggle_windowed_window_mode;
 
 // Exported Func
-bool R_DepthIsEquivalent(int depth1, int depth2);
+bool EquivalentDisplayDepth(int depth1, int depth2);
 
-void R_AddResolution(scrmode_c *mode);
-void R_DumpResList(void);
+void AddDisplayResolution(DisplayMode *mode);
+void DumpResolutionList(void);
 
-typedef enum
+enum ResolutionIncrement
 {
-    RESINC_Size = 0,
-    RESINC_DisplayMode,
-} increment_res_e;
+    kIncrementSize = 0,
+    kIncrementWindowMode,
+};
 
-bool R_IncrementResolution(scrmode_c *mode, int what, int dir);
+bool IncrementResolution(DisplayMode *mode, int what, int dir);
 // update the given screen mode with the next highest (dir=1)
 // or next lowest (dir=-1) attribute given by 'what' parameter,
 // either the size, depth or fullscreen/windowed mode.  Returns
 // true on succses.  If no such resolution exists (whether or
 // not the given mode exists) then false is returned.
 
-void R_ToggleFullscreen(void);
+void ToggleFullscreen(void);
 
-void R_InitialResolution(void);
-bool R_ChangeResolution(scrmode_c *mode);
+void SetInitialResolution(void);
+bool ChangeResolution(DisplayMode *mode);
 
-void R_SoftInitResolution(void);
+void SoftInitializeResolution(void);
 
 // only call these when it really is time to do the actual resolution
 // or view size change, i.e. at the start of a frame.
-
-#endif // __VIDEORES_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

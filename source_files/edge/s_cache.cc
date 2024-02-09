@@ -23,299 +23,285 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+#include "s_cache.h"
 
 #include <vector>
 
+#include "dm_state.h"  // game_directory
+#include "epi.h"
 #include "file.h"
 #include "filesystem.h"
-#include "sound_data.h"
-#include "sound_types.h"
-#include "str_util.h"
-
-#include "main.h"
-#include "sfx.h"
-
-#include "s_sound.h"
-#include "s_cache.h"
-#include "s_ogg.h"
-#include "s_mp3.h"
-#include "s_wav.h"
-
-#include "dm_state.h" // game_dir
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_misc.h"
 #include "m_random.h"
+#include "main.h"
 #include "p_mobj.h"
 #include "r_defs.h"
+#include "s_mp3.h"
+#include "s_ogg.h"
+#include "s_sound.h"
+#include "s_wav.h"
+#include "sfx.h"
+#include "snd_data.h"
+#include "snd_types.h"
+#include "str_util.h"
 #include "w_files.h"
 #include "w_wad.h"
 
-extern int  dev_freq;
-extern bool var_pc_speaker_mode;
+extern int  sound_device_frequency;
+extern bool pc_speaker_mode;
 
-static std::vector<sound_data_c *> fx_cache;
+static std::vector<SoundData *> sound_effects_cache;
 
-static void Load_Silence(sound_data_c *buf)
+static void LoadSilence(SoundData *buf)
 {
     int length = 256;
 
-    buf->freq = dev_freq;
-    buf->Allocate(length, SBUF_Mono);
+    buf->frequency_ = sound_device_frequency;
+    buf->Allocate(length, kMixMono);
 
-    memset(buf->data_L, 0, length * sizeof(int16_t));
+    memset(buf->data_left_, 0, length * sizeof(int16_t));
 }
 
-static bool Load_DOOM(sound_data_c *buf, const uint8_t *lump, int length)
+static bool LoadDoom(SoundData *buf, const uint8_t *lump, int length)
 {
-    buf->freq = lump[2] + (lump[3] << 8);
+    buf->frequency_ = lump[2] + (lump[3] << 8);
 
-    if (buf->freq < 8000 || buf->freq > 48000)
-        I_Warning("Sound Load: weird frequency: %d Hz\n", buf->freq);
+    if (buf->frequency_ < 8000 || buf->frequency_ > 48000)
+        LogWarning("Sound Load: weird frequency: %d Hz\n", buf->frequency_);
 
-    if (buf->freq < 4000)
-        buf->freq = 4000;
+    if (buf->frequency_ < 4000) buf->frequency_ = 4000;
 
     length -= 8;
 
-    if (length <= 0)
-        return false;
+    if (length <= 0) return false;
 
-    buf->Allocate(length, SBUF_Mono);
+    buf->Allocate(length, kMixMono);
 
     // convert to signed 16-bit format
     const uint8_t *src   = lump + 8;
     const uint8_t *s_end = src + length;
 
-    int16_t *dest = buf->data_L;
+    int16_t *dest = buf->data_left_;
 
-    for (; src < s_end; src++)
-        *dest++ = (*src ^ 0x80) << 8;
+    for (; src < s_end; src++) *dest++ = (*src ^ 0x80) << 8;
 
     return true;
 }
 
-static bool Load_WAV(sound_data_c *buf, uint8_t *lump, int length, bool pc_speaker)
+static bool LoadWav(SoundData *buf, uint8_t *lump, int length, bool pc_speaker)
 {
-    return S_LoadWAVSound(buf, lump, length, pc_speaker);
+    return SoundLoadWAV(buf, lump, length, pc_speaker);
 }
 
-static bool Load_OGG(sound_data_c *buf, const uint8_t *lump, int length)
+static bool LoadOgg(SoundData *buf, const uint8_t *lump, int length)
 {
-    return S_LoadOGGSound(buf, lump, length);
+    return LoadOggSound(buf, lump, length);
 }
 
-static bool Load_MP3(sound_data_c *buf, const uint8_t *lump, int length)
+static bool LoadMp3(SoundData *buf, const uint8_t *lump, int length)
 {
-    return S_LoadMP3Sound(buf, lump, length);
+    return LoadMp3Sound(buf, lump, length);
 }
 
 //----------------------------------------------------------------------------
 
-void S_CacheInit(void)
+void SoundCacheClearAll(void)
 {
-    // nothing to do
+    for (int i = 0; i < (int)sound_effects_cache.size(); i++)
+        delete sound_effects_cache[i];
+
+    sound_effects_cache.erase(sound_effects_cache.begin(),
+                              sound_effects_cache.end());
 }
 
-void S_FlushData(sound_data_c *fx)
-{
-    SYS_ASSERT(fx->ref_count == 0);
-
-    fx->Free();
-}
-
-void S_CacheClearAll(void)
-{
-    for (int i = 0; i < (int)fx_cache.size(); i++)
-        delete fx_cache[i];
-
-    fx_cache.erase(fx_cache.begin(), fx_cache.end());
-}
-
-static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
+static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
 {
     // open the file or lump, and read it into memory
-    epi::File        *F;
-    sound_format_e fmt = kUnknownImage;
+    epi::File  *F;
+    SoundFormat fmt = kSoundUnknown;
 
-    if (var_pc_speaker_mode)
+    if (pc_speaker_mode)
     {
-        if (epi::GetExtension(def->pc_speaker_sound).empty())
+        if (epi::GetExtension(def->pc_speaker_sound_).empty())
         {
-            F = W_OpenPackFile(def->pc_speaker_sound);
+            F = OpenFileFromPack(def->pc_speaker_sound_);
             if (!F)
             {
-                std::string open_name = M_ComposeFileName(game_dir, def->pc_speaker_sound);
-                F = epi::FileOpen(open_name, epi::kFileAccessRead | epi::kFileAccessBinary);
+                std::string open_name = epi::PathAppendIfNotAbsolute(
+                    game_directory, def->pc_speaker_sound_);
+                F = epi::FileOpen(
+                    open_name, epi::kFileAccessRead | epi::kFileAccessBinary);
             }
             if (!F)
             {
-                M_DebugError("SFX Loader: Missing sound: '%s'\n", def->pc_speaker_sound.c_str());
+                PrintDebugOrError("SFX Loader: Missing sound: '%s'\n",
+                                  def->pc_speaker_sound_.c_str());
                 return false;
             }
-            fmt = Sound_FilenameToFormat(def->pc_speaker_sound);
+            fmt = SoundFilenameToFormat(def->pc_speaker_sound_);
         }
-        else // Assume bare name is a lump reference
+        else  // Assume bare name is a lump reference
         {
             int lump = -1;
-            lump     = W_CheckNumForName(def->pc_speaker_sound.c_str());
+            lump     = CheckLumpNumberForName(def->pc_speaker_sound_.c_str());
             if (lump < 0)
             {
-                // Just write a debug message for SFX lumps; this prevents spam amongst the various IWADs
-                M_DebugError("SFX Loader: Missing sound lump: %s\n", def->pc_speaker_sound.c_str());
+                // Just write a debug message for SFX lumps; this prevents spam
+                // amongst the various IWADs
+                PrintDebugOrError("SFX Loader: Missing sound lump: %s\n",
+                                  def->pc_speaker_sound_.c_str());
                 return false;
             }
-            F = W_OpenLump(lump);
-            SYS_ASSERT(F);
+            F = LoadLumpAsFile(lump);
+            EPI_ASSERT(F);
         }
     }
     else
     {
-        if (def->pack_name != "")
+        if (def->pack_name_ != "")
         {
-            F = W_OpenPackFile(def->pack_name);
+            F = OpenFileFromPack(def->pack_name_);
             if (!F)
             {
-                M_DebugError("SFX Loader: Missing sound in EPK: '%s'\n", def->pack_name.c_str());
+                PrintDebugOrError("SFX Loader: Missing sound in EPK: '%s'\n",
+                                  def->pack_name_.c_str());
                 return false;
             }
-            fmt = Sound_FilenameToFormat(def->pack_name);
+            fmt = SoundFilenameToFormat(def->pack_name_);
         }
-        else if (def->file_name != "")
+        else if (def->file_name_ != "")
         {
             // Why is this composed with the app dir? - Dasho
-            std::string fn = M_ComposeFileName(game_dir, def->file_name);
-            F  = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
+            std::string fn =
+                epi::PathAppendIfNotAbsolute(game_directory, def->file_name_);
+            F = epi::FileOpen(fn,
+                              epi::kFileAccessRead | epi::kFileAccessBinary);
             if (!F)
             {
-                M_DebugError("SFX Loader: Can't Find File '%s'\n", fn.c_str());
+                PrintDebugOrError("SFX Loader: Can't Find File '%s'\n",
+                                  fn.c_str());
                 return false;
             }
-            fmt = Sound_FilenameToFormat(def->file_name);
+            fmt = SoundFilenameToFormat(def->file_name_);
         }
         else
         {
             int lump = -1;
-            lump     = W_CheckNumForName(def->lump_name.c_str());
+            lump     = CheckLumpNumberForName(def->lump_name_.c_str());
             if (lump < 0)
             {
-                // Just write a debug message for SFX lumps; this prevents spam amongst the various IWADs
-                M_DebugError("SFX Loader: Missing sound lump: %s\n", def->lump_name.c_str());
+                // Just write a debug message for SFX lumps; this prevents spam
+                // amongst the various IWADs
+                PrintDebugOrError("SFX Loader: Missing sound lump: %s\n",
+                                  def->lump_name_.c_str());
                 return false;
             }
-            F = W_OpenLump(lump);
-            SYS_ASSERT(F);
+            F = LoadLumpAsFile(lump);
+            EPI_ASSERT(F);
         }
     }
 
     // Load the data into the buffer
-    int   length = F->GetLength();
+    int      length = F->GetLength();
     uint8_t *data   = F->LoadIntoMemory();
 
     // no longer need the epi::File
     delete F;
-    F = NULL;
+    F = nullptr;
 
     if (!data)
     {
-        M_WarnError("SFX Loader: Error loading data.\n");
+        PrintWarningOrError("SFX Loader: Error loading data.\n");
         return false;
     }
     if (length < 4)
     {
         delete[] data;
-        M_WarnError("SFX Loader: Ignored short data (%d bytes).\n", length);
+        PrintWarningOrError("SFX Loader: Ignored short data (%d bytes).\n",
+                            length);
         return false;
     }
 
-    if ((var_pc_speaker_mode && epi::GetExtension(def->pc_speaker_sound).empty()) ||
-        (def->pack_name == "" && def->file_name == ""))
+    if ((pc_speaker_mode &&
+         epi::GetExtension(def->pc_speaker_sound_).empty()) ||
+        (def->pack_name_ == "" && def->file_name_ == ""))
     {
         // for lumps, we must detect the format from the lump contents
-        fmt = Sound_DetectFormat(data, length);
+        fmt = DetectSoundFormat(data, length);
     }
 
     bool OK = false;
 
     switch (fmt)
     {
-    case FMT_WAV:
-        OK = Load_WAV(buf, data, length, false);
-        break;
+        case kSoundWav:
+            OK = LoadWav(buf, data, length, false);
+            break;
 
-    case FMT_OGG:
-        OK = Load_OGG(buf, data, length);
-        break;
+        case kSoundOgg:
+            OK = LoadOgg(buf, data, length);
+            break;
 
-    case FMT_MP3:
-        OK = Load_MP3(buf, data, length);
-        break;
+        case kSoundMp3:
+            OK = LoadMp3(buf, data, length);
+            break;
 
-    // Double-check first byte here because pack filename detection could
-    // return FMT_SPK for either
-    case FMT_SPK:
-        if (data[0] == 0x3)
-            OK = Load_DOOM(buf, data, length);
-        else
-            OK = Load_WAV(buf, data, length, true);
-        break;
+        // Double-check first byte here because pack filename detection could
+        // return kSoundPcSpeaker for either
+        case kSoundPcSpeaker:
+            if (data[0] == 0x3)
+                OK = LoadDoom(buf, data, length);
+            else
+                OK = LoadWav(buf, data, length, true);
+            break;
 
-    case FMT_DOOM:
-        OK = Load_DOOM(buf, data, length);
-        break;
+        case kSoundDoom:
+            OK = LoadDoom(buf, data, length);
+            break;
 
-    default:
-        OK = false;
-        break;
+        default:
+            OK = false;
+            break;
     }
 
     // Tag sound as SFX for environmental effects - Dasho
-    if (OK)
-        buf->is_sfx = true;
+    if (OK) buf->is_sound_effect_ = true;
 
     return OK;
 }
 
-sound_data_c *S_CacheLoad(sfxdef_c *def)
+SoundData *SoundCacheLoad(SoundEffectDefinition *def)
 {
     bool pc_speaker_skip = false;
 
-    if (var_pc_speaker_mode)
+    if (pc_speaker_mode)
     {
-        if (def->pc_speaker_sound.empty())
-            pc_speaker_skip = true;
+        if (def->pc_speaker_sound_.empty()) pc_speaker_skip = true;
     }
 
-    for (int i = 0; i < (int)fx_cache.size(); i++)
+    for (int i = 0; i < (int)sound_effects_cache.size(); i++)
     {
-        if (fx_cache[i]->priv_data == (void *)def)
+        if (sound_effects_cache[i]->definition_data_ == (void *)def)
         {
-            fx_cache[i]->ref_count++;
-            return fx_cache[i];
+            return sound_effects_cache[i];
         }
     }
 
     // create data structure
-    sound_data_c *buf = new sound_data_c();
+    SoundData *buf = new SoundData();
 
-    fx_cache.push_back(buf);
+    sound_effects_cache.push_back(buf);
 
-    buf->priv_data = def;
-    buf->ref_count = 1;
+    buf->definition_data_ = def;
 
     if (pc_speaker_skip)
-        Load_Silence(buf);
+        LoadSilence(buf);
     else if (!DoCacheLoad(def, buf))
-        Load_Silence(buf);
+        LoadSilence(buf);
 
     return buf;
-}
-
-void S_CacheRelease(sound_data_c *data)
-{
-    SYS_ASSERT(data->ref_count >= 1);
-
-    data->ref_count--;
 }
 
 //--- editor settings ---

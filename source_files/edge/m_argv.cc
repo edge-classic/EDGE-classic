@@ -18,36 +18,42 @@
 //
 //------------------------------------------------------------------------
 
-#include "i_defs.h"
 #include "m_argv.h"
-#include "str_util.h"
-#include "filesystem.h"
+
+#include <string.h>
+
+#include "epi.h"
 #include "epi_windows.h"
+#include "filesystem.h"
+#include "i_system.h"
+#include "str_compare.h"
+#include "str_util.h"
 #ifdef _WIN32
 #include <shellapi.h>
 #endif
 
-std::vector<std::string> argv::list;
+std::vector<std::string> program_argument_list;
 
 // this one is here to avoid infinite recursion of param files.
-typedef struct added_parm_s
+struct AddedParameter
 {
-    std::string name;
-    struct added_parm_s  *next;
-} added_parm_t;
+    std::string            name;
+    struct AddedParameter *next;
+};
 
-static added_parm_t *added_parms;
+static AddedParameter *added_parameters;
 
 //
 // ArgvInit
 //
-// Initialise argument list. The strings (and array) are copied.
+// Initialise argument program_argument_list. The strings (and array) are
+// copied.
 //
 // NOTE: doesn't merge multiple uses of an option, hence
 //       using ArgvFind() will only return the first usage.
 //
 #ifdef _WIN32
-void argv::Init(const int argc, const char *const *argv)
+void ArgumentParse(const int argc, const char *const *argv)
 {
     (void)argc;
     (void)argv;
@@ -57,15 +63,16 @@ void argv::Init(const int argc, const char *const *argv)
     wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
 
     if (!win_argv)
-        I_Error("argv::Init: Could not retrieve command line arguments!\n");
+        FatalError(
+            "ArgumentParse: Could not retrieve command line arguments!\n");
 
-    list.reserve(win_argc);
+    program_argument_list.reserve(win_argc);
 
     std::vector<std::string> argv_block;
 
     for (i = 0; i < win_argc; i++)
     {
-        SYS_ASSERT(win_argv[i] != nullptr);
+        EPI_ASSERT(win_argv[i] != nullptr);
         argv_block.push_back(epi::WStringToUTF8(win_argv[i]));
     }
 
@@ -76,97 +83,93 @@ void argv::Init(const int argc, const char *const *argv)
         // Just place argv[0] as is
         if (i == 0)
         {
-            list.emplace_back(argv_block[i]);
+            program_argument_list.emplace_back(argv_block[i]);
             continue;
         }
 
         if (argv_block[i][0] == '@')
-        { // add it as a response file
-            ApplyResponseFile(&argv_block[i][1]);
+        {  // add it as a response file
+            ArgumentApplyResponseFile(&argv_block[i][1]);
             continue;
         }
 
-        list.emplace_back(argv_block[i]);
+        program_argument_list.emplace_back(argv_block[i]);
     }
 }
 #else
-void argv::Init(const int argc, const char *const *argv)
+void ArgumentParse(const int argc, const char *const *argv)
 {
-    SYS_ASSERT(argc >= 0);
-    list.reserve(argc);
+    EPI_ASSERT(argc >= 0);
+    program_argument_list.reserve(argc);
 
     for (int i = 0; i < argc; i++)
     {
-        SYS_ASSERT(argv[i] != nullptr);
+        EPI_ASSERT(argv[i] != nullptr);
 
 #ifdef __APPLE__
         // ignore MacOS X rubbish
-        if (argv[i] == "-psn")
-            continue;
+        if (argv[i] == "-psn") continue;
 #endif
         // Just place argv[0] as is
         if (i == 0)
         {
-            list.emplace_back(argv[i]);
+            program_argument_list.emplace_back(argv[i]);
             continue;
         }
 
         if (argv[i][0] == '@')
-        { // add it as a response file
-            ApplyResponseFile(&argv[i][1]);
+        {  // add it as a response file
+            ArgumentApplyResponseFile(&argv[i][1]);
             continue;
         }
 
-        list.emplace_back(argv[i]);
+        program_argument_list.emplace_back(argv[i]);
     }
 }
 #endif
 
-int argv::Find(std::string longName, int *numParams)
+int ArgumentFind(std::string_view long_name, int *total_parameters)
 {
-    SYS_ASSERT(!longName.empty());
+    EPI_ASSERT(!long_name.empty());
 
-    if (numParams)
-        *numParams = 0;
+    if (total_parameters) *total_parameters = 0;
 
     size_t p = 0;
 
-    for (; p < list.size(); ++p)
+    for (; p < program_argument_list.size(); ++p)
     {
-        if (!IsOption(p))
-            continue;
+        if (!ArgumentIsOption(p)) continue;
 
-        if (epi::StringCaseCompareASCII(longName, list[p].substr(1)) == 0)
+        if (epi::StringCaseCompareASCII(
+                long_name, program_argument_list[p].substr(1)) == 0)
             break;
     }
 
-    if (p == list.size())
-        return -1;
+    if (p == program_argument_list.size()) return -1;
 
-    if (numParams)
+    if (total_parameters)
     {
         size_t q = p + 1;
 
-        while (q < list.size() && !IsOption(q))
-            ++q;
+        while (q < program_argument_list.size() && !ArgumentIsOption(q)) ++q;
 
-        *numParams = q - p - 1;
+        *total_parameters = q - p - 1;
     }
 
     return p;
 }
 
-std::string argv::Value(std::string longName, int *numParams)
+std::string ArgumentValue(std::string_view long_name, int *total_parameters)
 {
-    SYS_ASSERT(!longName.empty());
+    EPI_ASSERT(!long_name.empty());
 
-    int pos = Find(longName, numParams);
+    int pos = ArgumentFind(long_name, total_parameters);
 
-    if (pos <= 0)
-        return "";
+    if (pos <= 0) return "";
 
-    if (pos + 1 < int(list.size()) && !IsOption(pos + 1))
-        return list[pos + 1];
+    if (pos + 1 < int(program_argument_list.size()) &&
+        !ArgumentIsOption(pos + 1))
+        return program_argument_list[pos + 1];
     else
         return "";
 }
@@ -175,32 +178,35 @@ std::string argv::Value(std::string longName, int *numParams)
 // present, sets it to false if parm prefixed with `-no' is present,
 // otherwise leaves it unchanged.
 //
-void argv::CheckBooleanParm(std::string parm, bool *boolval, bool reverse)
+void ArgumentCheckBooleanParameter(const std::string &parameter,
+                                   bool *boolean_value, bool reverse)
 {
-    if (Find(parm) > 0)
+    if (ArgumentFind(parameter) > 0)
     {
-        *boolval = !reverse;
+        *boolean_value = !reverse;
         return;
     }
 
-    if (Find(epi::StringFormat("no%s", parm.c_str())) > 0)
+    if (ArgumentFind(epi::StringFormat("no%s", parameter.c_str())) > 0)
     {
-        *boolval = reverse;
+        *boolean_value = reverse;
         return;
     }
 }
 
-void argv::CheckBooleanCVar(std::string parm, cvar_c *var, bool reverse)
+void ArgumentCheckBooleanConsoleVariable(const std::string &parameter,
+                                         ConsoleVariable   *variable,
+                                         bool               reverse)
 {
-    if (Find(parm) > 0)
+    if (ArgumentFind(parameter) > 0)
     {
-        *var = (reverse ? 0 : 1);
+        *variable = (reverse ? 0 : 1);
         return;
     }
 
-    if (Find(epi::StringFormat("no%s", parm.c_str())) > 0)
+    if (ArgumentFind(epi::StringFormat("no%s", parameter.c_str())) > 0)
     {
-        *var = (reverse ? 1 : 0);
+        *variable = (reverse ? 1 : 0);
         return;
     }
 }
@@ -213,12 +219,10 @@ static int ParseOneFilename(FILE *fp, char *buf)
     int ch;
 
     // skip whitespace
-    do
-    {
+    do {
         ch = fgetc(fp);
 
-        if (ch == EOF)
-            return EOF;
+        if (ch == EOF) return EOF;
     } while (epi::IsSpaceASCII(ch));
 
     bool quoting = false;
@@ -232,8 +236,7 @@ static int ParseOneFilename(FILE *fp, char *buf)
             continue;
         }
 
-        if (ch == EOF || (epi::IsSpaceASCII(ch) && !quoting))
-            break;
+        if (ch == EOF || (epi::IsSpaceASCII(ch) && !quoting)) break;
 
         *buf++ = ch;
 
@@ -248,60 +251,61 @@ static int ParseOneFilename(FILE *fp, char *buf)
 //
 // Adds a response file
 //
-void argv::ApplyResponseFile(std::string name)
+void ArgumentApplyResponseFile(std::string_view name)
 {
-    char          buf[1024];
-    FILE         *f;
-    added_parm_t  this_parm;
-    added_parm_t *p;
+    char            buf[1024];
+    FILE           *f;
+    AddedParameter  this_parm;
+    AddedParameter *p;
 
     // check if the file has already been added
-    for (p = added_parms; p; p = p->next)
+    for (p = added_parameters; p; p = p->next)
     {
-        if (p->name.compare(name) == 0)
-            return;
+        if (epi::StringCompare(p->name, name) == 0) return;
     }
 
     // mark that this file has been added
     this_parm.name = name;
-    p = this_parm.next = added_parms;
+    p = this_parm.next = added_parameters;
 
     // add arguments from the given file
     f = epi::FileOpenRaw(name, epi::kFileAccessRead | epi::kFileAccessBinary);
     if (!f)
-        I_Error("Couldn't open \"%s\" for reading!", name.c_str());
+        FatalError("Couldn't open \"%s\" for reading!", this_parm.name.c_str());
 
     for (; EOF != ParseOneFilename(f, buf);)
-        list.push_back(strdup(buf));
+        program_argument_list.push_back(strdup(buf));
 
     // unlink from list
-    added_parms = p;
+    added_parameters = p;
 
     fclose(f);
 }
 
-void argv::DebugDumpArgs(void)
+void ArgumentDebugDump(void)
 {
-    I_Printf("Command-line Options:\n");
+    LogPrint("Command-line Options:\n");
 
     int i = 0;
 
-    while (i < int(list.size()))
+    while (i < int(program_argument_list.size()))
     {
         bool pair_it_up = false;
 
-        if (i > 0 && i + 1 < int(list.size()) && !IsOption(i + 1))
+        if (i > 0 && i + 1 < int(program_argument_list.size()) &&
+            !ArgumentIsOption(i + 1))
             pair_it_up = true;
 
-        I_Printf("  %s %s\n", list[i].c_str(), pair_it_up ? list[i + 1].c_str() : "");
+        LogPrint("  %s %s\n", program_argument_list[i].c_str(),
+                 pair_it_up ? program_argument_list[i + 1].c_str() : "");
 
         i += pair_it_up ? 2 : 1;
     }
 }
 
-bool argv::IsOption(const int index)
+bool ArgumentIsOption(const int index)
 {
-    return list.at(index)[0] == '-';
+    return program_argument_list.at(index)[0] == '-';
 }
 
 //--- editor settings ---

@@ -1,27 +1,21 @@
-#include "i_defs.h"
 
-#include "file.h"
-#include "filesystem.h"
 
-#include "main.h"
-
-#include "vm_coal.h"
 #include "dm_state.h"
 #include "e_main.h"
-#include "g_game.h"
-#include "version.h"
-
 #include "e_player.h"
-#include "hu_font.h"
-#include "hu_draw.h"
-#include "r_modes.h"
-#include "w_wad.h"
-
-#include "m_random.h"
-
-#include "lua_compat.h"
-
 #include "epi_windows.h"
+#include "file.h"
+#include "filesystem.h"
+#include "g_game.h"
+#include "hu_draw.h"
+#include "hu_font.h"
+#include "lua_compat.h"
+#include "m_random.h"
+#include "main.h"
+#include "r_modes.h"
+#include "version.h"
+#include "vm_coal.h"
+#include "w_wad.h"
 
 //------------------------------------------------------------------------
 //  SYSTEM MODULE
@@ -32,7 +26,7 @@
 static int SYS_error(lua_State *L)
 {
     const char *s = luaL_checkstring(L, 1);
-    I_Error("%s\n", s);
+    FatalError("%s\n", s);
     return 0;
 }
 
@@ -41,7 +35,7 @@ static int SYS_error(lua_State *L)
 static int SYS_print(lua_State *L)
 {
     const char *s = luaL_checkstring(L, 1);
-    I_Printf("%s\n", s);
+    LogPrint("%s\n", s);
     return 0;
 }
 
@@ -50,7 +44,7 @@ static int SYS_print(lua_State *L)
 static int SYS_debug_print(lua_State *L)
 {
     const char *s = luaL_checkstring(L, 1);
-    I_Debugf("%s\n", s);
+    LogDebug("%s\n", s);
     return 0;
 }
 
@@ -58,7 +52,7 @@ static int SYS_debug_print(lua_State *L)
 //
 static int SYS_edge_version(lua_State *L)
 {
-    lua_pushnumber(L, edgeversion.f);
+    lua_pushnumber(L, edgeversion.f_);
     return 1;
 }
 
@@ -68,10 +62,7 @@ static bool console_allocated = false;
 static int SYS_AllocConsole(lua_State *L)
 {
 #ifdef WIN32
-    if (console_allocated)
-    {
-        return 0;
-    }
+    if (console_allocated) { return 0; }
 
     console_allocated = true;
     AllocConsole();
@@ -88,10 +79,10 @@ static int SYS_AllocConsole(lua_State *L)
 //------------------------------------------------------------------------
 
 // math.rint(val)
-static int MATH_rint(lua_State* L)
+static int MATH_rint(lua_State *L)
 {
     double val = luaL_checknumber(L, 1);
-    lua_pushinteger(L, I_ROUND(val));
+    lua_pushinteger(L, RoundToInteger(val));
     return 1;
 }
 
@@ -101,7 +92,7 @@ static const luaL_Reg syslib[] = {{"error", SYS_error},
                                   {"debug_print", SYS_debug_print},
                                   {"edge_version", SYS_edge_version},
                                   {"allocate_console", SYS_AllocConsole},
-                                  {NULL, NULL}};
+                                  {nullptr, nullptr}};
 
 static int luaopen_sys(lua_State *L)
 {
@@ -109,9 +100,9 @@ static int luaopen_sys(lua_State *L)
     return 1;
 }
 
-const luaL_Reg loadlibs[] = {{"sys", luaopen_sys}, {NULL, NULL}};
+const luaL_Reg loadlibs[] = {{"sys", luaopen_sys}, {nullptr, nullptr}};
 
-void LUA_RegisterCoreLibraries(lua_State *L)
+void LuaRegisterCoreLibraries(lua_State *L)
 {
     const luaL_Reg *lib;
     /* "require" functions from 'loadedlibs' and set results to global table */

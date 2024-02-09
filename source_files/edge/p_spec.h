@@ -28,94 +28,93 @@
 // -ACB- 2001/01/14 Added Elevator Types
 //
 
-#ifndef __P_SPEC__
-#define __P_SPEC__
+#pragma once
 
 #include "main.h"
 #include "r_defs.h"
 #include "r_image.h"
 
-typedef struct light_s
+struct LightSpecial
 {
     // type of light effect
-    const lightdef_c *type;
+    const LightSpecialDefinition *type;
 
-    sector_t *sector;
+    Sector *sector;
 
     // countdown value to next change, or 0 if disabled
     int count;
 
     // dark and bright levels
-    int minlight;
-    int maxlight;
+    int minimum_light;
+    int maximum_light;
 
     // current direction for GLOW type, -1 down, +1 up
     int direction;
 
     // countdown value for FADE type
     int fade_count;
-} light_t;
+};
 
-typedef enum
+enum ButtonPosition
 {
-    BWH_None,
-    BWH_Top,
-    BWH_Middle,
-    BWH_Bottom
-} bwhere_e;
+    kButtonNone,
+    kButtonTop,
+    kButtonMiddle,
+    kButtonBottom
+};
 
-typedef struct button_s
+struct Button
 {
-    line_t        *line;
-    bwhere_e       where;
-    const image_c *bimage;
-    int            btimer;
-    struct sfx_s  *off_sound;
-} button_t;
+    Line               *line;
+    ButtonPosition      where;
+    const Image        *button_image;
+    int                 button_timer;
+    struct SoundEffect *off_sound;
+};
 
-typedef enum
+enum PlaneDirection
 {
-    DIRECTION_UP     = +1,
-    DIRECTION_WAIT   = 0,
-    DIRECTION_DOWN   = -1,
-    DIRECTION_STASIS = -2
-} plane_dir_e;
+    kPlaneDirectionUp     = +1,
+    kPlaneDirectionWait   = 0,
+    kPlaneDirectionDown   = -1,
+    kPlaneDirectionStasis = -2
+};
 
-typedef struct plane_move_s
+struct PlaneMover
 {
-    const movplanedef_c *type;
-    sector_t            *sector;
+    const PlaneMoverDefinition *type;
+    Sector                     *sector;
 
     bool is_ceiling;
     bool is_elevator;
 
-    float startheight;
-    float destheight;
-    float elev_height;
+    float start_height;
+    float destination_height;
+    float elevator_height;
     float speed;
-    int   crush; // damage, or 0 for no crushing
+    int   crush;  // damage, or 0 for no crushing
 
     // 1 = up, 0 = waiting at top, -1 = down
     int direction;
-    int olddirection;
+    int old_direction;
 
     int tag;
 
     // tics to wait when fully open
     int waited;
 
-    bool sfxstarted;
+    bool sound_effect_started;
 
-    int            newspecial;
-    const image_c *new_image;
+    int          new_special;
+    const Image *new_image;
 
-    bool nukeme = false; // for changers already at their dest height
-} plane_move_t;
+    bool nuke_me = false;  // for changers already at their dest height
+};
 
-typedef struct slider_move_s
+struct SlidingDoorMover
 {
-    const sliding_door_c *info;
-    line_t               *line;
+    const SlidingDoor *info;
+    Line              *line;
 
     // current distance it has opened
     float opening;
@@ -124,7 +123,7 @@ typedef struct slider_move_s
     float target;
 
     // length of line
-    float line_len;
+    float line_length;
 
     // 1 = opening, 0 = waiting, -1 = closing
     int direction;
@@ -132,11 +131,11 @@ typedef struct slider_move_s
     // tics to wait at the top
     int waited;
 
-    bool sfxstarted;
+    bool sound_effect_started;
     bool final_open;
-} slider_move_t;
+};
 
-typedef struct force_s
+struct Force
 {
     bool is_point;
     bool is_wind;
@@ -146,96 +145,98 @@ typedef struct force_s
     float radius;
     float magnitude;
 
-    HMM_Vec2 mag; // wind/current
+    HMM_Vec2 direction;  // wind/current
 
-    sector_t *sector; // the affected sector
-} force_t;
+    Sector *sector;  // the affected sector
+};
 
 // End-level timer (-TIMER option)
-extern bool levelTimer;
-extern int  levelTimeCount;
+extern bool level_timer;
+extern int  level_time_count;
 
-extern linetype_c donut[2];
+extern LineType donut[2];
 
 // at map load
-void P_SpawnSpecials1(void);
-void P_SpawnSpecials2(int autotag);
-
-// at map exit
-void P_StopAmbientSectorSfx(void);
+void SpawnMapSpecials1(void);
+void SpawnMapSpecials2(int autotag);
 
 // every tic
-void P_UpdateSpecials(bool extra_tic);
+void UpdateSpecials(bool extra_tic);
 
 // when needed
-bool P_UseSpecialLine(mobj_t *thing, line_t *line, int side, float open_bottom, float open_top);
-bool P_CrossSpecialLine(line_t *ld, int side, mobj_t *thing);
-void P_ShootSpecialLine(line_t *ld, int side, mobj_t *thing);
-void P_RemoteActivation(mobj_t *thing, int typenum, int tag, int side, trigger_e method);
-void P_PlayerInSpecialSector(struct player_s *pl, sector_t *sec, bool should_choke = true);
+bool UseSpecialLine(MapObject *thing, Line *line, int side, float open_bottom,
+                    float open_top);
+bool CrossSpecialLine(Line *ld, int side, MapObject *thing);
+void ShootSpecialLine(Line *ld, int side, MapObject *thing);
+void RemoteActivation(MapObject *thing, int typenum, int tag, int side,
+                      LineTrigger method);
+void PlayerInSpecialSector(class Player *pl, Sector *sec,
+                           bool should_choke = true);
 
 // Utilities...
-int       P_TwoSided(int sector, int line);
-side_t   *P_GetSide(int currentSector, int line, int side);
-sector_t *P_GetSector(int currentSector, int line, int side);
-sector_t *P_GetNextSector(const line_t *line, const sector_t *sec, bool ignore_selfref = false);
+int     LineIsTwoSided(int sector, int line);
+Side   *GetLineSidedef(int currentSector, int line, int side);
+Sector *GetLineSector(int currentSector, int line, int side);
+Sector *GetLineSectorAdjacent(const Line *line, const Sector *sec,
+                              bool ignore_selfref = false);
 
 // Info Needs....
-float     P_FindSurroundingHeight(const heightref_e ref, const sector_t *sec);
-float     P_FindRaiseToTexture(sector_t *sec); // -KM- 1998/09/01 New func, old inline
-sector_t *P_FindSectorFromTag(int tag);
-int       P_FindMinSurroundingLight(sector_t *sector, int max);
+float FindSurroundingHeight(const TriggerHeightReference ref,
+                            const Sector                *sec);
+float FindRaiseToTexture(Sector *sec);  // -KM- 1998/09/01 New func, old inline
+Sector *FindSectorFromTag(int tag);
+int     FindMinimumSurroundingLight(Sector *sector, int max);
 
 // start an action...
-bool EV_Lights(sector_t *sec, const lightdef_c *type);
+bool RunSectorLight(Sector *sec, const LightSpecialDefinition *type);
 
-void P_RunActivePlanes(void);
-void P_RunActiveSliders(void);
+void RunActivePlanes(void);
+void RunActiveSliders(void);
 
-void P_AddActivePlane(plane_move_t *pmov);
-void P_AddActiveSlider(slider_move_t *smov);
-void P_DestroyAllPlanes(void);
-void P_DestroyAllSliders(void);
+void AddActivePlane(PlaneMover *pmov);
+void AddActiveSlider(SlidingDoorMover *smov);
+void DestroyAllPlanes(void);
+void DestroyAllSliders(void);
 
-void P_AddSpecialLine(line_t *ld);
-void P_AddSpecialSector(sector_t *sec);
-void P_SectorChangeSpecial(sector_t *sec, int new_type);
+void AddSpecialLine(Line *ld);
+void AddSpecialSector(Sector *sec);
+void SectorChangeSpecial(Sector *sec, int new_type);
 
-void     P_RunLights(void);
-light_t *P_NewLight(void);
-void     P_DestroyAllLights(void);
-void     P_RunSectorSFX(void);
-void     P_DestroyAllSectorSFX(void);
+void          RunLights(void);
+LightSpecial *NewLight(void);
+void          DestroyAllLights(void);
 
-void EV_LightTurnOn(int tag, int bright);
-bool EV_DoDonut(sector_t *s1, struct sfx_s *sfx[4]);
-bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def);
-bool EV_ManualPlane(line_t *line, mobj_t *thing, const movplanedef_c *type);
-// bool EV_ManualElevator(line_t * line, mobj_t * thing, const elevatordef_c * type);
+void RunLineTagLights(int tag, int bright);
+bool RunDonutSpecial(Sector *s1, struct SoundEffect *sfx[4]);
+bool TeleportMapObject(Line *line, int tag, MapObject *thing,
+                       const TeleportDefinition *def);
+bool RunManualPlaneMover(Line *line, MapObject *thing,
+                         const PlaneMoverDefinition *type);
 
-bool EV_DoPlane(sector_t *sec, const movplanedef_c *type, sector_t *model);
-bool EV_DoSlider(line_t *door, line_t *act_line, mobj_t *thing, const linetype_c *special);
-bool P_SectorIsLowering(sector_t *sec);
+bool RunPlaneMover(Sector *sec, const PlaneMoverDefinition *type,
+                   Sector *model);
+bool RunSlidingDoor(Line *door, Line *act_line, MapObject *thing,
+                    const LineType *special);
+bool SectorIsLowering(Sector *sec);
 
-void P_RunForces(bool extra_tic);
-void P_DestroyAllForces(void);
-void P_AddPointForce(sector_t *sec, float length);
-void P_AddSectorForce(sector_t *sec, bool is_wind, float x_mag, float y_mag);
+void RunForces(bool extra_tic);
+void DestroyAllForces(void);
+void AddPointForce(Sector *sec, float length);
+void AddSectorForce(Sector *sec, bool is_wind, float x_mag, float y_mag);
 
-void P_RunAmbientSFX(void);
-void P_AddAmbientSFX(sector_t *sec, struct sfx_s *sfx);
-void P_DestroyAllAmbientSFX(void);
+void RunAmbientSounds(void);
+void AddAmbientSounds(Sector *sec, struct SoundEffect *sfx);
+void DestroyAllAmbientSounds(void);
 
 //
 //  P_SWITCH
 //
-void P_InitSwitchList(void);
-void P_ChangeSwitchTexture(line_t *line, bool useAgain, line_special_e specials, bool noSound);
-void P_ClearButtons(void);
-void P_UpdateButtons(void);
-bool P_ButtonIsPressed(line_t *ld);
-
-#endif // __P_SPEC__
+void InitializeSwitchList(void);
+void ChangeSwitchTexture(Line *line, bool useAgain, LineSpecial specials,
+                         bool noSound);
+void ClearButtons(void);
+void UpdateButtons(void);
+bool ButtonIsPressed(Line *ld);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

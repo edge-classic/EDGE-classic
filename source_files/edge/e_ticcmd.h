@@ -23,97 +23,78 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __E_TICCMD_H__
-#define __E_TICCMD_H__
+#pragma once
+
+#include <stdint.h>
 
 // The data sampled per tick (single player)
 // and transmitted to other peers (multiplayer).
 // Mainly movements/button commands per game tick,
 
-typedef struct
+struct EventTicCommand
 {
     // horizontal turning, *65536 for angle delta
-    int16_t angleturn;
-
+    int16_t angle_turn;
     // vertical angle for mlook, *65536 for angle delta
-    int16_t mlookturn;
-
+    int16_t  mouselook_turn;
     uint16_t unused;
-
     // active player number, -1 for "dropped out" player
-    int16_t player_idx;
-
+    int16_t player_index;
     // /32 for move
-    int8_t forwardmove;
-
+    int8_t forward_move;
     // /32 for move
-    int8_t sidemove;
-
+    int8_t side_move;
     // -MH- 1998/08/23 upward movement
-    int8_t upwardmove;
-
-    uint8_t buttons;
-
-    uint16_t extbuttons;
-
-    uint8_t chatchar;
-
-    uint8_t unused2, unused3;
-} ticcmd_t;
+    int8_t   upward_move;
+    uint8_t  buttons;
+    uint16_t extended_buttons;
+    uint8_t  chat_character;
+    uint8_t  unused2, unused3;
+};
 
 //
 // Button/action code definitions.
 //
-typedef enum
+enum EventButtonCode
 {
     // Press "Fire".
-    BT_ATTACK = 1,
-
+    kButtonCodeAttack = 1,
     // Use button, to open doors, activate switches.
-    BT_USE = 2,
-
+    kButtonCodeUse = 2,
     // Flag, weapon change pending.
     // If true, the next 4 bits hold weapon num.
-    BT_CHANGE = 4,
-
+    kButtonCodeChangeWeapon = 4,
     // The 3bit weapon mask and shift, convenience.
-    BT_WEAPONMASK  = (8 + 16 + 32 + 64),
-    BT_WEAPONSHIFT = 3,
-} buttoncode_e;
+    kButtonCodeWeaponMask      = (8 + 16 + 32 + 64),
+    kButtonCodeWeaponMaskShift = 3,
+};
 
 // special weapon numbers
-#define BT_NEXT_WEAPON 14
-#define BT_PREV_WEAPON 15
+constexpr uint8_t kButtonCodeNextWeapon     = 14;
+constexpr uint8_t kButtonCodePreviousWeapon = 15;
 
 //
 // Extended Buttons: EDGE Specfics
 // -ACB- 1998/07/03
 //
-typedef enum
+enum EventExtendedButtonCode
 {
-    EBT_CENTER = 4,
-
+    kExtendedButtonCodeCenter = 4,
     // -AJA- 2000/02/08: support for second attack.
-    EBT_SECONDATK = 8,
-
+    kExtendedButtonCodeSecondAttack = 8,
     // -AJA- 2000/03/18: more control over zooming
-    EBT_ZOOM = 16,
-
+    kExtendedButtonCodeZoom = 16,
     // -AJA- 2004/11/10: manual weapon reload
-    EBT_RELOAD = 32,
-
+    kExtendedButtonCodeReload = 32,
     // -AJA- 2009/09/07: custom action buttons
-    EBT_ACTION1 = 64,
-    EBT_ACTION2 = 128,
-
-    EBT_INVPREV   = 256,
-    EBT_INVUSE    = 512,
-    EBT_INVNEXT   = 1024,
-    EBT_THIRDATK  = 2048,
-    EBT_FOURTHATK = 4096
-} extbuttoncode_e;
-
-#endif // __E_TICCMD_H__
+    kExtendedButtonCodeAction1           = 64,
+    kExtendedButtonCodeAction2           = 128,
+    kExtendedButtonCodeInventoryPrevious = 256,
+    kExtendedButtonCodeInventoryUse      = 512,
+    kExtendedButtonCodeInventoryNext     = 1024,
+    kExtendedButtonCodeThirdAttack       = 2048,
+    kExtendedButtonCodeFourthAttack      = 4096
+};
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

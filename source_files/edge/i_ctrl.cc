@@ -16,42 +16,37 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
-#include "i_video.h" // epi_sdl.h is also covered here - Dasho
-
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_event.h"
 #include "e_input.h"
 #include "e_main.h"
+#include "edge_profiling.h"
+#include "epi.h"
+#include "i_system.h"
+#include "i_video.h"
 #include "m_argv.h"
 #include "r_modes.h"
-
 #include "str_util.h"
-#include "edge_profiling.h"
-
-#undef DEBUG_KB
 
 // FIXME: Combine all these SDL bool vars into an int/enum'd flags structure
 
-extern cvar_c r_doubleframes;
+extern ConsoleVariable double_framerate;
 
 // Work around for alt-tabbing
 bool alt_is_down;
 bool eat_mouse_motion = true;
 
-DEF_CVAR(in_keypad, "1", CVAR_ARCHIVE)
+bool no_joystick;  // what a wowser, joysticks completely disabled
 
-bool nojoy; // what a wowser, joysticks completely disabled
+int joystick_device;  // choice in menu, 0 for none
 
-int joystick_device; // choice in menu, 0 for none
-
-static int          num_joys;
-static int          cur_joy; // 0 for none
+static int          total_joysticks;
+static int          current_joystick;  // 0 for none
 static bool         need_mouse_recapture = false;
-SDL_Joystick       *joy_info             = nullptr;
+SDL_Joystick       *joystick_info        = nullptr;
 SDL_GameController *gamepad_info         = nullptr;
-SDL_JoystickID      gamepad_inst         = -1;
+SDL_JoystickID      current_gamepad      = -1;
 
 // Track trigger state to avoid pushing multiple unnecessary trigger events
 bool right_trigger_pulled = false;
@@ -63,168 +58,136 @@ bool left_trigger_pulled  = false;
 //
 int TranslateSDLKey(SDL_Scancode key)
 {
-    // if keypad is not wanted, convert to normal keys
-    if (!in_keypad.d)
+    switch (key)
     {
-        if (SDL_SCANCODE_KP_1 <= key && key < SDL_SCANCODE_KP_0)
-            return '0' + (key - 88);
+        case SDL_SCANCODE_GRAVE:
+            return kTilde;
+        case SDL_SCANCODE_MINUS:
+            return kMinus;
+        case SDL_SCANCODE_EQUALS:
+            return kEquals;
 
-        if (key == SDL_SCANCODE_KP_0)
-            return '0';
+        case SDL_SCANCODE_TAB:
+            return kTab;
+        case SDL_SCANCODE_RETURN:
+            return kEnter;
+        case SDL_SCANCODE_ESCAPE:
+            return kEscape;
+        case SDL_SCANCODE_BACKSPACE:
+            return kBackspace;
 
-        switch (key)
-        {
-        case SDL_SCANCODE_KP_PLUS:
-            return '+';
-        case SDL_SCANCODE_KP_MINUS:
-            return '-';
+        case SDL_SCANCODE_UP:
+            return kUpArrow;
+        case SDL_SCANCODE_DOWN:
+            return kDownArrow;
+        case SDL_SCANCODE_LEFT:
+            return kLeftArrow;
+        case SDL_SCANCODE_RIGHT:
+            return kRightArrow;
+
+        case SDL_SCANCODE_HOME:
+            return kHome;
+        case SDL_SCANCODE_END:
+            return kEnd;
+        case SDL_SCANCODE_INSERT:
+            return kInsert;
+        case SDL_SCANCODE_DELETE:
+            return kDelete;
+        case SDL_SCANCODE_PAGEUP:
+            return kPageUp;
+        case SDL_SCANCODE_PAGEDOWN:
+            return kPageDown;
+
+        case SDL_SCANCODE_F1:
+            return kFunction1;
+        case SDL_SCANCODE_F2:
+            return kFunction2;
+        case SDL_SCANCODE_F3:
+            return kFunction3;
+        case SDL_SCANCODE_F4:
+            return kFunction4;
+        case SDL_SCANCODE_F5:
+            return kFunction5;
+        case SDL_SCANCODE_F6:
+            return kFunction6;
+        case SDL_SCANCODE_F7:
+            return kFunction7;
+        case SDL_SCANCODE_F8:
+            return kFunction8;
+        case SDL_SCANCODE_F9:
+            return kFunction9;
+        case SDL_SCANCODE_F10:
+            return kFunction10;
+        case SDL_SCANCODE_F11:
+            return kFunction11;
+        case SDL_SCANCODE_F12:
+            return kFunction12;
+
+        case SDL_SCANCODE_KP_0:
+            return kKeypad0;
+        case SDL_SCANCODE_KP_1:
+            return kKeypad1;
+        case SDL_SCANCODE_KP_2:
+            return kKeypad2;
+        case SDL_SCANCODE_KP_3:
+            return kKeypad3;
+        case SDL_SCANCODE_KP_4:
+            return kKeypad4;
+        case SDL_SCANCODE_KP_5:
+            return kKeypad5;
+        case SDL_SCANCODE_KP_6:
+            return kKeypad6;
+        case SDL_SCANCODE_KP_7:
+            return kKeypad7;
+        case SDL_SCANCODE_KP_8:
+            return kKeypad8;
+        case SDL_SCANCODE_KP_9:
+            return kKeypad9;
+
         case SDL_SCANCODE_KP_PERIOD:
-            return '.';
+            return kKeypadDot;
+        case SDL_SCANCODE_KP_PLUS:
+            return kKeypadPlus;
+        case SDL_SCANCODE_KP_MINUS:
+            return kKeypadMinus;
         case SDL_SCANCODE_KP_MULTIPLY:
-            return '*';
+            return kKeypadStar;
         case SDL_SCANCODE_KP_DIVIDE:
-            return '/';
+            return kKeypadSlash;
         case SDL_SCANCODE_KP_EQUALS:
-            return '=';
+            return kKeypadEquals;
         case SDL_SCANCODE_KP_ENTER:
-            return KEYD_ENTER;
+            return kKeypadEnter;
+
+        case SDL_SCANCODE_PRINTSCREEN:
+            return kPrintScreen;
+        case SDL_SCANCODE_CAPSLOCK:
+            return kCapsLock;
+        case SDL_SCANCODE_NUMLOCKCLEAR:
+            return kNumberLock;
+        case SDL_SCANCODE_SCROLLLOCK:
+            return kScrollLock;
+        case SDL_SCANCODE_PAUSE:
+            return kPause;
+
+        case SDL_SCANCODE_LSHIFT:
+        case SDL_SCANCODE_RSHIFT:
+            return kRightShift;
+        case SDL_SCANCODE_LCTRL:
+        case SDL_SCANCODE_RCTRL:
+            return kRightControl;
+        case SDL_SCANCODE_LGUI:
+        case SDL_SCANCODE_LALT:
+            return kLeftAlt;
+        case SDL_SCANCODE_RGUI:
+        case SDL_SCANCODE_RALT:
+            return kRightAlt;
 
         default:
             break;
-        }
     }
 
-    switch (key)
-    {
-    case SDL_SCANCODE_GRAVE:
-        return KEYD_TILDE;
-    case SDL_SCANCODE_MINUS:
-        return KEYD_MINUS;
-    case SDL_SCANCODE_EQUALS:
-        return KEYD_EQUALS;
-
-    case SDL_SCANCODE_TAB:
-        return KEYD_TAB;
-    case SDL_SCANCODE_RETURN:
-        return KEYD_ENTER;
-    case SDL_SCANCODE_ESCAPE:
-        return KEYD_ESCAPE;
-    case SDL_SCANCODE_BACKSPACE:
-        return KEYD_BACKSPACE;
-
-    case SDL_SCANCODE_UP:
-        return KEYD_UPARROW;
-    case SDL_SCANCODE_DOWN:
-        return KEYD_DOWNARROW;
-    case SDL_SCANCODE_LEFT:
-        return KEYD_LEFTARROW;
-    case SDL_SCANCODE_RIGHT:
-        return KEYD_RIGHTARROW;
-
-    case SDL_SCANCODE_HOME:
-        return KEYD_HOME;
-    case SDL_SCANCODE_END:
-        return KEYD_END;
-    case SDL_SCANCODE_INSERT:
-        return KEYD_INSERT;
-    case SDL_SCANCODE_DELETE:
-        return KEYD_DELETE;
-    case SDL_SCANCODE_PAGEUP:
-        return KEYD_PGUP;
-    case SDL_SCANCODE_PAGEDOWN:
-        return KEYD_PGDN;
-
-    case SDL_SCANCODE_F1:
-        return KEYD_F1;
-    case SDL_SCANCODE_F2:
-        return KEYD_F2;
-    case SDL_SCANCODE_F3:
-        return KEYD_F3;
-    case SDL_SCANCODE_F4:
-        return KEYD_F4;
-    case SDL_SCANCODE_F5:
-        return KEYD_F5;
-    case SDL_SCANCODE_F6:
-        return KEYD_F6;
-    case SDL_SCANCODE_F7:
-        return KEYD_F7;
-    case SDL_SCANCODE_F8:
-        return KEYD_F8;
-    case SDL_SCANCODE_F9:
-        return KEYD_F9;
-    case SDL_SCANCODE_F10:
-        return KEYD_F10;
-    case SDL_SCANCODE_F11:
-        return KEYD_F11;
-    case SDL_SCANCODE_F12:
-        return KEYD_F12;
-
-    case SDL_SCANCODE_KP_0:
-        return KEYD_KP0;
-    case SDL_SCANCODE_KP_1:
-        return KEYD_KP1;
-    case SDL_SCANCODE_KP_2:
-        return KEYD_KP2;
-    case SDL_SCANCODE_KP_3:
-        return KEYD_KP3;
-    case SDL_SCANCODE_KP_4:
-        return KEYD_KP4;
-    case SDL_SCANCODE_KP_5:
-        return KEYD_KP5;
-    case SDL_SCANCODE_KP_6:
-        return KEYD_KP6;
-    case SDL_SCANCODE_KP_7:
-        return KEYD_KP7;
-    case SDL_SCANCODE_KP_8:
-        return KEYD_KP8;
-    case SDL_SCANCODE_KP_9:
-        return KEYD_KP9;
-
-    case SDL_SCANCODE_KP_PERIOD:
-        return KEYD_KP_DOT;
-    case SDL_SCANCODE_KP_PLUS:
-        return KEYD_KP_PLUS;
-    case SDL_SCANCODE_KP_MINUS:
-        return KEYD_KP_MINUS;
-    case SDL_SCANCODE_KP_MULTIPLY:
-        return KEYD_KP_STAR;
-    case SDL_SCANCODE_KP_DIVIDE:
-        return KEYD_KP_SLASH;
-    case SDL_SCANCODE_KP_EQUALS:
-        return KEYD_KP_EQUAL;
-    case SDL_SCANCODE_KP_ENTER:
-        return KEYD_KP_ENTER;
-
-    case SDL_SCANCODE_PRINTSCREEN:
-        return KEYD_PRTSCR;
-    case SDL_SCANCODE_CAPSLOCK:
-        return KEYD_CAPSLOCK;
-    case SDL_SCANCODE_NUMLOCKCLEAR:
-        return KEYD_NUMLOCK;
-    case SDL_SCANCODE_SCROLLLOCK:
-        return KEYD_SCRLOCK;
-    case SDL_SCANCODE_PAUSE:
-        return KEYD_PAUSE;
-
-    case SDL_SCANCODE_LSHIFT:
-    case SDL_SCANCODE_RSHIFT:
-        return KEYD_RSHIFT;
-    case SDL_SCANCODE_LCTRL:
-    case SDL_SCANCODE_RCTRL:
-        return KEYD_RCTRL;
-    case SDL_SCANCODE_LGUI:
-    case SDL_SCANCODE_LALT:
-        return KEYD_LALT;
-    case SDL_SCANCODE_RGUI:
-    case SDL_SCANCODE_RALT:
-        return KEYD_RALT;
-
-    default:
-        break;
-    }
-
-    if (key <= 0x7f)
-        return epi::ToLowerASCII(SDL_GetKeyFromScancode(key));
+    if (key <= 0x7f) return epi::ToLowerASCII(SDL_GetKeyFromScancode(key));
 
     return -1;
 }
@@ -232,63 +195,48 @@ int TranslateSDLKey(SDL_Scancode key)
 void HandleFocusGain(void)
 {
     // Hide cursor and grab input
-    I_GrabCursor(true);
+    GrabCursor(true);
 
     // Ignore any pending mouse motion
     eat_mouse_motion = true;
 
     // Now active again
-    app_state |= APP_STATE_ACTIVE;
+    app_state |= kApplicationActive;
 }
 
 void HandleFocusLost(void)
 {
-    I_GrabCursor(false);
+    GrabCursor(false);
 
-    E_Idle();
+    EdgeIdle();
 
     // No longer active
-    app_state &= ~APP_STATE_ACTIVE;
+    app_state &= ~kApplicationActive;
 }
 
 void HandleKeyEvent(SDL_Event *ev)
 {
-    if (ev->type != SDL_KEYDOWN && ev->type != SDL_KEYUP)
-        return;
-
-#ifdef DEBUG_KB
-    if (ev->type == SDL_KEYDOWN)
-        L_WriteDebug("  HandleKey: DOWN\n");
-    else if (ev->type == SDL_KEYUP)
-        L_WriteDebug("  HandleKey: UP\n");
-#endif
+    if (ev->type != SDL_KEYDOWN && ev->type != SDL_KEYUP) return;
 
     SDL_Scancode sym = ev->key.keysym.scancode;
 
-    event_t event;
+    InputEvent event;
     event.value.key.sym = TranslateSDLKey(sym);
 
     // handle certain keys which don't behave normally
     if (sym == SDL_SCANCODE_CAPSLOCK || sym == SDL_SCANCODE_NUMLOCKCLEAR)
     {
-#ifdef DEBUG_KB
-        L_WriteDebug("   HandleKey: CAPS or NUMLOCK\n");
-#endif
-        if (ev->type != SDL_KEYDOWN)
-            return;
-        event.type = ev_keydown;
-        E_PostEvent(&event);
+        if (ev->type != SDL_KEYDOWN) return;
+        event.type = kInputEventKeyDown;
+        EventPostEvent(&event);
 
-        event.type = ev_keyup;
-        E_PostEvent(&event);
+        event.type = kInputEventKeyUp;
+        EventPostEvent(&event);
         return;
     }
 
-    event.type = (ev->type == SDL_KEYDOWN) ? ev_keydown : ev_keyup;
-
-#ifdef DEBUG_KB
-    L_WriteDebug("   HandleKey: sym=%d scan=%d --> key=%d\n", sym, ev->key.keysym.scancode, event.value.key);
-#endif
+    event.type =
+        (ev->type == SDL_KEYDOWN) ? kInputEventKeyDown : kInputEventKeyUp;
 
     if (event.value.key.sym < 0)
     {
@@ -296,181 +244,168 @@ void HandleKeyEvent(SDL_Event *ev)
         return;
     }
 
-    if (event.value.key.sym == KEYD_TAB && alt_is_down)
+    if (event.value.key.sym == kTab && alt_is_down)
     {
-#ifdef DEBUG_KB
-        L_WriteDebug("   HandleKey: ALT-TAB\n");
-#endif
         alt_is_down = false;
         return;
     }
 
-#ifndef EDGE_WEB // Not sure if this is desired on the web build
-    if (event.value.key.sym == KEYD_ENTER && alt_is_down)
+#ifndef EDGE_WEB  // Not sure if this is desired on the web build
+    if (event.value.key.sym == kEnter && alt_is_down)
     {
-#ifdef DEBUG_KB
-        L_WriteDebug("   HandleKey: ALT-ENTER\n");
-#endif
         alt_is_down = false;
-        R_ToggleFullscreen();
-        if (DISPLAYMODE == scrmode_c::SCR_WINDOW)
+        ToggleFullscreen();
+        if (current_window_mode == kWindowModeWindowed)
         {
-            I_GrabCursor(false);
+            GrabCursor(false);
             need_mouse_recapture = true;
         }
         return;
     }
 #endif
 
-    if (event.value.key.sym == KEYD_LALT)
-        alt_is_down = (event.type == ev_keydown);
+    if (event.value.key.sym == kLeftAlt)
+        alt_is_down = (event.type == kInputEventKeyDown);
 
-    E_PostEvent(&event);
+    EventPostEvent(&event);
 }
 
 void HandleMouseButtonEvent(SDL_Event *ev)
 {
-    event_t event;
+    InputEvent event;
 
     if (ev->type == SDL_MOUSEBUTTONDOWN)
-        event.type = ev_keydown;
+        event.type = kInputEventKeyDown;
     else if (ev->type == SDL_MOUSEBUTTONUP)
-        event.type = ev_keyup;
+        event.type = kInputEventKeyUp;
     else
         return;
 
     switch (ev->button.button)
     {
-    case 1:
-        event.value.key.sym = KEYD_MOUSE1;
-        break;
-    case 2:
-        event.value.key.sym = KEYD_MOUSE2;
-        break;
-    case 3:
-        event.value.key.sym = KEYD_MOUSE3;
-        break;
-    case 4:
-        event.value.key.sym = KEYD_MOUSE4;
-        break;
-    case 5:
-        event.value.key.sym = KEYD_MOUSE5;
-        break;
-    case 6:
-        event.value.key.sym = KEYD_MOUSE6;
-        break;
+        case 1:
+            event.value.key.sym = kMouse1;
+            break;
+        case 2:
+            event.value.key.sym = kMouse2;
+            break;
+        case 3:
+            event.value.key.sym = kMouse3;
+            break;
+        case 4:
+            event.value.key.sym = kMouse4;
+            break;
+        case 5:
+            event.value.key.sym = kMouse5;
+            break;
+        case 6:
+            event.value.key.sym = kMouse6;
+            break;
 
-    default:
-        return;
+        default:
+            return;
     }
 
-    E_PostEvent(&event);
+    EventPostEvent(&event);
 }
 
 void HandleMouseWheelEvent(SDL_Event *ev)
 {
-    event_t event;
-    event_t release;
+    InputEvent event;
+    InputEvent release;
 
-    event.type   = ev_keydown;
-    release.type = ev_keyup;
+    event.type   = kInputEventKeyDown;
+    release.type = kInputEventKeyUp;
 
     if (ev->wheel.y > 0)
     {
-        event.value.key.sym   = KEYD_WHEEL_UP;
-        release.value.key.sym = KEYD_WHEEL_UP;
+        event.value.key.sym   = kMouseWheelUp;
+        release.value.key.sym = kMouseWheelUp;
     }
     else if (ev->wheel.y < 0)
     {
-        event.value.key.sym   = KEYD_WHEEL_DN;
-        release.value.key.sym = KEYD_WHEEL_DN;
+        event.value.key.sym   = kMouseWheelDown;
+        release.value.key.sym = kMouseWheelDown;
     }
-    else
-    {
-        return;
-    }
-    E_PostEvent(&event);
-    E_PostEvent(&release);
+    else { return; }
+    EventPostEvent(&event);
+    EventPostEvent(&release);
 }
 
 static void HandleGamepadButtonEvent(SDL_Event *ev)
 {
     // ignore other gamepads;
-    if (ev->cbutton.which != gamepad_inst)
-        return;
+    if (ev->cbutton.which != current_gamepad) return;
 
-    event_t event;
+    InputEvent event;
 
     if (ev->type == SDL_CONTROLLERBUTTONDOWN)
-        event.type = ev_keydown;
+        event.type = kInputEventKeyDown;
     else if (ev->type == SDL_CONTROLLERBUTTONUP)
-        event.type = ev_keyup;
+        event.type = kInputEventKeyUp;
     else
         return;
 
-    if (ev->cbutton.button >= SDL_CONTROLLER_BUTTON_MAX) // How would this happen? - Dasho
+    if (ev->cbutton.button >=
+        SDL_CONTROLLER_BUTTON_MAX)  // How would this happen? - Dasho
         return;
 
-    event.value.key.sym = KEYD_GP_A + ev->cbutton.button;
+    event.value.key.sym = kGamepadA + ev->cbutton.button;
 
-    E_PostEvent(&event);
+    EventPostEvent(&event);
 }
 
 static void HandleGamepadTriggerEvent(SDL_Event *ev)
 {
     // ignore other gamepads
-    if (ev->caxis.which != gamepad_inst)
-        return;
+    if (ev->caxis.which != current_gamepad) return;
 
     Uint8 current_axis = ev->caxis.axis;
 
     // ignore non-trigger axes
-    if (current_axis != SDL_CONTROLLER_AXIS_TRIGGERLEFT && current_axis != SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
+    if (current_axis != SDL_CONTROLLER_AXIS_TRIGGERLEFT &&
+        current_axis != SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
         return;
 
-    event_t event;
+    InputEvent event;
 
-    int thresh = I_ROUND(*joy_deads[current_axis] * 32767.0f);
+    int thresh = RoundToInteger(*joystick_deadzones[current_axis] * 32767.0f);
     int input  = ev->caxis.value;
 
     if (current_axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
     {
-        event.value.key.sym = KEYD_TRIGGER_LEFT;
+        event.value.key.sym = kGamepadTriggerLeft;
         if (input < thresh)
         {
-            if (!left_trigger_pulled)
-                return;
-            event.type          = ev_keyup;
+            if (!left_trigger_pulled) return;
+            event.type          = kInputEventKeyUp;
             left_trigger_pulled = false;
         }
         else
         {
-            if (left_trigger_pulled)
-                return;
-            event.type          = ev_keydown;
+            if (left_trigger_pulled) return;
+            event.type          = kInputEventKeyDown;
             left_trigger_pulled = true;
         }
     }
     else
     {
-        event.value.key.sym = KEYD_TRIGGER_RIGHT;
+        event.value.key.sym = kGamepadTriggerRight;
         if (input < thresh)
         {
-            if (!right_trigger_pulled)
-                return;
-            event.type           = ev_keyup;
+            if (!right_trigger_pulled) return;
+            event.type           = kInputEventKeyUp;
             right_trigger_pulled = false;
         }
         else
         {
-            if (right_trigger_pulled)
-                return;
-            event.type           = ev_keydown;
+            if (right_trigger_pulled) return;
+            event.type           = kInputEventKeyDown;
             right_trigger_pulled = true;
         }
     }
 
-    E_PostEvent(&event);
+    EventPostEvent(&event);
 }
 
 void HandleMouseMotionEvent(SDL_Event *ev)
@@ -482,119 +417,124 @@ void HandleMouseMotionEvent(SDL_Event *ev)
 
     if (dx || dy)
     {
-        event_t event;
+        InputEvent event;
 
-        event.type           = ev_mouse;
+        event.type           = kInputEventKeyMouse;
         event.value.mouse.dx = dx;
-        event.value.mouse.dy = -dy; // -AJA- positive should be "up"
+        event.value.mouse.dy = -dy;  // -AJA- positive should be "up"
 
-        E_PostEvent(&event);
+        EventPostEvent(&event);
     }
 }
 
-int I_JoyGetAxis(int n) // n begins at 0
+int JoystickGetAxis(int n)  // n begins at 0
 {
-    if (nojoy || !joy_info || !gamepad_info)
-        return 0;
+    if (no_joystick || !joystick_info || !gamepad_info) return 0;
 
     return SDL_GameControllerGetAxis(gamepad_info, (SDL_GameControllerAxis)n);
 }
 
 static void I_OpenJoystick(int index)
 {
-    SYS_ASSERT(1 <= index && index <= num_joys);
+    EPI_ASSERT(1 <= index && index <= total_joysticks);
 
-    joy_info = SDL_JoystickOpen(index - 1);
-    if (!joy_info)
+    joystick_info = SDL_JoystickOpen(index - 1);
+    if (!joystick_info)
     {
-        I_Printf("Unable to open joystick %d (SDL error)\n", index);
+        LogPrint("Unable to open joystick %d (SDL error)\n", index);
         return;
     }
 
-    cur_joy = index;
+    current_joystick = index;
 
-    gamepad_info = SDL_GameControllerOpen(cur_joy - 1);
+    gamepad_info = SDL_GameControllerOpen(current_joystick - 1);
 
     if (!gamepad_info)
     {
-        I_Printf("Unable to open joystick %s as a gamepad!\n", SDL_JoystickName(joy_info));
-        SDL_JoystickClose(joy_info);
-        joy_info = nullptr;
+        LogPrint("Unable to open joystick %s as a gamepad!\n",
+                 SDL_JoystickName(joystick_info));
+        SDL_JoystickClose(joystick_info);
+        joystick_info = nullptr;
         return;
     }
 
-    gamepad_inst = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(gamepad_info));
+    current_gamepad =
+        SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(gamepad_info));
 
     const char *name = SDL_GameControllerName(gamepad_info);
-    if (!name)
-        name = "(UNKNOWN)";
+    if (!name) name = "(UNKNOWN)";
 
-    int gp_num_joysticks = 0;
-    int gp_num_triggers  = 0;
-    int gp_num_buttons   = 0;
+    int gp_total_joysticksticks = 0;
+    int gp_num_triggers         = 0;
+    int gp_num_buttons          = 0;
 
     if (SDL_GameControllerHasAxis(gamepad_info, SDL_CONTROLLER_AXIS_LEFTX) &&
         SDL_GameControllerHasAxis(gamepad_info, SDL_CONTROLLER_AXIS_LEFTY))
-        gp_num_joysticks++;
+        gp_total_joysticksticks++;
     if (SDL_GameControllerHasAxis(gamepad_info, SDL_CONTROLLER_AXIS_RIGHTX) &&
         SDL_GameControllerHasAxis(gamepad_info, SDL_CONTROLLER_AXIS_RIGHTY))
-        gp_num_joysticks++;
-    if (SDL_GameControllerHasAxis(gamepad_info, SDL_CONTROLLER_AXIS_TRIGGERLEFT))
+        gp_total_joysticksticks++;
+    if (SDL_GameControllerHasAxis(gamepad_info,
+                                  SDL_CONTROLLER_AXIS_TRIGGERLEFT))
         gp_num_triggers++;
-    if (SDL_GameControllerHasAxis(gamepad_info, SDL_CONTROLLER_AXIS_TRIGGERRIGHT))
+    if (SDL_GameControllerHasAxis(gamepad_info,
+                                  SDL_CONTROLLER_AXIS_TRIGGERRIGHT))
         gp_num_triggers++;
     for (int i = 0; i < SDL_CONTROLLER_BUTTON_MAX; i++)
     {
-        if (SDL_GameControllerHasButton(gamepad_info, (SDL_GameControllerButton)i))
+        if (SDL_GameControllerHasButton(gamepad_info,
+                                        (SDL_GameControllerButton)i))
             gp_num_buttons++;
     }
 
-    I_Printf("Opened gamepad %d : %s\n", cur_joy, name);
-    I_Printf("Sticks:%d Triggers: %d Buttons: %d Touchpads: %d\n", gp_num_joysticks, gp_num_triggers, gp_num_buttons,
+    LogPrint("Opened gamepad %d : %s\n", current_joystick, name);
+    LogPrint("Sticks:%d Triggers: %d Buttons: %d Touchpads: %d\n",
+             gp_total_joysticksticks, gp_num_triggers, gp_num_buttons,
              SDL_GameControllerGetNumTouchpads(gamepad_info));
-    I_Printf("Rumble:%s Trigger Rumble: %s LED: %s\n", SDL_GameControllerHasRumble(gamepad_info) ? "Yes" : "No",
+    LogPrint("Rumble:%s Trigger Rumble: %s LED: %s\n",
+             SDL_GameControllerHasRumble(gamepad_info) ? "Yes" : "No",
              SDL_GameControllerHasRumbleTriggers(gamepad_info) ? "Yes" : "No",
              SDL_GameControllerHasLED(gamepad_info) ? "Yes" : "No");
 }
 
 static void CheckJoystickChanged(void)
 {
-    int new_num_joys = SDL_NumJoysticks();
+    int new_total_joysticks = SDL_NumJoysticks();
 
-    if (new_num_joys == num_joys && cur_joy == joystick_device)
+    if (new_total_joysticks == total_joysticks &&
+        current_joystick == joystick_device)
         return;
 
-    if (new_num_joys == 0)
+    if (new_total_joysticks == 0)
     {
         if (gamepad_info)
         {
             SDL_GameControllerClose(gamepad_info);
             gamepad_info = nullptr;
         }
-        if (joy_info)
+        if (joystick_info)
         {
-            SDL_JoystickClose(joy_info);
-            joy_info = nullptr;
+            SDL_JoystickClose(joystick_info);
+            joystick_info = nullptr;
         }
-        num_joys        = 0;
-        joystick_device = 0;
-        cur_joy         = 0;
-        gamepad_inst    = -1;
+        total_joysticks  = 0;
+        joystick_device  = 0;
+        current_joystick = 0;
+        current_gamepad  = -1;
         return;
     }
 
     int new_joy = joystick_device;
 
-    if (joystick_device < 0 || joystick_device > new_num_joys)
+    if (joystick_device < 0 || joystick_device > new_total_joysticks)
     {
         joystick_device = 0;
         new_joy         = 0;
     }
 
-    if (new_joy == cur_joy && cur_joy > 0)
-        return;
+    if (new_joy == current_joystick && current_joystick > 0) return;
 
-    if (joy_info)
+    if (joystick_info)
     {
         if (gamepad_info)
         {
@@ -602,29 +542,29 @@ static void CheckJoystickChanged(void)
             gamepad_info = nullptr;
         }
 
-        SDL_JoystickClose(joy_info);
-        joy_info = nullptr;
+        SDL_JoystickClose(joystick_info);
+        joystick_info = nullptr;
 
-        I_Printf("Closed joystick %d\n", cur_joy);
-        cur_joy = 0;
+        LogPrint("Closed joystick %d\n", current_joystick);
+        current_joystick = 0;
 
-        gamepad_inst = -1;
+        current_gamepad = -1;
     }
 
     if (new_joy > 0)
     {
-        num_joys        = new_num_joys;
+        total_joysticks = new_total_joysticks;
         joystick_device = new_joy;
         I_OpenJoystick(new_joy);
     }
-    else if (num_joys == 0 && new_num_joys > 0)
+    else if (total_joysticks == 0 && new_total_joysticks > 0)
     {
-        num_joys        = new_num_joys;
+        total_joysticks = new_total_joysticks;
         joystick_device = new_joy = 1;
         I_OpenJoystick(new_joy);
     }
     else
-        num_joys = new_num_joys;
+        total_joysticks = new_total_joysticks;
 }
 
 //
@@ -634,87 +574,88 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 {
     switch (sdl_ev->type)
     {
-    case SDL_WINDOWEVENT: {
-        if (sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+        case SDL_WINDOWEVENT:
         {
-            HandleFocusLost();
-        }
+            if (sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+            {
+                HandleFocusLost();
+            }
 #ifdef EDGE_WEB
-        if (sdl_ev->window.event == SDL_WINDOWEVENT_RESIZED)
-        {
-            printf("SDL window resize event %i %i\n", sdl_ev->window.data1, sdl_ev->window.data2);
-            SCREENWIDTH  = sdl_ev->window.data1;
-            SCREENHEIGHT = sdl_ev->window.data2;
-            SCREENBITS   = 24;
-            DISPLAYMODE  = 0;
-            I_DeterminePixelAspect();
-        }
+            if (sdl_ev->window.event == SDL_WINDOWEVENT_RESIZED)
+            {
+                printf("SDL window resize event %i %i\n", sdl_ev->window.data1,
+                       sdl_ev->window.data2);
+                current_screen_width  = sdl_ev->window.data1;
+                current_screen_height = sdl_ev->window.data2;
+                current_screen_depth  = 24;
+                current_window_mode   = 0;
+                DeterminePixelAspect();
+            }
 #endif
 
-        break;
-    }
+            break;
+        }
 
-    case SDL_KEYDOWN:
-    case SDL_KEYUP:
-        HandleKeyEvent(sdl_ev);
-        break;
+        case SDL_KEYDOWN:
+        case SDL_KEYUP:
+            HandleKeyEvent(sdl_ev);
+            break;
 
-    case SDL_MOUSEBUTTONDOWN:
-    case SDL_MOUSEBUTTONUP:
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONUP:
 #ifdef EDGE_WEB
-        // On web, we don't want clicks coming through when changing pointer lock
-        // Otherwise, menus will be selected, weapons fired, unexpectedly
-        if (SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE)
-            HandleMouseButtonEvent(sdl_ev);
+            // On web, we don't want clicks coming through when changing pointer
+            // lock Otherwise, menus will be selected, weapons fired,
+            // unexpectedly
+            if (SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE)
+                HandleMouseButtonEvent(sdl_ev);
 #else
-        if (need_mouse_recapture)
-        {
-            I_GrabCursor(true);
-            need_mouse_recapture = false;
-            break;
-        }
-        HandleMouseButtonEvent(sdl_ev);
+            if (need_mouse_recapture)
+            {
+                GrabCursor(true);
+                need_mouse_recapture = false;
+                break;
+            }
+            HandleMouseButtonEvent(sdl_ev);
 #endif
-        break;
-
-    case SDL_MOUSEWHEEL:
-        if (!need_mouse_recapture)
-            HandleMouseWheelEvent(sdl_ev);
-        break;
-
-    case SDL_CONTROLLERBUTTONDOWN:
-    case SDL_CONTROLLERBUTTONUP:
-        HandleGamepadButtonEvent(sdl_ev);
-        break;
-
-    // Analog triggers should be the only thing handled here -Dasho
-    case SDL_CONTROLLERAXISMOTION:
-        HandleGamepadTriggerEvent(sdl_ev);
-        break;
-
-    case SDL_MOUSEMOTION:
-        if (eat_mouse_motion)
-        {
-            eat_mouse_motion = false; // One motion needs to be discarded
             break;
-        }
-        if (!need_mouse_recapture)
-            HandleMouseMotionEvent(sdl_ev);
-        break;
 
-    case SDL_QUIT:
-        // Note we deliberate clear all other flags here. Its our method of
-        // ensuring nothing more is done with events.
-        app_state = APP_STATE_PENDING_QUIT;
-        break;
+        case SDL_MOUSEWHEEL:
+            if (!need_mouse_recapture) HandleMouseWheelEvent(sdl_ev);
+            break;
 
-    case SDL_CONTROLLERDEVICEADDED:
-    case SDL_CONTROLLERDEVICEREMOVED:
-        CheckJoystickChanged();
-        break;
+        case SDL_CONTROLLERBUTTONDOWN:
+        case SDL_CONTROLLERBUTTONUP:
+            HandleGamepadButtonEvent(sdl_ev);
+            break;
 
-    default:
-        break; // Don't care
+        // Analog triggers should be the only thing handled here -Dasho
+        case SDL_CONTROLLERAXISMOTION:
+            HandleGamepadTriggerEvent(sdl_ev);
+            break;
+
+        case SDL_MOUSEMOTION:
+            if (eat_mouse_motion)
+            {
+                eat_mouse_motion = false;  // One motion needs to be discarded
+                break;
+            }
+            if (!need_mouse_recapture) HandleMouseMotionEvent(sdl_ev);
+            break;
+
+        case SDL_QUIT:
+            // Note we deliberate clear all other flags here. Its our method of
+            // ensuring nothing more is done with events.
+            app_state = kApplicationPendingQuit;
+            break;
+
+        case SDL_CONTROLLERDEVICEADDED:
+        case SDL_CONTROLLERDEVICEREMOVED:
+            CheckJoystickChanged();
+            break;
+
+        default:
+            break;  // Don't care
     }
 }
 
@@ -725,100 +666,99 @@ void InactiveEventProcess(SDL_Event *sdl_ev)
 {
     switch (sdl_ev->type)
     {
-    case SDL_WINDOWEVENT:
-        if (app_state & APP_STATE_PENDING_QUIT)
-            break; // Don't care: we're going to exit
+        case SDL_WINDOWEVENT:
+            if (app_state & kApplicationPendingQuit)
+                break;  // Don't care: we're going to exit
 
-        if (sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
-            HandleFocusGain();
-        break;
+            if (sdl_ev->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+                HandleFocusGain();
+            break;
 
-    case SDL_QUIT:
-        // Note we deliberate clear all other flags here. Its our method of
-        // ensuring nothing more is done with events.
-        app_state = APP_STATE_PENDING_QUIT;
-        break;
+        case SDL_QUIT:
+            // Note we deliberate clear all other flags here. Its our method of
+            // ensuring nothing more is done with events.
+            app_state = kApplicationPendingQuit;
+            break;
 
-    case SDL_CONTROLLERDEVICEADDED:
-    case SDL_CONTROLLERDEVICEREMOVED:
-        CheckJoystickChanged();
-        break;
+        case SDL_CONTROLLERDEVICEADDED:
+        case SDL_CONTROLLERDEVICEREMOVED:
+            CheckJoystickChanged();
+            break;
 
-    default:
-        break; // Don't care
+        default:
+            break;  // Don't care
     }
 }
 
 void I_ShowGamepads(void)
 {
-    if (nojoy)
+    if (no_joystick)
     {
-        I_Printf("Gamepad system is disabled.\n");
+        LogPrint("Gamepad system is disabled.\n");
         return;
     }
 
-    if (num_joys == 0)
+    if (total_joysticks == 0)
     {
-        I_Printf("No gamepads found.\n");
+        LogPrint("No gamepads found.\n");
         return;
     }
 
-    I_Printf("Gamepads:\n");
+    LogPrint("Gamepads:\n");
 
-    for (int i = 0; i < num_joys; i++)
+    for (int i = 0; i < total_joysticks; i++)
     {
         const char *name = SDL_GameControllerNameForIndex(i);
-        if (!name)
-            name = "(UNKNOWN)";
+        if (!name) name = "(UNKNOWN)";
 
-        I_Printf("  %2d : %s\n", i + 1, name);
+        LogPrint("  %2d : %s\n", i + 1, name);
     }
 }
 
-void I_StartupJoystick(void)
+void StartupJoystick(void)
 {
-    cur_joy         = 0;
-    joystick_device = 0;
+    current_joystick = 0;
+    joystick_device  = 0;
 
-    if (argv::Find("nojoy") > 0)
+    if (ArgumentFind("no_joystick") > 0)
     {
-        I_Printf("I_StartupControl: Gamepad system disabled.\n");
-        nojoy = true;
+        LogPrint("StartupControl: Gamepad system disabled.\n");
+        no_joystick = true;
         return;
     }
 
     if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) < 0)
     {
-        I_Printf("I_StartupControl: Couldn't init SDL GAMEPAD!\n");
-        nojoy = true;
+        LogPrint("StartupControl: Couldn't init SDL GAMEPAD!\n");
+        no_joystick = true;
         return;
     }
 
     SDL_GameControllerEventState(SDL_ENABLE);
 
-    num_joys = SDL_NumJoysticks();
+    total_joysticks = SDL_NumJoysticks();
 
-    I_Printf("I_StartupControl: %d gamepads found.\n", num_joys);
+    LogPrint("StartupControl: %d gamepads found.\n", total_joysticks);
 
-    if (num_joys == 0)
+    if (total_joysticks == 0)
         return;
     else
     {
-        joystick_device = 1; // Automatically set to first detected gamepad
+        joystick_device = 1;  // Automatically set to first detected gamepad
         I_OpenJoystick(joystick_device);
     }
 }
 
 /****** Input Event Generation ******/
 
-void I_StartupControl(void)
+void StartupControl(void)
 {
     alt_is_down = false;
 
-    I_StartupJoystick();
+    StartupJoystick();
 }
 
-void I_ControlGetEvents(void)
+void ControlGetEvents(void)
 {
     EDGE_ZoneScoped;
 
@@ -826,44 +766,38 @@ void I_ControlGetEvents(void)
 
     while (SDL_PollEvent(&sdl_ev))
     {
-#ifdef DEBUG_KB
-        L_WriteDebug("#I_ControlGetEvents: type=%d\n", sdl_ev.type);
-#endif
-        if (app_state & APP_STATE_ACTIVE)
+        if (app_state & kApplicationActive)
             ActiveEventProcess(&sdl_ev);
         else
             InactiveEventProcess(&sdl_ev);
     }
 }
 
-void I_ShutdownControl(void)
+void ShutdownControl(void)
 {
     if (gamepad_info)
     {
         SDL_GameControllerClose(gamepad_info);
         gamepad_info = nullptr;
     }
-    if (joy_info)
+    if (joystick_info)
     {
-        SDL_JoystickClose(joy_info);
-        joy_info = nullptr;
+        SDL_JoystickClose(joystick_info);
+        joystick_info = nullptr;
     }
 }
 
-int I_GetTime(void)
+int GetTime(void)
 {
     Uint32 t = SDL_GetTicks();
 
-    int factor = (r_doubleframes.d ? 70 : 35);
+    int factor = (double_framerate.d_ ? 70 : 35);
 
     // more complex than "t*70/1000" to give more accuracy
     return (t / 1000) * factor + (t % 1000) * factor / 1000;
 }
 
-int I_GetMillies(void)
-{
-    return SDL_GetTicks();
-}
+int GetMilliseconds(void) { return SDL_GetTicks(); }
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

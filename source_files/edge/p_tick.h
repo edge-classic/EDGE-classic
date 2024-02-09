@@ -23,20 +23,17 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __P_TICK__
-#define __P_TICK__
+#pragma once
 
 // Called by C_Ticker,
 // can call G_PlayerExited.
 // Carries out all thinking of monsters and players.
-void P_Ticker(bool extra_tic);
+void MapObjectTicker(bool extra_tic);
 
-void P_HubFastForward(void);
+void HubFastForward(void);
 
-// Needed to pause flat anims, etc when not moving or firing in Erraticism - Dasho
+// Needed to pause flat anims, etc when not moving or firing in Erraticism
 extern bool erraticism_active;
-
-#endif // __P_TICK__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

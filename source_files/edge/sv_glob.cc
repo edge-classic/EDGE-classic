@@ -23,175 +23,200 @@
 //   + implement ReadWADS and ReadVIEW.
 //
 
-#include "i_defs.h"
-
 #include <limits.h>
+#include <stddef.h>
 
+#include "epi.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 
 // forward decls:
-static void GV_GetInt(const char *info, void *storage);
-static void GV_GetString(const char *info, void *storage);
-static void GV_GetCheckCRC(const char *info, void *storage);
-static void GV_GetLevelFlags(const char *info, void *storage);
-static void GV_GetImage(const char *info, void *storage);
+static void SaveGlobalGetInteger(const char *info, void *storage);
+static void SaveGlobalGetString(const char *info, void *storage);
+static void SaveGlobalGetCheckCRC(const char *info, void *storage);
+static void SaveGlobalGetLevelFlags(const char *info, void *storage);
+static void SaveGlobalGetImage(const char *info, void *storage);
 
-static const char *GV_PutInt(void *storage);
-static const char *GV_PutString(void *storage);
-static const char *GV_PutCheckCRC(void *storage);
-static const char *GV_PutLevelFlags(void *storage);
-static const char *GV_PutImage(void *storage);
+static const char *SaveGlobalPutInteger(void *storage);
+static const char *SaveGlobalPutString(void *storage);
+static const char *SaveGlobalPutCheckCRC(void *storage);
+static const char *SaveGlobalPutLevelFlags(void *storage);
+static const char *SaveGlobalPutImage(void *storage);
 
-static saveglobals_t  dummy_glob;
-static saveglobals_t *cur_globs = NULL;
+static SaveGlobals *current_global = nullptr;
 
-typedef struct
+struct GlobalCommand
 {
     // global name
     const char *name;
 
     // parse function.  `storage' is where the data should go (for
-    // routines that don't modify the cur_globs structure directly).
-    void (*parse_func)(const char *info, void *storage);
+    // routines that don't modify the current_global structure directly).
+    void (*parse_function)(const char *info, void *storage);
 
     // stringify function.  Return string must be freed.
-    const char *(*stringify_func)(void *storage);
+    const char *(*stringify_function)(void *storage);
 
-    // field offset (given as a pointer within dummy struct)
-    const char *offset_p;
-} global_command_t;
+    // field offset
+    size_t pointer_offset;
+};
 
-#define GLOB_OFF(field) ((const char *)&dummy_glob.field)
+static const GlobalCommand global_commands[] = {
+    {"GAME", SaveGlobalGetString, SaveGlobalPutString,
+     offsetof(SaveGlobals, game)},
+    {"LEVEL", SaveGlobalGetString, SaveGlobalPutString,
+     offsetof(SaveGlobals, level)},
+    {"FLAGS", SaveGlobalGetLevelFlags, SaveGlobalPutLevelFlags,
+     offsetof(SaveGlobals, flags)},
+    {"HUB_TAG", SaveGlobalGetInteger, SaveGlobalPutInteger,
+     offsetof(SaveGlobals, hub_tag)},
+    {"HUB_FIRST", SaveGlobalGetString, SaveGlobalPutString,
+     offsetof(SaveGlobals, hub_first)},
 
-static const global_command_t global_commands[] = {{"GAME", GV_GetString, GV_PutString, GLOB_OFF(game)},
-                                                   {"LEVEL", GV_GetString, GV_PutString, GLOB_OFF(level)},
-                                                   {"FLAGS", GV_GetLevelFlags, GV_PutLevelFlags, GLOB_OFF(flags)},
-                                                   {"HUB_TAG", GV_GetInt, GV_PutInt, GLOB_OFF(hub_tag)},
-                                                   {"HUB_FIRST", GV_GetString, GV_PutString, GLOB_OFF(hub_first)},
+    {"GRAVITY", SaveGlobalGetInteger, SaveGlobalPutInteger,
+     offsetof(SaveGlobals, flags.menu_gravity_factor)},
+    {"LEVEL_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger,
+     offsetof(SaveGlobals, level_time)},
+    {"EXIT_TIME", SaveGlobalGetInteger, SaveGlobalPutInteger,
+     offsetof(SaveGlobals, exit_time)},
+    {"P_RANDOM", SaveGlobalGetInteger, SaveGlobalPutInteger,
+     offsetof(SaveGlobals, p_random)},
 
-                                                   {"GRAVITY", GV_GetInt, GV_PutInt, GLOB_OFF(flags.menu_grav)},
-                                                   {"LEVEL_TIME", GV_GetInt, GV_PutInt, GLOB_OFF(level_time)},
-                                                   {"EXIT_TIME", GV_GetInt, GV_PutInt, GLOB_OFF(exit_time)},
-                                                   {"P_RANDOM", GV_GetInt, GV_PutInt, GLOB_OFF(p_random)},
+    {"TOTAL_KILLS", SaveGlobalGetInteger, SaveGlobalPutInteger,
+     offsetof(SaveGlobals, total_kills)},
+    {"TOTAL_ITEMS", SaveGlobalGetInteger, SaveGlobalPutInteger,
+     offsetof(SaveGlobals, total_items)},
+    {"TOTAL_SECRETS", SaveGlobalGetInteger, SaveGlobalPutInteger,
+     offsetof(SaveGlobals, total_secrets)},
+    {"CONSOLE_PLAYER", SaveGlobalGetInteger, SaveGlobalPutInteger,
+     offsetof(SaveGlobals, console_player)},
+    {"SKILL", SaveGlobalGetInteger, SaveGlobalPutInteger,
+     offsetof(SaveGlobals, skill)},
+    {"NETGAME", SaveGlobalGetInteger, SaveGlobalPutInteger,
+     offsetof(SaveGlobals, netgame)},
+    {"SKY_IMAGE", SaveGlobalGetImage, SaveGlobalPutImage,
+     offsetof(SaveGlobals, sky_image)},
 
-                                                   {"TOTAL_KILLS", GV_GetInt, GV_PutInt, GLOB_OFF(total_kills)},
-                                                   {"TOTAL_ITEMS", GV_GetInt, GV_PutInt, GLOB_OFF(total_items)},
-                                                   {"TOTAL_SECRETS", GV_GetInt, GV_PutInt, GLOB_OFF(total_secrets)},
-                                                   {"CONSOLE_PLAYER", GV_GetInt, GV_PutInt, GLOB_OFF(console_player)},
-                                                   {"SKILL", GV_GetInt, GV_PutInt, GLOB_OFF(skill)},
-                                                   {"NETGAME", GV_GetInt, GV_PutInt, GLOB_OFF(netgame)},
-                                                   {"SKY_IMAGE", GV_GetImage, GV_PutImage, GLOB_OFF(sky_image)},
+    {"DESCRIPTION", SaveGlobalGetString, SaveGlobalPutString,
+     offsetof(SaveGlobals, description)},
+    {"DESC_DATE", SaveGlobalGetString, SaveGlobalPutString,
+     offsetof(SaveGlobals, desc_date)},
 
-                                                   {"DESCRIPTION", GV_GetString, GV_PutString, GLOB_OFF(description)},
-                                                   {"DESC_DATE", GV_GetString, GV_PutString, GLOB_OFF(desc_date)},
+    {"MAPSECTOR", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
+     offsetof(SaveGlobals, mapsector)},
+    {"MAPLINE", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
+     offsetof(SaveGlobals, mapline)},
+    {"MAPTHING", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
+     offsetof(SaveGlobals, mapthing)},
 
-                                                   {"MAPSECTOR", GV_GetCheckCRC, GV_PutCheckCRC, GLOB_OFF(mapsector)},
-                                                   {"MAPLINE", GV_GetCheckCRC, GV_PutCheckCRC, GLOB_OFF(mapline)},
-                                                   {"MAPTHING", GV_GetCheckCRC, GV_PutCheckCRC, GLOB_OFF(mapthing)},
+    {"RSCRIPT", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
+     offsetof(SaveGlobals, rscript)},
+    {"DDFATK", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
+     offsetof(SaveGlobals, ddfatk)},
+    {"DDFGAME", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
+     offsetof(SaveGlobals, ddfgame)},
+    {"DDFLEVL", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
+     offsetof(SaveGlobals, ddflevl)},
+    {"DDFLINE", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
+     offsetof(SaveGlobals, ddfline)},
+    {"DDFSECT", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
+     offsetof(SaveGlobals, ddfsect)},
+    {"DDFMOBJ", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
+     offsetof(SaveGlobals, ddfmobj)},
+    {"DDFWEAP", SaveGlobalGetCheckCRC, SaveGlobalPutCheckCRC,
+     offsetof(SaveGlobals, ddfweap)},
 
-                                                   {"RSCRIPT", GV_GetCheckCRC, GV_PutCheckCRC, GLOB_OFF(rscript)},
-                                                   {"DDFATK", GV_GetCheckCRC, GV_PutCheckCRC, GLOB_OFF(ddfatk)},
-                                                   {"DDFGAME", GV_GetCheckCRC, GV_PutCheckCRC, GLOB_OFF(ddfgame)},
-                                                   {"DDFLEVL", GV_GetCheckCRC, GV_PutCheckCRC, GLOB_OFF(ddflevl)},
-                                                   {"DDFLINE", GV_GetCheckCRC, GV_PutCheckCRC, GLOB_OFF(ddfline)},
-                                                   {"DDFSECT", GV_GetCheckCRC, GV_PutCheckCRC, GLOB_OFF(ddfsect)},
-                                                   {"DDFMOBJ", GV_GetCheckCRC, GV_PutCheckCRC, GLOB_OFF(ddfmobj)},
-                                                   {"DDFWEAP", GV_GetCheckCRC, GV_PutCheckCRC, GLOB_OFF(ddfweap)},
-
-                                                   {NULL, NULL, 0}};
+    {nullptr, nullptr, nullptr, 0}};
 
 //----------------------------------------------------------------------------
 //
 //  PARSERS
 //
 
-static void GV_GetInt(const char *info, void *storage)
+static void SaveGlobalGetInteger(const char *info, void *storage)
 {
     int *dest = (int *)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
-    *dest = strtol(info, NULL, 0);
+    *dest = strtol(info, nullptr, 0);
 }
 
-static void GV_GetString(const char *info, void *storage)
+static void SaveGlobalGetString(const char *info, void *storage)
 {
     char **dest = (char **)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     // free any previous string
-    SV_FreeString(*dest);
+    SaveChunkFreeString(*dest);
 
     if (info[0] == 0)
-        *dest = NULL;
+        *dest = nullptr;
     else
-        *dest = (char *)SV_DupString(info);
+        *dest = (char *)SaveChunkCopyString(info);
 }
 
-static void GV_GetCheckCRC(const char *info, void *storage)
+static void SaveGlobalGetCheckCRC(const char *info, void *storage)
 {
-    crc_check_t *dest = (crc_check_t *)storage;
+    CrcCheck *dest = (CrcCheck *)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     sscanf(info, "%d %u", &dest->count, &dest->crc);
 }
 
-static void GV_GetLevelFlags(const char *info, void *storage)
+static void SaveGlobalGetLevelFlags(const char *info, void *storage)
 {
-    gameflags_t *dest = (gameflags_t *)storage;
-    int          flags;
+    GameFlags *dest = (GameFlags *)storage;
+    int        flags;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
-    flags = strtol(info, NULL, 0);
+    flags = strtol(info, nullptr, 0);
 
-    Z_Clear(dest, gameflags_t, 1);
+    EPI_CLEAR_MEMORY(dest, GameFlags, 1);
 
-#define HANDLE_FLAG(var, specflag) (var) = (flags & (specflag)) ? true : false;
-
-    HANDLE_FLAG(dest->jump, MPF_Jumping);
-    HANDLE_FLAG(dest->crouch, MPF_Crouching);
-    HANDLE_FLAG(dest->mlook, MPF_Mlook);
-    HANDLE_FLAG(dest->itemrespawn, MPF_ItemRespawn);
-    HANDLE_FLAG(dest->fastparm, MPF_FastParm);
-    HANDLE_FLAG(dest->true3dgameplay, MPF_True3D);
-    HANDLE_FLAG(dest->more_blood, MPF_MoreBlood);
-    HANDLE_FLAG(dest->cheats, MPF_Cheats);
-    HANDLE_FLAG(dest->respawn, MPF_Respawn);
-    HANDLE_FLAG(dest->res_respawn, MPF_ResRespawn);
-    HANDLE_FLAG(dest->have_extra, MPF_Extras);
-    HANDLE_FLAG(dest->limit_zoom, MPF_LimitZoom);
-    HANDLE_FLAG(dest->kicking, MPF_Kicking);
-    HANDLE_FLAG(dest->weapon_switch, MPF_WeaponSwitch);
-    HANDLE_FLAG(dest->pass_missile, MPF_PassMissile);
-    HANDLE_FLAG(dest->team_damage, MPF_TeamDamage);
-
-#undef HANDLE_FLAG
-
-    dest->autoaim = (flags & MPF_AutoAim) ? ((flags & MPF_AutoAimMlook) ? AA_MLOOK : AA_ON) : AA_OFF;
+    dest->jump               = (flags & kMapFlagJumping) ? true : false;
+    dest->crouch             = (flags & kMapFlagCrouching) ? true : false;
+    dest->mouselook          = (flags & kMapFlagMlook) ? true : false;
+    dest->items_respawn      = (flags & kMapFlagItemRespawn) ? true : false;
+    dest->fast_monsters      = (flags & kMapFlagFastParm) ? true : false;
+    dest->true_3d_gameplay   = (flags & kMapFlagTrue3D) ? true : false;
+    dest->more_blood         = (flags & kMapFlagMoreBlood) ? true : false;
+    dest->cheats             = (flags & kMapFlagCheats) ? true : false;
+    dest->enemies_respawn    = (flags & kMapFlagRespawn) ? true : false;
+    dest->enemy_respawn_mode = (flags & kMapFlagResRespawn) ? true : false;
+    dest->have_extra         = (flags & kMapFlagExtras) ? true : false;
+    dest->limit_zoom         = (flags & kMapFlagLimitZoom) ? true : false;
+    dest->kicking            = (flags & kMapFlagKicking) ? true : false;
+    dest->weapon_switch      = (flags & kMapFlagWeaponSwitch) ? true : false;
+    dest->pass_missile       = (flags & kMapFlagPassMissile) ? true : false;
+    dest->team_damage        = (flags & kMapFlagTeamDamage) ? true : false;
+    dest->autoaim =
+        (flags & kMapFlagAutoAim)
+            ? ((flags & kMapFlagAutoAimMlook) ? kAutoAimMouselook : kAutoAimOn)
+            : kAutoAimOff;
 }
 
-static void GV_GetImage(const char *info, void *storage)
+static void SaveGlobalGetImage(const char *info, void *storage)
 {
-    // based on SR_LevelGetImage...
+    // based on SaveGameLevelGetImage...
 
-    const image_c **dest = (const image_c **)storage;
+    const Image **dest = (const Image **)storage;
 
-    SYS_ASSERT(info && storage);
+    EPI_ASSERT(info && storage);
 
     if (info[0] == 0)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return;
     }
 
     if (info[1] != ':')
-        I_Warning("GV_GetImage: invalid image string `%s'\n", info);
+        LogWarning("SaveGlobalGetImage: invalid image string `%s'\n", info);
 
-    (*dest) = W_ImageParseSaveString(info[0], info + 2);
+    (*dest) = ImageParseSaveString(info[0], info + 2);
 }
 
 //----------------------------------------------------------------------------
@@ -199,98 +224,87 @@ static void GV_GetImage(const char *info, void *storage)
 //  STRINGIFIERS
 //
 
-static const char *GV_PutInt(void *storage)
+static const char *SaveGlobalPutInteger(void *storage)
 {
     int *src = (int *)storage;
     char buffer[40];
 
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
     sprintf(buffer, "%d", *src);
 
-    return SV_DupString(buffer);
+    return SaveChunkCopyString(buffer);
 }
 
-static const char *GV_PutString(void *storage)
+static const char *SaveGlobalPutString(void *storage)
 {
     char **src = (char **)storage;
 
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
-    if (*src == NULL)
-        return SV_DupString("");
+    if (*src == nullptr) return SaveChunkCopyString("");
 
-    return SV_DupString(*src);
+    return SaveChunkCopyString(*src);
 }
 
-static const char *GV_PutCheckCRC(void *storage)
+static const char *SaveGlobalPutCheckCRC(void *storage)
 {
-    crc_check_t *src = (crc_check_t *)storage;
-    char         buffer[80];
+    CrcCheck *src = (CrcCheck *)storage;
+    char      buffer[80];
 
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
     sprintf(buffer, "%d %u", src->count, src->crc);
 
-    return SV_DupString(buffer);
+    return SaveChunkCopyString(buffer);
 }
 
-static const char *GV_PutLevelFlags(void *storage)
+static const char *SaveGlobalPutLevelFlags(void *storage)
 {
-    gameflags_t *src = (gameflags_t *)storage;
-    int          flags;
+    GameFlags *src = (GameFlags *)storage;
+    int        flags;
 
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
     flags = 0;
 
-#define HANDLE_FLAG(var, specflag)                                                                                     \
-    if (var)                                                                                                           \
-        flags |= (specflag);
+    if (src->jump) flags |= kMapFlagJumping;
+    if (src->crouch) flags |= kMapFlagCrouching;
+    if (src->mouselook) flags |= kMapFlagMlook;
+    if (src->items_respawn) flags |= kMapFlagItemRespawn;
+    if (src->fast_monsters) flags |= kMapFlagFastParm;
+    if (src->true_3d_gameplay) flags |= kMapFlagTrue3D;
+    if (src->more_blood) flags |= kMapFlagMoreBlood;
+    if (src->cheats) flags |= kMapFlagCheats;
+    if (src->enemies_respawn) flags |= kMapFlagRespawn;
+    if (src->enemy_respawn_mode) flags |= kMapFlagResRespawn;
+    if (src->have_extra) flags |= kMapFlagExtras;
+    if (src->limit_zoom) flags |= kMapFlagLimitZoom;
+    if (src->kicking) flags |= kMapFlagKicking;
+    if (src->weapon_switch) flags |= kMapFlagWeaponSwitch;
+    if (src->pass_missile) flags |= kMapFlagPassMissile;
+    if (src->team_damage) flags |= kMapFlagTeamDamage;
+    if (src->autoaim != kAutoAimOff) flags |= kMapFlagAutoAim;
+    if (src->autoaim == kAutoAimMouselook) flags |= kMapFlagAutoAimMlook;
 
-    HANDLE_FLAG(src->jump, MPF_Jumping);
-    HANDLE_FLAG(src->crouch, MPF_Crouching);
-    HANDLE_FLAG(src->mlook, MPF_Mlook);
-    HANDLE_FLAG(src->itemrespawn, MPF_ItemRespawn);
-    HANDLE_FLAG(src->fastparm, MPF_FastParm);
-    HANDLE_FLAG(src->true3dgameplay, MPF_True3D);
-    HANDLE_FLAG(src->more_blood, MPF_MoreBlood);
-    HANDLE_FLAG(src->cheats, MPF_Cheats);
-    HANDLE_FLAG(src->respawn, MPF_Respawn);
-    HANDLE_FLAG(src->res_respawn, MPF_ResRespawn);
-    HANDLE_FLAG(src->have_extra, MPF_Extras);
-    HANDLE_FLAG(src->limit_zoom, MPF_LimitZoom);
-    HANDLE_FLAG(src->kicking, MPF_Kicking);
-    HANDLE_FLAG(src->weapon_switch, MPF_WeaponSwitch);
-    HANDLE_FLAG(src->pass_missile, MPF_PassMissile);
-    HANDLE_FLAG(src->team_damage, MPF_TeamDamage);
-
-#undef HANDLE_FLAG
-
-    if (src->autoaim != AA_OFF)
-        flags |= MPF_AutoAim;
-    if (src->autoaim == AA_MLOOK)
-        flags |= MPF_AutoAimMlook;
-
-    return GV_PutInt(&flags);
+    return SaveGlobalPutInteger(&flags);
 }
 
-static const char *GV_PutImage(void *storage)
+static const char *SaveGlobalPutImage(void *storage)
 {
-    // based on SR_LevelPutImage...
+    // based on SaveGameLevelPutImage...
 
-    const image_c **src = (const image_c **)storage;
-    char            buffer[64];
+    const Image **src = (const Image **)storage;
+    char          buffer[64];
 
-    SYS_ASSERT(storage);
+    EPI_ASSERT(storage);
 
-    if (*src == NULL)
-        return SV_DupString("");
+    if (*src == nullptr) return SaveChunkCopyString("");
 
-    W_ImageMakeSaveString(*src, buffer, buffer + 2);
+    ImageMakeSaveString(*src, buffer, buffer + 2);
     buffer[1] = ':';
 
-    return SV_DupString(buffer);
+    return SaveChunkCopyString(buffer);
 }
 
 //----------------------------------------------------------------------------
@@ -298,29 +312,28 @@ static const char *GV_PutImage(void *storage)
 //  MISCELLANY
 //
 
-saveglobals_t *SV_NewGLOB(void)
+SaveGlobals *SaveGlobalsNew(void)
 {
-    saveglobals_t *globs;
+    SaveGlobals *globs;
 
-    globs = new saveglobals_t;
+    globs = new SaveGlobals;
 
-    Z_Clear(globs, saveglobals_t, 1);
+    EPI_CLEAR_MEMORY(globs, SaveGlobals, 1);
 
     globs->exit_time = INT_MAX;
 
     return globs;
 }
 
-void SV_FreeGLOB(saveglobals_t *globs)
+void SaveGlobalsFree(SaveGlobals *globs)
 {
-    SV_FreeString(globs->game);
-    SV_FreeString(globs->level);
-    SV_FreeString(globs->hub_first);
-    SV_FreeString(globs->description);
-    SV_FreeString(globs->desc_date);
+    SaveChunkFreeString(globs->game);
+    SaveChunkFreeString(globs->level);
+    SaveChunkFreeString(globs->hub_first);
+    SaveChunkFreeString(globs->description);
+    SaveChunkFreeString(globs->desc_date);
 
-    if (globs->wad_names)
-        delete[] globs->wad_names;
+    if (globs->wad_names) delete[] globs->wad_names;
 
     delete globs;
 }
@@ -330,7 +343,7 @@ void SV_FreeGLOB(saveglobals_t *globs)
 //  LOADING GLOBALS
 //
 
-static bool GlobReadVARI(saveglobals_t *globs)
+static bool GlobalReadVariable(SaveGlobals *globs)
 {
     const char *var_name;
     const char *var_data;
@@ -338,16 +351,15 @@ static bool GlobReadVARI(saveglobals_t *globs)
     int   i;
     void *storage;
 
-    if (!SV_PushReadChunk("Vari"))
-        return false;
+    if (!SavePushReadChunk("Vari")) return false;
 
-    var_name = SV_GetString();
-    var_data = SV_GetString();
+    var_name = SaveChunkGetString();
+    var_data = SaveChunkGetString();
 
-    if (!SV_PopReadChunk() || !var_name || !var_data)
+    if (!SavePopReadChunk() || !var_name || !var_data)
     {
-        SV_FreeString(var_name);
-        SV_FreeString(var_data);
+        SaveChunkFreeString(var_name);
+        SaveChunkFreeString(var_data);
 
         return false;
     }
@@ -355,85 +367,75 @@ static bool GlobReadVARI(saveglobals_t *globs)
     // find variable in list
     for (i = 0; global_commands[i].name; i++)
     {
-        if (strcmp(global_commands[i].name, var_name) == 0)
-            break;
+        if (strcmp(global_commands[i].name, var_name) == 0) break;
     }
 
     if (global_commands[i].name)
     {
-        int offset = global_commands[i].offset_p - (char *)&dummy_glob;
-
         // found it, so parse it
-        storage = ((char *)globs) + offset;
+        storage = ((char *)globs) + global_commands[i].pointer_offset;
 
-        (*global_commands[i].parse_func)(var_data, storage);
+        (*global_commands[i].parse_function)(var_data, storage);
     }
-    else
-    {
-        I_Debugf("GlobReadVARI: unknown global: %s\n", var_name);
-    }
+    else { LogDebug("GlobalReadVariable: unknown global: %s\n", var_name); }
 
-    SV_FreeString(var_name);
-    SV_FreeString(var_data);
+    SaveChunkFreeString(var_name);
+    SaveChunkFreeString(var_data);
 
     return true;
 }
 
-static bool GlobReadWADS(saveglobals_t *glob)
+static bool GlobalReadWads(SaveGlobals *glob)
 {
-    if (!SV_PushReadChunk("Wads"))
-        return false;
+    if (!SavePushReadChunk("Wads")) return false;
 
     //!!! IMPLEMENT THIS
 
-    SV_PopReadChunk();
+    SavePopReadChunk();
     return true;
 }
 
-saveglobals_t *SV_LoadGLOB(void)
+SaveGlobals *SaveGlobalsLoad(void)
 {
     char marker[6];
 
-    saveglobals_t *globs;
+    SaveGlobals *globs;
 
-    SV_GetMarker(marker);
+    SaveChunkGetMarker(marker);
 
-    if (strcmp(marker, "Glob") != 0 || !SV_PushReadChunk("Glob"))
-        return NULL;
+    if (strcmp(marker, "Glob") != 0 || !SavePushReadChunk("Glob"))
+        return nullptr;
 
-    cur_globs = globs = SV_NewGLOB();
+    current_global = globs = SaveGlobalsNew();
 
     // read through all the chunks, picking the bits we need
 
     for (;;)
     {
-        if (SV_GetError() != 0)
-            break; /// set error !!
+        if (SaveGetError() != 0) break;  /// set error !!
 
-        if (SV_RemainingChunkSize() == 0)
-            break;
+        if (SaveRemainingChunkSize() == 0) break;
 
-        SV_GetMarker(marker);
+        SaveChunkGetMarker(marker);
 
         if (strcmp(marker, "Vari") == 0)
         {
-            GlobReadVARI(globs);
+            GlobalReadVariable(globs);
             continue;
         }
         if (strcmp(marker, "Wads") == 0)
         {
-            GlobReadWADS(globs);
+            GlobalReadWads(globs);
             continue;
         }
 
         // skip chunk
-        I_Warning("LOADGAME: Unknown GLOB chunk [%s]\n", marker);
+        LogWarning("LOADGAME: Unknown GLOB chunk [%s]\n", marker);
 
-        if (!SV_SkipReadChunk(marker))
-            break;
+        if (!SaveSkipReadChunk(marker)) break;
     }
 
-    SV_PopReadChunk(); /// check err
+    SavePopReadChunk();  /// check err
 
     return globs;
 }
@@ -443,57 +445,54 @@ saveglobals_t *SV_LoadGLOB(void)
 //  SAVING GLOBALS
 //
 
-static void GlobWriteVARIs(saveglobals_t *globs)
+static void GlobalWriteVariables(SaveGlobals *globs)
 {
     int i;
 
     for (i = 0; global_commands[i].name; i++)
     {
-        int offset = global_commands[i].offset_p - (char *)&dummy_glob;
+        void *storage = ((char *)globs) + global_commands[i].pointer_offset;
 
-        void *storage = ((char *)globs) + offset;
+        const char *data = (*global_commands[i].stringify_function)(storage);
+        EPI_ASSERT(data);
 
-        const char *data = (*global_commands[i].stringify_func)(storage);
-        SYS_ASSERT(data);
+        SavePushWriteChunk("Vari");
+        SaveChunkPutString(global_commands[i].name);
+        SaveChunkPutString(data);
+        SavePopWriteChunk();
 
-        SV_PushWriteChunk("Vari");
-        SV_PutString(global_commands[i].name);
-        SV_PutString(data);
-        SV_PopWriteChunk();
-
-        SV_FreeString(data);
+        SaveChunkFreeString(data);
     }
 }
 
-static void GlobWriteWADS(saveglobals_t *globs)
+static void GlobalWriteWads(SaveGlobals *globs)
 {
     int i;
 
-    if (!globs->wad_names)
-        return;
+    if (!globs->wad_names) return;
 
-    SYS_ASSERT(globs->wad_num > 0);
+    EPI_ASSERT(globs->wad_num > 0);
 
-    SV_PushWriteChunk("Wads");
-    SV_PutInt(globs->wad_num);
+    SavePushWriteChunk("Wads");
+    SaveChunkPutInteger(globs->wad_num);
 
     for (i = 0; i < globs->wad_num; i++)
-        SV_PutString(globs->wad_names[i]);
+        SaveChunkPutString(globs->wad_names[i]);
 
-    SV_PopWriteChunk();
+    SavePopWriteChunk();
 }
 
-void SV_SaveGLOB(saveglobals_t *globs)
+void SaveGlobalsSave(SaveGlobals *globs)
 {
-    cur_globs = globs;
+    current_global = globs;
 
-    SV_PushWriteChunk("Glob");
+    SavePushWriteChunk("Glob");
 
-    GlobWriteVARIs(globs);
-    GlobWriteWADS(globs);
+    GlobalWriteVariables(globs);
+    GlobalWriteWads(globs);
 
     // all done
-    SV_PopWriteChunk();
+    SavePopWriteChunk();
 }
 
 //--- editor settings ---

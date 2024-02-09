@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE OPL-Emulation Music Player
+//  EDGE Opal Music Player
 //----------------------------------------------------------------------------
 //
 //  Copyright (c) 2022-2024 The EDGE Team.
@@ -16,20 +16,20 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __S_OPL_H__
-#define __S_OPL_H__
+#pragma once
 
-#include "i_defs.h"
+#include <stdint.h>
+
+#include "s_music.h"
 
 extern bool opl_disabled;
 
-bool S_StartupOPL(void);
+bool StartupOpal(void);
 
-void S_RestartOPL(void);
+void RestartOpal(void);
 
-abstract_music_c *S_PlayOPL(uint8_t *data, int length, bool loop, int type);
-
-#endif /* __S_OPL_H__ */
+AbstractMusicPlayer *PlayOplMusic(uint8_t *data, int length, bool loop,
+                                  int type);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

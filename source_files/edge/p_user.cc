@@ -23,115 +23,116 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
-
 #include <float.h>
 
+#include "AlmostEquals.h"
+#include "bot_think.h"
+#include "coal.h"  // for coal::vm_c
 #include "colormap.h"
-
 #include "dm_state.h"
 #include "e_input.h"
 #include "g_game.h"
+#include "i_system.h"
 #include "m_random.h"
 #include "n_network.h"
-#include "bot_think.h"
+#include "p_blockmap.h"
 #include "p_local.h"
+#include "r_misc.h"
 #include "rad_trig.h"
 #include "s_blit.h"
 #include "s_sound.h"
-
-// Room size test - Dasho
-#include "p_blockmap.h"
-
-#include "AlmostEquals.h"
-
-#include "coal.h" // for coal::vm_c
-#include "vm_coal.h"
 #include "script/compat/lua_compat.h"
+#include "vm_coal.h"
 
 extern coal::vm_c *ui_vm;
-extern void        VM_SetVector(coal::vm_c *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
-                                double val_3);
+extern void        CoalSetVector(coal::vm_c *vm, const char *mod_name,
+                                 const char *var_name, double val_1, double val_2,
+                                 double val_3);
 
-extern cvar_c r_doubleframes;
+extern ConsoleVariable double_framerate;
 
-DEF_CVAR(g_erraticism, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(erraticism, "0", kConsoleVariableFlagArchive)
 
-DEF_CVAR(g_bobbing, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(view_bobbing, "0", kConsoleVariableFlagArchive)
 
 float room_area;
 
-struct room_measure
-{
-    float x = 0;
-    float y = 0;
-};
+static constexpr float    kMaximumBob       = 16.0f;
+static constexpr uint8_t  kZoomAngleDivisor = 4;
+static constexpr BAMAngle kMouseLookLimit   = 0x53333355;  // 75 degrees
+static constexpr float    kCrouchSlowdown   = 0.5f;
+
+static SoundEffect *sfx_jpidle;
+static SoundEffect *sfx_jpmove;
+static SoundEffect *sfx_jprise;
+static SoundEffect *sfx_jpdown;
+static SoundEffect *sfx_jpflow;
 
 // Test for "measuring" size of room
-static bool P_RoomPath(intercept_t *in, void *dataptr)
+static bool P_RoomPath(PathIntercept *in, void *dataptr)
 {
-    room_measure *blocker = (room_measure *)dataptr;
+    HMM_Vec2 *blocker = (HMM_Vec2 *)dataptr;
 
     if (in->line)
     {
-        line_t *ld = in->line;
+        Line *ld = in->line;
 
-        if (ld->backsector && ld->frontsector)
+        if (ld->back_sector && ld->front_sector)
         {
-            if ((IS_SKY(ld->backsector->ceil) && !IS_SKY(ld->frontsector->ceil)) ||
-                (!IS_SKY(ld->backsector->ceil) && IS_SKY(ld->frontsector->ceil)))
+            if ((EDGE_IMAGE_IS_SKY(ld->back_sector->ceiling) &&
+                 !EDGE_IMAGE_IS_SKY(ld->front_sector->ceiling)) ||
+                (!EDGE_IMAGE_IS_SKY(ld->back_sector->ceiling) &&
+                 EDGE_IMAGE_IS_SKY(ld->front_sector->ceiling)))
             {
-                blocker->x = (ld->v1->X + ld->v2->X) / 2;
-                blocker->y = (ld->v1->Y + ld->v2->Y) / 2;
+                blocker->X = (ld->vertex_1->X + ld->vertex_2->X) / 2;
+                blocker->Y = (ld->vertex_1->Y + ld->vertex_2->Y) / 2;
                 return false;
             }
         }
 
         if (ld->blocked)
         {
-            blocker->x = (ld->v1->X + ld->v2->X) / 2;
-            blocker->y = (ld->v1->Y + ld->v2->Y) / 2;
+            blocker->X = (ld->vertex_1->X + ld->vertex_2->X) / 2;
+            blocker->Y = (ld->vertex_1->Y + ld->vertex_2->Y) / 2;
             return false;
         }
     }
     return true;
 }
 
-static void P_UpdatePowerups(player_t *player);
+static void UpdatePowerups(Player *player);
 
-#define MAXBOB 16.0f
-
-#define ZOOM_ANGLE_DIV 4
-
-static sfx_t *sfx_jpidle;
-static sfx_t *sfx_jpmove;
-static sfx_t *sfx_jprise;
-static sfx_t *sfx_jpdown;
-static sfx_t *sfx_jpflow;
-
-static void CalcHeight(player_t *player, bool extra_tic)
+static void CalcHeight(Player *player, bool extra_tic)
 {
-    bool      onground  = player->mo->z <= player->mo->floorz;
-    float     sink_mult = 1.0f;
-    sector_t *cur_sec   = player->mo->subsector->sector;
-    if (!cur_sec->exfloor_used && !cur_sec->heightsec && onground)
+    bool    onground  = player->map_object_->z <= player->map_object_->floor_z_;
+    float   sink_mult = 1.0f;
+    Sector *cur_sec   = player->map_object_->subsector_->sector;
+    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && onground)
         sink_mult -= cur_sec->sink_depth;
 
-    if (g_erraticism.d && leveltime > 0 && (!player->cmd.forwardmove && !player->cmd.sidemove) &&
-        ((AlmostEquals(player->mo->height, player->mo->info->height) ||
-          AlmostEquals(player->mo->height, player->mo->info->crouchheight)) &&
-         (AlmostEquals(player->deltaviewheight, 0.0f) || sink_mult < 1.0f)))
+    if (erraticism.d_ && level_time_elapsed > 0 &&
+        (!player->command_.forward_move && !player->command_.side_move) &&
+        ((AlmostEquals(player->map_object_->height_,
+                       player->map_object_->info_->height_) ||
+          AlmostEquals(player->map_object_->height_,
+                       player->map_object_->info_->crouchheight_)) &&
+         (AlmostEquals(player->delta_view_height_, 0.0f) || sink_mult < 1.0f)))
         return;
 
-    if (player->mo->height < (player->mo->info->height + player->mo->info->crouchheight) / 2.0f)
-        player->mo->extendedflags |= EF_CROUCHING;
+    if (player->map_object_->height_ <
+        (player->map_object_->info_->height_ +
+         player->map_object_->info_->crouchheight_) /
+            2.0f)
+        player->map_object_->extended_flags_ |= kExtendedFlagCrouching;
     else
-        player->mo->extendedflags &= ~EF_CROUCHING;
+        player->map_object_->extended_flags_ &= ~kExtendedFlagCrouching;
 
-    player->std_viewheight = player->mo->height * PERCENT_2_FLOAT(player->mo->info->viewheight);
+    player->standard_view_height_ =
+        player->map_object_->height_ * player->map_object_->info_->viewheight_;
 
     if (sink_mult < 1.0f)
-        player->deltaviewheight = HMM_MAX(player->deltaviewheight - 1.0f, -1.0f);
+        player->delta_view_height_ =
+            HMM_MAX(player->delta_view_height_ - 1.0f, -1.0f);
 
     // calculate the walking / running height adjustment.
 
@@ -142,147 +143,149 @@ static void CalcHeight(player_t *player, bool extra_tic)
     // -AJA- Moved up here, to prevent weapon jumps when running down
     // stairs.
 
-    if (g_erraticism.d)
-        player->bob = 12.0f;
+    if (erraticism.d_)
+        player->bob_factor_ = 12.0f;
     else
-        player->bob = (player->mo->mom.X * player->mo->mom.X + player->mo->mom.Y * player->mo->mom.Y) / 8;
+        player->bob_factor_ = (player->map_object_->momentum_.X *
+                                   player->map_object_->momentum_.X +
+                               player->map_object_->momentum_.Y *
+                                   player->map_object_->momentum_.Y) /
+                              8;
 
-    if (player->bob > MAXBOB)
-        player->bob = MAXBOB;
+    if (player->bob_factor_ > kMaximumBob) player->bob_factor_ = kMaximumBob;
 
     // ----CALCULATE BOB EFFECT----
-    if (player->playerstate == PST_LIVE && onground)
+    if (player->player_state_ == kPlayerAlive && onground)
     {
-        BAMAngle angle = kBAMAngle90 / 5 * leveltime;
+        BAMAngle angle = kBAMAngle90 / 5 * level_time_elapsed;
 
-        bob_z = player->bob / 2 * player->mo->info->bobbing * epi::BAMSin(angle);
+        bob_z = player->bob_factor_ / 2 * player->map_object_->info_->bobbing_ *
+                epi::BAMSin(angle);
     }
 
     // ----CALCULATE VIEWHEIGHT----
-    if (player->playerstate == PST_LIVE)
+    if (player->player_state_ == kPlayerAlive)
     {
-        player->viewheight += player->deltaviewheight * (r_doubleframes.d ? 0.5 : 1);
+        player->view_height_ +=
+            player->delta_view_height_ * (double_framerate.d_ ? 0.5 : 1);
 
-        if (player->viewheight > player->std_viewheight)
+        if (player->view_height_ > player->standard_view_height_)
         {
-            player->viewheight      = player->std_viewheight;
-            player->deltaviewheight = 0;
+            player->view_height_       = player->standard_view_height_;
+            player->delta_view_height_ = 0;
         }
-        else if (sink_mult < 1.0f && !(player->mo->extendedflags & EF_CROUCHING) &&
-                 player->viewheight < player->std_viewheight * sink_mult)
+        else if (sink_mult < 1.0f &&
+                 !(player->map_object_->extended_flags_ &
+                   kExtendedFlagCrouching) &&
+                 player->view_height_ <
+                     player->standard_view_height_ * sink_mult)
         {
-            player->viewheight = player->std_viewheight * sink_mult;
-            if (player->deltaviewheight <= 0)
-                player->deltaviewheight = 0.01f;
+            player->view_height_ = player->standard_view_height_ * sink_mult;
+            if (player->delta_view_height_ <= 0)
+                player->delta_view_height_ = 0.01f;
         }
         else
         {
-            float thresh = player->std_viewheight / 2;
+            float thresh = player->standard_view_height_ / 2;
             if (sink_mult < 1.0f)
-                thresh = HMM_MIN(thresh, player->std_viewheight * sink_mult);
-            if (player->viewheight < thresh)
+                thresh =
+                    HMM_MIN(thresh, player->standard_view_height_ * sink_mult);
+            if (player->view_height_ < thresh)
             {
-                player->viewheight = thresh;
-                if (player->deltaviewheight <= 0)
-                    player->deltaviewheight = 0.01f;
+                player->view_height_ = thresh;
+                if (player->delta_view_height_ <= 0)
+                    player->delta_view_height_ = 0.01f;
             }
         }
 
-        if (!AlmostEquals(player->deltaviewheight, 0.0f))
+        if (!AlmostEquals(player->delta_view_height_, 0.0f))
         {
             // use a weird number to minimise chance of hitting
-            // zero when deltaviewheight goes neg -> positive.
-            if (!extra_tic || !r_doubleframes.d)
-                player->deltaviewheight += 0.24162f;
+            // zero when delta_view_height_ goes neg -> positive.
+            if (!extra_tic || !double_framerate.d_)
+                player->delta_view_height_ += 0.24162f;
         }
     }
 
     //----CALCULATE FREEFALL EFFECT, WITH SOUND EFFECTS (code based on HEXEN)
     //  CORBIN, on:
-    //  6/6/2011 - Fix this so RTS does NOT interfere with fracunits (it does in Hypertension's E1M1 starting script)!
-    //  6/7/2011 - Ajaped said to remove FRACUNIT...seeya oldness.
+    //  6/6/2011 - Fix this so RTS does NOT interfere with fracunits (it does in
+    //  Hypertension's E1M1 starting script)! 6/7/2011 - Ajaped said to remove
+    //  FRACUNIT...seeya oldness.
 
-    // if ((player->mo->mom.z <= -35.0)&&(player->mo->mom.z >= -40.0))
-    if ((player->mo->mom.Z <= -35.0) && (player->mo->mom.Z >= -36.0))
-        if (player->mo->info->falling_sound)
+    // if ((player->map_object_->momentum_.z <=
+    // -35.0)&&(player->map_object_->momentum_.z >= -40.0))
+    if ((player->map_object_->momentum_.Z <= -35.0) &&
+        (player->map_object_->momentum_.Z >= -36.0))
+        if (player->map_object_->info_->falling_sound_)
         {
             int sfx_cat;
 
-            if (player == players[consoleplayer])
+            if (player == players[console_player])
             {
-                sfx_cat = SNCAT_Player;
+                sfx_cat = kCategoryPlayer;
             }
-            else
-            {
-                sfx_cat = SNCAT_Opponent;
-            }
-            S_StartFX(player->mo->info->falling_sound, sfx_cat, player->mo);
+            else { sfx_cat = kCategoryOpponent; }
+            StartSoundEffect(player->map_object_->info_->falling_sound_,
+                             sfx_cat, player->map_object_);
         }
 
     // don't apply bobbing when jumping, but have a smooth
     // transition at the end of the jump.
-    if (player->jumpwait > 0)
+    if (player->jump_wait_ > 0)
     {
-        if (player->jumpwait >= 6)
+        if (player->jump_wait_ >= 6)
             bob_z = 0;
         else
-            bob_z *= (6 - player->jumpwait) / 6.0;
+            bob_z *= (6 - player->jump_wait_) / 6.0;
     }
 
-    if (r_doubleframes.d)
-        bob_z *= 0.5;
+    if (double_framerate.d_) bob_z *= 0.5;
 
-    if (g_bobbing.d > 1)
-        bob_z = 0;
+    if (view_bobbing.d_ > 1) bob_z = 0;
 
-    player->viewz = player->viewheight + bob_z;
-
-#if 0 // DEBUG
-I_Debugf("Jump:%d bob_z:%1.2f  z:%1.2f  height:%1.2f delta:%1.2f --> viewz:%1.3f\n",
-		 player->jumpwait, bob_z, player->mo->z,
-		 player->viewheight, player->deltaviewheight,
-		 player->mo->z + player->viewz);
-#endif
+    player->view_z_ = player->view_height_ + bob_z;
 }
 
-void P_PlayerJump(player_t *pl, float dz, int wait)
+void PlayerJump(Player *pl, float dz, int wait)
 {
-    pl->mo->mom.Z += dz;
+    pl->map_object_->momentum_.Z += dz;
 
-    if (pl->jumpwait < wait)
-        pl->jumpwait = wait;
+    if (pl->jump_wait_ < wait) pl->jump_wait_ = wait;
 
     // enter the JUMP states (if present)
-    statenum_t jump_st = P_MobjFindLabel(pl->mo, "JUMP");
-    if (jump_st != S_NULL)
-        P_SetMobjStateDeferred(pl->mo, jump_st, 0);
+    int jump_st = MapObjectFindLabel(pl->map_object_, "JUMP");
+    if (jump_st != 0) MapObjectSetStateDeferred(pl->map_object_, jump_st, 0);
 
     // -AJA- 1999/09/11: New JUMP_SOUND for ddf.
-    if (pl->mo->info->jump_sound)
+    if (pl->map_object_->info_->jump_sound_)
     {
         int sfx_cat;
 
-        if (pl == players[consoleplayer])
-            sfx_cat = SNCAT_Player;
+        if (pl == players[console_player])
+            sfx_cat = kCategoryPlayer;
         else
-            sfx_cat = SNCAT_Opponent;
+            sfx_cat = kCategoryOpponent;
 
-        S_StartFX(pl->mo->info->jump_sound, sfx_cat, pl->mo);
+        StartSoundEffect(pl->map_object_->info_->jump_sound_, sfx_cat,
+                         pl->map_object_);
     }
 }
 
-static void MovePlayer(player_t *player, bool extra_tic)
+static void MovePlayer(Player *player, bool extra_tic)
 {
-    ticcmd_t *cmd;
-    mobj_t   *mo = player->mo;
+    EventTicCommand *cmd;
+    MapObject       *mo = player->map_object_;
 
-    bool onground = player->mo->z <= player->mo->floorz;
-    bool onladder = player->mo->on_ladder >= 0;
+    bool onground = player->map_object_->z <= player->map_object_->floor_z_;
+    bool onladder = player->map_object_->on_ladder_ >= 0;
 
-    bool swimming  = player->swimming;
-    bool flying    = (player->powers[PW_Jetpack] > 0) && !swimming;
-    bool jumping   = (player->jumpwait > 0);
-    bool crouching = (player->mo->extendedflags & EF_CROUCHING) ? true : false;
+    bool swimming = player->swimming_;
+    bool flying   = (player->powers_[kPowerTypeJetpack] > 0) && !swimming;
+    bool jumping  = (player->jump_wait_ > 0);
+    bool crouching =
+        (player->map_object_->extended_flags_ & kExtendedFlagCrouching) ? true
+                                                                        : false;
 
     float dx, dy;
     float eh, ev;
@@ -292,72 +295,68 @@ static void MovePlayer(player_t *player, bool extra_tic)
 
     float F_vec[3], U_vec[3], S_vec[3];
 
-    cmd = &player->cmd;
+    cmd = &player->command_;
 
-    if (player->zoom_fov > 0)
-        cmd->angleturn /= ZOOM_ANGLE_DIV;
+    if (player->zoom_field_of_view_ > 0) cmd->angle_turn /= kZoomAngleDivisor;
 
-    player->mo->angle -= (BAMAngle)(cmd->angleturn << 16);
+    player->map_object_->angle_ -= (BAMAngle)(cmd->angle_turn << 16);
 
     // EDGE Feature: Vertical Look (Mlook)
     //
     // -ACB- 1998/07/02 New Code used, rerouted via Ticcmd
     // -ACB- 1998/07/27 Used defines for look limits.
     //
-    if (level_flags.mlook)
+    if (level_flags.mouselook)
     {
-        if (player->zoom_fov > 0)
-            cmd->mlookturn /= ZOOM_ANGLE_DIV;
+        if (player->zoom_field_of_view_ > 0)
+            cmd->mouselook_turn /= kZoomAngleDivisor;
 
-        BAMAngle V = player->mo->vertangle + (BAMAngle)(cmd->mlookturn << 16);
+        BAMAngle V = player->map_object_->vertical_angle_ +
+                     (BAMAngle)(cmd->mouselook_turn << 16);
 
-        if (V < kBAMAngle180 && V > MLOOK_LIMIT)
-            V = MLOOK_LIMIT;
-        else if (V >= kBAMAngle180 && V < (kBAMAngle360 - MLOOK_LIMIT))
-            V = (kBAMAngle360 - MLOOK_LIMIT);
+        if (V < kBAMAngle180 && V > kMouseLookLimit)
+            V = kMouseLookLimit;
+        else if (V >= kBAMAngle180 && V < (kBAMAngle360 - kMouseLookLimit))
+            V = (kBAMAngle360 - kMouseLookLimit);
 
-        player->mo->vertangle = V;
+        player->map_object_->vertical_angle_ = V;
     }
-    else
-    {
-        player->mo->vertangle = 0;
-    }
+    else { player->map_object_->vertical_angle_ = 0; }
 
     // EDGE Feature: Vertical Centering
     //
     // -ACB- 1998/07/02 Re-routed via Ticcmd
     //
-    if (cmd->extbuttons & EBT_CENTER)
-        player->mo->vertangle = 0;
+    if (cmd->extended_buttons & kExtendedButtonCodeCenter)
+        player->map_object_->vertical_angle_ = 0;
 
     // compute XY and Z speeds, taking swimming (etc) into account
     // (we try to swim in view direction -- assumes no gravity).
 
-    base_xy_speed = player->mo->speed / (r_doubleframes.d ? 64.0f : 32.0f);
-    base_z_speed  = player->mo->speed / (r_doubleframes.d ? 57.0f : 64.0f);
+    base_xy_speed =
+        player->map_object_->speed_ / (double_framerate.d_ ? 64.0f : 32.0f);
+    base_z_speed =
+        player->map_object_->speed_ / (double_framerate.d_ ? 57.0f : 64.0f);
 
     // Do not let the player control movement if not onground.
     // -MH- 1998/06/18  unless he has the JetPack!
 
-    if (!(onground || onladder || swimming || flying))
-        base_xy_speed /= 16.0f;
+    if (!(onground || onladder || swimming || flying)) base_xy_speed /= 16.0f;
 
-    if (!(onladder || swimming || flying))
-        base_z_speed /= 16.0f;
+    if (!(onladder || swimming || flying)) base_z_speed /= 16.0f;
 
     // move slower when crouching
-    if (crouching)
-        base_xy_speed *= CROUCH_SLOWDOWN;
+    if (crouching) base_xy_speed *= kCrouchSlowdown;
 
-    dx = epi::BAMCos(player->mo->angle);
-    dy = epi::BAMSin(player->mo->angle);
+    dx = epi::BAMCos(player->map_object_->angle_);
+    dy = epi::BAMSin(player->map_object_->angle_);
 
     eh = 1;
     ev = 0;
 
     if (swimming || flying || onladder)
     {
-        float slope = epi::BAMTan(player->mo->vertangle);
+        float slope = epi::BAMTan(player->map_object_->vertical_angle_);
 
         float hyp = (float)sqrt((double)(1.0f + slope * slope));
 
@@ -379,118 +378,138 @@ static void MovePlayer(player_t *player, bool extra_tic)
     U_vec[1] = -ev * dy * base_xy_speed;
     U_vec[2] = eh * base_z_speed;
 
-    player->mo->mom.X += F_vec[0] * cmd->forwardmove + S_vec[0] * cmd->sidemove + U_vec[0] * cmd->upwardmove;
+    player->map_object_->momentum_.X += F_vec[0] * cmd->forward_move +
+                                        S_vec[0] * cmd->side_move +
+                                        U_vec[0] * cmd->upward_move;
 
-    player->mo->mom.Y += F_vec[1] * cmd->forwardmove + S_vec[1] * cmd->sidemove + U_vec[1] * cmd->upwardmove;
+    player->map_object_->momentum_.Y += F_vec[1] * cmd->forward_move +
+                                        S_vec[1] * cmd->side_move +
+                                        U_vec[1] * cmd->upward_move;
 
     if (flying || swimming || !onground || onladder)
     {
-        player->mo->mom.Z += F_vec[2] * cmd->forwardmove + S_vec[2] * cmd->sidemove + U_vec[2] * cmd->upwardmove;
+        player->map_object_->momentum_.Z += F_vec[2] * cmd->forward_move +
+                                            S_vec[2] * cmd->side_move +
+                                            U_vec[2] * cmd->upward_move;
     }
 
     if (flying && !swimming)
     {
         int sfx_cat;
 
-        if (player == players[consoleplayer])
-            sfx_cat = SNCAT_Player;
+        if (player == players[console_player])
+            sfx_cat = kCategoryPlayer;
         else
-            sfx_cat = SNCAT_Opponent;
+            sfx_cat = kCategoryOpponent;
 
-        if (player->powers[PW_Jetpack] <= (5 * TICRATE))
+        if (player->powers_[kPowerTypeJetpack] <= (5 * kTicRate))
         {
-            if ((leveltime & 10) == 0)
-                S_StartFX(sfx_jpflow, sfx_cat, player->mo); // fuel low
+            if ((level_time_elapsed & 10) == 0)
+                StartSoundEffect(sfx_jpflow, sfx_cat,
+                                 player->map_object_);  // fuel low
         }
-        else if (cmd->upwardmove > 0)
-            S_StartFX(sfx_jprise, sfx_cat, player->mo);
-        else if (cmd->upwardmove < 0)
-            S_StartFX(sfx_jpdown, sfx_cat, player->mo);
-        else if (cmd->forwardmove || cmd->sidemove)
-            S_StartFX((onground ? sfx_jpidle : sfx_jpmove), sfx_cat, player->mo);
+        else if (cmd->upward_move > 0)
+            StartSoundEffect(sfx_jprise, sfx_cat, player->map_object_);
+        else if (cmd->upward_move < 0)
+            StartSoundEffect(sfx_jpdown, sfx_cat, player->map_object_);
+        else if (cmd->forward_move || cmd->side_move)
+            StartSoundEffect((onground ? sfx_jpidle : sfx_jpmove), sfx_cat,
+                             player->map_object_);
         else
-            S_StartFX(sfx_jpidle, sfx_cat, player->mo);
+            StartSoundEffect(sfx_jpidle, sfx_cat, player->map_object_);
     }
 
-    if (player->mo->state == &states[player->mo->info->idle_state])
+    if (player->map_object_->state_ ==
+        &states[player->map_object_->info_->idle_state_])
     {
-        if (!jumping && !flying && (onground || swimming) && (cmd->forwardmove || cmd->sidemove))
+        if (!jumping && !flying && (onground || swimming) &&
+            (cmd->forward_move || cmd->side_move))
         {
             // enter the CHASE (i.e. walking) states
-            if (player->mo->info->chase_state)
-                P_SetMobjStateDeferred(player->mo, player->mo->info->chase_state, 0);
+            if (player->map_object_->info_->chase_state_)
+                MapObjectSetStateDeferred(
+                    player->map_object_,
+                    player->map_object_->info_->chase_state_, 0);
         }
     }
 
     // EDGE Feature: Jump Code
     //
-    // -ACB- 1998/08/09 Check that jumping is allowed in the currmap
+    // -ACB- 1998/08/09 Check that jumping is allowed in the current_map
     //                  Make player pause before jumping again
 
-    if (!extra_tic || !r_doubleframes.d)
+    if (!extra_tic || !double_framerate.d_)
     {
-        if (level_flags.jump && mo->info->jumpheight > 0 && (cmd->upwardmove > 4))
+        if (level_flags.jump && mo->info_->jumpheight_ > 0 &&
+            (cmd->upward_move > 4))
         {
-            if (!jumping && !crouching && !swimming && !flying && onground && !onladder)
+            if (!jumping && !crouching && !swimming && !flying && onground &&
+                !onladder)
             {
-                P_PlayerJump(player, player->mo->info->jumpheight / (r_doubleframes.d ? 1.25f : 1.4f),
-                             player->mo->info->jump_delay);
+                PlayerJump(player,
+                           player->map_object_->info_->jumpheight_ /
+                               (double_framerate.d_ ? 1.25f : 1.4f),
+                           player->map_object_->info_->jump_delay_);
             }
         }
     }
 
     // EDGE Feature: Crouching
 
-    if (level_flags.crouch && mo->info->crouchheight > 0 && (player->cmd.upwardmove < -4) && !player->wet_feet &&
-        !jumping && onground)
+    if (level_flags.crouch && mo->info_->crouchheight_ > 0 &&
+        (player->command_.upward_move < -4) && !player->wet_feet_ && !jumping &&
+        onground)
     // NB: no ladder check, onground is sufficient
     {
-        if (mo->height > mo->info->crouchheight)
+        if (mo->height_ > mo->info_->crouchheight_)
         {
-            mo->height = HMM_MAX(mo->height - 2.0f / (r_doubleframes.d ? 2.0 : 1.0), mo->info->crouchheight);
-            mo->player->deltaviewheight = -1.0f;
+            mo->height_ =
+                HMM_MAX(mo->height_ - 2.0f / (double_framerate.d_ ? 2.0 : 1.0),
+                        mo->info_->crouchheight_);
+            mo->player_->delta_view_height_ = -1.0f;
         }
     }
-    else // STAND UP
+    else  // STAND UP
     {
-        if (mo->height < mo->info->height)
+        if (mo->height_ < mo->info_->height_)
         {
-            float new_height = HMM_MIN(mo->height + 2 / (r_doubleframes.d ? 2 : 1), mo->info->height);
+            float new_height =
+                HMM_MIN(mo->height_ + 2 / (double_framerate.d_ ? 2 : 1),
+                        mo->info_->height_);
 
             // prevent standing up inside a solid area
-            if ((mo->flags & MF_NOCLIP) || mo->z + new_height <= mo->ceilingz)
+            if ((mo->flags_ & kMapObjectFlagNoClip) ||
+                mo->z + new_height <= mo->ceiling_z_)
             {
-                mo->height                  = new_height;
-                mo->player->deltaviewheight = 1.0f;
+                mo->height_                     = new_height;
+                mo->player_->delta_view_height_ = 1.0f;
             }
         }
     }
 
     // EDGE Feature: Zooming
     //
-    if (cmd->extbuttons & EBT_ZOOM)
+    if (cmd->extended_buttons & kExtendedButtonCodeZoom)
     {
         int fov = 0;
 
-        if (player->zoom_fov == 0)
+        if (player->zoom_field_of_view_ == 0)
         {
-            if (!(player->ready_wp < 0 || player->pending_wp >= 0))
-                fov = player->weapons[player->ready_wp].info->zoom_fov;
+            if (!(player->ready_weapon_ < 0 || player->pending_weapon_ >= 0))
+                fov = player->weapons_[player->ready_weapon_].info->zoom_fov_;
 
-            if (fov == int(kBAMAngle360))
-                fov = 0;
+            if (fov == int(kBAMAngle360)) fov = 0;
         }
 
-        player->zoom_fov = fov;
+        player->zoom_field_of_view_ = fov;
     }
 }
 
-static void DeathThink(player_t *player, bool extra_tic)
+static void DeathThink(Player *player, bool extra_tic)
 {
     int subtract = extra_tic ? 0 : 1;
 
-    if (!r_doubleframes.d)
-        subtract = 1;
+    if (!double_framerate.d_) subtract = 1;
 
     // fall on your face when dying.
 
@@ -498,107 +517,116 @@ static void DeathThink(player_t *player, bool extra_tic)
 
     BAMAngle angle;
     BAMAngle delta, delta_s;
-    float   slope;
+    float    slope;
 
     // -AJA- 1999/12/07: don't die mid-air.
-    player->powers[PW_Jetpack] = 0;
+    player->powers_[kPowerTypeJetpack] = 0;
 
-    if (!extra_tic)
-        P_MovePsprites(player);
+    if (!extra_tic) MovePlayerSprites(player);
 
     // fall to the ground
-    if (player->viewheight > player->std_viewheight)
-        player->viewheight -= 1.0f / (r_doubleframes.d ? 2.0 : 1.0);
-    else if (player->viewheight < player->std_viewheight)
-        player->viewheight = player->std_viewheight;
+    if (player->view_height_ > player->standard_view_height_)
+        player->view_height_ -= 1.0f / (double_framerate.d_ ? 2.0 : 1.0);
+    else if (player->view_height_ < player->standard_view_height_)
+        player->view_height_ = player->standard_view_height_;
 
-    player->deltaviewheight = 0.0f;
-    player->kick_offset     = 0.0f;
+    player->delta_view_height_ = 0.0f;
+    player->kick_offset_       = 0.0f;
 
     CalcHeight(player, extra_tic);
 
-    if (player->attacker && player->attacker != player->mo)
+    if (player->attacker_ && player->attacker_ != player->map_object_)
     {
-        dx = player->attacker->x - player->mo->x;
-        dy = player->attacker->y - player->mo->y;
-        dz = (player->attacker->z + player->attacker->height / 2) - (player->mo->z + player->viewheight);
+        dx = player->attacker_->x - player->map_object_->x;
+        dy = player->attacker_->y - player->map_object_->y;
+        dz = (player->attacker_->z + player->attacker_->height_ / 2) -
+             (player->map_object_->z + player->view_height_);
 
-        angle = R_PointToAngle(0, 0, dx, dy);
-        delta = angle - player->mo->angle;
+        angle = RendererPointToAngle(0, 0, dx, dy);
+        delta = angle - player->map_object_->angle_;
 
-        slope   = P_ApproxSlope(dx, dy, dz);
-        slope   = HMM_MIN(1.7f, HMM_MAX(-1.7f, slope));
-        delta_s = epi::BAMFromATan(slope) - player->mo->vertangle;
+        slope = ApproximateSlope(dx, dy, dz);
+        slope = HMM_MIN(1.7f, HMM_MAX(-1.7f, slope));
+        delta_s =
+            epi::BAMFromATan(slope) - player->map_object_->vertical_angle_;
 
-        if ((delta <= kBAMAngle1 / 2 || delta >= (BAMAngle)(0 - kBAMAngle1 / 2)) &&
-            (delta_s <= kBAMAngle1 / 2 || delta_s >= (BAMAngle)(0 - kBAMAngle1 / 2)))
+        if ((delta <= kBAMAngle1 / 2 ||
+             delta >= (BAMAngle)(0 - kBAMAngle1 / 2)) &&
+            (delta_s <= kBAMAngle1 / 2 ||
+             delta_s >= (BAMAngle)(0 - kBAMAngle1 / 2)))
         {
             // Looking at killer, so fade damage flash down.
-            player->mo->angle     = angle;
-            player->mo->vertangle = epi::BAMFromATan(slope);
+            player->map_object_->angle_          = angle;
+            player->map_object_->vertical_angle_ = epi::BAMFromATan(slope);
 
-            if (player->damagecount > 0)
-                player->damagecount -= subtract;
+            if (player->damage_count_ > 0) player->damage_count_ -= subtract;
         }
         else
         {
-            unsigned int factor = r_doubleframes.d ? 2 : 1;
+            unsigned int factor = double_framerate.d_ ? 2 : 1;
             if (delta < kBAMAngle180)
                 delta /= (5 * factor);
             else
                 delta = (BAMAngle)(0 - (BAMAngle)(0 - delta) / (5 * factor));
 
-            if (delta > kBAMAngle5 / factor && delta < (BAMAngle)(0 - kBAMAngle5 / factor))
-                delta = (delta < kBAMAngle180) ? kBAMAngle5 / factor : (BAMAngle)(0 - kBAMAngle5 / factor);
+            if (delta > kBAMAngle5 / factor &&
+                delta < (BAMAngle)(0 - kBAMAngle5 / factor))
+                delta = (delta < kBAMAngle180)
+                            ? kBAMAngle5 / factor
+                            : (BAMAngle)(0 - kBAMAngle5 / factor);
 
             if (delta_s < kBAMAngle180)
                 delta_s /= (5 * factor);
             else
-                delta_s = (BAMAngle)(0 - (BAMAngle)(0 - delta_s) / (5 * factor));
+                delta_s =
+                    (BAMAngle)(0 - (BAMAngle)(0 - delta_s) / (5 * factor));
 
-            if (delta_s > (kBAMAngle5 / (factor * 2)) && delta_s < (BAMAngle)(0 - kBAMAngle5 / (factor * 2)))
-                delta_s = (delta_s < kBAMAngle180) ? (kBAMAngle5 / (factor * 2)) : (BAMAngle)(0 - kBAMAngle5 / (factor * 2));
+            if (delta_s > (kBAMAngle5 / (factor * 2)) &&
+                delta_s < (BAMAngle)(0 - kBAMAngle5 / (factor * 2)))
+                delta_s = (delta_s < kBAMAngle180)
+                              ? (kBAMAngle5 / (factor * 2))
+                              : (BAMAngle)(0 - kBAMAngle5 / (factor * 2));
 
-            player->mo->angle += delta;
-            player->mo->vertangle += delta_s;
+            player->map_object_->angle_ += delta;
+            player->map_object_->vertical_angle_ += delta_s;
 
-            if (player->damagecount && (leveltime % 3) == 0)
-                player->damagecount -= subtract;
+            if (player->damage_count_ && (level_time_elapsed % 3) == 0)
+                player->damage_count_ -= subtract;
         }
     }
-    else if (player->damagecount > 0)
-        player->damagecount--;
+    else if (player->damage_count_ > 0)
+        player->damage_count_--;
 
     // -AJA- 1999/08/07: Fade out armor points too.
-    if (player->bonuscount)
-        player->bonuscount -= subtract;
+    if (player->bonus_count_) player->bonus_count_ -= subtract;
 
-    P_UpdatePowerups(player);
+    UpdatePowerups(player);
 
     // lose the zoom when dead
-    player->zoom_fov = 0;
+    player->zoom_field_of_view_ = 0;
 
-    if (deathmatch >= 3 && player->mo->movecount > player->mo->info->respawntime)
+    if (deathmatch >= 3 && player->map_object_->move_count_ >
+                               player->map_object_->info_->respawntime_)
         return;
 
-    if (player->cmd.buttons & BT_USE)
-        player->playerstate = PST_REBORN;
+    if (player->command_.buttons & kButtonCodeUse)
+        player->player_state_ = kPlayerAwaitingRespawn;
 }
 
-static void P_UpdatePowerups(player_t *player)
+static void UpdatePowerups(Player *player)
 {
     float limit = FLT_MAX;
     int   pw;
 
-    if (player->playerstate == PST_DEAD)
-        limit = 1; // TICRATE * 5;
+    if (player->player_state_ == kPlayerDead) limit = 1;  // kTicRate * 5;
 
-    for (pw = 0; pw < NUMPOWERS; pw++)
+    for (pw = 0; pw < kTotalPowerTypes; pw++)
     {
-        if (player->powers[pw] < 0) // -ACB- 2004/02/04 Negative values last a level
+        if (player->powers_[pw] <
+            0)  // -ACB- 2004/02/04 Negative values last a level
             continue;
 
-        float &qty_r = player->powers[pw];
+        float &qty_r = player->powers_[pw];
 
         if (qty_r > limit)
             qty_r = limit;
@@ -606,370 +634,380 @@ static void P_UpdatePowerups(player_t *player)
             qty_r -= 1;
         else if (qty_r > 0)
         {
-            if (player->keep_powers & (1 << pw))
+            if (player->keep_powers_ & (1 << pw))
                 qty_r = -1;
             else
                 qty_r = 0;
         }
     }
 
-    if (player->powers[PW_PartInvis] >= 128 || fmod(player->powers[PW_PartInvis], 16) >= 8)
-        player->mo->flags |= MF_FUZZY;
+    if (player->powers_[kPowerTypePartInvis] >= 128 ||
+        fmod(player->powers_[kPowerTypePartInvis], 16) >= 8)
+        player->map_object_->flags_ |= kMapObjectFlagFuzzy;
     else
-        player->mo->flags &= ~MF_FUZZY;
+        player->map_object_->flags_ &= ~kMapObjectFlagFuzzy;
 
-    // Handling colourmaps.
+    // Handling colormaps.
     //
     // -AJA- 1999/07/10: Updated for colmap.ddf.
     //
     // !!! FIXME: overlap here with stuff in rgl_fx.cpp.
 
-    player->effect_colourmap = NULL;
-    player->effect_left      = 0;
+    player->effect_colourmap_ = nullptr;
+    player->effect_left_      = 0;
 
-    if (player->powers[PW_Invulnerable] > 0)
+    if (player->powers_[kPowerTypeInvulnerable] > 0)
     {
-        float s = player->powers[PW_Invulnerable];
+        float s = player->powers_[kPowerTypeInvulnerable];
 
         // -ACB- FIXME!!! Catch lookup failure!
-        player->effect_colourmap = colourmaps.Lookup("ALLWHITE");
-        player->effect_left      = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
+        player->effect_colourmap_ = colormaps.Lookup("ALLWHITE");
+        player->effect_left_ =
+            (s <= 0) ? 0 : HMM_MIN(int(s), kMaximumEffectTime);
     }
-    else if (player->powers[PW_Infrared] > 0)
+    else if (player->powers_[kPowerTypeInfrared] > 0)
     {
-        float s = player->powers[PW_Infrared];
+        float s = player->powers_[kPowerTypeInfrared];
 
-        player->effect_left = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
+        player->effect_left_ =
+            (s <= 0) ? 0 : HMM_MIN(int(s), kMaximumEffectTime);
     }
-    else if (player->powers[PW_NightVision] > 0) // -ACB- 1998/07/15 NightVision Code
+    else if (player->powers_[kPowerTypeNightVision] >
+             0)  // -ACB- 1998/07/15 NightVision Code
     {
-        float s = player->powers[PW_NightVision];
+        float s = player->powers_[kPowerTypeNightVision];
 
         // -ACB- FIXME!!! Catch lookup failure!
-        player->effect_colourmap = colourmaps.Lookup("ALLGREEN");
-        player->effect_left      = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
+        player->effect_colourmap_ = colormaps.Lookup("ALLGREEN");
+        player->effect_left_ =
+            (s <= 0) ? 0 : HMM_MIN(int(s), kMaximumEffectTime);
     }
-    else if (player->powers[PW_Berserk] > 0) // Lobo 2021: Un-Hardcode Berserk colour tint
+    else if (player->powers_[kPowerTypeBerserk] >
+             0)  // Lobo 2021: Un-Hardcode Berserk colour tint
     {
-        float s = player->powers[PW_Berserk];
+        float s = player->powers_[kPowerTypeBerserk];
 
-        player->effect_colourmap = colourmaps.Lookup("BERSERK");
-        player->effect_left      = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
+        player->effect_colourmap_ = colormaps.Lookup("BERSERK");
+        player->effect_left_ =
+            (s <= 0) ? 0 : HMM_MIN(int(s), kMaximumEffectTime);
     }
 }
 
 // Does the thinking of the console player, i.e. read from input
-void P_ConsolePlayerBuilder(const player_t *pl, void *data, ticcmd_t *dest)
+void ConsolePlayerBuilder(const Player *pl, void *data, EventTicCommand *dest)
 {
-    E_BuildTiccmd(dest);
+    EventBuildTicCommand(dest);
 
-    dest->player_idx = pl->pnum;
+    dest->player_index = pl->player_number_;
 }
 
-bool P_PlayerSwitchWeapon(player_t *player, weapondef_c *choice)
+bool PlayerSwitchWeapon(Player *player, WeaponDefinition *choice)
 {
     int pw_index;
 
     // see if player owns this kind of weapon
-    for (pw_index = 0; pw_index < MAXWEAPONS; pw_index++)
+    for (pw_index = 0; pw_index < kMaximumWeapons; pw_index++)
     {
-        if (!player->weapons[pw_index].owned)
-            continue;
+        if (!player->weapons_[pw_index].owned) continue;
 
-        if (player->weapons[pw_index].info == choice)
-            break;
+        if (player->weapons_[pw_index].info == choice) break;
     }
 
-    if (pw_index == MAXWEAPONS)
-        return false;
+    if (pw_index == kMaximumWeapons) return false;
 
     // ignore this choice if it the same as the current weapon
-    if (player->ready_wp >= 0 && choice == player->weapons[player->ready_wp].info)
+    if (player->ready_weapon_ >= 0 &&
+        choice == player->weapons_[player->ready_weapon_].info)
     {
         return false;
     }
 
-    player->pending_wp = (weapon_selection_e)pw_index;
+    player->pending_weapon_ = (WeaponSelection)pw_index;
 
     return true;
 }
 
 void P_DumpMobjsTemp(void)
 {
-    mobj_t *mo;
+    MapObject *mo;
 
     int index = 0;
 
-    I_Warning("MOBJs:\n");
+    LogWarning("MOBJs:\n");
 
-    for (mo = mobjlisthead; mo; mo = mo->next, index++)
+    for (mo = map_object_list_head; mo; mo = mo->next_, index++)
     {
-        I_Warning(" %4d: %p next:%p prev:%p [%s] at (%1.0f,%1.0f,%1.0f) states=%d > %d tics=%d\n", index, mo, mo->next,
-                  mo->prev, mo->info->name.c_str(), mo->x, mo->y, mo->z, (int)(mo->state ? mo->state - states : -1),
-                  (int)(mo->next_state ? mo->next_state - states : -1), mo->tics);
+        LogWarning(
+            " %4d: %p next:%p prev:%p [%s] at (%1.0f,%1.0f,%1.0f) states=%d > "
+            "%d tics=%d\n",
+            index, mo, mo->next_, mo->previous_, mo->info_->name_.c_str(),
+            mo->x, mo->y, mo->z, (int)(mo->state_ ? mo->state_ - states : -1),
+            (int)(mo->next_state_ ? mo->next_state_ - states : -1), mo->tics_);
     }
 
-    I_Warning("END OF MOBJs\n");
+    LogWarning("END OF MOBJs\n");
 }
 
-bool P_PlayerThink(player_t *player, bool extra_tic)
+bool PlayerThink(Player *player, bool extra_tic)
 {
-    ticcmd_t *cmd = &player->cmd;
+    EventTicCommand *cmd = &player->command_;
 
-    SYS_ASSERT(player->mo);
+    EPI_ASSERT(player->map_object_);
 
     bool should_think = true;
 
-#if 0 // DEBUG ONLY
-	{
-		touch_node_t *tn;
-		L_WriteDebug("Player %d Touch List:\n", player->pnum);
-		for (tn = mo->touch_sectors; tn; tn=tn->mo_next)
-		{
-			L_WriteDebug("  SEC %d  Other = %s\n", tn->sec - sectors,
-				tn->sec_next ? tn->sec_next->mo->info->name :
-			tn->sec_prev ? tn->sec_prev->mo->info->name : "(None)");
-
-			SYS_ASSERT(tn->mo == mo);
-			if (tn->mo_next)
-			{
-				SYS_ASSERT(tn->mo_next->mo_prev == tn);
-			}
-		}
-	}
-#endif
-
-    if (player->attacker && player->attacker->isRemoved())
+    if (player->attacker_ && player->attacker_->IsRemoved())
     {
         P_DumpMobjsTemp();
-        I_Error("INTERNAL ERROR: player has a removed attacker. \n");
+        FatalError("INTERNAL ERROR: player has a removed attacker. \n");
     }
 
-    if (player->damagecount <= 0)
-        player->damage_pain = 0;
+    if (player->damage_count_ <= 0) player->damage_pain_ = 0;
 
     // fixme: do this in the cheat code
-    if (player->cheats & CF_NOCLIP)
-        player->mo->flags |= MF_NOCLIP;
+    if (player->cheats_ & kCheatingNoClip)
+        player->map_object_->flags_ |= kMapObjectFlagNoClip;
     else
-        player->mo->flags &= ~MF_NOCLIP;
+        player->map_object_->flags_ &= ~kMapObjectFlagNoClip;
 
     // chain saw run forward
-    if (extra_tic || !r_doubleframes.d)
+    if (extra_tic || !double_framerate.d_)
     {
-        if (player->mo->flags & MF_JUSTATTACKED)
+        if (player->map_object_->flags_ & kMapObjectFlagJustAttacked)
         {
-            cmd->angleturn   = 0;
-            cmd->forwardmove = 64;
-            cmd->sidemove    = 0;
-            player->mo->flags &= ~MF_JUSTATTACKED;
+            cmd->angle_turn   = 0;
+            cmd->forward_move = 64;
+            cmd->side_move    = 0;
+            player->map_object_->flags_ &= ~kMapObjectFlagJustAttacked;
         }
     }
 
-    if (player->playerstate == PST_DEAD)
+    if (player->player_state_ == kPlayerDead)
     {
         DeathThink(player, extra_tic);
-        if (player->mo->props->special && player->mo->props->special->e_exit != EXIT_None)
+        if (player->map_object_->region_properties_->special &&
+            player->map_object_->region_properties_->special->e_exit_ !=
+                kExitTypeNone)
         {
-            exittype_e do_exit = player->mo->props->special->e_exit;
+            ExitType do_exit =
+                player->map_object_->region_properties_->special->e_exit_;
 
-            player->mo->subsector->sector->props.special = NULL;
+            player->map_object_->subsector_->sector->properties.special =
+                nullptr;
 
-            if (do_exit == EXIT_Secret)
-                G_SecretExitLevel(1);
+            if (do_exit == kExitTypeSecret)
+                GameSecretExitLevel(1);
             else
-                G_ExitLevel(1);
+                GameExitLevel(1);
         }
         return true;
     }
 
     int subtract = extra_tic ? 0 : 1;
-    if (!r_doubleframes.d)
-        subtract = 1;
+    if (!double_framerate.d_) subtract = 1;
 
     // Move/Look around.  Reactiontime is used to prevent movement for a
     // bit after a teleport.
 
-    if (player->mo->reactiontime)
-        player->mo->reactiontime -= subtract;
+    if (player->map_object_->reaction_time_)
+        player->map_object_->reaction_time_ -= subtract;
 
-    if (player->mo->reactiontime == 0)
-        MovePlayer(player, extra_tic);
+    if (player->map_object_->reaction_time_ == 0) MovePlayer(player, extra_tic);
 
     CalcHeight(player, extra_tic);
 
-    if (g_erraticism.d)
+    if (erraticism.d_)
     {
-        bool      sinking = false;
-        sector_t *cur_sec = player->mo->subsector->sector;
-        if (!cur_sec->exfloor_used && !cur_sec->heightsec && cur_sec->sink_depth > 0 &&
-            player->mo->z <= player->mo->floorz)
+        bool    sinking = false;
+        Sector *cur_sec = player->map_object_->subsector_->sector;
+        if (!cur_sec->extrafloor_used && !cur_sec->height_sector &&
+            cur_sec->sink_depth > 0 &&
+            player->map_object_->z <= player->map_object_->floor_z_)
             sinking = true;
-        if (cmd->forwardmove == 0 && cmd->sidemove == 0 && !player->swimming && cmd->upwardmove <= 0 &&
-            !(cmd->buttons & (BT_ATTACK | BT_USE | BT_CHANGE | EBT_SECONDATK | EBT_RELOAD | EBT_ACTION1 | EBT_ACTION2 |
-                              EBT_INVUSE | EBT_THIRDATK | EBT_FOURTHATK)) &&
-            ((AlmostEquals(player->mo->height, player->mo->info->height) ||
-              AlmostEquals(player->mo->height, player->mo->info->crouchheight)) &&
-             (AlmostEquals(player->deltaviewheight, 0.0f) || sinking)))
+        if (cmd->forward_move == 0 && cmd->side_move == 0 &&
+            !player->swimming_ && cmd->upward_move <= 0 &&
+            !(cmd->buttons &
+              (kButtonCodeAttack | kButtonCodeUse | kButtonCodeChangeWeapon |
+               kExtendedButtonCodeSecondAttack | kExtendedButtonCodeReload |
+               kExtendedButtonCodeAction1 | kExtendedButtonCodeAction2 |
+               kExtendedButtonCodeInventoryUse |
+               kExtendedButtonCodeThirdAttack |
+               kExtendedButtonCodeFourthAttack)) &&
+            ((AlmostEquals(player->map_object_->height_,
+                           player->map_object_->info_->height_) ||
+              AlmostEquals(player->map_object_->height_,
+                           player->map_object_->info_->crouchheight_)) &&
+             (AlmostEquals(player->delta_view_height_, 0.0f) || sinking)))
         {
             should_think = false;
-            if (!player->mo->mom.Z)
+            if (!player->map_object_->momentum_.Z)
             {
-                player->mo->mom.X = 0;
-                player->mo->mom.Y = 0;
+                player->map_object_->momentum_.X = 0;
+                player->map_object_->momentum_.Y = 0;
             }
         }
     }
 
-    // Reset environmental FX in case player has left sector in which they apply - Dasho
-    vacuum_sfx       = false;
-    submerged_sfx    = false;
-    outdoor_reverb   = false;
-    ddf_reverb       = false;
-    ddf_reverb_type  = 0;
-    ddf_reverb_delay = 0;
-    ddf_reverb_ratio = 0;
+    // Reset environmental FX in case player has left sector in which they apply
+    // - Dasho
+    vacuum_sound_effects    = false;
+    submerged_sound_effects = false;
+    outdoor_reverb          = false;
+    ddf_reverb              = false;
+    ddf_reverb_type         = 0;
+    ddf_reverb_delay        = 0;
+    ddf_reverb_ratio        = 0;
 
-    if (player->mo->props->special || player->mo->subsector->sector->exfloor_used > 0 || player->underwater ||
-        player->swimming || player->airless)
+    if (player->map_object_->region_properties_->special ||
+        player->map_object_->subsector_->sector->extrafloor_used > 0 ||
+        player->underwater_ || player->swimming_ || player->airless_)
     {
-        P_PlayerInSpecialSector(player, player->mo->subsector->sector, should_think);
+        PlayerInSpecialSector(player, player->map_object_->subsector_->sector,
+                              should_think);
     }
 
-    if (IS_SKY(player->mo->subsector->sector->ceil))
+    if (EDGE_IMAGE_IS_SKY(player->map_object_->subsector_->sector->ceiling))
         outdoor_reverb = true;
 
     // Check for weapon change.
-    if (cmd->buttons & BT_CHANGE)
+    if (cmd->buttons & kButtonCodeChangeWeapon)
     {
         // The actual changing of the weapon is done when the weapon
         // psprite can do it (read: not in the middle of an attack).
 
-        int key = (cmd->buttons & BT_WEAPONMASK) >> BT_WEAPONSHIFT;
+        int key = (cmd->buttons & kButtonCodeWeaponMask) >>
+                  kButtonCodeWeaponMaskShift;
 
-        if (key == BT_NEXT_WEAPON)
-        {
-            P_NextPrevWeapon(player, +1);
-        }
-        else if (key == BT_PREV_WEAPON)
-        {
-            P_NextPrevWeapon(player, -1);
-        }
-        else /* numeric key */
-        {
-            P_DesireWeaponChange(player, key);
-        }
+        if (key == kButtonCodeNextWeapon) { CycleWeapon(player, +1); }
+        else if (key == kButtonCodePreviousWeapon) { CycleWeapon(player, -1); }
+        else /* numeric key */ { DesireWeaponChange(player, key); }
     }
 
     // check for use
-    if (cmd->buttons & BT_USE)
+    if (cmd->buttons & kButtonCodeUse)
     {
-        if (!player->usedown)
+        if (!player->use_button_down_)
         {
-            P_UseLines(player);
-            player->usedown = true;
+            UseLines(player);
+            player->use_button_down_ = true;
         }
     }
-    else
-    {
-        player->usedown = false;
-    }
+    else { player->use_button_down_ = false; }
 
-    player->actiondown[0] = (cmd->extbuttons & EBT_ACTION1) ? true : false;
-    player->actiondown[1] = (cmd->extbuttons & EBT_ACTION2) ? true : false;
+    player->action_button_down_[0] =
+        (cmd->extended_buttons & kExtendedButtonCodeAction1) ? true : false;
+    player->action_button_down_[1] =
+        (cmd->extended_buttons & kExtendedButtonCodeAction2) ? true : false;
 
-    if (LUA_UseLuaHud())
-        LUA_SetVector3(LUA_GetGlobalVM(), "player", "inventory_event_handler",
-                       HMM_Vec3{{cmd->extbuttons & EBT_INVPREV ? 1.0f : 0.0f, cmd->extbuttons & EBT_INVUSE ? 1.0f : 0.0f,
-                                   cmd->extbuttons & EBT_INVNEXT ? 1.0f : 0.0f}});
+    if (LuaUseLuaHud())
+        LuaSetVector3(
+            LuaGetGlobalVM(), "player", "inventory_event_handler",
+            HMM_Vec3{
+                {cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious
+                     ? 1.0f
+                     : 0.0f,
+                 cmd->extended_buttons & kExtendedButtonCodeInventoryUse ? 1.0f
+                                                                         : 0.0f,
+                 cmd->extended_buttons & kExtendedButtonCodeInventoryNext
+                     ? 1.0f
+                     : 0.0f}});
     else
-        VM_SetVector(ui_vm, "player", "inventory_event_handler", cmd->extbuttons & EBT_INVPREV ? 1 : 0,
-                     cmd->extbuttons & EBT_INVUSE ? 1 : 0, cmd->extbuttons & EBT_INVNEXT ? 1 : 0);
+        CoalSetVector(
+            ui_vm, "player", "inventory_event_handler",
+            cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious ? 1
+                                                                         : 0,
+            cmd->extended_buttons & kExtendedButtonCodeInventoryUse ? 1 : 0,
+            cmd->extended_buttons & kExtendedButtonCodeInventoryNext ? 1 : 0);
 
     // FIXME separate code more cleanly
-    if (extra_tic && r_doubleframes.d)
-        return should_think;
+    if (extra_tic && double_framerate.d_) return should_think;
 
-    // decrement jumpwait counter
-    if (player->jumpwait > 0)
-        player->jumpwait--;
+    // decrement jump_wait_ counter
+    if (player->jump_wait_ > 0) player->jump_wait_--;
 
-    if (player->splashwait > 0)
-        player->splashwait--;
+    if (player->splash_wait_ > 0) player->splash_wait_--;
 
     // cycle psprites
-    P_MovePsprites(player);
+    MovePlayerSprites(player);
 
     // Counters, time dependend power ups.
 
-    P_UpdatePowerups(player);
+    UpdatePowerups(player);
 
-    if (player->damagecount > 0)
-        player->damagecount--;
+    if (player->damage_count_ > 0) player->damage_count_--;
 
-    if (player->bonuscount > 0)
-        player->bonuscount--;
+    if (player->bonus_count_ > 0) player->bonus_count_--;
 
-    if (player->grin_count > 0)
-        player->grin_count--;
+    if (player->grin_count_ > 0) player->grin_count_--;
 
-    if (player->attackdown[0] || player->attackdown[1])
-        player->attackdown_count++;
+    if (player->action_button_down_[0] || player->action_button_down_[1])
+        player->attack_sustained_count_++;
     else
-        player->attackdown_count = 0;
+        player->attack_sustained_count_ = 0;
 
-    player->kick_offset /= 1.6f;
+    player->kick_offset_ /= 1.6f;
 
-    if (players[consoleplayer] == player && dynamic_reverb)
+    if (players[console_player] == player && dynamic_reverb)
     {
         // Approximate "room size" determination for reverb system - Dasho
-        room_measure room_checker;
-        float        line_lengths = 0;
-        float        player_x     = player->mo->x;
-        float        player_y     = player->mo->y;
-        P_PathTraverse(player_x, player_y, player_x, 32768.0f, PT_ADDLINES, P_RoomPath, &room_checker);
-        line_lengths += abs(room_checker.y - player_y);
-        P_PathTraverse(player_x, player_y, 32768.0f + player_x, 32768.0f + player_y, PT_ADDLINES, P_RoomPath,
-                       &room_checker);
-        line_lengths += R_PointToDist(player_x, player_y, room_checker.x, room_checker.y);
-        P_PathTraverse(player_x, player_y, -32768.0f + player_x, 32768.0f + player_y, PT_ADDLINES, P_RoomPath,
-                       &room_checker);
-        line_lengths += R_PointToDist(player_x, player_y, room_checker.x, room_checker.y);
-        P_PathTraverse(player_x, player_y, player_x, -32768.0f, PT_ADDLINES, P_RoomPath, &room_checker);
-        line_lengths += abs(player_y - room_checker.y);
-        P_PathTraverse(player_x, player_y, -32768.0f + player_x, -32768.0f + player_y, PT_ADDLINES, P_RoomPath,
-                       &room_checker);
-        line_lengths += R_PointToDist(player_x, player_y, room_checker.x, room_checker.y);
-        P_PathTraverse(player_x, player_y, 32768.0f + player_x, -32768.0f + player_y, PT_ADDLINES, P_RoomPath,
-                       &room_checker);
-        line_lengths += R_PointToDist(player_x, player_y, room_checker.x, room_checker.y);
-        P_PathTraverse(player_x, player_y, -32768.0f, player_y, PT_ADDLINES, P_RoomPath, &room_checker);
-        line_lengths += abs(player_x - room_checker.x);
-        P_PathTraverse(player_x, player_y, 32768.0f, player_y, PT_ADDLINES, P_RoomPath, &room_checker);
-        line_lengths += abs(room_checker.x - player_x);
+        HMM_Vec2 room_checker;
+        float    line_lengths = 0;
+        float    player_x     = player->map_object_->x;
+        float    player_y     = player->map_object_->y;
+        PathTraverse(player_x, player_y, player_x, 32768.0f, kPathAddLines,
+                     P_RoomPath, &room_checker);
+        line_lengths += abs(room_checker.Y - player_y);
+        PathTraverse(player_x, player_y, 32768.0f + player_x,
+                     32768.0f + player_y, kPathAddLines, P_RoomPath,
+                     &room_checker);
+        line_lengths += RendererPointToDistance(player_x, player_y,
+                                                room_checker.X, room_checker.Y);
+        PathTraverse(player_x, player_y, -32768.0f + player_x,
+                     32768.0f + player_y, kPathAddLines, P_RoomPath,
+                     &room_checker);
+        line_lengths += RendererPointToDistance(player_x, player_y,
+                                                room_checker.X, room_checker.Y);
+        PathTraverse(player_x, player_y, player_x, -32768.0f, kPathAddLines,
+                     P_RoomPath, &room_checker);
+        line_lengths += abs(player_y - room_checker.Y);
+        PathTraverse(player_x, player_y, -32768.0f + player_x,
+                     -32768.0f + player_y, kPathAddLines, P_RoomPath,
+                     &room_checker);
+        line_lengths += RendererPointToDistance(player_x, player_y,
+                                                room_checker.X, room_checker.Y);
+        PathTraverse(player_x, player_y, 32768.0f + player_x,
+                     -32768.0f + player_y, kPathAddLines, P_RoomPath,
+                     &room_checker);
+        line_lengths += RendererPointToDistance(player_x, player_y,
+                                                room_checker.X, room_checker.Y);
+        PathTraverse(player_x, player_y, -32768.0f, player_y, kPathAddLines,
+                     P_RoomPath, &room_checker);
+        line_lengths += abs(player_x - room_checker.X);
+        PathTraverse(player_x, player_y, 32768.0f, player_y, kPathAddLines,
+                     P_RoomPath, &room_checker);
+        line_lengths += abs(room_checker.X - player_x);
         room_area = line_lengths / 8;
     }
 
     return should_think;
 }
 
-void P_CreatePlayer(int pnum, bool is_bot)
+void CreatePlayer(int pnum, bool is_bot)
 {
-    SYS_ASSERT(0 <= pnum && pnum < MAXPLAYERS);
-    SYS_ASSERT(players[pnum] == NULL);
+    EPI_ASSERT(0 <= pnum && pnum < kMaximumPlayers);
+    EPI_ASSERT(players[pnum] == nullptr);
 
-    player_t *p = new player_t;
+    Player *p = new Player;
 
-    Z_Clear(p, player_t, 1);
+    EPI_CLEAR_MEMORY(p, Player, 1);
 
-    p->pnum        = pnum;
-    p->playerstate = PST_DEAD;
+    p->player_number_ = pnum;
+    p->player_state_  = kPlayerDead;
 
     players[pnum] = p;
 
-    numplayers++;
-    if (is_bot)
-        numbots++;
+    total_players++;
+    if (is_bot) total_bots++;
 
     // determine name
     char namebuf[32];
@@ -977,17 +1015,17 @@ void P_CreatePlayer(int pnum, bool is_bot)
 
     if (language.IsValidRef(namebuf))
     {
-        strncpy(p->playername, language[namebuf], MAX_PLAYNAME - 1);
-        p->playername[MAX_PLAYNAME - 1] = '\0';
+        strncpy(p->player_name_, language[namebuf],
+                kPlayerNameCharacterLimit - 1);
+        p->player_name_[kPlayerNameCharacterLimit - 1] = '\0';
     }
     else
     {
         // -ES- Default to player##
-        sprintf(p->playername, "Player%d", pnum + 1);
+        sprintf(p->player_name_, "Player%d", pnum + 1);
     }
 
-    if (is_bot)
-        P_BotCreate(p, false);
+    if (is_bot) P_BotCreate(p, false);
 
     if (!sfx_jpidle)
     {
@@ -999,292 +1037,282 @@ void P_CreatePlayer(int pnum, bool is_bot)
     }
 }
 
-void P_DestroyAllPlayers(void)
+void DestroyAllPlayers(void)
 {
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
+    for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
-        if (!players[pnum])
-            continue;
+        if (!players[pnum]) continue;
 
         delete players[pnum];
 
-        players[pnum] = NULL;
+        players[pnum] = nullptr;
     }
 
-    numplayers = 0;
-    numbots    = 0;
+    total_players = 0;
+    total_bots    = 0;
 
-    consoleplayer = -1;
-    displayplayer = -1;
+    console_player = -1;
+    display_player = -1;
 
-    sfx_jpidle = sfx_jpmove = sfx_jprise = NULL;
-    sfx_jpdown = sfx_jpflow = NULL;
+    sfx_jpidle = sfx_jpmove = sfx_jprise = nullptr;
+    sfx_jpdown = sfx_jpflow = nullptr;
 }
 
-void P_UpdateAvailWeapons(player_t *p)
+void UpdateAvailWeapons(Player *p)
 {
     // Must be called as soon as the player has received or lost
     // a weapon.  Updates the status bar icons.
 
     int key;
 
-    for (key = 0; key < WEAPON_KEYS; key++)
-        p->avail_weapons[key] = false;
+    for (key = 0; key < kTotalWeaponKeys; key++)
+        p->available_weapons_[key] = false;
 
-    for (int i = 0; i < MAXWEAPONS; i++)
+    for (int i = 0; i < kMaximumWeapons; i++)
     {
-        if (!p->weapons[i].owned)
-            continue;
+        if (!p->weapons_[i].owned) continue;
 
-        SYS_ASSERT(p->weapons[i].info);
+        EPI_ASSERT(p->weapons_[i].info);
 
-        key = p->weapons[i].info->bind_key;
+        key = p->weapons_[i].info->bind_key_;
 
         // update the status bar icons
-        if (0 <= key && key <= 9)
-            p->avail_weapons[key] = true;
+        if (0 <= key && key <= 9) p->available_weapons_[key] = true;
     }
 }
 
-void P_UpdateTotalArmour(player_t *p)
+void UpdateTotalArmour(Player *p)
 {
     int i;
 
-    p->totalarmour = 0;
+    p->total_armour_ = 0;
 
-    for (i = 0; i < NUMARMOUR; i++)
+    for (i = 0; i < kTotalArmourTypes; i++)
     {
-        p->totalarmour += p->armours[i];
+        p->total_armour_ += p->armours_[i];
 
         // forget the association once fully depleted
-        if (p->armours[i] <= 0)
-            p->armour_types[i] = NULL;
+        if (p->armours_[i] <= 0) p->armour_types_[i] = nullptr;
     }
 
-    if (p->totalarmour > 999.0f)
-        p->totalarmour = 999.0f;
+    if (p->total_armour_ > 999.0f) p->total_armour_ = 999.0f;
 }
 
-bool P_AddWeapon(player_t *player, weapondef_c *info, int *index)
+bool AddWeapon(Player *player, WeaponDefinition *info, int *index)
 {
     // Returns true if player did not already have the weapon.
-    // If successful and 'index' is non-NULL, the new index is
+    // If successful and 'index' is non-nullptr, the new index is
     // stored there.
 
     int slot         = -1;
     int upgrade_slot = -1;
 
     // cannot own weapons if sprites are missing
-    if (!P_CheckWeaponSprite(info))
+    if (!CheckWeaponSprite(info))
     {
-        I_Warning("WEAPON %s has no sprites and will not be added!\n", info->name.c_str());
+        LogWarning("WEAPON %s has no sprites and will not be added!\n",
+                   info->name_.c_str());
         return false;
     }
 
-    for (int i = 0; i < MAXWEAPONS; i++)
+    for (int i = 0; i < kMaximumWeapons; i++)
     {
-        weapondef_c *cur_info = player->weapons[i].info;
+        WeaponDefinition *cur_info = player->weapons_[i].info;
 
         // skip weapons that are being removed
-        if (player->weapons[i].flags & PLWEP_Removing)
-            continue;
+        if (player->weapons_[i].flags & kPlayerWeaponRemoving) continue;
 
         // find free slot
-        if (!player->weapons[i].owned)
+        if (!player->weapons_[i].owned)
         {
-            if (slot < 0)
-                slot = i;
+            if (slot < 0) slot = i;
             continue;
         }
 
         // check if already own this weapon
-        if (cur_info == info)
-            return false;
+        if (cur_info == info) return false;
 
         // don't downgrade any UPGRADED weapons
-        if (DDF_WeaponIsUpgrade(cur_info, info))
-            return false;
+        if (DDF_WeaponIsUpgrade(cur_info, info)) return false;
 
         // check for weapon upgrades
-        if (cur_info == info->upgrade_weap)
+        if (cur_info == info->upgrade_weap_)
         {
             upgrade_slot = i;
             continue;
         }
     }
 
-    if (slot < 0)
-        return false;
+    if (slot < 0) return false;
 
-    if (index)
-        (*index) = slot;
+    if (index) (*index) = slot;
 
-    L_WriteDebug("P_AddWeapon: [%s] @ %d\n", info->name.c_str(), slot);
+    LogDebug("AddWeapon: [%s] @ %d\n", info->name_.c_str(), slot);
 
-    player->weapons[slot].owned        = true;
-    player->weapons[slot].info         = info;
-    player->weapons[slot].flags        = 0;
-    player->weapons[slot].clip_size[0] = 0;
-    player->weapons[slot].clip_size[1] = 0;
-    player->weapons[slot].model_skin   = info->model_skin;
+    player->weapons_[slot].owned        = true;
+    player->weapons_[slot].info         = info;
+    player->weapons_[slot].flags        = kPlayerWeaponNoFlag;
+    player->weapons_[slot].clip_size[0] = 0;
+    player->weapons_[slot].clip_size[1] = 0;
+    player->weapons_[slot].model_skin   = info->model_skin_;
 
-    P_UpdateAvailWeapons(player);
+    UpdateAvailWeapons(player);
 
     // for NoAmmo+Clip weapons, always begin with a full clip
     for (int ATK = 0; ATK < 2; ATK++)
     {
-        if (info->clip_size[ATK] > 0 && info->ammo[ATK] == AM_NoAmmo)
-            player->weapons[slot].clip_size[ATK] = info->clip_size[ATK];
+        if (info->clip_size_[ATK] > 0 &&
+            info->ammo_[ATK] == kAmmunitionTypeNoAmmo)
+            player->weapons_[slot].clip_size[ATK] = info->clip_size_[ATK];
     }
 
     // initial weapons should get a full clip
-    if (info->autogive)
-        P_TryFillNewWeapon(player, slot, AM_DontCare, NULL);
+    if (info->autogive_)
+        TryFillNewWeapon(player, slot, kAmmunitionTypeDontCare, nullptr);
 
     if (upgrade_slot >= 0)
     {
-        player->weapons[upgrade_slot].owned = false;
+        player->weapons_[upgrade_slot].owned = false;
 
         // check and update key_choices[]
         for (int w = 0; w <= 9; w++)
-            if (player->key_choices[w] == upgrade_slot)
-                player->key_choices[w] = (weapon_selection_e)slot;
+            if (player->key_choices_[w] == upgrade_slot)
+                player->key_choices_[w] = (WeaponSelection)slot;
 
         // handle the case of holding the weapon which is being upgraded
         // by the new one.  We mark the old weapon for removal.
 
-        if (player->ready_wp == upgrade_slot)
+        if (player->ready_weapon_ == upgrade_slot)
         {
-            player->weapons[upgrade_slot].flags |= PLWEP_Removing;
-            player->pending_wp = (weapon_selection_e)slot;
+            player->weapons_[upgrade_slot].flags =
+                (PlayerWeaponFlag)(player->weapons_[upgrade_slot].flags |
+                                   kPlayerWeaponRemoving);
+            player->pending_weapon_ = (WeaponSelection)slot;
         }
         else
-            player->weapons[upgrade_slot].info = NULL;
+            player->weapons_[upgrade_slot].info = nullptr;
 
-        if (player->pending_wp == upgrade_slot)
-            player->pending_wp = (weapon_selection_e)slot;
+        if (player->pending_weapon_ == upgrade_slot)
+            player->pending_weapon_ = (WeaponSelection)slot;
     }
 
     return true;
 }
 
-bool P_RemoveWeapon(player_t *player, weapondef_c *info)
+bool RemoveWeapon(Player *player, WeaponDefinition *info)
 {
     // returns true if player had the weapon.
 
     int slot;
 
-    for (slot = 0; slot < MAXWEAPONS; slot++)
+    for (slot = 0; slot < kMaximumWeapons; slot++)
     {
-        if (!player->weapons[slot].owned)
-            continue;
+        if (!player->weapons_[slot].owned) continue;
 
-        // Note: no need to check PLWEP_Removing
+        // Note: no need to check kPlayerWeaponRemoving
 
-        if (player->weapons[slot].info == info)
-            break;
+        if (player->weapons_[slot].info == info) break;
     }
 
-    if (slot >= MAXWEAPONS)
-        return false;
+    if (slot >= kMaximumWeapons) return false;
 
-    L_WriteDebug("P_RemoveWeapon: [%s] @ %d\n", info->name.c_str(), slot);
+    LogDebug("RemoveWeapon: [%s] @ %d\n", info->name_.c_str(), slot);
 
-    player->weapons[slot].owned = false;
+    player->weapons_[slot].owned = false;
 
-    P_UpdateAvailWeapons(player);
+    UpdateAvailWeapons(player);
 
     // fix the key choices
     for (int w = 0; w <= 9; w++)
-        if (player->key_choices[w] == slot)
-            player->key_choices[w] = WPSEL_None;
+        if (player->key_choices_[w] == slot)
+            player->key_choices_[w] = KWeaponSelectionNone;
 
     // handle the case of already holding the weapon.  We mark the
     // weapon as being removed (the flag is cleared once lowered).
 
-    if (player->ready_wp == slot)
+    if (player->ready_weapon_ == slot)
     {
-        player->weapons[slot].flags |= PLWEP_Removing;
+        player->weapons_[slot].flags =
+            (PlayerWeaponFlag)(player->weapons_[slot].flags |
+                               kPlayerWeaponRemoving);
 
-        if (player->pending_wp == WPSEL_NoChange)
-            P_DropWeapon(player);
+        if (player->pending_weapon_ == KWeaponSelectionNoChange)
+            DropWeapon(player);
     }
     else
-        player->weapons[slot].info = NULL;
+        player->weapons_[slot].info = nullptr;
 
-    if (player->pending_wp == slot)
-        P_SelectNewWeapon(player, -100, AM_DontCare);
+    if (player->pending_weapon_ == slot)
+        SelectNewWeapon(player, -100, kAmmunitionTypeDontCare);
 
-    SYS_ASSERT(player->pending_wp != slot);
+    EPI_ASSERT(player->pending_weapon_ != slot);
 
     return true;
 }
 
-void P_GiveInitialBenefits(player_t *p, const mobjtype_c *info)
+void GiveInitialBenefits(Player *p, const MapObjectDefinition *info)
 {
     // Give the player the initial benefits when they start a game
     // (or restart after dying).  Sets up: ammo, ammo-limits, health,
     // armour, keys and weapons.
 
-    p->ready_wp   = WPSEL_None;
-    p->pending_wp = WPSEL_NoChange;
+    p->ready_weapon_   = KWeaponSelectionNone;
+    p->pending_weapon_ = KWeaponSelectionNoChange;
 
     int i;
 
-    for (i = 0; i < WEAPON_KEYS; i++)
-        p->key_choices[i] = WPSEL_None;
+    for (i = 0; i < kTotalWeaponKeys; i++)
+        p->key_choices_[i] = KWeaponSelectionNone;
 
     // clear out ammo & ammo-limits
-    for (i = 0; i < NUMAMMO; i++)
+    for (i = 0; i < kTotalAmmunitionTypes; i++)
     {
-        p->ammo[i].num = p->ammo[i].max = 0;
+        p->ammo_[i].count = p->ammo_[i].maximum = 0;
     }
 
     // clear out inventory & inventory-limits
-    for (i = 0; i < NUMINV; i++)
+    for (i = 0; i < kTotalInventoryTypes; i++)
     {
-        p->inventory[i].num = p->inventory[i].max = 0;
+        p->inventory_[i].count = p->inventory_[i].maximum = 0;
     }
 
     // clear out counter & counter-limits
-    for (i = 0; i < NUMCOUNTER; i++)
+    for (i = 0; i < kTotalCounterTypes; i++)
     {
-        p->counters[i].num = p->counters[i].max = 0;
+        p->counters_[i].count = p->counters_[i].maximum = 0;
     }
 
     // set health and armour
-    p->health       = info->spawnhealth;
-    p->air_in_lungs = info->lung_capacity;
-    p->underwater   = false;
-    p->airless   = false;
+    p->health_       = info->spawn_health_;
+    p->air_in_lungs_ = info->lung_capacity_;
+    p->underwater_   = false;
+    p->airless_      = false;
 
-
-    for (i = 0; i < NUMARMOUR; i++)
+    for (i = 0; i < kTotalArmourTypes; i++)
     {
-        p->armours[i]      = 0;
-        p->armour_types[i] = NULL;
+        p->armours_[i]      = 0;
+        p->armour_types_[i] = nullptr;
     }
 
-    p->totalarmour = 0;
-    p->cards       = KF_NONE;
+    p->total_armour_ = 0;
+    p->cards_        = kDoorKeyNone;
 
     // give all initial benefits
-    P_GiveBenefitList(p, NULL, info->initial_benefits, false);
+    GiveBenefitList(p, nullptr, info->initial_benefits_, false);
 
     // give all free weapons.  Needs to be after ammo, so that
     // clip weapons can get their clips filled.
-    for (auto w : weapondefs)
+    for (WeaponDefinition *w : weapondefs)
     {
-        if (!w->autogive)
-            continue;
+        if (!w->autogive_) continue;
 
         int pw_index;
 
-        P_AddWeapon(p, w, &pw_index);
+        AddWeapon(p, w, &pw_index);
     }
 
     // refresh to remove all stuff from status bar
-    P_UpdateAvailWeapons(p);
+    UpdateAvailWeapons(p);
 }
 
 //--- editor settings ---

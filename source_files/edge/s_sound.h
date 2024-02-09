@@ -23,18 +23,11 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __S_SOUND_H__
-#define __S_SOUND_H__
+#pragma once
 
 // Forward declarations
-struct position_c;
-struct mobj_s;
-struct sfx_s;
-
-// for the sliders
-#define SND_SLIDER_NUM 20
-
-extern float slider_to_gain[SND_SLIDER_NUM];
+struct Position;
+class MapObject;
 
 // Sound Categories
 // ----------------
@@ -51,60 +44,57 @@ extern float slider_to_gain[SND_SLIDER_NUM];
 // The order here is significant, if the channel limit for a
 // category is set to zero, then NEXT category is tried.
 //
-typedef enum
+enum SoundCategory
 {
-    SNCAT_UI = 0,   // for the user interface (menus, tips)
-    SNCAT_Player,   // for console player (pain, death, pickup)
-    SNCAT_Weapon,   // for console player's weapon
-    SNCAT_Opponent, // for all other players (DM or COOP)
-    SNCAT_Monster,  // for all monster sounds
-    SNCAT_Object,   // for all objects (esp. projectiles)
-    SNCAT_Level,    // for doors, lifts and map scripts
-
-    SNCAT_NUMTYPES
-} sound_category_e;
+    kCategoryUi = 0,    // for the user interface (menus, tips)
+    kCategoryPlayer,    // for console player (pain, death, pickup)
+    kCategoryWeapon,    // for console player's weapon
+    kCategoryOpponent,  // for all other players (DM or COOP)
+    kCategoryMonster,   // for all monster sounds
+    kCategoryObject,    // for all objects (esp. projectiles)
+    kCategoryLevel,     // for doors, lifts and map scripts
+    kTotalCategories
+};
 
 /* FX Flags */
-typedef enum
+enum SoundEffectFlag
 {
-    FX_NORMAL = 0,
+    kSoundEffectNormal = 0,
 
     // monster bosses: sound is not diminished by distance
-    FX_Boss = (1 << 1),
+    kSoundEffectBoss = (1 << 1),
 
     // only play one instance of this sound at this location.
-    FX_Single = (1 << 2),
+    kSoundEffectSingle = (1 << 2),
 
-    // combine with FX_Single: the already playing sound is
+    // combine with kSoundEffectSingle: the already playing sound is
     // allowed to continue and the new sound it dropped.
     // Without this flag: the playing sound is cut off.
-    // (has no effect without FX_Single).
-    FX_Precious = (1 << 3),
-
-} fx_flag_e;
+    // (has no effect without kSoundEffectSingle).
+    kSoundEffectPrecious = (1 << 3),
+};
 
 // Init/Shutdown
-void S_Init(void);
-void S_Shutdown(void);
+void SoundInitialize(void);
+void SoundShutdown(void);
 
-void S_StartFX(struct sfx_s *sfx, int category = SNCAT_UI, position_c *pos = NULL, int flags = 0);
+void StartSoundEffect(struct SoundEffect *sfx, int category = kCategoryUi,
+                      Position *pos = nullptr, int flags = 0);
 
-void S_StopFX(position_c *pos);
-void S_StopLevelFX(void);
-void S_StopAllFX(void);
+void StopSoundEffect(Position *pos);
+void StopLevelSoundEffects(void);
+void StopAllSoundEffects(void);
 
-void S_ResumeSound(void);
-void S_PauseSound(void);
-void S_ResumeAudioDevice();
-void S_PauseAudioDevice();
+void ResumeSound(void);
+void PauseSound(void);
+void ResumeAudioDevice();
+void PauseAudioDevice();
 
-void S_SoundTicker(void);
+void SoundTicker(void);
 
-void S_ChangeChannelNum(void);
+void UpdateSoundCategoryLimits(void);
 
-void S_PrecacheSounds(void);
-
-#endif /* __S_SOUND_H__ */
+void PrecacheSounds(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -16,25 +16,21 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
-
 #include "endianess.h"
+#include "epi.h"
 #include "file.h"
 #include "filesystem.h"
-#include "sound_gather.h"
-
+#include "opal.h"
 #include "playlist.h"
-
-#include "s_cache.h"
+#include "radplay.h"
 #include "s_blit.h"
+#include "s_cache.h"
 #include "s_music.h"
+#include "snd_gather.h"
 #include "w_wad.h"
 
-#include "opal.h"
-#include "radplay.h"
-
-extern bool dev_stereo; // FIXME: encapsulation
-extern int  dev_freq;
+extern bool sound_device_stereo;  // FIXME: encapsulation
+extern int  sound_device_frequency;
 
 #define RAD_BLOCK_SIZE 1024
 
@@ -42,32 +38,32 @@ extern int  dev_freq;
 Opal      *edge_opal = nullptr;
 RADPlayer *edge_rad  = nullptr;
 
-class radplayer_c : public abstract_music_c
+class RadPlayer : public AbstractMusicPlayer
 {
-  public:
-    radplayer_c();
-    ~radplayer_c();
+   public:
+    RadPlayer();
+    ~RadPlayer();
 
-  private:
-    enum status_e
+   private:
+    enum Status
     {
-        NOT_LOADED,
-        PLAYING,
-        PAUSED,
-        STOPPED
+        kNotLoaded,
+        kPlaying,
+        kPaused,
+        kStopped
     };
 
-    int  status;
-    bool looping;
+    int  status_;
+    bool looping_;
 
-    int16_t *mono_buffer;
+    int16_t *mono_buffer_;
 
-    int   samp_count;
-    int   samp_update;
-    int   samp_rate;
-    uint8_t *tune;
+    int      sample_count_;
+    int      sample_update_;
+    int      sample_rate_;
+    uint8_t *tune_;
 
-  public:
+   public:
     bool OpenMemory(uint8_t *data, int length);
 
     virtual void Close(void);
@@ -80,33 +76,32 @@ class radplayer_c : public abstract_music_c
 
     virtual void Ticker(void);
 
-  private:
-    void PostOpenInit(void);
+   private:
+    void PostOpen(void);
 
-    bool StreamIntoBuffer(sound_data_c *buf);
+    bool StreamIntoBuffer(SoundData *buf);
 };
 
 //----------------------------------------------------------------------------
 
-radplayer_c::radplayer_c() : status(NOT_LOADED), tune(nullptr)
+RadPlayer::RadPlayer() : status_(kNotLoaded), tune_(nullptr)
 {
-    mono_buffer = new int16_t[RAD_BLOCK_SIZE * 2];
+    mono_buffer_ = new int16_t[RAD_BLOCK_SIZE * 2];
 }
 
-radplayer_c::~radplayer_c()
+RadPlayer::~RadPlayer()
 {
     Close();
 
-    if (mono_buffer)
-        delete[] mono_buffer;
+    if (mono_buffer_) delete[] mono_buffer_;
 }
 
-void radplayer_c::PostOpenInit()
+void RadPlayer::PostOpen()
 {
-    samp_count  = 0;
-    samp_update = dev_freq / samp_rate;
+    sample_count_  = 0;
+    sample_update_ = sound_device_frequency / sample_rate_;
     // Loaded, but not playing
-    status = STOPPED;
+    status_ = kStopped;
 }
 
 static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
@@ -120,67 +115,69 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
     }
 }
 
-bool radplayer_c::StreamIntoBuffer(sound_data_c *buf)
+bool RadPlayer::StreamIntoBuffer(SoundData *buf)
 {
     int16_t *data_buf;
 
     bool song_done = false;
     int  samples   = 0;
 
-    if (!dev_stereo)
-        data_buf = mono_buffer;
+    if (!sound_device_stereo)
+        data_buf = mono_buffer_;
     else
-        data_buf = buf->data_L;
+        data_buf = buf->data_left_;
 
     for (int i = 0; i < RAD_BLOCK_SIZE; i += 2)
     {
         edge_opal->Sample(data_buf + i, data_buf + i + 1);
         samples++;
-        samp_count++;
-        if (samp_count >= samp_update)
+        sample_count_++;
+        if (sample_count_ >= sample_update_)
         {
-            samp_count = 0;
-            song_done  = edge_rad->Update();
+            sample_count_ = 0;
+            song_done     = edge_rad->Update();
         }
     }
 
-    buf->length = samples;
+    buf->length_ = samples;
 
-    if (!dev_stereo)
-        ConvertToMono(buf->data_L, mono_buffer, buf->length);
+    if (!sound_device_stereo)
+        ConvertToMono(buf->data_left_, mono_buffer_, buf->length_);
 
     if (song_done) /* EOF */
     {
-        if (!looping)
-            return false;
+        if (!looping_) return false;
         return true;
     }
 
     return true;
 }
 
-bool radplayer_c::OpenMemory(uint8_t *data, int length)
+bool RadPlayer::OpenMemory(uint8_t *data, int length)
 {
-    SYS_ASSERT(data);
+    EPI_ASSERT(data);
 
     const char *err = RADValidate(data, length);
 
     if (err)
     {
-        I_Warning("RAD: Cannot play tune: %s\n", err);
+        LogWarning("RAD: Cannot play tune: %s\n", err);
         return false;
     }
 
-    edge_opal = new Opal(dev_freq);
+    edge_opal = new Opal(sound_device_frequency);
     edge_rad  = new RADPlayer;
     edge_rad->Init(
-        data, [](void *arg, uint16_t reg_num, uint8_t val) { edge_opal->Port(reg_num, val); }, 0);
+        data,
+        [](void *arg, uint16_t reg_num, uint8_t val)
+        { edge_opal->Port(reg_num, val); },
+        0);
 
-    samp_rate = edge_rad->GetHertz();
+    sample_rate_ = edge_rad->GetHertz();
 
-    if (samp_rate <= 0)
+    if (sample_rate_ <= 0)
     {
-        I_Warning("RAD: failure to load song!\n");
+        LogWarning("RAD: failure to load song!\n");
         delete edge_rad;
         edge_rad = nullptr;
         delete edge_opal;
@@ -189,95 +186,85 @@ bool radplayer_c::OpenMemory(uint8_t *data, int length)
     }
 
     // The player needs to free this afterwards
-    tune = data;
+    tune_ = data;
 
-    PostOpenInit();
+    PostOpen();
     return true;
 }
 
-void radplayer_c::Close()
+void RadPlayer::Close()
 {
-    if (status == NOT_LOADED)
-        return;
+    if (status_ == kNotLoaded) return;
 
     // Stop playback
-    if (status != STOPPED)
-        Stop();
+    if (status_ != kStopped) Stop();
 
     delete edge_rad;
     edge_rad = nullptr;
     delete edge_opal;
     edge_opal = nullptr;
-    delete[] tune;
+    delete[] tune_;
 
-    status = NOT_LOADED;
+    status_ = kNotLoaded;
 }
 
-void radplayer_c::Pause()
+void RadPlayer::Pause()
 {
-    if (status != PLAYING)
-        return;
+    if (status_ != kPlaying) return;
 
-    status = PAUSED;
+    status_ = kPaused;
 }
 
-void radplayer_c::Resume()
+void RadPlayer::Resume()
 {
-    if (status != PAUSED)
-        return;
+    if (status_ != kPaused) return;
 
-    status = PLAYING;
+    status_ = kPlaying;
 }
 
-void radplayer_c::Play(bool loop)
+void RadPlayer::Play(bool loop)
 {
-    if (status != NOT_LOADED && status != STOPPED)
-        return;
+    if (status_ != kNotLoaded && status_ != kStopped) return;
 
-    status  = PLAYING;
-    looping = loop;
+    status_  = kPlaying;
+    looping_ = loop;
 
     // Load up initial buffer data
     Ticker();
 }
 
-void radplayer_c::Stop()
+void RadPlayer::Stop()
 {
-    if (status != PLAYING && status != PAUSED)
-        return;
+    if (status_ != kPlaying && status_ != kPaused) return;
 
-    S_QueueStop();
+    SoundQueueStop();
 
     edge_rad->Stop();
 
-    status = STOPPED;
+    status_ = kStopped;
 }
 
-void radplayer_c::Ticker()
+void RadPlayer::Ticker()
 {
-    while (status == PLAYING && !var_pc_speaker_mode)
+    while (status_ == kPlaying && !pc_speaker_mode)
     {
-        sound_data_c *buf =
-            S_QueueGetFreeBuffer(RAD_BLOCK_SIZE, (dev_stereo) ? SBUF_Interleaved : SBUF_Mono);
+        SoundData *buf = SoundQueueGetFreeBuffer(
+            RAD_BLOCK_SIZE, (sound_device_stereo) ? kMixInterleaved : kMixMono);
 
-        if (!buf)
-            break;
+        if (!buf) break;
 
         if (StreamIntoBuffer(buf))
         {
-            if (buf->length > 0)
+            if (buf->length_ > 0)
             {
-                S_QueueAddBuffer(buf, dev_freq);
+                SoundQueueAddBuffer(buf, sound_device_frequency);
             }
-            else
-            {
-                S_QueueReturnBuffer(buf);
-            }
+            else { SoundQueueReturnBuffer(buf); }
         }
         else
         {
             // finished playing
-            S_QueueReturnBuffer(buf);
+            SoundQueueReturnBuffer(buf);
             Stop();
         }
     }
@@ -285,15 +272,15 @@ void radplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c *S_PlayRADMusic(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *PlayRadMusic(uint8_t *data, int length, bool looping)
 {
-    radplayer_c *player = new radplayer_c();
+    RadPlayer *player = new RadPlayer();
 
     if (!player->OpenMemory(data, length))
     {
         delete[] data;
         delete player;
-        return NULL;
+        return nullptr;
     }
 
     player->Play(looping);

@@ -19,26 +19,29 @@
 // Switch Texture Setup and Parser Code
 //
 
-#include "local.h"
-
 #include "switch.h"
 
-static switchdef_c *dynamic_switchdef;
+#include <string.h>
 
-switchdef_container_c switchdefs;
+#include "local.h"
 
-#define DDF_CMD_BASE dummy_switchdef
-static switchdef_c dummy_switchdef;
+static SwitchDefinition *dynamic_switchdef;
 
-static const commandlist_t switch_commands[] = {
-    DDF_FIELD("ON_TEXTURE", on_name, DDF_MainGetLumpName), DDF_FIELD("OFF_TEXTURE", off_name, DDF_MainGetLumpName),
-    DDF_FIELD("ON_SOUND", on_sfx, DDF_MainLookupSound), DDF_FIELD("OFF_SOUND", off_sfx, DDF_MainLookupSound),
-    DDF_FIELD("TIME", time, DDF_MainGetTime),
+SwitchDefinitionContainer switchdefs;
+
+static SwitchDefinition dummy_switchdef;
+
+static const DDFCommandList switch_commands[] = {
+    DDF_FIELD("ON_TEXTURE", dummy_switchdef, on_name_, DDF_MainGetLumpName),
+    DDF_FIELD("OFF_TEXTURE", dummy_switchdef, off_name_, DDF_MainGetLumpName),
+    DDF_FIELD("ON_SOUND", dummy_switchdef, on_sfx_, DDF_MainLookupSound),
+    DDF_FIELD("OFF_SOUND", dummy_switchdef, off_sfx_, DDF_MainLookupSound),
+    DDF_FIELD("TIME", dummy_switchdef, time_, DDF_MainGetTime),
 
     // -AJA- backwards compatibility cruft...
-    DDF_FIELD("SOUND", on_sfx, DDF_MainLookupSound),
+    DDF_FIELD("SOUND", dummy_switchdef, on_sfx_, DDF_MainLookupSound),
 
-    DDF_CMD_END};
+    {nullptr, nullptr, 0, nullptr}};
 
 //
 //  DDF PARSE ROUTINES
@@ -69,20 +72,22 @@ static void SwitchStartEntry(const char *name, bool extend)
     }
 
     // not found, create a new one
-    dynamic_switchdef = new switchdef_c;
+    dynamic_switchdef = new SwitchDefinition;
 
-    dynamic_switchdef->name = name;
+    dynamic_switchdef->name_ = name;
 
     switchdefs.push_back(dynamic_switchdef);
 }
 
-static void SwitchParseField(const char *field, const char *contents, int index, bool is_last)
+static void SwitchParseField(const char *field, const char *contents, int index,
+                             bool is_last)
 {
 #if (DEBUG_DDF)
-    I_Debugf("SWITCH_PARSE: %s = %s;\n", field, contents);
+    LogDebug("SWITCH_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(switch_commands, field, contents, (uint8_t *)dynamic_switchdef))
+    if (DDF_MainParseField(switch_commands, field, contents,
+                           (uint8_t *)dynamic_switchdef))
         return;
 
     DDF_WarnError("Unknown switch.ddf command: %s\n", field);
@@ -90,14 +95,14 @@ static void SwitchParseField(const char *field, const char *contents, int index,
 
 static void SwitchFinishEntry(void)
 {
-    if (!dynamic_switchdef->on_name[0])
+    if (!dynamic_switchdef->on_name_[0])
         DDF_Error("Missing first name for switch.\n");
 
-    if (!dynamic_switchdef->off_name[0])
+    if (!dynamic_switchdef->off_name_[0])
         DDF_Error("Missing last name for switch.\n");
 
-    if (dynamic_switchdef->time <= 0)
-        DDF_Error("Bad time value for switch: %d\n", dynamic_switchdef->time);
+    if (dynamic_switchdef->time_ <= 0)
+        DDF_Error("Bad time value for switch: %d\n", dynamic_switchdef->time_);
 }
 
 static void SwitchClearAll(void)
@@ -113,7 +118,7 @@ static void SwitchClearAll(void)
 
 void DDF_ReadSwitch(const std::string &data)
 {
-    readinfo_t switches;
+    DDFReadInfo switches;
 
     switches.tag      = "SWITCHES";
     switches.lumpname = "DDFSWTH";
@@ -127,15 +132,16 @@ void DDF_ReadSwitch(const std::string &data)
 
 #if (DEBUG_DDF)
     epi::array_iterator_c it;
-    switchdef_c          *sw;
+    SwitchDefinition     *sw;
 
-    I_Debugf("DDF_ReadSW: Switch List:\n");
+    LogDebug("DDF_ReadSW: Switch List:\n");
 
     for (it = switchdefs.GetBaseIterator(); it.IsValid(); it++)
     {
-        sw = ITERATOR_TO_TYPE(it, switchdef_c *);
+        sw = ITERATOR_TO_TYPE(it, SwitchDefinition *);
 
-        I_Debugf("  Num: %d  ON: '%s'  OFF: '%s'\n", i, sw->on_name, sw->off_name);
+        LogDebug("  Num: %d  ON: '%s'  OFF: '%s'\n", i, sw->on_name,
+                 sw->off_name);
     }
 #endif
 }
@@ -143,74 +149,66 @@ void DDF_ReadSwitch(const std::string &data)
 //
 // DDF_SwitchInit
 //
-void DDF_SwitchInit(void)
-{
-    SwitchClearAll();
-}
+void DDF_SwitchInit(void) { SwitchClearAll(); }
 
 //
 // DDF_SwitchCleanUp
 //
-void DDF_SwitchCleanUp(void)
-{
-    switchdefs.shrink_to_fit();
-}
+void DDF_SwitchCleanUp(void) { switchdefs.shrink_to_fit(); }
 
-// ---> switchdef_c class
+// ---> SwitchDefinition class
 
 //
-// switchdef_c Constructor
+// SwitchDefinition Constructor
 //
-switchdef_c::switchdef_c() : name()
-{
-    Default();
-}
+SwitchDefinition::SwitchDefinition() : name_() { Default(); }
 
 //
-// switchdef_c::CopyDetail()
+// SwitchDefinition::CopyDetail()
 //
 // Copies all the detail with the exception of ddf info
 //
-void switchdef_c::CopyDetail(switchdef_c &src)
+void SwitchDefinition::CopyDetail(SwitchDefinition &src)
 {
-    on_name  = src.on_name;
-    off_name = src.off_name;
+    on_name_  = src.on_name_;
+    off_name_ = src.off_name_;
 
-    on_sfx  = src.on_sfx;
-    off_sfx = src.off_sfx;
+    on_sfx_  = src.on_sfx_;
+    off_sfx_ = src.off_sfx_;
 
-    time = src.time;
+    time_ = src.time_;
 }
 
 //
-// switchdef_c::Default()
+// SwitchDefinition::Default()
 //
-void switchdef_c::Default()
+void SwitchDefinition::Default()
 {
-    on_name.clear();
-    off_name.clear();
+    on_name_.clear();
+    off_name_.clear();
 
-    on_sfx  = sfx_None;
-    off_sfx = sfx_None;
+    on_sfx_  = nullptr;
+    off_sfx_ = nullptr;
 
-    time = BUTTONTIME;
+    time_ = 35;
 }
 
-// --> switchdef_container_c Class
+// --> SwitchDefinitionContainer Class
 
 //
-// switchdef_c* switchdef_container_c::Find()
+// SwitchDefinition* SwitchDefinitionContainer::Find()
 //
-switchdef_c *switchdef_container_c::Find(const char *name)
+SwitchDefinition *SwitchDefinitionContainer::Find(const char *name)
 {
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<SwitchDefinition *>::iterator iter     = begin(),
+                                                   iter_end = end();
+         iter != iter_end; iter++)
     {
-        switchdef_c *sw = *iter;
-        if (DDF_CompareName(sw->name.c_str(), name) == 0)
-            return sw;
+        SwitchDefinition *sw = *iter;
+        if (DDF_CompareName(sw->name_.c_str(), name) == 0) return sw;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -219,14 +217,13 @@ void DDF_ConvertSWITCHES(const uint8_t *data, int size)
 {
     // handles the Boom SWITCHES lump (in a wad).
 
-    if (size < 20)
-        return;
+    if (size < 20) return;
 
     std::string text = "<SWITCHES>\n\n";
 
     for (; size >= 20; data += 20, size -= 20)
     {
-        if (data[18] == 0) // end marker
+        if (data[18] == 0)  // end marker
             break;
 
         char off_name[9];
@@ -242,11 +239,10 @@ void DDF_ConvertSWITCHES(const uint8_t *data, int size)
         memcpy(on_name, data + 9, 8);
         on_name[8] = 0;
 
-        I_Debugf("- SWITCHES LUMP: off '%s' : on '%s'\n", off_name, on_name);
+        LogDebug("- SWITCHES LUMP: off '%s' : on '%s'\n", off_name, on_name);
 
         // ignore zero-length names
-        if (off_name[0] == 0 || on_name[0] == 0)
-            continue;
+        if (off_name[0] == 0 || on_name[0] == 0) continue;
 
         // create the DDF equivalent...
         text += "[";
@@ -269,7 +265,7 @@ void DDF_ConvertSWITCHES(const uint8_t *data, int size)
     // DEBUG:
     // DDF_DumpFile(text);
 
-    DDF_AddFile(DDF_Switch, text, "Boom SWITCHES lump");
+    DDF_AddFile(kDDFTypeSwitch, text, "Boom SWITCHES lump");
 }
 
 //--- editor settings ---

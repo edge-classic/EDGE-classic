@@ -26,87 +26,73 @@
 // -KM- 1998/09/27 Dynamic Colourmaps.
 //
 
-#ifndef __R_MAIN_H__
-#define __R_MAIN_H__
+#pragma once
 
-#include "w_flat.h"
+#include "con_var.h"
 #include "r_defs.h"
 
 //
 // POV related.
 //
-extern float   viewcos;
-extern float   viewsin;
-extern BAMAngle viewvertangle;
+extern float    view_cosine;
+extern float    view_sine;
+extern BAMAngle view_vertical_angle;
 
-extern subsector_t         *viewsubsector;
-extern region_properties_t *view_props;
+extern Subsector        *view_subsector;
+extern RegionProperties *view_properties;
 
-extern int viewwindow_x;
-extern int viewwindow_y;
-extern int viewwindow_w;
-extern int viewwindow_h;
+extern int view_window_x;
+extern int view_window_y;
+extern int view_window_width;
+extern int view_window_height;
 
-extern HMM_Vec3 viewforward;
-extern HMM_Vec3 viewup;
-extern HMM_Vec3 viewright;
+extern HMM_Vec3 view_forward;
+extern HMM_Vec3 view_up;
+extern HMM_Vec3 view_right;
 
-extern int validcount;
+extern int valid_count;
 
-extern int linecount;
+extern int line_count;
 
 // -ES- 1999/03/29 Added these
-extern BAMAngle normalfov, zoomedfov;
-extern bool    viewiszoomed;
+extern BAMAngle normal_field_of_view, zoomed_field_of_view;
+extern bool     view_is_zoomed;
 
-extern cvar_c r_fov;
+extern ConsoleVariable field_of_view;
 
-extern int framecount;
+extern int render_frame_count;
 
-extern struct mobj_s *background_camera_mo;
+extern MapObject *background_camera_map_object;
 
-#define DOOM_SCREEN_ASPECT (320.0f / 200.0f)
-#define DOOHMM_PIXEL_ASPECT  (5.0f / 6.0f)
-
-extern cvar_c v_pixelaspect;
-extern cvar_c v_monitorsize;
+extern ConsoleVariable pixel_aspect_ratio;
+extern ConsoleVariable monitor_aspect_ratio;
 
 // Values/tables adapted from Quake 3 GPL release
-#define FUNCTABLE_SIZE 1024
-#define FUNCTABLE_MASK FUNCTABLE_SIZE - 1
-#define DEG2RAD(a)     ((a * HMM_PI) / 180.0f)
+constexpr uint16_t kSineTableSize = 1024;
+constexpr uint16_t kSineTableMask = kSineTableSize - 1;
 
-extern float *r_sintable;
-extern float *r_squaretable;
-extern float *r_sawtoothtable;
-extern float *r_inversesawtoothtable;
-extern float *r_triangletable;
+extern float sine_table[kSineTableSize];
 
 //
 // Utility functions.
-BAMAngle              R_PointToAngle(float x1, float y1, float x2, float y2, bool precise = false);
-float                R_PointToDist(float x1, float y1, float x2, float y2);
-float                R_ScaleFromGlobalAngle(BAMAngle visangle);
-subsector_t         *R_PointInSubsector(float x, float y);
-region_properties_t *R_PointGetProps(subsector_t *sub, float z);
-void                 R_InitShaderTables();
+BAMAngle   RendererPointToAngle(float x1, float y1, float x2, float y2,
+                                bool precise = false);
+float      RendererPointToDistance(float x1, float y1, float x2, float y2);
+Subsector *RendererPointInSubsector(float x, float y);
+RegionProperties *RendererPointGetProps(Subsector *sub, float z);
 
 //
 // REFRESH - the actual rendering functions.
 //
 
 // Renders the view for the next frame.
-void R_Render(int x, int y, int w, int h, mobj_t *camera, bool full_height, float expand_w);
+void RenderView(int x, int y, int w, int h, MapObject *camera, bool full_height,
+                float expand_w);
 
 // Called by startup code.
-void R_Init(void);
+void RendererStartup(void);
 // Called by shutdown code
-void R_Shutdown(void);
-
-// -ES- 1998/09/11 Added these prototypes.
-void R_SetViewSize(int blocks);
-
-#endif /* __R_MAIN_H__ */
+void RendererShutdown(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

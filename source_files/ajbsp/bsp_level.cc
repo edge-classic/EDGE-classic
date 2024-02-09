@@ -18,20 +18,17 @@
 //
 //------------------------------------------------------------------------
 
+#include <algorithm>
+
 #include "bsp_local.h"
-#include "bsp_raw_def.h"
 #include "bsp_utility.h"
 #include "bsp_wad.h"
-
-// EPI
+#include "common_doomdefs.h"
 #include "endianess.h"
+#include "miniz.h"
 #include "str_ename.h"
 #include "str_lexer.h"
 #include "str_util.h"
-
-#include "miniz.h"
-
-#include <algorithm>
 
 #define DEBUG_BLOCKMAP 0
 #define DEBUG_REJECT   0
@@ -40,7 +37,7 @@
 #define DEBUG_BSP  0
 
 // Startup Messages
-extern void E_ProgressMessage(const char *message);
+extern void StartupProgressMessage(const char *message);
 
 namespace ajbsp
 {
@@ -81,10 +78,10 @@ std::vector<Sidedef *> level_sidedefs;
 std::vector<Sector *>  level_sectors;
 std::vector<Thing *>   level_things;
 
-std::vector<Seg *>     level_segs;
-std::vector<Subsector *>  level_subsecs;
-std::vector<Node *>    level_nodes;
-std::vector<WallTip *> level_walltips;
+std::vector<Seg *>       level_segs;
+std::vector<Subsector *> level_subsecs;
+std::vector<Node *>      level_nodes;
+std::vector<WallTip *>   level_walltips;
 
 int num_old_vert   = 0;
 int num_new_vert   = 0;
@@ -95,7 +92,7 @@ int num_real_lines = 0;
 Vertex *NewVertex()
 {
     Vertex *V = (Vertex *)UtilCalloc(sizeof(Vertex));
-    V->index_    = (int)level_vertices.size();
+    V->index_ = (int)level_vertices.size();
     level_vertices.push_back(V);
     return V;
 }
@@ -103,7 +100,7 @@ Vertex *NewVertex()
 Linedef *NewLinedef()
 {
     Linedef *L = (Linedef *)UtilCalloc(sizeof(Linedef));
-    L->index     = (int)level_linedefs.size();
+    L->index   = (int)level_linedefs.size();
     level_linedefs.push_back(L);
     return L;
 }
@@ -111,7 +108,7 @@ Linedef *NewLinedef()
 Sidedef *NewSidedef()
 {
     Sidedef *S = (Sidedef *)UtilCalloc(sizeof(Sidedef));
-    S->index     = (int)level_sidedefs.size();
+    S->index   = (int)level_sidedefs.size();
     level_sidedefs.push_back(S);
     return S;
 }
@@ -119,7 +116,7 @@ Sidedef *NewSidedef()
 Sector *NewSector()
 {
     Sector *S = (Sector *)UtilCalloc(sizeof(Sector));
-    S->index    = (int)level_sectors.size();
+    S->index  = (int)level_sectors.size();
     level_sectors.push_back(S);
     return S;
 }
@@ -127,7 +124,7 @@ Sector *NewSector()
 Thing *NewThing()
 {
     Thing *T = (Thing *)UtilCalloc(sizeof(Thing));
-    T->index   = (int)level_things.size();
+    T->index = (int)level_things.size();
     level_things.push_back(T);
     return T;
 }
@@ -238,7 +235,7 @@ void FreeWallTips()
 
 static const char *GetLevelName(int level_index)
 {
-    SYS_ASSERT(cur_wad != NULL);
+    EPI_ASSERT(cur_wad != nullptr);
 
     int lump_idx = cur_wad->LevelHeader(level_index);
 
@@ -248,30 +245,27 @@ static const char *GetLevelName(int level_index)
 static Vertex *SafeLookupVertex(int num)
 {
     if (num >= level_vertices.size())
-        I_Error("AJBSP: illegal vertex number #%d\n", num);
+        FatalError("AJBSP: illegal vertex number #%d\n", num);
 
     return level_vertices[num];
 }
 
 static Sector *SafeLookupSector(uint16_t num)
 {
-    if (num == 0xFFFF)
-        return NULL;
+    if (num == 0xFFFF) return nullptr;
 
     if (num >= level_sectors.size())
-        I_Error("AJBSP: illegal sector number #%d\n", (int)num);
+        FatalError("AJBSP: illegal sector number #%d\n", (int)num);
 
     return level_sectors[num];
 }
 
 static inline Sidedef *SafeLookupSidedef(uint16_t num)
 {
-    if (num == 0xFFFF)
-        return NULL;
+    if (num == 0xFFFF) return nullptr;
 
     // silently ignore illegal sidedef numbers
-    if (num >= (unsigned int)level_sidedefs.size())
-        return NULL;
+    if (num >= (unsigned int)level_sidedefs.size()) return nullptr;
 
     return level_sidedefs[num];
 }
@@ -282,25 +276,22 @@ void GetVertices()
 
     Lump *lump = FindLevelLump("VERTEXES");
 
-    if (lump)
-        count = lump->Length() / (int)sizeof(RawVertex);
+    if (lump) count = lump->Length() / (int)sizeof(RawVertex);
 
 #if DEBUG_LOAD
-    I_Debugf("GetVertices: num = %d\n", count);
+    LogDebug("GetVertices: num = %d\n", count);
 #endif
 
-    if (lump == NULL || count == 0)
-        return;
+    if (lump == nullptr || count == 0) return;
 
-    if (!lump->Seek(0))
-        I_Error("AJBSP: Error seeking to vertices.\n");
+    if (!lump->Seek(0)) FatalError("AJBSP: Error seeking to vertices.\n");
 
     for (int i = 0; i < count; i++)
     {
         RawVertex raw;
 
         if (!lump->Read(&raw, sizeof(raw)))
-            I_Error("AJBSP: Error reading vertices.\n");
+            FatalError("AJBSP: Error reading vertices.\n");
 
         Vertex *vert = NewVertex();
 
@@ -317,17 +308,14 @@ void GetSectors()
 
     Lump *lump = FindLevelLump("SECTORS");
 
-    if (lump)
-        count = lump->Length() / (int)sizeof(RawSector);
+    if (lump) count = lump->Length() / (int)sizeof(RawSector);
 
-    if (lump == NULL || count == 0)
-        return;
+    if (lump == nullptr || count == 0) return;
 
-    if (!lump->Seek(0))
-        I_Error("AJBSP: Error seeking to sectors.\n");
+    if (!lump->Seek(0)) FatalError("AJBSP: Error seeking to sectors.\n");
 
 #if DEBUG_LOAD
-    I_Debugf("GetSectors: num = %d\n", count);
+    LogDebug("GetSectors: num = %d\n", count);
 #endif
 
     for (int i = 0; i < count; i++)
@@ -335,7 +323,7 @@ void GetSectors()
         RawSector raw;
 
         if (!lump->Read(&raw, sizeof(raw)))
-            I_Error("AJBSP: Error reading sectors.\n");
+            FatalError("AJBSP: Error reading sectors.\n");
 
         Sector *sector = NewSector();
 
@@ -349,17 +337,14 @@ void GetThings()
 
     Lump *lump = FindLevelLump("THINGS");
 
-    if (lump)
-        count = lump->Length() / (int)sizeof(RawThing);
+    if (lump) count = lump->Length() / (int)sizeof(RawThing);
 
-    if (lump == NULL || count == 0)
-        return;
+    if (lump == nullptr || count == 0) return;
 
-    if (!lump->Seek(0))
-        I_Error("AJBSP: Error seeking to things.\n");
+    if (!lump->Seek(0)) FatalError("AJBSP: Error seeking to things.\n");
 
 #if DEBUG_LOAD
-    I_Debugf("GetThings: num = %d\n", count);
+    LogDebug("GetThings: num = %d\n", count);
 #endif
 
     for (int i = 0; i < count; i++)
@@ -367,41 +352,7 @@ void GetThings()
         RawThing raw;
 
         if (!lump->Read(&raw, sizeof(raw)))
-            I_Error("AJBSP: Error reading things.\n");
-
-        Thing *thing = NewThing();
-
-        thing->x    = AlignedLittleEndianS16(raw.x);
-        thing->y    = AlignedLittleEndianS16(raw.y);
-        thing->type = AlignedLittleEndianU16(raw.type);
-    }
-}
-
-void GetThingsHexen()
-{
-    int count = 0;
-
-    Lump *lump = FindLevelLump("THINGS");
-
-    if (lump)
-        count = lump->Length() / (int)sizeof(RawHexenThing);
-
-    if (lump == NULL || count == 0)
-        return;
-
-    if (!lump->Seek(0))
-        I_Error("AJBSP: Error seeking to things.\n");
-
-#if DEBUG_LOAD
-    I_Debugf("GetThingsHexen: num = %d\n", count);
-#endif
-
-    for (int i = 0; i < count; i++)
-    {
-        RawHexenThing raw;
-
-        if (!lump->Read(&raw, sizeof(raw)))
-            I_Error("AJBSP: Error reading things.\n");
+            FatalError("AJBSP: Error reading things.\n");
 
         Thing *thing = NewThing();
 
@@ -417,17 +368,14 @@ void GetSidedefs()
 
     Lump *lump = FindLevelLump("SIDEDEFS");
 
-    if (lump)
-        count = lump->Length() / (int)sizeof(RawSidedef);
+    if (lump) count = lump->Length() / (int)sizeof(RawSidedef);
 
-    if (lump == NULL || count == 0)
-        return;
+    if (lump == nullptr || count == 0) return;
 
-    if (!lump->Seek(0))
-        I_Error("AJBSP: Error seeking to sidedefs.\n");
+    if (!lump->Seek(0)) FatalError("AJBSP: Error seeking to sidedefs.\n");
 
 #if DEBUG_LOAD
-    I_Debugf("GetSidedefs: num = %d\n", count);
+    LogDebug("GetSidedefs: num = %d\n", count);
 #endif
 
     for (int i = 0; i < count; i++)
@@ -435,7 +383,7 @@ void GetSidedefs()
         RawSidedef raw;
 
         if (!lump->Read(&raw, sizeof(raw)))
-            I_Error("AJBSP: Error reading sidedefs.\n");
+            FatalError("AJBSP: Error reading sidedefs.\n");
 
         Sidedef *side = NewSidedef();
 
@@ -449,17 +397,14 @@ void GetLinedefs()
 
     Lump *lump = FindLevelLump("LINEDEFS");
 
-    if (lump)
-        count = lump->Length() / (int)sizeof(RawLinedef);
+    if (lump) count = lump->Length() / (int)sizeof(RawLinedef);
 
-    if (lump == NULL || count == 0)
-        return;
+    if (lump == nullptr || count == 0) return;
 
-    if (!lump->Seek(0))
-        I_Error("AJBSP: Error seeking to linedefs.\n");
+    if (!lump->Seek(0)) FatalError("AJBSP: Error seeking to linedefs.\n");
 
 #if DEBUG_LOAD
-    I_Debugf("GetLinedefs: num = %d\n", count);
+    LogDebug("GetLinedefs: num = %d\n", count);
 #endif
 
     for (int i = 0; i < count; i++)
@@ -467,7 +412,7 @@ void GetLinedefs()
         RawLinedef raw;
 
         if (!lump->Read(&raw, sizeof(raw)))
-            I_Error("AJBSP: Error reading linedefs.\n");
+            FatalError("AJBSP: Error reading linedefs.\n");
 
         Linedef *line;
 
@@ -483,86 +428,27 @@ void GetLinedefs()
         line->end   = end;
 
         // check for zero-length line
-        line->zero_length = (fabs(start->x_ - end->x_) < kEpsilon) && (fabs(start->y_ - end->y_) < kEpsilon);
+        line->zero_length = (fabs(start->x_ - end->x_) < kEpsilon) &&
+                            (fabs(start->y_ - end->y_) < kEpsilon);
 
-        line->type  = AlignedLittleEndianU16(raw.type);
+        line->type     = AlignedLittleEndianU16(raw.type);
         uint16_t flags = AlignedLittleEndianU16(raw.flags);
-        int16_t tag   = AlignedLittleEndianS16(raw.tag);
+        int16_t  tag   = AlignedLittleEndianS16(raw.tag);
 
-        line->two_sided   = (flags & kLineFlagTwoSided) != 0;
-        line->is_precious = (tag >= 900 && tag < 1000); // Why is this the case? Need to investigate - Dasho
-
-        line->right = SafeLookupSidedef(AlignedLittleEndianU16(raw.right));
-        line->left  = SafeLookupSidedef(AlignedLittleEndianU16(raw.left));
-
-        if (line->right || line->left)
-            num_real_lines++;
-
-        line->self_referencing = (line->left && line->right && (line->left->sector == line->right->sector));
-
-        if (line->self_referencing)
-            line->is_precious = true;
-    }
-}
-
-void GetLinedefsHexen()
-{
-    int count = 0;
-
-    Lump *lump = FindLevelLump("LINEDEFS");
-
-    if (lump)
-        count = lump->Length() / (int)sizeof(RawHexenLinedef);
-
-    if (lump == NULL || count == 0)
-        return;
-
-    if (!lump->Seek(0))
-        I_Error("AJBSP: Error seeking to linedefs.\n");
-
-#if DEBUG_LOAD
-    I_Debugf("GetLinedefsHexen: num = %d\n", count);
-#endif
-
-    for (int i = 0; i < count; i++)
-    {
-        RawHexenLinedef raw;
-
-        if (!lump->Read(&raw, sizeof(raw)))
-            I_Error("AJBSP: Error reading linedefs.\n");
-
-        Linedef *line;
-
-        Vertex *start = SafeLookupVertex(AlignedLittleEndianU16(raw.start));
-        Vertex *end   = SafeLookupVertex(AlignedLittleEndianU16(raw.end));
-
-        start->is_used_ = true;
-        end->is_used_   = true;
-
-        line = NewLinedef();
-
-        line->start = start;
-        line->end   = end;
-
-        // check for zero-length line
-        line->zero_length = (fabs(start->x_ - end->x_) < kEpsilon) && (fabs(start->y_ - end->y_) < kEpsilon);
-
-        line->type  = (uint8_t)raw.type;
-        uint16_t flags = AlignedLittleEndianU16(raw.flags);
-
-        // -JL- Added missing twosided flag handling that caused a broken reject
         line->two_sided = (flags & kLineFlagTwoSided) != 0;
+        line->is_precious =
+            (tag >= 900 &&
+             tag < 1000);  // Why is this the case? Need to investigate - Dasho
 
         line->right = SafeLookupSidedef(AlignedLittleEndianU16(raw.right));
         line->left  = SafeLookupSidedef(AlignedLittleEndianU16(raw.left));
 
-        if (line->right || line->left)
-            num_real_lines++;
+        if (line->right || line->left) num_real_lines++;
 
-        line->self_referencing = (line->left && line->right && (line->left->sector == line->right->sector));
+        line->self_referencing = (line->left && line->right &&
+                                  (line->left->sector == line->right->sector));
 
-        if (line->self_referencing)
-            line->is_precious = true;
+        if (line->self_referencing) line->is_precious = true;
     }
 }
 
@@ -570,13 +456,14 @@ void GetLinedefsHexen()
 
 void ParseThingField(Thing *thing, const int &key, const std::string &value)
 {
-    // Do we need more precision than an int for things? I think this would only be
-    // an issue if/when polyobjects happen, as I think other thing types are ignored - Dasho
+    // Do we need more precision than an int for things? I think this would only
+    // be an issue if/when polyobjects happen, as I think other thing types are
+    // ignored - Dasho
 
     if (key == epi::kENameX)
-        thing->x = I_ROUND(epi::LexDouble(value));
+        thing->x = RoundToInteger(epi::LexDouble(value));
     else if (key == epi::kENameY)
-        thing->y = I_ROUND(epi::LexDouble(value));
+        thing->y = RoundToInteger(epi::LexDouble(value));
     else if (key == epi::kENameType)
         thing->type = epi::LexInteger(value);
 }
@@ -596,7 +483,7 @@ void ParseSidedefField(Sidedef *side, const int &key, const std::string &value)
         int num = epi::LexInteger(value);
 
         if (num < 0 || num >= level_sectors.size())
-            I_Error("AJBSP: illegal sector number #%d\n", (int)num);
+            FatalError("AJBSP: illegal sector number #%d\n", (int)num);
 
         side->sector = level_sectors[num];
     }
@@ -604,7 +491,7 @@ void ParseSidedefField(Sidedef *side, const int &key, const std::string &value)
 
 void ParseLinedefField(Linedef *line, const int &key, const std::string &value)
 {
-    switch(key)
+    switch (key)
     {
         case epi::kENameV1:
             line->start = SafeLookupVertex(epi::LexInteger(value));
@@ -619,25 +506,25 @@ void ParseLinedefField(Linedef *line, const int &key, const std::string &value)
             line->two_sided = epi::LexBoolean(value);
             break;
         case epi::kENameSidefront:
-            {
-                int num = epi::LexInteger(value);
+        {
+            int num = epi::LexInteger(value);
 
-                if (num < 0 || num >= (int)level_sidedefs.size())
-                    line->right = NULL;
-                else
-                    line->right = level_sidedefs[num];
-            }
-            break;
+            if (num < 0 || num >= (int)level_sidedefs.size())
+                line->right = nullptr;
+            else
+                line->right = level_sidedefs[num];
+        }
+        break;
         case epi::kENameSideback:
-            {
-                int num = epi::LexInteger(value);
+        {
+            int num = epi::LexInteger(value);
 
-                if (num < 0 || num >= (int)level_sidedefs.size())
-                    line->left = NULL;
-                else
-                    line->left = level_sidedefs[num];
-            }
-            break;
+            if (num < 0 || num >= (int)level_sidedefs.size())
+                line->left = nullptr;
+            else
+                line->left = level_sidedefs[num];
+        }
+        break;
         default:
             break;
     }
@@ -645,10 +532,10 @@ void ParseLinedefField(Linedef *line, const int &key, const std::string &value)
 
 void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
 {
-    Vertex  *vertex = NULL;
-    Thing   *thing  = NULL;
-    Sidedef *side   = NULL;
-    Linedef *line   = NULL;
+    Vertex  *vertex = nullptr;
+    Thing   *thing  = nullptr;
+    Sidedef *side   = nullptr;
+    Linedef *line   = nullptr;
 
     switch (cur_type)
     {
@@ -659,7 +546,7 @@ void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
             thing = NewThing();
             break;
         case kUDMFSector:
-            NewSector(); // We don't use the returned pointer in this function
+            NewSector();  // We don't use the returned pointer in this function
             break;
         case kUDMFSidedef:
             side = NewSidedef();
@@ -673,8 +560,7 @@ void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
 
     for (;;)
     {
-        if (lex.Match("}"))
-            break;
+        if (lex.Match("}")) break;
 
         std::string key;
         std::string value;
@@ -682,21 +568,21 @@ void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
         epi::TokenKind tok = lex.Next(key);
 
         if (tok == epi::kTokenEOF)
-            I_Error("AJBSP: Malformed TEXTMAP lump: unclosed block\n");
+            FatalError("AJBSP: Malformed TEXTMAP lump: unclosed block\n");
 
         if (tok != epi::kTokenIdentifier)
-            I_Error("AJBSP: Malformed TEXTMAP lump: missing key\n");
+            FatalError("AJBSP: Malformed TEXTMAP lump: missing key\n");
 
         if (!lex.Match("="))
-            I_Error("AJBSP: Malformed TEXTMAP lump: missing '='\n");
+            FatalError("AJBSP: Malformed TEXTMAP lump: missing '='\n");
 
         tok = lex.Next(value);
 
         if (tok == epi::kTokenEOF || tok == epi::kTokenError || value == "}")
-            I_Error("AJBSP: Malformed TEXTMAP lump: missing value\n");
+            FatalError("AJBSP: Malformed TEXTMAP lump: missing value\n");
 
         if (!lex.Match(";"))
-            I_Error("AJBSP: Malformed TEXTMAP lump: missing ';'\n");
+            FatalError("AJBSP: Malformed TEXTMAP lump: missing ';'\n");
 
         epi::EName key_ename(key, true);
 
@@ -722,18 +608,18 @@ void ParseUDMF_Block(epi::Lexer &lex, int cur_type)
 
     // validate stuff
 
-    if (line != NULL)
+    if (line != nullptr)
     {
-        if (line->start == NULL || line->end == NULL)
-            I_Error("AJBSP: Linedef #%d is missing a vertex!\n", line->index);
+        if (line->start == nullptr || line->end == nullptr)
+            FatalError("AJBSP: Linedef #%d is missing a vertex!\n",
+                       line->index);
 
-        if (line->right || line->left)
-            num_real_lines++;
+        if (line->right || line->left) num_real_lines++;
 
-        line->self_referencing = (line->left && line->right && (line->left->sector == line->right->sector));
+        line->self_referencing = (line->left && line->right &&
+                                  (line->left->sector == line->right->sector));
 
-        if (line->self_referencing)
-            line->is_precious = true;
+        if (line->self_referencing) line->is_precious = true;
     }
 }
 
@@ -747,15 +633,14 @@ void ParseUDMF_Pass(const std::string &data, int pass)
 
     for (;;)
     {
-        std::string       section;
+        std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
-            return;
+        if (tok == epi::kTokenEOF) return;
 
         if (tok != epi::kTokenIdentifier)
         {
-            I_Error("AJBSP: Malformed TEXTMAP lump.\n");
+            FatalError("AJBSP: Malformed TEXTMAP lump.\n");
             return;
         }
 
@@ -764,12 +649,12 @@ void ParseUDMF_Pass(const std::string &data, int pass)
         {
             lex.Next(section);
             if (!lex.Match(";"))
-                I_Error("AJBSP: Malformed TEXTMAP lump: missing ';'\n");
+                FatalError("AJBSP: Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
         if (!lex.Match("{"))
-            I_Error("AJBSP: Malformed TEXTMAP lump: missing '{'\n");
+            FatalError("AJBSP: Malformed TEXTMAP lump: missing '{'\n");
 
         int cur_type = 0;
 
@@ -805,13 +690,13 @@ void ParseUDMF()
 {
     Lump *lump = FindLevelLump("TEXTMAP");
 
-    if (lump == NULL || !lump->Seek(0))
-        I_Error("AJBSP: Error finding TEXTMAP lump.\n");
+    if (lump == nullptr || !lump->Seek(0))
+        FatalError("AJBSP: Error finding TEXTMAP lump.\n");
 
     // load the lump into this string
     std::string data(lump->Length(), 0);
     if (!lump->Read(data.data(), lump->Length()))
-        I_Error("AJBSP: Error reading TEXTMAP lump.\n");
+        FatalError("AJBSP: Error reading TEXTMAP lump.\n");
 
     // now parse it...
 
@@ -830,8 +715,7 @@ void ParseUDMF()
 
 static inline uint32_t VertexIndex_XNOD(const Vertex *v)
 {
-    if (v->is_new_)
-        return (uint32_t)(num_old_vert + v->index_);
+    if (v->is_new_) return (uint32_t)(num_old_vert + v->index_);
 
     return (uint32_t)v->index_;
 }
@@ -849,7 +733,7 @@ void SortSegs()
     // do a sanity check
     for (int i = 0; i < level_segs.size(); i++)
         if (level_segs[i]->index_ < 0)
-            I_Error("AJBSP: Seg %p never reached a subsector!\n", i);
+            FatalError("AJBSP: Seg %p never reached a subsector!\n", i);
 
     // sort segs into ascending index
     std::sort(level_segs.begin(), level_segs.end(), CompareSegPredicate());
@@ -883,11 +767,10 @@ void PutZVertices()
 
         const Vertex *vert = level_vertices[i];
 
-        if (!vert->is_new_)
-            continue;
+        if (!vert->is_new_) continue;
 
-        raw.x = AlignedLittleEndianS32(I_ROUND(vert->x_ * 65536.0));
-        raw.y = AlignedLittleEndianS32(I_ROUND(vert->y_ * 65536.0));
+        raw.x = AlignedLittleEndianS32(RoundToInteger(vert->x_ * 65536.0));
+        raw.y = AlignedLittleEndianS32(RoundToInteger(vert->y_ * 65536.0));
 
         ZLibAppendLump(&raw, sizeof(raw));
 
@@ -895,7 +778,8 @@ void PutZVertices()
     }
 
     if (count != num_new_vert)
-        I_Error("AJBSP: PutZVertices miscounted (%d != %d)\n", count, num_new_vert);
+        FatalError("AJBSP: PutZVertices miscounted (%d != %d)\n", count,
+                   num_new_vert);
 }
 
 void PutZSubsecs()
@@ -914,20 +798,27 @@ void PutZSubsecs()
 
         // sanity check the seg index values
         int count = 0;
-        for (const Seg *seg = sub->seg_list_; seg; seg = seg->next_, cur_seg_index++)
+        for (const Seg *seg = sub->seg_list_; seg;
+             seg            = seg->next_, cur_seg_index++)
         {
             if (cur_seg_index != seg->index_)
-                I_Error("AJBSP: PutZSubsecs: seg index mismatch in sub %d (%d != %d)\n", i, cur_seg_index, seg->index_);
+                FatalError(
+                    "AJBSP: PutZSubsecs: seg index mismatch in sub %d (%d != "
+                    "%d)\n",
+                    i, cur_seg_index, seg->index_);
 
             count++;
         }
 
         if (count != sub->seg_count_)
-            I_Error("AJBSP: PutZSubsecs: miscounted segs in sub %d (%d != %d)\n", i, count, sub->seg_count_);
+            FatalError(
+                "AJBSP: PutZSubsecs: miscounted segs in sub %d (%d != %d)\n", i,
+                count, sub->seg_count_);
     }
 
     if (cur_seg_index != level_segs.size())
-        I_Error("AJBSP: PutZSubsecs miscounted segs (%d != %d)\n", cur_seg_index, level_segs.size());
+        FatalError("AJBSP: PutZSubsecs miscounted segs (%d != %d)\n",
+                   cur_seg_index, level_segs.size());
 }
 
 void PutZSegs()
@@ -940,7 +831,8 @@ void PutZSegs()
         const Seg *seg = level_segs[i];
 
         if (seg->index_ != i)
-            I_Error("AJBSP: PutZSegs: seg index mismatch (%d != %d)\n", seg->index_, i);
+            FatalError("AJBSP: PutZSegs: seg index mismatch (%d != %d)\n",
+                       seg->index_, i);
 
         uint32_t v1 = AlignedLittleEndianU32(VertexIndex_XNOD(seg->start_));
         uint32_t v2 = AlignedLittleEndianU32(VertexIndex_XNOD(seg->end_));
@@ -965,12 +857,15 @@ void PutXGL3Segs()
         const Seg *seg = level_segs[i];
 
         if (seg->index_ != i)
-            I_Error("AJBSP: PutXGL3Segs: seg index mismatch (%d != %d)\n", seg->index_, i);
+            FatalError("AJBSP: PutXGL3Segs: seg index mismatch (%d != %d)\n",
+                       seg->index_, i);
 
-        uint32_t v1      = AlignedLittleEndianU32(VertexIndex_XNOD(seg->start_));
-        uint32_t partner = AlignedLittleEndianU32(seg->partner_ ? seg->partner_->index_ : -1);
-        uint32_t line    = AlignedLittleEndianU32(seg->linedef_ ? seg->linedef_->index : -1);
-        uint8_t  side    = (uint8_t)seg->side_;
+        uint32_t v1 = AlignedLittleEndianU32(VertexIndex_XNOD(seg->start_));
+        uint32_t partner =
+            AlignedLittleEndianU32(seg->partner_ ? seg->partner_->index_ : -1);
+        uint32_t line =
+            AlignedLittleEndianU32(seg->linedef_ ? seg->linedef_->index : -1);
+        uint8_t side = (uint8_t)seg->side_;
 
         ZLibAppendLump(&v1, 4);
         ZLibAppendLump(&partner, 4);
@@ -978,7 +873,8 @@ void PutXGL3Segs()
         ZLibAppendLump(&side, 1);
 
 #if DEBUG_BSP
-        fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1, partner, line, side);
+        fprintf(stderr, "SEG[%d] v1=%d partner=%d line=%d side=%d\n", i, v1,
+                partner, line, side);
 #endif
     }
 }
@@ -989,59 +885,69 @@ static void PutOneZNode(Node *node)
 {
     RawV5Node raw;
 
-    if (node->r_.node)
-        PutOneZNode(node->r_.node);
+    if (node->r_.node) PutOneZNode(node->r_.node);
 
-    if (node->l_.node)
-        PutOneZNode(node->l_.node);
+    if (node->l_.node) PutOneZNode(node->l_.node);
 
     node->index_ = node_cur_index++;
 
-    uint32_t x  = AlignedLittleEndianS32(I_ROUND(node->x_ * 65536.0));
-    uint32_t y  = AlignedLittleEndianS32(I_ROUND(node->y_ * 65536.0));
-    uint32_t dx = AlignedLittleEndianS32(I_ROUND(node->dx_ * 65536.0));
-    uint32_t dy = AlignedLittleEndianS32(I_ROUND(node->dy_ * 65536.0));
+    uint32_t x  = AlignedLittleEndianS32(RoundToInteger(node->x_ * 65536.0));
+    uint32_t y  = AlignedLittleEndianS32(RoundToInteger(node->y_ * 65536.0));
+    uint32_t dx = AlignedLittleEndianS32(RoundToInteger(node->dx_ * 65536.0));
+    uint32_t dy = AlignedLittleEndianS32(RoundToInteger(node->dy_ * 65536.0));
 
     ZLibAppendLump(&x, 4);
     ZLibAppendLump(&y, 4);
     ZLibAppendLump(&dx, 4);
     ZLibAppendLump(&dy, 4);
 
-    raw.b1.minx = AlignedLittleEndianS16(node->r_.bounds.minx);
-    raw.b1.miny = AlignedLittleEndianS16(node->r_.bounds.miny);
-    raw.b1.maxx = AlignedLittleEndianS16(node->r_.bounds.maxx);
-    raw.b1.maxy = AlignedLittleEndianS16(node->r_.bounds.maxy);
+    raw.bounding_box_1.minimum_x =
+        AlignedLittleEndianS16(node->r_.bounds.minimum_x);
+    raw.bounding_box_1.minimum_y =
+        AlignedLittleEndianS16(node->r_.bounds.minimum_y);
+    raw.bounding_box_1.maximum_x =
+        AlignedLittleEndianS16(node->r_.bounds.maximum_x);
+    raw.bounding_box_1.maximum_y =
+        AlignedLittleEndianS16(node->r_.bounds.maximum_y);
 
-    raw.b2.minx = AlignedLittleEndianS16(node->l_.bounds.minx);
-    raw.b2.miny = AlignedLittleEndianS16(node->l_.bounds.miny);
-    raw.b2.maxx = AlignedLittleEndianS16(node->l_.bounds.maxx);
-    raw.b2.maxy = AlignedLittleEndianS16(node->l_.bounds.maxy);
+    raw.bounding_box_2.minimum_x =
+        AlignedLittleEndianS16(node->l_.bounds.minimum_x);
+    raw.bounding_box_2.minimum_y =
+        AlignedLittleEndianS16(node->l_.bounds.minimum_y);
+    raw.bounding_box_2.maximum_x =
+        AlignedLittleEndianS16(node->l_.bounds.maximum_x);
+    raw.bounding_box_2.maximum_y =
+        AlignedLittleEndianS16(node->l_.bounds.maximum_y);
 
-    ZLibAppendLump(&raw.b1, sizeof(raw.b1));
-    ZLibAppendLump(&raw.b2, sizeof(raw.b2));
+    ZLibAppendLump(&raw.bounding_box_1, sizeof(raw.bounding_box_1));
+    ZLibAppendLump(&raw.bounding_box_2, sizeof(raw.bounding_box_2));
 
     if (node->r_.node)
         raw.right = AlignedLittleEndianU32(node->r_.node->index_);
     else if (node->r_.subsec)
-        raw.right = AlignedLittleEndianU32(node->r_.subsec->index_ | 0x80000000U);
+        raw.right =
+            AlignedLittleEndianU32(node->r_.subsec->index_ | 0x80000000U);
     else
-        I_Error("AJBSP: Bad right child in V5 node %d\n", node->index_);
+        FatalError("AJBSP: Bad right child in V5 node %d\n", node->index_);
 
     if (node->l_.node)
         raw.left = AlignedLittleEndianU32(node->l_.node->index_);
     else if (node->l_.subsec)
-        raw.left = AlignedLittleEndianU32(node->l_.subsec->index_ | 0x80000000U);
+        raw.left =
+            AlignedLittleEndianU32(node->l_.subsec->index_ | 0x80000000U);
     else
-        I_Error("AJBSP: Bad left child in V5 node %d\n", node->index_);
+        FatalError("AJBSP: Bad left child in V5 node %d\n", node->index_);
 
     ZLibAppendLump(&raw.right, 4);
     ZLibAppendLump(&raw.left, 4);
 
 #if DEBUG_BSP
-    I_Debugf("PUT Z NODE %08X  Left %08X  Right %08X  "
-                    "(%d,%d) -> (%d,%d)\n",
-                    node->index, AlignedLittleEndianU32(raw.left), AlignedLittleEndianU32(raw.right), node->x_, node->y_, node->x_ + node->dx_,
-                    node->y_ + node->dy_);
+    LogDebug(
+        "PUT Z NODE %08X  Left %08X  Right %08X  "
+        "(%d,%d) -> (%d,%d)\n",
+        node->index, AlignedLittleEndianU32(raw.left),
+        AlignedLittleEndianU32(raw.right), node->x_, node->y_,
+        node->x_ + node->dx_, node->y_ + node->dy_);
 #endif
 }
 
@@ -1052,11 +958,11 @@ void PutZNodes(Node *root)
 
     node_cur_index = 0;
 
-    if (root)
-        PutOneZNode(root);
+    if (root) PutOneZNode(root);
 
     if (node_cur_index != level_nodes.size())
-        I_Error("AJBSP: PutZNodes miscounted (%d != %d)\n", node_cur_index, level_nodes.size());
+        FatalError("AJBSP: PutZNodes miscounted (%d != %d)\n", node_cur_index,
+                   level_nodes.size());
 }
 
 void SaveXGL3Format(Lump *lump, Node *root_node)
@@ -1087,15 +993,14 @@ void LoadLevel()
     level_current_name = LEV->Name();
     level_long_name    = false;
 
-    E_ProgressMessage(epi::StringFormat("Building nodes for %s\n", level_current_name).c_str());
+    StartupProgressMessage(
+        epi::StringFormat("Building nodes for %s\n", level_current_name)
+            .c_str());
 
     num_new_vert   = 0;
     num_real_lines = 0;
 
-    if (level_format == kMapFormatUDMF)
-    {
-        ParseUDMF();
-    }
+    if (level_format == kMapFormatUDMF) { ParseUDMF(); }
     else
     {
         GetVertices();
@@ -1104,8 +1009,8 @@ void LoadLevel()
 
         if (level_format == kMapFormatHexen)
         {
-            GetLinedefsHexen();
-            GetThingsHexen();
+            FatalError("AJBSP: Level %s is Hexen format (not supported).\n",
+                       level_current_name);
         }
         else
         {
@@ -1118,8 +1023,10 @@ void LoadLevel()
         PruneVerticesAtEnd();
     }
 
-    I_Debugf("    Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n", level_vertices.size(), level_sectors.size(),
-                    level_sidedefs.size(), level_linedefs.size(), level_things.size());
+    LogDebug(
+        "    Loaded %d vertices, %d sectors, %d sides, %d lines, %d things\n",
+        level_vertices.size(), level_sectors.size(), level_sidedefs.size(),
+        level_linedefs.size(), level_things.size());
 
     DetectOverlappingVertices();
     DetectOverlappingLines();
@@ -1127,17 +1034,7 @@ void LoadLevel()
     CalculateWallTips();
 
     // -JL- Find sectors containing polyobjs
-    switch (level_format)
-    {
-    case kMapFormatHexen:
-        DetectPolyobjSectors(false);
-        break;
-    case kMapFormatUDMF:
-        DetectPolyobjSectors(true);
-        break;
-    default:
-        break;
-    }
+    if (level_format == kMapFormatUDMF) DetectPolyobjSectors();
 }
 
 void FreeLevel()
@@ -1159,12 +1056,9 @@ BuildResult SaveXWA(Node *root_node)
     xwa_wad->BeginWrite();
 
     const char *level_name = GetLevelName(level_current_idx);
-    Lump     *lump     = xwa_wad->AddLump(level_name);
+    Lump       *lump       = xwa_wad->AddLump(level_name);
 
-    if (num_real_lines == 0)
-    {
-        lump->Finish();
-    }
+    if (num_real_lines == 0) { lump->Finish(); }
     else
     {
         SortSegs();
@@ -1187,15 +1081,14 @@ void ZLibBeginLump(Lump *lump)
 {
     zout_lump = lump;
 
-    if (!current_build_info.compress_nodes)
-        return;
+    if (!current_build_info.compress_nodes) return;
 
     zout_stream.zalloc = (alloc_func)0;
     zout_stream.zfree  = (free_func)0;
     zout_stream.opaque = (voidpf)0;
 
     if (Z_OK != deflateInit(&zout_stream, Z_DEFAULT_COMPRESSION))
-        I_Error("AJBSP: Trouble setting up zlib compression\n");
+        FatalError("AJBSP: Trouble setting up zlib compression\n");
 
     zout_stream.next_out  = zout_buffer;
     zout_stream.avail_out = sizeof(zout_buffer);
@@ -1209,7 +1102,7 @@ void ZLibAppendLump(const void *data, int length)
         return;
     }
 
-    zout_stream.next_in  = (Bytef *)data; // const override
+    zout_stream.next_in  = (Bytef *)data;  // const override
     zout_stream.avail_in = length;
 
     while (zout_stream.avail_in > 0)
@@ -1217,7 +1110,7 @@ void ZLibAppendLump(const void *data, int length)
         int err = deflate(&zout_stream, Z_NO_FLUSH);
 
         if (err != Z_OK)
-            I_Error("AJBSP: Trouble compressing %d bytes (zlib)\n", length);
+            FatalError("AJBSP: Trouble compressing %d bytes (zlib)\n", length);
 
         if (zout_stream.avail_out == 0)
         {
@@ -1234,7 +1127,7 @@ void ZLibFinishLump(void)
     if (!current_build_info.compress_nodes)
     {
         zout_lump->Finish();
-        zout_lump = NULL;
+        zout_lump = nullptr;
         return;
     }
 
@@ -1249,11 +1142,10 @@ void ZLibFinishLump(void)
     {
         int err = deflate(&zout_stream, Z_FINISH);
 
-        if (err == Z_STREAM_END)
-            break;
+        if (err == Z_STREAM_END) break;
 
         if (err != Z_OK)
-            I_Error("AJBSP: Trouble finishing compression (zlib)\n");
+            FatalError("AJBSP: Trouble finishing compression (zlib)\n");
 
         if (zout_stream.avail_out == 0)
         {
@@ -1266,13 +1158,12 @@ void ZLibFinishLump(void)
 
     left_over = sizeof(zout_buffer) - zout_stream.avail_out;
 
-    if (left_over > 0)
-        zout_lump->Write(zout_buffer, left_over);
+    if (left_over > 0) zout_lump->Write(zout_buffer, left_over);
 
     deflateEnd(&zout_stream);
 
     zout_lump->Finish();
-    zout_lump = NULL;
+    zout_lump = nullptr;
 }
 
 /* ---------------------------------------------------------------- */
@@ -1281,8 +1172,7 @@ Lump *FindLevelLump(const char *name)
 {
     int idx = cur_wad->LevelLookupLump(level_current_idx, name);
 
-    if (idx < 0)
-        return NULL;
+    if (idx < 0) return nullptr;
 
     return cur_wad->GetLump(idx);
 }
@@ -1296,30 +1186,31 @@ BuildInfo current_build_info;
 void ResetInfo()
 {
     current_build_info.total_minor_issues = 0;
-    current_build_info.total_warnings = 0;
-    current_build_info.compress_nodes = true;
-    current_build_info.split_cost = kSplitCostDefault;
+    current_build_info.total_warnings     = 0;
+    current_build_info.compress_nodes     = true;
+    current_build_info.split_cost         = kSplitCostDefault;
 }
 
 void OpenWad(std::string filename)
 {
     cur_wad = WadFile::Open(filename, 'r');
-    if (cur_wad == NULL)
-        I_Error("AJBSP: Cannot open file: %s\n", filename.c_str());
+    if (cur_wad == nullptr)
+        FatalError("AJBSP: Cannot open file: %s\n", filename.c_str());
 }
 
 void OpenMem(std::string filename, uint8_t *Rawdata, int Rawlength)
 {
     cur_wad = WadFile::OpenMem(filename, Rawdata, Rawlength);
-    if (cur_wad == NULL)
-        I_Error("AJBSP: Cannot open file from memory: %s\n", filename.c_str());
+    if (cur_wad == nullptr)
+        FatalError("AJBSP: Cannot open file from memory: %s\n",
+                   filename.c_str());
 }
 
 void CreateXWA(std::string filename)
 {
     xwa_wad = WadFile::Open(filename, 'w');
-    if (xwa_wad == NULL)
-        I_Error("AJBSP: Cannot create file: %s\n", filename.c_str());
+    if (xwa_wad == nullptr)
+        FatalError("AJBSP: Cannot create file: %s\n", filename.c_str());
 
     xwa_wad->BeginWrite();
     xwa_wad->AddLump("XG_START")->Finish();
@@ -1335,24 +1226,23 @@ void FinishXWA()
 
 void CloseWad()
 {
-    if (cur_wad != NULL)
+    if (cur_wad != nullptr)
     {
         // this closes the file
         delete cur_wad;
-        cur_wad = NULL;
+        cur_wad = nullptr;
     }
 
-    if (xwa_wad != NULL)
+    if (xwa_wad != nullptr)
     {
         delete xwa_wad;
-        xwa_wad = NULL;
+        xwa_wad = nullptr;
     }
 }
 
 int LevelsInWad()
 {
-    if (cur_wad == NULL)
-        return 0;
+    if (cur_wad == nullptr) return 0;
 
     return cur_wad->LevelCount();
 }
@@ -1361,8 +1251,8 @@ int LevelsInWad()
 
 BuildResult BuildLevel(int level_index)
 {
-    Node   *root_node = NULL;
-    Subsector *root_sub  = NULL;
+    Node      *root_node = nullptr;
+    Subsector *root_sub  = nullptr;
 
     level_current_idx   = level_index;
     level_current_start = cur_wad->LevelHeader(level_index);
@@ -1385,25 +1275,26 @@ BuildResult BuildLevel(int level_index)
 
     if (ret == kBuildOK)
     {
-        I_Debugf("    Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n", level_nodes.size(), level_subsecs.size(), level_segs.size(),
-                        num_old_vert + num_new_vert);
+        LogDebug("    Built %d NODES, %d SSECTORS, %d SEGS, %d VERTEXES\n",
+                 level_nodes.size(), level_subsecs.size(), level_segs.size(),
+                 num_old_vert + num_new_vert);
 
-        if (root_node != NULL)
+        if (root_node != nullptr)
         {
-            I_Debugf("    Heights of subtrees: %d / %d\n", ComputeBspHeight(root_node->r_.node),
-                            ComputeBspHeight(root_node->l_.node));
+            LogDebug("    Heights of subtrees: %d / %d\n",
+                     ComputeBspHeight(root_node->r_.node),
+                     ComputeBspHeight(root_node->l_.node));
         }
 
         ClockwiseBspTree();
 
-        if (xwa_wad != NULL)
+        if (xwa_wad != nullptr)
             ret = SaveXWA(root_node);
         else
-            I_Error("AJBSP: Cannot save nodes to XWA file!\n");
+            FatalError("AJBSP: Cannot save nodes to XWA file!\n");
     }
     else
-    {
-        /* build was Cancelled by the user */
+    { /* build was Cancelled by the user */
     }
 
     FreeLevel();
@@ -1411,7 +1302,7 @@ BuildResult BuildLevel(int level_index)
     return ret;
 }
 
-} // namespace ajbsp
+}  // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

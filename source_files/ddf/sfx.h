@@ -16,85 +16,74 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_SFX_H__
-#define __DDF_SFX_H__
-
-#include "epi.h"
+#pragma once
 
 #include "types.h"
-
-#define S_CLOSE_DIST    160.0f
-#define S_CLIPPING_DIST 4000.0f
 
 // ----------------------------------------------------------------
 // ------------------------ SOUND EFFECTS -------------------------
 // ----------------------------------------------------------------
 
 // -KM- 1998/10/29
-typedef struct sfx_s
+struct SoundEffect
 {
     int num;
-    int sounds[1]; // -ACB- 1999/11/06 Zero based array is not ANSI compliant
-                   // -AJA- I'm also relying on the [1] within sfxdef_c.
-} sfx_t;
+    int sounds[1];  // -ACB- 1999/11/06 Zero based array is not ANSI compliant
+                    // -AJA- I'm also relying on the [1] within
+                    // SoundEffectDefinition.
+};
 
-#define sfx_None (sfx_t *)NULL
-
-// Sound Effect Definition Class
-class sfxdef_c
+class SoundEffectDefinition
 {
-  public:
-    sfxdef_c();
-    ~sfxdef_c();
+   public:
+    SoundEffectDefinition();
+    ~SoundEffectDefinition();
 
-  public:
+   public:
     void Default(void);
-    void CopyDetail(sfxdef_c &src);
+    void CopyDetail(SoundEffectDefinition &src);
 
     // Member vars....
-    std::string name;
+    std::string name_;
 
     // full sound lump name (or file name)
-    std::string lump_name;
-    std::string file_name;
-    std::string pack_name;
+    std::string lump_name_;
+    std::string file_name_;
+    std::string pack_name_;
 
     // PC Speaker equivalent sound
-    std::string pc_speaker_sound;
+    std::string pc_speaker_sound_;
 
     // sfxinfo ID number
-    // -AJA- Changed to a sfx_t.  It serves two purposes: (a) hold the
+    // -AJA- Changed to a SoundEffect.  It serves two purposes: (a) hold the
     //       sound ID, like before, (b) better memory usage, as we don't
-    //       need to allocate a new sfx_t for non-wildcard sounds.
-    sfx_t normal;
+    //       need to allocate a new SoundEffect for non-wildcard sounds.
+    SoundEffect normal_;
 
     // Sfx singularity (only one at a time), or 0 if not singular
-    int singularity;
+    int singularity_;
 
     // Sfx priority
-    int priority;
+    int priority_;
 
     // volume adjustment (100% is normal, lower is quieter)
-    percent_t volume;
+    float volume_;
 
-    // -KM- 1998/09/01  Looping: for non NULL origins
-    bool looping;
+    // -KM- 1998/09/01  Looping: for non nullptr origins
+    bool looping_;
 
     // -AJA- 2000/04/19: Prefer to play the whole sound rather than
     //       chopping it off with a new sound.
-    bool precious;
+    bool precious_;
 
     // distance limit, if the hearer is further away than `max_distance'
     // then the this sound won't be played at all.
-    float max_distance;
+    float max_distance_;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit sfxdef_c(sfxdef_c &rhs)
-    {
-        (void)rhs;
-    }
-    sfxdef_c &operator=(sfxdef_c &rhs)
+    explicit SoundEffectDefinition(SoundEffectDefinition &rhs) { (void)rhs; }
+    SoundEffectDefinition &operator=(SoundEffectDefinition &rhs)
     {
         (void)rhs;
         return *this;
@@ -102,36 +91,35 @@ class sfxdef_c
 };
 
 // Our sound effect definition container
-class sfxdef_container_c : public std::vector<sfxdef_c *>
+class SoundEffectDefinitionContainer
+    : public std::vector<SoundEffectDefinition *>
 {
-  public:
-    sfxdef_container_c()
+   public:
+    SoundEffectDefinitionContainer() {}
+
+    ~SoundEffectDefinitionContainer()
     {
+        for (std::vector<SoundEffectDefinition *>::iterator iter     = begin(),
+                                                            iter_end = end();
+             iter != iter_end; iter++)
+        {
+            SoundEffectDefinition *s = *iter;
+            delete s;
+            s = nullptr;
+        }
     }
 
-    ~sfxdef_container_c()
-    {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          sfxdef_c *s= *iter;
-          delete s;
-          s = nullptr;
-      }
-    }
-
-  public:
+   public:
     // Lookup functions
-    sfx_t    *GetEffect(const char *name, bool error = true);
-    sfxdef_c *Lookup(const char *name);
+    SoundEffect           *GetEffect(const char *name, bool error = true);
+    SoundEffectDefinition *Lookup(const char *name);
 };
 
 // ----------EXTERNALISATIONS----------
 
-extern sfxdef_container_c sfxdefs; // -ACB- 2004/07/25 Implemented
+extern SoundEffectDefinitionContainer sfxdefs;  // -ACB- 2004/07/25 Implemented
 
 void DDF_ReadSFX(const std::string &data);
-
-#endif // __DDF_SFX_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

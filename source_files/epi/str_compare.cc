@@ -16,28 +16,29 @@
 //
 //----------------------------------------------------------------------------
 
-#include "epi.h"
 #include "str_compare.h"
-#include "str_util.h"
 
-#include <string.h>
 #include <ctype.h>
+#include <string.h>
+
+#include "epi.h"
+#include "str_util.h"
 
 namespace epi
 {
 
 int StringCompare(std::string_view A, std::string_view B)
 {
-    size_t A_pos = 0;
-    size_t B_pos = 0;
-    size_t A_end = A.size();
-    size_t B_end = B.size();
-    unsigned char AC = 0;
-    unsigned char BC = 0;
+    size_t        A_pos = 0;
+    size_t        B_pos = 0;
+    size_t        A_end = A.size();
+    size_t        B_end = B.size();
+    unsigned char AC    = 0;
+    unsigned char BC    = 0;
 
-    for (;;A_pos++, B_pos++)
-	{
-		if (A_pos >= A_end)
+    for (;; A_pos++, B_pos++)
+    {
+        if (A_pos >= A_end)
             AC = 0;
         else
             AC = (int)(unsigned char)A[A_pos];
@@ -46,30 +47,27 @@ int StringCompare(std::string_view A, std::string_view B)
         else
             BC = (int)(unsigned char)B[B_pos];
 
-		if (AC != BC)
-			return AC - BC;
+        if (AC != BC) return AC - BC;
 
-		if (A_pos == A_end)
-			return 0;
-	}
+        if (A_pos == A_end) return 0;
+    }
 }
 
 //----------------------------------------------------------------------------
 
 int StringCompareMax(std::string_view A, std::string_view B, size_t n)
 {
-    SYS_ASSERT(n != 0);
-    size_t A_pos = 0;
-    size_t B_pos = 0;
-    size_t A_end = A.size();
-    size_t B_end = B.size();
-    unsigned char AC = 0;
-    unsigned char BC = 0;
+    EPI_ASSERT(n != 0);
+    size_t        A_pos = 0;
+    size_t        B_pos = 0;
+    size_t        A_end = A.size();
+    size_t        B_end = B.size();
+    unsigned char AC    = 0;
+    unsigned char BC    = 0;
 
-	for (;;A_pos++, B_pos++)
-	{
-		if (n == 0)
-			return 0;
+    for (;; A_pos++, B_pos++)
+    {
+        if (n == 0) return 0;
 
         if (A_pos >= A_end)
             AC = 0;
@@ -80,28 +78,26 @@ int StringCompareMax(std::string_view A, std::string_view B, size_t n)
         else
             BC = (int)(unsigned char)B[B_pos];
 
-		if (AC != BC)
-			return AC - BC;
+        if (AC != BC) return AC - BC;
 
-		if (A_pos == A_end)
-			return 0;
+        if (A_pos == A_end) return 0;
 
-		n--;
-	}
+        n--;
+    }
 }
 
 //----------------------------------------------------------------------------
 
 int StringCaseCompareASCII(std::string_view A, std::string_view B)
 {
-    size_t A_pos = 0;
-    size_t B_pos = 0;
-    size_t A_end = A.size();
-    size_t B_end = B.size();
-    unsigned char AC = 0;
-    unsigned char BC = 0;
+    size_t        A_pos = 0;
+    size_t        B_pos = 0;
+    size_t        A_end = A.size();
+    size_t        B_end = B.size();
+    unsigned char AC    = 0;
+    unsigned char BC    = 0;
 
-    for (;;A_pos++, B_pos++)
+    for (;; A_pos++, B_pos++)
     {
         if (A_pos >= A_end)
             AC = 0;
@@ -118,11 +114,9 @@ int StringCaseCompareASCII(std::string_view A, std::string_view B)
             if (BC > '@' && BC < '[') BC ^= 0x20;
         }
 
-        if (AC != BC)
-            return AC - BC;
+        if (AC != BC) return AC - BC;
 
-        if (A_pos == A_end)
-            return 0;
+        if (A_pos == A_end) return 0;
     }
 }
 
@@ -130,20 +124,19 @@ int StringCaseCompareASCII(std::string_view A, std::string_view B)
 
 int StringCaseCompareMaxASCII(std::string_view A, std::string_view B, size_t n)
 {
-    SYS_ASSERT(n != 0);
-    size_t A_pos = 0;
-    size_t B_pos = 0;
-    size_t A_end = A.size();
-    size_t B_end = B.size();
-    unsigned char AC = 0;
-    unsigned char BC = 0;
+    EPI_ASSERT(n != 0);
+    size_t        A_pos = 0;
+    size_t        B_pos = 0;
+    size_t        A_end = A.size();
+    size_t        B_end = B.size();
+    unsigned char AC    = 0;
+    unsigned char BC    = 0;
 
-	for (;;A_pos++, B_pos++)
-	{
-		if (n == 0)
-			return 0;
+    for (;; A_pos++, B_pos++)
+    {
+        if (n == 0) return 0;
 
-		if (A_pos >= A_end)
+        if (A_pos >= A_end)
             AC = 0;
         else
         {
@@ -158,28 +151,26 @@ int StringCaseCompareMaxASCII(std::string_view A, std::string_view B, size_t n)
             if (BC > '@' && BC < '[') BC ^= 0x20;
         }
 
-		if (AC != BC)
-			return AC - BC;
+        if (AC != BC) return AC - BC;
 
-		if (A_pos == A_end)
-			return 0;
+        if (A_pos == A_end) return 0;
 
-		n--;
-	}
+        n--;
+    }
 }
 
 //----------------------------------------------------------------------------
 
 int StringPrefixCompare(std::string_view A, std::string_view B)
 {
-    size_t A_pos = 0;
-    size_t B_pos = 0;
-    size_t A_end = A.size();
-    size_t B_end = B.size();
-    unsigned char AC = 0;
-    unsigned char BC = 0;
+    size_t        A_pos = 0;
+    size_t        B_pos = 0;
+    size_t        A_end = A.size();
+    size_t        B_end = B.size();
+    unsigned char AC    = 0;
+    unsigned char BC    = 0;
 
-    for (;;A_pos++, B_pos++)
+    for (;; A_pos++, B_pos++)
     {
         if (A_pos >= A_end)
             AC = 0;
@@ -190,11 +181,9 @@ int StringPrefixCompare(std::string_view A, std::string_view B)
         else
             BC = (int)(unsigned char)B[B_pos];
 
-        if (B_pos == B_end)
-            return 0;
+        if (B_pos == B_end) return 0;
 
-        if (AC != BC)
-            return AC - BC;
+        if (AC != BC) return AC - BC;
     }
 }
 
@@ -202,14 +191,14 @@ int StringPrefixCompare(std::string_view A, std::string_view B)
 
 int StringPrefixCaseCompareASCII(std::string_view A, std::string_view B)
 {
-    size_t A_pos = 0;
-    size_t B_pos = 0;
-    size_t A_end = A.size();
-    size_t B_end = B.size();
-    unsigned char AC = 0;
-    unsigned char BC = 0;
+    size_t        A_pos = 0;
+    size_t        B_pos = 0;
+    size_t        A_end = A.size();
+    size_t        B_end = B.size();
+    unsigned char AC    = 0;
+    unsigned char BC    = 0;
 
-    for (;;A_pos++, B_pos++)
+    for (;; A_pos++, B_pos++)
     {
         if (A_pos >= A_end)
             AC = 0;
@@ -226,15 +215,13 @@ int StringPrefixCaseCompareASCII(std::string_view A, std::string_view B)
             if (BC > '@' && BC < '[') BC ^= 0x20;
         }
 
-        if (B_pos == B_end)
-            return 0;
+        if (B_pos == B_end) return 0;
 
-        if (AC != BC)
-            return AC - BC;
+        if (AC != BC) return AC - BC;
     }
 }
 
-} // namespace epi
+}  // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

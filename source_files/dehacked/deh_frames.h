@@ -25,22 +25,22 @@ struct State;
 
 enum ActionFlags
 {
-    kActionFlagExplode       = (1 << 0), // uses A_Explode
-    kActionFlagBossDeath     = (1 << 1), // uses A_BossDeath
-    kActionFlagKeenDie       = (1 << 2), // uses A_KeenDie
-    kActionFlagLook          = (1 << 3), // uses A_Look
-    kActionFlagDetonate      = (1 << 4), // uses A_Detonate
-    kActionFlagSpread        = (1 << 6), // uses A_FatAttack1/2/3
-    kActionFlagChase         = (1 << 7), // uses A_Chase
-    kActionFlagFall          = (1 << 8), // uses A_Fall
-    kActionFlagRaise         = (1 << 9), // uses A_ResChase
-    kActionFlagFlash         = (1 << 14), // weapon will go into flash state
-    kActionFlagMakeDead      = (1 << 15), // action needs an extra MAKEDEAD state
-    kActionFlagFaceTarget    = (1 << 16), // action needs FACE_TARGET state
-    kActionFlagSpecial       = (1 << 17), // special action (uses misc1/2)
-    kActionFlagUnimplemented = (1 << 18), // not yet supported
-    kActionFlagWeaponState   = (1 << 20), // uses a weapon state
-    kActionFlagThingState    = (1 << 21)  // uses a thing state
+    kActionFlagExplode    = (1 << 0),   // uses A_Explode
+    kActionFlagBossDeath  = (1 << 1),   // uses A_BossDeath
+    kActionFlagKeenDie    = (1 << 2),   // uses A_KeenDie
+    kActionFlagLook       = (1 << 3),   // uses A_Look
+    kActionFlagDetonate   = (1 << 4),   // uses A_Detonate
+    kActionFlagSpread     = (1 << 6),   // uses A_FatAttack1/2/3
+    kActionFlagChase      = (1 << 7),   // uses A_Chase
+    kActionFlagFall       = (1 << 8),   // uses A_Fall
+    kActionFlagRaise      = (1 << 9),   // uses A_ResChase
+    kActionFlagFlash      = (1 << 14),  // weapon will go into flash state
+    kActionFlagMakeDead   = (1 << 15),  // action needs an extra MAKEDEAD state
+    kActionFlagFaceTarget = (1 << 16),  // action needs FACE_TARGET state
+    kActionFlagSpecial    = (1 << 17),  // special action (uses misc1/2)
+    kActionFlagUnimplemented = (1 << 18),  // not yet supported
+    kActionFlagWeaponState   = (1 << 20),  // uses a weapon state
+    kActionFlagThingState    = (1 << 21)   // uses a thing state
 };
 
 namespace frames
@@ -48,14 +48,14 @@ namespace frames
 
 enum AttackMethod
 {
-    kAttackMethodRanged  = 0,
-    kAttackMethodCombat  = 1,
-    kAttackMethodSpare   = 2
+    kAttackMethodRanged = 0,
+    kAttackMethodCombat = 1,
+    kAttackMethodSpare  = 2
 };
 
 extern const char *attack_slot[3];
 extern int         act_flags;
-extern bool        force_fullbright; // DEHEXTRA compatibility
+extern bool        force_fullbright;  // DEHEXTRA compatibility
 
 void Init();
 void Shutdown();
@@ -65,19 +65,19 @@ void MarkStatesWithSprite(int spr_num);
 void StateDependencies();
 
 State *GetModifiedState(int st_num);
-int      GetStateSprite(int st_num);
+int    GetStateSprite(int st_num);
 
 void AlterFrame(int new_val);
 void AlterPointer(int new_val);
 void AlterBexCodePtr(const char *new_action);
 
-void ResetGroups(); // also resets the slots and flags
+void ResetGroups();  // also resets the slots and flags
 int  BeginGroup(char group, int first);
 void SpreadGroups();
 
 bool CheckWeaponFlash(int first);
 bool CheckMissileState(int first);
 void OutputGroup(char group);
-} // namespace frames
+}  // namespace frames
 
-} // namespace dehacked
+}  // namespace dehacked

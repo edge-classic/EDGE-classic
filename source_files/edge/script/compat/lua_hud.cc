@@ -1,36 +1,36 @@
 
-#include "i_defs.h"
-#include "e_player.h"
-#include "hu_draw.h"
-#include "dm_state.h"
-#include "lua_compat.h"
-#include "g_game.h"
-#include "s_sound.h"
 #include "am_map.h"
+#include "dm_state.h"
+#include "e_player.h"
 #include "font.h"
-#include "r_misc.h"
-#include "w_wad.h"
-#include "rad_trig.h"
+#include "g_game.h"
+#include "hu_draw.h"
+#include "i_system.h"
+#include "lua_compat.h"
 #include "r_colormap.h"
+#include "r_misc.h"
+#include "rad_trig.h"
+#include "s_sound.h"
+#include "w_wad.h"
 
-extern cvar_c      r_doubleframes;
-extern bool        erraticism_active;
-extern std::string w_map_title;
+extern ConsoleVariable double_framerate;
+extern bool            erraticism_active;
+extern std::string     current_map_title;
 
-extern image_data_c *ReadAsEpiBlock(image_c *rim);
-extern image_data_c *R_PalettisedToRGB(image_data_c *src, const uint8_t *palette, int opacity);
+extern ImageData *ReadAsEpiBlock(Image *rim);
+extern ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette,
+                                    int opacity);
 
-extern player_t *ui_player_who;
+extern Player *ui_player_who;
 
-extern player_t *ui_hud_who;
+extern Player *ui_hud_who;
 
-static int   ui_hud_automap_flags[2]; // 0 = disabled, 1 = enabled
+static int   ui_hud_automap_flags[2];  // 0 = disabled, 1 = enabled
 static float ui_hud_automap_zoom;
 
 static RGBAColor HD_VectorToColor(const HMM_Vec3 &v)
 {
-    if (v.X < 0)
-        return kRGBANoValue;
+    if (v.X < 0) return kRGBANoValue;
 
     int r = HMM_Clamp(0, (int)v.X, 255);
     int g = HMM_Clamp(0, (int)v.Y, 255);
@@ -39,8 +39,7 @@ static RGBAColor HD_VectorToColor(const HMM_Vec3 &v)
     RGBAColor rgb = epi::MakeRGBA(r, g, b);
 
     // ensure we don't get the "no color" value by mistake
-    if (rgb == kRGBANoValue)
-        rgb ^= 0x00010100;
+    if (rgb == kRGBANoValue) rgb ^= 0x00010100;
 
     return rgb;
 }
@@ -56,13 +55,12 @@ static int HD_coord_sys(lua_State *L)
     double w = luaL_checknumber(L, 1);
     double h = luaL_checknumber(L, 2);
 
-    if (w < 64 || h < 64)
-        I_Error("Bad hud.coord_sys size: %fx%f\n", w, h);
+    if (w < 64 || h < 64) FatalError("Bad hud.coord_sys size: %fx%f\n", w, h);
 
-    HUD_SetCoordSys(w, h);
+    HudSetCoordinateSystem(w, h);
 
-    LUA_SetFloat(L, "hud", "x_left", hud_x_left);
-    LUA_SetFloat(L, "hud", "x_right", hud_x_right);
+    LuaSetFloat(L, "hud", "x_left", hud_x_left);
+    LuaSetFloat(L, "hud", "x_right", hud_x_right);
 
     return 0;
 }
@@ -71,9 +69,9 @@ static int HD_coord_sys(lua_State *L)
 //
 static int HD_game_mode(lua_State *L)
 {
-    if (DEATHMATCH())
+    if (InDeathmatch())
         lua_pushstring(L, "dm");
-    else if (COOP_MATCH())
+    else if (InCooperativeMatch())
         lua_pushstring(L, "coop");
     else
         lua_pushstring(L, "sp");
@@ -85,10 +83,10 @@ static int HD_game_mode(lua_State *L)
 //
 static int HD_game_name(lua_State *L)
 {
-    gamedef_c *g = currmap->episode;
-    SYS_ASSERT(g);
+    GameDefinition *g = current_map->episode_;
+    EPI_ASSERT(g);
 
-    lua_pushstring(L, g->name.c_str());
+    lua_pushstring(L, g->name_.c_str());
 
     return 1;
 }
@@ -97,7 +95,7 @@ static int HD_game_name(lua_State *L)
 // Lobo: December 2023
 static int HD_game_skill(lua_State *L)
 {
-    lua_pushinteger(L, gameskill);
+    lua_pushinteger(L, game_skill);
     return 1;
 }
 
@@ -105,7 +103,7 @@ static int HD_game_skill(lua_State *L)
 //
 static int HD_map_name(lua_State *L)
 {
-    lua_pushstring(L, currmap->name.c_str());
+    lua_pushstring(L, current_map->name_.c_str());
     return 1;
 }
 
@@ -113,7 +111,7 @@ static int HD_map_name(lua_State *L)
 //
 static int HD_map_title(lua_State *L)
 {
-    lua_pushstring(L, w_map_title.c_str());
+    lua_pushstring(L, current_map_title.c_str());
     return 1;
 }
 
@@ -121,7 +119,7 @@ static int HD_map_title(lua_State *L)
 //
 static int HD_map_author(lua_State *L)
 {
-    lua_pushstring(L, currmap->author.c_str());
+    lua_pushstring(L, current_map->author_.c_str());
     return 1;
 }
 
@@ -137,7 +135,7 @@ static int HD_which_hud(lua_State *L)
 //
 static int HD_check_automap(lua_State *L)
 {
-    lua_pushboolean(L, automapactive ? 1 : 0);
+    lua_pushboolean(L, automap_active ? 1 : 0);
     return 1;
 }
 
@@ -145,7 +143,7 @@ static int HD_check_automap(lua_State *L)
 //
 static int HD_get_time(lua_State *L)
 {
-    int time = I_GetTime() / (r_doubleframes.d ? 2 : 1);
+    int time = GetTime() / (double_framerate.d_ ? 2 : 1);
     lua_pushnumber(L, (double)time);
     return 1;
 }
@@ -156,19 +154,17 @@ static int HD_text_font(lua_State *L)
 {
     const char *font_name = luaL_checkstring(L, 1);
 
-    fontdef_c *DEF = fontdefs.Lookup(font_name);
-    SYS_ASSERT(DEF);
+    FontDefinition *DEF = fontdefs.Lookup(font_name);
+    EPI_ASSERT(DEF);
 
-    if (!DEF)
-        I_Error("hud.text_font: Bad font name: %s\n", font_name);
+    if (!DEF) FatalError("hud.text_font: Bad font name: %s\n", font_name);
 
-    font_c *font = hu_fonts.Lookup(DEF);
-    SYS_ASSERT(font);
+    Font *font = hud_fonts.Lookup(DEF);
+    EPI_ASSERT(font);
 
-    if (!font)
-        I_Error("hud.text_font: Bad font name: %s\n", font_name);
+    if (!font) FatalError("hud.text_font: Bad font name: %s\n", font_name);
 
-    HUD_SetFont(font);
+    HudSetFont(font);
 
     return 0;
 }
@@ -177,9 +173,9 @@ static int HD_text_font(lua_State *L)
 //
 static int HD_text_color(lua_State *L)
 {
-    RGBAColor color = HD_VectorToColor(LUA_CheckVector3(L, 1));
+    RGBAColor color = HD_VectorToColor(LuaCheckVector3(L, 1));
 
-    HUD_SetTextColor(color);
+    HudSetTextColor(color);
 
     return 0;
 }
@@ -191,9 +187,9 @@ static int HD_set_scale(lua_State *L)
     float scale = luaL_checknumber(L, 1);
 
     if (scale <= 0)
-        I_Error("hud.set_scale: Bad scale value: %1.3f\n", scale);
+        FatalError("hud.set_scale: Bad scale value: %1.3f\n", scale);
 
-    HUD_SetScale(scale);
+    HudSetScale(scale);
 
     return 0;
 }
@@ -204,7 +200,7 @@ static int HD_set_alpha(lua_State *L)
 {
     float alpha = (float)luaL_checknumber(L, 1);
 
-    HUD_SetAlpha(alpha);
+    HudSetAlpha(alpha);
 
     return 0;
 }
@@ -218,9 +214,9 @@ static int HD_solid_box(lua_State *L)
     float w = luaL_checknumber(L, 3);
     float h = luaL_checknumber(L, 4);
 
-    RGBAColor rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
+    RGBAColor rgb = HD_VectorToColor(LuaCheckVector3(L, 5));
 
-    HUD_SolidBox(x, y, x + w, y + h, rgb);
+    HudSolidBox(x, y, x + w, y + h, rgb);
 
     return 0;
 }
@@ -234,9 +230,9 @@ static int HD_solid_line(lua_State *L)
     float x2 = luaL_checknumber(L, 3);
     float y2 = luaL_checknumber(L, 4);
 
-    RGBAColor rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
+    RGBAColor rgb = HD_VectorToColor(LuaCheckVector3(L, 5));
 
-    HUD_SolidLine(x1, y1, x2, y2, rgb);
+    HudSolidLine(x1, y1, x2, y2, rgb);
 
     return 0;
 }
@@ -250,9 +246,9 @@ static int HD_thin_box(lua_State *L)
     float w = luaL_checknumber(L, 3);
     float h = luaL_checknumber(L, 4);
 
-    RGBAColor rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
+    RGBAColor rgb = HD_VectorToColor(LuaCheckVector3(L, 5));
 
-    HUD_ThinBox(x, y, x + w, y + h, rgb);
+    HudThinBox(x, y, x + w, y + h, rgb);
 
     return 0;
 }
@@ -268,12 +264,12 @@ static int HD_gradient_box(lua_State *L)
 
     RGBAColor cols[4];
 
-    cols[0] = HD_VectorToColor(LUA_CheckVector3(L, 5));
-    cols[1] = HD_VectorToColor(LUA_CheckVector3(L, 6));
-    cols[2] = HD_VectorToColor(LUA_CheckVector3(L, 7));
-    cols[3] = HD_VectorToColor(LUA_CheckVector3(L, 8));
+    cols[0] = HD_VectorToColor(LuaCheckVector3(L, 5));
+    cols[1] = HD_VectorToColor(LuaCheckVector3(L, 6));
+    cols[2] = HD_VectorToColor(LuaCheckVector3(L, 7));
+    cols[3] = HD_VectorToColor(LuaCheckVector3(L, 8));
 
-    HUD_GradientBox(x, y, x + w, y + h, cols);
+    HudGradientBox(x, y, x + w, y + h, cols);
 
     return 0;
 }
@@ -288,16 +284,16 @@ static int HD_draw_image(lua_State *L)
     float       y    = (float)luaL_checknumber(L, 2);
     const char *name = luaL_checkstring(L, 3);
 
-    const image_c *img = W_ImageLookup(name, INS_Graphic);
+    const Image *img = ImageLookup(name, kImageNamespaceGraphic);
 
     int noOffset = (int)luaL_optnumber(L, 4, 0);
 
     if (img)
     {
         if (noOffset)
-            HUD_DrawImageNoOffset(x, y, img);
+            HudDrawImageNoOffset(x, y, img);
         else
-            HUD_DrawImage(x, y, img);
+            HudDrawImage(x, y, img);
     }
 
     return 0;
@@ -314,17 +310,20 @@ static int HD_scroll_image(lua_State *L)
     float       sx   = luaL_checknumber(L, 4);
     float       sy   = luaL_checknumber(L, 5);
 
-    const image_c *img      = W_ImageLookup(name, INS_Graphic);
-    int            noOffset = (int)luaL_optnumber(L, 6, 0);
+    const Image *img      = ImageLookup(name, kImageNamespaceGraphic);
+    int          noOffset = (int)luaL_optnumber(L, 6, 0);
 
     if (img)
     {
         if (noOffset)
-            HUD_ScrollImageNoOffset(
-                x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
+            HudScrollImageNoOffset(
+                x, y, img, -sx,
+                -sy);  // Invert sx/sy so that user can enter positive X for
+                       // right and positive Y for up
         else
-            HUD_ScrollImage(x, y, img, -sx,
-                            -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
+            HudScrollImage(x, y, img, -sx,
+                           -sy);  // Invert sx/sy so that user can enter
+                                  // positive X for right and positive Y for up
     }
 
     return 0;
@@ -343,15 +342,15 @@ static int HD_stretch_image(lua_State *L)
 
     const char *name = luaL_checkstring(L, 5);
 
-    const image_c *img      = W_ImageLookup(name, INS_Graphic);
-    int            noOffset = (int)luaL_optnumber(L, 6, 0);
+    const Image *img      = ImageLookup(name, kImageNamespaceGraphic);
+    int          noOffset = (int)luaL_optnumber(L, 6, 0);
 
     if (img)
     {
         if (noOffset)
-            HUD_StretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
+            HudStretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
         else
-            HUD_StretchImage(x, y, w, h, img, 0.0, 0.0);
+            HudStretchImage(x, y, w, h, img, 0.0, 0.0);
     }
 
     return 0;
@@ -371,12 +370,9 @@ static int HD_tile_image(lua_State *L)
     float offset_x = luaL_checknumber(L, 6);
     float offset_y = luaL_checknumber(L, 7);
 
-    const image_c *img = W_ImageLookup(name, INS_Texture);
+    const Image *img = ImageLookup(name, kImageNamespaceTexture);
 
-    if (img)
-    {
-        HUD_TileImage(x, y, w, h, img, offset_x, offset_y);
-    }
+    if (img) { HudTileImage(x, y, w, h, img, offset_x, offset_y); }
 
     return 0;
 }
@@ -392,7 +388,7 @@ static int HD_draw_text(lua_State *L)
 
     double size = luaL_optnumber(L, 4, 0);
 
-    HUD_DrawText(x, y, str, size);
+    HudDrawText(x, y, str, size);
 
     return 0;
 }
@@ -410,7 +406,7 @@ static int HD_draw_num2(lua_State *L)
     double size = luaL_optnumber(L, 5, 0);
 
     if (len < 1 || len > 20)
-        I_Error("hud.draw_number: bad field length: %d\n", len);
+        FatalError("hud.draw_number: bad field length: %d\n", len);
 
     bool is_neg = false;
 
@@ -427,22 +423,17 @@ static int HD_draw_num2(lua_State *L)
 
     *--pos = 0;
 
-    if (num == 0)
-    {
-        *--pos = '0';
-    }
+    if (num == 0) { *--pos = '0'; }
     else
     {
-        for (; num > 0 && len > 0; num /= 10, len--)
-            *--pos = '0' + (num % 10);
+        for (; num > 0 && len > 0; num /= 10, len--) *--pos = '0' + (num % 10);
 
-        if (is_neg)
-            *--pos = '-';
+        if (is_neg) *--pos = '-';
     }
 
-    HUD_SetAlignment(+1, -1);
-    HUD_DrawText(x, y, pos, size);
-    HUD_SetAlignment();
+    HudSetAlignment(+1, -1);
+    HudDrawText(x, y, pos, size);
+    HudSetAlignment();
 
     return 0;
 }
@@ -461,7 +452,7 @@ static int HD_draw_number(lua_State *L)
     double size        = luaL_optnumber(L, 6, 0);
 
     if (len < 1 || len > 20)
-        I_Error("hud.draw_number: bad field length: %d\n", len);
+        FatalError("hud.draw_number: bad field length: %d\n", len);
 
     bool is_neg = false;
 
@@ -478,28 +469,20 @@ static int HD_draw_number(lua_State *L)
 
     *--pos = 0;
 
-    if (num == 0)
-    {
-        *--pos = '0';
-    }
+    if (num == 0) { *--pos = '0'; }
     else
     {
-        for (; num > 0 && len > 0; num /= 10, len--)
-            *--pos = '0' + (num % 10);
+        for (; num > 0 && len > 0; num /= 10, len--) *--pos = '0' + (num % 10);
 
-        if (is_neg)
-            *--pos = '-';
+        if (is_neg) *--pos = '-';
     }
 
-    if (align_right == 0)
-    {
-        HUD_DrawText(x, y, pos, size);
-    }
+    if (align_right == 0) { HudDrawText(x, y, pos, size); }
     else
     {
-        HUD_SetAlignment(+1, -1);
-        HUD_DrawText(x, y, pos, size);
-        HUD_SetAlignment();
+        HudSetAlignment(+1, -1);
+        HudDrawText(x, y, pos, size);
+        HudSetAlignment();
     }
 
     return 0;
@@ -509,14 +492,12 @@ static int HD_draw_number(lua_State *L)
 //
 static int HD_game_paused(lua_State *L)
 {
-    if (paused || menuactive || rts_menuactive || time_stop_active || erraticism_active)
+    if (paused || menu_active || rts_menu_active || time_stop_active ||
+        erraticism_active)
     {
         lua_pushboolean(L, 1);
     }
-    else
-    {
-        lua_pushboolean(L, 0);
-    }
+    else { lua_pushboolean(L, 0); }
 
     return 1;
 }
@@ -525,14 +506,8 @@ static int HD_game_paused(lua_State *L)
 //
 static int HD_erraticism_active(lua_State *L)
 {
-    if (erraticism_active)
-    {
-        lua_pushboolean(L, 1);
-    }
-    else
-    {
-        lua_pushboolean(L, 0);
-    }
+    if (erraticism_active) { lua_pushboolean(L, 1); }
+    else { lua_pushboolean(L, 0); }
 
     return 1;
 }
@@ -541,14 +516,8 @@ static int HD_erraticism_active(lua_State *L)
 //
 static int HD_time_stop_active(lua_State *L)
 {
-    if (time_stop_active)
-    {
-        lua_pushboolean(L, 1);
-    }
-    else
-    {
-        lua_pushboolean(L, 0);
-    }
+    if (time_stop_active) { lua_pushboolean(L, 1); }
+    else { lua_pushboolean(L, 0); }
 
     return 1;
 }
@@ -561,7 +530,7 @@ static int HD_render_world(lua_State *L)
     float h     = (float)luaL_checknumber(L, 4);
     int   flags = (int)luaL_optnumber(L, 5, 0);
 
-    HUD_RenderWorld(x, y, w, h, ui_hud_who->mo, flags);
+    HudRenderWorld(x, y, w, h, ui_hud_who->map_object_, flags);
 
     return 0;
 }
@@ -579,21 +548,20 @@ static int HD_render_automap(lua_State *L)
     int   old_state;
     float old_zoom;
 
-    AM_GetState(&old_state, &old_zoom);
+    AutomapGetState(&old_state, &old_zoom);
 
     int new_state = old_state;
     new_state &= ~ui_hud_automap_flags[0];
     new_state |= ui_hud_automap_flags[1];
 
     float new_zoom = old_zoom;
-    if (ui_hud_automap_zoom > 0.1)
-        new_zoom = ui_hud_automap_zoom;
+    if (ui_hud_automap_zoom > 0.1) new_zoom = ui_hud_automap_zoom;
 
-    AM_SetState(new_state, new_zoom);
+    AutomapSetState(new_state, new_zoom);
 
-    HUD_RenderAutomap(x, y, w, h, ui_hud_who->mo, flags);
+    HudRenderAutomap(x, y, w, h, ui_hud_who->map_object_, flags);
 
-    AM_SetState(old_state, old_zoom);
+    AutomapSetState(old_state, old_zoom);
 
     return 0;
 }
@@ -604,14 +572,14 @@ static int HD_automap_color(lua_State *L)
 {
     int which = (int)luaL_checknumber(L, 1);
 
-    if (which < 1 || which > AM_NUM_COLORS)
-        I_Error("hud.automap_color: bad color number: %d\n", which);
+    if (which < 1 || which > kTotalAutomapColors)
+        FatalError("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
-    RGBAColor rgb = HD_VectorToColor(LUA_CheckVector3(L, 2));
+    RGBAColor rgb = HD_VectorToColor(LuaCheckVector3(L, 2));
 
-    AM_SetColor(which, rgb);
+    AutomapSetColor(which, rgb);
 
     return 0;
 }
@@ -624,7 +592,7 @@ static int HD_automap_option(lua_State *L)
     int value = (int)luaL_checknumber(L, 2);
 
     if (which < 1 || which > 7)
-        I_Error("hud.automap_color: bad color number: %d\n", which);
+        FatalError("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
@@ -654,7 +622,7 @@ static int HD_automap_player_arrow(lua_State *L)
 {
     int arrow = (int)luaL_checknumber(L, 1);
 
-    AM_SetArrow((automap_arrow_e)arrow);
+    AutomapSetArrow((AutomapArrowStyle)arrow);
 
     return 0;
 }
@@ -665,23 +633,23 @@ static int HD_set_render_who(lua_State *L)
 {
     int index = (int)luaL_checknumber(L, 1);
 
-    if (index < 0 || index >= numplayers)
-        I_Error("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
+    if (index < 0 || index >= total_players)
+        FatalError("hud.set_render_who: bad index value: %d (numplayers=%d)\n",
+                   index, total_players);
 
     if (index == 0)
     {
-        ui_hud_who = players[consoleplayer];
+        ui_hud_who = players[console_player];
         return 0;
     }
 
-    int who = displayplayer;
+    int who = display_player;
 
     for (; index > 1; index--)
     {
-        do
-        {
-            who = (who + 1) % MAXPLAYERS;
-        } while (players[who] == NULL);
+        do {
+            who = (who + 1) % kMaximumPlayers;
+        } while (players[who] == nullptr);
     }
 
     ui_hud_who = players[who];
@@ -695,12 +663,12 @@ static int HD_play_sound(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
 
-    sfx_t *fx = sfxdefs.GetEffect(name);
+    SoundEffect *fx = sfxdefs.GetEffect(name);
 
     if (fx)
-        S_StartFX(fx);
+        StartSoundEffect(fx);
     else
-        I_Warning("hud.play_sound: unknown sfx '%s'\n", name);
+        LogWarning("hud.play_sound: unknown sfx '%s'\n", name);
 
     return 0;
 }
@@ -709,146 +677,149 @@ static int HD_play_sound(lua_State *L)
 //
 static int HD_screen_aspect(lua_State *L)
 {
-    lua_pushnumber(L, std::ceil(v_pixelaspect.f * 100.0) / 100.0);
+    lua_pushnumber(L, std::ceil(pixel_aspect_ratio.f_ * 100.0) / 100.0);
     return 1;
 }
 
 static int HD_get_average_color(lua_State *L)
 {
-    HMM_Vec3    rgb;
+    HMM_Vec3       rgb;
     const char    *name         = luaL_checkstring(L, 1);
     double         from_x       = luaL_optnumber(L, 2, -1);
     double         to_x         = luaL_optnumber(L, 3, 1000000);
     double         from_y       = luaL_optnumber(L, 4, -1);
     double         to_y         = luaL_optnumber(L, 5, 1000000);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+    ImageData *tmp_img_data = RgbFromPalettised(
+        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     RGBAColor col = tmp_img_data->AverageColor(from_x, to_x, from_y, to_y);
-    rgb.X = epi::GetRGBARed(col);
-    rgb.Y = epi::GetRGBAGreen(col);
-    rgb.Z = epi::GetRGBABlue(col);
+    rgb.X         = epi::GetRGBARed(col);
+    rgb.Y         = epi::GetRGBAGreen(col);
+    rgb.Z         = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
-    LUA_PushVector3(L, rgb);
+    LuaPushVector3(L, rgb);
 
     return 1;
 }
 
 static int HD_get_lightest_color(lua_State *L)
 {
-    HMM_Vec3    rgb;
+    HMM_Vec3       rgb;
     const char    *name         = luaL_checkstring(L, 1);
     double         from_x       = luaL_optnumber(L, 2, -1);
     double         to_x         = luaL_optnumber(L, 3, 1000000);
     double         from_y       = luaL_optnumber(L, 4, -1);
     double         to_y         = luaL_optnumber(L, 5, 1000000);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+    ImageData *tmp_img_data = RgbFromPalettised(
+        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     RGBAColor col = tmp_img_data->LightestColor(from_x, to_x, from_y, to_y);
-    rgb.X = epi::GetRGBARed(col);
-    rgb.Y = epi::GetRGBAGreen(col);
-    rgb.Z = epi::GetRGBABlue(col);
+    rgb.X         = epi::GetRGBARed(col);
+    rgb.Y         = epi::GetRGBAGreen(col);
+    rgb.Z         = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
-    LUA_PushVector3(L, rgb);
+    LuaPushVector3(L, rgb);
     return 1;
 }
 
 static int HD_get_darkest_color(lua_State *L)
 {
-    HMM_Vec3    rgb;
+    HMM_Vec3       rgb;
     const char    *name         = luaL_checkstring(L, 1);
     double         from_x       = luaL_optnumber(L, 2, -1);
     double         to_x         = luaL_optnumber(L, 3, 1000000);
     double         from_y       = luaL_optnumber(L, 4, -1);
     double         to_y         = luaL_optnumber(L, 5, 1000000);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+    ImageData *tmp_img_data = RgbFromPalettised(
+        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     RGBAColor col = tmp_img_data->DarkestColor(from_x, to_x, from_y, to_y);
-    rgb.X = epi::GetRGBARed(col);
-    rgb.Y = epi::GetRGBAGreen(col);
-    rgb.Z = epi::GetRGBABlue(col);
+    rgb.X         = epi::GetRGBARed(col);
+    rgb.Y         = epi::GetRGBAGreen(col);
+    rgb.Z         = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
-    LUA_PushVector3(L, rgb);
+    LuaPushVector3(L, rgb);
     return 1;
 }
 
 static int HD_get_average_hue(lua_State *L)
 {
-    HMM_Vec3    rgb;
+    HMM_Vec3       rgb;
     const char    *name         = luaL_checkstring(L, 1);
     double         from_x       = luaL_optnumber(L, 2, -1);
     double         to_x         = luaL_optnumber(L, 3, 1000000);
     double         from_y       = luaL_optnumber(L, 4, -1);
     double         to_y         = luaL_optnumber(L, 5, 1000000);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+    ImageData *tmp_img_data = RgbFromPalettised(
+        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     uint8_t temp_rgb[3];
-    tmp_img_data->AverageHue(temp_rgb, NULL, from_x, to_x, from_y, to_y);
+    tmp_img_data->AverageHue(temp_rgb, nullptr, from_x, to_x, from_y, to_y);
     rgb.X = temp_rgb[0];
     rgb.Y = temp_rgb[1];
     rgb.Z = temp_rgb[2];
     delete tmp_img_data;
 
-    LUA_PushVector3(L, rgb);
+    LuaPushVector3(L, rgb);
     return 1;
 }
 
-// These two aren't really needed anymore with the AverageColor rework, but keeping them in case COALHUDS in the wild
-// use them - Dasho
+// These two aren't really needed anymore with the AverageColor rework, but
+// keeping them in case COALHUDS in the wild use them - Dasho
 static int HD_get_average_top_border_color(lua_State *L)
 {
-    HMM_Vec3    rgb;
+    HMM_Vec3       rgb;
     const char    *name         = luaL_checkstring(L, 1);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, tmp_img_c->actual_h - 1, tmp_img_c->actual_h);
-    rgb.X = epi::GetRGBARed(col);
-    rgb.Y = epi::GetRGBAGreen(col);
-    rgb.Z = epi::GetRGBABlue(col);
+    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+    ImageData *tmp_img_data = RgbFromPalettised(
+        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_,
+                                               tmp_img_c->actual_height_ - 1,
+                                               tmp_img_c->actual_height_);
+    rgb.X         = epi::GetRGBARed(col);
+    rgb.Y         = epi::GetRGBAGreen(col);
+    rgb.Z         = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
-    LUA_PushVector3(L, rgb);
+    LuaPushVector3(L, rgb);
     return 1;
 }
 static int HD_get_average_bottom_border_color(lua_State *L)
 {
-    HMM_Vec3    rgb;
+    HMM_Vec3       rgb;
     const char    *name         = luaL_checkstring(L, 1);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, 0, 1);
+    const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
+    ImageData *tmp_img_data = RgbFromPalettised(
+        ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor col =
+        tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, 0, 1);
     rgb.X = epi::GetRGBARed(col);
     rgb.Y = epi::GetRGBAGreen(col);
     rgb.Z = epi::GetRGBABlue(col);
     delete tmp_img_data;
 
-    LUA_PushVector3(L, rgb);
+    LuaPushVector3(L, rgb);
     return 1;
 }
 
@@ -856,11 +827,9 @@ static int HD_get_average_bottom_border_color(lua_State *L)
 //
 static int HD_rts_enable(lua_State *L)
 {
-
     std::string name = luaL_checkstring(L, 1);
 
-    if (!name.empty())
-        RAD_EnableByTag(NULL, name.c_str(), false);
+    if (!name.empty()) ScriptEnableByTag(nullptr, name.c_str(), false);
 
     return 0;
 }
@@ -869,11 +838,9 @@ static int HD_rts_enable(lua_State *L)
 //
 static int HD_rts_disable(lua_State *L)
 {
-
     std::string name = luaL_checkstring(L, 1);
 
-    if (!name.empty())
-        RAD_EnableByTag(NULL, name.c_str(), true);
+    if (!name.empty()) ScriptEnableByTag(nullptr, name.c_str(), true);
 
     return 0;
 }
@@ -882,12 +849,11 @@ static int HD_rts_disable(lua_State *L)
 //
 static int HD_rts_isactive(lua_State *L)
 {
-
     std::string name = luaL_checkstring(L, 1);
 
     if (!name.empty())
     {
-        if (RAD_IsActiveByTag(NULL, name.c_str()))
+        if (CheckActiveScriptByTag(nullptr, name.c_str()))
             lua_pushboolean(L, 1);
         else
             lua_pushboolean(L, 0);
@@ -902,16 +868,10 @@ static int HD_get_image_width(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
 
-    const image_c *img = W_ImageLookup(name, INS_Graphic);
+    const Image *img = ImageLookup(name, kImageNamespaceGraphic);
 
-    if (img)
-    {
-        lua_pushinteger(L, HUD_GetImageWidth(img));
-    }
-    else
-    {
-        lua_pushinteger(L, 0);
-    }
+    if (img) { lua_pushinteger(L, HudGetImageWidth(img)); }
+    else { lua_pushinteger(L, 0); }
 
     return 1;
 }
@@ -922,86 +882,81 @@ static int HD_get_image_height(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
 
-    const image_c *img = W_ImageLookup(name, INS_Graphic);
+    const Image *img = ImageLookup(name, kImageNamespaceGraphic);
 
-    if (img)
-    {
-        lua_pushinteger(L, HUD_GetImageHeight(img));
-    }
-    else
-    {
-        lua_pushinteger(L, 0);
-    }
+    if (img) { lua_pushinteger(L, HudGetImageHeight(img)); }
+    else { lua_pushinteger(L, 0); }
 
     return 1;
 }
 
-static const luaL_Reg hudlib[] = {{"game_mode", HD_game_mode},
-                                  {"game_name", HD_game_name},
-                                  {"game_skill", HD_game_skill},
-                                  {"map_name", HD_map_name},
-                                  {"map_title", HD_map_title},
-                                  {"map_author", HD_map_author},
+static const luaL_Reg hudlib[] = {
+    {"game_mode", HD_game_mode},
+    {"game_name", HD_game_name},
+    {"game_skill", HD_game_skill},
+    {"map_name", HD_map_name},
+    {"map_title", HD_map_title},
+    {"map_author", HD_map_author},
 
-                                  {"which_hud", HD_which_hud},
-                                  {"check_automap", HD_check_automap},
-                                  {"get_time", HD_get_time},
+    {"which_hud", HD_which_hud},
+    {"check_automap", HD_check_automap},
+    {"get_time", HD_get_time},
 
-                                  // set-state functions
-                                  {"coord_sys", HD_coord_sys},
+    // set-state functions
+    {"coord_sys", HD_coord_sys},
 
-                                  {"text_font", HD_text_font},
-                                  {"text_color", HD_text_color},
-                                  {"set_scale", HD_set_scale},
-                                  {"set_alpha", HD_set_alpha},
+    {"text_font", HD_text_font},
+    {"text_color", HD_text_color},
+    {"set_scale", HD_set_scale},
+    {"set_alpha", HD_set_alpha},
 
-                                  {"set_render_who", HD_set_render_who},
-                                  {"automap_color", HD_automap_color},
-                                  {"automap_option", HD_automap_option},
-                                  {"automap_zoom", HD_automap_zoom},
-                                  {"automap_player_arrow", HD_automap_player_arrow},
+    {"set_render_who", HD_set_render_who},
+    {"automap_color", HD_automap_color},
+    {"automap_option", HD_automap_option},
+    {"automap_zoom", HD_automap_zoom},
+    {"automap_player_arrow", HD_automap_player_arrow},
 
-                                  // drawing functions
-                                  {"solid_box", HD_solid_box},
-                                  {"solid_line", HD_solid_line},
-                                  {"thin_box", HD_thin_box},
-                                  {"gradient_box", HD_gradient_box},
+    // drawing functions
+    {"solid_box", HD_solid_box},
+    {"solid_line", HD_solid_line},
+    {"thin_box", HD_thin_box},
+    {"gradient_box", HD_gradient_box},
 
-                                  {"draw_image", HD_draw_image},
-                                  {"stretch_image", HD_stretch_image},
-                                  {"scroll_image", HD_scroll_image},
+    {"draw_image", HD_draw_image},
+    {"stretch_image", HD_stretch_image},
+    {"scroll_image", HD_scroll_image},
 
-                                  {"tile_image", HD_tile_image},
-                                  {"draw_text", HD_draw_text},
-                                  {"draw_num2", HD_draw_num2},
+    {"tile_image", HD_tile_image},
+    {"draw_text", HD_draw_text},
+    {"draw_num2", HD_draw_num2},
 
-                                  {"draw_number", HD_draw_number},
-                                  {"game_paused", HD_game_paused},
-                                  {"erraticism_active", HD_erraticism_active},
-                                  {"time_stop_active", HD_time_stop_active},
-                                  {"screen_aspect", HD_screen_aspect},
+    {"draw_number", HD_draw_number},
+    {"game_paused", HD_game_paused},
+    {"erraticism_active", HD_erraticism_active},
+    {"time_stop_active", HD_time_stop_active},
+    {"screen_aspect", HD_screen_aspect},
 
-                                  {"render_world", HD_render_world},
-                                  {"render_automap", HD_render_automap},
+    {"render_world", HD_render_world},
+    {"render_automap", HD_render_automap},
 
-                                  // sound functions
-                                  {"play_sound", HD_play_sound},
+    // sound functions
+    {"play_sound", HD_play_sound},
 
-                                  // image color functions
-                                  {"get_average_color", HD_get_average_color},
-                                  {"get_average_top_border_color", HD_get_average_top_border_color},
-                                  {"get_average_bottom_border_color", HD_get_average_bottom_border_color},
-                                  {"get_lightest_color", HD_get_lightest_color},
-                                  {"get_darkest_color", HD_get_darkest_color},
-                                  {"get_average_hue", HD_get_average_hue},
+    // image color functions
+    {"get_average_color", HD_get_average_color},
+    {"get_average_top_border_color", HD_get_average_top_border_color},
+    {"get_average_bottom_border_color", HD_get_average_bottom_border_color},
+    {"get_lightest_color", HD_get_lightest_color},
+    {"get_darkest_color", HD_get_darkest_color},
+    {"get_average_hue", HD_get_average_hue},
 
-                                  {"rts_enable", HD_rts_enable},
-                                  {"rts_disable", HD_rts_disable},
-                                  {"rts_isactive", HD_rts_isactive},
+    {"rts_enable", HD_rts_enable},
+    {"rts_disable", HD_rts_disable},
+    {"rts_isactive", HD_rts_isactive},
 
-                                  {"get_image_width", HD_get_image_width},
-                                  {"get_image_height", HD_get_image_height},
-                                  {NULL, NULL}};
+    {"get_image_width", HD_get_image_width},
+    {"get_image_height", HD_get_image_height},
+    {nullptr, nullptr}};
 
 static int luaopen_hud(lua_State *L)
 {
@@ -1009,24 +964,24 @@ static int luaopen_hud(lua_State *L)
     return 1;
 }
 
-void LUA_RegisterHudLibrary(lua_State *L)
+void LuaRegisterHudLibrary(lua_State *L)
 {
     luaL_requiref(L, "_hud", luaopen_hud, 1);
     lua_pop(L, 1);
 }
 
-void LUA_RunHud(void)
+void LuaRunHud(void)
 {
-    HUD_Reset();
+    HudReset();
 
-    ui_hud_who    = players[displayplayer];
-    ui_player_who = players[displayplayer];
+    ui_hud_who    = players[display_player];
+    ui_player_who = players[display_player];
 
     ui_hud_automap_flags[0] = 0;
     ui_hud_automap_flags[1] = 0;
     ui_hud_automap_zoom     = -1;
 
-    LUA_CallGlobalFunction(global_lua_state, "draw_all");
+    LuaCallGlobalFunction(global_lua_state, "draw_all");
 
-    HUD_Reset();
+    HudReset();
 }

@@ -35,34 +35,34 @@
 //  extrafloors that block the view.
 //
 
-#include "i_defs.h"
-
 #include <math.h>
 
 #include <vector>
 
-#include "dm_data.h"
+#include "AlmostEquals.h"
+#include "common_doomdefs.h"
 #include "dm_defs.h"
-#include "dm_structs.h"
+#include "epi.h"
 #include "m_bbox.h"
 #include "p_local.h"
+#include "r_misc.h"
 #include "r_state.h"
-
-#include "AlmostEquals.h"
 
 #define DEBUG_SIGHT 0
 
-typedef struct sight_info_s
+extern unsigned int root_node;
+
+struct LineOfSight
 {
     // source position (dx/dy is vector to dest)
-    divline_t    src;
-    float        src_z;
-    subsector_t *src_sub;
+    DividingLine source;
+    float        source_z;
+    Subsector   *source_subsector;
 
     // dest position
-    HMM_Vec2       dest;
-    float        dest_z;
-    subsector_t *dest_sub;
+    HMM_Vec2   destination;
+    float      destination_z;
+    Subsector *destination_subsector;
 
     // angle from src->dest, for fast seg check
     BAMAngle angle;
@@ -78,45 +78,39 @@ typedef struct sight_info_s
     float bottom_slope;
 
     // bounding box on LOS line (idea pinched from PrBOOM).
-    float bbox[4];
+    float bounding_box[4];
 
     // true if one of the sectors contained extrafloors
-    bool exfloors;
+    bool saw_extrafloors;
 
     // true if one of the sectors contained vertex slopes
-    bool vertslopes;
-} sight_info_t;
+    bool saw_vertex_slopes;
+};
 
-static sight_info_t sight_I;
+static LineOfSight sight_check;
 
 // intercepts found during first pass
 
-typedef struct wall_intercept_s
+struct WallIntercept
 {
     // fractional distance, 0.0 -> 1.0
-    float frac;
+    float along;
 
     // sector that faces the source from this intercept point
-    sector_t *sector;
-} wall_intercept_t;
+    Sector *sector;
+};
 
 // intercept array
-static std::vector<wall_intercept_t> wall_icpts;
+static std::vector<WallIntercept> wall_intercepts;
 
-// for profiling...
-#ifdef DEVELOPERS
-int sight_rej_hit;
-int sight_rej_miss;
-#endif
-
-static inline void AddSightIntercept(float frac, sector_t *sec)
+static inline void AddSightIntercept(float frac, Sector *sec)
 {
-    wall_intercept_t WI;
+    WallIntercept WI;
 
-    WI.frac   = frac;
+    WI.along  = frac;
     WI.sector = sec;
 
-    wall_icpts.push_back(WI);
+    wall_intercepts.push_back(WI);
 }
 
 //
@@ -125,126 +119,128 @@ static inline void AddSightIntercept(float frac, sector_t *sec)
 // Returns false if LOS is blocked by the given subsector, otherwise
 // true.  Note: extrafloors are not checked here.
 //
-static bool CrossSubsector(subsector_t *sub)
+static bool CrossSubsector(Subsector *sub)
 {
-    seg_t  *seg;
-    line_t *ld;
+    Seg  *seg;
+    Line *ld;
 
     int s1, s2;
 
-    sector_t *front;
-    sector_t *back;
-    divline_t divl;
+    Sector      *front;
+    Sector      *back;
+    DividingLine divl;
 
     float frac;
     float slope;
 
     // check lines
-    for (seg = sub->segs; seg != NULL; seg = seg->sub_next)
+    for (seg = sub->segs; seg != nullptr; seg = seg->subsector_next)
     {
-        if (seg->miniseg)
-            continue;
+        if (seg->miniseg) continue;
 
         // ignore segs that face away from the source.  We only want to
         // process linedefs on the _far_ side of each subsector.
         //
-        if ((BAMAngle)(seg->angle - sight_I.angle) < kBAMAngle180)
-            continue;
+        if ((BAMAngle)(seg->angle - sight_check.angle) < kBAMAngle180) continue;
 
         ld = seg->linedef;
 
         // line already checked ? (e.g. multiple segs on it)
-        if (ld->validcount == validcount)
-            continue;
+        if (ld->valid_count == valid_count) continue;
 
-        ld->validcount = validcount;
+        ld->valid_count = valid_count;
 
         // line outside of bbox ?
-        if (ld->bbox[BOXLEFT] > sight_I.bbox[BOXRIGHT] || ld->bbox[BOXRIGHT] < sight_I.bbox[BOXLEFT] ||
-            ld->bbox[BOXBOTTOM] > sight_I.bbox[BOXTOP] || ld->bbox[BOXTOP] < sight_I.bbox[BOXBOTTOM])
+        if (ld->bounding_box[kBoundingBoxLeft] >
+                sight_check.bounding_box[kBoundingBoxRight] ||
+            ld->bounding_box[kBoundingBoxRight] <
+                sight_check.bounding_box[kBoundingBoxLeft] ||
+            ld->bounding_box[kBoundingBoxBottom] >
+                sight_check.bounding_box[kBoundingBoxTop] ||
+            ld->bounding_box[kBoundingBoxTop] <
+                sight_check.bounding_box[kBoundingBoxBottom])
             continue;
 
         // does linedef cross LOS ?
-        s1 = P_PointOnDivlineSide(ld->v1->X, ld->v1->Y, &sight_I.src);
-        s2 = P_PointOnDivlineSide(ld->v2->X, ld->v2->Y, &sight_I.src);
+        s1 = PointOnDividingLineSide(ld->vertex_1->X, ld->vertex_1->Y,
+                                     &sight_check.source);
+        s2 = PointOnDividingLineSide(ld->vertex_2->X, ld->vertex_2->Y,
+                                     &sight_check.source);
 
-        if (s1 == s2)
-            continue;
+        if (s1 == s2) continue;
 
         // linedef crosses LOS (extended to infinity), now check if the
         // cross point lies within the finite LOS range.
         //
-        divl.x  = ld->v1->X;
-        divl.y  = ld->v1->Y;
-        divl.dx = ld->dx;
-        divl.dy = ld->dy;
+        divl.x       = ld->vertex_1->X;
+        divl.y       = ld->vertex_1->Y;
+        divl.delta_x = ld->delta_x;
+        divl.delta_y = ld->delta_y;
 
-        s1 = P_PointOnDivlineSide(sight_I.src.x, sight_I.src.y, &divl);
-        s2 = P_PointOnDivlineSide(sight_I.dest.X, sight_I.dest.Y, &divl);
+        s1 = PointOnDividingLineSide(sight_check.source.x, sight_check.source.y,
+                                     &divl);
+        s2 = PointOnDividingLineSide(sight_check.destination.X,
+                                     sight_check.destination.Y, &divl);
 
-        if (s1 == s2)
-            continue;
+        if (s1 == s2) continue;
 
         // stop because it is not two sided anyway
-        if (!(ld->flags & MLF_TwoSided) || ld->blocked)
-        {
-            return false;
-        }
+        if (!(ld->flags & kLineFlagTwoSided) || ld->blocked) { return false; }
 
         // line explicitly blocks sight ?  (XDoom compatibility)
-        if (ld->flags & MLF_SightBlock)
-            return false;
+        if (ld->flags & kLineFlagSightBlock) return false;
 
         // -AJA- 2001/11/11: closed Sliding door ?
-        if (ld->slide_door && !ld->slide_door->s.see_through && !ld->slider_move)
+        if (ld->slide_door && !ld->slide_door->s_.see_through_ &&
+            !ld->slider_move)
         {
             return false;
         }
 
-        front = seg->frontsector;
-        back  = seg->backsector;
+        front = seg->front_sector;
+        back  = seg->back_sector;
 
-        SYS_ASSERT(back);
+        EPI_ASSERT(back);
 
         // compute intercept vector (fraction from 0 to 1)
         {
             float num, den;
 
-            den = divl.dy * sight_I.src.dx - divl.dx * sight_I.src.dy;
+            den = divl.delta_y * sight_check.source.delta_x -
+                  divl.delta_x * sight_check.source.delta_y;
 
             // parallel ?
             // -AJA- probably can't happen due to the above Divline checks
-            if (fabs(den) < 0.0001)
-                continue;
+            if (fabs(den) < 0.0001) continue;
 
-            num = (divl.x - sight_I.src.x) * divl.dy + (sight_I.src.y - divl.y) * divl.dx;
+            num = (divl.x - sight_check.source.x) * divl.delta_y +
+                  (sight_check.source.y - divl.y) * divl.delta_x;
 
             frac = num / den;
 
             // too close to source ?
-            if (frac < 0.0001f)
-                continue;
+            if (frac < 0.0001f) continue;
         }
 
-        if (!AlmostEquals(front->f_h, back->f_h))
+        if (!AlmostEquals(front->floor_height, back->floor_height))
         {
-            float openbottom = HMM_MAX(ld->frontsector->f_h, ld->backsector->f_h);
-            slope            = (openbottom - sight_I.src_z) / frac;
-            if (slope > sight_I.bottom_slope)
-                sight_I.bottom_slope = slope;
+            float openbottom = HMM_MAX(ld->front_sector->floor_height,
+                                       ld->back_sector->floor_height);
+            slope            = (openbottom - sight_check.source_z) / frac;
+            if (slope > sight_check.bottom_slope)
+                sight_check.bottom_slope = slope;
         }
 
-        if (!AlmostEquals(front->c_h, back->c_h))
+        if (!AlmostEquals(front->ceiling_height, back->ceiling_height))
         {
-            float opentop = HMM_MIN(ld->frontsector->c_h, ld->backsector->c_h);
-            slope         = (opentop - sight_I.src_z) / frac;
-            if (slope < sight_I.top_slope)
-                sight_I.top_slope = slope;
+            float opentop = HMM_MIN(ld->front_sector->ceiling_height,
+                                    ld->back_sector->ceiling_height);
+            slope         = (opentop - sight_check.source_z) / frac;
+            if (slope < sight_check.top_slope) sight_check.top_slope = slope;
         }
 
         // did our slope range close up ?
-        if (sight_I.top_slope <= sight_I.bottom_slope)
-            return false;
+        if (sight_check.top_slope <= sight_check.bottom_slope) return false;
 
         // shouldn't be any more matching linedefs
         AddSightIntercept(frac, front);
@@ -263,22 +259,25 @@ static bool CrossSubsector(subsector_t *sub)
 //
 static bool CheckSightBSP(unsigned int bspnum)
 {
-    while (!(bspnum & NF_V5_SUBSECTOR))
+    while (!(bspnum & kLeafSubsector))
     {
-        node_t *node = nodes + bspnum;
-        int     s1, s2;
+        BspNode *node = level_nodes + bspnum;
+        int      s1, s2;
 
 #if (DEBUG_SIGHT >= 2)
-        L_WriteDebug("CheckSightBSP: node %d (%1.1f,%1.1f) + (%1.1f,%1.1f)\n", bspnum, node->div.x, node->div.y,
-                     node->div.dx, node->div.dy);
+        LogDebug("CheckSightBSP: node %d (%1.1f,%1.1f) + (%1.1f,%1.1f)\n",
+                 bspnum, node->div.x, node->div.y, node->div.delta_x,
+                 node->div.delta_y);
 #endif
 
         // decide which side the src and dest points are on
-        s1 = P_PointOnDivlineSide(sight_I.src.x, sight_I.src.y, &node->div);
-        s2 = P_PointOnDivlineSide(sight_I.dest.X, sight_I.dest.Y, &node->div);
+        s1 = PointOnDividingLineSide(sight_check.source.x, sight_check.source.y,
+                                     &node->divider);
+        s2 = PointOnDividingLineSide(sight_check.destination.X,
+                                     sight_check.destination.Y, &node->divider);
 
 #if (DEBUG_SIGHT >= 2)
-        L_WriteDebug("  Sides: %d %d\n", s1, s2);
+        LogDebug("  Sides: %d %d\n", s1, s2);
 #endif
 
         // If sides are different, we must recursively check both.
@@ -287,35 +286,35 @@ static bool CheckSightBSP(unsigned int bspnum)
 
         if (s1 != s2)
         {
-            if (!CheckSightBSP(node->children[s1]))
-                return false;
+            if (!CheckSightBSP(node->children[s1])) return false;
         }
 
         bspnum = node->children[s2];
     }
 
-    bspnum &= ~NF_V5_SUBSECTOR;
+    bspnum &= ~kLeafSubsector;
 
-    SYS_ASSERT(bspnum < (unsigned int)numsubsectors);
+    EPI_ASSERT(bspnum < (unsigned int)total_level_subsectors);
 
     {
-        subsector_t *sub = subsectors + bspnum;
+        Subsector *sub = level_subsectors + bspnum;
 
 #if (DEBUG_SIGHT >= 2)
-        L_WriteDebug("  Subsec %d  SEC %d\n", bspnum, sub->sector - sectors);
+        LogDebug("  Subsec %d  SEC %d\n", bspnum, sub->sector - sectors);
 #endif
 
-        if (sub->sector->exfloor_used > 0)
-            sight_I.exfloors = true;
+        if (sub->sector->extrafloor_used > 0)
+            sight_check.saw_extrafloors = true;
 
-        if (sub->sector->floor_vertex_slope || sub->sector->ceil_vertex_slope)
-            sight_I.vertslopes = true;
+        if (sub->sector->floor_vertex_slope ||
+            sub->sector->ceiling_vertex_slope)
+            sight_check.saw_vertex_slopes = true;
 
         // when target subsector is reached, there are no more lines to
         // check, since we only check lines on the _far_ side of the
         // subsector and the target object is inside its subsector.
 
-        if (sub != sight_I.dest_sub)
+        if (sub != sight_check.destination_subsector)
             return CrossSubsector(sub);
 
         AddSightIntercept(1.0f, sub->sector);
@@ -331,37 +330,38 @@ static bool CheckSightBSP(unsigned int bspnum)
 //
 static bool CheckSightIntercepts(float slope)
 {
-    int       i, j;
-    sector_t *sec;
+    int     i, j;
+    Sector *sec;
 
-    float last_h = sight_I.src_z;
+    float last_h = sight_check.source_z;
     float cur_h;
 
 #if (DEBUG_SIGHT >= 1)
-    L_WriteDebug("INTERCEPTS  slope %1.0f\n", slope);
+    LogDebug("INTERCEPTS  slope %1.0f\n", slope);
 #endif
 
-    for (i = 0; i < (int)wall_icpts.size(); i++, last_h = cur_h)
+    for (i = 0; i < (int)wall_intercepts.size(); i++, last_h = cur_h)
     {
         bool blocked = true;
 
-        cur_h = sight_I.src_z + slope * wall_icpts[i].frac;
+        cur_h = sight_check.source_z + slope * wall_intercepts[i].along;
 
 #if (DEBUG_SIGHT >= 1)
-        L_WriteDebug("  %d/%d  FRAC %1.4f  SEC %d  H=%1.4f/%1.4f\n", i + 1, wall_icpts.size(), wall_icpts[i].frac,
-                     wall_icpts[i].sector - sectors, last_h, cur_h);
+        LogDebug("  %d/%d  FRAC %1.4f  SEC %d  H=%1.4f/%1.4f\n", i + 1,
+                 wall_intercepts.size(), wall_intercepts[i].along,
+                 wall_intercepts[i].sector - sectors, last_h, cur_h);
 #endif
 
         // check all the sight gaps.
-        sec = wall_icpts[i].sector;
+        sec = wall_intercepts[i].sector;
 
-        for (j = 0; j < sec->sight_gap_num; j++)
+        for (j = 0; j < sec->sight_gap_number; j++)
         {
-            float z1 = sec->sight_gaps[j].f;
-            float z2 = sec->sight_gaps[j].c;
+            float z1 = sec->sight_gaps[j].floor;
+            float z2 = sec->sight_gaps[j].ceiling;
 
 #if (DEBUG_SIGHT >= 3)
-            L_WriteDebug("    SIGHT GAP [%d] = %1.1f .. %1.1f\n", j, z1, z2);
+            LogDebug("    SIGHT GAP [%d] = %1.1f .. %1.1f\n", j, z1, z2);
 #endif
 
             if (z1 <= last_h && last_h <= z2 && z1 <= cur_h && cur_h <= z2)
@@ -371,8 +371,7 @@ static bool CheckSightIntercepts(float slope)
             }
         }
 
-        if (blocked)
-            return false;
+        if (blocked) return false;
     }
 
     return true;
@@ -384,49 +383,44 @@ static bool CheckSightIntercepts(float slope)
 // When the subsector is the same, we only need to check whether a
 // non-SeeThrough extrafloor gets in the way.
 //
-static bool CheckSightSameSubsector(mobj_t *src, mobj_t *dest)
+static bool CheckSightSameSubsector(MapObject *src, MapObject *dest)
 {
-    int       j;
-    sector_t *sec;
+    int     j;
+    Sector *sec;
 
     float lower_z;
     float upper_z;
 
-    if (sight_I.src_z < dest->z)
+    if (sight_check.source_z < dest->z)
     {
-        lower_z = sight_I.src_z;
+        lower_z = sight_check.source_z;
         upper_z = dest->z;
     }
-    else if (sight_I.src_z > dest->z + dest->height)
+    else if (sight_check.source_z > dest->z + dest->height_)
     {
-        lower_z = dest->z + dest->height;
-        upper_z = sight_I.src_z;
+        lower_z = dest->z + dest->height_;
+        upper_z = sight_check.source_z;
     }
-    else
-    {
-        return true;
-    }
+    else { return true; }
 
     // check all the sight gaps.
-    sec = src->subsector->sector;
+    sec = src->subsector_->sector;
 
-    for (j = 0; j < sec->sight_gap_num; j++)
+    for (j = 0; j < sec->sight_gap_number; j++)
     {
-        float z1 = sec->sight_gaps[j].f;
-        float z2 = sec->sight_gaps[j].c;
+        float z1 = sec->sight_gaps[j].floor;
+        float z2 = sec->sight_gaps[j].ceiling;
 
-        if (z1 <= lower_z && upper_z <= z2)
-            return true;
+        if (z1 <= lower_z && upper_z <= z2) return true;
     }
 
     return false;
 }
 
-bool P_CheckSight(mobj_t *src, mobj_t *dest)
+bool CheckSight(MapObject *src, MapObject *dest)
 {
     // -ACB- 1998/07/20 t2 is Invisible, t1 cannot possibly see it.
-    if (dest->visibility == INVISIBLE)
-        return false;
+    if (AlmostEquals(dest->visibility_, 0.0f)) return false;
 
     int n, num_div;
 
@@ -435,94 +429,107 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
 
     // First check for trivial rejection.
 
-    SYS_ASSERT(src->subsector);
-    SYS_ASSERT(dest->subsector);
+    EPI_ASSERT(src->subsector_);
+    EPI_ASSERT(dest->subsector_);
 
     // An unobstructed LOS is possible.
     // Now look from eyes of t1 to any part of t2.
 
-    validcount++;
+    valid_count++;
 
     // The "eyes" of a thing is 75% of its height.
-    SYS_ASSERT(src->info);
-    sight_I.src_z = src->z + src->height * PERCENT_2_FLOAT(src->info->viewheight);
+    EPI_ASSERT(src->info_);
+    sight_check.source_z = src->z + src->height_ * src->info_->viewheight_;
 
-    sight_I.src.x   = src->x;
-    sight_I.src.y   = src->y;
-    sight_I.src.dx  = dest->x - src->x;
-    sight_I.src.dy  = dest->y - src->y;
-    sight_I.src_sub = src->subsector;
+    sight_check.source.x         = src->x;
+    sight_check.source.y         = src->y;
+    sight_check.source.delta_x   = dest->x - src->x;
+    sight_check.source.delta_y   = dest->y - src->y;
+    sight_check.source_subsector = src->subsector_;
 
-    sight_I.dest.X   = dest->x;
-    sight_I.dest.Y   = dest->y;
-    sight_I.dest_sub = dest->subsector;
+    sight_check.destination.X         = dest->x;
+    sight_check.destination.Y         = dest->y;
+    sight_check.destination_subsector = dest->subsector_;
 
-    sight_I.bottom_slope = dest->z - sight_I.src_z;
-    sight_I.top_slope    = sight_I.bottom_slope + dest->height;
+    sight_check.bottom_slope = dest->z - sight_check.source_z;
+    sight_check.top_slope    = sight_check.bottom_slope + dest->height_;
 
     // destination out of object's DDF slope range ?
-    dist_a = P_ApproxDistance(sight_I.src.dx, sight_I.src.dy);
+    dist_a = ApproximateDistance(sight_check.source.delta_x,
+                                 sight_check.source.delta_y);
 
-    if (src->info->sight_distance > -1) // if we have sight_distance set
+    if (src->info_->sight_distance_ > -1)  // if we have sight_distance set
     {
-        if (src->info->sight_distance < dist_a)
-            return false; // too far away for this thing to see
+        if (src->info_->sight_distance_ < dist_a)
+            return false;  // too far away for this thing to see
     }
 
 #if (DEBUG_SIGHT >= 1)
-    L_WriteDebug("\n");
-    L_WriteDebug("P_CheckSight:\n");
-    L_WriteDebug("  Src: [%s] @ (%1.0f,%1.0f) in sub %d SEC %d\n", src->info->name, sight_I.src.x, sight_I.src.y,
-                 sight_I.src_sub - subsectors, sight_I.src_sub->sector - sectors);
-    L_WriteDebug("  Dest: [%s] @ (%1.0f,%1.0f) in sub %d SEC %d\n", dest->info->name, sight_I.dest.x, sight_I.dest.y,
-                 sight_I.dest_sub - subsectors, sight_I.dest_sub->sector - sectors);
-    L_WriteDebug("  Angle: %1.0f\n", ANG_2_FLOAT(sight_I.angle));
+    LogDebug("\n");
+    LogDebug("P_CheckSight:\n");
+    LogDebug("  Src: [%s] @ (%1.0f,%1.0f) in sub %d SEC %d\n", src->info->name,
+             sight_check.source.x, sight_check.source.y,
+             sight_check.source_subsector - subsectors,
+             sight_check.source_subsector->sector - sectors);
+    LogDebug("  Dest: [%s] @ (%1.0f,%1.0f) in sub %d SEC %d\n",
+             dest->info->name, sight_check.destination.x,
+             sight_check.destination.y,
+             sight_check.destination_subsector - subsectors,
+             sight_check.destination_subsector->sector - sectors);
+    LogDebug("  Angle: %1.0f\n", ANG_2_FLOAT(sight_check.angle));
 #endif
 
-    if (sight_I.top_slope < dist_a * -src->info->sight_slope)
+    if (sight_check.top_slope < dist_a * -src->info_->sight_slope_)
         return false;
 
-    if (sight_I.bottom_slope > dist_a * src->info->sight_slope)
+    if (sight_check.bottom_slope > dist_a * src->info_->sight_slope_)
         return false;
 
     // -AJA- handle the case where no linedefs are crossed
-    if (src->subsector == dest->subsector)
+    if (src->subsector_ == dest->subsector_)
     {
         return CheckSightSameSubsector(src, dest);
     }
 
-    sight_I.angle = R_PointToAngle(sight_I.src.x, sight_I.src.y, sight_I.dest.X, sight_I.dest.Y);
+    sight_check.angle = RendererPointToAngle(
+        sight_check.source.x, sight_check.source.y, sight_check.destination.X,
+        sight_check.destination.Y);
 
-    sight_I.bbox[BOXLEFT]   = HMM_MIN(sight_I.src.x, sight_I.dest.X);
-    sight_I.bbox[BOXRIGHT]  = HMM_MAX(sight_I.src.x, sight_I.dest.X);
-    sight_I.bbox[BOXBOTTOM] = HMM_MIN(sight_I.src.y, sight_I.dest.Y);
-    sight_I.bbox[BOXTOP]    = HMM_MAX(sight_I.src.y, sight_I.dest.Y);
+    sight_check.bounding_box[kBoundingBoxLeft] =
+        HMM_MIN(sight_check.source.x, sight_check.destination.X);
+    sight_check.bounding_box[kBoundingBoxRight] =
+        HMM_MAX(sight_check.source.x, sight_check.destination.X);
+    sight_check.bounding_box[kBoundingBoxBottom] =
+        HMM_MIN(sight_check.source.y, sight_check.destination.Y);
+    sight_check.bounding_box[kBoundingBoxTop] =
+        HMM_MAX(sight_check.source.y, sight_check.destination.Y);
 
-    wall_icpts.clear(); // FIXME
+    wall_intercepts.clear();  // FIXME
 
-    sight_I.exfloors   = false;
-    sight_I.vertslopes = false;
+    sight_check.saw_extrafloors   = false;
+    sight_check.saw_vertex_slopes = false;
 
     // initial pass -- check for basic blockage & create intercepts
-    if (!CheckSightBSP(root_node))
-        return false;
+    if (!CheckSightBSP(root_node)) return false;
 
     // no extrafloors or vertslopes encountered ?  Then the checks made by
     // CheckSightBSP are sufficient.  (-AJA- double check this)
     //
-    if (!sight_I.exfloors && !sight_I.vertslopes)
+    if (!sight_check.saw_extrafloors && !sight_check.saw_vertex_slopes)
         return true;
 
-    // Leveraging the existing hitscan attack code is easier than trying to wrangle this stuff
-    if (sight_I.vertslopes)
+    // Leveraging the existing hitscan attack code is easier than trying to
+    // wrangle this stuff
+    if (sight_check.saw_vertex_slopes)
     {
         float objslope;
-        P_AimLineAttack(src, sight_I.angle, 64000, &objslope);
-        P_LineAttack(src, sight_I.angle, 64000, objslope, 0, nullptr, nullptr);
-        bool slope_sight_good = dest->slopesighthit;
+        AimLineAttack(src, sight_check.angle, 64000, &objslope);
+        LineAttack(src, sight_check.angle, 64000, objslope, 0, nullptr,
+                   nullptr);
+        bool slope_sight_good = dest->slope_sight_hit_;
         if (slope_sight_good)
         {
-            dest->slopesighthit = false; // reset for future sight checks
+            dest->slope_sight_hit_ = false;  // reset for future sight checks
             return true;
         }
         else
@@ -535,90 +542,92 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
     // points we test depends on the destination: 5 for players, 3 for
     // monsters, 1 for everything else.
 
-    if (dest->player)
+    if (dest->player_)
     {
         num_div         = 5;
         dest_heights[0] = dest->z;
-        dest_heights[1] = dest->z + dest->height * 0.25f;
-        dest_heights[2] = dest->z + dest->height * 0.50f;
-        dest_heights[3] = dest->z + dest->height * 0.75f;
-        dest_heights[4] = dest->z + dest->height;
+        dest_heights[1] = dest->z + dest->height_ * 0.25f;
+        dest_heights[2] = dest->z + dest->height_ * 0.50f;
+        dest_heights[3] = dest->z + dest->height_ * 0.75f;
+        dest_heights[4] = dest->z + dest->height_;
     }
-    else if (dest->extendedflags & EF_MONSTER)
+    else if (dest->extended_flags_ & kExtendedFlagMonster)
     {
         num_div         = 3;
         dest_heights[0] = dest->z;
-        dest_heights[1] = dest->z + dest->height * 0.5f;
-        dest_heights[2] = dest->z + dest->height;
+        dest_heights[1] = dest->z + dest->height_ * 0.5f;
+        dest_heights[2] = dest->z + dest->height_;
     }
     else
     {
         num_div         = 1;
-        dest_heights[0] = dest->z + dest->height * 0.5f;
+        dest_heights[0] = dest->z + dest->height_ * 0.5f;
     }
 
     // use intercepts to check extrafloor heights
     //
     for (n = 0; n < num_div; n++)
     {
-        float slope = dest_heights[n] - sight_I.src_z;
+        float slope = dest_heights[n] - sight_check.source_z;
 
-        if (slope > sight_I.top_slope || slope < sight_I.bottom_slope)
+        if (slope > sight_check.top_slope || slope < sight_check.bottom_slope)
             continue;
 
-        if (CheckSightIntercepts(slope))
-            return true;
+        if (CheckSightIntercepts(slope)) return true;
     }
 
     return false;
 }
 
-bool P_CheckSightToPoint(mobj_t *src, float x, float y, float z)
+bool CheckSightToPoint(MapObject *src, float x, float y, float z)
 {
-    subsector_t *dest_sub = R_PointInSubsector(x, y);
+    Subsector *dest_sub = RendererPointInSubsector(x, y);
 
-    if (dest_sub == src->subsector)
-        return true;
+    if (dest_sub == src->subsector_) return true;
 
-    validcount++;
+    valid_count++;
 
-    sight_I.src.x   = src->x;
-    sight_I.src.y   = src->y;
-    sight_I.src_z   = src->z + src->height * PERCENT_2_FLOAT(src->info->viewheight);
-    sight_I.src.dx  = x - src->x;
-    sight_I.src.dy  = y - src->y;
-    sight_I.src_sub = src->subsector;
+    sight_check.source.x = src->x;
+    sight_check.source.y = src->y;
+    sight_check.source_z = src->z + src->height_ * src->info_->viewheight_;
+    sight_check.source.delta_x   = x - src->x;
+    sight_check.source.delta_y   = y - src->y;
+    sight_check.source_subsector = src->subsector_;
 
-    sight_I.dest.X   = x;
-    sight_I.dest.Y   = y;
-    sight_I.dest_z   = z;
-    sight_I.dest_sub = dest_sub;
+    sight_check.destination.X         = x;
+    sight_check.destination.Y         = y;
+    sight_check.destination_z         = z;
+    sight_check.destination_subsector = dest_sub;
 
-    sight_I.bottom_slope = z - 1.0f - sight_I.src_z;
-    sight_I.top_slope    = z + 1.0f - sight_I.src_z;
+    sight_check.bottom_slope = z - 1.0f - sight_check.source_z;
+    sight_check.top_slope    = z + 1.0f - sight_check.source_z;
 
-    sight_I.angle = R_PointToAngle(sight_I.src.x, sight_I.src.y, sight_I.dest.X, sight_I.dest.Y);
+    sight_check.angle = RendererPointToAngle(
+        sight_check.source.x, sight_check.source.y, sight_check.destination.X,
+        sight_check.destination.Y);
 
-    sight_I.bbox[BOXLEFT]   = HMM_MIN(sight_I.src.x, sight_I.dest.X);
-    sight_I.bbox[BOXRIGHT]  = HMM_MAX(sight_I.src.x, sight_I.dest.X);
-    sight_I.bbox[BOXBOTTOM] = HMM_MIN(sight_I.src.y, sight_I.dest.Y);
-    sight_I.bbox[BOXTOP]    = HMM_MAX(sight_I.src.y, sight_I.dest.Y);
+    sight_check.bounding_box[kBoundingBoxLeft] =
+        HMM_MIN(sight_check.source.x, sight_check.destination.X);
+    sight_check.bounding_box[kBoundingBoxRight] =
+        HMM_MAX(sight_check.source.x, sight_check.destination.X);
+    sight_check.bounding_box[kBoundingBoxBottom] =
+        HMM_MIN(sight_check.source.y, sight_check.destination.Y);
+    sight_check.bounding_box[kBoundingBoxTop] =
+        HMM_MAX(sight_check.source.y, sight_check.destination.Y);
 
-    wall_icpts.clear();
+    wall_intercepts.clear();
 
-    sight_I.exfloors = false;
+    sight_check.saw_extrafloors = false;
 
-    if (!CheckSightBSP(root_node))
-        return false;
+    if (!CheckSightBSP(root_node)) return false;
 
 #if 1
-    if (!sight_I.exfloors)
-        return true;
+    if (!sight_check.saw_extrafloors) return true;
 #endif
 
-    float slope = z - sight_I.src_z;
+    float slope = z - sight_check.source_z;
 
-    if (slope > sight_I.top_slope || slope < sight_I.bottom_slope)
+    if (slope > sight_check.top_slope || slope < sight_check.bottom_slope)
         return false;
 
     return CheckSightIntercepts(slope);
@@ -632,11 +641,11 @@ bool P_CheckSightToPoint(mobj_t *src, float x, float y, float z)
 // don't resurrect monsters that are completely out of view in another
 // vertical region.  Returns true if sight possible, false otherwise.
 //
-bool P_CheckSightApproxVert(mobj_t *src, mobj_t *dest)
+bool QuickVerticalSightCheck(MapObject *src, MapObject *dest)
 {
-    SYS_ASSERT(src->info);
+    EPI_ASSERT(src->info_);
 
-    sight_I.src_z = src->z + src->height * PERCENT_2_FLOAT(src->info->viewheight);
+    sight_check.source_z = src->z + src->height_ * src->info_->viewheight_;
 
     return CheckSightSameSubsector(src, dest);
 }

@@ -23,25 +23,24 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __M_RANDOM__
-#define __M_RANDOM__
+#pragma once
 
-#include "types.h"
-
-void M_Random_Init(void);
-int  M_Random(void);
-int  M_RandomNegPos(void);
-int  P_Random(void);
-int  C_Random(void);
-int  P_RandomNegPos(void);
-bool M_RandomTest(percent_t chance);
-bool P_RandomTest(percent_t chance);
+// A bit verbose, but hopefully describes what they do decently.
+// The "Deterministic" suffixes increment and track the index and step
+// for its random number generator so that loading/saving a game
+// does not change the outcomes of functions that use them - Dasho
+void RandomInit(void);
+int  RandomByte(void);
+int  RandomByteSkewToZero(void);
+int  RandomByteDeterministic(void);
+int  RandomShort(void);
+int  RandomByteSkewToZeroDeterministic(void);
+bool RandomByteTest(float chance);
+bool RandomByteTestDeterministic(float chance);
 
 // Savegame support
-int  P_ReadRandomState(void);
-void P_WriteRandomState(int value);
-
-#endif // __M_RANDOM__
+int  RandomStateRead(void);
+void RandomStateWrite(int value);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -16,15 +16,16 @@
 //
 //----------------------------------------------------------------------------
 //
-//  Based on the UMAPINFO reference implementation, released by Christoph Oelckers under the
-//  following copyright:
+//  Based on the UMAPINFO reference implementation, released by Christoph
+//  Oelckers under the following copyright:
 //
 //    Copyright 2017 Christoph Oelckers
 //
 //----------------------------------------------------------------------------
 
-#ifndef __P_UMAPINFO__
-#define __P_UMAPINFO__
+#pragma once
+
+#include <string>
 
 struct BossAction
 {
@@ -42,7 +43,7 @@ struct MapEntry
     char *intertextsecret;
     char *authorname;
     char  levelpic[9];
-    char  nextmap[9];
+    char  next_map[9];
     char  nextsecret[9];
     char  music[9];
     char  skytexture[9];
@@ -70,8 +71,6 @@ struct MapList
 
 extern struct MapList Maps;
 
-void Parse_UMAPINFO(const std::string &buffer);
+void ParseUmapinfo(const std::string &buffer);
 
 void FreeMapList();
-
-#endif

@@ -16,132 +16,113 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
-#include "epi_sdl.h" // needed for proper SDL main linkage
-#include "filesystem.h"
-#include "str_util.h"
+#include <emscripten/html5.h>
 
 #include "dm_defs.h"
+#include "e_main.h"
+#include "epi_sdl.h"  // needed for proper SDL main linkage
+#include "filesystem.h"
+#include "i_system.h"
+#include "i_video.h"
 #include "m_argv.h"
 #include "m_menu.h"
-#include "e_main.h"
 #include "r_modes.h"
-#include "i_video.h"
+#include "str_util.h"
 #include "version.h"
-
-#include <emscripten/html5.h>
 
 // Event reference
 // https://github.com/emscripten-ports/SDL2/blob/master/src/video/emscripten/SDL_emscriptenevents.c
 
-std::string exe_path = ".";
+std::string executable_path = ".";
 
 static int web_deferred_screen_width  = -1;
 static int web_deferred_screen_height = -1;
 static int web_deferred_menu          = -1;
 
-static void I_WebSyncScreenSize(int width, int height)
+static void WebSyncScreenSize(int width, int height)
 {
-    SDL_SetWindowSize(my_vis, width, height);
-    SCREENWIDTH  = (int)width;
-    SCREENHEIGHT = (int)height;
-    SCREENBITS   = 24;
-    DISPLAYMODE  = 0;
-    I_DeterminePixelAspect();
+    SDL_SetWindowSize(program_window, width, height);
+    current_screen_width  = (int)width;
+    current_screen_height = (int)height;
+    current_screen_depth  = 24;
+    current_window_mode   = 0;
+    DeterminePixelAspect();
 
-    R_SoftInitResolution();
+    SoftInitializeResolution();
 }
 
-void E_WebTick(void)
+void WebTick(void)
 {
     if (web_deferred_screen_width != -1)
     {
-        I_WebSyncScreenSize(web_deferred_screen_width, web_deferred_screen_height);
+        WebSyncScreenSize(web_deferred_screen_width,
+                          web_deferred_screen_height);
         web_deferred_screen_width = web_deferred_screen_height = -1;
     }
 
     if (web_deferred_menu != -1)
     {
-        if (web_deferred_menu)
-        {
-            M_StartControlPanel();
-        }
-        else
-        {
-            M_ClearMenus();
-        }
+        if (web_deferred_menu) { MenuStartControlPanel(); }
+        else { MenuClear(); }
 
         web_deferred_menu = -1;
     }
 
     // We always do this once here, although the engine may
     // makes in own calls to keep on top of the event processing
-    I_ControlGetEvents();
+    ControlGetEvents();
 
-    if (app_state & APP_STATE_ACTIVE)
-        E_Tick();
+    if (app_state & kApplicationActive) EdgeTicker();
 }
 
 extern "C"
 {
-
-    static EM_BOOL I_WebHandlePointerLockChange(int eventType, const EmscriptenPointerlockChangeEvent *changeEvent,
-                                                void *userData)
+    static EM_BOOL WebHandlePointerLockChange(
+        int eventType, const EmscriptenPointerlockChangeEvent *changeEvent,
+        void *userData)
     {
-        if (changeEvent->isActive)
-        {
-            SDL_ShowCursor(SDL_FALSE);
-        }
-        else
-        {
-            SDL_ShowCursor(SDL_TRUE);
-        }
+        if (changeEvent->isActive) { SDL_ShowCursor(SDL_FALSE); }
+        else { SDL_ShowCursor(SDL_TRUE); }
 
         return 0;
     }
 
-    static EM_BOOL I_WebWindowResizedCallback(int eventType, const void *reserved, void *userData)
+    static EM_BOOL WebWindowResizedCallback(int eventType, const void *reserved,
+                                            void *userData)
     {
-
         double width, height;
         emscripten_get_element_css_size("canvas", &width, &height);
 
         printf("window fullscreen resized %i %i\n", (int)width, (int)height);
 
-        I_WebSyncScreenSize(width, height);
+        WebSyncScreenSize(width, height);
 
         EM_ASM_({
-            if (Module.onFullscreen)
-            {
-                Module.onFullscreen();
-            }
+            if (Module.onFullscreen) { Module.onFullscreen(); }
         });
 
         return true;
     }
 
-    void EMSCRIPTEN_KEEPALIVE I_WebSetFullscreen(int fullscreen)
+    void EMSCRIPTEN_KEEPALIVE WebSetFullscreen(int fullscreen)
     {
         if (fullscreen)
         {
             EmscriptenFullscreenStrategy strategy;
-            strategy.scaleMode             = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_STDDEF;
-            strategy.filteringMode         = EMSCRIPTEN_FULLSCREEN_FILTERING_DEFAULT;
-            strategy.canvasResizedCallback = I_WebWindowResizedCallback;
+            strategy.scaleMode     = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_STDDEF;
+            strategy.filteringMode = EMSCRIPTEN_FULLSCREEN_FILTERING_DEFAULT;
+            strategy.canvasResizedCallback = WebWindowResizedCallback;
             emscripten_enter_soft_fullscreen("canvas", &strategy);
         }
-        else
-        {
-            emscripten_exit_soft_fullscreen();
-        }
+        else { emscripten_exit_soft_fullscreen(); }
     }
 
-    void EMSCRIPTEN_KEEPALIVE I_WebOpenGameMenu(int open)
+    void EMSCRIPTEN_KEEPALIVE WebOpenGameMenu(int open)
     {
         web_deferred_menu = open;
     }
 
-    void EMSCRIPTEN_KEEPALIVE I_WebSyncScreenSize()
+    void EMSCRIPTEN_KEEPALIVE WebSyncScreenSize()
     {
         double width, height;
         emscripten_get_element_css_size("canvas", &width, &height);
@@ -150,28 +131,26 @@ extern "C"
         web_deferred_screen_height = (int)height;
     }
 
-    void EMSCRIPTEN_KEEPALIVE I_WebMain(int argc, const char **argv)
+    void EMSCRIPTEN_KEEPALIVE WebMain(int argc, const char **argv)
     {
-
         // Note: We're using the max framerate which feels smoother in testing
-        // Though raises a console error in debug warning about not using requestAnimationFrame
-        emscripten_set_main_loop(E_WebTick, 70, 0);
+        // Though raises a console error in debug warning about not using
+        // requestAnimationFrame
+        emscripten_set_main_loop(WebTick, 70, 0);
 
-        emscripten_set_pointerlockchange_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, nullptr, 0,
-                                                  I_WebHandlePointerLockChange);
+        emscripten_set_pointerlockchange_callback(
+            EMSCRIPTEN_EVENT_TARGET_DOCUMENT, nullptr, 0,
+            WebHandlePointerLockChange);
 
         if (SDL_Init(0) < 0)
-            I_Error("Couldn't init SDL!!\n%s\n", SDL_GetError());
+            FatalError("Couldn't init SDL!!\n%s\n", SDL_GetError());
 
-        exe_path = SDL_GetBasePath();
+        executable_path = SDL_GetBasePath();
 
-        E_Main(argc, argv);
+        EdgeMain(argc, argv);
 
         EM_ASM_({
-            if (Module.edgePostInit)
-            {
-                Module.edgePostInit();
-            }
+            if (Module.edgePostInit) { Module.edgePostInit(); }
         });
     }
 
@@ -197,10 +176,7 @@ extern "C"
 
                 const homeDir = args[homeIndex + 1];
 
-                if (!FS.analyzePath(homeDir).exists)
-                {
-                    FS.mkdirTree(homeDir);
-                }
+                if (!FS.analyzePath(homeDir).exists) { FS.mkdirTree(homeDir); }
 
                 FS.mount(IDBFS, {}, homeDir);
                 FS.syncfs(
@@ -210,7 +186,7 @@ extern "C"
                             console.error(`Error mounting home dir $ { err }`);
                             return;
                         }
-                        Module._I_WebMain($0, $1);
+                        Module._WebMain($0, $1);
                     });
             },
             argc, argv);

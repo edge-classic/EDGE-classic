@@ -16,9 +16,13 @@
 //
 //----------------------------------------------------------------------------
 
-extern cvar_c windowtitle;
-extern cvar_c edgeversion;
-extern cvar_c appname;
+#pragma once
+
+#include "con_var.h"
+
+extern ConsoleVariable windowtitle;
+extern ConsoleVariable edgeversion;
+extern ConsoleVariable appname;
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

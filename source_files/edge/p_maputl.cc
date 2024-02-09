@@ -32,32 +32,32 @@
 //   Touch Node code.
 //
 // TODO HERE:
-//   + make gap routines I_Error if overflow limit.
+//   + make gap routines FatalError if overflow limit.
 //
-
-#include "i_defs.h"
 
 #include <float.h>
 
-#include <vector>
 #include <algorithm>
+#include <vector>
 
-#include "dm_data.h"
+#include "AlmostEquals.h"
+#include "common_doomdefs.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "epi.h"
 #include "m_bbox.h"
 #include "p_local.h"
 #include "p_spec.h"
 #include "r_state.h"
 
-#include "AlmostEquals.h"
+extern unsigned int root_node;
 
 //
-// P_ApproxDistance
+// ApproximateDistance
 //
 // Gives an estimation of distance (not exact)
 //
-float P_ApproxDistance(float dx, float dy)
+float ApproximateDistance(float dx, float dy)
 {
     dx = fabs(dx);
     dy = fabs(dy);
@@ -65,7 +65,7 @@ float P_ApproxDistance(float dx, float dy)
     return (dy > dx) ? dy + dx / 2 : dx + dy / 2;
 }
 
-float P_ApproxDistance(float dx, float dy, float dz)
+float ApproximateDistance(float dx, float dy, float dz)
 {
     dx = fabs(dx);
     dy = fabs(dy);
@@ -77,31 +77,31 @@ float P_ApproxDistance(float dx, float dy, float dz)
 }
 
 //
-// P_ApproxSlope
+// ApproximateSlope
 //
 // Gives an estimation of slope (not exact)
 //
 // -AJA- 1999/09/11: written.
 //
-float P_ApproxSlope(float dx, float dy, float dz)
+float ApproximateSlope(float dx, float dy, float dz)
 {
-    float dist = P_ApproxDistance(dx, dy);
+    float dist = ApproximateDistance(dx, dy);
 
     // kludge to prevent overflow or division by zero.
-    if (dist < 1.0f / 32.0f)
-        dist = 1.0f / 32.0f;
+    if (dist < 1.0f / 32.0f) dist = 1.0f / 32.0f;
 
     return dz / dist;
 }
 
-void P_ComputeIntersection(divline_t *div, float x1, float y1, float x2, float y2, float *ix, float *iy)
+void ComputeIntersection(DividingLine *div, float x1, float y1, float x2,
+                         float y2, float *ix, float *iy)
 {
-    if (AlmostEquals(div->dx, 0.0f))
+    if (AlmostEquals(div->delta_x, 0.0f))
     {
         *ix = div->x;
         *iy = y1 + (y2 - y1) * (div->x - x1) / (x2 - x1);
     }
-    else if (AlmostEquals(div->dy, 0.0f))
+    else if (AlmostEquals(div->delta_y, 0.0f))
     {
         *iy = div->y;
         *ix = x1 + (x2 - x1) * (div->y - y1) / (y2 - y1);
@@ -109,8 +109,8 @@ void P_ComputeIntersection(divline_t *div, float x1, float y1, float x2, float y
     else
     {
         // perpendicular distances (unnormalised)
-        float p1 = (x1 - div->x) * div->dy - (y1 - div->y) * div->dx;
-        float p2 = (x2 - div->x) * div->dy - (y2 - div->y) * div->dx;
+        float p1 = (x1 - div->x) * div->delta_y - (y1 - div->y) * div->delta_x;
+        float p2 = (x2 - div->x) * div->delta_y - (y2 - div->y) * div->delta_x;
 
         *ix = x1 + (x2 - x1) * p1 / (p1 - p2);
         *iy = y1 + (y2 - y1) * p1 / (p1 - p2);
@@ -118,200 +118,203 @@ void P_ComputeIntersection(divline_t *div, float x1, float y1, float x2, float y
 }
 
 //
-// P_PointOnDivlineSide
+// PointOnDividingLineSide
 //
 // Tests which side of the line the given point lies on.
 // Returns 0 (front/right) or 1 (back/left).  If the point lies
 // directly on the line, result is undefined (either 0 or 1).
 //
-int P_PointOnDivlineSide(float x, float y, divline_t *div)
+int PointOnDividingLineSide(float x, float y, DividingLine *div)
 {
     float dx, dy;
     float left, right;
 
-    if (div->dx == 0.0f)
-        return ((x <= div->x) ^ (div->dy > 0)) ? 0 : 1;
+    if (AlmostEquals(div->delta_x, 0.0f))
+        return ((x <= div->x) ^ (div->delta_y > 0)) ? 0 : 1;
 
-    if (div->dy == 0.0f)
-        return ((y <= div->y) ^ (div->dx < 0)) ? 0 : 1;
+    if (AlmostEquals(div->delta_y, 0.0f))
+        return ((y <= div->y) ^ (div->delta_x < 0)) ? 0 : 1;
 
     dx = x - div->x;
     dy = y - div->y;
 
     // try to quickly decide by looking at sign bits
-    if ((div->dy < 0) ^ (div->dx < 0) ^ (dx < 0) ^ (dy < 0))
+    if ((div->delta_y < 0) ^ (div->delta_x < 0) ^ (dx < 0) ^ (dy < 0))
     {
         // left is negative
-        if ((div->dy < 0) ^ (dx < 0))
-            return 1;
+        if ((div->delta_y < 0) ^ (dx < 0)) return 1;
 
         return 0;
     }
 
-    left  = dx * div->dy;
-    right = dy * div->dx;
+    left  = dx * div->delta_y;
+    right = dy * div->delta_x;
 
     return (right < left) ? 0 : 1;
 }
 
 //
-// P_PointOnDivlineThick
+// PointOnDividingLineThick
 //
 // Tests which side of the line the given point is on.   The thickness
 // parameter determines when the point is considered "on" the line.
 // Returns 0 (front/right), 1 (back/left), or 2 (on).
 //
-int P_PointOnDivlineThick(float x, float y, divline_t *div, float div_len, float thickness)
+int PointOnDividingLineThick(float x, float y, DividingLine *div, float div_len,
+                             float thickness)
 {
     float dx, dy;
     float left, right;
 
-    if (AlmostEquals(div->dx, 0.0f))
+    if (AlmostEquals(div->delta_x, 0.0f))
     {
-        if (fabs(x - div->x) <= thickness)
-            return 2;
+        if (fabs(x - div->x) <= thickness) return 2;
 
-        return ((x < div->x) ^ (div->dy > 0)) ? 0 : 1;
+        return ((x < div->x) ^ (div->delta_y > 0)) ? 0 : 1;
     }
 
-    if (AlmostEquals(div->dy, 0.0f))
+    if (AlmostEquals(div->delta_y, 0.0f))
     {
-        if (fabs(y - div->y) <= thickness)
-            return 2;
+        if (fabs(y - div->y) <= thickness) return 2;
 
-        return ((y < div->y) ^ (div->dx < 0)) ? 0 : 1;
+        return ((y < div->y) ^ (div->delta_x < 0)) ? 0 : 1;
     }
 
     dx = x - div->x;
     dy = y - div->y;
 
     // need divline's length here to compute proper distances
-    left  = (dx * div->dy) / div_len;
-    right = (dy * div->dx) / div_len;
+    left  = (dx * div->delta_y) / div_len;
+    right = (dy * div->delta_x) / div_len;
 
-    if (fabs(left - right) < thickness)
-        return 2;
+    if (fabs(left - right) < thickness) return 2;
 
     return (right < left) ? 0 : 1;
 }
 
 //
-// P_BoxOnLineSide
+// BoxOnLineSide
 //
 // Considers the line to be infinite
 // Returns side 0 or 1, -1 if box crosses the line.
 //
-int P_BoxOnLineSide(const float *tmbox, line_t *ld)
+int BoxOnLineSide(const float *tmbox, Line *ld)
 {
     int p1 = 0;
     int p2 = 0;
 
-    divline_t div;
+    DividingLine div;
 
-    div.x  = ld->v1->X;
-    div.y  = ld->v1->Y;
-    div.dx = ld->dx;
-    div.dy = ld->dy;
+    div.x       = ld->vertex_1->X;
+    div.y       = ld->vertex_1->Y;
+    div.delta_x = ld->delta_x;
+    div.delta_y = ld->delta_y;
 
-    switch (ld->slopetype)
+    switch (ld->slope_type)
     {
-    case ST_HORIZONTAL:
-        p1 = tmbox[BOXTOP] > ld->v1->Y;
-        p2 = tmbox[BOXBOTTOM] > ld->v1->Y;
-        if (ld->dx < 0)
-        {
-            p1 ^= 1;
-            p2 ^= 1;
-        }
-        break;
+        case kLineClipHorizontal:
+            p1 = tmbox[kBoundingBoxTop] > ld->vertex_1->Y;
+            p2 = tmbox[kBoundingBoxBottom] > ld->vertex_1->Y;
+            if (ld->delta_x < 0)
+            {
+                p1 ^= 1;
+                p2 ^= 1;
+            }
+            break;
 
-    case ST_VERTICAL:
-        p1 = tmbox[BOXRIGHT] < ld->v1->X;
-        p2 = tmbox[BOXLEFT] < ld->v1->X;
-        if (ld->dy < 0)
-        {
-            p1 ^= 1;
-            p2 ^= 1;
-        }
-        break;
+        case kLineClipVertical:
+            p1 = tmbox[kBoundingBoxRight] < ld->vertex_1->X;
+            p2 = tmbox[kBoundingBoxLeft] < ld->vertex_1->X;
+            if (ld->delta_y < 0)
+            {
+                p1 ^= 1;
+                p2 ^= 1;
+            }
+            break;
 
-    case ST_POSITIVE:
-        p1 = P_PointOnDivlineSide(tmbox[BOXLEFT], tmbox[BOXTOP], &div);
-        p2 = P_PointOnDivlineSide(tmbox[BOXRIGHT], tmbox[BOXBOTTOM], &div);
-        break;
+        case kLineClipPositive:
+            p1 = PointOnDividingLineSide(tmbox[kBoundingBoxLeft],
+                                         tmbox[kBoundingBoxTop], &div);
+            p2 = PointOnDividingLineSide(tmbox[kBoundingBoxRight],
+                                         tmbox[kBoundingBoxBottom], &div);
+            break;
 
-    case ST_NEGATIVE:
-        p1 = P_PointOnDivlineSide(tmbox[BOXRIGHT], tmbox[BOXTOP], &div);
-        p2 = P_PointOnDivlineSide(tmbox[BOXLEFT], tmbox[BOXBOTTOM], &div);
-        break;
+        case kLineClipNegative:
+            p1 = PointOnDividingLineSide(tmbox[kBoundingBoxRight],
+                                         tmbox[kBoundingBoxTop], &div);
+            p2 = PointOnDividingLineSide(tmbox[kBoundingBoxLeft],
+                                         tmbox[kBoundingBoxBottom], &div);
+            break;
     }
 
-    if (p1 == p2)
-        return p1;
+    if (p1 == p2) return p1;
 
     return -1;
 }
 
 //
-// P_BoxOnDivLineSide
+// BoxOnDividingLineSide
 //
 // Considers the line to be infinite
 // Returns side 0 or 1, -1 if box crosses the line.
 //
-int P_BoxOnDivLineSide(const float *tmbox, divline_t *div)
+int BoxOnDividingLineSide(const float *tmbox, DividingLine *div)
 {
     int p1 = 0;
     int p2 = 0;
 
-    if (AlmostEquals(div->dy, 0.0f))
+    if (AlmostEquals(div->delta_y, 0.0f))
     {
-        p1 = tmbox[BOXTOP] > div->y;
-        p2 = tmbox[BOXBOTTOM] > div->y;
+        p1 = tmbox[kBoundingBoxTop] > div->y;
+        p2 = tmbox[kBoundingBoxBottom] > div->y;
 
-        if (div->dx < 0)
+        if (div->delta_x < 0)
         {
             p1 ^= 1;
             p2 ^= 1;
         }
     }
-    else if (AlmostEquals(div->dx, 0.0f))
+    else if (AlmostEquals(div->delta_x, 0.0f))
     {
-        p1 = tmbox[BOXRIGHT] < div->x;
-        p2 = tmbox[BOXLEFT] < div->x;
+        p1 = tmbox[kBoundingBoxRight] < div->x;
+        p2 = tmbox[kBoundingBoxLeft] < div->x;
 
-        if (div->dy < 0)
+        if (div->delta_y < 0)
         {
             p1 ^= 1;
             p2 ^= 1;
         }
     }
-    else if (div->dy / div->dx > 0) // optimise ?
+    else if (div->delta_y / div->delta_x > 0)  // optimise ?
     {
-        p1 = P_PointOnDivlineSide(tmbox[BOXLEFT], tmbox[BOXTOP], div);
-        p2 = P_PointOnDivlineSide(tmbox[BOXRIGHT], tmbox[BOXBOTTOM], div);
+        p1 = PointOnDividingLineSide(tmbox[kBoundingBoxLeft],
+                                     tmbox[kBoundingBoxTop], div);
+        p2 = PointOnDividingLineSide(tmbox[kBoundingBoxRight],
+                                     tmbox[kBoundingBoxBottom], div);
     }
     else
     {
-        p1 = P_PointOnDivlineSide(tmbox[BOXRIGHT], tmbox[BOXTOP], div);
-        p2 = P_PointOnDivlineSide(tmbox[BOXLEFT], tmbox[BOXBOTTOM], div);
+        p1 = PointOnDividingLineSide(tmbox[kBoundingBoxRight],
+                                     tmbox[kBoundingBoxTop], div);
+        p2 = PointOnDividingLineSide(tmbox[kBoundingBoxLeft],
+                                     tmbox[kBoundingBoxBottom], div);
     }
 
-    if (p1 == p2)
-        return p1;
+    if (p1 == p2) return p1;
 
     return -1;
 }
 
-int P_ThingOnLineSide(const mobj_t *mo, line_t *ld)
+int ThingOnLineSide(const MapObject *mo, Line *ld)
 {
     float bbox[4];
 
-    bbox[BOXLEFT]   = mo->x - mo->radius;
-    bbox[BOXRIGHT]  = mo->x + mo->radius;
-    bbox[BOXBOTTOM] = mo->y - mo->radius;
-    bbox[BOXTOP]    = mo->y + mo->radius;
+    bbox[kBoundingBoxLeft]   = mo->x - mo->radius_;
+    bbox[kBoundingBoxRight]  = mo->x + mo->radius_;
+    bbox[kBoundingBoxBottom] = mo->y - mo->radius_;
+    bbox[kBoundingBoxTop]    = mo->y + mo->radius_;
 
-    return P_BoxOnLineSide(bbox, ld);
+    return BoxOnLineSide(bbox, ld);
 }
 
 //------------------------------------------------------------------------
@@ -319,169 +322,157 @@ int P_ThingOnLineSide(const mobj_t *mo, line_t *ld)
 //  GAP UTILITY FUNCTIONS
 //
 
-static int GAP_RemoveSolid(vgap_t *dest, int d_num, float z1, float z2)
+static int GapRemoveSolid(VerticalGap *dest, int d_num, float z1, float z2)
 {
-    int    d;
-    int    new_num = 0;
-    vgap_t new_gaps[100];
+    int         d;
+    int         new_num = 0;
+    VerticalGap new_gaps[100];
 
 #ifdef DEVELOPERS
-    if (z1 > z2)
-        I_Error("RemoveSolid: z1 > z2");
+    if (z1 > z2) FatalError("RemoveSolid: z1 > z2");
 #endif
 
     for (d = 0; d < d_num; d++)
     {
-        if (dest[d].c <= dest[d].f)
-            continue; // ignore empty gaps.
+        if (dest[d].ceiling <= dest[d].floor) continue;  // ignore empty gaps.
 
-        if (z1 <= dest[d].f && z2 >= dest[d].c)
-            continue; // completely blocks it.
+        if (z1 <= dest[d].floor && z2 >= dest[d].ceiling)
+            continue;  // completely blocks it.
 
-        if (z1 >= dest[d].c || z2 <= dest[d].f)
+        if (z1 >= dest[d].ceiling || z2 <= dest[d].floor)
         {
             // no intersection.
 
-            new_gaps[new_num].f = dest[d].f;
-            new_gaps[new_num].c = dest[d].c;
+            new_gaps[new_num].floor   = dest[d].floor;
+            new_gaps[new_num].ceiling = dest[d].ceiling;
             new_num++;
             continue;
         }
 
         // partial intersections.
 
-        if (z1 > dest[d].f)
+        if (z1 > dest[d].floor)
         {
-            new_gaps[new_num].f = dest[d].f;
-            new_gaps[new_num].c = z1;
+            new_gaps[new_num].floor   = dest[d].floor;
+            new_gaps[new_num].ceiling = z1;
             new_num++;
         }
 
-        if (z2 < dest[d].c)
+        if (z2 < dest[d].ceiling)
         {
-            new_gaps[new_num].f = z2;
-            new_gaps[new_num].c = dest[d].c;
+            new_gaps[new_num].floor   = z2;
+            new_gaps[new_num].ceiling = dest[d].ceiling;
             new_num++;
         }
     }
 
-    memmove(dest, new_gaps, new_num * sizeof(vgap_t));
+    memmove(dest, new_gaps, new_num * sizeof(VerticalGap));
 
     return new_num;
 }
 
-static int GAP_Construct(vgap_t *gaps, sector_t *sec, mobj_t *thing, float f_slope_z = 0, float c_slope_z = 0)
+static int GapConstruct(VerticalGap *gaps, Sector *sec, MapObject *thing,
+                        float floor_slope_z = 0, float ceiling_slope_z = 0)
 {
-    extrafloor_t *ef;
+    Extrafloor *ef;
 
     int num = 1;
 
     // early out for FUBAR sectors
-    if (sec->f_h >= sec->c_h)
-        return 0;
+    if (sec->floor_height >= sec->ceiling_height) return 0;
 
-    gaps[0].f = sec->f_h + f_slope_z;
-    gaps[0].c = sec->c_h - c_slope_z;
+    gaps[0].floor   = sec->floor_height + floor_slope_z;
+    gaps[0].ceiling = sec->ceiling_height - ceiling_slope_z;
 
-    for (ef = sec->bottom_ef; ef; ef = ef->higher)
+    for (ef = sec->bottom_extrafloor; ef; ef = ef->higher)
     {
-        num = GAP_RemoveSolid(gaps, num, ef->bottom_h, ef->top_h);
+        num = GapRemoveSolid(gaps, num, ef->bottom_height, ef->top_height);
     }
 
     // -- handle WATER WALKERS --
 
-    if (!thing || !(thing->extendedflags & EF_WATERWALKER))
+    if (!thing || !(thing->extended_flags_ & kExtendedFlagWaterWalker))
         return num;
 
-    for (ef = sec->bottom_liq; ef; ef = ef->higher)
+    for (ef = sec->bottom_liquid; ef; ef = ef->higher)
     {
-        if (ef->ef_info && (ef->ef_info->type & EXFL_Water))
+        if (ef->extrafloor_definition &&
+            (ef->extrafloor_definition->type_ & kExtraFloorTypeWater))
         {
-            num = GAP_RemoveSolid(gaps, num, ef->bottom_h, ef->top_h);
+            num = GapRemoveSolid(gaps, num, ef->bottom_height, ef->top_height);
         }
     }
 
     return num;
 }
 
-static int GAP_SightConstruct(vgap_t *gaps, sector_t *sec)
+static int GapSightConstruct(VerticalGap *gaps, Sector *sec)
 {
-    extrafloor_t *ef;
+    Extrafloor *ef;
 
     int num = 1;
 
     // early out for closed or FUBAR sectors
-    if (sec->c_h <= sec->f_h)
-        return 0;
+    if (sec->ceiling_height <= sec->floor_height) return 0;
 
-    gaps[0].f = sec->f_h;
-    gaps[0].c = sec->c_h;
+    gaps[0].floor   = sec->floor_height;
+    gaps[0].ceiling = sec->ceiling_height;
 
-    for (ef = sec->bottom_ef; ef; ef = ef->higher)
+    for (ef = sec->bottom_extrafloor; ef; ef = ef->higher)
     {
-        if (!ef->ef_info || !(ef->ef_info->type & EXFL_SeeThrough))
-            num = GAP_RemoveSolid(gaps, num, ef->bottom_h, ef->top_h);
+        if (!ef->extrafloor_definition ||
+            !(ef->extrafloor_definition->type_ & kExtraFloorTypeSeeThrough))
+            num = GapRemoveSolid(gaps, num, ef->bottom_height, ef->top_height);
     }
 
-    for (ef = sec->bottom_liq; ef; ef = ef->higher)
+    for (ef = sec->bottom_liquid; ef; ef = ef->higher)
     {
-        if (!ef->ef_info || !(ef->ef_info->type & EXFL_SeeThrough))
-            num = GAP_RemoveSolid(gaps, num, ef->bottom_h, ef->top_h);
+        if (!ef->extrafloor_definition ||
+            !(ef->extrafloor_definition->type_ & kExtraFloorTypeSeeThrough))
+            num = GapRemoveSolid(gaps, num, ef->bottom_height, ef->top_height);
     }
 
     return num;
 }
 
-static int GAP_Restrict(vgap_t *dest, int d_num, vgap_t *src, int s_num)
+static int GapRestrict(VerticalGap *dest, int d_num, VerticalGap *src,
+                       int s_num)
 {
     int   d, s;
     float f, c;
 
-    int    new_num = 0;
-    vgap_t new_gaps[100];
+    int         new_num = 0;
+    VerticalGap new_gaps[100];
 
     for (s = 0; s < s_num; s++)
     {
         // ignore empty gaps.
-        if (src[s].c <= src[s].f)
-            continue;
+        if (src[s].ceiling <= src[s].floor) continue;
 
         for (d = 0; d < d_num; d++)
         {
             // ignore empty gaps.
-            if (dest[d].c <= dest[d].f)
-                continue;
+            if (dest[d].ceiling <= dest[d].floor) continue;
 
-            f = HMM_MAX(src[s].f, dest[d].f);
-            c = HMM_MIN(src[s].c, dest[d].c);
+            f = HMM_MAX(src[s].floor, dest[d].floor);
+            c = HMM_MIN(src[s].ceiling, dest[d].ceiling);
 
             if (f < c)
             {
-                new_gaps[new_num].c = c;
-                new_gaps[new_num].f = f;
+                new_gaps[new_num].ceiling = c;
+                new_gaps[new_num].floor   = f;
                 new_num++;
             }
         }
     }
 
-    memmove(dest, new_gaps, new_num * sizeof(vgap_t));
+    memmove(dest, new_gaps, new_num * sizeof(VerticalGap));
 
     return new_num;
 }
 
-#if 0 // DEBUG ONLY
-static void GAP_Dump(vgap_t *gaps, int num)
-{
-	int j;
-
-	for (j=0; j < num; j++)
-		L_WriteDebug("  GAP %d/%d  %1.1f .. %1.1f\n", j+1, num,
-		gaps[j].f, gaps[j].c);
-}
-#endif
-
 //
-// P_FindThingGap
+// FindThingGap
 //
 // Find the best gap that the thing could fit in, given a certain Z
 // position (z1 is foot, z2 is head).  Assuming at least two gaps exist,
@@ -500,7 +491,7 @@ static void GAP_Dump(vgap_t *gaps, int num)
 //
 // Returns the gap number, or -1 if there are no gaps at all.
 //
-int P_FindThingGap(vgap_t *gaps, int gap_num, float z1, float z2)
+int FindThingGap(VerticalGap *gaps, int gap_num, float z1, float z2)
 {
     int   i;
     float dist;
@@ -516,33 +507,27 @@ int P_FindThingGap(vgap_t *gaps, int gap_num, float z1, float z2)
 
     // check for trivial gaps...
 
-    if (gap_num == 0)
-    {
-        return -1;
-    }
-    else if (gap_num == 1)
-    {
-        return 0;
-    }
+    if (gap_num == 0) { return -1; }
+    else if (gap_num == 1) { return 0; }
 
     // There are 2 or more gaps.  Now it gets interesting :-)
 
     for (i = 0; i < gap_num; i++)
     {
-        if (z1 >= gaps[i].f && z2 <= gaps[i].c)
-        { // [1]
+        if (z1 >= gaps[i].floor && z2 <= gaps[i].ceiling)
+        {  // [1]
             return i;
         }
 
-        dist = HMM_ABS(z1 - gaps[i].f);
+        dist = HMM_ABS(z1 - gaps[i].floor);
 
-        if (z2 - z1 <= gaps[i].c - gaps[i].f)
-        { // [2]
+        if (z2 - z1 <= gaps[i].ceiling - gaps[i].floor)
+        {  // [2]
             fit_num++;
 
             fit_last = i;
             if (dist < fit_mindist)
-            { // [3]
+            {  // [3]
                 fit_mindist = dist;
                 fit_closest = i;
             }
@@ -550,7 +535,7 @@ int P_FindThingGap(vgap_t *gaps, int gap_num, float z1, float z2)
         else
         {
             if (dist < nofit_mindist)
-            { // [4]
+            {  // [4]
                 nofit_mindist = dist;
                 nofit_closest = i;
             }
@@ -566,58 +551,58 @@ int P_FindThingGap(vgap_t *gaps, int gap_num, float z1, float z2)
 }
 
 //
-// P_ComputeThingGap
+// ComputeThingGap
 //
 // Determine the initial floorz and ceilingz that a thing placed at a
 // particular Z would have.  Returns the nominal Z height.  Some special
-// values of Z are recognised: ONFLOORZ & ONCEILINGZ.
+// values of Z are recognised: kOnFloorZ & kOnCeilingZ.
 //
-float P_ComputeThingGap(mobj_t *thing, sector_t *sec, float z, float *f, float *c, float f_slope_z, float c_slope_z)
+float ComputeThingGap(MapObject *thing, Sector *sec, float z, float *f,
+                      float *c, float floor_slope_z, float ceiling_slope_z)
 {
-    vgap_t temp_gaps[100];
-    int    temp_num;
+    VerticalGap temp_gaps[100];
+    int         temp_num;
 
-    temp_num = GAP_Construct(temp_gaps, sec, thing, f_slope_z, c_slope_z);
+    temp_num =
+        GapConstruct(temp_gaps, sec, thing, floor_slope_z, ceiling_slope_z);
 
-    if (AlmostEquals(z, ONFLOORZ))
-        z = sec->f_h;
+    if (AlmostEquals(z, kOnFloorZ)) z = sec->floor_height;
 
-    if (AlmostEquals(z, ONCEILINGZ))
-        z = sec->c_h - thing->height;
+    if (AlmostEquals(z, kOnCeilingZ)) z = sec->ceiling_height - thing->height_;
 
-    temp_num = P_FindThingGap(temp_gaps, temp_num, z, z + thing->height);
+    temp_num = FindThingGap(temp_gaps, temp_num, z, z + thing->height_);
 
     if (temp_num < 0)
     {
         // thing is stuck in a closed door.
-        *f = *c = sec->f_h;
+        *f = *c = sec->floor_height;
         return *f;
     }
 
-    *f = temp_gaps[temp_num].f;
-    *c = temp_gaps[temp_num].c;
+    *f = temp_gaps[temp_num].floor;
+    *c = temp_gaps[temp_num].ceiling;
 
     return z;
 }
 
 //
-// P_ComputeGaps
+// ComputeGaps
 //
 // Determine the gaps between the front & back sectors of the line,
 // taking into account any extra floors.
 //
 // -AJA- 1999/07/19: This replaces P_LineOpening.
 //
-void P_ComputeGaps(line_t *ld)
+void ComputeGaps(Line *ld)
 {
-    sector_t *front = ld->frontsector;
-    sector_t *back  = ld->backsector;
+    Sector *front = ld->front_sector;
+    Sector *back  = ld->back_sector;
 
-    int    temp_num;
-    vgap_t temp_gaps[100];
+    int         temp_num;
+    VerticalGap temp_gaps[100];
 
-    ld->blocked = true;
-    ld->gap_num = 0;
+    ld->blocked    = true;
+    ld->gap_number = 0;
 
     if (!front || !back)
     {
@@ -630,12 +615,14 @@ void P_ComputeGaps(line_t *ld)
     // In particular, the blocked flag can be clear even when one of the
     // sectors is closed (has ceiling <= floor).
 
-    if (back->c_h <= front->f_h || front->c_h <= back->f_h)
+    if (back->ceiling_height <= front->floor_height ||
+        front->ceiling_height <= back->floor_height)
     {
         // closed door.
 
         // -AJA- MUNDO HACK for slopes!!!!
-        if (front->f_slope || back->f_slope || front->c_slope || back->c_slope)
+        if (front->floor_slope || back->floor_slope || front->ceiling_slope ||
+            back->ceiling_slope)
         {
             ld->blocked = false;
         }
@@ -650,173 +637,179 @@ void P_ComputeGaps(line_t *ld)
     // handle horizontal sliders
     if (ld->slide_door)
     {
-        slider_move_t *smov = ld->slider_move;
+        SlidingDoorMover *smov = ld->slider_move;
 
-        if (!smov)
-            return;
+        if (!smov) return;
 
         // these semantics copied from XDoom
-        if (smov->direction > 0 && smov->opening < smov->target * 0.5f)
-            return;
+        if (smov->direction > 0 && smov->opening < smov->target * 0.5f) return;
 
-        if (smov->direction < 0 && smov->opening < smov->target * 0.75f)
-            return;
+        if (smov->direction < 0 && smov->opening < smov->target * 0.75f) return;
     }
 
     // handle normal gaps ("movement" gaps)
 
-    ld->gap_num = GAP_Construct(ld->gaps, front, NULL);
-    temp_num    = GAP_Construct(temp_gaps, back, NULL);
+    ld->gap_number = GapConstruct(ld->gaps, front, nullptr);
+    temp_num       = GapConstruct(temp_gaps, back, nullptr);
 
-    ld->gap_num = GAP_Restrict(ld->gaps, ld->gap_num, temp_gaps, temp_num);
+    ld->gap_number = GapRestrict(ld->gaps, ld->gap_number, temp_gaps, temp_num);
 }
 
 //
-// P_DumpExtraFloors
+// DumpExtraFloors
 //
 #ifdef DEVELOPERS
-void P_DumpExtraFloors(const sector_t *sec)
+void DumpExtraFloors(const sector_t *sec)
 {
     const extrafloor_t *ef;
 
-    L_WriteDebug("EXTRAFLOORS IN Sector %d  (%d used, %d max)\n", (int)(sec - sectors), sec->exfloor_used,
-                 sec->exfloor_max);
+    LogDebug("EXTRAFLOORS IN Sector %d  (%d used, %d max)\n",
+             (int)(sec - sectors), sec->extrafloor_used,
+             sec->extrafloor_maximum);
 
-    L_WriteDebug("  Basic height: %1.1f .. %1.1f\n", sec->f_h, sec->c_h);
+    LogDebug("  Basic height: %1.1f .. %1.1f\n", sec->floor_height,
+             sec->ceiling_height);
 
-    for (ef = sec->bottom_ef; ef; ef = ef->higher)
+    for (ef = sec->bottom_extrafloor; ef; ef = ef->higher)
     {
-        L_WriteDebug("  Solid %s: %1.1f .. %1.1f\n", (ef->ef_info->type & EXFL_Thick) ? "Thick" : "Thin", ef->bottom_h,
-                     ef->top_h);
+        LogDebug("  Solid %s: %1.1f .. %1.1f\n",
+                 (ef->extrafloor_definition->type & kExtraFloorTypeThick)
+                     ? "Thick"
+                     : "Thin",
+                 ef->bottom_height, ef->top_height);
     }
 
-    for (ef = sec->bottom_liq; ef; ef = ef->higher)
+    for (ef = sec->bottom_liquid; ef; ef = ef->higher)
     {
-        L_WriteDebug("  Liquid %s: %1.1f .. %1.1f\n", (ef->ef_info->type & EXFL_Thick) ? "Thick" : "Thin", ef->bottom_h,
-                     ef->top_h);
+        LogDebug("  Liquid %s: %1.1f .. %1.1f\n",
+                 (ef->extrafloor_definition->type & kExtraFloorTypeThick)
+                     ? "Thick"
+                     : "Thin",
+                 ef->bottom_height, ef->top_height);
     }
 }
 #endif
 
 //
-// P_ExtraFloorFits
+// CheckExtrafloorFit
 //
 // Check if a solid extrafloor fits.
 //
-exfloor_fit_e P_ExtraFloorFits(sector_t *sec, float z1, float z2)
+ExtrafloorFit CheckExtrafloorFit(Sector *sec, float z1, float z2)
 {
-    extrafloor_t *ef;
+    Extrafloor *ef;
 
-    if (z2 > sec->c_h)
-        return EXFIT_StuckInCeiling;
+    if (z2 > sec->ceiling_height) return kFitStuckInCeiling;
 
-    if (z1 < sec->f_h)
-        return EXFIT_StuckInFloor;
+    if (z1 < sec->floor_height) return kFitStuckInFloor;
 
-    for (ef = sec->bottom_ef; ef && ef->higher; ef = ef->higher)
+    for (ef = sec->bottom_extrafloor; ef && ef->higher; ef = ef->higher)
     {
-        float bottom = ef->bottom_h;
-        float top    = ef->top_h;
+        float bottom = ef->bottom_height;
+        float top    = ef->top_height;
 
-        SYS_ASSERT(top >= bottom);
+        EPI_ASSERT(top >= bottom);
 
         // here is another solid extrafloor, check for overlap
-        if (z2 > bottom && z1 < top)
-            return EXFIT_StuckInExtraFloor;
+        if (z2 > bottom && z1 < top) return kFitStuckInExtraFloor;
     }
 
-    return EXFIT_Ok;
+    return kFitOk;
 }
 
-void P_AddExtraFloor(sector_t *sec, line_t *line)
+void AddExtraFloor(Sector *sec, Line *line)
 {
-    sector_t              *ctrl = line->frontsector;
-    const extrafloordef_c *ef_info;
+    Sector                     *ctrl = line->front_sector;
+    const ExtraFloorDefinition *ef_info;
 
-    surface_t    *top, *bottom;
-    extrafloor_t *newbie, *cur;
+    MapSurface *top, *bottom;
+    Extrafloor *newbie, *cur;
 
     bool          liquid;
-    exfloor_fit_e errcode;
+    ExtrafloorFit errcode;
 
-    SYS_ASSERT(line->special);
-    SYS_ASSERT(line->special->ef.type & EXFL_Present);
+    EPI_ASSERT(line->special);
+    EPI_ASSERT(line->special->ef_.type_ & kExtraFloorTypePresent);
 
-    ef_info = &line->special->ef;
+    ef_info = &line->special->ef_;
 
     //
     // -- create new extrafloor --
     //
 
-    SYS_ASSERT(sec->exfloor_used <= sec->exfloor_max);
+    EPI_ASSERT(sec->extrafloor_used <= sec->extrafloor_maximum);
 
-    if (sec->exfloor_used == sec->exfloor_max)
-        I_Error("INTERNAL ERROR: extrafloor overflow in sector %d\n", (int)(sec - sectors));
+    if (sec->extrafloor_used == sec->extrafloor_maximum)
+        FatalError("INTERNAL ERROR: extrafloor overflow in sector %d\n",
+                   (int)(sec - level_sectors));
 
-    newbie = sec->exfloor_first + sec->exfloor_used;
-    sec->exfloor_used++;
+    newbie = sec->extrafloor_first + sec->extrafloor_used;
+    sec->extrafloor_used++;
 
-    Z_Clear(newbie, extrafloor_t, 1);
+    EPI_CLEAR_MEMORY(newbie, Extrafloor, 1);
 
     bottom = &ctrl->floor;
-    top    = (ef_info->type & EXFL_Thick) ? &ctrl->ceil : bottom;
+    top    = (ef_info->type_ & kExtraFloorTypeThick) ? &ctrl->ceiling : bottom;
 
     // Handle the BOOMTEX flag (Boom compatibility)
-    if (ef_info->type & EXFL_BoomTex)
+    if (ef_info->type_ & kExtraFloorTypeBoomTex)
     {
-        bottom = &ctrl->ceil;
+        bottom = &ctrl->ceiling;
         top    = &sec->floor;
     }
 
-    newbie->bottom_h = ctrl->f_h;
-    newbie->top_h    = (ef_info->type & EXFL_Thick) ? ctrl->c_h : newbie->bottom_h;
+    newbie->bottom_height = ctrl->floor_height;
+    newbie->top_height    = (ef_info->type_ & kExtraFloorTypeThick)
+                                ? ctrl->ceiling_height
+                                : newbie->bottom_height;
 
-    if (newbie->top_h < newbie->bottom_h)
-        I_Error("Bad Extrafloor in sector #%d: "
-                "z range is %1.0f / %1.0f\n",
-                (int)(sec - sectors), newbie->bottom_h, newbie->top_h);
+    if (newbie->top_height < newbie->bottom_height)
+        FatalError(
+            "Bad Extrafloor in sector #%d: "
+            "z range is %1.0f / %1.0f\n",
+            (int)(sec - level_sectors), newbie->bottom_height,
+            newbie->top_height);
 
     newbie->sector = sec;
     newbie->top    = top;
     newbie->bottom = bottom;
 
-    newbie->p       = &ctrl->props;
-    newbie->ef_info = ef_info;
-    newbie->ef_line = line;
+    newbie->properties            = &ctrl->properties;
+    newbie->extrafloor_definition = ef_info;
+    newbie->extrafloor_line       = line;
 
     // Insert into the dummy's linked list
-    newbie->ctrl_next    = ctrl->control_floors;
-    ctrl->control_floors = newbie;
+    newbie->control_sector_next = ctrl->control_floors;
+    ctrl->control_floors        = newbie;
 
     //
     // -- handle liquid extrafloors --
     //
 
-    liquid = (ef_info->type & EXFL_Liquid) ? true : false;
+    liquid = (ef_info->type_ & kExtraFloorTypeLiquid) ? true : false;
 
     if (liquid)
     {
         // find place to link into.  cur will be the next higher liquid,
-        // or NULL if this is the highest.
+        // or nullptr if this is the highest.
 
-        for (cur = sec->bottom_liq; cur; cur = cur->higher)
+        for (cur = sec->bottom_liquid; cur; cur = cur->higher)
         {
-            if (cur->bottom_h > newbie->bottom_h)
-                break;
+            if (cur->bottom_height > newbie->bottom_height) break;
         }
 
         newbie->higher = cur;
-        newbie->lower  = cur ? cur->lower : sec->top_liq;
+        newbie->lower  = cur ? cur->lower : sec->top_liquid;
 
         if (newbie->higher)
             newbie->higher->lower = newbie;
         else
-            sec->top_liq = newbie;
+            sec->top_liquid = newbie;
 
         if (newbie->lower)
             newbie->lower->higher = newbie;
         else
-            sec->bottom_liq = newbie;
+            sec->bottom_liquid = newbie;
 
         return;
     }
@@ -826,68 +819,74 @@ void P_AddExtraFloor(sector_t *sec, line_t *line)
     //
 
     // check if fits
-    errcode = P_ExtraFloorFits(sec, newbie->bottom_h, newbie->top_h);
+    errcode =
+        CheckExtrafloorFit(sec, newbie->bottom_height, newbie->top_height);
 
     switch (errcode)
     {
-    case EXFIT_Ok:
-        break;
+        case kFitOk:
+            break;
 
-    case EXFIT_StuckInCeiling:
-        I_Warning("Extrafloor with z range of %1.0f / %1.0f is stuck "
-                  "in sector #%d's ceiling.\n",
-                  newbie->bottom_h, newbie->top_h, (int)(sec - sectors));
+        case kFitStuckInCeiling:
+            LogWarning(
+                "Extrafloor with z range of %1.0f / %1.0f is stuck "
+                "in sector #%d's ceiling.\n",
+                newbie->bottom_height, newbie->top_height,
+                (int)(sec - level_sectors));
 
-    case EXFIT_StuckInFloor:
-        I_Warning("Extrafloor with z range of %1.0f / %1.0f is stuck "
-                  "in sector #%d's floor.\n",
-                  newbie->bottom_h, newbie->top_h, (int)(sec - sectors));
+        case kFitStuckInFloor:
+            LogWarning(
+                "Extrafloor with z range of %1.0f / %1.0f is stuck "
+                "in sector #%d's floor.\n",
+                newbie->bottom_height, newbie->top_height,
+                (int)(sec - level_sectors));
 
-    default:
-        I_Warning("Extrafloor with z range of %1.0f / %1.0f is stuck "
-                  "in sector #%d in another extrafloor.\n",
-                  newbie->bottom_h, newbie->top_h, (int)(sec - sectors));
+        default:
+            LogWarning(
+                "Extrafloor with z range of %1.0f / %1.0f is stuck "
+                "in sector #%d in another extrafloor.\n",
+                newbie->bottom_height, newbie->top_height,
+                (int)(sec - level_sectors));
     }
 
     // find place to link into.  cur will be the next higher extrafloor,
-    // or NULL if this is the highest.
+    // or nullptr if this is the highest.
 
-    for (cur = sec->bottom_ef; cur; cur = cur->higher)
+    for (cur = sec->bottom_extrafloor; cur; cur = cur->higher)
     {
-        if (cur->bottom_h > newbie->bottom_h)
-            break;
+        if (cur->bottom_height > newbie->bottom_height) break;
     }
 
     newbie->higher = cur;
-    newbie->lower  = cur ? cur->lower : sec->top_ef;
+    newbie->lower  = cur ? cur->lower : sec->top_extrafloor;
 
     if (newbie->higher)
         newbie->higher->lower = newbie;
     else
-        sec->top_ef = newbie;
+        sec->top_extrafloor = newbie;
 
     if (newbie->lower)
         newbie->lower->higher = newbie;
     else
-        sec->bottom_ef = newbie;
+        sec->bottom_extrafloor = newbie;
 }
 
-void P_FloodExtraFloors(sector_t *sector)
+void FloodExtraFloors(Sector *sector)
 {
-    extrafloor_t *S, *L, *C;
+    Extrafloor *S, *L, *C;
 
-    region_properties_t *props;
-    region_properties_t *flood_p = NULL, *last_p = NULL;
+    RegionProperties *props;
+    RegionProperties *flood_p = nullptr, *last_p = nullptr;
 
-    sector->p = &sector->props;
+    sector->active_properties = &sector->properties;
 
     // traverse downwards, stagger both lists
-    S = sector->top_ef;
-    L = sector->top_liq;
+    S = sector->top_extrafloor;
+    L = sector->top_liquid;
 
     while (S || L)
     {
-        if (!L || (S && S->bottom_h > L->bottom_h))
+        if (!L || (S && S->bottom_height > L->bottom_height))
         {
             C = S;
             S = S->lower;
@@ -898,85 +897,83 @@ void P_FloodExtraFloors(sector_t *sector)
             L = L->lower;
         }
 
-        SYS_ASSERT(C);
+        EPI_ASSERT(C);
 
-        props = &C->ef_line->frontsector->props;
+        props = &C->extrafloor_line->front_sector->properties;
 
-        if (C->ef_info->type & EXFL_Flooder)
+        if (C->extrafloor_definition->type_ & kExtraFloorTypeFlooder)
         {
-            C->p = last_p = flood_p = props;
+            C->properties = last_p = flood_p = props;
 
-            if ((C->ef_info->type & EXFL_Liquid) && C->bottom_h >= sector->c_h)
-                sector->p = flood_p;
+            if ((C->extrafloor_definition->type_ & kExtraFloorTypeLiquid) &&
+                C->bottom_height >= sector->ceiling_height)
+                sector->active_properties = flood_p;
 
             continue;
         }
 
-        if (C->ef_info->type & EXFL_NoShade)
+        if (C->extrafloor_definition->type_ & kExtraFloorTypeNoShade)
         {
-            if (!last_p)
-                last_p = props;
+            if (!last_p) last_p = props;
 
-            C->p = last_p;
+            C->properties = last_p;
             continue;
         }
 
-        C->p = last_p = flood_p ? flood_p : props;
+        C->properties = last_p = flood_p ? flood_p : props;
     }
 }
 
-void P_RecomputeGapsAroundSector(sector_t *sec)
+void RecomputeGapsAroundSector(Sector *sec)
 {
     int i;
 
-    for (i = 0; i < sec->linecount; i++)
-    {
-        P_ComputeGaps(sec->lines[i]);
-    }
+    for (i = 0; i < sec->line_count; i++) { ComputeGaps(sec->lines[i]); }
 
     // now do the sight gaps...
 
-    if (sec->c_h <= sec->f_h)
+    if (sec->ceiling_height <= sec->floor_height)
     {
-        sec->sight_gap_num = 0;
+        sec->sight_gap_number = 0;
         return;
     }
 
-    sec->sight_gap_num = GAP_SightConstruct(sec->sight_gaps, sec);
+    sec->sight_gap_number = GapSightConstruct(sec->sight_gaps, sec);
 }
 
-static inline bool PST_CheckBBox(float *bspcoord, float *test)
+static inline bool CheckBoundingBoxOverlap(float *bspcoord, float *test)
 {
-    return (test[BOXRIGHT] < bspcoord[BOXLEFT] || test[BOXLEFT] > bspcoord[BOXRIGHT] ||
-            test[BOXTOP] < bspcoord[BOXBOTTOM] || test[BOXBOTTOM] > bspcoord[BOXTOP])
+    return (test[kBoundingBoxRight] < bspcoord[kBoundingBoxLeft] ||
+            test[kBoundingBoxLeft] > bspcoord[kBoundingBoxRight] ||
+            test[kBoundingBoxTop] < bspcoord[kBoundingBoxBottom] ||
+            test[kBoundingBoxBottom] > bspcoord[kBoundingBoxTop])
                ? false
                : true;
 }
 
-static bool TraverseSubsec(unsigned int bspnum, float *bbox, bool (*func)(mobj_t *mo))
+static bool TraverseSubsector(unsigned int bspnum, float *bbox,
+                              bool (*func)(MapObject *mo))
 {
-    subsector_t *sub;
-    node_t      *node;
-    mobj_t      *obj;
+    Subsector *sub;
+    BspNode   *node;
+    MapObject *obj;
 
     // just a normal node ?
-    if (!(bspnum & NF_V5_SUBSECTOR))
+    if (!(bspnum & kLeafSubsector))
     {
-        node = nodes + bspnum;
+        node = level_nodes + bspnum;
 
         // recursively check the children nodes
         // OPTIMISE: check against partition lines instead of bboxes.
 
-        if (PST_CheckBBox(node->bbox[0], bbox))
+        if (CheckBoundingBoxOverlap(node->bounding_boxes[0], bbox))
         {
-            if (!TraverseSubsec(node->children[0], bbox, func))
-                return false;
+            if (!TraverseSubsector(node->children[0], bbox, func)) return false;
         }
 
-        if (PST_CheckBBox(node->bbox[1], bbox))
+        if (CheckBoundingBoxOverlap(node->bounding_boxes[1], bbox))
         {
-            if (!TraverseSubsec(node->children[1], bbox, func))
-                return false;
+            if (!TraverseSubsector(node->children[1], bbox, func)) return false;
         }
 
         return true;
@@ -984,19 +981,18 @@ static bool TraverseSubsec(unsigned int bspnum, float *bbox, bool (*func)(mobj_t
 
     // the sharp end: check all things in the subsector
 
-    sub = subsectors + (bspnum & ~NF_V5_SUBSECTOR);
+    sub = level_subsectors + (bspnum & ~kLeafSubsector);
 
-    for (obj = sub->thinglist; obj; obj = obj->snext)
+    for (obj = sub->thing_list; obj; obj = obj->subsector_next_)
     {
-        if (!(*func)(obj))
-            return false;
+        if (!(*func)(obj)) return false;
     }
 
     return true;
 }
 
 //
-// P_SubsecThingIterator
+// SubsectorThingIterator
 //
 // Iterate over all things that touch a certain rectangle on the map,
 // using the BSP tree.
@@ -1004,95 +1000,97 @@ static bool TraverseSubsec(unsigned int bspnum, float *bbox, bool (*func)(mobj_t
 // If any function returns false, then this routine returns false and
 // nothing else is checked.  Otherwise true is returned.
 //
-bool P_SubsecThingIterator(float *bbox, bool (*func)(mobj_t *mo))
+bool SubsectorThingIterator(float *bbox, bool (*func)(MapObject *mo))
 {
-    return TraverseSubsec(root_node, bbox, func);
+    return TraverseSubsector(root_node, bbox, func);
 }
 
-static float   checkempty_bbox[4];
-static line_t *checkempty_line;
+static float checkempty_bbox[4];
+static Line *checkempty_line;
 
-static bool PST_CheckThingArea(mobj_t *mo)
+static bool CheckThingInArea(MapObject *mo)
 {
-    if (mo->x + mo->radius < checkempty_bbox[BOXLEFT] || mo->x - mo->radius > checkempty_bbox[BOXRIGHT] ||
-        mo->y + mo->radius < checkempty_bbox[BOXBOTTOM] || mo->y - mo->radius > checkempty_bbox[BOXTOP])
+    if (mo->x + mo->radius_ < checkempty_bbox[kBoundingBoxLeft] ||
+        mo->x - mo->radius_ > checkempty_bbox[kBoundingBoxRight] ||
+        mo->y + mo->radius_ < checkempty_bbox[kBoundingBoxBottom] ||
+        mo->y - mo->radius_ > checkempty_bbox[kBoundingBoxTop])
     {
         // keep looking
         return true;
     }
 
     // ignore corpses and pickup items
-    if (!(mo->flags & MF_SOLID) && (mo->flags & MF_CORPSE))
+    if (!(mo->flags_ & kMapObjectFlagSolid) &&
+        (mo->flags_ & kMapObjectFlagCorpse))
         return true;
 
-    if (mo->flags & MF_SPECIAL)
-        return true;
+    if (mo->flags_ & kMapObjectFlagSpecial) return true;
 
     // we've found a thing in that area: we can stop now
     return false;
 }
 
-static bool PST_CheckThingLine(mobj_t *mo)
+static bool CheckThingOnLine(MapObject *mo)
 {
     float bbox[4];
     int   side;
 
-    bbox[BOXLEFT]   = mo->x - mo->radius;
-    bbox[BOXRIGHT]  = mo->x + mo->radius;
-    bbox[BOXBOTTOM] = mo->y - mo->radius;
-    bbox[BOXTOP]    = mo->y + mo->radius;
+    bbox[kBoundingBoxLeft]   = mo->x - mo->radius_;
+    bbox[kBoundingBoxRight]  = mo->x + mo->radius_;
+    bbox[kBoundingBoxBottom] = mo->y - mo->radius_;
+    bbox[kBoundingBoxTop]    = mo->y + mo->radius_;
 
     // found a thing on the line ?
-    side = P_BoxOnLineSide(bbox, checkempty_line);
+    side = BoxOnLineSide(bbox, checkempty_line);
 
-    if (side != -1)
-        return true;
+    if (side != -1) return true;
 
     // ignore corpses and pickup items
-    if (!(mo->flags & MF_SOLID) && (mo->flags & MF_CORPSE))
+    if (!(mo->flags_ & kMapObjectFlagSolid) &&
+        (mo->flags_ & kMapObjectFlagCorpse))
         return true;
 
-    if (mo->flags & MF_SPECIAL)
-        return true;
+    if (mo->flags_ & kMapObjectFlagSpecial) return true;
 
     return false;
 }
 
 //
-// P_ThingsInArea
+// CheckAreaForThings
 //
 // Checks if there are any things contained within the given rectangle
 // on the 2D map.
 //
-bool P_ThingsInArea(float *bbox)
+bool CheckAreaForThings(float *bbox)
 {
-    checkempty_bbox[BOXLEFT]   = bbox[BOXLEFT];
-    checkempty_bbox[BOXRIGHT]  = bbox[BOXRIGHT];
-    checkempty_bbox[BOXBOTTOM] = bbox[BOXBOTTOM];
-    checkempty_bbox[BOXTOP]    = bbox[BOXTOP];
+    checkempty_bbox[kBoundingBoxLeft]   = bbox[kBoundingBoxLeft];
+    checkempty_bbox[kBoundingBoxRight]  = bbox[kBoundingBoxRight];
+    checkempty_bbox[kBoundingBoxBottom] = bbox[kBoundingBoxBottom];
+    checkempty_bbox[kBoundingBoxTop]    = bbox[kBoundingBoxTop];
 
-    return !P_SubsecThingIterator(bbox, PST_CheckThingArea);
+    return !SubsectorThingIterator(bbox, CheckThingInArea);
 }
 
 //
-// P_ThingsOnSliderPath
+// CheckSliderPathForThings
 //
 //
-bool P_ThingsOnSliderPath(line_t *ld)
+bool CheckSliderPathForThings(Line *ld)
 {
-    line_t *temp_line = new line_t;
-    memcpy(temp_line, ld, sizeof(line_t));
-    temp_line->bbox[BOXLEFT] -= 32;
-    temp_line->bbox[BOXRIGHT] += 32;
-    temp_line->bbox[BOXBOTTOM] -= 32;
-    temp_line->bbox[BOXTOP] += 32;
+    Line *temp_line = new Line;
+    memcpy(temp_line, ld, sizeof(Line));
+    temp_line->bounding_box[kBoundingBoxLeft] -= 32;
+    temp_line->bounding_box[kBoundingBoxRight] += 32;
+    temp_line->bounding_box[kBoundingBoxBottom] -= 32;
+    temp_line->bounding_box[kBoundingBoxTop] += 32;
 
     checkempty_line = temp_line;
 
-    bool slider_check = P_SubsecThingIterator(temp_line->bbox, PST_CheckThingLine);
+    bool slider_check =
+        SubsectorThingIterator(temp_line->bounding_box, CheckThingOnLine);
 
     delete temp_line;
-    temp_line = NULL;
+    temp_line = nullptr;
 
     return !slider_check;
 }

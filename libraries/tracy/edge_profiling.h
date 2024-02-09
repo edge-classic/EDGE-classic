@@ -5,29 +5,29 @@
 
 struct ECFrameStats
 {
-	int draw_runits;
+	int draw_render_units;
 	int draw_planes;
-	int draw_wallparts;
+	int draw_wall_parts;
 	int draw_things;
-	int draw_lightiterator;
-	int draw_sectorglowiterator;
-	int draw_statechange;
-	int draw_texchange;
+	int draw_light_iterator;
+	int draw_sector_glow_iterator;
+	int draw_state_change;
+	int draw_texture_change;
 
 	void Clear()
 	{		
-		draw_runits = 0;
-		draw_wallparts = 0;
+		draw_render_units = 0;
+		draw_wall_parts = 0;
 		draw_planes = 0;
 		draw_things = 0;
-		draw_lightiterator  = 0;
-		draw_sectorglowiterator = 0;
-		draw_statechange = 0;
-		draw_texchange = 0;
+		draw_light_iterator  = 0;
+		draw_sector_glow_iterator = 0;
+		draw_state_change = 0;
+		draw_texture_change = 0;
 	}	
 };
 
-extern ECFrameStats ecframe_stats;
+extern ECFrameStats ec_frame_stats;
 
 #ifdef EDGE_PROFILING
 	

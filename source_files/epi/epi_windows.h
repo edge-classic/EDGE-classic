@@ -16,14 +16,15 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_WIN_H__
-#define __EPI_WIN_H__
+#pragma once
 
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
 #ifndef _WINDOWS
 #define _WINDOWS
 #endif
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #ifndef WIN32
 #define WIN32
 #endif
@@ -34,6 +35,4 @@
 #define _UNICODE
 #endif
 #include <windows.h>
-#endif
-
 #endif

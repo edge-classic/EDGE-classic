@@ -16,29 +16,27 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __R_MDL_H__
-#define __R_MDL_H__
+#pragma once
 
 #include "file.h"
-
-#include "r_defs.h"
 #include "p_mobj.h"
+#include "r_defs.h"
 
 // opaque handle for rest of the engine
-class mdl_model_c;
+class MdlModel;
 
-mdl_model_c *MDL_LoadModel(epi::File *f);
+MdlModel *MdlLoad(epi::File *f);
 
-short MDL_FindFrame(mdl_model_c *md, const char *name);
+short MdlFindFrame(MdlModel *md, const char *name);
 
-void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, int frame1, int frame2, float lerp,
-                     float x, float y, float z, mobj_t *mo, region_properties_t *props, float scale, float aspect,
-                     float bias, int rotation);
+void MdlRenderModel(MdlModel *md, const Image *skin_img, bool is_weapon,
+                    int frame1, int frame2, float lerp, float x, float y,
+                    float z, MapObject *mo, RegionProperties *props,
+                    float scale, float aspect, float bias, int rotation);
 
-void MDL_RenderModel_2D(mdl_model_c *md, const image_c *skin_img, int frame, float x, float y, float xscale,
-                        float yscale, const mobjtype_c *info);
-
-#endif /* __R_MD2_H__ */
+void MdlRenderModel2d(MdlModel *md, const Image *skin_img, int frame, float x,
+                      float y, float xscale, float yscale,
+                      const MapObjectDefinition *info);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

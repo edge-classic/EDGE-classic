@@ -17,8 +17,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __AJBSP_UTILITY_H__
-#define __AJBSP_UTILITY_H__
+#pragma once
 
 namespace ajbsp
 {
@@ -31,9 +30,7 @@ void  UtilFree(void *data);
 // math stuff
 double ComputeAngle(double dx, double dy);
 
-} // namespace ajbsp
-
-#endif /* __AJBSP_UTILITY_H__ */
+}  // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

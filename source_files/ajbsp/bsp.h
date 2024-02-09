@@ -18,11 +18,10 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __AJBSP_BSP_H__
-#define __AJBSP_BSP_H__
+#pragma once
 
-#include "epi.h"
 #include "AlmostEquals.h"
+#include "epi.h"
 
 //
 // Node Build Information Structure
@@ -32,22 +31,22 @@ constexpr uint8_t kSplitCostDefault = 11;
 
 struct BuildInfo
 {
-    bool compress_nodes;
+  bool compress_nodes;
 
-    int split_cost;
+  int split_cost;
 
-    // from here on, various bits of internal state
-    int total_warnings;
-    int total_minor_issues;
+  // from here on, various bits of internal state
+  int total_warnings;
+  int total_minor_issues;
 };
 
 enum BuildResult
 {
-    // everything went peachy keen
-    kBuildOK = 0,
+  // everything went peachy keen
+  kBuildOK = 0,
 
-    // not used at the moment, I think we just throw I_Error if needed - Dasho
-    kBuildError
+  // not used at the moment, I think we just throw I_Error if needed - Dasho
+  kBuildError
 };
 
 namespace ajbsp
@@ -80,9 +79,7 @@ int LevelsInWad();
 // kBuildError
 BuildResult BuildLevel(int level_index);
 
-} // namespace ajbsp
-
-#endif /* __AJBSP_BSP_H__ */
+}  // namespace ajbsp
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

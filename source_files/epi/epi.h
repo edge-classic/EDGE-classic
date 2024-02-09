@@ -75,15 +75,6 @@ void I_Debugf(const char *message, ...) GCCATTR((format(printf, 1, 2)));
 //
 #define Z_Clear(ptr, type, num) memset((void *)(ptr), ((ptr) - ((type *)(ptr))), (num) * sizeof(type))
 
-//
-// Z_StrNCpy
-//
-// Copies up to max characters of src into dest, and then applies a
-// terminating zero (so dest must hold at least max+1 characters).
-// The terminating zero is always applied (there is no reason not to)
-//
-#define Z_StrNCpy(dest, src, max) (void)(strncpy((dest), (src), (max)), (dest)[(max)] = 0)
-
 #endif /* __EDGE_PLATFORM_INTERFACE__ */
 
 //--- editor settings ---

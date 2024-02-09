@@ -32,7 +32,6 @@
 #include "deh_patch.h"
 #include "deh_system.h"
 #include "deh_things.h"
-#include "deh_util.h"
 
 #include <string.h>
 
@@ -139,8 +138,8 @@ void ammo::AlterAmmo(int new_val)
 
     SYS_ASSERT(0 <= a_num && a_num < kTotalAmmoTypes && a_num != kAmmoTypeUnused);
 
-    bool max_m = (0 == StrCaseCmp(deh_field, "Max ammo"));
-    bool per_m = (0 == StrCaseCmp(deh_field, "Per ammo"));
+    bool max_m = (0 == epi::StringCaseCompareASCII(deh_field, "Max ammo"));
+    bool per_m = (0 == epi::StringCaseCompareASCII(deh_field, "Per ammo"));
 
     if (!max_m && !per_m)
     {

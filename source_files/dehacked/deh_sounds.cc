@@ -34,7 +34,6 @@
 #include "deh_patch.h"
 #include "deh_sounds.h"
 #include "deh_system.h"
-#include "deh_util.h"
 #include "deh_wad.h"
 
 namespace dehacked
@@ -325,19 +324,19 @@ void sounds::AlterSound(int new_val)
 
     SYS_ASSERT(s_num >= 0);
 
-    if (StrCaseCmpPartial(deh_field, "Zero") == 0 || StrCaseCmpPartial(deh_field, "Neg. One") == 0)
+    if (epi::StringPrefixCaseCompareASCII(deh_field, "Zero") == 0 || epi::StringPrefixCaseCompareASCII(deh_field, "Neg. One") == 0)
         return;
 
-    if (StrCaseCmp(deh_field, "Zero/One") == 0) // singularity, ignored
+    if (epi::StringCaseCompareASCII(deh_field, "Zero/One") == 0) // singularity, ignored
         return;
 
-    if (StrCaseCmp(deh_field, "Offset") == 0)
+    if (epi::StringCaseCompareASCII(deh_field, "Offset") == 0)
     {
         I_Debugf("Dehacked: Warning - Line %d: raw sound Offset not supported.\n", patch::line_num);
         return;
     }
 
-    if (StrCaseCmp(deh_field, "Value") == 0) // priority
+    if (epi::StringCaseCompareASCII(deh_field, "Value") == 0) // priority
     {
         if (new_val < 0)
         {
@@ -380,7 +379,7 @@ const char *sounds::GetEdgeSfxName(int sound_id)
     const SoundEffectInfo *orig = GetOriginalSFX(sound_id);
 
     if (orig->name[0] != 0)
-        return StrUpper(orig->name);
+        return epi::CStringUpper(orig->name);
 
     // we get here for sounds with no original name (only possible
     // for DSDehacked / MBF21).  check if modified name is empty too.
@@ -472,7 +471,7 @@ void sounds::WriteSound(int sound_id)
             lump = link->name;
     }
 
-    wad::Printf("LUMP_NAME = \"DS%s\";\n", StrUpper(lump));
+    wad::Printf("LUMP_NAME = \"DS%s\";\n", epi::CStringUpper(lump));
     wad::Printf("PRIORITY = %d;\n", sound->priority);
 
     if (sound->singularity != 0)
@@ -529,7 +528,7 @@ bool sounds::ReplaceSound(const char *before, const char *after)
         if (orig->name[0] == 0)
             continue;
 
-        if (StrCaseCmp(orig->name, before) != 0)
+        if (epi::StringCaseCompareASCII(orig->name, before) != 0)
             continue;
 
         MarkSound(i);

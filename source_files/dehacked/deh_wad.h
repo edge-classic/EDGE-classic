@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_WAD_HDR__
-#define __DEH_WAD_HDR__
+#pragma once
 
 #include "deh_system.h"
 
@@ -34,5 +33,3 @@ void Printf(const char *str, ...) GCCATTR((format(printf, 1, 2)));
 } // namespace wad
 
 } // namespace dehacked
-
-#endif /* __DEH_WAD_HDR__ */

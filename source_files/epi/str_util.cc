@@ -200,6 +200,71 @@ uint32_t StringHash32(std::string_view str_to_hash)
     return SFH_MakeKey(str_to_hash.data(), str_to_hash.length());
 }
 
+// Copies up to max characters of src into dest, and then applies a
+// terminating zero (so dest must hold at least max+1 characters).
+// The terminating zero is always applied (there is no reason not to)
+void CStringCopyMax(char *destination, const char *source, int max)
+{
+    for (; *source && max > 0; max--)
+    {
+        *destination++ = *source++;
+    }
+
+    *destination = 0;
+}
+
+char *CStringNew(int length)
+{
+    // length does not include the trailing NUL.
+
+    char *s = (char *)calloc(length + 1, 1);
+
+    if (!s)
+        I_Error("Out of memory (%d bytes for string)\n", length);
+
+    return s;
+}
+
+char *CStringDuplicate(const char *original, int limit)
+{
+    if (!original)
+        return NULL;
+
+    if (limit < 0)
+    {
+        char *s = strdup(original);
+
+        if (!s)
+            I_Error("Out of memory (copy string)\n");
+
+        return s;
+    }
+
+    char *s = CStringNew(limit + 1);
+    strncpy(s, original, limit);
+    s[limit] = 0;
+
+    return s;
+}
+
+char *CStringUpper(const char *name)
+{
+    char *copy = CStringDuplicate(name);
+
+    for (char *p = copy; *p; p++)
+        *p = epi::ToUpperASCII(*p);
+
+    return copy;
+}
+
+void CStringFree(const char *string)
+{
+    if (string)
+    {
+        free((void *)string);
+    }
+}
+
 } // namespace epi
 
 //--- editor settings ---

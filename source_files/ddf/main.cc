@@ -1285,7 +1285,7 @@ void DDF_MainGetPercent(const char *info, void *storage)
     float      f;
 
     // check that the string is valid
-    Z_StrNCpy(s, info, 100);
+    epi::CStringCopyMax(s, info, 100);
     for (p = s; epi::IsDigitASCII(*p) || *p == '.'; p++)
     { /* do nothing */
     }
@@ -1323,7 +1323,7 @@ void DDF_MainGetPercentAny(const char *info, void *storage)
     float      f;
 
     // check that the string is valid
-    Z_StrNCpy(s, info, 100);
+    epi::CStringCopyMax(s, info, 100);
     for (p = s; epi::IsDigitASCII(*p) || *p == '.'; p++)
     { /* do nothing */
     }

@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_MISC_HDR__
-#define __DEH_MISC_HDR__
+#pragma once
 
 namespace dehacked
 {
@@ -50,5 +49,3 @@ void AlterMisc(int new_val);
 } // namespace miscellaneous
 
 } // namespace dehacked
-
-#endif /* __DEH_MISC_HDR__ */

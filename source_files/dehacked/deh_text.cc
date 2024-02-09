@@ -38,7 +38,6 @@
 #include "deh_text.h"
 #include "deh_sounds.h"
 #include "deh_system.h"
-#include "deh_util.h"
 #include "deh_wad.h"
 
 namespace dehacked
@@ -459,15 +458,15 @@ bool text_strings::ReplaceString(const char *before, const char *after)
     {
         LanguageInfo *lang = lang_list + i;
 
-        if (StrCaseCmp(before, lang->orig_text) != 0)
+        if (epi::StringCaseCompareASCII(before, lang->orig_text) != 0)
             continue;
 
         int len = strlen(lang->orig_text);
 
         if (!lang->new_text)
-            lang->new_text = StringNew(len + 5);
+            lang->new_text = epi::CStringNew(len + 5);
 
-        StrMaxCopy(lang->new_text, after, len + 4);
+        epi::CStringCopyMax(lang->new_text, after, len + 4);
 
         return true;
     }
@@ -483,13 +482,13 @@ bool text_strings::ReplaceBexString(const char *bex_name, const char *after)
     {
         LanguageInfo *lang = lang_list + i;
 
-        if (StrCaseCmp(bex_name, lang->deh_name) != 0)
+        if (epi::StringCaseCompareASCII(bex_name, lang->deh_name) != 0)
             continue;
 
         if (lang->new_text)
             free(lang->new_text);
 
-        lang->new_text = StringDup(after);
+        lang->new_text = epi::CStringDuplicate(after);
 
         return true;
     }
@@ -510,14 +509,14 @@ void text_strings::ReplaceBinaryString(int v166_index, const char *str)
 
         // OK, found it, so check if it has changed
 
-        if (StrCaseCmp(str, lang->orig_text) != 0)
+        if (epi::StringCaseCompareASCII(str, lang->orig_text) != 0)
         {
             int len = strlen(lang->orig_text);
 
             if (!lang->new_text)
-                lang->new_text = StringNew(len + 5);
+                lang->new_text = epi::CStringNew(len + 5);
 
-            StrMaxCopy(lang->new_text, str, len + 4);
+            epi::CStringCopyMax(lang->new_text, str, len + 4);
         }
 
         return;
@@ -535,7 +534,7 @@ bool text_strings::ReplaceCheat(const char *deh_name, const char *str)
     {
         LanguageInfo *cht = cheat_list + i;
 
-        if (StrCaseCmp(deh_name, cht->deh_name) != 0)
+        if (epi::StringCaseCompareASCII(deh_name, cht->deh_name) != 0)
             continue;
 
         int len = strlen(cht->orig_text);
@@ -551,9 +550,9 @@ bool text_strings::ReplaceCheat(const char *deh_name, const char *str)
         }
 
         if (!cht->new_text)
-            cht->new_text = StringNew(len + 1);
+            cht->new_text = epi::CStringNew(len + 1);
 
-        StrMaxCopy(cht->new_text, str, len);
+        epi::CStringCopyMax(cht->new_text, str, len);
 
         return true;
     }
@@ -632,7 +631,7 @@ const char *text_strings::GetLDFForBex(const char *bex_name)
 {
     for (auto entry : lang_list)
     {
-        if (entry.deh_name && StrCaseCmp(entry.deh_name, bex_name) == 0)
+        if (entry.deh_name && epi::StringCaseCompareASCII(entry.deh_name, bex_name) == 0)
             return entry.ldf_name;
     }
     return nullptr;

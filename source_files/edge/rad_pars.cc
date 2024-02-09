@@ -204,7 +204,7 @@ static void RAD_CheckForPercent(const char *info, void *storage)
     float f;
 
     // just check that the string is valid
-    Z_StrNCpy(s, info, 100);
+    epi::CStringCopyMax(s, info, 100);
     for (p = s; epi::IsDigitASCII(*p) || *p == '.'; p++)
     { /* nothing here */
     }
@@ -233,7 +233,7 @@ static void RAD_CheckForPercentAny(const char *info, void *storage)
     float f;
 
     // just check that the string is valid
-    Z_StrNCpy(s, info, 100);
+    epi::CStringCopyMax(s, info, 100);
     for (p = s; epi::IsDigitASCII(*p) || *p == '-' || *p == '.'; p++)
     { /* nothing here */
     }
@@ -1153,7 +1153,7 @@ static void RAD_ParsePathEvent(param_set_t &pars)
         RAD_Error("%s: Bad label '%s'.\n", pars[0], pars[2]);
 
     this_rad->path_event_label = new char[i + 1];
-    Z_StrNCpy((char *)this_rad->path_event_label, pars[1], i);
+    epi::CStringCopyMax((char *)this_rad->path_event_label, pars[1], i);
 
     this_rad->path_event_offset = div ? HMM_MAX(0, atoi(div + 1) - 1) : 0;
 }
@@ -1808,7 +1808,7 @@ static void RAD_ParseThingEvent(param_set_t &pars)
         RAD_Error("%s: Bad label '%s'.\n", pars[0], pars[2]);
 
     tev->label = new char[i + 1];
-    Z_StrNCpy((char *)tev->label, pars[2], i);
+    epi::CStringCopyMax((char *)tev->label, pars[2], i);
 
     tev->offset = div ? HMM_MAX(0, atoi(div + 1) - 1) : 0;
 
@@ -2274,7 +2274,7 @@ static void RAD_ParseWeaponEvent(param_set_t &pars)
         RAD_Error("%s: Bad label '%s'.\n", pars[0], pars[2]);
 
     tev->label = new char[i + 1];
-    Z_StrNCpy((char *)tev->label, pars[2], i);
+    epi::CStringCopyMax((char *)tev->label, pars[2], i);
 
     tev->offset = div ? HMM_MAX(0, atoi(div + 1) - 1) : 0;
 

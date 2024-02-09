@@ -440,7 +440,7 @@ static void LoadSectors(int lump)
 
         ss->ceil = ss->floor;
 
-        Z_StrNCpy(buffer, ms->floor_tex, 8);
+        epi::CStringCopyMax(buffer, ms->floor_tex, 8);
         ss->floor.image = W_ImageLookup(buffer, INS_Flat);
 
         if (ss->floor.image)
@@ -453,7 +453,7 @@ static void LoadSectors(int lump)
             }
         }
 
-        Z_StrNCpy(buffer, ms->ceil_tex, 8);
+        epi::CStringCopyMax(buffer, ms->ceil_tex, 8);
         ss->ceil.image = W_ImageLookup(buffer, INS_Flat);
 
         if (!ss->floor.image)
@@ -1228,7 +1228,7 @@ static void LoadXGL3Nodes(int lumpnum)
     else
     {
         static char xgltemp[6];
-        Z_StrNCpy(xgltemp, (char *)xgldata, 4);
+        epi::CStringCopyMax(xgltemp, (char *)xgldata, 4);
         delete[] xgldata;
         I_Error("LoadXGL3Nodes: Unrecognized node type %s\n", xgltemp);
     }
@@ -1630,10 +1630,10 @@ static void LoadUDMFSectors()
                         cz = epi::LexInteger(value);
                         break;
                     case epi::kENameTexturefloor:
-                        Z_StrNCpy(floor_tex, value.c_str(), 8);
+                        epi::CStringCopyMax(floor_tex, value.c_str(), 8);
                         break;
                     case epi::kENameTextureceiling:
-                        Z_StrNCpy(ceil_tex, value.c_str(), 8);
+                        epi::CStringCopyMax(ceil_tex, value.c_str(), 8);
                         break;
                     case epi::kENameLightlevel:
                         light = epi::LexInteger(value);
@@ -1966,13 +1966,13 @@ static void LoadUDMFSideDefs()
                         high_scy = epi::LexDouble(value);
                         break;
                     case epi::kENameTexturetop:
-                        Z_StrNCpy(top_tex, value.c_str(), 8);
+                        epi::CStringCopyMax(top_tex, value.c_str(), 8);
                         break;
                     case epi::kENameTexturebottom:
-                        Z_StrNCpy(bottom_tex, value.c_str(), 8);
+                        epi::CStringCopyMax(bottom_tex, value.c_str(), 8);
                         break;
                     case epi::kENameTexturemiddle:
-                        Z_StrNCpy(middle_tex, value.c_str(), 8);
+                        epi::CStringCopyMax(middle_tex, value.c_str(), 8);
                         break;
                     case epi::kENameSector:
                         sec_num = epi::LexInteger(value);
@@ -2637,9 +2637,9 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
     }
     sd->sector = &sectors[sec_num];
 
-    Z_StrNCpy(upper_tex, msd->upper_tex, 8);
-    Z_StrNCpy(middle_tex, msd->mid_tex, 8);
-    Z_StrNCpy(lower_tex, msd->lower_tex, 8);
+    epi::CStringCopyMax(upper_tex, msd->upper_tex, 8);
+    epi::CStringCopyMax(middle_tex, msd->mid_tex, 8);
+    epi::CStringCopyMax(lower_tex, msd->lower_tex, 8);
 
     sd->top.image = W_ImageLookup(upper_tex, INS_Texture, ILF_Null);
 

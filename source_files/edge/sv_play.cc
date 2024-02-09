@@ -608,7 +608,7 @@ bool SR_PlayerGetName(void *storage, int index, void *extra)
     SYS_ASSERT(index == 0);
 
     str = SV_GetString();
-    Z_StrNCpy(dest, str, MAX_PLAYNAME - 1);
+    epi::CStringCopyMax(dest, str, MAX_PLAYNAME - 1);
     SV_FreeString(str);
 
     return true;
@@ -676,7 +676,7 @@ bool SR_PlayerGetState(void *storage, int index, void *extra)
         return true;
     }
 
-    Z_StrNCpy(buffer, swizzle, 256 - 1);
+    epi::CStringCopyMax(buffer, swizzle, 256 - 1);
     SV_FreeString(swizzle);
 
     // separate string at `:' characters

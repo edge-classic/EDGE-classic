@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_PATCH_HDR__
-#define __DEH_PATCH_HDR__
+#pragma once
 
 namespace dehacked
 {
@@ -35,5 +34,3 @@ DehackedResult Load(InputBuffer *buf);
 } // namespace patch
 
 } // namespace dehacked
-
-#endif /* __DEH_PATCH_HDR__ */

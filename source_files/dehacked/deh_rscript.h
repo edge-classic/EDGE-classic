@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_RSCRIPT_HDR__
-#define __DEH_RSCRIPT_HDR__
+#pragma once
 
 namespace dehacked
 {
@@ -33,5 +32,3 @@ void ConvertRAD();
 } // namespace rscript
 
 } // namespace dehacked
-
-#endif /* __DEH_RSCRIPT_HDR__ */

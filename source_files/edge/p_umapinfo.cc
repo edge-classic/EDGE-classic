@@ -383,7 +383,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     if (val->levelname)
                         free(val->levelname);
                     val->levelname = (char *)calloc(value.size() + 1, sizeof(char));
-                    Z_StrNCpy(val->levelname, value.c_str(), value.size());
+                    epi::CStringCopyMax(val->levelname, value.c_str(), value.size());
                 }
                 break;
             case epi::kENameLabel:
@@ -400,7 +400,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                         if (val->label)
                             free(val->label);
                         val->label = (char *)calloc(value.size() + 1, sizeof(char));
-                        Z_StrNCpy(val->label, value.c_str(), value.size());
+                        epi::CStringCopyMax(val->label, value.c_str(), value.size());
                     }
                 }
                 break;
@@ -409,7 +409,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     Z_Clear(val->nextmap, char, 9);
                     if (value.size() > 8)
                         I_Error("UMAPINFO: Mapname for \"next\" over 8 characters!\n");
-                    Z_StrNCpy(val->nextmap, value.data(), 8);
+                    epi::CStringCopyMax(val->nextmap, value.data(), 8);
                 }
                 break;
             case epi::kENameNextsecret:
@@ -417,7 +417,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     Z_Clear(val->nextsecret, char, 9);
                     if (value.size() > 8)
                         I_Error("UMAPINFO: Mapname for \"nextsecret\" over 8 characters!\n");
-                    Z_StrNCpy(val->nextsecret, value.data(), 8);
+                    epi::CStringCopyMax(val->nextsecret, value.data(), 8);
                 }
                 break;
             case epi::kENameLevelpic:
@@ -425,7 +425,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     Z_Clear(val->levelpic, char, 9);
                     if (value.size() > 8)
                         I_Error("UMAPINFO: Entry for \"levelpic\" over 8 characters!\n");
-                    Z_StrNCpy(val->levelpic, value.data(), 8);
+                    epi::CStringCopyMax(val->levelpic, value.data(), 8);
                 }
                 break;
             case epi::kENameSkytexture:
@@ -433,7 +433,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     Z_Clear(val->skytexture, char, 9);
                     if (value.size() > 8)
                         I_Error("UMAPINFO: Entry for \"skytexture\" over 8 characters!\n");
-                    Z_StrNCpy(val->skytexture, value.data(), 8);
+                    epi::CStringCopyMax(val->skytexture, value.data(), 8);
                 }
                 break;
             case epi::kENameMusic:
@@ -441,7 +441,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     Z_Clear(val->music, char, 9);
                     if (value.size() > 8)
                         I_Error("UMAPINFO: Entry for \"music\" over 8 characters!\n");
-                    Z_StrNCpy(val->music, value.data(), 8);
+                    epi::CStringCopyMax(val->music, value.data(), 8);
                 }
                 break;
             case epi::kENameEndpic:
@@ -449,7 +449,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     Z_Clear(val->endpic, char, 9);
                     if (value.size() > 8)
                         I_Error("UMAPINFO: Entry for \"endpic\" over 8 characters!\n");
-                    Z_StrNCpy(val->endpic, value.data(), 8);
+                    epi::CStringCopyMax(val->endpic, value.data(), 8);
                 }
                 break;
             case epi::kENameEndcast:
@@ -466,7 +466,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     Z_Clear(val->exitpic, char, 9);
                     if (value.size() > 8)
                         I_Error("UMAPINFO: Entry for \"exitpic\" over 8 characters!\n");
-                    Z_StrNCpy(val->exitpic, value.data(), 8);
+                    epi::CStringCopyMax(val->exitpic, value.data(), 8);
                 }
                 break;
             case epi::kENameEnterpic:
@@ -474,7 +474,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     Z_Clear(val->enterpic, char, 9);
                     if (value.size() > 8)
                         I_Error("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
-                    Z_StrNCpy(val->enterpic, value.data(), 8);
+                    epi::CStringCopyMax(val->enterpic, value.data(), 8);
                 }
                 break;
             case epi::kENameNointermission:
@@ -495,7 +495,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     if (val->intertext)
                         free(val->intertext);
                     val->intertext = (char *)calloc(it_builder.size() + 1, sizeof(char));
-                    Z_StrNCpy(val->intertext, it_builder.c_str(), it_builder.size());
+                    epi::CStringCopyMax(val->intertext, it_builder.c_str(), it_builder.size());
                 }
                 break;
             case epi::kENameIntertextsecret:
@@ -510,7 +510,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     if (val->intertextsecret)
                         free(val->intertextsecret);
                     val->intertextsecret = (char *)calloc(it_builder.size() + 1, sizeof(char));
-                    Z_StrNCpy(val->intertextsecret, it_builder.c_str(), it_builder.size());
+                    epi::CStringCopyMax(val->intertextsecret, it_builder.c_str(), it_builder.size());
                 }
                 break;
             case epi::kENameInterbackdrop:
@@ -518,7 +518,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     Z_Clear(val->interbackdrop, char, 9);
                     if (value.size() > 8)
                         I_Error("UMAPINFO: Entry for \"interbackdrop\" over 8 characters!\n");
-                    Z_StrNCpy(val->interbackdrop, value.data(), 8);
+                    epi::CStringCopyMax(val->interbackdrop, value.data(), 8);
                 }
                 break;
             case epi::kENameIntermusic:
@@ -526,7 +526,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     Z_Clear(val->intermusic, char, 9);
                     if (value.size() > 8)
                         I_Error("UMAPINFO: Entry for \"intermusic\" over 8 characters!\n");
-                    Z_StrNCpy(val->intermusic, value.data(), 8);
+                    epi::CStringCopyMax(val->intermusic, value.data(), 8);
                 }
                 break;
             case epi::kENameEpisode:
@@ -586,7 +586,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                         std::string epikey; // Do we use this?
                         if (value.size() > 8)
                             I_Error("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
-                        Z_StrNCpy(lumpname, value.data(), 8);
+                        epi::CStringCopyMax(lumpname, value.data(), 8);
                         if (lex.Match(","))
                         {
                             lex.Next(alttext);
@@ -652,7 +652,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     if (val->authorname)
                         free(val->authorname);
                     val->authorname = (char *)calloc(value.size() + 1, sizeof(char));
-                    Z_StrNCpy(val->authorname, value.c_str(), value.size());
+                    epi::CStringCopyMax(val->authorname, value.c_str(), value.size());
                 }
                 break;
             default:
@@ -663,7 +663,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
     if (!val->nextsecret[0])
     {
         if (val->nextmap[0])
-            Z_StrNCpy(val->nextsecret, val->nextmap, 8);
+            epi::CStringCopyMax(val->nextsecret, val->nextmap, 8);
     }
     if (!val->enterpic[0])
     {
@@ -672,7 +672,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
             if (!strcmp(val->mapname, Maps.maps[i].nextmap))
             {
                 if (Maps.maps[i].exitpic[0])
-                    Z_StrNCpy(val->enterpic, Maps.maps[i].exitpic, 8);
+                    epi::CStringCopyMax(val->enterpic, Maps.maps[i].exitpic, 8);
                 break;
             }
         }
@@ -708,7 +708,7 @@ void Parse_UMAPINFO(const std::string &buffer)
         unsigned int i      = 0;
         MapEntry     parsed = {0};
         parsed.mapname      = (char *)calloc(section.size() + 1, sizeof(char));
-        Z_StrNCpy(parsed.mapname, section.data(), section.size());
+        epi::CStringCopyMax(parsed.mapname, section.data(), section.size());
 
         if (!lex.Match("{"))
             I_Error("Malformed UMAPINFO lump: missing '{'\n");

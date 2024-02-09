@@ -42,7 +42,6 @@
 #include "deh_system.h"
 #include "deh_text.h"
 #include "deh_things.h"
-#include "deh_util.h"
 #include "deh_wad.h"
 #include "deh_weapons.h"
 
@@ -769,7 +768,7 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
 
     atk1 += 2;
 
-    free1 = (!attack_slot[kind1] || StrCaseCmp(attack_slot[kind1], atk1) == 0);
+    free1 = (!attack_slot[kind1] || epi::StringCaseCompareASCII(attack_slot[kind1], atk1) == 0);
 
     if (atk2)
     {
@@ -780,7 +779,7 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
 
         atk2 += 2;
 
-        free2 = (!attack_slot[kind2] || StrCaseCmp(attack_slot[kind2], atk2) == 0);
+        free2 = (!attack_slot[kind2] || epi::StringCaseCompareASCII(attack_slot[kind2], atk2) == 0);
     }
 
     if (free1 && free2)
@@ -798,7 +797,7 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
     // do some magic to put the attack name into parenthesis,
     // for example RANGE_ATTACK(IMP_FIREBALL).
 
-    if (StrCaseCmp(act_name, "BRAINSPIT") == 0)
+    if (epi::StringCaseCompareASCII(act_name, "BRAINSPIT") == 0)
     {
         I_Debugf("Dehacked: Warning - Multiple range attacks used with kA_BrainSpit.\n");
         return;
@@ -956,7 +955,7 @@ void frames::SpecialAction(char *act_name, const State *st)
     case kA_PlaySound: {
         const char *sfx = sounds::GetSound(ReadArg(st, 0));
 
-        if (StrCaseCmp(sfx, "NULL") == 0)
+        if (epi::StringCaseCompareASCII(sfx, "NULL") == 0)
             strcpy(act_name, "NOTHING");
         else
             sprintf(act_name, "PLAYSOUND(\"%s\")", sfx);
@@ -976,7 +975,7 @@ void frames::SpecialAction(char *act_name, const State *st)
             const char *sfx = NULL;
             if (sfx_id > 0)
                 sfx = sounds::GetSound(sfx_id);
-            if (sfx != NULL && StrCaseCmp(sfx, "NULL") == 0)
+            if (sfx != NULL && epi::StringCaseCompareASCII(sfx, "NULL") == 0)
                 sfx = NULL;
 
             const char *atk_name = things::AddScratchAttack(damage, sfx);
@@ -1076,7 +1075,7 @@ void frames::OutputState(char group, int cur, bool do_action)
             strcpy(act_name, action_info[action].ddf_name + 2);
     }
 
-    if (action != kA_NULL && (weap_act == !IS_WEAPON(group)) && StrCaseCmp(act_name, "NOTHING") != 0)
+    if (action != kA_NULL && (weap_act == !IS_WEAPON(group)) && epi::StringCaseCompareASCII(act_name, "NOTHING") != 0)
     {
         if (weap_act)
             I_Debugf("Dehacked: Warning - Frame %d: weapon action %s used in thing.\n", cur, bex_name);
@@ -1123,7 +1122,7 @@ void frames::OutputState(char group, int cur, bool do_action)
     // 2023.11.13: This is not stricly accurate; the real kA_CloseShotgun2 will play the sound before refiring,
     // but with our current sound channel handling this causes the DBCLS sound to play repeatedly and persist
     // even with the refire noises (ex: Harmony re-release chaingun will constantly play its wind-down noise)
-    if (StrCaseCmp(action_info[action].bex_name, "A_CloseShotgun2") == 0)
+    if (epi::StringCaseCompareASCII(action_info[action].bex_name, "A_CloseShotgun2") == 0)
     {
         wad::Printf("    %s:%c:0:%s:REFIRE,\n", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31),
                     (st->frame >= 32768 || force_fullbright) ? "BRIGHT" : "NORMAL");
@@ -1134,7 +1133,7 @@ void frames::OutputState(char group, int cur, bool do_action)
     // kludge for EDGE and Batman TC.  EDGE waits 35 tics before exiting the
     // level from kA_BrainDie, but standard Doom does it immediately.  Oddly,
     // Batman TC goes into a loop calling kA_BrainDie every tic.
-    if (tics >= 0 && tics < 44 && StrCaseCmp(act_name, "BRAINDIE") == 0)
+    if (tics >= 0 && tics < 44 && epi::StringCaseCompareASCII(act_name, "BRAINDIE") == 0)
         tics = 44;
 
     wad::Printf("    %s:%c:%d:%s:%s", sprites::GetSprite(st->sprite), 'A' + ((int)st->frame & 31), tics,
@@ -1265,25 +1264,25 @@ void frames::AlterFrame(int new_val)
     State *st = new_states[st_num];
     SYS_ASSERT(st);
 
-    if (StrCaseCmp(field_name, "Action pointer") == 0)
+    if (epi::StringCaseCompareASCII(field_name, "Action pointer") == 0)
     {
         I_Debugf("Dehacked: Warning - Line %d: raw Action pointer not supported.\n", patch::line_num);
         return;
     }
 
-    if (StrCaseCmp(field_name, "Unknown 1") == 0)
+    if (epi::StringCaseCompareASCII(field_name, "Unknown 1") == 0)
     {
         WriteArg(st, 0, new_val);
         return;
     }
 
-    if (StrCaseCmp(field_name, "Unknown 2") == 0)
+    if (epi::StringCaseCompareASCII(field_name, "Unknown 2") == 0)
     {
         WriteArg(st, 1, new_val);
         return;
     }
 
-    if (StrCaseCmpPartial(field_name, "Args") == 0)
+    if (epi::StringPrefixCaseCompareASCII(field_name, "Args") == 0)
     {
         int arg = atoi(field_name + 4);
         if (arg >= 1 && arg <= 8)
@@ -1318,7 +1317,7 @@ void frames::AlterPointer(int new_val)
     State *st = new_states[st_num];
     SYS_ASSERT(st);
 
-    if (StrCaseCmp(deh_field, "Codep Frame") != 0)
+    if (epi::StringCaseCompareASCII(deh_field, "Codep Frame") != 0)
     {
         I_Debugf("Dehacked: Warning - UNKNOWN POINTER FIELD: %s\n", deh_field);
         return;
@@ -1337,7 +1336,7 @@ void frames::AlterBexCodePtr(const char *new_action)
 {
     const char *bex_field = patch::line_buf;
 
-    if (StrCaseCmpPartial(bex_field, "FRAME ") != 0)
+    if (epi::StringPrefixCaseCompareASCII(bex_field, "FRAME ") != 0)
     {
         I_Debugf("Dehacked: Warning - Line %d: bad code pointer '%s' - must begin with FRAME.\n", patch::line_num, bex_field);
         return;
@@ -1371,7 +1370,7 @@ void frames::AlterBexCodePtr(const char *new_action)
     for (action = 0; action < kTotalMBF21Actions; action++)
     {
         // use +2 here to ignore the "A_" prefix
-        if (StrCaseCmp(action_info[action].bex_name + 2, new_action) == 0)
+        if (epi::StringCaseCompareASCII(action_info[action].bex_name + 2, new_action) == 0)
         {
             // found it!
             st->action = action;

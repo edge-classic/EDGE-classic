@@ -31,12 +31,6 @@ void  UtilFree(void *data);
 // math stuff
 double ComputeAngle(double dx, double dy);
 
-// string utilities
-char *StringNew(int length);
-char *StringDup(const char *orig, int limit = -1);
-char *StringUpper(const char *name);
-void  StringFree(const char *str);
-
 } // namespace ajbsp
 
 #endif /* __AJBSP_UTILITY_H__ */

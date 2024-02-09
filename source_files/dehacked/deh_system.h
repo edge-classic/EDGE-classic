@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_SYSTEM_HDR__
-#define __DEH_SYSTEM_HDR__
+#pragma once
 
 #include "epi.h"
 #include "str_util.h"
@@ -35,5 +34,3 @@ void        SetErrorMsg(const char *str, ...) GCCATTR((format(printf, 1, 2)));
 const char *GetErrorMsg(void);
 
 } // namespace dehacked
-
-#endif /* __DEH_SYSTEM_HDR__ */

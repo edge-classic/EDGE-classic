@@ -25,62 +25,6 @@ namespace ajbsp
 {
 
 //------------------------------------------------------------------------
-// STRINGS
-//------------------------------------------------------------------------
-
-char *StringNew(int length)
-{
-    // length does not include the trailing NUL.
-
-    char *s = (char *)calloc(length + 1, 1);
-
-    if (!s)
-        I_Error("AJBSP: Out of memory (%d bytes for string)\n", length);
-
-    return s;
-}
-
-char *StringDup(const char *orig, int limit)
-{
-    if (!orig)
-        return NULL;
-
-    if (limit < 0)
-    {
-        char *s = strdup(orig);
-
-        if (!s)
-            I_Error("AJBSP: Out of memory (copy string)\n");
-
-        return s;
-    }
-
-    char *s = StringNew(limit + 1);
-    strncpy(s, orig, limit);
-    s[limit] = 0;
-
-    return s;
-}
-
-char *StringUpper(const char *name)
-{
-    char *copy = StringDup(name);
-
-    for (char *p = copy; *p; p++)
-        *p = epi::ToUpperASCII(*p);
-
-    return copy;
-}
-
-void StringFree(const char *str)
-{
-    if (str)
-    {
-        free((void *)str);
-    }
-}
-
-//------------------------------------------------------------------------
 // MEMORY ALLOCATION
 //------------------------------------------------------------------------
 

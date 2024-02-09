@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_FRAMES_HDR__
-#define __DEH_FRAMES_HDR__
+#pragma once
 
 namespace dehacked
 {
@@ -82,5 +81,3 @@ void OutputGroup(char group);
 } // namespace frames
 
 } // namespace dehacked
-
-#endif /* __DEH_FRAMES_HDR__ */

@@ -34,7 +34,6 @@
 #include "deh_patch.h"
 #include "deh_music.h"
 #include "deh_system.h"
-#include "deh_util.h"
 #include "deh_wad.h"
 
 namespace dehacked
@@ -207,7 +206,7 @@ void music::WriteEntry(int num)
 
     wad::Printf("\n");
     wad::Printf("[%02d] ", mod->ddf_num);
-    wad::Printf("MUSICINFO = MUS:LUMP:\"D_%s\";\n", StrUpper(mod->name));
+    wad::Printf("MUSICINFO = MUS:LUMP:\"D_%s\";\n", epi::CStringUpper(mod->name));
 }
 
 void music::ConvertMUS()
@@ -240,7 +239,7 @@ bool music::ReplaceMusic(const char *before, const char *after)
 {
     for (int i = 1; i < kTotalMusicTypes; i++)
     {
-        if (StrCaseCmp(S_music_orig[i].name, before) != 0)
+        if (epi::StringCaseCompareASCII(S_music_orig[i].name, before) != 0)
             continue;
 
         // create modified entry if it does not exist yet

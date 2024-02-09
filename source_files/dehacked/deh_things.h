@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_THINGS_HDR__
-#define __DEH_THINGS_HDR__
+#pragma once
 
 #include "deh_mobj.h"
 
@@ -56,5 +55,3 @@ void AlterMBF21Bits(char *bit_str);
 } // namespace things
 
 } // namespace dehacked
-
-#endif /* __DEH_THINGS_HDR__ */

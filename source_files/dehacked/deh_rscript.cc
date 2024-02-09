@@ -32,7 +32,6 @@
 #include "deh_rscript.h"
 #include "deh_system.h"
 #include "deh_things.h"
-#include "deh_util.h"
 #include "deh_wad.h"
 
 namespace dehacked

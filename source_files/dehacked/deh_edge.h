@@ -25,8 +25,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_EDGE_PLUGIN_H__
-#define __DEH_EDGE_PLUGIN_H__
+#pragma once
 
 // DDF
 #include "collection.h"
@@ -64,5 +63,3 @@ DehackedResult DehackedRunConversion(ddf_collection_c *dest);
 
 // shut down: free all memory, close all files, etc..
 void DehackedShutdown(void);
-
-#endif /* __DEH_EDGE_PLUGIN_H__ */

@@ -24,6 +24,12 @@
 
 namespace epi
 {
+#ifdef _WIN32
+// Technically these are to and from UTF-16, but since these are only for 
+// Windows "wide" APIs I think we'll be ok - Dasho
+std::string WStringToUTF8(std::wstring_view instring);
+std::wstring UTF8ToWString(std::string_view instring);
+#endif
 
 inline bool IsUpperASCII(int character)
 {
@@ -77,21 +83,18 @@ inline int ToUpperASCII(int character)
 void StringLowerASCII(std::string &s);
 void StringUpperASCII(std::string &s);
 
+// These are for AJBSP/Dehacked, just de-duplicated
+// CStringCopyMax also replaces the old Z_StrNCpy macro
+void CStringCopyMax(char *destination, const char *source, int max);
+char *CStringNew(int length);
+char *CStringDuplicate(const char *original, int limit = -1);
+char *CStringUpper(const char *name);
+void  CStringFree(const char *string);
+
 void TextureNameFromFilename(std::string &buf, std::string_view stem);
-
 std::string StringFormat(const char *fmt, ...) GCCATTR((format(printf, 1, 2)));
-
 std::vector<std::string> SeparatedStringVector(std::string_view str, char separator);
-
 uint32_t StringHash32(std::string_view str_to_hash);
-
-#ifdef _WIN32
-// Technically these are to and from UTF-16, but since these are only for 
-// Windows "wide" APIs I think we'll be ok - Dasho
-std::string WStringToUTF8(std::wstring_view instring);
-std::wstring UTF8ToWString(std::string_view instring);
-#endif
-
 } // namespace epi
 
 #endif /* __EPI_STR_UTIL_H__ */

@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_SPRITES_HDR__
-#define __DEH_SPRITES_HDR__
+#pragma once
 
 namespace dehacked
 {
@@ -200,5 +199,3 @@ void SpriteDependencies();
 } // namespace sprites
 
 } // namespace dehacked
-
-#endif /* __DEH_SPRITES_HDR__ */

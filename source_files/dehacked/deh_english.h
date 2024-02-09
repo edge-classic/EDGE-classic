@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_ENGLISH_HDR__
-#define __DEH_ENGLISH_HDR__
+#pragma once
 
 namespace dehacked
 {
@@ -700,5 +699,3 @@ constexpr const char *kX_MODIFIED =                                             
     "===========================================================================\n";
 
 } // namespace dehacked
-
-#endif /* __DEH_ENGLISH_HDR__ */

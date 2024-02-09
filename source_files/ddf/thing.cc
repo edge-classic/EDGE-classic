@@ -798,10 +798,10 @@ static int ParseBenefitString(const char *info, char *name, char *param, float *
     {
         int len2 = (pos - info);
 
-        Z_StrNCpy(name, info, len2);
+        epi::CStringCopyMax(name, info, len2);
 
         len -= len2 + 2;
-        Z_StrNCpy(param, pos + 1, len);
+        epi::CStringCopyMax(param, pos + 1, len);
 
         switch (sscanf(param, " %f : %f ", value, limit))
         {
@@ -872,7 +872,7 @@ static bool BenefitTryCounterLimit(const char *name, benefit_t *be, int num_vals
         return false;
 
     len -= 6;
-    Z_StrNCpy(namebuf, name, len);
+    epi::CStringCopyMax(namebuf, name, len);
 
     if (CHKF_Positive != DDF_MainCheckSpecialFlag(namebuf, counter_types, &be->sub.type, false, false))
     {
@@ -929,7 +929,7 @@ static bool BenefitTryInventoryLimit(const char *name, benefit_t *be, int num_va
         return false;
 
     len -= 6;
-    Z_StrNCpy(namebuf, name, len);
+    epi::CStringCopyMax(namebuf, name, len);
 
     if (CHKF_Positive != DDF_MainCheckSpecialFlag(namebuf, inv_types, &be->sub.type, false, false))
     {
@@ -993,7 +993,7 @@ static bool BenefitTryAmmoLimit(const char *name, benefit_t *be, int num_vals)
         return false;
 
     len -= 6;
-    Z_StrNCpy(namebuf, name, len);
+    epi::CStringCopyMax(namebuf, name, len);
 
     if (CHKF_Positive != DDF_MainCheckSpecialFlag(namebuf, ammo_types, &be->sub.type, false, false))
     {
@@ -1878,10 +1878,10 @@ bool DDF_MainParseCondition(const char *info, condition_check_t *cond)
     {
         int len2 = (pos - info);
 
-        Z_StrNCpy(typebuf, info, len2);
+        epi::CStringCopyMax(typebuf, info, len2);
 
         len -= len2 + 2;
-        Z_StrNCpy(sub_buf, pos + 1, len);
+        epi::CStringCopyMax(sub_buf, pos + 1, len);
     }
     else if (pos || strchr(info, ')'))
     {

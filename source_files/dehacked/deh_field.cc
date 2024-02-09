@@ -46,7 +46,6 @@
 #include "deh_sounds.h"
 #include "deh_sprites.h"
 #include "deh_system.h"
-#include "deh_util.h"
 #include "deh_weapons.h"
 
 namespace dehacked
@@ -137,7 +136,7 @@ bool FieldAlter(const FieldReference *references, const char *dehacked_field, in
 {
     for (; references->dehacked_name; references++)
     {
-        if (StrCaseCmp(references->dehacked_name, dehacked_field) != 0)
+        if (epi::StringCaseCompareASCII(references->dehacked_name, dehacked_field) != 0)
             continue;
 
         // found it...

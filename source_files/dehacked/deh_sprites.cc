@@ -37,7 +37,6 @@
 #include "deh_sounds.h"
 #include "deh_sprites.h"
 #include "deh_system.h"
-#include "deh_util.h"
 #include "deh_wad.h"
 
 namespace dehacked
@@ -117,7 +116,7 @@ bool sprites::ReplaceSprite(const char *before, const char *after)
 
     for (int i = 0; i < kTotalSpritesDEHEXTRA; i++)
     {
-        if (StrCaseCmp(before, sprnames_orig[i]) == 0)
+        if (epi::StringCaseCompareASCII(before, sprnames_orig[i]) == 0)
         {
             MarkEntry(i);
 
@@ -179,7 +178,7 @@ const char *sprites::GetSprite(int spr_num)
         name = GetOriginalName(spr_num);
 
     // Boom support: TNT1 is an invisible sprite
-    if (StrCaseCmp(name, "TNT1") == 0)
+    if (epi::StringCaseCompareASCII(name, "TNT1") == 0)
         return "NULL";
 
     return name;

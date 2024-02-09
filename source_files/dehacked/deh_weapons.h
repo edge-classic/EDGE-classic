@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_WEAPONS_HDR__
-#define __DEH_WEAPONS_HDR__
+#pragma once
 
 namespace dehacked
 {
@@ -95,5 +94,3 @@ void ConvertWEAP(void);
 } // namespace weapons
 
 } // namespace dehacked
-
-#endif /* __DEH_WEAPONS_HDR__ */

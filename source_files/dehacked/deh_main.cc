@@ -45,7 +45,6 @@
 #include "deh_system.h"
 #include "deh_things.h"
 #include "deh_text.h"
-#include "deh_util.h"
 #include "deh_wad.h"
 #include "deh_weapons.h"
 

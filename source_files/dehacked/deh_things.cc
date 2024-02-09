@@ -48,7 +48,6 @@
 #include "deh_sprites.h"
 #include "deh_system.h"
 #include "deh_text.h"
-#include "deh_util.h"
 #include "deh_wad.h"
 #include "deh_weapons.h"
 
@@ -325,12 +324,20 @@ void ConvertScratch(const ScratchAttack *atk);
 
 const char *Attacks::AddScratchAttack(int damage, const char *sfx)
 {
-    const char *safe_sfx = "QUIET";
+    std::string safe_sfx = "QUIET";
     if (sfx != NULL)
-        safe_sfx = StrSanitize(sfx);
+    {
+        safe_sfx.clear();
+        while (*sfx)
+        {
+            char ch = *sfx++;
+            if (epi::IsAlphanumericASCII(ch) || ch == '_')
+                safe_sfx.push_back(ch);
+        }
+    }
 
     static char namebuf[256];
-    snprintf(namebuf, sizeof(namebuf), "SCRATCH_%s_%d", safe_sfx, damage);
+    snprintf(namebuf, sizeof(namebuf), "SCRATCH_%s_%d", safe_sfx.c_str(), damage);
 
     // already have it?
     for (size_t i = 0; i < scratchers.size(); i++)
@@ -811,7 +818,7 @@ int ParseBits(const FlagName *list, char *bit_str)
         // find the name in the given list
         int i;
         for (i = 0; list[i].bex != NULL; i++)
-            if (StrCaseCmp(token, list[i].bex) == 0)
+            if (epi::StringCaseCompareASCII(token, list[i].bex) == 0)
                 break;
 
         if (list[i].bex == NULL)

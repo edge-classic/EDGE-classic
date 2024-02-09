@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_TEXT_HDR__
-#define __DEH_TEXT_HDR__
+#pragma once
 
 namespace dehacked
 {
@@ -41,5 +40,3 @@ void ConvertLDF(void);
 } // namespace text_strings
 
 } // namespace dehacked
-
-#endif /* __DEH_TEXT_HDR__ */

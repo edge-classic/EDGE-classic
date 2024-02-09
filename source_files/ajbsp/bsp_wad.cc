@@ -56,7 +56,7 @@ static constexpr uint8_t kMaxLevelLumps = 21;
 Lump::Lump(WadFile *parent, const char *name, int start, int length) : parent_(parent), lump_start_(start), lump_length_(length)
 {
     // ensure lump name is uppercase
-    name_ = StringUpper(name);
+    name_ = epi::CStringUpper(name);
 }
 
 Lump::Lump(WadFile *parent, const struct RawWadEntry *entry) : parent_(parent)
@@ -66,7 +66,7 @@ Lump::Lump(WadFile *parent, const struct RawWadEntry *entry) : parent_(parent)
     strncpy(buffer, entry->name, 8);
     buffer[8] = 0;
 
-    name_ = StringDup(buffer);
+    name_ = epi::CStringDuplicate(buffer);
 
     lump_start_  = AlignedLittleEndianU32(entry->pos);
     lump_length_ = AlignedLittleEndianU32(entry->size);
@@ -78,7 +78,7 @@ Lump::Lump(WadFile *parent, const struct RawWadEntry *entry) : parent_(parent)
 
 Lump::~Lump()
 {
-    StringFree(name_);
+    epi::CStringFree(name_);
 }
 
 void Lump::MakeEntry(struct RawWadEntry *entry)
@@ -93,10 +93,10 @@ void Lump::MakeEntry(struct RawWadEntry *entry)
 
 void Lump::Rename(const char *new_name)
 {
-    StringFree(name_);
+    epi::CStringFree(name_);
 
     // ensure lump name is uppercase
-    name_ = StringUpper(new_name);
+    name_ = epi::CStringUpper(new_name);
 }
 
 bool Lump::Seek(int offset)

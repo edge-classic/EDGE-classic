@@ -644,7 +644,7 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
         return true;
     }
 
-    Z_StrNCpy(buffer, swizzle, 256 - 1);
+    epi::CStringCopyMax(buffer, swizzle, 256 - 1);
     SV_FreeString(swizzle);
 
     // separate string at `:' characters

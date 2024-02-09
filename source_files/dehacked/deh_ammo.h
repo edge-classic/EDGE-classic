@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_AMMO_HDR__
-#define __DEH_AMMO_HDR__
+#pragma once
 
 namespace dehacked
 {
@@ -51,5 +50,3 @@ void AlterAmmo(int new_val);
 } // namespace ammo
 
 } // namespace dehacked
-
-#endif /* __DEH_AMMO_HDR__ */

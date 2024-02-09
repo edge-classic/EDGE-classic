@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_SOUNDS_HDR__
-#define __DEH_SOUNDS_HDR__
+#pragma once
 
 #include <string>
 
@@ -185,5 +184,3 @@ void ConvertSFX(void);
 } // namespace sounds
 
 } // namespace dehacked
-
-#endif /* __DEH_SOUNDS_HDR__ */

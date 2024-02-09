@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_FIELD_HDR__
-#define __DEH_FIELD_HDR__
+#pragma once
 
 #include "deh_mobj.h"
 
@@ -51,5 +50,3 @@ struct FieldReference
 bool FieldAlter(const FieldReference *references, const char *dehacked_field, int *object, int new_value);
 
 } // namespace dehacked
-
-#endif /* __DEH_FIELD_HDR__ */

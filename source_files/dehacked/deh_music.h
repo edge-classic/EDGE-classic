@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_MUSIC_HDR__
-#define __DEH_MUSIC_HDR__
+#pragma once
 
 #include <string>
 
@@ -114,5 +113,3 @@ void ConvertMUS();
 } // namespace music
 
 } // namespace dehacked
-
-#endif /* __DEH_MUSIC_HDR__ */

@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_INFO_HDR__
-#define __DEH_INFO_HDR__
+#pragma once
 
 namespace dehacked
 {
@@ -1249,5 +1248,3 @@ struct State
 };
 
 } // namespace dehacked
-
-#endif /* __DEH_INFO_HDR__ */

@@ -948,7 +948,7 @@ bool SR_TriggerGetScript(void *storage, int index, void *extra)
         return true;
     }
 
-    Z_StrNCpy(buffer, swizzle, 256 - 1);
+    epi::CStringCopyMax(buffer, swizzle, 256 - 1);
     SV_FreeString(swizzle);
 
     if (buffer[0] != 'B' || buffer[1] != ':')

@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_MOBJ_HDR__
-#define __DEH_MOBJ_HDR__
+#pragma once
 
 namespace dehacked
 {
@@ -429,5 +428,3 @@ struct MobjInfo
 };
 
 } // namespace dehacked
-
-#endif /* __DEH_MOBJ_HDR__ */

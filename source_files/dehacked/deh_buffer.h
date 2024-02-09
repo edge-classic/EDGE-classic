@@ -16,8 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __DEH_BUFFER_HDR__
-#define __DEH_BUFFER_HDR__
+#pragma once
 
 namespace dehacked
 {
@@ -43,5 +42,3 @@ class InputBuffer
 };
 
 } // namespace dehacked
-
-#endif /* __DEH_BUFFER_HDR__ */

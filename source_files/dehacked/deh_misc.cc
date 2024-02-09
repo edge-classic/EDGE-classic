@@ -35,7 +35,6 @@
 #include "deh_sounds.h"
 #include "deh_system.h"
 #include "deh_things.h"
-#include "deh_util.h"
 #include "deh_weapons.h"
 
 namespace dehacked
@@ -124,7 +123,7 @@ void miscellaneous::AlterMisc(int new_val)
 
     // --- special cases ---
 
-    if (StrCaseCmp(misc_name, "Initial Health") == 0)
+    if (epi::StringCaseCompareASCII(misc_name, "Initial Health") == 0)
     {
         if (new_val < 1)
         {
@@ -136,7 +135,7 @@ void miscellaneous::AlterMisc(int new_val)
         return;
     }
 
-    if (StrCaseCmp(misc_name, "BFG Cells/Shot") == 0)
+    if (epi::StringCaseCompareASCII(misc_name, "BFG Cells/Shot") == 0)
     {
         if (new_val < 1)
         {
@@ -150,7 +149,7 @@ void miscellaneous::AlterMisc(int new_val)
         return;
     }
 
-    if (StrCaseCmp(misc_name, "Monsters Infight") == 0)
+    if (epi::StringCaseCompareASCII(misc_name, "Monsters Infight") == 0)
     {
         if (new_val != 202 && new_val != 221)
         {
@@ -172,7 +171,7 @@ void miscellaneous::AlterMisc(int new_val)
 
     for (j = 0; misc_info[j].deh_name; j++)
     {
-        if (StrCaseCmp(misc_name, misc_info[j].deh_name) == 0)
+        if (epi::StringCaseCompareASCII(misc_name, misc_info[j].deh_name) == 0)
             break;
     }
 

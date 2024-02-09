@@ -20,7 +20,6 @@ add_library(
   deh_system.cc
   deh_text.cc
   deh_things.cc
-  deh_util.cc
   deh_wad.cc
   deh_weapons.cc
 )

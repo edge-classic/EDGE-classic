@@ -43,7 +43,6 @@
 #include "deh_system.h"
 #include "deh_text.h"
 #include "deh_things.h"
-#include "deh_util.h"
 #include "deh_weapons.h"
 
 namespace dehacked
@@ -920,7 +919,7 @@ bool CheckNewSection(void)
 
     for (i = 0; i < kTotalSections; i++)
     {
-        if (StrCaseCmpPartial(line_buf, section_name[i]) != 0)
+        if (epi::StringPrefixCaseCompareASCII(line_buf, section_name[i]) != 0)
             continue;
 
         // make sure no '=' appears (to prevent a mismatch with
@@ -1166,13 +1165,13 @@ void ProcessLine(void)
         return;
     }
 
-    if (patch_fmt >= 6 && active_section == kDEH_THING && StrCaseCmp(line_buf, "Bits") == 0)
+    if (patch_fmt >= 6 && active_section == kDEH_THING && epi::StringCaseCompareASCII(line_buf, "Bits") == 0)
     {
         things::AlterBexBits(equal_pos);
         return;
     }
 
-    if (patch_fmt >= 6 && active_section == kDEH_THING && StrCaseCmp(line_buf, "MBF21 Bits") == 0)
+    if (patch_fmt >= 6 && active_section == kDEH_THING && epi::StringCaseCompareASCII(line_buf, "MBF21 Bits") == 0)
     {
         things::AlterMBF21Bits(equal_pos);
         return;
@@ -1262,7 +1261,7 @@ DehackedResult LoadDiff(bool no_header)
 
         // I_Printf("LINE %d: <%s>\n", line_num, line_buf);
 
-        if (StrCaseCmpPartial(line_buf, "Doom version") == 0)
+        if (epi::StringPrefixCaseCompareASCII(line_buf, "Doom version") == 0)
         {
             if (!equal_pos)
             {
@@ -1286,7 +1285,7 @@ DehackedResult LoadDiff(bool no_header)
             }
         }
 
-        if (StrCaseCmpPartial(line_buf, "Patch format") == 0)
+        if (epi::StringPrefixCaseCompareASCII(line_buf, "Patch format") == 0)
         {
             if (got_info)
             {
@@ -1313,13 +1312,13 @@ DehackedResult LoadDiff(bool no_header)
             VersionMsg();
         }
 
-        if (StrCaseCmpPartial(line_buf, "include") == 0)
+        if (epi::StringPrefixCaseCompareASCII(line_buf, "include") == 0)
         {
             I_Printf("- Warning: BEX INCLUDE directive not supported!\n");
             continue;
         }
 
-        if (StrCaseCmpPartial(line_buf, "Text") == 0 && epi::IsSpaceASCII(line_buf[4]))
+        if (epi::StringPrefixCaseCompareASCII(line_buf, "Text") == 0 && epi::IsSpaceASCII(line_buf[4]))
         {
             int len1, len2;
 
@@ -1355,7 +1354,7 @@ DehackedResult LoadNormal(void)
     pat_buf->Read(idstr, 24);
 
     // Note: the 'P' is checked elsewhere
-    if (StrCaseCmp(idstr, "atch File for DeHackEd v") != 0)
+    if (epi::StringCaseCompareASCII(idstr, "atch File for DeHackEd v") != 0)
     {
         SetErrorMsg("Not a DeHackEd patch file !\n");
         return kDehackedConversionParseError;

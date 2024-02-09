@@ -89,7 +89,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
     {
         patch_names[i].resize(9);
 
-        Z_StrNCpy(patch_names[i].data(), (const char *)(name_p + i * 8), 8);
+        epi::CStringCopyMax(patch_names[i].data(), (const char *)(name_p + i * 8), 8);
 
         patchlookup[i] = W_CheckNumForTexPatch(patch_names[i].c_str());
     }
@@ -175,7 +175,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
         texture->palette_lump = W_GetPaletteForLump(WT->texture1);
         texture->patchcount   = patchcount;
 
-        Z_StrNCpy(texture->name, mtexture->name, 8);
+        epi::CStringCopyMax(texture->name, mtexture->name, 8);
         for (size_t j = 0; j < strlen(texture->name); j++)
         {
             texture->name[j] = epi::ToUpperASCII(texture->name[j]);
@@ -249,7 +249,7 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
     {
         patch_names[i].resize(9);
 
-        Z_StrNCpy(patch_names[i].data(), (const char *)(name_p + i * 8), 8);
+        epi::CStringCopyMax(patch_names[i].data(), (const char *)(name_p + i * 8), 8);
 
         patchlookup[i] = W_CheckNumForTexPatch(patch_names[i].c_str());
     }
@@ -335,7 +335,7 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
         texture->palette_lump = W_GetPaletteForLump(WT->texture1);
         texture->patchcount   = patchcount;
 
-        Z_StrNCpy(texture->name, mtexture->name, 8);
+        epi::CStringCopyMax(texture->name, mtexture->name, 8);
         for (size_t j = 0; j < strlen(texture->name); j++)
         {
             texture->name[j] = epi::ToUpperASCII(texture->name[j]);

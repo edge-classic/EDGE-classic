@@ -229,10 +229,10 @@ static void DDF_MainSplitActionArg(const char *info, char *actname, char *actarg
     {
         int len2 = (mid - info);
 
-        Z_StrNCpy(actname, info, len2);
+        epi::CStringCopyMax(actname, info, len2);
 
         len -= len2 + 2;
-        Z_StrNCpy(actarg, mid + 1, len);
+        epi::CStringCopyMax(actarg, mid + 1, len);
     }
     else
     {

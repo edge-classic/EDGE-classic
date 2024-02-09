@@ -523,13 +523,13 @@ void M_ReadSaveStrings(void)
 
         ex_slots[i].corrupt = false;
 
-        Z_StrNCpy(ex_slots[i].gamename, globs->game, 32 - 1);
-        Z_StrNCpy(ex_slots[i].mapname, globs->level, 10 - 1);
+        epi::CStringCopyMax(ex_slots[i].gamename, globs->game, 32 - 1);
+        epi::CStringCopyMax(ex_slots[i].mapname, globs->level, 10 - 1);
 
-        Z_StrNCpy(ex_slots[i].desc, globs->description, SAVESTRINGSIZE - 1);
+        epi::CStringCopyMax(ex_slots[i].desc, globs->description, SAVESTRINGSIZE - 1);
 
         if (globs->desc_date)
-            Z_StrNCpy(ex_slots[i].timestr, globs->desc_date, 32 - 1);
+            epi::CStringCopyMax(ex_slots[i].timestr, globs->desc_date, 32 - 1);
 
         ex_slots[i].skill   = globs->skill;
         ex_slots[i].netgame = globs->netgame;
@@ -1281,7 +1281,7 @@ static void CreateEpisodeMenu(void)
         EpisodeMenu[e].alpha_key   = '1' + e;
         EpisodeMenuSkipSkill[e]    = g->no_skill_menu;
 
-        Z_StrNCpy(EpisodeMenu[e].patch_name, g->namegraphic.c_str(), 8);
+        epi::CStringCopyMax(EpisodeMenu[e].patch_name, g->namegraphic.c_str(), 8);
         EpisodeMenu[e].patch_name[8] = 0;
 
         if (g->description != "")

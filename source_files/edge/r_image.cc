@@ -47,7 +47,7 @@
 #include "image_hq2x.h"
 #include "image_funcs.h"
 #include "str_util.h"
-
+#include "str_compare.h"
 #include "dm_data.h"
 #include "dm_defs.h"
 #include "dm_state.h"
@@ -97,7 +97,7 @@ typedef struct cached_image_s
     // parent image
     image_c *parent;
 
-    // colormap used for translated image, normally NULL
+    // colormap used for translated image, normally nullptr
     const colourmap_c *trans_map;
 
     // general hue of image (skewed towards pure colors)
@@ -134,7 +134,7 @@ image_c *W_ImageDoLookup(real_image_container_c &bucket, const char *name, int s
             return rim;
     }
 
-    return NULL; // not found
+    return nullptr; // not found
 }
 
 static void do_Animate(real_image_container_c &bucket)
@@ -276,7 +276,7 @@ void W_ImageStoreBlurred(const image_c *image, float sigma)
         img->blurred_version->total_h        = img->total_h;
         img->blurred_version->total_w        = img->total_w;
         img->blurred_version->anim.cur       = img->blurred_version;
-        img->blurred_version->anim.next      = NULL;
+        img->blurred_version->anim.next      = nullptr;
         img->blurred_version->anim.count     = 0;
         img->blurred_version->anim.speed     = 0;
         img->blurred_version->blur_sigma     = sigma;
@@ -301,7 +301,7 @@ static image_c *NewImage(int width, int height, int opacity = OPAC_Unknown)
 
     // set initial animation info
     rim->anim.cur   = rim;
-    rim->anim.next  = NULL;
+    rim->anim.next  = nullptr;
     rim->anim.count = rim->anim.speed = 0;
 
     rim->liquid_type = LIQ_None;
@@ -358,7 +358,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
         delete f;
 
         I_Warning("Unsupported image format in '%s'\n", packfile_name);
-        return NULL;
+        return nullptr;
     }
     else if (fmt == kUnknownImage)
     {
@@ -415,7 +415,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
         if (!Image_GetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
         {
             I_Warning("Error scanning image in '%s'\n", packfile_name);
-            return NULL;
+            return nullptr;
         }
 
         solid = (bpp == 3);
@@ -470,7 +470,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
 }
 
 static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, real_image_container_c &container,
-                               const image_c *replaces = NULL)
+                               const image_c *replaces = nullptr)
 {
     /* used for Graphics, Sprites and TX/HI stuff */
 
@@ -501,7 +501,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
         delete f;
 
         I_Warning("Unsupported image format in '%s' lump\n", W_GetLumpName(lump));
-        return NULL;
+        return nullptr;
     }
     else if (fmt == kUnknownImage)
     {
@@ -557,7 +557,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
         if (!Image_GetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
         {
             I_Warning("Error scanning image in '%s' lump\n", W_GetLumpName(lump));
-            return NULL;
+            return nullptr;
         }
 
         solid = (bpp == 3);
@@ -668,7 +668,7 @@ static image_c *AddImageFlat(const char *name, int lump)
         break;
 
     default:
-        return NULL;
+        return nullptr;
     }
 
     rim = NewImage(size, size, OPAC_Solid);
@@ -699,7 +699,7 @@ static image_c *AddImage_DOOM(imagedef_c *def, bool user_defined = false)
     const char *name      = def->name.c_str();
     const char *lump_name = def->info.c_str();
 
-    image_c *rim = NULL;
+    image_c *rim = nullptr;
 
     if (def->type == IMGDT_Package)
     {
@@ -744,10 +744,10 @@ static image_c *AddImage_DOOM(imagedef_c *def, bool user_defined = false)
         }
     }
 
-    if (rim == NULL)
+    if (rim == nullptr)
     {
         I_Warning("Unable to add image lump: %s\n", lump_name);
-        return NULL;
+        return nullptr;
     }
 
     rim->offset_x += def->x_offset;
@@ -806,10 +806,10 @@ static image_c *AddImageUser(imagedef_c *def)
         const char *filename = def->info.c_str();
 
         epi::File *f = OpenUserFileOrLump(def);
-        if (f == NULL)
+        if (f == nullptr)
         {
             I_Warning("Unable to open image %s: %s\n", (def->type == IMGDT_Lump) ? "lump" : "file", filename);
-            return NULL;
+            return nullptr;
         }
 
         int file_size = f->GetLength();
@@ -844,21 +844,21 @@ static image_c *AddImageUser(imagedef_c *def)
                 return AddImage_DOOM(def, true);
 
             I_Warning("Unknown image format in: %s\n", filename);
-            return NULL;
+            return nullptr;
         }
 
         if (fmt == kOtherImage)
         {
             delete f;
             I_Warning("Unsupported image format in: %s\n", filename);
-            return NULL;
+            return nullptr;
         }
 
         if (!Image_GetInfo(f, &width, &height, &bpp))
         {
             delete f;
             I_Warning("Error occurred scanning image: %s\n", filename);
-            return NULL;
+            return nullptr;
         }
 
         // close it
@@ -870,7 +870,7 @@ static image_c *AddImageUser(imagedef_c *def)
 
     default:
         I_Error("AddImageUser: Coding error, unknown type %d\n", def->type);
-        return NULL; /* NOT REACHED */
+        return nullptr; /* NOT REACHED */
     }
 
     image_c *rim = NewImage(width, height, solid ? OPAC_Solid : OPAC_Unknown);
@@ -950,7 +950,7 @@ void W_ImageCreateFlats(std::vector<int> &lumps)
 //
 // Used to fill in the image array with textures from the WAD.  The
 // list of texture definitions comes from each TEXTURE1/2 lump in each
-// existing wad file, with duplicates set to NULL.
+// existing wad file, with duplicates set to nullptr.
 //
 // NOTE: should only be called once, as it assumes none of the
 // textures in the list have names colliding with existing texture
@@ -964,7 +964,7 @@ void W_ImageCreateTextures(struct texturedef_s **defs, int number)
 
     for (i = 0; i < number; i++)
     {
-        if (defs[i] == NULL)
+        if (defs[i] == nullptr)
             continue;
 
         AddImageTexture(defs[i]->name, defs[i]);
@@ -985,7 +985,7 @@ const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon)
 
     image_c *rim = AddImage_Smart(name, IMSRC_Sprite, lump, real_sprites);
     if (!rim)
-        return NULL;
+        return nullptr;
 
     // adjust sprite offsets so that (0,0) is normal
     if (is_weapon)
@@ -1010,7 +1010,7 @@ const image_c *W_ImageCreatePackSprite(std::string packname, pack_file_c *pack, 
     image_c *rim = AddImage_SmartPack(epi::GetStem(packname).c_str(), IMSRC_Sprite, packname.c_str(),
                                       real_sprites);
     if (!rim)
-        return NULL;
+        return nullptr;
 
     // adjust sprite offsets so that (0,0) is normal
     if (is_weapon)
@@ -1037,7 +1037,7 @@ void W_ImageCreateUser(void)
 
     for (auto def : imagedefs)
     {
-        if (def == NULL)
+        if (def == nullptr)
             continue;
 
         if (def->belong != INS_Patch)
@@ -1123,7 +1123,7 @@ const image_c **W_ImageGetUserSprites(int *count)
     if (*count == 0)
     {
         L_WriteDebug("W_ImageGetUserSprites(count = %d)\n", *count);
-        return NULL;
+        return nullptr;
     }
 
     const image_c **array = new const image_c *[*count];
@@ -1314,7 +1314,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
 
     static uint8_t trans_pal[256 * 3];
 
-    if (trans != NULL)
+    if (trans != nullptr)
     {
         // Note: we don't care about source_palette here. It's likely that
         // the translation table itself would not match the other palette,
@@ -1398,7 +1398,7 @@ static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_white
             delete tmp_img;
             tmp_img = blurred_img;
         }
-        if (trans != NULL)
+        if (trans != nullptr)
             R_PaletteRemapRGBA(tmp_img, what_palette, (const uint8_t *)&playpal_data[0]);
     }
 
@@ -1431,7 +1431,7 @@ void UnloadImageOGL(cached_image_t *rc, image_c *rim)
 	{
 		if (rim->cache[i] == rc)
 		{
-			rim->cache[i] = NULL;
+			rim->cache[i] = nullptr;
 			return;
 		}
 	}
@@ -1505,7 +1505,7 @@ static const image_c *BackupTexture(const char *tex_name, int flags)
     }
 
     if (flags & ILF_Null)
-        return NULL;
+        return nullptr;
 
     M_WarnError("Unknown texture found in level: '%s'\n", tex_name);
 
@@ -1556,7 +1556,7 @@ static const image_c *BackupFlat(const char *flat_name, int flags)
     }
 
     if (flags & ILF_Null)
-        return NULL;
+        return nullptr;
 
     M_WarnError("Unknown flat found in level: '%s'\n", flat_name);
 
@@ -1605,7 +1605,7 @@ static const image_c *BackupGraphic(const char *gfx_name, int flags)
     }
 
     if (flags & ILF_Null)
-        return NULL;
+        return nullptr;
 
     M_DebugError("Unknown graphic: '%s'\n", gfx_name);
 
@@ -1624,7 +1624,7 @@ static const image_c *BackupGraphic(const char *gfx_name, int flags)
 static const image_c *BackupSprite(const char *spr_name, int flags)
 {
     if (flags & ILF_Null)
-        return NULL;
+        return nullptr;
 
     return W_ImageForDummySprite();
 }
@@ -1637,7 +1637,7 @@ const image_c *W_ImageLookup(const char *name, image_namespace_e type, int flags
 
     // "NoTexture" marker.
     if (!name || !name[0] || name[0] == '-')
-        return NULL;
+        return nullptr;
 
     // "Sky" marker.
     if (type == INS_Flat && (epi::StringCaseCompareASCII(name, "F_SKY1") == 0 || epi::StringCaseCompareASCII(name, "F_SKY") == 0))
@@ -1649,7 +1649,7 @@ const image_c *W_ImageLookup(const char *name, image_namespace_e type, int flags
     if (type == INS_Texture && ((epi::StringCaseCompareASCII(name, "AASTINKY") == 0) || (epi::StringCaseCompareASCII(name, "AASHITTY") == 0) ||
                                 (epi::StringCaseCompareASCII(name, "BADPATCH") == 0) || (epi::StringCaseCompareASCII(name, "ABADONE") == 0)))
     {
-        return NULL;
+        return nullptr;
     }
 
     const image_c *rim;
@@ -1826,7 +1826,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim, const colourmap_c *trans, boo
 
     int free_slot = -1;
 
-    cached_image_t *rc = NULL;
+    cached_image_t *rc = nullptr;
 
     for (int i = 0; i < (int)rim->cache.size(); i++)
     {
@@ -1852,7 +1852,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim, const colourmap_c *trans, boo
                 break;
         }
 
-        rc = NULL;
+        rc = nullptr;
     }
 
     if (!rc)
@@ -2039,7 +2039,7 @@ void W_DeleteAllImages(void)
 // W_AnimateImageSet
 //
 // Sets up the images so they will animate properly.  Array is
-// allowed to contain NULL entries.
+// allowed to contain nullptr entries.
 //
 // NOTE: modifies the input array of images.
 //

@@ -23,6 +23,8 @@
 
 #include "colormap.h"
 
+#include "str_compare.h"
+
 static colourmap_c *dynamic_colmap;
 
 colourmap_container_c colourmaps;
@@ -180,7 +182,7 @@ specflags_t colmap_specials[] = {{"FLASH", COLSP_NoFlash, true},
                                  // -AJA- backwards compatibility cruft...
                                  {"SKY", 0, 0},
 
-                                 {NULL, 0, 0}};
+                                 {nullptr, 0, 0}};
 
 //
 // DDF_ColmapGetSpecial
@@ -241,8 +243,8 @@ void colourmap_c::CopyDetail(colourmap_c &src)
     gl_colour   = src.gl_colour;
     font_colour = src.font_colour;
 
-    cache.data = NULL;
-    analysis   = NULL;
+    cache.data = nullptr;
+    analysis   = nullptr;
 }
 
 //
@@ -259,8 +261,8 @@ void colourmap_c::Default()
     gl_colour   = kRGBANoValue;
     font_colour = kRGBANoValue;
 
-    cache.data = NULL;
-    analysis   = NULL;
+    cache.data = nullptr;
+    analysis   = nullptr;
 }
 
 // --> colourmap_container_c class
@@ -291,7 +293,7 @@ colourmap_container_c::~colourmap_container_c()
 colourmap_c *colourmap_container_c::Lookup(const char *refname)
 {
     if (!refname || !refname[0])
-        return NULL;
+        return nullptr;
 
     for (auto iter = begin(); iter != end(); iter++)
     {
@@ -300,7 +302,7 @@ colourmap_c *colourmap_container_c::Lookup(const char *refname)
             return cmap;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -326,7 +328,7 @@ void DDF_AddRawColourmap(const char *name, int size, const char *pack_name)
     text += name;
     text += "]\n";
 
-    if (pack_name != NULL)
+    if (pack_name != nullptr)
     {
         text += "pack   = \"";
         text += pack_name;

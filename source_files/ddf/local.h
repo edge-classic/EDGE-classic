@@ -49,17 +49,17 @@ typedef struct commandlist_s
 
 #define DDF_FIELD(name, field, parser)                                                                                 \
     {                                                                                                                  \
-        name, parser, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE), NULL                                      \
+        name, parser, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE), nullptr                                      \
     }
 
 #define DDF_SUB_LIST(name, field, subcomms)                                                                            \
     {                                                                                                                  \
-        "*" name, NULL, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE), subcomms                                \
+        "*" name, nullptr, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE), subcomms                                \
     }
 
 #define DDF_CMD_END                                                                                                    \
     {                                                                                                                  \
-        NULL, NULL, 0, NULL                                                                                            \
+        nullptr, nullptr, 0, nullptr                                                                                            \
     }
 
 #define DDF_STATE(name, redir, field)                                                                                  \
@@ -69,7 +69,7 @@ typedef struct commandlist_s
 
 #define DDF_STATE_END                                                                                                  \
     {                                                                                                                  \
-        NULL, NULL, 0                                                                                                  \
+        nullptr, nullptr, 0                                                                                                  \
     }
 
 //
@@ -172,7 +172,7 @@ typedef struct
     void (*action)(struct mobj_s *mo);
 
     // -AJA- 1999/08/09: This function handles the argument when brackets
-    // are present (e.g. "WEAPON_SHOOT(FIREBALL)").  NULL if unused.
+    // are present (e.g. "WEAPON_SHOOT(FIREBALL)").  nullptr if unused.
     void (*handle_arg)(const char *arg, state_t *curstate);
 } actioncode_t;
 
@@ -197,10 +197,17 @@ extern std::string cur_ddf_filename;
 extern std::string cur_ddf_entryname;
 extern std::string cur_ddf_linedata;
 
-void DDF_Error(const char *err, ...) GCCATTR((format(printf, 1, 2)));
-void DDF_Debug(const char *err, ...) GCCATTR((format(printf, 1, 2)));
-void DDF_Warning(const char *err, ...) GCCATTR((format(printf, 1, 2)));
-void DDF_WarnError(const char *err, ...) GCCATTR((format(printf, 1, 2)));
+#ifdef __GNUC__
+void DDF_Error(const char *err, ...) __attribute__((format(printf, 1, 2)));
+void DDF_Debug(const char *err, ...) __attribute__((format(printf, 1, 2)));
+void DDF_Warning(const char *err, ...) __attribute__((format(printf, 1, 2)));
+void DDF_WarnError(const char *err, ...) __attribute__((format(printf, 1, 2)));
+#else
+void DDF_Error(const char *err, ...);
+void DDF_Debug(const char *err, ...);
+void DDF_Warning(const char *err, ...);
+void DDF_WarnError(const char *err, ...);
+#endif
 
 void DDF_MainGetPercent(const char *info, void *storage);
 void DDF_MainGetPercentAny(const char *info, void *storage);

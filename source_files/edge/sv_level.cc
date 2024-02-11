@@ -35,7 +35,7 @@
 #include <stdlib.h>
 
 #include "str_util.h"
-
+#include "str_compare.h"
 #include "colormap.h"
 
 #include "r_image.h"
@@ -116,13 +116,13 @@ static savefield_t sv_fields_surface[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_surface = {
-    NULL,              // link in list
+    nullptr,              // link in list
     "surface_t",       // structure name
     "surf",            // start marker
     sv_fields_surface, // field descriptions
     SVDUMMY,           // dummy base
     true,              // define_me
-    NULL               // pointer to known struct
+    nullptr               // pointer to known struct
 };
 
 #undef SV_F_BASE
@@ -146,19 +146,19 @@ static savefield_t sv_fields_side[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_side = {
-    NULL,           // link in list
+    nullptr,           // link in list
     "side_t",       // structure name
     "side",         // start marker
     sv_fields_side, // field descriptions
     SVDUMMY,        // dummy base
     true,           // define_me
-    NULL            // pointer to known struct
+    nullptr            // pointer to known struct
 };
 
 #undef SV_F_BASE
 
 savearray_t sv_array_side = {
-    NULL,            // link in list
+    nullptr,            // link in list
     "sides",         // array name
     &sv_struct_side, // array type
     true,            // define_me
@@ -169,7 +169,7 @@ savearray_t sv_array_side = {
     SV_SideCreateElems,   // creation routine
     SV_SideFinaliseElems, // finalisation routine
 
-    NULL, // pointer to known array
+    nullptr, // pointer to known array
     0     // loaded size
 };
 
@@ -198,19 +198,19 @@ static savefield_t sv_fields_line[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_line = {
-    NULL,           // link in list
+    nullptr,           // link in list
     "line_t",       // structure name
     "line",         // start marker
     sv_fields_line, // field descriptions
     SVDUMMY,        // dummy base
     true,           // define_me
-    NULL            // pointer to known struct
+    nullptr            // pointer to known struct
 };
 
 #undef SV_F_BASE
 
 savearray_t sv_array_line = {
-    NULL,            // link in list
+    nullptr,            // link in list
     "lines",         // array name
     &sv_struct_line, // array type
     true,            // define_me
@@ -221,7 +221,7 @@ savearray_t sv_array_line = {
     SV_LineCreateElems,   // creation routine
     SV_LineFinaliseElems, // finalisation routine
 
-    NULL, // pointer to known array
+    nullptr, // pointer to known array
     0     // loaded size
 };
 
@@ -254,13 +254,13 @@ static savefield_t sv_fields_regprops[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_regprops = {
-    NULL,                  // link in list
+    nullptr,                  // link in list
     "region_properties_t", // structure name
     "rprp",                // start marker
     sv_fields_regprops,    // field descriptions
     SVDUMMY,               // dummy base
     true,                  // define_me
-    NULL                   // pointer to known struct
+    nullptr                   // pointer to known struct
 };
 
 #undef SV_F_BASE
@@ -294,19 +294,19 @@ static savefield_t sv_fields_exfloor[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_exfloor = {
-    NULL,              // link in list
+    nullptr,              // link in list
     "extrafloor_t",    // structure name
     "exfl",            // start marker
     sv_fields_exfloor, // field descriptions
     SVDUMMY,           // dummy base
     true,              // define_me
-    NULL               // pointer to known struct
+    nullptr               // pointer to known struct
 };
 
 #undef SV_F_BASE
 
 savearray_t sv_array_exfloor = {
-    NULL,               // link in list
+    nullptr,               // link in list
     "extrafloors",      // array name
     &sv_struct_exfloor, // array type
     true,               // define_me
@@ -317,7 +317,7 @@ savearray_t sv_array_exfloor = {
     SV_ExfloorCreateElems,   // creation routine
     SV_ExfloorFinaliseElems, // finalisation routine
 
-    NULL, // pointer to known array
+    nullptr, // pointer to known array
     0     // loaded size
 };
 
@@ -355,19 +355,19 @@ static savefield_t sv_fields_sector[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_sector = {
-    NULL,             // link in list
+    nullptr,             // link in list
     "sector_t",       // structure name
     "sect",           // start marker
     sv_fields_sector, // field descriptions
     SVDUMMY,          // dummy base
     true,             // define_me
-    NULL              // pointer to known struct
+    nullptr              // pointer to known struct
 };
 
 #undef SV_F_BASE
 
 savearray_t sv_array_sector = {
-    NULL,              // link in list
+    nullptr,              // link in list
     "sectors",         // array name
     &sv_struct_sector, // array type
     true,              // define_me
@@ -378,7 +378,7 @@ savearray_t sv_array_sector = {
     SV_SectorCreateElems,   // creation routine
     SV_SectorFinaliseElems, // finalisation routine
 
-    NULL, // pointer to known array
+    nullptr, // pointer to known array
     0     // loaded size
 };
 
@@ -547,7 +547,7 @@ void SV_ExfloorFinaliseElems(void)
         extrafloor_t *ef = extrafloors + i;
 
         // skip unused extrafloors
-        if (ef->ef_line == NULL)
+        if (ef->ef_line == nullptr)
             continue;
 
         if (!ef->ef_line->special || !(ef->ef_line->special->ef.type & EXFL_Present))
@@ -624,8 +624,8 @@ void SV_SectorFinaliseElems(void)
     {
         if (lineanims[i].scroll_sec_ref)
         {
-            lineanims[i].scroll_sec_ref->ceil_move  = NULL;
-            lineanims[i].scroll_sec_ref->floor_move = NULL;
+            lineanims[i].scroll_sec_ref->ceil_move  = nullptr;
+            lineanims[i].scroll_sec_ref->floor_move = nullptr;
         }
     }
 
@@ -635,7 +635,7 @@ void SV_SectorFinaliseElems(void)
     {
         if (lightanims[i].light_sec_ref)
         {
-            lightanims[i].light_sec_ref->ceil_move = NULL;
+            lightanims[i].light_sec_ref->ceil_move = nullptr;
         }
     }
 
@@ -689,14 +689,14 @@ bool SR_LevelGetSurfPtr(void *storage, int index, void *extra)
 
     if (!str)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
     if (str[1] != ':')
         I_Error("SR_LevelGetSurfPtr: invalid surface string `%s'\n", str);
 
-    num = strtol(str + 2, NULL, 0);
+    num = strtol(str + 2, nullptr, 0);
 
     if (num < 0 || num >= numsectors)
     {
@@ -732,7 +732,7 @@ void SR_LevelPutSurfPtr(void *storage, int index, void *extra)
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SV_PutString(nullptr);
         return;
     }
 
@@ -766,7 +766,7 @@ bool SR_LevelGetImage(void *storage, int index, void *extra)
 
     if (!str)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
@@ -796,7 +796,7 @@ void SR_LevelPutImage(void *storage, int index, void *extra)
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SV_PutString(nullptr);
         return;
     }
 
@@ -816,11 +816,11 @@ bool SR_LevelGetColmap(void *storage, int index, void *extra)
     if (str)
         (*dest) = colourmaps.Lookup(str);
     else
-        (*dest) = NULL;
+        (*dest) = nullptr;
 
     // -AJA- 2008/03/15: backwards compatibility
     if (*dest && epi::StringCaseCompareASCII((*dest)->name, "NORMAL") == 0)
-        *dest = NULL;
+        *dest = nullptr;
 
     SV_FreeString(str);
     return true;
@@ -836,7 +836,7 @@ void SR_LevelPutColmap(void *storage, int index, void *extra)
     if (src)
         SV_PutString(src->name.c_str());
     else
-        SV_PutString(NULL);
+        SV_PutString(nullptr);
 }
 
 bool SR_LineGetSpecial(void *storage, int index, void *extra)
@@ -848,14 +848,14 @@ bool SR_LineGetSpecial(void *storage, int index, void *extra)
 
     if (!str)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
     if (str[0] != ':')
         I_Error("SR_LineGetSpecial: invalid special `%s'\n", str);
 
-    (*dest) = P_LookupLineType(strtol(str + 1, NULL, 0));
+    (*dest) = P_LookupLineType(strtol(str + 1, nullptr, 0));
 
     SV_FreeString(str);
     return true;
@@ -873,7 +873,7 @@ void SR_LinePutSpecial(void *storage, int index, void *extra)
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SV_PutString(nullptr);
         return;
     }
 
@@ -891,14 +891,14 @@ bool SR_SectorGetSpecial(void *storage, int index, void *extra)
 
     if (!str)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
     if (str[0] != ':')
         I_Error("SR_SectorGetSpecial: invalid special `%s'\n", str);
 
-    (*dest) = P_LookupSectorType(strtol(str + 1, NULL, 0));
+    (*dest) = P_LookupSectorType(strtol(str + 1, nullptr, 0));
 
     SV_FreeString(str);
     return true;
@@ -916,7 +916,7 @@ void SR_SectorPutSpecial(void *storage, int index, void *extra)
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SV_PutString(nullptr);
         return;
     }
 
@@ -955,11 +955,11 @@ bool SR_SectorGetPropRef(void *storage, int index, void *extra)
 
     if (!str)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
-    num = strtol(str, NULL, 0);
+    num = strtol(str, nullptr, 0);
 
     if (num < 0 || num >= numsectors)
     {
@@ -986,7 +986,7 @@ void SR_SectorPutPropRef(void *storage, int index, void *extra)
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SV_PutString(nullptr);
         return;
     }
 
@@ -1013,7 +1013,7 @@ bool SR_LineGetLine(void *storage, int index, void *extra)
 
     int swizzle = SV_GetInt();
 
-    *dest = (line_t *)((swizzle == 0) ? NULL : SV_LineGetElem(swizzle - 1));
+    *dest = (line_t *)((swizzle == 0) ? nullptr : SV_LineGetElem(swizzle - 1));
     return true;
 }
 
@@ -1021,7 +1021,7 @@ void SR_LinePutLine(void *storage, int index, void *extra)
 {
     line_t *elem = ((line_t **)storage)[index];
 
-    int swizzle = (elem == NULL) ? 0 : SV_LineFindElem(elem) + 1;
+    int swizzle = (elem == nullptr) ? 0 : SV_LineFindElem(elem) + 1;
 
     SV_PutInt(swizzle);
 }
@@ -1032,7 +1032,7 @@ bool SR_SideGetSide(void *storage, int index, void *extra)
 
     int swizzle = SV_GetInt();
 
-    *dest = (side_t *)((swizzle == 0) ? NULL : SV_SideGetElem(swizzle - 1));
+    *dest = (side_t *)((swizzle == 0) ? nullptr : SV_SideGetElem(swizzle - 1));
     return true;
 }
 
@@ -1040,7 +1040,7 @@ void SR_SidePutSide(void *storage, int index, void *extra)
 {
     side_t *elem = ((side_t **)storage)[index];
 
-    int swizzle = (elem == NULL) ? 0 : SV_SideFindElem(elem) + 1;
+    int swizzle = (elem == nullptr) ? 0 : SV_SideFindElem(elem) + 1;
 
     SV_PutInt(swizzle);
 }
@@ -1051,7 +1051,7 @@ bool SR_SectorGetSector(void *storage, int index, void *extra)
 
     int swizzle = SV_GetInt();
 
-    *dest = (sector_t *)((swizzle == 0) ? NULL : SV_SectorGetElem(swizzle - 1));
+    *dest = (sector_t *)((swizzle == 0) ? nullptr : SV_SectorGetElem(swizzle - 1));
     return true;
 }
 
@@ -1059,7 +1059,7 @@ void SR_SectorPutSector(void *storage, int index, void *extra)
 {
     sector_t *elem = ((sector_t **)storage)[index];
 
-    int swizzle = (elem == NULL) ? 0 : SV_SectorFindElem(elem) + 1;
+    int swizzle = (elem == nullptr) ? 0 : SV_SectorFindElem(elem) + 1;
 
     SV_PutInt(swizzle);
 }
@@ -1070,7 +1070,7 @@ bool SR_SectorGetEF(void *storage, int index, void *extra)
 
     int swizzle = SV_GetInt();
 
-    *dest = (extrafloor_t *)((swizzle == 0) ? NULL : SV_ExfloorGetElem(swizzle - 1));
+    *dest = (extrafloor_t *)((swizzle == 0) ? nullptr : SV_ExfloorGetElem(swizzle - 1));
     return true;
 }
 
@@ -1078,7 +1078,7 @@ void SR_SectorPutEF(void *storage, int index, void *extra)
 {
     extrafloor_t *elem = ((extrafloor_t **)storage)[index];
 
-    int swizzle = (elem == NULL) ? 0 : SV_ExfloorFindElem(elem) + 1;
+    int swizzle = (elem == nullptr) ? 0 : SV_ExfloorFindElem(elem) + 1;
 
     SV_PutInt(swizzle);
 }

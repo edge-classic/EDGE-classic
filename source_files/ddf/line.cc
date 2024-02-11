@@ -28,6 +28,8 @@
 // -ACB- 2001/02/04 DDF_GetSecHeightReference moved to p_plane.c
 //
 
+
+#include <string.h>
 #include "local.h"
 #include "line.h"
 
@@ -190,7 +192,7 @@ typedef struct
 
 static scroll_kludge_t s_scroll[] = {{"NONE", dir_none},   {"UP", (scrolldirs_e)(dir_vert | dir_up)},
                                      {"DOWN", dir_vert},   {"LEFT", (scrolldirs_e)(dir_horiz | dir_left)},
-                                     {"RIGHT", dir_horiz}, {NULL, dir_none}};
+                                     {"RIGHT", dir_horiz}, {nullptr, dir_none}};
 
 static struct // FIXME: APPLIES TO NEXT 3 TABLES !
 {
@@ -426,12 +428,12 @@ void DDF_LinedefCleanUp(void)
     {
         cur_ddf_entryname = epi::StringFormat("[%d]  (lines.ddf)", l->number);
 
-        l->t.inspawnobj = l->t.inspawnobj_ref != "" ? mobjtypes.Lookup(l->t.inspawnobj_ref.c_str()) : NULL;
+        l->t.inspawnobj = l->t.inspawnobj_ref != "" ? mobjtypes.Lookup(l->t.inspawnobj_ref.c_str()) : nullptr;
 
-        l->t.outspawnobj = l->t.outspawnobj_ref != "" ? mobjtypes.Lookup(l->t.outspawnobj_ref.c_str()) : NULL;
+        l->t.outspawnobj = l->t.outspawnobj_ref != "" ? mobjtypes.Lookup(l->t.outspawnobj_ref.c_str()) : nullptr;
 
         // Lobo: 2021
-        l->effectobject = l->effectobject_ref != "" ? mobjtypes.Lookup(l->effectobject_ref.c_str()) : NULL;
+        l->effectobject = l->effectobject_ref != "" ? mobjtypes.Lookup(l->effectobject_ref.c_str()) : nullptr;
 
         cur_ddf_entryname.clear();
     }
@@ -557,7 +559,7 @@ static specflags_t extrafloor_types[] = {
     // backwards compatibility...
     {"FALL_THROUGH", EXFL_Liquid, 0},
     {"SHOOT_THROUGH", 0, 0},
-    {NULL, 0, 0}};
+    {nullptr, 0, 0}};
 
 //
 // DDF_LineGetExtraFloor
@@ -596,7 +598,7 @@ void DDF_LineGetExtraFloor(const char *info, void *storage)
     }
 }
 
-static specflags_t ef_control_types[] = {{"NONE", EFCTL_None, 0}, {"REMOVE", EFCTL_Remove, 0}, {NULL, 0, 0}};
+static specflags_t ef_control_types[] = {{"NONE", EFCTL_None, 0}, {"REMOVE", EFCTL_Remove, 0}, {nullptr, 0, 0}};
 
 //
 // DDF_LineGetEFControl
@@ -640,7 +642,7 @@ static specflags_t teleport_specials[] = {{"RELATIVE", TELSP_Relative, 0},
                                           {"ROTATE", TELSP_Rotate, 0},
                                           {"PRESERVE", TELSP_Preserve, 0},
 
-                                          {NULL, 0, 0}};
+                                          {nullptr, 0, 0}};
 
 //
 // DDF_LineGetTeleportSpecial
@@ -682,7 +684,7 @@ static specflags_t scrollpart_specials[] = {{"RIGHT_UPPER", SCPT_RightUpper, 0},
                                             {"LEFT", SCPT_LEFT, 0},
                                             {"LEFT_REVERSE_X", SCPT_LeftRevX, 0},
                                             {"LEFT_REVERSE_Y", SCPT_LeftRevY, 0},
-                                            {NULL, 0, 0}};
+                                            {nullptr, 0, 0}};
 
 //
 // DDF_LineGetScrollPart
@@ -724,7 +726,7 @@ void DDF_LineGetScrollPart(const char *info, void *storage)
 static specflags_t line_specials[] = {{"MUST_REACH", LINSP_MustReach, 0},
                                       {"SWITCH_SEPARATE", LINSP_SwitchSeparate, 0},
                                       {"BACK_SECTOR", LINSP_BackSector, 0},
-                                      {NULL, 0, 0}};
+                                      {nullptr, 0, 0}};
 
 //
 // DDF_LineGetSpecialFlags
@@ -782,7 +784,7 @@ static const specflags_t slidingdoor_names[] = {{"NONE", SLIDE_None, 0},
                                                 {"RIGHT", SLIDE_Right, 0},
                                                 {"CENTER", SLIDE_Center, 0},
                                                 {"CENTRE", SLIDE_Center, 0}, // synonym
-                                                {NULL, 0, 0}};
+                                                {nullptr, 0, 0}};
 
 //
 // DDF_LineGetSlideType
@@ -812,7 +814,7 @@ static specflags_t line_effect_names[] = {{"TRANSLUCENT", LINEFX_Translucency, 0
                                           {"BLOCK_PLAYERS", LINEFX_BlockPlayers, 0},                // MBF21
                                           {"STRETCH_TEX_WIDTH", LINEFX_StretchWidth, 0},            // Lobo 2023
                                           {"STRETCH_TEX_HEIGHT", LINEFX_StretchHeight, 0},          // Lobo 2023
-                                          {NULL, 0, 0}};
+                                          {nullptr, 0, 0}};
 
 //
 // Gets the line effect flags.
@@ -847,7 +849,7 @@ static void DDF_LineGetLineEffect(const char *info, void *storage)
 }
 
 static specflags_t scroll_type_names[] = {
-    {"DISPLACE", ScrollType_Displace, 0}, {"ACCEL", ScrollType_Accel, 0}, {NULL, 0, 0}};
+    {"DISPLACE", ScrollType_Displace, 0}, {"ACCEL", ScrollType_Accel, 0}, {nullptr, 0, 0}};
 
 //
 // Gets the scroll type flags.
@@ -893,7 +895,7 @@ static specflags_t sector_effect_names[] = {
     {"ALIGN_FLOOR", SECTFX_AlignFloor, 0},   {"ALIGN_CEILING", SECTFX_AlignCeiling, 0},
     {"SCALE_FLOOR", SECTFX_ScaleFloor, 0},   {"SCALE_CEILING", SECTFX_ScaleCeiling, 0},
 
-    {"BOOM_HEIGHTS", SECTFX_BoomHeights, 0}, {NULL, 0, 0}};
+    {"BOOM_HEIGHTS", SECTFX_BoomHeights, 0}, {nullptr, 0, 0}};
 
 //
 // Gets the sector effect flags.
@@ -931,7 +933,7 @@ static specflags_t portal_effect_names[] = {{"STANDARD", PORTFX_Standard, 0},
                                             {"MIRROR", PORTFX_Mirror, 0},
                                             {"CAMERA", PORTFX_Camera, 0},
 
-                                            {NULL, 0, 0}};
+                                            {nullptr, 0, 0}};
 
 //
 // Gets the portal effect flags.
@@ -968,7 +970,7 @@ static void DDF_LineGetPortalEffect(const char *info, void *storage)
 static specflags_t slope_type_names[] = {{"FAKE_FLOOR", SLP_DetailFloor, 0},
                                          {"FAKE_CEILING", SLP_DetailCeiling, 0},
 
-                                         {NULL, 0, 0}};
+                                         {nullptr, 0, 0}};
 
 static void DDF_LineGetSlopeType(const char *info, void *storage)
 {
@@ -1052,10 +1054,10 @@ void donutdef_c::Copy(donutdef_c &src)
 void donutdef_c::Default()
 {
     dodonut      = false;
-    d_sfxin      = NULL;
-    d_sfxinstop  = NULL;
-    d_sfxout     = NULL;
-    d_sfxoutstop = NULL;
+    d_sfxin      = nullptr;
+    d_sfxinstop  = nullptr;
+    d_sfxout     = nullptr;
+    d_sfxoutstop = nullptr;
 }
 
 //
@@ -1353,10 +1355,10 @@ void movplanedef_c::Default(movplanedef_c::default_e def)
     wait    = 0;
     prewait = 0;
 
-    sfxstart = NULL;
-    sfxup    = NULL;
-    sfxdown  = NULL;
-    sfxstop  = NULL;
+    sfxstart = nullptr;
+    sfxup    = nullptr;
+    sfxdown  = nullptr;
+    sfxstop  = nullptr;
 
     scroll_angle = 0;
     scroll_speed = 0.0f;
@@ -1490,10 +1492,10 @@ void teleportdef_c::Default()
 {
     teleport = false;
 
-    inspawnobj = NULL;
+    inspawnobj = nullptr;
     inspawnobj_ref.clear();
 
-    outspawnobj = NULL;
+    outspawnobj = nullptr;
     outspawnobj_ref.clear();
 
     delay   = 0;
@@ -1610,9 +1612,9 @@ void linetype_c::Default(void)
     scroll_parts = SCPT_None;
 
     failedmessage.clear();
-    failed_sfx = NULL;
+    failed_sfx = nullptr;
 
-    use_colourmap = NULL;
+    use_colourmap = nullptr;
     gravity       = FLO_UNUSED;
     friction      = FLO_UNUSED;
     viscosity     = FLO_UNUSED;
@@ -1638,7 +1640,7 @@ void linetype_c::Default(void)
     fx_color       = SG_BLACK_RGBA32;
 
     // lobo 2022
-    effectobject = NULL;
+    effectobject = nullptr;
     effectobject_ref.clear();
     glass = false;
     brokentex.clear();
@@ -1670,7 +1672,7 @@ linetype_container_c::~linetype_container_c()
 //
 // linetype_c* linetype_container_c::Lookup()
 //
-// Looks an linetype by id, returns NULL if line can't be found.
+// Looks an linetype by id, returns nullptr if line can't be found.
 //
 linetype_c *linetype_container_c::Lookup(const int id)
 {
@@ -1697,7 +1699,7 @@ linetype_c *linetype_container_c::Lookup(const int id)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //

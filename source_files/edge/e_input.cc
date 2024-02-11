@@ -347,7 +347,7 @@ void E_BuildTiccmd(ticcmd_t *cmd)
         // -ACB- 1998/09/06 Angle Turn Speed Control
         turn += angleturn[t_speed] * ball_deltas[AXIS_TURN] / 64.0;
 
-        cmd->angleturn = I_ROUND(turn);
+        cmd->angleturn = RoundToInt(turn);
     }
 
     // MLook
@@ -359,7 +359,7 @@ void E_BuildTiccmd(ticcmd_t *cmd)
 
         mlook += mlookturn[m_speed] * ball_deltas[AXIS_MLOOK] / 64.0;
 
-        cmd->mlookturn = I_ROUND(mlook);
+        cmd->mlookturn = RoundToInt(mlook);
     }
 
     // Forward [ no change for 70Hz ]
@@ -373,7 +373,7 @@ void E_BuildTiccmd(ticcmd_t *cmd)
 
         forward = HMM_Clamp(-MAXPLMOVE, forward, MAXPLMOVE);
 
-        cmd->forwardmove = I_ROUND(forward);
+        cmd->forwardmove = RoundToInt(forward);
     }
 
     // Sideways [ no change for 70Hz ]
@@ -393,7 +393,7 @@ void E_BuildTiccmd(ticcmd_t *cmd)
 
         side = HMM_Clamp(-MAXPLMOVE, side, MAXPLMOVE);
 
-        cmd->sidemove = I_ROUND(side);
+        cmd->sidemove = RoundToInt(side);
     }
 
     // Upwards  -MH- 1998/08/18 Fly Up/Down movement
@@ -406,7 +406,7 @@ void E_BuildTiccmd(ticcmd_t *cmd)
 
         upward = HMM_Clamp(-MAXPLMOVE, upward, MAXPLMOVE);
 
-        cmd->upwardmove = I_ROUND(upward);
+        cmd->upwardmove = RoundToInt(upward);
     }
 
     // ---Buttons---
@@ -803,7 +803,7 @@ static specialkey_t special_keys[] = {{KEYD_RIGHTARROW, "Right Arrow"},
                                       {KEYD_TRIGGER_RIGHT, "Right Trigger"},
 
                                       // THE END
-                                      {-1, NULL}};
+                                      {-1, nullptr}};
 
 const char *E_GetKeyName(int key)
 {

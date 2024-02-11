@@ -52,7 +52,7 @@ typedef struct intercept_s
 {
     float frac; // along trace line
 
-    // one of these will be NULL
+    // one of these will be nullptr
     mobj_t *thing;
     line_t *line;
 } intercept_t;
@@ -72,20 +72,20 @@ void P_FreeSectorTouchNodes(sector_t *sec);
 
 void P_GenerateBlockMap(int min_x, int min_y, int max_x, int max_y);
 
-bool P_BlockLinesIterator(float x1, float y1, float x2, float y2, bool (*func)(line_t *, void *), void *data = NULL);
+bool P_BlockLinesIterator(float x1, float y1, float x2, float y2, bool (*func)(line_t *, void *), void *data = nullptr);
 
-bool P_BlockThingsIterator(float x1, float y1, float x2, float y2, bool (*func)(mobj_t *, void *), void *data = NULL);
+bool P_BlockThingsIterator(float x1, float y1, float x2, float y2, bool (*func)(mobj_t *, void *), void *data = nullptr);
 
 void P_DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, float z2, void (*func)(mobj_t *, void *),
-                            void *data = NULL);
+                            void *data = nullptr);
 
 void P_SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2, float y2, float z2,
-                          void (*func)(mobj_t *, void *), void *data = NULL);
+                          void (*func)(mobj_t *, void *), void *data = nullptr);
 
 float P_InterceptVector(divline_t *v2, divline_t *v1);
 
 bool P_PathTraverse(float x1, float y1, float x2, float y2, int flags, bool (*func)(intercept_t *, void *),
-                    void *data = NULL);
+                    void *data = nullptr);
 
 #endif // __P_BLOCKMAP_H__
 

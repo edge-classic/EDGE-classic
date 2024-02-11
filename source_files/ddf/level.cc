@@ -22,7 +22,7 @@
 #include "colormap.h"
 #include "local.h"
 #include "level.h"
-
+#include "str_compare.h"
 // engine code (FIXME don't do wad shit here)
 #include "w_wad.h"
 
@@ -112,7 +112,7 @@ static specflags_t map_specials[] = {{"JUMPING", MPF_Jumping, 0},
                                      {"CROUCHING", MPF_Crouching, 0},
                                      {"WEAPON_KICK", MPF_Kicking, 0},
 
-                                     {NULL, 0, 0}};
+                                     {nullptr, 0, 0}};
 
 //
 //  DDF PARSE ROUTINES
@@ -316,7 +316,7 @@ void DDF_LevelGetSkyStretch(const char *info, void *storage)
         *stretch = SKS_Unset;
 }
 
-static specflags_t wistyle_names[] = {{"DOOM", WISTYLE_Doom, 0}, {"NONE", WISTYLE_None, 0}, {NULL, 0, 0}};
+static specflags_t wistyle_names[] = {{"DOOM", WISTYLE_Doom, 0}, {"NONE", WISTYLE_None, 0}, {nullptr, 0, 0}};
 
 void DDF_LevelGetWistyle(const char *info, void *storage)
 {
@@ -376,7 +376,7 @@ void map_finaledef_c::Default()
     text_flat.clear();
     text_speed  = 3.0f;
     text_wait   = 150;
-    text_colmap = NULL;
+    text_colmap = nullptr;
 
     movie.clear();
 
@@ -460,7 +460,7 @@ void mapdef_c::Default()
     music   = 0;
     partime = 0;
 
-    episode = NULL;
+    episode = nullptr;
     episode_name.clear();
 
     force_on  = MPF_None;
@@ -497,7 +497,7 @@ void mapdef_c::Default()
 mapdef_c *mapdef_container_c::Lookup(const char *refname)
 {
     if (!refname || !refname[0])
-        return NULL;
+        return nullptr;
 
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
@@ -559,7 +559,7 @@ mapdef_c *mapdef_container_c::Lookup(const char *refname)
         return temp_level;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--- editor settings ---

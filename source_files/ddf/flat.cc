@@ -16,6 +16,8 @@
 //
 //----------------------------------------------------------------------------
 
+#include <string.h>
+
 #include "local.h"
 #include "flat.h"
 
@@ -130,12 +132,12 @@ void DDF_FlatCleanUp(void)
     {
         cur_ddf_entryname = epi::StringFormat("[%s]  (flats.ddf)", f->name.c_str());
 
-        f->impactobject = f->impactobject_ref != "" ? mobjtypes.Lookup(f->impactobject_ref.c_str()) : NULL;
+        f->impactobject = f->impactobject_ref != "" ? mobjtypes.Lookup(f->impactobject_ref.c_str()) : nullptr;
 
-        f->glowobject = f->glowobject_ref != "" ? mobjtypes.Lookup(f->glowobject_ref.c_str()) : NULL;
+        f->glowobject = f->glowobject_ref != "" ? mobjtypes.Lookup(f->glowobject_ref.c_str()) : nullptr;
 
         // f->effectobject = f->effectobject_ref.empty() ?
-        //		NULL : mobjtypes.Lookup(f->effectobject_ref);
+        //		nullptr : mobjtypes.Lookup(f->effectobject_ref);
         cur_ddf_entryname.clear();
     }
 
@@ -207,9 +209,9 @@ void flatdef_c::Default()
     liquid   = "";
     footstep = sfx_None;
     splash.clear();
-    impactobject = NULL;
+    impactobject = nullptr;
     impactobject_ref.clear();
-    glowobject = NULL;
+    glowobject = nullptr;
     glowobject_ref.clear();
     sink_depth = PERCENT_MAKE(0);
     bob_depth  = PERCENT_MAKE(0);
@@ -221,7 +223,7 @@ void flatdef_c::Default()
 flatdef_c *flatdef_container_c::Find(const char *name)
 {
     if (!name || !name[0])
-        return NULL;
+        return nullptr;
 
     for (auto iter = begin(); iter != end(); iter++)
     {
@@ -230,7 +232,7 @@ flatdef_c *flatdef_container_c::Find(const char *name)
             return flt;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--- editor settings ---

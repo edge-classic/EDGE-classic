@@ -24,6 +24,8 @@
 // in the contrib/ directory.
 //
 
+#include <string.h>
+
 #include "i_defs.h"
 #include "i_defs_gl.h"
 
@@ -48,7 +50,7 @@
 #include "w_files.h"
 #include "w_wad.h"
 #include "edge_profiling.h"
-
+#include <stdarg.h>
 #include <vector>
 
 #define CON_WIPE_TICS 12
@@ -562,7 +564,7 @@ static void CalcSizes()
 
     FNSZ_ratio = FNSZ / con_font->def->default_size;
     if (con_font->def->type == FNTYP_Image)
-        XMUL = I_ROUND((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
+        XMUL = RoundToInt((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 }
 
 static void SolidBox(int x, int y, int w, int h, RGBAColor col, float alpha)
@@ -605,7 +607,7 @@ static void DrawChar(int x, int y, char ch, RGBAColor col)
     if (con_font->def->type == FNTYP_TrueType)
     {
         float chwidth  = con_font->CharWidth(ch);
-        XMUL           = I_ROUND(chwidth * FNSZ_ratio / v_pixelaspect.f);
+        XMUL           = RoundToInt(chwidth * FNSZ_ratio / v_pixelaspect.f);
         float width    = (chwidth - con_font->spacing) * FNSZ_ratio / v_pixelaspect.f;
         float x_adjust = (XMUL - width) / 2;
         float y_adjust = con_font->ttf_glyph_map.at((uint8_t)ch).y_shift[current_font_size] * FNSZ_ratio;
@@ -782,7 +784,7 @@ static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
     // Always whiten the font when used with console output
     GLuint tex_id = W_ImageCache(endoom_font->font_image, true, (const colourmap_c *)0, true);
 
-    int enwidth = I_ROUND((float)endoom_font->im_mono_width * ((float)FNSZ / endoom_font->im_mono_width) / 2);
+    int enwidth = RoundToInt((float)endoom_font->im_mono_width * ((float)FNSZ / endoom_font->im_mono_width) / 2);
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -860,12 +862,12 @@ void CON_Drawer(void)
     else
         y = y - CON_GFX_HT;
 
-    if (console_style->bg_image != NULL)
+    if (console_style->bg_image != nullptr)
     {
         const image_c *img = console_style->bg_image;
 
         HUD_RawImage(0, y, SCREENWIDTH, y + CON_GFX_HT, img, 0.0, 0.0, IM_RIGHT(img), IM_TOP(img),
-                     console_style->def->bg.translucency, kRGBANoValue, NULL, 0, 0);
+                     console_style->def->bg.translucency, kRGBANoValue, nullptr, 0, 0);
     }
     else
     {
@@ -1716,7 +1718,7 @@ void CON_ShowPosition(void)
     CON_SetupFont();
 
     player_t *p = players[displayplayer];
-    if (p == NULL)
+    if (p == nullptr)
         return;
 
     char textbuf[128];

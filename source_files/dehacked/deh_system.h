@@ -30,7 +30,11 @@ extern bool all_mode;
 void System_Startup(void);
 
 // error message storage and retrieval
-void        SetErrorMsg(const char *str, ...) GCCATTR((format(printf, 1, 2)));
+#ifdef __GNUC__
+void        SetErrorMsg(const char *str, ...) __attribute__((format(printf, 1, 2)));
+#else
+void        SetErrorMsg(const char *str, ...);
+#endif
 const char *GetErrorMsg(void);
 
 } // namespace dehacked

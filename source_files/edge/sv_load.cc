@@ -66,7 +66,7 @@ savestruct_t *SV_LookupLoadedStruct(const char *name)
             return S;
 
     // not found
-    return NULL;
+    return nullptr;
 }
 
 savearray_t *SV_LookupLoadedArray(const char *name)
@@ -78,7 +78,7 @@ savearray_t *SV_LookupLoadedArray(const char *name)
             return A;
 
     // not found
-    return NULL;
+    return nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -97,15 +97,15 @@ void SV_BeginLoad(bool is_hub)
 
     L_WriteDebug("SV_BeginLoad...\n");
 
-    loaded_struct_list = NULL;
-    loaded_array_list  = NULL;
+    loaded_struct_list = nullptr;
+    loaded_array_list  = nullptr;
 
     // clear counterpart fields
     for (S = sv_known_structs; S; S = S->next)
-        S->counterpart = NULL;
+        S->counterpart = nullptr;
 
     for (A = sv_known_arrays; A; A = A->next)
-        A->counterpart = NULL;
+        A->counterpart = nullptr;
 }
 
 static void LoadFreeStruct(savestruct_t *S)
@@ -164,7 +164,7 @@ static savefield_t *StructFindField(savestruct_t *info, const char *name)
             return F;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static void StructSkipField(savefield_t *field)
@@ -241,7 +241,7 @@ bool SV_LoadStruct(void *base, savestruct_t *info)
                 break;
 
             default:
-                (*actual->field_get)(storage, i, NULL);
+                (*actual->field_get)(storage, i, nullptr);
                 break;
             }
         }
@@ -266,7 +266,7 @@ static bool SV_LoadSTRU(void)
     // make the counterparts refer to each other
     if (S->counterpart)
     {
-        SYS_ASSERT(S->counterpart->counterpart == NULL);
+        SYS_ASSERT(S->counterpart->counterpart == nullptr);
         S->counterpart->counterpart = S;
     }
 
@@ -298,7 +298,7 @@ static bool SV_LoadSTRU(void)
             F->type.name = SV_GetString();
         }
 
-        F->known_field = NULL;
+        F->known_field = nullptr;
 
         if (S->counterpart)
             F->known_field = StructFindField(S->counterpart, F->field_name);
@@ -328,7 +328,7 @@ static bool SV_LoadARRY(void)
     // make the counterparts refer to each other
     if (A->counterpart)
     {
-        SYS_ASSERT(A->counterpart->counterpart == NULL);
+        SYS_ASSERT(A->counterpart->counterpart == nullptr);
         A->counterpart->counterpart = A;
     }
 
@@ -336,7 +336,7 @@ static bool SV_LoadARRY(void)
 
     A->sdef = SV_LookupLoadedStruct(struct_name);
 
-    if (A->sdef == NULL)
+    if (A->sdef == nullptr)
         I_Error("LOADGAME: Coding Error ! (no STRU `%s' for ARRY)\n", struct_name);
 
     SV_FreeString(struct_name);

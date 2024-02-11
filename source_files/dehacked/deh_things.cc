@@ -50,7 +50,7 @@
 #include "deh_text.h"
 #include "deh_wad.h"
 #include "deh_weapons.h"
-
+#include "str_compare.h"
 namespace dehacked
 {
 
@@ -148,7 +148,7 @@ const ExtraAttack attack_extra[] =   {{kMT_FIRE, "TRACKER", 0, 75, "FS"},
                                       {kMT_EXTRABFG, "SPRAY", 0, 75, ""},
                                       {kMT_SPAWNSHOT, "SHOOTTOSPOT", 16, 100, ""},
 
-                                      {-1, NULL, 0, 0, ""}};
+                                      {-1, nullptr, 0, 0, ""}};
 
 void HandleSounds(const MobjInfo *info, int mt_num)
 {
@@ -289,7 +289,7 @@ void CheckPainElemental(void)
         BeginLump();
     }
 
-    const char *spawn_at = NULL;
+    const char *spawn_at = nullptr;
 
     if (skull->seestate != kS_NULL)
         spawn_at = "CHASE:1";
@@ -325,7 +325,7 @@ void ConvertScratch(const ScratchAttack *atk);
 const char *Attacks::AddScratchAttack(int damage, const char *sfx)
 {
     std::string safe_sfx = "QUIET";
-    if (sfx != NULL)
+    if (sfx != nullptr)
     {
         safe_sfx.clear();
         while (*sfx)
@@ -396,7 +396,7 @@ void Attacks::ConvertAttack(const MobjInfo *info, int mt_num, bool plr_rocket)
         wad::Printf("[%s]\n", things::GetMobjName(mt_num) + 1);
 
     // find attack in the extra table...
-    const ExtraAttack *ext = NULL;
+    const ExtraAttack *ext = nullptr;
 
     for (int j = 0; attack_extra[j].atk_type; j++)
         if (attack_extra[j].mt_num == mt_num)
@@ -528,7 +528,7 @@ void things::Init()
 void things::Shutdown()
 {
     for (size_t i = 0; i < new_mobjinfo.size(); i++)
-        if (new_mobjinfo[i] != NULL)
+        if (new_mobjinfo[i] != nullptr)
             delete new_mobjinfo[i];
 
     new_mobjinfo.clear();
@@ -559,14 +559,14 @@ void things::MarkThing(int mt_num)
     if (mt_num == kMT_SPAWNFIRE)
         MarkThing(kMT_SPAWNSHOT);
 
-    // fill any missing slots with NULLs, including the one we want
+    // fill any missing slots with nullptrs, including the one we want
     while ((int)new_mobjinfo.size() < mt_num + 1)
     {
-        new_mobjinfo.push_back(NULL);
+        new_mobjinfo.push_back(nullptr);
     }
 
     // already have a modified entry?
-    if (new_mobjinfo[mt_num] != NULL)
+    if (new_mobjinfo[mt_num] != nullptr)
         return;
 
     // create new entry, copy original info if we have it
@@ -649,7 +649,7 @@ const MobjInfo *things::OldMobj(int mt_num)
     if (mt_num < kTotalMobjTypesPortCompatibility)
         return &mobjinfo[mt_num];
 
-    return NULL;
+    return nullptr;
 }
 
 MobjInfo *things::NewMobj(int mt_num)
@@ -657,13 +657,13 @@ MobjInfo *things::NewMobj(int mt_num)
     if (mt_num < (int)new_mobjinfo.size())
         return new_mobjinfo[mt_num];
 
-    return NULL;
+    return nullptr;
 }
 
 const MobjInfo *things::NewMobjElseOld(int mt_num)
 {
     const MobjInfo *info = NewMobj(mt_num);
-    if (info != NULL)
+    if (info != nullptr)
         return info;
 
     return OldMobj(mt_num);
@@ -672,7 +672,7 @@ const MobjInfo *things::NewMobjElseOld(int mt_num)
 int things::GetMobjMBF21Flags(int mt_num)
 {
     const MobjInfo *info = NewMobjElseOld(mt_num);
-    if (info == NULL)
+    if (info == nullptr)
         return 0;
     return info->mbf21_flags;
 }
@@ -684,7 +684,7 @@ bool things::IsSpawnable(int mt_num)
         return false;
 
     const MobjInfo *info = NewMobjElseOld(mt_num);
-    if (info == NULL)
+    if (info == nullptr)
         return false;
 
     return info->doomednum > 0;
@@ -701,7 +701,7 @@ struct FlagName
 {
     long long int flag; // flag in MobjInfo (kMF_XXX), 0 if ignored
     const char   *bex;  // name in a DEHACKED or BEX file
-    const char   *conv; // edge name, NULL if none, can be multiple
+    const char   *conv; // edge name, nullptr if none, can be multiple
 };
 
 const FlagName flag_list[] = {
@@ -711,8 +711,8 @@ const FlagName flag_list[] = {
     {kMF_NOSECTOR, "NOSECTOR", "NOSECTOR"},
     {kMF_NOBLOCKMAP, "NOBLOCKMAP", "NOBLOCKMAP"},
     {kMF_AMBUSH, "AMBUSH", "AMBUSH"},
-    {0, "JUSTHIT", NULL},
-    {0, "JUSTATTACKED", NULL},
+    {0, "JUSTHIT", nullptr},
+    {0, "JUSTATTACKED", nullptr},
     {kMF_SPAWNCEILING, "SPAWNCEILING", "SPAWNCEILING"},
     {kMF_NOGRAVITY, "NOGRAVITY", "NOGRAVITY"},
     {kMF_DROPOFF, "DROPOFF", "DROPOFF"},
@@ -726,28 +726,28 @@ const FlagName flag_list[] = {
     {kMF_SHADOW, "SHADOW", "FUZZY"},
     {kMF_NOBLOOD, "NOBLOOD", "DAMAGESMOKE"},
     {kMF_CORPSE, "CORPSE", "CORPSE"},
-    {0, "INFLOAT", NULL},
+    {0, "INFLOAT", nullptr},
     {kMF_COUNTKILL, "COUNTKILL", "COUNT_AS_KILL"},
     {kMF_COUNTITEM, "COUNTITEM", "COUNT_AS_ITEM"},
     {kMF_SKULLFLY, "SKULLFLY", "SKULLFLY"},
     {kMF_NOTDMATCH, "NOTDMATCH", "NODEATHMATCH"},
-    {kMF_TRANSLATION1, "TRANSLATION1", NULL},
-    {kMF_TRANSLATION2, "TRANSLATION2", NULL},
-    {kMF_TRANSLATION1, "TRANSLATION", NULL}, // bug compat
+    {kMF_TRANSLATION1, "TRANSLATION1", nullptr},
+    {kMF_TRANSLATION2, "TRANSLATION2", nullptr},
+    {kMF_TRANSLATION1, "TRANSLATION", nullptr}, // bug compat
     {kMF_TOUCHY, "TOUCHY", "TOUCHY"},
     {kMF_BOUNCES, "BOUNCES", "BOUNCE"},
-    {kMF_FRIEND, "FRIEND", NULL},
-    {kMF_TRANSLUCENT, "TRANSLUCENT", NULL},
-    {kMF_TRANSLUCENT, "TRANSLUC50", NULL},
+    {kMF_FRIEND, "FRIEND", nullptr},
+    {kMF_TRANSLUCENT, "TRANSLUCENT", nullptr},
+    {kMF_TRANSLUCENT, "TRANSLUC50", nullptr},
     // BOOM and MBF flags...
     //{ kMF_STEALTH,      "STEALTH",       "STEALTH" },
 
-    {kMF_UNUSED1, "UNUSED1", NULL},
-    {kMF_UNUSED2, "UNUSED2", NULL},
-    {kMF_UNUSED3, "UNUSED3", NULL},
-    {kMF_UNUSED4, "UNUSED4", NULL},
+    {kMF_UNUSED1, "UNUSED1", nullptr},
+    {kMF_UNUSED2, "UNUSED2", nullptr},
+    {kMF_UNUSED3, "UNUSED3", nullptr},
+    {kMF_UNUSED4, "UNUSED4", nullptr},
 
-    {0, NULL, NULL} // End sentinel
+    {0, nullptr, nullptr} // End sentinel
 };
 
 const FlagName mbf21flag_list[] = {
@@ -762,33 +762,33 @@ const FlagName mbf21flag_list[] = {
     {kMBF21_FULLVOLSOUNDS, "FULLVOLSOUNDS", "ALWAYS_LOUD"},
 
     // flags which don't produce an Edge special
-    {kMBF21_SHORTMRANGE, "SHORTMRANGE", NULL},
-    {kMBF21_LONGMELEE, "LONGMELEE", NULL},
-    {kMBF21_FORCERADIUSDMG, "FORCERADIUSDMG", NULL},
+    {kMBF21_SHORTMRANGE, "SHORTMRANGE", nullptr},
+    {kMBF21_LONGMELEE, "LONGMELEE", nullptr},
+    {kMBF21_FORCERADIUSDMG, "FORCERADIUSDMG", nullptr},
 
-    {kMBF21_MAP07BOSS1, "MAP07BOSS1", NULL},
-    {kMBF21_MAP07BOSS2, "MAP07BOSS2", NULL},
-    {kMBF21_E1M8BOSS, "E1M8BOSS", NULL},
-    {kMBF21_E2M8BOSS, "E2M8BOSS", NULL},
-    {kMBF21_E3M8BOSS, "E3M8BOSS", NULL},
-    {kMBF21_E4M6BOSS, "E4M6BOSS", NULL},
-    {kMBF21_E4M8BOSS, "E4M8BOSS", NULL},
+    {kMBF21_MAP07BOSS1, "MAP07BOSS1", nullptr},
+    {kMBF21_MAP07BOSS2, "MAP07BOSS2", nullptr},
+    {kMBF21_E1M8BOSS, "E1M8BOSS", nullptr},
+    {kMBF21_E2M8BOSS, "E2M8BOSS", nullptr},
+    {kMBF21_E3M8BOSS, "E3M8BOSS", nullptr},
+    {kMBF21_E4M6BOSS, "E4M6BOSS", nullptr},
+    {kMBF21_E4M8BOSS, "E4M8BOSS", nullptr},
 
-    {0, NULL, NULL} // End sentinel
+    {0, nullptr, nullptr} // End sentinel
 };
 
 // these are extra flags we add for certain monsters.
 // they do not correspond to anything in DEHACKED / BEX / MBF21.
 const FlagName extflaglist[] = {
-    {kExtraFlagDisloyal, NULL, "DISLOYAL,ATTACK_HURTS"}, // must be first
-    {kExtraFlagTriggerHappy, NULL, "TRIGGER_HAPPY"},
-    {kExtraFlagBossMan, NULL, "BOSSMAN"},
-    {kExtraFlagLoud, NULL, "ALWAYS_LOUD"},
-    {kExtraFlagNoRaise, NULL, "NO_RESURRECT"},
-    {kExtraFlagNoGrudge, NULL, "NO_GRUDGE,NEVERTARGETED"},
-    {kExtraFlagNoItemBk, NULL, "NO_RESPAWN"},
+    {kExtraFlagDisloyal, nullptr, "DISLOYAL,ATTACK_HURTS"}, // must be first
+    {kExtraFlagTriggerHappy, nullptr, "TRIGGER_HAPPY"},
+    {kExtraFlagBossMan, nullptr, "BOSSMAN"},
+    {kExtraFlagLoud, nullptr, "ALWAYS_LOUD"},
+    {kExtraFlagNoRaise, nullptr, "NO_RESURRECT"},
+    {kExtraFlagNoGrudge, nullptr, "NO_GRUDGE,NEVERTARGETED"},
+    {kExtraFlagNoItemBk, nullptr, "NO_RESPAWN"},
 
-    {0, NULL, NULL} // End sentinel
+    {0, nullptr, nullptr} // End sentinel
 };
 
 int ParseBits(const FlagName *list, char *bit_str)
@@ -798,7 +798,7 @@ int ParseBits(const FlagName *list, char *bit_str)
     // these delimiters are the same as what Boom/MBF uses
     static const char *delims = "+|, \t\f\r";
 
-    for (char *token = strtok(bit_str, delims); token != NULL; token = strtok(NULL, delims))
+    for (char *token = strtok(bit_str, delims); token != nullptr; token = strtok(nullptr, delims))
     {
         // tokens should be non-empty
         SYS_ASSERT(token[0] != 0);
@@ -817,11 +817,11 @@ int ParseBits(const FlagName *list, char *bit_str)
 
         // find the name in the given list
         int i;
-        for (i = 0; list[i].bex != NULL; i++)
+        for (i = 0; list[i].bex != nullptr; i++)
             if (epi::StringCaseCompareASCII(token, list[i].bex) == 0)
                 break;
 
-        if (list[i].bex == NULL)
+        if (list[i].bex == nullptr)
         {
             I_Debugf("Dehacked: Warning - Line %d: unknown BITS mnemonic: %s\n", patch::line_num, token);
             continue;
@@ -975,18 +975,18 @@ void HandleFlags(const MobjInfo *info, int mt_num, int player)
     bool is_monster     = CheckIsMonster(info, mt_num, player, true);
     bool force_disloyal = (is_monster && miscellaneous::monster_infight == 221);
 
-    for (i = 0; flag_list[i].bex != NULL; i++)
+    for (i = 0; flag_list[i].bex != nullptr; i++)
     {
         if (0 == (cur_f & flag_list[i].flag))
             continue;
 
-        if (flag_list[i].conv != NULL)
+        if (flag_list[i].conv != nullptr)
             AddOneFlag(info, flag_list[i].conv, got_a_flag);
     }
 
     const char *eflags = GetExtFlags(mt_num, player);
 
-    for (i = 0; extflaglist[i].bex != NULL; i++)
+    for (i = 0; extflaglist[i].bex != nullptr; i++)
     {
         char ch = (char)extflaglist[i].flag;
 
@@ -1004,12 +1004,12 @@ void HandleFlags(const MobjInfo *info, int mt_num, int player)
 
     cur_f = info->mbf21_flags;
 
-    for (i = 0; mbf21flag_list[i].bex != NULL; i++)
+    for (i = 0; mbf21flag_list[i].bex != nullptr; i++)
     {
         if (0 == (cur_f & mbf21flag_list[i].flag))
             continue;
 
-        if (mbf21flag_list[i].conv != NULL)
+        if (mbf21flag_list[i].conv != nullptr)
             AddOneFlag(info, mbf21flag_list[i].conv, got_a_flag);
     }
 
@@ -1061,7 +1061,7 @@ void FixHeights()
             continue;
 
         MobjInfo *info = new_mobjinfo[mt_num];
-        if (info == NULL)
+        if (info == nullptr)
             continue;
 
         /* Kludge for Aliens TC (and others) that put these things on
@@ -1387,7 +1387,7 @@ const pickupitem_t pickup_item[] = {
     {kSPR_PLAS, "PLASMA_RIFLE,CELLS", 1, 40, 0, "GotPlasmaGun", ksfx_wpnup},
     {kSPR_BFUG, "BFG9000,CELLS", 1, 40, 0, "GotBFG", ksfx_wpnup},
 
-    {-1, NULL, 0, 0, 0, NULL}};
+    {-1, nullptr, 0, 0, 0, nullptr}};
 
 void HandleItem(const MobjInfo *info, int mt_num)
 {
@@ -1433,7 +1433,7 @@ void HandleItem(const MobjInfo *info, int mt_num)
 
     int i;
 
-    for (i = 0; pickup_item[i].benefit != NULL; i++)
+    for (i = 0; pickup_item[i].benefit != nullptr; i++)
     {
         if (spr_num == pickup_item[i].spr_num)
             break;
@@ -1441,7 +1441,7 @@ void HandleItem(const MobjInfo *info, int mt_num)
 
     const pickupitem_t *pu = pickup_item + i;
 
-    if (pu->benefit == NULL) // not found
+    if (pu->benefit == nullptr) // not found
     {
         I_Debugf("Dehacked: Warning - Unknown pickup sprite \"%s\" for item [%s]\n", sprites::GetOriginalName(spr_num),
                   GetMobjName(mt_num));
@@ -1566,7 +1566,7 @@ void ConvertMobj(const MobjInfo *info, int mt_num, int player, bool brain_missil
 
 void things::HandleDropItem(const MobjInfo *info, int mt_num)
 {
-    const char *item = NULL;
+    const char *item = nullptr;
 
     if (info->dropped_item == 0)
     {
@@ -1730,7 +1730,7 @@ void things::ConvertTHING(void)
     {
         const MobjInfo *info = new_mobjinfo[i];
 
-        if (info == NULL)
+        if (info == nullptr)
             continue;
 
         if (i == kMT_PLAYER)
@@ -1767,7 +1767,7 @@ void things::ConvertATK()
     {
         const MobjInfo *info = new_mobjinfo[i];
 
-        if (info == NULL)
+        if (info == nullptr)
             continue;
 
         Attacks::ConvertAttack(info, i, false);
@@ -1823,7 +1823,7 @@ const FieldReference mobj_field[] = {
     {"Fullbright", offsetof(MobjInfo, fullbright), kFieldTypeZeroOrGreater},
     {"Respawn frame", offsetof(MobjInfo, raisestate), kFieldTypeFrameNumber},
 
-    {NULL, 0, kFieldTypeAny} // End sentinel
+    {nullptr, 0, kFieldTypeAny} // End sentinel
 };
 } // namespace things
 
@@ -1837,7 +1837,7 @@ void things::AlterThing(int new_val)
     MarkThing(mt_num);
 
     int *raw_obj = (int *)new_mobjinfo[mt_num];
-    SYS_ASSERT(raw_obj != NULL);
+    SYS_ASSERT(raw_obj != nullptr);
 
     if (!FieldAlter(mobj_field, field_name, raw_obj, new_val))
     {

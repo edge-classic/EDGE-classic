@@ -115,8 +115,8 @@ bool menuactive;
 // timed message = no input from user
 static bool msg_needsinput;
 
-static void (*message_key_routine)(int response)           = NULL;
-static void (*message_input_routine)(const char *response) = NULL;
+static void (*message_key_routine)(int response)           = nullptr;
+static void (*message_input_routine)(const char *response) = nullptr;
 
 static int chosen_epi;
 
@@ -322,28 +322,28 @@ typedef enum
     main_end
 } main_e;
 
-static menuitem_t MainMenu[] = {{1, "M_NGAME", NULL, M_NewGame, 'n', language["MainNewGame"]},
-                                {1, "M_OPTION", NULL, M_Options, 'o', language["MainOptions"]},
-                                {1, "M_LOADG", NULL, M_LoadGame, 'l', language["MainLoadGame"]},
-                                {1, "M_SAVEG", NULL, M_SaveGame, 's', language["MainSaveGame"]},
+static menuitem_t MainMenu[] = {{1, "M_NGAME", nullptr, M_NewGame, 'n', language["MainNewGame"]},
+                                {1, "M_OPTION", nullptr, M_Options, 'o', language["MainOptions"]},
+                                {1, "M_LOADG", nullptr, M_LoadGame, 'l', language["MainLoadGame"]},
+                                {1, "M_SAVEG", nullptr, M_SaveGame, 's', language["MainSaveGame"]},
                                 // Another hickup with Special edition.
-                                {1, "M_RDTHIS", NULL, M_ReadThis, 'r', language["MainReadThis"]},
-                                {1, "M_QUITG", NULL, M_QuitEDGE, 'q', language["MainQuitGame"]}};
+                                {1, "M_RDTHIS", nullptr, M_ReadThis, 'r', language["MainReadThis"]},
+                                {1, "M_QUITG", nullptr, M_QuitEDGE, 'q', language["MainQuitGame"]}};
 
-static menu_t MainDef = {main_end, NULL, MainMenu, &main_menu_style, M_DrawMainMenu, 94, 64, 0};
+static menu_t MainDef = {main_end, nullptr, MainMenu, &main_menu_style, M_DrawMainMenu, 94, 64, 0};
 
 //
 // EPISODE SELECT
 //
 // -KM- 1998/12/16 This is generated dynamically.
 //
-static menuitem_t *EpisodeMenu          = NULL;
-static bool       *EpisodeMenuSkipSkill = NULL;
+static menuitem_t *EpisodeMenu          = nullptr;
+static bool       *EpisodeMenuSkipSkill = nullptr;
 
 static menuitem_t DefaultEpiMenu = {1,         // status
                                     "Working", // name
-                                    NULL,      // image
-                                    NULL,      // select_func
+                                    nullptr,      // image
+                                    nullptr,      // select_func
                                     'w',       // alphakey
                                     "DEFAULT"};
 
@@ -358,11 +358,11 @@ static menu_t EpiDef = {
     0   // lastOn
 };
 
-static menuitem_t SkillMenu[] = {{1, "M_JKILL", NULL, M_ChooseSkill, 'p', language["MenuDifficulty1"]},
-                                 {1, "M_ROUGH", NULL, M_ChooseSkill, 'r', language["MenuDifficulty2"]},
-                                 {1, "M_HURT", NULL, M_ChooseSkill, 'h', language["MenuDifficulty3"]},
-                                 {1, "M_ULTRA", NULL, M_ChooseSkill, 'u', language["MenuDifficulty4"]},
-                                 {1, "M_NMARE", NULL, M_ChooseSkill, 'n', language["MenuDifficulty5"]}};
+static menuitem_t SkillMenu[] = {{1, "M_JKILL", nullptr, M_ChooseSkill, 'p', language["MenuDifficulty1"]},
+                                 {1, "M_ROUGH", nullptr, M_ChooseSkill, 'r', language["MenuDifficulty2"]},
+                                 {1, "M_HURT", nullptr, M_ChooseSkill, 'h', language["MenuDifficulty3"]},
+                                 {1, "M_ULTRA", nullptr, M_ChooseSkill, 'u', language["MenuDifficulty4"]},
+                                 {1, "M_NMARE", nullptr, M_ChooseSkill, 'n', language["MenuDifficulty5"]}};
 
 static menu_t SkillDef = {
     sk_numtypes, // # of menu items
@@ -394,7 +394,7 @@ typedef enum
 // Read This! MENU 1 & 2
 //
 
-static menuitem_t ReadMenu1[] = {{1, "", NULL, M_ReadThis2, 0}};
+static menuitem_t ReadMenu1[] = {{1, "", nullptr, M_ReadThis2, 0}};
 
 static menu_t ReadDef1 = {1,
                           &MainDef,
@@ -405,7 +405,7 @@ static menu_t ReadDef1 = {1,
                           1000,
                           0};
 
-static menuitem_t ReadMenu2[] = {{1, "", NULL, M_FinishReadThis, 0}};
+static menuitem_t ReadMenu2[] = {{1, "", nullptr, M_FinishReadThis, 0}};
 
 static menu_t ReadDef2 = {1,
                           &ReadDef1,
@@ -421,22 +421,22 @@ static menu_t ReadDef2 = {1,
 //
 // Note: upto 10 slots per page
 //
-static menuitem_t LoadingMenu[] = {{2, "", NULL, M_LoadSelect, '1'}, {2, "", NULL, M_LoadSelect, '2'},
-                                   {2, "", NULL, M_LoadSelect, '3'}, {2, "", NULL, M_LoadSelect, '4'},
-                                   {2, "", NULL, M_LoadSelect, '5'}, {2, "", NULL, M_LoadSelect, '6'},
-                                   {2, "", NULL, M_LoadSelect, '7'}, {2, "", NULL, M_LoadSelect, '8'},
-                                   {2, "", NULL, M_LoadSelect, '9'}, {2, "", NULL, M_LoadSelect, '0'}};
+static menuitem_t LoadingMenu[] = {{2, "", nullptr, M_LoadSelect, '1'}, {2, "", nullptr, M_LoadSelect, '2'},
+                                   {2, "", nullptr, M_LoadSelect, '3'}, {2, "", nullptr, M_LoadSelect, '4'},
+                                   {2, "", nullptr, M_LoadSelect, '5'}, {2, "", nullptr, M_LoadSelect, '6'},
+                                   {2, "", nullptr, M_LoadSelect, '7'}, {2, "", nullptr, M_LoadSelect, '8'},
+                                   {2, "", nullptr, M_LoadSelect, '9'}, {2, "", nullptr, M_LoadSelect, '0'}};
 
 static menu_t LoadDef = {SAVE_SLOTS, &MainDef, LoadingMenu, &load_style, M_DrawLoad, 30, 42, 0};
 
 //
 // SAVE GAME MENU
 //
-static menuitem_t SavingMenu[] = {{2, "", NULL, M_SaveSelect, '1'}, {2, "", NULL, M_SaveSelect, '2'},
-                                  {2, "", NULL, M_SaveSelect, '3'}, {2, "", NULL, M_SaveSelect, '4'},
-                                  {2, "", NULL, M_SaveSelect, '5'}, {2, "", NULL, M_SaveSelect, '6'},
-                                  {2, "", NULL, M_SaveSelect, '7'}, {2, "", NULL, M_SaveSelect, '8'},
-                                  {2, "", NULL, M_SaveSelect, '9'}, {2, "", NULL, M_SaveSelect, '0'}};
+static menuitem_t SavingMenu[] = {{2, "", nullptr, M_SaveSelect, '1'}, {2, "", nullptr, M_SaveSelect, '2'},
+                                  {2, "", nullptr, M_SaveSelect, '3'}, {2, "", nullptr, M_SaveSelect, '4'},
+                                  {2, "", nullptr, M_SaveSelect, '5'}, {2, "", nullptr, M_SaveSelect, '6'},
+                                  {2, "", nullptr, M_SaveSelect, '7'}, {2, "", nullptr, M_SaveSelect, '8'},
+                                  {2, "", nullptr, M_SaveSelect, '9'}, {2, "", nullptr, M_SaveSelect, '0'}};
 
 static menu_t SaveDef = {SAVE_SLOTS, &MainDef, SavingMenu, &save_style, M_DrawSave, 30, 42, 0};
 
@@ -872,7 +872,7 @@ void M_LoadGame(int choice)
 {
     if (netgame)
     {
-        M_StartMessage(language["NoLoadInNetGame"], NULL, false);
+        M_StartMessage(language["NoLoadInNetGame"], nullptr, false);
         return;
     }
 
@@ -1054,14 +1054,14 @@ void M_SaveGame(int choice)
 {
     if (gamestate != GS_LEVEL)
     {
-        M_StartMessage(language["SaveWhenNotPlaying"], NULL, false);
+        M_StartMessage(language["SaveWhenNotPlaying"], nullptr, false);
         return;
     }
 
     // -AJA- big cop-out here (add RTS menu stuff to savegame ?)
     if (rts_menuactive)
     {
-        M_StartMessage("You can't save during an RTS menu.\n\npress a key.", NULL, false);
+        M_StartMessage("You can't save during an RTS menu.\n\npress a key.", nullptr, false);
         return;
     }
 
@@ -1129,13 +1129,13 @@ void M_QuickLoad(void)
 {
     if (netgame)
     {
-        M_StartMessage(language["NoQLoadInNet"], NULL, false);
+        M_StartMessage(language["NoQLoadInNet"], nullptr, false);
         return;
     }
 
     if (quickSaveSlot < 0)
     {
-        M_StartMessage(language["NoQuickSaveSlot"], NULL, false);
+        M_StartMessage(language["NoQuickSaveSlot"], nullptr, false);
         return;
     }
 
@@ -1277,7 +1277,7 @@ static void CreateEpisodeMenu(void)
 
         EpisodeMenu[e].status      = 1;
         EpisodeMenu[e].select_func = M_Episode;
-        EpisodeMenu[e].image       = NULL;
+        EpisodeMenu[e].image       = nullptr;
         EpisodeMenu[e].alpha_key   = '1' + e;
         EpisodeMenuSkipSkill[e]    = g->no_skill_menu;
 
@@ -1313,7 +1313,7 @@ void M_NewGame(int choice)
 {
     if (netgame)
     {
-        M_StartMessage(language["NewNetGame"], NULL, false);
+        M_StartMessage(language["NewNetGame"], nullptr, false);
         return;
     }
 
@@ -1391,7 +1391,7 @@ static void ReallyDoStartLevel(skill_t skill, gamedef_c *g)
     {
         // 23-6-98 KM Fixed this.
         M_SetupNextMenu(&EpiDef);
-        M_StartMessage(language["EpisodeNonExist"], NULL, false);
+        M_StartMessage(language["EpisodeNonExist"], nullptr, false);
         return;
     }
 
@@ -1530,7 +1530,7 @@ void M_EndGame(int choice, cvar_c *cvar)
 
     if (netgame)
     {
-        M_StartMessage(language["EndNetGame"], NULL, false);
+        M_StartMessage(language["EndNetGame"], nullptr, false);
         return;
     }
 
@@ -1814,7 +1814,7 @@ void M_StartMessage(const char *string, void (*routine)(int response), bool inpu
     msg_mode              = 1;
     msg_string            = std::string(string);
     message_key_routine   = routine;
-    message_input_routine = NULL;
+    message_input_routine = nullptr;
     msg_needsinput        = input;
     menuactive            = true;
     CON_SetVisible(vs_notvisible);
@@ -1828,7 +1828,7 @@ void M_StartMessage(const char *string, void (*routine)(int response), bool inpu
 // string:  The prompt.
 //
 // routine: Format is void routine(char *s)  Routine will be called
-//          with a pointer to the input in s.  s will be NULL if the user
+//          with a pointer to the input in s.  s will be nullptr if the user
 //          pressed ESCAPE to cancel the input.
 //
 void M_StartMessageInput(const char *string, void (*routine)(const char *response))
@@ -1837,7 +1837,7 @@ void M_StartMessageInput(const char *string, void (*routine)(const char *respons
     msg_mode              = 2;
     msg_string            = std::string(string);
     message_input_routine = routine;
-    message_key_routine   = NULL;
+    message_key_routine   = nullptr;
     msg_needsinput        = true;
     menuactive            = true;
     CON_SetVisible(vs_notvisible);
@@ -1922,7 +1922,7 @@ bool M_Responder(event_t *ev)
             msg_mode   = 0;
 
             if (message_input_routine)
-                (*message_input_routine)(NULL);
+                (*message_input_routine)(nullptr);
 
             input_string.clear();
 
@@ -2516,14 +2516,14 @@ void M_DrawCursor(style_c *style, bool graphical_item)
 
     // const colourmap_c *colmap = style->def->text[styledef_c::T_TEXT].colmap; // Should we allow a colmap for the
     // cursor?
-    const colourmap_c *colmap = NULL;
+    const colourmap_c *colmap = nullptr;
 
     //-------------------------------------------------------------
     // 1. First up, do we want a graphical cursor or a text one?
     //-------------------------------------------------------------
     image_c *cursor;
     if (style->def->cursor.cursor_string != "")
-        cursor = NULL;
+        cursor = nullptr;
     else if (style->def->cursor.alt_cursor != "")
         cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor.c_str());
     else
@@ -2941,7 +2941,7 @@ void M_DrawItems(style_c *style, bool graphical_item)
             }
 
             const colourmap_c *colmap = style->def->text[textstyle].colmap;
-            // colourmap_c *colmap = NULL;
+            // colourmap_c *colmap = nullptr;
 
             // HUD_StretchImage() will apply image.offset_x again so subtract it first
             TempX -= (currentMenu->menuitems[j].image->offset_x * txtscale);

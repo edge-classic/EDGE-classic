@@ -21,6 +21,8 @@
 // 1998/10/29 -KM- Finalisation of sound code.  SmartProjectile.
 //
 
+#include <string.h>
+
 #include "local.h"
 
 #include "str_util.h"
@@ -131,7 +133,7 @@ static void AttackStartEntry(const char *name, bool extend)
     a_damage_multi = -1;
 
     // mobj counterpart will be created only if needed
-    dynamic_mobj = NULL;
+    dynamic_mobj = nullptr;
 
     dynamic_atk = atkdefs.Lookup(name);
 
@@ -171,9 +173,9 @@ static void AttackDoTemplate(const char *contents)
         DDF_Error("Unknown attack template: '%s'\n", contents);
 
     dynamic_atk->CopyDetail(*other);
-    dynamic_atk->atk_mobj = NULL;
+    dynamic_atk->atk_mobj = nullptr;
 
-    dynamic_mobj = NULL;
+    dynamic_mobj = nullptr;
 
     if (other->atk_mobj)
     {
@@ -346,9 +348,9 @@ void DDF_AttackCleanUp(void)
 
         // lookup thing references
 
-        a->puff = a->puff_ref.empty() ? NULL : mobjtypes.Lookup(a->puff_ref.c_str());
+        a->puff = a->puff_ref.empty() ? nullptr : mobjtypes.Lookup(a->puff_ref.c_str());
 
-        a->spawnedobj = a->spawnedobj_ref.empty() ? NULL : mobjtypes.Lookup(a->spawnedobj_ref.c_str());
+        a->spawnedobj = a->spawnedobj_ref.empty() ? nullptr : mobjtypes.Lookup(a->spawnedobj_ref.c_str());
 
         if (a->spawnedobj)
         {
@@ -383,7 +385,7 @@ static const specflags_t attack_specials[] = {{"SMOKING_TRACER", AF_TraceSmoke, 
                                               // -AJA- backwards compatibility cruft...
                                               {"NOAMMO", AF_None, 0},
 
-                                              {NULL, AF_None, 0}};
+                                              {nullptr, AF_None, 0}};
 
 static void DDF_AtkGetSpecial(const char *info, void *storage)
 {
@@ -518,8 +520,8 @@ void atkdef_c::Default()
 {
     attackstyle    = ATK_NONE;
     flags          = AF_None;
-    initsound      = NULL;
-    sound          = NULL;
+    initsound      = nullptr;
+    sound          = nullptr;
     accuracy_slope = 0;
     accuracy_angle = 0;
     xoffset        = 0;
@@ -541,14 +543,14 @@ void atkdef_c::Default()
     objinitstate_ref.clear();
     notracechance  = PERCENT_MAKE(0);
     keepfirechance = PERCENT_MAKE(0);
-    atk_mobj       = NULL;
-    spawnedobj     = NULL;
+    atk_mobj       = nullptr;
+    spawnedobj     = nullptr;
     spawnedobj_ref.clear();
     spawn_limit = 0; // unlimited
-    puff        = NULL;
+    puff        = nullptr;
     puff_ref.clear();
-    dualattack1 = NULL;
-    dualattack2 = NULL;
+    dualattack1 = nullptr;
+    dualattack2 = nullptr;
 }
 
 // --> atkdef_container_c class
@@ -581,7 +583,7 @@ atkdef_container_c::~atkdef_container_c()
 atkdef_c *atkdef_container_c::Lookup(const char *refname)
 {
     if (!refname || !refname[0])
-        return NULL;
+        return nullptr;
 
     for (auto iter = begin(); iter != end(); iter++)
     {
@@ -590,7 +592,7 @@ atkdef_c *atkdef_container_c::Lookup(const char *refname)
             return atk;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--- editor settings ---

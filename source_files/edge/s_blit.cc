@@ -95,7 +95,7 @@ extern int dev_frag_pairs;
 
 extern bool dev_stereo;
 
-mix_channel_c::mix_channel_c() : state(CHAN_Empty), data(NULL)
+mix_channel_c::mix_channel_c() : state(CHAN_Empty), data(nullptr)
 {
 }
 
@@ -373,7 +373,7 @@ static bool QueueNextBuffer(void)
     if (playing_qbufs.empty())
     {
         queue_chan->state = CHAN_Finished;
-        queue_chan->data  = NULL;
+        queue_chan->data  = nullptr;
         return false;
     }
 
@@ -520,7 +520,7 @@ void S_FreeChannels(void)
         if (chan && chan->data)
         {
             S_CacheRelease(chan->data);
-            chan->data = NULL;
+            chan->data = nullptr;
         }
 
         delete chan;
@@ -537,7 +537,7 @@ void S_KillChannel(int k)
     {
         S_CacheRelease(chan->data);
 
-        chan->data  = NULL;
+        chan->data  = nullptr;
         chan->state = CHAN_Empty;
     }
 }
@@ -591,7 +591,7 @@ void S_ReallocChannels(int total)
                 S_KillChannel(i);
 
             delete mix_chan[i];
-            mix_chan[i] = NULL;
+            mix_chan[i] = nullptr;
         }
     }
 
@@ -654,7 +654,7 @@ void S_QueueInit(void)
             queue_chan = new mix_channel_c();
 
         queue_chan->state = CHAN_Empty;
-        queue_chan->data  = NULL;
+        queue_chan->data  = nullptr;
 
         queue_chan->ComputeMusicVolume();
     }
@@ -682,10 +682,10 @@ void S_QueueShutdown(void)
                 delete free_qbufs.front();
             }
 
-            queue_chan->data = NULL;
+            queue_chan->data = nullptr;
 
             delete queue_chan;
-            queue_chan = NULL;
+            queue_chan = nullptr;
         }
     }
     I_UnlockAudio();
@@ -706,7 +706,7 @@ void S_QueueStop(void)
         }
 
         queue_chan->state = CHAN_Finished;
-        queue_chan->data  = NULL;
+        queue_chan->data  = nullptr;
     }
     I_UnlockAudio();
 }
@@ -714,9 +714,9 @@ void S_QueueStop(void)
 sound_data_c *S_QueueGetFreeBuffer(int samples, int buf_mode)
 {
     if (nosound)
-        return NULL;
+        return nullptr;
 
-    sound_data_c *buf = NULL;
+    sound_data_c *buf = nullptr;
 
     I_LockAudio();
     {

@@ -57,13 +57,13 @@ typedef struct state_s
     // model frame name like "run2", normally NULL
     const char *model_frame;
 
-    // label for state, or NULL
+    // label for state, or nullptr
     const char *label;
 
     // routine to be performed
     void (*action)(struct mobj_s *object);
 
-    // parameter for routine, or NULL
+    // parameter for routine, or nullptr
     void *action_par;
 
     int rts_tag_type;

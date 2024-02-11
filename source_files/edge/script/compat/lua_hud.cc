@@ -681,7 +681,7 @@ static int HD_set_render_who(lua_State *L)
         do
         {
             who = (who + 1) % MAXPLAYERS;
-        } while (players[who] == NULL);
+        } while (players[who] == nullptr);
     }
 
     ui_hud_who = players[who];
@@ -801,7 +801,7 @@ static int HD_get_average_hue(lua_State *L)
     image_data_c *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     uint8_t temp_rgb[3];
-    tmp_img_data->AverageHue(temp_rgb, NULL, from_x, to_x, from_y, to_y);
+    tmp_img_data->AverageHue(temp_rgb, nullptr, from_x, to_x, from_y, to_y);
     rgb.X = temp_rgb[0];
     rgb.Y = temp_rgb[1];
     rgb.Z = temp_rgb[2];
@@ -860,7 +860,7 @@ static int HD_rts_enable(lua_State *L)
     std::string name = luaL_checkstring(L, 1);
 
     if (!name.empty())
-        RAD_EnableByTag(NULL, name.c_str(), false);
+        RAD_EnableByTag(nullptr, name.c_str(), false);
 
     return 0;
 }
@@ -873,7 +873,7 @@ static int HD_rts_disable(lua_State *L)
     std::string name = luaL_checkstring(L, 1);
 
     if (!name.empty())
-        RAD_EnableByTag(NULL, name.c_str(), true);
+        RAD_EnableByTag(nullptr, name.c_str(), true);
 
     return 0;
 }
@@ -887,7 +887,7 @@ static int HD_rts_isactive(lua_State *L)
 
     if (!name.empty())
     {
-        if (RAD_IsActiveByTag(NULL, name.c_str()))
+        if (RAD_IsActiveByTag(nullptr, name.c_str()))
             lua_pushboolean(L, 1);
         else
             lua_pushboolean(L, 0);
@@ -1001,7 +1001,7 @@ static const luaL_Reg hudlib[] = {{"game_mode", HD_game_mode},
 
                                   {"get_image_width", HD_get_image_width},
                                   {"get_image_height", HD_get_image_height},
-                                  {NULL, NULL}};
+                                  {nullptr, nullptr}};
 
 static int luaopen_hud(lua_State *L)
 {

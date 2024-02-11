@@ -665,8 +665,8 @@ void P_ComputeGaps(line_t *ld)
 
     // handle normal gaps ("movement" gaps)
 
-    ld->gap_num = GAP_Construct(ld->gaps, front, NULL);
-    temp_num    = GAP_Construct(temp_gaps, back, NULL);
+    ld->gap_num = GAP_Construct(ld->gaps, front, nullptr);
+    temp_num    = GAP_Construct(temp_gaps, back, nullptr);
 
     ld->gap_num = GAP_Restrict(ld->gaps, ld->gap_num, temp_gaps, temp_num);
 }
@@ -797,7 +797,7 @@ void P_AddExtraFloor(sector_t *sec, line_t *line)
     if (liquid)
     {
         // find place to link into.  cur will be the next higher liquid,
-        // or NULL if this is the highest.
+        // or nullptr if this is the highest.
 
         for (cur = sec->bottom_liq; cur; cur = cur->higher)
         {
@@ -850,7 +850,7 @@ void P_AddExtraFloor(sector_t *sec, line_t *line)
     }
 
     // find place to link into.  cur will be the next higher extrafloor,
-    // or NULL if this is the highest.
+    // or nullptr if this is the highest.
 
     for (cur = sec->bottom_ef; cur; cur = cur->higher)
     {
@@ -877,7 +877,7 @@ void P_FloodExtraFloors(sector_t *sector)
     extrafloor_t *S, *L, *C;
 
     region_properties_t *props;
-    region_properties_t *flood_p = NULL, *last_p = NULL;
+    region_properties_t *flood_p = nullptr, *last_p = nullptr;
 
     sector->p = &sector->props;
 
@@ -1092,7 +1092,7 @@ bool P_ThingsOnSliderPath(line_t *ld)
     bool slider_check = P_SubsecThingIterator(temp_line->bbox, PST_CheckThingLine);
 
     delete temp_line;
-    temp_line = NULL;
+    temp_line = nullptr;
 
     return !slider_check;
 }

@@ -202,7 +202,7 @@ static bool PIT_StompThing(mobj_t *thing, void *data)
     if (!tm_I.mover->player && (currmap->force_off & MPF_Stomp))
         return false;
 
-    P_TelefragMobj(thing, tm_I.mover, NULL);
+    P_TelefragMobj(thing, tm_I.mover, nullptr);
     return true;
 }
 
@@ -226,8 +226,8 @@ bool P_TeleportMove(mobj_t *thing, float x, float y, float z)
     // The base floor/ceiling is from the subsector that contains the point.
     // Any contacted lines the step closer together will adjust them.
     tm_I.dropoff = tm_I.floorz;
-    tm_I.above   = NULL;
-    tm_I.below   = NULL;
+    tm_I.above   = nullptr;
+    tm_I.below   = nullptr;
 
     // -ACB- 2004/08/01 Don't think this is needed
     //	spechit.ZeroiseCount();
@@ -768,7 +768,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
         if (ld->gaps[i].f >= tm_I.floorz && !tm_I.sub->sector->floor_vertex_slope)
         {
             tm_I.floorz = ld->gaps[i].f;
-            tm_I.below  = NULL;
+            tm_I.below  = nullptr;
         }
 
         if (ld->gaps[i].c < tm_I.ceilnz)
@@ -953,7 +953,7 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
 static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
 {
     mobj_hit_sky = false;
-    blockline    = NULL;
+    blockline    = nullptr;
 
     tm_I.mover    = thing;
     tm_I.flags    = thing->flags;
@@ -1002,8 +1002,8 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
     P_ComputeThingGap(thing, tm_I.sub->sector, tm_I.z, &tm_I.floorz, &tm_I.ceilnz, tm_I.f_slope_z, tm_I.c_slope_z);
 
     tm_I.dropoff    = tm_I.floorz;
-    tm_I.above      = NULL;
-    tm_I.below      = NULL;
+    tm_I.above      = nullptr;
+    tm_I.below      = nullptr;
     tm_I.line_count = 0;
 
     // can go anywhere
@@ -1275,7 +1275,7 @@ static bool PTR_SlideTraverse(intercept_t *in, void *dataptr)
     // -AJA- 2022: allow sliding along railings (etc)
     bool is_blocking = false;
 
-    if (slidemo->player != NULL)
+    if (slidemo->player != nullptr)
     {
         if (0 != (ld->flags & (MLF_Blocking | MLF_BlockPlayers)))
             is_blocking = true;
@@ -2220,7 +2220,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
 
     if (use_blood)
     {
-        if (mo->info->blood != NULL)
+        if (mo->info->blood != nullptr)
             P_SpawnBlood(x, y, z, shoot_I.damage, shoot_I.angle, mo->info->blood);
     }
     else
@@ -2262,7 +2262,7 @@ mobj_t *P_AimLineAttack(mobj_t *t1, BAMAngle angle, float distance, float *slope
     aim_I.range  = distance;
     aim_I.angle  = angle;
     aim_I.slope  = 0.0f;
-    aim_I.target = NULL;
+    aim_I.target = nullptr;
 
     P_PathTraverse(t1->x, t1->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, PTR_AimTraverse);
 
@@ -2275,7 +2275,7 @@ mobj_t *P_AimLineAttack(mobj_t *t1, BAMAngle angle, float distance, float *slope
 void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float damage, const damage_c *damtype,
                   const mobjtype_c *puff)
 {
-    // Note: Damtype can be NULL.
+    // Note: Damtype can be nullptr.
 
     float x2 = t1->x + distance * epi::BAMCos(angle);
     float y2 = t1->y + distance * epi::BAMSin(angle);
@@ -2348,7 +2348,7 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance)
         aim_I.start_z = source->z + source->height / 2 + 8;
 
     aim_I.range  = distance;
-    aim_I.target = NULL;
+    aim_I.target = nullptr;
 
     // Lobo: try and limit the vertical range somewhat
     float vertslope   = epi::BAMTan(source->vertangle);
@@ -2360,7 +2360,7 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance)
     P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, PTR_AimTraverse2);
 
     if (!aim_I.target)
-        return NULL;
+        return nullptr;
 
     /*
         // -KM- 1999/01/31 Look at the thing you aimed at.  Is sometimes
@@ -2382,7 +2382,7 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance)
 // P_MapTargetAutoAim
 //
 // Returns a moving object for a target.  Will search for a mobj
-// to lock onto.  Returns NULL if nothing could be locked onto.
+// to lock onto.  Returns nullptr if nothing could be locked onto.
 //
 // -ACB- 1998/09/01
 // -AJA- 1999/08/08: Added `force_aim' to fix chainsaw.
@@ -2394,7 +2394,7 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool 
     // -KM- 1999/01/31 Autoaim is an option.
     if (source->player && !level_flags.autoaim && !force_aim)
     {
-        return NULL;
+        return nullptr;
     }
 
     Z_Clear(&aim_I, shoot_trav_info_t, 1);
@@ -2424,12 +2424,12 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool 
     }
 
     aim_I.range  = distance;
-    aim_I.target = NULL;
+    aim_I.target = nullptr;
 
     P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, PTR_AimTraverse);
 
     if (!aim_I.target)
-        return NULL;
+        return nullptr;
 
     // -KM- 1999/01/31 Look at the thing you aimed at.  Is sometimes
     //   useful, sometimes annoying :-)
@@ -2673,7 +2673,7 @@ static bool PIT_RadiusAttack(mobj_t *thing, void *data)
 //
 // Source is the creature that caused the explosion at spot.
 //
-// Note: Damtype can be NULL.
+// Note: Damtype can be nullptr.
 //
 void P_RadiusAttack(mobj_t *spot, mobj_t *source, float radius, float damage, const damage_c *damtype, bool thrust_only)
 {
@@ -2759,7 +2759,7 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
 
     if (crush_damage > 0 && (leveltime % 4) == 0)
     {
-        P_DamageMobj(thing, NULL, NULL, crush_damage, NULL);
+        P_DamageMobj(thing, nullptr, nullptr, crush_damage, nullptr);
 
         // spray blood in a random direction
         if (g_gore.d < 2)
@@ -3117,7 +3117,7 @@ static bool PIT_CorpseCheck(mobj_t *thing, void *data)
 //
 // Used to detect corpses that have a raise state and therefore can be
 // raised. Arch-Viles (Raisers in-general) use this procedure to pick
-// their corpse. NULL is returned if no corpse is found, if one is
+// their corpse. nullptr is returned if no corpse is found, if one is
 // found it is returned.
 //
 // -ACB- 1998/08/22
@@ -3139,7 +3139,7 @@ mobj_t *P_MapFindCorpse(mobj_t *thing)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //
@@ -3249,7 +3249,7 @@ bool P_MapCheckBlockingLine(mobj_t *thing, mobj_t *spawnthing)
 
     crosser = (spawnthing->extendedflags & EF_CROSSLINES) ? true : false;
 
-    blockline    = NULL;
+    blockline    = nullptr;
     mobj_hit_sky = false;
 
     if (!P_BlockLinesIterator(HMM_MIN(mx1, mx2), HMM_MIN(my1, my2), HMM_MAX(mx1, mx2), HMM_MAX(my1, my2), PIT_CheckBlockingLine))

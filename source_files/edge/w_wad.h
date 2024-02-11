@@ -72,8 +72,8 @@ int W_GetNumForName(const char *name);
 
 int W_LumpLength(int lump);
 
-uint8_t *W_LoadLump(int lump, int *length = NULL);
-uint8_t *W_LoadLump(const char *name, int *length = NULL);
+uint8_t *W_LoadLump(int lump, int *length = nullptr);
+uint8_t *W_LoadLump(const char *name, int *length = nullptr);
 
 std::string W_LoadString(int lump);
 std::string W_LoadString(const char *name);

@@ -38,23 +38,19 @@
 // I_StartupSound).  Does whatever else the platform code needs.
 void I_SystemStartup(void);
 
-// The generic print function.  If in text mode, the message should be
-// displayed on the text mode screen.  This function should also call
-// I_Debugf() and CON_Printf().
-void I_Printf(const char *message, ...) GCCATTR((format(printf, 1, 2)));
-
-void I_Logf(const char *message, ...) GCCATTR((format(printf, 1, 2)));
-
-// Writes a warning to the console and the debug file (if any).  This
-// function should call CON_Printf().
-void I_Warning(const char *warning, ...) GCCATTR((format(printf, 1, 2)));
-
-// The generic debugging function.
-void I_Debugf(const char *message, ...) GCCATTR((format(printf, 1, 2)));
-
-// The error function.  All fatal errors call I_Error().  This calls
-// I_CloseProgram.
-void I_Error(const char *error, ...) GCCATTR((format(printf, 1, 2)));
+#ifdef __GNUC__
+void I_Printf(const char *message, ...) __attribute__((format(printf, 1, 2)));
+void I_Logf(const char *message, ...) __attribute__((format(printf, 1, 2)));
+void I_Warning(const char *warning, ...) __attribute__((format(printf, 1, 2)));
+void I_Debugf(const char *message, ...) __attribute__((format(printf, 1, 2)));
+void I_Error(const char *error, ...) __attribute__((format(printf, 1, 2)));
+#else
+void I_Printf(const char *message, ...);
+void I_Logf(const char *message, ...);
+void I_Warning(const char *warning, ...);
+void I_Debugf(const char *message, ...);
+void I_Error(const char *error, ...);
+#endif
 
 // FIXME : remove eventually
 #define L_WriteDebug I_Debugf
@@ -70,7 +66,7 @@ void I_SystemShutdown(void);
 // Exit the program immediately, using the given `exitnum' as the
 // program's exit status.  This is the very last thing done, and
 // I_SystemShutdown() is guaranteed to have already been called.
-void I_CloseProgram(int exitnum) GCCATTR((noreturn));
+[[noreturn]] void I_CloseProgram(int exitnum);
 
 // -AJA- 2005/01/21: sleep for the given number of milliseconds.
 void I_Sleep(int millisecs);

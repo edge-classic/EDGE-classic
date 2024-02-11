@@ -19,6 +19,8 @@
 #ifndef __EPI_STR_LEXER_H__
 #define __EPI_STR_LEXER_H__
 
+#include <string>
+
 namespace epi
 {
 
@@ -34,14 +36,10 @@ enum TokenKind
 
 class Lexer
 {
-  public:
-    Lexer(const std::string &data) : data_(data), pos_(0), line_(1)
-    {
-    }
+   public:
+    Lexer(const std::string &data) : data_(data), pos_(0), line_(1) {}
 
-    ~Lexer()
-    {
-    }
+    ~Lexer() {}
 
     // parse the next token, storing contents into given string.
     // returns kTokenEOF at the end of the data, and kTokenERROR when a
@@ -68,7 +66,7 @@ class Lexer
     // get current lexer position
     size_t GetPos();
 
-  private:
+   private:
     const std::string &data_;
 
     size_t pos_;
@@ -88,7 +86,7 @@ int    LexInteger(const std::string &s);
 double LexDouble(const std::string &s);
 bool   LexBoolean(const std::string &s);
 
-} // namespace epi
+}  // namespace epi
 
 #endif /* __EPI_STR_LEXER_H__ */
 

@@ -624,7 +624,7 @@ static void P_UpdatePowerups(player_t *player)
     //
     // !!! FIXME: overlap here with stuff in rgl_fx.cpp.
 
-    player->effect_colourmap = NULL;
+    player->effect_colourmap = nullptr;
     player->effect_left      = 0;
 
     if (player->powers[PW_Invulnerable] > 0)
@@ -773,7 +773,7 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
         {
             exittype_e do_exit = player->mo->props->special->e_exit;
 
-            player->mo->subsector->sector->props.special = NULL;
+            player->mo->subsector->sector->props.special = nullptr;
 
             if (do_exit == EXIT_Secret)
                 G_SecretExitLevel(1);
@@ -956,7 +956,7 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
 void P_CreatePlayer(int pnum, bool is_bot)
 {
     SYS_ASSERT(0 <= pnum && pnum < MAXPLAYERS);
-    SYS_ASSERT(players[pnum] == NULL);
+    SYS_ASSERT(players[pnum] == nullptr);
 
     player_t *p = new player_t;
 
@@ -1008,7 +1008,7 @@ void P_DestroyAllPlayers(void)
 
         delete players[pnum];
 
-        players[pnum] = NULL;
+        players[pnum] = nullptr;
     }
 
     numplayers = 0;
@@ -1017,8 +1017,8 @@ void P_DestroyAllPlayers(void)
     consoleplayer = -1;
     displayplayer = -1;
 
-    sfx_jpidle = sfx_jpmove = sfx_jprise = NULL;
-    sfx_jpdown = sfx_jpflow = NULL;
+    sfx_jpidle = sfx_jpmove = sfx_jprise = nullptr;
+    sfx_jpdown = sfx_jpflow = nullptr;
 }
 
 void P_UpdateAvailWeapons(player_t *p)
@@ -1058,7 +1058,7 @@ void P_UpdateTotalArmour(player_t *p)
 
         // forget the association once fully depleted
         if (p->armours[i] <= 0)
-            p->armour_types[i] = NULL;
+            p->armour_types[i] = nullptr;
     }
 
     if (p->totalarmour > 999.0f)
@@ -1068,7 +1068,7 @@ void P_UpdateTotalArmour(player_t *p)
 bool P_AddWeapon(player_t *player, weapondef_c *info, int *index)
 {
     // Returns true if player did not already have the weapon.
-    // If successful and 'index' is non-NULL, the new index is
+    // If successful and 'index' is non-nullptr, the new index is
     // stored there.
 
     int slot         = -1;
@@ -1139,7 +1139,7 @@ bool P_AddWeapon(player_t *player, weapondef_c *info, int *index)
 
     // initial weapons should get a full clip
     if (info->autogive)
-        P_TryFillNewWeapon(player, slot, AM_DontCare, NULL);
+        P_TryFillNewWeapon(player, slot, AM_DontCare, nullptr);
 
     if (upgrade_slot >= 0)
     {
@@ -1159,7 +1159,7 @@ bool P_AddWeapon(player_t *player, weapondef_c *info, int *index)
             player->pending_wp = (weapon_selection_e)slot;
         }
         else
-            player->weapons[upgrade_slot].info = NULL;
+            player->weapons[upgrade_slot].info = nullptr;
 
         if (player->pending_wp == upgrade_slot)
             player->pending_wp = (weapon_selection_e)slot;
@@ -1210,7 +1210,7 @@ bool P_RemoveWeapon(player_t *player, weapondef_c *info)
             P_DropWeapon(player);
     }
     else
-        player->weapons[slot].info = NULL;
+        player->weapons[slot].info = nullptr;
 
     if (player->pending_wp == slot)
         P_SelectNewWeapon(player, -100, AM_DontCare);
@@ -1262,14 +1262,14 @@ void P_GiveInitialBenefits(player_t *p, const mobjtype_c *info)
     for (i = 0; i < NUMARMOUR; i++)
     {
         p->armours[i]      = 0;
-        p->armour_types[i] = NULL;
+        p->armour_types[i] = nullptr;
     }
 
     p->totalarmour = 0;
     p->cards       = KF_NONE;
 
     // give all initial benefits
-    P_GiveBenefitList(p, NULL, info->initial_benefits, false);
+    P_GiveBenefitList(p, nullptr, info->initial_benefits, false);
 
     // give all free weapons.  Needs to be after ammo, so that
     // clip weapons can get their clips filled.

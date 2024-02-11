@@ -19,6 +19,8 @@
 // Movie Setup and Parser Code
 //
 
+#include <string.h>
+
 #include "local.h"
 
 #include "movie.h"
@@ -135,7 +137,7 @@ static void DDF_MovieGetType(const char *info, void *storage)
 {
     const char *colon = DDF_MainDecodeList(info, ':', true);
 
-    if (colon == NULL || colon == info || (colon - info) >= 16 || colon[1] == 0)
+    if (colon == nullptr || colon == info || (colon - info) >= 16 || colon[1] == 0)
         DDF_Error("Malformed movie type spec: %s\n", info);
 
     char keyword[20];
@@ -157,7 +159,7 @@ static void DDF_MovieGetType(const char *info, void *storage)
         DDF_Error("Unknown movie type: %s\n", keyword);
 }
 
-static specflags_t movie_specials[] = {{"MUTE", MOVSP_Mute, 0}, {NULL, 0, 0}};
+static specflags_t movie_specials[] = {{"MUTE", MOVSP_Mute, 0}, {nullptr, 0, 0}};
 
 static void DDF_MovieGetSpecial(const char *info, void *storage)
 {
@@ -234,7 +236,7 @@ void moviedef_c::Default()
 moviedef_c *moviedef_container_c::Lookup(const char *refname)
 {
     if (!refname || !refname[0])
-        return NULL;
+        return nullptr;
 
     for (auto g : moviedefs)
     {
@@ -242,7 +244,7 @@ moviedef_c *moviedef_container_c::Lookup(const char *refname)
             return g;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--- editor settings ---

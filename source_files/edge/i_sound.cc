@@ -32,7 +32,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "str_util.h"
-
+#include "str_compare.h"
 #include "m_argv.h"
 #include "m_misc.h"
 #include "m_random.h"
@@ -82,7 +82,7 @@ static bool I_TryOpenSound(int want_freq, bool want_stereo)
     trydev.samples  = 1024;
     trydev.callback = SoundFill_Callback;
 
-    mydev_id = SDL_OpenAudioDevice(NULL, 0, &trydev, &mydev, 0);
+    mydev_id = SDL_OpenAudioDevice(nullptr, 0, &trydev, &mydev, 0);
 
     if (mydev_id > 0)
         return true;

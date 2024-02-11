@@ -26,7 +26,7 @@
 #include "m_argv.h"
 #include "m_misc.h"
 #include "r_modes.h"
-
+#include "str_compare.h"
 #include "str_util.h"
 #include "edge_profiling.h"
 
@@ -263,7 +263,7 @@ static bool I_CreateWindow(scrmode_c *mode)
                                   : (mode->display_mode == scrmode_c::SCR_FULLSCREEN ? SDL_WINDOW_FULLSCREEN : 0)) |
                              resizeable);
 
-    if (my_vis == NULL)
+    if (my_vis == nullptr)
     {
         I_Printf("Failed to create window: %s\n", SDL_GetError());
         return false;
@@ -294,7 +294,7 @@ static bool I_CreateWindow(scrmode_c *mode)
         tf_displaymode  = scrmode_c::SCR_BORDERLESS;
     }
 
-    if (SDL_GL_CreateContext(my_vis) == NULL)
+    if (SDL_GL_CreateContext(my_vis) == nullptr)
         I_Error("Failed to create OpenGL context.\n");
 
     if (v_sync.d == 2)
@@ -325,7 +325,7 @@ bool I_SetScreenSize(scrmode_c *mode)
                  ? "borderless"
                  : (mode->display_mode == scrmode_c::SCR_FULLSCREEN ? "fullscreen" : "windowed"));
 
-    if (my_vis == NULL)
+    if (my_vis == nullptr)
     {
         if (!I_CreateWindow(mode))
         {
@@ -348,7 +348,7 @@ bool I_SetScreenSize(scrmode_c *mode)
         SDL_SetWindowDisplayMode(my_vis, new_mode);
         SDL_SetWindowSize(my_vis, mode->width, mode->height);
         delete new_mode;
-        new_mode = NULL;
+        new_mode = nullptr;
 
         I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
     }

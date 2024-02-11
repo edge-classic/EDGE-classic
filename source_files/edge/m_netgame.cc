@@ -235,8 +235,8 @@ void M_NetHostBegun(void)
 
 static void ChangeGame(newgame_params_c *param, int dir)
 {
-    gamedef_c *closest  = NULL;
-    gamedef_c *furthest = NULL;
+    gamedef_c *closest  = nullptr;
+    gamedef_c *furthest = nullptr;
 
     for (auto def : gamedefs)
     {
@@ -286,8 +286,8 @@ static void ChangeGame(newgame_params_c *param, int dir)
 
 static void ChangeLevel(newgame_params_c *param, int dir)
 {
-    mapdef_c *closest  = NULL;
-    mapdef_c *furthest = NULL;
+    mapdef_c *closest  = nullptr;
+    mapdef_c *furthest = nullptr;
 
     for (auto def : mapdefs)
     {

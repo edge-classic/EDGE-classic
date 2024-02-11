@@ -16,6 +16,8 @@
 //
 //----------------------------------------------------------------------------
 
+#include <string.h>
+
 #include "epi.h"
 
 #include "image_data.h"
@@ -23,7 +25,7 @@
 #include "tables.h"
 
 #include "math_color.h"
-
+#include "HandmadeMath.h"
 #include <unordered_map>
 
 image_data_c::image_data_c(int _w, int _h, int _bpp) : width(_w), height(_h), bpp(_bpp), used_w(_w), used_h(_h)
@@ -37,7 +39,7 @@ image_data_c::~image_data_c()
 {
     delete[] pixels;
 
-    pixels = NULL;
+    pixels = nullptr;
     width = height = 0;
 }
 

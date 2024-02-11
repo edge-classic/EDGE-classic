@@ -53,7 +53,7 @@ extern coal::vm_c *ui_vm;
 extern void VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value);
 extern void VM_CallFunction(coal::vm_c *vm, const char *name);
 
-player_t *ui_player_who = NULL;
+player_t *ui_player_who = nullptr;
 
 //------------------------------------------------------------------------
 //  PLAYER MODULE
@@ -88,7 +88,7 @@ static void PL_set_who(coal::vm_c *vm, int argc)
         do
         {
             who = (who + 1) % MAXPLAYERS;
-        } while (players[who] == NULL);
+        } while (players[who] == nullptr);
     }
 
     ui_player_who = players[who];
@@ -452,14 +452,14 @@ static void PL_cur_weapon(coal::vm_c *vm, int argc)
     vm->ReturnString(info->name.c_str());
 }
 
-static void COAL_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info = NULL)
+static void COAL_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info = nullptr)
 {
     pspdef_t *psp = &p->psprites[position];
 
     if (stnum == S_NULL)
     {
         // object removed itself
-        psp->state = psp->next_state = NULL;
+        psp->state = psp->next_state = nullptr;
         return;
     }
 
@@ -489,7 +489,7 @@ static void COAL_SetPsprite(player_t *p, int position, int stnum, weapondef_c *i
 
     psp->state      = st;
     psp->tics       = st->tics;
-    psp->next_state = (st->nextstate == S_NULL) ? NULL : (states + st->nextstate);
+    psp->next_state = (st->nextstate == S_NULL) ? nullptr : (states + st->nextstate);
 
     // call action routine
 
@@ -509,7 +509,7 @@ static void COAL_SetPspriteDeferred(player_t *p, int position, int stnum)
 {
     pspdef_t *psp = &p->psprites[position];
 
-    if (stnum == S_NULL || psp->state == NULL)
+    if (stnum == S_NULL || psp->state == nullptr)
     {
         COAL_SetPsprite(p, position, stnum);
         return;
@@ -1047,12 +1047,12 @@ static void PL_use_inventory(coal::vm_c *vm, int argc)
     //******
     // If the same inventory script is already running then
     // don't start the same one again
-    if (!RAD_IsActiveByTag(NULL, script_name.c_str()))
+    if (!RAD_IsActiveByTag(nullptr, script_name.c_str()))
     {
         if (ui_player_who->inventory[inv].num > 0)
         {
             ui_player_who->inventory[inv].num -= 1;
-            RAD_EnableByTag(NULL, script_name.c_str(), false);
+            RAD_EnableByTag(nullptr, script_name.c_str(), false);
         }
     }
 }
@@ -1064,7 +1064,7 @@ static void PL_rts_enable_tagged(coal::vm_c *vm, int argc)
     std::string name = vm->AccessParamString(0);
 
     if (!name.empty())
-        RAD_EnableByTag(NULL, name.c_str(), false);
+        RAD_EnableByTag(nullptr, name.c_str(), false);
 }
 
 // AuxStringReplaceAll("Our_String", std::string("_"), std::string(" "));
@@ -1094,7 +1094,7 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
     else
         list = obj->info->pickup_benefits;
 
-    for (; list != NULL; list = list->next)
+    for (; list != nullptr; list = list->next)
     {
         switch (list->type)
         {

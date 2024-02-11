@@ -16,7 +16,7 @@ void LUA_NewGame(void)
 
 void LUA_LoadGame(void)
 {
-    // Need to set these to prevent NULL references if using any player.xxx in the load_level hook
+    // Need to set these to prevent nullptr references if using any player.xxx in the load_level hook
     ui_hud_who    = players[displayplayer];
     ui_player_who = players[displayplayer];
 
@@ -30,7 +30,7 @@ void LUA_SaveGame(void)
 
 void LUA_BeginLevel(void)
 {
-    // Need to set these to prevent NULL references if using player.xxx in the begin_level hook
+    // Need to set these to prevent nullptr references if using player.xxx in the begin_level hook
     ui_hud_who    = players[displayplayer];
     ui_player_who = players[displayplayer];
     LUA_CallGlobalFunction(LUA_GetGlobalVM(), "begin_level");

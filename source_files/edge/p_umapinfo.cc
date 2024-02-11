@@ -28,7 +28,7 @@
 #include "str_lexer.h"
 #include "p_umapinfo.h"
 #include "deh_text.h"
-
+#include "str_compare.h"
 #include "game.h"
 
 #include <unordered_map> // ZDoom Actor Name <-> Doomednum lookups
@@ -309,7 +309,7 @@ static void FreeMap(MapEntry *mape)
         free(mape->bossactions);
     if (mape->authorname)
         free(mape->authorname);
-    mape->mapname = NULL;
+    mape->mapname = nullptr;
 }
 
 void FreeMapList()
@@ -321,7 +321,7 @@ void FreeMapList()
         FreeMap(&Maps.maps[i]);
     }
     free(Maps.maps);
-    Maps.maps     = NULL;
+    Maps.maps     = nullptr;
     Maps.mapcount = 0;
 }
 
@@ -608,7 +608,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                         special = tag = -1;
                         if (val->bossactions)
                             free(val->bossactions);
-                        val->bossactions    = NULL;
+                        val->bossactions    = nullptr;
                         val->numbossactions = -1;
                     }
                     else

@@ -19,6 +19,8 @@
 // Overall Game Setup and Parser Code
 //
 
+#include <string.h>
+
 #include "local.h"
 
 #undef DF
@@ -127,12 +129,12 @@ static void GameParseField(const char *field, const char *contents, int index, b
     // handle some special fields...
     if (DDF_CompareName(field, "TITLE_GRAPHIC") == 0)
     {
-        DDF_GameGetPic(contents, NULL);
+        DDF_GameGetPic(contents, nullptr);
         return;
     }
     else if (DDF_CompareName(field, "MAP") == 0)
     {
-        DDF_GameGetMap(contents, NULL);
+        DDF_GameGetMap(contents, nullptr);
         return;
     }
     else if (DDF_CompareName(field, "ANIM") == 0)
@@ -290,7 +292,7 @@ static specflags_t lighting_names[] = {{"DOOM", LMODEL_Doom, 0},
                                        {"DOOMISH", LMODEL_Doomish, 0},
                                        {"FLAT", LMODEL_Flat, 0},
                                        {"VERTEX", LMODEL_Vertex, 0},
-                                       {NULL, 0, 0}};
+                                       {nullptr, 0, 0}};
 
 void DDF_GameGetLighting(const char *info, void *storage)
 {
@@ -798,7 +800,7 @@ gamedef_container_c::~gamedef_container_c()
 gamedef_c *gamedef_container_c::Lookup(const char *refname)
 {
     if (!refname || !refname[0])
-        return NULL;
+        return nullptr;
 
     for (auto iter = begin(); iter != end(); iter++)
     {
@@ -807,7 +809,7 @@ gamedef_c *gamedef_container_c::Lookup(const char *refname)
             return game;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--- editor settings ---

@@ -159,7 +159,7 @@ static bool SV_DumpSTRU(void)
         int             size, count;
 
         const char *field_name;
-        const char *sub_type = NULL;
+        const char *sub_type = nullptr;
         char        count_buf[40];
 
         kind       = (savefieldkind_e)SV_GetByte();

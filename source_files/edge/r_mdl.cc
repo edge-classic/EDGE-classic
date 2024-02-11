@@ -29,7 +29,7 @@
 #include "types.h"
 #include "endianess.h"
 #include "image_data.h"
-
+#include "str_compare.h"
 #include "dm_state.h" // IS_SKY
 #include "g_game.h"   //currmap
 #include "r_mdcommon.h"
@@ -256,13 +256,13 @@ mdl_model_c *MDL_LoadModel(epi::File *f)
     if (epi::StringPrefixCompare(header.ident, MDL_IDENTIFIER) != 0)
     {
         I_Error("MDL_LoadModel: lump is not an MDL model!");
-        return NULL; /* NOT REACHED */
+        return nullptr; /* NOT REACHED */
     }
 
     if (version != MDL_VERSION)
     {
         I_Error("MDL_LoadModel: strange version!");
-        return NULL; /* NOT REACHED */
+        return nullptr; /* NOT REACHED */
     }
 
     int num_frames = AlignedLittleEndianS32(header.num_frames);
@@ -436,7 +436,7 @@ mdl_model_c *MDL_LoadModel(epi::File *f)
     if (md->vbo == 0)
         I_Error("MDL_LoadModel: Failed to bind VBO!\n");
     glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
-    glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), NULL, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), nullptr, GL_STREAM_DRAW);
     return md;
 }
 

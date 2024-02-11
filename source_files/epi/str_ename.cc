@@ -44,8 +44,10 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //---------------------------------------------------------------------------
 
-#include <string.h>
 #include "str_ename.h"
+
+#include <string.h>
+
 #include "str_compare.h"
 #include "str_util.h"
 
@@ -65,17 +67,16 @@ namespace epi
 // being populated by text for names.
 struct EName::NameManager::NameBlock
 {
-	size_t next_alloc;
-	NameBlock *next_block;
+    size_t     next_alloc;
+    NameBlock *next_block;
 };
 
 EName::NameManager EName::name_data_;
-bool EName::NameManager::inited_;
-size_t EName::NameManager::known_name_count_;
+bool               EName::NameManager::inited_;
+size_t             EName::NameManager::known_name_count_;
 
-const char *predefined_names[] =
-{
-#define xx(n) #n,
+const char *predefined_names[] = {
+#define xx(n)    #n,
 #define xy(n, s) s,
 #include "str_known_enames.h"
 #undef xx
@@ -87,133 +88,126 @@ const char *predefined_names[] =
 // false, then the name is added to the table and its new index is returned.
 int EName::NameManager::FindName(std::string_view text, bool no_create)
 {
-	if (!inited_)
-	{
-		InitBuckets();
-	}
+    if (!inited_) { InitBuckets(); }
 
-	if (text.empty())
-	{
-		return 0;
-	}
+    if (text.empty()) { return 0; }
 
-	uint32_t hash = StringHash32(text);
-	uint32_t bucket = hash % kHashSize;
-	int scanner = buckets_[bucket];
-	size_t text_len = text.size();
+    uint32_t hash     = StringHash32(text);
+    uint32_t bucket   = hash % kHashSize;
+    int      scanner  = buckets_[bucket];
+    size_t   text_len = text.size();
 
-	// See if the name already exists.
-	while (scanner >= 0)
-	{
-		if (name_array_[scanner].hash == hash &&
-			StringCaseCompareMaxASCII(name_array_[scanner].text, text, text_len) == 0 &&
-			name_array_[scanner].text[text_len] == '\0')
-		{
-			return scanner;
-		}
-		scanner = name_array_[scanner].next_hash;
-	}
+    // See if the name already exists.
+    while (scanner >= 0)
+    {
+        if (name_array_[scanner].hash == hash &&
+            StringCaseCompareMaxASCII(name_array_[scanner].text, text,
+                                      text_len) == 0 &&
+            name_array_[scanner].text[text_len] == '\0')
+        {
+            return scanner;
+        }
+        scanner = name_array_[scanner].next_hash;
+    }
 
-	// If we get here, then the name does not exist.
-	if (no_create)
-	{
-		return 0;
-	}
+    // If we get here, then the name does not exist.
+    if (no_create) { return 0; }
 
-	return AddName(text, text_len, hash, bucket);
+    return AddName(text, text_len, hash, bucket);
 }
 
 // Sets up the hash table and inserts all the default names into the table.
 void EName::NameManager::InitBuckets()
 {
-	inited_ = true;
-	memset(buckets_, -1, sizeof(buckets_));
+    inited_ = true;
+    memset(buckets_, -1, sizeof(buckets_));
 
-	known_name_count_ = sizeof(predefined_names) / sizeof(const char *);
+    known_name_count_ = sizeof(predefined_names) / sizeof(const char *);
 
-	// Register built-in names. 'None' must be name 0.
-	for (size_t i = 0; i < known_name_count_; ++i)
-	{
-		SYS_ASSERT((0 == FindName(predefined_names[i], true)) && "Predefined name already inserted");
-		FindName(predefined_names[i], false);
-	}
+    // Register built-in names. 'None' must be name 0.
+    for (size_t i = 0; i < known_name_count_; ++i)
+    {
+        SYS_ASSERT((0 == FindName(predefined_names[i], true)) &&
+                   "Predefined name already inserted");
+        FindName(predefined_names[i], false);
+    }
 }
 
 // Adds a new name to the name table.
-int EName::NameManager::AddName(std::string_view text, size_t text_len, unsigned int hash, unsigned int bucket)
+int EName::NameManager::AddName(std::string_view text, size_t text_len,
+                                unsigned int hash, unsigned int bucket)
 {
-	char *textstore;
-	NameBlock *block = blocks_;
-	size_t len = text_len + 1;
+    char      *textstore;
+    NameBlock *block = blocks_;
+    size_t     len   = text_len + 1;
 
-	// Get a block large enough for the name. Only the first block in the
-	// list is ever considered for name storage.
-	if (block == NULL || block->next_alloc + len >= kBlockSize)
-	{
-		block = AddBlock(len);
-	}
+    // Get a block large enough for the name. Only the first block in the
+    // list is ever considered for name storage.
+    if (block == nullptr || block->next_alloc + len >= kBlockSize)
+    {
+        block = AddBlock(len);
+    }
 
-	// Copy the string into the block.
-	textstore = (char *)block + block->next_alloc;
-	memcpy(textstore, text.data(), text_len);
-	textstore[text_len] = '\0';
-	block->next_alloc += len;
+    // Copy the string into the block.
+    textstore = (char *)block + block->next_alloc;
+    memcpy(textstore, text.data(), text_len);
+    textstore[text_len] = '\0';
+    block->next_alloc += len;
 
-	// Add an entry for the name to the NameArray
-	if (num_names_ >= max_names_)
-	{
-		// If no names have been defined yet, make the first allocation
-		// large enough to hold all the predefined names.
-		max_names_ += max_names_ == 0 ? known_name_count_ + kNameGrowAmount : kNameGrowAmount;
+    // Add an entry for the name to the NameArray
+    if (num_names_ >= max_names_)
+    {
+        // If no names have been defined yet, make the first allocation
+        // large enough to hold all the predefined names.
+        max_names_ += max_names_ == 0 ? known_name_count_ + kNameGrowAmount
+                                      : kNameGrowAmount;
 
-		name_array_ = (NameEntry *)realloc(name_array_, max_names_ * sizeof(NameEntry));
-	}
+        name_array_ =
+            (NameEntry *)realloc(name_array_, max_names_ * sizeof(NameEntry));
+    }
 
-	name_array_[num_names_].text = textstore;
-	name_array_[num_names_].hash = hash;
-	name_array_[num_names_].next_hash = buckets_[bucket];
-	buckets_[bucket] = num_names_;
+    name_array_[num_names_].text      = textstore;
+    name_array_[num_names_].hash      = hash;
+    name_array_[num_names_].next_hash = buckets_[bucket];
+    buckets_[bucket]                  = num_names_;
 
-	return num_names_++;
+    return num_names_++;
 }
 
 // Creates a new NameBlock at least large enough to hold the required
 // number of chars.
 EName::NameManager::NameBlock *EName::NameManager::AddBlock(size_t len)
 {
-	NameBlock *block;
+    NameBlock *block;
 
-	len += sizeof(NameBlock);
-	if (len < kBlockSize)
-	{
-		len = kBlockSize;
-	}
-	block = (NameBlock *)malloc(len);
-	block->next_alloc = sizeof(NameBlock);
-	block->next_block = blocks_;
-	blocks_ = block;
-	return block;
+    len += sizeof(NameBlock);
+    if (len < kBlockSize) { len = kBlockSize; }
+    block             = (NameBlock *)malloc(len);
+    block->next_alloc = sizeof(NameBlock);
+    block->next_block = blocks_;
+    blocks_           = block;
+    return block;
 }
 
 // Release all the memory used for name bookkeeping.
 EName::NameManager::~NameManager()
 {
-	NameBlock *block, *next;
+    NameBlock *block, *next;
 
-	for (block = blocks_; block != nullptr; block = next)
-	{
-		next = block->next_block;
-		free(block);
-	}
-	blocks_ = nullptr;
+    for (block = blocks_; block != nullptr; block = next)
+    {
+        next = block->next_block;
+        free(block);
+    }
+    blocks_ = nullptr;
 
-	if (name_array_ != nullptr)
-	{
-		free(name_array_);
-		name_array_ = nullptr;
-	}
-	num_names_ = max_names_ = 0;
-	memset (buckets_, -1, sizeof(buckets_));
+    if (name_array_ != nullptr)
+    {
+        free(name_array_);
+        name_array_ = nullptr;
+    }
+    num_names_ = max_names_ = 0;
+    memset(buckets_, -1, sizeof(buckets_));
 }
 
-} // namespace epi
+}  // namespace epi

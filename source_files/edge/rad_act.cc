@@ -135,7 +135,7 @@ static void SendTip(rad_trigger_t *R, s_tip_t *tip, int slot)
     else if (tip->tip_text)
         current->tip_text = SV_DupString(tip->tip_text);
     else
-        current->tip_text = NULL;
+        current->tip_text = nullptr;
 
     // send message to the console (unless it would clog it up)
     if (current->tip_text && current->tip_text != R->last_con_message)
@@ -144,7 +144,7 @@ static void SendTip(rad_trigger_t *R, s_tip_t *tip, int slot)
         R->last_con_message = current->tip_text;
     }
 
-    current->tip_graphic = tip->tip_graphic ? W_ImageLookup(tip->tip_graphic) : NULL;
+    current->tip_graphic = tip->tip_graphic ? W_ImageLookup(tip->tip_graphic) : nullptr;
     current->playsound   = tip->playsound ? true : false;
     // current->scale       = tip->tip_graphic ? tip->gfx_scale : 1.0f;
     current->scale     = tip->gfx_scale;
@@ -274,7 +274,7 @@ static player_t *GetWhoDunnit(rad_trigger_t *R)
         return players[consoleplayer];
 
     if (R->acti_players == 0)
-        return NULL;
+        return nullptr;
 
     // does the activator list have only one player?
     // if so, return that one.
@@ -285,7 +285,7 @@ static player_t *GetWhoDunnit(rad_trigger_t *R)
     // there are multiple players who triggered the script.
     // one option: select one of them (round robin style).
     // However the following is probably more correct.
-    //return NULL;
+    //return nullptr;
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
         if (R->acti_players & (1 << pnum))
@@ -367,7 +367,7 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
     else
         minfo = mobjtypes.Lookup(t->thing_type);
 
-    if (minfo == NULL)
+    if (minfo == nullptr)
     {
         if (t->thing_name)
             I_Warning("Unknown thing type: %s in RTS trigger.\n", t->thing_name);
@@ -444,7 +444,7 @@ void RAD_ActDamagePlayers(rad_trigger_t *R, void *param)
         if (!RAD_WithinRadius(p->mo, R->info))
             continue;
 
-        P_DamageMobj(p->mo, NULL, NULL, damage->damage_amount, NULL);
+        P_DamageMobj(p->mo, nullptr, nullptr, damage->damage_amount, nullptr);
     }
 }
 
@@ -515,7 +515,7 @@ void RAD_ActBenefitPlayers(rad_trigger_t *R, void *param)
         if (!RAD_WithinRadius(p->mo, R->info))
             continue;
 
-        P_GiveBenefitList(p, NULL, be->benefit, be->lose_it);
+        P_GiveBenefitList(p, nullptr, be->benefit, be->lose_it);
     }
 }
 
@@ -523,7 +523,7 @@ void RAD_ActDamageMonsters(rad_trigger_t *R, void *param)
 {
     s_damage_monsters_t *mon = (s_damage_monsters_t *)param;
 
-    const mobjtype_c *info = NULL;
+    const mobjtype_c *info = nullptr;
     int               tag  = mon->thing_tag;
 
     if (mon->thing_name)
@@ -534,7 +534,7 @@ void RAD_ActDamageMonsters(rad_trigger_t *R, void *param)
     {
         info = mobjtypes.Lookup(mon->thing_type);
 
-        if (info == NULL)
+        if (info == nullptr)
             I_Error("RTS DAMAGE_MONSTERS: Unknown thing type %d.\n", mon->thing_type);
     }
 
@@ -546,7 +546,7 @@ void RAD_ActDamageMonsters(rad_trigger_t *R, void *param)
 
     player_t *player = GetWhoDunnit(R);
 
-    for (mo = mobjlisthead; mo != NULL; mo = next)
+    for (mo = mobjlisthead; mo != nullptr; mo = next)
     {
         next = mo->next;
 
@@ -562,7 +562,7 @@ void RAD_ActDamageMonsters(rad_trigger_t *R, void *param)
         if (!RAD_WithinRadius(mo, R->info))
             continue;
 
-        P_DamageMobj(mo, NULL, player ? player->mo : NULL, mon->damage_amount, NULL);
+        P_DamageMobj(mo, nullptr, player ? player->mo : nullptr, mon->damage_amount, nullptr);
     }
 }
 
@@ -570,21 +570,21 @@ void RAD_ActThingEvent(rad_trigger_t *R, void *param)
 {
     s_thing_event_t *tev = (s_thing_event_t *)param;
 
-    const mobjtype_c *info = NULL;
+    const mobjtype_c *info = nullptr;
     int               tag  = tev->thing_tag;
 
     if (tev->thing_name)
     {
         info = mobjtypes.Lookup(tev->thing_name);
 
-        if (info == NULL)
+        if (info == nullptr)
             I_Error("RTS THING_EVENT: Unknown thing name '%s'.\n", tev->thing_name);
     }
     else if (tev->thing_type > 0)
     {
         info = mobjtypes.Lookup(tev->thing_type);
 
-        if (info == NULL)
+        if (info == nullptr)
             I_Error("RTS THING_EVENT: Unknown thing type %d.\n", tev->thing_type);
     }
 
@@ -594,7 +594,7 @@ void RAD_ActThingEvent(rad_trigger_t *R, void *param)
     mobj_t *mo;
     mobj_t *next;
 
-    for (mo = mobjlisthead; mo != NULL; mo = next)
+    for (mo = mobjlisthead; mo != nullptr; mo = next)
     {
         next = mo->next;
 
@@ -724,7 +724,7 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
 
         sector_t *tsec;
 
-        for (tsec = P_FindSectorFromTag(ctex->tag); tsec != NULL; tsec = tsec->tag_next)
+        for (tsec = P_FindSectorFromTag(ctex->tag); tsec != nullptr; tsec = tsec->tag_next)
         {
             if (ctex->subtag)
             {
@@ -870,9 +870,9 @@ void RAD_ActMoveSector(rad_trigger_t *R, void *param)
 static void LightOneSector(sector_t *sec, s_lightsector_t *t)
 {
     if (t->relative)
-        sec->props.lightlevel += I_ROUND(t->value);
+        sec->props.lightlevel += RoundToInt(t->value);
     else
-        sec->props.lightlevel = I_ROUND(t->value);
+        sec->props.lightlevel = RoundToInt(t->value);
 }
 
 void RAD_ActLightSector(rad_trigger_t *R, void *param)
@@ -962,9 +962,9 @@ void RAD_ActEnableScript(rad_trigger_t *R, void *param)
     else
     {
         if (t->tag[0] != 0)
-            RAD_EnableByTag(NULL, t->tag[0], t->new_disabled, RTS_TAG_NUMBER);
+            RAD_EnableByTag(nullptr, t->tag[0], t->new_disabled, RTS_TAG_NUMBER);
         else
-            RAD_EnableByTag(NULL, t->tag[1], t->new_disabled, RTS_TAG_HASH);
+            RAD_EnableByTag(nullptr, t->tag[1], t->new_disabled, RTS_TAG_HASH);
     }
 }
 
@@ -974,7 +974,7 @@ void RAD_ActActivateLinetype(rad_trigger_t *R, void *param)
 
     player_t *player = GetWhoDunnit(R);
 
-    P_RemoteActivation(player ? player->mo : NULL, t->typenum, t->tag, 0, line_Any);
+    P_RemoteActivation(player ? player->mo : nullptr, t->typenum, t->tag, 0, line_Any);
 }
 
 void RAD_ActUnblockLines(rad_trigger_t *R, void *param)
@@ -1093,7 +1093,7 @@ void RAD_ActJumpOn(rad_trigger_t *R, void *param)
         return;
 
     rts_state_t *cache_state;
-    char        *label = NULL;
+    char        *label = nullptr;
 
     if (R->menu_result > 0)
     {
@@ -1146,7 +1146,7 @@ void RAD_ActWaitUntilDead(rad_trigger_t *R, void *param)
     mobj_t *mo;
     mobj_t *next;
 
-    for (mo = mobjlisthead; mo != NULL; mo = next)
+    for (mo = mobjlisthead; mo != nullptr; mo = next)
     {
         next = mo->next;
 
@@ -1232,14 +1232,14 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
     P_TeleportMove(p->mo, point->x, point->y, point->z);
 }
 
-static void RAD_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info = NULL)
+static void RAD_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info = nullptr)
 {
     pspdef_t *psp = &p->psprites[position];
 
     if (stnum == S_NULL)
     {
         // object removed itself
-        psp->state = psp->next_state = NULL;
+        psp->state = psp->next_state = nullptr;
         return;
     }
 
@@ -1269,7 +1269,7 @@ static void RAD_SetPsprite(player_t *p, int position, int stnum, weapondef_c *in
 
     psp->state      = st;
     psp->tics       = st->tics;
-    psp->next_state = (st->nextstate == S_NULL) ? NULL : (states + st->nextstate);
+    psp->next_state = (st->nextstate == S_NULL) ? nullptr : (states + st->nextstate);
 
     // call action routine
 
@@ -1289,7 +1289,7 @@ void RAD_SetPspriteDeferred(player_t *p, int position, int stnum)
 {
     pspdef_t *psp = &p->psprites[position];
 
-    if (stnum == S_NULL || psp->state == NULL)
+    if (stnum == S_NULL || psp->state == nullptr)
     {
         RAD_SetPsprite(p, position, stnum);
         return;
@@ -1406,7 +1406,7 @@ void P_ActReplace(struct mobj_s *mo, const mobjtype_c *newThing)
         mo->hyperflags    = mo->info->hyperflags;
 
         mo->vis_target       = PERCENT_2_FLOAT(mo->info->translucency);
-        mo->currentattack    = NULL;
+        mo->currentattack    = nullptr;
         mo->model_skin       = mo->info->model_skin;
         mo->model_last_frame = -1;
 
@@ -1423,7 +1423,7 @@ void P_ActReplace(struct mobj_s *mo, const mobjtype_c *newThing)
                 if (mo->dlight.shader)
                 {
                     // FIXME: delete mo->dlight.shader;
-                    mo->dlight.shader = NULL;
+                    mo->dlight.shader = nullptr;
                 }
             }
         }
@@ -1442,8 +1442,8 @@ void RAD_ActReplaceThing(rad_trigger_t *R, void *param)
 {
     s_thing_replace_t *thingarg = (s_thing_replace_t *)param;
 
-    const mobjtype_c *oldThing = NULL;
-    const mobjtype_c *newThing = NULL;
+    const mobjtype_c *oldThing = nullptr;
+    const mobjtype_c *newThing = nullptr;
 
     // Prioritize number lookup. It's faster and more permissive
     if (thingarg->old_thing_type > -1)
@@ -1478,7 +1478,7 @@ void RAD_ActReplaceThing(rad_trigger_t *R, void *param)
     mobj_t *mo;
     mobj_t *next;
 
-    for (mo = mobjlisthead; mo != NULL; mo = next)
+    for (mo = mobjlisthead; mo != nullptr; mo = next)
     {
         next = mo->next;
 

@@ -20,6 +20,7 @@
 
 #include <limits.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "types.h"
 #include "endianess.h"
@@ -56,7 +57,7 @@ DEF_CVAR(r_doubleframes, "1", CVAR_ARCHIVE)
 DEF_CVAR(n_busywait, "1", CVAR_ROM)
 
 #if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
-HANDLE windows_timer = NULL;
+HANDLE windows_timer = nullptr;
 #endif
 
 // gametic is the tic about to (or currently being) run.
@@ -85,8 +86,8 @@ void N_InitNetwork(void)
     N_ResetTics();
 
 #if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
-    windows_timer = CreateWaitableTimerExW(NULL, NULL, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);
-    if (windows_timer != NULL)
+    windows_timer = CreateWaitableTimerExW(nullptr, nullptr, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);
+    if (windows_timer != nullptr)
     {
         n_busywait = 0;
     }
@@ -99,7 +100,7 @@ void N_Shutdown(void)
     if (windows_timer)
     {
         CloseHandle(windows_timer);
-        windows_timer = NULL;
+        windows_timer = nullptr;
     }
 #endif
 }

@@ -118,7 +118,7 @@ void S_QueueStop(void);
 // are moved into the free list.
 
 sound_data_c *S_QueueGetFreeBuffer(int samples, int buf_mode);
-// returns the next unused (or finished) buffer, or NULL
+// returns the next unused (or finished) buffer, or nullptr
 // if there are none.  The data_L/data_R fields will be
 // updated to ensure they hold the requested number of
 // samples and conform to the wanted buffer mode.

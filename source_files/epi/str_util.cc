@@ -16,9 +16,11 @@
 //
 //----------------------------------------------------------------------------
 
-#include "epi.h"
 #include "str_util.h"
 
+#include <stdarg.h>
+
+#include "epi.h"
 #include "superfasthash.h"
 
 #define UTF8PROC_STATIC
@@ -30,22 +32,24 @@ namespace epi
 #ifdef _WIN32
 std::wstring UTF8ToWString(std::string_view instring)
 {
-    size_t utf8pos = 0;
+    size_t                  utf8pos = 0;
     const utf8proc_uint8_t *utf8ptr = (const utf8proc_uint8_t *)instring.data();
-    size_t utf8len = instring.size();
-	std::wstring outstring;
-    utf8proc_int32_t u32c;
+    size_t                  utf8len = instring.size();
+    std::wstring            outstring;
+    utf8proc_int32_t        u32c;
     while (utf8pos < utf8len)
     {
         u32c = 0;
-        size_t res = utf8proc_iterate(utf8ptr+utf8pos, utf8len-utf8pos, &u32c);
+        size_t res =
+            utf8proc_iterate(utf8ptr + utf8pos, utf8len - utf8pos, &u32c);
         if (res < 0)
-            I_Error("Failed to convert %s to a wide string!\n", std::string(instring).c_str());
+            I_Error("Failed to convert %s to a wide string!\n",
+                    std::string(instring).c_str());
         else
             utf8pos += res;
         if (u32c < 0x10000)
             outstring.push_back((wchar_t)u32c);
-        else // Make into surrogate pair if needed
+        else  // Make into surrogate pair if needed
         {
             u32c -= 0x10000;
             outstring.push_back((wchar_t)(u32c >> 10) + 0xD800);
@@ -56,33 +60,36 @@ std::wstring UTF8ToWString(std::string_view instring)
 }
 std::string WStringToUTF8(std::wstring_view instring)
 {
-    std::string outstring;
-    size_t inpos = 0;
-    size_t inlen = instring.size();
-    const wchar_t *inptr = instring.data();
+    std::string      outstring;
+    size_t           inpos = 0;
+    size_t           inlen = instring.size();
+    const wchar_t   *inptr = instring.data();
     utf8proc_uint8_t u8c[4];
     while (inpos < inlen)
     {
         utf8proc_int32_t u32c = 0;
-        if ((*(inptr+inpos) & 0xD800) == 0xD800) // High surrogate
+        if ((*(inptr + inpos) & 0xD800) == 0xD800)  // High surrogate
         {
-            if (inpos+1 < inlen && (*(inptr+inpos+1) & 0xDC00) == 0xDC00) // Low surrogate
+            if (inpos + 1 < inlen &&
+                (*(inptr + inpos + 1) & 0xDC00) == 0xDC00)  // Low surrogate
             {
-                u32c = ((*(inptr+inpos) - 0xD800) * 0x400) + (*(inptr+inpos+1) - 0xDC00) + 0x10000;
+                u32c = ((*(inptr + inpos) - 0xD800) * 0x400) +
+                       (*(inptr + inpos + 1) - 0xDC00) + 0x10000;
                 inpos += 2;
             }
-            else // Assume an unpaired surrogate is malformed
+            else  // Assume an unpaired surrogate is malformed
             {
                 // print what was safely converted if present
                 if (!outstring.empty())
-                    I_Error("Failure to convert %s from a wide string!\n", outstring.c_str());
+                    I_Error("Failure to convert %s from a wide string!\n",
+                            outstring.c_str());
                 else
                     I_Error("Wide string to UTF-8 conversion failure!\n");
             }
         }
         else
         {
-            u32c = *(inptr+inpos);
+            u32c = *(inptr + inpos);
             inpos++;
         }
         memset(u8c, 0, 4);
@@ -90,7 +97,8 @@ std::string WStringToUTF8(std::wstring_view instring)
         {
             // print what was safely converted if present
             if (!outstring.empty())
-                I_Error("Failure to convert %s from a wide string!\n", outstring.c_str());
+                I_Error("Failure to convert %s from a wide string!\n",
+                        outstring.c_str());
             else
                 I_Error("Wide string to UTF-8 conversion failure!\n");
         }
@@ -107,16 +115,14 @@ void StringLowerASCII(std::string &s)
 {
     for (char &ch : s)
     {
-        if (ch > '@' && ch < '[')
-            ch ^= 0x20;
+        if (ch > '@' && ch < '[') ch ^= 0x20;
     }
 }
 void StringUpperASCII(std::string &s)
 {
     for (char &ch : s)
     {
-        if (ch > '`' && ch < '{')
-            ch ^= 0x20;
+        if (ch > '`' && ch < '{') ch ^= 0x20;
     }
 }
 
@@ -173,29 +179,26 @@ std::string StringFormat(const char *fmt, ...)
     }
 }
 
-std::vector<std::string> SeparatedStringVector(std::string_view str, char separator)
+std::vector<std::string> SeparatedStringVector(std::string_view str,
+                                               char             separator)
 {
-    std::vector<std::string> vec;
-    std::string_view::size_type   oldpos = 0;
-    std::string_view::size_type   pos    = 0;
+    std::vector<std::string>    vec;
+    std::string_view::size_type oldpos = 0;
+    std::string_view::size_type pos    = 0;
     while (pos != std::string_view::npos)
     {
-        pos                    = str.find(separator, oldpos);
-        std::string sub_string(str.substr(oldpos, (pos == std::string::npos ? str.size() : pos) - oldpos));
-        if (!sub_string.empty())
-            vec.push_back(sub_string);
-        if (pos != std::string_view::npos)
-            oldpos = pos + 1;
+        pos = str.find(separator, oldpos);
+        std::string sub_string(str.substr(
+            oldpos, (pos == std::string::npos ? str.size() : pos) - oldpos));
+        if (!sub_string.empty()) vec.push_back(sub_string);
+        if (pos != std::string_view::npos) oldpos = pos + 1;
     }
     return vec;
 }
 
 uint32_t StringHash32(std::string_view str_to_hash)
 {
-    if (str_to_hash.empty())
-    {
-        return 0;
-    }
+    if (str_to_hash.empty()) { return 0; }
 
     return SFH_MakeKey(str_to_hash.data(), str_to_hash.length());
 }
@@ -205,10 +208,7 @@ uint32_t StringHash32(std::string_view str_to_hash)
 // The terminating zero is always applied (there is no reason not to)
 void CStringCopyMax(char *destination, const char *source, int max)
 {
-    for (; *source && max > 0; max--)
-    {
-        *destination++ = *source++;
-    }
+    for (; *source && max > 0; max--) { *destination++ = *source++; }
 
     *destination = 0;
 }
@@ -219,23 +219,20 @@ char *CStringNew(int length)
 
     char *s = (char *)calloc(length + 1, 1);
 
-    if (!s)
-        I_Error("Out of memory (%d bytes for string)\n", length);
+    if (!s) I_Error("Out of memory (%d bytes for string)\n", length);
 
     return s;
 }
 
 char *CStringDuplicate(const char *original, int limit)
 {
-    if (!original)
-        return NULL;
+    if (!original) return nullptr;
 
     if (limit < 0)
     {
         char *s = strdup(original);
 
-        if (!s)
-            I_Error("Out of memory (copy string)\n");
+        if (!s) I_Error("Out of memory (copy string)\n");
 
         return s;
     }
@@ -251,21 +248,17 @@ char *CStringUpper(const char *name)
 {
     char *copy = CStringDuplicate(name);
 
-    for (char *p = copy; *p; p++)
-        *p = epi::ToUpperASCII(*p);
+    for (char *p = copy; *p; p++) *p = epi::ToUpperASCII(*p);
 
     return copy;
 }
 
 void CStringFree(const char *string)
 {
-    if (string)
-    {
-        free((void *)string);
-    }
+    if (string) { free((void *)string); }
 }
 
-} // namespace epi
+}  // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

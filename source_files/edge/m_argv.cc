@@ -18,9 +18,11 @@
 //
 //------------------------------------------------------------------------
 
+#include <string.h>
 #include "i_defs.h"
 #include "m_argv.h"
 #include "str_util.h"
+#include "str_compare.h"
 #include "filesystem.h"
 #include "epi_windows.h"
 #ifdef _WIN32

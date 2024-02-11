@@ -35,7 +35,7 @@
 #include "deh_sounds.h"
 #include "deh_system.h"
 #include "deh_wad.h"
-
+#include "str_compare.h"
 namespace dehacked
 {
 
@@ -234,7 +234,7 @@ const SoundEffectInfo S_sfx_dehextra[200] = {
 
 //
 // all the modified entries.
-// NOTE: some pointers may be NULL!
+// NOTE: some pointers may be nullptr!
 //
 std::vector<SoundEffectInfo *> S_sfx;
 
@@ -259,7 +259,7 @@ void sounds::Init()
 void sounds::Shutdown()
 {
     for (size_t i = 0; i < S_sfx.size(); i++)
-        if (S_sfx[i] != NULL)
+        if (S_sfx[i] != nullptr)
             delete S_sfx[i];
 
     S_sfx.clear();
@@ -295,14 +295,14 @@ void sounds::MarkSound(int num)
     if (num == ksfx_None)
         return;
 
-    // fill any missing slots with NULLs, including the one we want
+    // fill any missing slots with nullptrs, including the one we want
     while ((int)S_sfx.size() < num + 1)
     {
-        S_sfx.push_back(NULL);
+        S_sfx.push_back(nullptr);
     }
 
     // already have a modified entry?
-    if (S_sfx[num] != NULL)
+    if (S_sfx[num] != nullptr)
         return;
 
     SoundEffectInfo *entry = new SoundEffectInfo;
@@ -356,7 +356,7 @@ void sounds::AlterSound(int new_val)
 const char *sounds::GetEdgeSfxName(int sound_id)
 {
     if (sound_id == ksfx_None)
-        return NULL;
+        return nullptr;
 
     switch (sound_id)
     {
@@ -385,11 +385,11 @@ const char *sounds::GetEdgeSfxName(int sound_id)
     // for DSDehacked / MBF21).  check if modified name is empty too.
 
     if (sound_id >= (int)S_sfx.size())
-        return NULL;
+        return nullptr;
 
     const SoundEffectInfo *mod = S_sfx[sound_id];
-    if (mod == NULL || mod->name[0] == 0)
-        return NULL;
+    if (mod == nullptr || mod->name[0] == 0)
+        return nullptr;
 
     // create a suitable name
     static char name_buf[64];
@@ -400,7 +400,7 @@ const char *sounds::GetEdgeSfxName(int sound_id)
 const char *sounds::GetSound(int sound_id)
 {
     if (sound_id == ksfx_None)
-        return "NULL";
+        return "nullptr";
 
     // handle random sounds
     switch (sound_id)
@@ -435,8 +435,8 @@ const char *sounds::GetSound(int sound_id)
     }
 
     const char *name = GetEdgeSfxName(sound_id);
-    if (name == NULL)
-        return "NULL";
+    if (name == nullptr)
+        return "nullptr";
 
     return name;
 }
@@ -453,7 +453,7 @@ void sounds::WriteSound(int sound_id)
         return;
 
     const char *ddf_name = GetEdgeSfxName(sound_id);
-    if (ddf_name == NULL)
+    if (ddf_name == nullptr)
         I_Error("Dehacked: Error - No DDF name for sound %d ??\n", sound_id);
 
     wad::Printf("[%s]\n", ddf_name);
@@ -464,7 +464,7 @@ void sounds::WriteSound(int sound_id)
     {
         const SoundEffectInfo *link = &S_sfx_orig[ksfx_pistol];
 
-        if (ksfx_pistol < (int)S_sfx.size() && S_sfx[ksfx_pistol] != NULL)
+        if (ksfx_pistol < (int)S_sfx.size() && S_sfx[ksfx_pistol] != nullptr)
             link = S_sfx[ksfx_pistol];
 
         if (link->name[0] != 0)
@@ -500,7 +500,7 @@ void sounds::ConvertSFX(void)
 
     for (int i = 1; i < (int)S_sfx.size(); i++)
     {
-        if (S_sfx[i] == NULL)
+        if (S_sfx[i] == nullptr)
             continue;
 
         if (!got_one)

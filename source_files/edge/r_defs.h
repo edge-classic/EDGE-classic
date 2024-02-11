@@ -69,8 +69,8 @@ struct region_properties_s;
 // things are in or touch them.
 //
 // NOTE: we use the same optimisation: in P_UnsetThingPos we just
-// clear all the `mo' fields to NULL.  During P_SetThingPos we find
-// the first NULL `mo' field (i.e. as an allocation).  The interesting
+// clear all the `mo' fields to nullptr.  During P_SetThingPos we find
+// the first nullptr `mo' field (i.e. as an allocation).  The interesting
 // part is that we only need to unlink the node from the sector list
 // (and relink) if the sector in that node is different.  Thus saving
 // work for the common case where the sector(s) don't change.
@@ -101,7 +101,7 @@ typedef struct region_properties_s
     // rendering related
     int lightlevel;
 
-    const colourmap_c *colourmap; // can be NULL
+    const colourmap_c *colourmap; // can be nullptr
 
     // special type (e.g. damaging)
     int                 type;
@@ -158,7 +158,7 @@ typedef struct surface_s
     HMM_Vec2 net_scroll = {{0, 0}};
     HMM_Vec2 old_scroll = {{0, 0}};
 
-    // lighting override (as in BOOM).  Usually NULL.
+    // lighting override (as in BOOM).  Usually nullptr.
     region_properties_t *override_p;
 
     // this only used for BOOM deep water (linetype 242)
@@ -199,11 +199,11 @@ typedef struct extrafloor_s
     // properties used for stuff below us
     region_properties_t *p;
 
-    // type of extrafloor this is.  Only NULL for unused extrafloors.
+    // type of extrafloor this is.  Only nullptr for unused extrafloors.
     // This value is cached pointer to ef_line->special->ef.
     const extrafloordef_c *ef_info;
 
-    // extrafloor linedef (frontsector == control sector).  Only NULL
+    // extrafloor linedef (frontsector == control sector).  Only nullptr
     // for unused extrafloors.
     struct line_s *ef_line;
 
@@ -253,7 +253,7 @@ typedef struct sector_s
     //
     // Now the FLOORS ARE IMPLIED.  Unlike before, the floor below an
     // extrafloor is NOT stored in each extrafloor_t -- you must scan
-    // down to find them, and use the sector's floor if you hit NULL.
+    // down to find them, and use the sector's floor if you hit nullptr.
     extrafloor_t *bottom_ef;
     extrafloor_t *top_ef;
 
@@ -268,7 +268,7 @@ typedef struct sector_s
     // "props" field) due to flooders.
     region_properties_t *p;
 
-    // slope information, normally NULL
+    // slope information, normally nullptr
     slope_plane_t *f_slope;
     slope_plane_t *c_slope;
 
@@ -282,7 +282,7 @@ typedef struct sector_s
     HMM_Vec2              floor_vs_hilo;
     HMM_Vec2              ceil_vs_hilo;
 
-    // linked list of extrafloors that this sector controls.  NULL means
+    // linked list of extrafloors that this sector controls.  nullptr means
     // that this sector is not a controller.
     extrafloor_t *control_floors;
 
@@ -404,7 +404,7 @@ typedef struct line_s
     const linetype_c *special;
 
     // Visual appearance: SideDefs.
-    // side[1] will be NULL if one sided.
+    // side[1] will be nullptr if one sided.
     side_t *side[2];
 
     // Front and back sector.
@@ -442,7 +442,7 @@ typedef struct line_s
 
     const linetype_c *slide_door;
 
-    // slider thinker, normally NULL
+    // slider thinker, normally nullptr
     struct slider_move_s *slider_move;
 
     struct line_s *portal_pair;
@@ -493,12 +493,12 @@ typedef struct seg_s
     // (NOTE: sorted in clockwise order)
     struct seg_s *sub_next;
 
-    // -AJA- 1999/12/20: Reference to partner seg, or NULL if the seg
+    // -AJA- 1999/12/20: Reference to partner seg, or nullptr if the seg
     //       lies along a one-sided line.
     struct seg_s *partner;
 
     // -AJA- 1999/09/23: Reference to subsector on each side of seg,
-    //       back_sub is NULL for one-sided segs.
+    //       back_sub is nullptr for one-sided segs.
     //       (Addendum: back_sub is obsolete with new `partner' field)
     subsector_t *front_sub;
     subsector_t *back_sub;
@@ -519,12 +519,12 @@ typedef struct seg_s
     int side; // 0 for front, 1 for back
 
     // Sector references.
-    // backsector is NULL for one sided lines
+    // backsector is nullptr for one sided lines
 
     sector_t *frontsector;
     sector_t *backsector;
 
-    // compact list of sectors touching each vertex (can be NULL)
+    // compact list of sectors touching each vertex (can be nullptr)
     vertex_seclist_t *nb_sec[2];
 } seg_t;
 
@@ -554,10 +554,10 @@ typedef struct node_s
 
 typedef struct secanim_s
 {
-    sector_t         *target             = NULL;
-    struct sector_s  *scroll_sec_ref     = NULL;
-    const linetype_c *scroll_special_ref = NULL;
-    line_s           *scroll_line_ref    = NULL;
+    sector_t         *target             = nullptr;
+    struct sector_s  *scroll_sec_ref     = nullptr;
+    const linetype_c *scroll_special_ref = nullptr;
+    line_s           *scroll_line_ref    = nullptr;
     HMM_Vec2            floor_scroll       = {{0, 0}};
     HMM_Vec2            ceil_scroll        = {{0, 0}};
     HMM_Vec3            push               = {{0, 0, 0}};
@@ -567,10 +567,10 @@ typedef struct secanim_s
 
 typedef struct lineanim_s
 {
-    line_t           *target             = NULL;
-    struct sector_s  *scroll_sec_ref     = NULL;
-    const linetype_c *scroll_special_ref = NULL;
-    line_s           *scroll_line_ref    = NULL;
+    line_t           *target             = nullptr;
+    struct sector_s  *scroll_sec_ref     = nullptr;
+    const linetype_c *scroll_special_ref = nullptr;
+    line_s           *scroll_line_ref    = nullptr;
     float             side0_xspeed       = 0.0;
     float             side1_xspeed       = 0.0;
     float             side0_yspeed       = 0.0;
@@ -585,8 +585,8 @@ typedef struct lineanim_s
 
 typedef struct lightanim_s
 {
-    struct sector_s *light_sec_ref  = NULL;
-    line_s          *light_line_ref = NULL;
+    struct sector_s *light_sec_ref  = nullptr;
+    line_s          *light_line_ref = nullptr;
 } lightanim_t;
 
 #endif /*__R_DEFS__*/

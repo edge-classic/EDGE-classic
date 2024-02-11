@@ -34,7 +34,7 @@
 #include "endianess.h"
 #include "filesystem.h"
 #include "str_util.h"
-
+#include "str_compare.h"
 #include "e_main.h"
 #include "e_search.h"
 #include "r_image.h"
@@ -66,7 +66,7 @@ class spritedef_c
     spriteframe_c *frames;
 
   public:
-    spritedef_c(std::string _name) : numframes(0), frames(NULL)
+    spritedef_c(std::string _name) : numframes(0), frames(nullptr)
     {
         name = _name;
     }
@@ -101,7 +101,7 @@ static spritedef_c **sprites;
 static int           numsprites = 0;
 
 // Sorted map of sprite defs.  Only used during initialisation.
-static spritedef_c **sprite_map = NULL;
+static spritedef_c **sprite_map = nullptr;
 static int           sprite_map_len;
 
 //
@@ -139,14 +139,14 @@ static spriteframe_c *WhatFrame(spritedef_c *def, const char *name, int pos)
 
         default:
             I_Warning("Sprite lump %s has illegal frame.\n", name);
-            return NULL;
+            return nullptr;
         }
 
     SYS_ASSERT(index >= 0);
 
     // ignore frames larger than what is used in DDF
     if (index >= def->numframes)
-        return NULL;
+        return nullptr;
 
     return &def->frames[index];
 }
@@ -163,7 +163,7 @@ static void SetExtendedRots(spriteframe_c *frame)
 
     for (int k = 1; k <= 15; k += 2)
     {
-        frame->images[k] = NULL;
+        frame->images[k] = nullptr;
         frame->flip[k]   = 0;
     }
 }
@@ -305,7 +305,7 @@ static void FillSpriteFrames(int file)
     if (data_files[file]->wad)
     {
         std::vector<int> *lumps = W_GetSpriteList(file);
-        if (lumps == NULL)
+        if (lumps == nullptr)
             return;
 
         int lumpnum = (int)lumps->size();
@@ -508,7 +508,7 @@ static void MarkCompletedFrames(void)
 
             int rot_count = 0;
 
-            // check if all image pointers are NULL
+            // check if all image pointers are nullptr
             for (int i = 0; i < frame->rots; i++)
                 rot_count += frame->images[i] ? 1 : 0;
 
@@ -560,7 +560,7 @@ static void CheckSpriteFrames(spritedef_c *def)
         delete[] def->frames;
 
         def->numframes = 0;
-        def->frames    = NULL;
+        def->frames    = nullptr;
     }
 }
 
@@ -586,10 +586,10 @@ void W_InitSprites(void)
 
     I_Printf("W_InitSprites: Finding sprite patches\n");
 
-    // 1. Allocate sprite definitions (ignore NULL sprite, #0)
+    // 1. Allocate sprite definitions (ignore nullptr sprite, #0)
 
     sprites           = new spritedef_c *[numsprites];
-    sprites[SPR_NULL] = NULL;
+    sprites[SPR_NULL] = nullptr;
 
     for (int i = 1; i < numsprites; i++)
     {
@@ -649,7 +649,7 @@ void W_InitSprites(void)
 
     // 5. Fill in frames using wad lumps + images.ddf
 
-    // create a sorted list (ignore NULL entry, #0)
+    // create a sorted list (ignore nullptr entry, #0)
     sprite_map_len = numsprites - 1;
 
     sprite_map = new spritedef_c *[sprite_map_len];
@@ -684,7 +684,7 @@ void W_InitSprites(void)
         CheckSpriteFrames(sprites[j]);
 
     delete[] sprite_map;
-    sprite_map = NULL;
+    sprite_map = nullptr;
 }
 
 bool W_CheckSpritesExist(const state_group_t &group)
@@ -722,12 +722,12 @@ spriteframe_c *W_GetSpriteFrame(int spr_num, int framenum)
     spritedef_c *def = sprites[spr_num];
 
     if (framenum >= def->numframes)
-        return NULL;
+        return nullptr;
 
     spriteframe_c *frame = &def->frames[framenum];
 
     if (!frame || !frame->finished)
-        return NULL;
+        return nullptr;
 
     return frame;
 }
@@ -754,7 +754,7 @@ void W_PrecacheSprites(void)
         spritedef_c *def = sprites[i];
 
         const image_c *cur_image;
-        const image_c *last_image = NULL; // an optimisation
+        const image_c *last_image = nullptr; // an optimisation
 
         if (def->numframes == 0)
             continue;
@@ -779,7 +779,7 @@ void W_PrecacheSprites(void)
             {
                 cur_image = def->frames[fr].images[rot];
 
-                if (cur_image == NULL || cur_image == last_image)
+                if (cur_image == nullptr || cur_image == last_image)
                     continue;
 
                 W_ImagePreCache(cur_image);

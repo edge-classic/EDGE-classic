@@ -44,7 +44,7 @@
 #include "deh_text.h"
 #include "deh_things.h"
 #include "deh_weapons.h"
-
+#include "str_compare.h"
 namespace dehacked
 {
 
@@ -221,7 +221,7 @@ const char *ObjectName(int o_kind)
         I_Error("Dehacked: Error - Illegal object kind: %d\n", o_kind);
     }
 
-    return NULL; // not reached
+    return nullptr; // not reached
 }
 
 void MarkObject(int o_kind, int o_num)
@@ -773,7 +773,7 @@ bool        syncing;
 void GetNextLine(void)
 {
     int len   = 0;
-    equal_pos = NULL;
+    equal_pos = nullptr;
 
     for (;;)
     {
@@ -1269,7 +1269,7 @@ DehackedResult LoadDiff(bool no_header)
                 return kDehackedConversionParseError;
             }
 
-            doom_ver = (int)strtol(equal_pos + 1, NULL, 10);
+            doom_ver = (int)strtol(equal_pos + 1, nullptr, 10);
 
             if (!(doom_ver == 12 || (doom_ver >= 16 && doom_ver <= 21) || doom_ver == 2021 /* DSDehacked */))
             {
@@ -1301,7 +1301,7 @@ DehackedResult LoadDiff(bool no_header)
                 return kDehackedConversionParseError;
             }
 
-            patch_fmt = (int)strtol(equal_pos + 1, NULL, 10);
+            patch_fmt = (int)strtol(equal_pos + 1, nullptr, 10);
 
             if (patch_fmt < 5 || patch_fmt > 6)
             {
@@ -1424,7 +1424,7 @@ DehackedResult patch::Load(InputBuffer *buf)
     }
 
     I_Printf("\n");
-    pat_buf = NULL;
+    pat_buf = nullptr;
 
     return result;
 }

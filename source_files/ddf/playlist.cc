@@ -19,7 +19,7 @@
 #include "local.h"
 
 #include "playlist.h"
-
+#include "str_compare.h"
 static pl_entry_c *dynamic_plentry;
 
 pl_entry_container_c playlist;
@@ -32,8 +32,8 @@ pl_entry_container_c playlist;
 static void DDF_MusicParseInfo(const char *info)
 {
     static const char *const musstrtype[] = {"UNKNOWN", "MIDI", "MUS", "OGG", "MP3", "FLAC",
-                                             "M4P", "RAD",  "IMF280", "IMF560", "IMF700", NULL};
-    static const char *const musinftype[] = {"UNKNOWN", "LUMP", "FILE", "PACK", NULL};
+                                             "M4P", "RAD",  "IMF280", "IMF560", "IMF700", nullptr};
+    static const char *const musinftype[] = {"UNKNOWN", "LUMP", "FILE", "PACK", nullptr};
 
     char charbuff[256];
     int  pos, i;
@@ -66,7 +66,7 @@ static void DDF_MusicParseInfo(const char *info)
     if (i == ENDOFMUSTYPES)
     {
         i = MUSINF_UNKNOWN;
-        while (musinftype[i] != NULL && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
+        while (musinftype[i] != nullptr && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
             i++;
         if (i == ENDOFMUSINFTYPES)
             DDF_Warning("DDF_MusicParseInfo: Unknown music type: '%s'\n", charbuff);
@@ -103,7 +103,7 @@ static void DDF_MusicParseInfo(const char *info)
     charbuff[i] = 0;
 
     i = MUSINF_UNKNOWN;
-    while (musinftype[i] != NULL && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
+    while (musinftype[i] != nullptr && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
         i++;
 
     if (i == ENDOFMUSINFTYPES)
@@ -264,7 +264,7 @@ pl_entry_c *pl_entry_container_c::Find(int number)
             return p;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 int pl_entry_container_c::FindLast(const char *name)

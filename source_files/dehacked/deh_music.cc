@@ -35,7 +35,7 @@
 #include "deh_music.h"
 #include "deh_system.h"
 #include "deh_wad.h"
-
+#include "str_compare.h"
 namespace dehacked
 {
 
@@ -129,7 +129,7 @@ const MusicInfo S_music_orig[kTotalMusicTypes] = {
 
 //
 // all the modified entries.
-// NOTE: some pointers may be NULL!
+// NOTE: some pointers may be nullptr!
 //
 std::vector<MusicInfo *> S_music;
 
@@ -151,7 +151,7 @@ void music::Init()
 void music::Shutdown()
 {
     for (size_t i = 0; i < S_music.size(); i++)
-        if (S_music[i] != NULL)
+        if (S_music[i] != nullptr)
             delete S_music[i];
 
     S_music.clear();
@@ -162,14 +162,14 @@ void music::MarkEntry(int num)
     if (num == kmus_None)
         return;
 
-    // fill any missing slots with NULLs, including the one we want
+    // fill any missing slots with nullptrs, including the one we want
     while ((int)S_music.size() < num + 1)
     {
-        S_music.push_back(NULL);
+        S_music.push_back(nullptr);
     }
 
     // already have a modified entry?
-    if (S_music[num] != NULL)
+    if (S_music[num] != nullptr)
         return;
 
     MusicInfo *entry = new MusicInfo;
@@ -219,7 +219,7 @@ void music::ConvertMUS()
 
     for (int i = 1; i < (int)S_music.size(); i++)
     {
-        if (S_music[i] == NULL)
+        if (S_music[i] == nullptr)
             continue;
 
         if (!got_one)

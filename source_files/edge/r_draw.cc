@@ -43,17 +43,17 @@ void RGL_NewScreenSize(int width, int height, int bits)
 void RGL_DrawImage(float x, float y, float w, float h, const image_c *image, float tx1, float ty1, float tx2, float ty2,
                    const colourmap_c *textmap, float alpha, const colourmap_c *palremap)
 {
-    int x1 = I_ROUND(x);
-    int y1 = I_ROUND(y);
-    int x2 = I_ROUND(x + w + 0.25f);
-    int y2 = I_ROUND(y + h + 0.25f);
+    int x1 = RoundToInt(x);
+    int y1 = RoundToInt(y);
+    int x2 = RoundToInt(x + w + 0.25f);
+    int y2 = RoundToInt(y + h + 0.25f);
 
     if (x1 == x2 || y1 == y2)
         return;
 
     sg_color sgcol = sg_white;
 
-    GLuint tex_id = W_ImageCache(image, true, (textmap && (textmap->special & COLSP_Whiten)) ? NULL : palremap,
+    GLuint tex_id = W_ImageCache(image, true, (textmap && (textmap->special & COLSP_Whiten)) ? nullptr : palremap,
                                  (textmap && (textmap->special & COLSP_Whiten)) ? true : false);
 
     glEnable(GL_TEXTURE_2D);

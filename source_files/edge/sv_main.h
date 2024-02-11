@@ -72,32 +72,32 @@ typedef struct
 
 #define SVT_INVALID                                                                                                    \
     {                                                                                                                  \
-        SFKIND_Invalid, 0, NULL                                                                                        \
+        SFKIND_Invalid, 0, nullptr                                                                                        \
     }
 
 #define SVT_INT                                                                                                        \
     {                                                                                                                  \
-        SFKIND_Numeric, 4, NULL                                                                                        \
+        SFKIND_Numeric, 4, nullptr                                                                                        \
     }
 #define SVT_SHORT                                                                                                      \
     {                                                                                                                  \
-        SFKIND_Numeric, 2, NULL                                                                                        \
+        SFKIND_Numeric, 2, nullptr                                                                                        \
     }
 #define SVT_BYTE                                                                                                       \
     {                                                                                                                  \
-        SFKIND_Numeric, 1, NULL                                                                                        \
+        SFKIND_Numeric, 1, nullptr                                                                                        \
     }
 #define SVT_FLOAT                                                                                                      \
     {                                                                                                                  \
-        SFKIND_Numeric, 4, NULL                                                                                        \
+        SFKIND_Numeric, 4, nullptr                                                                                        \
     }
 #define SVT_VEC2                                                                                                       \
     {                                                                                                                  \
-        SFKIND_Numeric, 8, NULL                                                                                        \
+        SFKIND_Numeric, 8, nullptr                                                                                        \
     }
 #define SVT_VEC3                                                                                                       \
     {                                                                                                                  \
-        SFKIND_Numeric, 12, NULL                                                                                       \
+        SFKIND_Numeric, 12, nullptr                                                                                       \
     }
 #define SVT_INDEX(name)                                                                                                \
     {                                                                                                                  \
@@ -105,7 +105,7 @@ typedef struct
     }
 #define SVT_STRING                                                                                                     \
     {                                                                                                                  \
-        SFKIND_String, 0, NULL                                                                                         \
+        SFKIND_String, 0, nullptr                                                                                         \
     }
 #define SVT_STRUCT(name)                                                                                               \
     {                                                                                                                  \
@@ -135,13 +135,13 @@ typedef struct savefieldtype_s
 
     // get & put routines.  The extra parameter depends on the type, for
     // SFKIND_Struct it is the name of the structure, for SFKIND_Index
-    // it is the name of the array.  When `field_put' is NULL, then this
+    // it is the name of the array.  When `field_put' is nullptr, then this
     // field is not saved into the output SDEF chunk.
     bool (*field_get)(void *storage, int index, void *extra);
     void (*field_put)(void *storage, int index, void *extra);
 
     // for loaded info, this points to the known version of the field,
-    // otherwise NULL if the loaded field is unknown.
+    // otherwise nullptr if the loaded field is unknown.
     struct savefieldtype_s *known_field;
 } savefield_t;
 
@@ -149,12 +149,12 @@ typedef struct savefieldtype_s
 
 #define SVFIELD(field, fname, fnum, ftype, getter, putter)                                                             \
     {                                                                                                                  \
-        (const char *)&SV_F_BASE.field, fname, fnum, ftype, getter, putter, NULL                                       \
+        (const char *)&SV_F_BASE.field, fname, fnum, ftype, getter, putter, nullptr                                       \
     }
 
 #define SVFIELD_END                                                                                                    \
     {                                                                                                                  \
-        0, NULL, 0, SVT_INVALID, NULL, NULL, NULL                                                                      \
+        0, nullptr, 0, SVT_INVALID, nullptr, nullptr, nullptr                                                                      \
     }
 
 #define SVDUMMY ((const char *)&SV_F_BASE)
@@ -182,8 +182,8 @@ typedef struct savestruct_s
     bool define_me;
 
     // only used when loading.  For loaded info, this refers to the
-    // known struct of the same name (or NULL if none).  For known info,
-    // this points to the loaded info (or NULL if absent).
+    // known struct of the same name (or nullptr if none).  For known info,
+    // this points to the loaded info (or nullptr if absent).
     struct savestruct_s *counterpart;
 } savestruct_t;
 
@@ -197,7 +197,7 @@ typedef struct savearray_s
     const char *array_name;
 
     // array type.  For loaded info, this points to the loaded
-    // structure.  Never NULL.
+    // structure.  Never nullptr.
     savestruct_t *sdef;
 
     // this must be true to put the definition into the savegame file.
@@ -216,8 +216,8 @@ typedef struct savearray_s
     void (*finalise_elems)(void);
 
     // only used when loading.  For loaded info, this refers to the
-    // known array (or NULL if none).  For known info, this points to
-    // the loaded info (or NULL if absent).
+    // known array (or nullptr if none).  For known info, this points to
+    // the loaded info (or nullptr if absent).
     struct savearray_s *counterpart;
 
     // number of elements to be loaded.

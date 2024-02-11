@@ -175,7 +175,7 @@ fixdef_c *fixdef_container_c::Find(const char *name)
             return fl;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--- editor settings ---

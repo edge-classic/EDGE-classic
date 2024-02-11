@@ -59,7 +59,7 @@
 std::vector<data_file_c *> data_files;
 
 data_file_c::data_file_c(std::string _name, filekind_e _kind)
-    : name(_name), kind(_kind), file(NULL), wad(NULL), pack(NULL)
+    : name(_name), kind(_kind), file(nullptr), wad(nullptr), pack(nullptr)
 {
 }
 
@@ -107,7 +107,7 @@ extern std::string W_BuildNodesForWad(data_file_c *df);
 static void DEH_ConvertFile(std::string &filename)
 {
     epi::File *F = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
-    if (F == NULL)
+    if (F == nullptr)
     {
         I_Printf("FAILED to open file: %s\n", filename.c_str());
         return;
@@ -116,7 +116,7 @@ static void DEH_ConvertFile(std::string &filename)
     int   length = F->GetLength();
     uint8_t *data   = F->LoadIntoMemory();
 
-    if (data == NULL)
+    if (data == nullptr)
     {
         I_Printf("FAILED to read file: %s\n", filename.c_str());
         delete F;
@@ -142,13 +142,13 @@ static void W_ExternalDDF(data_file_c *df)
     I_Printf("Reading DDF file: %s\n", df->name.c_str());
 
     epi::File *F = epi::FileOpen(df->name, epi::kFileAccessRead);
-    if (F == NULL)
+    if (F == nullptr)
         I_Error("Couldn't open file: %s\n", df->name.c_str());
 
     // WISH: load directly into a std::string
 
     char *raw_data = (char *)F->LoadIntoMemory();
-    if (raw_data == NULL)
+    if (raw_data == nullptr)
         I_Error("Couldn't read file: %s\n", df->name.c_str());
 
     std::string data(raw_data);
@@ -162,13 +162,13 @@ static void W_ExternalRTS(data_file_c *df)
     I_Printf("Reading RTS script: %s\n", df->name.c_str());
 
     epi::File *F = epi::FileOpen(df->name, epi::kFileAccessRead);
-    if (F == NULL)
+    if (F == nullptr)
         I_Error("Couldn't open file: %s\n", df->name.c_str());
 
     // WISH: load directly into a std::string
 
     char *raw_data = (char *)F->LoadIntoMemory();
-    if (raw_data == NULL)
+    if (raw_data == nullptr)
         I_Error("Couldn't read file: %s\n", df->name.c_str());
 
     std::string data(raw_data);
@@ -190,7 +190,7 @@ void ProcessFile(data_file_c *df)
     if (df->kind <= FLKIND_XWad)
     {
         epi::File *file = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
-        if (file == NULL)
+        if (file == nullptr)
         {
             I_Error("Couldn't open file: %s\n", filename.c_str());
             return;
@@ -229,7 +229,7 @@ void ProcessFile(data_file_c *df)
     }
 
     // handle fixer-uppers   [ TODO support it for EPK files too ]
-    if (df->wad != NULL)
+    if (df->wad != nullptr)
         ProcessFixersForWad(df);
 }
 
@@ -304,13 +304,13 @@ epi::File *W_OpenPackFile(const std::string &name)
             df->kind == FLKIND_EEPK || df->kind == FLKIND_IFolder || df->kind == FLKIND_IPK)
         {
             epi::File *F = Pack_FileOpen(df->pack, name);
-            if (F != NULL)
+            if (F != nullptr)
                 return F;
         }
     }
 
     // not found
-    return NULL;
+    return nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -331,7 +331,7 @@ uint8_t *W_OpenPackOrLumpInMemory(const std::string &name, const std::vector<std
                 df->kind == FLKIND_EEPK || df->kind == FLKIND_IFolder || df->kind == FLKIND_IPK)
             {
                 epi::File *F = Pack_OpenMatch(df->pack, name, extensions);
-                if (F != NULL)
+                if (F != nullptr)
                 {
                     uint8_t *raw_packfile = F->LoadIntoMemory();
                     *length            = F->GetLength();

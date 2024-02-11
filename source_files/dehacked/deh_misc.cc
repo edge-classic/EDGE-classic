@@ -36,7 +36,7 @@
 #include "deh_system.h"
 #include "deh_things.h"
 #include "deh_weapons.h"
-
+#include "str_compare.h"
 namespace dehacked
 {
 
@@ -86,13 +86,13 @@ const MiscellaneousInfo misc_info[] = {
     {"Soulsphere Health", 1, &soul_health, soulsphere_mobj},
     {"Megasphere Health", 1, &mega_health, megasphere_mobj},
 
-    {"God Mode Health", 0, NULL, NULL},
-    {"IDFA Armor", 0, NULL, NULL},
-    {"IDFA Armor Class", 0, NULL, NULL},
-    {"IDKFA Armor", 0, NULL, NULL},
-    {"IDKFA Armor Class", 0, NULL, NULL},
+    {"God Mode Health", 0, nullptr, nullptr},
+    {"IDFA Armor", 0, nullptr, nullptr},
+    {"IDFA Armor Class", 0, nullptr, nullptr},
+    {"IDKFA Armor", 0, nullptr, nullptr},
+    {"IDKFA Armor Class", 0, nullptr, nullptr},
 
-    {NULL, 0, NULL, 0} // End sentinel
+    {nullptr, 0, nullptr, 0} // End sentinel
 };
 } // namespace miscellaneous
 

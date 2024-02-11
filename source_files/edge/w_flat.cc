@@ -99,7 +99,7 @@ void R_AddFlatAnim(animdef_c *anim)
         }
 
         std::vector<int> *lumps = W_GetFlatList(file);
-        if (lumps == NULL)
+        if (lumps == nullptr)
             return;
 
         int total = (int)lumps->size();
@@ -274,7 +274,7 @@ void W_InitFlats(void)
     for (file = 0; file < max_file; file++)
     {
         std::vector<int> *lumps = W_GetFlatList(file);
-        if (lumps == NULL)
+        if (lumps == nullptr)
             continue;
 
         int lumpnum = (int)lumps->size();

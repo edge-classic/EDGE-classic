@@ -69,7 +69,7 @@ typedef struct
 
 static bool P_CheckForBenefit(benefit_t *list, int kind)
 {
-    for (benefit_t *be = list; be != NULL; be = be->next)
+    for (benefit_t *be = list; be != nullptr; be = be->next)
     {
         if (be->type == kind)
             return true;
@@ -87,7 +87,7 @@ static bool P_CheckForBenefit(benefit_t *list, int kind)
 static void GiveCounter(pickup_info_t *pu, benefit_t *be)
 {
     int cntr = be->sub.type;
-    int num  = I_ROUND(be->amount);
+    int num  = RoundToInt(be->amount);
 
     if (cntr < 0 || cntr >= NUMCOUNTER)
         I_Error("GiveCounter: bad type %i", cntr);
@@ -125,7 +125,7 @@ static void GiveCounter(pickup_info_t *pu, benefit_t *be)
 static void GiveCounterLimit(pickup_info_t *pu, benefit_t *be)
 {
     int cntr  = be->sub.type;
-    int limit = I_ROUND(be->amount);
+    int limit = RoundToInt(be->amount);
 
     if (cntr < 0 || cntr >= NUMCOUNTER)
         I_Error("GiveCounterLimit: bad type %i", cntr);
@@ -154,7 +154,7 @@ static void GiveCounterLimit(pickup_info_t *pu, benefit_t *be)
 static void GiveInventory(pickup_info_t *pu, benefit_t *be)
 {
     int inv = be->sub.type;
-    int num = I_ROUND(be->amount);
+    int num = RoundToInt(be->amount);
 
     if (inv < 0 || inv >= NUMINV)
         I_Error("GiveInventory: bad type %i", inv);
@@ -192,7 +192,7 @@ static void GiveInventory(pickup_info_t *pu, benefit_t *be)
 static void GiveInventoryLimit(pickup_info_t *pu, benefit_t *be)
 {
     int inv   = be->sub.type;
-    int limit = I_ROUND(be->amount);
+    int limit = RoundToInt(be->amount);
 
     if (inv < 0 || inv >= NUMINV)
         I_Error("GiveInventoryLimit: bad type %i", inv);
@@ -226,12 +226,12 @@ static void GiveAmmo(pickup_info_t *pu, benefit_t *be)
         return;
 
     int ammo = be->sub.type;
-    int num  = I_ROUND(be->amount);
+    int num  = RoundToInt(be->amount);
 
     // -AJA- in old deathmatch, weapons give 2.5 times more ammo
     if (deathmatch == 1 && P_CheckForBenefit(pu->list, BENEFIT_Weapon) && pu->special && !pu->dropped)
     {
-        num = I_ROUND(be->amount * 2.5);
+        num = RoundToInt(be->amount * 2.5);
     }
 
     if (ammo == AM_NoAmmo || num <= 0)
@@ -306,7 +306,7 @@ static void GiveAmmo(pickup_info_t *pu, benefit_t *be)
 static void GiveAmmoLimit(pickup_info_t *pu, benefit_t *be)
 {
     int ammo  = be->sub.type;
-    int limit = I_ROUND(be->amount);
+    int limit = RoundToInt(be->amount);
 
     if (ammo == AM_NoAmmo)
         return;
@@ -382,7 +382,7 @@ static void GiveHealth(pickup_info_t *pu, benefit_t *be)
 {
     if (pu->lose_em)
     {
-        // P_DamageMobj(pu->player->mo, pu->special, NULL, be->amount, NULL);
+        // P_DamageMobj(pu->player->mo, pu->special, nullptr, be->amount, nullptr);
         if (pu->player->health <= 0)
             return;
 
@@ -391,7 +391,7 @@ static void GiveHealth(pickup_info_t *pu, benefit_t *be)
 
         if (pu->player->mo->health <= 0)
         {
-            P_KillMobj(NULL, pu->player->mo);
+            P_KillMobj(nullptr, pu->player->mo);
             // return;
         }
 
@@ -745,7 +745,7 @@ bool P_HasBenefitInList(player_t *player, benefit_t *list)
 // P_GiveBenefitList
 //
 // Give all the benefits in the list to the player.  `special' is the
-// special object that all these benefits came from, or NULL if they
+// special object that all these benefits came from, or nullptr if they
 // came from the initial_benefits list.  When `lose_em' is true, the
 // benefits should be taken away instead.  Returns true if _any_
 // benefit was picked up (or lost), or false if none of them were.
@@ -878,7 +878,7 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
         special->health = 0;
         if (time_stop_active) // Hide pickup after gaining benefit while time stop is still active
             special->visibility = INVISIBLE;
-        P_KillMobj(info.player->mo, special, NULL);
+        P_KillMobj(info.player->mo, special, nullptr);
     }
 
     // do all the special effects, lights & sound etc...
@@ -1012,7 +1012,7 @@ void P_ObituaryMessage(mobj_t *victim, mobj_t *killer, const damage_c *damtype)
 // Altered to reflect the fact that the dropped item is a pointer to
 // mobjtype_c, uses new procedure: P_MobjCreateObject.
 //
-// Note: Damtype can be NULL here.
+// Note: Damtype can be nullptr here.
 //
 // -ACB- 1998/08/01
 //
@@ -1025,7 +1025,7 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const damage_c *damtype, bool we
     if (target->player && target->player->mo != target)
     {
         P_KillMobj(source, target->player->mo, damtype, weak_spot);
-        target->player = NULL;
+        target->player = nullptr;
     }
 
     bool nofog = (target->flags & MF_SPECIAL);
@@ -1051,7 +1051,7 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const damage_c *damtype, bool we
         {
             pickup_info_t info;
             info.player  = source->player;
-            info.special = NULL;
+            info.special = nullptr;
             info.dropped = false;
 
             info.new_weap = -1; // the most recently added weapon (must be new)
@@ -1182,7 +1182,7 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const damage_c *damtype, bool we
     {
         mobj_t *mo = P_MobjCreateObject(target->x, target->y, target->floorz, item);
 
-        // -ES- 1998/07/18 NULL check to prevent crashing
+        // -ES- 1998/07/18 nullptr check to prevent crashing
         if (mo)
             mo->flags |= MF_DROPPED;
     }
@@ -1312,11 +1312,11 @@ void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust)
 //
 // * Target    - mobj to be damaged.
 // * Inflictor - mobj which is causing the damage.
-// * Source    - mobj who is responsible for doing the damage. Can be NULL
+// * Source    - mobj who is responsible for doing the damage. Can be nullptr
 // * Amount    - amount of damage done.
-// * Damtype   - type of damage (for override states).  Can be NULL
+// * Damtype   - type of damage (for override states).  Can be nullptr
 //
-// Both source and inflictor can be NULL, slime damage and barrel
+// Both source and inflictor can be nullptr, slime damage and barrel
 // explosions etc....
 //
 // -AJA- 1999/09/12: Now uses P_SetMobjStateDeferred, since this
@@ -1346,9 +1346,9 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
 
     // sanity check : don't produce references to removed objects
     if (inflictor && inflictor->isRemoved())
-        inflictor = NULL;
+        inflictor = nullptr;
     if (source && source->isRemoved())
-        source = NULL;
+        source = nullptr;
 
     // check for immortality
     if (target->hyperflags & HF_IMMORTAL)
@@ -1596,7 +1596,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         source = CurrentPlayer->mo;
 
         if (source && source->isRemoved()) // Sanity check?
-            source = NULL;
+            source = nullptr;
     }
 
     // -AJA- 2007/11/06: vampire mode!
@@ -1678,7 +1678,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
 //
 // For killing monsters and players when something teleports on top
 // of them.  Even the invulnerability powerup doesn't stop it.  Also
-// used for the kill-all cheat.  Inflictor and damtype can be NULL.
+// used for the kill-all cheat.  Inflictor and damtype can be nullptr.
 //
 void P_TelefragMobj(mobj_t *target, mobj_t *inflictor, const damage_c *damtype)
 {

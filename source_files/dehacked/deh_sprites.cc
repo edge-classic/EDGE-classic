@@ -38,7 +38,7 @@
 #include "deh_sprites.h"
 #include "deh_system.h"
 #include "deh_wad.h"
-
+#include "str_compare.h"
 namespace dehacked
 {
 
@@ -179,7 +179,7 @@ const char *sprites::GetSprite(int spr_num)
 
     // Boom support: TNT1 is an invisible sprite
     if (epi::StringCaseCompareASCII(name, "TNT1") == 0)
-        return "NULL";
+        return "nullptr";
 
     return name;
 }
@@ -189,7 +189,7 @@ const char *sprites::GetOriginalName(int spr_num)
     if (spr_num < kTotalSpritesDEHEXTRA)
         return sprnames_orig[spr_num];
 
-    return "NULL";
+    return "nullptr";
 }
 
 } // namespace dehacked

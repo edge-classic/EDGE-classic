@@ -262,7 +262,7 @@ class real_vm_c : public vm_c
     void STAT_ForLoop();
     void STAT_Return();
 
-    def_t *EXP_Expression(int priority, bool *lvalue = NULL);
+    def_t *EXP_Expression(int priority, bool *lvalue = nullptr);
     def_t *EXP_FieldQuery(def_t *e, bool lvalue);
     def_t *EXP_ShortCircuit(def_t *e, int n);
     def_t *EXP_Term();

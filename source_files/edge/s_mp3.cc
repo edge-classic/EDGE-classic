@@ -281,7 +281,7 @@ abstract_music_c *S_PlayMP3Music(uint8_t *data, int length, bool looping)
     {
         delete[] data;
         delete player;
-        return NULL;
+        return nullptr;
     }
 
     player->Play(looping);

@@ -214,7 +214,7 @@ static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
 
     // no longer need the epi::File
     delete F;
-    F = NULL;
+    F = nullptr;
 
     if (!data)
     {

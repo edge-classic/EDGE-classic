@@ -211,7 +211,7 @@ void HUD_Reset()
 
 void HUD_FrameSetup(void)
 {
-    if (default_font == NULL)
+    if (default_font == nullptr)
     {
         // FIXME: get default font from DDF gamedef
         fontdef_c *DEF = fontdefs.Lookup("DOOM");
@@ -252,10 +252,10 @@ void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand)
     y1 = COORD_Y(y1);
     y2 = COORD_Y(y2);
 
-    int sx1 = I_ROUND(x1);
-    int sy1 = I_ROUND(y1);
-    int sx2 = I_ROUND(x2);
-    int sy2 = I_ROUND(y2);
+    int sx1 = RoundToInt(x1);
+    int sy1 = RoundToInt(y1);
+    int sx2 = RoundToInt(x2);
+    int sy2 = RoundToInt(y2);
 
     if (sci_stack_top == 0)
     {
@@ -397,10 +397,10 @@ void HUD_CalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
 void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *image, float tx1, float ty1, float tx2,
                   float ty2, float alpha, RGBAColor text_col, const colourmap_c *palremap, float sx, float sy, char ch)
 {
-    int x1 = I_ROUND(hx1);
-    int y1 = I_ROUND(hy1);
-    int x2 = I_ROUND(hx2 + 0.25f);
-    int y2 = I_ROUND(hy2 + 0.25f);
+    int x1 = RoundToInt(hx1);
+    int y1 = RoundToInt(hy1);
+    int x2 = RoundToInt(hx2 + 0.25f);
+    int y2 = RoundToInt(hy2 + 0.25f);
 
     if (x1 >= x2 || y1 >= y2)
         return;
@@ -591,10 +591,10 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
 void HUD_RawFromTexID(float hx1, float hy1, float hx2, float hy2, unsigned int tex_id, image_opacity_e opacity,
                       float tx1, float ty1, float tx2, float ty2, float alpha)
 {
-    int x1 = I_ROUND(hx1);
-    int y1 = I_ROUND(hy1);
-    int x2 = I_ROUND(hx2 + 0.25f);
-    int y2 = I_ROUND(hy2 + 0.25f);
+    int x1 = RoundToInt(hx1);
+    int y1 = RoundToInt(hy1);
+    int x2 = RoundToInt(hx2 + 0.25f);
+    int y2 = RoundToInt(hy2 + 0.25f);
 
     if (x1 >= x2 || y1 >= y2)
         return;
@@ -708,7 +708,7 @@ void HUD_StretchImageNoOffset(float x, float y, float w, float h, const image_c 
     float y1 = COORD_Y(y + h);
     float y2 = COORD_Y(y);
 
-    HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha, kRGBANoValue, NULL, sx, sy);
+    HUD_RawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img), cur_alpha, kRGBANoValue, nullptr, sx, sy);
 }
 
 void HUD_DrawImageTitleWS(const image_c *title_image)
@@ -1048,7 +1048,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
     float y1 = COORD_Y(y + h);
     float y2 = COORD_Y(y);
 
-    HUD_RawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, cur_alpha, cur_color, NULL, 0.0, 0.0, ch);
+    HUD_RawImage(x1, y1, x2, y2, img, tx1, ty1, tx2, ty2, cur_alpha, cur_color, nullptr, 0.0, 0.0, ch);
 }
 
 void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img, char ch, RGBAColor color1,

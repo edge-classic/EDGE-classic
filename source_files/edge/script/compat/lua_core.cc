@@ -91,7 +91,7 @@ static int SYS_AllocConsole(lua_State *L)
 static int MATH_rint(lua_State* L)
 {
     double val = luaL_checknumber(L, 1);
-    lua_pushinteger(L, I_ROUND(val));
+    lua_pushinteger(L, RoundToInt(val));
     return 1;
 }
 
@@ -101,7 +101,7 @@ static const luaL_Reg syslib[] = {{"error", SYS_error},
                                   {"debug_print", SYS_debug_print},
                                   {"edge_version", SYS_edge_version},
                                   {"allocate_console", SYS_AllocConsole},
-                                  {NULL, NULL}};
+                                  {nullptr, nullptr}};
 
 static int luaopen_sys(lua_State *L)
 {
@@ -109,7 +109,7 @@ static int luaopen_sys(lua_State *L)
     return 1;
 }
 
-const luaL_Reg loadlibs[] = {{"sys", luaopen_sys}, {NULL, NULL}};
+const luaL_Reg loadlibs[] = {{"sys", luaopen_sys}, {nullptr, nullptr}};
 
 void LUA_RegisterCoreLibraries(lua_State *L)
 {

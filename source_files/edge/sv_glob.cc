@@ -44,7 +44,7 @@ static const char *GV_PutLevelFlags(void *storage);
 static const char *GV_PutImage(void *storage);
 
 static saveglobals_t  dummy_glob;
-static saveglobals_t *cur_globs = NULL;
+static saveglobals_t *cur_globs = nullptr;
 
 typedef struct
 {
@@ -99,7 +99,7 @@ static const global_command_t global_commands[] = {{"GAME", GV_GetString, GV_Put
                                                    {"DDFMOBJ", GV_GetCheckCRC, GV_PutCheckCRC, GLOB_OFF(ddfmobj)},
                                                    {"DDFWEAP", GV_GetCheckCRC, GV_PutCheckCRC, GLOB_OFF(ddfweap)},
 
-                                                   {NULL, NULL, 0}};
+                                                   {nullptr, nullptr, 0}};
 
 //----------------------------------------------------------------------------
 //
@@ -112,7 +112,7 @@ static void GV_GetInt(const char *info, void *storage)
 
     SYS_ASSERT(info && storage);
 
-    *dest = strtol(info, NULL, 0);
+    *dest = strtol(info, nullptr, 0);
 }
 
 static void GV_GetString(const char *info, void *storage)
@@ -125,7 +125,7 @@ static void GV_GetString(const char *info, void *storage)
     SV_FreeString(*dest);
 
     if (info[0] == 0)
-        *dest = NULL;
+        *dest = nullptr;
     else
         *dest = (char *)SV_DupString(info);
 }
@@ -146,7 +146,7 @@ static void GV_GetLevelFlags(const char *info, void *storage)
 
     SYS_ASSERT(info && storage);
 
-    flags = strtol(info, NULL, 0);
+    flags = strtol(info, nullptr, 0);
 
     Z_Clear(dest, gameflags_t, 1);
 
@@ -184,7 +184,7 @@ static void GV_GetImage(const char *info, void *storage)
 
     if (info[0] == 0)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return;
     }
 
@@ -217,7 +217,7 @@ static const char *GV_PutString(void *storage)
 
     SYS_ASSERT(storage);
 
-    if (*src == NULL)
+    if (*src == nullptr)
         return SV_DupString("");
 
     return SV_DupString(*src);
@@ -284,7 +284,7 @@ static const char *GV_PutImage(void *storage)
 
     SYS_ASSERT(storage);
 
-    if (*src == NULL)
+    if (*src == nullptr)
         return SV_DupString("");
 
     W_ImageMakeSaveString(*src, buffer, buffer + 2);
@@ -399,7 +399,7 @@ saveglobals_t *SV_LoadGLOB(void)
     SV_GetMarker(marker);
 
     if (strcmp(marker, "Glob") != 0 || !SV_PushReadChunk("Glob"))
-        return NULL;
+        return nullptr;
 
     cur_globs = globs = SV_NewGLOB();
 

@@ -62,8 +62,13 @@ void M_MakeSaveScreenShot(void);
 
 std::string M_ComposeFileName(std::string dir, std::string file);
 epi::File          *M_OpenComposedEPIFile(std::string dir, std::string file);
-void                  M_WarnError(const char *error, ...) GCCATTR((format(printf, 1, 2)));
-void                  M_DebugError(const char *error, ...) GCCATTR((format(printf, 1, 2)));
+#ifdef __GNUC__
+void                  M_WarnError(const char *error, ...) __attribute__((format(printf, 1, 2)));
+void                  M_DebugError(const char *error, ...) __attribute__((format(printf, 1, 2)));
+#else
+void                  M_WarnError(const char *error, ...);
+void                  M_DebugError(const char *error, ...);
+#endif
 
 extern bool save_screenshot_valid;
 

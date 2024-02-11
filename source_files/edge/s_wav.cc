@@ -92,7 +92,7 @@ uint8_t *Convert_PCSpeaker(const uint8_t *data, int *length)
     if (*length < 4)
     {
         I_Warning("Invalid PC Speaker Sound\n");
-        return NULL;
+        return nullptr;
     }
 
     SpkSndHeader header;
@@ -103,12 +103,12 @@ uint8_t *Convert_PCSpeaker(const uint8_t *data, int *length)
     if (header.zero != 0) // Check for magic number
     {
         I_Warning("Invalid Doom PC Speaker Sound\n");
-        return NULL;
+        return nullptr;
     }
     if (header.samples > (*length - 4) || header.samples < 4) // Check for sane values
     {
         I_Warning("Invalid Doom PC Speaker Sound\n");
-        return NULL;
+        return nullptr;
     }
     numsamples = header.samples;
 
@@ -126,7 +126,7 @@ uint8_t *Convert_PCSpeaker(const uint8_t *data, int *length)
         if (osamples[s] > 127)
         {
             I_Warning("Invalid PC Speaker counter value: %d > 127", osamples[s]);
-            return NULL;
+            return nullptr;
         }
         if (osamples[s] > 0)
         {

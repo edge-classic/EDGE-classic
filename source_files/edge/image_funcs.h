@@ -68,7 +68,7 @@ ImageFormat Image_DetectFormat(uint8_t *header, int header_len, int file_size);
 ImageFormat Image_FilenameToFormat(const std::string &filename);
 
 // loads the given image, which must be PNG, TGA or JPEG format.
-// Returns NULL if something went wrong.  The result image will be RGB
+// Returns nullptr if something went wrong.  The result image will be RGB
 // or RGBA (never paletted).  The image size (width and height) will be
 // rounded to the next power-of-two.
 image_data_c *Image_Load(epi::File *f);

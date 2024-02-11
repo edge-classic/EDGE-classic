@@ -67,7 +67,7 @@ void RGL_RainbowEffect(player_t *player)
 
     ren_red_mul = ren_grn_mul = ren_blu_mul = 1.0f;
 
-    ren_fx_colmap = NULL;
+    ren_fx_colmap = nullptr;
 
     if (!player)
         return;
@@ -130,9 +130,9 @@ void RGL_RainbowEffect(player_t *player)
     // AJA 2022: handle BOOM colourmaps (linetype 242)
     sector_t *sector = player->mo->subsector->sector;
 
-    if (sector->heightsec != NULL)
+    if (sector->heightsec != nullptr)
     {
-        const colourmap_c *colmap = NULL;
+        const colourmap_c *colmap = nullptr;
 
         // see which region the camera is in
         if (viewz > sector->heightsec->c_h)
@@ -195,7 +195,7 @@ void RGL_ColourmapEffect(player_t *player)
             HUD_SetAlpha(0.0f);
             s = HMM_MAX(0.5f, s);
             HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                        epi::MakeRGBA(I_ROUND(s * 255), I_ROUND(s * 255), I_ROUND(s * 255)), 25.0f);
+                        epi::MakeRGBA(RoundToInt(s * 255), RoundToInt(s * 255), RoundToInt(s * 255)), 25.0f);
             HUD_SetAlpha(old_alpha);
         }
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -230,7 +230,7 @@ void RGL_PaletteEffect(player_t *player)
         {
             HUD_SetAlpha(0.20f * s);
             HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                        epi::MakeRGBA(I_ROUND(r * 255), I_ROUND(g * 255), I_ROUND(b * 255)), 25.0f);
+                        epi::MakeRGBA(RoundToInt(r * 255), RoundToInt(g * 255), RoundToInt(b * 255)), 25.0f);
         }
     }
     else
@@ -251,9 +251,9 @@ void RGL_PaletteEffect(player_t *player)
         {
             HUD_SetAlpha((float)rgb_max / 255.0f);
             HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                        epi::MakeRGBA(I_ROUND((float)rgb_data[0] / rgb_max * 255),
-                                 I_ROUND((float)rgb_data[1] / rgb_max * 255),
-                                 I_ROUND((float)rgb_data[2] / rgb_max * 255)),
+                        epi::MakeRGBA(RoundToInt((float)rgb_data[0] / rgb_max * 255),
+                                 RoundToInt((float)rgb_data[1] / rgb_max * 255),
+                                 RoundToInt((float)rgb_data[2] / rgb_max * 255)),
                         25.0f);
         }
     }

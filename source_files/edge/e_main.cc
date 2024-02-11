@@ -46,7 +46,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "str_util.h"
-
+#include "str_compare.h"
 #include "am_map.h"
 #include "con_gui.h"
 #include "con_main.h"
@@ -116,8 +116,8 @@ bool custom_MenuMain       = false;
 bool custom_MenuEpisode    = false;
 bool custom_MenuDifficulty = false;
 
-FILE *logfile   = NULL;
-FILE *debugfile = NULL;
+FILE *logfile   = nullptr;
+FILE *debugfile = nullptr;
 
 gameflags_t default_gameflags = {
     false, // nomonsters
@@ -523,7 +523,7 @@ static void DoSystemStartup(void)
 
 static void M_DisplayPause(void)
 {
-    static const image_c *pause_image = NULL;
+    static const image_c *pause_image = nullptr;
 
     if (!pause_image)
         pause_image = W_ImageLookup("M_PAUSE");
@@ -702,7 +702,7 @@ static int title_game;
 static int title_pic;
 static int title_countdown;
 
-static const image_c *title_image = NULL;
+static const image_c *title_image = nullptr;
 
 static void E_TitleDrawer(void)
 {
@@ -772,7 +772,7 @@ void E_PickLoadingScreen(void)
     // not found
     title_game    = gamedefs.size() - 1;
     title_pic     = 29999;
-    loading_image = NULL;
+    loading_image = nullptr;
 }
 
 //
@@ -940,7 +940,7 @@ void E_AdvanceTitle(void)
 
     // not found
 
-    title_image     = NULL;
+    title_image     = nullptr;
     title_countdown = TICRATE * (r_doubleframes.d ? 2 : 1);
 }
 
@@ -1629,8 +1629,8 @@ static void SetupLogAndDebugFiles(void)
     std::string debug_fn = epi::PathAppend(home_dir, debugfilename.s);
 
 
-    logfile   = NULL;
-    debugfile = NULL;
+    logfile   = nullptr;
+    debugfile = nullptr;
 
     if (argv::Find("nolog") < 0)
     {

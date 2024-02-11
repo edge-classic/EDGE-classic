@@ -41,15 +41,15 @@ namespace dehacked
 namespace wad
 {
 
-ddf_collection_c *dest_container = NULL;
+ddf_collection_c *dest_container = nullptr;
 
-ddf_file_c *cur_lump = NULL;
+ddf_file_c *cur_lump = nullptr;
 
 char wad_msg_buf[1024];
 
 void NewLump(ddf_type_e type)
 {
-    if (dest_container == NULL)
+    if (dest_container == nullptr)
         I_Error("Dehacked: Error - WAD_NewLump: no container!\n");
 
     dest_container->files.push_back(ddf_file_c(type, ""));
@@ -59,7 +59,7 @@ void NewLump(ddf_type_e type)
 
 void Printf(const char *str, ...)
 {
-    if (cur_lump == NULL)
+    if (cur_lump == nullptr)
         I_Error("Dehacked: Error - WAD_Printf: not started.\n");
 
     va_list args;

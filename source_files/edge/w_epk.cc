@@ -30,7 +30,7 @@
 #include "filesystem.h"
 #include "sound_types.h"
 #include "str_util.h"
-
+#include "str_compare.h"
 // DDF
 #include "main.h"
 #include "colormap.h"
@@ -142,13 +142,13 @@ class pack_file_c
     mz_zip_archive *arch;
 
   public:
-    pack_file_c(data_file_c *_par, bool _folder) : parent(_par), is_folder(_folder), dirs(), arch(NULL)
+    pack_file_c(data_file_c *_par, bool _folder) : parent(_par), is_folder(_folder), dirs(), arch(nullptr)
     {
     }
 
     ~pack_file_c()
     {
-        if (arch != NULL)
+        if (arch != nullptr)
             delete arch;
     }
 
@@ -193,7 +193,7 @@ class pack_file_c
     int EntryLength(size_t dir, size_t index)
     {
         epi::File *f = OpenEntry(dir, index);
-        if (f == NULL)
+        if (f == nullptr)
             return 0;
 
         int length = f->GetLength();
@@ -205,7 +205,7 @@ class pack_file_c
     uint8_t *LoadEntry(size_t dir, size_t index, int &length)
     {
         epi::File *f = OpenEntry(dir, index);
-        if (f == NULL)
+        if (f == nullptr)
         {
             length = 0;
             return new uint8_t[1];
@@ -217,7 +217,7 @@ class pack_file_c
         // close file
         delete f;
 
-        if (data == NULL)
+        if (data == nullptr)
         {
             length = 0;
             return new uint8_t[1];
@@ -379,7 +379,7 @@ epi::File *pack_file_c::OpenEntry_Folder(size_t dir, size_t index)
     epi::File *F = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
 
     // this generally won't happen, file was found during a dir scan
-    if (F == NULL)
+    if (F == nullptr)
         I_Error("Failed to open file: %s\n", filename.c_str());
 
     return F;
@@ -487,7 +487,7 @@ class epk_file_c : public epi::File
     mz_uint length = 0;
     mz_uint pos    = 0;
 
-    mz_zip_reader_extract_iter_state *iter = NULL;
+    mz_zip_reader_extract_iter_state *iter = nullptr;
 
   public:
     epk_file_c(pack_file_c *_pack, mz_uint _idx) : pack(_pack), zip_idx(_idx)
@@ -503,7 +503,7 @@ class epk_file_c : public epi::File
 
     ~epk_file_c()
     {
-        if (iter != NULL)
+        if (iter != nullptr)
             mz_zip_reader_extract_iter_free(iter);
     }
 
@@ -626,9 +626,9 @@ epi::File *pack_file_c::OpenEntry_Zip(size_t dir, size_t index)
 epi::File *pack_file_c::FileOpen_Zip(const std::string &name)
 {
     // this ignores case by default
-    int idx = mz_zip_reader_locate_file(arch, name.c_str(), NULL, 0);
+    int idx = mz_zip_reader_locate_file(arch, name.c_str(), nullptr, 0);
     if (idx < 0)
-        return NULL;
+        return nullptr;
 
     epk_file_c *F = new epk_file_c(this, (mz_uint)idx);
     return F;
@@ -1099,7 +1099,7 @@ bool Pack_FindFile(pack_file_c *pack, const std::string &name)
 
 epi::File *Pack_FileOpen(pack_file_c *pack, const std::string &name)
 {
-    // when file does not exist, this returns NULL.
+    // when file does not exist, this returns nullptr.
 
     SYS_ASSERT(!name.empty());
 
@@ -1132,12 +1132,12 @@ epi::File *Pack_FileOpen(pack_file_c *pack, const std::string &name)
     if (!Pack_FindStem(pack, open_stem))
         return nullptr;
 
-    // Specific path given; attempt to open as-is, otherwise return NULL
+    // Specific path given; attempt to open as-is, otherwise return nullptr
     if (open_name != epi::GetFilename(open_name))
     {
         return pack->FileOpenByName(open_name);
     }
-    // Search only the root dir for this filename, return NULL if not present
+    // Search only the root dir for this filename, return nullptr if not present
     else if (root_only)
     {
         for (auto file : pack->dirs[0].entries)
@@ -1167,18 +1167,18 @@ epi::File *Pack_FileOpen(pack_file_c *pack, const std::string &name)
 // Like the above, but is in the form of a stem + acceptable extensions
 epi::File *Pack_OpenMatch(pack_file_c *pack, const std::string &name, const std::vector<std::string> &extensions)
 {
-    // when file does not exist, this returns NULL.
+    // when file does not exist, this returns nullptr.
 
     // Nothing to match (may change this to allow a wildcard in the future)
     if (extensions.empty())
-        return NULL;
+        return nullptr;
 
     std::string open_stem = name;
     epi::StringUpperASCII(open_stem);
 
     // quick file stem check to see if it's present at all
     if (!Pack_FindStem(pack, open_stem))
-        return NULL;
+        return nullptr;
 
     std::string stem_match = open_stem;
 
@@ -1193,7 +1193,7 @@ epi::File *Pack_OpenMatch(pack_file_c *pack, const std::string &name, const std:
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)

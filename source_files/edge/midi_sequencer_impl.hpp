@@ -282,10 +282,10 @@ void BW_MidiSequencer::MidiTrackRow::sortEvents(bool *noteStates)
 }
 
 BW_MidiSequencer::BW_MidiSequencer()
-    : m_interface(NULL), m_format(Format_MIDI), m_smfFormat(0), m_loopFormat(Loop_Default), m_loopEnabled(false),
+    : m_interface(nullptr), m_format(Format_MIDI), m_smfFormat(0), m_loopFormat(Loop_Default), m_loopEnabled(false),
       m_loopHooksOnly(false), m_fullSongTimeLength(0.0), m_postSongWaitDelay(1.0), m_loopStartTime(-1.0),
       m_loopEndTime(-1.0), m_tempoMultiplier(1.0), m_atEnd(false), m_loopCount(-1), m_loadTrackNumber(0),
-      m_trackSolo(~(size_t)(0)), m_triggerHandler(NULL), m_triggerUserData(NULL)
+      m_trackSolo(~(size_t)(0)), m_triggerHandler(nullptr), m_triggerUserData(nullptr)
 {
     m_loop.reset();
     m_loop.invalidLoop = false;
@@ -298,7 +298,7 @@ BW_MidiSequencer::~BW_MidiSequencer()
 
 void BW_MidiSequencer::setInterface(const BW_MidiRtInterface *intrf)
 {
-    // Interface must NOT be NULL
+    // Interface must NOT be nullptr
     assert(intrf);
 
     // Note ON hook is REQUIRED
@@ -1421,7 +1421,7 @@ BW_MidiSequencer::MidiEvent BW_MidiSequencer::parseEvent(const uint8_t **pptr, c
             evt.isValid = 0;
             return evt;
         }
-        std::string data(length ? (const char *)ptr : NULL, (size_t)length);
+        std::string data(length ? (const char *)ptr : nullptr, (size_t)length);
         ptr += (size_t)length;
 
         evt.type    = byte;
@@ -2145,7 +2145,7 @@ template <class T> class BufferGuard
     T *m_ptr;
 
   public:
-    BufferGuard() : m_ptr(NULL)
+    BufferGuard() : m_ptr(nullptr)
     {
     }
 
@@ -2154,7 +2154,7 @@ template <class T> class BufferGuard
         set();
     }
 
-    void set(T *p = NULL)
+    void set(T *p = nullptr)
     {
         if (m_ptr)
             free(m_ptr);
@@ -2748,7 +2748,7 @@ bool BW_MidiSequencer::parseMUS(epi::MemFile *mfr)
     delete mfr;
     mfr = nullptr;
 
-    uint8_t *mid     = NULL;
+    uint8_t *mid     = nullptr;
     uint32_t mid_len = 0;
     int      m2mret  = Convert_mus2midi(mus, (uint32_t)(mus_len), &mid, &mid_len, 0);
 

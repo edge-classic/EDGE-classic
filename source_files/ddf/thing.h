@@ -887,7 +887,7 @@ typedef struct condition_check_s
 //
 // override labels for various states, if the object being damaged
 // has such a state then it is used instead of the normal ones
-// (PAIN, DEATH, OVERKILL).  Defaults to NULL.
+// (PAIN, DEATH, OVERKILL).  Defaults to nullptr.
 //
 
 class label_offset_c
@@ -954,7 +954,7 @@ class damage_c
 
     // override labels for various states, if the object being damaged
     // has such a state then it is used instead of the normal ones
-    // (PAIN, DEATH, OVERKILL).  Defaults to NULL.
+    // (PAIN, DEATH, OVERKILL).  Defaults to nullptr.
     label_offset_c pain, death, overkill;
 
     // this flag says that the damage is unaffected by the player's
@@ -1110,22 +1110,22 @@ class mobjtype_c
     damage_c explode_damage;
     float    explode_radius; // normally zero (radius == damage)
 
-    // linked list of losing benefits, or NULL
+    // linked list of losing benefits, or nullptr
     benefit_t *lose_benefits;
 
-    // linked list of pickup benefits, or NULL
+    // linked list of pickup benefits, or nullptr
     benefit_t *pickup_benefits;
 
-    // linked list of kill benefits, or NULL
+    // linked list of kill benefits, or nullptr
     benefit_t *kill_benefits;
 
-    // linked list of pickup effects, or NULL
+    // linked list of pickup effects, or nullptr
     pickup_effect_c *pickup_effects;
 
     // pickup message, a reference to languages.ldf
     std::string pickup_message;
 
-    // linked list of initial benefits for players, or NULL if none
+    // linked list of initial benefits for players, or nullptr if none
     benefit_t *initial_benefits;
 
     int                castorder;
@@ -1217,22 +1217,22 @@ class mobjtype_c
     // -AJA- 2007/08/21: weakness support (head-shots etc)
     weakness_info_c weak;
 
-    // item to drop (or NULL).  The mobjdef pointer is only valid after
+    // item to drop (or nullptr).  The mobjdef pointer is only valid after
     // DDF_MobjCleanUp() has been called.
     const mobjtype_c *dropitem;
     std::string       dropitem_ref;
 
-    // blood object (or NULL).  The mobjdef pointer is only valid after
+    // blood object (or nullptr).  The mobjdef pointer is only valid after
     // DDF_MobjCleanUp() has been called.
     const mobjtype_c *blood;
     std::string       blood_ref;
 
-    // respawn effect object (or NULL).  The mobjdef pointer is only
+    // respawn effect object (or nullptr).  The mobjdef pointer is only
     // valid after DDF_MobjCleanUp() has been called.
     const mobjtype_c *respawneffect;
     std::string       respawneffect_ref;
 
-    // spot type for the `SHOOT_TO_SPOT' attack (or NULL).  The mobjdef
+    // spot type for the `SHOOT_TO_SPOT' attack (or nullptr).  The mobjdef
     // pointer is only valid after DDF_MobjCleanUp() has been called.
     const mobjtype_c *spitspot;
     std::string       spitspot_ref;

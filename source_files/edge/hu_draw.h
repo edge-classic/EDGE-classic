@@ -44,7 +44,7 @@ extern std::vector<std::string> hud_overlays;
 
 void HUD_SetCoordSys(int width, int height);
 
-void  HUD_SetFont(font_c *font = NULL);
+void  HUD_SetFont(font_c *font = nullptr);
 void  HUD_SetScale(float scale = 1.0f);
 void  HUD_SetTextColor(RGBAColor color = kRGBANoValue);
 void  HUD_SetAlpha(float alpha = 1.0f);
@@ -68,7 +68,7 @@ void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand = false
 void HUD_PopScissor();
 
 void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *image, float tx1, float ty1, float tx2,
-                  float ty2, float alpha = 1.0f, RGBAColor text_col = kRGBANoValue, const colourmap_c *palremap = NULL,
+                  float ty2, float alpha = 1.0f, RGBAColor text_col = kRGBANoValue, const colourmap_c *palremap = nullptr,
                   float sx = 0.0, float sy = 0.0, char ch = -1);
 
 // Draw a solid colour box (possibly translucent) in the given

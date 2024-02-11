@@ -20,9 +20,12 @@
 
 #pragma once
 
+#include <stdint.h>
+
+#include <string>
+
 #include "AlmostEquals.h"
 #include "epi.h"
-
 //
 // Node Build Information Structure
 //

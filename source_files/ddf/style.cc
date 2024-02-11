@@ -22,7 +22,7 @@
 #include "local.h"
 #include "font.h"
 #include "style.h"
-
+#include "str_compare.h"
 #undef DF
 #define DF DDF_FIELD
 
@@ -236,7 +236,7 @@ void DDF_StyleCleanUp(void)
 static specflags_t style_specials[] = {{"TILED", SYLSP_Tiled, 0},
                                        {"TILED_NOSCALE", SYLSP_TiledNoScale, 0},
                                        {"STRETCH_FULLSCREEN", SYLSP_StretchFullScreen, 0},
-                                       {NULL, 0, 0}};
+                                       {nullptr, 0, 0}};
 
 void DDF_StyleGetSpecials(const char *info, void *storage)
 {
@@ -349,10 +349,10 @@ textstyle_c::~textstyle_c()
 //
 void textstyle_c::Default()
 {
-    colmap       = NULL;
+    colmap       = nullptr;
     translucency = PERCENT_MAKE(100);
 
-    font     = NULL;
+    font     = nullptr;
     scale    = 1.0f;
     aspect   = 1.0f;
     x_offset = 0;
@@ -469,13 +469,13 @@ soundstyle_c::~soundstyle_c()
 //
 void soundstyle_c::Default()
 {
-    begin  = NULL;
-    end    = NULL;
-    select = NULL;
-    back   = NULL;
-    error  = NULL;
-    move   = NULL;
-    slider = NULL;
+    begin  = nullptr;
+    end    = nullptr;
+    select = nullptr;
+    back   = nullptr;
+    error  = nullptr;
+    move   = nullptr;
+    slider = nullptr;
 }
 
 //
@@ -564,12 +564,12 @@ void styledef_c::Default()
 //
 // styledef_container_c::Lookup()
 //
-// Finds a styledef by name, returns NULL if it doesn't exist.
+// Finds a styledef by name, returns nullptr if it doesn't exist.
 //
 styledef_c *styledef_container_c::Lookup(const char *refname)
 {
     if (!refname || !refname[0])
-        return NULL;
+        return nullptr;
 
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
@@ -578,7 +578,7 @@ styledef_c *styledef_container_c::Lookup(const char *refname)
             return m;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--- editor settings ---

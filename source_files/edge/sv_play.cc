@@ -129,19 +129,19 @@ static savefield_t sv_fields_player[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_player = {
-    NULL,             // link in list
+    nullptr,             // link in list
     "player_t",       // structure name
     "play",           // start marker
     sv_fields_player, // field descriptions
     SVDUMMY,          // dummy base
     true,             // define_me
-    NULL              // pointer to known struct
+    nullptr              // pointer to known struct
 };
 
 #undef SV_F_BASE
 
 savearray_t sv_array_player = {
-    NULL,              // link in list
+    nullptr,              // link in list
     "players",         // array name
     &sv_struct_player, // array type
     true,              // define_me
@@ -152,7 +152,7 @@ savearray_t sv_array_player = {
     SV_PlayerCreateElems,   // creation routine
     SV_PlayerFinaliseElems, // finalisation routine
 
-    NULL, // pointer to known array
+    nullptr, // pointer to known array
     0     // loaded size
 };
 
@@ -176,13 +176,13 @@ static savefield_t sv_fields_playerweapon[] = {SF(info, "info", 1, SVT_STRING, S
                                                SVFIELD_END};
 
 savestruct_t sv_struct_playerweapon = {
-    NULL,                   // link in list
+    nullptr,                   // link in list
     "playerweapon_t",       // structure name
     "weap",                 // start marker
     sv_fields_playerweapon, // field descriptions
     SVDUMMY,                // dummy base
     true,                   // define_me
-    NULL                    // pointer to known struct
+    nullptr                    // pointer to known struct
 };
 
 #undef SV_F_BASE
@@ -201,13 +201,13 @@ static savefield_t sv_fields_playercounter[] = {SF(num, "num", 1, SVT_INT, SR_Ge
                                                 SVFIELD_END};
 
 savestruct_t sv_struct_playercounter = {
-    NULL,                    // link in list
+    nullptr,                    // link in list
     "playercounter_t",       // structure name
     "cntr",                  // start marker
     sv_fields_playercounter, // field descriptions
     SVDUMMY,                 // dummy base
     true,                    // define_me
-    NULL                     // pointer to known struct
+    nullptr                     // pointer to known struct
 };
 
 #undef SV_F_BASE
@@ -226,13 +226,13 @@ static savefield_t sv_fields_playerinv[] = {SF(num, "num", 1, SVT_INT, SR_GetInt
                                             SVFIELD_END};
 
 savestruct_t sv_struct_playerinv = {
-    NULL,                // link in list
+    nullptr,                // link in list
     "playerinv_t",       // structure name
     "invy",              // start marker
     sv_fields_playerinv, // field descriptions
     SVDUMMY,             // dummy base
     true,                // define_me
-    NULL                 // pointer to known struct
+    nullptr                 // pointer to known struct
 };
 
 #undef SV_F_BASE
@@ -251,13 +251,13 @@ static savefield_t sv_fields_playerammo[] = {SF(num, "num", 1, SVT_INT, SR_GetIn
                                              SVFIELD_END};
 
 savestruct_t sv_struct_playerammo = {
-    NULL,                 // link in list
+    nullptr,                 // link in list
     "playerammo_t",       // structure name
     "ammo",               // start marker
     sv_fields_playerammo, // field descriptions
     SVDUMMY,              // dummy base
     true,                 // define_me
-    NULL                  // pointer to known struct
+    nullptr                  // pointer to known struct
 };
 
 #undef SV_F_BASE
@@ -283,13 +283,13 @@ static savefield_t sv_fields_psprite[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_psprite = {
-    NULL,              // link in list
+    nullptr,              // link in list
     "pspdef_t",        // structure name
     "pspr",            // start marker
     sv_fields_psprite, // field descriptions
     SVDUMMY,           // dummy base
     true,              // define_me
-    NULL               // pointer to known struct
+    nullptr               // pointer to known struct
 };
 
 #undef SV_F_BASE
@@ -338,7 +338,7 @@ void *SV_PlayerGetElem(int index)
     }
 
     I_Error("Internal error in SV_PlayerGetElem: index not found.\n");
-    return NULL;
+    return nullptr;
 }
 
 int SV_PlayerFindElem(player_t *elem)
@@ -357,7 +357,7 @@ int SV_PlayerFindElem(player_t *elem)
         if (p == elem)
             return index;
 
-        index++; // only count non-NULL pointers
+        index++; // only count non-nullptr pointers
     }
 
     I_Error("Internal error in SV_PlayerFindElem: No such PlayerPtr: %p\n", elem);
@@ -368,7 +368,7 @@ void SV_PlayerCreateElems(int num_elems)
 {
     I_Debugf("SV_PlayerCreateElems...\n");
 
-    // free existing players (sets all pointers to NULL)
+    // free existing players (sets all pointers to nullptr)
     P_DestroyAllPlayers();
 
     if (num_elems > MAXPLAYERS)
@@ -425,7 +425,7 @@ void SV_PlayerFinaliseElems(void)
     for (int i = 0; i < MAXPLAYERS; i++)
     {
         temp[i]    = players[i];
-        players[i] = NULL;
+        players[i] = nullptr;
     }
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
@@ -636,7 +636,7 @@ bool SR_WeaponGetInfo(void *storage, int index, void *extra)
 
     name = SV_GetString();
 
-    *dest = name ? weapondefs.Lookup(name) : NULL;
+    *dest = name ? weapondefs.Lookup(name) : nullptr;
     SV_FreeString(name);
 
     return true;
@@ -649,7 +649,7 @@ void SR_WeaponPutInfo(void *storage, int index, void *extra)
 {
     weapondef_c *info = ((weapondef_c **)storage)[index];
 
-    SV_PutString(info ? info->name.c_str() : NULL);
+    SV_PutString(info ? info->name.c_str() : nullptr);
 }
 
 //----------------------------------------------------------------------------
@@ -672,7 +672,7 @@ bool SR_PlayerGetState(void *storage, int index, void *extra)
 
     if (!swizzle)
     {
-        *dest = NULL;
+        *dest = nullptr;
         return true;
     }
 
@@ -683,28 +683,28 @@ bool SR_PlayerGetState(void *storage, int index, void *extra)
 
     base_p = strchr(buffer, ':');
 
-    if (base_p == NULL || base_p[0] == 0)
+    if (base_p == nullptr || base_p[0] == 0)
         I_Error("Corrupt savegame: bad weapon state 1: `%s'\n", buffer);
 
     *base_p++ = 0;
 
     off_p = strchr(base_p, ':');
 
-    if (off_p == NULL || off_p[0] == 0)
+    if (off_p == nullptr || off_p[0] == 0)
         I_Error("Corrupt savegame: bad weapon state 2: `%s'\n", base_p);
 
     *off_p++ = 0;
 
     // find weapon that contains the state
     // Traverses backwards in case #CLEARALL was used.
-    actual = NULL;
+    actual = nullptr;
 
     actual = weapondefs.Lookup(buffer);
     if (!actual)
         I_Error("LOADGAME: no such weapon %s for state %s:%s\n", buffer, base_p, off_p);
 
     // find base state
-    offset = strtol(off_p, NULL, 0) - 1;
+    offset = strtol(off_p, nullptr, 0) - 1;
 
     base = DDF_StateFindLabel(actual->state_grp, base_p, true /* quiet */);
 
@@ -739,16 +739,16 @@ bool SR_PlayerGetState(void *storage, int index, void *extra)
 // integer offset from the base state, which BTW starts at 1 (like in
 // ddf).
 //
-// Alternatively, the string can be NULL, which means the state
-// pointer should be NULL.
+// Alternatively, the string can be nullptr, which means the state
+// pointer should be nullptr.
 //
 void SR_PlayerPutState(void *storage, int index, void *extra)
 {
     state_t *S = ((state_t **)storage)[index];
 
-    if (S == NULL)
+    if (S == nullptr)
     {
-        SV_PutString(NULL);
+        SV_PutString(nullptr);
         return;
     }
 

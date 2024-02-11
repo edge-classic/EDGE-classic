@@ -40,7 +40,7 @@ class flatdef_c
 
     struct sfx_s *footstep;
     std::string   splash;
-    // Lobo: item to spawn (or NULL).  The mobjdef pointer is only valid after
+    // Lobo: item to spawn (or nullptr).  The mobjdef pointer is only valid after
     //  DDF_flatCleanUp() has been called.
     const mobjtype_c *impactobject;
     std::string       impactobject_ref;

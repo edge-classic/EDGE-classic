@@ -19,6 +19,8 @@
 #ifndef __EPI_STR_COMPARE_H__
 #define __EPI_STR_COMPARE_H__
 
+#include <string>
+
 namespace epi
 {
 
@@ -30,8 +32,7 @@ int StringCaseCompareASCII(std::string_view A, std::string_view B);
 int StringCaseCompareMaxASCII(std::string_view A, std::string_view B, size_t n);
 int StringPrefixCaseCompareASCII(std::string_view A, std::string_view B);
 
-
-} // namespace epi
+}  // namespace epi
 
 #endif /* __EPI_STR_COMPARE_H__ */
 

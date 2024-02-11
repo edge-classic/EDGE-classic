@@ -38,7 +38,7 @@ typedef struct sfx_s
                    // -AJA- I'm also relying on the [1] within sfxdef_c.
 } sfx_t;
 
-#define sfx_None (sfx_t *)NULL
+#define sfx_None (sfx_t *)nullptr
 
 // Sound Effect Definition Class
 class sfxdef_c
@@ -77,7 +77,7 @@ class sfxdef_c
     // volume adjustment (100% is normal, lower is quieter)
     percent_t volume;
 
-    // -KM- 1998/09/01  Looping: for non NULL origins
+    // -KM- 1998/09/01  Looping: for non nullptr origins
     bool looping;
 
     // -AJA- 2000/04/19: Prefer to play the whole sound rather than

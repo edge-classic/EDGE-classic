@@ -249,7 +249,7 @@ abstract_music_c *S_PlayM4PMusic(uint8_t *data, int length, bool looping)
     {
         delete[] data;
         delete player;
-        return NULL;
+        return nullptr;
     }
 
     delete[] data;

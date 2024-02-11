@@ -22,7 +22,7 @@
 namespace ajbsp
 {
 
-// memory allocation, guaranteed to not return NULL.
+// memory allocation, guaranteed to not return nullptr.
 void *UtilCalloc(int size);
 void *UtilRealloc(void *old, int size);
 void  UtilFree(void *data);

@@ -18,6 +18,7 @@
 
 #include "math_color.h"
 
+#include "HandmadeMath.h"
 namespace epi
 {
 
@@ -82,24 +83,24 @@ RGBAColor HSVColor::ToRGBA() const
 
     switch (sextant)
     {
-    case 0:
-        r = v_, g = p3, b = p1;
-        break;
-    case 1:
-        r = p2, g = v_, b = p1;
-        break;
-    case 2:
-        r = p1, g = v_, b = p3;
-        break;
-    case 3:
-        r = p1, g = p2, b = v_;
-        break;
-    case 4:
-        r = p3, g = p1, b = v_;
-        break;
-    default:
-        r = v_, g = p1, b = p2;
-        break;
+        case 0:
+            r = v_, g = p3, b = p1;
+            break;
+        case 1:
+            r = p2, g = v_, b = p1;
+            break;
+        case 2:
+            r = p1, g = v_, b = p3;
+            break;
+        case 3:
+            r = p1, g = p2, b = v_;
+            break;
+        case 4:
+            r = p3, g = p1, b = v_;
+            break;
+        default:
+            r = v_, g = p1, b = p2;
+            break;
     }
 
     SYS_ASSERT(0 <= r && r <= 255);
@@ -109,7 +110,7 @@ RGBAColor HSVColor::ToRGBA() const
     return MakeRGBA(r, g, b);
 }
 
-} // namespace epi
+}  // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

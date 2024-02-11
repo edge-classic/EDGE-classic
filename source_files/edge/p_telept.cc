@@ -51,7 +51,7 @@ mobj_t *P_FindTeleportMan(int tag, const mobjtype_c *info)
         }
     }
 
-    return NULL; // not found
+    return nullptr; // not found
 }
 
 line_t *P_FindTeleportLine(int tag, line_t *original)
@@ -67,7 +67,7 @@ line_t *P_FindTeleportLine(int tag, line_t *original)
         return lines + i;
     }
 
-    return NULL; // not found
+    return nullptr; // not found
 }
 
 //
@@ -101,7 +101,7 @@ line_t *P_FindTeleportLine(int tag, line_t *original)
 //
 // -AJA- 1999/07/12: Support for TELEPORT_SPECIAL in lines.ddf.
 // -AJA- 1999/07/30: Updated for extra floor support.
-// -AJA- 1999/10/21: Allow line to be NULL, and added `tag' param.
+// -AJA- 1999/10/21: Allow line to be nullptr, and added `tag' param.
 // -AJA- 2004/10/08: Reworked for Silent and Line-to-Line teleporters
 //                   (based on the logic in prBoom's p_telept.c code).
 //
@@ -123,14 +123,14 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
     BAMAngle dest_ang;
     BAMAngle source_ang = kBAMAngle90 + (line ? R_PointToAngle(0, 0, line->dx, line->dy) : 0);
 
-    mobj_t *currmobj = NULL;
-    line_t *currline = NULL;
+    mobj_t *currmobj = nullptr;
+    line_t *currline = nullptr;
 
     bool flipped = (def->special & TELSP_Flipped) ? true : false;
 
     player_t *player = thing->player;
     if (player && player->mo != thing) // exclude voodoo dolls
-        player = NULL;
+        player = nullptr;
 
     if (def->special & TELSP_Line)
     {

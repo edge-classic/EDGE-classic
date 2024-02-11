@@ -16,12 +16,14 @@
 //
 //----------------------------------------------------------------------------
 
+#include <string.h>
+
 #include "local.h"
 
 #include "states.h"
 
 #include "p_action.h"
-
+#include "str_compare.h"
 static const state_t template_state = {
     0,  // sprite ref
     0,  // frame ref
@@ -29,17 +31,17 @@ static const state_t template_state = {
     0,  // flags
     -1, // tics
 
-    NULL, // model_frame
-    NULL, // label
-    NULL, // routine
-    NULL, // parameter
+    nullptr, // model_frame
+    nullptr, // label
+    nullptr, // routine
+    nullptr, // parameter
     0,    // rts_tag_type
 
     0, // next state ref
     -1 // jump state ref
 };
 
-state_t *states = NULL;
+state_t *states = nullptr;
 int      num_states;
 
 std::vector<std::string> ddf_sprite_names;
@@ -68,7 +70,7 @@ static int last_model  = -1;
 
 static int AddSpriteName(const char *name)
 {
-    if (epi::StringCaseCompareASCII(name, "NULL") == 0)
+    if (epi::StringCaseCompareASCII(name, "nullptr") == 0)
         return SPR_NULL;
 
     if (last_sprite >= 0 && epi::StringCaseCompareASCII(ddf_sprite_names[last_sprite], name) == 0)
@@ -89,7 +91,7 @@ static int AddSpriteName(const char *name)
 
 static int AddModelName(const char *name)
 {
-    if (epi::StringCaseCompareASCII(name, "NULL") == 0)
+    if (epi::StringCaseCompareASCII(name, "nullptr") == 0)
         return SPR_NULL;
 
     if (last_model >= 0 && epi::StringCaseCompareASCII(ddf_model_names[last_model], name) == 0)
@@ -112,7 +114,7 @@ void DDF_StateInit(void)
 {
     // create states array with a single 'S_NULL' state
     states = (state_t *)malloc(sizeof(state_t));
-    if (states == NULL)
+    if (states == nullptr)
         I_Error("could not allocate states\n");
 
     states[0]  = template_state;
@@ -121,8 +123,8 @@ void DDF_StateInit(void)
     // create the 'SPR_NULL' sprite
     // (Not strictly needed, but means we can access the arrays
     //  without subtracting 1)
-    AddSpriteName("!NULL!");
-    AddModelName("!NULL!");
+    AddSpriteName("!nullptr!");
+    AddModelName("!nullptr!");
 }
 
 void DDF_StateCleanUp(void)
@@ -354,7 +356,7 @@ void DDF_StateReadState(const char *info, const char *label, state_group_t &grou
     num_states += 1;
 
     states = (state_t *)realloc(states, num_states * sizeof(state_t));
-    if (states == NULL)
+    if (states == nullptr)
         I_Error("could not allocate states\n");
 
     cur = &states[num_states - 1];
@@ -458,7 +460,7 @@ void DDF_StateReadState(const char *info, const char *label, state_group_t &grou
         cur->bright = 255;
     else if (epi::StringPrefixCaseCompareASCII(stateinfo[3], "LIT") == 0)
     {
-        cur->bright = strtol(stateinfo[3].c_str() + 3, NULL, 10);
+        cur->bright = strtol(stateinfo[3].c_str() + 3, nullptr, 10);
         cur->bright = HMM_Clamp(0, cur->bright * 255 / 99, 255);
     }
     else
@@ -495,7 +497,7 @@ void DDF_StateReadState(const char *info, const char *label, state_group_t &grou
         else
         {
             cur->action     = action_list[i].action;
-            cur->action_par = NULL;
+            cur->action_par = nullptr;
 
             if (action_list[i].handle_arg)
                 (*action_list[i].handle_arg)(action_arg, cur);
@@ -514,7 +516,7 @@ bool DDF_MainParseState(uint8_t *object, state_group_t &group, const char *field
 
     const char *pos = strchr(field, ')');
 
-    if (pos == NULL || pos == field || (pos - field) > 64)
+    if (pos == nullptr || pos == field || (pos - field) > 64)
         return false;
 
     std::string labname(field, pos - field);
@@ -525,15 +527,15 @@ bool DDF_MainParseState(uint8_t *object, state_group_t &group, const char *field
         if (DDF_CompareName(starters[i].label, labname.c_str()) == 0)
             break;
 
-    const state_starter_t *starter = NULL;
+    const state_starter_t *starter = nullptr;
     if (starters[i].label)
         starter = &starters[i];
 
-    int *var = NULL;
+    int *var = nullptr;
     if (starter)
         var = (int *)(object + starter->offset);
 
-    const char *redir = NULL;
+    const char *redir = nullptr;
     if (is_last)
         redir = starter ? starter->last_redir : (is_weapon ? "READY" : "IDLE");
 
@@ -639,7 +641,7 @@ void DDF_StateGetAttack(const char *arg, state_t *cur_state)
         return;
 
     cur_state->action_par = (void *)atkdefs.Lookup(arg);
-    if (cur_state->action_par == NULL)
+    if (cur_state->action_par == nullptr)
         DDF_WarnError("Unknown Attack (States): %s\n", arg);
 }
 
@@ -804,7 +806,7 @@ void DDF_StateGetFrame(const char *arg, state_t *cur_state)
     cur_state->jumpstate = ((StateGetRedirector(buffer) + 1) << 16) + offset;
 }
 
-act_morph_info_s::act_morph_info_s() : info(NULL), info_ref(), start()
+act_morph_info_s::act_morph_info_s() : info(nullptr), info_ref(), start()
 {
 }
 
@@ -871,7 +873,7 @@ void DDF_StateGetMorph(const char *arg, state_t *cur_state)
     cur_state->action_par = morph;
 }
 
-act_become_info_s::act_become_info_s() : info(NULL), info_ref(), start()
+act_become_info_s::act_become_info_s() : info(nullptr), info_ref(), start()
 {
 }
 
@@ -938,7 +940,7 @@ void DDF_StateGetBecome(const char *arg, state_t *cur_state)
     cur_state->action_par = become;
 }
 
-wep_become_info_s::wep_become_info_s() : info(NULL), info_ref(), start()
+wep_become_info_s::wep_become_info_s() : info(nullptr), info_ref(), start()
 {
 }
 

@@ -117,19 +117,19 @@ static savefield_t sv_fields_button[] = {SF(line, "line", 1, SVT_INDEX("lines"),
                                          SVFIELD_END};
 
 savestruct_t sv_struct_button = {
-    NULL,             // link in list
+    nullptr,             // link in list
     "button_t",       // structure name
     "butn",           // start marker
     sv_fields_button, // field descriptions
     SVDUMMY,          // dummy base
     true,             // define_me
-    NULL              // pointer to known struct
+    nullptr              // pointer to known struct
 };
 
 #undef SV_F_BASE
 
 savearray_t sv_array_button = {
-    NULL,              // link in list
+    nullptr,              // link in list
     "buttonlist",      // array name
     &sv_struct_button, // array type
     true,              // define_me
@@ -140,7 +140,7 @@ savearray_t sv_array_button = {
     SV_ButtonCreateElems,   // creation routine
     SV_ButtonFinaliseElems, // finalisation routine
 
-    NULL, // pointer to known array
+    nullptr, // pointer to known array
     0     // loaded size
 };
 
@@ -166,19 +166,19 @@ static savefield_t sv_fields_light[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_light = {
-    NULL,            // link in list
+    nullptr,            // link in list
     "light_t",       // structure name
     "lite",          // start marker
     sv_fields_light, // field descriptions
     SVDUMMY,         // dummy base
     true,            // define_me
-    NULL             // pointer to known struct
+    nullptr             // pointer to known struct
 };
 
 #undef SV_F_BASE
 
 savearray_t sv_array_light = {
-    NULL,             // link in list
+    nullptr,             // link in list
     "lights",         // array name
     &sv_struct_light, // array type
     true,             // define_me
@@ -189,7 +189,7 @@ savearray_t sv_array_light = {
     SV_LightCreateElems,   // creation routine
     SV_LightFinaliseElems, // finalisation routine
 
-    NULL, // pointer to known array
+    nullptr, // pointer to known array
     0     // loaded size
 };
 
@@ -227,19 +227,19 @@ static savefield_t sv_fields_trigger[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_trigger = {
-    NULL,              // link in list
+    nullptr,              // link in list
     "rad_trigger_t",   // structure name
     "trig",            // start marker
     sv_fields_trigger, // field descriptions
     SVDUMMY,           // dummy base
     true,              // define_me
-    NULL               // pointer to known struct
+    nullptr               // pointer to known struct
 };
 
 #undef SV_F_BASE
 
 savearray_t sv_array_trigger = {
-    NULL,               // link in list
+    nullptr,               // link in list
     "r_triggers",       // array name
     &sv_struct_trigger, // array type
     true,               // define_me
@@ -250,7 +250,7 @@ savearray_t sv_array_trigger = {
     SV_TriggerCreateElems,   // creation routine
     SV_TriggerFinaliseElems, // finalisation routine
 
-    NULL, // pointer to known array
+    nullptr, // pointer to known array
     0     // loaded size
 };
 
@@ -288,19 +288,19 @@ static savefield_t sv_fields_drawtip[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_drawtip = {
-    NULL,              // link in list
+    nullptr,              // link in list
     "drawtip_t",       // structure name
     "dtip",            // start marker
     sv_fields_drawtip, // field descriptions
     SVDUMMY,           // dummy base
     true,              // define_me
-    NULL               // pointer to known struct
+    nullptr               // pointer to known struct
 };
 
 #undef SV_F_BASE
 
 savearray_t sv_array_drawtip = {
-    NULL,               // link in list
+    nullptr,               // link in list
     "tip_slots",        // array name
     &sv_struct_drawtip, // array type
     true,               // define_me
@@ -311,7 +311,7 @@ savearray_t sv_array_drawtip = {
     SV_TipCreateElems,   // creation routine
     SV_TipFinaliseElems, // finalisation routine
 
-    NULL, // pointer to known array
+    nullptr, // pointer to known array
     0     // loaded size
 };
 
@@ -347,19 +347,19 @@ static savefield_t sv_fields_plane_move[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_plane_move = {
-    NULL,                 // link in list
+    nullptr,                 // link in list
     "plane_move_t",       // structure name
     "pmov",               // start marker
     sv_fields_plane_move, // field descriptions
     SVDUMMY,              // dummy base
     true,                 // define_me
-    NULL                  // pointer to known struct
+    nullptr                  // pointer to known struct
 };
 
 #undef SV_F_BASE
 
 savearray_t sv_array_plane_move = {
-    NULL,                  // link in list
+    nullptr,                  // link in list
     "plane_movers",        // array name (virtual list)
     &sv_struct_plane_move, // array type
     true,                  // define_me
@@ -370,7 +370,7 @@ savearray_t sv_array_plane_move = {
     SV_PlaneMoveCreateElems,   // creation routine
     SV_PlaneMoveFinaliseElems, // finalisation routine
 
-    NULL, // pointer to known array
+    nullptr, // pointer to known array
     0     // loaded size
 };
 
@@ -401,19 +401,19 @@ static savefield_t sv_fields_slider_move[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_slider_move = {
-    NULL,                  // link in list
+    nullptr,                  // link in list
     "slider_move_t",       // structure name
     "pmov",                // start marker
     sv_fields_slider_move, // field descriptions
     SVDUMMY,               // dummy base
     true,                  // define_me
-    NULL                   // pointer to known struct
+    nullptr                   // pointer to known struct
 };
 
 #undef SV_F_BASE
 
 savearray_t sv_array_slider_move = {
-    NULL,                   // link in list
+    nullptr,                   // link in list
     "active_sliders",       // array name (virtual list)
     &sv_struct_slider_move, // array type
     true,                   // define_me
@@ -424,7 +424,7 @@ savearray_t sv_array_slider_move = {
     SV_SliderMoveCreateElems,   // creation routine
     SV_SliderMoveFinaliseElems, // finalisation routine
 
-    NULL, // pointer to known array
+    nullptr, // pointer to known array
     0     // loaded size
 };
 
@@ -586,7 +586,7 @@ void SV_TriggerCreateElems(int num_elems)
 
         // link it in
         cur->next = active_triggers;
-        cur->prev = NULL;
+        cur->prev = nullptr;
 
         if (active_triggers)
             active_triggers->prev = cur;
@@ -595,7 +595,7 @@ void SV_TriggerCreateElems(int num_elems)
 
         // initialise defaults
         cur->info     = r_scripts;
-        cur->state    = r_scripts ? r_scripts->first_state : NULL;
+        cur->state    = r_scripts ? r_scripts->first_state : nullptr;
         cur->disabled = true;
     }
 }
@@ -793,14 +793,14 @@ bool SR_LightGetType(void *storage, int index, void *extra)
 
     if (!str)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
     if (str[1] != ':')
         I_Error("SR_LightGetType: invalid lighttype `%s'\n", str);
 
-    number = strtol(str + 2, NULL, 0);
+    number = strtol(str + 2, nullptr, 0);
 
     if (str[0] == 'S')
     {
@@ -836,7 +836,7 @@ void SR_LightPutType(void *storage, int index, void *extra)
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SV_PutString(nullptr);
         return;
     }
 
@@ -880,7 +880,7 @@ bool SR_TriggerGetState(void *storage, int index, void *extra)
 
     if (value == 0)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
@@ -944,7 +944,7 @@ bool SR_TriggerGetScript(void *storage, int index, void *extra)
 
     if (!swizzle)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
@@ -959,7 +959,7 @@ bool SR_TriggerGetScript(void *storage, int index, void *extra)
     map_name = buffer + 2;
     base_p   = strchr(map_name, ':');
 
-    if (base_p == NULL || base_p == map_name || base_p[0] == 0)
+    if (base_p == nullptr || base_p == map_name || base_p[0] == 0)
         I_Error("Corrupt savegame: bad script ref 2/4: `%s'\n", map_name);
 
     // terminate the map name
@@ -970,17 +970,17 @@ bool SR_TriggerGetScript(void *storage, int index, void *extra)
     use_p  = base_p;
     base_p = strchr(use_p, ':');
 
-    if (base_p == NULL || base_p == use_p || base_p[0] == 0)
+    if (base_p == nullptr || base_p == use_p || base_p[0] == 0)
         I_Error("Corrupt savegame: bad script ref 3/4: `%s'\n", use_p);
 
     *base_p++ = 0;
 
-    idx_val = strtol(use_p, NULL, 0);
+    idx_val = strtol(use_p, nullptr, 0);
     SYS_ASSERT(idx_val >= 1);
 
     // get CRC value
 
-    crc = (uint32_t)strtoul(base_p, NULL, 16);
+    crc = (uint32_t)strtoul(base_p, nullptr, 16);
 
     // now find the bugger !
     // FIXME: move into RTS code
@@ -1032,7 +1032,7 @@ void SR_TriggerPutScript(void *storage, int index, void *extra)
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SV_PutString(nullptr);
         return;
     }
 
@@ -1089,7 +1089,7 @@ bool SR_PlaneMoveGetType(void *storage, int index, void *extra)
 
     if (!str)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
@@ -1105,7 +1105,7 @@ bool SR_PlaneMoveGetType(void *storage, int index, void *extra)
     else
         I_Error("SR_PlaneMoveGetType: invalid floortype `%s'\n", str);
 
-    number = strtol(str + 4, NULL, 0);
+    number = strtol(str + 4, nullptr, 0);
 
     if (str[0] == 'S')
     {
@@ -1146,7 +1146,7 @@ void SR_PlaneMovePutType(void *storage, int index, void *extra)
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SV_PutString(nullptr);
         return;
     }
 
@@ -1221,14 +1221,14 @@ bool SR_SliderGetInfo(void *storage, int index, void *extra)
 
     if (!str)
     {
-        (*dest) = NULL;
+        (*dest) = nullptr;
         return true;
     }
 
     if (str[0] != ':')
         I_Error("SR_SliderGetInfo: invalid special `%s'\n", str);
 
-    const linetype_c *ld_type = P_LookupLineType(strtol(str + 1, NULL, 0));
+    const linetype_c *ld_type = P_LookupLineType(strtol(str + 1, nullptr, 0));
 
     (*dest) = &ld_type->s;
 
@@ -1246,7 +1246,7 @@ void SR_SliderPutInfo(void *storage, int index, void *extra)
 
     if (!src)
     {
-        SV_PutString(NULL);
+        SV_PutString(nullptr);
         return;
     }
 

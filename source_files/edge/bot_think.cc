@@ -23,6 +23,8 @@
 //
 //----------------------------------------------------------------------------
 
+#include <string.h>
+
 #include "i_defs.h"
 
 #include "bot_think.h"
@@ -169,14 +171,14 @@ float bot_t::EvalItem(const mobj_t *mo)
     if (0 == (mo->flags & MF_SPECIAL))
         return -1;
 
-    bool fighting = (pl->mo->target != NULL);
+    bool fighting = (pl->mo->target != nullptr);
 
     // do we *really* need some health?
     bool want_health = (pl->mo->health < 90);
     bool need_health = (pl->mo->health < 45);
 
     // handle weapons first (due to deathmatch rules)
-    for (const benefit_t *B = mo->info->pickup_benefits; B != NULL; B = B->next)
+    for (const benefit_t *B = mo->info->pickup_benefits; B != nullptr; B = B->next)
     {
         if (B->type == BENEFIT_Weapon)
         {
@@ -209,7 +211,7 @@ float bot_t::EvalItem(const mobj_t *mo)
         }
     }
 
-    for (const benefit_t *B = mo->info->pickup_benefits; B != NULL; B = B->next)
+    for (const benefit_t *B = mo->info->pickup_benefits; B != nullptr; B = B->next)
     {
         switch (B->type)
         {
@@ -325,7 +327,7 @@ float bot_t::EvaluateWeapon(int w_num, int &key) const
 
     // prefer smaller weapons for smaller monsters.
     // when not fighting, prefer biggest non-dangerous weapon.
-    if (pl->mo->target == NULL || DEATHMATCH())
+    if (pl->mo->target == nullptr || DEATHMATCH())
     {
         if (!weapon->dangerous)
             score += 1000.0f;
@@ -373,13 +375,13 @@ void bot_t::PainResponse()
 
     if (pl->attacker->health <= 0)
     {
-        pl->attacker = NULL;
+        pl->attacker = nullptr;
         return;
     }
 
     // TODO only update target if "threat" is greater than current target
 
-    if (pl->mo->target == NULL)
+    if (pl->mo->target == nullptr)
     {
         if (IsEnemyVisible(pl->attacker))
         {
@@ -395,14 +397,14 @@ void bot_t::LookForLeader()
     if (DEATHMATCH())
         return;
 
-    if (pl->mo->supportobj != NULL)
+    if (pl->mo->supportobj != nullptr)
         return;
 
     for (int i = 0; i < MAXPLAYERS; i++)
     {
         player_t *p2 = players[i];
 
-        if (p2 == NULL || p2->isBot())
+        if (p2 == nullptr || p2->isBot())
             continue;
 
         // when multiple humans, make it random who is picked
@@ -431,7 +433,7 @@ bool bot_t::IsEnemyVisible(mobj_t *enemy)
 void bot_t::LookForEnemies(float radius)
 {
     // check sight of existing target
-    if (pl->mo->target != NULL)
+    if (pl->mo->target != nullptr)
     {
         UpdateEnemy();
 
@@ -447,7 +449,7 @@ void bot_t::LookForEnemies(float radius)
             return;
 
         // look for a new enemy
-        pl->mo->SetTarget(NULL);
+        pl->mo->SetTarget(nullptr);
     }
 
     // pick a random nearby monster, then check sight, since the enemy
@@ -455,7 +457,7 @@ void bot_t::LookForEnemies(float radius)
 
     mobj_t *enemy = NAV_FindEnemy(this, radius);
 
-    if (enemy != NULL)
+    if (enemy != nullptr)
     {
         if (IsEnemyVisible(enemy))
         {
@@ -468,10 +470,10 @@ void bot_t::LookForEnemies(float radius)
 
 void bot_t::LookForItems(float radius)
 {
-    mobj_t     *item      = NULL;
+    mobj_t     *item      = nullptr;
     bot_path_c *item_path = NAV_FindThing(this, radius, item);
 
-    if (item_path == NULL)
+    if (item_path == nullptr)
         return;
 
     // GET IT !!
@@ -858,7 +860,7 @@ void bot_t::PathToLeader()
 
     path = NAV_FindPath(pl->mo, leader, 0);
 
-    if (path != NULL)
+    if (path != nullptr)
     {
         EstimateTravelTime();
     }
@@ -912,7 +914,7 @@ void bot_t::Think_Help()
         return;
     }
 
-    if (path != NULL)
+    if (path != nullptr)
     {
         switch (FollowPath(true))
         {
@@ -950,7 +952,7 @@ bot_follow_path_e bot_t::FollowPath(bool do_look)
 {
     // returns a FOLLOW_XXX enum constant.
 
-    SYS_ASSERT(path != NULL);
+    SYS_ASSERT(path != nullptr);
     SYS_ASSERT(!path->finished());
 
     // handle doors and lifts
@@ -962,7 +964,7 @@ bot_follow_path_e bot_t::FollowPath(bool do_look)
         door_stage = TKDOOR_Approach;
         door_seg   = path->nodes[path->along].seg;
         door_time  = 5 * TICRATE;
-        SYS_ASSERT(door_seg != NULL);
+        SYS_ASSERT(door_seg != nullptr);
         return FOLLOW_OK;
     }
     else if (flags & PNODE_Lift)
@@ -971,7 +973,7 @@ bot_follow_path_e bot_t::FollowPath(bool do_look)
         lift_stage = TKLIFT_Approach;
         lift_seg   = path->nodes[path->along].seg;
         lift_time  = 5 * TICRATE;
-        SYS_ASSERT(lift_seg != NULL);
+        SYS_ASSERT(lift_seg != nullptr);
         return FOLLOW_OK;
     }
     else if (flags & PNODE_Lift)
@@ -1022,7 +1024,7 @@ bot_follow_path_e bot_t::FollowPath(bool do_look)
 
 void bot_t::Think_Roam()
 {
-    if (path != NULL)
+    if (path != nullptr)
     {
         switch (FollowPath(true))
         {
@@ -1057,7 +1059,7 @@ void bot_t::Think_Roam()
         path = NAV_FindPath(pl->mo, &roam_goal, 0);
 
         // if no path found, try again soon
-        if (path == NULL)
+        if (path == nullptr)
         {
             roam_goal = position_c{0, 0, 0};
             return;
@@ -1072,13 +1074,13 @@ void bot_t::Think_Roam()
 void bot_t::FinishGetItem()
 {
     task = TASK_None;
-    pl->mo->SetTracer(NULL);
+    pl->mo->SetTracer(nullptr);
 
     DeletePath();
     path_wait = 4 + C_Random() % 4;
 
     // when fighting, look furthe for more items
-    if (pl->mo->target != NULL)
+    if (pl->mo->target != nullptr)
     {
         LookForItems(1024);
         return;
@@ -1091,7 +1093,7 @@ void bot_t::FinishGetItem()
         return;
 
     // continue to follow player
-    if (pl->mo->supportobj != NULL)
+    if (pl->mo->supportobj != nullptr)
         return;
 
     // otherwise we were roaming about, so re-establish path
@@ -1100,7 +1102,7 @@ void bot_t::FinishGetItem()
         path = NAV_FindPath(pl->mo, &roam_goal, 0);
 
         // if no path found, try again soon
-        if (path == NULL)
+        if (path == nullptr)
         {
             roam_goal = position_c{0, 0, 0};
             return;
@@ -1113,7 +1115,7 @@ void bot_t::FinishGetItem()
 void bot_t::Think_GetItem()
 {
     // item gone?  (either we picked it up, or someone else did)
-    if (pl->mo->tracer == NULL)
+    if (pl->mo->tracer == nullptr)
     {
         FinishGetItem();
         return;
@@ -1135,7 +1137,7 @@ void bot_t::Think_GetItem()
     }
 
     // follow the path previously found
-    if (path != NULL)
+    if (path != nullptr)
     {
         switch (FollowPath(false))
         {
@@ -1221,7 +1223,7 @@ void bot_t::Think_OpenDoor()
         const sector_t     *sector = door_seg->back_sub->sector;
         const plane_move_t *pm     = sector->ceil_move;
 
-        if (pm != NULL && pm->direction < 0)
+        if (pm != nullptr && pm->direction < 0)
         {
             if (door_time & 1)
                 cmd.use = true;
@@ -1236,7 +1238,7 @@ void bot_t::Think_OpenDoor()
         }
 
         // door is opening, so don't interfere
-        if (pm != NULL)
+        if (pm != nullptr)
             return;
 
         if (door_time & 1)
@@ -1288,7 +1290,7 @@ void bot_t::Think_UseLift()
         const sector_t     *sector = lift_seg->back_sub->sector;
         const plane_move_t *pm     = sector->floor_move;
 
-        if (pm != NULL && pm->direction > 0)
+        if (pm != nullptr && pm->direction > 0)
         {
             if (lift_time & 1)
                 cmd.use = true;
@@ -1308,7 +1310,7 @@ void bot_t::Think_UseLift()
         }
 
         // lift is lowering, so don't interfere
-        if (pm != NULL)
+        if (pm != nullptr)
             return;
 
         // try to activate it
@@ -1329,7 +1331,7 @@ void bot_t::Think_UseLift()
 
         const sector_t *lift_sec = lift_seg->back_sub->sector;
 
-        if (lift_sec->floor_move != NULL)
+        if (lift_sec->floor_move != nullptr)
         {
             // if lift went down again, don't time out
             if (lift_sec->floor_move->direction <= 0)
@@ -1348,10 +1350,10 @@ void bot_t::Think_UseLift()
 
 void bot_t::DeletePath()
 {
-    if (path != NULL)
+    if (path != nullptr)
     {
         delete path;
-        path = NULL;
+        path = nullptr;
     }
 }
 
@@ -1359,8 +1361,8 @@ void bot_t::DeletePath()
 
 void bot_t::Think()
 {
-    SYS_ASSERT(pl != NULL);
-    SYS_ASSERT(pl->mo != NULL);
+    SYS_ASSERT(pl != nullptr);
+    SYS_ASSERT(pl->mo != nullptr);
 
     // initialize the botcmd_t
     memset(&cmd, 0, sizeof(botcmd_t));
@@ -1381,13 +1383,13 @@ void bot_t::Think()
 
     // forget target (etc) if they died
     if (mo->target && mo->target->health <= 0)
-        mo->SetTarget(NULL);
+        mo->SetTarget(nullptr);
 
     if (mo->supportobj && mo->supportobj->health <= 0)
-        mo->SetSupportObj(NULL);
+        mo->SetSupportObj(nullptr);
 
     // hurt by somebody?
-    if (pl->attacker != NULL)
+    if (pl->attacker != nullptr)
     {
         PainResponse();
     }
@@ -1419,14 +1421,14 @@ void bot_t::Think()
         SelectWeapon();
 
     // if we have a target enemy, fight it or flee it
-    if (pl->mo->target != NULL)
+    if (pl->mo->target != nullptr)
     {
         Think_Fight();
         return;
     }
 
     // if we have a leader (in co-op), follow them
-    if (pl->mo->supportobj != NULL)
+    if (pl->mo->supportobj != nullptr)
     {
         Think_Help();
         return;
@@ -1564,7 +1566,7 @@ void BOT_EndLevel(void)
     for (int i = 0; i < MAXPLAYERS; i++)
     {
         player_t *pl = players[i];
-        if (pl != NULL && pl->isBot())
+        if (pl != nullptr && pl->isBot())
         {
             bot_t *bot = (bot_t *)pl->build_data;
             SYS_ASSERT(bot);

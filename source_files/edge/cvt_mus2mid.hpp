@@ -252,7 +252,7 @@ static int Convert_mus2midi(uint8_t *in, uint32_t insize, uint8_t **out, uint32_
 
     if (memcmp(header.ID, MUS_ID, 4))
     {
-        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_MUS, NULL, 0);*/
+        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_MUS, nullptr, 0);*/
         return (-1);
     }
     if (insize < (uint32_t)header.scoreLen + (uint32_t)header.scoreStart)
@@ -263,7 +263,7 @@ static int Convert_mus2midi(uint8_t *in, uint32_t insize, uint8_t **out, uint32_
     /* channel #15 should be excluded in the numchannels field: */
     if (header.channels > MUS_MIDI_MAXCHANNELS - 1)
     {
-        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_INVALID, NULL, 0);*/
+        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_INVALID, nullptr, 0);*/
         return (-1);
     }
 
@@ -470,7 +470,7 @@ _end: /* cleanup */
     if (ret < 0)
     {
         free(ctx.dst);
-        *out     = NULL;
+        *out     = nullptr;
         *outsize = 0;
     }
 

@@ -33,7 +33,7 @@
 #include "str_lexer.h"
 #include "str_util.h"
 #include "str_ename.h"
-
+#include "str_compare.h"
 #include "main.h"
 #include "colormap.h"
 
@@ -115,7 +115,7 @@ vgap_t *vertgaps;
 
 vertex_seclist_t *v_seclists;
 
-static line_t **linebuffer = NULL;
+static line_t **linebuffer = nullptr;
 
 // bbox used
 static float dummy_bbox[4];
@@ -322,7 +322,7 @@ static void LoadVertexes(int lump)
 
 static void SegCommonStuff(seg_t *seg, int linedef_in)
 {
-    seg->frontsector = seg->backsector = NULL;
+    seg->frontsector = seg->backsector = nullptr;
 
     if (linedef_in == -1)
     {
@@ -371,7 +371,7 @@ static void GroupSectorTags(sector_t *dest, sector_t *seclist, int numsecs)
 {
     // NOTE: `numsecs' does not include the current sector.
 
-    dest->tag_next = dest->tag_prev = NULL;
+    dest->tag_next = dest->tag_prev = nullptr;
 
     for (; numsecs > 0; numsecs--)
     {
@@ -479,7 +479,7 @@ static void LoadSectors(int lump)
 
         ss->exfloor_max = 0;
 
-        ss->props.colourmap = NULL;
+        ss->props.colourmap = nullptr;
 
         ss->props.gravity   = GRAVITY;
         ss->props.friction  = FRICTION;
@@ -743,7 +743,7 @@ static void LoadThings(int lump)
 
         // MOBJTYPE not found, don't crash out: JDS Compliance.
         // -ACB- 1998/07/21
-        if (objtype == NULL)
+        if (objtype == nullptr)
         {
             UnknownThingWarning(typenum, x, y);
             continue;
@@ -850,7 +850,7 @@ static void LoadHexenThings(int lump)
 
         // MOBJTYPE not found, don't crash out: JDS Compliance.
         // -ACB- 1998/07/21
-        if (objtype == NULL)
+        if (objtype == nullptr)
         {
             UnknownThingWarning(typenum, x, y);
             continue;
@@ -1053,7 +1053,7 @@ static void LoadHexenLineDefs(int lump)
         ld->v2    = &vertexes[AlignedLittleEndianU16(mld->end)];
 
         // this ignores the activation bits -- oh well
-        ld->special = (mld->args[0] == 0) ? NULL : linetypes.Lookup(1000 + mld->args[0]);
+        ld->special = (mld->args[0] == 0) ? nullptr : linetypes.Lookup(1000 + mld->args[0]);
 
         int side0 = AlignedLittleEndianU16(mld->side_R);
         int side1 = AlignedLittleEndianU16(mld->side_L);
@@ -1068,7 +1068,7 @@ static sector_t *DetermineSubsectorSector(subsector_t *ss, int pass)
 {
     const seg_t *seg;
 
-    for (seg = ss->segs; seg != NULL; seg = seg->sub_next)
+    for (seg = ss->segs; seg != nullptr; seg = seg->sub_next)
     {
         if (seg->miniseg)
             continue;
@@ -1080,9 +1080,9 @@ static sector_t *DetermineSubsectorSector(subsector_t *ss, int pass)
         return seg->frontsector;
     }
 
-    for (seg = ss->segs; seg != NULL; seg = seg->sub_next)
+    for (seg = ss->segs; seg != nullptr; seg = seg->sub_next)
     {
-        if (seg->partner == NULL)
+        if (seg->partner == nullptr)
             continue;
 
         // only do this for self-referencing linedefs if the original sector isn't tagged, otherwise
@@ -1090,13 +1090,13 @@ static sector_t *DetermineSubsectorSector(subsector_t *ss, int pass)
         if (seg->frontsector == seg->backsector && seg->frontsector && seg->frontsector->tag == 0)
             return seg->frontsector;
 
-        if (seg->frontsector != seg->backsector && seg->partner->front_sub->sector != NULL)
+        if (seg->frontsector != seg->backsector && seg->partner->front_sub->sector != nullptr)
             return seg->partner->front_sub->sector;
     }
 
     if (pass == 1)
     {
-        for (seg = ss->segs; seg != NULL; seg = seg->sub_next)
+        for (seg = ss->segs; seg != nullptr; seg = seg->sub_next)
         {
             if (!seg->miniseg)
                 return seg->frontsector;
@@ -1106,7 +1106,7 @@ static sector_t *DetermineSubsectorSector(subsector_t *ss, int pass)
     if (pass == 2)
         return &sectors[0];
 
-    return NULL;
+    return nullptr;
 }
 
 static bool AssignSubsectorsPass(int pass)
@@ -1124,13 +1124,13 @@ static bool AssignSubsectorsPass(int pass)
     {
         subsector_t *ss = &subsectors[i];
 
-        if (ss->sector == NULL)
+        if (ss->sector == nullptr)
         {
             null_count += 1;
 
             ss->sector = DetermineSubsectorSector(ss, pass);
 
-            if (ss->sector != NULL)
+            if (ss->sector != nullptr)
             {
                 progress = true;
 
@@ -1327,7 +1327,7 @@ static void LoadXGL3Nodes(int lumpnum)
         seg->side = side ? 1 : 0;
 
         if (partner == -1)
-            seg->partner = NULL;
+            seg->partner = nullptr;
         else
         {
             SYS_ASSERT(partner < numsegs); // sanity check
@@ -1371,8 +1371,8 @@ static void LoadXGL3Nodes(int lumpnum)
         if (countsegs == 0)
             I_Error("LoadXGL3Nodes: level %s has invalid SSECTORS.\n", currmap->lump.c_str());
 
-        ss->sector    = NULL;
-        ss->thinglist = NULL;
+        ss->sector    = nullptr;
+        ss->thinglist = nullptr;
 
         // this is updated when the nodes are loaded
         ss->bbox = dummy_bbox;
@@ -1385,13 +1385,13 @@ static void LoadXGL3Nodes(int lumpnum)
             prevptr  = &cur->sub_next;
 
             cur->front_sub = ss;
-            cur->back_sub  = NULL;
+            cur->back_sub  = nullptr;
 
             // I_Debugf("  ssec = %d, seg = %d\n", i, firstseg + j);
         }
         // I_Debugf("LoadZNodes: ssec = %d, fseg = %d, cseg = %d\n", i, firstseg, countsegs);
 
-        *prevptr = NULL;
+        *prevptr = nullptr;
     }
     delete[] ss_temp; // CA 9.30.18: allocated with new but released using delete, added [] between delete and ss_temp
 
@@ -1766,7 +1766,7 @@ static void LoadUDMFSectors()
 
             ss->exfloor_max = 0;
 
-            ss->props.colourmap = NULL;
+            ss->props.colourmap = nullptr;
 
             ss->props.gravity   = GRAVITY * gravfactor;
             ss->props.friction  = FRICTION;
@@ -2000,7 +2000,7 @@ static void LoadUDMFSideDefs()
 
             sd->top.image = W_ImageLookup(top_tex, INS_Texture, ILF_Null);
 
-            if (sd->top.image == NULL)
+            if (sd->top.image == nullptr)
             {
                 if (m_goobers.d)
                     sd->top.image = W_ImageLookup(bottom_tex, INS_Texture);
@@ -2431,7 +2431,7 @@ static void LoadUDMFThings()
 
             // MOBJTYPE not found, don't crash out: JDS Compliance.
             // -ACB- 1998/07/21
-            if (objtype == NULL)
+            if (objtype == nullptr)
             {
                 UnknownThingWarning(typenum, x, y);
                 continue;
@@ -2643,7 +2643,7 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
 
     sd->top.image = W_ImageLookup(upper_tex, INS_Texture, ILF_Null);
 
-    if (sd->top.image == NULL)
+    if (sd->top.image == nullptr)
     {
         if (m_goobers.d)
             sd->top.image = W_ImageLookup(upper_tex, INS_Texture);
@@ -3423,7 +3423,7 @@ static void CreateVertexSeclists(void)
     {
         delete[] branches;
 
-        v_seclists = NULL;
+        v_seclists = nullptr;
         return;
     }
 
@@ -3537,15 +3537,15 @@ void ShutdownLevel(void)
     DDF_BoomClearGenTypes();
 
     delete[] segs;
-    segs = NULL;
+    segs = nullptr;
     delete[] nodes;
-    nodes = NULL;
+    nodes = nullptr;
     delete[] vertexes;
-    vertexes = NULL;
+    vertexes = nullptr;
     delete[] sides;
-    sides = NULL;
+    sides = nullptr;
     delete[] lines;
-    lines = NULL;
+    lines = nullptr;
     for (int i = 0; i < numsectors; i++)
     {
         sector_t *sec = &sectors[i];
@@ -3561,20 +3561,20 @@ void ShutdownLevel(void)
         }
     }
     delete[] sectors;
-    sectors = NULL;
+    sectors = nullptr;
     delete[] subsectors;
-    subsectors = NULL;
+    subsectors = nullptr;
 
     delete[] gl_vertexes;
-    gl_vertexes = NULL;
+    gl_vertexes = nullptr;
     delete[] extrafloors;
-    extrafloors = NULL;
+    extrafloors = nullptr;
     delete[] vertgaps;
-    vertgaps = NULL;
+    vertgaps = nullptr;
     delete[] linebuffer;
-    linebuffer = NULL;
+    linebuffer = nullptr;
     delete[] v_seclists;
-    v_seclists = NULL;
+    v_seclists = nullptr;
 
     P_DestroyBlockMap();
 
@@ -3591,9 +3591,9 @@ void P_SetupLevel(void)
     if (level_active)
         ShutdownLevel();
 
-    // -ACB- 1998/08/27 NULL the head pointers for the linked lists....
-    itemquehead  = NULL;
-    mobjlisthead = NULL;
+    // -ACB- 1998/08/27 nullptr the head pointers for the linked lists....
+    itemquehead  = nullptr;
+    mobjlisthead = nullptr;
     seen_monsters.clear();
 
     // get lump for map header e.g. MAP01
@@ -3768,7 +3768,7 @@ void P_Init(void)
 linetype_c *P_LookupLineType(int num)
 {
     if (num <= 0)
-        return NULL;
+        return nullptr;
 
     linetype_c *def = linetypes.Lookup(num);
 
@@ -3787,7 +3787,7 @@ linetype_c *P_LookupLineType(int num)
 sectortype_c *P_LookupSectorType(int num)
 {
     if (num <= 0)
-        return NULL;
+        return nullptr;
 
     sectortype_c *def = sectortypes.Lookup(num);
 

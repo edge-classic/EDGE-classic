@@ -265,7 +265,7 @@ light_t *P_NewLight(void)
 bool EV_Lights(sector_t *sec, const lightdef_c *type)
 {
     // check if a light effect already is running on this sector.
-    light_t *light = NULL;
+    light_t *light = nullptr;
 
     std::vector<light_t *>::iterator LI;
 

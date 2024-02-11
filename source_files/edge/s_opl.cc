@@ -23,7 +23,7 @@
 #include "sound_types.h"
 #include "str_util.h"
 #include "playlist.h"
-
+#include "str_compare.h"
 #include "m_misc.h"
 #include "s_blit.h"
 #include "s_music.h"

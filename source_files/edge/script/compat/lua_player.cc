@@ -63,7 +63,7 @@ static int PL_set_who(lua_State *L)
         do
         {
             who = (who + 1) % MAXPLAYERS;
-        } while (players[who] == NULL);
+        } while (players[who] == nullptr);
     }
 
     ui_player_who = players[who];
@@ -460,14 +460,14 @@ static int PL_cur_weapon(lua_State *L)
     return 1;
 }
 
-static void LUA_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info = NULL)
+static void LUA_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info = nullptr)
 {
     pspdef_t *psp = &p->psprites[position];
 
     if (stnum == S_NULL)
     {
         // object removed itself
-        psp->state = psp->next_state = NULL;
+        psp->state = psp->next_state = nullptr;
         return;
     }
 
@@ -497,7 +497,7 @@ static void LUA_SetPsprite(player_t *p, int position, int stnum, weapondef_c *in
 
     psp->state      = st;
     psp->tics       = st->tics;
-    psp->next_state = (st->nextstate == S_NULL) ? NULL : (states + st->nextstate);
+    psp->next_state = (st->nextstate == S_NULL) ? nullptr : (states + st->nextstate);
 
     // call action routine
 
@@ -517,7 +517,7 @@ static void LUA_SetPspriteDeferred(player_t *p, int position, int stnum)
 {
     pspdef_t *psp = &p->psprites[position];
 
-    if (stnum == S_NULL || psp->state == NULL)
+    if (stnum == S_NULL || psp->state == nullptr)
     {
         LUA_SetPsprite(p, position, stnum);
         return;
@@ -1079,12 +1079,12 @@ static int PL_use_inventory(lua_State *L)
     //******
     // If the same inventory script is already running then
     // don't start the same one again
-    if (!RAD_IsActiveByTag(NULL, script_name.c_str()))
+    if (!RAD_IsActiveByTag(nullptr, script_name.c_str()))
     {
         if (ui_player_who->inventory[inv].num > 0)
         {
             ui_player_who->inventory[inv].num -= 1;
-            RAD_EnableByTag(NULL, script_name.c_str(), false);
+            RAD_EnableByTag(nullptr, script_name.c_str(), false);
         }
     }
 
@@ -1098,7 +1098,7 @@ static int PL_rts_enable_tagged(lua_State *L)
     std::string name = luaL_checkstring(L, 1);
 
     if (!name.empty())
-        RAD_EnableByTag(NULL, name.c_str(), false);
+        RAD_EnableByTag(nullptr, name.c_str(), false);
 
     return 0;
 }
@@ -1129,7 +1129,7 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
     else
         list = obj->info->pickup_benefits;
 
-    for (; list != NULL; list = list->next)
+    for (; list != nullptr; list = list->next)
     {
         switch (list->type)
         {
@@ -1413,7 +1413,7 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
     
     //how many benefits do we have?
     int NumberOfBenefits = 0;
-    for (; list != NULL; list = list->next)
+    for (; list != nullptr; list = list->next)
     {
         NumberOfBenefits++;
     }
@@ -1432,7 +1432,7 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
     else
         list = obj->info->pickup_benefits; //need to grab these again
 
-    for (; list != NULL; list = list->next)
+    for (; list != nullptr; list = list->next)
     {
         BenefitName.clear();
         BenefitType = 0;
@@ -2386,7 +2386,7 @@ static const luaL_Reg playerlib[] = {{"num_players", PL_num_players},
                                      {"sector_floor_height", PL_sector_floor_height},
                                      {"sector_ceiling_height", PL_sector_ceiling_height},
                                      {"is_outside", PL_is_outside},
-                                     {NULL, NULL}};
+                                     {nullptr, nullptr}};
 
 static int luaopen_player(lua_State *L)
 {
@@ -2398,7 +2398,7 @@ static const luaL_Reg mapobjectlib[] = {{"query_tagged", MO_query_tagged},
                                      {"tagged_info", MO_tagged_info},
                                      {"object_info", MO_object_info},
                                      {"weapon_info", MO_weapon_info},
-                                     {"count", MO_count}, {NULL, NULL}};
+                                     {"count", MO_count}, {nullptr, nullptr}};
 
 static int luaopen_mapobject(lua_State *L)
 {
@@ -2407,7 +2407,7 @@ static int luaopen_mapobject(lua_State *L)
 }
 
 static const luaL_Reg gamelib[] = {{"info", Game_info},
-                                      {NULL, NULL}};
+                                      {nullptr, nullptr}};
 
 static int luaopen_game(lua_State *L)
 {
@@ -2416,7 +2416,7 @@ static int luaopen_game(lua_State *L)
 }
 
 static const luaL_Reg maplib[] = {{"info", Map_info},
-                                      {NULL, NULL}};
+                                      {nullptr, nullptr}};
 
 static int luaopen_map(lua_State *L)
 {
@@ -2425,7 +2425,7 @@ static int luaopen_map(lua_State *L)
 }
 
 static const luaL_Reg sectorlib[] = {{"info", Sector_info},
-                                      {NULL, NULL}};
+                                      {nullptr, nullptr}};
 
 static int luaopen_sector(lua_State *L)
 {

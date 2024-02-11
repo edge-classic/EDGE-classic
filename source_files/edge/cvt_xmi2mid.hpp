@@ -552,12 +552,12 @@ static int Convert_xmi2midi(uint8_t *in, uint32_t insize,
     ctx.convert_type = convert_type;
 
     if (xmi2mid_ParseXMI(&ctx) < 0) {
-        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_XMI, NULL, 0);*/
+        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_XMI, nullptr, 0);*/
         goto _end;
     }
 
     if (xmi2mid_ExtractTracks(&ctx, trackNumber) < 0) {
-        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_MIDI, NULL, 0);*/
+        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_MIDI, nullptr, 0);*/
         goto _end;
     }
 
@@ -593,7 +593,7 @@ static int Convert_xmi2midi(uint8_t *in, uint32_t insize,
 _end:   /* cleanup */
     if (ret < 0) {
         free(ctx.dst);
-        *out = NULL;
+        *out = nullptr;
         *outsize = 0;
     }
     if (ctx.events) {
@@ -630,13 +630,13 @@ static int Convert_xmi2midi_multi(uint8_t *in, uint32_t insize, std::vector<std:
 
     if (xmi2mid_ParseXMI(&ctx) < 0)
     {
-        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_XMI, NULL, 0);*/
+        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_XMI, nullptr, 0);*/
         goto _end;
     }
 
     if (xmi2mid_ExtractTracks(&ctx, 0) < 0)
     {
-        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_MIDI, NULL, 0);*/
+        /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_NOT_MIDI, nullptr, 0);*/
         goto _end;
     }
 
@@ -691,7 +691,7 @@ static void xmi2mid_DeleteEventList(midi_event *mlist)
 
     next = mlist;
 
-    while ((event = next) != NULL)
+    while ((event = next) != nullptr)
     {
         next = event->next;
         free(event->buffer);
@@ -1050,7 +1050,7 @@ static int32_t xmi2mid_ConvertFiletoList(struct xmi2mid_xmi_ctx *ctx, const xmi2
 
 /* Converts and event list to a MTrk
  * Returns bytes of the array
- * buf can be NULL */
+ * buf can be nullptr */
 static uint32_t xmi2mid_ConvertListToMTrk(struct xmi2mid_xmi_ctx *ctx, midi_event *mlist)
 {
     int32_t     time = 0;
@@ -1210,7 +1210,7 @@ static uint32_t xmi2mid_ExtractTracksFromXmi(struct xmi2mid_xmi_ctx *ctx)
             continue;
         }
 
-        ctx->list = NULL;
+        ctx->list = nullptr;
         begin     = xmi2mid_getsrcpos(ctx);
 
         /* Rearrange branches as structure */
@@ -1230,7 +1230,7 @@ static uint32_t xmi2mid_ExtractTracksFromXmi(struct xmi2mid_xmi_ctx *ctx)
         /* Convert it */
         if ((ppqn = xmi2mid_ConvertFiletoList(ctx, &rbrn)) == 0)
         {
-            /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_CORUPT, NULL, 0);*/
+            /*_WM_GLOBAL_ERROR(__FUNCTION__, __LINE__, WM_ERR_CORUPT, nullptr, 0);*/
             break;
         }
         ctx->timing[num] = ppqn;

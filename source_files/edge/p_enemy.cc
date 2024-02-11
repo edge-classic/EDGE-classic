@@ -87,7 +87,7 @@ static void RecursiveSound(sector_t *sec, int soundblocks, int player)
     sec->sound_player   = player;
 
     /*
-        for (mobj_t *mo = sec->subsectors->thinglist; mo != NULL; mo = mo->snext)
+        for (mobj_t *mo = sec->subsectors->thinglist; mo != nullptr; mo = mo->snext)
         {
             mo->lastheard=player;
         }
@@ -97,7 +97,7 @@ static void RecursiveSound(sector_t *sec, int soundblocks, int player)
         int index = 0;
         for (mo=sec->subsectors->thinglist; mo; mo=mo->snext, index++)
         {
-            if(mo != NULL && !mo->player)
+            if(mo != nullptr && !mo->player)
                 mo->lastheard=player;
         }
     */
@@ -106,7 +106,7 @@ static void RecursiveSound(sector_t *sec, int soundblocks, int player)
     touch_node_t *nd;
     for (nd = sec->touch_things; nd; nd = nd->sec_next)
     {
-        if (nd->mo != NULL)
+        if (nd->mo != nullptr)
         {
             if (!AlmostEquals(nd->mo->info->hear_distance, -1.0f)) // if we have hear_distance set
             {
@@ -523,12 +523,12 @@ mobj_t *P_LookForShootSpot(const mobjtype_c *spot_type)
 
     std::vector<mobj_t *> spots;
 
-    for (mobj_t *cur = mobjlisthead; cur != NULL; cur = cur->next)
+    for (mobj_t *cur = mobjlisthead; cur != nullptr; cur = cur->next)
         if (cur->info == spot_type && !cur->isRemoved())
             spots.push_back(cur);
 
     if (spots.empty())
-        return NULL;
+        return nullptr;
 
     int idx = C_Random() % (int)spots.size();
 

@@ -70,7 +70,7 @@ static int LUA_PackSearcher(lua_State *L)
 static int LUA_MsgHandler(lua_State *L)
 {
     const char *msg = lua_tostring(L, 1);
-    if (msg == NULL)
+    if (msg == nullptr)
     {                                            /* is error object not a string? */
         if (luaL_callmeta(L, 1, "__tostring") && /* does it have a metamethod */
             lua_type(L, -1) == LUA_TSTRING)      /* that produces a string? */
@@ -204,11 +204,11 @@ static void LUA_Sandbox(lua_State *L)
     lua_pop(L, 1);
 
     // os module
-    const char *os_functions[] = {"execute", "exit", "getenv", "remove", "rename", "setlocale", "tmpname", NULL};
+    const char *os_functions[] = {"execute", "exit", "getenv", "remove", "rename", "setlocale", "tmpname", nullptr};
     LUA_Sandbox_Module(L, "os", os_functions);
 
     // base/global functions
-    const char *base_functions[] = {"dofile", "loadfile", NULL};
+    const char *base_functions[] = {"dofile", "loadfile", nullptr};
     LUA_Sandbox_Module(L, "_G", base_functions);
 
     // if debugging is enabled, load debug/io libs and sandbox
@@ -219,7 +219,7 @@ static void LUA_Sandbox(lua_State *L)
         luaL_requiref(L, LUA_IOLIBNAME, luaopen_io, 1);
         lua_pop(L, 2);
 
-        const char *io_functions[] = {"close", "input", "lines", "open", "output", "popen", "tmpfile", "type", NULL};
+        const char *io_functions[] = {"close", "input", "lines", "open", "output", "popen", "tmpfile", "type", nullptr};
         LUA_Sandbox_Module(L, "io", io_functions);
     }
 }
@@ -238,7 +238,7 @@ lua_State *LUA_CreateVM()
     const luaL_Reg loadedlibs[] = {
         {LUA_GNAME, luaopen_base},          {LUA_LOADLIBNAME, luaopen_package}, {LUA_OSLIBNAME, luaopen_os},
         {LUA_COLIBNAME, luaopen_coroutine}, {LUA_TABLIBNAME, luaopen_table},    {LUA_STRLIBNAME, luaopen_string},
-        {LUA_MATHLIBNAME, luaopen_math},    {LUA_UTF8LIBNAME, luaopen_utf8},    {NULL, NULL}};
+        {LUA_MATHLIBNAME, luaopen_math},    {LUA_UTF8LIBNAME, luaopen_utf8},    {nullptr, nullptr}};
 
     const luaL_Reg *lib;
     /* "require" functions from 'loadedlibs' and set results to global table */

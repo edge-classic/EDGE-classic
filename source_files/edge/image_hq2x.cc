@@ -32,6 +32,7 @@
 //        was copied from the Doomsday engine by Jaakko Ker�nen.
 //
 
+#include "HandmadeMath.h"
 #include "epi.h"
 #include "image_hq2x.h"
 
@@ -183,9 +184,9 @@ inline bool Diff(const uint8_t p1, const uint8_t p2)
     uint32_t YUV1 = PixelYUV[p1];
     uint32_t YUV2 = PixelYUV[p2];
 
-    return (YUV1 & Amask) != (YUV2 & Amask) || std::abs((int)((YUV1 & Ymask) - (YUV2 & Ymask))) > trY ||
-           std::abs((int)((YUV1 & Umask) - (YUV2 & Umask))) > trU ||
-           std::abs((int)((YUV1 & Vmask) - (YUV2 & Vmask))) > trV;
+    return (YUV1 & Amask) != (YUV2 & Amask) || HMM_ABS((int)((YUV1 & Ymask) - (YUV2 & Ymask))) > trY ||
+           HMM_ABS((int)((YUV1 & Umask) - (YUV2 & Umask))) > trU ||
+           HMM_ABS((int)((YUV1 & Vmask) - (YUV2 & Vmask))) > trV;
 }
 
 void Setup(const uint8_t *palette, int trans_pixel)
@@ -2803,7 +2804,7 @@ image_data_c *Convert(image_data_c *img, bool solid, bool invert)
     image_data_c *result = new image_data_c(w * 2, h * 2, solid ? 3 : 4);
 
     // for solid mode, we must strip off the alpha channel
-    uint8_t *temp_buffer = NULL;
+    uint8_t *temp_buffer = nullptr;
 
     if (solid)
         temp_buffer = new uint8_t[w * 16]; // two lines worth

@@ -40,7 +40,7 @@
 #define XOR_LEN    5
 
 #define STRING_MARKER  0xAA
-#define NULLSTR_MARKER 0xDE
+#define nullptrSTR_MARKER 0xDE
 
 #define EDGESAVE_MAGIC  "EdgeSave"
 #define FIRST_CHUNK_OFS 16L
@@ -71,7 +71,7 @@ typedef struct chunk_s
 static chunk_t chunk_stack[MAX_CHUNK_DEPTH];
 static int     chunk_stack_size = 0;
 
-static FILE        *current_fp = NULL;
+static FILE        *current_fp = nullptr;
 static epi::CRC32 current_crc;
 
 static bool CheckMagic(void)
@@ -442,7 +442,7 @@ bool SV_PopReadChunk(void)
         delete[] cur->start;
     }
 
-    cur->start = cur->pos = cur->end = NULL;
+    cur->start = cur->pos = cur->end = nullptr;
     chunk_stack_size--;
 
     return true;
@@ -631,7 +631,7 @@ bool SV_PopWriteChunk(void)
     // all done, free stuff
     delete[] cur->start;
 
-    cur->start = cur->pos = cur->end = NULL;
+    cur->start = cur->pos = cur->end = nullptr;
     return true;
 }
 
@@ -785,9 +785,9 @@ float SV_GetFloat(void)
 
 void SV_PutString(const char *str)
 {
-    if (str == NULL)
+    if (str == nullptr)
     {
-        SV_PutByte(NULLSTR_MARKER);
+        SV_PutByte(nullptrSTR_MARKER);
         return;
     }
 
@@ -815,8 +815,8 @@ const char *SV_GetString(void)
 {
     int type = SV_GetByte();
 
-    if (type == NULLSTR_MARKER)
-        return NULL;
+    if (type == nullptrSTR_MARKER)
+        return nullptr;
 
     if (type != STRING_MARKER)
         I_Error("Corrupt savegame (invalid string).\n");
@@ -835,7 +835,7 @@ const char *SV_GetString(void)
 const char *SV_DupString(const char *old)
 {
     if (!old)
-        return NULL;
+        return nullptr;
 
     char *result = new char[strlen(old) + 1];
 

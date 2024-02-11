@@ -21,7 +21,7 @@
 
 // EPI
 #include "str_util.h"
-
+#include "str_compare.h"
 #include "e_main.h"
 #include "r_image.h"
 #include "r_md2.h"
@@ -309,7 +309,7 @@ void W_InitModels(void)
     models = new modeldef_c *[nummodels];
 
     for (int i = 0; i < nummodels; i++)
-        models[i] = NULL;
+        models[i] = nullptr;
 }
 
 modeldef_c *W_GetModel(int model_num)

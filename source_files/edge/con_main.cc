@@ -16,6 +16,8 @@
 //
 //----------------------------------------------------------------------------
 
+#include <string.h>
+
 #include "i_defs.h"
 
 #include "filesystem.h"
@@ -37,7 +39,8 @@
 #include "w_wad.h"
 #include "version.h"
 #include "filesystem.h"
-
+#include "str_compare.h"
+#include <stdarg.h>
 #define MAX_CON_ARGS 64
 
 static std::string readme_names[4] = {"readme.txt", "readme.1st", "read.me", "readme.md"};
@@ -325,7 +328,7 @@ int CMD_ShowLumps(char **argv, int argc)
 {
     int for_file = -1; // all files
 
-    char *match = NULL;
+    char *match = nullptr;
 
     if (argc >= 2 && epi::IsDigitASCII(argv[1][0]))
         for_file = atoi(argv[1]);
@@ -347,7 +350,7 @@ int CMD_ShowVars(char **argv, int argc)
 {
     bool show_default = false;
 
-    char *match = NULL;
+    char *match = nullptr;
 
     if (argc >= 2 && epi::StringCaseCompareASCII(argv[1], "-l") == 0)
     {
@@ -371,7 +374,7 @@ int CMD_ShowVars(char **argv, int argc)
 
 int CMD_ShowCmds(char **argv, int argc)
 {
-    char *match = NULL;
+    char *match = nullptr;
 
     if (argc >= 2)
         match = argv[1];
@@ -413,7 +416,7 @@ int CMD_ShowMaps(char **argv, int argc)
 int CMD_ShowKeys(char **argv, int argc)
 {
 #if 0 // TODO
-	char *match = NULL;
+	char *match = nullptr;
 
 	if (argc >= 2)
 		match = argv[1];
@@ -595,7 +598,7 @@ const con_cmd_t builtin_commands[] = {{"args", CMD_ArgList},
                                       {"exit", CMD_QuitEDGE},
 
                                       // end of list
-                                      {NULL, NULL}};
+                                      {nullptr, nullptr}};
 
 static int FindCommand(const char *name)
 {
@@ -649,7 +652,7 @@ void CON_TryCommand(const char *cmd)
     }
 
     cvar_c *var = CON_FindVar(argv[0]);
-    if (var != NULL)
+    if (var != nullptr)
     {
         if (argc <= 1)
         {

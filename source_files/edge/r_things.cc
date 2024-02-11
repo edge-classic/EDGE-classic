@@ -157,7 +157,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
     if (!image)
         return;
 
-    GLuint tex_id = W_ImageCache(image, false, (which == ps_crosshair) ? NULL : ren_fx_colmap);
+    GLuint tex_id = W_ImageCache(image, false, (which == ps_crosshair) ? nullptr : ren_fx_colmap);
 
     float w     = IM_WIDTH(image);
     float h     = IM_HEIGHT(image);
@@ -310,7 +310,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
         if (fc_to_use != kRGBANoValue)
         {
-            int          mix_factor = I_ROUND(255.0f * (fd_to_use * 75));
+            int          mix_factor = RoundToInt(255.0f * (fd_to_use * 75));
             RGBAColor mixme = epi::MixRGBA(epi::MakeRGBA(data.col[0].mod_R, data.col[0].mod_G, data.col[0].mod_B), fc_to_use, mix_factor);
             data.col[0].mod_R = epi::GetRGBARed(mixme);
             data.col[0].mod_G = epi::GetRGBAGreen(mixme);
@@ -465,7 +465,7 @@ static void DrawStdCrossHair(void)
     float x = viewwindow_x + viewwindow_w / 2;
     float y = viewwindow_y + viewwindow_h / 2;
 
-    float w = I_ROUND(SCREENWIDTH * r_crosssize.f / 640.0f);
+    float w = RoundToInt(SCREENWIDTH * r_crosssize.f / 640.0f);
 
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
@@ -670,7 +670,7 @@ static inline void LinkDrawthingIntoDrawfloor(drawfloor_t *dfloor, drawthing_t *
 {
     dthing->props = dfloor->props;
     dthing->next  = dfloor->things;
-    dthing->prev  = NULL;
+    dthing->prev  = nullptr;
 
     if (dfloor->things)
         dfloor->things->prev = dthing;
@@ -680,13 +680,13 @@ static inline void LinkDrawthingIntoDrawfloor(drawfloor_t *dfloor, drawthing_t *
 
 static const image_c *R2_GetThingSprite2(mobj_t *mo, float mx, float my, bool *flip)
 {
-    // Note: can return NULL for no image.
+    // Note: can return nullptr for no image.
 
     // decide which patch to use for sprite relative to player
     SYS_ASSERT(mo->state);
 
     if (mo->state->sprite == SPR_NULL)
-        return NULL;
+        return nullptr;
 
     spriteframe_c *frame = W_GetSpriteFrame(mo->state->sprite, mo->state->frame);
 
@@ -740,7 +740,7 @@ const image_c *R2_GetOtherSprite(int spritenum, int framenum, bool *flip)
     /* Used for non-object stuff, like weapons and finale */
 
     if (spritenum == SPR_NULL)
-        return NULL;
+        return nullptr;
 
     spriteframe_c *frame = W_GetSpriteFrame(spritenum, framenum);
 
@@ -759,7 +759,7 @@ const image_c *R2_GetOtherSprite(int spritenum, int framenum, bool *flip)
 
 static void R2_ClipSpriteVertically(drawsub_c *dsub, drawthing_t *dthing)
 {
-    drawfloor_t *dfloor = NULL;
+    drawfloor_t *dfloor = nullptr;
 
     // find the thing's nominal region.  This section is equivalent to
     // the R_PointInVertRegion() code (but using drawfloors).
@@ -1043,7 +1043,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
         hover_dz -= (mo->height * 0.5 * sink_mult);
 
     bool           spr_flip = false;
-    const image_c *image    = NULL;
+    const image_c *image    = nullptr;
 
     float gzt = 0, gzb = 0;
     float pos1 = 0, pos2 = 0;
@@ -1552,14 +1552,14 @@ void RGL_DrawSortThings(drawfloor_t *dfloor)
     drawthing_t *curr_dt, *dt, *next_dt;
     float        cmp_val;
 
-    head_dt->rd_l = head_dt->rd_r = head_dt->rd_prev = head_dt->rd_next = NULL;
+    head_dt->rd_l = head_dt->rd_r = head_dt->rd_prev = head_dt->rd_next = nullptr;
 
-    dt = NULL; // Warning removal: This will always have been set
+    dt = nullptr; // Warning removal: This will always have been set
 
     curr_dt = head_dt->next;
     while (curr_dt)
     {
-        curr_dt->rd_l = curr_dt->rd_r = NULL;
+        curr_dt->rd_l = curr_dt->rd_r = nullptr;
 
         // Parse the tree to find our place
         next_dt = head_dt;

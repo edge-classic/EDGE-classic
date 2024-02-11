@@ -86,7 +86,7 @@ void M_StartMessage(const char *string, void (*routine)(int response), bool inpu
 // String will be printed as a prompt.
 // Routine should be void Foobar(char *string)
 // and will be called with the input returned
-// or NULL if user pressed escape.
+// or nullptr if user pressed escape.
 
 void M_StartMessageInput(const char *string, void (*routine)(const char *response));
 

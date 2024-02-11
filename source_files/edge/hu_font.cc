@@ -24,7 +24,7 @@
 #include "font.h"
 #include "image_data.h"
 #include "str_util.h"
-
+#include "str_compare.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "hu_font.h"
@@ -274,7 +274,7 @@ void font_c::LoadFontImage()
         if (!def->image_name.empty())
             font_image = W_ImageLookup(def->image_name.c_str(), INS_Graphic, ILF_Exact | ILF_Null);
         else
-            I_Error("LoadFontImage: NULL image name provided for font %s!", def->name.c_str());
+            I_Error("LoadFontImage: nullptr image name provided for font %s!", def->name.c_str());
         if (!font_image)
             I_Error("LoadFontImage: Image %s not found for font %s!", def->image_name.c_str(), def->name.c_str());
         int char_height = font_image->actual_h / 16;
@@ -403,7 +403,7 @@ void font_c::LoadFontTTF()
             unsigned char *temp_bitmap = new unsigned char[res_font_bitmap_sizes[i] * res_font_bitmap_sizes[i]];
 
             stbtt_pack_context *spc = new stbtt_pack_context;
-            stbtt_PackBegin(spc, temp_bitmap, res_font_bitmap_sizes[i], res_font_bitmap_sizes[i], 0, 1, NULL);
+            stbtt_PackBegin(spc, temp_bitmap, res_font_bitmap_sizes[i], res_font_bitmap_sizes[i], 0, 1, nullptr);
             stbtt_PackSetOversampling(spc, 2, 2);
             stbtt_PackFontRanges(spc, ttf_buffer, 0, ttf_atlas[i], 1);
             stbtt_PackEnd(spc);
@@ -506,18 +506,18 @@ const image_c *font_c::CharImage(char ch) const
             // Create or return dummy image
             return W_ImageLookup("FONT_DUMMY_IMAGE", INS_Graphic, ILF_Font);
         else
-            return NULL;
+            return nullptr;
     }
 
     SYS_ASSERT(def->type == FNTYP_Patch);
 
     if (ch == ' ')
-        return NULL;
+        return nullptr;
 
     if (p_cache.atlas_rects.count(cp437_unicode_values[(uint8_t)ch]))
         return W_ImageLookup("FONT_DUMMY_IMAGE", INS_Graphic, ILF_Font);
     else
-        return NULL;
+        return nullptr;
 }
 
 float font_c::CharRatio(char ch)
@@ -702,7 +702,7 @@ int font_c::StringLines(const char *str) const
 //  font_container_c class
 //----------------------------------------------------------------------------
 
-// Never returns NULL.
+// Never returns nullptr.
 //
 font_c *font_container_c::Lookup(fontdef_c *def)
 {

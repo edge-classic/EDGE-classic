@@ -321,7 +321,7 @@ savestruct_t *SV_MainLookupStruct(const char *name)
             return cur;
 
     // not found
-    return NULL;
+    return nullptr;
 }
 
 savearray_t *SV_MainLookupArray(const char *name)
@@ -333,7 +333,7 @@ savearray_t *SV_MainLookupArray(const char *name)
             return cur;
 
     // not found
-    return NULL;
+    return nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -384,7 +384,7 @@ void SV_MainTestPrimitives(void)
 	SV_PutFloat(1234567890.0f);  
 	SV_PutFloat(-1234567890.0f);
 
-	SV_PutString(NULL);
+	SV_PutString(nullptr);
 	SV_PutString("");
 	SV_PutString("A");
 	SV_PutString("123");
@@ -439,7 +439,7 @@ void SV_MainTestPrimitives(void)
 	for (i=0; i < 5; i++)
 	{
 		const char *val = SV_GetString();
-		L_WriteDebug("TEST STRING: [%s]\n", val ? val : "--NULL--");
+		L_WriteDebug("TEST STRING: [%s]\n", val ? val : "--nullptr--");
 		SV_FreeString(val);
 	}
 

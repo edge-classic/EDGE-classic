@@ -204,8 +204,8 @@ typedef struct
     const image_c *face[6];
 } fake_skybox_t;
 
-static fake_skybox_t fake_box[2] = {{NULL, NULL, 1, {0, 0, 0, 0, 0, 0}, {NULL, NULL, NULL, NULL, NULL, NULL}},
-                                    {NULL, NULL, 1, {0, 0, 0, 0, 0, 0}, {NULL, NULL, NULL, NULL, NULL, NULL}}};
+static fake_skybox_t fake_box[2] = {{nullptr, nullptr, 1, {0, 0, 0, 0, 0, 0}, {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}},
+                                    {nullptr, nullptr, 1, {0, 0, 0, 0, 0, 0}, {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}}};
 
 static void DeleteSkyTexGroup(int SK)
 {
@@ -223,8 +223,8 @@ void DeleteSkyTextures(void)
 {
     for (int SK = 0; SK < 2; SK++)
     {
-        fake_box[SK].base_sky  = NULL;
-        fake_box[SK].fx_colmap = NULL;
+        fake_box[SK].base_sky  = nullptr;
+        fake_box[SK].fx_colmap = nullptr;
 
         DeleteSkyTexGroup(SK);
     }
@@ -844,7 +844,7 @@ int RGL_UpdateSkyBoxTextures(void)
     // own sky.
     if (W_LoboDisableSkybox(sky_image->name.c_str()))
     {
-        info->face[WSKY_North] = NULL;
+        info->face[WSKY_North] = nullptr;
         // I_Printf("Skybox turned OFF\n");
     }
 

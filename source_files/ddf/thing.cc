@@ -25,12 +25,14 @@
 // -KM- 1998/12/16 No limit on number of ammo types.
 //
 
+#include <string.h>
+
 #include "local.h"
 #include "thing.h"
 #include "types.h"
 
 #include "p_action.h"
-
+#include "str_compare.h"
 #include "str_util.h"
 
 #undef DF
@@ -38,7 +40,7 @@
 
 #define DDF_MobjHashFunc(x) (((x) + LOOKUP_CACHESIZE) % LOOKUP_CACHESIZE)
 
-const char *TemplateThing = NULL; // Lobo 2022: TEMPLATE inheritance fix
+const char *TemplateThing = nullptr; // Lobo 2022: TEMPLATE inheritance fix
 
 mobjtype_container_c mobjtypes;
 
@@ -193,71 +195,71 @@ const state_starter_t thing_starters[] = {DDF_STATE("SPAWN", "IDLE", spawn_state
 // -AJA- 1999/08/09: Moved this here from p_action.h, and added an extra
 // field `handle_arg' for things like "WEAPON_SHOOT(FIREBALL)".
 
-const actioncode_t thing_actions[] = {{"NOTHING", NULL, NULL},
+const actioncode_t thing_actions[] = {{"NOTHING", nullptr, nullptr},
 
-                                      {"CLOSEATTEMPTSND", P_ActMakeCloseAttemptSound, NULL},
-                                      {"COMBOATTACK", P_ActComboAttack, NULL},
-                                      {"FACETARGET", P_ActFaceTarget, NULL},
+                                      {"CLOSEATTEMPTSND", P_ActMakeCloseAttemptSound, nullptr},
+                                      {"COMBOATTACK", P_ActComboAttack, nullptr},
+                                      {"FACETARGET", P_ActFaceTarget, nullptr},
                                       {"PLAYSOUND", P_ActPlaySound, DDF_StateGetSound},
                                       {"PLAYSOUND_BOSS", P_ActPlaySoundBoss, DDF_StateGetSound},
-                                      {"KILLSOUND", P_ActKillSound, NULL},
-                                      {"MAKESOUND", P_ActMakeAmbientSound, NULL},
-                                      {"MAKEACTIVESOUND", P_ActMakeActiveSound, NULL},
-                                      {"MAKESOUNDRANDOM", P_ActMakeAmbientSoundRandom, NULL},
-                                      {"MAKEDEATHSOUND", P_ActMakeDyingSound, NULL},
-                                      {"MAKEDEAD", P_ActMakeIntoCorpse, NULL},
-                                      {"MAKEOVERKILLSOUND", P_ActMakeOverKillSound, NULL},
-                                      {"MAKEPAINSOUND", P_ActMakePainSound, NULL},
-                                      {"PLAYER_SCREAM", P_ActPlayerScream, NULL},
+                                      {"KILLSOUND", P_ActKillSound, nullptr},
+                                      {"MAKESOUND", P_ActMakeAmbientSound, nullptr},
+                                      {"MAKEACTIVESOUND", P_ActMakeActiveSound, nullptr},
+                                      {"MAKESOUNDRANDOM", P_ActMakeAmbientSoundRandom, nullptr},
+                                      {"MAKEDEATHSOUND", P_ActMakeDyingSound, nullptr},
+                                      {"MAKEDEAD", P_ActMakeIntoCorpse, nullptr},
+                                      {"MAKEOVERKILLSOUND", P_ActMakeOverKillSound, nullptr},
+                                      {"MAKEPAINSOUND", P_ActMakePainSound, nullptr},
+                                      {"PLAYER_SCREAM", P_ActPlayerScream, nullptr},
                                       {"CLOSE_ATTACK", P_ActMeleeAttack, DDF_StateGetAttack},
                                       {"RANGE_ATTACK", P_ActRangeAttack, DDF_StateGetAttack},
                                       {"SPARE_ATTACK", P_ActSpareAttack, DDF_StateGetAttack},
 
-                                      {"RANGEATTEMPTSND", P_ActMakeRangeAttemptSound, NULL},
-                                      {"REFIRE_CHECK", P_ActRefireCheck, NULL},
-                                      {"RELOAD_CHECK", P_ActReloadCheck, NULL},
-                                      {"RELOAD_RESET", P_ActReloadReset, NULL},
-                                      {"LOOKOUT", P_ActStandardLook, NULL},
-                                      {"SUPPORT_LOOKOUT", P_ActPlayerSupportLook, NULL},
-                                      {"CHASE", P_ActStandardChase, NULL},
-                                      {"RESCHASE", P_ActResurrectChase, NULL},
-                                      {"WALKSOUND_CHASE", P_ActWalkSoundChase, NULL},
-                                      {"MEANDER", P_ActStandardMeander, NULL},
-                                      {"SUPPORT_MEANDER", P_ActPlayerSupportMeander, NULL},
-                                      {"EXPLOSIONDAMAGE", P_ActDamageExplosion, NULL},
-                                      {"THRUST", P_ActThrust, NULL},
-                                      {"TRACER", P_ActHomingProjectile, NULL},
-                                      {"RANDOM_TRACER", P_ActHomingProjectile, NULL}, // same as above
-                                      {"RESET_SPREADER", P_ActResetSpreadCount, NULL},
-                                      {"SMOKING", P_ActCreateSmokeTrail, NULL},
-                                      {"TRACKERACTIVE", P_ActTrackerActive, NULL},
-                                      {"TRACKERFOLLOW", P_ActTrackerFollow, NULL},
-                                      {"TRACKERSTART", P_ActTrackerStart, NULL},
-                                      {"EFFECTTRACKER", P_ActEffectTracker, NULL},
-                                      {"CHECKBLOOD", P_ActCheckBlood, NULL},
-                                      {"CHECKMOVING", P_ActCheckMoving, NULL},
-                                      {"CHECK_ACTIVITY", P_ActCheckActivity, NULL},
+                                      {"RANGEATTEMPTSND", P_ActMakeRangeAttemptSound, nullptr},
+                                      {"REFIRE_CHECK", P_ActRefireCheck, nullptr},
+                                      {"RELOAD_CHECK", P_ActReloadCheck, nullptr},
+                                      {"RELOAD_RESET", P_ActReloadReset, nullptr},
+                                      {"LOOKOUT", P_ActStandardLook, nullptr},
+                                      {"SUPPORT_LOOKOUT", P_ActPlayerSupportLook, nullptr},
+                                      {"CHASE", P_ActStandardChase, nullptr},
+                                      {"RESCHASE", P_ActResurrectChase, nullptr},
+                                      {"WALKSOUND_CHASE", P_ActWalkSoundChase, nullptr},
+                                      {"MEANDER", P_ActStandardMeander, nullptr},
+                                      {"SUPPORT_MEANDER", P_ActPlayerSupportMeander, nullptr},
+                                      {"EXPLOSIONDAMAGE", P_ActDamageExplosion, nullptr},
+                                      {"THRUST", P_ActThrust, nullptr},
+                                      {"TRACER", P_ActHomingProjectile, nullptr},
+                                      {"RANDOM_TRACER", P_ActHomingProjectile, nullptr}, // same as above
+                                      {"RESET_SPREADER", P_ActResetSpreadCount, nullptr},
+                                      {"SMOKING", P_ActCreateSmokeTrail, nullptr},
+                                      {"TRACKERACTIVE", P_ActTrackerActive, nullptr},
+                                      {"TRACKERFOLLOW", P_ActTrackerFollow, nullptr},
+                                      {"TRACKERSTART", P_ActTrackerStart, nullptr},
+                                      {"EFFECTTRACKER", P_ActEffectTracker, nullptr},
+                                      {"CHECKBLOOD", P_ActCheckBlood, nullptr},
+                                      {"CHECKMOVING", P_ActCheckMoving, nullptr},
+                                      {"CHECK_ACTIVITY", P_ActCheckActivity, nullptr},
                                       {"JUMP", P_ActJump, DDF_StateGetJump},
                                       {"JUMP_LIQUID", P_ActJumpLiquid, DDF_StateGetJump},
                                       {"JUMP_SKY", P_ActJumpSky, DDF_StateGetJump},
                                       //{"JUMP_STUCK",        P_ActJumpStuck, DDF_StateGetJump},
                                       {"BECOME", P_ActBecome, DDF_StateGetBecome},
-                                      {"UNBECOME", P_ActUnBecome, NULL},
+                                      {"UNBECOME", P_ActUnBecome, nullptr},
                                       {"MORPH", P_ActMorph, DDF_StateGetMorph}, // same as BECOME but resets health
-                                      {"UNMORPH", P_ActUnMorph, NULL},          // same as UNBECOME but resets health
+                                      {"UNMORPH", P_ActUnMorph, nullptr},          // same as UNBECOME but resets health
 
-                                      {"EXPLODE", P_ActExplode, NULL},
+                                      {"EXPLODE", P_ActExplode, nullptr},
                                       {"ACTIVATE_LINETYPE", P_ActActivateLineType, DDF_StateGetIntPair},
                                       {"RTS_ENABLE_TAGGED", P_ActEnableRadTrig, DDF_MobjStateGetRADTrigger},
                                       {"RTS_DISABLE_TAGGED", P_ActDisableRadTrig, DDF_MobjStateGetRADTrigger},
-                                      {"TOUCHY_REARM", P_ActTouchyRearm, NULL},
-                                      {"TOUCHY_DISARM", P_ActTouchyDisarm, NULL},
-                                      {"BOUNCE_REARM", P_ActBounceRearm, NULL},
-                                      {"BOUNCE_DISARM", P_ActBounceDisarm, NULL},
-                                      {"PATH_CHECK", P_ActPathCheck, NULL},
-                                      {"PATH_FOLLOW", P_ActPathFollow, NULL},
-                                      {"SET_INVULNERABLE", P_ActSetInvuln, NULL},
-                                      {"CLEAR_INVULNERABLE", P_ActClearInvuln, NULL},
+                                      {"TOUCHY_REARM", P_ActTouchyRearm, nullptr},
+                                      {"TOUCHY_DISARM", P_ActTouchyDisarm, nullptr},
+                                      {"BOUNCE_REARM", P_ActBounceRearm, nullptr},
+                                      {"BOUNCE_DISARM", P_ActBounceDisarm, nullptr},
+                                      {"PATH_CHECK", P_ActPathCheck, nullptr},
+                                      {"PATH_FOLLOW", P_ActPathFollow, nullptr},
+                                      {"SET_INVULNERABLE", P_ActSetInvuln, nullptr},
+                                      {"CLEAR_INVULNERABLE", P_ActClearInvuln, nullptr},
                                       {"SET_PAINCHANCE", P_ActPainChanceSet, DDF_StateGetPercent},
 
                                       {"DROPITEM", P_ActDropItem, DDF_StateGetMobj},
@@ -281,27 +283,27 @@ const actioncode_t thing_actions[] = {{"NOTHING", NULL, NULL},
                                       {"MOVE_FWD", P_ActMoveFwd, DDF_StateGetFloat},
                                       {"MOVE_RIGHT", P_ActMoveRight, DDF_StateGetFloat},
                                       {"MOVE_UP", P_ActMoveUp, DDF_StateGetFloat},
-                                      {"STOP", P_ActStopMoving, NULL},
+                                      {"STOP", P_ActStopMoving, nullptr},
 
                                       // Boom/MBF compatibility
-                                      {"DIE", P_ActDie, NULL},
-                                      {"KEEN_DIE", P_ActKeenDie, NULL},
-                                      {"MUSHROOM", P_ActMushroom, NULL},
-                                      {"NOISE_ALERT", P_ActNoiseAlert, NULL},
+                                      {"DIE", P_ActDie, nullptr},
+                                      {"KEEN_DIE", P_ActKeenDie, nullptr},
+                                      {"MUSHROOM", P_ActMushroom, nullptr},
+                                      {"NOISE_ALERT", P_ActNoiseAlert, nullptr},
 
                                       // bossbrain actions
-                                      {"BRAINSPIT", P_ActBrainSpit, NULL},
-                                      {"CUBESPAWN", P_ActCubeSpawn, NULL},
-                                      {"CUBETRACER", P_ActHomeToSpot, NULL},
-                                      {"BRAINSCREAM", P_ActBrainScream, NULL},
-                                      {"BRAINMISSILEEXPLODE", P_ActBrainMissileExplode, NULL},
-                                      {"BRAINDIE", P_ActBrainDie, NULL},
+                                      {"BRAINSPIT", P_ActBrainSpit, nullptr},
+                                      {"CUBESPAWN", P_ActCubeSpawn, nullptr},
+                                      {"CUBETRACER", P_ActHomeToSpot, nullptr},
+                                      {"BRAINSCREAM", P_ActBrainScream, nullptr},
+                                      {"BRAINMISSILEEXPLODE", P_ActBrainMissileExplode, nullptr},
+                                      {"BRAINDIE", P_ActBrainDie, nullptr},
 
                                       // -AJA- backwards compatibility cruft...
-                                      {"VARIEDEXPDAMAGE", P_ActDamageExplosion, NULL},
-                                      {"VARIED_THRUST", P_ActThrust, NULL},
+                                      {"VARIEDEXPDAMAGE", P_ActDamageExplosion, nullptr},
+                                      {"VARIED_THRUST", P_ActThrust, nullptr},
 
-                                      {NULL, NULL, NULL}};
+                                      {nullptr, nullptr, nullptr}};
 
 const specflags_t keytype_names[] = {{"BLUECARD", KF_BlueCard, 0},
                                      {"YELLOWCARD", KF_YellowCard, 0},
@@ -333,11 +335,11 @@ const specflags_t keytype_names[] = {{"BLUECARD", KF_BlueCard, 0},
                                      {"KEY_REDSKULL", KF_RedSkull, 0},
                                      {"KEY_GREENSKULL", KF_GreenSkull, 0},
 
-                                     {NULL, 0, 0}};
+                                     {nullptr, 0, 0}};
 
 const specflags_t armourtype_names[] = {{"GREEN_ARMOUR", ARMOUR_Green, 0},   {"BLUE_ARMOUR", ARMOUR_Blue, 0},
                                         {"PURPLE_ARMOUR", ARMOUR_Purple, 0}, {"YELLOW_ARMOUR", ARMOUR_Yellow, 0},
-                                        {"RED_ARMOUR", ARMOUR_Red, 0},       {NULL, 0, 0}};
+                                        {"RED_ARMOUR", ARMOUR_Red, 0},       {nullptr, 0, 0}};
 
 const specflags_t powertype_names[] = {
     {"POWERUP_INVULNERABLE", PW_Invulnerable, 0}, {"POWERUP_BARE_BERSERK", PW_Berserk, 0},
@@ -345,13 +347,13 @@ const specflags_t powertype_names[] = {
     {"POWERUP_ACIDSUIT", PW_AcidSuit, 0},         {"POWERUP_AUTOMAP", PW_AllMap, 0},
     {"POWERUP_LIGHTGOGGLES", PW_Infrared, 0},     {"POWERUP_JETPACK", PW_Jetpack, 0},
     {"POWERUP_NIGHTVISION", PW_NightVision, 0},   {"POWERUP_SCUBA", PW_Scuba, 0},
-    {"POWERUP_TIMESTOP", PW_TimeStop, 0},         {NULL, 0, 0}};
+    {"POWERUP_TIMESTOP", PW_TimeStop, 0},         {nullptr, 0, 0}};
 
 const specflags_t simplecond_names[] = {{"JUMPING", COND_Jumping, 0},     {"CROUCHING", COND_Crouching, 0},
                                         {"SWIMMING", COND_Swimming, 0},   {"ATTACKING", COND_Attacking, 0},
                                         {"RAMPAGING", COND_Rampaging, 0}, {"USING", COND_Using, 0},
                                         {"ACTION1", COND_Action1, 0},     {"ACTION2", COND_Action2, 0},
-                                        {"WALKING", COND_Walking, 0},     {NULL, 0, 0}};
+                                        {"WALKING", COND_Walking, 0},     {nullptr, 0, 0}};
 
 const specflags_t inv_types[] = {
     {"INVENTORY01", INV_01, 0}, {"INVENTORY02", INV_02, 0}, {"INVENTORY03", INV_03, 0}, {"INVENTORY04", INV_04, 0},
@@ -378,7 +380,7 @@ const specflags_t inv_types[] = {
     {"INVENTORY85", INV_85, 0}, {"INVENTORY86", INV_86, 0}, {"INVENTORY87", INV_87, 0}, {"INVENTORY88", INV_88, 0},
     {"INVENTORY89", INV_89, 0}, {"INVENTORY90", INV_90, 0}, {"INVENTORY91", INV_91, 0}, {"INVENTORY92", INV_92, 0},
     {"INVENTORY93", INV_93, 0}, {"INVENTORY94", INV_94, 0}, {"INVENTORY95", INV_95, 0}, {"INVENTORY96", INV_96, 0},
-    {"INVENTORY97", INV_97, 0}, {"INVENTORY98", INV_98, 0}, {"INVENTORY99", INV_99, 0}, {NULL, 0, 0}};
+    {"INVENTORY97", INV_97, 0}, {"INVENTORY98", INV_98, 0}, {"INVENTORY99", INV_99, 0}, {nullptr, 0, 0}};
 
 const specflags_t counter_types[] = {{"LIVES", CT_Lives, 0},     {"SCORE", CT_Score, 0},
                                      {"MONEY", CT_Money, 0},     {"EXPERIENCE", CT_Experience, 0},
@@ -431,7 +433,7 @@ const specflags_t counter_types[] = {{"LIVES", CT_Lives, 0},     {"SCORE", CT_Sc
                                      {"COUNTER93", COUNT_93, 0}, {"COUNTER94", COUNT_94, 0},
                                      {"COUNTER95", COUNT_95, 0}, {"COUNTER96", COUNT_96, 0},
                                      {"COUNTER97", COUNT_97, 0}, {"COUNTER98", COUNT_98, 0},
-                                     {"COUNTER99", COUNT_99, 0}, {NULL, 0, 0}};
+                                     {"COUNTER99", COUNT_99, 0}, {nullptr, 0, 0}};
 
 //
 // DDF_CompareName
@@ -482,7 +484,7 @@ static void ThingStartEntry(const char *buffer, bool extend)
         buffer = "THING_WITH_NO_NAME";
     }
 
-    TemplateThing = NULL;
+    TemplateThing = nullptr;
 
     std::string name(buffer);
     int         number = 0;
@@ -502,7 +504,7 @@ static void ThingStartEntry(const char *buffer, bool extend)
         }
     }
 
-    dynamic_mobj = NULL;
+    dynamic_mobj = nullptr;
 
     int idx = mobjtypes.FindFirst(name.c_str(), 0);
 
@@ -717,7 +719,7 @@ static void ThingFinishEntry(void)
             dynamic_mobj->pickup_message = other->pickup_message;
         }
     }
-    TemplateThing = NULL;
+    TemplateThing = nullptr;
 }
 
 static void ThingClearAll(void)
@@ -761,14 +763,14 @@ void DDF_MobjCleanUp(void)
     {
         cur_ddf_entryname = epi::StringFormat("[%s]  (things.ddf)", m->name.c_str());
 
-        m->dropitem = m->dropitem_ref != "" ? mobjtypes.Lookup(m->dropitem_ref.c_str()) : NULL;
+        m->dropitem = m->dropitem_ref != "" ? mobjtypes.Lookup(m->dropitem_ref.c_str()) : nullptr;
         m->blood    = m->blood_ref != "" ? mobjtypes.Lookup(m->blood_ref.c_str()) : mobjtypes.Lookup("BLOOD");
 
         m->respawneffect = m->respawneffect_ref != "" ? mobjtypes.Lookup(m->respawneffect_ref.c_str())
                            : (m->flags & MF_SPECIAL)  ? mobjtypes.Lookup("ITEM_RESPAWN")
                                                       : mobjtypes.Lookup("RESPAWN_FLASH");
 
-        m->spitspot = m->spitspot_ref != "" ? mobjtypes.Lookup(m->spitspot_ref.c_str()) : NULL;
+        m->spitspot = m->spitspot_ref != "" ? mobjtypes.Lookup(m->spitspot_ref.c_str()) : nullptr;
 
         cur_ddf_entryname.clear();
     }
@@ -1195,9 +1197,9 @@ static void BenefitAdd(benefit_t **list, benefit_t *source)
     cur = new benefit_t;
 
     cur[0]    = source[0];
-    cur->next = NULL;
+    cur->next = nullptr;
 
-    if ((*list) == NULL)
+    if ((*list) == nullptr)
     {
         (*list) = cur;
         return;
@@ -1248,22 +1250,22 @@ void DDF_MobjGetBenefit(const char *info, void *storage)
 }
 
 pickup_effect_c::pickup_effect_c(pickup_effect_type_e _type, int _sub, int _slot, float _time)
-    : next(NULL), type(_type), slot(_slot), time(_time)
+    : next(nullptr), type(_type), slot(_slot), time(_time)
 {
     sub.type = _sub;
 }
 
 pickup_effect_c::pickup_effect_c(pickup_effect_type_e _type, weapondef_c *_weap, int _slot, float _time)
-    : next(NULL), type(_type), slot(_slot), time(_time)
+    : next(nullptr), type(_type), slot(_slot), time(_time)
 {
     sub.weap = _weap;
 }
 
 static void AddPickupEffect(pickup_effect_c **list, pickup_effect_c *cur)
 {
-    cur->next = NULL;
+    cur->next = nullptr;
 
-    if ((*list) == NULL)
+    if ((*list) == nullptr)
     {
         (*list) = cur;
         return;
@@ -1341,7 +1343,7 @@ static const pick_fx_parser_t pick_fx_parsers[] = {{"SCREEN_EFFECT", 2, BA_Parse
                                                    {"KEEP_POWERUP", -1, BA_ParseKeepPowerup},
 
                                                    // that's all, folks.
-                                                   {NULL, 0, NULL}};
+                                                   {nullptr, 0, nullptr}};
 
 //
 // DDF_MobjGetPickupEffect
@@ -1430,7 +1432,7 @@ static const specflags_t normal_specials[] = {{"AMBUSH", MF_AMBUSH, 0},
                                               {"PRESERVE_MOMENTUM", MF_PRESERVEMOMENTUM, 0},
                                               {"DEATHMATCH", MF_NOTDMATCH, 1},
                                               {"TOUCHY", MF_TOUCHY, 0},
-                                              {NULL, 0, 0}};
+                                              {nullptr, 0, 0}};
 
 static specflags_t extended_specials[] = {{"RESPAWN", EF_NORESPAWN, 1},
                                           {"RESURRECT", EF_NORESURRECT, 1},
@@ -1455,7 +1457,7 @@ static specflags_t extended_specials[] = {{"RESPAWN", EF_NORESPAWN, 1},
                                           {"BLOCK_SHOTS", EF_BLOCKSHOTS, 0},
                                           {"TUNNEL", EF_TUNNEL, 0},
                                           {"SIMPLE_ARMOUR", EF_SIMPLEARMOUR, 0},
-                                          {NULL, 0, 0}};
+                                          {nullptr, 0, 0}};
 
 static specflags_t hyper_specials[] = {{"FORCE_PICKUP", HF_FORCEPICKUP, 0},
                                        {"SIDE_IMMUNE", HF_SIDEIMMUNE, 0},
@@ -1478,9 +1480,9 @@ static specflags_t hyper_specials[] = {{"FORCE_PICKUP", HF_FORCEPICKUP, 0},
                                        {"DEHACKED_COMPAT", HF_DEHACKED_COMPAT, 0},
                                        {"IMMOVABLE", HF_IMMOVABLE, 0},
                                        {"MUSIC_CHANGER", HF_MUSIC_CHANGER, 0},
-                                       {NULL, 0, 0}};
+                                       {nullptr, 0, 0}};
 
-static specflags_t mbf21_specials[] = {{"LOGRAV", MBF21_LOGRAV, 0}, {NULL, 0, 0}};
+static specflags_t mbf21_specials[] = {{"LOGRAV", MBF21_LOGRAV, 0}, {nullptr, 0, 0}};
 
 //
 // DDF_MobjGetSpecial
@@ -1569,7 +1571,7 @@ static specflags_t dlight_type_names[] = {{"NONE", DLITE_None, 0},
                                           {"QUADRATIC", DLITE_Compat_QUAD, 0},
                                           {"CONSTANT", DLITE_Compat_LIN, 0},
 
-                                          {NULL, 0, 0}};
+                                          {nullptr, 0, 0}};
 
 //
 // DDF_MobjGetDLight
@@ -1597,10 +1599,10 @@ void DDF_MobjGetExtra(const char *info, void *storage)
 {
     int *extendedflags = (int *)storage;
 
-    // If keyword is "NULL", then the mobj is not marked as extra.
+    // If keyword is "nullptr", then the mobj is not marked as extra.
     // Otherwise it is.
 
-    if (DDF_CompareName(info, "NULL") == 0)
+    if (DDF_CompareName(info, "nullptr") == 0)
     {
         *extendedflags &= ~EF_EXTRA;
     }
@@ -1643,7 +1645,7 @@ static const specflags_t sprite_yalign_names[] = {{"BOTTOM", SPYA_BottomUp, 0},
                                                   {"MIDDLE", SPYA_Middle, 0},
                                                   {"TOP", SPYA_TopDown, 0},
 
-                                                  {NULL, 0, 0}};
+                                                  {nullptr, 0, 0}};
 
 static void DDF_MobjGetYAlign(const char *info, void *storage)
 {
@@ -1982,9 +1984,9 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
         pickup_message = src.pickup_message;
     }
 
-    lose_benefits   = NULL;
-    pickup_benefits = NULL;
-    kill_benefits   = NULL; // I think? - Dasho
+    lose_benefits   = nullptr;
+    pickup_benefits = nullptr;
+    kill_benefits   = nullptr; // I think? - Dasho
     /*
     if(src.pickup_benefits)
     {
@@ -2138,19 +2140,19 @@ void mobjtype_c::Default()
     explode_damage.Default(damage_c::DEFAULT_Mobj);
     explode_radius = 0;
 
-    lose_benefits    = NULL;
-    pickup_benefits  = NULL;
-    kill_benefits    = NULL;
-    pickup_effects   = NULL;
+    lose_benefits    = nullptr;
+    pickup_benefits  = nullptr;
+    kill_benefits    = nullptr;
+    pickup_effects   = nullptr;
     pickup_message   = "";
-    initial_benefits = NULL;
+    initial_benefits = nullptr;
 
     castorder = 0;
     cast_title.clear();
     respawntime  = 30 * TICRATE;
     translucency = PERCENT_MAKE(100);
     minatkchance = PERCENT_MAKE(0);
-    palremap     = NULL;
+    palremap     = nullptr;
 
     jump_delay   = 1 * TICRATE;
     jumpheight   = 10;
@@ -2214,9 +2216,9 @@ void mobjtype_c::Default()
     resist_painchance = -1; // disabled
     ghost             = BITSET_EMPTY;
 
-    closecombat = NULL;
-    rangeattack = NULL;
-    spareattack = NULL;
+    closecombat = nullptr;
+    rangeattack = nullptr;
+    spareattack = nullptr;
 
     // dynamic light info
     dlight[0].Default();
@@ -2224,13 +2226,13 @@ void mobjtype_c::Default()
 
     weak.Default();
 
-    dropitem = NULL;
+    dropitem = nullptr;
     dropitem_ref.clear();
-    blood = NULL;
+    blood = nullptr;
     blood_ref.clear();
-    respawneffect = NULL;
+    respawneffect = nullptr;
     respawneffect_ref.clear();
-    spitspot = NULL;
+    spitspot = nullptr;
     spitspot_ref.clear();
 
     gib_health = 0;
@@ -2366,7 +2368,7 @@ const mobjtype_c *mobjtype_container_c::Lookup(const char *refname)
         return default_mobjtype;
 
     DDF_Error("Unknown thing type: %s\n", refname);
-    return NULL; /* NOT REACHED */
+    return nullptr; /* NOT REACHED */
 }
 
 const mobjtype_c *mobjtype_container_c::Lookup(int id)
@@ -2397,7 +2399,7 @@ const mobjtype_c *mobjtype_container_c::Lookup(int id)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const mobjtype_c *mobjtype_container_c::LookupCastMember(int castpos)
@@ -2475,7 +2477,7 @@ const mobjtype_c *mobjtype_container_c::LookupPlayer(int playernum)
     }
 
     I_Error("Missing DDF entry for player number %d\n", playernum);
-    return NULL; /* NOT REACHED */
+    return nullptr; /* NOT REACHED */
 }
 
 const mobjtype_c *mobjtype_container_c::LookupDoorKey(int theKey)
@@ -2505,7 +2507,7 @@ const mobjtype_c *mobjtype_container_c::LookupDoorKey(int theKey)
 
         benefit_t *list;
         list = m->pickup_benefits;
-        for (; list != NULL; list = list->next)
+        for (; list != nullptr; list = list->next)
         {
             if (list->type == BENEFIT_Key)
             {
@@ -2518,7 +2520,7 @@ const mobjtype_c *mobjtype_container_c::LookupDoorKey(int theKey)
     }
 
     I_Warning("Missing DDF entry for key %d\n", theKey);
-    return NULL;
+    return nullptr;
 }
 
 //--- editor settings ---

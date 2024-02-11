@@ -43,7 +43,7 @@ typedef struct s_weapon_s
 
 typedef struct s_tip_s
 {
-    // tip text or graphic.  Two of these must be NULL.
+    // tip text or graphic.  Two of these must be nullptr.
     const char *tip_text    = nullptr;
     char       *tip_ldf     = nullptr;
     char       *tip_graphic = nullptr;
@@ -70,7 +70,7 @@ typedef struct s_tip_prop_s
     // left justify.  Can be 1, 0, or < 0 for no change.
     int left_just = 0;
 
-    // tip color, or NULL for no change
+    // tip color, or nullptr for no change
     const char *color_name = nullptr;
 
     // translucency value (normally 1.0), or < 0 for no change
@@ -118,7 +118,7 @@ typedef struct s_thing_s
     //       DDF* lumps, we can't store a pointer to a mobjtype_c here
     //       (and the mobjtypes can move about with later additions).
 
-    // thing's DDF name, or if NULL, then thing's mapnumber.
+    // thing's DDF name, or if nullptr, then thing's mapnumber.
     char *thing_name = nullptr;
     int   thing_type = 0;
 
@@ -157,7 +157,7 @@ typedef struct s_benefit_s
 // Radius Damage Monster Trigger
 typedef struct s_damage_monsters_s
 {
-    // type of monster to damage: DDF name, or if NULL, then the
+    // type of monster to damage: DDF name, or if nullptr, then the
     // monster's mapnumber, or if -1 then ANY monster can be damaged.
     char *thing_name = nullptr;
     int   thing_type = 0;
@@ -274,7 +274,7 @@ typedef struct s_fogsector_s
 // Enable/Disable
 typedef struct s_enabler_s
 {
-    // script to enable/disable.  If script_name is NULL, then `tag' is
+    // script to enable/disable.  If script_name is nullptr, then `tag' is
     // the tag number to enable/disable.
     char    *script_name = nullptr;
     uint32_t tag[2]      = {0, 0};
@@ -306,7 +306,7 @@ typedef struct s_jump_s
     // label name
     char *label = nullptr;
 
-    // state to jump to.  Initially NULL, it is looked up when needed
+    // state to jump to.  Initially nullptr, it is looked up when needed
     // (since the label may be a future reference, we can't rely on
     // looking it up at parse time).
     struct rts_state_s *cache_state = nullptr;
@@ -366,7 +366,7 @@ typedef struct s_changetex_s
 // Thing Event
 typedef struct s_thing_event_s
 {
-    // DDF type name of thing to cause the event.  If NULL, then the
+    // DDF type name of thing to cause the event.  If nullptr, then the
     // thing map number is used instead.
     const char *thing_name = nullptr;
     int         thing_type = 0;
@@ -416,17 +416,17 @@ typedef struct rts_state_s
     // routine to be performed
     void (*action)(struct rad_trigger_s *trig, void *param) = nullptr;
 
-    // parameter for routine, or NULL
+    // parameter for routine, or nullptr
     void *param = nullptr;
 
-    // state's label, or NULL
+    // state's label, or nullptr
     char *label = nullptr;
 } rts_state_t;
 
 // Destination path name
 typedef struct rts_path_s
 {
-    // next in list, or NULL
+    // next in list, or nullptr
     struct rts_path_s *next = nullptr;
 
     const char *name = nullptr;
@@ -441,7 +441,7 @@ typedef struct s_ondeath_s
     // next in link (order is unimportant)
     struct s_ondeath_s *next = nullptr;
 
-    // thing's DDF name, or if NULL, then thing's mapnumber.
+    // thing's DDF name, or if nullptr, then thing's mapnumber.
     char *thing_name = nullptr;
     int   thing_type = 0;
 
@@ -520,7 +520,7 @@ typedef struct rad_script_s
     // Sector Index - Will ignore above X/Y coords and size if >= 0 and Tag is also 0
     int sector_index = -1;
 
-    // Script name (or NULL)
+    // Script name (or nullptr)
     char *script_name = nullptr;
 
     // Script tag (or 0 for none)
@@ -602,7 +602,7 @@ typedef struct rad_trigger_s
     // current tip slot (each tip slot works independently).
     int tip_slot = 0;
 
-    // menu style name, or NULL if not set
+    // menu style name, or nullptr if not set
     const char *menu_style_name = nullptr;
 
     // result of last SHOW_MENU (1 to 9, or 0 when cancelled)

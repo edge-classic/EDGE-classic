@@ -19,6 +19,8 @@
 // Animated Texture/Flat Setup and Parser Code
 //
 
+#include <string.h>
+
 #include "local.h"
 
 #include "anim.h"
@@ -61,7 +63,7 @@ static animdef_c *animdefs_Lookup(const char *name)
             return anim;
     }
 
-    return NULL; // not found
+    return nullptr; // not found
 }
 
 //

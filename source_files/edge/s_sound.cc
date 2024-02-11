@@ -16,6 +16,10 @@
 //
 //----------------------------------------------------------------------------
 
+#ifdef EDGE_WEB
+#include <emscripten.h>
+#endif
+
 #include "i_defs.h"
 #include "epi_sdl.h"
 #include "i_sound.h"
@@ -548,7 +552,7 @@ void S_SoundTicker(void)
         }
         else
         {
-            S_UpdateSounds(NULL, 0);
+            S_UpdateSounds(nullptr, 0);
         }
     }
     I_UnlockAudio();

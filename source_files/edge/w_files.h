@@ -25,9 +25,9 @@
 
 #ifndef __W_FILES__
 #define __W_FILES__
-
+#include <vector>
 #include "dm_defs.h"
-
+#include <string>
 // EPI
 #include "file.h"
 

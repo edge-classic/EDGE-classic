@@ -19,6 +19,8 @@
 // Switch Texture Setup and Parser Code
 //
 
+#include <string.h>
+
 #include "local.h"
 
 #include "switch.h"
@@ -210,7 +212,7 @@ switchdef_c *switchdef_container_c::Find(const char *name)
             return sw;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //----------------------------------------------------------------------------

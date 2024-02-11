@@ -46,7 +46,7 @@
 #include "r_draw.h"
 #include "r_modes.h"
 #include "w_wad.h"
-
+#include "str_compare.h"
 //
 // Data needed to add patches to full screen intermission pics.
 // Patches are statistics messages, and animations.
@@ -145,10 +145,10 @@ bool tile_leaving_bg  = false;
 bool tile_entering_bg = false;
 
 // You Are Here graphic
-static const image_c *yah[2] = {NULL, NULL};
+static const image_c *yah[2] = {nullptr, nullptr};
 
 // splat
-static const image_c *splat[2] = {NULL, NULL};
+static const image_c *splat[2] = {nullptr, nullptr};
 
 // %, : graphics
 static const image_c *percent;
@@ -206,7 +206,7 @@ class wi_mappos_c
   public:
     wi_mappos_c()
     {
-        info = NULL;
+        info = nullptr;
         done = false;
     }
     ~wi_mappos_c()
@@ -227,8 +227,8 @@ class wi_frame_c
   public:
     wi_frame_c()
     {
-        info  = NULL;
-        image = NULL;
+        info  = nullptr;
+        image = nullptr;
     }
     ~wi_frame_c()
     {
@@ -253,7 +253,7 @@ class wi_anim_c
   public:
     wi_anim_c()
     {
-        frames    = NULL;
+        frames    = nullptr;
         numframes = 0;
     }
 
@@ -271,7 +271,7 @@ class wi_anim_c
         if (frames)
         {
             delete[] frames;
-            frames = NULL;
+            frames = nullptr;
 
             numframes = 0;
         }
@@ -317,12 +317,12 @@ class wi_c
   public:
     wi_c()
     {
-        gamedef = NULL;
+        gamedef = nullptr;
 
-        anims    = NULL;
+        anims    = nullptr;
         numanims = 0;
 
-        mappos    = NULL;
+        mappos    = nullptr;
         nummappos = 0;
     }
 
@@ -339,7 +339,7 @@ class wi_c
         if (anims)
         {
             delete[] anims;
-            anims = NULL;
+            anims = nullptr;
 
             numanims = 0;
         }
@@ -347,7 +347,7 @@ class wi_c
         if (mappos)
         {
             delete[] mappos;
-            mappos = NULL;
+            mappos = nullptr;
 
             nummappos = 0;
         }
@@ -415,7 +415,7 @@ static wi_c worldint;
 
 void WI_Clear(void)
 {
-    worldint.Init(NULL);
+    worldint.Init(nullptr);
 }
 
 // Draws "<Levelname> Finished!"
@@ -548,7 +548,7 @@ static void DrawOnLnode(wi_mappos_c *mappos, const image_c *images[2])
 
     for (i = 0; i < 2; i++)
     {
-        if (images[i] == NULL)
+        if (images[i] == nullptr)
             continue;
 
         float left = mappos->info->x - IM_OFFSETX(images[i]);
@@ -636,7 +636,7 @@ static void DrawEnteringLevel(void)
         if (worldint.mappos[i].done)
             DrawOnLnode(&worldint.mappos[i], splat);
 
-        if (snl_pointeron && !strcmp(wi_stats.next->name.c_str(), worldint.mappos[i].info->name.c_str()))
+        if (snl_pointeron && !epi::StringCompare(wi_stats.next->name.c_str(), worldint.mappos[i].info->name.c_str()))
             DrawOnLnode(&worldint.mappos[i], yah);
     }
 
@@ -902,7 +902,7 @@ static void WI_End(void)
 {
     E_ForceWipe();
 
-    background_camera_mo = NULL;
+    background_camera_mo = nullptr;
 
     F_StartFinale(&currmap->f_end, nextmap ? ga_finale : ga_nothing);
 }
@@ -933,7 +933,7 @@ static void InitShowNextLoc(void)
 
     for (i = 0; i < worldint.nummappos; i++)
     {
-        if (strcmp(worldint.mappos[i].info->name.c_str(), wi_stats.cur->name.c_str()) == 0)
+        if (epi::StringCompare(worldint.mappos[i].info->name.c_str(), wi_stats.cur->name.c_str()) == 0)
             worldint.mappos[i].done = true;
     }
 
@@ -960,7 +960,7 @@ static void DrawShowNextLoc(void)
                 DrawOnLnode(&worldint.mappos[i], splat);
 
             if (snl_pointeron && wi_stats.next &&
-                !strcmp(wi_stats.next->name.c_str(), worldint.mappos[i].info->name.c_str()))
+                !epi::StringCompare(wi_stats.next->name.c_str(), worldint.mappos[i].info->name.c_str()))
                 DrawOnLnode(&worldint.mappos[i], yah);
         }
     }
@@ -1594,7 +1594,7 @@ static void DrawSinglePlayerStats(void)
     DrawLevelFinished();
 
     bool drawTextBased = true;
-    if (kills != NULL)
+    if (kills != nullptr)
     {
         if (W_IsLumpInPwad(kills->name.c_str()))
             drawTextBased = false;
@@ -1829,13 +1829,13 @@ void WI_Drawer(void)
                 if (a->frameon == -1)
                     continue;
 
-                wi_frame_c *f = NULL;
+                wi_frame_c *f = nullptr;
 
                 if (a->info->type == wi_animdef_c::WI_LEVEL)
                 {
                     if (!wi_stats.next)
-                        f = NULL;
-                    else if (!strcmp(wi_stats.next->name.c_str(), a->info->level.c_str()))
+                        f = nullptr;
+                    else if (!epi::StringCompare(wi_stats.next->name.c_str(), a->info->level.c_str()))
                         f = &a->frames[a->frameon];
                 }
                 else
@@ -2026,11 +2026,11 @@ void WI_Start(void)
         InitCoopStats();
 
     // -AJA- 1999/10/22: background cameras.
-    background_camera_mo = NULL;
+    background_camera_mo = nullptr;
 
     if (gd->bg_camera != "")
     {
-        for (mobj_t *mo = mobjlisthead; mo != NULL; mo = mo->next)
+        for (mobj_t *mo = mobjlisthead; mo != nullptr; mo = mo->next)
         {
             if (DDF_CompareName(mo->info->name.c_str(), gd->bg_camera.c_str()) != 0)
                 continue;

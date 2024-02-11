@@ -33,6 +33,7 @@
 #include "endianess.h"
 #include "file.h"
 #include "filesystem.h"
+#include "str_compare.h"
 #include "str_lexer.h"
 #include "str_util.h"
 
@@ -65,7 +66,7 @@
 #include "version.h"
 
 #include "defaults.h"
-
+#include <stdarg.h>
 //
 // DEFAULTS
 //
@@ -345,7 +346,7 @@ static void ParseConfigBlock(epi::Lexer &lex)
         {
             for (int i = 0; i < numdefaults; i++)
             {
-                if (0 == strcmp(key.c_str(), defaults[i].name))
+                if (0 == epi::StringCompare(key.c_str(), defaults[i].name))
                 {
                     if (defaults[i].type == CFGT_Boolean)
                     {

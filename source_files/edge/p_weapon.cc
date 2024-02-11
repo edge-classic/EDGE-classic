@@ -54,14 +54,14 @@ static sound_category_e WeapSfxCat(player_t *p)
     return SNCAT_Opponent;
 }
 
-static void P_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info = NULL)
+static void P_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info = nullptr)
 {
     pspdef_t *psp = &p->psprites[position];
 
     if (stnum == S_NULL)
     {
         // object removed itself
-        psp->state = psp->next_state = NULL;
+        psp->state = psp->next_state = nullptr;
         return;
     }
 
@@ -91,7 +91,7 @@ static void P_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info
 
     psp->state      = st;
     psp->tics       = st->tics;
-    psp->next_state = (st->nextstate == S_NULL) ? NULL : (states + st->nextstate);
+    psp->next_state = (st->nextstate == S_NULL) ? nullptr : (states + st->nextstate);
 
     // call action routine
 
@@ -111,7 +111,7 @@ void P_SetPspriteDeferred(player_t *p, int position, int stnum)
 {
     pspdef_t *psp = &p->psprites[position];
 
-    if (stnum == S_NULL || psp->state == NULL)
+    if (stnum == S_NULL || psp->state == nullptr)
     {
         P_SetPsprite(p, position, stnum);
         return;
@@ -515,7 +515,7 @@ void P_DesireWeaponChange(player_t *p, int key)
 
     // NEW CODE
 
-    weapondef_c *ready_info = NULL;
+    weapondef_c *ready_info = nullptr;
     if (p->ready_wp >= 0)
         ready_info = p->weapons[p->ready_wp].info;
 
@@ -834,8 +834,8 @@ void P_SetupPsprites(player_t *p)
     {
         pspdef_t *psp = &p->psprites[i];
 
-        psp->state      = NULL;
-        psp->next_state = NULL;
+        psp->state      = nullptr;
+        psp->next_state = nullptr;
         psp->sx = psp->sy = 0;
         psp->visibility = psp->vis_target = VISIBLE;
     }
@@ -887,7 +887,7 @@ void P_MovePsprites(player_t *p)
                 break;
             }
 
-            weapondef_c *info = NULL;
+            weapondef_c *info = nullptr;
             if (p->ready_wp >= 0)
                 info = p->weapons[p->ready_wp].info;
 
@@ -1406,7 +1406,7 @@ void A_Lower(mobj_t *mo)
     if (p->weapons[p->ready_wp].flags & PLWEP_Removing)
     {
         p->weapons[p->ready_wp].flags &= ~PLWEP_Removing;
-        p->weapons[p->ready_wp].info = NULL;
+        p->weapons[p->ready_wp].info = nullptr;
 
         // this should not happen, but handle it just in case
         if (p->pending_wp == p->ready_wp)
@@ -1686,7 +1686,7 @@ void A_WeaponPlaySound(mobj_t *mo)
     player_t *p   = mo->player;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
-    sfx_t *sound = NULL;
+    sfx_t *sound = nullptr;
 
     if (psp->state && psp->state->action_par)
         sound = (sfx_t *)psp->state->action_par;
@@ -1769,7 +1769,7 @@ void A_WeaponJump(mobj_t *mo)
 
     if (P_RandomTest(jump->chance))
     {
-        psp->next_state = (psp->state->jumpstate == S_NULL) ? NULL : (states + psp->state->jumpstate);
+        psp->next_state = (psp->state->jumpstate == S_NULL) ? nullptr : (states + psp->state->jumpstate);
     }
 }
 
@@ -1798,7 +1798,7 @@ void A_WeaponDJNE(mobj_t *mo)
 
     if (--p->weapons[p->ready_wp].reload_count[ATK] > 0)
     {
-        psp->next_state = (psp->state->jumpstate == S_NULL) ? NULL : (states + psp->state->jumpstate);
+        psp->next_state = (psp->state->jumpstate == S_NULL) ? nullptr : (states + psp->state->jumpstate);
     }
 }
 

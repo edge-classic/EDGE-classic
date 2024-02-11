@@ -20,6 +20,9 @@
 //
 // -KM- 1998/11/25 File Written
 //
+
+#include <string.h>
+
 #include "local.h"
 
 #include "weapon.h"
@@ -27,7 +30,7 @@
 #include "p_action.h"
 
 #include "types.h"
-
+#include "str_compare.h"
 #include "str_util.h"
 
 #undef DF
@@ -136,35 +139,35 @@ static const state_starter_t weapon_starters[] = {DDF_STATE("UP", "UP", up_state
 
                                                   DDF_STATE_END};
 
-static const actioncode_t weapon_actions[] = {{"NOTHING", NULL, NULL},
+static const actioncode_t weapon_actions[] = {{"NOTHING", nullptr, nullptr},
 
-                                              {"RAISE", A_Raise, NULL},
-                                              {"LOWER", A_Lower, NULL},
-                                              {"READY", A_WeaponReady, NULL},
-                                              {"EMPTY", A_WeaponEmpty, NULL},
+                                              {"RAISE", A_Raise, nullptr},
+                                              {"LOWER", A_Lower, nullptr},
+                                              {"READY", A_WeaponReady, nullptr},
+                                              {"EMPTY", A_WeaponEmpty, nullptr},
                                               {"SHOOT", A_WeaponShoot, DDF_StateGetAttack},
                                               {"EJECT", A_WeaponEject, DDF_StateGetAttack},
-                                              {"REFIRE", A_ReFire, NULL},
+                                              {"REFIRE", A_ReFire, nullptr},
                                               {"REFIRE_TO", A_ReFireTo, DDF_StateGetJump},
-                                              {"NOFIRE", A_NoFire, NULL},
-                                              {"NOFIRE_RETURN", A_NoFireReturn, NULL},
+                                              {"NOFIRE", A_NoFire, nullptr},
+                                              {"NOFIRE_RETURN", A_NoFireReturn, nullptr},
                                               {"KICK", A_WeaponKick, DDF_StateGetFloat},
-                                              {"CHECKRELOAD", A_CheckReload, NULL},
+                                              {"CHECKRELOAD", A_CheckReload, nullptr},
                                               {"PLAYSOUND", A_WeaponPlaySound, DDF_StateGetSound},
-                                              {"KILLSOUND", A_WeaponKillSound, NULL},
+                                              {"KILLSOUND", A_WeaponKillSound, nullptr},
                                               {"SET_SKIN", A_WeaponSetSkin, DDF_StateGetInteger},
                                               {"JUMP", A_WeaponJump, DDF_StateGetJump},
-                                              {"UNZOOM", A_WeaponUnzoom, NULL},
+                                              {"UNZOOM", A_WeaponUnzoom, nullptr},
 
                                               {"DJNE", A_WeaponDJNE, DDF_StateGetJump},
 
-                                              {"ZOOM", A_WeaponZoom, NULL},
-                                              {"SET_INVULNERABLE", A_SetInvuln, NULL},
-                                              {"CLEAR_INVULNERABLE", A_ClearInvuln, NULL},
+                                              {"ZOOM", A_WeaponZoom, nullptr},
+                                              {"SET_INVULNERABLE", A_SetInvuln, nullptr},
+                                              {"CLEAR_INVULNERABLE", A_ClearInvuln, nullptr},
                                               {"MOVE_FWD", A_MoveFwd, DDF_StateGetFloat},
                                               {"MOVE_RIGHT", A_MoveRight, DDF_StateGetFloat},
                                               {"MOVE_UP", A_MoveUp, DDF_StateGetFloat},
-                                              {"STOP", A_StopMoving, NULL},
+                                              {"STOP", A_StopMoving, nullptr},
                                               {"TURN", A_TurnDir, DDF_StateGetAngle},
                                               {"TURN_RANDOM", A_TurnRandom, DDF_StateGetInteger},
                                               {"MLOOK_TURN", A_MlookTurn, DDF_StateGetSlope},
@@ -172,42 +175,42 @@ static const actioncode_t weapon_actions[] = {{"NOTHING", NULL, NULL},
                                               {"RTS_ENABLE_TAGGED", A_WeaponEnableRadTrig, DDF_WStateGetRADTrigger},
                                               {"RTS_DISABLE_TAGGED", A_WeaponDisableRadTrig, DDF_WStateGetRADTrigger},
                                               {"SEC_SHOOT", A_WeaponShootSA, DDF_StateGetAttack},
-                                              {"SEC_REFIRE", A_ReFireSA, NULL},
+                                              {"SEC_REFIRE", A_ReFireSA, nullptr},
                                               {"SEC_REFIRE_TO", A_ReFireToSA, DDF_StateGetJump},
-                                              {"SEC_NOFIRE", A_NoFireSA, NULL},
-                                              {"SEC_NOFIRE_RETURN", A_NoFireReturnSA, NULL},
-                                              {"SEC_CHECKRELOAD", A_CheckReloadSA, NULL},
+                                              {"SEC_NOFIRE", A_NoFireSA, nullptr},
+                                              {"SEC_NOFIRE_RETURN", A_NoFireReturnSA, nullptr},
+                                              {"SEC_CHECKRELOAD", A_CheckReloadSA, nullptr},
 
                                               {"2ND_SHOOT", A_WeaponShootSA, DDF_StateGetAttack},
-                                              {"2ND_REFIRE", A_ReFireSA, NULL},
+                                              {"2ND_REFIRE", A_ReFireSA, nullptr},
                                               {"2ND_REFIRE_TO", A_ReFireToSA, DDF_StateGetJump},
-                                              {"2ND_NOFIRE", A_NoFireSA, NULL},
-                                              {"2ND_NOFIRE_RETURN", A_NoFireReturnSA, NULL},
-                                              {"2ND_CHECKRELOAD", A_CheckReloadSA, NULL},
+                                              {"2ND_NOFIRE", A_NoFireSA, nullptr},
+                                              {"2ND_NOFIRE_RETURN", A_NoFireReturnSA, nullptr},
+                                              {"2ND_CHECKRELOAD", A_CheckReloadSA, nullptr},
 
                                               {"3RD_SHOOT", A_WeaponShootTA, DDF_StateGetAttack},
-                                              {"3RD_REFIRE", A_ReFireTA, NULL},
+                                              {"3RD_REFIRE", A_ReFireTA, nullptr},
                                               {"3RD_REFIRE_TO", A_ReFireToTA, DDF_StateGetJump},
-                                              {"3RD_NOFIRE", A_NoFireTA, NULL},
-                                              {"3RD_NOFIRE_RETURN", A_NoFireReturnTA, NULL},
-                                              {"3RD_CHECKRELOAD", A_CheckReloadTA, NULL},
+                                              {"3RD_NOFIRE", A_NoFireTA, nullptr},
+                                              {"3RD_NOFIRE_RETURN", A_NoFireReturnTA, nullptr},
+                                              {"3RD_CHECKRELOAD", A_CheckReloadTA, nullptr},
 
                                               {"4TH_SHOOT", A_WeaponShootFA, DDF_StateGetAttack},
-                                              {"4TH_REFIRE", A_ReFireFA, NULL},
+                                              {"4TH_REFIRE", A_ReFireFA, nullptr},
                                               {"4TH_REFIRE_TO", A_ReFireToFA, DDF_StateGetJump},
-                                              {"4TH_NOFIRE", A_NoFireFA, NULL},
-                                              {"4TH_NOFIRE_RETURN", A_NoFireReturnFA, NULL},
-                                              {"4TH_CHECKRELOAD", A_CheckReloadFA, NULL},
+                                              {"4TH_NOFIRE", A_NoFireFA, nullptr},
+                                              {"4TH_NOFIRE_RETURN", A_NoFireReturnFA, nullptr},
+                                              {"4TH_CHECKRELOAD", A_CheckReloadFA, nullptr},
 
                                               // flash-related actions
-                                              {"FLASH", A_GunFlash, NULL},
-                                              {"SEC_FLASH", A_GunFlashSA, NULL},
-                                              {"2ND_FLASH", A_GunFlashSA, NULL},
-                                              {"3RD_FLASH", A_GunFlashTA, NULL},
-                                              {"4TH_FLASH", A_GunFlashFA, NULL},
-                                              {"LIGHT0", A_Light0, NULL},
-                                              {"LIGHT1", A_Light1, NULL},
-                                              {"LIGHT2", A_Light2, NULL},
+                                              {"FLASH", A_GunFlash, nullptr},
+                                              {"SEC_FLASH", A_GunFlashSA, nullptr},
+                                              {"2ND_FLASH", A_GunFlashSA, nullptr},
+                                              {"3RD_FLASH", A_GunFlashTA, nullptr},
+                                              {"4TH_FLASH", A_GunFlashFA, nullptr},
+                                              {"LIGHT0", A_Light0, nullptr},
+                                              {"LIGHT1", A_Light1, nullptr},
+                                              {"LIGHT2", A_Light2, nullptr},
                                               {"TRANS_SET", A_WeaponTransSet, DDF_StateGetPercent},
                                               {"TRANS_FADE", A_WeaponTransFade, DDF_StateGetPercent},
 
@@ -217,13 +220,13 @@ static const actioncode_t weapon_actions[] = {{"NOTHING", NULL, NULL},
                                               {"FRIEND_JUMP", A_FriendJump, DDF_StateGetFrame},
 
                                               // -AJA- backwards compatibility cruft...
-                                              {"SOUND1", A_SFXWeapon1, NULL},
-                                              {"SOUND2", A_SFXWeapon2, NULL},
-                                              {"SOUND3", A_SFXWeapon3, NULL},
+                                              {"SOUND1", A_SFXWeapon1, nullptr},
+                                              {"SOUND2", A_SFXWeapon2, nullptr},
+                                              {"SOUND3", A_SFXWeapon3, nullptr},
 
                                               {"BECOME", A_WeaponBecome, DDF_StateGetBecomeWeapon},
 
-                                              {NULL, NULL, NULL}};
+                                              {nullptr, nullptr, nullptr}};
 
 const specflags_t ammo_types[] = {{"NOAMMO", AM_NoAmmo, 0},
 
@@ -337,7 +340,7 @@ const specflags_t ammo_types[] = {{"NOAMMO", AM_NoAmmo, 0},
                                   {"AMMO98", AM_98, 0},
                                   {"AMMO99", AM_99, 0},
 
-                                  {NULL, 0, 0}};
+                                  {nullptr, 0, 0}};
 
 //
 //  DDF PARSE ROUTINES
@@ -504,7 +507,7 @@ static void WeaponFinishEntry(void)
     }
 
     if (dynamic_weapon->zoom_factor > 0.0)
-        dynamic_weapon->zoom_fov = I_ROUND(90 / dynamic_weapon->zoom_factor);
+        dynamic_weapon->zoom_fov = RoundToInt(90 / dynamic_weapon->zoom_factor);
 
     dynamic_weapon->model_rotate *= kBAMAngle1;
 
@@ -596,7 +599,7 @@ static void DDF_WGetUpgrade(const char *info, void *storage)
 
     *dest = weapondefs.Lookup(info);
 
-    if (*dest == NULL)
+    if (*dest == nullptr)
         DDF_Warning("Unknown weapon: %s\n", info);
 }
 
@@ -608,7 +611,7 @@ static specflags_t weapon_specials[] = {{"SILENT_TO_MONSTERS", WPSP_SilentToMon,
                                         {"MANUAL", WPSP_Manual, 0},
                                         {"PARTIAL", WPSP_Partial, 0},
                                         {"NOAUTOFIRE", WPSP_NoAutoFire, 0},
-                                        {NULL, WPSP_None, 0}};
+                                        {nullptr, WPSP_None, 0}};
 
 //
 // DDF_WStateGetRADTrigger
@@ -806,7 +809,7 @@ void weapondef_c::Default(void)
 
     for (int ATK = 0; ATK < 4; ATK++)
     {
-        attack[ATK]      = NULL;
+        attack[ATK]      = nullptr;
         ammo[ATK]        = AM_NoAmmo;
         ammopershot[ATK] = 0;
         clip_size[ATK]   = 0;
@@ -839,19 +842,19 @@ void weapondef_c::Default(void)
 
     autogive     = false;
     feedback     = false;
-    upgrade_weap = NULL;
+    upgrade_weap = nullptr;
     priority     = 0;
     dangerous    = false;
 
-    eject_attack = NULL;
-    idle         = NULL;
-    engaged      = NULL;
-    hit          = NULL;
-    start        = NULL;
+    eject_attack = nullptr;
+    idle         = nullptr;
+    engaged      = nullptr;
+    hit          = nullptr;
+    start        = nullptr;
 
-    sound1 = NULL;
-    sound2 = NULL;
-    sound3 = NULL;
+    sound1 = nullptr;
+    sound2 = nullptr;
+    sound3 = nullptr;
 
     nothrust     = false;
     bind_key     = -1;
@@ -926,7 +929,7 @@ weapondef_c *weapondef_container_c::Lookup(const char *refname)
     if (idx >= 0)
         return (*this)[idx];
 
-    return NULL;
+    return nullptr;
 }
 
 //--- editor settings ---

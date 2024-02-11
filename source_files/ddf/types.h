@@ -43,13 +43,13 @@ typedef float percent_t;
 class mobj_strref_c
 {
   public:
-    mobj_strref_c() : name(), def(NULL)
+    mobj_strref_c() : name(), def(nullptr)
     {
     }
-    mobj_strref_c(const char *s) : name(s), def(NULL)
+    mobj_strref_c(const char *s) : name(s), def(nullptr)
     {
     }
-    mobj_strref_c(const mobj_strref_c &rhs) : name(rhs.name), def(NULL)
+    mobj_strref_c(const mobj_strref_c &rhs) : name(rhs.name), def(nullptr)
     {
     }
     ~mobj_strref_c(){};
@@ -66,7 +66,7 @@ class mobj_strref_c
     }
 
     const mobjtype_c *GetRef();
-    // Note: this returns NULL if not found, in which case you should
+    // Note: this returns nullptr if not found, in which case you should
     // produce an error, since future calls will do the search again.
 
     mobj_strref_c &operator=(mobj_strref_c &rhs)
@@ -74,7 +74,7 @@ class mobj_strref_c
         if (&rhs != this)
         {
             name = rhs.name;
-            def  = NULL;
+            def  = nullptr;
         }
 
         return *this;

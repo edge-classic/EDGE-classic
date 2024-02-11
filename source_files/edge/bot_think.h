@@ -93,7 +93,7 @@ struct botcmd_t
 class bot_t
 {
   public:
-    struct player_s *pl = NULL;
+    struct player_s *pl = nullptr;
 
     bot_task_e task = TASK_None;
 
@@ -129,7 +129,7 @@ class bot_t
     // used for DM roaming, COOP follow-the-leader, and getting items.
     // main_goal is final target.  travel_time detects losing the path.
     // path_wait is when we need a path, but are waiting a bit.
-    bot_path_c *path = NULL;
+    bot_path_c *path = nullptr;
     position_c  roam_goal{0, 0, 0};
     int         travel_time = 0;
     int         path_wait   = 0;
@@ -140,12 +140,12 @@ class bot_t
     // information for TASK_OpenDoor
     int          door_stage = 0;
     int          door_time  = 0;
-    const seg_t *door_seg   = NULL;
+    const seg_t *door_seg   = nullptr;
 
     // information for TASK_UseLift
     int          lift_stage = 0;
     int          lift_time  = 0;
-    const seg_t *lift_seg   = NULL;
+    const seg_t *lift_seg   = nullptr;
 
     botcmd_t cmd;
 

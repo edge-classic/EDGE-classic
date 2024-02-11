@@ -89,7 +89,7 @@ int real_vm_c::GetNativeFunc(const char *name, const char *module)
 void real_vm_c::AddNativeFunction(const char *name, native_func_t func)
 {
     // already registered?
-    int prev = GetNativeFunc(name, NULL);
+    int prev = GetNativeFunc(name, nullptr);
 
     if (prev >= 0)
     {
@@ -150,7 +150,7 @@ double *real_vm_c::AccessParam(int p)
         RunError("PR_Parameter: p=%d out of range\n", p);
 
     if (AlmostEquals(exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]], (double)(-FLT_MAX)))
-        return NULL;
+        return nullptr;
     else
         return &exec.stack[exec.stack_depth + functions[exec.func]->parm_ofs[p]];
 }
@@ -162,7 +162,7 @@ const char *real_vm_c::AccessParamString(int p)
     if (d)
         return REF_STRING((int)*d);
     else
-        return NULL;
+        return nullptr;
 }
 
 void real_vm_c::ReturnFloat(double f)
@@ -337,7 +337,7 @@ void real_vm_c::EnterNative(int func, int argc)
     exec.stack_depth -= functions[exec.func]->locals_end;
 }
 
-#define Operand(a) (((a) > 0) ? REF_GLOBAL(a) : ((a) < 0) ? &exec.stack[exec.stack_depth - ((a) + 1)] : NULL)
+#define Operand(a) (((a) > 0) ? REF_GLOBAL(a) : ((a) < 0) ? &exec.stack[exec.stack_depth - ((a) + 1)] : nullptr)
 
 void real_vm_c::DoExecute(int fnum)
 {

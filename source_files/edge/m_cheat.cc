@@ -183,7 +183,7 @@ static void CheatGiveWeapons(player_t *pl, int key = -2)
     {
         if (info && !info->no_cheat && (key < 0 || info->bind_key == key))
         {
-            P_AddWeapon(pl, info, NULL);
+            P_AddWeapon(pl, info, nullptr);
         }
     }
 
@@ -304,7 +304,7 @@ bool M_CheatResponder(event_t *ev)
 #endif
     else if (M_CheckCheat(&cheat_suicide, key))
     {
-        P_TelefragMobj(pl->mo, pl->mo, NULL);
+        P_TelefragMobj(pl->mo, pl->mo, nullptr);
 
         // -ACB- 1998/08/26 Suicide language reference
         CON_MessageLDF("SuicideCheat");
@@ -323,7 +323,7 @@ bool M_CheatResponder(event_t *ev)
 
             if ((mo->extendedflags & EF_MONSTER) && (mo->health > 0))
             {
-                P_TelefragMobj(mo, NULL, NULL);
+                P_TelefragMobj(mo, nullptr, nullptr);
                 killcount++;
             }
         }
@@ -391,7 +391,7 @@ bool M_CheatResponder(event_t *ev)
         weapondef_c *w = weapondefs.Lookup("CHAINSAW");
         if (w)
         {
-            P_AddWeapon(pl, w, NULL);
+            P_AddWeapon(pl, w, nullptr);
             pl->powers[PW_Invulnerable] = 1;
             CON_MessageLDF("CHOPPERSNote");
         }

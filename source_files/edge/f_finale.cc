@@ -227,7 +227,7 @@ static void LookupFinaleStuff(void)
     else if (finale->text_back != "")
         finale_textback = W_ImageLookup(finale->text_back.c_str(), INS_Graphic);
     else
-        finale_textback = NULL;
+        finale_textback = nullptr;
 
     finale_textcol = V_GetFontColor(finale->text_colmap);
 
@@ -516,7 +516,7 @@ static void CastSetState(statenum_t st)
 
 static void CAST_RangeAttack(const atkdef_c *range)
 {
-    sfx_t *sfx = NULL;
+    sfx_t *sfx = nullptr;
 
     SYS_ASSERT(range);
 
@@ -547,7 +547,7 @@ static void CAST_RangeAttack(const atkdef_c *range)
 
 static void CastPerformAction(void)
 {
-    sfx_t *sfx = NULL;
+    sfx_t *sfx = nullptr;
 
     // Yuk, handles sounds
 
@@ -820,7 +820,7 @@ static void CastDrawer(void)
     height *= scale_y;
 
     RGL_DrawImage(pos_x - offset_x, pos_y + offset_y, width, height, image, flip ? IM_RIGHT(image) : 0, 0,
-                  flip ? 0 : IM_RIGHT(image), IM_TOP(image), NULL, 1.0f, castorder->palremap);
+                  flip ? 0 : IM_RIGHT(image), IM_TOP(image), nullptr, 1.0f, castorder->palremap);
 }
 
 //

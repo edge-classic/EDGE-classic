@@ -31,7 +31,7 @@
 #include "image_blur.h"
 #include <math.h>
 #include <string.h>
-
+#include <algorithm>
 namespace Blur
 {
 

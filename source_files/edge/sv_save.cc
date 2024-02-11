@@ -78,7 +78,7 @@ void SV_SaveStruct(void *base, savestruct_t *info)
                 break;
 
             default:
-                (*cur->field_put)(storage, i, NULL);
+                (*cur->field_put)(storage, i, nullptr);
                 break;
             }
         }

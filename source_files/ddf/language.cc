@@ -146,7 +146,7 @@ static void LanguageParseField(const char *field, const char *contents, int inde
 
 static void LanguageFinishEntry(void)
 {
-    dynamic_choice = NULL;
+    dynamic_choice = nullptr;
 }
 
 static void LanguageClearAll(void)
@@ -208,7 +208,7 @@ lang_choice_c *language_c::AddChoice(const char *name)
 
 void language_c::AddOrReplace(const char *ref, const char *value)
 {
-    if (umap == NULL)
+    if (umap == nullptr)
     {
         umap = new lang_choice_c;
     }
@@ -226,7 +226,7 @@ const char *language_c::GetRefOrNull(const char *refname)
     // ensure ref name is uppercase, with no spaces
     std::string ref = DDF_SanitizeName(refname);
 
-    if (umap != NULL)
+    if (umap != nullptr)
     {
         if (umap->HasEntry(ref))
         {
@@ -263,10 +263,10 @@ void language_c::Clear()
 
     choices.clear();
 
-    if (umap != NULL)
+    if (umap != nullptr)
     {
         delete umap;
-        umap = NULL;
+        umap = nullptr;
     }
 
     current = -1;
@@ -314,7 +314,7 @@ bool language_c::Select(int idx)
 
 bool language_c::IsValidRef(const char *refname)
 {
-    if (refname == NULL)
+    if (refname == nullptr)
         return false;
 
     if (current < 0 || current >= (int)choices.size())
@@ -323,7 +323,7 @@ bool language_c::IsValidRef(const char *refname)
     // ensure ref name is uppercase, with no spaces
     std::string ref = DDF_SanitizeName(refname);
 
-    if (umap != NULL)
+    if (umap != nullptr)
         if (umap->HasEntry(ref))
             return true;
 
@@ -333,7 +333,7 @@ bool language_c::IsValidRef(const char *refname)
 // this returns the given refname if the lookup fails.
 const char *language_c::operator[](const char *refname)
 {
-    if (refname == NULL)
+    if (refname == nullptr)
         return "";
 
     if (current < 0 || current >= (int)choices.size())
@@ -342,7 +342,7 @@ const char *language_c::operator[](const char *refname)
     // ensure ref name is uppercase, with no spaces
     std::string ref = DDF_SanitizeName(refname);
 
-    if (umap != NULL)
+    if (umap != nullptr)
     {
         if (umap->HasEntry(ref))
         {

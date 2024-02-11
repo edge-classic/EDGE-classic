@@ -25,6 +25,7 @@
 
 #include "i_defs.h"
 
+#include <string.h>
 #include <time.h>
 #include <limits.h>
 
@@ -59,7 +60,7 @@
 #include "f_interm.h"
 #include "vm_coal.h"
 #include "script/compat/lua_compat.h"
-
+#include "str_compare.h"
 extern cvar_c r_doubleframes;
 
 gamestate_e gamestate = GS_NOTHING;
@@ -102,8 +103,8 @@ int deathmatch;
 skill_t gameskill = sk_medium;
 
 // -ACB- 2004/05/25 We need to store our current/next mapdefs
-const mapdef_c *currmap = NULL;
-const mapdef_c *nextmap = NULL;
+const mapdef_c *currmap = nullptr;
+const mapdef_c *nextmap = nullptr;
 
 int             curr_hub_tag = 0; // affects where players are spawned
 const mapdef_c *curr_hub_first;   // first map in group of hubs
@@ -118,7 +119,7 @@ static int  defer_save_slot;
 static char defer_save_desc[32];
 
 // deferred stuff...
-static newgame_params_c *defer_params = NULL;
+static newgame_params_c *defer_params = nullptr;
 
 static void G_DoNewGame(void);
 static void G_DoLoadGame(void);
@@ -135,7 +136,7 @@ static bool G_SaveGameToFile(std::string filename, const char *description);
 
 void LoadLevel_Bits(void)
 {
-    if (currmap == NULL)
+    if (currmap == nullptr)
         I_Error("G_DoLoadLevel: No Current Map selected");
 
 #ifdef EDGE_WEB
@@ -155,7 +156,7 @@ void LoadLevel_Bits(void)
     gamestate = GS_NOTHING; // FIXME: needed ???
 
     // -AJA- FIXME: this background camera stuff is a mess
-    background_camera_mo = NULL;
+    background_camera_mo = nullptr;
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
@@ -230,7 +231,7 @@ void LoadLevel_Bits(void)
             continue;
 
         p->killcount = p->secretcount = p->itemcount = 0;
-        p->mo                                        = NULL;
+        p->mo                                        = nullptr;
     }
 
     // Initial height of PointOfView will be set by player think.
@@ -409,7 +410,7 @@ static void CheckPlayersReborn(void)
             {
                 currmap        = curr_hub_first;
                 curr_hub_tag   = 0;
-                curr_hub_first = NULL;
+                curr_hub_first = nullptr;
             }
             return;
         }
@@ -452,7 +453,7 @@ void G_BigStuff(void)
             SYS_ASSERT(nextmap);
             currmap        = nextmap;
             curr_hub_tag   = 0;
-            curr_hub_first = NULL;
+            curr_hub_first = nullptr;
             F_StartFinale(&currmap->f_pre, ga_loadlevel);
             break;
 
@@ -538,9 +539,9 @@ static void RespawnPlayer(player_t *p)
 {
     // first disassociate the corpse (if any)
     if (p->mo)
-        p->mo->player = NULL;
+        p->mo->player = nullptr;
 
-    p->mo = NULL;
+    p->mo = nullptr;
 
     // spawn at random spot if in death match
     if (DEATHMATCH())
@@ -559,7 +560,7 @@ static void SpawnInitialPlayers(void)
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
         player_t *p = players[pnum];
-        if (p == NULL)
+        if (p == nullptr)
         {
             // no real player, maybe spawn a helper dog?
             G_SpawnHelper(pnum);
@@ -573,7 +574,7 @@ static void SpawnInitialPlayers(void)
     }
 
     // check for missing player start.
-    if (players[consoleplayer]->mo == NULL)
+    if (players[consoleplayer]->mo == nullptr)
         I_Error("Missing player start !\n");
 
     G_SetDisplayPlayer(consoleplayer); // view the guy you are playing
@@ -688,7 +689,7 @@ static void G_DoCompleted(void)
         if (exit_skipall && nextmap)
         {
             if (exit_hub_tag <= 0)
-                curr_hub_first = NULL;
+                curr_hub_first = nullptr;
             else
             {
                 // save current map for HUB system
@@ -798,7 +799,7 @@ static bool G_LoadGameFromFile(std::string filename, bool is_hub)
         InitNew(params);
 
         curr_hub_tag   = globs->hub_tag;
-        curr_hub_first = globs->hub_first ? G_LookupMap(globs->hub_first) : NULL;
+        curr_hub_first = globs->hub_first ? G_LookupMap(globs->hub_first) : nullptr;
     }
 
     LoadLevel_Bits();
@@ -923,7 +924,7 @@ static bool G_SaveGameToFile(std::string filename, const char *description)
     globs->level     = SV_DupString(currmap->name.c_str());
     globs->flags     = level_flags;
     globs->hub_tag   = curr_hub_tag;
-    globs->hub_first = curr_hub_first ? SV_DupString(curr_hub_first->name.c_str()) : NULL;
+    globs->hub_first = curr_hub_first ? SV_DupString(curr_hub_first->name.c_str()) : nullptr;
 
     globs->skill    = gameskill;
     globs->netgame  = netgame ? (1 + deathmatch) : 0;
@@ -1008,12 +1009,12 @@ static void G_DoSaveGame(void)
 //---> newgame_params_c class
 
 newgame_params_c::newgame_params_c()
-    : skill(sk_medium), deathmatch(0), map(NULL), random_seed(0), total_players(0), flags(NULL)
+    : skill(sk_medium), deathmatch(0), map(nullptr), random_seed(0), total_players(0), flags(nullptr)
 {
     for (int i = 0; i < MAXPLAYERS; i++)
     {
         players[i] = PFL_NOPLAYER;
-        nodes[i]   = NULL;
+        nodes[i]   = nullptr;
     }
 }
 
@@ -1033,7 +1034,7 @@ newgame_params_c::newgame_params_c(const newgame_params_c &src)
         nodes[i]   = src.nodes[i];
     }
 
-    flags = NULL;
+    flags = nullptr;
 
     if (src.flags)
         CopyFlags(src.flags);
@@ -1049,12 +1050,12 @@ void newgame_params_c::SinglePlayer(int num_bots)
 {
     total_players = 1 + num_bots;
     players[0]    = PFL_Zero; // i.e. !BOT and !NETWORK
-    nodes[0]      = NULL;
+    nodes[0]      = nullptr;
 
     for (int pnum = 1; pnum <= num_bots; pnum++)
     {
         players[pnum] = PFL_Bot;
-        nodes[pnum]   = NULL;
+        nodes[pnum]   = nullptr;
     }
 }
 
@@ -1109,7 +1110,7 @@ static void G_DoNewGame(void)
     bool skip_pre = defer_params->level_skip;
 
     delete defer_params;
-    defer_params = NULL;
+    defer_params = nullptr;
 
     if (LUA_UseLuaHud())
         LUA_NewGame();
@@ -1174,7 +1175,7 @@ static void InitNew(newgame_params_c &params)
 
     currmap        = params.map;
     curr_hub_tag   = 0;
-    curr_hub_first = NULL;
+    curr_hub_first = nullptr;
 
     if (params.skill > sk_nightmare)
         params.skill = sk_nightmare;

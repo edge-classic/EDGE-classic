@@ -300,7 +300,7 @@ struct mobj_s : public position_c
     // -ES- 1999/10/25 Reference Count.
     // All the following mobj references should be set *only* via the
     // SetXX() methods, where XX is the field name. This is useful because
-    // it sets the pointer to NULL if the mobj is removed, which protects
+    // it sets the pointer to nullptr if the mobj is removed, which protects
     // us from a crash.
     int refcount = 0;
 

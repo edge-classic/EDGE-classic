@@ -59,7 +59,7 @@ float NAV_EvaluateBigItem(const mobj_t *mo)
 {
     ammotype_e ammotype;
 
-    for (const benefit_t *B = mo->info->pickup_benefits; B != NULL; B = B->next)
+    for (const benefit_t *B = mo->info->pickup_benefits; B != nullptr; B = B->next)
     {
         switch (B->type)
         {
@@ -128,7 +128,7 @@ static void NAV_CollectBigItems()
     // items (e.g. weapons) tend to be well distributed around a map.
     // it will also be useful for finding a weapon after spawning.
 
-    for (const mobj_t *mo = mobjlisthead; mo != NULL; mo = mo->next)
+    for (const mobj_t *mo = mobjlisthead; mo != nullptr; mo = mo->next)
     {
         if ((mo->flags & MF_SPECIAL) == 0)
             continue;
@@ -218,7 +218,7 @@ class nav_link_c
     int          dest_id = -1;
     float        length  = 0;
     int          flags   = PNODE_Normal;
-    const seg_t *seg     = NULL;
+    const seg_t *seg     = nullptr;
 };
 
 // there is a one-to-one correspondence from a subsector_t to a
@@ -242,7 +242,7 @@ void nav_area_c::compute_middle(const subsector_t &sub)
 
     int total = 0;
 
-    for (const seg_t *seg = sub.segs; seg != NULL; seg = seg->sub_next, total += 1)
+    for (const seg_t *seg = sub.segs; seg != nullptr; seg = seg->sub_next, total += 1)
     {
         sum_x += seg->v1->X;
         sum_y += seg->v1->Y;
@@ -262,7 +262,7 @@ static int NAV_CheckDoorOrLift(const seg_t *seg)
 
     const line_t *ld = seg->linedef;
 
-    if (ld->special == NULL)
+    if (ld->special == nullptr)
         return PNODE_Normal;
 
     const linetype_c *spec = ld->special;
@@ -330,7 +330,7 @@ static int NAV_CheckTeleporter(const seg_t *seg)
 
     const line_t *ld = seg->linedef;
 
-    if (ld->special == NULL)
+    if (ld->special == nullptr)
         return -1;
 
     const linetype_c *spec = ld->special;
@@ -352,11 +352,11 @@ static int NAV_CheckTeleporter(const seg_t *seg)
         return -1;
 
     // find the destination thing...
-    if (spec->t.outspawnobj == NULL)
+    if (spec->t.outspawnobj == nullptr)
         return -1;
 
     const mobj_t *dest = P_FindTeleportMan(ld->tag, spec->t.outspawnobj);
-    if (dest == NULL)
+    if (dest == nullptr)
         return -1;
 
     return (int)(dest->subsector - subsectors);
@@ -378,10 +378,10 @@ static void NAV_CreateLinks()
         nav_area_c &area = nav_areas[i];
         area.first_link  = (int)nav_links.size();
 
-        for (const seg_t *seg = sub.segs; seg != NULL; seg = seg->sub_next)
+        for (const seg_t *seg = sub.segs; seg != nullptr; seg = seg->sub_next)
         {
             // no link for a one-sided wall
-            if (seg->back_sub == NULL)
+            if (seg->back_sub == nullptr)
                 continue;
 
             int dest_id = (int)(seg->back_sub - subsectors);
@@ -560,12 +560,12 @@ static bot_path_c *NAV_StorePath(position_c start, int start_id, position_c fini
 {
     bot_path_c *path = new bot_path_c;
 
-    path->nodes.push_back(path_node_c{start, 0, NULL});
+    path->nodes.push_back(path_node_c{start, 0, nullptr});
 
     // handle case of same subsector -- no segs
     if (start_id == finish_id)
     {
-        path->nodes.push_back(path_node_c{finish, 0, NULL});
+        path->nodes.push_back(path_node_c{finish, 0, nullptr});
         return path;
     }
 
@@ -595,7 +595,7 @@ static bot_path_c *NAV_StorePath(position_c start, int start_id, position_c fini
 
         // find the link
         const nav_area_c &area = nav_areas[prev_id];
-        const nav_link_c *link = NULL;
+        const nav_link_c *link = nullptr;
 
         for (int k = 0; k < area.num_links; k++)
         {
@@ -609,7 +609,7 @@ static bot_path_c *NAV_StorePath(position_c start, int start_id, position_c fini
         }
 
         // this should never happen
-        if (link == NULL)
+        if (link == nullptr)
             I_Error("could not find link in path (%d -> %d)\n", prev_id, cur_id);
 
         NAV_StoreSegMiddle(path, link->flags, link->seg);
@@ -618,13 +618,13 @@ static bot_path_c *NAV_StorePath(position_c start, int start_id, position_c fini
         if (link->flags & PNODE_Lift)
         {
             auto pos = nav_areas[link->dest_id].get_middle();
-            path->nodes.push_back(path_node_c{pos, 0, NULL});
+            path->nodes.push_back(path_node_c{pos, 0, nullptr});
         }
 
         prev_id = cur_id;
     }
 
-    path->nodes.push_back(path_node_c{finish, 0, NULL});
+    path->nodes.push_back(path_node_c{finish, 0, nullptr});
 
     return path;
 }
@@ -632,7 +632,7 @@ static bot_path_c *NAV_StorePath(position_c start, int start_id, position_c fini
 bot_path_c *NAV_FindPath(const position_c *start, const position_c *finish, int flags)
 {
     // tries to find a path from start to finish.
-    // if successful, returns a path, otherwise returns NULL.
+    // if successful, returns a path, otherwise returns nullptr.
     //
     // the path may include manual lifts and doors, but more complicated
     // things (e.g. a door activated by a nearby switch) will fail.
@@ -671,7 +671,7 @@ bot_path_c *NAV_FindPath(const position_c *start, const position_c *finish, int 
 
         // no path at all?
         if (cur < 0)
-            return NULL;
+            return nullptr;
 
         // reached the destination?
         if (cur == finish_id)
@@ -706,7 +706,7 @@ bot_path_c *NAV_FindPath(const position_c *start, const position_c *finish, int 
 static void NAV_ItemsInSubsector(subsector_t *sub, bot_t *bot, position_c &pos, float radius, int sub_id, int &best_id,
                                  float &best_score, mobj_t *&best_mo)
 {
-    for (mobj_t *mo = sub->thinglist; mo != NULL; mo = mo->snext)
+    for (mobj_t *mo = sub->thinglist; mo != nullptr; mo = mo->snext)
     {
         float score = bot->EvalItem(mo);
         if (score < 0)
@@ -736,7 +736,7 @@ bot_path_c *NAV_FindThing(bot_t *bot, float radius, mobj_t *&best)
 {
     // find an item to pickup or enemy to fight.
     // each nearby thing (limited roughly by `radius') will be passed to the
-    // EvalThing() method of the bot.  returns NULL if nothing was found.
+    // EvalThing() method of the bot.  returns nullptr if nothing was found.
 
     position_c pos{bot->pl->mo->x, bot->pl->mo->y, bot->pl->mo->z};
 
@@ -744,7 +744,7 @@ bot_path_c *NAV_FindThing(bot_t *bot, float radius, mobj_t *&best)
     int          start_id = (int)(start - subsectors);
 
     // the best thing so far...
-    best             = NULL;
+    best             = nullptr;
     float best_score = 0;
     int   best_id    = -1;
 
@@ -766,8 +766,8 @@ bot_path_c *NAV_FindThing(bot_t *bot, float radius, mobj_t *&best)
         // no areas left to visit?
         if (cur < 0)
         {
-            if (best == NULL)
-                return NULL;
+            if (best == nullptr)
+                return nullptr;
 
             return NAV_StorePath(pos, start_id, *best, best_id);
         }
@@ -811,7 +811,7 @@ bot_path_c *NAV_FindThing(bot_t *bot, float radius, mobj_t *&best)
 static void NAV_EnemiesInSubsector(const subsector_t *sub, bot_t *bot, float radius, mobj_t *&best_mo,
                                    float &best_score)
 {
-    for (mobj_t *mo = sub->thinglist; mo != NULL; mo = mo->snext)
+    for (mobj_t *mo = sub->thinglist; mo != nullptr; mo = mo->snext)
     {
         if (bot->EvalEnemy(mo) < 0)
             continue;
@@ -864,11 +864,11 @@ static void NAV_EnemiesInNode(unsigned int bspnum, bot_t *bot, float radius, mob
 
 mobj_t *NAV_FindEnemy(bot_t *bot, float radius)
 {
-    // find an enemy to fight, or NULL if none found.
+    // find an enemy to fight, or nullptr if none found.
     // caller is responsible to do a sight checks.
     // radius is the size of a square box (not a circle).
 
-    mobj_t *best_mo    = NULL;
+    mobj_t *best_mo    = nullptr;
     float   best_score = 0;
 
     NAV_EnemiesInNode(root_node, bot, radius, best_mo, best_score);

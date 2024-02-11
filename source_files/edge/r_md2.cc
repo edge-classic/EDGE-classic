@@ -43,7 +43,7 @@
 #include "r_shader.h"
 #include "r_units.h"
 #include "p_blockmap.h"
-
+#include "str_compare.h"
 #include <stddef.h>
 #include <vector>
 
@@ -327,13 +327,13 @@ md2_model_c *MD2_LoadModel(epi::File *f)
     if (epi::StringPrefixCompare(header.ident, MD2_IDENTIFIER) != 0)
     {
         I_Error("MD2_LoadModel: lump is not an MD2 model!");
-        return NULL; /* NOT REACHED */
+        return nullptr; /* NOT REACHED */
     }
 
     if (version != MD2_VERSION)
     {
         I_Error("MD2_LoadModel: strange version!");
-        return NULL; /* NOT REACHED */
+        return nullptr; /* NOT REACHED */
     }
 
     int num_frames = AlignedLittleEndianS32(header.num_frames);
@@ -495,7 +495,7 @@ md2_model_c *MD2_LoadModel(epi::File *f)
     if (md->vbo == 0)
         I_Error("MD2_LoadModel: Failed to bind VBO!\n");
     glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
-    glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), NULL, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), nullptr, GL_STREAM_DRAW);
 
     return md;
 }
@@ -618,13 +618,13 @@ md2_model_c *MD3_LoadModel(epi::File *f)
     if (strncmp(header.ident, MD3_IDENTIFIER, 4) != 0)
     {
         I_Error("MD3_LoadModel: lump is not an MD3 model!");
-        return NULL; /* NOT REACHED */
+        return nullptr; /* NOT REACHED */
     }
 
     if (version != MD3_VERSION)
     {
         I_Error("MD3_LoadModel: strange version!");
-        return NULL; /* NOT REACHED */
+        return nullptr; /* NOT REACHED */
     }
 
     if (AlignedLittleEndianS32(header.num_meshes) > 1)
@@ -754,7 +754,7 @@ md2_model_c *MD3_LoadModel(epi::File *f)
     if (md->vbo == 0)
         I_Error("MD3_LoadModel: Failed to create VBO!\n");
     glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
-    glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), NULL, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), nullptr, GL_STREAM_DRAW);
     return md;
 }
 
@@ -1093,7 +1093,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
     }
     else /* (! data.is_fuzzy) */
     {
-        skin_tex = W_ImageCache(skin_img, false, ren_fx_colmap ? ren_fx_colmap : is_weapon ? NULL : mo->info->palremap);
+        skin_tex = W_ImageCache(skin_img, false, ren_fx_colmap ? ren_fx_colmap : is_weapon ? nullptr : mo->info->palremap);
 
         data.im_right = IM_RIGHT(skin_img);
         data.im_top   = IM_TOP(skin_img);

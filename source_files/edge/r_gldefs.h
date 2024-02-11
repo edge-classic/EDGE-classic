@@ -141,11 +141,11 @@ typedef struct drawthing_s
   public:
     void Clear()
     {
-        next = prev = NULL;
-        mo          = NULL;
-        image       = NULL;
-        props       = NULL;
-        rd_l = rd_r = rd_prev = rd_next = NULL;
+        next = prev = nullptr;
+        mo          = nullptr;
+        image       = nullptr;
+        props       = nullptr;
+        rd_l = rd_r = rd_prev = rd_next = nullptr;
     }
 } drawthing_t;
 
@@ -182,11 +182,11 @@ class drawfloor_t
     void Clear()
     {
         is_highest = is_lowest = false;
-        next_R = prev_R = NULL;
-        floor = ceil = NULL;
-        ef           = NULL;
-        props        = NULL;
-        things       = NULL;
+        next_R = prev_R = nullptr;
+        floor = ceil = nullptr;
+        ef           = nullptr;
+        props        = nullptr;
+        things       = nullptr;
     }
 };
 
@@ -202,7 +202,7 @@ class drawmirror_c
     std::list<drawsub_c *> drawsubs;
 
   public:
-    drawmirror_c() : seg(NULL), is_portal(false), drawsubs()
+    drawmirror_c() : seg(nullptr), is_portal(false), drawsubs()
     {
     }
 
@@ -243,7 +243,7 @@ class drawsub_c
     bool sorted;
 
   public:
-    drawsub_c() : sub(NULL), floors(), segs(), mirrors()
+    drawsub_c() : sub(nullptr), floors(), segs(), mirrors()
     {
     }
 
@@ -256,7 +256,7 @@ class drawsub_c
         sub      = ss;
         visible  = false;
         sorted   = false;
-        floors_R = NULL;
+        floors_R = nullptr;
 
         floors.clear();
         segs.clear();

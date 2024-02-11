@@ -25,12 +25,14 @@
 //    iteminque_t   [ITMQ]
 //
 
+#include <string.h>
+
 #include "i_defs.h"
 
 #include "p_setup.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
-
+#include "str_compare.h"
 #undef SF
 #define SF SVFIELD
 
@@ -139,19 +141,19 @@ static savefield_t sv_fields_mobj[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_mobj = {
-    NULL,           // link in list
+    nullptr,           // link in list
     "mobj_t",       // structure name
     "mobj",         // start marker
     sv_fields_mobj, // field descriptions
     SVDUMMY,        // dummy base
     true,           // define_me
-    NULL            // pointer to known struct
+    nullptr            // pointer to known struct
 };
 
 #undef SV_F_BASE
 
 savearray_t sv_array_mobj = {
-    NULL,            // link in list
+    nullptr,            // link in list
     "mobjs",         // array name
     &sv_struct_mobj, // array type
     true,            // define_me
@@ -162,7 +164,7 @@ savearray_t sv_array_mobj = {
     SV_MobjCreateElems,   // creation routine
     SV_MobjFinaliseElems, // finalisation routine
 
-    NULL, // pointer to known array
+    nullptr, // pointer to known array
     0     // loaded size
 };
 
@@ -186,13 +188,13 @@ static savefield_t sv_fields_spawnpoint[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_spawnpoint = {
-    NULL,                 // link in list
+    nullptr,                 // link in list
     "spawnpoint_t",       // structure name
     "spwn",               // start marker
     sv_fields_spawnpoint, // field descriptions
     SVDUMMY,              // dummy base
     true,                 // define_me
-    NULL                  // pointer to known struct
+    nullptr                  // pointer to known struct
 };
 
 #undef SV_F_BASE
@@ -215,19 +217,19 @@ static savefield_t sv_fields_iteminque[] = {
     SVFIELD_END};
 
 savestruct_t sv_struct_iteminque = {
-    NULL,                // link in list
+    nullptr,                // link in list
     "iteminque_t",       // structure name
     "itmq",              // start marker
     sv_fields_iteminque, // field descriptions
     SVDUMMY,             // dummy base
     true,                // define_me
-    NULL                 // pointer to known struct
+    nullptr                 // pointer to known struct
 };
 
 #undef SV_F_BASE
 
 savearray_t sv_array_iteminque = {
-    NULL,                 // link in list
+    nullptr,                 // link in list
     "itemquehead",        // array name
     &sv_struct_iteminque, // array type
     true,                 // define_me
@@ -238,7 +240,7 @@ savearray_t sv_array_iteminque = {
     SV_ItemqCreateElems,   // creation routine
     SV_ItemqFinaliseElems, // finalisation routine
 
-    NULL, // pointer to known array
+    nullptr, // pointer to known array
     0     // loaded size
 };
 
@@ -303,14 +305,14 @@ void SV_MobjCreateElems(int num_elems)
     if (mobjlisthead)
         P_RemoveAllMobjs(true);
 
-    SYS_ASSERT(mobjlisthead == NULL);
+    SYS_ASSERT(mobjlisthead == nullptr);
 
     for (; num_elems > 0; num_elems--)
     {
         mobj_t *cur = new mobj_t;
 
         cur->next = mobjlisthead;
-        cur->prev = NULL;
+        cur->prev = nullptr;
 
         if (mobjlisthead)
             mobjlisthead->prev = cur;
@@ -318,7 +320,7 @@ void SV_MobjCreateElems(int num_elems)
         mobjlisthead = cur;
 
         // initialise defaults
-        cur->info  = NULL;
+        cur->info  = nullptr;
         cur->state = cur->next_state = states + 1;
 
         cur->model_skin       = 1;
@@ -328,9 +330,9 @@ void SV_MobjCreateElems(int num_elems)
 
 void SV_MobjFinaliseElems(void)
 {
-    for (mobj_t *mo = mobjlisthead; mo != NULL; mo = mo->next)
+    for (mobj_t *mo = mobjlisthead; mo != nullptr; mo = mo->next)
     {
-        if (mo->info == NULL)
+        if (mo->info == nullptr)
             mo->info = mobjtypes.Lookup(0); // template
 
         // do not link zombie objects into the blockmap
@@ -422,14 +424,14 @@ void SV_ItemqCreateElems(int num_elems)
 {
     P_RemoveItemsInQue();
 
-    itemquehead = NULL;
+    itemquehead = nullptr;
 
     for (; num_elems > 0; num_elems--)
     {
         iteminque_t *cur = new iteminque_t;
 
         cur->next = itemquehead;
-        cur->prev = NULL;
+        cur->prev = nullptr;
 
         if (itemquehead)
             itemquehead->prev = cur;
@@ -477,7 +479,7 @@ bool SR_MobjGetPlayer(void *storage, int index, void *extra)
 
     int swizzle = SV_GetInt();
 
-    *dest = (swizzle == 0) ? NULL : (player_t *)SV_PlayerGetElem(swizzle - 1);
+    *dest = (swizzle == 0) ? nullptr : (player_t *)SV_PlayerGetElem(swizzle - 1);
     return true;
 }
 
@@ -485,7 +487,7 @@ void SR_MobjPutPlayer(void *storage, int index, void *extra)
 {
     player_t *elem = ((player_t **)storage)[index];
 
-    int swizzle = (elem == NULL) ? 0 : SV_PlayerFindElem(elem) + 1;
+    int swizzle = (elem == nullptr) ? 0 : SV_PlayerFindElem(elem) + 1;
 
     SV_PutInt(swizzle);
 }
@@ -496,7 +498,7 @@ bool SR_MobjGetMobj(void *storage, int index, void *extra)
 
     int swizzle = SV_GetInt();
 
-    *dest = (swizzle == 0) ? NULL : (mobj_t *)SV_MobjGetElem(swizzle - 1);
+    *dest = (swizzle == 0) ? nullptr : (mobj_t *)SV_MobjGetElem(swizzle - 1);
     return true;
 }
 
@@ -506,7 +508,7 @@ void SR_MobjPutMobj(void *storage, int index, void *extra)
 
     int swizzle;
 
-    swizzle = (elem == NULL) ? 0 : SV_MobjFindElem(elem) + 1;
+    swizzle = (elem == nullptr) ? 0 : SV_MobjFindElem(elem) + 1;
     SV_PutInt(swizzle);
 }
 
@@ -518,7 +520,7 @@ bool SR_MobjGetType(void *storage, int index, void *extra)
 
     if (!name)
     {
-        *dest = NULL;
+        *dest = nullptr;
         return true;
     }
 
@@ -547,7 +549,7 @@ void SR_MobjPutType(void *storage, int index, void *extra)
 {
     mobjtype_c *info = ((mobjtype_c **)storage)[index];
 
-    SV_PutString((info == NULL) ? NULL : info->name.c_str());
+    SV_PutString((info == nullptr) ? nullptr : info->name.c_str());
 }
 
 bool SR_MobjGetSpawnPoint(void *storage, int index, void *extra)
@@ -574,7 +576,7 @@ bool SR_MobjGetAttack(void *storage, int index, void *extra)
     const char *name = SV_GetString();
 
     // Intentional Const Override
-    *dest = (name == NULL) ? NULL : (atkdef_c *)atkdefs.Lookup(name);
+    *dest = (name == nullptr) ? nullptr : (atkdef_c *)atkdefs.Lookup(name);
 
     SV_FreeString(name);
     return true;
@@ -584,7 +586,7 @@ void SR_MobjPutAttack(void *storage, int index, void *extra)
 {
     atkdef_c *info = ((atkdef_c **)storage)[index];
 
-    SV_PutString((info == NULL) ? NULL : info->name.c_str());
+    SV_PutString((info == nullptr) ? nullptr : info->name.c_str());
 }
 
 bool SR_MobjGetWUDs(void *storage, int index, void *extra)
@@ -614,7 +616,7 @@ void SR_MobjPutWUDs(void *storage, int index, void *extra)
 
     SYS_ASSERT(index == 0);
 
-    SV_PutString(src->empty() ? NULL : src->c_str());
+    SV_PutString(src->empty() ? nullptr : src->c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -640,7 +642,7 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
 
     if (!swizzle || !mo->info)
     {
-        *dest = NULL;
+        *dest = nullptr;
         return true;
     }
 
@@ -651,14 +653,14 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
 
     base_p = strchr(buffer, ':');
 
-    if (base_p == NULL || base_p[0] == 0)
+    if (base_p == nullptr || base_p[0] == 0)
         I_Error("Corrupt savegame: bad state 1/2: `%s'\n", buffer);
 
     *base_p++ = 0;
 
     off_p = strchr(base_p, ':');
 
-    if (off_p == NULL || off_p[0] == 0)
+    if (off_p == nullptr || off_p[0] == 0)
         I_Error("Corrupt savegame: bad state 2/2: `%s'\n", base_p);
 
     *off_p++ = 0;
@@ -675,7 +677,7 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
     }
 
     // find base state
-    offset = strtol(off_p, NULL, 0) - 1;
+    offset = strtol(off_p, nullptr, 0) - 1;
 
     base = DDF_StateFindLabel(actual->state_grp, base_p, true /* quiet */);
 
@@ -720,8 +722,8 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
 // from the base state (e.g. "5"), which BTW starts at 1 (like the ddf
 // format).
 //
-// Alternatively, the string can be NULL, which means the state
-// pointer should be NULL.
+// Alternatively, the string can be nullptr, which means the state
+// pointer should be nullptr.
 //
 // P.S: we go to all this trouble to try and get reasonable behaviour
 // when loading with different DDF files than what we saved with.
@@ -741,9 +743,9 @@ void SR_MobjPutState(void *storage, int index, void *extra)
 
     SYS_ASSERT(mo);
 
-    if (S == NULL || !mo->info)
+    if (S == nullptr || !mo->info)
     {
-        SV_PutString(NULL);
+        SV_PutString(nullptr);
         return;
     }
 
@@ -751,7 +753,7 @@ void SR_MobjPutState(void *storage, int index, void *extra)
     if (mo->info->state_grp.empty())
     {
         I_Warning("SAVEGAME: object [%s] has no states !!\n", mo->info->name.c_str());
-        SV_PutString(NULL);
+        SV_PutString(nullptr);
         return;
     }
 

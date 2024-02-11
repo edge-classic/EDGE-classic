@@ -18,15 +18,18 @@
 
 #include "bsp_wad.h"
 
+#include <stdarg.h>
+#include <string.h>  // memcpy
+
 #include <algorithm>
 
+#include "HandmadeMath.h"
 #include "bsp_local.h"
 #include "bsp_raw_def.h"
 #include "bsp_utility.h"
 #include "endianess.h"
 #include "filesystem.h"
 #include "str_compare.h"
-
 #define DEBUG_WAD 0
 
 namespace ajbsp
@@ -262,7 +265,7 @@ retry:
 
         int what = errno;
         FileMessage("Open file failed: %s\n", strerror(what));
-        return NULL;
+        return nullptr;
     }
 
     WadFile *w = new WadFile(filename, mode, fp, nullptr);
@@ -299,7 +302,7 @@ WadFile *WadFile::OpenMem(std::string filename, uint8_t *raw_wad,
     if (!memory_file_pointer_)
     {
         FileMessage("Open memfile failed: %s\n", filename.c_str());
-        return NULL;
+        return nullptr;
     }
 
     WadFile *w = new WadFile(filename, 'r', nullptr, memory_file_pointer_);
@@ -321,7 +324,7 @@ WadFile *WadFile::Create(std::string filename, char mode)
 
     FILE *fp = epi::FileOpenRaw(filename,
                                 epi::kFileAccessWrite | epi::kFileAccessBinary);
-    if (!fp) return NULL;
+    if (!fp) return nullptr;
 
     WadFile *w = new WadFile(filename, mode, fp, nullptr);
 
@@ -384,7 +387,7 @@ Lump *WadFile::FindLump(const char *name)
         if (epi::StringCaseCompareASCII(directory_[k]->name_, name) == 0)
             return directory_[k];
 
-    return NULL;  // not found
+    return nullptr;  // not found
 }
 
 int WadFile::FindLumpNumber(const char *name)
@@ -553,7 +556,7 @@ Lump *WadFile::FindLumpInNamespace(const char *name, char group)
             I_Error("AJBSP: FindLumpInNamespace: bad group '%c'\n", group);
     }
 
-    return NULL;  // not found!
+    return nullptr;  // not found!
 }
 
 void WadFile::ReadDirectory()

@@ -293,7 +293,7 @@ abstract_music_c *S_PlayRADMusic(uint8_t *data, int length, bool looping)
     {
         delete[] data;
         delete player;
-        return NULL;
+        return nullptr;
     }
 
     player->Play(looping);

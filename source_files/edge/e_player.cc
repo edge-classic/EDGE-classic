@@ -27,6 +27,8 @@
 // -MH- 1998/08/18 Flyup and flydown logic
 //
 
+#include <string.h>
+
 #include "i_defs.h"
 
 #include "endianess.h"
@@ -51,8 +53,8 @@
 //
 // Main rule is that players[p->num] == p (for all players p).
 // The array only holds players "in game", the remaining fields
-// are NULL.  There may be NULL entries in-between valid entries
-// (e.g. player #2 left the game, so players[2] becomes NULL).
+// are nullptr.  There may be nullptr entries in-between valid entries
+// (e.g. player #2 left the game, so players[2] becomes nullptr).
 // This means that numplayers is NOT an index to last entry + 1.
 //
 // The consoleplayer and displayplayer variables must be valid
@@ -132,7 +134,7 @@ void G_PlayerFinishLevel(player_t *p, bool keep_cards)
     p->extralight = 0; // cancel gun flashes
 
     // cancel colourmap effects
-    p->effect_colourmap = NULL;
+    p->effect_colourmap = nullptr;
 
     // no palette changes
     p->damagecount        = 0;
@@ -143,7 +145,7 @@ void G_PlayerFinishLevel(player_t *p, bool keep_cards)
 
     // Lobo 2023: uncomment if still getting
     //  "INTERNAL ERROR: player has a removed attacker"
-    p->attacker = NULL;
+    p->attacker = nullptr;
 
     if (LUA_UseLuaHud())
         LUA_EndLevel();        
@@ -163,7 +165,7 @@ void player_s::Reborn()
 
     playerstate = PST_LIVE;
 
-    mo     = NULL;
+    mo     = nullptr;
     health = 0;
 
     memset(armours, 0, sizeof(armours));
@@ -198,9 +200,9 @@ void player_s::Reborn()
     flash              = false;
     last_damage_colour = SG_RED_RGBA32;
 
-    attacker = NULL;
+    attacker = nullptr;
 
-    effect_colourmap = NULL;
+    effect_colourmap = nullptr;
     effect_left      = 0;
 
     memset(psprites, 0, sizeof(psprites));
@@ -294,7 +296,7 @@ void G_SetConsolePlayer(int pnum)
     else
     {
         players[pnum]->builder    = P_ConsolePlayerBuilder;
-        players[pnum]->build_data = NULL;
+        players[pnum]->build_data = nullptr;
     }
 }
 
@@ -343,7 +345,7 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
     //   will hold player start objects, sprite will be taken for skin.
     // -AJA- 2004/04/14: Use DDF entry from level thing.
 
-    if (point->info == NULL)
+    if (point->info == nullptr)
         I_Error("P_SpawnPlayer: No such item type!");
 
     const mobjtype_c *info = point->info;
@@ -374,7 +376,7 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
     p->damage_pain      = 0;
     p->bonuscount       = 0;
     p->extralight       = 0;
-    p->effect_colourmap = NULL;
+    p->effect_colourmap = nullptr;
     p->std_viewheight   = mobj->height * PERCENT_2_FLOAT(info->viewheight);
     p->viewheight       = p->std_viewheight;
     p->zoom_fov         = 0;
@@ -533,7 +535,7 @@ static spawnpoint_t *G_FindHubPlayer(int pnum, int tag)
     else
         I_Error("No usable hub start for player %d (tag %d)\n", pnum + 1, tag);
 
-    return NULL; /* NOT REACHED */
+    return nullptr; /* NOT REACHED */
 }
 
 void G_HubSpawnPlayer(player_t *p, int tag)
@@ -571,11 +573,11 @@ void G_SpawnHelper(int pnum)
         return;
 
     spawnpoint_t *point = G_FindCoopPlayer(pnum + 1);
-    if (point == NULL)
+    if (point == nullptr)
         return;
 
     const mobjtype_c *info = mobjtypes.Lookup(888);
-    if (info == NULL)
+    if (info == nullptr)
         return;
 
     mobj_t *mo = P_MobjCreateObject(point->x, point->y, point->z, info);
@@ -858,7 +860,7 @@ spawnpoint_t *G_FindCoopPlayer(int pnum)
             return point;
     }
 
-    return NULL; // not found
+    return nullptr; // not found
 }
 
 void G_MarkPlayerAvatars(void)

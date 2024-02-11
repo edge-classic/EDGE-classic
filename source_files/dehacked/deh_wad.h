@@ -28,8 +28,11 @@ namespace wad
 extern ddf_collection_c *dest_container;
 
 void NewLump(ddf_type_e type);
-
-void Printf(const char *str, ...) GCCATTR((format(printf, 1, 2)));
+#ifdef __GNUC__
+void Printf(const char *str, ...) __attribute__((format(printf, 1, 2)));
+#else
+void Printf(const char *str, ...);
+#endif
 } // namespace wad
 
 } // namespace dehacked

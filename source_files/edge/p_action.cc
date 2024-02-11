@@ -101,9 +101,9 @@ void P_ActActivateLineType(mobj_t *mo)
 
     values = (int *)mo->state->action_par;
 
-    // Note the `NULL' here: this prevents the activation from failing
+    // Note the `nullptr' here: this prevents the activation from failing
     // because the object isn't a PLAYER, for example.
-    P_RemoteActivation(NULL, values[0], values[1], 0, line_Any);
+    P_RemoteActivation(nullptr, values[0], values[1], 0, line_Any);
 }
 
 //
@@ -155,7 +155,7 @@ bool P_ActLookForTargets(mobj_t *we)
     if (we->side == 0)
         return P_LookForPlayers(we, we->info->sight_angle);
 
-    for (them = mobjlisthead; them != NULL; them = them->next)
+    for (them = mobjlisthead; them != nullptr; them = them->next)
     {
         if (them == we)
             continue;
@@ -794,7 +794,7 @@ void P_ActPlaySound(mobj_t *mo)
 {
     // Generate an arbitrary sound.
 
-    sfx_t *sound = NULL;
+    sfx_t *sound = nullptr;
 
     if (mo->state && mo->state->action_par)
         sound = (sfx_t *)mo->state->action_par;
@@ -814,7 +814,7 @@ void P_ActPlaySoundBoss(mobj_t *mo)
 {
     // Generate an arbitrary sound.
 
-    sfx_t *sound = NULL;
+    sfx_t *sound = nullptr;
 
     if (mo->state && mo->state->action_par)
         sound = (sfx_t *)mo->state->action_par;
@@ -883,7 +883,7 @@ void P_ActMakeDyingSound(mobj_t *mo)
     // This procedure is like every other sound generating
     // procedure with the exception that if the object is
     // a boss (EF_ALWAYSLOUD extended flag) then the sound is
-    // generated at full volume (source = NULL).
+    // generated at full volume (source = nullptr).
 
     sfx_t *sound = mo->info->deathsound;
 
@@ -1057,7 +1057,7 @@ static void CheckMissileSpawn(mobj_t *projectile)
 //
 // This procedure launches a project the direction of the target mobj.
 // * source - the source of the projectile, required
-// * target - the target of the projectile, can be NULL
+// * target - the target of the projectile, can be nullptr
 // * type   - the mobj type of the projectile
 //
 // For all sense and purposes it is possible for the target to be a dummy
@@ -1082,14 +1082,14 @@ static void CheckMissileSpawn(mobj_t *projectile)
 //
 // projx, projy & projz are the projectiles spawn location
 //
-// NOTE: may return NULL.
+// NOTE: may return nullptr.
 //
 static mobj_t *DoLaunchProjectile(mobj_t *source, float tx, float ty, float tz, mobj_t *target, const mobjtype_c *type)
 {
     const atkdef_c *attack = source->currentattack;
 
     if (!attack)
-        return NULL;
+        return nullptr;
 
     // -AJA- projz now handles crouching
     float     projx          = source->x;
@@ -1132,7 +1132,7 @@ static mobj_t *DoLaunchProjectile(mobj_t *source, float tx, float ty, float tz, 
     if (P_MapCheckBlockingLine(source, projectile))
     {
         P_MobjExplodeMissile(projectile);
-        return NULL;
+        return nullptr;
     }
 
     // launch sound
@@ -1216,7 +1216,7 @@ static mobj_t *LaunchProjectile(mobj_t *source, mobj_t *target, const mobjtype_c
     float tx, ty, tz;
 
     if (source->currentattack && (source->currentattack->flags & AF_NoTarget))
-        target = NULL;
+        target = nullptr;
 
     P_TargetTheory(source, target, &tx, &ty, &tz);
 
@@ -1398,7 +1398,7 @@ int P_MissileContact(mobj_t *object, mobj_t *target)
                 return 0;
         }
 
-        if (object->currentattack != NULL && !(target->extendedflags & EF_OWNATTACKHURTS))
+        if (object->currentattack != nullptr && !(target->extendedflags & EF_OWNATTACKHURTS))
         {
             if (object->currentattack == target->info->rangeattack)
                 return 0;
@@ -1508,7 +1508,7 @@ int P_BulletContact(mobj_t *source, mobj_t *target, float damage, const damage_c
             return 0;
     }
 
-    if (source->currentattack != NULL && !(target->extendedflags & EF_OWNATTACKHURTS))
+    if (source->currentattack != nullptr && !(target->extendedflags & EF_OWNATTACKHURTS))
     {
         if (source->currentattack == target->info->rangeattack)
             return 0;
@@ -1577,10 +1577,10 @@ void P_ActCreateSmokeTrail(mobj_t *projectile)
 {
     const atkdef_c *attack = projectile->currentattack;
 
-    if (attack == NULL)
+    if (attack == nullptr)
         return;
 
-    if (attack->puff == NULL)
+    if (attack->puff == nullptr)
     {
         M_WarnError("P_ActCreateSmokeTrail: attack %s has no PUFF object\n", attack->name.c_str());
         return;
@@ -1628,7 +1628,7 @@ void P_ActHomingProjectile(mobj_t *projectile)
 {
     const atkdef_c *attack = projectile->currentattack;
 
-    if (attack == NULL)
+    if (attack == nullptr)
         return;
 
     if (attack->flags & AF_TraceSmoke)
@@ -1640,7 +1640,7 @@ void P_ActHomingProjectile(mobj_t *projectile)
 
         if (P_RandomTest(attack->notracechance))
         {
-            projectile->SetTarget(NULL);
+            projectile->SetTarget(nullptr);
             return;
         }
     }
@@ -1696,7 +1696,7 @@ void P_ActHomeToSpot(mobj_t *projectile)
 {
     mobj_t *target = projectile->target;
 
-    if (target == NULL)
+    if (target == nullptr)
     {
         P_MobjExplodeMissile(projectile);
         return;
@@ -1746,7 +1746,7 @@ static void LaunchOrderedSpread(mobj_t *mo)
 
     const atkdef_c *attack = mo->currentattack;
 
-    if (attack == NULL)
+    if (attack == nullptr)
         return;
 
     int count = mo->spreadcount;
@@ -1765,7 +1765,7 @@ static void LaunchOrderedSpread(mobj_t *mo)
     else
     {
         mobj_t *projectile = LaunchProjectile(mo, mo->target, attack->atk_mobj);
-        if (projectile == NULL)
+        if (projectile == nullptr)
             return;
 
         projectile->angle += spreadorder[count];
@@ -1791,11 +1791,11 @@ static void LaunchOrderedSpread(mobj_t *mo)
 //
 static void LaunchRandomSpread(mobj_t *mo)
 {
-    if (mo->currentattack == NULL)
+    if (mo->currentattack == nullptr)
         return;
 
     mobj_t *projectile = LaunchProjectile(mo, mo->target, mo->currentattack->atk_mobj);
-    if (projectile == NULL)
+    if (projectile == nullptr)
         return;
 
     int i = P_Random() & 127;
@@ -1886,7 +1886,7 @@ static void SprayAttack(mobj_t *mo)
         BAMAngle an = mo->angle - kBAMAngle90 / 2 + (kBAMAngle90 / 40) * i;
 
         // mo->source is the originator (player) of the missile
-        mobj_t *target = P_AimLineAttack(mo->source ? mo->source : mo, an, range, NULL);
+        mobj_t *target = P_AimLineAttack(mo->source ? mo->source : mo, an, range, nullptr);
 
         if (!target)
             continue;
@@ -1909,7 +1909,7 @@ static void SprayAttack(mobj_t *mo)
             damage *= attack->berserk_mul;
 
         if (damage)
-            P_DamageMobj(target, NULL, mo->source, damage, &attack->damage);
+            P_DamageMobj(target, nullptr, mo->source, damage, &attack->damage);
     }
 }
 
@@ -2164,7 +2164,7 @@ static void ShootToSpot(mobj_t *object)
 
     const mobjtype_c *spot_type = object->info->spitspot;
 
-    if (spot_type == NULL)
+    if (spot_type == nullptr)
     {
         M_WarnError("Thing [%s] used SHOOT_TO_SPOT attack, but has no SPIT_SPOT\n", object->info->name.c_str());
         return;
@@ -2172,7 +2172,7 @@ static void ShootToSpot(mobj_t *object)
 
     mobj_t *spot = P_LookForShootSpot(object->info->spitspot);
 
-    if (spot == NULL)
+    if (spot == nullptr)
     {
         I_Warning("No [%s] objects found for BossBrain shooter.\n", spot_type->name.c_str());
         return;
@@ -2254,7 +2254,7 @@ static void ObjectSpawning(mobj_t *parent, BAMAngle angle)
         // -AJA- 2000/02/01: Remove now the default.
         if (attack->flags & AF_KillFailedSpawn)
         {
-            P_KillMobj(parent, child, NULL);
+            P_KillMobj(parent, child, nullptr);
             if (child->flags & MF_COUNTKILL)
                 players[consoleplayer]->killcount--;
         }
@@ -2276,7 +2276,7 @@ static void ObjectSpawning(mobj_t *parent, BAMAngle angle)
             wi_stats.items--;
         if (attack->flags & AF_KillFailedSpawn)
         {
-            P_KillMobj(parent, child, NULL);
+            P_KillMobj(parent, child, nullptr);
             if (child->flags & MF_COUNTKILL)
                 players[consoleplayer]->killcount--;
         }
@@ -2399,7 +2399,7 @@ void P_SlammedIntoObject(mobj_t *object, mobj_t *target)
 {
     if (object->currentattack)
     {
-        if (target != NULL)
+        if (target != nullptr)
         {
             // -KM- 1999/01/31 Only hurt shootable objects...
             if (target->flags & MF_SHOOTABLE)
@@ -3090,7 +3090,7 @@ static bool CreateAggression(mobj_t *mo)
 void P_ActStandardLook(mobj_t *object)
 {
     int     targ_pnum;
-    mobj_t *targ = NULL;
+    mobj_t *targ = nullptr;
 
     object->threshold = 0; // any shot will wake up
 
@@ -3112,7 +3112,7 @@ void P_ActStandardLook(mobj_t *object)
     // if (targ && (targ->side & object->side) != 0)
     if (object->side != 0)
     {
-        // targ = NULL;
+        // targ = nullptr;
         // P_ActPlayerSupportLook(object);
         P_ActPlayerSupportMeander(object);
         return;
@@ -3296,8 +3296,8 @@ void P_ActStandardChase(mobj_t *object)
         if (P_ActLookForTargets(object))
             return;
 
-        // -ACB- 1998/09/06 Target is not relevant: NULLify.
-        object->SetTarget(NULL);
+        // -ACB- 1998/09/06 Target is not relevant: nullptrify.
+        object->SetTarget(nullptr);
 
         P_SetMobjStateDeferred(object, object->info->idle_state, 0);
         return;
@@ -3394,8 +3394,8 @@ void P_ActResurrectChase(mobj_t *object)
         }
         else
         {
-            corpse->SetSupportObj(NULL);
-            corpse->SetTarget(NULL);
+            corpse->SetSupportObj(nullptr);
+            corpse->SetTarget(nullptr);
         }
 
         // -AJA- Resurrected creatures are on Archvile's side (like MBF)
@@ -3428,7 +3428,7 @@ void P_ActDie(mobj_t *mo)
     // Boom/MBF compatibility.
 
     mo->health = 0;
-    P_KillMobj(NULL, mo);
+    P_KillMobj(nullptr, mo);
 }
 
 void P_ActKeenDie(mobj_t *mo)
@@ -3436,7 +3436,7 @@ void P_ActKeenDie(mobj_t *mo)
     P_ActMakeIntoCorpse(mo);
 
     // see if all other Keens are dead
-    for (mobj_t *cur = mobjlisthead; cur != NULL; cur = cur->next)
+    for (mobj_t *cur = mobjlisthead; cur != nullptr; cur = cur->next)
     {
         if (cur == mo)
             continue;
@@ -3450,7 +3450,7 @@ void P_ActKeenDie(mobj_t *mo)
 
     L_WriteDebug("P_ActKeenDie: ALL DEAD, activating...\n");
 
-    P_RemoteActivation(NULL, 2 /* door type */, 666 /* tag */, 0, line_Any);
+    P_RemoteActivation(nullptr, 2 /* door type */, 666 /* tag */, 0, line_Any);
 }
 
 void P_ActCheckMoving(mobj_t *mo)
@@ -3571,7 +3571,7 @@ void P_ActJump(mobj_t *mo)
 
     if (P_RandomTest(jump->chance))
     {
-        mo->next_state = (mo->state->jumpstate == S_NULL) ? NULL : (states + mo->state->jumpstate);
+        mo->next_state = (mo->state->jumpstate == S_NULL) ? nullptr : (states + mo->state->jumpstate);
     }
 }
 
@@ -3599,7 +3599,7 @@ void P_ActJumpLiquid(mobj_t *mo)
 
     if (P_RandomTest(jump->chance))
     {
-        mo->next_state = (mo->state->jumpstate == S_NULL) ? NULL : (states + mo->state->jumpstate);
+        mo->next_state = (mo->state->jumpstate == S_NULL) ? nullptr : (states + mo->state->jumpstate);
     }
 }
 
@@ -3626,7 +3626,7 @@ void P_ActJumpSky(mobj_t *mo)
 
     if (P_RandomTest(jump->chance))
     {
-        mo->next_state = (mo->state->jumpstate == S_NULL) ? NULL : (states + mo->state->jumpstate);
+        mo->next_state = (mo->state->jumpstate == S_NULL) ? nullptr : (states + mo->state->jumpstate);
     }
 }
 
@@ -3657,7 +3657,7 @@ void P_ActJumpStuck(mobj_t * mo)
     if (P_RandomTest(jump->chance))
     {
         mo->next_state = (mo->state->jumpstate == S_NULL) ?
-            NULL : (states + mo->state->jumpstate);
+            nullptr : (states + mo->state->jumpstate);
     }
 }
 */
@@ -3717,7 +3717,7 @@ void P_ActBecome(struct mobj_s *mo)
         mo->hyperflags    = mo->info->hyperflags;
 
         mo->vis_target       = PERCENT_2_FLOAT(mo->info->translucency);
-        mo->currentattack    = NULL;
+        mo->currentattack    = nullptr;
         mo->model_skin       = mo->info->model_skin;
         mo->model_last_frame = -1;
 
@@ -3736,7 +3736,7 @@ void P_ActBecome(struct mobj_s *mo)
                 if (mo->dlight.shader)
                 {
                     // FIXME: delete mo->dlight.shader;
-                    mo->dlight.shader = NULL;
+                    mo->dlight.shader = nullptr;
                 }
             }
         }
@@ -3792,7 +3792,7 @@ void P_ActUnBecome(struct mobj_s *mo)
         mo->hyperflags    = mo->info->hyperflags;
 
         mo->vis_target       = PERCENT_2_FLOAT(mo->info->translucency);
-        mo->currentattack    = NULL;
+        mo->currentattack    = nullptr;
         mo->model_skin       = mo->info->model_skin;
         mo->model_last_frame = -1;
 
@@ -3811,7 +3811,7 @@ void P_ActUnBecome(struct mobj_s *mo)
                 if (mo->dlight.shader)
                 {
                     // FIXME: delete mo->dlight.shader;
-                    mo->dlight.shader = NULL;
+                    mo->dlight.shader = nullptr;
                 }
             }
         }
@@ -3871,7 +3871,7 @@ void P_ActMorph(struct mobj_s *mo)
         mo->hyperflags    = mo->info->hyperflags;
 
         mo->vis_target       = PERCENT_2_FLOAT(mo->info->translucency);
-        mo->currentattack    = NULL;
+        mo->currentattack    = nullptr;
         mo->model_skin       = mo->info->model_skin;
         mo->model_last_frame = -1;
 
@@ -3890,7 +3890,7 @@ void P_ActMorph(struct mobj_s *mo)
                 if (mo->dlight.shader)
                 {
                     // FIXME: delete mo->dlight.shader;
-                    mo->dlight.shader = NULL;
+                    mo->dlight.shader = nullptr;
                 }
             }
         }
@@ -3950,7 +3950,7 @@ void P_ActUnMorph(struct mobj_s *mo)
         mo->hyperflags    = mo->info->hyperflags;
 
         mo->vis_target       = PERCENT_2_FLOAT(mo->info->translucency);
-        mo->currentattack    = NULL;
+        mo->currentattack    = nullptr;
         mo->model_skin       = mo->info->model_skin;
         mo->model_last_frame = -1;
 
@@ -3969,7 +3969,7 @@ void P_ActUnMorph(struct mobj_s *mo)
                 if (mo->dlight.shader)
                 {
                     // FIXME: delete mo->dlight.shader;
-                    mo->dlight.shader = NULL;
+                    mo->dlight.shader = nullptr;
                 }
             }
         }
@@ -4099,9 +4099,9 @@ void P_ActMushroom(struct mobj_s *mo)
 
     // Now launch mushroom cloud
     const atkdef_c *atk = mo->info->spareattack;
-    if (atk == NULL)
+    if (atk == nullptr)
         atk = atkdefs.Lookup("MUSHROOM_FIREBALL");
-    if (atk == NULL)
+    if (atk == nullptr)
         return;
 
     for (int i = -spread; i <= spread; i += 16)
@@ -4115,8 +4115,8 @@ void P_ActMushroom(struct mobj_s *mo)
 
             mo->currentattack = atk;
 
-            mobj_t *proj = DoLaunchProjectile(mo, tx, ty, tz, NULL, atk->atk_mobj);
-            if (proj == NULL)
+            mobj_t *proj = DoLaunchProjectile(mo, tx, ty, tz, nullptr, atk->atk_mobj);
+            if (proj == nullptr)
                 continue;
         }
     }

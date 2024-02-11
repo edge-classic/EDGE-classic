@@ -49,7 +49,7 @@ typedef enum
 
 typedef struct
 {
-    // current state.  NULL state means not active
+    // current state.  nullptr state means not active
     const state_t *state;
 
     // state to enter next.

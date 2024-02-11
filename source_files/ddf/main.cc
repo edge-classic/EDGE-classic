@@ -25,9 +25,11 @@
 #include "switch.h"
 
 #include <limits.h>
-
+#include <stdarg.h>
+#include <string.h>
 // EPI
 #include "epi.h"
+#include "str_compare.h"
 #include "str_util.h"
 
 // EDGE
@@ -323,7 +325,7 @@ static const char *tag_conversion_table[] = {
     "DDFSFX",     "STYLES",  "DDFSTYLE", "SWITCHES", "DDFSWTH",    "THINGS",  "DDFTHING", "WEAPONS",   "DDFWEAP",
     "MOVIES",     "DDFMOVIE",
 
-    NULL,         NULL};
+    nullptr,         nullptr};
 
 void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
 {
@@ -417,7 +419,7 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
 // When the parser function is called, a pointer to a readinfo_t is passed and
 // contains all the info needed, it contains:
 //
-// * filename              - filename to be read, returns error if NULL
+// * filename              - filename to be read, returns error if nullptr
 // * DDF_MainCheckName     - function called when a def has been just been started
 // * DDF_MainCheckCmd      - function called when we need to check a command
 // * DDF_MainCreateEntry   - function called when a def has been completed
@@ -695,8 +697,8 @@ void DDF_MainReadFile(readinfo_t *readinfo, const std::string &data)
     std::string token;
     std::string current_cmd;
 
-    char *name  = NULL;
-    char *value = NULL;
+    char *name  = nullptr;
+    char *value = nullptr;
 
     int current_index = 0;
     int entry_count   = 0;
@@ -1073,7 +1075,7 @@ void DDF_MainGetNumeric(const char *info, void *storage)
     }
 
     // -KM- 1999/01/29 strtol accepts hex and decimal.
-    *dest = strtol(info, NULL, 0); // straight conversion - no messin'
+    *dest = strtol(info, nullptr, 0); // straight conversion - no messin'
 }
 
 //
@@ -1190,7 +1192,7 @@ void DDF_MainRefAttack(const char *info, void *storage)
     SYS_ASSERT(info && storage);
 
     *dest = (atkdef_c *)atkdefs.Lookup(info);
-    if (*dest == NULL)
+    if (*dest == nullptr)
         DDF_WarnError("Unknown Attack: %s\n", info);
 }
 
@@ -1218,7 +1220,7 @@ void DDF_MainGetFloat(const char *info, void *storage)
 
     SYS_ASSERT(info && storage);
 
-    if (strchr(info, '%') != NULL)
+    if (strchr(info, '%') != nullptr)
     {
         DDF_MainGetPercentAny(info, storage);
         return;
@@ -1391,7 +1393,7 @@ void DDF_MainGetColourmap(const char *info, void *storage)
     const colourmap_c **result = (const colourmap_c **)storage;
 
     *result = colourmaps.Lookup(info);
-    if (*result == NULL)
+    if (*result == nullptr)
         DDF_Error("DDF_MainGetColourmap: No such colourmap '%s'\n", info);
 }
 
@@ -1753,7 +1755,7 @@ bool DDF_MainDecodeBrackets(const char *info, char *outer, char *inner, int buf_
 //
 // DDF_MainDecodeList
 //
-// Find the dividing character.  Returns NULL if not found.
+// Find the dividing character.  Returns nullptr if not found.
 // Handles strings and brackets unless simple is true.
 //
 const char *DDF_MainDecodeList(const char *info, char divider, bool simple)
@@ -1803,7 +1805,7 @@ const char *DDF_MainDecodeList(const char *info, char divider, bool simple)
     if (brackets != 0)
         DDF_Error("Unclosed brackets found: %s\n", info);
 
-    return NULL;
+    return nullptr;
 }
 
 // DDF OBJECTS
@@ -2030,7 +2032,7 @@ void dlight_info_c::Copy(dlight_info_c &src)
     height = src.height;
     leaky  = src.leaky;
 
-    cache_data = NULL;
+    cache_data = nullptr;
 }
 
 void dlight_info_c::Default()
@@ -2042,7 +2044,7 @@ void dlight_info_c::Default()
     leaky  = false;
     shape  = "DLIGHT_EXP";
 
-    cache_data = NULL;
+    cache_data = nullptr;
 }
 
 dlight_info_c &dlight_info_c::operator=(dlight_info_c &rhs)
@@ -2136,7 +2138,7 @@ static ddf_reader_t ddf_readers[DDF_NUM_TYPES] = {
     {DDF_Movie, "DDFMOVIE", "movies.ddf", "Movies", DDF_ReadMovies},
 
     // RTS scripts are handled differently
-    {DDF_RadScript, "RSCRIPT", "rscript.rts", "RadTrig", NULL}};
+    {DDF_RadScript, "RSCRIPT", "rscript.rts", "RadTrig", nullptr}};
 
 ddf_type_e DDF_LumpToType(const std::string &name)
 {

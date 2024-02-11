@@ -19,7 +19,7 @@
 #include "i_defs.h"
 
 #include "coal.h"
-
+#include <stdarg.h>
 #include "file.h"
 #include "filesystem.h"
 
@@ -60,7 +60,7 @@ void VM_Printer(const char *msg, ...)
 }
 
 // VM_GetFloat/VM_GetString/VM_GetVector usage:
-// mod_name = NULL to search global scope or a module name such as "hud", "math", etc
+// mod_name = nullptr to search global scope or a module name such as "hud", "math", etc
 // var_name = Variable name, without the module prefix, i.e. "custom_stbar" instead of "hud.custom_stbar"
 
 double VM_GetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name)
@@ -94,9 +94,9 @@ double VM_GetVectorZ(coal::vm_c *vm, const char *mod_name, const char *var_name)
 }
 
 // VM_SetFloat/VM_SetString/VM_SetVector usage:
-// mod_name = NULL to search global scope or a module name such as "hud", "math", etc
+// mod_name = nullptr to search global scope or a module name such as "hud", "math", etc
 // var_name = Variable name, without the module prefix, i.e. "custom_stbar" instead of "hud.custom_stbar"
-// value = Whatever is appropriate. SetString should allow a NULL string as this may be desired
+// value = Whatever is appropriate. SetString should allow a nullptr string as this may be desired
 
 void VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value)
 {
@@ -195,7 +195,7 @@ static void MATH_rint(coal::vm_c *vm, int argc)
     (void)argc;
 
     double val = *vm->AccessParam(0);
-    vm->ReturnFloat(I_ROUND(val));
+    vm->ReturnFloat(RoundToInt(val));
 }
 
 // math.floor(val)
@@ -461,7 +461,7 @@ void VM_QuitCoal()
     if (ui_vm)
     {
         delete ui_vm;
-        ui_vm = NULL;
+        ui_vm = nullptr;
     }
 }
 

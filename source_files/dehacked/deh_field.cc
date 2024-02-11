@@ -47,7 +47,7 @@
 #include "deh_sprites.h"
 #include "deh_system.h"
 #include "deh_weapons.h"
-
+#include "str_compare.h"
 namespace dehacked
 {
 

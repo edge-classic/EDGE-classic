@@ -116,17 +116,17 @@ class atkdef_c
     percent_t notracechance;
     percent_t keepfirechance;
 
-    // the MOBJ that is integrated with this attack, or NULL
+    // the MOBJ that is integrated with this attack, or nullptr
     const mobjtype_c *atk_mobj;
 
     // spawned object (for spawners).  The mobjdef pointer only becomes
-    // valid after DDF_AttackCleanUp().  Can be NULL.
+    // valid after DDF_AttackCleanUp().  Can be nullptr.
     const mobjtype_c *spawnedobj;
     std::string       spawnedobj_ref;
     int               spawn_limit;
 
     // puff object.  The mobjdef pointer only becomes valid after
-    // DDF_AttackCleanUp() has been called.  Can be NULL.
+    // DDF_AttackCleanUp() has been called.  Can be nullptr.
     const mobjtype_c *puff;
     std::string       puff_ref;
 

@@ -183,7 +183,7 @@ class image_c
         // when the animation flips over, it becomes cur->next.
         image_c *cur;
 
-        // next image in the animation, or NULL.
+        // next image in the animation, or nullptr.
         image_c *next;
 
         // tics before next anim change, or 0 if non-animated.
@@ -220,7 +220,7 @@ class image_c
 //
 typedef enum
 {
-    ILF_Null  = 0x0001, // return NULL rather than a dummy image
+    ILF_Null  = 0x0001, // return nullptr rather than a dummy image
     ILF_Exact = 0x0002, // type must be exactly the same
     ILF_NoNew = 0x0004, // image must already exist (don't create it)
     ILF_Font  = 0x0008, // font character (be careful with backups)
@@ -271,7 +271,7 @@ void W_MakeEdgeFlat(void);
 void W_MakeEdgeTex(void);
 
 #ifdef USING_GL_TYPES
-GLuint W_ImageCache(const image_c *image, bool anim = true, const colourmap_c *trans = NULL, bool do_whiten = false);
+GLuint W_ImageCache(const image_c *image, bool anim = true, const colourmap_c *trans = nullptr, bool do_whiten = false);
 #endif
 void W_ImagePreCache(const image_c *image);
 

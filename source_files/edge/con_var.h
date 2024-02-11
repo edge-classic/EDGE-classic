@@ -125,7 +125,7 @@ int CON_MatchAllVars(std::vector<const char *> &list, const char *pattern);
 // scan the program arguments and set matching cvars.
 void CON_HandleProgramArgs(void);
 
-// display value of matching cvars.  match can be NULL to match everything.
+// display value of matching cvars.  match can be nullptr to match everything.
 int CON_PrintVars(const char *match, bool show_default);
 
 // write all cvars to the config file.

@@ -182,5 +182,5 @@ DehackedResult DehackedRunConversion(ddf_collection_c *dest)
 void DehackedShutdown(void)
 {
     dehacked::Shutdown();
-    dehacked::wad::dest_container = NULL;
+    dehacked::wad::dest_container = nullptr;
 }

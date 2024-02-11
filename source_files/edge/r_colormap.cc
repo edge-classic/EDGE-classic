@@ -239,7 +239,7 @@ static void LoadColourmap(const colourmap_c *colm)
     if (colm->pack_name != "")
     {
         epi::File *f = W_OpenPackFile(colm->pack_name);
-        if (f == NULL)
+        if (f == nullptr)
             I_Error("No such colormap file: %s\n", colm->pack_name.c_str());
         size = f->GetLength();
         data = f->LoadIntoMemory();
@@ -267,7 +267,7 @@ const uint8_t *V_GetTranslationTable(const colourmap_c *colmap)
 {
     // Do we need to load or recompute this colourmap ?
 
-    if (colmap->cache.data == NULL)
+    if (colmap->cache.data == nullptr)
         LoadColourmap(colmap);
 
     return (const uint8_t *)colmap->cache.data;
@@ -401,7 +401,7 @@ void TransformColourmap(colourmap_c *colmap)
 {
     const uint8_t *table = colmap->cache.data;
 
-    if (table == NULL && (!colmap->lump_name.empty() || !colmap->pack_name.empty()))
+    if (table == nullptr && (!colmap->lump_name.empty() || !colmap->pack_name.empty()))
     {
         LoadColourmap(colmap);
 
@@ -770,7 +770,7 @@ class colormap_shader_c : public abstract_shader_c
     {
         image_data_c img(256, 64, 4);
 
-        const uint8_t *map    = NULL;
+        const uint8_t *map    = nullptr;
         int         length = 32;
 
         if (colmap && colmap->length > 0)
@@ -927,7 +927,7 @@ static colormap_shader_c *std_cmap_shader;
 abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props, int light_add, sector_t *sec)
 {
     if (!std_cmap_shader)
-        std_cmap_shader = new colormap_shader_c(NULL);
+        std_cmap_shader = new colormap_shader_c(nullptr);
 
     colormap_shader_c *shader = std_cmap_shader;
 
@@ -972,7 +972,7 @@ void DeleteColourmapTextures(void)
     if (std_cmap_shader)
         std_cmap_shader->DeleteTex();
 
-    std_cmap_shader = NULL;
+    std_cmap_shader = nullptr;
 
     for (auto cmap : colourmaps)
     {

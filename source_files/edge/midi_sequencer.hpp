@@ -180,7 +180,7 @@ class BW_MidiSequencer
          * @brief Sort events in this position
          * @param noteStates Buffer of currently pressed/released note keys in the track
          */
-        void sortEvents(bool *noteStates = NULL);
+        void sortEvents(bool *noteStates = nullptr);
     };
 
     /**
@@ -617,7 +617,7 @@ class BW_MidiSequencer
 
     /**
      * @brief Defines a handler for callback trigger events
-     * @param handler Handler to invoke from the sequencer when triggered, or NULL.
+     * @param handler Handler to invoke from the sequencer when triggered, or nullptr.
      * @param userData Instance of the library
      */
     void setTriggerHandler(TriggerHandler handler, void *userData);

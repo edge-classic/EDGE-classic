@@ -32,10 +32,10 @@ typedef struct angle_range_s
     struct angle_range_s *prev;
 } angle_range_t;
 
-static angle_range_t *occbuf_head = NULL;
-static angle_range_t *occbuf_tail = NULL;
+static angle_range_t *occbuf_head = nullptr;
+static angle_range_t *occbuf_tail = nullptr;
 
-static angle_range_t *free_range_chickens = NULL;
+static angle_range_t *free_range_chickens = nullptr;
 
 #ifdef DEBUG_OCC
 static void ValidateBuffer(void)
@@ -83,8 +83,8 @@ void RGL_1DOcclusionClear(void)
 
         free_range_chickens = occbuf_head;
 
-        occbuf_head = NULL;
-        occbuf_tail = NULL;
+        occbuf_head = nullptr;
+        occbuf_tail = nullptr;
     }
 
 #ifdef DEBUG_OCC
@@ -129,7 +129,7 @@ static inline void LinkBefore(angle_range_t *X, angle_range_t *N)
 
 static inline void LinkInTail(angle_range_t *N)
 {
-    N->next = NULL;
+    N->next = nullptr;
     N->prev = occbuf_tail;
 
     if (occbuf_tail)
@@ -154,7 +154,7 @@ static inline void RemoveRange(angle_range_t *R)
 
     // add it to the quick-alloc list
     R->next = free_range_chickens;
-    R->prev = NULL;
+    R->prev = nullptr;
 
     free_range_chickens = R;
 }

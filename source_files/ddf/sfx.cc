@@ -264,9 +264,9 @@ sfx_t *sfxdef_container_c::GetEffect(const char *name, bool error)
     sfxdef_c *last = nullptr;
     sfx_t    *r = nullptr;
 
-    // NULL Sound
-    if (!name || !name[0] || DDF_CompareName(name, "NULL") == 0)
-        return NULL;
+    // nullptr Sound
+    if (!name || !name[0] || DDF_CompareName(name, "nullptr") == 0)
+        return nullptr;
 
     // count them
     for (auto iter = rbegin(); iter != rend(); iter++)
@@ -286,7 +286,7 @@ sfx_t *sfxdef_container_c::GetEffect(const char *name, bool error)
         if (error)
             DDF_WarnError("Unknown SFX: '%.8s'\n", name);
 
-        return NULL;
+        return nullptr;
     }
 
     // -AJA- optimisation to save some memory
@@ -334,7 +334,7 @@ sfxdef_c *sfxdef_container_c::Lookup(const char *name)
             return s;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--- editor settings ---

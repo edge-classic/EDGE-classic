@@ -28,31 +28,13 @@ enum Endianness
 // Used to swap values.  Try to use superfast macros on systems
 // that support them, otherwise use regular C++ functions.
 #if defined(__GNUC__) || defined(__clang__)
-static inline uint16_t __Swap16(uint16_t n)
-{
-    return __builtin_bswap16(n);
-}
-static inline uint32_t __Swap32(uint32_t n)
-{
-    return __builtin_bswap32(n);
-}
-static inline uint64_t __Swap64(uint64_t n)
-{
-    return __builtin_bswap64(n);
-}
+static inline uint16_t __Swap16(uint16_t n) { return __builtin_bswap16(n); }
+static inline uint32_t __Swap32(uint32_t n) { return __builtin_bswap32(n); }
+static inline uint64_t __Swap64(uint64_t n) { return __builtin_bswap64(n); }
 #elif defined(_MSC_VER)
-static inline uint16_t __Swap16(uint16_t n)
-{
-    return _byteswap_ushort(n);
-}
-static inline uint32_t __Swap32(uint32_t n)
-{
-    return _byteswap_ulong(n);
-}
-static inline uint64_t __Swap64(uint64_t n)
-{
-    return _byteswap_uint64(n);
-}
+static inline uint16_t __Swap16(uint16_t n) { return _byteswap_ushort(n); }
+static inline uint32_t __Swap32(uint32_t n) { return _byteswap_ulong(n); }
+static inline uint64_t __Swap64(uint64_t n) { return _byteswap_uint64(n); }
 #else
 static inline uint16_t __Swap16(uint16_t n)
 {
@@ -85,112 +67,60 @@ static inline uint64_t __Swap64(uint64_t n)
 }
 #endif
 
-#if defined(__LITTLE_ENDIAN__) || defined(__i386__) || defined(__ia64__) || defined(WIN32) || defined(__alpha__) ||    \
-    defined(__alpha) || defined(__arm__) || (defined(__mips__) && defined(__MIPSEL__)) || defined(__SYMBIAN32__) ||    \
-    defined(__x86_64__) || defined(__arm64__) || defined(__aarch64__)
+#if defined(__LITTLE_ENDIAN__) || defined(__i386__) || defined(__ia64__) || \
+    defined(WIN32) || defined(__alpha__) || defined(__alpha) ||             \
+    defined(__arm__) || (defined(__mips__) && defined(__MIPSEL__)) ||       \
+    defined(__SYMBIAN32__) || defined(__x86_64__) || defined(__arm64__) ||  \
+    defined(__aarch64__)
 constexpr Endianness kByteOrder = kLittleEndian;
 
-inline uint16_t AlignedLittleEndianU16(const uint16_t x)
-{
-    return x;
-}
-inline int16_t AlignedLittleEndianS16(const uint16_t x)
-{
-    return (int16_t)x;
-}
-inline uint32_t AlignedLittleEndianU32(const uint32_t x)
-{
-    return x;
-}
-inline int32_t AlignedLittleEndianS32(const uint32_t x)
-{
-    return (int32_t)x;
-}
-inline uint64_t AlignedLittleEndianU64(const uint64_t x)
-{
-    return x;
-}
-inline int64_t AlignedLittleEndianS64(const uint64_t x)
-{
-    return (int64_t)x;
-}
+inline uint16_t AlignedLittleEndianU16(const uint16_t x) { return x; }
+inline int16_t  AlignedLittleEndianS16(const uint16_t x) { return (int16_t)x; }
+inline uint32_t AlignedLittleEndianU32(const uint32_t x) { return x; }
+inline int32_t  AlignedLittleEndianS32(const uint32_t x) { return (int32_t)x; }
+inline uint64_t AlignedLittleEndianU64(const uint64_t x) { return x; }
+inline int64_t  AlignedLittleEndianS64(const uint64_t x) { return (int64_t)x; }
 
-inline uint16_t AlignedBigEndianU16(const uint16_t x)
-{
-    return __Swap16(x);
-}
-inline int16_t AlignedBigEndianS16(const uint16_t x)
+inline uint16_t AlignedBigEndianU16(const uint16_t x) { return __Swap16(x); }
+inline int16_t  AlignedBigEndianS16(const uint16_t x)
 {
     return (int16_t)__Swap16(x);
 }
-inline uint32_t AlignedBigEndianU32(const uint32_t x)
-{
-    return __Swap32(x);
-}
-inline int32_t AlignedBigEndianS32(const uint32_t x)
+inline uint32_t AlignedBigEndianU32(const uint32_t x) { return __Swap32(x); }
+inline int32_t  AlignedBigEndianS32(const uint32_t x)
 {
     return (int32_t)__Swap32(x);
 }
-inline uint64_t AlignedBigEndianU64(const uint64_t x)
-{
-    return __Swap64(x);
-}
-inline int64_t AlignedBigEndianS64(const uint64_t x)
+inline uint64_t AlignedBigEndianU64(const uint64_t x) { return __Swap64(x); }
+inline int64_t  AlignedBigEndianS64(const uint64_t x)
 {
     return (int64_t)__Swap64(x);
 }
 #else
 constexpr Endianness kByteOrder = kBigEndian;
 
-inline uint16_t AlignedLittleEndianU16(const uint16_t x)
-{
-    return __Swap16(x);
-}
-inline int16_t AlignedLittleEndianS16(const uint16_t x)
+inline uint16_t AlignedLittleEndianU16(const uint16_t x) { return __Swap16(x); }
+inline int16_t  AlignedLittleEndianS16(const uint16_t x)
 {
     return (int16_t)__Swap16(x);
 }
-inline uint32_t AlignedLittleEndianU32(const uint32_t x)
-{
-    return __Swap32(x);
-}
-inline int32_t AlignedLittleEndianS32(const uint32_t x)
+inline uint32_t AlignedLittleEndianU32(const uint32_t x) { return __Swap32(x); }
+inline int32_t  AlignedLittleEndianS32(const uint32_t x)
 {
     return (int32_t)__Swap32(x);
 }
-inline uint64_t AlignedLittleEndianU64(const uint64_t x)
-{
-    return __Swap64(x);
-}
-inline int64_t AlignedLittleEndianS64(const uint64_t x)
+inline uint64_t AlignedLittleEndianU64(const uint64_t x) { return __Swap64(x); }
+inline int64_t  AlignedLittleEndianS64(const uint64_t x)
 {
     return (int64_t)__Swap64(x);
 }
 
-inline uint16_t AlignedBigEndianU16(const uint16_t x)
-{
-    return x;
-}
-inline int16_t AlignedBigEndianS16(const uint16_t x)
-{
-    return (int16_t)x;
-}
-inline uint32_t AlignedBigEndianU32(const uint32_t x)
-{
-    return x;
-}
-inline int32_t AlignedBigEndianS32(const uint32_t x)
-{
-    return (int32_t)x;
-}
-inline uint64_t AlignedBigEndianU64(const uint64_t x)
-{
-    return x;
-}
-inline int64_t AlignedBigEndianS64(const uint64_t x)
-{
-    return (int64_t)x;
-}
+inline uint16_t AlignedBigEndianU16(const uint16_t x) { return x; }
+inline int16_t  AlignedBigEndianS16(const uint16_t x) { return (int16_t)x; }
+inline uint32_t AlignedBigEndianU32(const uint32_t x) { return x; }
+inline int32_t  AlignedBigEndianS32(const uint32_t x) { return (int32_t)x; }
+inline uint64_t AlignedBigEndianU64(const uint64_t x) { return x; }
+inline int64_t  AlignedBigEndianS64(const uint64_t x) { return (int64_t)x; }
 #endif
 
 namespace epi
@@ -233,7 +163,7 @@ inline int32_t UnalignedBigEndianS32(const uint8_t *p)
     return (int32_t)UnalignedBigEndianU32(p);
 }
 
-} // namespace epi
+}  // namespace epi
 
 #endif /* __EPI_ENDIAN_H__ */
 

@@ -78,7 +78,7 @@ class newgame_params_c
     playerflag_e players[MAXPLAYERS];
     net_node_c  *nodes[MAXPLAYERS];
 
-    gameflags_t *flags; // can be NULL
+    gameflags_t *flags; // can be nullptr
 
     bool level_skip = false;
 

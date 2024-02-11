@@ -19,9 +19,12 @@
 // Font Setup and Parser Code
 //
 
+#include <string.h>
+
 #include "local.h"
 
 #include "font.h"
+#include "str_compare.h"
 
 static fontdef_c *dynamic_font;
 
@@ -218,7 +221,7 @@ static void DDF_FontGetPatch(const char *info, void *storage)
         DDF_Error("Malformed font patch: %s\n", info);
 
     // find dividing colon
-    char *colon = NULL;
+    char *colon = nullptr;
 
     if (strlen(range_buf) > 1)
         colon = (char *)DDF_MainDecodeList(range_buf, ':', true);
@@ -252,7 +255,7 @@ static void DDF_FontGetPatch(const char *info, void *storage)
 
 // ---> fontpatch_c class
 
-fontpatch_c::fontpatch_c(int _ch1, int _ch2, const char *_pat1) : next(NULL), char1(_ch1), char2(_ch2), patch1(_pat1)
+fontpatch_c::fontpatch_c(int _ch1, int _ch2, const char *_pat1) : next(nullptr), char1(_ch1), char2(_ch2), patch1(_pat1)
 {
 }
 
@@ -290,7 +293,7 @@ void fontdef_c::CopyDetail(const fontdef_c &src)
 void fontdef_c::Default()
 {
     type    = FNTYP_Patch;
-    patches = NULL;
+    patches = nullptr;
     image_name.clear();
     missing_patch.clear();
     ttf_name.clear();
@@ -306,7 +309,7 @@ void fontdef_c::Default()
 fontdef_c *fontdef_container_c::Lookup(const char *refname)
 {
     if (!refname || !refname[0])
-        return NULL;
+        return nullptr;
 
     for (auto iter = begin(); iter != end(); iter++)
     {
@@ -315,7 +318,7 @@ fontdef_c *fontdef_container_c::Lookup(const char *refname)
             return fnt;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //
@@ -327,7 +330,7 @@ void DDF_MainLookupFont(const char *info, void *storage)
 
     *dest = fontdefs.Lookup(info);
 
-    if (*dest == NULL)
+    if (*dest == nullptr)
         DDF_Error("Unknown font: %s\n", info);
 }
 

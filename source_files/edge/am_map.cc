@@ -46,7 +46,7 @@
 #include <math.h>
 
 #include "AlmostEquals.h"
-
+#include "str_compare.h"
 #define DEBUG_TRUEBSP 0
 #define DEBUG_COLLIDE 0
 

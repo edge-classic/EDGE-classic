@@ -32,7 +32,7 @@
 #include "w_files.h"
 #include "w_texture.h"
 #include "w_wad.h"
-
+#include "str_compare.h"
 extern std::string game_base;
 
 class texture_set_c
@@ -116,7 +116,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
     }
     else
     {
-        maptex2      = NULL;
+        maptex2      = nullptr;
         numtextures2 = 0;
         maxoff2      = 0;
     }
@@ -276,7 +276,7 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
     }
     else
     {
-        maptex2      = NULL;
+        maptex2      = nullptr;
         numtextures2 = 0;
         maxoff2      = 0;
     }
@@ -392,7 +392,7 @@ void W_InitTextures(void)
     int num_files = W_GetNumFiles();
     int file;
 
-    texturedef_t **textures = NULL;
+    texturedef_t **textures = nullptr;
     texturedef_t **cur;
     int            numtextures = 0;
 
@@ -471,14 +471,14 @@ void W_InitTextures(void)
 
         if (strcmp(a->name, b->name) == 0)
         {
-            textures[k - 1] = NULL;
+            textures[k - 1] = nullptr;
         }
     }
 
 #if 0 // DEBUGGING
 	for (j=0; j < numtextures; j++)
 	{
-		if (textures[j] == NULL)
+		if (textures[j] == nullptr)
 		{
 			L_WriteDebug("TEXTURE #%d was a dupicate\n", j);
 			continue;

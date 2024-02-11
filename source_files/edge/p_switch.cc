@@ -57,7 +57,7 @@ static void StartButton(switchdef_c *sw, line_t *line, bwhere_e w, const image_c
     if (P_ButtonIsPressed(line))
         return;
 
-    button_t *b = NULL;
+    button_t *b = nullptr;
 
     std::vector<button_t *>::iterator BI;
 

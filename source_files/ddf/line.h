@@ -728,7 +728,7 @@ class linetype_c
     // Teleporter
     teleportdef_c t;
 
-    // Lobo: item to spawn (or NULL).  The mobjdef pointer is only valid after
+    // Lobo: item to spawn (or nullptr).  The mobjdef pointer is only valid after
     //  DDF_MobjCleanUp() has been called.
     const mobjtype_c *effectobject;
     std::string       effectobject_ref;

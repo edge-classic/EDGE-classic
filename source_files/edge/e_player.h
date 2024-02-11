@@ -162,7 +162,7 @@ typedef struct player_s
     // miscellaneous flags
     int playerflags;
 
-    // map object that this player controls.  Will be NULL outside of a
+    // map object that this player controls.  Will be nullptr outside of a
     // level (e.g. on the intermission screen).
     mobj_t *mo;
 
@@ -265,7 +265,7 @@ typedef struct player_s
     int damagecount;
     int bonuscount;
 
-    // Who did damage (NULL for floors/ceilings).
+    // Who did damage (nullptr for floors/ceilings).
     mobj_t *attacker;
 
     // how much damage was done (used for status bar)
@@ -328,7 +328,7 @@ typedef struct player_s
 
     int in_tic; /* tic number of next input command expected */
 
-    // node is NULL for players and bots on the same computer,
+    // node is nullptr for players and bots on the same computer,
     // otherwise is the networking info for the remote computer.
     net_node_c *node;
 

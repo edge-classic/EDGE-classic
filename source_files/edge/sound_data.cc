@@ -18,11 +18,11 @@
 
 #include "epi.h"
 #include "sound_data.h"
-
+#include "HandmadeMath.h"
 #include <vector>
 
 sound_data_c::sound_data_c()
-    : length(0), freq(0), mode(0), data_L(NULL), data_R(NULL), fx_data_L(NULL), fx_data_R(NULL), priv_data(NULL),
+    : length(0), freq(0), mode(0), data_L(nullptr), data_R(nullptr), fx_data_L(nullptr), fx_data_R(nullptr), priv_data(nullptr),
       ref_count(0), is_sfx(false), current_mix(SFX_None), reverbed_room_size(RM_None), current_ddf_ratio(0),
       current_ddf_delay(0), current_ddf_type(0), reverb_is_outdoors(false)
 {
@@ -43,8 +43,8 @@ void sound_data_c::Free()
     if (data_L)
         delete[] data_L;
 
-    data_L = NULL;
-    data_R = NULL;
+    data_L = nullptr;
+    data_R = nullptr;
 
     Free_FX();
 }
@@ -57,8 +57,8 @@ void sound_data_c::Free_FX()
     if (fx_data_L)
         delete[] fx_data_L;
 
-    fx_data_L = NULL;
-    fx_data_R = NULL;
+    fx_data_L = nullptr;
+    fx_data_R = nullptr;
 }
 
 void sound_data_c::Allocate(int samples, int buf_mode)
@@ -138,7 +138,7 @@ void sound_data_c::Mix_Submerged()
             }
             current_mix = SFX_Submerged;
             delete[] reverb_buffer_L;
-            reverb_buffer_L = NULL;
+            reverb_buffer_L = nullptr;
             break;
 
         case SBUF_Stereo:
@@ -169,8 +169,8 @@ void sound_data_c::Mix_Submerged()
             current_mix = SFX_Submerged;
             delete[] reverb_buffer_L;
             delete[] reverb_buffer_R;
-            reverb_buffer_L = NULL;
-            reverb_buffer_R = NULL;
+            reverb_buffer_L = nullptr;
+            reverb_buffer_R = nullptr;
             break;
 
         case SBUF_Interleaved:
@@ -192,7 +192,7 @@ void sound_data_c::Mix_Submerged()
             }
             current_mix = SFX_Submerged;
             delete[] reverb_buffer_L;
-            reverb_buffer_L = NULL;
+            reverb_buffer_L = nullptr;
             break;
         }
     }
@@ -294,7 +294,7 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
                 current_ddf_type   = ddf_reverb_type;
                 reverbed_room_size = RM_None;
                 delete[] reverb_buffer_L;
-                reverb_buffer_L = NULL;
+                reverb_buffer_L = nullptr;
                 break;
 
             case SBUF_Stereo:
@@ -333,8 +333,8 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
                 reverbed_room_size = RM_None;
                 delete[] reverb_buffer_L;
                 delete[] reverb_buffer_R;
-                reverb_buffer_L = NULL;
-                reverb_buffer_R = NULL;
+                reverb_buffer_L = nullptr;
+                reverb_buffer_R = nullptr;
                 break;
 
             case SBUF_Interleaved:
@@ -361,7 +361,7 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
                 current_ddf_type   = ddf_reverb_type;
                 reverbed_room_size = RM_None;
                 delete[] reverb_buffer_L;
-                reverb_buffer_L = NULL;
+                reverb_buffer_L = nullptr;
                 break;
             }
         }
@@ -423,7 +423,7 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
                 else
                     reverb_is_outdoors = false;
                 delete[] reverb_buffer_L;
-                reverb_buffer_L = NULL;
+                reverb_buffer_L = nullptr;
                 break;
 
             case SBUF_Stereo:
@@ -463,8 +463,8 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
                     reverb_is_outdoors = false;
                 delete[] reverb_buffer_L;
                 delete[] reverb_buffer_R;
-                reverb_buffer_L = NULL;
-                reverb_buffer_R = NULL;
+                reverb_buffer_L = nullptr;
+                reverb_buffer_R = nullptr;
                 break;
 
             case SBUF_Interleaved:
@@ -492,7 +492,7 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
                 else
                     reverb_is_outdoors = false;
                 delete[] reverb_buffer_L;
-                reverb_buffer_L = NULL;
+                reverb_buffer_L = nullptr;
                 break;
             }
         }

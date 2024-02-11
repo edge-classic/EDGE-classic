@@ -37,7 +37,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "str_util.h"
-
+#include "str_compare.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_input.h"
@@ -63,10 +63,10 @@
 #include "w_wad.h"
 
 // Static Scripts.  Never change once all scripts have been read in.
-rad_script_t *r_scripts = NULL;
+rad_script_t *r_scripts = nullptr;
 
 // Dynamic Triggers.  These only exist for the current level.
-rad_trigger_t *active_triggers = NULL;
+rad_trigger_t *active_triggers = nullptr;
 
 class rts_menu_c
 {
@@ -245,7 +245,7 @@ class rts_menu_c
 
 // RTS menu active ?
 bool               rts_menuactive = false;
-static rts_menu_c *rts_curr_menu  = NULL;
+static rts_menu_c *rts_curr_menu  = nullptr;
 
 rad_script_t *RAD_FindScriptByName(const char *map_name, const char *name)
 {
@@ -253,7 +253,7 @@ rad_script_t *RAD_FindScriptByName(const char *map_name, const char *name)
 
     for (scr = r_scripts; scr; scr = scr->next)
     {
-        if (scr->script_name == NULL)
+        if (scr->script_name == nullptr)
             continue;
 
         if (strcmp(scr->mapid, map_name) != 0)
@@ -264,7 +264,7 @@ rad_script_t *RAD_FindScriptByName(const char *map_name, const char *name)
     }
 
     I_Error("RTS: No such script `%s' on map %s.\n", name, map_name);
-    return NULL;
+    return nullptr;
 }
 
 rad_trigger_t *RAD_FindTriggerByName(const char *name)
@@ -273,7 +273,7 @@ rad_trigger_t *RAD_FindTriggerByName(const char *name)
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
-        if (trig->info->script_name == NULL)
+        if (trig->info->script_name == nullptr)
             continue;
 
         if (DDF_CompareName(trig->info->script_name, name) == 0)
@@ -281,7 +281,7 @@ rad_trigger_t *RAD_FindTriggerByName(const char *name)
     }
 
     I_Warning("RTS: No such trigger `%s'.\n", name);
-    return NULL;
+    return nullptr;
 }
 
 rad_trigger_t *RAD_FindTriggerByScript(const rad_script_t *scr)
@@ -294,7 +294,7 @@ rad_trigger_t *RAD_FindTriggerByScript(const rad_script_t *scr)
             return trig;
     }
 
-    return NULL; // no worries if none.
+    return nullptr; // no worries if none.
 }
 
 rts_state_t *RAD_FindStateByLabel(rad_script_t *scr, char *label)
@@ -303,7 +303,7 @@ rts_state_t *RAD_FindStateByLabel(rad_script_t *scr, char *label)
 
     for (st = scr->first_state; st; st = st->next)
     {
-        if (st->label == NULL)
+        if (st->label == nullptr)
             continue;
 
         if (DDF_CompareName(st->label, label) == 0)
@@ -311,7 +311,7 @@ rts_state_t *RAD_FindStateByLabel(rad_script_t *scr, char *label)
     }
 
     // NOTE: no error message, unlike the other Find funcs
-    return NULL;
+    return nullptr;
 }
 
 void RAD_ClearWUDsByMap(const std::string &mapname)
@@ -337,7 +337,7 @@ void RAD_ClearWUDsByMap(const std::string &mapname)
 //
 // Looks for all current triggers with the given tag number, and
 // either enables them or disables them (based on `disable').
-// Actor can be NULL.
+// Actor can be nullptr.
 //
 void RAD_EnableByTag(mobj_t *actor, uint32_t tag, bool disable, s_tagtype_e tagtype)
 {
@@ -368,7 +368,7 @@ void RAD_EnableByTag(mobj_t *actor, uint32_t tag, bool disable, s_tagtype_e tagt
 //
 // Looks for all current triggers based on a hash of the given string, and
 // either enables them or disables them (based on `disable').
-// Actor can be NULL.
+// Actor can be nullptr.
 //
 void RAD_EnableByTag(mobj_t *actor, const char *name, bool disable)
 {
@@ -401,7 +401,7 @@ void RAD_EnableByTag(mobj_t *actor, const char *name, bool disable)
 //
 // Looks for all current triggers based on a hash of the given string, and
 // check if it is active).
-// Actor can be NULL.
+// Actor can be nullptr.
 //
 bool RAD_IsActiveByTag(mobj_t *actor, const char *name)
 {
@@ -548,13 +548,13 @@ static bool RAD_CheckBossTrig(rad_trigger_t *trig, s_ondeath_t *cond)
         {
             cond->cached_info = mobjtypes.Lookup(cond->thing_type);
 
-            if (cond->cached_info == NULL)
+            if (cond->cached_info == nullptr)
                 I_Error("RTS ONDEATH: Unknown thing type %d.\n", cond->thing_type);
         }
     }
 
     // scan the remaining mobjs to see if all bosses are dead
-    for (mo = mobjlisthead; mo != NULL; mo = mo->next)
+    for (mo = mobjlisthead; mo != nullptr; mo = mo->next)
     {
         if (seen_monsters.count(cond->cached_info) == 0)
             return false; // Never on map?
@@ -629,7 +629,7 @@ bool RAD_CheckReachedTrigger(mobj_t *thing)
 
     if (scr->next_path_total == 0)
     {
-        thing->path_trigger = NULL;
+        thing->path_trigger = nullptr;
         return true;
     }
     else if (scr->next_path_total == 1)
@@ -742,7 +742,7 @@ void RAD_RunTriggers(void)
                     if (!RAD_CheckHeightTrig(trig, cur))
                         break;
 
-                // if they all succeeded, then cur will be NULL...
+                // if they all succeeded, then cur will be nullptr...
                 if (cur)
                     continue;
             }
@@ -756,7 +756,7 @@ void RAD_RunTriggers(void)
                     if (!RAD_CheckBossTrig(trig, cur))
                         break;
 
-                // if they all succeeded, then cur will be NULL...
+                // if they all succeeded, then cur will be nullptr...
                 if (cur)
                     continue;
             }
@@ -855,7 +855,7 @@ void RAD_GroupTriggerTags(rad_trigger_t *trig)
 {
     rad_trigger_t *cur;
 
-    trig->tag_next = trig->tag_prev = NULL;
+    trig->tag_next = trig->tag_prev = nullptr;
 
     // find first trigger with the same tag #
     for (cur = active_triggers; cur; cur = cur->next)
@@ -928,7 +928,7 @@ void RAD_SpawnTriggers(const char *map_name)
 
         // link it in
         trig->next = active_triggers;
-        trig->prev = NULL;
+        trig->prev = nullptr;
 
         if (active_triggers)
             active_triggers->prev = trig;
@@ -948,13 +948,13 @@ static void RAD_ClearCachedInfo(void)
         // clear ONDEATH cached info
         for (d_cur = scr->boss_trig; d_cur; d_cur = d_cur->next)
         {
-            d_cur->cached_info = NULL;
+            d_cur->cached_info = nullptr;
         }
 
         // clear ONHEIGHT cached info
         for (h_cur = scr->height_trig; h_cur; h_cur = h_cur->next)
         {
-            h_cur->cached_sector = NULL;
+            h_cur->cached_sector = nullptr;
         }
     }
 }
@@ -984,7 +984,7 @@ void RAD_StartMenu(rad_trigger_t *R, s_show_menu_t *menu)
     SYS_ASSERT(!rts_menuactive);
 
     // find the right style
-    styledef_c *def = NULL;
+    styledef_c *def = nullptr;
 
     if (R->menu_style_name)
         def = styledefs.Lookup(R->menu_style_name);
@@ -1015,7 +1015,7 @@ void RAD_FinishMenu(int result)
 
     delete rts_curr_menu;
 
-    rts_curr_menu  = NULL;
+    rts_curr_menu  = nullptr;
     rts_menuactive = false;
 }
 

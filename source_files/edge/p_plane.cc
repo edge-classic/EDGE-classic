@@ -34,7 +34,7 @@
 #include "s_sound.h"
 
 #include "AlmostEquals.h"
-
+#include "str_compare.h"
 #include <algorithm>
 
 typedef enum
@@ -537,7 +537,7 @@ static sector_t *P_GSS(sector_t *sec, float dest, bool forc)
             {
                 sector = P_GetSector(secnum, i, 1);
 
-                if (SECPIC(sector, forc, NULL) != SECPIC(sec, forc, NULL) && AlmostEquals(HEIGHT(sector, forc), dest))
+                if (SECPIC(sector, forc, nullptr) != SECPIC(sec, forc, nullptr) && AlmostEquals(HEIGHT(sector, forc), dest))
                 {
                     return sector;
                 }
@@ -546,7 +546,7 @@ static sector_t *P_GSS(sector_t *sec, float dest, bool forc)
             {
                 sector = P_GetSector(secnum, i, 0);
 
-                if (SECPIC(sector, forc, NULL) != SECPIC(sec, forc, NULL) && AlmostEquals(HEIGHT(sector, forc), dest))
+                if (SECPIC(sector, forc, nullptr) != SECPIC(sec, forc, nullptr) && AlmostEquals(HEIGHT(sector, forc), dest))
                 {
                     return sector;
                 }
@@ -576,7 +576,7 @@ static sector_t *P_GSS(sector_t *sec, float dest, bool forc)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static sector_t *P_GetSectorSurrounding(sector_t *sec, float dest, bool forc)
@@ -685,21 +685,21 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
             {
                 if (def->tex.size() == 1) // Only '-'; do both (default)
                 {
-                    plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
+                    plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
                     plane->newspecial = model->props.special ? model->props.special->number : 0;
                 }
                 else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changezero") == 0)
                 {
-                    plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
+                    plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
                     plane->newspecial = 0;
                 }
                 else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changetexonly") == 0)
                 {
-                    plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                    plane->new_image = SECPIC(model, def->is_ceiling, nullptr);
                 }
                 else // Unknown directive after '-'; just do default
                 {
-                    plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
+                    plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
                     plane->newspecial = model->props.special ? model->props.special->number : 0;
                 }
                 SECPIC(sector, def->is_ceiling, plane->new_image);
@@ -713,7 +713,7 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
         {
             if (model)
             {
-                if (SECPIC(model, def->is_ceiling, NULL) == SECPIC(sector, def->is_ceiling, NULL))
+                if (SECPIC(model, def->is_ceiling, nullptr) == SECPIC(sector, def->is_ceiling, nullptr))
                 {
                     model = P_GetSectorSurrounding(model, plane->destheight, def->is_ceiling);
                 }
@@ -723,21 +723,21 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
             {
                 if (def->tex.size() == 1) // Only '+'; do both (default)
                 {
-                    plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
+                    plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
                     plane->newspecial = model->props.special ? model->props.special->number : 0;
                 }
                 else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changezero") == 0)
                 {
-                    plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
+                    plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
                     plane->newspecial = 0;
                 }
                 else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changetexonly") == 0)
                 {
-                    plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                    plane->new_image = SECPIC(model, def->is_ceiling, nullptr);
                 }
                 else // Unknown directive after '+'; just do default
                 {
-                    plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
+                    plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
                     plane->newspecial = model->props.special ? model->props.special->number : 0;
                 }
 
@@ -756,9 +756,9 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
         }
 
         if (def->is_ceiling)
-            sector->ceil_move = NULL;
+            sector->ceil_move = nullptr;
         else
-            sector->floor_move = NULL;
+            sector->floor_move = nullptr;
 
         plane->nukeme = true;
 
@@ -767,7 +767,7 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
 
     plane->tag         = sector->tag;
     plane->type        = def;
-    plane->new_image   = SECPIC(sector, def->is_ceiling, NULL);
+    plane->new_image   = SECPIC(sector, def->is_ceiling, nullptr);
     plane->newspecial  = -1;
     plane->is_ceiling  = def->is_ceiling;
     plane->is_elevator = (def->type == mov_Elevator);
@@ -789,21 +789,21 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
         {
             if (def->tex.size() == 1) // Only '-'; do both (default)
             {
-                plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
+                plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
                 plane->newspecial = model->props.special ? model->props.special->number : 0;
             }
             else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changezero") == 0)
             {
-                plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
+                plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
                 plane->newspecial = 0;
             }
             else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changetexonly") == 0)
             {
-                plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                plane->new_image = SECPIC(model, def->is_ceiling, nullptr);
             }
             else // Unknown directive after '-'; just do default
             {
-                plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
+                plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
                 plane->newspecial = model->props.special ? model->props.special->number : 0;
             }
         }
@@ -821,7 +821,7 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
     {
         if (model)
         {
-            if (SECPIC(model, def->is_ceiling, NULL) == SECPIC(sector, def->is_ceiling, NULL))
+            if (SECPIC(model, def->is_ceiling, nullptr) == SECPIC(sector, def->is_ceiling, nullptr))
             {
                 model = P_GetSectorSurrounding(model, plane->destheight, def->is_ceiling);
             }
@@ -831,21 +831,21 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
         {
             if (def->tex.size() == 1) // Only '+'; do both (default)
             {
-                plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
+                plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
                 plane->newspecial = model->props.special ? model->props.special->number : 0;
             }
             else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changezero") == 0)
             {
-                plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
+                plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
                 plane->newspecial = 0;
             }
             else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changetexonly") == 0)
             {
-                plane->new_image = SECPIC(model, def->is_ceiling, NULL);
+                plane->new_image = SECPIC(model, def->is_ceiling, nullptr);
             }
             else // Unknown directive after '+'; just do default
             {
-                plane->new_image  = SECPIC(model, def->is_ceiling, NULL);
+                plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
                 plane->newspecial = model->props.special ? model->props.special->number : 0;
             }
 
@@ -1261,12 +1261,12 @@ static bool MoveSlider(slider_move_t *smov)
                 line_t *ld = smov->line;
 
                 // clear line special
-                ld->slide_door = NULL;
-                ld->special    = NULL;
+                ld->slide_door = nullptr;
+                ld->special    = nullptr;
 
                 // clear the side textures
-                ld->side[0]->middle.image = NULL;
-                ld->side[1]->middle.image = NULL;
+                ld->side[0]->middle.image = nullptr;
+                ld->side[1]->middle.image = nullptr;
 
                 return true; // REMOVE ME
             }
@@ -1314,12 +1314,12 @@ static bool MoveSlider(slider_move_t *smov)
                     line_t *ld = smov->line;
 
                     // clear line special
-                    ld->slide_door = NULL;
-                    ld->special    = NULL;
+                    ld->slide_door = nullptr;
+                    ld->special    = nullptr;
 
                     // clear the side textures
-                    ld->side[0]->middle.image = NULL;
-                    ld->side[1]->middle.image = NULL;
+                    ld->side[0]->middle.image = nullptr;
+                    ld->side[1]->middle.image = nullptr;
 
                     return true; // REMOVE ME
                 }
@@ -1586,12 +1586,12 @@ void P_RunActivePlanes(void)
             }
 
             if (pmov->is_ceiling || pmov->is_elevator)
-                pmov->sector->ceil_move = NULL;
+                pmov->sector->ceil_move = nullptr;
 
             if (!pmov->is_ceiling)
-                pmov->sector->floor_move = NULL;
+                pmov->sector->floor_move = nullptr;
 
-            *PMI = NULL;
+            *PMI = nullptr;
             delete pmov;
 
             removed_plane = true;
@@ -1602,7 +1602,7 @@ void P_RunActivePlanes(void)
     {
         std::vector<plane_move_t *>::iterator ENDP;
 
-        ENDP = std::remove(active_planes.begin(), active_planes.end(), (plane_move_t *)NULL);
+        ENDP = std::remove(active_planes.begin(), active_planes.end(), (plane_move_t *)nullptr);
 
         active_planes.erase(ENDP, active_planes.end());
     }
@@ -1623,9 +1623,9 @@ void P_RunActiveSliders(void)
 
         if (MoveSlider(smov))
         {
-            smov->line->slider_move = NULL;
+            smov->line->slider_move = nullptr;
 
-            *SMI = NULL;
+            *SMI = nullptr;
             delete smov;
 
             removed_slider = true;
@@ -1636,7 +1636,7 @@ void P_RunActiveSliders(void)
     {
         std::vector<slider_move_t *>::iterator ENDP;
 
-        ENDP = std::remove(active_sliders.begin(), active_sliders.end(), (slider_move_t *)NULL);
+        ENDP = std::remove(active_sliders.begin(), active_sliders.end(), (slider_move_t *)nullptr);
 
         active_sliders.erase(ENDP, active_sliders.end());
     }

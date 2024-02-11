@@ -44,7 +44,7 @@ class gather_chunk_c
 
 //----------------------------------------------------------------------------
 
-sound_gather_c::sound_gather_c() : chunks(), total_samples(0), request(NULL)
+sound_gather_c::sound_gather_c() : chunks(), total_samples(0), request(nullptr)
 {
 }
 
@@ -84,7 +84,7 @@ void sound_gather_c::CommitChunk(int actual_samples)
     total_samples += actual_samples;
 
     chunks.push_back(request);
-    request = NULL;
+    request = nullptr;
 }
 
 void sound_gather_c::DiscardChunk()
@@ -92,7 +92,7 @@ void sound_gather_c::DiscardChunk()
     SYS_ASSERT(request);
 
     delete request;
-    request = NULL;
+    request = nullptr;
 }
 
 bool sound_gather_c::Finalise(sound_data_c *buf, bool want_stereo)

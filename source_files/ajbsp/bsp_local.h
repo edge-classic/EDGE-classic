@@ -20,8 +20,9 @@
 
 #pragma once
 
-#include "bsp.h"
+#include <vector>
 
+#include "bsp.h"
 namespace ajbsp
 {
 
@@ -73,7 +74,7 @@ class Vertex
     // when building normal nodes, unused vertices will be pruned.
     bool is_used_;
 
-    // usually NULL, unless this vertex occupies the same location as a
+    // usually nullptr, unless this vertex occupies the same location as a
     // previous vertex.
     Vertex *overlap_;
 
@@ -105,7 +106,7 @@ struct Sector
 
 struct Sidedef
 {
-    // adjacent sector.  Can be NULL (invalid sidedef)
+    // adjacent sector.  Can be nullptr (invalid sidedef)
     Sector *sector;
 
     // sidedef index.  Always valid after loading & pruning.
@@ -121,7 +122,7 @@ struct Linedef
     Vertex *end;    // ... to this vertex
 
     Sidedef *right;  // right sidedef
-    Sidedef *left;   // left sidede, or NULL if none
+    Sidedef *left;   // left sidede, or nullptr if none
 
     int type;
 
@@ -137,7 +138,7 @@ struct Linedef
     // sector is the same on both sides
     bool self_referencing;
 
-    // normally NULL, except when this linedef directly overlaps an earlier
+    // normally nullptr, except when this linedef directly overlaps an earlier
     // one (a rarely-used trick to create higher mid-masked textures).
     // No segs should be created for these overlapping linedefs.
     Linedef *overlap;
@@ -168,13 +169,13 @@ class Seg
     Vertex *start_;  // from this vertex...
     Vertex *end_;    // ... to this vertex
 
-    // linedef that this seg goes along, or NULL if miniseg
+    // linedef that this seg goes along, or nullptr if miniseg
     Linedef *linedef_;
 
     // 0 for right, 1 for left
     int side_;
 
-    // seg on other side, or NULL if one-sided.  This relationship is
+    // seg on other side, or nullptr if one-sided.  This relationship is
     // always one-to-one -- if one of the segs is split, the partner seg
     // must also be split.
     Seg *partner_;
@@ -190,7 +191,7 @@ class Seg
     // won't be any of these when writing the V2 GL_SEGS lump].
     bool is_degenerate_;
 
-    // the quad-tree node that contains this seg, or NULL if the seg
+    // the quad-tree node that contains this seg, or nullptr if the seg
     // is now in a subsector.
     QuadTree *quad_;
 
@@ -270,7 +271,7 @@ struct BoundingBox
 
 struct Child
 {
-    // child node or subsector (one must be NULL)
+    // child node or subsector (one must be nullptr)
     Node      *node;
     Subsector *subsec;
 
@@ -311,7 +312,7 @@ class QuadTree
     int x1_, y1_;
     int x2_, y2_;
 
-    // sub-trees.  NULL for leaf nodes.
+    // sub-trees.  nullptr for leaf nodes.
     // [0] has the lower coordinates, and [1] has the higher coordinates.
     // Division of a square always occurs horizontally (e.g. 512x512 ->
     // 256x512).
@@ -460,9 +461,9 @@ Seg *CreateSegs(void);
 
 // takes the seg list and determines if it is convex.  When it is, the
 // segs are converted to a subsector, and '*S' is the new subsector
-// (and '*N' is set to NULL).  Otherwise the seg list is divided into
+// (and '*N' is set to nullptr).  Otherwise the seg list is divided into
 // two halves, a node is created by calling this routine recursively,
-// and '*N' is the new node (and '*S' is set to NULL).  Normally
+// and '*N' is the new node (and '*S' is set to nullptr).  Normally
 // returns kBuildOK, or BUILD_Cancelled if user stopped it.
 BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */,
                        Node **N, Subsector **S);

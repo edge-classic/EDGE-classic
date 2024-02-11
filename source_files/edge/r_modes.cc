@@ -92,7 +92,7 @@ static scrmode_c *R_FindResolution(int w, int h, int depth, int display_mode)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //
@@ -178,7 +178,7 @@ bool R_IncrementResolution(scrmode_c *mode, int what, int dir)
         return true;
     }
 
-    scrmode_c *best      = NULL;
+    scrmode_c *best      = nullptr;
     int        best_diff = (1 << 30);
 
     for (int i = 0; i < (int)screen_modes.size(); i++)

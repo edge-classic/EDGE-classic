@@ -41,7 +41,7 @@ static int luaopen_debugger(lua_State *lua){
     delete file;
 
 	if(
-		luaL_loadbufferx(lua, debugger_source.c_str(), debugger_source.length(), "<debugger.lua>", NULL) ||
+		luaL_loadbufferx(lua, debugger_source.c_str(), debugger_source.length(), "<debugger.lua>", nullptr) ||
 		lua_pcall(lua, 0, LUA_MULTRET, 0)
 	) lua_error(lua);
 	
@@ -89,7 +89,7 @@ void dbg_setup(lua_State *lua, const char *name, const char *globalName, lua_CFu
 }
 
 void dbg_setup_default(lua_State *lua){
-	dbg_setup(lua, "debugger", "dbg", NULL, NULL);
+	dbg_setup(lua, "debugger", "dbg", nullptr, nullptr);
 }
 
 int dbg_pcall(lua_State *lua, int nargs, int nresults, int msgh){

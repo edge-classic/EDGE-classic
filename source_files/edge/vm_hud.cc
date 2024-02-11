@@ -54,7 +54,7 @@ extern image_data_c *ReadAsEpiBlock(image_c *rim);
 
 extern image_data_c *R_PalettisedToRGB(image_data_c *src, const uint8_t *palette, int opacity);
 
-player_t *ui_hud_who = NULL;
+player_t *ui_hud_who = nullptr;
 
 extern player_t *ui_player_who;
 
@@ -727,7 +727,7 @@ static void HD_set_render_who(coal::vm_c *vm, int argc)
         do
         {
             who = (who + 1) % MAXPLAYERS;
-        } while (players[who] == NULL);
+        } while (players[who] == nullptr);
     }
 
     ui_hud_who = players[who];
@@ -852,7 +852,7 @@ static void HD_get_average_hue(coal::vm_c *vm, int argc)
     image_data_c *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     uint8_t *temp_rgb = new uint8_t[3];
-    tmp_img_data->AverageHue(temp_rgb, NULL, from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
+    tmp_img_data->AverageHue(temp_rgb, nullptr, from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                              to_y ? *to_y : 1000000);
     rgb[0] = temp_rgb[0];
     rgb[1] = temp_rgb[1];
@@ -912,7 +912,7 @@ static void HD_rts_enable(coal::vm_c *vm, int argc)
     std::string name = vm->AccessParamString(0);
 
     if (!name.empty())
-        RAD_EnableByTag(NULL, name.c_str(), false);
+        RAD_EnableByTag(nullptr, name.c_str(), false);
 }
 
 // hud.rts_disable(tag)
@@ -924,7 +924,7 @@ static void HD_rts_disable(coal::vm_c *vm, int argc)
     std::string name = vm->AccessParamString(0);
 
     if (!name.empty())
-        RAD_EnableByTag(NULL, name.c_str(), true);
+        RAD_EnableByTag(nullptr, name.c_str(), true);
 }
 
 // hud.rts_isactive(tag)
@@ -937,7 +937,7 @@ static void HD_rts_isactive(coal::vm_c *vm, int argc)
 
     if (!name.empty())
     {
-        if (RAD_IsActiveByTag(NULL, name.c_str()))
+        if (RAD_IsActiveByTag(nullptr, name.c_str()))
             vm->ReturnFloat(1);
         else
             vm->ReturnFloat(0);
@@ -1062,7 +1062,7 @@ void VM_NewGame(void)
 
 void VM_LoadGame(void)
 {
-    // Need to set these to prevent NULL references if using any player.xxx in the load_level hook
+    // Need to set these to prevent nullptr references if using any player.xxx in the load_level hook
     ui_hud_who    = players[displayplayer];
     ui_player_who = players[displayplayer];
 
@@ -1076,7 +1076,7 @@ void VM_SaveGame(void)
 
 void VM_BeginLevel(void)
 {
-    // Need to set these to prevent NULL references if using player.xxx in the begin_level hook
+    // Need to set these to prevent nullptr references if using player.xxx in the begin_level hook
     ui_hud_who    = players[displayplayer];
     ui_player_who = players[displayplayer];
     VM_CallFunction(ui_vm, "begin_level");

@@ -20,6 +20,8 @@
 //
 // -KM- 1998/09/27 Written.
 
+#include <string.h>
+
 #include "local.h"
 
 #include "colormap.h"
@@ -216,7 +218,7 @@ static specflags_t sector_specials[] = {{"WHOLE_REGION", SECSP_WholeRegion, 0},
                                         {"SUBMERGED_SFX", SECSP_SubmergedSFX, 0},
                                         {"VACUUM_SFX", SECSP_VacuumSFX, 0},
                                         {"REVERB_SFX", SECSP_ReverbSFX, 0},
-                                        {NULL, 0, 0}};
+                                        {nullptr, 0, 0}};
 
 //
 // DDF_SectGetSpecialFlags
@@ -254,7 +256,7 @@ static specflags_t exit_types[] = {{"NONE", EXIT_None, 0},
 
                                    // -AJA- backwards compatibility cruft...
                                    {"!EXIT", EXIT_Normal, 0},
-                                   {NULL, 0, 0}};
+                                   {nullptr, 0, 0}};
 
 //
 // DDF_SectGetExit
@@ -282,7 +284,7 @@ void DDF_SectGetExit(const char *info, void *storage)
 
 static specflags_t light_types[] = {
     {"NONE", LITE_None, 0},   {"SET", LITE_Set, 0},   {"FADE", LITE_Fade, 0},           {"STROBE", LITE_Strobe, 0},
-    {"FLASH", LITE_Flash, 0}, {"GLOW", LITE_Glow, 0}, {"FLICKER", LITE_FireFlicker, 0}, {NULL, 0, 0}};
+    {"FLASH", LITE_Flash, 0}, {"GLOW", LITE_Glow, 0}, {"FLICKER", LITE_FireFlicker, 0}, {nullptr, 0, 0}};
 
 //
 // DDF_SectGetLighttype
@@ -316,7 +318,7 @@ static specflags_t movement_types[] = {{"MOVE", mov_Once, 0},
                                        {"STOP", mov_Stop, 0},
                                        {"TOGGLE", mov_Toggle, 0},
                                        {"ELEVATOR", mov_Elevator, 0},
-                                       {NULL, 0, 0}};
+                                       {nullptr, 0, 0}};
 
 //
 // DDF_SectGetMType
@@ -499,9 +501,9 @@ void sectortype_c::Default()
 
     special_flags = SECSP_None;
     e_exit        = EXIT_None;
-    use_colourmap = NULL;
-    ambient_sfx   = NULL;
-    splash_sfx    = NULL;
+    use_colourmap = nullptr;
+    ambient_sfx   = nullptr;
+    splash_sfx    = nullptr;
 
     appear = DEFAULT_APPEAR;
 
@@ -546,7 +548,7 @@ sectortype_container_c::~sectortype_container_c()
 }
 
 //
-// Looks an linetype by id, returns NULL if line can't be found.
+// Looks an linetype by id, returns nullptr if line can't be found.
 //
 sectortype_c *sectortype_container_c::Lookup(const int id)
 {
@@ -573,7 +575,7 @@ sectortype_c *sectortype_container_c::Lookup(const int id)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //

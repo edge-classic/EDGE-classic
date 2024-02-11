@@ -24,7 +24,7 @@
 #include "bsp_raw_def.h"
 // EPI
 #include "file.h"
-
+#include "str_compare.h"
 namespace ajbsp
 {
 
@@ -204,7 +204,7 @@ class WadFile
     // something else in the WAD.
     Lump *AddLump(const char *name, int max_size = -1);
     Lump *AddLevel(const char *name, int max_size = -1,
-                   int *level_number = NULL);
+                   int *level_number = nullptr);
 
     // setup lump to write new data to it.
     // the old contents are lost.
@@ -275,7 +275,7 @@ class WadFile
             const Lump *L1 = wad_->directory_[A];
             const Lump *L2 = wad_->directory_[B];
 
-            return (strcmp(L1->Name(), L2->Name()) < 0);
+            return (epi::StringCompare(L1->Name(), L2->Name()) < 0);
         }
     };
 };

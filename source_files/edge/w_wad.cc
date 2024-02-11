@@ -47,7 +47,7 @@
 #include "filesystem.h"
 #include "math_md5.h"
 #include "str_util.h"
-
+#include "str_compare.h"
 // AJBSP
 #include "bsp.h"
 
@@ -395,7 +395,7 @@ void W_GetTextureLumps(int file, wadtex_resource_c *res)
     data_file_c *df  = data_files[file];
     wad_file_c  *wad = df->wad;
 
-    if (wad == NULL)
+    if (wad == nullptr)
     {
         // leave the wadtex_resource_c in initial state
         return;
@@ -415,13 +415,13 @@ void W_GetTextureLumps(int file, wadtex_resource_c *res)
 
         for (cur = file; res->pnames == -1 && cur > 0; cur--)
         {
-            if (data_files[cur]->wad != NULL)
+            if (data_files[cur]->wad != nullptr)
                 res->pnames = data_files[cur]->wad->wadtex.pnames;
         }
 
         for (cur = file; res->palette == -1 && cur > 0; cur--)
         {
-            if (data_files[cur]->wad != NULL)
+            if (data_files[cur]->wad != nullptr)
                 res->palette = data_files[cur]->wad->wadtex.palette;
         }
     }
@@ -542,7 +542,7 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
     if (strcmp(info.name, "PLAYPAL") == 0)
     {
         lump_p->kind = LMKIND_WadTex;
-        if (wad != NULL)
+        if (wad != nullptr)
             wad->wadtex.palette = lump;
         if (palette_datafile < 0)
             palette_datafile = file_index;
@@ -551,69 +551,69 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
     else if (strcmp(info.name, "PNAMES") == 0)
     {
         lump_p->kind = LMKIND_WadTex;
-        if (wad != NULL)
+        if (wad != nullptr)
             wad->wadtex.pnames = lump;
         return;
     }
     else if (strcmp(info.name, "TEXTURE1") == 0)
     {
         lump_p->kind = LMKIND_WadTex;
-        if (wad != NULL)
+        if (wad != nullptr)
             wad->wadtex.texture1 = lump;
         return;
     }
     else if (strcmp(info.name, "TEXTURE2") == 0)
     {
         lump_p->kind = LMKIND_WadTex;
-        if (wad != NULL)
+        if (wad != nullptr)
             wad->wadtex.texture2 = lump;
         return;
     }
     else if (strcmp(info.name, "DEHACKED") == 0)
     {
         lump_p->kind = LMKIND_DDFRTS;
-        if (wad != NULL && info.size > 0)
+        if (wad != nullptr && info.size > 0)
             wad->deh_lump = lump;
         return;
     }
     else if (strcmp(info.name, "COALHUDS") == 0)
     {
         lump_p->kind = LMKIND_DDFRTS;
-        if (wad != NULL)
+        if (wad != nullptr)
             wad->coal_huds = lump;
         return;
     }
     else if (strcmp(info.name, "LUAHUDS") == 0)
     {
         lump_p->kind = LMKIND_DDFRTS;
-        if (wad != NULL)
+        if (wad != nullptr)
             wad->lua_huds = lump;
         return;
     }
     else if (strcmp(info.name, "UMAPINFO") == 0)
     {
         lump_p->kind = LMKIND_Normal;
-        if (wad != NULL)
+        if (wad != nullptr)
             wad->umapinfo_lump = lump;
         return;
     }
     else if (strcmp(info.name, "ANIMATED") == 0)
     {
         lump_p->kind = LMKIND_DDFRTS;
-        if (wad != NULL)
+        if (wad != nullptr)
             wad->animated = lump;
         return;
     }
     else if (strcmp(info.name, "SWITCHES") == 0)
     {
         lump_p->kind = LMKIND_DDFRTS;
-        if (wad != NULL)
+        if (wad != nullptr)
             wad->switches = lump;
         return;
     }
 
     // -KM- 1998/12/16 Load DDF/RSCRIPT file from wad.
-    if (allow_ddf && wad != NULL)
+    if (allow_ddf && wad != nullptr)
     {
         ddf_type_e type = DDF_LumpToType(info.name);
 
@@ -628,7 +628,7 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
     if (IsSkin(info.name))
     {
         lump_p->kind = LMKIND_Marker;
-        if (wad != NULL)
+        if (wad != nullptr)
             wad->skin_markers.push_back(lump);
         return;
     }
@@ -745,7 +745,7 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
     if (lump_p->size == 0 || IsDummySF(lump_p->name))
         return;
 
-    if (wad == NULL)
+    if (wad == nullptr)
         return;
 
     if (within_sprite_list)
@@ -1106,7 +1106,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
     // handle BOOM Colourmaps (between C_START and C_END)
     for (int lump : df->wad->colmap_lumps)
     {
-        DDF_AddRawColourmap(W_GetLumpName(lump), W_LumpLength(lump), NULL);
+        DDF_AddRawColourmap(W_GetLumpName(lump), W_LumpLength(lump), nullptr);
     }
 }
 
@@ -2122,7 +2122,7 @@ int W_FindFlatSequence(const char *start, const char *end, int *s_offset, int *e
         data_file_c *df  = data_files[file];
         wad_file_c  *wad = df->wad;
 
-        if (wad == NULL)
+        if (wad == nullptr)
             continue;
 
         // look for start name
@@ -2153,7 +2153,7 @@ int W_FindFlatSequence(const char *start, const char *end, int *s_offset, int *e
     return -1;
 }
 
-// returns NULL for an empty list.
+// returns nullptr for an empty list.
 std::vector<int> *W_GetFlatList(int file)
 {
     SYS_ASSERT(0 <= file && file < (int)data_files.size());
@@ -2161,10 +2161,10 @@ std::vector<int> *W_GetFlatList(int file)
     data_file_c *df  = data_files[file];
     wad_file_c  *wad = df->wad;
 
-    if (wad != NULL)
+    if (wad != nullptr)
         return &wad->flat_lumps;
 
-    return NULL;
+    return nullptr;
 }
 
 std::vector<int> *W_GetSpriteList(int file)
@@ -2174,10 +2174,10 @@ std::vector<int> *W_GetSpriteList(int file)
     data_file_c *df  = data_files[file];
     wad_file_c  *wad = df->wad;
 
-    if (wad != NULL)
+    if (wad != nullptr)
         return &wad->sprite_lumps;
 
-    return NULL;
+    return nullptr;
 }
 
 std::vector<int> *W_GetPatchList(int file)
@@ -2187,10 +2187,10 @@ std::vector<int> *W_GetPatchList(int file)
     data_file_c *df  = data_files[file];
     wad_file_c  *wad = df->wad;
 
-    if (wad != NULL)
+    if (wad != nullptr)
         return &wad->patch_lumps;
 
-    return NULL;
+    return nullptr;
 }
 
 int W_GetFileForLump(int lump)
@@ -2236,7 +2236,7 @@ uint8_t *W_LoadLump(int lump, int *length)
 {
     int w_length = W_LumpLength(lump);
 
-    if (length != NULL)
+    if (length != nullptr)
         *length = w_length;
 
     uint8_t *data = new uint8_t[w_length + 1];
@@ -2293,7 +2293,7 @@ void W_ProcessTX_HI(void)
         data_file_c *df  = data_files[file];
         wad_file_c  *wad = df->wad;
 
-        if (wad == NULL)
+        if (wad == nullptr)
             continue;
 
         for (int i = 0; i < (int)wad->tx_lumps.size(); i++)

@@ -20,9 +20,9 @@
 
 #include <limits.h>
 #include <unordered_map>
-
+#include <stdarg.h>
 #include "str_util.h"
-
+#include "str_compare.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "g_game.h"
@@ -46,7 +46,7 @@ static std::unordered_map<uint32_t, std::string> parsed_string_tags;
 static char *Z_StrDup(const char *s)
 {
     char *dup = strdup(s);
-    if (dup == NULL)
+    if (dup == nullptr)
         I_Error("out of memory\n");
     return dup;
 }
@@ -85,14 +85,14 @@ static const char *rad_level_names[3] = {"outer area", "map area", "trigger area
 
 // Location of current script
 static rad_script_t *this_rad;
-static char         *this_map = NULL;
+static char         *this_map = nullptr;
 
 // Pending state info for current script
 static int   pending_wait_tics = 0;
-static char *pending_label     = NULL;
+static char *pending_label     = nullptr;
 
 // Default tip properties (position, colour, etc)
-static s_tip_prop_t default_tip_props = {-1, -1, -1, -1, NULL, -1.0f, 0};
+static s_tip_prop_t default_tip_props = {-1, -1, -1, -1, nullptr, -1.0f, 0};
 
 void RAD_Error(const char *err, ...)
 {
@@ -284,7 +284,7 @@ static void RAD_CheckForTime(const char *info, void *storage)
         return;
     }
 
-    *dest = I_ROUND(val * (float)TICRATE);
+    *dest = RoundToInt(val * (float)TICRATE);
 }
 
 static armour_type_e RAD_CheckForArmourType(const char *info)
@@ -436,10 +436,10 @@ static void AddStateToScript(rad_script_t *R, int tics, void (*action)(struct ra
     state->label = pending_label;
 
     pending_wait_tics = 0;
-    pending_label     = NULL;
+    pending_label     = nullptr;
 
     // link it in
-    state->next = NULL;
+    state->next = nullptr;
     state->prev = R->last_state;
 
     if (R->last_state)
@@ -562,12 +562,12 @@ static void RAD_ComputeScriptCRC(rad_script_t *scr)
     scr->crc += (int)scr->max_players;
     scr->crc += (int)scr->repeat_count;
 
-    scr->crc += (int)I_ROUND(scr->x);
-    scr->crc += (int)I_ROUND(scr->y);
-    scr->crc += (int)I_ROUND(scr->z);
-    scr->crc += (int)I_ROUND(scr->rad_x);
-    scr->crc += (int)I_ROUND(scr->rad_y);
-    scr->crc += (int)I_ROUND(scr->rad_z);
+    scr->crc += (int)RoundToInt(scr->x);
+    scr->crc += (int)RoundToInt(scr->y);
+    scr->crc += (int)RoundToInt(scr->z);
+    scr->crc += (int)RoundToInt(scr->rad_x);
+    scr->crc += (int)RoundToInt(scr->rad_y);
+    scr->crc += (int)RoundToInt(scr->rad_z);
     scr->crc += scr->sector_tag;
     scr->crc += scr->sector_index;
 
@@ -587,10 +587,10 @@ static void RAD_ComputeScriptCRC(rad_script_t *scr)
     M_FLAG(2, (scr->tagged_independent));
     M_FLAG(3, (scr->tagged_immediate));
 
-    M_FLAG(4, (scr->boss_trig != NULL));
-    M_FLAG(5, (scr->height_trig != NULL));
-    M_FLAG(6, (scr->cond_trig != NULL));
-    M_FLAG(7, (scr->next_in_path != NULL));
+    M_FLAG(4, (scr->boss_trig != nullptr));
+    M_FLAG(5, (scr->height_trig != nullptr));
+    M_FLAG(6, (scr->cond_trig != nullptr));
+    M_FLAG(7, (scr->next_in_path != nullptr));
 
     scr->crc += (int)flags;
 
@@ -808,7 +808,7 @@ static void RAD_ParseRadiusTrigger(param_set_t &pars)
     this_rad->repeat_delay         = 0;
 
     pending_wait_tics = 0;
-    pending_label     = NULL;
+    pending_label     = nullptr;
 
     if (DDF_CompareName("RECT_TRIGGER", pars[0]) == 0)
     {
@@ -872,7 +872,7 @@ static void RAD_ParseRadiusTrigger(param_set_t &pars)
 
     // link it in
     this_rad->next = r_scripts;
-    this_rad->prev = NULL;
+    this_rad->prev = nullptr;
 
     if (r_scripts)
         r_scripts->prev = this_rad;
@@ -917,7 +917,7 @@ static void RAD_ParseSectorTrigger(param_set_t &pars)
     this_rad->repeat_delay         = 0;
 
     pending_wait_tics = 0;
-    pending_label     = NULL;
+    pending_label     = nullptr;
 
     if (pars.size() != 2 && pars.size() != 4)
         RAD_Error("%s: Wrong number of parameters.\n", pars[0]);
@@ -943,7 +943,7 @@ static void RAD_ParseSectorTrigger(param_set_t &pars)
 
     // link it in
     this_rad->next = r_scripts;
-    this_rad->prev = NULL;
+    this_rad->prev = nullptr;
 
     if (r_scripts)
         r_scripts->prev = this_rad;
@@ -965,12 +965,12 @@ static void RAD_ParseEndRadiusTrigger(param_set_t &pars)
     // handle any pending WAIT or LABEL values
     if (pending_wait_tics > 0 || pending_label)
     {
-        AddStateToScript(this_rad, 0, RAD_ActNOP, NULL);
+        AddStateToScript(this_rad, 0, RAD_ActNOP, nullptr);
     }
 
     this_rad->mapid = Z_StrDup(this_map);
     RAD_ComputeScriptCRC(this_rad);
-    this_rad = NULL;
+    this_rad = nullptr;
 
     rad_cur_level--;
 }
@@ -985,7 +985,7 @@ static void RAD_ParseEndMap(param_set_t &pars)
     if (rad_cur_level == 0)
         RAD_Error("%s found, but without any START_MAP !\n", pars[0]);
 
-    this_map = NULL;
+    this_map = nullptr;
 
     rad_cur_level--;
 }
@@ -1240,7 +1240,7 @@ static void RAD_ParseLabel(param_set_t &pars)
 
     // handle any pending WAIT value
     if (pending_wait_tics > 0)
-        AddStateToScript(this_rad, 0, RAD_ActNOP, NULL);
+        AddStateToScript(this_rad, 0, RAD_ActNOP, nullptr);
 
     pending_label = Z_StrDup(pars[1]);
 }
@@ -1313,7 +1313,7 @@ static void RAD_ParseExitGame(param_set_t &pars)
 {
     // ExitGame to TitleScreen
 
-    AddStateToScript(this_rad, 0, RAD_ActExitGame, NULL);
+    AddStateToScript(this_rad, 0, RAD_ActExitGame, nullptr);
 }
 
 static void RAD_ParseTip(param_set_t &pars)
@@ -1549,14 +1549,14 @@ static void RAD_ParseSpawnThing(param_set_t &pars)
         t->thing_name = Z_StrDup(pars[1]);
 
     // handle keyword parameters
-    while (pars.size() >= 3 && strchr(pars.back(), '=') != NULL)
+    while (pars.size() >= 3 && strchr(pars.back(), '=') != nullptr)
     {
         HandleSpawnKeyword(pars.back(), t);
         pars.pop_back();
     }
 
     // get angle
-    const char *angle_str = (pars.size() == 3) ? pars[2] : (pars.size() >= 5) ? pars[4] : NULL;
+    const char *angle_str = (pars.size() == 3) ? pars[2] : (pars.size() >= 5) ? pars[4] : nullptr;
 
     if (angle_str)
     {
@@ -1636,7 +1636,7 @@ static void RAD_ParseKillSound(param_set_t &pars)
 {
     // KillSound
 
-    AddStateToScript(this_rad, 0, RAD_ActKillSound, NULL);
+    AddStateToScript(this_rad, 0, RAD_ActKillSound, nullptr);
 }
 
 static void RAD_ParseChangeMusic(param_set_t &pars)
@@ -2094,7 +2094,7 @@ static void RAD_ParseSleep(param_set_t &pars)
 {
     // Sleep
 
-    AddStateToScript(this_rad, 0, RAD_ActSleep, NULL);
+    AddStateToScript(this_rad, 0, RAD_ActSleep, nullptr);
 }
 
 static void RAD_ParseRetrigger(param_set_t &pars)
@@ -2104,7 +2104,7 @@ static void RAD_ParseRetrigger(param_set_t &pars)
     if (!this_rad->tagged_independent)
         RAD_Error("%s can only be used with TAGGED_INDEPENDENT.\n", pars[0]);
 
-    AddStateToScript(this_rad, 0, RAD_ActRetrigger, NULL);
+    AddStateToScript(this_rad, 0, RAD_ActRetrigger, nullptr);
 }
 
 static void RAD_ParseChangeTex(param_set_t &pars)
@@ -2230,7 +2230,7 @@ static void RAD_ParseTeleportToStart(param_set_t &pars)
 {
     // TELEPORT_TO_START
 
-    AddStateToScript(this_rad, 0, RAD_ActTeleportToStart, NULL);
+    AddStateToScript(this_rad, 0, RAD_ActTeleportToStart, nullptr);
 }
 
 // Replace one weapon with another instantly (no up/down states run)
@@ -2408,7 +2408,7 @@ static const rts_parser_t radtrig_parsers[] = {
     {2, "SECTORL", 3, 3, RAD_ParseLightSector},
 
     // that's all, folks.
-    {0, NULL, 0, 0, NULL}};
+    {0, nullptr, 0, 0, nullptr}};
 
 void RAD_ParseLine()
 {
@@ -2420,7 +2420,7 @@ void RAD_ParseLine()
     if (pars.empty())
         return;
 
-    for (const rts_parser_t *cur = radtrig_parsers; cur->name != NULL; cur++)
+    for (const rts_parser_t *cur = radtrig_parsers; cur->name != nullptr; cur++)
     {
         const char *cur_name = cur->name;
 

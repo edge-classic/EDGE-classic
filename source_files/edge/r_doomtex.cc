@@ -475,13 +475,13 @@ epi::File *OpenUserFileOrLump(imagedef_c *def)
     case IMGDT_Lump: {
         int lump = W_CheckNumForName(def->info.c_str());
         if (lump < 0)
-            return NULL;
+            return nullptr;
 
         return W_OpenLump(lump);
     }
 
     default:
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -561,7 +561,7 @@ static image_data_c *ReadUserAsEpiBlock(image_c *rim)
         I_Error("ReadUserAsEpiBlock: Coding error, unknown type %d\n", def->type);
     }
 
-    return NULL; /* NOT REACHED */
+    return nullptr; /* NOT REACHED */
 }
 
 //
@@ -572,7 +572,7 @@ static image_data_c *ReadUserAsEpiBlock(image_c *rim)
 // palette must be determined from rim->source_palette.  Mainly
 // just a switch to more specialised image readers.
 //
-// Never returns NULL.
+// Never returns nullptr.
 //
 image_data_c *ReadAsEpiBlock(image_c *rim)
 {
@@ -598,7 +598,7 @@ image_data_c *ReadAsEpiBlock(image_c *rim)
 
     default:
         I_Error("ReadAsBlock: unknown source_type %d !\n", rim->source_type);
-        return NULL;
+        return nullptr;
     }
 }
 

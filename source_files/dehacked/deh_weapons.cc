@@ -43,7 +43,7 @@
 #include "deh_things.h"
 #include "deh_wad.h"
 #include "deh_weapons.h"
-
+#include "str_compare.h"
 namespace dehacked
 {
 
@@ -56,13 +56,13 @@ static constexpr char kWeaponFlagFeedback = 'b';
 WeaponInfo weapon_info[kTotalWeapons] = {
     {"FIST", kAmmoTypeNoAmmo, 0, 1, 0, "f", kS_PUNCHUP, kS_PUNCHDOWN, kS_PUNCH, kS_PUNCH1, kS_NULL, 0},
     {"PISTOL", kAmmoTypeBullet, 1, 2, 2, "fr", kS_PISTOLUP, kS_PISTOLDOWN, kS_PISTOL, kS_PISTOL1, kS_PISTOLFLASH, 0},
-    {"SHOTGUN", kAmmoTypeShell, 1, 3, 3, NULL, kS_SGUNUP, kS_SGUNDOWN, kS_SGUN, kS_SGUN1, kS_SGUNFLASH1, 0},
+    {"SHOTGUN", kAmmoTypeShell, 1, 3, 3, nullptr, kS_SGUNUP, kS_SGUNDOWN, kS_SGUN, kS_SGUN1, kS_SGUNFLASH1, 0},
     {"CHAINGUN", kAmmoTypeBullet, 1, 4, 5, "r", kS_CHAINUP, kS_CHAINDOWN, kS_CHAIN, kS_CHAIN1, kS_CHAINFLASH1, 0},
     {"ROCKET_LAUNCHER", kAmmoTypeRocket, 1, 5, 6, "d", kS_MISSILEUP, kS_MISSILEDOWN, kS_MISSILE, kS_MISSILE1, kS_MISSILEFLASH1, 0},
-    {"PLASMA_RIFLE", kAmmoTypeCell, 1, 6, 7, NULL, kS_PLASMAUP, kS_PLASMADOWN, kS_PLASMA, kS_PLASMA1, kS_PLASMAFLASH1, 0},
+    {"PLASMA_RIFLE", kAmmoTypeCell, 1, 6, 7, nullptr, kS_PLASMAUP, kS_PLASMADOWN, kS_PLASMA, kS_PLASMA1, kS_PLASMAFLASH1, 0},
     {"BFG_9000", kAmmoTypeCell, 40, 7, 8, "d", kS_BFGUP, kS_BFGDOWN, kS_BFG, kS_BFG1, kS_BFGFLASH1, 0},
     {"CHAINSAW", kAmmoTypeNoAmmo, 0, 1, 1, "bt", kS_SAWUP, kS_SAWDOWN, kS_SAW, kS_SAW1, kS_NULL, 0},
-    {"SUPER_SHOTGUN", kAmmoTypeShell, 2, 3, 4, NULL, kS_DSGUNUP, kS_DSGUNDOWN, kS_DSGUN, kS_DSGUN1, kS_DSGUNFLASH1, 0},
+    {"SUPER_SHOTGUN", kAmmoTypeShell, 2, 3, 4, nullptr, kS_DSGUNUP, kS_DSGUNDOWN, kS_DSGUN, kS_DSGUN1, kS_DSGUNFLASH1, 0},
 };
 
 bool weapon_modified[kTotalWeapons];
@@ -85,7 +85,7 @@ struct FlagName
 {
     int         flag;
     const char *name; // for EDGE
-    const char *bex;  // NULL if same as EDGE name
+    const char *bex;  // nullptr if same as EDGE name
 };
 
 const FieldReference weapon_field[] = {
@@ -100,18 +100,18 @@ const FieldReference weapon_field[] = {
     {"Firing frame", offsetof(WeaponInfo, flashstate), kFieldTypeFrameNumber},
     {"MBF21 Bits", offsetof(WeaponInfo, mbf21_flags), kFieldTypeBitflags},
 
-    {NULL, 0, kFieldTypeAny} // End sentinel
+    {nullptr, 0, kFieldTypeAny} // End sentinel
 };
 
 const FlagName mbf21flagnamelist[] = {
-    {kMBF21_NOTHRUST, "NOTHRUST", NULL},
+    {kMBF21_NOTHRUST, "NOTHRUST", nullptr},
     {kMBF21_SILENT, "SILENT_TO_MONSTERS", "SILENT"},
-    {kMBF21_NOAUTOFIRE, "NOAUTOFIRE", NULL},
-    {kMBF21_FLEEMELEE, "FLEEMELEE", NULL},
+    {kMBF21_NOAUTOFIRE, "NOAUTOFIRE", nullptr},
+    {kMBF21_FLEEMELEE, "FLEEMELEE", nullptr},
     {kMBF21_AUTOSWITCHFROM, "SWITCH", "AUTOSWITCHFROM"},
     {kMBF21_NOAUTOSWITCHTO, "DANGEROUS", "NOAUTOSWITCHTO"},
 
-    {0, NULL, NULL} // End sentinel
+    {0, nullptr, nullptr} // End sentinel
 };
 } // namespace weapons
 
@@ -179,7 +179,7 @@ void HandleMBF21Flags(const WeaponInfo *info, int w_num)
     int  cur_f      = info->mbf21_flags;
     bool got_a_flag = false;
 
-    for (i = 0; mbf21flagnamelist[i].name != NULL; i++)
+    for (i = 0; mbf21flagnamelist[i].name != nullptr; i++)
     {
         if (0 == (cur_f & mbf21flagnamelist[i].flag))
             continue;
@@ -264,7 +264,7 @@ void HandleAttacks(const WeaponInfo *info, int w_num)
     if (!atk)
         atk = frames::attack_slot[2];
 
-    SYS_ASSERT(atk != NULL);
+    SYS_ASSERT(atk != nullptr);
 
     wad::Printf("ATTACK = %s;\n", atk);
 

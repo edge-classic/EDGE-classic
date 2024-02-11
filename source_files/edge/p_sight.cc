@@ -140,7 +140,7 @@ static bool CrossSubsector(subsector_t *sub)
     float slope;
 
     // check lines
-    for (seg = sub->segs; seg != NULL; seg = seg->sub_next)
+    for (seg = sub->segs; seg != nullptr; seg = seg->sub_next)
     {
         if (seg->miniseg)
             continue;

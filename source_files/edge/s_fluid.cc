@@ -21,7 +21,7 @@
 #include "file.h"
 #include "filesystem.h"
 #include "str_util.h"
-
+#include "str_compare.h"
 #include "m_misc.h"
 #include "s_blit.h"
 #include "s_music.h"
@@ -63,7 +63,7 @@ static void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
 {
 	FILE *fp = epi::FileOpenRaw(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
 	if (!fp)
-		return NULL;
+		return nullptr;
     return fp;
 }
 
@@ -103,10 +103,10 @@ bool S_StartupFluid(void)
     }
 
     // Initialize settings and change values from default if needed
-    fluid_set_log_function(FLUID_PANIC, FluidError, NULL);
-    fluid_set_log_function(FLUID_ERR, NULL, NULL);
-    fluid_set_log_function(FLUID_WARN, NULL, NULL);
-    fluid_set_log_function(FLUID_DBG, NULL, NULL);
+    fluid_set_log_function(FLUID_PANIC, FluidError, nullptr);
+    fluid_set_log_function(FLUID_ERR, nullptr, nullptr);
+    fluid_set_log_function(FLUID_WARN, nullptr, nullptr);
+    fluid_set_log_function(FLUID_DBG, nullptr, nullptr);
     edge_fluid_settings = new_fluid_settings();
     fluid_settings_setstr(edge_fluid_settings, "synth.reverb.active", "no");
     fluid_settings_setstr(edge_fluid_settings, "synth.chorus.active", "no");

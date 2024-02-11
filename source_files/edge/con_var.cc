@@ -16,6 +16,8 @@
 //
 //----------------------------------------------------------------------------
 
+#include <string.h>
+
 #include "i_defs.h"
 
 #include "con_var.h"
@@ -25,12 +27,12 @@
 
 #include "filesystem.h"
 #include "str_util.h"
-
+#include "str_compare.h"
 // NOTE: we must use a plain linked list (and not std::vector) here,
 //       because constructors run very early (before main is called)
 //       and we cannot rely on a std::vector being initialized.
 
-static cvar_c *all_cvars = NULL;
+static cvar_c *all_cvars = nullptr;
 
 cvar_c::cvar_c(const char *_name, const char *_def, int _flags, cvar_callback _cb, float _min, float _max)
     : d(), f(), s(_def), name(_name), def(_def), flags(_flags), min(_min), max(_max), cvar_cb(_cb), modified(0)
@@ -80,7 +82,7 @@ cvar_c &cvar_c::operator=(float value)
     }
     else
     {
-        d = I_ROUND(value);
+        d = RoundToInt(value);
         f = value;
         FmtFloat(value);
     }
@@ -166,17 +168,17 @@ void cvar_c::ParseString()
 
 static cvar_c *MergeSort(cvar_c *list)
 {
-    SYS_ASSERT(list != NULL);
+    SYS_ASSERT(list != nullptr);
 
     // only a single item?  done!
-    if (list->next == NULL)
+    if (list->next == nullptr)
         return list;
 
     // split into left and right lists
-    cvar_c *L = NULL;
-    cvar_c *R = NULL;
+    cvar_c *L = nullptr;
+    cvar_c *R = nullptr;
 
-    while (list != NULL)
+    while (list != nullptr)
     {
         cvar_c *var = list;
         list        = list->next;
@@ -191,26 +193,26 @@ static cvar_c *MergeSort(cvar_c *list)
     R = MergeSort(R);
 
     // now merge them
-    cvar_c *tail = NULL;
+    cvar_c *tail = nullptr;
 
-    while (L != NULL || R != NULL)
+    while (L != nullptr || R != nullptr)
     {
         // pick the smallest name
-        if (L == NULL)
+        if (L == nullptr)
             std::swap(L, R);
-        else if (R != NULL && epi::StringCaseCompareASCII(L->name, R->name) > 0)
+        else if (R != nullptr && epi::StringCaseCompareASCII(L->name, R->name) > 0)
             std::swap(L, R);
 
         // remove it, add to tail of the new list
         cvar_c *var = L;
         L           = L->next;
 
-        if (list == NULL)
+        if (list == nullptr)
             list = var;
         else
             tail->next = var;
 
-        var->next = NULL;
+        var->next = nullptr;
         tail      = var;
     }
 
@@ -224,7 +226,7 @@ void CON_SortVars()
 
 void CON_ResetAllVars()
 {
-    for (cvar_c *var = all_cvars; var != NULL; var = var->next)
+    for (cvar_c *var = all_cvars; var != nullptr; var = var->next)
     {
         if (!(var->flags & CVAR_NO_RESET))
             *var = var->def;
@@ -233,13 +235,13 @@ void CON_ResetAllVars()
 
 cvar_c *CON_FindVar(const char *name)
 {
-    for (cvar_c *var = all_cvars; var != NULL; var = var->next)
+    for (cvar_c *var = all_cvars; var != nullptr; var = var->next)
     {
         if (epi::StringCaseCompareASCII(var->name, name) == 0)
             return var;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 bool CON_MatchPattern(const char *name, const char *pat)
@@ -260,7 +262,7 @@ int CON_MatchAllVars(std::vector<const char *> &list, const char *pattern)
 {
     list.clear();
 
-    for (cvar_c *var = all_cvars; var != NULL; var = var->next)
+    for (cvar_c *var = all_cvars; var != nullptr; var = var->next)
     {
         if (!CON_MatchPattern(var->name, pattern))
             continue;
@@ -303,7 +305,7 @@ int CON_PrintVars(const char *match, bool show_default)
 {
     int total = 0;
 
-    for (cvar_c *var = all_cvars; var != NULL; var = var->next)
+    for (cvar_c *var = all_cvars; var != nullptr; var = var->next)
     {
         if (match && *match)
             if (!strstr(var->name, match))
@@ -322,7 +324,7 @@ int CON_PrintVars(const char *match, bool show_default)
 
 void CON_WriteVars(FILE *f)
 {
-    for (cvar_c *var = all_cvars; var != NULL; var = var->next)
+    for (cvar_c *var = all_cvars; var != nullptr; var = var->next)
     {
         if (var->flags & CVAR_ARCHIVE)
         {

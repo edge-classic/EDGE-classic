@@ -41,7 +41,7 @@ void S_CacheClearAll(void);
 sound_data_c *S_CacheLoad(sfxdef_c *def);
 // load a sound into the cache.  If the sound has already
 // been loaded, then it is simply returned (increasing the
-// reference count).  Returns NULL if the lump doesn't exist.
+// reference count).  Returns nullptr if the lump doesn't exist.
 
 void S_CacheRelease(sound_data_c *data);
 // we are finished with this data.  The cache system may

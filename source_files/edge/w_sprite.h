@@ -67,7 +67,7 @@ class spriteframe_c
         for (int j = 0; j < 16; j++)
         {
             flip[j]   = 0;
-            images[j] = NULL;
+            images[j] = nullptr;
         }
     }
 };

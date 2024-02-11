@@ -173,7 +173,7 @@ long oggplayer_memtell(void *datasource)
 
 //----------------------------------------------------------------------------
 
-oggplayer_c::oggplayer_c() : status(NOT_LOADED), vorbis_inf(NULL)
+oggplayer_c::oggplayer_c() : status(NOT_LOADED), vorbis_inf(nullptr)
 {
     mono_buffer = new int16_t[OGGV_NUM_SAMPLES * 2];
 }
@@ -314,7 +314,7 @@ bool oggplayer_c::OpenMemory(uint8_t *data, int length)
     CB.close_func = oggplayer_memclose;
     CB.tell_func  = oggplayer_memtell;
 
-    int result = ov_open_callbacks((void *)ogg_lump, &ogg_stream, NULL, 0, CB);
+    int result = ov_open_callbacks((void *)ogg_lump, &ogg_stream, nullptr, 0, CB);
 
     if (result < 0)
     {
@@ -426,7 +426,7 @@ abstract_music_c *S_PlayOGGMusic(uint8_t *data, int length, bool looping)
     {
         delete[] data;
         delete player;
-        return NULL;
+        return nullptr;
     }
 
     player->Play(looping);
@@ -451,7 +451,7 @@ bool S_LoadOGGSound(sound_data_c *buf, const uint8_t *data, int length)
 
     OggVorbis_File ogg_stream;
 
-    int result = ov_open_callbacks((void *)&ogg_lump, &ogg_stream, NULL, 0, CB);
+    int result = ov_open_callbacks((void *)&ogg_lump, &ogg_stream, nullptr, 0, CB);
 
     if (result < 0)
     {

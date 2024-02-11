@@ -19,6 +19,8 @@
 // Image Setup and Parser Code
 //
 
+#include <string.h>
+
 #include "local.h"
 
 #include "image.h"
@@ -218,7 +220,7 @@ static void ImageParseLump(const char *spec)
 {
     const char *colon = DDF_MainDecodeList(spec, ':', true);
 
-    if (colon == NULL)
+    if (colon == nullptr)
     {
         dynamic_image->info   = spec;
         dynamic_image->format = LIF_STANDARD;
@@ -261,7 +263,7 @@ static void ImageParseCompose(const char *info)
 {
     const char *colon = DDF_MainDecodeList(info, ':', true);
 
-    if (colon == NULL || colon == info || colon[1] == 0)
+    if (colon == nullptr || colon == info || colon[1] == 0)
         DDF_Error("Malformed image compose spec: %s\n", info);
 
     dynamic_image->compose_w = atoi(info);
@@ -275,7 +277,7 @@ static void DDF_ImageGetType(const char *info, void *storage)
 {
     const char *colon = DDF_MainDecodeList(info, ':', true);
 
-    if (colon == NULL || colon == info || (colon - info) >= 16 || colon[1] == 0)
+    if (colon == nullptr || colon == info || (colon - info) >= 16 || colon[1] == 0)
         DDF_Error("Malformed image type spec: %s\n", info);
 
     char keyword[20];
@@ -322,7 +324,7 @@ static specflags_t image_specials[] = {{"NOALPHA", IMGSP_NoAlpha, 0},         {"
                                        {"FORCE_NOMIP", IMGSP_NoMip, 0},       {"FORCE_CLAMP", IMGSP_Clamp, 0},
                                        {"FORCE_SMOOTH", IMGSP_Smooth, 0},     {"FORCE_NOSMOOTH", IMGSP_NoSmooth, 0},
                                        {"CROSSHAIR", IMGSP_Crosshair, 0},     {"GRAYSCALE", IMGSP_Grayscale, 0},
-                                       {"FORCE_PRECACHE", IMGSP_Precache, 0}, {NULL, 0, 0}};
+                                       {"FORCE_PRECACHE", IMGSP_Precache, 0}, {nullptr, 0, 0}};
 
 static void DDF_ImageGetSpecial(const char *info, void *storage)
 {
@@ -369,11 +371,11 @@ static void DDF_ImageGetPatches(const char *info, void *storage)
     // in the future we may accept more stuff at the end.
 
     const char *colon1 = DDF_MainDecodeList(info, ':', true);
-    if (colon1 == NULL || colon1 == info || colon1[1] == 0)
+    if (colon1 == nullptr || colon1 == info || colon1[1] == 0)
         DDF_Error("Malformed patch spec: %s\n", info);
 
     const char *colon2 = DDF_MainDecodeList(colon1 + 1, ':', true);
-    if (colon2 == NULL || colon2 == colon1 + 1 || colon2[1] == 0)
+    if (colon2 == nullptr || colon2 == colon1 + 1 || colon2[1] == 0)
         DDF_Error("Malformed patch spec: %s\n", info);
 
     compose_patch_c patch;
@@ -456,7 +458,7 @@ void imagedef_container_c::CleanupObject(void *obj)
 imagedef_c *imagedef_container_c::Lookup(const char *refname, image_namespace_e belong)
 {
     if (!refname || !refname[0])
-        return NULL;
+        return nullptr;
 
     for (auto iter = begin(); iter != end(); iter++)
     {
@@ -466,7 +468,7 @@ imagedef_c *imagedef_container_c::Lookup(const char *refname, image_namespace_e 
             return g;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--- editor settings ---

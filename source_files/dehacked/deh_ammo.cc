@@ -32,9 +32,9 @@
 #include "deh_patch.h"
 #include "deh_system.h"
 #include "deh_things.h"
-
+#include "str_compare.h"
 #include <string.h>
-
+#include "str_compare.h"
 namespace dehacked
 {
 
@@ -128,7 +128,7 @@ const char *ammo::GetAmmo(int type)
     }
 
     I_Error("Dehacked: Internal Error - Bad ammo type %d\n", type);
-    return NULL;
+    return nullptr;
 }
 
 void ammo::AlterAmmo(int new_val)

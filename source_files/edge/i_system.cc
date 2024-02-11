@@ -121,12 +121,12 @@ void I_Printf(const char *message, ...)
 
 void I_MessageBox(const char *message, const char *title)
 {
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, NULL);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, nullptr);
 }
 
 int I_PureRandom(void)
 {
-    int P1 = (int)time(NULL);
+    int P1 = (int)time(nullptr);
     int P2 = (int)I_GetMicros();
 
     return (P1 ^ P2) & 0x7FFFFFFF;
@@ -145,11 +145,11 @@ void I_Sleep(int millisecs)
 #if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
     // On Windows use high resolution timer if available, the Sleep Win32 call defaults to 15.6ms resolution and
     // timeBeginPeriod is problematic
-    if (windows_timer != NULL)
+    if (windows_timer != nullptr)
     {
         LARGE_INTEGER due_time;
         due_time.QuadPart = -((LONGLONG)(millisecs * 1000000) / 100);
-        if (SetWaitableTimerEx(windows_timer, &due_time, 0, NULL, NULL, NULL, 0)) 
+        if (SetWaitableTimerEx(windows_timer, &due_time, 0, nullptr, nullptr, nullptr, 0)) 
         {
             WaitForSingleObject(windows_timer, INFINITE);
         }
@@ -172,14 +172,14 @@ void I_SystemShutdown(void)
     if (logfile)
     {
         fclose(logfile);
-        logfile = NULL;
+        logfile = nullptr;
     }
 
     // -KM- 1999/01/31 Close the debugfile
-    if (debugfile != NULL)
+    if (debugfile != nullptr)
     {
         fclose(debugfile);
-        debugfile = NULL;
+        debugfile = nullptr;
     }
 }
 

@@ -243,7 +243,7 @@ void S_StopMusic(void)
     {
         music_player->Stop();
         delete music_player;
-        music_player = NULL;
+        music_player = nullptr;
     }
 
     entry_playing = -1;

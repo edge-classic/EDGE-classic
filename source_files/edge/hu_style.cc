@@ -31,10 +31,10 @@
 // Edge has lots of style
 style_container_c hu_styles;
 
-style_c::style_c(styledef_c *_def) : def(_def), bg_image(NULL)
+style_c::style_c(styledef_c *_def) : def(_def), bg_image(nullptr)
 {
     for (int T = 0; T < styledef_c::NUM_TXST; T++)
-        fonts[T] = NULL;
+        fonts[T] = nullptr;
 }
 
 style_c::~style_c()
@@ -133,7 +133,7 @@ void style_c::DrawBackground()
 //
 // style_container_c::Lookup()
 //
-// Never returns NULL.
+// Never returns nullptr.
 //
 style_c *style_container_c::Lookup(styledef_c *def)
 {

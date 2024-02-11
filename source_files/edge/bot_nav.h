@@ -38,7 +38,7 @@ class path_node_c
   public:
     position_c   pos{0, 0, 0};
     int          flags = PNODE_Normal;
-    const seg_t *seg   = NULL;
+    const seg_t *seg   = nullptr;
 };
 
 // a path from a start point to a finish one.
@@ -70,13 +70,13 @@ void NAV_FreeLevel();
 float NAV_EvaluateBigItem(const mobj_t *mo);
 bool  NAV_NextRoamPoint(position_c &out);
 
-// attempt to find a traversible path, returns NULL if failed.
+// attempt to find a traversible path, returns nullptr if failed.
 bot_path_c *NAV_FindPath(const position_c *start, const position_c *finish, int flags);
 
-// find an pickup item in a nearby area, returns NULL if none found.
+// find an pickup item in a nearby area, returns nullptr if none found.
 bot_path_c *NAV_FindThing(bot_t *bot, float radius, mobj_t *&best);
 
-// find an enemy to fight, or NULL if none found.
+// find an enemy to fight, or nullptr if none found.
 // caller is responsible to do a sight checks.
 mobj_t *NAV_FindEnemy(bot_t *bot, float radius);
 

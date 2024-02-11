@@ -102,10 +102,10 @@ static void P_AddItemToQueue(const mobj_t *mo)
 
     // add to end of list
 
-    if (itemquehead == NULL)
+    if (itemquehead == nullptr)
     {
-        newbie->next = NULL;
-        newbie->prev = NULL;
+        newbie->next = nullptr;
+        newbie->prev = nullptr;
 
         itemquehead = newbie;
     }
@@ -113,10 +113,10 @@ static void P_AddItemToQueue(const mobj_t *mo)
     {
         iteminque_t *tail = itemquehead;
 
-        while (tail->next != NULL)
+        while (tail->next != nullptr)
             tail = tail->next;
 
-        newbie->next = NULL;
+        newbie->next = nullptr;
         newbie->prev = tail;
 
         tail->next = newbie;
@@ -125,7 +125,7 @@ static void P_AddItemToQueue(const mobj_t *mo)
 
 bool mobj_t::isRemoved() const
 {
-    return state == NULL;
+    return state == nullptr;
 }
 
 #if 1 // DEBUGGING
@@ -452,8 +452,8 @@ static void ResurrectRespawn(mobj_t *mobj)
 
     mobj->painchance = PERCENT_2_FLOAT(info->painchance);
 
-    mobj->SetSource(NULL);
-    mobj->SetTarget(NULL);
+    mobj->SetSource(nullptr);
+    mobj->SetTarget(nullptr);
 
     mobj->tag = mobj->spawnpoint.tag;
 
@@ -494,7 +494,7 @@ bool P_SetMobjState(mobj_t *mobj, statenum_t state)
 
     mobj->state      = st;
     mobj->tics       = st->tics;
-    mobj->next_state = (st->nextstate == S_NULL) ? NULL : (states + st->nextstate);
+    mobj->next_state = (st->nextstate == S_NULL) ? nullptr : (states + st->nextstate);
 
     if (st->action)
         (*st->action)(mobj);
@@ -556,7 +556,7 @@ bool P_SetMobjStateDeferred(mobj_t *mo, statenum_t stnum, int tic_skip)
     ///???		return false;
     ///???	}
 
-    mo->next_state = (stnum == S_NULL) ? NULL : (states + stnum);
+    mo->next_state = (stnum == S_NULL) ? nullptr : (states + stnum);
 
     mo->tics     = 0;
     mo->tic_skip = tic_skip;
@@ -735,7 +735,7 @@ void P_CalcFullProperties(const mobj_t *mo, region_properties_t *new_p)
     new_p->push.X = new_p->push.Y = new_p->push.Z = 0;
 
     new_p->type    = 0; // these shouldn't be used
-    new_p->special = NULL;
+    new_p->special = nullptr;
 
     // Note: friction not averaged: comes from region foot is in
     new_p->friction = sector->p->friction;
@@ -1173,7 +1173,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
             // -KM- 1998/12/16 If bigger than max fall, take damage.
             if (mo->info->maxfall > 0 && gravity > 0 && -mo->mom.Z > hurt_momz && (!mo->player || !fly_or_swim))
             {
-                P_DamageMobj(mo, NULL, NULL, (-mo->mom.Z - hurt_momz), NULL);
+                P_DamageMobj(mo, nullptr, nullptr, (-mo->mom.Z - hurt_momz), nullptr);
             }
 
             // -KM- 1999/01/31 Bouncy bouncy...
@@ -1263,7 +1263,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
             }
             if (mo->info->maxfall > 0 && gravity < 0 && mo->mom.Z > hurt_momz && (!mo->player || !fly_or_swim))
             {
-                P_DamageMobj(mo, NULL, NULL, (mo->mom.Z - hurt_momz), NULL);
+                P_DamageMobj(mo, nullptr, nullptr, (mo->mom.Z - hurt_momz), nullptr);
             }
 
             // -KM- 1999/01/31 More bouncing.
@@ -1454,7 +1454,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
         // Only damage grounded monsters (not players)
         if (props->special && props->special->damage.grounded_monsters && mobj->z <= mobj->floorz + 1.0f)
         {
-            P_DamageMobj(mobj, NULL, NULL, 5.0, &props->special->damage, false);
+            P_DamageMobj(mobj, nullptr, nullptr, 5.0, &props->special->damage, false);
         }
     }
 
@@ -1586,18 +1586,18 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
 void mobj_t::ClearStaleRefs()
 {
     if (target && target->isRemoved())
-        SetTarget(NULL);
+        SetTarget(nullptr);
     if (source && source->isRemoved())
-        SetSource(NULL);
+        SetSource(nullptr);
     if (tracer && tracer->isRemoved())
-        SetTracer(NULL);
+        SetTracer(nullptr);
 
     if (supportobj && supportobj->isRemoved())
-        SetSupportObj(NULL);
+        SetSupportObj(nullptr);
     if (above_mo && above_mo->isRemoved())
-        SetAboveMo(NULL);
+        SetAboveMo(nullptr);
     if (below_mo && below_mo->isRemoved())
-        SetBelowMo(NULL);
+        SetBelowMo(nullptr);
 }
 
 //
@@ -1633,16 +1633,16 @@ static inline void UpdateMobjRef(mobj_t *self, mobj_t *&field, mobj_t *other)
 {
     // prevent a reference to oneself
     if (other == self)
-        other = NULL;
+        other = nullptr;
 
     // never refer to a removed object
-    if (other != NULL && other->isRemoved())
-        other = NULL;
+    if (other != nullptr && other->isRemoved())
+        other = nullptr;
 
-    if (field != NULL)
+    if (field != nullptr)
         field->refcount--;
 
-    if (other != NULL)
+    if (other != nullptr)
         other->refcount++;
 
     field = other;
@@ -1699,7 +1699,7 @@ void mobj_t::SetRealSource(mobj_t *ref)
 
 void P_ClearAllStaleRefs(void)
 {
-    for (mobj_t *mo = mobjlisthead; mo != NULL; mo = mo->next)
+    for (mobj_t *mo = mobjlisthead; mo != nullptr; mo = mo->next)
     {
         mo->ClearStaleRefs();
     }
@@ -1707,12 +1707,12 @@ void P_ClearAllStaleRefs(void)
 
 static void AddMobjToList(mobj_t *mo)
 {
-    mo->prev = NULL;
+    mo->prev = nullptr;
     mo->next = mobjlisthead;
 
-    if (mo->next != NULL)
+    if (mo->next != nullptr)
     {
-        SYS_ASSERT(mo->next->prev == NULL);
+        SYS_ASSERT(mo->next->prev == nullptr);
         mo->next->prev = mo;
     }
 
@@ -1732,7 +1732,7 @@ static void RemoveMobjFromList(mobj_t *mo)
     I_Debugf("tics=%05d  REMOVE %p [%s]\n", leveltime, mo, mo->info ? mo->info->name.c_str() : "???");
 #endif
 
-    if (mo->prev != NULL)
+    if (mo->prev != nullptr)
     {
         SYS_ASSERT(mo->prev->next == mo);
         mo->prev->next = mo->next;
@@ -1743,7 +1743,7 @@ static void RemoveMobjFromList(mobj_t *mo)
         mobjlisthead = mo->next;
     }
 
-    if (mo->next != NULL)
+    if (mo->next != nullptr)
     {
         SYS_ASSERT(mo->next->prev == mo);
         mo->next->prev = mo->prev;
@@ -1764,7 +1764,7 @@ void P_RemoveMobj(mobj_t *mo)
     {
         player_t *p = players[pnum];
         if (p && p->attacker == mo)
-            p->attacker = NULL;
+            p->attacker = nullptr;
     }
 
     if (mo->isRemoved())
@@ -1783,8 +1783,8 @@ void P_RemoveMobj(mobj_t *mo)
     P_UnsetThingFinally(mo);
 
     // mark as REMOVED
-    mo->state      = NULL;
-    mo->next_state = NULL;
+    mo->state      = nullptr;
+    mo->next_state = nullptr;
 
     mo->flags         = 0;
     mo->extendedflags = 0;
@@ -1795,13 +1795,13 @@ void P_RemoveMobj(mobj_t *mo)
     mo->wud_tags.clear();
 
     // Clear all references to other mobjs
-    mo->SetTarget(NULL);
-    mo->SetSource(NULL);
-    mo->SetTracer(NULL);
+    mo->SetTarget(nullptr);
+    mo->SetSource(nullptr);
+    mo->SetTracer(nullptr);
 
-    mo->SetSupportObj(NULL);
-    mo->SetAboveMo(NULL);
-    mo->SetBelowMo(NULL);
+    mo->SetSupportObj(nullptr);
+    mo->SetAboveMo(nullptr);
+    mo->SetBelowMo(nullptr);
 
     // NOTE: object is kept in mobjlist until no there are no more
     //       references to it, and until 5 seconds has elapsed (giving time
@@ -1814,7 +1814,7 @@ void P_RemoveMobj(mobj_t *mo)
 
 void P_RemoveAllMobjs(bool loading)
 {
-    while (mobjlisthead != NULL)
+    while (mobjlisthead != nullptr)
     {
         mobj_t *mo   = mobjlisthead;
         mobjlisthead = mo->next;
@@ -1832,7 +1832,7 @@ void P_RemoveAllMobjs(bool loading)
 
 void P_RemoveItemsInQue(void)
 {
-    while (itemquehead != NULL)
+    while (itemquehead != nullptr)
     {
         iteminque_t *tmp = itemquehead;
         itemquehead      = itemquehead->next;
@@ -1863,7 +1863,7 @@ void P_RunMobjThinkers(bool extra_tic)
         }
     }
 
-    for (mo = mobjlisthead; mo != NULL; mo = next)
+    for (mo = mobjlisthead; mo != nullptr; mo = next)
     {
         next = mo->next;
 
@@ -1891,7 +1891,7 @@ void P_RunMobjThinkers(bool extra_tic)
             if (!r_doubleframes.d)
             {
                 if (!g_cullthinkers.d || (gametic / 2 %
-                                              I_ROUND(1 + R_PointToDist(players[consoleplayer]->mo->x,
+                                              RoundToInt(1 + R_PointToDist(players[consoleplayer]->mo->x,
                                                                         players[consoleplayer]->mo->y, mo->x, mo->y) /
                                                               1500) ==
                                           0))
@@ -1904,14 +1904,14 @@ void P_RunMobjThinkers(bool extra_tic)
                     if (!(mo->flags & MF_MISSILE))
                         continue;
                     else if (!g_cullthinkers.d ||
-                             ((gametic / 4) % I_ROUND(1 + R_PointToDist(players[consoleplayer]->mo->x,
+                             ((gametic / 4) % RoundToInt(1 + R_PointToDist(players[consoleplayer]->mo->x,
                                                                         players[consoleplayer]->mo->y, mo->x, mo->y) /
                                                               1500) ==
                               0))
                         P_MobjThinker(mo, extra_tic);
                 }
                 else if (!g_cullthinkers.d ||
-                         ((gametic / 4) % I_ROUND(1 + R_PointToDist(players[consoleplayer]->mo->x,
+                         ((gametic / 4) % RoundToInt(1 + R_PointToDist(players[consoleplayer]->mo->x,
                                                                     players[consoleplayer]->mo->y, mo->x, mo->y) /
                                                           1500) ==
                           0))
@@ -2129,7 +2129,7 @@ void P_MobjItemRespawn(void)
 
         objtype = cur->spawnpoint.info;
 
-        if (objtype == NULL)
+        if (objtype == nullptr)
         {
             I_Error("P_MobjItemRespawn: No such item type!");
             return; // shouldn't happen.
@@ -2236,7 +2236,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
     mobj->mbf21flags    = info->mbf21flags;
     mobj->vis_target = mobj->visibility = PERCENT_2_FLOAT(info->translucency);
 
-    mobj->currentattack = NULL;
+    mobj->currentattack = nullptr;
     mobj->on_ladder     = -1;
 
     if (gameskill != sk_nightmare)
@@ -2282,7 +2282,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
             mobj->dlight.r = mobj->dlight.target = dinfo->radius;
             mobj->dlight.color                   = dinfo->colour;
 
-            // leave 'shader' field as NULL : renderer will create it
+            // leave 'shader' field as nullptr : renderer will create it
         }
     }
 

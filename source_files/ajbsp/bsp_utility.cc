@@ -19,9 +19,9 @@
 
 #include "bsp_utility.h"
 
+#include "HandmadeMath.h"
 #include "bsp_local.h"
 #include "str_util.h"
-
 namespace ajbsp
 {
 
@@ -60,7 +60,7 @@ void *UtilRealloc(void *old, int size)
 //
 void UtilFree(void *data)
 {
-    if (data == NULL) I_Error("AJBSP: Trying to free a NULL pointer\n");
+    if (data == nullptr) I_Error("AJBSP: Trying to free a nullptr pointer\n");
 
     free(data);
 }

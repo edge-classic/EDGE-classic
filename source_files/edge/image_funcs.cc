@@ -157,7 +157,7 @@ image_data_c *Image_Load(epi::File *f)
     uint8_t *decoded_img = stbi_load_from_memory(raw_image, length, &width, &height, &bpp, 0);
 
     // we don't want no grayscale here, force STB to convert
-    if (decoded_img != NULL && (bpp == 1 || bpp == 2))
+    if (decoded_img != nullptr && (bpp == 1 || bpp == 2))
     {
         stbi_image_free(decoded_img);
 
@@ -172,8 +172,8 @@ image_data_c *Image_Load(epi::File *f)
 
     delete[] raw_image;
 
-    if (decoded_img == NULL)
-        return NULL;
+    if (decoded_img == nullptr)
+        return nullptr;
 
     int total_w = width;
     int total_h = height;

@@ -45,7 +45,7 @@
 #include "s_blit.h"
 #include "s_sound.h"
 #include "s_music.h"
-
+#include "str_compare.h"
 #include "str_util.h"
 
 #include "r_sky.h" //Lobo 2022: added for our Sky Transfer special
@@ -121,17 +121,17 @@ int P_TwoSided(int sector, int line)
 }
 
 //
-// Return sector_t * of sector next to current; NULL if not two-sided line
+// Return sector_t * of sector next to current; nullptr if not two-sided line
 //
 sector_t *P_GetNextSector(const line_t *line, const sector_t *sec, bool ignore_selfref)
 {
     if (!(line->flags & MLF_TwoSided))
-        return NULL;
+        return nullptr;
 
     // -AJA- 2011/03/31: follow BOOM's logic for self-ref linedefs, which
     //                   fixes the red door of MAP01 of 1024CLAU.wad
     if (ignore_selfref && (line->frontsector == line->backsector))
-        return NULL;
+        return nullptr;
 
     if (line->frontsector == sec)
         return line->backsector;
@@ -255,7 +255,7 @@ sector_t *P_FindSectorFromTag(int tag)
             return sectors + i;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //
@@ -502,7 +502,7 @@ static void P_EFTransferTrans(sector_t *ctrl, sector_t *sec, line_t *line, const
         for (i = 0; i < sec->linecount; i++)
         {
             line_t *L = sec->lines[i];
-            side_t *S = NULL;
+            side_t *S = nullptr;
 
             if (L->frontsector == sec)
                 S = L->side[1];
@@ -897,13 +897,13 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 
     if (special->sector_effect & SECTFX_ResetFloor)
     {
-        target->floor.override_p = NULL;
+        target->floor.override_p = nullptr;
         target->floor.scroll.X = target->floor.scroll.Y = 0;
         target->props.push.X = target->props.push.Y = target->props.push.Z = 0;
     }
     if (special->sector_effect & SECTFX_ResetCeiling)
     {
-        target->ceil.override_p = NULL;
+        target->ceil.override_p = nullptr;
         target->ceil.scroll.X = target->ceil.scroll.Y = 0;
     }
 
@@ -1121,7 +1121,7 @@ static slope_plane_t *DetailSlope_BoundIt(line_t *ld, sector_t *sec, float dz1, 
     if (d_far - d_close < 0.5)
     {
         I_Warning("Detail slope in sector #%d disabled: no area?!?\n", (int)(sec - sectors));
-        return NULL;
+        return nullptr;
     }
 
     slope_plane_t *result = new slope_plane_t;
@@ -1233,7 +1233,7 @@ static void DetailSlope_Ceiling(line_t *ld)
 // line is the line to be activated, side is the side activated from,
 // (as lines can only be activated from the right), thing is the thing
 // activating, to check for player/monster only lines trig is how it
-// was activated, ie shot/crossed/pushed.  `line' can be NULL for
+// was activated, ie shot/crossed/pushed.  `line' can be nullptr for
 // non-line activations.
 //
 // -KM- 1998/09/01 Procedure Written.
@@ -1242,7 +1242,7 @@ static void DetailSlope_Ceiling(line_t *ld)
 //
 // -AJA- 1999/09/29: Updated for new tagged sector links.
 //
-// -AJA- 1999/10/21: Allow non-line activation (line == NULL), and
+// -AJA- 1999/10/21: Allow non-line activation (line == nullptr), and
 //                   added `typenum' and `tag' parameter.
 //
 // -AJA- 2000/01/02: New trigger method `line_Any'.
@@ -1263,7 +1263,7 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
 #ifdef DEVELOPERS
     if (!special)
     {
-        if (line == NULL)
+        if (line == nullptr)
             I_Error("P_ActivateSpecialLine: Special type is 0\n");
         else
             I_Error("P_ActivateSpecialLine: Line %d is not Special\n", (int)(line - lines));
@@ -1273,7 +1273,7 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
     if (!G_CheckWhenAppear(special->appear))
     {
         if (line)
-            line->special = NULL;
+            line->special = nullptr;
 
         return true;
     }
@@ -1436,7 +1436,7 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
         break;
 
     default:
-        texSwitch = P_DoSectorsFromTag(tag, &special->l, NULL, DoLights_wrapper);
+        texSwitch = P_DoSectorsFromTag(tag, &special->l, nullptr, DoLights_wrapper);
         break;
     }
 
@@ -1470,7 +1470,7 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
         sfx[2] = special->d.d_sfxin;
         sfx[3] = special->d.d_sfxinstop;
 
-        texSwitch = P_DoSectorsFromTag(tag, NULL, sfx, DoDonut_wrapper);
+        texSwitch = P_DoSectorsFromTag(tag, nullptr, sfx, DoDonut_wrapper);
     }
 
     //
@@ -1485,7 +1485,7 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
         }
         else
         {
-            texSwitch = P_DoSectorsFromTag(tag, &special->f, line ? line->frontsector : NULL, DoPlane_wrapper);
+            texSwitch = P_DoSectorsFromTag(tag, &special->f, line ? line->frontsector : nullptr, DoPlane_wrapper);
         }
     }
 
@@ -1501,7 +1501,7 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
         }
         else
         {
-            texSwitch = P_DoSectorsFromTag(tag, &special->c, line ? line->frontsector : NULL, DoPlane_wrapper);
+            texSwitch = P_DoSectorsFromTag(tag, &special->c, line ? line->frontsector : nullptr, DoPlane_wrapper);
         }
     }
 
@@ -1667,12 +1667,12 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
             line->count--;
 
             if (!line->count)
-                line->special = NULL;
+                line->special = nullptr;
         }
         // -KM- 1998/09/27 Reversable linedefs.
         if (line->special && special->newtrignum)
         {
-            line->special = (special->newtrignum <= 0) ? NULL : P_LookupLineType(special->newtrignum);
+            line->special = (special->newtrignum <= 0) ? nullptr : P_LookupLineType(special->newtrignum);
         }
 
         P_ChangeSwitchTexture(line, line->special && (special->newtrignum == 0), special->special_flags, playedSound);
@@ -1722,7 +1722,7 @@ bool P_UseSpecialLine(mobj_t *thing, line_t *line, int side, float open_bottom, 
 
 //
 // Called by the RTS `ACTIVATE_LINETYPE' primitive, and also the code
-// pointer in things.ddf of the same name.  Thing can be NULL.
+// pointer in things.ddf of the same name.  Thing can be nullptr.
 //
 // -AJA- 1999/10/21: written.
 //
@@ -1730,7 +1730,7 @@ void P_RemoteActivation(mobj_t *thing, int typenum, int tag, int side, trigger_e
 {
     const linetype_c *spec = P_LookupLineType(typenum);
 
-    P_ActivateSpecialLine(NULL, spec, tag, side, thing, method, 1, (thing == NULL));
+    P_ActivateSpecialLine(nullptr, spec, tag, side, thing, method, 1, (thing == nullptr));
 }
 
 static inline void PlayerInProperties(player_t *player, float bz, float tz, float f_h, float c_h,
@@ -1766,7 +1766,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
             DAMAGE_COMPUTE(damage, &player->mo->info->choke_damage);
 
             if (damage)
-                P_DamageMobj(player->mo, NULL, NULL, damage, &player->mo->info->choke_damage);
+                P_DamageMobj(player->mo, nullptr, nullptr, damage, &player->mo->info->choke_damage);
         }
     }
 
@@ -1852,7 +1852,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
         DAMAGE_COMPUTE(damage, &special->damage);
 
         if (damage || special->damage.instakill)
-            P_DamageMobj(player->mo, NULL, NULL, damage * factor, &special->damage);
+            P_DamageMobj(player->mo, nullptr, nullptr, damage * factor, &special->damage);
     }
 
     if (special->secret && !props->secret_found)
@@ -1879,7 +1879,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
         {
             // -KM- 1998/12/16 We don't want to alter the special type,
             //   modify the sector's attributes instead.
-            props->special = NULL;
+            props->special = nullptr;
 
             if (special->e_exit == EXIT_Secret)
                 G_SecretExitLevel(1);
@@ -1908,7 +1908,7 @@ void P_PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
     bool was_airless = player->airless;
     bool was_swimming   = player->swimming;
 
-    const sectortype_c *swim_special = NULL;
+    const sectortype_c *swim_special = nullptr;
 
     player->swimming   = false;
     player->underwater = false;
@@ -2510,7 +2510,7 @@ void P_SpawnSpecials1(void)
         // -AJA- 1999/10/23: weed out non-appearing lines.
         if (!G_CheckWhenAppear(special->appear))
         {
-            lines[i].special = NULL;
+            lines[i].special = nullptr;
             continue;
         }
 
@@ -2705,13 +2705,13 @@ void P_SpawnSpecials2(int autotag)
 
         if (special->autoline)
         {
-            P_ActivateSpecialLine(&lines[i], lines[i].special, lines[i].tag, 0, NULL, line_Any, 1, 1);
+            P_ActivateSpecialLine(&lines[i], lines[i].special, lines[i].tag, 0, nullptr, line_Any, 1, 1);
         }
 
         // -KM- 1998/11/25 This line should be pushed automatically
         if (autotag && lines[i].special && lines[i].tag == autotag)
         {
-            P_ActivateSpecialLine(&lines[i], lines[i].special, lines[i].tag, 0, NULL, line_pushable, 1, 1);
+            P_ActivateSpecialLine(&lines[i], lines[i].special, lines[i].tag, 0, nullptr, line_pushable, 1, 1);
         }
 
         // add lightanim for manual doors with tags

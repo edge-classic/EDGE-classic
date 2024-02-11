@@ -430,7 +430,7 @@ static void HandleGamepadTriggerEvent(SDL_Event *ev)
 
     event_t event;
 
-    int thresh = I_ROUND(*joy_deads[current_axis] * 32767.0f);
+    int thresh = RoundToInt(*joy_deads[current_axis] * 32767.0f);
     int input  = ev->caxis.value;
 
     if (current_axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)

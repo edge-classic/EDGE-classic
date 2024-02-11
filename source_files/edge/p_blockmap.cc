@@ -70,16 +70,16 @@ float bmap_orgy;
 
 typedef std::list<line_t *> linedef_set_t;
 
-static linedef_set_t **bmap_lines = NULL;
+static linedef_set_t **bmap_lines = nullptr;
 
 // for thing chains
-mobj_t **bmap_things = NULL;
+mobj_t **bmap_things = nullptr;
 
 // for dynamic lights
 int dlmap_width;
 int dlmap_height;
 
-mobj_t **dlmap_things = NULL;
+mobj_t **dlmap_things = nullptr;
 
 extern std::unordered_set<abstract_shader_c *> seen_dlights;
 extern cvar_c                                  r_culling;
@@ -117,12 +117,12 @@ void P_DestroyBlockMap(void)
     }
 
     delete[] bmap_lines;
-    bmap_lines = NULL;
+    bmap_lines = nullptr;
     delete[] bmap_things;
-    bmap_things = NULL;
+    bmap_things = nullptr;
 
     delete[] dlmap_things;
-    dlmap_things = NULL;
+    dlmap_things = nullptr;
 
     bmap_width = bmap_height = 0;
 }
@@ -182,7 +182,7 @@ static inline void TouchNodeLinkIntoSector(touch_node_t *tn, sector_t *sec)
     tn->sec = sec;
 
     tn->sec_next = sec->touch_things;
-    tn->sec_prev = NULL;
+    tn->sec_prev = nullptr;
 
     if (tn->sec_next)
         tn->sec_next->sec_prev = tn;
@@ -195,7 +195,7 @@ static inline void TouchNodeLinkIntoThing(touch_node_t *tn, mobj_t *mo)
     tn->mo = mo;
 
     tn->mo_next = mo->touch_sectors;
-    tn->mo_prev = NULL;
+    tn->mo_prev = nullptr;
 
     if (tn->mo_next)
         tn->mo_next->mo_prev = tn;
@@ -381,8 +381,8 @@ void P_UnsetThingPosition(mobj_t *mo)
             }
         }
 
-        mo->snext = NULL;
-        mo->sprev = NULL;
+        mo->snext = nullptr;
+        mo->sprev = nullptr;
     }
 
     // unlink from touching list.
@@ -390,7 +390,7 @@ void P_UnsetThingPosition(mobj_t *mo)
     //
     for (tn = mo->touch_sectors; tn; tn = tn->mo_next)
     {
-        tn->mo = NULL;
+        tn->mo = nullptr;
     }
 
     // unlink from blockmap
@@ -431,8 +431,8 @@ void P_UnsetThingPosition(mobj_t *mo)
             }
         }
 
-        mo->bprev = NULL;
-        mo->bnext = NULL;
+        mo->bprev = nullptr;
+        mo->bnext = nullptr;
     }
 
     // unlink from dynamic light blockmap
@@ -471,8 +471,8 @@ void P_UnsetThingPosition(mobj_t *mo)
             }
         }
 
-        mo->dlprev = NULL;
-        mo->dlnext = NULL;
+        mo->dlprev = nullptr;
+        mo->dlnext = nullptr;
     }
 
     // unlink from sector glow list
@@ -509,8 +509,8 @@ void P_UnsetThingPosition(mobj_t *mo)
             }
         }
 
-        mo->dlprev = NULL;
-        mo->dlnext = NULL;
+        mo->dlprev = nullptr;
+        mo->dlnext = nullptr;
     }
 }
 
@@ -569,7 +569,7 @@ void P_SetThingPosition(mobj_t *mo)
     if (!(mo->flags & MF_NOSECTOR))
     {
         mo->snext = ss->thinglist;
-        mo->sprev = NULL;
+        mo->sprev = nullptr;
 
         if (ss->thinglist)
             ss->thinglist->sprev = mo;
@@ -600,9 +600,9 @@ void P_SetThingPosition(mobj_t *mo)
     if (tn)
     {
         if (tn->mo_prev)
-            tn->mo_prev->mo_next = NULL;
+            tn->mo_prev->mo_next = nullptr;
         else
-            mo->touch_sectors = NULL;
+            mo->touch_sectors = nullptr;
 
         while (tn)
         {
@@ -644,7 +644,7 @@ void P_SetThingPosition(mobj_t *mo)
         {
             bnum = blocky * bmap_width + blockx;
 
-            mo->bprev = NULL;
+            mo->bprev = nullptr;
             mo->bnext = bmap_things[bnum];
 
             if (bmap_things[bnum])
@@ -655,7 +655,7 @@ void P_SetThingPosition(mobj_t *mo)
         else
         {
             // thing is off the map
-            mo->bnext = mo->bprev = NULL;
+            mo->bnext = mo->bprev = nullptr;
         }
     }
 
@@ -669,7 +669,7 @@ void P_SetThingPosition(mobj_t *mo)
         {
             bnum = blocky * dlmap_width + blockx;
 
-            mo->dlprev = NULL;
+            mo->dlprev = nullptr;
             mo->dlnext = dlmap_things[bnum];
 
             if (dlmap_things[bnum])
@@ -680,7 +680,7 @@ void P_SetThingPosition(mobj_t *mo)
         else
         {
             // thing is off the map
-            mo->dlnext = mo->dlprev = NULL;
+            mo->dlnext = mo->dlprev = nullptr;
         }
     }
 
@@ -689,7 +689,7 @@ void P_SetThingPosition(mobj_t *mo)
     {
         sector_t *sec = mo->subsector->sector;
 
-        mo->dlprev = NULL;
+        mo->dlprev = nullptr;
         mo->dlnext = sec->glow_things;
 
         if (sec->glow_things)
@@ -1037,7 +1037,7 @@ static inline void PIT_AddLineIntercept(line_t *ld)
     intercept_t in;
 
     in.frac  = frac;
-    in.thing = NULL;
+    in.thing = nullptr;
     in.line  = ld;
 
     intercepts.push_back(in);
@@ -1103,7 +1103,7 @@ static inline void PIT_AddThingIntercept(mobj_t *thing)
 
     in.frac  = frac;
     in.thing = thing;
-    in.line  = NULL;
+    in.line  = nullptr;
 
     intercepts.push_back(in);
 }
@@ -1399,7 +1399,7 @@ void P_GenerateBlockMap(int min_x, int min_y, int max_x, int max_y)
     L_WriteDebug("GenerateBlockmap: MAP (%d,%d) -> (%d,%d)\n", min_x, min_y, max_x, max_y);
     L_WriteDebug("GenerateBlockmap: BLOCKS %d x %d  TOTAL %d\n", bmap_width, bmap_height, btotal);
 
-    // setup blk_cur_lines array.  Initially all pointers are NULL, when
+    // setup blk_cur_lines array.  Initially all pointers are nullptr, when
     // any lines get added then the dynamic array is created.
 
     bmap_lines = new linedef_set_t *[btotal];

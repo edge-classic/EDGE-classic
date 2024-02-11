@@ -49,7 +49,7 @@ enum DehackedResult
 void DehackedStartup();
 
 // return the message for the last error, or an empty string if there
-// was none.  Also clears the current error.  Never returns NULL.
+// was none.  Also clears the current error.  Never returns nullptr.
 const char *DehackedGetError(void);
 
 // set quiet mode (disables warnings).

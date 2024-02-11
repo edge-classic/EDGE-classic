@@ -400,7 +400,7 @@ const char *sounds::GetEdgeSfxName(int sound_id)
 const char *sounds::GetSound(int sound_id)
 {
     if (sound_id == ksfx_None)
-        return "nullptr";
+        return "NULL";
 
     // handle random sounds
     switch (sound_id)
@@ -436,7 +436,7 @@ const char *sounds::GetSound(int sound_id)
 
     const char *name = GetEdgeSfxName(sound_id);
     if (name == nullptr)
-        return "nullptr";
+        return "NULL";
 
     return name;
 }

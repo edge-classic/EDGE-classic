@@ -955,7 +955,7 @@ void frames::SpecialAction(char *act_name, const State *st)
     case kA_PlaySound: {
         const char *sfx = sounds::GetSound(ReadArg(st, 0));
 
-        if (epi::StringCaseCompareASCII(sfx, "nullptr") == 0)
+        if (epi::StringCaseCompareASCII(sfx, "NULL") == 0)
             strcpy(act_name, "NOTHING");
         else
             sprintf(act_name, "PLAYSOUND(\"%s\")", sfx);
@@ -975,7 +975,7 @@ void frames::SpecialAction(char *act_name, const State *st)
             const char *sfx = nullptr;
             if (sfx_id > 0)
                 sfx = sounds::GetSound(sfx_id);
-            if (sfx != nullptr && epi::StringCaseCompareASCII(sfx, "nullptr") == 0)
+            if (sfx != nullptr && epi::StringCaseCompareASCII(sfx, "NULL") == 0)
                 sfx = nullptr;
 
             const char *atk_name = things::AddScratchAttack(damage, sfx);

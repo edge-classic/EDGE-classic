@@ -265,7 +265,7 @@ sfx_t *sfxdef_container_c::GetEffect(const char *name, bool error)
     sfx_t    *r = nullptr;
 
     // nullptr Sound
-    if (!name || !name[0] || DDF_CompareName(name, "nullptr") == 0)
+    if (!name || !name[0] || DDF_CompareName(name, "NULL") == 0)
         return nullptr;
 
     // count them

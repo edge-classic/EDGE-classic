@@ -179,7 +179,7 @@ const char *sprites::GetSprite(int spr_num)
 
     // Boom support: TNT1 is an invisible sprite
     if (epi::StringCaseCompareASCII(name, "TNT1") == 0)
-        return "nullptr";
+        return "NULL";
 
     return name;
 }
@@ -189,7 +189,7 @@ const char *sprites::GetOriginalName(int spr_num)
     if (spr_num < kTotalSpritesDEHEXTRA)
         return sprnames_orig[spr_num];
 
-    return "nullptr";
+    return "NULL";
 }
 
 } // namespace dehacked

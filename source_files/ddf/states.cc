@@ -70,7 +70,7 @@ static int last_model  = -1;
 
 static int AddSpriteName(const char *name)
 {
-    if (epi::StringCaseCompareASCII(name, "nullptr") == 0)
+    if (epi::StringCaseCompareASCII(name, "NULL") == 0)
         return SPR_NULL;
 
     if (last_sprite >= 0 && epi::StringCaseCompareASCII(ddf_sprite_names[last_sprite], name) == 0)
@@ -91,7 +91,7 @@ static int AddSpriteName(const char *name)
 
 static int AddModelName(const char *name)
 {
-    if (epi::StringCaseCompareASCII(name, "nullptr") == 0)
+    if (epi::StringCaseCompareASCII(name, "NULL") == 0)
         return SPR_NULL;
 
     if (last_model >= 0 && epi::StringCaseCompareASCII(ddf_model_names[last_model], name) == 0)

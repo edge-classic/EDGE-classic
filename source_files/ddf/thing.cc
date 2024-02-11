@@ -1599,10 +1599,10 @@ void DDF_MobjGetExtra(const char *info, void *storage)
 {
     int *extendedflags = (int *)storage;
 
-    // If keyword is "nullptr", then the mobj is not marked as extra.
+    // If keyword is "NULL", then the mobj is not marked as extra.
     // Otherwise it is.
 
-    if (DDF_CompareName(info, "nullptr") == 0)
+    if (DDF_CompareName(info, "NULL") == 0)
     {
         *extendedflags &= ~EF_EXTRA;
     }

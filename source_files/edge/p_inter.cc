@@ -1116,7 +1116,7 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const damage_c *damtype, bool we
             E_ClearInput();
     }
 
-    statenum_t state    = S_NULL;
+    int state    = S_NULL;
     bool       overkill = false;
 
     if (target->info->gib_health < 0 && target->health < target->info->gib_health)
@@ -1637,7 +1637,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         // setup to hit back
         target->flags |= MF_JUSTHIT;
 
-        statenum_t state = S_NULL;
+        int state = S_NULL;
 
         if (weak_spot)
             state = P_MobjFindLabel(target, "WEAKPAIN");

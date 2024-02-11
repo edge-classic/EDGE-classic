@@ -20,7 +20,6 @@
 #define __DDF_GAME_H__
 
 #include "epi.h"
-
 #include "types.h"
 
 // ------------------------------------------------------------------
@@ -29,74 +28,74 @@
 
 class wi_mapposdef_c
 {
-  public:
+   public:
     std::string name;
 
     int x, y;
 
-  public:
+   public:
     wi_mapposdef_c();
     wi_mapposdef_c(wi_mapposdef_c &rhs);
     ~wi_mapposdef_c();
 
-  public:
+   public:
     wi_mapposdef_c &operator=(wi_mapposdef_c &rhs);
 
-  private:
+   private:
     void Copy(wi_mapposdef_c &src);
 };
 
 class wi_mapposdef_container_c : public std::vector<wi_mapposdef_c *>
 {
-  public:
+   public:
     wi_mapposdef_container_c();
     wi_mapposdef_container_c(wi_mapposdef_container_c &rhs);
     ~wi_mapposdef_container_c();
 
-  private:
+   private:
     void Copy(wi_mapposdef_container_c &src);
 
-  public:
+   public:
     wi_mapposdef_container_c &operator=(wi_mapposdef_container_c &rhs);
 };
 
 class wi_framedef_c
 {
-  public:
-    std::string pic;  // Name of pic to display.
-    int         tics; // Tics on this frame
-    int         x, y; // Position on screen where this goes
+   public:
+    std::string pic;   // Name of pic to display.
+    int         tics;  // Tics on this frame
+    int         x, y;  // Position on screen where this goes
 
-  public:
+   public:
     wi_framedef_c();
     wi_framedef_c(wi_framedef_c &rhs);
     ~wi_framedef_c();
 
-  public:
+   public:
     void           Default(void);
     wi_framedef_c &operator=(wi_framedef_c &rhs);
 
-  private:
+   private:
     void Copy(wi_framedef_c &src);
 };
 
 class wi_framedef_container_c : public std::vector<wi_framedef_c *>
 {
-  public:
+   public:
     wi_framedef_container_c();
     wi_framedef_container_c(wi_framedef_container_c &rhs);
     ~wi_framedef_container_c();
 
-  private:
+   private:
     void Copy(wi_framedef_container_c &rhs);
 
-  public:
+   public:
     wi_framedef_container_c &operator=(wi_framedef_container_c &rhs);
 };
 
 class wi_animdef_c
 {
-  public:
+   public:
     enum animtype_e
     {
         WI_NORMAL,
@@ -109,30 +108,30 @@ class wi_animdef_c
 
     wi_framedef_container_c frames;
 
-  public:
+   public:
     wi_animdef_c();
     wi_animdef_c(wi_animdef_c &rhs);
     ~wi_animdef_c();
 
-  public:
+   public:
     wi_animdef_c &operator=(wi_animdef_c &rhs);
     void          Default(void);
 
-  private:
+   private:
     void Copy(wi_animdef_c &rhs);
 };
 
 class wi_animdef_container_c : public std::vector<wi_animdef_c *>
 {
-  public:
+   public:
     wi_animdef_container_c();
     wi_animdef_container_c(wi_animdef_container_c &rhs);
     ~wi_animdef_container_c();
 
-  private:
+   private:
     void Copy(wi_animdef_container_c &src);
 
-  public:
+   public:
     wi_animdef_container_c &operator=(wi_animdef_container_c &rhs);
 };
 
@@ -150,18 +149,19 @@ typedef enum
     // vertex lighting
     LMODEL_Vertex = 3,
 
-    // Invalid (-ACB- 2003/10/06: MSVC wants the invalid value as part of the enum)
+    // Invalid (-ACB- 2003/10/06: MSVC wants the invalid value as part of the
+    // enum)
     LMODEL_Invalid = 999
 } lighting_model_e;
 
 // Game definition file
 class gamedef_c
 {
-  public:
+   public:
     gamedef_c();
     ~gamedef_c();
 
-  public:
+   public:
     void Default(void);
     void CopyDetail(gamedef_c &src);
 
@@ -191,7 +191,7 @@ class gamedef_c
     std::string namegraphic;
 
     std::string titlemovie;
-    bool movie_played;
+    bool        movie_played;
 
     std::vector<std::string> titlepics;
 
@@ -204,12 +204,9 @@ class gamedef_c
     // Episode description, a reference to languages.ldf
     std::string description;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit gamedef_c(gamedef_c &rhs)
-    {
-        (void)rhs;
-    }
+    explicit gamedef_c(gamedef_c &rhs) { (void)rhs; }
     gamedef_c &operator=(gamedef_c &rhs)
     {
         (void)rhs;
@@ -219,22 +216,22 @@ class gamedef_c
 
 class gamedef_container_c : public std::vector<gamedef_c *>
 {
-  public:
+   public:
     gamedef_container_c();
     ~gamedef_container_c();
 
-  public:
+   public:
     // Search Functions
     gamedef_c *Lookup(const char *refname);
 };
 
 // -------EXTERNALISATIONS-------
 
-extern gamedef_container_c gamedefs; // -ACB- 2004/06/21 Implemented
+extern gamedef_container_c gamedefs;  // -ACB- 2004/06/21 Implemented
 
 void DDF_ReadGames(const std::string &data);
 
-#endif // __DDF_GAME_H__
+#endif  // __DDF_GAME_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

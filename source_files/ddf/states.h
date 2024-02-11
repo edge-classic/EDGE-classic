@@ -19,22 +19,24 @@
 #ifndef __DDF_STAT_H__
 #define __DDF_STAT_H__
 
+#include <string>
+#include <vector>
+
 #include "epi.h"
+#include "types.h"
 
 //-------------------------------------------------------------------------
 //-----------------------  THING STATE STUFF   ----------------------------
 //-------------------------------------------------------------------------
 
-typedef int statenum_t;
-
-#define S_NULL   0 // state
-#define SPR_NULL 0 // sprite
+#define S_NULL   0  // state
+#define SPR_NULL 0  // sprite
 
 typedef enum
 {
     SFF_Weapon   = (1 << 0),
     SFF_Model    = (1 << 1),
-    SFF_Unmapped = (1 << 2), // model_frame not yet looked up
+    SFF_Unmapped = (1 << 2),  // model_frame not yet looked up
 } state_frame_flag_e;
 
 // State Struct
@@ -75,13 +77,6 @@ typedef struct state_s
     int jumpstate;
 } state_t;
 
-typedef struct
-{
-    statenum_t first, last;
-} state_range_t;
-
-typedef std::vector<state_range_t> state_group_t;
-
 // -------EXTERNALISATIONS-------
 
 extern state_t *states;
@@ -90,11 +85,12 @@ extern int      num_states;
 extern std::vector<std::string> ddf_sprite_names;
 extern std::vector<std::string> ddf_model_names;
 
-statenum_t DDF_StateFindLabel(const state_group_t &group, const char *label, bool quiet = false);
+int DDF_StateFindLabel(const std::vector<state_range_t> &group,
+                       const char *label, bool quiet = false);
 
-bool DDF_StateGroupHasState(const state_group_t &group, statenum_t st);
+bool DDF_StateGroupHasState(const std::vector<state_range_t> &group, int st);
 
-#endif // __DDF_STAT_H__
+#endif  // __DDF_STAT_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

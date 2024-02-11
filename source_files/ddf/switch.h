@@ -20,7 +20,6 @@
 #define __DDF_SWTH_H__
 
 #include "epi.h"
-
 #include "types.h"
 
 class image_c;
@@ -37,11 +36,11 @@ typedef struct switchcache_s
 
 class switchdef_c
 {
-  public:
+   public:
     switchdef_c();
     ~switchdef_c(){};
 
-  public:
+   public:
     void Default(void);
     void CopyDetail(switchdef_c &src);
 
@@ -58,39 +57,32 @@ class switchdef_c
 
     switchcache_t cache;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit switchdef_c(switchdef_c &rhs)
-    {
-    }
-    switchdef_c &operator=(switchdef_c &rhs)
-    {
-        return *this;
-    }
+    explicit switchdef_c(switchdef_c &rhs) {}
+    switchdef_c &operator=(switchdef_c &rhs) { return *this; }
 };
 
 // Our switchdefs container
 class switchdef_container_c : public std::vector<switchdef_c *>
 {
-  public:
-    switchdef_container_c()
-    {
-    }
+   public:
+    switchdef_container_c() {}
     ~switchdef_container_c()
     {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          switchdef_c *s= *iter;
-          delete s;
-          s = nullptr;
-      }
+        for (auto iter = begin(); iter != end(); iter++)
+        {
+            switchdef_c *s = *iter;
+            delete s;
+            s = nullptr;
+        }
     }
 
-  public:
+   public:
     switchdef_c *Find(const char *name);
 };
 
-extern switchdef_container_c switchdefs; // -ACB- 2004/06/04 Implemented
+extern switchdef_container_c switchdefs;  // -ACB- 2004/06/04 Implemented
 
 void DDF_ReadSwitch(const std::string &data);
 

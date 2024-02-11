@@ -72,7 +72,7 @@ static void P_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info
 
         if (st->label)
         {
-            statenum_t new_state = DDF_StateFindLabel(info->state_grp, st->label, true /* quiet */);
+            int new_state = DDF_StateFindLabel(info->state_grp, st->label, true /* quiet */);
             if (new_state != S_NULL)
                 stnum = new_state;
         }
@@ -1940,7 +1940,7 @@ void A_WeaponBecome(mobj_t *mo)
 
     p->weapons[p->ready_wp].info = newWep; // here it BECOMES()
 
-    statenum_t state = DDF_StateFindLabel(newWep->state_grp, become->start.label.c_str(), true /* quiet */);
+    int state = DDF_StateFindLabel(newWep->state_grp, become->start.label.c_str(), true /* quiet */);
     if (state == S_NULL)
         I_Error("BECOME action: frame '%s' in [%s] not found!\n", become->start.label.c_str(), newWep->name.c_str());
 

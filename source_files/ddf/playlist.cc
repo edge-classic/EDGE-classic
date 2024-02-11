@@ -16,9 +16,9 @@
 //
 //----------------------------------------------------------------------------
 
-#include "local.h"
-
 #include "playlist.h"
+
+#include "local.h"
 #include "str_compare.h"
 static pl_entry_c *dynamic_plentry;
 
@@ -31,9 +31,11 @@ pl_entry_container_c playlist;
 //
 static void DDF_MusicParseInfo(const char *info)
 {
-    static const char *const musstrtype[] = {"UNKNOWN", "MIDI", "MUS", "OGG", "MP3", "FLAC",
-                                             "M4P", "RAD",  "IMF280", "IMF560", "IMF700", nullptr};
-    static const char *const musinftype[] = {"UNKNOWN", "LUMP", "FILE", "PACK", nullptr};
+    static const char *const musstrtype[] = {
+        "UNKNOWN", "MIDI", "MUS",    "OGG",    "MP3",    "FLAC",
+        "M4P",     "RAD",  "IMF280", "IMF560", "IMF700", nullptr};
+    static const char *const musinftype[] = {"UNKNOWN", "LUMP", "FILE", "PACK",
+                                             nullptr};
 
     char charbuff[256];
     int  pos, i;
@@ -53,23 +55,25 @@ static void DDF_MusicParseInfo(const char *info)
         pos++;
     }
 
-    if (i == 255)
-        DDF_Error("DDF_MusicParseInfo: Music info too big\n");
+    if (i == 255) DDF_Error("DDF_MusicParseInfo: Music info too big\n");
 
     // -AJA- terminate charbuff with trailing \0.
     charbuff[i] = 0;
 
     i = MUS_UNKNOWN;
-    while (i != ENDOFMUSTYPES && epi::StringCaseCompareASCII(charbuff, musstrtype[i]) != 0)
+    while (i != ENDOFMUSTYPES &&
+           epi::StringCaseCompareASCII(charbuff, musstrtype[i]) != 0)
         i++;
 
     if (i == ENDOFMUSTYPES)
     {
         i = MUSINF_UNKNOWN;
-        while (musinftype[i] != nullptr && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
+        while (musinftype[i] != nullptr &&
+               epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
             i++;
         if (i == ENDOFMUSINFTYPES)
-            DDF_Warning("DDF_MusicParseInfo: Unknown music type: '%s'\n", charbuff);
+            DDF_Warning("DDF_MusicParseInfo: Unknown music type: '%s'\n",
+                        charbuff);
         else
         {
             dynamic_plentry->infotype = (musicinftype_e)i;
@@ -96,20 +100,21 @@ static void DDF_MusicParseInfo(const char *info)
         i++;
     }
 
-    if (i == 255)
-        DDF_Error("DDF_MusicParseInfo: Music info too big\n");
+    if (i == 255) DDF_Error("DDF_MusicParseInfo: Music info too big\n");
 
     // -AJA- terminate charbuff with trailing \0.
     charbuff[i] = 0;
 
     i = MUSINF_UNKNOWN;
-    while (musinftype[i] != nullptr && epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
+    while (musinftype[i] != nullptr &&
+           epi::StringCaseCompareASCII(charbuff, musinftype[i]) != 0)
         i++;
 
     if (i == ENDOFMUSINFTYPES)
         DDF_Warning("DDF_MusicParseInfo: Unknown music info: '%s'\n", charbuff);
     else
-        dynamic_plentry->infotype = (musicinftype_e)i; // technically speaking this is proper
+        dynamic_plentry->infotype =
+            (musicinftype_e)i;  // technically speaking this is proper
 
     // Remained is the string reference: filename/lumpname
     pos++;
@@ -126,8 +131,7 @@ static void PlaylistStartEntry(const char *name, bool extend)
 {
     int number = HMM_MAX(0, atoi(name));
 
-    if (number == 0)
-        DDF_Error("Bad music number in playlist.ddf: %s\n", name);
+    if (number == 0) DDF_Error("Bad music number in playlist.ddf: %s\n", name);
 
     dynamic_plentry = playlist.Find(number);
 
@@ -153,7 +157,8 @@ static void PlaylistStartEntry(const char *name, bool extend)
     playlist.push_back(dynamic_plentry);
 }
 
-static void PlaylistParseField(const char *field, const char *contents, int index, bool is_last)
+static void PlaylistParseField(const char *field, const char *contents,
+                               int index, bool is_last)
 {
 #if (DEBUG_DDF)
     I_Debugf("PLAYLIST_PARSE: %s = %s;\n", field, contents);
@@ -216,17 +221,12 @@ void DDF_MusicPlaylistCleanUp(void)
 //
 // pl_entry_c constructor
 //
-pl_entry_c::pl_entry_c() : number(0)
-{
-    Default();
-}
+pl_entry_c::pl_entry_c() : number(0) { Default(); }
 
 //
 // pl_entry_c destructor
 //
-pl_entry_c::~pl_entry_c()
-{
-}
+pl_entry_c::~pl_entry_c() {}
 
 //
 // pl_entry_c::CopyDetail()
@@ -260,8 +260,7 @@ pl_entry_c *pl_entry_container_c::Find(int number)
     for (auto iter = begin(); iter != end(); iter++)
     {
         pl_entry_c *p = *iter;
-        if (p->number == number)
-            return p;
+        if (p->number == number) return p;
     }
 
     return nullptr;
@@ -272,8 +271,7 @@ int pl_entry_container_c::FindLast(const char *name)
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
         pl_entry_c *p = *iter;
-        if (DDF_CompareName(p->info.c_str(), name) == 0)
-            return p->number;
+        if (DDF_CompareName(p->info.c_str(), name) == 0) return p->number;
     }
 
     return -1;
@@ -281,15 +279,12 @@ int pl_entry_container_c::FindLast(const char *name)
 
 int pl_entry_container_c::FindFree()
 {
-    int                   HighestNum = 0;
+    int HighestNum = 0;
 
     for (auto iter = begin(); iter != end(); iter++)
     {
         pl_entry_c *p = *iter;
-        if (p->number > HighestNum)
-        {
-            HighestNum = p->number;
-        }
+        if (p->number > HighestNum) { HighestNum = p->number; }
     }
     HighestNum = HighestNum + 1;
     return HighestNum;

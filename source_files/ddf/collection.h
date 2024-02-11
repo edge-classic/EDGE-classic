@@ -54,36 +54,32 @@ enum ddf_type_e
 
 class ddf_file_c
 {
-  public:
+   public:
     ddf_type_e  type;
     std::string source;
     std::string data;
 
-    ddf_file_c(ddf_type_e _t, const std::string &_s) : type(_t), source(_s), data()
+    ddf_file_c(ddf_type_e _t, const std::string &_s)
+        : type(_t), source(_s), data()
     {
     }
 
-    ddf_file_c(ddf_type_e _t, const std::string &_s, std::string &_d) : type(_t), source(_s), data(_d)
+    ddf_file_c(ddf_type_e _t, const std::string &_s, std::string &_d)
+        : type(_t), source(_s), data(_d)
     {
     }
 
-    ~ddf_file_c()
-    {
-    }
+    ~ddf_file_c() {}
 };
 
 class ddf_collection_c
 {
-  public:
+   public:
     std::vector<ddf_file_c> files;
 
-    ddf_collection_c() : files()
-    {
-    }
+    ddf_collection_c() : files() {}
 
-    ~ddf_collection_c()
-    {
-    }
+    ~ddf_collection_c() {}
 };
 
 #endif /*__DDF_COLLECTION_H__*/

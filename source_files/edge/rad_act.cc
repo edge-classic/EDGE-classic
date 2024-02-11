@@ -611,7 +611,7 @@ void RAD_ActThingEvent(rad_trigger_t *R, void *param)
         if (!RAD_WithinRadius(mo, R->info))
             continue;
 
-        statenum_t state = P_MobjFindLabel(mo, tev->label);
+        int state = P_MobjFindLabel(mo, tev->label);
 
         if (state)
             P_SetMobjStateDeferred(mo, state + tev->offset, 0);
@@ -1250,7 +1250,7 @@ static void RAD_SetPsprite(player_t *p, int position, int stnum, weapondef_c *in
 
         if (st->label)
         {
-            statenum_t new_state = DDF_StateFindLabel(info->state_grp, st->label, true /* quiet */);
+            int new_state = DDF_StateFindLabel(info->state_grp, st->label, true /* quiet */);
             if (new_state != S_NULL)
                 stnum = new_state;
         }
@@ -1368,7 +1368,7 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
 
     p->ready_wp = (weapon_selection_e)pw_index; // insta-switch to it
 
-    statenum_t state = DDF_StateFindLabel(oldWep->state_grp, tev->label, true /* quiet */);
+    int state = DDF_StateFindLabel(oldWep->state_grp, tev->label, true /* quiet */);
     if (state == S_NULL)
         I_Error("RTS WEAPON_EVENT: frame '%s' in [%s] not found!\n", tev->label, tev->weapon_name);
     state += tev->offset;
@@ -1430,7 +1430,7 @@ void P_ActReplace(struct mobj_s *mo, const mobjtype_c *newThing)
     }
     // P_SetThingPosition(mo);
 
-    statenum_t state = P_MobjFindLabel(mo, "IDLE"); // nothing fancy, always default to idle
+    int state = P_MobjFindLabel(mo, "IDLE"); // nothing fancy, always default to idle
     if (state == S_NULL)
         I_Error("RTS REPLACE_THING: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name.c_str());
 

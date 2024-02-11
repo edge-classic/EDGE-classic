@@ -20,7 +20,6 @@
 #define __DDF_COLORMAP_H__
 
 #include "epi.h"
-
 #include "types.h"
 
 // -AJA- 1999/07/09: colmap.ddf structures.
@@ -40,16 +39,16 @@ typedef enum
 typedef struct colmapcache_s
 {
     uint8_t *data;
-    int   size;
+    int      size;
 } colmapcache_t;
 
 class colourmap_c
 {
-  public:
+   public:
     colourmap_c();
     ~colourmap_c();
 
-  public:
+   public:
     void CopyDetail(colourmap_c &src);
     void Default();
 
@@ -67,18 +66,15 @@ class colourmap_c
     // colours for GL renderer
     RGBAColor gl_colour;
 
-    RGBAColor font_colour; // (computed only, not in DDF)
+    RGBAColor font_colour;  // (computed only, not in DDF)
 
     colmapcache_t cache;
 
     void *analysis;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit colourmap_c(colourmap_c &rhs)
-    {
-        (void)rhs;
-    }
+    explicit colourmap_c(colourmap_c &rhs) { (void)rhs; }
     colourmap_c &operator=(colourmap_c &rhs)
     {
         (void)rhs;
@@ -89,16 +85,16 @@ class colourmap_c
 // Colourmap container
 class colourmap_container_c : public std::vector<colourmap_c *>
 {
-  public:
+   public:
     colourmap_container_c();
     ~colourmap_container_c();
 
-  public:
+   public:
     // Search Functions
     colourmap_c *Lookup(const char *refname);
 };
 
-extern colourmap_container_c colourmaps; // -ACB- 2004/06/10 Implemented
+extern colourmap_container_c colourmaps;  // -ACB- 2004/06/10 Implemented
 
 void DDF_ReadColourMaps(const std::string &data);
 

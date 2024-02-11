@@ -20,7 +20,6 @@
 #define __DDF_LANG_H__
 
 #include "epi.h"
-
 #include "types.h"
 
 // ------------------------------------------------------------------
@@ -31,11 +30,11 @@ class lang_choice_c;
 
 class language_c
 {
-  public:
+   public:
     language_c();
     ~language_c();
 
-  private:
+   private:
     std::vector<lang_choice_c *> choices;
 
     // UMAPINFO strings
@@ -44,17 +43,11 @@ class language_c
     // the current language choice
     int current;
 
-  public:
+   public:
     void Clear();
 
-    int GetChoiceCount()
-    {
-        return (int)choices.size();
-    }
-    int GetChoice()
-    {
-        return current;
-    }
+    int GetChoiceCount() { return (int)choices.size(); }
+    int GetChoice() { return current; }
 
     const char *GetName(int idx = -1);
     bool        IsValidRef(const char *refname);
@@ -76,7 +69,7 @@ class language_c
     lang_choice_c *AddChoice(const char *name);
 };
 
-extern language_c language; // -ACB- 2004/06/27 Implemented
+extern language_c language;  // -ACB- 2004/06/27 Implemented
 
 void DDF_ReadLangs(const std::string &data);
 

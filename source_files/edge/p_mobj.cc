@@ -469,7 +469,7 @@ static void ResurrectRespawn(mobj_t *mobj)
 //
 // Returns true if the mobj is still present.
 //
-bool P_SetMobjState(mobj_t *mobj, statenum_t state)
+bool P_SetMobjState(mobj_t *mobj, int state)
 {
     // ignore removed objects
     if (mobj->isRemoved())
@@ -502,7 +502,7 @@ bool P_SetMobjState(mobj_t *mobj, statenum_t state)
     return true;
 }
 
-bool P_SetMobjState2(mobj_t *mobj, statenum_t state)
+bool P_SetMobjState2(mobj_t *mobj, int state)
 {
     // -AJA- 2010/07/10: mundo hack for DDF inheritance. When jumping
     //                   to an old state, check if a newer one exists.
@@ -522,7 +522,7 @@ bool P_SetMobjState2(mobj_t *mobj, statenum_t state)
 
         if (st->label)
         {
-            statenum_t new_state = P_MobjFindLabel(mobj, st->label);
+            int new_state = P_MobjFindLabel(mobj, st->label);
 
             if (new_state != S_NULL)
                 state = new_state;
@@ -544,7 +544,7 @@ bool P_SetMobjState2(mobj_t *mobj, statenum_t state)
 //
 // -AJA- 1999/09/12: written.
 //
-bool P_SetMobjStateDeferred(mobj_t *mo, statenum_t stnum, int tic_skip)
+bool P_SetMobjStateDeferred(mobj_t *mo, int stnum, int tic_skip)
 {
     // ignore removed objects
     if (mo->isRemoved() || !mo->next_state)
@@ -570,7 +570,7 @@ bool P_SetMobjStateDeferred(mobj_t *mo, statenum_t stnum, int tic_skip)
 // Look for the given label in the mobj's states.  Returns the state
 // number if found, otherwise S_NULL.
 //
-statenum_t P_MobjFindLabel(mobj_t *mobj, const char *label)
+int P_MobjFindLabel(mobj_t *mobj, const char *label)
 {
     return DDF_StateFindLabel(mobj->info->state_grp, label, true /* quiet */);
 }

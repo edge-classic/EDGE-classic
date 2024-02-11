@@ -20,57 +20,56 @@
 #define __DDF_MOVIE_H__
 
 #include "epi.h"
-
 #include "types.h"
 
 typedef enum
 {
-    MOVDT_None,       // Default/dummy value
-    MOVDT_Lump,       // load from lump in a WAD
-    MOVDT_Package,    // load from an EPK
+    MOVDT_None,     // Default/dummy value
+    MOVDT_Lump,     // load from lump in a WAD
+    MOVDT_Package,  // load from an EPK
 } moviedata_type_e;
 
 typedef enum
 {
-    MOVSC_Autofit, // fit movie to screen as best as possible
-    MOVSC_NoScale, // force movie to play at original size regardless of display
-    MOVSC_Zoom, // movie will be scaled to fit display height; sides may be clipped
-    MOVSC_Stretch, // movie will stretch to fit display; disregards aspect ratio
+    MOVSC_Autofit,  // fit movie to screen as best as possible
+    MOVSC_NoScale,  // force movie to play at original size regardless of
+                    // display
+    MOVSC_Zoom,     // movie will be scaled to fit display height; sides may be
+                    // clipped
+    MOVSC_Stretch,  // movie will stretch to fit display; disregards aspect
+                    // ratio
 } moviescale_type_e;
 
 typedef enum
 {
     MOVSP_None = 0,
-    MOVSP_Mute = 0x0001, // do not play associated audio track
+    MOVSP_Mute = 0x0001,  // do not play associated audio track
 } movie_special_e;
 
 class moviedef_c
 {
-  public:
+   public:
     moviedef_c();
     ~moviedef_c(){};
 
-  public:
+   public:
     void Default(void);
     void CopyDetail(const moviedef_c &src);
 
     // Member vars....
-    std::string       name;
+    std::string name;
 
     moviedata_type_e type;
 
-    std::string      info;
+    std::string info;
 
     moviescale_type_e scaling;
 
     movie_special_e special;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit moviedef_c(moviedef_c &rhs)
-    {
-        (void)rhs;
-    }
+    explicit moviedef_c(moviedef_c &rhs) { (void)rhs; }
     moviedef_c &operator=(moviedef_c &rhs)
     {
         (void)rhs;
@@ -81,21 +80,19 @@ class moviedef_c
 // Our moviedefs container
 class moviedef_container_c : public std::vector<moviedef_c *>
 {
-  public:
-    moviedef_container_c()
-    {
-    }
+   public:
+    moviedef_container_c() {}
     ~moviedef_container_c()
     {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          moviedef_c *mov = *iter;
-          delete mov;
-          mov = nullptr;
-      }
+        for (auto iter = begin(); iter != end(); iter++)
+        {
+            moviedef_c *mov = *iter;
+            delete mov;
+            mov = nullptr;
+        }
     }
 
-  public:
+   public:
     // Search Functions
     moviedef_c *Lookup(const char *refname);
 };

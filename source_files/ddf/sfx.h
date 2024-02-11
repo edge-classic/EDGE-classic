@@ -20,7 +20,6 @@
 #define __DDF_SFX_H__
 
 #include "epi.h"
-
 #include "types.h"
 
 #define S_CLOSE_DIST    160.0f
@@ -34,8 +33,8 @@
 typedef struct sfx_s
 {
     int num;
-    int sounds[1]; // -ACB- 1999/11/06 Zero based array is not ANSI compliant
-                   // -AJA- I'm also relying on the [1] within sfxdef_c.
+    int sounds[1];  // -ACB- 1999/11/06 Zero based array is not ANSI compliant
+                    // -AJA- I'm also relying on the [1] within sfxdef_c.
 } sfx_t;
 
 #define sfx_None (sfx_t *)nullptr
@@ -43,11 +42,11 @@ typedef struct sfx_s
 // Sound Effect Definition Class
 class sfxdef_c
 {
-  public:
+   public:
     sfxdef_c();
     ~sfxdef_c();
 
-  public:
+   public:
     void Default(void);
     void CopyDetail(sfxdef_c &src);
 
@@ -88,12 +87,9 @@ class sfxdef_c
     // then the this sound won't be played at all.
     float max_distance;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit sfxdef_c(sfxdef_c &rhs)
-    {
-        (void)rhs;
-    }
+    explicit sfxdef_c(sfxdef_c &rhs) { (void)rhs; }
     sfxdef_c &operator=(sfxdef_c &rhs)
     {
         (void)rhs;
@@ -104,22 +100,20 @@ class sfxdef_c
 // Our sound effect definition container
 class sfxdef_container_c : public std::vector<sfxdef_c *>
 {
-  public:
-    sfxdef_container_c()
-    {
-    }
+   public:
+    sfxdef_container_c() {}
 
     ~sfxdef_container_c()
     {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          sfxdef_c *s= *iter;
-          delete s;
-          s = nullptr;
-      }
+        for (auto iter = begin(); iter != end(); iter++)
+        {
+            sfxdef_c *s = *iter;
+            delete s;
+            s = nullptr;
+        }
     }
 
-  public:
+   public:
     // Lookup functions
     sfx_t    *GetEffect(const char *name, bool error = true);
     sfxdef_c *Lookup(const char *name);
@@ -127,11 +121,11 @@ class sfxdef_container_c : public std::vector<sfxdef_c *>
 
 // ----------EXTERNALISATIONS----------
 
-extern sfxdef_container_c sfxdefs; // -ACB- 2004/07/25 Implemented
+extern sfxdef_container_c sfxdefs;  // -ACB- 2004/07/25 Implemented
 
 void DDF_ReadSFX(const std::string &data);
 
-#endif // __DDF_SFX_H__
+#endif  // __DDF_SFX_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

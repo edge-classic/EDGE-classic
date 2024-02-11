@@ -141,9 +141,9 @@ extern iteminque_t *itemquehead;
 extern mobj_t *mobjlisthead;
 
 void       P_RemoveMobj(mobj_t *th);
-statenum_t P_MobjFindLabel(mobj_t *mobj, const char *label);
-bool       P_SetMobjState(mobj_t *mobj, statenum_t state);
-bool       P_SetMobjStateDeferred(mobj_t *mobj, statenum_t state, int tic_skip);
+int P_MobjFindLabel(mobj_t *mobj, const char *label);
+bool       P_SetMobjState(mobj_t *mobj, int state);
+bool       P_SetMobjStateDeferred(mobj_t *mobj, int state, int tic_skip);
 void       P_SetMobjDirAndSpeed(mobj_t *mobj, BAMAngle angle, float slope, float speed);
 void       P_RunMobjThinkers(bool extra_tic);
 void       P_SpawnDebris(float x, float y, float z, BAMAngle angle, const mobjtype_c *debris);

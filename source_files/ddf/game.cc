@@ -41,29 +41,30 @@ static void DDF_GameGetLighting(const char *info, void *storage);
 #define DDF_CMD_BASE dummy_gamedef
 static gamedef_c dummy_gamedef;
 
-static const commandlist_t gamedef_commands[] = {DF("INTERMISSION_GRAPHIC", background, DDF_MainGetLumpName),
-                                                 DF("INTERMISSION_CAMERA", bg_camera, DDF_MainGetString),
-                                                 DF("INTERMISSION_MUSIC", music, DDF_MainGetNumeric),
-                                                 DF("SPLAT_GRAPHIC", splatpic, DDF_MainGetLumpName),
-                                                 DF("YAH1_GRAPHIC", yah[0], DDF_MainGetLumpName),
-                                                 DF("YAH2_GRAPHIC", yah[1], DDF_MainGetLumpName),
-                                                 DF("PERCENT_SOUND", percent, DDF_MainLookupSound),
-                                                 DF("DONE_SOUND", done, DDF_MainLookupSound),
-                                                 DF("ENDMAP_SOUND", endmap, DDF_MainLookupSound),
-                                                 DF("NEXTMAP_SOUND", nextmap, DDF_MainLookupSound),
-                                                 DF("ACCEL_SOUND", accel_snd, DDF_MainLookupSound),
-                                                 DF("FRAG_SOUND", frag_snd, DDF_MainLookupSound),
-                                                 DF("FIRSTMAP", firstmap, DDF_MainGetLumpName),
-                                                 DF("NAME_GRAPHIC", namegraphic, DDF_MainGetLumpName),
-                                                 DF("TITLE_MOVIE", titlemovie, DDF_MainGetString),
-                                                 DF("TITLE_MUSIC", titlemusic, DDF_MainGetNumeric),
-                                                 DF("TITLE_TIME", titletics, DDF_MainGetTime),
-                                                 DF("SPECIAL_MUSIC", special_music, DDF_MainGetNumeric),
-                                                 DF("LIGHTING", lighting, DDF_GameGetLighting),
-                                                 DF("DESCRIPTION", description, DDF_MainGetString),
-                                                 DF("NO_SKILL_MENU", no_skill_menu, DDF_MainGetBoolean),
+static const commandlist_t gamedef_commands[] = {
+    DF("INTERMISSION_GRAPHIC", background, DDF_MainGetLumpName),
+    DF("INTERMISSION_CAMERA", bg_camera, DDF_MainGetString),
+    DF("INTERMISSION_MUSIC", music, DDF_MainGetNumeric),
+    DF("SPLAT_GRAPHIC", splatpic, DDF_MainGetLumpName),
+    DF("YAH1_GRAPHIC", yah[0], DDF_MainGetLumpName),
+    DF("YAH2_GRAPHIC", yah[1], DDF_MainGetLumpName),
+    DF("PERCENT_SOUND", percent, DDF_MainLookupSound),
+    DF("DONE_SOUND", done, DDF_MainLookupSound),
+    DF("ENDMAP_SOUND", endmap, DDF_MainLookupSound),
+    DF("NEXTMAP_SOUND", nextmap, DDF_MainLookupSound),
+    DF("ACCEL_SOUND", accel_snd, DDF_MainLookupSound),
+    DF("FRAG_SOUND", frag_snd, DDF_MainLookupSound),
+    DF("FIRSTMAP", firstmap, DDF_MainGetLumpName),
+    DF("NAME_GRAPHIC", namegraphic, DDF_MainGetLumpName),
+    DF("TITLE_MOVIE", titlemovie, DDF_MainGetString),
+    DF("TITLE_MUSIC", titlemusic, DDF_MainGetNumeric),
+    DF("TITLE_TIME", titletics, DDF_MainGetTime),
+    DF("SPECIAL_MUSIC", special_music, DDF_MainGetNumeric),
+    DF("LIGHTING", lighting, DDF_GameGetLighting),
+    DF("DESCRIPTION", description, DDF_MainGetString),
+    DF("NO_SKILL_MENU", no_skill_menu, DDF_MainGetBoolean),
 
-                                                 DDF_CMD_END};
+    DDF_CMD_END};
 
 //
 //  DDF PARSE ROUTINES
@@ -86,8 +87,7 @@ static void GameStartEntry(const char *name, bool extend)
 
     if (extend)
     {
-        if (!dynamic_gamedef)
-            DDF_Error("Unknown game to extend: %s\n", name);
+        if (!dynamic_gamedef) DDF_Error("Unknown game to extend: %s\n", name);
         return;
     }
 
@@ -114,7 +114,8 @@ static void GameDoTemplate(const char *contents)
     dynamic_gamedef->CopyDetail(*other);
 }
 
-static void GameParseField(const char *field, const char *contents, int index, bool is_last)
+static void GameParseField(const char *field, const char *contents, int index,
+                           bool is_last)
 {
 #if (DEBUG_DDF)
     I_Debugf("GAME_PARSE: %s = %s;\n", field, contents);
@@ -143,8 +144,9 @@ static void GameParseField(const char *field, const char *contents, int index, b
         return;
     }
 
-    if (DDF_MainParseField(gamedef_commands, field, contents, (uint8_t *)dynamic_gamedef))
-        return; // OK
+    if (DDF_MainParseField(gamedef_commands, field, contents,
+                           (uint8_t *)dynamic_gamedef))
+        return;  // OK
 
     DDF_WarnError("Unknown games.ddf command: %s\n", field);
 }
@@ -180,15 +182,11 @@ void DDF_ReadGames(const std::string &data)
     DDF_MainReadFile(&games, data);
 }
 
-void DDF_GameInit(void)
-{
-    GameClearAll();
-}
+void DDF_GameInit(void) { GameClearAll(); }
 
 void DDF_GameCleanUp(void)
 {
-    if (gamedefs.empty())
-        I_Error("There are no games defined in DDF !\n");
+    if (gamedefs.empty()) I_Error("There are no games defined in DDF !\n");
 }
 
 static void DDF_GameAddFrame(void)
@@ -246,8 +244,7 @@ static void DDF_GameGetAnim(const char *info, void *storage)
             DDF_Error("Invalid # command: '%s'\n", info);
 
         p = strchr(info, ':');
-        if (!p || p <= info + 1)
-            DDF_Error("Invalid # command: '%s'\n", info);
+        if (!p || p <= info + 1) DDF_Error("Invalid # command: '%s'\n", info);
 
         buffer_animdef.level = std::string(info + 1, p - (info + 1));
 
@@ -298,7 +295,8 @@ void DDF_GameGetLighting(const char *info, void *storage)
 {
     int flag_value;
 
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(info, lighting_names, &flag_value, false, false))
+    if (CHKF_Positive != DDF_MainCheckSpecialFlag(info, lighting_names,
+                                                  &flag_value, false, false))
     {
         DDF_WarnError("GAMES.DDF LIGHTING: Unknown model: %s", info);
         return;
@@ -312,24 +310,17 @@ void DDF_GameGetLighting(const char *info, void *storage)
 //
 // wi_mapposdef_c Constructor
 //
-wi_mapposdef_c::wi_mapposdef_c()
-{
-}
+wi_mapposdef_c::wi_mapposdef_c() {}
 
 //
 // wi_mapposdef_c Copy constructor
 //
-wi_mapposdef_c::wi_mapposdef_c(wi_mapposdef_c &rhs)
-{
-    Copy(rhs);
-}
+wi_mapposdef_c::wi_mapposdef_c(wi_mapposdef_c &rhs) { Copy(rhs); }
 
 //
 // wi_mapposdef_c Destructor
 //
-wi_mapposdef_c::~wi_mapposdef_c()
-{
-}
+wi_mapposdef_c::~wi_mapposdef_c() {}
 
 //
 // wi_mapposdef_c::Copy()
@@ -346,8 +337,7 @@ void wi_mapposdef_c::Copy(wi_mapposdef_c &src)
 //
 wi_mapposdef_c &wi_mapposdef_c::operator=(wi_mapposdef_c &rhs)
 {
-    if (&rhs != this)
-        Copy(rhs);
+    if (&rhs != this) Copy(rhs);
 
     return *this;
 }
@@ -357,14 +347,13 @@ wi_mapposdef_c &wi_mapposdef_c::operator=(wi_mapposdef_c &rhs)
 //
 // wi_mapposdef_container_c Constructor
 //
-wi_mapposdef_container_c::wi_mapposdef_container_c()
-{
-}
+wi_mapposdef_container_c::wi_mapposdef_container_c() {}
 
 //
 // wi_mapposdef_container_c Copy constructor
 //
-wi_mapposdef_container_c::wi_mapposdef_container_c(wi_mapposdef_container_c &rhs)
+wi_mapposdef_container_c::wi_mapposdef_container_c(
+    wi_mapposdef_container_c &rhs)
 {
     Copy(rhs);
 }
@@ -400,7 +389,8 @@ void wi_mapposdef_container_c::Copy(wi_mapposdef_container_c &src)
 //
 // wi_mapposdef_container_c assignment operator
 //
-wi_mapposdef_container_c &wi_mapposdef_container_c::operator=(wi_mapposdef_container_c &rhs)
+wi_mapposdef_container_c &wi_mapposdef_container_c::operator=(
+    wi_mapposdef_container_c &rhs)
 {
     if (&rhs != this)
     {
@@ -422,25 +412,17 @@ wi_mapposdef_container_c &wi_mapposdef_container_c::operator=(wi_mapposdef_conta
 //
 // wi_framedef_c Constructor
 //
-wi_framedef_c::wi_framedef_c()
-{
-    Default();
-}
+wi_framedef_c::wi_framedef_c() { Default(); }
 
 //
 // wi_framedef_c Copy constructor
 //
-wi_framedef_c::wi_framedef_c(wi_framedef_c &rhs)
-{
-    Copy(rhs);
-}
+wi_framedef_c::wi_framedef_c(wi_framedef_c &rhs) { Copy(rhs); }
 
 //
 // wi_framedef_c Destructor
 //
-wi_framedef_c::~wi_framedef_c()
-{
-}
+wi_framedef_c::~wi_framedef_c() {}
 
 //
 // wi_framedef_c::Copy()
@@ -468,8 +450,7 @@ void wi_framedef_c::Default()
 //
 wi_framedef_c &wi_framedef_c::operator=(wi_framedef_c &rhs)
 {
-    if (&rhs != this)
-        Copy(rhs);
+    if (&rhs != this) Copy(rhs);
 
     return *this;
 }
@@ -479,9 +460,7 @@ wi_framedef_c &wi_framedef_c::operator=(wi_framedef_c &rhs)
 //
 // wi_framedef_container_c Constructor
 //
-wi_framedef_container_c::wi_framedef_container_c()
-{
-}
+wi_framedef_container_c::wi_framedef_container_c() {}
 
 //
 // wi_framedef_container_c Copy constructor
@@ -522,7 +501,8 @@ void wi_framedef_container_c::Copy(wi_framedef_container_c &src)
 //
 // wi_framedef_container_c assignment operator
 //
-wi_framedef_container_c &wi_framedef_container_c::operator=(wi_framedef_container_c &rhs)
+wi_framedef_container_c &wi_framedef_container_c::operator=(
+    wi_framedef_container_c &rhs)
 {
     if (&rhs != this)
     {
@@ -544,25 +524,17 @@ wi_framedef_container_c &wi_framedef_container_c::operator=(wi_framedef_containe
 //
 // wi_animdef_c Constructor
 //
-wi_animdef_c::wi_animdef_c()
-{
-    Default();
-}
+wi_animdef_c::wi_animdef_c() { Default(); }
 
 //
 // wi_animdef_c Copy constructor
 //
-wi_animdef_c::wi_animdef_c(wi_animdef_c &rhs)
-{
-    Copy(rhs);
-}
+wi_animdef_c::wi_animdef_c(wi_animdef_c &rhs) { Copy(rhs); }
 
 //
 // wi_animdef_c Destructor
 //
-wi_animdef_c::~wi_animdef_c()
-{
-}
+wi_animdef_c::~wi_animdef_c() {}
 
 //
 // void Copy()
@@ -595,8 +567,7 @@ void wi_animdef_c::Default()
 //
 wi_animdef_c &wi_animdef_c::operator=(wi_animdef_c &rhs)
 {
-    if (&rhs != this)
-        Copy(rhs);
+    if (&rhs != this) Copy(rhs);
 
     return *this;
 }
@@ -606,9 +577,7 @@ wi_animdef_c &wi_animdef_c::operator=(wi_animdef_c &rhs)
 //
 // wi_animdef_container_c Constructor
 //
-wi_animdef_container_c::wi_animdef_container_c()
-{
-}
+wi_animdef_container_c::wi_animdef_container_c() {}
 
 //
 // wi_animdef_container_c Copy constructor
@@ -649,7 +618,8 @@ void wi_animdef_container_c::Copy(wi_animdef_container_c &src)
 //
 // wi_animdef_container_c assignment operator
 //
-wi_animdef_container_c &wi_animdef_container_c::operator=(wi_animdef_container_c &rhs)
+wi_animdef_container_c &wi_animdef_container_c::operator=(
+    wi_animdef_container_c &rhs)
 {
     if (&rhs != this)
     {
@@ -671,17 +641,12 @@ wi_animdef_container_c &wi_animdef_container_c::operator=(wi_animdef_container_c
 //
 // gamedef_c Constructor
 //
-gamedef_c::gamedef_c() : name(), titlepics()
-{
-    Default();
-}
+gamedef_c::gamedef_c() : name(), titlepics() { Default(); }
 
 //
 // gamedef_c Destructor
 //
-gamedef_c::~gamedef_c()
-{
-}
+gamedef_c::~gamedef_c() {}
 
 //
 // gamedef_c::CopyDetail()
@@ -762,8 +727,8 @@ void gamedef_c::Default()
     titlepics.clear();
     titlemovie.clear();
     movie_played = false;
-    titlemusic = 0;
-    titletics  = TICRATE * 4;
+    titlemusic   = 0;
+    titletics    = TICRATE * 4;
 
     special_music = 0;
     lighting      = LMODEL_Doomish;
@@ -775,9 +740,7 @@ void gamedef_c::Default()
 //
 // gamedef_container_c Constructor
 //
-gamedef_container_c::gamedef_container_c()
-{
-}
+gamedef_container_c::gamedef_container_c() {}
 
 //
 // gamedef_container_c Destructor
@@ -799,14 +762,12 @@ gamedef_container_c::~gamedef_container_c()
 //
 gamedef_c *gamedef_container_c::Lookup(const char *refname)
 {
-    if (!refname || !refname[0])
-        return nullptr;
+    if (!refname || !refname[0]) return nullptr;
 
     for (auto iter = begin(); iter != end(); iter++)
     {
         gamedef_c *game = *iter;
-        if (DDF_CompareName(game->name.c_str(), refname) == 0)
-            return game;
+        if (DDF_CompareName(game->name.c_str(), refname) == 0) return game;
     }
 
     return nullptr;

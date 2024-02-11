@@ -21,17 +21,15 @@
 // -KM- 1998/11/25 File Written
 //
 
+#include "weapon.h"
+
 #include <string.h>
 
 #include "local.h"
-
-#include "weapon.h"
-
 #include "p_action.h"
-
-#include "types.h"
 #include "str_compare.h"
 #include "str_util.h"
+#include "types.h"
 
 #undef DF
 #define DF DDF_FIELD
@@ -52,181 +50,215 @@ static void DDF_WStateGetRADTrigger(const char *arg, state_t *cur_state);
 static weapondef_c dummy_weapon;
 
 static const commandlist_t weapon_commands[] = {
-    DF("AMMOTYPE", ammo[0], DDF_WGetAmmo), DF("AMMOPERSHOT", ammopershot[0], DDF_MainGetNumeric),
-    DF("CLIPSIZE", clip_size[0], DDF_MainGetNumeric), DF("AUTOMATIC", autofire[0], DDF_MainGetBoolean),
-    DF("NO_CHEAT", no_cheat, DDF_MainGetBoolean), DF("ATTACK", attack[0], DDF_MainRefAttack),
+    DF("AMMOTYPE", ammo[0], DDF_WGetAmmo),
+    DF("AMMOPERSHOT", ammopershot[0], DDF_MainGetNumeric),
+    DF("CLIPSIZE", clip_size[0], DDF_MainGetNumeric),
+    DF("AUTOMATIC", autofire[0], DDF_MainGetBoolean),
+    DF("NO_CHEAT", no_cheat, DDF_MainGetBoolean),
+    DF("ATTACK", attack[0], DDF_MainRefAttack),
     DF("SPECIAL", specials[0], DDF_WGetSpecialFlags),
 
-    DF("SEC_AMMOTYPE", ammo[1], DDF_WGetAmmo), DF("SEC_AMMOPERSHOT", ammopershot[1], DDF_MainGetNumeric),
-    DF("SEC_CLIPSIZE", clip_size[1], DDF_MainGetNumeric), DF("SEC_AUTOMATIC", autofire[1], DDF_MainGetBoolean),
-    DF("SEC_ATTACK", attack[1], DDF_MainRefAttack), DF("SEC_SPECIAL", specials[1], DDF_WGetSpecialFlags),
+    DF("SEC_AMMOTYPE", ammo[1], DDF_WGetAmmo),
+    DF("SEC_AMMOPERSHOT", ammopershot[1], DDF_MainGetNumeric),
+    DF("SEC_CLIPSIZE", clip_size[1], DDF_MainGetNumeric),
+    DF("SEC_AUTOMATIC", autofire[1], DDF_MainGetBoolean),
+    DF("SEC_ATTACK", attack[1], DDF_MainRefAttack),
+    DF("SEC_SPECIAL", specials[1], DDF_WGetSpecialFlags),
 
-    DF("2ND_AMMOTYPE", ammo[1], DDF_WGetAmmo), DF("2ND_AMMOPERSHOT", ammopershot[1], DDF_MainGetNumeric),
-    DF("2ND_CLIPSIZE", clip_size[1], DDF_MainGetNumeric), DF("2ND_AUTOMATIC", autofire[1], DDF_MainGetBoolean),
-    DF("2ND_ATTACK", attack[1], DDF_MainRefAttack), DF("2ND_SPECIAL", specials[1], DDF_WGetSpecialFlags),
+    DF("2ND_AMMOTYPE", ammo[1], DDF_WGetAmmo),
+    DF("2ND_AMMOPERSHOT", ammopershot[1], DDF_MainGetNumeric),
+    DF("2ND_CLIPSIZE", clip_size[1], DDF_MainGetNumeric),
+    DF("2ND_AUTOMATIC", autofire[1], DDF_MainGetBoolean),
+    DF("2ND_ATTACK", attack[1], DDF_MainRefAttack),
+    DF("2ND_SPECIAL", specials[1], DDF_WGetSpecialFlags),
 
-    DF("3RD_AMMOTYPE", ammo[2], DDF_WGetAmmo), DF("3RD_AMMOPERSHOT", ammopershot[2], DDF_MainGetNumeric),
-    DF("3RD_CLIPSIZE", clip_size[2], DDF_MainGetNumeric), DF("3RD_AUTOMATIC", autofire[2], DDF_MainGetBoolean),
-    DF("3RD_ATTACK", attack[2], DDF_MainRefAttack), DF("3RD_SPECIAL", specials[2], DDF_WGetSpecialFlags),
+    DF("3RD_AMMOTYPE", ammo[2], DDF_WGetAmmo),
+    DF("3RD_AMMOPERSHOT", ammopershot[2], DDF_MainGetNumeric),
+    DF("3RD_CLIPSIZE", clip_size[2], DDF_MainGetNumeric),
+    DF("3RD_AUTOMATIC", autofire[2], DDF_MainGetBoolean),
+    DF("3RD_ATTACK", attack[2], DDF_MainRefAttack),
+    DF("3RD_SPECIAL", specials[2], DDF_WGetSpecialFlags),
 
-    DF("4TH_AMMOTYPE", ammo[3], DDF_WGetAmmo), DF("4TH_AMMOPERSHOT", ammopershot[3], DDF_MainGetNumeric),
-    DF("4TH_CLIPSIZE", clip_size[3], DDF_MainGetNumeric), DF("4TH_AUTOMATIC", autofire[3], DDF_MainGetBoolean),
-    DF("4TH_ATTACK", attack[3], DDF_MainRefAttack), DF("4TH_SPECIAL", specials[3], DDF_WGetSpecialFlags),
+    DF("4TH_AMMOTYPE", ammo[3], DDF_WGetAmmo),
+    DF("4TH_AMMOPERSHOT", ammopershot[3], DDF_MainGetNumeric),
+    DF("4TH_CLIPSIZE", clip_size[3], DDF_MainGetNumeric),
+    DF("4TH_AUTOMATIC", autofire[3], DDF_MainGetBoolean),
+    DF("4TH_ATTACK", attack[3], DDF_MainRefAttack),
+    DF("4TH_SPECIAL", specials[3], DDF_WGetSpecialFlags),
 
-    DF("EJECT_ATTACK", eject_attack, DDF_MainRefAttack), DF("FREE", autogive, DDF_MainGetBoolean),
-    DF("BINDKEY", bind_key, DDF_MainGetNumeric), DF("PRIORITY", priority, DDF_MainGetNumeric),
-    DF("DANGEROUS", dangerous, DDF_MainGetBoolean), DF("UPGRADES", upgrade_weap, DDF_WGetUpgrade),
-    DF("IDLE_SOUND", idle, DDF_MainLookupSound), DF("ENGAGED_SOUND", engaged, DDF_MainLookupSound),
-    DF("HIT_SOUND", hit, DDF_MainLookupSound), DF("START_SOUND", start, DDF_MainLookupSound),
-    DF("NOTHRUST", nothrust, DDF_MainGetBoolean), DF("FEEDBACK", feedback, DDF_MainGetBoolean),
-    DF("KICK", kick, DDF_MainGetFloat), DF("ZOOM_FOV", zoom_fov, DDF_MainGetNumeric),
-    DF("ZOOM_FACTOR", zoom_factor, DDF_MainGetFloat), DF("REFIRE_INACCURATE", refire_inacc, DDF_MainGetBoolean),
-    DF("SHOW_CLIP", show_clip, DDF_MainGetBoolean), DF("SHARED_CLIP", shared_clip, DDF_MainGetBoolean),
-    DF("BOBBING", bobbing, DDF_MainGetPercent), DF("SWAYING", swaying, DDF_MainGetPercent),
-    DF("IDLE_WAIT", idle_wait, DDF_MainGetTime), DF("IDLE_CHANCE", idle_chance, DDF_MainGetPercent),
-    DF("MODEL_SKIN", model_skin, DDF_MainGetNumeric), DF("MODEL_ASPECT", model_aspect, DDF_MainGetFloat),
-    DF("MODEL_BIAS", model_bias, DDF_MainGetFloat), DF("MODEL_ROTATE", model_rotate, DDF_MainGetNumeric),
-    DF("MODEL_FORWARD", model_forward, DDF_MainGetFloat), DF("MODEL_SIDE", model_side, DDF_MainGetFloat),
+    DF("EJECT_ATTACK", eject_attack, DDF_MainRefAttack),
+    DF("FREE", autogive, DDF_MainGetBoolean),
+    DF("BINDKEY", bind_key, DDF_MainGetNumeric),
+    DF("PRIORITY", priority, DDF_MainGetNumeric),
+    DF("DANGEROUS", dangerous, DDF_MainGetBoolean),
+    DF("UPGRADES", upgrade_weap, DDF_WGetUpgrade),
+    DF("IDLE_SOUND", idle, DDF_MainLookupSound),
+    DF("ENGAGED_SOUND", engaged, DDF_MainLookupSound),
+    DF("HIT_SOUND", hit, DDF_MainLookupSound),
+    DF("START_SOUND", start, DDF_MainLookupSound),
+    DF("NOTHRUST", nothrust, DDF_MainGetBoolean),
+    DF("FEEDBACK", feedback, DDF_MainGetBoolean),
+    DF("KICK", kick, DDF_MainGetFloat),
+    DF("ZOOM_FOV", zoom_fov, DDF_MainGetNumeric),
+    DF("ZOOM_FACTOR", zoom_factor, DDF_MainGetFloat),
+    DF("REFIRE_INACCURATE", refire_inacc, DDF_MainGetBoolean),
+    DF("SHOW_CLIP", show_clip, DDF_MainGetBoolean),
+    DF("SHARED_CLIP", shared_clip, DDF_MainGetBoolean),
+    DF("BOBBING", bobbing, DDF_MainGetPercent),
+    DF("SWAYING", swaying, DDF_MainGetPercent),
+    DF("IDLE_WAIT", idle_wait, DDF_MainGetTime),
+    DF("IDLE_CHANCE", idle_chance, DDF_MainGetPercent),
+    DF("MODEL_SKIN", model_skin, DDF_MainGetNumeric),
+    DF("MODEL_ASPECT", model_aspect, DDF_MainGetFloat),
+    DF("MODEL_BIAS", model_bias, DDF_MainGetFloat),
+    DF("MODEL_ROTATE", model_rotate, DDF_MainGetNumeric),
+    DF("MODEL_FORWARD", model_forward, DDF_MainGetFloat),
+    DF("MODEL_SIDE", model_side, DDF_MainGetFloat),
 
     // -AJA- backwards compatibility cruft...
     DF("SECOND_ATTACK", attack[1], DDF_MainRefAttack),
 
-    DF("SOUND1", sound1, DDF_MainLookupSound), DF("SOUND2", sound2, DDF_MainLookupSound),
+    DF("SOUND1", sound1, DDF_MainLookupSound),
+    DF("SOUND2", sound2, DDF_MainLookupSound),
     DF("SOUND3", sound3, DDF_MainLookupSound),
 
-    DF("RENDER_INVERT", render_invert, DDF_MainGetBoolean), DF("Y_ADJUST", y_adjust, DDF_MainGetFloat),
-    DF("IGNORE_CROSSHAIR_SCALING", ignore_crosshair_scaling, DDF_MainGetBoolean),
+    DF("RENDER_INVERT", render_invert, DDF_MainGetBoolean),
+    DF("Y_ADJUST", y_adjust, DDF_MainGetFloat),
+    DF("IGNORE_CROSSHAIR_SCALING", ignore_crosshair_scaling,
+       DDF_MainGetBoolean),
 
     DDF_CMD_END};
 
-static const state_starter_t weapon_starters[] = {DDF_STATE("UP", "UP", up_state),
-                                                  DDF_STATE("DOWN", "DOWN", down_state),
-                                                  DDF_STATE("READY", "READY", ready_state),
-                                                  DDF_STATE("EMPTY", "EMPTY", empty_state),
-                                                  DDF_STATE("IDLE", "READY", idle_state),
-                                                  DDF_STATE("CROSSHAIR", "CROSSHAIR", crosshair),
-                                                  DDF_STATE("ZOOM", "ZOOM", zoom_state),
+static const state_starter_t weapon_starters[] = {
+    DDF_STATE("UP", "UP", up_state),
+    DDF_STATE("DOWN", "DOWN", down_state),
+    DDF_STATE("READY", "READY", ready_state),
+    DDF_STATE("EMPTY", "EMPTY", empty_state),
+    DDF_STATE("IDLE", "READY", idle_state),
+    DDF_STATE("CROSSHAIR", "CROSSHAIR", crosshair),
+    DDF_STATE("ZOOM", "ZOOM", zoom_state),
 
-                                                  DDF_STATE("ATTACK", "READY", attack_state[0]),
-                                                  DDF_STATE("RELOAD", "READY", reload_state[0]),
-                                                  DDF_STATE("DISCARD", "READY", discard_state[0]),
-                                                  DDF_STATE("WARMUP", "ATTACK", warmup_state[0]),
-                                                  DDF_STATE("FLASH", "REMOVE", flash_state[0]),
+    DDF_STATE("ATTACK", "READY", attack_state[0]),
+    DDF_STATE("RELOAD", "READY", reload_state[0]),
+    DDF_STATE("DISCARD", "READY", discard_state[0]),
+    DDF_STATE("WARMUP", "ATTACK", warmup_state[0]),
+    DDF_STATE("FLASH", "REMOVE", flash_state[0]),
 
-                                                  DDF_STATE("SECATTACK", "READY", attack_state[1]),
-                                                  DDF_STATE("SECRELOAD", "READY", reload_state[1]),
-                                                  DDF_STATE("SECDISCARD", "READY", discard_state[1]),
-                                                  DDF_STATE("SECWARMUP", "SECATTACK", warmup_state[1]),
-                                                  DDF_STATE("SECFLASH", "REMOVE", flash_state[1]),
+    DDF_STATE("SECATTACK", "READY", attack_state[1]),
+    DDF_STATE("SECRELOAD", "READY", reload_state[1]),
+    DDF_STATE("SECDISCARD", "READY", discard_state[1]),
+    DDF_STATE("SECWARMUP", "SECATTACK", warmup_state[1]),
+    DDF_STATE("SECFLASH", "REMOVE", flash_state[1]),
 
-                                                  DDF_STATE("2NDATTACK", "READY", attack_state[1]),
-                                                  DDF_STATE("2NDRELOAD", "READY", reload_state[1]),
-                                                  DDF_STATE("2NDDISCARD", "READY", discard_state[1]),
-                                                  DDF_STATE("2NDWARMUP", "2NDATTACK", warmup_state[1]),
-                                                  DDF_STATE("2NDFLASH", "REMOVE", flash_state[1]),
+    DDF_STATE("2NDATTACK", "READY", attack_state[1]),
+    DDF_STATE("2NDRELOAD", "READY", reload_state[1]),
+    DDF_STATE("2NDDISCARD", "READY", discard_state[1]),
+    DDF_STATE("2NDWARMUP", "2NDATTACK", warmup_state[1]),
+    DDF_STATE("2NDFLASH", "REMOVE", flash_state[1]),
 
-                                                  DDF_STATE("3RDATTACK", "READY", attack_state[2]),
-                                                  DDF_STATE("3RDRELOAD", "READY", reload_state[2]),
-                                                  DDF_STATE("3RDDISCARD", "READY", discard_state[2]),
-                                                  DDF_STATE("3RDWARMUP", "3RDATTACK", warmup_state[2]),
-                                                  DDF_STATE("3RDFLASH", "REMOVE", flash_state[2]),
+    DDF_STATE("3RDATTACK", "READY", attack_state[2]),
+    DDF_STATE("3RDRELOAD", "READY", reload_state[2]),
+    DDF_STATE("3RDDISCARD", "READY", discard_state[2]),
+    DDF_STATE("3RDWARMUP", "3RDATTACK", warmup_state[2]),
+    DDF_STATE("3RDFLASH", "REMOVE", flash_state[2]),
 
-                                                  DDF_STATE("4THATTACK", "READY", attack_state[3]),
-                                                  DDF_STATE("4THRELOAD", "READY", reload_state[3]),
-                                                  DDF_STATE("4THDISCARD", "READY", discard_state[3]),
-                                                  DDF_STATE("4THWARMUP", "4THATTACK", warmup_state[3]),
-                                                  DDF_STATE("4THFLASH", "REMOVE", flash_state[3]),
+    DDF_STATE("4THATTACK", "READY", attack_state[3]),
+    DDF_STATE("4THRELOAD", "READY", reload_state[3]),
+    DDF_STATE("4THDISCARD", "READY", discard_state[3]),
+    DDF_STATE("4THWARMUP", "4THATTACK", warmup_state[3]),
+    DDF_STATE("4THFLASH", "REMOVE", flash_state[3]),
 
-                                                  DDF_STATE_END};
+    DDF_STATE_END};
 
-static const actioncode_t weapon_actions[] = {{"NOTHING", nullptr, nullptr},
+static const actioncode_t weapon_actions[] = {
+    {"NOTHING", nullptr, nullptr},
 
-                                              {"RAISE", A_Raise, nullptr},
-                                              {"LOWER", A_Lower, nullptr},
-                                              {"READY", A_WeaponReady, nullptr},
-                                              {"EMPTY", A_WeaponEmpty, nullptr},
-                                              {"SHOOT", A_WeaponShoot, DDF_StateGetAttack},
-                                              {"EJECT", A_WeaponEject, DDF_StateGetAttack},
-                                              {"REFIRE", A_ReFire, nullptr},
-                                              {"REFIRE_TO", A_ReFireTo, DDF_StateGetJump},
-                                              {"NOFIRE", A_NoFire, nullptr},
-                                              {"NOFIRE_RETURN", A_NoFireReturn, nullptr},
-                                              {"KICK", A_WeaponKick, DDF_StateGetFloat},
-                                              {"CHECKRELOAD", A_CheckReload, nullptr},
-                                              {"PLAYSOUND", A_WeaponPlaySound, DDF_StateGetSound},
-                                              {"KILLSOUND", A_WeaponKillSound, nullptr},
-                                              {"SET_SKIN", A_WeaponSetSkin, DDF_StateGetInteger},
-                                              {"JUMP", A_WeaponJump, DDF_StateGetJump},
-                                              {"UNZOOM", A_WeaponUnzoom, nullptr},
+    {"RAISE", A_Raise, nullptr},
+    {"LOWER", A_Lower, nullptr},
+    {"READY", A_WeaponReady, nullptr},
+    {"EMPTY", A_WeaponEmpty, nullptr},
+    {"SHOOT", A_WeaponShoot, DDF_StateGetAttack},
+    {"EJECT", A_WeaponEject, DDF_StateGetAttack},
+    {"REFIRE", A_ReFire, nullptr},
+    {"REFIRE_TO", A_ReFireTo, DDF_StateGetJump},
+    {"NOFIRE", A_NoFire, nullptr},
+    {"NOFIRE_RETURN", A_NoFireReturn, nullptr},
+    {"KICK", A_WeaponKick, DDF_StateGetFloat},
+    {"CHECKRELOAD", A_CheckReload, nullptr},
+    {"PLAYSOUND", A_WeaponPlaySound, DDF_StateGetSound},
+    {"KILLSOUND", A_WeaponKillSound, nullptr},
+    {"SET_SKIN", A_WeaponSetSkin, DDF_StateGetInteger},
+    {"JUMP", A_WeaponJump, DDF_StateGetJump},
+    {"UNZOOM", A_WeaponUnzoom, nullptr},
 
-                                              {"DJNE", A_WeaponDJNE, DDF_StateGetJump},
+    {"DJNE", A_WeaponDJNE, DDF_StateGetJump},
 
-                                              {"ZOOM", A_WeaponZoom, nullptr},
-                                              {"SET_INVULNERABLE", A_SetInvuln, nullptr},
-                                              {"CLEAR_INVULNERABLE", A_ClearInvuln, nullptr},
-                                              {"MOVE_FWD", A_MoveFwd, DDF_StateGetFloat},
-                                              {"MOVE_RIGHT", A_MoveRight, DDF_StateGetFloat},
-                                              {"MOVE_UP", A_MoveUp, DDF_StateGetFloat},
-                                              {"STOP", A_StopMoving, nullptr},
-                                              {"TURN", A_TurnDir, DDF_StateGetAngle},
-                                              {"TURN_RANDOM", A_TurnRandom, DDF_StateGetInteger},
-                                              {"MLOOK_TURN", A_MlookTurn, DDF_StateGetSlope},
+    {"ZOOM", A_WeaponZoom, nullptr},
+    {"SET_INVULNERABLE", A_SetInvuln, nullptr},
+    {"CLEAR_INVULNERABLE", A_ClearInvuln, nullptr},
+    {"MOVE_FWD", A_MoveFwd, DDF_StateGetFloat},
+    {"MOVE_RIGHT", A_MoveRight, DDF_StateGetFloat},
+    {"MOVE_UP", A_MoveUp, DDF_StateGetFloat},
+    {"STOP", A_StopMoving, nullptr},
+    {"TURN", A_TurnDir, DDF_StateGetAngle},
+    {"TURN_RANDOM", A_TurnRandom, DDF_StateGetInteger},
+    {"MLOOK_TURN", A_MlookTurn, DDF_StateGetSlope},
 
-                                              {"RTS_ENABLE_TAGGED", A_WeaponEnableRadTrig, DDF_WStateGetRADTrigger},
-                                              {"RTS_DISABLE_TAGGED", A_WeaponDisableRadTrig, DDF_WStateGetRADTrigger},
-                                              {"SEC_SHOOT", A_WeaponShootSA, DDF_StateGetAttack},
-                                              {"SEC_REFIRE", A_ReFireSA, nullptr},
-                                              {"SEC_REFIRE_TO", A_ReFireToSA, DDF_StateGetJump},
-                                              {"SEC_NOFIRE", A_NoFireSA, nullptr},
-                                              {"SEC_NOFIRE_RETURN", A_NoFireReturnSA, nullptr},
-                                              {"SEC_CHECKRELOAD", A_CheckReloadSA, nullptr},
+    {"RTS_ENABLE_TAGGED", A_WeaponEnableRadTrig, DDF_WStateGetRADTrigger},
+    {"RTS_DISABLE_TAGGED", A_WeaponDisableRadTrig, DDF_WStateGetRADTrigger},
+    {"SEC_SHOOT", A_WeaponShootSA, DDF_StateGetAttack},
+    {"SEC_REFIRE", A_ReFireSA, nullptr},
+    {"SEC_REFIRE_TO", A_ReFireToSA, DDF_StateGetJump},
+    {"SEC_NOFIRE", A_NoFireSA, nullptr},
+    {"SEC_NOFIRE_RETURN", A_NoFireReturnSA, nullptr},
+    {"SEC_CHECKRELOAD", A_CheckReloadSA, nullptr},
 
-                                              {"2ND_SHOOT", A_WeaponShootSA, DDF_StateGetAttack},
-                                              {"2ND_REFIRE", A_ReFireSA, nullptr},
-                                              {"2ND_REFIRE_TO", A_ReFireToSA, DDF_StateGetJump},
-                                              {"2ND_NOFIRE", A_NoFireSA, nullptr},
-                                              {"2ND_NOFIRE_RETURN", A_NoFireReturnSA, nullptr},
-                                              {"2ND_CHECKRELOAD", A_CheckReloadSA, nullptr},
+    {"2ND_SHOOT", A_WeaponShootSA, DDF_StateGetAttack},
+    {"2ND_REFIRE", A_ReFireSA, nullptr},
+    {"2ND_REFIRE_TO", A_ReFireToSA, DDF_StateGetJump},
+    {"2ND_NOFIRE", A_NoFireSA, nullptr},
+    {"2ND_NOFIRE_RETURN", A_NoFireReturnSA, nullptr},
+    {"2ND_CHECKRELOAD", A_CheckReloadSA, nullptr},
 
-                                              {"3RD_SHOOT", A_WeaponShootTA, DDF_StateGetAttack},
-                                              {"3RD_REFIRE", A_ReFireTA, nullptr},
-                                              {"3RD_REFIRE_TO", A_ReFireToTA, DDF_StateGetJump},
-                                              {"3RD_NOFIRE", A_NoFireTA, nullptr},
-                                              {"3RD_NOFIRE_RETURN", A_NoFireReturnTA, nullptr},
-                                              {"3RD_CHECKRELOAD", A_CheckReloadTA, nullptr},
+    {"3RD_SHOOT", A_WeaponShootTA, DDF_StateGetAttack},
+    {"3RD_REFIRE", A_ReFireTA, nullptr},
+    {"3RD_REFIRE_TO", A_ReFireToTA, DDF_StateGetJump},
+    {"3RD_NOFIRE", A_NoFireTA, nullptr},
+    {"3RD_NOFIRE_RETURN", A_NoFireReturnTA, nullptr},
+    {"3RD_CHECKRELOAD", A_CheckReloadTA, nullptr},
 
-                                              {"4TH_SHOOT", A_WeaponShootFA, DDF_StateGetAttack},
-                                              {"4TH_REFIRE", A_ReFireFA, nullptr},
-                                              {"4TH_REFIRE_TO", A_ReFireToFA, DDF_StateGetJump},
-                                              {"4TH_NOFIRE", A_NoFireFA, nullptr},
-                                              {"4TH_NOFIRE_RETURN", A_NoFireReturnFA, nullptr},
-                                              {"4TH_CHECKRELOAD", A_CheckReloadFA, nullptr},
+    {"4TH_SHOOT", A_WeaponShootFA, DDF_StateGetAttack},
+    {"4TH_REFIRE", A_ReFireFA, nullptr},
+    {"4TH_REFIRE_TO", A_ReFireToFA, DDF_StateGetJump},
+    {"4TH_NOFIRE", A_NoFireFA, nullptr},
+    {"4TH_NOFIRE_RETURN", A_NoFireReturnFA, nullptr},
+    {"4TH_CHECKRELOAD", A_CheckReloadFA, nullptr},
 
-                                              // flash-related actions
-                                              {"FLASH", A_GunFlash, nullptr},
-                                              {"SEC_FLASH", A_GunFlashSA, nullptr},
-                                              {"2ND_FLASH", A_GunFlashSA, nullptr},
-                                              {"3RD_FLASH", A_GunFlashTA, nullptr},
-                                              {"4TH_FLASH", A_GunFlashFA, nullptr},
-                                              {"LIGHT0", A_Light0, nullptr},
-                                              {"LIGHT1", A_Light1, nullptr},
-                                              {"LIGHT2", A_Light2, nullptr},
-                                              {"TRANS_SET", A_WeaponTransSet, DDF_StateGetPercent},
-                                              {"TRANS_FADE", A_WeaponTransFade, DDF_StateGetPercent},
+    // flash-related actions
+    {"FLASH", A_GunFlash, nullptr},
+    {"SEC_FLASH", A_GunFlashSA, nullptr},
+    {"2ND_FLASH", A_GunFlashSA, nullptr},
+    {"3RD_FLASH", A_GunFlashTA, nullptr},
+    {"4TH_FLASH", A_GunFlashFA, nullptr},
+    {"LIGHT0", A_Light0, nullptr},
+    {"LIGHT1", A_Light1, nullptr},
+    {"LIGHT2", A_Light2, nullptr},
+    {"TRANS_SET", A_WeaponTransSet, DDF_StateGetPercent},
+    {"TRANS_FADE", A_WeaponTransFade, DDF_StateGetPercent},
 
-                                              // crosshair-related actions
-                                              {"SETCROSS", A_SetCrosshair, DDF_StateGetFrame},
-                                              {"TARGET_JUMP", A_TargetJump, DDF_StateGetFrame},
-                                              {"FRIEND_JUMP", A_FriendJump, DDF_StateGetFrame},
+    // crosshair-related actions
+    {"SETCROSS", A_SetCrosshair, DDF_StateGetFrame},
+    {"TARGET_JUMP", A_TargetJump, DDF_StateGetFrame},
+    {"FRIEND_JUMP", A_FriendJump, DDF_StateGetFrame},
 
-                                              // -AJA- backwards compatibility cruft...
-                                              {"SOUND1", A_SFXWeapon1, nullptr},
-                                              {"SOUND2", A_SFXWeapon2, nullptr},
-                                              {"SOUND3", A_SFXWeapon3, nullptr},
+    // -AJA- backwards compatibility cruft...
+    {"SOUND1", A_SFXWeapon1, nullptr},
+    {"SOUND2", A_SFXWeapon2, nullptr},
+    {"SOUND3", A_SFXWeapon3, nullptr},
 
-                                              {"BECOME", A_WeaponBecome, DDF_StateGetBecomeWeapon},
+    {"BECOME", A_WeaponBecome, DDF_StateGetBecomeWeapon},
 
-                                              {nullptr, nullptr, nullptr}};
+    {nullptr, nullptr, nullptr}};
 
 const specflags_t ammo_types[] = {{"NOAMMO", AM_NoAmmo, 0},
 
@@ -360,18 +392,14 @@ static void WeaponStartEntry(const char *name, bool extend)
 
     if (extend)
     {
-        if (!dynamic_weapon)
-            DDF_Error("Unknown weapon to extend: %s\n", name);
+        if (!dynamic_weapon) DDF_Error("Unknown weapon to extend: %s\n", name);
 
         DDF_StateBeginRange(dynamic_weapon->state_grp);
         return;
     }
 
     // replaces an existing entry?
-    if (dynamic_weapon)
-    {
-        dynamic_weapon->Default();
-    }
+    if (dynamic_weapon) { dynamic_weapon->Default(); }
     else
     {
         // not found, create a new one
@@ -396,7 +424,8 @@ static void WeaponDoTemplate(const char *contents)
     DDF_StateBeginRange(dynamic_weapon->state_grp);
 }
 
-static void WeaponParseField(const char *field, const char *contents, int index, bool is_last)
+static void WeaponParseField(const char *field, const char *contents, int index,
+                             bool is_last)
 {
 #if (DEBUG_DDF)
     I_Debugf("WEAPON_PARSE: %s = %s;\n", field, contents);
@@ -408,11 +437,14 @@ static void WeaponParseField(const char *field, const char *contents, int index,
         return;
     }
 
-    if (DDF_MainParseField(weapon_commands, field, contents, (uint8_t *)dynamic_weapon))
+    if (DDF_MainParseField(weapon_commands, field, contents,
+                           (uint8_t *)dynamic_weapon))
         return;
 
-    if (DDF_MainParseState((uint8_t *)dynamic_weapon, dynamic_weapon->state_grp, field, contents, index, is_last,
-                           true /* is_weapon */, weapon_starters, weapon_actions))
+    if (DDF_MainParseState((uint8_t *)dynamic_weapon, dynamic_weapon->state_grp,
+                           field, contents, index, is_last,
+                           true /* is_weapon */, weapon_starters,
+                           weapon_actions))
         return;
 
     DDF_WarnError("Unknown weapons.ddf command: %s\n", field);
@@ -434,8 +466,8 @@ static void WeaponFinishEntry(void)
     {
         if (dynamic_weapon->ammopershot[ATK] < 0)
         {
-            DDF_WarnError("Bad %sAMMOPERSHOT value for weapon: %d\n", ATK ? "XXX_" : "",
-                          dynamic_weapon->ammopershot[ATK]);
+            DDF_WarnError("Bad %sAMMOPERSHOT value for weapon: %d\n",
+                          ATK ? "XXX_" : "", dynamic_weapon->ammopershot[ATK]);
             dynamic_weapon->ammopershot[ATK] = 0;
         }
 
@@ -445,57 +477,78 @@ static void WeaponFinishEntry(void)
 
         if (dynamic_weapon->clip_size[ATK] < 0)
         {
-            DDF_WarnError("Bad %sCLIPSIZE value for weapon: %d\n", ATK ? "XXX_" : "", dynamic_weapon->clip_size[ATK]);
+            DDF_WarnError("Bad %sCLIPSIZE value for weapon: %d\n",
+                          ATK ? "XXX_" : "", dynamic_weapon->clip_size[ATK]);
             dynamic_weapon->clip_size[ATK] = 0;
         }
 
         // check if clip_size + ammopershot makes sense
-        if (dynamic_weapon->clip_size[ATK] > 0 && dynamic_weapon->ammo[ATK] != AM_NoAmmo &&
-            (dynamic_weapon->clip_size[ATK] < dynamic_weapon->ammopershot[ATK] ||
-             (dynamic_weapon->clip_size[ATK] % dynamic_weapon->ammopershot[ATK] != 0)))
+        if (dynamic_weapon->clip_size[ATK] > 0 &&
+            dynamic_weapon->ammo[ATK] != AM_NoAmmo &&
+            (dynamic_weapon->clip_size[ATK] <
+                 dynamic_weapon->ammopershot[ATK] ||
+             (dynamic_weapon->clip_size[ATK] %
+                  dynamic_weapon->ammopershot[ATK] !=
+              0)))
         {
-            DDF_WarnError("%sAMMOPERSHOT=%d incompatible with %sCLIPSIZE=%d\n", ATK ? "XXX_" : "",
-                          dynamic_weapon->ammopershot[ATK], ATK ? "XXX_" : "", dynamic_weapon->clip_size[ATK]);
+            DDF_WarnError("%sAMMOPERSHOT=%d incompatible with %sCLIPSIZE=%d\n",
+                          ATK ? "XXX_" : "", dynamic_weapon->ammopershot[ATK],
+                          ATK ? "XXX_" : "", dynamic_weapon->clip_size[ATK]);
             dynamic_weapon->ammopershot[ATK] = 1;
         }
 
         // DISCARD states require the PARTIAL special
-        if (dynamic_weapon->discard_state[ATK] && !(dynamic_weapon->specials[ATK] & WPSP_Partial))
+        if (dynamic_weapon->discard_state[ATK] &&
+            !(dynamic_weapon->specials[ATK] & WPSP_Partial))
         {
-            DDF_Error("Cannot use %sDISCARD states with NO_PARTIAL special.\n", ATK ? "XXX_" : "");
+            DDF_Error("Cannot use %sDISCARD states with NO_PARTIAL special.\n",
+                      ATK ? "XXX_" : "");
         }
     }
 
     if (dynamic_weapon->shared_clip)
     {
         if (dynamic_weapon->clip_size[0] == 0)
-            DDF_Error("SHARED_CLIP requires a clip weapon (missing CLIPSIZE)\n");
+            DDF_Error(
+                "SHARED_CLIP requires a clip weapon (missing CLIPSIZE)\n");
 
-        if (dynamic_weapon->attack_state[1] == 0 && dynamic_weapon->attack_state[2] == 0 &&
+        if (dynamic_weapon->attack_state[1] == 0 &&
+            dynamic_weapon->attack_state[2] == 0 &&
             dynamic_weapon->attack_state[3] == 0)
-            DDF_Error("SHARED_CLIP used without 2nd 3rd or 4th attack states.\n");
+            DDF_Error(
+                "SHARED_CLIP used without 2nd 3rd or 4th attack states.\n");
 
-        if (dynamic_weapon->ammo[1] != AM_NoAmmo || dynamic_weapon->ammopershot[1] != 0 ||
+        if (dynamic_weapon->ammo[1] != AM_NoAmmo ||
+            dynamic_weapon->ammopershot[1] != 0 ||
             dynamic_weapon->clip_size[1] != 0)
         {
-            DDF_Error("SHARED_CLIP cannot be used with SEC_AMMO or SEC_AMMOPERSHOT or SEC_CLIPSIZE commands.\n");
+            DDF_Error(
+                "SHARED_CLIP cannot be used with SEC_AMMO or SEC_AMMOPERSHOT "
+                "or SEC_CLIPSIZE commands.\n");
         }
 
-        if (dynamic_weapon->ammo[2] != AM_NoAmmo || dynamic_weapon->ammopershot[2] != 0 ||
+        if (dynamic_weapon->ammo[2] != AM_NoAmmo ||
+            dynamic_weapon->ammopershot[2] != 0 ||
             dynamic_weapon->clip_size[2] != 0)
         {
-            DDF_Error("SHARED_CLIP cannot be used with 3RD_AMMO or 3RD_AMMOPERSHOT or 3RD_CLIPSIZE commands.\n");
+            DDF_Error(
+                "SHARED_CLIP cannot be used with 3RD_AMMO or 3RD_AMMOPERSHOT "
+                "or 3RD_CLIPSIZE commands.\n");
         }
 
-        if (dynamic_weapon->ammo[3] != AM_NoAmmo || dynamic_weapon->ammopershot[3] != 0 ||
+        if (dynamic_weapon->ammo[3] != AM_NoAmmo ||
+            dynamic_weapon->ammopershot[3] != 0 ||
             dynamic_weapon->clip_size[3] != 0)
         {
-            DDF_Error("SHARED_CLIP cannot be used with 4TH_AMMO or 4TH_AMMOPERSHOT or 4TH_CLIPSIZE commands.\n");
+            DDF_Error(
+                "SHARED_CLIP cannot be used with 4TH_AMMO or 4TH_AMMOPERSHOT "
+                "or 4TH_CLIPSIZE commands.\n");
         }
     }
 
     if (dynamic_weapon->model_skin < 0 || dynamic_weapon->model_skin > 9)
-        DDF_Error("Bad MODEL_SKIN value %d in DDF (must be 0-9).\n", dynamic_weapon->model_skin);
+        DDF_Error("Bad MODEL_SKIN value %d in DDF (must be 0-9).\n",
+                  dynamic_weapon->model_skin);
 
     // backwards compatibility
     if (dynamic_weapon->priority < 0)
@@ -519,10 +572,11 @@ static void WeaponFinishEntry(void)
         else if (epi::StringCaseCompareASCII(flag, "DANGEROUS") == 0)
             dynamic_weapon->dangerous = true;
         else if (epi::StringCaseCompareASCII(flag, "FLEEMELEE") == 0)
-            continue; // We don't implement FLEEMELEE, but don't present the
-                      // user with an error as it's a valid MBF21 flag
+            continue;  // We don't implement FLEEMELEE, but don't present the
+                       // user with an error as it's a valid MBF21 flag
         else
-            DDF_WarnError("DDF_WGetSpecialFlags: Unknown Special: %s", flag.c_str());
+            DDF_WarnError("DDF_WGetSpecialFlags: Unknown Special: %s",
+                          flag.c_str());
     }
     flag_tests.clear();
 }
@@ -579,17 +633,18 @@ static void DDF_WGetAmmo(const char *info, void *storage)
     int *ammo = (int *)storage;
     int  flag_value;
 
-    switch (DDF_MainCheckSpecialFlag(info, ammo_types, &flag_value, false, false))
+    switch (
+        DDF_MainCheckSpecialFlag(info, ammo_types, &flag_value, false, false))
     {
-    case CHKF_Positive:
-    case CHKF_Negative:
-        (*ammo) = flag_value;
-        break;
+        case CHKF_Positive:
+        case CHKF_Negative:
+            (*ammo) = flag_value;
+            break;
 
-    case CHKF_User:
-    case CHKF_Unknown:
-        DDF_WarnError("Unknown Ammo type '%s'\n", info);
-        break;
+        case CHKF_User:
+        case CHKF_Unknown:
+            DDF_WarnError("Unknown Ammo type '%s'\n", info);
+            break;
     }
 }
 
@@ -599,27 +654,26 @@ static void DDF_WGetUpgrade(const char *info, void *storage)
 
     *dest = weapondefs.Lookup(info);
 
-    if (*dest == nullptr)
-        DDF_Warning("Unknown weapon: %s\n", info);
+    if (*dest == nullptr) DDF_Warning("Unknown weapon: %s\n", info);
 }
 
-static specflags_t weapon_specials[] = {{"SILENT_TO_MONSTERS", WPSP_SilentToMon, 0},
-                                        {"ANIMATED", WPSP_Animated, 0},
-                                        {"SWITCH", WPSP_SwitchAway, 0},
-                                        {"TRIGGER", WPSP_Trigger, 0},
-                                        {"FRESH", WPSP_Fresh, 0},
-                                        {"MANUAL", WPSP_Manual, 0},
-                                        {"PARTIAL", WPSP_Partial, 0},
-                                        {"NOAUTOFIRE", WPSP_NoAutoFire, 0},
-                                        {nullptr, WPSP_None, 0}};
+static specflags_t weapon_specials[] = {
+    {"SILENT_TO_MONSTERS", WPSP_SilentToMon, 0},
+    {"ANIMATED", WPSP_Animated, 0},
+    {"SWITCH", WPSP_SwitchAway, 0},
+    {"TRIGGER", WPSP_Trigger, 0},
+    {"FRESH", WPSP_Fresh, 0},
+    {"MANUAL", WPSP_Manual, 0},
+    {"PARTIAL", WPSP_Partial, 0},
+    {"NOAUTOFIRE", WPSP_NoAutoFire, 0},
+    {nullptr, WPSP_None, 0}};
 
 //
 // DDF_WStateGetRADTrigger
 //
 static void DDF_WStateGetRADTrigger(const char *arg, state_t *cur_state)
 {
-    if (!arg || !arg[0])
-        return;
+    if (!arg || !arg[0]) return;
 
     int *val_ptr = new int;
 
@@ -628,8 +682,7 @@ static void DDF_WStateGetRADTrigger(const char *arg, state_t *cur_state)
     int         count  = 0;
     int         length = strlen(arg);
 
-    while (epi::IsDigitASCII(*pos++))
-        count++;
+    while (epi::IsDigitASCII(*pos++)) count++;
 
     // Is the value an integer?
     if (length != count)
@@ -655,23 +708,25 @@ static void DDF_WGetSpecialFlags(const char *info, void *storage)
 
     weapon_flag_e *dest = (weapon_flag_e *)storage;
 
-    switch (DDF_MainCheckSpecialFlag(info, weapon_specials, &flag_value, true, false))
+    switch (DDF_MainCheckSpecialFlag(info, weapon_specials, &flag_value, true,
+                                     false))
     {
-    case CHKF_Positive:
-        *dest = (weapon_flag_e)(*dest | flag_value);
-        break;
+        case CHKF_Positive:
+            *dest = (weapon_flag_e)(*dest | flag_value);
+            break;
 
-    case CHKF_Negative:
-        *dest = (weapon_flag_e)(*dest & ~flag_value);
-        break;
+        case CHKF_Negative:
+            *dest = (weapon_flag_e)(*dest & ~flag_value);
+            break;
 
-    case CHKF_User:
-    case CHKF_Unknown: {
-        // Check unknown flags in WeaponFinishEntry as some MBF21 flags
-        // correlate to non-flag variables
-        flag_tests.push_back(info);
-        return;
-    }
+        case CHKF_User:
+        case CHKF_Unknown:
+        {
+            // Check unknown flags in WeaponFinishEntry as some MBF21 flags
+            // correlate to non-flag variables
+            flag_tests.push_back(info);
+            return;
+        }
     }
 }
 
@@ -683,16 +738,13 @@ static void DDF_WGetSpecialFlags(const char *info, void *storage)
 //
 bool DDF_WeaponIsUpgrade(weapondef_c *weap, weapondef_c *old)
 {
-    if (!weap || !old || weap == old)
-        return false;
+    if (!weap || !old || weap == old) return false;
 
     for (int loop = 0; loop < 10; loop++)
     {
-        if (!weap->upgrade_weap)
-            return false;
+        if (!weap->upgrade_weap) return false;
 
-        if (weap->upgrade_weap == old)
-            return true;
+        if (weap->upgrade_weap == old) return true;
 
         weap = weap->upgrade_weap;
     }
@@ -705,17 +757,12 @@ bool DDF_WeaponIsUpgrade(weapondef_c *weap, weapondef_c *old)
 //
 // weapondef_c Constructor
 //
-weapondef_c::weapondef_c() : name(), state_grp()
-{
-    Default();
-}
+weapondef_c::weapondef_c() : name(), state_grp() { Default(); }
 
 //
 // weapondef_c Destructor
 //
-weapondef_c::~weapondef_c()
-{
-}
+weapondef_c::~weapondef_c() {}
 
 //
 // weapondef_c::CopyDetail()
@@ -886,9 +933,7 @@ void weapondef_c::Default(void)
 //
 // weapondef_container_c Constructor
 //
-weapondef_container_c::weapondef_container_c()
-{
-}
+weapondef_container_c::weapondef_container_c() {}
 
 //
 // weapondef_container_c Destructor
@@ -897,7 +942,7 @@ weapondef_container_c::~weapondef_container_c()
 {
     for (auto iter = begin(); iter != end(); iter++)
     {
-        weapondef_c *w= *iter;
+        weapondef_c *w = *iter;
         delete w;
         w = nullptr;
     }
@@ -913,8 +958,7 @@ int weapondef_container_c::FindFirst(const char *name, int startpos)
     for (startpos; startpos < size(); startpos++)
     {
         weapondef_c *w = at(startpos);
-        if (DDF_CompareName(w->name.c_str(), name) == 0)
-            return startpos;
+        if (DDF_CompareName(w->name.c_str(), name) == 0) return startpos;
     }
 
     return -1;
@@ -926,8 +970,7 @@ int weapondef_container_c::FindFirst(const char *name, int startpos)
 weapondef_c *weapondef_container_c::Lookup(const char *refname)
 {
     int idx = FindFirst(refname, 0);
-    if (idx >= 0)
-        return (*this)[idx];
+    if (idx >= 0) return (*this)[idx];
 
     return nullptr;
 }

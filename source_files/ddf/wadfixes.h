@@ -20,58 +20,51 @@
 #define __DDF_WADFIXES_H__
 
 #include "epi.h"
-
 #include "types.h"
 
 class fixdef_c
 {
-  public:
+   public:
     fixdef_c();
     ~fixdef_c(){};
 
-  public:
+   public:
     void Default(void);
     void CopyDetail(fixdef_c &src);
 
     // Member vars....
     std::string name;
 
-    std::string md5_string; // Fixes are likely to be for finalized WADs that won't be updated anymore,
-                            // but other qualifiers like unique lumps might be added if necessary
+    std::string md5_string;  // Fixes are likely to be for finalized WADs that
+                             // won't be updated anymore, but other qualifiers
+                             // like unique lumps might be added if necessary
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit fixdef_c(fixdef_c &rhs)
-    {
-    }
-    fixdef_c &operator=(fixdef_c &rhs)
-    {
-        return *this;
-    }
+    explicit fixdef_c(fixdef_c &rhs) {}
+    fixdef_c &operator=(fixdef_c &rhs) { return *this; }
 };
 
 // Our fixdefs container
 class fixdef_container_c : public std::vector<fixdef_c *>
 {
-  public:
-    fixdef_container_c()
-    {
-    }
+   public:
+    fixdef_container_c() {}
     ~fixdef_container_c()
     {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          fixdef_c *f= *iter;
-          delete f;
-          f = nullptr;
-      }
+        for (auto iter = begin(); iter != end(); iter++)
+        {
+            fixdef_c *f = *iter;
+            delete f;
+            f = nullptr;
+        }
     }
 
-  public:
+   public:
     fixdef_c *Find(const char *name);
 };
 
-extern fixdef_container_c fixdefs; // -DASHO- 2022 Implemented
+extern fixdef_container_c fixdefs;  // -DASHO- 2022 Implemented
 
 void DDF_ReadFixes(const std::string &data);
 

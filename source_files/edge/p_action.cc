@@ -3490,7 +3490,7 @@ void P_ActCheckActivity(mobj_t *mo)
     if (pl->swimming)
     {
         // enter the SWIM states (if present)
-        statenum_t swim_st = P_MobjFindLabel(pl->mo, "SWIM");
+        int swim_st = P_MobjFindLabel(pl->mo, "SWIM");
 
         if (swim_st == S_NULL)
             swim_st = pl->mo->info->chase_state;
@@ -3504,7 +3504,7 @@ void P_ActCheckActivity(mobj_t *mo)
     if (pl->powers[PW_Jetpack] > 0)
     {
         // enter the FLY states (if present)
-        statenum_t fly_st = P_MobjFindLabel(pl->mo, "FLY");
+        int fly_st = P_MobjFindLabel(pl->mo, "FLY");
 
         if (fly_st != S_NULL)
             P_SetMobjStateDeferred(pl->mo, fly_st, 0);
@@ -3515,7 +3515,7 @@ void P_ActCheckActivity(mobj_t *mo)
     if (mo->on_ladder >= 0)
     {
         // enter the CLIMB states (if present)
-        statenum_t climb_st = P_MobjFindLabel(pl->mo, "CLIMB");
+        int climb_st = P_MobjFindLabel(pl->mo, "CLIMB");
 
         if (climb_st != S_NULL)
             P_SetMobjStateDeferred(pl->mo, climb_st, 0);
@@ -3527,7 +3527,7 @@ void P_ActCheckActivity(mobj_t *mo)
     if (pl->mo->extendedflags & EF_CROUCHING)
     {
         // enter the CROUCH states (if present)
-        statenum_t crouch_st = P_MobjFindLabel(pl->mo, "CROUCH");
+        int crouch_st = P_MobjFindLabel(pl->mo, "CROUCH");
 
         if (crouch_st != S_NULL)
             P_SetMobjStateDeferred(pl->mo, crouch_st, 0);
@@ -3743,7 +3743,7 @@ void P_ActBecome(struct mobj_s *mo)
     }
     P_SetThingPosition(mo);
 
-    statenum_t state = P_MobjFindLabel(mo, become->start.label.c_str());
+    int state = P_MobjFindLabel(mo, become->start.label.c_str());
     if (state == S_NULL)
         I_Error("BECOME action: frame '%s' in [%s] not found!\n", become->start.label.c_str(), mo->info->name.c_str());
 
@@ -3818,7 +3818,7 @@ void P_ActUnBecome(struct mobj_s *mo)
     }
     P_SetThingPosition(mo);
 
-    statenum_t state = P_MobjFindLabel(mo, "IDLE");
+    int state = P_MobjFindLabel(mo, "IDLE");
     if (state == S_NULL)
         I_Error("UNBECOME action: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name.c_str());
 
@@ -3897,7 +3897,7 @@ void P_ActMorph(struct mobj_s *mo)
     }
     P_SetThingPosition(mo);
 
-    statenum_t state = P_MobjFindLabel(mo, morph->start.label.c_str());
+    int state = P_MobjFindLabel(mo, morph->start.label.c_str());
     if (state == S_NULL)
         I_Error("MORPH action: frame '%s' in [%s] not found!\n", morph->start.label.c_str(), mo->info->name.c_str());
 
@@ -3976,7 +3976,7 @@ void P_ActUnMorph(struct mobj_s *mo)
     }
     P_SetThingPosition(mo);
 
-    statenum_t state = P_MobjFindLabel(mo, "IDLE");
+    int state = P_MobjFindLabel(mo, "IDLE");
     if (state == S_NULL)
         I_Error("UNMORPH action: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name.c_str());
 

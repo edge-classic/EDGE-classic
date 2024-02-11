@@ -502,7 +502,7 @@ static bool              castattacking;
 //
 // -AJA- 2001/05/28: separated this out from CastTicker
 //
-static void CastSetState(statenum_t st)
+static void CastSetState(int st)
 {
     if (st == S_NULL)
         return;

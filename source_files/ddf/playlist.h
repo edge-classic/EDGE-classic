@@ -20,7 +20,6 @@
 #define __DDF_MUS_H__
 
 #include "epi.h"
-
 #include "types.h"
 
 // ----------------------------------------------------------------
@@ -57,11 +56,11 @@ typedef enum
 
 class pl_entry_c
 {
-  public:
+   public:
     pl_entry_c();
     ~pl_entry_c();
 
-  public:
+   public:
     void Default(void);
     void CopyDetail(pl_entry_c &src);
 
@@ -73,12 +72,9 @@ class pl_entry_c
 
     std::string info;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit pl_entry_c(pl_entry_c &rhs)
-    {
-        (void)rhs;
-    }
+    explicit pl_entry_c(pl_entry_c &rhs) { (void)rhs; }
     pl_entry_c &operator=(pl_entry_c &rhs)
     {
         (void)rhs;
@@ -89,21 +85,19 @@ class pl_entry_c
 // Our playlist entry container
 class pl_entry_container_c : public std::vector<pl_entry_c *>
 {
-  public:
-    pl_entry_container_c()
-    {
-    }
+   public:
+    pl_entry_container_c() {}
     ~pl_entry_container_c()
     {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          pl_entry_c *pl = *iter;
-          delete pl;
-          pl = nullptr;
-      }
+        for (auto iter = begin(); iter != end(); iter++)
+        {
+            pl_entry_c *pl = *iter;
+            delete pl;
+            pl = nullptr;
+        }
     }
 
-  public:
+   public:
     pl_entry_c *Find(int number);
     int         FindLast(const char *name);
     int         FindFree();
@@ -111,11 +105,11 @@ class pl_entry_container_c : public std::vector<pl_entry_c *>
 
 // -------EXTERNALISATIONS-------
 
-extern pl_entry_container_c playlist; // -ACB- 2004/06/04 Implemented
+extern pl_entry_container_c playlist;  // -ACB- 2004/06/04 Implemented
 
 void DDF_ReadMusicPlaylist(const std::string &data);
 
-#endif // __DDF_MUS_H__
+#endif  // __DDF_MUS_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

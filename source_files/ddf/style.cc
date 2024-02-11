@@ -19,9 +19,10 @@
 // Style Setup and Parser Code
 //
 
-#include "local.h"
-#include "font.h"
 #include "style.h"
+
+#include "font.h"
+#include "local.h"
 #include "str_compare.h"
 #undef DF
 #define DF DDF_FIELD
@@ -36,55 +37,59 @@ styledef_container_c styledefs;
 #define DDF_CMD_BASE dummy_bgstyle
 static backgroundstyle_c dummy_bgstyle;
 
-static const commandlist_t background_commands[] = {DF("COLOUR", colour, DDF_MainGetRGB),
-                                                    DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
-                                                    DF("IMAGE", image_name, DDF_MainGetString),
-                                                    DF("SCALE", scale, DDF_MainGetFloat),
-                                                    DF("ASPECT", aspect, DDF_MainGetFloat),
+static const commandlist_t background_commands[] = {
+    DF("COLOUR", colour, DDF_MainGetRGB),
+    DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
+    DF("IMAGE", image_name, DDF_MainGetString),
+    DF("SCALE", scale, DDF_MainGetFloat),
+    DF("ASPECT", aspect, DDF_MainGetFloat),
 
-                                                    DDF_CMD_END};
+    DDF_CMD_END};
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_textstyle
 static textstyle_c dummy_textstyle;
 
-static const commandlist_t text_commands[] = {DF("COLOURMAP", colmap, DDF_MainGetColourmap),
-                                              DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
-                                              DF("FONT", font, DDF_MainLookupFont),
-                                              DF("SCALE", scale, DDF_MainGetFloat),
-                                              DF("ASPECT", aspect, DDF_MainGetFloat),
-                                              DF("X_OFFSET", x_offset, DDF_MainGetNumeric),
-                                              DF("Y_OFFSET", y_offset, DDF_MainGetNumeric),
+static const commandlist_t text_commands[] = {
+    DF("COLOURMAP", colmap, DDF_MainGetColourmap),
+    DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
+    DF("FONT", font, DDF_MainLookupFont),
+    DF("SCALE", scale, DDF_MainGetFloat),
+    DF("ASPECT", aspect, DDF_MainGetFloat),
+    DF("X_OFFSET", x_offset, DDF_MainGetNumeric),
+    DF("Y_OFFSET", y_offset, DDF_MainGetNumeric),
 
-                                              DDF_CMD_END};
+    DDF_CMD_END};
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_cursorstyle
 static cursorstyle_c dummy_cursorstyle;
 
-static const commandlist_t cursor_commands[] = {DF("POSITION", pos_string, DDF_MainGetString),
-                                                DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
-                                                DF("IMAGE", alt_cursor, DDF_MainGetString),
-                                                DF("STRING", cursor_string, DDF_MainGetString),
-                                                DF("BORDER", border, DDF_MainGetBoolean),
-                                                DF("SCALING", scaling, DDF_MainGetBoolean),
-                                                DF("FORCE_OFFSETS", force_offsets, DDF_MainGetBoolean),
+static const commandlist_t cursor_commands[] = {
+    DF("POSITION", pos_string, DDF_MainGetString),
+    DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
+    DF("IMAGE", alt_cursor, DDF_MainGetString),
+    DF("STRING", cursor_string, DDF_MainGetString),
+    DF("BORDER", border, DDF_MainGetBoolean),
+    DF("SCALING", scaling, DDF_MainGetBoolean),
+    DF("FORCE_OFFSETS", force_offsets, DDF_MainGetBoolean),
 
-                                                DDF_CMD_END};
+    DDF_CMD_END};
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_soundstyle
 static soundstyle_c dummy_soundstyle;
 
-static const commandlist_t sound_commands[] = {DF("BEGIN", begin, DDF_MainLookupSound),
-                                               DF("END", end, DDF_MainLookupSound),
-                                               DF("SELECT", select, DDF_MainLookupSound),
-                                               DF("BACK", back, DDF_MainLookupSound),
-                                               DF("ERROR", error, DDF_MainLookupSound),
-                                               DF("MOVE", move, DDF_MainLookupSound),
-                                               DF("SLIDER", slider, DDF_MainLookupSound),
+static const commandlist_t sound_commands[] = {
+    DF("BEGIN", begin, DDF_MainLookupSound),
+    DF("END", end, DDF_MainLookupSound),
+    DF("SELECT", select, DDF_MainLookupSound),
+    DF("BACK", back, DDF_MainLookupSound),
+    DF("ERROR", error, DDF_MainLookupSound),
+    DF("MOVE", move, DDF_MainLookupSound),
+    DF("SLIDER", slider, DDF_MainLookupSound),
 
-                                               DDF_CMD_END};
+    DDF_CMD_END};
 
 static styledef_c *dynamic_style;
 
@@ -129,8 +134,7 @@ static void StyleStartEntry(const char *name, bool extend)
 
     if (extend)
     {
-        if (!dynamic_style)
-            DDF_Error("Unknown style to extend: %s\n", name);
+        if (!dynamic_style) DDF_Error("Unknown style to extend: %s\n", name);
         return;
     }
 
@@ -147,14 +151,16 @@ static void StyleStartEntry(const char *name, bool extend)
     styledefs.push_back(dynamic_style);
 }
 
-static void StyleParseField(const char *field, const char *contents, int index, bool is_last)
+static void StyleParseField(const char *field, const char *contents, int index,
+                            bool is_last)
 {
 #if (DEBUG_DDF)
     I_Debugf("STYLE_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(style_commands, field, contents, (uint8_t *)dynamic_style))
-        return; // OK
+    if (DDF_MainParseField(style_commands, field, contents,
+                           (uint8_t *)dynamic_style))
+        return;  // OK
 
     DDF_WarnError("Unknown styles.ddf command: %s\n", field);
 }
@@ -220,8 +226,7 @@ void DDF_StyleInit(void)
 
 void DDF_StyleCleanUp(void)
 {
-    if (styledefs.empty())
-        I_Error("There are no styles defined in DDF !\n");
+    if (styledefs.empty()) I_Error("There are no styles defined in DDF !\n");
 
     default_style = styledefs.Lookup("DEFAULT");
 
@@ -233,10 +238,11 @@ void DDF_StyleCleanUp(void)
     styledefs.shrink_to_fit();
 }
 
-static specflags_t style_specials[] = {{"TILED", SYLSP_Tiled, 0},
-                                       {"TILED_NOSCALE", SYLSP_TiledNoScale, 0},
-                                       {"STRETCH_FULLSCREEN", SYLSP_StretchFullScreen, 0},
-                                       {nullptr, 0, 0}};
+static specflags_t style_specials[] = {
+    {"TILED", SYLSP_Tiled, 0},
+    {"TILED_NOSCALE", SYLSP_TiledNoScale, 0},
+    {"STRETCH_FULLSCREEN", SYLSP_StretchFullScreen, 0},
+    {nullptr, 0, 0}};
 
 void DDF_StyleGetSpecials(const char *info, void *storage)
 {
@@ -244,20 +250,21 @@ void DDF_StyleGetSpecials(const char *info, void *storage)
 
     int flag_value;
 
-    switch (DDF_MainCheckSpecialFlag(info, style_specials, &flag_value, true, false))
+    switch (DDF_MainCheckSpecialFlag(info, style_specials, &flag_value, true,
+                                     false))
     {
-    case CHKF_Positive:
-        *dest = (style_special_e)(*dest | flag_value);
-        break;
+        case CHKF_Positive:
+            *dest = (style_special_e)(*dest | flag_value);
+            break;
 
-    case CHKF_Negative:
-        *dest = (style_special_e)(*dest & ~flag_value);
-        break;
+        case CHKF_Negative:
+            *dest = (style_special_e)(*dest & ~flag_value);
+            break;
 
-    case CHKF_User:
-    case CHKF_Unknown:
-        DDF_WarnError("Unknown style special: %s", info);
-        break;
+        case CHKF_User:
+        case CHKF_Unknown:
+            DDF_WarnError("Unknown style special: %s", info);
+            break;
     }
 }
 
@@ -266,10 +273,7 @@ void DDF_StyleGetSpecials(const char *info, void *storage)
 //
 // backgroundstyle_c Constructor
 //
-backgroundstyle_c::backgroundstyle_c()
-{
-    Default();
-}
+backgroundstyle_c::backgroundstyle_c() { Default(); }
 
 //
 // backgroundstyle_c Copy constructor
@@ -282,9 +286,7 @@ backgroundstyle_c::backgroundstyle_c(const backgroundstyle_c &rhs)
 //
 // backgroundstyle_c Destructor
 //
-backgroundstyle_c::~backgroundstyle_c()
-{
-}
+backgroundstyle_c::~backgroundstyle_c() {}
 
 //
 // backgroundstyle_c::Default()
@@ -324,25 +326,17 @@ backgroundstyle_c &backgroundstyle_c::operator=(const backgroundstyle_c &rhs)
 //
 // textstyle_c Constructor
 //
-textstyle_c::textstyle_c()
-{
-    Default();
-}
+textstyle_c::textstyle_c() { Default(); }
 
 //
 // textstyle_c Copy constructor
 //
-textstyle_c::textstyle_c(const textstyle_c &rhs)
-{
-    *this = rhs;
-}
+textstyle_c::textstyle_c(const textstyle_c &rhs) { *this = rhs; }
 
 //
 // textstyle_c Destructor
 //
-textstyle_c::~textstyle_c()
-{
-}
+textstyle_c::~textstyle_c() {}
 
 //
 // textstyle_c::Default()
@@ -384,25 +378,17 @@ textstyle_c &textstyle_c::operator=(const textstyle_c &rhs)
 //
 // cursorstyle_c Constructor
 //
-cursorstyle_c::cursorstyle_c()
-{
-    Default();
-}
+cursorstyle_c::cursorstyle_c() { Default(); }
 
 //
 // cursorstyle_c Copy constructor
 //
-cursorstyle_c::cursorstyle_c(const cursorstyle_c &rhs)
-{
-    *this = rhs;
-}
+cursorstyle_c::cursorstyle_c(const cursorstyle_c &rhs) { *this = rhs; }
 
 //
 // cursorstyle_c Destructor
 //
-cursorstyle_c::~cursorstyle_c()
-{
-}
+cursorstyle_c::~cursorstyle_c() {}
 
 //
 // cursorstyle_c::Default()
@@ -444,25 +430,17 @@ cursorstyle_c &cursorstyle_c::operator=(const cursorstyle_c &rhs)
 //
 // soundstyle_c Constructor
 //
-soundstyle_c::soundstyle_c()
-{
-    Default();
-}
+soundstyle_c::soundstyle_c() { Default(); }
 
 //
 // soundstyle_c Copy constructor
 //
-soundstyle_c::soundstyle_c(const soundstyle_c &rhs)
-{
-    *this = rhs;
-}
+soundstyle_c::soundstyle_c(const soundstyle_c &rhs) { *this = rhs; }
 
 //
 // soundstyle_c Destructor
 //
-soundstyle_c::~soundstyle_c()
-{
-}
+soundstyle_c::~soundstyle_c() {}
 
 //
 // soundstyle_c::Default()
@@ -502,17 +480,12 @@ soundstyle_c &soundstyle_c::operator=(const soundstyle_c &rhs)
 //
 // styledef_c Constructor
 //
-styledef_c::styledef_c() : name()
-{
-    Default();
-}
+styledef_c::styledef_c() : name() { Default(); }
 
 //
 // styledef_c Destructor
 //
-styledef_c::~styledef_c()
-{
-}
+styledef_c::~styledef_c() {}
 
 //
 // styledef_c::CopyDetail()
@@ -521,8 +494,7 @@ void styledef_c::CopyDetail(const styledef_c &src)
 {
     bg = src.bg;
 
-    for (int T = 0; T < NUM_TXST; T++)
-        text[T] = src.text[T];
+    for (int T = 0; T < NUM_TXST; T++) text[T] = src.text[T];
 
     sounds = src.sounds;
 
@@ -543,16 +515,16 @@ void styledef_c::Default()
 {
     bg.Default();
 
-    for (int T = 0; T < NUM_TXST; T++)
-        text[T].Default();
+    for (int T = 0; T < NUM_TXST; T++) text[T].Default();
 
     sounds.Default();
 
     x_offset = 0;
     y_offset = 0;
 
-    special = SYLSP_None; //(style_special_e) SYLSP_StretchFullScreen; // I think this might be better for backwards
-                          //compat, revert to 0 if needed - Dasho
+    special = SYLSP_None;  //(style_special_e) SYLSP_StretchFullScreen; // I
+                           // think this might be better for backwards compat,
+                           // revert to 0 if needed - Dasho
 
     entry_align_string = "";
     entry_alignment    = 0;
@@ -568,14 +540,12 @@ void styledef_c::Default()
 //
 styledef_c *styledef_container_c::Lookup(const char *refname)
 {
-    if (!refname || !refname[0])
-        return nullptr;
+    if (!refname || !refname[0]) return nullptr;
 
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
         styledef_c *m = *iter;
-        if (DDF_CompareName(m->name.c_str(), refname) == 0)
-            return m;
+        if (DDF_CompareName(m->name.c_str(), refname) == 0) return m;
     }
 
     return nullptr;

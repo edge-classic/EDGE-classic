@@ -19,10 +19,10 @@
 #ifndef __DDF_MOBJ_H__
 #define __DDF_MOBJ_H__
 
+#include "colormap.h"
 #include "epi.h"
-
-#include "types.h"
 #include "states.h"
+#include "types.h"
 
 // special 'number' value which signifies that the mobjtype_c
 // forms part of an ATTACKS.DDF entry.
@@ -312,7 +312,7 @@ typedef enum
     HF_IMMOVABLE = (1 << 22),
 
     // Dasho 2023/12/05: this thing is a MUSINFO Music Changer thing
-    // This flag is present because we cannot assume a thing is a 
+    // This flag is present because we cannot assume a thing is a
     // music changer just because it has an ID of 14100-14164
     HF_MUSIC_CHANGER = (1 << 23),
 
@@ -336,134 +336,6 @@ typedef enum
 // ------------------------------------------------------------------
 // ------------------------BENEFIT TYPES-----------------------------
 // ------------------------------------------------------------------
-
-typedef enum
-{
-    BENEFIT_None = 0,
-    BENEFIT_Ammo,
-    BENEFIT_AmmoLimit,
-    BENEFIT_Weapon,
-    BENEFIT_Key,
-    BENEFIT_Health,
-    BENEFIT_Armour,
-    BENEFIT_Powerup,
-    BENEFIT_Inventory,
-    BENEFIT_InventoryLimit,
-    BENEFIT_Counter,
-    BENEFIT_CounterLimit
-} benefit_type_e;
-
-// Ammunition types defined.
-typedef enum
-{
-    AM_DontCare = -2, // Only used for P_SelectNewWeapon()
-    AM_NoAmmo   = -1, // Unlimited for chainsaw / fist.
-
-    AM_Bullet = 0, // Pistol / chaingun ammo.
-    AM_Shell,      // Shotgun / double barreled shotgun.
-    AM_Rocket,     // Missile launcher.
-    AM_Cell,       // Plasma rifle, BFG.
-
-    // New ammo types
-    AM_Pellet,
-    AM_Nail,
-    AM_Grenade,
-    AM_Gas,
-
-    AM_9,
-    AM_10,
-    AM_11,
-    AM_12,
-    AM_13,
-    AM_14,
-    AM_15,
-    AM_16,
-    AM_17,
-    AM_18,
-    AM_19,
-    AM_20,
-    AM_21,
-    AM_22,
-    AM_23,
-    AM_24,
-    AM_25,
-    AM_26,
-    AM_27,
-    AM_28,
-    AM_29,
-    AM_30,
-    AM_31,
-    AM_32,
-    AM_33,
-    AM_34,
-    AM_35,
-    AM_36,
-    AM_37,
-    AM_38,
-    AM_39,
-    AM_40,
-    AM_41,
-    AM_42,
-    AM_43,
-    AM_44,
-    AM_45,
-    AM_46,
-    AM_47,
-    AM_48,
-    AM_49,
-    AM_50,
-    AM_51,
-    AM_52,
-    AM_53,
-    AM_54,
-    AM_55,
-    AM_56,
-    AM_57,
-    AM_58,
-    AM_59,
-    AM_60,
-    AM_61,
-    AM_62,
-    AM_63,
-    AM_64,
-    AM_65,
-    AM_66,
-    AM_67,
-    AM_68,
-    AM_69,
-    AM_70,
-    AM_71,
-    AM_72,
-    AM_73,
-    AM_74,
-    AM_75,
-    AM_76,
-    AM_77,
-    AM_78,
-    AM_79,
-    AM_80,
-    AM_81,
-    AM_82,
-    AM_83,
-    AM_84,
-    AM_85,
-    AM_86,
-    AM_87,
-    AM_88,
-    AM_89,
-    AM_90,
-    AM_91,
-    AM_92,
-    AM_93,
-    AM_94,
-    AM_95,
-    AM_96,
-    AM_97,
-    AM_98,
-    AM_99,
-
-    NUMAMMO // Total count (99)
-} ammotype_e;
 
 // Inventory types defined.
 typedef enum
@@ -567,16 +439,16 @@ typedef enum
     INV_97,
     INV_98,
     INV_99,
-    NUMINV // Total count (99)
+    NUMINV  // Total count (99)
 } invtype_e;
 
 // Counter types defined.
 typedef enum
 {
-    CT_Lives = 0,  // Arbitrarily named Lives counter
-    CT_Score,      // Arbitrarily named Score counter
-    CT_Money,      // Arbitrarily named Money
-    CT_Experience, // Arbitrarily named EXP counter
+    CT_Lives = 0,   // Arbitrarily named Lives counter
+    CT_Score,       // Arbitrarily named Score counter
+    CT_Money,       // Arbitrarily named Money
+    CT_Experience,  // Arbitrarily named EXP counter
 
     COUNT_05,
     COUNT_06,
@@ -673,7 +545,7 @@ typedef enum
     COUNT_97,
     COUNT_98,
     COUNT_99,
-    NUMCOUNTER // Total count (99)
+    NUMCOUNTER  // Total count (99)
 } countertype_e;
 
 typedef enum
@@ -696,9 +568,9 @@ typedef enum
     NUMARMOUR
 } armour_type_e;
 
-#define ARMOUR_Total (NUMARMOUR + 0) // -AJA- used for conditions
+#define ARMOUR_Total (NUMARMOUR + 0)  // -AJA- used for conditions
 
-typedef short armour_set_t; // one bit per armour
+typedef short armour_set_t;  // one bit per armour
 
 // Power up artifacts.
 //
@@ -715,7 +587,7 @@ typedef enum
     PW_Infrared,
 
     // extra powerups (not in Doom)
-    PW_Jetpack, // -MH- 1998/06/18  jetpack "fuel" counter
+    PW_Jetpack,  // -MH- 1998/06/18  jetpack "fuel" counter
     PW_NightVision,
     PW_Scuba,
 
@@ -732,33 +604,6 @@ typedef enum
     NUMPOWERS
 } power_type_e;
 
-typedef struct benefit_s
-{
-    // next in linked list
-    struct benefit_s *next;
-
-    // type of benefit (ammo, ammo-limit, weapon, key, health, armour,
-    // powerup, inventory, or inventory-limit).
-    benefit_type_e type;
-
-    // sub-type (specific type of ammo, weapon, key, powerup, or inventory).  For
-    // armour this is the class, for health it is unused.
-    union {
-        int          type;
-        weapondef_c *weap;
-    } sub;
-
-    // amount of benefit (e.g. quantity of ammo or health).  For weapons
-    // and keys, this is a boolean value: 1 to give, 0 to ignore.  For
-    // powerups, it is number of seconds the powerup lasts.
-    float amount;
-
-    // for health, armour and powerups, don't make the new value go
-    // higher than this (if it is already higher, prefer not to pickup
-    // the object).
-    float limit;
-} benefit_t;
-
 typedef enum
 {
     PUFX_None = 0,
@@ -770,12 +615,12 @@ typedef enum
 
 class pickup_effect_c
 {
-  public:
-    pickup_effect_c(pickup_effect_type_e _type, int _sub, int _slot, float _time);
-    pickup_effect_c(pickup_effect_type_e _type, weapondef_c *_weap, int _slot, float _time);
-    ~pickup_effect_c()
-    {
-    }
+   public:
+    pickup_effect_c(pickup_effect_type_e _type, int _sub, int _slot,
+                    float _time);
+    pickup_effect_c(pickup_effect_type_e _type, weapondef_c *_weap, int _slot,
+                    float _time);
+    ~pickup_effect_c() {}
 
     // next in linked list
     pickup_effect_c *next;
@@ -783,7 +628,8 @@ class pickup_effect_c
     // type and optional sub-type
     pickup_effect_type_e type;
 
-    union {
+    union
+    {
         int          type;
         weapondef_c *weap;
     } sub;
@@ -795,7 +641,8 @@ class pickup_effect_c
     float time;
 };
 
-// -ACB- 2003/05/15: Made enum external to structure, caused different issues with gcc and VC.NET compile
+// -ACB- 2003/05/15: Made enum external to structure, caused different issues
+// with gcc and VC.NET compile
 typedef enum
 {
     // dummy condition, used if parsing failed
@@ -859,21 +706,24 @@ typedef struct condition_check_s
     // negate the condition
     bool negate = false;
 
-    // condition is looking for an exact value (not "greater than" or "smaller than")
+    // condition is looking for an exact value (not "greater than" or "smaller
+    // than")
     bool exact = false;
 
-    // condition typing. -ACB- 2003/05/15: Made an integer to hold condition_check_type_e enumeration
+    // condition typing. -ACB- 2003/05/15: Made an integer to hold
+    // condition_check_type_e enumeration
     int cond_type = 0;
 
-    // sub-type (specific type of ammo, weapon, key, powerup, inventory).  Not used
-    // for health, jumping, crouching, etc.
-    union {
+    // sub-type (specific type of ammo, weapon, key, powerup, inventory).  Not
+    // used for health, jumping, crouching, etc.
+    union
+    {
         int          type;
         weapondef_c *weap;
     } sub;
 
-    // required amount of health, armour, ammo, inventory or "counter",   Not used for
-    // weapon, key, powerup, jumping, crouching, etc.
+    // required amount of health, armour, ammo, inventory or "counter",   Not
+    // used for weapon, key, powerup, jumping, crouching, etc.
     float amount = 0;
 } condition_check_t;
 
@@ -890,94 +740,6 @@ typedef struct condition_check_s
 // (PAIN, DEATH, OVERKILL).  Defaults to nullptr.
 //
 
-class label_offset_c
-{
-  public:
-    label_offset_c();
-    label_offset_c(label_offset_c &rhs);
-    ~label_offset_c();
-
-  private:
-    void Copy(label_offset_c &src);
-
-  public:
-    void            Default();
-    label_offset_c &operator=(label_offset_c &rhs);
-
-    std::string label;
-    int         offset;
-};
-
-class damage_c
-{
-  public:
-    damage_c();
-    damage_c(damage_c &rhs);
-    ~damage_c();
-
-    enum default_e
-    {
-        DEFAULT_Attack,
-        DEFAULT_Mobj,
-        DEFAULT_MobjChoke,
-        DEFAULT_Sector,
-        DEFAULT_Numtypes
-    };
-
-  private:
-    void Copy(damage_c &src);
-
-  public:
-    void      Default(default_e def);
-    damage_c &operator=(damage_c &rhs);
-
-    // nominal damage amount (required)
-    float nominal;
-
-    // used for DAMAGE.MAX: when this is > 0, the damage is random
-    // between nominal and linear_max, where each value has equal
-    // probability.
-    float linear_max;
-
-    // used for DAMAGE.ERROR: when this is > 0, the damage is the
-    // nominal value +/- this error amount, with a bell-shaped
-    // distribution (values near the nominal are much more likely than
-    // values at the outer extreme).
-    float error;
-
-    // delay (in terms of tics) between damage application, e.g. 34
-    // would be once every second.  Only used for slime/crush damage.
-    int delay;
-
-    // death message, names an entry in LANGUAGES.LDF
-    std::string obituary;
-
-    // override labels for various states, if the object being damaged
-    // has such a state then it is used instead of the normal ones
-    // (PAIN, DEATH, OVERKILL).  Defaults to nullptr.
-    label_offset_c pain, death, overkill;
-
-    // this flag says that the damage is unaffected by the player's
-    // armour -- and vice versa.
-    bool no_armour;
-
-    // Color of the flash when player is hit by this damage type
-    RGBAColor damage_flash_colour;
-
-    // Apply damange unconditionally
-    bool bypass_all;
-    // Damage is always health+1 with no resistances applied
-    bool instakill;
-    // Apply to all players
-    bool all_players;
-    // Apply damage unless one of these benefits is in effect
-    benefit_t *damage_unless;
-    // Apply damage if one of these benefits is in effect
-    benefit_t *damage_if;
-    // Apply to (grounded) monsters instead (MBF21)
-    bool grounded_monsters;
-};
-
 typedef enum
 {
     GLOW_None    = 0,
@@ -992,13 +754,6 @@ typedef enum
     SPYA_Middle   = 1,
     SPYA_TopDown  = 2,
 } sprite_y_alignment_e;
-
-// a bitset is a set of named bits, from `A' to `Z'.
-typedef int bitset_t;
-
-#define BITSET_EMPTY    0
-#define BITSET_FULL     0x7FFFFFFF
-#define BITSET_MAKE(ch) (1 << ((ch) - 'A'))
 
 // dynamic light info
 
@@ -1020,22 +775,22 @@ typedef enum
 
 class dlight_info_c
 {
-  public:
+   public:
     dlight_info_c();
     dlight_info_c(dlight_info_c &rhs);
     ~dlight_info_c(){};
 
-  private:
+   private:
     void Copy(dlight_info_c &src);
 
-  public:
+   public:
     void           Default(void);
     dlight_info_c &operator=(dlight_info_c &rhs);
 
     dlight_type_e type;
-    std::string   shape; // IMAGES.DDF reference
+    std::string   shape;  // IMAGES.DDF reference
     float         radius;
-    RGBAColor      colour;
+    RGBAColor     colour;
     percent_t     height;
     bool          leaky;
 
@@ -1044,20 +799,20 @@ class dlight_info_c
 
 class weakness_info_c
 {
-  public:
+   public:
     weakness_info_c();
     weakness_info_c(weakness_info_c &rhs);
     ~weakness_info_c(){};
 
-  private:
+   private:
     void Copy(weakness_info_c &src);
 
-  public:
+   public:
     void             Default(void);
     weakness_info_c &operator=(weakness_info_c &rhs);
 
     percent_t height[2];
-    BAMAngle   angle[2];
+    BAMAngle  angle[2];
     bitset_t  classes;
     float     multiply;
     percent_t painchance;
@@ -1066,14 +821,14 @@ class weakness_info_c
 // mobjdef class
 class mobjtype_c
 {
-  public:
+   public:
     // DDF Id
     std::string name;
 
     int number;
 
     // range of states used
-    state_group_t state_grp;
+    std::vector<state_range_t> state_grp;
 
     int spawn_state;
     int idle_state;
@@ -1108,7 +863,7 @@ class mobjtype_c
     int mbf21flags;
 
     damage_c explode_damage;
-    float    explode_radius; // normally zero (radius == damage)
+    float    explode_radius;  // normally zero (radius == damage)
 
     // linked list of losing benefits, or nullptr
     benefit_t *lose_benefits;
@@ -1147,7 +902,7 @@ class mobjtype_c
     float     bounce_speed;
     float     bounce_up;
     float     sight_slope;
-    BAMAngle   sight_angle;
+    BAMAngle  sight_angle;
     float     ride_friction;
     percent_t shadow_trans;
 
@@ -1181,9 +936,9 @@ class mobjtype_c
 
     bitset_t side;
     int      playernum;
-    int      yalign; // -AJA- 2007/08/08: sprite Y alignment in bbox
+    int      yalign;  // -AJA- 2007/08/08: sprite Y alignment in bbox
 
-    int   model_skin; // -AJA- 2007/10/16: MD2 model support
+    int   model_skin;  // -AJA- 2007/10/16: MD2 model support
     float model_scale;
     float model_aspect;
     float model_bias;
@@ -1202,7 +957,7 @@ class mobjtype_c
     // what attack classes we are immune/resistant to (usually none).
     bitset_t immunity;
     bitset_t resistance;
-    bitset_t ghost; // pass through us
+    bitset_t ghost;  // pass through us
 
     float     resist_multiply;
     percent_t resist_painchance;
@@ -1237,10 +992,10 @@ class mobjtype_c
     const mobjtype_c *spitspot;
     std::string       spitspot_ref;
 
-    float sight_distance; // lobo 2022: How far this thing can see
-    float hear_distance;  // lobo 2022: How far this thing can hear
+    float sight_distance;  // lobo 2022: How far this thing can see
+    float hear_distance;   // lobo 2022: How far this thing can hear
 
-    int morphtimeout; // lobo 2023: Go to MORPH states when times up
+    int morphtimeout;  // lobo 2023: Go to MORPH states when times up
 
     // DEHEXTRA
     float gib_health;
@@ -1252,22 +1007,19 @@ class mobjtype_c
     int fast_speed;
     int melee_range;
 
-  public:
+   public:
     mobjtype_c();
     ~mobjtype_c();
 
-  public:
+   public:
     void Default();
     void CopyDetail(mobjtype_c &src);
 
     void DLightCompatibility(void);
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit mobjtype_c(mobjtype_c &rhs)
-    {
-        (void)rhs;
-    }
+    explicit mobjtype_c(mobjtype_c &rhs) { (void)rhs; }
     mobjtype_c &operator=(mobjtype_c &rhs)
     {
         (void)rhs;
@@ -1275,19 +1027,16 @@ class mobjtype_c
     }
 };
 
-// Our mobjdef container
-#define LOOKUP_CACHESIZE 211
-
 class mobjtype_container_c : public std::vector<mobjtype_c *>
 {
-  public:
+   public:
     mobjtype_container_c();
     ~mobjtype_container_c();
 
-  private:
+   private:
     mobjtype_c *lookup_cache[LOOKUP_CACHESIZE];
 
-  public:
+   public:
     // List Management
     bool MoveToEnd(int idx);
 

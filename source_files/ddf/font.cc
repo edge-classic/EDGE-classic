@@ -19,11 +19,11 @@
 // Font Setup and Parser Code
 //
 
+#include "font.h"
+
 #include <string.h>
 
 #include "local.h"
-
-#include "font.h"
 #include "str_compare.h"
 
 static fontdef_c *dynamic_font;
@@ -34,16 +34,17 @@ static void DDF_FontGetPatch(const char *info, void *storage);
 #define DDF_CMD_BASE dummy_font
 static fontdef_c dummy_font;
 
-static const commandlist_t font_commands[] = {DDF_FIELD("TYPE", type, DDF_FontGetType),
-                                              DDF_FIELD("PATCHES", patches, DDF_FontGetPatch),
-                                              DDF_FIELD("IMAGE", image_name, DDF_MainGetString),
-                                              DDF_FIELD("TTF", ttf_name, DDF_MainGetString),
-                                              DDF_FIELD("DEFAULT_SIZE", default_size, DDF_MainGetFloat),
-                                              DDF_FIELD("TTF_SMOOTHING", ttf_smoothing_string, DDF_MainGetString),
-                                              DDF_FIELD("MISSING_PATCH", missing_patch, DDF_MainGetString),
-                                              DDF_FIELD("SPACING", spacing, DDF_MainGetFloat),
+static const commandlist_t font_commands[] = {
+    DDF_FIELD("TYPE", type, DDF_FontGetType),
+    DDF_FIELD("PATCHES", patches, DDF_FontGetPatch),
+    DDF_FIELD("IMAGE", image_name, DDF_MainGetString),
+    DDF_FIELD("TTF", ttf_name, DDF_MainGetString),
+    DDF_FIELD("DEFAULT_SIZE", default_size, DDF_MainGetFloat),
+    DDF_FIELD("TTF_SMOOTHING", ttf_smoothing_string, DDF_MainGetString),
+    DDF_FIELD("MISSING_PATCH", missing_patch, DDF_MainGetString),
+    DDF_FIELD("SPACING", spacing, DDF_MainGetFloat),
 
-                                              DDF_CMD_END};
+    DDF_CMD_END};
 
 // -ACB- 2004/06/03 Replaced array and size with purpose-built class
 fontdef_container_c fontdefs;
@@ -63,8 +64,7 @@ static void FontStartEntry(const char *name, bool extend)
 
     if (extend)
     {
-        if (!dynamic_font)
-            DDF_Error("Unknown font to extend: %s\n", name);
+        if (!dynamic_font) DDF_Error("Unknown font to extend: %s\n", name);
         return;
     }
 
@@ -83,14 +83,16 @@ static void FontStartEntry(const char *name, bool extend)
     fontdefs.push_back(dynamic_font);
 }
 
-static void FontParseField(const char *field, const char *contents, int index, bool is_last)
+static void FontParseField(const char *field, const char *contents, int index,
+                           bool is_last)
 {
 #if (DEBUG_DDF)
     I_Debugf("FONT_PARSE: %s = %s;\n", field, contents);
 #endif
 
-    if (DDF_MainParseField(font_commands, field, contents, (uint8_t *)dynamic_font))
-        return; // OK
+    if (DDF_MainParseField(font_commands, field, contents,
+                           (uint8_t *)dynamic_font))
+        return;  // OK
 
     DDF_Error("Unknown fonts.ddf command: %s\n", field);
 }
@@ -109,13 +111,17 @@ static void FontFinishEntry(void)
     if (dynamic_font->type == FNTYP_TrueType && dynamic_font->ttf_name.empty())
         DDF_Error("Missing font TTF/OTF lump/file name.\n");
 
-    if (dynamic_font->type == FNTYP_TrueType && !dynamic_font->ttf_smoothing_string.empty())
+    if (dynamic_font->type == FNTYP_TrueType &&
+        !dynamic_font->ttf_smoothing_string.empty())
     {
-        if (epi::StringCaseCompareASCII(dynamic_font->ttf_smoothing_string, "NEVER") == 0)
+        if (epi::StringCaseCompareASCII(dynamic_font->ttf_smoothing_string,
+                                        "NEVER") == 0)
             dynamic_font->ttf_smoothing = dynamic_font->TTF_SMOOTH_NEVER;
-        else if (epi::StringCaseCompareASCII(dynamic_font->ttf_smoothing_string, "ALWAYS") == 0)
+        else if (epi::StringCaseCompareASCII(dynamic_font->ttf_smoothing_string,
+                                             "ALWAYS") == 0)
             dynamic_font->ttf_smoothing = dynamic_font->TTF_SMOOTH_ALWAYS;
-        else if (epi::StringCaseCompareASCII(dynamic_font->ttf_smoothing_string, "ON_DEMAND") == 0)
+        else if (epi::StringCaseCompareASCII(dynamic_font->ttf_smoothing_string,
+                                             "ON_DEMAND") == 0)
             dynamic_font->ttf_smoothing = dynamic_font->TTF_SMOOTH_ON_DEMAND;
     }
 }
@@ -152,10 +158,9 @@ void DDF_FontInit(void)
 
 void DDF_FontCleanUp(void)
 {
-    if (fontdefs.empty())
-        I_Error("There are no fonts defined in DDF !\n");
+    if (fontdefs.empty()) I_Error("There are no fonts defined in DDF !\n");
 
-    fontdefs.shrink_to_fit(); // <-- Reduce to allocated size
+    fontdefs.shrink_to_fit();  // <-- Reduce to allocated size
 }
 
 //
@@ -179,7 +184,7 @@ static void DDF_FontGetType(const char *info, void *storage)
 
 static int FontParseCharacter(const char *buf)
 {
-#if 0 // the main parser strips out all the " quotes
+#if 0  // the main parser strips out all the " quotes
 	while (epi::IsSpaceASCII(*buf))
 		buf++;
 
@@ -226,8 +231,7 @@ static void DDF_FontGetPatch(const char *info, void *storage)
     if (strlen(range_buf) > 1)
         colon = (char *)DDF_MainDecodeList(range_buf, ':', true);
 
-    if (colon)
-        *colon++ = 0;
+    if (colon) *colon++ = 0;
 
     int char1, char2;
 
@@ -255,7 +259,8 @@ static void DDF_FontGetPatch(const char *info, void *storage)
 
 // ---> fontpatch_c class
 
-fontpatch_c::fontpatch_c(int _ch1, int _ch2, const char *_pat1) : next(nullptr), char1(_ch1), char2(_ch2), patch1(_pat1)
+fontpatch_c::fontpatch_c(int _ch1, int _ch2, const char *_pat1)
+    : next(nullptr), char1(_ch1), char2(_ch2), patch1(_pat1)
 {
 }
 
@@ -264,10 +269,7 @@ fontpatch_c::fontpatch_c(int _ch1, int _ch2, const char *_pat1) : next(nullptr),
 //
 // fontdef_c constructor
 //
-fontdef_c::fontdef_c() : name()
-{
-    Default();
-}
+fontdef_c::fontdef_c() : name() { Default(); }
 
 //
 // fontdef_c::CopyDetail()
@@ -277,7 +279,7 @@ fontdef_c::fontdef_c() : name()
 void fontdef_c::CopyDetail(const fontdef_c &src)
 {
     type                 = src.type;
-    patches              = src.patches; // FIXME: copy list
+    patches              = src.patches;  // FIXME: copy list
     image_name           = src.image_name;
     missing_patch        = src.missing_patch;
     spacing              = src.spacing;
@@ -308,14 +310,12 @@ void fontdef_c::Default()
 //
 fontdef_c *fontdef_container_c::Lookup(const char *refname)
 {
-    if (!refname || !refname[0])
-        return nullptr;
+    if (!refname || !refname[0]) return nullptr;
 
     for (auto iter = begin(); iter != end(); iter++)
     {
         fontdef_c *fnt = *iter;
-        if (DDF_CompareName(fnt->name.c_str(), refname) == 0)
-            return fnt;
+        if (DDF_CompareName(fnt->name.c_str(), refname) == 0) return fnt;
     }
 
     return nullptr;
@@ -330,8 +330,7 @@ void DDF_MainLookupFont(const char *info, void *storage)
 
     *dest = fontdefs.Lookup(info);
 
-    if (*dest == nullptr)
-        DDF_Error("Unknown font: %s\n", info);
+    if (*dest == nullptr) DDF_Error("Unknown font: %s\n", info);
 }
 
 //--- editor settings ---

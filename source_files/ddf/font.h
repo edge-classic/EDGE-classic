@@ -20,7 +20,6 @@
 #define __DDF_FONT__
 
 #include "epi.h"
-
 #include "types.h"
 
 //
@@ -30,31 +29,31 @@ typedef enum
 {
     FNTYP_UNSET = 0,
 
-    FNTYP_Patch    = 1, // font is made up of individual patches
-    FNTYP_Image    = 2, // font consists of one big image (16x16 chars)
-    FNTYP_TrueType = 3  // font is a ttf/otf file or lump
+    FNTYP_Patch    = 1,  // font is made up of individual patches
+    FNTYP_Image    = 2,  // font consists of one big image (16x16 chars)
+    FNTYP_TrueType = 3   // font is a ttf/otf file or lump
 } fonttype_e;
 
 class fontpatch_c
 {
-  public:
+   public:
     fontpatch_c(int _ch1, int _ch2, const char *_pat1);
     ~fontpatch_c();
 
-    fontpatch_c *next; // link in list
+    fontpatch_c *next;  // link in list
 
-    int char1, char2; // range
+    int char1, char2;  // range
 
     std::string patch1;
 };
 
 class fontdef_c
 {
-  public:
+   public:
     fontdef_c();
     ~fontdef_c(){};
 
-  public:
+   public:
     void Default(void);
     void CopyDetail(const fontdef_c &src);
 
@@ -81,14 +80,11 @@ class fontdef_c
 
     std::string ttf_name;
     int         ttf_smoothing;
-    std::string ttf_smoothing_string; // User convenience
+    std::string ttf_smoothing_string;  // User convenience
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit fontdef_c(fontdef_c &rhs)
-    {
-        (void)rhs;
-    }
+    explicit fontdef_c(fontdef_c &rhs) { (void)rhs; }
     fontdef_c &operator=(fontdef_c &rhs)
     {
         (void)rhs;
@@ -99,21 +95,19 @@ class fontdef_c
 // Our fontdefs container
 class fontdef_container_c : public std::vector<fontdef_c *>
 {
-  public:
-    fontdef_container_c()
-    {
-    }
+   public:
+    fontdef_container_c() {}
     ~fontdef_container_c()
     {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          fontdef_c *fnt = *iter;
-          delete fnt;
-          fnt = nullptr;
-      }
+        for (auto iter = begin(); iter != end(); iter++)
+        {
+            fontdef_c *fnt = *iter;
+            delete fnt;
+            fnt = nullptr;
+        }
     }
 
-  public:
+   public:
     // Search Functions
     fontdef_c *Lookup(const char *refname);
 };

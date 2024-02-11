@@ -621,7 +621,7 @@ bool RAD_CheckReachedTrigger(mobj_t *thing)
 
     if (scr->path_event_label)
     {
-        statenum_t state = P_MobjFindLabel(thing, scr->path_event_label);
+        int state = P_MobjFindLabel(thing, scr->path_event_label);
 
         if (state)
             P_SetMobjStateDeferred(thing, state + scr->path_event_offset, 0);

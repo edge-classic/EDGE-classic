@@ -19,9 +19,9 @@
 // -KM- 1998/09/27 Finished :-)
 //
 
-#include "local.h"
-
 #include "sfx.h"
+
+#include "local.h"
 
 static sfxdef_c *dynamic_sfx;
 
@@ -34,7 +34,8 @@ static const commandlist_t sfx_commands[] = {
     DDF_FIELD("LUMP_NAME", lump_name, DDF_MainGetLumpName),
     DDF_FIELD("PACK_NAME", pack_name, DDF_MainGetString),
     DDF_FIELD("FILE_NAME", file_name, DDF_MainGetString),
-    DDF_FIELD("PC_SPEAKER_LUMP", pc_speaker_sound, DDF_MainGetString), // Kept for backwards compat
+    DDF_FIELD("PC_SPEAKER_LUMP", pc_speaker_sound,
+              DDF_MainGetString),  // Kept for backwards compat
     DDF_FIELD("PC_SPEAKER_SOUND", pc_speaker_sound, DDF_MainGetString),
     DDF_FIELD("SINGULAR", singularity, DDF_MainGetNumeric),
     DDF_FIELD("PRIORITY", priority, DDF_MainGetNumeric),
@@ -61,8 +62,7 @@ static void SoundStartEntry(const char *name, bool extend)
 
     if (extend)
     {
-        if (!dynamic_sfx)
-            DDF_Error("Unknown sound to extend: %s\n", name);
+        if (!dynamic_sfx) DDF_Error("Unknown sound to extend: %s\n", name);
         return;
     }
 
@@ -91,25 +91,29 @@ static void SoundStartEntry(const char *name, bool extend)
     dynamic_sfx->normal.num       = 1;
 }
 
-static void SoundParseField(const char *field, const char *contents, int index, bool is_last)
+static void SoundParseField(const char *field, const char *contents, int index,
+                            bool is_last)
 {
 #if (DEBUG_DDF)
     I_Debugf("SOUND_PARSE: %s = %s;\n", field, contents);
 #endif
 
     // -AJA- ignore these for backwards compatibility
-    if (DDF_CompareName(field, "BITS") == 0 || DDF_CompareName(field, "STEREO") == 0)
+    if (DDF_CompareName(field, "BITS") == 0 ||
+        DDF_CompareName(field, "STEREO") == 0)
         return;
 
-    if (DDF_MainParseField(sfx_commands, field, contents, (uint8_t *)dynamic_sfx))
-        return; // OK
+    if (DDF_MainParseField(sfx_commands, field, contents,
+                           (uint8_t *)dynamic_sfx))
+        return;  // OK
 
     DDF_WarnError("Unknown sounds.ddf command: %s\n", field);
 }
 
 static void SoundFinishEntry(void)
 {
-    if (dynamic_sfx->lump_name.empty() && dynamic_sfx->file_name.empty() && dynamic_sfx->pack_name.empty())
+    if (dynamic_sfx->lump_name.empty() && dynamic_sfx->file_name.empty() &&
+        dynamic_sfx->pack_name.empty())
     {
         DDF_Error("Missing LUMP_NAME or PACK_NAME for sound.\n");
     }
@@ -145,10 +149,7 @@ void DDF_SFXInit(void)
     sfxdefs.clear();
 }
 
-void DDF_SFXCleanUp(void)
-{
-    sfxdefs.shrink_to_fit();
-}
+void DDF_SFXCleanUp(void) { sfxdefs.shrink_to_fit(); }
 
 //
 // DDF_MainLookupSound
@@ -156,9 +157,9 @@ void DDF_SFXCleanUp(void)
 // Lookup the sound specified.
 //
 // -ACB- 1998/07/08 Checked the S_sfx table for sfx names.
-// -ACB- 1998/07/18 Removed to the need set *currentcmdlist[commandref].data to -1
-// -KM- 1998/09/27 Fixed this func because of sounds.ddf
-// -KM- 1998/10/29 sfx_t finished
+// -ACB- 1998/07/18 Removed to the need set *currentcmdlist[commandref].data to
+// -1 -KM- 1998/09/27 Fixed this func because of sounds.ddf -KM- 1998/10/29
+// sfx_t finished
 //
 void DDF_MainLookupSound(const char *info, void *storage)
 {
@@ -174,17 +175,12 @@ void DDF_MainLookupSound(const char *info, void *storage)
 //
 // sfxdef_c Constructor
 //
-sfxdef_c::sfxdef_c() : name()
-{
-    Default();
-}
+sfxdef_c::sfxdef_c() : name() { Default(); }
 
 //
 // sfxdef_c Destructor
 //
-sfxdef_c::~sfxdef_c()
-{
-}
+sfxdef_c::~sfxdef_c() {}
 
 //
 // sfxdef_c::CopyDetail()
@@ -200,12 +196,12 @@ void sfxdef_c::CopyDetail(sfxdef_c &src)
     normal.sounds[0] = 0;
     normal.num       = 0;
 
-    singularity  = src.singularity;  // singularity
-    priority     = src.priority;     // priority (lower is more important)
-    volume       = src.volume;       // volume
-    looping      = src.looping;      // looping
-    precious     = src.precious;     // precious
-    max_distance = src.max_distance; // max_distance
+    singularity  = src.singularity;   // singularity
+    priority     = src.priority;      // priority (lower is more important)
+    volume       = src.volume;        // volume
+    looping      = src.looping;       // looping
+    precious     = src.precious;      // precious
+    max_distance = src.max_distance;  // max_distance
 }
 
 //
@@ -221,12 +217,12 @@ void sfxdef_c::Default()
     normal.sounds[0] = 0;
     normal.num       = 0;
 
-    singularity  = 0;                 // singularity
-    priority     = 999;               // priority (lower is more important)
-    volume       = PERCENT_MAKE(100); // volume
-    looping      = false;             // looping
-    precious     = false;             // precious
-    max_distance = S_CLIPPING_DIST;   // max_distance
+    singularity  = 0;                  // singularity
+    priority     = 999;                // priority (lower is more important)
+    volume       = PERCENT_MAKE(100);  // volume
+    looping      = false;              // looping
+    precious     = false;              // precious
+    max_distance = S_CLIPPING_DIST;    // max_distance
 }
 
 // --> Sound Effect Definition Containter Class
@@ -237,15 +233,14 @@ static int strncasecmpwild(const char *s1, const char *s2, int n)
 
     for (i = 0; s1[i] && s2[i] && i < n; i++)
     {
-        if ((epi::ToUpperASCII(s1[i]) != epi::ToUpperASCII(s2[i])) && (s1[i] != '?') && (s2[i] != '?'))
+        if ((epi::ToUpperASCII(s1[i]) != epi::ToUpperASCII(s2[i])) &&
+            (s1[i] != '?') && (s2[i] != '?'))
             break;
     }
     // -KM- 1999/01/29 If strings are equal return equal.
-    if (i == n)
-        return 0;
+    if (i == n) return 0;
 
-    if (s1[i] == '?' || s2[i] == '?')
-        return 0;
+    if (s1[i] == '?' || s2[i] == '?') return 0;
 
     return s1[i] - s2[i];
 }
@@ -258,15 +253,14 @@ static int strncasecmpwild(const char *s1, const char *s2, int n)
 //
 sfx_t *sfxdef_container_c::GetEffect(const char *name, bool error)
 {
-    int                   count = 0;
+    int count = 0;
 
-    sfxdef_c *si = nullptr;
+    sfxdef_c *si   = nullptr;
     sfxdef_c *last = nullptr;
-    sfx_t    *r = nullptr;
+    sfx_t    *r    = nullptr;
 
     // nullptr Sound
-    if (!name || !name[0] || DDF_CompareName(name, "NULL") == 0)
-        return nullptr;
+    if (!name || !name[0] || DDF_CompareName(name, "NULL") == 0) return nullptr;
 
     // count them
     for (auto iter = rbegin(); iter != rend(); iter++)
@@ -276,15 +270,13 @@ sfx_t *sfxdef_container_c::GetEffect(const char *name, bool error)
         if (strncasecmpwild(name, si->name.c_str(), 8) == 0)
         {
             count++;
-            if (!last)
-                last = si;
+            if (!last) last = si;
         }
     }
 
     if (count == 0)
     {
-        if (error)
-            DDF_WarnError("Unknown SFX: '%.8s'\n", name);
+        if (error) DDF_WarnError("Unknown SFX: '%.8s'\n", name);
 
         return nullptr;
     }
@@ -304,11 +296,11 @@ sfx_t *sfxdef_container_c::GetEffect(const char *name, bool error)
     // allocate elements.  Uses (count-1) since sfx_t already includes
     // the first integer.
     //
-    r = (sfx_t *)new uint8_t[sizeof(sfx_t) + ((count - 1) * sizeof(int))];
+    r      = (sfx_t *)new uint8_t[sizeof(sfx_t) + ((count - 1) * sizeof(int))];
     r->num = 0;
 
     // now store them
-    for (int i = size()-1; i >= 0; i--)
+    for (int i = size() - 1; i >= 0; i--)
     {
         si = at(i);
 
@@ -330,8 +322,7 @@ sfxdef_c *sfxdef_container_c::Lookup(const char *name)
     {
         sfxdef_c *s = *iter;
 
-        if (DDF_CompareName(s->name.c_str(), name) == 0)
-            return s;
+        if (DDF_CompareName(s->name.c_str(), name) == 0) return s;
     }
 
     return nullptr;

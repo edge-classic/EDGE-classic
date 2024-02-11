@@ -478,7 +478,7 @@ static void LUA_SetPsprite(player_t *p, int position, int stnum, weapondef_c *in
 
         if (st->label)
         {
-            statenum_t new_state = DDF_StateFindLabel(info->state_grp, st->label, true /* quiet */);
+            int new_state = DDF_StateFindLabel(info->state_grp, st->label, true /* quiet */);
             if (new_state != S_NULL)
                 stnum = new_state;
         }
@@ -573,7 +573,7 @@ static int PL_weapon_state(lua_State *L)
 
     ui_player_who->ready_wp = (weapon_selection_e)pw_index; // insta-switch to it
 
-    statenum_t state = DDF_StateFindLabel(oldWep->state_grp, weapon_state, true /* quiet */);
+    int state = DDF_StateFindLabel(oldWep->state_grp, weapon_state, true /* quiet */);
     if (state == S_NULL)
         I_Error("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;

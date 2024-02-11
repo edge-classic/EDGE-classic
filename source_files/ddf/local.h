@@ -19,18 +19,17 @@
 #ifndef __DDF_LOCAL_H__
 #define __DDF_LOCAL_H__
 
-#include "epi.h"
+#include <stddef.h>
 
-#include "types.h"
+#include "epi.h"
 #include "main.h"
 #include "states.h"
-
-#include <stddef.h>
+#include "types.h"
 
 //
 // This structure forms the basis for the command checking, it hands back a code
-// pointer and sometimes a pointer to a (int) numeric value. (used for info that gets
-// its value directly from the file).
+// pointer and sometimes a pointer to a (int) numeric value. (used for info that
+// gets its value directly from the file).
 //
 typedef struct commandlist_s
 {
@@ -47,29 +46,31 @@ typedef struct commandlist_s
 
 // NOTE: requires DDF_CMD_BASE to be defined as the dummy struct
 
-#define DDF_FIELD(name, field, parser)                                                                                 \
-    {                                                                                                                  \
-        name, parser, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE), nullptr                                      \
+#define DDF_FIELD(name, field, parser)                                       \
+    {                                                                        \
+        name, parser, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE), \
+            nullptr                                                          \
     }
 
-#define DDF_SUB_LIST(name, field, subcomms)                                                                            \
-    {                                                                                                                  \
-        "*" name, nullptr, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE), subcomms                                \
+#define DDF_SUB_LIST(name, field, subcomms)                                 \
+    {                                                                       \
+        "*" name, nullptr,                                                  \
+            ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE), subcomms \
     }
 
-#define DDF_CMD_END                                                                                                    \
-    {                                                                                                                  \
-        nullptr, nullptr, 0, nullptr                                                                                            \
+#define DDF_CMD_END                  \
+    {                                \
+        nullptr, nullptr, 0, nullptr \
     }
 
-#define DDF_STATE(name, redir, field)                                                                                  \
-    {                                                                                                                  \
-        name, redir, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE)                                             \
+#define DDF_STATE(name, redir, field)                                      \
+    {                                                                      \
+        name, redir, ((char *)&DDF_CMD_BASE.field - (char *)&DDF_CMD_BASE) \
     }
 
-#define DDF_STATE_END                                                                                                  \
-    {                                                                                                                  \
-        nullptr, nullptr, 0                                                                                                  \
+#define DDF_STATE_END       \
+    {                       \
+        nullptr, nullptr, 0 \
     }
 
 //
@@ -113,7 +114,8 @@ typedef struct readinfo_s
     // be called multiple times, once for each element, and `index' is
     // used to indicate which element (starting at 0).
     //
-    void (*parse_field)(const char *field, const char *contents, int index, bool is_last);
+    void (*parse_field)(const char *field, const char *contents, int index,
+                        bool is_last);
 
     // when the entry has finished, this routine can perform any
     // necessary operations here (such as updating a number -> entry
@@ -224,14 +226,18 @@ void DDF_MainGetRGB(const char *info, void *storage);
 void DDF_MainGetWhenAppear(const char *info, void *storage);
 void DDF_MainGetBitSet(const char *info, void *storage);
 
-bool DDF_MainParseField(const commandlist_t *commands, const char *field, const char *contents, uint8_t *obj_base);
+bool DDF_MainParseField(const commandlist_t *commands, const char *field,
+                        const char *contents, uint8_t *obj_base);
 void DDF_MainLookupSound(const char *info, void *storage);
 void DDF_MainRefAttack(const char *info, void *storage);
 
 void DDF_DummyFunction(const char *info, void *storage);
 
-checkflag_result_e DDF_MainCheckSpecialFlag(const char *name, const specflags_t *flag_set, int *flag_value,
-                                            bool allow_prefixes, bool allow_user);
+checkflag_result_e DDF_MainCheckSpecialFlag(const char        *name,
+                                            const specflags_t *flag_set,
+                                            int               *flag_value,
+                                            bool               allow_prefixes,
+                                            bool               allow_user);
 
 int DDF_MainLookupDirector(const mobjtype_c *obj, const char *info);
 
@@ -274,7 +280,8 @@ void DDF_MobjGetBpKeys(const char *info, void *storage);
 void DDF_MobjGetBpWeapon(const char *info, void *storage);
 void DDF_MobjGetPlayer(const char *info, void *storage);
 
-void ThingParseField(const char *field, const char *contents, int index, bool is_last);
+void ThingParseField(const char *field, const char *contents, int index,
+                     bool is_last);
 
 // DDF_MUS Code
 void DDF_MusicPlaylistInit(void);
@@ -298,11 +305,14 @@ void DDF_StateGetAngle(const char *arg, state_t *cur_state);
 void DDF_StateGetSlope(const char *arg, state_t *cur_state);
 void DDF_StateGetRGB(const char *arg, state_t *cur_state);
 
-bool DDF_MainParseState(uint8_t *object, state_group_t &group, const char *field, const char *contents, int index,
-                        bool is_last, bool is_weapon, const state_starter_t *starters, const actioncode_t *actions);
+bool DDF_MainParseState(uint8_t *object, std::vector<state_range_t> &group,
+                        const char *field, const char *contents, int index,
+                        bool is_last, bool is_weapon,
+                        const state_starter_t *starters,
+                        const actioncode_t    *actions);
 
-void DDF_StateBeginRange(state_group_t &group);
-void DDF_StateFinishRange(state_group_t &group);
+void DDF_StateBeginRange(std::vector<state_range_t> &group);
+void DDF_StateFinishRange(std::vector<state_range_t> &group);
 void DDF_StateCleanUp(void);
 
 // DDF_SECT Code
@@ -355,12 +365,11 @@ void DDF_FixCleanUp(void);
 void DDF_MovieInit(void);
 void DDF_MovieCleanUp(void);
 
-
 // Miscellaneous stuff needed here & there
 extern const commandlist_t floor_commands[];
 extern const commandlist_t damage_commands[];
 
-#endif //__DDF_LOCAL_H__*/
+#endif  //__DDF_LOCAL_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

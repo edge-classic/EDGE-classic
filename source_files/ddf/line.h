@@ -19,8 +19,8 @@
 #ifndef __DDF_LINE_H__
 #define __DDF_LINE_H__
 
+#include "colormap.h"
 #include "epi.h"
-
 #include "types.h"
 
 // ------------------------------------------------------------------
@@ -37,7 +37,7 @@ typedef enum
     line_shootable,
     line_walkable,
     line_pushable,
-    line_manual, // same as pushable, but ignore any tag
+    line_manual,  // same as pushable, but ignore any tag
     line_Any
 } trigger_e;
 
@@ -49,25 +49,25 @@ typedef enum
     trig_player  = 1,
     trig_monster = 2,
     trig_other   = 4,
-    trig_nobot   = 8 // -AJA- 2009/10/17
+    trig_nobot   = 8  // -AJA- 2009/10/17
 } trigacttype_e;
 
 // Height Info Reference
 // NOTE TO SELF: Move to an area for linedef/rts/sector stuff
 typedef enum
 {
-    REF_Absolute = 0, // Absolute from current position
-    REF_Current,      // Measure from current sector height
-    REF_Surrounding,  // Measure from surrounding heights
+    REF_Absolute = 0,  // Absolute from current position
+    REF_Current,       // Measure from current sector height
+    REF_Surrounding,   // Measure from surrounding heights
     REF_LowestLoTexture,
-    REF_Trigger, // Use the triggering linedef
+    REF_Trigger,  // Use the triggering linedef
 
     // additive flags
     REF_MASK    = 0x00FF,
-    REF_CEILING = 0x0100, // otherwise floor
-    REF_HIGHEST = 0x0200, // otherwise lowest
-    REF_NEXT    = 0x0400, // otherwise absolute
-    REF_INCLUDE = 0x0800, // otherwise excludes self
+    REF_CEILING = 0x0100,  // otherwise floor
+    REF_HIGHEST = 0x0200,  // otherwise lowest
+    REF_NEXT    = 0x0400,  // otherwise absolute
+    REF_INCLUDE = 0x0800,  // otherwise excludes self
 } heightref_e;
 
 // Movement type
@@ -80,8 +80,8 @@ typedef enum
     mov_Plat,
     mov_Stairs,
     mov_Stop,
-    mov_Toggle,   // -AJA- 2004/10/07: added.
-    mov_Elevator, // -AJA- 2006/11/17: added.
+    mov_Toggle,    // -AJA- 2004/10/07: added.
+    mov_Elevator,  // -AJA- 2006/11/17: added.
 } movetype_e;
 
 // Security type: requires certain key
@@ -125,7 +125,8 @@ typedef enum
     KF_MASK   = 0xFFFF
 } keys_e;
 
-#define EXPAND_KEYS(set) ((set) | (((set) & KF_CARDS) << 4) | (((set) & KF_SKULLS) >> 4))
+#define EXPAND_KEYS(set) \
+    ((set) | (((set) & KF_CARDS) << 4) | (((set) & KF_SKULLS) >> 4))
 
 // NOTE TO SELF: Move to an area for linedef/rts/sector stuff
 typedef enum
@@ -221,15 +222,15 @@ typedef enum
 
 class extrafloordef_c
 {
-  public:
+   public:
     extrafloordef_c();
     extrafloordef_c(extrafloordef_c &rhs);
     ~extrafloordef_c();
 
-  private:
+   private:
     void Copy(extrafloordef_c &src);
 
-  public:
+   public:
     void             Default(void);
     extrafloordef_c &operator=(extrafloordef_c &src);
 
@@ -240,7 +241,7 @@ class extrafloordef_c
 // --> Moving plane def (Ceilings, floors and doors)
 class movplanedef_c
 {
-  public:
+   public:
     movplanedef_c();
     movplanedef_c(movplanedef_c &rhs);
     ~movplanedef_c();
@@ -255,10 +256,10 @@ class movplanedef_c
         DEFAULT_Numtypes
     };
 
-  private:
+   private:
     void Copy(movplanedef_c &src);
 
-  public:
+   public:
     void           Default(default_e def);
     movplanedef_c &operator=(movplanedef_c &rhs);
 
@@ -297,7 +298,7 @@ class movplanedef_c
 
     // Scrolling. -AJA- 2000/04/16
     BAMAngle scroll_angle;
-    float   scroll_speed;
+    float    scroll_speed;
 
     // Boom compatibility bits
     bool ignore_texture;
@@ -330,15 +331,15 @@ typedef enum
 //
 class sliding_door_c
 {
-  public:
+   public:
     sliding_door_c();
     sliding_door_c(sliding_door_c &rhs);
     ~sliding_door_c();
 
-  private:
+   private:
     void Copy(sliding_door_c &src);
 
-  public:
+   public:
     void            Default(void);
     sliding_door_c &operator=(sliding_door_c &rhs);
 
@@ -369,15 +370,15 @@ class sliding_door_c
 
 class donutdef_c
 {
-  public:
+   public:
     donutdef_c();
     donutdef_c(donutdef_c &rhs);
     ~donutdef_c();
 
-  private:
+   private:
     void Copy(donutdef_c &src);
 
-  public:
+   public:
     void        Default(void);
     donutdef_c &operator=(donutdef_c &rhs);
 
@@ -406,32 +407,32 @@ typedef enum
 {
     TELSP_None = 0,
 
-    TELSP_Relative   = 0x0001, // keep same relative angle
-    TELSP_SameHeight = 0x0002, // keep same height off the floor
-    TELSP_SameSpeed  = 0x0004, // keep same momentum
-    TELSP_SameOffset = 0x0008, // keep same X/Y offset along line
+    TELSP_Relative   = 0x0001,  // keep same relative angle
+    TELSP_SameHeight = 0x0002,  // keep same height off the floor
+    TELSP_SameSpeed  = 0x0004,  // keep same momentum
+    TELSP_SameOffset = 0x0008,  // keep same X/Y offset along line
 
-    TELSP_SameAbsDir = 0x0010, // keep same _absolute_ angle (DEPRECATED)
-    TELSP_Rotate     = 0x0020, // rotate by target angle     (DEPRECATED)
+    TELSP_SameAbsDir = 0x0010,  // keep same _absolute_ angle (DEPRECATED)
+    TELSP_Rotate     = 0x0020,  // rotate by target angle     (DEPRECATED)
 
-    TELSP_Line    = 0x0100, // target is a line (not a thing)
-    TELSP_Flipped = 0x0200, // pretend target was flipped 180 degrees
-    TELSP_Silent  = 0x0400  // no fog or sound
+    TELSP_Line    = 0x0100,  // target is a line (not a thing)
+    TELSP_Flipped = 0x0200,  // pretend target was flipped 180 degrees
+    TELSP_Silent  = 0x0400   // no fog or sound
 } teleportspecial_e;
 
 // --> Teleport def class
 
 class teleportdef_c
 {
-  public:
+   public:
     teleportdef_c();
     teleportdef_c(teleportdef_c &rhs);
     ~teleportdef_c();
 
-  private:
+   private:
     void Copy(teleportdef_c &src);
 
-  public:
+   public:
     void           Default(void);
     teleportdef_c &operator=(teleportdef_c &rhs);
 
@@ -444,11 +445,11 @@ class teleportdef_c
     bool teleport;
 
     // effect object spawned when going in...
-    const mobjtype_c *inspawnobj; // FIXME! Do mobjtypes.Lookup()?
+    const mobjtype_c *inspawnobj;  // FIXME! Do mobjtypes.Lookup()?
     std::string       inspawnobj_ref;
 
     // effect object spawned when going out...
-    const mobjtype_c *outspawnobj; // FIXME! Do mobjtypes.Lookup()?
+    const mobjtype_c *outspawnobj;  // FIXME! Do mobjtypes.Lookup()?
     std::string       outspawnobj_ref;
 
     // Teleport delay
@@ -485,15 +486,15 @@ typedef enum
 // --> Light information class
 class lightdef_c
 {
-  public:
+   public:
     lightdef_c();
     lightdef_c(lightdef_c &rhs);
     ~lightdef_c();
 
-  private:
+   private:
     void Copy(lightdef_c &src);
 
-  public:
+   public:
     void        Default(void);
     lightdef_c &operator=(lightdef_c &rhs);
 
@@ -520,15 +521,15 @@ class lightdef_c
 
 class ladderdef_c
 {
-  public:
+   public:
     ladderdef_c();
     ladderdef_c(ladderdef_c &rhs);
     ~ladderdef_c();
 
-  private:
+   private:
     void Copy(ladderdef_c &src);
 
-  public:
+   public:
     void         Default(void);
     ladderdef_c &operator=(ladderdef_c &rhs);
 
@@ -578,8 +579,10 @@ typedef enum
     // block players (MBF21)
     LINEFX_BlockPlayers = (1 << 12),
 
-    LINEFX_StretchWidth  = (1 << 13), // stretch the texture horizontally to line length
-    LINEFX_StretchHeight = (1 << 14), // stretch the texture vertically to line length
+    LINEFX_StretchWidth =
+        (1 << 13),  // stretch the texture horizontally to line length
+    LINEFX_StretchHeight =
+        (1 << 14),  // stretch the texture vertically to line length
 } line_effect_type_e;
 
 typedef enum
@@ -654,8 +657,10 @@ typedef enum
     SCPT_LeftRevY = 0x0200
 } scroll_part_e;
 
-#define SCPT_RIGHT ((scroll_part_e)(SCPT_RightUpper | SCPT_RightMiddle | SCPT_RightLower))
-#define SCPT_LEFT  ((scroll_part_e)(SCPT_LeftUpper | SCPT_LeftMiddle | SCPT_LeftLower))
+#define SCPT_RIGHT \
+    ((scroll_part_e)(SCPT_RightUpper | SCPT_RightMiddle | SCPT_RightLower))
+#define SCPT_LEFT \
+    ((scroll_part_e)(SCPT_LeftUpper | SCPT_LeftMiddle | SCPT_LeftLower))
 
 // -AJA- 1999/12/07: Linedef special flags
 typedef enum
@@ -684,11 +689,11 @@ typedef enum
 
 class linetype_c
 {
-  public:
+   public:
     linetype_c();
     ~linetype_c();
 
-  public:
+   public:
     void Default(void);
     void CopyDetail(linetype_c &src);
 
@@ -728,7 +733,8 @@ class linetype_c
     // Teleporter
     teleportdef_c t;
 
-    // Lobo: item to spawn (or nullptr).  The mobjdef pointer is only valid after
+    // Lobo: item to spawn (or nullptr).  The mobjdef pointer is only valid
+    // after
     //  DDF_MobjCleanUp() has been called.
     const mobjtype_c *effectobject;
     std::string       effectobject_ref;
@@ -811,12 +817,9 @@ class linetype_c
     // -AJA- 2007/07/05: color for effects (e.g. MIRRORs)
     RGBAColor fx_color;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit linetype_c(linetype_c &rhs)
-    {
-        (void)rhs;
-    }
+    explicit linetype_c(linetype_c &rhs) { (void)rhs; }
     linetype_c &operator=(linetype_c &rhs)
     {
         (void)rhs;
@@ -828,16 +831,16 @@ class linetype_c
 
 class linetype_container_c : public std::vector<linetype_c *>
 {
-  public:
+   public:
     linetype_container_c();
     ~linetype_container_c();
 
-  private:
+   private:
     linetype_c *lookup_cache[LOOKUP_CACHESIZE];
 
-  public:
+   public:
     linetype_c *Lookup(int num);
-    void Reset();
+    void        Reset();
 };
 
 // ------------------------------------------------------------------
@@ -880,11 +883,11 @@ typedef enum
 
 class sectortype_c
 {
-  public:
+   public:
     sectortype_c();
     ~sectortype_c();
 
-  public:
+   public:
     void Default(void);
     void CopyDetail(sectortype_c &src);
 
@@ -933,8 +936,8 @@ class sectortype_c
     when_appear_e appear;
 
     // -AJA- 2000/04/16: Pushing (fixed direction).
-    float   push_speed;
-    float   push_zspeed;
+    float    push_speed;
+    float    push_zspeed;
     BAMAngle push_angle;
 
     // Dasho 2022 - Params for user-defined reverb in sectors
@@ -946,15 +949,12 @@ class sectortype_c
     float ceiling_bob;
 
     colourmap_c *fog_cmap;
-    RGBAColor     fog_color;
+    RGBAColor    fog_color;
     float        fog_density;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit sectortype_c(sectortype_c &rhs)
-    {
-        (void)rhs;
-    }
+    explicit sectortype_c(sectortype_c &rhs) { (void)rhs; }
     sectortype_c &operator=(sectortype_c &rhs)
     {
         (void)rhs;
@@ -966,27 +966,27 @@ class sectortype_c
 
 class sectortype_container_c : public std::vector<sectortype_c *>
 {
-  public:
+   public:
     sectortype_container_c();
     ~sectortype_container_c();
 
-  private:
+   private:
     sectortype_c *lookup_cache[LOOKUP_CACHESIZE];
 
-  public:
+   public:
     sectortype_c *Lookup(int num);
-    void Reset();
+    void          Reset();
 };
 
 /* EXTERNALISATIONS */
 
-extern linetype_container_c   linetypes;   // -ACB- 2004/07/05 Implemented
-extern sectortype_container_c sectortypes; // -ACB- 2004/07/05 Implemented
+extern linetype_container_c   linetypes;    // -ACB- 2004/07/05 Implemented
+extern sectortype_container_c sectortypes;  // -ACB- 2004/07/05 Implemented
 
 void DDF_ReadLines(const std::string &data);
 void DDF_ReadSectors(const std::string &data);
 
-#endif // __DDF_LINE_H__
+#endif  // __DDF_LINE_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

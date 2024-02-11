@@ -20,7 +20,6 @@
 #define __DDF_ANIM_H_
 
 #include "epi.h"
-
 #include "types.h"
 
 //
@@ -30,18 +29,18 @@
 //
 class animdef_c
 {
-  public:
+   public:
     animdef_c();
     ~animdef_c(){};
 
-  public:
+   public:
     void Default(void);
     void CopyDetail(animdef_c &src);
 
     // Member vars....
     std::string name;
 
-    enum // types
+    enum  // types
     {
         A_Flat = 0,
         A_Texture,
@@ -60,12 +59,9 @@ class animdef_c
     // how many 1/35s ticks each frame lasts
     int speed;
 
-  private:
+   private:
     // disable copy construct and assignment operator
-    explicit animdef_c(animdef_c &rhs)
-    {
-        (void)rhs;
-    }
+    explicit animdef_c(animdef_c &rhs) { (void)rhs; }
     animdef_c &operator=(animdef_c &rhs)
     {
         (void)rhs;
@@ -76,22 +72,20 @@ class animdef_c
 // Our animdefs container
 class animdef_container_c : public std::vector<animdef_c *>
 {
-  public:
-    animdef_container_c()
-    {
-    }
+   public:
+    animdef_container_c() {}
     ~animdef_container_c()
     {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          animdef_c *anim = *iter;
-          delete anim;
-          anim = nullptr;
-      }
+        for (auto iter = begin(); iter != end(); iter++)
+        {
+            animdef_c *anim = *iter;
+            delete anim;
+            anim = nullptr;
+        }
     }
 };
 
-extern animdef_container_c animdefs; // -ACB- 2004/06/03 Implemented
+extern animdef_container_c animdefs;  // -ACB- 2004/06/03 Implemented
 
 void DDF_ReadAnims(const std::string &data);
 

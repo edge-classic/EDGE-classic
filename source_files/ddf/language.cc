@@ -30,18 +30,19 @@
 // [<Refname>]
 // STRING=<string>;
 //
-// also the file suffix is LDF (Language Def File), this is to avoid confusion with
-// the oridnary DDF files. The default file is DEFAULT.LDF, which can be subbed by
-// using -lang <NameOfLangFile>.
+// also the file suffix is LDF (Language Def File), this is to avoid confusion
+// with the oridnary DDF files. The default file is DEFAULT.LDF, which can be
+// subbed by using -lang <NameOfLangFile>.
 //
 
-#include "local.h"
 #include "language.h"
 
 #include <unordered_map>
 
+#include "local.h"
+
 // Globals
-language_c language; // -ACB- 2004/07/28 Languages instance
+language_c language;  // -ACB- 2004/07/28 Languages instance
 
 std::string DDF_SanitizeName(const std::string &s)
 {
@@ -49,14 +50,12 @@ std::string DDF_SanitizeName(const std::string &s)
 
     for (size_t i = 0; i < s.size(); i++)
     {
-        if (s[i] == ' ' || s[i] == '_')
-            continue;
+        if (s[i] == ' ' || s[i] == '_') continue;
 
         out.push_back((char)epi::ToUpperASCII(s[i]));
     }
 
-    if (out.empty())
-        out.push_back('_');
+    if (out.empty()) out.push_back('_');
 
     return out;
 }
@@ -83,17 +82,13 @@ std::string DDF_SanitizePrintString(const std::string &s)
 
 class lang_choice_c
 {
-  public:
+   public:
     std::string                                  name;
     std::unordered_map<std::string, std::string> refs;
 
-    lang_choice_c() : name(), refs()
-    {
-    }
+    lang_choice_c() : name(), refs() {}
 
-    ~lang_choice_c()
-    {
-    }
+    ~lang_choice_c() {}
 
     bool HasEntry(const std::string &refname) const
     {
@@ -129,7 +124,8 @@ static void LanguageStartEntry(const char *name, bool extend)
     dynamic_choice = language.AddChoice(name);
 }
 
-static void LanguageParseField(const char *field, const char *contents, int index, bool is_last)
+static void LanguageParseField(const char *field, const char *contents,
+                               int index, bool is_last)
 {
 #if (DEBUG_DDF)
     I_Debugf("LANGUAGE_PARSE: %s = %s;\n", field, contents);
@@ -144,10 +140,7 @@ static void LanguageParseField(const char *field, const char *contents, int inde
     dynamic_choice->AddEntry(field, contents);
 }
 
-static void LanguageFinishEntry(void)
-{
-    dynamic_choice = nullptr;
-}
+static void LanguageFinishEntry(void) { dynamic_choice = nullptr; }
 
 static void LanguageClearAll(void)
 {
@@ -177,19 +170,12 @@ void DDF_LanguageInit(void)
 
 void DDF_LanguageCleanUp(void)
 {
-    if (language.GetChoiceCount() == 0)
-        I_Error("Missing languages !\n");
+    if (language.GetChoiceCount() == 0) I_Error("Missing languages !\n");
 }
 
-language_c::language_c()
-{
-    current = -1;
-}
+language_c::language_c() { current = -1; }
 
-language_c::~language_c()
-{
-    Clear();
-}
+language_c::~language_c() { Clear(); }
 
 lang_choice_c *language_c::AddChoice(const char *name)
 {
@@ -208,20 +194,15 @@ lang_choice_c *language_c::AddChoice(const char *name)
 
 void language_c::AddOrReplace(const char *ref, const char *value)
 {
-    if (umap == nullptr)
-    {
-        umap = new lang_choice_c;
-    }
+    if (umap == nullptr) { umap = new lang_choice_c; }
     umap->AddEntry(ref, value);
 }
 
 const char *language_c::GetRefOrNull(const char *refname)
 {
-    if (!refname)
-        return nullptr;
+    if (!refname) return nullptr;
 
-    if (current < 0 || current >= (int)choices.size())
-        return nullptr;
+    if (current < 0 || current >= (int)choices.size()) return nullptr;
 
     // ensure ref name is uppercase, with no spaces
     std::string ref = DDF_SanitizeName(refname);
@@ -258,8 +239,7 @@ const char *language_c::GetRefOrNull(const char *refname)
 
 void language_c::Clear()
 {
-    for (size_t i = 0; i < choices.size(); i++)
-        delete choices[i];
+    for (size_t i = 0; i < choices.size(); i++) delete choices[i];
 
     choices.clear();
 
@@ -276,11 +256,9 @@ void language_c::Clear()
 const char *language_c::GetName(int idx)
 {
     // fallback in case no languages are loaded
-    if (choices.empty())
-        return "ENGLISH";
+    if (choices.empty()) return "ENGLISH";
 
-    if (idx < 0)
-        idx = current;
+    if (idx < 0) idx = current;
 
     // caller must ensure index is valid
     if (idx < 0 || idx >= (int)choices.size())
@@ -305,8 +283,7 @@ bool language_c::Select(const char *name)
 
 bool language_c::Select(int idx)
 {
-    if (idx < 0 || idx >= (int)choices.size())
-        return false;
+    if (idx < 0 || idx >= (int)choices.size()) return false;
 
     current = idx;
     return true;
@@ -314,18 +291,15 @@ bool language_c::Select(int idx)
 
 bool language_c::IsValidRef(const char *refname)
 {
-    if (refname == nullptr)
-        return false;
+    if (refname == nullptr) return false;
 
-    if (current < 0 || current >= (int)choices.size())
-        return false;
+    if (current < 0 || current >= (int)choices.size()) return false;
 
     // ensure ref name is uppercase, with no spaces
     std::string ref = DDF_SanitizeName(refname);
 
     if (umap != nullptr)
-        if (umap->HasEntry(ref))
-            return true;
+        if (umap->HasEntry(ref)) return true;
 
     return choices[current]->HasEntry(ref);
 }
@@ -333,11 +307,9 @@ bool language_c::IsValidRef(const char *refname)
 // this returns the given refname if the lookup fails.
 const char *language_c::operator[](const char *refname)
 {
-    if (refname == nullptr)
-        return "";
+    if (refname == nullptr) return "";
 
-    if (current < 0 || current >= (int)choices.size())
-        return refname;
+    if (current < 0 || current >= (int)choices.size()) return refname;
 
     // ensure ref name is uppercase, with no spaces
     std::string ref = DDF_SanitizeName(refname);

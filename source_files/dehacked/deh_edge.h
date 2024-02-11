@@ -27,11 +27,7 @@
 
 #pragma once
 
-// DDF
 #include "collection.h"
-
-#include <vector>
-#include <string>
 
 enum DehackedResult
 {

@@ -91,6 +91,6 @@ void MarkWeapon(int kwp_num);
 void AlterWeapon(int new_val);
 
 void ConvertWEAP(void);
-} // namespace weapons
+}  // namespace weapons
 
-} // namespace dehacked
+}  // namespace dehacked

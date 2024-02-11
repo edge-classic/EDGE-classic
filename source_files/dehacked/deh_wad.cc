@@ -25,15 +25,16 @@
 //
 //------------------------------------------------------------------------
 
+#include "deh_wad.h"
+
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
 
 #include "deh_edge.h"
-
 #include "deh_system.h"
-#include "deh_wad.h"
+#include "epi.h"
 
 namespace dehacked
 {
@@ -71,6 +72,6 @@ void Printf(const char *str, ...)
     cur_lump->data += (const char *)wad_msg_buf;
 }
 
-} // namespace wad
+}  // namespace wad
 
-} // namespace dehacked
+}  // namespace dehacked

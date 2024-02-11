@@ -23,7 +23,9 @@
 #ifndef _WINDOWS
 #define _WINDOWS
 #endif
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #ifndef WIN32
 #define WIN32
 #endif

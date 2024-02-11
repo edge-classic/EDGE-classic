@@ -18,9 +18,6 @@
 
 #pragma once
 
-#include "epi.h"
-#include "str_util.h"
-
 namespace dehacked
 {
 
@@ -31,10 +28,10 @@ void System_Startup(void);
 
 // error message storage and retrieval
 #ifdef __GNUC__
-void        SetErrorMsg(const char *str, ...) __attribute__((format(printf, 1, 2)));
+void SetErrorMsg(const char *str, ...) __attribute__((format(printf, 1, 2)));
 #else
-void        SetErrorMsg(const char *str, ...);
+void SetErrorMsg(const char *str, ...);
 #endif
 const char *GetErrorMsg(void);
 
-} // namespace dehacked
+}  // namespace dehacked

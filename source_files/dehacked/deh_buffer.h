@@ -23,7 +23,7 @@ namespace dehacked
 
 class InputBuffer
 {
-  public:
+   public:
     InputBuffer(const char *data, int length);
     ~InputBuffer();
 
@@ -34,11 +34,11 @@ class InputBuffer
     void UngetCharacter(int character);
     bool IsBinary() const;
 
-  private:
-    const char *data_; // base pointer
+   private:
+    const char *data_;     // base pointer
     const char *pointer_;  // current read pointer
 
     int length_;
 };
 
-} // namespace dehacked
+}  // namespace dehacked

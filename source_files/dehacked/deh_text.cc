@@ -25,21 +25,23 @@
 //
 //------------------------------------------------------------------------
 
+#include "deh_text.h"
+
 #include <stdlib.h>
 #include <string.h>
 
-#include "deh_edge.h"
-
 #include "deh_buffer.h"
-#include "deh_info.h"
+#include "deh_edge.h"
 #include "deh_english.h"
 #include "deh_frames.h"
+#include "deh_info.h"
 #include "deh_patch.h"
-#include "deh_text.h"
 #include "deh_sounds.h"
 #include "deh_system.h"
 #include "deh_wad.h"
+#include "epi.h"
 #include "str_compare.h"
+#include "str_util.h"
 namespace dehacked
 {
 
@@ -47,9 +49,9 @@ struct LanguageInfo
 {
     const char *orig_text;
     const char *ldf_name;
-    const char *deh_name; // also BEX name
+    const char *deh_name;  // also BEX name
 
-    int v166_index; // starts at 1, or -1 for no match
+    int v166_index;  // starts at 1, or -1 for no match
 
     // holds modified version (nullptr means not modified).  Guaranteed to
     // have space for an additional four (4) characters.
@@ -62,7 +64,8 @@ LanguageInfo lang_list[] = {
     {kAMSTR_GRIDOFF, "AutoMapGridOff", "AMSTR_GRIDOFF", 411, nullptr},
     {kAMSTR_GRIDON, "AutoMapGridOn", "AMSTR_GRIDON", 410, nullptr},
     {kAMSTR_MARKEDSPOT, "AutoMapMarkedSpot", "AMSTR_MARKEDSPOT", 412, nullptr},
-    {kAMSTR_MARKSCLEARED, "AutoMapMarksClear", "AMSTR_MARKSCLEARED", 414, nullptr},
+    {kAMSTR_MARKSCLEARED, "AutoMapMarksClear", "AMSTR_MARKSCLEARED", 414,
+     nullptr},
     {kD_DEVSTR, "DevelopmentMode", "D_DEVSTR", 197, nullptr},
     {kDOSY, "PressToQuit", "DOSY", -1, nullptr},
     {kEMPTYSTRING, "EmptySlot", "EMPTYSTRING", 300, nullptr},
@@ -92,7 +95,8 @@ LanguageInfo lang_list[] = {
     {kGOTLAUNCHER, "GotRocketLauncher", "GOTLAUNCHER", 458, nullptr},
     {kGOTMAP, "GotMap", "GOTMAP", 444, nullptr},
     {kGOTMEDIKIT, "GotMedi", "GOTMEDIKIT", 439, nullptr},
-    {kGOTMEDINEED, "GotMediNeed", "GOTMEDINEED", 438, nullptr}, // not supported by EDGE
+    {kGOTMEDINEED, "GotMediNeed", "GOTMEDINEED", 438,
+     nullptr},  // not supported by EDGE
     {kGOTMEGA, "GotMegaArmour", "GOTMEGA", 426, nullptr},
     {kGOTMSPHERE, "GotMega", "GOTMSPHERE", 430, nullptr},
     {kGOTPLASMA, "GotPlasmaGun", "GOTPLASMA", 459, nullptr},
@@ -397,7 +401,7 @@ LanguageInfo lang_list[] = {
     {kOB_MPBFG_SPLASH, "OB_BFG", "OB_MPBFG_SPLASH", -1, nullptr},
     {kOB_MPBFG_MBF, "OB_BFG", "OB_MPBFG_MBF", -1, nullptr},
 
-    {nullptr, nullptr, nullptr, -1, nullptr} // End sentinel
+    {nullptr, nullptr, nullptr, -1, nullptr}  // End sentinel
 };
 
 LanguageInfo cheat_list[] = {
@@ -419,21 +423,21 @@ LanguageInfo cheat_list[] = {
     {"idmypos", "idmypos", "Player Position", -1, nullptr},
     {"idspispopd", "idspispopd", "No Clipping 1", -1, nullptr},
 
-    {nullptr, nullptr, nullptr, -1, nullptr} // End sentinel
+    {nullptr, nullptr, nullptr, -1, nullptr}  // End sentinel
 };
 
 const char *lang_bex_unsupported[] = {
-    "BGCASTCALL", "BGFLAT06", "BGFLAT11", "BGFLAT15", "BGFLAT20", "BGFLAT30",      "BGFLAT31",     "BGFLATE1",
-    "BGFLATE2",   "BGFLATE3", "BGFLATE4", "PD_ALL3",  "PD_ALL6",  "PD_ANY",        "RESTARTLEVEL", "SAVEGAMENAME",
-    "STARTUP1",   "STARTUP2", "STARTUP3", "STARTUP4", "STARTUP5", "STSTR_COMPOFF", "STSTR_COMPON",
+    "BGCASTCALL",   "BGFLAT06",      "BGFLAT11",     "BGFLAT15", "BGFLAT20",
+    "BGFLAT30",     "BGFLAT31",      "BGFLATE1",     "BGFLATE2", "BGFLATE3",
+    "BGFLATE4",     "PD_ALL3",       "PD_ALL6",      "PD_ANY",   "RESTARTLEVEL",
+    "SAVEGAMENAME", "STARTUP1",      "STARTUP2",     "STARTUP3", "STARTUP4",
+    "STARTUP5",     "STSTR_COMPOFF", "STSTR_COMPON",
 
     nullptr};
 
 //------------------------------------------------------------------------
 
-void text_strings::Init()
-{
-}
+void text_strings::Init() {}
 
 void text_strings::Shutdown()
 {
@@ -458,13 +462,11 @@ bool text_strings::ReplaceString(const char *before, const char *after)
     {
         LanguageInfo *lang = lang_list + i;
 
-        if (epi::StringCaseCompareASCII(before, lang->orig_text) != 0)
-            continue;
+        if (epi::StringCaseCompareASCII(before, lang->orig_text) != 0) continue;
 
         int len = strlen(lang->orig_text);
 
-        if (!lang->new_text)
-            lang->new_text = epi::CStringNew(len + 5);
+        if (!lang->new_text) lang->new_text = epi::CStringNew(len + 5);
 
         epi::CStringCopyMax(lang->new_text, after, len + 4);
 
@@ -485,8 +487,7 @@ bool text_strings::ReplaceBexString(const char *bex_name, const char *after)
         if (epi::StringCaseCompareASCII(bex_name, lang->deh_name) != 0)
             continue;
 
-        if (lang->new_text)
-            free(lang->new_text);
+        if (lang->new_text) free(lang->new_text);
 
         lang->new_text = epi::CStringDuplicate(after);
 
@@ -504,8 +505,7 @@ void text_strings::ReplaceBinaryString(int v166_index, const char *str)
     {
         LanguageInfo *lang = lang_list + i;
 
-        if (lang->v166_index != v166_index)
-            continue;
+        if (lang->v166_index != v166_index) continue;
 
         // OK, found it, so check if it has changed
 
@@ -513,8 +513,7 @@ void text_strings::ReplaceBinaryString(int v166_index, const char *str)
         {
             int len = strlen(lang->orig_text);
 
-            if (!lang->new_text)
-                lang->new_text = epi::CStringNew(len + 5);
+            if (!lang->new_text) lang->new_text = epi::CStringNew(len + 5);
 
             epi::CStringCopyMax(lang->new_text, str, len + 4);
         }
@@ -534,8 +533,7 @@ bool text_strings::ReplaceCheat(const char *deh_name, const char *str)
     {
         LanguageInfo *cht = cheat_list + i;
 
-        if (epi::StringCaseCompareASCII(deh_name, cht->deh_name) != 0)
-            continue;
+        if (epi::StringCaseCompareASCII(deh_name, cht->deh_name) != 0) continue;
 
         int len = strlen(cht->orig_text);
 
@@ -545,12 +543,10 @@ bool text_strings::ReplaceCheat(const char *deh_name, const char *str)
         {
             int end_pos = end_mark - str;
 
-            if (end_pos > 1 && end_pos < len)
-                len = end_pos;
+            if (end_pos > 1 && end_pos < len) len = end_pos;
         }
 
-        if (!cht->new_text)
-            cht->new_text = epi::CStringNew(len + 1);
+        if (!cht->new_text) cht->new_text = epi::CStringNew(len + 1);
 
         epi::CStringCopyMax(cht->new_text, str, len);
 
@@ -579,7 +575,7 @@ bool got_one;
 void BeginTextLump();
 void FinishTextLump();
 void WriteTextString(const LanguageInfo *info);
-} // namespace text_strings
+}  // namespace text_strings
 
 void text_strings::BeginTextLump()
 {
@@ -589,10 +585,7 @@ void text_strings::BeginTextLump()
     wad::Printf("[ENGLISH]\n");
 }
 
-void text_strings::FinishTextLump()
-{
-    wad::Printf("\n");
-}
+void text_strings::FinishTextLump() { wad::Printf("\n"); }
 
 void text_strings::WriteTextString(const LanguageInfo *info)
 {
@@ -631,7 +624,8 @@ const char *text_strings::GetLDFForBex(const char *bex_name)
 {
     for (auto entry : lang_list)
     {
-        if (entry.deh_name && epi::StringCaseCompareASCII(entry.deh_name, bex_name) == 0)
+        if (entry.deh_name &&
+            epi::StringCaseCompareASCII(entry.deh_name, bex_name) == 0)
             return entry.ldf_name;
     }
     return nullptr;
@@ -643,27 +637,23 @@ void text_strings::ConvertLDF(void)
 
     for (int i = 0; lang_list[i].orig_text; i++)
     {
-        if (!all_mode && !lang_list[i].new_text)
-            continue;
+        if (!all_mode && !lang_list[i].new_text) continue;
 
         WriteTextString(lang_list + i);
     }
 
     // --- cheats ---
 
-    if (got_one)
-        wad::Printf("\n");
+    if (got_one) wad::Printf("\n");
 
     for (int i = 0; cheat_list[i].orig_text; i++)
     {
-        if (!all_mode && !cheat_list[i].new_text)
-            continue;
+        if (!all_mode && !cheat_list[i].new_text) continue;
 
         WriteTextString(cheat_list + i);
     }
 
-    if (got_one)
-        FinishTextLump();
+    if (got_one) FinishTextLump();
 }
 
-} // namespace dehacked
+}  // namespace dehacked

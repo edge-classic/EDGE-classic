@@ -25,17 +25,18 @@
 //
 //------------------------------------------------------------------------
 
-#include "deh_edge.h"
+#include "deh_misc.h"
 
 #include "deh_buffer.h"
+#include "deh_edge.h"
 #include "deh_info.h"
-#include "deh_misc.h"
 #include "deh_mobj.h"
 #include "deh_patch.h"
 #include "deh_sounds.h"
 #include "deh_system.h"
 #include "deh_things.h"
 #include "deh_weapons.h"
+#include "epi.h"
 #include "str_compare.h"
 namespace dehacked
 {
@@ -55,7 +56,7 @@ int soul_limit;
 int mega_health;
 
 int monster_infight;
-} // namespace miscellaneous
+}  // namespace miscellaneous
 
 struct MiscellaneousInfo
 {
@@ -92,9 +93,9 @@ const MiscellaneousInfo misc_info[] = {
     {"IDKFA Armor", 0, nullptr, nullptr},
     {"IDKFA Armor Class", 0, nullptr, nullptr},
 
-    {nullptr, 0, nullptr, 0} // End sentinel
+    {nullptr, 0, nullptr, 0}  // End sentinel
 };
-} // namespace miscellaneous
+}  // namespace miscellaneous
 
 void miscellaneous::Init()
 {
@@ -113,9 +114,7 @@ void miscellaneous::Init()
     monster_infight = 202;
 }
 
-void miscellaneous::Shutdown()
-{
-}
+void miscellaneous::Shutdown() {}
 
 void miscellaneous::AlterMisc(int new_val)
 {
@@ -127,7 +126,8 @@ void miscellaneous::AlterMisc(int new_val)
     {
         if (new_val < 1)
         {
-            I_Debugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n", new_val, misc_name);
+            I_Debugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
+                     new_val, misc_name);
             return;
         }
 
@@ -139,7 +139,8 @@ void miscellaneous::AlterMisc(int new_val)
     {
         if (new_val < 1)
         {
-            I_Debugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n", new_val, misc_name);
+            I_Debugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
+                     new_val, misc_name);
             return;
         }
 
@@ -153,14 +154,14 @@ void miscellaneous::AlterMisc(int new_val)
     {
         if (new_val != 202 && new_val != 221)
         {
-            I_Debugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n", new_val, misc_name);
+            I_Debugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
+                     new_val, misc_name);
             return;
         }
 
         monster_infight = new_val;
 
-        if (monster_infight == 221)
-            things::MarkAllMonsters();
+        if (monster_infight == 221) things::MarkAllMonsters();
 
         return;
     }
@@ -189,9 +190,10 @@ void miscellaneous::AlterMisc(int new_val)
         return;
     }
 
-    if (new_val < info->minimum) // mainly here to disallow negative values
+    if (new_val < info->minimum)  // mainly here to disallow negative values
     {
-        I_Debugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n", new_val, misc_name);
+        I_Debugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
+                 new_val, misc_name);
         new_val = info->minimum;
     }
 
@@ -202,10 +204,7 @@ void miscellaneous::AlterMisc(int new_val)
     const int *affect = info->affected_mobjs;
     SYS_ASSERT(affect);
 
-    for (; *affect >= 0; affect++)
-    {
-        things::MarkThing(*affect);
-    }
+    for (; *affect >= 0; affect++) { things::MarkThing(*affect); }
 }
 
-} // namespace dehacked
+}  // namespace dehacked

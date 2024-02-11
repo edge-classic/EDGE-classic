@@ -172,7 +172,8 @@ enum MobjFlagMBF21
     // Higher missile attack prob (cyberdemon)
     kMBF21_HIGHERMPROB = 32,
 
-    // Use half distance for missile attack prob (cyberdemon, mastermind, revvie, lost soul)
+    // Use half distance for missile attack prob (cyberdemon, mastermind,
+    // revvie, lost soul)
     kMBF21_RANGEHALF = 64,
 
     // Has no targeting threshold (archvile)
@@ -213,8 +214,9 @@ enum MobjFlagMBF21
 };
 
 #define kMF_TRANSLATION (kMF_TRANSLATION1 | kMF_TRANSLATION2)
-#define ALL_BEX_FLAGS                                                                                                  \
-    (kMF_TRANSLUCENT | kMF_TOUCHY | kMF_BOUNCES | kMF_FRIEND) // Also housed kMF_STEALTH, but this is not a BEX flag
+#define ALL_BEX_FLAGS                             \
+    (kMF_TRANSLUCENT | kMF_TOUCHY | kMF_BOUNCES | \
+     kMF_FRIEND)  // Also housed kMF_STEALTH, but this is not a BEX flag
 
 enum MobjType
 {
@@ -427,4 +429,4 @@ struct MobjInfo
     int raisestate;
 };
 
-} // namespace dehacked
+}  // namespace dehacked

@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------
 
-#include "deh_edge.h"
+#include "deh_rscript.h"
 
+#include "deh_edge.h"
 #include "deh_info.h"
 #include "deh_mobj.h"
-#include "deh_rscript.h"
 #include "deh_system.h"
 #include "deh_things.h"
 #include "deh_wad.h"
@@ -47,19 +47,15 @@ void FinishLump();
 bool IsKeen(int kMT_num);
 
 void CollectMatchingBosses(std::vector<int> &list, int flag);
-void OutputTrigger(const std::string &map, const std::vector<int> &list, bool boss2);
-void HandleLevel(const std::string &map, int flag1, int mt1, int flag2, int mt2);
-} // namespace rscript
+void OutputTrigger(const std::string &map, const std::vector<int> &list,
+                   bool boss2);
+void HandleLevel(const std::string &map, int flag1, int mt1, int flag2,
+                 int mt2);
+}  // namespace rscript
 
-void rscript::Init()
-{
-    keen_mobjs.clear();
-}
+void rscript::Init() { keen_mobjs.clear(); }
 
-void rscript::Shutdown()
-{
-    keen_mobjs.clear();
-}
+void rscript::Shutdown() { keen_mobjs.clear(); }
 
 void rscript::BeginLump()
 {
@@ -68,24 +64,19 @@ void rscript::BeginLump()
     wad::Printf("// <SCRIPTS>\n\n");
 }
 
-void rscript::FinishLump()
-{
-    wad::Printf("\n");
-}
+void rscript::FinishLump() { wad::Printf("\n"); }
 
 bool rscript::IsKeen(int kMT_num)
 {
     for (int num : keen_mobjs)
-        if (num == kMT_num)
-            return true; // peachy keen!
+        if (num == kMT_num) return true;  // peachy keen!
 
-    return false; // not so keen
+    return false;  // not so keen
 }
 
 void rscript::MarkKeenDie(int kMT_num)
 {
-    if (!IsKeen(kMT_num))
-        keen_mobjs.push_back(kMT_num);
+    if (!IsKeen(kMT_num)) keen_mobjs.push_back(kMT_num);
 }
 
 void rscript::CollectMatchingBosses(std::vector<int> &list, int flag)
@@ -96,20 +87,18 @@ void rscript::CollectMatchingBosses(std::vector<int> &list, int flag)
 
         // skip monsters using A_KeenDie, since the KEEN_DIE action already
         // handles their death and we don't want to intefere with that.
-        if (IsKeen(i))
-            continue;
+        if (IsKeen(i)) continue;
 
-        if (0 != (things::GetMobjMBF21Flags(i) & flag))
-            list.push_back(i);
+        if (0 != (things::GetMobjMBF21Flags(i) & flag)) list.push_back(i);
     }
 }
 
-void rscript::OutputTrigger(const std::string &map, const std::vector<int> &list, bool boss2)
+void rscript::OutputTrigger(const std::string      &map,
+                            const std::vector<int> &list, bool boss2)
 {
     // when there is no monsters, that is okay, we just don't output any
     // radius trigger (there is nothing it could do).
-    if (list.empty())
-        return;
+    if (list.empty()) return;
 
     wad::Printf("  radiustrigger 0 0 -1\n");
     wad::Printf("    wait_until_dead");
@@ -134,41 +123,35 @@ void rscript::OutputTrigger(const std::string &map, const std::vector<int> &list
     else if (map == "E4M8")
         wad::Printf("    activate_linetype 38 666\n");
     else if (!boss2)
-        wad::Printf("    activate_linetype 38 666\n"); // MAP07 Mancubus
+        wad::Printf("    activate_linetype 38 666\n");  // MAP07 Mancubus
     else
-        wad::Printf("    activate_linetype 30 667\n"); // MAP07 Arachnotron
+        wad::Printf("    activate_linetype 30 667\n");  // MAP07 Arachnotron
 
     wad::Printf("  end_radiustrigger\n");
 }
 
-void rscript::HandleLevel(const std::string &map, int flag1, int mt1, int flag2, int mt2)
+void rscript::HandleLevel(const std::string &map, int flag1, int mt1, int flag2,
+                          int mt2)
 {
     std::vector<int> list1;
     std::vector<int> list2;
 
-    if (flag1 != 0)
-        CollectMatchingBosses(list1, flag1);
-    if (flag2 != 0)
-        CollectMatchingBosses(list2, flag2);
+    if (flag1 != 0) CollectMatchingBosses(list1, flag1);
+    if (flag2 != 0) CollectMatchingBosses(list2, flag2);
 
     // check if the results are any different from normal.
     // if there was no change, then we output no script.
     bool different = false;
 
-    if (flag1 != 0 && (list1.size() != 1 || list1[0] != mt1))
-        different = true;
-    if (flag2 != 0 && (list2.size() != 1 || list2[0] != mt2))
-        different = true;
+    if (flag1 != 0 && (list1.size() != 1 || list1[0] != mt1)) different = true;
+    if (flag2 != 0 && (list2.size() != 1 || list2[0] != mt2)) different = true;
 
-    if (!different && !all_mode)
-        return;
+    if (!different && !all_mode) return;
 
     wad::Printf("START_MAP %s\n", map.c_str());
 
-    if (flag1 != 0)
-        OutputTrigger(map, list1, false);
-    if (flag2 != 0)
-        OutputTrigger(map, list2, true);
+    if (flag1 != 0) OutputTrigger(map, list1, false);
+    if (flag2 != 0) OutputTrigger(map, list2, true);
 
     wad::Printf("END_MAP\n\n\n");
 }
@@ -187,9 +170,10 @@ void rscript::ConvertRAD()
 
     wad::Printf("// --- DOOM II Scripts ---\n\n");
 
-    HandleLevel("MAP07", kMBF21_MAP07BOSS1, kMT_FATSO, kMBF21_MAP07BOSS2, kMT_BABY);
+    HandleLevel("MAP07", kMBF21_MAP07BOSS1, kMT_FATSO, kMBF21_MAP07BOSS2,
+                kMT_BABY);
 
     FinishLump();
 }
 
-} // namespace dehacked
+}  // namespace dehacked

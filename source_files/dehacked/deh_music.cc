@@ -25,17 +25,19 @@
 //
 //------------------------------------------------------------------------
 
+#include "deh_music.h"
+
 #include <stdlib.h>
 #include <string.h>
 
-#include "deh_edge.h"
-
 #include "deh_buffer.h"
+#include "deh_edge.h"
 #include "deh_patch.h"
-#include "deh_music.h"
 #include "deh_system.h"
 #include "deh_wad.h"
+#include "epi.h"
 #include "str_compare.h"
+#include "str_util.h"
 namespace dehacked
 {
 
@@ -46,7 +48,7 @@ struct MusicInfo
 {
     // up to 6-character name
     char name[12];
-    int ddf_num;
+    int  ddf_num;
 };
 
 //
@@ -141,39 +143,30 @@ void MarkEntry(int num);
 void BeginLump();
 void FinishLump();
 void WriteEntry(int num);
-} // namespace music
+}  // namespace music
 
-void music::Init()
-{
-    S_music.clear();
-}
+void music::Init() { S_music.clear(); }
 
 void music::Shutdown()
 {
     for (size_t i = 0; i < S_music.size(); i++)
-        if (S_music[i] != nullptr)
-            delete S_music[i];
+        if (S_music[i] != nullptr) delete S_music[i];
 
     S_music.clear();
 }
 
 void music::MarkEntry(int num)
 {
-    if (num == kmus_None)
-        return;
+    if (num == kmus_None) return;
 
     // fill any missing slots with nullptrs, including the one we want
-    while ((int)S_music.size() < num + 1)
-    {
-        S_music.push_back(nullptr);
-    }
+    while ((int)S_music.size() < num + 1) { S_music.push_back(nullptr); }
 
     // already have a modified entry?
-    if (S_music[num] != nullptr)
-        return;
+    if (S_music[num] != nullptr) return;
 
     MusicInfo *entry = new MusicInfo;
-    S_music[num]       = entry;
+    S_music[num]     = entry;
 
     // copy the original info
     if (num < kTotalMusicTypes)
@@ -195,10 +188,7 @@ void music::BeginLump()
     wad::Printf("<PLAYLISTS>\n");
 }
 
-void music::FinishLump()
-{
-    wad::Printf("\n");
-}
+void music::FinishLump() { wad::Printf("\n"); }
 
 void music::WriteEntry(int num)
 {
@@ -206,21 +196,20 @@ void music::WriteEntry(int num)
 
     wad::Printf("\n");
     wad::Printf("[%02d] ", mod->ddf_num);
-    wad::Printf("MUSICINFO = MUS:LUMP:\"D_%s\";\n", epi::CStringUpper(mod->name));
+    wad::Printf("MUSICINFO = MUS:LUMP:\"D_%s\";\n",
+                epi::CStringUpper(mod->name));
 }
 
 void music::ConvertMUS()
 {
     if (all_mode)
-        for (int i = 1; i < kTotalMusicTypes; i++)
-            MarkEntry(i);
+        for (int i = 1; i < kTotalMusicTypes; i++) MarkEntry(i);
 
     bool got_one = false;
 
     for (int i = 1; i < (int)S_music.size(); i++)
     {
-        if (S_music[i] == nullptr)
-            continue;
+        if (S_music[i] == nullptr) continue;
 
         if (!got_one)
         {
@@ -231,8 +220,7 @@ void music::ConvertMUS()
         WriteEntry(i);
     }
 
-    if (got_one)
-        FinishLump();
+    if (got_one) FinishLump();
 }
 
 bool music::ReplaceMusic(const char *before, const char *after)
@@ -258,7 +246,8 @@ void music::AlterBexMusic(const char *new_val)
 
     if (strlen(new_val) < 1 || strlen(new_val) > 6)
     {
-        I_Debugf("Dehacked: Warning - Bad length for music name '%s'.\n", new_val);
+        I_Debugf("Dehacked: Warning - Bad length for music name '%s'.\n",
+                 new_val);
         return;
     }
 
@@ -268,7 +257,8 @@ void music::AlterBexMusic(const char *new_val)
         int num = atoi(old_val);
         if (num < 1 || num > 32767)
         {
-            I_Debugf("Dehacked: Warning - Line %d: illegal music entry '%s'.\n", patch::line_num, old_val);
+            I_Debugf("Dehacked: Warning - Line %d: illegal music entry '%s'.\n",
+                     patch::line_num, old_val);
         }
         else
         {
@@ -280,12 +270,14 @@ void music::AlterBexMusic(const char *new_val)
 
     if (strlen(old_val) < 1 || strlen(old_val) > 6)
     {
-        I_Debugf("Dehacked: Warning - Bad length for music name '%s'.\n", old_val);
+        I_Debugf("Dehacked: Warning - Bad length for music name '%s'.\n",
+                 old_val);
         return;
     }
 
     if (!ReplaceMusic(old_val, new_val))
-        I_Debugf("Dehacked: Warning - Line %d: unknown music name '%s'.\n", patch::line_num, old_val);
+        I_Debugf("Dehacked: Warning - Line %d: unknown music name '%s'.\n",
+                 patch::line_num, old_val);
 }
 
-} // namespace dehacked
+}  // namespace dehacked

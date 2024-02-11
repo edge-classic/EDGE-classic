@@ -29,10 +29,10 @@ void Init();
 void Shutdown();
 
 void UseThing(int mt_num);
-void MarkThing(int mt_num); // attacks too
+void MarkThing(int mt_num);  // attacks too
 void MarkAllMonsters();
 
-MobjInfo *GetModifiedMobj(int mt_num);
+MobjInfo   *GetModifiedMobj(int mt_num);
 const char *GetMobjName(int mt_num);
 int         GetMobjMBF21Flags(int mt_num);
 
@@ -52,6 +52,6 @@ const char *GetSpeed(int speed);
 void AlterThing(int new_val);
 void AlterBexBits(char *bit_str);
 void AlterMBF21Bits(char *bit_str);
-} // namespace things
+}  // namespace things
 
-} // namespace dehacked
+}  // namespace dehacked

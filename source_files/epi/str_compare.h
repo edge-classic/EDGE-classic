@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_STR_COMPARE_H__
-#define __EPI_STR_COMPARE_H__
+#pragma once
 
 #include <string>
 
@@ -33,8 +32,6 @@ int StringCaseCompareMaxASCII(std::string_view A, std::string_view B, size_t n);
 int StringPrefixCaseCompareASCII(std::string_view A, std::string_view B);
 
 }  // namespace epi
-
-#endif /* __EPI_STR_COMPARE_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

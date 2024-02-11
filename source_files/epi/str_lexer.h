@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_STR_LEXER_H__
-#define __EPI_STR_LEXER_H__
+#pragma once
 
 #include <string>
 
@@ -87,8 +86,6 @@ double LexDouble(const std::string &s);
 bool   LexBoolean(const std::string &s);
 
 }  // namespace epi
-
-#endif /* __EPI_STR_LEXER_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

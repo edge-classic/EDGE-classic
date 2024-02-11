@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_FILE_CLASS__
-#define __EPI_FILE_CLASS__
+#pragma once
 
 #include <limits.h>
 
@@ -128,8 +127,6 @@ class MemFile : public File
 };
 
 }  // namespace epi
-
-#endif /* __EPI_FILE_CLASS__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

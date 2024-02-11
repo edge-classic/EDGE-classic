@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_ENDIAN_H__
-#define __EPI_ENDIAN_H__
+#pragma once
 
 enum Endianness
 {
@@ -164,8 +163,6 @@ inline int32_t UnalignedBigEndianS32(const uint8_t *p)
 }
 
 }  // namespace epi
-
-#endif /* __EPI_ENDIAN_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

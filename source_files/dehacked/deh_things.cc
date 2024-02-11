@@ -1258,14 +1258,14 @@ void HandleFrames(const MobjInfo *info, int mt_num)
 
 const int NUMPLAYERS = 8;
 
-typedef struct
+struct PlayerInfo
 {
     const char *name;
     int         num;
     const char *remap;
-} playerinfo_t;
+};
 
-const playerinfo_t player_info[NUMPLAYERS] = {
+const PlayerInfo player_info[NUMPLAYERS] = {
     {"OUR_HERO", 1, "PLAYER_GREEN"},    {"PLAYER2", 2, "PLAYER_DK_GREY"},
     {"PLAYER3", 3, "PLAYER_BROWN"},     {"PLAYER4", 4, "PLAYER_DULL_RED"},
     {"PLAYER5", 4001, "PLAYER_ORANGE"}, {"PLAYER6", 4002, "PLAYER_LT_GREY"},
@@ -1277,7 +1277,7 @@ void HandlePlayer(const MobjInfo *info, int player)
 
     SYS_ASSERT(player <= NUMPLAYERS);
 
-    const playerinfo_t *pi = player_info + (player - 1);
+    const PlayerInfo *pi = player_info + (player - 1);
 
     wad::Printf("PLAYER = %d;\n", player);
     wad::Printf("SIDE = %d;\n", 1 << (player - 1));
@@ -1305,7 +1305,7 @@ void HandlePlayer(const MobjInfo *info, int player)
     wad::Printf("    BULLETS(%d);\n", miscellaneous::init_ammo);
 }
 
-typedef struct
+struct PickupItem
 {
     int         spr_num;
     const char *benefit;
@@ -1313,9 +1313,9 @@ typedef struct
     int         amount, limit;
     const char *ldf;
     int         sound;
-} pickupitem_t;
+};
 
-const pickupitem_t pickup_item[] = {
+const PickupItem pickup_item[] = {
     // Health & Armor....
     {kSPR_BON1, "HEALTH", 2, 1, 200, "GotHealthPotion", ksfx_itemup},
     {kSPR_STIM, "HEALTH", 2, 10, 100, "GotStim", ksfx_itemup},
@@ -1416,7 +1416,7 @@ void HandleItem(const MobjInfo *info, int mt_num)
         if (spr_num == pickup_item[i].spr_num) break;
     }
 
-    const pickupitem_t *pu = pickup_item + i;
+    const PickupItem *pu = pickup_item + i;
 
     if (pu->benefit == nullptr)  // not found
     {

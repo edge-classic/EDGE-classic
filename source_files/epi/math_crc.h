@@ -20,8 +20,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __EPI_CRC_H__
-#define __EPI_CRC_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -61,7 +60,6 @@ class CRC32
 };
 
 };     // namespace epi
-#endif /* __EPI_CRC_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

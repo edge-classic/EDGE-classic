@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_STR_UTIL_H__
-#define __EPI_STR_UTIL_H__
+#pragma once
 
 #include <string>
 #include <vector>
@@ -105,8 +104,6 @@ std::vector<std::string> SeparatedStringVector(std::string_view str,
                                                char             separator);
 uint32_t                 StringHash32(std::string_view str_to_hash);
 }  // namespace epi
-
-#endif /* __EPI_STR_UTIL_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

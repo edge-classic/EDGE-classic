@@ -55,7 +55,7 @@ static constexpr uint8_t kSegFastModeThreshold   = 200;
 namespace ajbsp
 {
 
-class eval_info_t
+class EvalInfo
 {
    public:
     double cost;
@@ -287,7 +287,7 @@ void AddIntersection(Intersection **cut_list, Vertex *vert, Seg *part,
 // Returns true if a "bad seg" was found early.
 //
 bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost,
-                         eval_info_t *info)
+                         EvalInfo *info)
 {
     double split_cost = current_build_info.split_cost;
 
@@ -478,7 +478,7 @@ bool EvalPartitionWorker(QuadTree *tree, Seg *part, double best_cost,
 //
 double EvalPartition(QuadTree *tree, Seg *part, double best_cost)
 {
-    eval_info_t info;
+    EvalInfo info;
 
     /* initialise info structure */
     info.cost      = 0;

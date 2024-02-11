@@ -44,8 +44,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //---------------------------------------------------------------------------
 
-#ifndef __EPI_ENAME_H__
-#define __EPI_ENAME_H__
+#pragma once
 
 #include <string>
 
@@ -158,5 +157,3 @@ class EName
 };
 
 }  // namespace epi
-
-#endif  // __EPI_ENAME_H__

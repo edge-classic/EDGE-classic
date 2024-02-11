@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_MATH_COLOR_H__
-#define __EPI_MATH_COLOR_H__
+#pragma once
 
 #include "epi.h"
 #include "sokol_color.h"
@@ -100,8 +99,6 @@ class HSVColor
 };
 
 }  // namespace epi
-
-#endif /* __EPI_MATH_COLOR_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

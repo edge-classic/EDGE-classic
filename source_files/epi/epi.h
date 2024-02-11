@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EDGE_PLATFORM_INTERFACE__
-#define __EDGE_PLATFORM_INTERFACE__
+#pragma once
 
 /* Important functions provided by Engine code */
 #ifdef __GNUC__
@@ -53,8 +52,6 @@ inline int RoundToInt(double x) { return (int)round(x); }
 #include <string.h>
 #define Z_Clear(ptr, type, num) \
     memset((void *)(ptr), ((ptr) - ((type *)(ptr))), (num) * sizeof(type))
-
-#endif /* __EDGE_PLATFORM_INTERFACE__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

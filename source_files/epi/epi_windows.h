@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_WIN_H__
-#define __EPI_WIN_H__
+#pragma once
 
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64)
 #ifndef _WINDOWS
@@ -36,6 +35,4 @@
 #define _UNICODE
 #endif
 #include <windows.h>
-#endif
-
 #endif

@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_BAM__
-#define __EPI_BAM__
+#pragma once
 
 #include <stdint.h>
 
@@ -87,8 +86,6 @@ inline float BAMCos(BAMAngle bam) { return HMM_COSF(RadiansFromBAM(bam)); }
 inline float BAMTan(BAMAngle bam) { return HMM_TANF(RadiansFromBAM(bam)); }
 
 }  // namespace epi
-
-#endif /* __EPI_BAM__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

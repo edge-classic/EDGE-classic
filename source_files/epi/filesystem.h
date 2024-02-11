@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_FILESYSTEM_H__
-#define __EPI_FILESYSTEM_H__
+#pragma once
 
 #include <vector>
 
@@ -81,8 +80,6 @@ bool FileDelete(std::string_view name);
 void SyncFilesystem(bool populate = false);
 
 }  // namespace epi
-
-#endif /*__EPI_FILESYSTEM_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

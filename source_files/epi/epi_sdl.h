@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_SDL_H__
-#define __EPI_SDL_H__
+#pragma once
 
 #ifdef _MSC_VER
 #include "SDL.h"
@@ -26,5 +25,3 @@
 #else
 #include <SDL2/SDL.h>
 #endif
-
-#endif /*__EPI_SDL_H__*/

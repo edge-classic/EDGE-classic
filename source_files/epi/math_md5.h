@@ -25,8 +25,7 @@
 //
 //------------------------------------------------------------------------
 
-#ifndef __EPI_MD5_H__
-#define __EPI_MD5_H__
+#pragma once
 
 #include <stdint.h>
 
@@ -70,8 +69,6 @@ class MD5Hash
 };
 
 }  // namespace epi
-
-#endif /* __EPI_MD5_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

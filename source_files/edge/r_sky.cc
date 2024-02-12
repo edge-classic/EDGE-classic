@@ -193,7 +193,7 @@ typedef struct
 {
     const image_c *base_sky;
 
-    const colourmap_c *fx_colmap;
+    const Colormap *fx_colmap;
 
     int face_size;
 

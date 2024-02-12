@@ -618,7 +618,7 @@ static void P_UpdatePowerups(player_t *player)
     else
         player->mo->flags &= ~MF_FUZZY;
 
-    // Handling colourmaps.
+    // Handling colormaps.
     //
     // -AJA- 1999/07/10: Updated for colmap.ddf.
     //
@@ -632,7 +632,7 @@ static void P_UpdatePowerups(player_t *player)
         float s = player->powers[PW_Invulnerable];
 
         // -ACB- FIXME!!! Catch lookup failure!
-        player->effect_colourmap = colourmaps.Lookup("ALLWHITE");
+        player->effect_colourmap = colormaps.Lookup("ALLWHITE");
         player->effect_left      = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
     }
     else if (player->powers[PW_Infrared] > 0)
@@ -646,14 +646,14 @@ static void P_UpdatePowerups(player_t *player)
         float s = player->powers[PW_NightVision];
 
         // -ACB- FIXME!!! Catch lookup failure!
-        player->effect_colourmap = colourmaps.Lookup("ALLGREEN");
+        player->effect_colourmap = colormaps.Lookup("ALLGREEN");
         player->effect_left      = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
     }
     else if (player->powers[PW_Berserk] > 0) // Lobo 2021: Un-Hardcode Berserk colour tint
     {
         float s = player->powers[PW_Berserk];
 
-        player->effect_colourmap = colourmaps.Lookup("BERSERK");
+        player->effect_colourmap = colormaps.Lookup("BERSERK");
         player->effect_left      = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
     }
 }

@@ -458,7 +458,7 @@ static void MIR_Pop()
     MIR_SetClippers();
 }
 
-static GLuint R_ImageCache(const image_c *image, bool anim = true, const colourmap_c *trans = nullptr)
+static GLuint R_ImageCache(const image_c *image, bool anim = true, const Colormap *trans = nullptr)
 {
     // (need to load the image to know the opacity)
     auto frameid = frame_texids.find(image);
@@ -3248,7 +3248,7 @@ static void RGL_RenderTrueBSP(void)
 
     player_t *v_player = view_cam_mo->player;
 
-    // handle powerup effects and BOOM colourmaps
+    // handle powerup effects and BOOM colormaps
     RGL_RainbowEffect(v_player);
 
     RGL_SetupMatrices3D();

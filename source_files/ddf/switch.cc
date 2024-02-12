@@ -264,7 +264,7 @@ void DDF_ConvertSWITCHES(const uint8_t *data, int size)
     // DEBUG:
     // DDF_DumpFile(text);
 
-    DDF_AddFile(DDF_Switch, text, "Boom SWITCHES lump");
+    DDF_AddFile(kDDFTypeSwitch, text, "Boom SWITCHES lump");
 }
 
 //--- editor settings ---

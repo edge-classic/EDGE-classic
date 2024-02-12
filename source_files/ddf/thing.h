@@ -888,7 +888,7 @@ class mobjtype_c
     int                respawntime;
     percent_t          translucency;
     percent_t          minatkchance;
-    const colourmap_c *palremap;
+    const Colormap *palremap;
 
     int       jump_delay;
     float     jumpheight;

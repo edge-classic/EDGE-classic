@@ -1861,15 +1861,15 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
         !(shoot_I.source->currentattack->flags & AF_NoTriggerLines))
     {
         const char *flat            = floor->image->name.c_str();
-        flatdef_c  *current_flatdef = flatdefs.Find(flat);
+        FlatDefinition  *current_flatdef = flatdefs.Find(flat);
         if (current_flatdef)
         {
-            if (current_flatdef->impactobject)
+            if (current_flatdef->impactobject_)
             {
                 BAMAngle angle = shoot_I.angle + kBAMAngle180;
                 angle += (BAMAngle)(P_RandomNegPos() * (int)(kBAMAngle1 / 2));
 
-                P_SpawnDebris(x, y, z, angle, current_flatdef->impactobject);
+                P_SpawnDebris(x, y, z, angle, current_flatdef->impactobject_);
                 // don't go any farther
                 return false;
             }

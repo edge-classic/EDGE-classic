@@ -58,7 +58,7 @@
 
 #include "AlmostEquals.h"
 
-extern flatdef_c *P_IsThingOnLiquidFloor(mobj_t *thing);
+extern FlatDefinition *P_IsThingOnLiquidFloor(mobj_t *thing);
 
 static int AttackSfxCat(const mobj_t *mo)
 {

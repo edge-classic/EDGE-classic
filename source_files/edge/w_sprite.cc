@@ -24,7 +24,7 @@
 //----------------------------------------------------------------------------
 //
 // -KM- 1998/07/26 Replaced #ifdef RANGECHECK with #ifdef DEVELOPERS
-// -KM- 1998/09/27 Dynamic colourmaps
+// -KM- 1998/09/27 Dynamic colormaps
 // -AJA- 1999/07/12: Now uses colmap.ddf.
 //
 

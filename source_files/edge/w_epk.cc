@@ -657,9 +657,9 @@ static void ProcessDDFInPack(pack_file_c *pack)
             source += bare_filename;
 
             // this handles RTS scripts too!
-            ddf_type_e type = DDF_FilenameToType(ent.name);
+            DDFType type = DDF_FilenameToType(ent.name);
 
-            if (type != DDF_UNKNOWN)
+            if (type != kDDFTypeUNKNOWN)
             {
                 int         length   = -1;
                 const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
@@ -934,14 +934,14 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
 
             bool add_it = true;
 
-            for (auto colm : colourmaps)
+            for (auto colm : colormaps)
             {
-                if (!colm->lump_name.empty() &&
-                    epi::StringCaseCompareASCII(colm->lump_name, epi::GetStem(entry.name)) == 0 &&
-                    W_CheckFileNumForName(colm->lump_name.c_str()) < pack_index)
+                if (!colm->lump_name_.empty() &&
+                    epi::StringCaseCompareASCII(colm->lump_name_, epi::GetStem(entry.name)) == 0 &&
+                    W_CheckFileNumForName(colm->lump_name_.c_str()) < pack_index)
                 {
-                    colm->lump_name.clear();
-                    colm->pack_name = entry.packpath;
+                    colm->lump_name_.clear();
+                    colm->pack_name_ = entry.packpath;
                     add_it          = false;
                 }
             }

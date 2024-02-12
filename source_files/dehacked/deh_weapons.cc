@@ -134,7 +134,7 @@ void MarkWeapon(int wp_num)
 
 void BeginLump(void)
 {
-    wad::NewLump(DDF_Weapon);
+    wad::NewLump(kDDFTypeWeapon);
 
     wad::Printf("<WEAPONS>\n\n");
 }

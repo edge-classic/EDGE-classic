@@ -214,7 +214,7 @@ void HUD_FrameSetup(void)
     if (default_font == nullptr)
     {
         // FIXME: get default font from DDF gamedef
-        fontdef_c *DEF = fontdefs.Lookup("DOOM");
+        FontDefinition *DEF = fontdefs.Lookup("DOOM");
         SYS_ASSERT(DEF);
 
         default_font = hu_fonts.Lookup(DEF);
@@ -395,7 +395,7 @@ void HUD_CalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
 //----------------------------------------------------------------------------
 
 void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *image, float tx1, float ty1, float tx2,
-                  float ty2, float alpha, RGBAColor text_col, const colourmap_c *palremap, float sx, float sy, char ch)
+                  float ty2, float alpha, RGBAColor text_col, const Colormap *palremap, float sx, float sy, char ch)
 {
     int x1 = RoundToInt(hx1);
     int y1 = RoundToInt(hy1);
@@ -421,13 +421,13 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
 
     if (epi::StringCaseCompareASCII(image->name, "FONT_DUMMY_IMAGE") == 0)
     {
-        if (cur_font->def->type == FNTYP_TrueType)
+        if (cur_font->def->type_ == kFontTypeTrueType)
         {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_TEXTURE_2D);
-            if ((var_smoothing && cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ON_DEMAND) ||
-                cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ALWAYS)
+            if ((var_smoothing && cur_font->def->ttf_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
+                cur_font->def->ttf_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
                 glBindTexture(GL_TEXTURE_2D, cur_font->ttf_smoothed_tex_id[current_font_size]);
             else
                 glBindTexture(GL_TEXTURE_2D, cur_font->ttf_tex_id[current_font_size]);
@@ -437,8 +437,8 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
             glEnable(GL_ALPHA_TEST);
             glEnable(GL_BLEND);
             glEnable(GL_TEXTURE_2D);
-            if ((var_smoothing && cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ON_DEMAND) ||
-                cur_font->def->ttf_smoothing == cur_font->def->TTF_SMOOTH_ALWAYS)
+            if ((var_smoothing && cur_font->def->ttf_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
+                cur_font->def->ttf_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
             {
                 if (do_whiten)
                     glBindTexture(GL_TEXTURE_2D, cur_font->p_cache.atlas_whitened_smoothed_texid);
@@ -663,7 +663,7 @@ void HUD_StretchFromImageData(float x, float y, float w, float h, const image_da
 }
 
 void HUD_StretchImage(float x, float y, float w, float h, const image_c *img, float sx, float sy,
-                      const colourmap_c *colmap)
+                      const Colormap *colmap)
 {
     if (cur_x_align >= 0)
         x -= w / (cur_x_align == 0 ? 2.0f : 1.0f);
@@ -750,7 +750,7 @@ float HUD_GetImageHeight(const image_c *img)
     return (IM_HEIGHT(img) * cur_scale);
 }
 
-void HUD_DrawImage(float x, float y, const image_c *img, const colourmap_c *colmap)
+void HUD_DrawImage(float x, float y, const image_c *img, const Colormap *colmap)
 {
     float w = IM_WIDTH(img) * cur_scale;
     float h = IM_HEIGHT(img) * cur_scale;
@@ -997,16 +997,16 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
 
     if (epi::StringCaseCompareASCII(img->name, "FONT_DUMMY_IMAGE") == 0)
     {
-        if (cur_font->def->type == FNTYP_TrueType)
+        if (cur_font->def->type_ == kFontTypeTrueType)
         {
             stbtt_aligned_quad *q = cur_font->ttf_glyph_map.at((uint8_t)ch).char_quad[current_font_size];
             y                     = top_y + (cur_font->ttf_glyph_map.at((uint8_t)ch).y_shift[current_font_size] *
-                        (size > 0 ? (size / cur_font->def->default_size) : 1.0) * sc_y);
-            w = ((size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->default_size)) : cur_font->CharWidth(ch)) -
+                        (size > 0 ? (size / cur_font->def->default_size_) : 1.0) * sc_y);
+            w = ((size > 0 ? (cur_font->CharWidth(ch) * (size / cur_font->def->default_size_)) : cur_font->CharWidth(ch)) -
                 cur_font->spacing) *
                 sc_x;
             h = (cur_font->ttf_glyph_map.at((uint8_t)ch).height[current_font_size] *
-                (size > 0 ? (size / cur_font->def->default_size) : 1.0)) *
+                (size > 0 ? (size / cur_font->def->default_size_) : 1.0)) *
                 sc_y;
             tx1 = q->s0;
             ty1 = q->t0;
@@ -1016,7 +1016,7 @@ void HUD_DrawChar(float left_x, float top_y, const image_c *img, char ch, float 
         else // Patch font atlas
         {
             w = (size > 0 ? (size * cur_font->p_cache.ratio) : cur_font->CharWidth(ch)) * sc_x;
-            h = (size > 0 ? size : (cur_font->def->default_size > 0.0 ? cur_font->def->default_size : 
+            h = (size > 0 ? size : (cur_font->def->default_size_ > 0.0 ? cur_font->def->default_size_ : 
                 cur_font->p_cache.atlas_rects.at(cp437_unicode_values[(uint8_t)ch]).ih)) * sc_y;
             x -= (cur_font->p_cache.atlas_rects.at(cp437_unicode_values[(uint8_t)ch]).off_x * sc_x);
             y -= (cur_font->p_cache.atlas_rects.at(cp437_unicode_values[(uint8_t)ch]).off_y * sc_y);
@@ -1094,7 +1094,7 @@ void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img
 
     glEnable(GL_TEXTURE_2D);
 
-    GLuint tex_id = W_ImageCache(img, true, (const colourmap_c *)0, true);
+    GLuint tex_id = W_ImageCache(img, true, (const Colormap *)0, true);
     glBindTexture(GL_TEXTURE_2D, tex_id);
 
     if (img->opacity == OPAC_Solid)
@@ -1170,9 +1170,9 @@ void HUD_DrawText(float x, float y, const char *str, float size)
 
         for (int i = 0; i < len; i++)
         {
-            if (cur_font->def->type == FNTYP_TrueType)
+            if (cur_font->def->type_ == kFontTypeTrueType)
             {
-                float factor = size > 0 ? (size / cur_font->def->default_size) : 1;
+                float factor = size > 0 ? (size / cur_font->def->default_size_) : 1;
                 total_w += cur_font->CharWidth(str[i]) * factor * cur_scale;
                 if (str[i + 1])
                 {
@@ -1181,7 +1181,7 @@ void HUD_DrawText(float x, float y, const char *str, float size)
                                cur_font->ttf_kern_scale[current_font_size] * factor * cur_scale;
                 }
             }
-            else if (cur_font->def->type == FNTYP_Image)
+            else if (cur_font->def->type_ == kFontTypeImage)
                 total_w +=
                     (size > 0 ? size * cur_font->CharRatio(str[i]) + cur_font->spacing : cur_font->CharWidth(str[i])) *
                     cur_scale;
@@ -1208,9 +1208,9 @@ void HUD_DrawText(float x, float y, const char *str, float size)
             if (img)
                 HUD_DrawChar(cx, cy, img, ch, size);
 
-            if (cur_font->def->type == FNTYP_TrueType)
+            if (cur_font->def->type_ == kFontTypeTrueType)
             {
-                float factor = size > 0 ? (size / cur_font->def->default_size) : 1;
+                float factor = size > 0 ? (size / cur_font->def->default_size_) : 1;
                 cx += cur_font->CharWidth(ch) * factor * cur_scale;
                 if (str[k + 1])
                 {
@@ -1219,7 +1219,7 @@ void HUD_DrawText(float x, float y, const char *str, float size)
                           cur_font->ttf_kern_scale[current_font_size] * factor * cur_scale;
                 }
             }
-            else if (cur_font->def->type == FNTYP_Image)
+            else if (cur_font->def->type_ == kFontTypeImage)
                 cx += (size > 0 ? size * cur_font->CharRatio(ch) + cur_font->spacing : cur_font->CharWidth(ch)) *
                       cur_scale;
             else

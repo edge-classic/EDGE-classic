@@ -1366,9 +1366,9 @@ void DDF_DummyFunction(const char *info, void *storage)
 //
 void DDF_MainGetColourmap(const char *info, void *storage)
 {
-    const colourmap_c **result = (const colourmap_c **)storage;
+    const Colormap **result = (const Colormap **)storage;
 
-    *result = colourmaps.Lookup(info);
+    *result = colormaps.Lookup(info);
     if (*result == nullptr)
         DDF_Error("DDF_MainGetColourmap: No such colourmap '%s'\n", info);
 }
@@ -2037,11 +2037,11 @@ weakness_info_c &weakness_info_c::operator=(weakness_info_c &rhs)
 
 //----------------------------------------------------------------------------
 
-static ddf_collection_c unread_ddf;
+static std::vector<DDFFile> unread_ddf;
 
 struct ddf_reader_t
 {
-    ddf_type_e  type;
+    DDFType  type;
     const char *lump_name;
     const char *pack_name;
     const char *print_name;
@@ -2049,71 +2049,71 @@ struct ddf_reader_t
 };
 
 // -KM- 1999/01/31 Order is important, Languages are loaded before sfx, etc...
-static ddf_reader_t ddf_readers[DDF_NUM_TYPES] = {
-    {DDF_Language, "DDFLANG", "language.ldf", "Languages", DDF_ReadLangs},
-    {DDF_SFX, "DDFSFX", "sounds.ddf", "Sounds", DDF_ReadSFX},
-    {DDF_ColourMap, "DDFCOLM", "colmap.ddf", "ColourMaps", DDF_ReadColourMaps},
-    {DDF_Image, "DDFIMAGE", "images.ddf", "Images", DDF_ReadImages},
-    {DDF_Font, "DDFFONT", "fonts.ddf", "Fonts", DDF_ReadFonts},
-    {DDF_Style, "DDFSTYLE", "styles.ddf", "Styles", DDF_ReadStyles},
-    {DDF_Attack, "DDFATK", "attacks.ddf", "Attacks", DDF_ReadAtks},
-    {DDF_Weapon, "DDFWEAP", "weapons.ddf", "Weapons", DDF_ReadWeapons},
-    {DDF_Thing, "DDFTHING", "things.ddf", "Things", DDF_ReadThings},
+static ddf_reader_t ddf_readers[kTotalDDFTypes] = {
+    {kDDFTypeLanguage, "DDFLANG", "language.ldf", "Languages", DDF_ReadLangs},
+    {kDDFTypeSFX, "DDFSFX", "sounds.ddf", "Sounds", DDF_ReadSFX},
+    {kDDFTypeColourMap, "DDFCOLM", "colmap.ddf", "ColourMaps", DDF_ReadColourMaps},
+    {kDDFTypeImage, "DDFIMAGE", "images.ddf", "Images", DDF_ReadImages},
+    {kDDFTypeFont, "DDFFONT", "fonts.ddf", "Fonts", DDF_ReadFonts},
+    {kDDFTypeStyle, "DDFSTYLE", "styles.ddf", "Styles", DDF_ReadStyles},
+    {kDDFTypeAttack, "DDFATK", "attacks.ddf", "Attacks", DDF_ReadAtks},
+    {kDDFTypeWeapon, "DDFWEAP", "weapons.ddf", "Weapons", DDF_ReadWeapons},
+    {kDDFTypeThing, "DDFTHING", "things.ddf", "Things", DDF_ReadThings},
 
-    {DDF_Playlist, "DDFPLAY", "playlist.ddf", "Playlists",
+    {kDDFTypePlaylist, "DDFPLAY", "playlist.ddf", "Playlists",
      DDF_ReadMusicPlaylist},
-    {DDF_Line, "DDFLINE", "lines.ddf", "Lines", DDF_ReadLines},
-    {DDF_Sector, "DDFSECT", "sectors.ddf", "Sectors", DDF_ReadSectors},
-    {DDF_Switch, "DDFSWTH", "switch.ddf", "Switches", DDF_ReadSwitch},
-    {DDF_Anim, "DDFANIM", "anims.ddf", "Anims", DDF_ReadAnims},
-    {DDF_Game, "DDFGAME", "games.ddf", "Games", DDF_ReadGames},
-    {DDF_Level, "DDFLEVL", "levels.ddf", "Levels", DDF_ReadLevels},
-    {DDF_Flat, "DDFFLAT", "flats.ddf", "Flats", DDF_ReadFlat},
-    {DDF_Movie, "DDFMOVIE", "movies.ddf", "Movies", DDF_ReadMovies},
+    {kDDFTypeLine, "DDFLINE", "lines.ddf", "Lines", DDF_ReadLines},
+    {kDDFTypeSector, "DDFSECT", "sectors.ddf", "Sectors", DDF_ReadSectors},
+    {kDDFTypeSwitch, "DDFSWTH", "switch.ddf", "Switches", DDF_ReadSwitch},
+    {kDDFTypeAnim, "DDFANIM", "anims.ddf", "Anims", DDF_ReadAnims},
+    {kDDFTypeGame, "DDFGAME", "games.ddf", "Games", DDF_ReadGames},
+    {kDDFTypeLevel, "DDFLEVL", "levels.ddf", "Levels", DDF_ReadLevels},
+    {kDDFTypeFlat, "DDFFLAT", "flats.ddf", "Flats", DDF_ReadFlat},
+    {kDDFTypeMovie, "DDFMOVIE", "movies.ddf", "Movies", DDF_ReadMovies},
 
     // RTS scripts are handled differently
-    {DDF_RadScript, "RSCRIPT", "rscript.rts", "RadTrig", nullptr}};
+    {kDDFTypeRadScript, "RSCRIPT", "rscript.rts", "RadTrig", nullptr}};
 
-ddf_type_e DDF_LumpToType(const std::string &name)
+DDFType DDF_LumpToType(const std::string &name)
 {
     std::string up_name(name);
     epi::StringUpperASCII(up_name);
 
-    for (size_t i = 0; i < DDF_NUM_TYPES; i++)
+    for (size_t i = 0; i < kTotalDDFTypes; i++)
         if (up_name == ddf_readers[i].lump_name) return ddf_readers[i].type;
 
-    return DDF_UNKNOWN;
+    return kDDFTypeUNKNOWN;
 }
 
-ddf_type_e DDF_FilenameToType(const std::string &path)
+DDFType DDF_FilenameToType(const std::string &path)
 {
     std::string check = epi::GetExtension(path);
 
-    if (epi::StringCaseCompareASCII(check, ".rts") == 0) return DDF_RadScript;
+    if (epi::StringCaseCompareASCII(check, ".rts") == 0) return kDDFTypeRadScript;
 
     check = epi::GetFilename(path);
 
     std::string stem = epi::GetStem(check);
 
-    for (size_t i = 0; i < DDF_NUM_TYPES; i++)
+    for (size_t i = 0; i < kTotalDDFTypes; i++)
         if (epi::StringCaseCompareASCII(check, ddf_readers[i].pack_name) == 0 ||
             epi::StringCaseCompareASCII(stem, ddf_readers[i].lump_name) == 0)
             return ddf_readers[i].type;
 
-    return DDF_UNKNOWN;
+    return kDDFTypeUNKNOWN;
 }
 
-void DDF_AddFile(ddf_type_e type, std::string &data, const std::string &source)
+void DDF_AddFile(DDFType type, std::string &data, const std::string &source)
 {
-    unread_ddf.files.push_back(ddf_file_c(type, source));
+    unread_ddf.push_back({type, "", source});
 
     // transfer the caller's data
-    unread_ddf.files.back().data.swap(data);
+    unread_ddf.back().data.swap(data);
 }
 
-void DDF_AddCollection(ddf_collection_c *col, const std::string &source)
+void DDF_AddCollection(std::vector<DDFFile> &col, const std::string &source)
 {
-    for (auto &it : col->files) DDF_AddFile(it.type, it.data, source);
+    for (DDFFile &it : col) DDF_AddFile(it.type, it.data, source);
 }
 
 void DDF_DumpFile(const std::string &data)
@@ -2140,21 +2140,21 @@ void DDF_DumpFile(const std::string &data)
     if (line.size() > 0) I_Debugf("%s", line.c_str());
 }
 
-void DDF_DumpCollection(ddf_collection_c *col)
+void DDF_DumpCollection(const std::vector<DDFFile> &col)
 {
-    for (auto &it : col->files) DDF_DumpFile(it.data);
+    for (const DDFFile &it : col) DDF_DumpFile(it.data);
 }
 
 static void DDF_ParseUnreadFile(size_t d)
 {
-    for (auto &it : unread_ddf.files)
+    for (DDFFile &it : unread_ddf)
     {
         if (it.type == ddf_readers[d].type)
         {
             I_Printf("Parsing %s from: %s\n", ddf_readers[d].lump_name,
                      it.source.c_str());
 
-            if (it.type == DDF_RadScript)
+            if (it.type == kDDFTypeRadScript)
             {
                 RAD_ReadScript(it.data, it.source);
             }
@@ -2177,7 +2177,7 @@ void DDF_ParseEverything()
     //       sense to load all lumps of a certain type together, for example
     //       all DDFSFX lumps before all the DDFTHING lumps.
 
-    for (size_t d = 0; d < DDF_NUM_TYPES; d++) DDF_ParseUnreadFile(d);
+    for (size_t d = 0; d < kTotalDDFTypes; d++) DDF_ParseUnreadFile(d);
 }
 
 //--- editor settings ---

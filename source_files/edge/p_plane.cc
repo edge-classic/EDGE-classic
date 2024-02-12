@@ -82,11 +82,11 @@ static const image_c *SECPIC(sector_t *sec, bool is_ceiling, const image_c *new_
             sec->floor.image = new_image;
             if (new_image)
             {
-                flatdef_c *current_flatdef = flatdefs.Find(new_image->name.c_str());
+                FlatDefinition *current_flatdef = flatdefs.Find(new_image->name.c_str());
                 if (current_flatdef)
                 {
-                    sec->bob_depth  = current_flatdef->bob_depth;
-                    sec->sink_depth = current_flatdef->sink_depth;
+                    sec->bob_depth  = current_flatdef->bob_depth_;
+                    sec->sink_depth = current_flatdef->sink_depth_;
                 }
                 else
                     sec->bob_depth = 0;
@@ -1170,11 +1170,11 @@ bool EV_DoDonut(sector_t *s1, sfx_t *sfx[4])
 
             if (s2->floor.image)
             {
-                flatdef_c *current_flatdef = flatdefs.Find(s2->floor.image->name.c_str());
+                FlatDefinition *current_flatdef = flatdefs.Find(s2->floor.image->name.c_str());
                 if (current_flatdef)
                 {
-                    s2->bob_depth  = current_flatdef->bob_depth;
-                    s2->sink_depth = current_flatdef->sink_depth;
+                    s2->bob_depth  = current_flatdef->bob_depth_;
+                    s2->sink_depth = current_flatdef->sink_depth_;
                 }
                 else
                     s2->bob_depth = 0;

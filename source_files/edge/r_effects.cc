@@ -38,7 +38,7 @@ float ren_red_mul;
 float ren_grn_mul;
 float ren_blu_mul;
 
-const colourmap_c *ren_fx_colmap;
+const Colormap *ren_fx_colmap;
 
 DEF_CVAR(r_fadepower, "1.0", CVAR_ARCHIVE)
 DEF_CVAR(debug_fullbright, "0", CVAR_CHEAT)
@@ -127,12 +127,12 @@ void RGL_RainbowEffect(player_t *player)
         // fallthrough...
     }
 
-    // AJA 2022: handle BOOM colourmaps (linetype 242)
+    // AJA 2022: handle BOOM colormaps (linetype 242)
     sector_t *sector = player->mo->subsector->sector;
 
     if (sector->heightsec != nullptr)
     {
-        const colourmap_c *colmap = nullptr;
+        const Colormap *colmap = nullptr;
 
         // see which region the camera is in
         if (viewz > sector->heightsec->c_h)

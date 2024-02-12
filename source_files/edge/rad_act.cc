@@ -749,11 +749,11 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
                 // update sink/bob depth
                 if (image)
                 {
-                    flatdef_c *current_flatdef = flatdefs.Find(image->name.c_str());
+                    FlatDefinition *current_flatdef = flatdefs.Find(image->name.c_str());
                     if (current_flatdef)
                     {
-                        tsec->bob_depth  = current_flatdef->bob_depth;
-                        tsec->sink_depth = current_flatdef->sink_depth;
+                        tsec->bob_depth  = current_flatdef->bob_depth_;
+                        tsec->sink_depth = current_flatdef->sink_depth_;
                     }
                     else
                         tsec->bob_depth = 0;

@@ -227,61 +227,61 @@ void V_SetPalette(int type, float amount)
 // the dc_colourmap & ds_colourmap variables for use by the column &
 // span drawers.
 //
-static void LoadColourmap(const colourmap_c *colm)
+static void LoadColourmap(const Colormap *colm)
 {
     int   size;
     uint8_t *data;
 
     // we are writing to const marked memory here. Here is the only place
     // the cache struct is touched.
-    colmapcache_t *cache = (colmapcache_t *)&colm->cache;
+    ColormapCache *cache = (ColormapCache *)&colm->cache_;
 
-    if (colm->pack_name != "")
+    if (colm->pack_name_ != "")
     {
-        epi::File *f = W_OpenPackFile(colm->pack_name);
+        epi::File *f = W_OpenPackFile(colm->pack_name_);
         if (f == nullptr)
-            I_Error("No such colormap file: %s\n", colm->pack_name.c_str());
+            I_Error("No such colormap file: %s\n", colm->pack_name_.c_str());
         size = f->GetLength();
         data = f->LoadIntoMemory();
         delete f; // close file
     }
     else
     {
-        data = W_LoadLump(colm->lump_name.c_str(), &size);
+        data = W_LoadLump(colm->lump_name_.c_str(), &size);
     }
 
-    if ((colm->start + colm->length) * 256 > size)
+    if ((colm->start_ + colm->length_) * 256 > size)
     {
-        I_Error("Colourmap [%s] is too small ! (LENGTH too big)\n", colm->name.c_str());
+        I_Error("Colourmap [%s] is too small ! (LENGTH too big)\n", colm->name_.c_str());
     }
 
-    cache->size = colm->length * 256;
+    cache->size = colm->length_ * 256;
     cache->data = new uint8_t[cache->size];
 
-    memcpy(cache->data, data + (colm->start * 256), cache->size);
+    memcpy(cache->data, data + (colm->start_ * 256), cache->size);
 
     delete[] data;
 }
 
-const uint8_t *V_GetTranslationTable(const colourmap_c *colmap)
+const uint8_t *V_GetTranslationTable(const Colormap *colmap)
 {
     // Do we need to load or recompute this colourmap ?
 
-    if (colmap->cache.data == nullptr)
+    if (colmap->cache_.data == nullptr)
         LoadColourmap(colmap);
 
-    return (const uint8_t *)colmap->cache.data;
+    return (const uint8_t *)colmap->cache_.data;
 }
 
-void R_TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const colourmap_c *trans)
+void R_TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const Colormap *trans)
 {
 
     // is the colormap just using GL_COLOUR?
-    if (trans->length == 0)
+    if (trans->length_ == 0)
     {
-        int r = epi::GetRGBARed(trans->gl_colour);
-        int g = epi::GetRGBAGreen(trans->gl_colour);
-        int b = epi::GetRGBABlue(trans->gl_colour);
+        int r = epi::GetRGBARed(trans->gl_color_);
+        int g = epi::GetRGBAGreen(trans->gl_color_);
+        int b = epi::GetRGBABlue(trans->gl_color_);
 
         for (int j = 0; j < 256; j++)
         {
@@ -397,21 +397,21 @@ static int AnalyseColourmap(const uint8_t *table, int alpha, int *r, int *g, int
     return total / 256;
 }
 
-void TransformColourmap(colourmap_c *colmap)
+void TransformColourmap(Colormap *colmap)
 {
-    const uint8_t *table = colmap->cache.data;
+    const uint8_t *table = colmap->cache_.data;
 
-    if (table == nullptr && (!colmap->lump_name.empty() || !colmap->pack_name.empty()))
+    if (table == nullptr && (!colmap->lump_name_.empty() || !colmap->pack_name_.empty()))
     {
         LoadColourmap(colmap);
 
-        table = (uint8_t *)colmap->cache.data;
+        table = (uint8_t *)colmap->cache_.data;
     }
 
-    if (colmap->font_colour == kRGBANoValue)
+    if (colmap->font_colour_ == kRGBANoValue)
     {
-        if (colmap->gl_colour != kRGBANoValue)
-            colmap->font_colour = colmap->gl_colour;
+        if (colmap->gl_color_ != kRGBANoValue)
+            colmap->font_colour_ = colmap->gl_color_;
         else
         {
             SYS_ASSERT(table);
@@ -425,11 +425,11 @@ void TransformColourmap(colourmap_c *colmap)
             g = HMM_MIN(255, HMM_MAX(0, g));
             b = HMM_MIN(255, HMM_MAX(0, b));
 
-            colmap->font_colour = epi::MakeRGBA(r, g, b);
+            colmap->font_colour_ = epi::MakeRGBA(r, g, b);
         }
     }
 
-    if (colmap->gl_colour == kRGBANoValue)
+    if (colmap->gl_color_ == kRGBANoValue)
     {
         SYS_ASSERT(table);
 
@@ -447,40 +447,40 @@ void TransformColourmap(colourmap_c *colmap)
         g = HMM_MIN(255, HMM_MAX(0, g));
         b = HMM_MIN(255, HMM_MAX(0, b));
 
-        colmap->gl_colour = epi::MakeRGBA(r, g, b);
+        colmap->gl_color_ = epi::MakeRGBA(r, g, b);
     }
 
-    L_WriteDebug("TransformColourmap [%s]\n", colmap->name.c_str());
-    L_WriteDebug("- gl_colour   = #%06x\n", colmap->gl_colour);
+    L_WriteDebug("TransformColourmap [%s]\n", colmap->name_.c_str());
+    L_WriteDebug("- gl_color_   = #%06x\n", colmap->gl_color_);
 }
 
-void V_GetColmapRGB(const colourmap_c *colmap, float *r, float *g, float *b)
+void V_GetColmapRGB(const Colormap *colmap, float *r, float *g, float *b)
 {
-    if (colmap->gl_colour == kRGBANoValue)
+    if (colmap->gl_color_ == kRGBANoValue)
     {
         // Intention Const Override
-        TransformColourmap((colourmap_c *)colmap);
+        TransformColourmap((Colormap *)colmap);
     }
 
-    RGBAColor col = colmap->gl_colour;
+    RGBAColor col = colmap->gl_color_;
 
     (*r) = GAMMA_CONV((col >> 24) & 0xFF) / 255.0f;
     (*g) = GAMMA_CONV((col >> 16) & 0xFF) / 255.0f;
     (*b) = GAMMA_CONV((col >> 8) & 0xFF) / 255.0f;
 }
 
-RGBAColor V_GetFontColor(const colourmap_c *colmap)
+RGBAColor V_GetFontColor(const Colormap *colmap)
 {
     if (!colmap)
         return kRGBANoValue;
 
-    if (colmap->font_colour == kRGBANoValue)
+    if (colmap->font_colour_ == kRGBANoValue)
     {
         // Intention Const Override
-        TransformColourmap((colourmap_c *)colmap);
+        TransformColourmap((Colormap *)colmap);
     }
 
-    return colmap->font_colour;
+    return colmap->font_colour_;
 }
 
 RGBAColor V_ParseFontColor(const char *name, bool strict)
@@ -501,7 +501,7 @@ RGBAColor V_ParseFontColor(const char *name, bool strict)
     }
     else
     {
-        const colourmap_c *colmap = colourmaps.Lookup(name);
+        const Colormap *colmap = colormaps.Lookup(name);
 
         if (!colmap)
         {
@@ -610,7 +610,7 @@ void R_PaletteStuff(void)
     }
 
     // This routine will limit `amount' to acceptable values, and will
-    // only update the video palette/colourmaps when the palette actually
+    // only update the video palette/colormaps when the palette actually
     // changes.
     V_SetPalette(palette, amount);
 }
@@ -634,7 +634,7 @@ int R_DoomLightingEquation(int L, float dist)
 class colormap_shader_c : public abstract_shader_c
 {
   private:
-    const colourmap_c *colmap;
+    const Colormap *colmap;
 
     int light_lev;
 
@@ -652,7 +652,7 @@ class colormap_shader_c : public abstract_shader_c
     sector_t *sec;
 
   public:
-    colormap_shader_c(const colourmap_c *CM)
+    colormap_shader_c(const Colormap *CM)
         : colmap(CM), light_lev(255), fade_tex(0), simple_cmap(true), lt_model(LMODEL_Doom), fog_color(kRGBANoValue),
           fog_density(0), sec(nullptr)
     {
@@ -773,10 +773,10 @@ class colormap_shader_c : public abstract_shader_c
         const uint8_t *map    = nullptr;
         int         length = 32;
 
-        if (colmap && colmap->length > 0)
+        if (colmap && colmap->length_ > 0)
         {
             map    = V_GetTranslationTable(colmap);
-            length = colmap->length;
+            length = colmap->length_;
 
             for (int ci = 0; ci < 32; ci++)
             {
@@ -796,9 +796,9 @@ class colormap_shader_c : public abstract_shader_c
         {
             for (int ci = 0; ci < 32; ci++)
             {
-                int r = epi::GetRGBARed(colmap->gl_colour) * (31 - ci) / 31;
-                int g = epi::GetRGBAGreen(colmap->gl_colour) * (31 - ci) / 31;
-                int b = epi::GetRGBABlue(colmap->gl_colour) * (31 - ci) / 31;
+                int r = epi::GetRGBARed(colmap->gl_color_) * (31 - ci) / 31;
+                int g = epi::GetRGBAGreen(colmap->gl_color_) * (31 - ci) / 31;
+                int b = epi::GetRGBABlue(colmap->gl_color_) * (31 - ci) / 31;
 
                 whites[ci] = epi::MakeRGBA(r, g, b);
             }
@@ -933,15 +933,15 @@ abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props, 
 
     if (props->colourmap)
     {
-        if (props->colourmap->analysis)
-            shader = (colormap_shader_c *)props->colourmap->analysis;
+        if (props->colourmap->analysis_)
+            shader = (colormap_shader_c *)props->colourmap->analysis_;
         else
         {
             shader = new colormap_shader_c(props->colourmap);
 
             // Intentional Const Override
-            colourmap_c *CM = (colourmap_c *)props->colourmap;
-            CM->analysis    = shader;
+            Colormap *CM = (Colormap *)props->colourmap;
+            CM->analysis_    = shader;
         }
     }
 
@@ -951,7 +951,7 @@ abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props, 
 
     int lit_Nom = props->lightlevel + light_add + ((v_secbright.d - 5) * 10);
 
-    if (!(props->colourmap && (props->colourmap->special & COLSP_NoFlash)) || ren_extralight > 250)
+    if (!(props->colourmap && (props->colourmap->special_ & kColorSpecialNoFlash)) || ren_extralight > 250)
     {
         lit_Nom += ren_extralight;
     }
@@ -974,11 +974,11 @@ void DeleteColourmapTextures(void)
 
     std_cmap_shader = nullptr;
 
-    for (auto cmap : colourmaps)
+    for (auto cmap : colormaps)
     {
-        if (cmap->analysis)
+        if (cmap->analysis_)
         {
-            colormap_shader_c *shader = (colormap_shader_c *)cmap->analysis;
+            colormap_shader_c *shader = (colormap_shader_c *)cmap->analysis_;
 
             shader->DeleteTex();
         }

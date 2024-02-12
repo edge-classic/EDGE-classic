@@ -156,7 +156,7 @@ static int HD_text_font(lua_State *L)
 {
     const char *font_name = luaL_checkstring(L, 1);
 
-    fontdef_c *DEF = fontdefs.Lookup(font_name);
+    FontDefinition *DEF = fontdefs.Lookup(font_name);
     SYS_ASSERT(DEF);
 
     if (!DEF)

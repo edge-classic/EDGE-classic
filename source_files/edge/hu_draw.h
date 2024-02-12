@@ -68,7 +68,7 @@ void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand = false
 void HUD_PopScissor();
 
 void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *image, float tx1, float ty1, float tx2,
-                  float ty2, float alpha = 1.0f, RGBAColor text_col = kRGBANoValue, const colourmap_c *palremap = nullptr,
+                  float ty2, float alpha = 1.0f, RGBAColor text_col = kRGBANoValue, const Colormap *palremap = nullptr,
                   float sx = 0.0, float sy = 0.0, char ch = -1);
 
 // Draw a solid colour box (possibly translucent) in the given
@@ -89,13 +89,13 @@ void HUD_ThinBox(float x1, float y1, float x2, float y2, RGBAColor col, float th
 // be specified individually.
 void HUD_GradientBox(float x1, float y1, float x2, float y2, RGBAColor *cols);
 
-void HUD_DrawImage(float x, float y, const image_c *image, const colourmap_c *colmap = nullptr);
+void HUD_DrawImage(float x, float y, const image_c *image, const Colormap *colmap = nullptr);
 void HUD_DrawImageNoOffset(float x, float y, const image_c *image);
 void HUD_ScrollImage(float x, float y, const image_c *image, float sx, float sy);
 void HUD_ScrollImageNoOffset(float x, float y, const image_c *image, float sx, float sy);
 void HUD_DrawImageTitleWS(const image_c *image);
 void HUD_StretchImage(float x, float y, float w, float h, const image_c *image, float sx, float sy,
-                      const colourmap_c *colmap = nullptr);
+                      const Colormap *colmap = nullptr);
 void HUD_StretchImageNoOffset(float x, float y, float w, float h, const image_c *image, float sx, float sy);
 void HUD_TileImage(float x, float y, float w, float h, const image_c *image, float offset_x = 0.0f,
                    float offset_y = 0.0f);

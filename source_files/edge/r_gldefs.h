@@ -73,7 +73,7 @@ extern float ren_red_mul;
 extern float ren_grn_mul;
 extern float ren_blu_mul;
 
-extern const colourmap_c *ren_fx_colmap;
+extern const Colormap *ren_fx_colmap;
 
 extern cvar_c r_nearclip;
 extern cvar_c r_farclip;

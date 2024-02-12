@@ -50,7 +50,7 @@ class map_finaledef_c
     std::string        text_flat;
     float              text_speed;
     unsigned int       text_wait;
-    const colourmap_c *text_colmap;
+    const Colormap *text_colmap;
 
     // Movie (pack file reference)
     std::string movie;
@@ -178,10 +178,10 @@ class mapdef_c
     // sky stretch override
     skystretch_e forced_skystretch;
 
-    colourmap_c *indoor_fog_cmap;
+    Colormap *indoor_fog_cmap;
     RGBAColor    indoor_fog_color;
     float        indoor_fog_density;
-    colourmap_c *outdoor_fog_cmap;
+    Colormap *outdoor_fog_cmap;
     RGBAColor    outdoor_fog_color;
     float        outdoor_fog_density;
 

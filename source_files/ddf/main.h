@@ -32,7 +32,7 @@ struct mobj_s;
 struct sfx_s;
 
 class atkdef_c;
-class colourmap_c;
+class Colormap;
 class gamedef_c;
 class mapdef_c;
 class mobjtype_c;
@@ -156,15 +156,15 @@ void          DDF_BoomClearGenTypes(void);
 linetype_c   *DDF_BoomGetGenLine(int number);
 sectortype_c *DDF_BoomGetGenSector(int number);
 
-ddf_type_e DDF_LumpToType(const std::string &name);
-ddf_type_e DDF_FilenameToType(const std::string &path);
+DDFType DDF_LumpToType(const std::string &name);
+DDFType DDF_FilenameToType(const std::string &path);
 
-void DDF_AddFile(ddf_type_e type, std::string &data, const std::string &source);
-void DDF_AddCollection(ddf_collection_c *col, const std::string &source);
+void DDF_AddFile(DDFType type, std::string &data, const std::string &source);
+void DDF_AddCollection(std::vector<DDFFile> &col, const std::string &source);
 void DDF_ParseEverything();
 
 void DDF_DumpFile(const std::string &data);
-void DDF_DumpCollection(ddf_collection_c *col);
+void DDF_DumpCollection(const std::vector<DDFFile> &col);
 
 #endif /* __DDF_MAIN_H__ */
 

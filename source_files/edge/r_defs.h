@@ -101,7 +101,7 @@ typedef struct region_properties_s
     // rendering related
     int lightlevel;
 
-    const colourmap_c *colourmap; // can be nullptr
+    const Colormap *colourmap; // can be nullptr
 
     // special type (e.g. damaging)
     int                 type;
@@ -162,7 +162,7 @@ typedef struct surface_s
     region_properties_t *override_p;
 
     // this only used for BOOM deep water (linetype 242)
-    const colourmap_c *boom_colmap;
+    const Colormap *boom_colmap;
 
     // used for fog boundaries if needed
     bool fogwall = false;

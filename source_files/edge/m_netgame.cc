@@ -93,14 +93,14 @@ static void DrawKeyword(int index, style_c *style, int y, const char *keyword, c
 
     if (is_selected)
     {
-        if (style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image)
+        if (style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeImage)
         {
             int cursor = 16;
             HL_WriteText(style, styledef_c::T_TITLE,
                          x - style->fonts[styledef_c::T_TITLE]->StringWidth((const char *)&cursor) / 2, y,
                          (const char *)&cursor);
         }
-        else if (style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
+        else if (style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType)
             HL_WriteText(style, styledef_c::T_TITLE, x - style->fonts[styledef_c::T_TITLE]->StringWidth("+") / 2, y,
                          "+");
         else

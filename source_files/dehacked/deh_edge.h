@@ -27,6 +27,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "collection.h"
 
 enum DehackedResult
@@ -55,7 +57,7 @@ DehackedResult DehackedSetQuiet(int quiet);
 DehackedResult DehackedAddLump(const char *data, int length);
 
 // convert all the DeHackEd patch files into DDF.
-DehackedResult DehackedRunConversion(ddf_collection_c *dest);
+DehackedResult DehackedRunConversion(std::vector<DDFFile> *dest);
 
 // shut down: free all memory, close all files, etc..
 void DehackedShutdown(void);

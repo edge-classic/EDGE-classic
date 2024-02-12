@@ -1036,7 +1036,7 @@ static int PL_play_footstep(lua_State *L)
     if (!flat)
         I_Error("player.play_footstep: No flat name given!\n");
 
-    flatdef_c *current_flatdef = flatdefs.Find(flat);
+    FlatDefinition *current_flatdef = flatdefs.Find(flat);
 
     if (!current_flatdef)
     {
@@ -1044,7 +1044,7 @@ static int PL_play_footstep(lua_State *L)
         return 1;
     }
 
-    if (!current_flatdef->footstep)
+    if (!current_flatdef->footstep_)
     {
         lua_pushboolean(L, 0);
         return 1;
@@ -1052,7 +1052,7 @@ static int PL_play_footstep(lua_State *L)
     else
     {
         // Probably need to add check to see if the sfx is valid - Dasho
-        S_StartFX(current_flatdef->footstep);
+        S_StartFX(current_flatdef->footstep_);
         lua_pushboolean(L, 1);
     }
 

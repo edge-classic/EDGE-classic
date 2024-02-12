@@ -41,7 +41,7 @@ void RGL_NewScreenSize(int width, int height, int bits)
 }
 
 void RGL_DrawImage(float x, float y, float w, float h, const image_c *image, float tx1, float ty1, float tx2, float ty2,
-                   const colourmap_c *textmap, float alpha, const colourmap_c *palremap)
+                   const Colormap *textmap, float alpha, const Colormap *palremap)
 {
     int x1 = RoundToInt(x);
     int y1 = RoundToInt(y);
@@ -53,8 +53,8 @@ void RGL_DrawImage(float x, float y, float w, float h, const image_c *image, flo
 
     sg_color sgcol = sg_white;
 
-    GLuint tex_id = W_ImageCache(image, true, (textmap && (textmap->special & COLSP_Whiten)) ? nullptr : palremap,
-                                 (textmap && (textmap->special & COLSP_Whiten)) ? true : false);
+    GLuint tex_id = W_ImageCache(image, true, (textmap && (textmap->special_ & kColorSpecialWhiten)) ? nullptr : palremap,
+                                 (textmap && (textmap->special_ & kColorSpecialWhiten)) ? true : false);
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex_id);

@@ -16,83 +16,77 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_ANIM_H_
-#define __DDF_ANIM_H_
+#pragma once
 
-#include "epi.h"
 #include "types.h"
 
-//
-// source animation definition
-//
-// -KM- 98/07/31 Anims.ddf
-//
-class animdef_c
+class AnimationDefinition
 {
    public:
-    animdef_c();
-    ~animdef_c(){};
+    AnimationDefinition();
+    ~AnimationDefinition(){};
 
    public:
     void Default(void);
-    void CopyDetail(animdef_c &src);
+    void CopyDetail(AnimationDefinition &src);
 
-    // Member vars....
-    std::string name;
+    std::string name_;
 
-    enum  // types
+    enum AnimationType
     {
-        A_Flat = 0,
-        A_Texture,
-        A_Graphic
+        kAnimationTypeFlat = 0,
+        kAnimationTypeTexture,
+        kAnimationTypeGraphic
     };
 
-    int type;
+    int type_;
 
     // -AJA- 2004/10/27: new SEQUENCE command for anims
-    std::vector<std::string> pics;
+    std::vector<std::string> pics_;
 
     // first and last names in TEXTURE1/2 lump
-    std::string startname;
-    std::string endname;
+    std::string start_name_;
+    std::string end_name_;
 
     // how many 1/35s ticks each frame lasts
-    int speed;
+    int speed_;
 
    private:
     // disable copy construct and assignment operator
-    explicit animdef_c(animdef_c &rhs) { (void)rhs; }
-    animdef_c &operator=(animdef_c &rhs)
+    explicit AnimationDefinition(AnimationDefinition &rhs) { (void)rhs; }
+    AnimationDefinition &operator=(AnimationDefinition &rhs)
     {
         (void)rhs;
         return *this;
     }
 };
 
-// Our animdefs container
-class animdef_container_c : public std::vector<animdef_c *>
+class AnimationDefinitionContainer : public std::vector<AnimationDefinition *>
 {
    public:
-    animdef_container_c() {}
-    ~animdef_container_c()
+    AnimationDefinitionContainer() {}
+    ~AnimationDefinitionContainer()
     {
-        for (auto iter = begin(); iter != end(); iter++)
+        for (std::vector<AnimationDefinition *>::iterator iter     = begin(),
+                                                          iter_end = end();
+             iter != iter_end; iter++)
         {
-            animdef_c *anim = *iter;
+            AnimationDefinition *anim = *iter;
             delete anim;
             anim = nullptr;
         }
     }
+
+   public:
+    AnimationDefinition *Lookup(const char *refname);
 };
 
-extern animdef_container_c animdefs;  // -ACB- 2004/06/03 Implemented
+extern AnimationDefinitionContainer animdefs;  // -ACB- 2004/06/03 Implemented
 
 void DDF_ReadAnims(const std::string &data);
 
 // handle the BOOM lump
 void DDF_ConvertANIMATED(const uint8_t *data, int size);
-
-#endif /* __DDF_ANIM__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

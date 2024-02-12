@@ -15,31 +15,28 @@
 //  GNU General Public License for more details.
 //
 //----------------------------------------------------------------------------
-//
-// Colourmap handling.
-//
 
 #include "colormap.h"
 
 #include "local.h"
 #include "str_compare.h"
 
-static colourmap_c *dynamic_colmap;
+static Colormap *dynamic_colmap;
 
-colourmap_container_c colourmaps;
+ColormapContainer colormaps;
 
 void DDF_ColmapGetSpecial(const char *info, void *storage);
 
 #define DDF_CMD_BASE dummy_colmap
-static colourmap_c dummy_colmap;
+static Colormap dummy_colmap;
 
 static const commandlist_t colmap_commands[] = {
-    DDF_FIELD("LUMP", lump_name, DDF_MainGetLumpName),
-    DDF_FIELD("PACK", pack_name, DDF_MainGetString),
-    DDF_FIELD("START", start, DDF_MainGetNumeric),
-    DDF_FIELD("LENGTH", length, DDF_MainGetNumeric),
-    DDF_FIELD("SPECIAL", special, DDF_ColmapGetSpecial),
-    DDF_FIELD("GL_COLOUR", gl_colour, DDF_MainGetRGB),
+    DDF_FIELD("LUMP", lump_name_, DDF_MainGetLumpName),
+    DDF_FIELD("PACK", pack_name_, DDF_MainGetString),
+    DDF_FIELD("START", start_, DDF_MainGetNumeric),
+    DDF_FIELD("LENGTH", length_, DDF_MainGetNumeric),
+    DDF_FIELD("SPECIAL", special_, DDF_ColmapGetSpecial),
+    DDF_FIELD("GL_COLOUR", gl_color_, DDF_MainGetRGB),
 
     DDF_CMD_END};
 
@@ -55,7 +52,7 @@ static void ColmapStartEntry(const char *name, bool extend)
         name = "COLORMAP_WITH_NO_NAME";
     }
 
-    dynamic_colmap = colourmaps.Lookup(name);
+    dynamic_colmap = colormaps.Lookup(name);
 
     if (extend)
     {
@@ -70,21 +67,21 @@ static void ColmapStartEntry(const char *name, bool extend)
         dynamic_colmap->Default();
 
         if (epi::StringPrefixCaseCompareASCII(name, "TEXT") == 0)
-            dynamic_colmap->special = COLSP_Whiten;
+            dynamic_colmap->special_ = kColorSpecialWhiten;
 
         return;
     }
 
     // not found, create a new one
-    dynamic_colmap = new colourmap_c;
+    dynamic_colmap = new Colormap;
 
-    dynamic_colmap->name = name;
+    dynamic_colmap->name_ = name;
 
     // make sure fonts get whitened properly (as the default)
     if (epi::StringPrefixCaseCompareASCII(name, "TEXT") == 0)
-        dynamic_colmap->special = COLSP_Whiten;
+        dynamic_colmap->special_ = kColorSpecialWhiten;
 
-    colourmaps.push_back(dynamic_colmap);
+    colormaps.push_back(dynamic_colmap);
 }
 
 static void ColmapParseField(const char *field, const char *contents, int index,
@@ -106,39 +103,41 @@ static void ColmapParseField(const char *field, const char *contents, int index,
 
 static void ColmapFinishEntry(void)
 {
-    if (dynamic_colmap->start < 0)
+    if (dynamic_colmap->start_ < 0)
     {
         DDF_WarnError("Bad START value for colmap: %d\n",
-                      dynamic_colmap->start);
-        dynamic_colmap->start = 0;
+                      dynamic_colmap->start_);
+        dynamic_colmap->start_ = 0;
     }
 
     // don't need a length when using GL_COLOUR
-    if (!dynamic_colmap->lump_name.empty() &&
-        !dynamic_colmap->pack_name.empty() && dynamic_colmap->length <= 0)
+    if (!dynamic_colmap->lump_name_.empty() &&
+        !dynamic_colmap->pack_name_.empty() && dynamic_colmap->length_ <= 0)
     {
         DDF_WarnError("Bad LENGTH value for colmap: %d\n",
-                      dynamic_colmap->length);
-        dynamic_colmap->length = 1;
+                      dynamic_colmap->length_);
+        dynamic_colmap->length_ = 1;
     }
 
-    if (dynamic_colmap->lump_name.empty() &&
-        dynamic_colmap->pack_name.empty() &&
-        dynamic_colmap->gl_colour == kRGBANoValue)
+    if (dynamic_colmap->lump_name_.empty() &&
+        dynamic_colmap->pack_name_.empty() &&
+        dynamic_colmap->gl_color_ == kRGBANoValue)
     {
         DDF_WarnError("Colourmap entry missing LUMP, PACK or GL_COLOUR.\n");
         // We are now assuming that the intent is to remove all
         // colmaps with this name (i.e., "null" it), as the only way to get here
-        // is to create an empty entry or use gl_colour=NONE; - Dasho
-        std::string doomed_name = dynamic_colmap->name;
-        for (auto iter = colourmaps.begin(); iter != colourmaps.end();)
+        // is to create an empty entry or use gl_color_=NONE; - Dasho
+        std::string doomed_name = dynamic_colmap->name_;
+        for (std::vector<Colormap *>::iterator iter     = colormaps.begin(),
+                                               iter_end = colormaps.end();
+             iter != iter_end; iter++)
         {
-            colourmap_c *cmap = *iter;
-            if (DDF_CompareName(doomed_name.c_str(), cmap->name.c_str()) == 0)
+            Colormap *cmap = *iter;
+            if (DDF_CompareName(doomed_name.c_str(), cmap->name_.c_str()) == 0)
             {
                 delete cmap;
                 cmap = nullptr;
-                iter = colourmaps.erase(iter);
+                iter = colormaps.erase(iter);
             }
             else
                 ++iter;
@@ -168,18 +167,18 @@ void DDF_ReadColourMaps(const std::string &data)
 
 void DDF_ColmapInit(void)
 {
-    for (auto cmap : colourmaps)
+    for (Colormap *cmap : colormaps)
     {
         delete cmap;
         cmap = nullptr;
     }
-    colourmaps.clear();
+    colormaps.clear();
 }
 
-void DDF_ColmapCleanUp(void) { colourmaps.shrink_to_fit(); }
+void DDF_ColmapCleanUp(void) { colormaps.shrink_to_fit(); }
 
-specflags_t colmap_specials[] = {{"FLASH", COLSP_NoFlash, true},
-                                 {"WHITEN", COLSP_Whiten, false},
+specflags_t colmap_specials[] = {{"FLASH", kColorSpecialNoFlash, true},
+                                 {"WHITEN", kColorSpecialWhiten, false},
 
                                  // -AJA- backwards compatibility cruft...
                                  {"SKY", 0, 0},
@@ -189,11 +188,11 @@ specflags_t colmap_specials[] = {{"FLASH", COLSP_NoFlash, true},
 //
 // DDF_ColmapGetSpecial
 //
-// Gets the colourmap specials.
+// Gets the colormap specials.
 //
 void DDF_ColmapGetSpecial(const char *info, void *storage)
 {
-    colourspecial_e *spec = (colourspecial_e *)storage;
+    ColorSpecial *spec = (ColorSpecial *)storage;
 
     int flag_value;
 
@@ -201,11 +200,11 @@ void DDF_ColmapGetSpecial(const char *info, void *storage)
                                      false))
     {
         case CHKF_Positive:
-            *spec = (colourspecial_e)(*spec | flag_value);
+            *spec = (ColorSpecial)(*spec | flag_value);
             break;
 
         case CHKF_Negative:
-            *spec = (colourspecial_e)(*spec & ~flag_value);
+            *spec = (ColorSpecial)(*spec & ~flag_value);
             break;
 
         case CHKF_User:
@@ -218,82 +217,84 @@ void DDF_ColmapGetSpecial(const char *info, void *storage)
 // --> Colourmap Class
 
 //
-// colourmap_c Constructor
+// Colormap Constructor
 //
-colourmap_c::colourmap_c() : name() { Default(); }
+Colormap::Colormap() : name_() { Default(); }
 
 //
-// colourmap_c Deconstructor
+// Colormap Deconstructor
 //
-colourmap_c::~colourmap_c() {}
+Colormap::~Colormap() {}
 
 //
-// colourmap_c::CopyDetail()
+// Colormap::CopyDetail()
 //
-void colourmap_c::CopyDetail(colourmap_c &src)
+void Colormap::CopyDetail(Colormap &src)
 {
-    lump_name = src.lump_name;
+    lump_name_ = src.lump_name_;
 
-    start   = src.start;
-    length  = src.length;
-    special = src.special;
+    start_   = src.start_;
+    length_  = src.length_;
+    special_ = src.special_;
 
-    gl_colour   = src.gl_colour;
-    font_colour = src.font_colour;
+    gl_color_    = src.gl_color_;
+    font_colour_ = src.font_colour_;
 
-    cache.data = nullptr;
-    analysis   = nullptr;
+    cache_.data = nullptr;
+    analysis_   = nullptr;
 }
 
 //
-// colourmap_c::Default()
+// Colormap::Default()
 //
-void colourmap_c::Default()
+void Colormap::Default()
 {
-    lump_name.clear();
+    lump_name_.clear();
 
-    start   = 0;
-    length  = 0;
-    special = COLSP_None;
+    start_   = 0;
+    length_  = 0;
+    special_ = kColorSpecialNone;
 
-    gl_colour   = kRGBANoValue;
-    font_colour = kRGBANoValue;
+    gl_color_    = kRGBANoValue;
+    font_colour_ = kRGBANoValue;
 
-    cache.data = nullptr;
-    analysis   = nullptr;
+    cache_.data = nullptr;
+    analysis_   = nullptr;
 }
 
-// --> colourmap_container_c class
+// --> ColormapContainer class
 
 //
-// colourmap_container_c::colourmap_container_c()
+// ColormapContainer::ColormapContainer()
 //
-colourmap_container_c::colourmap_container_c() {}
+ColormapContainer::ColormapContainer() {}
 
 //
-// ~colourmap_container_c::colourmap_container_c()
+// ~ColormapContainer::ColormapContainer()
 //
-colourmap_container_c::~colourmap_container_c()
+ColormapContainer::~ColormapContainer()
 {
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<Colormap *>::iterator iter = begin(), iter_end = end();
+         iter != iter_end; iter++)
     {
-        colourmap_c *cmap = *iter;
+        Colormap *cmap = *iter;
         delete cmap;
         cmap = nullptr;
     }
 }
 
 //
-// colourmap_c* colourmap_container_c::Lookup()
+// Colormap* Colormapontainer_c::Lookup()
 //
-colourmap_c *colourmap_container_c::Lookup(const char *refname)
+Colormap *ColormapContainer::Lookup(const char *refname)
 {
     if (!refname || !refname[0]) return nullptr;
 
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<Colormap *>::iterator iter = begin(), iter_end = end();
+         iter != iter_end; iter++)
     {
-        colourmap_c *cmap = *iter;
-        if (DDF_CompareName(cmap->name.c_str(), refname) == 0) return cmap;
+        Colormap *cmap = *iter;
+        if (DDF_CompareName(cmap->name_.c_str(), refname) == 0) return cmap;
     }
 
     return nullptr;
@@ -346,10 +347,9 @@ void DDF_AddRawColourmap(const char *name, int size, const char *pack_name)
     // DEBUG:
     DDF_DumpFile(text);
 
-    DDF_AddFile(DDF_ColourMap, text, pack_name ? pack_name : name);
+    DDF_AddFile(kDDFTypeColourMap, text, pack_name ? pack_name : name);
 
-    I_Debugf("- Added RAW colourmap '%s' start=0 length=%s\n", name,
-             length_buf);
+    I_Debugf("- Added RAW colormap '%s' start=0 length=%s\n", name, length_buf);
 }
 
 //--- editor settings ---

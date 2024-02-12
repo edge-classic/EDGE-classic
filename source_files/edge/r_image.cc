@@ -98,7 +98,7 @@ typedef struct cached_image_s
     image_c *parent;
 
     // colormap used for translated image, normally nullptr
-    const colourmap_c *trans_map;
+    const Colormap *trans_map;
 
     // general hue of image (skewed towards pure colors)
     RGBAColor hue;
@@ -432,13 +432,13 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
 
     rim->name = name;
 
-    flatdef_c *current_flatdef = flatdefs.Find(rim->name.c_str());
+    FlatDefinition *current_flatdef = flatdefs.Find(rim->name.c_str());
 
-    if (current_flatdef && !current_flatdef->liquid.empty())
+    if (current_flatdef && !current_flatdef->liquid_.empty())
     {
-        if (epi::StringCaseCompareASCII(current_flatdef->liquid, "THIN") == 0)
+        if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THIN") == 0)
             rim->liquid_type = LIQ_Thin;
-        else if (epi::StringCaseCompareASCII(current_flatdef->liquid, "THICK") == 0)
+        else if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THICK") == 0)
             rim->liquid_type = LIQ_Thick;
     }
 
@@ -574,13 +574,13 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
 
     rim->name = name;
 
-    flatdef_c *current_flatdef = flatdefs.Find(rim->name.c_str());
+    FlatDefinition *current_flatdef = flatdefs.Find(rim->name.c_str());
 
-    if (current_flatdef && !current_flatdef->liquid.empty())
+    if (current_flatdef && !current_flatdef->liquid_.empty())
     {
-        if (epi::StringCaseCompareASCII(current_flatdef->liquid, "THIN") == 0)
+        if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THIN") == 0)
             rim->liquid_type = LIQ_Thin;
-        else if (epi::StringCaseCompareASCII(current_flatdef->liquid, "THICK") == 0)
+        else if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THICK") == 0)
             rim->liquid_type = LIQ_Thick;
     }
 
@@ -679,13 +679,13 @@ static image_c *AddImageFlat(const char *name, int lump)
     rim->source.flat.lump = lump;
     rim->source_palette   = W_GetPaletteForLump(lump);
 
-    flatdef_c *current_flatdef = flatdefs.Find(rim->name.c_str());
+    FlatDefinition *current_flatdef = flatdefs.Find(rim->name.c_str());
 
-    if (current_flatdef && !current_flatdef->liquid.empty())
+    if (current_flatdef && !current_flatdef->liquid_.empty())
     {
-        if (epi::StringCaseCompareASCII(current_flatdef->liquid, "THIN") == 0)
+        if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THIN") == 0)
             rim->liquid_type = LIQ_Thin;
-        else if (epi::StringCaseCompareASCII(current_flatdef->liquid, "THICK") == 0)
+        else if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THICK") == 0)
             rim->liquid_type = LIQ_Thick;
     }
 
@@ -1270,7 +1270,7 @@ static int IM_PixelLimit(image_c *rim)
         return (1 << 22);
 }
 
-static GLuint LoadImageOGL(image_c *rim, const colourmap_c *trans, bool do_whiten)
+static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
 {
     bool clamp  = IM_ShouldClamp(rim);
     bool mip    = IM_ShouldMipmap(rim);
@@ -1820,7 +1820,7 @@ const char *W_ImageGetName(const image_c *image)
 //  IMAGE USAGE
 //
 
-static cached_image_t *ImageCacheOGL(image_c *rim, const colourmap_c *trans, bool do_whiten)
+static cached_image_t *ImageCacheOGL(image_c *rim, const Colormap *trans, bool do_whiten)
 {
     // check if image + translation is already cached
 
@@ -1901,7 +1901,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim, const colourmap_c *trans, boo
 // The top-level routine for caching in an image.  Mainly just a
 // switch to more specialised routines.
 //
-GLuint W_ImageCache(const image_c *image, bool anim, const colourmap_c *trans, bool do_whiten)
+GLuint W_ImageCache(const image_c *image, bool anim, const Colormap *trans, bool do_whiten)
 {
     // Intentional Const Override
     image_c *rim = (image_c *)image;

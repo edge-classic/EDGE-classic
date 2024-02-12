@@ -117,7 +117,7 @@ class wad_file_c
     std::vector<int> skin_markers;
 
     // ddf and rts lump list
-    int ddf_lumps[DDF_NUM_TYPES];
+    int ddf_lumps[kTotalDDFTypes];
 
     // texture information
     wadtex_resource_c wadtex;
@@ -146,7 +146,7 @@ class wad_file_c
           level_markers(), skin_markers(), wadtex(), deh_lump(-1), coal_huds(-1), lua_huds(-1), umapinfo_lump(-1), animated(-1), switches(-1),
           md5_string()
     {
-        for (int d = 0; d < DDF_NUM_TYPES; d++)
+        for (int d = 0; d < kTotalDDFTypes; d++)
             ddf_lumps[d] = -1;
     }
 
@@ -615,9 +615,9 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
     // -KM- 1998/12/16 Load DDF/RSCRIPT file from wad.
     if (allow_ddf && wad != nullptr)
     {
-        ddf_type_e type = DDF_LumpToType(info.name);
+        DDFType type = DDF_LumpToType(info.name);
 
-        if (type != DDF_UNKNOWN)
+        if (type != kDDFTypeUNKNOWN)
         {
             lump_p->kind         = LMKIND_DDFRTS;
             wad->ddf_lumps[type] = lump;
@@ -1011,7 +1011,7 @@ static void ProcessDDFInWad(data_file_c *df)
 {
     std::string bare_filename = epi::GetFilename(df->name);
 
-    for (size_t d = 0; d < DDF_NUM_TYPES; d++)
+    for (size_t d = 0; d < kTotalDDFTypes; d++)
     {
         int lump = df->wad->ddf_lumps[d];
 
@@ -1025,7 +1025,7 @@ static void ProcessDDFInWad(data_file_c *df)
             source += " in ";
             source += bare_filename;
 
-            DDF_AddFile((ddf_type_e)d, data, source);
+            DDF_AddFile((DDFType)d, data, source);
         }
     }
 }

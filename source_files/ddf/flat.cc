@@ -23,21 +23,21 @@
 #include "local.h"
 #include "str_util.h"
 
-static flatdef_c *dynamic_flatdef;
+static FlatDefinition *dynamic_flatdef;
 
-flatdef_container_c flatdefs;
+FlatDefinitionContainer flatdefs;
 
 #define DDF_CMD_BASE dummy_flatdef
-static flatdef_c dummy_flatdef;
+static FlatDefinition dummy_flatdef;
 
 static const commandlist_t flat_commands[] = {
-    DDF_FIELD("LIQUID", liquid, DDF_MainGetString),
-    DDF_FIELD("FOOTSTEP", footstep, DDF_MainLookupSound),
-    DDF_FIELD("SPLASH", splash, DDF_MainGetLumpName),
-    DDF_FIELD("IMPACT_OBJECT", impactobject_ref, DDF_MainGetString),
-    DDF_FIELD("GLOW_OBJECT", glowobject_ref, DDF_MainGetString),
-    DDF_FIELD("SINK_DEPTH", sink_depth, DDF_MainGetPercent),
-    DDF_FIELD("BOB_DEPTH", bob_depth, DDF_MainGetPercent),
+    DDF_FIELD("LIQUID", liquid_, DDF_MainGetString),
+    DDF_FIELD("FOOTSTEP", footstep_, DDF_MainLookupSound),
+    DDF_FIELD("SPLASH", splash_, DDF_MainGetLumpName),
+    DDF_FIELD("IMPACT_OBJECT", impactobject_ref_, DDF_MainGetString),
+    DDF_FIELD("GLOW_OBJECT", glowobject_ref_, DDF_MainGetString),
+    DDF_FIELD("SINK_DEPTH", sink_depth_, DDF_MainGetPercent),
+    DDF_FIELD("BOB_DEPTH", bob_depth_, DDF_MainGetPercent),
 
     DDF_CMD_END};
 
@@ -69,9 +69,9 @@ static void FlatStartEntry(const char *name, bool extend)
     }
 
     // not found, create a new one
-    dynamic_flatdef = new flatdef_c;
+    dynamic_flatdef = new FlatDefinition;
 
-    dynamic_flatdef->name = name;
+    dynamic_flatdef->name_ = name;
 
     flatdefs.push_back(dynamic_flatdef);
 }
@@ -94,7 +94,7 @@ static void FlatParseField(const char *field, const char *contents, int index,
 
 static void FlatClearAll(void)
 {
-    for (auto flt : flatdefs)
+    for (FlatDefinition *flt : flatdefs)
     {
         delete flt;
         flt = nullptr;
@@ -124,18 +124,18 @@ void DDF_FlatInit(void) { FlatClearAll(); }
 //
 void DDF_FlatCleanUp(void)
 {
-    for (auto f : flatdefs)
+    for (FlatDefinition *f : flatdefs)
     {
         cur_ddf_entryname =
-            epi::StringFormat("[%s]  (flats.ddf)", f->name.c_str());
+            epi::StringFormat("[%s]  (flats.ddf)", f->name_.c_str());
 
-        f->impactobject = f->impactobject_ref != ""
-                              ? mobjtypes.Lookup(f->impactobject_ref.c_str())
-                              : nullptr;
+        f->impactobject_ = f->impactobject_ref_ != ""
+                               ? mobjtypes.Lookup(f->impactobject_ref_.c_str())
+                               : nullptr;
 
-        f->glowobject = f->glowobject_ref != ""
-                            ? mobjtypes.Lookup(f->glowobject_ref.c_str())
-                            : nullptr;
+        f->glowobject_ = f->glowobject_ref_ != ""
+                             ? mobjtypes.Lookup(f->glowobject_ref_.c_str())
+                             : nullptr;
 
         // f->effectobject = f->effectobject_ref.empty() ?
         //		nullptr : mobjtypes.Lookup(f->effectobject_ref);
@@ -161,70 +161,56 @@ void DDF_ParseFLATS(const uint8_t *data, int size)
         // ignore zero-length names
         if (!splash[0]) continue;
 
-        flatdef_c *def = new flatdef_c;
+        FlatDefinition *def = new FlatDefinition;
 
-        def->name = "FLAT";
+        def->name_ = "FLAT";
 
         def->Default();
 
-        def->splash = splash;
+        def->splash_ = splash;
 
         flatdefs.push_back(def);
     }
 }
 
-// ---> flatdef_c class
+FlatDefinition::FlatDefinition() : name_() { Default(); }
 
-//
-// flatdef_c Constructor
-//
-flatdef_c::flatdef_c() : name() { Default(); }
-
-//
-// flatdef_c::CopyDetail()
-//
-// Copies all the detail with the exception of ddf info
-//
-void flatdef_c::CopyDetail(flatdef_c &src)
+void FlatDefinition::CopyDetail(FlatDefinition &src)
 {
-    liquid           = src.liquid;
-    footstep         = src.footstep;
-    splash           = src.splash;
-    impactobject     = src.impactobject;
-    impactobject_ref = src.impactobject_ref;
-    glowobject       = src.glowobject;
-    glowobject_ref   = src.glowobject_ref;
-    sink_depth       = src.sink_depth;
-    bob_depth        = src.bob_depth;
+    liquid_           = src.liquid_;
+    footstep_         = src.footstep_;
+    splash_           = src.splash_;
+    impactobject_     = src.impactobject_;
+    impactobject_ref_ = src.impactobject_ref_;
+    glowobject_       = src.glowobject_;
+    glowobject_ref_   = src.glowobject_ref_;
+    sink_depth_       = src.sink_depth_;
+    bob_depth_        = src.bob_depth_;
 }
 
-//
-// flatdef_c::Default()
-//
-void flatdef_c::Default()
+void FlatDefinition::Default()
 {
-    liquid   = "";
-    footstep = sfx_None;
-    splash.clear();
-    impactobject = nullptr;
-    impactobject_ref.clear();
-    glowobject = nullptr;
-    glowobject_ref.clear();
-    sink_depth = PERCENT_MAKE(0);
-    bob_depth  = PERCENT_MAKE(0);
+    liquid_   = "";
+    footstep_ = sfx_None;
+    splash_.clear();
+    impactobject_ = nullptr;
+    impactobject_ref_.clear();
+    glowobject_ = nullptr;
+    glowobject_ref_.clear();
+    sink_depth_ = PERCENT_MAKE(0);
+    bob_depth_  = PERCENT_MAKE(0);
 }
 
-//
-// flatdef_c* flatdef_container_c::Find()
-//
-flatdef_c *flatdef_container_c::Find(const char *name)
+FlatDefinition *FlatDefinitionContainer::Find(const char *name)
 {
     if (!name || !name[0]) return nullptr;
 
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<FlatDefinition *>::iterator iter     = begin(),
+                                                 iter_end = end();
+         iter != iter_end; iter++)
     {
-        flatdef_c *flt = *iter;
-        if (DDF_CompareName(flt->name.c_str(), name) == 0) return flt;
+        FlatDefinition *flt = *iter;
+        if (DDF_CompareName(flt->name_.c_str(), name) == 0) return flt;
     }
 
     return nullptr;

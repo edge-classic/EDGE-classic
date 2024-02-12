@@ -163,7 +163,7 @@ void HL_WriteText(style_c *style, int text_type, int x, int y, const char *str, 
     HUD_SetFont(style->fonts[text_type]);
     HUD_SetScale(scale * style->def->text[text_type].scale);
 
-    const colourmap_c *colmap = style->def->text[text_type].colmap;
+    const Colormap *colmap = style->def->text[text_type].colmap;
 
     if (colmap)
         HUD_SetTextColor(V_GetFontColor(colmap));

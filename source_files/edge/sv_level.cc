@@ -808,18 +808,18 @@ void SR_LevelPutImage(void *storage, int index, void *extra)
 
 bool SR_LevelGetColmap(void *storage, int index, void *extra)
 {
-    const colourmap_c **dest = (const colourmap_c **)storage + index;
+    const Colormap **dest = (const Colormap **)storage + index;
     const char         *str;
 
     str = SV_GetString();
 
     if (str)
-        (*dest) = colourmaps.Lookup(str);
+        (*dest) = colormaps.Lookup(str);
     else
         (*dest) = nullptr;
 
     // -AJA- 2008/03/15: backwards compatibility
-    if (*dest && epi::StringCaseCompareASCII((*dest)->name, "NORMAL") == 0)
+    if (*dest && epi::StringCaseCompareASCII((*dest)->name_, "NORMAL") == 0)
         *dest = nullptr;
 
     SV_FreeString(str);
@@ -831,10 +831,10 @@ bool SR_LevelGetColmap(void *storage, int index, void *extra)
 //
 void SR_LevelPutColmap(void *storage, int index, void *extra)
 {
-    const colourmap_c *src = ((const colourmap_c **)storage)[index];
+    const Colormap *src = ((const Colormap **)storage)[index];
 
     if (src)
-        SV_PutString(src->name.c_str());
+        SV_PutString(src->name_.c_str());
     else
         SV_PutString(nullptr);
 }

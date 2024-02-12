@@ -1001,7 +1001,7 @@ static void PL_play_footstep(coal::vm_c *vm, int argc)
     if (!flat)
         I_Error("player.play_footstep: No flat name given!\n");
 
-    flatdef_c *current_flatdef = flatdefs.Find(flat);
+    FlatDefinition *current_flatdef = flatdefs.Find(flat);
 
     if (!current_flatdef)
     {
@@ -1009,7 +1009,7 @@ static void PL_play_footstep(coal::vm_c *vm, int argc)
         return;
     }
 
-    if (!current_flatdef->footstep)
+    if (!current_flatdef->footstep_)
     {
         vm->ReturnFloat(0);
         return;
@@ -1017,7 +1017,7 @@ static void PL_play_footstep(coal::vm_c *vm, int argc)
     else
     {
         // Probably need to add check to see if the sfx is valid - Dasho
-        S_StartFX(current_flatdef->footstep);
+        S_StartFX(current_flatdef->footstep_);
         vm->ReturnFloat(1);
     }
 }

@@ -430,7 +430,7 @@ static void TextWrite(void)
 
     if (style->def->text[t_type].colmap)
     {
-        const colourmap_c *colmap = style->def->text[t_type].colmap;
+        const Colormap *colmap = style->def->text[t_type].colmap;
         HUD_SetTextColor(V_GetFontColor(colmap));
     }
 

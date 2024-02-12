@@ -59,7 +59,7 @@ void rscript::Shutdown() { keen_mobjs.clear(); }
 
 void rscript::BeginLump()
 {
-    wad::NewLump(DDF_RadScript);
+    wad::NewLump(kDDFTypeRadScript);
 
     wad::Printf("// <SCRIPTS>\n\n");
 }

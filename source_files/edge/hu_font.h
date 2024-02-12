@@ -24,7 +24,7 @@
 #include "stb_truetype.h"
 #include <unordered_map>
 
-class fontdef_c;
+class FontDefinition;
 
 // Temporary measure since all of our text routines are Unicode-unaware
 const int cp437_unicode_values[256] = {
@@ -79,7 +79,7 @@ class font_c
     friend class font_container_c;
 
   public:
-    font_c(fontdef_c *_def);
+    font_c(FontDefinition *_def);
     ~font_c();
 
 private:
@@ -101,7 +101,7 @@ public:
 
     patchcache_t p_cache;
 
-	fontdef_c *def;
+	FontDefinition *def;
 
     float spacing;
 
@@ -152,7 +152,7 @@ class font_container_c : public std::vector<font_c *>
 
   public:
     // Search Functions
-    font_c *Lookup(fontdef_c *def);
+    font_c *Lookup(FontDefinition *def);
 };
 
 extern font_container_c hu_fonts;

@@ -562,8 +562,8 @@ static void CalcSizes()
     else
         FNSZ = 24;
 
-    FNSZ_ratio = FNSZ / con_font->def->default_size;
-    if (con_font->def->type == FNTYP_Image)
+    FNSZ_ratio = FNSZ / con_font->def->default_size_;
+    if (con_font->def->type_ == kFontTypeImage)
         XMUL = RoundToInt((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
 }
 
@@ -604,7 +604,7 @@ static void DrawChar(int x, int y, char ch, RGBAColor col)
 
     glColor4f(sgcol.r, sgcol.g, sgcol.b, 1.0f);
 
-    if (con_font->def->type == FNTYP_TrueType)
+    if (con_font->def->type_ == kFontTypeTrueType)
     {
         float chwidth  = con_font->CharWidth(ch);
         XMUL           = RoundToInt(chwidth * FNSZ_ratio / v_pixelaspect.f);
@@ -712,10 +712,10 @@ static void DrawEndoomChar(float x, float y, char ch, RGBAColor col, RGBAColor c
 // writes the text on coords (x,y) of the console
 static void DrawText(int x, int y, const char *s, RGBAColor col)
 {
-    if (con_font->def->type == FNTYP_Image)
+    if (con_font->def->type_ == kFontTypeImage)
     {
         // Always whiten the font when used with console output
-        GLuint tex_id = W_ImageCache(con_font->font_image, true, (const colourmap_c *)0, true);
+        GLuint tex_id = W_ImageCache(con_font->font_image, true, (const Colormap *)0, true);
 
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -724,13 +724,13 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
         glEnable(GL_ALPHA_TEST);
         glAlphaFunc(GL_GREATER, 0);
     }
-    else if (con_font->def->type == FNTYP_TrueType)
+    else if (con_font->def->type_ == kFontTypeTrueType)
     {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_TEXTURE_2D);
-        if ((var_smoothing && con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ON_DEMAND) ||
-            con_font->def->ttf_smoothing == con_font->def->TTF_SMOOTH_ALWAYS)
+        if ((var_smoothing && con_font->def->ttf_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
+            con_font->def->ttf_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
             glBindTexture(GL_TEXTURE_2D, con_font->ttf_smoothed_tex_id[current_font_size]);
         else
             glBindTexture(GL_TEXTURE_2D, con_font->ttf_tex_id[current_font_size]);
@@ -749,7 +749,7 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
     {
         DrawChar(x, y, *s, col);
 
-        if (con_font->def->type == FNTYP_TrueType)
+        if (con_font->def->type_ == kFontTypeTrueType)
         {
             if (s + 1)
             {
@@ -782,7 +782,7 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
 static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
 {
     // Always whiten the font when used with console output
-    GLuint tex_id = W_ImageCache(endoom_font->font_image, true, (const colourmap_c *)0, true);
+    GLuint tex_id = W_ImageCache(endoom_font->font_image, true, (const Colormap *)0, true);
 
     int enwidth = RoundToInt((float)endoom_font->im_mono_width * ((float)FNSZ / endoom_font->im_mono_width) / 2);
 
@@ -815,7 +815,7 @@ void CON_SetupFont(void)
 {
     if (!con_font)
     {
-        fontdef_c *DEF = fontdefs.Lookup("CON_FONT_2");
+        FontDefinition *DEF = fontdefs.Lookup("CON_FONT_2");
         if (!DEF)
             I_Error("CON_FONT_2 definition missing from DDFFONT!\n");
         con_font = hu_fonts.Lookup(DEF);
@@ -825,7 +825,7 @@ void CON_SetupFont(void)
 
     if (!endoom_font)
     {
-        fontdef_c *DEF = fontdefs.Lookup("ENDFONT");
+        FontDefinition *DEF = fontdefs.Lookup("ENDFONT");
         if (!DEF)
             I_Error("ENDFONT definition missing from DDFFONT!\n");
         endoom_font = hu_fonts.Lookup(DEF);
@@ -876,7 +876,7 @@ void CON_Drawer(void)
                  console_style->def->bg.translucency);
     }
 
-    y += FNSZ / 4 + (con_font->def->type == FNTYP_TrueType ? FNSZ : 0);
+    y += FNSZ / 4 + (con_font->def->type_ == kFontTypeTrueType ? FNSZ : 0);
 
     // -- input line --
 
@@ -1657,7 +1657,7 @@ void CON_ShowFPS(void)
     SolidBox(x, y, SCREENWIDTH, SCREENHEIGHT, SG_BLACK_RGBA32, 0.5);
 
     x += XMUL;
-    y = SCREENHEIGHT - FNSZ - FNSZ * (con_font->def->type == FNTYP_TrueType ? -0.5 : 0.5);
+    y = SCREENHEIGHT - FNSZ - FNSZ * (con_font->def->type_ == kFontTypeTrueType ? -0.5 : 0.5);
 
     // show average...
 
@@ -1729,7 +1729,7 @@ void CON_ShowPosition(void)
     SolidBox(x, y - FNSZ * 10, XMUL * 16, FNSZ * 10 + 2, SG_BLACK_RGBA32, 0.5);
 
     x += XMUL;
-    y -= FNSZ * (con_font->def->type == FNTYP_TrueType ? 0.25 : 1.25);
+    y -= FNSZ * (con_font->def->type_ == kFontTypeTrueType ? 0.25 : 1.25);
     sprintf(textbuf, "    x: %d", (int)p->mo->x);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 

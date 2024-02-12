@@ -196,7 +196,7 @@ static void HD_text_font(coal::vm_c *vm, int argc)
 
     const char *font_name = vm->AccessParamString(0);
 
-    fontdef_c *DEF = fontdefs.Lookup(font_name);
+    FontDefinition *DEF = fontdefs.Lookup(font_name);
     SYS_ASSERT(DEF);
 
     if (!DEF)

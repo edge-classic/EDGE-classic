@@ -766,7 +766,7 @@ class linetype_c
 
     // Colourmap changing
     // -AJA- 1999/07/09: Now uses colmap.ddf
-    const colourmap_c *use_colourmap;
+    const Colormap *use_colourmap;
 
     // Property Transfers (FLO_UNUSED if unset)
     float gravity;
@@ -924,7 +924,7 @@ class sectortype_c
 
     // Colourmap changing
     // -AJA- 1999/07/09: Now uses colmap.ddf
-    const colourmap_c *use_colourmap;
+    const Colormap *use_colourmap;
 
     // Ambient sound transfer
     struct sfx_s *ambient_sfx;
@@ -948,7 +948,7 @@ class sectortype_c
     float floor_bob;
     float ceiling_bob;
 
-    colourmap_c *fog_cmap;
+    Colormap *fog_cmap;
     RGBAColor    fog_color;
     float        fog_density;
 

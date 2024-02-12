@@ -291,7 +291,7 @@ void sounds::Shutdown()
 
 void sounds::BeginLump()
 {
-    wad::NewLump(DDF_SFX);
+    wad::NewLump(kDDFTypeSFX);
 
     wad::Printf("<SOUNDS>\n\n");
 }

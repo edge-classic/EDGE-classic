@@ -25,7 +25,7 @@
 
 #include "local.h"
 
-static animdef_c *dynamic_anim;
+static AnimationDefinition *dynamic_anim;
 
 static void DDF_AnimGetType(const char *info, void *storage);
 static void DDF_AnimGetPic(const char *info, void *storage);
@@ -34,14 +34,14 @@ static void DDF_AnimGetPic(const char *info, void *storage);
 // -KM- 1998/09/27 Use DDF_MainGetTime for getting tics
 
 #define DDF_CMD_BASE dummy_anim
-static animdef_c dummy_anim;
+static AnimationDefinition dummy_anim;
 
 static const commandlist_t anim_commands[] = {
-    DDF_FIELD("TYPE", type, DDF_AnimGetType),
-    DDF_FIELD("SEQUENCE", pics, DDF_AnimGetPic),
-    DDF_FIELD("SPEED", speed, DDF_MainGetTime),
-    DDF_FIELD("FIRST", startname, DDF_MainGetLumpName),
-    DDF_FIELD("LAST", endname, DDF_MainGetLumpName),
+    DDF_FIELD("TYPE", type_, DDF_AnimGetType),
+    DDF_FIELD("SEQUENCE", pics_, DDF_AnimGetPic),
+    DDF_FIELD("SPEED", speed_, DDF_MainGetTime),
+    DDF_FIELD("FIRST", start_name_, DDF_MainGetLumpName),
+    DDF_FIELD("LAST", end_name_, DDF_MainGetLumpName),
 
     DDF_CMD_END};
 
@@ -53,17 +53,21 @@ static const commandlist_t anim_commands[] = {
 //
 
 // -ACB- 2004/06/03 Replaced array and size with purpose-built class
-animdef_container_c animdefs;
+AnimationDefinitionContainer animdefs;
 
-static animdef_c *animdefs_Lookup(const char *name)
+AnimationDefinition *AnimationDefinitionContainer::Lookup(const char *refname)
 {
-    for (auto iter = animdefs.begin(); iter != animdefs.end(); iter++)
+    if (!refname || !refname[0]) return nullptr;
+
+    for (std::vector<AnimationDefinition *>::iterator iter     = begin(),
+                                                      iter_end = end();
+         iter != iter_end; iter++)
     {
-        animdef_c *anim = *iter;
-        if (DDF_CompareName(anim->name.c_str(), name) == 0) return anim;
+        AnimationDefinition *anim = *iter;
+        if (DDF_CompareName(anim->name_.c_str(), refname) == 0) return anim;
     }
 
-    return nullptr;  // not found
+    return nullptr;
 }
 
 //
@@ -77,7 +81,7 @@ static void AnimStartEntry(const char *name, bool extend)
         name = "ANIM_WITH_NO_NAME";
     }
 
-    dynamic_anim = animdefs_Lookup(name);
+    dynamic_anim = animdefs.Lookup(name);
 
     if (extend)
     {
@@ -93,9 +97,9 @@ static void AnimStartEntry(const char *name, bool extend)
     }
 
     // not found, create a new one
-    dynamic_anim = new animdef_c;
+    dynamic_anim = new AnimationDefinition;
 
-    dynamic_anim->name = name;
+    dynamic_anim->name_ = name;
 
     animdefs.push_back(dynamic_anim);
 }
@@ -116,20 +120,21 @@ static void AnimParseField(const char *field, const char *contents, int index,
 
 static void AnimFinishEntry(void)
 {
-    if (dynamic_anim->speed <= 0)
+    if (dynamic_anim->speed_ <= 0)
     {
-        DDF_WarnError("Bad TICS value for anim: %d\n", dynamic_anim->speed);
-        dynamic_anim->speed = 8;
+        DDF_WarnError("Bad TICS value for anim: %d\n", dynamic_anim->speed_);
+        dynamic_anim->speed_ = 8;
     }
 
-    if (dynamic_anim->pics.empty())
+    if (dynamic_anim->pics_.empty())
     {
-        if (dynamic_anim->startname.empty() || dynamic_anim->endname.empty())
+        if (dynamic_anim->start_name_.empty() ||
+            dynamic_anim->end_name_.empty())
         {
             DDF_Error("Missing animation sequence.\n");
         }
 
-        if (dynamic_anim->type == animdef_c::A_Graphic)
+        if (dynamic_anim->type_ == AnimationDefinition::kAnimationTypeGraphic)
             DDF_Error(
                 "TYPE=GRAPHIC animations must use the SEQUENCE command.\n");
     }
@@ -138,7 +143,7 @@ static void AnimFinishEntry(void)
 static void AnimClearAll(void)
 {
     // 100% safe to delete all animations
-    for (auto anim : animdefs)
+    for (AnimationDefinition *anim : animdefs)
     {
         delete anim;
         anim = nullptr;
@@ -184,21 +189,21 @@ static void DDF_AnimGetType(const char *info, void *storage)
     int *type = (int *)storage;
 
     if (DDF_CompareName(info, "FLAT") == 0)
-        (*type) = animdef_c::A_Flat;
+        (*type) = AnimationDefinition::kAnimationTypeFlat;
     else if (DDF_CompareName(info, "TEXTURE") == 0)
-        (*type) = animdef_c::A_Texture;
+        (*type) = AnimationDefinition::kAnimationTypeTexture;
     else if (DDF_CompareName(info, "GRAPHIC") == 0)
-        (*type) = animdef_c::A_Graphic;
+        (*type) = AnimationDefinition::kAnimationTypeGraphic;
     else
     {
         DDF_WarnError("Unknown animation type: %s\n", info);
-        (*type) = animdef_c::A_Flat;
+        (*type) = AnimationDefinition::kAnimationTypeFlat;
     }
 }
 
 static void DDF_AnimGetPic(const char *info, void *storage)
 {
-    dynamic_anim->pics.push_back(info);
+    dynamic_anim->pics_.push_back(info);
 }
 
 // ---> animdef_c class
@@ -206,35 +211,35 @@ static void DDF_AnimGetPic(const char *info, void *storage)
 //
 // animdef_c constructor
 //
-animdef_c::animdef_c() : name(), pics() { Default(); }
+AnimationDefinition::AnimationDefinition() : name_(), pics_() { Default(); }
 
 //
 // animdef_c::CopyDetail()
 //
 // Copies all the detail with the exception of ddf info
 //
-void animdef_c::CopyDetail(animdef_c &src)
+void AnimationDefinition::CopyDetail(AnimationDefinition &src)
 {
-    type      = src.type;
-    pics      = src.pics;
-    startname = src.startname;
-    endname   = src.endname;
-    speed     = src.speed;
+    type_       = src.type_;
+    pics_       = src.pics_;
+    start_name_ = src.start_name_;
+    end_name_   = src.end_name_;
+    speed_      = src.speed_;
 }
 
 //
 // animdef_c::Default()
 //
-void animdef_c::Default()
+void AnimationDefinition::Default()
 {
-    type = A_Texture;
+    type_ = kAnimationTypeTexture;
 
-    pics.clear();
+    pics_.clear();
 
-    startname.clear();
-    endname.clear();
+    start_name_.clear();
+    end_name_.clear();
 
-    speed = 8;
+    speed_ = 8;
 }
 
 //----------------------------------------------------------------------------
@@ -302,7 +307,7 @@ void DDF_ConvertANIMATED(const uint8_t *data, int size)
     // DEBUG:
     // DDF_DumpFile(text);
 
-    DDF_AddFile(DDF_Anim, text, "Boom ANIMATED lump");
+    DDF_AddFile(kDDFTypeAnim, text, "Boom ANIMATED lump");
 }
 
 //--- editor settings ---

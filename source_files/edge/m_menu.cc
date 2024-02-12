@@ -695,7 +695,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 
     LineHeight = style->fonts[text_type]->NominalHeight() * txtscale;
 
-    const colourmap_c *colmap = style->def->text[text_type].colmap;
+    const Colormap *colmap = style->def->text[text_type].colmap;
     RGBAColor           col    = V_GetFontColor(colmap);
     // HUD_ThinBox(x - 5, y - 5, x + 95, y + 50, col);
     HUD_ThinBox(x - 5, y - 5, x + 95, y + 115, col);
@@ -821,7 +821,7 @@ void M_DrawLoad(void)
 
         if (fontType == styledef_c::T_SELECTED)
         {
-            if (style->fonts[styledef_c::T_SELECTED]->def->type == FNTYP_TrueType)
+            if (style->fonts[styledef_c::T_SELECTED]->def->type_ == kFontTypeTrueType)
             {
                 // ttf_ref_yshift is important for TTF fonts.
                 float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift[current_font_size]; // * txtscale;
@@ -837,7 +837,7 @@ void M_DrawLoad(void)
                 HUD_SetAlpha(old_alpha);
             }
         }
-        if (style->fonts[fontType]->def->type == FNTYP_TrueType)
+        if (style->fonts[fontType]->def->type_ == kFontTypeTrueType)
             HL_WriteText(style, fontType, TempX, TempY - (LineHeight / 2), ex_slots[i].desc);
         else
             HL_WriteText(style, fontType, TempX, TempY - 1, ex_slots[i].desc);
@@ -942,7 +942,7 @@ void M_DrawSave(void)
 
         if (fontType == styledef_c::T_SELECTED)
         {
-            if (style->fonts[fontType]->def->type == FNTYP_TrueType)
+            if (style->fonts[fontType]->def->type_ == kFontTypeTrueType)
             {
                 // ttf_ref_yshift is important for TTF fonts.
                 float y_shift = style->fonts[fontType]->ttf_ref_yshift[current_font_size]; // * txtscale;
@@ -978,7 +978,7 @@ void M_DrawSave(void)
             len = style->fonts[fontType]->StringWidth(ex_slots[save_slot].desc) * txtscale;
         }
 
-        if (style->fonts[fontType]->def->type == FNTYP_TrueType)
+        if (style->fonts[fontType]->def->type_ == kFontTypeTrueType)
         {
             HL_WriteText(style, fontType, TempX, TempY - (LineHeight / 2), ex_slots[i].desc);
 
@@ -1214,7 +1214,7 @@ void M_DrawNewGame(void)
     }
     else
     {
-        const colourmap_c *colmap = style->def->text[fontType].colmap;
+        const Colormap *colmap = style->def->text[fontType].colmap;
         if (menu_newgame->offset_x != 0.0f) // Only auto-center if no Xoffset
             x = MainDef.x;                  // cannot get away from the damn hardcoded value
         else
@@ -1363,7 +1363,7 @@ void M_DrawEpisode(void)
                 x = CenterMenuImage2(style, fontType, menu_episode);
         }
 
-        const colourmap_c *colmap = style->def->text[fontType].colmap;
+        const Colormap *colmap = style->def->text[fontType].colmap;
         HUD_StretchImage(x, 38 + style->def->text[fontType].y_offset, IM_WIDTH(menu_episode) * txtscale,
                          IM_HEIGHT(menu_episode) * txtscale, menu_episode, 0.0, 0.0, colmap);
 
@@ -1696,24 +1696,24 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
     style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
     // If using an IMAGE or TRUETYPE type font for the menu, use a COALHUDs-style bar for the slider instead
-    if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image ||
-        opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
+    if (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeImage ||
+        opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType)
     {
         RGBAColor slider_color = SG_WHITE_RGBA32;
 
-        const colourmap_c *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
+        const Colormap *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
 
         if (colmap)
             slider_color = V_GetFontColor(colmap);
 
         HUD_ThinBox(x,
-                    y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
+                    y + (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType
                              ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
                              : 0),
                     x + (thermWidth * step) - step, y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight(),
                     slider_color);
         HUD_SolidBox(x,
-                     y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
+                     y + (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType
                               ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
                               : 0),
                      x + (thermDot * step), y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
@@ -1755,29 +1755,29 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
     style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
     // If using an IMAGE or TRUETYPE type font for the menu, use a COALHUDs-style bar for the slider instead
-    if (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_Image ||
-        opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType)
+    if (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeImage ||
+        opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType)
     {
         RGBAColor slider_color = SG_WHITE_RGBA32;
 
-        const colourmap_c *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
+        const Colormap *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
 
         if (colmap)
             slider_color = V_GetFontColor(colmap);
 
         HUD_ThinBox(x,
-                    y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
+                    y + (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType
                              ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
                              : 0),
-                    x + 50.0f, y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight() + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
+                    x + 50.0f, y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight() + (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType
                              ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]/2
                              : 0), slider_color);
         HUD_SolidBox(x,
-                     y + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
+                     y + (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType
                               ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
                               : 0),
                      x + (((thermDot - min) / increment) * scale_step),
-                     y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight() + (opt_style->fonts[styledef_c::T_ALT]->def->type == FNTYP_TrueType
+                     y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight() + (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType
                              ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]/2
                              : 0), slider_color);
         if (!actual_val.empty())
@@ -2516,7 +2516,7 @@ void M_DrawCursor(style_c *style, bool graphical_item)
 
     // const colourmap_c *colmap = style->def->text[styledef_c::T_TEXT].colmap; // Should we allow a colmap for the
     // cursor?
-    const colourmap_c *colmap = nullptr;
+    const Colormap *colmap = nullptr;
 
     //-------------------------------------------------------------
     // 1. First up, do we want a graphical cursor or a text one?
@@ -2560,7 +2560,7 @@ void M_DrawCursor(style_c *style, bool graphical_item)
 
         if (graphical_item == false)
         {
-            if (style->fonts[styledef_c::T_TEXT]->def->type == FNTYP_TrueType)
+            if (style->fonts[styledef_c::T_TEXT]->def->type_ == kFontTypeTrueType)
             {
                 ShortestLine = style->fonts[styledef_c::T_TEXT]->ttf_ref_height[current_font_size] * txtscale;
                 y_shift      = style->fonts[styledef_c::T_TEXT]->ttf_ref_yshift[current_font_size] * txtscale;
@@ -2940,7 +2940,7 @@ void M_DrawItems(style_c *style, bool graphical_item)
                 }
             }
 
-            const colourmap_c *colmap = style->def->text[textstyle].colmap;
+            const Colormap *colmap = style->def->text[textstyle].colmap;
             // colourmap_c *colmap = nullptr;
 
             // HUD_StretchImage() will apply image.offset_x again so subtract it first

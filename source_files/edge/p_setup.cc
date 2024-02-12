@@ -445,11 +445,11 @@ static void LoadSectors(int lump)
 
         if (ss->floor.image)
         {
-            flatdef_c *current_flatdef = flatdefs.Find(ss->floor.image->name.c_str());
+            FlatDefinition *current_flatdef = flatdefs.Find(ss->floor.image->name.c_str());
             if (current_flatdef)
             {
-                ss->bob_depth  = current_flatdef->bob_depth;
-                ss->sink_depth = current_flatdef->sink_depth;
+                ss->bob_depth  = current_flatdef->bob_depth_;
+                ss->sink_depth = current_flatdef->sink_depth_;
             }
         }
 
@@ -1734,11 +1734,11 @@ static void LoadUDMFSectors()
 
             if (ss->floor.image)
             {
-                flatdef_c *current_flatdef = flatdefs.Find(ss->floor.image->name.c_str());
+                FlatDefinition *current_flatdef = flatdefs.Find(ss->floor.image->name.c_str());
                 if (current_flatdef)
                 {
-                    ss->bob_depth  = current_flatdef->bob_depth;
-                    ss->sink_depth = current_flatdef->sink_depth;
+                    ss->bob_depth  = current_flatdef->bob_depth_;
+                    ss->sink_depth = current_flatdef->sink_depth_;
                 }
             }
 
@@ -1802,22 +1802,22 @@ static void LoadUDMFSectors()
 
                 if (light_color == kRGBANoValue)
                     light_color ^= 0x00010100;
-                // Make colourmap if necessary
-                for (auto cmap : colourmaps)
+                // Make colormap if necessary
+                for (Colormap *cmap : colormaps)
                 {
-                    if (cmap->gl_colour != kRGBANoValue && cmap->gl_colour == light_color)
+                    if (cmap->gl_color_ != kRGBANoValue && cmap->gl_color_ == light_color)
                     {
                         ss->props.colourmap = cmap;
                         break;
                     }
                 }
-                if (!ss->props.colourmap || ss->props.colourmap->gl_colour != light_color)
+                if (!ss->props.colourmap || ss->props.colourmap->gl_color_ != light_color)
                 {
-                    colourmap_c *ad_hoc = new colourmap_c;
-                    ad_hoc->name        = epi::StringFormat("UDMF_%d", light_color); // Internal
-                    ad_hoc->gl_colour   = light_color;
+                    Colormap *ad_hoc = new Colormap;
+                    ad_hoc->name_        = epi::StringFormat("UDMF_%d", light_color); // Internal
+                    ad_hoc->gl_color_   = light_color;
                     ss->props.colourmap = ad_hoc;
-                    colourmaps.push_back(ad_hoc);
+                    colormaps.push_back(ad_hoc);
                 }
             }
 
@@ -2027,10 +2027,10 @@ static void LoadUDMFSideDefs()
             sd->middle.y_mat.Y = mid_scy;
             sd->top.y_mat.Y    = high_scy;
 
-            // handle BOOM colourmaps with [242] linetype
-            sd->top.boom_colmap    = colourmaps.Lookup(top_tex);
-            sd->middle.boom_colmap = colourmaps.Lookup(middle_tex);
-            sd->bottom.boom_colmap = colourmaps.Lookup(bottom_tex);
+            // handle BOOM colormaps with [242] linetype
+            sd->top.boom_colmap    = colormaps.Lookup(top_tex);
+            sd->middle.boom_colmap = colormaps.Lookup(middle_tex);
+            sd->bottom.boom_colmap = colormaps.Lookup(bottom_tex);
 
             if (sd->top.image && fabs(sd->top.offset.Y) > IM_HEIGHT(sd->top.image))
                 sd->top.offset.Y = fmodf(sd->top.offset.Y, IM_HEIGHT(sd->top.image));
@@ -2654,10 +2654,10 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
     sd->middle.image = W_ImageLookup(middle_tex, INS_Texture);
     sd->bottom.image = W_ImageLookup(lower_tex, INS_Texture);
 
-    // handle BOOM colourmaps with [242] linetype
-    sd->top.boom_colmap    = colourmaps.Lookup(upper_tex);
-    sd->middle.boom_colmap = colourmaps.Lookup(middle_tex);
-    sd->bottom.boom_colmap = colourmaps.Lookup(lower_tex);
+    // handle BOOM colormaps with [242] linetype
+    sd->top.boom_colmap    = colormaps.Lookup(upper_tex);
+    sd->middle.boom_colmap = colormaps.Lookup(middle_tex);
+    sd->bottom.boom_colmap = colormaps.Lookup(lower_tex);
 
     if (sd->middle.image && two_sided)
     {

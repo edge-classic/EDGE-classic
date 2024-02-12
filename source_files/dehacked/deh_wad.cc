@@ -42,20 +42,20 @@ namespace dehacked
 namespace wad
 {
 
-ddf_collection_c *dest_container = nullptr;
+std::vector<DDFFile> *dest_container = nullptr;
 
-ddf_file_c *cur_lump = nullptr;
+DDFFile *cur_lump = nullptr;
 
 char wad_msg_buf[1024];
 
-void NewLump(ddf_type_e type)
+void NewLump(DDFType type)
 {
     if (dest_container == nullptr)
         I_Error("Dehacked: Error - WAD_NewLump: no container!\n");
 
-    dest_container->files.push_back(ddf_file_c(type, ""));
+    dest_container->push_back({type, "", ""});
 
-    cur_lump = &dest_container->files.back();
+    cur_lump = &dest_container->back();
 }
 
 void Printf(const char *str, ...)

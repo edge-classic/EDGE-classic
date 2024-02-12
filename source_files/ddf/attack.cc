@@ -29,7 +29,7 @@
 #undef DF
 #define DF DDF_FIELD
 
-atkdef_container_c atkdefs;
+AttackDefinitionContainer atkdefs;
 
 extern mobjtype_c *dynamic_mobj;
 
@@ -358,7 +358,7 @@ void DDF_ReadAtks(const std::string &data)
 
 void DDF_AttackInit(void)
 {
-    for (auto atk : atkdefs)
+    for (atkdef_c *atk : atkdefs)
     {
         delete atk;
         atk = nullptr;
@@ -368,7 +368,7 @@ void DDF_AttackInit(void)
 
 void DDF_AttackCleanUp(void)
 {
-    for (auto a : atkdefs)
+    for (atkdef_c *a : atkdefs)
     {
         cur_ddf_entryname =
             epi::StringFormat("[%s]  (attacks.ddf)", a->name.c_str());
@@ -587,14 +587,15 @@ void atkdef_c::Default()
 //
 // atkdef_container_c::atkdef_container_c()
 //
-atkdef_container_c::atkdef_container_c() {}
+AttackDefinitionContainer::AttackDefinitionContainer() {}
 
 //
 // ~atkdef_container_c::atkdef_container_c()
 //
-atkdef_container_c::~atkdef_container_c()
+AttackDefinitionContainer::~AttackDefinitionContainer()
 {
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<atkdef_c *>::iterator iter = begin(), iter_end = end();
+         iter != iter_end; iter++)
     {
         atkdef_c *atk = *iter;
         delete atk;
@@ -607,11 +608,12 @@ atkdef_container_c::~atkdef_container_c()
 //
 // Looks an atkdef by name, returns a fatal error if it does not exist.
 //
-atkdef_c *atkdef_container_c::Lookup(const char *refname)
+atkdef_c *AttackDefinitionContainer::Lookup(const char *refname)
 {
     if (!refname || !refname[0]) return nullptr;
 
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<atkdef_c *>::iterator iter = begin(), iter_end = end();
+         iter != iter_end; iter++)
     {
         atkdef_c *atk = *iter;
         if (DDF_CompareName(atk->name.c_str(), refname) == 0) return atk;

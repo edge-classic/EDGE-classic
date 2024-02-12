@@ -22,8 +22,8 @@
 #include "epi.h"
 #include "types.h"
 
-class fontdef_c;
-class colourmap_c;
+class FontDefinition;
+class Colormap;
 
 //
 // -AJA- 2004/11/14 Styles.ddf
@@ -57,11 +57,11 @@ class textstyle_c
     void         Default();
     textstyle_c &operator=(const textstyle_c &rhs);
 
-    const colourmap_c *colmap;
+    const Colormap *colmap;
 
     percent_t translucency;
 
-    fontdef_c *font;
+    FontDefinition *font;
 
     float scale;
     float aspect;

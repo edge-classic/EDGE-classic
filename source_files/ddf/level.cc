@@ -201,11 +201,11 @@ static void LevelFinishEntry(void)
 
     if (dynamic_level->indoor_fog_cmap)
         dynamic_level->indoor_fog_color =
-            dynamic_level->indoor_fog_cmap->gl_colour;
+            dynamic_level->indoor_fog_cmap->gl_color_;
 
     if (dynamic_level->outdoor_fog_cmap)
         dynamic_level->outdoor_fog_color =
-            dynamic_level->outdoor_fog_cmap->gl_colour;
+            dynamic_level->outdoor_fog_cmap->gl_color_;
 }
 
 static void LevelClearAll(void)

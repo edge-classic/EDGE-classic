@@ -71,12 +71,12 @@ DEF_CVAR(r_precache_model, "1", CVAR_ARCHIVE)
 //
 // -AJA- 2001/01/28: reworked flat animations.
 //
-void R_AddFlatAnim(animdef_c *anim)
+void R_AddFlatAnim(AnimationDefinition *anim)
 {
-    if (anim->pics.empty()) // old way
+    if (anim->pics_.empty()) // old way
     {
-        int start = W_CheckNumForName(anim->startname.c_str());
-        int end   = W_CheckNumForName(anim->endname.c_str());
+        int start = W_CheckNumForName(anim->start_name_.c_str());
+        int end   = W_CheckNumForName(anim->end_name_.c_str());
 
         int file;
         int s_offset, e_offset;
@@ -89,12 +89,12 @@ void R_AddFlatAnim(animdef_c *anim)
             return;
         }
 
-        file = W_FindFlatSequence(anim->startname.c_str(), anim->endname.c_str(), &s_offset, &e_offset);
+        file = W_FindFlatSequence(anim->start_name_.c_str(), anim->end_name_.c_str(), &s_offset, &e_offset);
 
         if (file < 0)
         {
-            I_Warning("Missing flat animation: %s-%s not in any wad.\n", anim->startname.c_str(),
-                      anim->endname.c_str());
+            I_Warning("Missing flat animation: %s-%s not in any wad.\n", anim->start_name_.c_str(),
+                      anim->end_name_.c_str());
             return;
         }
 
@@ -125,13 +125,13 @@ void R_AddFlatAnim(animdef_c *anim)
             flats[i] = W_ImageLookup(name, INS_Flat, ILF_Null | ILF_Exact | ILF_NoNew);
         }
 
-        W_AnimateImageSet(flats, total, anim->speed);
+        W_AnimateImageSet(flats, total, anim->speed_);
         delete[] flats;
     }
 
     // -AJA- 2004/10/27: new SEQUENCE command for anims
 
-    int total = (int)anim->pics.size();
+    int total = (int)anim->pics_.size();
 
     if (total == 1)
         return;
@@ -140,10 +140,10 @@ void R_AddFlatAnim(animdef_c *anim)
 
     for (int i = 0; i < total; i++)
     {
-        flats[i] = W_ImageLookup(anim->pics[i].c_str(), INS_Flat, ILF_Null | ILF_Exact);
+        flats[i] = W_ImageLookup(anim->pics_[i].c_str(), INS_Flat, ILF_Null | ILF_Exact);
     }
 
-    W_AnimateImageSet(flats, total, anim->speed);
+    W_AnimateImageSet(flats, total, anim->speed_);
     delete[] flats;
 }
 
@@ -171,13 +171,13 @@ void R_AddFlatAnim(animdef_c *anim)
 //
 // -AJA- 2001/06/17: reworked texture animations.
 //
-void R_AddTextureAnim(animdef_c *anim)
+void R_AddTextureAnim(AnimationDefinition *anim)
 {
-    if (anim->pics.empty()) // old way
+    if (anim->pics_.empty()) // old way
     {
         int set, s_offset, e_offset;
 
-        set = W_FindTextureSequence(anim->startname.c_str(), anim->endname.c_str(), &s_offset, &e_offset);
+        set = W_FindTextureSequence(anim->start_name_.c_str(), anim->end_name_.c_str(), &s_offset, &e_offset);
 
         if (set < 0)
         {
@@ -197,7 +197,7 @@ void R_AddTextureAnim(animdef_c *anim)
             texs[i]          = W_ImageLookup(name, INS_Texture, ILF_Null | ILF_Exact | ILF_NoNew);
         }
 
-        W_AnimateImageSet(texs, total, anim->speed);
+        W_AnimateImageSet(texs, total, anim->speed_);
         delete[] texs;
 
         return;
@@ -205,7 +205,7 @@ void R_AddTextureAnim(animdef_c *anim)
 
     // -AJA- 2004/10/27: new SEQUENCE command for anims
 
-    int total = (int)anim->pics.size();
+    int total = (int)anim->pics_.size();
 
     if (total == 1)
         return;
@@ -214,19 +214,19 @@ void R_AddTextureAnim(animdef_c *anim)
 
     for (int i = 0; i < total; i++)
     {
-        texs[i] = W_ImageLookup(anim->pics[i].c_str(), INS_Texture, ILF_Null | ILF_Exact);
+        texs[i] = W_ImageLookup(anim->pics_[i].c_str(), INS_Texture, ILF_Null | ILF_Exact);
     }
 
-    W_AnimateImageSet(texs, total, anim->speed);
+    W_AnimateImageSet(texs, total, anim->speed_);
     delete[] texs;
 }
 
 //
 // R_AddGraphicAnim
 //
-void R_AddGraphicAnim(animdef_c *anim)
+void R_AddGraphicAnim(AnimationDefinition *anim)
 {
-    int total = (int)anim->pics.size();
+    int total = (int)anim->pics_.size();
 
     SYS_ASSERT(total != 0);
 
@@ -237,10 +237,10 @@ void R_AddGraphicAnim(animdef_c *anim)
 
     for (int i = 0; i < total; i++)
     {
-        users[i] = W_ImageLookup(anim->pics[i].c_str(), INS_Graphic, ILF_Null | ILF_Exact);
+        users[i] = W_ImageLookup(anim->pics_[i].c_str(), INS_Graphic, ILF_Null | ILF_Exact);
     }
 
-    W_AnimateImageSet(users, total, anim->speed);
+    W_AnimateImageSet(users, total, anim->speed_);
     delete[] users;
 }
 
@@ -331,23 +331,23 @@ void W_InitPicAnims(void)
 {
     // loop through animdefs, and add relevant anims.
     // Note: reverse order, give priority to newer anims.
-    for (auto iter = animdefs.rbegin(); iter != animdefs.rend(); iter++)
+    for (std::vector<AnimationDefinition *>::reverse_iterator iter = animdefs.rbegin(), iter_end = animdefs.rend(); iter != iter_end; iter++)
     {
-        animdef_c *A = *iter;
+        AnimationDefinition *A = *iter;
 
         SYS_ASSERT(A);
 
-        switch (A->type)
+        switch (A->type_)
         {
-        case animdef_c::A_Texture:
+        case AnimationDefinition::kAnimationTypeTexture:
             R_AddTextureAnim(A);
             break;
 
-        case animdef_c::A_Flat:
+        case AnimationDefinition::kAnimationTypeFlat:
             R_AddFlatAnim(A);
             break;
 
-        case animdef_c::A_Graphic:
+        case AnimationDefinition::kAnimationTypeGraphic:
             R_AddGraphicAnim(A);
             break;
         }

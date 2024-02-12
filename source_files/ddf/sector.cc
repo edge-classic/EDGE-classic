@@ -178,7 +178,7 @@ static void SectorParseField(const char *field, const char *contents, int index,
 static void SectorFinishEntry(void)
 {
     if (dynamic_sector->fog_cmap)
-        dynamic_sector->fog_color = dynamic_sector->fog_cmap->gl_colour;
+        dynamic_sector->fog_color = dynamic_sector->fog_cmap->gl_color_;
 }
 
 //

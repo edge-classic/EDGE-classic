@@ -16,46 +16,44 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_FLAT_H__
-#define __DDF_FLAT_H__
+#pragma once
 
-#include "epi.h"
 #include "types.h"
 
-class flatdef_c
+class FlatDefinition
 {
    public:
-    flatdef_c();
-    ~flatdef_c(){};
+    FlatDefinition();
+    ~FlatDefinition(){};
 
    public:
     void Default(void);
-    void CopyDetail(flatdef_c &src);
+    void CopyDetail(FlatDefinition &src);
 
     // Member vars....
-    std::string name;
+    std::string name_;
 
-    std::string liquid;  // Values are "THIN" and "THICK" - determines swirl and
-                         // shader params - Dasho
+    std::string liquid_;  // Values are "THIN" and "THICK" - determines swirl
+                          // and shader params - Dasho
 
-    struct sfx_s *footstep;
-    std::string   splash;
+    struct sfx_s *footstep_;
+    std::string   splash_;
     // Lobo: item to spawn (or nullptr).  The mobjdef pointer is only valid
     // after
     //  DDF_flatCleanUp() has been called.
-    const mobjtype_c *impactobject;
-    std::string       impactobject_ref;
+    const mobjtype_c *impactobject_;
+    std::string       impactobject_ref_;
 
-    const mobjtype_c *glowobject;
-    std::string       glowobject_ref;
+    const mobjtype_c *glowobject_;
+    std::string       glowobject_ref_;
 
-    percent_t sink_depth;
-    percent_t bob_depth;
+    percent_t sink_depth_;
+    percent_t bob_depth_;
 
    private:
     // disable copy construct and assignment operator
-    explicit flatdef_c(flatdef_c &rhs) { (void)rhs; }
-    flatdef_c &operator=(flatdef_c &rhs)
+    explicit FlatDefinition(FlatDefinition &rhs) { (void)rhs; }
+    FlatDefinition &operator=(FlatDefinition &rhs)
     {
         (void)rhs;
         return *this;
@@ -63,27 +61,29 @@ class flatdef_c
 };
 
 // Our flatdefs container
-class flatdef_container_c : public std::vector<flatdef_c *>
+class FlatDefinitionContainer : public std::vector<FlatDefinition *>
 {
    public:
-    flatdef_container_c() {}
-    ~flatdef_container_c()
+    FlatDefinitionContainer() {}
+    ~FlatDefinitionContainer()
     {
-        for (auto iter = begin(); iter != end(); iter++)
+        for (std::vector<FlatDefinition *>::iterator iter     = begin(),
+                                                     iter_end = end();
+             iter != iter_end; iter++)
         {
-            flatdef_c *flt = *iter;
+            FlatDefinition *flt = *iter;
             delete flt;
             flt = nullptr;
         }
     }
-    flatdef_c *Find(const char *name);
+
+   public:
+    FlatDefinition *Find(const char *name);
 };
 
-extern flatdef_container_c flatdefs;  // -DASHO- 2022 Implemented
+extern FlatDefinitionContainer flatdefs;  // -DASHO- 2022 Implemented
 
 void DDF_ReadFlat(const std::string &data);
-
-#endif /*__DDF_FLAT_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

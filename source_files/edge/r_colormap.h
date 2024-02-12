@@ -71,13 +71,13 @@ typedef enum
 } vcol_flags_e;
 
 // translation support
-const uint8_t *V_GetTranslationTable(const colourmap_c *colmap);
+const uint8_t *V_GetTranslationTable(const Colormap *colmap);
 
-void R_TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const colourmap_c *trans);
+void R_TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const Colormap *trans);
 
-void V_GetColmapRGB(const colourmap_c *colmap, float *r, float *g, float *b);
+void V_GetColmapRGB(const Colormap *colmap, float *r, float *g, float *b);
 
-RGBAColor V_GetFontColor(const colourmap_c *colmap);
+RGBAColor V_GetFontColor(const Colormap *colmap);
 RGBAColor V_ParseFontColor(const char *name, bool strict = false);
 
 abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props, int light_add = 0,

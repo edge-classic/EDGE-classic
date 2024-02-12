@@ -16,76 +16,64 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_FONT__
-#define __DDF_FONT__
+#pragma once
 
-#include "epi.h"
 #include "types.h"
 
-//
-// -AJA- 2004/11/13 Fonts.ddf
-//
-typedef enum
+enum FontType
 {
-    FNTYP_UNSET = 0,
+    kFontTypeUNSET    = 0,
+    kFontTypePatch    = 1,  // font is made up of individual patches
+    kFontTypeImage    = 2,  // font consists of one big image (16x16 chars)
+    kFontTypeTrueType = 3   // font is a ttf/otf file or lump
+};
 
-    FNTYP_Patch    = 1,  // font is made up of individual patches
-    FNTYP_Image    = 2,  // font consists of one big image (16x16 chars)
-    FNTYP_TrueType = 3   // font is a ttf/otf file or lump
-} fonttype_e;
-
-class fontpatch_c
+struct FontPatch
 {
-   public:
-    fontpatch_c(int _ch1, int _ch2, const char *_pat1);
-    ~fontpatch_c();
-
-    fontpatch_c *next;  // link in list
-
-    int char1, char2;  // range
-
+    FontPatch  *next;          // link in list
+    int         char1, char2;  // range
     std::string patch1;
 };
 
-class fontdef_c
+class FontDefinition
 {
    public:
-    fontdef_c();
-    ~fontdef_c(){};
+    FontDefinition();
+    ~FontDefinition(){};
 
    public:
     void Default(void);
-    void CopyDetail(const fontdef_c &src);
+    void CopyDetail(const FontDefinition &src);
 
     // Member vars....
-    std::string name;
+    std::string name_;
 
-    fonttype_e type;
+    FontType type_;
 
-    fontpatch_c *patches;
-    std::string  missing_patch;
+    FontPatch  *patches_;
+    std::string missing_patch_;
 
-    std::string image_name;
+    std::string image_name_;
 
-    float spacing;
-    float default_size;
+    float spacing_;
+    float default_size_;
 
     // TTF Stuff
-    enum
+    enum TrueTypeSmoothing
     {
-        TTF_SMOOTH_ON_DEMAND = 0,
-        TTF_SMOOTH_ALWAYS    = 1,
-        TTF_SMOOTH_NEVER     = 2
+        kTrueTypeSmoothOnDemand = 0,
+        kTrueTypeSmoothAlways   = 1,
+        kTrueTypeSmoothNever    = 2
     };
 
-    std::string ttf_name;
-    int         ttf_smoothing;
-    std::string ttf_smoothing_string;  // User convenience
+    std::string ttf_name_;
+    int         ttf_smoothing_;
+    std::string ttf_smoothing_string_;  // User convenience
 
    private:
     // disable copy construct and assignment operator
-    explicit fontdef_c(fontdef_c &rhs) { (void)rhs; }
-    fontdef_c &operator=(fontdef_c &rhs)
+    explicit FontDefinition(FontDefinition &rhs) { (void)rhs; }
+    FontDefinition &operator=(FontDefinition &rhs)
     {
         (void)rhs;
         return *this;
@@ -93,15 +81,17 @@ class fontdef_c
 };
 
 // Our fontdefs container
-class fontdef_container_c : public std::vector<fontdef_c *>
+class FontDefinitionContainer : public std::vector<FontDefinition *>
 {
    public:
-    fontdef_container_c() {}
-    ~fontdef_container_c()
+    FontDefinitionContainer() {}
+    ~FontDefinitionContainer()
     {
-        for (auto iter = begin(); iter != end(); iter++)
+        for (std::vector<FontDefinition *>::iterator iter     = begin(),
+                                                     iter_end = end();
+             iter != iter_end; iter++)
         {
-            fontdef_c *fnt = *iter;
+            FontDefinition *fnt = *iter;
             delete fnt;
             fnt = nullptr;
         }
@@ -109,16 +99,14 @@ class fontdef_container_c : public std::vector<fontdef_c *>
 
    public:
     // Search Functions
-    fontdef_c *Lookup(const char *refname);
+    FontDefinition *Lookup(const char *refname);
 };
 
-extern fontdef_container_c fontdefs;
+extern FontDefinitionContainer fontdefs;
 
 void DDF_MainLookupFont(const char *info, void *storage);
 
 void DDF_ReadFonts(const std::string &data);
-
-#endif /* __DDF_FONT__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

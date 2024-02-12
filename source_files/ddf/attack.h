@@ -16,33 +16,21 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_ATK_H__
-#define __DDF_ATK_H__
+#pragma once
 
-// ------------------------------------------------------------------
-// --------------------ATTACK TYPE STRUCTURES------------------------
-// ------------------------------------------------------------------
-
-// -KM- 1998/11/25 Added BFG SPRAY attack type.
-
-class atkdef_container_c : public std::vector<atkdef_c *>
+class AttackDefinitionContainer : public std::vector<atkdef_c *>
 {
    public:
-    atkdef_container_c();
-    ~atkdef_container_c();
+    AttackDefinitionContainer();
+    ~AttackDefinitionContainer();
 
    public:
-    // Search Functions
     atkdef_c *Lookup(const char *refname);
 };
 
-// -----EXTERNALISATIONS-----
-
-extern atkdef_container_c atkdefs;  // -ACB- 2004/06/09 Implemented
+extern AttackDefinitionContainer atkdefs;  // -ACB- 2004/06/09 Implemented
 
 void DDF_ReadAtks(const std::string &data);
-
-#endif  // __DDF_ATK_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

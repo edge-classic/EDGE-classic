@@ -27,6 +27,9 @@
 #include <dirent.h>
 #include <unistd.h>
 #endif
+#ifdef __MINGW32__
+#include <sys/stat.h>
+#endif
 
 namespace epi
 {

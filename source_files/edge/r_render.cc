@@ -1024,7 +1024,7 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     int lit_adjust = 0;
 
     // do the N/S/W/E bizzo...
-    if (!r_forceflatlighting.d && currmap->episode->lighting == LMODEL_Doom && props->lightlevel > 0)
+    if (!r_forceflatlighting.d && currmap->episode->lighting_ == kLightingModelDoom && props->lightlevel > 0)
     {
         if (AlmostEquals(cur_seg->v1->Y, cur_seg->v2->Y))
             lit_adjust -= 16;

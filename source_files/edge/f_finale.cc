@@ -171,13 +171,13 @@ static void DoStartFinale(void)
 
     case f_bunny:
         if (currmap->episode)
-            S_ChangeMusic(currmap->episode->special_music, true);
+            S_ChangeMusic(currmap->episode->special_music_, true);
         break;
 
     case f_cast:
         CastInitNew(2);
         if (currmap->episode)
-            S_ChangeMusic(currmap->episode->special_music, true);
+            S_ChangeMusic(currmap->episode->special_music_, true);
         break;
 
     default:

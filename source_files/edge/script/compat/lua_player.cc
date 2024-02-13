@@ -2035,17 +2035,17 @@ static int Game_info(lua_State *L)
 
     //---------------
     // game.name
-    gamedef_c *g = currmap->episode;
+    GameDefinition *g = currmap->episode;
     SYS_ASSERT(g);
 
-    if (g->description.empty())
+    if (g->description_.empty())
     {
-        temp_value = g->name;
+        temp_value = g->name_;
         temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
     }
     else
     {
-        temp_value = language[g->description]; //try for description
+        temp_value = language[g->description_]; //try for description
     }
 
     lua_pushstring(L, temp_value.c_str());

@@ -538,8 +538,8 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                         // this should not clear out any UMAPINFO-defined episodes
                         for (auto iter = gamedefs.begin()+1; iter != gamedefs.end();)
                         {
-                            gamedef_c *game = *iter;
-                            if (game->firstmap.empty() && epi::StringCaseCompareASCII(game->name, "UMAPINFO_TEMPLATE") != 0)
+                            GameDefinition *game = *iter;
+                            if (game->firstmap_.empty() && epi::StringCaseCompareASCII(game->name_, "UMAPINFO_TEMPLATE") != 0)
                             {
                                 delete game;
                                 game = nullptr;
@@ -551,12 +551,12 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                     }
                     else
                     {
-                        gamedef_c *new_epi = nullptr;
+                        GameDefinition *new_epi = nullptr;
                         // Check for episode to replace
                         for (auto game : gamedefs)
                         {
-                            if (epi::StringCaseCompareASCII(game->firstmap, val->mapname) == 0 &&
-                                epi::StringCaseCompareASCII(game->name, "UMAPINFO_TEMPLATE") != 0)
+                            if (epi::StringCaseCompareASCII(game->firstmap_, val->mapname) == 0 &&
+                                epi::StringCaseCompareASCII(game->name_, "UMAPINFO_TEMPLATE") != 0)
                             {
                                 new_epi = game;
                                 break;
@@ -565,10 +565,10 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                         if (!new_epi)
                         {
                             // Create a new episode from game-specific UMAPINFO template data
-                            gamedef_c *um_template = nullptr;
+                            GameDefinition *um_template = nullptr;
                             for (auto game : gamedefs)
                             {
-                                if (epi::StringCaseCompareASCII(game->name, "UMAPINFO_TEMPLATE") == 0)
+                                if (epi::StringCaseCompareASCII(game->name_, "UMAPINFO_TEMPLATE") == 0)
                                 {
                                     um_template = game;
                                     break;
@@ -576,9 +576,9 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                             }
                             if (!um_template)
                                 I_Error("UMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
-                            new_epi = new gamedef_c;
+                            new_epi = new GameDefinition;
                             new_epi->CopyDetail(*um_template);
-                            new_epi->firstmap = val->mapname;
+                            new_epi->firstmap_ = val->mapname;
                             gamedefs.push_back(new_epi);
                         }
                         char        lumpname[9] = {0};
@@ -593,9 +593,9 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                             if (lex.Match(","))
                                 lex.Next(epikey);
                         }
-                        new_epi->namegraphic = lumpname;
-                        new_epi->description = alttext;
-                        new_epi->name        = epi::StringFormat("UMAPINFO_%s\n", val->mapname); // Internal
+                        new_epi->namegraphic_ = lumpname;
+                        new_epi->description_ = alttext;
+                        new_epi->name_        = epi::StringFormat("UMAPINFO_%s\n", val->mapname); // Internal
                     }
                 }
                 break;

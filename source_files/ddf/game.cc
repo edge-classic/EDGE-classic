@@ -26,12 +26,12 @@
 #undef DF
 #define DF DDF_FIELD
 
-gamedef_container_c gamedefs;
+GameDefinitionContainer gamedefs;
 
-static gamedef_c *dynamic_gamedef;
+static GameDefinition *dynamic_gamedef;
 
-static wi_animdef_c  buffer_animdef;
-static wi_framedef_c buffer_framedef;
+static IntermissionAnimation buffer_animdef;
+static IntermissionFrame     buffer_framedef;
 
 static void DDF_GameGetPic(const char *info, void *storage);
 static void DDF_GameGetAnim(const char *info, void *storage);
@@ -39,30 +39,30 @@ static void DDF_GameGetMap(const char *info, void *storage);
 static void DDF_GameGetLighting(const char *info, void *storage);
 
 #define DDF_CMD_BASE dummy_gamedef
-static gamedef_c dummy_gamedef;
+static GameDefinition dummy_gamedef;
 
 static const commandlist_t gamedef_commands[] = {
-    DF("INTERMISSION_GRAPHIC", background, DDF_MainGetLumpName),
-    DF("INTERMISSION_CAMERA", bg_camera, DDF_MainGetString),
-    DF("INTERMISSION_MUSIC", music, DDF_MainGetNumeric),
-    DF("SPLAT_GRAPHIC", splatpic, DDF_MainGetLumpName),
-    DF("YAH1_GRAPHIC", yah[0], DDF_MainGetLumpName),
-    DF("YAH2_GRAPHIC", yah[1], DDF_MainGetLumpName),
-    DF("PERCENT_SOUND", percent, DDF_MainLookupSound),
-    DF("DONE_SOUND", done, DDF_MainLookupSound),
-    DF("ENDMAP_SOUND", endmap, DDF_MainLookupSound),
-    DF("NEXTMAP_SOUND", nextmap, DDF_MainLookupSound),
-    DF("ACCEL_SOUND", accel_snd, DDF_MainLookupSound),
-    DF("FRAG_SOUND", frag_snd, DDF_MainLookupSound),
-    DF("FIRSTMAP", firstmap, DDF_MainGetLumpName),
-    DF("NAME_GRAPHIC", namegraphic, DDF_MainGetLumpName),
-    DF("TITLE_MOVIE", titlemovie, DDF_MainGetString),
-    DF("TITLE_MUSIC", titlemusic, DDF_MainGetNumeric),
-    DF("TITLE_TIME", titletics, DDF_MainGetTime),
-    DF("SPECIAL_MUSIC", special_music, DDF_MainGetNumeric),
-    DF("LIGHTING", lighting, DDF_GameGetLighting),
-    DF("DESCRIPTION", description, DDF_MainGetString),
-    DF("NO_SKILL_MENU", no_skill_menu, DDF_MainGetBoolean),
+    DF("INTERMISSION_GRAPHIC", background_, DDF_MainGetLumpName),
+    DF("INTERMISSION_CAMERA", bg_camera_, DDF_MainGetString),
+    DF("INTERMISSION_MUSIC", music_, DDF_MainGetNumeric),
+    DF("SPLAT_GRAPHIC", splatpic_, DDF_MainGetLumpName),
+    DF("YAH1_GRAPHIC", yah_[0], DDF_MainGetLumpName),
+    DF("YAH2_GRAPHIC", yah_[1], DDF_MainGetLumpName),
+    DF("PERCENT_SOUND", percent_, DDF_MainLookupSound),
+    DF("DONE_SOUND", done_, DDF_MainLookupSound),
+    DF("ENDMAP_SOUND", endmap_, DDF_MainLookupSound),
+    DF("NEXTMAP_SOUND", nextmap_, DDF_MainLookupSound),
+    DF("ACCEL_SOUND", accel_snd_, DDF_MainLookupSound),
+    DF("FRAG_SOUND", frag_snd_, DDF_MainLookupSound),
+    DF("FIRSTMAP", firstmap_, DDF_MainGetLumpName),
+    DF("NAME_GRAPHIC", namegraphic_, DDF_MainGetLumpName),
+    DF("TITLE_MOVIE", titlemovie_, DDF_MainGetString),
+    DF("TITLE_MUSIC", titlemusic_, DDF_MainGetNumeric),
+    DF("TITLE_TIME", titletics_, DDF_MainGetTime),
+    DF("SPECIAL_MUSIC", special_music_, DDF_MainGetNumeric),
+    DF("LIGHTING", lighting_, DDF_GameGetLighting),
+    DF("DESCRIPTION", description_, DDF_MainGetString),
+    DF("NO_SKILL_MENU", no_skill_menu_, DDF_MainGetBoolean),
 
     DDF_CMD_END};
 
@@ -98,15 +98,15 @@ static void GameStartEntry(const char *name, bool extend)
     }
 
     // not found, create a new one
-    dynamic_gamedef       = new gamedef_c;
-    dynamic_gamedef->name = name;
+    dynamic_gamedef        = new GameDefinition;
+    dynamic_gamedef->name_ = name;
 
     gamedefs.push_back(dynamic_gamedef);
 }
 
 static void GameDoTemplate(const char *contents)
 {
-    gamedef_c *other = gamedefs.Lookup(contents);
+    GameDefinition *other = gamedefs.Lookup(contents);
 
     if (!other || other == dynamic_gamedef)
         DDF_Error("Unknown game template: '%s'\n", contents);
@@ -159,7 +159,7 @@ static void GameFinishEntry(void)
 static void GameClearAll(void)
 {
     // 100% safe to delete all game entries
-    for (auto game : gamedefs)
+    for (GameDefinition *game : gamedefs)
     {
         delete game;
         game = nullptr;
@@ -191,44 +191,44 @@ void DDF_GameCleanUp(void)
 
 static void DDF_GameAddFrame(void)
 {
-    wi_framedef_c *f = new wi_framedef_c(buffer_framedef);
+    IntermissionFrame *f = new IntermissionFrame(buffer_framedef);
 
-    buffer_animdef.frames.push_back(f);
+    buffer_animdef.frames_.push_back(f);
 
     buffer_framedef.Default();
 }
 
 static void DDF_GameAddAnim(void)
 {
-    wi_animdef_c *a = new wi_animdef_c(buffer_animdef);
+    IntermissionAnimation *a = new IntermissionAnimation(buffer_animdef);
 
-    if (a->level[0])
-        a->type = wi_animdef_c::WI_LEVEL;
+    if (a->level_[0])
+        a->type_ = IntermissionAnimation::kIntermissionAnimationLevel;
     else
-        a->type = wi_animdef_c::WI_NORMAL;
+        a->type_ = IntermissionAnimation::kIntermissionAnimationNormal;
 
-    dynamic_gamedef->anims.push_back(a);
+    dynamic_gamedef->anims_.push_back(a);
 
     buffer_animdef.Default();
 }
 
-static void ParseFrame(const char *info, wi_framedef_c *f)
+static void ParseFrame(const char *info, IntermissionFrame *f)
 {
     const char *p = strchr(info, ':');
     if (!p || p == info)
         DDF_Error("Bad frame def: '%s' (missing pic name)\n", info);
 
-    f->pic = std::string(info, p - info);
+    f->pic_ = std::string(info, p - info);
 
     p++;
 
-    if (sscanf(p, " %d : %d : %d ", &f->tics, &f->x, &f->y) != 3)
+    if (sscanf(p, " %d : %d : %d ", &f->tics_, &f->x_, &f->y_) != 3)
         DDF_Error("Bad frame definition: '%s'\n", info);
 }
 
 static void DDF_GameGetAnim(const char *info, void *storage)
 {
-    wi_framedef_c *f = (wi_framedef_c *)storage;
+    IntermissionFrame *f = (IntermissionFrame *)storage;
 
     if (DDF_CompareName(info, "#END") == 0)
     {
@@ -240,13 +240,13 @@ static void DDF_GameGetAnim(const char *info, void *storage)
 
     if (info[0] == '#')
     {
-        if (buffer_animdef.frames.size() > 0)
+        if (buffer_animdef.frames_.size() > 0)
             DDF_Error("Invalid # command: '%s'\n", info);
 
         p = strchr(info, ':');
         if (!p || p <= info + 1) DDF_Error("Invalid # command: '%s'\n", info);
 
-        buffer_animdef.level = std::string(info + 1, p - (info + 1));
+        buffer_animdef.level_ = std::string(info + 1, p - (info + 1));
 
         p++;
     }
@@ -257,38 +257,38 @@ static void DDF_GameGetAnim(const char *info, void *storage)
     DDF_GameAddFrame();
 }
 
-static void ParseMap(const char *info, wi_mapposdef_c *mp)
+static void ParseMap(const char *info, IntermissionMapPosition *mp)
 {
     const char *p = strchr(info, ':');
     if (!p || p == info)
         DDF_Error("Bad map def: '%s' (missing level name)\n", info);
 
-    mp->name = std::string(info, p - info);
+    mp->name_ = std::string(info, p - info);
 
     p++;
 
-    if (sscanf(p, " %d : %d ", &mp->x, &mp->y) != 2)
+    if (sscanf(p, " %d : %d ", &mp->x_, &mp->y_) != 2)
         DDF_Error("Bad map definition: '%s'\n", info);
 }
 
 static void DDF_GameGetMap(const char *info, void *storage)
 {
-    wi_mapposdef_c *mp = new wi_mapposdef_c();
+    IntermissionMapPosition *mp = new IntermissionMapPosition();
 
     ParseMap(info, mp);
 
-    dynamic_gamedef->mappos.push_back(mp);
+    dynamic_gamedef->mappos_.push_back(mp);
 }
 
 static void DDF_GameGetPic(const char *info, void *storage)
 {
-    dynamic_gamedef->titlepics.push_back(info);
+    dynamic_gamedef->titlepics_.push_back(info);
 }
 
-static specflags_t lighting_names[] = {{"DOOM", LMODEL_Doom, 0},
-                                       {"DOOMISH", LMODEL_Doomish, 0},
-                                       {"FLAT", LMODEL_Flat, 0},
-                                       {"VERTEX", LMODEL_Vertex, 0},
+static specflags_t lighting_names[] = {{"DOOM", kLightingModelDoom, 0},
+                                       {"DOOMISH", kLightingModelDoomish, 0},
+                                       {"FLAT", kLightingModelFlat, 0},
+                                       {"VERTEX", kLightingModelVertex, 0},
                                        {nullptr, 0, 0}};
 
 void DDF_GameGetLighting(const char *info, void *storage)
@@ -302,7 +302,7 @@ void DDF_GameGetLighting(const char *info, void *storage)
         return;
     }
 
-    ((lighting_model_e *)storage)[0] = (lighting_model_e)flag_value;
+    ((LightingModel *)storage)[0] = (LightingModel)flag_value;
 }
 
 // --> world intermission mappos class
@@ -310,32 +310,36 @@ void DDF_GameGetLighting(const char *info, void *storage)
 //
 // wi_mapposdef_c Constructor
 //
-wi_mapposdef_c::wi_mapposdef_c() {}
+IntermissionMapPosition::IntermissionMapPosition() {}
 
 //
 // wi_mapposdef_c Copy constructor
 //
-wi_mapposdef_c::wi_mapposdef_c(wi_mapposdef_c &rhs) { Copy(rhs); }
+IntermissionMapPosition::IntermissionMapPosition(IntermissionMapPosition &rhs)
+{
+    Copy(rhs);
+}
 
 //
 // wi_mapposdef_c Destructor
 //
-wi_mapposdef_c::~wi_mapposdef_c() {}
+IntermissionMapPosition::~IntermissionMapPosition() {}
 
 //
 // wi_mapposdef_c::Copy()
 //
-void wi_mapposdef_c::Copy(wi_mapposdef_c &src)
+void IntermissionMapPosition::Copy(IntermissionMapPosition &src)
 {
-    name = src.name;
-    x    = src.x;
-    y    = src.y;
+    name_ = src.name_;
+    x_    = src.x_;
+    y_    = src.y_;
 }
 
 //
 // wi_mapposdef_c assignment operator
 //
-wi_mapposdef_c &wi_mapposdef_c::operator=(wi_mapposdef_c &rhs)
+IntermissionMapPosition &IntermissionMapPosition::operator=(
+    IntermissionMapPosition &rhs)
 {
     if (&rhs != this) Copy(rhs);
 
@@ -347,13 +351,13 @@ wi_mapposdef_c &wi_mapposdef_c::operator=(wi_mapposdef_c &rhs)
 //
 // wi_mapposdef_container_c Constructor
 //
-wi_mapposdef_container_c::wi_mapposdef_container_c() {}
+IntermissionMapPositionContainer::IntermissionMapPositionContainer() {}
 
 //
 // wi_mapposdef_container_c Copy constructor
 //
-wi_mapposdef_container_c::wi_mapposdef_container_c(
-    wi_mapposdef_container_c &rhs)
+IntermissionMapPositionContainer::IntermissionMapPositionContainer(
+    IntermissionMapPositionContainer &rhs)
 {
     Copy(rhs);
 }
@@ -361,11 +365,13 @@ wi_mapposdef_container_c::wi_mapposdef_container_c(
 //
 // wi_mapposdef_container_c Destructor
 //
-wi_mapposdef_container_c::~wi_mapposdef_container_c()
+IntermissionMapPositionContainer::~IntermissionMapPositionContainer()
 {
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<IntermissionMapPosition *>::iterator iter     = begin(),
+                                                          iter_end = end();
+         iter != iter_end; iter++)
     {
-        wi_mapposdef_c *wi = *iter;
+        IntermissionMapPosition *wi = *iter;
         delete wi;
         wi = nullptr;
     }
@@ -374,13 +380,14 @@ wi_mapposdef_container_c::~wi_mapposdef_container_c()
 //
 // wi_mapposdef_container_c::Copy()
 //
-void wi_mapposdef_container_c::Copy(wi_mapposdef_container_c &src)
+void IntermissionMapPositionContainer::Copy(
+    IntermissionMapPositionContainer &src)
 {
-    for (auto wi : src)
+    for (IntermissionMapPosition *wi : src)
     {
         if (wi)
         {
-            wi_mapposdef_c *wi2 = new wi_mapposdef_c(*wi);
+            IntermissionMapPosition *wi2 = new IntermissionMapPosition(*wi);
             push_back(wi2);
         }
     }
@@ -389,14 +396,16 @@ void wi_mapposdef_container_c::Copy(wi_mapposdef_container_c &src)
 //
 // wi_mapposdef_container_c assignment operator
 //
-wi_mapposdef_container_c &wi_mapposdef_container_c::operator=(
-    wi_mapposdef_container_c &rhs)
+IntermissionMapPositionContainer &IntermissionMapPositionContainer::operator=(
+    IntermissionMapPositionContainer &rhs)
 {
     if (&rhs != this)
     {
-        for (auto iter = begin(); iter != end(); iter++)
+        for (std::vector<IntermissionMapPosition *>::iterator iter = begin(),
+                                                              iter_end = end();
+             iter != iter_end; iter++)
         {
-            wi_mapposdef_c *wi = *iter;
+            IntermissionMapPosition *wi = *iter;
             delete wi;
             wi = nullptr;
         }
@@ -412,43 +421,43 @@ wi_mapposdef_container_c &wi_mapposdef_container_c::operator=(
 //
 // wi_framedef_c Constructor
 //
-wi_framedef_c::wi_framedef_c() { Default(); }
+IntermissionFrame::IntermissionFrame() { Default(); }
 
 //
 // wi_framedef_c Copy constructor
 //
-wi_framedef_c::wi_framedef_c(wi_framedef_c &rhs) { Copy(rhs); }
+IntermissionFrame::IntermissionFrame(IntermissionFrame &rhs) { Copy(rhs); }
 
 //
 // wi_framedef_c Destructor
 //
-wi_framedef_c::~wi_framedef_c() {}
+IntermissionFrame::~IntermissionFrame() {}
 
 //
 // wi_framedef_c::Copy()
 //
-void wi_framedef_c::Copy(wi_framedef_c &src)
+void IntermissionFrame::Copy(IntermissionFrame &src)
 {
-    pic  = src.pic;
-    tics = src.tics;
-    x    = src.x;
-    y    = src.y;
+    pic_  = src.pic_;
+    tics_ = src.tics_;
+    x_    = src.x_;
+    y_    = src.y_;
 }
 
 //
 // wi_framedef_c::Default()
 //
-void wi_framedef_c::Default()
+void IntermissionFrame::Default()
 {
-    pic.clear();
-    tics = 0;
-    x = y = 0;
+    pic_.clear();
+    tics_ = 0;
+    x_ = y_ = 0;
 }
 
 //
 // wi_framedef_c assignment operator
 //
-wi_framedef_c &wi_framedef_c::operator=(wi_framedef_c &rhs)
+IntermissionFrame &IntermissionFrame::operator=(IntermissionFrame &rhs)
 {
     if (&rhs != this) Copy(rhs);
 
@@ -460,12 +469,13 @@ wi_framedef_c &wi_framedef_c::operator=(wi_framedef_c &rhs)
 //
 // wi_framedef_container_c Constructor
 //
-wi_framedef_container_c::wi_framedef_container_c() {}
+IntermissionFrameContainer::IntermissionFrameContainer() {}
 
 //
 // wi_framedef_container_c Copy constructor
 //
-wi_framedef_container_c::wi_framedef_container_c(wi_framedef_container_c &rhs)
+IntermissionFrameContainer::IntermissionFrameContainer(
+    IntermissionFrameContainer &rhs)
 {
     Copy(rhs);
 }
@@ -473,11 +483,13 @@ wi_framedef_container_c::wi_framedef_container_c(wi_framedef_container_c &rhs)
 //
 // wi_framedef_container_c Destructor
 //
-wi_framedef_container_c::~wi_framedef_container_c()
+IntermissionFrameContainer::~IntermissionFrameContainer()
 {
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<IntermissionFrame *>::iterator iter     = begin(),
+                                                    iter_end = end();
+         iter != iter_end; iter++)
     {
-        wi_framedef_c *wi = *iter;
+        IntermissionFrame *wi = *iter;
         delete wi;
         wi = nullptr;
     }
@@ -486,13 +498,13 @@ wi_framedef_container_c::~wi_framedef_container_c()
 //
 // wi_framedef_container_c::Copy()
 //
-void wi_framedef_container_c::Copy(wi_framedef_container_c &src)
+void IntermissionFrameContainer::Copy(IntermissionFrameContainer &src)
 {
-    for (auto f : src)
+    for (IntermissionFrame *f : src)
     {
         if (f)
         {
-            wi_framedef_c *f2 = new wi_framedef_c(*f);
+            IntermissionFrame *f2 = new IntermissionFrame(*f);
             push_back(f2);
         }
     }
@@ -501,14 +513,16 @@ void wi_framedef_container_c::Copy(wi_framedef_container_c &src)
 //
 // wi_framedef_container_c assignment operator
 //
-wi_framedef_container_c &wi_framedef_container_c::operator=(
-    wi_framedef_container_c &rhs)
+IntermissionFrameContainer &IntermissionFrameContainer::operator=(
+    IntermissionFrameContainer &rhs)
 {
     if (&rhs != this)
     {
-        for (auto iter = begin(); iter != end(); iter++)
+        for (std::vector<IntermissionFrame *>::iterator iter     = begin(),
+                                                        iter_end = end();
+             iter != iter_end; iter++)
         {
-            wi_framedef_c *wi = *iter;
+            IntermissionFrame *wi = *iter;
             delete wi;
             wi = nullptr;
         }
@@ -524,48 +538,52 @@ wi_framedef_container_c &wi_framedef_container_c::operator=(
 //
 // wi_animdef_c Constructor
 //
-wi_animdef_c::wi_animdef_c() { Default(); }
+IntermissionAnimation::IntermissionAnimation() { Default(); }
 
 //
 // wi_animdef_c Copy constructor
 //
-wi_animdef_c::wi_animdef_c(wi_animdef_c &rhs) { Copy(rhs); }
+IntermissionAnimation::IntermissionAnimation(IntermissionAnimation &rhs)
+{
+    Copy(rhs);
+}
 
 //
 // wi_animdef_c Destructor
 //
-wi_animdef_c::~wi_animdef_c() {}
+IntermissionAnimation::~IntermissionAnimation() {}
 
 //
 // void Copy()
 //
-void wi_animdef_c::Copy(wi_animdef_c &src)
+void IntermissionAnimation::Copy(IntermissionAnimation &src)
 {
-    type   = src.type;
-    level  = src.level;
-    frames = src.frames;
+    type_   = src.type_;
+    level_  = src.level_;
+    frames_ = src.frames_;
 }
 
 //
 // wi_animdef_c::Default()
 //
-void wi_animdef_c::Default()
+void IntermissionAnimation::Default()
 {
-    type = WI_NORMAL;
-    level.clear();
+    type_ = kIntermissionAnimationNormal;
+    level_.clear();
 
-    for (auto frame : frames)
+    for (IntermissionFrame *frame : frames_)
     {
         delete frame;
         frame = nullptr;
     }
-    frames.clear();
+    frames_.clear();
 }
 
 //
 // wi_animdef_c assignment operator
 //
-wi_animdef_c &wi_animdef_c::operator=(wi_animdef_c &rhs)
+IntermissionAnimation &IntermissionAnimation::operator=(
+    IntermissionAnimation &rhs)
 {
     if (&rhs != this) Copy(rhs);
 
@@ -577,12 +595,13 @@ wi_animdef_c &wi_animdef_c::operator=(wi_animdef_c &rhs)
 //
 // wi_animdef_container_c Constructor
 //
-wi_animdef_container_c::wi_animdef_container_c() {}
+IntermissionAnimationContainer::IntermissionAnimationContainer() {}
 
 //
 // wi_animdef_container_c Copy constructor
 //
-wi_animdef_container_c::wi_animdef_container_c(wi_animdef_container_c &rhs)
+IntermissionAnimationContainer::IntermissionAnimationContainer(
+    IntermissionAnimationContainer &rhs)
 {
     Copy(rhs);
 }
@@ -590,11 +609,13 @@ wi_animdef_container_c::wi_animdef_container_c(wi_animdef_container_c &rhs)
 //
 // wi_animdef_container_c Destructor
 //
-wi_animdef_container_c::~wi_animdef_container_c()
+IntermissionAnimationContainer::~IntermissionAnimationContainer()
 {
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<IntermissionAnimation *>::iterator iter     = begin(),
+                                                        iter_end = end();
+         iter != iter_end; iter++)
     {
-        wi_animdef_c *wi = *iter;
+        IntermissionAnimation *wi = *iter;
         delete wi;
         wi = nullptr;
     }
@@ -603,13 +624,13 @@ wi_animdef_container_c::~wi_animdef_container_c()
 //
 // wi_animdef_container_c::Copy()
 //
-void wi_animdef_container_c::Copy(wi_animdef_container_c &src)
+void IntermissionAnimationContainer::Copy(IntermissionAnimationContainer &src)
 {
-    for (auto a : src)
+    for (IntermissionAnimation *a : src)
     {
         if (a)
         {
-            wi_animdef_c *a2 = new wi_animdef_c(*a);
+            IntermissionAnimation *a2 = new IntermissionAnimation(*a);
             push_back(a2);
         }
     }
@@ -618,14 +639,16 @@ void wi_animdef_container_c::Copy(wi_animdef_container_c &src)
 //
 // wi_animdef_container_c assignment operator
 //
-wi_animdef_container_c &wi_animdef_container_c::operator=(
-    wi_animdef_container_c &rhs)
+IntermissionAnimationContainer &IntermissionAnimationContainer::operator=(
+    IntermissionAnimationContainer &rhs)
 {
     if (&rhs != this)
     {
-        for (auto iter = begin(); iter != end(); iter++)
+        for (std::vector<IntermissionAnimation *>::iterator iter     = begin(),
+                                                            iter_end = end();
+             iter != iter_end; iter++)
         {
-            wi_animdef_c *wi = *iter;
+            IntermissionAnimation *wi = *iter;
             delete wi;
             wi = nullptr;
         }
@@ -641,98 +664,98 @@ wi_animdef_container_c &wi_animdef_container_c::operator=(
 //
 // gamedef_c Constructor
 //
-gamedef_c::gamedef_c() : name(), titlepics() { Default(); }
+GameDefinition::GameDefinition() : name_(), titlepics_() { Default(); }
 
 //
 // gamedef_c Destructor
 //
-gamedef_c::~gamedef_c() {}
+GameDefinition::~GameDefinition() {}
 
 //
 // gamedef_c::CopyDetail()
 //
-void gamedef_c::CopyDetail(gamedef_c &src)
+void GameDefinition::CopyDetail(GameDefinition &src)
 {
-    anims  = src.anims;
-    mappos = src.mappos;
+    anims_  = src.anims_;
+    mappos_ = src.mappos_;
 
-    background = src.background;
-    splatpic   = src.splatpic;
+    background_ = src.background_;
+    splatpic_   = src.splatpic_;
 
-    yah[0] = src.yah[0];
-    yah[1] = src.yah[1];
+    yah_[0] = src.yah_[0];
+    yah_[1] = src.yah_[1];
 
-    bg_camera = src.bg_camera;
-    music     = src.music;
+    bg_camera_ = src.bg_camera_;
+    music_     = src.music_;
 
-    percent       = src.percent;
-    done          = src.done;
-    endmap        = src.endmap;
-    nextmap       = src.nextmap;
-    accel_snd     = src.accel_snd;
-    frag_snd      = src.frag_snd;
-    no_skill_menu = src.no_skill_menu;
+    percent_       = src.percent_;
+    done_          = src.done_;
+    endmap_        = src.endmap_;
+    nextmap_       = src.nextmap_;
+    accel_snd_     = src.accel_snd_;
+    frag_snd_      = src.frag_snd_;
+    no_skill_menu_ = src.no_skill_menu_;
 
-    firstmap    = src.firstmap;
-    namegraphic = src.namegraphic;
+    firstmap_    = src.firstmap_;
+    namegraphic_ = src.namegraphic_;
 
-    titlepics  = src.titlepics;
-    titlemovie = src.titlemovie;
-    titlemusic = src.titlemusic;
-    titletics  = src.titletics;
+    titlepics_  = src.titlepics_;
+    titlemovie_ = src.titlemovie_;
+    titlemusic_ = src.titlemusic_;
+    titletics_  = src.titletics_;
 
-    special_music = src.special_music;
-    lighting      = src.lighting;
-    description   = src.description;
+    special_music_ = src.special_music_;
+    lighting_      = src.lighting_;
+    description_   = src.description_;
 }
 
 //
 // gamedef_c::Default()
 //
-void gamedef_c::Default()
+void GameDefinition::Default()
 {
-    for (auto a : anims)
+    for (IntermissionAnimation *a : anims_)
     {
         delete a;
         a = nullptr;
     }
-    anims.clear();
-    for (auto m : mappos)
+    anims_.clear();
+    for (IntermissionMapPosition *m : mappos_)
     {
         delete m;
         m = nullptr;
     }
-    mappos.clear();
+    mappos_.clear();
 
-    background.clear();
-    splatpic.clear();
+    background_.clear();
+    splatpic_.clear();
 
-    yah[0].clear();
-    yah[1].clear();
+    yah_[0].clear();
+    yah_[1].clear();
 
-    bg_camera.clear();
-    music         = 0;
-    no_skill_menu = false;
+    bg_camera_.clear();
+    music_         = 0;
+    no_skill_menu_ = false;
 
-    percent   = sfx_None;
-    done      = sfx_None;
-    endmap    = sfx_None;
-    nextmap   = sfx_None;
-    accel_snd = sfx_None;
-    frag_snd  = sfx_None;
+    percent_   = sfx_None;
+    done_      = sfx_None;
+    endmap_    = sfx_None;
+    nextmap_   = sfx_None;
+    accel_snd_ = sfx_None;
+    frag_snd_  = sfx_None;
 
-    firstmap.clear();
-    namegraphic.clear();
+    firstmap_.clear();
+    namegraphic_.clear();
 
-    titlepics.clear();
-    titlemovie.clear();
-    movie_played = false;
-    titlemusic   = 0;
-    titletics    = TICRATE * 4;
+    titlepics_.clear();
+    titlemovie_.clear();
+    movie_played_ = false;
+    titlemusic_   = 0;
+    titletics_    = TICRATE * 4;
 
-    special_music = 0;
-    lighting      = LMODEL_Doomish;
-    description.clear();
+    special_music_ = 0;
+    lighting_      = kLightingModelDoomish;
+    description_.clear();
 }
 
 // --> game definition container class
@@ -740,16 +763,18 @@ void gamedef_c::Default()
 //
 // gamedef_container_c Constructor
 //
-gamedef_container_c::gamedef_container_c() {}
+GameDefinitionContainer::GameDefinitionContainer() {}
 
 //
 // gamedef_container_c Destructor
 //
-gamedef_container_c::~gamedef_container_c()
+GameDefinitionContainer::~GameDefinitionContainer()
 {
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<GameDefinition *>::iterator iter     = begin(),
+                                                 iter_end = end();
+         iter != iter_end; iter++)
     {
-        gamedef_c *game = *iter;
+        GameDefinition *game = *iter;
         delete game;
         game = nullptr;
     }
@@ -760,14 +785,16 @@ gamedef_container_c::~gamedef_container_c()
 //
 // Looks an gamedef by name, returns a fatal error if it does not exist.
 //
-gamedef_c *gamedef_container_c::Lookup(const char *refname)
+GameDefinition *GameDefinitionContainer::Lookup(const char *refname)
 {
     if (!refname || !refname[0]) return nullptr;
 
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<GameDefinition *>::iterator iter     = begin(),
+                                                 iter_end = end();
+         iter != iter_end; iter++)
     {
-        gamedef_c *game = *iter;
-        if (DDF_CompareName(game->name.c_str(), refname) == 0) return game;
+        GameDefinition *game = *iter;
+        if (DDF_CompareName(game->name_.c_str(), refname) == 0) return game;
     }
 
     return nullptr;

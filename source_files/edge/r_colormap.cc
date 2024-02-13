@@ -556,7 +556,7 @@ RGBAColor V_LookupColour(int col)
 }
 
 #if 0 // OLD BUT POTENTIALLY USEFUL
-static void SetupLightMap(lighting_model_e model)
+static void SetupLightMap(LightingModel model)
 {
 	for (i=0; i < 256; i++)
 	{
@@ -641,7 +641,7 @@ class colormap_shader_c : public abstract_shader_c
     GLuint fade_tex;
 
     bool             simple_cmap;
-    lighting_model_e lt_model;
+    LightingModel lt_model;
 
     RGBAColor whites[32];
 
@@ -653,7 +653,7 @@ class colormap_shader_c : public abstract_shader_c
 
   public:
     colormap_shader_c(const Colormap *CM)
-        : colmap(CM), light_lev(255), fade_tex(0), simple_cmap(true), lt_model(LMODEL_Doom), fog_color(kRGBANoValue),
+        : colmap(CM), light_lev(255), fade_tex(0), simple_cmap(true), lt_model(kLightingModelDoom), fog_color(kRGBANoValue),
           fog_density(0), sec(nullptr)
     {
     }
@@ -692,7 +692,7 @@ class colormap_shader_c : public abstract_shader_c
 
         int cmap_idx;
 
-        if (lt_model >= LMODEL_Flat)
+        if (lt_model >= kLightingModelFlat)
             cmap_idx = HMM_Clamp(0, 42 - light_lev / 6, 31);
         else
             cmap_idx = R_DoomLightingEquation(light_lev / 4, dist);
@@ -823,7 +823,7 @@ class colormap_shader_c : public abstract_shader_c
 
                 int index;
 
-                if (lt_model >= LMODEL_Flat)
+                if (lt_model >= kLightingModelFlat)
                 {
                     // FLAT lighting
                     index = HMM_Clamp(0, 42 - (L * 2 / 3), 31);
@@ -879,8 +879,8 @@ class colormap_shader_c : public abstract_shader_c
   public:
     void Update()
     {
-        if (fade_tex == 0 || (r_forceflatlighting.d && lt_model != LMODEL_Flat) ||
-            (!r_forceflatlighting.d && lt_model != currmap->episode->lighting))
+        if (fade_tex == 0 || (r_forceflatlighting.d && lt_model != kLightingModelFlat) ||
+            (!r_forceflatlighting.d && lt_model != currmap->episode->lighting_))
         {
             if (fade_tex != 0)
             {
@@ -888,9 +888,9 @@ class colormap_shader_c : public abstract_shader_c
             }
 
             if (r_forceflatlighting.d)
-                lt_model = LMODEL_Flat;
+                lt_model = kLightingModelFlat;
             else
-                lt_model = currmap->episode->lighting;
+                lt_model = currmap->episode->lighting_;
 
             MakeColormapTexture(0);
         }

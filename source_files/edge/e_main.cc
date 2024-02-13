@@ -735,10 +735,10 @@ void E_PickLoadingScreen(void)
     // prevent an infinite loop
     for (int loop = 0; loop < 100; loop++)
     {
-        gamedef_c *g = gamedefs[title_game];
+        GameDefinition *g = gamedefs[title_game];
         SYS_ASSERT(g);
 
-        if (title_pic >= (int)g->titlepics.size())
+        if (title_pic >= (int)g->titlepics_.size())
         {
             title_game = (title_game + 1) % (int)gamedefs.size();
             title_pic  = 0;
@@ -747,7 +747,7 @@ void E_PickLoadingScreen(void)
 
         // ignore non-existing episodes.  Doesn't include title-only ones
         // like [EDGE].
-        if (title_pic == 0 && g->firstmap != "" && W_CheckNumForName(g->firstmap.c_str()) == -1)
+        if (title_pic == 0 && g->firstmap_ != "" && W_CheckNumForName(g->firstmap_.c_str()) == -1)
         {
             title_game = (title_game + 1) % gamedefs.size();
             title_pic  = 0;
@@ -755,7 +755,7 @@ void E_PickLoadingScreen(void)
         }
 
         // ignore non-existing images
-        loading_image = W_ImageLookup(g->titlepics[title_pic].c_str(), INS_Graphic, ILF_Null);
+        loading_image = W_ImageLookup(g->titlepics_[title_pic].c_str(), INS_Graphic, ILF_Null);
 
         if (!loading_image)
         {
@@ -789,10 +789,10 @@ void E_PickMenuScreen(void)
     // prevent an infinite loop
     for (int loop = 0; loop < 100; loop++)
     {
-        gamedef_c *g = gamedefs[title_game];
+        GameDefinition *g = gamedefs[title_game];
         SYS_ASSERT(g);
 
-        if (title_pic >= (int)g->titlepics.size())
+        if (title_pic >= (int)g->titlepics_.size())
         {
             title_game = (title_game + 1) % (int)gamedefs.size();
             title_pic  = 0;
@@ -800,7 +800,7 @@ void E_PickMenuScreen(void)
         }
 
         // ignore non-existing episodes.
-        if (title_pic == 0 && (g->firstmap == "" || W_CheckNumForName(g->firstmap.c_str()) == -1))
+        if (title_pic == 0 && (g->firstmap_ == "" || W_CheckNumForName(g->firstmap_.c_str()) == -1))
         {
             title_game = (title_game + 1) % gamedefs.size();
             title_pic  = 0;
@@ -808,7 +808,7 @@ void E_PickMenuScreen(void)
         }
 
         // ignore non-existing images
-        const image_c *menu_image = W_ImageLookup(g->titlepics[title_pic].c_str(), INS_Graphic, ILF_Null);
+        const image_c *menu_image = W_ImageLookup(g->titlepics_[title_pic].c_str(), INS_Graphic, ILF_Null);
 
         if (!menu_image)
         {
@@ -889,23 +889,23 @@ void E_AdvanceTitle(void)
     // prevent an infinite loop
     for (int loop = 0; loop < 100; loop++)
     {
-        gamedef_c *g = gamedefs[title_game];
+        GameDefinition *g = gamedefs[title_game];
         SYS_ASSERT(g);
 
         // Only play title movies once
-        if (!g->titlemovie.empty() && !g->movie_played)
+        if (!g->titlemovie_.empty() && !g->movie_played_)
         {
             if (skip_intros.d)
-                g->movie_played = true;
+                g->movie_played_ = true;
             else
             {
-                E_PlayMovie(g->titlemovie);
-                g->movie_played = true;
+                E_PlayMovie(g->titlemovie_);
+                g->movie_played_ = true;
             }
             continue;
         }
 
-        if (title_pic >= (int)g->titlepics.size())
+        if (title_pic >= (int)g->titlepics_.size())
         {
             title_game = (title_game + 1) % (int)gamedefs.size();
             title_pic  = 0;
@@ -914,7 +914,7 @@ void E_AdvanceTitle(void)
 
         // ignore non-existing episodes.  Doesn't include title-only ones
         // like [EDGE].
-        if (title_pic == 0 && g->firstmap != "" && W_CheckNumForName(g->firstmap.c_str()) == -1)
+        if (title_pic == 0 && g->firstmap_ != "" && W_CheckNumForName(g->firstmap_.c_str()) == -1)
         {
             title_game = (title_game + 1) % gamedefs.size();
             title_pic  = 0;
@@ -922,7 +922,7 @@ void E_AdvanceTitle(void)
         }
 
         // ignore non-existing images
-        title_image = W_ImageLookup(g->titlepics[title_pic].c_str(), INS_Graphic, ILF_Null);
+        title_image = W_ImageLookup(g->titlepics_[title_pic].c_str(), INS_Graphic, ILF_Null);
 
         if (!title_image)
         {
@@ -931,10 +931,10 @@ void E_AdvanceTitle(void)
         }
 
         // found one !!
-        if (title_pic == 0 && g->titlemusic > 0)
-            S_ChangeMusic(g->titlemusic, false);
+        if (title_pic == 0 && g->titlemusic_ > 0)
+            S_ChangeMusic(g->titlemusic_, false);
 
-        title_countdown = g->titletics * (r_doubleframes.d ? 2 : 1);
+        title_countdown = g->titletics_ * (r_doubleframes.d ? 2 : 1);
         return;
     }
 

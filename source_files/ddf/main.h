@@ -33,7 +33,7 @@ struct sfx_s;
 
 class atkdef_c;
 class Colormap;
-class gamedef_c;
+class GameDefinition;
 class mapdef_c;
 class mobjtype_c;
 class pl_entry_c;

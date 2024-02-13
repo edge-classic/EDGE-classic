@@ -127,10 +127,10 @@ static void HD_game_name(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    gamedef_c *g = currmap->episode;
+    GameDefinition *g = currmap->episode;
     SYS_ASSERT(g);
 
-    vm->ReturnString(g->name.c_str());
+    vm->ReturnString(g->name_.c_str());
 }
 
 // hud.map_name()

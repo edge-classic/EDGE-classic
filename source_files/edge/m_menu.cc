@@ -1269,28 +1269,28 @@ static void CreateEpisodeMenu(void)
         if (!g)
             continue;
 
-        if (g->firstmap.empty())
+        if (g->firstmap_.empty())
             continue;
 
-        if (W_CheckNumForName(g->firstmap.c_str()) == -1)
+        if (W_CheckNumForName(g->firstmap_.c_str()) == -1)
             continue;
 
         EpisodeMenu[e].status      = 1;
         EpisodeMenu[e].select_func = M_Episode;
         EpisodeMenu[e].image       = nullptr;
         EpisodeMenu[e].alpha_key   = '1' + e;
-        EpisodeMenuSkipSkill[e]    = g->no_skill_menu;
+        EpisodeMenuSkipSkill[e]    = g->no_skill_menu_;
 
-        epi::CStringCopyMax(EpisodeMenu[e].patch_name, g->namegraphic.c_str(), 8);
+        epi::CStringCopyMax(EpisodeMenu[e].patch_name, g->namegraphic_.c_str(), 8);
         EpisodeMenu[e].patch_name[8] = 0;
 
-        if (g->description != "")
+        if (g->description_ != "")
         {
-            EpisodeMenu[e].name = language[g->description];
+            EpisodeMenu[e].name = language[g->description_];
         }
         else
         {
-            EpisodeMenu[e].name = g->name.c_str();
+            EpisodeMenu[e].name = g->name_.c_str();
         }
 
         if (EpisodeMenu[e].patch_name[0])
@@ -1374,7 +1374,7 @@ void M_DrawEpisode(void)
     HUD_SetAlpha(old_alpha);
 }
 
-static void ReallyDoStartLevel(skill_t skill, gamedef_c *g)
+static void ReallyDoStartLevel(skill_t skill, GameDefinition *g)
 {
     newgame_params_c params;
 
@@ -1385,7 +1385,7 @@ static void ReallyDoStartLevel(skill_t skill, gamedef_c *g)
 
     params.SinglePlayer(0);
 
-    params.map = G_LookupMap(g->firstmap.c_str());
+    params.map = G_LookupMap(g->firstmap_.c_str());
 
     if (!params.map)
     {
@@ -1409,16 +1409,16 @@ static void DoStartLevel(skill_t skill)
     WI_Clear();
 
     // find episode
-    gamedef_c            *g = nullptr;
+    GameDefinition            *g = nullptr;
 
     std::string chosen_episode = epi::StringFormat("%s", EpisodeMenu[chosen_epi].name);
 
     for (auto game : gamedefs)
     {
         // Lobo 2022: lets use text instead of M_EPIxx graphic
-        if (game->description != "")
+        if (game->description_ != "")
         {
-            std::string gamedef_episode = epi::StringFormat("%s", language[game->description.c_str()]);
+            std::string gamedef_episode = epi::StringFormat("%s", language[game->description_.c_str()]);
             if (DDF_CompareName(gamedef_episode.c_str(), chosen_episode.c_str()) == 0)
             {
                 g = game;
@@ -1427,7 +1427,7 @@ static void DoStartLevel(skill_t skill)
         }
         else
         {
-            if (DDF_CompareName(game->name.c_str(), chosen_episode.c_str()) == 0)
+            if (DDF_CompareName(game->name_.c_str(), chosen_episode.c_str()) == 0)
             {
                 g = game;
                 break;
@@ -1451,10 +1451,10 @@ static void DoStartLevel(skill_t skill)
         return;
     }
 
-    const mapdef_c *map = G_LookupMap(g->firstmap.c_str());
+    const mapdef_c *map = G_LookupMap(g->firstmap_.c_str());
     if (!map)
     {
-        I_Warning("Cannot find map for '%s' (episode %s)\n", g->firstmap.c_str(), chosen_episode.c_str());
+        I_Warning("Cannot find map for '%s' (episode %s)\n", g->firstmap_.c_str(), chosen_episode.c_str());
         M_ClearMenus();
         return;
     }

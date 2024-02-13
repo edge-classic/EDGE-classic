@@ -507,11 +507,11 @@ mapdef_c *mapdef_container_c::Lookup(const char *refname)
             // Invent a temp episode if we don't have one
             if (m->episode_name.empty())
             {
-                gamedef_c *temp_gamedef;
+                GameDefinition *temp_gamedef;
 
-                temp_gamedef       = new gamedef_c;
-                temp_gamedef->name = "TEMPEPI";
-                m->episode_name    = temp_gamedef->name;
+                temp_gamedef       = new GameDefinition;
+                temp_gamedef->name_ = "TEMPEPI";
+                m->episode_name    = temp_gamedef->name_;
                 m->episode         = temp_gamedef;
 
                 // We must have a default sky
@@ -536,10 +536,10 @@ mapdef_c *mapdef_container_c::Lookup(const char *refname)
         temp_level->lump        = refname;
 
         // 3. we also need to assign an episode
-        gamedef_c *temp_gamedef;
-        temp_gamedef             = new gamedef_c;
-        temp_gamedef->name       = "TEMPEPI";
-        temp_level->episode_name = temp_gamedef->name;
+        GameDefinition *temp_gamedef;
+        temp_gamedef             = new GameDefinition;
+        temp_gamedef->name_       = "TEMPEPI";
+        temp_level->episode_name = temp_gamedef->name_;
         temp_level->episode      = temp_gamedef;
 
         // 4. Finally We must have a default sky

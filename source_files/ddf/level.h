@@ -23,7 +23,7 @@
 #include "epi.h"
 #include "types.h"
 
-class gamedef_c;
+class GameDefinition;
 
 // ------------------------------------------------------------------
 // ---------------MAP STRUCTURES AND CONFIGURATION-------------------
@@ -147,7 +147,7 @@ class mapdef_c
 
     int partime;
 
-    gamedef_c  *episode;  // set during DDF_CleanUp
+    GameDefinition  *episode;  // set during DDF_CleanUp
     std::string episode_name;
 
     // flags come in two flavours: "force on" and "force off".  When not

@@ -235,18 +235,18 @@ void M_NetHostBegun(void)
 
 static void ChangeGame(newgame_params_c *param, int dir)
 {
-    gamedef_c *closest  = nullptr;
-    gamedef_c *furthest = nullptr;
+    GameDefinition *closest  = nullptr;
+    GameDefinition *furthest = nullptr;
 
     for (auto def : gamedefs)
     {
-        mapdef_c *first_map = mapdefs.Lookup(def->firstmap.c_str());
+        mapdef_c *first_map = mapdefs.Lookup(def->firstmap_.c_str());
 
         if (!first_map || !G_MapExists(first_map))
             continue;
 
-        const char *old_name = param->map->episode->name.c_str();
-        const char *new_name = def->name.c_str();
+        const char *old_name = param->map->episode->name_.c_str();
+        const char *new_name = def->name_.c_str();
 
         int compare = DDF_CompareName(new_name, old_name);
 
@@ -255,22 +255,22 @@ static void ChangeGame(newgame_params_c *param, int dir)
 
         if (compare * dir > 0)
         {
-            if (!closest || dir * DDF_CompareName(new_name, closest->name.c_str()) < 0)
+            if (!closest || dir * DDF_CompareName(new_name, closest->name_.c_str()) < 0)
                 closest = def;
         }
         else
         {
-            if (!furthest || dir * DDF_CompareName(new_name, furthest->name.c_str()) < 0)
+            if (!furthest || dir * DDF_CompareName(new_name, furthest->name_.c_str()) < 0)
                 furthest = def;
         }
     }
 
-    I_Debugf("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n", dir, ng_params->map->episode->name.c_str(),
-             closest ? closest->name.c_str() : "none", furthest ? furthest->name.c_str() : "none");
+    I_Debugf("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n", dir, ng_params->map->episode->name_.c_str(),
+             closest ? closest->name_.c_str() : "none", furthest ? furthest->name_.c_str() : "none");
 
     if (closest)
     {
-        param->map = mapdefs.Lookup(closest->firstmap.c_str());
+        param->map = mapdefs.Lookup(closest->firstmap_.c_str());
         SYS_ASSERT(param->map);
         return;
     }
@@ -278,7 +278,7 @@ static void ChangeGame(newgame_params_c *param, int dir)
     // could not find the next/previous map, hence wrap around
     if (furthest)
     {
-        param->map = mapdefs.Lookup(furthest->firstmap.c_str());
+        param->map = mapdefs.Lookup(furthest->firstmap_.c_str());
         SYS_ASSERT(param->map);
         return;
     }
@@ -446,8 +446,8 @@ void M_DrawHostMenu(void)
                   ng_host_style->def->text[styledef_c::T_TEXT].scale) +
                  ng_host_style->def->entry_spacing;
 
-    if (!ng_params->map->episode->description.empty())
-        DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode->description.c_str()]);
+    if (!ng_params->map->episode->description_.empty())
+        DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode->description_.c_str()]);
     else
         DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode_name.c_str()]);
 

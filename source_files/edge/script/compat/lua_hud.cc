@@ -85,10 +85,10 @@ static int HD_game_mode(lua_State *L)
 //
 static int HD_game_name(lua_State *L)
 {
-    gamedef_c *g = currmap->episode;
+    GameDefinition *g = currmap->episode;
     SYS_ASSERT(g);
 
-    lua_pushstring(L, g->name.c_str());
+    lua_pushstring(L, g->name_.c_str());
 
     return 1;
 }

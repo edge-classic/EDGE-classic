@@ -1689,20 +1689,20 @@ void W_ReadUMAPINFOLumps(void)
             {
                 for (int g = gamedefs.size() - 1; g >= 0; g--)
                 {
-                    if (gamedefs[g]->name != "TEMPEPI" && epi::StringCaseCompareMaxASCII(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
+                    if (gamedefs[g]->name_ != "TEMPEPI" && epi::StringCaseCompareMaxASCII(gamedefs[g]->firstmap_, temp_level->name, 3) == 0)
                     {
-                        if (atoi(gamedefs[g]->firstmap.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
+                        if (atoi(gamedefs[g]->firstmap_.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
                             continue;
                         else
                         {
-                            temp_level->episode->background = gamedefs[g]->background;
-                            temp_level->episode->music      = gamedefs[g]->music;
-                            temp_level->episode->titlemusic = gamedefs[g]->titlemusic;
-                            temp_level->episode->titlepics  = gamedefs[g]->titlepics;
-                            temp_level->episode->titletics  = gamedefs[g]->titletics;
-                            temp_level->episode->percent    = gamedefs[g]->percent;
-                            temp_level->episode->done       = gamedefs[g]->done;
-                            temp_level->episode->accel_snd  = gamedefs[g]->accel_snd;
+                            temp_level->episode->background_ = gamedefs[g]->background_;
+                            temp_level->episode->music_      = gamedefs[g]->music_;
+                            temp_level->episode->titlemusic_ = gamedefs[g]->titlemusic_;
+                            temp_level->episode->titlepics_  = gamedefs[g]->titlepics_;
+                            temp_level->episode->titletics_  = gamedefs[g]->titletics_;
+                            temp_level->episode->percent_    = gamedefs[g]->percent_;
+                            temp_level->episode->done_       = gamedefs[g]->done_;
+                            temp_level->episode->accel_snd_  = gamedefs[g]->accel_snd_;
                             break;
                         }
                     }
@@ -1713,7 +1713,7 @@ void W_ReadUMAPINFOLumps(void)
                 bool good_epi = false;
                 for (auto g : gamedefs)
                 {
-                    if (temp_level->episode_name == g->name)
+                    if (temp_level->episode_name == g->name_)
                     {
                         good_epi = true;
                         break;
@@ -1723,14 +1723,14 @@ void W_ReadUMAPINFOLumps(void)
                 {
                     for (int g = gamedefs.size() - 1; g >= 0; g--)
                     {
-                        if (epi::StringCaseCompareMaxASCII(gamedefs[g]->firstmap, temp_level->name, 3) == 0)
+                        if (epi::StringCaseCompareMaxASCII(gamedefs[g]->firstmap_, temp_level->name, 3) == 0)
                         {
-                            if (atoi(gamedefs[g]->firstmap.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
+                            if (atoi(gamedefs[g]->firstmap_.substr(3).c_str()) > atoi(temp_level->name.substr(3).c_str()))
                                 continue;
                             else
                             {
                                 temp_level->episode      = gamedefs[g];
-                                temp_level->episode_name = gamedefs[g]->name;
+                                temp_level->episode_name = gamedefs[g]->name_;
                                 good_epi                 = true;
                                 break;
                             }
@@ -1769,7 +1769,7 @@ void W_ReadUMAPINFOLumps(void)
             // Clear pre_text for this map if it is an episode's starting map
             for (int g = gamedefs.size() - 1; g >= 0; g--)
             {
-                if (epi::StringCaseCompareASCII(gamedefs[g]->firstmap, temp_level->name) == 0)
+                if (epi::StringCaseCompareASCII(gamedefs[g]->firstmap_, temp_level->name) == 0)
                 {
                     temp_level->f_pre.text.clear();
                     temp_level->f_pre.text_flat.clear();

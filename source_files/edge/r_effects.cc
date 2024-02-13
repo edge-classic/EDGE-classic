@@ -289,7 +289,7 @@ void FUZZ_Update(void)
 {
     if (!fuzz_image)
     {
-        fuzz_image = W_ImageLookup("FUZZ_MAP", INS_Texture, ILF_Exact | ILF_Null);
+        fuzz_image = W_ImageLookup("FUZZ_MAP", kImageNamespaceTexture, ILF_Exact | ILF_Null);
         if (!fuzz_image)
             I_Error("Cannot find essential image: FUZZ_MAP\n");
     }

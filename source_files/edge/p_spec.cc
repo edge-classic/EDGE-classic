@@ -785,7 +785,7 @@ static void P_LineEffect(line_t *target, line_t *source, const linetype_c *speci
     if ((special->line_effect & LINEFX_SkyTransfer) && source->side[0])
     {
         if (source->side[0]->top.image)
-            sky_image = W_ImageLookup(source->side[0]->top.image->name.c_str(), INS_Texture);
+            sky_image = W_ImageLookup(source->side[0]->top.image->name.c_str(), kImageNamespaceTexture);
     }
 
     // experimental: stretch wall texture(s) by line length

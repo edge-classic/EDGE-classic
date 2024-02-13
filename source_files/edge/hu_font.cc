@@ -126,7 +126,7 @@ void font_c::LoadPatches()
     std::vector<image_data_c *> temp_imdata;
 
 	missing = def->missing_patch_ != "" ?
-		W_ImageLookup(def->missing_patch_.c_str(), INS_Graphic, ILF_Font|ILF_Null) : nullptr;
+		W_ImageLookup(def->missing_patch_.c_str(), kImageNamespaceGraphic, ILF_Font|ILF_Null) : nullptr;
 	image_data_c *missing_imdata = nullptr;
 
 	if (missing)
@@ -163,7 +163,7 @@ void font_c::LoadPatches()
             int idx = ch - first;
             SYS_ASSERT(0 <= idx && idx < total);
 
-			images[idx] = W_ImageLookup(pname, INS_Graphic, ILF_Font|ILF_Null);
+			images[idx] = W_ImageLookup(pname, kImageNamespaceGraphic, ILF_Font|ILF_Null);
 
 			if (images[idx])
 			{
@@ -272,7 +272,7 @@ void font_c::LoadFontImage()
     if (!font_image)
     {
         if (!def->image_name_.empty())
-            font_image = W_ImageLookup(def->image_name_.c_str(), INS_Graphic, ILF_Exact | ILF_Null);
+            font_image = W_ImageLookup(def->image_name_.c_str(), kImageNamespaceGraphic, ILF_Exact | ILF_Null);
         else
             I_Error("LoadFontImage: nullptr image name provided for font %s!", def->name_.c_str());
         if (!font_image)
@@ -504,7 +504,7 @@ const image_c *font_c::CharImage(char ch) const
     {
         if (ttf_glyph_map.find((uint8_t)ch) != ttf_glyph_map.end())
             // Create or return dummy image
-            return W_ImageLookup("FONT_DUMMY_IMAGE", INS_Graphic, ILF_Font);
+            return W_ImageLookup("FONT_DUMMY_IMAGE", kImageNamespaceGraphic, ILF_Font);
         else
             return nullptr;
     }
@@ -515,7 +515,7 @@ const image_c *font_c::CharImage(char ch) const
         return nullptr;
 
     if (p_cache.atlas_rects.count(cp437_unicode_values[(uint8_t)ch]))
-        return W_ImageLookup("FONT_DUMMY_IMAGE", INS_Graphic, ILF_Font);
+        return W_ImageLookup("FONT_DUMMY_IMAGE", kImageNamespaceGraphic, ILF_Font);
     else
         return nullptr;
 }

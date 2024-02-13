@@ -248,7 +248,7 @@ class startup_progress_c
 
         if (!hud_overlays.at(r_overlay.d).empty())
         {
-            const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), INS_Graphic, ILF_Null);
+            const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), kImageNamespaceGraphic, ILF_Null);
             if (overlay)
                 HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
                              SCREENHEIGHT / IM_HEIGHT(overlay));
@@ -654,7 +654,7 @@ void E_Display(void)
 
     if (!hud_overlays.at(r_overlay.d).empty())
     {
-        const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), INS_Graphic, ILF_Null);
+        const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), kImageNamespaceGraphic, ILF_Null);
         if (overlay)
             HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
                          SCREENHEIGHT / IM_HEIGHT(overlay));
@@ -755,7 +755,7 @@ void E_PickLoadingScreen(void)
         }
 
         // ignore non-existing images
-        loading_image = W_ImageLookup(g->titlepics_[title_pic].c_str(), INS_Graphic, ILF_Null);
+        loading_image = W_ImageLookup(g->titlepics_[title_pic].c_str(), kImageNamespaceGraphic, ILF_Null);
 
         if (!loading_image)
         {
@@ -808,7 +808,7 @@ void E_PickMenuScreen(void)
         }
 
         // ignore non-existing images
-        const image_c *menu_image = W_ImageLookup(g->titlepics_[title_pic].c_str(), INS_Graphic, ILF_Null);
+        const image_c *menu_image = W_ImageLookup(g->titlepics_[title_pic].c_str(), kImageNamespaceGraphic, ILF_Null);
 
         if (!menu_image)
         {
@@ -922,7 +922,7 @@ void E_AdvanceTitle(void)
         }
 
         // ignore non-existing images
-        title_image = W_ImageLookup(g->titlepics_[title_pic].c_str(), INS_Graphic, ILF_Null);
+        title_image = W_ImageLookup(g->titlepics_[title_pic].c_str(), kImageNamespaceGraphic, ILF_Null);
 
         if (!title_image)
         {

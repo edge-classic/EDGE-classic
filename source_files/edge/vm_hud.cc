@@ -330,7 +330,7 @@ static void HD_draw_image(coal::vm_c *vm, int argc)
     float       y    = *vm->AccessParam(1);
     const char *name = vm->AccessParamString(2);
 
-    const image_c *img = W_ImageLookup(name, INS_Graphic);
+    const image_c *img = W_ImageLookup(name, kImageNamespaceGraphic);
 
     double *noOffset = vm->AccessParam(3);
 
@@ -356,7 +356,7 @@ static void HD_scroll_image(coal::vm_c *vm, int argc)
     float       sx   = *vm->AccessParam(3);
     float       sy   = *vm->AccessParam(4);
 
-    const image_c *img      = W_ImageLookup(name, INS_Graphic);
+    const image_c *img      = W_ImageLookup(name, kImageNamespaceGraphic);
     double        *noOffset = vm->AccessParam(5);
 
     if (img)
@@ -385,7 +385,7 @@ static void HD_stretch_image(coal::vm_c *vm, int argc)
 
     const char *name = vm->AccessParamString(4);
 
-    const image_c *img      = W_ImageLookup(name, INS_Graphic);
+    const image_c *img      = W_ImageLookup(name, kImageNamespaceGraphic);
     double        *noOffset = vm->AccessParam(5);
 
     if (img)
@@ -413,7 +413,7 @@ static void HD_tile_image(coal::vm_c *vm, int argc)
     float offset_x = *vm->AccessParam(5);
     float offset_y = *vm->AccessParam(6);
 
-    const image_c *img = W_ImageLookup(name, INS_Texture);
+    const image_c *img = W_ImageLookup(name, kImageNamespaceTexture);
 
     if (img)
     {
@@ -771,7 +771,7 @@ static void HD_get_average_color(coal::vm_c *vm, int argc)
     double        *from_y       = vm->AccessParam(3);
     double        *to_y         = vm->AccessParam(4);
     const uint8_t    *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
@@ -796,7 +796,7 @@ static void HD_get_lightest_color(coal::vm_c *vm, int argc)
     double        *from_y       = vm->AccessParam(3);
     double        *to_y         = vm->AccessParam(4);
     const uint8_t    *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
@@ -821,7 +821,7 @@ static void HD_get_darkest_color(coal::vm_c *vm, int argc)
     double        *from_y       = vm->AccessParam(3);
     double        *to_y         = vm->AccessParam(4);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
@@ -846,7 +846,7 @@ static void HD_get_average_hue(coal::vm_c *vm, int argc)
     double        *from_y       = vm->AccessParam(3);
     double        *to_y         = vm->AccessParam(4);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
@@ -871,7 +871,7 @@ static void HD_get_average_top_border_color(coal::vm_c *vm, int argc)
     double         rgb[3];
     const char    *name         = vm->AccessParamString(0);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
@@ -890,7 +890,7 @@ static void HD_get_average_bottom_border_color(coal::vm_c *vm, int argc)
     double         rgb[3];
     const char    *name         = vm->AccessParamString(0);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
@@ -951,7 +951,7 @@ static void HD_get_image_width(coal::vm_c *vm, int argc)
     (void)argc;
     const char *name = vm->AccessParamString(0);
 
-    const image_c *img = W_ImageLookup(name, INS_Graphic);
+    const image_c *img = W_ImageLookup(name, kImageNamespaceGraphic);
 
     if (img)
     {
@@ -970,7 +970,7 @@ static void HD_get_image_height(coal::vm_c *vm, int argc)
     (void)argc;
     const char *name = vm->AccessParamString(0);
 
-    const image_c *img = W_ImageLookup(name, INS_Graphic);
+    const image_c *img = W_ImageLookup(name, kImageNamespaceGraphic);
 
     if (img)
     {

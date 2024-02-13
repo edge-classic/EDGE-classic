@@ -223,9 +223,9 @@ static void LookupFinaleStuff(void)
     // here is where we lookup the required images
 
     if (finale->text_flat != "")
-        finale_textback = W_ImageLookup(finale->text_flat.c_str(), INS_Flat);
+        finale_textback = W_ImageLookup(finale->text_flat.c_str(), kImageNamespaceFlat);
     else if (finale->text_back != "")
-        finale_textback = W_ImageLookup(finale->text_back.c_str(), INS_Graphic);
+        finale_textback = W_ImageLookup(finale->text_back.c_str(), kImageNamespaceGraphic);
     else
         finale_textback = nullptr;
 

@@ -127,7 +127,7 @@ static light_image_c *GetLightImage(const mobjtype_c *info, int DL)
 
         SYS_ASSERT(shape && strlen(shape) > 0);
 
-        const image_c *image = W_ImageLookup(shape, INS_Graphic, ILF_Null);
+        const image_c *image = W_ImageLookup(shape, kImageNamespaceGraphic, ILF_Null);
 
         if (!image)
             I_Error("Missing dynamic light graphic: %s\n", shape);

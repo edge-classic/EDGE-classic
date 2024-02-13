@@ -122,7 +122,7 @@ void R_AddFlatAnim(AnimationDefinition *anim)
             // that -- the lump list does NOT take overriding flats (in newer
             // pwads) into account.
 
-            flats[i] = W_ImageLookup(name, INS_Flat, ILF_Null | ILF_Exact | ILF_NoNew);
+            flats[i] = W_ImageLookup(name, kImageNamespaceFlat, ILF_Null | ILF_Exact | ILF_NoNew);
         }
 
         W_AnimateImageSet(flats, total, anim->speed_);
@@ -140,7 +140,7 @@ void R_AddFlatAnim(AnimationDefinition *anim)
 
     for (int i = 0; i < total; i++)
     {
-        flats[i] = W_ImageLookup(anim->pics_[i].c_str(), INS_Flat, ILF_Null | ILF_Exact);
+        flats[i] = W_ImageLookup(anim->pics_[i].c_str(), kImageNamespaceFlat, ILF_Null | ILF_Exact);
     }
 
     W_AnimateImageSet(flats, total, anim->speed_);
@@ -194,7 +194,7 @@ void R_AddTextureAnim(AnimationDefinition *anim)
         for (int i = 0; i < total; i++)
         {
             const char *name = W_TextureNameInSet(set, s_offset + i);
-            texs[i]          = W_ImageLookup(name, INS_Texture, ILF_Null | ILF_Exact | ILF_NoNew);
+            texs[i]          = W_ImageLookup(name, kImageNamespaceTexture, ILF_Null | ILF_Exact | ILF_NoNew);
         }
 
         W_AnimateImageSet(texs, total, anim->speed_);
@@ -214,7 +214,7 @@ void R_AddTextureAnim(AnimationDefinition *anim)
 
     for (int i = 0; i < total; i++)
     {
-        texs[i] = W_ImageLookup(anim->pics_[i].c_str(), INS_Texture, ILF_Null | ILF_Exact);
+        texs[i] = W_ImageLookup(anim->pics_[i].c_str(), kImageNamespaceTexture, ILF_Null | ILF_Exact);
     }
 
     W_AnimateImageSet(texs, total, anim->speed_);
@@ -237,7 +237,7 @@ void R_AddGraphicAnim(AnimationDefinition *anim)
 
     for (int i = 0; i < total; i++)
     {
-        users[i] = W_ImageLookup(anim->pics_[i].c_str(), INS_Graphic, ILF_Null | ILF_Exact);
+        users[i] = W_ImageLookup(anim->pics_[i].c_str(), kImageNamespaceGraphic, ILF_Null | ILF_Exact);
     }
 
     W_AnimateImageSet(users, total, anim->speed_);

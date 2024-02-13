@@ -260,17 +260,17 @@ modeldef_c *LoadModelFromLump(int model_num)
             if (pack_file)
             {
                 skinname      = epi::StringFormat("%s%d", basename.c_str(), i);
-                def->skins[i] = W_ImageLookup(skinname.c_str(), INS_Sprite, ILF_Null);
+                def->skins[i] = W_ImageLookup(skinname.c_str(), kImageNamespaceSprite, ILF_Null);
                 if (!def->skins[i])
                 {
                     skinname      = epi::StringFormat("%sSKN%d", basename.c_str(), i);
-                    def->skins[i] = W_ImageLookup(skinname.c_str(), INS_Sprite, ILF_Null);
+                    def->skins[i] = W_ImageLookup(skinname.c_str(), kImageNamespaceSprite, ILF_Null);
                 }
             }
             else
             {
                 skinname      = epi::StringFormat("%sSKN%d", basename.c_str(), i);
-                def->skins[i] = W_ImageLookup(skinname.c_str(), INS_Sprite, ILF_Null);
+                def->skins[i] = W_ImageLookup(skinname.c_str(), kImageNamespaceSprite, ILF_Null);
             }
         }
     }

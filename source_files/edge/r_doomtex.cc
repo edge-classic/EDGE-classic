@@ -441,7 +441,7 @@ static image_data_c *ReadDummyAsEpiBlock(image_c *rim)
     return img;
 }
 
-static image_data_c *CreateUserColourImage(image_c *rim, imagedef_c *def)
+static image_data_c *CreateUserColourImage(image_c *rim, ImageDefinition *def)
 {
     int tw = HMM_MAX(rim->total_w, 1);
     int th = HMM_MAX(rim->total_h, 1);
@@ -453,27 +453,27 @@ static image_data_c *CreateUserColourImage(image_c *rim, imagedef_c *def)
     for (int y = 0; y < img->height; y++)
         for (int x = 0; x < img->width; x++)
         {
-            *dest++ = epi::GetRGBARed(def->colour);
-            *dest++ = epi::GetRGBAGreen(def->colour);
-            *dest++ = epi::GetRGBABlue(def->colour);
+            *dest++ = epi::GetRGBARed(def->colour_);
+            *dest++ = epi::GetRGBAGreen(def->colour_);
+            *dest++ = epi::GetRGBABlue(def->colour_);
         }
 
     return img;
 }
 
-epi::File *OpenUserFileOrLump(imagedef_c *def)
+epi::File *OpenUserFileOrLump(ImageDefinition *def)
 {
-    switch (def->type)
+    switch (def->type_)
     {
-    case IMGDT_File:
+    case kImageDataFile:
         // -AJA- 2005/01/15: filenames in DDF relative to APPDIR
-        return M_OpenComposedEPIFile(game_dir.c_str(), def->info.c_str());
+        return M_OpenComposedEPIFile(game_dir.c_str(), def->info_.c_str());
 
-    case IMGDT_Package:
-        return W_OpenPackFile(def->info);
+    case kImageDataPackage:
+        return W_OpenPackFile(def->info_);
 
-    case IMGDT_Lump: {
-        int lump = W_CheckNumForName(def->info.c_str());
+    case kImageDataLump: {
+        int lump = W_CheckNumForName(def->info_.c_str());
         if (lump < 0)
             return nullptr;
 
@@ -485,12 +485,12 @@ epi::File *OpenUserFileOrLump(imagedef_c *def)
     }
 }
 
-static image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
+static image_data_c *CreateUserFileImage(image_c *rim, ImageDefinition *def)
 {
     epi::File *f = OpenUserFileOrLump(def);
 
     if (!f)
-        I_Error("Missing image file: %s\n", def->info.c_str());
+        I_Error("Missing image file: %s\n", def->info_.c_str());
 
     image_data_c *img = Image_Load(f);
 
@@ -498,24 +498,14 @@ static image_data_c *CreateUserFileImage(image_c *rim, imagedef_c *def)
     delete f;
 
     if (!img)
-        I_Error("Error occurred loading image file: %s\n", def->info.c_str());
+        I_Error("Error occurred loading image file: %s\n", def->info_.c_str());
 
-    /* Lobo 2022: info overload. Shut up.
-    #if 1  // DEBUGGING
-        L_WriteDebug("CREATE IMAGE [%s] %dx%d < %dx%d opac=%d --> %p %dx%d bpp %d\n",
-        rim->name,
-        rim->actual_w, rim->actual_h,
-        rim->total_w, rim->total_h,
-        rim->opacity,
-        img, img->width, img->height, img->bpp);
-    #endif
-    */
     rim->opacity = R_DetermineOpacity(img, &rim->is_empty);
 
-    if (def->is_font)
+    if (def->is_font_)
         return img;
 
-    if (def->fix_trans == FIXTRN_Blacken)
+    if (def->fix_trans_ == kTransparencyFixBlacken)
         R_BlackenClearAreas(img);
 
     SYS_ASSERT(rim->total_w == img->width);
@@ -545,20 +535,20 @@ static image_data_c *ReadUserAsEpiBlock(image_c *rim)
     // clear initial image to black / transparent
     /// ALREADY DONE: memset(dest, pal_black, tw * th * bpp);
 
-    imagedef_c *def = rim->source.user.def;
+    ImageDefinition *def = rim->source.user.def;
 
-    switch (def->type)
+    switch (def->type_)
     {
-    case IMGDT_Colour:
+    case kImageDataColor:
         return CreateUserColourImage(rim, def);
 
-    case IMGDT_File:
-    case IMGDT_Lump:
-    case IMGDT_Package:
+    case kImageDataFile:
+    case kImageDataLump:
+    case kImageDataPackage:
         return CreateUserFileImage(rim, def);
 
     default:
-        I_Error("ReadUserAsEpiBlock: Coding error, unknown type %d\n", def->type);
+        I_Error("ReadUserAsEpiBlock: Coding error, unknown type %d\n", def->type_);
     }
 
     return nullptr; /* NOT REACHED */

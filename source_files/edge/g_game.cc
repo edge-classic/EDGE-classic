@@ -151,7 +151,7 @@ void LoadLevel_Bits(void)
     //
     // -ACB- 1998/08/09 Reference current map for sky name.
 
-    sky_image = W_ImageLookup(currmap->sky.c_str(), INS_Texture);
+    sky_image = W_ImageLookup(currmap->sky.c_str(), kImageNamespaceTexture);
 
     gamestate = GS_NOTHING; // FIXME: needed ???
 

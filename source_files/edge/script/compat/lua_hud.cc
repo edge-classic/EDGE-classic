@@ -288,7 +288,7 @@ static int HD_draw_image(lua_State *L)
     float       y    = (float)luaL_checknumber(L, 2);
     const char *name = luaL_checkstring(L, 3);
 
-    const image_c *img = W_ImageLookup(name, INS_Graphic);
+    const image_c *img = W_ImageLookup(name, kImageNamespaceGraphic);
 
     int noOffset = (int)luaL_optnumber(L, 4, 0);
 
@@ -314,7 +314,7 @@ static int HD_scroll_image(lua_State *L)
     float       sx   = luaL_checknumber(L, 4);
     float       sy   = luaL_checknumber(L, 5);
 
-    const image_c *img      = W_ImageLookup(name, INS_Graphic);
+    const image_c *img      = W_ImageLookup(name, kImageNamespaceGraphic);
     int            noOffset = (int)luaL_optnumber(L, 6, 0);
 
     if (img)
@@ -343,7 +343,7 @@ static int HD_stretch_image(lua_State *L)
 
     const char *name = luaL_checkstring(L, 5);
 
-    const image_c *img      = W_ImageLookup(name, INS_Graphic);
+    const image_c *img      = W_ImageLookup(name, kImageNamespaceGraphic);
     int            noOffset = (int)luaL_optnumber(L, 6, 0);
 
     if (img)
@@ -371,7 +371,7 @@ static int HD_tile_image(lua_State *L)
     float offset_x = luaL_checknumber(L, 6);
     float offset_y = luaL_checknumber(L, 7);
 
-    const image_c *img = W_ImageLookup(name, INS_Texture);
+    const image_c *img = W_ImageLookup(name, kImageNamespaceTexture);
 
     if (img)
     {
@@ -722,7 +722,7 @@ static int HD_get_average_color(lua_State *L)
     double         from_y       = luaL_optnumber(L, 4, -1);
     double         to_y         = luaL_optnumber(L, 5, 1000000);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
@@ -747,7 +747,7 @@ static int HD_get_lightest_color(lua_State *L)
     double         from_y       = luaL_optnumber(L, 4, -1);
     double         to_y         = luaL_optnumber(L, 5, 1000000);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
@@ -771,7 +771,7 @@ static int HD_get_darkest_color(lua_State *L)
     double         from_y       = luaL_optnumber(L, 4, -1);
     double         to_y         = luaL_optnumber(L, 5, 1000000);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
@@ -795,7 +795,7 @@ static int HD_get_average_hue(lua_State *L)
     double         from_y       = luaL_optnumber(L, 4, -1);
     double         to_y         = luaL_optnumber(L, 5, 1000000);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
@@ -818,7 +818,7 @@ static int HD_get_average_top_border_color(lua_State *L)
     HMM_Vec3    rgb;
     const char    *name         = luaL_checkstring(L, 1);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
@@ -837,7 +837,7 @@ static int HD_get_average_bottom_border_color(lua_State *L)
     HMM_Vec3    rgb;
     const char    *name         = luaL_checkstring(L, 1);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, INS_Graphic, 0);
+    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
     image_data_c *tmp_img_data =
@@ -902,7 +902,7 @@ static int HD_get_image_width(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
 
-    const image_c *img = W_ImageLookup(name, INS_Graphic);
+    const image_c *img = W_ImageLookup(name, kImageNamespaceGraphic);
 
     if (img)
     {
@@ -922,7 +922,7 @@ static int HD_get_image_height(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
 
-    const image_c *img = W_ImageLookup(name, INS_Graphic);
+    const image_c *img = W_ImageLookup(name, kImageNamespaceGraphic);
 
     if (img)
     {

@@ -75,7 +75,7 @@ swirl_type_e swirling_flats = SWIRL_Vanilla;
 
 extern image_data_c *ReadAsEpiBlock(image_c *rim);
 
-extern epi::File *OpenUserFileOrLump(imagedef_c *def);
+extern epi::File *OpenUserFileOrLump(ImageDefinition *def);
 
 extern cvar_c r_doubleframes;
 
@@ -694,53 +694,53 @@ static image_c *AddImageFlat(const char *name, int lump)
     return rim;
 }
 
-static image_c *AddImage_DOOM(imagedef_c *def, bool user_defined = false)
+static image_c *AddImage_DOOM(ImageDefinition *def, bool user_defined = false)
 {
-    const char *name      = def->name.c_str();
-    const char *lump_name = def->info.c_str();
+    const char *name      = def->name_.c_str();
+    const char *lump_name = def->info_.c_str();
 
     image_c *rim = nullptr;
 
-    if (def->type == IMGDT_Package)
+    if (def->type_ == kImageDataPackage)
     {
-        switch (def->belong)
+        switch (def->belong_)
         {
-        case INS_Graphic:
+        case kImageNamespaceGraphic:
             rim = AddImage_SmartPack(name, IMSRC_Graphic, lump_name, real_graphics);
             break;
-        case INS_Texture:
+        case kImageNamespaceTexture:
             rim = AddImage_SmartPack(name, IMSRC_Texture, lump_name, real_textures);
             break;
-        case INS_Flat:
+        case kImageNamespaceFlat:
             rim = AddImage_SmartPack(name, IMSRC_Flat, lump_name, real_flats);
             break;
-        case INS_Sprite:
+        case kImageNamespaceSprite:
             rim = AddImage_SmartPack(name, IMSRC_Sprite, lump_name, real_sprites);
             break;
 
         default:
-            I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
+            I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
         }
     }
     else
     {
-        switch (def->belong)
+        switch (def->belong_)
         {
-        case INS_Graphic:
+        case kImageNamespaceGraphic:
             rim = AddImage_Smart(name, IMSRC_Graphic, W_GetNumForName(lump_name), real_graphics);
             break;
-        case INS_Texture:
+        case kImageNamespaceTexture:
             rim = AddImage_Smart(name, IMSRC_Texture, W_GetNumForName(lump_name), real_textures);
             break;
-        case INS_Flat:
+        case kImageNamespaceFlat:
             rim = AddImage_Smart(name, IMSRC_Flat, W_GetNumForName(lump_name), real_flats);
             break;
-        case INS_Sprite:
+        case kImageNamespaceSprite:
             rim = AddImage_Smart(name, IMSRC_Sprite, W_GetNumForName(lump_name), real_sprites);
             break;
 
         default:
-            I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
+            I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
         }
     }
 
@@ -750,65 +750,65 @@ static image_c *AddImage_DOOM(imagedef_c *def, bool user_defined = false)
         return nullptr;
     }
 
-    rim->offset_x += def->x_offset;
-    rim->offset_y += def->y_offset;
+    rim->offset_x += def->x_offset_;
+    rim->offset_y += def->y_offset_;
 
-    rim->scale_x = def->scale * def->aspect;
-    rim->scale_y = def->scale;
+    rim->scale_x = def->scale_ * def->aspect_;
+    rim->scale_y = def->scale_;
 
-    rim->is_font = def->is_font;
+    rim->is_font = def->is_font_;
 
-    rim->hsv_rotation   = def->hsv_rotation;
-    rim->hsv_saturation = def->hsv_saturation;
-    rim->hsv_value      = def->hsv_value;
-    rim->blur_sigma     = def->blur_factor;
+    rim->hsv_rotation   = def->hsv_rotation_;
+    rim->hsv_saturation = def->hsv_saturation_;
+    rim->hsv_value      = def->hsv_value_;
+    rim->blur_sigma     = def->blur_factor_;
 
-    rim->source.graphic.special = IMGSP_None;
+    rim->source.graphic.special = kImageSpecialNone;
 
     if (user_defined)
     {
         rim->source.graphic.user_defined = true;
-        rim->source.graphic.special      = def->special;
+        rim->source.graphic.special      = def->special_;
     }
 
-    if (def->special & IMGSP_Crosshair)
+    if (def->special_ & kImageSpecialCrosshair)
     {
         float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f; // - WEAPONTOP;
         rim->offset_y += int(dy / rim->scale_y);
     }
 
-    if (def->special & IMGSP_Grayscale)
+    if (def->special_ & kImageSpecialGrayscale)
         rim->grayscale = true;
 
     return rim;
 }
 
-static image_c *AddImageUser(imagedef_c *def)
+static image_c *AddImageUser(ImageDefinition *def)
 {
     int  width = 0, height = 0, bpp = 0;
     bool solid = false;
 
-    if (def->type == IMGDT_Lump && def->format == LIF_DOOM)
+    if (def->type_ == kImageDataLump && def->format_ == kLumpImageFormatDoom)
         return AddImage_DOOM(def, true);
 
-    switch (def->type)
+    switch (def->type_)
     {
-    case IMGDT_Colour:
+    case kImageDataColor:
         width  = 8;
         height = 8;
         bpp    = 3;
         solid  = true;
         break;
 
-    case IMGDT_Lump:
-    case IMGDT_File:
-    case IMGDT_Package: {
-        const char *filename = def->info.c_str();
+    case kImageDataLump:
+    case kImageDataFile:
+    case kImageDataPackage: {
+        const char *filename = def->info_.c_str();
 
         epi::File *f = OpenUserFileOrLump(def);
         if (f == nullptr)
         {
-            I_Warning("Unable to open image %s: %s\n", (def->type == IMGDT_Lump) ? "lump" : "file", filename);
+            I_Warning("Unable to open image %s: %s\n", (def->type_ == kImageDataLump) ? "lump" : "file", filename);
             return nullptr;
         }
 
@@ -819,7 +819,7 @@ static image_c *AddImageUser(imagedef_c *def)
         // it is wrong (like a PNG called "foo.jpeg"), it can still work.
         ImageFormat fmt = kUnknownImage;
 
-        if (def->type == IMGDT_Lump)
+        if (def->type_ == kImageDataLump)
         {
             uint8_t header[32];
             memset(header, 255, sizeof(header));
@@ -831,7 +831,7 @@ static image_c *AddImageUser(imagedef_c *def)
             fmt            = Image_DetectFormat(header, header_len, file_size);
         }
         else
-            fmt = Image_FilenameToFormat(def->info);
+            fmt = Image_FilenameToFormat(def->info_);
 
         // when a lump uses DOOM patch format, use the other method.
         // for lumps, assume kUnknownImage is a mis-detection of DOOM patch
@@ -869,59 +869,59 @@ static image_c *AddImageUser(imagedef_c *def)
     break;
 
     default:
-        I_Error("AddImageUser: Coding error, unknown type %d\n", def->type);
+        I_Error("AddImageUser: Coding error, unknown type %d\n", def->type_);
         return nullptr; /* NOT REACHED */
     }
 
     image_c *rim = NewImage(width, height, solid ? OPAC_Solid : OPAC_Unknown);
 
-    rim->name = def->name;
+    rim->name = def->name_;
 
-    rim->offset_x = def->x_offset;
-    rim->offset_y = def->y_offset;
+    rim->offset_x = def->x_offset_;
+    rim->offset_y = def->y_offset_;
 
-    rim->scale_x = def->scale * def->aspect;
-    rim->scale_y = def->scale;
+    rim->scale_x = def->scale_ * def->aspect_;
+    rim->scale_y = def->scale_;
 
     rim->source_type     = IMSRC_User;
     rim->source.user.def = def;
 
-    rim->is_font = def->is_font;
+    rim->is_font = def->is_font_;
 
-    rim->hsv_rotation   = def->hsv_rotation;
-    rim->hsv_saturation = def->hsv_saturation;
-    rim->hsv_value      = def->hsv_value;
-    rim->blur_sigma     = def->blur_factor;
+    rim->hsv_rotation   = def->hsv_rotation_;
+    rim->hsv_saturation = def->hsv_saturation_;
+    rim->hsv_value      = def->hsv_value_;
+    rim->blur_sigma     = def->blur_factor_;
 
-    if (def->special & IMGSP_Crosshair)
+    if (def->special_ & kImageSpecialCrosshair)
     {
         float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f; // - WEAPONTOP;
         rim->offset_y += int(dy / rim->scale_y);
     }
 
-    if (def->special & IMGSP_Grayscale)
+    if (def->special_ & kImageSpecialGrayscale)
         rim->grayscale = true;
 
-    switch (def->belong)
+    switch (def->belong_)
     {
-    case INS_Graphic:
+    case kImageNamespaceGraphic:
         real_graphics.push_back(rim);
         break;
-    case INS_Texture:
+    case kImageNamespaceTexture:
         real_textures.push_back(rim);
         break;
-    case INS_Flat:
+    case kImageNamespaceFlat:
         real_flats.push_back(rim);
         break;
-    case INS_Sprite:
+    case kImageNamespaceSprite:
         real_sprites.push_back(rim);
         break;
 
     default:
-        I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong);
+        I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
     }
 
-    if (def->special & IMGSP_Precache)
+    if (def->special_ & kImageSpecialPrecache)
         W_ImagePreCache(rim);
 
     return rim;
@@ -1040,7 +1040,7 @@ void W_ImageCreateUser(void)
         if (def == nullptr)
             continue;
 
-        if (def->belong != INS_Patch)
+        if (def->belong_ != kImageNamespacePatch)
             AddImageUser(def);
     }
 
@@ -1085,7 +1085,7 @@ void W_ImageAddTX(int lump, const char *name, bool hires)
         }
 
         // we do it this way to force the original graphic to be loaded
-        rim = W_ImageLookup(name, INS_Graphic, ILF_Exact | ILF_Null);
+        rim = W_ImageLookup(name, kImageNamespaceGraphic, ILF_Exact | ILF_Null);
 
         if (rim && rim->source_type != IMSRC_User)
         {
@@ -1171,10 +1171,10 @@ static bool IM_ShouldClamp(const image_c *rim)
         return true;
 
     case IMSRC_User:
-        switch (rim->source.user.def->belong)
+        switch (rim->source.user.def->belong_)
         {
-        case INS_Graphic:
-        case INS_Sprite:
+        case kImageNamespaceGraphic:
+        case kImageNamespaceSprite:
             return true;
 
         default:
@@ -1200,10 +1200,10 @@ static bool IM_ShouldMipmap(image_c *rim)
         return true;
 
     case IMSRC_User:
-        switch (rim->source.user.def->belong)
+        switch (rim->source.user.def->belong_)
         {
-        case INS_Texture:
-        case INS_Flat:
+        case kImageNamespaceTexture:
+        case kImageNamespaceFlat:
             return true;
 
         default:
@@ -1280,32 +1280,32 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
 
     if (rim->source_type == IMSRC_User)
     {
-        if (rim->source.user.def->special & IMGSP_Clamp)
+        if (rim->source.user.def->special_ & kImageSpecialClamp)
             clamp = true;
 
-        if (rim->source.user.def->special & IMGSP_Mip)
+        if (rim->source.user.def->special_ & kImageSpecialMip)
             mip = true;
-        else if (rim->source.user.def->special & IMGSP_NoMip)
+        else if (rim->source.user.def->special_ & kImageSpecialNoMip)
             mip = false;
 
-        if (rim->source.user.def->special & IMGSP_Smooth)
+        if (rim->source.user.def->special_ & kImageSpecialSmooth)
             smooth = true;
-        else if (rim->source.user.def->special & IMGSP_NoSmooth)
+        else if (rim->source.user.def->special_ & kImageSpecialNoSmooth)
             smooth = false;
     }
     else if (rim->source_type == IMSRC_Graphic && rim->source.graphic.user_defined)
     {
-        if (rim->source.graphic.special & IMGSP_Clamp)
+        if (rim->source.graphic.special & kImageSpecialClamp)
             clamp = true;
 
-        if (rim->source.graphic.special & IMGSP_Mip)
+        if (rim->source.graphic.special & kImageSpecialMip)
             mip = true;
-        else if (rim->source.graphic.special & IMGSP_NoMip)
+        else if (rim->source.graphic.special & kImageSpecialNoMip)
             mip = false;
 
-        if (rim->source.graphic.special & IMGSP_Smooth)
+        if (rim->source.graphic.special & kImageSpecialSmooth)
             smooth = true;
-        else if (rim->source.graphic.special & IMGSP_NoSmooth)
+        else if (rim->source.graphic.special & kImageSpecialNoSmooth)
             smooth = false;
     }
 
@@ -1629,7 +1629,7 @@ static const image_c *BackupSprite(const char *spr_name, int flags)
     return W_ImageForDummySprite();
 }
 
-const image_c *W_ImageLookup(const char *name, image_namespace_e type, int flags)
+const image_c *W_ImageLookup(const char *name, ImageNamespace type, int flags)
 {
     //
     // Note: search must be case insensitive.
@@ -1640,13 +1640,13 @@ const image_c *W_ImageLookup(const char *name, image_namespace_e type, int flags
         return nullptr;
 
     // "Sky" marker.
-    if (type == INS_Flat && (epi::StringCaseCompareASCII(name, "F_SKY1") == 0 || epi::StringCaseCompareASCII(name, "F_SKY") == 0))
+    if (type == kImageNamespaceFlat && (epi::StringCaseCompareASCII(name, "F_SKY1") == 0 || epi::StringCaseCompareASCII(name, "F_SKY") == 0))
     {
         return skyflatimage;
     }
 
     // compatibility hack (first texture in IWAD is a dummy)
-    if (type == INS_Texture && ((epi::StringCaseCompareASCII(name, "AASTINKY") == 0) || (epi::StringCaseCompareASCII(name, "AASHITTY") == 0) ||
+    if (type == kImageNamespaceTexture && ((epi::StringCaseCompareASCII(name, "AASTINKY") == 0) || (epi::StringCaseCompareASCII(name, "AASHITTY") == 0) ||
                                 (epi::StringCaseCompareASCII(name, "BADPATCH") == 0) || (epi::StringCaseCompareASCII(name, "ABADONE") == 0)))
     {
         return nullptr;
@@ -1654,23 +1654,23 @@ const image_c *W_ImageLookup(const char *name, image_namespace_e type, int flags
 
     const image_c *rim;
 
-    if (type == INS_Texture)
+    if (type == kImageNamespaceTexture)
     {
         rim = W_ImageDoLookup(real_textures, name);
         return rim ? rim : BackupTexture(name, flags);
     }
-    if (type == INS_Flat)
+    if (type == kImageNamespaceFlat)
     {
         rim = W_ImageDoLookup(real_flats, name);
         return rim ? rim : BackupFlat(name, flags);
     }
-    if (type == INS_Sprite)
+    if (type == kImageNamespaceSprite)
     {
         rim = W_ImageDoLookup(real_sprites, name);
         return rim ? rim : BackupSprite(name, flags);
     }
 
-    /* INS_Graphic */
+    /* kImageNamespaceGraphic */
 
     rim = W_ImageDoLookup(real_graphics, name);
     return rim ? rim : BackupGraphic(name, flags);
@@ -1694,14 +1694,14 @@ const image_c *W_ImageForHOMDetect(void)
 const image_c *W_ImageForFogWall(RGBAColor fog_color)
 {
     std::string fogname = epi::StringFormat("FOGWALL_%d", fog_color);
-    image_c    *fogwall = (image_c *)W_ImageLookup(fogname.c_str(), INS_Graphic, ILF_Null);
+    image_c    *fogwall = (image_c *)W_ImageLookup(fogname.c_str(), kImageNamespaceGraphic, ILF_Null);
     if (fogwall)
         return fogwall;
-    imagedef_c *fogdef = new imagedef_c;
-    fogdef->colour     = fog_color;
-    fogdef->name       = fogname;
-    fogdef->type       = IMGDT_Colour;
-    fogdef->belong     = INS_Graphic;
+    ImageDefinition *fogdef = new ImageDefinition;
+    fogdef->colour_     = fog_color;
+    fogdef->name_       = fogname;
+    fogdef->type_       = kImageDataColor;
+    fogdef->belong_     = kImageNamespaceGraphic;
     fogwall            = AddImageUser(fogdef);
     return fogwall;
 }
@@ -1722,13 +1722,13 @@ const image_c *W_ImageParseSaveString(char type, const char *name)
         return skyflatimage;
 
     case 'F':
-        return W_ImageLookup(name, INS_Flat);
+        return W_ImageLookup(name, kImageNamespaceFlat);
 
     case 'P':
-        return W_ImageLookup(name, INS_Graphic);
+        return W_ImageLookup(name, kImageNamespaceGraphic);
 
     case 'S':
-        return W_ImageLookup(name, INS_Sprite);
+        return W_ImageLookup(name, kImageNamespaceSprite);
 
     default:
         I_Warning("W_ImageParseSaveString: unknown type '%c'\n", type);
@@ -1736,7 +1736,7 @@ const image_c *W_ImageParseSaveString(char type, const char *name)
 
     case 'd': /* dummy */
     case 'T':
-        return W_ImageLookup(name, INS_Texture);
+        return W_ImageLookup(name, kImageNamespaceTexture);
     }
 }
 
@@ -1758,19 +1758,19 @@ void W_ImageMakeSaveString(const image_c *image, char *type, char *namebuf)
     /* handle User images (convert to a more general type) */
     if (rim->source_type == IMSRC_User)
     {
-        switch (rim->source.user.def->belong)
+        switch (rim->source.user.def->belong_)
         {
-        case INS_Texture:
+        case kImageNamespaceTexture:
             (*type) = 'T';
             return;
-        case INS_Flat:
+        case kImageNamespaceFlat:
             (*type) = 'F';
             return;
-        case INS_Sprite:
+        case kImageNamespaceSprite:
             (*type) = 'S';
             return;
 
-        default: /* INS_Graphic */
+        default: /* kImageNamespaceGraphic */
             (*type) = 'P';
             return;
         }

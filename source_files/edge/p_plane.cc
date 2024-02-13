@@ -751,7 +751,7 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
         }
         else if (def->tex != "")
         {
-            plane->new_image = W_ImageLookup(def->tex.c_str(), INS_Flat);
+            plane->new_image = W_ImageLookup(def->tex.c_str(), kImageNamespaceFlat);
             SECPIC(sector, def->is_ceiling, plane->new_image);
         }
 
@@ -862,7 +862,7 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
     }
     else if (def->tex != "")
     {
-        plane->new_image = W_ImageLookup(def->tex.c_str(), INS_Flat);
+        plane->new_image = W_ImageLookup(def->tex.c_str(), kImageNamespaceFlat);
     }
 
     P_AddActivePlane(plane);

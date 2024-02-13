@@ -1894,7 +1894,7 @@ static void LoadData(void)
     // Lobo 2022: if we have a per level image defined, use that instead
     if (wi_stats.cur->leavingbggraphic != "")
     {
-        leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic.c_str(), INS_Flat, ILF_Null);
+        leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic.c_str(), kImageNamespaceFlat, ILF_Null);
         if (leaving_bg_image)
             tile_leaving_bg = true;
         else
@@ -1906,7 +1906,7 @@ static void LoadData(void)
 
     if (wi_stats.cur->enteringbggraphic != "")
     {
-        entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic.c_str(), INS_Flat, ILF_Null);
+        entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic.c_str(), kImageNamespaceFlat, ILF_Null);
         if (entering_bg_image)
             tile_entering_bg = true;
         else
@@ -1916,7 +1916,7 @@ static void LoadData(void)
         }
     }
 
-    bg_image = W_ImageLookup(gd->background_.c_str(), INS_Flat, ILF_Null);
+    bg_image = W_ImageLookup(gd->background_.c_str(), kImageNamespaceFlat, ILF_Null);
 
     if (bg_image)
         tile_bg = true;
@@ -1944,17 +1944,17 @@ static void LoadData(void)
 
     finished = W_ImageLookup("WIF");
     entering = W_ImageLookup("WIENTER");
-    kills    = W_ImageLookup("WIOSTK", INS_Graphic, ILF_Null);
+    kills    = W_ImageLookup("WIOSTK", kImageNamespaceGraphic, ILF_Null);
     // kills = W_ImageLookup("WIOSTK");
     secret = W_ImageLookup("WIOSTS"); // "scrt"
 
-    sp_secret = W_ImageLookup("WISCRT2", INS_Graphic, ILF_Null); // "secret"
+    sp_secret = W_ImageLookup("WISCRT2", kImageNamespaceGraphic, ILF_Null); // "secret"
 
-    items      = W_ImageLookup("WIOSTI", INS_Graphic, ILF_Null);
+    items      = W_ImageLookup("WIOSTI", kImageNamespaceGraphic, ILF_Null);
     frags      = W_ImageLookup("WIFRGS");
-    time_image = W_ImageLookup("WITIME", INS_Graphic, ILF_Null);
-    sucks      = W_ImageLookup("WISUCKS", INS_Graphic, ILF_Null);
-    par        = W_ImageLookup("WIPAR", INS_Graphic, ILF_Null);
+    time_image = W_ImageLookup("WITIME", kImageNamespaceGraphic, ILF_Null);
+    sucks      = W_ImageLookup("WISUCKS", kImageNamespaceGraphic, ILF_Null);
+    par        = W_ImageLookup("WIPAR", kImageNamespaceGraphic, ILF_Null);
     killers    = W_ImageLookup("WIKILRS"); // "killers" (vertical)
 
     victims = W_ImageLookup("WIVCTMS"); // "victims" (horiz)

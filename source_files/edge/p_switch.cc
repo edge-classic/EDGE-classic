@@ -43,8 +43,8 @@ void P_InitSwitchList(void)
     // only called at game initialization.
     for (auto sw : switchdefs)
     {
-        sw->cache.image[0] = W_ImageLookup(sw->on_name.c_str(), INS_Texture, ILF_Null);
-        sw->cache.image[1] = W_ImageLookup(sw->off_name.c_str(), INS_Texture, ILF_Null);
+        sw->cache.image[0] = W_ImageLookup(sw->on_name.c_str(), kImageNamespaceTexture, ILF_Null);
+        sw->cache.image[1] = W_ImageLookup(sw->off_name.c_str(), kImageNamespaceTexture, ILF_Null);
     }
 }
 

@@ -703,9 +703,9 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
 
     // find texture or flat
     if (ctex->what >= CHTEX_Floor)
-        image = W_ImageLookup(ctex->texname, INS_Flat);
+        image = W_ImageLookup(ctex->texname, kImageNamespaceFlat);
     else
-        image = W_ImageLookup(ctex->texname, INS_Texture);
+        image = W_ImageLookup(ctex->texname, kImageNamespaceTexture);
 
     if (ctex->what == CHTEX_Sky)
     {

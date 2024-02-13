@@ -441,7 +441,7 @@ static void LoadSectors(int lump)
         ss->ceil = ss->floor;
 
         epi::CStringCopyMax(buffer, ms->floor_tex, 8);
-        ss->floor.image = W_ImageLookup(buffer, INS_Flat);
+        ss->floor.image = W_ImageLookup(buffer, kImageNamespaceFlat);
 
         if (ss->floor.image)
         {
@@ -454,12 +454,12 @@ static void LoadSectors(int lump)
         }
 
         epi::CStringCopyMax(buffer, ms->ceil_tex, 8);
-        ss->ceil.image = W_ImageLookup(buffer, INS_Flat);
+        ss->ceil.image = W_ImageLookup(buffer, kImageNamespaceFlat);
 
         if (!ss->floor.image)
         {
             I_Warning("Bad Level: sector #%d has missing floor texture.\n", i);
-            ss->floor.image = W_ImageLookup("FLAT1", INS_Flat);
+            ss->floor.image = W_ImageLookup("FLAT1", kImageNamespaceFlat);
         }
         if (!ss->ceil.image)
         {
@@ -1730,7 +1730,7 @@ static void LoadUDMFSectors()
             ss->ceil.x_mat.X  = cx_sc;
             ss->ceil.y_mat.Y  = cy_sc;
 
-            ss->floor.image = W_ImageLookup(floor_tex, INS_Flat);
+            ss->floor.image = W_ImageLookup(floor_tex, kImageNamespaceFlat);
 
             if (ss->floor.image)
             {
@@ -1742,12 +1742,12 @@ static void LoadUDMFSectors()
                 }
             }
 
-            ss->ceil.image = W_ImageLookup(ceil_tex, INS_Flat);
+            ss->ceil.image = W_ImageLookup(ceil_tex, kImageNamespaceFlat);
 
             if (!ss->floor.image)
             {
                 I_Warning("Bad Level: sector #%d has missing floor texture.\n", cur_sector);
-                ss->floor.image = W_ImageLookup("FLAT1", INS_Flat);
+                ss->floor.image = W_ImageLookup("FLAT1", kImageNamespaceFlat);
             }
             if (!ss->ceil.image)
             {
@@ -1998,18 +1998,18 @@ static void LoadUDMFSideDefs()
 
             sd->sector = &sectors[sec_num];
 
-            sd->top.image = W_ImageLookup(top_tex, INS_Texture, ILF_Null);
+            sd->top.image = W_ImageLookup(top_tex, kImageNamespaceTexture, ILF_Null);
 
             if (sd->top.image == nullptr)
             {
                 if (m_goobers.d)
-                    sd->top.image = W_ImageLookup(bottom_tex, INS_Texture);
+                    sd->top.image = W_ImageLookup(bottom_tex, kImageNamespaceTexture);
                 else
-                    sd->top.image = W_ImageLookup(top_tex, INS_Texture);
+                    sd->top.image = W_ImageLookup(top_tex, kImageNamespaceTexture);
             }
 
-            sd->middle.image = W_ImageLookup(middle_tex, INS_Texture);
-            sd->bottom.image = W_ImageLookup(bottom_tex, INS_Texture);
+            sd->middle.image = W_ImageLookup(middle_tex, kImageNamespaceTexture);
+            sd->bottom.image = W_ImageLookup(bottom_tex, kImageNamespaceTexture);
 
             // granular offsets
             sd->bottom.offset.X += lowx;
@@ -2641,18 +2641,18 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
     epi::CStringCopyMax(middle_tex, msd->mid_tex, 8);
     epi::CStringCopyMax(lower_tex, msd->lower_tex, 8);
 
-    sd->top.image = W_ImageLookup(upper_tex, INS_Texture, ILF_Null);
+    sd->top.image = W_ImageLookup(upper_tex, kImageNamespaceTexture, ILF_Null);
 
     if (sd->top.image == nullptr)
     {
         if (m_goobers.d)
-            sd->top.image = W_ImageLookup(upper_tex, INS_Texture);
+            sd->top.image = W_ImageLookup(upper_tex, kImageNamespaceTexture);
         else
-            sd->top.image = W_ImageLookup(upper_tex, INS_Texture);
+            sd->top.image = W_ImageLookup(upper_tex, kImageNamespaceTexture);
     }
 
-    sd->middle.image = W_ImageLookup(middle_tex, INS_Texture);
-    sd->bottom.image = W_ImageLookup(lower_tex, INS_Texture);
+    sd->middle.image = W_ImageLookup(middle_tex, kImageNamespaceTexture);
+    sd->bottom.image = W_ImageLookup(lower_tex, kImageNamespaceTexture);
 
     // handle BOOM colormaps with [242] linetype
     sd->top.boom_colmap    = colormaps.Lookup(upper_tex);

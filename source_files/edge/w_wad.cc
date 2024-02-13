@@ -1454,11 +1454,11 @@ void W_ReadUMAPINFOLumps(void)
                     std::string ibd_lookup = Maps.maps[i].interbackdrop;
                     epi::StringUpperASCII(ibd_lookup);
 
-                    rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
+                    rim = W_ImageLookup(ibd_lookup.c_str(), kImageNamespaceFlat, ILF_Null);
 
                     if (!rim) // no flat
                     {
-                        rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
+                        rim = W_ImageLookup(ibd_lookup.c_str(), kImageNamespaceGraphic, ILF_Null);
 
                         if (!rim)                                     // no graphic
                             temp_level->f_end.text_flat = "FLOOR4_8"; // should not happen
@@ -1563,11 +1563,11 @@ void W_ReadUMAPINFOLumps(void)
                                 std::string    ibd_lookup = Maps.maps[i].interbackdrop;
                                 epi::StringUpperASCII(ibd_lookup);
 
-                                rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
+                                rim = W_ImageLookup(ibd_lookup.c_str(), kImageNamespaceFlat, ILF_Null);
 
                                 if (!rim) // no flat
                                 {
-                                    rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
+                                    rim = W_ImageLookup(ibd_lookup.c_str(), kImageNamespaceGraphic, ILF_Null);
 
                                     if (!rim)                                     // no graphic
                                         temp_level->f_end.text_flat = "FLOOR4_8"; // should not happen
@@ -1593,11 +1593,11 @@ void W_ReadUMAPINFOLumps(void)
                                 std::string    ibd_lookup = Maps.maps[i].interbackdrop;
                                 epi::StringUpperASCII(ibd_lookup);
 
-                                rim = W_ImageLookup(ibd_lookup.c_str(), INS_Flat, ILF_Null);
+                                rim = W_ImageLookup(ibd_lookup.c_str(), kImageNamespaceFlat, ILF_Null);
 
                                 if (!rim) // no flat
                                 {
-                                    rim = W_ImageLookup(ibd_lookup.c_str(), INS_Graphic, ILF_Null);
+                                    rim = W_ImageLookup(ibd_lookup.c_str(), kImageNamespaceGraphic, ILF_Null);
 
                                     if (!rim)                                       // no graphic
                                         secret_level->f_pre.text_flat = "FLOOR4_8"; // should not happen
@@ -2448,7 +2448,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 
     // First we should try for "SKY1_N" type names but only
     // use it if it's in a pwad i.e. a users skybox
-    tempImage = W_ImageLookup(UserSkyBoxName(ActualSky, 0), INS_Texture, ILF_Null);
+    tempImage = W_ImageLookup(UserSkyBoxName(ActualSky, 0), kImageNamespaceTexture, ILF_Null);
     if (tempImage)
     {
         if (tempImage->source_type == IMSRC_User) // from images.ddf
@@ -2476,7 +2476,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 
     // If we're here then there are no user skyboxes.
     // Lets check for single texture ones instead.
-    tempImage = W_ImageLookup(ActualSky, INS_Texture, ILF_Null);
+    tempImage = W_ImageLookup(ActualSky, kImageNamespaceTexture, ILF_Null);
 
     if (tempImage) // this should always be true but check just in case
     {

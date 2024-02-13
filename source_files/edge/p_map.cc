@@ -1939,7 +1939,7 @@ bool ReplaceMidTexFromPart(line_t *TheLine, scroll_part_e parts)
 
     if (!image) // 2 sided and no image so add default
     {
-        image = W_ImageLookup("-", INS_Texture); // default is blank
+        image = W_ImageLookup("-", kImageNamespaceTexture); // default is blank
     }
 
     TheLine->side[0]->middle.image = image;
@@ -1972,7 +1972,7 @@ void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
         // if it's got a BROKEN_TEXTURE=<tex> then use that
         if (!special->brokentex.empty())
         {
-            const image_c *image           = W_ImageLookup(special->brokentex.c_str(), INS_Texture);
+            const image_c *image           = W_ImageLookup(special->brokentex.c_str(), kImageNamespaceTexture);
             TheLine->side[0]->middle.image = image;
             if (TwoSided)
             {

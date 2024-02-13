@@ -846,11 +846,11 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
                 // Check DDFIMAGE definitions to see if this is replacing a lump type def
                 for (auto img : imagedefs)
                 {
-                    if (img->type == IMGDT_Lump && epi::StringCaseCompareASCII(img->info, texname) == 0 &&
+                    if (img->type_ == kImageDataLump && epi::StringCaseCompareASCII(img->info_, texname) == 0 &&
                         W_CheckFileNumForName(texname.c_str()) < pack_index)
                     {
-                        img->type = IMGDT_Package;
-                        img->info = entry.packpath;
+                        img->type_ = kImageDataPackage;
+                        img->info_ = entry.packpath;
                         add_it    = false;
                     }
                 }
@@ -1004,7 +1004,7 @@ void Pack_ProcessHiresSubstitutions(pack_file_c *pack, int pack_index)
             }
 
             // we do it this way to force the original graphic to be loaded
-            rim = W_ImageLookup(texname.c_str(), INS_Graphic, ILF_Exact | ILF_Null);
+            rim = W_ImageLookup(texname.c_str(), kImageNamespaceGraphic, ILF_Exact | ILF_Null);
 
             if (rim && rim->source_type != IMSRC_User)
             {
@@ -1224,7 +1224,7 @@ std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack)
                 // Don't add things already defined in DDFIMAGE
                 for (auto img : imagedefs)
                 {
-                    if (epi::StringCaseCompareASCII(img->name, texname) == 0)
+                    if (epi::StringCaseCompareASCII(img->name_, texname) == 0)
                     {
                         addme = false;
                         break;

@@ -136,7 +136,7 @@ class image_c
             char           *packfile_name;
             bool            is_patch;
             bool            user_defined;
-            image_special_e special;
+            ImageSpecial special;
         } graphic;
 
         // case IMSRC_Flat:
@@ -163,7 +163,7 @@ class image_c
         // case IMSRC_User:
         struct
         {
-            imagedef_c *def;
+            ImageDefinition *def;
         } user;
     } source;
 
@@ -227,7 +227,7 @@ typedef enum
 } image_lookup_flags_e;
 
 image_c       *W_ImageDoLookup(real_image_container_c &bucket, const char *name, int source_type = -1);
-const image_c *W_ImageLookup(const char *name, image_namespace_e = INS_Graphic, int flags = 0);
+const image_c *W_ImageLookup(const char *name, ImageNamespace = kImageNamespaceGraphic, int flags = 0);
 
 const image_c *W_ImageForDummySprite(void);
 const image_c *W_ImageForDummySkin(void);

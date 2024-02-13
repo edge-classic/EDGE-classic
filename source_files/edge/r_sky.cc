@@ -836,7 +836,7 @@ int RGL_UpdateSkyBoxTextures(void)
     info->fx_colmap = ren_fx_colmap;
 
     // check for custom sky boxes
-    info->face[WSKY_North] = W_ImageLookup(UserSkyFaceName(sky_image->name.c_str(), WSKY_North), INS_Texture, ILF_Null);
+    info->face[WSKY_North] = W_ImageLookup(UserSkyFaceName(sky_image->name.c_str(), WSKY_North), kImageNamespaceTexture, ILF_Null);
 
     // LOBO 2022:
     // If we do nothing, our EWAD skybox will be used for all maps.
@@ -865,7 +865,7 @@ int RGL_UpdateSkyBoxTextures(void)
         info->face_size = info->face[WSKY_North]->total_w;
 
         for (int i = WSKY_East; i < 6; i++)
-            info->face[i] = W_ImageLookup(UserSkyFaceName(sky_image->name.c_str(), i), INS_Texture);
+            info->face[i] = W_ImageLookup(UserSkyFaceName(sky_image->name.c_str(), i), kImageNamespaceTexture);
 
         for (int k = 0; k < 6; k++)
             info->tex[k] = W_ImageCache(info->face[k], false, ren_fx_colmap);

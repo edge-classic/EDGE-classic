@@ -49,7 +49,7 @@ extern cvar_c r_culling;
 
 static sg_color sky_cap_color;
 
-static skystretch_e current_sky_stretch = SKS_Unset;
+static SkyStretch current_sky_stretch = kSkyStretchUnset;
 
 DEF_CVAR_CLAMPED(r_skystretch, "0", CVAR_ARCHIVE, 0, 3);
 
@@ -264,7 +264,7 @@ static void RGL_SetupSkyMatrices(void)
 
         glRotatef(270.0f - epi::DegreesFromBAM(viewvertangle), 1.0f, 0.0f, 0.0f);
         glRotatef(90.0f - epi::DegreesFromBAM(viewangle), 0.0f, 0.0f, 1.0f);
-        if (current_sky_stretch == SKS_Stretch)
+        if (current_sky_stretch == kSkyStretchStretch)
             glTranslatef(0.0f, 0.0f, (r_farclip.f * 2 * 0.15)); // Draw center above horizon a little
         else
             glTranslatef(0.0f, 0.0f, -(r_farclip.f * 2 * 0.15)); // Draw center below horizon a little
@@ -321,7 +321,7 @@ static void renderSkySlice(float top, float bottom, float atop, float abottom, f
     float tc_y1 = (top + 1.0f) * (ty * 0.5f);
     float tc_y2 = (bottom + 1.0f) * (ty * 0.5f);
 
-    if (current_sky_stretch == SKS_Mirror && bottom < -0.5f)
+    if (current_sky_stretch == kSkyStretchMirror && bottom < -0.5f)
     {
         tc_y1 = -tc_y1;
         tc_y2 = -tc_y2;
@@ -371,12 +371,12 @@ static void RGL_DrawSkyCylinder(void)
 {
     GLuint sky = W_ImageCache(sky_image, false, ren_fx_colmap);
 
-    if (currmap->forced_skystretch > SKS_Unset)
-        current_sky_stretch = currmap->forced_skystretch;
+    if (currmap->forced_skystretch_ > kSkyStretchUnset)
+        current_sky_stretch = currmap->forced_skystretch_;
     else if (!level_flags.mlook)
-        current_sky_stretch = SKS_Vanilla;
+        current_sky_stretch = kSkyStretchVanilla;
     else
-        current_sky_stretch = (skystretch_e)r_skystretch.d;
+        current_sky_stretch = (SkyStretch)r_skystretch.d;
 
     // Center skybox a bit below the camera view
     RGL_SetupSkyMatrices();
@@ -388,20 +388,20 @@ static void RGL_DrawSkyCylinder(void)
                                   // Calculate some stuff based on sky height
     float sky_h_ratio;
     float solid_sky_h;
-    if (IM_HEIGHT(sky_image) > 128 && current_sky_stretch != SKS_Stretch)
+    if (IM_HEIGHT(sky_image) > 128 && current_sky_stretch != kSkyStretchStretch)
         sky_h_ratio = (float)IM_HEIGHT(sky_image) / 256;
-    else if (current_sky_stretch == SKS_Vanilla)
+    else if (current_sky_stretch == kSkyStretchVanilla)
         sky_h_ratio = 0.5f;
     else
         sky_h_ratio = 1.0f;
-    if (current_sky_stretch == SKS_Vanilla)
+    if (current_sky_stretch == kSkyStretchVanilla)
         solid_sky_h = sky_h_ratio * 0.98f;
     else
         solid_sky_h = sky_h_ratio * 0.75f;
     float cap_z = dist * sky_h_ratio;
 
-    RGBAColor fc_to_use = currmap->outdoor_fog_color;
-    float    fd_to_use = 0.01f * currmap->outdoor_fog_density;
+    RGBAColor fc_to_use = currmap->outdoor_fog_color_;
+    float    fd_to_use = 0.01f * currmap->outdoor_fog_density_;
     // check for sector fog
     if (fc_to_use == kRGBANoValue)
     {
@@ -429,10 +429,10 @@ static void RGL_DrawSkyCylinder(void)
     glEnd();
 
     // Render bottom cap
-    if (current_sky_stretch > SKS_Mirror)
+    if (current_sky_stretch > kSkyStretchMirror)
         glColor4f(cull_fog_color.r, cull_fog_color.g, cull_fog_color.b, 1.0f);
     glBegin(GL_QUADS);
-    if (current_sky_stretch == SKS_Vanilla)
+    if (current_sky_stretch == kSkyStretchVanilla)
         cap_z = 0;
     glVertex3f(-cap_dist, -cap_dist, -cap_z);
     glVertex3f(-cap_dist, cap_dist, -cap_z);
@@ -455,7 +455,7 @@ static void RGL_DrawSkyCylinder(void)
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_BLEND);
 
-    if (current_sky_stretch == SKS_Mirror)
+    if (current_sky_stretch == kSkyStretchMirror)
     {
         if (IM_HEIGHT(sky_image) > 128)
         {
@@ -472,7 +472,7 @@ static void RGL_DrawSkyCylinder(void)
             renderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
         }
     }
-    else if (current_sky_stretch == SKS_Repeat)
+    else if (current_sky_stretch == kSkyStretchRepeat)
     {
         if (IM_HEIGHT(sky_image) > 128)
         {
@@ -487,7 +487,7 @@ static void RGL_DrawSkyCylinder(void)
             renderSkySlice(-0.75f, -1.0f, 1.0f, 0.0f, dist, tx, ty); // Bottom Fade
         }
     }
-    else if (current_sky_stretch == SKS_Stretch)
+    else if (current_sky_stretch == kSkyStretchStretch)
     {
         if (IM_HEIGHT(sky_image) > 128)
         {
@@ -564,8 +564,8 @@ static void RGL_DrawSkyBox(void)
     else
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, col);
 
-    RGBAColor fc_to_use = currmap->outdoor_fog_color;
-    float    fd_to_use = 0.01f * currmap->outdoor_fog_density;
+    RGBAColor fc_to_use = currmap->outdoor_fog_color_;
+    float    fd_to_use = 0.01f * currmap->outdoor_fog_density_;
     // check for sector fog
     if (fc_to_use == kRGBANoValue)
     {

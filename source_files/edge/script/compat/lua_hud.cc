@@ -85,7 +85,7 @@ static int HD_game_mode(lua_State *L)
 //
 static int HD_game_name(lua_State *L)
 {
-    GameDefinition *g = currmap->episode;
+    GameDefinition *g = currmap->episode_;
     SYS_ASSERT(g);
 
     lua_pushstring(L, g->name_.c_str());
@@ -105,7 +105,7 @@ static int HD_game_skill(lua_State *L)
 //
 static int HD_map_name(lua_State *L)
 {
-    lua_pushstring(L, currmap->name.c_str());
+    lua_pushstring(L, currmap->name_.c_str());
     return 1;
 }
 
@@ -121,7 +121,7 @@ static int HD_map_title(lua_State *L)
 //
 static int HD_map_author(lua_State *L)
 {
-    lua_pushstring(L, currmap->author.c_str());
+    lua_pushstring(L, currmap->author_.c_str());
     return 1;
 }
 

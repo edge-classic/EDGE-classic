@@ -152,26 +152,26 @@ static void GV_GetLevelFlags(const char *info, void *storage)
 
 #define HANDLE_FLAG(var, specflag) (var) = (flags & (specflag)) ? true : false;
 
-    HANDLE_FLAG(dest->jump, MPF_Jumping);
-    HANDLE_FLAG(dest->crouch, MPF_Crouching);
-    HANDLE_FLAG(dest->mlook, MPF_Mlook);
-    HANDLE_FLAG(dest->itemrespawn, MPF_ItemRespawn);
-    HANDLE_FLAG(dest->fastparm, MPF_FastParm);
-    HANDLE_FLAG(dest->true3dgameplay, MPF_True3D);
-    HANDLE_FLAG(dest->more_blood, MPF_MoreBlood);
-    HANDLE_FLAG(dest->cheats, MPF_Cheats);
-    HANDLE_FLAG(dest->respawn, MPF_Respawn);
-    HANDLE_FLAG(dest->res_respawn, MPF_ResRespawn);
-    HANDLE_FLAG(dest->have_extra, MPF_Extras);
-    HANDLE_FLAG(dest->limit_zoom, MPF_LimitZoom);
-    HANDLE_FLAG(dest->kicking, MPF_Kicking);
-    HANDLE_FLAG(dest->weapon_switch, MPF_WeaponSwitch);
-    HANDLE_FLAG(dest->pass_missile, MPF_PassMissile);
-    HANDLE_FLAG(dest->team_damage, MPF_TeamDamage);
+    HANDLE_FLAG(dest->jump, kMapFlagJumping);
+    HANDLE_FLAG(dest->crouch, kMapFlagCrouching);
+    HANDLE_FLAG(dest->mlook, kMapFlagMlook);
+    HANDLE_FLAG(dest->itemrespawn, kMapFlagItemRespawn);
+    HANDLE_FLAG(dest->fastparm, kMapFlagFastParm);
+    HANDLE_FLAG(dest->true3dgameplay, kMapFlagTrue3D);
+    HANDLE_FLAG(dest->more_blood, kMapFlagMoreBlood);
+    HANDLE_FLAG(dest->cheats, kMapFlagCheats);
+    HANDLE_FLAG(dest->respawn, kMapFlagRespawn);
+    HANDLE_FLAG(dest->res_respawn, kMapFlagResRespawn);
+    HANDLE_FLAG(dest->have_extra, kMapFlagExtras);
+    HANDLE_FLAG(dest->limit_zoom, kMapFlagLimitZoom);
+    HANDLE_FLAG(dest->kicking, kMapFlagKicking);
+    HANDLE_FLAG(dest->weapon_switch, kMapFlagWeaponSwitch);
+    HANDLE_FLAG(dest->pass_missile, kMapFlagPassMissile);
+    HANDLE_FLAG(dest->team_damage, kMapFlagTeamDamage);
 
 #undef HANDLE_FLAG
 
-    dest->autoaim = (flags & MPF_AutoAim) ? ((flags & MPF_AutoAimMlook) ? AA_MLOOK : AA_ON) : AA_OFF;
+    dest->autoaim = (flags & kMapFlagAutoAim) ? ((flags & kMapFlagAutoAimMlook) ? AA_MLOOK : AA_ON) : AA_OFF;
 }
 
 static void GV_GetImage(const char *info, void *storage)
@@ -248,29 +248,29 @@ static const char *GV_PutLevelFlags(void *storage)
     if (var)                                                                                                           \
         flags |= (specflag);
 
-    HANDLE_FLAG(src->jump, MPF_Jumping);
-    HANDLE_FLAG(src->crouch, MPF_Crouching);
-    HANDLE_FLAG(src->mlook, MPF_Mlook);
-    HANDLE_FLAG(src->itemrespawn, MPF_ItemRespawn);
-    HANDLE_FLAG(src->fastparm, MPF_FastParm);
-    HANDLE_FLAG(src->true3dgameplay, MPF_True3D);
-    HANDLE_FLAG(src->more_blood, MPF_MoreBlood);
-    HANDLE_FLAG(src->cheats, MPF_Cheats);
-    HANDLE_FLAG(src->respawn, MPF_Respawn);
-    HANDLE_FLAG(src->res_respawn, MPF_ResRespawn);
-    HANDLE_FLAG(src->have_extra, MPF_Extras);
-    HANDLE_FLAG(src->limit_zoom, MPF_LimitZoom);
-    HANDLE_FLAG(src->kicking, MPF_Kicking);
-    HANDLE_FLAG(src->weapon_switch, MPF_WeaponSwitch);
-    HANDLE_FLAG(src->pass_missile, MPF_PassMissile);
-    HANDLE_FLAG(src->team_damage, MPF_TeamDamage);
+    HANDLE_FLAG(src->jump, kMapFlagJumping);
+    HANDLE_FLAG(src->crouch, kMapFlagCrouching);
+    HANDLE_FLAG(src->mlook, kMapFlagMlook);
+    HANDLE_FLAG(src->itemrespawn, kMapFlagItemRespawn);
+    HANDLE_FLAG(src->fastparm, kMapFlagFastParm);
+    HANDLE_FLAG(src->true3dgameplay, kMapFlagTrue3D);
+    HANDLE_FLAG(src->more_blood, kMapFlagMoreBlood);
+    HANDLE_FLAG(src->cheats, kMapFlagCheats);
+    HANDLE_FLAG(src->respawn, kMapFlagRespawn);
+    HANDLE_FLAG(src->res_respawn, kMapFlagResRespawn);
+    HANDLE_FLAG(src->have_extra, kMapFlagExtras);
+    HANDLE_FLAG(src->limit_zoom, kMapFlagLimitZoom);
+    HANDLE_FLAG(src->kicking, kMapFlagKicking);
+    HANDLE_FLAG(src->weapon_switch, kMapFlagWeaponSwitch);
+    HANDLE_FLAG(src->pass_missile, kMapFlagPassMissile);
+    HANDLE_FLAG(src->team_damage, kMapFlagTeamDamage);
 
 #undef HANDLE_FLAG
 
     if (src->autoaim != AA_OFF)
-        flags |= MPF_AutoAim;
+        flags |= kMapFlagAutoAim;
     if (src->autoaim == AA_MLOOK)
-        flags |= MPF_AutoAimMlook;
+        flags |= kMapFlagAutoAimMlook;
 
     return GV_PutInt(&flags);
 }

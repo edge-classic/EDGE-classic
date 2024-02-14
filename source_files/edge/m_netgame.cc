@@ -240,12 +240,12 @@ static void ChangeGame(newgame_params_c *param, int dir)
 
     for (auto def : gamedefs)
     {
-        mapdef_c *first_map = mapdefs.Lookup(def->firstmap_.c_str());
+        MapDefinition *first_map = mapdefs.Lookup(def->firstmap_.c_str());
 
         if (!first_map || !G_MapExists(first_map))
             continue;
 
-        const char *old_name = param->map->episode->name_.c_str();
+        const char *old_name = param->map->episode_->name_.c_str();
         const char *new_name = def->name_.c_str();
 
         int compare = DDF_CompareName(new_name, old_name);
@@ -265,7 +265,7 @@ static void ChangeGame(newgame_params_c *param, int dir)
         }
     }
 
-    I_Debugf("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n", dir, ng_params->map->episode->name_.c_str(),
+    I_Debugf("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n", dir, ng_params->map->episode_->name_.c_str(),
              closest ? closest->name_.c_str() : "none", furthest ? furthest->name_.c_str() : "none");
 
     if (closest)
@@ -286,16 +286,16 @@ static void ChangeGame(newgame_params_c *param, int dir)
 
 static void ChangeLevel(newgame_params_c *param, int dir)
 {
-    mapdef_c *closest  = nullptr;
-    mapdef_c *furthest = nullptr;
+    MapDefinition *closest  = nullptr;
+    MapDefinition *furthest = nullptr;
 
-    for (auto def : mapdefs)
+    for (MapDefinition *def : mapdefs)
     {
-        if (def->episode != param->map->episode)
+        if (def->episode_ != param->map->episode_)
             continue;
 
-        const char *old_name = param->map->name.c_str();
-        const char *new_name = def->name.c_str();
+        const char *old_name = param->map->name_.c_str();
+        const char *new_name = def->name_.c_str();
 
         int compare = DDF_CompareName(new_name, old_name);
 
@@ -304,12 +304,12 @@ static void ChangeLevel(newgame_params_c *param, int dir)
 
         if (compare * dir > 0)
         {
-            if (!closest || dir * DDF_CompareName(new_name, closest->name.c_str()) < 0)
+            if (!closest || dir * DDF_CompareName(new_name, closest->name_.c_str()) < 0)
                 closest = def;
         }
         else
         {
-            if (!furthest || dir * DDF_CompareName(new_name, furthest->name.c_str()) < 0)
+            if (!furthest || dir * DDF_CompareName(new_name, furthest->name_.c_str()) < 0)
                 furthest = def;
         }
     }
@@ -446,15 +446,15 @@ void M_DrawHostMenu(void)
                   ng_host_style->def->text[styledef_c::T_TEXT].scale) +
                  ng_host_style->def->entry_spacing;
 
-    if (!ng_params->map->episode->description_.empty())
-        DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode->description_.c_str()]);
+    if (!ng_params->map->episode_->description_.empty())
+        DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode_->description_.c_str()]);
     else
-        DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode_name.c_str()]);
+        DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode_name_.c_str()]);
 
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, ng_host_style, y, "Level", ng_params->map->name.c_str());
+    DrawKeyword(idx, ng_host_style, y, "Level", ng_params->map->name_.c_str());
     y += deltay + (deltay / 2);
     idx++;
 

@@ -91,7 +91,7 @@ static int  picnum;
 static const char *finaletext;
 
 static gameaction_e           newgameaction;
-static const map_finaledef_c *finale;
+static const FinaleDefinition *finale;
 
 static void CastInitNew(int num);
 static void CastTicker(void);
@@ -107,26 +107,26 @@ static style_c *wi_cast_style;
 // forward dec
 static void DoBumpFinale(void);
 
-static bool HasFinale(const map_finaledef_c *F, finalestage_e cur)
+static bool HasFinale(const FinaleDefinition *F, finalestage_e cur)
 {
     SYS_ASSERT(F);
 
     switch (cur)
     {
     case f_text:
-        return F->text != "";
+        return F->text_ != "";
 
     case f_movie:
-        return F->movie!= "";
+        return F->movie_ != "";
 
     case f_pic:
-        return (F->pics.size() > 0);
+        return (F->pics_.size() > 0);
 
     case f_bunny:
-        return F->dobunny;
+        return F->dobunny_;
 
     case f_cast:
-        return F->docast;
+        return F->docast_;
 
     default:
         I_Error("Bad parameter passed to HasFinale().\n");
@@ -136,7 +136,7 @@ static bool HasFinale(const map_finaledef_c *F, finalestage_e cur)
 }
 
 // returns f_done if nothing found
-static finalestage_e FindValidFinale(const map_finaledef_c *F, finalestage_e cur)
+static finalestage_e FindValidFinale(const FinaleDefinition *F, finalestage_e cur)
 {
     SYS_ASSERT(F);
 
@@ -156,12 +156,12 @@ static void DoStartFinale(void)
     switch (finalestage)
     {
     case f_text:
-        finaletext = language[finale->text];
-        S_ChangeMusic(finale->music, true);
+        finaletext = language[finale->text_];
+        S_ChangeMusic(finale->music_, true);
         break;
 
     case f_movie:
-        E_PlayMovie(finale->movie);
+        E_PlayMovie(finale->movie_);
         DoBumpFinale();
         break;
 
@@ -170,14 +170,14 @@ static void DoStartFinale(void)
         break;
 
     case f_bunny:
-        if (currmap->episode)
-            S_ChangeMusic(currmap->episode->special_music_, true);
+        if (currmap->episode_)
+            S_ChangeMusic(currmap->episode_->special_music_, true);
         break;
 
     case f_cast:
         CastInitNew(2);
-        if (currmap->episode)
-            S_ChangeMusic(currmap->episode->special_music_, true);
+        if (currmap->episode_)
+            S_ChangeMusic(currmap->episode_->special_music_, true);
         break;
 
     default:
@@ -222,14 +222,14 @@ static void LookupFinaleStuff(void)
 {
     // here is where we lookup the required images
 
-    if (finale->text_flat != "")
-        finale_textback = W_ImageLookup(finale->text_flat.c_str(), kImageNamespaceFlat);
-    else if (finale->text_back != "")
-        finale_textback = W_ImageLookup(finale->text_back.c_str(), kImageNamespaceGraphic);
+    if (finale->text_flat_ != "")
+        finale_textback = W_ImageLookup(finale->text_flat_.c_str(), kImageNamespaceFlat);
+    else if (finale->text_back_ != "")
+        finale_textback = W_ImageLookup(finale->text_back_.c_str(), kImageNamespaceGraphic);
     else
         finale_textback = nullptr;
 
-    finale_textcol = V_GetFontColor(finale->text_colmap);
+    finale_textcol = V_GetFontColor(finale->text_colmap_);
 
     if (!wi_leveltext_style)
     {
@@ -247,7 +247,7 @@ static void LookupFinaleStuff(void)
     }
 }
 
-void F_StartFinale(const map_finaledef_c *F, gameaction_e newaction)
+void F_StartFinale(const FinaleDefinition *F, gameaction_e newaction)
 {
     SYS_ASSERT(F);
 
@@ -287,7 +287,7 @@ bool F_Responder(event_t *event)
 
     if (finalecount > TICRATE)
     {
-        if (finalestage == f_pic && finale->picwait == INT_MAX)
+        if (finalestage == f_pic && finale->picwait_ == INT_MAX)
             return false;
 
         skip_finale = true;
@@ -320,13 +320,13 @@ void F_Ticker(void)
         break;
 
     case f_pic:
-        if (skip_finale || finalecount > (int)finale->picwait)
+        if (skip_finale || finalecount > (int)finale->picwait_)
         {
             picnum++;
             finalecount = 0;
             skip_finale = false;
         }
-        if (picnum >= (int)finale->pics.size())
+        if (picnum >= (int)finale->pics_.size())
         {
             DoBumpFinale();
         }
@@ -378,7 +378,7 @@ static void TextWrite(void)
     {
         HUD_SetScale(finale_textbackscale);
 
-        if (finale->text_flat[0])
+        if (finale->text_flat_[0])
         {
             // AJA 2022: make the flats be square, not squished
             HUD_SetCoordSys(266, 200);
@@ -411,7 +411,7 @@ static void TextWrite(void)
 
     const char *ch = finaletext;
 
-    int count = (int)((finalecount - 10) / finale->text_speed);
+    int count = (int)((finalecount - 10) / finale->text_speed_);
     if (count < 0)
         count = 0;
 
@@ -909,7 +909,7 @@ void F_Drawer(void)
 
     case f_pic:
         {
-            const image_c *image = W_ImageLookup(finale->pics[HMM_MIN((size_t)picnum, finale->pics.size() - 1)].c_str());
+            const image_c *image = W_ImageLookup(finale->pics_[HMM_MIN((size_t)picnum, finale->pics_.size() - 1)].c_str());
             if (r_titlescaling.d) // Fill Border
             {
                 if (!image->blurred_version)

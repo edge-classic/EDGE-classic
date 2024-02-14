@@ -292,13 +292,13 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
     {
         if (IS_SKY(player->mo->subsector->sector->ceil))
         {
-            fc_to_use = currmap->outdoor_fog_color;
-            fd_to_use = 0.01f * currmap->outdoor_fog_density;
+            fc_to_use = currmap->outdoor_fog_color_;
+            fd_to_use = 0.01f * currmap->outdoor_fog_density_;
         }
         else
         {
-            fc_to_use = currmap->indoor_fog_color;
-            fd_to_use = 0.01f * currmap->indoor_fog_density;
+            fc_to_use = currmap->indoor_fog_color_;
+            fd_to_use = 0.01f * currmap->indoor_fog_density_;
         }
     }
 
@@ -1434,13 +1434,13 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
     {
         if (IS_SKY(mo->subsector->sector->ceil))
         {
-            fc_to_use = currmap->outdoor_fog_color;
-            fd_to_use = 0.01f * currmap->outdoor_fog_density;
+            fc_to_use = currmap->outdoor_fog_color_;
+            fd_to_use = 0.01f * currmap->outdoor_fog_density_;
         }
         else
         {
-            fc_to_use = currmap->indoor_fog_color;
-            fd_to_use = 0.01f * currmap->indoor_fog_density;
+            fc_to_use = currmap->indoor_fog_color_;
+            fd_to_use = 0.01f * currmap->indoor_fog_density_;
         }
     }
 

@@ -127,7 +127,7 @@ static void HD_game_name(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    GameDefinition *g = currmap->episode;
+    GameDefinition *g = currmap->episode_;
     SYS_ASSERT(g);
 
     vm->ReturnString(g->name_.c_str());
@@ -139,7 +139,7 @@ static void HD_map_name(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnString(currmap->name.c_str());
+    vm->ReturnString(currmap->name_.c_str());
 }
 
 // hud.map_title()
@@ -157,7 +157,7 @@ static void HD_map_author(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnString(currmap->author.c_str());
+    vm->ReturnString(currmap->author_.c_str());
 }
 
 // hud.which_hud()

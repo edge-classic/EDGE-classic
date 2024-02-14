@@ -406,8 +406,8 @@ int CMD_ShowMaps(char **argv, int argc)
 
     for (int i = 0; i < mapdefs.size(); i++)
     {
-        if (G_MapExists(mapdefs[i]) && mapdefs[i]->episode)
-            I_Printf("  %s           %s\n", mapdefs[i]->name.c_str(), language[mapdefs[i]->description.c_str()]);
+        if (G_MapExists(mapdefs[i]) && mapdefs[i]->episode_)
+            I_Printf("  %s           %s\n", mapdefs[i]->name_.c_str(), language[mapdefs[i]->description_.c_str()]);
     }
 
     return 0;

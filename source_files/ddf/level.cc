@@ -35,85 +35,85 @@ static void DDF_LevelGetPic(const char *info, void *storage);
 static void DDF_LevelGetSkyStretch(const char *info, void *storage);
 static void DDF_LevelGetWistyle(const char *info, void *storage);
 
-mapdef_container_c mapdefs;
+MapDefinitionContainer mapdefs;
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_finale
-static map_finaledef_c dummy_finale;
+static FinaleDefinition dummy_finale;
 
 static const commandlist_t finale_commands[] = {
-    DF("TEXT", text, DDF_MainGetString),
-    DF("TEXT_GRAPHIC", text_back, DDF_MainGetLumpName),
-    DF("TEXT_FLAT", text_flat, DDF_MainGetLumpName),
-    DF("TEXT_SPEED", text_speed, DDF_MainGetFloat),
-    DF("TEXT_WAIT", text_wait, DDF_MainGetNumeric),
-    DF("COLOURMAP", text_colmap, DDF_MainGetColourmap),
-    DF("GRAPHIC", pics, DDF_LevelGetPic),
-    DF("GRAPHIC_WAIT", picwait, DDF_MainGetTime),
-    DF("MOVIE", movie, DDF_MainGetString),
-    DF("CAST", docast, DDF_MainGetBoolean),
-    DF("BUNNY", dobunny, DDF_MainGetBoolean),
-    DF("MUSIC", music, DDF_MainGetNumeric),
+    DF("TEXT", text_, DDF_MainGetString),
+    DF("TEXT_GRAPHIC", text_back_, DDF_MainGetLumpName),
+    DF("TEXT_FLAT", text_flat_, DDF_MainGetLumpName),
+    DF("TEXT_SPEED", text_speed_, DDF_MainGetFloat),
+    DF("TEXT_WAIT", text_wait_, DDF_MainGetNumeric),
+    DF("COLOURMAP", text_colmap_, DDF_MainGetColourmap),
+    DF("GRAPHIC", pics_, DDF_LevelGetPic),
+    DF("GRAPHIC_WAIT", picwait_, DDF_MainGetTime),
+    DF("MOVIE", movie_, DDF_MainGetString),
+    DF("CAST", docast_, DDF_MainGetBoolean),
+    DF("BUNNY", dobunny_, DDF_MainGetBoolean),
+    DF("MUSIC", music_, DDF_MainGetNumeric),
 
     DDF_CMD_END};
 
 // -KM- 1998/11/25 Finales are all go.
 
-static mapdef_c *dynamic_level;
+static MapDefinition *dynamic_level;
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_level
-static mapdef_c dummy_level;
+static MapDefinition dummy_level;
 
 static const commandlist_t level_commands[] = {
     // sub-commands
-    DDF_SUB_LIST("PRE", f_pre, finale_commands),
-    DDF_SUB_LIST("END", f_end, finale_commands),
+    DDF_SUB_LIST("PRE", f_pre_, finale_commands),
+    DDF_SUB_LIST("END", f_end_, finale_commands),
 
-    DF("LUMPNAME", lump, DDF_MainGetLumpName),
-    DF("DESCRIPTION", description, DDF_MainGetString),
-    DF("AUTHOR", author, DDF_MainGetString),
-    DF("NAME_GRAPHIC", namegraphic, DDF_MainGetLumpName),
-    DF("SKY_TEXTURE", sky, DDF_MainGetLumpName),
-    DF("SKY_STRETCH", forced_skystretch, DDF_LevelGetSkyStretch),
-    DF("MUSIC_ENTRY", music, DDF_MainGetNumeric),
-    DF("SURROUND_FLAT", surround, DDF_MainGetLumpName),
-    DF("NEXT_MAP", nextmapname, DDF_MainGetLumpName),
-    DF("SECRET_MAP", secretmapname, DDF_MainGetLumpName),
-    DF("AUTOTAG", autotag, DDF_MainGetNumeric),
-    DF("PARTIME", partime, DDF_MainGetTime),
-    DF("EPISODE", episode_name, DDF_MainGetString),
-    DF("STATS", wistyle, DDF_LevelGetWistyle),
-    DF("LEAVING_BACKGROUND", leavingbggraphic, DDF_MainGetLumpName),
-    DF("ENTERING_BACKGROUND", enteringbggraphic, DDF_MainGetLumpName),
-    DF("INDOOR_FOG_COLOR", indoor_fog_cmap, DDF_MainGetColourmap),
-    DF("INDOOR_FOG_DENSITY", indoor_fog_density, DDF_MainGetPercent),
-    DF("OUTDOOR_FOG_COLOR", outdoor_fog_cmap, DDF_MainGetColourmap),
-    DF("OUTDOOR_FOG_DENSITY", outdoor_fog_density, DDF_MainGetPercent),
+    DF("LUMPNAME", lump_, DDF_MainGetLumpName),
+    DF("DESCRIPTION", description_, DDF_MainGetString),
+    DF("AUTHOR", author_, DDF_MainGetString),
+    DF("NAME_GRAPHIC", namegraphic_, DDF_MainGetLumpName),
+    DF("SKY_TEXTURE", sky_, DDF_MainGetLumpName),
+    DF("SKY_STRETCH", forced_skystretch_, DDF_LevelGetSkyStretch),
+    DF("MUSIC_ENTRY", music_, DDF_MainGetNumeric),
+    DF("SURROUND_FLAT", surround_, DDF_MainGetLumpName),
+    DF("NEXT_MAP", nextmapname_, DDF_MainGetLumpName),
+    DF("SECRET_MAP", secretmapname_, DDF_MainGetLumpName),
+    DF("AUTOTAG", autotag_, DDF_MainGetNumeric),
+    DF("PARTIME", partime_, DDF_MainGetTime),
+    DF("EPISODE", episode_name_, DDF_MainGetString),
+    DF("STATS", wistyle_, DDF_LevelGetWistyle),
+    DF("LEAVING_BACKGROUND", leavingbggraphic_, DDF_MainGetLumpName),
+    DF("ENTERING_BACKGROUND", enteringbggraphic_, DDF_MainGetLumpName),
+    DF("INDOOR_FOG_COLOR", indoor_fog_cmap_, DDF_MainGetColourmap),
+    DF("INDOOR_FOG_DENSITY", indoor_fog_density_, DDF_MainGetPercent),
+    DF("OUTDOOR_FOG_COLOR", outdoor_fog_cmap_, DDF_MainGetColourmap),
+    DF("OUTDOOR_FOG_DENSITY", outdoor_fog_density_, DDF_MainGetPercent),
 
     DDF_CMD_END};
 
 static specflags_t map_specials[] = {
-    {"JUMPING", MPF_Jumping, 0},
-    {"MLOOK", MPF_Mlook, 0},
-    {"FREELOOK", MPF_Mlook, 0},  // -AJA- backwards compat.
-    {"CHEATS", MPF_Cheats, 0},
-    {"ITEM_RESPAWN", MPF_ItemRespawn, 0},
-    {"FAST_MONSTERS", MPF_FastParm, 0},
-    {"RESURRECT_RESPAWN", MPF_ResRespawn, 0},
-    {"TELEPORT_RESPAWN", MPF_ResRespawn, 1},
-    {"TRUE3D", MPF_True3D, 0},
-    {"ENEMY_STOMP", MPF_Stomp, 0},
-    {"MORE_BLOOD", MPF_MoreBlood, 0},
-    {"NORMAL_BLOOD", MPF_MoreBlood, 1},
-    {"RESPAWN", MPF_Respawn, 0},
-    {"AUTOAIM", MPF_AutoAim, 0},
-    {"AA_MLOOK", MPF_AutoAimMlook, 0},
-    {"EXTRAS", MPF_Extras, 0},
-    {"RESET_PLAYER", MPF_ResetPlayer, 0},
-    {"LIMIT_ZOOM", MPF_LimitZoom, 0},
-    {"CROUCHING", MPF_Crouching, 0},
-    {"WEAPON_KICK", MPF_Kicking, 0},
+    {"JUMPING", kMapFlagJumping, 0},
+    {"MLOOK", kMapFlagMlook, 0},
+    {"FREELOOK", kMapFlagMlook, 0},  // -AJA- backwards compat.
+    {"CHEATS", kMapFlagCheats, 0},
+    {"ITEM_RESPAWN", kMapFlagItemRespawn, 0},
+    {"FAST_MONSTERS", kMapFlagFastParm, 0},
+    {"RESURRECT_RESPAWN", kMapFlagResRespawn, 0},
+    {"TELEPORT_RESPAWN", kMapFlagResRespawn, 1},
+    {"TRUE3D", kMapFlagTrue3D, 0},
+    {"ENEMY_STOMP", kMapFlagStomp, 0},
+    {"MORE_BLOOD", kMapFlagMoreBlood, 0},
+    {"NORMAL_BLOOD", kMapFlagMoreBlood, 1},
+    {"RESPAWN", kMapFlagRespawn, 0},
+    {"AUTOAIM", kMapFlagAutoAim, 0},
+    {"AA_MLOOK", kMapFlagAutoAimMlook, 0},
+    {"EXTRAS", kMapFlagExtras, 0},
+    {"RESET_PLAYER", kMapFlagResetPlayer, 0},
+    {"LIMIT_ZOOM", kMapFlagLimitZoom, 0},
+    {"CROUCHING", kMapFlagCrouching, 0},
+    {"WEAPON_KICK", kMapFlagKicking, 0},
 
     {nullptr, 0, 0}};
 
@@ -147,15 +147,15 @@ static void LevelStartEntry(const char *name, bool extend)
         return;
     }
 
-    dynamic_level       = new mapdef_c;
-    dynamic_level->name = name;
+    dynamic_level        = new MapDefinition;
+    dynamic_level->name_ = name;
 
     mapdefs.push_back(dynamic_level);
 }
 
 static void LevelDoTemplate(const char *contents)
 {
-    mapdef_c *other = mapdefs.Lookup(contents);
+    MapDefinition *other = mapdefs.Lookup(contents);
 
     if (!other || other == dynamic_level)
         DDF_Error("Unknown level template: '%s'\n", contents);
@@ -196,22 +196,22 @@ static void LevelParseField(const char *field, const char *contents, int index,
 static void LevelFinishEntry(void)
 {
     // check stuff
-    if (dynamic_level->episode_name.empty())
+    if (dynamic_level->episode_name_.empty())
         DDF_Error("Level entry must have an EPISODE name!\n");
 
-    if (dynamic_level->indoor_fog_cmap)
-        dynamic_level->indoor_fog_color =
-            dynamic_level->indoor_fog_cmap->gl_color_;
+    if (dynamic_level->indoor_fog_cmap_)
+        dynamic_level->indoor_fog_color_ =
+            dynamic_level->indoor_fog_cmap_->gl_color_;
 
-    if (dynamic_level->outdoor_fog_cmap)
-        dynamic_level->outdoor_fog_color =
-            dynamic_level->outdoor_fog_cmap->gl_color_;
+    if (dynamic_level->outdoor_fog_cmap_)
+        dynamic_level->outdoor_fog_color_ =
+            dynamic_level->outdoor_fog_cmap_->gl_color_;
 }
 
 static void LevelClearAll(void)
 {
     // 100% safe to delete the level entries -- no refs
-    for (auto map : mapdefs)
+    for (MapDefinition *map : mapdefs)
     {
         delete map;
         map = nullptr;
@@ -244,15 +244,18 @@ void DDF_LevelCleanUp(void)
 
     // lookup episodes
 
-    for (auto iter = mapdefs.rbegin(); iter != mapdefs.rend(); iter++)
+    for (std::vector<MapDefinition *>::reverse_iterator
+             iter     = mapdefs.rbegin(),
+             iter_end = mapdefs.rend();
+         iter != iter_end; iter++)
     {
-        mapdef_c *m = *iter;
+        MapDefinition *m = *iter;
 
-        m->episode = gamedefs.Lookup(m->episode_name.c_str());
+        m->episode_ = gamedefs.Lookup(m->episode_name_.c_str());
 
-        if (m->episode_name.empty())
+        if (m->episode_name_.empty())
             I_Printf("WARNING: Cannot find episode name for map entry [%s]\n",
-                     m->name.c_str());
+                     m->name_.c_str());
     }
 }
 
@@ -283,18 +286,18 @@ void DDF_LevelGetSpecials(const char *info)
         DDF_MainCheckSpecialFlag(info, map_specials, &flag_value, true, true))
     {
         case CHKF_Positive:
-            dynamic_level->force_on |= flag_value;
-            dynamic_level->force_off &= ~flag_value;
+            dynamic_level->force_on_ |= flag_value;
+            dynamic_level->force_off_ &= ~flag_value;
             break;
 
         case CHKF_Negative:
-            dynamic_level->force_on &= ~flag_value;
-            dynamic_level->force_off |= flag_value;
+            dynamic_level->force_on_ &= ~flag_value;
+            dynamic_level->force_off_ |= flag_value;
             break;
 
         case CHKF_User:
-            dynamic_level->force_on &= ~flag_value;
-            dynamic_level->force_off &= ~flag_value;
+            dynamic_level->force_on_ &= ~flag_value;
+            dynamic_level->force_off_ &= ~flag_value;
             break;
 
         case CHKF_Unknown:
@@ -306,22 +309,23 @@ void DDF_LevelGetSpecials(const char *info)
 
 void DDF_LevelGetSkyStretch(const char *info, void *storage)
 {
-    skystretch_e *stretch = (skystretch_e *)storage;
+    SkyStretch *stretch = (SkyStretch *)storage;
 
     if (epi::StringCaseCompareASCII(info, "MIRROR") == 0)
-        *stretch = SKS_Mirror;
+        *stretch = kSkyStretchMirror;
     else if (epi::StringCaseCompareASCII(info, "REPEAT") == 0)
-        *stretch = SKS_Repeat;
+        *stretch = kSkyStretchRepeat;
     else if (epi::StringCaseCompareASCII(info, "STRETCH") == 0)
-        *stretch = SKS_Stretch;
+        *stretch = kSkyStretchStretch;
     else if (epi::StringCaseCompareASCII(info, "VANILLA") == 0)
-        *stretch = SKS_Vanilla;
+        *stretch = kSkyStretchVanilla;
     else  // Unknown
-        *stretch = SKS_Unset;
+        *stretch = kSkyStretchUnset;
 }
 
-static specflags_t wistyle_names[] = {
-    {"DOOM", WISTYLE_Doom, 0}, {"NONE", WISTYLE_None, 0}, {nullptr, 0, 0}};
+static specflags_t wistyle_names[] = {{"DOOM", kIntermissionStyleDoom, 0},
+                                      {"NONE", kIntermissionStyleNone, 0},
+                                      {nullptr, 0, 0}};
 
 void DDF_LevelGetWistyle(const char *info, void *storage)
 {
@@ -334,59 +338,62 @@ void DDF_LevelGetWistyle(const char *info, void *storage)
         return;
     }
 
-    ((intermission_style_e *)storage)[0] = (intermission_style_e)flag_value;
+    ((IntermissionStyle *)storage)[0] = (IntermissionStyle)flag_value;
 }
 
 //------------------------------------------------------------------
 
 // --> map finale definition class
 
-map_finaledef_c::map_finaledef_c() : pics() { Default(); }
+FinaleDefinition::FinaleDefinition() : pics_() { Default(); }
 
-map_finaledef_c::map_finaledef_c(map_finaledef_c &rhs) : pics() { Copy(rhs); }
-
-map_finaledef_c::~map_finaledef_c() {}
-
-void map_finaledef_c::Copy(map_finaledef_c &src)
+FinaleDefinition::FinaleDefinition(FinaleDefinition &rhs) : pics_()
 {
-    text = src.text;
-
-    text_back   = src.text_back;
-    text_flat   = src.text_flat;
-    text_speed  = src.text_speed;
-    text_wait   = src.text_wait;
-    text_colmap = src.text_colmap;
-
-    movie = src.movie;
-
-    pics    = src.pics;
-    picwait = src.picwait;
-
-    docast  = src.docast;
-    dobunny = src.dobunny;
-    music   = src.music;
+    Copy(rhs);
 }
 
-void map_finaledef_c::Default()
+FinaleDefinition::~FinaleDefinition() {}
+
+void FinaleDefinition::Copy(FinaleDefinition &src)
 {
-    text.clear();
-    text_back.clear();
-    text_flat.clear();
-    text_speed  = 3.0f;
-    text_wait   = 150;
-    text_colmap = nullptr;
+    text_ = src.text_;
 
-    movie.clear();
+    text_back_   = src.text_back_;
+    text_flat_   = src.text_flat_;
+    text_speed_  = src.text_speed_;
+    text_wait_   = src.text_wait_;
+    text_colmap_ = src.text_colmap_;
 
-    pics.clear();
-    picwait = 0;
+    movie_ = src.movie_;
 
-    docast  = false;
-    dobunny = false;
-    music   = 0;
+    pics_    = src.pics_;
+    picwait_ = src.picwait_;
+
+    docast_  = src.docast_;
+    dobunny_ = src.dobunny_;
+    music_   = src.music_;
 }
 
-map_finaledef_c &map_finaledef_c::operator=(map_finaledef_c &rhs)
+void FinaleDefinition::Default()
+{
+    text_.clear();
+    text_back_.clear();
+    text_flat_.clear();
+    text_speed_  = 3.0f;
+    text_wait_   = 150;
+    text_colmap_ = nullptr;
+
+    movie_.clear();
+
+    pics_.clear();
+    picwait_ = 0;
+
+    docast_  = false;
+    dobunny_ = false;
+    music_   = 0;
+}
+
+FinaleDefinition &FinaleDefinition::operator=(FinaleDefinition &rhs)
 {
     if (&rhs != this) Copy(rhs);
 
@@ -395,91 +402,88 @@ map_finaledef_c &map_finaledef_c::operator=(map_finaledef_c &rhs)
 
 // --> map definition class
 
-mapdef_c::mapdef_c() : name() { Default(); }
+MapDefinition::MapDefinition() : name_() { Default(); }
 
-mapdef_c::~mapdef_c() {}
+MapDefinition::~MapDefinition() {}
 
-void mapdef_c::CopyDetail(mapdef_c &src)
+void MapDefinition::CopyDetail(MapDefinition &src)
 {
-    ///---	next = src.next;				// FIXME!!
-    /// Gamestate data
+    description_ = src.description_;
+    namegraphic_ = src.namegraphic_;
+    lump_        = src.lump_;
+    sky_         = src.sky_;
+    surround_    = src.surround_;
+    author_      = src.author_;
 
-    description = src.description;
-    namegraphic = src.namegraphic;
-    lump        = src.lump;
-    sky         = src.sky;
-    surround    = src.surround;
-    author      = src.author;
+    music_   = src.music_;
+    partime_ = src.partime_;
 
-    music   = src.music;
-    partime = src.partime;
+    episode_name_ = src.episode_name_;
 
-    episode_name = src.episode_name;
+    force_on_  = src.force_on_;
+    force_off_ = src.force_off_;
 
-    force_on  = src.force_on;
-    force_off = src.force_off;
+    nextmapname_   = src.nextmapname_;
+    secretmapname_ = src.secretmapname_;
 
-    nextmapname   = src.nextmapname;
-    secretmapname = src.secretmapname;
+    autotag_ = src.autotag_;
 
-    autotag = src.autotag;
+    wistyle_           = src.wistyle_;
+    leavingbggraphic_  = src.leavingbggraphic_;
+    enteringbggraphic_ = src.enteringbggraphic_;
 
-    wistyle           = src.wistyle;
-    leavingbggraphic  = src.leavingbggraphic;
-    enteringbggraphic = src.enteringbggraphic;
+    f_pre_ = src.f_pre_;
+    f_end_ = src.f_end_;
 
-    f_pre = src.f_pre;
-    f_end = src.f_end;
+    forced_skystretch_ = src.forced_skystretch_;
 
-    forced_skystretch = src.forced_skystretch;
-
-    indoor_fog_cmap     = src.indoor_fog_cmap;
-    indoor_fog_color    = src.indoor_fog_color;
-    indoor_fog_density  = src.indoor_fog_density;
-    outdoor_fog_cmap    = src.outdoor_fog_cmap;
-    outdoor_fog_color   = src.outdoor_fog_color;
-    outdoor_fog_density = src.outdoor_fog_density;
+    indoor_fog_cmap_     = src.indoor_fog_cmap_;
+    indoor_fog_color_    = src.indoor_fog_color_;
+    indoor_fog_density_  = src.indoor_fog_density_;
+    outdoor_fog_cmap_    = src.outdoor_fog_cmap_;
+    outdoor_fog_color_   = src.outdoor_fog_color_;
+    outdoor_fog_density_ = src.outdoor_fog_density_;
 }
 
-void mapdef_c::Default()
+void MapDefinition::Default()
 {
-    description.clear();
-    namegraphic.clear();
-    lump.clear();
-    sky.clear();
-    surround.clear();
-    author.clear();
+    description_.clear();
+    namegraphic_.clear();
+    lump_.clear();
+    sky_.clear();
+    surround_.clear();
+    author_.clear();
 
-    music   = 0;
-    partime = 0;
+    music_   = 0;
+    partime_ = 0;
 
-    episode = nullptr;
-    episode_name.clear();
+    episode_ = nullptr;
+    episode_name_.clear();
 
-    force_on  = MPF_None;
-    force_off = MPF_None;
+    force_on_  = kMapFlagNone;
+    force_off_ = kMapFlagNone;
 
-    nextmapname.clear();
-    secretmapname.clear();
+    nextmapname_.clear();
+    secretmapname_.clear();
 
-    autotag = 0;
+    autotag_ = 0;
 
-    wistyle = WISTYLE_Doom;
+    wistyle_ = kIntermissionStyleDoom;
 
-    leavingbggraphic.clear();
-    enteringbggraphic.clear();
+    leavingbggraphic_.clear();
+    enteringbggraphic_.clear();
 
-    f_pre.Default();
-    f_end.Default();
+    f_pre_.Default();
+    f_end_.Default();
 
-    forced_skystretch = SKS_Unset;
+    forced_skystretch_ = kSkyStretchUnset;
 
-    indoor_fog_cmap     = nullptr;
-    indoor_fog_color    = kRGBANoValue;
-    indoor_fog_density  = 0;
-    outdoor_fog_cmap    = nullptr;
-    outdoor_fog_color   = kRGBANoValue;
-    outdoor_fog_density = 0;
+    indoor_fog_cmap_     = nullptr;
+    indoor_fog_color_    = kRGBANoValue;
+    indoor_fog_density_  = 0;
+    outdoor_fog_cmap_    = nullptr;
+    outdoor_fog_color_   = kRGBANoValue;
+    outdoor_fog_density_ = 0;
 }
 
 //
@@ -487,13 +491,15 @@ void mapdef_c::Default()
 //
 // Looks an gamedef by name, returns a fatal error if it does not exist.
 //
-mapdef_c *mapdef_container_c::Lookup(const char *refname)
+MapDefinition *MapDefinitionContainer::Lookup(const char *refname)
 {
     if (!refname || !refname[0]) return nullptr;
 
-    for (auto iter = rbegin(); iter != rend(); iter++)
+    for (std::vector<MapDefinition *>::reverse_iterator iter     = rbegin(),
+                                                        iter_end = rend();
+         iter != iter_end; iter++)
     {
-        mapdef_c *m = *iter;
+        MapDefinition *m = *iter;
 
         // ignore maps with unknown episode_name
         // if (! m->episode)
@@ -502,20 +508,20 @@ mapdef_c *mapdef_container_c::Lookup(const char *refname)
         // Lobo 2022: Allow warping and IDCLEVing to arbitrarily
         //  named maps. We have to have a levels.ddf entry AND an episode
         //  so we need to create them on the fly if they are missing.
-        if (DDF_CompareName(m->name.c_str(), refname) == 0)
+        if (DDF_CompareName(m->name_.c_str(), refname) == 0)
         {
             // Invent a temp episode if we don't have one
-            if (m->episode_name.empty())
+            if (m->episode_name_.empty())
             {
                 GameDefinition *temp_gamedef;
 
-                temp_gamedef       = new GameDefinition;
+                temp_gamedef        = new GameDefinition;
                 temp_gamedef->name_ = "TEMPEPI";
-                m->episode_name    = temp_gamedef->name_;
-                m->episode         = temp_gamedef;
+                m->episode_name_    = temp_gamedef->name_;
+                m->episode_         = temp_gamedef;
 
                 // We must have a default sky
-                if (m->sky.empty()) m->sky = "SKY1";
+                if (m->sky_.empty()) m->sky_ = "SKY1";
             }
             return m;
         }
@@ -529,21 +535,21 @@ mapdef_c *mapdef_container_c::Lookup(const char *refname)
         W_GetKindForLump(W_CheckNumForName(refname)) == 3)  // LMKIND_Marker
     {
         // 2. make a levels.ddf entry
-        mapdef_c *temp_level;
-        temp_level              = new mapdef_c;
-        temp_level->name        = refname;
-        temp_level->description = refname;
-        temp_level->lump        = refname;
+        MapDefinition *temp_level;
+        temp_level               = new MapDefinition;
+        temp_level->name_        = refname;
+        temp_level->description_ = refname;
+        temp_level->lump_        = refname;
 
         // 3. we also need to assign an episode
         GameDefinition *temp_gamedef;
-        temp_gamedef             = new GameDefinition;
+        temp_gamedef              = new GameDefinition;
         temp_gamedef->name_       = "TEMPEPI";
-        temp_level->episode_name = temp_gamedef->name_;
-        temp_level->episode      = temp_gamedef;
+        temp_level->episode_name_ = temp_gamedef->name_;
+        temp_level->episode_      = temp_gamedef;
 
         // 4. Finally We must have a default sky
-        if (temp_level->sky.empty()) temp_level->sky = "SKY1";
+        if (temp_level->sky_.empty()) temp_level->sky_ = "SKY1";
 
         mapdefs.push_back(temp_level);
 

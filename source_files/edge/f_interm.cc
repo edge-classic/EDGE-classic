@@ -475,17 +475,17 @@ static void DrawLevelFinished(void)
                 txtscale = style->def->text[t_type].scale;
             }
             int txtWidth = 0;
-            txtWidth     = style->fonts[t_type]->StringWidth(language[wi_stats.cur->description.c_str()]) * txtscale;
+            txtWidth     = style->fonts[t_type]->StringWidth(language[wi_stats.cur->description_.c_str()]) * txtscale;
 
             if (txtWidth > 320) // Too big? Shrink it to fit the screen
             {
                 float TempScale = 0;
                 TempScale       = 310;
                 TempScale /= txtWidth;
-                HL_WriteText(style, t_type, 160, y, language[wi_stats.cur->description.c_str()], TempScale);
+                HL_WriteText(style, t_type, 160, y, language[wi_stats.cur->description_.c_str()], TempScale);
             }
             else
-                HL_WriteText(style, t_type, 160, y, language[wi_stats.cur->description.c_str()]);
+                HL_WriteText(style, t_type, 160, y, language[wi_stats.cur->description_.c_str()]);
         }
     }
     else
@@ -498,17 +498,17 @@ static void DrawLevelFinished(void)
             txtscale = style->def->text[t_type].scale;
         }
         int txtWidth = 0;
-        txtWidth     = style->fonts[t_type]->StringWidth(language[wi_stats.cur->description.c_str()]) * txtscale;
+        txtWidth     = style->fonts[t_type]->StringWidth(language[wi_stats.cur->description_.c_str()]) * txtscale;
 
         if (txtWidth > 320) // Too big? Shrink it to fit the screen
         {
             float TempScale = 0;
             TempScale       = 310;
             TempScale /= txtWidth;
-            HL_WriteText(style, t_type, 160, y, language[wi_stats.cur->description.c_str()], TempScale);
+            HL_WriteText(style, t_type, 160, y, language[wi_stats.cur->description_.c_str()], TempScale);
         }
         else
-            HL_WriteText(style, t_type, 160, y, language[wi_stats.cur->description.c_str()]);
+            HL_WriteText(style, t_type, 160, y, language[wi_stats.cur->description_.c_str()]);
     }
     HUD_SetAlignment(-1, -1); // set it back to usual
 
@@ -636,7 +636,7 @@ static void DrawEnteringLevel(void)
         if (worldint.mappos[i].done)
             DrawOnLnode(&worldint.mappos[i], splat);
 
-        if (snl_pointeron && !epi::StringCompare(wi_stats.next->name.c_str(), worldint.mappos[i].info->name_.c_str()))
+        if (snl_pointeron && !epi::StringCompare(wi_stats.next->name_.c_str(), worldint.mappos[i].info->name_.c_str()))
             DrawOnLnode(&worldint.mappos[i], yah);
     }
 
@@ -671,17 +671,17 @@ static void DrawEnteringLevel(void)
                 txtscale = style->def->text[t_type].scale;
             }
             int txtWidth = 0;
-            txtWidth     = style->fonts[t_type]->StringWidth(language[wi_stats.next->description.c_str()]) * txtscale;
+            txtWidth     = style->fonts[t_type]->StringWidth(language[wi_stats.next->description_.c_str()]) * txtscale;
 
             if (txtWidth > 320) // Too big? Shrink it to fit the screen
             {
                 float TempScale = 0;
                 TempScale       = 310;
                 TempScale /= txtWidth;
-                HL_WriteText(style, t_type, 160, y * 5 / 4, language[wi_stats.next->description.c_str()], TempScale);
+                HL_WriteText(style, t_type, 160, y * 5 / 4, language[wi_stats.next->description_.c_str()], TempScale);
             }
             else
-                HL_WriteText(style, t_type, 160, y * 5 / 4, language[wi_stats.next->description.c_str()]);
+                HL_WriteText(style, t_type, 160, y * 5 / 4, language[wi_stats.next->description_.c_str()]);
         }
     }
     else
@@ -692,17 +692,17 @@ static void DrawEnteringLevel(void)
             txtscale = style->def->text[t_type].scale;
         }
         int txtWidth = 0;
-        txtWidth     = style->fonts[t_type]->StringWidth(language[wi_stats.next->description.c_str()]) * txtscale;
+        txtWidth     = style->fonts[t_type]->StringWidth(language[wi_stats.next->description_.c_str()]) * txtscale;
 
         if (txtWidth > 320) // Too big? Shrink it to fit the screen
         {
             float TempScale = 0;
             TempScale       = 310;
             TempScale /= txtWidth;
-            HL_WriteText(style, t_type, 160, y * 5 / 4, language[wi_stats.next->description.c_str()], TempScale);
+            HL_WriteText(style, t_type, 160, y * 5 / 4, language[wi_stats.next->description_.c_str()], TempScale);
         }
         else
-            HL_WriteText(style, t_type, 160, y * 5 / 4, language[wi_stats.next->description.c_str()]);
+            HL_WriteText(style, t_type, 160, y * 5 / 4, language[wi_stats.next->description_.c_str()]);
     }
     HUD_SetAlignment(-1, -1); // set it back to usual
 }
@@ -904,7 +904,7 @@ static void WI_End(void)
 
     background_camera_mo = nullptr;
 
-    F_StartFinale(&currmap->f_end, nextmap ? ga_finale : ga_nothing);
+    F_StartFinale(&currmap->f_end_, nextmap ? ga_finale : ga_nothing);
 }
 
 static void InitNoState(void)
@@ -933,7 +933,7 @@ static void InitShowNextLoc(void)
 
     for (i = 0; i < worldint.nummappos; i++)
     {
-        if (epi::StringCompare(worldint.mappos[i].info->name_.c_str(), wi_stats.cur->name.c_str()) == 0)
+        if (epi::StringCompare(worldint.mappos[i].info->name_.c_str(), wi_stats.cur->name_.c_str()) == 0)
             worldint.mappos[i].done = true;
     }
 
@@ -960,7 +960,7 @@ static void DrawShowNextLoc(void)
                 DrawOnLnode(&worldint.mappos[i], splat);
 
             if (snl_pointeron && wi_stats.next &&
-                !epi::StringCompare(wi_stats.next->name.c_str(), worldint.mappos[i].info->name_.c_str()))
+                !epi::StringCompare(wi_stats.next->name_.c_str(), worldint.mappos[i].info->name_.c_str()))
                 DrawOnLnode(&worldint.mappos[i], yah);
         }
     }
@@ -1043,7 +1043,7 @@ static void UpdateDeathmatchStats(void)
 {
     bool stillticking;
 
-    const GameDefinition *gd = wi_stats.cur->episode;
+    const GameDefinition *gd = wi_stats.cur->episode_;
 
     if (acceleratestage && dm_state != 4)
     {
@@ -1222,7 +1222,7 @@ static void UpdateCoopStats(void)
 {
     bool stillticking;
 
-    const GameDefinition *gd = wi_stats.cur->episode;
+    const GameDefinition *gd = wi_stats.cur->episode_;
 
     if (acceleratestage && ng_state != 10)
     {
@@ -1480,7 +1480,7 @@ static void UpdateSinglePlayerStats(void)
 
     player_t *con_plyr = players[consoleplayer];
 
-    const GameDefinition *gd = wi_stats.cur->episode;
+    const GameDefinition *gd = wi_stats.cur->episode_;
 
     if (acceleratestage && sp_state != sp_end)
     {
@@ -1754,7 +1754,7 @@ void WI_Ticker(void)
     if (bcnt == 1)
     {
         // intermission music
-        S_ChangeMusic(wi_stats.cur->episode->music_, true);
+        S_ChangeMusic(wi_stats.cur->episode_->music_, true);
     }
 
     if (WI_CheckForAccelerate())
@@ -1835,7 +1835,7 @@ void WI_Drawer(void)
                 {
                     if (!wi_stats.next)
                         f = nullptr;
-                    else if (!epi::StringCompare(wi_stats.next->name.c_str(), a->info->level_.c_str()))
+                    else if (!epi::StringCompare(wi_stats.next->name_.c_str(), a->info->level_.c_str()))
                         f = &a->frames[a->frameon];
                 }
                 else
@@ -1889,29 +1889,29 @@ static void LoadData(void)
         wi_net_style = hu_styles.Lookup(def);
     }
 
-    const GameDefinition *gd = wi_stats.cur->episode;
+    const GameDefinition *gd = wi_stats.cur->episode_;
 
     // Lobo 2022: if we have a per level image defined, use that instead
-    if (wi_stats.cur->leavingbggraphic != "")
+    if (wi_stats.cur->leavingbggraphic_ != "")
     {
-        leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic.c_str(), kImageNamespaceFlat, ILF_Null);
+        leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic_.c_str(), kImageNamespaceFlat, ILF_Null);
         if (leaving_bg_image)
             tile_leaving_bg = true;
         else
         {
-            leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic.c_str());
+            leaving_bg_image = W_ImageLookup(wi_stats.cur->leavingbggraphic_.c_str());
             tile_leaving_bg  = false;
         }
     }
 
-    if (wi_stats.cur->enteringbggraphic != "")
+    if (wi_stats.cur->enteringbggraphic_ != "")
     {
-        entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic.c_str(), kImageNamespaceFlat, ILF_Null);
+        entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic_.c_str(), kImageNamespaceFlat, ILF_Null);
         if (entering_bg_image)
             tile_entering_bg = true;
         else
         {
-            entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic.c_str());
+            entering_bg_image = W_ImageLookup(wi_stats.cur->enteringbggraphic_.c_str());
             tile_entering_bg  = false;
         }
     }
@@ -1926,10 +1926,10 @@ static void LoadData(void)
         tile_bg  = false;
     }
 
-    lnames[0] = W_ImageLookup(wi_stats.cur->namegraphic.c_str());
+    lnames[0] = W_ImageLookup(wi_stats.cur->namegraphic_.c_str());
 
     if (wi_stats.next)
-        lnames[1] = W_ImageLookup(wi_stats.next->namegraphic.c_str());
+        lnames[1] = W_ImageLookup(wi_stats.next->namegraphic_.c_str());
 
     if (gd->yah_[0] != "")
         yah[0] = W_ImageLookup(gd->yah_[0].c_str());
@@ -1986,8 +1986,8 @@ static void LoadData(void)
 
 static void InitVariables(void)
 {
-    wi_stats.level   = wi_stats.cur->name.c_str();
-    wi_stats.partime = wi_stats.cur->partime;
+    wi_stats.level   = wi_stats.cur->name_.c_str();
+    wi_stats.partime = wi_stats.cur->partime_;
 
     acceleratestage = false;
     cnt = bcnt   = 0;
@@ -2002,7 +2002,7 @@ static void InitVariables(void)
     if (wi_stats.secret <= 0)
         wi_stats.secret = 1;
 
-    GameDefinition *def = wi_stats.cur->episode;
+    GameDefinition *def = wi_stats.cur->episode_;
 
     SYS_ASSERT(def);
 
@@ -2015,7 +2015,7 @@ void WI_Start(void)
 {
     InitVariables();
 
-    const GameDefinition *gd = wi_stats.cur->episode;
+    const GameDefinition *gd = wi_stats.cur->episode_;
     SYS_ASSERT(gd);
 
     if (SP_MATCH())

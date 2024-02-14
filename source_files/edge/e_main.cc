@@ -2086,7 +2086,7 @@ static void E_InitialState(void)
         I_Error("-warp: no such level '%s'\n", warp_map.c_str());
 
     SYS_ASSERT(G_MapExists(params.map));
-    SYS_ASSERT(params.map->episode);
+    SYS_ASSERT(params.map->episode_);
 
     params.random_seed = I_PureRandom();
 

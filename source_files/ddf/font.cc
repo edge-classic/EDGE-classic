@@ -99,7 +99,7 @@ static void FontParseField(const char *field, const char *contents, int index,
 
 static void FontFinishEntry(void)
 {
-    if (dynamic_font->type_ == kFontTypeUNSET)
+    if (dynamic_font->type_ == kFontTypeUnset)
         DDF_Error("No type specified for font.\n");
 
     if (dynamic_font->type_ == kFontTypePatch && !dynamic_font->patches_)

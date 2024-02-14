@@ -22,7 +22,7 @@
 
 enum FontType
 {
-    kFontTypeUNSET    = 0,
+    kFontTypeUnset    = 0,
     kFontTypePatch    = 1,  // font is made up of individual patches
     kFontTypeImage    = 2,  // font consists of one big image (16x16 chars)
     kFontTypeTrueType = 3   // font is a ttf/otf file or lump

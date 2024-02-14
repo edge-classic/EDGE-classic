@@ -1804,7 +1804,7 @@ static void M_ChangeMonitorSize(int key, cvar_c *cvar)
 //
 /*static void M_ChangeBlood(int keypressed, cvar_c *cvar)
 {
-    if (currmap && ((currmap->force_on | currmap->force_off) & MPF_MoreBlood))
+    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagMoreBlood))
         return;
 
     level_flags.more_blood = global_flags.more_blood;
@@ -1812,7 +1812,7 @@ static void M_ChangeMonitorSize(int key, cvar_c *cvar)
 
 static void M_ChangeMLook(int keypressed, cvar_c *cvar)
 {
-    if (currmap && ((currmap->force_on | currmap->force_off) & MPF_Mlook))
+    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagMlook))
         return;
 
     level_flags.mlook = global_flags.mlook;
@@ -1820,7 +1820,7 @@ static void M_ChangeMLook(int keypressed, cvar_c *cvar)
 
 static void M_ChangeJumping(int keypressed, cvar_c *cvar)
 {
-    if (currmap && ((currmap->force_on | currmap->force_off) & MPF_Jumping))
+    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagJumping))
         return;
 
     level_flags.jump = global_flags.jump;
@@ -1828,7 +1828,7 @@ static void M_ChangeJumping(int keypressed, cvar_c *cvar)
 
 static void M_ChangeCrouching(int keypressed, cvar_c *cvar)
 {
-    if (currmap && ((currmap->force_on | currmap->force_off) & MPF_Crouching))
+    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagCrouching))
         return;
 
     level_flags.crouch = global_flags.crouch;
@@ -1836,7 +1836,7 @@ static void M_ChangeCrouching(int keypressed, cvar_c *cvar)
 
 static void M_ChangeExtra(int keypressed, cvar_c *cvar)
 {
-    if (currmap && ((currmap->force_on | currmap->force_off) & MPF_Extras))
+    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagExtras))
         return;
 
     level_flags.have_extra = global_flags.have_extra;
@@ -1849,7 +1849,7 @@ static void M_ChangeExtra(int keypressed, cvar_c *cvar)
 //
 static void M_ChangeMonsterRespawn(int keypressed, cvar_c *cvar)
 {
-    if (currmap && ((currmap->force_on | currmap->force_off) & MPF_ResRespawn))
+    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagResRespawn))
         return;
 
     level_flags.res_respawn = global_flags.res_respawn;
@@ -1857,7 +1857,7 @@ static void M_ChangeMonsterRespawn(int keypressed, cvar_c *cvar)
 
 static void M_ChangeItemRespawn(int keypressed, cvar_c *cvar)
 {
-    if (currmap && ((currmap->force_on | currmap->force_off) & MPF_ItemRespawn))
+    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagItemRespawn))
         return;
 
     level_flags.itemrespawn = global_flags.itemrespawn;
@@ -1865,7 +1865,7 @@ static void M_ChangeItemRespawn(int keypressed, cvar_c *cvar)
 
 static void M_ChangeTrue3d(int keypressed, cvar_c *cvar)
 {
-    if (currmap && ((currmap->force_on | currmap->force_off) & MPF_True3D))
+    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagTrue3D))
         return;
 
     level_flags.true3dgameplay = global_flags.true3dgameplay;
@@ -1873,7 +1873,7 @@ static void M_ChangeTrue3d(int keypressed, cvar_c *cvar)
 
 static void M_ChangeAutoAim(int keypressed, cvar_c *cvar)
 {
-    if (currmap && ((currmap->force_on | currmap->force_off) & MPF_AutoAim))
+    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagAutoAim))
         return;
 
     level_flags.autoaim = global_flags.autoaim;
@@ -1884,7 +1884,7 @@ static void M_ChangeRespawn(int keypressed, cvar_c *cvar)
     if (gameskill == sk_nightmare)
         return;
 
-    if (currmap && ((currmap->force_on | currmap->force_off) & MPF_Respawn))
+    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagRespawn))
         return;
 
     level_flags.respawn = global_flags.respawn;
@@ -1895,7 +1895,7 @@ static void M_ChangeFastparm(int keypressed, cvar_c *cvar)
     if (gameskill == sk_nightmare)
         return;
 
-    if (currmap && ((currmap->force_on | currmap->force_off) & MPF_FastParm))
+    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagFastParm))
         return;
 
     level_flags.fastparm = global_flags.fastparm;
@@ -1942,7 +1942,7 @@ static void M_UpdateCVARFromInt(int keypressed, cvar_c *cvar)
 
 static void M_ChangeKicking(int keypressed, cvar_c *cvar)
 {
-    if (currmap && ((currmap->force_on | currmap->force_off) & MPF_Kicking))
+    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagKicking))
         return;
 
     level_flags.kicking = global_flags.kicking;
@@ -1950,7 +1950,7 @@ static void M_ChangeKicking(int keypressed, cvar_c *cvar)
 
 static void M_ChangeWeaponSwitch(int keypressed, cvar_c *cvar)
 {
-    if (currmap && ((currmap->force_on | currmap->force_off) & MPF_WeaponSwitch))
+    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagWeaponSwitch))
         return;
 
     level_flags.weapon_switch = global_flags.weapon_switch;

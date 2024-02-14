@@ -34,7 +34,7 @@ struct sfx_s;
 class atkdef_c;
 class Colormap;
 class GameDefinition;
-class mapdef_c;
+class MapDefinition;
 class mobjtype_c;
 class pl_entry_c;
 class weapondef_c;

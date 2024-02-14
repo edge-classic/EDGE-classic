@@ -1024,7 +1024,7 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     int lit_adjust = 0;
 
     // do the N/S/W/E bizzo...
-    if (!r_forceflatlighting.d && currmap->episode->lighting_ == kLightingModelDoom && props->lightlevel > 0)
+    if (!r_forceflatlighting.d && currmap->episode_->lighting_ == kLightingModelDoom && props->lightlevel > 0)
     {
         if (AlmostEquals(cur_seg->v1->Y, cur_seg->v2->Y))
             lit_adjust -= 16;
@@ -1502,13 +1502,13 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
     {
         if (IS_SKY(seg->sidedef->sector->ceil))
         {
-            sec_fc = currmap->outdoor_fog_color;
-            sec_fd = 0.01f * currmap->outdoor_fog_density;
+            sec_fc = currmap->outdoor_fog_color_;
+            sec_fd = 0.01f * currmap->outdoor_fog_density_;
         }
         else
         {
-            sec_fc = currmap->indoor_fog_color;
-            sec_fd = 0.01f * currmap->indoor_fog_density;
+            sec_fc = currmap->indoor_fog_color_;
+            sec_fd = 0.01f * currmap->indoor_fog_density_;
         }
     }
     RGBAColor other_fc = (other ? other->props.fog_color : kRGBANoValue);
@@ -1519,13 +1519,13 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         {
             if (IS_SKY(other->ceil))
             {
-                other_fc = currmap->outdoor_fog_color;
-                other_fd = 0.01f * currmap->outdoor_fog_density;
+                other_fc = currmap->outdoor_fog_color_;
+                other_fd = 0.01f * currmap->outdoor_fog_density_;
             }
             else
             {
-                other_fc = currmap->indoor_fog_color;
-                other_fd = 0.01f * currmap->indoor_fog_density;
+                other_fc = currmap->indoor_fog_color_;
+                other_fd = 0.01f * currmap->indoor_fog_density_;
             }
         }
     }

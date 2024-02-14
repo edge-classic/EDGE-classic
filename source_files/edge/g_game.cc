@@ -103,11 +103,11 @@ int deathmatch;
 skill_t gameskill = sk_medium;
 
 // -ACB- 2004/05/25 We need to store our current/next mapdefs
-const mapdef_c *currmap = nullptr;
-const mapdef_c *nextmap = nullptr;
+const MapDefinition *currmap = nullptr;
+const MapDefinition *nextmap = nullptr;
 
 int             curr_hub_tag = 0; // affects where players are spawned
-const mapdef_c *curr_hub_first;   // first map in group of hubs
+const MapDefinition *curr_hub_first;   // first map in group of hubs
 
 // -KM- 1998/12/16 These flags hold everything needed about a level
 gameflags_t level_flags;
@@ -151,7 +151,7 @@ void LoadLevel_Bits(void)
     //
     // -ACB- 1998/08/09 Reference current map for sky name.
 
-    sky_image = W_ImageLookup(currmap->sky.c_str(), kImageNamespaceTexture);
+    sky_image = W_ImageLookup(currmap->sky_.c_str(), kImageNamespaceTexture);
 
     gamestate = GS_NOTHING; // FIXME: needed ???
 
@@ -164,7 +164,7 @@ void LoadLevel_Bits(void)
         if (!p)
             continue;
 
-        if (p->playerstate == PST_DEAD || (currmap->force_on & MPF_ResetPlayer) || pistol_starts)
+        if (p->playerstate == PST_DEAD || (currmap->force_on_ & kMapFlagResetPlayer) || pistol_starts)
         {
             p->playerstate = PST_REBORN;
         }
@@ -176,38 +176,38 @@ void LoadLevel_Bits(void)
     // -AJA- 2000/02/02: Made it more generic.
 
 #define HANDLE_FLAG(var, specflag)                                                                                     \
-    if (currmap->force_on & (specflag))                                                                                \
+    if (currmap->force_on_ & (specflag))                                                                                \
         (var) = true;                                                                                                  \
-    else if (currmap->force_off & (specflag))                                                                          \
+    else if (currmap->force_off_ & (specflag))                                                                          \
         (var) = false;
 
-    HANDLE_FLAG(level_flags.jump, MPF_Jumping);
-    HANDLE_FLAG(level_flags.crouch, MPF_Crouching);
-    HANDLE_FLAG(level_flags.mlook, MPF_Mlook);
-    HANDLE_FLAG(level_flags.itemrespawn, MPF_ItemRespawn);
-    HANDLE_FLAG(level_flags.fastparm, MPF_FastParm);
-    HANDLE_FLAG(level_flags.true3dgameplay, MPF_True3D);
-    HANDLE_FLAG(level_flags.more_blood, MPF_MoreBlood);
-    HANDLE_FLAG(level_flags.cheats, MPF_Cheats);
-    HANDLE_FLAG(level_flags.respawn, MPF_Respawn);
-    HANDLE_FLAG(level_flags.res_respawn, MPF_ResRespawn);
-    HANDLE_FLAG(level_flags.have_extra, MPF_Extras);
-    HANDLE_FLAG(level_flags.limit_zoom, MPF_LimitZoom);
-    HANDLE_FLAG(level_flags.kicking, MPF_Kicking);
-    HANDLE_FLAG(level_flags.weapon_switch, MPF_WeaponSwitch);
-    HANDLE_FLAG(level_flags.pass_missile, MPF_PassMissile);
-    HANDLE_FLAG(level_flags.team_damage, MPF_TeamDamage);
+    HANDLE_FLAG(level_flags.jump, kMapFlagJumping);
+    HANDLE_FLAG(level_flags.crouch, kMapFlagCrouching);
+    HANDLE_FLAG(level_flags.mlook, kMapFlagMlook);
+    HANDLE_FLAG(level_flags.itemrespawn, kMapFlagItemRespawn);
+    HANDLE_FLAG(level_flags.fastparm, kMapFlagFastParm);
+    HANDLE_FLAG(level_flags.true3dgameplay, kMapFlagTrue3D);
+    HANDLE_FLAG(level_flags.more_blood, kMapFlagMoreBlood);
+    HANDLE_FLAG(level_flags.cheats, kMapFlagCheats);
+    HANDLE_FLAG(level_flags.respawn, kMapFlagRespawn);
+    HANDLE_FLAG(level_flags.res_respawn, kMapFlagResRespawn);
+    HANDLE_FLAG(level_flags.have_extra, kMapFlagExtras);
+    HANDLE_FLAG(level_flags.limit_zoom, kMapFlagLimitZoom);
+    HANDLE_FLAG(level_flags.kicking, kMapFlagKicking);
+    HANDLE_FLAG(level_flags.weapon_switch, kMapFlagWeaponSwitch);
+    HANDLE_FLAG(level_flags.pass_missile, kMapFlagPassMissile);
+    HANDLE_FLAG(level_flags.team_damage, kMapFlagTeamDamage);
 
 #undef HANDLE_FLAG
 
-    if (currmap->force_on & MPF_AutoAim)
+    if (currmap->force_on_ & kMapFlagAutoAim)
     {
-        if (currmap->force_on & MPF_AutoAimMlook)
+        if (currmap->force_on_ & kMapFlagAutoAimMlook)
             level_flags.autoaim = AA_MLOOK;
         else
             level_flags.autoaim = AA_ON;
     }
-    else if (currmap->force_off & MPF_AutoAim)
+    else if (currmap->force_off_ & kMapFlagAutoAim)
         level_flags.autoaim = AA_OFF;
 
     //
@@ -241,7 +241,7 @@ void LoadLevel_Bits(void)
 
     P_SetupLevel();
 
-    RAD_SpawnTriggers(currmap->name.c_str());
+    RAD_SpawnTriggers(currmap->name_.c_str());
 
     exittime     = INT_MAX;
     exit_skipall = false;
@@ -454,7 +454,7 @@ void G_BigStuff(void)
             currmap        = nextmap;
             curr_hub_tag   = 0;
             curr_hub_first = nullptr;
-            F_StartFinale(&currmap->f_pre, ga_loadlevel);
+            F_StartFinale(&currmap->f_pre_, ga_loadlevel);
             break;
 
         case ga_endgame:
@@ -589,7 +589,7 @@ void G_DeferredScreenShot(void)
 //  actually exiting level.
 void G_ExitLevel(int time)
 {
-    nextmap      = G_LookupMap(currmap->nextmapname.c_str());
+    nextmap      = G_LookupMap(currmap->nextmapname_.c_str());
     exittime     = leveltime + time;
     exit_skipall = false;
     exit_hub_tag = 0;
@@ -599,7 +599,7 @@ void G_ExitLevel(int time)
 //                  removed the check for map31.
 void G_SecretExitLevel(int time)
 {
-    nextmap      = G_LookupMap(currmap->secretmapname.c_str());
+    nextmap      = G_LookupMap(currmap->secretmapname_.c_str());
     exittime     = leveltime + time;
     exit_skipall = false;
     exit_hub_tag = 0;
@@ -634,7 +634,7 @@ void G_ExitToHub(int map_number, int tag)
     char name_buf[32];
 
     // bit hackish: decided whether to use MAP## or E#M#
-    if (currmap->name[0] == 'E')
+    if (currmap->name_[0] == 'E')
     {
         sprintf(name_buf, "E%dM%d", 1 + (map_number / 10), map_number % 10);
     }
@@ -684,7 +684,7 @@ static void G_DoCompleted(void)
     automapactive = false;
 
     // handle "no stat" levels
-    if (currmap->wistyle == WISTYLE_None || exit_skipall)
+    if (currmap->wistyle_ == kIntermissionStyleNone || exit_skipall)
     {
         if (exit_skipall && nextmap)
         {
@@ -717,7 +717,7 @@ static void G_DoCompleted(void)
         }
         else
         {
-            F_StartFinale(&currmap->f_end, nextmap ? ga_finale : ga_nothing);
+            F_StartFinale(&currmap->f_end_, nextmap ? ga_finale : ga_nothing);
         }
 
         return;
@@ -784,7 +784,7 @@ static bool G_LoadGameFromFile(std::string filename, bool is_hub)
         if (!params.map)
             I_Error("LOAD-GAME: No such map %s !  Check WADS\n", globs->level);
 
-        SYS_ASSERT(params.map->episode);
+        SYS_ASSERT(params.map->episode_);
 
         params.skill      = (skill_t)globs->skill;
         params.deathmatch = (globs->netgame >= 2) ? (globs->netgame - 1) : 0;
@@ -920,11 +920,11 @@ static bool G_SaveGameToFile(std::string filename, const char *description)
     // --- fill in global structure ---
 
     // globs->game  = SV_DupString(game_base.c_str());
-    globs->game      = SV_DupString(currmap->episode_name.c_str());
-    globs->level     = SV_DupString(currmap->name.c_str());
+    globs->game      = SV_DupString(currmap->episode_name_.c_str());
+    globs->level     = SV_DupString(currmap->name_.c_str());
     globs->flags     = level_flags;
     globs->hub_tag   = curr_hub_tag;
-    globs->hub_first = curr_hub_first ? SV_DupString(curr_hub_first->name.c_str()) : nullptr;
+    globs->hub_first = curr_hub_first ? SV_DupString(curr_hub_first->name_.c_str()) : nullptr;
 
     globs->skill    = gameskill;
     globs->netgame  = netgame ? (1 + deathmatch) : 0;
@@ -1087,9 +1087,9 @@ void G_DeferredNewGame(newgame_params_c &params)
     gameaction = ga_newgame;
 }
 
-bool G_MapExists(const mapdef_c *map)
+bool G_MapExists(const MapDefinition *map)
 {
-    return (W_CheckNumForName(map->lump.c_str()) >= 0);
+    return (W_CheckNumForName(map->lump_.c_str()) >= 0);
 }
 
 //
@@ -1122,7 +1122,7 @@ static void G_DoNewGame(void)
     if (skip_pre)
         gameaction = ga_loadlevel;
     else
-        F_StartFinale(&currmap->f_pre, ga_loadlevel);
+        F_StartFinale(&currmap->f_pre_, ga_loadlevel);
 }
 
 //
@@ -1259,9 +1259,9 @@ bool G_CheckWhenAppear(when_appear_e appear)
     return true;
 }
 
-mapdef_c *G_LookupMap(const char *refname)
+MapDefinition *G_LookupMap(const char *refname)
 {
-    mapdef_c *m = mapdefs.Lookup(refname);
+    MapDefinition *m = mapdefs.Lookup(refname);
 
     if (m && G_MapExists(m))
         return m;
@@ -1274,10 +1274,10 @@ mapdef_c *G_LookupMap(const char *refname)
         std::string map_check = epi::StringFormat("%02d", num);
         for (int i = mapdefs.size() - 1; i >= 0; i--)
         {
-            if (mapdefs[i]->name.size() >= 2)
+            if (mapdefs[i]->name_.size() >= 2)
             {
-                if (epi::StringCaseCompareASCII(map_check, mapdefs[i]->name.substr(mapdefs[i]->name.size() - 2)) == 0 &&
-                    G_MapExists(mapdefs[i]) && mapdefs[i]->episode)
+                if (epi::StringCaseCompareASCII(map_check, mapdefs[i]->name_.substr(mapdefs[i]->name_.size() - 2)) == 0 &&
+                    G_MapExists(mapdefs[i]) && mapdefs[i]->episode_)
                     return mapdefs[i];
             }
         }
@@ -1288,10 +1288,10 @@ mapdef_c *G_LookupMap(const char *refname)
         map_check = epi::StringFormat("E%dM%d", num / 10, num % 10);
         for (int i = mapdefs.size() - 1; i >= 0; i--)
         {
-            if (mapdefs[i]->name.size() == 4)
+            if (mapdefs[i]->name_.size() == 4)
             {
-                if (mapdefs[i]->name[1] == map_check[1] && mapdefs[i]->name[3] == map_check[3] &&
-                    G_MapExists(mapdefs[i]) && mapdefs[i]->episode)
+                if (mapdefs[i]->name_[1] == map_check[1] && mapdefs[i]->name_[3] == map_check[3] &&
+                    G_MapExists(mapdefs[i]) && mapdefs[i]->episode_)
                     return mapdefs[i];
             }
         }

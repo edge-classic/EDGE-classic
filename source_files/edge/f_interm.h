@@ -45,8 +45,8 @@ typedef struct wistats_s
     const char *level; // episode # (0-2)
 
     // current and next levels
-    const mapdef_c *cur;
-    const mapdef_c *next;
+    const MapDefinition *cur;
+    const MapDefinition *next;
 
     int kills;
     int items;

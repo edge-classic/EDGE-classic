@@ -1396,7 +1396,7 @@ static void ReallyDoStartLevel(skill_t skill, GameDefinition *g)
     }
 
     SYS_ASSERT(G_MapExists(params.map));
-    SYS_ASSERT(params.map->episode);
+    SYS_ASSERT(params.map->episode_);
 
     G_DeferredNewGame(params);
 
@@ -1451,7 +1451,7 @@ static void DoStartLevel(skill_t skill)
         return;
     }
 
-    const mapdef_c *map = G_LookupMap(g->firstmap_.c_str());
+    const MapDefinition *map = G_LookupMap(g->firstmap_.c_str());
     if (!map)
     {
         I_Warning("Cannot find map for '%s' (episode %s)\n", g->firstmap_.c_str(), chosen_episode.c_str());

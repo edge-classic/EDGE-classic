@@ -144,7 +144,7 @@ void M_ChangeLevelCheat(const char *string)
     }
 
     SYS_ASSERT(G_MapExists(params.map));
-    SYS_ASSERT(params.map->episode);
+    SYS_ASSERT(params.map->episode_);
 
     params.random_seed = I_PureRandom();
 

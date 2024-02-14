@@ -42,7 +42,7 @@
 #include "p_local.h"
 
 class image_c;
-class mapdef_c;
+class MapDefinition;
 
 //
 // STRUCTURE TABLE STUFF
@@ -356,7 +356,7 @@ void SV_SaveStruct(void *base, savestruct_t *info);
 void SV_SaveEverything(void);
 
 const char *SV_SlotName(int slot);
-const char *SV_MapName(const mapdef_c *map);
+const char *SV_MapName(const MapDefinition *map);
 
 std::string SV_FileName(const char *slot_name, const char *map_name);
 

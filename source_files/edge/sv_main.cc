@@ -468,12 +468,12 @@ const char *SV_SlotName(int slot)
     return buffer;
 }
 
-const char *SV_MapName(const mapdef_c *map)
+const char *SV_MapName(const MapDefinition *map)
 {
     // ensure the name is LOWER CASE
     static char buffer[256];
 
-    strcpy(buffer, map->name.c_str());
+    strcpy(buffer, map->name_.c_str());
 
     for (char *pos = buffer; *pos; pos++)
         *pos = epi::ToLowerASCII(*pos);

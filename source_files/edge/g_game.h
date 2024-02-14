@@ -69,7 +69,7 @@ class newgame_params_c
     skill_t skill;
     int     deathmatch;
 
-    const mapdef_c *map;
+    const MapDefinition *map;
     // gamedef_c is implied (== map->episode)
 
     int random_seed;
@@ -112,7 +112,7 @@ void G_DeferredSaveGame(int slot, const char *description);
 void G_DeferredScreenShot(void);
 void G_DeferredEndGame(void);
 
-bool G_MapExists(const mapdef_c *map);
+bool G_MapExists(const MapDefinition *map);
 
 // -KM- 1998/11/25 Added Time param
 void G_ExitLevel(int time);
@@ -127,10 +127,10 @@ bool G_Responder(event_t *ev);
 
 bool G_CheckWhenAppear(when_appear_e appear);
 
-extern const mapdef_c *currmap;
-extern const mapdef_c *nextmap;
+extern const MapDefinition *currmap;
+extern const MapDefinition *nextmap;
 
-mapdef_c *G_LookupMap(const char *refname);
+MapDefinition *G_LookupMap(const char *refname);
 
 void G_DoLoadLevel(void);
 void G_SpawnInitialPlayers(void); //

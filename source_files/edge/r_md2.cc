@@ -1125,13 +1125,13 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
     {
         if (IS_SKY(mo->subsector->sector->ceil))
         {
-            fc_to_use = currmap->outdoor_fog_color;
-            fd_to_use = 0.01f * currmap->outdoor_fog_density;
+            fc_to_use = currmap->outdoor_fog_color_;
+            fd_to_use = 0.01f * currmap->outdoor_fog_density_;
         }
         else
         {
-            fc_to_use = currmap->indoor_fog_color;
-            fd_to_use = 0.01f * currmap->indoor_fog_density;
+            fc_to_use = currmap->indoor_fog_color_;
+            fd_to_use = 0.01f * currmap->indoor_fog_density_;
         }
     }
 

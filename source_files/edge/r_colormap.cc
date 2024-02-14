@@ -733,13 +733,13 @@ class colormap_shader_c : public abstract_shader_c
         {
             if (IS_SKY(sec->ceil))
             {
-                fc_to_use = currmap->outdoor_fog_color;
-                fd_to_use = 0.01f * currmap->outdoor_fog_density;
+                fc_to_use = currmap->outdoor_fog_color_;
+                fd_to_use = 0.01f * currmap->outdoor_fog_density_;
             }
             else
             {
-                fc_to_use = currmap->indoor_fog_color;
-                fd_to_use = 0.01f * currmap->indoor_fog_density;
+                fc_to_use = currmap->indoor_fog_color_;
+                fd_to_use = 0.01f * currmap->indoor_fog_density_;
             }
         }
 
@@ -880,7 +880,7 @@ class colormap_shader_c : public abstract_shader_c
     void Update()
     {
         if (fade_tex == 0 || (r_forceflatlighting.d && lt_model != kLightingModelFlat) ||
-            (!r_forceflatlighting.d && lt_model != currmap->episode->lighting_))
+            (!r_forceflatlighting.d && lt_model != currmap->episode_->lighting_))
         {
             if (fade_tex != 0)
             {
@@ -890,7 +890,7 @@ class colormap_shader_c : public abstract_shader_c
             if (r_forceflatlighting.d)
                 lt_model = kLightingModelFlat;
             else
-                lt_model = currmap->episode->lighting_;
+                lt_model = currmap->episode_->lighting_;
 
             MakeColormapTexture(0);
         }

@@ -36,7 +36,7 @@ static void DDF_AnimGetPic(const char *info, void *storage);
 #define DDF_CMD_BASE dummy_anim
 static AnimationDefinition dummy_anim;
 
-static const commandlist_t anim_commands[] = {
+static const DDFCommandList anim_commands[] = {
     DDF_FIELD("TYPE", type_, DDF_AnimGetType),
     DDF_FIELD("SEQUENCE", pics_, DDF_AnimGetPic),
     DDF_FIELD("SPEED", speed_, DDF_MainGetTime),
@@ -153,7 +153,7 @@ static void AnimClearAll(void)
 
 void DDF_ReadAnims(const std::string &data)
 {
-    readinfo_t anims;
+    DDFReadInfo anims;
 
     anims.tag      = "ANIMATIONS";
     anims.lumpname = "DDFANIM";

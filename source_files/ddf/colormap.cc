@@ -30,7 +30,7 @@ void DDF_ColmapGetSpecial(const char *info, void *storage);
 #define DDF_CMD_BASE dummy_colmap
 static Colormap dummy_colmap;
 
-static const commandlist_t colmap_commands[] = {
+static const DDFCommandList colmap_commands[] = {
     DDF_FIELD("LUMP", lump_name_, DDF_MainGetLumpName),
     DDF_FIELD("PACK", pack_name_, DDF_MainGetString),
     DDF_FIELD("START", start_, DDF_MainGetNumeric),
@@ -152,7 +152,7 @@ static void ColmapClearAll(void)
 
 void DDF_ReadColourMaps(const std::string &data)
 {
-    readinfo_t colm_r;
+    DDFReadInfo colm_r;
 
     colm_r.tag      = "COLOURMAPS";
     colm_r.lumpname = "DDFCOLM";
@@ -177,7 +177,7 @@ void DDF_ColmapInit(void)
 
 void DDF_ColmapCleanUp(void) { colormaps.shrink_to_fit(); }
 
-specflags_t colmap_specials[] = {{"FLASH", kColorSpecialNoFlash, true},
+DDFSpecialFlags colmap_specials[] = {{"FLASH", kColorSpecialNoFlash, true},
                                  {"WHITEN", kColorSpecialWhiten, false},
 
                                  // -AJA- backwards compatibility cruft...
@@ -199,16 +199,16 @@ void DDF_ColmapGetSpecial(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, colmap_specials, &flag_value, true,
                                      false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *spec = (ColorSpecial)(*spec | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *spec = (ColorSpecial)(*spec & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("DDF_ColmapGetSpecial: Unknown Special: %s", info);
             break;
     }

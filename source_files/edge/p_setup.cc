@@ -202,14 +202,14 @@ static void GetMUSINFOTracksForLevel(void)
                 }
                 else
                 {
-                    static pl_entry_c *dynamic_plentry;
-                    dynamic_plentry           = new pl_entry_c;
-                    dynamic_plentry->number   = playlist.FindFree();
-                    dynamic_plentry->info     = value;
-                    dynamic_plentry->type     = MUS_UNKNOWN;
-                    dynamic_plentry->infotype = MUSINF_LUMP;
+                    static PlaylistEntry *dynamic_plentry;
+                    dynamic_plentry           = new PlaylistEntry;
+                    dynamic_plentry->number_   = playlist.FindFree();
+                    dynamic_plentry->info_     = value;
+                    dynamic_plentry->type_     = kDDFMusicUnknown;
+                    dynamic_plentry->infotype_ = kDDFMusicDataLump;
                     playlist.push_back(dynamic_plentry);
-                    musinfo_tracks[currmap->name_].mappings.try_emplace(mus_number, dynamic_plentry->number);
+                    musinfo_tracks[currmap->name_].mappings.try_emplace(mus_number, dynamic_plentry->number_);
                 }
                 mus_number = -1;
             }

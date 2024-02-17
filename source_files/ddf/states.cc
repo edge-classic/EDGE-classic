@@ -284,7 +284,7 @@ int DDF_StateFindLabel(const std::vector<state_range_t> &group,
 void DDF_StateReadState(const char *info, const char *label,
                         std::vector<state_range_t> &group, int *state_num,
                         int index, const char *redir,
-                        const actioncode_t *action_list, bool is_weapon)
+                        const DDFActionCode *action_list, bool is_weapon)
 {
     SYS_ASSERT(group.size() > 0);
 
@@ -495,8 +495,8 @@ void DDF_StateReadState(const char *info, const char *label,
 bool DDF_MainParseState(uint8_t *object, std::vector<state_range_t> &group,
                         const char *field, const char *contents, int index,
                         bool is_last, bool is_weapon,
-                        const state_starter_t *starters,
-                        const actioncode_t    *actions)
+                        const DDFStateStarter *starters,
+                        const DDFActionCode    *actions)
 {
     if (epi::StringPrefixCaseCompareASCII(field, "STATES(") != 0) return false;
 
@@ -514,7 +514,7 @@ bool DDF_MainParseState(uint8_t *object, std::vector<state_range_t> &group,
     for (i = 0; starters[i].label; i++)
         if (DDF_CompareName(starters[i].label, labname.c_str()) == 0) break;
 
-    const state_starter_t *starter = nullptr;
+    const DDFStateStarter *starter = nullptr;
     if (starters[i].label) starter = &starters[i];
 
     int *var = nullptr;

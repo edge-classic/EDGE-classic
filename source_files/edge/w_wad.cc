@@ -1373,13 +1373,13 @@ void W_ReadUMAPINFOLumps(void)
                 }
                 else // we need to add it
                 {
-                    static pl_entry_c *dynamic_plentry;
-                    dynamic_plentry           = new pl_entry_c;
-                    dynamic_plentry->number   = playlist.FindFree();
-                    dynamic_plentry->info     = Maps.maps[i].music;
-                    dynamic_plentry->type     = MUS_UNKNOWN; // MUS_MUS
-                    dynamic_plentry->infotype = MUSINF_LUMP;
-                    temp_level->music_         = dynamic_plentry->number;
+                    static PlaylistEntry *dynamic_plentry;
+                    dynamic_plentry           = new PlaylistEntry;
+                    dynamic_plentry->number_   = playlist.FindFree();
+                    dynamic_plentry->info_     = Maps.maps[i].music;
+                    dynamic_plentry->type_     = kDDFMusicUnknown;
+                    dynamic_plentry->infotype_ = kDDFMusicDataLump;
+                    temp_level->music_         = dynamic_plentry->number_;
                     playlist.push_back(dynamic_plentry);
                 }
             }
@@ -1482,13 +1482,13 @@ void W_ReadUMAPINFOLumps(void)
                 }
                 else // we need to add it
                 {
-                    static pl_entry_c *dynamic_plentry;
-                    dynamic_plentry           = new pl_entry_c;
-                    dynamic_plentry->number   = playlist.FindFree();
-                    dynamic_plentry->info     = Maps.maps[i].intermusic;
-                    dynamic_plentry->type     = MUS_UNKNOWN; // MUS_MUS
-                    dynamic_plentry->infotype = MUSINF_LUMP;
-                    temp_level->f_end_.music_   = dynamic_plentry->number;
+                    static PlaylistEntry *dynamic_plentry;
+                    dynamic_plentry           = new PlaylistEntry;
+                    dynamic_plentry->number_   = playlist.FindFree();
+                    dynamic_plentry->info_     = Maps.maps[i].intermusic;
+                    dynamic_plentry->type_     = kDDFMusicUnknown;
+                    dynamic_plentry->infotype_ = kDDFMusicDataLump;
+                    temp_level->f_end_.music_   = dynamic_plentry->number_;
                     playlist.push_back(dynamic_plentry);
                 }
             }

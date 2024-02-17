@@ -30,7 +30,7 @@ sfxdef_container_c sfxdefs;
 #define DDF_CMD_BASE dummy_sfx
 static sfxdef_c dummy_sfx;
 
-static const commandlist_t sfx_commands[] = {
+static const DDFCommandList sfx_commands[] = {
     DDF_FIELD("LUMP_NAME", lump_name, DDF_MainGetLumpName),
     DDF_FIELD("PACK_NAME", pack_name, DDF_MainGetString),
     DDF_FIELD("FILE_NAME", file_name, DDF_MainGetString),
@@ -126,7 +126,7 @@ static void SoundClearAll(void)
 
 void DDF_ReadSFX(const std::string &data)
 {
-    readinfo_t sfx_r;
+    DDFReadInfo sfx_r;
 
     sfx_r.tag      = "SOUNDS";
     sfx_r.lumpname = "DDFSFX";

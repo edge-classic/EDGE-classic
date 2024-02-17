@@ -41,7 +41,7 @@ static void DDF_GameGetLighting(const char *info, void *storage);
 #define DDF_CMD_BASE dummy_gamedef
 static GameDefinition dummy_gamedef;
 
-static const commandlist_t gamedef_commands[] = {
+static const DDFCommandList gamedef_commands[] = {
     DF("INTERMISSION_GRAPHIC", background_, DDF_MainGetLumpName),
     DF("INTERMISSION_CAMERA", bg_camera_, DDF_MainGetString),
     DF("INTERMISSION_MUSIC", music_, DDF_MainGetNumeric),
@@ -169,7 +169,7 @@ static void GameClearAll(void)
 
 void DDF_ReadGames(const std::string &data)
 {
-    readinfo_t games;
+    DDFReadInfo games;
 
     games.tag      = "GAMES";
     games.lumpname = "DDFGAME";
@@ -285,7 +285,7 @@ static void DDF_GameGetPic(const char *info, void *storage)
     dynamic_gamedef->titlepics_.push_back(info);
 }
 
-static specflags_t lighting_names[] = {{"DOOM", kLightingModelDoom, 0},
+static DDFSpecialFlags lighting_names[] = {{"DOOM", kLightingModelDoom, 0},
                                        {"DOOMISH", kLightingModelDoomish, 0},
                                        {"FLAT", kLightingModelFlat, 0},
                                        {"VERTEX", kLightingModelVertex, 0},
@@ -295,7 +295,7 @@ void DDF_GameGetLighting(const char *info, void *storage)
 {
     int flag_value;
 
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(info, lighting_names,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(info, lighting_names,
                                                   &flag_value, false, false))
     {
         DDF_WarnError("GAMES.DDF LIGHTING: Unknown model: %s", info);

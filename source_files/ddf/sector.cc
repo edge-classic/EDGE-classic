@@ -44,7 +44,7 @@ static void DDF_SectMakeCrush(const char *info);
 #define DDF_CMD_BASE dummy_sector
 static SectorType dummy_sector;
 
-static const commandlist_t sect_commands[] = {
+static const DDFCommandList sect_commands[] = {
     // sub-commands
     DDF_SUB_LIST("FLOOR", f_, floor_commands),
     DDF_SUB_LIST("CEILING", c_, floor_commands),
@@ -192,7 +192,7 @@ static void SectorClearAll(void)
 
 void DDF_ReadSectors(const std::string &data)
 {
-    readinfo_t sects;
+    DDFReadInfo sects;
 
     sects.tag      = "SECTORS";
     sects.lumpname = "DDFSECT";
@@ -223,7 +223,7 @@ void DDF_SectorCleanUp(void) { sectortypes.shrink_to_fit(); }
 
 //----------------------------------------------------------------------------
 
-static specflags_t sector_specials[] = {
+static DDFSpecialFlags sector_specials[] = {
     {"WHOLE_REGION", kSectorFlagWholeRegion, 0},
     {"PROPORTIONAL", kSectorFlagProportional, 0},
     {"PUSH_ALL", kSectorFlagPushAll, 0},
@@ -249,24 +249,24 @@ void DDF_SectGetSpecialFlags(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, sector_specials, &flag_value, true,
                                      false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *special = (SectorFlag)(*special | flag_value);
 
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *special = (SectorFlag)(*special & ~flag_value);
 
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown sector special: %s", info);
             break;
     }
 }
 
-static specflags_t exit_types[] = {{"NONE", kExitTypeNone, 0},
+static DDFSpecialFlags exit_types[] = {{"NONE", kExitTypeNone, 0},
                                    {"NORMAL", kExitTypeNormal, 0},
                                    {"SECRET", kExitTypeSecret, 0},
 
@@ -287,19 +287,19 @@ void DDF_SectGetExit(const char *info, void *storage)
     switch (
         DDF_MainCheckSpecialFlag(info, exit_types, &flag_value, false, false))
     {
-        case CHKF_Positive:
-        case CHKF_Negative:
+        case kDDFCheckFlagPositive:
+        case kDDFCheckFlagNegative:
             (*dest) = flag_value;
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown Exit type: %s\n", info);
             break;
     }
 }
 
-static specflags_t light_types[] = {
+static DDFSpecialFlags light_types[] = {
     {"NONE", kLightSpecialTypeNone, 0},
     {"SET", kLightSpecialTypeSet, 0},
     {"FADE", kLightSpecialTypeFade, 0},
@@ -322,19 +322,19 @@ void DDF_SectGetLighttype(const char *info, void *storage)
     switch (
         DDF_MainCheckSpecialFlag(info, light_types, &flag_value, false, false))
     {
-        case CHKF_Positive:
-        case CHKF_Negative:
+        case kDDFCheckFlagPositive:
+        case kDDFCheckFlagNegative:
             (*dest) = flag_value;
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown light type: %s\n", info);
             break;
     }
 }
 
-static specflags_t movement_types[] = {
+static DDFSpecialFlags movement_types[] = {
     {"MOVE", kPlaneMoverOnce, 0},
     {"MOVEWAITRETURN", kPlaneMoverMoveWaitReturn, 0},
     {"CONTINUOUS", kPlaneMoverContinuous, 0},
@@ -358,19 +358,19 @@ void DDF_SectGetMType(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, movement_types, &flag_value, false,
                                      false))
     {
-        case CHKF_Positive:
-        case CHKF_Negative:
+        case kDDFCheckFlagPositive:
+        case kDDFCheckFlagNegative:
             (*dest) = flag_value;
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown Movement type: %s\n", info);
             break;
     }
 }
 
-static specflags_t reference_types[] = {
+static DDFSpecialFlags reference_types[] = {
     {"ABSOLUTE", kTriggerHeightReferenceAbsolute, false},
 
     {"FLOOR", kTriggerHeightReferenceCurrent, false},
@@ -446,13 +446,13 @@ void DDF_SectGetDestRef(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, reference_types, &flag_value, false,
                                      false))
     {
-        case CHKF_Positive:
-        case CHKF_Negative:
+        case kDDFCheckFlagPositive:
+        case kDDFCheckFlagNegative:
             (*dest) = flag_value;
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown Reference Point: %s\n", info);
             break;
     }

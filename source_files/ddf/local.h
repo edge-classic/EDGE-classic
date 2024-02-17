@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_LOCAL_H__
-#define __DDF_LOCAL_H__
+#pragma once
 
 #include <stddef.h>
 
@@ -31,7 +30,7 @@
 // pointer and sometimes a pointer to a (int) numeric value. (used for info that
 // gets its value directly from the file).
 //
-typedef struct commandlist_s
+struct DDFCommandList
 {
     // command name
     const char *name;
@@ -41,8 +40,8 @@ typedef struct commandlist_s
 
     ptrdiff_t offset;
 
-    const struct commandlist_s *sub_comms;
-} commandlist_t;
+    const struct DDFCommandList *sub_comms;
+};
 
 // NOTE: requires DDF_CMD_BASE to be defined as the dummy struct
 
@@ -77,7 +76,7 @@ typedef struct commandlist_s
 // This structure passes the information needed to DDF_MainReadFile, so that
 // the reader uses the correct procedures when reading a file.
 //
-typedef struct readinfo_s
+struct DDFReadInfo
 {
     // name of the lump, for error messages
     const char *lumpname;
@@ -131,12 +130,12 @@ typedef struct readinfo_s
     // this is never called in the middle of an entry.
     //
     void (*clear_all)(void);
-} readinfo_t;
+};
 
 //
 // This structure forms the basis for referencing specials.
 //
-typedef struct
+struct DDFSpecialFlags
 {
     // name of special
     const char *name;
@@ -147,28 +146,28 @@ typedef struct
     // this is true if the DDF name (e.g. "GRAVITY") is opposite to the
     // code's flag name (e.g. MF_NoGravity).
     bool negative;
-} specflags_t;
+};
 
-typedef enum
+enum DDFCheckFlagResult
 {
     // special flag is unknown
-    CHKF_Unknown,
+    kDDFCheckFlagUnknown,
 
     // the flag should be set (i.e. forced on)
-    CHKF_Positive,
+    kDDFCheckFlagPositive,
 
     // the flag should be cleared (i.e. forced off)
-    CHKF_Negative,
+    kDDFCheckFlagNegative,
 
     // the flag should be made user-definable
-    CHKF_User
-} checkflag_result_e;
+    kDDFCheckFlagUser
+};
 
 //
 // This is a reference table, that determines what code pointer is placed in the
 // states table entry.
 //
-typedef struct
+struct DDFActionCode
 {
     const char *actionname;
     void (*action)(struct mobj_s *mo);
@@ -176,10 +175,10 @@ typedef struct
     // -AJA- 1999/08/09: This function handles the argument when brackets
     // are present (e.g. "WEAPON_SHOOT(FIREBALL)").  nullptr if unused.
     void (*handle_arg)(const char *arg, state_t *curstate);
-} actioncode_t;
+};
 
 // This structure is used for parsing states
-typedef struct
+struct DDFStateStarter
 {
     // state label
     const char *label;
@@ -189,10 +188,10 @@ typedef struct
 
     // pointer to state_num storage
     ptrdiff_t offset;
-} state_starter_t;
+};
 
 // DDF_MAIN Code (Reading all files, main init & generic functions).
-void DDF_MainReadFile(readinfo_t *readinfo, const std::string &data);
+void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data);
 
 extern int         cur_ddf_line_num;
 extern std::string cur_ddf_filename;
@@ -226,18 +225,18 @@ void DDF_MainGetRGB(const char *info, void *storage);
 void DDF_MainGetWhenAppear(const char *info, void *storage);
 void DDF_MainGetBitSet(const char *info, void *storage);
 
-bool DDF_MainParseField(const commandlist_t *commands, const char *field,
+bool DDF_MainParseField(const DDFCommandList *commands, const char *field,
                         const char *contents, uint8_t *obj_base);
 void DDF_MainLookupSound(const char *info, void *storage);
 void DDF_MainRefAttack(const char *info, void *storage);
 
 void DDF_DummyFunction(const char *info, void *storage);
 
-checkflag_result_e DDF_MainCheckSpecialFlag(const char        *name,
-                                            const specflags_t *flag_set,
-                                            int               *flag_value,
-                                            bool               allow_prefixes,
-                                            bool               allow_user);
+DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char            *name,
+                                            const DDFSpecialFlags *flag_set,
+                                            int                   *flag_value,
+                                            bool allow_prefixes,
+                                            bool allow_user);
 
 int DDF_MainLookupDirector(const mobjtype_c *obj, const char *info);
 
@@ -265,8 +264,8 @@ void DDF_LevelCleanUp(void);
 void DDF_LinedefInit(void);
 void DDF_LinedefCleanUp(void);
 
-#define EMPTY_COLMAP_NAME "_NONE_"
-#define EMPTY_COLMAP_NUM  -777
+constexpr const char *kEmptyColormapName   = "_NONE_";
+constexpr int16_t     kEmptyColormapNumber = -777;
 
 // DDF_MOBJ Code  (Moving Objects)
 void DDF_MobjInit(void);
@@ -308,8 +307,8 @@ void DDF_StateGetRGB(const char *arg, state_t *cur_state);
 bool DDF_MainParseState(uint8_t *object, std::vector<state_range_t> &group,
                         const char *field, const char *contents, int index,
                         bool is_last, bool is_weapon,
-                        const state_starter_t *starters,
-                        const actioncode_t    *actions);
+                        const DDFStateStarter *starters,
+                        const DDFActionCode   *actions);
 
 void DDF_StateBeginRange(std::vector<state_range_t> &group);
 void DDF_StateFinishRange(std::vector<state_range_t> &group);
@@ -333,9 +332,9 @@ void DDF_SwitchInit(void);
 void DDF_SwitchCleanUp(void);
 
 // DDF_WEAP Code
-void                     DDF_WeaponInit(void);
-void                     DDF_WeaponCleanUp(void);
-extern const specflags_t ammo_types[];
+void                         DDF_WeaponInit(void);
+void                         DDF_WeaponCleanUp(void);
+extern const DDFSpecialFlags ammo_types[];
 
 // DDF_COLM Code -AJA- 1999/07/09.
 void DDF_ColmapInit(void);
@@ -366,10 +365,8 @@ void DDF_MovieInit(void);
 void DDF_MovieCleanUp(void);
 
 // Miscellaneous stuff needed here & there
-extern const commandlist_t floor_commands[];
-extern const commandlist_t damage_commands[];
-
-#endif  //__DDF_LOCAL_H__*/
+extern const DDFCommandList floor_commands[];
+extern const DDFCommandList damage_commands[];
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

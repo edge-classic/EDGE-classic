@@ -25,23 +25,23 @@
 
 #include "local.h"
 
-static moviedef_c *dynamic_movie;
+static MovieDefinition *dynamic_movie;
 
 static void DDF_MovieGetType(const char *info, void *storage);
 static void DDF_MovieGetSpecial(const char *info, void *storage);
 static void DDF_MovieGetScaling(const char *info, void *storage);
 
 #define DDF_CMD_BASE dummy_movie
-static moviedef_c dummy_movie;
+static MovieDefinition dummy_movie;
 
-static const commandlist_t movie_commands[] = {
-    DDF_FIELD("MOVIE_DATA", type, DDF_MovieGetType),
-    DDF_FIELD("SPECIAL", special, DDF_MovieGetSpecial),
-    DDF_FIELD("SCALING", scaling, DDF_MovieGetScaling),
+static const DDFCommandList movie_commands[] = {
+    DDF_FIELD("MOVIE_DATA", type_, DDF_MovieGetType),
+    DDF_FIELD("SPECIAL", special_, DDF_MovieGetSpecial),
+    DDF_FIELD("SCALING", scaling_, DDF_MovieGetScaling),
 
     DDF_CMD_END};
 
-moviedef_container_c moviedefs;
+MovieDefinitionContainer moviedefs;
 
 //
 //  DDF PARSE ROUTINES
@@ -67,9 +67,9 @@ static void MovieStartEntry(const char *name, bool extend)
     }
 
     // not found, create a new one
-    dynamic_movie = new moviedef_c;
+    dynamic_movie = new MovieDefinition;
 
-    dynamic_movie->name = name;
+    dynamic_movie->name_ = name;
 
     moviedefs.push_back(dynamic_movie);
 }
@@ -90,9 +90,9 @@ static void MovieParseField(const char *field, const char *contents, int index,
 
 static void MovieFinishEntry(void)
 {
-    if (dynamic_movie->type == MOVDT_None)
+    if (dynamic_movie->type_ == kMovieDataNone)
         DDF_Error("No lump or packfile defined for %s!\n",
-                  dynamic_movie->name.c_str());
+                  dynamic_movie->name_.c_str());
 }
 
 static void MovieClearAll(void)
@@ -102,7 +102,7 @@ static void MovieClearAll(void)
 
 void DDF_ReadMovies(const std::string &data)
 {
-    readinfo_t movies;
+    DDFReadInfo movies;
 
     movies.tag      = "MOVIES";
     movies.lumpname = "DDFMOVIE";
@@ -117,7 +117,7 @@ void DDF_ReadMovies(const std::string &data)
 
 void DDF_MovieInit(void)
 {
-    for (auto movie : moviedefs)
+    for (MovieDefinition *movie : moviedefs)
     {
         delete movie;
         movie = nullptr;
@@ -130,7 +130,7 @@ void DDF_MovieCleanUp(void)
     moviedefs.shrink_to_fit();  // <-- Reduce to allocated size
 }
 
-static void MovieParseInfo(const char *value) { dynamic_movie->info = value; }
+static void MovieParseInfo(const char *value) { dynamic_movie->info_ = value; }
 
 static void DDF_MovieGetType(const char *info, void *storage)
 {
@@ -147,40 +147,40 @@ static void DDF_MovieGetType(const char *info, void *storage)
 
     if (DDF_CompareName(keyword, "LUMP") == 0)
     {
-        dynamic_movie->type = MOVDT_Lump;
+        dynamic_movie->type_ = kMovieDataLump;
         MovieParseInfo(colon + 1);
     }
     else if (DDF_CompareName(keyword, "PACK") == 0)
     {
-        dynamic_movie->type = MOVDT_Package;
+        dynamic_movie->type_ = kMovieDataPackage;
         MovieParseInfo(colon + 1);
     }
     else
         DDF_Error("Unknown movie type: %s\n", keyword);
 }
 
-static specflags_t movie_specials[] = {{"MUTE", MOVSP_Mute, 0},
-                                       {nullptr, 0, 0}};
+static DDFSpecialFlags movie_specials[] = {{"MUTE", kMovieSpecialMute, 0},
+                                           {nullptr, 0, 0}};
 
 static void DDF_MovieGetSpecial(const char *info, void *storage)
 {
-    movie_special_e *dest = (movie_special_e *)storage;
+    MovieSpecial *dest = (MovieSpecial *)storage;
 
     int flag_value;
 
     switch (DDF_MainCheckSpecialFlag(info, movie_specials, &flag_value,
                                      false /* allow_prefixes */, false))
     {
-        case CHKF_Positive:
-            *dest = (movie_special_e)(*dest | flag_value);
+        case kDDFCheckFlagPositive:
+            *dest = (MovieSpecial)(*dest | flag_value);
             break;
 
-        case CHKF_Negative:
-            *dest = (movie_special_e)(*dest & ~flag_value);
+        case kDDFCheckFlagNegative:
+            *dest = (MovieSpecial)(*dest & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown movie special: %s\n", info);
             break;
     }
@@ -188,56 +188,56 @@ static void DDF_MovieGetSpecial(const char *info, void *storage)
 
 static void DDF_MovieGetScaling(const char *info, void *storage)
 {
-    moviescale_type_e *dest = (moviescale_type_e *)storage;
+    MovieScaling *dest = (MovieScaling *)storage;
 
-    if (DDF_CompareName(info, "AUTO") == 0) *dest = MOVSC_Autofit;
+    if (DDF_CompareName(info, "AUTO") == 0) *dest = kMovieScalingAutofit;
     if (DDF_CompareName(info, "NONE") == 0)
-        *dest = MOVSC_NoScale;
+        *dest = kMovieScalingNoScale;
     else if (DDF_CompareName(info, "ZOOM") == 0)
-        *dest = MOVSC_Zoom;
+        *dest = kMovieScalingZoom;
     else if (DDF_CompareName(info, "STRETCH") == 0)
-        *dest = MOVSC_Stretch;
+        *dest = kMovieScalingStretch;
     else
     {
         DDF_WarnError("Unknown movie scaling mode: %s\n", info);
-        *dest = MOVSC_Autofit;  // Default
+        *dest = kMovieScalingAutofit;  // Default
     }
 }
 
-// ---> moviedef_c class
+// ---> MovieDefinition class
 
-moviedef_c::moviedef_c() : name(), info() { Default(); }
+MovieDefinition::MovieDefinition() : name_(), info_() { Default(); }
 
 //
 // Copies all the detail with the exception of ddf info
 //
-void moviedef_c::CopyDetail(const moviedef_c &src)
+void MovieDefinition::CopyDetail(const MovieDefinition &src)
 {
-    type    = src.type;
-    info    = src.info;
-    scaling = src.scaling;
-    special = src.special;
+    type_    = src.type_;
+    info_    = src.info_;
+    scaling_ = src.scaling_;
+    special_ = src.special_;
 }
 
-void moviedef_c::Default()
+void MovieDefinition::Default()
 {
-    info.clear();
+    info_.clear();
 
-    type = MOVDT_None;
+    type_ = kMovieDataNone;
 
-    scaling = MOVSC_Autofit;
-    special = MOVSP_None;
+    scaling_ = kMovieScalingAutofit;
+    special_ = kMovieSpecialNone;
 }
 
-// ---> moviedef_container_c class
+// ---> MovieDefinitionontainer_c class
 
-moviedef_c *moviedef_container_c::Lookup(const char *refname)
+MovieDefinition *MovieDefinitionContainer::Lookup(const char *refname)
 {
     if (!refname || !refname[0]) return nullptr;
 
-    for (auto g : moviedefs)
+    for (MovieDefinition *g : moviedefs)
     {
-        if (DDF_CompareName(g->name.c_str(), refname) == 0) return g;
+        if (DDF_CompareName(g->name_.c_str(), refname) == 0) return g;
     }
 
     return nullptr;

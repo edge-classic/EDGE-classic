@@ -45,7 +45,7 @@ static void DDF_AtkGetLabel(const char *info, void *storage);
 #define DDF_CMD_BASE dummy_damage
 damage_c dummy_damage;
 
-const commandlist_t damage_commands[] = {
+const DDFCommandList damage_commands[] = {
     DF("VAL", nominal, DDF_MainGetFloat),
     DF("MAX", linear_max, DDF_MainGetFloat),
     DF("ERROR", error, DDF_MainGetFloat),
@@ -80,7 +80,7 @@ static atkdef_c *dynamic_atk;
 #define DDF_CMD_BASE dummy_atk
 static atkdef_c dummy_atk;
 
-static const commandlist_t attack_commands[] = {
+static const DDFCommandList attack_commands[] = {
     // sub-commands
     DDF_SUB_LIST("DAMAGE", damage, damage_commands),
 
@@ -343,7 +343,7 @@ static void AttackClearAll(void)
 
 void DDF_ReadAtks(const std::string &data)
 {
-    readinfo_t attacks;
+    DDFReadInfo attacks;
 
     attacks.tag      = "ATTACKS";
     attacks.lumpname = "DDFATK";
@@ -397,7 +397,7 @@ void DDF_AttackCleanUp(void)
     atkdefs.shrink_to_fit();
 }
 
-static const specflags_t attack_specials[] = {
+static const DDFSpecialFlags attack_specials[] = {
     {"SMOKING_TRACER", AF_TraceSmoke, 0},
     {"KILL_FAILED_SPAWN", AF_KillFailedSpawn, 0},
     {"REMOVE_FAILED_SPAWN", AF_KillFailedSpawn, 1},
@@ -428,16 +428,16 @@ static void DDF_AtkGetSpecial(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, attack_specials, &flag_value, true,
                                      false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *var = (attackflags_e)(*var | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *var = (attackflags_e)(*var & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("DDF_AtkGetSpecials: Unknown Attack Special: %s\n",
                           info);
             break;

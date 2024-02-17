@@ -103,7 +103,7 @@ void Movie_VideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
 
 void E_PlayMovie(const std::string &name)
 {
-	moviedef_c *movie = moviedefs.Lookup(name.c_str());
+	MovieDefinition *movie = moviedefs.Lookup(name.c_str());
 
 	if (!movie)
 	{
@@ -119,11 +119,11 @@ void E_PlayMovie(const std::string &name)
 	int length = 0;
 	uint8_t *bytes = nullptr;
 
-	if (movie->type == MOVDT_Lump)
-		bytes = W_LoadLump(movie->info.c_str(), &length);
+	if (movie->type_ == kMovieDataLump)
+		bytes = W_LoadLump(movie->info_.c_str(), &length);
 	else
 	{
-		epi::File *mf = W_OpenPackFile(movie->info.c_str());
+		epi::File *mf = W_OpenPackFile(movie->info_.c_str());
 		if (mf)
 		{
 			bytes = mf->LoadIntoMemory();
@@ -134,7 +134,7 @@ void E_PlayMovie(const std::string &name)
 
 	if (!bytes)
 	{
-		I_Warning("E_PlayMovie: Could not open %s!\n", movie->info.c_str());
+		I_Warning("E_PlayMovie: Could not open %s!\n", movie->info_.c_str());
 		return;
 	}
 
@@ -159,7 +159,7 @@ void E_PlayMovie(const std::string &name)
 		return;
 	}
 
-	if (!nosound && !(movie->special & MOVSP_Mute) && plm_get_num_audio_streams(decoder) > 0)
+	if (!nosound && !(movie->special_ & kMovieSpecialMute) && plm_get_num_audio_streams(decoder) > 0)
 	{
 		movie_sample_rate = plm_get_samplerate(decoder);
 		if (!Movie_SetupAudioStream(movie_sample_rate))
@@ -193,7 +193,7 @@ void E_PlayMovie(const std::string &name)
 	float tx2 = 1.0f;
 	float ty1 = 0.0f;
 	float ty2 = 1.0f;
-	if (movie->scaling == MOVSC_Autofit)
+	if (movie->scaling_ == kMovieScalingAutofit)
 	{
 		// If movie and display ratios match (ish), stretch it
 		if (fabs((float)SCREENWIDTH / SCREENHEIGHT / movie_ratio - 1.0f) <= 0.10f)
@@ -207,12 +207,12 @@ void E_PlayMovie(const std::string &name)
 			frame_width = RoundToInt((float)SCREENHEIGHT * movie_ratio);
 		}
 	}
-	else if (movie->scaling == MOVSC_NoScale)
+	else if (movie->scaling_ == kMovieScalingNoScale)
 	{
 		frame_height = movie_height;
 		frame_width = movie_width;
 	}
-	else if (movie->scaling == MOVSC_Zoom)
+	else if (movie->scaling_ == kMovieScalingZoom)
 	{
 		frame_height = SCREENHEIGHT;
 		frame_width = RoundToInt((float)SCREENHEIGHT * movie_ratio);

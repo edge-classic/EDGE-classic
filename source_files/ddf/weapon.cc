@@ -49,7 +49,7 @@ static void DDF_WStateGetRADTrigger(const char *arg, state_t *cur_state);
 #define DDF_CMD_BASE dummy_weapon
 static weapondef_c dummy_weapon;
 
-static const commandlist_t weapon_commands[] = {
+static const DDFCommandList weapon_commands[] = {
     DF("AMMOTYPE", ammo[0], DDF_WGetAmmo),
     DF("AMMOPERSHOT", ammopershot[0], DDF_MainGetNumeric),
     DF("CLIPSIZE", clip_size[0], DDF_MainGetNumeric),
@@ -129,7 +129,7 @@ static const commandlist_t weapon_commands[] = {
 
     DDF_CMD_END};
 
-static const state_starter_t weapon_starters[] = {
+static const DDFStateStarter weapon_starters[] = {
     DDF_STATE("UP", "UP", up_state),
     DDF_STATE("DOWN", "DOWN", down_state),
     DDF_STATE("READY", "READY", ready_state),
@@ -170,7 +170,7 @@ static const state_starter_t weapon_starters[] = {
 
     DDF_STATE_END};
 
-static const actioncode_t weapon_actions[] = {
+static const DDFActionCode weapon_actions[] = {
     {"NOTHING", nullptr, nullptr},
 
     {"RAISE", A_Raise, nullptr},
@@ -260,7 +260,7 @@ static const actioncode_t weapon_actions[] = {
 
     {nullptr, nullptr, nullptr}};
 
-const specflags_t ammo_types[] = {{"NOAMMO", AM_NoAmmo, 0},
+const DDFSpecialFlags ammo_types[] = {{"NOAMMO", AM_NoAmmo, 0},
 
                                   {"BULLETS", AM_Bullet, 0},
                                   {"SHELLS", AM_Shell, 0},
@@ -599,7 +599,7 @@ static void WeaponClearAll(void)
 
 void DDF_ReadWeapons(const std::string &data)
 {
-    readinfo_t weapons;
+    DDFReadInfo weapons;
 
     weapons.tag      = "WEAPONS";
     weapons.lumpname = "DDFWEAP";
@@ -636,13 +636,13 @@ static void DDF_WGetAmmo(const char *info, void *storage)
     switch (
         DDF_MainCheckSpecialFlag(info, ammo_types, &flag_value, false, false))
     {
-        case CHKF_Positive:
-        case CHKF_Negative:
+        case kDDFCheckFlagPositive:
+        case kDDFCheckFlagNegative:
             (*ammo) = flag_value;
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown Ammo type '%s'\n", info);
             break;
     }
@@ -657,7 +657,7 @@ static void DDF_WGetUpgrade(const char *info, void *storage)
     if (*dest == nullptr) DDF_Warning("Unknown weapon: %s\n", info);
 }
 
-static specflags_t weapon_specials[] = {
+static DDFSpecialFlags weapon_specials[] = {
     {"SILENT_TO_MONSTERS", WPSP_SilentToMon, 0},
     {"ANIMATED", WPSP_Animated, 0},
     {"SWITCH", WPSP_SwitchAway, 0},
@@ -711,16 +711,16 @@ static void DDF_WGetSpecialFlags(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, weapon_specials, &flag_value, true,
                                      false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *dest = (weapon_flag_e)(*dest | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *dest = (weapon_flag_e)(*dest & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
         {
             // Check unknown flags in WeaponFinishEntry as some MBF21 flags
             // correlate to non-flag variables

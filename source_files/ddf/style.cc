@@ -37,7 +37,7 @@ styledef_container_c styledefs;
 #define DDF_CMD_BASE dummy_bgstyle
 static backgroundstyle_c dummy_bgstyle;
 
-static const commandlist_t background_commands[] = {
+static const DDFCommandList background_commands[] = {
     DF("COLOUR", colour, DDF_MainGetRGB),
     DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
     DF("IMAGE", image_name, DDF_MainGetString),
@@ -50,7 +50,7 @@ static const commandlist_t background_commands[] = {
 #define DDF_CMD_BASE dummy_textstyle
 static textstyle_c dummy_textstyle;
 
-static const commandlist_t text_commands[] = {
+static const DDFCommandList text_commands[] = {
     DF("COLOURMAP", colmap, DDF_MainGetColourmap),
     DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
     DF("FONT", font, DDF_MainLookupFont),
@@ -65,7 +65,7 @@ static const commandlist_t text_commands[] = {
 #define DDF_CMD_BASE dummy_cursorstyle
 static cursorstyle_c dummy_cursorstyle;
 
-static const commandlist_t cursor_commands[] = {
+static const DDFCommandList cursor_commands[] = {
     DF("POSITION", pos_string, DDF_MainGetString),
     DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
     DF("IMAGE", alt_cursor, DDF_MainGetString),
@@ -80,7 +80,7 @@ static const commandlist_t cursor_commands[] = {
 #define DDF_CMD_BASE dummy_soundstyle
 static soundstyle_c dummy_soundstyle;
 
-static const commandlist_t sound_commands[] = {
+static const DDFCommandList sound_commands[] = {
     DF("BEGIN", begin, DDF_MainLookupSound),
     DF("END", end, DDF_MainLookupSound),
     DF("SELECT", select, DDF_MainLookupSound),
@@ -97,7 +97,7 @@ static styledef_c *dynamic_style;
 #define DDF_CMD_BASE dummy_style
 static styledef_c dummy_style;
 
-static const commandlist_t style_commands[] = {
+static const DDFCommandList style_commands[] = {
     // sub-commands
     DDF_SUB_LIST("BACKGROUND", bg, background_commands),
     DDF_SUB_LIST("CURSOR", cursor, cursor_commands),
@@ -201,7 +201,7 @@ static void StyleClearAll(void)
 
 void DDF_ReadStyles(const std::string &data)
 {
-    readinfo_t styles;
+    DDFReadInfo styles;
 
     styles.tag      = "STYLES";
     styles.lumpname = "DDFSTYLE";
@@ -238,7 +238,7 @@ void DDF_StyleCleanUp(void)
     styledefs.shrink_to_fit();
 }
 
-static specflags_t style_specials[] = {
+static DDFSpecialFlags style_specials[] = {
     {"TILED", SYLSP_Tiled, 0},
     {"TILED_NOSCALE", SYLSP_TiledNoScale, 0},
     {"STRETCH_FULLSCREEN", SYLSP_StretchFullScreen, 0},
@@ -253,16 +253,16 @@ void DDF_StyleGetSpecials(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, style_specials, &flag_value, true,
                                      false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *dest = (style_special_e)(*dest | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *dest = (style_special_e)(*dest & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown style special: %s", info);
             break;
     }

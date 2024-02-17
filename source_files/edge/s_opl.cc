@@ -448,13 +448,13 @@ abstract_music_c *S_PlayOPL(uint8_t *data, int length, bool loop, int type)
 
     switch (type)
     {
-    case MUS_IMF280:
+    case kDDFMusicIMF280:
         rate = 280;
         break;
-    case MUS_IMF560:
+    case kDDFMusicIMF560:
         rate = 560;
         break;
-    case MUS_IMF700:
+    case kDDFMusicIMF700:
         rate = 700;
         break;
     default:

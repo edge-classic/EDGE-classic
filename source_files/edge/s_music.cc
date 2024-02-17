@@ -78,7 +78,7 @@ void S_ChangeMusic(int entrynum, bool loop)
     entry_looped  = loop;
 
     // when we cannot find the music entry, no music will play
-    const pl_entry_c *play = playlist.Find(entrynum);
+    const PlaylistEntry *play = playlist.Find(entrynum);
     if (!play)
     {
         I_Warning("Could not find music entry [%d]\n", entrynum);
@@ -88,10 +88,10 @@ void S_ChangeMusic(int entrynum, bool loop)
     // open the file or lump, and read it into memory
     epi::File *F;
 
-    switch (play->infotype)
+    switch (play->infotype_)
     {
-    case MUSINF_FILE: {
-        std::string fn = M_ComposeFileName(game_dir, play->info);
+    case kDDFMusicDataFile: {
+        std::string fn = M_ComposeFileName(game_dir, play->info_);
 
         F = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (!F)
@@ -102,21 +102,21 @@ void S_ChangeMusic(int entrynum, bool loop)
         break;
     }
 
-    case MUSINF_PACKAGE: {
-        F = W_OpenPackFile(play->info);
+    case kDDFMusicDataPackage: {
+        F = W_OpenPackFile(play->info_);
         if (!F)
         {
-            I_Warning("S_ChangeMusic: PK3 entry '%s' not found.\n", play->info.c_str());
+            I_Warning("S_ChangeMusic: PK3 entry '%s' not found.\n", play->info_.c_str());
             return;
         }
         break;
     }
 
-    case MUSINF_LUMP: {
-        int lump = W_CheckNumForName(play->info.c_str());
+    case kDDFMusicDataLump: {
+        int lump = W_CheckNumForName(play->info_.c_str());
         if (lump < 0)
         {
-            I_Warning("S_ChangeMusic: LUMP '%s' not found.\n", play->info.c_str());
+            I_Warning("S_ChangeMusic: LUMP '%s' not found.\n", play->info_.c_str());
             return;
         }
 
@@ -125,7 +125,7 @@ void S_ChangeMusic(int entrynum, bool loop)
     }
 
     default:
-        I_Printf("S_ChangeMusic: invalid method %d for MUS/MIDI\n", play->infotype);
+        I_Printf("S_ChangeMusic: invalid method %d for MUS/MIDI\n", play->infotype_);
         return;
     }
 
@@ -150,11 +150,11 @@ void S_ChangeMusic(int entrynum, bool loop)
 
     // IMF Music is the outlier in that it must be predefined in DDFPLAY with the appropriate
     // IMF frequency, as there is no way of determining this from file information alone
-    if (play->type == MUS_IMF280 || play->type == MUS_IMF560 || play->type == MUS_IMF700)
+    if (play->type_ == kDDFMusicIMF280 || play->type_ == kDDFMusicIMF560 || play->type_ == kDDFMusicIMF700)
         fmt = FMT_IMF;
     else
     {
-        if (play->infotype == MUSINF_LUMP)
+        if (play->infotype_ == kDDFMusicDataLump)
         {
             // lumps must use auto-detection based on their contents
             fmt = Sound_DetectFormat(data, length);
@@ -162,7 +162,7 @@ void S_ChangeMusic(int entrynum, bool loop)
         else
         {
             // for FILE and PACK, use the file extension
-            fmt = Sound_FilenameToFormat(play->info);
+            fmt = Sound_FilenameToFormat(play->info_);
         }
     }
 
@@ -198,7 +198,7 @@ void S_ChangeMusic(int entrynum, bool loop)
     // IMF writes raw OPL registers, so must use the OPL player unconditionally
     case FMT_IMF:
         delete F;
-        music_player = S_PlayOPL(data, length, loop, play->type);
+        music_player = S_PlayOPL(data, length, loop, play->type_);
         break;
 
     case FMT_MIDI:
@@ -211,7 +211,7 @@ void S_ChangeMusic(int entrynum, bool loop)
         }
         else
         {
-            music_player = S_PlayOPL(data, length, loop, play->type);
+            music_player = S_PlayOPL(data, length, loop, play->type_);
         }
         break;
 

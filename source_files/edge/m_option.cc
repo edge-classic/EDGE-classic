@@ -2012,9 +2012,9 @@ static void M_ChangeLanguage(int keypressed, cvar_c *cvar)
 //
 static void M_ChangeMIDIPlayer(int keypressed, cvar_c *cvar)
 {
-    pl_entry_c *playing = playlist.Find(entry_playing);
+    PlaylistEntry *playing = playlist.Find(entry_playing);
     if (var_midi_player == 1 ||
-        (playing && (playing->type == MUS_IMF280 || playing->type == MUS_IMF560 || playing->type == MUS_IMF700)))
+        (playing && (playing->type_ == kDDFMusicIMF280 || playing->type_ == kDDFMusicIMF560 || playing->type_ == kDDFMusicIMF700)))
         S_RestartOPL();
     else
         S_RestartFluid();

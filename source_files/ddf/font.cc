@@ -34,7 +34,7 @@ static void DDF_FontGetPatch(const char *info, void *storage);
 #define DDF_CMD_BASE dummy_font
 static FontDefinition dummy_font;
 
-static const commandlist_t font_commands[] = {
+static const DDFCommandList font_commands[] = {
     DDF_FIELD("TYPE", type_, DDF_FontGetType),
     DDF_FIELD("PATCHES", patches_, DDF_FontGetPatch),
     DDF_FIELD("IMAGE", image_name_, DDF_MainGetString),
@@ -136,7 +136,7 @@ static void FontClearAll(void)
 
 void DDF_ReadFonts(const std::string &data)
 {
-    readinfo_t fonts;
+    DDFReadInfo fonts;
 
     fonts.tag      = "FONTS";
     fonts.lumpname = "DDFFONT";

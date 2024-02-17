@@ -65,7 +65,7 @@ static int dlight_radius_warnings = 0;
 #define DDF_CMD_BASE dummy_dlight
 static dlight_info_c dummy_dlight;
 
-const commandlist_t dlight_commands[] = {
+const DDFCommandList dlight_commands[] = {
     DF("TYPE", type, DDF_MobjGetDLight),
     DF("GRAPHIC", shape, DDF_MainGetString),
     DF("RADIUS", radius, DDF_MainGetFloat),
@@ -82,7 +82,7 @@ const commandlist_t dlight_commands[] = {
 #define DDF_CMD_BASE dummy_weakness
 static weakness_info_c dummy_weakness;
 
-const commandlist_t weakness_commands[] = {
+const DDFCommandList weakness_commands[] = {
     DF("CLASS", classes, DDF_MainGetBitSet),
     DF("HEIGHTS", height, DDF_MobjGetPercentRange),
     DF("ANGLES", angle, DDF_MobjGetAngleRange),
@@ -97,7 +97,7 @@ mobjtype_c *dynamic_mobj;
 #define DDF_CMD_BASE dummy_mobj
 static mobjtype_c dummy_mobj;
 
-const commandlist_t thing_commands[] = {
+const DDFCommandList thing_commands[] = {
     // sub-commands
     DDF_SUB_LIST("DLIGHT", dlight[0], dlight_commands),
     DDF_SUB_LIST("DLIGHT2", dlight[1], dlight_commands),
@@ -216,7 +216,7 @@ const commandlist_t thing_commands[] = {
 
     DDF_CMD_END};
 
-const state_starter_t thing_starters[] = {
+const DDFStateStarter thing_starters[] = {
     DDF_STATE("SPAWN", "IDLE", spawn_state),
     DDF_STATE("IDLE", "IDLE", idle_state),
     DDF_STATE("CHASE", "CHASE", chase_state),
@@ -240,7 +240,7 @@ const state_starter_t thing_starters[] = {
 // -AJA- 1999/08/09: Moved this here from p_action.h, and added an extra
 // field `handle_arg' for things like "WEAPON_SHOOT(FIREBALL)".
 
-const actioncode_t thing_actions[] = {
+const DDFActionCode thing_actions[] = {
     {"NOTHING", nullptr, nullptr},
 
     {"CLOSEATTEMPTSND", P_ActMakeCloseAttemptSound, nullptr},
@@ -352,7 +352,7 @@ const actioncode_t thing_actions[] = {
 
     {nullptr, nullptr, nullptr}};
 
-const specflags_t keytype_names[] = {
+const DDFSpecialFlags keytype_names[] = {
     {"BLUECARD", kDoorKeyBlueCard, 0},
     {"YELLOWCARD", kDoorKeyYellowCard, 0},
     {"REDCARD", kDoorKeyRedCard, 0},
@@ -385,12 +385,12 @@ const specflags_t keytype_names[] = {
 
     {nullptr, 0, 0}};
 
-const specflags_t armourtype_names[] = {
+const DDFSpecialFlags armourtype_names[] = {
     {"GREEN_ARMOUR", ARMOUR_Green, 0},   {"BLUE_ARMOUR", ARMOUR_Blue, 0},
     {"PURPLE_ARMOUR", ARMOUR_Purple, 0}, {"YELLOW_ARMOUR", ARMOUR_Yellow, 0},
     {"RED_ARMOUR", ARMOUR_Red, 0},       {nullptr, 0, 0}};
 
-const specflags_t powertype_names[] = {
+const DDFSpecialFlags powertype_names[] = {
     {"POWERUP_INVULNERABLE", PW_Invulnerable, 0},
     {"POWERUP_BARE_BERSERK", PW_Berserk, 0},
     {"POWERUP_BERSERK", PW_Berserk, 0},
@@ -404,14 +404,14 @@ const specflags_t powertype_names[] = {
     {"POWERUP_TIMESTOP", PW_TimeStop, 0},
     {nullptr, 0, 0}};
 
-const specflags_t simplecond_names[] = {
+const DDFSpecialFlags simplecond_names[] = {
     {"JUMPING", COND_Jumping, 0},     {"CROUCHING", COND_Crouching, 0},
     {"SWIMMING", COND_Swimming, 0},   {"ATTACKING", COND_Attacking, 0},
     {"RAMPAGING", COND_Rampaging, 0}, {"USING", COND_Using, 0},
     {"ACTION1", COND_Action1, 0},     {"ACTION2", COND_Action2, 0},
     {"WALKING", COND_Walking, 0},     {nullptr, 0, 0}};
 
-const specflags_t inv_types[] = {
+const DDFSpecialFlags inv_types[] = {
     {"INVENTORY01", INV_01, 0}, {"INVENTORY02", INV_02, 0},
     {"INVENTORY03", INV_03, 0}, {"INVENTORY04", INV_04, 0},
     {"INVENTORY05", INV_05, 0}, {"INVENTORY06", INV_06, 0},
@@ -463,7 +463,7 @@ const specflags_t inv_types[] = {
     {"INVENTORY97", INV_97, 0}, {"INVENTORY98", INV_98, 0},
     {"INVENTORY99", INV_99, 0}, {nullptr, 0, 0}};
 
-const specflags_t counter_types[] = {
+const DDFSpecialFlags counter_types[] = {
     {"LIVES", CT_Lives, 0},     {"SCORE", CT_Score, 0},
     {"MONEY", CT_Money, 0},     {"EXPERIENCE", CT_Experience, 0},
     {"COUNTER01", CT_Lives, 0}, {"COUNTER02", CT_Score, 0},
@@ -815,7 +815,7 @@ static void ThingClearAll(void)
 
 void DDF_ReadThings(const std::string &data)
 {
-    readinfo_t things;
+    DDFReadInfo things;
 
     things.tag      = "THINGS";
     things.lumpname = "DDFTHING";
@@ -938,7 +938,7 @@ static int ParseBenefitString(const char *info, char *name, char *param,
 
 static bool BenefitTryCounter(const char *name, benefit_t *be, int num_vals)
 {
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(name, counter_types,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, counter_types,
                                                   &be->sub.type, false, false))
     {
         return false;
@@ -969,7 +969,7 @@ static bool BenefitTryCounterLimit(const char *name, benefit_t *be,
     len -= 6;
     epi::CStringCopyMax(namebuf, name, len);
 
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(namebuf, counter_types,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(namebuf, counter_types,
                                                   &be->sub.type, false, false))
     {
         return false;
@@ -994,7 +994,7 @@ static bool BenefitTryCounterLimit(const char *name, benefit_t *be,
 
 static bool BenefitTryInventory(const char *name, benefit_t *be, int num_vals)
 {
-    if (CHKF_Positive !=
+    if (kDDFCheckFlagPositive !=
         DDF_MainCheckSpecialFlag(name, inv_types, &be->sub.type, false, false))
     {
         return false;
@@ -1025,7 +1025,7 @@ static bool BenefitTryInventoryLimit(const char *name, benefit_t *be,
     len -= 6;
     epi::CStringCopyMax(namebuf, name, len);
 
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(namebuf, inv_types,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(namebuf, inv_types,
                                                   &be->sub.type, false, false))
     {
         return false;
@@ -1050,7 +1050,7 @@ static bool BenefitTryInventoryLimit(const char *name, benefit_t *be,
 
 static bool BenefitTryAmmo(const char *name, benefit_t *be, int num_vals)
 {
-    if (CHKF_Positive !=
+    if (kDDFCheckFlagPositive !=
         DDF_MainCheckSpecialFlag(name, ammo_types, &be->sub.type, false, false))
     {
         return false;
@@ -1087,7 +1087,7 @@ static bool BenefitTryAmmoLimit(const char *name, benefit_t *be, int num_vals)
     len -= 6;
     epi::CStringCopyMax(namebuf, name, len);
 
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(namebuf, ammo_types,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(namebuf, ammo_types,
                                                   &be->sub.type, false, false))
     {
         return false;
@@ -1148,7 +1148,7 @@ static bool BenefitTryWeapon(const char *name, benefit_t *be, int num_vals)
 
 static bool BenefitTryKey(const char *name, benefit_t *be, int num_vals)
 {
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(name, keytype_names,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, keytype_names,
                                                   &be->sub.type, false, false))
     {
         return false;
@@ -1195,7 +1195,7 @@ static bool BenefitTryHealth(const char *name, benefit_t *be, int num_vals)
 
 static bool BenefitTryArmour(const char *name, benefit_t *be, int num_vals)
 {
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(name, armourtype_names,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, armourtype_names,
                                                   &be->sub.type, false, false))
     {
         return false;
@@ -1237,7 +1237,7 @@ static bool BenefitTryArmour(const char *name, benefit_t *be, int num_vals)
 
 static bool BenefitTryPowerup(const char *name, benefit_t *be, int num_vals)
 {
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(name, powertype_names,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, powertype_names,
                                                   &be->sub.type, false, false))
     {
         return false;
@@ -1501,7 +1501,7 @@ void DDF_MobjGetPickupEffect(const char *info, void *storage)
 // -KM- 1998/12/16 Added individual flags for all.
 // -AJA- 2000/02/02: Split into two lists.
 
-static const specflags_t normal_specials[] = {
+static const DDFSpecialFlags normal_specials[] = {
     {"AMBUSH", MF_AMBUSH, 0},
     {"FUZZY", MF_FUZZY, 0},
     {"SOLID", MF_SOLID, 0},
@@ -1536,7 +1536,7 @@ static const specflags_t normal_specials[] = {
     {"TOUCHY", MF_TOUCHY, 0},
     {nullptr, 0, 0}};
 
-static specflags_t extended_specials[] = {
+static DDFSpecialFlags extended_specials[] = {
     {"RESPAWN", EF_NORESPAWN, 1},
     {"RESURRECT", EF_NORESURRECT, 1},
     {"DISLOYAL", EF_DISLOYALTYPE, 0},
@@ -1562,7 +1562,7 @@ static specflags_t extended_specials[] = {
     {"SIMPLE_ARMOUR", EF_SIMPLEARMOUR, 0},
     {nullptr, 0, 0}};
 
-static specflags_t hyper_specials[] = {
+static DDFSpecialFlags hyper_specials[] = {
     {"FORCE_PICKUP", HF_FORCEPICKUP, 0},
     {"SIDE_IMMUNE", HF_SIDEIMMUNE, 0},
     {"SIDE_GHOST", HF_SIDEGHOST, 0},
@@ -1587,7 +1587,7 @@ static specflags_t hyper_specials[] = {
     {"MUSIC_CHANGER", HF_MUSIC_CHANGER, 0},
     {nullptr, 0, 0}};
 
-static specflags_t mbf21_specials[] = {{"LOGRAV", MBF21_LOGRAV, 0},
+static DDFSpecialFlags mbf21_specials[] = {{"LOGRAV", MBF21_LOGRAV, 0},
                                        {nullptr, 0, 0}};
 
 //
@@ -1625,10 +1625,10 @@ void DDF_MobjGetSpecial(const char *info)
 
     int *flag_ptr = &dynamic_mobj->flags;
 
-    checkflag_result_e res = DDF_MainCheckSpecialFlag(info, normal_specials,
+    DDFCheckFlagResult res = DDF_MainCheckSpecialFlag(info, normal_specials,
                                                       &flag_value, true, false);
 
-    if (res == CHKF_User || res == CHKF_Unknown)
+    if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
     {
         // wasn't a normal special.  Try the extended ones...
         flag_ptr = &dynamic_mobj->extendedflags;
@@ -1637,7 +1637,7 @@ void DDF_MobjGetSpecial(const char *info)
                                        true, false);
     }
 
-    if (res == CHKF_User || res == CHKF_Unknown)
+    if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
     {
         // -AJA- 2004/08/25: Try the hyper specials...
         flag_ptr = &dynamic_mobj->hyperflags;
@@ -1646,7 +1646,7 @@ void DDF_MobjGetSpecial(const char *info)
                                        false);
     }
 
-    if (res == CHKF_User || res == CHKF_Unknown)
+    if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
     {
         // Try the MBF21 specials...
         flag_ptr = &dynamic_mobj->mbf21flags;
@@ -1657,22 +1657,22 @@ void DDF_MobjGetSpecial(const char *info)
 
     switch (res)
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *flag_ptr |= flag_value;
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *flag_ptr &= ~flag_value;
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("DDF_MobjGetSpecial: Unknown special '%s'\n", info);
             break;
     }
 }
 
-static specflags_t dlight_type_names[] = {{"NONE", DLITE_None, 0},
+static DDFSpecialFlags dlight_type_names[] = {{"NONE", DLITE_None, 0},
                                           {"MODULATE", DLITE_Modulate, 0},
                                           {"ADD", DLITE_Add, 0},
 
@@ -1693,7 +1693,7 @@ void DDF_MobjGetDLight(const char *info, void *storage)
 
     SYS_ASSERT(dtype);
 
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(info, dlight_type_names,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(info, dlight_type_names,
                                                   &flag_value, false, false))
     {
         DDF_WarnError("Unknown dlight type '%s'\n", info);
@@ -1745,7 +1745,7 @@ static void DDF_MobjGetGlowType(const char *info, void *storage)
         *glow = GLOW_None;
 }
 
-static const specflags_t sprite_yalign_names[] = {{"BOTTOM", SPYA_BottomUp, 0},
+static const DDFSpecialFlags sprite_yalign_names[] = {{"BOTTOM", SPYA_BottomUp, 0},
                                                   {"MIDDLE", SPYA_Middle, 0},
                                                   {"TOP", SPYA_TopDown, 0},
 
@@ -1753,7 +1753,7 @@ static const specflags_t sprite_yalign_names[] = {{"BOTTOM", SPYA_BottomUp, 0},
 
 static void DDF_MobjGetYAlign(const char *info, void *storage)
 {
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(info, sprite_yalign_names,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(info, sprite_yalign_names,
                                                   (int *)storage, false, false))
     {
         DDF_WarnError("DDF_MobjGetYAlign: Unknown alignment: %s\n", info);
@@ -1833,7 +1833,7 @@ static void DDF_MobjStateGetRADTrigger(const char *arg, state_t *cur_state)
 static bool ConditionTryCounter(const char *name, const char *sub,
                                 condition_check_t *cond)
 {
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(name, counter_types,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, counter_types,
                                                   &cond->sub.type, false,
                                                   false))
     {
@@ -1849,7 +1849,7 @@ static bool ConditionTryCounter(const char *name, const char *sub,
 static bool ConditionTryInventory(const char *name, const char *sub,
                                   condition_check_t *cond)
 {
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(
                              name, inv_types, &cond->sub.type, false, false))
     {
         return false;
@@ -1864,7 +1864,7 @@ static bool ConditionTryInventory(const char *name, const char *sub,
 static bool ConditionTryAmmo(const char *name, const char *sub,
                              condition_check_t *cond)
 {
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(
                              name, ammo_types, &cond->sub.type, false, false))
     {
         return false;
@@ -1898,7 +1898,7 @@ static bool ConditionTryWeapon(const char *name, const char *sub,
 static bool ConditionTryKey(const char *name, const char *sub,
                             condition_check_t *cond)
 {
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(name, keytype_names,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, keytype_names,
                                                   &cond->sub.type, false,
                                                   false))
     {
@@ -1924,7 +1924,7 @@ static bool ConditionTryArmour(const char *name, const char *sub,
                                condition_check_t *cond)
 {
     if (DDF_CompareName(name, "ARMOUR") == 0) { cond->sub.type = ARMOUR_Total; }
-    else if (CHKF_Positive != DDF_MainCheckSpecialFlag(name, armourtype_names,
+    else if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, armourtype_names,
                                                        &cond->sub.type, false,
                                                        false))
     {
@@ -1940,7 +1940,7 @@ static bool ConditionTryArmour(const char *name, const char *sub,
 static bool ConditionTryPowerup(const char *name, const char *sub,
                                 condition_check_t *cond)
 {
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(name, powertype_names,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, powertype_names,
                                                   &cond->sub.type, false,
                                                   false))
     {
@@ -1961,7 +1961,7 @@ static bool ConditionTryPowerup(const char *name, const char *sub,
 static bool ConditionTryPlayerState(const char *name, const char *sub,
                                     condition_check_t *cond)
 {
-    return (CHKF_Positive == DDF_MainCheckSpecialFlag(name, simplecond_names,
+    return (kDDFCheckFlagPositive == DDF_MainCheckSpecialFlag(name, simplecond_names,
                                                       (int *)&cond->cond_type,
                                                       false, false));
 }

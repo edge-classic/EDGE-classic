@@ -150,7 +150,7 @@ static void LanguageClearAll(void)
 
 void DDF_ReadLangs(const std::string &data)
 {
-    readinfo_t languages;
+    DDFReadInfo languages;
 
     languages.tag      = "LANGUAGES";
     languages.lumpname = "DDFLANG";

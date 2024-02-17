@@ -79,7 +79,7 @@ static void DDF_LineMakeCrush(const char *info);
 #define DDF_CMD_BASE dummy_floor
 static PlaneMoverDefinition dummy_floor;
 
-const commandlist_t floor_commands[] = {
+const DDFCommandList floor_commands[] = {
     DF("TYPE", type_, DDF_SectGetMType),
     DF("SPEED_UP", speed_up_, DDF_MainGetFloat),
     DF("SPEED_DOWN", speed_down_, DDF_MainGetFloat),
@@ -105,14 +105,14 @@ const commandlist_t floor_commands[] = {
 #define DDF_CMD_BASE dummy_ladder
 static LadderDefinition dummy_ladder;
 
-const commandlist_t ladder_commands[] = {
+const DDFCommandList ladder_commands[] = {
     DF("HEIGHT", height_, DDF_MainGetFloat), DDF_CMD_END};
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_slider
 static SlidingDoor dummy_slider;
 
-const commandlist_t slider_commands[] = {
+const DDFCommandList slider_commands[] = {
     DF("TYPE", type_, DDF_LineGetSlideType),
     DF("SPEED", speed_, DDF_MainGetFloat),
     DF("PAUSE_TIME", wait_, DDF_MainGetTime),
@@ -135,7 +135,7 @@ static ScrollDirections scrolling_dir;
 #define DDF_CMD_BASE dummy_line
 static LineType dummy_line;
 
-static const commandlist_t linedef_commands[] = {
+static const DDFCommandList linedef_commands[] = {
     // sub-commands
     DDF_SUB_LIST("FLOOR", f_, floor_commands),
     DDF_SUB_LIST("CEILING", c_, floor_commands),
@@ -437,7 +437,7 @@ static void LinedefClearAll(void)
 
 void DDF_ReadLines(const std::string &data)
 {
-    readinfo_t lines;
+    DDFReadInfo lines;
 
     lines.tag      = "LINES";
     lines.lumpname = "DDFLINE";
@@ -583,7 +583,7 @@ void DDF_LineGetActivators(const char *info, void *storage)
     DDF_WarnError("Unknown Activator type %s\n", info);
 }
 
-static specflags_t extrafloor_types[] = {
+static DDFSpecialFlags extrafloor_types[] = {
     // definers:
     {"THIN", kExtraFloorThinDefaults, 0},
     {"THICK", kExtraFloorThickDefaults, 0},
@@ -627,22 +627,22 @@ void DDF_LineGetExtraFloor(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, extrafloor_types, &flag_value, true,
                                      false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *var = (ExtraFloorType)(*var | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *var = (ExtraFloorType)(*var & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown Extrafloor Type: %s\n", info);
             break;
     }
 }
 
-static specflags_t ef_control_types[] = {
+static DDFSpecialFlags ef_control_types[] = {
     {"NONE", kExtraFloorControlNone, 0},
     {"REMOVE", kExtraFloorControlRemove, 0},
     {nullptr, 0, 0}};
@@ -659,13 +659,13 @@ void DDF_LineGetEFControl(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, ef_control_types, &flag_value, false,
                                      false))
     {
-        case CHKF_Positive:
-        case CHKF_Negative:
+        case kDDFCheckFlagPositive:
+        case kDDFCheckFlagNegative:
             *var = (ExtraFloorControl)flag_value;
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown CONTROL_EXTRAFLOOR tag: %s", info);
             break;
     }
@@ -679,7 +679,7 @@ static constexpr int kTeleportSpecialPreserve =
     ((TeleportSpecial)(kTeleportSpecialSameAbsDir | kTeleportSpecialSameHeight |
                        kTeleportSpecialSameSpeed));
 
-static specflags_t teleport_specials[] = {
+static DDFSpecialFlags teleport_specials[] = {
     {"RELATIVE", kTeleportSpecialRelative, 0},
     {"SAME_HEIGHT", kTeleportSpecialSameHeight, 0},
     {"SAME_SPEED", kTeleportSpecialSameSpeed, 0},
@@ -713,23 +713,23 @@ void DDF_LineGetTeleportSpecial(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, teleport_specials, &flag_value, true,
                                      false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *var = (TeleportSpecial)(*var | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *var = (TeleportSpecial)(*var & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("DDF_LineGetTeleportSpecial: Unknown Special: %s\n",
                           info);
             break;
     }
 }
 
-static specflags_t scrollpart_specials[] = {
+static DDFSpecialFlags scrollpart_specials[] = {
     {"RIGHT_UPPER", kScrollingPartRightUpper, 0},
     {"RIGHT_MIDDLE", kScrollingPartRightMiddle, 0},
     {"RIGHT_LOWER", kScrollingPartRightLower, 0},
@@ -763,16 +763,16 @@ void DDF_LineGetScrollPart(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, scrollpart_specials, &flag_value,
                                      true, false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             (*dest) = (ScrollingPart)((*dest) | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             (*dest) = (ScrollingPart)((*dest) & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("DDF_LineGetScrollPart: Unknown Part: %s", info);
             break;
     }
@@ -780,7 +780,7 @@ void DDF_LineGetScrollPart(const char *info, void *storage)
 
 //----------------------------------------------------------------------------
 
-static specflags_t line_specials[] = {
+static DDFSpecialFlags line_specials[] = {
     {"MUST_REACH", kLineSpecialMustReach, 0},
     {"SWITCH_SEPARATE", kLineSpecialSwitchSeparate, 0},
     {"BACK_SECTOR", kLineSpecialBackSector, 0},
@@ -800,16 +800,16 @@ void DDF_LineGetSpecialFlags(const char *info, void *storage)
     switch (
         DDF_MainCheckSpecialFlag(info, line_specials, &flag_value, true, false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *var = (LineSpecial)(*var | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *var = (LineSpecial)(*var & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown line special: %s", info);
             break;
     }
@@ -838,7 +838,7 @@ static void DDF_LineGetRadTrig(const char *info, void *storage)
     DDF_WarnError("DDF_LineGetRadTrig: Unknown effect: %s\n", info);
 }
 
-static const specflags_t slidingdoor_names[] = {
+static const DDFSpecialFlags slidingdoor_names[] = {
     {"NONE", kSlidingDoorTypeNone, 0},
     {"LEFT", kSlidingDoorTypeLeft, 0},
     {"RIGHT", kSlidingDoorTypeRight, 0},
@@ -851,14 +851,14 @@ static const specflags_t slidingdoor_names[] = {
 //
 static void DDF_LineGetSlideType(const char *info, void *storage)
 {
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(info, slidingdoor_names,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(info, slidingdoor_names,
                                                   (int *)storage, false, false))
     {
         DDF_WarnError("DDF_LineGetSlideType: Unknown slider: %s\n", info);
     }
 }
 
-static specflags_t line_effect_names[] = {
+static DDFSpecialFlags line_effect_names[] = {
     {"TRANSLUCENT", kLineEffectTypeTranslucency, 0},
     {"VECTOR_SCROLL", kLineEffectTypeVectorScroll, 0},
     {"OFFSET_SCROLL", kLineEffectTypeOffsetScroll, 0},
@@ -896,22 +896,22 @@ static void DDF_LineGetLineEffect(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, line_effect_names, &flag_value, true,
                                      false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *var = (LineEffectType)(*var | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *var = (LineEffectType)(*var & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown line effect type: %s", info);
             break;
     }
 }
 
-static specflags_t scroll_type_names[] = {
+static DDFSpecialFlags scroll_type_names[] = {
     {"DISPLACE", BoomScrollerTypeDisplace, 0},
     {"ACCEL", BoomScrollerTypeAccel, 0},
     {nullptr, 0, 0}};
@@ -934,22 +934,22 @@ static void DDF_LineGetScrollType(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, scroll_type_names, &flag_value, true,
                                      false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *var = (BoomScrollerType)(*var | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *var = (BoomScrollerType)(*var & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown scroll type: %s", info);
             break;
     }
 }
 
-static specflags_t sector_effect_names[] = {
+static DDFSpecialFlags sector_effect_names[] = {
     {"LIGHT_FLOOR", kSectorEffectTypeLightFloor, 0},
     {"LIGHT_CEILING", kSectorEffectTypeLightCeiling, 0},
     {"SCROLL_FLOOR", kSectorEffectTypeScrollFloor, 0},
@@ -989,22 +989,22 @@ static void DDF_LineGetSectorEffect(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, sector_effect_names, &flag_value,
                                      true, false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *var = (SectorEffectType)(*var | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *var = (SectorEffectType)(*var & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown sector effect type: %s", info);
             break;
     }
 }
 
-static specflags_t portal_effect_names[] = {
+static DDFSpecialFlags portal_effect_names[] = {
     {"STANDARD", kPortalEffectTypeStandard, 0},
     {"MIRROR", kPortalEffectTypeMirror, 0},
     {"CAMERA", kPortalEffectTypeCamera, 0},
@@ -1029,22 +1029,22 @@ static void DDF_LineGetPortalEffect(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, portal_effect_names, &flag_value,
                                      true, false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *var = (PortalEffectType)(*var | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *var = (PortalEffectType)(*var & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown portal type: %s", info);
             break;
     }
 }
 
-static specflags_t slope_type_names[] = {
+static DDFSpecialFlags slope_type_names[] = {
     {"FAKE_FLOOR", kSlopeTypeDetailFloor, 0},
     {"FAKE_CEILING", kSlopeTypeDetailCeiling, 0},
 
@@ -1065,16 +1065,16 @@ static void DDF_LineGetSlopeType(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, slope_type_names, &flag_value, true,
                                      false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *var = (SlopeType)(*var | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *var = (SlopeType)(*var & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown slope type: %s", info);
             break;
     }

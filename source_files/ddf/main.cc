@@ -402,7 +402,7 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
 // depending in which mode it is in; Unless an error is encountered or a called
 // procedure stops the parser, it will read everything until EOF is encountered.
 //
-// When the parser function is called, a pointer to a readinfo_t is passed and
+// When the parser function is called, a pointer to a DDFReadInfo is passed and
 // contains all the info needed, it contains:
 //
 // * filename              - filename to be read, returns error if nullptr
@@ -672,7 +672,7 @@ static readchar_t DDF_MainProcessChar(char character, std::string &token,
 // -AJA- 1999/10/02 Recursive { } comments.
 // -ES- 2000/02/29 Added
 //
-void DDF_MainReadFile(readinfo_t *readinfo, const std::string &data)
+void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
 {
     std::string token;
     std::string current_cmd;
@@ -1103,7 +1103,7 @@ void DDF_MainGetString(const char *info, void *storage)
 // Check if the command exists, and call the parser function if it
 // does (and return true), otherwise return false.
 //
-bool DDF_MainParseField(const commandlist_t *commands, const char *field,
+bool DDF_MainParseField(const DDFCommandList *commands, const char *field,
                         const char *contents, uint8_t *obj_base)
 {
     SYS_ASSERT(obj_base);
@@ -1586,7 +1586,7 @@ void DDF_MainGetBitSet(const char *info, void *storage)
 }
 
 static int FindSpecialFlag(const char *prefix, const char *name,
-                           const specflags_t *flag_set)
+                           const DDFSpecialFlags *flag_set)
 {
     int  i;
     char try_name[512];
@@ -1605,8 +1605,8 @@ static int FindSpecialFlag(const char *prefix, const char *name,
     return -1;
 }
 
-checkflag_result_e DDF_MainCheckSpecialFlag(const char        *name,
-                                            const specflags_t *flag_set,
+DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char        *name,
+                                            const DDFSpecialFlags *flag_set,
                                             int               *flag_value,
                                             bool               allow_prefixes,
                                             bool               allow_user)
@@ -1653,17 +1653,17 @@ checkflag_result_e DDF_MainCheckSpecialFlag(const char        *name,
         }
     }
 
-    if (index < 0) return CHKF_Unknown;
+    if (index < 0) return kDDFCheckFlagUnknown;
 
     (*flag_value) = flag_set[index].flags;
 
     if (flag_set[index].negative) negate = !negate;
 
-    if (user) return CHKF_User;
+    if (user) return kDDFCheckFlagUser;
 
-    if (negate) return CHKF_Negative;
+    if (negate) return kDDFCheckFlagNegative;
 
-    return CHKF_Positive;
+    return kDDFCheckFlagPositive;
 }
 
 //

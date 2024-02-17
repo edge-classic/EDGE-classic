@@ -38,7 +38,7 @@ static void DDF_ImageGetPatches(const char *info, void *storage);
 #define DDF_CMD_BASE dummy_image
 static ImageDefinition dummy_image;
 
-static const commandlist_t image_commands[] = {
+static const DDFCommandList image_commands[] = {
     DDF_FIELD("IMAGE_DATA", type_, DDF_ImageGetType),
     DDF_FIELD("PATCHES", patches_, DDF_ImageGetPatches),
     DDF_FIELD("SPECIAL", special_, DDF_ImageGetSpecial),
@@ -174,7 +174,7 @@ static void ImageClearAll(void)
 
 void DDF_ReadImages(const std::string &data)
 {
-    readinfo_t images;
+    DDFReadInfo images;
 
     images.tag      = "IMAGES";
     images.lumpname = "DDFIMAGE";
@@ -319,7 +319,7 @@ static void DDF_ImageGetType(const char *info, void *storage)
         DDF_Error("Unknown image type: %s\n", keyword);
 }
 
-static specflags_t image_specials[] = {
+static DDFSpecialFlags image_specials[] = {
     {"NOALPHA", kImageSpecialNoAlpha, 0},
     {"FORCE_MIP", kImageSpecialMip, 0},
     {"FORCE_NOMIP", kImageSpecialNoMip, 0},
@@ -340,16 +340,16 @@ static void DDF_ImageGetSpecial(const char *info, void *storage)
     switch (DDF_MainCheckSpecialFlag(info, image_specials, &flag_value,
                                      false /* allow_prefixes */, false))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             *dest = (ImageSpecial)(*dest | flag_value);
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             *dest = (ImageSpecial)(*dest & ~flag_value);
             break;
 
-        case CHKF_User:
-        case CHKF_Unknown:
+        case kDDFCheckFlagUser:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("Unknown image special: %s\n", info);
             break;
     }

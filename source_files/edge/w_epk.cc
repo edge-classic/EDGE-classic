@@ -910,14 +910,14 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
             pack_entry_c &entry = pack->dirs[d].entries[i];
             for (auto song : playlist)
             {
-                if (epi::GetExtension(song->info).empty())
+                if (epi::GetExtension(song->info_).empty())
                 {
-                    if (song->infotype == MUSINF_LUMP &&
-                        epi::StringCaseCompareASCII(epi::GetStem(entry.name), song->info) == 0 &&
-                        W_CheckFileNumForName(song->info.c_str()) < pack_index)
+                    if (song->infotype_ == kDDFMusicDataLump &&
+                        epi::StringCaseCompareASCII(epi::GetStem(entry.name), song->info_) == 0 &&
+                        W_CheckFileNumForName(song->info_.c_str()) < pack_index)
                     {
-                        song->info     = entry.packpath;
-                        song->infotype = MUSINF_PACKAGE;
+                        song->info_     = entry.packpath;
+                        song->infotype_ = kDDFMusicDataPackage;
                     }
                 }
             }

@@ -36,7 +36,7 @@ class Colormap;
 class GameDefinition;
 class MapDefinition;
 class mobjtype_c;
-class pl_entry_c;
+class PlaylistEntry;
 class weapondef_c;
 
 #include "attack.h"

@@ -41,7 +41,7 @@ MapDefinitionContainer mapdefs;
 #define DDF_CMD_BASE dummy_finale
 static FinaleDefinition dummy_finale;
 
-static const commandlist_t finale_commands[] = {
+static const DDFCommandList finale_commands[] = {
     DF("TEXT", text_, DDF_MainGetString),
     DF("TEXT_GRAPHIC", text_back_, DDF_MainGetLumpName),
     DF("TEXT_FLAT", text_flat_, DDF_MainGetLumpName),
@@ -65,7 +65,7 @@ static MapDefinition *dynamic_level;
 #define DDF_CMD_BASE dummy_level
 static MapDefinition dummy_level;
 
-static const commandlist_t level_commands[] = {
+static const DDFCommandList level_commands[] = {
     // sub-commands
     DDF_SUB_LIST("PRE", f_pre_, finale_commands),
     DDF_SUB_LIST("END", f_end_, finale_commands),
@@ -93,7 +93,7 @@ static const commandlist_t level_commands[] = {
 
     DDF_CMD_END};
 
-static specflags_t map_specials[] = {
+static DDFSpecialFlags map_specials[] = {
     {"JUMPING", kMapFlagJumping, 0},
     {"MLOOK", kMapFlagMlook, 0},
     {"FREELOOK", kMapFlagMlook, 0},  // -AJA- backwards compat.
@@ -221,7 +221,7 @@ static void LevelClearAll(void)
 
 void DDF_ReadLevels(const std::string &data)
 {
-    readinfo_t levels;
+    DDFReadInfo levels;
 
     levels.tag      = "LEVELS";
     levels.lumpname = "DDFLEVL";
@@ -285,22 +285,22 @@ void DDF_LevelGetSpecials(const char *info)
     switch (
         DDF_MainCheckSpecialFlag(info, map_specials, &flag_value, true, true))
     {
-        case CHKF_Positive:
+        case kDDFCheckFlagPositive:
             dynamic_level->force_on_ |= flag_value;
             dynamic_level->force_off_ &= ~flag_value;
             break;
 
-        case CHKF_Negative:
+        case kDDFCheckFlagNegative:
             dynamic_level->force_on_ &= ~flag_value;
             dynamic_level->force_off_ |= flag_value;
             break;
 
-        case CHKF_User:
+        case kDDFCheckFlagUser:
             dynamic_level->force_on_ &= ~flag_value;
             dynamic_level->force_off_ &= ~flag_value;
             break;
 
-        case CHKF_Unknown:
+        case kDDFCheckFlagUnknown:
             DDF_WarnError("DDF_LevelGetSpecials: Unknown level special: %s",
                           info);
             break;
@@ -323,7 +323,7 @@ void DDF_LevelGetSkyStretch(const char *info, void *storage)
         *stretch = kSkyStretchUnset;
 }
 
-static specflags_t wistyle_names[] = {{"DOOM", kIntermissionStyleDoom, 0},
+static DDFSpecialFlags wistyle_names[] = {{"DOOM", kIntermissionStyleDoom, 0},
                                       {"NONE", kIntermissionStyleNone, 0},
                                       {nullptr, 0, 0}};
 
@@ -331,7 +331,7 @@ void DDF_LevelGetWistyle(const char *info, void *storage)
 {
     int flag_value;
 
-    if (CHKF_Positive != DDF_MainCheckSpecialFlag(info, wistyle_names,
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(info, wistyle_names,
                                                   &flag_value, false, false))
     {
         DDF_WarnError("DDF_LevelGetWistyle: Unknown stats: %s", info);

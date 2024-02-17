@@ -32,7 +32,7 @@ switchdef_container_c switchdefs;
 #define DDF_CMD_BASE dummy_switchdef
 static switchdef_c dummy_switchdef;
 
-static const commandlist_t switch_commands[] = {
+static const DDFCommandList switch_commands[] = {
     DDF_FIELD("ON_TEXTURE", on_name, DDF_MainGetLumpName),
     DDF_FIELD("OFF_TEXTURE", off_name, DDF_MainGetLumpName),
     DDF_FIELD("ON_SOUND", on_sfx, DDF_MainLookupSound),
@@ -119,7 +119,7 @@ static void SwitchClearAll(void)
 
 void DDF_ReadSwitch(const std::string &data)
 {
-    readinfo_t switches;
+    DDFReadInfo switches;
 
     switches.tag      = "SWITCHES";
     switches.lumpname = "DDFSWTH";

@@ -30,7 +30,7 @@ FlatDefinitionContainer flatdefs;
 #define DDF_CMD_BASE dummy_flatdef
 static FlatDefinition dummy_flatdef;
 
-static const commandlist_t flat_commands[] = {
+static const DDFCommandList flat_commands[] = {
     DDF_FIELD("LIQUID", liquid_, DDF_MainGetString),
     DDF_FIELD("FOOTSTEP", footstep_, DDF_MainLookupSound),
     DDF_FIELD("SPLASH", splash_, DDF_MainGetLumpName),
@@ -104,7 +104,7 @@ static void FlatClearAll(void)
 
 void DDF_ReadFlat(const std::string &data)
 {
-    readinfo_t flats;
+    DDFReadInfo flats;
 
     flats.tag      = "FLATS";
     flats.lumpname = "DDFFLAT";

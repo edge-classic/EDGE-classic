@@ -28,7 +28,7 @@ fixdef_container_c fixdefs;
 #define DDF_CMD_BASE dummy_fixdef
 static fixdef_c dummy_fixdef;
 
-static const commandlist_t fix_commands[] = {
+static const DDFCommandList fix_commands[] = {
     DDF_FIELD("MD5", md5_string, DDF_MainGetString),
 
     DDF_CMD_END};
@@ -101,7 +101,7 @@ static void FixClearAll(void)
 
 void DDF_ReadFixes(const std::string &data)
 {
-    readinfo_t fixes;
+    DDFReadInfo fixes;
 
     fixes.tag      = "FIXES";
     fixes.lumpname = "WADFIXES";

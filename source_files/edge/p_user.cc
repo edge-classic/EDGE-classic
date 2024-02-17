@@ -769,13 +769,13 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
     if (player->playerstate == PST_DEAD)
     {
         DeathThink(player, extra_tic);
-        if (player->mo->props->special && player->mo->props->special->e_exit != EXIT_None)
+        if (player->mo->props->special && player->mo->props->special->e_exit_ != kExitTypeNone)
         {
-            exittype_e do_exit = player->mo->props->special->e_exit;
+            ExitType do_exit = player->mo->props->special->e_exit_;
 
             player->mo->subsector->sector->props.special = nullptr;
 
-            if (do_exit == EXIT_Secret)
+            if (do_exit == kExitTypeSecret)
                 G_SecretExitLevel(1);
             else
                 G_ExitLevel(1);
@@ -1266,7 +1266,7 @@ void P_GiveInitialBenefits(player_t *p, const mobjtype_c *info)
     }
 
     p->totalarmour = 0;
-    p->cards       = KF_NONE;
+    p->cards       = kDoorKeyNone;
 
     // give all initial benefits
     P_GiveBenefitList(p, nullptr, info->initial_benefits, false);

@@ -395,7 +395,7 @@ static int GAP_Construct(vgap_t *gaps, sector_t *sec, mobj_t *thing, float f_slo
 
     for (ef = sec->bottom_liq; ef; ef = ef->higher)
     {
-        if (ef->ef_info && (ef->ef_info->type & EXFL_Water))
+        if (ef->ef_info && (ef->ef_info->type_ & kExtraFloorTypeWater))
         {
             num = GAP_RemoveSolid(gaps, num, ef->bottom_h, ef->top_h);
         }
@@ -419,13 +419,13 @@ static int GAP_SightConstruct(vgap_t *gaps, sector_t *sec)
 
     for (ef = sec->bottom_ef; ef; ef = ef->higher)
     {
-        if (!ef->ef_info || !(ef->ef_info->type & EXFL_SeeThrough))
+        if (!ef->ef_info || !(ef->ef_info->type_ & kExtraFloorTypeSeeThrough))
             num = GAP_RemoveSolid(gaps, num, ef->bottom_h, ef->top_h);
     }
 
     for (ef = sec->bottom_liq; ef; ef = ef->higher)
     {
-        if (!ef->ef_info || !(ef->ef_info->type & EXFL_SeeThrough))
+        if (!ef->ef_info || !(ef->ef_info->type_ & kExtraFloorTypeSeeThrough))
             num = GAP_RemoveSolid(gaps, num, ef->bottom_h, ef->top_h);
     }
 
@@ -686,13 +686,13 @@ void P_DumpExtraFloors(const sector_t *sec)
 
     for (ef = sec->bottom_ef; ef; ef = ef->higher)
     {
-        L_WriteDebug("  Solid %s: %1.1f .. %1.1f\n", (ef->ef_info->type & EXFL_Thick) ? "Thick" : "Thin", ef->bottom_h,
+        L_WriteDebug("  Solid %s: %1.1f .. %1.1f\n", (ef->ef_info->type & kExtraFloorTypeThick) ? "Thick" : "Thin", ef->bottom_h,
                      ef->top_h);
     }
 
     for (ef = sec->bottom_liq; ef; ef = ef->higher)
     {
-        L_WriteDebug("  Liquid %s: %1.1f .. %1.1f\n", (ef->ef_info->type & EXFL_Thick) ? "Thick" : "Thin", ef->bottom_h,
+        L_WriteDebug("  Liquid %s: %1.1f .. %1.1f\n", (ef->ef_info->type & kExtraFloorTypeThick) ? "Thick" : "Thin", ef->bottom_h,
                      ef->top_h);
     }
 }
@@ -731,7 +731,7 @@ exfloor_fit_e P_ExtraFloorFits(sector_t *sec, float z1, float z2)
 void P_AddExtraFloor(sector_t *sec, line_t *line)
 {
     sector_t              *ctrl = line->frontsector;
-    const extrafloordef_c *ef_info;
+    const ExtraFloorDefinition *ef_info;
 
     surface_t    *top, *bottom;
     extrafloor_t *newbie, *cur;
@@ -740,9 +740,9 @@ void P_AddExtraFloor(sector_t *sec, line_t *line)
     exfloor_fit_e errcode;
 
     SYS_ASSERT(line->special);
-    SYS_ASSERT(line->special->ef.type & EXFL_Present);
+    SYS_ASSERT(line->special->ef_.type_ & kExtraFloorTypePresent);
 
-    ef_info = &line->special->ef;
+    ef_info = &line->special->ef_;
 
     //
     // -- create new extrafloor --
@@ -759,17 +759,17 @@ void P_AddExtraFloor(sector_t *sec, line_t *line)
     Z_Clear(newbie, extrafloor_t, 1);
 
     bottom = &ctrl->floor;
-    top    = (ef_info->type & EXFL_Thick) ? &ctrl->ceil : bottom;
+    top    = (ef_info->type_ & kExtraFloorTypeThick) ? &ctrl->ceil : bottom;
 
     // Handle the BOOMTEX flag (Boom compatibility)
-    if (ef_info->type & EXFL_BoomTex)
+    if (ef_info->type_ & kExtraFloorTypeBoomTex)
     {
         bottom = &ctrl->ceil;
         top    = &sec->floor;
     }
 
     newbie->bottom_h = ctrl->f_h;
-    newbie->top_h    = (ef_info->type & EXFL_Thick) ? ctrl->c_h : newbie->bottom_h;
+    newbie->top_h    = (ef_info->type_ & kExtraFloorTypeThick) ? ctrl->c_h : newbie->bottom_h;
 
     if (newbie->top_h < newbie->bottom_h)
         I_Error("Bad Extrafloor in sector #%d: "
@@ -792,7 +792,7 @@ void P_AddExtraFloor(sector_t *sec, line_t *line)
     // -- handle liquid extrafloors --
     //
 
-    liquid = (ef_info->type & EXFL_Liquid) ? true : false;
+    liquid = (ef_info->type_ & kExtraFloorTypeLiquid) ? true : false;
 
     if (liquid)
     {
@@ -902,17 +902,17 @@ void P_FloodExtraFloors(sector_t *sector)
 
         props = &C->ef_line->frontsector->props;
 
-        if (C->ef_info->type & EXFL_Flooder)
+        if (C->ef_info->type_ & kExtraFloorTypeFlooder)
         {
             C->p = last_p = flood_p = props;
 
-            if ((C->ef_info->type & EXFL_Liquid) && C->bottom_h >= sector->c_h)
+            if ((C->ef_info->type_ & kExtraFloorTypeLiquid) && C->bottom_h >= sector->c_h)
                 sector->p = flood_p;
 
             continue;
         }
 
-        if (C->ef_info->type & EXFL_NoShade)
+        if (C->ef_info->type_ & kExtraFloorTypeNoShade)
         {
             if (!last_p)
                 last_p = props;

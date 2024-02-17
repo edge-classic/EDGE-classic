@@ -613,7 +613,7 @@ void P_MobjExplodeMissile(mobj_t *mo)
 static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, region_properties_t *new_p, float f_h,
                                        float c_h, const region_properties_t *p, bool iterate_pushers)
 {
-    int flags = p->special ? p->special->special_flags : SECSP_PushConstant;
+    int flags = p->special ? p->special->special_flags_ : kSectorFlagPushConstant;
 
     float factor = 1.0f;
     float push_mul;
@@ -646,20 +646,20 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
                 region_properties_t tn_props = tn->sec->props;
                 if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
                 {
-                    sector_flag_e tn_flags = tn_props.special ? tn_props.special->special_flags : SECSP_PushConstant;
+                    SectorFlag tn_flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagPushConstant;
 
-                    if (!(tn_flags & SECSP_WholeRegion) && bz > tn->sec->f_h + 1)
+                    if (!(tn_flags & kSectorFlagWholeRegion) && bz > tn->sec->f_h + 1)
                         continue;
 
                     push_mul = 1.0f;
 
-                    if (!(tn_flags & SECSP_PushConstant))
+                    if (!(tn_flags & kSectorFlagPushConstant))
                     {
                         SYS_ASSERT(mo->info->mass > 0);
                         push_mul = 100.0f / mo->info->mass;
                     }
 
-                    if (tn_flags & SECSP_Proportional)
+                    if (tn_flags & kSectorFlagProportional)
                         push_mul *= factor;
 
                     if (tn_props.push.X)
@@ -687,18 +687,18 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
     {
         if (p->push.X || p->push.Y || p->push.Z)
         {        
-            if (!(flags & SECSP_WholeRegion) && bz > f_h + 1)
+            if (!(flags & kSectorFlagWholeRegion) && bz > f_h + 1)
                 return;
 
             push_mul = 1.0f;
 
-            if (!(flags & SECSP_PushConstant))
+            if (!(flags & kSectorFlagPushConstant))
             {
                 SYS_ASSERT(mo->info->mass > 0);
                 push_mul = 100.0f / mo->info->mass;
             }
 
-            if (flags & SECSP_Proportional)
+            if (flags & kSectorFlagProportional)
                 push_mul *= factor;
 
             new_p->push.X += push_mul * p->push.X;
@@ -936,17 +936,17 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
                 {
                     // P_ShootSpecialLine()->P_ActivateSpecialLine() can remove
                     //  the special so we need to get the info before calling it
-                    const linetype_c *tempspecial = blockline->special;
+                    const LineType *tempspecial = blockline->special;
                     const mobjtype_c *DebrisThing;
 
                     P_ShootSpecialLine(blockline, PointOnLineSide(mo->x, mo->y, blockline), mo->source);
 
-                    if (tempspecial->type == line_shootable)
+                    if (tempspecial->type_ == kLineTriggerShootable)
                     {
                         P_UnblockLineEffectDebris(blockline, tempspecial);
-                        if (tempspecial->effectobject)
+                        if (tempspecial->effectobject_)
                         {
-                            DebrisThing = tempspecial->effectobject;
+                            DebrisThing = tempspecial->effectobject_;
                             P_SpawnDebris(mo->x, mo->y, mo->z, mo->angle + kBAMAngle180, DebrisThing);
                         }
                     }
@@ -1427,17 +1427,17 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
                 region_properties_t tn_props = tn->sec->props;
                 if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
                 {
-                    sector_flag_e flags = tn_props.special ? tn_props.special->special_flags : SECSP_PushConstant;
+                    SectorFlag flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagPushConstant;
 
-                    if (!((mobj->flags & MF_NOGRAVITY) || (flags & SECSP_PushAll)) &&
-                        (mobj->z <= mobj->floorz + 1.0f || (flags & SECSP_WholeRegion)))
+                    if (!((mobj->flags & MF_NOGRAVITY) || (flags & kSectorFlagPushAll)) &&
+                        (mobj->z <= mobj->floorz + 1.0f || (flags & kSectorFlagWholeRegion)))
                     {
                         if (!extra_tic || !r_doubleframes.d)
                         {
                             float push_mul = 1.0f;
 
                             SYS_ASSERT(mobj->info->mass > 0);
-                            if (!(flags & SECSP_PushConstant))
+                            if (!(flags & kSectorFlagPushConstant))
                                 push_mul = 100.0f / mobj->info->mass;
 
                             mobj->mom.X += push_mul * tn_props.push.X;
@@ -1452,9 +1452,9 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
         props = mobj->props;
 
         // Only damage grounded monsters (not players)
-        if (props->special && props->special->damage.grounded_monsters && mobj->z <= mobj->floorz + 1.0f)
+        if (props->special && props->special->damage_.grounded_monsters && mobj->z <= mobj->floorz + 1.0f)
         {
-            P_DamageMobj(mobj, nullptr, nullptr, 5.0, &props->special->damage, false);
+            P_DamageMobj(mobj, nullptr, nullptr, 5.0, &props->special->damage_, false);
         }
     }
 

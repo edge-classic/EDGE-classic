@@ -51,7 +51,7 @@ std::vector<slider_move_t *> active_sliders;
 extern std::vector<secanim_t>  secanims;
 extern std::vector<lineanim_t> lineanims;
 
-linetype_c donut[2];
+LineType donut[2];
 static int donut_setup = 0;
 
 extern cvar_c r_doubleframes;
@@ -117,26 +117,26 @@ static const image_c *SECPIC(sector_t *sec, bool is_ceiling, const image_c *new_
 // -ACB- 1998/09/06 Remarked and Reformatted.
 // -ACB- 2001/02/04 Move to p_plane.c
 //
-static float GetSecHeightReference(heightref_e ref, sector_t *sec, sector_t *model)
+static float GetSecHeightReference(TriggerHeightReference ref, sector_t *sec, sector_t *model)
 {
-    switch (ref & REF_MASK)
+    switch (ref & kTriggerHeightReferenceMask)
     {
-    case REF_Absolute:
+    case kTriggerHeightReferenceAbsolute:
         return 0;
 
-    case REF_Trigger:
+    case kTriggerHeightReferenceTriggeringLinedef:
         if (model)
-            return (ref & REF_CEILING) ? model->c_h : model->f_h;
+            return (ref & kTriggerHeightReferenceCeiling) ? model->c_h : model->f_h;
 
         return 0; // ick!
 
-    case REF_Current:
-        return (ref & REF_CEILING) ? sec->c_h : sec->f_h;
+    case kTriggerHeightReferenceCurrent:
+        return (ref & kTriggerHeightReferenceCeiling) ? sec->c_h : sec->f_h;
 
-    case REF_Surrounding:
+    case kTriggerHeightReferenceSurrounding:
         return P_FindSurroundingHeight(ref, sec);
 
-    case REF_LowestLoTexture:
+    case kTriggerHeightReferenceLowestLowTexture:
         return P_FindRaiseToTexture(sec);
 
     default:
@@ -336,17 +336,17 @@ static bool MovePlane(plane_move_t *plane)
 
         if (!AlmostEquals(plane->destheight, plane->startheight))
         {
-            MakeMovingSound(&plane->sfxstarted, plane->type->sfxdown, &plane->sector->sfx_origin);
+            MakeMovingSound(&plane->sfxstarted, plane->type->sfxdown_, &plane->sector->sfx_origin);
         }
 
         if (res == RES_PastDest)
         {
             if (!AlmostEquals(plane->destheight, plane->startheight))
             {
-                S_StartFX(plane->type->sfxstop, SNCAT_Level, &plane->sector->sfx_origin);
+                S_StartFX(plane->type->sfxstop_, SNCAT_Level, &plane->sector->sfx_origin);
             }
 
-            plane->speed = plane->type->speed_up;
+            plane->speed = plane->type->speed_up_;
 
             if (plane->newspecial != -1)
             {
@@ -355,16 +355,16 @@ static bool MovePlane(plane_move_t *plane)
 
             SECPIC(plane->sector, plane->is_ceiling, plane->new_image);
 
-            switch (plane->type->type)
+            switch (plane->type->type_)
             {
-            case mov_Plat:
-            case mov_Continuous:
+            case kPlaneMoverPlatform:
+            case kPlaneMoverContinuous:
                 plane->direction = DIRECTION_WAIT;
-                plane->waited    = plane->type->wait;
-                plane->speed     = plane->type->speed_up;
+                plane->waited    = plane->type->wait_;
+                plane->speed     = plane->type->speed_up_;
                 break;
 
-            case mov_MoveWaitReturn:
+            case kPlaneMoverMoveWaitReturn:
                 if (AlmostEquals(HEIGHT(plane->sector, plane->is_ceiling), plane->startheight))
                 {
                     return true; // REMOVE ME
@@ -372,12 +372,12 @@ static bool MovePlane(plane_move_t *plane)
                 else // assume we reached the destination
                 {
                     plane->direction = DIRECTION_WAIT;
-                    plane->waited    = plane->type->wait;
-                    plane->speed     = plane->type->speed_up;
+                    plane->waited    = plane->type->wait_;
+                    plane->speed     = plane->type->speed_up_;
                 }
                 break;
 
-            case mov_Toggle:
+            case kPlaneMoverToggle:
                 plane->direction    = DIRECTION_STASIS;
                 plane->olddirection = DIRECTION_UP;
                 break;
@@ -390,17 +390,17 @@ static bool MovePlane(plane_move_t *plane)
         {
             if (plane->crush)
             {
-                plane->speed = plane->type->speed_down;
+                plane->speed = plane->type->speed_down_;
 
                 if (plane->speed < 1.5f)
                     plane->speed = plane->speed / 8.0f;
             }
-            else if (plane->type->type == mov_MoveWaitReturn) // Go back up
+            else if (plane->type->type_ == kPlaneMoverMoveWaitReturn) // Go back up
             {
                 plane->direction  = DIRECTION_UP;
                 plane->sfxstarted = false;
                 plane->waited     = 0;
-                plane->speed      = plane->type->speed_up;
+                plane->speed      = plane->type->speed_up_;
             }
         }
 
@@ -421,17 +421,17 @@ static bool MovePlane(plane_move_t *plane)
             if (HEIGHT(plane->sector, plane->is_ceiling) > dest)
             {
                 dir          = DIRECTION_DOWN;
-                plane->speed = plane->type->speed_down;
+                plane->speed = plane->type->speed_down_;
             }
             else
             {
                 dir          = DIRECTION_UP;
-                plane->speed = plane->type->speed_up;
+                plane->speed = plane->type->speed_up_;
             }
 
             if (dir)
             {
-                S_StartFX(plane->type->sfxstart, SNCAT_Level, &plane->sector->sfx_origin);
+                S_StartFX(plane->type->sfxstart_, SNCAT_Level, &plane->sector->sfx_origin);
             }
 
             plane->direction  = dir; // time to go back
@@ -445,14 +445,14 @@ static bool MovePlane(plane_move_t *plane)
 
         if (!AlmostEquals(plane->destheight, plane->startheight))
         {
-            MakeMovingSound(&plane->sfxstarted, plane->type->sfxup, &plane->sector->sfx_origin);
+            MakeMovingSound(&plane->sfxstarted, plane->type->sfxup_, &plane->sector->sfx_origin);
         }
 
         if (res == RES_PastDest)
         {
             if (!AlmostEquals(plane->destheight, plane->startheight))
             {
-                S_StartFX(plane->type->sfxstop, SNCAT_Level, &plane->sector->sfx_origin);
+                S_StartFX(plane->type->sfxstop_, SNCAT_Level, &plane->sector->sfx_origin);
             }
 
             if (plane->newspecial != -1)
@@ -462,16 +462,16 @@ static bool MovePlane(plane_move_t *plane)
 
             SECPIC(plane->sector, plane->is_ceiling, plane->new_image);
 
-            switch (plane->type->type)
+            switch (plane->type->type_)
             {
-            case mov_Plat:
-            case mov_Continuous:
+            case kPlaneMoverPlatform:
+            case kPlaneMoverContinuous:
                 plane->direction = DIRECTION_WAIT;
-                plane->waited    = plane->type->wait;
-                plane->speed     = plane->type->speed_down;
+                plane->waited    = plane->type->wait_;
+                plane->speed     = plane->type->speed_down_;
                 break;
 
-            case mov_MoveWaitReturn:
+            case kPlaneMoverMoveWaitReturn:
                 if (AlmostEquals(HEIGHT(plane->sector, plane->is_ceiling), plane->startheight))
                 {
                     return true; // REMOVE ME
@@ -479,12 +479,12 @@ static bool MovePlane(plane_move_t *plane)
                 else // assume we reached the destination
                 {
                     plane->direction = DIRECTION_WAIT;
-                    plane->speed     = plane->type->speed_down;
-                    plane->waited    = plane->type->wait;
+                    plane->speed     = plane->type->speed_down_;
+                    plane->waited    = plane->type->wait_;
                 }
                 break;
 
-            case mov_Toggle:
+            case kPlaneMoverToggle:
                 plane->direction    = DIRECTION_STASIS;
                 plane->olddirection = DIRECTION_DOWN;
                 break;
@@ -497,17 +497,17 @@ static bool MovePlane(plane_move_t *plane)
         {
             if (plane->crush)
             {
-                plane->speed = plane->type->speed_up;
+                plane->speed = plane->type->speed_up_;
 
                 if (plane->speed < 1.5f)
                     plane->speed = plane->speed / 8.0f;
             }
-            else if (plane->type->type == mov_MoveWaitReturn) // Go back down
+            else if (plane->type->type_ == kPlaneMoverMoveWaitReturn) // Go back down
             {
                 plane->direction  = DIRECTION_DOWN;
                 plane->sfxstarted = false;
                 plane->waited     = 0;
-                plane->speed      = plane->type->speed_down;
+                plane->speed      = plane->type->speed_down_;
             }
         }
         break;
@@ -586,7 +586,7 @@ static sector_t *P_GetSectorSurrounding(sector_t *sec, float dest, bool forc)
     return P_GSS(sec, dest, forc);
 }
 
-void P_SetupPlaneDirection(plane_move_t *plane, const movplanedef_c *def, float start, float dest)
+void P_SetupPlaneDirection(plane_move_t *plane, const PlaneMoverDefinition *def, float start, float dest)
 {
     plane->startheight = start;
     plane->destheight  = dest;
@@ -595,8 +595,8 @@ void P_SetupPlaneDirection(plane_move_t *plane, const movplanedef_c *def, float 
     {
         plane->direction = DIRECTION_UP;
 
-        if (def->speed_up >= 0)
-            plane->speed = def->speed_up;
+        if (def->speed_up_ >= 0)
+            plane->speed = def->speed_up_;
         else
             plane->speed = dest - start;
     }
@@ -604,8 +604,8 @@ void P_SetupPlaneDirection(plane_move_t *plane, const movplanedef_c *def, float 
     {
         plane->direction = DIRECTION_DOWN;
 
-        if (def->speed_down >= 0)
-            plane->speed = def->speed_down;
+        if (def->speed_down_ >= 0)
+            plane->speed = def->speed_down_;
         else
             plane->speed = start - dest;
     }
@@ -617,53 +617,53 @@ void P_SetupPlaneDirection(plane_move_t *plane, const movplanedef_c *def, float 
 // Setup the Floor Action, depending on the linedeftype trigger and the
 // sector info.
 //
-static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *def, sector_t *model)
+static plane_move_t *P_SetupSectorAction(sector_t *sector, const PlaneMoverDefinition *def, sector_t *model)
 {
     // new door thinker
     plane_move_t *plane = new plane_move_t;
 
-    if (def->is_ceiling)
+    if (def->is_ceiling_)
         sector->ceil_move = plane;
     else
         sector->floor_move = plane;
 
     plane->sector     = sector;
-    plane->crush      = def->crush_damage;
+    plane->crush      = def->crush_damage_;
     plane->sfxstarted = false;
 
-    float start = HEIGHT(sector, def->is_ceiling);
+    float start = HEIGHT(sector, def->is_ceiling_);
 
-    float dest = GetSecHeightReference(def->destref, sector, model);
-    dest += def->dest;
+    float dest = GetSecHeightReference(def->destref_, sector, model);
+    dest += def->dest_;
 
-    if (def->type == mov_Plat || def->type == mov_Continuous || def->type == mov_Toggle)
+    if (def->type_ == kPlaneMoverPlatform || def->type_ == kPlaneMoverContinuous || def->type_ == kPlaneMoverToggle)
     {
-        start = GetSecHeightReference(def->otherref, sector, model);
-        start += def->other;
+        start = GetSecHeightReference(def->otherref_, sector, model);
+        start += def->other_;
     }
 
 #if 0 // DEBUG
     L_WriteDebug("SEC_ACT: %d type %d %s start %1.0f dest %1.0f\n",
                  sector - sectors, def->type, 
-                 def->is_ceiling ? "CEIL" : "FLOOR", 
+                 def->is_ceiling_ ? "CEIL" : "FLOOR", 
                  start, dest);
 #endif
 
-    if (def->prewait)
+    if (def->prewait_)
     {
         plane->direction   = DIRECTION_WAIT;
-        plane->waited      = def->prewait;
+        plane->waited      = def->prewait_;
         plane->destheight  = dest;
         plane->startheight = start;
     }
-    else if (def->type == mov_Continuous)
+    else if (def->type_ == kPlaneMoverContinuous)
     {
         plane->direction = (P_Random() & 1) ? DIRECTION_UP : DIRECTION_DOWN;
 
         if (plane->direction == DIRECTION_UP)
-            plane->speed = def->speed_up;
+            plane->speed = def->speed_up_;
         else
-            plane->speed = def->speed_down;
+            plane->speed = def->speed_down_;
 
         plane->destheight  = dest;
         plane->startheight = start;
@@ -678,70 +678,70 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
         // texture/type changes that were intended
 
         // change to surrounding
-        if (def->tex != "" && def->tex[0] == '-')
+        if (def->tex_ != "" && def->tex_[0] == '-')
         {
-            model = P_GetSectorSurrounding(sector, plane->destheight, def->is_ceiling);
+            model = P_GetSectorSurrounding(sector, plane->destheight, def->is_ceiling_);
             if (model)
             {
-                if (def->tex.size() == 1) // Only '-'; do both (default)
+                if (def->tex_.size() == 1) // Only '-'; do both (default)
                 {
-                    plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
-                    plane->newspecial = model->props.special ? model->props.special->number : 0;
+                    plane->new_image  = SECPIC(model, def->is_ceiling_, nullptr);
+                    plane->newspecial = model->props.special ? model->props.special->number_ : 0;
                 }
-                else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changezero") == 0)
+                else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changezero") == 0)
                 {
-                    plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
+                    plane->new_image  = SECPIC(model, def->is_ceiling_, nullptr);
                     plane->newspecial = 0;
                 }
-                else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changetexonly") == 0)
+                else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changetexonly") == 0)
                 {
-                    plane->new_image = SECPIC(model, def->is_ceiling, nullptr);
+                    plane->new_image = SECPIC(model, def->is_ceiling_, nullptr);
                 }
                 else // Unknown directive after '-'; just do default
                 {
-                    plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
-                    plane->newspecial = model->props.special ? model->props.special->number : 0;
+                    plane->new_image  = SECPIC(model, def->is_ceiling_, nullptr);
+                    plane->newspecial = model->props.special ? model->props.special->number_ : 0;
                 }
-                SECPIC(sector, def->is_ceiling, plane->new_image);
+                SECPIC(sector, def->is_ceiling_, plane->new_image);
                 if (plane->newspecial != -1)
                 {
                     P_SectorChangeSpecial(sector, plane->newspecial);
                 }
             }
         }
-        else if (def->tex != "" && def->tex[0] == '+')
+        else if (def->tex_ != "" && def->tex_[0] == '+')
         {
             if (model)
             {
-                if (SECPIC(model, def->is_ceiling, nullptr) == SECPIC(sector, def->is_ceiling, nullptr))
+                if (SECPIC(model, def->is_ceiling_, nullptr) == SECPIC(sector, def->is_ceiling_, nullptr))
                 {
-                    model = P_GetSectorSurrounding(model, plane->destheight, def->is_ceiling);
+                    model = P_GetSectorSurrounding(model, plane->destheight, def->is_ceiling_);
                 }
             }
 
             if (model)
             {
-                if (def->tex.size() == 1) // Only '+'; do both (default)
+                if (def->tex_.size() == 1) // Only '+'; do both (default)
                 {
-                    plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
-                    plane->newspecial = model->props.special ? model->props.special->number : 0;
+                    plane->new_image  = SECPIC(model, def->is_ceiling_, nullptr);
+                    plane->newspecial = model->props.special ? model->props.special->number_ : 0;
                 }
-                else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changezero") == 0)
+                else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changezero") == 0)
                 {
-                    plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
+                    plane->new_image  = SECPIC(model, def->is_ceiling_, nullptr);
                     plane->newspecial = 0;
                 }
-                else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changetexonly") == 0)
+                else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changetexonly") == 0)
                 {
-                    plane->new_image = SECPIC(model, def->is_ceiling, nullptr);
+                    plane->new_image = SECPIC(model, def->is_ceiling_, nullptr);
                 }
                 else // Unknown directive after '+'; just do default
                 {
-                    plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
-                    plane->newspecial = model->props.special ? model->props.special->number : 0;
+                    plane->new_image  = SECPIC(model, def->is_ceiling_, nullptr);
+                    plane->newspecial = model->props.special ? model->props.special->number_ : 0;
                 }
 
-                SECPIC(sector, def->is_ceiling, plane->new_image);
+                SECPIC(sector, def->is_ceiling_, plane->new_image);
 
                 if (plane->newspecial != -1)
                 {
@@ -749,13 +749,13 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
                 }
             }
         }
-        else if (def->tex != "")
+        else if (def->tex_ != "")
         {
-            plane->new_image = W_ImageLookup(def->tex.c_str(), kImageNamespaceFlat);
-            SECPIC(sector, def->is_ceiling, plane->new_image);
+            plane->new_image = W_ImageLookup(def->tex_.c_str(), kImageNamespaceFlat);
+            SECPIC(sector, def->is_ceiling_, plane->new_image);
         }
 
-        if (def->is_ceiling)
+        if (def->is_ceiling_)
             sector->ceil_move = nullptr;
         else
             sector->floor_move = nullptr;
@@ -767,91 +767,91 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
 
     plane->tag         = sector->tag;
     plane->type        = def;
-    plane->new_image   = SECPIC(sector, def->is_ceiling, nullptr);
+    plane->new_image   = SECPIC(sector, def->is_ceiling_, nullptr);
     plane->newspecial  = -1;
-    plane->is_ceiling  = def->is_ceiling;
-    plane->is_elevator = (def->type == mov_Elevator);
+    plane->is_ceiling  = def->is_ceiling_;
+    plane->is_elevator = (def->type_ == kPlaneMoverElevator);
     plane->elev_height = sector->c_h - sector->f_h;
 
     // -ACB- 10/01/2001 Trigger starting sfx
     // UNNEEDED    sound::StopLoopingFX(&sector->sfx_origin);
 
-    if (def->sfxstart && !AlmostEquals(plane->destheight, plane->startheight))
+    if (def->sfxstart_ && !AlmostEquals(plane->destheight, plane->startheight))
     {
-        S_StartFX(def->sfxstart, SNCAT_Level, &sector->sfx_origin);
+        S_StartFX(def->sfxstart_, SNCAT_Level, &sector->sfx_origin);
     }
 
     // change to surrounding
-    if (def->tex != "" && def->tex[0] == '-')
+    if (def->tex_ != "" && def->tex_[0] == '-')
     {
-        model = P_GetSectorSurrounding(sector, plane->destheight, def->is_ceiling);
+        model = P_GetSectorSurrounding(sector, plane->destheight, def->is_ceiling_);
         if (model)
         {
-            if (def->tex.size() == 1) // Only '-'; do both (default)
+            if (def->tex_.size() == 1) // Only '-'; do both (default)
             {
-                plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
-                plane->newspecial = model->props.special ? model->props.special->number : 0;
+                plane->new_image  = SECPIC(model, def->is_ceiling_, nullptr);
+                plane->newspecial = model->props.special ? model->props.special->number_ : 0;
             }
-            else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changezero") == 0)
+            else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changezero") == 0)
             {
-                plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
+                plane->new_image  = SECPIC(model, def->is_ceiling_, nullptr);
                 plane->newspecial = 0;
             }
-            else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changetexonly") == 0)
+            else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changetexonly") == 0)
             {
-                plane->new_image = SECPIC(model, def->is_ceiling, nullptr);
+                plane->new_image = SECPIC(model, def->is_ceiling_, nullptr);
             }
             else // Unknown directive after '-'; just do default
             {
-                plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
-                plane->newspecial = model->props.special ? model->props.special->number : 0;
+                plane->new_image  = SECPIC(model, def->is_ceiling_, nullptr);
+                plane->newspecial = model->props.special ? model->props.special->number_ : 0;
             }
         }
 
-        if (model && plane->direction == (def->is_ceiling ? DIRECTION_DOWN : DIRECTION_UP))
+        if (model && plane->direction == (def->is_ceiling_ ? DIRECTION_DOWN : DIRECTION_UP))
         {
-            SECPIC(sector, def->is_ceiling, plane->new_image);
+            SECPIC(sector, def->is_ceiling_, plane->new_image);
             if (plane->newspecial != -1)
             {
                 P_SectorChangeSpecial(sector, plane->newspecial);
             }
         }
     }
-    else if (def->tex != "" && def->tex[0] == '+')
+    else if (def->tex_ != "" && def->tex_[0] == '+')
     {
         if (model)
         {
-            if (SECPIC(model, def->is_ceiling, nullptr) == SECPIC(sector, def->is_ceiling, nullptr))
+            if (SECPIC(model, def->is_ceiling_, nullptr) == SECPIC(sector, def->is_ceiling_, nullptr))
             {
-                model = P_GetSectorSurrounding(model, plane->destheight, def->is_ceiling);
+                model = P_GetSectorSurrounding(model, plane->destheight, def->is_ceiling_);
             }
         }
 
         if (model)
         {
-            if (def->tex.size() == 1) // Only '+'; do both (default)
+            if (def->tex_.size() == 1) // Only '+'; do both (default)
             {
-                plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
-                plane->newspecial = model->props.special ? model->props.special->number : 0;
+                plane->new_image  = SECPIC(model, def->is_ceiling_, nullptr);
+                plane->newspecial = model->props.special ? model->props.special->number_ : 0;
             }
-            else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changezero") == 0)
+            else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changezero") == 0)
             {
-                plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
+                plane->new_image  = SECPIC(model, def->is_ceiling_, nullptr);
                 plane->newspecial = 0;
             }
-            else if (epi::StringCaseCompareASCII(def->tex.substr(1), "changetexonly") == 0)
+            else if (epi::StringCaseCompareASCII(def->tex_.substr(1), "changetexonly") == 0)
             {
-                plane->new_image = SECPIC(model, def->is_ceiling, nullptr);
+                plane->new_image = SECPIC(model, def->is_ceiling_, nullptr);
             }
             else // Unknown directive after '+'; just do default
             {
-                plane->new_image  = SECPIC(model, def->is_ceiling, nullptr);
-                plane->newspecial = model->props.special ? model->props.special->number : 0;
+                plane->new_image  = SECPIC(model, def->is_ceiling_, nullptr);
+                plane->newspecial = model->props.special ? model->props.special->number_ : 0;
             }
 
-            if (plane->direction == (def->is_ceiling ? DIRECTION_DOWN : DIRECTION_UP))
+            if (plane->direction == (def->is_ceiling_ ? DIRECTION_DOWN : DIRECTION_UP))
             {
-                SECPIC(sector, def->is_ceiling, plane->new_image);
+                SECPIC(sector, def->is_ceiling_, plane->new_image);
 
                 if (plane->newspecial != -1)
                 {
@@ -860,9 +860,9 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
             }
         }
     }
-    else if (def->tex != "")
+    else if (def->tex_ != "")
     {
-        plane->new_image = W_ImageLookup(def->tex.c_str(), kImageNamespaceFlat);
+        plane->new_image = W_ImageLookup(def->tex_.c_str(), kImageNamespaceFlat);
     }
 
     P_AddActivePlane(plane);
@@ -881,7 +881,7 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const movplanedef_c *
 // things (e.g. skip a whole staircase) when 2 or more stair sectors
 // were tagged.
 //
-static bool EV_BuildOneStair(sector_t *sec, const movplanedef_c *def)
+static bool EV_BuildOneStair(sector_t *sec, const PlaneMoverDefinition *def)
 {
     int   i;
     float next_height;
@@ -889,7 +889,7 @@ static bool EV_BuildOneStair(sector_t *sec, const movplanedef_c *def)
 
     plane_move_t *step;
     sector_t     *tsec;
-    float         stairsize = def->dest;
+    float         stairsize = def->dest_;
 
     const image_c *image = sec->floor.image;
 
@@ -923,12 +923,12 @@ static bool EV_BuildOneStair(sector_t *sec, const movplanedef_c *def)
 
             tsec = sec->lines[i]->backsector;
 
-            if (tsec->floor.image != image && !def->ignore_texture)
+            if (tsec->floor.image != image && !def->ignore_texture_)
                 continue;
 
-            if (def->is_ceiling && tsec->ceil_move)
+            if (def->is_ceiling_ && tsec->ceil_move)
                 continue;
-            if (!def->is_ceiling && tsec->floor_move)
+            if (!def->is_ceiling_ && tsec->floor_move)
                 continue;
 
             step = P_SetupSectorAction(tsec, def, tsec);
@@ -949,7 +949,7 @@ static bool EV_BuildOneStair(sector_t *sec, const movplanedef_c *def)
     return true;
 }
 
-static bool EV_BuildStairs(sector_t *sec, const movplanedef_c *def)
+static bool EV_BuildStairs(sector_t *sec, const PlaneMoverDefinition *def)
 {
     bool rtn = false;
 
@@ -959,9 +959,9 @@ static bool EV_BuildStairs(sector_t *sec, const movplanedef_c *def)
     for (; sec; sec = sec->tag_next)
     {
         // Already moving?  If so, keep going...
-        if (def->is_ceiling && sec->ceil_move)
+        if (def->is_ceiling_ && sec->ceil_move)
             continue;
-        if (!def->is_ceiling && sec->floor_move)
+        if (!def->is_ceiling_ && sec->floor_move)
             continue;
 
         if (EV_BuildOneStair(sec, def))
@@ -974,35 +974,35 @@ static bool EV_BuildStairs(sector_t *sec, const movplanedef_c *def)
 //
 // Do Platforms/Floors/Stairs/Ceilings/Doors/Elevators
 //
-bool EV_DoPlane(sector_t *sec, const movplanedef_c *def, sector_t *model)
+bool EV_DoPlane(sector_t *sec, const PlaneMoverDefinition *def, sector_t *model)
 {
     // Activate all <type> plats that are in_stasis
-    switch (def->type)
+    switch (def->type_)
     {
-    case mov_Plat:
-    case mov_Continuous:
-    case mov_Toggle:
+    case kPlaneMoverPlatform:
+    case kPlaneMoverContinuous:
+    case kPlaneMoverToggle:
         if (P_ActivateInStasis(sec->tag))
             return true;
         break;
 
-    case mov_Stairs:
+    case kPlaneMoverStairs:
         return EV_BuildStairs(sec, def);
 
-    case mov_Stop:
+    case kPlaneMoverStop:
         return P_StasifySector(sec->tag);
 
     default:
         break;
     }
 
-    if (def->is_ceiling || def->type == mov_Elevator)
+    if (def->is_ceiling_ || def->type_ == kPlaneMoverElevator)
     {
         if (sec->ceil_move)
             return false;
     }
 
-    if (!def->is_ceiling)
+    if (!def->is_ceiling_)
     {
         if (sec->floor_move)
             return false;
@@ -1024,7 +1024,7 @@ bool EV_DoPlane(sector_t *sec, const movplanedef_c *def, sector_t *model)
         return secaction ? true : false;
 }
 
-bool EV_ManualPlane(line_t *line, mobj_t *thing, const movplanedef_c *def)
+bool EV_ManualPlane(line_t *line, mobj_t *thing, const PlaneMoverDefinition *def)
 {
     int side = 0; // only front sides can be used
 
@@ -1033,11 +1033,11 @@ bool EV_ManualPlane(line_t *line, mobj_t *thing, const movplanedef_c *def)
     if (!sec)
         return false;
 
-    plane_move_t *pmov = def->is_ceiling ? sec->ceil_move : sec->floor_move;
+    plane_move_t *pmov = def->is_ceiling_ ? sec->ceil_move : sec->floor_move;
 
     if (pmov && thing)
     {
-        if (def->type == mov_MoveWaitReturn)
+        if (def->type_ == kPlaneMoverMoveWaitReturn)
         {
             int newdir;
             int olddir = pmov->direction;
@@ -1050,7 +1050,7 @@ bool EV_ManualPlane(line_t *line, mobj_t *thing, const movplanedef_c *def)
 
             if (newdir != olddir)
             {
-                S_StartFX(def->sfxstart, SNCAT_Level, &sec->sfx_origin);
+                S_StartFX(def->sfxstart_, SNCAT_Level, &sec->sfx_origin);
 
                 pmov->sfxstarted = !thing->player;
                 return true;
@@ -1130,14 +1130,14 @@ bool EV_DoDonut(sector_t *s1, sfx_t *sfx[4])
     if (!donut_setup)
     {
         donut[0].Default();
-        donut[0].count = 1;
-        donut[0].f.Default(movplanedef_c::DEFAULT_DonutFloor);
-        donut[0].f.tex = "-";
+        donut[0].count_ = 1;
+        donut[0].f_.Default(PlaneMoverDefinition::kPlaneMoverDefaultDonutFloor);
+        donut[0].f_.tex_ = "-";
 
         donut[1].Default();
-        donut[1].count = 1;
-        donut[1].f.Default(movplanedef_c::DEFAULT_DonutFloor);
-        donut[1].f.dest = -32000.0f;
+        donut[1].count_ = 1;
+        donut[1].f_.Default(PlaneMoverDefinition::kPlaneMoverDefaultDonutFloor);
+        donut[1].f_.dest_ = -32000.0f;
 
         donut_setup++;
     }
@@ -1158,10 +1158,10 @@ bool EV_DoDonut(sector_t *s1, sfx_t *sfx[4])
         result = true;
 
         // Spawn rising slime
-        donut[0].f.sfxup   = sfx[0];
-        donut[0].f.sfxstop = sfx[1];
+        donut[0].f_.sfxup_   = sfx[0];
+        donut[0].f_.sfxstop_ = sfx[1];
 
-        sec = P_SetupSectorAction(s2, &donut[0].f, s3);
+        sec = P_SetupSectorAction(s2, &donut[0].f_, s3);
 
         if (sec)
         {
@@ -1191,10 +1191,10 @@ bool EV_DoDonut(sector_t *s1, sfx_t *sfx[4])
         }
 
         // Spawn lowering donut-hole
-        donut[1].f.sfxup   = sfx[2];
-        donut[1].f.sfxstop = sfx[3];
+        donut[1].f_.sfxup_   = sfx[2];
+        donut[1].f_.sfxstop_ = sfx[3];
 
-        sec = P_SetupSectorAction(s1, &donut[1].f, s1);
+        sec = P_SetupSectorAction(s1, &donut[1].f_, s1);
 
         if (sec)
             sec->destheight = s3->f_h;
@@ -1226,7 +1226,7 @@ static bool MoveSlider(slider_move_t *smov)
         {
             if (SliderCanClose(smov->line))
             {
-                S_StartFX(smov->info->sfx_start, SNCAT_Level, &sec->sfx_origin);
+                S_StartFX(smov->info->sfx_start_, SNCAT_Level, &sec->sfx_origin);
 
                 smov->sfxstarted = false;
                 smov->direction  = DIRECTION_DOWN;
@@ -1241,20 +1241,20 @@ static bool MoveSlider(slider_move_t *smov)
 
     // OPENING
     case 1:
-        MakeMovingSound(&smov->sfxstarted, smov->info->sfx_open, &sec->sfx_origin);
+        MakeMovingSound(&smov->sfxstarted, smov->info->sfx_open_, &sec->sfx_origin);
 
-        smov->opening += (smov->info->speed * factor);
+        smov->opening += (smov->info->speed_ * factor);
 
         // mark line as non-blocking (at some point)
         P_ComputeGaps(smov->line);
 
         if (smov->opening >= smov->target)
         {
-            S_StartFX(smov->info->sfx_stop, SNCAT_Level, &sec->sfx_origin);
+            S_StartFX(smov->info->sfx_stop_, SNCAT_Level, &sec->sfx_origin);
 
             smov->opening   = smov->target;
             smov->direction = DIRECTION_WAIT;
-            smov->waited    = smov->info->wait;
+            smov->waited    = smov->info->wait_;
 
             if (smov->final_open)
             {
@@ -1278,36 +1278,36 @@ static bool MoveSlider(slider_move_t *smov)
 
         if (SliderCanClose(smov->line))
         {
-            MakeMovingSound(&smov->sfxstarted, smov->info->sfx_close, &sec->sfx_origin);
+            MakeMovingSound(&smov->sfxstarted, smov->info->sfx_close_, &sec->sfx_origin);
 
-            smov->opening -= (smov->info->speed * factor);
+            smov->opening -= (smov->info->speed_ * factor);
 
             // mark line as blocking (at some point)
             P_ComputeGaps(smov->line);
 
             if (smov->opening <= 0.0f)
             {
-                S_StartFX(smov->info->sfx_stop, SNCAT_Level, &sec->sfx_origin);
+                S_StartFX(smov->info->sfx_stop_, SNCAT_Level, &sec->sfx_origin);
 
                 return true; // REMOVE ME
             }
         }
         else
         {
-            MakeMovingSound(&smov->sfxstarted, smov->info->sfx_open, &sec->sfx_origin);
+            MakeMovingSound(&smov->sfxstarted, smov->info->sfx_open_, &sec->sfx_origin);
 
-            smov->opening += (smov->info->speed * factor);
+            smov->opening += (smov->info->speed_ * factor);
 
             // mark line as non-blocking (at some point)
             P_ComputeGaps(smov->line);
 
             if (smov->opening >= smov->target)
             {
-                S_StartFX(smov->info->sfx_stop, SNCAT_Level, &sec->sfx_origin);
+                S_StartFX(smov->info->sfx_stop_, SNCAT_Level, &sec->sfx_origin);
 
                 smov->opening   = smov->target;
                 smov->direction = DIRECTION_WAIT;
-                smov->waited    = smov->info->wait;
+                smov->waited    = smov->info->wait_;
 
                 if (smov->final_open)
                 {
@@ -1338,7 +1338,7 @@ static bool MoveSlider(slider_move_t *smov)
 //
 // Handle thin horizontal sliding doors.
 //
-bool EV_DoSlider(line_t *door, line_t *act_line, mobj_t *thing, const linetype_c *special)
+bool EV_DoSlider(line_t *door, line_t *act_line, mobj_t *thing, const LineType *special)
 {
     SYS_ASSERT(door);
 
@@ -1367,11 +1367,11 @@ bool EV_DoSlider(line_t *door, line_t *act_line, mobj_t *thing, const linetype_c
     // new sliding door thinker
     smov = new slider_move_t;
 
-    smov->info     = &special->s;
+    smov->info     = &special->s_;
     smov->line     = door;
     smov->opening  = 0.0f;
     smov->line_len = R_PointToDist(0, 0, door->dx, door->dy);
-    smov->target   = smov->line_len * PERCENT_2_FLOAT(smov->info->distance);
+    smov->target   = smov->line_len * PERCENT_2_FLOAT(smov->info->distance_);
 
     smov->direction  = DIRECTION_UP;
     smov->sfxstarted = !(thing && thing->player);
@@ -1392,7 +1392,7 @@ bool EV_DoSlider(line_t *door, line_t *act_line, mobj_t *thing, const linetype_c
     // and quietly forget about SFX_START.
 
     // S_StartFX(special->s.sfx_start, SNCAT_Level, &sec->sfx_origin);
-    S_StartFX(special->s.sfx_open, SNCAT_Level, &sec->sfx_origin);
+    S_StartFX(special->s_.sfx_open_, SNCAT_Level, &sec->sfx_origin);
 
     return true;
 }
@@ -1417,48 +1417,48 @@ void P_RunActivePlanes(void)
         if (MovePlane(pmov))
         {
             // Make BOOM scroller effects permanent as this pmov will never be recreated
-            if (pmov->type->type == mov_Once || pmov->type->type == mov_Stairs || pmov->type->type == mov_Toggle)
+            if (pmov->type->type_ == kPlaneMoverOnce || pmov->type->type_ == kPlaneMoverStairs || pmov->type->type_ == kPlaneMoverToggle)
             {
                 for (auto anim : secanims)
                 {
                     if (anim.scroll_sec_ref &&
                         (anim.scroll_sec_ref->ceil_move == pmov || anim.scroll_sec_ref->floor_move == pmov) &&
-                        (anim.permanent || anim.scroll_special_ref->scroll_type & ScrollType_Accel))
+                        (anim.permanent || anim.scroll_special_ref->scroll_type_ & BoomScrollerTypeAccel))
                     {
                         struct sector_s  *sec_ref     = anim.scroll_sec_ref;
                         sector_t         *sec         = anim.target;
-                        const linetype_c *special_ref = anim.scroll_special_ref;
+                        const LineType *special_ref = anim.scroll_special_ref;
                         line_s           *line_ref    = anim.scroll_line_ref;
                         if (!sec || !special_ref || !line_ref ||
-                            !(special_ref->scroll_type & ScrollType_Displace ||
-                              special_ref->scroll_type & ScrollType_Accel))
+                            !(special_ref->scroll_type_ & BoomScrollerTypeDisplace ||
+                              special_ref->scroll_type_ & BoomScrollerTypeAccel))
                             continue;
                         float heightref =
-                            (special_ref->scroll_type & ScrollType_Displace ? anim.last_height : sec_ref->orig_height);
+                            (special_ref->scroll_type_ & BoomScrollerTypeDisplace ? anim.last_height : sec_ref->orig_height);
                         float sy = line_ref->length / 32.0f * line_ref->dy / line_ref->length *
                                    ((sec_ref->f_h + sec_ref->c_h) - heightref);
                         float sx = line_ref->length / 32.0f * line_ref->dx / line_ref->length *
                                    ((sec_ref->f_h + sec_ref->c_h) - heightref);
-                        if (r_doubleframes.d && special_ref->scroll_type & ScrollType_Displace)
+                        if (r_doubleframes.d && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
                         {
                             sy *= 2;
                             sx *= 2;
                         }
-                        if (special_ref->sector_effect & SECTFX_PushThings)
+                        if (special_ref->sector_effect_ & kSectorEffectTypePushThings)
                         {
                             sec->props.old_push.Y += BOOM_CARRY_FACTOR * sy;
                             sec->props.push.Y += BOOM_CARRY_FACTOR * sy;
                             sec->props.old_push.X += BOOM_CARRY_FACTOR * sx;
                             sec->props.push.X += BOOM_CARRY_FACTOR * sx;
                         }
-                        if (special_ref->sector_effect & SECTFX_ScrollFloor)
+                        if (special_ref->sector_effect_ & kSectorEffectTypeScrollFloor)
                         {
                             sec->floor.old_scroll.Y -= sy;
                             sec->floor.scroll.Y -= sy;
                             sec->floor.old_scroll.X -= sx;
                             sec->floor.scroll.X -= sx;
                         }
-                        if (special_ref->sector_effect & SECTFX_ScrollCeiling)
+                        if (special_ref->sector_effect_ & kSectorEffectTypeScrollCeiling)
                         {
                             sec->ceil.old_scroll.Y -= sy;
                             sec->ceil.old_scroll.X -= sx;
@@ -1471,25 +1471,25 @@ void P_RunActivePlanes(void)
                 {
                     if (anim.scroll_sec_ref &&
                         (anim.scroll_sec_ref->ceil_move == pmov || anim.scroll_sec_ref->floor_move == pmov) &&
-                        (anim.permanent || anim.scroll_special_ref->scroll_type & ScrollType_Accel))
+                        (anim.permanent || anim.scroll_special_ref->scroll_type_ & BoomScrollerTypeAccel))
                     {
                         struct sector_s  *sec_ref     = anim.scroll_sec_ref;
                         line_t           *ld          = anim.target;
-                        const linetype_c *special_ref = anim.scroll_special_ref;
+                        const LineType *special_ref = anim.scroll_special_ref;
                         line_s           *line_ref    = anim.scroll_line_ref;
 
                         if (!ld || !special_ref || !line_ref)
                             continue;
 
-                        if (special_ref->line_effect & LINEFX_VectorScroll)
+                        if (special_ref->line_effect_ & kLineEffectTypeVectorScroll)
                         {
                             float tdx       = anim.dynamic_dx;
                             float tdy       = anim.dynamic_dy;
-                            float heightref = special_ref->scroll_type & ScrollType_Displace ? anim.last_height
+                            float heightref = special_ref->scroll_type_ & BoomScrollerTypeDisplace ? anim.last_height
                                                                                              : sec_ref->orig_height;
                             float sy        = tdy * ((sec_ref->f_h + sec_ref->c_h) - heightref);
                             float sx        = tdx * ((sec_ref->f_h + sec_ref->c_h) - heightref);
-                            if (r_doubleframes.d && special_ref->scroll_type & ScrollType_Displace)
+                            if (r_doubleframes.d && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
                             {
                                 sy *= 2;
                                 sx *= 2;
@@ -1543,15 +1543,15 @@ void P_RunActivePlanes(void)
                                 }
                             }
                         }
-                        if (special_ref->line_effect & LINEFX_TaggedOffsetScroll)
+                        if (special_ref->line_effect_ & kLineEffectTypeTaggedOffsetScroll)
                         {
                             float x_speed   = anim.side0_xoffspeed;
                             float y_speed   = anim.side0_yoffspeed;
-                            float heightref = special_ref->scroll_type & ScrollType_Displace ? anim.last_height
+                            float heightref = special_ref->scroll_type_ & BoomScrollerTypeDisplace ? anim.last_height
                                                                                              : sec_ref->orig_height;
                             float sy        = x_speed * ((sec_ref->f_h + sec_ref->c_h) - heightref);
                             float sx        = y_speed * ((sec_ref->f_h + sec_ref->c_h) - heightref);
-                            if (r_doubleframes.d && special_ref->scroll_type & ScrollType_Displace)
+                            if (r_doubleframes.d && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
                             {
                                 sy *= 2;
                                 sx *= 2;

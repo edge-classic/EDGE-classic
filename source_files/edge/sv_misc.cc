@@ -524,7 +524,7 @@ void SV_LightCreateElems(int num_elems)
         light_t *cur = P_NewLight();
 
         // initialise defaults
-        cur->type   = &sectortypes.Lookup(0)->l;
+        cur->type   = &sectortypes.Lookup(0)->l_;
         cur->sector = sectors + 0;
     }
 }
@@ -784,7 +784,7 @@ bool SR_LightGetType(void *storage, int index, void *extra)
 {
     (void)extra;
 
-    const lightdef_c **dest = (const lightdef_c **)storage + index;
+    const LightSpecialDefinition **dest = (const LightSpecialDefinition **)storage + index;
 
     int         number;
     const char *str;
@@ -804,13 +804,13 @@ bool SR_LightGetType(void *storage, int index, void *extra)
 
     if (str[0] == 'S')
     {
-        const sectortype_c *special = P_LookupSectorType(number);
-        (*dest)                     = &special->l;
+        const SectorType *special = P_LookupSectorType(number);
+        (*dest)                     = &special->l_;
     }
     else if (str[0] == 'L')
     {
-        const linetype_c *special = P_LookupLineType(number);
-        (*dest)                   = &special->l;
+        const LineType *special = P_LookupLineType(number);
+        (*dest)                   = &special->l_;
     }
     else
         I_Error("SR_LightGetType: invalid lighttype `%s'\n", str);
@@ -832,7 +832,7 @@ bool SR_LightGetType(void *storage, int index, void *extra)
 //
 void SR_LightPutType(void *storage, int index, void *extra)
 {
-    const lightdef_c     *src = ((const lightdef_c **)storage)[index];
+    const LightSpecialDefinition     *src = ((const LightSpecialDefinition **)storage)[index];
 
     if (!src)
     {
@@ -843,9 +843,9 @@ void SR_LightPutType(void *storage, int index, void *extra)
     // look for it in the line types
     for (auto ln : linetypes)
     {
-        if (src == &ln->l)
+        if (src == &ln->l_)
         {
-            std::string s = epi::StringFormat("L:%d", ln->number);
+            std::string s = epi::StringFormat("L:%d", ln->number_);
             SV_PutString(s.c_str());
             return;
         }
@@ -854,9 +854,9 @@ void SR_LightPutType(void *storage, int index, void *extra)
     // look for it in the sector types
     for (auto sec : sectortypes)
     {
-        if (src == &sec->l)
+        if (src == &sec->l_)
         {
-            std::string s = epi::StringFormat("S:%d", sec->number);
+            std::string s = epi::StringFormat("S:%d", sec->number_);
             SV_PutString(s.c_str());
             return;
         }
@@ -1079,7 +1079,7 @@ void SR_TipPutString(void *storage, int index, void *extra)
 
 bool SR_PlaneMoveGetType(void *storage, int index, void *extra)
 {
-    const movplanedef_c **dest = (const movplanedef_c **)storage + index;
+    const PlaneMoverDefinition **dest = (const PlaneMoverDefinition **)storage + index;
 
     int         number;
     bool        is_ceil;
@@ -1109,18 +1109,18 @@ bool SR_PlaneMoveGetType(void *storage, int index, void *extra)
 
     if (str[0] == 'S')
     {
-        const sectortype_c *special = P_LookupSectorType(number);
-        (*dest)                     = is_ceil ? &special->c : &special->f;
+        const SectorType *special = P_LookupSectorType(number);
+        (*dest)                     = is_ceil ? &special->c_ : &special->f_;
     }
     else if (str[0] == 'L')
     {
-        const linetype_c *special = P_LookupLineType(number);
-        (*dest)                   = is_ceil ? &special->c : &special->f;
+        const LineType *special = P_LookupLineType(number);
+        (*dest)                   = is_ceil ? &special->c_ : &special->f_;
     }
     else if (str[0] == 'D')
     {
         // FIXME: this ain't gonna work, freddy
-        (*dest) = is_ceil ? &donut[number].c : &donut[number].f;
+        (*dest) = is_ceil ? &donut[number].c_ : &donut[number].f_;
     }
     else
         I_Error("SR_PlaneMoveGetType: invalid srctype `%s'\n", str);
@@ -1135,14 +1135,14 @@ bool SR_PlaneMoveGetType(void *storage, int index, void *extra)
 //   <line/sec>  `:'  <floor/ceil>  `:'  <ddf num>
 //
 // The first field contains `L' if the movplanedef_c is within a
-// linetype_c, `S' for a sectortype_c, or `D' for the donut (which
+// LineType, `S' for a SectorType, or `D' for the donut (which
 // prolly won't work yet).  The second field is `F' for the floor
 // field in the line/sectortype, or `C' for the ceiling field.  The
 // last value is the line/sector DDF number.
 //
 void SR_PlaneMovePutType(void *storage, int index, void *extra)
 {
-    const movplanedef_c *src = ((const movplanedef_c **)storage)[index];
+    const PlaneMoverDefinition *src = ((const PlaneMoverDefinition **)storage)[index];
 
     if (!src)
     {
@@ -1155,13 +1155,13 @@ void SR_PlaneMovePutType(void *storage, int index, void *extra)
         int i;
         for (i = 0; i < 2; i++)
         {
-            if (src == &donut[i].f)
+            if (src == &donut[i].f_)
             {
                 std::string s = epi::StringFormat("D:F:%d", i);
                 SV_PutString(s.c_str());
                 return;
             }
-            else if (src == &donut[i].c)
+            else if (src == &donut[i].c_)
             {
                 std::string s = epi::StringFormat("D:C:%d", i);
                 SV_PutString(s.c_str());
@@ -1173,16 +1173,16 @@ void SR_PlaneMovePutType(void *storage, int index, void *extra)
     // check all the line types
     for (auto ln : linetypes)
     {
-        if (src == &ln->f)
+        if (src == &ln->f_)
         {
-            std::string s = epi::StringFormat("L:F:%d", ln->number);
+            std::string s = epi::StringFormat("L:F:%d", ln->number_);
             SV_PutString(s.c_str());
             return;
         }
 
-        if (src == &ln->c)
+        if (src == &ln->c_)
         {
-            std::string s = epi::StringFormat("L:C:%d", ln->number);
+            std::string s = epi::StringFormat("L:C:%d", ln->number_);
             SV_PutString(s.c_str());
             return;
         }
@@ -1191,16 +1191,16 @@ void SR_PlaneMovePutType(void *storage, int index, void *extra)
     // check all the sector types
     for (auto sec : sectortypes)
     {
-        if (src == &sec->f)
+        if (src == &sec->f_)
         {
-            std::string s = epi::StringFormat("S:F:%d", sec->number);
+            std::string s = epi::StringFormat("S:F:%d", sec->number_);
             SV_PutString(s.c_str());
             return;
         }
 
-        if (src == &sec->c)
+        if (src == &sec->c_)
         {
-            std::string s = epi::StringFormat("S:C:%d", sec->number);
+            std::string s = epi::StringFormat("S:C:%d", sec->number_);
             SV_PutString(s.c_str());
             return;
         }
@@ -1214,7 +1214,7 @@ void SR_PlaneMovePutType(void *storage, int index, void *extra)
 
 bool SR_SliderGetInfo(void *storage, int index, void *extra)
 {
-    const sliding_door_c **dest = (const sliding_door_c **)storage + index;
+    const SlidingDoor **dest = (const SlidingDoor **)storage + index;
     const char            *str;
 
     str = SV_GetString();
@@ -1228,9 +1228,9 @@ bool SR_SliderGetInfo(void *storage, int index, void *extra)
     if (str[0] != ':')
         I_Error("SR_SliderGetInfo: invalid special `%s'\n", str);
 
-    const linetype_c *ld_type = P_LookupLineType(strtol(str + 1, nullptr, 0));
+    const LineType *ld_type = P_LookupLineType(strtol(str + 1, nullptr, 0));
 
-    (*dest) = &ld_type->s;
+    (*dest) = &ld_type->s_;
 
     SV_FreeString(str);
     return true;
@@ -1242,7 +1242,7 @@ bool SR_SliderGetInfo(void *storage, int index, void *extra)
 //
 void SR_SliderPutInfo(void *storage, int index, void *extra)
 {
-    const sliding_door_c *src = ((const sliding_door_c **)storage)[index];
+    const SlidingDoor *src = ((const SlidingDoor **)storage)[index];
 
     if (!src)
     {
@@ -1254,9 +1254,9 @@ void SR_SliderPutInfo(void *storage, int index, void *extra)
 
     for (auto ld_type : linetypes)
     {
-        if (src == &ld_type->s)
+        if (src == &ld_type->s_)
         {
-            std::string s = epi::StringFormat(":%d", ld_type->number);
+            std::string s = epi::StringFormat(":%d", ld_type->number_);
             SV_PutString(s.c_str());
             return;
         }

@@ -105,7 +105,7 @@ typedef struct region_properties_s
 
     // special type (e.g. damaging)
     int                 type;
-    const sectortype_c *special;
+    const SectorType *special;
     bool                secret_found = false;
 
     // -KM- 1998/10/29 Added gravity + friction
@@ -201,7 +201,7 @@ typedef struct extrafloor_s
 
     // type of extrafloor this is.  Only nullptr for unused extrafloors.
     // This value is cached pointer to ef_line->special->ef.
-    const extrafloordef_c *ef_info;
+    const ExtraFloorDefinition *ef_info;
 
     // extrafloor linedef (frontsector == control sector).  Only nullptr
     // for unused extrafloors.
@@ -401,7 +401,7 @@ typedef struct line_s
     int tag;
     int count;
 
-    const linetype_c *special;
+    const LineType *special;
 
     // Visual appearance: SideDefs.
     // side[1] will be nullptr if one sided.
@@ -440,7 +440,7 @@ typedef struct line_s
 
     vgap_t *gaps;
 
-    const linetype_c *slide_door;
+    const LineType *slide_door;
 
     // slider thinker, normally nullptr
     struct slider_move_s *slider_move;
@@ -556,7 +556,7 @@ typedef struct secanim_s
 {
     sector_t         *target             = nullptr;
     struct sector_s  *scroll_sec_ref     = nullptr;
-    const linetype_c *scroll_special_ref = nullptr;
+    const LineType *scroll_special_ref = nullptr;
     line_s           *scroll_line_ref    = nullptr;
     HMM_Vec2            floor_scroll       = {{0, 0}};
     HMM_Vec2            ceil_scroll        = {{0, 0}};
@@ -569,7 +569,7 @@ typedef struct lineanim_s
 {
     line_t           *target             = nullptr;
     struct sector_s  *scroll_sec_ref     = nullptr;
-    const linetype_c *scroll_special_ref = nullptr;
+    const LineType *scroll_special_ref = nullptr;
     line_s           *scroll_line_ref    = nullptr;
     float             side0_xspeed       = 0.0;
     float             side1_xspeed       = 0.0;

@@ -126,7 +126,7 @@ void G_PlayerFinishLevel(player_t *p, bool keep_cards)
 
         p->keep_powers = 0;
 
-        p->cards = KF_NONE;
+        p->cards = kDoorKeyNone;
 
         p->mo->flags &= ~MF_FUZZY; // cancel invisibility
     }
@@ -174,7 +174,7 @@ void player_s::Reborn()
 
     keep_powers = 0;
     totalarmour = 0;
-    cards       = KF_NONE;
+    cards       = kDoorKeyNone;
 
     ready_wp   = WPSEL_None;
     pending_wp = WPSEL_NoChange;
@@ -393,7 +393,7 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
 
     // give all cards in death match mode
     if (DEATHMATCH())
-        p->cards = KF_MASK;
+        p->cards = kDoorKeyBitmask;
 
     // -AJA- in COOP, all players are on the same side
     if (COOP_MATCH())

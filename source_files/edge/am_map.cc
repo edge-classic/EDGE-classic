@@ -685,7 +685,7 @@ static void DrawKeyOnLine(mline_t *ml, int theKey, RGBAColor rgb = SG_WHITE_RGBA
     std::string              CleanName;
     CleanName.clear();
 
-    if (theKey == KF_STRICTLY_ALL)
+    if (theKey == kDoorKeyStrictlyAllKeys)
     {
         CleanName = "All keys";
     }
@@ -902,64 +902,64 @@ static void AM_WalkSeg(seg_t *seg)
             // Lobo 2022: give keyed doors the colour of the required key
             if (line->special)
             {
-                if (line->special->keys)
+                if (line->special->keys_)
                 {
-                    if (line->special->keys & KF_STRICTLY_ALL)
+                    if (line->special->keys_ & kDoorKeyStrictlyAllKeys)
                     {
                         DrawMLineDoor(&l, SG_PURPLE_RGBA32); // purple
-                        DrawKeyOnLine(&l, KF_STRICTLY_ALL);
+                        DrawKeyOnLine(&l, kDoorKeyStrictlyAllKeys);
                     }
-                    else if (line->special->keys & KF_BlueCard || line->special->keys & KF_BlueSkull)
+                    else if (line->special->keys_ & kDoorKeyBlueCard || line->special->keys_ & kDoorKeyBlueSkull)
                     {
                         DrawMLineDoor(&l, SG_BLUE_RGBA32); // blue
-                        if (line->special->keys & (KF_BlueSkull | KF_BlueCard))
+                        if (line->special->keys_ & (kDoorKeyBlueSkull | kDoorKeyBlueCard))
                         {
-                            DrawKeyOnLine(&l, KF_BlueCard);
-                            DrawKeyOnLine(&l, KF_BlueSkull);
+                            DrawKeyOnLine(&l, kDoorKeyBlueCard);
+                            DrawKeyOnLine(&l, kDoorKeyBlueSkull);
                         }
-                        else if (line->special->keys & KF_BlueCard)
-                            DrawKeyOnLine(&l, KF_BlueCard);
+                        else if (line->special->keys_ & kDoorKeyBlueCard)
+                            DrawKeyOnLine(&l, kDoorKeyBlueCard);
                         else
-                            DrawKeyOnLine(&l, KF_BlueSkull);
+                            DrawKeyOnLine(&l, kDoorKeyBlueSkull);
                     }
-                    else if (line->special->keys & KF_YellowCard || line->special->keys & KF_YellowSkull)
+                    else if (line->special->keys_ & kDoorKeyYellowCard || line->special->keys_ & kDoorKeyYellowSkull)
                     {
                         DrawMLineDoor(&l, SG_YELLOW_RGBA32); // yellow
-                        if (line->special->keys & (KF_YellowSkull | KF_YellowCard))
+                        if (line->special->keys_ & (kDoorKeyYellowSkull | kDoorKeyYellowCard))
                         {
-                            DrawKeyOnLine(&l, KF_YellowCard);
-                            DrawKeyOnLine(&l, KF_YellowSkull);
+                            DrawKeyOnLine(&l, kDoorKeyYellowCard);
+                            DrawKeyOnLine(&l, kDoorKeyYellowSkull);
                         }
-                        else if (line->special->keys & KF_YellowCard)
-                            DrawKeyOnLine(&l, KF_YellowCard);
+                        else if (line->special->keys_ & kDoorKeyYellowCard)
+                            DrawKeyOnLine(&l, kDoorKeyYellowCard);
                         else
-                            DrawKeyOnLine(&l, KF_YellowSkull);
+                            DrawKeyOnLine(&l, kDoorKeyYellowSkull);
                     }
-                    else if (line->special->keys & KF_RedCard || line->special->keys & KF_RedSkull)
+                    else if (line->special->keys_ & kDoorKeyRedCard || line->special->keys_ & kDoorKeyRedSkull)
                     {
                         DrawMLineDoor(&l, SG_RED_RGBA32); // red
-                        if (line->special->keys & (KF_RedSkull | KF_RedCard))
+                        if (line->special->keys_ & (kDoorKeyRedSkull | kDoorKeyRedCard))
                         {
-                            DrawKeyOnLine(&l, KF_RedCard);
-                            DrawKeyOnLine(&l, KF_RedSkull);
+                            DrawKeyOnLine(&l, kDoorKeyRedCard);
+                            DrawKeyOnLine(&l, kDoorKeyRedSkull);
                         }
-                        else if (line->special->keys & KF_RedCard)
-                            DrawKeyOnLine(&l, KF_RedCard);
+                        else if (line->special->keys_ & kDoorKeyRedCard)
+                            DrawKeyOnLine(&l, kDoorKeyRedCard);
                         else
-                            DrawKeyOnLine(&l, KF_RedSkull);
+                            DrawKeyOnLine(&l, kDoorKeyRedSkull);
                     }
-                    else if (line->special->keys & KF_GreenCard || line->special->keys & KF_GreenSkull)
+                    else if (line->special->keys_ & kDoorKeyGreenCard || line->special->keys_ & kDoorKeyGreenSkull)
                     {
                         DrawMLineDoor(&l, SG_GREEN_RGBA32); // green
-                        if (line->special->keys & (KF_GreenSkull | KF_GreenCard))
+                        if (line->special->keys_ & (kDoorKeyGreenSkull | kDoorKeyGreenCard))
                         {
-                            DrawKeyOnLine(&l, KF_GreenCard);
-                            DrawKeyOnLine(&l, KF_GreenSkull);
+                            DrawKeyOnLine(&l, kDoorKeyGreenCard);
+                            DrawKeyOnLine(&l, kDoorKeyGreenSkull);
                         }
-                        else if (line->special->keys & KF_GreenCard)
-                            DrawKeyOnLine(&l, KF_GreenCard);
+                        else if (line->special->keys_ & kDoorKeyGreenCard)
+                            DrawKeyOnLine(&l, kDoorKeyGreenCard);
                         else
-                            DrawKeyOnLine(&l, KF_GreenSkull);
+                            DrawKeyOnLine(&l, kDoorKeyGreenSkull);
                     }
                     else
                     {

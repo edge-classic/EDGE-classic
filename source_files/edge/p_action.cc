@@ -103,7 +103,7 @@ void P_ActActivateLineType(mobj_t *mo)
 
     // Note the `nullptr' here: this prevents the activation from failing
     // because the object isn't a PLAYER, for example.
-    P_RemoteActivation(nullptr, values[0], values[1], 0, line_Any);
+    P_RemoteActivation(nullptr, values[0], values[1], 0, kLineTriggerAny);
 }
 
 //
@@ -3450,7 +3450,7 @@ void P_ActKeenDie(mobj_t *mo)
 
     L_WriteDebug("P_ActKeenDie: ALL DEAD, activating...\n");
 
-    P_RemoteActivation(nullptr, 2 /* door type */, 666 /* tag */, 0, line_Any);
+    P_RemoteActivation(nullptr, 2 /* door type */, 666 /* tag */, 0, kLineTriggerAny);
 }
 
 void P_ActCheckMoving(mobj_t *mo)

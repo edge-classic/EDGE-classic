@@ -974,7 +974,7 @@ void RAD_ActActivateLinetype(rad_trigger_t *R, void *param)
 
     player_t *player = GetWhoDunnit(R);
 
-    P_RemoteActivation(player ? player->mo : nullptr, t->typenum, t->tag, 0, line_Any);
+    P_RemoteActivation(player ? player->mo : nullptr, t->typenum, t->tag, 0, kLineTriggerAny);
 }
 
 void RAD_ActUnblockLines(rad_trigger_t *R, void *param)

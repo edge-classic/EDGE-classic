@@ -125,7 +125,7 @@ void G_BigStuff(void);
 void G_Ticker(void);
 bool G_Responder(event_t *ev);
 
-bool G_CheckWhenAppear(when_appear_e appear);
+bool G_CheckWhenAppear(AppearsFlag appear);
 
 extern const MapDefinition *currmap;
 extern const MapDefinition *nextmap;

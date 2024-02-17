@@ -112,7 +112,7 @@ typedef struct s_thing_s
     float   slope = 0;
     int     tag   = 0;
 
-    when_appear_e appear = WNAP_None;
+    AppearsFlag appear = kAppearsWhenNone;
 
     // -AJA- 1999/09/11: since the RSCRIPT lump can be loaded before
     //       DDF* lumps, we can't store a pointer to a mobjtype_c here
@@ -499,7 +499,7 @@ typedef struct rad_script_s
     char *mapid = nullptr;
 
     // When appears
-    when_appear_e appear = WNAP_None;
+    AppearsFlag appear = kAppearsWhenNone;
 
     int min_players = 0;
     int max_players = 0;

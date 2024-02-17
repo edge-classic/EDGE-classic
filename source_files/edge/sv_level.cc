@@ -550,14 +550,14 @@ void SV_ExfloorFinaliseElems(void)
         if (ef->ef_line == nullptr)
             continue;
 
-        if (!ef->ef_line->special || !(ef->ef_line->special->ef.type & EXFL_Present))
+        if (!ef->ef_line->special || !(ef->ef_line->special->ef_.type_ & kExtraFloorTypePresent))
         {
             I_Warning("LOADGAME: Missing Extrafloor Special !\n");
-            ef->ef_info = &linetypes.Lookup(0)->ef;
+            ef->ef_info = &linetypes.Lookup(0)->ef_;
             continue;
         }
 
-        ef->ef_info = &ef->ef_line->special->ef;
+        ef->ef_info = &ef->ef_line->special->ef_;
     }
 }
 
@@ -841,7 +841,7 @@ void SR_LevelPutColmap(void *storage, int index, void *extra)
 
 bool SR_LineGetSpecial(void *storage, int index, void *extra)
 {
-    const linetype_c **dest = (const linetype_c **)storage + index;
+    const LineType **dest = (const LineType **)storage + index;
     const char        *str;
 
     str = SV_GetString();
@@ -869,7 +869,7 @@ bool SR_LineGetSpecial(void *storage, int index, void *extra)
 //
 void SR_LinePutSpecial(void *storage, int index, void *extra)
 {
-    const linetype_c *src = ((const linetype_c **)storage)[index];
+    const LineType *src = ((const LineType **)storage)[index];
 
     if (!src)
     {
@@ -877,14 +877,14 @@ void SR_LinePutSpecial(void *storage, int index, void *extra)
         return;
     }
 
-    std::string s = epi::StringFormat(":%d", src->number);
+    std::string s = epi::StringFormat(":%d", src->number_);
 
     SV_PutString(s.c_str());
 }
 
 bool SR_SectorGetSpecial(void *storage, int index, void *extra)
 {
-    const sectortype_c **dest = (const sectortype_c **)storage + index;
+    const SectorType **dest = (const SectorType **)storage + index;
     const char          *str;
 
     str = SV_GetString();
@@ -912,7 +912,7 @@ bool SR_SectorGetSpecial(void *storage, int index, void *extra)
 //
 void SR_SectorPutSpecial(void *storage, int index, void *extra)
 {
-    const sectortype_c *src = ((const sectortype_c **)storage)[index];
+    const SectorType *src = ((const SectorType **)storage)[index];
 
     if (!src)
     {
@@ -920,7 +920,7 @@ void SR_SectorPutSpecial(void *storage, int index, void *extra)
         return;
     }
 
-    std::string s = epi::StringFormat(":%d", src->number);
+    std::string s = epi::StringFormat(":%d", src->number_);
 
     SV_PutString(s.c_str());
 }

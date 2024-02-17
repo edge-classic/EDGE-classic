@@ -31,62 +31,62 @@
 
 #define DDF_SectHashFunc(x) (((x) + LOOKUP_CACHESIZE) % LOOKUP_CACHESIZE)
 
-static sectortype_c *dynamic_sector;
+static SectorType *dynamic_sector;
 
-sectortype_container_c sectortypes;  // <-- User-defined
+SectorTypeContainer sectortypes;  // <-- User-defined
 
-static sectortype_c *default_sector;
+static SectorType *default_sector;
 
 void        DDF_SectGetSpecialFlags(const char *info, void *storage);
 static void DDF_SectMakeCrush(const char *info);
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_sector
-static sectortype_c dummy_sector;
+static SectorType dummy_sector;
 
 static const commandlist_t sect_commands[] = {
     // sub-commands
-    DDF_SUB_LIST("FLOOR", f, floor_commands),
-    DDF_SUB_LIST("CEILING", c, floor_commands),
-    DDF_SUB_LIST("DAMAGE", damage, damage_commands),
+    DDF_SUB_LIST("FLOOR", f_, floor_commands),
+    DDF_SUB_LIST("CEILING", c_, floor_commands),
+    DDF_SUB_LIST("DAMAGE", damage_, damage_commands),
 
-    DF("SECRET", secret, DDF_MainGetBoolean),
-    DF("HUB", hub, DDF_MainGetBoolean),
-    DF("SPECIAL", special_flags, DDF_SectGetSpecialFlags),
+    DF("SECRET", secret_, DDF_MainGetBoolean),
+    DF("HUB", hub_, DDF_MainGetBoolean),
+    DF("SPECIAL", special_flags_, DDF_SectGetSpecialFlags),
 
-    DF("LIGHT_TYPE", l.type, DDF_SectGetLighttype),
-    DF("LIGHT_LEVEL", l.level, DDF_MainGetNumeric),
-    DF("LIGHT_DARKTIME", l.darktime, DDF_MainGetTime),
-    DF("LIGHT_BRIGHTTIME", l.brighttime, DDF_MainGetTime),
-    DF("LIGHT_CHANCE", l.chance, DDF_MainGetPercent),
-    DF("LIGHT_SYNC", l.sync, DDF_MainGetTime),
-    DF("LIGHT_STEP", l.step, DDF_MainGetNumeric),
-    DF("EXIT", e_exit, DDF_SectGetExit),
-    DF("USE_COLOURMAP", use_colourmap, DDF_MainGetColourmap),
-    DF("GRAVITY", gravity, DDF_MainGetFloat),
-    DF("FRICTION", friction, DDF_MainGetFloat),
-    DF("VISCOSITY", viscosity, DDF_MainGetFloat),
-    DF("DRAG", drag, DDF_MainGetFloat),
-    DF("AMBIENT_SOUND", ambient_sfx, DDF_MainLookupSound),
-    DF("SPLASH_SOUND", splash_sfx, DDF_MainLookupSound),
-    DF("WHEN_APPEAR", appear, DDF_MainGetWhenAppear),
-    DF("PUSH_ANGLE", push_angle, DDF_MainGetAngle),
-    DF("PUSH_SPEED", push_speed, DDF_MainGetFloat),
-    DF("PUSH_ZSPEED", push_zspeed, DDF_MainGetFloat),
+    DF("LIGHT_TYPE", l_.type_, DDF_SectGetLighttype),
+    DF("LIGHT_LEVEL", l_.level_, DDF_MainGetNumeric),
+    DF("LIGHT_DARKTIME", l_.darktime_, DDF_MainGetTime),
+    DF("LIGHT_BRIGHTTIME", l_.brighttime_, DDF_MainGetTime),
+    DF("LIGHT_CHANCE", l_.chance_, DDF_MainGetPercent),
+    DF("LIGHT_SYNC", l_.sync_, DDF_MainGetTime),
+    DF("LIGHT_STEP", l_.step_, DDF_MainGetNumeric),
+    DF("EXIT", e_exit_, DDF_SectGetExit),
+    DF("USE_COLOURMAP", use_colourmap_, DDF_MainGetColourmap),
+    DF("GRAVITY", gravity_, DDF_MainGetFloat),
+    DF("FRICTION", friction_, DDF_MainGetFloat),
+    DF("VISCOSITY", viscosity_, DDF_MainGetFloat),
+    DF("DRAG", drag_, DDF_MainGetFloat),
+    DF("AMBIENT_SOUND", ambient_sfx_, DDF_MainLookupSound),
+    DF("SPLASH_SOUND", splash_sfx_, DDF_MainLookupSound),
+    DF("WHEN_APPEAR", appear_, DDF_MainGetWhenAppear),
+    DF("PUSH_ANGLE", push_angle_, DDF_MainGetAngle),
+    DF("PUSH_SPEED", push_speed_, DDF_MainGetFloat),
+    DF("PUSH_ZSPEED", push_zspeed_, DDF_MainGetFloat),
 
     // -AJA- backwards compatibility cruft...
-    DF("DAMAGE", damage.nominal, DDF_MainGetFloat),
-    DF("DAMAGETIME", damage.delay, DDF_MainGetTime),
+    DF("DAMAGE", damage_.nominal, DDF_MainGetFloat),
+    DF("DAMAGETIME", damage_.delay, DDF_MainGetTime),
 
-    DF("REVERB TYPE", reverb_type, DDF_MainGetString),
-    DF("REVERB RATIO", reverb_ratio, DDF_MainGetFloat),
-    DF("REVERB DELAY", reverb_delay, DDF_MainGetFloat),
+    DF("REVERB TYPE", reverb_type_, DDF_MainGetString),
+    DF("REVERB RATIO", reverb_ratio_, DDF_MainGetFloat),
+    DF("REVERB DELAY", reverb_delay_, DDF_MainGetFloat),
 
-    DF("FLOOR_BOB", floor_bob, DDF_MainGetFloat),
-    DF("CEILING_BOB", ceiling_bob, DDF_MainGetFloat),
+    DF("FLOOR_BOB", floor_bob_, DDF_MainGetFloat),
+    DF("CEILING_BOB", ceiling_bob_, DDF_MainGetFloat),
 
-    DF("FOG_COLOR", fog_cmap, DDF_MainGetColourmap),
-    DF("FOG_DENSITY", fog_density, DDF_MainGetPercent),
+    DF("FOG_COLOR", fog_cmap_, DDF_MainGetColourmap),
+    DF("FOG_DENSITY", fog_density_, DDF_MainGetPercent),
 
     DDF_CMD_END};
 
@@ -121,8 +121,8 @@ static void SectorStartEntry(const char *name, bool extend)
     }
 
     // not found, create a new one
-    dynamic_sector         = new sectortype_c;
-    dynamic_sector->number = number;
+    dynamic_sector          = new SectorType;
+    dynamic_sector->number_ = number;
 
     sectortypes.push_back(dynamic_sector);
 }
@@ -133,7 +133,7 @@ static void SectorDoTemplate(const char *contents)
     if (number == 0)
         DDF_Error("Bad sectortype number for template: %s\n", contents);
 
-    sectortype_c *other = sectortypes.Lookup(number);
+    SectorType *other = sectortypes.Lookup(number);
 
     if (!other || other == dynamic_sector)
         DDF_Error("Unknown sector template: '%s'\n", contents);
@@ -177,8 +177,8 @@ static void SectorParseField(const char *field, const char *contents, int index,
 //
 static void SectorFinishEntry(void)
 {
-    if (dynamic_sector->fog_cmap)
-        dynamic_sector->fog_color = dynamic_sector->fog_cmap->gl_color_;
+    if (dynamic_sector->fog_cmap_)
+        dynamic_sector->fog_color_ = dynamic_sector->fog_cmap_->gl_color_;
 }
 
 //
@@ -212,8 +212,8 @@ void DDF_SectorInit(void)
 {
     sectortypes.Reset();
 
-    default_sector         = new sectortype_c;
-    default_sector->number = 0;
+    default_sector          = new SectorType;
+    default_sector->number_ = 0;
 }
 
 //
@@ -224,15 +224,15 @@ void DDF_SectorCleanUp(void) { sectortypes.shrink_to_fit(); }
 //----------------------------------------------------------------------------
 
 static specflags_t sector_specials[] = {
-    {"WHOLE_REGION", SECSP_WholeRegion, 0},
-    {"PROPORTIONAL", SECSP_Proportional, 0},
-    {"PUSH_ALL", SECSP_PushAll, 0},
-    {"PUSH_CONSTANT", SECSP_PushConstant, 0},
-    {"AIRLESS", SECSP_AirLess, 0},
-    {"SWIM", SECSP_Swimming, 0},
-    {"SUBMERGED_SFX", SECSP_SubmergedSFX, 0},
-    {"VACUUM_SFX", SECSP_VacuumSFX, 0},
-    {"REVERB_SFX", SECSP_ReverbSFX, 0},
+    {"WHOLE_REGION", kSectorFlagWholeRegion, 0},
+    {"PROPORTIONAL", kSectorFlagProportional, 0},
+    {"PUSH_ALL", kSectorFlagPushAll, 0},
+    {"PUSH_CONSTANT", kSectorFlagPushConstant, 0},
+    {"AIRLESS", kSectorFlagAirLess, 0},
+    {"SWIM", kSectorFlagSwimming, 0},
+    {"SUBMERGED_SFX", kSectorFlagSubmergedSFX, 0},
+    {"VACUUM_SFX", kSectorFlagVacuumSFX, 0},
+    {"REVERB_SFX", kSectorFlagReverbSFX, 0},
     {nullptr, 0, 0}};
 
 //
@@ -242,7 +242,7 @@ static specflags_t sector_specials[] = {
 //
 void DDF_SectGetSpecialFlags(const char *info, void *storage)
 {
-    sector_flag_e *special = (sector_flag_e *)storage;
+    SectorFlag *special = (SectorFlag *)storage;
 
     int flag_value;
 
@@ -250,12 +250,12 @@ void DDF_SectGetSpecialFlags(const char *info, void *storage)
                                      false))
     {
         case CHKF_Positive:
-            *special = (sector_flag_e)(*special | flag_value);
+            *special = (SectorFlag)(*special | flag_value);
 
             break;
 
         case CHKF_Negative:
-            *special = (sector_flag_e)(*special & ~flag_value);
+            *special = (SectorFlag)(*special & ~flag_value);
 
             break;
 
@@ -266,12 +266,12 @@ void DDF_SectGetSpecialFlags(const char *info, void *storage)
     }
 }
 
-static specflags_t exit_types[] = {{"NONE", EXIT_None, 0},
-                                   {"NORMAL", EXIT_Normal, 0},
-                                   {"SECRET", EXIT_Secret, 0},
+static specflags_t exit_types[] = {{"NONE", kExitTypeNone, 0},
+                                   {"NORMAL", kExitTypeNormal, 0},
+                                   {"SECRET", kExitTypeSecret, 0},
 
                                    // -AJA- backwards compatibility cruft...
-                                   {"!EXIT", EXIT_Normal, 0},
+                                   {"!EXIT", kExitTypeNormal, 0},
                                    {nullptr, 0, 0}};
 
 //
@@ -300,10 +300,14 @@ void DDF_SectGetExit(const char *info, void *storage)
 }
 
 static specflags_t light_types[] = {
-    {"NONE", LITE_None, 0},           {"SET", LITE_Set, 0},
-    {"FADE", LITE_Fade, 0},           {"STROBE", LITE_Strobe, 0},
-    {"FLASH", LITE_Flash, 0},         {"GLOW", LITE_Glow, 0},
-    {"FLICKER", LITE_FireFlicker, 0}, {nullptr, 0, 0}};
+    {"NONE", kLightSpecialTypeNone, 0},
+    {"SET", kLightSpecialTypeSet, 0},
+    {"FADE", kLightSpecialTypeFade, 0},
+    {"STROBE", kLightSpecialTypeStrobe, 0},
+    {"FLASH", kLightSpecialTypeFlash, 0},
+    {"GLOW", kLightSpecialTypeGlow, 0},
+    {"FLICKER", kLightSpecialTypeFireFlicker, 0},
+    {nullptr, 0, 0}};
 
 //
 // DDF_SectGetLighttype
@@ -331,14 +335,14 @@ void DDF_SectGetLighttype(const char *info, void *storage)
 }
 
 static specflags_t movement_types[] = {
-    {"MOVE", mov_Once, 0},
-    {"MOVEWAITRETURN", mov_MoveWaitReturn, 0},
-    {"CONTINUOUS", mov_Continuous, 0},
-    {"PLAT", mov_Plat, 0},
-    {"BUILDSTAIRS", mov_Stairs, 0},
-    {"STOP", mov_Stop, 0},
-    {"TOGGLE", mov_Toggle, 0},
-    {"ELEVATOR", mov_Elevator, 0},
+    {"MOVE", kPlaneMoverOnce, 0},
+    {"MOVEWAITRETURN", kPlaneMoverMoveWaitReturn, 0},
+    {"CONTINUOUS", kPlaneMoverContinuous, 0},
+    {"PLAT", kPlaneMoverPlatform, 0},
+    {"BUILDSTAIRS", kPlaneMoverStairs, 0},
+    {"STOP", kPlaneMoverStop, 0},
+    {"TOGGLE", kPlaneMoverToggle, 0},
+    {"ELEVATOR", kPlaneMoverElevator, 0},
     {nullptr, 0, 0}};
 
 //
@@ -367,35 +371,55 @@ void DDF_SectGetMType(const char *info, void *storage)
 }
 
 static specflags_t reference_types[] = {
-    {"ABSOLUTE", REF_Absolute, false},
+    {"ABSOLUTE", kTriggerHeightReferenceAbsolute, false},
 
-    {"FLOOR", REF_Current, false},
-    {"CEILING", REF_Current + REF_CEILING, false},
-
-    {"TRIGGERFLOOR", REF_Trigger, false},
-    {"TRIGGERCEILING", REF_Trigger + REF_CEILING, false},
-
-    // Note that LOSURROUNDINGFLOOR has the REF_INCLUDE flag, but the
-    // others do not.  It's there to maintain backwards compatibility.
-    //
-    {"LOSURROUNDINGCEILING", REF_Surrounding + REF_CEILING, false},
-    {"HISURROUNDINGCEILING", REF_Surrounding + REF_CEILING + REF_HIGHEST,
+    {"FLOOR", kTriggerHeightReferenceCurrent, false},
+    {"CEILING", kTriggerHeightReferenceCurrent + kTriggerHeightReferenceCeiling,
      false},
-    {"LOSURROUNDINGFLOOR", REF_Surrounding + REF_INCLUDE, false},
-    {"HISURROUNDINGFLOOR", REF_Surrounding + REF_HIGHEST, false},
 
-    // Note that REF_HIGHEST is used for the NextLowest types, and
-    // vice versa, which may seem strange.  It's because the next
+    {"TRIGGERFLOOR", kTriggerHeightReferenceTriggeringLinedef, false},
+    {"TRIGGERCEILING",
+     kTriggerHeightReferenceTriggeringLinedef + kTriggerHeightReferenceCeiling,
+     false},
+
+    // Note that LOSURROUNDINGFLOOR has the kTriggerHeightReferenceInclude flag,
+    // but the others do not.  It's there to maintain backwards compatibility.
+    //
+    {"LOSURROUNDINGCEILING",
+     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceCeiling,
+     false},
+    {"HISURROUNDINGCEILING",
+     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceCeiling +
+         kTriggerHeightReferenceHighest,
+     false},
+    {"LOSURROUNDINGFLOOR",
+     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceInclude,
+     false},
+    {"HISURROUNDINGFLOOR",
+     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceHighest,
+     false},
+
+    // Note that kTriggerHeightReferenceHighest is used for the NextLowest
+    // types, and vice versa, which may seem strange.  It's because the next
     // lowest sector is actually the highest of all adjacent sectors
     // that are lower than the current sector.
     //
-    {"NEXTLOWESTFLOOR", REF_Surrounding + REF_NEXT + REF_HIGHEST, false},
-    {"NEXTHIGHESTFLOOR", REF_Surrounding + REF_NEXT, false},
+    {"NEXTLOWESTFLOOR",
+     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext +
+         kTriggerHeightReferenceHighest,
+     false},
+    {"NEXTHIGHESTFLOOR",
+     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext, false},
     {"NEXTLOWESTCEILING",
-     REF_Surrounding + REF_NEXT + REF_CEILING + REF_HIGHEST, false},
-    {"NEXTHIGHESTCEILING", REF_Surrounding + REF_NEXT + REF_CEILING, false},
+     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext +
+         kTriggerHeightReferenceCeiling + kTriggerHeightReferenceHighest,
+     false},
+    {"NEXTHIGHESTCEILING",
+     kTriggerHeightReferenceSurrounding + kTriggerHeightReferenceNext +
+         kTriggerHeightReferenceCeiling,
+     false},
 
-    {"LOWESTBOTTOMTEXTURE", REF_LowestLoTexture, false}};
+    {"LOWESTBOTTOMTEXTURE", kTriggerHeightReferenceLowestLowTexture, false}};
 
 //
 // DDF_SectGetDestRef
@@ -410,12 +434,12 @@ void DDF_SectGetDestRef(const char *info, void *storage)
     // check for modifier flags
     if (DDF_CompareName(info, "INCLUDE") == 0)
     {
-        *dest |= REF_INCLUDE;
+        *dest |= kTriggerHeightReferenceInclude;
         return;
     }
     else if (DDF_CompareName(info, "EXCLUDE") == 0)
     {
-        *dest &= ~REF_INCLUDE;
+        *dest &= ~kTriggerHeightReferenceInclude;
         return;
     }
 
@@ -436,8 +460,8 @@ void DDF_SectGetDestRef(const char *info, void *storage)
 
 static void DDF_SectMakeCrush(const char *info)
 {
-    dynamic_sector->f.crush_damage = 10;
-    dynamic_sector->c.crush_damage = 10;
+    dynamic_sector->f_.crush_damage_ = 10;
+    dynamic_sector->c_.crush_damage_ = 10;
 }
 
 //----------------------------------------------------------------------------
@@ -445,120 +469,109 @@ static void DDF_SectMakeCrush(const char *info)
 // --> Sector type definition class
 
 //
-// sectortype_c Constructor
+// SectorType Constructor
 //
-sectortype_c::sectortype_c() : number(0) { Default(); }
+SectorType::SectorType() : number_(0) { Default(); }
 
 //
-// sectortype_c Destructor
+// SectorType Destructor
 //
-sectortype_c::~sectortype_c() {}
+SectorType::~SectorType() {}
 
 //
-// sectortype_c::CopyDetail()
+// SectorType::CopyDetail()
 //
-void sectortype_c::CopyDetail(sectortype_c &src)
+void SectorType::CopyDetail(SectorType &src)
 {
-    secret = src.secret;
-    hub    = src.hub;
+    secret_ = src.secret_;
+    hub_    = src.hub_;
 
-    gravity   = src.gravity;
-    friction  = src.friction;
-    viscosity = src.viscosity;
-    drag      = src.drag;
+    gravity_   = src.gravity_;
+    friction_  = src.friction_;
+    viscosity_ = src.viscosity_;
+    drag_      = src.drag_;
 
-    f = src.f;
-    c = src.c;
-    l = src.l;
+    f_ = src.f_;
+    c_ = src.c_;
+    l_ = src.l_;
 
-    damage = src.damage;
+    damage_ = src.damage_;
 
-    special_flags = src.special_flags;
-    e_exit        = src.e_exit;
+    special_flags_ = src.special_flags_;
+    e_exit_        = src.e_exit_;
 
-    use_colourmap = src.use_colourmap;
+    use_colourmap_ = src.use_colourmap_;
 
-    ambient_sfx = src.ambient_sfx;
-    splash_sfx  = src.splash_sfx;
+    ambient_sfx_ = src.ambient_sfx_;
+    splash_sfx_  = src.splash_sfx_;
 
-    appear = src.appear;
+    appear_ = src.appear_;
 
-    push_speed  = src.push_speed;
-    push_zspeed = src.push_zspeed;
-    push_angle  = src.push_angle;
+    push_speed_  = src.push_speed_;
+    push_zspeed_ = src.push_zspeed_;
+    push_angle_  = src.push_angle_;
 
-    reverb_type  = src.reverb_type;
-    reverb_ratio = src.reverb_ratio;
-    reverb_delay = src.reverb_delay;
+    reverb_type_  = src.reverb_type_;
+    reverb_ratio_ = src.reverb_ratio_;
+    reverb_delay_ = src.reverb_delay_;
 
-    floor_bob   = src.floor_bob;
-    ceiling_bob = src.ceiling_bob;
+    floor_bob_   = src.floor_bob_;
+    ceiling_bob_ = src.ceiling_bob_;
 
-    fog_cmap    = src.fog_cmap;
-    fog_color   = src.fog_color;
-    fog_density = src.fog_density;
+    fog_cmap_    = src.fog_cmap_;
+    fog_color_   = src.fog_color_;
+    fog_density_ = src.fog_density_;
 }
 
-//
-// sectortype_c::Default()
-//
-void sectortype_c::Default()
+void SectorType::Default()
 {
-    secret = false;
-    hub    = false;
+    secret_ = false;
+    hub_    = false;
 
-    gravity   = GRAVITY;
-    friction  = FRICTION;
-    viscosity = VISCOSITY;
-    drag      = DRAG;
+    gravity_   = GRAVITY;
+    friction_  = FRICTION;
+    viscosity_ = VISCOSITY;
+    drag_      = DRAG;
 
-    f.Default(movplanedef_c::DEFAULT_FloorSect);
-    c.Default(movplanedef_c::DEFAULT_CeilingSect);
+    f_.Default(PlaneMoverDefinition::kPlaneMoverDefaultFloorSect);
+    c_.Default(PlaneMoverDefinition::kPlaneMoverDefaultCeilingSect);
 
-    l.Default();
+    l_.Default();
 
-    damage.Default(damage_c::DEFAULT_Sector);
+    damage_.Default(damage_c::DEFAULT_Sector);
 
-    special_flags = SECSP_None;
-    e_exit        = EXIT_None;
-    use_colourmap = nullptr;
-    ambient_sfx   = nullptr;
-    splash_sfx    = nullptr;
+    special_flags_ = kSectorFlagNone;
+    e_exit_        = kExitTypeNone;
+    use_colourmap_ = nullptr;
+    ambient_sfx_   = nullptr;
+    splash_sfx_    = nullptr;
 
-    appear = DEFAULT_APPEAR;
+    appear_ = kAppearsWhenDefault;
 
-    push_speed  = 0.0f;
-    push_zspeed = 0.0f;
+    push_speed_  = 0.0f;
+    push_zspeed_ = 0.0f;
 
-    push_angle = 0;
+    push_angle_ = 0;
 
-    reverb_type  = "NONE";
-    reverb_delay = 0;
-    reverb_ratio = 0;
+    reverb_type_  = "NONE";
+    reverb_delay_ = 0;
+    reverb_ratio_ = 0;
 
-    floor_bob   = 0.0f;
-    ceiling_bob = 0.0f;
+    floor_bob_   = 0.0f;
+    ceiling_bob_ = 0.0f;
 
-    fog_cmap    = nullptr;
-    fog_color   = kRGBANoValue;
-    fog_density = 0;
+    fog_cmap_    = nullptr;
+    fog_color_   = kRGBANoValue;
+    fog_density_ = 0;
 }
 
-// --> Sector definition type container class
+SectorTypeContainer::SectorTypeContainer() { Reset(); }
 
-//
-// sectortype_container_c Constructor
-//
-sectortype_container_c::sectortype_container_c() { Reset(); }
-
-//
-// sectortype_container_c Destructor
-//
-sectortype_container_c::~sectortype_container_c()
+SectorTypeContainer::~SectorTypeContainer()
 {
     for (auto iter = begin(); iter != end(); iter++)
     {
-        sectortype_c *sec = *iter;
+        SectorType *sec = *iter;
         delete sec;
         sec = nullptr;
     }
@@ -567,26 +580,26 @@ sectortype_container_c::~sectortype_container_c()
 //
 // Looks an linetype by id, returns nullptr if line can't be found.
 //
-sectortype_c *sectortype_container_c::Lookup(const int id)
+SectorType *SectorTypeContainer::Lookup(const int id)
 {
     if (id == 0) return default_sector;
 
     int slot = DDF_SectHashFunc(id);
 
     // check the cache
-    if (lookup_cache[slot] && lookup_cache[slot]->number == id)
+    if (lookup_cache_[slot] && lookup_cache_[slot]->number_ == id)
     {
-        return lookup_cache[slot];
+        return lookup_cache_[slot];
     }
 
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        sectortype_c *s = *iter;
+        SectorType *s = *iter;
 
-        if (s->number == id)
+        if (s->number_ == id)
         {
             // update the cache
-            lookup_cache[slot] = s;
+            lookup_cache_[slot] = s;
             return s;
         }
     }
@@ -595,20 +608,20 @@ sectortype_c *sectortype_container_c::Lookup(const int id)
 }
 
 //
-// sectortype_container_c::Reset()
+// SectorTypeContainer::Reset()
 //
 // Clears down both the data and the cache
 //
-void sectortype_container_c::Reset()
+void SectorTypeContainer::Reset()
 {
     for (auto iter = begin(); iter != end(); iter++)
     {
-        sectortype_c *sec = *iter;
+        SectorType *sec = *iter;
         delete sec;
         sec = nullptr;
     }
     clear();
-    memset(lookup_cache, 0, sizeof(sectortype_c *) * LOOKUP_CACHESIZE);
+    memset(lookup_cache_, 0, sizeof(SectorType *) * LOOKUP_CACHESIZE);
 }
 
 //--- editor settings ---

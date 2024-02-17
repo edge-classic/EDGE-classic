@@ -1127,7 +1127,7 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
         blending |= BL_Alpha;
 
     // -AJA- 2006-06-22: fix for midmask wrapping bug
-    if (mid_masked && (!cur_seg->linedef->special || AlmostEquals(cur_seg->linedef->special->s_yspeed,
+    if (mid_masked && (!cur_seg->linedef->special || AlmostEquals(cur_seg->linedef->special->s_yspeed_,
                                                                   0.0f))) // Allow vertical scroller midmasks - Dasho
         blending |= BL_ClampY;
 
@@ -1215,7 +1215,7 @@ static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f, float tex_top
     /// float im_width = IM_WIDTH(wt->surface->image);
 
     int num_parts = 1;
-    if (cur_seg->linedef->slide_door->s.type == SLIDE_Center)
+    if (cur_seg->linedef->slide_door->s_.type_ == kSlidingDoorTypeCenter)
         num_parts = 2;
 
     // extent of current seg along the linedef
@@ -1238,9 +1238,9 @@ static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f, float tex_top
         float s_along, s_tex;
         float e_along, e_tex;
 
-        switch (cur_seg->linedef->slide_door->s.type)
+        switch (cur_seg->linedef->slide_door->s_.type_)
         {
-        case SLIDE_Left:
+        case kSlidingDoorTypeLeft:
             s_along = 0;
             e_along = ld->length - opening;
 
@@ -1248,7 +1248,7 @@ static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f, float tex_top
             e_tex = 0;
             break;
 
-        case SLIDE_Right:
+        case kSlidingDoorTypeRight:
             s_along = opening;
             e_along = ld->length;
 
@@ -1256,7 +1256,7 @@ static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f, float tex_top
             e_tex = e_along - s_along;
             break;
 
-        case SLIDE_Center:
+        case kSlidingDoorTypeCenter:
             if (part == 0)
             {
                 s_along = 0;
@@ -1404,7 +1404,7 @@ static void DrawTile(seg_t *seg, drawfloor_t *dfloor, float lz1, float lz2, floa
     // check for breakable glass
     if (seg->linedef->special)
     {
-        if ((flags & WTILF_MidMask) && seg->linedef->special->glass)
+        if ((flags & WTILF_MidMask) && seg->linedef->special->glass_)
         {
             if (surf->image)
                 DrawGlass(dfloor, lz2, lz1, tex_top_h, surf, opaque, x_offset);
@@ -1423,16 +1423,16 @@ static void DrawTile(seg_t *seg, drawfloor_t *dfloor, float lz1, float lz2, floa
     tex_x1 += x_offset;
     tex_x2 += x_offset;
 
-    if (seg->sidedef->sector->props.special && seg->sidedef->sector->props.special->floor_bob > 0)
+    if (seg->sidedef->sector->props.special && seg->sidedef->sector->props.special->floor_bob_ > 0)
     {
-        lz1 -= seg->sidedef->sector->props.special->floor_bob;
-        rz1 -= seg->sidedef->sector->props.special->floor_bob;
+        lz1 -= seg->sidedef->sector->props.special->floor_bob_;
+        rz1 -= seg->sidedef->sector->props.special->floor_bob_;
     }
 
-    if (seg->sidedef->sector->props.special && seg->sidedef->sector->props.special->ceiling_bob > 0)
+    if (seg->sidedef->sector->props.special && seg->sidedef->sector->props.special->ceiling_bob_ > 0)
     {
-        lz2 += seg->sidedef->sector->props.special->ceiling_bob;
-        rz2 += seg->sidedef->sector->props.special->ceiling_bob;
+        lz2 += seg->sidedef->sector->props.special->ceiling_bob_;
+        rz2 += seg->sidedef->sector->props.special->ceiling_bob_;
     }
 
     DrawWallPart(dfloor, x1, y1, lz1, lz2, x2, y2, rz1, rz2, tex_top_h, surf, image,
@@ -1762,14 +1762,14 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         if (C->bottom_h < floor_h || C->bottom_h > other->c_h)
             continue;
 
-        if (C->ef_info->type & EXFL_Thick)
+        if (C->ef_info->type_ & kExtraFloorTypeThick)
         {
             int flags = WTILF_IsExtra;
 
             // -AJA- 1999/09/25: Better DDF control of side texture.
-            if (C->ef_info->type & EXFL_SideUpper)
+            if (C->ef_info->type_ & kExtraFloorTypeSideUpper)
                 surf = &sd->top;
-            else if (C->ef_info->type & EXFL_SideLower)
+            else if (C->ef_info->type_ & kExtraFloorTypeSideLower)
                 surf = &sd->bottom;
             else
             {
@@ -1777,7 +1777,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 
                 flags |= WTILF_ExtraX;
 
-                if (C->ef_info->type & EXFL_SideMidY)
+                if (C->ef_info->type_ & kExtraFloorTypeSideMidY)
                     flags |= WTILF_ExtraY;
             }
 
@@ -2068,7 +2068,7 @@ static void RGL_DrawSeg(drawfloor_t *dfloor, seg_t *seg, bool mirror_sub = false
 #endif
 
     // handle TRANSLUCENT + THICK floors (a bit of a hack)
-    if (dfloor->ef && !dfloor->is_highest && (dfloor->ef->ef_info->type & EXFL_Thick) &&
+    if (dfloor->ef && !dfloor->is_highest && (dfloor->ef->ef_info->type_ & kExtraFloorTypeThick) &&
         (dfloor->ef->top->translucency < 0.99f))
     {
         c_max = dfloor->ef->top_h;
@@ -2633,9 +2633,9 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
     if (cur_sub->sector->props.special)
     {
         if (face_dir > 0)
-            data.bob_amount = cur_sub->sector->props.special->floor_bob;
+            data.bob_amount = cur_sub->sector->props.special->floor_bob_;
         else
-            data.bob_amount = cur_sub->sector->props.special->ceiling_bob;
+            data.bob_amount = cur_sub->sector->props.special->ceiling_bob_;
     }
 
     if (surf->image->liquid_type == LIQ_Thick)
@@ -2808,7 +2808,7 @@ static void RGL_WalkSubsector(int num)
 
     // the OLD method of Boom deep water (the BOOMTEX flag)
     extrafloor_t *boom_ef = sector->bottom_liq ? sector->bottom_liq : sector->bottom_ef;
-    if (boom_ef && (boom_ef->ef_info->type & EXFL_BoomTex))
+    if (boom_ef && (boom_ef->ef_info->type_ & kExtraFloorTypeBoomTex))
         floor_s = &boom_ef->ef_line->frontsector->floor;
 
     // add in each extrafloor, traversing strictly upwards
@@ -2954,7 +2954,7 @@ static void DrawMirrorPolygon(drawmirror_c *mir)
 
     if (ld->special)
     {
-        sg_color sgcol = sg_make_color_1i(ld->special->fx_color);
+        sg_color sgcol = sg_make_color_1i(ld->special->fx_color_);
 
         // looks better with reduced color in multiple reflections
         float reduce = 1.0f / (1 + 1.5 * num_active_mirrors);
@@ -2998,7 +2998,7 @@ static void DrawPortalPolygon(drawmirror_c *mir)
 
     const surface_t *surf = &mir->seg->sidedef->middle;
 
-    if (!surf->image || !ld->special || !(ld->special->portal_effect & PORTFX_Standard))
+    if (!surf->image || !ld->special || !(ld->special->portal_effect_ & kPortalEffectTypeStandard))
     {
         DrawMirrorPolygon(mir);
         return;
@@ -3015,9 +3015,9 @@ static void DrawPortalPolygon(drawmirror_c *mir)
     glBindTexture(GL_TEXTURE_2D, tex_id);
 
     // set colour & alpha
-    float alpha = ld->special->translucency * surf->translucency;
+    float alpha = ld->special->translucency_ * surf->translucency;
 
-    sg_color sgcol = sg_make_color_1i(ld->special->fx_color);
+    sg_color sgcol = sg_make_color_1i(ld->special->fx_color_);
 
     glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
 

@@ -235,7 +235,7 @@ void LoadLevel_Bits(void)
     }
 
     // Initial height of PointOfView will be set by player think.
-    players[consoleplayer]->viewz = FLO_UNUSED;
+    players[consoleplayer]->viewz = kFloatUnused;
 
     leveltime = 0;
 
@@ -1242,18 +1242,18 @@ static void G_DoEndGame(void)
     E_StartTitle();
 }
 
-bool G_CheckWhenAppear(when_appear_e appear)
+bool G_CheckWhenAppear(AppearsFlag appear)
 {
     if (!(appear & (1 << gameskill)))
         return false;
 
-    if (SP_MATCH() && !(appear & WNAP_Single))
+    if (SP_MATCH() && !(appear & kAppearsWhenSingle))
         return false;
 
-    if (COOP_MATCH() && !(appear & WNAP_Coop))
+    if (COOP_MATCH() && !(appear & kAppearsWhenCoop))
         return false;
 
-    if (DEATHMATCH() && !(appear & WNAP_DeathMatch))
+    if (DEATHMATCH() && !(appear & kAppearsWhenDeathMatch))
         return false;
 
     return true;

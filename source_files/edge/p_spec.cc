@@ -71,12 +71,12 @@ static bool P_DoSectorsFromTag(int tag, const void *p1, void *p2, bool (*func)(s
 
 static bool DoPlane_wrapper(sector_t *s, const void *p1, void *p2)
 {
-    return EV_DoPlane(s, (const movplanedef_c *)p1, (sector_t *)p2);
+    return EV_DoPlane(s, (const PlaneMoverDefinition *)p1, (sector_t *)p2);
 }
 
 static bool DoLights_wrapper(sector_t *s, const void *p1, void *p2)
 {
-    return EV_Lights(s, (const lightdef_c *)p1);
+    return EV_Lights(s, (const LightSpecialDefinition *)p1);
 }
 
 static bool DoDonut_wrapper(sector_t *s, const void *p1, void *p2)
@@ -145,17 +145,17 @@ sector_t *P_GetNextSector(const line_t *line, const sector_t *sec, bool ignore_s
 //       this one big routine -- the compiler's optimiser had better
 //       kick in !
 //
-#define F_C_HEIGHT(sector) ((ref & REF_CEILING) ? (sector)->c_h : (sector)->f_h)
+#define F_C_HEIGHT(sector) ((ref & kTriggerHeightReferenceCeiling) ? (sector)->c_h : (sector)->f_h)
 
-float P_FindSurroundingHeight(const heightref_e ref, const sector_t *sec)
+float P_FindSurroundingHeight(const TriggerHeightReference ref, const sector_t *sec)
 {
     int   i, count;
     float height;
     float base = F_C_HEIGHT(sec);
 
-    if (ref & REF_INCLUDE)
+    if (ref & kTriggerHeightReferenceInclude)
         height = base;
-    else if (ref & REF_HIGHEST)
+    else if (ref & kTriggerHeightReferenceHighest)
         height = -32000.0f; // BOOM compatible value
     else
         height = +32000.0f;
@@ -169,16 +169,16 @@ float P_FindSurroundingHeight(const heightref_e ref, const sector_t *sec)
 
         float other_h = F_C_HEIGHT(other);
 
-        if (ref & REF_NEXT)
+        if (ref & kTriggerHeightReferenceNext)
         {
             bool satisfy;
 
-            // Note that REF_HIGHEST is used for the NextLowest types, and
+            // Note that kTriggerHeightReferenceHighest is used for the NextLowest types, and
             // vice versa, which may seem strange.  It's because the next
             // lowest sector is actually the highest of all adjacent sectors
             // that are lower than the current sector.
 
-            if (ref & REF_HIGHEST)
+            if (ref & kTriggerHeightReferenceHighest)
                 satisfy = (other_h < base); // next lowest
             else
                 satisfy = (other_h > base); // next highest
@@ -189,13 +189,13 @@ float P_FindSurroundingHeight(const heightref_e ref, const sector_t *sec)
 
         count++;
 
-        if (ref & REF_HIGHEST)
+        if (ref & kTriggerHeightReferenceHighest)
             height = HMM_MAX(height, other_h);
         else
             height = HMM_MIN(height, other_h);
     }
 
-    if ((ref & REF_NEXT) && count == 0)
+    if ((ref & kTriggerHeightReferenceNext) && count == 0)
         return base;
 
     return height;
@@ -211,7 +211,7 @@ float P_FindRaiseToTexture(sector_t *sec)
 {
     int     i;
     side_t *side;
-    float   minsize = INT_MAX;
+    float   minsize = (float)INT_MAX;
     int     secnum  = sec - sectors;
 
     for (i = 0; i < sec->linecount; i++)
@@ -336,72 +336,72 @@ void P_AddSpecialSector(sector_t *sec)
     active_sector_anims.push_back(sec);
 }
 
-static void AdjustScrollParts(side_t *side, bool left, scroll_part_e parts, float x_speed, float y_speed)
+static void AdjustScrollParts(side_t *side, bool left, ScrollingPart parts, float x_speed, float y_speed)
 {
-    float xmul = (left && (parts & SCPT_LeftRevX)) ? -1 : 1;
-    float ymul = (left && (parts & SCPT_LeftRevY)) ? -1 : 1;
+    float xmul = (left && (parts & kScrollingPartLeftRevX)) ? -1 : 1;
+    float ymul = (left && (parts & kScrollingPartLeftRevY)) ? -1 : 1;
 
     if (!side)
         return;
 
     // -AJA- this is an inconsistency, needed for compatibility with
-    //       original DOOM and Boom.  (Should be SCPT_RIGHT | SCPT_LEFT).
-    if (parts == SCPT_None)
-        parts = SCPT_RIGHT;
+    //       original DOOM and Boom.  (Should be kScrollingPartRIGHT | kScrollingPartLEFT).
+    if (parts == kScrollingPartNone)
+        parts = kScrollingPartRight;
 
-    if (parts & (left ? SCPT_LeftUpper : SCPT_RightUpper))
+    if (parts & (left ? kScrollingPartLeftUpper : kScrollingPartRightUpper))
     {
         side->top.scroll.X += x_speed * xmul;
         side->top.scroll.Y += y_speed * ymul;
     }
-    if (parts & (left ? SCPT_LeftMiddle : SCPT_RightMiddle))
+    if (parts & (left ? kScrollingPartLeftMiddle : kScrollingPartRightMiddle))
     {
         side->middle.scroll.X += x_speed * xmul;
         side->middle.scroll.Y += y_speed * ymul;
     }
-    if (parts & (left ? SCPT_LeftLower : SCPT_RightLower))
+    if (parts & (left ? kScrollingPartLeftLower : kScrollingPartRightLower))
     {
         side->bottom.scroll.X += x_speed * xmul;
         side->bottom.scroll.Y += y_speed * ymul;
     }
 }
 
-static void AdjustScaleParts(side_t *side, bool left, scroll_part_e parts, float factor)
+static void AdjustScaleParts(side_t *side, bool left, ScrollingPart parts, float factor)
 {
     if (!side)
         return;
 
-    if (parts == SCPT_None)
-        parts = (scroll_part_e)(SCPT_LEFT | SCPT_RIGHT);
+    if (parts == kScrollingPartNone)
+        parts = (ScrollingPart)(kScrollingPartLeft | kScrollingPartRight);
 
-    if (parts & (left ? SCPT_LeftUpper : SCPT_RightUpper))
+    if (parts & (left ? kScrollingPartLeftUpper : kScrollingPartRightUpper))
     {
         side->top.x_mat.X *= factor;
         side->top.y_mat.Y *= factor;
     }
-    if (parts & (left ? SCPT_LeftMiddle : SCPT_RightMiddle))
+    if (parts & (left ? kScrollingPartLeftMiddle : kScrollingPartRightMiddle))
     {
         side->middle.x_mat.X *= factor;
         side->middle.y_mat.Y *= factor;
     }
-    if (parts & (left ? SCPT_LeftLower : SCPT_RightLower))
+    if (parts & (left ? kScrollingPartLeftLower : kScrollingPartRightLower))
     {
         side->bottom.x_mat.X *= factor;
         side->bottom.y_mat.Y *= factor;
     }
 }
 
-static void AdjustStretchParts(side_t *side, bool left, scroll_part_e parts, float linelength, bool widthOnly)
+static void AdjustStretchParts(side_t *side, bool left, ScrollingPart parts, float linelength, bool widthOnly)
 {
     if (!side)
         return;
 
     float factor = 0;
 
-    if (parts == SCPT_None)
-        parts = (scroll_part_e)(SCPT_LEFT | SCPT_RIGHT);
+    if (parts == kScrollingPartNone)
+        parts = (ScrollingPart)(kScrollingPartLeft | kScrollingPartRight);
 
-    if (parts & (left ? SCPT_LeftUpper : SCPT_RightUpper))
+    if (parts & (left ? kScrollingPartLeftUpper : kScrollingPartRightUpper))
     {
         if (side->top.image)
             factor = IM_WIDTH(side->top.image) / linelength;
@@ -412,7 +412,7 @@ static void AdjustStretchParts(side_t *side, bool left, scroll_part_e parts, flo
         if (!widthOnly)
             side->top.y_mat.Y *= factor;
     }
-    if (parts & (left ? SCPT_LeftMiddle : SCPT_RightMiddle))
+    if (parts & (left ? kScrollingPartLeftMiddle : kScrollingPartRightMiddle))
     {
         if (side->middle.image)
             factor = IM_WIDTH(side->middle.image) / linelength;
@@ -423,7 +423,7 @@ static void AdjustStretchParts(side_t *side, bool left, scroll_part_e parts, flo
         if (!widthOnly)
             side->middle.y_mat.Y *= factor;
     }
-    if (parts & (left ? SCPT_LeftLower : SCPT_RightLower))
+    if (parts & (left ? kScrollingPartLeftLower : kScrollingPartRightLower))
     {
         if (side->bottom.image)
             factor = IM_WIDTH(side->bottom.image) / linelength;
@@ -436,39 +436,39 @@ static void AdjustStretchParts(side_t *side, bool left, scroll_part_e parts, flo
     }
 }
 
-static void AdjustSkewParts(side_t *side, bool left, scroll_part_e parts, float skew)
+static void AdjustSkewParts(side_t *side, bool left, ScrollingPart parts, float skew)
 {
     if (!side)
         return;
 
-    if (parts == SCPT_None)
-        parts = (scroll_part_e)(SCPT_LEFT | SCPT_RIGHT);
+    if (parts == kScrollingPartNone)
+        parts = (ScrollingPart)(kScrollingPartLeft | kScrollingPartRight);
 
-    if (parts & (left ? SCPT_LeftUpper : SCPT_RightUpper))
+    if (parts & (left ? kScrollingPartLeftUpper : kScrollingPartRightUpper))
         side->top.y_mat.X = skew * side->top.y_mat.Y;
 
-    if (parts & (left ? SCPT_LeftMiddle : SCPT_RightMiddle))
+    if (parts & (left ? kScrollingPartLeftMiddle : kScrollingPartRightMiddle))
         side->middle.y_mat.X = skew * side->middle.y_mat.Y;
 
-    if (parts & (left ? SCPT_LeftLower : SCPT_RightLower))
+    if (parts & (left ? kScrollingPartLeftLower : kScrollingPartRightLower))
         side->bottom.y_mat.X = skew * side->bottom.y_mat.Y;
 }
 
-static void AdjustLightParts(side_t *side, bool left, scroll_part_e parts, region_properties_t *p)
+static void AdjustLightParts(side_t *side, bool left, ScrollingPart parts, region_properties_t *p)
 {
     if (!side)
         return;
 
-    if (parts == SCPT_None)
-        parts = (scroll_part_e)(SCPT_LEFT | SCPT_RIGHT);
+    if (parts == kScrollingPartNone)
+        parts = (ScrollingPart)(kScrollingPartLeft | kScrollingPartRight);
 
-    if (parts & (left ? SCPT_LeftUpper : SCPT_RightUpper))
+    if (parts & (left ? kScrollingPartLeftUpper : kScrollingPartRightUpper))
         side->top.override_p = p;
 
-    if (parts & (left ? SCPT_LeftMiddle : SCPT_RightMiddle))
+    if (parts & (left ? kScrollingPartLeftMiddle : kScrollingPartRightMiddle))
         side->middle.override_p = p;
 
-    if (parts & (left ? SCPT_LeftLower : SCPT_RightLower))
+    if (parts & (left ? kScrollingPartLeftLower : kScrollingPartRightLower))
         side->bottom.override_p = p;
 }
 
@@ -480,7 +480,7 @@ static float ScaleFactorForPlane(surface_t &surf, float line_len, bool use_heigh
         return IM_WIDTH(surf.image) / line_len;
 }
 
-static void P_EFTransferTrans(sector_t *ctrl, sector_t *sec, line_t *line, const extrafloordef_c *ef, float trans)
+static void P_EFTransferTrans(sector_t *ctrl, sector_t *sec, line_t *line, const ExtraFloorDefinition *ef, float trans)
 {
     int i;
 
@@ -494,10 +494,10 @@ static void P_EFTransferTrans(sector_t *ctrl, sector_t *sec, line_t *line, const
 
     // sides
 
-    if (!(ef->type & EXFL_Thick))
+    if (!(ef->type_ & kExtraFloorTypeThick))
         return;
 
-    if (ef->type & (EXFL_SideUpper | EXFL_SideLower))
+    if (ef->type_ & (kExtraFloorTypeSideUpper | kExtraFloorTypeSideLower))
     {
         for (i = 0; i < sec->linecount; i++)
         {
@@ -512,9 +512,9 @@ static void P_EFTransferTrans(sector_t *ctrl, sector_t *sec, line_t *line, const
             if (!S)
                 continue;
 
-            if (ef->type & EXFL_SideUpper)
+            if (ef->type_ & kExtraFloorTypeSideUpper)
                 S->top.translucency = trans;
-            else // EXFL_SideLower
+            else // kExtraFloorTypeSideLower
                 S->bottom.translucency = trans;
         }
 
@@ -527,22 +527,22 @@ static void P_EFTransferTrans(sector_t *ctrl, sector_t *sec, line_t *line, const
 //
 // Lobo:2021 Setup our special debris linetype.
 //
-// This is because we want to set the "LINE_EFFECT="" specials
+// This is because we want to set the "line_effect_="" specials
 // BLOCK_SHOTS and BLOCK_SIGHT
 // without actually activating the line.
 //
-static void P_LineEffectDebris(line_t *TheLine, const linetype_c *special)
+static void P_LineEffectDebris(line_t *TheLine, const LineType *special)
 {
     if (TheLine->side[0] && TheLine->side[1])
     {
         // block bullets/missiles
-        if (special->line_effect & LINEFX_BlockShots)
+        if (special->line_effect_ & kLineEffectTypeBlockShots)
         {
             TheLine->flags |= MLF_ShootBlock;
         }
 
         // block monster sight
-        if (special->line_effect & LINEFX_BlockSight)
+        if (special->line_effect_ & kLineEffectTypeBlockSight)
         {
             TheLine->flags |= MLF_SightBlock;
         }
@@ -557,7 +557,7 @@ static void P_LineEffectDebris(line_t *TheLine, const linetype_c *special)
 //
 // Lobo:2021 Spawn debris on our special linetype.
 //
-static void P_SpawnLineEffectDebris(line_t *TheLine, const linetype_c *special)
+static void P_SpawnLineEffectDebris(line_t *TheLine, const LineType *special)
 {
     if (!special)
         return; // found nothing so exit
@@ -565,7 +565,7 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const linetype_c *special)
     // Spawn our debris thing
     const mobjtype_c *info;
 
-    info = special->effectobject;
+    info = special->effectobject_;
     if (!info)
         return; // found nothing so exit
 
@@ -573,7 +573,7 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const linetype_c *special)
         return;
 
     // if it's shootable we've already handled this elsewhere
-    if (special->type == line_shootable)
+    if (special->type_ == kLineTriggerShootable)
         return;
 
     float midx = 0;
@@ -607,32 +607,32 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const linetype_c *special)
 //
 // Handles BOOM's line -> tagged line transfers.
 //
-static void P_LineEffect(line_t *target, line_t *source, const linetype_c *special)
+static void P_LineEffect(line_t *target, line_t *source, const LineType *special)
 {
     float length = R_PointToDist(0, 0, source->dx, source->dy);
     float factor = 64.0 / length;
 
-    if ((special->line_effect & LINEFX_Translucency) && (target->flags & MLF_TwoSided))
+    if ((special->line_effect_ & kLineEffectTypeTranslucency) && (target->flags & MLF_TwoSided))
     {
         target->side[0]->middle.translucency = 0.5f;
         target->side[1]->middle.translucency = 0.5f;
     }
 
-    if ((special->line_effect & LINEFX_OffsetScroll) && target->side[0])
+    if ((special->line_effect_ & kLineEffectTypeOffsetScroll) && target->side[0])
     {
         float x_speed = -target->side[0]->middle.offset.X;
         float y_speed = target->side[0]->middle.offset.Y;
 
-        AdjustScrollParts(target->side[0], 0, special->line_parts, x_speed, y_speed);
+        AdjustScrollParts(target->side[0], 0, special->line_parts_, x_speed, y_speed);
 
         P_AddSpecialLine(target);
     }
 
-    if ((special->line_effect & LINEFX_TaggedOffsetScroll) && target->side[0] && source->side[0])
+    if ((special->line_effect_ & kLineEffectTypeTaggedOffsetScroll) && target->side[0] && source->side[0])
     {
         lineanim_t anim;
         anim.target = target;
-        if (special->scroll_type == ScrollType_None)
+        if (special->scroll_type_ == BoomScrollerTypeNone)
         {
             anim.side0_xspeed = -source->side[0]->middle.offset.X / 8.0;
             anim.side0_yspeed = source->side[0]->middle.offset.Y / 8.0;
@@ -652,7 +652,7 @@ static void P_LineEffect(line_t *target, line_t *source, const linetype_c *speci
                 {
                     if (lines[i].tag == source->frontsector->tag)
                     {
-                        if (!lines[i].special || lines[i].special->count == 1)
+                        if (!lines[i].special || lines[i].special->count_ == 1)
                             anim.permanent = true;
                     }
                 }
@@ -663,7 +663,7 @@ static void P_LineEffect(line_t *target, line_t *source, const linetype_c *speci
         P_AddSpecialLine(target);
     }
 
-    if (special->line_effect & LINEFX_VectorScroll)
+    if (special->line_effect_ & kLineEffectTypeVectorScroll)
     {
         lineanim_t anim;
         anim.target = target;
@@ -697,7 +697,7 @@ static void P_LineEffect(line_t *target, line_t *source, const linetype_c *speci
 
         if (x || y)
         {
-            if (special->scroll_type == ScrollType_None)
+            if (special->scroll_type_ == BoomScrollerTypeNone)
             {
                 anim.side0_xspeed += x;
                 anim.side1_xspeed += x;
@@ -719,7 +719,7 @@ static void P_LineEffect(line_t *target, line_t *source, const linetype_c *speci
                     {
                         if (lines[i].tag == source->frontsector->tag)
                         {
-                            if (!lines[i].special || lines[i].special->count == 1)
+                            if (!lines[i].special || lines[i].special->count_ == 1)
                                 anim.permanent = true;
                         }
                     }
@@ -732,40 +732,40 @@ static void P_LineEffect(line_t *target, line_t *source, const linetype_c *speci
     }
 
     // experimental: unblock line(s)
-    if (special->line_effect & LINEFX_UnblockThings)
+    if (special->line_effect_ & kLineEffectTypeUnblockThings)
     {
         if (target->side[0] && target->side[1] && (target != source))
             target->flags &= ~(MLF_Blocking | MLF_BlockMonsters | MLF_BlockGrounded | MLF_BlockPlayers);
     }
 
     // experimental: block bullets/missiles
-    if (special->line_effect & LINEFX_BlockShots)
+    if (special->line_effect_ & kLineEffectTypeBlockShots)
     {
         if (target->side[0] && target->side[1])
             target->flags |= MLF_ShootBlock;
     }
 
     // experimental: block monster sight
-    if (special->line_effect & LINEFX_BlockSight)
+    if (special->line_effect_ & kLineEffectTypeBlockSight)
     {
         if (target->side[0] && target->side[1])
             target->flags |= MLF_SightBlock;
     }
 
     // experimental: scale wall texture(s) by line length
-    if (special->line_effect & LINEFX_Scale)
+    if (special->line_effect_ & kLineEffectTypeScale)
     {
-        AdjustScaleParts(target->side[0], 0, special->line_parts, factor);
-        AdjustScaleParts(target->side[1], 1, special->line_parts, factor);
+        AdjustScaleParts(target->side[0], 0, special->line_parts_, factor);
+        AdjustScaleParts(target->side[1], 1, special->line_parts_, factor);
     }
 
     // experimental: skew wall texture(s) by sidedef Y offset
-    if ((special->line_effect & LINEFX_Skew) && source->side[0])
+    if ((special->line_effect_ & kLineEffectTypeSkew) && source->side[0])
     {
         float skew = source->side[0]->top.offset.X / 128.0f;
 
-        AdjustSkewParts(target->side[0], 0, special->line_parts, skew);
-        AdjustSkewParts(target->side[1], 1, special->line_parts, skew);
+        AdjustSkewParts(target->side[0], 0, special->line_parts_, skew);
+        AdjustSkewParts(target->side[1], 1, special->line_parts_, skew);
 
         if (target == source)
         {
@@ -775,38 +775,38 @@ static void P_LineEffect(line_t *target, line_t *source, const linetype_c *speci
     }
 
     // experimental: transfer lighting to wall parts
-    if (special->line_effect & LINEFX_LightWall)
+    if (special->line_effect_ & kLineEffectTypeLightWall)
     {
-        AdjustLightParts(target->side[0], 0, special->line_parts, &source->frontsector->props);
-        AdjustLightParts(target->side[1], 1, special->line_parts, &source->frontsector->props);
+        AdjustLightParts(target->side[0], 0, special->line_parts_, &source->frontsector->props);
+        AdjustLightParts(target->side[1], 1, special->line_parts_, &source->frontsector->props);
     }
 
     // Lobo 2022: experimental partial sky transfer support
-    if ((special->line_effect & LINEFX_SkyTransfer) && source->side[0])
+    if ((special->line_effect_ & kLineEffectTypeSkyTransfer) && source->side[0])
     {
         if (source->side[0]->top.image)
             sky_image = W_ImageLookup(source->side[0]->top.image->name.c_str(), kImageNamespaceTexture);
     }
 
     // experimental: stretch wall texture(s) by line length
-    if (special->line_effect & LINEFX_StretchWidth)
+    if (special->line_effect_ & kLineEffectTypeStretchWidth)
     {
-        AdjustStretchParts(target->side[0], 0, special->line_parts, length, true);
-        AdjustStretchParts(target->side[1], 1, special->line_parts, length, true);
+        AdjustStretchParts(target->side[0], 0, special->line_parts_, length, true);
+        AdjustStretchParts(target->side[1], 1, special->line_parts_, length, true);
     }
 
     // experimental: stretch wall texture(s) by line length
-    if (special->line_effect & LINEFX_StretchHeight)
+    if (special->line_effect_ & kLineEffectTypeStretchHeight)
     {
-        AdjustStretchParts(target->side[0], 0, special->line_parts, length, false);
-        AdjustStretchParts(target->side[1], 1, special->line_parts, length, false);
+        AdjustStretchParts(target->side[0], 0, special->line_parts_, length, false);
+        AdjustStretchParts(target->side[1], 1, special->line_parts_, length, false);
     }
 }
 
 //
 // Handles BOOM's line -> tagged sector transfers.
 //
-static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *special)
+static void P_SectorEffect(sector_t *target, line_t *source, const LineType *special)
 {
     if (!target)
         return;
@@ -815,30 +815,30 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
     BAMAngle angle   = kBAMAngle360 - R_PointToAngle(0, 0, -source->dx, -source->dy);
     bool    is_vert = fabs(source->dy) > fabs(source->dx);
 
-    if (special->sector_effect & SECTFX_LightFloor)
+    if (special->sector_effect_ & kSectorEffectTypeLightFloor)
         target->floor.override_p = &source->frontsector->props;
 
-    if (special->sector_effect & SECTFX_LightCeiling)
+    if (special->sector_effect_ & kSectorEffectTypeLightCeiling)
         target->ceil.override_p = &source->frontsector->props;
 
-    if (special->sector_effect & SECTFX_ScrollFloor || special->sector_effect & SECTFX_ScrollCeiling ||
-        special->sector_effect & SECTFX_PushThings)
+    if (special->sector_effect_ & kSectorEffectTypeScrollFloor || special->sector_effect_ & kSectorEffectTypeScrollCeiling ||
+        special->sector_effect_ & kSectorEffectTypePushThings)
     {
         secanim_t anim;
         anim.target = target;
-        if (special->scroll_type == ScrollType_None)
+        if (special->scroll_type_ == BoomScrollerTypeNone)
         {
-            if (special->sector_effect & SECTFX_ScrollFloor)
+            if (special->sector_effect_ & kSectorEffectTypeScrollFloor)
             {
                 anim.floor_scroll.X -= source->dx / 32.0f;
                 anim.floor_scroll.Y -= source->dy / 32.0f;
             }
-            if (special->sector_effect & SECTFX_ScrollCeiling)
+            if (special->sector_effect_ & kSectorEffectTypeScrollCeiling)
             {
                 anim.ceil_scroll.X -= source->dx / 32.0f;
                 anim.ceil_scroll.Y -= source->dy / 32.0f;
             }
-            if (special->sector_effect & SECTFX_PushThings)
+            if (special->sector_effect_ & kSectorEffectTypePushThings)
             {
                 anim.push.X += source->dx / 32.0f * BOOM_CARRY_FACTOR;
                 anim.push.Y += source->dy / 32.0f * BOOM_CARRY_FACTOR;
@@ -857,7 +857,7 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
                 {
                     if (lines[i].tag == source->frontsector->tag)
                     {
-                        if (!lines[i].special || lines[i].special->count == 1)
+                        if (!lines[i].special || lines[i].special->count_ == 1)
                             anim.permanent = true;
                     }
                 }
@@ -868,7 +868,7 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
         P_AddSpecialSector(target);
     }
 
-    if (special->sector_effect & SECTFX_SetFriction)
+    if (special->sector_effect_ & kSectorEffectTypeSetFriction)
     {
         // TODO: this is not 100% correct, because the MSF_Friction flag is
         //       supposed to turn the custom friction on/off, but with this
@@ -882,33 +882,33 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
         }
     }
 
-    if (special->sector_effect & SECTFX_PointForce)
+    if (special->sector_effect_ & kSectorEffectTypePointForce)
     {
         P_AddPointForce(target, length);
     }
-    if (special->sector_effect & SECTFX_WindForce)
+    if (special->sector_effect_ & kSectorEffectTypeWindForce)
     {
         P_AddSectorForce(target, true /* is_wind */, source->dx, source->dy);
     }
-    if (special->sector_effect & SECTFX_CurrentForce)
+    if (special->sector_effect_ & kSectorEffectTypeCurrentForce)
     {
         P_AddSectorForce(target, false /* is_wind */, source->dx, source->dy);
     }
 
-    if (special->sector_effect & SECTFX_ResetFloor)
+    if (special->sector_effect_ & kSectorEffectTypeResetFloor)
     {
         target->floor.override_p = nullptr;
         target->floor.scroll.X = target->floor.scroll.Y = 0;
         target->props.push.X = target->props.push.Y = target->props.push.Z = 0;
     }
-    if (special->sector_effect & SECTFX_ResetCeiling)
+    if (special->sector_effect_ & kSectorEffectTypeResetCeiling)
     {
         target->ceil.override_p = nullptr;
         target->ceil.scroll.X = target->ceil.scroll.Y = 0;
     }
 
     // set texture alignment
-    if (special->sector_effect & SECTFX_AlignFloor)
+    if (special->sector_effect_ & kSectorEffectTypeAlignFloor)
     {
         target->floor.offset.X = -source->v1->X;
         target->floor.offset.Y = -source->v1->Y;
@@ -919,7 +919,7 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
         }
         target->floor.rotation = angle;
     }
-    if (special->sector_effect & SECTFX_AlignCeiling)
+    if (special->sector_effect_ & kSectorEffectTypeAlignCeiling)
     {
         target->ceil.offset.X = -source->v1->X;
         target->ceil.offset.Y = -source->v1->Y;
@@ -932,9 +932,9 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
     }
 
     // set texture scale
-    if (special->sector_effect & SECTFX_ScaleFloor)
+    if (special->sector_effect_ & kSectorEffectTypeScaleFloor)
     {
-        bool  aligned = (special->sector_effect & SECTFX_AlignFloor) != 0;
+        bool  aligned = (special->sector_effect_ & kSectorEffectTypeAlignFloor) != 0;
         float factor  = ScaleFactorForPlane(target->floor, length, is_vert && !aligned);
 
         target->floor.x_mat.X *= factor;
@@ -942,9 +942,9 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
         target->floor.y_mat.X *= factor;
         target->floor.y_mat.Y *= factor;
     }
-    if (special->sector_effect & SECTFX_ScaleCeiling)
+    if (special->sector_effect_ & kSectorEffectTypeScaleCeiling)
     {
-        bool  aligned = (special->sector_effect & SECTFX_AlignCeiling) != 0;
+        bool  aligned = (special->sector_effect_ & kSectorEffectTypeAlignCeiling) != 0;
         float factor  = ScaleFactorForPlane(target->ceil, length, is_vert && !aligned);
 
         target->ceil.x_mat.X *= factor;
@@ -955,7 +955,7 @@ static void P_SectorEffect(sector_t *target, line_t *source, const linetype_c *s
 
     // killough 3/7/98 and AJA 2022:
     // support for drawn heights coming from different sector
-    if (special->sector_effect & SECTFX_BoomHeights)
+    if (special->sector_effect_ & kSectorEffectTypeBoomHeights)
     {
         target->heightsec      = source->frontsector;
         target->heightsec_side = source->side[0];
@@ -1006,7 +1006,7 @@ static void P_PortalEffect(line_t *ld)
         return;
     }
 
-    if (ld->special->portal_effect & PORTFX_Mirror)
+    if (ld->special->portal_effect_ & kPortalEffectTypeMirror)
     {
         ld->flags |= MLF_Mirror;
         return;
@@ -1018,7 +1018,7 @@ static void P_PortalEffect(line_t *ld)
         return;
     }
 
-    bool is_camera = (ld->special->portal_effect & PORTFX_Camera) ? true : false;
+    bool is_camera = (ld->special->portal_effect_ & kPortalEffectTypeCamera) ? true : false;
 
     for (int i = 0; i < numlines; i++)
     {
@@ -1245,12 +1245,12 @@ static void DetailSlope_Ceiling(line_t *ld)
 // -AJA- 1999/10/21: Allow non-line activation (line == nullptr), and
 //                   added `typenum' and `tag' parameter.
 //
-// -AJA- 2000/01/02: New trigger method `line_Any'.
+// -AJA- 2000/01/02: New trigger method `kLineTriggerAny'.
 //
 // -ACB- 2001/01/14: Added Elevator Sector Type
 //
-static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int tag, int side, mobj_t *thing,
-                                  trigger_e trig, int can_reach, int no_care_who)
+static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag, int side, mobj_t *thing,
+                                  LineTrigger trig, int can_reach, int no_care_who)
 {
     bool texSwitch   = false;
     bool playedSound = false;
@@ -1270,7 +1270,7 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
     }
 #endif
 
-    if (!G_CheckWhenAppear(special->appear))
+    if (!G_CheckWhenAppear(special->appear_))
     {
         if (line)
             line->special = nullptr;
@@ -1278,7 +1278,7 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
         return true;
     }
 
-    if (trig != line_Any && special->type != trig && !(special->type == line_manual && trig == line_pushable))
+    if (trig != kLineTriggerAny && special->type_ != trig && !(special->type_ == kLineTriggerManual && trig == kLineTriggerPushable))
         return false;
 
     // Check for use once.
@@ -1286,11 +1286,11 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
         return false;
 
     // Single sided line
-    if (trig != line_Any && special->singlesided && side == 1)
+    if (trig != kLineTriggerAny && special->singlesided_ && side == 1)
         return false;
 
     // -AJA- 1999/12/07: Height checking.
-    if (line && thing && thing->player && (special->special_flags & LINSP_MustReach) && !can_reach)
+    if (line && thing && thing->player && (special->special_flags_ & kLineSpecialMustReach) && !can_reach)
     {
         S_StartFX(thing->info->noway_sound, P_MobjGetSfxCategory(thing), thing);
 
@@ -1302,17 +1302,17 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
     {
         if (thing && thing->player)
         {
-            // Players can only trigger if the trig_player is set
-            if (!(special->obj & trig_player))
+            // Players can only trigger if the kTriggerActivatorPlayer is set
+            if (!(special->obj_ & kTriggerActivatorPlayer))
                 return false;
 
-            if (thing->player->isBot() && (special->obj & trig_nobot))
+            if (thing->player->isBot() && (special->obj_ & kTriggerActivatorNoBot))
                 return false;
         }
         else if (thing && (thing->info->extendedflags & EF_MONSTER))
         {
-            // Monsters can only trigger if the trig_monster flag is set
-            if (!(special->obj & trig_monster))
+            // Monsters can only trigger if the kTriggerActivatorMonster flag is set
+            if (!(special->obj_ & kTriggerActivatorMonster))
                 return false;
 
             // Monsters don't trigger secrets
@@ -1325,8 +1325,8 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
         }
         else
         {
-            // Other stuff can only trigger if trig_other is set
-            if (!(special->obj & trig_other))
+            // Other stuff can only trigger if kTriggerActivatorOther is set
+            if (!(special->obj_ & kTriggerActivatorOther))
                 return false;
 
             // Other stuff doesn't trigger secrets
@@ -1339,7 +1339,7 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
     // wouldn't otherwise cross (for now, the edge of a high dropoff)
     // Note: I believe this assumes no 3D floors, but I think it's a
     // very particular situation anyway - Dasho
-    if (trig == line_walkable && line->backsector && thing && (thing->info->extendedflags & EF_MONSTER) &&
+    if (trig == kLineTriggerWalkable && line->backsector && thing && (thing->info->extendedflags & EF_MONSTER) &&
         !(thing->flags & (MF_TELEPORT | MF_DROPOFF | MF_FLOAT)))
     {
         if (std::abs(line->frontsector->f_h - line->backsector->f_h) > thing->info->step_size)
@@ -1350,10 +1350,10 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
     {
         // Check for keys
         // -ACB- 1998/09/11 Key possibilites extended
-        if (special->keys != KF_NONE)
+        if (special->keys_ != kDoorKeyNone)
         {
-            keys_e req = (keys_e)(special->keys & KF_MASK);
-            keys_e cards;
+            DoorKeyType req = (DoorKeyType)(special->keys_ & kDoorKeyBitmask);
+            DoorKeyType cards;
 
             // Monsters/Missiles have no keys
             if (!thing->player)
@@ -1370,13 +1370,13 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
 
             bool failedsecurity = false;
 
-            if (special->keys & KF_BOOM_SKCK)
+            if (special->keys_ & kDoorKeyCardOrSkull)
             {
                 // Boom compatibility: treat card and skull types the same
-                cards = (keys_e)(EXPAND_KEYS(cards));
+                cards = (DoorKeyType)(ExpandKeyBits(cards));
             }
 
-            if (special->keys & KF_STRICTLY_ALL)
+            if (special->keys_ & kDoorKeyStrictlyAllKeys)
             {
                 if ((cards & req) != req)
                     failedsecurity = true;
@@ -1389,11 +1389,11 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
 
             if (failedsecurity)
             {
-                if (special->failedmessage != "")
-                    CON_PlayerMessageLDF(thing->player->pnum, special->failedmessage.c_str());
+                if (special->failedmessage_ != "")
+                    CON_PlayerMessageLDF(thing->player->pnum, special->failedmessage_.c_str());
 
-                if (special->failed_sfx)
-                    S_StartFX(special->failed_sfx, SNCAT_Level, thing);
+                if (special->failed_sfx_)
+                    S_StartFX(special->failed_sfx_, SNCAT_Level, thing);
 
                 return false;
             }
@@ -1405,7 +1405,7 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
         return false;
 
     // Tagged line effect_object
-    if (line && special->effectobject)
+    if (line && special->effectobject_)
     {
         if (!tag)
         {
@@ -1425,50 +1425,50 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
 
     // Do lights
     // -KM- 1998/09/27 Generalised light types.
-    switch (special->l.type)
+    switch (special->l_.type_)
     {
-    case LITE_Set:
-        EV_LightTurnOn(tag, special->l.level);
+    case kLightSpecialTypeSet:
+        EV_LightTurnOn(tag, special->l_.level_);
         texSwitch = true;
         break;
 
-    case LITE_None:
+    case kLightSpecialTypeNone:
         break;
 
     default:
-        texSwitch = P_DoSectorsFromTag(tag, &special->l, nullptr, DoLights_wrapper);
+        texSwitch = P_DoSectorsFromTag(tag, &special->l_, nullptr, DoLights_wrapper);
         break;
     }
 
     // -ACB- 1998/09/13 Use teleport define..
-    if (special->t.teleport)
+    if (special->t_.teleport_)
     {
-        texSwitch = EV_Teleport(line, tag, thing, &special->t);
+        texSwitch = EV_Teleport(line, tag, thing, &special->t_);
     }
 
-    if (special->e_exit == EXIT_Normal)
+    if (special->e_exit_ == kExitTypeNormal)
     {
         G_ExitLevel(5);
         texSwitch = true;
     }
-    else if (special->e_exit == EXIT_Secret)
+    else if (special->e_exit_ == kExitTypeSecret)
     {
         G_SecretExitLevel(5);
         texSwitch = true;
     }
-    else if (special->e_exit == EXIT_Hub)
+    else if (special->e_exit_ == kExitTypeHub)
     {
-        G_ExitToHub(special->hub_exit, line ? line->tag : tag);
+        G_ExitToHub(special->hub_exit_, line ? line->tag : tag);
         texSwitch = true;
     }
 
-    if (special->d.dodonut)
+    if (special->d_.dodonut_)
     {
         // Proper ANSI C++ Init
-        sfx[0] = special->d.d_sfxout;
-        sfx[1] = special->d.d_sfxoutstop;
-        sfx[2] = special->d.d_sfxin;
-        sfx[3] = special->d.d_sfxinstop;
+        sfx[0] = special->d_.d_sfxout_;
+        sfx[1] = special->d_.d_sfxoutstop_;
+        sfx[2] = special->d_.d_sfxin_;
+        sfx[3] = special->d_.d_sfxinstop_;
 
         texSwitch = P_DoSectorsFromTag(tag, nullptr, sfx, DoDonut_wrapper);
     }
@@ -1476,41 +1476,41 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
     //
     // - Plats/Floors -
     //
-    if (special->f.type != mov_undefined)
+    if (special->f_.type_ != kPlaneMoverUndefined)
     {
-        if (!tag || special->type == line_manual)
+        if (!tag || special->type_ == kLineTriggerManual)
         {
             if (line)
-                texSwitch = EV_ManualPlane(line, thing, &special->f);
+                texSwitch = EV_ManualPlane(line, thing, &special->f_);
         }
         else
         {
-            texSwitch = P_DoSectorsFromTag(tag, &special->f, line ? line->frontsector : nullptr, DoPlane_wrapper);
+            texSwitch = P_DoSectorsFromTag(tag, &special->f_, line ? line->frontsector : nullptr, DoPlane_wrapper);
         }
     }
 
     //
     // - Doors/Ceilings -
     //
-    if (special->c.type != mov_undefined)
+    if (special->c_.type_ != kPlaneMoverUndefined)
     {
-        if (!tag || special->type == line_manual)
+        if (!tag || special->type_ == kLineTriggerManual)
         {
             if (line)
-                texSwitch = EV_ManualPlane(line, thing, &special->c);
+                texSwitch = EV_ManualPlane(line, thing, &special->c_);
         }
         else
         {
-            texSwitch = P_DoSectorsFromTag(tag, &special->c, line ? line->frontsector : nullptr, DoPlane_wrapper);
+            texSwitch = P_DoSectorsFromTag(tag, &special->c_, line ? line->frontsector : nullptr, DoPlane_wrapper);
         }
     }
 
     //
     // - Thin Sliding Doors -
     //
-    if (special->s.type != SLIDE_None)
+    if (special->s_.type_ != kSlidingDoorTypeNone)
     {
-        if (line && (!tag || special->type == line_manual))
+        if (line && (!tag || special->type_ == kLineTriggerManual))
         {
             EV_DoSlider(line, line, thing, special);
             texSwitch = false;
@@ -1536,53 +1536,53 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
         }
     }
 
-    if (special->use_colourmap && tag > 0)
+    if (special->use_colourmap_ && tag > 0)
     {
         for (tsec = P_FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
         {
-            tsec->props.colourmap = special->use_colourmap;
+            tsec->props.colourmap = special->use_colourmap_;
             texSwitch             = true;
         }
     }
 
-    if (!AlmostEquals(special->gravity, FLO_UNUSED) && tag > 0)
+    if (!AlmostEquals(special->gravity_, kFloatUnused) && tag > 0)
     {
         for (tsec = P_FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
         {
-            tsec->props.gravity = special->gravity;
+            tsec->props.gravity = special->gravity_;
             texSwitch           = true;
         }
     }
 
-    if (!AlmostEquals(special->friction, FLO_UNUSED) && tag > 0)
+    if (!AlmostEquals(special->friction_, kFloatUnused) && tag > 0)
     {
         for (tsec = P_FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
         {
-            tsec->props.friction = special->friction;
+            tsec->props.friction = special->friction_;
             texSwitch            = true;
         }
     }
 
-    if (!AlmostEquals(special->viscosity, FLO_UNUSED) && tag > 0)
+    if (!AlmostEquals(special->viscosity_, kFloatUnused) && tag > 0)
     {
         for (tsec = P_FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
         {
-            tsec->props.viscosity = special->viscosity;
+            tsec->props.viscosity = special->viscosity_;
             texSwitch             = true;
         }
     }
 
-    if (!AlmostEquals(special->drag, FLO_UNUSED) && tag > 0)
+    if (!AlmostEquals(special->drag_, kFloatUnused) && tag > 0)
     {
         for (tsec = P_FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
         {
-            tsec->props.drag = special->drag;
+            tsec->props.drag = special->drag_;
             texSwitch        = true;
         }
     }
 
     // Tagged line effects
-    if (line && special->line_effect)
+    if (line && special->line_effect_)
     {
         if (!tag)
         {
@@ -1603,11 +1603,11 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
     }
 
     // Tagged sector effects
-    if (line && special->sector_effect)
+    if (line && special->sector_effect_)
     {
         if (!tag)
         {
-            if (special->special_flags & LINSP_BackSector)
+            if (special->special_flags_ & kLineSpecialBackSector)
                 P_SectorEffect(line->backsector, line, special);
             else
                 P_SectorEffect(line->frontsector, line, special);
@@ -1624,36 +1624,36 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
         }
     }
 
-    if (special->trigger_effect && tag > 0)
+    if (special->trigger_effect_ && tag > 0)
     {
-        RAD_EnableByTag(thing, tag, special->trigger_effect < 0, RTS_TAG_NUMBER);
+        RAD_EnableByTag(thing, tag, special->trigger_effect_ < 0, RTS_TAG_NUMBER);
         texSwitch = true;
     }
 
-    if (special->ambient_sfx && tag > 0)
+    if (special->ambient_sfx_ && tag > 0)
     {
         for (tsec = P_FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
         {
-            P_AddAmbientSFX(tsec, special->ambient_sfx);
+            P_AddAmbientSFX(tsec, special->ambient_sfx_);
             texSwitch = true;
         }
     }
 
-    if (special->music)
+    if (special->music_)
     {
-        S_ChangeMusic(special->music, true);
+        S_ChangeMusic(special->music_, true);
         texSwitch = true;
     }
 
-    if (special->activate_sfx)
+    if (special->activate_sfx_)
     {
         if (line)
         {
-            S_StartFX(special->activate_sfx, SNCAT_Level, &line->frontsector->sfx_origin);
+            S_StartFX(special->activate_sfx_, SNCAT_Level, &line->frontsector->sfx_origin);
         }
         else if (thing)
         {
-            S_StartFX(special->activate_sfx, P_MobjGetSfxCategory(thing), thing);
+            S_StartFX(special->activate_sfx_, P_MobjGetSfxCategory(thing), thing);
         }
 
         playedSound = true;
@@ -1670,12 +1670,12 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
                 line->special = nullptr;
         }
         // -KM- 1998/09/27 Reversable linedefs.
-        if (line->special && special->newtrignum)
+        if (line->special && special->newtrignum_)
         {
-            line->special = (special->newtrignum <= 0) ? nullptr : P_LookupLineType(special->newtrignum);
+            line->special = (special->newtrignum_ <= 0) ? nullptr : P_LookupLineType(special->newtrignum_);
         }
 
-        P_ChangeSwitchTexture(line, line->special && (special->newtrignum == 0), special->special_flags, playedSound);
+        P_ChangeSwitchTexture(line, line->special && (special->newtrignum_ == 0), special->special_flags_, playedSound);
     }
     return true;
 }
@@ -1689,7 +1689,7 @@ static bool P_ActivateSpecialLine(line_t *line, const linetype_c *special, int t
 //
 bool P_CrossSpecialLine(line_t *ld, int side, mobj_t *thing)
 {
-    return P_ActivateSpecialLine(ld, ld->special, ld->tag, side, thing, line_walkable, 1, 0);
+    return P_ActivateSpecialLine(ld, ld->special, ld->tag, side, thing, kLineTriggerWalkable, 1, 0);
 }
 
 //
@@ -1697,7 +1697,7 @@ bool P_CrossSpecialLine(line_t *ld, int side, mobj_t *thing)
 //
 void P_ShootSpecialLine(line_t *ld, int side, mobj_t *thing)
 {
-    P_ActivateSpecialLine(ld, ld->special, ld->tag, side, thing, line_shootable, 1, 0);
+    P_ActivateSpecialLine(ld, ld->special, ld->tag, side, thing, kLineTriggerShootable, 1, 0);
 }
 
 //
@@ -1717,7 +1717,7 @@ bool P_UseSpecialLine(mobj_t *thing, line_t *line, int side, float open_bottom, 
 {
     int can_reach = (thing->z < open_top) && (thing->z + thing->height + USE_Z_RANGE >= open_bottom);
 
-    return P_ActivateSpecialLine(line, line->special, line->tag, side, thing, line_pushable, can_reach, 0);
+    return P_ActivateSpecialLine(line, line->special, line->tag, side, thing, kLineTriggerPushable, can_reach, 0);
 }
 
 //
@@ -1726,18 +1726,18 @@ bool P_UseSpecialLine(mobj_t *thing, line_t *line, int side, float open_bottom, 
 //
 // -AJA- 1999/10/21: written.
 //
-void P_RemoteActivation(mobj_t *thing, int typenum, int tag, int side, trigger_e method)
+void P_RemoteActivation(mobj_t *thing, int typenum, int tag, int side, LineTrigger method)
 {
-    const linetype_c *spec = P_LookupLineType(typenum);
+    const LineType *spec = P_LookupLineType(typenum);
 
     P_ActivateSpecialLine(nullptr, spec, tag, side, thing, method, 1, (thing == nullptr));
 }
 
 static inline void PlayerInProperties(player_t *player, float bz, float tz, float f_h, float c_h,
-                                      region_properties_t *props, const sectortype_c **swim_special,
+                                      region_properties_t *props, const SectorType **swim_special,
                                       bool should_choke = true)
 {
-    const sectortype_c *special = props->special;
+    const SectorType *special = props->special;
     float               damage, factor;
 
     bool extra_tic = ((gametic & 1) == 1);
@@ -1745,7 +1745,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
     if (!special || c_h < f_h)
         return;
 
-    if (!G_CheckWhenAppear(special->appear))
+    if (!G_CheckWhenAppear(special->appear_))
         return;
 
     // breathing support
@@ -1753,7 +1753,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
     //
     float mouth_z = player->mo->z + player->viewz;
 
-    if ((special->special_flags & SECSP_AirLess) && mouth_z >= f_h && mouth_z <= c_h && player->powers[PW_Scuba] <= 0)
+    if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= f_h && mouth_z <= c_h && player->powers[PW_Scuba] <= 0)
     {
         int subtract = 1;
         if ((r_doubleframes.d && extra_tic) || !should_choke)
@@ -1770,44 +1770,44 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
         }
     }
 
-    if ((special->special_flags & SECSP_AirLess) && mouth_z >= f_h && mouth_z <= c_h)
+    if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= f_h && mouth_z <= c_h)
     {
         player->airless = true;
     }
 
-    if ((special->special_flags & SECSP_Swimming) && mouth_z >= f_h && mouth_z <= c_h)
+    if ((special->special_flags_ & kSectorFlagSwimming) && mouth_z >= f_h && mouth_z <= c_h)
     {
         player->swimming = true;
         *swim_special    = special;
-        if (special->special_flags & SECSP_SubmergedSFX)
+        if (special->special_flags_ & kSectorFlagSubmergedSFX)
             submerged_sfx = true;
     }
 
-    if ((special->special_flags & SECSP_Swimming) && player->mo->z >= f_h && player->mo->z <= c_h)
+    if ((special->special_flags_ & kSectorFlagSwimming) && player->mo->z >= f_h && player->mo->z <= c_h)
     {
         player->wet_feet = true;
         P_HitLiquidFloor(player->mo);
     }
 
-    if (special->special_flags & SECSP_VacuumSFX)
+    if (special->special_flags_ & kSectorFlagVacuumSFX)
         vacuum_sfx = true;
 
-    if (special->special_flags & SECSP_ReverbSFX)
+    if (special->special_flags_ & kSectorFlagReverbSFX)
     {
         ddf_reverb = true;
-        if (epi::StringCaseCompareASCII(special->reverb_type, "REVERB") == 0)
+        if (epi::StringCaseCompareASCII(special->reverb_type_, "REVERB") == 0)
             ddf_reverb_type = 1;
-        else if (epi::StringCaseCompareASCII(special->reverb_type, "ECHO") == 0)
+        else if (epi::StringCaseCompareASCII(special->reverb_type_, "ECHO") == 0)
             ddf_reverb_type = 2;
-        ddf_reverb_delay = HMM_MAX(0, special->reverb_delay);
-        ddf_reverb_ratio = HMM_Clamp(0, special->reverb_ratio, 100);
+        ddf_reverb_delay = HMM_MAX(0, special->reverb_delay_);
+        ddf_reverb_ratio = HMM_Clamp(0, special->reverb_ratio_, 100);
     }
 
     factor = 1.0f;
 
-    if (special->special_flags & SECSP_WholeRegion)
+    if (special->special_flags_ & kSectorFlagWholeRegion)
     {
-        if (special->special_flags & SECSP_Proportional)
+        if (special->special_flags_ & kSectorFlagProportional)
         {
             // only partially in region -- mitigate damage
             if (tz > c_h)
@@ -1830,32 +1830,32 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
     }
 
     // Check for DAMAGE_UNLESS/DAMAGE_IF DDF specials
-    if (special->damage.damage_unless || special->damage.damage_if)
+    if (special->damage_.damage_unless || special->damage_.damage_if)
     {
-        bool unless_damage = (special->damage.damage_unless != nullptr);
+        bool unless_damage = (special->damage_.damage_unless != nullptr);
         bool if_damage     = false;
-        if (special->damage.damage_unless && P_HasBenefitInList(player, special->damage.damage_unless))
+        if (special->damage_.damage_unless && P_HasBenefitInList(player, special->damage_.damage_unless))
             unless_damage = false;
-        if (special->damage.damage_if && P_HasBenefitInList(player, special->damage.damage_if))
+        if (special->damage_.damage_if && P_HasBenefitInList(player, special->damage_.damage_if))
             if_damage = true;
-        if (!unless_damage && !if_damage && !special->damage.bypass_all)
+        if (!unless_damage && !if_damage && !special->damage_.bypass_all)
             factor = 0;
     }
-    else if (player->powers[PW_AcidSuit] && !special->damage.bypass_all)
+    else if (player->powers[PW_AcidSuit] && !special->damage_.bypass_all)
         factor = 0;
 
     if (r_doubleframes.d && extra_tic)
         factor = 0;
 
-    if (factor > 0 && (leveltime % (1 + special->damage.delay)) == 0)
+    if (factor > 0 && (leveltime % (1 + special->damage_.delay)) == 0)
     {
-        DAMAGE_COMPUTE(damage, &special->damage);
+        DAMAGE_COMPUTE(damage, &special->damage_);
 
-        if (damage || special->damage.instakill)
-            P_DamageMobj(player->mo, nullptr, nullptr, damage * factor, &special->damage);
+        if (damage || special->damage_.instakill)
+            P_DamageMobj(player->mo, nullptr, nullptr, damage * factor, &special->damage_);
     }
 
-    if (special->secret && !props->secret_found)
+    if (special->secret_ && !props->secret_found)
     {
         player->secretcount++;
 
@@ -1871,7 +1871,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
         props->secret_found = true;
     }
 
-    if (special->e_exit != EXIT_None)
+    if (special->e_exit_ != kExitTypeNone)
     {
         player->cheats &= ~CF_GODMODE;
 
@@ -1881,7 +1881,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
             //   modify the sector's attributes instead.
             props->special = nullptr;
 
-            if (special->e_exit == EXIT_Secret)
+            if (special->e_exit_ == kExitTypeSecret)
                 G_SecretExitLevel(1);
             else
                 G_ExitLevel(1);
@@ -1908,7 +1908,7 @@ void P_PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
     bool was_airless = player->airless;
     bool was_swimming   = player->swimming;
 
-    const sectortype_c *swim_special = nullptr;
+    const SectorType *swim_special = nullptr;
 
     player->swimming   = false;
     player->underwater = false;
@@ -1975,10 +1975,10 @@ void P_PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
     {
         SYS_ASSERT(swim_special);
 
-        if (player->splashwait == 0 && swim_special->splash_sfx)
+        if (player->splashwait == 0 && swim_special->splash_sfx_)
         {
             // S_StartFX(swim_special->splash_sfx, SNCAT_UI, player->mo);
-            S_StartFX(swim_special->splash_sfx, P_MobjGetSfxCategory(player->mo), player->mo);
+            S_StartFX(swim_special->splash_sfx_, P_MobjGetSfxCategory(player->mo), player->mo);
 
             P_HitLiquidFloor(player->mo);
         }
@@ -2082,21 +2082,21 @@ void P_UpdateSpecials(bool extra_tic)
 
             // Update dynamic values
             struct sector_s  *sec_ref     = lineanims[i].scroll_sec_ref;
-            const linetype_c *special_ref = lineanims[i].scroll_special_ref;
+            const LineType *special_ref = lineanims[i].scroll_special_ref;
             line_s           *line_ref    = lineanims[i].scroll_line_ref;
 
             if (!sec_ref || !special_ref || !line_ref)
                 continue;
 
-            if (special_ref->line_effect & LINEFX_VectorScroll)
+            if (special_ref->line_effect_ & kLineEffectTypeVectorScroll)
             {
                 float tdx = lineanims[i].dynamic_dx;
                 float tdy = lineanims[i].dynamic_dy;
                 float heightref =
-                    special_ref->scroll_type & ScrollType_Displace ? lineanims[i].last_height : sec_ref->orig_height;
+                    special_ref->scroll_type_ & BoomScrollerTypeDisplace ? lineanims[i].last_height : sec_ref->orig_height;
                 float sy = tdy * ((sec_ref->f_h + sec_ref->c_h) - heightref);
                 float sx = tdx * ((sec_ref->f_h + sec_ref->c_h) - heightref);
-                if (r_doubleframes.d && special_ref->scroll_type & ScrollType_Displace)
+                if (r_doubleframes.d && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
                 {
                     sy *= 2;
                     sx *= 2;
@@ -2138,15 +2138,15 @@ void P_UpdateSpecials(bool extra_tic)
                     }
                 }
             }
-            if (special_ref->line_effect & LINEFX_TaggedOffsetScroll)
+            if (special_ref->line_effect_ & kLineEffectTypeTaggedOffsetScroll)
             {
                 float x_speed = lineanims[i].side0_xoffspeed;
                 float y_speed = lineanims[i].side0_yoffspeed;
                 float heightref =
-                    special_ref->scroll_type & ScrollType_Displace ? lineanims[i].last_height : sec_ref->orig_height;
+                    special_ref->scroll_type_ & BoomScrollerTypeDisplace ? lineanims[i].last_height : sec_ref->orig_height;
                 float sy = x_speed * ((sec_ref->f_h + sec_ref->c_h) - heightref);
                 float sx = y_speed * ((sec_ref->f_h + sec_ref->c_h) - heightref);
-                if (r_doubleframes.d && special_ref->scroll_type & ScrollType_Displace)
+                if (r_doubleframes.d && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
                 {
                     sy *= 2;
                     sx *= 2;
@@ -2360,35 +2360,35 @@ void P_UpdateSpecials(bool extra_tic)
 
             // Update dynamic values
             struct sector_s  *sec_ref     = secanims[i].scroll_sec_ref;
-            const linetype_c *special_ref = secanims[i].scroll_special_ref;
+            const LineType *special_ref = secanims[i].scroll_special_ref;
             line_s           *line_ref    = secanims[i].scroll_line_ref;
 
             if (!sec_ref || !special_ref || !line_ref ||
-                !(special_ref->scroll_type & ScrollType_Displace || special_ref->scroll_type & ScrollType_Accel))
+                !(special_ref->scroll_type_ & BoomScrollerTypeDisplace || special_ref->scroll_type_ & BoomScrollerTypeAccel))
                 continue;
 
             float heightref =
-                special_ref->scroll_type & ScrollType_Displace ? secanims[i].last_height : sec_ref->orig_height;
+                special_ref->scroll_type_ & BoomScrollerTypeDisplace ? secanims[i].last_height : sec_ref->orig_height;
             float sy = line_ref->length / 32.0f * line_ref->dy / line_ref->length *
                        ((sec_ref->f_h + sec_ref->c_h) - heightref);
             float sx = line_ref->length / 32.0f * line_ref->dx / line_ref->length *
                        ((sec_ref->f_h + sec_ref->c_h) - heightref);
-            if (r_doubleframes.d && special_ref->scroll_type & ScrollType_Displace)
+            if (r_doubleframes.d && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
             {
                 sy *= 2;
                 sx *= 2;
             }
-            if (special_ref->sector_effect & SECTFX_PushThings)
+            if (special_ref->sector_effect_ & kSectorEffectTypePushThings)
             {
                 sec->props.net_push.Y += BOOM_CARRY_FACTOR * sy;
                 sec->props.net_push.X += BOOM_CARRY_FACTOR * sx;
             }
-            if (special_ref->sector_effect & SECTFX_ScrollFloor)
+            if (special_ref->sector_effect_ & kSectorEffectTypeScrollFloor)
             {
                 sec->floor.net_scroll.Y -= sy;
                 sec->floor.net_scroll.X -= sx;
             }
-            if (special_ref->sector_effect & SECTFX_ScrollCeiling)
+            if (special_ref->sector_effect_ & kSectorEffectTypeScrollCeiling)
             {
                 sec->ceil.net_scroll.Y -= sy;
                 sec->ceil.net_scroll.X -= sx;
@@ -2499,7 +2499,7 @@ void P_SpawnSpecials1(void)
 
     for (i = 0; i < numlines; i++)
     {
-        const linetype_c *special = lines[i].special;
+        const LineType *special = lines[i].special;
 
         if (!special)
         {
@@ -2508,29 +2508,29 @@ void P_SpawnSpecials1(void)
         }
 
         // -AJA- 1999/10/23: weed out non-appearing lines.
-        if (!G_CheckWhenAppear(special->appear))
+        if (!G_CheckWhenAppear(special->appear_))
         {
             lines[i].special = nullptr;
             continue;
         }
 
-        lines[i].count = special->count;
+        lines[i].count = special->count_;
 
         // -AJA- 2007/12/29: Portal effects
-        if (special->portal_effect != PORTFX_None)
+        if (special->portal_effect_ != kPortalEffectTypeNone)
         {
             P_PortalEffect(&lines[i]);
         }
 
         // Extrafloor creation
-        if (special->ef.type != EXFL_None && lines[i].tag > 0)
+        if (special->ef_.type_ != kExtraFloorTypeNone && lines[i].tag > 0)
         {
             sector_t *ctrl = lines[i].frontsector;
 
             for (sector_t *tsec = P_FindSectorFromTag(lines[i].tag); tsec; tsec = tsec->tag_next)
             {
                 // the OLD method of Boom deep water (the BOOMTEX flag)
-                if (special->ef.type & EXFL_BoomTex)
+                if (special->ef_.type_ & kExtraFloorTypeBoomTex)
                 {
                     if (ctrl->f_h <= tsec->f_h)
                     {
@@ -2542,9 +2542,9 @@ void P_SpawnSpecials1(void)
                 P_AddExtraFloor(tsec, &lines[i]);
 
                 // transfer any translucency
-                if (PERCENT_2_FLOAT(special->translucency) <= 0.99f)
+                if (PERCENT_2_FLOAT(special->translucency_) <= 0.99f)
                 {
-                    P_EFTransferTrans(ctrl, tsec, &lines[i], &special->ef, PERCENT_2_FLOAT(special->translucency));
+                    P_EFTransferTrans(ctrl, tsec, &lines[i], &special->ef_, PERCENT_2_FLOAT(special->translucency_));
                 }
 
                 // update the line gaps & things:
@@ -2555,17 +2555,17 @@ void P_SpawnSpecials1(void)
         }
 
         // Detail slopes
-        if (special->slope_type & SLP_DetailFloor)
+        if (special->slope_type_ & kSlopeTypeDetailFloor)
         {
             DetailSlope_Floor(&lines[i]);
         }
-        if (special->slope_type & SLP_DetailCeiling)
+        if (special->slope_type_ & kSlopeTypeDetailCeiling)
         {
             DetailSlope_Ceiling(&lines[i]);
         }
 
         // Handle our Glass line type now
-        if (special->glass)
+        if (special->glass_)
         {
             P_LineEffectDebris(&lines[i], special);
         }
@@ -2575,8 +2575,8 @@ void P_SpawnSpecials1(void)
 void P_SpawnSpecials2(int autotag)
 {
     sector_t           *sector;
-    const sectortype_c *secSpecial;
-    const linetype_c   *special;
+    const SectorType *secSpecial;
+    const LineType   *special;
 
     int i;
 
@@ -2592,58 +2592,58 @@ void P_SpawnSpecials2(int autotag)
 
         secSpecial = sector->props.special;
 
-        if (!G_CheckWhenAppear(secSpecial->appear))
+        if (!G_CheckWhenAppear(secSpecial->appear_))
         {
             P_SectorChangeSpecial(sector, 0);
             continue;
         }
 
-        if (secSpecial->l.type != LITE_None)
-            EV_Lights(sector, &secSpecial->l);
+        if (secSpecial->l_.type_ != kLightSpecialTypeNone)
+            EV_Lights(sector, &secSpecial->l_);
 
-        if (secSpecial->secret)
+        if (secSpecial->secret_)
             wi_stats.secret++;
 
-        if (secSpecial->use_colourmap)
-            sector->props.colourmap = secSpecial->use_colourmap;
+        if (secSpecial->use_colourmap_)
+            sector->props.colourmap = secSpecial->use_colourmap_;
 
-        if (secSpecial->ambient_sfx)
-            P_AddAmbientSFX(sector, secSpecial->ambient_sfx);
+        if (secSpecial->ambient_sfx_)
+            P_AddAmbientSFX(sector, secSpecial->ambient_sfx_);
 
         // - Plats/Floors -
-        if (secSpecial->f.type != mov_undefined)
-            EV_DoPlane(sector, &secSpecial->f, sector);
+        if (secSpecial->f_.type_ != kPlaneMoverUndefined)
+            EV_DoPlane(sector, &secSpecial->f_, sector);
 
         // - Doors/Ceilings -
-        if (secSpecial->c.type != mov_undefined)
-            EV_DoPlane(sector, &secSpecial->c, sector);
+        if (secSpecial->c_.type_ != kPlaneMoverUndefined)
+            EV_DoPlane(sector, &secSpecial->c_, sector);
 
-        sector->props.gravity   = secSpecial->gravity;
-        sector->props.friction  = secSpecial->friction;
-        sector->props.viscosity = secSpecial->viscosity;
-        sector->props.drag      = secSpecial->drag;
+        sector->props.gravity   = secSpecial->gravity_;
+        sector->props.friction  = secSpecial->friction_;
+        sector->props.viscosity = secSpecial->viscosity_;
+        sector->props.drag      = secSpecial->drag_;
 
         // compute pushing force
-        if (secSpecial->push_speed > 0 || secSpecial->push_zspeed > 0)
+        if (secSpecial->push_speed_ > 0 || secSpecial->push_zspeed_ > 0)
         {
-            float mul = secSpecial->push_speed / 100.0f;
+            float mul = secSpecial->push_speed_ / 100.0f;
 
-            sector->props.push.X += epi::BAMCos(secSpecial->push_angle) * mul;
-            sector->props.push.Y += epi::BAMSin(secSpecial->push_angle) * mul;
-            sector->props.push.Z += secSpecial->push_zspeed / (r_doubleframes.d ? 89.2f : 100.0f);
+            sector->props.push.X += epi::BAMCos(secSpecial->push_angle_) * mul;
+            sector->props.push.Y += epi::BAMSin(secSpecial->push_angle_) * mul;
+            sector->props.push.Z += secSpecial->push_zspeed_ / (r_doubleframes.d ? 89.2f : 100.0f);
         }
 
         // Scrollers
-        if (secSpecial->f.scroll_speed > 0)
+        if (secSpecial->f_.scroll_speed_ > 0)
         {
             secanim_t anim;
             anim.target = sector;
 
-            float dx = epi::BAMCos(secSpecial->f.scroll_angle);
-            float dy = epi::BAMSin(secSpecial->f.scroll_angle);
+            float dx = epi::BAMCos(secSpecial->f_.scroll_angle_);
+            float dy = epi::BAMSin(secSpecial->f_.scroll_angle_);
 
-            anim.floor_scroll.X -= dx * secSpecial->f.scroll_speed / 32.0f;
-            anim.floor_scroll.Y -= dy * secSpecial->f.scroll_speed / 32.0f;
+            anim.floor_scroll.X -= dx * secSpecial->f_.scroll_speed_ / 32.0f;
+            anim.floor_scroll.Y -= dy * secSpecial->f_.scroll_speed_ / 32.0f;
 
             anim.last_height = sector->orig_height;
 
@@ -2651,16 +2651,16 @@ void P_SpawnSpecials2(int autotag)
 
             P_AddSpecialSector(sector);
         }
-        if (secSpecial->c.scroll_speed > 0)
+        if (secSpecial->c_.scroll_speed_ > 0)
         {
             secanim_t anim;
             anim.target = sector;
 
-            float dx = epi::BAMCos(secSpecial->c.scroll_angle);
-            float dy = epi::BAMSin(secSpecial->c.scroll_angle);
+            float dx = epi::BAMCos(secSpecial->c_.scroll_angle_);
+            float dy = epi::BAMSin(secSpecial->c_.scroll_angle_);
 
-            anim.ceil_scroll.X -= dx * secSpecial->c.scroll_speed / 32.0f;
-            anim.ceil_scroll.Y -= dy * secSpecial->c.scroll_speed / 32.0f;
+            anim.ceil_scroll.X -= dx * secSpecial->c_.scroll_speed_ / 32.0f;
+            anim.ceil_scroll.Y -= dy * secSpecial->c_.scroll_speed_ / 32.0f;
 
             anim.last_height = sector->orig_height;
 
@@ -2687,35 +2687,35 @@ void P_SpawnSpecials2(int autotag)
         if (!special)
             continue;
 
-        if (special->s_xspeed || special->s_yspeed)
+        if (special->s_xspeed_ || special->s_yspeed_)
         {
-            AdjustScrollParts(lines[i].side[0], 0, special->scroll_parts, special->s_xspeed, special->s_yspeed);
+            AdjustScrollParts(lines[i].side[0], 0, special->scroll_parts_, special->s_xspeed_, special->s_yspeed_);
 
-            AdjustScrollParts(lines[i].side[1], 1, special->scroll_parts, special->s_xspeed, special->s_yspeed);
+            AdjustScrollParts(lines[i].side[1], 1, special->scroll_parts_, special->s_xspeed_, special->s_yspeed_);
 
             P_AddSpecialLine(lines + i);
         }
 
         // -AJA- 1999/06/30: Translucency effect.
-        if (PERCENT_2_FLOAT(special->translucency) <= 0.99f && lines[i].side[0])
-            lines[i].side[0]->middle.translucency = PERCENT_2_FLOAT(special->translucency);
+        if (PERCENT_2_FLOAT(special->translucency_) <= 0.99f && lines[i].side[0])
+            lines[i].side[0]->middle.translucency = PERCENT_2_FLOAT(special->translucency_);
 
-        if (PERCENT_2_FLOAT(special->translucency) <= 0.99f && lines[i].side[1])
-            lines[i].side[1]->middle.translucency = PERCENT_2_FLOAT(special->translucency);
+        if (PERCENT_2_FLOAT(special->translucency_) <= 0.99f && lines[i].side[1])
+            lines[i].side[1]->middle.translucency = PERCENT_2_FLOAT(special->translucency_);
 
-        if (special->autoline)
+        if (special->autoline_)
         {
-            P_ActivateSpecialLine(&lines[i], lines[i].special, lines[i].tag, 0, nullptr, line_Any, 1, 1);
+            P_ActivateSpecialLine(&lines[i], lines[i].special, lines[i].tag, 0, nullptr, kLineTriggerAny, 1, 1);
         }
 
         // -KM- 1998/11/25 This line should be pushed automatically
         if (autotag && lines[i].special && lines[i].tag == autotag)
         {
-            P_ActivateSpecialLine(&lines[i], lines[i].special, lines[i].tag, 0, nullptr, line_pushable, 1, 1);
+            P_ActivateSpecialLine(&lines[i], lines[i].special, lines[i].tag, 0, nullptr, kLineTriggerPushable, 1, 1);
         }
 
         // add lightanim for manual doors with tags
-        if (special->type == line_manual && special->c.type != mov_undefined && lines[i].tag)
+        if (special->type_ == kLineTriggerManual && special->c_.type_ != kPlaneMoverUndefined && lines[i].tag)
         {
             lightanim_t anim;
             anim.light_line_ref = &lines[i];

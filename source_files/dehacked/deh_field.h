@@ -19,6 +19,7 @@
 #pragma once
 
 #include "deh_mobj.h"
+#include <stdint.h>
 
 namespace dehacked
 {

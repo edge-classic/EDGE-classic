@@ -486,10 +486,10 @@ static void LoadSectors(int lump)
         ss->props.viscosity = VISCOSITY;
         ss->props.drag      = DRAG;
 
-        if (ss->props.special && ss->props.special->fog_color != kRGBANoValue)
+        if (ss->props.special && ss->props.special->fog_color_ != kRGBANoValue)
         {
-            ss->props.fog_color   = ss->props.special->fog_color;
-            ss->props.fog_density = 0.01f * ss->props.special->fog_density;
+            ss->props.fog_color   = ss->props.special->fog_color_;
+            ss->props.fog_density = 0.01f * ss->props.special->fog_density_;
         }
         else
         {
@@ -575,7 +575,7 @@ static mobj_t *SpawnMapThing(const mobjtype_c *info, float x, float y, float z, 
     if (info->playernum > 0)
     {
         // -AJA- 2009/10/07: Hub support
-        if (sec->props.special && sec->props.special->hub)
+        if (sec->props.special && sec->props.special->hub_)
         {
             if (sec->tag <= 0)
                 I_Warning("HUB_START in sector without tag @ (%1.0f %1.0f)\n", x, y);
@@ -979,19 +979,19 @@ static void LoadLineDefs(int lump)
 
         ld->special = P_LookupLineType(HMM_MAX(0, AlignedLittleEndianS16(mld->special)));
 
-        if (ld->special && ld->special->type == line_walkable)
+        if (ld->special && ld->special->type_ == kLineTriggerWalkable)
             ld->flags |= MLF_PassThru;
 
-        if (ld->special && ld->special->type == line_none &&
-            (ld->special->s_xspeed || ld->special->s_yspeed || ld->special->scroll_type > ScrollType_None ||
-             ld->special->line_effect == LINEFX_VectorScroll || ld->special->line_effect == LINEFX_OffsetScroll ||
-             ld->special->line_effect == LINEFX_TaggedOffsetScroll))
+        if (ld->special && ld->special->type_ == kLineTriggerNone &&
+            (ld->special->s_xspeed_ || ld->special->s_yspeed_ || ld->special->scroll_type_ > BoomScrollerTypeNone ||
+             ld->special->line_effect_ == kLineEffectTypeVectorScroll || ld->special->line_effect_ == kLineEffectTypeOffsetScroll ||
+             ld->special->line_effect_ == kLineEffectTypeTaggedOffsetScroll))
             ld->flags |= MLF_PassThru;
 
-        if (ld->special && ld->special->slope_type & SLP_DetailFloor)
+        if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailFloor)
             ld->flags |= MLF_PassThru;
 
-        if (ld->special && ld->special->slope_type & SLP_DetailCeiling)
+        if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailCeiling)
             ld->flags |= MLF_PassThru;
 
         if (ld->special && ld->special == linetypes.Lookup(0)) // Add passthru to unknown/templated
@@ -1005,7 +1005,7 @@ static void LoadLineDefs(int lump)
         // check for possible extrafloors, updating the exfloor_max count
         // for the sectors in question.
 
-        if (ld->tag && ld->special && ld->special->ef.type)
+        if (ld->tag && ld->special && ld->special->ef_.type_)
         {
             for (int j = 0; j < numsectors; j++)
             {
@@ -1787,10 +1787,10 @@ static void LoadUDMFSectors()
                 else
                     ss->props.fog_density = 0.01f * ((float)fog_density / 1020.0f);
             }
-            else if (ss->props.special && ss->props.special->fog_color != kRGBANoValue)
+            else if (ss->props.special && ss->props.special->fog_color_ != kRGBANoValue)
             {
-                ss->props.fog_color   = ss->props.special->fog_color;
-                ss->props.fog_density = 0.01f * ss->props.special->fog_density;
+                ss->props.fog_color   = ss->props.special->fog_color_;
+                ss->props.fog_density = 0.01f * ss->props.special->fog_density_;
             }
             else
             {
@@ -2243,19 +2243,19 @@ static void LoadUDMFLineDefs()
 
             ld->special = P_LookupLineType(HMM_MAX(0, special));
 
-            if (ld->special && ld->special->type == line_walkable)
+            if (ld->special && ld->special->type_ == kLineTriggerWalkable)
                 ld->flags |= MLF_PassThru;
 
-            if (ld->special && ld->special->type == line_none &&
-                (ld->special->s_xspeed || ld->special->s_yspeed || ld->special->scroll_type > ScrollType_None ||
-                 ld->special->line_effect == LINEFX_VectorScroll || ld->special->line_effect == LINEFX_OffsetScroll ||
-                 ld->special->line_effect == LINEFX_TaggedOffsetScroll))
+            if (ld->special && ld->special->type_ == kLineTriggerNone &&
+                (ld->special->s_xspeed_ || ld->special->s_yspeed_ || ld->special->scroll_type_ > BoomScrollerTypeNone ||
+                 ld->special->line_effect_ == kLineEffectTypeVectorScroll || ld->special->line_effect_ == kLineEffectTypeOffsetScroll ||
+                 ld->special->line_effect_ == kLineEffectTypeTaggedOffsetScroll))
                 ld->flags |= MLF_PassThru;
 
-            if (ld->special && ld->special->slope_type & SLP_DetailFloor)
+            if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailFloor)
                 ld->flags |= MLF_PassThru;
 
-            if (ld->special && ld->special->slope_type & SLP_DetailCeiling)
+            if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailCeiling)
                 ld->flags |= MLF_PassThru;
 
             if (ld->special && ld->special == linetypes.Lookup(0)) // Add passthru to unknown/templated
@@ -2263,7 +2263,7 @@ static void LoadUDMFLineDefs()
 
             ComputeLinedefData(ld, side0, side1);
 
-            if (ld->tag && ld->special && ld->special->ef.type)
+            if (ld->tag && ld->special && ld->special->ef_.type_)
             {
                 for (int j = 0; j < numsectors; j++)
                 {
@@ -2803,10 +2803,10 @@ static void SetupSlidingDoors(void)
     {
         line_t *ld = lines + i;
 
-        if (!ld->special || ld->special->s.type == SLIDE_None)
+        if (!ld->special || ld->special->s_.type_ == kSlidingDoorTypeNone)
             continue;
 
-        if (ld->tag == 0 || ld->special->type == line_manual)
+        if (ld->tag == 0 || ld->special->type_ == kLineTriggerManual)
             ld->slide_door = ld->special;
         else
         {
@@ -3765,12 +3765,12 @@ void P_Init(void)
     G_ClearPlayerStarts();
 }
 
-linetype_c *P_LookupLineType(int num)
+LineType *P_LookupLineType(int num)
 {
     if (num <= 0)
         return nullptr;
 
-    linetype_c *def = linetypes.Lookup(num);
+    LineType *def = linetypes.Lookup(num);
 
     // DDF types always override
     if (def)
@@ -3784,12 +3784,12 @@ linetype_c *P_LookupLineType(int num)
     return linetypes.Lookup(0); // template line
 }
 
-sectortype_c *P_LookupSectorType(int num)
+SectorType *P_LookupSectorType(int num)
 {
     if (num <= 0)
         return nullptr;
 
-    sectortype_c *def = sectortypes.Lookup(num);
+    SectorType *def = sectortypes.Lookup(num);
 
     // DDF types always override
     if (def)

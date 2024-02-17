@@ -105,7 +105,7 @@ line_t *P_FindTeleportLine(int tag, line_t *original)
 // -AJA- 2004/10/08: Reworked for Silent and Line-to-Line teleporters
 //                   (based on the logic in prBoom's p_telept.c code).
 //
-bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
+bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const TeleportDefinition *def)
 {
     if (!thing)
         return false;
@@ -126,13 +126,13 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
     mobj_t *currmobj = nullptr;
     line_t *currline = nullptr;
 
-    bool flipped = (def->special & TELSP_Flipped) ? true : false;
+    bool flipped = (def->special_ & kTeleportSpecialFlipped) ? true : false;
 
     player_t *player = thing->player;
     if (player && player->mo != thing) // exclude voodoo dolls
         player = nullptr;
 
-    if (def->special & TELSP_Line)
+    if (def->special_ & kTeleportSpecialLine)
     {
         if (!line || tag <= 0)
             return false;
@@ -156,10 +156,10 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
     }
     else /* thing-based teleport */
     {
-        if (!def->outspawnobj)
+        if (!def->outspawnobj_)
             return false;
 
-        currmobj = P_FindTeleportMan(tag, def->outspawnobj);
+        currmobj = P_FindTeleportMan(tag, def->outspawnobj_);
 
         if (!currmobj)
             return false;
@@ -176,18 +176,18 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
     if (flipped)
         dest_ang += kBAMAngle180;
 
-    if (def->special & TELSP_Relative && currline)
+    if (def->special_ & kTeleportSpecialRelative && currline)
         new_ang = thing->angle + (dest_ang - source_ang);
-    else if (def->special & TELSP_SameAbsDir)
+    else if (def->special_ & kTeleportSpecialSameAbsDir)
         new_ang = thing->angle;
-    else if (def->special & TELSP_Rotate)
+    else if (def->special_ & kTeleportSpecialRotate)
         new_ang = thing->angle + dest_ang;
     else
         new_ang = dest_ang;
 
     /* --- Offset handling --- */
 
-    if (line && def->special & TELSP_SameOffset)
+    if (line && def->special_ & kTeleportSpecialSameOffset)
     {
         float dx = 0;
         float dy = 0;
@@ -236,7 +236,7 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
         }
     }
 
-    if (def->special & TELSP_SameHeight)
+    if (def->special_ & kTeleportSpecialSameHeight)
     {
         new_z += (thing->z - thing->floorz);
     }
@@ -264,7 +264,7 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
         thing->mom.X = thing->speed * epi::BAMCos(new_ang);
         thing->mom.Y = thing->speed * epi::BAMSin(new_ang);
     }
-    else if (def->special & TELSP_SameSpeed)
+    else if (def->special_ & kTeleportSpecialSameSpeed)
     {
         // we need to rotate the momentum vector
         BAMAngle mom_ang = new_ang - thing->angle;
@@ -281,7 +281,7 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
     else if (player)
     {
         // don't move for a bit
-        thing->reactiontime = def->delay;
+        thing->reactiontime = def->delay_;
 
         thing->mom.X = thing->mom.Y = thing->mom.Z = 0;
 
@@ -290,20 +290,20 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
 
     thing->angle = new_ang;
 
-    if (currmobj && 0 == (def->special & (TELSP_Relative | TELSP_SameAbsDir | TELSP_Rotate)))
+    if (currmobj && 0 == (def->special_ & (kTeleportSpecialRelative | kTeleportSpecialSameAbsDir | kTeleportSpecialRotate)))
     {
         thing->vertangle = currmobj->vertangle;
     }
 
     /* --- Spawning teleport fog (source and/or dest) --- */
 
-    if (!(def->special & TELSP_Silent))
+    if (!(def->special_ & kTeleportSpecialSilent))
     {
         mobj_t *fog;
 
-        if (def->inspawnobj)
+        if (def->inspawnobj_)
         {
-            fog = P_MobjCreateObject(oldx, oldy, oldz, def->inspawnobj);
+            fog = P_MobjCreateObject(oldx, oldy, oldz, def->inspawnobj_);
 
             // never use this object as a teleport destination
             fog->extendedflags |= EF_NEVERTARGET;
@@ -312,7 +312,7 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
                 P_SetMobjStateDeferred(fog, fog->info->chase_state, 0);
         }
 
-        if (def->outspawnobj)
+        if (def->outspawnobj_)
         {
             //
             // -ACB- 1998/09/06 Switched 40 to 20. This by my records is
@@ -321,7 +321,7 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def)
             // -ES- 1998/10/29 When fading, we don't want to see the fog.
             //
             fog = P_MobjCreateObject(new_x + 20.0f * epi::BAMCos(thing->angle), new_y + 20.0f * epi::BAMSin(thing->angle), new_z,
-                                     def->outspawnobj);
+                                     def->outspawnobj_);
 
             // never use this object as a teleport destination
             fog->extendedflags |= EF_NEVERTARGET;

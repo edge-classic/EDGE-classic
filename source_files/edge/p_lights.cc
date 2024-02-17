@@ -47,28 +47,28 @@ std::vector<light_t *> active_lights;
 //
 static void DoLight(light_t *light)
 {
-    const lightdef_c *type = light->type;
+    const LightSpecialDefinition *type = light->type;
 
     if (light->count == 0)
         return;
 
-    if (type->type == LITE_None || --light->count)
+    if (type->type_ == kLightSpecialTypeNone || --light->count)
         return;
 
     // Flashing lights
-    switch (type->type)
+    switch (type->type_)
     {
-    case LITE_Set: {
+    case kLightSpecialTypeSet: {
         light->sector->props.lightlevel = light->maxlight;
 
         // count is 0, i.e. this light is now disabled
         return;
     }
 
-    case LITE_Fade: {
+    case kLightSpecialTypeFade: {
         int diff = light->maxlight - light->minlight;
 
-        if (HMM_ABS(diff) < type->step)
+        if (HMM_ABS(diff) < type->step_)
         {
             light->sector->props.lightlevel = light->maxlight;
 
@@ -78,24 +78,24 @@ static void DoLight(light_t *light)
 
         // step towards the target light level
         if (diff < 0)
-            light->minlight -= type->step;
+            light->minlight -= type->step_;
         else
-            light->minlight += type->step;
+            light->minlight += type->step_;
 
         light->sector->props.lightlevel = light->minlight;
-        light->count                    = type->brighttime;
+        light->count                    = type->brighttime_;
         break;
     }
 
-    case LITE_Flash: {
+    case kLightSpecialTypeFlash: {
         // Dark
-        if (M_RandomTest(type->chance))
+        if (M_RandomTest(type->chance_))
         {
             if (reduce_flash)
                 light->sector->props.lightlevel = (light->maxlight + light->minlight) / 2;
             else
                 light->sector->props.lightlevel = light->minlight;
-            light->count = type->darktime;
+            light->count = type->darktime_;
         }
         else
         {
@@ -103,12 +103,12 @@ static void DoLight(light_t *light)
                 light->sector->props.lightlevel = (light->maxlight + light->minlight) / 2;
             else
                 light->sector->props.lightlevel = light->maxlight;
-            light->count = type->brighttime;
+            light->count = type->brighttime_;
         }
         break;
     }
 
-    case LITE_Strobe:
+    case kLightSpecialTypeStrobe:
         if (light->sector->props.lightlevel == light->maxlight)
         {
             // Go dark
@@ -116,7 +116,7 @@ static void DoLight(light_t *light)
                 light->sector->props.lightlevel = (light->maxlight + light->minlight) / 2;
             else
                 light->sector->props.lightlevel = light->minlight;
-            light->count = type->darktime;
+            light->count = type->darktime_;
         }
         else
         {
@@ -125,46 +125,46 @@ static void DoLight(light_t *light)
                 light->sector->props.lightlevel = (light->maxlight + light->minlight) / 2;
             else
                 light->sector->props.lightlevel = light->maxlight;
-            light->count = type->brighttime;
+            light->count = type->brighttime_;
         }
         break;
 
-    case LITE_Glow:
+    case kLightSpecialTypeGlow:
         if (light->direction == -1)
         {
             // Go dark
-            light->sector->props.lightlevel -= type->step;
+            light->sector->props.lightlevel -= type->step_;
             if (light->sector->props.lightlevel <= light->minlight)
             {
                 light->sector->props.lightlevel = light->minlight;
-                light->count                    = type->brighttime;
+                light->count                    = type->brighttime_;
                 light->direction                = +1;
             }
             else
             {
-                light->count = type->darktime;
+                light->count = type->darktime_;
             }
         }
         else
         {
             // Go Bright
-            light->sector->props.lightlevel += type->step;
+            light->sector->props.lightlevel += type->step_;
             if (light->sector->props.lightlevel >= light->maxlight)
             {
                 light->sector->props.lightlevel = light->maxlight;
-                light->count                    = type->darktime;
+                light->count                    = type->darktime_;
                 light->direction                = -1;
             }
             else
             {
-                light->count = type->brighttime;
+                light->count = type->brighttime_;
             }
         }
         break;
 
-    case LITE_FireFlicker: {
+    case kLightSpecialTypeFireFlicker: {
         // -ES- 2000/02/13 Changed this to original DOOM style flicker
-        int amount = (M_Random() & 7) * type->step;
+        int amount = (M_Random() & 7) * type->step_;
 
         if (light->sector->props.lightlevel - amount < light->minlight)
         {
@@ -172,7 +172,7 @@ static void DoLight(light_t *light)
                 light->sector->props.lightlevel = (light->maxlight + light->minlight) / 2;
             else
                 light->sector->props.lightlevel = light->minlight;
-            light->count = type->darktime;
+            light->count = type->darktime_;
         }
         else
         {
@@ -180,7 +180,7 @@ static void DoLight(light_t *light)
                 light->sector->props.lightlevel = (light->maxlight + light->minlight) / 2;
             else
                 light->sector->props.lightlevel = light->maxlight - amount;
-            light->count = type->brighttime;
+            light->count = type->brighttime_;
         }
     }
 
@@ -262,7 +262,7 @@ light_t *P_NewLight(void)
     return light;
 }
 
-bool EV_Lights(sector_t *sec, const lightdef_c *type)
+bool EV_Lights(sector_t *sec, const LightSpecialDefinition *type)
 {
     // check if a light effect already is running on this sector.
     light_t *light = nullptr;
@@ -288,23 +288,23 @@ bool EV_Lights(sector_t *sec, const lightdef_c *type)
     light->sector    = sec;
     light->direction = -1;
 
-    switch (type->type)
+    switch (type->type_)
     {
-    case LITE_Set:
-    case LITE_Fade: {
+    case kLightSpecialTypeSet:
+    case kLightSpecialTypeFade: {
         light->minlight = sec->props.lightlevel;
-        light->maxlight = type->level;
-        light->count    = type->brighttime;
+        light->maxlight = type->level_;
+        light->count    = type->brighttime_;
         break;
     }
 
     default: {
         light->minlight = P_FindMinSurroundingLight(sec, sec->props.lightlevel);
         light->maxlight = sec->props.lightlevel;
-        light->count    = type->sync ? (leveltime % type->sync) + 1 : type->darktime;
+        light->count    = type->sync_ ? (leveltime % type->sync_) + 1 : type->darktime_;
 
         // -AJA- 2009/10/26: DOOM compatibility
-        if (type->type == LITE_Strobe && light->minlight == light->maxlight)
+        if (type->type_ == kLightSpecialTypeStrobe && light->minlight == light->maxlight)
             light->minlight = 0;
         break;
     }

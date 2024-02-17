@@ -38,7 +38,7 @@
 typedef struct light_s
 {
     // type of light effect
-    const lightdef_c *type;
+    const LightSpecialDefinition *type;
 
     sector_t *sector;
 
@@ -83,7 +83,7 @@ typedef enum
 
 typedef struct plane_move_s
 {
-    const movplanedef_c *type;
+    const PlaneMoverDefinition *type;
     sector_t            *sector;
 
     bool is_ceiling;
@@ -114,7 +114,7 @@ typedef struct plane_move_s
 
 typedef struct slider_move_s
 {
-    const sliding_door_c *info;
+    const SlidingDoor *info;
     line_t               *line;
 
     // current distance it has opened
@@ -155,7 +155,7 @@ typedef struct force_s
 extern bool levelTimer;
 extern int  levelTimeCount;
 
-extern linetype_c donut[2];
+extern LineType donut[2];
 
 // at map load
 void P_SpawnSpecials1(void);
@@ -171,7 +171,7 @@ void P_UpdateSpecials(bool extra_tic);
 bool P_UseSpecialLine(mobj_t *thing, line_t *line, int side, float open_bottom, float open_top);
 bool P_CrossSpecialLine(line_t *ld, int side, mobj_t *thing);
 void P_ShootSpecialLine(line_t *ld, int side, mobj_t *thing);
-void P_RemoteActivation(mobj_t *thing, int typenum, int tag, int side, trigger_e method);
+void P_RemoteActivation(mobj_t *thing, int typenum, int tag, int side, LineTrigger method);
 void P_PlayerInSpecialSector(struct player_s *pl, sector_t *sec, bool should_choke = true);
 
 // Utilities...
@@ -181,13 +181,13 @@ sector_t *P_GetSector(int currentSector, int line, int side);
 sector_t *P_GetNextSector(const line_t *line, const sector_t *sec, bool ignore_selfref = false);
 
 // Info Needs....
-float     P_FindSurroundingHeight(const heightref_e ref, const sector_t *sec);
+float     P_FindSurroundingHeight(const TriggerHeightReference ref, const sector_t *sec);
 float     P_FindRaiseToTexture(sector_t *sec); // -KM- 1998/09/01 New func, old inline
 sector_t *P_FindSectorFromTag(int tag);
 int       P_FindMinSurroundingLight(sector_t *sector, int max);
 
 // start an action...
-bool EV_Lights(sector_t *sec, const lightdef_c *type);
+bool EV_Lights(sector_t *sec, const LightSpecialDefinition *type);
 
 void P_RunActivePlanes(void);
 void P_RunActiveSliders(void);
@@ -209,12 +209,12 @@ void     P_DestroyAllSectorSFX(void);
 
 void EV_LightTurnOn(int tag, int bright);
 bool EV_DoDonut(sector_t *s1, struct sfx_s *sfx[4]);
-bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const teleportdef_c *def);
-bool EV_ManualPlane(line_t *line, mobj_t *thing, const movplanedef_c *type);
+bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const TeleportDefinition *def);
+bool EV_ManualPlane(line_t *line, mobj_t *thing, const PlaneMoverDefinition *type);
 // bool EV_ManualElevator(line_t * line, mobj_t * thing, const elevatordef_c * type);
 
-bool EV_DoPlane(sector_t *sec, const movplanedef_c *type, sector_t *model);
-bool EV_DoSlider(line_t *door, line_t *act_line, mobj_t *thing, const linetype_c *special);
+bool EV_DoPlane(sector_t *sec, const PlaneMoverDefinition *type, sector_t *model);
+bool EV_DoSlider(line_t *door, line_t *act_line, mobj_t *thing, const LineType *special);
 bool P_SectorIsLowering(sector_t *sec);
 
 void P_RunForces(bool extra_tic);
@@ -230,7 +230,7 @@ void P_DestroyAllAmbientSFX(void);
 //  P_SWITCH
 //
 void P_InitSwitchList(void);
-void P_ChangeSwitchTexture(line_t *line, bool useAgain, line_special_e specials, bool noSound);
+void P_ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials, bool noSound);
 void P_ClearButtons(void);
 void P_UpdateButtons(void);
 bool P_ButtonIsPressed(line_t *ld);

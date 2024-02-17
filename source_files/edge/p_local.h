@@ -275,11 +275,11 @@ void P_UseLines(player_t *player);
 void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float damage, const damage_c *damtype,
                   const mobjtype_c *puff);
 
-void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special);
+void P_UnblockLineEffectDebris(line_t *TheLine, const LineType *special);
 
 mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance);
 
-bool ReplaceMidTexFromPart(line_t *TheLine, scroll_part_e parts);
+bool ReplaceMidTexFromPart(line_t *TheLine, ScrollingPart parts);
 
 //
 // P_SETUP
@@ -307,8 +307,8 @@ bool P_HasBenefitInList(player_t *player, benefit_t *list);
 //
 #include "p_spec.h"
 
-linetype_c   *P_LookupLineType(int num);
-sectortype_c *P_LookupSectorType(int num);
+LineType   *P_LookupLineType(int num);
+SectorType *P_LookupSectorType(int num);
 
 #endif // __P_LOCAL__
 

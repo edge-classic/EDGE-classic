@@ -274,7 +274,7 @@ bool M_CheatResponder(event_t *ev)
         for (i = 0; i < NUMAMMO; i++)
             pl->ammo[i].num = pl->ammo[i].max;
 
-        pl->cards = KF_MASK;
+        pl->cards = kDoorKeyBitmask;
 
         CheatGiveWeapons(pl);
 
@@ -282,7 +282,7 @@ bool M_CheatResponder(event_t *ev)
     }
     else if (M_CheckCheat(&cheat_keys, key))
     {
-        pl->cards = KF_MASK;
+        pl->cards = kDoorKeyBitmask;
 
         CON_MessageLDF("UnlockCheat");
     }

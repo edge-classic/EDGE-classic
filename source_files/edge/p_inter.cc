@@ -515,21 +515,21 @@ static void GiveArmour(pickup_info_t *pu, benefit_t *be)
 //
 static void GiveKey(pickup_info_t *pu, benefit_t *be)
 {
-    keys_e key = (keys_e)be->sub.type;
+    DoorKeyType key = (DoorKeyType)be->sub.type;
 
     if (pu->lose_em)
     {
         if (!(pu->player->cards & key))
             return;
 
-        pu->player->cards = (keys_e)(pu->player->cards & ~key);
+        pu->player->cards = (DoorKeyType)(pu->player->cards & ~key);
     }
     else
     {
         if (pu->player->cards & key)
             return;
 
-        pu->player->cards = (keys_e)(pu->player->cards | key);
+        pu->player->cards = (DoorKeyType)(pu->player->cards | key);
     }
 
     // -AJA- leave keys in Co-op games
@@ -695,7 +695,7 @@ bool P_HasBenefitInList(player_t *player, benefit_t *list)
             break;
 
         case BENEFIT_Key:
-            if (player->cards & (keys_e)be->sub.type)
+            if (player->cards & (DoorKeyType)be->sub.type)
                 return true;
             break;
 

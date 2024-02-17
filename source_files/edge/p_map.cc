@@ -260,7 +260,7 @@ static bool PIT_CheckAbsLine(line_t *ld, void *data)
     // The spawning thing's position touches the given line.
     // If this should not be allowed, return false.
 
-    if (tm_I.mover->player && ld->special && (ld->special->portal_effect & PORTFX_Standard))
+    if (tm_I.mover->player && ld->special && (ld->special->portal_effect_ & kPortalEffectTypeStandard))
         return true;
 
     if (!ld->backsector || ld->gap_num == 0)
@@ -279,7 +279,7 @@ static bool PIT_CheckAbsLine(line_t *ld, void *data)
 
         // block players ?
         if (tm_I.mover->player &&
-            ((ld->flags & MLF_BlockPlayers) || (ld->special && (ld->special->line_effect & LINEFX_BlockPlayers))))
+            ((ld->flags & MLF_BlockPlayers) || (ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockPlayers))))
         {
             return false;
         }
@@ -287,7 +287,7 @@ static bool PIT_CheckAbsLine(line_t *ld, void *data)
         // block grounded monsters ?
         if ((tm_I.extflags & EF_MONSTER) &&
             ((ld->flags & MLF_BlockGrounded) ||
-             (ld->special && (ld->special->line_effect & LINEFX_BlockGroundedMonsters))) &&
+             (ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockGroundedMonsters))) &&
             (tm_I.mover->z <= tm_I.mover->floorz + 1.0f))
         {
             return false;
@@ -454,7 +454,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
     // so two special lines that are only 8 pixels apart
     // could be crossed in either order.
 
-    if (tm_I.mover->player && ld->special && (ld->special->portal_effect & PORTFX_Standard))
+    if (tm_I.mover->player && ld->special && (ld->special->portal_effect_ & kPortalEffectTypeStandard))
         return true;
 
     if (!ld->backsector)
@@ -479,10 +479,10 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
         // or just blocking monsters ?
 
         if ((ld->flags & MLF_Blocking) || ((ld->flags & MLF_BlockMonsters) && (tm_I.extflags & EF_MONSTER)) ||
-            (((ld->special && (ld->special->line_effect & LINEFX_BlockGroundedMonsters)) ||
+            (((ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockGroundedMonsters)) ||
               (ld->flags & MLF_BlockGrounded)) &&
              (tm_I.extflags & EF_MONSTER) && (tm_I.mover->z <= tm_I.mover->floorz + 1.0f)) ||
-            (((ld->special && (ld->special->line_effect & LINEFX_BlockPlayers)) || (ld->flags & MLF_BlockPlayers)) &&
+            (((ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockPlayers)) || (ld->flags & MLF_BlockPlayers)) &&
              (tm_I.mover->player)))
         {
             blockline = ld;
@@ -502,13 +502,13 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
     }
 
     // handle ladders (players only !)
-    if (tm_I.mover->player && ld->special && ld->special->ladder.height > 0)
+    if (tm_I.mover->player && ld->special && ld->special->ladder_.height_ > 0)
     {
         float z1, z2;
         float pz1, pz2;
 
         z1 = ld->frontsector->f_h + ld->side[0]->middle.offset.Y;
-        z2 = z1 + ld->special->ladder.height;
+        z2 = z1 + ld->special->ladder_.height_;
 
         pz1 = tm_I.mover->z;
         pz2 = tm_I.mover->z + tm_I.mover->height;
@@ -1888,11 +1888,11 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
 // Try and get a texture for our midtex.
 //-If we specified a LINE_PART copy that texture over.
 //-If not, just remove the current midtex we have (only on 2-sided lines).
-bool ReplaceMidTexFromPart(line_t *TheLine, scroll_part_e parts)
+bool ReplaceMidTexFromPart(line_t *TheLine, ScrollingPart parts)
 {
     bool IsFront = true;
 
-    if (parts <= SCPT_RightLower) // assume right is back
+    if (parts <= kScrollingPartRightLower) // assume right is back
         IsFront = false;
 
     if (IsFront == false)
@@ -1904,32 +1904,32 @@ bool ReplaceMidTexFromPart(line_t *TheLine, scroll_part_e parts)
 
     const image_c *image = nullptr;
 
-    // if (parts == SCPT_None)
+    // if (parts == kScrollingPartNone)
     // return false;
-    // parts = (scroll_part_e)(SCPT_LEFT | SCPT_RIGHT);
+    // parts = (scroll_part_e)(kScrollingPartLEFT | kScrollingPartRIGHT);
 
-    if (parts & (SCPT_LeftUpper))
+    if (parts & (kScrollingPartLeftUpper))
     {
         image = side->top.image;
     }
-    if (parts & (SCPT_RightUpper))
+    if (parts & (kScrollingPartRightUpper))
     {
         image = side->top.image;
     }
-    if (parts & (SCPT_LeftLower))
+    if (parts & (kScrollingPartLeftLower))
     {
         image = side->bottom.image;
     }
-    if (parts & (SCPT_RightLower))
+    if (parts & (kScrollingPartRightLower))
     {
         image = side->bottom.image;
     }
 
-    if (parts & (SCPT_LeftMiddle))
+    if (parts & (kScrollingPartLeftMiddle))
     {
         image = side->middle.image; // redundant but whatever ;)
     }
-    if (parts & (SCPT_RightMiddle))
+    if (parts & (kScrollingPartRightMiddle))
     {
         image = side->middle.image; // redundant but whatever ;)
     }
@@ -1953,7 +1953,7 @@ bool ReplaceMidTexFromPart(line_t *TheLine, scroll_part_e parts)
 //
 // Lobo:2021 Unblock and remove texture from our special debris linetype.
 //
-void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
+void P_UnblockLineEffectDebris(line_t *TheLine, const LineType *special)
 {
     if (!TheLine)
     {
@@ -1965,14 +1965,14 @@ void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
     if (TheLine->side[0] && TheLine->side[1])
         TwoSided = true;
 
-    if (special->glass)
+    if (special->glass_)
     {
         // 1. Change the texture on our line
 
         // if it's got a BROKEN_TEXTURE=<tex> then use that
-        if (!special->brokentex.empty())
+        if (!special->brokentex_.empty())
         {
-            const image_c *image           = W_ImageLookup(special->brokentex.c_str(), kImageNamespaceTexture);
+            const image_c *image           = W_ImageLookup(special->brokentex_.c_str(), kImageNamespaceTexture);
             TheLine->side[0]->middle.image = image;
             if (TwoSided)
             {
@@ -1981,7 +1981,7 @@ void P_UnblockLineEffectDebris(line_t *TheLine, const linetype_c *special)
         }
         else // otherwise try get the texture from our LINE_PART=
         {
-            ReplaceMidTexFromPart(TheLine, special->line_parts);
+            ReplaceMidTexFromPart(TheLine, special->line_parts_);
         }
 
         // 2. if it's 2 sided, make it unblocking now
@@ -2019,7 +2019,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
 
         // P_ShootSpecialLine()->P_ActivateSpecialLine() can remove
         //  the special so we need to get the info before calling it
-        const linetype_c *tempspecial = ld->special;
+        const LineType *tempspecial = ld->special;
 
         // Lobo 2021: moved the line check (2.) to be after
         // the floor/ceiling check (1.)
@@ -2149,9 +2149,9 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
                             !(shoot_I.source->currentattack->flags & AF_NoTriggerLines)))
         {
             const mobjtype_c *info;
-            info = tempspecial->effectobject;
+            info = tempspecial->effectobject_;
 
-            if (info && tempspecial->type == line_shootable)
+            if (info && tempspecial->type_ == kLineTriggerShootable)
             {
                 P_SpawnDebris(x, y, z, shoot_I.angle + kBAMAngle180, info);
             }
@@ -2510,7 +2510,7 @@ static bool PTR_UseTraverse(intercept_t *in, void *dataptr)
         use_upper = HMM_MIN(use_upper, side->sector->c_h);
     }
 
-    if (!ld->special || ld->special->type == line_shootable || ld->special->type == line_walkable)
+    if (!ld->special || ld->special->type_ == kLineTriggerShootable || ld->special->type_ == kLineTriggerWalkable)
     {
         if (ld->gap_num == 0 || use_upper <= use_lower)
         {
@@ -2534,7 +2534,7 @@ static bool PTR_UseTraverse(intercept_t *in, void *dataptr)
     /*
     if (ld->special)
     {
-        if(ld->special->slope_type & SLP_DetailFloor || ld->special->slope_type & SLP_DetailCeiling)
+        if(ld->special->slope_type & kSlopeTypeDetailFloor || ld->special->slope_type & kSlopeTypeDetailCeiling)
             return true;
     }
     */
@@ -2870,11 +2870,11 @@ bool P_CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh)
     for (ef = sec->control_floors; ef; ef = ef->ctrl_next)
     {
         // liquids can go anywhere, anytime
-        if (ef->ef_info->type & EXFL_Liquid)
+        if (ef->ef_info->type_ & kExtraFloorTypeLiquid)
             continue;
 
         // moving a thin extrafloor ?
-        if (!is_ceiling && !(ef->ef_info->type & EXFL_Thick))
+        if (!is_ceiling && !(ef->ef_info->type_ & kExtraFloorTypeThick))
         {
             float new_h = ef->top_h + dh;
 
@@ -2891,7 +2891,7 @@ bool P_CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh)
         }
 
         // moving the top of a thick extrafloor ?
-        if (is_ceiling && (ef->ef_info->type & EXFL_Thick))
+        if (is_ceiling && (ef->ef_info->type_ & kExtraFloorTypeThick))
         {
             float new_h = ef->top_h + dh;
 
@@ -2906,7 +2906,7 @@ bool P_CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh)
         }
 
         // moving the bottom of a thick extrafloor ?
-        if (!is_ceiling && (ef->ef_info->type & EXFL_Thick))
+        if (!is_ceiling && (ef->ef_info->type_ & kExtraFloorTypeThick))
         {
             float new_h = ef->bottom_h + dh;
 
@@ -2977,7 +2977,7 @@ bool P_SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush, bool
 
     for (ef = sec->control_floors; ef; ef = ef->ctrl_next)
     {
-        if (ef->ef_info->type & EXFL_Thick)
+        if (ef->ef_info->type_ & kExtraFloorTypeThick)
         {
             ef->top_h    = sec->c_h;
             ef->bottom_h = sec->f_h;
@@ -2996,11 +2996,11 @@ bool P_SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush, bool
         for (ef = sec->control_floors; ef; ef = ef->ctrl_next)
         {
             // liquids can go anywhere, anytime
-            if (ef->ef_info->type & EXFL_Liquid)
+            if (ef->ef_info->type_ & kExtraFloorTypeLiquid)
                 continue;
 
             // moving a thin extrafloor ?
-            if (!is_ceiling && !(ef->ef_info->type & EXFL_Thick))
+            if (!is_ceiling && !(ef->ef_info->type_ & kExtraFloorTypeThick))
             {
                 if (dh > 0)
                 {
@@ -3016,7 +3016,7 @@ bool P_SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush, bool
             }
 
             // moving the top of a thick extrafloor ?
-            if (is_ceiling && (ef->ef_info->type & EXFL_Thick))
+            if (is_ceiling && (ef->ef_info->type_ & kExtraFloorTypeThick))
             {
                 float h = ef->higher ? ef->higher->bottom_h : ef->sector->c_h;
                 ChangeSectorHeights(ef->sector, ef->top_h, h, dh, 0);
@@ -3024,7 +3024,7 @@ bool P_SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush, bool
             }
 
             // moving the bottom of a thick extrafloor ?
-            if (!is_ceiling && (ef->ef_info->type & EXFL_Thick))
+            if (!is_ceiling && (ef->ef_info->type_ & kExtraFloorTypeThick))
             {
                 float h = ef->lower ? ef->lower->top_h : ef->sector->f_h;
                 ChangeSectorHeights(ef->sector, h, ef->bottom_h, 0, dh);

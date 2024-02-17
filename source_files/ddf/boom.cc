@@ -18,8 +18,8 @@
 
 #include "local.h"
 
-static linetype_container_c   genlinetypes;    // <-- Generalised
-static sectortype_container_c gensectortypes;  // <-- Generalised
+static LineTypeContainer   genlinetypes;    // <-- Generalised
+static SectorTypeContainer gensectortypes;  // <-- Generalised
 
 //
 // DDF_IsBoomLineType
@@ -58,7 +58,7 @@ void DDF_BoomClearGenTypes(void)
 //
 // -AJA- 2001/06/22: written.
 //
-void DDF_BoomMakeGenSector(sectortype_c *sec, int number)
+void DDF_BoomMakeGenSector(SectorType *sec, int number)
 {
     //  I_Debugf("- Making Generalized Sector 0x%03x\n", number);
 
@@ -69,49 +69,49 @@ void DDF_BoomMakeGenSector(sectortype_c *sec, int number)
             break;
 
         case 1:  // random off
-            sec->l.type       = LITE_Flash;
-            sec->l.chance     = PERCENT_MAKE(10);
-            sec->l.darktime   = 8;
-            sec->l.brighttime = 8;
+            sec->l_.type_       = kLightSpecialTypeFlash;
+            sec->l_.chance_     = PERCENT_MAKE(10);
+            sec->l_.darktime_   = 8;
+            sec->l_.brighttime_ = 8;
             break;
 
         case 2:
         case 4:  // blink 0.5 second
-            sec->l.type       = LITE_Strobe;
-            sec->l.darktime   = 15;
-            sec->l.brighttime = 5;
+            sec->l_.type_       = kLightSpecialTypeStrobe;
+            sec->l_.darktime_   = 15;
+            sec->l_.brighttime_ = 5;
             break;
 
         case 3:  // blink 1.0 second
-            sec->l.type       = LITE_Strobe;
-            sec->l.darktime   = 35;
-            sec->l.brighttime = 5;
+            sec->l_.type_       = kLightSpecialTypeStrobe;
+            sec->l_.darktime_   = 35;
+            sec->l_.brighttime_ = 5;
             break;
 
         case 8:  // oscillates
-            sec->l.type       = LITE_Glow;
-            sec->l.darktime   = 1;
-            sec->l.brighttime = 1;
+            sec->l_.type_       = kLightSpecialTypeGlow;
+            sec->l_.darktime_   = 1;
+            sec->l_.brighttime_ = 1;
             break;
 
         case 12:  // blink 0.5 second, sync
-            sec->l.type       = LITE_Strobe;
-            sec->l.darktime   = 15;
-            sec->l.brighttime = 5;
-            sec->l.sync       = 20;
+            sec->l_.type_       = kLightSpecialTypeStrobe;
+            sec->l_.darktime_   = 15;
+            sec->l_.brighttime_ = 5;
+            sec->l_.sync_       = 20;
             break;
 
         case 13:  // blink 1.0 second, sync
-            sec->l.type       = LITE_Strobe;
-            sec->l.darktime   = 35;
-            sec->l.brighttime = 5;
-            sec->l.sync       = 40;
+            sec->l_.type_       = kLightSpecialTypeStrobe;
+            sec->l_.darktime_   = 35;
+            sec->l_.brighttime_ = 5;
+            sec->l_.sync_       = 40;
             break;
 
         case 17:  // flickers
-            sec->l.type       = LITE_FireFlicker;
-            sec->l.darktime   = 4;
-            sec->l.brighttime = 4;
+            sec->l_.type_       = kLightSpecialTypeFireFlicker;
+            sec->l_.darktime_   = 4;
+            sec->l_.brighttime_ = 4;
             break;
     }
 
@@ -122,23 +122,23 @@ void DDF_BoomMakeGenSector(sectortype_c *sec, int number)
             break;
 
         case 1:  // 5 units
-            sec->damage.nominal = 5;
-            sec->damage.delay   = 32;
+            sec->damage_.nominal = 5;
+            sec->damage_.delay   = 32;
             break;
 
         case 2:  // 10 units
-            sec->damage.nominal = 10;
-            sec->damage.delay   = 32;
+            sec->damage_.nominal = 10;
+            sec->damage_.delay   = 32;
             break;
 
         case 3:  // 20 units
-            sec->damage.nominal = 20;
-            sec->damage.delay   = 32;
+            sec->damage_.nominal = 20;
+            sec->damage_.delay   = 32;
             break;
     }
 
     // handle bit 7: Secret
-    if ((number >> 7) & 1) sec->secret = true;
+    if ((number >> 7) & 1) sec->secret_ = true;
 
     // ignoring bit 8: Ice/Mud effect
 
@@ -156,37 +156,37 @@ void DDF_BoomMakeGenSector(sectortype_c *sec, int number)
         switch ((number >> 5) & 0x3)
         {
             case 0:  // Kill player if no radsuit or invul status
-                sec->damage.delay                         = 0;
-                sec->damage.instakill                     = true;
-                sec->damage.damage_unless                 = new benefit_t;
-                sec->damage.damage_unless->type           = BENEFIT_Powerup;
-                sec->damage.damage_unless->sub.type       = PW_AcidSuit;
-                sec->damage.damage_unless->next           = new benefit_t;
-                sec->damage.damage_unless->next->type     = BENEFIT_Powerup;
-                sec->damage.damage_unless->next->sub.type = PW_Invulnerable;
-                sec->damage.damage_unless->next->next     = nullptr;
+                sec->damage_.delay                         = 0;
+                sec->damage_.instakill                     = true;
+                sec->damage_.damage_unless                 = new benefit_t;
+                sec->damage_.damage_unless->type           = BENEFIT_Powerup;
+                sec->damage_.damage_unless->sub.type       = PW_AcidSuit;
+                sec->damage_.damage_unless->next           = new benefit_t;
+                sec->damage_.damage_unless->next->type     = BENEFIT_Powerup;
+                sec->damage_.damage_unless->next->sub.type = PW_Invulnerable;
+                sec->damage_.damage_unless->next->next     = nullptr;
                 break;
 
             case 1:  // Kill player
-                sec->damage.delay      = 0;
-                sec->damage.bypass_all = true;
-                sec->damage.instakill  = true;
+                sec->damage_.delay      = 0;
+                sec->damage_.bypass_all = true;
+                sec->damage_.instakill  = true;
                 break;
 
             case 2:  // Kill all players and exit map (normal)
-                sec->damage.delay       = 0;
-                sec->damage.all_players = true;
-                sec->damage.instakill   = true;
-                sec->damage.bypass_all  = true;
-                sec->e_exit             = EXIT_Normal;
+                sec->damage_.delay       = 0;
+                sec->damage_.all_players = true;
+                sec->damage_.instakill   = true;
+                sec->damage_.bypass_all  = true;
+                sec->e_exit_             = kExitTypeNormal;
                 break;
 
             case 3:  // Kill all players and exit map (secret)
-                sec->damage.delay       = 0;
-                sec->damage.all_players = true;
-                sec->damage.instakill   = true;
-                sec->damage.bypass_all  = true;
-                sec->e_exit             = EXIT_Secret;
+                sec->damage_.delay       = 0;
+                sec->damage_.all_players = true;
+                sec->damage_.instakill   = true;
+                sec->damage_.bypass_all  = true;
+                sec->e_exit_             = kExitTypeSecret;
                 break;
         }
     }
@@ -194,28 +194,28 @@ void DDF_BoomMakeGenSector(sectortype_c *sec, int number)
     // handle bit 13: Kill grounded monsters (MBF21)
     if ((number >> 13) & 1)
     {
-        sec->damage.delay             = 0;
-        sec->damage.instakill         = true;
-        sec->damage.grounded_monsters = true;
+        sec->damage_.delay             = 0;
+        sec->damage_.instakill         = true;
+        sec->damage_.grounded_monsters = true;
     }
 }
 
 //
 // DDF_BoomGetGenSector
 //
-sectortype_c *DDF_BoomGetGenSector(int number)
+SectorType *DDF_BoomGetGenSector(int number)
 {
     SYS_ASSERT(DDF_IsBoomSectorType(number));
 
-    sectortype_c *sec = gensectortypes.Lookup(number);
+    SectorType *sec = gensectortypes.Lookup(number);
 
     // Create if it doesn't exist
     if (!sec)
     {
-        sec = new sectortype_c;
+        sec = new SectorType;
         sec->Default();
 
-        sec->number = number;
+        sec->number_ = number;
 
         DDF_BoomMakeGenSector(sec, number);
 
@@ -227,34 +227,34 @@ sectortype_c *DDF_BoomGetGenSector(int number)
 
 //----------------------------------------------------------------------------
 
-static void HandleLineTrigger(linetype_c *line, int trigger)
+static void HandleLineTrigger(LineType *line, int trigger)
 {
     if ((trigger & 0x1) == 0)
-        line->count = 1;
+        line->count_ = 1;
     else
-        line->count = -1;
+        line->count_ = -1;
 
     switch (trigger & 0x6)
     {
         case 0:  // W1 and WR
-            line->type = line_walkable;
+            line->type_ = kLineTriggerWalkable;
             break;
 
         case 2:  // S1 and SR
-            line->type = line_pushable;
+            line->type_ = kLineTriggerPushable;
             break;
 
         case 4:  // G1 and GR
-            line->type = line_shootable;
+            line->type_ = kLineTriggerShootable;
             break;
 
         case 6:  // P1 and PR
-            line->type = line_manual;
+            line->type_ = kLineTriggerManual;
             break;
     }
 }
 
-static void MakeBoomFloor(linetype_c *line, int number)
+static void MakeBoomFloor(LineType *line, int number)
 {
     int speed  = (number >> 3) & 0x3;
     int model  = (number >> 5) & 0x1;
@@ -263,86 +263,98 @@ static void MakeBoomFloor(linetype_c *line, int number)
     int change = (number >> 10) & 0x3;
     int crush  = (number >> 12) & 0x1;
 
-    line->obj = (trigacttype_e)(trig_player |
-                                ((change == 0 && model) ? trig_monster : 0));
+    line->obj_ =
+        (TriggerActivator)(kTriggerActivatorPlayer |
+                           ((change == 0 && model) ? kTriggerActivatorMonster
+                                                   : 0));
 
-    line->f.type = mov_Once;
-    line->f.dest = 0;
+    line->f_.type_ = kPlaneMoverOnce;
+    line->f_.dest_ = 0;
 
-    if (crush) line->f.crush_damage = 10;
+    if (crush) line->f_.crush_damage_ = 10;
 
     switch (target)
     {
         case 0:  // HnF (Highest neighbour Floor)
-            line->f.destref = (heightref_e)(REF_Surrounding | REF_HIGHEST);
+            line->f_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceHighest);
             break;
 
         case 1:  // LnF (Lowest neighbour Floor)
-            line->f.destref = REF_Surrounding;
+            line->f_.destref_ = kTriggerHeightReferenceSurrounding;
             break;
 
         case 2:  // NnF (Next neighbour Floor)
-            line->f.destref = (heightref_e)(REF_Surrounding | REF_NEXT);
+            line->f_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceNext);
 
             // guesswork here:
             if (dir == 0)
-                line->f.destref = (heightref_e)(line->f.destref | REF_HIGHEST);
+                line->f_.destref_ =
+                    (TriggerHeightReference)(line->f_.destref_ |
+                                             kTriggerHeightReferenceHighest);
 
             break;
 
         case 3:  // LnC (Lowest neighbour Ceiling)
-            line->f.destref = (heightref_e)(REF_Surrounding | REF_CEILING);
+            line->f_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceCeiling);
             break;
 
         case 4:  // ceiling
-            line->f.destref = (heightref_e)(REF_Current | REF_CEILING);
+            line->f_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceCurrent |
+                                         kTriggerHeightReferenceCeiling);
             break;
 
         case 5:  // shorted texture
-            line->f.destref = REF_LowestLoTexture;
+            line->f_.destref_ = kTriggerHeightReferenceLowestLowTexture;
             break;
 
-        case 6:                             // 24
-            line->f.destref = REF_Current;  // FLOOR
-            line->f.dest    = dir ? 24 : -24;
+        case 6:                                                  // 24
+            line->f_.destref_ = kTriggerHeightReferenceCurrent;  // FLOOR
+            line->f_.dest_    = dir ? 24 : -24;
             break;
 
-        case 7:                             // 32
-            line->f.destref = REF_Current;  // FLOOR
-            line->f.dest    = dir ? 32 : -32;
+        case 7:                                                  // 32
+            line->f_.destref_ = kTriggerHeightReferenceCurrent;  // FLOOR
+            line->f_.dest_    = dir ? 32 : -32;
             break;
     }
 
     switch (dir)
     {
         case 0:  // Down
-            line->f.speed_down = 1 << speed;
-            line->f.sfxdown    = sfxdefs.GetEffect("STNMOV");
+            line->f_.speed_down_ = 1 << speed;
+            line->f_.sfxdown_    = sfxdefs.GetEffect("STNMOV");
             break;
 
         case 1:  // Up;
-            line->f.speed_up = 1 << speed;
-            line->f.sfxup    = sfxdefs.GetEffect("STNMOV");
+            line->f_.speed_up_ = 1 << speed;
+            line->f_.sfxup_    = sfxdefs.GetEffect("STNMOV");
             break;
     }
 
     // handle change + model (pretty dodgy this bit)
     if (change > 0)
     {
-        line->f.tex = model ? "-" : "+";
+        line->f_.tex_ = model ? "-" : "+";
 
         // Default behavior is to change both tex and type, and this is
         // fine with the non-generalized types, so append one of these
         // if applicable. We will check this when setting up the map - Dasho
 
         if (change == 1)  // Change tex, zero out type
-            line->f.tex.append("changezero");
+            line->f_.tex_.append("changezero");
         else if (change == 2)  // Texture only; type unaltered
-            line->f.tex.append("changetexonly");
+            line->f_.tex_.append("changetexonly");
     }
 }
 
-static void MakeBoomCeiling(linetype_c *line, int number)
+static void MakeBoomCeiling(LineType *line, int number)
 {
     int speed  = (number >> 3) & 0x3;
     int model  = (number >> 5) & 0x1;
@@ -351,283 +363,324 @@ static void MakeBoomCeiling(linetype_c *line, int number)
     int change = (number >> 10) & 0x3;
     int crush  = (number >> 12) & 0x1;
 
-    line->obj = (trigacttype_e)(trig_player |
-                                ((change == 0 && model) ? trig_monster : 0));
+    line->obj_ =
+        (TriggerActivator)(kTriggerActivatorPlayer |
+                           ((change == 0 && model) ? kTriggerActivatorMonster
+                                                   : 0));
 
-    line->c.type = mov_Once;
-    line->c.dest = 0;
+    line->c_.type_ = kPlaneMoverOnce;
+    line->c_.dest_ = 0;
 
-    if (crush) line->c.crush_damage = 10;
+    if (crush) line->c_.crush_damage_ = 10;
 
     switch (target)
     {
         case 0:  // HnC (Highest neighbour Ceiling)
-            line->c.destref =
-                (heightref_e)(REF_Surrounding | REF_CEILING | REF_HIGHEST);
+            line->c_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceCeiling |
+                                         kTriggerHeightReferenceHighest);
             break;
 
         case 1:  // LnC (Lowest neighbour Ceiling)
-            line->c.destref = (heightref_e)(REF_Surrounding | REF_CEILING);
+            line->c_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceCeiling);
             break;
 
         case 2:  // NnC (Next neighbour Ceiling)
-            line->c.destref =
-                (heightref_e)(REF_Surrounding | REF_CEILING | REF_NEXT);
+            line->c_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceCeiling |
+                                         kTriggerHeightReferenceNext);
 
             // guesswork here:
             if (dir == 0)
-                line->c.destref = (heightref_e)(line->c.destref | REF_HIGHEST);
+                line->c_.destref_ =
+                    (TriggerHeightReference)(line->c_.destref_ |
+                                             kTriggerHeightReferenceHighest);
 
             break;
 
         case 3:  // HnF (Highest neighbour Floor)
-            line->c.destref = (heightref_e)(REF_Surrounding | REF_HIGHEST);
+            line->c_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceHighest);
             break;
 
-        case 4:                             // floor
-            line->c.destref = REF_Current;  // FLOOR
+        case 4:                                                  // floor
+            line->c_.destref_ = kTriggerHeightReferenceCurrent;  // FLOOR
             break;
 
         case 5:  // shorted texture
-            line->c.destref = REF_LowestLoTexture;
+            line->c_.destref_ = kTriggerHeightReferenceLowestLowTexture;
             break;
 
         case 6:  // 24
-            line->c.destref = (heightref_e)(REF_Current | REF_CEILING);
-            line->c.dest    = dir ? 24 : -24;
+            line->c_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceCurrent |
+                                         kTriggerHeightReferenceCeiling);
+            line->c_.dest_ = dir ? 24 : -24;
             break;
 
         case 7:  // 32
-            line->c.destref = (heightref_e)(REF_Current | REF_CEILING);
-            line->c.dest    = dir ? 32 : -32;
+            line->c_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceCurrent |
+                                         kTriggerHeightReferenceCeiling);
+            line->c_.dest_ = dir ? 32 : -32;
             break;
     }
 
     switch (dir)
     {
         case 0:  // Down
-            line->c.speed_down = 1 << speed;
-            line->c.sfxdown    = sfxdefs.GetEffect("STNMOV");
+            line->c_.speed_down_ = 1 << speed;
+            line->c_.sfxdown_    = sfxdefs.GetEffect("STNMOV");
             break;
 
         case 1:  // Up;
-            line->c.speed_up = 1 << speed;
-            line->c.sfxup    = sfxdefs.GetEffect("STNMOV");
+            line->c_.speed_up_ = 1 << speed;
+            line->c_.sfxup_    = sfxdefs.GetEffect("STNMOV");
             break;
     }
 
     // handle change + model (this logic is pretty dodgy)
     if (change > 0)
     {
-        line->c.tex = model ? "-" : "+";
+        line->c_.tex_ = model ? "-" : "+";
 
         // Default behavior is to change both tex and type, and this is
         // fine with the non-generalized types, so append one of these
         // if applicable. We will check this when setting up the map - Dasho
 
         if (change == 1)  // Change tex, zero out type
-            line->c.tex.append("changezero");
+            line->c_.tex_.append("changezero");
         else if (change == 2)  // Texture only; type unaltered
-            line->c.tex.append("changetexonly");
+            line->c_.tex_.append("changetexonly");
     }
 }
 
-static void MakeBoomDoor(linetype_c *line, int number)
+static void MakeBoomDoor(LineType *line, int number)
 {
     int speed   = (number >> 3) & 0x3;
     int kind    = (number >> 5) & 0x3;
     int monster = (number >> 7) & 0x1;
     int delay   = (number >> 8) & 0x3;
 
-    line->obj = (trigacttype_e)(trig_player | (monster ? trig_monster : 0));
+    line->obj_ = (TriggerActivator)(kTriggerActivatorPlayer |
+                                    (monster ? kTriggerActivatorMonster : 0));
 
-    line->c.type = (kind & 1) ? mov_Once : mov_MoveWaitReturn;
+    line->c_.type_ = (kind & 1) ? kPlaneMoverOnce : kPlaneMoverMoveWaitReturn;
 
-    line->c.speed_up   = 2 << speed;
-    line->c.speed_down = line->c.speed_up;
+    line->c_.speed_up_   = 2 << speed;
+    line->c_.speed_down_ = line->c_.speed_up_;
 
-    if (line->c.speed_up > 7)
+    if (line->c_.speed_up_ > 7)
     {
-        line->c.sfxup   = sfxdefs.GetEffect("BDOPN");
-        line->c.sfxdown = sfxdefs.GetEffect("BDCLS");
+        line->c_.sfxup_   = sfxdefs.GetEffect("BDOPN");
+        line->c_.sfxdown_ = sfxdefs.GetEffect("BDCLS");
     }
     else
     {
-        line->c.sfxup   = sfxdefs.GetEffect("DOROPN");
-        line->c.sfxdown = sfxdefs.GetEffect("DORCLS");
+        line->c_.sfxup_   = sfxdefs.GetEffect("DOROPN");
+        line->c_.sfxdown_ = sfxdefs.GetEffect("DORCLS");
     }
 
     switch (kind & 2)
     {
         case 0:  // open types (odc and o)
-            line->c.destref =
-                (heightref_e)(REF_Surrounding | REF_CEILING);  // LnC
-            line->c.dest = -4;
+            line->c_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceCeiling);  // LnC
+            line->c_.dest_ = -4;
             break;
 
-        case 2:                             // close types (cdo and c)
-            line->c.destref = REF_Current;  // FLOOR
-            line->c.dest    = 0;
+        case 2:  // close types (cdo and c)
+            line->c_.destref_ = kTriggerHeightReferenceCurrent;  // FLOOR
+            line->c_.dest_    = 0;
             break;
     }
 
     switch (delay)
     {
         case 0:
-            line->c.wait = 35;
+            line->c_.wait_ = 35;
             break;
         case 1:
-            line->c.wait = 150;
+            line->c_.wait_ = 150;
             break;
         case 2:
-            line->c.wait = 300;
+            line->c_.wait_ = 300;
             break;
         case 3:
-            line->c.wait = 1050;
+            line->c_.wait_ = 1050;
             break;
     }
 }
 
-static void MakeBoomLockedDoor(linetype_c *line, int number)
+static void MakeBoomLockedDoor(LineType *line, int number)
 {
     int speed = (number >> 3) & 0x3;
     int kind  = (number >> 5) & 0x1;
     int lock  = (number >> 6) & 0x7;
     int sk_ck = (number >> 9) & 0x1;
 
-    line->obj = trig_player;  // never allow monsters
+    line->obj_ = kTriggerActivatorPlayer;  // never allow monsters
 
-    line->c.type    = kind ? mov_Once : mov_MoveWaitReturn;
-    line->c.destref = (heightref_e)(REF_Surrounding | REF_CEILING);  // LnC
-    line->c.dest    = -4;
+    line->c_.type_ = kind ? kPlaneMoverOnce : kPlaneMoverMoveWaitReturn;
+    line->c_.destref_ =
+        (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                 kTriggerHeightReferenceCeiling);  // LnC
+    line->c_.dest_ = -4;
 
-    line->c.speed_up   = 2 << speed;
-    line->c.speed_down = line->c.speed_up;
+    line->c_.speed_up_   = 2 << speed;
+    line->c_.speed_down_ = line->c_.speed_up_;
 
-    if (line->c.speed_up > 7)
+    if (line->c_.speed_up_ > 7)
     {
-        line->c.sfxup   = sfxdefs.GetEffect("BDOPN");
-        line->c.sfxdown = sfxdefs.GetEffect("BDCLS");
+        line->c_.sfxup_   = sfxdefs.GetEffect("BDOPN");
+        line->c_.sfxdown_ = sfxdefs.GetEffect("BDCLS");
     }
     else
     {
-        line->c.sfxup   = sfxdefs.GetEffect("DOROPN");
-        line->c.sfxdown = sfxdefs.GetEffect("DORCLS");
+        line->c_.sfxup_   = sfxdefs.GetEffect("DOROPN");
+        line->c_.sfxdown_ = sfxdefs.GetEffect("DORCLS");
     }
 
-    line->c.wait = 150;
+    line->c_.wait_ = 150;
 
     // handle keys
 
     switch (lock)
     {
         case 0:  // ANY
-            line->keys = (keys_e)(KF_RedCard | KF_BlueCard | KF_YellowCard |
-                                  KF_RedSkull | KF_BlueSkull | KF_YellowSkull);
-            line->failedmessage = "NeedAnyForDoor";
+            line->keys_ =
+                (DoorKeyType)(kDoorKeyRedCard | kDoorKeyBlueCard |
+                              kDoorKeyYellowCard | kDoorKeyRedSkull |
+                              kDoorKeyBlueSkull | kDoorKeyYellowSkull);
+            line->failedmessage_ = "NeedAnyForDoor";
             break;
 
         case 1:  // Red Card
-            line->keys = (keys_e)(KF_RedCard | (sk_ck ? KF_RedSkull : 0));
-            line->failedmessage = "NeedRedCardForDoor";
+            line->keys_ =
+                (DoorKeyType)(kDoorKeyRedCard | (sk_ck ? kDoorKeyRedSkull : 0));
+            line->failedmessage_ = "NeedRedCardForDoor";
             break;
 
         case 2:  // Blue Card
-            line->keys = (keys_e)(KF_BlueCard | (sk_ck ? KF_BlueSkull : 0));
-            line->failedmessage = "NeedBlueCardForDoor";
+            line->keys_          = (DoorKeyType)(kDoorKeyBlueCard |
+                                        (sk_ck ? kDoorKeyBlueSkull : 0));
+            line->failedmessage_ = "NeedBlueCardForDoor";
             break;
 
         case 3:  // Yellow Card
-            line->keys = (keys_e)(KF_YellowCard | (sk_ck ? KF_YellowSkull : 0));
-            line->failedmessage = "NeedYellowCardForDoor";
+            line->keys_          = (DoorKeyType)(kDoorKeyYellowCard |
+                                        (sk_ck ? kDoorKeyYellowSkull : 0));
+            line->failedmessage_ = "NeedYellowCardForDoor";
             break;
 
         case 4:  // Red Skull
-            line->keys = (keys_e)(KF_RedSkull | (sk_ck ? KF_RedCard : 0));
-            line->failedmessage = "NeedRedSkullForDoor";
+            line->keys_ =
+                (DoorKeyType)(kDoorKeyRedSkull | (sk_ck ? kDoorKeyRedCard : 0));
+            line->failedmessage_ = "NeedRedSkullForDoor";
             break;
 
         case 5:  // Blue Skull
-            line->keys = (keys_e)(KF_BlueSkull | (sk_ck ? KF_BlueCard : 0));
-            line->failedmessage = "NeedBlueSkullForDoor";
+            line->keys_          = (DoorKeyType)(kDoorKeyBlueSkull |
+                                        (sk_ck ? kDoorKeyBlueCard : 0));
+            line->failedmessage_ = "NeedBlueSkullForDoor";
             break;
 
         case 6:  // Yellow Skull
-            line->keys = (keys_e)(KF_YellowSkull | (sk_ck ? KF_YellowCard : 0));
-            line->failedmessage = "NeedYellowSkullForDoor";
+            line->keys_          = (DoorKeyType)(kDoorKeyYellowSkull |
+                                        (sk_ck ? kDoorKeyYellowCard : 0));
+            line->failedmessage_ = "NeedYellowSkullForDoor";
             break;
 
         case 7:  // ALL
-            line->keys =
-                (keys_e)((sk_ck ? KF_BOOM_SKCK : 0) | KF_STRICTLY_ALL |
-                         (KF_RedCard | KF_BlueCard | KF_YellowCard |
-                          KF_RedSkull | KF_BlueSkull | KF_YellowSkull));
+            line->keys_ =
+                (DoorKeyType)((sk_ck ? kDoorKeyCardOrSkull : 0) |
+                              kDoorKeyStrictlyAllKeys |
+                              (kDoorKeyRedCard | kDoorKeyBlueCard |
+                               kDoorKeyYellowCard | kDoorKeyRedSkull |
+                               kDoorKeyBlueSkull | kDoorKeyYellowSkull));
 
-            line->failedmessage = "NeedAllForDoor";
+            line->failedmessage_ = "NeedAllForDoor";
             break;
     }
 }
 
-static void MakeBoomLift(linetype_c *line, int number)
+static void MakeBoomLift(LineType *line, int number)
 {
     int speed   = (number >> 3) & 0x3;
     int monster = (number >> 5) & 0x1;
     int delay   = (number >> 6) & 0x3;
     int target  = (number >> 8) & 0x3;
 
-    line->obj = (trigacttype_e)(trig_player | (monster ? trig_monster : 0));
+    line->obj_ = (TriggerActivator)(kTriggerActivatorPlayer |
+                                    (monster ? kTriggerActivatorMonster : 0));
 
-    line->f.type  = mov_MoveWaitReturn;
-    line->f.dest  = 0;
-    line->f.other = 0;
+    line->f_.type_  = kPlaneMoverMoveWaitReturn;
+    line->f_.dest_  = 0;
+    line->f_.other_ = 0;
 
-    line->f.speed_up   = 2 << speed;
-    line->f.speed_down = line->f.speed_up;
-    line->f.sfxstart   = sfxdefs.GetEffect("PSTART");
-    line->f.sfxstop    = sfxdefs.GetEffect("PSTOP");
+    line->f_.speed_up_   = 2 << speed;
+    line->f_.speed_down_ = line->f_.speed_up_;
+    line->f_.sfxstart_   = sfxdefs.GetEffect("PSTART");
+    line->f_.sfxstop_    = sfxdefs.GetEffect("PSTOP");
 
     switch (target)
     {
         case 0:  // LnF (Lowest neighbour Floor)
-            line->f.destref = (heightref_e)(REF_Surrounding | REF_INCLUDE);
+            line->f_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceInclude);
             break;
 
         case 1:  // NnF (Next lowest neighbour Floor)
-            line->f.destref =
-                (heightref_e)(REF_Surrounding | REF_NEXT | REF_HIGHEST);
+            line->f_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceNext |
+                                         kTriggerHeightReferenceHighest);
             break;
 
         case 2:  // LnC (Lowest neighbour Ceiling)
-            line->f.destref =
-                (heightref_e)(REF_Surrounding | REF_CEILING | REF_INCLUDE);
+            line->f_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceCeiling |
+                                         kTriggerHeightReferenceInclude);
             break;
 
         case 3:  // Perpetual lift LnF<->HnF
-            line->f.type    = mov_Continuous;
-            line->f.destref = (heightref_e)(REF_Surrounding | REF_INCLUDE);
-            line->f.otherref =
-                (heightref_e)(REF_Surrounding | REF_HIGHEST | REF_INCLUDE);
+            line->f_.type_ = kPlaneMoverContinuous;
+            line->f_.destref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceInclude);
+            line->f_.otherref_ =
+                (TriggerHeightReference)(kTriggerHeightReferenceSurrounding |
+                                         kTriggerHeightReferenceHighest |
+                                         kTriggerHeightReferenceInclude);
             break;
     }
 
     switch (delay)
     {
         case 0:
-            line->f.wait = 35;
+            line->f_.wait_ = 35;
             break;
         case 1:
-            line->f.wait = 105;
+            line->f_.wait_ = 105;
             break;
         case 2:
-            line->f.wait = 165;
+            line->f_.wait_ = 165;
             break;
         case 3:
-            line->f.wait = 350;
+            line->f_.wait_ = 350;
             break;
     }
 }
 
-static void MakeBoomStair(linetype_c *line, int number)
+static void MakeBoomStair(LineType *line, int number)
 {
     int speed   = (number >> 3) & 0x3;
     int monster = (number >> 5) & 0x1;
@@ -635,48 +688,50 @@ static void MakeBoomStair(linetype_c *line, int number)
     int dir     = (number >> 8) & 0x1;
     int igntxt  = (number >> 9) & 0x1;
 
-    line->obj = (trigacttype_e)(trig_player | (monster ? trig_monster : 0));
+    line->obj_ = (TriggerActivator)(kTriggerActivatorPlayer |
+                                    (monster ? kTriggerActivatorMonster : 0));
 
-    line->f.type = mov_Stairs;
+    line->f_.type_ = kPlaneMoverStairs;
 
     // generalized repeatable stairs alternate between up and down
-    if (number & 1) { line->newtrignum = number ^ 0x100; }
+    if (number & 1) { line->newtrignum_ = number ^ 0x100; }
 
-    line->f.destref = REF_Current;  // FLOOR
-    line->f.dest    = ((dir == 0) ? -1 : 1) * (step ? 8 * step : 4);
+    line->f_.destref_ = kTriggerHeightReferenceCurrent;  // FLOOR
+    line->f_.dest_    = ((dir == 0) ? -1 : 1) * (step ? 8 * step : 4);
 
     // speed values are 0.25, 0.5, 2.0, 4.0 (never 1.0)
     if (speed >= 2) speed++;
 
-    line->f.speed_down = (1 << speed) / 4.0f;
-    line->f.speed_up   = line->f.speed_down;
+    line->f_.speed_down_ = (1 << speed) / 4.0f;
+    line->f_.speed_up_   = line->f_.speed_down_;
 
-    line->f.sfxdown = sfxdefs.GetEffect("STNMOV");
-    line->f.sfxup   = line->f.sfxdown;
+    line->f_.sfxdown_ = sfxdefs.GetEffect("STNMOV");
+    line->f_.sfxup_   = line->f_.sfxdown_;
 
-    if (igntxt) line->f.ignore_texture = true;
+    if (igntxt) line->f_.ignore_texture_ = true;
 }
 
-static void MakeBoomCrusher(linetype_c *line, int number)
+static void MakeBoomCrusher(LineType *line, int number)
 {
     int speed   = (number >> 3) & 0x3;
     int monster = (number >> 5) & 0x1;
     int silent  = (number >> 6) & 0x1;
 
-    line->obj = (trigacttype_e)(trig_player | (monster ? trig_monster : 0));
+    line->obj_ = (TriggerActivator)(kTriggerActivatorPlayer |
+                                    (monster ? kTriggerActivatorMonster : 0));
 
-    line->c.type    = mov_Continuous;
-    line->c.destref = REF_Current;  // FLOOR
-    line->c.dest    = 8;
+    line->c_.type_    = kPlaneMoverContinuous;
+    line->c_.destref_ = kTriggerHeightReferenceCurrent;  // FLOOR
+    line->c_.dest_    = 8;
 
-    line->c.speed_up     = 1 << speed;
-    line->c.speed_down   = line->c.speed_up;
-    line->c.crush_damage = 10;
+    line->c_.speed_up_     = 1 << speed;
+    line->c_.speed_down_   = line->c_.speed_up_;
+    line->c_.crush_damage_ = 10;
 
     if (!silent)
     {
-        line->c.sfxup   = sfxdefs.GetEffect("STNMOV");
-        line->c.sfxdown = line->c.sfxup;
+        line->c_.sfxup_   = sfxdefs.GetEffect("STNMOV");
+        line->c_.sfxdown_ = line->c_.sfxup_;
     }
 }
 
@@ -691,7 +746,7 @@ static void MakeBoomCrusher(linetype_c *line, int number)
 //
 // -AJA- 2001/06/22: began work on this.
 //
-void DDF_BoomMakeGenLine(linetype_c *line, int number)
+void DDF_BoomMakeGenLine(LineType *line, int number)
 {
     //	I_Debugf("- Making Generalized Linedef 0x%04x\n", number);
 
@@ -720,19 +775,19 @@ void DDF_BoomMakeGenLine(linetype_c *line, int number)
         MakeBoomCrusher(line, number);
 }
 
-linetype_c *DDF_BoomGetGenLine(int number)
+LineType *DDF_BoomGetGenLine(int number)
 {
     SYS_ASSERT(DDF_IsBoomLineType(number));
 
-    linetype_c *line = genlinetypes.Lookup(number);
+    LineType *line = genlinetypes.Lookup(number);
 
     // If this hasn't be found, create it
     if (!line)
     {
-        line = new linetype_c;
+        line = new LineType;
         line->Default();
 
-        line->number = number;
+        line->number_ = number;
 
         DDF_BoomMakeGenLine(line, number);
 

@@ -59,7 +59,7 @@ void P_Ticker(bool extra_tic)
         return;
 
     // pause if in menu and at least one tic has been run
-    if (!netgame && (menuactive || rts_menuactive) && !AlmostEquals(players[consoleplayer]->viewz, FLO_UNUSED))
+    if (!netgame && (menuactive || rts_menuactive) && !AlmostEquals(players[consoleplayer]->viewz, kFloatUnused))
     {
         return;
     }

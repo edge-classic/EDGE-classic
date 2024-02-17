@@ -883,11 +883,11 @@ class mobjtype_c
     // linked list of initial benefits for players, or nullptr if none
     benefit_t *initial_benefits;
 
-    int                castorder;
-    std::string        cast_title;
-    int                respawntime;
-    percent_t          translucency;
-    percent_t          minatkchance;
+    int             castorder;
+    std::string     cast_title;
+    int             respawntime;
+    percent_t       translucency;
+    percent_t       minatkchance;
     const Colormap *palremap;
 
     int       jump_delay;

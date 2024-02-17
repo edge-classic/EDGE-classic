@@ -805,7 +805,7 @@ static void R2_ClipSpriteVertically(drawsub_c *dsub, drawthing_t *dthing)
 
 	// handle TRANSLUCENT + THICK floors (a bit of a hack)
 	if (dfloor->ef && dfloor->ef->ef_info && !dfloor->is_highest &&
-		(dfloor->ef->ef_info->type & EXFL_Thick) &&
+		(dfloor->ef->ef_info->type & kExtraFloorTypeThick) &&
 		(dfloor->ef->top->translucency < 0.99f))
 	{
 		c1 = dfloor->top_h;
@@ -842,7 +842,7 @@ static void R2_ClipSpriteVertically(drawsub_c *dsub, drawthing_t *dthing)
 
 		SYS_ASSERT(dfloor->lower->ef && dfloor->lower->ef->ef_info);
 
-		if (! (dfloor->lower->ef->ef_info->type & EXFL_Liquid))
+		if (! (dfloor->lower->ef->ef_info->type & kExtraFloorTypeLiquid))
 			break;
 
 		// sprite must be split (bottom), make a copy.
@@ -874,7 +874,7 @@ static void R2_ClipSpriteVertically(drawsub_c *dsub, drawthing_t *dthing)
 
 		// handle TRANSLUCENT + THICK floors (a bit of a hack)
 		if (dfloor->ef && dfloor->ef->ef_info && !dfloor->is_highest &&
-			(dfloor->ef->ef_info->type & EXFL_Thick) &&
+			(dfloor->ef->ef_info->type & kExtraFloorTypeThick) &&
 			(dfloor->ef->top->translucency < 0.99f))
 		{
 			c1 = dfloor->top_h;
@@ -913,7 +913,7 @@ static void R2_ClipSpriteVertically(drawsub_c *dsub, drawthing_t *dthing)
 
 		SYS_ASSERT(dfloor->ef && dfloor->ef->ef_info);
 
-		if (! (dfloor->ef->ef_info->type & EXFL_Liquid))
+		if (! (dfloor->ef->ef_info->type & kExtraFloorTypeLiquid))
 			break;
 
 		// sprite must be split (top), make a copy.
@@ -945,7 +945,7 @@ static void R2_ClipSpriteVertically(drawsub_c *dsub, drawthing_t *dthing)
 
 		// handle TRANSLUCENT + THICK floors (a bit of a hack)
 		if (dfloor->ef && dfloor->ef->ef_info && !dfloor->is_highest &&
-			(dfloor->ef->ef_info->type & EXFL_Thick) &&
+			(dfloor->ef->ef_info->type & kExtraFloorTypeThick) &&
 			(dfloor->ef->top->translucency < 0.99f))
 		{
 			c1 = dfloor->top_h;

@@ -353,35 +353,35 @@ const actioncode_t thing_actions[] = {
     {nullptr, nullptr, nullptr}};
 
 const specflags_t keytype_names[] = {
-    {"BLUECARD", KF_BlueCard, 0},
-    {"YELLOWCARD", KF_YellowCard, 0},
-    {"REDCARD", KF_RedCard, 0},
-    {"GREENCARD", KF_GreenCard, 0},
+    {"BLUECARD", kDoorKeyBlueCard, 0},
+    {"YELLOWCARD", kDoorKeyYellowCard, 0},
+    {"REDCARD", kDoorKeyRedCard, 0},
+    {"GREENCARD", kDoorKeyGreenCard, 0},
 
-    {"BLUESKULL", KF_BlueSkull, 0},
-    {"YELLOWSKULL", KF_YellowSkull, 0},
-    {"REDSKULL", KF_RedSkull, 0},
-    {"GREENSKULL", KF_GreenSkull, 0},
+    {"BLUESKULL", kDoorKeyBlueSkull, 0},
+    {"YELLOWSKULL", kDoorKeyYellowSkull, 0},
+    {"REDSKULL", kDoorKeyRedSkull, 0},
+    {"GREENSKULL", kDoorKeyGreenSkull, 0},
 
-    {"GOLD_KEY", KF_GoldKey, 0},
-    {"SILVER_KEY", KF_SilverKey, 0},
-    {"BRASS_KEY", KF_BrassKey, 0},
-    {"COPPER_KEY", KF_CopperKey, 0},
-    {"STEEL_KEY", KF_SteelKey, 0},
-    {"WOODEN_KEY", KF_WoodenKey, 0},
-    {"FIRE_KEY", KF_FireKey, 0},
-    {"WATER_KEY", KF_WaterKey, 0},
+    {"GOLD_KEY", kDoorKeyGoldKey, 0},
+    {"SILVER_KEY", kDoorKeySilverKey, 0},
+    {"BRASS_KEY", kDoorKeyBrassKey, 0},
+    {"COPPER_KEY", kDoorKeyCopperKey, 0},
+    {"STEEL_KEY", kDoorKeySteelKey, 0},
+    {"WOODEN_KEY", kDoorKeyWoodenKey, 0},
+    {"FIRE_KEY", kDoorKeyFireKey, 0},
+    {"WATER_KEY", kDoorKeyWaterKey, 0},
 
     // -AJA- compatibility (this way is the easiest)
-    {"KEY_BLUECARD", KF_BlueCard, 0},
-    {"KEY_YELLOWCARD", KF_YellowCard, 0},
-    {"KEY_REDCARD", KF_RedCard, 0},
-    {"KEY_GREENCARD", KF_GreenCard, 0},
+    {"KEY_BLUECARD", kDoorKeyBlueCard, 0},
+    {"KEY_YELLOWCARD", kDoorKeyYellowCard, 0},
+    {"KEY_REDCARD", kDoorKeyRedCard, 0},
+    {"KEY_GREENCARD", kDoorKeyGreenCard, 0},
 
-    {"KEY_BLUESKULL", KF_BlueSkull, 0},
-    {"KEY_YELLOWSKULL", KF_YellowSkull, 0},
-    {"KEY_REDSKULL", KF_RedSkull, 0},
-    {"KEY_GREENSKULL", KF_GreenSkull, 0},
+    {"KEY_BLUESKULL", kDoorKeyBlueSkull, 0},
+    {"KEY_YELLOWSKULL", kDoorKeyYellowSkull, 0},
+    {"KEY_REDSKULL", kDoorKeyRedSkull, 0},
+    {"KEY_GREENSKULL", kDoorKeyGreenSkull, 0},
 
     {nullptr, 0, 0}};
 

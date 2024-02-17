@@ -1415,9 +1415,9 @@ void DDF_MainGetRGB(const char *info, void *storage)
 //
 void DDF_MainGetWhenAppear(const char *info, void *storage)
 {
-    when_appear_e *result = (when_appear_e *)storage;
+    AppearsFlag *result = (AppearsFlag *)storage;
 
-    *result = WNAP_None;
+    *result = kAppearsWhenNone;
 
     bool negate = (info[0] == '!');
 
@@ -1435,46 +1435,47 @@ void DDF_MainGetWhenAppear(const char *info, void *storage)
 
         for (char sk = '1'; sk <= '5'; sk++)
             if (range[-1] <= sk && sk <= range[+1])
-                *result =
-                    (when_appear_e)(*result | (WNAP_SkillLevel1 << (sk - '1')));
+                *result = (AppearsFlag)(*result | (kAppearsWhenSkillLevel1
+                                                   << (sk - '1')));
     }
     else
     {
         if (strstr(info, "1"))
-            *result = (when_appear_e)(*result | WNAP_SkillLevel1);
+            *result = (AppearsFlag)(*result | kAppearsWhenSkillLevel1);
 
         if (strstr(info, "2"))
-            *result = (when_appear_e)(*result | WNAP_SkillLevel2);
+            *result = (AppearsFlag)(*result | kAppearsWhenSkillLevel2);
 
         if (strstr(info, "3"))
-            *result = (when_appear_e)(*result | WNAP_SkillLevel3);
+            *result = (AppearsFlag)(*result | kAppearsWhenSkillLevel3);
 
         if (strstr(info, "4"))
-            *result = (when_appear_e)(*result | WNAP_SkillLevel4);
+            *result = (AppearsFlag)(*result | kAppearsWhenSkillLevel4);
 
         if (strstr(info, "5"))
-            *result = (when_appear_e)(*result | WNAP_SkillLevel5);
+            *result = (AppearsFlag)(*result | kAppearsWhenSkillLevel5);
     }
 
     if (strstr(info, "SP") || strstr(info, "sp"))
-        *result = (when_appear_e)(*result | WNAP_Single);
+        *result = (AppearsFlag)(*result | kAppearsWhenSingle);
 
     if (strstr(info, "COOP") || strstr(info, "coop"))
-        *result = (when_appear_e)(*result | WNAP_Coop);
+        *result = (AppearsFlag)(*result | kAppearsWhenCoop);
 
     if (strstr(info, "DM") || strstr(info, "dm"))
-        *result = (when_appear_e)(*result | WNAP_DeathMatch);
+        *result = (AppearsFlag)(*result | kAppearsWhenDeathMatch);
 
     // allow more human readable strings...
 
     if (negate)
-        *result = (when_appear_e)(*result ^ (WNAP_SkillBits | WNAP_NetBits));
+        *result = (AppearsFlag)(*result ^
+                                (kAppearsWhenSkillBits | kAppearsWhenNetBits));
 
-    if ((*result & WNAP_SkillBits) == 0)
-        *result = (when_appear_e)(*result | WNAP_SkillBits);
+    if ((*result & kAppearsWhenSkillBits) == 0)
+        *result = (AppearsFlag)(*result | kAppearsWhenSkillBits);
 
-    if ((*result & WNAP_NetBits) == 0)
-        *result = (when_appear_e)(*result | WNAP_NetBits);
+    if ((*result & kAppearsWhenNetBits) == 0)
+        *result = (AppearsFlag)(*result | kAppearsWhenNetBits);
 }
 
 #if 0  // DEBUGGING ONLY
@@ -2041,7 +2042,7 @@ static std::vector<DDFFile> unread_ddf;
 
 struct ddf_reader_t
 {
-    DDFType  type;
+    DDFType     type;
     const char *lump_name;
     const char *pack_name;
     const char *print_name;
@@ -2052,7 +2053,8 @@ struct ddf_reader_t
 static ddf_reader_t ddf_readers[kTotalDDFTypes] = {
     {kDDFTypeLanguage, "DDFLANG", "language.ldf", "Languages", DDF_ReadLangs},
     {kDDFTypeSFX, "DDFSFX", "sounds.ddf", "Sounds", DDF_ReadSFX},
-    {kDDFTypeColourMap, "DDFCOLM", "colmap.ddf", "ColourMaps", DDF_ReadColourMaps},
+    {kDDFTypeColourMap, "DDFCOLM", "colmap.ddf", "ColourMaps",
+     DDF_ReadColourMaps},
     {kDDFTypeImage, "DDFIMAGE", "images.ddf", "Images", DDF_ReadImages},
     {kDDFTypeFont, "DDFFONT", "fonts.ddf", "Fonts", DDF_ReadFonts},
     {kDDFTypeStyle, "DDFSTYLE", "styles.ddf", "Styles", DDF_ReadStyles},
@@ -2089,7 +2091,8 @@ DDFType DDF_FilenameToType(const std::string &path)
 {
     std::string check = epi::GetExtension(path);
 
-    if (epi::StringCaseCompareASCII(check, ".rts") == 0) return kDDFTypeRadScript;
+    if (epi::StringCaseCompareASCII(check, ".rts") == 0)
+        return kDDFTypeRadScript;
 
     check = epi::GetFilename(path);
 

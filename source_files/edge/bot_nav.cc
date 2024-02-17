@@ -265,13 +265,13 @@ static int NAV_CheckDoorOrLift(const seg_t *seg)
     if (ld->special == nullptr)
         return PNODE_Normal;
 
-    const linetype_c *spec = ld->special;
+    const LineType *spec = ld->special;
 
-    if (spec->type == line_manual)
+    if (spec->type_ == kLineTriggerManual)
     {
         // ok
     }
-    else if (spec->type == line_pushable)
+    else if (spec->type_ == kLineTriggerPushable)
     {
         // require tag to match the back sector
         if (ld->tag <= 0)
@@ -287,24 +287,24 @@ static int NAV_CheckDoorOrLift(const seg_t *seg)
     }
 
     // don't open single-use doors in COOP -- a human should do it
-    if (!DEATHMATCH() && spec->count > 0)
+    if (!DEATHMATCH() && spec->count_ > 0)
         return PNODE_Normal;
 
-    if (spec->c.type == mov_Once || spec->c.type == mov_MoveWaitReturn)
+    if (spec->c_.type_ == kPlaneMoverOnce || spec->c_.type_ == kPlaneMoverMoveWaitReturn)
     {
         // determine "front" of door by ceiling heights
         if (seg->back_sub->sector->c_h >= seg->front_sub->sector->c_h)
             return PNODE_Normal;
 
         // ignore locked doors in COOP, since bots don't puzzle solve (yet)
-        if (!DEATHMATCH() && spec->keys != KF_NONE)
+        if (!DEATHMATCH() && spec->keys_ != kDoorKeyNone)
             return PNODE_Normal;
 
         return PNODE_Door;
     }
 
-    if (spec->f.type == mov_Once || spec->f.type == mov_MoveWaitReturn || spec->f.type == mov_Plat ||
-        spec->f.type == mov_Elevator)
+    if (spec->f_.type_ == kPlaneMoverOnce || spec->f_.type_ == kPlaneMoverMoveWaitReturn || spec->f_.type_ == kPlaneMoverPlatform ||
+        spec->f_.type_ == kPlaneMoverElevator)
     {
         // determine "front" of lift by floor heights
         if (seg->back_sub->sector->f_h <= seg->front_sub->sector->f_h)
@@ -333,29 +333,29 @@ static int NAV_CheckTeleporter(const seg_t *seg)
     if (ld->special == nullptr)
         return -1;
 
-    const linetype_c *spec = ld->special;
+    const LineType *spec = ld->special;
 
-    if (spec->type != line_walkable)
+    if (spec->type_ != kLineTriggerWalkable)
         return -1;
 
-    if (!spec->t.teleport)
+    if (!spec->t_.teleport_)
         return -1;
 
     // ignore a single-use teleporter
-    if (spec->count > 0)
+    if (spec->count_ > 0)
         return -1;
 
     if (ld->tag <= 0)
         return -1;
 
-    if (spec->t.special & TELSP_Line)
+    if (spec->t_.special_ & kTeleportSpecialLine)
         return -1;
 
     // find the destination thing...
-    if (spec->t.outspawnobj == nullptr)
+    if (spec->t_.outspawnobj_ == nullptr)
         return -1;
 
-    const mobj_t *dest = P_FindTeleportMan(ld->tag, spec->t.outspawnobj);
+    const mobj_t *dest = P_FindTeleportMan(ld->tag, spec->t_.outspawnobj_);
     if (dest == nullptr)
         return -1;
 

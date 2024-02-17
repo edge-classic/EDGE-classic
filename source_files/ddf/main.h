@@ -150,11 +150,11 @@ void        DDF_MainFreeDefines();
 
 bool DDF_WeaponIsUpgrade(weapondef_c *weap, weapondef_c *old);
 
-bool          DDF_IsBoomLineType(int num);
-bool          DDF_IsBoomSectorType(int num);
-void          DDF_BoomClearGenTypes(void);
-linetype_c   *DDF_BoomGetGenLine(int number);
-sectortype_c *DDF_BoomGetGenSector(int number);
+bool        DDF_IsBoomLineType(int num);
+bool        DDF_IsBoomSectorType(int num);
+void        DDF_BoomClearGenTypes(void);
+LineType   *DDF_BoomGetGenLine(int number);
+SectorType *DDF_BoomGetGenSector(int number);
 
 DDFType DDF_LumpToType(const std::string &name);
 DDFType DDF_FilenameToType(const std::string &path);

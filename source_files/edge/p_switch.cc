@@ -97,13 +97,13 @@ static void StartButton(switchdef_c *sw, line_t *line, bwhere_e w, const image_c
 #define SET_SW(PART)   side->PART.image = sw->cache.image[k ^ 1]
 #define OLD_SW         sw->cache.image[k]
 
-void P_ChangeSwitchTexture(line_t *line, bool useAgain, line_special_e specials, bool noSound)
+void P_ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials, bool noSound)
 {
     for (int j = 0; j < numlines; j++)
     {
         if (line != &lines[j])
         {
-            if (line->tag == 0 || line->tag != lines[j].tag || (specials & LINSP_SwitchSeparate) ||
+            if (line->tag == 0 || line->tag != lines[j].tag || (specials & kLineSpecialSwitchSeparate) ||
                 (useAgain && line->special && line->special != lines[j].special))
             {
                 continue;

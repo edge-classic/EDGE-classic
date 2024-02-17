@@ -800,7 +800,7 @@ static void RAD_ParseRadiusTrigger(param_set_t &pars)
     this_rad->rad_z                = -1;
     this_rad->sector_tag           = 0;
     this_rad->sector_index         = -1;
-    this_rad->appear               = DEFAULT_APPEAR;
+    this_rad->appear               = kAppearsWhenDefault;
     this_rad->min_players          = 0;
     this_rad->max_players          = MAXPLAYERS;
     this_rad->absolute_req_players = 1;
@@ -909,7 +909,7 @@ static void RAD_ParseSectorTrigger(param_set_t &pars)
     this_rad->rad_z                = -1;
     this_rad->sector_tag           = 0;
     this_rad->sector_index         = -1;
-    this_rad->appear               = DEFAULT_APPEAR;
+    this_rad->appear               = kAppearsWhenDefault;
     this_rad->min_players          = 0;
     this_rad->max_players          = MAXPLAYERS;
     this_rad->absolute_req_players = 1;
@@ -1535,7 +1535,7 @@ static void RAD_ParseSpawnThing(param_set_t &pars)
     else
         t->z = this_rad->z - this_rad->rad_z;
 
-    t->appear = DEFAULT_APPEAR;
+    t->appear = kAppearsWhenDefault;
 
     t->ambush       = DDF_CompareName("SPAWNTHING_AMBUSH", pars[0]) == 0;
     t->spawn_effect = DDF_CompareName("SPAWNTHING_FLASH", pars[0]) == 0;

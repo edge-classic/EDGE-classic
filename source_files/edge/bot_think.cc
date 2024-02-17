@@ -217,7 +217,7 @@ float bot_t::EvalItem(const mobj_t *mo)
         {
         case BENEFIT_Key:
             // have it already?
-            if (pl->cards & (keys_e)B->sub.type)
+            if (pl->cards & (DoorKeyType)B->sub.type)
                 continue;
 
             return 90;

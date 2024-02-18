@@ -342,13 +342,13 @@ class ambientsfx_c
   public:
     sector_t *sector;
 
-    sfx_t *sfx;
+    SoundEffect *sfx;
 
     // tics to go before next update
     int count;
 
   public:
-    ambientsfx_c(sector_t *_sec, sfx_t *_fx) : sector(_sec), sfx(_fx), count(SECSFX_TIME)
+    ambientsfx_c(sector_t *_sec, SoundEffect *_fx) : sector(_sec), sfx(_fx), count(SECSFX_TIME)
     {
     }
 
@@ -359,7 +359,7 @@ class ambientsfx_c
 
 std::list<ambientsfx_c *> active_ambients;
 
-void P_AddAmbientSFX(sector_t *sec, sfx_t *sfx)
+void P_AddAmbientSFX(sector_t *sec, SoundEffect *sfx)
 {
     active_ambients.push_back(new ambientsfx_c(sec, sfx));
 }

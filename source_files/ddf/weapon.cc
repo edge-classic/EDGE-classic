@@ -38,7 +38,7 @@ std::vector<std::string> flag_tests;
 
 static WeaponDefinition *dynamic_weapon;
 
-WeaponDefinitionontainer_c weapondefs;
+WeaponDefinitionContainer weapondefs;
 
 static void DDF_WGetAmmo(const char *info, void *storage);
 static void DDF_WGetUpgrade(const char *info, void *storage);
@@ -931,14 +931,14 @@ void WeaponDefinition::Default(void)
 // --> Weapon Definition Container
 
 //
-// WeaponDefinitionontainer_c Constructor
+// WeaponDefinitionContainer Constructor
 //
-WeaponDefinitionontainer_c::WeaponDefinitionontainer_c() {}
+WeaponDefinitionContainer::WeaponDefinitionContainer() {}
 
 //
-// WeaponDefinitionontainer_c Destructor
+// WeaponDefinitionContainer Destructor
 //
-WeaponDefinitionontainer_c::~WeaponDefinitionontainer_c()
+WeaponDefinitionContainer::~WeaponDefinitionContainer()
 {
     for (auto iter = begin(); iter != end(); iter++)
     {
@@ -949,9 +949,9 @@ WeaponDefinitionontainer_c::~WeaponDefinitionontainer_c()
 }
 
 //
-// WeaponDefinitionontainer_c::FindFirst()
+// WeaponDefinitionContainer::FindFirst()
 //
-int WeaponDefinitionontainer_c::FindFirst(const char *name, int startpos)
+int WeaponDefinitionContainer::FindFirst(const char *name, int startpos)
 {
     startpos = HMM_MAX(startpos, 0);
 
@@ -965,9 +965,9 @@ int WeaponDefinitionontainer_c::FindFirst(const char *name, int startpos)
 }
 
 //
-// WeaponDefinitionontainer_c::Lookup()
+// WeaponDefinitionContainer::Lookup()
 //
-WeaponDefinition *WeaponDefinitionontainer_c::Lookup(const char *refname)
+WeaponDefinition *WeaponDefinitionContainer::Lookup(const char *refname)
 {
     int idx = FindFirst(refname, 0);
     if (idx >= 0) return (*this)[idx];

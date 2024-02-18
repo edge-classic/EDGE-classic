@@ -253,7 +253,7 @@ class PlaneMoverDefinition
     int prewait_;
 
     // Up/Down/Stop sfx
-    struct sfx_s *sfxstart_, *sfxup_, *sfxdown_, *sfxstop_;
+    struct SoundEffect *sfxstart_, *sfxup_, *sfxdown_, *sfxstop_;
 
     // Scrolling. -AJA- 2000/04/16
     BAMAngle scroll_angle_;
@@ -316,10 +316,10 @@ class SlidingDoor
     float distance_;
 
     // sound effects.
-    struct sfx_s *sfx_start_;
-    struct sfx_s *sfx_open_;
-    struct sfx_s *sfx_close_;
-    struct sfx_s *sfx_stop_;
+    struct SoundEffect *sfx_start_;
+    struct SoundEffect *sfx_open_;
+    struct SoundEffect *sfx_close_;
+    struct SoundEffect *sfx_stop_;
 };
 
 class DonutDefinition
@@ -349,10 +349,10 @@ class DonutDefinition
     // to differentiate them now?
 
     // SFX for inner donut parts
-    struct sfx_s *d_sfxin_, *d_sfxinstop_;
+    struct SoundEffect *d_sfxin_, *d_sfxinstop_;
 
     // SFX for outer donut parts
-    struct sfx_s *d_sfxout_, *d_sfxoutstop_;
+    struct SoundEffect *d_sfxout_, *d_sfxoutstop_;
 };
 
 // -AJA- 1999/07/12: teleporter special flags.
@@ -677,7 +677,7 @@ class LineType
     std::string failedmessage_;
 
     // -AJA- 2011/01/14: sound for unusable locked door
-    struct sfx_s *failed_sfx_;
+    struct SoundEffect *failed_sfx_;
 
     // Colourmap changing
     // -AJA- 1999/07/09: Now uses colmap.ddf
@@ -690,10 +690,10 @@ class LineType
     float drag_;
 
     // Ambient sound transfer
-    struct sfx_s *ambient_sfx_;
+    struct SoundEffect *ambient_sfx_;
 
     // Activation sound (overrides the switch sound)
-    struct sfx_s *activate_sfx_;
+    struct SoundEffect *activate_sfx_;
 
     int music_;
 
@@ -842,10 +842,10 @@ class SectorType
     const Colormap *use_colourmap_;
 
     // Ambient sound transfer
-    struct sfx_s *ambient_sfx_;
+    struct SoundEffect *ambient_sfx_;
 
     // -AJA- 2008/01/20: Splash sounds
-    struct sfx_s *splash_sfx_;
+    struct SoundEffect *splash_sfx_;
 
     // -AJA- 1999/10/24: Appearance control.
     AppearsFlag appear_;

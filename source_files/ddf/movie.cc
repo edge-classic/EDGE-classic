@@ -229,7 +229,7 @@ void MovieDefinition::Default()
     special_ = kMovieSpecialNone;
 }
 
-// ---> MovieDefinitionontainer_c class
+// ---> MovieDefinitionContainer class
 
 MovieDefinition *MovieDefinitionContainer::Lookup(const char *refname)
 {

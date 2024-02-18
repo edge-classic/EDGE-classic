@@ -103,11 +103,11 @@ static void P_UpdatePowerups(player_t *player);
 
 #define ZOOM_ANGLE_DIV 4
 
-static sfx_t *sfx_jpidle;
-static sfx_t *sfx_jpmove;
-static sfx_t *sfx_jprise;
-static sfx_t *sfx_jpdown;
-static sfx_t *sfx_jpflow;
+static SoundEffect *sfx_jpidle;
+static SoundEffect *sfx_jpmove;
+static SoundEffect *sfx_jprise;
+static SoundEffect *sfx_jpdown;
+static SoundEffect *sfx_jpflow;
 
 static void CalcHeight(player_t *player, bool extra_tic)
 {

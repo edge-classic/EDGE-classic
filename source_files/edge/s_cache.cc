@@ -132,7 +132,7 @@ void S_CacheClearAll(void)
     fx_cache.erase(fx_cache.begin(), fx_cache.end());
 }
 
-static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
+static bool DoCacheLoad(SoundEffectDefinition *def, sound_data_c *buf)
 {
     // open the file or lump, and read it into memory
     epi::File        *F;
@@ -140,29 +140,29 @@ static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
 
     if (var_pc_speaker_mode)
     {
-        if (epi::GetExtension(def->pc_speaker_sound).empty())
+        if (epi::GetExtension(def->pc_speaker_sound_).empty())
         {
-            F = W_OpenPackFile(def->pc_speaker_sound);
+            F = W_OpenPackFile(def->pc_speaker_sound_);
             if (!F)
             {
-                std::string open_name = M_ComposeFileName(game_dir, def->pc_speaker_sound);
+                std::string open_name = M_ComposeFileName(game_dir, def->pc_speaker_sound_);
                 F = epi::FileOpen(open_name, epi::kFileAccessRead | epi::kFileAccessBinary);
             }
             if (!F)
             {
-                M_DebugError("SFX Loader: Missing sound: '%s'\n", def->pc_speaker_sound.c_str());
+                M_DebugError("SFX Loader: Missing sound: '%s'\n", def->pc_speaker_sound_.c_str());
                 return false;
             }
-            fmt = Sound_FilenameToFormat(def->pc_speaker_sound);
+            fmt = Sound_FilenameToFormat(def->pc_speaker_sound_);
         }
         else // Assume bare name is a lump reference
         {
             int lump = -1;
-            lump     = W_CheckNumForName(def->pc_speaker_sound.c_str());
+            lump     = W_CheckNumForName(def->pc_speaker_sound_.c_str());
             if (lump < 0)
             {
                 // Just write a debug message for SFX lumps; this prevents spam amongst the various IWADs
-                M_DebugError("SFX Loader: Missing sound lump: %s\n", def->pc_speaker_sound.c_str());
+                M_DebugError("SFX Loader: Missing sound lump: %s\n", def->pc_speaker_sound_.c_str());
                 return false;
             }
             F = W_OpenLump(lump);
@@ -171,36 +171,36 @@ static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
     }
     else
     {
-        if (def->pack_name != "")
+        if (def->pack_name_ != "")
         {
-            F = W_OpenPackFile(def->pack_name);
+            F = W_OpenPackFile(def->pack_name_);
             if (!F)
             {
-                M_DebugError("SFX Loader: Missing sound in EPK: '%s'\n", def->pack_name.c_str());
+                M_DebugError("SFX Loader: Missing sound in EPK: '%s'\n", def->pack_name_.c_str());
                 return false;
             }
-            fmt = Sound_FilenameToFormat(def->pack_name);
+            fmt = Sound_FilenameToFormat(def->pack_name_);
         }
-        else if (def->file_name != "")
+        else if (def->file_name_ != "")
         {
             // Why is this composed with the app dir? - Dasho
-            std::string fn = M_ComposeFileName(game_dir, def->file_name);
+            std::string fn = M_ComposeFileName(game_dir, def->file_name_);
             F  = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
             if (!F)
             {
                 M_DebugError("SFX Loader: Can't Find File '%s'\n", fn.c_str());
                 return false;
             }
-            fmt = Sound_FilenameToFormat(def->file_name);
+            fmt = Sound_FilenameToFormat(def->file_name_);
         }
         else
         {
             int lump = -1;
-            lump     = W_CheckNumForName(def->lump_name.c_str());
+            lump     = W_CheckNumForName(def->lump_name_.c_str());
             if (lump < 0)
             {
                 // Just write a debug message for SFX lumps; this prevents spam amongst the various IWADs
-                M_DebugError("SFX Loader: Missing sound lump: %s\n", def->lump_name.c_str());
+                M_DebugError("SFX Loader: Missing sound lump: %s\n", def->lump_name_.c_str());
                 return false;
             }
             F = W_OpenLump(lump);
@@ -228,8 +228,8 @@ static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
         return false;
     }
 
-    if ((var_pc_speaker_mode && epi::GetExtension(def->pc_speaker_sound).empty()) ||
-        (def->pack_name == "" && def->file_name == ""))
+    if ((var_pc_speaker_mode && epi::GetExtension(def->pc_speaker_sound_).empty()) ||
+        (def->pack_name_ == "" && def->file_name_ == ""))
     {
         // for lumps, we must detect the format from the lump contents
         fmt = Sound_DetectFormat(data, length);
@@ -276,13 +276,13 @@ static bool DoCacheLoad(sfxdef_c *def, sound_data_c *buf)
     return OK;
 }
 
-sound_data_c *S_CacheLoad(sfxdef_c *def)
+sound_data_c *S_CacheLoad(SoundEffectDefinition *def)
 {
     bool pc_speaker_skip = false;
 
     if (var_pc_speaker_mode)
     {
-        if (def->pc_speaker_sound.empty())
+        if (def->pc_speaker_sound_.empty())
             pc_speaker_skip = true;
     }
 

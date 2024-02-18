@@ -2289,22 +2289,22 @@ void MobjType::Default()
     shadow_trans  = 0.5f;
     glow_type     = GLOW_None;
 
-    seesound       = sfx_None;
-    attacksound    = sfx_None;
-    painsound      = sfx_None;
-    deathsound     = sfx_None;
-    overkill_sound = sfx_None;
-    activesound    = sfx_None;
-    walksound      = sfx_None;
-    jump_sound     = sfx_None;
-    noway_sound    = sfx_None;
-    oof_sound      = sfx_None;
-    fallpain_sound = sfx_None;
-    gasp_sound     = sfx_None;
-    // secretsound = sfx_None;
+    seesound       = nullptr;
+    attacksound    = nullptr;
+    painsound      = nullptr;
+    deathsound     = nullptr;
+    overkill_sound = nullptr;
+    activesound    = nullptr;
+    walksound      = nullptr;
+    jump_sound     = nullptr;
+    noway_sound    = nullptr;
+    oof_sound      = nullptr;
+    fallpain_sound = nullptr;
+    gasp_sound     = nullptr;
+    // secretsound = nullptr;
     secretsound   = sfxdefs.GetEffect("SECRET");
-    falling_sound = sfx_None;
-    rip_sound     = sfx_None;
+    falling_sound = nullptr;
+    rip_sound     = nullptr;
 
     fuse           = 0;
     reload_shots   = 5;

@@ -44,14 +44,14 @@ extern int key_quit_edge;
 extern int key_gamma_toggle;
 
 // the so-called "bastard sfx" used for the menus
-extern struct sfx_s *sfx_swtchn;
-extern struct sfx_s *sfx_tink;
-extern struct sfx_s *sfx_radio;
-extern struct sfx_s *sfx_oof;
-extern struct sfx_s *sfx_pstop;
-extern struct sfx_s *sfx_stnmov;
-extern struct sfx_s *sfx_pistol;
-extern struct sfx_s *sfx_swtchx;
+extern struct SoundEffect *sfx_swtchn;
+extern struct SoundEffect *sfx_tink;
+extern struct SoundEffect *sfx_radio;
+extern struct SoundEffect *sfx_oof;
+extern struct SoundEffect *sfx_pstop;
+extern struct SoundEffect *sfx_stnmov;
+extern struct SoundEffect *sfx_pistol;
+extern struct SoundEffect *sfx_swtchx;
 
 //
 // MENUS

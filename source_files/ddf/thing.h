@@ -906,21 +906,21 @@ class MobjType
     float     ride_friction;
     float shadow_trans;
 
-    struct sfx_s *seesound;
-    struct sfx_s *attacksound;
-    struct sfx_s *painsound;
-    struct sfx_s *deathsound;
-    struct sfx_s *overkill_sound;
-    struct sfx_s *activesound;
-    struct sfx_s *walksound;
-    struct sfx_s *jump_sound;
-    struct sfx_s *noway_sound;
-    struct sfx_s *oof_sound;
-    struct sfx_s *fallpain_sound;
-    struct sfx_s *gasp_sound;
-    struct sfx_s *secretsound;
-    struct sfx_s *falling_sound;
-    struct sfx_s *rip_sound;
+    struct SoundEffect *seesound;
+    struct SoundEffect *attacksound;
+    struct SoundEffect *painsound;
+    struct SoundEffect *deathsound;
+    struct SoundEffect *overkill_sound;
+    struct SoundEffect *activesound;
+    struct SoundEffect *walksound;
+    struct SoundEffect *jump_sound;
+    struct SoundEffect *noway_sound;
+    struct SoundEffect *oof_sound;
+    struct SoundEffect *fallpain_sound;
+    struct SoundEffect *gasp_sound;
+    struct SoundEffect *secretsound;
+    struct SoundEffect *falling_sound;
+    struct SoundEffect *rip_sound;
 
     int fuse;
     int reload_shots;

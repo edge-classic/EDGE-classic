@@ -284,7 +284,7 @@ int CMD_Crc(char **argv, int argc)
 
 int CMD_PlaySound(char **argv, int argc)
 {
-    sfx_t *sfx;
+    SoundEffect *sfx;
 
     if (argc != 2)
     {

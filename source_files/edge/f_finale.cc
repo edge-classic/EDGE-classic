@@ -516,7 +516,7 @@ static void CastSetState(int st)
 
 static void CAST_RangeAttack(const AttackDefinition *range)
 {
-    sfx_t *sfx = nullptr;
+    SoundEffect *sfx = nullptr;
 
     SYS_ASSERT(range);
 
@@ -547,7 +547,7 @@ static void CAST_RangeAttack(const AttackDefinition *range)
 
 static void CastPerformAction(void)
 {
-    sfx_t *sfx = nullptr;
+    SoundEffect *sfx = nullptr;
 
     // Yuk, handles sounds
 

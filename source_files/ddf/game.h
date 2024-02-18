@@ -172,12 +172,12 @@ class GameDefinition
 
     int           music_;
     bool          no_skill_menu_;
-    struct sfx_s *percent_;
-    struct sfx_s *done_;
-    struct sfx_s *endmap_;
-    struct sfx_s *nextmap_;
-    struct sfx_s *accel_snd_;
-    struct sfx_s *frag_snd_;
+    struct SoundEffect *percent_;
+    struct SoundEffect *done_;
+    struct SoundEffect *endmap_;
+    struct SoundEffect *nextmap_;
+    struct SoundEffect *accel_snd_;
+    struct SoundEffect *frag_snd_;
 
     std::string firstmap_;
     std::string namegraphic_;

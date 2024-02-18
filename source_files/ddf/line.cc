@@ -1475,10 +1475,10 @@ void SlidingDoor::Default()
     wait_        = 150;
     see_through_ = false;
     distance_    = 0.9f;
-    sfx_start_   = sfx_None;
-    sfx_open_    = sfx_None;
-    sfx_close_   = sfx_None;
-    sfx_stop_    = sfx_None;
+    sfx_start_   = nullptr;
+    sfx_open_    = nullptr;
+    sfx_close_   = nullptr;
+    sfx_stop_    = nullptr;
 }
 
 //
@@ -1653,8 +1653,8 @@ void LineType::Default(void)
     friction_      = kFloatUnused;
     viscosity_     = kFloatUnused;
     drag_          = kFloatUnused;
-    ambient_sfx_   = sfx_None;
-    activate_sfx_  = sfx_None;
+    ambient_sfx_   = nullptr;
+    activate_sfx_  = nullptr;
     music_         = 0;
     autoline_      = false;
     singlesided_   = false;

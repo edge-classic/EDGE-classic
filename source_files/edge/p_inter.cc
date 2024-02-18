@@ -833,7 +833,7 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
         return;
 
     // -KM- 1998/09/27 Sounds.ddf
-    sfx_t *sound = special->info->activesound;
+    SoundEffect *sound = special->info->activesound;
 
     pickup_info_t info;
 

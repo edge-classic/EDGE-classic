@@ -50,8 +50,8 @@ class switchdef_c
     std::string on_name;
     std::string off_name;
 
-    struct sfx_s *on_sfx;
-    struct sfx_s *off_sfx;
+    struct SoundEffect *on_sfx;
+    struct SoundEffect *off_sfx;
 
     int time;
 

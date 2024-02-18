@@ -188,8 +188,8 @@ void switchdef_c::Default()
     on_name.clear();
     off_name.clear();
 
-    on_sfx  = sfx_None;
-    off_sfx = sfx_None;
+    on_sfx  = nullptr;
+    off_sfx = nullptr;
 
     time = BUTTONTIME;
 }

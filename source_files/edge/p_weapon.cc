@@ -1686,10 +1686,10 @@ void A_WeaponPlaySound(mobj_t *mo)
     player_t *p   = mo->player;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
-    sfx_t *sound = nullptr;
+    SoundEffect *sound = nullptr;
 
     if (psp->state && psp->state->action_par)
-        sound = (sfx_t *)psp->state->action_par;
+        sound = (SoundEffect *)psp->state->action_par;
 
     if (!sound)
     {

@@ -87,7 +87,7 @@ typedef enum
 void S_Init(void);
 void S_Shutdown(void);
 
-void S_StartFX(struct sfx_s *sfx, int category = SNCAT_UI, position_c *pos = nullptr, int flags = 0);
+void S_StartFX(struct SoundEffect *sfx, int category = SNCAT_UI, position_c *pos = nullptr, int flags = 0);
 
 void S_StopFX(position_c *pos);
 void S_StopLevelFX(void);

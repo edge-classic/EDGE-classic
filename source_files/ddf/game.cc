@@ -737,12 +737,12 @@ void GameDefinition::Default()
     music_         = 0;
     no_skill_menu_ = false;
 
-    percent_   = sfx_None;
-    done_      = sfx_None;
-    endmap_    = sfx_None;
-    nextmap_   = sfx_None;
-    accel_snd_ = sfx_None;
-    frag_snd_  = sfx_None;
+    percent_   = nullptr;
+    done_      = nullptr;
+    endmap_    = nullptr;
+    nextmap_   = nullptr;
+    accel_snd_ = nullptr;
+    frag_snd_  = nullptr;
 
     firstmap_.clear();
     namegraphic_.clear();

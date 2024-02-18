@@ -70,7 +70,7 @@ typedef struct button_s
     bwhere_e       where;
     const image_c *bimage;
     int            btimer;
-    struct sfx_s  *off_sound;
+    struct SoundEffect  *off_sound;
 } button_t;
 
 typedef enum
@@ -208,7 +208,7 @@ void     P_RunSectorSFX(void);
 void     P_DestroyAllSectorSFX(void);
 
 void EV_LightTurnOn(int tag, int bright);
-bool EV_DoDonut(sector_t *s1, struct sfx_s *sfx[4]);
+bool EV_DoDonut(sector_t *s1, struct SoundEffect *sfx[4]);
 bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const TeleportDefinition *def);
 bool EV_ManualPlane(line_t *line, mobj_t *thing, const PlaneMoverDefinition *type);
 // bool EV_ManualElevator(line_t * line, mobj_t * thing, const elevatordef_c * type);
@@ -223,7 +223,7 @@ void P_AddPointForce(sector_t *sec, float length);
 void P_AddSectorForce(sector_t *sec, bool is_wind, float x_mag, float y_mag);
 
 void P_RunAmbientSFX(void);
-void P_AddAmbientSFX(sector_t *sec, struct sfx_s *sfx);
+void P_AddAmbientSFX(sector_t *sec, struct SoundEffect *sfx);
 void P_DestroyAllAmbientSFX(void);
 
 //

@@ -264,8 +264,8 @@ class AttackDefinition
 
     AttackStyle   attackstyle_;
     AttackFlags   flags_;
-    struct sfx_s *initsound_;
-    struct sfx_s *sound_;
+    struct SoundEffect *initsound_;
+    struct SoundEffect *sound_;
     float         accuracy_slope_;
     BAMAngle      accuracy_angle_;
     float         xoffset_;
@@ -509,21 +509,21 @@ class WeaponDefinition
 
     // Sounds.
     // Played at the start of every readystate
-    struct sfx_s *idle_;
+    struct SoundEffect *idle_;
 
     // Played while the trigger is held (chainsaw)
-    struct sfx_s *engaged_;
+    struct SoundEffect *engaged_;
 
     // Played while the trigger is held and it is pointed at a target.
-    struct sfx_s *hit_;
+    struct SoundEffect *hit_;
 
     // Played when the weapon is selected
-    struct sfx_s *start_;
+    struct SoundEffect *start_;
 
     // Misc sounds
-    struct sfx_s *sound1_;
-    struct sfx_s *sound2_;
-    struct sfx_s *sound3_;
+    struct SoundEffect *sound1_;
+    struct SoundEffect *sound2_;
+    struct SoundEffect *sound3_;
 
     // This close combat weapon should not push the target away (chainsaw)
     bool nothrust_;

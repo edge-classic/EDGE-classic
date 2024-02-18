@@ -695,7 +695,7 @@ static int HD_play_sound(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
 
-    sfx_t *fx = sfxdefs.GetEffect(name);
+    SoundEffect *fx = sfxdefs.GetEffect(name);
 
     if (fx)
         S_StartFX(fx);

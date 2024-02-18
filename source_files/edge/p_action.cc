@@ -794,10 +794,10 @@ void P_ActPlaySound(mobj_t *mo)
 {
     // Generate an arbitrary sound.
 
-    sfx_t *sound = nullptr;
+    SoundEffect *sound = nullptr;
 
     if (mo->state && mo->state->action_par)
-        sound = (sfx_t *)mo->state->action_par;
+        sound = (SoundEffect *)mo->state->action_par;
 
     if (!sound)
     {
@@ -814,10 +814,10 @@ void P_ActPlaySoundBoss(mobj_t *mo)
 {
     // Generate an arbitrary sound.
 
-    sfx_t *sound = nullptr;
+    SoundEffect *sound = nullptr;
 
     if (mo->state && mo->state->action_par)
-        sound = (sfx_t *)mo->state->action_par;
+        sound = (SoundEffect *)mo->state->action_par;
 
     if (!sound)
     {
@@ -885,7 +885,7 @@ void P_ActMakeDyingSound(mobj_t *mo)
     // a boss (EF_ALWAYSLOUD extended flag) then the sound is
     // generated at full volume (source = nullptr).
 
-    sfx_t *sound = mo->info->deathsound;
+    SoundEffect *sound = mo->info->deathsound;
 
     if (sound)
         S_StartFX(sound, P_MobjGetSfxCategory(mo), mo, SfxFlags(mo->info));
@@ -920,7 +920,7 @@ void P_ActMakeCloseAttemptSound(mobj_t *mo)
                 "but has no CLOSE_ATTACK\n",
                 mo->info->name.c_str());
 
-    sfx_t *sound = mo->info->closecombat->initsound_;
+    SoundEffect *sound = mo->info->closecombat->initsound_;
 
     if (sound)
         S_StartFX(sound, P_MobjGetSfxCategory(mo), mo);
@@ -937,7 +937,7 @@ void P_ActMakeRangeAttemptSound(mobj_t *mo)
                 "but has no RANGE_ATTACK\n",
                 mo->info->name.c_str());
 
-    sfx_t *sound = mo->info->rangeattack->initsound_;
+    SoundEffect *sound = mo->info->rangeattack->initsound_;
 
     if (sound)
         S_StartFX(sound, P_MobjGetSfxCategory(mo), mo);
@@ -2367,7 +2367,7 @@ static void SkullFlyAssault(mobj_t *object)
 
     float speed = object->currentattack->assault_speed_;
 
-    sfx_t *sound = object->currentattack->initsound_;
+    SoundEffect *sound = object->currentattack->initsound_;
 
     if (sound)
         S_StartFX(sound, P_MobjGetSfxCategory(object), object);
@@ -2413,7 +2413,7 @@ void P_SlammedIntoObject(mobj_t *object, mobj_t *target)
             }
         }
 
-        sfx_t *sound = object->currentattack->sound_;
+        SoundEffect *sound = object->currentattack->sound_;
         if (sound)
             S_StartFX(sound, P_MobjGetSfxCategory(object), object);
     }
@@ -3260,7 +3260,7 @@ void P_ActPlayerSupportMeander(mobj_t *object)
 void P_ActStandardChase(mobj_t *object)
 {
     int    delta;
-    sfx_t *sound;
+    SoundEffect *sound;
 
     if (object->reactiontime)
         object->reactiontime--;

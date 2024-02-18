@@ -583,15 +583,15 @@ void AttackDefinition::Default()
     dualattack2_ = nullptr;
 }
 
-// --> AttackDefinitionontainer_c class
+// --> AttackDefinitionContainer class
 
 //
-// AttackDefinitionontainer_c::AttackDefinitionontainer_c()
+// AttackDefinitionContainer::AttackDefinitionContainer()
 //
 AttackDefinitionContainer::AttackDefinitionContainer() {}
 
 //
-// ~AttackDefinitionontainer_c::AttackDefinitionontainer_c()
+// ~AttackDefinitionContainer::AttackDefinitionContainer()
 //
 AttackDefinitionContainer::~AttackDefinitionContainer()
 {
@@ -605,7 +605,7 @@ AttackDefinitionContainer::~AttackDefinitionContainer()
 }
 
 //
-// AttackDefinition* AttackDefinitionontainer_c::Lookup()
+// AttackDefinition* AttackDefinitionContainer::Lookup()
 //
 // Looks an atkdef by name, returns a fatal error if it does not exist.
 //

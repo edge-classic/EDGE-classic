@@ -31,7 +31,7 @@
 #include "types.h"
 
 // Forward declarations
-class sfxdef_c;
+class SoundEffectDefinition;
 struct position_c;
 
 // We use a 22.10 fixed point for sound offsets.  It's a reasonable
@@ -54,7 +54,7 @@ class mix_channel_c
     sound_data_c *data;
 
     int         category;
-    sfxdef_c   *def;
+    SoundEffectDefinition   *def;
     position_c *pos;
 
     fixed22_t offset;

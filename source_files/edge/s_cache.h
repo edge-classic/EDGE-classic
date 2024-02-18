@@ -28,7 +28,7 @@
 
 #include "sound_data.h"
 
-class sfxdef_c;
+class SoundEffectDefinition;
 
 void S_CacheInit(void);
 // setup the sound cache system.
@@ -38,7 +38,7 @@ void S_CacheClearAll(void);
 // Must be called if the audio system parameters (sample_bits,
 // stereoness) are changed.
 
-sound_data_c *S_CacheLoad(sfxdef_c *def);
+sound_data_c *S_CacheLoad(SoundEffectDefinition *def);
 // load a sound into the cache.  If the sound has already
 // been loaded, then it is simply returned (increasing the
 // reference count).  Returns nullptr if the lump doesn't exist.

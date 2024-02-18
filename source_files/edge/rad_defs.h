@@ -202,7 +202,7 @@ typedef struct s_sound_s
     float y = 0;
     float z = 0;
 
-    struct sfx_s *sfx = nullptr;
+    struct SoundEffect *sfx = nullptr;
 } s_sound_t;
 
 // Change Music function

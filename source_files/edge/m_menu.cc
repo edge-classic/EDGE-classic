@@ -121,14 +121,14 @@ static void (*message_input_routine)(const char *response) = nullptr;
 static int chosen_epi;
 
 // SOUNDS
-sfx_t *sfx_swtchn;
-sfx_t *sfx_tink;
-sfx_t *sfx_radio;
-sfx_t *sfx_oof;
-sfx_t *sfx_pstop;
-sfx_t *sfx_stnmov;
-sfx_t *sfx_pistol;
-sfx_t *sfx_swtchx;
+SoundEffect *sfx_swtchn;
+SoundEffect *sfx_tink;
+SoundEffect *sfx_radio;
+SoundEffect *sfx_oof;
+SoundEffect *sfx_pstop;
+SoundEffect *sfx_stnmov;
+SoundEffect *sfx_pistol;
+SoundEffect *sfx_swtchx;
 //
 //  IMAGES USED
 //

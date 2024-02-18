@@ -81,7 +81,7 @@ static bool DoLights_wrapper(sector_t *s, const void *p1, void *p2)
 
 static bool DoDonut_wrapper(sector_t *s, const void *p1, void *p2)
 {
-    return EV_DoDonut(s, (sfx_t **)p2);
+    return EV_DoDonut(s, (SoundEffect **)p2);
 }
 
 //
@@ -1255,7 +1255,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
     bool texSwitch   = false;
     bool playedSound = false;
 
-    sfx_t    *sfx[4];
+    SoundEffect    *sfx[4];
     sector_t *tsec;
 
     int i;

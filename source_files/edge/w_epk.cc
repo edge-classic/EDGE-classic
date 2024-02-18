@@ -890,13 +890,13 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
             for (auto sfx : sfxdefs)
             {
                 // Assume that same stem name is meant to replace an identically named lump entry
-                if (!sfx->lump_name.empty())
+                if (!sfx->lump_name_.empty())
                 {
-                    if (epi::StringCaseCompareASCII(epi::GetStem(entry.name), sfx->lump_name) == 0 &&
-                        W_CheckFileNumForName(sfx->lump_name.c_str()) < pack_index)
+                    if (epi::StringCaseCompareASCII(epi::GetStem(entry.name), sfx->lump_name_) == 0 &&
+                        W_CheckFileNumForName(sfx->lump_name_.c_str()) < pack_index)
                     {
-                        sfx->pack_name = entry.packpath;
-                        sfx->lump_name.clear();
+                        sfx->pack_name_ = entry.packpath;
+                        sfx->lump_name_.clear();
                     }
                 }
             }

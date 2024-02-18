@@ -138,7 +138,7 @@ static int FindFreeChannel(void)
     return -1; // not found
 }
 
-static int FindPlayingFX(sfxdef_c *def, int cat, position_c *pos)
+static int FindPlayingFX(SoundEffectDefinition *def, int cat, position_c *pos)
 {
     for (int i = 0; i < num_chan; i++)
     {
@@ -149,7 +149,7 @@ static int FindPlayingFX(sfxdef_c *def, int cat, position_c *pos)
             if (chan->def == def)
                 return i;
 
-            if (chan->def->singularity > 0 && chan->def->singularity == def->singularity)
+            if (chan->def->singularity_ > 0 && chan->def->singularity_ == def->singularity_)
                 return i;
         }
     }
@@ -199,12 +199,12 @@ static void CountPlayingCats(void)
     }
 }
 
-static int ChannelScore(sfxdef_c *def, int category, position_c *pos, bool boss)
+static int ChannelScore(SoundEffectDefinition *def, int category, position_c *pos, bool boss)
 {
     // for full-volume sounds, use the priority from DDF
     if (category <= SNCAT_Weapon)
     {
-        return 200 - def->priority;
+        return 200 - def->priority_;
     }
 
     // for stuff in the level, use the distance
@@ -214,7 +214,7 @@ static int ChannelScore(sfxdef_c *def, int category, position_c *pos, bool boss)
 
     int base_score = 999 - (int)(dist / 10.0);
 
-    return base_score * 100 - def->priority;
+    return base_score * 100 - def->priority_;
 }
 
 static int FindChannelToKill(int kill_cat, int real_cat, int new_score)
@@ -295,7 +295,7 @@ void S_Shutdown(void)
 }
 
 // Not-rejigged-yet stuff..
-sfxdef_c *LookupEffectDef(const sfx_t *s)
+SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
 {
     SYS_ASSERT(s->num >= 1);
 
@@ -311,7 +311,7 @@ sfxdef_c *LookupEffectDef(const sfx_t *s)
     return sfxdefs[num];
 }
 
-static void S_PlaySound(int idx, sfxdef_c *def, int category, position_c *pos, int flags, sound_data_c *buf)
+static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, position_c *pos, int flags, sound_data_c *buf)
 {
     // I_Printf("S_PlaySound on idx #%d DEF:%p\n", idx, def);
 
@@ -343,7 +343,7 @@ static void S_PlaySound(int idx, sfxdef_c *def, int category, position_c *pos, i
     // I_Printf("FINISHED: delta=0x%lx\n", chan->delta);
 }
 
-static void DoStartFX(sfxdef_c *def, int category, position_c *pos, int flags, sound_data_c *buf)
+static void DoStartFX(SoundEffectDefinition *def, int category, position_c *pos, int flags, sound_data_c *buf)
 {
     CountPlayingCats();
 
@@ -354,7 +354,7 @@ static void DoStartFX(sfxdef_c *def, int category, position_c *pos, int flags, s
         // I_Printf("@ already playing on #%d\n", k);
         mix_channel_c *chan = mix_chan[k];
 
-        if (def->looping && def == chan->def)
+        if (def->looping_ && def == chan->def)
         {
             // I_Printf("@@ RE-LOOPING\n");
             chan->loop = true;
@@ -362,7 +362,7 @@ static void DoStartFX(sfxdef_c *def, int category, position_c *pos, int flags, s
         }
         else if (flags & FX_Single)
         {
-            if (chan->def->precious)
+            if (chan->def->precious_)
                 return;
 
             // I_Printf("@@ Killing sound for SINGULAR\n");
@@ -413,7 +413,7 @@ static void DoStartFX(sfxdef_c *def, int category, position_c *pos, int flags, s
     S_PlaySound(k, def, category, pos, flags, buf);
 }
 
-void S_StartFX(sfx_t *sfx, int category, position_c *pos, int flags)
+void S_StartFX(SoundEffect *sfx, int category, position_c *pos, int flags)
 {
     if (nosound || !sfx)
         return;
@@ -426,7 +426,7 @@ void S_StartFX(sfx_t *sfx, int category, position_c *pos, int flags)
     if (category >= SNCAT_Opponent && !pos)
         I_Error("S_StartFX: position missing for category: %d\n", category);
 
-    sfxdef_c *def = LookupEffectDef(sfx);
+    SoundEffectDefinition *def = LookupEffectDef(sfx);
     SYS_ASSERT(def);
 
     // ignore very far away sounds
@@ -434,14 +434,14 @@ void S_StartFX(sfx_t *sfx, int category, position_c *pos, int flags)
     {
         float dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
 
-        if (dist > def->max_distance)
+        if (dist > def->max_distance_)
             return;
     }
 
-    if (def->singularity > 0)
+    if (def->singularity_ > 0)
     {
         flags |= FX_Single;
-        flags |= (def->precious ? FX_Precious : 0);
+        flags |= (def->precious_ ? FX_Precious : 0);
     }
 
     // I_Printf("StartFX: '%s' cat:%d flags:0x%04x\n", def->name.c_str(), category, flags);

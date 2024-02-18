@@ -102,13 +102,13 @@ class soundstyle_c
     void          Default();
     soundstyle_c &operator=(const soundstyle_c &rhs);
 
-    struct sfx_s *begin;
-    struct sfx_s *end;
-    struct sfx_s *select;
-    struct sfx_s *back;
-    struct sfx_s *error;
-    struct sfx_s *move;
-    struct sfx_s *slider;
+    struct SoundEffect *begin;
+    struct SoundEffect *end;
+    struct SoundEffect *select;
+    struct SoundEffect *back;
+    struct SoundEffect *error;
+    struct SoundEffect *move;
+    struct SoundEffect *slider;
 };
 
 typedef enum

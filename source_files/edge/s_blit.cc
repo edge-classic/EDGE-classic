@@ -150,7 +150,7 @@ void mix_channel_c::ComputeVolume()
     MAX_VOL = (boss ? MAX_VOL : MAX_VOL / dist) * sfx_volume.f;
 
     if (def)
-        MAX_VOL *= def->volume;
+        MAX_VOL *= def->volume_;
 
     // strictly linear equations
     volume_L = (int)(MAX_VOL * (1.0 - sep));

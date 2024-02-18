@@ -191,7 +191,7 @@ void FlatDefinition::CopyDetail(FlatDefinition &src)
 void FlatDefinition::Default()
 {
     liquid_   = "";
-    footstep_ = sfx_None;
+    footstep_ = nullptr;
     splash_.clear();
     impactobject_ = nullptr;
     impactobject_ref_.clear();

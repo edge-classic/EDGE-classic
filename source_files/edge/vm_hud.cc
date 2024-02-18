@@ -741,7 +741,7 @@ static void HD_play_sound(coal::vm_c *vm, int argc)
 
     const char *name = vm->AccessParamString(0);
 
-    sfx_t *fx = sfxdefs.GetEffect(name);
+    SoundEffect *fx = sfxdefs.GetEffect(name);
 
     if (fx)
         S_StartFX(fx);

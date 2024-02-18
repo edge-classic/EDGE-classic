@@ -148,18 +148,18 @@ static float GetSecHeightReference(TriggerHeightReference ref, sector_t *sec, se
 
 #define RELOOP_TICKS 6
 
-static void MakeMovingSound(bool *started_var, sfx_t *sfx, position_c *pos)
+static void MakeMovingSound(bool *started_var, SoundEffect *sfx, position_c *pos)
 {
     if (!sfx || sfx->num < 1)
         return;
 
-    sfxdef_c *def = sfxdefs[sfx->sounds[0]];
+    SoundEffectDefinition *def = sfxdefs[sfx->sounds[0]];
 
     // looping sounds need to be "pumped" to keep looping.
     // The main one is STNMOV, which lasts a little over 0.25 seconds,
     // hence we need to pump it every 6 tics or so.
 
-    if (!*started_var || (def->looping && (leveltime % RELOOP_TICKS) == 0))
+    if (!*started_var || (def->looping_ && (leveltime % RELOOP_TICKS) == 0))
     {
         S_StartFX(sfx, SNCAT_Level, pos);
 
@@ -1119,7 +1119,7 @@ bool P_SectorIsLowering(sector_t *sec)
 // Special Stuff that can not be categorized
 // Mmmmmmm....  Donuts....
 //
-bool EV_DoDonut(sector_t *s1, sfx_t *sfx[4])
+bool EV_DoDonut(sector_t *s1, SoundEffect *sfx[4])
 {
     sector_t     *s2;
     sector_t     *s3;

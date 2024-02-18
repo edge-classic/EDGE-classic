@@ -671,7 +671,7 @@ void P_ActCubeSpawn(mobj_t *cube)
 
 void P_ActPlayerScream(mobj_t *mo)
 {
-    sfx_t *sound;
+    SoundEffect *sound;
 
     sound = mo->info->deathsound;
 

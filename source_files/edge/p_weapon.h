@@ -50,10 +50,10 @@ typedef enum
 typedef struct
 {
     // current state.  nullptr state means not active
-    const state_t *state;
+    const State *state;
 
     // state to enter next.
-    const state_t *next_state;
+    const State *next_state;
 
     // time (in tics) remaining for current state
     int tics;

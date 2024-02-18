@@ -145,9 +145,9 @@ static int GetMulticolMaxRGB(multi_color_c *cols, int num, bool additive)
 }
 
 static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_properties_t *props,
-                            const state_t *state)
+                            const State *state)
 {
-    if (state->flags & SFF_Model)
+    if (state->flags & kStateFrameFlagModel)
         return;
 
     // determine sprite patch
@@ -215,14 +215,14 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
     if (LUA_UseLuaHud())
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-        if ((state->flags & SFF_Weapon) && (player->ready_wp >= 0))
+        if ((state->flags & kStateFrameFlagWeapon) && (player->ready_wp >= 0))
             ty1 += LUA_GetFloat(LUA_GetGlobalVM(), "hud", "universal_y_adjust") +
                    player->weapons[player->ready_wp].info->y_adjust_;
     }
     else
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
-        if ((state->flags & SFF_Weapon) && (player->ready_wp >= 0))
+        if ((state->flags & kStateFrameFlagWeapon) && (player->ready_wp >= 0))
             ty1 += VM_GetFloat(ui_vm, "hud", "universal_y_adjust") + player->weapons[player->ready_wp].info->y_adjust_;
     }
 
@@ -503,7 +503,7 @@ void RGL_DrawWeaponSprites(player_t *p)
     {
         pspdef_t *psp = &p->psprites[ps_weapon];
 
-        if ((p->ready_wp < 0) || (psp->state == S_NULL))
+        if ((p->ready_wp < 0) || (psp->state == 0))
             return;
 
         WeaponDefinition *w = p->weapons[p->ready_wp].info;
@@ -536,7 +536,7 @@ void RGL_DrawWeaponSprites(player_t *p)
         {
             pspdef_t *psp = &p->psprites[i];
 
-            if ((p->ready_wp < 0) || (psp->state == S_NULL))
+            if ((p->ready_wp < 0) || (psp->state == 0))
                 continue;
 
             RGL_DrawPSprite(psp, i, p, view_props, psp->state);
@@ -548,7 +548,7 @@ void RGL_DrawWeaponSprites(player_t *p)
         {
             pspdef_t *psp = &p->psprites[i];
 
-            if ((p->ready_wp < 0) || (psp->state == S_NULL))
+            if ((p->ready_wp < 0) || (psp->state == 0))
                 continue;
 
             RGL_DrawPSprite(psp, i, p, view_props, psp->state);
@@ -568,7 +568,7 @@ void RGL_DrawCrosshair(player_t *p)
     {
         pspdef_t *psp = &p->psprites[ps_crosshair];
 
-        if (p->ready_wp >= 0 && psp->state != S_NULL)
+        if (p->ready_wp >= 0 && psp->state != 0)
             return;
     }
 
@@ -586,10 +586,10 @@ void RGL_DrawWeaponModel(player_t *p)
     if (p->ready_wp < 0)
         return;
 
-    if (psp->state == S_NULL)
+    if (psp->state == 0)
         return;
 
-    if (!(psp->state->flags & SFF_Model))
+    if (!(psp->state->flags & kStateFrameFlagModel))
         return;
 
     WeaponDefinition *w = p->weapons[p->ready_wp].info;
@@ -685,7 +685,7 @@ static const image_c *R2_GetThingSprite2(mobj_t *mo, float mx, float my, bool *f
     // decide which patch to use for sprite relative to player
     SYS_ASSERT(mo->state);
 
-    if (mo->state->sprite == SPR_NULL)
+    if (mo->state->sprite == 0)
         return nullptr;
 
     spriteframe_c *frame = W_GetSpriteFrame(mo->state->sprite, mo->state->frame);
@@ -739,7 +739,7 @@ const image_c *R2_GetOtherSprite(int spritenum, int framenum, bool *flip)
 {
     /* Used for non-object stuff, like weapons and finale */
 
-    if (spritenum == SPR_NULL)
+    if (spritenum == 0)
         return nullptr;
 
     spriteframe_c *frame = W_GetSpriteFrame(spritenum, framenum);
@@ -990,7 +990,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
     if (mo->teleport_tic-- > 0)
         return;
 
-    bool is_model = (mo->state->flags & SFF_Model) ? true : false;
+    bool is_model = (mo->state->flags & kStateFrameFlagModel) ? true : false;
 
     // transform the origin point
     float mx = mo->x, my = mo->y, mz = mo->z;

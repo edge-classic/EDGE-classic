@@ -723,9 +723,9 @@ static void DrawKeyOnLine(mline_t *ml, int theKey, RGBAColor rgb = SG_WHITE_RGBA
         {
             if (TheObject)
             {
-                static state_t *idlestate;
+                static State *idlestate;
                 idlestate = &states[TheObject->idle_state];
-                if (!(idlestate->flags & SFF_Model)) // Can't handle 3d models...yet
+                if (!(idlestate->flags & kStateFrameFlagModel)) // Can't handle 3d models...yet
                 {
                     bool           flip;
                     const image_c *img = R2_GetOtherSprite(idlestate->sprite, idlestate->frame, &flip);

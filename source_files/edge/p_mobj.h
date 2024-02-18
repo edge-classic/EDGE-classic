@@ -47,7 +47,7 @@ struct mobj_s;
 struct player_s;
 struct rad_script_s;
 struct region_properties_s;
-struct state_s;
+struct State;
 struct subsector_s;
 struct touch_node_s;
 struct line_s;
@@ -73,7 +73,7 @@ extern cvar_c g_gravity;
 // The sprite, frame, and angle elements determine which patch_t
 // is used to draw the sprite if it is visible.
 // The sprite and frame values are allmost always set
-// from state_t structures.
+// from State structures.
 //
 // The statescr.exe utility generates the states.h and states.c
 // files that contain the sprite/frame numbers from the
@@ -239,8 +239,8 @@ struct mobj_s : public position_c
     int tics     = 0;
     int tic_skip = 0;
 
-    const struct state_s *state      = nullptr;
-    const struct state_s *next_state = nullptr;
+    const struct State *state      = nullptr;
+    const struct State *next_state = nullptr;
 
     // flags (Old and New)
     int flags         = 0;

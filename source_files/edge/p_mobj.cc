@@ -475,16 +475,16 @@ bool P_SetMobjState(mobj_t *mobj, int state)
     if (mobj->isRemoved())
         return false;
 
-    if (state == S_NULL)
+    if (state == 0)
     {
         P_RemoveMobj(mobj);
         return false;
     }
 
-    state_t *st = &states[state];
+    State *st = &states[state];
 
     // model interpolation stuff
-    if ((st->flags & SFF_Model) && (mobj->state->flags & SFF_Model) && (st->sprite == mobj->state->sprite) &&
+    if ((st->flags & kStateFrameFlagModel) && (mobj->state->flags & kStateFrameFlagModel) && (st->sprite == mobj->state->sprite) &&
         st->tics > 1)
     {
         mobj->model_last_frame = mobj->state->frame;
@@ -494,7 +494,7 @@ bool P_SetMobjState(mobj_t *mobj, int state)
 
     mobj->state      = st;
     mobj->tics       = st->tics;
-    mobj->next_state = (st->nextstate == S_NULL) ? nullptr : (states + st->nextstate);
+    mobj->next_state = (st->nextstate == 0) ? nullptr : (states + st->nextstate);
 
     if (st->action)
         (*st->action)(mobj);
@@ -510,7 +510,7 @@ bool P_SetMobjState2(mobj_t *mobj, int state)
     if (mobj->isRemoved())
         return false;
 
-    if (state == S_NULL)
+    if (state == 0)
         return P_SetMobjState(mobj, state);
 
     SYS_ASSERT(!mobj->info->state_grp.empty());
@@ -518,13 +518,13 @@ bool P_SetMobjState2(mobj_t *mobj, int state)
     // state is old?
     if (state < mobj->info->state_grp.back().first)
     {
-        state_t *st = &states[state];
+        State *st = &states[state];
 
         if (st->label)
         {
             int new_state = P_MobjFindLabel(mobj, st->label);
 
-            if (new_state != S_NULL)
+            if (new_state != 0)
                 state = new_state;
         }
     }
@@ -550,13 +550,13 @@ bool P_SetMobjStateDeferred(mobj_t *mo, int stnum, int tic_skip)
     if (mo->isRemoved() || !mo->next_state)
         return false;
 
-    ///???	if (stnum == S_NULL)
+    ///???	if (stnum == 0)
     ///???	{
     ///???		P_RemoveMobj(mo);
     ///???		return false;
     ///???	}
 
-    mo->next_state = (stnum == S_NULL) ? nullptr : (states + stnum);
+    mo->next_state = (stnum == 0) ? nullptr : (states + stnum);
 
     mo->tics     = 0;
     mo->tic_skip = tic_skip;
@@ -568,7 +568,7 @@ bool P_SetMobjStateDeferred(mobj_t *mo, int stnum, int tic_skip)
 // P_MobjFindLabel
 //
 // Look for the given label in the mobj's states.  Returns the state
-// number if found, otherwise S_NULL.
+// number if found, otherwise 0.
 //
 int P_MobjFindLabel(mobj_t *mobj, const char *label)
 {
@@ -1571,7 +1571,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
         // You can cycle through multiple states in a tic.
         // NOTE: returns false if object freed itself.
 
-        P_SetMobjState2(mobj, mobj->next_state ? (mobj->next_state - states) : S_NULL);
+        P_SetMobjState2(mobj, mobj->next_state ? (mobj->next_state - states) : 0);
 
         if (mobj->isRemoved())
             return;
@@ -2254,7 +2254,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MobjType *info)
     // -AJA- So that the first action gets executed, the `next_state'
     //       is set to the first state and `tics' set to 0.
     //
-    state_t *st;
+    State *st;
 
     if (info->spawn_state)
         st = &states[info->spawn_state];

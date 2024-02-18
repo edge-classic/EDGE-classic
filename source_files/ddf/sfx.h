@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_SFX_H__
-#define __DDF_SFX_H__
+#pragma once
 
 #include "types.h"
 
@@ -121,8 +120,6 @@ class SoundEffectDefinitionContainer
 extern SoundEffectDefinitionContainer sfxdefs;  // -ACB- 2004/07/25 Implemented
 
 void DDF_ReadSFX(const std::string &data);
-
-#endif  // __DDF_SFX_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

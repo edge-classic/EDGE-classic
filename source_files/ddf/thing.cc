@@ -55,7 +55,7 @@ static void DDF_MobjGetGlowType(const char *info, void *storage);
 static void DDF_MobjGetYAlign(const char *info, void *storage);
 static void DDF_MobjGetPercentRange(const char *info, void *storage);
 static void DDF_MobjGetAngleRange(const char *info, void *storage);
-static void DDF_MobjStateGetRADTrigger(const char *arg, state_t *cur_state);
+static void DDF_MobjStateGetRADTrigger(const char *arg, State *cur_state);
 
 static void AddPickupEffect(pickup_effect_c **list, pickup_effect_c *cur);
 
@@ -1794,7 +1794,7 @@ static void DDF_MobjGetAngleRange(const char *info, void *storage)
 //
 // DDF_MobjStateGetRADTrigger
 //
-static void DDF_MobjStateGetRADTrigger(const char *arg, state_t *cur_state)
+static void DDF_MobjStateGetRADTrigger(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0]) return;
 

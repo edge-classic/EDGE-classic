@@ -58,7 +58,7 @@ static void P_SetPsprite(player_t *p, int position, int stnum, WeaponDefinition 
 {
     pspdef_t *psp = &p->psprites[position];
 
-    if (stnum == S_NULL)
+    if (stnum == 0)
     {
         // object removed itself
         psp->state = psp->next_state = nullptr;
@@ -68,20 +68,20 @@ static void P_SetPsprite(player_t *p, int position, int stnum, WeaponDefinition 
     // state is old? -- Mundo hack for DDF inheritance
     if (info && stnum < info->state_grp_.back().first)
     {
-        state_t *st = &states[stnum];
+        State *st = &states[stnum];
 
         if (st->label)
         {
             int new_state = DDF_StateFindLabel(info->state_grp_, st->label, true /* quiet */);
-            if (new_state != S_NULL)
+            if (new_state != 0)
                 stnum = new_state;
         }
     }
 
-    state_t *st = &states[stnum];
+    State *st = &states[stnum];
 
     // model interpolation stuff
-    if (psp->state && (st->flags & SFF_Model) && (psp->state->flags & SFF_Model) &&
+    if (psp->state && (st->flags & kStateFrameFlagModel) && (psp->state->flags & kStateFrameFlagModel) &&
         (st->sprite == psp->state->sprite) && st->tics > 1)
     {
         p->weapon_last_frame = psp->state->frame;
@@ -91,7 +91,7 @@ static void P_SetPsprite(player_t *p, int position, int stnum, WeaponDefinition 
 
     psp->state      = st;
     psp->tics       = st->tics;
-    psp->next_state = (st->nextstate == S_NULL) ? nullptr : (states + st->nextstate);
+    psp->next_state = (st->nextstate == 0) ? nullptr : (states + st->nextstate);
 
     // call action routine
 
@@ -111,7 +111,7 @@ void P_SetPspriteDeferred(player_t *p, int position, int stnum)
 {
     pspdef_t *psp = &p->psprites[position];
 
-    if (stnum == S_NULL || psp->state == nullptr)
+    if (stnum == 0 || psp->state == nullptr)
     {
         P_SetPsprite(p, position, stnum);
         return;
@@ -133,7 +133,7 @@ void P_SetPspriteDeferred(player_t *p, int position, int stnum)
 //
 bool P_CheckWeaponSprite(WeaponDefinition *info)
 {
-    if (info->up_state_ == S_NULL)
+    if (info->up_state_ == 0)
         return false;
 
     return W_CheckSpritesExist(info->state_grp_);
@@ -311,7 +311,7 @@ static void GotoEmptyState(player_t *p)
     int newstate = info->empty_state_;
 
     P_SetPspriteDeferred(p, ps_weapon, newstate);
-    P_SetPsprite(p, ps_crosshair, S_NULL);
+    P_SetPsprite(p, ps_crosshair, 0);
 }
 
 static void GotoAttackState(player_t *p, int ATK, bool can_warmup)
@@ -448,9 +448,9 @@ static void P_BringUpWeapon(player_t *p)
         p->attackdown[2] = false;
         p->attackdown[3] = false;
 
-        P_SetPsprite(p, ps_weapon, S_NULL);
-        P_SetPsprite(p, ps_flash, S_NULL);
-        P_SetPsprite(p, ps_crosshair, S_NULL);
+        P_SetPsprite(p, ps_weapon, 0);
+        P_SetPsprite(p, ps_flash, 0);
+        P_SetPsprite(p, ps_crosshair, 0);
 
         p->zoom_fov = 0;
         return;
@@ -477,7 +477,7 @@ static void P_BringUpWeapon(player_t *p)
         S_StartFX(info->start_, WeapSfxCat(p), p->mo);
 
     P_SetPspriteDeferred(p, ps_weapon, info->up_state_);
-    P_SetPsprite(p, ps_flash, S_NULL);
+    P_SetPsprite(p, ps_flash, 0);
     P_SetPsprite(p, ps_crosshair, info->crosshair_);
 
     p->refire = info->refire_inacc_ ? 0 : 1;
@@ -891,7 +891,7 @@ void P_MovePsprites(player_t *p)
             if (p->ready_wp >= 0)
                 info = p->weapons[p->ready_wp].info;
 
-            P_SetPsprite(p, i, psp->next_state ? (psp->next_state - states) : S_NULL, info);
+            P_SetPsprite(p, i, psp->next_state ? (psp->next_state - states) : 0, info);
 
             if (psp->tics != 0)
                 break;
@@ -1171,7 +1171,7 @@ static void DoReFireTo(mobj_t *mo, int ATK)
         return;
     }
 
-    if (psp->state->jumpstate == S_NULL)
+    if (psp->state->jumpstate == 0)
         return; // show warning ??
 
     WeaponDefinition *info = p->weapons[p->ready_wp].info;
@@ -1398,7 +1398,7 @@ void A_Lower(mobj_t *mo)
         p->ready_wp   = WPSEL_None;
         p->pending_wp = WPSEL_NoChange;
 
-        P_SetPsprite(p, ps_weapon, S_NULL);
+        P_SetPsprite(p, ps_weapon, 0);
         return;
     }
 
@@ -1454,7 +1454,7 @@ void A_SetCrosshair(mobj_t *mo)
     player_t *p   = mo->player;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
-    if (psp->state->jumpstate == S_NULL)
+    if (psp->state->jumpstate == 0)
         return; // show warning ??
 
     P_SetPspriteDeferred(p, ps_crosshair, psp->state->jumpstate);
@@ -1465,7 +1465,7 @@ void A_TargetJump(mobj_t *mo)
     player_t *p   = mo->player;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
-    if (psp->state->jumpstate == S_NULL)
+    if (psp->state->jumpstate == 0)
         return; // show warning ?? error ???
 
     if (p->ready_wp == WPSEL_None)
@@ -1489,7 +1489,7 @@ void A_FriendJump(mobj_t *mo)
     player_t *p   = mo->player;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
-    if (psp->state->jumpstate == S_NULL)
+    if (psp->state->jumpstate == 0)
         return; // show warning ?? error ???
 
     if (p->ready_wp == WPSEL_None)
@@ -1769,7 +1769,7 @@ void A_WeaponJump(mobj_t *mo)
 
     if (P_RandomTest(jump->chance))
     {
-        psp->next_state = (psp->state->jumpstate == S_NULL) ? nullptr : (states + psp->state->jumpstate);
+        psp->next_state = (psp->state->jumpstate == 0) ? nullptr : (states + psp->state->jumpstate);
     }
 }
 
@@ -1798,7 +1798,7 @@ void A_WeaponDJNE(mobj_t *mo)
 
     if (--p->weapons[p->ready_wp].reload_count[ATK] > 0)
     {
-        psp->next_state = (psp->state->jumpstate == S_NULL) ? nullptr : (states + psp->state->jumpstate);
+        psp->next_state = (psp->state->jumpstate == 0) ? nullptr : (states + psp->state->jumpstate);
     }
 }
 
@@ -1865,7 +1865,7 @@ void A_WeaponSetSkin(mobj_t *mo)
     SYS_ASSERT(p->ready_wp >= 0);
     WeaponDefinition *info = p->weapons[p->ready_wp].info;
 
-    const state_t *st = psp->state;
+    const State *st = psp->state;
 
     if (st && st->action_par)
     {
@@ -1941,7 +1941,7 @@ void A_WeaponBecome(mobj_t *mo)
     p->weapons[p->ready_wp].info = newWep; // here it BECOMES()
 
     int state = DDF_StateFindLabel(newWep->state_grp_, become->start.label_.c_str(), true /* quiet */);
-    if (state == S_NULL)
+    if (state == 0)
         I_Error("BECOME action: frame '%s' in [%s] not found!\n", become->start.label_.c_str(), newWep->name_.c_str());
 
     state += become->start.offset_;
@@ -1987,7 +1987,7 @@ void A_MoveFwd(mobj_t *mo)
     player_t *p   = mo->player;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
-    const state_t *st = psp->state;
+    const State *st = psp->state;
 
     if (st && st->action_par)
     {
@@ -2006,7 +2006,7 @@ void A_MoveRight(mobj_t *mo)
     player_t *p   = mo->player;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
-    const state_t *st = psp->state;
+    const State *st = psp->state;
 
     if (st && st->action_par)
     {
@@ -2025,7 +2025,7 @@ void A_MoveUp(mobj_t *mo)
     player_t *p   = mo->player;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
-    const state_t *st = psp->state;
+    const State *st = psp->state;
 
     if (st && st->action_par)
         mo->mom.Z += *(float *)st->action_par;
@@ -2041,7 +2041,7 @@ void A_TurnDir(mobj_t *mo)
     player_t *p   = mo->player;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
-    const state_t *st = psp->state;
+    const State *st = psp->state;
 
     if (st && st->action_par)
         mo->angle += *(BAMAngle *)st->action_par;
@@ -2052,7 +2052,7 @@ void A_TurnRandom(mobj_t *mo)
     player_t *p   = mo->player;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
-    const state_t *st            = psp->state;
+    const State *st            = psp->state;
     int            turn          = 359;
     int            random_angle  = 0;
     int            current_angle = (int)epi::DegreesFromBAM(mo->angle);
@@ -2083,7 +2083,7 @@ void A_MlookTurn(mobj_t *mo)
     player_t *p   = mo->player;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
-    const state_t *st = psp->state;
+    const State *st = psp->state;
 
     if (st && st->action_par)
         mo->vertangle += epi::BAMFromATan(*(float *)st->action_par);

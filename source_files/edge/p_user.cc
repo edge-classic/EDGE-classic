@@ -254,7 +254,7 @@ void P_PlayerJump(player_t *pl, float dz, int wait)
 
     // enter the JUMP states (if present)
     int jump_st = P_MobjFindLabel(pl->mo, "JUMP");
-    if (jump_st != S_NULL)
+    if (jump_st != 0)
         P_SetMobjStateDeferred(pl->mo, jump_st, 0);
 
     // -AJA- 1999/09/11: New JUMP_SOUND for ddf.

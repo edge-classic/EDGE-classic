@@ -1236,7 +1236,7 @@ static void RAD_SetPsprite(player_t *p, int position, int stnum, WeaponDefinitio
 {
     pspdef_t *psp = &p->psprites[position];
 
-    if (stnum == S_NULL)
+    if (stnum == 0)
     {
         // object removed itself
         psp->state = psp->next_state = nullptr;
@@ -1246,20 +1246,20 @@ static void RAD_SetPsprite(player_t *p, int position, int stnum, WeaponDefinitio
     // state is old? -- Mundo hack for DDF inheritance
     if (info && stnum < info->state_grp_.back().first)
     {
-        state_t *st = &states[stnum];
+        State *st = &states[stnum];
 
         if (st->label)
         {
             int new_state = DDF_StateFindLabel(info->state_grp_, st->label, true /* quiet */);
-            if (new_state != S_NULL)
+            if (new_state != 0)
                 stnum = new_state;
         }
     }
 
-    state_t *st = &states[stnum];
+    State *st = &states[stnum];
 
     // model interpolation stuff
-    if (psp->state && (st->flags & SFF_Model) && (psp->state->flags & SFF_Model) &&
+    if (psp->state && (st->flags & kStateFrameFlagModel) && (psp->state->flags & kStateFrameFlagModel) &&
         (st->sprite == psp->state->sprite) && st->tics > 1)
     {
         p->weapon_last_frame = psp->state->frame;
@@ -1269,7 +1269,7 @@ static void RAD_SetPsprite(player_t *p, int position, int stnum, WeaponDefinitio
 
     psp->state      = st;
     psp->tics       = st->tics;
-    psp->next_state = (st->nextstate == S_NULL) ? nullptr : (states + st->nextstate);
+    psp->next_state = (st->nextstate == 0) ? nullptr : (states + st->nextstate);
 
     // call action routine
 
@@ -1289,7 +1289,7 @@ void RAD_SetPspriteDeferred(player_t *p, int position, int stnum)
 {
     pspdef_t *psp = &p->psprites[position];
 
-    if (stnum == S_NULL || psp->state == nullptr)
+    if (stnum == 0 || psp->state == nullptr)
     {
         RAD_SetPsprite(p, position, stnum);
         return;
@@ -1369,7 +1369,7 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
     p->ready_wp = (weapon_selection_e)pw_index; // insta-switch to it
 
     int state = DDF_StateFindLabel(oldWep->state_grp_, tev->label, true /* quiet */);
-    if (state == S_NULL)
+    if (state == 0)
         I_Error("RTS WEAPON_EVENT: frame '%s' in [%s] not found!\n", tev->label, tev->weapon_name);
     state += tev->offset;
 
@@ -1431,7 +1431,7 @@ void P_ActReplace(struct mobj_s *mo, const MobjType *newThing)
     // P_SetThingPosition(mo);
 
     int state = P_MobjFindLabel(mo, "IDLE"); // nothing fancy, always default to idle
-    if (state == S_NULL)
+    if (state == 0)
         I_Error("RTS REPLACE_THING: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name.c_str());
 
     P_SetMobjStateDeferred(mo, state, 0);

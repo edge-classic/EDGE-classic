@@ -501,7 +501,7 @@ void P_ActTransSet(mobj_t *mo)
 {
     float value = VISIBLE;
 
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
     {
@@ -516,7 +516,7 @@ void P_ActTransFade(mobj_t *mo)
 {
     float value = INVISIBLE;
 
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
     {
@@ -531,7 +531,7 @@ void P_ActTransLess(mobj_t *mo)
 {
     float value = 0.05f;
 
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
     {
@@ -549,7 +549,7 @@ void P_ActTransMore(mobj_t *mo)
 {
     float value = 0.05f;
 
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
     {
@@ -575,7 +575,7 @@ void P_ActTransMore(mobj_t *mo)
 //
 void P_ActTransAlternate(mobj_t *object)
 {
-    const state_t *st;
+    const State *st;
     float          value = 0.05f;
 
     st = object->state;
@@ -608,7 +608,7 @@ void P_ActTransAlternate(mobj_t *object)
 
 void P_ActDLightSet(mobj_t *mo)
 {
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
     {
@@ -623,7 +623,7 @@ void P_ActDLightSet(mobj_t *mo)
 
 void P_ActDLightFade(mobj_t *mo)
 {
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
     {
@@ -636,7 +636,7 @@ void P_ActDLightFade(mobj_t *mo)
 
 void P_ActDLightRandom(mobj_t *mo)
 {
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
     {
@@ -656,7 +656,7 @@ void P_ActDLightRandom(mobj_t *mo)
 
 void P_ActDLightColour(struct mobj_s *mo)
 {
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
     {
@@ -666,7 +666,7 @@ void P_ActDLightColour(struct mobj_s *mo)
 
 void P_ActSetSkin(mobj_t *mo)
 {
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
     {
@@ -685,7 +685,7 @@ void P_ActSetSkin(mobj_t *mo)
 
 void P_ActFaceDir(mobj_t *mo)
 {
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
         mo->angle = *(BAMAngle *)st->action_par;
@@ -695,7 +695,7 @@ void P_ActFaceDir(mobj_t *mo)
 
 void P_ActTurnDir(mobj_t *mo)
 {
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     BAMAngle turn = kBAMAngle180;
 
@@ -707,7 +707,7 @@ void P_ActTurnDir(mobj_t *mo)
 
 void P_ActTurnRandom(mobj_t *mo)
 {
-    const state_t *st   = mo->state;
+    const State *st   = mo->state;
     int            turn = 359;
 
     if (st && st->action_par)
@@ -725,7 +725,7 @@ void P_ActTurnRandom(mobj_t *mo)
 
 void P_ActMlookFace(mobj_t *mo)
 {
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
         mo->vertangle = epi::BAMFromATan(*(float *)st->action_par);
@@ -735,7 +735,7 @@ void P_ActMlookFace(mobj_t *mo)
 
 void P_ActMlookTurn(mobj_t *mo)
 {
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
         mo->vertangle = epi::BAMFromATan(*(float *)st->action_par);
@@ -743,7 +743,7 @@ void P_ActMlookTurn(mobj_t *mo)
 
 void P_ActMoveFwd(mobj_t *mo)
 {
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
     {
@@ -759,7 +759,7 @@ void P_ActMoveFwd(mobj_t *mo)
 
 void P_ActMoveRight(mobj_t *mo)
 {
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
     {
@@ -775,7 +775,7 @@ void P_ActMoveRight(mobj_t *mo)
 
 void P_ActMoveUp(mobj_t *mo)
 {
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
         mo->mom.Z += *(float *)st->action_par;
@@ -3492,10 +3492,10 @@ void P_ActCheckActivity(mobj_t *mo)
         // enter the SWIM states (if present)
         int swim_st = P_MobjFindLabel(pl->mo, "SWIM");
 
-        if (swim_st == S_NULL)
+        if (swim_st == 0)
             swim_st = pl->mo->info->chase_state;
 
-        if (swim_st != S_NULL)
+        if (swim_st != 0)
             P_SetMobjStateDeferred(pl->mo, swim_st, 0);
 
         return;
@@ -3506,7 +3506,7 @@ void P_ActCheckActivity(mobj_t *mo)
         // enter the FLY states (if present)
         int fly_st = P_MobjFindLabel(pl->mo, "FLY");
 
-        if (fly_st != S_NULL)
+        if (fly_st != 0)
             P_SetMobjStateDeferred(pl->mo, fly_st, 0);
 
         return;
@@ -3517,7 +3517,7 @@ void P_ActCheckActivity(mobj_t *mo)
         // enter the CLIMB states (if present)
         int climb_st = P_MobjFindLabel(pl->mo, "CLIMB");
 
-        if (climb_st != S_NULL)
+        if (climb_st != 0)
             P_SetMobjStateDeferred(pl->mo, climb_st, 0);
 
         return;
@@ -3529,7 +3529,7 @@ void P_ActCheckActivity(mobj_t *mo)
         // enter the CROUCH states (if present)
         int crouch_st = P_MobjFindLabel(pl->mo, "CROUCH");
 
-        if (crouch_st != S_NULL)
+        if (crouch_st != 0)
             P_SetMobjStateDeferred(pl->mo, crouch_st, 0);
 
         return;
@@ -3571,7 +3571,7 @@ void P_ActJump(mobj_t *mo)
 
     if (P_RandomTest(jump->chance))
     {
-        mo->next_state = (mo->state->jumpstate == S_NULL) ? nullptr : (states + mo->state->jumpstate);
+        mo->next_state = (mo->state->jumpstate == 0) ? nullptr : (states + mo->state->jumpstate);
     }
 }
 
@@ -3599,7 +3599,7 @@ void P_ActJumpLiquid(mobj_t *mo)
 
     if (P_RandomTest(jump->chance))
     {
-        mo->next_state = (mo->state->jumpstate == S_NULL) ? nullptr : (states + mo->state->jumpstate);
+        mo->next_state = (mo->state->jumpstate == 0) ? nullptr : (states + mo->state->jumpstate);
     }
 }
 
@@ -3626,7 +3626,7 @@ void P_ActJumpSky(mobj_t *mo)
 
     if (P_RandomTest(jump->chance))
     {
-        mo->next_state = (mo->state->jumpstate == S_NULL) ? nullptr : (states + mo->state->jumpstate);
+        mo->next_state = (mo->state->jumpstate == 0) ? nullptr : (states + mo->state->jumpstate);
     }
 }
 
@@ -3656,7 +3656,7 @@ void P_ActJumpStuck(mobj_t * mo)
 
     if (P_RandomTest(jump->chance))
     {
-        mo->next_state = (mo->state->jumpstate == S_NULL) ?
+        mo->next_state = (mo->state->jumpstate == 0) ?
             nullptr : (states + mo->state->jumpstate);
     }
 }
@@ -3744,7 +3744,7 @@ void P_ActBecome(struct mobj_s *mo)
     P_SetThingPosition(mo);
 
     int state = P_MobjFindLabel(mo, become->start.label_.c_str());
-    if (state == S_NULL)
+    if (state == 0)
         I_Error("BECOME action: frame '%s' in [%s] not found!\n", become->start.label_.c_str(), mo->info->name.c_str());
 
     state += become->start.offset_;
@@ -3819,7 +3819,7 @@ void P_ActUnBecome(struct mobj_s *mo)
     P_SetThingPosition(mo);
 
     int state = P_MobjFindLabel(mo, "IDLE");
-    if (state == S_NULL)
+    if (state == 0)
         I_Error("UNBECOME action: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name.c_str());
 
     P_SetMobjStateDeferred(mo, state, 0);
@@ -3898,7 +3898,7 @@ void P_ActMorph(struct mobj_s *mo)
     P_SetThingPosition(mo);
 
     int state = P_MobjFindLabel(mo, morph->start.label_.c_str());
-    if (state == S_NULL)
+    if (state == 0)
         I_Error("MORPH action: frame '%s' in [%s] not found!\n", morph->start.label_.c_str(), mo->info->name.c_str());
 
     state += morph->start.offset_;
@@ -3977,7 +3977,7 @@ void P_ActUnMorph(struct mobj_s *mo)
     P_SetThingPosition(mo);
 
     int state = P_MobjFindLabel(mo, "IDLE");
-    if (state == S_NULL)
+    if (state == 0)
         I_Error("UNMORPH action: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name.c_str());
 
     P_SetMobjStateDeferred(mo, state, 0);
@@ -4126,7 +4126,7 @@ void P_ActPainChanceSet(mobj_t *mo)
 {
     float value = 0;
 
-    const state_t *st = mo->state;
+    const State *st = mo->state;
 
     if (st && st->action_par)
     {

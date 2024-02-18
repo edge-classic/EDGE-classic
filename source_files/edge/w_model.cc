@@ -60,15 +60,15 @@ static void FindModelFrameNames(md2_model_c *md, int model_num)
 
     for (int stnum = 1; stnum < num_states; stnum++)
     {
-        state_t *st = &states[stnum];
+        State *st = &states[stnum];
 
         if (st->sprite != model_num)
             continue;
 
-        if (!(st->flags & SFF_Model))
+        if (!(st->flags & kStateFrameFlagModel))
             continue;
 
-        if (!(st->flags & SFF_Unmapped))
+        if (!(st->flags & kStateFrameFlagUnmapped))
             continue;
 
         SYS_ASSERT(st->model_frame);
@@ -77,7 +77,7 @@ static void FindModelFrameNames(md2_model_c *md, int model_num)
 
         if (st->frame >= 0)
         {
-            st->flags &= ~SFF_Unmapped;
+            st->flags &= ~kStateFrameFlagUnmapped;
         }
         else
         {
@@ -99,15 +99,15 @@ static void FindModelFrameNames(mdl_model_c *md, int model_num)
 
     for (int stnum = 1; stnum < num_states; stnum++)
     {
-        state_t *st = &states[stnum];
+        State *st = &states[stnum];
 
         if (st->sprite != model_num)
             continue;
 
-        if (!(st->flags & SFF_Model))
+        if (!(st->flags & kStateFrameFlagModel))
             continue;
 
-        if (!(st->flags & SFF_Unmapped))
+        if (!(st->flags & kStateFrameFlagUnmapped))
             continue;
 
         SYS_ASSERT(st->model_frame);
@@ -116,7 +116,7 @@ static void FindModelFrameNames(mdl_model_c *md, int model_num)
 
         if (st->frame >= 0)
         {
-            st->flags &= ~SFF_Unmapped;
+            st->flags &= ~kStateFrameFlagUnmapped;
         }
         else
         {
@@ -314,7 +314,7 @@ void W_InitModels(void)
 
 modeldef_c *W_GetModel(int model_num)
 {
-    // model_num comes from the 'sprite' field of state_t, and
+    // model_num comes from the 'sprite' field of State, and
     // is also an index into ddf_model_names vector.
 
     SYS_ASSERT(model_num > 0);
@@ -341,7 +341,7 @@ void W_PrecacheModels(void)
     {
         SYS_ASSERT(mo->state);
 
-        if (!(mo->state->flags & SFF_Model))
+        if (!(mo->state->flags & kStateFrameFlagModel))
             continue;
 
         int model = mo->state->sprite;
@@ -364,7 +364,7 @@ void W_PrecacheModels(void)
     // mark all weapons
     for (int k = 1; k < num_states; k++)
     {
-        if ((states[k].flags & (SFF_Weapon | SFF_Model)) != (SFF_Weapon | SFF_Model))
+        if ((states[k].flags & (kStateFrameFlagWeapon | kStateFrameFlagModel)) != (kStateFrameFlagWeapon | kStateFrameFlagModel))
             continue;
 
         int model = states[k].sprite;

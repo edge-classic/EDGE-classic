@@ -43,7 +43,7 @@ WeaponDefinitionContainer weapondefs;
 static void DDF_WGetAmmo(const char *info, void *storage);
 static void DDF_WGetUpgrade(const char *info, void *storage);
 static void DDF_WGetSpecialFlags(const char *info, void *storage);
-static void DDF_WStateGetRADTrigger(const char *arg, state_t *cur_state);
+static void DDF_WStateGetRADTrigger(const char *arg, State *cur_state);
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_weapon
@@ -671,7 +671,7 @@ static DDFSpecialFlags weapon_specials[] = {
 //
 // DDF_WStateGetRADTrigger
 //
-static void DDF_WStateGetRADTrigger(const char *arg, state_t *cur_state)
+static void DDF_WStateGetRADTrigger(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0]) return;
 

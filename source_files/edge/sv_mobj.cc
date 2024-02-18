@@ -626,7 +626,7 @@ void SR_MobjPutWUDs(void *storage, int index, void *extra)
 //
 bool SR_MobjGetState(void *storage, int index, void *extra)
 {
-    state_t **dest = (state_t **)storage + index;
+    State **dest = (State **)storage + index;
 
     char  buffer[256];
     char *base_p, *off_p;
@@ -732,7 +732,7 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
 //
 void SR_MobjPutState(void *storage, int index, void *extra)
 {
-    state_t *S = ((state_t **)storage)[index];
+    State *S = ((State **)storage)[index];
 
     char swizzle[256];
 

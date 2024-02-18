@@ -174,7 +174,7 @@ struct DDFActionCode
 
     // -AJA- 1999/08/09: This function handles the argument when brackets
     // are present (e.g. "WEAPON_SHOOT(FIREBALL)").  nullptr if unused.
-    void (*handle_arg)(const char *arg, state_t *curstate);
+    void (*handle_arg)(const char *arg, State *curstate);
 };
 
 // This structure is used for parsing states
@@ -288,21 +288,21 @@ void DDF_MusicPlaylistCleanUp(void);
 
 // DDF_STAT Code
 void DDF_StateInit(void);
-void DDF_StateGetAttack(const char *arg, state_t *cur_state);
-void DDF_StateGetMobj(const char *arg, state_t *cur_state);
-void DDF_StateGetSound(const char *arg, state_t *cur_state);
-void DDF_StateGetInteger(const char *arg, state_t *cur_state);
-void DDF_StateGetIntPair(const char *arg, state_t *cur_state);
-void DDF_StateGetFloat(const char *arg, state_t *cur_state);
-void DDF_StateGetPercent(const char *arg, state_t *cur_state);
-void DDF_StateGetJump(const char *arg, state_t *cur_state);
-void DDF_StateGetBecome(const char *arg, state_t *cur_state);
-void DDF_StateGetMorph(const char *arg, state_t *cur_state);
-void DDF_StateGetBecomeWeapon(const char *arg, state_t *cur_state);
-void DDF_StateGetFrame(const char *arg, state_t *cur_state);
-void DDF_StateGetAngle(const char *arg, state_t *cur_state);
-void DDF_StateGetSlope(const char *arg, state_t *cur_state);
-void DDF_StateGetRGB(const char *arg, state_t *cur_state);
+void DDF_StateGetAttack(const char *arg, State *cur_state);
+void DDF_StateGetMobj(const char *arg, State *cur_state);
+void DDF_StateGetSound(const char *arg, State *cur_state);
+void DDF_StateGetInteger(const char *arg, State *cur_state);
+void DDF_StateGetIntPair(const char *arg, State *cur_state);
+void DDF_StateGetFloat(const char *arg, State *cur_state);
+void DDF_StateGetPercent(const char *arg, State *cur_state);
+void DDF_StateGetJump(const char *arg, State *cur_state);
+void DDF_StateGetBecome(const char *arg, State *cur_state);
+void DDF_StateGetMorph(const char *arg, State *cur_state);
+void DDF_StateGetBecomeWeapon(const char *arg, State *cur_state);
+void DDF_StateGetFrame(const char *arg, State *cur_state);
+void DDF_StateGetAngle(const char *arg, State *cur_state);
+void DDF_StateGetSlope(const char *arg, State *cur_state);
+void DDF_StateGetRGB(const char *arg, State *cur_state);
 
 bool DDF_MainParseState(uint8_t *object, std::vector<StateRange> &group,
                         const char *field, const char *contents, int index,

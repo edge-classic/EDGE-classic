@@ -3064,7 +3064,7 @@ static bool PIT_CorpseCheck(mobj_t *thing, void *data)
     if (thing->tics != -1)
         return true; // not lying still yet
 
-    if (thing->info->raise_state == S_NULL)
+    if (thing->info->raise_state == 0)
         return true; // monster doesn't have a raise state
 
     // -KM- 1998/12/21 Monster can't be resurrected.

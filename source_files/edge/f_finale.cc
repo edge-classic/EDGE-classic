@@ -491,7 +491,7 @@ static void TextWrite(void)
 static const MobjType *castorder;
 static const char       *casttitle;
 static int               casttics;
-static state_t          *caststate;
+static State          *caststate;
 static bool              castdeath;
 static int               castframes;
 static int               castonmelee;
@@ -504,7 +504,7 @@ static bool              castattacking;
 //
 static void CastSetState(int st)
 {
-    if (st == S_NULL)
+    if (st == 0)
         return;
 
     caststate = &states[st];
@@ -629,7 +629,7 @@ static void CastTicker(void)
         return;
 
     // switch from deathstate to next monster
-    if (caststate->tics == -1 || caststate->nextstate == S_NULL || (castdeath && castframes >= 30))
+    if (caststate->tics == -1 || caststate->nextstate == 0 || (castdeath && castframes >= 30))
     {
         CastInitNew(castorder->castorder + 1);
 
@@ -658,14 +658,14 @@ static void CastTicker(void)
         castonmelee ^= 1;
         st = castonmelee ? castorder->melee_state : castorder->missile_state;
 
-        if (st == S_NULL)
+        if (st == 0)
         {
             castonmelee ^= 1;
             st = castonmelee ? castorder->melee_state : castorder->missile_state;
         }
 
         // check if missing both melee and missile states
-        if (st != S_NULL)
+        if (st != 0)
         {
             castattacking = true;
             CastSetState(st);
@@ -774,7 +774,7 @@ static void CastDrawer(void)
 
     HUD_GetCastPosition(&pos_x, &pos_y, &scale_x, &scale_y);
 
-    if (caststate->flags & SFF_Model)
+    if (caststate->flags & kStateFrameFlagModel)
     {
         modeldef_c *md = W_GetModel(caststate->sprite);
 

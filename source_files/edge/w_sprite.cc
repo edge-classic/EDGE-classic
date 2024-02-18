@@ -589,7 +589,7 @@ void W_InitSprites(void)
     // 1. Allocate sprite definitions (ignore nullptr sprite, #0)
 
     sprites           = new spritedef_c *[numsprites];
-    sprites[SPR_NULL] = nullptr;
+    sprites[0] = nullptr;
 
     for (int i = 1; i < numsprites; i++)
     {
@@ -604,12 +604,12 @@ void W_InitSprites(void)
 
     for (int stnum = 1; stnum < num_states; stnum++)
     {
-        state_t *st = &states[stnum];
+        State *st = &states[stnum];
 
-        if (st->flags & SFF_Model)
+        if (st->flags & kStateFrameFlagModel)
             continue;
 
-        if (st->sprite == SPR_NULL)
+        if (st->sprite == 0)
             continue;
 
         spritedef_c *def = sprites[st->sprite];
@@ -633,17 +633,17 @@ void W_InitSprites(void)
 
     for (int st_kk = 1; st_kk < num_states; st_kk++)
     {
-        state_t *st = &states[st_kk];
+        State *st = &states[st_kk];
 
-        if (st->flags & SFF_Model)
+        if (st->flags & kStateFrameFlagModel)
             continue;
 
-        if (st->sprite == SPR_NULL)
+        if (st->sprite == 0)
             continue;
 
         spritedef_c *def = sprites[st->sprite];
 
-        if (st->flags & SFF_Weapon)
+        if (st->flags & kStateFrameFlagWeapon)
             def->frames[st->frame].is_weapon = true;
     }
 
@@ -695,7 +695,7 @@ bool W_CheckSpritesExist(const std::vector<StateRange> &group)
 
         for (int i = range.first; i <= range.last; i++)
         {
-            if (states[i].sprite == SPR_NULL)
+            if (states[i].sprite == 0)
                 continue;
 
             if (sprites[states[i].sprite]->frames)
@@ -712,7 +712,7 @@ bool W_CheckSpritesExist(const std::vector<StateRange> &group)
 
 spriteframe_c *W_GetSpriteFrame(int spr_num, int framenum)
 {
-    // spr_num comes from the 'sprite' field of state_t, and
+    // spr_num comes from the 'sprite' field of State, and
     // is also an index into ddf_sprite_names vector.
 
     SYS_ASSERT(spr_num > 0);
@@ -749,7 +749,7 @@ void W_PrecacheSprites(void)
         sprite_present[mo->state->sprite] = 1;
     }
 
-    for (int i = 1; i < numsprites; i++) // ignore SPR_NULL
+    for (int i = 1; i < numsprites; i++) // ignore 0
     {
         spritedef_c *def = sprites[i];
 

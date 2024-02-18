@@ -1116,7 +1116,7 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool
             E_ClearInput();
     }
 
-    int state    = S_NULL;
+    int state    = 0;
     bool       overkill = false;
 
     if (target->info->gib_health < 0 && target->health < target->info->gib_health)
@@ -1127,34 +1127,34 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool
     if (weak_spot)
     {
         state = P_MobjFindLabel(target, "WEAKDEATH");
-        if (state == S_NULL)
+        if (state == 0)
             overkill = true;
     }
 
-    if (state == S_NULL && overkill && damtype && damtype->overkill_.label_ != "")
+    if (state == 0 && overkill && damtype && damtype->overkill_.label_ != "")
     {
         state = P_MobjFindLabel(target, damtype->overkill_.label_.c_str());
-        if (state != S_NULL)
+        if (state != 0)
             state += damtype->overkill_.offset_;
     }
 
-    if (state == S_NULL && overkill && target->info->overkill_state)
+    if (state == 0 && overkill && target->info->overkill_state)
         state = target->info->overkill_state;
 
-    if (state == S_NULL && damtype && damtype->death_.label_ != "")
+    if (state == 0 && damtype && damtype->death_.label_ != "")
     {
         state = P_MobjFindLabel(target, damtype->death_.label_.c_str());
-        if (state != S_NULL)
+        if (state != 0)
             state += damtype->death_.offset_;
     }
 
-    if (state == S_NULL)
+    if (state == 0)
         state = target->info->death_state;
 
     if (g_gore.d == 2 &&
         (target->flags & MF_COUNTKILL)) // Hopefully the only things with blood/gore are monsters and not "barrels", etc
     {
-        state = S_NULL;
+        state = 0;
         if (!nofog)
         {
             mobj_t *fog = P_MobjCreateObject(target->x, target->y, target->z, mobjtypes.Lookup("TELEPORT_FLASH"));
@@ -1637,22 +1637,22 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         // setup to hit back
         target->flags |= MF_JUSTHIT;
 
-        int state = S_NULL;
+        int state = 0;
 
         if (weak_spot)
             state = P_MobjFindLabel(target, "WEAKPAIN");
 
-        if (state == S_NULL && damtype && damtype->pain_.label_ != "")
+        if (state == 0 && damtype && damtype->pain_.label_ != "")
         {
             state = P_MobjFindLabel(target, damtype->pain_.label_.c_str());
-            if (state != S_NULL)
+            if (state != 0)
                 state += damtype->pain_.offset_;
         }
 
-        if (state == S_NULL)
+        if (state == 0)
             state = target->info->pain_state;
 
-        if (state != S_NULL)
+        if (state != 0)
             P_SetMobjStateDeferred(target, state, 0);
     }
 

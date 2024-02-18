@@ -23,7 +23,7 @@
 #include "local.h"
 #include "p_action.h"
 #include "str_compare.h"
-static const state_t template_state = {
+static const State template_state = {
     0,   // sprite ref
     0,   // frame ref
     0,   // bright
@@ -40,8 +40,8 @@ static const state_t template_state = {
     -1  // jump state ref
 };
 
-state_t *states = nullptr;
-int      num_states;
+State *states = nullptr;
+int    num_states;
 
 std::vector<std::string> ddf_sprite_names;
 std::vector<std::string> ddf_model_names;
@@ -69,14 +69,14 @@ static int last_model  = -1;
 
 static int AddSpriteName(const char *name)
 {
-    if (epi::StringCaseCompareASCII(name, "NULL") == 0) return SPR_NULL;
+    if (epi::StringCaseCompareASCII(name, "NULL") == 0) return 0;
 
     if (last_sprite >= 0 &&
         epi::StringCaseCompareASCII(ddf_sprite_names[last_sprite], name) == 0)
         return last_sprite;
 
     // look backwards, assuming a recent sprite is more likely
-    for (int i = (int)ddf_sprite_names.size() - 1; i > SPR_NULL; i--)
+    for (int i = (int)ddf_sprite_names.size() - 1; i > 0; i--)
         if (epi::StringCaseCompareASCII(ddf_sprite_names[i], name) == 0)
             return ((last_sprite = i));
 
@@ -90,14 +90,14 @@ static int AddSpriteName(const char *name)
 
 static int AddModelName(const char *name)
 {
-    if (epi::StringCaseCompareASCII(name, "NULL") == 0) return SPR_NULL;
+    if (epi::StringCaseCompareASCII(name, "NULL") == 0) return 0;
 
     if (last_model >= 0 &&
         epi::StringCaseCompareASCII(ddf_model_names[last_model], name) == 0)
         return last_model;
 
     // look backwards, assuming a recent model is more likely
-    for (int i = (int)ddf_model_names.size() - 1; i > SPR_NULL; i--)
+    for (int i = (int)ddf_model_names.size() - 1; i > 0; i--)
         if (epi::StringCaseCompareASCII(ddf_model_names[i], name) == 0)
             return ((last_model = i));
 
@@ -112,7 +112,7 @@ static int AddModelName(const char *name)
 void DDF_StateInit(void)
 {
     // create states array with a single 'S_NULL' state
-    states = (state_t *)malloc(sizeof(state_t));
+    states = (State *)malloc(sizeof(State));
     if (states == nullptr) I_Error("could not allocate states\n");
 
     states[0]  = template_state;
@@ -253,8 +253,8 @@ static int StateGetRedirector(const char *redir)
 //
 // DDF_StateFindLabel
 //
-int DDF_StateFindLabel(const std::vector<StateRange> &group,
-                       const char *label, bool quiet)
+int DDF_StateFindLabel(const std::vector<StateRange> &group, const char *label,
+                       bool quiet)
 {
     for (int g = (int)group.size() - 1; g >= 0; g--)
     {
@@ -275,7 +275,7 @@ int DDF_StateFindLabel(const std::vector<StateRange> &group,
     if (!quiet)
         DDF_Error("Unknown label '%s' (object has no such frames).\n", label);
 
-    return S_NULL;
+    return 0;
 }
 
 //
@@ -295,7 +295,7 @@ void DDF_StateReadState(const char *info, const char *label,
     char action_name[128];
     char action_arg[128];
 
-    state_t *cur;
+    State *cur;
 
     // Split the state info into component parts
     // -ACB- 1998/07/26 New Procedure, for cleaner code.
@@ -349,7 +349,7 @@ void DDF_StateReadState(const char *info, const char *label,
 
     num_states += 1;
 
-    states = (state_t *)realloc(states, num_states * sizeof(state_t));
+    states = (State *)realloc(states, num_states * sizeof(State));
     if (states == nullptr) I_Error("could not allocate states\n");
 
     cur = &states[num_states - 1];
@@ -409,12 +409,12 @@ void DDF_StateReadState(const char *info, const char *label,
 
         if (epi::IsDigitASCII(first_ch))
         {
-            cur->flags = SFF_Model;
+            cur->flags = kStateFrameFlagModel;
             cur->frame = atol(sprite_x + 1) - 1;
         }
         else if (epi::IsAlphaASCII(first_ch) || (first_ch == '_'))
         {
-            cur->flags       = SFF_Model | SFF_Unmapped;
+            cur->flags       = kStateFrameFlagModel | kStateFrameFlagUnmapped;
             cur->frame       = 0;
             cur->model_frame = strdup(sprite_x + 1);
         }
@@ -426,9 +426,9 @@ void DDF_StateReadState(const char *info, const char *label,
     else
         DDF_Error("DDF_MainLoadStates: Illegal sprite frame: %s\n", sprite_x);
 
-    if (is_weapon) cur->flags |= SFF_Weapon;
+    if (is_weapon) cur->flags |= kStateFrameFlagWeapon;
 
-    if (cur->flags & SFF_Model)
+    if (cur->flags & kStateFrameFlagModel)
         cur->sprite = AddModelName(stateinfo[0].c_str());
     else
         cur->sprite = AddSpriteName(stateinfo[0].c_str());
@@ -496,7 +496,7 @@ bool DDF_MainParseState(uint8_t *object, std::vector<StateRange> &group,
                         const char *field, const char *contents, int index,
                         bool is_last, bool is_weapon,
                         const DDFStateStarter *starters,
-                        const DDFActionCode    *actions)
+                        const DDFActionCode   *actions)
 {
     if (epi::StringPrefixCaseCompareASCII(field, "STATES(") != 0) return false;
 
@@ -533,8 +533,8 @@ void DDF_StateBeginRange(std::vector<StateRange> &group)
 {
     StateRange range;
 
-    range.first = S_NULL;
-    range.last  = S_NULL;
+    range.first = 0;
+    range.last  = 0;
 
     group.push_back(range);
 }
@@ -552,7 +552,7 @@ void DDF_StateFinishRange(std::vector<StateRange> &group)
     StateRange &range = group.back();
 
     // if no states were added, remove the unused range
-    if (range.first == S_NULL)
+    if (range.first == 0)
     {
         group.pop_back();
 
@@ -563,10 +563,10 @@ void DDF_StateFinishRange(std::vector<StateRange> &group)
     for (int i = range.first; i <= range.last; i++)
     {
         // handle next state ref
-        if (states[i].nextstate == -1) { states[i].nextstate = S_NULL; }
+        if (states[i].nextstate == -1) { states[i].nextstate = 0; }
         else if ((states[i].nextstate >> 16) == 0)
         {
-            states[i].nextstate = (i == range.last) ? S_NULL : i + 1;
+            states[i].nextstate = (i == range.last) ? 0 : i + 1;
         }
         else
         {
@@ -579,10 +579,10 @@ void DDF_StateFinishRange(std::vector<StateRange> &group)
         }
 
         // handle jump state ref
-        if (states[i].jumpstate == -1) { states[i].jumpstate = S_NULL; }
+        if (states[i].jumpstate == -1) { states[i].jumpstate = 0; }
         else if ((states[i].jumpstate >> 16) == 0)
         {
-            states[i].jumpstate = (i == range.last) ? S_NULL : i + 1;
+            states[i].jumpstate = (i == range.last) ? 0 : i + 1;
         }
         else
         {
@@ -618,7 +618,7 @@ bool DDF_StateGroupHasState(const std::vector<StateRange> &group, int st)
 //
 // -AJA- 1999/08/10: written.
 //
-void DDF_StateGetAttack(const char *arg, state_t *cur_state)
+void DDF_StateGetAttack(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0]) return;
 
@@ -627,21 +627,21 @@ void DDF_StateGetAttack(const char *arg, state_t *cur_state)
         DDF_WarnError("Unknown Attack (States): %s\n", arg);
 }
 
-void DDF_StateGetMobj(const char *arg, state_t *cur_state)
+void DDF_StateGetMobj(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0]) return;
 
     cur_state->action_par = new MobjStringReference(arg);
 }
 
-void DDF_StateGetSound(const char *arg, state_t *cur_state)
+void DDF_StateGetSound(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0]) return;
 
     cur_state->action_par = (void *)sfxdefs.GetEffect(arg);
 }
 
-void DDF_StateGetInteger(const char *arg, state_t *cur_state)
+void DDF_StateGetInteger(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0]) return;
 
@@ -653,7 +653,7 @@ void DDF_StateGetInteger(const char *arg, state_t *cur_state)
     cur_state->action_par = val_ptr;
 }
 
-void DDF_StateGetIntPair(const char *arg, state_t *cur_state)
+void DDF_StateGetIntPair(const char *arg, State *cur_state)
 {
     // Parses two integers separated by commas.
     //
@@ -669,7 +669,7 @@ void DDF_StateGetIntPair(const char *arg, state_t *cur_state)
     cur_state->action_par = values;
 }
 
-void DDF_StateGetFloat(const char *arg, state_t *cur_state)
+void DDF_StateGetFloat(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0]) return;
 
@@ -681,7 +681,7 @@ void DDF_StateGetFloat(const char *arg, state_t *cur_state)
     cur_state->action_par = val_ptr;
 }
 
-void DDF_StateGetPercent(const char *arg, state_t *cur_state)
+void DDF_StateGetPercent(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0]) return;
 
@@ -702,7 +702,7 @@ act_jump_info_s::act_jump_info_s()
 
 act_jump_info_s::~act_jump_info_s() {}
 
-void DDF_StateGetJump(const char *arg, state_t *cur_state)
+void DDF_StateGetJump(const char *arg, State *cur_state)
 {
     // JUMP(label)
     // JUMP(label,chance)
@@ -747,7 +747,7 @@ void DDF_StateGetJump(const char *arg, state_t *cur_state)
     cur_state->action_par = jump;
 }
 
-void DDF_StateGetFrame(const char *arg, state_t *cur_state)
+void DDF_StateGetFrame(const char *arg, State *cur_state)
 {
     // Sets the jump_state, like DDF_StateGetJump above.
     //
@@ -775,7 +775,7 @@ act_morph_info_s::act_morph_info_s() : info(nullptr), info_ref(), start() {}
 
 act_morph_info_s::~act_morph_info_s() {}
 
-void DDF_StateGetMorph(const char *arg, state_t *cur_state)
+void DDF_StateGetMorph(const char *arg, State *cur_state)
 {
     // MORPH(typename)
     // MORPH(typename,label)
@@ -832,7 +832,7 @@ act_become_info_s::act_become_info_s() : info(nullptr), info_ref(), start() {}
 
 act_become_info_s::~act_become_info_s() {}
 
-void DDF_StateGetBecome(const char *arg, state_t *cur_state)
+void DDF_StateGetBecome(const char *arg, State *cur_state)
 {
     // BECOME(typename)
     // BECOME(typename,label)
@@ -889,7 +889,7 @@ wep_become_info_s::wep_become_info_s() : info(nullptr), info_ref(), start() {}
 
 wep_become_info_s::~wep_become_info_s() {}
 
-void DDF_StateGetBecomeWeapon(const char *arg, state_t *cur_state)
+void DDF_StateGetBecomeWeapon(const char *arg, State *cur_state)
 {
     // BECOME(typename)
     // BECOME(typename,label)
@@ -942,7 +942,7 @@ void DDF_StateGetBecomeWeapon(const char *arg, state_t *cur_state)
     cur_state->action_par = become;
 }
 
-void DDF_StateGetAngle(const char *arg, state_t *cur_state)
+void DDF_StateGetAngle(const char *arg, State *cur_state)
 {
     BAMAngle *value;
     float     tmp;
@@ -959,7 +959,7 @@ void DDF_StateGetAngle(const char *arg, state_t *cur_state)
     cur_state->action_par = value;
 }
 
-void DDF_StateGetSlope(const char *arg, state_t *cur_state)
+void DDF_StateGetSlope(const char *arg, State *cur_state)
 {
     float *value, tmp;
 
@@ -978,7 +978,7 @@ void DDF_StateGetSlope(const char *arg, state_t *cur_state)
     cur_state->action_par = value;
 }
 
-void DDF_StateGetRGB(const char *arg, state_t *cur_state)
+void DDF_StateGetRGB(const char *arg, State *cur_state)
 {
     if (!arg || !arg[0]) return;
 

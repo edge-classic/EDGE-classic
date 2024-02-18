@@ -36,7 +36,7 @@
 
 #define TELE_FUDGE 0.1f
 
-mobj_t *P_FindTeleportMan(int tag, const mobjtype_c *info)
+mobj_t *P_FindTeleportMan(int tag, const MobjType *info)
 {
     for (int i = 0; i < numsectors; i++)
     {

@@ -1268,7 +1268,7 @@ void LightSpecialDefinition::Default()
 {
     type_       = kLightSpecialTypeNone;
     level_      = 64;
-    chance_     = PERCENT_MAKE(50);
+    chance_     = 0.5f;
     darktime_   = 0;
     brighttime_ = 0;
     sync_       = 0;
@@ -1474,7 +1474,7 @@ void SlidingDoor::Default()
     speed_       = 4.0f;
     wait_        = 150;
     see_through_ = false;
-    distance_    = PERCENT_MAKE(90);
+    distance_    = 0.9f;
     sfx_start_   = sfx_None;
     sfx_open_    = sfx_None;
     sfx_close_   = sfx_None;
@@ -1661,7 +1661,7 @@ void LineType::Default(void)
 
     ef_.Default();
 
-    translucency_   = PERCENT_MAKE(100);
+    translucency_   = 1.0f;
     appear_         = kAppearsWhenDefault;
     special_flags_  = kLineSpecialNone;
     trigger_effect_ = 0;
@@ -1709,7 +1709,7 @@ LineType *LineTypeContainer::Lookup(const int id)
 {
     if (id == 0) return default_linetype;
 
-    int slot = (((id) + LOOKUP_CACHESIZE) % LOOKUP_CACHESIZE);
+    int slot = (((id) + kLookupCacheSize) % kLookupCacheSize);
 
     // check the cache
     if (lookup_cache_[slot] && lookup_cache_[slot]->number_ == id)
@@ -1746,7 +1746,7 @@ void LineTypeContainer::Reset()
         line = nullptr;
     }
     clear();
-    memset(lookup_cache_, 0, sizeof(LineType *) * LOOKUP_CACHESIZE);
+    memset(lookup_cache_, 0, sizeof(LineType *) * kLookupCacheSize);
 }
 
 //--- editor settings ---

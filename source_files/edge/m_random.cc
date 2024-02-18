@@ -125,7 +125,7 @@ int P_RandomNegPos(void)
 //
 // M_RandomTest
 //
-bool M_RandomTest(percent_t chance)
+bool M_RandomTest(float chance)
 {
     return (chance <= 0) ? false : (chance >= 1) ? true : (M_Random() / 255.0f < chance) ? true : false;
 }
@@ -133,7 +133,7 @@ bool M_RandomTest(percent_t chance)
 //
 // P_RandomTest
 //
-bool P_RandomTest(percent_t chance)
+bool P_RandomTest(float chance)
 {
     return (chance <= 0) ? false : (chance >= 1) ? true : (P_Random() / 255.0f < chance) ? true : false;
 }

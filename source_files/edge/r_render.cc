@@ -3284,7 +3284,7 @@ static void RGL_RenderTrueBSP(void)
     {
         if (v_player->ready_wp >= 0)
         {
-            FlashFirst = v_player->weapons[v_player->ready_wp].info->render_invert;
+            FlashFirst = v_player->weapons[v_player->ready_wp].info->render_invert_;
         }
     }
 

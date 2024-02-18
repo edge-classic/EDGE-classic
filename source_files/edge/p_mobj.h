@@ -38,8 +38,8 @@
 #include <unordered_set>
 
 // forward decl.
-class atkdef_c;
-class mobjtype_c;
+class AttackDefinition;
+class MobjType;
 class image_c;
 class abstract_shader_c;
 
@@ -52,7 +52,7 @@ struct subsector_s;
 struct touch_node_s;
 struct line_s;
 
-extern std::unordered_set<const mobjtype_c *> seen_monsters;
+extern std::unordered_set<const MobjType *> seen_monsters;
 
 extern bool time_stop_active;
 
@@ -158,7 +158,7 @@ typedef struct
     BAMAngle vertangle;
 
     // type of thing
-    const mobjtype_c *info;
+    const MobjType *info;
 
     // certain flags (mainly MF_AMBUSH).
     int flags;
@@ -189,7 +189,7 @@ typedef struct mobj_s mobj_t;
 
 struct mobj_s : public position_c
 {
-    const mobjtype_c *info = nullptr;
+    const MobjType *info = nullptr;
 
     BAMAngle angle     = 0; // orientation
     BAMAngle vertangle = 0; // looking up or down
@@ -289,7 +289,7 @@ struct mobj_s : public position_c
     float painchance = 0;
 
     // current attack to be made
-    const atkdef_c *currentattack = nullptr;
+    const AttackDefinition *currentattack = nullptr;
 
     // spread count for Ordered spreaders
     int spreadcount = 0;
@@ -393,7 +393,7 @@ struct mobj_s : public position_c
     void ClearStaleRefs();
 
     // Stores what this mobj was before being MORPHed/BECOMEing
-    const mobjtype_c *preBecome = nullptr;
+    const MobjType *preBecome = nullptr;
 };
 
 // Item-in-Respawn-que Structure -ACB- 1998/07/30

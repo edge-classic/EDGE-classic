@@ -39,7 +39,7 @@ class backgroundstyle_c
     backgroundstyle_c &operator=(const backgroundstyle_c &rhs);
 
     RGBAColor colour;
-    percent_t translucency;
+    float translucency;
 
     std::string image_name;
 
@@ -59,7 +59,7 @@ class textstyle_c
 
     const Colormap *colmap;
 
-    percent_t translucency;
+    float translucency;
 
     FontDefinition *font;
 
@@ -80,7 +80,7 @@ class cursorstyle_c
     cursorstyle_c &operator=(const cursorstyle_c &rhs);
 
     int       position;
-    percent_t translucency;
+    float translucency;
 
     std::string alt_cursor;
     std::string pos_string;  // Here for user convenience, is translated to a

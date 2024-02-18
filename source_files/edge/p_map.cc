@@ -134,8 +134,8 @@ typedef struct shoot_trav_info_s
     bool    forced;
 
     float             damage;
-    const damage_c   *damtype;
-    const mobjtype_c *puff;
+    const DamageClass   *damtype;
+    const MobjType *puff;
     float             prev_z;
 
     // output field:
@@ -1128,7 +1128,7 @@ bool P_TryMove(mobj_t *thing, float x, float y)
     {
         // Thing doesn't change, so we check the notriggerlines flag once..
         if (thing->player || (thing->extendedflags & EF_MONSTER) ||
-            !(thing->currentattack && (thing->currentattack->flags & AF_NoTriggerLines)))
+            !(thing->currentattack && (thing->currentattack->flags_ & kAttackFlagNoTriggerLines)))
         {
             for (auto iter = spechit.rbegin(); iter != spechit.rend(); iter++)
             {
@@ -1858,7 +1858,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
 
     // Lobo 2021: respect our NO_TRIGGER_LINES attack flag
     if (!shoot_I.source || !shoot_I.source->currentattack ||
-        !(shoot_I.source->currentattack->flags & AF_NoTriggerLines))
+        !(shoot_I.source->currentattack->flags_ & kAttackFlagNoTriggerLines))
     {
         const char *flat            = floor->image->name.c_str();
         FlatDefinition  *current_flatdef = flatdefs.Find(flat);
@@ -2053,7 +2053,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
         //(2.) Line is a special, Cause action....
         // -AJA- honour the NO_TRIGGER_LINES attack special too
         if (ld->special && (!shoot_I.source || !shoot_I.source->currentattack ||
-                            !(shoot_I.source->currentattack->flags & AF_NoTriggerLines)))
+                            !(shoot_I.source->currentattack->flags_ & kAttackFlagNoTriggerLines)))
         {
             P_ShootSpecialLine(ld, sidenum, shoot_I.source);
         }
@@ -2146,9 +2146,9 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
         // Check if we're using EFFECT_OBJECT for this line
         // and spawn that as well as the previous bullet puff
         if (tempspecial && (!shoot_I.source || !shoot_I.source->currentattack ||
-                            !(shoot_I.source->currentattack->flags & AF_NoTriggerLines)))
+                            !(shoot_I.source->currentattack->flags_ & kAttackFlagNoTriggerLines)))
         {
-            const mobjtype_c *info;
+            const MobjType *info;
             info = tempspecial->effectobject_;
 
             if (info && tempspecial->type_ == kLineTriggerShootable)
@@ -2241,7 +2241,7 @@ mobj_t *P_AimLineAttack(mobj_t *t1, BAMAngle angle, float distance, float *slope
     Z_Clear(&aim_I, shoot_trav_info_t, 1);
 
     if (t1->info)
-        aim_I.start_z = t1->z + t1->height * PERCENT_2_FLOAT(t1->info->shotheight);
+        aim_I.start_z = t1->z + t1->height * t1->info->shotheight;
     else
         aim_I.start_z = t1->z + t1->height / 2 + 8;
 
@@ -2272,8 +2272,8 @@ mobj_t *P_AimLineAttack(mobj_t *t1, BAMAngle angle, float distance, float *slope
     return aim_I.target;
 }
 
-void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float damage, const damage_c *damtype,
-                  const mobjtype_c *puff)
+void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float damage, const DamageClass *damtype,
+                  const MobjType *puff)
 {
     // Note: Damtype can be nullptr.
 
@@ -2283,7 +2283,7 @@ void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float
     Z_Clear(&shoot_I, shoot_trav_info_t, 1);
 
     if (t1->info)
-        shoot_I.start_z = t1->z + t1->height * PERCENT_2_FLOAT(t1->info->shotheight);
+        shoot_I.start_z = t1->z + t1->height * t1->info->shotheight;
     else
         shoot_I.start_z = t1->z + t1->height / 2 + 8;
 
@@ -2320,7 +2320,7 @@ void P_TargetTheory(mobj_t *source, mobj_t *target, float *x, float *y, float *z
         float start_z;
 
         if (source->info)
-            start_z = source->z + source->height * PERCENT_2_FLOAT(source->info->shotheight);
+            start_z = source->z + source->height * source->info->shotheight;
         else
             start_z = source->z + source->height / 2 + 8;
 
@@ -2343,7 +2343,7 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance)
     y2 = source->y + distance * epi::BAMSin(angle);
 
     if (source->info)
-        aim_I.start_z = source->z + source->height * PERCENT_2_FLOAT(source->info->shotheight);
+        aim_I.start_z = source->z + source->height * source->info->shotheight;
     else
         aim_I.start_z = source->z + source->height / 2 + 8;
 
@@ -2406,7 +2406,7 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool 
     y2 = source->y + distance * epi::BAMSin(angle);
 
     if (source->info)
-        aim_I.start_z = source->z + source->height * PERCENT_2_FLOAT(source->info->shotheight);
+        aim_I.start_z = source->z + source->height * source->info->shotheight;
     else
         aim_I.start_z = source->z + source->height / 2 + 8;
 
@@ -2578,7 +2578,7 @@ typedef struct rds_atk_info_s
     mobj_t         *spot;
     mobj_t         *source;
     float           damage;
-    const damage_c *damtype;
+    const DamageClass *damtype;
     bool            thrust;
     bool            use_3d;
 } rds_atk_info_t;
@@ -2675,7 +2675,7 @@ static bool PIT_RadiusAttack(mobj_t *thing, void *data)
 //
 // Note: Damtype can be nullptr.
 //
-void P_RadiusAttack(mobj_t *spot, mobj_t *source, float radius, float damage, const damage_c *damtype, bool thrust_only)
+void P_RadiusAttack(mobj_t *spot, mobj_t *source, float radius, float damage, const DamageClass *damtype, bool thrust_only)
 {
     bomb_I.range   = radius;
     bomb_I.spot    = spot;

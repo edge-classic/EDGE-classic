@@ -181,7 +181,7 @@ static void CheatGiveWeapons(player_t *pl, int key = -2)
 {
     for (auto info : weapondefs)
     {
-        if (info && !info->no_cheat && (key < 0 || info->bind_key == key))
+        if (info && !info->no_cheat_ && (key < 0 || info->bind_key_ == key))
         {
             P_AddWeapon(pl, info, nullptr);
         }
@@ -253,7 +253,7 @@ bool M_CheatResponder(event_t *ev)
 
         P_UpdateTotalArmour(pl);
 
-        for (i = 0; i < NUMAMMO; i++)
+        for (i = 0; i < kTotalAmmunitionTypes; i++)
             pl->ammo[i].num = pl->ammo[i].max;
 
         CheatGiveWeapons(pl);
@@ -271,7 +271,7 @@ bool M_CheatResponder(event_t *ev)
 
         P_UpdateTotalArmour(pl);
 
-        for (i = 0; i < NUMAMMO; i++)
+        for (i = 0; i < kTotalAmmunitionTypes; i++)
             pl->ammo[i].num = pl->ammo[i].max;
 
         pl->cards = kDoorKeyBitmask;
@@ -288,7 +288,7 @@ bool M_CheatResponder(event_t *ev)
     }
     else if (M_CheckCheat(&cheat_loaded, key))
     {
-        for (i = 0; i < NUMAMMO; i++)
+        for (i = 0; i < kTotalAmmunitionTypes; i++)
             pl->ammo[i].num = pl->ammo[i].max;
 
         CON_MessageLDF("LoadedCheat");
@@ -388,7 +388,7 @@ bool M_CheatResponder(event_t *ev)
     // 'choppers' invulnerability & chainsaw
     if (M_CheckCheat(&cheat_choppers, key))
     {
-        weapondef_c *w = weapondefs.Lookup("CHAINSAW");
+        WeaponDefinition *w = weapondefs.Lookup("CHAINSAW");
         if (w)
         {
             P_AddWeapon(pl, w, nullptr);

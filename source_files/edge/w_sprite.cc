@@ -687,11 +687,11 @@ void W_InitSprites(void)
     sprite_map = nullptr;
 }
 
-bool W_CheckSpritesExist(const std::vector<state_range_t> &group)
+bool W_CheckSpritesExist(const std::vector<StateRange> &group)
 {
     for (int g = 0; g < (int)group.size(); g++)
     {
-        const state_range_t &range = group[g];
+        const StateRange &range = group[g];
 
         for (int i = range.first; i <= range.last; i++)
         {

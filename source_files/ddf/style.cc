@@ -294,7 +294,7 @@ backgroundstyle_c::~backgroundstyle_c() {}
 void backgroundstyle_c::Default()
 {
     colour       = kRGBANoValue;
-    translucency = PERCENT_MAKE(100);
+    translucency = 1.0f;
 
     image_name.clear();
 
@@ -344,7 +344,7 @@ textstyle_c::~textstyle_c() {}
 void textstyle_c::Default()
 {
     colmap       = nullptr;
-    translucency = PERCENT_MAKE(100);
+    translucency = 1.0f;
 
     font     = nullptr;
     scale    = 1.0f;
@@ -396,7 +396,7 @@ cursorstyle_c::~cursorstyle_c() {}
 void cursorstyle_c::Default()
 {
     position      = 0;
-    translucency  = PERCENT_MAKE(100);
+    translucency  = 1.0f;
     pos_string    = "";
     alt_cursor    = "";
     cursor_string = "";

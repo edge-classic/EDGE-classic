@@ -219,7 +219,7 @@ void sfxdef_c::Default()
 
     singularity  = 0;                  // singularity
     priority     = 999;                // priority (lower is more important)
-    volume       = PERCENT_MAKE(100);  // volume
+    volume       = 1.0f;  // volume
     looping      = false;              // looping
     precious     = false;              // precious
     max_distance = S_CLIPPING_DIST;    // max_distance

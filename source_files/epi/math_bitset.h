@@ -1,8 +1,8 @@
-//----------------------------------------------------------------------------
-//  EDGE Data Definition File Code (Main)
+//------------------------------------------------------------------------
+//  EPI Alphabetical Bit Set
 //----------------------------------------------------------------------------
 //
-//  Copyright (c) 1999-2024 The EDGE Team.
+//  Copyright (c) 2004-2024  The EDGE Team.
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -18,19 +18,29 @@
 
 #pragma once
 
-class AttackDefinitionContainer : public std::vector<AttackDefinition *>
+#include <string>
+
+// a bitset is a set of named bits, from `A' to `Z'.
+typedef int BitSet;
+
+constexpr int kBitSetFull = 0x7FFFFFFF;
+
+namespace epi
 {
-   public:
-    AttackDefinitionContainer();
-    ~AttackDefinitionContainer();
 
-   public:
-    AttackDefinition *Lookup(const char *refname);
-};
+// Case-insensitive, i.e. 'a' will return the same bit as 'A'
+// Returns 0 if not an ASCII alphabetical character
+inline BitSet BitSetFromChar(char ch)
+{
+    if (ch > '@' && ch < '[')
+        return (1 << ((ch) - 'A'));
+    else if (ch > '`' && ch < '{')
+        return (1 << ((ch ^ 0x20) - 'A'));
+    else
+        return 0;
+}
 
-extern AttackDefinitionContainer atkdefs;  // -ACB- 2004/06/09 Implemented
-
-void DDF_ReadAtks(const std::string &data);
+}  // namespace epi
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

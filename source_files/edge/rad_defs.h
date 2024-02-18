@@ -64,8 +64,8 @@ typedef struct s_tip_prop_s
     int slot_num = 0;
 
     // tip position (as a percentage, 0-255), < 0 for no change
-    percent_t x_pos = 0;
-    percent_t y_pos = 0;
+    float x_pos = 0;
+    float y_pos = 0;
 
     // left justify.  Can be 1, 0, or < 0 for no change.
     int left_just = 0;
@@ -74,7 +74,7 @@ typedef struct s_tip_prop_s
     const char *color_name = nullptr;
 
     // translucency value (normally 1.0), or < 0 for no change
-    percent_t translucency = 0;
+    float translucency = 0;
 
     // time (in tics) to reach target.
     int time = 0;
@@ -115,7 +115,7 @@ typedef struct s_thing_s
     AppearsFlag appear = kAppearsWhenNone;
 
     // -AJA- 1999/09/11: since the RSCRIPT lump can be loaded before
-    //       DDF* lumps, we can't store a pointer to a mobjtype_c here
+    //       DDF* lumps, we can't store a pointer to a MobjType here
     //       (and the mobjtypes can move about with later additions).
 
     // thing's DDF name, or if nullptr, then thing's mapnumber.
@@ -150,7 +150,7 @@ typedef struct s_armour_s
 // Radius Give/Lose Benefit
 typedef struct s_benefit_s
 {
-    benefit_t *benefit = nullptr;
+    Benefit *benefit = nullptr;
     bool       lose_it = false; // or use_it :)
 } s_benefit_t;
 
@@ -312,7 +312,7 @@ typedef struct s_jump_s
     struct rts_state_s *cache_state = nullptr;
 
     // chance that the jump is taken.
-    percent_t random_chance = 0;
+    float random_chance = 0;
 } s_jump_t;
 
 // Exit
@@ -451,7 +451,7 @@ typedef struct s_ondeath_s
 
     // mobjdef pointer, computed the first time this ONDEATH condition
     // is tested.
-    const mobjtype_c *cached_info = nullptr;
+    const MobjType *cached_info = nullptr;
 } s_ondeath_t;
 
 // ONHEIGHT info

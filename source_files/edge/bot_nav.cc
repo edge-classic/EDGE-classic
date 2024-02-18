@@ -41,7 +41,7 @@
 
 #include "AlmostEquals.h"
 
-extern mobj_t *P_FindTeleportMan(int tag, const mobjtype_c *info);
+extern mobj_t *P_FindTeleportMan(int tag, const MobjType *info);
 extern line_t *p_FindTeleportLine(int tag, line_t *original);
 
 class big_item_c
@@ -57,34 +57,34 @@ static std::vector<big_item_c> big_items;
 
 float NAV_EvaluateBigItem(const mobj_t *mo)
 {
-    ammotype_e ammotype;
+    AmmunitionType ammotype;
 
-    for (const benefit_t *B = mo->info->pickup_benefits; B != nullptr; B = B->next)
+    for (const Benefit *B = mo->info->pickup_benefits; B != nullptr; B = B->next)
     {
         switch (B->type)
         {
-        case BENEFIT_Weapon:
+        case kBenefitTypeWeapon:
             // crude guess of powerfulness based on ammo
-            ammotype = B->sub.weap->ammo[0];
+            ammotype = B->sub.weap->ammo_[0];
 
             switch (ammotype)
             {
-            case AM_NoAmmo:
+            case kAmmunitionTypeNoAmmo:
                 return 25;
-            case AM_Bullet:
+            case kAmmunitionTypeBullet:
                 return 50;
-            case AM_Shell:
+            case kAmmunitionTypeShell:
                 return 60;
-            case AM_Rocket:
+            case kAmmunitionTypeRocket:
                 return 70;
-            case AM_Cell:
+            case kAmmunitionTypeCell:
                 return 80;
             default:
                 return 65;
             }
             break;
 
-        case BENEFIT_Powerup:
+        case kBenefitTypePowerup:
             // invisibility is not here, since in COOP it makes monster
             // projectiles harder to dodge, and powerups are rare in DM.
             // hence for bots, only invulnerability is actually useful.
@@ -97,17 +97,17 @@ float NAV_EvaluateBigItem(const mobj_t *mo)
             }
             break;
 
-        case BENEFIT_Ammo:
+        case kBenefitTypeAmmo:
             // ignored here
             break;
 
-        case BENEFIT_Health:
+        case kBenefitTypeHealth:
             // ignore small amounts (e.g. potions, stimpacks)
             if (B->amount >= 100)
                 return 40;
             break;
 
-        case BENEFIT_Armour:
+        case kBenefitTypeArmour:
             // ignore small amounts (e.g. helmets)
             if (B->amount >= 50)
                 return 20;

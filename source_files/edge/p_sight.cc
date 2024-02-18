@@ -445,7 +445,7 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
 
     // The "eyes" of a thing is 75% of its height.
     SYS_ASSERT(src->info);
-    sight_I.src_z = src->z + src->height * PERCENT_2_FLOAT(src->info->viewheight);
+    sight_I.src_z = src->z + src->height * src->info->viewheight;
 
     sight_I.src.x   = src->x;
     sight_I.src.y   = src->y;
@@ -584,7 +584,7 @@ bool P_CheckSightToPoint(mobj_t *src, float x, float y, float z)
 
     sight_I.src.x   = src->x;
     sight_I.src.y   = src->y;
-    sight_I.src_z   = src->z + src->height * PERCENT_2_FLOAT(src->info->viewheight);
+    sight_I.src_z   = src->z + src->height * src->info->viewheight;
     sight_I.src.dx  = x - src->x;
     sight_I.src.dy  = y - src->y;
     sight_I.src_sub = src->subsector;
@@ -636,7 +636,7 @@ bool P_CheckSightApproxVert(mobj_t *src, mobj_t *dest)
 {
     SYS_ASSERT(src->info);
 
-    sight_I.src_z = src->z + src->height * PERCENT_2_FLOAT(src->info->viewheight);
+    sight_I.src_z = src->z + src->height * src->info->viewheight;
 
     return CheckSightSameSubsector(src, dest);
 }

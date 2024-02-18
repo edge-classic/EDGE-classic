@@ -406,7 +406,7 @@ static void PL_cur_weapon_slot(coal::vm_c *vm, int argc)
     if (ui_player_who->ready_wp < 0)
         slot = -1;
     else
-        slot = ui_player_who->weapons[ui_player_who->ready_wp].info->bind_key;
+        slot = ui_player_who->weapons[ui_player_who->ready_wp].info->bind_key_;
 
     vm->ReturnFloat(slot);
 }
@@ -421,7 +421,7 @@ static void PL_has_weapon(coal::vm_c *vm, int argc)
     {
         playerweapon_t *pw = &ui_player_who->weapons[j];
 
-        if (pw->owned && !(pw->flags & PLWEP_Removing) && DDF_CompareName(name, pw->info->name.c_str()) == 0)
+        if (pw->owned && !(pw->flags & PLWEP_Removing) && DDF_CompareName(name, pw->info->name_.c_str()) == 0)
         {
             vm->ReturnFloat(1);
             return;
@@ -447,12 +447,12 @@ static void PL_cur_weapon(coal::vm_c *vm, int argc)
         return;
     }
 
-    weapondef_c *info = ui_player_who->weapons[ui_player_who->ready_wp].info;
+    WeaponDefinition *info = ui_player_who->weapons[ui_player_who->ready_wp].info;
 
-    vm->ReturnString(info->name.c_str());
+    vm->ReturnString(info->name_.c_str());
 }
 
-static void COAL_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info = nullptr)
+static void COAL_SetPsprite(player_t *p, int position, int stnum, WeaponDefinition *info = nullptr)
 {
     pspdef_t *psp = &p->psprites[position];
 
@@ -464,13 +464,13 @@ static void COAL_SetPsprite(player_t *p, int position, int stnum, weapondef_c *i
     }
 
     // state is old? -- Mundo hack for DDF inheritance
-    if (info && stnum < info->state_grp.back().first)
+    if (info && stnum < info->state_grp_.back().first)
     {
         state_t *st = &states[stnum];
 
         if (st->label)
         {
-            int new_state = DDF_StateFindLabel(info->state_grp, st->label, true /* quiet */);
+            int new_state = DDF_StateFindLabel(info->state_grp_, st->label, true /* quiet */);
             if (new_state != S_NULL)
                 stnum = new_state;
         }
@@ -538,8 +538,8 @@ static void PL_weapon_state(coal::vm_c *vm, int argc)
         return;
     }
 
-    // weapondef_c *info = ui_player_who->weapons[ui_player_who->ready_wp].info;
-    weapondef_c *oldWep = weapondefs.Lookup(weapon_name);
+    // WeaponDefinition *info = ui_player_who->weapons[ui_player_who->ready_wp].info;
+    WeaponDefinition *oldWep = weapondefs.Lookup(weapon_name);
     if (!oldWep)
     {
         I_Error("player.weapon_state: Unknown weapon name '%s'.\n", weapon_name);
@@ -565,7 +565,7 @@ static void PL_weapon_state(coal::vm_c *vm, int argc)
 
     ui_player_who->ready_wp = (weapon_selection_e)pw_index; // insta-switch to it
 
-    int state = DDF_StateFindLabel(oldWep->state_grp, weapon_state, true /* quiet */);
+    int state = DDF_StateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
     if (state == S_NULL)
         I_Error("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;
@@ -581,7 +581,7 @@ static void PL_ammo(coal::vm_c *vm, int argc)
 {
     int ammo = (int)*vm->AccessParam(0);
 
-    if (ammo < 1 || ammo > NUMAMMO)
+    if (ammo < 1 || ammo > kTotalAmmunitionTypes)
         I_Error("player.ammo: bad ammo number: %d\n", ammo);
 
     ammo--;
@@ -595,7 +595,7 @@ static void PL_ammomax(coal::vm_c *vm, int argc)
 {
     int ammo = (int)*vm->AccessParam(0);
 
-    if (ammo < 1 || ammo > NUMAMMO)
+    if (ammo < 1 || ammo > kTotalAmmunitionTypes)
         I_Error("player.ammomax: bad ammo number: %d\n", ammo);
 
     ammo--;
@@ -693,19 +693,19 @@ static void PL_main_ammo(coal::vm_c *vm, int argc)
     {
         playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
-        if (pw->info->ammo[0] != AM_NoAmmo)
+        if (pw->info->ammo_[0] != kAmmunitionTypeNoAmmo)
         {
-            if (pw->info->show_clip)
+            if (pw->info->show_clip_)
             {
-                SYS_ASSERT(pw->info->ammopershot[0] > 0);
+                SYS_ASSERT(pw->info->ammopershot_[0] > 0);
 
-                value = pw->clip_size[0] / pw->info->ammopershot[0];
+                value = pw->clip_size[0] / pw->info->ammopershot_[0];
             }
             else
             {
-                value = ui_player_who->ammo[pw->info->ammo[0]].num;
+                value = ui_player_who->ammo[pw->info->ammo_[0]].num;
 
-                if (pw->info->clip_size[0] > 0)
+                if (pw->info->clip_size_[0] > 0)
                     value += pw->clip_size[0];
             }
         }
@@ -731,7 +731,7 @@ static void PL_ammo_type(coal::vm_c *vm, int argc)
     {
         playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
-        value = 1 + (int)pw->info->ammo[ATK];
+        value = 1 + (int)pw->info->ammo_[ATK];
     }
 
     vm->ReturnFloat(value);
@@ -754,7 +754,7 @@ static void PL_ammo_pershot(coal::vm_c *vm, int argc)
     {
         playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
-        value = pw->info->ammopershot[ATK];
+        value = pw->info->ammopershot_[ATK];
     }
 
     vm->ReturnFloat(value);
@@ -800,7 +800,7 @@ static void PL_clip_size(coal::vm_c *vm, int argc)
     {
         playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
-        value = pw->info->clip_size[ATK];
+        value = pw->info->clip_size_[ATK];
     }
 
     vm->ReturnFloat(value);
@@ -816,7 +816,7 @@ static void PL_clip_is_shared(coal::vm_c *vm, int argc)
     {
         playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
-        if (pw->info->shared_clip)
+        if (pw->info->shared_clip_)
             value = 1;
     }
 
@@ -1086,7 +1086,7 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
 {
     std::string temp_string;
     temp_string.clear();
-    benefit_t *list;
+    Benefit *list;
     int        temp_num = 0;
 
     if (KillBenefits)
@@ -1098,13 +1098,13 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
     {
         switch (list->type)
         {
-        case BENEFIT_Weapon:
+        case kBenefitTypeWeapon:
             // If it's a weapon all bets are off: we'll want to parse
             // it differently, not here.
             temp_string = "WEAPON=1";
             break;
 
-        case BENEFIT_Ammo:
+        case kBenefitTypeAmmo:
             temp_string += "AMMO";
             if ((list->sub.type + 1) < 10)
                 temp_string += "0";
@@ -1112,16 +1112,16 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
             temp_string += "=" + std::to_string((int)list->amount);
             break;
 
-        case BENEFIT_Health: // only benefit without a sub.type so just give it 01
+        case kBenefitTypeHealth: // only benefit without a sub.type so just give it 01
             temp_string += "HEALTH01=" + std::to_string((int)list->amount);
             break;
 
-        case BENEFIT_Armour:
+        case kBenefitTypeArmour:
             temp_string += "ARMOUR" + std::to_string((int)list->sub.type + 1);
             temp_string += "=" + std::to_string((int)list->amount);
             break;
 
-        case BENEFIT_Inventory:
+        case kBenefitTypeInventory:
             temp_string += "INVENTORY";
             if ((list->sub.type + 1) < 10)
                 temp_string += "0";
@@ -1129,7 +1129,7 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
             temp_string += "=" + std::to_string((int)list->amount);
             break;
 
-        case BENEFIT_Counter:
+        case kBenefitTypeCounter:
             temp_string += "COUNTER";
             if ((list->sub.type + 1) < 10)
                 temp_string += "0";
@@ -1137,14 +1137,14 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
             temp_string += "=" + std::to_string((int)list->amount);
             break;
 
-        case BENEFIT_Key:
+        case kBenefitTypeKey:
             temp_string += "KEY";
             temp_num = log2((int)list->sub.type);
             temp_num++;
             temp_string += std::to_string(temp_num);
             break;
 
-        case BENEFIT_Powerup:
+        case kBenefitTypePowerup:
             temp_string += "POWERUP" + std::to_string((int)list->sub.type + 1);
             break;
 
@@ -1228,10 +1228,10 @@ static std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secatt
         return "";
     if (!obj->info->pickup_benefits->sub.weap)
         return "";
-    if (obj->info->pickup_benefits->type != BENEFIT_Weapon)
+    if (obj->info->pickup_benefits->type != kBenefitTypeWeapon)
         return "";
 
-    weapondef_c *objWep = obj->info->pickup_benefits->sub.weap;
+    WeaponDefinition *objWep = obj->info->pickup_benefits->sub.weap;
     if (!objWep)
         return "";
 
@@ -1239,60 +1239,60 @@ static std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secatt
     if (secattackinfo)
         attacknum = 1;
 
-    atkdef_c *objAtck = objWep->attack[attacknum];
+    AttackDefinition *objAtck = objWep->attack_[attacknum];
     if (!objAtck && whatinfo > 2)
         return ""; // no attack to get info about (only should happen with secondary attacks)
 
-    const damage_c *damtype;
+    const DamageClass *damtype;
 
     float temp_num2;
 
     switch (whatinfo)
     {
     case 1: // name
-        temp_string = objWep->name;
+        temp_string = objWep->name_;
         temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
         break;
 
     case 2: // ZOOM_FACTOR
-        temp_num2   = 90.0f / objWep->zoom_fov;
+        temp_num2   = 90.0f / objWep->zoom_fov_;
         temp_string = std::to_string(temp_num2);
         break;
 
     case 3: // AMMOTYPE
-        temp_num    = (objWep->ammo[attacknum]) + 1;
+        temp_num    = (objWep->ammo_[attacknum]) + 1;
         temp_string = std::to_string(temp_num);
         break;
 
     case 4: // AMMOPERSHOT
-        temp_num    = objWep->ammopershot[attacknum];
+        temp_num    = objWep->ammopershot_[attacknum];
         temp_string = std::to_string(temp_num);
         break;
 
     case 5: // CLIPSIZE
-        temp_num    = objWep->clip_size[attacknum];
+        temp_num    = objWep->clip_size_[attacknum];
         temp_string = std::to_string(temp_num);
         break;
 
     case 6: // DAMAGE Nominal
-        damtype     = &objAtck->damage;
-        temp_num    = damtype->nominal;
+        damtype     = &objAtck->damage_;
+        temp_num    = damtype->nominal_;
         temp_string = std::to_string(temp_num);
         break;
 
     case 7: // DAMAGE Max
-        damtype     = &objAtck->damage;
-        temp_num    = damtype->linear_max;
+        damtype     = &objAtck->damage_;
+        temp_num    = damtype->linear_max_;
         temp_string = std::to_string(temp_num);
         break;
 
     case 8: // Range
-        temp_num    = objAtck->range;
+        temp_num    = objAtck->range_;
         temp_string = std::to_string(temp_num);
         break;
 
     case 9: // AUTOMATIC
-        if (objWep->autofire[attacknum])
+        if (objWep->autofire_[attacknum])
             temp_string = "1";
         else
             temp_string = "0";

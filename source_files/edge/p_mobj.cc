@@ -85,7 +85,7 @@ mobj_t *mobjlisthead;
 // List of item respawn objects
 iteminque_t *itemquehead;
 
-std::unordered_set<const mobjtype_c *> seen_monsters;
+std::unordered_set<const MobjType *> seen_monsters;
 
 bool time_stop_active = false;
 
@@ -315,7 +315,7 @@ static bool CorpseShouldSlide(mobj_t *mo)
 static void TeleportRespawn(mobj_t *mobj)
 {
     float             x, y, z, oldradius, oldheight;
-    const mobjtype_c *info = mobj->spawnpoint.info;
+    const MobjType *info = mobj->spawnpoint.info;
     mobj_t           *new_mo;
     int               oldflags;
 
@@ -392,7 +392,7 @@ static void TeleportRespawn(mobj_t *mobj)
 static void ResurrectRespawn(mobj_t *mobj)
 {
     float             x, y, z, oldradius, oldheight;
-    const mobjtype_c *info;
+    const MobjType *info;
     int               oldflags;
 
     x = mobj->x;
@@ -445,12 +445,12 @@ static void ResurrectRespawn(mobj_t *mobj)
     mobj->mbf21flags    = info->mbf21flags;
     mobj->health        = mobj->spawnhealth;
 
-    mobj->visibility = PERCENT_2_FLOAT(info->translucency);
+    mobj->visibility = info->translucency;
     if (!AlmostEquals(mobj->alpha, 1.0f))
         mobj->vis_target = mobj->alpha;
     mobj->movecount  = 0; // -ACB- 1998/08/03 Don't head off in any direction
 
-    mobj->painchance = PERCENT_2_FLOAT(info->painchance);
+    mobj->painchance = info->painchance;
 
     mobj->SetSource(nullptr);
     mobj->SetTarget(nullptr);
@@ -913,7 +913,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
             // NOTE: this is for solid lines.  The "pass over" case is
             // handled in P_TryMove().
 
-            if ((mo->flags & MF_MISSILE) && (!mo->currentattack || !(mo->currentattack->flags & AF_NoTriggerLines)))
+            if ((mo->flags & MF_MISSILE) && (!mo->currentattack || !(mo->currentattack->flags_ & kAttackFlagNoTriggerLines)))
             {
                 //
                 // -AJA- Seems this is called to handle this situation:
@@ -937,7 +937,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
                     // P_ShootSpecialLine()->P_ActivateSpecialLine() can remove
                     //  the special so we need to get the info before calling it
                     const LineType *tempspecial = blockline->special;
-                    const mobjtype_c *DebrisThing;
+                    const MobjType *DebrisThing;
 
                     P_ShootSpecialLine(blockline, PointOnLineSide(mo->x, mo->y, blockline), mo->source);
 
@@ -1452,7 +1452,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
         props = mobj->props;
 
         // Only damage grounded monsters (not players)
-        if (props->special && props->special->damage_.grounded_monsters && mobj->z <= mobj->floorz + 1.0f)
+        if (props->special && props->special->damage_.grounded_monsters_ && mobj->z <= mobj->floorz + 1.0f)
         {
             P_DamageMobj(mobj, nullptr, nullptr, 5.0, &props->special->damage_, false);
         }
@@ -1929,7 +1929,7 @@ void P_RunMobjThinkers(bool extra_tic)
 //
 // P_SpawnDebris
 //
-void P_SpawnDebris(float x, float y, float z, BAMAngle angle, const mobjtype_c *debris)
+void P_SpawnDebris(float x, float y, float z, BAMAngle angle, const MobjType *debris)
 {
     // if (!level_flags.have_extra && (splash->extendedflags & EF_EXTRA)) return;
     // if (! (splash->extendedflags & EF_EXTRA)) return; //Optional extra
@@ -1947,7 +1947,7 @@ void P_SpawnDebris(float x, float y, float z, BAMAngle angle, const mobjtype_c *
 //
 // P_SpawnPuff
 //
-void P_SpawnPuff(float x, float y, float z, const mobjtype_c *puff, BAMAngle angle)
+void P_SpawnPuff(float x, float y, float z, const MobjType *puff, BAMAngle angle)
 {
     mobj_t *th;
 
@@ -1974,7 +1974,7 @@ void P_SpawnPuff(float x, float y, float z, const mobjtype_c *puff, BAMAngle ang
 // -KM- 1998/11/25 Made more violent. :-)
 // -KM- 1999/01/31 Different blood objects for different mobjs.
 //
-void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const mobjtype_c *blood)
+void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const MobjType *blood)
 {
     int     num;
     mobj_t *th;
@@ -2107,7 +2107,7 @@ void P_MobjItemRespawn(void)
 
     float             x, y, z;
     mobj_t           *mo;
-    const mobjtype_c *objtype;
+    const MobjType *objtype;
 
     iteminque_t *cur, *next;
 
@@ -2196,7 +2196,7 @@ void P_MobjRemoveMissile(mobj_t *missile)
 //
 // -ACB- 1998/08/02 Procedure written.
 //
-mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
+mobj_t *P_MobjCreateObject(float x, float y, float z, const MobjType *info)
 {
     mobj_t *mobj = new mobj_t;
 
@@ -2223,7 +2223,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
     mobj->model_scale      = info->model_scale;
     mobj->wud_tags.clear();
 
-    mobj->painchance = PERCENT_2_FLOAT(info->painchance);
+    mobj->painchance = info->painchance;
 
     mobj->morphtimeout = info->morphtimeout;
 
@@ -2234,7 +2234,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *info)
     mobj->extendedflags = info->extendedflags;
     mobj->hyperflags    = info->hyperflags;
     mobj->mbf21flags    = info->mbf21flags;
-    mobj->vis_target = mobj->visibility = PERCENT_2_FLOAT(info->translucency);
+    mobj->vis_target = mobj->visibility = info->translucency;
 
     mobj->currentattack = nullptr;
     mobj->on_ladder     = -1;

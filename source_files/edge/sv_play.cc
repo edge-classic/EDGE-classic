@@ -101,7 +101,7 @@ static savefield_t sv_fields_player[] = {
     SF(ready_wp, "ready_wp", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(pending_wp, "pending_wp", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(weapons[0], "weapons", MAXWEAPONS, SVT_STRUCT("playerweapon_t"), SR_PlayerGetWeapon, SR_PlayerPutWeapon),
-    SF(ammo[0], "ammo", NUMAMMO, SVT_STRUCT("playerammo_t"), SR_PlayerGetAmmo, SR_PlayerPutAmmo),
+    SF(ammo[0], "ammo", kTotalAmmunitionTypes, SVT_STRUCT("playerammo_t"), SR_PlayerGetAmmo, SR_PlayerPutAmmo),
     SF(inventory[0], "inventory", NUMINV, SVT_STRUCT("playerinv_t"), SR_PlayerGetInv, SR_PlayerPutInv),
     SF(counters[0], "counters", NUMCOUNTER, SVT_STRUCT("playercounter_t"), SR_PlayerGetCounter, SR_PlayerPutCounter),
     SF(cheats, "cheats", 1, SVT_INT, SR_GetInt, SR_PutInt), SF(refire, "refire", 1, SVT_INT, SR_GetInt, SR_PutInt),
@@ -631,7 +631,7 @@ void SR_PlayerPutName(void *storage, int index, void *extra)
 //
 bool SR_WeaponGetInfo(void *storage, int index, void *extra)
 {
-    weapondef_c **dest = (weapondef_c **)storage + index;
+    WeaponDefinition **dest = (WeaponDefinition **)storage + index;
     const char   *name;
 
     name = SV_GetString();
@@ -647,9 +647,9 @@ bool SR_WeaponGetInfo(void *storage, int index, void *extra)
 //
 void SR_WeaponPutInfo(void *storage, int index, void *extra)
 {
-    weapondef_c *info = ((weapondef_c **)storage)[index];
+    WeaponDefinition *info = ((WeaponDefinition **)storage)[index];
 
-    SV_PutString(info ? info->name.c_str() : nullptr);
+    SV_PutString(info ? info->name_.c_str() : nullptr);
 }
 
 //----------------------------------------------------------------------------
@@ -666,7 +666,7 @@ bool SR_PlayerGetState(void *storage, int index, void *extra)
     int   base, offset;
 
     const char        *swizzle;
-    const weapondef_c *actual;
+    const WeaponDefinition *actual;
 
     swizzle = SV_GetString();
 
@@ -706,14 +706,14 @@ bool SR_PlayerGetState(void *storage, int index, void *extra)
     // find base state
     offset = strtol(off_p, nullptr, 0) - 1;
 
-    base = DDF_StateFindLabel(actual->state_grp, base_p, true /* quiet */);
+    base = DDF_StateFindLabel(actual->state_grp_, base_p, true /* quiet */);
 
     if (!base)
     {
         I_Warning("LOADGAME: no such label `%s' for weapon state.\n", base_p);
 
         offset = 0;
-        base   = actual->ready_state;
+        base   = actual->ready_state_;
     }
 
 #if 0
@@ -758,18 +758,18 @@ void SR_PlayerPutState(void *storage, int index, void *extra)
     if (s_num < 0 || s_num >= num_states)
     {
         I_Warning("SAVEGAME: weapon is in invalid state %d\n", s_num);
-        s_num = weapondefs[0]->state_grp[0].first;
+        s_num = weapondefs[0]->state_grp_[0].first;
     }
 
     // find the weapon that this state belongs to.
     // Traverses backwards in case #CLEARALL was used.
-    const weapondef_c *actual = nullptr;
+    const WeaponDefinition *actual = nullptr;
 
     for (auto iter = weapondefs.rbegin(); iter != weapondefs.rend(); iter++)
     {
         actual = *iter;
 
-        if (DDF_StateGroupHasState(actual->state_grp, s_num))
+        if (DDF_StateGroupHasState(actual->state_grp_, s_num))
             break;
     }
 
@@ -777,18 +777,18 @@ void SR_PlayerPutState(void *storage, int index, void *extra)
     {
         I_Warning("SAVEGAME: weapon state %d cannot be found !!\n", s_num);
         actual = weapondefs[0];
-        s_num  = actual->state_grp[0].first;
+        s_num  = actual->state_grp_[0].first;
     }
 
     // find the nearest base state
     int base = s_num;
 
-    while (!states[base].label && DDF_StateGroupHasState(actual->state_grp, base - 1))
+    while (!states[base].label && DDF_StateGroupHasState(actual->state_grp_, base - 1))
     {
         base--;
     }
 
-    std::string buf(epi::StringFormat("%s:%s:%d", actual->name.c_str(), states[base].label ? states[base].label : "*",
+    std::string buf(epi::StringFormat("%s:%s:%d", actual->name_.c_str(), states[base].label ? states[base].label : "*",
                                     1 + s_num - base));
 
 #if 0

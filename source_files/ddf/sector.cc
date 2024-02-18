@@ -29,7 +29,7 @@
 #undef DF
 #define DF DDF_FIELD
 
-#define DDF_SectHashFunc(x) (((x) + LOOKUP_CACHESIZE) % LOOKUP_CACHESIZE)
+#define DDF_SectHashFunc(x) (((x) + kLookupCacheSize) % kLookupCacheSize)
 
 static SectorType *dynamic_sector;
 
@@ -75,8 +75,8 @@ static const DDFCommandList sect_commands[] = {
     DF("PUSH_ZSPEED", push_zspeed_, DDF_MainGetFloat),
 
     // -AJA- backwards compatibility cruft...
-    DF("DAMAGE", damage_.nominal, DDF_MainGetFloat),
-    DF("DAMAGETIME", damage_.delay, DDF_MainGetTime),
+    DF("DAMAGE", damage_.nominal_, DDF_MainGetFloat),
+    DF("DAMAGETIME", damage_.delay_, DDF_MainGetTime),
 
     DF("REVERB TYPE", reverb_type_, DDF_MainGetString),
     DF("REVERB RATIO", reverb_ratio_, DDF_MainGetFloat),
@@ -538,7 +538,7 @@ void SectorType::Default()
 
     l_.Default();
 
-    damage_.Default(damage_c::DEFAULT_Sector);
+    damage_.Default(DamageClass::kDamageClassDefaultSector);
 
     special_flags_ = kSectorFlagNone;
     e_exit_        = kExitTypeNone;
@@ -621,7 +621,7 @@ void SectorTypeContainer::Reset()
         sec = nullptr;
     }
     clear();
-    memset(lookup_cache_, 0, sizeof(SectorType *) * LOOKUP_CACHESIZE);
+    memset(lookup_cache_, 0, sizeof(SectorType *) * kLookupCacheSize);
 }
 
 //--- editor settings ---

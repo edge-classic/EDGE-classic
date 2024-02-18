@@ -197,8 +197,8 @@ void FlatDefinition::Default()
     impactobject_ref_.clear();
     glowobject_ = nullptr;
     glowobject_ref_.clear();
-    sink_depth_ = PERCENT_MAKE(0);
-    bob_depth_  = PERCENT_MAKE(0);
+    sink_depth_ = 0.0f;
+    bob_depth_  = 0.0f;
 }
 
 FlatDefinition *FlatDefinitionContainer::Find(const char *name)

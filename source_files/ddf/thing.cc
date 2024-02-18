@@ -38,13 +38,13 @@
 #undef DF
 #define DF DDF_FIELD
 
-#define DDF_MobjHashFunc(x) (((x) + LOOKUP_CACHESIZE) % LOOKUP_CACHESIZE)
+#define DDF_MobjHashFunc(x) (((x) + kLookupCacheSize) % kLookupCacheSize)
 
 const char *TemplateThing = nullptr;  // Lobo 2022: TEMPLATE inheritance fix
 
-mobjtype_container_c mobjtypes;
+MobjTypeontainer_c mobjtypes;
 
-static mobjtype_c *default_mobjtype;
+static MobjType *default_mobjtype;
 
 void DDF_MobjGetSpecial(const char *info);
 void DDF_MobjGetBenefit(const char *info, void *storage);
@@ -91,11 +91,11 @@ const DDFCommandList weakness_commands[] = {
 
     DDF_CMD_END};
 
-mobjtype_c *dynamic_mobj;
+MobjType *dynamic_mobj;
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_mobj
-static mobjtype_c dummy_mobj;
+static MobjType dummy_mobj;
 
 const DDFCommandList thing_commands[] = {
     // sub-commands
@@ -210,9 +210,9 @@ const DDFCommandList thing_commands[] = {
     DF("MELEE_RANGE", melee_range, DDF_MainGetNumeric),
 
     // -AJA- backwards compatibility cruft...
-    DF("EXPLOD_DAMAGE", explode_damage.nominal, DDF_MainGetFloat),
-    DF("EXPLOSION_DAMAGE", explode_damage.nominal, DDF_MainGetFloat),
-    DF("EXPLOD_DAMAGERANGE", explode_damage.nominal, DDF_MainGetFloat),
+    DF("EXPLOD_DAMAGE", explode_damage.nominal_, DDF_MainGetFloat),
+    DF("EXPLOSION_DAMAGE", explode_damage.nominal_, DDF_MainGetFloat),
+    DF("EXPLOD_DAMAGERANGE", explode_damage.nominal_, DDF_MainGetFloat),
 
     DDF_CMD_END};
 
@@ -611,7 +611,7 @@ static void ThingStartEntry(const char *buffer, bool extend)
     else
     {
         // not found, create a new one
-        dynamic_mobj         = new mobjtype_c;
+        dynamic_mobj         = new MobjType;
         dynamic_mobj->name   = name.c_str();
         dynamic_mobj->number = number;
 
@@ -626,7 +626,7 @@ static void ThingDoTemplate(const char *contents)
     int idx = mobjtypes.FindFirst(contents, 0);
     if (idx < 0) DDF_Error("Unknown thing template: '%s'\n", contents);
 
-    mobjtype_c *other = mobjtypes[idx];
+    MobjType *other = mobjtypes[idx];
     SYS_ASSERT(other);
 
     if (other == dynamic_mobj)
@@ -719,10 +719,10 @@ static void ThingFinishEntry(void)
     }
 
     // check DAMAGE stuff
-    if (dynamic_mobj->explode_damage.nominal < 0)
+    if (dynamic_mobj->explode_damage.nominal_ < 0)
     {
         DDF_WarnError("Bad EXPLODE_DAMAGE.VAL value %f in DDF.\n",
-                      dynamic_mobj->explode_damage.nominal);
+                      dynamic_mobj->explode_damage.nominal_);
     }
 
     if (dynamic_mobj->explode_radius < 0)
@@ -737,10 +737,10 @@ static void ThingFinishEntry(void)
                   dynamic_mobj->reload_shots);
     }
 
-    if (dynamic_mobj->choke_damage.nominal < 0)
+    if (dynamic_mobj->choke_damage.nominal_ < 0)
     {
         DDF_WarnError("Bad CHOKE_DAMAGE.VAL value %f in DDF.\n",
-                      dynamic_mobj->choke_damage.nominal);
+                      dynamic_mobj->choke_damage.nominal_);
     }
 
     if (dynamic_mobj->model_skin < 0 || dynamic_mobj->model_skin > 9)
@@ -771,13 +771,13 @@ static void ThingFinishEntry(void)
         int idx = mobjtypes.FindFirst(TemplateThing, 0);
         if (idx < 0) DDF_Error("Unknown thing template: \n");
 
-        mobjtype_c *other = mobjtypes[idx];
+        MobjType *other = mobjtypes[idx];
 
         if (!dynamic_mobj->lose_benefits)
         {
             if (other->lose_benefits)
             {
-                dynamic_mobj->lose_benefits  = new benefit_t;
+                dynamic_mobj->lose_benefits  = new Benefit;
                 *dynamic_mobj->lose_benefits = *other->lose_benefits;
             }
         }
@@ -786,7 +786,7 @@ static void ThingFinishEntry(void)
         {
             if (other->pickup_benefits)
             {
-                dynamic_mobj->pickup_benefits  = new benefit_t;
+                dynamic_mobj->pickup_benefits  = new Benefit;
                 *dynamic_mobj->pickup_benefits = *other->pickup_benefits;
             }
         }
@@ -795,7 +795,7 @@ static void ThingFinishEntry(void)
         {
             if (other->kill_benefits)
             {
-                dynamic_mobj->kill_benefits  = new benefit_t;
+                dynamic_mobj->kill_benefits  = new Benefit;
                 *dynamic_mobj->kill_benefits = *other->kill_benefits;
             }
         }
@@ -837,7 +837,7 @@ void DDF_MobjInit(void)
     }
     mobjtypes.clear();
 
-    default_mobjtype         = new mobjtype_c();
+    default_mobjtype         = new MobjType();
     default_mobjtype->name   = "__DEFAULT_MOBJ";
     default_mobjtype->number = 0;
 }
@@ -936,7 +936,7 @@ static int ParseBenefitString(const char *info, char *name, char *param,
 //  false.
 //
 
-static bool BenefitTryCounter(const char *name, benefit_t *be, int num_vals)
+static bool BenefitTryCounter(const char *name, Benefit *be, int num_vals)
 {
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, counter_types,
                                                   &be->sub.type, false, false))
@@ -944,7 +944,7 @@ static bool BenefitTryCounter(const char *name, benefit_t *be, int num_vals)
         return false;
     }
 
-    be->type = BENEFIT_Counter;
+    be->type = kBenefitTypeCounter;
 
     if (num_vals < 1)
     {
@@ -957,7 +957,7 @@ static bool BenefitTryCounter(const char *name, benefit_t *be, int num_vals)
     return true;
 }
 
-static bool BenefitTryCounterLimit(const char *name, benefit_t *be,
+static bool BenefitTryCounterLimit(const char *name, Benefit *be,
                                    int num_vals)
 {
     char   namebuf[200];
@@ -975,7 +975,7 @@ static bool BenefitTryCounterLimit(const char *name, benefit_t *be,
         return false;
     }
 
-    be->type  = BENEFIT_CounterLimit;
+    be->type  = kBenefitTypeCounterLimit;
     be->limit = 0;
 
     if (num_vals < 1)
@@ -992,7 +992,7 @@ static bool BenefitTryCounterLimit(const char *name, benefit_t *be,
     return true;
 }
 
-static bool BenefitTryInventory(const char *name, benefit_t *be, int num_vals)
+static bool BenefitTryInventory(const char *name, Benefit *be, int num_vals)
 {
     if (kDDFCheckFlagPositive !=
         DDF_MainCheckSpecialFlag(name, inv_types, &be->sub.type, false, false))
@@ -1000,7 +1000,7 @@ static bool BenefitTryInventory(const char *name, benefit_t *be, int num_vals)
         return false;
     }
 
-    be->type = BENEFIT_Inventory;
+    be->type = kBenefitTypeInventory;
 
     if (num_vals < 1)
     {
@@ -1013,7 +1013,7 @@ static bool BenefitTryInventory(const char *name, benefit_t *be, int num_vals)
     return true;
 }
 
-static bool BenefitTryInventoryLimit(const char *name, benefit_t *be,
+static bool BenefitTryInventoryLimit(const char *name, Benefit *be,
                                      int num_vals)
 {
     char namebuf[200];
@@ -1031,7 +1031,7 @@ static bool BenefitTryInventoryLimit(const char *name, benefit_t *be,
         return false;
     }
 
-    be->type  = BENEFIT_InventoryLimit;
+    be->type  = kBenefitTypeInventoryLimit;
     be->limit = 0;
 
     if (num_vals < 1)
@@ -1048,7 +1048,7 @@ static bool BenefitTryInventoryLimit(const char *name, benefit_t *be,
     return true;
 }
 
-static bool BenefitTryAmmo(const char *name, benefit_t *be, int num_vals)
+static bool BenefitTryAmmo(const char *name, Benefit *be, int num_vals)
 {
     if (kDDFCheckFlagPositive !=
         DDF_MainCheckSpecialFlag(name, ammo_types, &be->sub.type, false, false))
@@ -1056,9 +1056,9 @@ static bool BenefitTryAmmo(const char *name, benefit_t *be, int num_vals)
         return false;
     }
 
-    be->type = BENEFIT_Ammo;
+    be->type = kBenefitTypeAmmo;
 
-    if ((ammotype_e)be->sub.type == AM_NoAmmo)
+    if ((AmmunitionType)be->sub.type == kAmmunitionTypeNoAmmo)
     {
         DDF_WarnError("Illegal ammo benefit: %s\n", name);
         return false;
@@ -1075,7 +1075,7 @@ static bool BenefitTryAmmo(const char *name, benefit_t *be, int num_vals)
     return true;
 }
 
-static bool BenefitTryAmmoLimit(const char *name, benefit_t *be, int num_vals)
+static bool BenefitTryAmmoLimit(const char *name, Benefit *be, int num_vals)
 {
     char   namebuf[200];
     size_t len = strlen(name);
@@ -1093,10 +1093,10 @@ static bool BenefitTryAmmoLimit(const char *name, benefit_t *be, int num_vals)
         return false;
     }
 
-    be->type  = BENEFIT_AmmoLimit;
+    be->type  = kBenefitTypeAmmoLimit;
     be->limit = 0;
 
-    if (be->sub.type == AM_NoAmmo)
+    if (be->sub.type == kAmmunitionTypeNoAmmo)
     {
         DDF_WarnError("Illegal ammolimit benefit: %s\n", name);
         return false;
@@ -1117,7 +1117,7 @@ static bool BenefitTryAmmoLimit(const char *name, benefit_t *be, int num_vals)
     return true;
 }
 
-static bool BenefitTryWeapon(const char *name, benefit_t *be, int num_vals)
+static bool BenefitTryWeapon(const char *name, Benefit *be, int num_vals)
 {
     int idx = weapondefs.FindFirst(name, 0);
 
@@ -1125,7 +1125,7 @@ static bool BenefitTryWeapon(const char *name, benefit_t *be, int num_vals)
 
     be->sub.weap = weapondefs[idx];
 
-    be->type  = BENEFIT_Weapon;
+    be->type  = kBenefitTypeWeapon;
     be->limit = 1.0f;
 
     if (num_vals < 1)
@@ -1146,7 +1146,7 @@ static bool BenefitTryWeapon(const char *name, benefit_t *be, int num_vals)
     return true;
 }
 
-static bool BenefitTryKey(const char *name, benefit_t *be, int num_vals)
+static bool BenefitTryKey(const char *name, Benefit *be, int num_vals)
 {
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, keytype_names,
                                                   &be->sub.type, false, false))
@@ -1154,7 +1154,7 @@ static bool BenefitTryKey(const char *name, benefit_t *be, int num_vals)
         return false;
     }
 
-    be->type  = BENEFIT_Key;
+    be->type  = kBenefitTypeKey;
     be->limit = 1.0f;
 
     if (num_vals < 1)
@@ -1175,11 +1175,11 @@ static bool BenefitTryKey(const char *name, benefit_t *be, int num_vals)
     return true;
 }
 
-static bool BenefitTryHealth(const char *name, benefit_t *be, int num_vals)
+static bool BenefitTryHealth(const char *name, Benefit *be, int num_vals)
 {
     if (DDF_CompareName(name, "HEALTH") != 0) return false;
 
-    be->type     = BENEFIT_Health;
+    be->type     = kBenefitTypeHealth;
     be->sub.type = 0;
 
     if (num_vals < 1)
@@ -1193,7 +1193,7 @@ static bool BenefitTryHealth(const char *name, benefit_t *be, int num_vals)
     return true;
 }
 
-static bool BenefitTryArmour(const char *name, benefit_t *be, int num_vals)
+static bool BenefitTryArmour(const char *name, Benefit *be, int num_vals)
 {
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, armourtype_names,
                                                   &be->sub.type, false, false))
@@ -1201,7 +1201,7 @@ static bool BenefitTryArmour(const char *name, benefit_t *be, int num_vals)
         return false;
     }
 
-    be->type = BENEFIT_Armour;
+    be->type = kBenefitTypeArmour;
 
     if (num_vals < 1)
     {
@@ -1235,7 +1235,7 @@ static bool BenefitTryArmour(const char *name, benefit_t *be, int num_vals)
     return true;
 }
 
-static bool BenefitTryPowerup(const char *name, benefit_t *be, int num_vals)
+static bool BenefitTryPowerup(const char *name, Benefit *be, int num_vals)
 {
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, powertype_names,
                                                   &be->sub.type, false, false))
@@ -1243,7 +1243,7 @@ static bool BenefitTryPowerup(const char *name, benefit_t *be, int num_vals)
         return false;
     }
 
-    be->type = BENEFIT_Powerup;
+    be->type = kBenefitTypePowerup;
 
     if (num_vals < 1) be->amount = 999999.0f;
 
@@ -1270,14 +1270,14 @@ static bool BenefitTryPowerup(const char *name, benefit_t *be, int num_vals)
     return true;
 }
 
-static void BenefitAdd(benefit_t **list, benefit_t *source)
+static void BenefitAdd(Benefit **list, Benefit *source)
 {
-    benefit_t *cur, *tail;
+    Benefit *cur, *tail;
 
     // check if this benefit overrides a previous one
     for (cur = (*list); cur; cur = cur->next)
     {
-        if (cur->type == BENEFIT_Weapon) continue;
+        if (cur->type == kBenefitTypeWeapon) continue;
 
         if (cur->type == source->type && cur->sub.type == source->sub.type)
         {
@@ -1288,7 +1288,7 @@ static void BenefitAdd(benefit_t **list, benefit_t *source)
     }
 
     // nope, create a new one and link it onto the _TAIL_
-    cur = new benefit_t;
+    cur = new Benefit;
 
     cur[0]    = source[0];
     cur->next = nullptr;
@@ -1317,7 +1317,7 @@ void DDF_MobjGetBenefit(const char *info, void *storage)
     char parambuf[200];
     int  num_vals;
 
-    benefit_t temp;
+    Benefit temp;
 
     SYS_ASSERT(storage);
 
@@ -1339,7 +1339,7 @@ void DDF_MobjGetBenefit(const char *info, void *storage)
         BenefitTryCounter(namebuf, &temp, num_vals) ||
         BenefitTryCounterLimit(namebuf, &temp, num_vals))
     {
-        BenefitAdd((benefit_t **)storage, &temp);
+        BenefitAdd((Benefit **)storage, &temp);
         return;
     }
 
@@ -1353,7 +1353,7 @@ pickup_effect_c::pickup_effect_c(pickup_effect_type_e _type, int _sub,
     sub.type = _sub;
 }
 
-pickup_effect_c::pickup_effect_c(pickup_effect_type_e _type, weapondef_c *_weap,
+pickup_effect_c::pickup_effect_c(pickup_effect_type_e _type, WeaponDefinition *_weap,
                                  int _slot, float _time)
     : next(nullptr), type(_type), slot(_slot), time(_time)
 {
@@ -1413,7 +1413,7 @@ void BA_ParseSwitchWeapon(pickup_effect_c **list, int pnum, float par1,
 
     SYS_ASSERT(word_par && word_par[0]);
 
-    weapondef_c *weap = weapondefs.Lookup(word_par);
+    WeaponDefinition *weap = weapondefs.Lookup(word_par);
 
     AddPickupEffect(list, new pickup_effect_c(PUFX_SwitchWeapon, weap, 0, 0));
 }
@@ -1464,7 +1464,7 @@ void DDF_MobjGetPickupEffect(const char *info, void *storage)
 
     pickup_effect_c **fx_list = (pickup_effect_c **)storage;
 
-    benefit_t temp;  // FIXME kludge (write new parser method ?)
+    Benefit temp;  // FIXME kludge (write new parser method ?)
 
     num_vals =
         ParseBenefitString(info, namebuf, parambuf, &temp.amount, &temp.limit);
@@ -1603,14 +1603,14 @@ void DDF_MobjGetSpecial(const char *info)
     // handle the "INVISIBLE" tag
     if (DDF_CompareName(info, "INVISIBLE") == 0)
     {
-        dynamic_mobj->translucency = PERCENT_MAKE(0);
+        dynamic_mobj->translucency = 0.0f;
         return;
     }
 
     // handle the "NOSHADOW" tag
     if (DDF_CompareName(info, "NOSHADOW") == 0)
     {
-        dynamic_mobj->shadow_trans = PERCENT_MAKE(0);
+        dynamic_mobj->shadow_trans = 0.0f;
         return;
     }
 
@@ -1870,7 +1870,7 @@ static bool ConditionTryAmmo(const char *name, const char *sub,
         return false;
     }
 
-    if ((ammotype_e)cond->sub.type == AM_NoAmmo)
+    if ((AmmunitionType)cond->sub.type == kAmmunitionTypeNoAmmo)
     {
         DDF_WarnError("Illegal ammo in condition: %s\n", name);
         return false;
@@ -2043,11 +2043,11 @@ bool DDF_MainParseCondition(const char *info, condition_check_t *cond)
 
 // ---> mobjdef class
 
-mobjtype_c::mobjtype_c() : name(), state_grp() { Default(); }
+MobjType::MobjType() : name(), state_grp() { Default(); }
 
-mobjtype_c::~mobjtype_c() {}
+MobjType::~MobjType() {}
 
-void mobjtype_c::CopyDetail(mobjtype_c &src)
+void MobjType::CopyDetail(MobjType &src)
 {
     state_grp.clear();
 
@@ -2211,7 +2211,7 @@ void mobjtype_c::CopyDetail(mobjtype_c &src)
     melee_range   = src.melee_range;
 }
 
-void mobjtype_c::Default()
+void MobjType::Default()
 {
     state_grp.clear();
 
@@ -2233,7 +2233,7 @@ void mobjtype_c::Default()
     gib_state      = 0;
 
     reactiontime = 0;
-    painchance   = PERCENT_MAKE(0);
+    painchance   = 0.0f;
     spawnhealth  = 1000.0f;
     speed        = 0;
     float_speed  = 2.0f;
@@ -2247,7 +2247,7 @@ void mobjtype_c::Default()
     hyperflags    = 0;
     mbf21flags    = 0;
 
-    explode_damage.Default(damage_c::DEFAULT_Mobj);
+    explode_damage.Default(DamageClass::kDamageClassDefaultMobj);
     explode_radius = 0;
 
     lose_benefits    = nullptr;
@@ -2260,15 +2260,15 @@ void mobjtype_c::Default()
     castorder = 0;
     cast_title.clear();
     respawntime  = 30 * TICRATE;
-    translucency = PERCENT_MAKE(100);
-    minatkchance = PERCENT_MAKE(0);
+    translucency = 1.0f;
+    minatkchance = 0.0f;
     palremap     = nullptr;
 
     jump_delay   = 1 * TICRATE;
     jumpheight   = 10;
     crouchheight = 28;
-    viewheight   = PERCENT_MAKE(75);
-    shotheight   = PERCENT_MAKE(64);
+    viewheight   = 0.75f;
+    shotheight   = 0.64f;
     maxfall      = 0;
     fast         = 1.0f;
     scale        = 1.0f;
@@ -2286,7 +2286,7 @@ void mobjtype_c::Default()
     sight_slope   = 16.0f;
     sight_angle   = kBAMAngle90;
     ride_friction = RIDE_FRICTION;
-    shadow_trans  = PERCENT_MAKE(50);
+    shadow_trans  = 0.5f;
     glow_type     = GLOW_None;
 
     seesound       = sfx_None;
@@ -2309,22 +2309,22 @@ void mobjtype_c::Default()
     fuse           = 0;
     reload_shots   = 5;
     armour_protect = -1.0;  // disabled!
-    armour_deplete = PERCENT_MAKE(100);
-    armour_class   = BITSET_FULL;
+    armour_deplete = 1.0f;
+    armour_class   = kBitSetFull;
 
-    side          = BITSET_EMPTY;
+    side          = 0;
     playernum     = 0;
     lung_capacity = 20 * TICRATE;
     gasp_start    = 2 * TICRATE;
 
-    choke_damage.Default(damage_c::DEFAULT_MobjChoke);
+    choke_damage.Default(DamageClass::kDamageClassDefaultMobjChoke);
 
-    bobbing           = PERCENT_MAKE(100);
-    immunity          = BITSET_EMPTY;
-    resistance        = BITSET_EMPTY;
+    bobbing           = 1.0f;
+    immunity          = 0;
+    resistance        = 0;
     resist_multiply   = 0.4;
     resist_painchance = -1;  // disabled
-    ghost             = BITSET_EMPTY;
+    ghost             = 0;
 
     closecombat = nullptr;
     rangeattack = nullptr;
@@ -2359,7 +2359,7 @@ void mobjtype_c::Default()
     melee_range   = -1;
 }
 
-void mobjtype_c::DLightCompatibility(void)
+void MobjType::DLightCompatibility(void)
 {
     for (int DL = 0; DL < 2; DL++)
     {
@@ -2397,54 +2397,54 @@ void mobjtype_c::DLightCompatibility(void)
     }
 }
 
-// --> mobjtype_container_c class
+// --> MobjTypeontainer_c class
 
-mobjtype_container_c::mobjtype_container_c()
+MobjTypeontainer_c::MobjTypeontainer_c()
 {
-    memset(lookup_cache, 0, sizeof(mobjtype_c *) * LOOKUP_CACHESIZE);
+    memset(lookup_cache, 0, sizeof(MobjType *) * kLookupCacheSize);
 }
 
-mobjtype_container_c::~mobjtype_container_c()
+MobjTypeontainer_c::~MobjTypeontainer_c()
 {
     for (auto iter = begin(); iter != end(); iter++)
     {
-        mobjtype_c *m = *iter;
+        MobjType *m = *iter;
         delete m;
         m = nullptr;
     }
 }
 
-int mobjtype_container_c::FindFirst(const char *name, int startpos)
+int MobjTypeontainer_c::FindFirst(const char *name, int startpos)
 {
     startpos = HMM_MAX(startpos, 0);
 
     for (startpos; startpos < size(); startpos++)
     {
-        mobjtype_c *m = at(startpos);
+        MobjType *m = at(startpos);
         if (DDF_CompareName(m->name.c_str(), name) == 0) return startpos;
     }
 
     return -1;
 }
 
-int mobjtype_container_c::FindLast(const char *name, int startpos)
+int MobjTypeontainer_c::FindLast(const char *name, int startpos)
 {
     startpos = HMM_MIN(startpos, size() - 1);
 
     for (startpos; startpos >= 0; startpos--)
     {
-        mobjtype_c *m = at(startpos);
+        MobjType *m = at(startpos);
         if (DDF_CompareName(m->name.c_str(), name) == 0) return startpos;
     }
 
     return -1;
 }
 
-bool mobjtype_container_c::MoveToEnd(int idx)
+bool MobjTypeontainer_c::MoveToEnd(int idx)
 {
     // Moves an entry from its current position to end of the list.
 
-    mobjtype_c *m = nullptr;
+    MobjType *m = nullptr;
 
     if (idx < 0 || idx >= size()) return false;
 
@@ -2460,7 +2460,7 @@ bool mobjtype_container_c::MoveToEnd(int idx)
     return true;
 }
 
-const mobjtype_c *mobjtype_container_c::Lookup(const char *refname)
+const MobjType *MobjTypeontainer_c::Lookup(const char *refname)
 {
     // Looks an mobjdef by name.
     // Fatal error if it does not exist.
@@ -2475,7 +2475,7 @@ const mobjtype_c *mobjtype_container_c::Lookup(const char *refname)
     return nullptr; /* NOT REACHED */
 }
 
-const mobjtype_c *mobjtype_container_c::Lookup(int id)
+const MobjType *MobjTypeontainer_c::Lookup(int id)
 {
     if (id == 0) return default_mobjtype;
 
@@ -2492,7 +2492,7 @@ const mobjtype_c *mobjtype_container_c::Lookup(int id)
 
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        mobjtype_c *m = *iter;
+        MobjType *m = *iter;
 
         if (m->number == id)
         {
@@ -2505,13 +2505,13 @@ const mobjtype_c *mobjtype_container_c::Lookup(int id)
     return nullptr;
 }
 
-const mobjtype_c *mobjtype_container_c::LookupCastMember(int castpos)
+const MobjType *MobjTypeontainer_c::LookupCastMember(int castpos)
 {
     // Lookup the cast member of the one with the nearest match
     // to the position given.
 
-    mobjtype_c *best = nullptr;
-    mobjtype_c *m    = nullptr;
+    MobjType *best = nullptr;
+    MobjType *m    = nullptr;
 
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
@@ -2567,12 +2567,12 @@ const mobjtype_c *mobjtype_container_c::LookupCastMember(int castpos)
     return best;
 }
 
-const mobjtype_c *mobjtype_container_c::LookupPlayer(int playernum)
+const MobjType *MobjTypeontainer_c::LookupPlayer(int playernum)
 {
     // Find a player thing (needed by deathmatch code).
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        mobjtype_c *m = *iter;
+        MobjType *m = *iter;
 
         if (m->playernum == playernum) return m;
     }
@@ -2581,7 +2581,7 @@ const mobjtype_c *mobjtype_container_c::LookupPlayer(int playernum)
     return nullptr; /* NOT REACHED */
 }
 
-const mobjtype_c *mobjtype_container_c::LookupDoorKey(int theKey)
+const MobjType *MobjTypeontainer_c::LookupDoorKey(int theKey)
 {
     // Find a key thing (needed by automap code).
 
@@ -2603,13 +2603,13 @@ const mobjtype_c *mobjtype_container_c::LookupDoorKey(int theKey)
 
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        mobjtype_c *m = *iter;
+        MobjType *m = *iter;
 
-        benefit_t *list;
+        Benefit *list;
         list = m->pickup_benefits;
         for (; list != nullptr; list = list->next)
         {
-            if (list->type == BENEFIT_Key)
+            if (list->type == kBenefitTypeKey)
             {
                 if (list->sub.type == theKey) { return m; }
             }

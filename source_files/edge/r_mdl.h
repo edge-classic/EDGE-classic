@@ -36,7 +36,7 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
                      float bias, int rotation);
 
 void MDL_RenderModel_2D(mdl_model_c *md, const image_c *skin_img, int frame, float x, float y, float xscale,
-                        float yscale, const mobjtype_c *info);
+                        float yscale, const MobjType *info);
 
 #endif /* __R_MD2_H__ */
 

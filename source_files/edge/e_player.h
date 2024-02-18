@@ -204,7 +204,7 @@ typedef struct player_s
 
     // Armour points for each type
     float             armours[NUMARMOUR];
-    const mobjtype_c *armour_types[NUMARMOUR];
+    const MobjType *armour_types[NUMARMOUR];
     float             totalarmour; // needed for status bar
 
     // Power ups. invinc and invis are tic counters.
@@ -230,8 +230,8 @@ typedef struct player_s
     // for status bar: which numbers to light up
     int avail_weapons[10];
 
-    // ammunition, one for each ammotype_e (except AM_NoAmmo)
-    playerammo_t ammo[NUMAMMO];
+    // ammunition, one for each AmmunitionType (except AM_NoAmmo)
+    playerammo_t ammo[kTotalAmmunitionTypes];
 
     // inventory stock, one for each invtype_e
     playerinv_t inventory[NUMINV];
@@ -360,7 +360,7 @@ void G_SetConsolePlayer(int pnum);
 void G_SetDisplayPlayer(int pnum);
 void G_ToggleDisplayPlayer(void);
 
-void G_PlayerReborn(player_t *player, const mobjtype_c *info);
+void G_PlayerReborn(player_t *player, const MobjType *info);
 void G_PlayerFinishLevel(player_t *p, bool keep_cards);
 void G_MarkPlayerAvatars(void);
 void G_RemoveOldAvatars(void);

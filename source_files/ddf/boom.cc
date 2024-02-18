@@ -70,7 +70,7 @@ void DDF_BoomMakeGenSector(SectorType *sec, int number)
 
         case 1:  // random off
             sec->l_.type_       = kLightSpecialTypeFlash;
-            sec->l_.chance_     = PERCENT_MAKE(10);
+            sec->l_.chance_     = 0.1f;
             sec->l_.darktime_   = 8;
             sec->l_.brighttime_ = 8;
             break;
@@ -122,18 +122,18 @@ void DDF_BoomMakeGenSector(SectorType *sec, int number)
             break;
 
         case 1:  // 5 units
-            sec->damage_.nominal = 5;
-            sec->damage_.delay   = 32;
+            sec->damage_.nominal_ = 5;
+            sec->damage_.delay_   = 32;
             break;
 
         case 2:  // 10 units
-            sec->damage_.nominal = 10;
-            sec->damage_.delay   = 32;
+            sec->damage_.nominal_ = 10;
+            sec->damage_.delay_   = 32;
             break;
 
         case 3:  // 20 units
-            sec->damage_.nominal = 20;
-            sec->damage_.delay   = 32;
+            sec->damage_.nominal_ = 20;
+            sec->damage_.delay_   = 32;
             break;
     }
 
@@ -156,36 +156,36 @@ void DDF_BoomMakeGenSector(SectorType *sec, int number)
         switch ((number >> 5) & 0x3)
         {
             case 0:  // Kill player if no radsuit or invul status
-                sec->damage_.delay                         = 0;
-                sec->damage_.instakill                     = true;
-                sec->damage_.damage_unless                 = new benefit_t;
-                sec->damage_.damage_unless->type           = BENEFIT_Powerup;
-                sec->damage_.damage_unless->sub.type       = PW_AcidSuit;
-                sec->damage_.damage_unless->next           = new benefit_t;
-                sec->damage_.damage_unless->next->type     = BENEFIT_Powerup;
-                sec->damage_.damage_unless->next->sub.type = PW_Invulnerable;
-                sec->damage_.damage_unless->next->next     = nullptr;
+                sec->damage_.delay_                         = 0;
+                sec->damage_.instakill_                     = true;
+                sec->damage_.damage_unless_                 = new Benefit;
+                sec->damage_.damage_unless_->type           = kBenefitTypePowerup;
+                sec->damage_.damage_unless_->sub.type       = PW_AcidSuit;
+                sec->damage_.damage_unless_->next           = new Benefit;
+                sec->damage_.damage_unless_->next->type     = kBenefitTypePowerup;
+                sec->damage_.damage_unless_->next->sub.type = PW_Invulnerable;
+                sec->damage_.damage_unless_->next->next     = nullptr;
                 break;
 
             case 1:  // Kill player
-                sec->damage_.delay      = 0;
-                sec->damage_.bypass_all = true;
-                sec->damage_.instakill  = true;
+                sec->damage_.delay_      = 0;
+                sec->damage_.bypass_all_ = true;
+                sec->damage_.instakill_  = true;
                 break;
 
             case 2:  // Kill all players and exit map (normal)
-                sec->damage_.delay       = 0;
-                sec->damage_.all_players = true;
-                sec->damage_.instakill   = true;
-                sec->damage_.bypass_all  = true;
+                sec->damage_.delay_       = 0;
+                sec->damage_.all_players_ = true;
+                sec->damage_.instakill_   = true;
+                sec->damage_.bypass_all_  = true;
                 sec->e_exit_             = kExitTypeNormal;
                 break;
 
             case 3:  // Kill all players and exit map (secret)
-                sec->damage_.delay       = 0;
-                sec->damage_.all_players = true;
-                sec->damage_.instakill   = true;
-                sec->damage_.bypass_all  = true;
+                sec->damage_.delay_       = 0;
+                sec->damage_.all_players_ = true;
+                sec->damage_.instakill_   = true;
+                sec->damage_.bypass_all_  = true;
                 sec->e_exit_             = kExitTypeSecret;
                 break;
         }
@@ -194,9 +194,9 @@ void DDF_BoomMakeGenSector(SectorType *sec, int number)
     // handle bit 13: Kill grounded monsters (MBF21)
     if ((number >> 13) & 1)
     {
-        sec->damage_.delay             = 0;
-        sec->damage_.instakill         = true;
-        sec->damage_.grounded_monsters = true;
+        sec->damage_.delay_             = 0;
+        sec->damage_.instakill_         = true;
+        sec->damage_.grounded_monsters_ = true;
     }
 }
 

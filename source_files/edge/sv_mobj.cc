@@ -514,7 +514,7 @@ void SR_MobjPutMobj(void *storage, int index, void *extra)
 
 bool SR_MobjGetType(void *storage, int index, void *extra)
 {
-    mobjtype_c **dest = (mobjtype_c **)storage + index;
+    MobjType **dest = (MobjType **)storage + index;
 
     const char *name = SV_GetString();
 
@@ -527,13 +527,13 @@ bool SR_MobjGetType(void *storage, int index, void *extra)
     // special handling for projectiles (attacks)
     if (epi::StringPrefixCaseCompareASCII(name, "atk:") == 0)
     {
-        const atkdef_c *atk = atkdefs.Lookup(name + 4);
+        const AttackDefinition *atk = atkdefs.Lookup(name + 4);
 
         if (atk)
-            *dest = (mobjtype_c *)atk->atk_mobj;
+            *dest = (MobjType *)atk->atk_mobj_;
     }
     else
-        *dest = (mobjtype_c *)mobjtypes.Lookup(name);
+        *dest = (MobjType *)mobjtypes.Lookup(name);
 
     if (!*dest)
     {
@@ -547,7 +547,7 @@ bool SR_MobjGetType(void *storage, int index, void *extra)
 
 void SR_MobjPutType(void *storage, int index, void *extra)
 {
-    mobjtype_c *info = ((mobjtype_c **)storage)[index];
+    MobjType *info = ((MobjType **)storage)[index];
 
     SV_PutString((info == nullptr) ? nullptr : info->name.c_str());
 }
@@ -571,12 +571,12 @@ void SR_MobjPutSpawnPoint(void *storage, int index, void *extra)
 
 bool SR_MobjGetAttack(void *storage, int index, void *extra)
 {
-    atkdef_c **dest = (atkdef_c **)storage + index;
+    AttackDefinition **dest = (AttackDefinition **)storage + index;
 
     const char *name = SV_GetString();
 
     // Intentional Const Override
-    *dest = (name == nullptr) ? nullptr : (atkdef_c *)atkdefs.Lookup(name);
+    *dest = (name == nullptr) ? nullptr : (AttackDefinition *)atkdefs.Lookup(name);
 
     SV_FreeString(name);
     return true;
@@ -584,9 +584,9 @@ bool SR_MobjGetAttack(void *storage, int index, void *extra)
 
 void SR_MobjPutAttack(void *storage, int index, void *extra)
 {
-    atkdef_c *info = ((atkdef_c **)storage)[index];
+    AttackDefinition *info = ((AttackDefinition **)storage)[index];
 
-    SV_PutString((info == nullptr) ? nullptr : info->name.c_str());
+    SV_PutString((info == nullptr) ? nullptr : info->name_.c_str());
 }
 
 bool SR_MobjGetWUDs(void *storage, int index, void *extra)
@@ -634,7 +634,7 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
 
     const char       *swizzle;
     const mobj_t     *mo = (mobj_t *)sv_current_elem;
-    const mobjtype_c *actual;
+    const MobjType *actual;
 
     SYS_ASSERT(mo);
 
@@ -739,7 +739,7 @@ void SR_MobjPutState(void *storage, int index, void *extra)
     int s_num, base;
 
     const mobj_t     *mo = (mobj_t *)sv_current_elem;
-    const mobjtype_c *actual;
+    const MobjType *actual;
 
     SYS_ASSERT(mo);
 

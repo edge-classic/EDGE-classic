@@ -69,12 +69,12 @@
 // -ACB- 2004/07/22 Moved here since its playsim related
 #define DAMAGE_COMPUTE(var, dam)                                                                                       \
     {                                                                                                                  \
-        (var) = (dam)->nominal;                                                                                        \
+        (var) = (dam)->nominal_;                                                                                        \
                                                                                                                        \
-        if ((dam)->error > 0)                                                                                          \
-            (var) += (dam)->error * P_RandomNegPos() / 255.0f;                                                         \
-        else if ((dam)->linear_max > 0)                                                                                \
-            (var) += ((dam)->linear_max - (var)) * P_Random() / 255.0f;                                                \
+        if ((dam)->error_ > 0)                                                                                          \
+            (var) += (dam)->error_ * P_RandomNegPos() / 255.0f;                                                         \
+        else if ((dam)->linear_max_ > 0)                                                                                \
+            (var) += ((dam)->linear_max_ - (var)) * P_Random() / 255.0f;                                                \
                                                                                                                        \
         if ((var) < 0)                                                                                                 \
             (var) = 0;                                                                                                 \
@@ -85,10 +85,10 @@
 //
 extern cvar_c g_aggression;
 
-void P_PlayerAttack(mobj_t *playerobj, const atkdef_c *attack);
+void P_PlayerAttack(mobj_t *playerobj, const AttackDefinition *attack);
 void P_SlammedIntoObject(mobj_t *object, mobj_t *objecthit);
 int  P_MissileContact(mobj_t *object, mobj_t *objecthit);
-int  P_BulletContact(mobj_t *object, mobj_t *objecthit, float damage, const damage_c *damtype, float x, float y,
+int  P_BulletContact(mobj_t *object, mobj_t *objecthit, float damage, const DamageClass *damtype, float x, float y,
                      float z);
 void P_TouchyContact(mobj_t *touchy, mobj_t *victim);
 bool P_UseThing(mobj_t *user, mobj_t *thing, float open_bottom, float open_top);
@@ -102,13 +102,13 @@ void P_BringCorpseToLife(mobj_t *corpse);
 void P_SetupPsprites(player_t *curplayer);
 void P_MovePsprites(player_t *curplayer);
 void P_DropWeapon(player_t *player);
-bool P_CheckWeaponSprite(weapondef_c *info);
+bool P_CheckWeaponSprite(WeaponDefinition *info);
 
 void P_DesireWeaponChange(player_t *p, int key);
 void P_NextPrevWeapon(player_t *p, int dir);
-void P_SelectNewWeapon(player_t *player, int priority, ammotype_e ammo);
-void P_TrySwitchNewWeapon(player_t *p, int new_weap, ammotype_e new_ammo);
-bool P_TryFillNewWeapon(player_t *p, int idx, ammotype_e ammo, int *qty);
+void P_SelectNewWeapon(player_t *player, int priority, AmmunitionType ammo);
+void P_TrySwitchNewWeapon(player_t *p, int new_weap, AmmunitionType new_ammo);
+bool P_TryFillNewWeapon(player_t *p, int idx, AmmunitionType ammo, int *qty);
 void P_FillWeapon(player_t *p, int slot);
 void P_FixWeaponClip(player_t *p, int slot);
 
@@ -117,15 +117,15 @@ void P_FixWeaponClip(player_t *p, int slot);
 //
 void P_CreatePlayer(int pnum, bool is_bot);
 void P_DestroyAllPlayers(void);
-void P_GiveInitialBenefits(player_t *player, const mobjtype_c *info);
+void P_GiveInitialBenefits(player_t *player, const MobjType *info);
 
 bool P_PlayerThink(player_t *player, bool extra_tic);
 void P_UpdateAvailWeapons(player_t *p);
 void P_UpdateTotalArmour(player_t *p);
 
-bool P_AddWeapon(player_t *player, weapondef_c *info, int *index);
-bool P_RemoveWeapon(player_t *player, weapondef_c *info);
-bool P_PlayerSwitchWeapon(player_t *player, weapondef_c *choice);
+bool P_AddWeapon(player_t *player, WeaponDefinition *info, int *index);
+bool P_RemoveWeapon(player_t *player, WeaponDefinition *info);
+bool P_PlayerSwitchWeapon(player_t *player, WeaponDefinition *choice);
 void P_PlayerJump(player_t *pl, float dz, int wait);
 
 //
@@ -146,9 +146,9 @@ bool       P_SetMobjState(mobj_t *mobj, int state);
 bool       P_SetMobjStateDeferred(mobj_t *mobj, int state, int tic_skip);
 void       P_SetMobjDirAndSpeed(mobj_t *mobj, BAMAngle angle, float slope, float speed);
 void       P_RunMobjThinkers(bool extra_tic);
-void       P_SpawnDebris(float x, float y, float z, BAMAngle angle, const mobjtype_c *debris);
-void       P_SpawnPuff(float x, float y, float z, const mobjtype_c *puff, BAMAngle angle);
-void       P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const mobjtype_c *blood);
+void       P_SpawnDebris(float x, float y, float z, BAMAngle angle, const MobjType *debris);
+void       P_SpawnPuff(float x, float y, float z, const MobjType *puff, BAMAngle angle);
+void       P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const MobjType *blood);
 void       P_CalcFullProperties(const mobj_t *mo, region_properties_t *newregp);
 bool       P_HitLiquidFloor(mobj_t *thing);
 
@@ -156,7 +156,7 @@ bool       P_HitLiquidFloor(mobj_t *thing);
 void    P_MobjItemRespawn(void);
 void    P_MobjRemoveMissile(mobj_t *missile);
 void    P_MobjExplodeMissile(mobj_t *missile);
-mobj_t *P_MobjCreateObject(float x, float y, float z, const mobjtype_c *type);
+mobj_t *P_MobjCreateObject(float x, float y, float z, const MobjType *type);
 
 // -ACB- 2005/05/06 Sound Effect Category Support
 int P_MobjGetSfxCategory(const mobj_t *mo);
@@ -183,7 +183,7 @@ bool    P_CheckMeleeRange(mobj_t *actor);
 bool    P_CheckMissileRange(mobj_t *actor);
 bool    P_Move(mobj_t *actor, bool path);
 bool    P_LookForPlayers(mobj_t *actor, BAMAngle range);
-mobj_t *P_LookForShootSpot(const mobjtype_c *spot_type);
+mobj_t *P_LookForShootSpot(const MobjType *spot_type);
 
 //
 // P_MAPUTL
@@ -265,15 +265,15 @@ bool    P_CheckAbsPosition(mobj_t *thing, float x, float y, float z);
 bool    P_CheckSight(mobj_t *src, mobj_t *dest);
 bool    P_CheckSightToPoint(mobj_t *src, float x, float y, float z);
 bool    P_CheckSightApproxVert(mobj_t *src, mobj_t *dest);
-void    P_RadiusAttack(mobj_t *spot, mobj_t *source, float radius, float damage, const damage_c *damtype,
+void    P_RadiusAttack(mobj_t *spot, mobj_t *source, float radius, float damage, const DamageClass *damtype,
                        bool thrust_only);
 
 bool P_TeleportMove(mobj_t *thing, float x, float y, float z);
 bool P_TryMove(mobj_t *thing, float x, float y);
 void P_SlideMove(mobj_t *mo, float x, float y);
 void P_UseLines(player_t *player);
-void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float damage, const damage_c *damtype,
-                  const mobjtype_c *puff);
+void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float damage, const DamageClass *damtype,
+                  const MobjType *puff);
 
 void P_UnblockLineEffectDebris(line_t *TheLine, const LineType *special);
 
@@ -295,12 +295,12 @@ bool ReplaceMidTexFromPart(line_t *TheLine, ScrollingPart parts);
 void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher);
 void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust);
 void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust);
-void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float amount, const damage_c *damtype = nullptr,
+void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float amount, const DamageClass *damtype = nullptr,
                   bool weak_spot = false);
-void P_TelefragMobj(mobj_t *target, mobj_t *inflictor, const damage_c *damtype = nullptr);
-void P_KillMobj(mobj_t *source, mobj_t *target, const damage_c *damtype = nullptr, bool weak_spot = false);
-bool P_GiveBenefitList(player_t *player, mobj_t *special, benefit_t *list, bool lose_em);
-bool P_HasBenefitInList(player_t *player, benefit_t *list);
+void P_TelefragMobj(mobj_t *target, mobj_t *inflictor, const DamageClass *damtype = nullptr);
+void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype = nullptr, bool weak_spot = false);
+bool P_GiveBenefitList(player_t *player, mobj_t *special, Benefit *list, bool lose_em);
+bool P_HasBenefitInList(player_t *player, Benefit *list);
 
 //
 // P_SPEC

@@ -1371,7 +1371,7 @@ bool EV_DoSlider(line_t *door, line_t *act_line, mobj_t *thing, const LineType *
     smov->line     = door;
     smov->opening  = 0.0f;
     smov->line_len = R_PointToDist(0, 0, door->dx, door->dy);
-    smov->target   = smov->line_len * PERCENT_2_FLOAT(smov->info->distance_);
+    smov->target   = smov->line_len * smov->info->distance_;
 
     smov->direction  = DIRECTION_UP;
     smov->sfxstarted = !(thing && thing->player);

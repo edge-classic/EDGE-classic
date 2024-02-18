@@ -238,7 +238,7 @@ DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char            *name,
                                             bool allow_prefixes,
                                             bool allow_user);
 
-int DDF_MainLookupDirector(const mobjtype_c *obj, const char *info);
+int DDF_MainLookupDirector(const MobjType *obj, const char *info);
 
 // DDF_ANIM Code
 void DDF_AnimInit(void);
@@ -304,14 +304,14 @@ void DDF_StateGetAngle(const char *arg, state_t *cur_state);
 void DDF_StateGetSlope(const char *arg, state_t *cur_state);
 void DDF_StateGetRGB(const char *arg, state_t *cur_state);
 
-bool DDF_MainParseState(uint8_t *object, std::vector<state_range_t> &group,
+bool DDF_MainParseState(uint8_t *object, std::vector<StateRange> &group,
                         const char *field, const char *contents, int index,
                         bool is_last, bool is_weapon,
                         const DDFStateStarter *starters,
                         const DDFActionCode   *actions);
 
-void DDF_StateBeginRange(std::vector<state_range_t> &group);
-void DDF_StateFinishRange(std::vector<state_range_t> &group);
+void DDF_StateBeginRange(std::vector<StateRange> &group);
+void DDF_StateFinishRange(std::vector<StateRange> &group);
 void DDF_StateCleanUp(void);
 
 // DDF_SECT Code

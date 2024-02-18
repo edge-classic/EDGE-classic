@@ -128,7 +128,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
     else
         player->mo->extendedflags &= ~EF_CROUCHING;
 
-    player->std_viewheight = player->mo->height * PERCENT_2_FLOAT(player->mo->info->viewheight);
+    player->std_viewheight = player->mo->height * player->mo->info->viewheight;
 
     if (sink_mult < 1.0f)
         player->deltaviewheight = HMM_MAX(player->deltaviewheight - 1.0f, -1.0f);
@@ -475,7 +475,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
         if (player->zoom_fov == 0)
         {
             if (!(player->ready_wp < 0 || player->pending_wp >= 0))
-                fov = player->weapons[player->ready_wp].info->zoom_fov;
+                fov = player->weapons[player->ready_wp].info->zoom_fov_;
 
             if (fov == int(kBAMAngle360))
                 fov = 0;
@@ -666,7 +666,7 @@ void P_ConsolePlayerBuilder(const player_t *pl, void *data, ticcmd_t *dest)
     dest->player_idx = pl->pnum;
 }
 
-bool P_PlayerSwitchWeapon(player_t *player, weapondef_c *choice)
+bool P_PlayerSwitchWeapon(player_t *player, WeaponDefinition *choice)
 {
     int pw_index;
 
@@ -1038,7 +1038,7 @@ void P_UpdateAvailWeapons(player_t *p)
 
         SYS_ASSERT(p->weapons[i].info);
 
-        key = p->weapons[i].info->bind_key;
+        key = p->weapons[i].info->bind_key_;
 
         // update the status bar icons
         if (0 <= key && key <= 9)
@@ -1065,7 +1065,7 @@ void P_UpdateTotalArmour(player_t *p)
         p->totalarmour = 999.0f;
 }
 
-bool P_AddWeapon(player_t *player, weapondef_c *info, int *index)
+bool P_AddWeapon(player_t *player, WeaponDefinition *info, int *index)
 {
     // Returns true if player did not already have the weapon.
     // If successful and 'index' is non-nullptr, the new index is
@@ -1077,13 +1077,13 @@ bool P_AddWeapon(player_t *player, weapondef_c *info, int *index)
     // cannot own weapons if sprites are missing
     if (!P_CheckWeaponSprite(info))
     {
-        I_Warning("WEAPON %s has no sprites and will not be added!\n", info->name.c_str());
+        I_Warning("WEAPON %s has no sprites and will not be added!\n", info->name_.c_str());
         return false;
     }
 
     for (int i = 0; i < MAXWEAPONS; i++)
     {
-        weapondef_c *cur_info = player->weapons[i].info;
+        WeaponDefinition *cur_info = player->weapons[i].info;
 
         // skip weapons that are being removed
         if (player->weapons[i].flags & PLWEP_Removing)
@@ -1106,7 +1106,7 @@ bool P_AddWeapon(player_t *player, weapondef_c *info, int *index)
             return false;
 
         // check for weapon upgrades
-        if (cur_info == info->upgrade_weap)
+        if (cur_info == info->upgrade_weap_)
         {
             upgrade_slot = i;
             continue;
@@ -1119,27 +1119,27 @@ bool P_AddWeapon(player_t *player, weapondef_c *info, int *index)
     if (index)
         (*index) = slot;
 
-    L_WriteDebug("P_AddWeapon: [%s] @ %d\n", info->name.c_str(), slot);
+    L_WriteDebug("P_AddWeapon: [%s] @ %d\n", info->name_.c_str(), slot);
 
     player->weapons[slot].owned        = true;
     player->weapons[slot].info         = info;
     player->weapons[slot].flags        = 0;
     player->weapons[slot].clip_size[0] = 0;
     player->weapons[slot].clip_size[1] = 0;
-    player->weapons[slot].model_skin   = info->model_skin;
+    player->weapons[slot].model_skin   = info->model_skin_;
 
     P_UpdateAvailWeapons(player);
 
     // for NoAmmo+Clip weapons, always begin with a full clip
     for (int ATK = 0; ATK < 2; ATK++)
     {
-        if (info->clip_size[ATK] > 0 && info->ammo[ATK] == AM_NoAmmo)
-            player->weapons[slot].clip_size[ATK] = info->clip_size[ATK];
+        if (info->clip_size_[ATK] > 0 && info->ammo_[ATK] == kAmmunitionTypeNoAmmo)
+            player->weapons[slot].clip_size[ATK] = info->clip_size_[ATK];
     }
 
     // initial weapons should get a full clip
-    if (info->autogive)
-        P_TryFillNewWeapon(player, slot, AM_DontCare, nullptr);
+    if (info->autogive_)
+        P_TryFillNewWeapon(player, slot, kAmmunitionTypeDontCare, nullptr);
 
     if (upgrade_slot >= 0)
     {
@@ -1168,7 +1168,7 @@ bool P_AddWeapon(player_t *player, weapondef_c *info, int *index)
     return true;
 }
 
-bool P_RemoveWeapon(player_t *player, weapondef_c *info)
+bool P_RemoveWeapon(player_t *player, WeaponDefinition *info)
 {
     // returns true if player had the weapon.
 
@@ -1188,7 +1188,7 @@ bool P_RemoveWeapon(player_t *player, weapondef_c *info)
     if (slot >= MAXWEAPONS)
         return false;
 
-    L_WriteDebug("P_RemoveWeapon: [%s] @ %d\n", info->name.c_str(), slot);
+    L_WriteDebug("P_RemoveWeapon: [%s] @ %d\n", info->name_.c_str(), slot);
 
     player->weapons[slot].owned = false;
 
@@ -1213,14 +1213,14 @@ bool P_RemoveWeapon(player_t *player, weapondef_c *info)
         player->weapons[slot].info = nullptr;
 
     if (player->pending_wp == slot)
-        P_SelectNewWeapon(player, -100, AM_DontCare);
+        P_SelectNewWeapon(player, -100, kAmmunitionTypeDontCare);
 
     SYS_ASSERT(player->pending_wp != slot);
 
     return true;
 }
 
-void P_GiveInitialBenefits(player_t *p, const mobjtype_c *info)
+void P_GiveInitialBenefits(player_t *p, const MobjType *info)
 {
     // Give the player the initial benefits when they start a game
     // (or restart after dying).  Sets up: ammo, ammo-limits, health,
@@ -1235,7 +1235,7 @@ void P_GiveInitialBenefits(player_t *p, const mobjtype_c *info)
         p->key_choices[i] = WPSEL_None;
 
     // clear out ammo & ammo-limits
-    for (i = 0; i < NUMAMMO; i++)
+    for (i = 0; i < kTotalAmmunitionTypes; i++)
     {
         p->ammo[i].num = p->ammo[i].max = 0;
     }
@@ -1273,9 +1273,9 @@ void P_GiveInitialBenefits(player_t *p, const mobjtype_c *info)
 
     // give all free weapons.  Needs to be after ammo, so that
     // clip weapons can get their clips filled.
-    for (auto w : weapondefs)
+    for (WeaponDefinition *w : weapondefs)
     {
-        if (!w->autogive)
+        if (!w->autogive_)
             continue;
 
         int pw_index;

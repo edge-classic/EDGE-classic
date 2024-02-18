@@ -563,7 +563,7 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const LineType *special)
         return; // found nothing so exit
 
     // Spawn our debris thing
-    const mobjtype_c *info;
+    const MobjType *info;
 
     info = special->effectobject_;
     if (!info)
@@ -1761,7 +1761,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
         player->air_in_lungs -= subtract;
         player->underwater = true;
 
-        if (subtract && player->air_in_lungs <= 0 && (leveltime % (1 + player->mo->info->choke_damage.delay)) == 0)
+        if (subtract && player->air_in_lungs <= 0 && (leveltime % (1 + player->mo->info->choke_damage.delay_)) == 0)
         {
             DAMAGE_COMPUTE(damage, &player->mo->info->choke_damage);
 
@@ -1830,28 +1830,28 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
     }
 
     // Check for DAMAGE_UNLESS/DAMAGE_IF DDF specials
-    if (special->damage_.damage_unless || special->damage_.damage_if)
+    if (special->damage_.damage_unless_ || special->damage_.damage_if_)
     {
-        bool unless_damage = (special->damage_.damage_unless != nullptr);
+        bool unless_damage = (special->damage_.damage_unless_ != nullptr);
         bool if_damage     = false;
-        if (special->damage_.damage_unless && P_HasBenefitInList(player, special->damage_.damage_unless))
+        if (special->damage_.damage_unless_ && P_HasBenefitInList(player, special->damage_.damage_unless_))
             unless_damage = false;
-        if (special->damage_.damage_if && P_HasBenefitInList(player, special->damage_.damage_if))
+        if (special->damage_.damage_if_ && P_HasBenefitInList(player, special->damage_.damage_if_))
             if_damage = true;
-        if (!unless_damage && !if_damage && !special->damage_.bypass_all)
+        if (!unless_damage && !if_damage && !special->damage_.bypass_all_)
             factor = 0;
     }
-    else if (player->powers[PW_AcidSuit] && !special->damage_.bypass_all)
+    else if (player->powers[PW_AcidSuit] && !special->damage_.bypass_all_)
         factor = 0;
 
     if (r_doubleframes.d && extra_tic)
         factor = 0;
 
-    if (factor > 0 && (leveltime % (1 + special->damage_.delay)) == 0)
+    if (factor > 0 && (leveltime % (1 + special->damage_.delay_)) == 0)
     {
         DAMAGE_COMPUTE(damage, &special->damage_);
 
-        if (damage || special->damage_.instakill)
+        if (damage || special->damage_.instakill_)
             P_DamageMobj(player->mo, nullptr, nullptr, damage * factor, &special->damage_);
     }
 
@@ -2542,9 +2542,9 @@ void P_SpawnSpecials1(void)
                 P_AddExtraFloor(tsec, &lines[i]);
 
                 // transfer any translucency
-                if (PERCENT_2_FLOAT(special->translucency_) <= 0.99f)
+                if (special->translucency_ <= 0.99f)
                 {
-                    P_EFTransferTrans(ctrl, tsec, &lines[i], &special->ef_, PERCENT_2_FLOAT(special->translucency_));
+                    P_EFTransferTrans(ctrl, tsec, &lines[i], &special->ef_, special->translucency_);
                 }
 
                 // update the line gaps & things:
@@ -2697,11 +2697,11 @@ void P_SpawnSpecials2(int autotag)
         }
 
         // -AJA- 1999/06/30: Translucency effect.
-        if (PERCENT_2_FLOAT(special->translucency_) <= 0.99f && lines[i].side[0])
-            lines[i].side[0]->middle.translucency = PERCENT_2_FLOAT(special->translucency_);
+        if (special->translucency_ <= 0.99f && lines[i].side[0])
+            lines[i].side[0]->middle.translucency = special->translucency_;
 
-        if (PERCENT_2_FLOAT(special->translucency_) <= 0.99f && lines[i].side[1])
-            lines[i].side[1]->middle.translucency = PERCENT_2_FLOAT(special->translucency_);
+        if (special->translucency_ <= 0.99f && lines[i].side[1])
+            lines[i].side[1]->middle.translucency = special->translucency_;
 
         if (special->autoline_)
         {

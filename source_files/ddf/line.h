@@ -313,7 +313,7 @@ class SlidingDoor
     bool see_through_;
 
     // how far it actually opens (usually 100%)
-    percent_t distance_;
+    float distance_;
 
     // sound effects.
     struct sfx_s *sfx_start_;
@@ -395,11 +395,11 @@ class TeleportDefinition
     bool teleport_;
 
     // effect object spawned when going in...
-    const mobjtype_c *inspawnobj_;  // FIXME! Do mobjtypes.Lookup()?
+    const MobjType *inspawnobj_;  // FIXME! Do mobjtypes.Lookup()?
     std::string       inspawnobj_ref_;
 
     // effect object spawned when going out...
-    const mobjtype_c *outspawnobj_;  // FIXME! Do mobjtypes.Lookup()?
+    const MobjType *outspawnobj_;  // FIXME! Do mobjtypes.Lookup()?
     std::string       outspawnobj_ref_;
 
     // Teleport delay
@@ -447,7 +447,7 @@ class LightSpecialDefinition
     int level_;
 
     // chance value for FLASH type
-    percent_t chance_;
+    float chance_;
 
     // time remaining dark and bright, in tics
     int darktime_;
@@ -651,7 +651,7 @@ class LineType
     // Lobo: item to spawn (or nullptr).  The mobjdef pointer is only valid
     // after
     //  DDF_MobjCleanUp() has been called.
-    const mobjtype_c *effectobject_;
+    const MobjType *effectobject_;
     std::string       effectobject_ref_;
 
     // Handle this line differently
@@ -707,7 +707,7 @@ class LineType
     ExtraFloorDefinition ef_;
 
     // -AJA- 1999/06/30: TRANSLUCENT MID-TEXTURES
-    percent_t translucency_;
+    float translucency_;
 
     // -AJA- 1999/10/24: Appearance control.
     AppearsFlag appear_;
@@ -751,7 +751,7 @@ class LineTypeContainer : public std::vector<LineType *>
     ~LineTypeContainer();
 
    private:
-    LineType *lookup_cache_[LOOKUP_CACHESIZE];
+    LineType *lookup_cache_[kLookupCacheSize];
 
    public:
     LineType *Lookup(int num);
@@ -829,7 +829,7 @@ class SectorType
     LightSpecialDefinition l_;
 
     // Slime
-    damage_c damage_;
+    DamageClass damage_;
 
     // -AJA- 1999/11/25: sector special flags
     SectorFlag special_flags_;
@@ -884,7 +884,7 @@ class SectorTypeContainer : public std::vector<SectorType *>
     ~SectorTypeContainer();
 
    private:
-    SectorType *lookup_cache_[LOOKUP_CACHESIZE];
+    SectorType *lookup_cache_[kLookupCacheSize];
 
    public:
     SectorType *Lookup(int num);

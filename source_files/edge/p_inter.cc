@@ -51,7 +51,7 @@ extern cvar_c player_dm_dr;
 
 typedef struct
 {
-    benefit_t *list;    // full list of benefits
+    Benefit *list;    // full list of benefits
     bool       lose_em; // lose stuff if true
 
     player_t *player;  // player picking it up
@@ -67,9 +67,9 @@ typedef struct
     bool no_ammo; // skip ammo
 } pickup_info_t;
 
-static bool P_CheckForBenefit(benefit_t *list, int kind)
+static bool P_CheckForBenefit(Benefit *list, int kind)
 {
-    for (benefit_t *be = list; be != nullptr; be = be->next)
+    for (Benefit *be = list; be != nullptr; be = be->next)
     {
         if (be->type == kind)
             return true;
@@ -84,7 +84,7 @@ static bool P_CheckForBenefit(benefit_t *list, int kind)
 // Returns false if the "counter" item can't be picked up at all
 //
 //
-static void GiveCounter(pickup_info_t *pu, benefit_t *be)
+static void GiveCounter(pickup_info_t *pu, Benefit *be)
 {
     int cntr = be->sub.type;
     int num  = RoundToInt(be->amount);
@@ -122,7 +122,7 @@ static void GiveCounter(pickup_info_t *pu, benefit_t *be)
 //
 // GiveCounterLimit
 //
-static void GiveCounterLimit(pickup_info_t *pu, benefit_t *be)
+static void GiveCounterLimit(pickup_info_t *pu, Benefit *be)
 {
     int cntr  = be->sub.type;
     int limit = RoundToInt(be->amount);
@@ -151,7 +151,7 @@ static void GiveCounterLimit(pickup_info_t *pu, benefit_t *be)
 // Returns false if the inventory item can't be picked up at all
 //
 //
-static void GiveInventory(pickup_info_t *pu, benefit_t *be)
+static void GiveInventory(pickup_info_t *pu, Benefit *be)
 {
     int inv = be->sub.type;
     int num = RoundToInt(be->amount);
@@ -189,7 +189,7 @@ static void GiveInventory(pickup_info_t *pu, benefit_t *be)
 //
 // GiveInventoryLimit
 //
-static void GiveInventoryLimit(pickup_info_t *pu, benefit_t *be)
+static void GiveInventoryLimit(pickup_info_t *pu, Benefit *be)
 {
     int inv   = be->sub.type;
     int limit = RoundToInt(be->amount);
@@ -220,7 +220,7 @@ static void GiveInventoryLimit(pickup_info_t *pu, benefit_t *be)
 // -ACB- 1998/06/19 DDF Change: Number passed is the exact amount of ammo given.
 // -KM- 1998/11/25 Handles weapon change from priority.
 //
-static void GiveAmmo(pickup_info_t *pu, benefit_t *be)
+static void GiveAmmo(pickup_info_t *pu, Benefit *be)
 {
     if (pu->no_ammo)
         return;
@@ -229,15 +229,15 @@ static void GiveAmmo(pickup_info_t *pu, benefit_t *be)
     int num  = RoundToInt(be->amount);
 
     // -AJA- in old deathmatch, weapons give 2.5 times more ammo
-    if (deathmatch == 1 && P_CheckForBenefit(pu->list, BENEFIT_Weapon) && pu->special && !pu->dropped)
+    if (deathmatch == 1 && P_CheckForBenefit(pu->list, kBenefitTypeWeapon) && pu->special && !pu->dropped)
     {
         num = RoundToInt(be->amount * 2.5);
     }
 
-    if (ammo == AM_NoAmmo || num <= 0)
+    if (ammo == kAmmunitionTypeNoAmmo || num <= 0)
         return;
 
-    if (ammo < 0 || ammo >= NUMAMMO)
+    if (ammo < 0 || ammo >= kTotalAmmunitionTypes)
         I_Error("GiveAmmo: bad type %i", ammo);
 
     if (pu->lose_em)
@@ -267,7 +267,7 @@ static void GiveAmmo(pickup_info_t *pu, benefit_t *be)
     // a clip, try to "bundle" this ammo inside that clip.
     if (pu->new_weap >= 0)
     {
-        did_pickup = P_TryFillNewWeapon(pu->player, pu->new_weap, (ammotype_e)ammo, &num);
+        did_pickup = P_TryFillNewWeapon(pu->player, pu->new_weap, (AmmunitionType)ammo, &num);
 
         if (num == 0)
         {
@@ -303,15 +303,15 @@ static void GiveAmmo(pickup_info_t *pu, benefit_t *be)
 //
 // GiveAmmoLimit
 //
-static void GiveAmmoLimit(pickup_info_t *pu, benefit_t *be)
+static void GiveAmmoLimit(pickup_info_t *pu, Benefit *be)
 {
     int ammo  = be->sub.type;
     int limit = RoundToInt(be->amount);
 
-    if (ammo == AM_NoAmmo)
+    if (ammo == kAmmunitionTypeNoAmmo)
         return;
 
-    if (ammo < 0 || ammo >= NUMAMMO)
+    if (ammo < 0 || ammo >= kTotalAmmunitionTypes)
         I_Error("GiveAmmoLimit: bad type %i", ammo);
 
     if ((!pu->lose_em && limit < pu->player->ammo[ammo].max) || (pu->lose_em && limit > pu->player->ammo[ammo].max))
@@ -333,11 +333,11 @@ static void GiveAmmoLimit(pickup_info_t *pu, benefit_t *be)
 //
 // The weapon thing may have a MF_DROPPED flag or'ed in.
 //
-// -AJA- 2000/03/02: Reworked for new benefit_t stuff.
+// -AJA- 2000/03/02: Reworked for new Benefit stuff.
 //
-static void GiveWeapon(pickup_info_t *pu, benefit_t *be)
+static void GiveWeapon(pickup_info_t *pu, Benefit *be)
 {
-    weapondef_c *info = be->sub.weap;
+    WeaponDefinition *info = be->sub.weap;
     int          pw_index;
 
     SYS_ASSERT(info);
@@ -378,7 +378,7 @@ static void GiveWeapon(pickup_info_t *pu, benefit_t *be)
 //
 // New Procedure: -ACB- 1998/06/21
 //
-static void GiveHealth(pickup_info_t *pu, benefit_t *be)
+static void GiveHealth(pickup_info_t *pu, Benefit *be)
 {
     if (pu->lose_em)
     {
@@ -417,7 +417,7 @@ static void GiveHealth(pickup_info_t *pu, benefit_t *be)
 //
 // Returns false if the new armour would not benefit
 //
-static void GiveArmour(pickup_info_t *pu, benefit_t *be)
+static void GiveArmour(pickup_info_t *pu, Benefit *be)
 {
     armour_type_e a_class = (armour_type_e)be->sub.type;
 
@@ -513,7 +513,7 @@ static void GiveArmour(pickup_info_t *pu, benefit_t *be)
 //
 // GiveKey
 //
-static void GiveKey(pickup_info_t *pu, benefit_t *be)
+static void GiveKey(pickup_info_t *pu, Benefit *be)
 {
     DoorKeyType key = (DoorKeyType)be->sub.type;
 
@@ -549,7 +549,7 @@ static void GiveKey(pickup_info_t *pu, benefit_t *be)
 // included is the use of limit, which gives a maxmium amount of protection
 // for this item. -ACB- 1998/06/20
 //
-static void GivePower(pickup_info_t *pu, benefit_t *be)
+static void GivePower(pickup_info_t *pu, Benefit *be)
 {
     // -ACB- 1998/06/20 - calculate duration in seconds
     float duration = be->amount * TICRATE;
@@ -590,65 +590,65 @@ static void DoGiveBenefitList(pickup_info_t *pu)
 {
     // handle weapons first, since this affects ammo handling
 
-    for (benefit_t *be = pu->list; be; be = be->next)
+    for (Benefit *be = pu->list; be; be = be->next)
     {
-        if (be->type == BENEFIT_Weapon && be->amount >= 0.0)
+        if (be->type == kBenefitTypeWeapon && be->amount >= 0.0)
             GiveWeapon(pu, be);
     }
 
-    for (benefit_t *be = pu->list; be; be = be->next)
+    for (Benefit *be = pu->list; be; be = be->next)
     {
         // Put the checking in for neg amounts at benefit level. Powerups can be neg
         // if they last all level. -ACB- 2004/02/04
 
         switch (be->type)
         {
-        case BENEFIT_None:
-        case BENEFIT_Weapon:
+        case kBenefitTypeNone:
+        case kBenefitTypeWeapon:
             break;
 
-        case BENEFIT_Ammo:
+        case kBenefitTypeAmmo:
             if (be->amount >= 0.0)
                 GiveAmmo(pu, be);
             break;
 
-        case BENEFIT_AmmoLimit:
+        case kBenefitTypeAmmoLimit:
             if (be->amount >= 0.0)
                 GiveAmmoLimit(pu, be);
             break;
 
-        case BENEFIT_Key:
+        case kBenefitTypeKey:
             if (be->amount >= 0.0)
                 GiveKey(pu, be);
             break;
 
-        case BENEFIT_Health:
+        case kBenefitTypeHealth:
             if (be->amount >= 0.0)
                 GiveHealth(pu, be);
             break;
 
-        case BENEFIT_Armour:
+        case kBenefitTypeArmour:
             if (be->amount >= 0.0)
                 GiveArmour(pu, be);
             break;
 
-        case BENEFIT_Powerup:
+        case kBenefitTypePowerup:
             GivePower(pu, be);
             break;
 
-        case BENEFIT_Inventory:
+        case kBenefitTypeInventory:
             GiveInventory(pu, be);
             break;
 
-        case BENEFIT_InventoryLimit:
+        case kBenefitTypeInventoryLimit:
             GiveInventoryLimit(pu, be);
             break;
 
-        case BENEFIT_Counter:
+        case kBenefitTypeCounter:
             GiveCounter(pu, be);
             break;
 
-        case BENEFIT_CounterLimit:
+        case kBenefitTypeCounterLimit:
             GiveCounterLimit(pu, be);
             break;
 
@@ -665,71 +665,71 @@ static void DoGiveBenefitList(pickup_info_t *pu)
 // Returns true if any of them are present for the player, but does not otherwise
 // return any information about which benefits matched or what their amounts are.
 //
-bool P_HasBenefitInList(player_t *player, benefit_t *list)
+bool P_HasBenefitInList(player_t *player, Benefit *list)
 {
     SYS_ASSERT(player && list);
-    for (benefit_t *be = list; be; be = be->next)
+    for (Benefit *be = list; be; be = be->next)
     {
         switch (be->type)
         {
-        case BENEFIT_None:
+        case kBenefitTypeNone:
             break;
 
-        case BENEFIT_Weapon:
+        case kBenefitTypeWeapon:
             for (int i = 0; i < MAXWEAPONS; i++)
             {
-                weapondef_c *cur_info = player->weapons[i].info;
+                WeaponDefinition *cur_info = player->weapons[i].info;
                 if (cur_info == be->sub.weap)
                     return true;
             }
             break;
 
-        case BENEFIT_Ammo:
+        case kBenefitTypeAmmo:
             if (player->ammo[be->sub.type].num > be->amount)
                 return true;
             break;
 
-        case BENEFIT_AmmoLimit:
+        case kBenefitTypeAmmoLimit:
             if (player->ammo[be->sub.type].max > be->amount)
                 return true;
             break;
 
-        case BENEFIT_Key:
+        case kBenefitTypeKey:
             if (player->cards & (DoorKeyType)be->sub.type)
                 return true;
             break;
 
-        case BENEFIT_Health:
+        case kBenefitTypeHealth:
             if (player->health > be->amount)
                 return true;
             break;
 
-        case BENEFIT_Armour:
+        case kBenefitTypeArmour:
             if (player->armours[be->sub.type] > be->amount)
                 return true;
             break;
 
-        case BENEFIT_Powerup:
+        case kBenefitTypePowerup:
             if (!AlmostEquals(player->powers[be->sub.type], 0.0f))
                 return true;
             break;
 
-        case BENEFIT_Inventory:
+        case kBenefitTypeInventory:
             if (player->inventory[be->sub.type].num > be->amount)
                 return true;
             break;
 
-        case BENEFIT_InventoryLimit:
+        case kBenefitTypeInventoryLimit:
             if (player->inventory[be->sub.type].max > be->amount)
                 return true;
             break;
 
-        case BENEFIT_Counter:
+        case kBenefitTypeCounter:
             if (player->counters[be->sub.type].num > be->amount)
                 return true;
             break;
 
-        case BENEFIT_CounterLimit:
+        case kBenefitTypeCounterLimit:
             if (player->counters[be->sub.type].max > be->amount)
                 return true;
             break;
@@ -750,7 +750,7 @@ bool P_HasBenefitInList(player_t *player, benefit_t *list)
 // benefits should be taken away instead.  Returns true if _any_
 // benefit was picked up (or lost), or false if none of them were.
 //
-bool P_GiveBenefitList(player_t *player, mobj_t *special, benefit_t *list, bool lose_em)
+bool P_GiveBenefitList(player_t *player, mobj_t *special, Benefit *list, bool lose_em)
 {
     pickup_info_t info;
 
@@ -906,7 +906,7 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
         }
 
         if (info.new_weap >= 0 || info.new_ammo >= 0)
-            P_TrySwitchNewWeapon(info.player, info.new_weap, (ammotype_e)info.new_ammo);
+            P_TrySwitchNewWeapon(info.player, info.new_weap, (AmmunitionType)info.new_ammo);
     }
 
     RunPickupEffects(info.player, special, special->info->pickup_effects);
@@ -982,14 +982,14 @@ static void DoObituary(const char *format, mobj_t *victim, mobj_t *killer)
     CON_PlayerMessage(victim->player->pnum, "%s", msg.c_str());
 }
 
-void P_ObituaryMessage(mobj_t *victim, mobj_t *killer, const damage_c *damtype)
+void P_ObituaryMessage(mobj_t *victim, mobj_t *killer, const DamageClass *damtype)
 {
     if (!var_obituaries)
         return;
 
-    if (damtype && !damtype->obituary.empty())
+    if (damtype && !damtype->obituary_.empty())
     {
-        const char *ref = damtype->obituary.c_str();
+        const char *ref = damtype->obituary_.c_str();
 
         if (language.IsValidRef(ref))
         {
@@ -1010,7 +1010,7 @@ void P_ObituaryMessage(mobj_t *victim, mobj_t *killer, const damage_c *damtype)
 // P_KillMobj
 //
 // Altered to reflect the fact that the dropped item is a pointer to
-// mobjtype_c, uses new procedure: P_MobjCreateObject.
+// MobjType, uses new procedure: P_MobjCreateObject.
 //
 // Note: Damtype can be nullptr here.
 //
@@ -1019,7 +1019,7 @@ void P_ObituaryMessage(mobj_t *victim, mobj_t *killer, const damage_c *damtype)
 // -AJA- 1999/09/12: Now uses P_SetMobjStateDeferred, since this
 //       routine can be called by TryMove/PIT_CheckRelThing/etc.
 //
-void P_KillMobj(mobj_t *source, mobj_t *target, const damage_c *damtype, bool weak_spot)
+void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool weak_spot)
 {
     // -AJA- 2006/09/10: Voodoo doll handling for coop
     if (target->player && target->player->mo != target)
@@ -1131,21 +1131,21 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const damage_c *damtype, bool we
             overkill = true;
     }
 
-    if (state == S_NULL && overkill && damtype && damtype->overkill.label != "")
+    if (state == S_NULL && overkill && damtype && damtype->overkill_.label_ != "")
     {
-        state = P_MobjFindLabel(target, damtype->overkill.label.c_str());
+        state = P_MobjFindLabel(target, damtype->overkill_.label_.c_str());
         if (state != S_NULL)
-            state += damtype->overkill.offset;
+            state += damtype->overkill_.offset_;
     }
 
     if (state == S_NULL && overkill && target->info->overkill_state)
         state = target->info->overkill_state;
 
-    if (state == S_NULL && damtype && damtype->death.label != "")
+    if (state == S_NULL && damtype && damtype->death_.label_ != "")
     {
-        state = P_MobjFindLabel(target, damtype->death.label.c_str());
+        state = P_MobjFindLabel(target, damtype->death_.label_.c_str());
         if (state != S_NULL)
-            state += damtype->death.offset;
+            state += damtype->death_.offset_;
     }
 
     if (state == S_NULL)
@@ -1177,7 +1177,7 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const damage_c *damtype, bool we
 
     // Drop stuff. This determines the kind of object spawned
     // during the death frame of a thing.
-    const mobjtype_c *item = target->info->dropitem;
+    const MobjType *item = target->info->dropitem;
     if (item)
     {
         mobj_t *mo = P_MobjCreateObject(target->x, target->y, target->floorz, item);
@@ -1212,7 +1212,7 @@ void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust)
         return;
 
     if (inflictor && inflictor->currentattack &&
-        BITSET_EMPTY == (inflictor->currentattack->attack_class & ~target->info->immunity))
+        0 == (inflictor->currentattack->attack_class_ & ~target->info->immunity))
     {
         return;
     }
@@ -1322,7 +1322,7 @@ void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust)
 // -AJA- 1999/09/12: Now uses P_SetMobjStateDeferred, since this
 //       routine can be called by TryMove/PIT_CheckRelThing/etc.
 //
-void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damage, const damage_c *damtype,
+void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damage, const DamageClass *damtype,
                   bool weak_spot)
 {
     if (target->isRemoved())
@@ -1339,7 +1339,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         return;
 
     if (!weak_spot && inflictor && inflictor->currentattack &&
-        BITSET_EMPTY == (inflictor->currentattack->attack_class & ~target->info->immunity))
+        0 == (inflictor->currentattack->attack_class_ & ~target->info->immunity))
     {
         return;
     }
@@ -1356,7 +1356,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
 
     // check for partial resistance against the attack
     if (!weak_spot && damage >= 0.1f && inflictor && inflictor->currentattack &&
-        BITSET_EMPTY == (inflictor->currentattack->attack_class & ~target->info->resistance))
+        0 == (inflictor->currentattack->attack_class_ & ~target->info->resistance))
     {
         damage = HMM_MAX(0.1f, damage * target->info->resist_multiply);
     }
@@ -1380,7 +1380,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
 
     if (inflictor && !(target->flags & MF_NOCLIP) &&
         !(source && source->player && source->player->ready_wp >= 0 &&
-          source->player->weapons[source->player->ready_wp].info->nothrust))
+          source->player->weapons[source->player->ready_wp].info->nothrust_))
     {
         // make fall forwards sometimes
         if (damage < 40 && damage > target->health && target->z - inflictor->z > 64 && (P_Random() & 1))
@@ -1398,7 +1398,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
 
         // Don't damage player if sector type should only affect grounded monsters
         // Note: flesh this out be be more versatile - Dasho
-        if (damtype && damtype->grounded_monsters)
+        if (damtype && damtype->grounded_monsters_)
             return;
 
         // ignore damage in GOD mode, or with INVUL powerup
@@ -1406,20 +1406,20 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         {
             if (!damtype)
                 return;
-            else if (!damtype->bypass_all && !damtype->damage_if)
+            else if (!damtype->bypass_all_ && !damtype->damage_if_)
                 return;
         }
 
         // Check for DAMAGE_UNLESS/DAMAGE_IF DDF specials
-        if (damtype && (damtype->damage_unless || damtype->damage_if))
+        if (damtype && (damtype->damage_unless_ || damtype->damage_if_))
         {
-            bool unless_damage = (damtype->damage_unless != nullptr);
+            bool unless_damage = (damtype->damage_unless_ != nullptr);
             bool if_damage     = false;
-            if (damtype->damage_unless && P_HasBenefitInList(player, damtype->damage_unless))
+            if (damtype->damage_unless_ && P_HasBenefitInList(player, damtype->damage_unless_))
                 unless_damage = false;
-            if (damtype->damage_if && P_HasBenefitInList(player, damtype->damage_if))
+            if (damtype->damage_if_ && P_HasBenefitInList(player, damtype->damage_if_))
                 if_damage = true;
-            if (!unless_damage && !if_damage && !damtype->bypass_all)
+            if (!unless_damage && !if_damage && !damtype->bypass_all_)
                 return;
         }
 
@@ -1430,25 +1430,25 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         // preliminary check: immunity and resistance
         for (i = NUMARMOUR - 1; i >= ARMOUR_Green; i--)
         {
-            if (damtype && damtype->no_armour)
+            if (damtype && damtype->no_armour_)
                 continue;
 
             if (player->armours[i] <= 0)
                 continue;
 
-            const mobjtype_c *arm_info = player->armour_types[i];
+            const MobjType *arm_info = player->armour_types[i];
 
             if (!arm_info || !inflictor || !inflictor->currentattack)
                 continue;
 
             // this armor does not provide any protection for this attack
-            if (BITSET_EMPTY != (inflictor->currentattack->attack_class & ~arm_info->armour_class))
+            if (0 != (inflictor->currentattack->attack_class_ & ~arm_info->armour_class))
                 continue;
 
-            if (BITSET_EMPTY == (inflictor->currentattack->attack_class & ~arm_info->immunity))
+            if (0 == (inflictor->currentattack->attack_class_ & ~arm_info->immunity))
                 return; /* immune : we can go home early! */
 
-            if (damage > 0.1f && BITSET_EMPTY == (inflictor->currentattack->attack_class & ~arm_info->resistance))
+            if (damage > 0.1f && 0 == (inflictor->currentattack->attack_class_ & ~arm_info->resistance))
             {
                 damage = HMM_MAX(0.1f, damage * arm_info->resist_multiply);
             }
@@ -1472,17 +1472,17 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         // check which armour can take some damage
         for (i = NUMARMOUR - 1; i >= ARMOUR_Green; i--)
         {
-            if (damtype && damtype->no_armour)
+            if (damtype && damtype->no_armour_)
                 continue;
 
             if (player->armours[i] <= 0)
                 continue;
 
-            const mobjtype_c *arm_info = player->armour_types[i];
+            const MobjType *arm_info = player->armour_types[i];
 
             // this armor does not provide any protection for this attack
             if (arm_info && inflictor && inflictor->currentattack &&
-                BITSET_EMPTY != (inflictor->currentattack->attack_class & ~arm_info->armour_class))
+                0 != (inflictor->currentattack->attack_class_ & ~arm_info->armour_class))
             {
                 continue;
             }
@@ -1490,7 +1490,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
             float saved = 0;
 
             if (arm_info)
-                saved = damage * PERCENT_2_FLOAT(arm_info->armour_protect);
+                saved = damage * arm_info->armour_protect;
             else
             {
                 switch (i)
@@ -1525,7 +1525,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
             damage -= saved;
 
             if (arm_info)
-                saved *= PERCENT_2_FLOAT(arm_info->armour_deplete);
+                saved *= arm_info->armour_deplete;
 
             player->armours[i] -= saved;
 
@@ -1541,7 +1541,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         player->attacker = source;
 
         // instakill sectors
-        if (damtype && damtype->instakill)
+        if (damtype && damtype->instakill_)
             damage = target->player->health + 1;
 
         // add damage after armour / invuln detection
@@ -1551,7 +1551,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
             if (damage >= player->damagecount)
             {
                 if (damtype)
-                    player->last_damage_colour = damtype->damage_flash_colour;
+                    player->last_damage_colour = damtype->damage_flash_colour_;
                 else
                     player->last_damage_colour = SG_RED_RGBA32;
             }
@@ -1567,7 +1567,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
     else
     {
         // instakill sectors
-        if (damtype && damtype->instakill)
+        if (damtype && damtype->instakill_)
             damage = target->health + 1;
     }
 
@@ -1588,7 +1588,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
     // Lobo 2023: Handle attack flagged with the "PLAYER_ATTACK" special.
     //  This attack will always be treated as originating from the player, even if it's an indirect secondary attack.
     //  This way the player gets his VAMPIRE health and KillBenefits.
-    if (inflictor && inflictor->currentattack && (inflictor->currentattack->flags & AF_Player))
+    if (inflictor && inflictor->currentattack && (inflictor->currentattack->flags_ & kAttackFlagPlayer))
     {
         player_t *CurrentPlayer;
         CurrentPlayer = players[consoleplayer];
@@ -1602,7 +1602,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
     // -AJA- 2007/11/06: vampire mode!
     if (source && source != target && source->health < source->spawnhealth &&
         ((source->hyperflags & HF_VAMPIRE) ||
-         (inflictor && inflictor->currentattack && (inflictor->currentattack->flags & AF_Vampire))))
+         (inflictor && inflictor->currentattack && (inflictor->currentattack->flags_ & kAttackFlagVampire))))
     {
         float qty = (target->player ? 0.5 : 0.25) * damage;
 
@@ -1626,7 +1626,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
     else if (weak_spot && target->info->weak.painchance >= 0)
         pain_chance = target->info->weak.painchance;
     else if (target->info->resist_painchance >= 0 && inflictor && inflictor->currentattack &&
-             BITSET_EMPTY == (inflictor->currentattack->attack_class & ~target->info->resistance))
+             0 == (inflictor->currentattack->attack_class_ & ~target->info->resistance))
         pain_chance = target->info->resist_painchance;
     else
         pain_chance = target->painchance; // Lobo 2023: use dynamic painchance
@@ -1642,11 +1642,11 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         if (weak_spot)
             state = P_MobjFindLabel(target, "WEAKPAIN");
 
-        if (state == S_NULL && damtype && damtype->pain.label != "")
+        if (state == S_NULL && damtype && damtype->pain_.label_ != "")
         {
-            state = P_MobjFindLabel(target, damtype->pain.label.c_str());
+            state = P_MobjFindLabel(target, damtype->pain_.label_.c_str());
             if (state != S_NULL)
-                state += damtype->pain.offset;
+                state += damtype->pain_.offset_;
         }
 
         if (state == S_NULL)
@@ -1680,7 +1680,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
 // of them.  Even the invulnerability powerup doesn't stop it.  Also
 // used for the kill-all cheat.  Inflictor and damtype can be nullptr.
 //
-void P_TelefragMobj(mobj_t *target, mobj_t *inflictor, const damage_c *damtype)
+void P_TelefragMobj(mobj_t *target, mobj_t *inflictor, const DamageClass *damtype)
 {
     if (target->health <= 0)
         return;

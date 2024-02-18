@@ -31,13 +31,13 @@
 struct mobj_s;
 struct sfx_s;
 
-class atkdef_c;
+class AttackDefinition;
 class Colormap;
 class GameDefinition;
 class MapDefinition;
-class mobjtype_c;
+class MobjType;
 class PlaylistEntry;
-class weapondef_c;
+class WeaponDefinition;
 
 #include "attack.h"
 #include "flat.h"
@@ -69,7 +69,7 @@ class weapondef_c;
 typedef struct act_jump_info_s
 {
     // chance value
-    percent_t chance;
+    float chance;
 
    public:
     act_jump_info_s();
@@ -79,10 +79,10 @@ typedef struct act_jump_info_s
 // Info for the BECOME action
 typedef struct act_become_info_s
 {
-    const mobjtype_c *info;
+    const MobjType *info;
     std::string       info_ref;
 
-    label_offset_c start;
+    LabelOffset start;
 
    public:
     act_become_info_s();
@@ -92,10 +92,10 @@ typedef struct act_become_info_s
 // Info for the MORPH action
 typedef struct act_morph_info_s
 {
-    const mobjtype_c *info;
+    const MobjType *info;
     std::string       info_ref;
 
-    label_offset_c start;
+    LabelOffset start;
 
    public:
     act_morph_info_s();
@@ -105,10 +105,10 @@ typedef struct act_morph_info_s
 // Info for the weapon BECOME action
 typedef struct wep_become_info_s
 {
-    const weapondef_c *info;
+    const WeaponDefinition *info;
     std::string        info_ref;
 
-    label_offset_c start;
+    LabelOffset start;
 
    public:
     wep_become_info_s();
@@ -148,7 +148,7 @@ void DDF_MainAddDefine(const std::string &name, const std::string &value);
 const char *DDF_MainGetDefine(const char *name);
 void        DDF_MainFreeDefines();
 
-bool DDF_WeaponIsUpgrade(weapondef_c *weap, weapondef_c *old);
+bool DDF_WeaponIsUpgrade(WeaponDefinition *weap, WeaponDefinition *old);
 
 bool        DDF_IsBoomLineType(int num);
 bool        DDF_IsBoomSectorType(int num);

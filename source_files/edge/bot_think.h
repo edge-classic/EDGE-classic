@@ -31,10 +31,7 @@
 #include "e_ticcmd.h"
 #include "r_defs.h"
 
-class weapondef_c;
 class bot_path_c;
-
-typedef struct benefit_s benefit_t;
 
 // specific tasks which the bot needs/wants to do.
 // these can occur in combination with the behaviors above, e.g. while
@@ -160,10 +157,10 @@ class bot_t
     float DistTo(position_c pos) const;
 
     void  SelectWeapon();
-    bool  HasWeapon(const weapondef_c *info) const;
+    bool  HasWeapon(const WeaponDefinition *info) const;
     bool  MeleeWeapon() const;
     float EvaluateWeapon(int w_num, int &key) const;
-    bool  CanGetArmour(const benefit_t *be, int extendedflags) const;
+    bool  CanGetArmour(const Benefit *be, int extendedflags) const;
 
     void MoveToward(const position_c &pos);
     void WalkToward(const position_c &pos);

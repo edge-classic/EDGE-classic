@@ -1166,15 +1166,15 @@ void DDF_MainGetLumpName(const char *info, void *storage)
 
 void DDF_MainRefAttack(const char *info, void *storage)
 {
-    atkdef_c **dest = (atkdef_c **)storage;
+    AttackDefinition **dest = (AttackDefinition **)storage;
 
     SYS_ASSERT(info && storage);
 
-    *dest = (atkdef_c *)atkdefs.Lookup(info);
+    *dest = (AttackDefinition *)atkdefs.Lookup(info);
     if (*dest == nullptr) DDF_WarnError("Unknown Attack: %s\n", info);
 }
 
-int DDF_MainLookupDirector(const mobjtype_c *info, const char *ref)
+int DDF_MainLookupDirector(const MobjType *info, const char *ref)
 {
     const char *p = strchr(ref, ':');
 
@@ -1254,7 +1254,7 @@ static void DoGetFloat(const char *info, void *storage)
 //
 void DDF_MainGetPercent(const char *info, void *storage)
 {
-    percent_t *dest = (percent_t *)storage;
+    float *dest = (float *)storage;
     char       s[101];
     char      *p;
     float      f;
@@ -1294,7 +1294,7 @@ void DDF_MainGetPercent(const char *info, void *storage)
 //
 void DDF_MainGetPercentAny(const char *info, void *storage)
 {
-    percent_t *dest = (percent_t *)storage;
+    float *dest = (float *)storage;
     char       s[101];
     char      *p;
     float      f;
@@ -1558,7 +1558,7 @@ void Test_ParseWhenAppear(void)
 //
 void DDF_MainGetBitSet(const char *info, void *storage)
 {
-    bitset_t *result = (bitset_t *)storage;
+    BitSet *result = (BitSet *)storage;
     int       start, end;
 
     SYS_ASSERT(info && storage);
@@ -1566,7 +1566,7 @@ void DDF_MainGetBitSet(const char *info, void *storage)
     // allow a numeric value
     if (sscanf(info, " %i ", result) == 1) return;
 
-    *result = BITSET_EMPTY;
+    *result = 0;
 
     for (; *info; info++)
     {
@@ -1773,139 +1773,139 @@ const char *DDF_MainDecodeList(const char *info, char divider, bool simple)
 
 // ---> mobj_strref class
 
-const mobjtype_c *mobj_strref_c::GetRef()
+const MobjType *MobjStringReference::GetRef()
 {
-    if (def) return def;
+    if (def_) return def_;
 
-    def = mobjtypes.Lookup(name.c_str());
+    def_ = mobjtypes.Lookup(name_.c_str());
 
-    return def;
+    return def_;
 }
 
 // ---> damage class
 
 //
-// damage_c Constructor
+// DamageClass Constructor
 //
-damage_c::damage_c() {}
+DamageClass::DamageClass() {}
 
 //
-// damage_c Copy constructor
+// DamageClass Copy constructor
 //
-damage_c::damage_c(damage_c &rhs) { Copy(rhs); }
+DamageClass::DamageClass(DamageClass &rhs) { Copy(rhs); }
 
 //
-// damage_c Destructor
+// DamageClass Destructor
 //
-damage_c::~damage_c() {}
+DamageClass::~DamageClass() {}
 
 //
-// damage_c::Copy
+// DamageClass::Copy
 //
-void damage_c::Copy(damage_c &src)
+void DamageClass::Copy(DamageClass &src)
 {
-    nominal    = src.nominal;
-    linear_max = src.linear_max;
-    error      = src.error;
-    delay      = src.delay;
+    nominal_    = src.nominal_;
+    linear_max_ = src.linear_max_;
+    error_      = src.error_;
+    delay_      = src.delay_;
 
-    obituary = src.obituary;
-    pain     = src.pain;
-    death    = src.death;
-    overkill = src.overkill;
+    obituary_ = src.obituary_;
+    pain_     = src.pain_;
+    death_    = src.death_;
+    overkill_ = src.overkill_;
 
-    no_armour           = src.no_armour;
-    damage_flash_colour = src.damage_flash_colour;
+    no_armour_           = src.no_armour_;
+    damage_flash_colour_ = src.damage_flash_colour_;
 
-    bypass_all = src.bypass_all;
-    instakill  = src.instakill;
-    if (src.damage_unless)
+    bypass_all_ = src.bypass_all_;
+    instakill_  = src.instakill_;
+    if (src.damage_unless_)
     {
-        damage_unless  = new benefit_t;
-        *damage_unless = *src.damage_unless;
+        damage_unless_  = new Benefit;
+        *damage_unless_ = *src.damage_unless_;
     }
-    if (src.damage_if)
+    if (src.damage_if_)
     {
-        damage_if  = new benefit_t;
-        *damage_if = *src.damage_if;
+        damage_if_  = new Benefit;
+        *damage_if_ = *src.damage_if_;
     }
-    grounded_monsters = src.grounded_monsters;
-    all_players       = src.all_players;
+    grounded_monsters_ = src.grounded_monsters_;
+    all_players_       = src.all_players_;
 }
 
 //
-// damage_c::Default
+// DamageClass::Default
 //
-void damage_c::Default(damage_c::default_e def)
+void DamageClass::Default(DamageClassDefault def)
 {
-    obituary.clear();
+    obituary_.clear();
 
     switch (def)
     {
-        case DEFAULT_MobjChoke:
+        case kDamageClassDefaultMobjChoke:
         {
-            nominal             = 6.0f;
-            linear_max          = 14.0f;
-            error               = -1.0f;
-            delay               = 2 * TICRATE;
-            obituary            = "OB_DROWN";
-            no_armour           = true;
-            bypass_all          = false;
-            instakill           = false;
-            damage_unless       = nullptr;
-            damage_if           = nullptr;
-            grounded_monsters   = false;
-            damage_flash_colour = SG_RED_RGBA32;
-            all_players         = false;
+            nominal_             = 6.0f;
+            linear_max_          = 14.0f;
+            error_               = -1.0f;
+            delay_               = 2 * TICRATE;
+            obituary_            = "OB_DROWN";
+            no_armour_           = true;
+            bypass_all_          = false;
+            instakill_           = false;
+            damage_unless_       = nullptr;
+            damage_if_           = nullptr;
+            grounded_monsters_   = false;
+            damage_flash_colour_ = SG_RED_RGBA32;
+            all_players_         = false;
             break;
         }
 
-        case DEFAULT_Sector:
+        case kDamageClassDefaultSector:
         {
-            nominal             = 0.0f;
-            linear_max          = -1.0f;
-            error               = -1.0f;
-            delay               = 31;
-            no_armour           = false;
-            bypass_all          = false;
-            instakill           = false;
-            damage_unless       = nullptr;
-            damage_if           = nullptr;
-            grounded_monsters   = false;
-            damage_flash_colour = SG_RED_RGBA32;
-            all_players         = false;
+            nominal_             = 0.0f;
+            linear_max_         = -1.0f;
+            error_               = -1.0f;
+            delay_               = 31;
+            no_armour_           = false;
+            bypass_all_          = false;
+            instakill_           = false;
+            damage_unless_       = nullptr;
+            damage_if_           = nullptr;
+            grounded_monsters_   = false;
+            damage_flash_colour_ = SG_RED_RGBA32;
+            all_players_         = false;
             break;
         }
 
-        case DEFAULT_Attack:
-        case DEFAULT_Mobj:
+        case kDamageClassDefaultAttack:
+        case kDamageClassDefaultMobj:
         default:
         {
-            nominal             = 0.0f;
-            linear_max          = -1.0f;
-            error               = -1.0f;
-            delay               = 0;
-            no_armour           = false;
-            bypass_all          = false;
-            instakill           = false;
-            damage_unless       = nullptr;
-            damage_if           = nullptr;
-            grounded_monsters   = false;
-            damage_flash_colour = SG_RED_RGBA32;
-            all_players         = false;
+            nominal_             = 0.0f;
+            linear_max_          = -1.0f;
+            error_               = -1.0f;
+            delay_               = 0;
+            no_armour_           = false;
+            bypass_all_          = false;
+            instakill_           = false;
+            damage_unless_       = nullptr;
+            damage_if_           = nullptr;
+            grounded_monsters_   = false;
+            damage_flash_colour_ = SG_RED_RGBA32;
+            all_players_         = false;
             break;
         }
     }
 
-    pain.Default();
-    death.Default();
-    overkill.Default();
+    pain_.Default();
+    death_.Default();
+    overkill_.Default();
 }
 
 //
-// damage_c assignment operator
+// DamageClass assignment operator
 //
-damage_c &damage_c::operator=(damage_c &rhs)
+DamageClass &DamageClass::operator=(DamageClass &rhs)
 {
     if (&rhs != this) Copy(rhs);
 
@@ -1915,42 +1915,42 @@ damage_c &damage_c::operator=(damage_c &rhs)
 // ---> label offset class
 
 //
-// label_offset_c Constructor
+// LabelOffset Constructor
 //
-label_offset_c::label_offset_c() { offset = 0; }
+LabelOffset::LabelOffset() { offset_ = 0; }
 
 //
-// label_offset_c Copy constructor
+// LabelOffset Copy constructor
 //
-label_offset_c::label_offset_c(label_offset_c &rhs) { Copy(rhs); }
+LabelOffset::LabelOffset(LabelOffset &rhs) { Copy(rhs); }
 
 //
-// label_offset_c Destructor
+// LabelOffset Destructor
 //
-label_offset_c::~label_offset_c() {}
+LabelOffset::~LabelOffset() {}
 
 //
-// label_offset_c::Copy
+// LabelOffset::Copy
 //
-void label_offset_c::Copy(label_offset_c &src)
+void LabelOffset::Copy(LabelOffset &src)
 {
-    label  = src.label;
-    offset = src.offset;
+    label_  = src.label_;
+    offset_ = src.offset_;
 }
 
 //
-// label_offset_c::Default
+// LabelOffset::Default
 //
-void label_offset_c::Default()
+void LabelOffset::Default()
 {
-    label.clear();
-    offset = 0;
+    label_.clear();
+    offset_ = 0;
 }
 
 //
-// label_offset_c assignment operator
+// LabelOffset assignment operator
 //
-label_offset_c &label_offset_c::operator=(label_offset_c &rhs)
+LabelOffset &LabelOffset::operator=(LabelOffset &rhs)
 {
     if (&rhs != this) Copy(rhs);
 
@@ -1980,7 +1980,7 @@ void dlight_info_c::Default()
     type   = DLITE_None;
     radius = 32;
     colour = SG_WHITE_RGBA32;
-    height = PERCENT_MAKE(50);
+    height = 0.5f;
     leaky  = false;
     shape  = "DLIGHT_EXP";
 
@@ -2016,13 +2016,13 @@ void weakness_info_c::Copy(weakness_info_c &src)
 
 void weakness_info_c::Default()
 {
-    height[0] = PERCENT_MAKE(0);
-    height[1] = PERCENT_MAKE(100);
+    height[0] = 0.0f;
+    height[1] = 1.0f;
 
     angle[0] = kBAMAngle0;
     angle[1] = kBAMAngle360;
 
-    classes    = BITSET_EMPTY;
+    classes    = 0;
     multiply   = 2.5;
     painchance = -1;  // disabled
 }

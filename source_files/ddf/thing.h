@@ -20,11 +20,11 @@
 #define __DDF_MOBJ_H__
 
 #include "colormap.h"
-#include "epi.h"
+#include "math_bitset.h"
 #include "states.h"
 #include "types.h"
 
-// special 'number' value which signifies that the mobjtype_c
+// special 'number' value which signifies that the MobjType
 // forms part of an ATTACKS.DDF entry.
 #define ATTACK__MOBJ -7777
 
@@ -618,7 +618,7 @@ class pickup_effect_c
    public:
     pickup_effect_c(pickup_effect_type_e _type, int _sub, int _slot,
                     float _time);
-    pickup_effect_c(pickup_effect_type_e _type, weapondef_c *_weap, int _slot,
+    pickup_effect_c(pickup_effect_type_e _type, WeaponDefinition *_weap, int _slot,
                     float _time);
     ~pickup_effect_c() {}
 
@@ -631,7 +631,7 @@ class pickup_effect_c
     union
     {
         int          type;
-        weapondef_c *weap;
+        WeaponDefinition *weap;
     } sub;
 
     // which slot to use
@@ -719,7 +719,7 @@ typedef struct condition_check_s
     union
     {
         int          type;
-        weapondef_c *weap;
+        WeaponDefinition *weap;
     } sub;
 
     // required amount of health, armour, ammo, inventory or "counter",   Not
@@ -732,7 +732,7 @@ typedef struct condition_check_s
 // ------------------------------------------------------------------
 
 //
-// -ACB- 2003/05/15: Moved this outside of damage_c. GCC and VC.NET have
+// -ACB- 2003/05/15: Moved this outside of DamageClass. GCC and VC.NET have
 // different- and conflicting - issues with structs in structs
 //
 // override labels for various states, if the object being damaged
@@ -791,7 +791,7 @@ class dlight_info_c
     std::string   shape;  // IMAGES.DDF reference
     float         radius;
     RGBAColor     colour;
-    percent_t     height;
+    float     height;
     bool          leaky;
 
     void *cache_data;
@@ -811,15 +811,15 @@ class weakness_info_c
     void             Default(void);
     weakness_info_c &operator=(weakness_info_c &rhs);
 
-    percent_t height[2];
+    float height[2];
     BAMAngle  angle[2];
-    bitset_t  classes;
+    BitSet  classes;
     float     multiply;
-    percent_t painchance;
+    float painchance;
 };
 
 // mobjdef class
-class mobjtype_c
+class MobjType
 {
    public:
     // DDF Id
@@ -828,7 +828,7 @@ class mobjtype_c
     int number;
 
     // range of states used
-    std::vector<state_range_t> state_grp;
+    std::vector<StateRange> state_grp;
 
     int spawn_state;
     int idle_state;
@@ -848,7 +848,7 @@ class mobjtype_c
     int reload_state;
 
     int       reactiontime;
-    percent_t painchance;
+    float painchance;
     float     spawnhealth;
     float     speed;
     float     float_speed;
@@ -862,17 +862,17 @@ class mobjtype_c
     int hyperflags;
     int mbf21flags;
 
-    damage_c explode_damage;
+    DamageClass explode_damage;
     float    explode_radius;  // normally zero (radius == damage)
 
     // linked list of losing benefits, or nullptr
-    benefit_t *lose_benefits;
+    Benefit *lose_benefits;
 
     // linked list of pickup benefits, or nullptr
-    benefit_t *pickup_benefits;
+    Benefit *pickup_benefits;
 
     // linked list of kill benefits, or nullptr
-    benefit_t *kill_benefits;
+    Benefit *kill_benefits;
 
     // linked list of pickup effects, or nullptr
     pickup_effect_c *pickup_effects;
@@ -881,20 +881,20 @@ class mobjtype_c
     std::string pickup_message;
 
     // linked list of initial benefits for players, or nullptr if none
-    benefit_t *initial_benefits;
+    Benefit *initial_benefits;
 
     int             castorder;
     std::string     cast_title;
     int             respawntime;
-    percent_t       translucency;
-    percent_t       minatkchance;
+    float       translucency;
+    float       minatkchance;
     const Colormap *palremap;
 
     int       jump_delay;
     float     jumpheight;
     float     crouchheight;
-    percent_t viewheight;
-    percent_t shotheight;
+    float viewheight;
+    float shotheight;
     float     maxfall;
     float     fast;
     float     scale;
@@ -904,7 +904,7 @@ class mobjtype_c
     float     sight_slope;
     BAMAngle  sight_angle;
     float     ride_friction;
-    percent_t shadow_trans;
+    float shadow_trans;
 
     struct sfx_s *seesound;
     struct sfx_s *attacksound;
@@ -927,14 +927,14 @@ class mobjtype_c
 
     // armour control: armour_protect is how much damage the armour
     // saves when the bullet/fireball hits you (1% to 100%).  Zero
-    // disables the association (between color and mobjtype_c).
+    // disables the association (between color and MobjType).
     // The 'erosion' is how much of the saved damage eats up the
     // armour held: 100% is normal, at 0% you never lose it.
-    percent_t armour_protect;
-    percent_t armour_deplete;
-    bitset_t  armour_class;
+    float armour_protect;
+    float armour_deplete;
+    BitSet  armour_class;
 
-    bitset_t side;
+    BitSet side;
     int      playernum;
     int      yalign;  // -AJA- 2007/08/08: sprite Y alignment in bbox
 
@@ -949,22 +949,22 @@ class mobjtype_c
     // when leaving it.  Damage and choking interval is in choke_damage.
     int      lung_capacity;
     int      gasp_start;
-    damage_c choke_damage;
+    DamageClass choke_damage;
 
     // controls how much the player bobs when walking.
-    percent_t bobbing;
+    float bobbing;
 
     // what attack classes we are immune/resistant to (usually none).
-    bitset_t immunity;
-    bitset_t resistance;
-    bitset_t ghost;  // pass through us
+    BitSet immunity;
+    BitSet resistance;
+    BitSet ghost;  // pass through us
 
     float     resist_multiply;
-    percent_t resist_painchance;
+    float resist_painchance;
 
-    const atkdef_c *closecombat;
-    const atkdef_c *rangeattack;
-    const atkdef_c *spareattack;
+    const AttackDefinition *closecombat;
+    const AttackDefinition *rangeattack;
+    const AttackDefinition *spareattack;
 
     dlight_info_c dlight[2];
     int           glow_type;
@@ -974,22 +974,22 @@ class mobjtype_c
 
     // item to drop (or nullptr).  The mobjdef pointer is only valid after
     // DDF_MobjCleanUp() has been called.
-    const mobjtype_c *dropitem;
+    const MobjType *dropitem;
     std::string       dropitem_ref;
 
     // blood object (or nullptr).  The mobjdef pointer is only valid after
     // DDF_MobjCleanUp() has been called.
-    const mobjtype_c *blood;
+    const MobjType *blood;
     std::string       blood_ref;
 
     // respawn effect object (or nullptr).  The mobjdef pointer is only
     // valid after DDF_MobjCleanUp() has been called.
-    const mobjtype_c *respawneffect;
+    const MobjType *respawneffect;
     std::string       respawneffect_ref;
 
     // spot type for the `SHOOT_TO_SPOT' attack (or nullptr).  The mobjdef
     // pointer is only valid after DDF_MobjCleanUp() has been called.
-    const mobjtype_c *spitspot;
+    const MobjType *spitspot;
     std::string       spitspot_ref;
 
     float sight_distance;  // lobo 2022: How far this thing can see
@@ -1008,33 +1008,33 @@ class mobjtype_c
     int melee_range;
 
    public:
-    mobjtype_c();
-    ~mobjtype_c();
+    MobjType();
+    ~MobjType();
 
    public:
     void Default();
-    void CopyDetail(mobjtype_c &src);
+    void CopyDetail(MobjType &src);
 
     void DLightCompatibility(void);
 
    private:
     // disable copy construct and assignment operator
-    explicit mobjtype_c(mobjtype_c &rhs) { (void)rhs; }
-    mobjtype_c &operator=(mobjtype_c &rhs)
+    explicit MobjType(MobjType &rhs) { (void)rhs; }
+    MobjType &operator=(MobjType &rhs)
     {
         (void)rhs;
         return *this;
     }
 };
 
-class mobjtype_container_c : public std::vector<mobjtype_c *>
+class MobjTypeontainer_c : public std::vector<MobjType *>
 {
    public:
-    mobjtype_container_c();
-    ~mobjtype_container_c();
+    MobjTypeontainer_c();
+    ~MobjTypeontainer_c();
 
    private:
-    mobjtype_c *lookup_cache[LOOKUP_CACHESIZE];
+    MobjType *lookup_cache[kLookupCacheSize];
 
    public:
     // List Management
@@ -1043,18 +1043,18 @@ class mobjtype_container_c : public std::vector<mobjtype_c *>
     // Search Functions
     int               FindFirst(const char *name, int startpos = -1);
     int               FindLast(const char *name, int startpos = -1);
-    const mobjtype_c *Lookup(const char *refname);
-    const mobjtype_c *Lookup(int id);
+    const MobjType *Lookup(const char *refname);
+    const MobjType *Lookup(int id);
 
     // FIXME!!! Move to a more appropriate location
-    const mobjtype_c *LookupCastMember(int castpos);
-    const mobjtype_c *LookupPlayer(int playernum);
-    const mobjtype_c *LookupDoorKey(int theKey);
+    const MobjType *LookupCastMember(int castpos);
+    const MobjType *LookupPlayer(int playernum);
+    const MobjType *LookupDoorKey(int theKey);
 };
 
 // -------EXTERNALISATIONS-------
 
-extern mobjtype_container_c mobjtypes;
+extern MobjTypeontainer_c mobjtypes;
 
 void DDF_MobjGetBenefit(const char *info, void *storage);
 

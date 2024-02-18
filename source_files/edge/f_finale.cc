@@ -488,7 +488,7 @@ static void TextWrite(void)
 //   in order of appearance
 //
 
-static const mobjtype_c *castorder;
+static const MobjType *castorder;
 static const char       *casttitle;
 static int               casttics;
 static state_t          *caststate;
@@ -514,32 +514,32 @@ static void CastSetState(int st)
         casttics = 15;
 }
 
-static void CAST_RangeAttack(const atkdef_c *range)
+static void CAST_RangeAttack(const AttackDefinition *range)
 {
     sfx_t *sfx = nullptr;
 
     SYS_ASSERT(range);
 
-    if (range->attackstyle == ATK_SHOT)
+    if (range->attackstyle_ == kAttackStyleShot)
     {
-        sfx = range->sound;
+        sfx = range->sound_;
     }
-    else if (range->attackstyle == ATK_SKULLFLY)
+    else if (range->attackstyle_ == kAttackStyleSkullFly)
     {
-        sfx = range->initsound;
+        sfx = range->initsound_;
     }
-    else if (range->attackstyle == ATK_SPAWNER)
+    else if (range->attackstyle_ == kAttackStyleSpawner)
     {
-        if (range->spawnedobj && range->spawnedobj->rangeattack)
-            sfx = range->spawnedobj->rangeattack->initsound;
+        if (range->spawnedobj_ && range->spawnedobj_->rangeattack)
+            sfx = range->spawnedobj_->rangeattack->initsound_;
     }
-    else if (range->attackstyle == ATK_TRACKER)
+    else if (range->attackstyle_ == kAttackStyleTracker)
     {
-        sfx = range->initsound;
+        sfx = range->initsound_;
     }
-    else if (range->atk_mobj)
+    else if (range->atk_mobj_)
     {
-        sfx = range->atk_mobj->seesound;
+        sfx = range->atk_mobj_->seesound;
     }
 
     S_StartFX(sfx);
@@ -554,17 +554,17 @@ static void CastPerformAction(void)
     if (caststate->action == P_ActMakeCloseAttemptSound)
     {
         if (castorder->closecombat)
-            sfx = castorder->closecombat->initsound;
+            sfx = castorder->closecombat->initsound_;
     }
     else if (caststate->action == P_ActMeleeAttack)
     {
         if (castorder->closecombat)
-            sfx = castorder->closecombat->sound;
+            sfx = castorder->closecombat->sound_;
     }
     else if (caststate->action == P_ActMakeRangeAttemptSound)
     {
         if (castorder->rangeattack)
-            sfx = castorder->rangeattack->initsound;
+            sfx = castorder->rangeattack->initsound_;
     }
     else if (caststate->action == P_ActRangeAttack)
     {
@@ -575,7 +575,7 @@ static void CastPerformAction(void)
     {
         if (castonmelee && castorder->closecombat)
         {
-            sfx = castorder->closecombat->sound;
+            sfx = castorder->closecombat->sound_;
         }
         else if (castorder->rangeattack)
         {

@@ -63,7 +63,7 @@ void style_c::Load()
 
 void style_c::DrawBackground()
 {
-    float alpha = PERCENT_2_FLOAT(def->bg.translucency);
+    float alpha = def->bg.translucency;
 
     if (alpha < 0.02)
         return;

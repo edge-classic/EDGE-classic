@@ -56,7 +56,7 @@ DEF_CVAR(bot_skill, "2", CVAR_ARCHIVE)
 //  EVALUATING ITEMS, MONSTERS, WEAPONS
 //----------------------------------------------------------------------------
 
-bool bot_t::HasWeapon(const weapondef_c *info) const
+bool bot_t::HasWeapon(const WeaponDefinition *info) const
 {
     for (int i = 0; i < MAXWEAPONS; i++)
         if (pl->weapons[i].owned && pl->weapons[i].info == info)
@@ -65,7 +65,7 @@ bool bot_t::HasWeapon(const weapondef_c *info) const
     return false;
 }
 
-bool bot_t::CanGetArmour(const benefit_t *be, int extendedflags) const
+bool bot_t::CanGetArmour(const Benefit *be, int extendedflags) const
 {
     // this matches the logic in GiveArmour() in p_inter.cc
 
@@ -110,7 +110,7 @@ bool bot_t::MeleeWeapon() const
     if (pl->pending_wp >= 0)
         wp_num = pl->pending_wp;
 
-    return pl->weapons[wp_num].info->ammo[0] == AM_NoAmmo;
+    return pl->weapons[wp_num].info->ammo_[0] == kAmmunitionTypeNoAmmo;
 }
 
 bool bot_t::IsBarrel(const mobj_t *mo)
@@ -178,9 +178,9 @@ float bot_t::EvalItem(const mobj_t *mo)
     bool need_health = (pl->mo->health < 45);
 
     // handle weapons first (due to deathmatch rules)
-    for (const benefit_t *B = mo->info->pickup_benefits; B != nullptr; B = B->next)
+    for (const Benefit *B = mo->info->pickup_benefits; B != nullptr; B = B->next)
     {
-        if (B->type == BENEFIT_Weapon)
+        if (B->type == kBenefitTypeWeapon)
         {
             if (!HasWeapon(B->sub.weap))
                 return NAV_EvaluateBigItem(mo);
@@ -200,9 +200,9 @@ float bot_t::EvalItem(const mobj_t *mo)
         {
             switch (B->type)
             {
-            case BENEFIT_Powerup:
-            case BENEFIT_Armour:
-            case BENEFIT_AmmoLimit:
+            case kBenefitTypePowerup:
+            case kBenefitTypeArmour:
+            case kBenefitTypeAmmoLimit:
                 return -1;
 
             default:
@@ -211,21 +211,21 @@ float bot_t::EvalItem(const mobj_t *mo)
         }
     }
 
-    for (const benefit_t *B = mo->info->pickup_benefits; B != nullptr; B = B->next)
+    for (const Benefit *B = mo->info->pickup_benefits; B != nullptr; B = B->next)
     {
         switch (B->type)
         {
-        case BENEFIT_Key:
+        case kBenefitTypeKey:
             // have it already?
             if (pl->cards & (DoorKeyType)B->sub.type)
                 continue;
 
             return 90;
 
-        case BENEFIT_Powerup:
+        case kBenefitTypePowerup:
             return NAV_EvaluateBigItem(mo);
 
-        case BENEFIT_Armour:
+        case kBenefitTypeArmour:
             // ignore when fighting
             if (fighting)
                 return -1;
@@ -235,7 +235,7 @@ float bot_t::EvalItem(const mobj_t *mo)
 
             return NAV_EvaluateBigItem(mo);
 
-        case BENEFIT_Health: {
+        case kBenefitTypeHealth: {
             // cannot get it?
             if (pl->health >= B->limit)
                 return -1;
@@ -261,8 +261,8 @@ float bot_t::EvalItem(const mobj_t *mo)
                 return 30;
         }
 
-        case BENEFIT_Ammo: {
-            if (B->sub.type == AM_NoAmmo)
+        case kBenefitTypeAmmo: {
+            if (B->sub.type == kAmmunitionTypeNoAmmo)
                 continue;
 
             int ammo = B->sub.type;
@@ -284,7 +284,7 @@ float bot_t::EvalItem(const mobj_t *mo)
                 return 10;
         }
 
-        case BENEFIT_Inventory:
+        case kBenefitTypeInventory:
             // TODO : heretic stuff
             continue;
 
@@ -307,39 +307,39 @@ float bot_t::EvaluateWeapon(int w_num, int &key) const
     if (!wp->owned)
         return -1;
 
-    weapondef_c *weapon = wp->info;
+    WeaponDefinition *weapon = wp->info;
     SYS_ASSERT(weapon);
 
-    atkdef_c *attack = weapon->attack[0];
+    AttackDefinition *attack = weapon->attack_[0];
     if (!attack)
         return -1;
 
-    key = weapon->bind_key;
+    key = weapon->bind_key_;
 
     // have enough ammo?
-    if (weapon->ammo[0] != AM_NoAmmo)
+    if (weapon->ammo_[0] != kAmmunitionTypeNoAmmo)
     {
-        if (pl->ammo[weapon->ammo[0]].num < weapon->ammopershot[0])
+        if (pl->ammo[weapon->ammo_[0]].num < weapon->ammopershot_[0])
             return -1;
     }
 
-    float score = 10.0f * weapon->priority;
+    float score = 10.0f * weapon->priority_;
 
     // prefer smaller weapons for smaller monsters.
     // when not fighting, prefer biggest non-dangerous weapon.
     if (pl->mo->target == nullptr || DEATHMATCH())
     {
-        if (!weapon->dangerous)
+        if (!weapon->dangerous_)
             score += 1000.0f;
     }
     else if (pl->mo->target->spawnhealth > 250)
     {
-        if (weapon->priority > 5)
+        if (weapon->priority_ > 5)
             score += 1000.0f;
     }
     else
     {
-        if (2 <= weapon->priority && weapon->priority <= 5)
+        if (2 <= weapon->priority_ && weapon->priority_ <= 5)
             score += 1000.0f;
     }
 
@@ -727,8 +727,8 @@ void bot_t::ShootTarget()
         return;
 
     // too close for a dangerous weapon?
-    const weapondef_c *weapon = pl->weapons[pl->ready_wp].info;
-    if (weapon->dangerous && enemy_dist < 208)
+    const WeaponDefinition *weapon = pl->weapons[pl->ready_wp].info;
+    if (weapon->dangerous_ && enemy_dist < 208)
         return;
 
     // check that we are facing the enemy
@@ -810,9 +810,9 @@ void bot_t::Think_Fight()
     float max_dist = 640.0f;
 
     // handle dangerous weapons
-    const weapondef_c *weapon = pl->weapons[pl->ready_wp].info;
+    const WeaponDefinition *weapon = pl->weapons[pl->ready_wp].info;
 
-    if (weapon->dangerous)
+    if (weapon->dangerous_)
         min_dist = HMM_MAX(min_dist, 224.0f);
 
     // approach if too far away

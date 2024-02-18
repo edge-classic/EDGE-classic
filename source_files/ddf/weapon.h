@@ -29,21 +29,21 @@
 
 #define WEAPON_KEYS 10
 
-class weapondef_container_c : public std::vector<weapondef_c *>
+class WeaponDefinitionontainer_c : public std::vector<WeaponDefinition *>
 {
    public:
-    weapondef_container_c();
-    ~weapondef_container_c();
+    WeaponDefinitionontainer_c();
+    ~WeaponDefinitionontainer_c();
 
    public:
     // Search Functions
     int          FindFirst(const char *name, int startpos = -1);
-    weapondef_c *Lookup(const char *refname);
+    WeaponDefinition *Lookup(const char *refname);
 };
 
 // -------EXTERNALISATIONS-------
 
-extern weapondef_container_c weapondefs;  // -ACB- 2004/07/14 Implemented
+extern WeaponDefinitionontainer_c weapondefs;  // -ACB- 2004/07/14 Implemented
 
 void DDF_ReadWeapons(const std::string &data);
 

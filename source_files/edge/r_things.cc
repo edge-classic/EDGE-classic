@@ -171,7 +171,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
     if (which == ps_crosshair)
     {
-        if (!player->weapons[player->ready_wp].info->ignore_crosshair_scaling)
+        if (!player->weapons[player->ready_wp].info->ignore_crosshair_scaling_)
             ratio = r_crosssize.f / w;
 
         w *= ratio;
@@ -181,7 +181,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
     }
 
     // Lobo: no sense having the zoom crosshair fuzzy
-    if (which == ps_weapon && viewiszoomed && player->weapons[player->ready_wp].info->zoom_state > 0)
+    if (which == ps_weapon && viewiszoomed && player->weapons[player->ready_wp].info->zoom_state_ > 0)
     {
         is_fuzzy = false;
         trans    = 1.0f;
@@ -217,13 +217,13 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
         if ((state->flags & SFF_Weapon) && (player->ready_wp >= 0))
             ty1 += LUA_GetFloat(LUA_GetGlobalVM(), "hud", "universal_y_adjust") +
-                   player->weapons[player->ready_wp].info->y_adjust;
+                   player->weapons[player->ready_wp].info->y_adjust_;
     }
     else
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
         if ((state->flags & SFF_Weapon) && (player->ready_wp >= 0))
-            ty1 += VM_GetFloat(ui_vm, "hud", "universal_y_adjust") + player->weapons[player->ready_wp].info->y_adjust;
+            ty1 += VM_GetFloat(ui_vm, "hud", "universal_y_adjust") + player->weapons[player->ready_wp].info->y_adjust_;
     }
 
     float ty2 = ty1 + h;
@@ -267,7 +267,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
     data.lit_pos.X = player->mo->x + viewcos * away;
     data.lit_pos.Y = player->mo->y + viewsin * away;
-    data.lit_pos.Z = player->mo->z + player->mo->height * PERCENT_2_FLOAT(player->mo->info->shotheight);
+    data.lit_pos.Z = player->mo->z + player->mo->height * player->mo->info->shotheight;
 
     data.col[0].Clear();
 
@@ -506,13 +506,13 @@ void RGL_DrawWeaponSprites(player_t *p)
         if ((p->ready_wp < 0) || (psp->state == S_NULL))
             return;
 
-        weapondef_c *w = p->weapons[p->ready_wp].info;
+        WeaponDefinition *w = p->weapons[p->ready_wp].info;
 
         // 2023.06.13 - If zoom state missing but weapon can zoom, allow the regular
         // psprite drawing routines to occur (old EDGE behavior)
-        if (w->zoom_state > 0)
+        if (w->zoom_state_ > 0)
         {
-            RGL_DrawPSprite(psp, ps_weapon, p, view_props, states + w->zoom_state);
+            RGL_DrawPSprite(psp, ps_weapon, p, view_props, states + w->zoom_state_);
             return;
         }
     }
@@ -527,7 +527,7 @@ void RGL_DrawWeaponSprites(player_t *p)
     bool FlashFirst = false;
     if (p->ready_wp >= 0)
     {
-        FlashFirst = p->weapons[p->ready_wp].info->render_invert;
+        FlashFirst = p->weapons[p->ready_wp].info->render_invert_;
     }
 
     if (FlashFirst == false)
@@ -558,7 +558,7 @@ void RGL_DrawWeaponSprites(player_t *p)
 
 void RGL_DrawCrosshair(player_t *p)
 {
-    if (viewiszoomed && p->weapons[p->ready_wp].info->zoom_state > 0)
+    if (viewiszoomed && p->weapons[p->ready_wp].info->zoom_state_ > 0)
     {
         // Only skip crosshair if there is a dedicated zoom state, which
         // should be providing its own
@@ -578,7 +578,7 @@ void RGL_DrawCrosshair(player_t *p)
 
 void RGL_DrawWeaponModel(player_t *p)
 {
-    if (viewiszoomed && p->weapons[p->ready_wp].info->zoom_state > 0)
+    if (viewiszoomed && p->weapons[p->ready_wp].info->zoom_state_ > 0)
         return;
 
     pspdef_t *psp = &p->psprites[ps_weapon];
@@ -592,7 +592,7 @@ void RGL_DrawWeaponModel(player_t *p)
     if (!(psp->state->flags & SFF_Model))
         return;
 
-    weapondef_c *w = p->weapons[p->ready_wp].info;
+    WeaponDefinition *w = p->weapons[p->ready_wp].info;
 
     modeldef_c *md = W_GetModel(psp->state->sprite);
 
@@ -616,13 +616,13 @@ void RGL_DrawWeaponModel(player_t *p)
     y -= viewup.Y * psp->sy / 10.0;
     z -= viewup.Z * psp->sy / 10.0;
 
-    x += viewforward.X * w->model_forward;
-    y += viewforward.Y * w->model_forward;
-    z += viewforward.Z * w->model_forward;
+    x += viewforward.X * w->model_forward_;
+    y += viewforward.Y * w->model_forward_;
+    z += viewforward.Z * w->model_forward_;
 
-    x += viewright.X * w->model_side;
-    y += viewright.Y * w->model_side;
-    z += viewright.Z * w->model_side;
+    x += viewright.X * w->model_side_;
+    y += viewright.Y * w->model_side_;
+    z += viewright.Z * w->model_side_;
 
     int   last_frame = psp->state->frame;
     float lerp       = 0.0;
@@ -642,22 +642,22 @@ void RGL_DrawWeaponModel(player_t *p)
 
     if (LUA_UseLuaHud())
     {
-        bias = LUA_GetFloat(LUA_GetGlobalVM(), "hud", "universal_y_adjust") + p->weapons[p->ready_wp].info->y_adjust;
+        bias = LUA_GetFloat(LUA_GetGlobalVM(), "hud", "universal_y_adjust") + p->weapons[p->ready_wp].info->y_adjust_;
     }
     else
     {
-        bias = VM_GetFloat(ui_vm, "hud", "universal_y_adjust") + p->weapons[p->ready_wp].info->y_adjust;        
+        bias = VM_GetFloat(ui_vm, "hud", "universal_y_adjust") + p->weapons[p->ready_wp].info->y_adjust_;        
     }
 
     bias /= 5;
-    bias += w->model_bias;
+    bias += w->model_bias_;
 
     if (md->md2_model)
         MD2_RenderModel(md->md2_model, skin_img, true, last_frame, psp->state->frame, lerp, x, y, z, p->mo, view_props,
-                        1.0f /* scale */, w->model_aspect, bias, w->model_rotate);
+                        1.0f /* scale */, w->model_aspect_, bias, w->model_rotate_);
     else if (md->mdl_model)
         MDL_RenderModel(md->mdl_model, skin_img, true, last_frame, psp->state->frame, lerp, x, y, z, p->mo, view_props,
-                        1.0f /* scale */, w->model_aspect, bias, w->model_rotate);
+                        1.0f /* scale */, w->model_aspect_, bias, w->model_rotate_);
 }
 
 // ============================================================================

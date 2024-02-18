@@ -348,7 +348,7 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
     if (point->info == nullptr)
         I_Error("P_SpawnPlayer: No such item type!");
 
-    const mobjtype_c *info = point->info;
+    const MobjType *info = point->info;
 
     L_WriteDebug("* P_SpawnPlayer %d @ %1.0f,%1.0f\n", point->info->playernum, point->x, point->y);
 
@@ -377,7 +377,7 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
     p->bonuscount       = 0;
     p->extralight       = 0;
     p->effect_colourmap = nullptr;
-    p->std_viewheight   = mobj->height * PERCENT_2_FLOAT(info->viewheight);
+    p->std_viewheight   = mobj->height * info->viewheight;
     p->viewheight       = p->std_viewheight;
     p->zoom_fov         = 0;
     p->jumpwait         = 0;
@@ -424,7 +424,7 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
 
 static void P_SpawnVoodooDoll(player_t *p, const spawnpoint_t *point)
 {
-    const mobjtype_c *info = point->info;
+    const MobjType *info = point->info;
 
     SYS_ASSERT(info);
     SYS_ASSERT(info->playernum > 0);
@@ -576,7 +576,7 @@ void G_SpawnHelper(int pnum)
     if (point == nullptr)
         return;
 
-    const mobjtype_c *info = mobjtypes.Lookup(888);
+    const MobjType *info = mobjtypes.Lookup(888);
     if (info == nullptr)
         return;
 

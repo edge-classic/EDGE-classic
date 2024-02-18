@@ -515,7 +515,7 @@ bool P_LookForPlayers(mobj_t *actor, BAMAngle range)
 //   BOSS-BRAIN HANDLING
 //
 
-mobj_t *P_LookForShootSpot(const mobjtype_c *spot_type)
+mobj_t *P_LookForShootSpot(const MobjType *spot_type)
 {
     // -AJA- 2022: changed this to find all spots matching the wanted type,
     //             and return a random one.  Since brain spits occur seldomly
@@ -537,7 +537,7 @@ mobj_t *P_LookForShootSpot(const mobjtype_c *spot_type)
 
 static void SpawnDeathMissile(mobj_t *source, float x, float y, float z)
 {
-    const mobjtype_c *info;
+    const MobjType *info;
     mobj_t           *th;
 
     info = mobjtypes.Lookup("BRAIN_DEATH_MISSILE");
@@ -618,13 +618,13 @@ void P_ActCubeSpawn(mobj_t *cube)
 {
     mobj_t           *targ;
     mobj_t           *newmobj;
-    const mobjtype_c *type;
+    const MobjType *type;
     int               r;
 
     targ = cube->target;
 
     // -AJA- 2007/07/28: workaround for DeHackEd patches using S_SPAWNFIRE
-    if (!targ || !cube->currentattack || cube->currentattack->attackstyle != ATK_SHOOTTOSPOT)
+    if (!targ || !cube->currentattack || cube->currentattack->attackstyle_ != kAttackStyleShootToSpot)
         return;
 
     // Randomly select monster to spawn.

@@ -76,7 +76,7 @@ class spriteframe_c
 
 void W_InitSprites(void);
 
-bool W_CheckSpritesExist(const std::vector<state_range_t> &group);
+bool W_CheckSpritesExist(const std::vector<StateRange> &group);
 void W_PrecacheSprites(void);
 
 spriteframe_c *W_GetSpriteFrame(int spr_num, int framenum);

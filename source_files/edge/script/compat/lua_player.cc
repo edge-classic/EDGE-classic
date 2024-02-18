@@ -411,7 +411,7 @@ static int PL_cur_weapon_slot(lua_State *L)
     if (ui_player_who->ready_wp < 0)
         slot = -1;
     else
-        slot = ui_player_who->weapons[ui_player_who->ready_wp].info->bind_key;
+        slot = ui_player_who->weapons[ui_player_who->ready_wp].info->bind_key_;
 
     lua_pushinteger(L, slot);
     return 1;
@@ -427,7 +427,7 @@ static int PL_has_weapon(lua_State *L)
     {
         playerweapon_t *pw = &ui_player_who->weapons[j];
 
-        if (pw->owned && !(pw->flags & PLWEP_Removing) && DDF_CompareName(name, pw->info->name.c_str()) == 0)
+        if (pw->owned && !(pw->flags & PLWEP_Removing) && DDF_CompareName(name, pw->info->name_.c_str()) == 0)
         {
             lua_pushboolean(L, 1);
             return 1;
@@ -454,13 +454,13 @@ static int PL_cur_weapon(lua_State *L)
         return 1;
     }
 
-    weapondef_c *info = ui_player_who->weapons[ui_player_who->ready_wp].info;
+    WeaponDefinition *info = ui_player_who->weapons[ui_player_who->ready_wp].info;
 
-    lua_pushstring(L, info->name.c_str());
+    lua_pushstring(L, info->name_.c_str());
     return 1;
 }
 
-static void LUA_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info = nullptr)
+static void LUA_SetPsprite(player_t *p, int position, int stnum, WeaponDefinition *info = nullptr)
 {
     pspdef_t *psp = &p->psprites[position];
 
@@ -472,13 +472,13 @@ static void LUA_SetPsprite(player_t *p, int position, int stnum, weapondef_c *in
     }
 
     // state is old? -- Mundo hack for DDF inheritance
-    if (info && stnum < info->state_grp.back().first)
+    if (info && stnum < info->state_grp_.back().first)
     {
         state_t *st = &states[stnum];
 
         if (st->label)
         {
-            int new_state = DDF_StateFindLabel(info->state_grp, st->label, true /* quiet */);
+            int new_state = DDF_StateFindLabel(info->state_grp_, st->label, true /* quiet */);
             if (new_state != S_NULL)
                 stnum = new_state;
         }
@@ -546,8 +546,8 @@ static int PL_weapon_state(lua_State *L)
         return 1;
     }
 
-    // weapondef_c *info = ui_player_who->weapons[ui_player_who->ready_wp].info;
-    weapondef_c *oldWep = weapondefs.Lookup(weapon_name);
+    // WeaponDefinition *info = ui_player_who->weapons[ui_player_who->ready_wp].info;
+    WeaponDefinition *oldWep = weapondefs.Lookup(weapon_name);
     if (!oldWep)
     {
         I_Error("player.weapon_state: Unknown weapon name '%s'.\n", weapon_name);
@@ -573,7 +573,7 @@ static int PL_weapon_state(lua_State *L)
 
     ui_player_who->ready_wp = (weapon_selection_e)pw_index; // insta-switch to it
 
-    int state = DDF_StateFindLabel(oldWep->state_grp, weapon_state, true /* quiet */);
+    int state = DDF_StateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
     if (state == S_NULL)
         I_Error("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;
@@ -590,7 +590,7 @@ static int PL_ammo(lua_State *L)
 {
     int ammo = (int)luaL_checknumber(L, 1);
 
-    if (ammo < 1 || ammo > NUMAMMO)
+    if (ammo < 1 || ammo > kTotalAmmunitionTypes)
         I_Error("player.ammo: bad ammo number: %d\n", ammo);
 
     ammo--;
@@ -605,7 +605,7 @@ static int PL_ammomax(lua_State *L)
 {
     int ammo = (int)luaL_checknumber(L, 1);
 
-    if (ammo < 1 || ammo > NUMAMMO)
+    if (ammo < 1 || ammo > kTotalAmmunitionTypes)
         I_Error("player.ammomax: bad ammo number: %d\n", ammo);
 
     ammo--;
@@ -707,19 +707,19 @@ static int PL_main_ammo(lua_State *L)
     {
         playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
-        if (pw->info->ammo[0] != AM_NoAmmo)
+        if (pw->info->ammo_[0] != kAmmunitionTypeNoAmmo)
         {
-            if (pw->info->show_clip)
+            if (pw->info->show_clip_)
             {
-                SYS_ASSERT(pw->info->ammopershot[0] > 0);
+                SYS_ASSERT(pw->info->ammopershot_[0] > 0);
 
-                value = pw->clip_size[0] / pw->info->ammopershot[0];
+                value = pw->clip_size[0] / pw->info->ammopershot_[0];
             }
             else
             {
-                value = ui_player_who->ammo[pw->info->ammo[0]].num;
+                value = ui_player_who->ammo[pw->info->ammo_[0]].num;
 
-                if (pw->info->clip_size[0] > 0)
+                if (pw->info->clip_size_[0] > 0)
                     value += pw->clip_size[0];
             }
         }
@@ -746,7 +746,7 @@ static int PL_ammo_type(lua_State *L)
     {
         playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
-        value = 1 + (int)pw->info->ammo[ATK];
+        value = 1 + (int)pw->info->ammo_[ATK];
     }
 
     lua_pushinteger(L, value);
@@ -770,7 +770,7 @@ static int PL_ammo_pershot(lua_State *L)
     {
         playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
-        value = pw->info->ammopershot[ATK];
+        value = pw->info->ammopershot_[ATK];
     }
 
     lua_pushinteger(L, value);
@@ -818,7 +818,7 @@ static int PL_clip_size(lua_State *L)
     {
         playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
-        value = pw->info->clip_size[ATK];
+        value = pw->info->clip_size_[ATK];
     }
 
     lua_pushinteger(L, value);
@@ -835,7 +835,7 @@ static int PL_clip_is_shared(lua_State *L)
     {
         playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
-        if (pw->info->shared_clip)
+        if (pw->info->shared_clip_)
             value = 1;
     }
 
@@ -1121,7 +1121,7 @@ static std::string AuxStringReplaceAll(std::string str, const std::string &from,
 static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
 {
     std::string temp_string;
-    benefit_t *list;
+    Benefit *list;
     int        temp_num = 0;
 
     if (KillBenefits)
@@ -1133,13 +1133,13 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
     {
         switch (list->type)
         {
-        case BENEFIT_Weapon:
+        case kBenefitTypeWeapon:
             // If it's a weapon all bets are off: we'll want to parse
             // it differently, not here.
             temp_string = "WEAPON=1";
             break;
 
-        case BENEFIT_Ammo:
+        case kBenefitTypeAmmo:
             temp_string += "AMMO";
             if ((list->sub.type + 1) < 10)
                 temp_string += "0";
@@ -1147,16 +1147,16 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
             temp_string += "=" + std::to_string((int)list->amount);
             break;
 
-        case BENEFIT_Health: // only benefit without a sub.type so just give it 01
+        case kBenefitTypeHealth: // only benefit without a sub.type so just give it 01
             temp_string += "HEALTH01=" + std::to_string((int)list->amount);
             break;
 
-        case BENEFIT_Armour:
+        case kBenefitTypeArmour:
             temp_string += "ARMOUR" + std::to_string((int)list->sub.type + 1);
             temp_string += "=" + std::to_string((int)list->amount);
             break;
 
-        case BENEFIT_Inventory:
+        case kBenefitTypeInventory:
             temp_string += "INVENTORY";
             if ((list->sub.type + 1) < 10)
                 temp_string += "0";
@@ -1164,7 +1164,7 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
             temp_string += "=" + std::to_string((int)list->amount);
             break;
 
-        case BENEFIT_Counter:
+        case kBenefitTypeCounter:
             temp_string += "COUNTER";
             if ((list->sub.type + 1) < 10)
                 temp_string += "0";
@@ -1172,14 +1172,14 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
             temp_string += "=" + std::to_string((int)list->amount);
             break;
 
-        case BENEFIT_Key:
+        case kBenefitTypeKey:
             temp_string += "KEY";
             temp_num = log2((int)list->sub.type);
             temp_num++;
             temp_string += std::to_string(temp_num);
             break;
 
-        case BENEFIT_Powerup:
+        case kBenefitTypePowerup:
             temp_string += "POWERUP" + std::to_string((int)list->sub.type + 1);
             break;
 
@@ -1262,10 +1262,10 @@ static std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secatt
         return "";
     if (!obj->info->pickup_benefits->sub.weap)
         return "";
-    if (obj->info->pickup_benefits->type != BENEFIT_Weapon)
+    if (obj->info->pickup_benefits->type != kBenefitTypeWeapon)
         return "";
 
-    weapondef_c *objWep = obj->info->pickup_benefits->sub.weap;
+    WeaponDefinition *objWep = obj->info->pickup_benefits->sub.weap;
     if (!objWep)
         return "";
 
@@ -1273,59 +1273,59 @@ static std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secatt
     if (secattackinfo)
         attacknum = 1;
 
-    atkdef_c *objAtck = objWep->attack[attacknum];
+    AttackDefinition *objAtck = objWep->attack_[attacknum];
     if (!objAtck && whatinfo > 2)
         return ""; // no attack to get info about (only should happen with secondary attacks)
 
-    const damage_c *damtype;
+    const DamageClass *damtype;
     float temp_num2;
 
     switch (whatinfo)
     {
     case 1: // name
-        temp_string = objWep->name;
+        temp_string = objWep->name_;
         temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
         break;
 
     case 2: // ZOOM_FACTOR
-        temp_num2   = 90.0f / objWep->zoom_fov;
+        temp_num2   = 90.0f / objWep->zoom_fov_;
         temp_string = std::to_string(temp_num2);
         break;
 
     case 3: // AMMOTYPE
-        temp_num    = (objWep->ammo[attacknum]) + 1;
+        temp_num    = (objWep->ammo_[attacknum]) + 1;
         temp_string = std::to_string(temp_num);
         break;
 
     case 4: // AMMOPERSHOT
-        temp_num    = objWep->ammopershot[attacknum];
+        temp_num    = objWep->ammopershot_[attacknum];
         temp_string = std::to_string(temp_num);
         break;
 
     case 5: // CLIPSIZE
-        temp_num    = objWep->clip_size[attacknum];
+        temp_num    = objWep->clip_size_[attacknum];
         temp_string = std::to_string(temp_num);
         break;
 
     case 6: // DAMAGE Nominal
-        damtype     = &objAtck->damage;
-        temp_num    = damtype->nominal;
+        damtype     = &objAtck->damage_;
+        temp_num    = damtype->nominal_;
         temp_string = std::to_string(temp_num);
         break;
 
     case 7: // DAMAGE Max
-        damtype     = &objAtck->damage;
-        temp_num    = damtype->linear_max;
+        damtype     = &objAtck->damage_;
+        temp_num    = damtype->linear_max_;
         temp_string = std::to_string(temp_num);
         break;
 
     case 8: // Range
-        temp_num    = objAtck->range;
+        temp_num    = objAtck->range_;
         temp_string = std::to_string(temp_num);
         break;
 
     case 9: // AUTOMATIC
-        if (objWep->autofire[attacknum])
+        if (objWep->autofire_[attacknum])
             temp_string = "1";
         else
             temp_string = "0";
@@ -1400,7 +1400,7 @@ static int MO_query_tagged(lua_State *L)
 //
 static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits = false)
 {
-    benefit_t *list;
+    Benefit *list;
     std::string BenefitName;
     int        BenefitType = 0;
     int        BenefitAmount = 0;
@@ -1441,21 +1441,21 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
 
         switch (list->type)
         {
-        case BENEFIT_Weapon:
+        case kBenefitTypeWeapon:
             // If it's a weapon we'll want to parse
             // it differently to get the name.
             BenefitName = "WEAPON";
             if (list->sub.weap)
             {
-                weapondef_c *objWep = list->sub.weap;
-                BenefitName = objWep->name;
+                WeaponDefinition *objWep = list->sub.weap;
+                BenefitName = objWep->name_;
                 BenefitName = AuxStringReplaceAll(BenefitName, std::string("_"), std::string(" "));
             }
             BenefitType = 0;
             BenefitAmount = 1;
             break;
             
-        case BENEFIT_Ammo:
+        case kBenefitTypeAmmo:
             BenefitName = "AMMO";
             BenefitType = (int)list->sub.type + 1;
             BenefitAmount = (int)list->amount;
@@ -1466,62 +1466,62 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
             BenefitLimit = (int)list->limit;
             break;
 
-        case BENEFIT_Health: // only benefit without a sub.type so just give it 1
+        case kBenefitTypeHealth: // only benefit without a sub.type so just give it 1
             BenefitName = "HEALTH";
             BenefitType = 1;
             BenefitAmount = (int)list->amount;
             BenefitLimit = (int)list->limit;
             break;
 
-        case BENEFIT_Armour:
+        case kBenefitTypeArmour:
             BenefitName = "ARMOUR";
             BenefitType = (int)list->sub.type + 1;
             BenefitAmount = (int)list->amount;
             BenefitLimit = (int)list->limit;
             break;
 
-        case BENEFIT_Inventory:
+        case kBenefitTypeInventory:
             BenefitName = "INVENTORY";
             BenefitType = (int)list->sub.type + 1;
             BenefitAmount = (int)list->amount;
             BenefitLimit = (int)list->limit;
             break;
 
-        case BENEFIT_Counter:
+        case kBenefitTypeCounter:
             BenefitName = "COUNTER";
             BenefitType = (int)list->sub.type + 1;
             BenefitAmount = (int)list->amount;
             BenefitLimit = (int)list->limit;
             break;
 
-        case BENEFIT_Key:
+        case kBenefitTypeKey:
             BenefitName = "KEY";
             BenefitType = (log2((int)list->sub.type) + 1);
             BenefitAmount = 1;
             break;
 
-        case BENEFIT_Powerup:
+        case kBenefitTypePowerup:
             BenefitName = "POWERUP";
             BenefitType = (int)list->sub.type + 1;
             BenefitAmount = (int)list->amount;
             BenefitLimit = (int)list->limit;
             break;
 
-        case BENEFIT_AmmoLimit:
+        case kBenefitTypeAmmoLimit:
             BenefitName = "AMMOLIMIT";
             BenefitType = (int)list->sub.type + 1;
             BenefitAmount = (int)list->amount;
             BenefitLimit = (int)list->limit;
             break;
         
-        case BENEFIT_InventoryLimit:
+        case kBenefitTypeInventoryLimit:
             BenefitName = "INVENTORYLIMIT";
             BenefitType = (int)list->sub.type + 1;
             BenefitAmount = (int)list->amount;
             BenefitLimit = (int)list->limit;
             break;
         
-        case BENEFIT_CounterLimit:
+        case kBenefitTypeCounterLimit:
             BenefitName = "COUNTERLIMIT";
             BenefitType = (int)list->sub.type + 1;
             BenefitAmount = (int)list->amount;
@@ -1595,7 +1595,7 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
         temp_value="PICKUP";
     if (mo->info->pickup_benefits)
     {
-        if (mo->info->pickup_benefits->type == BENEFIT_Weapon)
+        if (mo->info->pickup_benefits->type == kBenefitTypeWeapon)
             temp_value="WEAPON";
     } 
 
@@ -1673,9 +1673,9 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 }
 
 
-static void CreateLuaTable_Attacks(lua_State *L, weapondef_c *objWep)
+static void CreateLuaTable_Attacks(lua_State *L, WeaponDefinition *objWep)
 {
-    atkdef_c *objAtck;
+    AttackDefinition *objAtck;
     int         temp_num = 0;
     std::string temp_string;
     
@@ -1683,7 +1683,7 @@ static void CreateLuaTable_Attacks(lua_State *L, weapondef_c *objWep)
     int NumberOfAttacks = 0;
     for (NumberOfAttacks=0; NumberOfAttacks < 3;  NumberOfAttacks++)
     {
-        if (!objWep->attack[NumberOfAttacks])
+        if (!objWep->attack_[NumberOfAttacks])
             break;
     }
 
@@ -1695,52 +1695,52 @@ static void CreateLuaTable_Attacks(lua_State *L, weapondef_c *objWep)
     int CurrentAttack = 0; //counter
     for (CurrentAttack=0; CurrentAttack < NumberOfAttacks;  CurrentAttack++)
     {
-        objAtck = objWep->attack[CurrentAttack];
-        const damage_c *damtype;
+        objAtck = objWep->attack_[CurrentAttack];
+        const DamageClass *damtype;
 
          //add it to our table
         lua_pushnumber(L, CurrentAttack); //new attack
         lua_createtable(L, 0, NumberOfAttackFields); //create attack subItem table
 
         // NAME
-        temp_string = objAtck->name;
+        temp_string = objAtck->name_;
         temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
         lua_pushstring(L, temp_string.c_str());
         lua_setfield(L, -2, "name");   //add to ATTACK subItem table
 
         // AMMOTYPE
-        temp_num    = (objWep->ammo[CurrentAttack]) + 1;
+        temp_num    = (objWep->ammo_[CurrentAttack]) + 1;
         lua_pushinteger(L, temp_num);
         lua_setfield(L, -2, "ammo_type");   //add to ATTACK subItem table
 
         // AMMOPERSHOT
-        temp_num    = objWep->ammopershot[CurrentAttack];
+        temp_num    = objWep->ammopershot_[CurrentAttack];
         lua_pushinteger(L, temp_num);
         lua_setfield(L, -2, "ammo_per_shot");   //add to ATTACK subItem table
 
         // CLIPSIZE
-        temp_num    = objWep->clip_size[CurrentAttack];
+        temp_num    = objWep->clip_size_[CurrentAttack];
         lua_pushinteger(L, temp_num);
         lua_setfield(L, -2, "clip_size");   //add to ATTACK subItem table
 
         // DAMAGE Nominal
-        damtype     = &objAtck->damage;
-        temp_num    = damtype->nominal;
+        damtype     = &objAtck->damage_;
+        temp_num    = damtype->nominal_;
         lua_pushnumber(L, temp_num);
         lua_setfield(L, -2, "damage");   //add to ATTACK subItem table
 
         // DAMAGE Max
-        temp_num    = damtype->linear_max;
+        temp_num    = damtype->linear_max_;
         lua_pushnumber(L, temp_num);
         lua_setfield(L, -2, "damage_max");   //add to ATTACK subItem table
 
         // Range
-        temp_num    = objAtck->range;
+        temp_num    = objAtck->range_;
         lua_pushinteger(L, temp_num);
         lua_setfield(L, -2, "range");   //add to ATTACK subItem table
 
         // AUTOMATIC
-        lua_pushboolean(L, objWep->autofire[CurrentAttack] ? 1 : 0);
+        lua_pushboolean(L, objWep->autofire_[CurrentAttack] ? 1 : 0);
         lua_setfield(L, -2, "is_automatic");   //add to ATTACK subItem table
 
 
@@ -1753,7 +1753,7 @@ static void CreateLuaTable_Attacks(lua_State *L, weapondef_c *objWep)
 
 // CreateLuaTable_Weapon(LuaState, mobj)
 //
-static void CreateLuaTable_Weapon(lua_State *L, weapondef_c *objWep)
+static void CreateLuaTable_Weapon(lua_State *L, WeaponDefinition *objWep)
 {
     std::string temp_value;
     int NumberOfItems = 3; //how many fields in a row
@@ -1761,7 +1761,7 @@ static void CreateLuaTable_Weapon(lua_State *L, weapondef_c *objWep)
 
     //---------------
     // weapon.name
-    temp_value = objWep->name;
+    temp_value = objWep->name_;
     temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
     lua_pushstring(L, temp_value.c_str());
     lua_setfield(L, -2, "name");   //add to WEAPON Table
@@ -1770,7 +1770,7 @@ static void CreateLuaTable_Weapon(lua_State *L, weapondef_c *objWep)
     //---------------
     // weapon.zoomfactor
     //float temp_num2   = 90.0f / objWep->zoom_fov;
-    float temp_num2   = objWep->zoom_factor;
+    float temp_num2   = objWep->zoom_factor_;
     lua_pushnumber(L, temp_num2);
     lua_setfield(L, -2, "zoom_factor");   //add to WEAPON Table
     //---------------
@@ -1806,13 +1806,13 @@ static int MO_weapon_info(lua_State *L)
             lua_pushstring(L, "");
             return 1;
         }
-        if (mo->info->pickup_benefits->type != BENEFIT_Weapon)
+        if (mo->info->pickup_benefits->type != kBenefitTypeWeapon)
         {
             lua_pushstring(L, "");
             return 1;
         }
 
-        weapondef_c *objWep = mo->info->pickup_benefits->sub.weap;
+        WeaponDefinition *objWep = mo->info->pickup_benefits->sub.weap;
         if (!objWep)
         {
             lua_pushstring(L, "");

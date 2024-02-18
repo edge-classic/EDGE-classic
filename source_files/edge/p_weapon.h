@@ -76,7 +76,7 @@ typedef enum
 //
 typedef struct
 {
-    weapondef_c *info;
+    WeaponDefinition *info;
 
     // player has this weapon.
     bool owned;

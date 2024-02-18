@@ -114,7 +114,7 @@ class light_image_c
     }
 };
 
-static light_image_c *GetLightImage(const mobjtype_c *info, int DL)
+static light_image_c *GetLightImage(const MobjType *info, int DL)
 {
     // Intentional Const Overrides
     dlight_info_c *D_info = (dlight_info_c *)&info->dlight[DL];
@@ -473,7 +473,7 @@ class plane_glow_c : public abstract_shader_c
 
         if (is_weapon)
         {
-            float weapon_z = mod_pos->z + mod_pos->height * PERCENT_2_FLOAT(mod_pos->info->shotheight);
+            float weapon_z = mod_pos->z + mod_pos->height * mod_pos->info->shotheight;
 
             if (mo->info->glow_type == GLOW_Floor)
                 dist = weapon_z - sec->f_h;
@@ -746,14 +746,14 @@ private:
 	float length;
 	HMM_Vec3 normal;
 
-	const mobjtype_c *info;
+	const MobjType *info;
 	float bright;
 
 	light_image_c *lim[2];
 
 public:
 	laser_glow_c(const HMM_Vec3& _v1, const HMM_Vec3& _v2,
-				 const mobjtype_c *_info, float _intensity) :
+				 const MobjType *_info, float _intensity) :
 		s(_v1), e(_v2), info(_info), bright(_intensity)
 	{
 		normal.x = e.x - s.x;

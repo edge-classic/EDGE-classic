@@ -74,7 +74,7 @@ class sfxdef_c
     int priority;
 
     // volume adjustment (100% is normal, lower is quieter)
-    percent_t volume;
+    float volume;
 
     // -KM- 1998/09/01  Looping: for non nullptr origins
     bool looping;

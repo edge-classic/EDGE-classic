@@ -253,7 +253,7 @@ static int StateGetRedirector(const char *redir)
 //
 // DDF_StateFindLabel
 //
-int DDF_StateFindLabel(const std::vector<state_range_t> &group,
+int DDF_StateFindLabel(const std::vector<StateRange> &group,
                        const char *label, bool quiet)
 {
     for (int g = (int)group.size() - 1; g >= 0; g--)
@@ -282,13 +282,13 @@ int DDF_StateFindLabel(const std::vector<state_range_t> &group,
 // DDF_StateReadState
 //
 void DDF_StateReadState(const char *info, const char *label,
-                        std::vector<state_range_t> &group, int *state_num,
+                        std::vector<StateRange> &group, int *state_num,
                         int index, const char *redir,
                         const DDFActionCode *action_list, bool is_weapon)
 {
     SYS_ASSERT(group.size() > 0);
 
-    state_range_t &range = group.back();
+    StateRange &range = group.back();
 
     int i, j;
 
@@ -492,7 +492,7 @@ void DDF_StateReadState(const char *info, const char *label,
     }
 }
 
-bool DDF_MainParseState(uint8_t *object, std::vector<state_range_t> &group,
+bool DDF_MainParseState(uint8_t *object, std::vector<StateRange> &group,
                         const char *field, const char *contents, int index,
                         bool is_last, bool is_weapon,
                         const DDFStateStarter *starters,
@@ -529,9 +529,9 @@ bool DDF_MainParseState(uint8_t *object, std::vector<state_range_t> &group,
     return true;
 }
 
-void DDF_StateBeginRange(std::vector<state_range_t> &group)
+void DDF_StateBeginRange(std::vector<StateRange> &group)
 {
-    state_range_t range;
+    StateRange range;
 
     range.first = S_NULL;
     range.last  = S_NULL;
@@ -545,11 +545,11 @@ void DDF_StateBeginRange(std::vector<state_range_t> &group)
 // Check through the states on an mobj and attempts to dereference any
 // encoded state redirectors.
 //
-void DDF_StateFinishRange(std::vector<state_range_t> &group)
+void DDF_StateFinishRange(std::vector<StateRange> &group)
 {
     SYS_ASSERT(!group.empty());
 
-    state_range_t &range = group.back();
+    StateRange &range = group.back();
 
     // if no states were added, remove the unused range
     if (range.first == S_NULL)
@@ -597,11 +597,11 @@ void DDF_StateFinishRange(std::vector<state_range_t> &group)
     redirs.clear();
 }
 
-bool DDF_StateGroupHasState(const std::vector<state_range_t> &group, int st)
+bool DDF_StateGroupHasState(const std::vector<StateRange> &group, int st)
 {
     for (int g = 0; g < (int)group.size(); g++)
     {
-        const state_range_t &range = group[g];
+        const StateRange &range = group[g];
 
         if (range.first <= st && st <= range.last) return true;
     }
@@ -631,7 +631,7 @@ void DDF_StateGetMobj(const char *arg, state_t *cur_state)
 {
     if (!arg || !arg[0]) return;
 
-    cur_state->action_par = new mobj_strref_c(arg);
+    cur_state->action_par = new MobjStringReference(arg);
 }
 
 void DDF_StateGetSound(const char *arg, state_t *cur_state)
@@ -685,7 +685,7 @@ void DDF_StateGetPercent(const char *arg, state_t *cur_state)
 {
     if (!arg || !arg[0]) return;
 
-    percent_t *val_ptr = new percent_t;
+    float *val_ptr = new float;
 
     if (sscanf(arg, " %f%% ", val_ptr) != 1 || (*val_ptr) < 0)
         DDF_Error("DDF_StateGetPercent: Bad percentage: %s\n", arg);
@@ -696,7 +696,7 @@ void DDF_StateGetPercent(const char *arg, state_t *cur_state)
 }
 
 act_jump_info_s::act_jump_info_s()
-    : chance(PERCENT_MAKE(100))  // -ACB- 2001/02/04 tis a precent_t
+    : chance(1.0f)  // -ACB- 2001/02/04 tis a precent_t
 {
 }
 
@@ -784,7 +784,7 @@ void DDF_StateGetMorph(const char *arg, state_t *cur_state)
 
     act_morph_info_t *morph = new act_morph_info_t;
 
-    morph->start.label = "IDLE";
+    morph->start.label_ = "IDLE";
 
     const char *s = strchr(arg, ',');
 
@@ -820,9 +820,9 @@ void DDF_StateGetMorph(const char *arg, state_t *cur_state)
 
         buffer[len] = 0;
 
-        morph->start.label = buffer;
+        morph->start.label_ = buffer;
 
-        if (*s == ':') morph->start.offset = HMM_MAX(0, atoi(s + 1) - 1);
+        if (*s == ':') morph->start.offset_ = HMM_MAX(0, atoi(s + 1) - 1);
     }
 
     cur_state->action_par = morph;
@@ -841,7 +841,7 @@ void DDF_StateGetBecome(const char *arg, state_t *cur_state)
 
     act_become_info_t *become = new act_become_info_t;
 
-    become->start.label = "IDLE";
+    become->start.label_ = "IDLE";
 
     const char *s = strchr(arg, ',');
 
@@ -877,9 +877,9 @@ void DDF_StateGetBecome(const char *arg, state_t *cur_state)
 
         buffer[len] = 0;
 
-        become->start.label = buffer;
+        become->start.label_ = buffer;
 
-        if (*s == ':') become->start.offset = HMM_MAX(0, atoi(s + 1) - 1);
+        if (*s == ':') become->start.offset_ = HMM_MAX(0, atoi(s + 1) - 1);
     }
 
     cur_state->action_par = become;
@@ -898,7 +898,7 @@ void DDF_StateGetBecomeWeapon(const char *arg, state_t *cur_state)
 
     wep_become_info_t *become = new wep_become_info_t;
 
-    become->start.label = "READY";
+    become->start.label_ = "READY";
 
     const char *s = strchr(arg, ',');
 
@@ -934,9 +934,9 @@ void DDF_StateGetBecomeWeapon(const char *arg, state_t *cur_state)
 
         buffer[len] = 0;
 
-        become->start.label = buffer;
+        become->start.label_ = buffer;
 
-        if (*s == ':') become->start.offset = HMM_MAX(0, atoi(s + 1) - 1);
+        if (*s == ':') become->start.offset_ = HMM_MAX(0, atoi(s + 1) - 1);
     }
 
     cur_state->action_par = become;

@@ -218,7 +218,7 @@ static void RAD_CheckForPercent(const char *info, void *storage)
     if (f < 0.0f || f > 100.0f)
         RAD_Error("Percentage out of range: %s\n", info);
 
-    *(percent_t *)storage = f / 100.0f;
+    *(float *)storage = f / 100.0f;
 }
 
 //
@@ -245,7 +245,7 @@ static void RAD_CheckForPercentAny(const char *info, void *storage)
 
     RAD_CheckForFloat(s, &f);
 
-    *(percent_t *)storage = f / 100.0f;
+    *(float *)storage = f / 100.0f;
 }
 
 // -ES- Copied from DDF_MainGetTime.
@@ -1519,7 +1519,7 @@ static void RAD_ParseSpawnThing(param_set_t &pars)
     //   TAG=<num>
     //   WHEN=<when-appear>
     //
-    // -ACB- 1998/08/06 Use mobjtype_c linked list
+    // -ACB- 1998/08/06 Use MobjType linked list
     // -AJA- 1999/09/11: Extra fields for Z and slope.
 
     // -AJA- 1999/09/11: Reworked for spawning things at Z.
@@ -2082,7 +2082,7 @@ static void RAD_ParseJump(param_set_t &pars)
     s_jump_t *jump = new s_jump_t;
 
     jump->label         = Z_StrDup(pars[1]);
-    jump->random_chance = PERCENT_MAKE(100);
+    jump->random_chance = 1.0f;
 
     if (pars.size() >= 3)
         RAD_CheckForPercent(pars[2], &jump->random_chance);

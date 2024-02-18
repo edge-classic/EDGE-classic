@@ -358,7 +358,7 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
     s_thing_t *t = (s_thing_t *)param;
 
     mobj_t           *mo;
-    const mobjtype_c *minfo;
+    const MobjType *minfo;
 
     // Spawn a new map object.
 
@@ -523,7 +523,7 @@ void RAD_ActDamageMonsters(rad_trigger_t *R, void *param)
 {
     s_damage_monsters_t *mon = (s_damage_monsters_t *)param;
 
-    const mobjtype_c *info = nullptr;
+    const MobjType *info = nullptr;
     int               tag  = mon->thing_tag;
 
     if (mon->thing_name)
@@ -570,7 +570,7 @@ void RAD_ActThingEvent(rad_trigger_t *R, void *param)
 {
     s_thing_event_t *tev = (s_thing_event_t *)param;
 
-    const mobjtype_c *info = nullptr;
+    const MobjType *info = nullptr;
     int               tag  = tev->thing_tag;
 
     if (tev->thing_name)
@@ -1184,7 +1184,7 @@ void RAD_ActSwitchWeapon(rad_trigger_t *R, void *param)
     s_weapon_t *weaparg = (s_weapon_t *)param;
 
     player_t    *player = GetWhoDunnit(R);
-    weapondef_c *weap   = weapondefs.Lookup(weaparg->name);
+    WeaponDefinition *weap   = weapondefs.Lookup(weaparg->name);
 
     if (weap)
     {
@@ -1232,7 +1232,7 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
     P_TeleportMove(p->mo, point->x, point->y, point->z);
 }
 
-static void RAD_SetPsprite(player_t *p, int position, int stnum, weapondef_c *info = nullptr)
+static void RAD_SetPsprite(player_t *p, int position, int stnum, WeaponDefinition *info = nullptr)
 {
     pspdef_t *psp = &p->psprites[position];
 
@@ -1244,13 +1244,13 @@ static void RAD_SetPsprite(player_t *p, int position, int stnum, weapondef_c *in
     }
 
     // state is old? -- Mundo hack for DDF inheritance
-    if (info && stnum < info->state_grp.back().first)
+    if (info && stnum < info->state_grp_.back().first)
     {
         state_t *st = &states[stnum];
 
         if (st->label)
         {
-            int new_state = DDF_StateFindLabel(info->state_grp, st->label, true /* quiet */);
+            int new_state = DDF_StateFindLabel(info->state_grp_, st->label, true /* quiet */);
             if (new_state != S_NULL)
                 stnum = new_state;
         }
@@ -1306,8 +1306,8 @@ void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param)
     s_weapon_replace_t *weaparg = (s_weapon_replace_t *)param;
 
     player_t    *p      = GetWhoDunnit(R);
-    weapondef_c *oldWep = weapondefs.Lookup(weaparg->old_weapon);
-    weapondef_c *newWep = weapondefs.Lookup(weaparg->new_weapon);
+    WeaponDefinition *oldWep = weapondefs.Lookup(weaparg->old_weapon);
+    WeaponDefinition *newWep = weapondefs.Lookup(weaparg->new_weapon);
 
     if (!oldWep)
     {
@@ -1330,7 +1330,7 @@ void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param)
     // refresh the sprite
     if (p->weapons[p->ready_wp].info == newWep)
     {
-        RAD_SetPspriteDeferred(p, ps_weapon, p->weapons[p->ready_wp].info->ready_state);
+        RAD_SetPspriteDeferred(p, ps_weapon, p->weapons[p->ready_wp].info->ready_state_);
 
         P_FixWeaponClip(p, p->ready_wp); // handle the potential clip_size difference
         P_UpdateAvailWeapons(p);
@@ -1344,7 +1344,7 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
     s_weapon_event_t *tev = (s_weapon_event_t *)param;
 
     player_t    *p      = GetWhoDunnit(R);
-    weapondef_c *oldWep = weapondefs.Lookup(tev->weapon_name);
+    WeaponDefinition *oldWep = weapondefs.Lookup(tev->weapon_name);
 
     if (!oldWep)
     {
@@ -1368,7 +1368,7 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
 
     p->ready_wp = (weapon_selection_e)pw_index; // insta-switch to it
 
-    int state = DDF_StateFindLabel(oldWep->state_grp, tev->label, true /* quiet */);
+    int state = DDF_StateFindLabel(oldWep->state_grp_, tev->label, true /* quiet */);
     if (state == S_NULL)
         I_Error("RTS WEAPON_EVENT: frame '%s' in [%s] not found!\n", tev->label, tev->weapon_name);
     state += tev->offset;
@@ -1376,7 +1376,7 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
     RAD_SetPspriteDeferred(p, ps_weapon, state); // refresh the sprite
 }
 
-void P_ActReplace(struct mobj_s *mo, const mobjtype_c *newThing)
+void P_ActReplace(struct mobj_s *mo, const MobjType *newThing)
 {
 
     // DO THE DEED !!
@@ -1405,7 +1405,7 @@ void P_ActReplace(struct mobj_s *mo, const mobjtype_c *newThing)
         mo->extendedflags = mo->info->extendedflags;
         mo->hyperflags    = mo->info->hyperflags;
 
-        mo->vis_target       = PERCENT_2_FLOAT(mo->info->translucency);
+        mo->vis_target       = mo->info->translucency;
         mo->currentattack    = nullptr;
         mo->model_skin       = mo->info->model_skin;
         mo->model_last_frame = -1;
@@ -1442,8 +1442,8 @@ void RAD_ActReplaceThing(rad_trigger_t *R, void *param)
 {
     s_thing_replace_t *thingarg = (s_thing_replace_t *)param;
 
-    const mobjtype_c *oldThing = nullptr;
-    const mobjtype_c *newThing = nullptr;
+    const MobjType *oldThing = nullptr;
+    const MobjType *newThing = nullptr;
 
     // Prioritize number lookup. It's faster and more permissive
     if (thingarg->old_thing_type > -1)

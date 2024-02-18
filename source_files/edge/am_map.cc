@@ -1310,18 +1310,18 @@ void AM_Render(float x, float y, float w, float h, mobj_t *focus)
     if (automap_style->bg_image)
     {
         float old_alpha = HUD_GetAlpha();
-        HUD_SetAlpha(automap_style->def->bg.translucency);
-        if (automap_style->def->special == 0)
+        HUD_SetAlpha(automap_style->def->bg_.translucency_);
+        if (automap_style->def->special_ == 0)
             HUD_StretchImage(-90, 0, 500, 200, automap_style->bg_image, 0.0, 0.0);
         else
             HUD_TileImage(-90, 0, 500, 200, automap_style->bg_image, 0.0, 0.0);
         HUD_SetAlpha(old_alpha);
     }
-    else if (automap_style->def->bg.colour != kRGBANoValue)
+    else if (automap_style->def->bg_.colour_ != kRGBANoValue)
     {
         float old_alpha = HUD_GetAlpha();
-        HUD_SetAlpha(automap_style->def->bg.translucency);
-        HUD_SolidBox(x, y, x + w, y + h, automap_style->def->bg.colour);
+        HUD_SetAlpha(automap_style->def->bg_.translucency_);
+        HUD_SolidBox(x, y, x + w, y + h, automap_style->def->bg_.colour_);
         HUD_SetAlpha(old_alpha);
     }
 

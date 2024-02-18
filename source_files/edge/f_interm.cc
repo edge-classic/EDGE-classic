@@ -448,7 +448,7 @@ static void DrawLevelFinished(void)
     // load styles
     style_c *style;
     style      = wi_sp_style;
-    int t_type = styledef_c::T_TEXT;
+    int t_type = StyleDefinition::kTextSectionText;
 
     HUD_SetAlignment(0, -1); // center it
 
@@ -470,9 +470,9 @@ static void DrawLevelFinished(void)
             h1 = style->fonts[t_type]->NominalHeight();
 
             float txtscale = 1.0;
-            if (style->def->text[t_type].scale)
+            if (style->def->text_[t_type].scale_)
             {
-                txtscale = style->def->text[t_type].scale;
+                txtscale = style->def->text_[t_type].scale_;
             }
             int txtWidth = 0;
             txtWidth     = style->fonts[t_type]->StringWidth(language[wi_stats.cur->description_.c_str()]) * txtscale;
@@ -493,9 +493,9 @@ static void DrawLevelFinished(void)
         h1 = style->fonts[t_type]->NominalHeight();
 
         float txtscale = 1.0;
-        if (style->def->text[t_type].scale)
+        if (style->def->text_[t_type].scale_)
         {
-            txtscale = style->def->text[t_type].scale;
+            txtscale = style->def->text_[t_type].scale_;
         }
         int txtWidth = 0;
         txtWidth     = style->fonts[t_type]->StringWidth(language[wi_stats.cur->description_.c_str()]) * txtscale;
@@ -512,9 +512,9 @@ static void DrawLevelFinished(void)
     }
     HUD_SetAlignment(-1, -1); // set it back to usual
 
-    t_type = styledef_c::T_TITLE;
+    t_type = StyleDefinition::kTextSectionTitle;
     if (!style->fonts[t_type])
-        t_type = styledef_c::T_TEXT;
+        t_type = StyleDefinition::kTextSectionText;
 
     // ttf_ref_yshift is important for TTF fonts.
     float y_shift = style->fonts[t_type]->ttf_ref_yshift[current_font_size]; // * txtscale;
@@ -610,9 +610,9 @@ static void DrawEnteringLevel(void)
 
     style_c *style;
     style      = wi_sp_style;
-    int t_type = styledef_c::T_TITLE;
+    int t_type = StyleDefinition::kTextSectionTitle;
     if (!style->fonts[t_type])
-        t_type = styledef_c::T_TEXT;
+        t_type = StyleDefinition::kTextSectionText;
 
     HUD_SetAlignment(0, -1); // center it
 
@@ -646,7 +646,7 @@ static void DrawEnteringLevel(void)
     y = y + h1;
     y += y_shift;
 
-    t_type = styledef_c::T_TEXT;
+    t_type = StyleDefinition::kTextSectionText;
 
     HUD_SetAlignment(0, -1); // center it
 
@@ -666,9 +666,9 @@ static void DrawEnteringLevel(void)
         else
         {
             float txtscale = 1.0;
-            if (style->def->text[t_type].scale)
+            if (style->def->text_[t_type].scale_)
             {
-                txtscale = style->def->text[t_type].scale;
+                txtscale = style->def->text_[t_type].scale_;
             }
             int txtWidth = 0;
             txtWidth     = style->fonts[t_type]->StringWidth(language[wi_stats.next->description_.c_str()]) * txtscale;
@@ -687,9 +687,9 @@ static void DrawEnteringLevel(void)
     else
     {
         float txtscale = 1.0;
-        if (style->def->text[t_type].scale)
+        if (style->def->text_[t_type].scale_)
         {
-            txtscale = style->def->text[t_type].scale;
+            txtscale = style->def->text_[t_type].scale_;
         }
         int txtWidth = 0;
         txtWidth     = style->fonts[t_type]->StringWidth(language[wi_stats.next->description_.c_str()]) * txtscale;
@@ -780,15 +780,15 @@ static float TimeWidth(int t, bool drawText = false)
 
     if (drawText == true)
     {
-        float txtscale = wi_sp_style->def->text[styledef_c::T_ALT].scale;
+        float txtscale = wi_sp_style->def->text_[StyleDefinition::kTextSectionAlternate].scale_;
 
         if (t > 3599)
         {
-            return wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth("Sucks") * txtscale;
+            return wi_sp_style->fonts[StyleDefinition::kTextSectionAlternate]->StringWidth("Sucks") * txtscale;
         }
         else
         {
-            return wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()) * txtscale;
+            return wi_sp_style->fonts[StyleDefinition::kTextSectionAlternate]->StringWidth(s.c_str()) * txtscale;
         }
     }
     else
@@ -799,7 +799,7 @@ static float TimeWidth(int t, bool drawText = false)
             if ((sucks) && (W_IsLumpInPwad(sucks->name.c_str())))
                 return IM_WIDTH(sucks);
             else
-                return wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth("Sucks");
+                return wi_sp_style->fonts[StyleDefinition::kTextSectionAlternate]->StringWidth("Sucks");
         }
         else
         {
@@ -862,11 +862,11 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
     {
         if (t > 3599)
         {
-            HL_WriteText(wi_sp_style, styledef_c::T_TITLE, x, y, "Sucks");
+            HL_WriteText(wi_sp_style, StyleDefinition::kTextSectionTitle, x, y, "Sucks");
         }
         else
         {
-            HL_WriteText(wi_sp_style, styledef_c::T_ALT, x, y, s.c_str());
+            HL_WriteText(wi_sp_style, StyleDefinition::kTextSectionAlternate, x, y, s.c_str());
         }
     }
     else
@@ -877,7 +877,7 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
             if ((sucks) && (W_IsLumpInPwad(sucks->name.c_str())))
                 HUD_DrawImage(x, y, sucks);
             else
-                HL_WriteText(wi_sp_style, styledef_c::T_TITLE, x, y, "Sucks");
+                HL_WriteText(wi_sp_style, StyleDefinition::kTextSectionTitle, x, y, "Sucks");
         }
         else
         {
@@ -1124,7 +1124,7 @@ static void DrawDeathmatchStats(void)
 {
     DrawLevelFinished();
 
-    int t_type = styledef_c::T_TITLE;
+    int t_type = StyleDefinition::kTextSectionTitle;
     int y      = SP_STATSY; // 40;
 
     HL_WriteText(wi_net_style, t_type, 20, y, "Player");
@@ -1140,12 +1140,12 @@ static void DrawDeathmatchStats(void)
 
         y += 12;
 
-        t_type = styledef_c::T_TEXT;
+        t_type = StyleDefinition::kTextSectionText;
 
         // hightlight the console player
 #if 1
         if (p == consoleplayer)
-            t_type = styledef_c::T_ALT;
+            t_type = StyleDefinition::kTextSectionAlternate;
 #else
         if (p == consoleplayer && ((bcnt & 31) < 16))
             continue;
@@ -1391,7 +1391,7 @@ static void DrawCoopStats(void)
 {
     DrawLevelFinished();
 
-    int t_type = styledef_c::T_TITLE;
+    int t_type = StyleDefinition::kTextSectionTitle;
     int y      = SP_STATSY; // 40;
 
     // FIXME: better alignment
@@ -1416,12 +1416,12 @@ static void DrawCoopStats(void)
 
         y += 12;
 
-        t_type = styledef_c::T_TEXT;
+        t_type = StyleDefinition::kTextSectionText;
 
         // highlight the console player
 #if 1
         if (p == consoleplayer)
-            t_type = styledef_c::T_ALT;
+            t_type = StyleDefinition::kTextSectionAlternate;
 #else
         if (p == consoleplayer && ((bcnt & 31) < 16))
             continue;
@@ -1623,10 +1623,10 @@ static void DrawSinglePlayerStats(void)
     }
     else
     {
-        HL_WriteText(wi_sp_style, styledef_c::T_ALT, SP_STATSX, SP_STATSY, "Kills");
+        HL_WriteText(wi_sp_style, StyleDefinition::kTextSectionAlternate, SP_STATSX, SP_STATSY, "Kills");
         if (!s.empty())
-            HL_WriteText(wi_sp_style, styledef_c::T_ALT,
-                         320 - SP_STATSX - wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()), SP_STATSY,
+            HL_WriteText(wi_sp_style, StyleDefinition::kTextSectionAlternate,
+                         320 - SP_STATSX - wi_sp_style->fonts[StyleDefinition::kTextSectionAlternate]->StringWidth(s.c_str()), SP_STATSY,
                          s.c_str());
     }
 
@@ -1646,10 +1646,10 @@ static void DrawSinglePlayerStats(void)
     }
     else
     {
-        HL_WriteText(wi_sp_style, styledef_c::T_ALT, SP_STATSX, SP_STATSY + lh, "Items");
+        HL_WriteText(wi_sp_style, StyleDefinition::kTextSectionAlternate, SP_STATSX, SP_STATSY + lh, "Items");
         if (!s.empty())
-            HL_WriteText(wi_sp_style, styledef_c::T_ALT,
-                         320 - SP_STATSX - wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()),
+            HL_WriteText(wi_sp_style, StyleDefinition::kTextSectionAlternate,
+                         320 - SP_STATSX - wi_sp_style->fonts[StyleDefinition::kTextSectionAlternate]->StringWidth(s.c_str()),
                          SP_STATSY + lh, s.c_str());
     }
 
@@ -1669,10 +1669,10 @@ static void DrawSinglePlayerStats(void)
     }
     else
     {
-        HL_WriteText(wi_sp_style, styledef_c::T_ALT, SP_STATSX, SP_STATSY + 2 * lh, "Secrets");
+        HL_WriteText(wi_sp_style, StyleDefinition::kTextSectionAlternate, SP_STATSX, SP_STATSY + 2 * lh, "Secrets");
         if (!s.empty())
-            HL_WriteText(wi_sp_style, styledef_c::T_ALT,
-                         320 - SP_STATSX - wi_sp_style->fonts[styledef_c::T_ALT]->StringWidth(s.c_str()),
+            HL_WriteText(wi_sp_style, StyleDefinition::kTextSectionAlternate,
+                         320 - SP_STATSX - wi_sp_style->fonts[StyleDefinition::kTextSectionAlternate]->StringWidth(s.c_str()),
                          SP_STATSY + 2 * lh, s.c_str());
     }
 
@@ -1683,7 +1683,7 @@ static void DrawSinglePlayerStats(void)
     }
     else
     {
-        HL_WriteText(wi_sp_style, styledef_c::T_ALT, SP_TIMEX, SP_TIMEY, "Time");
+        HL_WriteText(wi_sp_style, StyleDefinition::kTextSectionAlternate, SP_TIMEX, SP_TIMEY, "Time");
         DrawTime(160 - SP_TIMEX - TimeWidth(cnt_time, true), SP_TIMEY, cnt_time, true);
     }
 
@@ -1697,7 +1697,7 @@ static void DrawSinglePlayerStats(void)
         }
         else
         {
-            HL_WriteText(wi_sp_style, styledef_c::T_ALT, 170, SP_TIMEY, "Par");
+            HL_WriteText(wi_sp_style, StyleDefinition::kTextSectionAlternate, 170, SP_TIMEY, "Par");
             DrawTime(320 - SP_TIMEX - TimeWidth(cnt_par, true), SP_TIMEY, cnt_par, true);
         }
     }
@@ -1875,7 +1875,7 @@ static void LoadData(void)
     // find styles
     if (!wi_sp_style)
     {
-        styledef_c *def = styledefs.Lookup("STATS");
+        StyleDefinition *def = styledefs.Lookup("STATS");
         if (!def)
             def = default_style;
         wi_sp_style = hu_styles.Lookup(def);
@@ -1883,7 +1883,7 @@ static void LoadData(void)
 
     if (!wi_net_style)
     {
-        styledef_c *def = styledefs.Lookup("NET STATS");
+        StyleDefinition *def = styledefs.Lookup("NET STATS");
         if (!def)
             def = default_style;
         wi_net_style = hu_styles.Lookup(def);

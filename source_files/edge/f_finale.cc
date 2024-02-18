@@ -233,14 +233,14 @@ static void LookupFinaleStuff(void)
 
     if (!wi_leveltext_style)
     {
-        styledef_c *def = styledefs.Lookup("INTERLEVEL TEXT");
+        StyleDefinition *def = styledefs.Lookup("INTERLEVEL TEXT");
         if (!def)
             def = default_style;
         wi_leveltext_style = hu_styles.Lookup(def);
     }
     if (!wi_cast_style)
     {
-        styledef_c *def = styledefs.Lookup("CAST_SCREEN");
+        StyleDefinition *def = styledefs.Lookup("CAST_SCREEN");
         if (!def)
             def = default_style;
         wi_cast_style = hu_styles.Lookup(def);
@@ -403,7 +403,7 @@ static void TextWrite(void)
 
     style_c *style;
     style      = wi_leveltext_style;
-    int t_type = styledef_c::T_TEXT;
+    int t_type = StyleDefinition::kTextSectionText;
 
     // draw some of the text onto the screen
     int cx = 10;
@@ -422,15 +422,15 @@ static void TextWrite(void)
     HUD_SetTextColor(finale_textcol); // set a default
 
     float txtscale = 0.9; // set a default
-    if (style->def->text[t_type].scale)
+    if (style->def->text_[t_type].scale_)
     {
-        txtscale = style->def->text[t_type].scale;
+        txtscale = style->def->text_[t_type].scale_;
         HUD_SetScale(txtscale);
     }
 
-    if (style->def->text[t_type].colmap)
+    if (style->def->text_[t_type].colmap_)
     {
-        const Colormap *colmap = style->def->text[t_type].colmap;
+        const Colormap *colmap = style->def->text_[t_type].colmap_;
         HUD_SetTextColor(V_GetFontColor(colmap));
     }
 
@@ -738,21 +738,21 @@ static void CastDrawer(void)
 
     HUD_SetAlignment(0, -1);
 
-    if (wi_cast_style->def->text[styledef_c::T_TEXT].colmap)
+    if (wi_cast_style->def->text_[StyleDefinition::kTextSectionText].colmap_)
     {
-        HUD_SetTextColor(V_GetFontColor(wi_cast_style->def->text[styledef_c::T_TEXT].colmap));
+        HUD_SetTextColor(V_GetFontColor(wi_cast_style->def->text_[StyleDefinition::kTextSectionText].colmap_));
     }
     else
     {
         HUD_SetTextColor(SG_YELLOW_RGBA32);
     }
 
-    TempScale = wi_cast_style->def->text[styledef_c::T_TEXT].scale;
+    TempScale = wi_cast_style->def->text_[StyleDefinition::kTextSectionText].scale_;
     HUD_SetScale(TempScale);
 
-    if (wi_cast_style->fonts[styledef_c::T_TEXT])
+    if (wi_cast_style->fonts[StyleDefinition::kTextSectionText])
     {
-        HUD_SetFont(wi_cast_style->fonts[styledef_c::T_TEXT]);
+        HUD_SetFont(wi_cast_style->fonts[StyleDefinition::kTextSectionText]);
     }
 
     HUD_DrawText(160, 180, casttitle);
@@ -764,10 +764,10 @@ static void CastDrawer(void)
     float pos_x, pos_y;
     float scale_x, scale_y;
 
-    TempScale = wi_cast_style->def->text[styledef_c::T_HEADER].scale;
+    TempScale = wi_cast_style->def->text_[StyleDefinition::kTextSectionHeader].scale_;
     if (TempScale < 1.0 || TempScale > 1.0)
     {
-        scale_y = wi_cast_style->def->text[styledef_c::T_HEADER].scale;
+        scale_y = wi_cast_style->def->text_[StyleDefinition::kTextSectionHeader].scale_;
     }
     else
         scale_y = 3;

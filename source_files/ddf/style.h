@@ -16,10 +16,8 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_STYLE_H__
-#define __DDF_STYLE_H__
+#pragma once
 
-#include "epi.h"
 #include "types.h"
 
 class FontDefinition;
@@ -28,165 +26,167 @@ class Colormap;
 //
 // -AJA- 2004/11/14 Styles.ddf
 //
-class backgroundstyle_c
+class BackgroundStyle
 {
    public:
-    backgroundstyle_c();
-    backgroundstyle_c(const backgroundstyle_c &rhs);
-    ~backgroundstyle_c();
+    BackgroundStyle();
+    BackgroundStyle(const BackgroundStyle &rhs);
+    ~BackgroundStyle();
 
-    void               Default();
-    backgroundstyle_c &operator=(const backgroundstyle_c &rhs);
+    void             Default();
+    BackgroundStyle &operator=(const BackgroundStyle &rhs);
 
-    RGBAColor colour;
-    float translucency;
+    RGBAColor colour_;
+    float     translucency_;
 
-    std::string image_name;
+    std::string image_name_;
 
-    float scale;
-    float aspect;
+    float scale_;
+    float aspect_;
 };
 
-class textstyle_c
+class TextStyle
 {
    public:
-    textstyle_c();
-    textstyle_c(const textstyle_c &rhs);
-    ~textstyle_c();
+    TextStyle();
+    TextStyle(const TextStyle &rhs);
+    ~TextStyle();
+
+    void       Default();
+    TextStyle &operator=(const TextStyle &rhs);
+
+    const Colormap *colmap_;
+
+    float translucency_;
+
+    FontDefinition *font_;
+
+    float scale_;
+    float aspect_;
+    int   x_offset_;
+    int   y_offset_;
+};
+
+class CursorStyle
+{
+   public:
+    CursorStyle();
+    CursorStyle(const CursorStyle &rhs);
+    ~CursorStyle();
 
     void         Default();
-    textstyle_c &operator=(const textstyle_c &rhs);
+    CursorStyle &operator=(const CursorStyle &rhs);
 
-    const Colormap *colmap;
+    int   position_;
+    float translucency_;
 
-    float translucency;
+    std::string alt_cursor_;
+    std::string pos_string_;  // Here for user convenience, is translated to a
+                              // value for position
+    std::string cursor_string_;
 
-    FontDefinition *font;
-
-    float scale;
-    float aspect;
-    int   x_offset;
-    int   y_offset;
+    bool force_offsets_;
+    bool scaling_;
+    bool border_;
 };
 
-class cursorstyle_c
+class SoundStyle
 {
    public:
-    cursorstyle_c();
-    cursorstyle_c(const cursorstyle_c &rhs);
-    ~cursorstyle_c();
+    SoundStyle();
+    SoundStyle(const SoundStyle &rhs);
+    ~SoundStyle();
 
-    void           Default();
-    cursorstyle_c &operator=(const cursorstyle_c &rhs);
+    void        Default();
+    SoundStyle &operator=(const SoundStyle &rhs);
 
-    int       position;
-    float translucency;
-
-    std::string alt_cursor;
-    std::string pos_string;  // Here for user convenience, is translated to a
-                             // value for position
-    std::string cursor_string;
-
-    bool force_offsets;
-    bool scaling;
-    bool border;
+    struct SoundEffect *begin_;
+    struct SoundEffect *end_;
+    struct SoundEffect *select_;
+    struct SoundEffect *back_;
+    struct SoundEffect *error_;
+    struct SoundEffect *move_;
+    struct SoundEffect *slider_;
 };
 
-class soundstyle_c
+enum StyleSpecial
 {
-   public:
-    soundstyle_c();
-    soundstyle_c(const soundstyle_c &rhs);
-    ~soundstyle_c();
-
-    void          Default();
-    soundstyle_c &operator=(const soundstyle_c &rhs);
-
-    struct SoundEffect *begin;
-    struct SoundEffect *end;
-    struct SoundEffect *select;
-    struct SoundEffect *back;
-    struct SoundEffect *error;
-    struct SoundEffect *move;
-    struct SoundEffect *slider;
-};
-
-typedef enum
-{
-    SYLSP_None  = 0,
-    SYLSP_Tiled = 0x0001,  // bg image should tile (otherwise covers whole area)
-    SYLSP_TiledNoScale = 0x0002,  // bg image should tile (1:1 pixels)
-    SYLSP_StretchFullScreen =
+    kStyleSpecialNone = 0,
+    kStyleSpecialTiled =
+        0x0001,  // bg image should tile (otherwise covers whole area)
+    kStyleSpecialTiledNoScale = 0x0002,  // bg image should tile (1:1 pixels)
+    kStyleSpecialStretchFullScreen =
         0x0004,  // bg image will be stretched to fill the screen
-} style_special_e;
+};
 
-class styledef_c
+class StyleDefinition
 {
    public:
-    styledef_c();
-    ~styledef_c();
+    StyleDefinition();
+    ~StyleDefinition();
 
    public:
     void Default(void);
-    void CopyDetail(const styledef_c &src);
+    void CopyDetail(const StyleDefinition &src);
 
     // Member vars....
-    std::string name;
+    std::string name_;
 
-    backgroundstyle_c bg;
+    BackgroundStyle bg_;
 
     // the four text styles
-    enum
+    enum TextSection
     {
-        T_TEXT = 0,  // main text style
-        T_ALT,       // alternative text style
-        T_TITLE,     // title style
-        T_HELP,      // for help messages
-        T_HEADER,    // for header /main title
-        T_SELECTED,  // for selected menu item
-
-        NUM_TXST
+        kTextSectionText = 0,   // main text style
+        kTextSectionAlternate,  // alternative text style
+        kTextSectionTitle,      // title style
+        kTextSectionHelp,       // for help messages
+        kTextSectionHeader,     // for header /main title
+        kTextSectionSelected,   // for selected menu item
+        kTotalTextSections
     };
 
-    enum
+    enum Alignment
     {
-        C_LEFT   = 0,
-        C_CENTER = 1,
-        C_RIGHT  = 2,
-        C_BOTH   = 3
+        kAlignmentLeft   = 0,
+        kAlignmentCenter = 1,
+        kAlignmentRight  = 2,
+        kAlignmentBoth   = 3
     };
 
-    textstyle_c text[NUM_TXST];
+    TextStyle text_[kTotalTextSections];
 
-    cursorstyle_c cursor;
+    CursorStyle cursor_;
 
-    soundstyle_c sounds;
+    SoundStyle sounds_;
 
-    style_special_e special;
+    StyleSpecial special_;
 
-    int x_offset;
-    int y_offset;
+    int x_offset_;
+    int y_offset_;
 
-    int         entry_alignment;
-    int         entry_spacing;
-    std::string entry_align_string;  // User convenience
+    int         entry_alignment_;
+    int         entry_spacing_;
+    std::string entry_align_string_;  // User convenience
 
    private:
     // disable copy construct and assignment operator
-    explicit styledef_c(styledef_c &rhs) {}
-    styledef_c &operator=(styledef_c &rhs) { return *this; }
+    explicit StyleDefinition(StyleDefinition &rhs) {}
+    StyleDefinition &operator=(StyleDefinition &rhs) { return *this; }
 };
 
 // Our styledefs container
-class styledef_container_c : public std::vector<styledef_c *>
+class StyleDefinitionContainer : public std::vector<StyleDefinition *>
 {
    public:
-    styledef_container_c() {}
-    ~styledef_container_c()
+    StyleDefinitionContainer() {}
+    ~StyleDefinitionContainer()
     {
-        for (auto iter = begin(); iter != end(); iter++)
+        for (std::vector<StyleDefinition *>::iterator iter     = begin(),
+                                                      iter_end = end();
+             iter != iter_end; iter++)
         {
-            styledef_c *s = *iter;
+            StyleDefinition *s = *iter;
             delete s;
             s = nullptr;
         }
@@ -194,15 +194,13 @@ class styledef_container_c : public std::vector<styledef_c *>
 
    public:
     // Search Functions
-    styledef_c *Lookup(const char *refname);
+    StyleDefinition *Lookup(const char *refname);
 };
 
-extern styledef_container_c styledefs;
-extern styledef_c          *default_style;
+extern StyleDefinitionContainer styledefs;
+extern StyleDefinition         *default_style;
 
 void DDF_ReadStyles(const std::string &data);
-
-#endif /*__DDF_STYLE_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -28,12 +28,12 @@ class style_c
     friend class style_container_c;
 
   public:
-    style_c(styledef_c *_def);
+    style_c(StyleDefinition *_def);
     ~style_c();
 
-    styledef_c *def;
+    StyleDefinition *def;
 
-    font_c *fonts[styledef_c::NUM_TXST];
+    font_c *fonts[StyleDefinition::kTotalTextSections];
 
     const image_c *bg_image;
 
@@ -62,7 +62,7 @@ class style_container_c : public std::vector<style_c *>
 
   public:
     // Search Functions
-    style_c *Lookup(styledef_c *def);
+    style_c *Lookup(StyleDefinition *def);
 };
 
 extern style_container_c hu_styles;

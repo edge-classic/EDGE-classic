@@ -31,9 +31,9 @@
 // Edge has lots of style
 style_container_c hu_styles;
 
-style_c::style_c(styledef_c *_def) : def(_def), bg_image(nullptr)
+style_c::style_c(StyleDefinition *_def) : def(_def), bg_image(nullptr)
 {
-    for (int T = 0; T < styledef_c::NUM_TXST; T++)
+    for (int T = 0; T < StyleDefinition::kTotalTextSections; T++)
         fonts[T] = nullptr;
 }
 
@@ -44,9 +44,9 @@ style_c::~style_c()
 
 void style_c::Load()
 {
-    if (def->bg.image_name.c_str())
+    if (def->bg_.image_name_.c_str())
     {
-        const char *name = def->bg.image_name.c_str();
+        const char *name = def->bg_.image_name_.c_str();
 
         bg_image = W_ImageLookup(name, kImageNamespaceFlat, ILF_Null);
 
@@ -54,16 +54,16 @@ void style_c::Load()
             bg_image = W_ImageLookup(name, kImageNamespaceGraphic);
     }
 
-    for (int T = 0; T < styledef_c::NUM_TXST; T++)
+    for (int T = 0; T < StyleDefinition::kTotalTextSections; T++)
     {
-        if (def->text[T].font)
-            fonts[T] = hu_fonts.Lookup(def->text[T].font);
+        if (def->text_[T].font_)
+            fonts[T] = hu_fonts.Lookup(def->text_[T].font_);
     }
 }
 
 void style_c::DrawBackground()
 {
-    float alpha = def->bg.translucency;
+    float alpha = def->bg_.translucency_;
 
     if (alpha < 0.02)
         return;
@@ -75,14 +75,14 @@ void style_c::DrawBackground()
 
     if (!bg_image)
     {
-        if (!(def->special & SYLSP_StretchFullScreen))
+        if (!(def->special_ & kStyleSpecialStretchFullScreen))
         {
             WS_x = 1;   // cannot be 0 or WS is invoked
             WS_w = 319; // cannot be 320 or WS is invoked
         }
 
-        if (def->bg.colour != kRGBANoValue)
-            HUD_SolidBox(WS_x, 0, WS_w, 200, def->bg.colour);
+        if (def->bg_.colour_ != kRGBANoValue)
+            HUD_SolidBox(WS_x, 0, WS_w, 200, def->bg_.colour_);
         /*else
             HUD_SolidBox(WS_x, 0, WS_w, 200, T_BLACK);
 */
@@ -90,18 +90,18 @@ void style_c::DrawBackground()
         return;
     }
 
-    if (def->special & (SYLSP_Tiled | SYLSP_TiledNoScale))
+    if (def->special_ & (kStyleSpecialTiled | kStyleSpecialTiledNoScale))
     {
-        HUD_SetScale(def->bg.scale);
+        HUD_SetScale(def->bg_.scale_);
 
         // HUD_TileImage(0, 0, 320, 200, bg_image);
         HUD_TileImage(WS_x, 0, WS_w, 200, bg_image, 0.0, 0.0);
         HUD_SetScale();
     }
     // Lobo: handle our new special
-    if (def->special & SYLSP_StretchFullScreen)
+    if (def->special_ & kStyleSpecialStretchFullScreen)
     {
-        HUD_SetScale(def->bg.scale);
+        HUD_SetScale(def->bg_.scale_);
 
         HUD_StretchImage(WS_x, 0, WS_w, 200, bg_image, 0.0, 0.0);
         // HUD_DrawImage(CenterX, 0, bg_image);
@@ -110,7 +110,7 @@ void style_c::DrawBackground()
     }
 
     // Lobo: positioning and size will be determined by images.ddf
-    if (def->special == 0)
+    if (def->special_ == 0)
     {
         // Lobo: calculate centering on screen
         float CenterX = 0;
@@ -118,7 +118,7 @@ void style_c::DrawBackground()
         CenterX = 160;
         CenterX -= (bg_image->actual_w * bg_image->scale_x) / 2;
 
-        HUD_SetScale(def->bg.scale);
+        HUD_SetScale(def->bg_.scale_);
         // HUD_StretchImage(0, 0, 320, 200, bg_image);
         HUD_DrawImage(CenterX, 0, bg_image);
 
@@ -135,7 +135,7 @@ void style_c::DrawBackground()
 //
 // Never returns nullptr.
 //
-style_c *style_container_c::Lookup(styledef_c *def)
+style_c *style_container_c::Lookup(StyleDefinition *def)
 {
     SYS_ASSERT(def);
 
@@ -161,9 +161,9 @@ style_c *style_container_c::Lookup(styledef_c *def)
 void HL_WriteText(style_c *style, int text_type, int x, int y, const char *str, float scale)
 {
     HUD_SetFont(style->fonts[text_type]);
-    HUD_SetScale(scale * style->def->text[text_type].scale);
+    HUD_SetScale(scale * style->def->text_[text_type].scale_);
 
-    const Colormap *colmap = style->def->text[text_type].colmap;
+    const Colormap *colmap = style->def->text_[text_type].colmap_;
 
     if (colmap)
         HUD_SetTextColor(V_GetFontColor(colmap));

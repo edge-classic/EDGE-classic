@@ -170,7 +170,7 @@ class rts_menu_c
 
         HUD_SetAlignment(0, -1);
 
-        HUD_SetScale(style->def->text[2].scale); // LOBO: Use TITLE.SCALE from styles.ddf
+        HUD_SetScale(style->def->text_[2].scale_); // LOBO: Use TITLE.SCALE from styles.ddf
         HUD_SetFont(style->fonts[2]);            // LOBO: Use TITLE.FONT from styles.ddf
 
         float total_h = HUD_StringHeight(title.c_str());
@@ -178,9 +178,9 @@ class rts_menu_c
 
         float y = 100 - total_h / 2.0f;
 
-        if (style->def->text[2].colmap)
+        if (style->def->text_[2].colmap_)
         {
-            HUD_SetTextColor(V_GetFontColor(style->def->text[2].colmap)); // LOBO: Use TITLE.COLOURMAP from styles.ddf
+            HUD_SetTextColor(V_GetFontColor(style->def->text_[2].colmap_)); // LOBO: Use TITLE.COLOURMAP from styles.ddf
         }
         else
         {
@@ -193,15 +193,15 @@ class rts_menu_c
         HUD_SetFont();
         HUD_SetTextColor();
 
-        HUD_SetScale(style->def->text[0].scale); // LOBO: Use TEXT.SCALE from styles.ddf
+        HUD_SetScale(style->def->text_[0].scale_); // LOBO: Use TEXT.SCALE from styles.ddf
         HUD_SetFont(style->fonts[0]);            // LOBO: Use TEXT.FONT from styles.ddf
 
         y += HUD_StringHeight(title.c_str());
         y += HUD_FontHeight();
 
-        if (style->def->text[0].colmap)
+        if (style->def->text_[0].colmap_)
         {
-            HUD_SetTextColor(V_GetFontColor(style->def->text[0].colmap)); // LOBO: Use TEXT.COLOURMAP from styles.ddf
+            HUD_SetTextColor(V_GetFontColor(style->def->text_[0].colmap_)); // LOBO: Use TEXT.COLOURMAP from styles.ddf
         }
         else
         {
@@ -984,7 +984,7 @@ void RAD_StartMenu(rad_trigger_t *R, s_show_menu_t *menu)
     SYS_ASSERT(!rts_menuactive);
 
     // find the right style
-    styledef_c *def = nullptr;
+    StyleDefinition *def = nullptr;
 
     if (R->menu_style_name)
         def = styledefs.Lookup(R->menu_style_name);

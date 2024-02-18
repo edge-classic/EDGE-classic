@@ -85,26 +85,26 @@ static void DrawKeyword(int index, style_c *style, int y, const char *keyword, c
     bool is_selected = (index == host_pos);
 
     x = x - 10;
-    x = x - (style->fonts[styledef_c::T_TEXT]->StringWidth(keyword) * style->def->text[styledef_c::T_TEXT].scale);
+    x = x - (style->fonts[StyleDefinition::kTextSectionText]->StringWidth(keyword) * style->def->text_[StyleDefinition::kTextSectionText].scale_);
     HL_WriteText(style, (index < 0) ? 3 : is_selected ? 2 : 0, x, y, keyword);
 
     x = 160;
-    HL_WriteText(style, styledef_c::T_ALT, x + 10, y, value);
+    HL_WriteText(style, StyleDefinition::kTextSectionAlternate, x + 10, y, value);
 
     if (is_selected)
     {
-        if (style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeImage)
+        if (style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeImage)
         {
             int cursor = 16;
-            HL_WriteText(style, styledef_c::T_TITLE,
-                         x - style->fonts[styledef_c::T_TITLE]->StringWidth((const char *)&cursor) / 2, y,
+            HL_WriteText(style, StyleDefinition::kTextSectionTitle,
+                         x - style->fonts[StyleDefinition::kTextSectionTitle]->StringWidth((const char *)&cursor) / 2, y,
                          (const char *)&cursor);
         }
-        else if (style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType)
-            HL_WriteText(style, styledef_c::T_TITLE, x - style->fonts[styledef_c::T_TITLE]->StringWidth("+") / 2, y,
+        else if (style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeTrueType)
+            HL_WriteText(style, StyleDefinition::kTextSectionTitle, x - style->fonts[StyleDefinition::kTextSectionTitle]->StringWidth("+") / 2, y,
                          "+");
         else
-            HL_WriteText(style, styledef_c::T_TITLE, x - style->fonts[styledef_c::T_TITLE]->StringWidth("*") / 2, y,
+            HL_WriteText(style, StyleDefinition::kTextSectionTitle, x - style->fonts[StyleDefinition::kTextSectionTitle]->StringWidth("*") / 2, y,
                          "*");
     }
 }
@@ -433,18 +433,18 @@ void M_DrawHostMenu(void)
 
     int CenterX;
     CenterX = 160;
-    CenterX -= (ng_host_style->fonts[styledef_c::T_HEADER]->StringWidth("Bot Match Settings") *
-                ng_host_style->def->text[styledef_c::T_HEADER].scale) /
+    CenterX -= (ng_host_style->fonts[StyleDefinition::kTextSectionHeader]->StringWidth("Bot Match Settings") *
+                ng_host_style->def->text_[StyleDefinition::kTextSectionHeader].scale_) /
                2;
 
-    HL_WriteText(ng_host_style, styledef_c::T_HEADER, CenterX, 25, "Bot Match Settings");
+    HL_WriteText(ng_host_style, StyleDefinition::kTextSectionHeader, CenterX, 25, "Bot Match Settings");
 
     int y      = 40;
     int idx    = 0;
     int deltay = 2 +
-                 (ng_host_style->fonts[styledef_c::T_TEXT]->NominalHeight() *
-                  ng_host_style->def->text[styledef_c::T_TEXT].scale) +
-                 ng_host_style->def->entry_spacing;
+                 (ng_host_style->fonts[StyleDefinition::kTextSectionText]->NominalHeight() *
+                  ng_host_style->def->text_[StyleDefinition::kTextSectionText].scale_) +
+                 ng_host_style->def->entry_spacing_;
 
     if (!ng_params->map->episode_->description_.empty())
         DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode_->description_.c_str()]);
@@ -480,8 +480,8 @@ void M_DrawHostMenu(void)
     y += deltay;
     idx++;
 
-    int x = 150 - (ng_host_style->fonts[styledef_c::T_TEXT]->StringWidth("(Deathmatch Only)") *
-                   ng_host_style->def->text[styledef_c::T_TEXT].scale);
+    int x = 150 - (ng_host_style->fonts[StyleDefinition::kTextSectionText]->StringWidth("(Deathmatch Only)") *
+                   ng_host_style->def->text_[StyleDefinition::kTextSectionText].scale_);
     HL_WriteText(ng_host_style, idx - 1 == host_pos ? 2 : 0, x, y, "(Deathmatch Only)");
     y += deltay;
 
@@ -501,11 +501,11 @@ void M_DrawHostMenu(void)
     idx++;
 
     CenterX = 160;
-    CenterX -= (ng_host_style->fonts[styledef_c::T_TEXT]->StringWidth("Start") *
-                ng_host_style->def->text[styledef_c::T_TEXT].scale) /
+    CenterX -= (ng_host_style->fonts[StyleDefinition::kTextSectionText]->StringWidth("Start") *
+                ng_host_style->def->text_[StyleDefinition::kTextSectionText].scale_) /
                2;
 
-    HL_WriteText(ng_host_style, (host_pos == idx) ? styledef_c::T_HELP : styledef_c::T_TEXT, CenterX, y, "Start");
+    HL_WriteText(ng_host_style, (host_pos == idx) ? StyleDefinition::kTextSectionHelp : StyleDefinition::kTextSectionText, CenterX, y, "Start");
 }
 
 bool M_NetHostResponder(event_t *ev, int ch)
@@ -640,7 +640,7 @@ void M_NetGameInit(void)
     host_pos = 0;
 
     // load styles
-    styledef_c *def;
+    StyleDefinition *def;
     style_c    *ng_default;
 
     def = styledefs.Lookup("OPTIONS");

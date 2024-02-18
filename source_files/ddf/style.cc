@@ -27,93 +27,93 @@
 #undef DF
 #define DF DDF_FIELD
 
-styledef_c *default_style;
+StyleDefinition *default_style;
 
 static void DDF_StyleGetSpecials(const char *info, void *storage);
 
-styledef_container_c styledefs;
+StyleDefinitionContainer styledefs;
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_bgstyle
-static backgroundstyle_c dummy_bgstyle;
+static BackgroundStyle dummy_bgstyle;
 
 static const DDFCommandList background_commands[] = {
-    DF("COLOUR", colour, DDF_MainGetRGB),
-    DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
-    DF("IMAGE", image_name, DDF_MainGetString),
-    DF("SCALE", scale, DDF_MainGetFloat),
-    DF("ASPECT", aspect, DDF_MainGetFloat),
+    DF("COLOUR", colour_, DDF_MainGetRGB),
+    DF("TRANSLUCENCY", translucency_, DDF_MainGetPercent),
+    DF("IMAGE", image_name_, DDF_MainGetString),
+    DF("SCALE", scale_, DDF_MainGetFloat),
+    DF("ASPECT", aspect_, DDF_MainGetFloat),
 
     DDF_CMD_END};
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_textstyle
-static textstyle_c dummy_textstyle;
+static TextStyle dummy_textstyle;
 
 static const DDFCommandList text_commands[] = {
-    DF("COLOURMAP", colmap, DDF_MainGetColourmap),
-    DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
-    DF("FONT", font, DDF_MainLookupFont),
-    DF("SCALE", scale, DDF_MainGetFloat),
-    DF("ASPECT", aspect, DDF_MainGetFloat),
-    DF("X_OFFSET", x_offset, DDF_MainGetNumeric),
-    DF("Y_OFFSET", y_offset, DDF_MainGetNumeric),
+    DF("COLOURMAP", colmap_, DDF_MainGetColourmap),
+    DF("TRANSLUCENCY", translucency_, DDF_MainGetPercent),
+    DF("FONT", font_, DDF_MainLookupFont),
+    DF("SCALE", scale_, DDF_MainGetFloat),
+    DF("ASPECT", aspect_, DDF_MainGetFloat),
+    DF("X_OFFSET", x_offset_, DDF_MainGetNumeric),
+    DF("Y_OFFSET", y_offset_, DDF_MainGetNumeric),
 
     DDF_CMD_END};
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_cursorstyle
-static cursorstyle_c dummy_cursorstyle;
+static CursorStyle dummy_cursorstyle;
 
 static const DDFCommandList cursor_commands[] = {
-    DF("POSITION", pos_string, DDF_MainGetString),
-    DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
-    DF("IMAGE", alt_cursor, DDF_MainGetString),
-    DF("STRING", cursor_string, DDF_MainGetString),
-    DF("BORDER", border, DDF_MainGetBoolean),
-    DF("SCALING", scaling, DDF_MainGetBoolean),
-    DF("FORCE_OFFSETS", force_offsets, DDF_MainGetBoolean),
+    DF("POSITION", pos_string_, DDF_MainGetString),
+    DF("TRANSLUCENCY", translucency_, DDF_MainGetPercent),
+    DF("IMAGE", alt_cursor_, DDF_MainGetString),
+    DF("STRING", cursor_string_, DDF_MainGetString),
+    DF("BORDER", border_, DDF_MainGetBoolean),
+    DF("SCALING", scaling_, DDF_MainGetBoolean),
+    DF("FORCE_OFFSETS", force_offsets_, DDF_MainGetBoolean),
 
     DDF_CMD_END};
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_soundstyle
-static soundstyle_c dummy_soundstyle;
+static SoundStyle dummy_soundstyle;
 
 static const DDFCommandList sound_commands[] = {
-    DF("BEGIN", begin, DDF_MainLookupSound),
-    DF("END", end, DDF_MainLookupSound),
-    DF("SELECT", select, DDF_MainLookupSound),
-    DF("BACK", back, DDF_MainLookupSound),
-    DF("ERROR", error, DDF_MainLookupSound),
-    DF("MOVE", move, DDF_MainLookupSound),
-    DF("SLIDER", slider, DDF_MainLookupSound),
+    DF("BEGIN", begin_, DDF_MainLookupSound),
+    DF("END", end_, DDF_MainLookupSound),
+    DF("SELECT", select_, DDF_MainLookupSound),
+    DF("BACK", back_, DDF_MainLookupSound),
+    DF("ERROR", error_, DDF_MainLookupSound),
+    DF("MOVE", move_, DDF_MainLookupSound),
+    DF("SLIDER", slider_, DDF_MainLookupSound),
 
     DDF_CMD_END};
 
-static styledef_c *dynamic_style;
+static StyleDefinition *dynamic_style;
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_style
-static styledef_c dummy_style;
+static StyleDefinition dummy_style;
 
 static const DDFCommandList style_commands[] = {
     // sub-commands
-    DDF_SUB_LIST("BACKGROUND", bg, background_commands),
-    DDF_SUB_LIST("CURSOR", cursor, cursor_commands),
-    DDF_SUB_LIST("TEXT", text[0], text_commands),
-    DDF_SUB_LIST("ALT", text[1], text_commands),
-    DDF_SUB_LIST("TITLE", text[2], text_commands),
-    DDF_SUB_LIST("HELP", text[3], text_commands),
-    DDF_SUB_LIST("HEADER", text[4], text_commands),
-    DDF_SUB_LIST("SELECTED", text[5], text_commands),
-    DDF_SUB_LIST("SOUND", sounds, sound_commands),
-    DF("X_OFFSET", x_offset, DDF_MainGetNumeric),
-    DF("Y_OFFSET", y_offset, DDF_MainGetNumeric),
-    DF("ENTRY_ALIGNMENT", entry_align_string, DDF_MainGetString),
-    DF("ENTRY_SPACING", entry_spacing, DDF_MainGetNumeric),
+    DDF_SUB_LIST("BACKGROUND", bg_, background_commands),
+    DDF_SUB_LIST("CURSOR", cursor_, cursor_commands),
+    DDF_SUB_LIST("TEXT", text_[0], text_commands),
+    DDF_SUB_LIST("ALT", text_[1], text_commands),
+    DDF_SUB_LIST("TITLE", text_[2], text_commands),
+    DDF_SUB_LIST("HELP", text_[3], text_commands),
+    DDF_SUB_LIST("HEADER", text_[4], text_commands),
+    DDF_SUB_LIST("SELECTED", text_[5], text_commands),
+    DDF_SUB_LIST("SOUND", sounds_, sound_commands),
+    DF("X_OFFSET", x_offset_, DDF_MainGetNumeric),
+    DF("Y_OFFSET", y_offset_, DDF_MainGetNumeric),
+    DF("ENTRY_ALIGNMENT", entry_align_string_, DDF_MainGetString),
+    DF("ENTRY_SPACING", entry_spacing_, DDF_MainGetNumeric),
 
-    DF("SPECIAL", special, DDF_StyleGetSpecials),
+    DF("SPECIAL", special_, DDF_StyleGetSpecials),
 
     DDF_CMD_END};
 
@@ -145,8 +145,8 @@ static void StyleStartEntry(const char *name, bool extend)
     }
 
     // not found, create a new one
-    dynamic_style       = new styledef_c;
-    dynamic_style->name = name;
+    dynamic_style        = new StyleDefinition;
+    dynamic_style->name_ = name;
 
     styledefs.push_back(dynamic_style);
 }
@@ -167,30 +167,31 @@ static void StyleParseField(const char *field, const char *contents, int index,
 
 static void StyleFinishEntry(void)
 {
-    if (dynamic_style->cursor.pos_string != "")
+    if (dynamic_style->cursor_.pos_string_ != "")
     {
-        const char *pos_str = dynamic_style->cursor.pos_string.c_str();
+        const char *pos_str = dynamic_style->cursor_.pos_string_.c_str();
 
         if (epi::StringCaseCompareASCII(pos_str, "LEFT") == 0)
-            dynamic_style->cursor.position = dynamic_style->C_LEFT;
+            dynamic_style->cursor_.position_ = StyleDefinition::kAlignmentLeft;
         else if (epi::StringCaseCompareASCII(pos_str, "CENTER") == 0)
-            dynamic_style->cursor.position = dynamic_style->C_CENTER;
+            dynamic_style->cursor_.position_ =
+                StyleDefinition::kAlignmentCenter;
         else if (epi::StringCaseCompareASCII(pos_str, "RIGHT") == 0)
-            dynamic_style->cursor.position = dynamic_style->C_RIGHT;
+            dynamic_style->cursor_.position_ = StyleDefinition::kAlignmentRight;
         else if (epi::StringCaseCompareASCII(pos_str, "BOTH") == 0)
-            dynamic_style->cursor.position = dynamic_style->C_BOTH;
+            dynamic_style->cursor_.position_ = StyleDefinition::kAlignmentBoth;
     }
 
-    if (dynamic_style->entry_align_string != "")
+    if (dynamic_style->entry_align_string_ != "")
     {
-        const char *align_str = dynamic_style->entry_align_string.c_str();
+        const char *align_str = dynamic_style->entry_align_string_.c_str();
 
         if (epi::StringCaseCompareASCII(align_str, "LEFT") == 0)
-            dynamic_style->entry_alignment = dynamic_style->C_LEFT;
+            dynamic_style->entry_alignment_ = StyleDefinition::kAlignmentLeft;
         else if (epi::StringCaseCompareASCII(align_str, "CENTER") == 0)
-            dynamic_style->entry_alignment = dynamic_style->C_CENTER;
+            dynamic_style->entry_alignment_ = StyleDefinition::kAlignmentCenter;
         else if (epi::StringCaseCompareASCII(align_str, "RIGHT") == 0)
-            dynamic_style->entry_alignment = dynamic_style->C_RIGHT;
+            dynamic_style->entry_alignment_ = StyleDefinition::kAlignmentRight;
     }
 }
 
@@ -232,21 +233,21 @@ void DDF_StyleCleanUp(void)
 
     if (!default_style)
         I_Error("Styles.ddf is missing the [DEFAULT] style.\n");
-    else if (!default_style->text[0].font)
+    else if (!default_style->text_[0].font_)
         I_Warning("The [DEFAULT] style is missing TEXT.FONT\n");
 
     styledefs.shrink_to_fit();
 }
 
 static DDFSpecialFlags style_specials[] = {
-    {"TILED", SYLSP_Tiled, 0},
-    {"TILED_NOSCALE", SYLSP_TiledNoScale, 0},
-    {"STRETCH_FULLSCREEN", SYLSP_StretchFullScreen, 0},
+    {"TILED", kStyleSpecialTiled, 0},
+    {"TILED_NOSCALE", kStyleSpecialTiledNoScale, 0},
+    {"STRETCH_FULLSCREEN", kStyleSpecialStretchFullScreen, 0},
     {nullptr, 0, 0}};
 
 void DDF_StyleGetSpecials(const char *info, void *storage)
 {
-    style_special_e *dest = (style_special_e *)storage;
+    StyleSpecial *dest = (StyleSpecial *)storage;
 
     int flag_value;
 
@@ -254,11 +255,11 @@ void DDF_StyleGetSpecials(const char *info, void *storage)
                                      false))
     {
         case kDDFCheckFlagPositive:
-            *dest = (style_special_e)(*dest | flag_value);
+            *dest = (StyleSpecial)(*dest | flag_value);
             break;
 
         case kDDFCheckFlagNegative:
-            *dest = (style_special_e)(*dest & ~flag_value);
+            *dest = (StyleSpecial)(*dest & ~flag_value);
             break;
 
         case kDDFCheckFlagUser:
@@ -268,208 +269,205 @@ void DDF_StyleGetSpecials(const char *info, void *storage)
     }
 }
 
-// --> backgroundstyle_c definition class
+// --> BackgroundStyle definition class
 
 //
-// backgroundstyle_c Constructor
+// BackgroundStyle Constructor
 //
-backgroundstyle_c::backgroundstyle_c() { Default(); }
+BackgroundStyle::BackgroundStyle() { Default(); }
 
 //
-// backgroundstyle_c Copy constructor
+// BackgroundStyle Copy constructor
 //
-backgroundstyle_c::backgroundstyle_c(const backgroundstyle_c &rhs)
+BackgroundStyle::BackgroundStyle(const BackgroundStyle &rhs) { *this = rhs; }
+
+//
+// BackgroundStyle Destructor
+//
+BackgroundStyle::~BackgroundStyle() {}
+
+//
+// BackgroundStyle::Default()
+//
+void BackgroundStyle::Default()
 {
-    *this = rhs;
+    colour_       = kRGBANoValue;
+    translucency_ = 1.0f;
+
+    image_name_.clear();
+
+    scale_  = 1.0f;
+    aspect_ = 1.0f;
 }
 
 //
-// backgroundstyle_c Destructor
+// BackgroundStyle assignment operator
 //
-backgroundstyle_c::~backgroundstyle_c() {}
-
-//
-// backgroundstyle_c::Default()
-//
-void backgroundstyle_c::Default()
-{
-    colour       = kRGBANoValue;
-    translucency = 1.0f;
-
-    image_name.clear();
-
-    scale  = 1.0f;
-    aspect = 1.0f;
-}
-
-//
-// backgroundstyle_c assignment operator
-//
-backgroundstyle_c &backgroundstyle_c::operator=(const backgroundstyle_c &rhs)
+BackgroundStyle &BackgroundStyle::operator=(const BackgroundStyle &rhs)
 {
     if (&rhs != this)
     {
-        colour       = rhs.colour;
-        translucency = rhs.translucency;
+        colour_       = rhs.colour_;
+        translucency_ = rhs.translucency_;
 
-        image_name = rhs.image_name;
+        image_name_ = rhs.image_name_;
 
-        scale  = rhs.scale;
-        aspect = rhs.aspect;
+        scale_  = rhs.scale_;
+        aspect_ = rhs.aspect_;
     }
 
     return *this;
 }
 
-// --> textstyle_c definition class
+// --> TextStyle definition class
 
 //
-// textstyle_c Constructor
+// TextStyle Constructor
 //
-textstyle_c::textstyle_c() { Default(); }
+TextStyle::TextStyle() { Default(); }
 
 //
-// textstyle_c Copy constructor
+// TextStyle Copy constructor
 //
-textstyle_c::textstyle_c(const textstyle_c &rhs) { *this = rhs; }
+TextStyle::TextStyle(const TextStyle &rhs) { *this = rhs; }
 
 //
-// textstyle_c Destructor
+// TextStyle Destructor
 //
-textstyle_c::~textstyle_c() {}
+TextStyle::~TextStyle() {}
 
 //
-// textstyle_c::Default()
+// TextStyle::Default()
 //
-void textstyle_c::Default()
+void TextStyle::Default()
 {
-    colmap       = nullptr;
-    translucency = 1.0f;
+    colmap_       = nullptr;
+    translucency_ = 1.0f;
 
-    font     = nullptr;
-    scale    = 1.0f;
-    aspect   = 1.0f;
-    x_offset = 0;
-    y_offset = 0;
+    font_     = nullptr;
+    scale_    = 1.0f;
+    aspect_   = 1.0f;
+    x_offset_ = 0;
+    y_offset_ = 0;
 }
 
 //
-// textstyle_c assignment operator
+// TextStyle assignment operator
 //
-textstyle_c &textstyle_c::operator=(const textstyle_c &rhs)
+TextStyle &TextStyle::operator=(const TextStyle &rhs)
 {
     if (&rhs != this)
     {
-        colmap       = rhs.colmap;
-        translucency = rhs.translucency;
+        colmap_       = rhs.colmap_;
+        translucency_ = rhs.translucency_;
 
-        font     = rhs.font;
-        scale    = rhs.scale;
-        aspect   = rhs.aspect;
-        x_offset = rhs.x_offset;
-        y_offset = rhs.y_offset;
+        font_     = rhs.font_;
+        scale_    = rhs.scale_;
+        aspect_   = rhs.aspect_;
+        x_offset_ = rhs.x_offset_;
+        y_offset_ = rhs.y_offset_;
     }
 
     return *this;
 }
 
-// --> cursorstyle_c definition class
+// --> CursorStyle definition class
 
 //
-// cursorstyle_c Constructor
+// CursorStyle Constructor
 //
-cursorstyle_c::cursorstyle_c() { Default(); }
+CursorStyle::CursorStyle() { Default(); }
 
 //
-// cursorstyle_c Copy constructor
+// CursorStyle Copy constructor
 //
-cursorstyle_c::cursorstyle_c(const cursorstyle_c &rhs) { *this = rhs; }
+CursorStyle::CursorStyle(const CursorStyle &rhs) { *this = rhs; }
 
 //
-// cursorstyle_c Destructor
+// CursorStyle Destructor
 //
-cursorstyle_c::~cursorstyle_c() {}
+CursorStyle::~CursorStyle() {}
 
 //
-// cursorstyle_c::Default()
+// CursorStyle::Default()
 //
-void cursorstyle_c::Default()
+void CursorStyle::Default()
 {
-    position      = 0;
-    translucency  = 1.0f;
-    pos_string    = "";
-    alt_cursor    = "";
-    cursor_string = "";
-    border        = false;
-    scaling       = true;
-    force_offsets = false;
+    position_      = 0;
+    translucency_  = 1.0f;
+    pos_string_    = "";
+    alt_cursor_    = "";
+    cursor_string_ = "";
+    border_        = false;
+    scaling_       = true;
+    force_offsets_ = false;
 }
 
 //
-// cursorstyle_c assignment operator
+// CursorStyle assignment operator
 //
-cursorstyle_c &cursorstyle_c::operator=(const cursorstyle_c &rhs)
+CursorStyle &CursorStyle::operator=(const CursorStyle &rhs)
 {
     if (&rhs != this)
     {
-        position      = rhs.position;
-        translucency  = rhs.translucency;
-        pos_string    = rhs.pos_string;
-        alt_cursor    = rhs.alt_cursor;
-        cursor_string = rhs.cursor_string;
-        border        = rhs.border;
-        scaling       = rhs.scaling;
-        force_offsets = rhs.force_offsets;
+        position_      = rhs.position_;
+        translucency_  = rhs.translucency_;
+        pos_string_    = rhs.pos_string_;
+        alt_cursor_    = rhs.alt_cursor_;
+        cursor_string_ = rhs.cursor_string_;
+        border_        = rhs.border_;
+        scaling_       = rhs.scaling_;
+        force_offsets_ = rhs.force_offsets_;
     }
 
     return *this;
 }
 
-// --> soundstyle_c definition class
+// --> SoundStyle definition class
 
 //
-// soundstyle_c Constructor
+// SoundStyle Constructor
 //
-soundstyle_c::soundstyle_c() { Default(); }
+SoundStyle::SoundStyle() { Default(); }
 
 //
-// soundstyle_c Copy constructor
+// SoundStyle Copy constructor
 //
-soundstyle_c::soundstyle_c(const soundstyle_c &rhs) { *this = rhs; }
+SoundStyle::SoundStyle(const SoundStyle &rhs) { *this = rhs; }
 
 //
-// soundstyle_c Destructor
+// SoundStyle Destructor
 //
-soundstyle_c::~soundstyle_c() {}
+SoundStyle::~SoundStyle() {}
 
 //
-// soundstyle_c::Default()
+// SoundStyle::Default()
 //
-void soundstyle_c::Default()
+void SoundStyle::Default()
 {
-    begin  = nullptr;
-    end    = nullptr;
-    select = nullptr;
-    back   = nullptr;
-    error  = nullptr;
-    move   = nullptr;
-    slider = nullptr;
+    begin_  = nullptr;
+    end_    = nullptr;
+    select_ = nullptr;
+    back_   = nullptr;
+    error_  = nullptr;
+    move_   = nullptr;
+    slider_ = nullptr;
 }
 
 //
-// soundstyle_c assignment operator
+// SoundStyle assignment operator
 //
-soundstyle_c &soundstyle_c::operator=(const soundstyle_c &rhs)
+SoundStyle &SoundStyle::operator=(const SoundStyle &rhs)
 {
     if (&rhs != this)
     {
-        begin  = rhs.begin;
-        end    = rhs.end;
-        select = rhs.select;
-        back   = rhs.back;
-        error  = rhs.error;
-        move   = rhs.move;
-        slider = rhs.slider;
+        begin_  = rhs.begin_;
+        end_    = rhs.end_;
+        select_ = rhs.select_;
+        back_   = rhs.back_;
+        error_  = rhs.error_;
+        move_   = rhs.move_;
+        slider_ = rhs.slider_;
     }
 
     return *this;
@@ -478,74 +476,77 @@ soundstyle_c &soundstyle_c::operator=(const soundstyle_c &rhs)
 // --> style definition class
 
 //
-// styledef_c Constructor
+// StyleDefinition Constructor
 //
-styledef_c::styledef_c() : name() { Default(); }
+StyleDefinition::StyleDefinition() : name_() { Default(); }
 
 //
-// styledef_c Destructor
+// StyleDefinition Destructor
 //
-styledef_c::~styledef_c() {}
+StyleDefinition::~StyleDefinition() {}
 
 //
-// styledef_c::CopyDetail()
+// StyleDefinition::CopyDetail()
 //
-void styledef_c::CopyDetail(const styledef_c &src)
+void StyleDefinition::CopyDetail(const StyleDefinition &src)
 {
-    bg = src.bg;
+    bg_ = src.bg_;
 
-    for (int T = 0; T < NUM_TXST; T++) text[T] = src.text[T];
+    for (int T = 0; T < kTotalTextSections; T++) text_[T] = src.text_[T];
 
-    sounds = src.sounds;
+    sounds_ = src.sounds_;
 
-    x_offset = src.x_offset;
-    y_offset = src.y_offset;
+    x_offset_ = src.x_offset_;
+    y_offset_ = src.y_offset_;
 
-    special = src.special;
+    special_ = src.special_;
 
-    entry_align_string = src.entry_align_string;
-    entry_alignment    = src.entry_alignment;
-    entry_spacing      = src.entry_spacing;
+    entry_align_string_ = src.entry_align_string_;
+    entry_alignment_    = src.entry_alignment_;
+    entry_spacing_      = src.entry_spacing_;
 }
 
 //
-// styledef_c::Default()
+// StyleDefinition::Default()
 //
-void styledef_c::Default()
+void StyleDefinition::Default()
 {
-    bg.Default();
+    bg_.Default();
 
-    for (int T = 0; T < NUM_TXST; T++) text[T].Default();
+    for (int T = 0; T < kTotalTextSections; T++) text_[T].Default();
 
-    sounds.Default();
+    sounds_.Default();
 
-    x_offset = 0;
-    y_offset = 0;
+    x_offset_ = 0;
+    y_offset_ = 0;
 
-    special = SYLSP_None;  //(style_special_e) SYLSP_StretchFullScreen; // I
-                           // think this might be better for backwards compat,
-                           // revert to 0 if needed - Dasho
+    special_ = kStyleSpecialNone;  //(StyleSpecial)
+                                   // kStyleSpecialStretchFullScreen; // I
+                                   // think this might be better for backwards
+                                   // compat, revert to 0 if needed - Dasho
 
-    entry_align_string = "";
-    entry_alignment    = 0;
-    entry_spacing      = 0;
+    entry_align_string_ = "";
+    entry_alignment_    = 0;
+    entry_spacing_      = 0;
 }
 
 // --> map definition container class
 
 //
-// styledef_container_c::Lookup()
+// StyleDefinitionontainer_c::Lookup()
 //
 // Finds a styledef by name, returns nullptr if it doesn't exist.
 //
-styledef_c *styledef_container_c::Lookup(const char *refname)
+StyleDefinition *StyleDefinitionContainer::Lookup(const char *refname)
 {
     if (!refname || !refname[0]) return nullptr;
 
-    for (auto iter = rbegin(); iter != rend(); iter++)
+    for (std::vector<StyleDefinition *>::reverse_iterator iter     = rbegin(),
+                                                          iter_end = rend();
+         iter != iter_end; iter++)
     {
-        styledef_c *m = *iter;
-        if (DDF_CompareName(m->name.c_str(), refname) == 0) return m;
+        StyleDefinition *m = *iter;
+        if (DDF_CompareName(m->name_.c_str(), refname) == 0) return m;
     }
 
     return nullptr;

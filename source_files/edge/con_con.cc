@@ -835,7 +835,7 @@ void CON_SetupFont(void)
 
     if (!console_style)
     {
-        styledef_c *def = styledefs.Lookup("CONSOLE");
+        StyleDefinition *def = styledefs.Lookup("CONSOLE");
         if (!def)
             def = default_style;
         console_style = hu_styles.Lookup(def);
@@ -867,13 +867,13 @@ void CON_Drawer(void)
         const image_c *img = console_style->bg_image;
 
         HUD_RawImage(0, y, SCREENWIDTH, y + CON_GFX_HT, img, 0.0, 0.0, IM_RIGHT(img), IM_TOP(img),
-                     console_style->def->bg.translucency, kRGBANoValue, nullptr, 0, 0);
+                     console_style->def->bg_.translucency_, kRGBANoValue, nullptr, 0, 0);
     }
     else
     {
         SolidBox(0, y, SCREENWIDTH, SCREENHEIGHT - y,
-                 console_style->def->bg.colour != kRGBANoValue ? console_style->def->bg.colour : SG_BLACK_RGBA32,
-                 console_style->def->bg.translucency);
+                 console_style->def->bg_.colour_ != kRGBANoValue ? console_style->def->bg_.colour_ : SG_BLACK_RGBA32,
+                 console_style->def->bg_.translucency_);
     }
 
     y += FNSZ / 4 + (con_font->def->type_ == kFontTypeTrueType ? FNSZ : 0);

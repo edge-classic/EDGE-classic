@@ -89,17 +89,17 @@ void HU_Start(void)
 
     SYS_ASSERT(currmap);
 
-    styledef_c *map_styledef = styledefs.Lookup("AUTOMAP");
+    StyleDefinition *map_styledef = styledefs.Lookup("AUTOMAP");
     if (!map_styledef)
         map_styledef = default_style;
     automap_style = hu_styles.Lookup(map_styledef);
 
-    styledef_c *messages_styledef = styledefs.Lookup("MESSAGES");
+    StyleDefinition *messages_styledef = styledefs.Lookup("MESSAGES");
     if (!messages_styledef)
         messages_styledef = default_style;
     message_style = hu_styles.Lookup(messages_styledef);
 
-    styledef_c *important_messages_styledef = styledefs.Lookup("IMPORTANT_MESSAGES");
+    StyleDefinition *important_messages_styledef = styledefs.Lookup("IMPORTANT_MESSAGES");
     if (!important_messages_styledef)
         important_messages_styledef = default_style;
     important_message_style = hu_styles.Lookup(important_messages_styledef);
@@ -139,16 +139,16 @@ void HU_Drawer(void)
 
         tempY = 0;
         tempY += message_style->fonts[0]->StringLines(w_message.c_str()) *
-                 (message_style->fonts[0]->NominalHeight() * message_style->def->text[0].scale);
+                 (message_style->fonts[0]->NominalHeight() * message_style->def->text_[0].scale_);
         tempY /= 2;
         if (message_style->fonts[0]->StringLines(w_message.c_str()) > 1)
-            tempY += message_style->fonts[0]->NominalHeight() * message_style->def->text[0].scale;
+            tempY += message_style->fonts[0]->NominalHeight() * message_style->def->text_[0].scale_;
 
         y = tempY;
 
         message_style->DrawBackground();
         HUD_SetAlignment(0, 0); // center it
-        HUD_SetAlpha(message_style->def->text->translucency);
+        HUD_SetAlpha(message_style->def->text_->translucency_);
         HL_WriteText(message_style, 0, 160, y, w_message.c_str());
         HUD_SetAlignment();
         HUD_SetAlpha();
@@ -158,12 +158,12 @@ void HU_Drawer(void)
     {
         tempY = 0;
         tempY -= important_message_style->fonts[0]->StringLines(w_important_message.c_str()) *
-                 (important_message_style->fonts[0]->NominalHeight() * important_message_style->def->text[0].scale);
+                 (important_message_style->fonts[0]->NominalHeight() * important_message_style->def->text_[0].scale_);
         tempY /= 2;
         y = 90 - tempY;
         important_message_style->DrawBackground();
         HUD_SetAlignment(0, 0); // center it
-        HUD_SetAlpha(important_message_style->def->text->translucency);
+        HUD_SetAlpha(important_message_style->def->text_->translucency_);
         HL_WriteText(important_message_style, 0, 160, y, w_important_message.c_str());
         HUD_SetAlignment();
         HUD_SetAlpha();

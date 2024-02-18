@@ -608,12 +608,12 @@ int CenterMenuImage(const image_c *img)
 int CenterMenuImage2(style_c *style, int text_type, const image_c *img)
 {
     float CenterX  = 160;
-    float txtscale = style->def->text[text_type].scale;
+    float txtscale = style->def->text_[text_type].scale_;
     float gfxWidth = 0;
 
     gfxWidth = IM_WIDTH(img) * txtscale;
     CenterX -= gfxWidth / 2;
-    CenterX += style->def->text[text_type].x_offset;
+    CenterX += style->def->text_[text_type].x_offset_;
 
     return CenterX;
 }
@@ -621,12 +621,12 @@ int CenterMenuImage2(style_c *style, int text_type, const image_c *img)
 int CenterMenuText(style_c *style, int text_type, const char *str)
 {
     float CenterX  = 160;
-    float txtscale = style->def->text[text_type].scale;
+    float txtscale = style->def->text_[text_type].scale_;
     float txtWidth = 0;
 
     txtWidth = style->fonts[text_type]->StringWidth(str) * txtscale;
     CenterX -= txtWidth / 2;
-    CenterX += style->def->text[text_type].x_offset;
+    CenterX += style->def->text_[text_type].x_offset_;
 
     // Should we also add "style->def->x_offset" here too?
     // CenterX += style->def->x_offset;
@@ -651,17 +651,17 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 {
     int   y        = 0; // LoadDef.y + LineHeight * row;
     int   x        = 0;
-    int text_type = styledef_c::T_TITLE;
-    float txtscale = style->def->text[text_type].scale;
+    int text_type = StyleDefinition::kTextSectionTitle;
+    float txtscale = style->def->text_[text_type].scale_;
 
     // TITLE.FONT="EDGE3"; // next page text
     // TEXT.FONT="EDGE3"; // save name & slot
     // ALT.FONT="EDGE3";  // when we edit the save name
     // HELP.FONT="EDGE3"; // save info text
 
-    y = style->def->text[text_type].y_offset;
-    y += style->def->entry_spacing;
-    x = style->def->text[text_type].x_offset;
+    y = style->def->text_[text_type].y_offset_;
+    y += style->def->entry_spacing_;
+    x = style->def->text_[text_type].x_offset_;
     slot_extra_info_t *info;
 
     std::string temp_string = epi::StringFormat("PAGE %d", save_page + 1);
@@ -685,17 +685,17 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
 
     // show some info about the savegame
 
-    text_type = styledef_c::T_HELP;
-    txtscale = style->def->text[text_type].scale;
+    text_type = StyleDefinition::kTextSectionHelp;
+    txtscale = style->def->text_[text_type].scale_;
 
     // y = LoadDef.y + LineHeight * (row2 + 1);
-    y = style->def->text[text_type].y_offset;
-    y += style->def->entry_spacing;
-    x = style->def->text[text_type].x_offset;
+    y = style->def->text_[text_type].y_offset_;
+    y += style->def->entry_spacing_;
+    x = style->def->text_[text_type].x_offset_;
 
     LineHeight = style->fonts[text_type]->NominalHeight() * txtscale;
 
-    const Colormap *colmap = style->def->text[text_type].colmap;
+    const Colormap *colmap = style->def->text_[text_type].colmap_;
     RGBAColor           col    = V_GetFontColor(colmap);
     // HUD_ThinBox(x - 5, y - 5, x + 95, y + 50, col);
     HUD_ThinBox(x - 5, y - 5, x + 95, y + 115, col);
@@ -710,23 +710,23 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
     SYS_ASSERT(timesplit != std::string::npos && temp_string.size() > timesplit + 2);
     HL_WriteText(style, text_type, x, y, temp_string.substr(0, timesplit).c_str());
     y += LineHeight;
-    y += style->def->entry_spacing;
+    y += style->def->entry_spacing_;
     HL_WriteText(style, text_type, x, y, temp_string.substr(timesplit + 2).c_str());
     y += LineHeight;
-    y += style->def->entry_spacing;
+    y += style->def->entry_spacing_;
 
     temp_string = info->gamename;
     temp_string = LoboStringReplaceAll(temp_string, std::string("_"), std::string(" "));
     HL_WriteText(style, text_type, x, y, temp_string.c_str());
 
     y += LineHeight;
-    y += style->def->entry_spacing;
+    y += style->def->entry_spacing_;
     
     temp_string = info->mapname;
     HL_WriteText(style, text_type, x, y, temp_string.c_str());
 
     y += LineHeight;
-    y += style->def->entry_spacing;
+    y += style->def->entry_spacing_;
 
     switch (info->skill)
     {
@@ -749,7 +749,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
     HL_WriteText(style, text_type, x, y, temp_string.c_str());
 
     /*int BottomY = 0;
-    BottomY = style->def->text[styledef_c::T_HELP].y_offset;
+    BottomY = style->def->text[StyleDefinition::kTextSectionHelp].y_offset;
     BottomY += style->def->entry_spacing;
     BottomY += 114;*/
 
@@ -758,7 +758,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, style_c *style, float LineHe
         y += 20;
         // BottomY -= y;
         HUD_StretchFromImageData(x - 3, y, 95,
-                                 (style->def->text[text_type].y_offset + style->def->entry_spacing + 114) - y,
+                                 (style->def->text_[text_type].y_offset_ + style->def->entry_spacing_ + 114) - y,
                                  info->save_imdata, info->save_texid, OPAC_Solid);
     }
 }
@@ -779,17 +779,17 @@ void M_DrawLoad(void)
     SYS_ASSERT(style);
     style->DrawBackground();
 
-    if (!style->fonts[styledef_c::T_HEADER])
-        fontType = styledef_c::T_TEXT;
+    if (!style->fonts[StyleDefinition::kTextSectionHeader])
+        fontType = StyleDefinition::kTextSectionText;
     else
-        fontType = styledef_c::T_HEADER;
+        fontType = StyleDefinition::kTextSectionHeader;
 
-    HUD_SetAlpha(style->def->text[fontType].translucency);
+    HUD_SetAlpha(style->def->text_[fontType].translucency_);
 
     // 1. Draw the header i.e. "Load Game"
     TempX = CenterMenuText(style, fontType, language["MainLoadGame"]);
     TempY = 5;
-    TempY += style->def->text[fontType].y_offset;
+    TempY += style->def->text_[fontType].y_offset_;
 
     HL_WriteText(style, fontType, TempX, TempY, language["MainLoadGame"]);
 
@@ -798,33 +798,33 @@ void M_DrawLoad(void)
     TempX = 0;
     TempY = 0;
 
-    fontType = styledef_c::T_TEXT;
+    fontType = StyleDefinition::kTextSectionText;
 
-    TempX += style->def->text[fontType].x_offset;
-    TempY += style->def->text[fontType].y_offset;
-    TempY += style->def->entry_spacing;
+    TempX += style->def->text_[fontType].x_offset_;
+    TempY += style->def->text_[fontType].y_offset_;
+    TempY += style->def->entry_spacing_;
 
-    RGBAColor col = V_GetFontColor(style->def->text[fontType].colmap);
+    RGBAColor col = V_GetFontColor(style->def->text_[fontType].colmap_);
     HUD_ThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
     // 2. draw the save games
     for (i = 0; i < SAVE_SLOTS; i++)
     {
-        fontType = styledef_c::T_TEXT;
+        fontType = StyleDefinition::kTextSectionText;
         if (i == itemOn)
         {
-            if (style->def->text[styledef_c::T_SELECTED].font)
-                fontType = styledef_c::T_SELECTED;
+            if (style->def->text_[StyleDefinition::kTextSectionSelected].font_)
+                fontType = StyleDefinition::kTextSectionSelected;
         }
 
         LineHeight = style->fonts[fontType]->NominalHeight(); // * txtscale
 
-        if (fontType == styledef_c::T_SELECTED)
+        if (fontType == StyleDefinition::kTextSectionSelected)
         {
-            if (style->fonts[styledef_c::T_SELECTED]->def->type_ == kFontTypeTrueType)
+            if (style->fonts[StyleDefinition::kTextSectionSelected]->def->type_ == kFontTypeTrueType)
             {
                 // ttf_ref_yshift is important for TTF fonts.
-                float y_shift = style->fonts[styledef_c::T_SELECTED]->ttf_ref_yshift[current_font_size]; // * txtscale;
+                float y_shift = style->fonts[StyleDefinition::kTextSectionSelected]->ttf_ref_yshift[current_font_size]; // * txtscale;
 
                 HUD_SetAlpha(0.33f);
                 HUD_SolidBox(TempX - 3, TempY - 2 + (y_shift/2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
@@ -842,7 +842,7 @@ void M_DrawLoad(void)
         else
             HL_WriteText(style, fontType, TempX, TempY - 1, ex_slots[i].desc);
         TempY += LineHeight + (LineHeight / 2);
-        TempY += style->def->entry_spacing;
+        TempY += style->def->entry_spacing_;
     }
 
     M_DrawSaveLoadCommon(i, i + 1, load_style, LineHeight);
@@ -896,51 +896,51 @@ void M_DrawSave(void)
     SYS_ASSERT(style);
     style->DrawBackground();
 
-    if (!style->fonts[styledef_c::T_HEADER])
-        fontType = styledef_c::T_TEXT;
+    if (!style->fonts[StyleDefinition::kTextSectionHeader])
+        fontType = StyleDefinition::kTextSectionText;
     else
-        fontType = styledef_c::T_HEADER;
+        fontType = StyleDefinition::kTextSectionHeader;
 
-    float txtscale = style->def->text[fontType].scale;
+    float txtscale = style->def->text_[fontType].scale_;
 
-    HUD_SetAlpha(style->def->text[fontType].translucency);
+    HUD_SetAlpha(style->def->text_[fontType].translucency_);
 
     // 1. Draw the header i.e. "Load Game"
     TempX = CenterMenuText(style, fontType, language["MainSaveGame"]);
     TempY = 5;
-    TempY += style->def->text[fontType].y_offset;
+    TempY += style->def->text_[fontType].y_offset_;
 
     HL_WriteText(style, fontType, TempX, TempY, language["MainSaveGame"]);
 
     HUD_SetAlpha(old_alpha);
 
-    fontType = styledef_c::T_TEXT;
+    fontType = StyleDefinition::kTextSectionText;
     TempX = 0;
     TempY = 0;
-    TempX += style->def->text[fontType].x_offset;
-    TempY += style->def->text[fontType].y_offset;
-    TempY += style->def->entry_spacing;
+    TempX += style->def->text_[fontType].x_offset_;
+    TempY += style->def->text_[fontType].y_offset_;
+    TempY += style->def->entry_spacing_;
 
-    RGBAColor col = V_GetFontColor(style->def->text[fontType].colmap);
+    RGBAColor col = V_GetFontColor(style->def->text_[fontType].colmap_);
     HUD_ThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
     // 2. draw the save games
     for (i = 0; i < SAVE_SLOTS; i++)
     {
-        fontType = styledef_c::T_TEXT;
-        txtscale = style->def->text[fontType].scale;
+        fontType = StyleDefinition::kTextSectionText;
+        txtscale = style->def->text_[fontType].scale_;
         if (i == itemOn)
         {
-            if (style->def->text[styledef_c::T_SELECTED].font)
+            if (style->def->text_[StyleDefinition::kTextSectionSelected].font_)
             {
-                fontType = styledef_c::T_SELECTED;
-                txtscale = style->def->text[fontType].scale;
+                fontType = StyleDefinition::kTextSectionSelected;
+                txtscale = style->def->text_[fontType].scale_;
             }
         }
 
         LineHeight = style->fonts[fontType]->NominalHeight(); // * txtscale
 
-        if (fontType == styledef_c::T_SELECTED)
+        if (fontType == StyleDefinition::kTextSectionSelected)
         {
             if (style->fonts[fontType]->def->type_ == kFontTypeTrueType)
             {
@@ -964,15 +964,15 @@ void M_DrawSave(void)
         if (saveStringEnter && i == save_slot)
         {
             entering_save = true;
-            if (!style->fonts[styledef_c::T_ALT])
+            if (!style->fonts[StyleDefinition::kTextSectionAlternate])
             {
-                fontType = styledef_c::T_TEXT;
-                txtscale = style->def->text[fontType].scale;
+                fontType = StyleDefinition::kTextSectionText;
+                txtscale = style->def->text_[fontType].scale_;
             }
             else
             {
-                fontType = styledef_c::T_ALT;
-                txtscale = style->def->text[fontType].scale;
+                fontType = StyleDefinition::kTextSectionAlternate;
+                txtscale = style->def->text_[fontType].scale_;
             }
 
             len = style->fonts[fontType]->StringWidth(ex_slots[save_slot].desc) * txtscale;
@@ -998,7 +998,7 @@ void M_DrawSave(void)
         }
 
         TempY += LineHeight + (LineHeight / 2);
-        TempY += style->def->entry_spacing;
+        TempY += style->def->entry_spacing_;
     }
 
     M_DrawSaveLoadCommon(i, i + 1, save_style, LineHeight);
@@ -1179,68 +1179,68 @@ void M_DrawNewGame(void)
 
     style_c *style = skill_style;
 
-    if (!style->fonts[styledef_c::T_HEADER])
-        fontType = styledef_c::T_TITLE;
+    if (!style->fonts[StyleDefinition::kTextSectionHeader])
+        fontType = StyleDefinition::kTextSectionTitle;
     else
-        fontType = styledef_c::T_HEADER;
+        fontType = StyleDefinition::kTextSectionHeader;
 
-    float txtscale = style->def->text[fontType].scale;
+    float txtscale = style->def->text_[fontType].scale_;
 
     float old_alpha = HUD_GetAlpha();
 
-    HUD_SetAlpha(style->def->text[fontType].translucency);
+    HUD_SetAlpha(style->def->text_[fontType].translucency_);
 
     if (custom_MenuDifficulty == false)
     {
-        if (style->def->entry_alignment == style->def->C_CENTER)
+        if (style->def->entry_alignment_ == StyleDefinition::kAlignmentCenter)
             x = CenterMenuText(style, fontType, language["MainNewGame"]);
         else
             x = 94;
-        HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 14 + style->def->text[fontType].y_offset,
+        HL_WriteText(style, fontType, x + style->def->text_[fontType].x_offset_, 14 + style->def->text_[fontType].y_offset_,
                      language["MainNewGame"]);
 
         HUD_SetAlpha(old_alpha);
-        fontType = styledef_c::T_TITLE;
-        txtscale = style->def->text[fontType].scale;
-        HUD_SetAlpha(style->def->text[fontType].translucency);
+        fontType = StyleDefinition::kTextSectionTitle;
+        txtscale = style->def->text_[fontType].scale_;
+        HUD_SetAlpha(style->def->text_[fontType].translucency_);
 
-        if (style->def->entry_alignment == style->def->C_CENTER)
+        if (style->def->entry_alignment_ == StyleDefinition::kAlignmentCenter)
             x = CenterMenuText(style, fontType, language["MenuSkill"]);
         else
             x = 54;
 
-        HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 38 + style->def->text[fontType].y_offset,
+        HL_WriteText(style, fontType, x + style->def->text_[fontType].x_offset_, 38 + style->def->text_[fontType].y_offset_,
                      language["MenuSkill"]);
     }
     else
     {
-        const Colormap *colmap = style->def->text[fontType].colmap;
+        const Colormap *colmap = style->def->text_[fontType].colmap_;
         if (menu_newgame->offset_x != 0.0f) // Only auto-center if no Xoffset
             x = MainDef.x;                  // cannot get away from the damn hardcoded value
         else
             x = CenterMenuImage2(style, fontType, menu_newgame);
 
-        HUD_StretchImage(x, 14 + style->def->text[fontType].y_offset, IM_WIDTH(menu_newgame) * txtscale,
+        HUD_StretchImage(x, 14 + style->def->text_[fontType].y_offset_, IM_WIDTH(menu_newgame) * txtscale,
                          IM_HEIGHT(menu_newgame) * txtscale, menu_newgame, 0.0, 0.0, colmap);
 
         // HUD_DrawImage(x + style->def->text[fontType].x_offset,
         //	14 + style->def->text[fontType].y_offset, menu_newgame, colmap);
 
         HUD_SetAlpha(old_alpha);
-        fontType = styledef_c::T_TITLE;
-        txtscale = style->def->text[fontType].scale;
-        HUD_SetAlpha(style->def->text[fontType].translucency);
+        fontType = StyleDefinition::kTextSectionTitle;
+        txtscale = style->def->text_[fontType].scale_;
+        HUD_SetAlpha(style->def->text_[fontType].translucency_);
 
         x = 54;
-        if (style->def->entry_alignment == style->def->C_CENTER)
+        if (style->def->entry_alignment_ == StyleDefinition::kAlignmentCenter)
         {
             if (menu_skill->offset_x != 0.0f) // Only auto-center if no Xoffset
                 x = 54;                       // cannot get away from the damn hardcoded value
             else
                 x = CenterMenuImage2(style, fontType, menu_skill);
         }
-        colmap = style->def->text[fontType].colmap;
-        HUD_StretchImage(x, 38 + style->def->text[fontType].y_offset, IM_WIDTH(menu_skill) * txtscale,
+        colmap = style->def->text_[fontType].colmap_;
+        HUD_StretchImage(x, 38 + style->def->text_[fontType].y_offset_, IM_WIDTH(menu_skill) * txtscale,
                          IM_HEIGHT(menu_skill) * txtscale, menu_skill, 0.0, 0.0, colmap);
 
         // HUD_DrawImage(x + style->def->text[fontType].x_offset,
@@ -1335,27 +1335,27 @@ void M_DrawEpisode(void)
 
     style_c *style = episode_style;
 
-    if (!style->fonts[styledef_c::T_HEADER])
-        fontType = styledef_c::T_TITLE;
+    if (!style->fonts[StyleDefinition::kTextSectionHeader])
+        fontType = StyleDefinition::kTextSectionTitle;
     else
-        fontType = styledef_c::T_HEADER;
+        fontType = StyleDefinition::kTextSectionHeader;
 
-    float txtscale = style->def->text[fontType].scale;
+    float txtscale = style->def->text_[fontType].scale_;
 
     float old_alpha = HUD_GetAlpha();
-    HUD_SetAlpha(style->def->text[fontType].translucency);
+    HUD_SetAlpha(style->def->text_[fontType].translucency_);
 
     if (custom_MenuEpisode == false)
     {
-        if (style->def->entry_alignment == style->def->C_CENTER)
+        if (style->def->entry_alignment_ == StyleDefinition::kAlignmentCenter)
             x = CenterMenuText(style, fontType, language["MenuWhichEpisode"]);
 
-        HL_WriteText(style, fontType, x + style->def->text[fontType].x_offset, 38 + style->def->text[fontType].y_offset,
+        HL_WriteText(style, fontType, x + style->def->text_[fontType].x_offset_, 38 + style->def->text_[fontType].y_offset_,
                      language["MenuWhichEpisode"]);
     }
     else
     {
-        if (style->def->entry_alignment == style->def->C_CENTER)
+        if (style->def->entry_alignment_ == StyleDefinition::kAlignmentCenter)
         {
             if (menu_episode->offset_x != 0.0f) // Only auto-center if no Xoffset
                 x = 54;                         // cannot get away from the damn hardcoded value
@@ -1363,8 +1363,8 @@ void M_DrawEpisode(void)
                 x = CenterMenuImage2(style, fontType, menu_episode);
         }
 
-        const Colormap *colmap = style->def->text[fontType].colmap;
-        HUD_StretchImage(x, 38 + style->def->text[fontType].y_offset, IM_WIDTH(menu_episode) * txtscale,
+        const Colormap *colmap = style->def->text_[fontType].colmap_;
+        HUD_StretchImage(x, 38 + style->def->text_[fontType].y_offset_, IM_WIDTH(menu_episode) * txtscale,
                          IM_HEIGHT(menu_episode) * txtscale, menu_episode, 0.0, 0.0, colmap);
 
         // HUD_DrawImage(x + episode_style->def->text[fontType].x_offset,
@@ -1696,27 +1696,27 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
     style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
     // If using an IMAGE or TRUETYPE type font for the menu, use a COALHUDs-style bar for the slider instead
-    if (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeImage ||
-        opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType)
+    if (opt_style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeImage ||
+        opt_style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeTrueType)
     {
         RGBAColor slider_color = SG_WHITE_RGBA32;
 
-        const Colormap *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
+        const Colormap *colmap = opt_style->def->text_[StyleDefinition::kTextSectionAlternate].colmap_;
 
         if (colmap)
             slider_color = V_GetFontColor(colmap);
 
         HUD_ThinBox(x,
-                    y + (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType
-                             ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
+                    y + (opt_style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeTrueType
+                             ? opt_style->fonts[StyleDefinition::kTextSectionAlternate]->ttf_ref_yshift[current_font_size]
                              : 0),
-                    x + (thermWidth * step) - step, y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight(),
+                    x + (thermWidth * step) - step, y + opt_style->fonts[StyleDefinition::kTextSectionAlternate]->NominalHeight(),
                     slider_color);
         HUD_SolidBox(x,
-                     y + (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType
-                              ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
+                     y + (opt_style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeTrueType
+                              ? opt_style->fonts[StyleDefinition::kTextSectionAlternate]->ttf_ref_yshift[current_font_size]
                               : 0),
-                     x + (thermDot * step), y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight(), slider_color);
+                     x + (thermDot * step), y + opt_style->fonts[StyleDefinition::kTextSectionAlternate]->NominalHeight(), slider_color);
     }
     else
     {
@@ -1755,33 +1755,33 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
     style_c *opt_style = hu_styles.Lookup(styledefs.Lookup("OPTIONS"));
 
     // If using an IMAGE or TRUETYPE type font for the menu, use a COALHUDs-style bar for the slider instead
-    if (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeImage ||
-        opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType)
+    if (opt_style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeImage ||
+        opt_style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeTrueType)
     {
         RGBAColor slider_color = SG_WHITE_RGBA32;
 
-        const Colormap *colmap = opt_style->def->text[styledef_c::T_ALT].colmap;
+        const Colormap *colmap = opt_style->def->text_[StyleDefinition::kTextSectionAlternate].colmap_;
 
         if (colmap)
             slider_color = V_GetFontColor(colmap);
 
         HUD_ThinBox(x,
-                    y + (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType
-                             ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
+                    y + (opt_style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeTrueType
+                             ? opt_style->fonts[StyleDefinition::kTextSectionAlternate]->ttf_ref_yshift[current_font_size]
                              : 0),
-                    x + 50.0f, y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight() + (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType
-                             ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]/2
+                    x + 50.0f, y + opt_style->fonts[StyleDefinition::kTextSectionAlternate]->NominalHeight() + (opt_style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeTrueType
+                             ? opt_style->fonts[StyleDefinition::kTextSectionAlternate]->ttf_ref_yshift[current_font_size]/2
                              : 0), slider_color);
         HUD_SolidBox(x,
-                     y + (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType
-                              ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]
+                     y + (opt_style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeTrueType
+                              ? opt_style->fonts[StyleDefinition::kTextSectionAlternate]->ttf_ref_yshift[current_font_size]
                               : 0),
                      x + (((thermDot - min) / increment) * scale_step),
-                     y + opt_style->fonts[styledef_c::T_ALT]->NominalHeight() + (opt_style->fonts[styledef_c::T_ALT]->def->type_ == kFontTypeTrueType
-                             ? opt_style->fonts[styledef_c::T_ALT]->ttf_ref_yshift[current_font_size]/2
+                     y + opt_style->fonts[StyleDefinition::kTextSectionAlternate]->NominalHeight() + (opt_style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeTrueType
+                             ? opt_style->fonts[StyleDefinition::kTextSectionAlternate]->ttf_ref_yshift[current_font_size]/2
                              : 0), slider_color);
         if (!actual_val.empty())
-            HL_WriteText(opt_style, styledef_c::T_ALT, x + 50.0f + step, y, actual_val.c_str());
+            HL_WriteText(opt_style, StyleDefinition::kTextSectionAlternate, x + 50.0f + step, y, actual_val.c_str());
     }
     else
     {
@@ -1803,7 +1803,7 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
                          therm_o, 0.0, 0.0);
 
         if (!actual_val.empty())
-            HL_WriteText(opt_style, styledef_c::T_ALT,
+            HL_WriteText(opt_style, StyleDefinition::kTextSectionAlternate,
                          basex + (((max - min) / increment) * scale_step) + (step * 2 + 2), y, actual_val.c_str());
     }
 }
@@ -2397,16 +2397,16 @@ static void DrawMessage(void)
     {
         I_StartFrame(); // To clear and ensure solid black background regardless of style
 
-        if (exit_style->def->text[styledef_c::T_TEXT].colmap)
+        if (exit_style->def->text_[StyleDefinition::kTextSectionText].colmap_)
         {
-            HUD_SetTextColor(V_GetFontColor(exit_style->def->text[styledef_c::T_TEXT].colmap));
+            HUD_SetTextColor(V_GetFontColor(exit_style->def->text_[StyleDefinition::kTextSectionText].colmap_));
         }
 
-        if (exit_style->fonts[styledef_c::T_TEXT])
+        if (exit_style->fonts[StyleDefinition::kTextSectionText])
         {
-            HUD_SetFont(exit_style->fonts[styledef_c::T_TEXT]);
+            HUD_SetFont(exit_style->fonts[StyleDefinition::kTextSectionText]);
         }
-        HUD_SetScale(exit_style->def->text[styledef_c::T_TEXT].scale);
+        HUD_SetScale(exit_style->def->text_[StyleDefinition::kTextSectionText].scale_);
 
         HUD_DrawQuitScreen();
         return;
@@ -2433,8 +2433,8 @@ static void DrawMessage(void)
 
     std::string s = msg + input;
 
-    y = 100 - (exit_style->fonts[styledef_c::T_TEXT]->StringLines(s.c_str()) *
-               exit_style->fonts[styledef_c::T_TEXT]->NominalHeight() / 2);
+    y = 100 - (exit_style->fonts[StyleDefinition::kTextSectionText]->StringLines(s.c_str()) *
+               exit_style->fonts[StyleDefinition::kTextSectionText]->NominalHeight() / 2);
 
     if (!msg.empty())
     {
@@ -2453,11 +2453,11 @@ static void DrawMessage(void)
             if (s.size() > 0)
             {
                 HUD_SetAlignment(0, -1); // center it
-                HL_WriteText(exit_style, styledef_c::T_TEXT, 160, y, s.c_str());
+                HL_WriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
                 HUD_SetAlignment(-1, -1); // set it back to usual
             }
 
-            y += exit_style->fonts[styledef_c::T_TEXT]->NominalHeight();
+            y += exit_style->fonts[StyleDefinition::kTextSectionText]->NominalHeight();
 
             oldpos = pos + 1;
         } while (pos >= 0 && oldpos < (int)msg.size());
@@ -2480,7 +2480,7 @@ static void DrawMessage(void)
             if (s.size() > 0)
             {
                 HUD_SetAlignment(0, -1); // center it
-                HL_WriteText(exit_style, styledef_c::T_TEXT, 160, y, s.c_str());
+                HL_WriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
                 HUD_SetAlignment(-1, -1); // set it back to usual
             }
 
@@ -2512,9 +2512,9 @@ void M_DrawCursor(style_c *style, bool graphical_item)
 
     float old_alpha = HUD_GetAlpha();
 
-    float txtscale = style->def->text[styledef_c::T_TEXT].scale;
+    float txtscale = style->def->text_[StyleDefinition::kTextSectionText].scale_;
 
-    // const colourmap_c *colmap = style->def->text[styledef_c::T_TEXT].colmap; // Should we allow a colmap for the
+    // const colourmap_c *colmap = style->def->text[StyleDefinition::kTextSectionText].colmap; // Should we allow a colmap for the
     // cursor?
     const Colormap *colmap = nullptr;
 
@@ -2522,17 +2522,17 @@ void M_DrawCursor(style_c *style, bool graphical_item)
     // 1. First up, do we want a graphical cursor or a text one?
     //-------------------------------------------------------------
     image_c *cursor;
-    if (style->def->cursor.cursor_string != "")
+    if (style->def->cursor_.cursor_string_ != "")
         cursor = nullptr;
-    else if (style->def->cursor.alt_cursor != "")
-        cursor = (image_c *)W_ImageLookup(style->def->cursor.alt_cursor.c_str());
+    else if (style->def->cursor_.alt_cursor_ != "")
+        cursor = (image_c *)W_ImageLookup(style->def->cursor_.alt_cursor_.c_str());
     else
         cursor = menu_skull[0];
 
     if (cursor) // we're using a graphic for the cursor
         graphical_cursor = true;
 
-    HUD_SetAlpha(style->def->cursor.translucency);
+    HUD_SetAlpha(style->def->cursor_.translucency_);
 
     //-------------------------------------------------------------
     // 2. Start drawing our cursor. We have to check if the
@@ -2542,8 +2542,8 @@ void M_DrawCursor(style_c *style, bool graphical_item)
     // graphical_item==true //We're going graphic-based menu items
     if (graphical_cursor == false) // We're going text-based cursor
     {
-        TempWidth  = style->fonts[styledef_c::T_TEXT]->StringWidth(style->def->cursor.cursor_string.c_str()) * txtscale;
-        TempSpacer = style->fonts[styledef_c::T_TEXT]->CharWidth(style->def->cursor.cursor_string[0]) * txtscale * 0.2;
+        TempWidth  = style->fonts[StyleDefinition::kTextSectionText]->StringWidth(style->def->cursor_.cursor_string_.c_str()) * txtscale;
+        TempSpacer = style->fonts[StyleDefinition::kTextSectionText]->CharWidth(style->def->cursor_.cursor_string_[0]) * txtscale * 0.2;
     }
     else // We're going graphical cursor
     {
@@ -2552,7 +2552,7 @@ void M_DrawCursor(style_c *style, bool graphical_item)
         cursor->offset_x = 0;
         cursor->offset_y = 0;
 
-        if (style->def->cursor.force_offsets)
+        if (style->def->cursor_.force_offsets_)
         {
             cursor->offset_x += old_offset_x;
             cursor->offset_y += old_offset_y;
@@ -2560,15 +2560,15 @@ void M_DrawCursor(style_c *style, bool graphical_item)
 
         if (graphical_item == false)
         {
-            if (style->fonts[styledef_c::T_TEXT]->def->type_ == kFontTypeTrueType)
+            if (style->fonts[StyleDefinition::kTextSectionText]->def->type_ == kFontTypeTrueType)
             {
-                ShortestLine = style->fonts[styledef_c::T_TEXT]->ttf_ref_height[current_font_size] * txtscale;
-                y_shift      = style->fonts[styledef_c::T_TEXT]->ttf_ref_yshift[current_font_size] * txtscale;
+                ShortestLine = style->fonts[StyleDefinition::kTextSectionText]->ttf_ref_height[current_font_size] * txtscale;
+                y_shift      = style->fonts[StyleDefinition::kTextSectionText]->ttf_ref_yshift[current_font_size] * txtscale;
             }
         }
         TempScale = ShortestLine / IM_HEIGHT(cursor);
         TempWidth = IM_WIDTH(cursor) * TempScale;
-        if (!style->def->cursor.scaling)
+        if (!style->def->cursor_.scaling_)
         {
             currentMenu->menuitems[itemOn].y -= (IM_HEIGHT(cursor) - ShortestLine) / 2;
             ShortestLine = IM_HEIGHT(cursor);
@@ -2577,14 +2577,14 @@ void M_DrawCursor(style_c *style, bool graphical_item)
     }
 
     TempSpacer = TempWidth * 0.2; // 20% of cursor graphic is our space
-    if (style->def->cursor.position == style->def->C_BOTH)
+    if (style->def->cursor_.position_ == StyleDefinition::kAlignmentBoth)
     {
-        if (style->def->entry_alignment == style->def->C_RIGHT)
+        if (style->def->entry_alignment_ == StyleDefinition::kAlignmentRight)
         {
             // Left cursor
             if (graphical_item == false)
                 txtWidth =
-                    style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
+                    style->fonts[StyleDefinition::kTextSectionText]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
             else
                 txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
 
@@ -2609,7 +2609,7 @@ void M_DrawCursor(style_c *style, bool graphical_item)
                 HUD_StretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+                HL_WriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->def->cursor_.cursor_string_.c_str());
 
             // Right cursor
             TempX = currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer;
@@ -2631,7 +2631,7 @@ void M_DrawCursor(style_c *style, bool graphical_item)
                 HUD_StretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+                HL_WriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->def->cursor_.cursor_string_.c_str());
         }
         else
         {
@@ -2655,12 +2655,12 @@ void M_DrawCursor(style_c *style, bool graphical_item)
                 HUD_StretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+                HL_WriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->def->cursor_.cursor_string_.c_str());
 
             // Right cursor
             if (graphical_item == false)
                 txtWidth =
-                    style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
+                    style->fonts[StyleDefinition::kTextSectionText]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
             else
                 txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
 
@@ -2681,16 +2681,16 @@ void M_DrawCursor(style_c *style, bool graphical_item)
                 HUD_StretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+                HL_WriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->def->cursor_.cursor_string_.c_str());
         }
     }
-    else if (style->def->cursor.position == style->def->C_CENTER)
+    else if (style->def->cursor_.position_ == StyleDefinition::kAlignmentCenter)
     {
         TempX = 0;
 
         if (graphical_cursor == true)
         {
-            TempX = CenterMenuImage2(style, styledef_c::T_TEXT, cursor); // + TempSpacer;
+            TempX = CenterMenuImage2(style, StyleDefinition::kTextSectionText, cursor); // + TempSpacer;
             TempY = currentMenu->menuitems[itemOn].y + y_shift;
             if (graphical_item == true)
             {
@@ -2699,7 +2699,7 @@ void M_DrawCursor(style_c *style, bool graphical_item)
             TempX -= (cursor->offset_x * txtscale);
             TempY -= (cursor->offset_y * txtscale);
 
-            if (style->def->cursor.border)
+            if (style->def->cursor_.border_)
                 HUD_StretchImage(currentMenu->menuitems[itemOn].x, TempY, WidestLine, TallestLine, cursor, 0.0, 0.0,
                                  colmap);
             else
@@ -2708,24 +2708,24 @@ void M_DrawCursor(style_c *style, bool graphical_item)
         else
         {
             TempX =
-                CenterMenuText(style, styledef_c::T_TEXT, style->def->cursor.cursor_string.c_str()); // + TempSpacer;
+                CenterMenuText(style, StyleDefinition::kTextSectionText, style->def->cursor_.cursor_string_.c_str()); // + TempSpacer;
             TempY = currentMenu->menuitems[itemOn].y + y_shift;
             if (graphical_item == true)
             {
                 TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
             }
-            HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+            HL_WriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->def->cursor_.cursor_string_.c_str());
         }
     }
-    else if (style->def->cursor.position == style->def->C_RIGHT)
+    else if (style->def->cursor_.position_ == StyleDefinition::kAlignmentRight)
     {
         TempX = 0;
 
-        if (style->def->entry_alignment == style->def->C_CENTER)
+        if (style->def->entry_alignment_ == StyleDefinition::kAlignmentCenter)
         {
             if (graphical_item == false)
                 txtWidth =
-                    style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
+                    style->fonts[StyleDefinition::kTextSectionText]->StringWidth(currentMenu->menuitems[itemOn].name) * txtscale;
             else
                 txtWidth = IM_WIDTH(currentMenu->menuitems[itemOn].image) * txtscale;
 
@@ -2751,7 +2751,7 @@ void M_DrawCursor(style_c *style, bool graphical_item)
             HUD_StretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
         }
         else
-            HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+            HL_WriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->def->cursor_.cursor_string_.c_str());
     }
     else
     {
@@ -2773,11 +2773,11 @@ void M_DrawCursor(style_c *style, bool graphical_item)
             /*
             char mbuffer[200];
             sprintf(mbuffer, "CX%d MX%d", TempX, currentMenu->menuitems[itemOn].x);
-            HL_WriteText(style,styledef_c::T_TEXT, 10, 185, mbuffer, 0.7f);
+            HL_WriteText(style,StyleDefinition::kTextSectionText, 10, 185, mbuffer, 0.7f);
             */
         }
         else
-            HL_WriteText(style, styledef_c::T_TEXT, TempX, TempY, style->def->cursor.cursor_string.c_str());
+            HL_WriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->def->cursor_.cursor_string_.c_str());
     }
 
     if (graphical_cursor == true)
@@ -2811,31 +2811,31 @@ void M_DrawItems(style_c *style, bool graphical_item)
 
     float old_alpha = HUD_GetAlpha();
 
-    float txtscale = style->def->text[styledef_c::T_TEXT].scale;
+    float txtscale = style->def->text_[StyleDefinition::kTextSectionText].scale_;
 
     //---------------------------------------------------
     // 1. For each menu item calculate x, width, height
     //---------------------------------------------------
     if (graphical_item == false) // We're going text-based menu items
     {
-        ShortestLine = txtscale * style->fonts[styledef_c::T_TEXT]->NominalHeight();
-        TallestLine  = txtscale * style->fonts[styledef_c::T_TEXT]->NominalHeight();
+        ShortestLine = txtscale * style->fonts[StyleDefinition::kTextSectionText]->NominalHeight();
+        TallestLine  = txtscale * style->fonts[StyleDefinition::kTextSectionText]->NominalHeight();
         for (i = 0; i < max; i++)
         {
             currentMenu->menuitems[i].height = ShortestLine;
-            if (style->def->entry_alignment == style->def->C_CENTER)
-                currentMenu->menuitems[i].x = CenterMenuText(style, styledef_c::T_TEXT, currentMenu->menuitems[i].name);
+            if (style->def->entry_alignment_ == StyleDefinition::kAlignmentCenter)
+                currentMenu->menuitems[i].x = CenterMenuText(style, StyleDefinition::kTextSectionText, currentMenu->menuitems[i].name);
             else
-                currentMenu->menuitems[i].x = x + style->def->x_offset + style->def->text[styledef_c::T_TEXT].x_offset;
+                currentMenu->menuitems[i].x = x + style->def->x_offset_ + style->def->text_[StyleDefinition::kTextSectionText].x_offset_;
 
-            currentMenu->menuitems[i].y = y + style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
+            currentMenu->menuitems[i].y = y + style->def->y_offset_ + style->def->text_[StyleDefinition::kTextSectionText].y_offset_;
             if (currentMenu->menuitems[i].width < 0)
                 currentMenu->menuitems[i].width =
-                    style->fonts[styledef_c::T_TEXT]->StringWidth(currentMenu->menuitems[i].name) * txtscale;
+                    style->fonts[StyleDefinition::kTextSectionText]->StringWidth(currentMenu->menuitems[i].name) * txtscale;
             if (currentMenu->menuitems[i].width > WidestLine)
                 WidestLine = currentMenu->menuitems[i].width;
 
-            y += currentMenu->menuitems[i].height + 1 + style->def->entry_spacing;
+            y += currentMenu->menuitems[i].height + 1 + style->def->entry_spacing_;
         }
     }
     else
@@ -2863,21 +2863,21 @@ void M_DrawItems(style_c *style, bool graphical_item)
                 if (currentMenu->menuitems[i].width > WidestLine)
                     WidestLine = currentMenu->menuitems[i].width;
 
-                if (style->def->entry_alignment == style->def->C_CENTER)
-                    currentMenu->menuitems[i].x = CenterMenuImage2(style, styledef_c::T_TEXT, image);
+                if (style->def->entry_alignment_ == StyleDefinition::kAlignmentCenter)
+                    currentMenu->menuitems[i].x = CenterMenuImage2(style, StyleDefinition::kTextSectionText, image);
                 else
-                    currentMenu->menuitems[i].x = x + (image->offset_x * txtscale) + style->def->x_offset +
-                                                  style->def->text[styledef_c::T_TEXT].x_offset;
+                    currentMenu->menuitems[i].x = x + (image->offset_x * txtscale) + style->def->x_offset_ +
+                                                  style->def->text_[StyleDefinition::kTextSectionText].x_offset_;
 
                 currentMenu->menuitems[i].y =
-                    y - image->offset_y + style->def->y_offset + style->def->text[styledef_c::T_TEXT].y_offset;
-                y += currentMenu->menuitems[i].height + style->def->entry_spacing;
+                    y - image->offset_y + style->def->y_offset_ + style->def->text_[StyleDefinition::kTextSectionText].y_offset_;
+                y += currentMenu->menuitems[i].height + style->def->entry_spacing_;
             }
             else
             {
                 currentMenu->menuitems[i].x = x;
                 currentMenu->menuitems[i].y = y;
-                y += 15 + style->def->entry_spacing;
+                y += 15 + style->def->entry_spacing_;
             }
         }
         if (ShortestLine == 10000.0f && TallestLine == 0.0f)
@@ -2891,31 +2891,31 @@ void M_DrawItems(style_c *style, bool graphical_item)
         }
     }
 
-    int textstyle = styledef_c::T_TEXT;
-    txtscale = style->def->text[textstyle].scale;
+    int textstyle = StyleDefinition::kTextSectionText;
+    txtscale = style->def->text_[textstyle].scale_;
 
     //---------------------------------------------------
     // 2. Draw each menu item
     //---------------------------------------------------
     for (j = 0; j < max; j++)
     {
-        // int textstyle = i == itemOn ? (style->def->text[styledef_c::T_SELECTED].font ? styledef_c::T_SELECTED :
-        // styledef_c::T_TEXT) : 		styledef_c::T_TEXT;
+        // int textstyle = i == itemOn ? (style->def->text[StyleDefinition::kTextSectionSelected].font ? StyleDefinition::kTextSectionSelected :
+        // StyleDefinition::kTextSectionText) : 		StyleDefinition::kTextSectionText;
 
-        textstyle = styledef_c::T_TEXT;
-        txtscale = style->def->text[textstyle].scale;
+        textstyle = StyleDefinition::kTextSectionText;
+        txtscale = style->def->text_[textstyle].scale_;
         if (j == itemOn)
         {
-            if (style->def->text[styledef_c::T_SELECTED].font)
+            if (style->def->text_[StyleDefinition::kTextSectionSelected].font_)
             {
-                textstyle = styledef_c::T_SELECTED;
-                txtscale = style->def->text[textstyle].scale;
+                textstyle = StyleDefinition::kTextSectionSelected;
+                txtscale = style->def->text_[textstyle].scale_;
             }
         }
 
-        HUD_SetAlpha(style->def->text[textstyle].translucency);
+        HUD_SetAlpha(style->def->text_[textstyle].translucency_);
 
-        if (style->def->entry_alignment == style->def->C_RIGHT)
+        if (style->def->entry_alignment_ == StyleDefinition::kAlignmentRight)
             TempX = currentMenu->menuitems[j].x + WidestLine - currentMenu->menuitems[j].width;
         else
             TempX = currentMenu->menuitems[j].x;
@@ -2926,21 +2926,21 @@ void M_DrawItems(style_c *style, bool graphical_item)
         }
         else // We're going graphical menu items
         {
-            // const colourmap_c *colmap = i == itemOn ? style->def->text[styledef_c::T_SELECTED].colmap :
-            //		style->def->text[styledef_c::T_TEXT].colmap;
+            // const colourmap_c *colmap = i == itemOn ? style->def->text[StyleDefinition::kTextSectionSelected].colmap :
+            //		style->def->text[StyleDefinition::kTextSectionText].colmap;
 
-            textstyle = styledef_c::T_TEXT;
-            txtscale = style->def->text[textstyle].scale;
+            textstyle = StyleDefinition::kTextSectionText;
+            txtscale = style->def->text_[textstyle].scale_;
             if (j == itemOn)
             {
-                if (style->def->text[styledef_c::T_SELECTED].colmap)
+                if (style->def->text_[StyleDefinition::kTextSectionSelected].colmap_)
                 {
-                    textstyle = styledef_c::T_SELECTED;
-                    txtscale = style->def->text[textstyle].scale;
+                    textstyle = StyleDefinition::kTextSectionSelected;
+                    txtscale = style->def->text_[textstyle].scale_;
                 }
             }
 
-            const Colormap *colmap = style->def->text[textstyle].colmap;
+            const Colormap *colmap = style->def->text_[textstyle].colmap_;
             // colourmap_c *colmap = nullptr;
 
             // HUD_StretchImage() will apply image.offset_x again so subtract it first
@@ -3084,7 +3084,7 @@ void M_Init(void)
     quickSaveSlot = -1;
 
     // lookup styles
-    styledef_c *def;
+    StyleDefinition *def;
 
     def = styledefs.Lookup("MENU");
     if (!def)

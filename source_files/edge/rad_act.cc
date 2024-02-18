@@ -162,7 +162,7 @@ void RAD_DisplayTips(void)
     HUD_Reset();
 
     // lookup styles
-    styledef_c *def;
+    StyleDefinition *def;
 
     def = styledefs.Lookup("RTS_TIP");
     if (!def)
@@ -217,8 +217,8 @@ void RAD_DisplayTips(void)
         float x = current->p.x_pos * 320.0f;
         float y = current->p.y_pos * 200.0f;
 
-        if (rts_tip_style->fonts[styledef_c::T_TEXT])
-            HUD_SetFont(rts_tip_style->fonts[styledef_c::T_TEXT]);
+        if (rts_tip_style->fonts[StyleDefinition::kTextSectionText])
+            HUD_SetFont(rts_tip_style->fonts[StyleDefinition::kTextSectionText]);
 
         if (current->tip_graphic)
             HUD_DrawImage(x, y, current->tip_graphic);

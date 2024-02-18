@@ -864,7 +864,7 @@ void M_OptMenuInit()
     InitMonitorSize();
 
     // load styles
-    styledef_c *def;
+    StyleDefinition *def;
 
     def = styledefs.Lookup("OPTIONS");
     if (!def)
@@ -911,19 +911,19 @@ void M_OptDrawer()
 
     style->DrawBackground();
 
-    if (!style->fonts[styledef_c::T_TEXT])
+    if (!style->fonts[StyleDefinition::kTextSectionText])
         return;
 
     int fontType;
 
-    if (!style->fonts[styledef_c::T_HEADER])
-        fontType = styledef_c::T_TEXT;
+    if (!style->fonts[StyleDefinition::kTextSectionHeader])
+        fontType = StyleDefinition::kTextSectionText;
     else
-        fontType = styledef_c::T_HEADER;
+        fontType = StyleDefinition::kTextSectionHeader;
 
     int   font_h;
     int   CenterX;
-    float TEXTscale = style->def->text[fontType].scale;
+    float TEXTscale = style->def->text_[fontType].scale_;
 
     font_h = style->fonts[fontType]->NominalHeight();
     font_h *= TEXTscale;
@@ -935,8 +935,8 @@ void M_OptDrawer()
     // Lobo 2022
     HL_WriteText(style, fontType, CenterX, menutop, curr_menu->name, 1.5);
 
-    fontType  = styledef_c::T_TEXT;
-    TEXTscale = style->def->text[fontType].scale;
+    fontType  = StyleDefinition::kTextSectionText;
+    TEXTscale = style->def->text_[fontType].scale_;
     font_h    = style->fonts[fontType]->NominalHeight();
     font_h *= TEXTscale;
     menutop = 68 - ((curr_menu->item_num * font_h) / 2);
@@ -948,14 +948,14 @@ void M_OptDrawer()
     // CenterX -= (style->fonts[fontType]->StringWidth(curr_menu->name) * 1.5) / 2;
 
     // now, draw all the menuitems
-    deltay = 1 + font_h + style->def->entry_spacing;
+    deltay = 1 + font_h + style->def->entry_spacing_;
 
     curry = menutop + 25;
 
     if (curr_menu->key_page[0])
     {
-        fontType = styledef_c::T_TITLE;
-        TEXTscale = style->def->text[fontType].scale;
+        fontType = StyleDefinition::kTextSectionTitle;
+        TEXTscale = style->def->text_[fontType].scale_;
 
         if (curr_key_menu > 0)
             HL_WriteText(style, fontType, 60, 200 - deltay * 4, "< PREV");
@@ -964,8 +964,8 @@ void M_OptDrawer()
             HL_WriteText(style, fontType, 260 - style->fonts[fontType]->StringWidth("NEXT >") * TEXTscale, 200 - deltay * 4,
                          "NEXT >");
 
-        fontType = styledef_c::T_HELP;
-        TEXTscale = style->def->text[fontType].scale;
+        fontType = StyleDefinition::kTextSectionHelp;
+        TEXTscale = style->def->text_[fontType].scale_;
 
         HL_WriteText(style, fontType, 160 - style->fonts[fontType]->StringWidth(curr_menu->key_page) * TEXTscale / 2, curry,
                      curr_menu->key_page);
@@ -1002,13 +1002,13 @@ void M_OptDrawer()
 
         if (is_selected)
         {
-            fontType  = styledef_c::T_TITLE;
-            TEXTscale = style->def->text[fontType].scale;
+            fontType  = StyleDefinition::kTextSectionTitle;
+            TEXTscale = style->def->text_[fontType].scale_;
         }
         else
         {
-            fontType  = styledef_c::T_TEXT;
-            TEXTscale = style->def->text[fontType].scale;
+            fontType  = StyleDefinition::kTextSectionText;
+            TEXTscale = style->def->text_[fontType].scale_;
         }
 
         HL_WriteText(style, fontType,
@@ -1021,8 +1021,8 @@ void M_OptDrawer()
         // Draw current soundfont
         if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeSoundfont)
         {
-            fontType  = styledef_c::T_ALT;
-            TEXTscale = style->def->text[fontType].scale;
+            fontType  = StyleDefinition::kTextSectionAlternate;
+            TEXTscale = style->def->text_[fontType].scale_;
             HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                          epi::GetStem(s_soundfont.s).c_str());
         }
@@ -1030,8 +1030,8 @@ void M_OptDrawer()
         // Draw current GENMIDI
         if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeGENMIDI)
         {
-            fontType  = styledef_c::T_ALT;
-            TEXTscale = style->def->text[fontType].scale;
+            fontType  = StyleDefinition::kTextSectionAlternate;
+            TEXTscale = style->def->text_[fontType].scale_;
             HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                          s_genmidi.s.empty() ? "Default" : epi::GetStem(s_genmidi.s).c_str());
         }
@@ -1039,8 +1039,8 @@ void M_OptDrawer()
         // -ACB- 1998/07/15 Menu Cursor is colour indexed.
         if (is_selected)
         {
-            fontType  = styledef_c::T_TITLE;
-            TEXTscale = style->def->text[fontType].scale;
+            fontType  = StyleDefinition::kTextSectionTitle;
+            TEXTscale = style->def->text_[fontType].scale_;
             if (style->fonts[fontType]->def->type_ == kFontTypeImage)
             {
                 int cursor = 16;
@@ -1053,8 +1053,8 @@ void M_OptDrawer()
 
             if (curr_menu->items[i].help)
             {
-                fontType  = styledef_c::T_HELP;
-                TEXTscale = style->def->text[fontType].scale;
+                fontType  = StyleDefinition::kTextSectionHelp;
+                TEXTscale = style->def->text_[fontType].scale_;
                 const char *help = language[curr_menu->items[i].help];
 
                 HL_WriteText(style, fontType, 160 - (style->fonts[fontType]->StringWidth(help) * TEXTscale / 2),
@@ -1063,8 +1063,8 @@ void M_OptDrawer()
         }
 
         // I believe it's all T_ALT
-        fontType  = styledef_c::T_ALT;
-        TEXTscale = style->def->text[fontType].scale;
+        fontType  = StyleDefinition::kTextSectionAlternate;
+        TEXTscale = style->def->text_[fontType].scale_;
 
         switch (curr_menu->items[i].type)
         {
@@ -1120,7 +1120,7 @@ void M_OptDrawer()
                 sprintf(tempstring, "Invalid");
             }
 
-            HL_WriteText(style, styledef_c::T_ALT, (curr_menu->menu_center) + 15, curry, tempstring);
+            HL_WriteText(style, StyleDefinition::kTextSectionAlternate, (curr_menu->menu_center) + 15, curry, tempstring);
             break;
         }
 
@@ -1171,8 +1171,8 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
     // Draw resolution selection option
     y += (dy * 3);
 
-    int fontType  = styledef_c::T_ALT;
-    float TEXTscale = style->def->text[fontType].scale;
+    int fontType  = StyleDefinition::kTextSectionAlternate;
+    float TEXTscale = style->def->text_[fontType].scale_;
 
     sprintf(tempstring, "%s",
             new_scrmode.display_mode == 2
@@ -1190,14 +1190,14 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
     // Draw selected resolution and mode:
     y = bottomy;
 
-    fontType  = styledef_c::T_HELP;
-    TEXTscale = style->def->text[fontType].scale;
+    fontType  = StyleDefinition::kTextSectionHelp;
+    TEXTscale = style->def->text_[fontType].scale_;
 
     sprintf(tempstring, "Current Resolution:");
     HL_WriteText(style, fontType, 160 - (style->fonts[fontType]->StringWidth(tempstring) * TEXTscale / 2), y, tempstring);
 
-    fontType  = styledef_c::T_ALT;
-    TEXTscale = style->def->text[fontType].scale;
+    fontType  = StyleDefinition::kTextSectionAlternate;
+    TEXTscale = style->def->text_[fontType].scale_;
 
     y += dy;
     y += 5;
@@ -1223,11 +1223,11 @@ static void M_LanguageDrawer(int x, int y, int deltay)
     // This seems unused for now - Dasho
     /*float ALTscale = 1.0;
 
-    if(opt_def_style->def->text[styledef_c::T_ALT].scale)
+    if(opt_def_style->def->text[StyleDefinition::kTextSectionAlternate].scale)
     {
-        ALTscale=opt_def_style->def->text[styledef_c::T_ALT].scale;
+        ALTscale=opt_def_style->def->text[StyleDefinition::kTextSectionAlternate].scale;
     }*/
-    HL_WriteText(opt_def_style, styledef_c::T_ALT, x + 15, y + deltay * LANGUAGE_POS, language.GetName());
+    HL_WriteText(opt_def_style, StyleDefinition::kTextSectionAlternate, x + 15, y + deltay * LANGUAGE_POS, language.GetName());
 }
 
 static void KeyMenu_Next()

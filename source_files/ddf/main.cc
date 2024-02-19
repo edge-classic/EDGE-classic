@@ -1174,7 +1174,7 @@ void DDF_MainRefAttack(const char *info, void *storage)
     if (*dest == nullptr) DDF_WarnError("Unknown Attack: %s\n", info);
 }
 
-int DDF_MainLookupDirector(const MobjType *info, const char *ref)
+int DDF_MainLookupDirector(const MapObjectDefinition *info, const char *ref)
 {
     const char *p = strchr(ref, ':');
 
@@ -1773,7 +1773,7 @@ const char *DDF_MainDecodeList(const char *info, char divider, bool simple)
 
 // ---> mobj_strref class
 
-const MobjType *MobjStringReference::GetRef()
+const MapObjectDefinition *MobjStringReference::GetRef()
 {
     if (def_) return def_;
 

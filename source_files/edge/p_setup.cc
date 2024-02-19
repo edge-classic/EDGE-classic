@@ -549,7 +549,7 @@ static void UnknownThingWarning(int type, float x, float y)
     unknown_thing_map[type] = count + 1;
 }
 
-static mobj_t *SpawnMapThing(const MobjType *info, float x, float y, float z, sector_t *sec, BAMAngle angle,
+static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, float z, sector_t *sec, BAMAngle angle,
                              int options, int tag)
 {
     spawnpoint_t point;
@@ -687,7 +687,7 @@ static void LoadThings(int lump)
 
     const uint8_t     *data;
     const raw_thing_t *mt;
-    const MobjType  *objtype;
+    const MapObjectDefinition  *objtype;
 
     if (!W_VerifyLumpName(lump, "THINGS"))
         I_Error("Bad WAD: level %s missing THINGS.\n", currmap->lump_.c_str());
@@ -821,7 +821,7 @@ static void LoadHexenThings(int lump)
 
     const uint8_t           *data;
     const raw_hexen_thing_t *mt;
-    const MobjType        *objtype;
+    const MapObjectDefinition        *objtype;
 
     if (!W_VerifyLumpName(lump, "THINGS"))
         I_Error("Bad WAD: level %s missing THINGS.\n", currmap->lump_.c_str());
@@ -2329,7 +2329,7 @@ static void LoadUDMFThings()
             float             healthfac = 1.0f;
             float             alpha     = 1.0f;
             float             scale = 0.0f, scalex = 0.0f, scaley = 0.0f;
-            const MobjType *objtype;
+            const MapObjectDefinition *objtype;
             for (;;)
             {
                 if (lex.Match("}"))

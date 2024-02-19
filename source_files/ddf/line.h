@@ -395,11 +395,11 @@ class TeleportDefinition
     bool teleport_;
 
     // effect object spawned when going in...
-    const MobjType *inspawnobj_;  // FIXME! Do mobjtypes.Lookup()?
+    const MapObjectDefinition *inspawnobj_;  // FIXME! Do mobjtypes.Lookup()?
     std::string       inspawnobj_ref_;
 
     // effect object spawned when going out...
-    const MobjType *outspawnobj_;  // FIXME! Do mobjtypes.Lookup()?
+    const MapObjectDefinition *outspawnobj_;  // FIXME! Do mobjtypes.Lookup()?
     std::string       outspawnobj_ref_;
 
     // Teleport delay
@@ -651,7 +651,7 @@ class LineType
     // Lobo: item to spawn (or nullptr).  The mobjdef pointer is only valid
     // after
     //  DDF_MobjCleanUp() has been called.
-    const MobjType *effectobject_;
+    const MapObjectDefinition *effectobject_;
     std::string       effectobject_ref_;
 
     // Handle this line differently

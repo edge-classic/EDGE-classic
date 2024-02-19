@@ -1010,7 +1010,7 @@ void P_ObituaryMessage(mobj_t *victim, mobj_t *killer, const DamageClass *damtyp
 // P_KillMobj
 //
 // Altered to reflect the fact that the dropped item is a pointer to
-// MobjType, uses new procedure: P_MobjCreateObject.
+// MapObjectDefinition, uses new procedure: P_MobjCreateObject.
 //
 // Note: Damtype can be nullptr here.
 //
@@ -1177,7 +1177,7 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool
 
     // Drop stuff. This determines the kind of object spawned
     // during the death frame of a thing.
-    const MobjType *item = target->info->dropitem;
+    const MapObjectDefinition *item = target->info->dropitem;
     if (item)
     {
         mobj_t *mo = P_MobjCreateObject(target->x, target->y, target->floorz, item);
@@ -1436,7 +1436,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
             if (player->armours[i] <= 0)
                 continue;
 
-            const MobjType *arm_info = player->armour_types[i];
+            const MapObjectDefinition *arm_info = player->armour_types[i];
 
             if (!arm_info || !inflictor || !inflictor->currentattack)
                 continue;
@@ -1478,7 +1478,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
             if (player->armours[i] <= 0)
                 continue;
 
-            const MobjType *arm_info = player->armour_types[i];
+            const MapObjectDefinition *arm_info = player->armour_types[i];
 
             // this armor does not provide any protection for this attack
             if (arm_info && inflictor && inflictor->currentattack &&

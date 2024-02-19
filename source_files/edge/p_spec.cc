@@ -563,7 +563,7 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const LineType *special)
         return; // found nothing so exit
 
     // Spawn our debris thing
-    const MobjType *info;
+    const MapObjectDefinition *info;
 
     info = special->effectobject_;
     if (!info)

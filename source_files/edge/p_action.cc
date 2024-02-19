@@ -70,7 +70,7 @@ static int AttackSfxCat(const mobj_t *mo)
     return category;
 }
 
-static int SfxFlags(const MobjType *info)
+static int SfxFlags(const MapObjectDefinition *info)
 {
     int flags = 0;
 
@@ -448,7 +448,7 @@ void P_BringCorpseToLife(mobj_t *corpse)
     // Bring a corpse back to life (the opposite of the above routine).
     // Handles players too !
 
-    const MobjType *info = corpse->info;
+    const MapObjectDefinition *info = corpse->info;
 
     corpse->flags         = info->flags;
     corpse->health        = corpse->spawnhealth;
@@ -1084,7 +1084,7 @@ static void CheckMissileSpawn(mobj_t *projectile)
 //
 // NOTE: may return nullptr.
 //
-static mobj_t *DoLaunchProjectile(mobj_t *source, float tx, float ty, float tz, mobj_t *target, const MobjType *type)
+static mobj_t *DoLaunchProjectile(mobj_t *source, float tx, float ty, float tz, mobj_t *target, const MapObjectDefinition *type)
 {
     const AttackDefinition *attack = source->currentattack;
 
@@ -1211,7 +1211,7 @@ static mobj_t *DoLaunchProjectile(mobj_t *source, float tx, float ty, float tz, 
     return projectile;
 }
 
-static mobj_t *LaunchProjectile(mobj_t *source, mobj_t *target, const MobjType *type)
+static mobj_t *LaunchProjectile(mobj_t *source, mobj_t *target, const MapObjectDefinition *type)
 {
     float tx, ty, tz;
 
@@ -1235,7 +1235,7 @@ static mobj_t *LaunchProjectile(mobj_t *source, mobj_t *target, const MobjType *
 // -KM- 1998/10/29
 // -KM- 1998/12/16 Fixed it up.  Works quite well :-)
 //
-static void LaunchSmartProjectile(mobj_t *source, mobj_t *target, const MobjType *type)
+static void LaunchSmartProjectile(mobj_t *source, mobj_t *target, const MapObjectDefinition *type)
 {
     float t  = -1;
     float mx = 0, my = 0;
@@ -2162,7 +2162,7 @@ static void ShootToSpot(mobj_t *object)
     if (!object->currentattack)
         return;
 
-    const MobjType *spot_type = object->info->spitspot;
+    const MapObjectDefinition *spot_type = object->info->spitspot;
 
     if (spot_type == nullptr)
     {
@@ -2207,7 +2207,7 @@ static void ObjectSpawning(mobj_t *parent, BAMAngle angle)
     if (!attack)
         return;
 
-    const MobjType *shoottype = attack->spawnedobj_;
+    const MapObjectDefinition *shoottype = attack->spawnedobj_;
 
     if (!shoottype)
     {
@@ -2496,7 +2496,7 @@ void P_ActBounceDisarm(mobj_t *mo)
 
 void P_ActDropItem(mobj_t *mo)
 {
-    const MobjType *info = mo->info->dropitem;
+    const MapObjectDefinition *info = mo->info->dropitem;
 
     if (mo->state && mo->state->action_par)
     {
@@ -2541,7 +2541,7 @@ void P_ActSpawn(mobj_t *mo)
 
     MobjStringReference *ref = (MobjStringReference *)mo->state->action_par;
 
-    const MobjType *info = ref->GetRef();
+    const MapObjectDefinition *info = ref->GetRef();
     SYS_ASSERT(info);
 
     mobj_t *item = P_MobjCreateObject(mo->x, mo->y, mo->z, info);
@@ -3760,7 +3760,7 @@ void P_ActUnBecome(struct mobj_s *mo)
         return;
     }
 
-    const MobjType *preBecome = nullptr;
+    const MapObjectDefinition *preBecome = nullptr;
     preBecome                   = mo->preBecome;
 
     // DO THE DEED !!
@@ -3915,7 +3915,7 @@ void P_ActUnMorph(struct mobj_s *mo)
         return;
     }
 
-    const MobjType *preBecome = nullptr;
+    const MapObjectDefinition *preBecome = nullptr;
     preBecome                   = mo->preBecome;
 
     // DO THE DEED !!

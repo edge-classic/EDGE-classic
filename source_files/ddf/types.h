@@ -32,7 +32,7 @@
 #include "math_bitset.h"
 #include "math_color.h"
 
-class MobjType;
+class MapObjectDefinition;
 class WeaponDefinition;
 
 constexpr uint8_t kLookupCacheSize = 211;  // Why this number? - Dasho
@@ -51,12 +51,12 @@ class MobjStringReference
    private:
     std::string name_;
 
-    const MobjType *def_;
+    const MapObjectDefinition *def_;
 
    public:
     const char *GetName() const { return name_.c_str(); }
 
-    const MobjType *GetRef();
+    const MapObjectDefinition *GetRef();
     // Note: this returns nullptr if not found, in which case you should
     // produce an error, since future calls will do the search again.
 
@@ -293,17 +293,17 @@ class AttackDefinition
     float keepfirechance_;
 
     // the MOBJ that is integrated with this attack, or nullptr
-    const MobjType *atk_mobj_;
+    const MapObjectDefinition *atk_mobj_;
 
     // spawned object (for spawners).  The mobjdef pointer only becomes
     // valid after DDF_AttackCleanUp().  Can be nullptr.
-    const MobjType *spawnedobj_;
+    const MapObjectDefinition *spawnedobj_;
     std::string     spawnedobj_ref_;
     int             spawn_limit_;
 
     // puff object.  The mobjdef pointer only becomes valid after
     // DDF_AttackCleanUp() has been called.  Can be nullptr.
-    const MobjType *puff_;
+    const MapObjectDefinition *puff_;
     std::string     puff_ref_;
 
     // For DUALATTACK type only

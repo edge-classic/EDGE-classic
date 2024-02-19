@@ -85,7 +85,7 @@ mobj_t *mobjlisthead;
 // List of item respawn objects
 iteminque_t *itemquehead;
 
-std::unordered_set<const MobjType *> seen_monsters;
+std::unordered_set<const MapObjectDefinition *> seen_monsters;
 
 bool time_stop_active = false;
 
@@ -315,7 +315,7 @@ static bool CorpseShouldSlide(mobj_t *mo)
 static void TeleportRespawn(mobj_t *mobj)
 {
     float             x, y, z, oldradius, oldheight;
-    const MobjType *info = mobj->spawnpoint.info;
+    const MapObjectDefinition *info = mobj->spawnpoint.info;
     mobj_t           *new_mo;
     int               oldflags;
 
@@ -392,7 +392,7 @@ static void TeleportRespawn(mobj_t *mobj)
 static void ResurrectRespawn(mobj_t *mobj)
 {
     float             x, y, z, oldradius, oldheight;
-    const MobjType *info;
+    const MapObjectDefinition *info;
     int               oldflags;
 
     x = mobj->x;
@@ -937,7 +937,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
                     // P_ShootSpecialLine()->P_ActivateSpecialLine() can remove
                     //  the special so we need to get the info before calling it
                     const LineType *tempspecial = blockline->special;
-                    const MobjType *DebrisThing;
+                    const MapObjectDefinition *DebrisThing;
 
                     P_ShootSpecialLine(blockline, PointOnLineSide(mo->x, mo->y, blockline), mo->source);
 
@@ -1929,7 +1929,7 @@ void P_RunMobjThinkers(bool extra_tic)
 //
 // P_SpawnDebris
 //
-void P_SpawnDebris(float x, float y, float z, BAMAngle angle, const MobjType *debris)
+void P_SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDefinition *debris)
 {
     // if (!level_flags.have_extra && (splash->extendedflags & EF_EXTRA)) return;
     // if (! (splash->extendedflags & EF_EXTRA)) return; //Optional extra
@@ -1947,7 +1947,7 @@ void P_SpawnDebris(float x, float y, float z, BAMAngle angle, const MobjType *de
 //
 // P_SpawnPuff
 //
-void P_SpawnPuff(float x, float y, float z, const MobjType *puff, BAMAngle angle)
+void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAMAngle angle)
 {
     mobj_t *th;
 
@@ -1974,7 +1974,7 @@ void P_SpawnPuff(float x, float y, float z, const MobjType *puff, BAMAngle angle
 // -KM- 1998/11/25 Made more violent. :-)
 // -KM- 1999/01/31 Different blood objects for different mobjs.
 //
-void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const MobjType *blood)
+void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const MapObjectDefinition *blood)
 {
     int     num;
     mobj_t *th;
@@ -2107,7 +2107,7 @@ void P_MobjItemRespawn(void)
 
     float             x, y, z;
     mobj_t           *mo;
-    const MobjType *objtype;
+    const MapObjectDefinition *objtype;
 
     iteminque_t *cur, *next;
 
@@ -2196,7 +2196,7 @@ void P_MobjRemoveMissile(mobj_t *missile)
 //
 // -ACB- 1998/08/02 Procedure written.
 //
-mobj_t *P_MobjCreateObject(float x, float y, float z, const MobjType *info)
+mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition *info)
 {
     mobj_t *mobj = new mobj_t;
 

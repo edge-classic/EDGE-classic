@@ -1220,7 +1220,7 @@ bool P_RemoveWeapon(player_t *player, WeaponDefinition *info)
     return true;
 }
 
-void P_GiveInitialBenefits(player_t *p, const MobjType *info)
+void P_GiveInitialBenefits(player_t *p, const MapObjectDefinition *info)
 {
     // Give the player the initial benefits when they start a game
     // (or restart after dying).  Sets up: ammo, ammo-limits, health,

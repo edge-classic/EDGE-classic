@@ -39,7 +39,7 @@
 
 // forward decl.
 class AttackDefinition;
-class MobjType;
+class MapObjectDefinition;
 class image_c;
 class abstract_shader_c;
 
@@ -52,7 +52,7 @@ struct subsector_s;
 struct touch_node_s;
 struct line_s;
 
-extern std::unordered_set<const MobjType *> seen_monsters;
+extern std::unordered_set<const MapObjectDefinition *> seen_monsters;
 
 extern bool time_stop_active;
 
@@ -158,7 +158,7 @@ typedef struct
     BAMAngle vertangle;
 
     // type of thing
-    const MobjType *info;
+    const MapObjectDefinition *info;
 
     // certain flags (mainly MF_AMBUSH).
     int flags;
@@ -189,7 +189,7 @@ typedef struct mobj_s mobj_t;
 
 struct mobj_s : public position_c
 {
-    const MobjType *info = nullptr;
+    const MapObjectDefinition *info = nullptr;
 
     BAMAngle angle     = 0; // orientation
     BAMAngle vertangle = 0; // looking up or down
@@ -393,7 +393,7 @@ struct mobj_s : public position_c
     void ClearStaleRefs();
 
     // Stores what this mobj was before being MORPHed/BECOMEing
-    const MobjType *preBecome = nullptr;
+    const MapObjectDefinition *preBecome = nullptr;
 };
 
 // Item-in-Respawn-que Structure -ACB- 1998/07/30

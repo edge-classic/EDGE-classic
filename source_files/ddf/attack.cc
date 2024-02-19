@@ -32,7 +32,7 @@
 
 AttackDefinitionContainer atkdefs;
 
-extern MobjType *dynamic_mobj;
+extern MapObjectDefinition *dynamic_mobj;
 
 // these logically belongs with buffer_atk:
 static float a_damage_range;
@@ -117,9 +117,9 @@ static const DDFCommandList attack_commands[] = {
 
     DDF_CMD_END};
 
-static MobjType *CreateAtkMobj(const char *atk_name)
+static MapObjectDefinition *CreateAtkMobj(const char *atk_name)
 {
-    MobjType *mobj = new MobjType();
+    MapObjectDefinition *mobj = new MapObjectDefinition();
 
     // determine a name
     char mobj_name[256];
@@ -158,7 +158,7 @@ static void AttackStartEntry(const char *name, bool extend)
         if (!dynamic_atk) DDF_Error("Unknown attack to extend: %s\n", name);
 
         // Intentional Const Override
-        dynamic_mobj = (MobjType *)dynamic_atk->atk_mobj_;
+        dynamic_mobj = (MapObjectDefinition *)dynamic_atk->atk_mobj_;
 
         if (dynamic_mobj) DDF_StateBeginRange(dynamic_mobj->state_grp);
 
@@ -195,7 +195,7 @@ static void AttackDoTemplate(const char *contents)
     {
         dynamic_mobj = CreateAtkMobj(dynamic_atk->name_.c_str());
 
-        dynamic_mobj->CopyDetail(*(MobjType *)other->atk_mobj_);
+        dynamic_mobj->CopyDetail(*(MapObjectDefinition *)other->atk_mobj_);
 
         dynamic_atk->atk_mobj_ = dynamic_mobj;
 

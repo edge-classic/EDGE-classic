@@ -456,7 +456,7 @@ void ReadBinaryThing(int mt_num)
     if (file_error)
         I_Error("Dehacked: Error - File error reading binary thing table.\n");
 
-    MobjInfo *mobj = things::GetModifiedMobj(mt_num);
+    DehackedMapObjectDefinition *mobj = things::GetModifiedMobj(mt_num);
 
     GetInt(kObjectKindMobj, mt_num, &mobj->doomednum);
     GetFrame(kObjectKindMobj, mt_num, &mobj->spawnstate);
@@ -673,7 +673,7 @@ DehackedResult LoadBinary(void)
     }
     else
     {
-        for (j = 0; j < kTotalMobjTypes; j++) ReadBinaryThing(j);
+        for (j = 0; j < kTotalDehackedMapObjectTypes; j++) ReadBinaryThing(j);
     }
 
     ReadBinaryAmmo();
@@ -851,7 +851,7 @@ bool ValidateObject(void)
         switch (active_section)
         {
             case kDEH_THING:
-                max_obj = kTotalMobjTypes;
+                max_obj = kTotalDehackedMapObjectTypes;
                 min_obj = 1;
                 break;
 

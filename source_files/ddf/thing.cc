@@ -42,9 +42,9 @@
 
 const char *TemplateThing = nullptr;  // Lobo 2022: TEMPLATE inheritance fix
 
-MobjTypeontainer_c mobjtypes;
+MapObjectDefinitionContainer mobjtypes;
 
-static MobjType *default_mobjtype;
+static MapObjectDefinition *default_mobjtype;
 
 void DDF_MobjGetSpecial(const char *info);
 void DDF_MobjGetBenefit(const char *info, void *storage);
@@ -91,11 +91,11 @@ const DDFCommandList weakness_commands[] = {
 
     DDF_CMD_END};
 
-MobjType *dynamic_mobj;
+MapObjectDefinition *dynamic_mobj;
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_mobj
-static MobjType dummy_mobj;
+static MapObjectDefinition dummy_mobj;
 
 const DDFCommandList thing_commands[] = {
     // sub-commands
@@ -611,7 +611,7 @@ static void ThingStartEntry(const char *buffer, bool extend)
     else
     {
         // not found, create a new one
-        dynamic_mobj         = new MobjType;
+        dynamic_mobj         = new MapObjectDefinition;
         dynamic_mobj->name   = name.c_str();
         dynamic_mobj->number = number;
 
@@ -626,7 +626,7 @@ static void ThingDoTemplate(const char *contents)
     int idx = mobjtypes.FindFirst(contents, 0);
     if (idx < 0) DDF_Error("Unknown thing template: '%s'\n", contents);
 
-    MobjType *other = mobjtypes[idx];
+    MapObjectDefinition *other = mobjtypes[idx];
     SYS_ASSERT(other);
 
     if (other == dynamic_mobj)
@@ -771,7 +771,7 @@ static void ThingFinishEntry(void)
         int idx = mobjtypes.FindFirst(TemplateThing, 0);
         if (idx < 0) DDF_Error("Unknown thing template: \n");
 
-        MobjType *other = mobjtypes[idx];
+        MapObjectDefinition *other = mobjtypes[idx];
 
         if (!dynamic_mobj->lose_benefits)
         {
@@ -837,7 +837,7 @@ void DDF_MobjInit(void)
     }
     mobjtypes.clear();
 
-    default_mobjtype         = new MobjType();
+    default_mobjtype         = new MapObjectDefinition();
     default_mobjtype->name   = "__DEFAULT_MOBJ";
     default_mobjtype->number = 0;
 }
@@ -2043,11 +2043,11 @@ bool DDF_MainParseCondition(const char *info, condition_check_t *cond)
 
 // ---> mobjdef class
 
-MobjType::MobjType() : name(), state_grp() { Default(); }
+MapObjectDefinition::MapObjectDefinition() : name(), state_grp() { Default(); }
 
-MobjType::~MobjType() {}
+MapObjectDefinition::~MapObjectDefinition() {}
 
-void MobjType::CopyDetail(MobjType &src)
+void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
 {
     state_grp.clear();
 
@@ -2211,7 +2211,7 @@ void MobjType::CopyDetail(MobjType &src)
     melee_range   = src.melee_range;
 }
 
-void MobjType::Default()
+void MapObjectDefinition::Default()
 {
     state_grp.clear();
 
@@ -2359,7 +2359,7 @@ void MobjType::Default()
     melee_range   = -1;
 }
 
-void MobjType::DLightCompatibility(void)
+void MapObjectDefinition::DLightCompatibility(void)
 {
     for (int DL = 0; DL < 2; DL++)
     {
@@ -2397,54 +2397,54 @@ void MobjType::DLightCompatibility(void)
     }
 }
 
-// --> MobjTypeontainer_c class
+// --> MapObjectDefinitionContainer class
 
-MobjTypeontainer_c::MobjTypeontainer_c()
+MapObjectDefinitionContainer::MapObjectDefinitionContainer()
 {
-    memset(lookup_cache, 0, sizeof(MobjType *) * kLookupCacheSize);
+    memset(lookup_cache, 0, sizeof(MapObjectDefinition *) * kLookupCacheSize);
 }
 
-MobjTypeontainer_c::~MobjTypeontainer_c()
+MapObjectDefinitionContainer::~MapObjectDefinitionContainer()
 {
     for (auto iter = begin(); iter != end(); iter++)
     {
-        MobjType *m = *iter;
+        MapObjectDefinition *m = *iter;
         delete m;
         m = nullptr;
     }
 }
 
-int MobjTypeontainer_c::FindFirst(const char *name, int startpos)
+int MapObjectDefinitionContainer::FindFirst(const char *name, int startpos)
 {
     startpos = HMM_MAX(startpos, 0);
 
     for (startpos; startpos < size(); startpos++)
     {
-        MobjType *m = at(startpos);
+        MapObjectDefinition *m = at(startpos);
         if (DDF_CompareName(m->name.c_str(), name) == 0) return startpos;
     }
 
     return -1;
 }
 
-int MobjTypeontainer_c::FindLast(const char *name, int startpos)
+int MapObjectDefinitionContainer::FindLast(const char *name, int startpos)
 {
     startpos = HMM_MIN(startpos, size() - 1);
 
     for (startpos; startpos >= 0; startpos--)
     {
-        MobjType *m = at(startpos);
+        MapObjectDefinition *m = at(startpos);
         if (DDF_CompareName(m->name.c_str(), name) == 0) return startpos;
     }
 
     return -1;
 }
 
-bool MobjTypeontainer_c::MoveToEnd(int idx)
+bool MapObjectDefinitionContainer::MoveToEnd(int idx)
 {
     // Moves an entry from its current position to end of the list.
 
-    MobjType *m = nullptr;
+    MapObjectDefinition *m = nullptr;
 
     if (idx < 0 || idx >= size()) return false;
 
@@ -2460,7 +2460,7 @@ bool MobjTypeontainer_c::MoveToEnd(int idx)
     return true;
 }
 
-const MobjType *MobjTypeontainer_c::Lookup(const char *refname)
+const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(const char *refname)
 {
     // Looks an mobjdef by name.
     // Fatal error if it does not exist.
@@ -2475,7 +2475,7 @@ const MobjType *MobjTypeontainer_c::Lookup(const char *refname)
     return nullptr; /* NOT REACHED */
 }
 
-const MobjType *MobjTypeontainer_c::Lookup(int id)
+const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(int id)
 {
     if (id == 0) return default_mobjtype;
 
@@ -2492,7 +2492,7 @@ const MobjType *MobjTypeontainer_c::Lookup(int id)
 
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        MobjType *m = *iter;
+        MapObjectDefinition *m = *iter;
 
         if (m->number == id)
         {
@@ -2505,13 +2505,13 @@ const MobjType *MobjTypeontainer_c::Lookup(int id)
     return nullptr;
 }
 
-const MobjType *MobjTypeontainer_c::LookupCastMember(int castpos)
+const MapObjectDefinition *MapObjectDefinitionContainer::LookupCastMember(int castpos)
 {
     // Lookup the cast member of the one with the nearest match
     // to the position given.
 
-    MobjType *best = nullptr;
-    MobjType *m    = nullptr;
+    MapObjectDefinition *best = nullptr;
+    MapObjectDefinition *m    = nullptr;
 
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
@@ -2567,12 +2567,12 @@ const MobjType *MobjTypeontainer_c::LookupCastMember(int castpos)
     return best;
 }
 
-const MobjType *MobjTypeontainer_c::LookupPlayer(int playernum)
+const MapObjectDefinition *MapObjectDefinitionContainer::LookupPlayer(int playernum)
 {
     // Find a player thing (needed by deathmatch code).
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        MobjType *m = *iter;
+        MapObjectDefinition *m = *iter;
 
         if (m->playernum == playernum) return m;
     }
@@ -2581,7 +2581,7 @@ const MobjType *MobjTypeontainer_c::LookupPlayer(int playernum)
     return nullptr; /* NOT REACHED */
 }
 
-const MobjType *MobjTypeontainer_c::LookupDoorKey(int theKey)
+const MapObjectDefinition *MapObjectDefinitionContainer::LookupDoorKey(int theKey)
 {
     // Find a key thing (needed by automap code).
 
@@ -2603,7 +2603,7 @@ const MobjType *MobjTypeontainer_c::LookupDoorKey(int theKey)
 
     for (auto iter = rbegin(); iter != rend(); iter++)
     {
-        MobjType *m = *iter;
+        MapObjectDefinition *m = *iter;
 
         Benefit *list;
         list = m->pickup_benefits;

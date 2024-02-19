@@ -1334,7 +1334,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
 }
 
 void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame, float x, float y, float xscale,
-                        float yscale, const MobjType *info)
+                        float yscale, const MapObjectDefinition *info)
 {
     // check if frame is valid
     if (frame < 0 || frame >= md->num_frames)

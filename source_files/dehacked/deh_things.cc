@@ -68,19 +68,19 @@ static constexpr char kExtraFlagNoItemBk     = 'I';
 
 static constexpr uint8_t kCastMaximum = 20;
 
-extern MobjInfo mobjinfo[kTotalMobjTypesPortCompatibility];
+extern DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibility];
 
-extern MobjInfo brain_explode_mobj;
+extern DehackedMapObjectDefinition brain_explode_mobj;
 
-std::vector<MobjInfo *> new_mobjinfo;
+std::vector<DehackedMapObjectDefinition *> new_mobjinfo;
 
 static inline float FixedToFloat(int fixed) { return (float)fixed / 65536.0f; }
 
 namespace things
 {
-MobjInfo       *NewMobj(int mt_num);
-const MobjInfo *OldMobj(int mt_num);
-const MobjInfo *NewMobjElseOld(int mt_num);
+DehackedMapObjectDefinition       *NewMobj(int mt_num);
+const DehackedMapObjectDefinition *OldMobj(int mt_num);
+const DehackedMapObjectDefinition *NewMobjElseOld(int mt_num);
 }  // namespace things
 
 //----------------------------------------------------------------------------
@@ -147,7 +147,7 @@ const ExtraAttack attack_extra[] = {
 
     {-1, nullptr, 0, 0, ""}};
 
-void HandleSounds(const MobjInfo *info, int mt_num)
+void HandleSounds(const DehackedMapObjectDefinition *info, int mt_num)
 {
     if (info->seesound != ksfx_None)
         wad::Printf("LAUNCH_SOUND = \"%s\";\n",
@@ -170,7 +170,7 @@ void HandleSounds(const MobjInfo *info, int mt_num)
         wad::Printf("ATTEMPT_SOUND = \"%s\";\n", sounds::GetSound(ksfx_manatk));
 }
 
-void HandleFrames(const MobjInfo *info, int mt_num)
+void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
 {
     frames::ResetGroups();
 
@@ -185,7 +185,7 @@ void HandleFrames(const MobjInfo *info, int mt_num)
 
         int count = 0;
 
-        const MobjInfo *spawnfire = things::NewMobjElseOld(kMT_SPAWNFIRE);
+        const DehackedMapObjectDefinition *spawnfire = things::NewMobjElseOld(kMT_SPAWNFIRE);
         SYS_ASSERT(spawnfire);
 
         count += frames::BeginGroup('D', spawnfire->spawnstate);
@@ -250,7 +250,7 @@ void AddAtkSpecial(const char *name)
     wad::Printf("%s", name);
 }
 
-void HandleAtkSpecials(const MobjInfo *info, int mt_num, const ExtraAttack *ext,
+void HandleAtkSpecials(const DehackedMapObjectDefinition *info, int mt_num, const ExtraAttack *ext,
                        bool plr_rocket)
 {
     flag_got_one = false;
@@ -275,7 +275,7 @@ void CheckPainElemental(void)
     // (ELEMENTAL_SPAWNER and ELEMENTAL_DEATHSPAWN).  check if
     // those states are still valid, recreate attacks if not.
 
-    const MobjInfo *skull = things::NewMobjElseOld(kMT_SKULL);
+    const DehackedMapObjectDefinition *skull = things::NewMobjElseOld(kMT_SKULL);
     SYS_ASSERT(skull);
 
     if (frames::CheckMissileState(skull->missilestate)) return;
@@ -317,7 +317,7 @@ void CheckPainElemental(void)
     wad::Printf("SPAWN_OBJECT_STATE = %s;\n", spawn_at);
 }
 
-void ConvertAttack(const MobjInfo *info, int mt_num, bool plr_rocket);
+void ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num, bool plr_rocket);
 void ConvertScratch(const ScratchAttack *atk);
 }  // namespace Attacks
 
@@ -375,7 +375,7 @@ void Attacks::ConvertScratch(const ScratchAttack *atk)
     wad::Printf("\n");
 }
 
-void Attacks::ConvertAttack(const MobjInfo *info, int mt_num, bool plr_rocket)
+void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num, bool plr_rocket)
 {
     if (info->name[0] != '*')  // thing?
         return;
@@ -519,7 +519,7 @@ int cast_mobjs[kCastMaximum];
 void BeginLump();
 void FinishLump();
 
-bool CheckIsMonster(const MobjInfo *info, int mt_num, int player,
+bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num, int player,
                     bool use_act_flags);
 }  // namespace things
 
@@ -567,16 +567,16 @@ void things::MarkThing(int mt_num)
     if (new_mobjinfo[mt_num] != nullptr) return;
 
     // create new entry, copy original info if we have it
-    MobjInfo *entry      = new MobjInfo;
+    DehackedMapObjectDefinition *entry      = new DehackedMapObjectDefinition;
     new_mobjinfo[mt_num] = entry;
 
-    if (mt_num < kTotalMobjTypesPortCompatibility)
+    if (mt_num < kTotalDehackedMapObjectTypesPortCompatibility)
     {
-        memcpy(entry, &mobjinfo[mt_num], sizeof(MobjInfo));
+        memcpy(entry, &mobjinfo[mt_num], sizeof(DehackedMapObjectDefinition));
     }
     else
     {
-        memset(entry, 0, sizeof(MobjInfo));
+        memset(entry, 0, sizeof(DehackedMapObjectDefinition));
 
         entry->name      = "X";  // only needed to differentiate from an attack
         entry->doomednum = -1;
@@ -597,17 +597,17 @@ void things::UseThing(int mt_num)
 
 void things::MarkAllMonsters()
 {
-    for (int i = 0; i < kTotalMobjTypesPortCompatibility; i++)
+    for (int i = 0; i < kTotalDehackedMapObjectTypesPortCompatibility; i++)
     {
         if (i == kMT_PLAYER) continue;
 
-        const MobjInfo *mobj = &mobjinfo[i];
+        const DehackedMapObjectDefinition *mobj = &mobjinfo[i];
 
         if (CheckIsMonster(mobj, i, 0, false)) MarkThing(i);
     }
 }
 
-MobjInfo *things::GetModifiedMobj(int mt_num)
+DehackedMapObjectDefinition *things::GetModifiedMobj(int mt_num)
 {
     MarkThing(mt_num);
 
@@ -618,7 +618,7 @@ const char *things::GetMobjName(int mt_num)
 {
     SYS_ASSERT(mt_num >= 0);
 
-    if (mt_num < kTotalMobjTypesPortCompatibility) return mobjinfo[mt_num].name;
+    if (mt_num < kTotalDehackedMapObjectTypesPortCompatibility) return mobjinfo[mt_num].name;
 
     static char buffer[64];
 
@@ -637,23 +637,23 @@ void things::SetPlayerHealth(int new_value)
     new_mobjinfo[kMT_PLAYER]->spawnhealth = new_value;
 }
 
-const MobjInfo *things::OldMobj(int mt_num)
+const DehackedMapObjectDefinition *things::OldMobj(int mt_num)
 {
-    if (mt_num < kTotalMobjTypesPortCompatibility) return &mobjinfo[mt_num];
+    if (mt_num < kTotalDehackedMapObjectTypesPortCompatibility) return &mobjinfo[mt_num];
 
     return nullptr;
 }
 
-MobjInfo *things::NewMobj(int mt_num)
+DehackedMapObjectDefinition *things::NewMobj(int mt_num)
 {
     if (mt_num < (int)new_mobjinfo.size()) return new_mobjinfo[mt_num];
 
     return nullptr;
 }
 
-const MobjInfo *things::NewMobjElseOld(int mt_num)
+const DehackedMapObjectDefinition *things::NewMobjElseOld(int mt_num)
 {
-    const MobjInfo *info = NewMobj(mt_num);
+    const DehackedMapObjectDefinition *info = NewMobj(mt_num);
     if (info != nullptr) return info;
 
     return OldMobj(mt_num);
@@ -661,7 +661,7 @@ const MobjInfo *things::NewMobjElseOld(int mt_num)
 
 int things::GetMobjMBF21Flags(int mt_num)
 {
-    const MobjInfo *info = NewMobjElseOld(mt_num);
+    const DehackedMapObjectDefinition *info = NewMobjElseOld(mt_num);
     if (info == nullptr) return 0;
     return info->mbf21_flags;
 }
@@ -669,11 +669,11 @@ int things::GetMobjMBF21Flags(int mt_num)
 bool things::IsSpawnable(int mt_num)
 {
     // attacks are not spawnable via A_Spawn
-    if (mt_num < kTotalMobjTypesPortCompatibility &&
+    if (mt_num < kTotalDehackedMapObjectTypesPortCompatibility &&
         mobjinfo[mt_num].name[0] == '*')
         return false;
 
-    const MobjInfo *info = NewMobjElseOld(mt_num);
+    const DehackedMapObjectDefinition *info = NewMobjElseOld(mt_num);
     if (info == nullptr) return false;
 
     return info->doomednum > 0;
@@ -688,7 +688,7 @@ namespace things
 {
 struct FlagName
 {
-    long long int flag;  // flag in MobjInfo (kMF_XXX), 0 if ignored
+    long long int flag;  // flag in DehackedMapObjectDefinition (kMF_XXX), 0 if ignored
     const char   *bex;   // name in a DEHACKED or BEX file
     const char   *conv;  // edge name, nullptr if none, can be multiple
 };
@@ -826,7 +826,7 @@ int ParseBits(const FlagName *list, char *bit_str)
     return new_flags;
 }
 
-bool CheckIsMonster(const MobjInfo *info, int mt_num, int player,
+bool CheckIsMonster(const DehackedMapObjectDefinition *info, int mt_num, int player,
                     bool use_act_flags)
 {
     if (player > 0) return false;
@@ -917,7 +917,7 @@ const char *GetExtFlags(int mt_num, int player)
     return "";
 }
 
-void AddOneFlag(const MobjInfo *info, const char *name, bool &got_a_flag)
+void AddOneFlag(const DehackedMapObjectDefinition *info, const char *name, bool &got_a_flag)
 {
     if (!got_a_flag)
     {
@@ -934,7 +934,7 @@ void AddOneFlag(const MobjInfo *info, const char *name, bool &got_a_flag)
     wad::Printf("%s", name);
 }
 
-void HandleFlags(const MobjInfo *info, int mt_num, int player)
+void HandleFlags(const DehackedMapObjectDefinition *info, int mt_num, int player)
 {
     int  i;
     int  cur_f      = info->flags;
@@ -1022,12 +1022,12 @@ void FixHeights()
         int mt_num = height_fixes[i];
         int new_h  = height_fixes[i + 1];
 
-        SYS_ASSERT(mt_num < kTotalMobjTypesPortCompatibility);
+        SYS_ASSERT(mt_num < kTotalDehackedMapObjectTypesPortCompatibility);
 
         // if the thing was not modified, nothing to do here
         if (mt_num >= (int)new_mobjinfo.size()) continue;
 
-        MobjInfo *info = new_mobjinfo[mt_num];
+        DehackedMapObjectDefinition *info = new_mobjinfo[mt_num];
         if (info == nullptr) continue;
 
         /* Kludge for Aliens TC (and others) that put these things on
@@ -1045,12 +1045,12 @@ void CollectTheCast()
 {
     for (int i = 0; i < kCastMaximum; i++) cast_mobjs[i] = -1;
 
-    for (int mt_num = 0; mt_num < kTotalMobjTypesPortCompatibility; mt_num++)
+    for (int mt_num = 0; mt_num < kTotalDehackedMapObjectTypesPortCompatibility; mt_num++)
     {
         int order = 0;
 
         // cast objects are required to have CHASE and DEATH states
-        const MobjInfo *info = NewMobjElseOld(mt_num);
+        const DehackedMapObjectDefinition *info = NewMobjElseOld(mt_num);
 
         if (info->seestate == kS_NULL || info->deathstate == kS_NULL) continue;
 
@@ -1131,7 +1131,7 @@ const char *GetSpeed(int speed)
     return num_buf;
 }
 
-void HandleSounds(const MobjInfo *info, int mt_num)
+void HandleSounds(const DehackedMapObjectDefinition *info, int mt_num)
 {
     if (info->activesound != ksfx_None)
     {
@@ -1170,7 +1170,7 @@ void HandleSounds(const MobjInfo *info, int mt_num)
         wad::Printf("RIP_SOUND = \"%s\";\n", sounds::GetSound(info->rip_sound));
 }
 
-void HandleFrames(const MobjInfo *info, int mt_num)
+void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
 {
     frames::ResetGroups();
 
@@ -1187,7 +1187,7 @@ void HandleFrames(const MobjInfo *info, int mt_num)
         // the CHASE states of the TELEPORT_FLASH object (i.e. the one
         // used to find the destination in the target sector).
 
-        const MobjInfo *tfog = NewMobjElseOld(kMT_TFOG);
+        const DehackedMapObjectDefinition *tfog = NewMobjElseOld(kMT_TFOG);
         SYS_ASSERT(tfog);
 
         if (0 == frames::BeginGroup('E', tfog->spawnstate))
@@ -1271,7 +1271,7 @@ const PlayerInfo player_info[NUMPLAYERS] = {
     {"PLAYER5", 4001, "PLAYER_ORANGE"}, {"PLAYER6", 4002, "PLAYER_LT_GREY"},
     {"PLAYER7", 4003, "PLAYER_LT_RED"}, {"PLAYER8", 4004, "PLAYER_PINK"}};
 
-void HandlePlayer(const MobjInfo *info, int player)
+void HandlePlayer(const DehackedMapObjectDefinition *info, int player)
 {
     if (player <= 0) return;
 
@@ -1362,7 +1362,7 @@ const PickupItem pickup_item[] = {
 
     {-1, nullptr, 0, 0, 0, nullptr}};
 
-void HandleItem(const MobjInfo *info, int mt_num)
+void HandleItem(const DehackedMapObjectDefinition *info, int mt_num)
 {
     if (!(info->flags & kMF_SPECIAL)) return;
 
@@ -1513,7 +1513,7 @@ const char *cast_titles[17] = {
     "RevenantName",         "MancubusName",    "ArchVileName",
     "SpiderMastermindName", "CyberdemonName"};
 
-void HandleCastOrder(const MobjInfo *info, int mt_num, int player)
+void HandleCastOrder(const DehackedMapObjectDefinition *info, int mt_num, int player)
 {
     if (player >= 2) return;
 
@@ -1537,13 +1537,13 @@ void HandleCastOrder(const MobjInfo *info, int mt_num, int player)
     wad::Printf("CAST_TITLE = %s;\n", cast_titles[pos - 1]);
 }
 
-void HandleDropItem(const MobjInfo *info, int mt_num);
-void HandleAttacks(const MobjInfo *info, int mt_num);
-void ConvertMobj(const MobjInfo *info, int mt_num, int player,
+void HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num);
+void HandleAttacks(const DehackedMapObjectDefinition *info, int mt_num);
+void ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, int player,
                  bool brain_missile, bool &got_one);
 }  // namespace things
 
-void things::HandleDropItem(const MobjInfo *info, int mt_num)
+void things::HandleDropItem(const DehackedMapObjectDefinition *info, int mt_num)
 {
     const char *item = nullptr;
 
@@ -1582,7 +1582,7 @@ void things::HandleDropItem(const MobjInfo *info, int mt_num)
     wad::Printf("DROPITEM = \"%s\";\n", item);
 }
 
-void things::HandleAttacks(const MobjInfo *info, int mt_num)
+void things::HandleAttacks(const DehackedMapObjectDefinition *info, int mt_num)
 {
     if (frames::attack_slot[frames::kAttackMethodRanged])
     {
@@ -1609,7 +1609,7 @@ void things::HandleAttacks(const MobjInfo *info, int mt_num)
                     frames::attack_slot[frames::kAttackMethodSpare]);
 }
 
-void things::ConvertMobj(const MobjInfo *info, int mt_num, int player,
+void things::ConvertMobj(const DehackedMapObjectDefinition *info, int mt_num, int player,
                          bool brain_missile, bool &got_one)
 {
     if (info->name[0] == '*')  // attack
@@ -1699,7 +1699,7 @@ void things::ConvertTHING(void)
 
     if (all_mode)
     {
-        for (int i = 0; i < kTotalMobjTypesPortCompatibility; i++) MarkThing(i);
+        for (int i = 0; i < kTotalDehackedMapObjectTypesPortCompatibility; i++) MarkThing(i);
 
         /* this is debatable...
         for (int i = kMT_EXTRA00 ; i <= kMT_EXTRA99 ; i++)
@@ -1711,7 +1711,7 @@ void things::ConvertTHING(void)
 
     for (int i = 0; i < (int)new_mobjinfo.size(); i++)
     {
-        const MobjInfo *info = new_mobjinfo[i];
+        const DehackedMapObjectDefinition *info = new_mobjinfo[i];
 
         if (info == nullptr) continue;
 
@@ -1745,7 +1745,7 @@ void things::ConvertATK()
 
     for (int i = 0; i < (int)new_mobjinfo.size(); i++)
     {
-        const MobjInfo *info = new_mobjinfo[i];
+        const DehackedMapObjectDefinition *info = new_mobjinfo[i];
 
         if (info == nullptr) continue;
 
@@ -1764,46 +1764,46 @@ void things::ConvertATK()
 namespace things
 {
 const FieldReference mobj_field[] = {
-    {"ID #", offsetof(MobjInfo, doomednum), kFieldTypeAny},
-    {"Initial frame", offsetof(MobjInfo, spawnstate), kFieldTypeFrameNumber},
-    {"Hit points", offsetof(MobjInfo, spawnhealth), kFieldTypeOneOrGreater},
-    {"First moving frame", offsetof(MobjInfo, seestate), kFieldTypeFrameNumber},
-    {"Alert sound", offsetof(MobjInfo, seesound), kFieldTypeSoundNumber},
-    {"Reaction time", offsetof(MobjInfo, reactiontime),
+    {"ID #", offsetof(DehackedMapObjectDefinition, doomednum), kFieldTypeAny},
+    {"Initial frame", offsetof(DehackedMapObjectDefinition, spawnstate), kFieldTypeFrameNumber},
+    {"Hit points", offsetof(DehackedMapObjectDefinition, spawnhealth), kFieldTypeOneOrGreater},
+    {"First moving frame", offsetof(DehackedMapObjectDefinition, seestate), kFieldTypeFrameNumber},
+    {"Alert sound", offsetof(DehackedMapObjectDefinition, seesound), kFieldTypeSoundNumber},
+    {"Reaction time", offsetof(DehackedMapObjectDefinition, reactiontime),
      kFieldTypeZeroOrGreater},
-    {"Attack sound", offsetof(MobjInfo, attacksound), kFieldTypeSoundNumber},
-    {"Injury frame", offsetof(MobjInfo, painstate), kFieldTypeFrameNumber},
-    {"Pain chance", offsetof(MobjInfo, painchance), kFieldTypeZeroOrGreater},
-    {"Pain sound", offsetof(MobjInfo, painsound), kFieldTypeSoundNumber},
-    {"Close attack frame", offsetof(MobjInfo, meleestate),
+    {"Attack sound", offsetof(DehackedMapObjectDefinition, attacksound), kFieldTypeSoundNumber},
+    {"Injury frame", offsetof(DehackedMapObjectDefinition, painstate), kFieldTypeFrameNumber},
+    {"Pain chance", offsetof(DehackedMapObjectDefinition, painchance), kFieldTypeZeroOrGreater},
+    {"Pain sound", offsetof(DehackedMapObjectDefinition, painsound), kFieldTypeSoundNumber},
+    {"Close attack frame", offsetof(DehackedMapObjectDefinition, meleestate),
      kFieldTypeFrameNumber},
-    {"Far attack frame", offsetof(MobjInfo, missilestate),
+    {"Far attack frame", offsetof(DehackedMapObjectDefinition, missilestate),
      kFieldTypeFrameNumber},
-    {"Death frame", offsetof(MobjInfo, deathstate), kFieldTypeFrameNumber},
-    {"Exploding frame", offsetof(MobjInfo, xdeathstate), kFieldTypeFrameNumber},
-    {"Death sound", offsetof(MobjInfo, deathsound), kFieldTypeSoundNumber},
-    {"Speed", offsetof(MobjInfo, speed), kFieldTypeZeroOrGreater},
-    {"Width", offsetof(MobjInfo, radius), kFieldTypeZeroOrGreater},
-    {"Height", offsetof(MobjInfo, height), kFieldTypeZeroOrGreater},
-    {"Mass", offsetof(MobjInfo, mass), kFieldTypeZeroOrGreater},
-    {"Missile damage", offsetof(MobjInfo, damage), kFieldTypeZeroOrGreater},
-    {"Action sound", offsetof(MobjInfo, activesound), kFieldTypeSoundNumber},
-    {"Bits", offsetof(MobjInfo, flags), kFieldTypeBitflags},
-    {"MBF21 Bits", offsetof(MobjInfo, mbf21_flags), kFieldTypeBitflags},
-    {"Infighting group", offsetof(MobjInfo, infight_group),
+    {"Death frame", offsetof(DehackedMapObjectDefinition, deathstate), kFieldTypeFrameNumber},
+    {"Exploding frame", offsetof(DehackedMapObjectDefinition, xdeathstate), kFieldTypeFrameNumber},
+    {"Death sound", offsetof(DehackedMapObjectDefinition, deathsound), kFieldTypeSoundNumber},
+    {"Speed", offsetof(DehackedMapObjectDefinition, speed), kFieldTypeZeroOrGreater},
+    {"Width", offsetof(DehackedMapObjectDefinition, radius), kFieldTypeZeroOrGreater},
+    {"Height", offsetof(DehackedMapObjectDefinition, height), kFieldTypeZeroOrGreater},
+    {"Mass", offsetof(DehackedMapObjectDefinition, mass), kFieldTypeZeroOrGreater},
+    {"Missile damage", offsetof(DehackedMapObjectDefinition, damage), kFieldTypeZeroOrGreater},
+    {"Action sound", offsetof(DehackedMapObjectDefinition, activesound), kFieldTypeSoundNumber},
+    {"Bits", offsetof(DehackedMapObjectDefinition, flags), kFieldTypeBitflags},
+    {"MBF21 Bits", offsetof(DehackedMapObjectDefinition, mbf21_flags), kFieldTypeBitflags},
+    {"Infighting group", offsetof(DehackedMapObjectDefinition, infight_group),
      kFieldTypeZeroOrGreater},
-    {"Projectile group", offsetof(MobjInfo, proj_group), kFieldTypeAny},
-    {"Splash group", offsetof(MobjInfo, splash_group), kFieldTypeZeroOrGreater},
-    {"Rip sound", offsetof(MobjInfo, rip_sound), kFieldTypeSoundNumber},
-    {"Fast speed", offsetof(MobjInfo, fast_speed), kFieldTypeZeroOrGreater},
-    {"Melee range", offsetof(MobjInfo, melee_range), kFieldTypeZeroOrGreater},
-    {"Gib health", offsetof(MobjInfo, gib_health), kFieldTypeAny},
-    {"Dropped item", offsetof(MobjInfo, dropped_item), kFieldTypeZeroOrGreater},
-    {"Pickup width", offsetof(MobjInfo, pickup_width), kFieldTypeZeroOrGreater},
-    {"Projectile pass height", offsetof(MobjInfo, projectile_pass_height),
+    {"Projectile group", offsetof(DehackedMapObjectDefinition, proj_group), kFieldTypeAny},
+    {"Splash group", offsetof(DehackedMapObjectDefinition, splash_group), kFieldTypeZeroOrGreater},
+    {"Rip sound", offsetof(DehackedMapObjectDefinition, rip_sound), kFieldTypeSoundNumber},
+    {"Fast speed", offsetof(DehackedMapObjectDefinition, fast_speed), kFieldTypeZeroOrGreater},
+    {"Melee range", offsetof(DehackedMapObjectDefinition, melee_range), kFieldTypeZeroOrGreater},
+    {"Gib health", offsetof(DehackedMapObjectDefinition, gib_health), kFieldTypeAny},
+    {"Dropped item", offsetof(DehackedMapObjectDefinition, dropped_item), kFieldTypeZeroOrGreater},
+    {"Pickup width", offsetof(DehackedMapObjectDefinition, pickup_width), kFieldTypeZeroOrGreater},
+    {"Projectile pass height", offsetof(DehackedMapObjectDefinition, projectile_pass_height),
      kFieldTypeZeroOrGreater},
-    {"Fullbright", offsetof(MobjInfo, fullbright), kFieldTypeZeroOrGreater},
-    {"Respawn frame", offsetof(MobjInfo, raisestate), kFieldTypeFrameNumber},
+    {"Fullbright", offsetof(DehackedMapObjectDefinition, fullbright), kFieldTypeZeroOrGreater},
+    {"Respawn frame", offsetof(DehackedMapObjectDefinition, raisestate), kFieldTypeFrameNumber},
 
     {nullptr, 0, kFieldTypeAny}  // End sentinel
 };

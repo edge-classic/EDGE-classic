@@ -117,7 +117,7 @@ void P_FixWeaponClip(player_t *p, int slot);
 //
 void P_CreatePlayer(int pnum, bool is_bot);
 void P_DestroyAllPlayers(void);
-void P_GiveInitialBenefits(player_t *player, const MobjType *info);
+void P_GiveInitialBenefits(player_t *player, const MapObjectDefinition *info);
 
 bool P_PlayerThink(player_t *player, bool extra_tic);
 void P_UpdateAvailWeapons(player_t *p);
@@ -146,9 +146,9 @@ bool       P_SetMobjState(mobj_t *mobj, int state);
 bool       P_SetMobjStateDeferred(mobj_t *mobj, int state, int tic_skip);
 void       P_SetMobjDirAndSpeed(mobj_t *mobj, BAMAngle angle, float slope, float speed);
 void       P_RunMobjThinkers(bool extra_tic);
-void       P_SpawnDebris(float x, float y, float z, BAMAngle angle, const MobjType *debris);
-void       P_SpawnPuff(float x, float y, float z, const MobjType *puff, BAMAngle angle);
-void       P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const MobjType *blood);
+void       P_SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDefinition *debris);
+void       P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAMAngle angle);
+void       P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const MapObjectDefinition *blood);
 void       P_CalcFullProperties(const mobj_t *mo, region_properties_t *newregp);
 bool       P_HitLiquidFloor(mobj_t *thing);
 
@@ -156,7 +156,7 @@ bool       P_HitLiquidFloor(mobj_t *thing);
 void    P_MobjItemRespawn(void);
 void    P_MobjRemoveMissile(mobj_t *missile);
 void    P_MobjExplodeMissile(mobj_t *missile);
-mobj_t *P_MobjCreateObject(float x, float y, float z, const MobjType *type);
+mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition *type);
 
 // -ACB- 2005/05/06 Sound Effect Category Support
 int P_MobjGetSfxCategory(const mobj_t *mo);
@@ -183,7 +183,7 @@ bool    P_CheckMeleeRange(mobj_t *actor);
 bool    P_CheckMissileRange(mobj_t *actor);
 bool    P_Move(mobj_t *actor, bool path);
 bool    P_LookForPlayers(mobj_t *actor, BAMAngle range);
-mobj_t *P_LookForShootSpot(const MobjType *spot_type);
+mobj_t *P_LookForShootSpot(const MapObjectDefinition *spot_type);
 
 //
 // P_MAPUTL
@@ -273,7 +273,7 @@ bool P_TryMove(mobj_t *thing, float x, float y);
 void P_SlideMove(mobj_t *mo, float x, float y);
 void P_UseLines(player_t *player);
 void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float damage, const DamageClass *damtype,
-                  const MobjType *puff);
+                  const MapObjectDefinition *puff);
 
 void P_UnblockLineEffectDebris(line_t *TheLine, const LineType *special);
 

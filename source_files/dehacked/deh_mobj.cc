@@ -34,7 +34,7 @@
 namespace dehacked
 {
 
-MobjInfo mobjinfo[kTotalMobjTypesPortCompatibility] = {
+DehackedMapObjectDefinition mobjinfo[kTotalDehackedMapObjectTypesPortCompatibility] = {
     // MT_PLAYER
     {
         "OUR_HERO",      // name
@@ -5885,7 +5885,7 @@ MobjInfo mobjinfo[kTotalMobjTypesPortCompatibility] = {
     },
 };
 
-MobjInfo brain_explode_mobj = {
+DehackedMapObjectDefinition brain_explode_mobj = {
     "BRAIN_DEATH_MISSILE",                                       // name
     -1,                                                          // doomednum
     kS_BRAINEXPLODE1,                                            // spawnstate

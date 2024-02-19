@@ -533,7 +533,7 @@ void StyleDefinition::Default()
 // --> map definition container class
 
 //
-// StyleDefinitionontainer_c::Lookup()
+// StyleDefinitionContainer::Lookup()
 //
 // Finds a styledef by name, returns nullptr if it doesn't exist.
 //

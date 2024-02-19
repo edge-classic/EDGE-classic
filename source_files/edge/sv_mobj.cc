@@ -514,7 +514,7 @@ void SR_MobjPutMobj(void *storage, int index, void *extra)
 
 bool SR_MobjGetType(void *storage, int index, void *extra)
 {
-    MobjType **dest = (MobjType **)storage + index;
+    MapObjectDefinition **dest = (MapObjectDefinition **)storage + index;
 
     const char *name = SV_GetString();
 
@@ -530,10 +530,10 @@ bool SR_MobjGetType(void *storage, int index, void *extra)
         const AttackDefinition *atk = atkdefs.Lookup(name + 4);
 
         if (atk)
-            *dest = (MobjType *)atk->atk_mobj_;
+            *dest = (MapObjectDefinition *)atk->atk_mobj_;
     }
     else
-        *dest = (MobjType *)mobjtypes.Lookup(name);
+        *dest = (MapObjectDefinition *)mobjtypes.Lookup(name);
 
     if (!*dest)
     {
@@ -547,7 +547,7 @@ bool SR_MobjGetType(void *storage, int index, void *extra)
 
 void SR_MobjPutType(void *storage, int index, void *extra)
 {
-    MobjType *info = ((MobjType **)storage)[index];
+    MapObjectDefinition *info = ((MapObjectDefinition **)storage)[index];
 
     SV_PutString((info == nullptr) ? nullptr : info->name.c_str());
 }
@@ -634,7 +634,7 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
 
     const char       *swizzle;
     const mobj_t     *mo = (mobj_t *)sv_current_elem;
-    const MobjType *actual;
+    const MapObjectDefinition *actual;
 
     SYS_ASSERT(mo);
 
@@ -739,7 +739,7 @@ void SR_MobjPutState(void *storage, int index, void *extra)
     int s_num, base;
 
     const mobj_t     *mo = (mobj_t *)sv_current_elem;
-    const MobjType *actual;
+    const MapObjectDefinition *actual;
 
     SYS_ASSERT(mo);
 

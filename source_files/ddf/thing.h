@@ -24,7 +24,7 @@
 #include "states.h"
 #include "types.h"
 
-// special 'number' value which signifies that the MobjType
+// special 'number' value which signifies that the MapObjectDefinition
 // forms part of an ATTACKS.DDF entry.
 #define ATTACK__MOBJ -7777
 
@@ -819,7 +819,7 @@ class weakness_info_c
 };
 
 // mobjdef class
-class MobjType
+class MapObjectDefinition
 {
    public:
     // DDF Id
@@ -927,7 +927,7 @@ class MobjType
 
     // armour control: armour_protect is how much damage the armour
     // saves when the bullet/fireball hits you (1% to 100%).  Zero
-    // disables the association (between color and MobjType).
+    // disables the association (between color and MapObjectDefinition).
     // The 'erosion' is how much of the saved damage eats up the
     // armour held: 100% is normal, at 0% you never lose it.
     float armour_protect;
@@ -974,22 +974,22 @@ class MobjType
 
     // item to drop (or nullptr).  The mobjdef pointer is only valid after
     // DDF_MobjCleanUp() has been called.
-    const MobjType *dropitem;
+    const MapObjectDefinition *dropitem;
     std::string       dropitem_ref;
 
     // blood object (or nullptr).  The mobjdef pointer is only valid after
     // DDF_MobjCleanUp() has been called.
-    const MobjType *blood;
+    const MapObjectDefinition *blood;
     std::string       blood_ref;
 
     // respawn effect object (or nullptr).  The mobjdef pointer is only
     // valid after DDF_MobjCleanUp() has been called.
-    const MobjType *respawneffect;
+    const MapObjectDefinition *respawneffect;
     std::string       respawneffect_ref;
 
     // spot type for the `SHOOT_TO_SPOT' attack (or nullptr).  The mobjdef
     // pointer is only valid after DDF_MobjCleanUp() has been called.
-    const MobjType *spitspot;
+    const MapObjectDefinition *spitspot;
     std::string       spitspot_ref;
 
     float sight_distance;  // lobo 2022: How far this thing can see
@@ -1008,33 +1008,33 @@ class MobjType
     int melee_range;
 
    public:
-    MobjType();
-    ~MobjType();
+    MapObjectDefinition();
+    ~MapObjectDefinition();
 
    public:
     void Default();
-    void CopyDetail(MobjType &src);
+    void CopyDetail(MapObjectDefinition &src);
 
     void DLightCompatibility(void);
 
    private:
     // disable copy construct and assignment operator
-    explicit MobjType(MobjType &rhs) { (void)rhs; }
-    MobjType &operator=(MobjType &rhs)
+    explicit MapObjectDefinition(MapObjectDefinition &rhs) { (void)rhs; }
+    MapObjectDefinition &operator=(MapObjectDefinition &rhs)
     {
         (void)rhs;
         return *this;
     }
 };
 
-class MobjTypeontainer_c : public std::vector<MobjType *>
+class MapObjectDefinitionContainer : public std::vector<MapObjectDefinition *>
 {
    public:
-    MobjTypeontainer_c();
-    ~MobjTypeontainer_c();
+    MapObjectDefinitionContainer();
+    ~MapObjectDefinitionContainer();
 
    private:
-    MobjType *lookup_cache[kLookupCacheSize];
+    MapObjectDefinition *lookup_cache[kLookupCacheSize];
 
    public:
     // List Management
@@ -1043,18 +1043,18 @@ class MobjTypeontainer_c : public std::vector<MobjType *>
     // Search Functions
     int               FindFirst(const char *name, int startpos = -1);
     int               FindLast(const char *name, int startpos = -1);
-    const MobjType *Lookup(const char *refname);
-    const MobjType *Lookup(int id);
+    const MapObjectDefinition *Lookup(const char *refname);
+    const MapObjectDefinition *Lookup(int id);
 
     // FIXME!!! Move to a more appropriate location
-    const MobjType *LookupCastMember(int castpos);
-    const MobjType *LookupPlayer(int playernum);
-    const MobjType *LookupDoorKey(int theKey);
+    const MapObjectDefinition *LookupCastMember(int castpos);
+    const MapObjectDefinition *LookupPlayer(int playernum);
+    const MapObjectDefinition *LookupDoorKey(int theKey);
 };
 
 // -------EXTERNALISATIONS-------
 
-extern MobjTypeontainer_c mobjtypes;
+extern MapObjectDefinitionContainer mobjtypes;
 
 void DDF_MobjGetBenefit(const char *info, void *storage);
 

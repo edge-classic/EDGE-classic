@@ -37,7 +37,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
                      float bias, int rotation);
 
 void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame, float x, float y, float xscale,
-                        float yscale, const MobjType *info);
+                        float yscale, const MapObjectDefinition *info);
 
 #endif /* __R_MD2_H__ */
 

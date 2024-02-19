@@ -114,7 +114,7 @@ class light_image_c
     }
 };
 
-static light_image_c *GetLightImage(const MobjType *info, int DL)
+static light_image_c *GetLightImage(const MapObjectDefinition *info, int DL)
 {
     // Intentional Const Overrides
     dlight_info_c *D_info = (dlight_info_c *)&info->dlight[DL];
@@ -746,14 +746,14 @@ private:
 	float length;
 	HMM_Vec3 normal;
 
-	const MobjType *info;
+	const MapObjectDefinition *info;
 	float bright;
 
 	light_image_c *lim[2];
 
 public:
 	laser_glow_c(const HMM_Vec3& _v1, const HMM_Vec3& _v2,
-				 const MobjType *_info, float _intensity) :
+				 const MapObjectDefinition *_info, float _intensity) :
 		s(_v1), e(_v2), info(_info), bright(_intensity)
 	{
 		normal.x = e.x - s.x;

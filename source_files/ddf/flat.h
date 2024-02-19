@@ -41,10 +41,10 @@ class FlatDefinition
     // Lobo: item to spawn (or nullptr).  The mobjdef pointer is only valid
     // after
     //  DDF_flatCleanUp() has been called.
-    const MobjType *impactobject_;
+    const MapObjectDefinition *impactobject_;
     std::string       impactobject_ref_;
 
-    const MobjType *glowobject_;
+    const MapObjectDefinition *glowobject_;
     std::string       glowobject_ref_;
 
     float sink_depth_;

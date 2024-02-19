@@ -488,7 +488,7 @@ static void TextWrite(void)
 //   in order of appearance
 //
 
-static const MobjType *castorder;
+static const MapObjectDefinition *castorder;
 static const char       *casttitle;
 static int               casttics;
 static State          *caststate;

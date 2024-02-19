@@ -35,7 +35,7 @@ class AttackDefinition;
 class Colormap;
 class GameDefinition;
 class MapDefinition;
-class MobjType;
+class MapObjectDefinition;
 class PlaylistEntry;
 class WeaponDefinition;
 
@@ -79,7 +79,7 @@ typedef struct act_jump_info_s
 // Info for the BECOME action
 typedef struct act_become_info_s
 {
-    const MobjType *info;
+    const MapObjectDefinition *info;
     std::string       info_ref;
 
     LabelOffset start;
@@ -92,7 +92,7 @@ typedef struct act_become_info_s
 // Info for the MORPH action
 typedef struct act_morph_info_s
 {
-    const MobjType *info;
+    const MapObjectDefinition *info;
     std::string       info_ref;
 
     LabelOffset start;

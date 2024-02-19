@@ -348,7 +348,7 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
     if (point->info == nullptr)
         I_Error("P_SpawnPlayer: No such item type!");
 
-    const MobjType *info = point->info;
+    const MapObjectDefinition *info = point->info;
 
     L_WriteDebug("* P_SpawnPlayer %d @ %1.0f,%1.0f\n", point->info->playernum, point->x, point->y);
 
@@ -424,7 +424,7 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
 
 static void P_SpawnVoodooDoll(player_t *p, const spawnpoint_t *point)
 {
-    const MobjType *info = point->info;
+    const MapObjectDefinition *info = point->info;
 
     SYS_ASSERT(info);
     SYS_ASSERT(info->playernum > 0);
@@ -576,7 +576,7 @@ void G_SpawnHelper(int pnum)
     if (point == nullptr)
         return;
 
-    const MobjType *info = mobjtypes.Lookup(888);
+    const MapObjectDefinition *info = mobjtypes.Lookup(888);
     if (info == nullptr)
         return;
 

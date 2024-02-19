@@ -238,7 +238,7 @@ DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char            *name,
                                             bool allow_prefixes,
                                             bool allow_user);
 
-int DDF_MainLookupDirector(const MobjType *obj, const char *info);
+int DDF_MainLookupDirector(const MapObjectDefinition *obj, const char *info);
 
 // DDF_ANIM Code
 void DDF_AnimInit(void);

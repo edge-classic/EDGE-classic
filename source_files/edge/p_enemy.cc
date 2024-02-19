@@ -515,7 +515,7 @@ bool P_LookForPlayers(mobj_t *actor, BAMAngle range)
 //   BOSS-BRAIN HANDLING
 //
 
-mobj_t *P_LookForShootSpot(const MobjType *spot_type)
+mobj_t *P_LookForShootSpot(const MapObjectDefinition *spot_type)
 {
     // -AJA- 2022: changed this to find all spots matching the wanted type,
     //             and return a random one.  Since brain spits occur seldomly
@@ -537,7 +537,7 @@ mobj_t *P_LookForShootSpot(const MobjType *spot_type)
 
 static void SpawnDeathMissile(mobj_t *source, float x, float y, float z)
 {
-    const MobjType *info;
+    const MapObjectDefinition *info;
     mobj_t           *th;
 
     info = mobjtypes.Lookup("BRAIN_DEATH_MISSILE");
@@ -618,7 +618,7 @@ void P_ActCubeSpawn(mobj_t *cube)
 {
     mobj_t           *targ;
     mobj_t           *newmobj;
-    const MobjType *type;
+    const MapObjectDefinition *type;
     int               r;
 
     targ = cube->target;

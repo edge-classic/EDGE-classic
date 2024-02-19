@@ -115,7 +115,7 @@ typedef struct s_thing_s
     AppearsFlag appear = kAppearsWhenNone;
 
     // -AJA- 1999/09/11: since the RSCRIPT lump can be loaded before
-    //       DDF* lumps, we can't store a pointer to a MobjType here
+    //       DDF* lumps, we can't store a pointer to a MapObjectDefinition here
     //       (and the mobjtypes can move about with later additions).
 
     // thing's DDF name, or if nullptr, then thing's mapnumber.
@@ -451,7 +451,7 @@ typedef struct s_ondeath_s
 
     // mobjdef pointer, computed the first time this ONDEATH condition
     // is tested.
-    const MobjType *cached_info = nullptr;
+    const MapObjectDefinition *cached_info = nullptr;
 } s_ondeath_t;
 
 // ONHEIGHT info

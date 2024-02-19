@@ -681,7 +681,7 @@ static void DrawKeyOnLine(mline_t *ml, int theKey, RGBAColor rgb = SG_WHITE_RGBA
     if (am_keydoortext.d == 0) // Only if we have Keyed Doors Named turned on
         return;
 
-    static const MobjType *TheObject;
+    static const MapObjectDefinition *TheObject;
     std::string              CleanName;
     CleanName.clear();
 

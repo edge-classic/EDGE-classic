@@ -253,7 +253,7 @@ void PlaylistEntry::Default()
 // --> PlaylistEntryontainter_c class
 
 //
-// PlaylistEntry* PlaylistEntryontainer_c::Find()
+// PlaylistEntry* PlaylistEntryContainer::Find()
 //
 PlaylistEntry *PlaylistEntryContainer::Find(int number)
 {

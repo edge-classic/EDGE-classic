@@ -358,7 +358,7 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
     s_thing_t *t = (s_thing_t *)param;
 
     mobj_t           *mo;
-    const MobjType *minfo;
+    const MapObjectDefinition *minfo;
 
     // Spawn a new map object.
 
@@ -523,7 +523,7 @@ void RAD_ActDamageMonsters(rad_trigger_t *R, void *param)
 {
     s_damage_monsters_t *mon = (s_damage_monsters_t *)param;
 
-    const MobjType *info = nullptr;
+    const MapObjectDefinition *info = nullptr;
     int               tag  = mon->thing_tag;
 
     if (mon->thing_name)
@@ -570,7 +570,7 @@ void RAD_ActThingEvent(rad_trigger_t *R, void *param)
 {
     s_thing_event_t *tev = (s_thing_event_t *)param;
 
-    const MobjType *info = nullptr;
+    const MapObjectDefinition *info = nullptr;
     int               tag  = tev->thing_tag;
 
     if (tev->thing_name)
@@ -1376,7 +1376,7 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
     RAD_SetPspriteDeferred(p, ps_weapon, state); // refresh the sprite
 }
 
-void P_ActReplace(struct mobj_s *mo, const MobjType *newThing)
+void P_ActReplace(struct mobj_s *mo, const MapObjectDefinition *newThing)
 {
 
     // DO THE DEED !!
@@ -1442,8 +1442,8 @@ void RAD_ActReplaceThing(rad_trigger_t *R, void *param)
 {
     s_thing_replace_t *thingarg = (s_thing_replace_t *)param;
 
-    const MobjType *oldThing = nullptr;
-    const MobjType *newThing = nullptr;
+    const MapObjectDefinition *oldThing = nullptr;
+    const MapObjectDefinition *newThing = nullptr;
 
     // Prioritize number lookup. It's faster and more permissive
     if (thingarg->old_thing_type > -1)

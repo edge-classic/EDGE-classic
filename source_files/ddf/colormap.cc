@@ -284,7 +284,7 @@ ColormapContainer::~ColormapContainer()
 }
 
 //
-// Colormap* Colormapontainer_c::Lookup()
+// Colormap* ColormapContainer::Lookup()
 //
 Colormap *ColormapContainer::Lookup(const char *refname)
 {

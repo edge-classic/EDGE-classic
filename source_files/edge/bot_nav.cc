@@ -41,7 +41,7 @@
 
 #include "AlmostEquals.h"
 
-extern mobj_t *P_FindTeleportMan(int tag, const MobjType *info);
+extern mobj_t *P_FindTeleportMan(int tag, const MapObjectDefinition *info);
 extern line_t *p_FindTeleportLine(int tag, line_t *original);
 
 class big_item_c

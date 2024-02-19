@@ -135,7 +135,7 @@ typedef struct shoot_trav_info_s
 
     float             damage;
     const DamageClass   *damtype;
-    const MobjType *puff;
+    const MapObjectDefinition *puff;
     float             prev_z;
 
     // output field:
@@ -2148,7 +2148,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
         if (tempspecial && (!shoot_I.source || !shoot_I.source->currentattack ||
                             !(shoot_I.source->currentattack->flags_ & kAttackFlagNoTriggerLines)))
         {
-            const MobjType *info;
+            const MapObjectDefinition *info;
             info = tempspecial->effectobject_;
 
             if (info && tempspecial->type_ == kLineTriggerShootable)
@@ -2273,7 +2273,7 @@ mobj_t *P_AimLineAttack(mobj_t *t1, BAMAngle angle, float distance, float *slope
 }
 
 void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float damage, const DamageClass *damtype,
-                  const MobjType *puff)
+                  const MapObjectDefinition *puff)
 {
     // Note: Damtype can be nullptr.
 

@@ -43,15 +43,15 @@ void P_InitSwitchList(void)
     // only called at game initialization.
     for (auto sw : switchdefs)
     {
-        sw->cache.image[0] = W_ImageLookup(sw->on_name.c_str(), kImageNamespaceTexture, ILF_Null);
-        sw->cache.image[1] = W_ImageLookup(sw->off_name.c_str(), kImageNamespaceTexture, ILF_Null);
+        sw->cache_.image[0] = W_ImageLookup(sw->on_name_.c_str(), kImageNamespaceTexture, ILF_Null);
+        sw->cache_.image[1] = W_ImageLookup(sw->off_name_.c_str(), kImageNamespaceTexture, ILF_Null);
     }
 }
 
 //
 // Start a button counting down till it turns off.
 //
-static void StartButton(switchdef_c *sw, line_t *line, bwhere_e w, const image_c *image)
+static void StartButton(SwitchDefinition *sw, line_t *line, bwhere_e w, const image_c *image)
 {
     // See if button is already pressed
     if (P_ButtonIsPressed(line))
@@ -79,8 +79,8 @@ static void StartButton(switchdef_c *sw, line_t *line, bwhere_e w, const image_c
 
     b->line      = line;
     b->where     = w;
-    b->btimer    = sw->time;
-    b->off_sound = sw->off_sfx;
+    b->btimer    = sw->time_;
+    b->off_sound = sw->off_sfx_;
     b->bimage    = image;
 }
 
@@ -93,9 +93,9 @@ static void StartButton(switchdef_c *sw, line_t *line, bwhere_e w, const image_c
 // -KM- 1998/09/01 All switches referencing a certain tag are switched
 //
 
-#define CHECK_SW(PART) (sw->cache.image[k] == side->PART.image)
-#define SET_SW(PART)   side->PART.image = sw->cache.image[k ^ 1]
-#define OLD_SW         sw->cache.image[k]
+#define CHECK_SW(PART) (sw->cache_.image[k] == side->PART.image)
+#define SET_SW(PART)   side->PART.image = sw->cache_.image[k ^ 1]
+#define OLD_SW         sw->cache_.image[k]
 
 void P_ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials, bool noSound)
 {
@@ -119,9 +119,9 @@ void P_ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials, bo
         // Note: reverse order, give priority to newer switches.
         for (auto iter = switchdefs.rbegin(); iter != switchdefs.rend() && (pos == BWH_None); iter++)
         {
-            switchdef_c *sw = *iter;
+            SwitchDefinition *sw = *iter;
 
-            if (!sw->cache.image[0] && !sw->cache.image[1])
+            if (!sw->cache_.image[0] && !sw->cache_.image[1])
                 continue;
 
             int k;
@@ -152,10 +152,10 @@ void P_ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials, bo
             if (pos != BWH_None)
             {
                 // -KM- 98/07/31 Implement sounds
-                if (!noSound && sw->on_sfx)
+                if (!noSound && sw->on_sfx_)
                 {
                     SYS_ASSERT(sfx_origin);
-                    S_StartFX(sw->on_sfx, SNCAT_Level, sfx_origin);
+                    S_StartFX(sw->on_sfx_, SNCAT_Level, sfx_origin);
                     noSound = true;
                 }
 

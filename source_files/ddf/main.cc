@@ -29,6 +29,7 @@
 #include "switch.h"
 // EPI
 #include "epi.h"
+#include "filesystem.h"
 #include "str_compare.h"
 #include "str_util.h"
 
@@ -37,43 +38,38 @@
 
 void RAD_ReadScript(const std::string &_data, const std::string &source);
 
-#define CHECK_SELF_ASSIGN(param) \
-    if (this == &param) return *this;
-
-// enum thats gives the parser's current status
-typedef enum
+enum DDFReadStatus
 {
-    readstatus_invalid = 0,
-    waiting_tag,
-    reading_tag,
-    waiting_newdef,
-    reading_newdef,
-    reading_command,
-    reading_data,
-    reading_remark,
-    reading_string
-} readstatus_e;
+    kDDFReadStatusInvalid = 0,
+    kDDFReadStatusWaitingTag,
+    kDDFReadStatusReadingTag,
+    kDDFReadStatusWaitingNewDefinition,
+    kDDFReadStatusReadingNewDefinition,
+    kDDFReadStatusReadingCommand,
+    kDDFReadStatusReadingData,
+    kDDFReadStatusReadingRemark,
+    kDDFReadStatusReadingString
+};
 
-// enum thats describes the return value from DDF_MainProcessChar
-typedef enum
+enum DDFReadCharReturn
 {
-    nothing,
-    command_read,
-    property_read,
-    def_start,
-    def_stop,
-    remark_start,
-    remark_stop,
-    separator,
-    string_start,
-    string_stop,
-    group_start,
-    group_stop,
-    tag_start,
-    tag_stop,
-    terminator,
-    ok_char
-} readchar_t;
+    kDDFReadCharReturnNothing,
+    kDDFReadCharReturnCommand,
+    kDDFReadCharReturnProperty,
+    kDDFReadCharReturnDefinitionStart,
+    kDDFReadCharReturnDefinitionStop,
+    kDDFReadCharReturnRemarkStart,
+    kDDFReadCharReturnRemarkStop,
+    kDDFReadCharReturnSeparator,
+    kDDFReadCharReturnStringStart,
+    kDDFReadCharReturnStringStop,
+    kDDFReadCharReturnGroupStart,
+    kDDFReadCharReturnGroupStop,
+    kDDFReadCharReturnTagStart,
+    kDDFReadCharReturnTagStop,
+    kDDFReadCharReturnTerminator,
+    kDDFReadCharReturnOK
+};
 
 #define DEBUG_DDFREAD 0
 
@@ -425,51 +421,55 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
 // numeric is used if a numeric value needs to be changed, by routine.
 //
 // The different parser modes are:
-//  waiting_newdef
-//  reading_newdef
-//  reading_command
-//  reading_data
-//  reading_remark
-//  reading_string
+//  kDDFReadStatusWaitingNewDefinition
+//  kDDFReadStatusReadingNewDefinition
+//  kDDFReadStatusReadingCommand
+//  kDDFReadStatusReadingData
+//  kDDFReadStatusReadingRemark
+//  kDDFReadStatusReadingString
 //
-// 'waiting_newdef' is only set at the start of the code, At this point every
-// character with the exception of DEFSTART is ignored. When DEFSTART is
-// encounted, the parser will switch to reading_newdef. DEFSTART the parser
-// will only switches modes and sets firstgo to false.
+// 'kDDFReadStatusWaitingNewDefinition' is only set at the start of the code, At
+// this point every character with the exception of DEFSTART is ignored. When
+// DEFSTART is encounted, the parser will switch to
+// kDDFReadStatusReadingNewDefinition. DEFSTART the parser will only switches
+// modes and sets firstgo to false.
 //
-// 'reading_newdef' reads all alphanumeric characters and the '_' character -
-// which substitudes for a space character (whitespace is ignored) - until
-// DEFSTOP is read. DEFSTOP passes the read string to DDF_MainCheckName and then
-// clears the string. Mode reading_command is now set. All read stuff is passed
-// to char *buffer.
+// 'kDDFReadStatusReadingNewDefinition' reads all alphanumeric characters and
+// the '_' character - which substitudes for a space character (whitespace is
+// ignored) - until DEFSTOP is read. DEFSTOP passes the read string to
+// DDF_MainCheckName and then clears the string. Mode
+// kDDFReadStatusReadingCommand is now set. All read stuff is passed to char
+// *buffer.
 //
-// 'reading_command' picks out all the alphabetic characters and passes them to
-// buffer as soon as COMMANDREAD is encountered; DDF_MainReadCmd looks through
-// for a matching command, if none is found a fatal error is returned. If a
-// matching command is found, this function returns a command reference number
-// to command ref and sets the mode to reading_data. if DEFSTART is encountered
-// the procedure will clear the buffer, run DDF_MainCreateEntry (called this as
-// it reflects that in Items & Scenery if starts a new mobj type, in truth it
-// can do anything procedure wise) and then switch mode to reading_newdef.
+// 'kDDFReadStatusReadingCommand' picks out all the alphabetic characters and
+// passes them to buffer as soon as COMMANDREAD is encountered; DDF_MainReadCmd
+// looks through for a matching command, if none is found a fatal error is
+// returned. If a matching command is found, this function returns a command
+// reference number to command ref and sets the mode to
+// kDDFReadStatusReadingData. if DEFSTART is encountered the procedure will
+// clear the buffer, run DDF_MainCreateEntry (called this as it reflects that in
+// Items & Scenery if starts a new mobj type, in truth it can do anything
+// procedure wise) and then switch mode to kDDFReadStatusReadingNewDefinition.
 //
-// 'reading_data' passes alphanumeric characters, plus a few other characters
-// that are also needed. It continues to feed buffer until a SEPARATOR or a
-// TERMINATOR is found. The difference between SEPARATOR and TERMINATOR is that
-// a TERMINATOR refs the cmdlist to find the routine to use and then sets the
-// mode to reading_command, whereas SEPARATOR refs the cmdlist to find the
-// routine and a looks for more data on the same command. This is how the
-// multiple states and specials are defined.
+// 'kDDFReadStatusReadingData' passes alphanumeric characters, plus a few other
+// characters that are also needed. It continues to feed buffer until a
+// SEPARATOR or a TERMINATOR is found. The difference between SEPARATOR and
+// TERMINATOR is that a TERMINATOR refs the cmdlist to find the routine to use
+// and then sets the mode to kDDFReadStatusReadingCommand, whereas SEPARATOR
+// refs the cmdlist to find the routine and a looks for more data on the same
+// command. This is how the multiple states and specials are defined.
 //
-// 'reading_remark' does not process any chars except REMARKSTOP, everything
-// else is ignored. This mode is only set when REMARKSTART is found, when this
-// happens the current mode is held in formerstatus, which is restored when
-// REMARKSTOP is found.
+// 'kDDFReadStatusReadingRemark' does not process any chars except REMARKSTOP,
+// everything else is ignored. This mode is only set when REMARKSTART is found,
+// when this happens the current mode is held in formerstatus, which is restored
+// when REMARKSTOP is found.
 //
-// 'reading_string' is set when the parser is going through data (reading_data)
-// and encounters STRINGSTART and only stops on a STRINGSTOP. When
-// reading_string, everything that is an ASCII char is read (which the exception
-// of STRINGSTOP) and passed to the buffer. REMARKS are ignored in when
-// reading_string and the case is take notice of here.
+// 'kDDFReadStatusReadingString' is set when the parser is going through data
+// (kDDFReadStatusReadingData) and encounters STRINGSTART and only stops on a
+// STRINGSTOP. When kDDFReadStatusReadingString, everything that is an ASCII
+// char is read (which the exception of STRINGSTOP) and passed to the buffer.
+// REMARKS are ignored in when kDDFReadStatusReadingString and the case is take
+// notice of here.
 //
 // The maximum size of BUFFER is set in the BUFFERSIZE define.
 //
@@ -485,105 +485,110 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
 //
 // 1998/08/10 Added String reading code.
 //
-static readchar_t DDF_MainProcessChar(char character, std::string &token,
-                                      int status)
+static DDFReadCharReturn DDF_MainProcessChar(char character, std::string &token,
+                                             int status)
 {
     // int len;
 
     // -ACB- 1998/08/11 Used for detecting formatting in a string
     static bool formatchar = false;
 
-    // With the exception of reading_string, whitespace is ignored.
-    if (status != reading_string)
+    // With the exception of kDDFReadStatusReadingString, whitespace is ignored.
+    if (status != kDDFReadStatusReadingString)
     {
-        if (epi::IsSpaceASCII(character)) return nothing;
+        if (epi::IsSpaceASCII(character)) return kDDFReadCharReturnNothing;
     }
     else  // check for formatting char in a string
     {
         if (!formatchar && character == '\\')
         {
             formatchar = true;
-            return nothing;
+            return kDDFReadCharReturnNothing;
         }
     }
 
     // -AJA- 1999/09/26: Handle unmatched '}' better.
-    if (status != reading_string && character == '{') return remark_start;
+    if (status != kDDFReadStatusReadingString && character == '{')
+        return kDDFReadCharReturnRemarkStart;
 
-    if (status == reading_remark && character == '}') return remark_stop;
+    if (status == kDDFReadStatusReadingRemark && character == '}')
+        return kDDFReadCharReturnRemarkStop;
 
-    if (status != reading_string && character == '}')
+    if (status != kDDFReadStatusReadingString && character == '}')
         DDF_Error("DDF: Encountered '}' without previous '{'.\n");
 
     switch (status)
     {
-        case reading_remark:
-            return nothing;
+        case kDDFReadStatusReadingRemark:
+            return kDDFReadCharReturnNothing;
 
             // -ES- 2000/02/29 Added tag check.
-        case waiting_tag:
+        case kDDFReadStatusWaitingTag:
             if (character == '<')
-                return tag_start;
+                return kDDFReadCharReturnTagStart;
             else
                 DDF_Error("DDF: File must start with a tag!\n");
             break;
 
-        case reading_tag:
+        case kDDFReadStatusReadingTag:
             if (character == '>')
-                return tag_stop;
+                return kDDFReadCharReturnTagStop;
             else
             {
                 token += (character);
-                return ok_char;
+                return kDDFReadCharReturnOK;
             }
 
-        case waiting_newdef:
+        case kDDFReadStatusWaitingNewDefinition:
             if (character == '[')
-                return def_start;
+                return kDDFReadCharReturnDefinitionStart;
             else
-                return nothing;
+                return kDDFReadCharReturnNothing;
 
-        case reading_newdef:
-            if (character == ']') { return def_stop; }
+        case kDDFReadStatusReadingNewDefinition:
+            if (character == ']') { return kDDFReadCharReturnDefinitionStop; }
             else if ((epi::IsAlphanumericASCII(character)) ||
                      (character == '_') || (character == ':') ||
                      (character == '+'))
             {
                 token += epi::ToUpperASCII(character);
-                return ok_char;
+                return kDDFReadCharReturnOK;
             }
-            return nothing;
+            return kDDFReadCharReturnNothing;
 
-        case reading_command:
-            if (character == '=') { return command_read; }
-            else if (character == ';') { return property_read; }
-            else if (character == '[') { return def_start; }
+        case kDDFReadStatusReadingCommand:
+            if (character == '=') { return kDDFReadCharReturnCommand; }
+            else if (character == ';') { return kDDFReadCharReturnProperty; }
+            else if (character == '[')
+            {
+                return kDDFReadCharReturnDefinitionStart;
+            }
             else if (epi::IsAlphanumericASCII(character) || character == '_' ||
                      character == '(' || character == ')' || character == '.')
             {
                 token += epi::ToUpperASCII(character);
-                return ok_char;
+                return kDDFReadCharReturnOK;
             }
-            return nothing;
+            return kDDFReadCharReturnNothing;
 
             // -ACB- 1998/08/10 Check for string start
-        case reading_data:
-            if (character == '\"') return string_start;
+        case kDDFReadStatusReadingData:
+            if (character == '\"') return kDDFReadCharReturnStringStart;
 
-            if (character == ';') return terminator;
+            if (character == ';') return kDDFReadCharReturnTerminator;
 
-            if (character == ',') return separator;
+            if (character == ',') return kDDFReadCharReturnSeparator;
 
             if (character == '(')
             {
                 token += (character);
-                return group_start;
+                return kDDFReadCharReturnGroupStart;
             }
 
             if (character == ')')
             {
                 token += (character);
-                return group_stop;
+                return kDDFReadCharReturnGroupStop;
             }
 
             // Sprite Data - more than a few exceptions....
@@ -594,7 +599,7 @@ static readchar_t DDF_MainProcessChar(char character, std::string &token,
                 character == '+' || character == '@' || character == '?')
             {
                 token += epi::ToUpperASCII(character);
-                return ok_char;
+                return kDDFReadCharReturnOK;
             }
             else if (epi::IsPrintASCII(character))
                 DDF_WarnError("DDF: Illegal character '%c' found.\n",
@@ -602,7 +607,8 @@ static readchar_t DDF_MainProcessChar(char character, std::string &token,
 
             break;
 
-        case reading_string:  // -ACB- 1998/08/10 New string handling
+        case kDDFReadStatusReadingString:  // -ACB- 1998/08/10 New string
+                                           // handling
             // -KM- 1999/01/29 Fixed nasty bug where \" would be recognised as
             //  string end over quote mark.  One of the level text used this.
             if (formatchar)
@@ -612,45 +618,45 @@ static readchar_t DDF_MainProcessChar(char character, std::string &token,
                 {
                     token += ('\n');
                     formatchar = false;
-                    return ok_char;
+                    return kDDFReadCharReturnOK;
                 }
                 else if (character ==
                          '\"')  // -KM- 1998/10/29 Also recognise quote
                 {
                     token += ('\"');
                     formatchar = false;
-                    return ok_char;
+                    return kDDFReadCharReturnOK;
                 }
                 else if (character == '\\')  // -ACB- 1999/11/24 Double
                                              // backslash means directory
                 {
                     token += ('\\');
                     formatchar = false;
-                    return ok_char;
+                    return kDDFReadCharReturnOK;
                 }
                 else  // -ACB- 1999/11/24 Any other characters are treated in
                       // the norm
                 {
                     token += (character);
                     formatchar = false;
-                    return ok_char;
+                    return kDDFReadCharReturnOK;
                 }
             }
-            else if (character == '\"') { return string_stop; }
+            else if (character == '\"') { return kDDFReadCharReturnStringStop; }
             else if (character == '\n')
             {
                 cur_ddf_line_num--;
                 DDF_WarnError("Unclosed string detected.\n");
 
                 cur_ddf_line_num++;
-                return nothing;
+                return kDDFReadCharReturnNothing;
             }
             // -KM- 1998/10/29 Removed ascii check, allow foreign characters (?)
             // -ES- HEY! Swedish is not foreign!
             else
             {
                 token += (character);
-                return ok_char;
+                return kDDFReadCharReturnOK;
             }
 
         default:  // doh!
@@ -661,7 +667,7 @@ static readchar_t DDF_MainProcessChar(char character, std::string &token,
             break;
     }
 
-    return nothing;
+    return kDDFReadCharReturnNothing;
 }
 
 //
@@ -687,8 +693,8 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
     char charcount = 0;
 #endif
 
-    int status       = waiting_tag;
-    int formerstatus = nothing;
+    int status       = kDDFReadStatusWaitingTag;
+    int formerstatus = kDDFReadCharReturnNothing;
 
     int  comment_level = 0;
     int  bracket_level = 0;
@@ -752,7 +758,7 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
         //       comments here and ignore them.  Ow the pain of long
         //       identifier names...  Ow the pain of &memfile[size] :-)
 
-        if (comment_level == 0 && status != reading_string &&
+        if (comment_level == 0 && status != kDDFReadStatusReadingString &&
             memfileptr + 1 < &memfile[memsize] && memfileptr[0] == '/' &&
             memfileptr[1] == '/')
         {
@@ -809,21 +815,21 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
 
         switch (response)
         {
-            case remark_start:
+            case kDDFReadCharReturnRemarkStart:
                 if (comment_level == 0)
                 {
                     formerstatus = status;
-                    status       = reading_remark;
+                    status       = kDDFReadStatusReadingRemark;
                 }
                 comment_level++;
                 break;
 
-            case remark_stop:
+            case kDDFReadCharReturnRemarkStop:
                 comment_level--;
                 if (comment_level == 0) { status = formerstatus; }
                 break;
 
-            case command_read:
+            case kDDFReadCharReturnCommand:
                 if (!token.empty())
                     current_cmd = token.c_str();
                 else
@@ -832,23 +838,23 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
                 SYS_ASSERT(current_index == 0);
 
                 token.clear();
-                status = reading_data;
+                status = kDDFReadStatusReadingData;
                 break;
 
-            case tag_start:
-                status = reading_tag;
+            case kDDFReadCharReturnTagStart:
+                status = kDDFReadStatusReadingTag;
                 break;
 
-            case tag_stop:
+            case kDDFReadCharReturnTagStop:
                 if (epi::StringCaseCompareASCII(token, readinfo->tag) != 0)
                     DDF_Error("Start tag <%s> expected, found <%s>!\n",
                               readinfo->tag, token.c_str());
 
-                status = waiting_newdef;
+                status = kDDFReadStatusWaitingNewDefinition;
                 token.clear();
                 break;
 
-            case def_start:
+            case kDDFReadCharReturnDefinitionStart:
                 if (bracket_level > 0)
                     DDF_Error("Unclosed () brackets detected.\n");
 
@@ -857,7 +863,7 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
                 if (firstgo)
                 {
                     firstgo = false;
-                    status  = reading_newdef;
+                    status  = kDDFReadStatusReadingNewDefinition;
                 }
                 else
                 {
@@ -868,13 +874,13 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
 
                     token.clear();
 
-                    status = reading_newdef;
+                    status = kDDFReadStatusReadingNewDefinition;
 
                     cur_ddf_entryname.clear();
                 }
                 break;
 
-            case def_stop:
+            case kDDFReadCharReturnDefinitionStop:
                 cur_ddf_entryname = epi::StringFormat("[%s]", token.c_str());
 
                 // -AJA- 2009/07/27: extend an existing entry
@@ -884,17 +890,19 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
                     (*readinfo->start_entry)(token.c_str(), false);
 
                 token.clear();
-                status = reading_command;
+                status = kDDFReadStatusReadingCommand;
                 break;
 
                 // -AJA- 2000/10/02: support for () brackets
-            case group_start:
-                if (status == reading_data || status == reading_command)
+            case kDDFReadCharReturnGroupStart:
+                if (status == kDDFReadStatusReadingData ||
+                    status == kDDFReadStatusReadingCommand)
                     bracket_level++;
                 break;
 
-            case group_stop:
-                if (status == reading_data || status == reading_command)
+            case kDDFReadCharReturnGroupStop:
+                if (status == kDDFReadStatusReadingData ||
+                    status == kDDFReadStatusReadingCommand)
                 {
                     bracket_level--;
                     if (bracket_level < 0)
@@ -902,7 +910,7 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
                 }
                 break;
 
-            case separator:
+            case kDDFReadCharReturnSeparator:
                 if (bracket_level > 0)
                 {
                     token += (',');
@@ -926,16 +934,16 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
                 break;
 
                 // -ACB- 1998/08/10 String Handling
-            case string_start:
-                status = reading_string;
+            case kDDFReadCharReturnStringStart:
+                status = kDDFReadStatusReadingString;
                 break;
 
                 // -ACB- 1998/08/10 String Handling
-            case string_stop:
-                status = reading_data;
+            case kDDFReadCharReturnStringStop:
+                status = kDDFReadStatusReadingData;
                 break;
 
-            case terminator:
+            case kDDFReadCharReturnTerminator:
                 if (current_cmd.empty())
                     DDF_Error("Unexpected semicolon `;'.\n");
 
@@ -948,18 +956,18 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
                 current_index = 0;
 
                 token.clear();
-                status = reading_command;
+                status = kDDFReadStatusReadingCommand;
                 break;
 
-            case property_read:
+            case kDDFReadCharReturnProperty:
                 DDF_WarnError(
                     "Badly formed command: Unexpected semicolon `;'\n");
                 break;
 
-            case nothing:
+            case kDDFReadCharReturnNothing:
                 break;
 
-            case ok_char:
+            case kDDFReadCharReturnOK:
 #if (DEBUG_DDFREAD)
                 charcount++;
                 I_Debugf("%c", character);
@@ -984,11 +992,14 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
 
     if (bracket_level > 0) DDF_Error("Unclosed () brackets detected.\n");
 
-    if (status == reading_tag) DDF_Error("Unclosed <> brackets detected.\n");
+    if (status == kDDFReadStatusReadingTag)
+        DDF_Error("Unclosed <> brackets detected.\n");
 
-    if (status == reading_newdef) DDF_Error("Unclosed [] brackets detected.\n");
+    if (status == kDDFReadStatusReadingNewDefinition)
+        DDF_Error("Unclosed [] brackets detected.\n");
 
-    if (status == reading_data || status == reading_string)
+    if (status == kDDFReadStatusReadingData ||
+        status == kDDFReadStatusReadingString)
         DDF_WarnError("Unfinished DDF command on last line.\n");
 
     // if firstgo is true, nothing was defined
@@ -1255,9 +1266,9 @@ static void DoGetFloat(const char *info, void *storage)
 void DDF_MainGetPercent(const char *info, void *storage)
 {
     float *dest = (float *)storage;
-    char       s[101];
-    char      *p;
-    float      f;
+    char   s[101];
+    char  *p;
+    float  f;
 
     // check that the string is valid
     epi::CStringCopyMax(s, info, 100);
@@ -1295,9 +1306,9 @@ void DDF_MainGetPercent(const char *info, void *storage)
 void DDF_MainGetPercentAny(const char *info, void *storage)
 {
     float *dest = (float *)storage;
-    char       s[101];
-    char      *p;
-    float      f;
+    char   s[101];
+    char  *p;
+    float  f;
 
     // check that the string is valid
     epi::CStringCopyMax(s, info, 100);
@@ -1348,7 +1359,7 @@ void DDF_MainGetTime(const char *info, void *storage)
 
     if (sscanf(info, "%f", &val) != 1) DDF_Error("Bad time value: %s\n", info);
 
-    *dest = (int)(val * (float)TICRATE);
+    *dest = (int)(val * (float)kTicRate);
 }
 
 //
@@ -1559,7 +1570,7 @@ void Test_ParseWhenAppear(void)
 void DDF_MainGetBitSet(const char *info, void *storage)
 {
     BitSet *result = (BitSet *)storage;
-    int       start, end;
+    int     start, end;
 
     SYS_ASSERT(info && storage);
 
@@ -1605,11 +1616,11 @@ static int FindSpecialFlag(const char *prefix, const char *name,
     return -1;
 }
 
-DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char        *name,
+DDFCheckFlagResult DDF_MainCheckSpecialFlag(const char            *name,
                                             const DDFSpecialFlags *flag_set,
-                                            int               *flag_value,
-                                            bool               allow_prefixes,
-                                            bool               allow_user)
+                                            int                   *flag_value,
+                                            bool allow_prefixes,
+                                            bool allow_user)
 {
     int index;
     int negate = 0;
@@ -1847,7 +1858,7 @@ void DamageClass::Default(DamageClassDefault def)
             nominal_             = 6.0f;
             linear_max_          = 14.0f;
             error_               = -1.0f;
-            delay_               = 2 * TICRATE;
+            delay_               = 2 * kTicRate;
             obituary_            = "OB_DROWN";
             no_armour_           = true;
             bypass_all_          = false;
@@ -1863,7 +1874,7 @@ void DamageClass::Default(DamageClassDefault def)
         case kDamageClassDefaultSector:
         {
             nominal_             = 0.0f;
-            linear_max_         = -1.0f;
+            linear_max_          = -1.0f;
             error_               = -1.0f;
             delay_               = 31;
             no_armour_           = false;
@@ -1961,7 +1972,10 @@ LabelOffset &LabelOffset::operator=(LabelOffset &rhs)
 
 DynamicLightDefinition::DynamicLightDefinition() { Default(); }
 
-DynamicLightDefinition::DynamicLightDefinition(DynamicLightDefinition &rhs) { Copy(rhs); }
+DynamicLightDefinition::DynamicLightDefinition(DynamicLightDefinition &rhs)
+{
+    Copy(rhs);
+}
 
 void DynamicLightDefinition::Copy(DynamicLightDefinition &src)
 {
@@ -1987,9 +2001,10 @@ void DynamicLightDefinition::Default()
     cache_data_ = nullptr;
 }
 
-DynamicLightDefinition &DynamicLightDefinition::operator=(DynamicLightDefinition &rhs)
+DynamicLightDefinition &DynamicLightDefinition::operator=(
+    DynamicLightDefinition &rhs)
 {
-    CHECK_SELF_ASSIGN(rhs);
+    if (this == &rhs) return *this;
 
     Copy(rhs);
 
@@ -2029,7 +2044,7 @@ void WeaknessDefinition::Default()
 
 WeaknessDefinition &WeaknessDefinition::operator=(WeaknessDefinition &rhs)
 {
-    CHECK_SELF_ASSIGN(rhs);
+    if (this == &rhs) return *this;
 
     Copy(rhs);
 

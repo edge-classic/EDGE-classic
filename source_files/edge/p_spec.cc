@@ -1985,7 +1985,7 @@ void P_PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
     }
     else if (was_swimming && !player->swimming)
     {
-        player->splashwait = TICRATE;
+        player->splashwait = kTicRate;
     }
 }
 
@@ -2483,7 +2483,7 @@ void P_SpawnSpecials1(void)
     if (i > 0 && DEATHMATCH())
     {
         levelTimer     = true;
-        levelTimeCount = 20 * 60 * TICRATE;
+        levelTimeCount = 20 * 60 * kTicRate;
     }
 
     std::string s = argv::Value("timer");
@@ -2492,7 +2492,7 @@ void P_SpawnSpecials1(void)
     {
         int time;
 
-        time           = atoi(s.c_str()) * 60 * TICRATE;
+        time           = atoi(s.c_str()) * 60 * kTicRate;
         levelTimer     = true;
         levelTimeCount = time;
     }

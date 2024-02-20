@@ -1357,8 +1357,8 @@ void PlaneMoverDefinition::Default(PlaneMoverDefinition::PlaneMoverDefault def)
 
         case kPlaneMoverDefaultDonutFloor:
         {
-            speed_up_   = FLOORSPEED / 2;
-            speed_down_ = FLOORSPEED / 2;
+            speed_up_   = kFloorSpeedDefault / 2;
+            speed_down_ = kFloorSpeedDefault / 2;
             break;
         }
 

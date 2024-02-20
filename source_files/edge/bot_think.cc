@@ -387,7 +387,7 @@ void bot_t::PainResponse()
         {
             pl->mo->SetTarget(pl->attacker);
             UpdateEnemy();
-            patience = TICRATE;
+            patience = kTicRate;
         }
     }
 }
@@ -439,11 +439,11 @@ void bot_t::LookForEnemies(float radius)
 
         if (see_enemy)
         {
-            patience = 2 * TICRATE;
+            patience = 2 * kTicRate;
             return;
         }
 
-        // IDEA: if patience == TICRATE/2, try using pathing algo
+        // IDEA: if patience == kTicRate/2, try using pathing algo
 
         if (patience-- >= 0)
             return;
@@ -463,7 +463,7 @@ void bot_t::LookForEnemies(float radius)
         {
             pl->mo->SetTarget(enemy);
             UpdateEnemy();
-            patience = TICRATE;
+            patience = kTicRate;
         }
     }
 }
@@ -484,7 +484,7 @@ void bot_t::LookForItems(float radius)
 
     task      = TASK_GetItem;
     path      = item_path;
-    item_time = TICRATE;
+    item_time = kTicRate;
 
     EstimateTravelTime();
 }
@@ -872,7 +872,7 @@ void bot_t::EstimateTravelTime()
     // overestimates by quite a bit, to account for obstacles.
 
     float dist = DistTo(path->cur_dest());
-    float tics = dist * 1.5f / 10.0f + 6.0f * TICRATE;
+    float tics = dist * 1.5f / 10.0f + 6.0f * kTicRate;
 
     travel_time = (int)tics;
 }
@@ -963,7 +963,7 @@ bot_follow_path_e bot_t::FollowPath(bool do_look)
         task       = TASK_OpenDoor;
         door_stage = TKDOOR_Approach;
         door_seg   = path->nodes[path->along].seg;
-        door_time  = 5 * TICRATE;
+        door_time  = 5 * kTicRate;
         SYS_ASSERT(door_seg != nullptr);
         return FOLLOW_OK;
     }
@@ -972,7 +972,7 @@ bot_follow_path_e bot_t::FollowPath(bool do_look)
         task       = TASK_UseLift;
         lift_stage = TKLIFT_Approach;
         lift_seg   = path->nodes[path->along].seg;
-        lift_time  = 5 * TICRATE;
+        lift_time  = 5 * kTicRate;
         SYS_ASSERT(lift_seg != nullptr);
         return FOLLOW_OK;
     }
@@ -1146,7 +1146,7 @@ void bot_t::Think_GetItem()
 
         case FOLLOW_Done:
             DeletePath();
-            item_time = TICRATE;
+            item_time = kTicRate;
             break;
 
         case FOLLOW_Failed:
@@ -1203,7 +1203,7 @@ void bot_t::Think_OpenDoor()
         if (diff < kBAMAngle5 && dist < (USERANGE - 16))
         {
             door_stage = TKDOOR_Use;
-            door_time  = TICRATE * 5;
+            door_time  = kTicRate * 5;
             return;
         }
 
@@ -1270,7 +1270,7 @@ void bot_t::Think_UseLift()
         if (diff < kBAMAngle5 && dist < (USERANGE - 16))
         {
             lift_stage = TKLIFT_Use;
-            lift_time  = TICRATE * 5;
+            lift_time  = kTicRate * 5;
             return;
         }
 
@@ -1305,7 +1305,7 @@ void bot_t::Think_UseLift()
 
             // TODO compute time it will take for lift to go fully up
             lift_stage = TKLIFT_Ride;
-            lift_time  = TICRATE * 10;
+            lift_time  = kTicRate * 10;
             return;
         }
 
@@ -1335,7 +1335,7 @@ void bot_t::Think_UseLift()
         {
             // if lift went down again, don't time out
             if (lift_sec->floor_move->direction <= 0)
-                lift_time = 10 * TICRATE;
+                lift_time = 10 * kTicRate;
 
             return;
         }

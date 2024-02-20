@@ -751,7 +751,7 @@ void GameDefinition::Default()
     titlemovie_.clear();
     movie_played_ = false;
     titlemusic_   = 0;
-    titletics_    = TICRATE * 4;
+    titletics_    = kTicRate * 4;
 
     special_music_ = 0;
     lighting_      = kLightingModelDoomish;

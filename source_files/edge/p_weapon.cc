@@ -1754,7 +1754,7 @@ void A_WeaponJump(mobj_t *mo)
 
     WeaponDefinition *info = p->weapons[p->ready_wp].info;
 
-    act_jump_info_t *jump;
+    JumpActionInfo *jump;
 
     if (!psp->state || !psp->state->action_par)
     {
@@ -1762,7 +1762,7 @@ void A_WeaponJump(mobj_t *mo)
         return;
     }
 
-    jump = (act_jump_info_t *)psp->state->action_par;
+    jump = (JumpActionInfo *)psp->state->action_par;
 
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
@@ -1781,7 +1781,7 @@ void A_WeaponDJNE(mobj_t *mo)
 
     WeaponDefinition *info = p->weapons[p->ready_wp].info;
 
-    act_jump_info_t *jump;
+    JumpActionInfo *jump;
 
     if (!psp->state || !psp->state->action_par)
     {
@@ -1789,7 +1789,7 @@ void A_WeaponDJNE(mobj_t *mo)
         return;
     }
 
-    jump = (act_jump_info_t *)psp->state->action_par;
+    jump = (JumpActionInfo *)psp->state->action_par;
 
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
@@ -1928,23 +1928,23 @@ void A_WeaponBecome(mobj_t *mo)
         return; /* NOT REACHED */
     }
 
-    wep_become_info_t *become = (wep_become_info_t *)psp->state->action_par;
+    WeaponBecomeActionInfo *become = (WeaponBecomeActionInfo *)psp->state->action_par;
 
-    if (!become->info)
+    if (!become->info_)
     {
-        become->info = weapondefs.Lookup(become->info_ref.c_str());
-        SYS_ASSERT(become->info); // lookup should be OK (fatal error if not found)
+        become->info_ = weapondefs.Lookup(become->info_ref_.c_str());
+        SYS_ASSERT(become->info_); // lookup should be OK (fatal error if not found)
     }
 
-    WeaponDefinition *newWep = weapondefs.Lookup(become->info_ref.c_str());
+    WeaponDefinition *newWep = weapondefs.Lookup(become->info_ref_.c_str());
 
     p->weapons[p->ready_wp].info = newWep; // here it BECOMES()
 
-    int state = DDF_StateFindLabel(newWep->state_grp_, become->start.label_.c_str(), true /* quiet */);
+    int state = DDF_StateFindLabel(newWep->state_grp_, become->start_.label_.c_str(), true /* quiet */);
     if (state == 0)
-        I_Error("BECOME action: frame '%s' in [%s] not found!\n", become->start.label_.c_str(), newWep->name_.c_str());
+        I_Error("BECOME action: frame '%s' in [%s] not found!\n", become->start_.label_.c_str(), newWep->name_.c_str());
 
-    state += become->start.offset_;
+    state += become->start_.offset_;
     P_SetPspriteDeferred(p, ps_weapon, state); // refresh the sprite
 
     P_FixWeaponClip(p, p->ready_wp); // handle the potential clip_size difference

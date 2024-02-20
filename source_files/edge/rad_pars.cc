@@ -284,7 +284,7 @@ static void RAD_CheckForTime(const char *info, void *storage)
         return;
     }
 
-    *dest = RoundToInt(val * (float)TICRATE);
+    *dest = RoundToInt(val * (float)kTicRate);
 }
 
 static ArmourType RAD_CheckForArmourType(const char *info)
@@ -1328,7 +1328,7 @@ static void RAD_ParseTip(param_set_t &pars)
 
     s_tip_t *tip = new s_tip_t;
 
-    tip->display_time = 3 * TICRATE;
+    tip->display_time = 3 * kTicRate;
     tip->playsound    = false;
     tip->gfx_scale    = 1.0f;
 

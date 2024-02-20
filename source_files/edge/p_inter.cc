@@ -35,6 +35,7 @@
 #include "p_local.h"
 #include "rad_trig.h"
 #include "s_sound.h"
+#include "str_util.h"
 
 #include "AlmostEquals.h"
 
@@ -552,8 +553,8 @@ static void GiveKey(pickup_info_t *pu, Benefit *be)
 static void GivePower(pickup_info_t *pu, Benefit *be)
 {
     // -ACB- 1998/06/20 - calculate duration in seconds
-    float duration = be->amount * TICRATE;
-    float limit    = be->limit * TICRATE;
+    float duration = be->amount * kTicRate;
+    float limit    = be->limit * kTicRate;
 
     if (pu->lose_em)
     {

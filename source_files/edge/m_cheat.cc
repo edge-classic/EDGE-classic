@@ -357,7 +357,7 @@ bool M_CheatResponder(event_t *ev)
         if (M_CheckCheat(&cheat_powerup[i], key))
         {
             if (!pl->powers[i])
-                pl->powers[i] = 60 * TICRATE;
+                pl->powers[i] = 60 * kTicRate;
             else
                 pl->powers[i] = 0;
 

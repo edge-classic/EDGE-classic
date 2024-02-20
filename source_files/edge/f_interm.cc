@@ -47,6 +47,7 @@
 #include "r_modes.h"
 #include "w_wad.h"
 #include "str_compare.h"
+#include "str_util.h"
 //
 // Data needed to add patches to full screen intermission pics.
 // Patches are statistics messages, and animations.
@@ -937,7 +938,7 @@ static void InitShowNextLoc(void)
             worldint.mappos[i].done = true;
     }
 
-    cnt = SHOWNEXTLOCDELAY * TICRATE;
+    cnt = SHOWNEXTLOCDELAY * kTicRate;
 }
 
 static void UpdateShowNextLoc(void)
@@ -1017,7 +1018,7 @@ static void InitDeathmatchStats(void)
     acceleratestage = false;
     dm_state        = 1;
 
-    cnt_pause = TICRATE;
+    cnt_pause = kTicRate;
 
     int rank[MAXPLAYERS];
     int score[MAXPLAYERS];
@@ -1114,7 +1115,7 @@ static void UpdateDeathmatchStats(void)
         if (!--cnt_pause)
         {
             dm_state++;
-            cnt_pause = TICRATE;
+            cnt_pause = kTicRate;
         }
         break;
     }
@@ -1188,7 +1189,7 @@ static void InitCoopStats(void)
     acceleratestage = false;
     ng_state        = 1;
 
-    cnt_pause = TICRATE;
+    cnt_pause = kTicRate;
 
     int rank[MAXPLAYERS];
     int score[MAXPLAYERS];
@@ -1382,7 +1383,7 @@ static void UpdateCoopStats(void)
         if (!--cnt_pause)
         {
             ng_state++;
-            cnt_pause = TICRATE;
+            cnt_pause = kTicRate;
         }
     }
 }
@@ -1469,7 +1470,7 @@ static void InitSinglePlayerStats(void)
     sp_state        = sp_paused;
     cnt_kills[0] = cnt_items[0] = cnt_secrets[0] = -1;
     cnt_time = cnt_par = -1;
-    cnt_pause          = TICRATE;
+    cnt_pause          = kTicRate;
 
     // WI_initAnimatedBack()
 }
@@ -1488,8 +1489,8 @@ static void UpdateSinglePlayerStats(void)
         cnt_kills[0]    = (con_plyr->killcount * 100) / wi_stats.kills;
         cnt_items[0]    = (con_plyr->itemcount * 100) / wi_stats.items;
         cnt_secrets[0]  = (con_plyr->secretcount * 100) / wi_stats.secret;
-        cnt_time        = con_plyr->leveltime / TICRATE;
-        cnt_par         = wi_stats.partime / TICRATE;
+        cnt_time        = con_plyr->leveltime / kTicRate;
+        cnt_par         = wi_stats.partime / kTicRate;
         S_StartFX(gd->done_);
         sp_state = sp_end;
     }
@@ -1544,16 +1545,16 @@ static void UpdateSinglePlayerStats(void)
 
         cnt_time += 3;
 
-        if (cnt_time >= con_plyr->leveltime / TICRATE)
-            cnt_time = con_plyr->leveltime / TICRATE;
+        if (cnt_time >= con_plyr->leveltime / kTicRate)
+            cnt_time = con_plyr->leveltime / kTicRate;
 
         cnt_par += 3;
 
-        if (cnt_par >= wi_stats.partime / TICRATE)
+        if (cnt_par >= wi_stats.partime / kTicRate)
         {
-            cnt_par = wi_stats.partime / TICRATE;
+            cnt_par = wi_stats.partime / kTicRate;
 
-            if (cnt_time >= con_plyr->leveltime / TICRATE)
+            if (cnt_time >= con_plyr->leveltime / kTicRate)
             {
                 S_StartFX(gd->done_);
                 sp_state++;
@@ -1578,7 +1579,7 @@ static void UpdateSinglePlayerStats(void)
         if (!--cnt_pause)
         {
             sp_state++;
-            cnt_pause = TICRATE;
+            cnt_pause = kTicRate;
         }
     }
 }

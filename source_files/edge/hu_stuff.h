@@ -42,8 +42,8 @@ extern int showMessages;
 #define HU_MSGWIDTH  64 // in characters
 #define HU_MSGHEIGHT 1  // in lines
 
-#define HU_MSGTIMEOUT    (4 * TICRATE)
-#define HU_IMPMSGTIMEOUT (2 * TICRATE) // how long the "found a secret" message is displayed
+#define HU_MSGTIMEOUT    (4 * kTicRate)
+#define HU_IMPMSGTIMEOUT (2 * kTicRate) // how long the "found a secret" message is displayed
 
 #define HU_IS_PRINTABLE(c) ((c) >= 32 && (c) <= 126)
 

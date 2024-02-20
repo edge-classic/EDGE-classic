@@ -33,6 +33,8 @@
 #include "w_texture.h"
 #include "w_wad.h"
 #include "str_compare.h"
+#include "str_util.h"
+
 extern std::string game_base;
 
 class texture_set_c

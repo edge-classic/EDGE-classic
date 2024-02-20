@@ -16,16 +16,16 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_MAIN_H__
-#define __DDF_MAIN_H__
-
-#include "collection.h"
-#include "epi.h"
-#include "file.h"
-#include "filesystem.h"
-#include "types.h"
+#pragma once
 
 #define DEBUG_DDF 0
+
+#include <string>
+#include <vector>
+
+#include "collection.h"
+#include "file.h"
+#include "types.h"
 
 // Forward declarations
 struct mobj_s;
@@ -53,67 +53,60 @@ class WeaponDefinition;
 #include "weapon.h"
 
 // State updates, number of tics / second.
-#define TICRATE 35
+constexpr uint8_t kTicRate = 35;
 
 // Misc playsim constants
-#define CEILSPEED  1.0f
-#define FLOORSPEED 1.0f
+constexpr float kCeilingSpeedDefault = 1.0f;
+constexpr float kFloorSpeedDefault   = 1.0f;
+constexpr float kGravityDefault      = 8.0f;
+constexpr float kFrictionDefault     = 0.9063f;
+constexpr float kViscosityDefault    = 0.0f;
+constexpr float kDragDefault         = 0.99f;
+constexpr float kRideFrictionDefault = 0.7f;
 
-#define GRAVITY       8.0f
-#define FRICTION      0.9063f
-#define VISCOSITY     0.0f
-#define DRAG          0.99f
-#define RIDE_FRICTION 0.7f
-
-// Info for the JUMP action
-typedef struct act_jump_info_s
+struct JumpActionInfo
 {
-    // chance value
-    float chance;
+    float chance = 1.0f;
+};
+
+class BecomeActionInfo
+{
+   public:
+    const MapObjectDefinition *info_;
+    std::string                info_ref_;
+
+    LabelOffset start_;
 
    public:
-    act_jump_info_s();
-    ~act_jump_info_s();
-} act_jump_info_t;
+    BecomeActionInfo();
+    ~BecomeActionInfo();
+};
 
-// Info for the BECOME action
-typedef struct act_become_info_s
+class MorphActionInfo
 {
-    const MapObjectDefinition *info;
-    std::string       info_ref;
+   public:
+    const MapObjectDefinition *info_;
+    std::string                info_ref_;
 
-    LabelOffset start;
+    LabelOffset start_;
 
    public:
-    act_become_info_s();
-    ~act_become_info_s();
-} act_become_info_t;
+    MorphActionInfo();
+    ~MorphActionInfo();
+};
 
-// Info for the MORPH action
-typedef struct act_morph_info_s
+class WeaponBecomeActionInfo
 {
-    const MapObjectDefinition *info;
-    std::string       info_ref;
+   public:
+    const WeaponDefinition *info_;
+    std::string             info_ref_;
 
-    LabelOffset start;
+    LabelOffset start_;
 
    public:
-    act_morph_info_s();
-    ~act_morph_info_s();
-} act_morph_info_t;
-
-// Info for the weapon BECOME action
-typedef struct wep_become_info_s
-{
-    const WeaponDefinition *info;
-    std::string        info_ref;
-
-    LabelOffset start;
-
-   public:
-    wep_become_info_s();
-    ~wep_become_info_s();
-} wep_become_info_t;
+    WeaponBecomeActionInfo();
+    ~WeaponBecomeActionInfo();
+};
 
 // ------------------------------------------------------------------
 // -------------------------EXTERNALISATIONS-------------------------
@@ -165,8 +158,6 @@ void DDF_ParseEverything();
 
 void DDF_DumpFile(const std::string &data);
 void DDF_DumpCollection(const std::vector<DDFFile> &col);
-
-#endif /* __DDF_MAIN_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

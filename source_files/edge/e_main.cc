@@ -941,7 +941,7 @@ void E_AdvanceTitle(void)
     // not found
 
     title_image     = nullptr;
-    title_countdown = TICRATE * (r_doubleframes.d ? 2 : 1);
+    title_countdown = kTicRate * (r_doubleframes.d ? 2 : 1);
 }
 
 void E_StartTitle(void)

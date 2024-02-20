@@ -33,6 +33,7 @@
 #include "language.h"
 
 #include "str_compare.h"
+#include "str_util.h"
 
 #include "con_main.h"
 #include "con_var.h"
@@ -100,8 +101,8 @@ static int  input_pos = 0;
 int           con_cursor;
 extern cvar_c r_doubleframes;
 
-#define KEYREPEATDELAY ((250 * TICRATE) / 1000)
-#define KEYREPEATRATE  (TICRATE / 15)
+#define KEYREPEATDELAY ((250 * kTicRate) / 1000)
+#define KEYREPEATRATE  (kTicRate / 15)
 
 // HISTORY
 

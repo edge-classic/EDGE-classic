@@ -3548,7 +3548,7 @@ void P_ActCheckBlood(mobj_t *mo)
         int val = P_Random();
 
         // exponential formula
-        mo->tics = ((val * val * val) >> 18) * TICRATE + TICRATE;
+        mo->tics = ((val * val * val) >> 18) * kTicRate + kTicRate;
     }
 }
 
@@ -3564,7 +3564,7 @@ void P_ActJump(mobj_t *mo)
         return;
     }
 
-    act_jump_info_t *jump = (act_jump_info_t *)mo->state->action_par;
+    JumpActionInfo *jump = (JumpActionInfo *)mo->state->action_par;
 
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
@@ -3592,7 +3592,7 @@ void P_ActJumpLiquid(mobj_t *mo)
         return;
     }
 
-    act_jump_info_t *jump = (act_jump_info_t *)mo->state->action_par;
+    JumpActionInfo *jump = (JumpActionInfo *)mo->state->action_par;
 
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
@@ -3619,7 +3619,7 @@ void P_ActJumpSky(mobj_t *mo)
         return;
     }
 
-    act_jump_info_t *jump = (act_jump_info_t *)mo->state->action_par;
+    JumpActionInfo *jump = (JumpActionInfo *)mo->state->action_par;
 
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
@@ -3649,7 +3649,7 @@ void P_ActJumpStuck(mobj_t * mo)
         return;
     }
 
-    act_jump_info_t *jump = (act_jump_info_t *) mo->state->action_par;
+    JumpActionInfo *jump = (JumpActionInfo *) mo->state->action_par;
 
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
@@ -3680,12 +3680,12 @@ void P_ActBecome(struct mobj_s *mo)
         return; /* NOT REACHED */
     }
 
-    act_become_info_t *become = (act_become_info_t *)mo->state->action_par;
+    BecomeActionInfo *become = (BecomeActionInfo *)mo->state->action_par;
 
-    if (!become->info)
+    if (!become->info_)
     {
-        become->info = mobjtypes.Lookup(become->info_ref.c_str());
-        SYS_ASSERT(become->info); // lookup should be OK (fatal error if not found)
+        become->info_ = mobjtypes.Lookup(become->info_ref_.c_str());
+        SYS_ASSERT(become->info_); // lookup should be OK (fatal error if not found)
     }
 
     // DO THE DEED !!
@@ -3693,7 +3693,7 @@ void P_ActBecome(struct mobj_s *mo)
 
     P_UnsetThingPosition(mo);
     {
-        mo->info = become->info;
+        mo->info = become->info_;
 
         mo->morphtimeout = mo->info->morphtimeout_;
 
@@ -3743,11 +3743,11 @@ void P_ActBecome(struct mobj_s *mo)
     }
     P_SetThingPosition(mo);
 
-    int state = P_MobjFindLabel(mo, become->start.label_.c_str());
+    int state = P_MobjFindLabel(mo, become->start_.label_.c_str());
     if (state == 0)
-        I_Error("BECOME action: frame '%s' in [%s] not found!\n", become->start.label_.c_str(), mo->info->name_.c_str());
+        I_Error("BECOME action: frame '%s' in [%s] not found!\n", become->start_.label_.c_str(), mo->info->name_.c_str());
 
-    state += become->start.offset_;
+    state += become->start_.offset_;
 
     P_SetMobjStateDeferred(mo, state, 0);
 }
@@ -3834,12 +3834,12 @@ void P_ActMorph(struct mobj_s *mo)
         return; /* NOT REACHED */
     }
 
-    act_morph_info_t *morph = (act_morph_info_t *)mo->state->action_par;
+    MorphActionInfo *morph = (MorphActionInfo *)mo->state->action_par;
 
-    if (!morph->info)
+    if (!morph->info_)
     {
-        morph->info = mobjtypes.Lookup(morph->info_ref.c_str());
-        SYS_ASSERT(morph->info); // lookup should be OK (fatal error if not found)
+        morph->info_ = mobjtypes.Lookup(morph->info_ref_.c_str());
+        SYS_ASSERT(morph->info_); // lookup should be OK (fatal error if not found)
     }
 
     // DO THE DEED !!
@@ -3847,7 +3847,7 @@ void P_ActMorph(struct mobj_s *mo)
 
     P_UnsetThingPosition(mo);
     {
-        mo->info   = morph->info;
+        mo->info   = morph->info_;
         mo->health = mo->info->spawnhealth_; // Set health to full again
 
         mo->morphtimeout = mo->info->morphtimeout_;
@@ -3897,11 +3897,11 @@ void P_ActMorph(struct mobj_s *mo)
     }
     P_SetThingPosition(mo);
 
-    int state = P_MobjFindLabel(mo, morph->start.label_.c_str());
+    int state = P_MobjFindLabel(mo, morph->start_.label_.c_str());
     if (state == 0)
-        I_Error("MORPH action: frame '%s' in [%s] not found!\n", morph->start.label_.c_str(), mo->info->name_.c_str());
+        I_Error("MORPH action: frame '%s' in [%s] not found!\n", morph->start_.label_.c_str(), mo->info->name_.c_str());
 
-    state += morph->start.offset_;
+    state += morph->start_.offset_;
 
     P_SetMobjStateDeferred(mo, state, 0);
 }

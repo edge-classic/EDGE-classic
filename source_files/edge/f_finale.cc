@@ -285,7 +285,7 @@ bool F_Responder(event_t *event)
     if (event->type != ev_keydown)
         return false;
 
-    if (finalecount > TICRATE)
+    if (finalecount > kTicRate)
     {
         if (finalestage == f_pic && finale->picwait_ == INT_MAX)
             return false;

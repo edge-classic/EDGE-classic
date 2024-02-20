@@ -40,6 +40,7 @@
 #include "m_math.h"
 #include "m_misc.h"
 #include "r_misc.h"
+#include "str_util.h"
 
 extern bool CON_Responder(event_t *ev);
 extern bool M_Responder(event_t *ev);

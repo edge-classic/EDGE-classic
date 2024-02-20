@@ -256,8 +256,8 @@ int N_TryRunTics()
         }
 
         // this limit is rather arbitrary
-        if (realtics > TICRATE / 3)
-            realtics = TICRATE / 3;
+        if (realtics > kTicRate / 3)
+            realtics = kTicRate / 3;
 
         return realtics;
     }

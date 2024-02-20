@@ -25,6 +25,7 @@
 
 #include "local.h"
 #include "str_compare.h"
+#include "str_util.h"
 
 static FontDefinition *dynamic_font;
 

@@ -405,7 +405,7 @@ void SV_PlayerCreateElems(int num_elems)
             p->psprites[j].sy = 0;
         }
 
-        for (int k = 0; k < WEAPON_KEYS; k++)
+        for (int k = 0; k < kTotalWeaponKeys; k++)
             p->key_choices[k] = WPSEL_None;
 
         for (int w = 0; w < MAXWEAPONS; w++)

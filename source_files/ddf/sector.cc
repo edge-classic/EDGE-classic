@@ -528,10 +528,10 @@ void SectorType::Default()
     secret_ = false;
     hub_    = false;
 
-    gravity_   = GRAVITY;
-    friction_  = FRICTION;
-    viscosity_ = VISCOSITY;
-    drag_      = DRAG;
+    gravity_   = kGravityDefault;
+    friction_  = kFrictionDefault;
+    viscosity_ = kViscosityDefault;
+    drag_      = kDragDefault;
 
     f_.Default(PlaneMoverDefinition::kPlaneMoverDefaultFloorSect);
     c_.Default(PlaneMoverDefinition::kPlaneMoverDefaultCeilingSect);

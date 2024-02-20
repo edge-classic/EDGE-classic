@@ -2031,7 +2031,7 @@ static bool ConditionTryPowerup(const char *name, const char *sub,
     {
         sscanf(sub, " %f ", &cond->amount);
 
-        cond->amount *= (float)TICRATE;
+        cond->amount *= (float)kTicRate;
     }
 
     cond->cond_type = kConditionCheckTypePowerup;
@@ -2342,12 +2342,12 @@ void MapObjectDefinition::Default()
 
     castorder_ = 0;
     cast_title_.clear();
-    respawntime_  = 30 * TICRATE;
+    respawntime_  = 30 * kTicRate;
     translucency_ = 1.0f;
     minatkchance_ = 0.0f;
     palremap_     = nullptr;
 
-    jump_delay_   = 1 * TICRATE;
+    jump_delay_   = 1 * kTicRate;
     jumpheight_   = 10;
     crouchheight_ = 28;
     viewheight_   = 0.75f;
@@ -2368,7 +2368,7 @@ void MapObjectDefinition::Default()
     bounce_up_     = 0.5f;
     sight_slope_   = 16.0f;
     sight_angle_   = kBAMAngle90;
-    ride_friction_ = RIDE_FRICTION;
+    ride_friction_ = kRideFrictionDefault;
     shadow_trans_  = 0.5f;
     glow_type_     = kSectorGlowTypeNone;
 
@@ -2397,8 +2397,8 @@ void MapObjectDefinition::Default()
 
     side_          = 0;
     playernum_     = 0;
-    lung_capacity_ = 20 * TICRATE;
-    gasp_start_    = 2 * TICRATE;
+    lung_capacity_ = 20 * kTicRate;
+    gasp_start_    = 2 * kTicRate;
 
     choke_damage_.Default(DamageClass::kDamageClassDefaultMobjChoke);
 

@@ -262,117 +262,117 @@ static const DDFActionCode weapon_actions[] = {
 
 const DDFSpecialFlags ammo_types[] = {{"NOAMMO", kAmmunitionTypeNoAmmo, 0},
 
-                                  {"BULLETS", kAmmunitionTypeBullet, 0},
-                                  {"SHELLS", kAmmunitionTypeShell, 0},
-                                  {"ROCKETS", kAmmunitionTypeRocket, 0},
-                                  {"CELLS", kAmmunitionTypeCell, 0},
-                                  {"PELLETS", kAmmunitionTypePellet, 0},
-                                  {"NAILS", kAmmunitionTypeNail, 0},
-                                  {"GRENADES", kAmmunitionTypeGrenade, 0},
-                                  {"GAS", kAmmunitionTypeGas, 0},
+                                      {"BULLETS", kAmmunitionTypeBullet, 0},
+                                      {"SHELLS", kAmmunitionTypeShell, 0},
+                                      {"ROCKETS", kAmmunitionTypeRocket, 0},
+                                      {"CELLS", kAmmunitionTypeCell, 0},
+                                      {"PELLETS", kAmmunitionTypePellet, 0},
+                                      {"NAILS", kAmmunitionTypeNail, 0},
+                                      {"GRENADES", kAmmunitionTypeGrenade, 0},
+                                      {"GAS", kAmmunitionTypeGas, 0},
 
-                                  {"AMMO1", kAmmunitionTypeBullet, 0},
-                                  {"AMMO2", kAmmunitionTypeShell, 0},
-                                  {"AMMO3", kAmmunitionTypeRocket, 0},
-                                  {"AMMO4", kAmmunitionTypeCell, 0},
-                                  {"AMMO5", kAmmunitionTypePellet, 0},
-                                  {"AMMO6", kAmmunitionTypeNail, 0},
-                                  {"AMMO7", kAmmunitionTypeGrenade, 0},
-                                  {"AMMO8", kAmmunitionTypeGas, 0},
+                                      {"AMMO1", kAmmunitionTypeBullet, 0},
+                                      {"AMMO2", kAmmunitionTypeShell, 0},
+                                      {"AMMO3", kAmmunitionTypeRocket, 0},
+                                      {"AMMO4", kAmmunitionTypeCell, 0},
+                                      {"AMMO5", kAmmunitionTypePellet, 0},
+                                      {"AMMO6", kAmmunitionTypeNail, 0},
+                                      {"AMMO7", kAmmunitionTypeGrenade, 0},
+                                      {"AMMO8", kAmmunitionTypeGas, 0},
 
-                                  {"AMMO9", kAmmunitionType9, 0},
-                                  {"AMMO10", kAmmunitionType10, 0},
-                                  {"AMMO11", kAmmunitionType11, 0},
-                                  {"AMMO12", kAmmunitionType12, 0},
-                                  {"AMMO13", kAmmunitionType13, 0},
-                                  {"AMMO14", kAmmunitionType14, 0},
-                                  {"AMMO15", kAmmunitionType15, 0},
-                                  {"AMMO16", kAmmunitionType16, 0},
-                                  {"AMMO17", kAmmunitionType17, 0},
-                                  {"AMMO18", kAmmunitionType18, 0},
-                                  {"AMMO19", kAmmunitionType19, 0},
-                                  {"AMMO20", kAmmunitionType20, 0},
-                                  {"AMMO21", kAmmunitionType21, 0},
-                                  {"AMMO22", kAmmunitionType22, 0},
-                                  {"AMMO23", kAmmunitionType23, 0},
-                                  {"AMMO24", kAmmunitionType24, 0},
-                                  {"AMMO25", kAmmunitionType25, 0},
-                                  {"AMMO26", kAmmunitionType26, 0},
-                                  {"AMMO27", kAmmunitionType27, 0},
-                                  {"AMMO28", kAmmunitionType28, 0},
-                                  {"AMMO29", kAmmunitionType29, 0},
-                                  {"AMMO30", kAmmunitionType30, 0},
-                                  {"AMMO31", kAmmunitionType31, 0},
-                                  {"AMMO32", kAmmunitionType32, 0},
-                                  {"AMMO33", kAmmunitionType33, 0},
-                                  {"AMMO34", kAmmunitionType34, 0},
-                                  {"AMMO35", kAmmunitionType35, 0},
-                                  {"AMMO36", kAmmunitionType36, 0},
-                                  {"AMMO37", kAmmunitionType37, 0},
-                                  {"AMMO38", kAmmunitionType38, 0},
-                                  {"AMMO39", kAmmunitionType39, 0},
-                                  {"AMMO40", kAmmunitionType40, 0},
-                                  {"AMMO41", kAmmunitionType41, 0},
-                                  {"AMMO42", kAmmunitionType42, 0},
-                                  {"AMMO43", kAmmunitionType43, 0},
-                                  {"AMMO44", kAmmunitionType44, 0},
-                                  {"AMMO45", kAmmunitionType45, 0},
-                                  {"AMMO46", kAmmunitionType46, 0},
-                                  {"AMMO47", kAmmunitionType47, 0},
-                                  {"AMMO48", kAmmunitionType48, 0},
-                                  {"AMMO49", kAmmunitionType49, 0},
-                                  {"AMMO50", kAmmunitionType50, 0},
-                                  {"AMMO51", kAmmunitionType51, 0},
-                                  {"AMMO52", kAmmunitionType52, 0},
-                                  {"AMMO53", kAmmunitionType53, 0},
-                                  {"AMMO54", kAmmunitionType54, 0},
-                                  {"AMMO55", kAmmunitionType55, 0},
-                                  {"AMMO56", kAmmunitionType56, 0},
-                                  {"AMMO57", kAmmunitionType57, 0},
-                                  {"AMMO58", kAmmunitionType58, 0},
-                                  {"AMMO59", kAmmunitionType59, 0},
-                                  {"AMMO60", kAmmunitionType60, 0},
-                                  {"AMMO61", kAmmunitionType61, 0},
-                                  {"AMMO62", kAmmunitionType62, 0},
-                                  {"AMMO63", kAmmunitionType63, 0},
-                                  {"AMMO64", kAmmunitionType64, 0},
-                                  {"AMMO65", kAmmunitionType65, 0},
-                                  {"AMMO66", kAmmunitionType66, 0},
-                                  {"AMMO67", kAmmunitionType67, 0},
-                                  {"AMMO68", kAmmunitionType68, 0},
-                                  {"AMMO69", kAmmunitionType69, 0},
-                                  {"AMMO70", kAmmunitionType70, 0},
-                                  {"AMMO71", kAmmunitionType71, 0},
-                                  {"AMMO72", kAmmunitionType72, 0},
-                                  {"AMMO73", kAmmunitionType73, 0},
-                                  {"AMMO74", kAmmunitionType74, 0},
-                                  {"AMMO75", kAmmunitionType75, 0},
-                                  {"AMMO76", kAmmunitionType76, 0},
-                                  {"AMMO77", kAmmunitionType77, 0},
-                                  {"AMMO78", kAmmunitionType78, 0},
-                                  {"AMMO79", kAmmunitionType79, 0},
-                                  {"AMMO80", kAmmunitionType80, 0},
-                                  {"AMMO81", kAmmunitionType81, 0},
-                                  {"AMMO82", kAmmunitionType82, 0},
-                                  {"AMMO83", kAmmunitionType83, 0},
-                                  {"AMMO84", kAmmunitionType84, 0},
-                                  {"AMMO85", kAmmunitionType85, 0},
-                                  {"AMMO86", kAmmunitionType86, 0},
-                                  {"AMMO87", kAmmunitionType87, 0},
-                                  {"AMMO88", kAmmunitionType88, 0},
-                                  {"AMMO89", kAmmunitionType89, 0},
-                                  {"AMMO90", kAmmunitionType90, 0},
-                                  {"AMMO91", kAmmunitionType91, 0},
-                                  {"AMMO92", kAmmunitionType92, 0},
-                                  {"AMMO93", kAmmunitionType93, 0},
-                                  {"AMMO94", kAmmunitionType94, 0},
-                                  {"AMMO95", kAmmunitionType95, 0},
-                                  {"AMMO96", kAmmunitionType96, 0},
-                                  {"AMMO97", kAmmunitionType97, 0},
-                                  {"AMMO98", kAmmunitionType98, 0},
-                                  {"AMMO99", kAmmunitionType99, 0},
+                                      {"AMMO9", kAmmunitionType9, 0},
+                                      {"AMMO10", kAmmunitionType10, 0},
+                                      {"AMMO11", kAmmunitionType11, 0},
+                                      {"AMMO12", kAmmunitionType12, 0},
+                                      {"AMMO13", kAmmunitionType13, 0},
+                                      {"AMMO14", kAmmunitionType14, 0},
+                                      {"AMMO15", kAmmunitionType15, 0},
+                                      {"AMMO16", kAmmunitionType16, 0},
+                                      {"AMMO17", kAmmunitionType17, 0},
+                                      {"AMMO18", kAmmunitionType18, 0},
+                                      {"AMMO19", kAmmunitionType19, 0},
+                                      {"AMMO20", kAmmunitionType20, 0},
+                                      {"AMMO21", kAmmunitionType21, 0},
+                                      {"AMMO22", kAmmunitionType22, 0},
+                                      {"AMMO23", kAmmunitionType23, 0},
+                                      {"AMMO24", kAmmunitionType24, 0},
+                                      {"AMMO25", kAmmunitionType25, 0},
+                                      {"AMMO26", kAmmunitionType26, 0},
+                                      {"AMMO27", kAmmunitionType27, 0},
+                                      {"AMMO28", kAmmunitionType28, 0},
+                                      {"AMMO29", kAmmunitionType29, 0},
+                                      {"AMMO30", kAmmunitionType30, 0},
+                                      {"AMMO31", kAmmunitionType31, 0},
+                                      {"AMMO32", kAmmunitionType32, 0},
+                                      {"AMMO33", kAmmunitionType33, 0},
+                                      {"AMMO34", kAmmunitionType34, 0},
+                                      {"AMMO35", kAmmunitionType35, 0},
+                                      {"AMMO36", kAmmunitionType36, 0},
+                                      {"AMMO37", kAmmunitionType37, 0},
+                                      {"AMMO38", kAmmunitionType38, 0},
+                                      {"AMMO39", kAmmunitionType39, 0},
+                                      {"AMMO40", kAmmunitionType40, 0},
+                                      {"AMMO41", kAmmunitionType41, 0},
+                                      {"AMMO42", kAmmunitionType42, 0},
+                                      {"AMMO43", kAmmunitionType43, 0},
+                                      {"AMMO44", kAmmunitionType44, 0},
+                                      {"AMMO45", kAmmunitionType45, 0},
+                                      {"AMMO46", kAmmunitionType46, 0},
+                                      {"AMMO47", kAmmunitionType47, 0},
+                                      {"AMMO48", kAmmunitionType48, 0},
+                                      {"AMMO49", kAmmunitionType49, 0},
+                                      {"AMMO50", kAmmunitionType50, 0},
+                                      {"AMMO51", kAmmunitionType51, 0},
+                                      {"AMMO52", kAmmunitionType52, 0},
+                                      {"AMMO53", kAmmunitionType53, 0},
+                                      {"AMMO54", kAmmunitionType54, 0},
+                                      {"AMMO55", kAmmunitionType55, 0},
+                                      {"AMMO56", kAmmunitionType56, 0},
+                                      {"AMMO57", kAmmunitionType57, 0},
+                                      {"AMMO58", kAmmunitionType58, 0},
+                                      {"AMMO59", kAmmunitionType59, 0},
+                                      {"AMMO60", kAmmunitionType60, 0},
+                                      {"AMMO61", kAmmunitionType61, 0},
+                                      {"AMMO62", kAmmunitionType62, 0},
+                                      {"AMMO63", kAmmunitionType63, 0},
+                                      {"AMMO64", kAmmunitionType64, 0},
+                                      {"AMMO65", kAmmunitionType65, 0},
+                                      {"AMMO66", kAmmunitionType66, 0},
+                                      {"AMMO67", kAmmunitionType67, 0},
+                                      {"AMMO68", kAmmunitionType68, 0},
+                                      {"AMMO69", kAmmunitionType69, 0},
+                                      {"AMMO70", kAmmunitionType70, 0},
+                                      {"AMMO71", kAmmunitionType71, 0},
+                                      {"AMMO72", kAmmunitionType72, 0},
+                                      {"AMMO73", kAmmunitionType73, 0},
+                                      {"AMMO74", kAmmunitionType74, 0},
+                                      {"AMMO75", kAmmunitionType75, 0},
+                                      {"AMMO76", kAmmunitionType76, 0},
+                                      {"AMMO77", kAmmunitionType77, 0},
+                                      {"AMMO78", kAmmunitionType78, 0},
+                                      {"AMMO79", kAmmunitionType79, 0},
+                                      {"AMMO80", kAmmunitionType80, 0},
+                                      {"AMMO81", kAmmunitionType81, 0},
+                                      {"AMMO82", kAmmunitionType82, 0},
+                                      {"AMMO83", kAmmunitionType83, 0},
+                                      {"AMMO84", kAmmunitionType84, 0},
+                                      {"AMMO85", kAmmunitionType85, 0},
+                                      {"AMMO86", kAmmunitionType86, 0},
+                                      {"AMMO87", kAmmunitionType87, 0},
+                                      {"AMMO88", kAmmunitionType88, 0},
+                                      {"AMMO89", kAmmunitionType89, 0},
+                                      {"AMMO90", kAmmunitionType90, 0},
+                                      {"AMMO91", kAmmunitionType91, 0},
+                                      {"AMMO92", kAmmunitionType92, 0},
+                                      {"AMMO93", kAmmunitionType93, 0},
+                                      {"AMMO94", kAmmunitionType94, 0},
+                                      {"AMMO95", kAmmunitionType95, 0},
+                                      {"AMMO96", kAmmunitionType96, 0},
+                                      {"AMMO97", kAmmunitionType97, 0},
+                                      {"AMMO98", kAmmunitionType98, 0},
+                                      {"AMMO99", kAmmunitionType99, 0},
 
-                                  {nullptr, 0, 0}};
+                                      {nullptr, 0, 0}};
 
 //
 //  DDF PARSE ROUTINES
@@ -403,7 +403,7 @@ static void WeaponStartEntry(const char *name, bool extend)
     else
     {
         // not found, create a new one
-        dynamic_weapon       = new WeaponDefinition;
+        dynamic_weapon        = new WeaponDefinition;
         dynamic_weapon->name_ = name;
 
         weapondefs.push_back(dynamic_weapon);
@@ -441,9 +441,9 @@ static void WeaponParseField(const char *field, const char *contents, int index,
                            (uint8_t *)dynamic_weapon))
         return;
 
-    if (DDF_MainParseState((uint8_t *)dynamic_weapon, dynamic_weapon->state_grp_,
-                           field, contents, index, is_last,
-                           true /* is_weapon */, weapon_starters,
+    if (DDF_MainParseState((uint8_t *)dynamic_weapon,
+                           dynamic_weapon->state_grp_, field, contents, index,
+                           is_last, true /* is_weapon */, weapon_starters,
                            weapon_actions))
         return;
 
@@ -560,12 +560,13 @@ static void WeaponFinishEntry(void)
     }
 
     if (dynamic_weapon->zoom_factor_ > 0.0)
-        dynamic_weapon->zoom_fov_ = RoundToInt(90 / dynamic_weapon->zoom_factor_);
+        dynamic_weapon->zoom_fov_ =
+            RoundToInt(90 / dynamic_weapon->zoom_factor_);
 
     dynamic_weapon->model_rotate_ *= kBAMAngle1;
 
     // Check MBF21 weapon flags that don't correlate to DDFWEAP flags
-    for (auto flag : flag_tests)
+    for (std::string &flag : flag_tests)
     {
         if (epi::StringCaseCompareASCII(flag, "NOTHRUST") == 0)
             dynamic_weapon->nothrust_ = true;
@@ -614,7 +615,7 @@ void DDF_ReadWeapons(const std::string &data)
 
 void DDF_WeaponInit(void)
 {
-    for (auto w : weapondefs)
+    for (WeaponDefinition *w : weapondefs)
     {
         delete w;
         w = nullptr;
@@ -913,7 +914,7 @@ void WeaponDefinition::Default(void)
 
     bobbing_     = 1.0f;
     swaying_     = 1.0f;
-    idle_wait_   = 15 * TICRATE;
+    idle_wait_   = 15 * kTicRate;
     idle_chance_ = 0.12f;
 
     model_skin_    = 1;
@@ -940,7 +941,9 @@ WeaponDefinitionContainer::WeaponDefinitionContainer() {}
 //
 WeaponDefinitionContainer::~WeaponDefinitionContainer()
 {
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<WeaponDefinition *>::iterator iter     = begin(),
+                                                   iter_end = end();
+         iter != iter_end; iter++)
     {
         WeaponDefinition *w = *iter;
         delete w;

@@ -16,10 +16,8 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_WEAPON_H__
-#define __DDF_WEAPON_H__
+#pragma once
 
-#include "epi.h"
 #include "states.h"
 #include "types.h"
 
@@ -27,7 +25,7 @@
 // -----------------------WEAPON HANDLING----------------------------
 // ------------------------------------------------------------------
 
-#define WEAPON_KEYS 10
+constexpr uint8_t kTotalWeaponKeys = 10;
 
 class WeaponDefinitionContainer : public std::vector<WeaponDefinition *>
 {
@@ -37,7 +35,7 @@ class WeaponDefinitionContainer : public std::vector<WeaponDefinition *>
 
    public:
     // Search Functions
-    int          FindFirst(const char *name, int startpos = -1);
+    int               FindFirst(const char *name, int startpos = -1);
     WeaponDefinition *Lookup(const char *refname);
 };
 
@@ -46,8 +44,6 @@ class WeaponDefinitionContainer : public std::vector<WeaponDefinition *>
 extern WeaponDefinitionContainer weapondefs;  // -ACB- 2004/07/14 Implemented
 
 void DDF_ReadWeapons(const std::string &data);
-
-#endif  // __DDF_WEAPON_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

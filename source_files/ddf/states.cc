@@ -23,6 +23,8 @@
 #include "local.h"
 #include "p_action.h"
 #include "str_compare.h"
+#include "str_util.h"
+
 static const State template_state = {
     0,   // sprite ref
     0,   // frame ref
@@ -695,13 +697,6 @@ void DDF_StateGetPercent(const char *arg, State *cur_state)
     cur_state->action_par = val_ptr;
 }
 
-act_jump_info_s::act_jump_info_s()
-    : chance(1.0f)  // -ACB- 2001/02/04 tis a precent_t
-{
-}
-
-act_jump_info_s::~act_jump_info_s() {}
-
 void DDF_StateGetJump(const char *arg, State *cur_state)
 {
     // JUMP(label)
@@ -712,7 +707,7 @@ void DDF_StateGetJump(const char *arg, State *cur_state)
 
     if (!arg || !arg[0]) return;
 
-    act_jump_info_t *jump = new act_jump_info_t;
+    JumpActionInfo *jump = new JumpActionInfo;
 
     int len;
     int offset = 0;
@@ -771,9 +766,9 @@ void DDF_StateGetFrame(const char *arg, State *cur_state)
     cur_state->jumpstate = ((StateGetRedirector(buffer) + 1) << 16) + offset;
 }
 
-act_morph_info_s::act_morph_info_s() : info(nullptr), info_ref(), start() {}
+MorphActionInfo::MorphActionInfo() : info_(nullptr), info_ref_(), start_() {}
 
-act_morph_info_s::~act_morph_info_s() {}
+MorphActionInfo::~MorphActionInfo() {}
 
 void DDF_StateGetMorph(const char *arg, State *cur_state)
 {
@@ -782,9 +777,9 @@ void DDF_StateGetMorph(const char *arg, State *cur_state)
 
     if (!arg || !arg[0]) return;
 
-    act_morph_info_t *morph = new act_morph_info_t;
+    MorphActionInfo *morph = new MorphActionInfo;
 
-    morph->start.label_ = "IDLE";
+    morph->start_.label_ = "IDLE";
 
     const char *s = strchr(arg, ',');
 
@@ -802,7 +797,7 @@ void DDF_StateGetMorph(const char *arg, State *cur_state)
 
     buffer[len] = 0;
 
-    morph->info_ref = buffer;
+    morph->info_ref_ = buffer;
 
     // get start label (if present)
     if (s)
@@ -820,17 +815,17 @@ void DDF_StateGetMorph(const char *arg, State *cur_state)
 
         buffer[len] = 0;
 
-        morph->start.label_ = buffer;
+        morph->start_.label_ = buffer;
 
-        if (*s == ':') morph->start.offset_ = HMM_MAX(0, atoi(s + 1) - 1);
+        if (*s == ':') morph->start_.offset_ = HMM_MAX(0, atoi(s + 1) - 1);
     }
 
     cur_state->action_par = morph;
 }
 
-act_become_info_s::act_become_info_s() : info(nullptr), info_ref(), start() {}
+BecomeActionInfo::BecomeActionInfo() : info_(nullptr), info_ref_(), start_() {}
 
-act_become_info_s::~act_become_info_s() {}
+BecomeActionInfo::~BecomeActionInfo() {}
 
 void DDF_StateGetBecome(const char *arg, State *cur_state)
 {
@@ -839,9 +834,9 @@ void DDF_StateGetBecome(const char *arg, State *cur_state)
 
     if (!arg || !arg[0]) return;
 
-    act_become_info_t *become = new act_become_info_t;
+    BecomeActionInfo *become = new BecomeActionInfo;
 
-    become->start.label_ = "IDLE";
+    become->start_.label_ = "IDLE";
 
     const char *s = strchr(arg, ',');
 
@@ -859,7 +854,7 @@ void DDF_StateGetBecome(const char *arg, State *cur_state)
 
     buffer[len] = 0;
 
-    become->info_ref = buffer;
+    become->info_ref_ = buffer;
 
     // get start label (if present)
     if (s)
@@ -877,17 +872,17 @@ void DDF_StateGetBecome(const char *arg, State *cur_state)
 
         buffer[len] = 0;
 
-        become->start.label_ = buffer;
+        become->start_.label_ = buffer;
 
-        if (*s == ':') become->start.offset_ = HMM_MAX(0, atoi(s + 1) - 1);
+        if (*s == ':') become->start_.offset_ = HMM_MAX(0, atoi(s + 1) - 1);
     }
 
     cur_state->action_par = become;
 }
 
-wep_become_info_s::wep_become_info_s() : info(nullptr), info_ref(), start() {}
+WeaponBecomeActionInfo::WeaponBecomeActionInfo() : info_(nullptr), info_ref_(), start_() {}
 
-wep_become_info_s::~wep_become_info_s() {}
+WeaponBecomeActionInfo::~WeaponBecomeActionInfo() {}
 
 void DDF_StateGetBecomeWeapon(const char *arg, State *cur_state)
 {
@@ -896,9 +891,9 @@ void DDF_StateGetBecomeWeapon(const char *arg, State *cur_state)
 
     if (!arg || !arg[0]) return;
 
-    wep_become_info_t *become = new wep_become_info_t;
+    WeaponBecomeActionInfo *become = new WeaponBecomeActionInfo;
 
-    become->start.label_ = "READY";
+    become->start_.label_ = "READY";
 
     const char *s = strchr(arg, ',');
 
@@ -916,7 +911,7 @@ void DDF_StateGetBecomeWeapon(const char *arg, State *cur_state)
 
     buffer[len] = 0;
 
-    become->info_ref = buffer;
+    become->info_ref_ = buffer;
 
     // get start label (if present)
     if (s)
@@ -934,9 +929,9 @@ void DDF_StateGetBecomeWeapon(const char *arg, State *cur_state)
 
         buffer[len] = 0;
 
-        become->start.label_ = buffer;
+        become->start_.label_ = buffer;
 
-        if (*s == ':') become->start.offset_ = HMM_MAX(0, atoi(s + 1) - 1);
+        if (*s == ':') become->start_.offset_ = HMM_MAX(0, atoi(s + 1) - 1);
     }
 
     cur_state->action_par = become;

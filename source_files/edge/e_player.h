@@ -48,7 +48,7 @@
 
 #define MAX_PLAYNAME 32
 
-#define EFFECT_MAX_TIME (5 * TICRATE)
+#define EFFECT_MAX_TIME (5 * kTicRate)
 
 // The maximum number of players, multiplayer/networking.
 #define MAXPLAYERS 16

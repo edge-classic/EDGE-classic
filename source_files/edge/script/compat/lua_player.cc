@@ -381,7 +381,7 @@ static int PL_power_left(lua_State *L)
     float value = ui_player_who->powers[power];
 
     if (value > 0)
-        value /= TICRATE;
+        value /= kTicRate;
 
     lua_pushnumber(L, value);
     return 1;

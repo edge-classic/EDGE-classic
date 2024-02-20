@@ -23,6 +23,7 @@
 
 #include <string.h>
 
+#include "filesystem.h"
 #include "local.h"
 
 static ImageDefinition *dynamic_image;

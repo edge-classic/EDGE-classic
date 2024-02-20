@@ -22,6 +22,7 @@
 #include "sfx.h"
 
 #include "local.h"
+#include "str_util.h"
 
 static SoundEffectDefinition *dynamic_sfx;
 

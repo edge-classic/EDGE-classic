@@ -51,7 +51,7 @@
 #define MISSILERANGE      (2000.0f)
 #define SHORTMISSILERANGE (896.0f) // For kMBF21FlagShortMissileRange
 
-#define RESPAWN_DELAY (TICRATE / 2)
+#define RESPAWN_DELAY (kTicRate / 2)
 
 // Weapon sprite speeds
 #define LOWERSPEED (6.0f)
@@ -97,7 +97,7 @@ void P_BringCorpseToLife(mobj_t *corpse);
 //
 // P_WEAPON
 //
-#define GRIN_TIME (TICRATE * 2)
+#define GRIN_TIME (kTicRate * 2)
 
 void P_SetupPsprites(player_t *curplayer);
 void P_MovePsprites(player_t *curplayer);

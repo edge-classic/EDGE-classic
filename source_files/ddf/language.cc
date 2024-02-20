@@ -40,6 +40,7 @@
 #include <unordered_map>
 
 #include "local.h"
+#include "str_util.h"
 
 // Globals
 language_c language;  // -ACB- 2004/07/28 Languages instance

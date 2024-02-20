@@ -125,13 +125,13 @@ void P_HubFastForward(void)
     fast_forward_active = true;
 
     // close doors
-    for (int i = 0; i < TICRATE * 8; i++)
+    for (int i = 0; i < kTicRate * 8; i++)
     {
         P_RunActivePlanes();
         P_RunActiveSliders();
     }
 
-    for (int k = 0; k < TICRATE / 3; k++)
+    for (int k = 0; k < kTicRate / 3; k++)
         P_Ticker(false);
 
     fast_forward_active = false;

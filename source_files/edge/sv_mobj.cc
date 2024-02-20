@@ -33,6 +33,7 @@
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "str_compare.h"
+#include "str_util.h"
 #undef SF
 #define SF SVFIELD
 

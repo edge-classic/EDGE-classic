@@ -481,10 +481,10 @@ static void LoadSectors(int lump)
 
         ss->props.colourmap = nullptr;
 
-        ss->props.gravity   = GRAVITY;
-        ss->props.friction  = FRICTION;
-        ss->props.viscosity = VISCOSITY;
-        ss->props.drag      = DRAG;
+        ss->props.gravity   = kGravityDefault;
+        ss->props.friction  = kFrictionDefault;
+        ss->props.viscosity = kViscosityDefault;
+        ss->props.drag      = kDragDefault;
 
         if (ss->props.special && ss->props.special->fog_color_ != kRGBANoValue)
         {
@@ -1768,10 +1768,10 @@ static void LoadUDMFSectors()
 
             ss->props.colourmap = nullptr;
 
-            ss->props.gravity   = GRAVITY * gravfactor;
-            ss->props.friction  = FRICTION;
-            ss->props.viscosity = VISCOSITY;
-            ss->props.drag      = DRAG;
+            ss->props.gravity   = kGravityDefault * gravfactor;
+            ss->props.friction  = kFrictionDefault;
+            ss->props.viscosity = kViscosityDefault;
+            ss->props.drag      = kDragDefault;
 
             // Allow UDMF sector light/fog information to override DDFSECT types
             if (fog_color != SG_BLACK_RGBA32) // All black is the established UDMF "no fog" color

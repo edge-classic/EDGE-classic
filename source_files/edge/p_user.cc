@@ -397,7 +397,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
         else
             sfx_cat = SNCAT_Opponent;
 
-        if (player->powers[kPowerTypeJetpack] <= (5 * TICRATE))
+        if (player->powers[kPowerTypeJetpack] <= (5 * kTicRate))
         {
             if ((leveltime & 10) == 0)
                 S_StartFX(sfx_jpflow, sfx_cat, player->mo); // fuel low
@@ -591,7 +591,7 @@ static void P_UpdatePowerups(player_t *player)
     int   pw;
 
     if (player->playerstate == PST_DEAD)
-        limit = 1; // TICRATE * 5;
+        limit = 1; // kTicRate * 5;
 
     for (pw = 0; pw < kTotalPowerTypes; pw++)
     {
@@ -1028,7 +1028,7 @@ void P_UpdateAvailWeapons(player_t *p)
 
     int key;
 
-    for (key = 0; key < WEAPON_KEYS; key++)
+    for (key = 0; key < kTotalWeaponKeys; key++)
         p->avail_weapons[key] = false;
 
     for (int i = 0; i < MAXWEAPONS; i++)
@@ -1231,7 +1231,7 @@ void P_GiveInitialBenefits(player_t *p, const MapObjectDefinition *info)
 
     int i;
 
-    for (i = 0; i < WEAPON_KEYS; i++)
+    for (i = 0; i < kTotalWeaponKeys; i++)
         p->key_choices[i] = WPSEL_None;
 
     // clear out ammo & ammo-limits

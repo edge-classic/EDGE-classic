@@ -378,7 +378,7 @@ static void PL_power_left(coal::vm_c *vm, int argc)
     float value = ui_player_who->powers[power];
 
     if (value > 0)
-        value /= TICRATE;
+        value /= kTicRate;
 
     vm->ReturnFloat(value);
 }

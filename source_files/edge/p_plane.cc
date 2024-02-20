@@ -1234,7 +1234,7 @@ static bool MoveSlider(slider_move_t *smov)
             else
             {
                 // try again soon
-                smov->waited = TICRATE / 3;
+                smov->waited = kTicRate / 3;
             }
         }
         break;

@@ -973,7 +973,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
 
                 if (mo->z < ground_h - 20.5f && mo->z > ground_h - mo->height * 1.4)
                 {
-                    P_PlayerJump(mo->player, mo->info->jumpheight_, 2 * TICRATE);
+                    P_PlayerJump(mo->player, mo->info->jumpheight_, 2 * kTicRate);
                 }
             }
 
@@ -1094,7 +1094,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
     // -KM- 1998/11/25 Gravity is now not precalculated so that
     //  menu changes affect instantly.
     float gravity =
-        props->gravity / 8.0f * (float)level_flags.menu_grav / GRAVITY * g_gravity.f; // New global gravity menu item
+        props->gravity / 8.0f * (float)level_flags.menu_grav / kGravityDefault * g_gravity.f; // New global gravity menu item
 
     // check for smooth step up
     if (mo->player && mo->player->mo == mo && mo->z < mo->floorz)
@@ -1527,7 +1527,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
         mobj->movecount++;
 
         //
-        // Uses movecount as a timer, when movecount hits 12*TICRATE the
+        // Uses movecount as a timer, when movecount hits 12*kTicRate the
         // object will try to respawn. So after 12 seconds the object will
         // try to respawn.
         //
@@ -1808,8 +1808,8 @@ void P_RemoveMobj(mobj_t *mo)
     //       for deaths sounds to play out).  such "zombie" objects may be
     //       legally stored and restored from savegames.
 
-    mo->fuse = TICRATE * 5;
-    // mo->morphtimeout = TICRATE * 5; //maybe we need this?
+    mo->fuse = kTicRate * 5;
+    // mo->morphtimeout = kTicRate * 5; //maybe we need this?
 }
 
 void P_RemoveAllMobjs(bool loading)

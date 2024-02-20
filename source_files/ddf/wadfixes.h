@@ -16,59 +16,57 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_WADFIXES_H__
-#define __DDF_WADFIXES_H__
+#pragma once
 
-#include "epi.h"
 #include "types.h"
 
-class fixdef_c
+class WadFixDefinition
 {
    public:
-    fixdef_c();
-    ~fixdef_c(){};
+    WadFixDefinition();
+    ~WadFixDefinition(){};
 
    public:
     void Default(void);
-    void CopyDetail(fixdef_c &src);
+    void CopyDetail(WadFixDefinition &src);
 
     // Member vars....
-    std::string name;
+    std::string name_;
 
-    std::string md5_string;  // Fixes are likely to be for finalized WADs that
-                             // won't be updated anymore, but other qualifiers
-                             // like unique lumps might be added if necessary
+    std::string md5_string_;  // Fixes are likely to be for finalized WADs that
+                              // won't be updated anymore, but other qualifiers
+                              // like unique lumps might be added if necessary
 
    private:
     // disable copy construct and assignment operator
-    explicit fixdef_c(fixdef_c &rhs) {}
-    fixdef_c &operator=(fixdef_c &rhs) { return *this; }
+    explicit WadFixDefinition(WadFixDefinition &rhs) {}
+    WadFixDefinition &operator=(WadFixDefinition &rhs) { return *this; }
 };
 
 // Our fixdefs container
-class fixdef_container_c : public std::vector<fixdef_c *>
+class WadFixDefinitionContainer : public std::vector<WadFixDefinition *>
 {
    public:
-    fixdef_container_c() {}
-    ~fixdef_container_c()
+    WadFixDefinitionContainer() {}
+    ~WadFixDefinitionContainer()
     {
-        for (auto iter = begin(); iter != end(); iter++)
+        for (std::vector<WadFixDefinition *>::iterator iter     = begin(),
+                                                       iter_end = end();
+             iter != iter_end; iter++)
         {
-            fixdef_c *f = *iter;
+            WadFixDefinition *f = *iter;
             delete f;
             f = nullptr;
         }
     }
 
    public:
-    fixdef_c *Find(const char *name);
+    WadFixDefinition *Find(const char *name);
 };
 
-extern fixdef_container_c fixdefs;  // -DASHO- 2022 Implemented
+extern WadFixDefinitionContainer fixdefs;  // -DASHO- 2022 Implemented
 
 void DDF_ReadFixes(const std::string &data);
-
-#endif /*__DDF_WADFIXES_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

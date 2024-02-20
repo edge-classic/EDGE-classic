@@ -87,10 +87,10 @@ static void WindCurrentForce(force_t *f, mobj_t *mo)
 
 static bool PIT_PushThing(mobj_t *mo, void *dataptr)
 {
-    if (!(mo->hyperflags & HF_PUSHABLE))
+    if (!(mo->hyperflags & kHyperFlagPushable))
         return true;
 
-    if (mo->flags & MF_NOCLIP)
+    if (mo->flags & kMapObjectFlagNoClip)
         return true;
 
     float dx = mo->x - tm_force->point.X;
@@ -147,7 +147,7 @@ static void DoForce(force_t *f)
             touch_node_t *nd;
 
             for (nd = sec->touch_things; nd; nd = nd->sec_next)
-                if (nd->mo->hyperflags & HF_PUSHABLE)
+                if (nd->mo->hyperflags & kHyperFlagPushable)
                     WindCurrentForce(f, nd->mo);
         }
     }
@@ -181,7 +181,7 @@ void P_AddPointForce(sector_t *sec, float length)
     // search for the point objects
     for (subsector_t *sub = sec->subsectors; sub; sub = sub->sec_next)
         for (mobj_t *mo = sub->thinglist; mo; mo = mo->snext)
-            if (mo->hyperflags & HF_POINT_FORCE)
+            if (mo->hyperflags & kHyperFlagPointForce)
             {
                 force_t *f = P_NewForce();
 
@@ -190,7 +190,7 @@ void P_AddPointForce(sector_t *sec, float length)
                 f->point.Y   = mo->y;
                 f->point.Z   = mo->z + 28.0f;
                 f->radius    = length * 2.0f;
-                f->magnitude = length * mo->info->speed / PUSH_FACTOR / 24.0f;
+                f->magnitude = length * mo->info->speed_ / PUSH_FACTOR / 24.0f;
                 f->sector    = sec;
             }
 }

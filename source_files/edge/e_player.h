@@ -203,12 +203,12 @@ typedef struct player_s
     float health;
 
     // Armour points for each type
-    float             armours[NUMARMOUR];
-    const MapObjectDefinition *armour_types[NUMARMOUR];
+    float             armours[kTotalArmourTypes];
+    const MapObjectDefinition *armour_types[kTotalArmourTypes];
     float             totalarmour; // needed for status bar
 
     // Power ups. invinc and invis are tic counters.
-    float powers[NUMPOWERS];
+    float powers[kTotalPowerTypes];
 
     // bitflag of powerups to be kept (esp. BERSERK)
     int keep_powers;
@@ -234,10 +234,10 @@ typedef struct player_s
     playerammo_t ammo[kTotalAmmunitionTypes];
 
     // inventory stock, one for each invtype_e
-    playerinv_t inventory[NUMINV];
+    playerinv_t inventory[kTotalInventoryTypes];
 
     // counters, one for each countertype_e
-    playercounter_t counters[NUMCOUNTER];
+    playercounter_t counters[kTotalCounterTypes];
 
     // True if button down last tic.
     bool attackdown[4];
@@ -365,7 +365,7 @@ void G_PlayerFinishLevel(player_t *p, bool keep_cards);
 void G_MarkPlayerAvatars(void);
 void G_RemoveOldAvatars(void);
 
-bool G_CheckConditions(mobj_t *mo, condition_check_t *cond);
+bool G_CheckConditions(mobj_t *mo, ConditionCheck *cond);
 
 void G_ClearPlayerStarts(void);
 

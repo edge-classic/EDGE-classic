@@ -1006,7 +1006,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
 
     model_coord_data_t data;
 
-    data.is_fuzzy = (mo->flags & MF_FUZZY) ? true : false;
+    data.is_fuzzy = (mo->flags & kMapObjectFlagFuzzy) ? true : false;
 
     float trans = mo->visibility;
 
@@ -1025,7 +1025,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
     if (trans < 0.99f || skin_img->opacity == OPAC_Complex)
         blending |= BL_Alpha;
 
-    if (mo->hyperflags & HF_NOZBUFFER)
+    if (mo->hyperflags & kHyperFlagNoZBufferUpdate)
         blending |= BL_NoZBuf;
 
     if (MIR_Reflective())
@@ -1051,7 +1051,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
     data.z_scale  = scale * MIR_ZScale();
     data.bias     = bias;
 
-    bool tilt = is_weapon || (mo->flags & MF_MISSILE) || (mo->hyperflags & HF_TILT);
+    bool tilt = is_weapon || (mo->flags & kMapObjectFlagMissile) || (mo->hyperflags & kHyperFlagForceModelTilt);
 
     M_Angle2Matrix(tilt ? ~mo->vertangle : 0, &data.kx_mat, &data.kz_mat);
 
@@ -1093,7 +1093,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
     }
     else /* (! data.is_fuzzy) */
     {
-        skin_tex = W_ImageCache(skin_img, false, ren_fx_colmap ? ren_fx_colmap : is_weapon ? nullptr : mo->info->palremap);
+        skin_tex = W_ImageCache(skin_img, false, ren_fx_colmap ? ren_fx_colmap : is_weapon ? nullptr : mo->info->palremap_);
 
         data.im_right = IM_RIGHT(skin_img);
         data.im_top   = IM_TOP(skin_img);
@@ -1340,13 +1340,13 @@ void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame, flo
     if (frame < 0 || frame >= md->num_frames)
         return;
 
-    GLuint skin_tex = W_ImageCache(skin_img, false, info->palremap);
+    GLuint skin_tex = W_ImageCache(skin_img, false, info->palremap_);
 
     float im_right = IM_RIGHT(skin_img);
     float im_top   = IM_TOP(skin_img);
 
-    xscale = yscale * info->model_scale * info->model_aspect;
-    yscale = yscale * info->model_scale;
+    xscale = yscale * info->model_scale_ * info->model_aspect_;
+    yscale = yscale * info->model_scale_;
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, skin_tex);
@@ -1354,7 +1354,7 @@ void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame, flo
     glEnable(GL_BLEND);
     glEnable(GL_CULL_FACE);
 
-    if (info->flags & MF_FUZZY)
+    if (info->flags_ & kMapObjectFlagFuzzy)
         glColor4f(0, 0, 0, 0.5f);
     else
         glColor4f(1, 1, 1, 1.0f);
@@ -1387,7 +1387,7 @@ void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame, flo
 
             float dx = vert->x * xscale;
             float dy = vert->y * xscale;
-            float dz = (vert->z + info->model_bias) * yscale;
+            float dz = (vert->z + info->model_bias_) * yscale;
 
             glVertex3f(x + dy, y + dz, dx / 256.0f);
         }

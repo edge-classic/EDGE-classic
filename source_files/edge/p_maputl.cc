@@ -390,7 +390,7 @@ static int GAP_Construct(vgap_t *gaps, sector_t *sec, mobj_t *thing, float f_slo
 
     // -- handle WATER WALKERS --
 
-    if (!thing || !(thing->extendedflags & EF_WATERWALKER))
+    if (!thing || !(thing->extendedflags & kExtendedFlagWaterWalker))
         return num;
 
     for (ef = sec->bottom_liq; ef; ef = ef->higher)
@@ -1022,10 +1022,10 @@ static bool PST_CheckThingArea(mobj_t *mo)
     }
 
     // ignore corpses and pickup items
-    if (!(mo->flags & MF_SOLID) && (mo->flags & MF_CORPSE))
+    if (!(mo->flags & kMapObjectFlagSolid) && (mo->flags & kMapObjectFlagCorpse))
         return true;
 
-    if (mo->flags & MF_SPECIAL)
+    if (mo->flags & kMapObjectFlagSpecial)
         return true;
 
     // we've found a thing in that area: we can stop now
@@ -1049,10 +1049,10 @@ static bool PST_CheckThingLine(mobj_t *mo)
         return true;
 
     // ignore corpses and pickup items
-    if (!(mo->flags & MF_SOLID) && (mo->flags & MF_CORPSE))
+    if (!(mo->flags & kMapObjectFlagSolid) && (mo->flags & kMapObjectFlagCorpse))
         return true;
 
-    if (mo->flags & MF_SPECIAL)
+    if (mo->flags & kMapObjectFlagSpecial)
         return true;
 
     return false;

@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------------
-//  EDGE Data Definition File Code (Main)
+//  EDGE Data Definition File Code (Map Objects)
 //----------------------------------------------------------------------------
 //
 //  Copyright (c) 1999-2024 The EDGE Team.
@@ -16,692 +16,574 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __DDF_MOBJ_H__
-#define __DDF_MOBJ_H__
+#pragma once
 
 #include "colormap.h"
 #include "math_bitset.h"
 #include "states.h"
 #include "types.h"
 
-// special 'number' value which signifies that the MapObjectDefinition
-// forms part of an ATTACKS.DDF entry.
-#define ATTACK__MOBJ -7777
-
-#define DLIT_COMPAT_RAD(x) (10.0f * sqrt(x))
-#define DLIT_COMPAT_ITY    0.8f
+inline float DynamicLightCompatibilityRadius(float x)
+{
+    return 10.0f * HMM_SQRTF(x);
+}
 
 //
 // Misc. mobj flags
 //
-typedef enum
+enum MapObjectFlag
 {
     // Call P_TouchSpecialThing when touched.
-    MF_SPECIAL = (1 << 0),
-
+    kMapObjectFlagSpecial = (1 << 0),
     // Blocks.
-    MF_SOLID = (1 << 1),
-
+    kMapObjectFlagSolid = (1 << 1),
     // Can be hit.
-    MF_SHOOTABLE = (1 << 2),
-
+    kMapObjectFlagShootable = (1 << 2),
     // Don't use the sector links (invisible but touchable).
-    MF_NOSECTOR = (1 << 3),
-
+    kMapObjectFlagNoSector = (1 << 3),
     // Don't use the blocklinks (inert but displayable)
-    MF_NOBLOCKMAP = (1 << 4),
-
+    kMapObjectFlagNoBlockmap = (1 << 4),
     // Not to be activated by sound, deaf monster.
-    MF_AMBUSH = (1 << 5),
-
+    kMapObjectFlagAmbush = (1 << 5),
     // Will try to attack right back.
-    MF_JUSTHIT = (1 << 6),
-
+    kMapObjectFlagJustHit = (1 << 6),
     // Will take at least one step before attacking.
-    MF_JUSTATTACKED = (1 << 7),
-
+    kMapObjectFlagJustAttacked = (1 << 7),
     // On level spawning (initial position),
     // hang from ceiling instead of stand on floor.
-    MF_SPAWNCEILING = (1 << 8),
-
+    kMapObjectFlagSpawnCeiling = (1 << 8),
     // Don't apply gravity (every tic), that is, object will float,
     // keeping current height or changing it actively.
-    MF_NOGRAVITY = (1 << 9),
-
+    kMapObjectFlagNoGravity = (1 << 9),
     // Movement flags. This allows jumps from high places.
-    MF_DROPOFF = (1 << 10),
-
+    kMapObjectFlagDropOff = (1 << 10),
     // For players, will pick up items.
-    MF_PICKUP = (1 << 11),
-
+    kMapObjectFlagPickup = (1 << 11),
     // Object is not checked when moving, no clipping is used.
-    MF_NOCLIP = (1 << 12),
-
+    kMapObjectFlagNoClip = (1 << 12),
     // Player: keep info about sliding along walls.
-    MF_SLIDE = (1 << 13),
-
+    kMapObjectFlagSlide = (1 << 13),
     // Allow moves to any height, no gravity.
     // For active floaters, e.g. cacodemons, pain elementals.
-    MF_FLOAT = (1 << 14),
-
+    kMapObjectFlagFloat = (1 << 14),
     // Instantly cross lines, whatever the height differences may be
     // (e.g. go from the bottom of a cliff to the top).
     // Note: nothing to do with teleporters.
-    MF_TELEPORT = (1 << 15),
-
+    kMapObjectFlagTeleport = (1 << 15),
     // Don't hit same species, explode on block.
     // Player missiles as well as fireballs of various kinds.
-    MF_MISSILE = (1 << 16),
-
+    kMapObjectFlagMissile = (1 << 16),
     // Dropped by a demon, not level spawned.
     // E.g. ammo clips dropped by dying former humans.
-    MF_DROPPED = (1 << 17),
-
+    kMapObjectFlagDropped = (1 << 17),
     // Use fuzzy draw (shadow demons or spectres),
     // temporary player invisibility powerup.
-    MF_FUZZY = (1 << 18),
-
+    kMapObjectFlagFuzzy = (1 << 18),
     // Flag: don't bleed when shot (use puff),
     // barrels and shootable furniture shall not bleed.
-    MF_NOBLOOD = (1 << 19),
-
+    kMapObjectFlagNoBlood = (1 << 19),
     // Don't stop moving halfway off a step,
     // that is, have dead bodies slide down all the way.
-    MF_CORPSE = (1 << 20),
-
+    kMapObjectFlagCorpse = (1 << 20),
     // Floating to a height for a move, ???
     // don't auto float to target's height.
-    MF_INFLOAT = (1 << 21),
-
+    kMapObjectFlagInFloat = (1 << 21),
     // On kill, count this enemy object
     // towards intermission kill total.
     // Happy gathering.
-    MF_COUNTKILL = (1 << 22),
-
+    kMapObjectFlagCountKill = (1 << 22),
     // On picking up, count this item object
     // towards intermission item total.
-    MF_COUNTITEM = (1 << 23),
-
+    kMapObjectFlagCountItem = (1 << 23),
     // Special handling: skull in flight.
     // Neither a cacodemon nor a missile.
-    MF_SKULLFLY = (1 << 24),
-
+    kMapObjectFlagSkullFly = (1 << 24),
     // Don't spawn this object
     // in death match mode (e.g. key cards).
-    MF_NOTDMATCH = (1 << 25),
-
+    kMapObjectFlagNotDeathmatch = (1 << 25),
     // Monster grows (in)visible at certain times.
-    MF_STEALTH = (1 << 26),
-
+    kMapObjectFlagStealth = (1 << 26),
     // For projectiles: keep momentum of projectile source
-    MF_PRESERVEMOMENTUM = (1 << 27),
-
+    kMapObjectFlagPreserveMomentum = (1 << 27),
     // Object reacts to being touched (often violently :->)
-    MF_TOUCHY = (1 << 28),
-} mobjflag_t;
+    kMapObjectFlagTouchy = (1 << 28),
+};
 
-typedef enum
+enum ExtendedFlag
 {
     // -AJA- 2004/07/22: ignore certain types of damage
     // (previously was the EF_BOSSMAN flag).
-    EF_EXPLODEIMMUNE = (1 << 0),
-
+    kExtendedFlagExplodeImmune = (1 << 0),
     // Used when varying visibility levels
-    EF_LESSVIS = (1 << 1),
-
+    kExtendedFlagLessVisible = (1 << 1),
     // This thing does not respawn
-    EF_NORESPAWN = (1 << 2),
-
-    // double the chance of object using range attack
-    EF_NOGRAVKILL = (1 << 3),
-
+    kExtendedFlagNoRespawn = (1 << 2),
+    // On death, gravity either affects it if it wasn't affected before,
+    // or now doesn't affect it if it was (best guess from looking at
+    // the code - Dasho)
+    kExtendedFlagNoGravityOnKill = (1 << 3),
     // This thing is not loyal to its own type, fights its own
-    EF_DISLOYALTYPE = (1 << 4),
-
+    kExtendedFlagDisloyalToOwnType = (1 << 4),
     // This thing can be hurt by another thing with same attack
-    EF_OWNATTACKHURTS = (1 << 5),
-
+    kExtendedFlagOwnAttackHurts = (1 << 5),
     // Used for tracing (homing) projectiles, its the first time
     // this projectile has been checked for tracing if set.
-    EF_FIRSTCHECK = (1 << 6),
-
-    // NO LONGER USED (1 << 7),  // was: NOTRACE
-
+    kExtendedFlagFirstTracerCheck = (1 << 6),
+    // Simplified checks when picking up armour
+    // i.e., does not take into account other armour classes
+    kExtendedFlagSimpleArmour = (1 << 7),
     // double the chance of object using range attack
-    EF_TRIGGERHAPPY = (1 << 8),
-
+    kExtendedFlagTriggerHappy = (1 << 8),
     // not targeted by other monsters for damaging them
-    EF_NEVERTARGET = (1 << 9),
-
+    kExtendedFlagNeverTarget = (1 << 9),
     // Normally most monsters will follow a target which caused them
     // damage for a length of time, even if another object inflicted
     // pain upon them; with this enabled, they will not hold the grudge
     // and switch targets to the other object that has caused them the
     // more recent pain.
-    EF_NOGRUDGE = (1 << 10),
-
+    kExtendedFlagNoGrudge = (1 << 10),
     // NO LONGER USED (1 << 11),  // was: DUMMYMOBJ
-
     // Archvile cannot resurrect this monster
-    EF_NORESURRECT = (1 << 12),
-
+    kExtendedFlagCannotResurrect = (1 << 12),
     // Object bounces
-    EF_BOUNCE = (1 << 13),
-
+    kExtendedFlagBounce = (1 << 13),
     // Thing walks along the edge near large dropoffs.
-    EF_EDGEWALKER = (1 << 14),
-
+    kExtendedFlagEdgeWalker = (1 << 14),
     // Monster falls with gravity when walks over cliff.
-    EF_GRAVFALL = (1 << 15),
-
+    kExtendedFlagGravityFall = (1 << 15),
     // Thing can be climbed on-top-of or over.
-    EF_CLIMBABLE = (1 << 16),
-
+    kExtendedFlagClimbable = (1 << 16),
     // Thing won't penetrate WATER extra floors.
-    EF_WATERWALKER = (1 << 17),
-
+    kExtendedFlagWaterWalker = (1 << 17),
     // Thing is a monster.
-    EF_MONSTER = (1 << 18),
-
+    kExtendedFlagMonster = (1 << 18),
     // Thing can cross blocking lines.
-    EF_CROSSLINES = (1 << 19),
-
+    kExtendedFlagCrossBlockingLines = (1 << 19),
     // Thing is never affected by friction
-    EF_NOFRICTION = (1 << 20),
-
+    kExtendedFlagNoFriction = (1 << 20),
     // Thing is optional, won't exist when -noextra is used.
-    EF_EXTRA = (1 << 21),
-
+    kExtendedFlagExtra = (1 << 21),
     // Just bounced, won't enter bounce states until BOUNCE_REARM.
-    EF_JUSTBOUNCED = (1 << 22),
-
+    kExtendedFlagJustBounced = (1 << 22),
     // Thing can be "used" (like linedefs) with the spacebar.  Thing
     // will then enter its TOUCH_STATES (when they exist).
-    EF_USABLE = (1 << 23),
-
+    kExtendedFlagUsable = (1 << 23),
     // Thing will block bullets and missiles.  -AJA- 2000/09/29
-    EF_BLOCKSHOTS = (1 << 24),
-
+    kExtendedFlagBlockShots = (1 << 24),
     // Player is currently crouching.  -AJA- 2000/10/19
-    EF_CROUCHING = (1 << 25),
-
+    kExtendedFlagCrouching = (1 << 25),
     // Missile can tunnel through enemies.  -AJA- 2000/10/23
-    EF_TUNNEL = (1 << 26),
-
+    kExtendedFlagTunnel = (1 << 26),
     // NO LONGER USED (1 << 27),  // was: DLIGHT
-
     // Thing has been gibbed.
-    EF_GIBBED = (1 << 28),
-
+    kExtendedFlagGibbed = (1 << 28),
     // -AJA- 2004/07/22: play the monster sounds at full volume
     // (separated out from the BOSSMAN flag).
-    EF_ALWAYSLOUD = (1 << 29),
-} mobjextendedflag_t;
+    kExtendedFlagAlwaysLoud = (1 << 29),
+};
 
-#define EF_SIMPLEARMOUR EF_TRIGGERHAPPY
-
-typedef enum
+enum HyperFlag
 {
     // -AJA- 2004/08/25: always pick up this item
-    HF_FORCEPICKUP = (1 << 0),
-
+    kHyperFlagForcePickup = (1 << 0),
     // -AJA- 2004/09/02: immune from friendly fire
-    HF_SIDEIMMUNE = (1 << 1),
-
+    kHyperFlagFriendlyFireImmune = (1 << 1),
     // -AJA- 2005/05/15: friendly fire passes through you
-    HF_SIDEGHOST = (1 << 2),
-
+    kHyperFlagFriendlyFirePassesThrough = (1 << 2),
     // -AJA- 2004/09/02: don't retaliate if hurt by friendly fire
-    HF_ULTRALOYAL = (1 << 3),
-
+    kHyperFlagUltraLoyal = (1 << 3),
     // -AJA- 2005/05/14: don't update the Z buffer (particles).
-    HF_NOZBUFFER = (1 << 4),
-
+    kHyperFlagNoZBufferUpdate = (1 << 4),
     // -AJA- 2005/05/15: the sprite hovers up and down
-    HF_HOVER = (1 << 5),
-
+    kHyperFlagHover = (1 << 5),
     // -AJA- 2006/08/17: object can be pushed (wind/current/point)
-    HF_PUSHABLE = (1 << 6),
-
+    kHyperFlagPushable = (1 << 6),
     // -AJA- 2006/08/17: used by MT_PUSH and MT_PULL objects
-    HF_POINT_FORCE = (1 << 7),
-
+    kHyperFlagPointForce = (1 << 7),
     // -AJA- 2006/10/19: scenery items don't block missiles
-    HF_PASSMISSILE = (1 << 8),
-
+    kHyperFlagMissilesPassThrough = (1 << 8),
     // -AJA- 2007/11/03: invulnerable flag
-    HF_INVULNERABLE = (1 << 9),
-
+    kHyperFlagInvulnerable = (1 << 9),
     // -AJA- 2007/11/06: gain health when causing damage
-    HF_VAMPIRE = (1 << 10),
-
+    kHyperFlagVampire = (1 << 10),
     // -AJA- 2008/01/11: compatibility for quadratic dlights
-    HF_QUADRATIC_COMPAT = (1 << 11),
-
+    kHyperFlagQuadraticDynamicLight = (1 << 11),
     // -AJA- 2009/10/15: HUB system: remember old avatars
-    HF_OLD_AVATAR = (1 << 12),
-
+    kHyperFlagRememberOldAvatars = (1 << 12),
     // -AJA- 2009/10/22: never autoaim at this monster/thing
-    HF_NO_AUTOAIM = (1 << 13),
-
+    kHyperFlagNoAutoaim = (1 << 13),
     // -AJA- 2010/06/13: used for RTS command of same name
-    HF_WAIT_UNTIL_DEAD = (1 << 14),
-
+    kHyperFlagWaitUntilDead = (1 << 14),
     // -AJA- 2010/12/23: force models to tilt by viewangle
-    HF_TILT = (1 << 15),
-
+    kHyperFlagForceModelTilt = (1 << 15),
     // -Lobo- 2021/10/24: immortal flag
-    HF_IMMORTAL = (1 << 16),
-
+    kHyperFlagImmortal = (1 << 16),
     // -Lobo- 2021/11/18: floorclip flag
-    HF_FLOORCLIP = (1 << 17),
-
+    kHyperFlagFloorClip = (1 << 17),
     // -Lobo- 2022/05/30: this thing cannot trigger lines
-    HF_NOTRIGGERLINES = (1 << 18),
-
+    kHyperFlagNoTriggerLines = (1 << 18),
     // -Lobo- 2022/07/07: this thing can be shoved/pushed
-    HF_SHOVEABLE = (1 << 19),
-
+    kHyperFlagShoveable = (1 << 19),
     // -Lobo- 2022/07/07: this thing doesn't cause splashes
-    HF_NOSPLASH = (1 << 20),
-
+    kHyperFlagNoSplash = (1 << 20),
     // -AJA- 2022/10/04: used by DEH_EDGE to workaround issues
-    HF_DEHACKED_COMPAT = (1 << 21),
-
+    kHyperFlagDehackedCompatibility = (1 << 21),
     // -Lobo- 2023/10/19: this thing will not be affected by thrust forces
-    HF_IMMOVABLE = (1 << 22),
-
+    kHyperFlagImmovable = (1 << 22),
     // Dasho 2023/12/05: this thing is a MUSINFO Music Changer thing
     // This flag is present because we cannot assume a thing is a
     // music changer just because it has an ID of 14100-14164
-    HF_MUSIC_CHANGER = (1 << 23),
-
-} mobjhyperflag_t;
+    kHyperFlagMusicChanger = (1 << 23),
+};
 
 // MBF21 flags not already covered by extended/hyper flags
-typedef enum
+enum MBF21Flag
 {
     // Gravity affects this thing as if it were 1/8 of the normal value
-    MBF21_LOGRAV = (1 << 0),
+    kMBF21FlagLowGravity        = (1 << 0),
+    kMBF21FlagShortMissileRange = (1 << 1),
+    kMBF21FlagForceRadiusDamage = (1 << 4),
+    kMBF21FlagLongMeleeRange    = (1 << 8),
+};
 
-    MBF21_SHORTMRANGE = (1 << 1),
-
-    MBF21_FORCERADIUSDMG = (1 << 4),
-
-    MBF21_LONGMELEE = (1 << 8),
-} mobjmbf21flag_t;
-
-#define NUM_FX_SLOT 30
+constexpr uint8_t kTotalEffectsSlots = 30;
 
 // ------------------------------------------------------------------
 // ------------------------BENEFIT TYPES-----------------------------
 // ------------------------------------------------------------------
 
-// Inventory types defined.
-typedef enum
+enum InventoryType
 {
-    INV_01,
-    INV_02,
-    INV_03,
-    INV_04,
-    INV_05,
-    INV_06,
-    INV_07,
-    INV_08,
-    INV_09,
-    INV_10,
-    INV_11,
-    INV_12,
-    INV_13,
-    INV_14,
-    INV_15,
-    INV_16,
-    INV_17,
-    INV_18,
-    INV_19,
-    INV_20,
-    INV_21,
-    INV_22,
-    INV_23,
-    INV_24,
-    INV_25,
-    INV_26,
-    INV_27,
-    INV_28,
-    INV_29,
-    INV_30,
-    INV_31,
-    INV_32,
-    INV_33,
-    INV_34,
-    INV_35,
-    INV_36,
-    INV_37,
-    INV_38,
-    INV_39,
-    INV_40,
-    INV_41,
-    INV_42,
-    INV_43,
-    INV_44,
-    INV_45,
-    INV_46,
-    INV_47,
-    INV_48,
-    INV_49,
-    INV_50,
-    INV_51,
-    INV_52,
-    INV_53,
-    INV_54,
-    INV_55,
-    INV_56,
-    INV_57,
-    INV_58,
-    INV_59,
-    INV_60,
-    INV_61,
-    INV_62,
-    INV_63,
-    INV_64,
-    INV_65,
-    INV_66,
-    INV_67,
-    INV_68,
-    INV_69,
-    INV_70,
-    INV_71,
-    INV_72,
-    INV_73,
-    INV_74,
-    INV_75,
-    INV_76,
-    INV_77,
-    INV_78,
-    INV_79,
-    INV_80,
-    INV_81,
-    INV_82,
-    INV_83,
-    INV_84,
-    INV_85,
-    INV_86,
-    INV_87,
-    INV_88,
-    INV_89,
-    INV_90,
-    INV_91,
-    INV_92,
-    INV_93,
-    INV_94,
-    INV_95,
-    INV_96,
-    INV_97,
-    INV_98,
-    INV_99,
-    NUMINV  // Total count (99)
-} invtype_e;
+    kInventoryType01,
+    kInventoryType02,
+    kInventoryType03,
+    kInventoryType04,
+    kInventoryType05,
+    kInventoryType06,
+    kInventoryType07,
+    kInventoryType08,
+    kInventoryType09,
+    kInventoryType10,
+    kInventoryType11,
+    kInventoryType12,
+    kInventoryType13,
+    kInventoryType14,
+    kInventoryType15,
+    kInventoryType16,
+    kInventoryType17,
+    kInventoryType18,
+    kInventoryType19,
+    kInventoryType20,
+    kInventoryType21,
+    kInventoryType22,
+    kInventoryType23,
+    kInventoryType24,
+    kInventoryType25,
+    kInventoryType26,
+    kInventoryType27,
+    kInventoryType28,
+    kInventoryType29,
+    kInventoryType30,
+    kInventoryType31,
+    kInventoryType32,
+    kInventoryType33,
+    kInventoryType34,
+    kInventoryType35,
+    kInventoryType36,
+    kInventoryType37,
+    kInventoryType38,
+    kInventoryType39,
+    kInventoryType40,
+    kInventoryType41,
+    kInventoryType42,
+    kInventoryType43,
+    kInventoryType44,
+    kInventoryType45,
+    kInventoryType46,
+    kInventoryType47,
+    kInventoryType48,
+    kInventoryType49,
+    kInventoryType50,
+    kInventoryType51,
+    kInventoryType52,
+    kInventoryType53,
+    kInventoryType54,
+    kInventoryType55,
+    kInventoryType56,
+    kInventoryType57,
+    kInventoryType58,
+    kInventoryType59,
+    kInventoryType60,
+    kInventoryType61,
+    kInventoryType62,
+    kInventoryType63,
+    kInventoryType64,
+    kInventoryType65,
+    kInventoryType66,
+    kInventoryType67,
+    kInventoryType68,
+    kInventoryType69,
+    kInventoryType70,
+    kInventoryType71,
+    kInventoryType72,
+    kInventoryType73,
+    kInventoryType74,
+    kInventoryType75,
+    kInventoryType76,
+    kInventoryType77,
+    kInventoryType78,
+    kInventoryType79,
+    kInventoryType80,
+    kInventoryType81,
+    kInventoryType82,
+    kInventoryType83,
+    kInventoryType84,
+    kInventoryType85,
+    kInventoryType86,
+    kInventoryType87,
+    kInventoryType88,
+    kInventoryType89,
+    kInventoryType90,
+    kInventoryType91,
+    kInventoryType92,
+    kInventoryType93,
+    kInventoryType94,
+    kInventoryType95,
+    kInventoryType96,
+    kInventoryType97,
+    kInventoryType98,
+    kInventoryType99,
+    kTotalInventoryTypes  // Total count (99)
+};
 
-// Counter types defined.
-typedef enum
+enum CounterType
 {
-    CT_Lives = 0,   // Arbitrarily named Lives counter
-    CT_Score,       // Arbitrarily named Score counter
-    CT_Money,       // Arbitrarily named Money
-    CT_Experience,  // Arbitrarily named EXP counter
+    kCounterTypeLives = 0,   // Arbitrarily named Lives counter
+    kCounterTypeScore,       // Arbitrarily named Score counter
+    kCounterTypeMoney,       // Arbitrarily named Money
+    kCounterTypeExperience,  // Arbitrarily named EXP counter
+    kCounterType05,
+    kCounterType06,
+    kCounterType07,
+    kCounterType08,
+    kCounterType09,
+    kCounterType10,
+    kCounterType11,
+    kCounterType12,
+    kCounterType13,
+    kCounterType14,
+    kCounterType15,
+    kCounterType16,
+    kCounterType17,
+    kCounterType18,
+    kCounterType19,
+    kCounterType20,
+    kCounterType21,
+    kCounterType22,
+    kCounterType23,
+    kCounterType24,
+    kCounterType25,
+    kCounterType26,
+    kCounterType27,
+    kCounterType28,
+    kCounterType29,
+    kCounterType30,
+    kCounterType31,
+    kCounterType32,
+    kCounterType33,
+    kCounterType34,
+    kCounterType35,
+    kCounterType36,
+    kCounterType37,
+    kCounterType38,
+    kCounterType39,
+    kCounterType40,
+    kCounterType41,
+    kCounterType42,
+    kCounterType43,
+    kCounterType44,
+    kCounterType45,
+    kCounterType46,
+    kCounterType47,
+    kCounterType48,
+    kCounterType49,
+    kCounterType50,
+    kCounterType51,
+    kCounterType52,
+    kCounterType53,
+    kCounterType54,
+    kCounterType55,
+    kCounterType56,
+    kCounterType57,
+    kCounterType58,
+    kCounterType59,
+    kCounterType60,
+    kCounterType61,
+    kCounterType62,
+    kCounterType63,
+    kCounterType64,
+    kCounterType65,
+    kCounterType66,
+    kCounterType67,
+    kCounterType68,
+    kCounterType69,
+    kCounterType70,
+    kCounterType71,
+    kCounterType72,
+    kCounterType73,
+    kCounterType74,
+    kCounterType75,
+    kCounterType76,
+    kCounterType77,
+    kCounterType78,
+    kCounterType79,
+    kCounterType80,
+    kCounterType81,
+    kCounterType82,
+    kCounterType83,
+    kCounterType84,
+    kCounterType85,
+    kCounterType86,
+    kCounterType87,
+    kCounterType88,
+    kCounterType89,
+    kCounterType90,
+    kCounterType91,
+    kCounterType92,
+    kCounterType93,
+    kCounterType94,
+    kCounterType95,
+    kCounterType96,
+    kCounterType97,
+    kCounterType98,
+    kCounterType99,
+    kTotalCounterTypes  // Total count (99)
+};
 
-    COUNT_05,
-    COUNT_06,
-    COUNT_07,
-    COUNT_08,
-    COUNT_09,
-    COUNT_10,
-    COUNT_11,
-    COUNT_12,
-    COUNT_13,
-    COUNT_14,
-    COUNT_15,
-    COUNT_16,
-    COUNT_17,
-    COUNT_18,
-    COUNT_19,
-    COUNT_20,
-    COUNT_21,
-    COUNT_22,
-    COUNT_23,
-    COUNT_24,
-    COUNT_25,
-    COUNT_26,
-    COUNT_27,
-    COUNT_28,
-    COUNT_29,
-    COUNT_30,
-    COUNT_31,
-    COUNT_32,
-    COUNT_33,
-    COUNT_34,
-    COUNT_35,
-    COUNT_36,
-    COUNT_37,
-    COUNT_38,
-    COUNT_39,
-    COUNT_40,
-    COUNT_41,
-    COUNT_42,
-    COUNT_43,
-    COUNT_44,
-    COUNT_45,
-    COUNT_46,
-    COUNT_47,
-    COUNT_48,
-    COUNT_49,
-    COUNT_50,
-    COUNT_51,
-    COUNT_52,
-    COUNT_53,
-    COUNT_54,
-    COUNT_55,
-    COUNT_56,
-    COUNT_57,
-    COUNT_58,
-    COUNT_59,
-    COUNT_60,
-    COUNT_61,
-    COUNT_62,
-    COUNT_63,
-    COUNT_64,
-    COUNT_65,
-    COUNT_66,
-    COUNT_67,
-    COUNT_68,
-    COUNT_69,
-    COUNT_70,
-    COUNT_71,
-    COUNT_72,
-    COUNT_73,
-    COUNT_74,
-    COUNT_75,
-    COUNT_76,
-    COUNT_77,
-    COUNT_78,
-    COUNT_79,
-    COUNT_80,
-    COUNT_81,
-    COUNT_82,
-    COUNT_83,
-    COUNT_84,
-    COUNT_85,
-    COUNT_86,
-    COUNT_87,
-    COUNT_88,
-    COUNT_89,
-    COUNT_90,
-    COUNT_91,
-    COUNT_92,
-    COUNT_93,
-    COUNT_94,
-    COUNT_95,
-    COUNT_96,
-    COUNT_97,
-    COUNT_98,
-    COUNT_99,
-    NUMCOUNTER  // Total count (99)
-} countertype_e;
-
-typedef enum
+enum ArmourType
 {
     // weak armour, saves 33% of damage
-    ARMOUR_Green = 0,
-
+    kArmourTypeGreen = 0,
     // better armour, saves 50% of damage
-    ARMOUR_Blue,
-
+    kArmourTypeBlue,
     // -AJA- 2007/08/22: another one, saves 66% of damage  (not in Doom)
-    ARMOUR_Purple,
-
+    kArmourTypePurple,
     // good armour, saves 75% of damage  (not in Doom)
-    ARMOUR_Yellow,
-
+    kArmourTypeYellow,
     // the best armour, saves 90% of damage  (not in Doom)
-    ARMOUR_Red,
-
-    NUMARMOUR
-} armour_type_e;
-
-#define ARMOUR_Total (NUMARMOUR + 0)  // -AJA- used for conditions
-
-typedef short armour_set_t;  // one bit per armour
+    kArmourTypeRed,
+    kTotalArmourTypes
+};
 
 // Power up artifacts.
 //
 // -MH- 1998/06/17  Jet Pack Added
 // -ACB- 1998/07/15 NightVision Added
 
-typedef enum
+enum PowerType
 {
-    PW_Invulnerable = 0,
-    PW_Berserk,
-    PW_PartInvis,
-    PW_AcidSuit,
-    PW_AllMap,
-    PW_Infrared,
-
+    kPowerTypeInvulnerable = 0,
+    kPowerTypeBerserk,
+    kPowerTypePartInvis,
+    kPowerTypeAcidSuit,
+    kPowerTypeAllMap,
+    kPowerTypeInfrared,
     // extra powerups (not in Doom)
-    PW_Jetpack,  // -MH- 1998/06/18  jetpack "fuel" counter
-    PW_NightVision,
-    PW_Scuba,
+    kPowerTypeJetpack,  // -MH- 1998/06/18  jetpack "fuel" counter
+    kPowerTypeNightVision,
+    kPowerTypeScuba,
+    kPowerTypeTimeStop,
+    kPowerTypeUnused10,
+    kPowerTypeUnused11,
+    kPowerTypeUnused12,
+    kPowerTypeUnused13,
+    kPowerTypeUnused14,
+    kPowerTypeUnused15,
+    // -AJA- Note: Savegame code relies on kTotalPowerTypes == 16.
+    kTotalPowerTypes
+};
 
-    PW_TimeStop,
-    PW_Unused10,
-    PW_Unused11,
-
-    PW_Unused12,
-    PW_Unused13,
-    PW_Unused14,
-    PW_Unused15,
-
-    // -AJA- Note: Savegame code relies on NUMPOWERS == 16.
-    NUMPOWERS
-} power_type_e;
-
-typedef enum
+enum PickupEffectType
 {
-    PUFX_None = 0,
-    PUFX_PowerupEffect,
-    PUFX_ScreenEffect,
-    PUFX_SwitchWeapon,
-    PUFX_KeepPowerup
-} pickup_effect_type_e;
+    kPickupEffectTypeNone = 0,
+    kPickupEffectTypePowerupEffect,
+    kPickupEffectTypeScreenEffect,
+    kPickupEffectTypeSwitchWeapon,
+    kPickupEffectTypeKeepPowerup
+};
 
-class pickup_effect_c
+class PickupEffect
 {
    public:
-    pickup_effect_c(pickup_effect_type_e _type, int _sub, int _slot,
-                    float _time);
-    pickup_effect_c(pickup_effect_type_e _type, WeaponDefinition *_weap, int _slot,
-                    float _time);
-    ~pickup_effect_c() {}
+    PickupEffect(PickupEffectType type, int sub, int slot, float time);
+    PickupEffect(PickupEffectType type, WeaponDefinition *weap, int slot,
+                 float time);
+    ~PickupEffect() {}
 
     // next in linked list
-    pickup_effect_c *next;
+    PickupEffect *next_;
 
     // type and optional sub-type
-    pickup_effect_type_e type;
+    PickupEffectType type_;
 
     union
     {
-        int          type;
+        int               type;
         WeaponDefinition *weap;
-    } sub;
+    } sub_;
 
     // which slot to use
-    int slot;
+    int slot_;
 
     // how long for the effect to last (in seconds).
-    float time;
+    float time_;
 };
 
 // -ACB- 2003/05/15: Made enum external to structure, caused different issues
 // with gcc and VC.NET compile
-typedef enum
+enum ConditionCheckType
 {
     // dummy condition, used if parsing failed
-    COND_NONE = 0,
-
+    kConditionCheckTypeNone = 0,
     // object must have health
-    COND_Health,
-
+    kConditionCheckTypeHealth,
     // player must have armour (subtype is ARMOUR_* value)
-    COND_Armour,
-
+    kConditionCheckTypeArmour,
     // player must have a key (subtype is KF_* value).
-    COND_Key,
-
+    kConditionCheckTypeKey,
     // player must have a weapon (subtype is slot number).
-    COND_Weapon,
-
-    // player must have a powerup (subtype is PW_* value).
-    COND_Powerup,
-
+    kConditionCheckTypeWeapon,
+    // player must have a powerup (subtype is kPowerType* value).
+    kConditionCheckTypePowerup,
     // player must have ammo (subtype is AM_* value)
-    COND_Ammo,
-
+    kConditionCheckTypeAmmo,
     // player must have inventory (subtype is INVENTORY* value)
-    COND_Inventory,
-
+    kConditionCheckTypeInventory,
     // player must have inventory (subtype is COUNTER* value)
-    COND_Counter,
-
+    kConditionCheckTypeCounter,
     // player must be jumping
-    COND_Jumping,
-
+    kConditionCheckTypeJumping,
     // player must be crouching
-    COND_Crouching,
-
+    kConditionCheckTypeCrouching,
     // object must be swimming (i.e. in water)
-    COND_Swimming,
-
+    kConditionCheckTypeSwimming,
     // player must be attacking (holding fire down)
-    COND_Attacking,
-
+    kConditionCheckTypeAttacking,
     // player must be rampaging (holding fire a long time)
-    COND_Rampaging,
-
+    kConditionCheckTypeRampaging,
     // player must be using (holding space down)
-    COND_Using,
-
+    kConditionCheckTypeUsing,
     // player must be pressing an Action key
-    COND_Action1,
-    COND_Action2,
-
+    kConditionCheckTypeAction1,
+    kConditionCheckTypeAction2,
     // player must be walking
-    COND_Walking
-} condition_check_type_e;
+    kConditionCheckTypeWalking
+};
 
-typedef struct condition_check_s
+struct ConditionCheck
 {
     // next in linked list (order is unimportant)
-    struct condition_check_s *next = nullptr;
+    struct ConditionCheck *next = nullptr;
 
     // negate the condition
     bool negate = false;
@@ -710,22 +592,20 @@ typedef struct condition_check_s
     // than")
     bool exact = false;
 
-    // condition typing. -ACB- 2003/05/15: Made an integer to hold
-    // condition_check_type_e enumeration
-    int cond_type = 0;
+    ConditionCheckType cond_type = kConditionCheckTypeNone;
 
     // sub-type (specific type of ammo, weapon, key, powerup, inventory).  Not
     // used for health, jumping, crouching, etc.
     union
     {
-        int          type;
+        int               type;
         WeaponDefinition *weap;
     } sub;
 
     // required amount of health, armour, ammo, inventory or "counter",   Not
     // used for weapon, key, powerup, jumping, crouching, etc.
     float amount = 0;
-} condition_check_t;
+};
 
 // ------------------------------------------------------------------
 // --------------------MOVING OBJECT INFORMATION---------------------
@@ -740,82 +620,77 @@ typedef struct condition_check_s
 // (PAIN, DEATH, OVERKILL).  Defaults to nullptr.
 //
 
-typedef enum
+enum SectorGlowType
 {
-    GLOW_None    = 0,
-    GLOW_Floor   = 1,
-    GLOW_Ceiling = 2,
-    GLOW_Wall    = 3
-} glow_sector_type_e;
-
-typedef enum
-{
-    SPYA_BottomUp = 0,
-    SPYA_Middle   = 1,
-    SPYA_TopDown  = 2,
-} sprite_y_alignment_e;
-
-// dynamic light info
-
-typedef enum
-{
-    // dynamic lighting disabled
-    DLITE_None,
-
-    // light texture is modulated with wall texture
-    DLITE_Modulate,
-
-    // light texture is simply added to wall
-    DLITE_Add,
-
-    // backwards compatibility cruft
-    DLITE_Compat_LIN,
-    DLITE_Compat_QUAD,
-} dlight_type_e;
-
-class dlight_info_c
-{
-   public:
-    dlight_info_c();
-    dlight_info_c(dlight_info_c &rhs);
-    ~dlight_info_c(){};
-
-   private:
-    void Copy(dlight_info_c &src);
-
-   public:
-    void           Default(void);
-    dlight_info_c &operator=(dlight_info_c &rhs);
-
-    dlight_type_e type;
-    std::string   shape;  // IMAGES.DDF reference
-    float         radius;
-    RGBAColor     colour;
-    float     height;
-    bool          leaky;
-
-    void *cache_data;
+    kSectorGlowTypeNone    = 0,
+    kSectorGlowTypeFloor   = 1,
+    kSectorGlowTypeCeiling = 2,
+    kSectorGlowTypeWall    = 3
 };
 
-class weakness_info_c
+enum SpriteYAlignment
+{
+    SpriteYAlignmentBottomUp = 0,
+    SpriteYAlignmentMiddle   = 1,
+    SpriteYAlignmentTopDown  = 2,
+};
+
+enum DynamicLightType
+{
+    // dynamic lighting disabled
+    kDynamicLightTypeNone,
+    // light texture is modulated with wall texture
+    kDynamicLightTypeModulate,
+    // light texture is simply added to wall
+    kDynamicLightTypeAdd,
+    // backwards compatibility cruft
+    kDynamicLightTypeCompatibilityLinear,
+    kDynamicLightTypeCompatibilityQuadratic,
+};
+
+class DynamicLightDefinition
 {
    public:
-    weakness_info_c();
-    weakness_info_c(weakness_info_c &rhs);
-    ~weakness_info_c(){};
+    DynamicLightDefinition();
+    DynamicLightDefinition(DynamicLightDefinition &rhs);
+    ~DynamicLightDefinition(){};
 
    private:
-    void Copy(weakness_info_c &src);
+    void Copy(DynamicLightDefinition &src);
 
    public:
-    void             Default(void);
-    weakness_info_c &operator=(weakness_info_c &rhs);
+    void                    Default(void);
+    DynamicLightDefinition &operator=(DynamicLightDefinition &rhs);
 
-    float height[2];
-    BAMAngle  angle[2];
-    BitSet  classes;
-    float     multiply;
-    float painchance;
+    DynamicLightType type_;
+    std::string      shape_;  // IMAGES.DDF reference
+    float            radius_;
+    RGBAColor        colour_;
+    float            height_;
+    bool             leaky_;
+
+    void *cache_data_;
+};
+
+class WeaknessDefinition
+{
+   public:
+    WeaknessDefinition();
+    WeaknessDefinition(WeaknessDefinition &rhs);
+    ~WeaknessDefinition(){};
+
+   private:
+    void Copy(WeaknessDefinition &src);
+
+   public:
+    void                Default(void);
+    WeaknessDefinition &operator=(WeaknessDefinition &rhs);
+
+    float    height_[2];
+    BAMAngle angle_[2];
+    BitSet   classes_;
+    float    multiply_;
+    float    painchance_;
 };
 
 // mobjdef class
@@ -823,189 +698,189 @@ class MapObjectDefinition
 {
    public:
     // DDF Id
-    std::string name;
+    std::string name_;
 
-    int number;
+    int number_;
 
     // range of states used
-    std::vector<StateRange> state_grp;
+    std::vector<StateRange> state_grp_;
 
-    int spawn_state;
-    int idle_state;
-    int chase_state;
-    int pain_state;
-    int missile_state;
-    int melee_state;
-    int death_state;
-    int overkill_state;
-    int raise_state;
-    int res_state;
-    int meander_state;
-    int morph_state;
-    int bounce_state;
-    int touch_state;
-    int gib_state;
-    int reload_state;
+    int spawn_state_;
+    int idle_state_;
+    int chase_state_;
+    int pain_state_;
+    int missile_state_;
+    int melee_state_;
+    int death_state_;
+    int overkill_state_;
+    int raise_state_;
+    int res_state_;
+    int meander_state_;
+    int morph_state_;
+    int bounce_state_;
+    int touch_state_;
+    int gib_state_;
+    int reload_state_;
 
-    int       reactiontime;
-    float painchance;
-    float     spawnhealth;
-    float     speed;
-    float     float_speed;
-    float     radius;
-    float     height;
-    float     step_size;
-    float     mass;
+    int   reactiontime_;
+    float painchance_;
+    float spawnhealth_;
+    float speed_;
+    float float_speed_;
+    float radius_;
+    float height_;
+    float step_size_;
+    float mass_;
 
-    int flags;
-    int extendedflags;
-    int hyperflags;
-    int mbf21flags;
+    int flags_;
+    int extendedflags_;
+    int hyperflags_;
+    int mbf21flags_;
 
-    DamageClass explode_damage;
-    float    explode_radius;  // normally zero (radius == damage)
+    DamageClass explode_damage_;
+    float       explode_radius_;  // normally zero (radius == damage)
 
     // linked list of losing benefits, or nullptr
-    Benefit *lose_benefits;
+    Benefit *lose_benefits_;
 
     // linked list of pickup benefits, or nullptr
-    Benefit *pickup_benefits;
+    Benefit *pickup_benefits_;
 
     // linked list of kill benefits, or nullptr
-    Benefit *kill_benefits;
+    Benefit *kill_benefits_;
 
     // linked list of pickup effects, or nullptr
-    pickup_effect_c *pickup_effects;
+    PickupEffect *pickup_effects_;
 
     // pickup message, a reference to languages.ldf
-    std::string pickup_message;
+    std::string pickup_message_;
 
     // linked list of initial benefits for players, or nullptr if none
-    Benefit *initial_benefits;
+    Benefit *initial_benefits_;
 
-    int             castorder;
-    std::string     cast_title;
-    int             respawntime;
-    float       translucency;
-    float       minatkchance;
-    const Colormap *palremap;
+    int             castorder_;
+    std::string     cast_title_;
+    int             respawntime_;
+    float           translucency_;
+    float           minatkchance_;
+    const Colormap *palremap_;
 
-    int       jump_delay;
-    float     jumpheight;
-    float     crouchheight;
-    float viewheight;
-    float shotheight;
-    float     maxfall;
-    float     fast;
-    float     scale;
-    float     aspect;
-    float     bounce_speed;
-    float     bounce_up;
-    float     sight_slope;
-    BAMAngle  sight_angle;
-    float     ride_friction;
-    float shadow_trans;
+    int      jump_delay_;
+    float    jumpheight_;
+    float    crouchheight_;
+    float    viewheight_;
+    float    shotheight_;
+    float    maxfall_;
+    float    fast_;
+    float    scale_;
+    float    aspect_;
+    float    bounce_speed_;
+    float    bounce_up_;
+    float    sight_slope_;
+    BAMAngle sight_angle_;
+    float    ride_friction_;
+    float    shadow_trans_;
 
-    struct SoundEffect *seesound;
-    struct SoundEffect *attacksound;
-    struct SoundEffect *painsound;
-    struct SoundEffect *deathsound;
-    struct SoundEffect *overkill_sound;
-    struct SoundEffect *activesound;
-    struct SoundEffect *walksound;
-    struct SoundEffect *jump_sound;
-    struct SoundEffect *noway_sound;
-    struct SoundEffect *oof_sound;
-    struct SoundEffect *fallpain_sound;
-    struct SoundEffect *gasp_sound;
-    struct SoundEffect *secretsound;
-    struct SoundEffect *falling_sound;
-    struct SoundEffect *rip_sound;
+    struct SoundEffect *seesound_;
+    struct SoundEffect *attacksound_;
+    struct SoundEffect *painsound_;
+    struct SoundEffect *deathsound_;
+    struct SoundEffect *overkill_sound_;
+    struct SoundEffect *activesound_;
+    struct SoundEffect *walksound_;
+    struct SoundEffect *jump_sound_;
+    struct SoundEffect *noway_sound_;
+    struct SoundEffect *oof_sound_;
+    struct SoundEffect *fallpain_sound_;
+    struct SoundEffect *gasp_sound_;
+    struct SoundEffect *secretsound_;
+    struct SoundEffect *falling_sound_;
+    struct SoundEffect *rip_sound_;
 
-    int fuse;
-    int reload_shots;
+    int fuse_;
+    int reload_shots_;
 
     // armour control: armour_protect is how much damage the armour
     // saves when the bullet/fireball hits you (1% to 100%).  Zero
     // disables the association (between color and MapObjectDefinition).
     // The 'erosion' is how much of the saved damage eats up the
     // armour held: 100% is normal, at 0% you never lose it.
-    float armour_protect;
-    float armour_deplete;
-    BitSet  armour_class;
+    float  armour_protect_;
+    float  armour_deplete_;
+    BitSet armour_class_;
 
-    BitSet side;
-    int      playernum;
-    int      yalign;  // -AJA- 2007/08/08: sprite Y alignment in bbox
+    BitSet side_;
+    int    playernum_;
+    int    yalign_;  // -AJA- 2007/08/08: sprite Y alignment in bbox
 
-    int   model_skin;  // -AJA- 2007/10/16: MD2 model support
-    float model_scale;
-    float model_aspect;
-    float model_bias;
-    int   model_rotate;
+    int   model_skin_;  // -AJA- 2007/10/16: MD2 model support
+    float model_scale_;
+    float model_aspect_;
+    float model_bias_;
+    int   model_rotate_;
 
     // breathing support: lung_capacity is how many tics we can last
     // underwater.  gasp_start is how long underwater before we gasp
     // when leaving it.  Damage and choking interval is in choke_damage.
-    int      lung_capacity;
-    int      gasp_start;
-    DamageClass choke_damage;
+    int         lung_capacity_;
+    int         gasp_start_;
+    DamageClass choke_damage_;
 
     // controls how much the player bobs when walking.
-    float bobbing;
+    float bobbing_;
 
     // what attack classes we are immune/resistant to (usually none).
-    BitSet immunity;
-    BitSet resistance;
-    BitSet ghost;  // pass through us
+    BitSet immunity_;
+    BitSet resistance_;
+    BitSet ghost_;  // pass through us
 
-    float     resist_multiply;
-    float resist_painchance;
+    float resist_multiply_;
+    float resist_painchance_;
 
-    const AttackDefinition *closecombat;
-    const AttackDefinition *rangeattack;
-    const AttackDefinition *spareattack;
+    const AttackDefinition *closecombat_;
+    const AttackDefinition *rangeattack_;
+    const AttackDefinition *spareattack_;
 
-    dlight_info_c dlight[2];
-    int           glow_type;
+    DynamicLightDefinition dlight_[2];
+    int                    glow_type_;
 
     // -AJA- 2007/08/21: weakness support (head-shots etc)
-    weakness_info_c weak;
+    WeaknessDefinition weak_;
 
     // item to drop (or nullptr).  The mobjdef pointer is only valid after
     // DDF_MobjCleanUp() has been called.
-    const MapObjectDefinition *dropitem;
-    std::string       dropitem_ref;
+    const MapObjectDefinition *dropitem_;
+    std::string                dropitem_ref_;
 
     // blood object (or nullptr).  The mobjdef pointer is only valid after
     // DDF_MobjCleanUp() has been called.
-    const MapObjectDefinition *blood;
-    std::string       blood_ref;
+    const MapObjectDefinition *blood_;
+    std::string                blood_ref_;
 
     // respawn effect object (or nullptr).  The mobjdef pointer is only
     // valid after DDF_MobjCleanUp() has been called.
-    const MapObjectDefinition *respawneffect;
-    std::string       respawneffect_ref;
+    const MapObjectDefinition *respawneffect_;
+    std::string                respawneffect_ref_;
 
     // spot type for the `SHOOT_TO_SPOT' attack (or nullptr).  The mobjdef
     // pointer is only valid after DDF_MobjCleanUp() has been called.
-    const MapObjectDefinition *spitspot;
-    std::string       spitspot_ref;
+    const MapObjectDefinition *spitspot_;
+    std::string                spitspot_ref_;
 
-    float sight_distance;  // lobo 2022: How far this thing can see
-    float hear_distance;   // lobo 2022: How far this thing can hear
+    float sight_distance_;  // lobo 2022: How far this thing can see
+    float hear_distance_;   // lobo 2022: How far this thing can hear
 
-    int morphtimeout;  // lobo 2023: Go to MORPH states when times up
+    int morphtimeout_;  // lobo 2023: Go to MORPH states when times up
 
     // DEHEXTRA
-    float gib_health;
+    float gib_health_;
 
     // MBF 21
-    int infight_group;
-    int proj_group;
-    int splash_group;
-    int fast_speed;
-    int melee_range;
+    int infight_group_;
+    int proj_group_;
+    int splash_group_;
+    int fast_speed_;
+    int melee_range_;
 
    public:
     MapObjectDefinition();
@@ -1034,15 +909,15 @@ class MapObjectDefinitionContainer : public std::vector<MapObjectDefinition *>
     ~MapObjectDefinitionContainer();
 
    private:
-    MapObjectDefinition *lookup_cache[kLookupCacheSize];
+    MapObjectDefinition *lookup_cache_[kLookupCacheSize];
 
    public:
     // List Management
     bool MoveToEnd(int idx);
 
     // Search Functions
-    int               FindFirst(const char *name, int startpos = -1);
-    int               FindLast(const char *name, int startpos = -1);
+    int                        FindFirst(const char *name, int startpos = -1);
+    int                        FindLast(const char *name, int startpos = -1);
     const MapObjectDefinition *Lookup(const char *refname);
     const MapObjectDefinition *Lookup(int id);
 
@@ -1059,8 +934,6 @@ extern MapObjectDefinitionContainer mobjtypes;
 void DDF_MobjGetBenefit(const char *info, void *storage);
 
 void DDF_ReadThings(const std::string &data);
-
-#endif /*__DDF_MOBJ_H__*/
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

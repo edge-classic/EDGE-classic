@@ -165,7 +165,7 @@ static void PL_armor(coal::vm_c *vm, int argc)
 {
     int kind = (int)*vm->AccessParam(0);
 
-    if (kind < 1 || kind > NUMARMOUR)
+    if (kind < 1 || kind > kTotalArmourTypes)
         I_Error("player.armor: bad armor index: %d\n", kind);
 
     kind--;
@@ -252,7 +252,7 @@ static void PL_is_jumping(coal::vm_c *vm, int argc)
 //
 static void PL_is_crouching(coal::vm_c *vm, int argc)
 {
-    vm->ReturnFloat((ui_player_who->mo->extendedflags & EF_CROUCHING) ? 1 : 0);
+    vm->ReturnFloat((ui_player_who->mo->extendedflags & kExtendedFlagCrouching) ? 1 : 0);
 }
 
 // player.is_attacking()
@@ -321,7 +321,7 @@ static void PL_air_in_lungs(coal::vm_c *vm, int argc)
         return;
     }
 
-    float value = ui_player_who->air_in_lungs * 100.0f / ui_player_who->mo->info->lung_capacity;
+    float value = ui_player_who->air_in_lungs * 100.0f / ui_player_who->mo->info->lung_capacity_;
 
     value = HMM_Clamp(0.0f, value, 100.0f);
 
@@ -350,7 +350,7 @@ static void PL_has_power(coal::vm_c *vm, int argc)
 {
     int power = (int)*vm->AccessParam(0);
 
-    if (power < 1 || power > NUMPOWERS)
+    if (power < 1 || power > kTotalPowerTypes)
         I_Error("player.has_power: bad powerup number: %d\n", power);
 
     power--;
@@ -358,7 +358,7 @@ static void PL_has_power(coal::vm_c *vm, int argc)
     int value = (ui_player_who->powers[power] > 0) ? 1 : 0;
 
     // special check for GOD mode
-    if (power == PW_Invulnerable && (ui_player_who->cheats & CF_GODMODE))
+    if (power == kPowerTypeInvulnerable && (ui_player_who->cheats & CF_GODMODE))
         value = 1;
 
     vm->ReturnFloat(value);
@@ -370,7 +370,7 @@ static void PL_power_left(coal::vm_c *vm, int argc)
 {
     int power = (int)*vm->AccessParam(0);
 
-    if (power < 1 || power > NUMPOWERS)
+    if (power < 1 || power > kTotalPowerTypes)
         I_Error("player.power_left: bad powerup number: %d\n", power);
 
     power--;
@@ -609,7 +609,7 @@ static void PL_inventory(coal::vm_c *vm, int argc)
 {
     int inv = (int)*vm->AccessParam(0);
 
-    if (inv < 1 || inv > NUMINV)
+    if (inv < 1 || inv > kTotalInventoryTypes)
         I_Error("player.inventory: bad inv number: %d\n", inv);
 
     inv--;
@@ -623,7 +623,7 @@ static void PL_inventorymax(coal::vm_c *vm, int argc)
 {
     int inv = (int)*vm->AccessParam(0);
 
-    if (inv < 1 || inv > NUMINV)
+    if (inv < 1 || inv > kTotalInventoryTypes)
         I_Error("player.inventorymax: bad inv number: %d\n", inv);
 
     inv--;
@@ -637,7 +637,7 @@ static void PL_counter(coal::vm_c *vm, int argc)
 {
     int cntr = (int)*vm->AccessParam(0);
 
-    if (cntr < 1 || cntr > NUMCOUNTER)
+    if (cntr < 1 || cntr > kTotalCounterTypes)
         I_Error("player.counter: bad counter number: %d\n", cntr);
 
     cntr--;
@@ -651,7 +651,7 @@ static void PL_counter_max(coal::vm_c *vm, int argc)
 {
     int cntr = (int)*vm->AccessParam(0);
 
-    if (cntr < 1 || cntr > NUMCOUNTER)
+    if (cntr < 1 || cntr > kTotalCounterTypes)
         I_Error("player.counter_max: bad counter number: %d\n", cntr);
 
     cntr--;
@@ -669,7 +669,7 @@ static void PL_set_counter(coal::vm_c *vm, int argc)
     int cntr = (int)*vm->AccessParam(0);
     int amt  = (int)*vm->AccessParam(1);
 
-    if (cntr < 1 || cntr > NUMCOUNTER)
+    if (cntr < 1 || cntr > kTotalCounterTypes)
         I_Error("player.set_counter: bad counter number: %d\n", cntr);
 
     cntr--;
@@ -850,7 +850,7 @@ static void PL_hurt_mon(coal::vm_c *vm, int argc)
 {
     if (ui_player_who->damagecount > 0 && ui_player_who->attacker && ui_player_who->attacker != ui_player_who->mo)
     {
-        vm->ReturnString(ui_player_who->attacker->info->name.c_str());
+        vm->ReturnString(ui_player_who->attacker->info->name_.c_str());
         return;
     }
 
@@ -1034,7 +1034,7 @@ static void PL_use_inventory(coal::vm_c *vm, int argc)
     else
         inv = (int)*num;
 
-    if (inv < 1 || inv > NUMINV)
+    if (inv < 1 || inv > kTotalInventoryTypes)
         I_Error("player.use_inventory: bad inventory number: %d\n", inv);
 
     if (inv < 10)
@@ -1090,9 +1090,9 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
     int        temp_num = 0;
 
     if (KillBenefits)
-        list = obj->info->kill_benefits;
+        list = obj->info->kill_benefits_;
     else
-        list = obj->info->pickup_benefits;
+        list = obj->info->pickup_benefits_;
 
     for (; list != nullptr; list = list->next)
     {
@@ -1169,11 +1169,11 @@ static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
         if (obj)
         {
             // try CAST_TITLE first
-            temp_string = language[obj->info->cast_title];
+            temp_string = language[obj->info->cast_title_];
 
             if (temp_string.empty()) // fallback to DDFTHING entry name
             {
-                temp_string = obj->info->name;
+                temp_string = obj->info->name_;
                 temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
             }
         }
@@ -1224,14 +1224,14 @@ static std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secatt
     std::string temp_string;
     temp_string.clear();
 
-    if (!obj->info->pickup_benefits)
+    if (!obj->info->pickup_benefits_)
         return "";
-    if (!obj->info->pickup_benefits->sub.weap)
+    if (!obj->info->pickup_benefits_->sub.weap)
         return "";
-    if (obj->info->pickup_benefits->type != kBenefitTypeWeapon)
+    if (obj->info->pickup_benefits_->type != kBenefitTypeWeapon)
         return "";
 
-    WeaponDefinition *objWep = obj->info->pickup_benefits->sub.weap;
+    WeaponDefinition *objWep = obj->info->pickup_benefits_->sub.weap;
     if (!objWep)
         return "";
 
@@ -1402,7 +1402,7 @@ static void MO_count(coal::vm_c *vm, int argc)
 
     for (mo = mobjlisthead; mo; mo = mo->next)
     {
-        if (mo->info->number == thingid && mo->health > 0)
+        if (mo->info->number_ == thingid && mo->health > 0)
             thingcount++;
     }
 

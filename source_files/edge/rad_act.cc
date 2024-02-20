@@ -382,18 +382,18 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
         return;
 
     // -AJA- 1999/10/02: -nomonsters check.
-    if (level_flags.nomonsters && (minfo->extendedflags & EF_MONSTER))
+    if (level_flags.nomonsters && (minfo->extendedflags_ & kExtendedFlagMonster))
         return;
 
     // -AJA- 1999/10/07: -noextra check.
-    if (!level_flags.have_extra && (minfo->extendedflags & EF_EXTRA))
+    if (!level_flags.have_extra && (minfo->extendedflags_ & kExtendedFlagExtra))
         return;
 
     // -AJA- 1999/09/11: Support for supplying Z value.
 
     if (t->spawn_effect)
     {
-        mo = P_MobjCreateObject(t->x, t->y, t->z, minfo->respawneffect);
+        mo = P_MobjCreateObject(t->x, t->y, t->z, minfo->respawneffect_);
     }
 
     mo = P_MobjCreateObject(t->x, t->y, t->z, minfo);
@@ -416,11 +416,11 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
     mo->spawnpoint.angle     = t->angle;
     mo->spawnpoint.vertangle = epi::BAMFromATan(t->slope);
     mo->spawnpoint.info      = minfo;
-    mo->spawnpoint.flags     = t->ambush ? MF_AMBUSH : 0;
+    mo->spawnpoint.flags     = t->ambush ? kMapObjectFlagAmbush : 0;
     mo->spawnpoint.tag       = t->tag;
 
     if (t->ambush)
-        mo->flags |= MF_AMBUSH;
+        mo->flags |= kMapObjectFlagAmbush;
 
     // -AJA- 1999/09/25: If radius trigger is a path node, then
     //       setup the thing to follow the path.
@@ -556,7 +556,7 @@ void RAD_ActDamageMonsters(rad_trigger_t *R, void *param)
         if (tag && (mo->tag != tag))
             continue;
 
-        if (!(mo->extendedflags & EF_MONSTER) || mo->health <= 0)
+        if (!(mo->extendedflags & kExtendedFlagMonster) || mo->health <= 0)
             continue;
 
         if (!RAD_WithinRadius(mo, R->info))
@@ -1156,14 +1156,14 @@ void RAD_ActWaitUntilDead(rad_trigger_t *R, void *param)
         if (mo->health <= 0)
             continue;
 
-        if (!WUD_Match(wud, mo->info->name.c_str()))
+        if (!WUD_Match(wud, mo->info->name_.c_str()))
             continue;
 
         if (!RAD_WithinRadius(mo, R->info))
             continue;
 
         // mark the monster
-        mo->hyperflags |= HF_WAIT_UNTIL_DEAD;
+        mo->hyperflags |= kHyperFlagWaitUntilDead;
         if (mo->wud_tags.empty())
             mo->wud_tags = epi::StringFormat("%d", wud->tag);
         else
@@ -1222,10 +1222,10 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
     y += 20 * epi::BAMSin(point->angle);
     fog = P_MobjCreateObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
     // never use this object as a teleport destination
-    fog->extendedflags |= EF_NEVERTARGET;
+    fog->extendedflags |= kExtendedFlagNeverTarget;
 
-    if (fog->info->chase_state)
-        P_SetMobjStateDeferred(fog, fog->info->chase_state, 0);
+    if (fog->info->chase_state_)
+        P_SetMobjStateDeferred(fog, fog->info->chase_state_, 0);
 
     // 4. Teleport him
     //  Don't get stuck spawned in things: telefrag them.
@@ -1385,39 +1385,39 @@ void P_ActReplace(struct mobj_s *mo, const MapObjectDefinition *newThing)
     {
         mo->info = newThing;
 
-        mo->radius = mo->info->radius;
-        mo->height = mo->info->height;
-        if (mo->info->fast_speed > -1 && level_flags.fastparm)
-            mo->speed = mo->info->fast_speed;
+        mo->radius = mo->info->radius_;
+        mo->height = mo->info->height_;
+        if (mo->info->fast_speed_ > -1 && level_flags.fastparm)
+            mo->speed = mo->info->fast_speed_;
         else
-            mo->speed = mo->info->speed;
+            mo->speed = mo->info->speed_;
 
         mo->health = mo->spawnhealth; // always top up health to full
 
-        if (mo->flags & MF_AMBUSH) // preserve map editor AMBUSH flag
+        if (mo->flags & kMapObjectFlagAmbush) // preserve map editor AMBUSH flag
         {
-            mo->flags = mo->info->flags;
-            mo->flags |= MF_AMBUSH;
+            mo->flags = mo->info->flags_;
+            mo->flags |= kMapObjectFlagAmbush;
         }
         else
-            mo->flags = mo->info->flags;
+            mo->flags = mo->info->flags_;
 
-        mo->extendedflags = mo->info->extendedflags;
-        mo->hyperflags    = mo->info->hyperflags;
+        mo->extendedflags = mo->info->extendedflags_;
+        mo->hyperflags    = mo->info->hyperflags_;
 
-        mo->vis_target       = mo->info->translucency;
+        mo->vis_target       = mo->info->translucency_;
         mo->currentattack    = nullptr;
-        mo->model_skin       = mo->info->model_skin;
+        mo->model_skin       = mo->info->model_skin_;
         mo->model_last_frame = -1;
 
         // handle dynamic lights
         {
-            const dlight_info_c *dinfo = &mo->info->dlight[0];
+            const DynamicLightDefinition *dinfo = &mo->info->dlight_[0];
 
-            if (dinfo->type != DLITE_None)
+            if (dinfo->type_ != kDynamicLightTypeNone)
             {
-                mo->dlight.target = dinfo->radius;
-                mo->dlight.color  = dinfo->colour;
+                mo->dlight.target = dinfo->radius_;
+                mo->dlight.color  = dinfo->colour_;
 
                 // make renderer re-create shader info
                 if (mo->dlight.shader)
@@ -1432,7 +1432,7 @@ void P_ActReplace(struct mobj_s *mo, const MapObjectDefinition *newThing)
 
     int state = P_MobjFindLabel(mo, "IDLE"); // nothing fancy, always default to idle
     if (state == 0)
-        I_Error("RTS REPLACE_THING: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name.c_str());
+        I_Error("RTS REPLACE_THING: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name_.c_str());
 
     P_SetMobjStateDeferred(mo, state, 0);
 }

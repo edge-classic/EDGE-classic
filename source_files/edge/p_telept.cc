@@ -46,7 +46,7 @@ mobj_t *P_FindTeleportMan(int tag, const MapObjectDefinition *info)
         for (subsector_t *sub = sectors[i].subsectors; sub; sub = sub->sec_next)
         {
             for (mobj_t *mo = sub->thinglist; mo; mo = mo->snext)
-                if (mo->info == info && !(mo->extendedflags & EF_NEVERTARGET))
+                if (mo->info == info && !(mo->extendedflags & kExtendedFlagNeverTarget))
                     return mo;
         }
     }
@@ -240,7 +240,7 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const TeleportDefinition 
     {
         new_z += (thing->z - thing->floorz);
     }
-    else if (thing->flags & MF_MISSILE)
+    else if (thing->flags & kMapObjectFlagMissile)
     {
         new_z += thing->origheight;
     }
@@ -259,7 +259,7 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const TeleportDefinition 
 
     /* --- Momentum handling --- */
 
-    if (thing->flags & MF_MISSILE)
+    if (thing->flags & kMapObjectFlagMissile)
     {
         thing->mom.X = thing->speed * epi::BAMCos(new_ang);
         thing->mom.Y = thing->speed * epi::BAMSin(new_ang);
@@ -306,10 +306,10 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const TeleportDefinition 
             fog = P_MobjCreateObject(oldx, oldy, oldz, def->inspawnobj_);
 
             // never use this object as a teleport destination
-            fog->extendedflags |= EF_NEVERTARGET;
+            fog->extendedflags |= kExtendedFlagNeverTarget;
 
-            if (fog->info->chase_state)
-                P_SetMobjStateDeferred(fog, fog->info->chase_state, 0);
+            if (fog->info->chase_state_)
+                P_SetMobjStateDeferred(fog, fog->info->chase_state_, 0);
         }
 
         if (def->outspawnobj_)
@@ -324,10 +324,10 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const TeleportDefinition 
                                      def->outspawnobj_);
 
             // never use this object as a teleport destination
-            fog->extendedflags |= EF_NEVERTARGET;
+            fog->extendedflags |= kExtendedFlagNeverTarget;
 
-            if (fog->info->chase_state)
-                P_SetMobjStateDeferred(fog, fog->info->chase_state, 0);
+            if (fog->info->chase_state_)
+                P_SetMobjStateDeferred(fog, fog->info->chase_state_, 0);
 
             if (player == players[displayplayer] && reduce_flash)
             {

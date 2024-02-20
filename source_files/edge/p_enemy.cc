@@ -108,12 +108,12 @@ static void RecursiveSound(sector_t *sec, int soundblocks, int player)
     {
         if (nd->mo != nullptr)
         {
-            if (!AlmostEquals(nd->mo->info->hear_distance, -1.0f)) // if we have hear_distance set
+            if (!AlmostEquals(nd->mo->info->hear_distance_, -1.0f)) // if we have hear_distance set
             {
                 float distance;
                 distance = P_ApproxDistance(players[player]->mo->x - nd->mo->x, players[player]->mo->y - nd->mo->y);
                 distance = P_ApproxDistance(players[player]->mo->z - nd->mo->z, distance);
-                if (distance < nd->mo->info->hear_distance)
+                if (distance < nd->mo->info->hear_distance_)
                 {
                     nd->mo->lastheard = player;
                 }
@@ -210,15 +210,15 @@ bool P_Move(mobj_t *actor, bool path)
     if (!P_TryMove(actor, tryx, tryy))
     {
         // open any specials
-        if (actor->flags & MF_FLOAT && floatok)
+        if (actor->flags & kMapObjectFlagFloat && floatok)
         {
             // must adjust height
             if (actor->z < float_destz)
-                actor->z += actor->info->float_speed;
+                actor->z += actor->info->float_speed_;
             else
-                actor->z -= actor->info->float_speed;
+                actor->z -= actor->info->float_speed_;
 
-            actor->flags |= MF_INFLOAT;
+            actor->flags |= kMapObjectFlagInFloat;
             // FIXME: position interpolation
             return true;
         }
@@ -252,9 +252,9 @@ bool P_Move(mobj_t *actor, bool path)
         return any_used && (P_Random() < 230 ? block_used : !block_used);
     }
 
-    actor->flags &= ~MF_INFLOAT;
+    actor->flags &= ~kMapObjectFlagInFloat;
 
-    if (!(actor->flags & MF_FLOAT) && !(actor->extendedflags & EF_GRAVFALL))
+    if (!(actor->flags & kMapObjectFlagFloat) && !(actor->extendedflags & kExtendedFlagGravityFall))
     {
         if (actor->z > actor->floorz)
         {
@@ -265,7 +265,7 @@ bool P_Move(mobj_t *actor, bool path)
             actor->z = actor->floorz;
     }
     // -AJA- 2008/01/16: position interpolation
-    if ((actor->state->flags & kStateFrameFlagModel) || (actor->flags & MF_FLOAT))
+    if ((actor->state->flags & kStateFrameFlagModel) || (actor->flags & kMapObjectFlagFloat))
     {
         actor->lerp_num = HMM_Clamp(2, actor->state->tics, 10);
         actor->lerp_pos = 1;
@@ -543,8 +543,8 @@ static void SpawnDeathMissile(mobj_t *source, float x, float y, float z)
     info = mobjtypes.Lookup("BRAIN_DEATH_MISSILE");
 
     th = P_MobjCreateObject(x, y, z, info);
-    if (th->info->seesound)
-        S_StartFX(th->info->seesound, P_MobjGetSfxCategory(th), th);
+    if (th->info->seesound_)
+        S_StartFX(th->info->seesound_, P_MobjGetSfxCategory(th), th);
 
     th->SetRealSource(source);
 
@@ -576,8 +576,8 @@ void P_ActBrainScream(mobj_t *bossbrain)
         SpawnDeathMissile(bossbrain, x, y, z);
     }
 
-    if (bossbrain->info->deathsound)
-        S_StartFX(bossbrain->info->deathsound, P_MobjGetSfxCategory(bossbrain), bossbrain);
+    if (bossbrain->info->deathsound_)
+        S_StartFX(bossbrain->info->deathsound_, P_MobjGetSfxCategory(bossbrain), bossbrain);
 }
 
 void P_ActBrainMissileExplode(mobj_t *mo)
@@ -659,10 +659,10 @@ void P_ActCubeSpawn(mobj_t *cube)
 
     if (P_LookForPlayers(newmobj, kBAMAngle180))
     {
-        if (newmobj->info->chase_state)
-            P_SetMobjState(newmobj, newmobj->info->chase_state);
+        if (newmobj->info->chase_state_)
+            P_SetMobjState(newmobj, newmobj->info->chase_state_);
         else
-            P_SetMobjState(newmobj, newmobj->info->spawn_state);
+            P_SetMobjState(newmobj, newmobj->info->spawn_state_);
     }
 
     // telefrag anything in this spot
@@ -673,7 +673,7 @@ void P_ActPlayerScream(mobj_t *mo)
 {
     SoundEffect *sound;
 
-    sound = mo->info->deathsound;
+    sound = mo->info->deathsound_;
 
     if ((mo->health < -50) && (W_IsLumpInAnyWad("DSPDIEHI")))
     {

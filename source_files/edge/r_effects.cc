@@ -74,7 +74,7 @@ void RGL_RainbowEffect(player_t *player)
 
     float s = EffectStrength(player);
 
-    if (s > 0 && player->powers[PW_Invulnerable] > 0 && (player->effect_left & 8) && !reduce_flash)
+    if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 && (player->effect_left & 8) && !reduce_flash)
     {
         if (var_invul_fx == INVULFX_Textured && !reduce_flash)
         {
@@ -93,7 +93,7 @@ void RGL_RainbowEffect(player_t *player)
         return;
     }
 
-    if (s > 0 && player->powers[PW_NightVision] > 0 && player->effect_colourmap && !debug_fullbright.d)
+    if (s > 0 && player->powers[kPowerTypeNightVision] > 0 && player->effect_colourmap && !debug_fullbright.d)
     {
         float r, g, b;
 
@@ -107,14 +107,14 @@ void RGL_RainbowEffect(player_t *player)
         return;
     }
 
-    if (s > 0 && player->powers[PW_Infrared] > 0 && !debug_fullbright.d)
+    if (s > 0 && player->powers[kPowerTypeInfrared] > 0 && !debug_fullbright.d)
     {
         ren_extralight = int(s * 255);
         return;
     }
 
     // Lobo 2021: un-hardcode berserk color tint
-    if (s > 0 && player->powers[PW_Berserk] > 0 && player->effect_colourmap && !debug_fullbright.d)
+    if (s > 0 && player->powers[kPowerTypeBerserk] > 0 && player->effect_colourmap && !debug_fullbright.d)
     {
         float r, g, b;
 
@@ -158,7 +158,7 @@ void RGL_ColourmapEffect(player_t *player)
 
     float s = EffectStrength(player);
 
-    if (s > 0 && player->powers[PW_Invulnerable] > 0 && player->effect_colourmap &&
+    if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 && player->effect_colourmap &&
         (player->effect_left & 8 || reduce_flash))
     {
         if (var_invul_fx == INVULFX_Textured && !reduce_flash)
@@ -215,12 +215,12 @@ void RGL_PaletteEffect(player_t *player)
 
     float old_alpha = HUD_GetAlpha();
 
-    if (s > 0 && player->powers[PW_Invulnerable] > 0 && player->effect_colourmap &&
+    if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 && player->effect_colourmap &&
         (player->effect_left & 8 || reduce_flash))
     {
         return;
     }
-    else if (s > 0 && player->powers[PW_NightVision] > 0 && player->effect_colourmap)
+    else if (s > 0 && player->powers[kPowerTypeNightVision] > 0 && player->effect_colourmap)
     {
         float r, g, b;
         V_GetColmapRGB(player->effect_colourmap, &r, &g, &b);

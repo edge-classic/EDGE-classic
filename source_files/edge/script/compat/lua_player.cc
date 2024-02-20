@@ -148,7 +148,7 @@ static int PL_armor(lua_State *L)
 {
     int kind = (int)luaL_checknumber(L, 1);
 
-    if (kind < 1 || kind > NUMARMOUR)
+    if (kind < 1 || kind > kTotalArmourTypes)
         I_Error("player.armor: bad armor index: %d\n", kind);
 
     kind--;
@@ -243,7 +243,7 @@ static int PL_is_jumping(lua_State *L)
 //
 static int PL_is_crouching(lua_State *L)
 {
-    lua_pushboolean(L, (ui_player_who->mo->extendedflags & EF_CROUCHING) ? 1 : 0);
+    lua_pushboolean(L, (ui_player_who->mo->extendedflags & kExtendedFlagCrouching) ? 1 : 0);
     return 1;
 }
 
@@ -321,7 +321,7 @@ static int PL_air_in_lungs(lua_State *L)
         return 1;
     }
 
-    float value = ui_player_who->air_in_lungs * 100.0f / ui_player_who->mo->info->lung_capacity;
+    float value = ui_player_who->air_in_lungs * 100.0f / ui_player_who->mo->info->lung_capacity_;
 
     value = HMM_Clamp(0.0f, value, 100.0f);
 
@@ -352,7 +352,7 @@ static int PL_has_power(lua_State *L)
 {
     int power = (int)luaL_checknumber(L, 1);
 
-    if (power < 1 || power > NUMPOWERS)
+    if (power < 1 || power > kTotalPowerTypes)
         I_Error("player.has_power: bad powerup number: %d\n", power);
 
     power--;
@@ -360,7 +360,7 @@ static int PL_has_power(lua_State *L)
     int value = (ui_player_who->powers[power] > 0) ? 1 : 0;
 
     // special check for GOD mode
-    if (power == PW_Invulnerable && (ui_player_who->cheats & CF_GODMODE))
+    if (power == kPowerTypeInvulnerable && (ui_player_who->cheats & CF_GODMODE))
         value = 1;
 
     lua_pushboolean(L, value);
@@ -373,7 +373,7 @@ static int PL_power_left(lua_State *L)
 {
     int power = (int)luaL_checknumber(L, 1);
 
-    if (power < 1 || power > NUMPOWERS)
+    if (power < 1 || power > kTotalPowerTypes)
         I_Error("player.power_left: bad powerup number: %d\n", power);
 
     power--;
@@ -620,7 +620,7 @@ static int PL_inventory(lua_State *L)
 {
     int inv = (int)luaL_checknumber(L, 1);
 
-    if (inv < 1 || inv > NUMINV)
+    if (inv < 1 || inv > kTotalInventoryTypes)
         I_Error("player.inventory: bad inv number: %d\n", inv);
 
     inv--;
@@ -635,7 +635,7 @@ static int PL_inventorymax(lua_State *L)
 {
     int inv = (int)luaL_checknumber(L, 1);
 
-    if (inv < 1 || inv > NUMINV)
+    if (inv < 1 || inv > kTotalInventoryTypes)
         I_Error("player.inventorymax: bad inv number: %d\n", inv);
 
     inv--;
@@ -650,7 +650,7 @@ static int PL_counter(lua_State *L)
 {
     int cntr = (int)luaL_checknumber(L, 1);
 
-    if (cntr < 1 || cntr > NUMCOUNTER)
+    if (cntr < 1 || cntr > kTotalCounterTypes)
         I_Error("player.counter: bad counter number: %d\n", cntr);
 
     cntr--;
@@ -665,7 +665,7 @@ static int PL_counter_max(lua_State *L)
 {
     int cntr = (int)luaL_checknumber(L, 1);
 
-    if (cntr < 1 || cntr > NUMCOUNTER)
+    if (cntr < 1 || cntr > kTotalCounterTypes)
         I_Error("player.counter_max: bad counter number: %d\n", cntr);
 
     cntr--;
@@ -681,7 +681,7 @@ static int PL_set_counter(lua_State *L)
     int cntr = (int)luaL_checknumber(L, 1);
     int amt  = (int)luaL_checknumber(L, 2);
 
-    if (cntr < 1 || cntr > NUMCOUNTER)
+    if (cntr < 1 || cntr > kTotalCounterTypes)
         I_Error("player.set_counter: bad counter number: %d\n", cntr);
 
     cntr--;
@@ -872,7 +872,7 @@ static int PL_hurt_mon(lua_State *L)
 {
     if (ui_player_who->damagecount > 0 && ui_player_who->attacker && ui_player_who->attacker != ui_player_who->mo)
     {
-        lua_pushstring(L, ui_player_who->attacker->info->name.c_str());
+        lua_pushstring(L, ui_player_who->attacker->info->name_.c_str());
         return 1;
     }
 
@@ -1066,7 +1066,7 @@ static int PL_use_inventory(lua_State *L)
     int         inv         = (int)luaL_checknumber(L, 1);
     std::string script_name = "INVENTORY";
 
-    if (inv < 1 || inv > NUMINV)
+    if (inv < 1 || inv > kTotalInventoryTypes)
         I_Error("player.use_inventory: bad inventory number: %d\n", inv);
 
     if (inv < 10)
@@ -1125,9 +1125,9 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
     int        temp_num = 0;
 
     if (KillBenefits)
-        list = obj->info->kill_benefits;
+        list = obj->info->kill_benefits_;
     else
-        list = obj->info->pickup_benefits;
+        list = obj->info->pickup_benefits_;
 
     for (; list != nullptr; list = list->next)
     {
@@ -1204,11 +1204,11 @@ static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
         if (obj)
         {
             // try CAST_TITLE first
-            temp_string = language[obj->info->cast_title];
+            temp_string = language[obj->info->cast_title_];
 
             if (temp_string.empty()) // fallback to DDFTHING entry name
             {
-                temp_string = obj->info->name;
+                temp_string = obj->info->name_;
                 temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
             }
         }
@@ -1258,14 +1258,14 @@ static std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secatt
     int         temp_num = 0;
     std::string temp_string;
 
-    if (!obj->info->pickup_benefits)
+    if (!obj->info->pickup_benefits_)
         return "";
-    if (!obj->info->pickup_benefits->sub.weap)
+    if (!obj->info->pickup_benefits_->sub.weap)
         return "";
-    if (obj->info->pickup_benefits->type != kBenefitTypeWeapon)
+    if (obj->info->pickup_benefits_->type != kBenefitTypeWeapon)
         return "";
 
-    WeaponDefinition *objWep = obj->info->pickup_benefits->sub.weap;
+    WeaponDefinition *objWep = obj->info->pickup_benefits_->sub.weap;
     if (!objWep)
         return "";
 
@@ -1407,9 +1407,9 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
     int        BenefitLimit = 0;
 
     if (KillBenefits)
-        list = obj->info->kill_benefits;
+        list = obj->info->kill_benefits_;
     else
-        list = obj->info->pickup_benefits;
+        list = obj->info->pickup_benefits_;
     
     //how many benefits do we have?
     int NumberOfBenefits = 0;
@@ -1428,9 +1428,9 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
 
     int CurrentBenefit = 1; //counter
     if (KillBenefits)
-        list = obj->info->kill_benefits; //need to grab these again
+        list = obj->info->kill_benefits_; //need to grab these again
     else
-        list = obj->info->pickup_benefits; //need to grab these again
+        list = obj->info->pickup_benefits_; //need to grab these again
 
     for (; list != nullptr; list = list->next)
     {
@@ -1461,7 +1461,7 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
             BenefitAmount = (int)list->amount;
             if ((gameskill == sk_baby) || (gameskill == sk_nightmare))
                 BenefitAmount <<= 1; //double the ammo
-            if(BenefitAmount > 1 && obj->flags & MF_DROPPED)
+            if(BenefitAmount > 1 && obj->flags & kMapObjectFlagDropped)
                 BenefitAmount /= 2; //dropped ammo gives half
             BenefitLimit = (int)list->limit;
             break;
@@ -1568,10 +1568,10 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 
     //---------------
     // object.name
-    temp_value = language[mo->info->cast_title];  // try CAST_TITLE first
+    temp_value = language[mo->info->cast_title_];  // try CAST_TITLE first
     if (temp_value.empty()) // fallback to DDFTHING entry name
     {
-        temp_value = mo->info->name;
+        temp_value = mo->info->name_;
         temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
     }
 
@@ -1589,13 +1589,13 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
     // object.type
     temp_value="SCENERY"; //default to scenery
 
-    if (mo->extendedflags & EF_MONSTER)
+    if (mo->extendedflags & kExtendedFlagMonster)
         temp_value="MONSTER";
-    if (mo->flags & MF_SPECIAL)
+    if (mo->flags & kMapObjectFlagSpecial)
         temp_value="PICKUP";
-    if (mo->info->pickup_benefits)
+    if (mo->info->pickup_benefits_)
     {
-        if (mo->info->pickup_benefits->type == kBenefitTypeWeapon)
+        if (mo->info->pickup_benefits_->type == kBenefitTypeWeapon)
             temp_value="WEAPON";
     } 
 
@@ -1664,7 +1664,7 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 
     //---------------
     // object.benefits
-    if (mo->extendedflags & EF_MONSTER)
+    if (mo->extendedflags & kExtendedFlagMonster)
         CreateLuaTable_Benefits(L, mo, true); //only want kill benefits
     else
         CreateLuaTable_Benefits(L, mo, false); //only want pickup benefits
@@ -1796,23 +1796,23 @@ static int MO_weapon_info(lua_State *L)
     } 
     else
     {
-        if (!mo->info->pickup_benefits)
+        if (!mo->info->pickup_benefits_)
         {
             lua_pushstring(L, "");
             return 1;
         }
-        if (!mo->info->pickup_benefits->sub.weap)
+        if (!mo->info->pickup_benefits_->sub.weap)
         {
             lua_pushstring(L, "");
             return 1;
         }
-        if (mo->info->pickup_benefits->type != kBenefitTypeWeapon)
+        if (mo->info->pickup_benefits_->type != kBenefitTypeWeapon)
         {
             lua_pushstring(L, "");
             return 1;
         }
 
-        WeaponDefinition *objWep = mo->info->pickup_benefits->sub.weap;
+        WeaponDefinition *objWep = mo->info->pickup_benefits_->sub.weap;
         if (!objWep)
         {
             lua_pushstring(L, "");
@@ -1887,7 +1887,7 @@ static int MO_count(lua_State *L)
 
     for (mo = mobjlisthead; mo; mo = mo->next)
     {
-        if (mo->info->number == thingid && mo->health > 0)
+        if (mo->info->number_ == thingid && mo->health > 0)
             thingcount++;
     }
 

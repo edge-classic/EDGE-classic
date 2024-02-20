@@ -565,14 +565,14 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
 
     // -KM- 1999/01/31 Use playernum property.
     // count deathmatch start positions
-    if (info->playernum < 0)
+    if (info->playernum_ < 0)
     {
         G_AddDeathmatchStart(point);
         return nullptr;
     }
 
     // check for players specially -jc-
-    if (info->playernum > 0)
+    if (info->playernum_ > 0)
     {
         // -AJA- 2009/10/07: Hub support
         if (sec->props.special && sec->props.special->hub_)
@@ -588,7 +588,7 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
 
         // -AJA- 2004/12/30: for duplicate players, the LAST one must
         //       be used (so levels with Voodoo dolls work properly).
-        spawnpoint_t *prev = G_FindCoopPlayer(info->playernum);
+        spawnpoint_t *prev = G_FindCoopPlayer(info->playernum_);
 
         if (!prev)
             G_AddCoopStart(point);
@@ -632,15 +632,15 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
         return nullptr;
 
     // don't spawn keycards in deathmatch
-    if (DEATHMATCH() && (info->flags & MF_NOTDMATCH))
+    if (DEATHMATCH() && (info->flags_ & kMapObjectFlagNotDeathmatch))
         return nullptr;
 
     // don't spawn any monsters if -nomonsters
-    if (level_flags.nomonsters && (info->extendedflags & EF_MONSTER))
+    if (level_flags.nomonsters && (info->extendedflags_ & kExtendedFlagMonster))
         return nullptr;
 
     // -AJA- 1999/10/07: don't spawn extra things if -noextra.
-    if (!level_flags.have_extra && (info->extendedflags & EF_EXTRA))
+    if (!level_flags.have_extra && (info->extendedflags_ & kExtendedFlagExtra))
         return nullptr;
 
     // spawn it now !
@@ -655,20 +655,20 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
 
     if (options & MTF_AMBUSH)
     {
-        mo->flags |= MF_AMBUSH;
-        mo->spawnpoint.flags |= MF_AMBUSH;
+        mo->flags |= kMapObjectFlagAmbush;
+        mo->spawnpoint.flags |= kMapObjectFlagAmbush;
     }
 
     // -AJA- 2000/09/22: MBF compatibility flag
     if (options & MTF_FRIEND)
     {
         mo->side = 1; //~0;
-        mo->hyperflags |= HF_ULTRALOYAL;
+        mo->hyperflags |= kHyperFlagUltraLoyal;
         /*
         player_t *player;
         player = players[0];
         mo->SetSupportObj(player->mo);
-        P_LookForPlayers(mo, mo->info->sight_angle);
+        P_LookForPlayers(mo, mo->info->sight_angle_);
         */
     }
     // Lobo 2022: added tagged mobj support ;)
@@ -751,17 +751,17 @@ static void LoadThings(int lump)
 
         sector_t *sec = R_PointInSubsector(x, y)->sector;
 
-        if ((objtype->hyperflags & HF_MUSIC_CHANGER) && !musinfo_tracks[currmap->name_].processed)
+        if ((objtype->hyperflags_ & kHyperFlagMusicChanger) && !musinfo_tracks[currmap->name_].processed)
         {
             // This really should only be used with the original DoomEd number range
-            if (objtype->number >= 14100 && objtype->number < 14165)
+            if (objtype->number_ >= 14100 && objtype->number_ < 14165)
             {
                 int mus_number = -1;
 
-                if (objtype->number == 14100) // Default for level
+                if (objtype->number_ == 14100) // Default for level
                     mus_number = currmap->music_;
-                else if (musinfo_tracks[currmap->name_].mappings.count(objtype->number - 14100))
-                    mus_number = musinfo_tracks[currmap->name_].mappings[objtype->number - 14100];
+                else if (musinfo_tracks[currmap->name_].mappings.count(objtype->number_ - 14100))
+                    mus_number = musinfo_tracks[currmap->name_].mappings[objtype->number_ - 14100];
                 // Track found; make ad-hoc RTS script for music changing
                 if (mus_number != -1)
                 {
@@ -782,8 +782,8 @@ static void LoadThings(int lump)
 
         z = sec->f_h;
 
-        if (objtype->flags & MF_SPAWNCEILING)
-            z = sec->c_h - objtype->height;
+        if (objtype->flags_ & kMapObjectFlagSpawnCeiling)
+            z = sec->c_h - objtype->height_;
 
         if ((options & MTF_RESERVED) == 0 && (options & MTF_EXFLOOR_MASK))
         {
@@ -860,8 +860,8 @@ static void LoadHexenThings(int lump)
 
         z += sec->f_h;
 
-        if (objtype->flags & MF_SPAWNCEILING)
-            z = sec->c_h - objtype->height;
+        if (objtype->flags_ & kMapObjectFlagSpawnCeiling)
+            z = sec->c_h - objtype->height_;
 
         SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
     }
@@ -2439,18 +2439,18 @@ static void LoadUDMFThings()
 
             sector_t *sec = R_PointInSubsector(x, y)->sector;
 
-            if ((objtype->hyperflags & HF_MUSIC_CHANGER) && !musinfo_tracks[currmap->name_].processed)
+            if ((objtype->hyperflags_ & kHyperFlagMusicChanger) && !musinfo_tracks[currmap->name_].processed)
             {
                 // This really should only be used with the original DoomEd number range
-                if (objtype->number >= 14100 && objtype->number < 14165)
+                if (objtype->number_ >= 14100 && objtype->number_ < 14165)
                 {
                     int mus_number = -1;
 
-                    if (objtype->number == 14100) // Default for level
+                    if (objtype->number_ == 14100) // Default for level
                         mus_number = currmap->music_;
-                    else if (musinfo_tracks[currmap->name_].mappings.count(objtype->number - 14100))
+                    else if (musinfo_tracks[currmap->name_].mappings.count(objtype->number_ - 14100))
                     {
-                        mus_number = musinfo_tracks[currmap->name_].mappings[objtype->number - 14100];
+                        mus_number = musinfo_tracks[currmap->name_].mappings[objtype->number_ - 14100];
                     }
                     // Track found; make ad-hoc RTS script for music changing
                     if (mus_number != -1)
@@ -2470,8 +2470,8 @@ static void LoadUDMFThings()
                 }
             }
 
-            if (objtype->flags & MF_SPAWNCEILING)
-                z += sec->c_h - objtype->height;
+            if (objtype->flags_ & kMapObjectFlagSpawnCeiling)
+                z += sec->c_h - objtype->height_;
             else
                 z += sec->f_h;
 

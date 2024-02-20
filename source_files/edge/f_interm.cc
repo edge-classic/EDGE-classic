@@ -2032,7 +2032,7 @@ void WI_Start(void)
     {
         for (mobj_t *mo = mobjlisthead; mo != nullptr; mo = mo->next)
         {
-            if (DDF_CompareName(mo->info->name.c_str(), gd->bg_camera_.c_str()) != 0)
+            if (DDF_CompareName(mo->info->name_.c_str(), gd->bg_camera_.c_str()) != 0)
                 continue;
 
             background_camera_mo = mo;

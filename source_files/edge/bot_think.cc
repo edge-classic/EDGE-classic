@@ -69,11 +69,11 @@ bool bot_t::CanGetArmour(const Benefit *be, int extendedflags) const
 {
     // this matches the logic in GiveArmour() in p_inter.cc
 
-    armour_type_e a_class = (armour_type_e)be->sub.type;
+    ArmourType a_class = (ArmourType)be->sub.type;
 
     float amount = be->amount;
 
-    if (extendedflags & EF_SIMPLEARMOUR)
+    if (extendedflags & kExtendedFlagSimpleArmour)
     {
         float slack = be->limit - pl->armours[a_class];
 
@@ -118,7 +118,7 @@ bool bot_t::IsBarrel(const mobj_t *mo)
     if (mo->player)
         return false;
 
-    if (0 == (mo->extendedflags & EF_MONSTER))
+    if (0 == (mo->extendedflags & kExtendedFlagMonster))
         return false;
 
     return true;
@@ -135,14 +135,14 @@ float bot_t::EvalEnemy(const mobj_t *mo)
     // - target may not have the same supportobj as you.
     // - You must be able to see and shoot the target.
 
-    if (0 == (mo->flags & MF_SHOOTABLE) || mo->health <= 0)
+    if (0 == (mo->flags & kMapObjectFlagShootable) || mo->health <= 0)
         return -1;
 
     // occasionally shoot barrels
     if (IsBarrel(mo))
         return (C_Random() % 100 < 20) ? +1 : -1;
 
-    if (0 == (mo->extendedflags & EF_MONSTER) && !mo->player)
+    if (0 == (mo->extendedflags & kExtendedFlagMonster) && !mo->player)
         return -1;
 
     if (mo->player && mo->player == pl)
@@ -168,7 +168,7 @@ float bot_t::EvalItem(const mobj_t *mo)
     // this depends on our current inventory, whether the game mode is COOP
     // or DEATHMATCH, and whether we are fighting or not.
 
-    if (0 == (mo->flags & MF_SPECIAL))
+    if (0 == (mo->flags & kMapObjectFlagSpecial))
         return -1;
 
     bool fighting = (pl->mo->target != nullptr);
@@ -178,7 +178,7 @@ float bot_t::EvalItem(const mobj_t *mo)
     bool need_health = (pl->mo->health < 45);
 
     // handle weapons first (due to deathmatch rules)
-    for (const Benefit *B = mo->info->pickup_benefits; B != nullptr; B = B->next)
+    for (const Benefit *B = mo->info->pickup_benefits_; B != nullptr; B = B->next)
     {
         if (B->type == kBenefitTypeWeapon)
         {
@@ -186,7 +186,7 @@ float bot_t::EvalItem(const mobj_t *mo)
                 return NAV_EvaluateBigItem(mo);
 
             // try to get ammo from a dropped weapon
-            if (mo->flags & MF_DROPPED)
+            if (mo->flags & kMapObjectFlagDropped)
                 continue;
 
             // cannot get the ammo from a placed weapon except in altdeath
@@ -211,7 +211,7 @@ float bot_t::EvalItem(const mobj_t *mo)
         }
     }
 
-    for (const Benefit *B = mo->info->pickup_benefits; B != nullptr; B = B->next)
+    for (const Benefit *B = mo->info->pickup_benefits_; B != nullptr; B = B->next)
     {
         switch (B->type)
         {

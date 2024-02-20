@@ -117,9 +117,9 @@ extern cvar_c g_gravity;
 // A valid mobj_t is a mobj_t that has the proper subsector_t
 // filled in for its xy coordinates and is linked into the
 // sector from which the subsector was made, or has the
-// MF_NOSECTOR flag set (the subsector_t needs to be valid
-// even if MF_NOSECTOR is set), and is linked into a blockmap
-// block or has the MF_NOBLOCKMAP flag set.
+// kMapObjectFlagNoSector flag set (the subsector_t needs to be valid
+// even if kMapObjectFlagNoSector is set), and is linked into a blockmap
+// block or has the kMapObjectFlagNoBlockmap flag set.
 // Links should only be modified by the P_[Un]SetThingPosition()
 // functions.
 // Do not change the MF_NO? flags while a thing is valid.
@@ -160,7 +160,7 @@ typedef struct
     // type of thing
     const MapObjectDefinition *info;
 
-    // certain flags (mainly MF_AMBUSH).
+    // certain flags (mainly kMapObjectFlagAmbush).
     int flags;
 
     // tag number (from Hexen map format)

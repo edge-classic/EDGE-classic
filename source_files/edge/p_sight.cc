@@ -445,7 +445,7 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
 
     // The "eyes" of a thing is 75% of its height.
     SYS_ASSERT(src->info);
-    sight_I.src_z = src->z + src->height * src->info->viewheight;
+    sight_I.src_z = src->z + src->height * src->info->viewheight_;
 
     sight_I.src.x   = src->x;
     sight_I.src.y   = src->y;
@@ -463,9 +463,9 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
     // destination out of object's DDF slope range ?
     dist_a = P_ApproxDistance(sight_I.src.dx, sight_I.src.dy);
 
-    if (src->info->sight_distance > -1) // if we have sight_distance set
+    if (src->info->sight_distance_ > -1) // if we have sight_distance set
     {
-        if (src->info->sight_distance < dist_a)
+        if (src->info->sight_distance_ < dist_a)
             return false; // too far away for this thing to see
     }
 
@@ -479,10 +479,10 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
     L_WriteDebug("  Angle: %1.0f\n", ANG_2_FLOAT(sight_I.angle));
 #endif
 
-    if (sight_I.top_slope < dist_a * -src->info->sight_slope)
+    if (sight_I.top_slope < dist_a * -src->info->sight_slope_)
         return false;
 
-    if (sight_I.bottom_slope > dist_a * src->info->sight_slope)
+    if (sight_I.bottom_slope > dist_a * src->info->sight_slope_)
         return false;
 
     // -AJA- handle the case where no linedefs are crossed
@@ -544,7 +544,7 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
         dest_heights[3] = dest->z + dest->height * 0.75f;
         dest_heights[4] = dest->z + dest->height;
     }
-    else if (dest->extendedflags & EF_MONSTER)
+    else if (dest->extendedflags & kExtendedFlagMonster)
     {
         num_div         = 3;
         dest_heights[0] = dest->z;
@@ -584,7 +584,7 @@ bool P_CheckSightToPoint(mobj_t *src, float x, float y, float z)
 
     sight_I.src.x   = src->x;
     sight_I.src.y   = src->y;
-    sight_I.src_z   = src->z + src->height * src->info->viewheight;
+    sight_I.src_z   = src->z + src->height * src->info->viewheight_;
     sight_I.src.dx  = x - src->x;
     sight_I.src.dy  = y - src->y;
     sight_I.src_sub = src->subsector;
@@ -636,7 +636,7 @@ bool P_CheckSightApproxVert(mobj_t *src, mobj_t *dest)
 {
     SYS_ASSERT(src->info);
 
-    sight_I.src_z = src->z + src->height * src->info->viewheight;
+    sight_I.src_z = src->z + src->height * src->info->viewheight_;
 
     return CheckSightSameSubsector(src, dest);
 }

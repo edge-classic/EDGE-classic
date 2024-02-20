@@ -391,8 +391,8 @@ static void GotoReloadState(player_t *p, int ATK)
     }
 
     // if player has reload states, use 'em baby
-    if (p->mo->info->reload_state)
-        P_SetMobjStateDeferred(p->mo, p->mo->info->reload_state, 0);
+    if (p->mo->info->reload_state_)
+        P_SetMobjStateDeferred(p->mo, p->mo->info->reload_state_, 0);
 }
 
 //
@@ -922,7 +922,7 @@ static void BobWeapon(player_t *p, WeaponDefinition *info)
     float new_sy = p->mo->mom.Z ? psp->sy : 0;
 
     // bob the weapon based on movement speed
-    if (p->powers[PW_Jetpack] <= 0) // Don't bob when using jetpack
+    if (p->powers[kPowerTypeJetpack] <= 0) // Don't bob when using jetpack
     {
         BAMAngle angle = (128 * (g_erraticism.d ? p->e_bob_ticker++ : leveltime)) << 19;
         new_sx        = p->bob * info->swaying_ * epi::BAMCos(angle);
@@ -1526,8 +1526,8 @@ static void DoGunFlash(mobj_t *mo, int ATK)
         P_SetPspriteDeferred(p, ps_flash, info->flash_state_[ATK]);
 
 #if 0 // the SHOOT actions already do this...
-		if (mo->info->missile_state)
-			P_SetMobjStateDeferred(mo, mo->info->missile_state, 0);
+		if (mo->info->missile_state_)
+			P_SetMobjStateDeferred(mo, mo->info->missile_state_, 0);
 #endif
     }
 }
@@ -1605,7 +1605,7 @@ static void DoWeaponShoot(mobj_t *mo, int ATK)
             S_StartFX(info->hit_, WeapSfxCat(p), mo);
 
         if (info->feedback_)
-            mo->flags |= MF_JUSTATTACKED;
+            mo->flags |= kMapObjectFlagJustAttacked;
     }
     else
     {
@@ -1614,13 +1614,13 @@ static void DoWeaponShoot(mobj_t *mo, int ATK)
     }
 
     // show the player making the shot/attack...
-    if (attack && attack->attackstyle_ == kAttackStyleCloseCombat && mo->info->melee_state)
+    if (attack && attack->attackstyle_ == kAttackStyleCloseCombat && mo->info->melee_state_)
     {
-        P_SetMobjStateDeferred(mo, mo->info->melee_state, 0);
+        P_SetMobjStateDeferred(mo, mo->info->melee_state_, 0);
     }
-    else if (mo->info->missile_state)
+    else if (mo->info->missile_state_)
     {
-        P_SetMobjStateDeferred(mo, mo->info->missile_state, 0);
+        P_SetMobjStateDeferred(mo, mo->info->missile_state_, 0);
     }
 
     ATK = ATK_orig;
@@ -1974,12 +1974,12 @@ void A_WeaponZoom(mobj_t *mo)
 
 void A_SetInvuln(struct mobj_s *mo)
 {
-    mo->hyperflags |= HF_INVULNERABLE;
+    mo->hyperflags |= kHyperFlagInvulnerable;
 }
 
 void A_ClearInvuln(struct mobj_s *mo)
 {
-    mo->hyperflags &= ~HF_INVULNERABLE;
+    mo->hyperflags &= ~kHyperFlagInvulnerable;
 }
 
 void A_MoveFwd(mobj_t *mo)

@@ -118,17 +118,17 @@ static void CalcHeight(player_t *player, bool extra_tic)
         sink_mult -= cur_sec->sink_depth;
 
     if (g_erraticism.d && leveltime > 0 && (!player->cmd.forwardmove && !player->cmd.sidemove) &&
-        ((AlmostEquals(player->mo->height, player->mo->info->height) ||
-          AlmostEquals(player->mo->height, player->mo->info->crouchheight)) &&
+        ((AlmostEquals(player->mo->height, player->mo->info->height_) ||
+          AlmostEquals(player->mo->height, player->mo->info->crouchheight_)) &&
          (AlmostEquals(player->deltaviewheight, 0.0f) || sink_mult < 1.0f)))
         return;
 
-    if (player->mo->height < (player->mo->info->height + player->mo->info->crouchheight) / 2.0f)
-        player->mo->extendedflags |= EF_CROUCHING;
+    if (player->mo->height < (player->mo->info->height_ + player->mo->info->crouchheight_) / 2.0f)
+        player->mo->extendedflags |= kExtendedFlagCrouching;
     else
-        player->mo->extendedflags &= ~EF_CROUCHING;
+        player->mo->extendedflags &= ~kExtendedFlagCrouching;
 
-    player->std_viewheight = player->mo->height * player->mo->info->viewheight;
+    player->std_viewheight = player->mo->height * player->mo->info->viewheight_;
 
     if (sink_mult < 1.0f)
         player->deltaviewheight = HMM_MAX(player->deltaviewheight - 1.0f, -1.0f);
@@ -155,7 +155,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
     {
         BAMAngle angle = kBAMAngle90 / 5 * leveltime;
 
-        bob_z = player->bob / 2 * player->mo->info->bobbing * epi::BAMSin(angle);
+        bob_z = player->bob / 2 * player->mo->info->bobbing_ * epi::BAMSin(angle);
     }
 
     // ----CALCULATE VIEWHEIGHT----
@@ -168,7 +168,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
             player->viewheight      = player->std_viewheight;
             player->deltaviewheight = 0;
         }
-        else if (sink_mult < 1.0f && !(player->mo->extendedflags & EF_CROUCHING) &&
+        else if (sink_mult < 1.0f && !(player->mo->extendedflags & kExtendedFlagCrouching) &&
                  player->viewheight < player->std_viewheight * sink_mult)
         {
             player->viewheight = player->std_viewheight * sink_mult;
@@ -204,7 +204,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
 
     // if ((player->mo->mom.z <= -35.0)&&(player->mo->mom.z >= -40.0))
     if ((player->mo->mom.Z <= -35.0) && (player->mo->mom.Z >= -36.0))
-        if (player->mo->info->falling_sound)
+        if (player->mo->info->falling_sound_)
         {
             int sfx_cat;
 
@@ -216,7 +216,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
             {
                 sfx_cat = SNCAT_Opponent;
             }
-            S_StartFX(player->mo->info->falling_sound, sfx_cat, player->mo);
+            S_StartFX(player->mo->info->falling_sound_, sfx_cat, player->mo);
         }
 
     // don't apply bobbing when jumping, but have a smooth
@@ -258,7 +258,7 @@ void P_PlayerJump(player_t *pl, float dz, int wait)
         P_SetMobjStateDeferred(pl->mo, jump_st, 0);
 
     // -AJA- 1999/09/11: New JUMP_SOUND for ddf.
-    if (pl->mo->info->jump_sound)
+    if (pl->mo->info->jump_sound_)
     {
         int sfx_cat;
 
@@ -267,7 +267,7 @@ void P_PlayerJump(player_t *pl, float dz, int wait)
         else
             sfx_cat = SNCAT_Opponent;
 
-        S_StartFX(pl->mo->info->jump_sound, sfx_cat, pl->mo);
+        S_StartFX(pl->mo->info->jump_sound_, sfx_cat, pl->mo);
     }
 }
 
@@ -280,9 +280,9 @@ static void MovePlayer(player_t *player, bool extra_tic)
     bool onladder = player->mo->on_ladder >= 0;
 
     bool swimming  = player->swimming;
-    bool flying    = (player->powers[PW_Jetpack] > 0) && !swimming;
+    bool flying    = (player->powers[kPowerTypeJetpack] > 0) && !swimming;
     bool jumping   = (player->jumpwait > 0);
-    bool crouching = (player->mo->extendedflags & EF_CROUCHING) ? true : false;
+    bool crouching = (player->mo->extendedflags & kExtendedFlagCrouching) ? true : false;
 
     float dx, dy;
     float eh, ev;
@@ -397,7 +397,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
         else
             sfx_cat = SNCAT_Opponent;
 
-        if (player->powers[PW_Jetpack] <= (5 * TICRATE))
+        if (player->powers[kPowerTypeJetpack] <= (5 * TICRATE))
         {
             if ((leveltime & 10) == 0)
                 S_StartFX(sfx_jpflow, sfx_cat, player->mo); // fuel low
@@ -412,13 +412,13 @@ static void MovePlayer(player_t *player, bool extra_tic)
             S_StartFX(sfx_jpidle, sfx_cat, player->mo);
     }
 
-    if (player->mo->state == &states[player->mo->info->idle_state])
+    if (player->mo->state == &states[player->mo->info->idle_state_])
     {
         if (!jumping && !flying && (onground || swimming) && (cmd->forwardmove || cmd->sidemove))
         {
             // enter the CHASE (i.e. walking) states
-            if (player->mo->info->chase_state)
-                P_SetMobjStateDeferred(player->mo, player->mo->info->chase_state, 0);
+            if (player->mo->info->chase_state_)
+                P_SetMobjStateDeferred(player->mo, player->mo->info->chase_state_, 0);
         }
     }
 
@@ -429,36 +429,36 @@ static void MovePlayer(player_t *player, bool extra_tic)
 
     if (!extra_tic || !r_doubleframes.d)
     {
-        if (level_flags.jump && mo->info->jumpheight > 0 && (cmd->upwardmove > 4))
+        if (level_flags.jump && mo->info->jumpheight_ > 0 && (cmd->upwardmove > 4))
         {
             if (!jumping && !crouching && !swimming && !flying && onground && !onladder)
             {
-                P_PlayerJump(player, player->mo->info->jumpheight / (r_doubleframes.d ? 1.25f : 1.4f),
-                             player->mo->info->jump_delay);
+                P_PlayerJump(player, player->mo->info->jumpheight_ / (r_doubleframes.d ? 1.25f : 1.4f),
+                             player->mo->info->jump_delay_);
             }
         }
     }
 
     // EDGE Feature: Crouching
 
-    if (level_flags.crouch && mo->info->crouchheight > 0 && (player->cmd.upwardmove < -4) && !player->wet_feet &&
+    if (level_flags.crouch && mo->info->crouchheight_ > 0 && (player->cmd.upwardmove < -4) && !player->wet_feet &&
         !jumping && onground)
     // NB: no ladder check, onground is sufficient
     {
-        if (mo->height > mo->info->crouchheight)
+        if (mo->height > mo->info->crouchheight_)
         {
-            mo->height = HMM_MAX(mo->height - 2.0f / (r_doubleframes.d ? 2.0 : 1.0), mo->info->crouchheight);
+            mo->height = HMM_MAX(mo->height - 2.0f / (r_doubleframes.d ? 2.0 : 1.0), mo->info->crouchheight_);
             mo->player->deltaviewheight = -1.0f;
         }
     }
     else // STAND UP
     {
-        if (mo->height < mo->info->height)
+        if (mo->height < mo->info->height_)
         {
-            float new_height = HMM_MIN(mo->height + 2 / (r_doubleframes.d ? 2 : 1), mo->info->height);
+            float new_height = HMM_MIN(mo->height + 2 / (r_doubleframes.d ? 2 : 1), mo->info->height_);
 
             // prevent standing up inside a solid area
-            if ((mo->flags & MF_NOCLIP) || mo->z + new_height <= mo->ceilingz)
+            if ((mo->flags & kMapObjectFlagNoClip) || mo->z + new_height <= mo->ceilingz)
             {
                 mo->height                  = new_height;
                 mo->player->deltaviewheight = 1.0f;
@@ -501,7 +501,7 @@ static void DeathThink(player_t *player, bool extra_tic)
     float   slope;
 
     // -AJA- 1999/12/07: don't die mid-air.
-    player->powers[PW_Jetpack] = 0;
+    player->powers[kPowerTypeJetpack] = 0;
 
     if (!extra_tic)
         P_MovePsprites(player);
@@ -578,7 +578,7 @@ static void DeathThink(player_t *player, bool extra_tic)
     // lose the zoom when dead
     player->zoom_fov = 0;
 
-    if (deathmatch >= 3 && player->mo->movecount > player->mo->info->respawntime)
+    if (deathmatch >= 3 && player->mo->movecount > player->mo->info->respawntime_)
         return;
 
     if (player->cmd.buttons & BT_USE)
@@ -593,7 +593,7 @@ static void P_UpdatePowerups(player_t *player)
     if (player->playerstate == PST_DEAD)
         limit = 1; // TICRATE * 5;
 
-    for (pw = 0; pw < NUMPOWERS; pw++)
+    for (pw = 0; pw < kTotalPowerTypes; pw++)
     {
         if (player->powers[pw] < 0) // -ACB- 2004/02/04 Negative values last a level
             continue;
@@ -613,10 +613,10 @@ static void P_UpdatePowerups(player_t *player)
         }
     }
 
-    if (player->powers[PW_PartInvis] >= 128 || fmod(player->powers[PW_PartInvis], 16) >= 8)
-        player->mo->flags |= MF_FUZZY;
+    if (player->powers[kPowerTypePartInvis] >= 128 || fmod(player->powers[kPowerTypePartInvis], 16) >= 8)
+        player->mo->flags |= kMapObjectFlagFuzzy;
     else
-        player->mo->flags &= ~MF_FUZZY;
+        player->mo->flags &= ~kMapObjectFlagFuzzy;
 
     // Handling colormaps.
     //
@@ -627,31 +627,31 @@ static void P_UpdatePowerups(player_t *player)
     player->effect_colourmap = nullptr;
     player->effect_left      = 0;
 
-    if (player->powers[PW_Invulnerable] > 0)
+    if (player->powers[kPowerTypeInvulnerable] > 0)
     {
-        float s = player->powers[PW_Invulnerable];
+        float s = player->powers[kPowerTypeInvulnerable];
 
         // -ACB- FIXME!!! Catch lookup failure!
         player->effect_colourmap = colormaps.Lookup("ALLWHITE");
         player->effect_left      = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
     }
-    else if (player->powers[PW_Infrared] > 0)
+    else if (player->powers[kPowerTypeInfrared] > 0)
     {
-        float s = player->powers[PW_Infrared];
+        float s = player->powers[kPowerTypeInfrared];
 
         player->effect_left = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
     }
-    else if (player->powers[PW_NightVision] > 0) // -ACB- 1998/07/15 NightVision Code
+    else if (player->powers[kPowerTypeNightVision] > 0) // -ACB- 1998/07/15 NightVision Code
     {
-        float s = player->powers[PW_NightVision];
+        float s = player->powers[kPowerTypeNightVision];
 
         // -ACB- FIXME!!! Catch lookup failure!
         player->effect_colourmap = colormaps.Lookup("ALLGREEN");
         player->effect_left      = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
     }
-    else if (player->powers[PW_Berserk] > 0) // Lobo 2021: Un-Hardcode Berserk colour tint
+    else if (player->powers[kPowerTypeBerserk] > 0) // Lobo 2021: Un-Hardcode Berserk colour tint
     {
-        float s = player->powers[PW_Berserk];
+        float s = player->powers[kPowerTypeBerserk];
 
         player->effect_colourmap = colormaps.Lookup("BERSERK");
         player->effect_left      = (s <= 0) ? 0 : HMM_MIN(int(s), EFFECT_MAX_TIME);
@@ -705,7 +705,7 @@ void P_DumpMobjsTemp(void)
     for (mo = mobjlisthead; mo; mo = mo->next, index++)
     {
         I_Warning(" %4d: %p next:%p prev:%p [%s] at (%1.0f,%1.0f,%1.0f) states=%d > %d tics=%d\n", index, mo, mo->next,
-                  mo->prev, mo->info->name.c_str(), mo->x, mo->y, mo->z, (int)(mo->state ? mo->state - states : -1),
+                  mo->prev, mo->info->name_.c_str(), mo->x, mo->y, mo->z, (int)(mo->state ? mo->state - states : -1),
                   (int)(mo->next_state ? mo->next_state - states : -1), mo->tics);
     }
 
@@ -727,8 +727,8 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
 		for (tn = mo->touch_sectors; tn; tn=tn->mo_next)
 		{
 			L_WriteDebug("  SEC %d  Other = %s\n", tn->sec - sectors,
-				tn->sec_next ? tn->sec_next->mo->info->name :
-			tn->sec_prev ? tn->sec_prev->mo->info->name : "(None)");
+				tn->sec_next ? tn->sec_next->mo->info->name_ :
+			tn->sec_prev ? tn->sec_prev->mo->info->name_ : "(None)");
 
 			SYS_ASSERT(tn->mo == mo);
 			if (tn->mo_next)
@@ -750,19 +750,19 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
 
     // fixme: do this in the cheat code
     if (player->cheats & CF_NOCLIP)
-        player->mo->flags |= MF_NOCLIP;
+        player->mo->flags |= kMapObjectFlagNoClip;
     else
-        player->mo->flags &= ~MF_NOCLIP;
+        player->mo->flags &= ~kMapObjectFlagNoClip;
 
     // chain saw run forward
     if (extra_tic || !r_doubleframes.d)
     {
-        if (player->mo->flags & MF_JUSTATTACKED)
+        if (player->mo->flags & kMapObjectFlagJustAttacked)
         {
             cmd->angleturn   = 0;
             cmd->forwardmove = 64;
             cmd->sidemove    = 0;
-            player->mo->flags &= ~MF_JUSTATTACKED;
+            player->mo->flags &= ~kMapObjectFlagJustAttacked;
         }
     }
 
@@ -808,8 +808,8 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
         if (cmd->forwardmove == 0 && cmd->sidemove == 0 && !player->swimming && cmd->upwardmove <= 0 &&
             !(cmd->buttons & (BT_ATTACK | BT_USE | BT_CHANGE | EBT_SECONDATK | EBT_RELOAD | EBT_ACTION1 | EBT_ACTION2 |
                               EBT_INVUSE | EBT_THIRDATK | EBT_FOURTHATK)) &&
-            ((AlmostEquals(player->mo->height, player->mo->info->height) ||
-              AlmostEquals(player->mo->height, player->mo->info->crouchheight)) &&
+            ((AlmostEquals(player->mo->height, player->mo->info->height_) ||
+              AlmostEquals(player->mo->height, player->mo->info->crouchheight_)) &&
              (AlmostEquals(player->deltaviewheight, 0.0f) || sinking)))
         {
             should_think = false;
@@ -1052,7 +1052,7 @@ void P_UpdateTotalArmour(player_t *p)
 
     p->totalarmour = 0;
 
-    for (i = 0; i < NUMARMOUR; i++)
+    for (i = 0; i < kTotalArmourTypes; i++)
     {
         p->totalarmour += p->armours[i];
 
@@ -1241,25 +1241,25 @@ void P_GiveInitialBenefits(player_t *p, const MapObjectDefinition *info)
     }
 
     // clear out inventory & inventory-limits
-    for (i = 0; i < NUMINV; i++)
+    for (i = 0; i < kTotalInventoryTypes; i++)
     {
         p->inventory[i].num = p->inventory[i].max = 0;
     }
 
     // clear out counter & counter-limits
-    for (i = 0; i < NUMCOUNTER; i++)
+    for (i = 0; i < kTotalCounterTypes; i++)
     {
         p->counters[i].num = p->counters[i].max = 0;
     }
 
     // set health and armour
-    p->health       = info->spawnhealth;
-    p->air_in_lungs = info->lung_capacity;
+    p->health       = info->spawnhealth_;
+    p->air_in_lungs = info->lung_capacity_;
     p->underwater   = false;
     p->airless   = false;
 
 
-    for (i = 0; i < NUMARMOUR; i++)
+    for (i = 0; i < kTotalArmourTypes; i++)
     {
         p->armours[i]      = 0;
         p->armour_types[i] = nullptr;
@@ -1269,7 +1269,7 @@ void P_GiveInitialBenefits(player_t *p, const MapObjectDefinition *info)
     p->cards       = kDoorKeyNone;
 
     // give all initial benefits
-    P_GiveBenefitList(p, nullptr, info->initial_benefits, false);
+    P_GiveBenefitList(p, nullptr, info->initial_benefits_, false);
 
     // give all free weapons.  Needs to be after ammo, so that
     // clip weapons can get their clips filled.

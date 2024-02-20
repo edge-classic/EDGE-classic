@@ -549,7 +549,7 @@ void SR_MobjPutType(void *storage, int index, void *extra)
 {
     MapObjectDefinition *info = ((MapObjectDefinition **)storage)[index];
 
-    SV_PutString((info == nullptr) ? nullptr : info->name.c_str());
+    SV_PutString((info == nullptr) ? nullptr : info->name_.c_str());
 }
 
 bool SR_MobjGetSpawnPoint(void *storage, int index, void *extra)
@@ -679,21 +679,21 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
     // find base state
     offset = strtol(off_p, nullptr, 0) - 1;
 
-    base = DDF_StateFindLabel(actual->state_grp, base_p, true /* quiet */);
+    base = DDF_StateFindLabel(actual->state_grp_, base_p, true /* quiet */);
 
     if (!base)
     {
         I_Warning("LOADGAME: no such label `%s' for state.\n", base_p);
         offset = 0;
 
-        if (actual->idle_state)
-            base = actual->idle_state;
-        else if (actual->spawn_state)
-            base = actual->spawn_state;
-        else if (actual->meander_state)
-            base = actual->meander_state;
-        else if (actual->state_grp.size() > 0)
-            base = actual->state_grp[0].first;
+        if (actual->idle_state_)
+            base = actual->idle_state_;
+        else if (actual->spawn_state_)
+            base = actual->spawn_state_;
+        else if (actual->meander_state_)
+            base = actual->meander_state_;
+        else if (actual->state_grp_.size() > 0)
+            base = actual->state_grp_[0].first;
         else
             base = 1;
     }
@@ -750,9 +750,9 @@ void SR_MobjPutState(void *storage, int index, void *extra)
     }
 
     // object has no states ?
-    if (mo->info->state_grp.empty())
+    if (mo->info->state_grp_.empty())
     {
-        I_Warning("SAVEGAME: object [%s] has no states !!\n", mo->info->name.c_str());
+        I_Warning("SAVEGAME: object [%s] has no states !!\n", mo->info->name_.c_str());
         SV_PutString(nullptr);
         return;
     }
@@ -762,14 +762,14 @@ void SR_MobjPutState(void *storage, int index, void *extra)
 
     if (s_num < 0 || s_num >= num_states)
     {
-        I_Warning("SAVEGAME: object [%s] is in invalid state %d\n", mo->info->name.c_str(), s_num);
+        I_Warning("SAVEGAME: object [%s] is in invalid state %d\n", mo->info->name_.c_str(), s_num);
 
-        if (mo->info->idle_state)
-            s_num = mo->info->idle_state;
-        else if (mo->info->spawn_state)
-            s_num = mo->info->spawn_state;
-        else if (mo->info->meander_state)
-            s_num = mo->info->meander_state;
+        if (mo->info->idle_state_)
+            s_num = mo->info->idle_state_;
+        else if (mo->info->spawn_state_)
+            s_num = mo->info->spawn_state_;
+        else if (mo->info->meander_state_)
+            s_num = mo->info->meander_state_;
         else
         {
             SV_PutString("*:*:1");
@@ -780,9 +780,9 @@ void SR_MobjPutState(void *storage, int index, void *extra)
     // state gone AWOL into another object ?
     actual = mo->info;
 
-    if (!DDF_StateGroupHasState(actual->state_grp, s_num))
+    if (!DDF_StateGroupHasState(actual->state_grp_, s_num))
     {
-        I_Warning("SAVEGAME: object [%s] is in AWOL state %d\n", mo->info->name.c_str(), s_num);
+        I_Warning("SAVEGAME: object [%s] is in AWOL state %d\n", mo->info->name_.c_str(), s_num);
 
         bool state_found = false;
 
@@ -791,7 +791,7 @@ void SR_MobjPutState(void *storage, int index, void *extra)
         {
             actual = *iter;
 
-            if (DDF_StateGroupHasState(actual->state_grp, s_num))
+            if (DDF_StateGroupHasState(actual->state_grp_, s_num))
             {
                 state_found = true;
                 break;
@@ -805,7 +805,7 @@ void SR_MobjPutState(void *storage, int index, void *extra)
             return;
         }
 
-        if (actual->name.empty())
+        if (actual->name_.empty())
         {
             I_Warning("-- OOPS: state %d found in unnamed object !!\n", s_num);
             SV_PutString("*:*:1");
@@ -816,17 +816,17 @@ void SR_MobjPutState(void *storage, int index, void *extra)
     // find the nearest base state
     base = s_num;
 
-    while (!states[base].label && DDF_StateGroupHasState(actual->state_grp, base - 1))
+    while (!states[base].label && DDF_StateGroupHasState(actual->state_grp_, base - 1))
     {
         base--;
     }
 
-    sprintf(swizzle, "%s:%s:%d", (actual == mo->info) ? "*" : actual->name.c_str(),
+    sprintf(swizzle, "%s:%s:%d", (actual == mo->info) ? "*" : actual->name_.c_str(),
             states[base].label ? states[base].label : "*", 1 + s_num - base);
 
 #if 0
 	L_WriteDebug("Swizzled state %d of [%s] -> `%s'\n", 
-		s_num, mo->info->name, swizzle);
+		s_num, mo->info->name_, swizzle);
 #endif
 
     SV_PutString(swizzle);

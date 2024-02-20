@@ -287,22 +287,22 @@ static void RAD_CheckForTime(const char *info, void *storage)
     *dest = RoundToInt(val * (float)TICRATE);
 }
 
-static armour_type_e RAD_CheckForArmourType(const char *info)
+static ArmourType RAD_CheckForArmourType(const char *info)
 {
     if (DDF_CompareName(info, "GREEN") == 0)
-        return ARMOUR_Green;
+        return kArmourTypeGreen;
     if (DDF_CompareName(info, "BLUE") == 0)
-        return ARMOUR_Blue;
+        return kArmourTypeBlue;
     if (DDF_CompareName(info, "PURPLE") == 0)
-        return ARMOUR_Purple;
+        return kArmourTypePurple;
     if (DDF_CompareName(info, "YELLOW") == 0)
-        return ARMOUR_Yellow;
+        return kArmourTypeYellow;
     if (DDF_CompareName(info, "RED") == 0)
-        return ARMOUR_Red;
+        return kArmourTypeRed;
 
     // this never returns
     RAD_Error("Unknown armour type: %s\n", info);
-    return ARMOUR_Green;
+    return kArmourTypeGreen;
 }
 
 static changetex_type_e RAD_CheckForChangetexType(const char *info)
@@ -1218,7 +1218,7 @@ static void RAD_ParseOnCondition(param_set_t &pars)
 {
     // OnCondition  <condition>
 
-    condition_check_t *cond = new condition_check_t;
+    ConditionCheck *cond = new ConditionCheck;
 
     if (!DDF_MainParseCondition(pars[1], cond))
     {

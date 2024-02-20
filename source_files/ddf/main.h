@@ -133,7 +133,7 @@ void DDF_CleanUp();
 
 void DDF_Load(epi::File *f);
 
-bool        DDF_MainParseCondition(const char *str, condition_check_t *cond);
+bool        DDF_MainParseCondition(const char *str, ConditionCheck *cond);
 void        DDF_MainGetWhenAppear(const char *info, void *storage);
 void        DDF_MainGetRGB(const char *info, void *storage);
 bool        DDF_MainDecodeBrackets(const char *info, char *outer, char *inner,

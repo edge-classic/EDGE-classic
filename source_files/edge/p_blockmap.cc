@@ -348,7 +348,7 @@ void P_UnsetThingPosition(mobj_t *mo)
     touch_node_t *tn;
 
     // unlink from subsector
-    if (!(mo->flags & MF_NOSECTOR))
+    if (!(mo->flags & kMapObjectFlagNoSector))
     {
         // (inert things don't need to be in subsector list)
 
@@ -394,7 +394,7 @@ void P_UnsetThingPosition(mobj_t *mo)
     }
 
     // unlink from blockmap
-    if (!(mo->flags & MF_NOBLOCKMAP))
+    if (!(mo->flags & kMapObjectFlagNoBlockmap))
     {
         // inert things don't need to be in blockmap
         if (mo->bnext)
@@ -436,7 +436,7 @@ void P_UnsetThingPosition(mobj_t *mo)
     }
 
     // unlink from dynamic light blockmap
-    if (mo->info && (mo->info->dlight[0].type != DLITE_None) && (mo->info->glow_type == GLOW_None))
+    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) && (mo->info->glow_type_ == kSectorGlowTypeNone))
     {
         if (mo->dlnext)
         {
@@ -476,7 +476,7 @@ void P_UnsetThingPosition(mobj_t *mo)
     }
 
     // unlink from sector glow list
-    if (mo->info && (mo->info->dlight[0].type != DLITE_None) && (mo->info->glow_type != GLOW_None))
+    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) && (mo->info->glow_type_ != kSectorGlowTypeNone))
     {
         sector_t *sec = mo->subsector->sector;
 
@@ -566,7 +566,7 @@ void P_SetThingPosition(mobj_t *mo)
     // determine properties
     mo->props = R_PointGetProps(ss, mo->z + mo->height / 2);
 
-    if (!(mo->flags & MF_NOSECTOR))
+    if (!(mo->flags & kMapObjectFlagNoSector))
     {
         mo->snext = ss->thinglist;
         mo->sprev = nullptr;
@@ -635,7 +635,7 @@ void P_SetThingPosition(mobj_t *mo)
 #endif
 
     // link into blockmap
-    if (!(mo->flags & MF_NOBLOCKMAP))
+    if (!(mo->flags & kMapObjectFlagNoBlockmap))
     {
         blockx = BLOCKMAP_GET_X(mo->x);
         blocky = BLOCKMAP_GET_Y(mo->y);
@@ -660,7 +660,7 @@ void P_SetThingPosition(mobj_t *mo)
     }
 
     // link into dynamic light blockmap
-    if (mo->info && (mo->info->dlight[0].type != DLITE_None) && (mo->info->glow_type == GLOW_None))
+    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) && (mo->info->glow_type_ == kSectorGlowTypeNone))
     {
         blockx = LIGHTMAP_GET_X(mo->x);
         blocky = LIGHTMAP_GET_Y(mo->y);
@@ -685,7 +685,7 @@ void P_SetThingPosition(mobj_t *mo)
     }
 
     // link into sector glow list
-    if (mo->info && (mo->info->dlight[0].type != DLITE_None) && (mo->info->glow_type != GLOW_None))
+    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) && (mo->info->glow_type_ != kSectorGlowTypeNone))
     {
         sector_t *sec = mo->subsector->sector;
 
@@ -910,16 +910,16 @@ void P_SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
         // check whether radius touches the given bbox
         float r = mo->dlight.r;
 
-        if (mo->info->glow_type == GLOW_Floor && sec->f_h + r <= z1)
+        if (mo->info->glow_type_ == kSectorGlowTypeFloor && sec->f_h + r <= z1)
             continue;
 
-        if (mo->info->glow_type == GLOW_Ceiling && sec->c_h - r >= z1)
+        if (mo->info->glow_type_ == kSectorGlowTypeCeiling && sec->c_h - r >= z1)
             continue;
 
         // create shader if necessary
         if (!mo->dlight.shader)
         {
-            if (mo->info->glow_type == GLOW_Wall)
+            if (mo->info->glow_type_ == kSectorGlowTypeWall)
             {
                 if (mo->dlight.bad_wall_glow)
                     continue;

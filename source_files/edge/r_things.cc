@@ -104,7 +104,7 @@ static float GetHoverDZ(mobj_t *mo, float bob_mult = 0)
 
     mo->phase = epi::BAMSin(phase);
 
-    if (mo->hyperflags & HF_HOVER)
+    if (mo->hyperflags & kHyperFlagHover)
         mo->phase *= 4.0f;
     else if (bob_mult > 0)
         mo->phase *= (mo->height * 0.5 * bob_mult);
@@ -165,7 +165,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
     float top   = IM_TOP(image);
     float ratio = 1.0f;
 
-    bool is_fuzzy = (player->mo->flags & MF_FUZZY) ? true : false;
+    bool is_fuzzy = (player->mo->flags & kMapObjectFlagFuzzy) ? true : false;
 
     float trans = player->mo->visibility;
 
@@ -267,7 +267,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
     data.lit_pos.X = player->mo->x + viewcos * away;
     data.lit_pos.Y = player->mo->y + viewsin * away;
-    data.lit_pos.Z = player->mo->z + player->mo->height * player->mo->info->shotheight;
+    data.lit_pos.Z = player->mo->z + player->mo->height * player->mo->info->shotheight_;
 
     data.col[0].Clear();
 
@@ -1036,7 +1036,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 
     float hover_dz = 0;
 
-    if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) && bob_mult > 0))
+    if (mo->hyperflags & kHyperFlagHover || ((mo->flags & kMapObjectFlagSpecial || mo->flags & kMapObjectFlagCorpse) && bob_mult > 0))
         hover_dz = GetHoverDZ(mo, bob_mult);
 
     if (sink_mult > 0)
@@ -1069,14 +1069,14 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
         pos1 = (sprite_width / -2.0f - side_offset) * xscale;
         pos2 = (sprite_width / +2.0f - side_offset) * xscale;
 
-        switch (mo->info->yalign)
+        switch (mo->info->yalign_)
         {
-        case SPYA_TopDown:
+        case SpriteYAlignmentTopDown:
             gzt = mo->z + mo->height + top_offset * mo->scale;
             gzb = gzt - sprite_height * mo->scale;
             break;
 
-        case SPYA_Middle: {
+        case SpriteYAlignmentMiddle: {
             float _mz = mo->z + mo->height * 0.5 + top_offset * mo->scale;
             float dz  = sprite_height * 0.5 * mo->scale;
 
@@ -1085,14 +1085,14 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
             break;
         }
 
-        case SPYA_BottomUp:
+        case SpriteYAlignmentBottomUp:
         default:
             gzb = mo->z + top_offset * mo->scale;
             gzt = gzb + sprite_height * mo->scale;
             break;
         }
 
-        if (mo->hyperflags & HF_HOVER || (sink_mult > 0 || bob_mult > 0))
+        if (mo->hyperflags & kHyperFlagHover || (sink_mult > 0 || bob_mult > 0))
         {
             gzt += hover_dz;
             gzb += hover_dz;
@@ -1102,12 +1102,12 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
     // fix for sprites that sit wrongly into the floor/ceiling
     int y_clipping = YCLIP_Soft;
 
-    if (is_model || (mo->flags & MF_FUZZY) || ((mo->hyperflags & HF_HOVER) && AlmostEquals(sink_mult, 0.0f)))
+    if (is_model || (mo->flags & kMapObjectFlagFuzzy) || ((mo->hyperflags & kHyperFlagHover) && AlmostEquals(sink_mult, 0.0f)))
     {
         y_clipping = YCLIP_Never;
     }
     // Lobo: new FLOOR_CLIP flag
-    else if (mo->hyperflags & HF_FLOORCLIP || sink_mult > 0)
+    else if (mo->hyperflags & kHyperFlagFloorClip || sink_mult > 0)
     {
         // do nothing? just skip the other elseifs below
         y_clipping = YCLIP_Hard;
@@ -1115,7 +1115,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
     else if (sprite_kludge == 0 && gzb < mo->floorz)
     {
         // explosion ?
-        if (mo->info->flags & MF_MISSILE)
+        if (mo->info->flags_ & kMapObjectFlagMissile)
         {
             y_clipping = YCLIP_Hard;
         }
@@ -1128,7 +1128,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
     else if (sprite_kludge == 0 && gzt > mo->ceilingz)
     {
         // explosion ?
-        if (mo->info->flags & MF_MISSILE)
+        if (mo->info->flags_ & kMapObjectFlagMissile)
         {
             y_clipping = YCLIP_Hard;
         }
@@ -1214,7 +1214,7 @@ static void RGL_DrawModel(drawthing_t *dthing)
     if (sink_mult > 0)
         z -= mo->height * 0.5 * sink_mult;
 
-    if (mo->hyperflags & HF_HOVER || ((mo->flags & MF_SPECIAL || mo->flags & MF_CORPSE) && bob_mult > 0))
+    if (mo->hyperflags & kHyperFlagHover || ((mo->flags & kMapObjectFlagSpecial || mo->flags & kMapObjectFlagCorpse) && bob_mult > 0))
         z += GetHoverDZ(mo, bob_mult);
 
     int   last_frame = mo->state->frame;
@@ -1232,10 +1232,10 @@ static void RGL_DrawModel(drawthing_t *dthing)
 
     if (md->md2_model)
         MD2_RenderModel(md->md2_model, skin_img, false, last_frame, mo->state->frame, lerp, dthing->mx, dthing->my, z,
-                        mo, mo->props, mo->model_scale, mo->model_aspect, mo->info->model_bias, mo->info->model_rotate);
+                        mo, mo->props, mo->model_scale, mo->model_aspect, mo->info->model_bias_, mo->info->model_rotate_);
     else if (md->mdl_model)
         MDL_RenderModel(md->mdl_model, skin_img, false, last_frame, mo->state->frame, lerp, dthing->mx, dthing->my, z,
-                        mo, mo->props, mo->model_scale, mo->model_aspect, mo->info->model_bias, mo->info->model_rotate);
+                        mo, mo->props, mo->model_scale, mo->model_aspect, mo->info->model_bias_, mo->info->model_rotate_);
 }
 
 typedef struct
@@ -1279,7 +1279,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
     mobj_t *mo = dthing->mo;
 
-    bool is_fuzzy = (mo->flags & MF_FUZZY) ? true : false;
+    bool is_fuzzy = (mo->flags & kMapObjectFlagFuzzy) ? true : false;
 
     float trans = mo->visibility;
 
@@ -1290,7 +1290,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
     const image_c *image = dthing->image;
 
-    GLuint tex_id = W_ImageCache(image, false, ren_fx_colmap ? ren_fx_colmap : dthing->mo->info->palremap);
+    GLuint tex_id = W_ImageCache(image, false, ren_fx_colmap ? ren_fx_colmap : dthing->mo->info->palremap_);
 
     //	float w = IM_WIDTH(image);
     float h     = IM_HEIGHT(image);
@@ -1382,7 +1382,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
     if (trans < 0.99 || image->opacity == OPAC_Complex)
         blending |= BL_Alpha;
 
-    if (mo->hyperflags & HF_NOZBUFFER)
+    if (mo->hyperflags & kHyperFlagNoZBufferUpdate)
         blending |= BL_NoZBuf;
 
     float  fuzz_mul = 0;

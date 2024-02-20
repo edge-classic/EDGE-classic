@@ -160,10 +160,10 @@ void DDF_BoomMakeGenSector(SectorType *sec, int number)
                 sec->damage_.instakill_                     = true;
                 sec->damage_.damage_unless_                 = new Benefit;
                 sec->damage_.damage_unless_->type           = kBenefitTypePowerup;
-                sec->damage_.damage_unless_->sub.type       = PW_AcidSuit;
+                sec->damage_.damage_unless_->sub.type       = kPowerTypeAcidSuit;
                 sec->damage_.damage_unless_->next           = new Benefit;
                 sec->damage_.damage_unless_->next->type     = kBenefitTypePowerup;
-                sec->damage_.damage_unless_->next->sub.type = PW_Invulnerable;
+                sec->damage_.damage_unless_->next->sub.type = kPowerTypeInvulnerable;
                 sec->damage_.damage_unless_->next->next     = nullptr;
                 break;
 

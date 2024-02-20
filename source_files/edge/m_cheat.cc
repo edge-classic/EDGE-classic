@@ -321,7 +321,7 @@ bool M_CheatResponder(event_t *ev)
         {
             next = mo->next;
 
-            if ((mo->extendedflags & EF_MONSTER) && (mo->health > 0))
+            if ((mo->extendedflags & kExtendedFlagMonster) && (mo->health > 0))
             {
                 P_TelefragMobj(mo, nullptr, nullptr);
                 killcount++;
@@ -361,8 +361,8 @@ bool M_CheatResponder(event_t *ev)
             else
                 pl->powers[i] = 0;
 
-            if (i == PW_Berserk)
-                pl->keep_powers |= (1 << PW_Berserk);
+            if (i == kPowerTypeBerserk)
+                pl->keep_powers |= (1 << kPowerTypeBerserk);
 
             CON_MessageLDF("BeholdUsed");
         }
@@ -392,7 +392,7 @@ bool M_CheatResponder(event_t *ev)
         if (w)
         {
             P_AddWeapon(pl, w, nullptr);
-            pl->powers[PW_Invulnerable] = 1;
+            pl->powers[kPowerTypeInvulnerable] = 1;
             CON_MessageLDF("CHOPPERSNote");
         }
     }

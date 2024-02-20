@@ -24,7 +24,7 @@
 //----------------------------------------------------------------------------
 //
 // -KM- 1998/07/21 Clear the background behind those end pics.
-// -KM- 1998/09/27 sounds.ddf stuff: seesound -> DDF_LookupSound(seesound)
+// -KM- 1998/09/27 sounds.ddf stuff: seesound_ -> DDF_LookupSound(seesound_)
 // -KM- 1998/11/25 Finale generalised.
 //
 
@@ -530,8 +530,8 @@ static void CAST_RangeAttack(const AttackDefinition *range)
     }
     else if (range->attackstyle_ == kAttackStyleSpawner)
     {
-        if (range->spawnedobj_ && range->spawnedobj_->rangeattack)
-            sfx = range->spawnedobj_->rangeattack->initsound_;
+        if (range->spawnedobj_ && range->spawnedobj_->rangeattack_)
+            sfx = range->spawnedobj_->rangeattack_->initsound_;
     }
     else if (range->attackstyle_ == kAttackStyleTracker)
     {
@@ -539,7 +539,7 @@ static void CAST_RangeAttack(const AttackDefinition *range)
     }
     else if (range->atk_mobj_)
     {
-        sfx = range->atk_mobj_->seesound;
+        sfx = range->atk_mobj_->seesound_;
     }
 
     S_StartFX(sfx);
@@ -553,42 +553,42 @@ static void CastPerformAction(void)
 
     if (caststate->action == P_ActMakeCloseAttemptSound)
     {
-        if (castorder->closecombat)
-            sfx = castorder->closecombat->initsound_;
+        if (castorder->closecombat_)
+            sfx = castorder->closecombat_->initsound_;
     }
     else if (caststate->action == P_ActMeleeAttack)
     {
-        if (castorder->closecombat)
-            sfx = castorder->closecombat->sound_;
+        if (castorder->closecombat_)
+            sfx = castorder->closecombat_->sound_;
     }
     else if (caststate->action == P_ActMakeRangeAttemptSound)
     {
-        if (castorder->rangeattack)
-            sfx = castorder->rangeattack->initsound_;
+        if (castorder->rangeattack_)
+            sfx = castorder->rangeattack_->initsound_;
     }
     else if (caststate->action == P_ActRangeAttack)
     {
-        if (castorder->rangeattack)
-            CAST_RangeAttack(castorder->rangeattack);
+        if (castorder->rangeattack_)
+            CAST_RangeAttack(castorder->rangeattack_);
     }
     else if (caststate->action == P_ActComboAttack)
     {
-        if (castonmelee && castorder->closecombat)
+        if (castonmelee && castorder->closecombat_)
         {
-            sfx = castorder->closecombat->sound_;
+            sfx = castorder->closecombat_->sound_;
         }
-        else if (castorder->rangeattack)
+        else if (castorder->rangeattack_)
         {
-            CAST_RangeAttack(castorder->rangeattack);
+            CAST_RangeAttack(castorder->rangeattack_);
         }
     }
-    else if (castorder->activesound && (M_Random() < 2) && !castdeath)
+    else if (castorder->activesound_ && (M_Random() < 2) && !castdeath)
     {
-        sfx = castorder->activesound;
+        sfx = castorder->activesound_;
     }
     else if (caststate->action == P_ActWalkSoundChase)
     {
-        sfx = castorder->walksound;
+        sfx = castorder->walksound_;
     }
 
     S_StartFX(sfx);
@@ -602,15 +602,15 @@ static void CastInitNew(int num)
     if (!castorder)
         castorder = mobjtypes.Lookup(0);
 
-    casttitle = castorder->cast_title != "" ? language[castorder->cast_title] : castorder->name.c_str();
+    casttitle = castorder->cast_title_ != "" ? language[castorder->cast_title_] : castorder->name_.c_str();
 
     castdeath     = false;
     castframes    = 0;
     castonmelee   = 0;
     castattacking = false;
 
-    SYS_ASSERT(castorder->chase_state); // checked in ddf_mobj.c
-    CastSetState(castorder->chase_state);
+    SYS_ASSERT(castorder->chase_state_); // checked in ddf_mobj.c
+    CastSetState(castorder->chase_state_);
 }
 
 //
@@ -631,10 +631,10 @@ static void CastTicker(void)
     // switch from deathstate to next monster
     if (caststate->tics == -1 || caststate->nextstate == 0 || (castdeath && castframes >= 30))
     {
-        CastInitNew(castorder->castorder + 1);
+        CastInitNew(castorder->castorder_ + 1);
 
-        if (castorder->seesound)
-            S_StartFX(castorder->seesound);
+        if (castorder->seesound_)
+            S_StartFX(castorder->seesound_);
 
         return;
     }
@@ -656,12 +656,12 @@ static void CastTicker(void)
     if (castframes == 24 && !castdeath)
     {
         castonmelee ^= 1;
-        st = castonmelee ? castorder->melee_state : castorder->missile_state;
+        st = castonmelee ? castorder->melee_state_ : castorder->missile_state_;
 
         if (st == 0)
         {
             castonmelee ^= 1;
-            st = castonmelee ? castorder->melee_state : castorder->missile_state;
+            st = castonmelee ? castorder->melee_state_ : castorder->missile_state_;
         }
 
         // check if missing both melee and missile states
@@ -670,17 +670,17 @@ static void CastTicker(void)
             castattacking = true;
             CastSetState(st);
 
-            if (castorder->attacksound)
-                S_StartFX(castorder->attacksound);
+            if (castorder->attacksound_)
+                S_StartFX(castorder->attacksound_);
         }
     }
 
     // leave attack frames after a certain time
-    if (castattacking && (castframes == 48 || caststate == &states[castorder->chase_state]))
+    if (castattacking && (castframes == 48 || caststate == &states[castorder->chase_state_]))
     {
         castattacking = false;
         castframes    = 0;
-        CastSetState(castorder->chase_state);
+        CastSetState(castorder->chase_state_);
     }
 }
 
@@ -695,20 +695,20 @@ static void CastSkip(void)
     // go into death frame
     castdeath = true;
 
-    if (castorder->overkill_state && (M_Random() < 32))
-        caststate = &states[castorder->overkill_state];
+    if (castorder->overkill_state_ && (M_Random() < 32))
+        caststate = &states[castorder->overkill_state_];
     else
     {
-        SYS_ASSERT(castorder->death_state); // checked in ddf_mobj.c
-        caststate = &states[castorder->death_state];
+        SYS_ASSERT(castorder->death_state_); // checked in ddf_mobj.c
+        caststate = &states[castorder->death_state_];
     }
 
     casttics      = caststate->tics;
     castframes    = 0;
     castattacking = false;
 
-    if (castorder->deathsound)
-        S_StartFX(castorder->deathsound);
+    if (castorder->deathsound_)
+        S_StartFX(castorder->deathsound_);
 }
 
 //
@@ -778,7 +778,7 @@ static void CastDrawer(void)
     {
         modeldef_c *md = W_GetModel(caststate->sprite);
 
-        const image_c *skin_img = md->skins[castorder->model_skin];
+        const image_c *skin_img = md->skins[castorder->model_skin_];
 
         if (!skin_img)
             skin_img = W_ImageForDummySkin();
@@ -801,8 +801,8 @@ static void CastDrawer(void)
     if (!image)
         return;
 
-    scale_x *= castorder->scale * castorder->aspect;
-    scale_y *= castorder->scale;
+    scale_x *= castorder->scale_ * castorder->aspect_;
+    scale_y *= castorder->scale_;
 
     float width  = IM_WIDTH(image);
     float height = IM_HEIGHT(image);
@@ -820,7 +820,7 @@ static void CastDrawer(void)
     height *= scale_y;
 
     RGL_DrawImage(pos_x - offset_x, pos_y + offset_y, width, height, image, flip ? IM_RIGHT(image) : 0, 0,
-                  flip ? 0 : IM_RIGHT(image), IM_TOP(image), nullptr, 1.0f, castorder->palremap);
+                  flip ? 0 : IM_RIGHT(image), IM_TOP(image), nullptr, 1.0f, castorder->palremap_);
 }
 
 //

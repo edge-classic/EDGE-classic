@@ -121,14 +121,14 @@ void G_PlayerFinishLevel(player_t *p, bool keep_cards)
 {
     if (!keep_cards)
     {
-        for (int i = 0; i < NUMPOWERS; i++)
+        for (int i = 0; i < kTotalPowerTypes; i++)
             p->powers[i] = 0;
 
         p->keep_powers = 0;
 
         p->cards = kDoorKeyNone;
 
-        p->mo->flags &= ~MF_FUZZY; // cancel invisibility
+        p->mo->flags &= ~kMapObjectFlagFuzzy; // cancel invisibility
     }
 
     p->extralight = 0; // cancel gun flashes
@@ -350,9 +350,9 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
 
     const MapObjectDefinition *info = point->info;
 
-    L_WriteDebug("* P_SpawnPlayer %d @ %1.0f,%1.0f\n", point->info->playernum, point->x, point->y);
+    L_WriteDebug("* P_SpawnPlayer %d @ %1.0f,%1.0f\n", point->info->playernum_, point->x, point->y);
 
-    if (info->playernum <= 0)
+    if (info->playernum_ <= 0)
         info = mobjtypes.LookupPlayer(p->pnum + 1);
 
     if (p->playerstate == PST_REBORN)
@@ -377,7 +377,7 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
     p->bonuscount       = 0;
     p->extralight       = 0;
     p->effect_colourmap = nullptr;
-    p->std_viewheight   = mobj->height * info->viewheight;
+    p->std_viewheight   = mobj->height * info->viewheight_;
     p->viewheight       = p->std_viewheight;
     p->zoom_fov         = 0;
     p->jumpwait         = 0;
@@ -411,7 +411,7 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
     // P_TeleportMove(mobj, mobj->x, mobj->y, mobj->z);
 
     if (COOP_MATCH() && !level_flags.team_damage)
-        mobj->hyperflags |= HF_SIDEIMMUNE;
+        mobj->hyperflags |= kHyperFlagFriendlyFireImmune;
 
     if (p->isBot())
     {
@@ -427,7 +427,7 @@ static void P_SpawnVoodooDoll(player_t *p, const spawnpoint_t *point)
     const MapObjectDefinition *info = point->info;
 
     SYS_ASSERT(info);
-    SYS_ASSERT(info->playernum > 0);
+    SYS_ASSERT(info->playernum_ > 0);
 
     L_WriteDebug("* P_SpawnVoodooDoll %d @ %1.0f,%1.0f\n", p->pnum + 1, point->x, point->y);
 
@@ -526,7 +526,7 @@ static spawnpoint_t *G_FindHubPlayer(int pnum, int tag)
 
         count++;
 
-        if (point->info->playernum == pnum)
+        if (point->info->playernum_ == pnum)
             return point;
     }
 
@@ -554,7 +554,7 @@ void G_SpawnVoodooDolls(player_t *p)
     {
         spawnpoint_t *point = &voodoo_dolls[i];
 
-        if (point->info->playernum != p->pnum + 1)
+        if (point->info->playernum_ != p->pnum + 1)
             continue;
 
         P_SpawnVoodooDoll(p, point);
@@ -588,7 +588,7 @@ void G_SpawnHelper(int pnum)
     mo->side = ~0;
 }
 
-bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
+bool G_CheckConditions(mobj_t *mo, ConditionCheck *cond)
 {
     player_t *p = mo->player;
     bool      temp;
@@ -599,7 +599,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
         switch (cond->cond_type)
         {
-        case COND_Health:
+        case kConditionCheckTypeHealth:
             if (cond->exact)
                 return (mo->health == cond->amount);
 
@@ -610,19 +610,19 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Armour:
+        case kConditionCheckTypeArmour:
             if (!p)
                 return false;
 
             if (cond->exact)
             {
-                if (cond->sub.type == ARMOUR_Total)
+                if (cond->sub.type == kTotalArmourTypes)
                     return (p->totalarmour == i_amount);
                 else
                     return (p->armours[cond->sub.type] == i_amount);
             }
 
-            if (cond->sub.type == ARMOUR_Total)
+            if (cond->sub.type == kTotalArmourTypes)
                 temp = (p->totalarmour >= i_amount);
             else
                 temp = (p->armours[cond->sub.type] >= i_amount);
@@ -632,7 +632,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Key:
+        case kConditionCheckTypeKey:
             if (!p)
                 return false;
 
@@ -643,7 +643,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Weapon:
+        case kConditionCheckTypeWeapon:
             if (!p)
                 return false;
 
@@ -663,7 +663,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Powerup:
+        case kConditionCheckTypePowerup:
             if (!p)
                 return false;
 
@@ -677,7 +677,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Ammo:
+        case kConditionCheckTypeAmmo:
             if (!p)
                 return false;
 
@@ -691,7 +691,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Inventory:
+        case kConditionCheckTypeInventory:
             if (!p)
                 return false;
 
@@ -705,7 +705,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Counter:
+        case kConditionCheckTypeCounter:
             if (!p)
                 return false;
 
@@ -719,7 +719,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Jumping:
+        case kConditionCheckTypeJumping:
             if (!p)
                 return false;
 
@@ -730,18 +730,18 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Crouching:
+        case kConditionCheckTypeCrouching:
             if (!p)
                 return false;
 
-            temp = (mo->extendedflags & EF_CROUCHING) ? true : false;
+            temp = (mo->extendedflags & kExtendedFlagCrouching) ? true : false;
 
             if ((!cond->negate && !temp) || (cond->negate && temp))
                 return false;
 
             break;
 
-        case COND_Swimming:
+        case kConditionCheckTypeSwimming:
             if (!p)
                 return false;
 
@@ -752,7 +752,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Attacking:
+        case kConditionCheckTypeAttacking:
             if (!p)
                 return false;
 
@@ -763,7 +763,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Rampaging:
+        case kConditionCheckTypeRampaging:
             if (!p)
                 return false;
 
@@ -774,7 +774,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Using:
+        case kConditionCheckTypeUsing:
             if (!p)
                 return false;
 
@@ -785,7 +785,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Action1:
+        case kConditionCheckTypeAction1:
             if (!p)
                 return false;
 
@@ -796,7 +796,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Action2:
+        case kConditionCheckTypeAction2:
             if (!p)
                 return false;
 
@@ -807,7 +807,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_Walking:
+        case kConditionCheckTypeWalking:
             if (!p)
                 return false;
 
@@ -818,7 +818,7 @@ bool G_CheckConditions(mobj_t *mo, condition_check_t *cond)
 
             break;
 
-        case COND_NONE:
+        case kConditionCheckTypeNone:
         default:
             // unknown condition -- play it safe and succeed
             break;
@@ -856,7 +856,7 @@ spawnpoint_t *G_FindCoopPlayer(int pnum)
         spawnpoint_t *point = &coop_starts[i];
         SYS_ASSERT(point->info);
 
-        if (point->info->playernum == pnum)
+        if (point->info->playernum_ == pnum)
             return point;
     }
 
@@ -870,7 +870,7 @@ void G_MarkPlayerAvatars(void)
         player_t *p = players[i];
 
         if (p && p->mo)
-            p->mo->hyperflags |= HF_OLD_AVATAR;
+            p->mo->hyperflags |= kHyperFlagRememberOldAvatars;
     }
 }
 
@@ -888,7 +888,7 @@ void G_RemoveOldAvatars(void)
         // (the one which was saved in the savegame) to refer to the
         // new avatar (the one spawned after loading).
 
-        if (mo->target && (mo->target->hyperflags & HF_OLD_AVATAR))
+        if (mo->target && (mo->target->hyperflags & kHyperFlagRememberOldAvatars))
         {
             SYS_ASSERT(mo->target->player);
             SYS_ASSERT(mo->target->player->mo);
@@ -898,12 +898,12 @@ void G_RemoveOldAvatars(void)
             mo->SetTarget(mo->target->player->mo);
         }
 
-        if (mo->source && (mo->source->hyperflags & HF_OLD_AVATAR))
+        if (mo->source && (mo->source->hyperflags & kHyperFlagRememberOldAvatars))
         {
             mo->SetSource(mo->source->player->mo);
         }
 
-        if (mo->supportobj && (mo->supportobj->hyperflags & HF_OLD_AVATAR))
+        if (mo->supportobj && (mo->supportobj->hyperflags & kHyperFlagRememberOldAvatars))
         {
             mo->SetSupportObj(mo->supportobj->player->mo);
         }
@@ -917,7 +917,7 @@ void G_RemoveOldAvatars(void)
     {
         next = mo->next;
 
-        if (mo->hyperflags & HF_OLD_AVATAR)
+        if (mo->hyperflags & kHyperFlagRememberOldAvatars)
         {
             I_Debugf("Removing old avatar: %p\n", mo);
 

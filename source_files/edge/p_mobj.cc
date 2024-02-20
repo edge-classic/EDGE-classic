@@ -98,7 +98,7 @@ static void P_AddItemToQueue(const mobj_t *mo)
     iteminque_t *newbie = new iteminque_t;
 
     newbie->spawnpoint = mo->spawnpoint;
-    newbie->time       = mo->info->respawntime;
+    newbie->time       = mo->info->respawntime_;
 
     // add to end of list
 
@@ -140,7 +140,7 @@ void P_DumpMobjs(void)
     for (mo = mobjlisthead; mo; mo = mo->next, index++)
     {
         L_WriteDebug(" %4d: %p next:%p prev:%p [%s] at (%1.0f,%1.0f,%1.0f) states=%d > %d tics=%d\n", index, mo,
-                     mo->next, mo->prev, mo->info->name.c_str(), mo->x, mo->y, mo->z,
+                     mo->next, mo->prev, mo->info->name_.c_str(), mo->x, mo->y, mo->z,
                      (int)(mo->state ? mo->state - states : -1), (int)(mo->next_state ? mo->next_state - states : -1),
                      mo->tics);
     }
@@ -170,11 +170,11 @@ static inline int PointOnLineSide(float x, float y, line_t *ld)
 //
 static void EnterBounceStates(mobj_t *mo)
 {
-    if (!mo->info->bounce_state)
+    if (!mo->info->bounce_state_)
         return;
 
     // ignore if disarmed
-    if (mo->extendedflags & EF_JUSTBOUNCED)
+    if (mo->extendedflags & kExtendedFlagJustBounced)
         return;
 
     // give deferred states a higher priority
@@ -183,9 +183,9 @@ static void EnterBounceStates(mobj_t *mo)
         return;
     }
 
-    mo->extendedflags |= EF_JUSTBOUNCED;
+    mo->extendedflags |= kExtendedFlagJustBounced;
 
-    P_SetMobjState(mo, mo->info->bounce_state);
+    P_SetMobjState(mo, mo->info->bounce_state_);
 }
 
 //
@@ -212,8 +212,8 @@ static void BounceOffWall(mobj_t *mo, line_t *wall)
 
     // -AJA- Prevent getting stuck at some walls...
 
-    dest_x = mo->x + epi::BAMCos(angle) * (mo->speed + mo->info->radius) * 4.0f;
-    dest_y = mo->y + epi::BAMSin(angle) * (mo->speed + mo->info->radius) * 4.0f;
+    dest_x = mo->x + epi::BAMCos(angle) * (mo->speed + mo->info->radius_) * 4.0f;
+    dest_y = mo->y + epi::BAMSin(angle) * (mo->speed + mo->info->radius_) * 4.0f;
 
     div.x  = wall->v1->X;
     div.y  = wall->v1->Y;
@@ -235,7 +235,7 @@ static void BounceOffWall(mobj_t *mo, line_t *wall)
 
     // calculate new momentum
 
-    mo->speed *= mo->info->bounce_speed;
+    mo->speed *= mo->info->bounce_speed_;
 
     mo->mom.X = epi::BAMCos(angle) * mo->speed;
     mo->mom.Y = epi::BAMSin(angle) * mo->speed;
@@ -253,11 +253,11 @@ static void BounceOffPlane(mobj_t *mo, float dir)
 {
     // calculate new momentum
 
-    mo->speed *= mo->info->bounce_speed;
+    mo->speed *= mo->info->bounce_speed_;
 
     mo->mom.X = (float)(epi::BAMCos(mo->angle) * mo->speed);
     mo->mom.Y = (float)(epi::BAMSin(mo->angle) * mo->speed);
-    mo->mom.Z = (float)(dir * mo->speed * mo->info->bounce_up);
+    mo->mom.Z = (float)(dir * mo->speed * mo->info->bounce_up_);
 
     EnterBounceStates(mo);
 }
@@ -336,11 +336,11 @@ static void TeleportRespawn(mobj_t *mobj)
     oldheight = mobj->height;
     oldflags  = mobj->flags;
 
-    mobj->radius = mobj->spawnpoint.info->radius;
-    mobj->height = mobj->spawnpoint.info->height;
+    mobj->radius = mobj->spawnpoint.info->radius_;
+    mobj->height = mobj->spawnpoint.info->height_;
 
-    if (info->flags & MF_SOLID) // Should it be solid?
-        mobj->flags |= MF_SOLID;
+    if (info->flags_ & kMapObjectFlagSolid) // Should it be solid?
+        mobj->flags |= kMapObjectFlagSolid;
 
     if (!P_CheckAbsPosition(mobj, x, y, z))
     {
@@ -354,14 +354,14 @@ static void TeleportRespawn(mobj_t *mobj)
     // because of removal of the body...
 
     // temp fix for teleport flash...
-    if (info->respawneffect)
-        P_MobjCreateObject(mobj->x, mobj->y, mobj->z, info->respawneffect);
+    if (info->respawneffect_)
+        P_MobjCreateObject(mobj->x, mobj->y, mobj->z, info->respawneffect_);
 
     // spawn a teleport fog at the new spot...
 
     // temp fix for teleport flash...
-    if (info->respawneffect)
-        P_MobjCreateObject(x, y, z, info->respawneffect);
+    if (info->respawneffect_)
+        P_MobjCreateObject(x, y, z, info->respawneffect_);
 
     // spawn it, inheriting attributes from deceased one
     // -ACB- 1998/08/06 Create Object
@@ -372,8 +372,8 @@ static void TeleportRespawn(mobj_t *mobj)
     new_mo->vertangle  = mobj->spawnpoint.vertangle;
     new_mo->tag        = mobj->spawnpoint.tag;
 
-    if (mobj->spawnpoint.flags & MF_AMBUSH)
-        new_mo->flags |= MF_AMBUSH;
+    if (mobj->spawnpoint.flags & kMapObjectFlagAmbush)
+        new_mo->flags |= kMapObjectFlagAmbush;
 
     new_mo->reactiontime = RESPAWN_DELAY;
 
@@ -402,11 +402,11 @@ static void ResurrectRespawn(mobj_t *mobj)
     info = mobj->info;
 
     // cannot raise the unraisable
-    if (!info->raise_state)
+    if (!info->raise_state_)
         return;
 
     // don't respawn gibs
-    if (mobj->extendedflags & EF_GIBBED)
+    if (mobj->extendedflags & kExtendedFlagGibbed)
         return;
 
     //
@@ -417,11 +417,11 @@ static void ResurrectRespawn(mobj_t *mobj)
     oldheight = mobj->height;
     oldflags  = mobj->flags;
 
-    mobj->radius = info->radius;
-    mobj->height = info->height;
+    mobj->radius = info->radius_;
+    mobj->height = info->height_;
 
-    if (info->flags & MF_SOLID) // Should it be solid?
-        mobj->flags |= MF_SOLID;
+    if (info->flags_ & kMapObjectFlagSolid) // Should it be solid?
+        mobj->flags |= kMapObjectFlagSolid;
 
     if (!P_CheckAbsPosition(mobj, x, y, z))
     {
@@ -432,33 +432,33 @@ static void ResurrectRespawn(mobj_t *mobj)
     }
 
     // Resurrect monster
-    if (info->overkill_sound)
-        S_StartFX(info->overkill_sound, P_MobjGetSfxCategory(mobj), mobj);
+    if (info->overkill_sound_)
+        S_StartFX(info->overkill_sound_, P_MobjGetSfxCategory(mobj), mobj);
 
-    P_SetMobjState(mobj, info->raise_state);
+    P_SetMobjState(mobj, info->raise_state_);
 
     SYS_ASSERT(!mobj->isRemoved());
 
-    mobj->flags         = info->flags;
-    mobj->extendedflags = info->extendedflags;
-    mobj->hyperflags    = info->hyperflags;
-    mobj->mbf21flags    = info->mbf21flags;
+    mobj->flags         = info->flags_;
+    mobj->extendedflags = info->extendedflags_;
+    mobj->hyperflags    = info->hyperflags_;
+    mobj->mbf21flags    = info->mbf21flags_;
     mobj->health        = mobj->spawnhealth;
 
-    mobj->visibility = info->translucency;
+    mobj->visibility = info->translucency_;
     if (!AlmostEquals(mobj->alpha, 1.0f))
         mobj->vis_target = mobj->alpha;
     mobj->movecount  = 0; // -ACB- 1998/08/03 Don't head off in any direction
 
-    mobj->painchance = info->painchance;
+    mobj->painchance = info->painchance_;
 
     mobj->SetSource(nullptr);
     mobj->SetTarget(nullptr);
 
     mobj->tag = mobj->spawnpoint.tag;
 
-    if (mobj->spawnpoint.flags & MF_AMBUSH)
-        mobj->flags |= MF_AMBUSH;
+    if (mobj->spawnpoint.flags & kMapObjectFlagAmbush)
+        mobj->flags |= kMapObjectFlagAmbush;
 
     mobj->reactiontime = RESPAWN_DELAY;
     return;
@@ -513,10 +513,10 @@ bool P_SetMobjState2(mobj_t *mobj, int state)
     if (state == 0)
         return P_SetMobjState(mobj, state);
 
-    SYS_ASSERT(!mobj->info->state_grp.empty());
+    SYS_ASSERT(!mobj->info->state_grp_.empty());
 
     // state is old?
-    if (state < mobj->info->state_grp.back().first)
+    if (state < mobj->info->state_grp_.back().first)
     {
         State *st = &states[state];
 
@@ -572,7 +572,7 @@ bool P_SetMobjStateDeferred(mobj_t *mo, int stnum, int tic_skip)
 //
 int P_MobjFindLabel(mobj_t *mobj, const char *label)
 {
-    return DDF_StateFindLabel(mobj->info->state_grp, label, true /* quiet */);
+    return DDF_StateFindLabel(mobj->info->state_grp_, label, true /* quiet */);
 }
 
 //
@@ -600,14 +600,14 @@ void P_MobjExplodeMissile(mobj_t *mo)
 {
     mo->mom.X = mo->mom.Y = mo->mom.Z = 0;
 
-    mo->flags &= ~(MF_MISSILE | MF_TOUCHY);
-    mo->extendedflags &= ~(EF_BOUNCE | EF_USABLE);
+    mo->flags &= ~(kMapObjectFlagMissile | kMapObjectFlagTouchy);
+    mo->extendedflags &= ~(kExtendedFlagBounce | kExtendedFlagUsable);
 
-    if (mo->info->deathsound)
-        S_StartFX(mo->info->deathsound, SNCAT_Object, mo);
+    if (mo->info->deathsound_)
+        S_StartFX(mo->info->deathsound_, SNCAT_Object, mo);
 
     // mobjdef used -ACB- 1998/08/06
-    P_SetMobjStateDeferred(mo, mo->info->death_state, P_Random() & 3);
+    P_SetMobjStateDeferred(mo, mo->info->death_state_, P_Random() & 3);
 }
 
 static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, region_properties_t *new_p, float f_h,
@@ -655,8 +655,8 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
 
                     if (!(tn_flags & kSectorFlagPushConstant))
                     {
-                        SYS_ASSERT(mo->info->mass > 0);
-                        push_mul = 100.0f / mo->info->mass;
+                        SYS_ASSERT(mo->info->mass_ > 0);
+                        push_mul = 100.0f / mo->info->mass_;
                     }
 
                     if (tn_flags & kSectorFlagProportional)
@@ -694,8 +694,8 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
 
             if (!(flags & kSectorFlagPushConstant))
             {
-                SYS_ASSERT(mo->info->mass > 0);
-                push_mul = 100.0f / mo->info->mass;
+                SYS_ASSERT(mo->info->mass_ > 0);
+                push_mul = 100.0f / mo->info->mass_;
             }
 
             if (flags & kSectorFlagProportional)
@@ -786,7 +786,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
     bool do_extra = mo->player != nullptr; // 70 Hz
 
     // missiles should run every tic too
-    if (mo->flags & MF_MISSILE)
+    if (mo->flags & kMapObjectFlagMissile)
         do_extra = true;
 
     float orig_x = mo->x;
@@ -823,10 +823,10 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
     }
 
     // -AJA- 1999/07/31: Ride that rawhide :->
-    if (mo->above_mo && !(mo->above_mo->flags & MF_FLOAT) && mo->above_mo->floorz < (mo->z + mo->height + 1))
+    if (mo->above_mo && !(mo->above_mo->flags & kMapObjectFlagFloat) && mo->above_mo->floorz < (mo->z + mo->height + 1))
     {
-        mo->above_mo->mom.X += xmove * mo->info->ride_friction;
-        mo->above_mo->mom.Y += ymove * mo->info->ride_friction;
+        mo->above_mo->mom.X += xmove * mo->info->ride_friction_;
+        mo->above_mo->mom.Y += ymove * mo->info->ride_friction_;
     }
 
     // -AJA- 1999/10/09: Reworked viscosity.
@@ -913,7 +913,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
             // NOTE: this is for solid lines.  The "pass over" case is
             // handled in P_TryMove().
 
-            if ((mo->flags & MF_MISSILE) && (!mo->currentattack || !(mo->currentattack->flags_ & kAttackFlagNoTriggerLines)))
+            if ((mo->flags & kMapObjectFlagMissile) && (!mo->currentattack || !(mo->currentattack->flags_ & kAttackFlagNoTriggerLines)))
             {
                 //
                 // -AJA- Seems this is called to handle this situation:
@@ -973,15 +973,15 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
 
                 if (mo->z < ground_h - 20.5f && mo->z > ground_h - mo->height * 1.4)
                 {
-                    P_PlayerJump(mo->player, mo->info->jumpheight, 2 * TICRATE);
+                    P_PlayerJump(mo->player, mo->info->jumpheight_, 2 * TICRATE);
                 }
             }
 
-            if (mo->info->flags & MF_SLIDE)
+            if (mo->info->flags_ & kMapObjectFlagSlide)
             {
                 P_SlideMove(mo, ptryx, ptryy);
             }
-            else if (mo->extendedflags & EF_BOUNCE)
+            else if (mo->extendedflags & kExtendedFlagBounce)
             {
                 // -KM- 1999/01/31 Bouncy objects (grenades)
                 // -AJA- 1999/07/30: Moved up here.
@@ -999,7 +999,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
                 BounceOffWall(mo, blockline);
                 xmove = ymove = 0;
             }
-            else if (mo->flags & MF_MISSILE)
+            else if (mo->flags & kMapObjectFlagMissile)
             {
                 if (mobj_hit_sky)
                     P_MobjRemoveMissile(mo); // New Procedure -ACB- 1998/07/30
@@ -1016,10 +1016,10 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
         }
     } while (xmove || ymove);
 
-    if ((mo->extendedflags & EF_NOFRICTION) || (mo->flags & MF_SKULLFLY))
+    if ((mo->extendedflags & kExtendedFlagNoFriction) || (mo->flags & kMapObjectFlagSkullFly))
         return;
 
-    if (mo->flags & MF_CORPSE)
+    if (mo->flags & kMapObjectFlagCorpse)
     {
         // do not stop sliding if halfway off a step with some momentum
         if (CorpseShouldSlide(mo))
@@ -1036,7 +1036,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
     //
     float friction = props->friction;
 
-    if ((mo->z > mo->floorz) && !(mo->on_ladder >= 0) && !(mo->player && mo->player->powers[PW_Jetpack] > 0) &&
+    if ((mo->z > mo->floorz) && !(mo->on_ladder >= 0) && !(mo->player && mo->player->powers[kPowerTypeJetpack] > 0) &&
         !mo->on_slope)
     {
         // apply drag when airborne
@@ -1083,7 +1083,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
 {
     bool do_extra = mo->player != nullptr; // 70 Hz
 
-    if (mo->flags & MF_MISSILE)
+    if (mo->flags & kMapObjectFlagMissile)
         do_extra = true;
 
     float dist;
@@ -1115,18 +1115,18 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
     // adjust height
     mo->z += zmove + zmove_vs;
 
-    if (mo->flags & MF_FLOAT && mo->target)
+    if (mo->flags & kMapObjectFlagFloat && mo->target)
     {
         // float down towards target if too close
-        if (!(mo->flags & MF_SKULLFLY) && !(mo->flags & MF_INFLOAT))
+        if (!(mo->flags & kMapObjectFlagSkullFly) && !(mo->flags & kMapObjectFlagInFloat))
         {
             dist  = P_ApproxDistance(mo->x - mo->target->x, mo->y - mo->target->y);
             delta = mo->target->z + (mo->height / 2) - mo->z;
 
             if (delta < 0 && dist < -(delta * 3))
-                mo->z -= mo->info->float_speed;
+                mo->z -= mo->info->float_speed_;
             else if (delta > 0 && dist < (delta * 3))
-                mo->z += mo->info->float_speed;
+                mo->z += mo->info->float_speed_;
         }
     }
 
@@ -1144,46 +1144,46 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
             return;
         }
 
-        if (mo->flags & MF_SKULLFLY)
+        if (mo->flags & kMapObjectFlagSkullFly)
             mo->mom.Z = -mo->mom.Z;
 
         if (mo->mom.Z < 0)
         {
-            float hurt_momz = gravity * mo->info->maxfall;
+            float hurt_momz = gravity * mo->info->maxfall_;
             bool  fly_or_swim =
-                mo->player && (mo->player->swimming || mo->player->powers[PW_Jetpack] > 0 || mo->on_ladder >= 0);
+                mo->player && (mo->player->swimming || mo->player->powers[kPowerTypeJetpack] > 0 || mo->on_ladder >= 0);
 
             if (mo->player && gravity > 0 && -zmove > (OOF_SPEED / (r_doubleframes.d ? 2 : 1)) && !fly_or_swim)
             {
                 // Squat down. Decrease viewheight for a moment after hitting the
                 // ground (hard), and utter appropriate sound.
                 mo->player->deltaviewheight = zmove / 8.0f * (r_doubleframes.d ? 2.0 : 1.0); // 70Hz
-                if (mo->info->maxfall > 0 && -mo->mom.Z > hurt_momz)
+                if (mo->info->maxfall_ > 0 && -mo->mom.Z > hurt_momz)
                 {
-                    if (!(mo->player->cheats & CF_GODMODE) && mo->player->powers[PW_Invulnerable] < 1)
-                        S_StartFX(mo->info->fallpain_sound, P_MobjGetSfxCategory(mo), mo);
+                    if (!(mo->player->cheats & CF_GODMODE) && mo->player->powers[kPowerTypeInvulnerable] < 1)
+                        S_StartFX(mo->info->fallpain_sound_, P_MobjGetSfxCategory(mo), mo);
                     else
-                        S_StartFX(mo->info->oof_sound, P_MobjGetSfxCategory(mo), mo);
+                        S_StartFX(mo->info->oof_sound_, P_MobjGetSfxCategory(mo), mo);
                 }
                 else
-                    S_StartFX(mo->info->oof_sound, P_MobjGetSfxCategory(mo), mo);
+                    S_StartFX(mo->info->oof_sound_, P_MobjGetSfxCategory(mo), mo);
 
                 P_HitLiquidFloor(mo);
             }
             // -KM- 1998/12/16 If bigger than max fall, take damage.
-            if (mo->info->maxfall > 0 && gravity > 0 && -mo->mom.Z > hurt_momz && (!mo->player || !fly_or_swim))
+            if (mo->info->maxfall_ > 0 && gravity > 0 && -mo->mom.Z > hurt_momz && (!mo->player || !fly_or_swim))
             {
                 P_DamageMobj(mo, nullptr, nullptr, (-mo->mom.Z - hurt_momz), nullptr);
             }
 
             // -KM- 1999/01/31 Bouncy bouncy...
-            if (mo->extendedflags & EF_BOUNCE)
+            if (mo->extendedflags & kExtendedFlagBounce)
             {
                 BounceOffPlane(mo, +1.0f);
 
                 // don't bounce forever on the floor
-                if (!(mo->flags & MF_NOGRAVITY) &&
-                    fabs(mo->mom.Z) < STOPSPEED + fabs(gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1)))
+                if (!(mo->flags & kMapObjectFlagNoGravity) &&
+                    fabs(mo->mom.Z) < STOPSPEED + fabs(gravity / (mo->mbf21flags & kMBF21FlagLowGravity ? 8 : 1)))
                 {
                     mo->mom.X = mo->mom.Y = mo->mom.Z = 0;
                 }
@@ -1199,16 +1199,16 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
 
         mo->z = mo->floorz;
 
-        if ((mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP))
+        if ((mo->flags & kMapObjectFlagMissile) && !(mo->flags & kMapObjectFlagNoClip))
         {
             // -AJA- 2003/10/09: handle missiles that hit a monster on
             //       the head from a sharp downward angle (such a case
             //       is missed by PIT_CheckRelThing).  FIXME: more kludge.
 
-            if (mo->below_mo && (int)mo->floorz == (int)(mo->below_mo->z + mo->below_mo->info->height) &&
-                (mo->below_mo->flags & MF_SHOOTABLE) && (mo->source != mo->below_mo))
+            if (mo->below_mo && (int)mo->floorz == (int)(mo->below_mo->z + mo->below_mo->info->height_) &&
+                (mo->below_mo->flags & kMapObjectFlagShootable) && (mo->source != mo->below_mo))
             {
-                if (P_MissileContact(mo, mo->below_mo) < 0 || (mo->extendedflags & EF_TUNNEL))
+                if (P_MissileContact(mo, mo->below_mo) < 0 || (mo->extendedflags & kExtendedFlagTunnel))
                     return;
             }
 
@@ -1219,7 +1219,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
             }
             else
             {
-                if (!(mo->extendedflags & EF_BOUNCE))
+                if (!(mo->extendedflags & kExtendedFlagBounce))
                     P_MobjExplodeMissile(mo);
             }
             return;
@@ -1232,11 +1232,11 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
         // -MH- 1998/08/18 - Disable gravity while player has jetpack
         //                   (nearly forgot this one:-)
 
-        if (!(mo->flags & MF_NOGRAVITY) && !(mo->player && mo->player->powers[PW_Jetpack] > 0) && !(mo->on_ladder >= 0))
+        if (!(mo->flags & kMapObjectFlagNoGravity) && !(mo->player && mo->player->powers[kPowerTypeJetpack] > 0) && !(mo->on_ladder >= 0))
         {
             // 70 Hz: apply gravity only on real tics
             if (!extra_tic || !r_doubleframes.d)
-                mo->mom.Z -= gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
+                mo->mom.Z -= gravity / (mo->mbf21flags & kMBF21FlagLowGravity ? 8 : 1);
         }
     }
 
@@ -1246,34 +1246,34 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
 
     if (mo->z + mo->height > mo->ceilingz)
     {
-        if (mo->flags & MF_SKULLFLY)
+        if (mo->flags & kMapObjectFlagSkullFly)
             mo->mom.Z = -mo->mom.Z; // the skull slammed into something
 
         // hit the ceiling
         if (mo->mom.Z > 0)
         {
-            float hurt_momz = gravity * mo->info->maxfall;
+            float hurt_momz = gravity * mo->info->maxfall_;
             bool  fly_or_swim =
-                mo->player && (mo->player->swimming || mo->player->powers[PW_Jetpack] > 0 || mo->on_ladder >= 0);
+                mo->player && (mo->player->swimming || mo->player->powers[kPowerTypeJetpack] > 0 || mo->on_ladder >= 0);
 
             if (mo->player && gravity < 0 && zmove > (OOF_SPEED / (r_doubleframes.d ? 2 : 1)) && !fly_or_swim)
             {
                 mo->player->deltaviewheight = zmove / 8.0f;
-                S_StartFX(mo->info->oof_sound, P_MobjGetSfxCategory(mo), mo);
+                S_StartFX(mo->info->oof_sound_, P_MobjGetSfxCategory(mo), mo);
             }
-            if (mo->info->maxfall > 0 && gravity < 0 && mo->mom.Z > hurt_momz && (!mo->player || !fly_or_swim))
+            if (mo->info->maxfall_ > 0 && gravity < 0 && mo->mom.Z > hurt_momz && (!mo->player || !fly_or_swim))
             {
                 P_DamageMobj(mo, nullptr, nullptr, (mo->mom.Z - hurt_momz), nullptr);
             }
 
             // -KM- 1999/01/31 More bouncing.
-            if (mo->extendedflags & EF_BOUNCE)
+            if (mo->extendedflags & kExtendedFlagBounce)
             {
                 BounceOffPlane(mo, -1.0f);
 
                 // don't bounce forever on the ceiling
-                if (!(mo->flags & MF_NOGRAVITY) &&
-                    fabs(mo->mom.Z) < STOPSPEED + fabs(gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1)))
+                if (!(mo->flags & kMapObjectFlagNoGravity) &&
+                    fabs(mo->mom.Z) < STOPSPEED + fabs(gravity / (mo->mbf21flags & kMBF21FlagLowGravity ? 8 : 1)))
                 {
                     mo->mom.X = mo->mom.Y = mo->mom.Z = 0;
                 }
@@ -1284,12 +1284,12 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
 
         mo->z = mo->ceilingz - mo->height;
 
-        if ((mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP))
+        if ((mo->flags & kMapObjectFlagMissile) && !(mo->flags & kMapObjectFlagNoClip))
         {
-            if (mo->above_mo && (int)mo->ceilingz == (int)(mo->above_mo->z) && (mo->above_mo->flags & MF_SHOOTABLE) &&
+            if (mo->above_mo && (int)mo->ceilingz == (int)(mo->above_mo->z) && (mo->above_mo->flags & kMapObjectFlagShootable) &&
                 (mo->source != mo->above_mo))
             {
-                if (P_MissileContact(mo, mo->above_mo) < 0 || (mo->extendedflags & EF_TUNNEL))
+                if (P_MissileContact(mo, mo->above_mo) < 0 || (mo->extendedflags & kExtendedFlagTunnel))
                     return;
             }
 
@@ -1300,7 +1300,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
             }
             else
             {
-                if (!(mo->extendedflags & EF_BOUNCE))
+                if (!(mo->extendedflags & kExtendedFlagBounce))
                     P_MobjExplodeMissile(mo);
             }
             return;
@@ -1313,11 +1313,11 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
         // -MH- 1998/08/18 - Disable gravity while player has jetpack
         //                   (nearly forgot this one:-)
 
-        if (!(mo->flags & MF_NOGRAVITY) && !(mo->player && mo->player->powers[PW_Jetpack] > 0) && !(mo->on_ladder >= 0))
+        if (!(mo->flags & kMapObjectFlagNoGravity) && !(mo->player && mo->player->powers[kPowerTypeJetpack] > 0) && !(mo->on_ladder >= 0))
         {
             // 70 Hz: apply gravity only on real tics
             if (!extra_tic || !r_doubleframes.d)
-                mo->mom.Z += -gravity / (mo->mbf21flags & MBF21_LOGRAV ? 8 : 1);
+                mo->mom.Z += -gravity / (mo->mbf21flags & kMBF21FlagLowGravity ? 8 : 1);
         }
     }
 
@@ -1325,13 +1325,13 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
     P_TryMove(mo, mo->x, mo->y);
 
     // apply drag -- but not to frictionless things
-    if ((mo->extendedflags & EF_NOFRICTION) || (mo->flags & MF_SKULLFLY))
+    if ((mo->extendedflags & kExtendedFlagNoFriction) || (mo->flags & kMapObjectFlagSkullFly))
         return;
 
     // ladders have friction
     if (mo->on_ladder >= 0)
         mo->mom.Z *= LADDER_FRICTION;
-    else if (mo->player && mo->player->powers[PW_Jetpack] > 0)
+    else if (mo->player && mo->player->powers[kPowerTypeJetpack] > 0)
         mo->mom.Z *= props->friction;
     else
         mo->mom.Z *= props->drag;
@@ -1387,13 +1387,13 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
         }
 
         // handle SKULLFLY attacks
-        if ((mobj->flags & MF_SKULLFLY) && AlmostEquals(mobj->mom.X, 0.0f) && AlmostEquals(mobj->mom.Y, 0.0f))
+        if ((mobj->flags & kMapObjectFlagSkullFly) && AlmostEquals(mobj->mom.X, 0.0f) && AlmostEquals(mobj->mom.Y, 0.0f))
         {
             // the skull slammed into something
-            mobj->flags &= ~MF_SKULLFLY;
+            mobj->flags &= ~kMapObjectFlagSkullFly;
             mobj->mom.X = mobj->mom.Y = mobj->mom.Z = 0;
 
-            P_SetMobjState(mobj, mobj->info->idle_state);
+            P_SetMobjState(mobj, mobj->info->idle_state_);
 
             if (mobj->isRemoved())
                 return;
@@ -1429,16 +1429,16 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
                 {
                     SectorFlag flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagPushConstant;
 
-                    if (!((mobj->flags & MF_NOGRAVITY) || (flags & kSectorFlagPushAll)) &&
+                    if (!((mobj->flags & kMapObjectFlagNoGravity) || (flags & kSectorFlagPushAll)) &&
                         (mobj->z <= mobj->floorz + 1.0f || (flags & kSectorFlagWholeRegion)))
                     {
                         if (!extra_tic || !r_doubleframes.d)
                         {
                             float push_mul = 1.0f;
 
-                            SYS_ASSERT(mobj->info->mass > 0);
+                            SYS_ASSERT(mobj->info->mass_ > 0);
                             if (!(flags & kSectorFlagPushConstant))
-                                push_mul = 100.0f / mobj->info->mass;
+                                push_mul = 100.0f / mobj->info->mass_;
 
                             mobj->mom.X += push_mul * tn_props.push.X;
                             mobj->mom.Y += push_mul * tn_props.push.Y;
@@ -1461,7 +1461,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
     // momentum movement
 
     bool do_extra = mobj->player != nullptr; // 70 Hz
-    if (mobj->flags & MF_MISSILE)
+    if (mobj->flags & kMapObjectFlagMissile)
         do_extra = true;
 
     if (!r_doubleframes.d || !extra_tic || do_extra)
@@ -1507,7 +1507,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
     if (mobj->health > 0 && mobj->morphtimeout >= 0)
     {
         if (!--mobj->morphtimeout)
-            P_SetMobjState(mobj, mobj->info->morph_state);
+            P_SetMobjState(mobj, mobj->info->morph_state_);
 
         if (mobj->isRemoved())
             return;
@@ -1516,7 +1516,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
     if (mobj->tics < 0)
     {
         // check for nightmare respawn
-        if (!(mobj->extendedflags & EF_MONSTER))
+        if (!(mobj->extendedflags & kExtendedFlagMonster))
             return;
 
         // replaced respawnmonsters & newnmrespawn with respawnsetting
@@ -1531,7 +1531,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
         // object will try to respawn. So after 12 seconds the object will
         // try to respawn.
         //
-        if (mobj->movecount < mobj->info->respawntime)
+        if (mobj->movecount < mobj->info->respawntime_)
             return;
 
         // if the first 5 bits of leveltime are on, don't respawn now...ok?
@@ -1559,7 +1559,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
     for (int loop_count = 0; loop_count < MAX_THINK_LOOP; loop_count++)
     {
         if (level_flags.fastparm)
-            mobj->tics -= (1 * mobj->info->fast + mobj->tic_skip);
+            mobj->tics -= (1 * mobj->info->fast_ + mobj->tic_skip);
         else
             mobj->tics -= (1 + mobj->tic_skip);
             
@@ -1612,7 +1612,7 @@ static void DeleteMobj(mobj_t *mo)
     }
 
 #if (DEBUG_MOBJ > 0)
-    I_Debugf("tics=%05d  DELETE %p [%s]\n", leveltime, mo, mo->info ? mo->info->name.c_str() : "???");
+    I_Debugf("tics=%05d  DELETE %p [%s]\n", leveltime, mo, mo->info ? mo->info->name_.c_str() : "???");
 #endif
 
     // Sound might still be playing, so use remove the
@@ -1687,11 +1687,11 @@ void mobj_t::SetBelowMo(mobj_t *other)
 //
 void mobj_t::SetRealSource(mobj_t *ref)
 {
-    if (ref && ref->source && (ref->flags & MF_MISSILE))
+    if (ref && ref->source && (ref->flags & kMapObjectFlagMissile))
         ref = ref->source;
-    if (ref && ref->source && (ref->flags & MF_MISSILE))
+    if (ref && ref->source && (ref->flags & kMapObjectFlagMissile))
         ref = ref->source;
-    if (ref && ref->source && (ref->flags & MF_MISSILE))
+    if (ref && ref->source && (ref->flags & kMapObjectFlagMissile))
         ref = ref->source;
 
     SetSource(ref);
@@ -1722,14 +1722,14 @@ static void AddMobjToList(mobj_t *mo)
         seen_monsters.insert(mo->info);
 
 #if (DEBUG_MOBJ > 0)
-    I_Debugf("tics=%05d  ADD %p [%s]\n", leveltime, mo, mo->info ? mo->info->name.c_str() : "???");
+    I_Debugf("tics=%05d  ADD %p [%s]\n", leveltime, mo, mo->info ? mo->info->name_.c_str() : "???");
 #endif
 }
 
 static void RemoveMobjFromList(mobj_t *mo)
 {
 #if (DEBUG_MOBJ > 0)
-    I_Debugf("tics=%05d  REMOVE %p [%s]\n", leveltime, mo, mo->info ? mo->info->name.c_str() : "???");
+    I_Debugf("tics=%05d  REMOVE %p [%s]\n", leveltime, mo, mo->info ? mo->info->name_.c_str() : "???");
 #endif
 
     if (mo->prev != nullptr)
@@ -1754,7 +1754,7 @@ static void RemoveMobjFromList(mobj_t *mo)
 // P_RemoveMobj
 //
 // Removes the object from the play simulation: no longer thinks, if
-// the mobj is MF_SPECIAL: i.e. item can be picked up, it is added to
+// the mobj is kMapObjectFlagSpecial: i.e. item can be picked up, it is added to
 // the item-respawn-que, so it gets respawned if needed; The respawning
 // only happens if itemrespawn is set or the deathmatch mode is altdeath.
 //
@@ -1773,8 +1773,8 @@ void P_RemoveMobj(mobj_t *mo)
         return;
     }
 
-    if ((mo->info->flags & MF_SPECIAL) && 0 == (mo->extendedflags & EF_NORESPAWN) &&
-        0 == (mo->flags & (MF_MISSILE | MF_DROPPED)) && mo->spawnpoint.info)
+    if ((mo->info->flags_ & kMapObjectFlagSpecial) && 0 == (mo->extendedflags & kExtendedFlagNoRespawn) &&
+        0 == (mo->flags & (kMapObjectFlagMissile | kMapObjectFlagDropped)) && mo->spawnpoint.info)
     {
         P_AddItemToQueue(mo);
     }
@@ -1856,7 +1856,7 @@ void P_RunMobjThinkers(bool extra_tic)
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
-        if (players[pnum] && players[pnum]->powers[PW_TimeStop] > 0)
+        if (players[pnum] && players[pnum]->powers[kPowerTypeTimeStop] > 0)
         {
             time_stop_active = true;
             break;
@@ -1901,7 +1901,7 @@ void P_RunMobjThinkers(bool extra_tic)
             {
                 if (extra_tic)
                 {
-                    if (!(mo->flags & MF_MISSILE))
+                    if (!(mo->flags & kMapObjectFlagMissile))
                         continue;
                     else if (!g_cullthinkers.d ||
                              ((gametic / 4) % RoundToInt(1 + R_PointToDist(players[consoleplayer]->mo->x,
@@ -1931,8 +1931,8 @@ void P_RunMobjThinkers(bool extra_tic)
 //
 void P_SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDefinition *debris)
 {
-    // if (!level_flags.have_extra && (splash->extendedflags & EF_EXTRA)) return;
-    // if (! (splash->extendedflags & EF_EXTRA)) return; //Optional extra
+    // if (!level_flags.have_extra && (splash->extendedflags & kExtendedFlagExtra)) return;
+    // if (! (splash->extendedflags & kExtendedFlagExtra)) return; //Optional extra
     mobj_t *th;
 
     th = P_MobjCreateObject(x, y, z, debris);
@@ -1957,7 +1957,7 @@ void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAM
     th = P_MobjCreateObject(x, y, z, puff);
 
     // -AJA- 1999/07/14: DDF-itised.
-    th->mom.Z = puff->float_speed;
+    th->mom.Z = puff->float_speed_;
 
     // -AJA- 2011/03/14: set the angle
     th->angle = angle;
@@ -2053,11 +2053,11 @@ FlatDefinition *P_IsThingOnLiquidFloor(mobj_t *thing)
 
 bool P_HitLiquidFloor(mobj_t *thing)
 {
-    if (thing->flags & MF_FLOAT)
+    if (thing->flags & kMapObjectFlagFloat)
         return false;
 
     // marked as not making splashes (e.g. a leaf)
-    if (thing->hyperflags & HF_NOSPLASH)
+    if (thing->hyperflags & kHyperFlagNoSplash)
         return false;
 
     // don't splash if landing on the edge above water/lava/etc....
@@ -2136,8 +2136,8 @@ void P_MobjItemRespawn(void)
         }
 
         // spawn a teleport fog at the new spot
-        SYS_ASSERT(objtype->respawneffect);
-        P_MobjCreateObject(x, y, z, objtype->respawneffect);
+        SYS_ASSERT(objtype->respawneffect_);
+        P_MobjCreateObject(x, y, z, objtype->respawneffect_);
 
         // -ACB- 1998/08/06 Use MobjCreateObject
         mo = P_MobjCreateObject(x, y, z, objtype);
@@ -2183,8 +2183,8 @@ void P_MobjRemoveMissile(mobj_t *missile)
 
     missile->mom.X = missile->mom.Y = missile->mom.Z = 0;
 
-    missile->flags &= ~(MF_MISSILE | MF_TOUCHY);
-    missile->extendedflags &= ~(EF_BOUNCE);
+    missile->flags &= ~(kMapObjectFlagMissile | kMapObjectFlagTouchy);
+    missile->extendedflags &= ~(kExtendedFlagBounce);
 }
 
 //
@@ -2207,40 +2207,40 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
     mobj->info             = info;
     mobj->x                = x;
     mobj->y                = y;
-    mobj->radius           = info->radius;
-    mobj->height           = info->height;
-    mobj->scale            = info->scale;
-    mobj->aspect           = info->aspect;
-    mobj->flags            = info->flags;
-    mobj->health           = info->spawnhealth;
-    mobj->spawnhealth      = info->spawnhealth;
-    mobj->speed            = info->speed;
-    mobj->fuse             = info->fuse;
-    mobj->side             = info->side;
-    mobj->model_skin       = info->model_skin;
+    mobj->radius           = info->radius_;
+    mobj->height           = info->height_;
+    mobj->scale            = info->scale_;
+    mobj->aspect           = info->aspect_;
+    mobj->flags            = info->flags_;
+    mobj->health           = info->spawnhealth_;
+    mobj->spawnhealth      = info->spawnhealth_;
+    mobj->speed            = info->speed_;
+    mobj->fuse             = info->fuse_;
+    mobj->side             = info->side_;
+    mobj->model_skin       = info->model_skin_;
     mobj->model_last_frame = -1;
-    mobj->model_aspect     = info->model_aspect;
-    mobj->model_scale      = info->model_scale;
+    mobj->model_aspect     = info->model_aspect_;
+    mobj->model_scale      = info->model_scale_;
     mobj->wud_tags.clear();
 
-    mobj->painchance = info->painchance;
+    mobj->painchance = info->painchance_;
 
-    mobj->morphtimeout = info->morphtimeout;
+    mobj->morphtimeout = info->morphtimeout_;
 
-    if (level_flags.fastparm && info->fast_speed > -1)
-        mobj->speed = info->fast_speed;
+    if (level_flags.fastparm && info->fast_speed_ > -1)
+        mobj->speed = info->fast_speed_;
 
     // -ACB- 1998/06/25 new mobj Stuff (1998/07/11 - invisibility added)
-    mobj->extendedflags = info->extendedflags;
-    mobj->hyperflags    = info->hyperflags;
-    mobj->mbf21flags    = info->mbf21flags;
-    mobj->vis_target = mobj->visibility = info->translucency;
+    mobj->extendedflags = info->extendedflags_;
+    mobj->hyperflags    = info->hyperflags_;
+    mobj->mbf21flags    = info->mbf21flags_;
+    mobj->vis_target = mobj->visibility = info->translucency_;
 
     mobj->currentattack = nullptr;
     mobj->on_ladder     = -1;
 
     if (gameskill != sk_nightmare)
-        mobj->reactiontime = info->reactiontime;
+        mobj->reactiontime = info->reactiontime_;
 
     mobj->lastlook = P_Random() % MAXPLAYERS;
 
@@ -2256,12 +2256,12 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
     //
     State *st;
 
-    if (info->spawn_state)
-        st = &states[info->spawn_state];
-    else if (info->meander_state)
-        st = &states[info->meander_state];
+    if (info->spawn_state_)
+        st = &states[info->spawn_state_];
+    else if (info->meander_state_)
+        st = &states[info->meander_state_];
     else
-        st = &states[info->idle_state];
+        st = &states[info->idle_state_];
 
     mobj->state      = st;
     mobj->tics       = 0;
@@ -2270,17 +2270,17 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
     SYS_ASSERT(!mobj->isRemoved());
 
     // enable usable items
-    if (mobj->extendedflags & EF_USABLE)
-        mobj->flags |= MF_TOUCHY;
+    if (mobj->extendedflags & kExtendedFlagUsable)
+        mobj->flags |= kMapObjectFlagTouchy;
 
     // handle dynamic lights
     {
-        const dlight_info_c *dinfo = &info->dlight[0];
+        const DynamicLightDefinition *dinfo = &info->dlight_[0];
 
-        if (dinfo->type != DLITE_None)
+        if (dinfo->type_ != kDynamicLightTypeNone)
         {
-            mobj->dlight.r = mobj->dlight.target = dinfo->radius;
-            mobj->dlight.color                   = dinfo->colour;
+            mobj->dlight.r = mobj->dlight.target = dinfo->radius_;
+            mobj->dlight.color                   = dinfo->colour_;
 
             // leave 'shader' field as nullptr : renderer will create it
         }
@@ -2322,10 +2322,10 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
     // when RTS comes into play -- trying to second guess which
     // spawnthings should not be counted just doesn't work).
 
-    if (mobj->flags & MF_COUNTKILL)
+    if (mobj->flags & kMapObjectFlagCountKill)
         wi_stats.kills++;
 
-    if (mobj->flags & MF_COUNTITEM)
+    if (mobj->flags & kMapObjectFlagCountItem)
         wi_stats.items++;
 
     mobj->lastheard = -1; // For now, the last player we heard
@@ -2358,7 +2358,7 @@ int P_MobjGetSfxCategory(const mobj_t *mo)
     }
     else
     {
-        if (mo->extendedflags & EF_MONSTER)
+        if (mo->extendedflags & kExtendedFlagMonster)
             return SNCAT_Monster;
 
         return SNCAT_Object;

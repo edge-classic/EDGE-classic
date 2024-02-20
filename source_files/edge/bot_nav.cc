@@ -59,7 +59,7 @@ float NAV_EvaluateBigItem(const mobj_t *mo)
 {
     AmmunitionType ammotype;
 
-    for (const Benefit *B = mo->info->pickup_benefits; B != nullptr; B = B->next)
+    for (const Benefit *B = mo->info->pickup_benefits_; B != nullptr; B = B->next)
     {
         switch (B->type)
         {
@@ -90,7 +90,7 @@ float NAV_EvaluateBigItem(const mobj_t *mo)
             // hence for bots, only invulnerability is actually useful.
             switch (B->sub.type)
             {
-            case PW_Invulnerable:
+            case kPowerTypeInvulnerable:
                 return 100;
             default:
                 return -1;
@@ -130,7 +130,7 @@ static void NAV_CollectBigItems()
 
     for (const mobj_t *mo = mobjlisthead; mo != nullptr; mo = mo->next)
     {
-        if ((mo->flags & MF_SPECIAL) == 0)
+        if ((mo->flags & kMapObjectFlagSpecial) == 0)
             continue;
 
         float score = NAV_EvaluateBigItem(mo);

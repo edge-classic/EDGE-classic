@@ -829,9 +829,9 @@ void RAD_RunTriggers(void)
 
 void RAD_MonsterIsDead(mobj_t *mo)
 {
-    if (mo->hyperflags & HF_WAIT_UNTIL_DEAD)
+    if (mo->hyperflags & kHyperFlagWaitUntilDead)
     {
-        mo->hyperflags &= ~HF_WAIT_UNTIL_DEAD;
+        mo->hyperflags &= ~kHyperFlagWaitUntilDead;
 
         rad_trigger_t *trig;
 

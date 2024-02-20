@@ -833,7 +833,7 @@ static void DLIT_Wall(mobj_t *mo, void *dataptr)
     wall_coord_data_t *data = (wall_coord_data_t *)dataptr;
 
     // light behind the plane ?
-    if (!mo->info->dlight[0].leaky && !data->mid_masked &&
+    if (!mo->info->dlight_[0].leaky_ && !data->mid_masked &&
         !(mo->subsector->sector->floor_vertex_slope || mo->subsector->sector->ceil_vertex_slope))
     {
         float mx = mo->x;
@@ -872,7 +872,7 @@ static void DLIT_Plane(mobj_t *mo, void *dataptr)
     plane_coord_data_t *data = (plane_coord_data_t *)dataptr;
 
     // light behind the plane ?
-    if (!mo->info->dlight[0].leaky &&
+    if (!mo->info->dlight_[0].leaky_ &&
         !(mo->subsector->sector->floor_vertex_slope || mo->subsector->sector->ceil_vertex_slope))
     {
         float z = data->vert[0].Z;
@@ -1852,7 +1852,7 @@ static void DLIT_Flood(mobj_t *mo, void *dataptr)
     flood_emu_data_t *data = (flood_emu_data_t *)dataptr;
 
     // light behind the plane ?
-    if (!mo->info->dlight[0].leaky &&
+    if (!mo->info->dlight_[0].leaky_ &&
         !(mo->subsector->sector->floor_vertex_slope || mo->subsector->sector->ceil_vertex_slope))
     {
         if ((MO_MIDZ(mo) > data->plane_h) != (data->normal.Z > 0))

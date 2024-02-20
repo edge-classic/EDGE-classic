@@ -1184,7 +1184,7 @@ int DDF_MainLookupDirector(const MapObjectDefinition *info, const char *ref)
 
     std::string director(ref, len);
 
-    int state  = DDF_StateFindLabel(info->state_grp, director.c_str());
+    int state  = DDF_StateFindLabel(info->state_grp_, director.c_str());
     int offset = p ? HMM_MAX(0, atoi(p + 1) - 1) : 0;
 
     // FIXME: check for overflow
@@ -1959,35 +1959,35 @@ LabelOffset &LabelOffset::operator=(LabelOffset &rhs)
 
 // ---> dlight_info class
 
-dlight_info_c::dlight_info_c() { Default(); }
+DynamicLightDefinition::DynamicLightDefinition() { Default(); }
 
-dlight_info_c::dlight_info_c(dlight_info_c &rhs) { Copy(rhs); }
+DynamicLightDefinition::DynamicLightDefinition(DynamicLightDefinition &rhs) { Copy(rhs); }
 
-void dlight_info_c::Copy(dlight_info_c &src)
+void DynamicLightDefinition::Copy(DynamicLightDefinition &src)
 {
-    type   = src.type;
-    shape  = src.shape;
-    radius = src.radius;
-    colour = src.colour;
-    height = src.height;
-    leaky  = src.leaky;
+    type_   = src.type_;
+    shape_  = src.shape_;
+    radius_ = src.radius_;
+    colour_ = src.colour_;
+    height_ = src.height_;
+    leaky_  = src.leaky_;
 
-    cache_data = nullptr;
+    cache_data_ = nullptr;
 }
 
-void dlight_info_c::Default()
+void DynamicLightDefinition::Default()
 {
-    type   = DLITE_None;
-    radius = 32;
-    colour = SG_WHITE_RGBA32;
-    height = 0.5f;
-    leaky  = false;
-    shape  = "DLIGHT_EXP";
+    type_   = kDynamicLightTypeNone;
+    radius_ = 32;
+    colour_ = SG_WHITE_RGBA32;
+    height_ = 0.5f;
+    leaky_  = false;
+    shape_  = "DLIGHT_EXP";
 
-    cache_data = nullptr;
+    cache_data_ = nullptr;
 }
 
-dlight_info_c &dlight_info_c::operator=(dlight_info_c &rhs)
+DynamicLightDefinition &DynamicLightDefinition::operator=(DynamicLightDefinition &rhs)
 {
     CHECK_SELF_ASSIGN(rhs);
 
@@ -1998,36 +1998,36 @@ dlight_info_c &dlight_info_c::operator=(dlight_info_c &rhs)
 
 // ---> weakness_info class
 
-weakness_info_c::weakness_info_c() { Default(); }
+WeaknessDefinition::WeaknessDefinition() { Default(); }
 
-weakness_info_c::weakness_info_c(weakness_info_c &rhs) { Copy(rhs); }
+WeaknessDefinition::WeaknessDefinition(WeaknessDefinition &rhs) { Copy(rhs); }
 
-void weakness_info_c::Copy(weakness_info_c &src)
+void WeaknessDefinition::Copy(WeaknessDefinition &src)
 {
-    height[0] = src.height[0];
-    height[1] = src.height[1];
-    angle[0]  = src.angle[0];
-    angle[1]  = src.angle[1];
+    height_[0] = src.height_[0];
+    height_[1] = src.height_[1];
+    angle_[0]  = src.angle_[0];
+    angle_[1]  = src.angle_[1];
 
-    classes    = src.classes;
-    multiply   = src.multiply;
-    painchance = src.painchance;
+    classes_    = src.classes_;
+    multiply_   = src.multiply_;
+    painchance_ = src.painchance_;
 }
 
-void weakness_info_c::Default()
+void WeaknessDefinition::Default()
 {
-    height[0] = 0.0f;
-    height[1] = 1.0f;
+    height_[0] = 0.0f;
+    height_[1] = 1.0f;
 
-    angle[0] = kBAMAngle0;
-    angle[1] = kBAMAngle360;
+    angle_[0] = kBAMAngle0;
+    angle_[1] = kBAMAngle360;
 
-    classes    = 0;
-    multiply   = 2.5;
-    painchance = -1;  // disabled
+    classes_    = 0;
+    multiply_   = 2.5;
+    painchance_ = -1;  // disabled
 }
 
-weakness_info_c &weakness_info_c::operator=(weakness_info_c &rhs)
+WeaknessDefinition &WeaknessDefinition::operator=(WeaknessDefinition &rhs)
 {
     CHECK_SELF_ASSIGN(rhs);
 

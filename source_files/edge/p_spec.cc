@@ -569,7 +569,7 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const LineType *special)
     if (!info)
         return; // found nothing so exit
 
-    if (!level_flags.have_extra && (info->extendedflags & EF_EXTRA))
+    if (!level_flags.have_extra && (info->extendedflags_ & kExtendedFlagExtra))
         return;
 
     // if it's shootable we've already handled this elsewhere
@@ -585,12 +585,12 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const LineType *special)
     midy = (TheLine->v1->Y + TheLine->v2->Y) / 2;
     midz = ONFLOORZ;
 
-    float dx = P_Random() * info->radius / 255.0f;
-    float dy = P_Random() * info->radius / 255.0f;
+    float dx = P_Random() * info->radius_ / 255.0f;
+    float dy = P_Random() * info->radius_ / 255.0f;
 
     // move slightly forward to spawn the debris
-    midx += dx + info->radius;
-    midy += dy + info->radius;
+    midx += dx + info->radius_;
+    midy += dy + info->radius_;
 
     P_SpawnDebris(midx, midy, midz, 0 + kBAMAngle180, info);
 
@@ -598,8 +598,8 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const LineType *special)
     midy = (TheLine->v1->Y + TheLine->v2->Y) / 2;
 
     // move slightly backward to spawn the debris
-    midx -= dx + info->radius;
-    midy -= dy + info->radius;
+    midx -= dx + info->radius_;
+    midy -= dy + info->radius_;
 
     P_SpawnDebris(midx, midy, midz, 0 + kBAMAngle180, info);
 }
@@ -1292,7 +1292,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
     // -AJA- 1999/12/07: Height checking.
     if (line && thing && thing->player && (special->special_flags_ & kLineSpecialMustReach) && !can_reach)
     {
-        S_StartFX(thing->info->noway_sound, P_MobjGetSfxCategory(thing), thing);
+        S_StartFX(thing->info->noway_sound_, P_MobjGetSfxCategory(thing), thing);
 
         return false;
     }
@@ -1309,7 +1309,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
             if (thing->player->isBot() && (special->obj_ & kTriggerActivatorNoBot))
                 return false;
         }
-        else if (thing && (thing->info->extendedflags & EF_MONSTER))
+        else if (thing && (thing->info->extendedflags_ & kExtendedFlagMonster))
         {
             // Monsters can only trigger if the kTriggerActivatorMonster flag is set
             if (!(special->obj_ & kTriggerActivatorMonster))
@@ -1320,7 +1320,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
                 return false;
 
             // Monster is not allowed to trigger lines
-            if (thing->info->hyperflags & HF_NOTRIGGERLINES)
+            if (thing->info->hyperflags_ & kHyperFlagNoTriggerLines)
                 return false;
         }
         else
@@ -1339,10 +1339,10 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
     // wouldn't otherwise cross (for now, the edge of a high dropoff)
     // Note: I believe this assumes no 3D floors, but I think it's a
     // very particular situation anyway - Dasho
-    if (trig == kLineTriggerWalkable && line->backsector && thing && (thing->info->extendedflags & EF_MONSTER) &&
-        !(thing->flags & (MF_TELEPORT | MF_DROPOFF | MF_FLOAT)))
+    if (trig == kLineTriggerWalkable && line->backsector && thing && (thing->info->extendedflags_ & kExtendedFlagMonster) &&
+        !(thing->flags & (kMapObjectFlagTeleport | kMapObjectFlagDropOff | kMapObjectFlagFloat)))
     {
-        if (std::abs(line->frontsector->f_h - line->backsector->f_h) > thing->info->step_size)
+        if (std::abs(line->frontsector->f_h - line->backsector->f_h) > thing->info->step_size_)
             return false;
     }
 
@@ -1753,7 +1753,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
     //
     float mouth_z = player->mo->z + player->viewz;
 
-    if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= f_h && mouth_z <= c_h && player->powers[PW_Scuba] <= 0)
+    if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= f_h && mouth_z <= c_h && player->powers[kPowerTypeScuba] <= 0)
     {
         int subtract = 1;
         if ((r_doubleframes.d && extra_tic) || !should_choke)
@@ -1761,12 +1761,12 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
         player->air_in_lungs -= subtract;
         player->underwater = true;
 
-        if (subtract && player->air_in_lungs <= 0 && (leveltime % (1 + player->mo->info->choke_damage.delay_)) == 0)
+        if (subtract && player->air_in_lungs <= 0 && (leveltime % (1 + player->mo->info->choke_damage_.delay_)) == 0)
         {
-            DAMAGE_COMPUTE(damage, &player->mo->info->choke_damage);
+            DAMAGE_COMPUTE(damage, &player->mo->info->choke_damage_);
 
             if (damage)
-                P_DamageMobj(player->mo, nullptr, nullptr, damage, &player->mo->info->choke_damage);
+                P_DamageMobj(player->mo, nullptr, nullptr, damage, &player->mo->info->choke_damage_);
         }
     }
 
@@ -1841,7 +1841,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
         if (!unless_damage && !if_damage && !special->damage_.bypass_all_)
             factor = 0;
     }
-    else if (player->powers[PW_AcidSuit] && !special->damage_.bypass_all_)
+    else if (player->powers[kPowerTypeAcidSuit] && !special->damage_.bypass_all_)
         factor = 0;
 
     if (r_doubleframes.d && extra_tic)
@@ -1863,8 +1863,8 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
         {
             CON_ImportantMessageLDF("FoundSecret"); // Lobo: get text from language.ddf
 
-            S_StartFX(player->mo->info->secretsound, SNCAT_UI, player->mo);
-            // S_StartFX(player->mo->info->secretsound,
+            S_StartFX(player->mo->info->secretsound_, SNCAT_UI, player->mo);
+            // S_StartFX(player->mo->info->secretsound_,
             //		P_MobjGetSfxCategory(player->mo), player->mo);
         }
 
@@ -1957,15 +1957,15 @@ void P_PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
     // breathing support: handle gasping when leaving the water
     if ((was_underwater && !player->underwater) || (was_airless && !player->airless))
     {
-        if (player->air_in_lungs <= (player->mo->info->lung_capacity - player->mo->info->gasp_start))
+        if (player->air_in_lungs <= (player->mo->info->lung_capacity_ - player->mo->info->gasp_start_))
         {
-            if (player->mo->info->gasp_sound)
+            if (player->mo->info->gasp_sound_)
             {
-                S_StartFX(player->mo->info->gasp_sound, P_MobjGetSfxCategory(player->mo), player->mo);
+                S_StartFX(player->mo->info->gasp_sound_, P_MobjGetSfxCategory(player->mo), player->mo);
             }
         }
 
-        player->air_in_lungs = player->mo->info->lung_capacity;
+        player->air_in_lungs = player->mo->info->lung_capacity_;
     }
 
 

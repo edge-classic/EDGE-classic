@@ -117,13 +117,13 @@ class light_image_c
 static light_image_c *GetLightImage(const MapObjectDefinition *info, int DL)
 {
     // Intentional Const Overrides
-    dlight_info_c *D_info = (dlight_info_c *)&info->dlight[DL];
+    DynamicLightDefinition *D_info = (DynamicLightDefinition *)&info->dlight_[DL];
 
-    if (!D_info->cache_data)
+    if (!D_info->cache_data_)
     {
         // FIXME !!!! share light_image_c instances
 
-        const char *shape = D_info->shape.c_str();
+        const char *shape = D_info->shape_.c_str();
 
         SYS_ASSERT(shape && strlen(shape) > 0);
 
@@ -144,10 +144,10 @@ static light_image_c *GetLightImage(const MapObjectDefinition *info, int DL)
             I_Error("Custom DLIGHT shapes not yet supported.\n");
         }
 
-        D_info->cache_data = lim;
+        D_info->cache_data_ = lim;
     }
 
-    return (light_image_c *)D_info->cache_data;
+    return (light_image_c *)D_info->cache_data_;
 }
 
 //----------------------------------------------------------------------------
@@ -223,17 +223,17 @@ class dynlight_shader_c : public abstract_shader_c
         if (DL == 0)
             return mo->dlight.r * MIR_XYScale();
 
-        return mo->info->dlight[1].radius * mo->dlight.r / mo->info->dlight[0].radius * MIR_XYScale();
+        return mo->info->dlight_[1].radius_ * mo->dlight.r / mo->info->dlight_[0].radius_ * MIR_XYScale();
     }
 
     inline RGBAColor WhatColor(int DL)
     {
-        return (DL == 0) ? mo->dlight.color : mo->info->dlight[1].colour;
+        return (DL == 0) ? mo->dlight.color : mo->info->dlight_[1].colour_;
     }
 
-    inline dlight_type_e WhatType(int DL)
+    inline DynamicLightType WhatType(int DL)
     {
-        return mo->info->dlight[DL].type;
+        return mo->info->dlight_[DL].type_;
     }
 
   public:
@@ -254,7 +254,7 @@ class dynlight_shader_c : public abstract_shader_c
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == DLITE_None)
+            if (WhatType(DL) == kDynamicLightTypeNone)
                 break;
 
             RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
@@ -263,7 +263,7 @@ class dynlight_shader_c : public abstract_shader_c
 
             if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
-                if (WhatType(DL) == DLITE_Add)
+                if (WhatType(DL) == kDynamicLightTypeAdd)
                     col->add_Give(new_col, L);
                 else
                     col->mod_Give(new_col, L);
@@ -311,14 +311,14 @@ class dynlight_shader_c : public abstract_shader_c
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == DLITE_None)
+            if (WhatType(DL) == kDynamicLightTypeNone)
                 break;
 
             RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
             if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
-                if (WhatType(DL) == DLITE_Add)
+                if (WhatType(DL) == kDynamicLightTypeAdd)
                     col->add_Give(new_col, L);
                 else
                     col->mod_Give(new_col, L);
@@ -331,10 +331,10 @@ class dynlight_shader_c : public abstract_shader_c
     {
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == DLITE_None)
+            if (WhatType(DL) == kDynamicLightTypeNone)
                 break;
 
-            bool is_additive = (WhatType(DL) == DLITE_Add);
+            bool is_additive = (WhatType(DL) == kDynamicLightTypeAdd);
 
             RGBAColor col = WhatColor(DL);
 
@@ -408,10 +408,10 @@ class plane_glow_c : public abstract_shader_c
   private:
     inline float Dist(const sector_t *sec, float z)
     {
-        if (mo->info->glow_type == GLOW_Floor)
+        if (mo->info->glow_type_ == kSectorGlowTypeFloor)
             return fabs(sec->f_h - z);
         else
-            return fabs(sec->c_h - z); // GLOW_Ceiling
+            return fabs(sec->c_h - z); // kSectorGlowTypeCeiling
     }
 
     inline void TexCoord(HMM_Vec2 *texc, float r, const sector_t *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
@@ -425,17 +425,17 @@ class plane_glow_c : public abstract_shader_c
         if (DL == 0)
             return mo->dlight.r * MIR_XYScale();
 
-        return mo->info->dlight[1].radius * mo->dlight.r / mo->info->dlight[0].radius * MIR_XYScale();
+        return mo->info->dlight_[1].radius_ * mo->dlight.r / mo->info->dlight_[0].radius_ * MIR_XYScale();
     }
 
     inline RGBAColor WhatColor(int DL)
     {
-        return (DL == 0) ? mo->dlight.color : mo->info->dlight[1].colour;
+        return (DL == 0) ? mo->dlight.color : mo->info->dlight_[1].colour_;
     }
 
-    inline dlight_type_e WhatType(int DL)
+    inline DynamicLightType WhatType(int DL)
     {
-        return mo->info->dlight[DL].type;
+        return mo->info->dlight_[DL].type_;
     }
 
   public:
@@ -447,7 +447,7 @@ class plane_glow_c : public abstract_shader_c
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == DLITE_None)
+            if (WhatType(DL) == kDynamicLightTypeNone)
                 break;
 
             RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
@@ -456,7 +456,7 @@ class plane_glow_c : public abstract_shader_c
 
             if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
-                if (WhatType(DL) == DLITE_Add)
+                if (WhatType(DL) == kDynamicLightTypeAdd)
                     col->add_Give(new_col, L);
                 else
                     col->mod_Give(new_col, L);
@@ -468,19 +468,19 @@ class plane_glow_c : public abstract_shader_c
     {
         const sector_t *sec = mo->subsector->sector;
 
-        float dz = (mo->info->glow_type == GLOW_Floor) ? +1 : -1;
+        float dz = (mo->info->glow_type_ == kSectorGlowTypeFloor) ? +1 : -1;
         float dist;
 
         if (is_weapon)
         {
-            float weapon_z = mod_pos->z + mod_pos->height * mod_pos->info->shotheight;
+            float weapon_z = mod_pos->z + mod_pos->height * mod_pos->info->shotheight_;
 
-            if (mo->info->glow_type == GLOW_Floor)
+            if (mo->info->glow_type_ == kSectorGlowTypeFloor)
                 dist = weapon_z - sec->f_h;
             else
                 dist = sec->c_h - weapon_z;
         }
-        else if (mo->info->glow_type == GLOW_Floor)
+        else if (mo->info->glow_type_ == kSectorGlowTypeFloor)
             dist = mod_pos->z - sec->f_h;
         else
             dist = sec->c_h - (mod_pos->z + mod_pos->height);
@@ -493,14 +493,14 @@ class plane_glow_c : public abstract_shader_c
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == DLITE_None)
+            if (WhatType(DL) == kDynamicLightTypeNone)
                 break;
 
             RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
             if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
-                if (WhatType(DL) == DLITE_Add)
+                if (WhatType(DL) == kDynamicLightTypeAdd)
                     col->add_Give(new_col, L);
                 else
                     col->mod_Give(new_col, L);
@@ -515,10 +515,10 @@ class plane_glow_c : public abstract_shader_c
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == DLITE_None)
+            if (WhatType(DL) == kDynamicLightTypeNone)
                 break;
 
-            bool is_additive = (WhatType(DL) == DLITE_Add);
+            bool is_additive = (WhatType(DL) == kDynamicLightTypeAdd);
 
             RGBAColor col = WhatColor(DL);
 
@@ -595,17 +595,17 @@ class wall_glow_c : public abstract_shader_c
         if (DL == 0)
             return mo->dlight.r * MIR_XYScale();
 
-        return mo->info->dlight[1].radius * mo->dlight.r / mo->info->dlight[0].radius * MIR_XYScale();
+        return mo->info->dlight_[1].radius_ * mo->dlight.r / mo->info->dlight_[0].radius_ * MIR_XYScale();
     }
 
     inline RGBAColor WhatColor(int DL)
     {
-        return (DL == 0) ? mo->dlight.color : mo->info->dlight[1].colour;
+        return (DL == 0) ? mo->dlight.color : mo->info->dlight_[1].colour_;
     }
 
-    inline dlight_type_e WhatType(int DL)
+    inline DynamicLightType WhatType(int DL)
     {
-        return mo->info->dlight[DL].type;
+        return mo->info->dlight_[DL].type_;
     }
 
   public:
@@ -634,14 +634,14 @@ class wall_glow_c : public abstract_shader_c
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == DLITE_None)
+            if (WhatType(DL) == kDynamicLightTypeNone)
                 break;
 
             RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
             if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
-                if (WhatType(DL) == DLITE_Add)
+                if (WhatType(DL) == kDynamicLightTypeAdd)
                     col->add_Give(new_col, L);
                 else
                     col->mod_Give(new_col, L);
@@ -660,14 +660,14 @@ class wall_glow_c : public abstract_shader_c
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == DLITE_None)
+            if (WhatType(DL) == kDynamicLightTypeNone)
                 break;
 
             RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
             if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
-                if (WhatType(DL) == DLITE_Add)
+                if (WhatType(DL) == kDynamicLightTypeAdd)
                     col->add_Give(new_col, L);
                 else
                     col->mod_Give(new_col, L);
@@ -682,10 +682,10 @@ class wall_glow_c : public abstract_shader_c
 
         for (int DL = 0; DL < 2; DL++)
         {
-            if (WhatType(DL) == DLITE_None)
+            if (WhatType(DL) == kDynamicLightTypeNone)
                 break;
 
-            bool is_additive = (WhatType(DL) == DLITE_Add);
+            bool is_additive = (WhatType(DL) == kDynamicLightTypeAdd);
 
             RGBAColor col = WhatColor(DL);
 
@@ -780,17 +780,17 @@ public:
 private:
 	inline float WhatRadius(int DL)
 	{
-		return info->dlight[DL].radius * MIR_XYScale();
+		return info->dlight_[DL].radius * MIR_XYScale();
 	}
 
 	inline RGBAColor WhatColor(int DL)
 	{
-		return info->dlight[DL].colour;
+		return info->dlight_[DL].colour;
 	}
 
-	inline dlight_type_e WhatType(int DL)
+	inline DynamicLightType WhatType(int DL)
 	{
-		return info->dlight[DL].type;
+		return info->dlight_[DL].type;
 	}
 
 public:
@@ -815,7 +815,7 @@ public:
 
 		for (int DL=0; DL < 2; DL++)
 		{
-			if (WhatType(DL) == DLITE_None)
+			if (WhatType(DL) == kDynamicLightTypeNone)
 				break;
 
 			float d = dist;
@@ -832,7 +832,7 @@ public:
 
 			if (new_col != SG_BLACK_RGBA32 && L > 1/256.0)
 			{
-				if (WhatType(DL) == DLITE_Add)
+				if (WhatType(DL) == kDynamicLightTypeAdd)
 					col->add_Give(new_col, L); 
 				else
 					col->mod_Give(new_col, L); 

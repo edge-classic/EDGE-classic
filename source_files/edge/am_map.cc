@@ -694,7 +694,7 @@ static void DrawKeyOnLine(mline_t *ml, int theKey, RGBAColor rgb = SG_WHITE_RGBA
         TheObject = mobjtypes.LookupDoorKey(theKey);
         if (!TheObject)
             return; // Very rare, only zombiesTC hits this so far
-        CleanName = Aux2StringReplaceAll(TheObject->name, std::string("_"), std::string(" "));
+        CleanName = Aux2StringReplaceAll(TheObject->name_, std::string("_"), std::string(" "));
     }
 
     // *********************
@@ -724,7 +724,7 @@ static void DrawKeyOnLine(mline_t *ml, int theKey, RGBAColor rgb = SG_WHITE_RGBA
             if (TheObject)
             {
                 static State *idlestate;
-                idlestate = &states[TheObject->idle_state];
+                idlestate = &states[TheObject->idle_state_];
                 if (!(idlestate->flags & kStateFrameFlagModel)) // Can't handle 3d models...yet
                 {
                     bool           flip;
@@ -1007,7 +1007,7 @@ static void AM_WalkSeg(seg_t *seg)
             }
         }
     }
-    else if (f_focus->player && (show_allmap || !AlmostEquals(f_focus->player->powers[PW_AllMap], 0.0f)))
+    else if (f_focus->player && (show_allmap || !AlmostEquals(f_focus->player->powers[kPowerTypeAllMap], 0.0f)))
     {
         if (!(line->flags & MLF_DontDraw))
             DrawMLine(&l, am_colors[AMCOL_Allmap]);
@@ -1157,13 +1157,13 @@ static void AM_WalkThing(mobj_t *mo)
         return;
 
     // -AJA- more colourful things
-    if (mo->flags & MF_SPECIAL)
+    if (mo->flags & kMapObjectFlagSpecial)
         index = AMCOL_Item;
-    else if (mo->flags & MF_MISSILE)
+    else if (mo->flags & kMapObjectFlagMissile)
         index = AMCOL_Missile;
-    else if (mo->extendedflags & EF_MONSTER && mo->health <= 0)
+    else if (mo->extendedflags & kExtendedFlagMonster && mo->health <= 0)
         index = AMCOL_Corpse;
-    else if (mo->extendedflags & EF_MONSTER)
+    else if (mo->extendedflags & kExtendedFlagMonster)
         index = AMCOL_Monster;
 
 #if (DEBUG_COLLIDE == 1)

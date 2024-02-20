@@ -142,7 +142,7 @@ typedef struct s_healp_s
 // Radius GiveArmour Player Trigger
 typedef struct s_armour_s
 {
-    armour_type_e type          = ARMOUR_Green;
+    ArmourType type          = kArmourTypeGreen;
     float         limit         = 0;
     float         armour_amount = 0;
 } s_armour_t;
@@ -548,7 +548,7 @@ typedef struct rad_script_s
     // Optional conditions...
     s_ondeath_t       *boss_trig   = nullptr;
     s_onheight_t      *height_trig = nullptr;
-    condition_check_t *cond_trig   = nullptr;
+    ConditionCheck *cond_trig   = nullptr;
 
     // Path info
     rts_path_t *next_in_path    = nullptr;

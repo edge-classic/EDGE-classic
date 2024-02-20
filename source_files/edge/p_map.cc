@@ -164,7 +164,7 @@ static inline int PointOnLineSide(float x, float y, line_t *ld)
 
 static bool PIT_StompThing(mobj_t *thing, void *data)
 {
-    if (!(thing->flags & MF_SHOOTABLE))
+    if (!(thing->flags & kMapObjectFlagShootable))
         return true;
 
     // check we aren't trying to stomp ourselves
@@ -172,7 +172,7 @@ static bool PIT_StompThing(mobj_t *thing, void *data)
         return true;
 
     // ignore old avatars (for Hub reloads), which get removed after loading
-    if (thing->hyperflags & HF_OLD_AVATAR)
+    if (thing->hyperflags & kHyperFlagRememberOldAvatars)
         return true;
 
     float blockdist = thing->radius + tm_I.mover->radius;
@@ -266,9 +266,9 @@ static bool PIT_CheckAbsLine(line_t *ld, void *data)
     if (!ld->backsector || ld->gap_num == 0)
         return false; // one sided line
 
-    if (tm_I.extflags & EF_CROSSLINES)
+    if (tm_I.extflags & kExtendedFlagCrossBlockingLines)
     {
-        if ((ld->flags & MLF_ShootBlock) && (tm_I.flags & MF_MISSILE))
+        if ((ld->flags & MLF_ShootBlock) && (tm_I.flags & kMapObjectFlagMissile))
             return false;
     }
     else
@@ -285,7 +285,7 @@ static bool PIT_CheckAbsLine(line_t *ld, void *data)
         }
 
         // block grounded monsters ?
-        if ((tm_I.extflags & EF_MONSTER) &&
+        if ((tm_I.extflags & kExtendedFlagMonster) &&
             ((ld->flags & MLF_BlockGrounded) ||
              (ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockGroundedMonsters))) &&
             (tm_I.mover->z <= tm_I.mover->floorz + 1.0f))
@@ -294,7 +294,7 @@ static bool PIT_CheckAbsLine(line_t *ld, void *data)
         }
 
         // block monsters ?
-        if ((tm_I.extflags & EF_MONSTER) && (ld->flags & MLF_BlockMonsters))
+        if ((tm_I.extflags & kExtendedFlagMonster) && (ld->flags & MLF_BlockMonsters))
         {
             return false;
         }
@@ -327,7 +327,7 @@ static bool PIT_CheckAbsThing(mobj_t *thing, void *data)
     if (thing == tm_I.mover)
         return true;
 
-    if (!(thing->flags & (MF_SOLID | MF_SHOOTABLE)))
+    if (!(thing->flags & (kMapObjectFlagSolid | kMapObjectFlagShootable)))
         return true;
 
     blockdist = thing->radius + tm_I.mover->radius;
@@ -340,7 +340,7 @@ static bool PIT_CheckAbsThing(mobj_t *thing, void *data)
     if (!AlmostEquals(tm_I.z, ONFLOORZ) && !AlmostEquals(tm_I.z, ONCEILINGZ))
     {
         // -KM- 1998/9/19 True 3d gameplay checks.
-        if ((tm_I.flags & MF_MISSILE) || level_flags.true3dgameplay)
+        if ((tm_I.flags & kMapObjectFlagMissile) || level_flags.true3dgameplay)
         {
             // overhead ?
             if (tm_I.z >= thing->z + thing->height)
@@ -352,7 +352,7 @@ static bool PIT_CheckAbsThing(mobj_t *thing, void *data)
         }
     }
 
-    solid = (thing->flags & MF_SOLID) ? true : false;
+    solid = (thing->flags & kMapObjectFlagSolid) ? true : false;
 
     // check for missiles making contact
     // -ACB- 1998/08/04 Procedure for missile contact
@@ -360,28 +360,28 @@ static bool PIT_CheckAbsThing(mobj_t *thing, void *data)
     if (tm_I.mover->source && tm_I.mover->source == thing)
         return true;
 
-    if (tm_I.flags & MF_MISSILE)
+    if (tm_I.flags & kMapObjectFlagMissile)
     {
         // ignore the missile's shooter
         if (tm_I.mover->source && tm_I.mover->source == thing)
             return true;
 
-        if ((thing->hyperflags & HF_PASSMISSILE) && level_flags.pass_missile)
+        if ((thing->hyperflags & kHyperFlagMissilesPassThrough) && level_flags.pass_missile)
             return true;
 
         // thing isn't shootable, return depending on if the thing is solid.
-        if (!(thing->flags & MF_SHOOTABLE))
+        if (!(thing->flags & kMapObjectFlagShootable))
             return !solid;
 
         if (P_MissileContact(tm_I.mover, thing) < 0)
             return true;
 
-        return (tm_I.extflags & EF_TUNNEL) ? true : false;
+        return (tm_I.extflags & kExtendedFlagTunnel) ? true : false;
     }
 
     // -AJA- 2000/06/09: Follow MBF semantics: allow the non-solid
     // moving things to pass through solid things.
-    return !solid || (thing->flags & MF_NOCLIP) || !(tm_I.flags & MF_SOLID);
+    return !solid || (thing->flags & kMapObjectFlagNoClip) || !(tm_I.flags & kMapObjectFlagSolid);
 }
 
 //
@@ -400,7 +400,7 @@ static bool PIT_CheckAbsThing(mobj_t *thing, void *data)
 bool P_CheckAbsPosition(mobj_t *thing, float x, float y, float z)
 {
     // can go anywhere
-    if (thing->flags & MF_NOCLIP)
+    if (thing->flags & kMapObjectFlagNoClip)
         return true;
 
     tm_I.mover    = thing;
@@ -465,9 +465,9 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
         return false;
     }
 
-    if (tm_I.extflags & EF_CROSSLINES)
+    if (tm_I.extflags & kExtendedFlagCrossBlockingLines)
     {
-        if ((ld->flags & MLF_ShootBlock) && (tm_I.flags & MF_MISSILE))
+        if ((ld->flags & MLF_ShootBlock) && (tm_I.flags & kMapObjectFlagMissile))
         {
             blockline = ld;
             return false;
@@ -478,10 +478,10 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
         // explicitly blocking everything ?
         // or just blocking monsters ?
 
-        if ((ld->flags & MLF_Blocking) || ((ld->flags & MLF_BlockMonsters) && (tm_I.extflags & EF_MONSTER)) ||
+        if ((ld->flags & MLF_Blocking) || ((ld->flags & MLF_BlockMonsters) && (tm_I.extflags & kExtendedFlagMonster)) ||
             (((ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockGroundedMonsters)) ||
               (ld->flags & MLF_BlockGrounded)) &&
-             (tm_I.extflags & EF_MONSTER) && (tm_I.mover->z <= tm_I.mover->floorz + 1.0f)) ||
+             (tm_I.extflags & kExtendedFlagMonster) && (tm_I.mover->z <= tm_I.mover->floorz + 1.0f)) ||
             (((ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockPlayers)) || (ld->flags & MLF_BlockPlayers)) &&
              (tm_I.mover->player)))
         {
@@ -576,7 +576,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             {
                 iz = M_LinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->floor_z_verts[2],
                                              ld->frontsector->floor_vs_normal).Z;
-                if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size)
+                if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size_)
                 {
                     blockline = ld;
                     return false;
@@ -593,7 +593,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             {
                 iz = M_LinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->floor_z_verts[2],
                                              ld->backsector->floor_vs_normal).Z;
-                if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size)
+                if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size_)
                 {
                     blockline = ld;
                     return false;
@@ -606,7 +606,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             if (!ld->backsector->floor_vertex_slope)
             {
                 iz = ld->backsector->f_h;
-                if (tm_I.mover->z + tm_I.mover->info->step_size < iz)
+                if (tm_I.mover->z + tm_I.mover->info->step_size_ < iz)
                 {
                     blockline = ld;
                     return false;
@@ -621,7 +621,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 {
                     iz = M_LinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->floor_z_verts[2],
                                                  ld->backsector->floor_vs_normal).Z;
-                    if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size)
+                    if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size_)
                     {
                         blockline = ld;
                         return false;
@@ -635,7 +635,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             if (!ld->frontsector->floor_vertex_slope)
             {
                 iz = ld->frontsector->f_h;
-                if (tm_I.mover->z + tm_I.mover->info->step_size < iz)
+                if (tm_I.mover->z + tm_I.mover->info->step_size_ < iz)
                 {
                     blockline = ld;
                     return false;
@@ -650,7 +650,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 {
                     iz = M_LinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->floor_z_verts[2],
                                                  ld->frontsector->floor_vs_normal).Z;
-                    if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size)
+                    if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size_)
                     {
                         blockline = ld;
                         return false;
@@ -804,7 +804,7 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
     if (thing == tm_I.mover)
         return true;
 
-    if (0 == (thing->flags & (MF_SOLID | MF_SPECIAL | MF_SHOOTABLE | MF_TOUCHY)))
+    if (0 == (thing->flags & (kMapObjectFlagSolid | kMapObjectFlagSpecial | kMapObjectFlagShootable | kMapObjectFlagTouchy)))
         return true;
 
     blockdist = tm_I.mover->radius + thing->radius;
@@ -814,14 +814,14 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
         return true; // no we missed this thing
 
     // -KM- 1998/9/19 True 3d gameplay checks.
-    if (level_flags.true3dgameplay && !(thing->flags & MF_SPECIAL))
+    if (level_flags.true3dgameplay && !(thing->flags & kMapObjectFlagSpecial))
     {
         float top_z = thing->z + thing->height;
 
         // see if we went over
         if (tm_I.z >= top_z)
         {
-            if (top_z > tm_I.floorz && !(thing->flags & MF_MISSILE))
+            if (top_z > tm_I.floorz && !(thing->flags & kMapObjectFlagMissile))
             {
                 tm_I.floorz = top_z;
                 tm_I.below  = thing;
@@ -832,7 +832,7 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
         // see if we went underneath
         if (tm_I.z + tm_I.mover->height <= thing->z)
         {
-            if (thing->z < tm_I.ceilnz && !(thing->flags & MF_MISSILE))
+            if (thing->z < tm_I.ceilnz && !(thing->flags & kMapObjectFlagMissile))
             {
                 tm_I.ceilnz = thing->z;
             }
@@ -841,10 +841,10 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
 
         // -AJA- 1999/07/21: allow climbing on top of things.
 
-        if (top_z > tm_I.floorz && (thing->extendedflags & EF_CLIMBABLE) &&
-            (tm_I.mover->player || (tm_I.extflags & EF_MONSTER)) &&
-            ((tm_I.flags & MF_DROPOFF) || (tm_I.extflags & EF_EDGEWALKER)) &&
-            (tm_I.z + tm_I.mover->info->step_size >= top_z))
+        if (top_z > tm_I.floorz && (thing->extendedflags & kExtendedFlagClimbable) &&
+            (tm_I.mover->player || (tm_I.extflags & kExtendedFlagMonster)) &&
+            ((tm_I.flags & kMapObjectFlagDropOff) || (tm_I.extflags & kExtendedFlagEdgeWalker)) &&
+            (tm_I.z + tm_I.mover->info->step_size_ >= top_z))
         {
             tm_I.floorz = top_z;
             tm_I.below  = thing;
@@ -856,9 +856,9 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
     // -ACB- 1998/08/04 Use procedure
     // -KM- 1998/09/01 After I noticed Skulls slamming into boxes of rockets...
 
-    solid = (thing->flags & MF_SOLID) ? true : false;
+    solid = (thing->flags & kMapObjectFlagSolid) ? true : false;
 
-    if ((tm_I.flags & MF_SKULLFLY) && solid)
+    if ((tm_I.flags & kMapObjectFlagSkullFly) && solid)
     {
         P_SlammedIntoObject(tm_I.mover, thing);
 
@@ -869,7 +869,7 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
     // check for missiles making contact
     // -ACB- 1998/08/04 Procedure for missile contact
 
-    if (tm_I.flags & MF_MISSILE)
+    if (tm_I.flags & kMapObjectFlagMissile)
     {
         // see if it went over / under
         if (tm_I.z > thing->z + thing->height)
@@ -882,34 +882,34 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
         if (tm_I.mover->source && tm_I.mover->source == thing)
             return true;
 
-        if ((thing->hyperflags & HF_PASSMISSILE) && level_flags.pass_missile)
+        if ((thing->hyperflags & kHyperFlagMissilesPassThrough) && level_flags.pass_missile)
             return true;
 
         // thing isn't shootable, return depending on if the thing is solid.
-        if (!(thing->flags & MF_SHOOTABLE))
+        if (!(thing->flags & kMapObjectFlagShootable))
             return !solid;
 
         if (P_MissileContact(tm_I.mover, thing) < 0)
             return true;
 
-        return (tm_I.extflags & EF_TUNNEL) ? true : false;
+        return (tm_I.extflags & kExtendedFlagTunnel) ? true : false;
     }
 
     // check for special pickup
-    if ((tm_I.flags & MF_PICKUP) && (thing->flags & MF_SPECIAL))
+    if ((tm_I.flags & kMapObjectFlagPickup) && (thing->flags & kMapObjectFlagSpecial))
     {
         // can remove thing
         P_TouchSpecialThing(thing, tm_I.mover);
     }
 
     // -AJA- 1999/08/21: check for touchy objects.
-    if ((thing->flags & MF_TOUCHY) && (tm_I.flags & MF_SOLID) && !(thing->extendedflags & EF_USABLE))
+    if ((thing->flags & kMapObjectFlagTouchy) && (tm_I.flags & kMapObjectFlagSolid) && !(thing->extendedflags & kExtendedFlagUsable))
     {
         P_TouchyContact(thing, tm_I.mover);
         return !solid;
     }
 
-    if (thing->hyperflags & HF_SHOVEABLE)
+    if (thing->hyperflags & kHyperFlagShoveable)
     { // Shoveable thing
         float ThrustSpeed = 8;
         P_PushMobj(thing, tm_I.mover, ThrustSpeed);
@@ -918,7 +918,7 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
 
     // -AJA- 2000/06/09: Follow MBF semantics: allow the non-solid
     // moving things to pass through solid things.
-    return !solid || (thing->flags & MF_NOCLIP) || !(tm_I.flags & MF_SOLID);
+    return !solid || (thing->flags & kMapObjectFlagNoClip) || !(tm_I.flags & kMapObjectFlagSolid);
 }
 
 //
@@ -937,7 +937,7 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
 //  a position to be checked
 //
 // during:
-//  special things are touched if MF_PICKUP
+//  special things are touched if kMapObjectFlagPickup
 //  early out on solid lines?
 //
 // out:
@@ -1007,13 +1007,13 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
     tm_I.line_count = 0;
 
     // can go anywhere
-    if (tm_I.flags & MF_NOCLIP)
+    if (tm_I.flags & kMapObjectFlagNoClip)
         return true;
 
     spechit.clear();
 
     // -KM- 1998/11/25 Corpses aren't supposed to hang in the air...
-    if (!(tm_I.flags & (MF_NOCLIP | MF_CORPSE)))
+    if (!(tm_I.flags & (kMapObjectFlagNoClip | kMapObjectFlagCorpse)))
     {
         // check things first, possibly picking things up
 
@@ -1035,7 +1035,7 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
 // P_TryMove
 //
 // Attempt to move to a new position,
-// crossing special lines unless MF_TELEPORT is set.
+// crossing special lines unless kMapObjectFlagTeleport is set.
 //
 bool P_TryMove(mobj_t *thing, float x, float y)
 {
@@ -1054,7 +1054,7 @@ bool P_TryMove(mobj_t *thing, float x, float y)
 
     fell_off_thing = (thing->below_mo && !tm_I.below);
 
-    if (!(thing->flags & MF_NOCLIP))
+    if (!(thing->flags & kMapObjectFlagNoClip))
     {
         if (thing->height > tm_I.ceilnz - tm_I.floorz)
         {
@@ -1067,7 +1067,7 @@ bool P_TryMove(mobj_t *thing, float x, float y)
         floatok     = true;
         float_destz = tm_I.floorz;
 
-        if (!(thing->flags & MF_TELEPORT) && (thing->z + thing->height > tm_I.ceilnz))
+        if (!(thing->flags & kMapObjectFlagTeleport) && (thing->z + thing->height > tm_I.ceilnz))
         {
             // mobj must lower itself to fit.
             if (!blockline && tm_I.line_count >= 1)
@@ -1075,7 +1075,7 @@ bool P_TryMove(mobj_t *thing, float x, float y)
             return false;
         }
 
-        if (!(thing->flags & MF_TELEPORT) && (thing->z + thing->info->step_size) < tm_I.floorz)
+        if (!(thing->flags & kMapObjectFlagTeleport) && (thing->z + thing->info->step_size_) < tm_I.floorz)
         {
             // too big a step up.
             if (!blockline && tm_I.line_count >= 1)
@@ -1083,18 +1083,18 @@ bool P_TryMove(mobj_t *thing, float x, float y)
             return false;
         }
 
-        if (!fell_off_thing && (thing->extendedflags & EF_MONSTER) &&
-            !(thing->flags & (MF_TELEPORT | MF_DROPOFF | MF_FLOAT)) &&
-            (thing->z - thing->info->step_size) > tm_I.floorz)
+        if (!fell_off_thing && (thing->extendedflags & kExtendedFlagMonster) &&
+            !(thing->flags & (kMapObjectFlagTeleport | kMapObjectFlagDropOff | kMapObjectFlagFloat)) &&
+            (thing->z - thing->info->step_size_) > tm_I.floorz)
         {
             // too big a step down.
             return false;
         }
 
-        if (!fell_off_thing && (thing->extendedflags & EF_MONSTER) &&
-            !((thing->flags & (MF_DROPOFF | MF_FLOAT)) || (thing->extendedflags & (EF_EDGEWALKER | EF_WATERWALKER))) &&
-            (tm_I.floorz - tm_I.dropoff > thing->info->step_size) &&
-            (thing->floorz - thing->dropoffz <= thing->info->step_size))
+        if (!fell_off_thing && (thing->extendedflags & kExtendedFlagMonster) &&
+            !((thing->flags & (kMapObjectFlagDropOff | kMapObjectFlagFloat)) || (thing->extendedflags & (kExtendedFlagEdgeWalker | kExtendedFlagWaterWalker))) &&
+            (tm_I.floorz - tm_I.dropoff > thing->info->step_size_) &&
+            (thing->floorz - thing->dropoffz <= thing->info->step_size_))
         {
             // don't stand over a dropoff.
             return false;
@@ -1109,8 +1109,8 @@ bool P_TryMove(mobj_t *thing, float x, float y)
     thing->ceilingz = tm_I.ceilnz;
     thing->dropoffz = tm_I.dropoff;
 
-    // -AJA- 1999/08/02: Improved MF_TELEPORT handling.
-    if (thing->flags & (MF_TELEPORT | MF_NOCLIP))
+    // -AJA- 1999/08/02: Improved kMapObjectFlagTeleport handling.
+    if (thing->flags & (kMapObjectFlagTeleport | kMapObjectFlagNoClip))
     {
         if (z <= thing->floorz)
             z = thing->floorz;
@@ -1124,10 +1124,10 @@ bool P_TryMove(mobj_t *thing, float x, float y)
     thing->SetBelowMo(tm_I.below);
 
     // if any special lines were hit, do the effect
-    if (!spechit.empty() && !(thing->flags & (MF_TELEPORT | MF_NOCLIP)))
+    if (!spechit.empty() && !(thing->flags & (kMapObjectFlagTeleport | kMapObjectFlagNoClip)))
     {
         // Thing doesn't change, so we check the notriggerlines flag once..
-        if (thing->player || (thing->extendedflags & EF_MONSTER) ||
+        if (thing->player || (thing->extendedflags & kExtendedFlagMonster) ||
             !(thing->currentattack && (thing->currentattack->flags_ & kAttackFlagNoTriggerLines)))
         {
             for (auto iter = spechit.rbegin(); iter != spechit.rend(); iter++)
@@ -1143,7 +1143,7 @@ bool P_TryMove(mobj_t *thing, float x, float y)
 
                     if (side != oldside)
                     {
-                        if (thing->flags & MF_MISSILE)
+                        if (thing->flags & kMapObjectFlagMissile)
                             P_ShootSpecialLine(ld, oldside, thing->source);
                         else
                             P_CrossSpecialLine(ld, oldside, thing);
@@ -1171,7 +1171,7 @@ static bool P_ThingHeightClip(mobj_t *thing)
 {
     bool onfloor = (fabs(thing->z - thing->floorz) < 1);
 
-    if (!(thing->flags & MF_SOLID))
+    if (!(thing->flags & kMapObjectFlagSolid))
     {
         thing->radius = thing->radius / 2 - 1;
         P_CheckRelPosition(thing, thing->x, thing->y);
@@ -1296,7 +1296,7 @@ static bool PTR_SlideTraverse(intercept_t *in, void *dataptr)
                 continue;
 
             // check slide mobj can step over
-            if (slidemo->z + slidemo->info->step_size < ld->gaps[i].f)
+            if (slidemo->z + slidemo->info->step_size_ < ld->gaps[i].f)
                 continue;
 
             return true;
@@ -1468,10 +1468,10 @@ static bool PTR_AimTraverse(intercept_t *in, void *dataptr)
     if (mo == aim_I.source)
         return true; // can't shoot self
 
-    if (!(mo->flags & MF_SHOOTABLE))
+    if (!(mo->flags & kMapObjectFlagShootable))
         return true; // has to be able to be shot
 
-    if (mo->hyperflags & HF_NO_AUTOAIM)
+    if (mo->hyperflags & kHyperFlagNoAutoaim)
         return true; // never should be aimed at
 
     if (aim_I.source && !aim_I.forced && (aim_I.source->side & mo->side) != 0)
@@ -1562,19 +1562,19 @@ static bool PTR_AimTraverse2(intercept_t *in, void *dataptr)
 
     if (aim_I.source && (aim_I.source->side & mo->side) == 0) // not a friend
     {
-        if (!(mo->extendedflags & EF_MONSTER) && !(mo->flags & MF_SPECIAL))
+        if (!(mo->extendedflags & kExtendedFlagMonster) && !(mo->flags & kMapObjectFlagSpecial))
             return true; // scenery
     }
-    if (mo->extendedflags & EF_MONSTER && mo->health <= 0)
+    if (mo->extendedflags & kExtendedFlagMonster && mo->health <= 0)
         return true; // don't aim at dead monsters
 
-    if (mo->flags & MF_CORPSE)
+    if (mo->flags & kMapObjectFlagCorpse)
         return true; // don't aim at corpses
 
-    if (mo->flags & MF_NOBLOCKMAP)
+    if (mo->flags & kMapObjectFlagNoBlockmap)
         return true; // don't aim at inert things
 
-    if (mo->flags & MF_NOSECTOR)
+    if (mo->flags & kMapObjectFlagNoSector)
         return true; // don't aim at invisible things
 
     // check angles to see if the thing can be aimed at
@@ -2172,7 +2172,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
         return true;
 
     // got to able to shoot it
-    if (!(mo->flags & MF_SHOOTABLE) && !(mo->extendedflags & EF_BLOCKSHOTS))
+    if (!(mo->flags & kMapObjectFlagShootable) && !(mo->extendedflags & kExtendedFlagBlockShots))
         return true;
 
     // check angles to see if the thing can be aimed at
@@ -2204,9 +2204,9 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
     // Spawn bullet puffs or blood spots,
     // depending on target type.
 
-    bool use_blood = (mo->flags & MF_SHOOTABLE) && !(mo->flags & MF_NOBLOOD) && (g_gore.d < 2);
+    bool use_blood = (mo->flags & kMapObjectFlagShootable) && !(mo->flags & kMapObjectFlagNoBlood) && (g_gore.d < 2);
 
-    if (mo->flags & MF_SHOOTABLE)
+    if (mo->flags & kMapObjectFlagShootable)
     {
         int what = P_BulletContact(shoot_I.source, mo, shoot_I.damage, shoot_I.damtype, x, y, z);
 
@@ -2220,8 +2220,8 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
 
     if (use_blood)
     {
-        if (mo->info->blood != nullptr)
-            P_SpawnBlood(x, y, z, shoot_I.damage, shoot_I.angle, mo->info->blood);
+        if (mo->info->blood_ != nullptr)
+            P_SpawnBlood(x, y, z, shoot_I.damage, shoot_I.angle, mo->info->blood_);
     }
     else
     {
@@ -2241,7 +2241,7 @@ mobj_t *P_AimLineAttack(mobj_t *t1, BAMAngle angle, float distance, float *slope
     Z_Clear(&aim_I, shoot_trav_info_t, 1);
 
     if (t1->info)
-        aim_I.start_z = t1->z + t1->height * t1->info->shotheight;
+        aim_I.start_z = t1->z + t1->height * t1->info->shotheight_;
     else
         aim_I.start_z = t1->z + t1->height / 2 + 8;
 
@@ -2283,7 +2283,7 @@ void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float
     Z_Clear(&shoot_I, shoot_trav_info_t, 1);
 
     if (t1->info)
-        shoot_I.start_z = t1->z + t1->height * t1->info->shotheight;
+        shoot_I.start_z = t1->z + t1->height * t1->info->shotheight_;
     else
         shoot_I.start_z = t1->z + t1->height / 2 + 8;
 
@@ -2320,7 +2320,7 @@ void P_TargetTheory(mobj_t *source, mobj_t *target, float *x, float *y, float *z
         float start_z;
 
         if (source->info)
-            start_z = source->z + source->height * source->info->shotheight;
+            start_z = source->z + source->height * source->info->shotheight_;
         else
             start_z = source->z + source->height / 2 + 8;
 
@@ -2343,7 +2343,7 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance)
     y2 = source->y + distance * epi::BAMSin(angle);
 
     if (source->info)
-        aim_I.start_z = source->z + source->height * source->info->shotheight;
+        aim_I.start_z = source->z + source->height * source->info->shotheight_;
     else
         aim_I.start_z = source->z + source->height / 2 + 8;
 
@@ -2406,7 +2406,7 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool 
     y2 = source->y + distance * epi::BAMSin(angle);
 
     if (source->info)
-        aim_I.start_z = source->z + source->height * source->info->shotheight;
+        aim_I.start_z = source->z + source->height * source->info->shotheight_;
     else
         aim_I.start_z = source->z + source->height / 2 + 8;
 
@@ -2484,7 +2484,7 @@ static bool PTR_UseTraverse(intercept_t *in, void *dataptr)
         mobj_t *mo = in->thing;
 
         // not a usable thing ?
-        if (!(mo->extendedflags & EF_USABLE) || !mo->info->touch_state)
+        if (!(mo->extendedflags & kExtendedFlagUsable) || !mo->info->touch_state_)
             return true;
 
         if (!P_UseThing(usething, mo, use_lower, use_upper))
@@ -2515,7 +2515,7 @@ static bool PTR_UseTraverse(intercept_t *in, void *dataptr)
         if (ld->gap_num == 0 || use_upper <= use_lower)
         {
             // can't use through a wall
-            S_StartFX(usething->info->noway_sound, P_MobjGetSfxCategory(usething), usething);
+            S_StartFX(usething->info->noway_sound_, P_MobjGetSfxCategory(usething), usething);
             return false;
         }
 
@@ -2609,17 +2609,17 @@ static bool PIT_RadiusAttack(mobj_t *thing, void *data)
     // if (thing == bomb_I.spot)
     // return true;
 
-    if (!(thing->flags & MF_SHOOTABLE))
+    if (!(thing->flags & kMapObjectFlagShootable))
         return true;
 
-    if ((thing->hyperflags & HF_SIDEIMMUNE) && bomb_I.source && (thing->side & bomb_I.source->side) != 0)
+    if ((thing->hyperflags & kHyperFlagFriendlyFireImmune) && bomb_I.source && (thing->side & bomb_I.source->side) != 0)
     {
         return true;
     }
 
     // MBF21: If in same splash group, don't damage it
-    if (thing->info->splash_group >= 0 && bomb_I.source->info->splash_group >= 0 &&
-        (thing->info->splash_group == bomb_I.source->info->splash_group))
+    if (thing->info->splash_group_ >= 0 && bomb_I.source->info->splash_group_ >= 0 &&
+        (thing->info->splash_group_ == bomb_I.source->info->splash_group_))
     {
         return true;
     }
@@ -2628,12 +2628,12 @@ static bool PIT_RadiusAttack(mobj_t *thing, void *data)
     // Boss types take no damage from concussion.
     // -ACB- 1998/06/14 Changed enum reference to extended flag check.
     //
-    if (thing->info->extendedflags & EF_EXPLODEIMMUNE)
+    if (thing->info->extendedflags_ & kExtendedFlagExplodeImmune)
     {
         if (!bomb_I.source)
             return true;
         // MBF21 FORCERADIUSDMG flag
-        if (!(bomb_I.source->mbf21flags & MBF21_FORCERADIUSDMG))
+        if (!(bomb_I.source->mbf21flags & kMBF21FlagForceRadiusDamage))
             return true;
     }
 
@@ -2713,7 +2713,7 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
     }
 
     // dropped items get removed by a falling ceiling
-    if (thing->flags & MF_DROPPED)
+    if (thing->flags & kMapObjectFlagDropped)
     {
         P_RemoveMobj(thing);
         return true;
@@ -2722,11 +2722,11 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
     // crunch bodies to giblets
     if (thing->health <= 0)
     {
-        if (thing->info->gib_state && !(thing->extendedflags & EF_GIBBED) && g_gore.d < 2)
+        if (thing->info->gib_state_ && !(thing->extendedflags & kExtendedFlagGibbed) && g_gore.d < 2)
         {
-            thing->extendedflags |= EF_GIBBED;
-            // P_SetMobjStateDeferred(thing, thing->info->gib_state, 0);
-            P_SetMobjState(thing, thing->info->gib_state);
+            thing->extendedflags |= kExtendedFlagGibbed;
+            // P_SetMobjStateDeferred(thing, thing->info->gib_state_, 0);
+            P_SetMobjState(thing, thing->info->gib_state_);
         }
 
         if (thing->player)
@@ -2738,7 +2738,7 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
         }
 
         // just been crushed, isn't solid.
-        thing->flags &= ~MF_SOLID;
+        thing->flags &= ~kMapObjectFlagSolid;
 
         thing->height = 0;
         thing->radius = 0;
@@ -2747,7 +2747,7 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
     }
 
     // if thing is not shootable, can't be crushed
-    if (!(thing->flags & MF_SHOOTABLE) || (thing->flags & MF_NOCLIP))
+    if (!(thing->flags & kMapObjectFlagShootable) || (thing->flags & kMapObjectFlagNoClip))
         return true;
 
     // -AJA- 2003/12/02: if the space is widening, we don't care if something
@@ -2764,7 +2764,7 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
         // spray blood in a random direction
         if (g_gore.d < 2)
         {
-            mo = P_MobjCreateObject(thing->x, thing->y, MO_MIDZ(thing), thing->info->blood);
+            mo = P_MobjCreateObject(thing->x, thing->y, MO_MIDZ(thing), thing->info->blood_);
 
             mo->mom.X = (float)(M_Random() - 128) / 4.0f;
             mo->mom.Y = (float)(M_Random() - 128) / 4.0f;
@@ -3058,21 +3058,21 @@ static bool PIT_CorpseCheck(mobj_t *thing, void *data)
     int   oldflags;
     bool  check;
 
-    if (!(thing->flags & MF_CORPSE))
+    if (!(thing->flags & kMapObjectFlagCorpse))
         return true; // not a corpse
 
     if (thing->tics != -1)
         return true; // not lying still yet
 
-    if (thing->info->raise_state == 0)
+    if (thing->info->raise_state_ == 0)
         return true; // monster doesn't have a raise state
 
     // -KM- 1998/12/21 Monster can't be resurrected.
-    if (thing->info->extendedflags & EF_NORESURRECT)
+    if (thing->info->extendedflags_ & kExtendedFlagCannotResurrect)
         return true;
 
     // -ACB- 1998/08/06 Use raiserobj for radius info
-    maxdist = thing->info->radius + raiserobj->radius;
+    maxdist = thing->info->radius_ + raiserobj->radius;
 
     if (fabs(thing->x - raisertryx) > maxdist || fabs(thing->y - raisertryy) > maxdist)
         return true; // not actually touching
@@ -3082,7 +3082,7 @@ static bool PIT_CorpseCheck(mobj_t *thing, void *data)
         return true;
 
     // -AJA- don't raise players unless on their side
-    if (thing->player && (raiserobj->info->side & thing->info->side) == 0)
+    if (thing->player && (raiserobj->info->side_ & thing->info->side_) == 0)
         return true;
 
     oldradius = thing->radius;
@@ -3090,11 +3090,11 @@ static bool PIT_CorpseCheck(mobj_t *thing, void *data)
     oldflags  = thing->flags;
 
     // -ACB- 1998/08/22 Check making sure with have the correct radius & height.
-    thing->radius = thing->info->radius;
-    thing->height = thing->info->height;
+    thing->radius = thing->info->radius_;
+    thing->height = thing->info->height_;
 
-    if (thing->info->flags & MF_SOLID) // Should it be solid?
-        thing->flags |= MF_SOLID;
+    if (thing->info->flags_ & kMapObjectFlagSolid) // Should it be solid?
+        thing->flags |= kMapObjectFlagSolid;
 
     check = P_CheckAbsPosition(thing, thing->x, thing->y, thing->z);
 
@@ -3247,7 +3247,7 @@ bool P_MapCheckBlockingLine(mobj_t *thing, mobj_t *spawnthing)
     mb2 = spawnthing->z;
     mt2 = spawnthing->z + spawnthing->height;
 
-    crosser = (spawnthing->extendedflags & EF_CROSSLINES) ? true : false;
+    crosser = (spawnthing->extendedflags & kExtendedFlagCrossBlockingLines) ? true : false;
 
     blockline    = nullptr;
     mobj_hit_sky = false;

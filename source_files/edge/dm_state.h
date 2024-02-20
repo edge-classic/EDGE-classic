@@ -92,7 +92,7 @@ extern int gametic;
 #define MAXARMOUR 200
 
 #define CHEATARMOUR     MAXARMOUR
-#define CHEATARMOURTYPE ARMOUR_Blue
+#define CHEATARMOURTYPE kArmourTypeBlue
 
 //-----------------------------------------
 // Internal parameters, used for engine.

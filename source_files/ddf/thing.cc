@@ -38,8 +38,6 @@
 #undef DF
 #define DF DDF_FIELD
 
-#define DDF_MobjHashFunc(x) (((x) + kLookupCacheSize) % kLookupCacheSize)
-
 const char *TemplateThing = nullptr;  // Lobo 2022: TEMPLATE inheritance fix
 
 MapObjectDefinitionContainer mobjtypes;
@@ -57,37 +55,37 @@ static void DDF_MobjGetPercentRange(const char *info, void *storage);
 static void DDF_MobjGetAngleRange(const char *info, void *storage);
 static void DDF_MobjStateGetRADTrigger(const char *arg, State *cur_state);
 
-static void AddPickupEffect(pickup_effect_c **list, pickup_effect_c *cur);
+static void AddPickupEffect(PickupEffect **list, PickupEffect *cur);
 
 static int dlight_radius_warnings = 0;
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_dlight
-static dlight_info_c dummy_dlight;
+static DynamicLightDefinition dummy_dlight;
 
 const DDFCommandList dlight_commands[] = {
-    DF("TYPE", type, DDF_MobjGetDLight),
-    DF("GRAPHIC", shape, DDF_MainGetString),
-    DF("RADIUS", radius, DDF_MainGetFloat),
-    DF("COLOUR", colour, DDF_MainGetRGB),
-    DF("HEIGHT", height, DDF_MainGetPercent),
-    DF("LEAKY", leaky, DDF_MainGetBoolean),
+    DF("TYPE", type_, DDF_MobjGetDLight),
+    DF("GRAPHIC", shape_, DDF_MainGetString),
+    DF("RADIUS", radius_, DDF_MainGetFloat),
+    DF("COLOUR", colour_, DDF_MainGetRGB),
+    DF("HEIGHT", height_, DDF_MainGetPercent),
+    DF("LEAKY", leaky_, DDF_MainGetBoolean),
 
     // backwards compatibility
-    DF("INTENSITY", radius, DDF_MainGetFloat),
+    DF("INTENSITY", radius_, DDF_MainGetFloat),
 
     DDF_CMD_END};
 
 #undef DDF_CMD_BASE
 #define DDF_CMD_BASE dummy_weakness
-static weakness_info_c dummy_weakness;
+static WeaknessDefinition dummy_weakness;
 
 const DDFCommandList weakness_commands[] = {
-    DF("CLASS", classes, DDF_MainGetBitSet),
-    DF("HEIGHTS", height, DDF_MobjGetPercentRange),
-    DF("ANGLES", angle, DDF_MobjGetAngleRange),
-    DF("MULTIPLY", multiply, DDF_MainGetFloat),
-    DF("PAINCHANCE", painchance, DDF_MainGetPercent),
+    DF("CLASS", classes_, DDF_MainGetBitSet),
+    DF("HEIGHTS", height_, DDF_MobjGetPercentRange),
+    DF("ANGLES", angle_, DDF_MobjGetAngleRange),
+    DF("MULTIPLY", multiply_, DDF_MainGetFloat),
+    DF("PAINCHANCE", painchance_, DDF_MainGetPercent),
 
     DDF_CMD_END};
 
@@ -99,140 +97,141 @@ static MapObjectDefinition dummy_mobj;
 
 const DDFCommandList thing_commands[] = {
     // sub-commands
-    DDF_SUB_LIST("DLIGHT", dlight[0], dlight_commands),
-    DDF_SUB_LIST("DLIGHT2", dlight[1], dlight_commands),
-    DDF_SUB_LIST("WEAKNESS", weak, weakness_commands),
-    DDF_SUB_LIST("EXPLODE_DAMAGE", explode_damage, damage_commands),
-    DDF_SUB_LIST("CHOKE_DAMAGE", choke_damage, damage_commands),
+    DDF_SUB_LIST("DLIGHT", dlight_[0], dlight_commands),
+    DDF_SUB_LIST("DLIGHT2", dlight_[1], dlight_commands),
+    DDF_SUB_LIST("WEAKNESS", weak_, weakness_commands),
+    DDF_SUB_LIST("EXPLODE_DAMAGE", explode_damage_, damage_commands),
+    DDF_SUB_LIST("CHOKE_DAMAGE", choke_damage_, damage_commands),
 
-    DF("SPAWNHEALTH", spawnhealth, DDF_MainGetFloat),
-    DF("RADIUS", radius, DDF_MainGetFloat),
-    DF("HEIGHT", height, DDF_MainGetFloat), DF("MASS", mass, DDF_MainGetFloat),
-    DF("SPEED", speed, DDF_MainGetFloat), DF("FAST", fast, DDF_MainGetFloat),
-    DF("EXTRA", extendedflags, DDF_MobjGetExtra),
-    DF("RESPAWN_TIME", respawntime, DDF_MainGetTime),
-    DF("FUSE", fuse, DDF_MainGetTime), DF("LIFESPAN", fuse, DDF_MainGetTime),
-    DF("PALETTE_REMAP", palremap, DDF_MainGetColourmap),
-    DF("TRANSLUCENCY", translucency, DDF_MainGetPercent),
+    DF("SPAWNHEALTH", spawnhealth_, DDF_MainGetFloat),
+    DF("RADIUS", radius_, DDF_MainGetFloat),
+    DF("HEIGHT", height_, DDF_MainGetFloat),
+    DF("MASS", mass_, DDF_MainGetFloat), DF("SPEED", speed_, DDF_MainGetFloat),
+    DF("FAST", fast_, DDF_MainGetFloat),
+    DF("EXTRA", extendedflags_, DDF_MobjGetExtra),
+    DF("RESPAWN_TIME", respawntime_, DDF_MainGetTime),
+    DF("FUSE", fuse_, DDF_MainGetTime), DF("LIFESPAN", fuse_, DDF_MainGetTime),
+    DF("PALETTE_REMAP", palremap_, DDF_MainGetColourmap),
+    DF("TRANSLUCENCY", translucency_, DDF_MainGetPercent),
 
-    DF("INITIAL_BENEFIT", initial_benefits, DDF_MobjGetBenefit),
-    DF("LOSE_BENEFIT", lose_benefits, DDF_MobjGetBenefit),
-    DF("PICKUP_BENEFIT", pickup_benefits, DDF_MobjGetBenefit),
-    DF("KILL_BENEFIT", kill_benefits, DDF_MobjGetBenefit),
-    DF("PICKUP_MESSAGE", pickup_message, DDF_MainGetString),
-    DF("PICKUP_EFFECT", pickup_effects, DDF_MobjGetPickupEffect),
+    DF("INITIAL_BENEFIT", initial_benefits_, DDF_MobjGetBenefit),
+    DF("LOSE_BENEFIT", lose_benefits_, DDF_MobjGetBenefit),
+    DF("PICKUP_BENEFIT", pickup_benefits_, DDF_MobjGetBenefit),
+    DF("KILL_BENEFIT", kill_benefits_, DDF_MobjGetBenefit),
+    DF("PICKUP_MESSAGE", pickup_message_, DDF_MainGetString),
+    DF("PICKUP_EFFECT", pickup_effects_, DDF_MobjGetPickupEffect),
 
-    DF("PAINCHANCE", painchance, DDF_MainGetPercent),
-    DF("MINATTACK_CHANCE", minatkchance, DDF_MainGetPercent),
-    DF("REACTION_TIME", reactiontime, DDF_MainGetTime),
-    DF("JUMP_DELAY", jump_delay, DDF_MainGetTime),
-    DF("JUMP_HEIGHT", jumpheight, DDF_MainGetFloat),
-    DF("CROUCH_HEIGHT", crouchheight, DDF_MainGetFloat),
-    DF("VIEW_HEIGHT", viewheight, DDF_MainGetPercent),
-    DF("SHOT_HEIGHT", shotheight, DDF_MainGetPercent),
-    DF("MAX_FALL", maxfall, DDF_MainGetFloat),
-    DF("CASTORDER", castorder, DDF_MainGetNumeric),
-    DF("CAST_TITLE", cast_title, DDF_MainGetString),
-    DF("PLAYER", playernum, DDF_MobjGetPlayer),
-    DF("SIDE", side, DDF_MainGetBitSet),
-    DF("CLOSE_ATTACK", closecombat, DDF_MainRefAttack),
-    DF("RANGE_ATTACK", rangeattack, DDF_MainRefAttack),
-    DF("SPARE_ATTACK", spareattack, DDF_MainRefAttack),
-    DF("DROPITEM", dropitem_ref, DDF_MainGetString),
-    DF("BLOOD", blood_ref, DDF_MainGetString),
-    DF("RESPAWN_EFFECT", respawneffect_ref, DDF_MainGetString),
-    DF("SPIT_SPOT", spitspot_ref, DDF_MainGetString),
+    DF("PAINCHANCE", painchance_, DDF_MainGetPercent),
+    DF("MINATTACK_CHANCE", minatkchance_, DDF_MainGetPercent),
+    DF("REACTION_TIME", reactiontime_, DDF_MainGetTime),
+    DF("JUMP_DELAY", jump_delay_, DDF_MainGetTime),
+    DF("JUMP_HEIGHT", jumpheight_, DDF_MainGetFloat),
+    DF("CROUCH_HEIGHT", crouchheight_, DDF_MainGetFloat),
+    DF("VIEW_HEIGHT", viewheight_, DDF_MainGetPercent),
+    DF("SHOT_HEIGHT", shotheight_, DDF_MainGetPercent),
+    DF("MAX_FALL", maxfall_, DDF_MainGetFloat),
+    DF("CASTORDER", castorder_, DDF_MainGetNumeric),
+    DF("CAST_TITLE", cast_title_, DDF_MainGetString),
+    DF("PLAYER", playernum_, DDF_MobjGetPlayer),
+    DF("SIDE", side_, DDF_MainGetBitSet),
+    DF("CLOSE_ATTACK", closecombat_, DDF_MainRefAttack),
+    DF("RANGE_ATTACK", rangeattack_, DDF_MainRefAttack),
+    DF("SPARE_ATTACK", spareattack_, DDF_MainRefAttack),
+    DF("DROPITEM", dropitem_ref_, DDF_MainGetString),
+    DF("BLOOD", blood_ref_, DDF_MainGetString),
+    DF("RESPAWN_EFFECT", respawneffect_ref_, DDF_MainGetString),
+    DF("SPIT_SPOT", spitspot_ref_, DDF_MainGetString),
 
-    DF("PICKUP_SOUND", activesound, DDF_MainLookupSound),
-    DF("ACTIVE_SOUND", activesound, DDF_MainLookupSound),
-    DF("LAUNCH_SOUND", seesound, DDF_MainLookupSound),
-    DF("AMBIENT_SOUND", seesound, DDF_MainLookupSound),
-    DF("SIGHTING_SOUND", seesound, DDF_MainLookupSound),
-    DF("DEATH_SOUND", deathsound, DDF_MainLookupSound),
-    DF("OVERKILL_SOUND", overkill_sound, DDF_MainLookupSound),
-    DF("PAIN_SOUND", painsound, DDF_MainLookupSound),
-    DF("STARTCOMBAT_SOUND", attacksound, DDF_MainLookupSound),
-    DF("WALK_SOUND", walksound, DDF_MainLookupSound),
-    DF("JUMP_SOUND", jump_sound, DDF_MainLookupSound),
-    DF("NOWAY_SOUND", noway_sound, DDF_MainLookupSound),
-    DF("OOF_SOUND", oof_sound, DDF_MainLookupSound),
-    DF("FALLPAIN_SOUND", fallpain_sound, DDF_MainLookupSound),
-    DF("GASP_SOUND", gasp_sound, DDF_MainLookupSound),
-    DF("SECRET_SOUND", secretsound, DDF_MainLookupSound),
-    DF("FALLING_SOUND", falling_sound, DDF_MainLookupSound),
-    DF("RIP_SOUND", rip_sound, DDF_MainLookupSound),
+    DF("PICKUP_SOUND", activesound_, DDF_MainLookupSound),
+    DF("ACTIVE_SOUND", activesound_, DDF_MainLookupSound),
+    DF("LAUNCH_SOUND", seesound_, DDF_MainLookupSound),
+    DF("AMBIENT_SOUND", seesound_, DDF_MainLookupSound),
+    DF("SIGHTING_SOUND", seesound_, DDF_MainLookupSound),
+    DF("DEATH_SOUND", deathsound_, DDF_MainLookupSound),
+    DF("OVERKILL_SOUND", overkill_sound_, DDF_MainLookupSound),
+    DF("PAIN_SOUND", painsound_, DDF_MainLookupSound),
+    DF("STARTCOMBAT_SOUND", attacksound_, DDF_MainLookupSound),
+    DF("WALK_SOUND", walksound_, DDF_MainLookupSound),
+    DF("JUMP_SOUND", jump_sound_, DDF_MainLookupSound),
+    DF("NOWAY_SOUND", noway_sound_, DDF_MainLookupSound),
+    DF("OOF_SOUND", oof_sound_, DDF_MainLookupSound),
+    DF("FALLPAIN_SOUND", fallpain_sound_, DDF_MainLookupSound),
+    DF("GASP_SOUND", gasp_sound_, DDF_MainLookupSound),
+    DF("SECRET_SOUND", secretsound_, DDF_MainLookupSound),
+    DF("FALLING_SOUND", falling_sound_, DDF_MainLookupSound),
+    DF("RIP_SOUND", rip_sound_, DDF_MainLookupSound),
 
-    DF("FLOAT_SPEED", float_speed, DDF_MainGetFloat),
-    DF("STEP_SIZE", step_size, DDF_MainGetFloat),
-    DF("SPRITE_SCALE", scale, DDF_MainGetFloat),
-    DF("SPRITE_ASPECT", aspect, DDF_MainGetFloat),
-    DF("SPRITE_YALIGN", yalign, DDF_MobjGetYAlign),    // -AJA- 2007/08/08
-    DF("MODEL_SKIN", model_skin, DDF_MainGetNumeric),  // -AJA- 2007/10/16
-    DF("MODEL_SCALE", model_scale, DDF_MainGetFloat),
-    DF("MODEL_ASPECT", model_aspect, DDF_MainGetFloat),
-    DF("MODEL_BIAS", model_bias, DDF_MainGetFloat),
-    DF("MODEL_ROTATE", model_rotate, DDF_MainGetNumeric),
-    DF("BOUNCE_SPEED", bounce_speed, DDF_MainGetFloat),
-    DF("BOUNCE_UP", bounce_up, DDF_MainGetFloat),
-    DF("SIGHT_SLOPE", sight_slope, DDF_MainGetSlope),
-    DF("SIGHT_ANGLE", sight_angle, DDF_MainGetAngle),
-    DF("RIDE_FRICTION", ride_friction, DDF_MainGetFloat),
-    DF("BOBBING", bobbing, DDF_MainGetPercent),
-    DF("IMMUNITY_CLASS", immunity, DDF_MainGetBitSet),
-    DF("RESISTANCE_CLASS", resistance, DDF_MainGetBitSet),
-    DF("RESISTANCE_MULTIPLY", resist_multiply, DDF_MainGetFloat),
-    DF("RESISTANCE_PAINCHANCE", resist_painchance, DDF_MainGetPercent),
-    DF("GHOST_CLASS", ghost, DDF_MainGetBitSet),  // -AJA- 2005/05/15
-    DF("SHADOW_TRANSLUCENCY", shadow_trans, DDF_MainGetPercent),
-    DF("LUNG_CAPACITY", lung_capacity, DDF_MainGetTime),
-    DF("GASP_START", gasp_start, DDF_MainGetTime),
-    DF("EXPLODE_RADIUS", explode_radius, DDF_MainGetFloat),
-    DF("RELOAD_SHOTS", reload_shots, DDF_MainGetNumeric),  // -AJA- 2004/11/15
-    DF("GLOW_TYPE", glow_type, DDF_MobjGetGlowType),       // -AJA- 2007/08/19
-    DF("ARMOUR_PROTECTION", armour_protect,
+    DF("FLOAT_SPEED", float_speed_, DDF_MainGetFloat),
+    DF("STEP_SIZE", step_size_, DDF_MainGetFloat),
+    DF("SPRITE_SCALE", scale_, DDF_MainGetFloat),
+    DF("SPRITE_ASPECT", aspect_, DDF_MainGetFloat),
+    DF("SPRITE_YALIGN", yalign_, DDF_MobjGetYAlign),    // -AJA- 2007/08/08
+    DF("MODEL_SKIN", model_skin_, DDF_MainGetNumeric),  // -AJA- 2007/10/16
+    DF("MODEL_SCALE", model_scale_, DDF_MainGetFloat),
+    DF("MODEL_ASPECT", model_aspect_, DDF_MainGetFloat),
+    DF("MODEL_BIAS", model_bias_, DDF_MainGetFloat),
+    DF("MODEL_ROTATE", model_rotate_, DDF_MainGetNumeric),
+    DF("BOUNCE_SPEED", bounce_speed_, DDF_MainGetFloat),
+    DF("BOUNCE_UP", bounce_up_, DDF_MainGetFloat),
+    DF("SIGHT_SLOPE", sight_slope_, DDF_MainGetSlope),
+    DF("SIGHT_ANGLE", sight_angle_, DDF_MainGetAngle),
+    DF("RIDE_FRICTION", ride_friction_, DDF_MainGetFloat),
+    DF("BOBBING", bobbing_, DDF_MainGetPercent),
+    DF("IMMUNITY_CLASS", immunity_, DDF_MainGetBitSet),
+    DF("RESISTANCE_CLASS", resistance_, DDF_MainGetBitSet),
+    DF("RESISTANCE_MULTIPLY", resist_multiply_, DDF_MainGetFloat),
+    DF("RESISTANCE_PAINCHANCE", resist_painchance_, DDF_MainGetPercent),
+    DF("GHOST_CLASS", ghost_, DDF_MainGetBitSet),  // -AJA- 2005/05/15
+    DF("SHADOW_TRANSLUCENCY", shadow_trans_, DDF_MainGetPercent),
+    DF("LUNG_CAPACITY", lung_capacity_, DDF_MainGetTime),
+    DF("GASP_START", gasp_start_, DDF_MainGetTime),
+    DF("EXPLODE_RADIUS", explode_radius_, DDF_MainGetFloat),
+    DF("RELOAD_SHOTS", reload_shots_, DDF_MainGetNumeric),  // -AJA- 2004/11/15
+    DF("GLOW_TYPE", glow_type_, DDF_MobjGetGlowType),       // -AJA- 2007/08/19
+    DF("ARMOUR_PROTECTION", armour_protect_,
        DDF_MainGetPercent),  // -AJA- 2007/08/22
-    DF("ARMOUR_DEPLETION", armour_deplete,
-       DDF_MainGetPercentAny),                            // -AJA- 2007/08/22
-    DF("ARMOUR_CLASS", armour_class, DDF_MainGetBitSet),  // -AJA- 2007/08/22
+    DF("ARMOUR_DEPLETION", armour_deplete_,
+       DDF_MainGetPercentAny),                             // -AJA- 2007/08/22
+    DF("ARMOUR_CLASS", armour_class_, DDF_MainGetBitSet),  // -AJA- 2007/08/22
 
-    DF("SIGHT_DISTANCE", sight_distance, DDF_MainGetFloat),  // Lobo 2022
-    DF("HEAR_DISTANCE", hear_distance, DDF_MainGetFloat),    // Lobo 2022
+    DF("SIGHT_DISTANCE", sight_distance_, DDF_MainGetFloat),  // Lobo 2022
+    DF("HEAR_DISTANCE", hear_distance_, DDF_MainGetFloat),    // Lobo 2022
 
-    DF("MORPH_TIMEOUT", morphtimeout, DDF_MainGetTime),  // Lobo 2023
+    DF("MORPH_TIMEOUT", morphtimeout_, DDF_MainGetTime),  // Lobo 2023
 
     // DEHEXTRA
-    DF("GIB_HEALTH", gib_health, DDF_MainGetFloat),
+    DF("GIB_HEALTH", gib_health_, DDF_MainGetFloat),
 
-    DF("INFIGHTING_GROUP", infight_group, DDF_MainGetNumeric),
-    DF("PROJECTILE_GROUP", proj_group, DDF_MainGetNumeric),
-    DF("SPLASH_GROUP", splash_group, DDF_MainGetNumeric),
-    DF("FAST_SPEED", fast_speed, DDF_MainGetNumeric),
-    DF("MELEE_RANGE", melee_range, DDF_MainGetNumeric),
+    DF("INFIGHTING_GROUP", infight_group_, DDF_MainGetNumeric),
+    DF("PROJECTILE_GROUP", proj_group_, DDF_MainGetNumeric),
+    DF("SPLASH_GROUP", splash_group_, DDF_MainGetNumeric),
+    DF("FAST_SPEED", fast_speed_, DDF_MainGetNumeric),
+    DF("MELEE_RANGE", melee_range_, DDF_MainGetNumeric),
 
     // -AJA- backwards compatibility cruft...
-    DF("EXPLOD_DAMAGE", explode_damage.nominal_, DDF_MainGetFloat),
-    DF("EXPLOSION_DAMAGE", explode_damage.nominal_, DDF_MainGetFloat),
-    DF("EXPLOD_DAMAGERANGE", explode_damage.nominal_, DDF_MainGetFloat),
+    DF("EXPLOD_DAMAGE", explode_damage_.nominal_, DDF_MainGetFloat),
+    DF("EXPLOSION_DAMAGE", explode_damage_.nominal_, DDF_MainGetFloat),
+    DF("EXPLOD_DAMAGERANGE", explode_damage_.nominal_, DDF_MainGetFloat),
 
     DDF_CMD_END};
 
 const DDFStateStarter thing_starters[] = {
-    DDF_STATE("SPAWN", "IDLE", spawn_state),
-    DDF_STATE("IDLE", "IDLE", idle_state),
-    DDF_STATE("CHASE", "CHASE", chase_state),
-    DDF_STATE("PAIN", "IDLE", pain_state),
-    DDF_STATE("MISSILE", "IDLE", missile_state),
-    DDF_STATE("MELEE", "IDLE", melee_state),
-    DDF_STATE("DEATH", "REMOVE", death_state),
-    DDF_STATE("OVERKILL", "REMOVE", overkill_state),
-    DDF_STATE("RESPAWN", "IDLE", raise_state),
-    DDF_STATE("RESURRECT", "IDLE", res_state),
-    DDF_STATE("MEANDER", "MEANDER", meander_state),
-    DDF_STATE("MORPH", "MORPH", morph_state),
-    DDF_STATE("BOUNCE", "IDLE", bounce_state),
-    DDF_STATE("TOUCH", "IDLE", touch_state),
-    DDF_STATE("RELOAD", "IDLE", reload_state),
-    DDF_STATE("GIB", "REMOVE", gib_state),
+    DDF_STATE("SPAWN", "IDLE", spawn_state_),
+    DDF_STATE("IDLE", "IDLE", idle_state_),
+    DDF_STATE("CHASE", "CHASE", chase_state_),
+    DDF_STATE("PAIN", "IDLE", pain_state_),
+    DDF_STATE("MISSILE", "IDLE", missile_state_),
+    DDF_STATE("MELEE", "IDLE", melee_state_),
+    DDF_STATE("DEATH", "REMOVE", death_state_),
+    DDF_STATE("OVERKILL", "REMOVE", overkill_state_),
+    DDF_STATE("RESPAWN", "IDLE", raise_state_),
+    DDF_STATE("RESURRECT", "IDLE", res_state_),
+    DDF_STATE("MEANDER", "MEANDER", meander_state_),
+    DDF_STATE("MORPH", "MORPH", morph_state_),
+    DDF_STATE("BOUNCE", "IDLE", bounce_state_),
+    DDF_STATE("TOUCH", "IDLE", touch_state_),
+    DDF_STATE("RELOAD", "IDLE", reload_state_),
+    DDF_STATE("GIB", "REMOVE", gib_state_),
 
     DDF_STATE_END};
 
@@ -386,136 +385,196 @@ const DDFSpecialFlags keytype_names[] = {
     {nullptr, 0, 0}};
 
 const DDFSpecialFlags armourtype_names[] = {
-    {"GREEN_ARMOUR", ARMOUR_Green, 0},   {"BLUE_ARMOUR", ARMOUR_Blue, 0},
-    {"PURPLE_ARMOUR", ARMOUR_Purple, 0}, {"YELLOW_ARMOUR", ARMOUR_Yellow, 0},
-    {"RED_ARMOUR", ARMOUR_Red, 0},       {nullptr, 0, 0}};
+    {"GREEN_ARMOUR", kArmourTypeGreen, 0},
+    {"BLUE_ARMOUR", kArmourTypeBlue, 0},
+    {"PURPLE_ARMOUR", kArmourTypePurple, 0},
+    {"YELLOW_ARMOUR", kArmourTypeYellow, 0},
+    {"RED_ARMOUR", kArmourTypeRed, 0},
+    {nullptr, 0, 0}};
 
 const DDFSpecialFlags powertype_names[] = {
-    {"POWERUP_INVULNERABLE", PW_Invulnerable, 0},
-    {"POWERUP_BARE_BERSERK", PW_Berserk, 0},
-    {"POWERUP_BERSERK", PW_Berserk, 0},
-    {"POWERUP_PARTINVIS", PW_PartInvis, 0},
-    {"POWERUP_ACIDSUIT", PW_AcidSuit, 0},
-    {"POWERUP_AUTOMAP", PW_AllMap, 0},
-    {"POWERUP_LIGHTGOGGLES", PW_Infrared, 0},
-    {"POWERUP_JETPACK", PW_Jetpack, 0},
-    {"POWERUP_NIGHTVISION", PW_NightVision, 0},
-    {"POWERUP_SCUBA", PW_Scuba, 0},
-    {"POWERUP_TIMESTOP", PW_TimeStop, 0},
+    {"POWERUP_INVULNERABLE", kPowerTypeInvulnerable, 0},
+    {"POWERUP_BARE_BERSERK", kPowerTypeBerserk, 0},
+    {"POWERUP_BERSERK", kPowerTypeBerserk, 0},
+    {"POWERUP_PARTINVIS", kPowerTypePartInvis, 0},
+    {"POWERUP_ACIDSUIT", kPowerTypeAcidSuit, 0},
+    {"POWERUP_AUTOMAP", kPowerTypeAllMap, 0},
+    {"POWERUP_LIGHTGOGGLES", kPowerTypeInfrared, 0},
+    {"POWERUP_JETPACK", kPowerTypeJetpack, 0},
+    {"POWERUP_NIGHTVISION", kPowerTypeNightVision, 0},
+    {"POWERUP_SCUBA", kPowerTypeScuba, 0},
+    {"POWERUP_TIMESTOP", kPowerTypeTimeStop, 0},
     {nullptr, 0, 0}};
 
 const DDFSpecialFlags simplecond_names[] = {
-    {"JUMPING", COND_Jumping, 0},     {"CROUCHING", COND_Crouching, 0},
-    {"SWIMMING", COND_Swimming, 0},   {"ATTACKING", COND_Attacking, 0},
-    {"RAMPAGING", COND_Rampaging, 0}, {"USING", COND_Using, 0},
-    {"ACTION1", COND_Action1, 0},     {"ACTION2", COND_Action2, 0},
-    {"WALKING", COND_Walking, 0},     {nullptr, 0, 0}};
+    {"JUMPING", kConditionCheckTypeJumping, 0},
+    {"CROUCHING", kConditionCheckTypeCrouching, 0},
+    {"SWIMMING", kConditionCheckTypeSwimming, 0},
+    {"ATTACKING", kConditionCheckTypeAttacking, 0},
+    {"RAMPAGING", kConditionCheckTypeRampaging, 0},
+    {"USING", kConditionCheckTypeUsing, 0},
+    {"ACTION1", kConditionCheckTypeAction1, 0},
+    {"ACTION2", kConditionCheckTypeAction2, 0},
+    {"WALKING", kConditionCheckTypeWalking, 0},
+    {nullptr, 0, 0}};
 
 const DDFSpecialFlags inv_types[] = {
-    {"INVENTORY01", INV_01, 0}, {"INVENTORY02", INV_02, 0},
-    {"INVENTORY03", INV_03, 0}, {"INVENTORY04", INV_04, 0},
-    {"INVENTORY05", INV_05, 0}, {"INVENTORY06", INV_06, 0},
-    {"INVENTORY07", INV_07, 0}, {"INVENTORY08", INV_08, 0},
-    {"INVENTORY09", INV_09, 0}, {"INVENTORY10", INV_10, 0},
-    {"INVENTORY11", INV_11, 0}, {"INVENTORY12", INV_12, 0},
-    {"INVENTORY13", INV_13, 0}, {"INVENTORY14", INV_14, 0},
-    {"INVENTORY15", INV_15, 0}, {"INVENTORY16", INV_16, 0},
-    {"INVENTORY17", INV_17, 0}, {"INVENTORY18", INV_18, 0},
-    {"INVENTORY19", INV_19, 0}, {"INVENTORY20", INV_20, 0},
-    {"INVENTORY21", INV_21, 0}, {"INVENTORY22", INV_22, 0},
-    {"INVENTORY23", INV_23, 0}, {"INVENTORY24", INV_24, 0},
-    {"INVENTORY25", INV_25, 0}, {"INVENTORY26", INV_26, 0},
-    {"INVENTORY27", INV_27, 0}, {"INVENTORY28", INV_28, 0},
-    {"INVENTORY29", INV_29, 0}, {"INVENTORY30", INV_30, 0},
-    {"INVENTORY31", INV_31, 0}, {"INVENTORY32", INV_32, 0},
-    {"INVENTORY33", INV_33, 0}, {"INVENTORY34", INV_34, 0},
-    {"INVENTORY35", INV_35, 0}, {"INVENTORY36", INV_36, 0},
-    {"INVENTORY37", INV_37, 0}, {"INVENTORY38", INV_38, 0},
-    {"INVENTORY39", INV_39, 0}, {"INVENTORY40", INV_40, 0},
-    {"INVENTORY41", INV_41, 0}, {"INVENTORY42", INV_42, 0},
-    {"INVENTORY43", INV_43, 0}, {"INVENTORY44", INV_44, 0},
-    {"INVENTORY45", INV_45, 0}, {"INVENTORY46", INV_46, 0},
-    {"INVENTORY47", INV_47, 0}, {"INVENTORY48", INV_48, 0},
-    {"INVENTORY49", INV_49, 0}, {"INVENTORY50", INV_50, 0},
-    {"INVENTORY51", INV_51, 0}, {"INVENTORY52", INV_52, 0},
-    {"INVENTORY53", INV_53, 0}, {"INVENTORY54", INV_54, 0},
-    {"INVENTORY55", INV_55, 0}, {"INVENTORY56", INV_56, 0},
-    {"INVENTORY57", INV_57, 0}, {"INVENTORY58", INV_58, 0},
-    {"INVENTORY59", INV_59, 0}, {"INVENTORY60", INV_60, 0},
-    {"INVENTORY61", INV_61, 0}, {"INVENTORY62", INV_62, 0},
-    {"INVENTORY63", INV_63, 0}, {"INVENTORY64", INV_64, 0},
-    {"INVENTORY65", INV_65, 0}, {"INVENTORY66", INV_66, 0},
-    {"INVENTORY67", INV_67, 0}, {"INVENTORY68", INV_68, 0},
-    {"INVENTORY69", INV_69, 0}, {"INVENTORY70", INV_70, 0},
-    {"INVENTORY71", INV_71, 0}, {"INVENTORY72", INV_72, 0},
-    {"INVENTORY73", INV_73, 0}, {"INVENTORY74", INV_74, 0},
-    {"INVENTORY75", INV_75, 0}, {"INVENTORY76", INV_76, 0},
-    {"INVENTORY77", INV_77, 0}, {"INVENTORY78", INV_78, 0},
-    {"INVENTORY79", INV_79, 0}, {"INVENTORY80", INV_80, 0},
-    {"INVENTORY81", INV_81, 0}, {"INVENTORY82", INV_82, 0},
-    {"INVENTORY83", INV_83, 0}, {"INVENTORY84", INV_84, 0},
-    {"INVENTORY85", INV_85, 0}, {"INVENTORY86", INV_86, 0},
-    {"INVENTORY87", INV_87, 0}, {"INVENTORY88", INV_88, 0},
-    {"INVENTORY89", INV_89, 0}, {"INVENTORY90", INV_90, 0},
-    {"INVENTORY91", INV_91, 0}, {"INVENTORY92", INV_92, 0},
-    {"INVENTORY93", INV_93, 0}, {"INVENTORY94", INV_94, 0},
-    {"INVENTORY95", INV_95, 0}, {"INVENTORY96", INV_96, 0},
-    {"INVENTORY97", INV_97, 0}, {"INVENTORY98", INV_98, 0},
-    {"INVENTORY99", INV_99, 0}, {nullptr, 0, 0}};
+    {"INVENTORY01", kInventoryType01, 0}, {"INVENTORY02", kInventoryType02, 0},
+    {"INVENTORY03", kInventoryType03, 0}, {"INVENTORY04", kInventoryType04, 0},
+    {"INVENTORY05", kInventoryType05, 0}, {"INVENTORY06", kInventoryType06, 0},
+    {"INVENTORY07", kInventoryType07, 0}, {"INVENTORY08", kInventoryType08, 0},
+    {"INVENTORY09", kInventoryType09, 0}, {"INVENTORY10", kInventoryType10, 0},
+    {"INVENTORY11", kInventoryType11, 0}, {"INVENTORY12", kInventoryType12, 0},
+    {"INVENTORY13", kInventoryType13, 0}, {"INVENTORY14", kInventoryType14, 0},
+    {"INVENTORY15", kInventoryType15, 0}, {"INVENTORY16", kInventoryType16, 0},
+    {"INVENTORY17", kInventoryType17, 0}, {"INVENTORY18", kInventoryType18, 0},
+    {"INVENTORY19", kInventoryType19, 0}, {"INVENTORY20", kInventoryType20, 0},
+    {"INVENTORY21", kInventoryType21, 0}, {"INVENTORY22", kInventoryType22, 0},
+    {"INVENTORY23", kInventoryType23, 0}, {"INVENTORY24", kInventoryType24, 0},
+    {"INVENTORY25", kInventoryType25, 0}, {"INVENTORY26", kInventoryType26, 0},
+    {"INVENTORY27", kInventoryType27, 0}, {"INVENTORY28", kInventoryType28, 0},
+    {"INVENTORY29", kInventoryType29, 0}, {"INVENTORY30", kInventoryType30, 0},
+    {"INVENTORY31", kInventoryType31, 0}, {"INVENTORY32", kInventoryType32, 0},
+    {"INVENTORY33", kInventoryType33, 0}, {"INVENTORY34", kInventoryType34, 0},
+    {"INVENTORY35", kInventoryType35, 0}, {"INVENTORY36", kInventoryType36, 0},
+    {"INVENTORY37", kInventoryType37, 0}, {"INVENTORY38", kInventoryType38, 0},
+    {"INVENTORY39", kInventoryType39, 0}, {"INVENTORY40", kInventoryType40, 0},
+    {"INVENTORY41", kInventoryType41, 0}, {"INVENTORY42", kInventoryType42, 0},
+    {"INVENTORY43", kInventoryType43, 0}, {"INVENTORY44", kInventoryType44, 0},
+    {"INVENTORY45", kInventoryType45, 0}, {"INVENTORY46", kInventoryType46, 0},
+    {"INVENTORY47", kInventoryType47, 0}, {"INVENTORY48", kInventoryType48, 0},
+    {"INVENTORY49", kInventoryType49, 0}, {"INVENTORY50", kInventoryType50, 0},
+    {"INVENTORY51", kInventoryType51, 0}, {"INVENTORY52", kInventoryType52, 0},
+    {"INVENTORY53", kInventoryType53, 0}, {"INVENTORY54", kInventoryType54, 0},
+    {"INVENTORY55", kInventoryType55, 0}, {"INVENTORY56", kInventoryType56, 0},
+    {"INVENTORY57", kInventoryType57, 0}, {"INVENTORY58", kInventoryType58, 0},
+    {"INVENTORY59", kInventoryType59, 0}, {"INVENTORY60", kInventoryType60, 0},
+    {"INVENTORY61", kInventoryType61, 0}, {"INVENTORY62", kInventoryType62, 0},
+    {"INVENTORY63", kInventoryType63, 0}, {"INVENTORY64", kInventoryType64, 0},
+    {"INVENTORY65", kInventoryType65, 0}, {"INVENTORY66", kInventoryType66, 0},
+    {"INVENTORY67", kInventoryType67, 0}, {"INVENTORY68", kInventoryType68, 0},
+    {"INVENTORY69", kInventoryType69, 0}, {"INVENTORY70", kInventoryType70, 0},
+    {"INVENTORY71", kInventoryType71, 0}, {"INVENTORY72", kInventoryType72, 0},
+    {"INVENTORY73", kInventoryType73, 0}, {"INVENTORY74", kInventoryType74, 0},
+    {"INVENTORY75", kInventoryType75, 0}, {"INVENTORY76", kInventoryType76, 0},
+    {"INVENTORY77", kInventoryType77, 0}, {"INVENTORY78", kInventoryType78, 0},
+    {"INVENTORY79", kInventoryType79, 0}, {"INVENTORY80", kInventoryType80, 0},
+    {"INVENTORY81", kInventoryType81, 0}, {"INVENTORY82", kInventoryType82, 0},
+    {"INVENTORY83", kInventoryType83, 0}, {"INVENTORY84", kInventoryType84, 0},
+    {"INVENTORY85", kInventoryType85, 0}, {"INVENTORY86", kInventoryType86, 0},
+    {"INVENTORY87", kInventoryType87, 0}, {"INVENTORY88", kInventoryType88, 0},
+    {"INVENTORY89", kInventoryType89, 0}, {"INVENTORY90", kInventoryType90, 0},
+    {"INVENTORY91", kInventoryType91, 0}, {"INVENTORY92", kInventoryType92, 0},
+    {"INVENTORY93", kInventoryType93, 0}, {"INVENTORY94", kInventoryType94, 0},
+    {"INVENTORY95", kInventoryType95, 0}, {"INVENTORY96", kInventoryType96, 0},
+    {"INVENTORY97", kInventoryType97, 0}, {"INVENTORY98", kInventoryType98, 0},
+    {"INVENTORY99", kInventoryType99, 0}, {nullptr, 0, 0}};
 
 const DDFSpecialFlags counter_types[] = {
-    {"LIVES", CT_Lives, 0},     {"SCORE", CT_Score, 0},
-    {"MONEY", CT_Money, 0},     {"EXPERIENCE", CT_Experience, 0},
-    {"COUNTER01", CT_Lives, 0}, {"COUNTER02", CT_Score, 0},
-    {"COUNTER03", CT_Money, 0}, {"COUNTER04", CT_Experience, 0},
-    {"COUNTER05", COUNT_05, 0}, {"COUNTER06", COUNT_06, 0},
-    {"COUNTER07", COUNT_07, 0}, {"COUNTER08", COUNT_08, 0},
-    {"COUNTER09", COUNT_09, 0}, {"COUNTER10", COUNT_10, 0},
-    {"COUNTER11", COUNT_11, 0}, {"COUNTER12", COUNT_12, 0},
-    {"COUNTER13", COUNT_13, 0}, {"COUNTER14", COUNT_14, 0},
-    {"COUNTER15", COUNT_15, 0}, {"COUNTER16", COUNT_16, 0},
-    {"COUNTER17", COUNT_17, 0}, {"COUNTER18", COUNT_18, 0},
-    {"COUNTER19", COUNT_19, 0}, {"COUNTER20", COUNT_20, 0},
-    {"COUNTER21", COUNT_21, 0}, {"COUNTER22", COUNT_22, 0},
-    {"COUNTER23", COUNT_23, 0}, {"COUNTER24", COUNT_24, 0},
-    {"COUNTER25", COUNT_25, 0}, {"COUNTER26", COUNT_26, 0},
-    {"COUNTER27", COUNT_27, 0}, {"COUNTER28", COUNT_28, 0},
-    {"COUNTER29", COUNT_29, 0}, {"COUNTER30", COUNT_30, 0},
-    {"COUNTER31", COUNT_31, 0}, {"COUNTER32", COUNT_32, 0},
-    {"COUNTER33", COUNT_33, 0}, {"COUNTER34", COUNT_34, 0},
-    {"COUNTER35", COUNT_35, 0}, {"COUNTER36", COUNT_36, 0},
-    {"COUNTER37", COUNT_37, 0}, {"COUNTER38", COUNT_38, 0},
-    {"COUNTER39", COUNT_39, 0}, {"COUNTER40", COUNT_40, 0},
-    {"COUNTER41", COUNT_41, 0}, {"COUNTER42", COUNT_42, 0},
-    {"COUNTER43", COUNT_43, 0}, {"COUNTER44", COUNT_44, 0},
-    {"COUNTER45", COUNT_45, 0}, {"COUNTER46", COUNT_46, 0},
-    {"COUNTER47", COUNT_47, 0}, {"COUNTER48", COUNT_48, 0},
-    {"COUNTER49", COUNT_49, 0}, {"COUNTER50", COUNT_50, 0},
-    {"COUNTER51", COUNT_51, 0}, {"COUNTER52", COUNT_52, 0},
-    {"COUNTER53", COUNT_53, 0}, {"COUNTER54", COUNT_54, 0},
-    {"COUNTER55", COUNT_55, 0}, {"COUNTER56", COUNT_56, 0},
-    {"COUNTER57", COUNT_57, 0}, {"COUNTER58", COUNT_58, 0},
-    {"COUNTER59", COUNT_59, 0}, {"COUNTER60", COUNT_60, 0},
-    {"COUNTER61", COUNT_61, 0}, {"COUNTER62", COUNT_62, 0},
-    {"COUNTER63", COUNT_63, 0}, {"COUNTER64", COUNT_64, 0},
-    {"COUNTER65", COUNT_65, 0}, {"COUNTER66", COUNT_66, 0},
-    {"COUNTER67", COUNT_67, 0}, {"COUNTER68", COUNT_68, 0},
-    {"COUNTER69", COUNT_69, 0}, {"COUNTER70", COUNT_70, 0},
-    {"COUNTER71", COUNT_71, 0}, {"COUNTER72", COUNT_72, 0},
-    {"COUNTER73", COUNT_73, 0}, {"COUNTER74", COUNT_74, 0},
-    {"COUNTER75", COUNT_75, 0}, {"COUNTER76", COUNT_76, 0},
-    {"COUNTER77", COUNT_77, 0}, {"COUNTER78", COUNT_78, 0},
-    {"COUNTER79", COUNT_79, 0}, {"COUNTER80", COUNT_80, 0},
-    {"COUNTER81", COUNT_81, 0}, {"COUNTER82", COUNT_82, 0},
-    {"COUNTER83", COUNT_83, 0}, {"COUNTER84", COUNT_84, 0},
-    {"COUNTER85", COUNT_85, 0}, {"COUNTER86", COUNT_86, 0},
-    {"COUNTER87", COUNT_87, 0}, {"COUNTER88", COUNT_88, 0},
-    {"COUNTER89", COUNT_89, 0}, {"COUNTER90", COUNT_90, 0},
-    {"COUNTER91", COUNT_91, 0}, {"COUNTER92", COUNT_92, 0},
-    {"COUNTER93", COUNT_93, 0}, {"COUNTER94", COUNT_94, 0},
-    {"COUNTER95", COUNT_95, 0}, {"COUNTER96", COUNT_96, 0},
-    {"COUNTER97", COUNT_97, 0}, {"COUNTER98", COUNT_98, 0},
-    {"COUNTER99", COUNT_99, 0}, {nullptr, 0, 0}};
+    {"LIVES", kCounterTypeLives, 0},
+    {"SCORE", kCounterTypeScore, 0},
+    {"MONEY", kCounterTypeMoney, 0},
+    {"EXPERIENCE", kCounterTypeExperience, 0},
+    {"COUNTER01", kCounterTypeLives, 0},
+    {"COUNTER02", kCounterTypeScore, 0},
+    {"COUNTER03", kCounterTypeMoney, 0},
+    {"COUNTER04", kCounterTypeExperience, 0},
+    {"COUNTER05", kCounterType05, 0},
+    {"COUNTER06", kCounterType06, 0},
+    {"COUNTER07", kCounterType07, 0},
+    {"COUNTER08", kCounterType08, 0},
+    {"COUNTER09", kCounterType09, 0},
+    {"COUNTER10", kCounterType10, 0},
+    {"COUNTER11", kCounterType11, 0},
+    {"COUNTER12", kCounterType12, 0},
+    {"COUNTER13", kCounterType13, 0},
+    {"COUNTER14", kCounterType14, 0},
+    {"COUNTER15", kCounterType15, 0},
+    {"COUNTER16", kCounterType16, 0},
+    {"COUNTER17", kCounterType17, 0},
+    {"COUNTER18", kCounterType18, 0},
+    {"COUNTER19", kCounterType19, 0},
+    {"COUNTER20", kCounterType20, 0},
+    {"COUNTER21", kCounterType21, 0},
+    {"COUNTER22", kCounterType22, 0},
+    {"COUNTER23", kCounterType23, 0},
+    {"COUNTER24", kCounterType24, 0},
+    {"COUNTER25", kCounterType25, 0},
+    {"COUNTER26", kCounterType26, 0},
+    {"COUNTER27", kCounterType27, 0},
+    {"COUNTER28", kCounterType28, 0},
+    {"COUNTER29", kCounterType29, 0},
+    {"COUNTER30", kCounterType30, 0},
+    {"COUNTER31", kCounterType31, 0},
+    {"COUNTER32", kCounterType32, 0},
+    {"COUNTER33", kCounterType33, 0},
+    {"COUNTER34", kCounterType34, 0},
+    {"COUNTER35", kCounterType35, 0},
+    {"COUNTER36", kCounterType36, 0},
+    {"COUNTER37", kCounterType37, 0},
+    {"COUNTER38", kCounterType38, 0},
+    {"COUNTER39", kCounterType39, 0},
+    {"COUNTER40", kCounterType40, 0},
+    {"COUNTER41", kCounterType41, 0},
+    {"COUNTER42", kCounterType42, 0},
+    {"COUNTER43", kCounterType43, 0},
+    {"COUNTER44", kCounterType44, 0},
+    {"COUNTER45", kCounterType45, 0},
+    {"COUNTER46", kCounterType46, 0},
+    {"COUNTER47", kCounterType47, 0},
+    {"COUNTER48", kCounterType48, 0},
+    {"COUNTER49", kCounterType49, 0},
+    {"COUNTER50", kCounterType50, 0},
+    {"COUNTER51", kCounterType51, 0},
+    {"COUNTER52", kCounterType52, 0},
+    {"COUNTER53", kCounterType53, 0},
+    {"COUNTER54", kCounterType54, 0},
+    {"COUNTER55", kCounterType55, 0},
+    {"COUNTER56", kCounterType56, 0},
+    {"COUNTER57", kCounterType57, 0},
+    {"COUNTER58", kCounterType58, 0},
+    {"COUNTER59", kCounterType59, 0},
+    {"COUNTER60", kCounterType60, 0},
+    {"COUNTER61", kCounterType61, 0},
+    {"COUNTER62", kCounterType62, 0},
+    {"COUNTER63", kCounterType63, 0},
+    {"COUNTER64", kCounterType64, 0},
+    {"COUNTER65", kCounterType65, 0},
+    {"COUNTER66", kCounterType66, 0},
+    {"COUNTER67", kCounterType67, 0},
+    {"COUNTER68", kCounterType68, 0},
+    {"COUNTER69", kCounterType69, 0},
+    {"COUNTER70", kCounterType70, 0},
+    {"COUNTER71", kCounterType71, 0},
+    {"COUNTER72", kCounterType72, 0},
+    {"COUNTER73", kCounterType73, 0},
+    {"COUNTER74", kCounterType74, 0},
+    {"COUNTER75", kCounterType75, 0},
+    {"COUNTER76", kCounterType76, 0},
+    {"COUNTER77", kCounterType77, 0},
+    {"COUNTER78", kCounterType78, 0},
+    {"COUNTER79", kCounterType79, 0},
+    {"COUNTER80", kCounterType80, 0},
+    {"COUNTER81", kCounterType81, 0},
+    {"COUNTER82", kCounterType82, 0},
+    {"COUNTER83", kCounterType83, 0},
+    {"COUNTER84", kCounterType84, 0},
+    {"COUNTER85", kCounterType85, 0},
+    {"COUNTER86", kCounterType86, 0},
+    {"COUNTER87", kCounterType87, 0},
+    {"COUNTER88", kCounterType88, 0},
+    {"COUNTER89", kCounterType89, 0},
+    {"COUNTER90", kCounterType90, 0},
+    {"COUNTER91", kCounterType91, 0},
+    {"COUNTER92", kCounterType92, 0},
+    {"COUNTER93", kCounterType93, 0},
+    {"COUNTER94", kCounterType94, 0},
+    {"COUNTER95", kCounterType95, 0},
+    {"COUNTER96", kCounterType96, 0},
+    {"COUNTER97", kCounterType97, 0},
+    {"COUNTER98", kCounterType98, 0},
+    {"COUNTER99", kCounterType99, 0},
+    {nullptr, 0, 0}};
 
 //
 // DDF_CompareName
@@ -596,9 +655,9 @@ static void ThingStartEntry(const char *buffer, bool extend)
         if (!dynamic_mobj)
             DDF_Error("Unknown thing to extend: %s\n", name.c_str());
 
-        if (number > 0) dynamic_mobj->number = number;
+        if (number > 0) dynamic_mobj->number_ = number;
 
-        DDF_StateBeginRange(dynamic_mobj->state_grp);
+        DDF_StateBeginRange(dynamic_mobj->state_grp_);
         return;
     }
 
@@ -606,19 +665,19 @@ static void ThingStartEntry(const char *buffer, bool extend)
     if (dynamic_mobj)
     {
         dynamic_mobj->Default();
-        dynamic_mobj->number = number;
+        dynamic_mobj->number_ = number;
     }
     else
     {
         // not found, create a new one
-        dynamic_mobj         = new MapObjectDefinition;
-        dynamic_mobj->name   = name.c_str();
-        dynamic_mobj->number = number;
+        dynamic_mobj          = new MapObjectDefinition;
+        dynamic_mobj->name_   = name.c_str();
+        dynamic_mobj->number_ = number;
 
         mobjtypes.push_back(dynamic_mobj);
     }
 
-    DDF_StateBeginRange(dynamic_mobj->state_grp);
+    DDF_StateBeginRange(dynamic_mobj->state_grp_);
 }
 
 static void ThingDoTemplate(const char *contents)
@@ -634,9 +693,9 @@ static void ThingDoTemplate(const char *contents)
 
     dynamic_mobj->CopyDetail(*other);
 
-    TemplateThing = other->name.c_str();
+    TemplateThing = other->name_.c_str();
 
-    DDF_StateBeginRange(dynamic_mobj->state_grp);
+    DDF_StateBeginRange(dynamic_mobj->state_grp_);
 }
 
 void ThingParseField(const char *field, const char *contents, int index,
@@ -666,7 +725,7 @@ void ThingParseField(const char *field, const char *contents, int index,
         if (DDF_MainParseField(thing_commands, field, contents,
                                (uint8_t *)dynamic_mobj))
         {
-            dynamic_mobj->model_rotate *= kBAMAngle1;  // apply the rotation
+            dynamic_mobj->model_rotate_ *= kBAMAngle1;  // apply the rotation
             return;
         }
     }
@@ -675,7 +734,7 @@ void ThingParseField(const char *field, const char *contents, int index,
                            (uint8_t *)dynamic_mobj))
         return;
 
-    if (DDF_MainParseState((uint8_t *)dynamic_mobj, dynamic_mobj->state_grp,
+    if (DDF_MainParseState((uint8_t *)dynamic_mobj, dynamic_mobj->state_grp_,
                            field, contents, index, is_last,
                            false /* is_weapon */, thing_starters,
                            thing_actions))
@@ -686,72 +745,72 @@ void ThingParseField(const char *field, const char *contents, int index,
 
 static void ThingFinishEntry(void)
 {
-    DDF_StateFinishRange(dynamic_mobj->state_grp);
+    DDF_StateFinishRange(dynamic_mobj->state_grp_);
 
     // count-as-kill things are automatically monsters
-    if (dynamic_mobj->flags & MF_COUNTKILL)
-        dynamic_mobj->extendedflags |= EF_MONSTER;
+    if (dynamic_mobj->flags_ & kMapObjectFlagCountKill)
+        dynamic_mobj->extendedflags_ |= kExtendedFlagMonster;
 
     // countable items are always pick-up-able
-    if (dynamic_mobj->flags & MF_COUNTITEM)
-        dynamic_mobj->hyperflags |= HF_FORCEPICKUP;
+    if (dynamic_mobj->flags_ & kMapObjectFlagCountItem)
+        dynamic_mobj->hyperflags_ |= kHyperFlagForcePickup;
 
     // shootable things are always pushable
-    if (dynamic_mobj->flags & MF_SHOOTABLE)
-        dynamic_mobj->hyperflags |= HF_PUSHABLE;
+    if (dynamic_mobj->flags_ & kMapObjectFlagShootable)
+        dynamic_mobj->hyperflags_ |= kHyperFlagPushable;
 
     // check stuff...
 
-    if (dynamic_mobj->mass < 1)
+    if (dynamic_mobj->mass_ < 1)
     {
-        DDF_WarnError("Bad MASS value %f in DDF.\n", dynamic_mobj->mass);
-        dynamic_mobj->mass = 1;
+        DDF_WarnError("Bad MASS value %f in DDF.\n", dynamic_mobj->mass_);
+        dynamic_mobj->mass_ = 1;
     }
 
     // check CAST stuff
-    if (dynamic_mobj->castorder > 0)
+    if (dynamic_mobj->castorder_ > 0)
     {
-        if (!dynamic_mobj->chase_state)
+        if (!dynamic_mobj->chase_state_)
             DDF_Error("Cast object must have CHASE states !\n");
 
-        if (!dynamic_mobj->death_state)
+        if (!dynamic_mobj->death_state_)
             DDF_Error("Cast object must have DEATH states !\n");
     }
 
     // check DAMAGE stuff
-    if (dynamic_mobj->explode_damage.nominal_ < 0)
+    if (dynamic_mobj->explode_damage_.nominal_ < 0)
     {
         DDF_WarnError("Bad EXPLODE_DAMAGE.VAL value %f in DDF.\n",
-                      dynamic_mobj->explode_damage.nominal_);
+                      dynamic_mobj->explode_damage_.nominal_);
     }
 
-    if (dynamic_mobj->explode_radius < 0)
+    if (dynamic_mobj->explode_radius_ < 0)
     {
         DDF_Error("Bad EXPLODE_RADIUS value %f in DDF.\n",
-                  dynamic_mobj->explode_radius);
+                  dynamic_mobj->explode_radius_);
     }
 
-    if (dynamic_mobj->reload_shots <= 0)
+    if (dynamic_mobj->reload_shots_ <= 0)
     {
         DDF_Error("Bad RELOAD_SHOTS value %d in DDF.\n",
-                  dynamic_mobj->reload_shots);
+                  dynamic_mobj->reload_shots_);
     }
 
-    if (dynamic_mobj->choke_damage.nominal_ < 0)
+    if (dynamic_mobj->choke_damage_.nominal_ < 0)
     {
         DDF_WarnError("Bad CHOKE_DAMAGE.VAL value %f in DDF.\n",
-                      dynamic_mobj->choke_damage.nominal_);
+                      dynamic_mobj->choke_damage_.nominal_);
     }
 
-    if (dynamic_mobj->model_skin < 0 || dynamic_mobj->model_skin > 9)
+    if (dynamic_mobj->model_skin_ < 0 || dynamic_mobj->model_skin_ > 9)
         DDF_Error("Bad MODEL_SKIN value %d in DDF (must be 0-9).\n",
-                  dynamic_mobj->model_skin);
+                  dynamic_mobj->model_skin_);
 
-    if (dynamic_mobj->dlight[0].radius > 512)
+    if (dynamic_mobj->dlight_[0].radius_ > 512)
     {
         if (dlight_radius_warnings < 3)
             DDF_Warning("DLIGHT_RADIUS value %1.1f too large (over 512).\n",
-                        dynamic_mobj->dlight[0].radius);
+                        dynamic_mobj->dlight_[0].radius_);
         else if (dlight_radius_warnings == 3)
             I_Warning("More too large DLIGHT_RADIUS values found....\n");
 
@@ -761,8 +820,8 @@ static void ThingFinishEntry(void)
     // FIXME: check more stuff
 
     // backwards compatibility: if no idle state, re-use spawn state
-    if (dynamic_mobj->idle_state == 0)
-        dynamic_mobj->idle_state = dynamic_mobj->spawn_state;
+    if (dynamic_mobj->idle_state_ == 0)
+        dynamic_mobj->idle_state_ = dynamic_mobj->spawn_state_;
 
     dynamic_mobj->DLightCompatibility();
 
@@ -773,36 +832,36 @@ static void ThingFinishEntry(void)
 
         MapObjectDefinition *other = mobjtypes[idx];
 
-        if (!dynamic_mobj->lose_benefits)
+        if (!dynamic_mobj->lose_benefits_)
         {
-            if (other->lose_benefits)
+            if (other->lose_benefits_)
             {
-                dynamic_mobj->lose_benefits  = new Benefit;
-                *dynamic_mobj->lose_benefits = *other->lose_benefits;
+                dynamic_mobj->lose_benefits_  = new Benefit;
+                *dynamic_mobj->lose_benefits_ = *other->lose_benefits_;
             }
         }
 
-        if (!dynamic_mobj->pickup_benefits)
+        if (!dynamic_mobj->pickup_benefits_)
         {
-            if (other->pickup_benefits)
+            if (other->pickup_benefits_)
             {
-                dynamic_mobj->pickup_benefits  = new Benefit;
-                *dynamic_mobj->pickup_benefits = *other->pickup_benefits;
+                dynamic_mobj->pickup_benefits_  = new Benefit;
+                *dynamic_mobj->pickup_benefits_ = *other->pickup_benefits_;
             }
         }
 
-        if (!dynamic_mobj->kill_benefits)
+        if (!dynamic_mobj->kill_benefits_)
         {
-            if (other->kill_benefits)
+            if (other->kill_benefits_)
             {
-                dynamic_mobj->kill_benefits  = new Benefit;
-                *dynamic_mobj->kill_benefits = *other->kill_benefits;
+                dynamic_mobj->kill_benefits_  = new Benefit;
+                *dynamic_mobj->kill_benefits_ = *other->kill_benefits_;
             }
         }
 
-        if (dynamic_mobj->pickup_message.empty())
+        if (dynamic_mobj->pickup_message_.empty())
         {
-            dynamic_mobj->pickup_message = other->pickup_message;
+            dynamic_mobj->pickup_message_ = other->pickup_message_;
         }
     }
     TemplateThing = nullptr;
@@ -830,41 +889,43 @@ void DDF_ReadThings(const std::string &data)
 
 void DDF_MobjInit(void)
 {
-    for (auto m : mobjtypes)
+    for (MapObjectDefinition *m : mobjtypes)
     {
         delete m;
         m = nullptr;
     }
     mobjtypes.clear();
 
-    default_mobjtype         = new MapObjectDefinition();
-    default_mobjtype->name   = "__DEFAULT_MOBJ";
-    default_mobjtype->number = 0;
+    default_mobjtype          = new MapObjectDefinition();
+    default_mobjtype->name_   = "__DEFAULT_MOBJ";
+    default_mobjtype->number_ = 0;
 }
 
 void DDF_MobjCleanUp(void)
 {
     // lookup references
-    for (auto m : mobjtypes)
+    for (MapObjectDefinition *m : mobjtypes)
     {
         cur_ddf_entryname =
-            epi::StringFormat("[%s]  (things.ddf)", m->name.c_str());
+            epi::StringFormat("[%s]  (things.ddf)", m->name_.c_str());
 
-        m->dropitem = m->dropitem_ref != ""
-                          ? mobjtypes.Lookup(m->dropitem_ref.c_str())
-                          : nullptr;
-        m->blood = m->blood_ref != "" ? mobjtypes.Lookup(m->blood_ref.c_str())
-                                      : mobjtypes.Lookup("BLOOD");
+        m->dropitem_ = m->dropitem_ref_ != ""
+                           ? mobjtypes.Lookup(m->dropitem_ref_.c_str())
+                           : nullptr;
+        m->blood_    = m->blood_ref_ != ""
+                           ? mobjtypes.Lookup(m->blood_ref_.c_str())
+                           : mobjtypes.Lookup("BLOOD");
 
-        m->respawneffect = m->respawneffect_ref != ""
-                               ? mobjtypes.Lookup(m->respawneffect_ref.c_str())
-                           : (m->flags & MF_SPECIAL)
-                               ? mobjtypes.Lookup("ITEM_RESPAWN")
-                               : mobjtypes.Lookup("RESPAWN_FLASH");
+        m->respawneffect_ =
+            m->respawneffect_ref_ != ""
+                ? mobjtypes.Lookup(m->respawneffect_ref_.c_str())
+            : (m->flags_ & kMapObjectFlagSpecial)
+                ? mobjtypes.Lookup("ITEM_RESPAWN")
+                : mobjtypes.Lookup("RESPAWN_FLASH");
 
-        m->spitspot = m->spitspot_ref != ""
-                          ? mobjtypes.Lookup(m->spitspot_ref.c_str())
-                          : nullptr;
+        m->spitspot_ = m->spitspot_ref_ != ""
+                           ? mobjtypes.Lookup(m->spitspot_ref_.c_str())
+                           : nullptr;
 
         cur_ddf_entryname.clear();
     }
@@ -939,7 +1000,8 @@ static int ParseBenefitString(const char *info, char *name, char *param,
 static bool BenefitTryCounter(const char *name, Benefit *be, int num_vals)
 {
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, counter_types,
-                                                  &be->sub.type, false, false))
+                                                          &be->sub.type, false,
+                                                          false))
     {
         return false;
     }
@@ -957,8 +1019,7 @@ static bool BenefitTryCounter(const char *name, Benefit *be, int num_vals)
     return true;
 }
 
-static bool BenefitTryCounterLimit(const char *name, Benefit *be,
-                                   int num_vals)
+static bool BenefitTryCounterLimit(const char *name, Benefit *be, int num_vals)
 {
     char   namebuf[200];
     size_t len = strlen(name);
@@ -969,8 +1030,9 @@ static bool BenefitTryCounterLimit(const char *name, Benefit *be,
     len -= 6;
     epi::CStringCopyMax(namebuf, name, len);
 
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(namebuf, counter_types,
-                                                  &be->sub.type, false, false))
+    if (kDDFCheckFlagPositive !=
+        DDF_MainCheckSpecialFlag(namebuf, counter_types, &be->sub.type, false,
+                                 false))
     {
         return false;
     }
@@ -1026,7 +1088,8 @@ static bool BenefitTryInventoryLimit(const char *name, Benefit *be,
     epi::CStringCopyMax(namebuf, name, len);
 
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(namebuf, inv_types,
-                                                  &be->sub.type, false, false))
+                                                          &be->sub.type, false,
+                                                          false))
     {
         return false;
     }
@@ -1088,7 +1151,8 @@ static bool BenefitTryAmmoLimit(const char *name, Benefit *be, int num_vals)
     epi::CStringCopyMax(namebuf, name, len);
 
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(namebuf, ammo_types,
-                                                  &be->sub.type, false, false))
+                                                          &be->sub.type, false,
+                                                          false))
     {
         return false;
     }
@@ -1149,7 +1213,8 @@ static bool BenefitTryWeapon(const char *name, Benefit *be, int num_vals)
 static bool BenefitTryKey(const char *name, Benefit *be, int num_vals)
 {
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, keytype_names,
-                                                  &be->sub.type, false, false))
+                                                          &be->sub.type, false,
+                                                          false))
     {
         return false;
     }
@@ -1195,8 +1260,9 @@ static bool BenefitTryHealth(const char *name, Benefit *be, int num_vals)
 
 static bool BenefitTryArmour(const char *name, Benefit *be, int num_vals)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, armourtype_names,
-                                                  &be->sub.type, false, false))
+    if (kDDFCheckFlagPositive !=
+        DDF_MainCheckSpecialFlag(name, armourtype_names, &be->sub.type, false,
+                                 false))
     {
         return false;
     }
@@ -1213,19 +1279,19 @@ static bool BenefitTryArmour(const char *name, Benefit *be, int num_vals)
     {
         switch (be->sub.type)
         {
-            case ARMOUR_Green:
+            case kArmourTypeGreen:
                 be->limit = 100;
                 break;
-            case ARMOUR_Blue:
+            case kArmourTypeBlue:
                 be->limit = 200;
                 break;
-            case ARMOUR_Purple:
+            case kArmourTypePurple:
                 be->limit = 200;
                 break;
-            case ARMOUR_Yellow:
+            case kArmourTypeYellow:
                 be->limit = 200;
                 break;
-            case ARMOUR_Red:
+            case kArmourTypeRed:
                 be->limit = 200;
                 break;
             default:;
@@ -1238,7 +1304,8 @@ static bool BenefitTryArmour(const char *name, Benefit *be, int num_vals)
 static bool BenefitTryPowerup(const char *name, Benefit *be, int num_vals)
 {
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, powertype_names,
-                                                  &be->sub.type, false, false))
+                                                          &be->sub.type, false,
+                                                          false))
     {
         return false;
     }
@@ -1250,20 +1317,20 @@ static bool BenefitTryPowerup(const char *name, Benefit *be, int num_vals)
     if (num_vals < 2) be->limit = 999999.0f;
 
     // -AJA- backwards compatibility (need Fist for Berserk)
-    if (be->sub.type == PW_Berserk &&
+    if (be->sub.type == kPowerTypeBerserk &&
         DDF_CompareName(name, "POWERUP_BERSERK") == 0)
     {
         int idx = weapondefs.FindFirst("FIST", 0);
 
         if (idx >= 0)
         {
-            AddPickupEffect(
-                &dynamic_mobj->pickup_effects,
-                new pickup_effect_c(PUFX_SwitchWeapon, weapondefs[idx], 0, 0));
+            AddPickupEffect(&dynamic_mobj->pickup_effects_,
+                            new PickupEffect(kPickupEffectTypeSwitchWeapon,
+                                             weapondefs[idx], 0, 0));
 
-            AddPickupEffect(
-                &dynamic_mobj->pickup_effects,
-                new pickup_effect_c(PUFX_KeepPowerup, PW_Berserk, 0, 0));
+            AddPickupEffect(&dynamic_mobj->pickup_effects_,
+                            new PickupEffect(kPickupEffectTypeKeepPowerup,
+                                             kPowerTypeBerserk, 0, 0));
         }
     }
 
@@ -1346,23 +1413,22 @@ void DDF_MobjGetBenefit(const char *info, void *storage)
     DDF_WarnError("Unknown/Malformed benefit type: %s\n", namebuf);
 }
 
-pickup_effect_c::pickup_effect_c(pickup_effect_type_e _type, int _sub,
-                                 int _slot, float _time)
-    : next(nullptr), type(_type), slot(_slot), time(_time)
+PickupEffect::PickupEffect(PickupEffectType type, int sub, int slot, float time)
+    : next_(nullptr), type_(type), slot_(slot), time_(time)
 {
-    sub.type = _sub;
+    sub_.type = sub;
 }
 
-pickup_effect_c::pickup_effect_c(pickup_effect_type_e _type, WeaponDefinition *_weap,
-                                 int _slot, float _time)
-    : next(nullptr), type(_type), slot(_slot), time(_time)
+PickupEffect::PickupEffect(PickupEffectType type, WeaponDefinition *weap,
+                           int slot, float time)
+    : next_(nullptr), type_(type), slot_(slot), time_(time)
 {
-    sub.weap = _weap;
+    sub_.weap = weap;
 }
 
-static void AddPickupEffect(pickup_effect_c **list, pickup_effect_c *cur)
+static void AddPickupEffect(PickupEffect **list, PickupEffect *cur)
 {
-    cur->next = nullptr;
+    cur->next_ = nullptr;
 
     if ((*list) == nullptr)
     {
@@ -1370,44 +1436,44 @@ static void AddPickupEffect(pickup_effect_c **list, pickup_effect_c *cur)
         return;
     }
 
-    pickup_effect_c *tail;
+    PickupEffect *tail;
 
-    for (tail = (*list); tail && tail->next; tail = tail->next) {}
+    for (tail = (*list); tail && tail->next_; tail = tail->next_) {}
 
-    tail->next = cur;
+    tail->next_ = cur;
 }
 
-void BA_ParsePowerupEffect(pickup_effect_c **list, int pnum, float par1,
+void BA_ParsePowerupEffect(PickupEffect **list, int pnum, float par1,
                            float par2, const char *word_par)
 {
     int p_up = (int)par1;
     int slot = (int)par2;
 
-    SYS_ASSERT(0 <= p_up && p_up < NUMPOWERS);
+    SYS_ASSERT(0 <= p_up && p_up < kTotalPowerTypes);
 
-    if (slot < 0 || slot >= NUM_FX_SLOT)
+    if (slot < 0 || slot >= kTotalEffectsSlots)
         DDF_Error("POWERUP_EFFECT: bad FX slot #%d\n", p_up);
 
-    AddPickupEffect(list,
-                    new pickup_effect_c(PUFX_PowerupEffect, p_up, slot, 0));
+    AddPickupEffect(
+        list, new PickupEffect(kPickupEffectTypePowerupEffect, p_up, slot, 0));
 }
 
-void BA_ParseScreenEffect(pickup_effect_c **list, int pnum, float par1,
-                          float par2, const char *word_par)
+void BA_ParseScreenEffect(PickupEffect **list, int pnum, float par1, float par2,
+                          const char *word_par)
 {
     int slot = (int)par1;
 
-    if (slot < 0 || slot >= NUM_FX_SLOT)
+    if (slot < 0 || slot >= kTotalEffectsSlots)
         DDF_Error("SCREEN_EFFECT: bad FX slot #%d\n", slot);
 
     if (par2 <= 0) DDF_Error("SCREEN_EFFECT: bad time value: %1.2f\n", par2);
 
-    AddPickupEffect(list,
-                    new pickup_effect_c(PUFX_ScreenEffect, 0, slot, par2));
+    AddPickupEffect(
+        list, new PickupEffect(kPickupEffectTypeScreenEffect, 0, slot, par2));
 }
 
-void BA_ParseSwitchWeapon(pickup_effect_c **list, int pnum, float par1,
-                          float par2, const char *word_par)
+void BA_ParseSwitchWeapon(PickupEffect **list, int pnum, float par1, float par2,
+                          const char *word_par)
 {
     if (pnum != -1) DDF_Error("SWITCH_WEAPON: missing weapon name !\n");
 
@@ -1415,11 +1481,12 @@ void BA_ParseSwitchWeapon(pickup_effect_c **list, int pnum, float par1,
 
     WeaponDefinition *weap = weapondefs.Lookup(word_par);
 
-    AddPickupEffect(list, new pickup_effect_c(PUFX_SwitchWeapon, weap, 0, 0));
+    AddPickupEffect(
+        list, new PickupEffect(kPickupEffectTypeSwitchWeapon, weap, 0, 0));
 }
 
-void BA_ParseKeepPowerup(pickup_effect_c **list, int pnum, float par1,
-                         float par2, const char *word_par)
+void BA_ParseKeepPowerup(PickupEffect **list, int pnum, float par1, float par2,
+                         const char *word_par)
 {
     if (pnum != -1) DDF_Error("KEEP_POWERUP: missing powerup name !\n");
 
@@ -1428,19 +1495,19 @@ void BA_ParseKeepPowerup(pickup_effect_c **list, int pnum, float par1,
     if (DDF_CompareName(word_par, "BERSERK") != 0)
         DDF_Error("KEEP_POWERUP: %s is not supported\n", word_par);
 
-    AddPickupEffect(list,
-                    new pickup_effect_c(PUFX_KeepPowerup, PW_Berserk, 0, 0));
+    AddPickupEffect(list, new PickupEffect(kPickupEffectTypeKeepPowerup,
+                                           kPowerTypeBerserk, 0, 0));
 }
 
-typedef struct pick_fx_parser_s
+struct PickupEffectParser
 {
     const char *name;
     int         num_pars;  // -1 means a single word
-    void (*parser)(pickup_effect_c **list, int pnum, float par1, float par2,
+    void (*parser)(PickupEffect **list, int pnum, float par1, float par2,
                    const char *word_par);
-} pick_fx_parser_t;
+};
 
-static const pick_fx_parser_t pick_fx_parsers[] = {
+static const PickupEffectParser pick_fx_parsers[] = {
     {"SCREEN_EFFECT", 2, BA_ParseScreenEffect},
     {"SWITCH_WEAPON", -1, BA_ParseSwitchWeapon},
     {"KEEP_POWERUP", -1, BA_ParseKeepPowerup},
@@ -1462,7 +1529,7 @@ void DDF_MobjGetPickupEffect(const char *info, void *storage)
 
     SYS_ASSERT(storage);
 
-    pickup_effect_c **fx_list = (pickup_effect_c **)storage;
+    PickupEffect **fx_list = (PickupEffect **)storage;
 
     Benefit temp;  // FIXME kludge (write new parser method ?)
 
@@ -1502,93 +1569,93 @@ void DDF_MobjGetPickupEffect(const char *info, void *storage)
 // -AJA- 2000/02/02: Split into two lists.
 
 static const DDFSpecialFlags normal_specials[] = {
-    {"AMBUSH", MF_AMBUSH, 0},
-    {"FUZZY", MF_FUZZY, 0},
-    {"SOLID", MF_SOLID, 0},
-    {"ON_CEILING", MF_SPAWNCEILING + MF_NOGRAVITY, 0},
-    {"FLOATER", MF_FLOAT + MF_NOGRAVITY, 0},
-    {"INERT", MF_NOBLOCKMAP, 0},
-    {"TELEPORT_TYPE", MF_NOGRAVITY, 0},
-    {"LINKS", MF_NOBLOCKMAP + MF_NOSECTOR, 1},
-    {"DAMAGESMOKE", MF_NOBLOOD, 0},
-    {"SHOOTABLE", MF_SHOOTABLE, 0},
-    {"COUNT_AS_KILL", MF_COUNTKILL, 0},
-    {"COUNT_AS_ITEM", MF_COUNTITEM, 0},
-    {"SKULLFLY", MF_SKULLFLY, 0},
-    {"SPECIAL", MF_SPECIAL, 0},
-    {"SECTOR", MF_NOSECTOR, 1},
-    {"BLOCKMAP", MF_NOBLOCKMAP, 1},
-    {"SPAWNCEILING", MF_SPAWNCEILING, 0},
-    {"GRAVITY", MF_NOGRAVITY, 1},
-    {"DROPOFF", MF_DROPOFF, 0},
-    {"PICKUP", MF_PICKUP, 0},
-    {"CLIP", MF_NOCLIP, 1},
-    {"SLIDER", MF_SLIDE, 0},
-    {"FLOAT", MF_FLOAT, 0},
-    {"TELEPORT", MF_TELEPORT, 0},
-    {"MISSILE", MF_MISSILE, 0},  // has a special check
-    {"BARE_MISSILE", MF_MISSILE, 0},
-    {"DROPPED", MF_DROPPED, 0},
-    {"CORPSE", MF_CORPSE, 0},
-    {"STEALTH", MF_STEALTH, 0},
-    {"PRESERVE_MOMENTUM", MF_PRESERVEMOMENTUM, 0},
-    {"DEATHMATCH", MF_NOTDMATCH, 1},
-    {"TOUCHY", MF_TOUCHY, 0},
+    {"AMBUSH", kMapObjectFlagAmbush, 0},
+    {"FUZZY", kMapObjectFlagFuzzy, 0},
+    {"SOLID", kMapObjectFlagSolid, 0},
+    {"ON_CEILING", kMapObjectFlagSpawnCeiling + kMapObjectFlagNoGravity, 0},
+    {"FLOATER", kMapObjectFlagFloat + kMapObjectFlagNoGravity, 0},
+    {"INERT", kMapObjectFlagNoBlockmap, 0},
+    {"TELEPORT_TYPE", kMapObjectFlagNoGravity, 0},
+    {"LINKS", kMapObjectFlagNoBlockmap + kMapObjectFlagNoSector, 1},
+    {"DAMAGESMOKE", kMapObjectFlagNoBlood, 0},
+    {"SHOOTABLE", kMapObjectFlagShootable, 0},
+    {"COUNT_AS_KILL", kMapObjectFlagCountKill, 0},
+    {"COUNT_AS_ITEM", kMapObjectFlagCountItem, 0},
+    {"SKULLFLY", kMapObjectFlagSkullFly, 0},
+    {"SPECIAL", kMapObjectFlagSpecial, 0},
+    {"SECTOR", kMapObjectFlagNoSector, 1},
+    {"BLOCKMAP", kMapObjectFlagNoBlockmap, 1},
+    {"SPAWNCEILING", kMapObjectFlagSpawnCeiling, 0},
+    {"GRAVITY", kMapObjectFlagNoGravity, 1},
+    {"DROPOFF", kMapObjectFlagDropOff, 0},
+    {"PICKUP", kMapObjectFlagPickup, 0},
+    {"CLIP", kMapObjectFlagNoClip, 1},
+    {"SLIDER", kMapObjectFlagSlide, 0},
+    {"FLOAT", kMapObjectFlagFloat, 0},
+    {"TELEPORT", kMapObjectFlagTeleport, 0},
+    {"MISSILE", kMapObjectFlagMissile, 0},  // has a special check
+    {"BARE_MISSILE", kMapObjectFlagMissile, 0},
+    {"DROPPED", kMapObjectFlagDropped, 0},
+    {"CORPSE", kMapObjectFlagCorpse, 0},
+    {"STEALTH", kMapObjectFlagStealth, 0},
+    {"PRESERVE_MOMENTUM", kMapObjectFlagPreserveMomentum, 0},
+    {"DEATHMATCH", kMapObjectFlagNotDeathmatch, 1},
+    {"TOUCHY", kMapObjectFlagTouchy, 0},
     {nullptr, 0, 0}};
 
 static DDFSpecialFlags extended_specials[] = {
-    {"RESPAWN", EF_NORESPAWN, 1},
-    {"RESURRECT", EF_NORESURRECT, 1},
-    {"DISLOYAL", EF_DISLOYALTYPE, 0},
-    {"TRIGGER_HAPPY", EF_TRIGGERHAPPY, 0},
-    {"ATTACK_HURTS", EF_OWNATTACKHURTS, 0},
-    {"EXPLODE_IMMUNE", EF_EXPLODEIMMUNE, 0},
-    {"ALWAYS_LOUD", EF_ALWAYSLOUD, 0},
-    {"BOSSMAN", EF_EXPLODEIMMUNE + EF_ALWAYSLOUD, 0},
-    {"NEVERTARGETED", EF_NEVERTARGET, 0},
-    {"GRAV_KILL", EF_NOGRAVKILL, 1},
-    {"GRUDGE", EF_NOGRUDGE, 1},
-    {"BOUNCE", EF_BOUNCE, 0},
-    {"EDGEWALKER", EF_EDGEWALKER, 0},
-    {"GRAVFALL", EF_GRAVFALL, 0},
-    {"CLIMBABLE", EF_CLIMBABLE, 0},
-    {"WATERWALKER", EF_WATERWALKER, 0},
-    {"MONSTER", EF_MONSTER, 0},
-    {"CROSSLINES", EF_CROSSLINES, 0},
-    {"FRICTION", EF_NOFRICTION, 1},
-    {"USABLE", EF_USABLE, 0},
-    {"BLOCK_SHOTS", EF_BLOCKSHOTS, 0},
-    {"TUNNEL", EF_TUNNEL, 0},
-    {"SIMPLE_ARMOUR", EF_SIMPLEARMOUR, 0},
+    {"RESPAWN", kExtendedFlagNoRespawn, 1},
+    {"RESURRECT", kExtendedFlagCannotResurrect, 1},
+    {"DISLOYAL", kExtendedFlagDisloyalToOwnType, 0},
+    {"TRIGGER_HAPPY", kExtendedFlagTriggerHappy, 0},
+    {"ATTACK_HURTS", kExtendedFlagOwnAttackHurts, 0},
+    {"EXPLODE_IMMUNE", kExtendedFlagExplodeImmune, 0},
+    {"ALWAYS_LOUD", kExtendedFlagAlwaysLoud, 0},
+    {"BOSSMAN", kExtendedFlagExplodeImmune + kExtendedFlagAlwaysLoud, 0},
+    {"NEVERTARGETED", kExtendedFlagNeverTarget, 0},
+    {"GRAV_KILL", kExtendedFlagNoGravityOnKill, 1},
+    {"GRUDGE", kExtendedFlagNoGrudge, 1},
+    {"BOUNCE", kExtendedFlagBounce, 0},
+    {"EDGEWALKER", kExtendedFlagEdgeWalker, 0},
+    {"GRAVFALL", kExtendedFlagGravityFall, 0},
+    {"CLIMBABLE", kExtendedFlagClimbable, 0},
+    {"WATERWALKER", kExtendedFlagWaterWalker, 0},
+    {"MONSTER", kExtendedFlagMonster, 0},
+    {"CROSSLINES", kExtendedFlagCrossBlockingLines, 0},
+    {"FRICTION", kExtendedFlagNoFriction, 1},
+    {"USABLE", kExtendedFlagUsable, 0},
+    {"BLOCK_SHOTS", kExtendedFlagBlockShots, 0},
+    {"TUNNEL", kExtendedFlagTunnel, 0},
+    {"SIMPLE_ARMOUR", kExtendedFlagSimpleArmour, 0},
     {nullptr, 0, 0}};
 
 static DDFSpecialFlags hyper_specials[] = {
-    {"FORCE_PICKUP", HF_FORCEPICKUP, 0},
-    {"SIDE_IMMUNE", HF_SIDEIMMUNE, 0},
-    {"SIDE_GHOST", HF_SIDEGHOST, 0},
-    {"ULTRA_LOYAL", HF_ULTRALOYAL, 0},
-    {"ZBUFFER", HF_NOZBUFFER, 1},
-    {"HOVER", HF_HOVER, 0},
-    {"PUSHABLE", HF_PUSHABLE, 0},
-    {"POINT_FORCE", HF_POINT_FORCE, 0},
-    {"PASS_MISSILE", HF_PASSMISSILE, 0},
-    {"INVULNERABLE", HF_INVULNERABLE, 0},
-    {"VAMPIRE", HF_VAMPIRE, 0},
-    {"AUTOAIM", HF_NO_AUTOAIM, 1},
-    {"TILT", HF_TILT, 0},
-    {"IMMORTAL", HF_IMMORTAL, 0},
-    {"FLOOR_CLIP", HF_FLOORCLIP, 0},  // Lobo: new FLOOR_CLIP flag
-    {"TRIGGER_LINES", HF_NOTRIGGERLINES,
-     1},                             // Lobo: Cannot activate doors etc.
-    {"SHOVEABLE", HF_SHOVEABLE, 0},  // Lobo: can be pushed
-    {"SPLASH", HF_NOSPLASH, 1},      // Lobo: causes no splash on liquids
-    {"DEHACKED_COMPAT", HF_DEHACKED_COMPAT, 0},
-    {"IMMOVABLE", HF_IMMOVABLE, 0},
-    {"MUSIC_CHANGER", HF_MUSIC_CHANGER, 0},
+    {"FORCE_PICKUP", kHyperFlagForcePickup, 0},
+    {"SIDE_IMMUNE", kHyperFlagFriendlyFireImmune, 0},
+    {"SIDE_GHOST", kHyperFlagFriendlyFirePassesThrough, 0},
+    {"ULTRA_LOYAL", kHyperFlagUltraLoyal, 0},
+    {"ZBUFFER", kHyperFlagNoZBufferUpdate, 1},
+    {"HOVER", kHyperFlagHover, 0},
+    {"PUSHABLE", kHyperFlagPushable, 0},
+    {"POINT_FORCE", kHyperFlagPointForce, 0},
+    {"PASS_MISSILE", kHyperFlagMissilesPassThrough, 0},
+    {"INVULNERABLE", kHyperFlagInvulnerable, 0},
+    {"VAMPIRE", kHyperFlagVampire, 0},
+    {"AUTOAIM", kHyperFlagNoAutoaim, 1},
+    {"TILT", kHyperFlagForceModelTilt, 0},
+    {"IMMORTAL", kHyperFlagImmortal, 0},
+    {"FLOOR_CLIP", kHyperFlagFloorClip, 0},  // Lobo: new FLOOR_CLIP flag
+    {"TRIGGER_LINES", kHyperFlagNoTriggerLines,
+     1},                                    // Lobo: Cannot activate doors etc.
+    {"SHOVEABLE", kHyperFlagShoveable, 0},  // Lobo: can be pushed
+    {"SPLASH", kHyperFlagNoSplash, 1},      // Lobo: causes no splash on liquids
+    {"DEHACKED_COMPAT", kHyperFlagDehackedCompatibility, 0},
+    {"IMMOVABLE", kHyperFlagImmovable, 0},
+    {"MUSIC_CHANGER", kHyperFlagMusicChanger, 0},
     {nullptr, 0, 0}};
 
-static DDFSpecialFlags mbf21_specials[] = {{"LOGRAV", MBF21_LOGRAV, 0},
-                                       {nullptr, 0, 0}};
+static DDFSpecialFlags mbf21_specials[] = {{"LOGRAV", kMBF21FlagLowGravity, 0},
+                                           {nullptr, 0, 0}};
 
 //
 // DDF_MobjGetSpecial
@@ -1603,14 +1670,14 @@ void DDF_MobjGetSpecial(const char *info)
     // handle the "INVISIBLE" tag
     if (DDF_CompareName(info, "INVISIBLE") == 0)
     {
-        dynamic_mobj->translucency = 0.0f;
+        dynamic_mobj->translucency_ = 0.0f;
         return;
     }
 
     // handle the "NOSHADOW" tag
     if (DDF_CompareName(info, "NOSHADOW") == 0)
     {
-        dynamic_mobj->shadow_trans = 0.0f;
+        dynamic_mobj->shadow_trans_ = 0.0f;
         return;
     }
 
@@ -1618,12 +1685,13 @@ void DDF_MobjGetSpecial(const char *info)
     // normal flags & extended flags.
     if (DDF_CompareName(info, "MISSILE") == 0)
     {
-        dynamic_mobj->flags |= MF_MISSILE;
-        dynamic_mobj->extendedflags |= EF_CROSSLINES | EF_NOFRICTION;
+        dynamic_mobj->flags_ |= kMapObjectFlagMissile;
+        dynamic_mobj->extendedflags_ |=
+            kExtendedFlagCrossBlockingLines | kExtendedFlagNoFriction;
         return;
     }
 
-    int *flag_ptr = &dynamic_mobj->flags;
+    int *flag_ptr = &dynamic_mobj->flags_;
 
     DDFCheckFlagResult res = DDF_MainCheckSpecialFlag(info, normal_specials,
                                                       &flag_value, true, false);
@@ -1631,7 +1699,7 @@ void DDF_MobjGetSpecial(const char *info)
     if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
     {
         // wasn't a normal special.  Try the extended ones...
-        flag_ptr = &dynamic_mobj->extendedflags;
+        flag_ptr = &dynamic_mobj->extendedflags_;
 
         res = DDF_MainCheckSpecialFlag(info, extended_specials, &flag_value,
                                        true, false);
@@ -1640,7 +1708,7 @@ void DDF_MobjGetSpecial(const char *info)
     if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
     {
         // -AJA- 2004/08/25: Try the hyper specials...
-        flag_ptr = &dynamic_mobj->hyperflags;
+        flag_ptr = &dynamic_mobj->hyperflags_;
 
         res = DDF_MainCheckSpecialFlag(info, hyper_specials, &flag_value, true,
                                        false);
@@ -1649,7 +1717,7 @@ void DDF_MobjGetSpecial(const char *info)
     if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
     {
         // Try the MBF21 specials...
-        flag_ptr = &dynamic_mobj->mbf21flags;
+        flag_ptr = &dynamic_mobj->mbf21flags_;
 
         res = DDF_MainCheckSpecialFlag(info, mbf21_specials, &flag_value, true,
                                        false);
@@ -1672,35 +1740,37 @@ void DDF_MobjGetSpecial(const char *info)
     }
 }
 
-static DDFSpecialFlags dlight_type_names[] = {{"NONE", DLITE_None, 0},
-                                          {"MODULATE", DLITE_Modulate, 0},
-                                          {"ADD", DLITE_Add, 0},
+static DDFSpecialFlags dlight_type_names[] = {
+    {"NONE", kDynamicLightTypeNone, 0},
+    {"MODULATE", kDynamicLightTypeModulate, 0},
+    {"ADD", kDynamicLightTypeAdd, 0},
 
-                                          // backwards compatibility
-                                          {"LINEAR", DLITE_Compat_LIN, 0},
-                                          {"QUADRATIC", DLITE_Compat_QUAD, 0},
-                                          {"CONSTANT", DLITE_Compat_LIN, 0},
+    // backwards compatibility
+    {"LINEAR", kDynamicLightTypeCompatibilityLinear, 0},
+    {"QUADRATIC", kDynamicLightTypeCompatibilityQuadratic, 0},
+    {"CONSTANT", kDynamicLightTypeCompatibilityLinear, 0},
 
-                                          {nullptr, 0, 0}};
+    {nullptr, 0, 0}};
 
 //
 // DDF_MobjGetDLight
 //
 void DDF_MobjGetDLight(const char *info, void *storage)
 {
-    dlight_type_e *dtype = (dlight_type_e *)storage;
-    int            flag_value;
+    DynamicLightType *dtype = (DynamicLightType *)storage;
+    int               flag_value;
 
     SYS_ASSERT(dtype);
 
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(info, dlight_type_names,
-                                                  &flag_value, false, false))
+    if (kDDFCheckFlagPositive !=
+        DDF_MainCheckSpecialFlag(info, dlight_type_names, &flag_value, false,
+                                 false))
     {
         DDF_WarnError("Unknown dlight type '%s'\n", info);
         return;
     }
 
-    (*dtype) = (dlight_type_e)flag_value;
+    (*dtype) = (DynamicLightType)flag_value;
 }
 
 //
@@ -1713,8 +1783,11 @@ void DDF_MobjGetExtra(const char *info, void *storage)
     // If keyword is "NULL", then the mobj is not marked as extra.
     // Otherwise it is.
 
-    if (DDF_CompareName(info, "NULL") == 0) { *extendedflags &= ~EF_EXTRA; }
-    else { *extendedflags |= EF_EXTRA; }
+    if (DDF_CompareName(info, "NULL") == 0)
+    {
+        *extendedflags &= ~kExtendedFlagExtra;
+    }
+    else { *extendedflags |= kExtendedFlagExtra; }
 }
 
 //
@@ -1733,28 +1806,30 @@ void DDF_MobjGetPlayer(const char *info, void *storage)
 
 static void DDF_MobjGetGlowType(const char *info, void *storage)
 {
-    glow_sector_type_e *glow = (glow_sector_type_e *)storage;
+    SectorGlowType *glow = (SectorGlowType *)storage;
 
     if (epi::StringCaseCompareASCII(info, "FLOOR") == 0)
-        *glow = GLOW_Floor;
+        *glow = kSectorGlowTypeFloor;
     else if (epi::StringCaseCompareASCII(info, "CEILING") == 0)
-        *glow = GLOW_Ceiling;
+        *glow = kSectorGlowTypeCeiling;
     else if (epi::StringCaseCompareASCII(info, "WALL") == 0)
-        *glow = GLOW_Wall;
+        *glow = kSectorGlowTypeWall;
     else  // Unknown/None
-        *glow = GLOW_None;
+        *glow = kSectorGlowTypeNone;
 }
 
-static const DDFSpecialFlags sprite_yalign_names[] = {{"BOTTOM", SPYA_BottomUp, 0},
-                                                  {"MIDDLE", SPYA_Middle, 0},
-                                                  {"TOP", SPYA_TopDown, 0},
+static const DDFSpecialFlags sprite_yalign_names[] = {
+    {"BOTTOM", SpriteYAlignmentBottomUp, 0},
+    {"MIDDLE", SpriteYAlignmentMiddle, 0},
+    {"TOP", SpriteYAlignmentTopDown, 0},
 
-                                                  {nullptr, 0, 0}};
+    {nullptr, 0, 0}};
 
 static void DDF_MobjGetYAlign(const char *info, void *storage)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(info, sprite_yalign_names,
-                                                  (int *)storage, false, false))
+    if (kDDFCheckFlagPositive !=
+        DDF_MainCheckSpecialFlag(info, sprite_yalign_names, (int *)storage,
+                                 false, false))
     {
         DDF_WarnError("DDF_MobjGetYAlign: Unknown alignment: %s\n", info);
     }
@@ -1831,41 +1906,43 @@ static void DDF_MobjStateGetRADTrigger(const char *arg, State *cur_state)
 //
 
 static bool ConditionTryCounter(const char *name, const char *sub,
-                                condition_check_t *cond)
+                                ConditionCheck *cond)
 {
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, counter_types,
-                                                  &cond->sub.type, false,
-                                                  false))
+                                                          &cond->sub.type,
+                                                          false, false))
     {
         return false;
     }
 
     if (sub[0]) sscanf(sub, " %f ", &cond->amount);
 
-    cond->cond_type = COND_Counter;
+    cond->cond_type = kConditionCheckTypeCounter;
     return true;
 }
 
 static bool ConditionTryInventory(const char *name, const char *sub,
-                                  condition_check_t *cond)
+                                  ConditionCheck *cond)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(
-                             name, inv_types, &cond->sub.type, false, false))
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, inv_types,
+                                                          &cond->sub.type,
+                                                          false, false))
     {
         return false;
     }
 
     if (sub[0]) sscanf(sub, " %f ", &cond->amount);
 
-    cond->cond_type = COND_Inventory;
+    cond->cond_type = kConditionCheckTypeInventory;
     return true;
 }
 
 static bool ConditionTryAmmo(const char *name, const char *sub,
-                             condition_check_t *cond)
+                             ConditionCheck *cond)
 {
-    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(
-                             name, ammo_types, &cond->sub.type, false, false))
+    if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, ammo_types,
+                                                          &cond->sub.type,
+                                                          false, false))
     {
         return false;
     }
@@ -1878,12 +1955,12 @@ static bool ConditionTryAmmo(const char *name, const char *sub,
 
     if (sub[0]) sscanf(sub, " %f ", &cond->amount);
 
-    cond->cond_type = COND_Ammo;
+    cond->cond_type = kConditionCheckTypeAmmo;
     return true;
 }
 
 static bool ConditionTryWeapon(const char *name, const char *sub,
-                               condition_check_t *cond)
+                               ConditionCheck *cond)
 {
     int idx = weapondefs.FindFirst(name, 0);
 
@@ -1891,58 +1968,61 @@ static bool ConditionTryWeapon(const char *name, const char *sub,
 
     cond->sub.weap = weapondefs[idx];
 
-    cond->cond_type = COND_Weapon;
+    cond->cond_type = kConditionCheckTypeWeapon;
     return true;
 }
 
 static bool ConditionTryKey(const char *name, const char *sub,
-                            condition_check_t *cond)
+                            ConditionCheck *cond)
 {
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, keytype_names,
-                                                  &cond->sub.type, false,
-                                                  false))
+                                                          &cond->sub.type,
+                                                          false, false))
     {
         return false;
     }
 
-    cond->cond_type = COND_Key;
+    cond->cond_type = kConditionCheckTypeKey;
     return true;
 }
 
 static bool ConditionTryHealth(const char *name, const char *sub,
-                               condition_check_t *cond)
+                               ConditionCheck *cond)
 {
     if (DDF_CompareName(name, "HEALTH") != 0) return false;
 
     if (sub[0]) sscanf(sub, " %f ", &cond->amount);
 
-    cond->cond_type = COND_Health;
+    cond->cond_type = kConditionCheckTypeHealth;
     return true;
 }
 
 static bool ConditionTryArmour(const char *name, const char *sub,
-                               condition_check_t *cond)
+                               ConditionCheck *cond)
 {
-    if (DDF_CompareName(name, "ARMOUR") == 0) { cond->sub.type = ARMOUR_Total; }
-    else if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, armourtype_names,
-                                                       &cond->sub.type, false,
-                                                       false))
+    if (DDF_CompareName(name, "ARMOUR") == 0)
+    {
+        cond->sub.type = kTotalArmourTypes;
+    }
+    else if (kDDFCheckFlagPositive !=
+             DDF_MainCheckSpecialFlag(name, armourtype_names, &cond->sub.type,
+                                      false, false))
     {
         return false;
     }
 
     if (sub[0]) sscanf(sub, " %f ", &cond->amount);
 
-    cond->cond_type = COND_Armour;
+    cond->cond_type = kConditionCheckTypeArmour;
     return true;
 }
 
 static bool ConditionTryPowerup(const char *name, const char *sub,
-                                condition_check_t *cond)
+                                ConditionCheck *cond)
 {
     if (kDDFCheckFlagPositive != DDF_MainCheckSpecialFlag(name, powertype_names,
-                                                  &cond->sub.type, false,
-                                                  false))
+                                                          &cond->sub.type,
+                                                          false, false))
     {
         return false;
     }
@@ -1954,16 +2034,16 @@ static bool ConditionTryPowerup(const char *name, const char *sub,
         cond->amount *= (float)TICRATE;
     }
 
-    cond->cond_type = COND_Powerup;
+    cond->cond_type = kConditionCheckTypePowerup;
     return true;
 }
 
 static bool ConditionTryPlayerState(const char *name, const char *sub,
-                                    condition_check_t *cond)
+                                    ConditionCheck *cond)
 {
-    return (kDDFCheckFlagPositive == DDF_MainCheckSpecialFlag(name, simplecond_names,
-                                                      (int *)&cond->cond_type,
-                                                      false, false));
+    return (kDDFCheckFlagPositive ==
+            DDF_MainCheckSpecialFlag(name, simplecond_names,
+                                     (int *)&cond->cond_type, false, false));
 }
 
 //
@@ -1971,7 +2051,7 @@ static bool ConditionTryPlayerState(const char *name, const char *sub,
 //
 // Returns `false' if parsing failed.
 //
-bool DDF_MainParseCondition(const char *info, condition_check_t *cond)
+bool DDF_MainParseCondition(const char *info, ConditionCheck *cond)
 {
     char typebuf[100];
     char sub_buf[100];
@@ -1982,7 +2062,7 @@ bool DDF_MainParseCondition(const char *info, condition_check_t *cond)
 
     cond->negate    = false;
     cond->exact     = false;
-    cond->cond_type = COND_NONE;
+    cond->cond_type = kConditionCheckTypeNone;
     cond->amount    = 1;
 
     memset(&cond->sub, 0, sizeof(cond->sub));
@@ -2043,357 +2123,358 @@ bool DDF_MainParseCondition(const char *info, condition_check_t *cond)
 
 // ---> mobjdef class
 
-MapObjectDefinition::MapObjectDefinition() : name(), state_grp() { Default(); }
+MapObjectDefinition::MapObjectDefinition() : name_(), state_grp_()
+{
+    Default();
+}
 
 MapObjectDefinition::~MapObjectDefinition() {}
 
 void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
 {
-    state_grp.clear();
+    state_grp_.clear();
 
-    for (unsigned int i = 0; i < src.state_grp.size(); i++)
-        state_grp.push_back(src.state_grp[i]);
+    for (size_t i = 0; i < src.state_grp_.size(); i++)
+        state_grp_.push_back(src.state_grp_[i]);
 
-    spawn_state    = src.spawn_state;
-    idle_state     = src.idle_state;
-    chase_state    = src.chase_state;
-    pain_state     = src.pain_state;
-    missile_state  = src.missile_state;
-    melee_state    = src.melee_state;
-    death_state    = src.death_state;
-    overkill_state = src.overkill_state;
-    raise_state    = src.raise_state;
-    res_state      = src.res_state;
-    meander_state  = src.meander_state;
-    morph_state    = src.morph_state;
-    bounce_state   = src.bounce_state;
-    touch_state    = src.touch_state;
-    reload_state   = src.reload_state;
-    gib_state      = src.gib_state;
+    spawn_state_    = src.spawn_state_;
+    idle_state_     = src.idle_state_;
+    chase_state_    = src.chase_state_;
+    pain_state_     = src.pain_state_;
+    missile_state_  = src.missile_state_;
+    melee_state_    = src.melee_state_;
+    death_state_    = src.death_state_;
+    overkill_state_ = src.overkill_state_;
+    raise_state_    = src.raise_state_;
+    res_state_      = src.res_state_;
+    meander_state_  = src.meander_state_;
+    morph_state_    = src.morph_state_;
+    bounce_state_   = src.bounce_state_;
+    touch_state_    = src.touch_state_;
+    reload_state_   = src.reload_state_;
+    gib_state_      = src.gib_state_;
 
-    reactiontime = src.reactiontime;
-    painchance   = src.painchance;
-    spawnhealth  = src.spawnhealth;
-    speed        = src.speed;
-    float_speed  = src.float_speed;
-    radius       = src.radius;
-    height       = src.height;
-    step_size    = src.step_size;
-    mass         = src.mass;
+    reactiontime_ = src.reactiontime_;
+    painchance_   = src.painchance_;
+    spawnhealth_  = src.spawnhealth_;
+    speed_        = src.speed_;
+    float_speed_  = src.float_speed_;
+    radius_       = src.radius_;
+    height_       = src.height_;
+    step_size_    = src.step_size_;
+    mass_         = src.mass_;
 
-    flags         = src.flags;
-    extendedflags = src.extendedflags;
-    hyperflags    = src.hyperflags;
-    mbf21flags    = src.mbf21flags;
+    flags_         = src.flags_;
+    extendedflags_ = src.extendedflags_;
+    hyperflags_    = src.hyperflags_;
+    mbf21flags_    = src.mbf21flags_;
 
-    explode_damage = src.explode_damage;
-    explode_radius = src.explode_radius;
+    explode_damage_ = src.explode_damage_;
+    explode_radius_ = src.explode_radius_;
 
-    // pickup_message = src.pickup_message;
-    // lose_benefits = src.lose_benefits;
-    // pickup_benefits = src.pickup_benefits;
-    if (src.pickup_message != "") { pickup_message = src.pickup_message; }
+    // pickup_message_ = src.pickup_message_;
+    // lose_benefits_ = src.lose_benefits_;
+    // pickup_benefits_ = src.pickup_benefits_;
+    if (src.pickup_message_ != "") { pickup_message_ = src.pickup_message_; }
 
-    lose_benefits   = nullptr;
-    pickup_benefits = nullptr;
-    kill_benefits   = nullptr;  // I think? - Dasho
+    lose_benefits_   = nullptr;
+    pickup_benefits_ = nullptr;
+    kill_benefits_   = nullptr;  // I think? - Dasho
     /*
-    if(src.pickup_benefits)
+    if(src.pickup_benefits_)
     {
         I_Debugf("%s: Benefits info not inherited from '%s', ",name,
-    src.name.c_str()); I_Debugf("You should define it explicitly.\n");
+    src.name_.c_str()); I_Debugf("You should define it explicitly.\n");
     }
     */
 
-    pickup_effects   = src.pickup_effects;
-    initial_benefits = src.initial_benefits;
+    pickup_effects_   = src.pickup_effects_;
+    initial_benefits_ = src.initial_benefits_;
 
-    castorder    = src.castorder;
-    cast_title   = src.cast_title;
-    respawntime  = src.respawntime;
-    translucency = src.translucency;
-    minatkchance = src.minatkchance;
-    palremap     = src.palremap;
+    castorder_    = src.castorder_;
+    cast_title_   = src.cast_title_;
+    respawntime_  = src.respawntime_;
+    translucency_ = src.translucency_;
+    minatkchance_ = src.minatkchance_;
+    palremap_     = src.palremap_;
 
-    jump_delay   = src.jump_delay;
-    jumpheight   = src.jumpheight;
-    crouchheight = src.crouchheight;
-    viewheight   = src.viewheight;
-    shotheight   = src.shotheight;
-    maxfall      = src.maxfall;
-    fast         = src.fast;
+    jump_delay_   = src.jump_delay_;
+    jumpheight_   = src.jumpheight_;
+    crouchheight_ = src.crouchheight_;
+    viewheight_   = src.viewheight_;
+    shotheight_   = src.shotheight_;
+    maxfall_      = src.maxfall_;
+    fast_         = src.fast_;
 
-    scale  = src.scale;
-    aspect = src.aspect;
-    yalign = src.yalign;
+    scale_  = src.scale_;
+    aspect_ = src.aspect_;
+    yalign_ = src.yalign_;
 
-    model_skin   = src.model_skin;
-    model_scale  = src.model_scale;
-    model_aspect = src.model_aspect;
-    model_bias   = src.model_bias;
-    model_rotate = src.model_rotate;
+    model_skin_   = src.model_skin_;
+    model_scale_  = src.model_scale_;
+    model_aspect_ = src.model_aspect_;
+    model_bias_   = src.model_bias_;
+    model_rotate_ = src.model_rotate_;
 
-    bounce_speed  = src.bounce_speed;
-    bounce_up     = src.bounce_up;
-    sight_slope   = src.sight_slope;
-    sight_angle   = src.sight_angle;
-    ride_friction = src.ride_friction;
-    shadow_trans  = src.shadow_trans;
-    glow_type     = src.glow_type;
+    bounce_speed_  = src.bounce_speed_;
+    bounce_up_     = src.bounce_up_;
+    sight_slope_   = src.sight_slope_;
+    sight_angle_   = src.sight_angle_;
+    ride_friction_ = src.ride_friction_;
+    shadow_trans_  = src.shadow_trans_;
+    glow_type_     = src.glow_type_;
 
-    seesound       = src.seesound;
-    attacksound    = src.attacksound;
-    painsound      = src.painsound;
-    deathsound     = src.deathsound;
-    overkill_sound = src.overkill_sound;
-    activesound    = src.activesound;
-    walksound      = src.walksound;
-    jump_sound     = src.jump_sound;
-    noway_sound    = src.noway_sound;
-    oof_sound      = src.oof_sound;
-    fallpain_sound = src.fallpain_sound;
-    gasp_sound     = src.gasp_sound;
-    secretsound    = src.secretsound;
-    falling_sound  = src.falling_sound;
-    rip_sound      = src.rip_sound;
+    seesound_       = src.seesound_;
+    attacksound_    = src.attacksound_;
+    painsound_      = src.painsound_;
+    deathsound_     = src.deathsound_;
+    overkill_sound_ = src.overkill_sound_;
+    activesound_    = src.activesound_;
+    walksound_      = src.walksound_;
+    jump_sound_     = src.jump_sound_;
+    noway_sound_    = src.noway_sound_;
+    oof_sound_      = src.oof_sound_;
+    fallpain_sound_ = src.fallpain_sound_;
+    gasp_sound_     = src.gasp_sound_;
+    secretsound_    = src.secretsound_;
+    falling_sound_  = src.falling_sound_;
+    rip_sound_      = src.rip_sound_;
 
-    fuse           = src.fuse;
-    reload_shots   = src.reload_shots;
-    armour_protect = src.armour_protect;
-    armour_deplete = src.armour_deplete;
-    armour_class   = src.armour_class;
+    fuse_           = src.fuse_;
+    reload_shots_   = src.reload_shots_;
+    armour_protect_ = src.armour_protect_;
+    armour_deplete_ = src.armour_deplete_;
+    armour_class_   = src.armour_class_;
 
-    side          = src.side;
-    playernum     = src.playernum;
-    lung_capacity = src.lung_capacity;
-    gasp_start    = src.gasp_start;
+    side_          = src.side_;
+    playernum_     = src.playernum_;
+    lung_capacity_ = src.lung_capacity_;
+    gasp_start_    = src.gasp_start_;
 
     // choke_damage
-    choke_damage = src.choke_damage;
+    choke_damage_ = src.choke_damage_;
 
-    bobbing           = src.bobbing;
-    immunity          = src.immunity;
-    resistance        = src.resistance;
-    resist_multiply   = src.resist_multiply;
-    resist_painchance = src.resist_painchance;
-    ghost             = src.ghost;
+    bobbing_           = src.bobbing_;
+    immunity_          = src.immunity_;
+    resistance_        = src.resistance_;
+    resist_multiply_   = src.resist_multiply_;
+    resist_painchance_ = src.resist_painchance_;
+    ghost_             = src.ghost_;
 
-    closecombat = src.closecombat;
-    rangeattack = src.rangeattack;
-    spareattack = src.spareattack;
+    closecombat_ = src.closecombat_;
+    rangeattack_ = src.rangeattack_;
+    spareattack_ = src.spareattack_;
 
     // dynamic light info
-    dlight[0] = src.dlight[0];
-    dlight[1] = src.dlight[1];
+    dlight_[0] = src.dlight_[0];
+    dlight_[1] = src.dlight_[1];
 
-    weak = src.weak;
+    weak_ = src.weak_;
 
-    dropitem          = src.dropitem;
-    dropitem_ref      = src.dropitem_ref;
-    blood             = src.blood;
-    blood_ref         = src.blood_ref;
-    respawneffect     = src.respawneffect;
-    respawneffect_ref = src.respawneffect_ref;
-    spitspot          = src.spitspot;
-    spitspot_ref      = src.spitspot_ref;
+    dropitem_          = src.dropitem_;
+    dropitem_ref_      = src.dropitem_ref_;
+    blood_             = src.blood_;
+    blood_ref_         = src.blood_ref_;
+    respawneffect_     = src.respawneffect_;
+    respawneffect_ref_ = src.respawneffect_ref_;
+    spitspot_          = src.spitspot_;
+    spitspot_ref_      = src.spitspot_ref_;
 
-    sight_distance = src.sight_distance;
-    hear_distance  = src.hear_distance;
+    sight_distance_ = src.sight_distance_;
+    hear_distance_  = src.hear_distance_;
 
-    morphtimeout = src.morphtimeout;
+    morphtimeout_ = src.morphtimeout_;
 
-    gib_health = src.gib_health;
+    gib_health_ = src.gib_health_;
 
-    infight_group = src.infight_group;
-    proj_group    = src.proj_group;
-    splash_group  = src.splash_group;
-    fast_speed    = src.fast_speed;
-    melee_range   = src.melee_range;
+    infight_group_ = src.infight_group_;
+    proj_group_    = src.proj_group_;
+    splash_group_  = src.splash_group_;
+    fast_speed_    = src.fast_speed_;
+    melee_range_   = src.melee_range_;
 }
 
 void MapObjectDefinition::Default()
 {
-    state_grp.clear();
+    state_grp_.clear();
 
-    spawn_state    = 0;
-    idle_state     = 0;
-    chase_state    = 0;
-    pain_state     = 0;
-    missile_state  = 0;
-    melee_state    = 0;
-    death_state    = 0;
-    overkill_state = 0;
-    raise_state    = 0;
-    res_state      = 0;
-    meander_state  = 0;
-    morph_state    = 0;
-    bounce_state   = 0;
-    touch_state    = 0;
-    reload_state   = 0;
-    gib_state      = 0;
+    spawn_state_    = 0;
+    idle_state_     = 0;
+    chase_state_    = 0;
+    pain_state_     = 0;
+    missile_state_  = 0;
+    melee_state_    = 0;
+    death_state_    = 0;
+    overkill_state_ = 0;
+    raise_state_    = 0;
+    res_state_      = 0;
+    meander_state_  = 0;
+    morph_state_    = 0;
+    bounce_state_   = 0;
+    touch_state_    = 0;
+    reload_state_   = 0;
+    gib_state_      = 0;
 
-    reactiontime = 0;
-    painchance   = 0.0f;
-    spawnhealth  = 1000.0f;
-    speed        = 0;
-    float_speed  = 2.0f;
-    radius       = 0;
-    height       = 0;
-    step_size    = 24.0f;
-    mass         = 100.0f;
+    reactiontime_ = 0;
+    painchance_   = 0.0f;
+    spawnhealth_  = 1000.0f;
+    speed_        = 0;
+    float_speed_  = 2.0f;
+    radius_       = 0;
+    height_       = 0;
+    step_size_    = 24.0f;
+    mass_         = 100.0f;
 
-    flags         = 0;
-    extendedflags = 0;
-    hyperflags    = 0;
-    mbf21flags    = 0;
+    flags_         = 0;
+    extendedflags_ = 0;
+    hyperflags_    = 0;
+    mbf21flags_    = 0;
 
-    explode_damage.Default(DamageClass::kDamageClassDefaultMobj);
-    explode_radius = 0;
+    explode_damage_.Default(DamageClass::kDamageClassDefaultMobj);
+    explode_radius_ = 0;
 
-    lose_benefits    = nullptr;
-    pickup_benefits  = nullptr;
-    kill_benefits    = nullptr;
-    pickup_effects   = nullptr;
-    pickup_message   = "";
-    initial_benefits = nullptr;
+    lose_benefits_    = nullptr;
+    pickup_benefits_  = nullptr;
+    kill_benefits_    = nullptr;
+    pickup_effects_   = nullptr;
+    pickup_message_   = "";
+    initial_benefits_ = nullptr;
 
-    castorder = 0;
-    cast_title.clear();
-    respawntime  = 30 * TICRATE;
-    translucency = 1.0f;
-    minatkchance = 0.0f;
-    palremap     = nullptr;
+    castorder_ = 0;
+    cast_title_.clear();
+    respawntime_  = 30 * TICRATE;
+    translucency_ = 1.0f;
+    minatkchance_ = 0.0f;
+    palremap_     = nullptr;
 
-    jump_delay   = 1 * TICRATE;
-    jumpheight   = 10;
-    crouchheight = 28;
-    viewheight   = 0.75f;
-    shotheight   = 0.64f;
-    maxfall      = 0;
-    fast         = 1.0f;
-    scale        = 1.0f;
-    aspect       = 1.0f;
-    yalign       = SPYA_BottomUp;
+    jump_delay_   = 1 * TICRATE;
+    jumpheight_   = 10;
+    crouchheight_ = 28;
+    viewheight_   = 0.75f;
+    shotheight_   = 0.64f;
+    maxfall_      = 0;
+    fast_         = 1.0f;
+    scale_        = 1.0f;
+    aspect_       = 1.0f;
+    yalign_       = SpriteYAlignmentBottomUp;
 
-    model_skin   = 1;
-    model_scale  = 1.0f;
-    model_aspect = 1.0f;
-    model_bias   = 0.0f;
-    model_rotate = 0;
+    model_skin_   = 1;
+    model_scale_  = 1.0f;
+    model_aspect_ = 1.0f;
+    model_bias_   = 0.0f;
+    model_rotate_ = 0;
 
-    bounce_speed  = 0.5f;
-    bounce_up     = 0.5f;
-    sight_slope   = 16.0f;
-    sight_angle   = kBAMAngle90;
-    ride_friction = RIDE_FRICTION;
-    shadow_trans  = 0.5f;
-    glow_type     = GLOW_None;
+    bounce_speed_  = 0.5f;
+    bounce_up_     = 0.5f;
+    sight_slope_   = 16.0f;
+    sight_angle_   = kBAMAngle90;
+    ride_friction_ = RIDE_FRICTION;
+    shadow_trans_  = 0.5f;
+    glow_type_     = kSectorGlowTypeNone;
 
-    seesound       = nullptr;
-    attacksound    = nullptr;
-    painsound      = nullptr;
-    deathsound     = nullptr;
-    overkill_sound = nullptr;
-    activesound    = nullptr;
-    walksound      = nullptr;
-    jump_sound     = nullptr;
-    noway_sound    = nullptr;
-    oof_sound      = nullptr;
-    fallpain_sound = nullptr;
-    gasp_sound     = nullptr;
-    // secretsound = nullptr;
-    secretsound   = sfxdefs.GetEffect("SECRET");
-    falling_sound = nullptr;
-    rip_sound     = nullptr;
+    seesound_       = nullptr;
+    attacksound_    = nullptr;
+    painsound_      = nullptr;
+    deathsound_     = nullptr;
+    overkill_sound_ = nullptr;
+    activesound_    = nullptr;
+    walksound_      = nullptr;
+    jump_sound_     = nullptr;
+    noway_sound_    = nullptr;
+    oof_sound_      = nullptr;
+    fallpain_sound_ = nullptr;
+    gasp_sound_     = nullptr;
+    // secretsound_ = nullptr;
+    secretsound_   = sfxdefs.GetEffect("SECRET");
+    falling_sound_ = nullptr;
+    rip_sound_     = nullptr;
 
-    fuse           = 0;
-    reload_shots   = 5;
-    armour_protect = -1.0;  // disabled!
-    armour_deplete = 1.0f;
-    armour_class   = kBitSetFull;
+    fuse_           = 0;
+    reload_shots_   = 5;
+    armour_protect_ = -1.0;  // disabled!
+    armour_deplete_ = 1.0f;
+    armour_class_   = kBitSetFull;
 
-    side          = 0;
-    playernum     = 0;
-    lung_capacity = 20 * TICRATE;
-    gasp_start    = 2 * TICRATE;
+    side_          = 0;
+    playernum_     = 0;
+    lung_capacity_ = 20 * TICRATE;
+    gasp_start_    = 2 * TICRATE;
 
-    choke_damage.Default(DamageClass::kDamageClassDefaultMobjChoke);
+    choke_damage_.Default(DamageClass::kDamageClassDefaultMobjChoke);
 
-    bobbing           = 1.0f;
-    immunity          = 0;
-    resistance        = 0;
-    resist_multiply   = 0.4;
-    resist_painchance = -1;  // disabled
-    ghost             = 0;
+    bobbing_           = 1.0f;
+    immunity_          = 0;
+    resistance_        = 0;
+    resist_multiply_   = 0.4;
+    resist_painchance_ = -1;  // disabled
+    ghost_             = 0;
 
-    closecombat = nullptr;
-    rangeattack = nullptr;
-    spareattack = nullptr;
+    closecombat_ = nullptr;
+    rangeattack_ = nullptr;
+    spareattack_ = nullptr;
 
     // dynamic light info
-    dlight[0].Default();
-    dlight[1].Default();
+    dlight_[0].Default();
+    dlight_[1].Default();
 
-    weak.Default();
+    weak_.Default();
 
-    dropitem = nullptr;
-    dropitem_ref.clear();
-    blood = nullptr;
-    blood_ref.clear();
-    respawneffect = nullptr;
-    respawneffect_ref.clear();
-    spitspot = nullptr;
-    spitspot_ref.clear();
+    dropitem_ = nullptr;
+    dropitem_ref_.clear();
+    blood_ = nullptr;
+    blood_ref_.clear();
+    respawneffect_ = nullptr;
+    respawneffect_ref_.clear();
+    spitspot_ = nullptr;
+    spitspot_ref_.clear();
 
-    gib_health = 0;
+    gib_health_ = 0;
 
-    sight_distance = -1;
-    hear_distance  = -1;
+    sight_distance_ = -1;
+    hear_distance_  = -1;
 
-    morphtimeout = 0;
+    morphtimeout_ = 0;
 
-    infight_group = -2;
-    proj_group    = -2;
-    splash_group  = -2;
-    fast_speed    = -1;
-    melee_range   = -1;
+    infight_group_ = -2;
+    proj_group_    = -2;
+    splash_group_  = -2;
+    fast_speed_    = -1;
+    melee_range_   = -1;
 }
 
 void MapObjectDefinition::DLightCompatibility(void)
 {
     for (int DL = 0; DL < 2; DL++)
     {
-        int r = epi::GetRGBARed(dlight[DL].colour);
-        int g = epi::GetRGBAGreen(dlight[DL].colour);
-        int b = epi::GetRGBABlue(dlight[DL].colour);
+        int r = epi::GetRGBARed(dlight_[DL].colour_);
+        int g = epi::GetRGBAGreen(dlight_[DL].colour_);
+        int b = epi::GetRGBABlue(dlight_[DL].colour_);
 
         // dim the colour
-        r = int(r * DLIT_COMPAT_ITY);
-        g = int(g * DLIT_COMPAT_ITY);
-        b = int(b * DLIT_COMPAT_ITY);
+        r = int(r * 0.8f);
+        g = int(g * 0.8f);
+        b = int(b * 0.8f);
 
-        switch (dlight[DL].type)
+        switch (dlight_[DL].type_)
         {
-            case DLITE_Compat_QUAD:
-                dlight[DL].type   = DLITE_Modulate;
-                dlight[DL].radius = DLIT_COMPAT_RAD(dlight[DL].radius);
-                dlight[DL].colour = epi::MakeRGBA(r, g, b);
+            case kDynamicLightTypeCompatibilityQuadratic:
+                dlight_[DL].type_ = kDynamicLightTypeModulate;
+                dlight_[DL].radius_ =
+                    DynamicLightCompatibilityRadius(dlight_[DL].radius_);
+                dlight_[DL].colour_ = epi::MakeRGBA(r, g, b);
 
-                hyperflags |= HF_QUADRATIC_COMPAT;
+                hyperflags_ |= kHyperFlagQuadraticDynamicLight;
                 break;
 
-            case DLITE_Compat_LIN:
-                dlight[DL].type = DLITE_Modulate;
-                dlight[DL].radius *= 1.3;
-                dlight[DL].colour = epi::MakeRGBA(r, g, b);
+            case kDynamicLightTypeCompatibilityLinear:
+                dlight_[DL].type_ = kDynamicLightTypeModulate;
+                dlight_[DL].radius_ *= 1.3;
+                dlight_[DL].colour_ = epi::MakeRGBA(r, g, b);
                 break;
 
             default:  // nothing to do
                 break;
         }
-
-        //??	if (dlight[DL].radius > 500)
-        //??		dlight[DL].radius = 500;
     }
 }
 
@@ -2401,12 +2482,14 @@ void MapObjectDefinition::DLightCompatibility(void)
 
 MapObjectDefinitionContainer::MapObjectDefinitionContainer()
 {
-    memset(lookup_cache, 0, sizeof(MapObjectDefinition *) * kLookupCacheSize);
+    memset(lookup_cache_, 0, sizeof(MapObjectDefinition *) * kLookupCacheSize);
 }
 
 MapObjectDefinitionContainer::~MapObjectDefinitionContainer()
 {
-    for (auto iter = begin(); iter != end(); iter++)
+    for (std::vector<MapObjectDefinition *>::iterator iter     = begin(),
+                                                      iter_end = end();
+         iter != iter_end; iter++)
     {
         MapObjectDefinition *m = *iter;
         delete m;
@@ -2421,7 +2504,7 @@ int MapObjectDefinitionContainer::FindFirst(const char *name, int startpos)
     for (startpos; startpos < size(); startpos++)
     {
         MapObjectDefinition *m = at(startpos);
-        if (DDF_CompareName(m->name.c_str(), name) == 0) return startpos;
+        if (DDF_CompareName(m->name_.c_str(), name) == 0) return startpos;
     }
 
     return -1;
@@ -2434,7 +2517,7 @@ int MapObjectDefinitionContainer::FindLast(const char *name, int startpos)
     for (startpos; startpos >= 0; startpos--)
     {
         MapObjectDefinition *m = at(startpos);
-        if (DDF_CompareName(m->name.c_str(), name) == 0) return startpos;
+        if (DDF_CompareName(m->name_.c_str(), name) == 0) return startpos;
     }
 
     return -1;
@@ -2460,7 +2543,8 @@ bool MapObjectDefinitionContainer::MoveToEnd(int idx)
     return true;
 }
 
-const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(const char *refname)
+const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(
+    const char *refname)
 {
     // Looks an mobjdef by name.
     // Fatal error if it does not exist.
@@ -2482,22 +2566,24 @@ const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(int id)
     // Looks an mobjdef by number.
     // Fatal error if it does not exist.
 
-    int slot = DDF_MobjHashFunc(id);
+    int slot = (((id) + kLookupCacheSize) % kLookupCacheSize);
 
     // check the cache
-    if (lookup_cache[slot] && lookup_cache[slot]->number == id)
+    if (lookup_cache_[slot] && lookup_cache_[slot]->number_ == id)
     {
-        return lookup_cache[slot];
+        return lookup_cache_[slot];
     }
 
-    for (auto iter = rbegin(); iter != rend(); iter++)
+    for (std::vector<MapObjectDefinition *>::reverse_iterator iter = rbegin(),
+                                                              iter_end = rend();
+         iter != iter_end; iter++)
     {
         MapObjectDefinition *m = *iter;
 
-        if (m->number == id)
+        if (m->number_ == id)
         {
             // update the cache
-            lookup_cache[slot] = m;
+            lookup_cache_[slot] = m;
             return m;
         }
     }
@@ -2505,7 +2591,8 @@ const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(int id)
     return nullptr;
 }
 
-const MapObjectDefinition *MapObjectDefinitionContainer::LookupCastMember(int castpos)
+const MapObjectDefinition *MapObjectDefinitionContainer::LookupCastMember(
+    int castpos)
 {
     // Lookup the cast member of the one with the nearest match
     // to the position given.
@@ -2513,22 +2600,24 @@ const MapObjectDefinition *MapObjectDefinitionContainer::LookupCastMember(int ca
     MapObjectDefinition *best = nullptr;
     MapObjectDefinition *m    = nullptr;
 
-    for (auto iter = rbegin(); iter != rend(); iter++)
+    for (std::vector<MapObjectDefinition *>::reverse_iterator iter = rbegin(),
+                                                              iter_end = rend();
+         iter != iter_end; iter++)
     {
         m = *iter;
-        if (m->castorder > 0)
+        if (m->castorder_ > 0)
         {
-            if (m->castorder == castpos)  // Exact match
+            if (m->castorder_ == castpos)  // Exact match
                 return m;
 
             if (best)
             {
-                if (m->castorder > castpos)
+                if (m->castorder_ > castpos)
                 {
-                    if (best->castorder > castpos)
+                    if (best->castorder_ > castpos)
                     {
-                        int of1 = m->castorder - castpos;
-                        int of2 = best->castorder - castpos;
+                        int of1 = m->castorder_ - castpos;
+                        int of2 = best->castorder_ - castpos;
 
                         if (of2 > of1) best = m;
                     }
@@ -2546,10 +2635,10 @@ const MapObjectDefinition *MapObjectDefinitionContainer::LookupCastMember(int ca
                     // best match was also prior to current
                     // entry. In this case we are looking for
                     // the first entry to wrap around to.
-                    if (best->castorder < castpos)
+                    if (best->castorder_ < castpos)
                     {
-                        int of1 = castpos - m->castorder;
-                        int of2 = castpos - best->castorder;
+                        int of1 = castpos - m->castorder_;
+                        int of2 = castpos - best->castorder_;
 
                         if (of1 > of2) best = m;
                     }
@@ -2567,21 +2656,25 @@ const MapObjectDefinition *MapObjectDefinitionContainer::LookupCastMember(int ca
     return best;
 }
 
-const MapObjectDefinition *MapObjectDefinitionContainer::LookupPlayer(int playernum)
+const MapObjectDefinition *MapObjectDefinitionContainer::LookupPlayer(
+    int playernum)
 {
     // Find a player thing (needed by deathmatch code).
-    for (auto iter = rbegin(); iter != rend(); iter++)
+    for (std::vector<MapObjectDefinition *>::reverse_iterator iter = rbegin(),
+                                                              iter_end = rend();
+         iter != iter_end; iter++)
     {
         MapObjectDefinition *m = *iter;
 
-        if (m->playernum == playernum) return m;
+        if (m->playernum_ == playernum) return m;
     }
 
     I_Error("Missing DDF entry for player number %d\n", playernum);
     return nullptr; /* NOT REACHED */
 }
 
-const MapObjectDefinition *MapObjectDefinitionContainer::LookupDoorKey(int theKey)
+const MapObjectDefinition *MapObjectDefinitionContainer::LookupDoorKey(
+    int theKey)
 {
     // Find a key thing (needed by automap code).
 
@@ -2601,12 +2694,14 @@ const MapObjectDefinition *MapObjectDefinitionContainer::LookupDoorKey(int theKe
         }
     */
 
-    for (auto iter = rbegin(); iter != rend(); iter++)
+    for (std::vector<MapObjectDefinition *>::reverse_iterator iter = rbegin(),
+                                                              iter_end = rend();
+         iter != iter_end; iter++)
     {
         MapObjectDefinition *m = *iter;
 
         Benefit *list;
-        list = m->pickup_benefits;
+        list = m->pickup_benefits_;
         for (; list != nullptr; list = list->next)
         {
             if (list->type == kBenefitTypeKey)

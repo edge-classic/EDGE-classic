@@ -603,7 +603,7 @@ void R_PaletteStuff(void)
         palette = PALETTE_BONUS;
         amount  = (p->bonuscount + 7) / 32.0f;
     }
-    else if (p->powers[PW_AcidSuit] > 4 * 32 || fmod(p->powers[PW_AcidSuit], 16) >= 8)
+    else if (p->powers[kPowerTypeAcidSuit] > 4 * 32 || fmod(p->powers[kPowerTypeAcidSuit], 16) >= 8)
     {
         palette = PALETTE_SUIT;
         amount  = 1.0f;

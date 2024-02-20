@@ -47,9 +47,9 @@
 #define USERANGE          (64.0f)
 #define USE_Z_RANGE       (32.0f)
 #define MELEERANGE        (64.0f)
-#define LONGMELEERANGE    (128.0f) // For MBF21_LONGMELEE
+#define LONGMELEERANGE    (128.0f) // For kMBF21FlagLongMeleeRange
 #define MISSILERANGE      (2000.0f)
-#define SHORTMISSILERANGE (896.0f) // For MBF21_SHORTMRANGE
+#define SHORTMISSILERANGE (896.0f) // For kMBF21FlagShortMissileRange
 
 #define RESPAWN_DELAY (TICRATE / 2)
 

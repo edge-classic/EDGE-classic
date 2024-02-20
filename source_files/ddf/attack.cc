@@ -127,8 +127,8 @@ static MapObjectDefinition *CreateAtkMobj(const char *atk_name)
     snprintf(mobj_name, sizeof(mobj_name) - 2, "atk:%s", atk_name);
     mobj_name[255] = 0;
 
-    mobj->name   = mobj_name;  // copies it
-    mobj->number = ATTACK__MOBJ;
+    mobj->name_   = mobj_name;  // copies it
+    mobj->number_ = -7777;
 
     return mobj;
 }
@@ -160,7 +160,7 @@ static void AttackStartEntry(const char *name, bool extend)
         // Intentional Const Override
         dynamic_mobj = (MapObjectDefinition *)dynamic_atk->atk_mobj_;
 
-        if (dynamic_mobj) DDF_StateBeginRange(dynamic_mobj->state_grp);
+        if (dynamic_mobj) DDF_StateBeginRange(dynamic_mobj->state_grp_);
 
         return;
     }
@@ -199,7 +199,7 @@ static void AttackDoTemplate(const char *contents)
 
         dynamic_atk->atk_mobj_ = dynamic_mobj;
 
-        DDF_StateBeginRange(dynamic_mobj->state_grp);
+        DDF_StateBeginRange(dynamic_mobj->state_grp_);
     }
 }
 
@@ -240,7 +240,7 @@ static void AttackParseField(const char *field, const char *contents, int index,
 
         dynamic_atk->atk_mobj_ = dynamic_mobj;
 
-        DDF_StateBeginRange(dynamic_mobj->state_grp);
+        DDF_StateBeginRange(dynamic_mobj->state_grp_);
     }
 
     ThingParseField(field, contents, index, is_last);
@@ -251,29 +251,29 @@ static void AttackFinishEntry(void)
     // handle attacks that have mobjs
     if (dynamic_mobj)
     {
-        DDF_StateFinishRange(dynamic_mobj->state_grp);
+        DDF_StateFinishRange(dynamic_mobj->state_grp_);
 
         // check MOBJ stuff
 
-        if (dynamic_mobj->explode_damage.nominal_ < 0)
+        if (dynamic_mobj->explode_damage_.nominal_ < 0)
         {
             DDF_WarnError("Bad EXPLODE_DAMAGE.VAL value %f in DDF.\n",
-                          dynamic_mobj->explode_damage.nominal_);
+                          dynamic_mobj->explode_damage_.nominal_);
         }
 
-        if (dynamic_mobj->explode_radius < 0)
+        if (dynamic_mobj->explode_radius_ < 0)
         {
             DDF_WarnError("Bad EXPLODE_RADIUS value %f in DDF.\n",
-                          dynamic_mobj->explode_radius);
+                          dynamic_mobj->explode_radius_);
         }
 
-        if (dynamic_mobj->model_skin < 0 || dynamic_mobj->model_skin > 9)
+        if (dynamic_mobj->model_skin_ < 0 || dynamic_mobj->model_skin_ > 9)
             DDF_Error("Bad MODEL_SKIN value %d in DDF (must be 0-9).\n",
-                      dynamic_mobj->model_skin);
+                      dynamic_mobj->model_skin_);
 
-        if (dynamic_mobj->dlight[0].radius > 512)
+        if (dynamic_mobj->dlight_[0].radius_ > 512)
             DDF_Warning("DLIGHT RADIUS value %1.1f too large (over 512).\n",
-                        dynamic_mobj->dlight[0].radius);
+                        dynamic_mobj->dlight_[0].radius_);
     }
 
     // check DAMAGE stuff
@@ -303,7 +303,7 @@ static void AttackFinishEntry(void)
     else if (dynamic_atk->attackstyle_ == kAttackStylePsychic && !dynamic_mobj)
     {
         dynamic_mobj          = CreateAtkMobj(dynamic_atk->name_.c_str());
-        dynamic_mobj->radius  = 1;
+        dynamic_mobj->radius_  = 1;
         dynamic_atk->atk_mobj_ = dynamic_mobj;
     }
 
@@ -386,7 +386,7 @@ void DDF_AttackCleanUp(void)
         if (a->spawnedobj_)
         {
             if (a->objinitstate_ref_.empty())
-                a->objinitstate_ = a->spawnedobj_->spawn_state;
+                a->objinitstate_ = a->spawnedobj_->spawn_state_;
             else
                 a->objinitstate_ = DDF_MainLookupDirector(
                     a->spawnedobj_, a->objinitstate_ref_.c_str());

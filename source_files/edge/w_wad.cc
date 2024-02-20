@@ -964,7 +964,7 @@ void ProcessFixersForWad(data_file_c *df)
 
     for (size_t i = 0; i < fixdefs.size(); i++)
     {
-        if (epi::StringCaseCompareASCII(fix_checker, fixdefs[i]->md5_string) == 0)
+        if (epi::StringCaseCompareASCII(fix_checker, fixdefs[i]->md5_string_) == 0)
         {
             std::string fix_path = epi::PathAppend(game_dir, "edge_fixes");
             fix_path = epi::PathAppend(fix_path, fix_checker.append(".epk"));
@@ -972,11 +972,11 @@ void ProcessFixersForWad(data_file_c *df)
             {
                 W_AddPending(fix_path, FLKIND_EPK);
 
-                I_Printf("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name.c_str());
+                I_Printf("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name_.c_str());
             }
             else
             {
-                I_Warning("WADFIXES: %s defined, but no fix WAD located in edge_fixes!\n", fixdefs[i]->name.c_str());
+                I_Warning("WADFIXES: %s defined, but no fix WAD located in edge_fixes!\n", fixdefs[i]->name_.c_str());
                 return;
             }
         }
@@ -1667,11 +1667,11 @@ void W_ReadUMAPINFOLumps(void)
                 {
                     for (size_t m = 0; m < mobjtypes.size(); m++)
                     {
-                        if (mobjtypes[m]->number == Maps.maps[i].bossactions[a].type)
+                        if (mobjtypes[m]->number_ == Maps.maps[i].bossactions[a].type)
                         {
                             ba_rts.append(epi::StringFormat("START_MAP %s\n", Maps.maps[i].mapname));
                             ba_rts.append("  RADIUS_TRIGGER 0 0 -1\n");
-                            ba_rts.append(epi::StringFormat("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name.c_str()));
+                            ba_rts.append(epi::StringFormat("    WAIT_UNTIL_DEAD %s\n", mobjtypes[m]->name_.c_str()));
                             ba_rts.append(epi::StringFormat("    ACTIVATE_LINETYPE %d %d\n",
                                                         Maps.maps[i].bossactions[a].special,
                                                         Maps.maps[i].bossactions[a].tag));

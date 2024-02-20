@@ -116,7 +116,7 @@ static const DDFCommandList weapon_commands[] = {
     DF("MODEL_SIDE", model_side_, DDF_MainGetFloat),
 
     // -AJA- backwards compatibility cruft...
-    DF("SECOND_ATTACK", attack_[1], DDF_MainRefAttack),
+    DF("SEkConditionCheckTypeATTACK", attack_[1], DDF_MainRefAttack),
 
     DF("SOUND1", sound1_, DDF_MainLookupSound),
     DF("SOUND2", sound2_, DDF_MainLookupSound),

@@ -610,7 +610,7 @@ void E_Display(void)
         break;
 
     case GS_FINALE:
-        F_Drawer();
+        FinaleDrawer();
         break;
 
     case GS_TITLESCREEN:

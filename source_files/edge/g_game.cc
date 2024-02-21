@@ -384,7 +384,7 @@ bool G_Responder(InputEvent *ev)
 
     if (gamestate == GS_FINALE)
     {
-        if (F_Responder(ev))
+        if (FinaleResponder(ev))
             return true; // finale ate the event
     }
 
@@ -456,7 +456,7 @@ void G_BigStuff(void)
             currmap        = nextmap;
             curr_hub_tag   = 0;
             curr_hub_first = nullptr;
-            F_StartFinale(&currmap->f_pre_, ga_loadlevel);
+            FinaleStart(&currmap->f_pre_, ga_loadlevel);
             break;
 
         case ga_endgame:
@@ -529,7 +529,7 @@ void G_Ticker(void)
 
     case GS_FINALE:
         N_GrabTiccmds();
-        F_Ticker();
+        FinaleTicker();
         break;
 
     default:
@@ -719,7 +719,7 @@ static void G_DoCompleted(void)
         }
         else
         {
-            F_StartFinale(&currmap->f_end_, nextmap ? ga_finale : ga_nothing);
+            FinaleStart(&currmap->f_end_, nextmap ? ga_finale : ga_nothing);
         }
 
         return;
@@ -1124,7 +1124,7 @@ static void G_DoNewGame(void)
     if (skip_pre)
         gameaction = ga_loadlevel;
     else
-        F_StartFinale(&currmap->f_pre_, ga_loadlevel);
+        FinaleStart(&currmap->f_pre_, ga_loadlevel);
 }
 
 //

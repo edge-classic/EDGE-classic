@@ -23,26 +23,22 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __F_FINALE__
-#define __F_FINALE__
+#pragma once
 
 #include "e_event.h"
 #include "g_game.h"
-#include "p_mobj.h"
 
 // Called by main loop.
-bool F_Responder(InputEvent *ev);
+bool FinaleResponder(InputEvent *ev);
 
 // Called by main loop.
-void F_Ticker(void);
+void FinaleTicker(void);
 
 // Called by main loop.
-void F_Drawer(void);
+void FinaleDrawer(void);
 
 // -KM- 1998/11/25 Finales generalised.
-void F_StartFinale(const FinaleDefinition *f, gameaction_e newaction);
-
-#endif // __F_FINALE__
+void FinaleStart(const FinaleDefinition *f, gameaction_e newaction);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

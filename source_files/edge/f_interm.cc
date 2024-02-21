@@ -906,7 +906,7 @@ static void WI_End(void)
 
     background_camera_mo = nullptr;
 
-    F_StartFinale(&currmap->f_end_, nextmap ? ga_finale : ga_nothing);
+    FinaleStart(&currmap->f_end_, nextmap ? ga_finale : ga_nothing);
 }
 
 static void InitNoState(void)

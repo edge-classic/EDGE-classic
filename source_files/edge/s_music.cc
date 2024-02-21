@@ -45,7 +45,7 @@
 #include "w_wad.h"
 
 // music slider value
-DEF_CVAR(mus_volume, "0.15", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(mus_volume, "0.15", kConsoleVariableFlagArchive)
 
 bool nomusic = false;
 

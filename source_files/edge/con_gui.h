@@ -16,29 +16,24 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __CON_MAIN_GUI_H
-#define __CON_MAIN_GUI_H
+#pragma once
+
+#include "e_event.h"
 
 // The console 'application' functions.
 // Adds the console to the gui.
-void CON_Start(void);
+void ConsoleStart(void);
 
-// Ticker.  Animates the opening/closing effect of the console
-void CON_Ticker(void);
+void ConsoleTicker(void);
 
-// Responder obeys events.
-bool CON_Responder(event_t *ev);
+bool ConsoleResponder(event_t *ev);
 
-// Drawer. Draws the console.
-void CON_Drawer(void);
+void ConsoleDrawer(void);
 
-void CON_ShowFPS(void);
-void CON_ShowPosition(void);
+void ConsoleShowFPS(void);
+void ConsoleShowPosition(void);
 
-// Initialises the console
-void CON_InitConsole(void);
-
-#endif /* __CON_MAIN_GUI_H */
+void ConsoleInit(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -20,6 +20,7 @@
 
 #include "file.h"
 #include "filesystem.h"
+#include "i_system.h"
 #include "str_util.h"
 #include "str_compare.h"
 #include "m_misc.h"
@@ -46,9 +47,9 @@ fluid_synth_t *edge_fluid = nullptr;
 fluid_settings_t *edge_fluid_settings = nullptr;
 fluid_sfloader_t *edge_fluid_sfloader = nullptr;
 
-DEF_CVAR(s_soundfont, "", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(s_soundfont, "", kConsoleVariableFlagArchive)
 
-DEF_CVAR(s_fluidgain, "0.3", CVAR_ARCHIVE|CVAR_PATH)
+EDGE_DEFINE_CONSOLE_VARIABLE(s_fluidgain, "0.3", (ConsoleVariableFlag)(kConsoleVariableFlagArchive|kConsoleVariableFlagFilepath))
 
 extern std::vector<std::string> available_soundfonts;
 
@@ -86,7 +87,7 @@ bool S_StartupFluid(void)
     bool cvar_good = false;
     for (size_t i = 0; i < available_soundfonts.size(); i++)
     {
-        if (epi::StringCaseCompareASCII(s_soundfont.s, available_soundfonts.at(i)) == 0)
+        if (epi::StringCaseCompareASCII(s_soundfont.s_, available_soundfonts.at(i)) == 0)
         {
             cvar_good = true;
             break;
@@ -97,7 +98,7 @@ bool S_StartupFluid(void)
     {
         I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
         s_soundfont = epi::SanitizePath(epi::PathAppend(game_dir, "soundfont/Default.sf2"));
-        if (!epi::FileExists(s_soundfont.s))
+        if (!epi::FileExists(s_soundfont.s_))
             I_Error("Fluidlite: Cannot locate default soundfont (Default.sf2)! Please check the /soundfont directory "
                     "of your EDGE-Classic install!\n");
     }
@@ -110,7 +111,7 @@ bool S_StartupFluid(void)
     edge_fluid_settings = new_fluid_settings();
     fluid_settings_setstr(edge_fluid_settings, "synth.reverb.active", "no");
     fluid_settings_setstr(edge_fluid_settings, "synth.chorus.active", "no");
-    fluid_settings_setnum(edge_fluid_settings, "synth.gain", s_fluidgain.f);
+    fluid_settings_setnum(edge_fluid_settings, "synth.gain", s_fluidgain.f_);
     fluid_settings_setnum(edge_fluid_settings, "synth.sample-rate", dev_freq);
     fluid_settings_setnum(edge_fluid_settings, "synth.polyphony", 64);
 	edge_fluid = new_fluid_synth(edge_fluid_settings);
@@ -359,9 +360,9 @@ class fluid_player_c : public abstract_music_c
     {
         if (s_fluidgain.CheckModified())
 		{
-			s_fluidgain.f = HMM_Clamp(0.0, s_fluidgain.f, 2.0f);
-			s_fluidgain = s_fluidgain.f;
-			fluid_synth_set_gain(edge_fluid, s_fluidgain.f);
+			s_fluidgain.f_ = HMM_Clamp(0.0, s_fluidgain.f_, 2.0f);
+			s_fluidgain = s_fluidgain.f_;
+			fluid_synth_set_gain(edge_fluid, s_fluidgain.f_);
 		}
 
         while (status == PLAYING && !var_pc_speaker_mode)

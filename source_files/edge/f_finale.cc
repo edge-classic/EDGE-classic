@@ -388,7 +388,7 @@ static void TextWrite(void)
         }
         else
         {
-            if (r_titlescaling.d) // Fill Border
+            if (r_titlescaling.d_) // Fill Border
             {
                 if (!finale_textback->blurred_version)
                     W_ImageStoreBlurred(finale_textback, 0.75f);
@@ -727,7 +727,7 @@ static void CastDrawer(void)
     else
     {
         image = W_ImageLookup("BOSSBACK");
-        if (r_titlescaling.d) // Fill Border
+        if (r_titlescaling.d_) // Fill Border
         {
             if (!image->blurred_version)
                 W_ImageStoreBlurred(image, 0.75f);
@@ -910,7 +910,7 @@ void F_Drawer(void)
     case f_pic:
         {
             const image_c *image = W_ImageLookup(finale->pics_[HMM_MIN((size_t)picnum, finale->pics_.size() - 1)].c_str());
-            if (r_titlescaling.d) // Fill Border
+            if (r_titlescaling.d_) // Fill Border
             {
                 if (!image->blurred_version)
                     W_ImageStoreBlurred(image, 0.75f);

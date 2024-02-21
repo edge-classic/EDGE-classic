@@ -40,15 +40,15 @@ float ren_blu_mul;
 
 const Colormap *ren_fx_colmap;
 
-DEF_CVAR(r_fadepower, "1.0", CVAR_ARCHIVE)
-DEF_CVAR(debug_fullbright, "0", CVAR_CHEAT)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_fadepower, "1.0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(debug_fullbright, "0", kConsoleVariableFlagCheat)
 
 static inline float EffectStrength(player_t *player)
 {
     if (player->effect_left >= EFFECT_MAX_TIME)
         return 1.0f;
 
-    if (r_fadepower.d || reduce_flash)
+    if (r_fadepower.d_|| reduce_flash)
     {
         return player->effect_left / (float)EFFECT_MAX_TIME;
     }
@@ -63,7 +63,7 @@ static inline float EffectStrength(player_t *player)
 //
 void RGL_RainbowEffect(player_t *player)
 {
-    ren_extralight = debug_fullbright.d ? 255 : player ? player->extralight * 4 : 0;
+    ren_extralight = debug_fullbright.d_? 255 : player ? player->extralight * 4 : 0;
 
     ren_red_mul = ren_grn_mul = ren_blu_mul = 1.0f;
 
@@ -93,7 +93,7 @@ void RGL_RainbowEffect(player_t *player)
         return;
     }
 
-    if (s > 0 && player->powers[kPowerTypeNightVision] > 0 && player->effect_colourmap && !debug_fullbright.d)
+    if (s > 0 && player->powers[kPowerTypeNightVision] > 0 && player->effect_colourmap && !debug_fullbright.d_)
     {
         float r, g, b;
 
@@ -107,14 +107,14 @@ void RGL_RainbowEffect(player_t *player)
         return;
     }
 
-    if (s > 0 && player->powers[kPowerTypeInfrared] > 0 && !debug_fullbright.d)
+    if (s > 0 && player->powers[kPowerTypeInfrared] > 0 && !debug_fullbright.d_)
     {
         ren_extralight = int(s * 255);
         return;
     }
 
     // Lobo 2021: un-hardcode berserk color tint
-    if (s > 0 && player->powers[kPowerTypeBerserk] > 0 && player->effect_colourmap && !debug_fullbright.d)
+    if (s > 0 && player->powers[kPowerTypeBerserk] > 0 && player->effect_colourmap && !debug_fullbright.d_)
     {
         float r, g, b;
 
@@ -195,7 +195,7 @@ void RGL_ColourmapEffect(player_t *player)
             HUD_SetAlpha(0.0f);
             s = HMM_MAX(0.5f, s);
             HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                        epi::MakeRGBA(RoundToInt(s * 255), RoundToInt(s * 255), RoundToInt(s * 255)), 25.0f);
+                        epi::MakeRGBA(RoundToInteger(s * 255), RoundToInteger(s * 255), RoundToInteger(s * 255)), 25.0f);
             HUD_SetAlpha(old_alpha);
         }
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -230,7 +230,7 @@ void RGL_PaletteEffect(player_t *player)
         {
             HUD_SetAlpha(0.20f * s);
             HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                        epi::MakeRGBA(RoundToInt(r * 255), RoundToInt(g * 255), RoundToInt(b * 255)), 25.0f);
+                        epi::MakeRGBA(RoundToInteger(r * 255), RoundToInteger(g * 255), RoundToInteger(b * 255)), 25.0f);
         }
     }
     else
@@ -251,9 +251,9 @@ void RGL_PaletteEffect(player_t *player)
         {
             HUD_SetAlpha((float)rgb_max / 255.0f);
             HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                        epi::MakeRGBA(RoundToInt((float)rgb_data[0] / rgb_max * 255),
-                                 RoundToInt((float)rgb_data[1] / rgb_max * 255),
-                                 RoundToInt((float)rgb_data[2] / rgb_max * 255)),
+                        epi::MakeRGBA(RoundToInteger((float)rgb_data[0] / rgb_max * 255),
+                                 RoundToInteger((float)rgb_data[1] / rgb_max * 255),
+                                 RoundToInteger((float)rgb_data[2] / rgb_max * 255)),
                         25.0f);
         }
     }

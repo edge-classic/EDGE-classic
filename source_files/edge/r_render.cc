@@ -70,11 +70,11 @@
 
 // #define DEBUG_GREET_NEIGHBOUR
 
-DEF_CVAR(debug_hom, "0", CVAR_CHEAT)
-DEF_CVAR(r_forceflatlighting, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(debug_hom, "0", kConsoleVariableFlagCheat)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_forceflatlighting, "0", kConsoleVariableFlagArchive)
 
-extern cvar_c r_culling;
-extern cvar_c r_doubleframes;
+extern ConsoleVariable r_culling;
+extern ConsoleVariable r_doubleframes;
 
 side_t   *sidedef;
 line_t   *linedef;
@@ -616,7 +616,7 @@ typedef struct wall_plane_data_s
 // Adapted from Quake 3 GPL release - Dasho (not used yet, but might be for future effects)
 /*static void CalcScrollTexCoords( float x_scroll, float y_scroll, HMM_Vec2 *texc )
 {
-    float timeScale = gametic / (r_doubleframes.d ? 200.0f : 100.0f);
+    float timeScale = gametic / (r_doubleframes.d_? 200.0f : 100.0f);
     float adjustedScrollS, adjustedScrollT;
 
     adjustedScrollS = x_scroll * timeScale;
@@ -1024,7 +1024,7 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     int lit_adjust = 0;
 
     // do the N/S/W/E bizzo...
-    if (!r_forceflatlighting.d && currmap->episode_->lighting_ == kLightingModelDoom && props->lightlevel > 0)
+    if (!r_forceflatlighting.d_&& currmap->episode_->lighting_ == kLightingModelDoom && props->lightlevel > 0)
     {
         if (AlmostEquals(cur_seg->v1->Y, cur_seg->v2->Y))
             lit_adjust -= 16;
@@ -1530,10 +1530,10 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         }
     }
 
-    if (sd->middle.fogwall && r_culling.d)
+    if (sd->middle.fogwall && r_culling.d_)
         sd->middle.image = nullptr; // Don't delete image in case culling is toggled again
 
-    if (!sd->middle.image && !r_culling.d)
+    if (!sd->middle.image && !r_culling.d_)
     {
         if (sec_fc == kRGBANoValue && other_fc != kRGBANoValue)
         {
@@ -1555,7 +1555,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
 
     if (!other)
     {
-        if (!sd->middle.image && !debug_hom.d)
+        if (!sd->middle.image && !debug_hom.d_)
             return;
 
         AddWallTile(seg, dfloor, &sd->middle, slope_fh, slope_ch,
@@ -1591,7 +1591,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
                          (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->f_h, other->f_h,
                          (ld->flags & MLF_LowerUnpegged) ? other->c_h : HMM_MAX(other->f_h, HMM_MAX(zv1, zv2)), 0);
         }
-        else if (!sd->bottom.image && !debug_hom.d)
+        else if (!sd->bottom.image && !debug_hom.d_)
         {
             lower_invis = true;
         }
@@ -1645,7 +1645,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
                          (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->c_h,
                          (ld->flags & MLF_UpperUnpegged) ? other->f_h : HMM_MIN(zv1, zv2), 0);
         }
-        else if (!sd->top.image && !debug_hom.d)
+        else if (!sd->top.image && !debug_hom.d_)
         {
             upper_invis = true;
         }
@@ -1781,7 +1781,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
                     flags |= WTILF_ExtraY;
             }
 
-            if (!surf->image && !debug_hom.d)
+            if (!surf->image && !debug_hom.d_)
                 continue;
 
             tex_z = (C->ef_line->flags & MLF_LowerUnpegged)
@@ -2077,7 +2077,7 @@ static void RGL_DrawSeg(drawfloor_t *dfloor, seg_t *seg, bool mirror_sub = false
     ComputeWallTiles(seg, dfloor, seg->side, f_min, c_max, mirror_sub);
 
     // -AJA- 2004/04/21: Emulate Flat-Flooding TRICK
-    if (!debug_hom.d && solid_mode && dfloor->is_lowest && sd->bottom.image == nullptr && cur_seg->back_sub &&
+    if (!debug_hom.d_&& solid_mode && dfloor->is_lowest && sd->bottom.image == nullptr && cur_seg->back_sub &&
         cur_seg->back_sub->sector->f_h > cur_seg->front_sub->sector->f_h && cur_seg->back_sub->sector->f_h < viewz &&
         cur_seg->back_sub->sector->heightsec == nullptr && cur_seg->front_sub->sector->heightsec == nullptr)
     {
@@ -2085,7 +2085,7 @@ static void RGL_DrawSeg(drawfloor_t *dfloor, seg_t *seg, bool mirror_sub = false
                           cur_seg->back_sub->sector->f_h);
     }
 
-    if (!debug_hom.d && solid_mode && dfloor->is_highest && sd->top.image == nullptr && cur_seg->back_sub &&
+    if (!debug_hom.d_&& solid_mode && dfloor->is_highest && sd->top.image == nullptr && cur_seg->back_sub &&
         cur_seg->back_sub->sector->c_h < cur_seg->front_sub->sector->c_h && cur_seg->back_sub->sector->c_h > viewz &&
         cur_seg->back_sub->sector->heightsec == nullptr && cur_seg->front_sub->sector->heightsec == nullptr)
     {
@@ -2334,7 +2334,7 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
         }
     }
     // -AJA- 2004/08/29: Emulate Sky-Flooding TRICK
-    else if (!debug_hom.d && bsector && IS_SKY(bsector->ceil) && seg->sidedef->top.image == nullptr &&
+    else if (!debug_hom.d_&& bsector && IS_SKY(bsector->ceil) && seg->sidedef->top.image == nullptr &&
              bsector->c_h < fsector->c_h)
     {
         RGL_DrawSkyWall(seg, bsector->c_h, fsector->c_h);
@@ -2442,7 +2442,7 @@ bool RGL_CheckBBox(float *bspcoord)
         if (angle_L == angle_R)
             return false;
 
-        if (r_culling.d)
+        if (r_culling.d_)
         {
             float closest = 1000000.0f;
             float check   = M_PointToSegDistance({{x1, y1}}, {{x2, y1}}, {{viewx, viewy}});
@@ -2458,7 +2458,7 @@ bool RGL_CheckBBox(float *bspcoord)
             if (check < closest)
                 closest = check;
 
-            if (closest > (r_farclip.f + 500.0f))
+            if (closest > (r_farclip.f_ + 500.0f))
                 return false;
         }
     }
@@ -2853,7 +2853,7 @@ static void RGL_WalkSubsector(int num)
     // handle each sprite in the subsector.  Must be done before walls,
     // since the wall code will update the 1D occlusion buffer.
 
-    if (r_culling.d)
+    if (r_culling.d_)
     {
         bool skip = true;
 
@@ -2868,7 +2868,7 @@ static void RGL_WalkSubsector(int num)
             float sx2 = seg->v2->X;
             float sy2 = seg->v2->Y;
 
-            if (M_PointToSegDistance({{sx1, sy1}}, {{sx2, sy2}}, {{viewx, viewy}}) <= (r_farclip.f + 500.0f))
+            if (M_PointToSegDistance({{sx1, sy1}}, {{sx2, sy2}}, {{viewx, viewy}}) <= (r_farclip.f_ + 500.0f))
             {
                 skip = false;
                 break;
@@ -3325,7 +3325,7 @@ static void RGL_RenderTrueBSP(void)
 
 static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 {
-    float fov = HMM_Clamp(5, r_fov.f, 175);
+    float fov = HMM_Clamp(5, r_fov.f_, 175);
 
     wave_now    = leveltime / 100.0f;
     plane_z_bob = r_sintable[(int)((WAVETABLE_INCREMENT + wave_now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)];

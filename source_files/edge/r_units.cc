@@ -46,8 +46,8 @@
 #include "edge_profiling.h"
 
 // TODO review if these should be archived
-DEF_CVAR(r_colorlighting, "1", 0)
-DEF_CVAR(r_colormaterial, "1", 0)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_colorlighting, "1", kConsoleVariableFlagNone)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_colormaterial, "1", kConsoleVariableFlagNone)
 
 #ifdef APPLE_SILICON
 #define DUMB_CLAMP "1"
@@ -55,18 +55,18 @@ DEF_CVAR(r_colormaterial, "1", 0)
 #define DUMB_CLAMP "0"
 #endif
 
-DEF_CVAR(r_dumbsky, "0", 0)
-DEF_CVAR(r_dumbmulti, "0", 0)
-DEF_CVAR(r_dumbcombine, "0", 0)
-DEF_CVAR(r_dumbclamp, DUMB_CLAMP, 0)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_dumbsky, "0", kConsoleVariableFlagNone)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_dumbmulti, "0", kConsoleVariableFlagNone)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_dumbcombine, "0", kConsoleVariableFlagNone)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_dumbclamp, DUMB_CLAMP, kConsoleVariableFlagNone)
 
 #define MAX_L_VERT 65545
 #define MAX_L_UNIT 1024
 
 #define DUMMY_CLAMP 789
 
-extern cvar_c r_culling;
-extern cvar_c r_cullfog;
+extern ConsoleVariable r_culling;
+extern ConsoleVariable r_cullfog;
 
 std::unordered_map<GLuint, GLint> texture_clamp;
 
@@ -287,7 +287,7 @@ static void EnableCustomEnv(GLuint env, bool enable)
 
 static inline void RGL_SendRawVector(const local_gl_vert_t *V)
 {
-    if (r_colormaterial.d || !r_colorlighting.d)
+    if (r_colormaterial.d_|| !r_colorlighting.d_)
         glColor4fv(V->rgba);
     else
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, V->rgba);
@@ -333,10 +333,10 @@ void RGL_DrawUnits(void)
         std::sort(local_unit_map.begin(), local_unit_map.begin() + cur_unit, Compare_Unit_pred());
     }
 
-    if (r_culling.d)
+    if (r_culling.d_)
     {
         sg_color fogColor;
-        switch (r_cullfog.d)
+        switch (r_cullfog.d_)
         {
         case 0:
             fogColor = cull_fog_color;
@@ -359,8 +359,8 @@ void RGL_DrawUnits(void)
         state->clearColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
         state->fogMode(GL_LINEAR);
         state->fogColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
-        state->fogStart(r_farclip.f - 750.0f);
-        state->fogEnd(r_farclip.f - 250.0f);
+        state->fogStart(r_farclip.f_ - 750.0f);
+        state->fogEnd(r_farclip.f_ - 250.0f);
         state->enable(GL_FOG);
     }
     else
@@ -376,7 +376,7 @@ void RGL_DrawUnits(void)
 
         // detect changes in texture/alpha/blending state
 
-        if (!r_culling.d && unit->fog_color != kRGBANoValue)
+        if (!r_culling.d_&& unit->fog_color != kRGBANoValue)
         {
             if (unit->fog_color != active_fog_rgb)
             {
@@ -395,7 +395,7 @@ void RGL_DrawUnits(void)
             else
                 state->disable(GL_FOG);
         }
-        else if (!r_culling.d)
+        else if (!r_culling.d_)
             state->disable(GL_FOG);
 
         if (active_pass != unit->pass)
@@ -473,7 +473,7 @@ void RGL_DrawUnits(void)
                 state->activeTexture(GL_TEXTURE0 + t);
             }
 
-            if (r_culling.d)
+            if (r_culling.d_)
             {
                 if (unit->pass > 0)
                     state->disable(GL_FOG);
@@ -503,7 +503,7 @@ void RGL_DrawUnits(void)
 
                     // This is very expensive, thus the map
                     // glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &old_clamp);
-                    state->texWrapT(r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE);
+                    state->texWrapT(r_dumbclamp.d_? GL_CLAMP : GL_CLAMP_TO_EDGE);
                 }
             }
 

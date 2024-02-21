@@ -159,7 +159,7 @@ GLuint R_UploadTexture(image_data_c *img, int flags, int max_pix)
     GLint tmode = GL_REPEAT;
 
     if (clamp)
-        tmode = r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE;
+        tmode = r_dumbclamp.d_? GL_CLAMP : GL_CLAMP_TO_EDGE;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, tmode);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, tmode);

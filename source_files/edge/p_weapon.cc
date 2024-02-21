@@ -41,8 +41,8 @@
 #include "w_sprite.h"
 #include "w_wad.h"
 
-extern cvar_c g_bobbing;
-extern cvar_c g_erraticism;
+extern ConsoleVariable g_bobbing;
+extern ConsoleVariable g_erraticism;
 
 static void BobWeapon(player_t *p, WeaponDefinition *info);
 
@@ -913,7 +913,7 @@ void P_MovePsprites(player_t *p)
 
 static void BobWeapon(player_t *p, WeaponDefinition *info)
 {
-    if (g_bobbing.d == 1 || g_bobbing.d == 3 || (g_erraticism.d && (!p->cmd.forwardmove && !p->cmd.sidemove)))
+    if (g_bobbing.d_== 1 || g_bobbing.d_== 3 || (g_erraticism.d_&& (!p->cmd.forwardmove && !p->cmd.sidemove)))
         return;
 
     pspdef_t *psp = &p->psprites[p->action_psp];
@@ -924,7 +924,7 @@ static void BobWeapon(player_t *p, WeaponDefinition *info)
     // bob the weapon based on movement speed
     if (p->powers[kPowerTypeJetpack] <= 0) // Don't bob when using jetpack
     {
-        BAMAngle angle = (128 * (g_erraticism.d ? p->e_bob_ticker++ : leveltime)) << 19;
+        BAMAngle angle = (128 * (g_erraticism.d_? p->e_bob_ticker++ : leveltime)) << 19;
         new_sx        = p->bob * info->swaying_ * epi::BAMCos(angle);
 
         angle &= (kBAMAngle180 - 1);
@@ -1310,7 +1310,7 @@ void A_WeaponKick(mobj_t *mo)
 
     float kick = 0.05f;
 
-    if (!level_flags.kicking || g_erraticism.d)
+    if (!level_flags.kicking || g_erraticism.d_)
         return;
 
     if (psp->state && psp->state->action_par)
@@ -1593,7 +1593,7 @@ static void DoWeaponShoot(mobj_t *mo, int ATK)
 
     P_PlayerAttack(mo, attack);
 
-    if (level_flags.kicking && ATK == 0 && !g_erraticism.d)
+    if (level_flags.kicking && ATK == 0 && !g_erraticism.d_)
     {
         p->deltaviewheight -= info->kick_;
         p->kick_offset = info->kick_;

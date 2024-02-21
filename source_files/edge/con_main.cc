@@ -16,58 +16,59 @@
 //
 //----------------------------------------------------------------------------
 
+#include "con_main.h"
+
+#include <stdarg.h>
 #include <string.h>
 
-#include "filesystem.h"
-#include "math_crc.h"
-#include "str_util.h"
-
-#include "language.h"
-#include "sfx.h"
-
-#include "con_main.h"
 #include "con_var.h"
 #include "dm_state.h"
 #include "e_input.h"
+#include "filesystem.h"
 #include "g_game.h"
+#include "language.h"
 #include "m_menu.h"
 #include "m_misc.h"
+#include "math_crc.h"
 #include "s_sound.h"
+#include "sfx.h"
+#include "str_compare.h"
+#include "str_util.h"
+#include "version.h"
 #include "w_files.h"
 #include "w_wad.h"
-#include "version.h"
-#include "filesystem.h"
-#include "str_compare.h"
-#include <stdarg.h>
-#define MAX_CON_ARGS 64
 
-static std::string readme_names[4] = {"readme.txt", "readme.1st", "read.me", "readme.md"};
+static constexpr uint8_t kMaximumConsoleArguments = 64;
 
-typedef struct
+static std::string readme_names[4] = {"readme.txt", "readme.1st", "read.me",
+                                      "readme.md"};
+
+struct ConsoleCommand
 {
     const char *name;
 
     int (*func)(char **argv, int argc);
-} con_cmd_t;
+};
 
 // forward decl.
-extern const con_cmd_t builtin_commands[];
+extern const ConsoleCommand builtin_commands[];
 
 extern void M_ChangeLevelCheat(const char *string);
 extern void I_ShowGamepads(void);
 
-int CMD_Exec(char **argv, int argc)
+int ConsoleCommandExec(char **argv, int argc)
 {
     if (argc != 2)
     {
-        CON_Printf("Usage: exec <script.cfg>\n");
+        ConsolePrintf("Usage: exec <script.cfg>\n");
         return 1;
     }
 
-    FILE *script = epi::FileOpenRaw(argv[1], epi::kFileAccessRead|epi::kFileAccessBinary);
+    FILE *script = epi::FileOpenRaw(
+        argv[1], epi::kFileAccessRead | epi::kFileAccessBinary);
     if (!script)
     {
-        CON_Printf("Unable to open file: %s\n", argv[1]);
+        ConsolePrintf("Unable to open file: %s\n", argv[1]);
         return 1;
     }
 
@@ -75,40 +76,40 @@ int CMD_Exec(char **argv, int argc)
 
     while (fgets(buffer, sizeof(buffer) - 1, script))
     {
-        CON_TryCommand(buffer);
+        ConsoleTryCommand(buffer);
     }
 
     fclose(script);
     return 0;
 }
 
-int CMD_Type(char **argv, int argc)
+int ConsoleCommandType(char **argv, int argc)
 {
     FILE *script;
     char  buffer[200];
 
     if (argc != 2)
     {
-        CON_Printf("Usage: %s <filename.txt>\n", argv[0]);
+        ConsolePrintf("Usage: %s <filename.txt>\n", argv[0]);
         return 2;
     }
 
     script = epi::FileOpenRaw(argv[1], epi::kFileAccessRead);
     if (!script)
     {
-        CON_Printf("Unable to open \'%s\'!\n", argv[1]);
+        ConsolePrintf("Unable to open \'%s\'!\n", argv[1]);
         return 3;
     }
     while (fgets(buffer, sizeof(buffer) - 1, script))
     {
-        CON_Printf("%s", buffer);
+        ConsolePrintf("%s", buffer);
     }
     fclose(script);
 
     return 0;
 }
 
-int CMD_Readme(char **argv, int argc)
+int ConsoleCommandReadme(char **argv, int argc)
 {
     epi::File *readme_file = nullptr;
 
@@ -116,21 +117,19 @@ int CMD_Readme(char **argv, int argc)
     for (auto name : readme_names)
     {
         readme_file = W_OpenPackFile(name);
-        if (readme_file)
-            break;
+        if (readme_file) break;
     }
 
     if (!readme_file)
     {
-        // Check for the existence of a .txt file whose name matches a WAD or pack
-        // in the load order
+        // Check for the existence of a .txt file whose name matches a WAD or
+        // pack in the load order
         for (int i = data_files.size() - 1; i > 0; i--)
         {
             std::string readme_check = data_files[i]->name;
             epi::ReplaceExtension(readme_check, ".txt");
             readme_file = W_OpenPackFile(readme_check);
-            if (readme_file)
-                break;
+            if (readme_file) break;
         }
     }
 
@@ -143,10 +142,12 @@ int CMD_Readme(char **argv, int argc)
             readme_file = W_OpenLump("README");
     }
 
-    // Check for an EDGEGAME lump or file and print (if it has text; these aren't required to)
+    // Check for an EDGEGAME lump or file and print (if it has text; these
+    // aren't required to)
     if (!readme_file)
     {
-        // Datafile at index 1 should always be either the IWAD or standalone EPK
+        // Datafile at index 1 should always be either the IWAD or standalone
+        // EPK
         if (data_files[1]->wad)
         {
             if (W_IsLumpInAnyWad("EDGEGAME"))
@@ -158,27 +159,28 @@ int CMD_Readme(char **argv, int argc)
 
     if (!readme_file)
     {
-        CON_Printf("No readme files found in current load order!\n");
+        ConsolePrintf("No readme files found in current load order!\n");
         return 1;
     }
     else
     {
         std::string readme = readme_file->ReadText();
         delete readme_file;
-        std::vector<std::string> readme_strings = epi::SeparatedStringVector(readme, '\n');
+        std::vector<std::string> readme_strings =
+            epi::SeparatedStringVector(readme, '\n');
         for (std::string &line : readme_strings)
         {
-            CON_Printf("%s\n", line.c_str());
+            ConsolePrintf("%s\n", line.c_str());
         }
     }
 
     return 0;
 }
 
-int CMD_Dir(char **argv, int argc)
+int ConsoleCommandDir(char **argv, int argc)
 {
     std::string path = ".";
-    std::string           mask = "*.*";
+    std::string mask = "*.*";
 
     if (argc >= 2)
     {
@@ -189,8 +191,7 @@ int CMD_Dir(char **argv, int argc)
             path = argv[1];
     }
 
-    if (argc >= 3)
-        mask = argv[2];
+    if (argc >= 3) mask = argv[2];
 
     std::vector<epi::DirectoryEntry> fsd;
 
@@ -206,18 +207,20 @@ int CMD_Dir(char **argv, int argc)
         return 0;
     }
 
-    I_Printf("Directory contents for %s matching %s\n", epi::GetDirectory(fsd[0].name).c_str(), mask.c_str());
+    I_Printf("Directory contents for %s matching %s\n",
+             epi::GetDirectory(fsd[0].name).c_str(), mask.c_str());
 
     for (size_t i = 0; i < fsd.size(); i++)
     {
-        I_Printf("%4d: %10d  %s  \"%s\"\n", (int)i + 1, (int)fsd[i].size, fsd[i].is_dir ? "DIR" : "   ",
+        I_Printf("%4d: %10d  %s  \"%s\"\n", (int)i + 1, (int)fsd[i].size,
+                 fsd[i].is_dir ? "DIR" : "   ",
                  epi::GetFilename(fsd[i].name).c_str());
     }
 
     return 0;
 }
 
-int CMD_ArgList(char **argv, int argc)
+int ConsoleCommandArgList(char **argv, int argc)
 {
     I_Printf("Arguments:\n");
 
@@ -227,14 +230,14 @@ int CMD_ArgList(char **argv, int argc)
     return 0;
 }
 
-int CMD_ScreenShot(char **argv, int argc)
+int ConsoleCommandScreenShot(char **argv, int argc)
 {
     G_DeferredScreenShot();
 
     return 0;
 }
 
-int CMD_QuitEDGE(char **argv, int argc)
+int ConsoleCommandQuitEDGE(char **argv, int argc)
 {
     if (argc >= 2 && epi::StringCaseCompareASCII(argv[1], "now") == 0)
         // this never returns
@@ -245,11 +248,11 @@ int CMD_QuitEDGE(char **argv, int argc)
     return 0;
 }
 
-int CMD_Crc(char **argv, int argc)
+int ConsoleCommandCrc(char **argv, int argc)
 {
     if (argc < 2)
     {
-        CON_Printf("Usage: crc <lump>\n");
+        ConsolePrintf("Usage: crc <lump>\n");
         return 1;
     }
 
@@ -257,13 +260,10 @@ int CMD_Crc(char **argv, int argc)
     {
         int lump = W_CheckNumForName(argv[i]);
 
-        if (lump == -1)
-        {
-            CON_Printf("No such lump: %s\n", argv[i]);
-        }
+        if (lump == -1) { ConsolePrintf("No such lump: %s\n", argv[i]); }
         else
         {
-            int   length;
+            int      length;
             uint8_t *data = (uint8_t *)W_LoadLump(lump, &length);
 
             epi::CRC32 result;
@@ -273,63 +273,57 @@ int CMD_Crc(char **argv, int argc)
 
             delete[] data;
 
-            CON_Printf("  %s  %d bytes  crc = %08x\n", argv[i], length, result.GetCRC());
+            ConsolePrintf("  %s  %d bytes  crc = %08x\n", argv[i], length,
+                          result.GetCRC());
         }
     }
 
     return 0;
 }
 
-int CMD_PlaySound(char **argv, int argc)
+int ConsoleCommandPlaySound(char **argv, int argc)
 {
     SoundEffect *sfx;
 
     if (argc != 2)
     {
-        CON_Printf("Usage: playsound <name>\n");
+        ConsolePrintf("Usage: playsound <name>\n");
         return 1;
     }
 
     sfx = sfxdefs.GetEffect(argv[1], false);
-    if (!sfx)
-    {
-        CON_Printf("No such sound: %s\n", argv[1]);
-    }
-    else
-    {
-        S_StartFX(sfx, SNCAT_UI);
-    }
+    if (!sfx) { ConsolePrintf("No such sound: %s\n", argv[1]); }
+    else { S_StartFX(sfx, SNCAT_UI); }
 
     return 0;
 }
 
-int CMD_ResetVars(char **argv, int argc)
+int ConsoleCommandResetVars(char **argv, int argc)
 {
-    CON_ResetAllVars();
+    ConsoleResetAllVariables();
     M_ResetDefaults(0);
     return 0;
 }
 
-int CMD_ShowFiles(char **argv, int argc)
+int ConsoleCommandShowFiles(char **argv, int argc)
 {
     W_ShowFiles();
     return 0;
 }
 
-int CMD_OpenHome(char **argv, int argc)
+int ConsoleCommandOpenHome(char **argv, int argc)
 {
     epi::OpenDirectory(home_dir);
     return 0;
 }
 
-int CMD_ShowLumps(char **argv, int argc)
+int ConsoleCommandShowLumps(char **argv, int argc)
 {
-    int for_file = -1; // all files
+    int for_file = -1;  // all files
 
     char *match = nullptr;
 
-    if (argc >= 2 && epi::IsDigitASCII(argv[1][0]))
-        for_file = atoi(argv[1]);
+    if (argc >= 2 && epi::IsDigitASCII(argv[1][0])) for_file = atoi(argv[1]);
 
     if (argc >= 3)
     {
@@ -344,7 +338,7 @@ int CMD_ShowLumps(char **argv, int argc)
     return 0;
 }
 
-int CMD_ShowVars(char **argv, int argc)
+int ConsoleCommandShowVars(char **argv, int argc)
 {
     bool show_default = false;
 
@@ -357,25 +351,22 @@ int CMD_ShowVars(char **argv, int argc)
         argc--;
     }
 
-    if (argc >= 2)
-        match = argv[1];
+    if (argc >= 2) match = argv[1];
 
     I_Printf("Console Variables:\n");
 
-    int total = CON_PrintVars(match, show_default);
+    int total = ConsolePrintVariables(match, show_default);
 
-    if (total == 0)
-        I_Printf("Nothing matched.\n");
+    if (total == 0) I_Printf("Nothing matched.\n");
 
     return 0;
 }
 
-int CMD_ShowCmds(char **argv, int argc)
+int ConsoleCommandShowCmds(char **argv, int argc)
 {
     char *match = nullptr;
 
-    if (argc >= 2)
-        match = argv[1];
+    if (argc >= 2) match = argv[1];
 
     I_Printf("Console Commands:\n");
 
@@ -384,36 +375,34 @@ int CMD_ShowCmds(char **argv, int argc)
     for (int i = 0; builtin_commands[i].name; i++)
     {
         if (match && *match)
-            if (!strstr(builtin_commands[i].name, match))
-                continue;
+            if (!strstr(builtin_commands[i].name, match)) continue;
 
         I_Printf("  %-15s\n", builtin_commands[i].name);
         total++;
     }
 
-    if (total == 0)
-        I_Printf("Nothing matched.\n");
+    if (total == 0) I_Printf("Nothing matched.\n");
 
     return 0;
 }
 
-int CMD_ShowMaps(char **argv, int argc)
+int ConsoleCommandShowMaps(char **argv, int argc)
 {
-
     I_Printf("Warp Name           Description\n");
 
     for (int i = 0; i < mapdefs.size(); i++)
     {
         if (G_MapExists(mapdefs[i]) && mapdefs[i]->episode_)
-            I_Printf("  %s           %s\n", mapdefs[i]->name_.c_str(), language[mapdefs[i]->description_.c_str()]);
+            I_Printf("  %s           %s\n", mapdefs[i]->name_.c_str(),
+                     language[mapdefs[i]->description_.c_str()]);
     }
 
     return 0;
 }
 
-int CMD_ShowKeys(char **argv, int argc)
+int ConsoleCommandShowKeys(char **argv, int argc)
 {
-#if 0 // TODO
+#if 0  // TODO
 	char *match = nullptr;
 
 	if (argc >= 2)
@@ -441,7 +430,7 @@ int CMD_ShowKeys(char **argv, int argc)
     return 0;
 }
 
-int CMD_ShowGamepads(char **argv, int argc)
+int ConsoleCommandShowGamepads(char **argv, int argc)
 {
     (void)argv;
     (void)argc;
@@ -450,7 +439,7 @@ int CMD_ShowGamepads(char **argv, int argc)
     return 0;
 }
 
-int CMD_Help(char **argv, int argc)
+int ConsoleCommandHelp(char **argv, int argc)
 {
     I_Printf("Welcome to the EDGE Console.\n");
     I_Printf("\n");
@@ -470,17 +459,17 @@ int CMD_Help(char **argv, int argc)
     return 0;
 }
 
-int CMD_Version(char **argv, int argc)
+int ConsoleCommandVersion(char **argv, int argc)
 {
     I_Printf("%s v%s\n", appname.c_str(), edgeversion.c_str());
     return 0;
 }
 
-int CMD_Map(char **argv, int argc)
+int ConsoleCommandMap(char **argv, int argc)
 {
     if (argc <= 1)
     {
-        CON_Printf("Usage: map <level>\n");
+        ConsolePrintf("Usage: map <level>\n");
         return 0;
     }
 
@@ -488,15 +477,15 @@ int CMD_Map(char **argv, int argc)
     return 0;
 }
 
-int CMD_Endoom(char **argv, int argc)
+int ConsoleCommandEndoom(char **argv, int argc)
 {
-    CON_PrintEndoom();
+    ConsolePrintEndoom();
     return 0;
 }
 
-int CMD_Clear(char **argv, int argc)
+int ConsoleCommandClear(char **argv, int argc)
 {
-    CON_ClearLines();
+    ConsoleClearLines();
     return 0;
 }
 
@@ -519,15 +508,12 @@ static int GetArgs(const char *line, char **argv, int max_argc)
 
     for (;;)
     {
-        while (epi::IsSpaceASCII(*(uint8_t *)line))
-            line++;
+        while (epi::IsSpaceASCII(*(uint8_t *)line)) line++;
 
-        if (!*line)
-            break;
+        if (!*line) break;
 
         // silent truncation (bad?)
-        if (argc >= max_argc)
-            break;
+        if (argc >= max_argc) break;
 
         const char *start = line;
 
@@ -536,13 +522,11 @@ static int GetArgs(const char *line, char **argv, int max_argc)
             start++;
             line++;
 
-            while (*line && *line != '"')
-                line++;
+            while (*line && *line != '"') line++;
         }
         else
         {
-            while (*line && !epi::IsSpaceASCII(*(uint8_t *)line))
-                line++;
+            while (*line && !epi::IsSpaceASCII(*(uint8_t *)line)) line++;
         }
 
         // ignore empty strings at beginning of the line
@@ -551,8 +535,7 @@ static int GetArgs(const char *line, char **argv, int max_argc)
             argv[argc++] = StrDup(start, line - start);
         }
 
-        if (*line)
-            line++;
+        if (*line) line++;
     }
 
     return argc;
@@ -560,43 +543,43 @@ static int GetArgs(const char *line, char **argv, int max_argc)
 
 static void KillArgs(char **argv, int argc)
 {
-    for (int i = 0; i < argc; i++)
-        delete[] argv[i];
+    for (int i = 0; i < argc; i++) delete[] argv[i];
 }
 
 //
 // Current console commands:
 //
-const con_cmd_t builtin_commands[] = {{"args", CMD_ArgList},
-                                      {"cat", CMD_Type},
-                                      {"cls", CMD_Clear},
-                                      {"clear", CMD_Clear},
-                                      {"crc", CMD_Crc},
-                                      {"dir", CMD_Dir},
-                                      {"ls", CMD_Dir},
-                                      {"endoom", CMD_Endoom},
-                                      {"exec", CMD_Exec},
-                                      {"help", CMD_Help},
-                                      {"map", CMD_Map},
-                                      {"warp", CMD_Map}, // compatibility
-                                      {"playsound", CMD_PlaySound},
-                                      {"readme", CMD_Readme},
-                                      {"openhome", CMD_OpenHome},
-                                      {"resetvars", CMD_ResetVars},
-                                      {"showfiles", CMD_ShowFiles},
-                                      {"showgamepads", CMD_ShowGamepads},
-                                      {"showlumps", CMD_ShowLumps},
-                                      {"showcmds", CMD_ShowCmds},
-                                      {"showmaps", CMD_ShowMaps},
-                                      {"showvars", CMD_ShowVars},
-                                      {"screenshot", CMD_ScreenShot},
-                                      {"type", CMD_Type},
-                                      {"version", CMD_Version},
-                                      {"quit", CMD_QuitEDGE},
-                                      {"exit", CMD_QuitEDGE},
+const ConsoleCommand builtin_commands[] = {
+    {"args", ConsoleCommandArgList},
+    {"cat", ConsoleCommandType},
+    {"cls", ConsoleCommandClear},
+    {"clear", ConsoleCommandClear},
+    {"crc", ConsoleCommandCrc},
+    {"dir", ConsoleCommandDir},
+    {"ls", ConsoleCommandDir},
+    {"endoom", ConsoleCommandEndoom},
+    {"exec", ConsoleCommandExec},
+    {"help", ConsoleCommandHelp},
+    {"map", ConsoleCommandMap},
+    {"warp", ConsoleCommandMap},  // compatibility
+    {"playsound", ConsoleCommandPlaySound},
+    {"readme", ConsoleCommandReadme},
+    {"openhome", ConsoleCommandOpenHome},
+    {"resetvars", ConsoleCommandResetVars},
+    {"showfiles", ConsoleCommandShowFiles},
+    {"showgamepads", ConsoleCommandShowGamepads},
+    {"showlumps", ConsoleCommandShowLumps},
+    {"showcmds", ConsoleCommandShowCmds},
+    {"showmaps", ConsoleCommandShowMaps},
+    {"showvars", ConsoleCommandShowVars},
+    {"screenshot", ConsoleCommandScreenShot},
+    {"type", ConsoleCommandType},
+    {"version", ConsoleCommandVersion},
+    {"quit", ConsoleCommandQuitEDGE},
+    {"exit", ConsoleCommandQuitEDGE},
 
-                                      // end of list
-                                      {nullptr, nullptr}};
+    // end of list
+    {nullptr, nullptr}};
 
 static int FindCommand(const char *name)
 {
@@ -606,7 +589,7 @@ static int FindCommand(const char *name)
             return i;
     }
 
-    return -1; // not found
+    return -1;  // not found
 }
 
 #if 0
@@ -623,7 +606,7 @@ static void ProcessBind(key_link_t *link, char **argv, int argc)
 		int keyd = E_KeyFromName(argv[i]);
 		if (keyd == 0)
 		{
-			CON_Printf("Invalid key name: %s\n", argv[i]);
+			ConsolePrintf("Invalid key name: %s\n", argv[i]);
 			continue;
 		}
 
@@ -632,13 +615,12 @@ static void ProcessBind(key_link_t *link, char **argv, int argc)
 }
 #endif
 
-void CON_TryCommand(const char *cmd)
+void ConsoleTryCommand(const char *cmd)
 {
-    char *argv[MAX_CON_ARGS];
-    int   argc = GetArgs(cmd, argv, MAX_CON_ARGS);
+    char *argv[kMaximumConsoleArguments];
+    int   argc = GetArgs(cmd, argv, kMaximumConsoleArguments);
 
-    if (argc == 0)
-        return;
+    if (argc == 0) return;
 
     int index = FindCommand(argv[0]);
     if (index >= 0)
@@ -649,17 +631,19 @@ void CON_TryCommand(const char *cmd)
         return;
     }
 
-    cvar_c *var = CON_FindVar(argv[0]);
+    ConsoleVariable *var = ConsoleFindVariable(argv[0]);
     if (var != nullptr)
     {
         if (argc <= 1)
         {
-            if (var->flags & CVAR_PATH)
-                I_Printf("%s \"%s\"\n", argv[0], epi::SanitizePath(var->s).c_str());
+            if (var->flags_ & kConsoleVariableFlagFilepath)
+                I_Printf("%s \"%s\"\n", argv[0],
+                         epi::SanitizePath(var->s_).c_str());
             else
                 I_Printf("%s \"%s\"\n", argv[0], var->c_str());
         }
-        else if (argc - 1 >= 2) // Assume string with spaces; concat args into one string and try it
+        else if (argc - 1 >= 2)  // Assume string with spaces; concat args into
+                                 // one string and try it
         {
             std::string concatter = argv[1];
             for (int i = 2; i < argc; i++)
@@ -667,16 +651,16 @@ void CON_TryCommand(const char *cmd)
                 // preserve spaces in original string
                 concatter.append(" ").append(argv[i]);
             }
-            if (var->flags & CVAR_PATH)
+            if (var->flags_ & kConsoleVariableFlagFilepath)
                 *var = epi::SanitizePath(concatter).c_str();
             else
                 *var = concatter.c_str();
         }
-        else if ((var->flags & CVAR_ROM) != 0)
-            I_Printf("The cvar '%s' is read only.\n", var->name);
+        else if ((var->flags_ & kConsoleVariableFlagReadOnly) != 0)
+            I_Printf("The cvar '%s' is read only.\n", var->name_);
         else
         {
-            if (var->flags & CVAR_PATH)
+            if (var->flags_ & kConsoleVariableFlagFilepath)
                 *var = epi::SanitizePath(argv[1]).c_str();
             else
                 *var = argv[1];
@@ -713,14 +697,13 @@ void CON_TryCommand(const char *cmd)
     return;
 }
 
-int CON_MatchAllCmds(std::vector<const char *> &list, const char *pattern)
+int ConsoleMatchAllCmds(std::vector<const char *> &list, const char *pattern)
 {
     list.clear();
 
     for (int i = 0; builtin_commands[i].name; i++)
     {
-        if (!CON_MatchPattern(builtin_commands[i].name, pattern))
-            continue;
+        if (!ConsoleMatchPattern(builtin_commands[i].name, pattern)) continue;
 
         list.push_back(builtin_commands[i].name);
     }
@@ -729,19 +712,18 @@ int CON_MatchAllCmds(std::vector<const char *> &list, const char *pattern)
 }
 
 //
-// CON_PlayerMessage
+// ConsolePlayerMessage
 //
 // -ACB- 1999/09/22 Console Player Message Only. Changed from
 //                  #define to procedure because of compiler
 //                  differences.
 //
-void CON_PlayerMessage(int plyr, const char *message, ...)
+void ConsolePlayerMessage(int plyr, const char *message, ...)
 {
     va_list argptr;
     char    buffer[256];
 
-    if (consoleplayer != plyr)
-        return;
+    if (consoleplayer != plyr) return;
 
     va_start(argptr, message);
     vsnprintf(buffer, sizeof(buffer), message, argptr);
@@ -749,23 +731,22 @@ void CON_PlayerMessage(int plyr, const char *message, ...)
 
     buffer[sizeof(buffer) - 1] = 0;
 
-    CON_Message("%s", buffer);
+    ConsoleMessage("%s", buffer);
 }
 
 //
-// CON_PlayerMessageLDF
+// ConsolePlayerMessageLDF
 //
 // -ACB- 1999/09/22 Console Player Message Only. Changed from
 //                  #define to procedure because of compiler
 //                  differences.
 //
-void CON_PlayerMessageLDF(int plyr, const char *message, ...)
+void ConsolePlayerMessageLDF(int plyr, const char *message, ...)
 {
     va_list argptr;
     char    buffer[256];
 
-    if (consoleplayer != plyr)
-        return;
+    if (consoleplayer != plyr) return;
 
     message = language[message];
 
@@ -775,7 +756,7 @@ void CON_PlayerMessageLDF(int plyr, const char *message, ...)
 
     buffer[sizeof(buffer) - 1] = 0;
 
-    CON_Message("%s", buffer);
+    ConsoleMessage("%s", buffer);
 }
 
 //--- editor settings ---

@@ -49,8 +49,8 @@
 
 extern float P_ApproxDistance(float dx, float dy, float dz);
 
-extern cvar_c r_culling;
-extern cvar_c r_cullfog;
+extern ConsoleVariable r_culling;
+extern ConsoleVariable r_cullfog;
 extern bool   need_to_draw_sky;
 
 // #define DEBUG_MD2_LOAD  1
@@ -1135,7 +1135,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
         }
     }
 
-    if (!r_culling.d && fc_to_use != kRGBANoValue)
+    if (!r_culling.d_&& fc_to_use != kRGBANoValue)
     {
         GLfloat fc[4];
         fc[0] = (float)epi::GetRGBARed(fc_to_use) / 255.0f;
@@ -1148,12 +1148,12 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
         glFogf(GL_FOG_DENSITY, std::log1p(fd_to_use));
         glEnable(GL_FOG);
     }
-    else if (r_culling.d)
+    else if (r_culling.d_)
     {
         sg_color fogColor;
         if (need_to_draw_sky)
         {
-            switch (r_cullfog.d)
+            switch (r_cullfog.d_)
             {
             case 0:
                 fogColor = cull_fog_color;
@@ -1180,8 +1180,8 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
         glClearColor(fogColor.r, fogColor.g, fogColor.b, 1.0f);
         glFogi(GL_FOG_MODE, GL_LINEAR);
         glFogfv(GL_FOG_COLOR, &fogColor.r);
-        glFogf(GL_FOG_START, r_farclip.f - 750.0f);
-        glFogf(GL_FOG_END, r_farclip.f - 250.0f);
+        glFogf(GL_FOG_START, r_farclip.f_ - 750.0f);
+        glFogf(GL_FOG_END, r_farclip.f_ - 250.0f);
         glEnable(GL_FOG);
     }
     else
@@ -1290,7 +1290,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
         {
             glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &old_clamp);
 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, r_dumbclamp.d ? GL_CLAMP : GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, r_dumbclamp.d_? GL_CLAMP : GL_CLAMP_TO_EDGE);
         }
 
         local_gl_vert_t *start = md->gl_verts;

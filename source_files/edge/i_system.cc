@@ -112,7 +112,7 @@ void I_Printf(const char *message, ...)
     I_Debugf("%s", printbuf);
 
     // Send the message to the console.
-    CON_Printf("%s", printbuf);
+    ConsolePrintf("%s", printbuf);
 
 #ifdef EDGE_WEB
     // Send to debug console in browser

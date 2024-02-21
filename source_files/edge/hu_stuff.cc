@@ -115,7 +115,7 @@ void HU_Start(void)
         I_Printf("\n");
         I_Printf("--------------------------------------------------\n");
 
-        CON_MessageColor(SG_GREEN_RGBA32);
+        ConsoleMessageColor(SG_GREEN_RGBA32);
 
         string = language[currmap->description_];
         I_Printf("Entering %s\n", string);
@@ -129,8 +129,8 @@ void HU_Start(void)
 
 void HU_Drawer(void)
 {
-    CON_ShowFPS();
-    CON_ShowPosition();
+    ConsoleShowFPS();
+    ConsoleShowPosition();
 
     short tempY;
     short y;

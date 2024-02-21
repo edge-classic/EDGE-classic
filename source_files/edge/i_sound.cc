@@ -62,7 +62,7 @@ std::vector<std::string> available_soundfonts;
 std::vector<std::string> available_genmidis;
 extern std::string       game_dir;
 extern std::string       home_dir;
-extern cvar_c                      s_soundfont;
+extern ConsoleVariable                      s_soundfont;
 
 void SoundFill_Callback(void *udata, Uint8 *stream, int len)
 {
@@ -236,7 +236,7 @@ void I_StartupMusic(void)
     // Always add the default/internal GENMIDI lump choice
     available_genmidis.push_back("GENMIDI");
     // Set default SF2 location in CVAR if needed
-    if (s_soundfont.s.empty())
+    if (s_soundfont.s_.empty())
         s_soundfont = epi::SanitizePath(epi::PathAppend(soundfont_dir, "Default.sf2"));
 
     if (!ReadDirectory(sfd, soundfont_dir, "*.*"))

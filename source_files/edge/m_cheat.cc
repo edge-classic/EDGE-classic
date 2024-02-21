@@ -50,8 +50,8 @@
 #include "p_mobj.h"
 #include "w_wad.h"
 
-extern cvar_c debug_fps;
-extern cvar_c debug_pos;
+extern ConsoleVariable debug_fps;
+extern ConsoleVariable debug_position;
 
 //
 // CHEAT SEQUENCE PACKAGE
@@ -140,7 +140,7 @@ void M_ChangeLevelCheat(const char *string)
     params.map = G_LookupMap(string);
     if (!params.map)
     {
-        CON_MessageLDF("ImpossibleChange");
+        ConsoleMessageLDF("ImpossibleChange");
         return;
     }
 
@@ -155,7 +155,7 @@ void M_ChangeLevelCheat(const char *string)
 
     G_DeferredNewGame(params);
 
-    CON_MessageLDF("LevelChange");
+    ConsoleMessageLDF("LevelChange");
 }
 
 //
@@ -175,7 +175,7 @@ static void M_ChangeMusicCheat(const char *string)
         return;
 
     S_ChangeMusic(entry_num, true);
-    CON_MessageLDF("MusChange");
+    ConsoleMessageLDF("MusChange");
 }
 
 static void CheatGiveWeapons(player_t *pl, int key = -2)
@@ -238,10 +238,10 @@ bool M_CheatResponder(event_t *ev)
             {
                 pl->health = pl->mo->health = pl->mo->spawnhealth;
             }
-            CON_MessageLDF("GodModeOn");
+            ConsoleMessageLDF("GodModeOn");
         }
         else
-            CON_MessageLDF("GodModeOff");
+            ConsoleMessageLDF("GodModeOff");
     }
 
     // 'fa' cheat for killer fucking arsenal
@@ -259,7 +259,7 @@ bool M_CheatResponder(event_t *ev)
 
         CheatGiveWeapons(pl);
 
-        CON_MessageLDF("AmmoAdded");
+        ConsoleMessageLDF("AmmoAdded");
     }
 
     // 'kfa' cheat for key full ammo
@@ -279,20 +279,20 @@ bool M_CheatResponder(event_t *ev)
 
         CheatGiveWeapons(pl);
 
-        CON_MessageLDF("VeryHappyAmmo");
+        ConsoleMessageLDF("VeryHappyAmmo");
     }
     else if (M_CheckCheat(&cheat_keys, key))
     {
         pl->cards = kDoorKeyBitmask;
 
-        CON_MessageLDF("UnlockCheat");
+        ConsoleMessageLDF("UnlockCheat");
     }
     else if (M_CheckCheat(&cheat_loaded, key))
     {
         for (i = 0; i < kTotalAmmunitionTypes; i++)
             pl->ammo[i].num = pl->ammo[i].max;
 
-        CON_MessageLDF("LoadedCheat");
+        ConsoleMessageLDF("LoadedCheat");
     }
 #if 0 // FIXME: this crashes ?
 	else if (M_CheckCheat(&cheat_takeall, key))
@@ -300,7 +300,7 @@ bool M_CheatResponder(event_t *ev)
 		P_GiveInitialBenefits(pl, pl->mo->info);
 
 		// -ACB- 1998/08/26 Stuff removed language reference
-		CON_MessageLDF("StuffRemoval");
+		ConsoleMessageLDF("StuffRemoval");
 	}
 #endif
     else if (M_CheckCheat(&cheat_suicide, key))
@@ -308,7 +308,7 @@ bool M_CheatResponder(event_t *ev)
         P_TelefragMobj(pl->mo, pl->mo, nullptr);
 
         // -ACB- 1998/08/26 Suicide language reference
-        CON_MessageLDF("SuicideCheat");
+        ConsoleMessageLDF("SuicideCheat");
     }
     // -ACB- 1998/08/27 Used Mobj linked-list code, much cleaner.
     else if (M_CheckCheat(&cheat_killall, key))
@@ -329,7 +329,7 @@ bool M_CheatResponder(event_t *ev)
             }
         }
 
-        CON_MessageLDF("MonstersKilled", killcount);
+        ConsoleMessageLDF("MonstersKilled", killcount);
     }
     // Simplified, accepting both "noclip" and "idspispopd".
     // no clipping mode cheat
@@ -338,18 +338,18 @@ bool M_CheatResponder(event_t *ev)
         pl->cheats ^= CF_NOCLIP;
 
         if (pl->cheats & CF_NOCLIP)
-            CON_MessageLDF("ClipOn");
+            ConsoleMessageLDF("ClipOn");
         else
-            CON_MessageLDF("ClipOff");
+            ConsoleMessageLDF("ClipOff");
     }
     else if (M_CheckCheat(&cheat_hom, key))
     {
-        debug_hom = debug_hom.d ? 0 : 1;
+        debug_hom = debug_hom.d_? 0 : 1;
 
-        if (debug_hom.d)
-            CON_MessageLDF("HomDetectOn");
+        if (debug_hom.d_)
+            ConsoleMessageLDF("HomDetectOn");
         else
-            CON_MessageLDF("HomDetectOff");
+            ConsoleMessageLDF("HomDetectOff");
     }
 
     // 'behold?' power-up cheats
@@ -365,7 +365,7 @@ bool M_CheatResponder(event_t *ev)
             if (i == kPowerTypeBerserk)
                 pl->keep_powers |= (1 << kPowerTypeBerserk);
 
-            CON_MessageLDF("BeholdUsed");
+            ConsoleMessageLDF("BeholdUsed");
         }
     }
 
@@ -373,7 +373,7 @@ bool M_CheatResponder(event_t *ev)
 	// 'behold' power-up menu
 	if (M_CheckCheat(&cheat_powerup[9], key))
 	{
-		CON_MessageLDF("BeholdNote");
+		ConsoleMessageLDF("BeholdNote");
 	}
 #endif
 
@@ -394,14 +394,14 @@ bool M_CheatResponder(event_t *ev)
         {
             P_AddWeapon(pl, w, nullptr);
             pl->powers[kPowerTypeInvulnerable] = 1;
-            CON_MessageLDF("CHOPPERSNote");
+            ConsoleMessageLDF("CHOPPERSNote");
         }
     }
 
     // 'mypos' for player position
     else if (M_CheckCheat(&cheat_mypos, key))
     {
-        CON_Message("ang=%f;x,y=(%f,%f)", epi::DegreesFromBAM(pl->mo->angle), pl->mo->x, pl->mo->y);
+        ConsoleMessage("ang=%f;x,y=(%f,%f)", epi::DegreesFromBAM(pl->mo->angle), pl->mo->x, pl->mo->y);
     }
 
     if (M_CheckCheat(&cheat_clev, key))
@@ -416,8 +416,8 @@ bool M_CheatResponder(event_t *ev)
     }
     else if (M_CheckCheat(&cheat_showstats, key))
     {
-        debug_fps = debug_fps.d ? 0 : 1;
-        debug_pos = debug_fps.d;
+        debug_fps = debug_fps.d_? 0 : 1;
+        debug_position = debug_fps.d_;
     }
 
     return false;

@@ -87,7 +87,7 @@ int key_gamma_toggle;
 
 extern bool E_MatchesKey(int keyvar, int key);
 
-extern cvar_c v_secbright;
+extern ConsoleVariable v_secbright;
 
 extern unsigned int R_UploadTexture(image_data_c *img, int flags, int max_pix);
 
@@ -100,7 +100,7 @@ extern const image_c *menu_backdrop;
 // Show messages has default, 0 = off, 1 = on
 int showMessages;
 
-extern cvar_c m_language;
+extern ConsoleVariable m_language;
 
 int screen_hud; // has default
 
@@ -284,7 +284,7 @@ extern void M_F4SoundOptions(int choice);
 static void M_LoadSavePage(int choice);
 static void M_ReadThis(int choice);
 static void M_ReadThis2(int choice);
-void        M_EndGame(int choice, cvar_c *cvar);
+void        M_EndGame(int choice, ConsoleVariable *cvar);
 
 static void M_ChangeMessages(int choice);
 
@@ -1501,9 +1501,9 @@ void M_ChangeMessages(int choice)
     showMessages = 1 - showMessages;
 
     if (showMessages)
-        CON_Printf("%s\n", language["MessagesOn"]);
+        ConsolePrintf("%s\n", language["MessagesOn"]);
     else
-        CON_Printf("%s\n", language["MessagesOff"]);
+        ConsolePrintf("%s\n", language["MessagesOff"]);
 }
 
 static void EndGameResponse(int ch)
@@ -1517,7 +1517,7 @@ static void EndGameResponse(int ch)
     M_ClearMenus();
 }
 
-void M_EndGame(int choice, cvar_c *cvar)
+void M_EndGame(int choice, ConsoleVariable *cvar)
 {
     if (gamestate != GS_LEVEL)
     {
@@ -1817,7 +1817,7 @@ void M_StartMessage(const char *string, void (*routine)(int response), bool inpu
     message_input_routine = nullptr;
     msg_needsinput        = input;
     menuactive            = true;
-    CON_SetVisible(vs_notvisible);
+    ConsoleSetVisible(kConsoleVisibilityNotVisible);
     return;
 }
 
@@ -1840,7 +1840,7 @@ void M_StartMessageInput(const char *string, void (*routine)(const char *respons
     message_key_routine   = nullptr;
     msg_needsinput        = true;
     menuactive            = true;
-    CON_SetVisible(vs_notvisible);
+    ConsoleSetVisible(kConsoleVisibilityNotVisible);
     return;
 }
 
@@ -2155,15 +2155,15 @@ bool M_Responder(event_t *ev)
 
         case KEYD_GAMMATOGGLE: // gamma toggle
 
-            v_secbright.d++;
-            if (v_secbright.d > 10)
-                v_secbright.d = 0;
+            v_secbright.d_++;
+            if (v_secbright.d_> 10)
+                v_secbright.d_= 0;
 
-            v_secbright = v_secbright.d;
+            v_secbright = v_secbright.d_;
 
             std::string msg = "Sector Brightness "; // TODO: Make language entry - Dasho
 
-            switch (v_secbright.d)
+            switch (v_secbright.d_)
             {
             case 0:
             case 1:
@@ -2171,7 +2171,7 @@ bool M_Responder(event_t *ev)
             case 3:
             case 4:
                 msg.append("-");
-                msg.append(std::to_string((5 - v_secbright.d) * 10));
+                msg.append(std::to_string((5 - v_secbright.d_) * 10));
                 break;
             case 5:
                 msg.append("Default");
@@ -2182,7 +2182,7 @@ bool M_Responder(event_t *ev)
             case 9:
             case 10:
                 msg.append("+");
-                msg.append(std::to_string((5 - v_secbright.d) * -10));
+                msg.append(std::to_string((5 - v_secbright.d_) * -10));
                 break;
             default:
                 msg.clear();
@@ -2190,7 +2190,7 @@ bool M_Responder(event_t *ev)
             }
 
             if (!msg.empty())
-                CON_PlayerMessage(consoleplayer, "%s", msg.c_str());
+                ConsolePlayerMessage(consoleplayer, "%s", msg.c_str());
 
             // -AJA- 1999/07/03: removed PLAYPAL reference.
             return true;
@@ -2359,7 +2359,7 @@ void M_StartControlPanel(void)
         return;
 
     menuactive = true;
-    CON_SetVisible(vs_notvisible);
+    ConsoleSetVisible(kConsoleVisibilityNotVisible);
 
     currentMenu = &MainDef;            // JDC
     itemOn      = currentMenu->lastOn; // JDC
@@ -2965,7 +2965,7 @@ void M_Drawer(void)
     if (menu_backdrop && 
         (option_menuon || netgame_menuon || (currentMenu->draw_func == M_DrawLoad || currentMenu->draw_func == M_DrawSave)))
     {
-        if (r_titlescaling.d) // Fill Border
+        if (r_titlescaling.d_) // Fill Border
         {
             if (!menu_backdrop->blurred_version)
             {

@@ -90,7 +90,7 @@ void M_StartMessage(const char *string, void (*routine)(int response), bool inpu
 
 void M_StartMessageInput(const char *string, void (*routine)(const char *response));
 
-void M_EndGame(int choice, cvar_c *cvar = nullptr);
+void M_EndGame(int choice, ConsoleVariable *cvar = nullptr);
 void M_QuitEDGE(int choice);
 void M_ImmediateQuit(void);
 void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div);

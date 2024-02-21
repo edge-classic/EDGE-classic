@@ -82,7 +82,7 @@
 //
 // P_ACTION
 //
-extern cvar_c g_aggression;
+extern ConsoleVariable g_aggression;
 
 void P_PlayerAttack(mobj_t *playerobj, const AttackDefinition *attack);
 void P_SlammedIntoObject(mobj_t *object, mobj_t *objecthit);

@@ -45,11 +45,11 @@
 // FIXME: this seems totally arbitrary, review it.
 #define VERT_SPACING 2.0f
 
-extern console_line_c *quit_lines[ENDOOM_LINES];
-extern int             con_cursor;
+extern ConsoleLine *quit_lines[kEndoomLines];
+extern int             console_cursor;
 extern font_c         *endoom_font;
-extern cvar_c          r_overlay;
-extern cvar_c          r_doubleframes;
+extern ConsoleVariable          r_overlay;
+extern ConsoleVariable          r_doubleframes;
 
 static font_c *default_font;
 
@@ -102,8 +102,8 @@ static inline float COORD_Y(float y)
     return margin_Y - y * margin_YMUL;
 }
 
-DEF_CVAR(v_letterbox, "0", CVAR_ARCHIVE)
-DEF_CVAR(v_pillarbox, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(v_letterbox, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(v_pillarbox, "0", kConsoleVariableFlagArchive)
 
 void HUD_SetCoordSys(int width, int height)
 {
@@ -143,7 +143,7 @@ void HUD_SetCoordSys(int width, int height)
         side_dist = side_dist * (sw / 320.0f) / (sh / 200.0f);
 
         // compensate for monitor's pixel aspect
-        side_dist = side_dist * v_pixelaspect.f;
+        side_dist = side_dist * v_pixelaspect.f_;
 
         // compensate for Doom's 5:6 pixel aspect ratio.
         if (true)
@@ -252,10 +252,10 @@ void HUD_PushScissor(float x1, float y1, float x2, float y2, bool expand)
     y1 = COORD_Y(y1);
     y2 = COORD_Y(y2);
 
-    int sx1 = RoundToInt(x1);
-    int sy1 = RoundToInt(y1);
-    int sx2 = RoundToInt(x2);
-    int sy2 = RoundToInt(y2);
+    int sx1 = RoundToInteger(x1);
+    int sy1 = RoundToInteger(y1);
+    int sx2 = RoundToInteger(x2);
+    int sy2 = RoundToInteger(y2);
 
     if (sci_stack_top == 0)
     {
@@ -319,7 +319,7 @@ void HUD_CalcScrollTexCoords(float x_scroll, float y_scroll, float *tx1, float *
 {
     float timeScale, adjustedScrollS, adjustedScrollT;
 
-    timeScale = gametic / (r_doubleframes.d ? 200.0f : 100.0f);
+    timeScale = gametic / (r_doubleframes.d_? 200.0f : 100.0f);
 
     adjustedScrollS = x_scroll * timeScale;
     adjustedScrollT = y_scroll * timeScale;
@@ -397,10 +397,10 @@ void HUD_CalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
 void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *image, float tx1, float ty1, float tx2,
                   float ty2, float alpha, RGBAColor text_col, const Colormap *palremap, float sx, float sy, char ch)
 {
-    int x1 = RoundToInt(hx1);
-    int y1 = RoundToInt(hy1);
-    int x2 = RoundToInt(hx2 + 0.25f);
-    int y2 = RoundToInt(hy2 + 0.25f);
+    int x1 = RoundToInteger(hx1);
+    int y1 = RoundToInteger(hy1);
+    int x2 = RoundToInteger(hx2 + 0.25f);
+    int y2 = RoundToInteger(hy2 + 0.25f);
 
     if (x1 >= x2 || y1 >= y2)
         return;
@@ -501,7 +501,7 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
         HUD_CalcScrollTexCoords(sx, sy, &tx1, &ty1, &tx2, &ty2);
     }
 
-    if (epi::StringCaseCompareASCII(image->name, hud_overlays.at(r_overlay.d)) == 0)
+    if (epi::StringCaseCompareASCII(image->name, hud_overlays.at(r_overlay.d_)) == 0)
     {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -591,10 +591,10 @@ void HUD_RawImage(float hx1, float hy1, float hx2, float hy2, const image_c *ima
 void HUD_RawFromTexID(float hx1, float hy1, float hx2, float hy2, unsigned int tex_id, image_opacity_e opacity,
                       float tx1, float ty1, float tx2, float ty2, float alpha)
 {
-    int x1 = RoundToInt(hx1);
-    int y1 = RoundToInt(hy1);
-    int x2 = RoundToInt(hx2 + 0.25f);
-    int y2 = RoundToInt(hy2 + 0.25f);
+    int x1 = RoundToInteger(hx1);
+    int y1 = RoundToInteger(hy1);
+    int x2 = RoundToInteger(hx2 + 0.25f);
+    int y2 = RoundToInteger(hy2 + 0.25f);
 
     if (x1 >= x2 || y1 >= y2)
         return;
@@ -1059,7 +1059,7 @@ void HUD_DrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img
 
     uint8_t character = (uint8_t)ch;
 
-    if (blink && con_cursor >= 16)
+    if (blink && console_cursor >= 16)
         character = 0x20;
 
     uint8_t px = character % 16;
@@ -1247,9 +1247,9 @@ void HUD_DrawQuitText(int line, float FNX, float FNY, float cx)
 
     for (int i = 0; i < 80; i++)
     {
-        uint8_t info = quit_lines[line]->endoom_bytes.at(i);
+        uint8_t info = quit_lines[line]->endoom_bytes_.at(i);
 
-        HUD_DrawEndoomChar(cx, cy, FNX, img, quit_lines[line]->line.at(i), endoom_colors[info & 15],
+        HUD_DrawEndoomChar(cx, cy, FNX, img, quit_lines[line]->line_.at(i), endoom_colors[info & 15],
                            endoom_colors[(info >> 4) & 7], info & 128);
 
         cx += FNX;
@@ -1269,7 +1269,7 @@ void HUD_DrawQuitScreen()
         float FNX = HMM_MIN((float)SCREENWIDTH / 80.0f, 320.0f / 80.0f * ((float)SCREENHEIGHT * 0.90f / 200.0f));
         float FNY = FNX * 2;
         float cx  = HMM_MAX(0, (((float)SCREENWIDTH - (FNX * 80.0f)) / 2.0f));
-        for (int i = 0; i < ENDOOM_LINES; i++)
+        for (int i = 0; i < kEndoomLines; i++)
         {
             HUD_DrawQuitText(i, FNX, FNY, cx);
         }
@@ -1338,7 +1338,7 @@ void HUD_GetCastPosition(float *x, float *y, float *scale_x, float *scale_y)
 
     // FIXME REVIEW THIS
     //*scale_y = 4.0;
-    *scale_x = *scale_y / v_pixelaspect.f;
+    *scale_x = *scale_y / v_pixelaspect.f_;
 }
 
 //--- editor settings ---

@@ -58,7 +58,7 @@ static int SYS_debug_print(lua_State *L)
 //
 static int SYS_edge_version(lua_State *L)
 {
-    lua_pushnumber(L, edgeversion.f);
+    lua_pushnumber(L, edgeversion.f_);
     return 1;
 }
 
@@ -91,7 +91,7 @@ static int SYS_AllocConsole(lua_State *L)
 static int MATH_rint(lua_State* L)
 {
     double val = luaL_checknumber(L, 1);
-    lua_pushinteger(L, RoundToInt(val));
+    lua_pushinteger(L, RoundToInteger(val));
     return 1;
 }
 

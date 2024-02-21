@@ -561,7 +561,7 @@ static void WeaponFinishEntry(void)
 
     if (dynamic_weapon->zoom_factor_ > 0.0)
         dynamic_weapon->zoom_fov_ =
-            RoundToInt(90 / dynamic_weapon->zoom_factor_);
+            RoundToInteger(90 / dynamic_weapon->zoom_factor_);
 
     dynamic_weapon->model_rotate_ *= kBAMAngle1;
 

@@ -552,9 +552,9 @@ void ParseThingField(Thing *thing, const int &key, const std::string &value)
     // ignored - Dasho
 
     if (key == epi::kENameX)
-        thing->x = RoundToInt(epi::LexDouble(value));
+        thing->x = RoundToInteger(epi::LexDouble(value));
     else if (key == epi::kENameY)
-        thing->y = RoundToInt(epi::LexDouble(value));
+        thing->y = RoundToInteger(epi::LexDouble(value));
     else if (key == epi::kENameType)
         thing->type = epi::LexInteger(value);
 }
@@ -859,8 +859,8 @@ void PutZVertices()
 
         if (!vert->is_new_) continue;
 
-        raw.x = AlignedLittleEndianS32(RoundToInt(vert->x_ * 65536.0));
-        raw.y = AlignedLittleEndianS32(RoundToInt(vert->y_ * 65536.0));
+        raw.x = AlignedLittleEndianS32(RoundToInteger(vert->x_ * 65536.0));
+        raw.y = AlignedLittleEndianS32(RoundToInteger(vert->y_ * 65536.0));
 
         ZLibAppendLump(&raw, sizeof(raw));
 
@@ -981,10 +981,10 @@ static void PutOneZNode(Node *node)
 
     node->index_ = node_cur_index++;
 
-    uint32_t x  = AlignedLittleEndianS32(RoundToInt(node->x_ * 65536.0));
-    uint32_t y  = AlignedLittleEndianS32(RoundToInt(node->y_ * 65536.0));
-    uint32_t dx = AlignedLittleEndianS32(RoundToInt(node->dx_ * 65536.0));
-    uint32_t dy = AlignedLittleEndianS32(RoundToInt(node->dy_ * 65536.0));
+    uint32_t x  = AlignedLittleEndianS32(RoundToInteger(node->x_ * 65536.0));
+    uint32_t y  = AlignedLittleEndianS32(RoundToInteger(node->y_ * 65536.0));
+    uint32_t dx = AlignedLittleEndianS32(RoundToInteger(node->dx_ * 65536.0));
+    uint32_t dy = AlignedLittleEndianS32(RoundToInteger(node->dy_ * 65536.0));
 
     ZLibAppendLump(&x, 4);
     ZLibAppendLump(&y, 4);

@@ -63,7 +63,7 @@
 #include "vm_coal.h"
 #include "script/compat/lua_compat.h"
 #include "str_compare.h"
-extern cvar_c r_doubleframes;
+extern ConsoleVariable r_doubleframes;
 
 gamestate_e gamestate = GS_NOTHING;
 
@@ -253,7 +253,7 @@ void LoadLevel_Bits(void)
 
     gamestate = GS_LEVEL;
 
-    CON_SetVisible(vs_notvisible);
+    ConsoleSetVisible(kConsoleVisibilityNotVisible);
 
     // clear cmd building stuff
     E_ClearInput();
@@ -475,7 +475,7 @@ void G_Ticker(void)
 
     bool extra_tic = (gametic & 1) == 1;
 
-    if (extra_tic && r_doubleframes.d)
+    if (extra_tic && r_doubleframes.d_)
     {
         switch (gamestate)
         {
@@ -991,7 +991,7 @@ static void G_DoSaveGame(void)
         SV_ClearSlot(dir_name);
         SV_CopySlot("current", dir_name);
 
-        CON_Printf("%s", language["GameSaved"]);
+        ConsolePrintf("%s", language["GameSaved"]);
     }
     else
     {

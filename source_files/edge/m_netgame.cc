@@ -58,7 +58,7 @@
 
 extern gameflags_t default_gameflags;
 
-extern cvar_c bot_skill;
+extern ConsoleVariable bot_skill;
 
 int  netgame_menuon;
 
@@ -75,7 +75,7 @@ static int host_want_bots;
 
 static void ListAccept(void);
 
-DEF_CVAR(player_dm_dr, "9", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(player_dm_dr, "9", kConsoleVariableFlagArchive)
 
 static void DrawKeyword(int index, style_c *style, int y, const char *keyword, const char *value)
 {
@@ -370,14 +370,14 @@ static void HostChangeOption(int opt, int key)
         break;
 
     case 5: // Bot Skill
-        bot_skill = bot_skill.d + dir;
-        bot_skill = HMM_Clamp(0, bot_skill.d, 4);
+        bot_skill = bot_skill.d_+ dir;
+        bot_skill = HMM_Clamp(0, bot_skill.d_, 4);
 
         break;
 
     case 6:
-        player_dm_dr = player_dm_dr.d + dir;
-        player_dm_dr = HMM_Clamp(0, player_dm_dr.d, 18);
+        player_dm_dr = player_dm_dr.d_+ dir;
+        player_dm_dr = HMM_Clamp(0, player_dm_dr.d_, 18);
 
         break;
 
@@ -469,12 +469,12 @@ void M_DrawHostMenu(void)
     y += deltay;
     idx++;
 
-    int skill = HMM_Clamp(0, bot_skill.d, 4);
+    int skill = HMM_Clamp(0, bot_skill.d_, 4);
     DrawKeyword(idx, ng_host_style, y, "Bot Skill", GetBotSkillName(skill));
     y += deltay;
     idx++;
 
-    int dm_damage_resistance = HMM_Clamp(0, player_dm_dr.d, 18);
+    int dm_damage_resistance = HMM_Clamp(0, player_dm_dr.d_, 18);
     DrawKeyword(idx, ng_host_style, y, "Player Damage Resistance", GetPlayerDamResName(dm_damage_resistance));
     y += deltay;
     idx++;

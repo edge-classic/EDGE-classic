@@ -50,8 +50,8 @@ bool INP_Responder(event_t *ev);
 extern int mouse_xaxis;
 extern int mouse_yaxis;
 
-extern cvar_c mouse_xsens;
-extern cvar_c mouse_ysens;
+extern ConsoleVariable mouse_xsens;
+extern ConsoleVariable mouse_ysens;
 
 extern int    joy_axis[4];
 extern float *joy_deads[6];
@@ -61,11 +61,11 @@ extern float *joy_deads[6];
 //                   horzmovement control, vertmovement control
 //                   strafemovediv;
 //
-extern cvar_c turnspeed;
-extern cvar_c vlookspeed;
-extern cvar_c forwardspeed;
-extern cvar_c sidespeed;
-extern cvar_c flyspeed;
+extern ConsoleVariable turnspeed;
+extern ConsoleVariable vlookspeed;
+extern ConsoleVariable forwardspeed;
+extern ConsoleVariable sidespeed;
+extern ConsoleVariable flyspeed;
 
 /* keyboard stuff */
 

@@ -142,7 +142,7 @@ static void SendTip(rad_trigger_t *R, s_tip_t *tip, int slot)
     // send message to the console (unless it would clog it up)
     if (current->tip_text && current->tip_text != R->last_con_message)
     {
-        CON_Printf("%s\n", current->tip_text);
+        ConsolePrintf("%s\n", current->tip_text);
         R->last_con_message = current->tip_text;
     }
 
@@ -872,9 +872,9 @@ void RAD_ActMoveSector(rad_trigger_t *R, void *param)
 static void LightOneSector(sector_t *sec, s_lightsector_t *t)
 {
     if (t->relative)
-        sec->props.lightlevel += RoundToInt(t->value);
+        sec->props.lightlevel += RoundToInteger(t->value);
     else
-        sec->props.lightlevel = RoundToInt(t->value);
+        sec->props.lightlevel = RoundToInteger(t->value);
 }
 
 void RAD_ActLightSector(rad_trigger_t *R, void *param)

@@ -38,7 +38,7 @@
 // DEH_EDGE
 #include "deh_edge.h"
 
-DEF_CVAR(debug_dehacked, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(debug_dehacked, "0", kConsoleVariableFlagArchive)
 
 void ConvertDehacked(const uint8_t *data, int length, const std::string &source)
 {
@@ -67,7 +67,7 @@ void ConvertDehacked(const uint8_t *data, int length, const std::string &source)
         I_Error("Failed to convert Dehacked file: %s\n", source.c_str());
     }
 
-    if (debug_dehacked.d > 0)
+    if (debug_dehacked.d_> 0)
         DDF_DumpCollection(col);
 
     DDF_AddCollection(col, source);

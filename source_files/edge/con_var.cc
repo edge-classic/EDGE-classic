@@ -16,125 +16,131 @@
 //
 //----------------------------------------------------------------------------
 
+#include "con_var.h"
+
 #include <string.h>
 
-#include "con_var.h"
 #include "con_main.h"
-
-#include "m_argv.h"
-
 #include "filesystem.h"
-#include "str_util.h"
+#include "m_argv.h"
 #include "str_compare.h"
+#include "str_util.h"
+
 // NOTE: we must use a plain linked list (and not std::vector) here,
 //       because constructors run very early (before main is called)
 //       and we cannot rely on a std::vector being initialized.
 
-static cvar_c *all_cvars = nullptr;
+static ConsoleVariable *all_console_variables = nullptr;
 
-cvar_c::cvar_c(const char *_name, const char *_def, int _flags, cvar_callback _cb, float _min, float _max)
-    : d(), f(), s(_def), name(_name), def(_def), flags(_flags), min(_min), max(_max), cvar_cb(_cb), modified(0)
+ConsoleVariable::ConsoleVariable(const char *name, const char *def,
+                                 ConsoleVariableFlag     flags,
+                                 ConsoleVariableCallback cb, float min,
+                                 float max)
+    : d_(),
+      f_(),
+      s_(def),
+      name_(name),
+      def_(def),
+      flags_(flags),
+      min_(min),
+      max_(max),
+      callback_(cb),
+      modified_(0)
 {
     ParseString();
 
     // add this cvar into the list.  it is sorted later.
-    next      = all_cvars;
-    all_cvars = this;
+    next_                 = all_console_variables;
+    all_console_variables = this;
 }
 
-cvar_c::~cvar_c()
+ConsoleVariable::~ConsoleVariable()
 {
     // nothing needed
 }
 
-cvar_c &cvar_c::operator=(int value)
+ConsoleVariable &ConsoleVariable::operator=(int value)
 {
-    if (value < min || value > max)
+    if (value < min_ || value > max_)
     {
-        I_Warning("Value %d exceeds lower/upper limits for %s! Resetting to default value!\n", value, name);
-        s = def;
+        I_Warning(
+            "Value %d exceeds lower/upper limits for %s! Resetting to default "
+            "value!\n",
+            value, name_);
+        s_ = def_;
         ParseString();
     }
     else
     {
-        d = value;
-        f = value;
-        FmtInt(value);
+        d_ = value;
+        f_ = value;
+        FormatInteger(value);
     }
 
-    if (cvar_cb)
-    {
-        cvar_cb(this);
-    }
-    modified++;
+    if (callback_) { callback_(this); }
+    modified_++;
     return *this;
 }
 
-cvar_c &cvar_c::operator=(float value)
+ConsoleVariable &ConsoleVariable::operator=(float value)
 {
-    if (value < min || value > max)
+    if (value < min_ || value > max_)
     {
-        I_Warning("Value %g exceeds lower/upper limits for %s! Resetting to default value!\n", value, name);
-        s = def;
+        I_Warning(
+            "Value %g exceeds lower/upper limits for %s! Resetting to default "
+            "value!\n",
+            value, name_);
+        s_ = def_;
         ParseString();
     }
     else
     {
-        d = RoundToInt(value);
-        f = value;
-        FmtFloat(value);
+        d_ = RoundToInteger(value);
+        f_ = value;
+        FormatFloat(value);
     }
 
-    if (cvar_cb)
-    {
-        cvar_cb(this);
-    }
-    modified++;
+    if (callback_) { callback_(this); }
+    modified_++;
     return *this;
 }
 
-cvar_c &cvar_c::operator=(const char *value)
+ConsoleVariable &ConsoleVariable::operator=(const char *value)
 {
-    s = value;
+    s_ = value;
     ParseString();
 
-    if (cvar_cb)
-    {
-        cvar_cb(this);
-    }
-    modified++;
+    if (callback_) { callback_(this); }
+    modified_++;
     return *this;
 }
 
-cvar_c &cvar_c::operator=(std::string value)
+ConsoleVariable &ConsoleVariable::operator=(std::string value)
 {
-    s = value;
+    s_ = value;
     ParseString();
 
-    if (cvar_cb)
-    {
-        cvar_cb(this);
-    }
-    modified++;
+    if (callback_) { callback_(this); }
+    modified_++;
     return *this;
 }
 
 // private method
-void cvar_c::FmtInt(int value)
+void ConsoleVariable::FormatInteger(int value)
 {
     char buffer[64];
     sprintf(buffer, "%d", value);
-    s = buffer;
+    s_ = buffer;
 }
 
 // private method
-void cvar_c::FmtFloat(float value)
+void ConsoleVariable::FormatFloat(float value)
 {
     char buffer[64];
 
     float ab = fabs(value);
 
-    if (ab >= 1e10) // handle huge numbers
+    if (ab >= 1e10)  // handle huge numbers
         sprintf(buffer, "%1.5e", value);
     else if (ab >= 1e5)
         sprintf(buffer, "%1.1f", value);
@@ -145,44 +151,46 @@ void cvar_c::FmtFloat(float value)
     else
         sprintf(buffer, "%1.7f", value);
 
-    s = buffer;
+    s_ = buffer;
 }
 
 // private method
-void cvar_c::ParseString()
+void ConsoleVariable::ParseString()
 {
-    d = atoi(s.c_str());
-    f = atof(s.c_str());
-    if (f < min || f > max)
+    d_ = atoi(s_.c_str());
+    f_ = atof(s_.c_str());
+    if (f_ < min_ || f_ > max_)
     {
-        I_Warning("Value %g exceeds lower/upper limits for %s! Resetting to default value!\n", f, name);
-        s = def;
-        d = atoi(s.c_str());
-        f = atof(s.c_str());
+        I_Warning(
+            "Value %g exceeds lower/upper limits for %s! Resetting to default "
+            "value!\n",
+            f_, name_);
+        s_ = def_;
+        d_ = atoi(s_.c_str());
+        f_ = atof(s_.c_str());
     }
 }
 
 //----------------------------------------------------------------------------
 
-static cvar_c *MergeSort(cvar_c *list)
+static ConsoleVariable *MergeSort(ConsoleVariable *list)
 {
     SYS_ASSERT(list != nullptr);
 
     // only a single item?  done!
-    if (list->next == nullptr)
-        return list;
+    if (list->next_ == nullptr) return list;
 
     // split into left and right lists
-    cvar_c *L = nullptr;
-    cvar_c *R = nullptr;
+    ConsoleVariable *L = nullptr;
+    ConsoleVariable *R = nullptr;
 
     while (list != nullptr)
     {
-        cvar_c *var = list;
-        list        = list->next;
+        ConsoleVariable *var = list;
+        list                 = list->next_;
 
-        var->next = L;
-        L         = var;
+        var->next_ = L;
+        L          = var;
 
         std::swap(L, R);
     }
@@ -191,63 +199,63 @@ static cvar_c *MergeSort(cvar_c *list)
     R = MergeSort(R);
 
     // now merge them
-    cvar_c *tail = nullptr;
+    ConsoleVariable *tail = nullptr;
 
     while (L != nullptr || R != nullptr)
     {
         // pick the smallest name
         if (L == nullptr)
             std::swap(L, R);
-        else if (R != nullptr && epi::StringCaseCompareASCII(L->name, R->name) > 0)
+        else if (R != nullptr &&
+                 epi::StringCaseCompareASCII(L->name_, R->name_) > 0)
             std::swap(L, R);
 
         // remove it, add to tail of the new list
-        cvar_c *var = L;
-        L           = L->next;
+        ConsoleVariable *var = L;
+        L                    = L->next_;
 
         if (list == nullptr)
             list = var;
         else
-            tail->next = var;
+            tail->next_ = var;
 
-        var->next = nullptr;
-        tail      = var;
+        var->next_ = nullptr;
+        tail       = var;
     }
 
     return list;
 }
 
-void CON_SortVars()
+void ConsoleSortVariables()
 {
-    all_cvars = MergeSort(all_cvars);
+    all_console_variables = MergeSort(all_console_variables);
 }
 
-void CON_ResetAllVars()
+void ConsoleResetAllVariables()
 {
-    for (cvar_c *var = all_cvars; var != nullptr; var = var->next)
+    for (ConsoleVariable *var = all_console_variables; var != nullptr;
+         var                  = var->next_)
     {
-        if (!(var->flags & CVAR_NO_RESET))
-            *var = var->def;
+        if (!(var->flags_ & kConsoleVariableFlagNoReset)) *var = var->def_;
     }
 }
 
-cvar_c *CON_FindVar(const char *name)
+ConsoleVariable *ConsoleFindVariable(const char *name)
 {
-    for (cvar_c *var = all_cvars; var != nullptr; var = var->next)
+    for (ConsoleVariable *var = all_console_variables; var != nullptr;
+         var                  = var->next_)
     {
-        if (epi::StringCaseCompareASCII(var->name, name) == 0)
-            return var;
+        if (epi::StringCaseCompareASCII(var->name_, name) == 0) return var;
     }
 
     return nullptr;
 }
 
-bool CON_MatchPattern(const char *name, const char *pat)
+bool ConsoleMatchPattern(const char *name, const char *pat)
 {
     while (*name && *pat)
     {
-        if (*name != *pat)
-            return false;
+        if (*name != *pat) return false;
 
         name++;
         pat++;
@@ -256,34 +264,33 @@ bool CON_MatchPattern(const char *name, const char *pat)
     return (*pat == 0);
 }
 
-int CON_MatchAllVars(std::vector<const char *> &list, const char *pattern)
+int ConsoleMatchAllVariables(std::vector<const char *> &list,
+                             const char                *pattern)
 {
     list.clear();
 
-    for (cvar_c *var = all_cvars; var != nullptr; var = var->next)
+    for (ConsoleVariable *var = all_console_variables; var != nullptr;
+         var                  = var->next_)
     {
-        if (!CON_MatchPattern(var->name, pattern))
-            continue;
+        if (!ConsoleMatchPattern(var->name_, pattern)) continue;
 
-        list.push_back(var->name);
+        list.push_back(var->name_);
     }
 
     return (int)list.size();
 }
 
-void CON_HandleProgramArgs(void)
+void ConsoleHandleProgramArguments(void)
 {
     for (size_t p = 1; p < argv::list.size(); p++)
     {
-        if (!argv::IsOption(p))
-            continue;
+        if (!argv::IsOption(p)) continue;
 
         std::string s = argv::list[p];
 
-        cvar_c *var = CON_FindVar(s.data() + 1);
+        ConsoleVariable *var = ConsoleFindVariable(s.data() + 1);
 
-        if (var == nullptr)
-            continue;
+        if (var == nullptr) continue;
 
         p++;
 
@@ -293,26 +300,27 @@ void CON_HandleProgramArgs(void)
             continue;
         }
 
-        // FIXME allow CVAR_ROM here ?
+        // FIXME allow kConsoleVariableFlagReadOnly here ?
 
         *var = argv::list[p].c_str();
     }
 }
 
-int CON_PrintVars(const char *match, bool show_default)
+int ConsolePrintVariables(const char *match, bool show_default)
 {
     int total = 0;
 
-    for (cvar_c *var = all_cvars; var != nullptr; var = var->next)
+    for (ConsoleVariable *var = all_console_variables; var != nullptr;
+         var                  = var->next_)
     {
         if (match && *match)
-            if (!strstr(var->name, match))
-                continue;
+            if (!strstr(var->name_, match)) continue;
 
         if (show_default)
-            I_Printf("  %-20s \"%s\" (%s)\n", var->name, var->c_str(), var->def);
+            I_Printf("  %-20s \"%s\" (%s)\n", var->name_, var->c_str(),
+                     var->def_);
         else
-            I_Printf("  %-20s \"%s\"\n", var->name, var->c_str());
+            I_Printf("  %-20s \"%s\"\n", var->name_, var->c_str());
 
         total++;
     }
@@ -320,17 +328,20 @@ int CON_PrintVars(const char *match, bool show_default)
     return total;
 }
 
-void CON_WriteVars(FILE *f)
+void ConsoleWriteVariables(FILE *f)
 {
-    for (cvar_c *var = all_cvars; var != nullptr; var = var->next)
+    for (ConsoleVariable *var = all_console_variables; var != nullptr;
+         var                  = var->next_)
     {
-        if (var->flags & CVAR_ARCHIVE)
+        if (var->flags_ & kConsoleVariableFlagArchive)
         {
             std::string line;
-            if (var->flags & CVAR_PATH)
-                line = epi::SanitizePath(epi::StringFormat("/%s\t\"%s\"\n", var->name, var->c_str()));
+            if (var->flags_ & kConsoleVariableFlagFilepath)
+                line = epi::SanitizePath(epi::StringFormat(
+                    "/%s\t\"%s\"\n", var->name_, var->c_str()));
             else
-                line = epi::StringFormat("/%s\t\"%s\"\n", var->name, var->c_str());
+                line = epi::StringFormat("/%s\t\"%s\"\n", var->name_,
+                                         var->c_str());
             fwrite(line.data(), line.size(), 1, f);
         }
     }

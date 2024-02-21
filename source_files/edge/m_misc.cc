@@ -72,7 +72,7 @@
 //
 bool save_screenshot_valid = false;
 
-extern cvar_c s_soundfont;
+extern ConsoleVariable s_soundfont;
 extern bool   var_pc_speaker_mode;
 int           var_midi_player  = 0;
 int           var_sound_stereo = 0;
@@ -240,7 +240,7 @@ void M_SaveDefaults(void)
     }
 
     // console variables
-    CON_WriteVars(f);
+    ConsoleWriteVariables(f);
 
     // normal variables
     for (int i = 0; i < numdefaults; i++)
@@ -284,7 +284,7 @@ static void SetToBaseValue(default_t *def)
     }
 }
 
-void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar)
+void M_ResetDefaults(int _dummy, ConsoleVariable *_dummy_cvar)
 {
     (void)_dummy;
     (void)_dummy_cvar;
@@ -297,7 +297,7 @@ void M_ResetDefaults(int _dummy, cvar_c *_dummy_cvar)
         SetToBaseValue(defaults + i);
     }
 
-    CON_ResetAllVars();
+    ConsoleResetAllVariables();
 
     // Set default SF2 location in s_soundfont CVAR
     // We can't store this as a CVAR default since it is path-dependent
@@ -340,7 +340,7 @@ static void ParseConfigBlock(epi::Lexer &lex)
         {
             std::string try_cvar = key;
             try_cvar.append(" ").append(value);
-            CON_TryCommand(try_cvar.c_str());
+            ConsoleTryCommand(try_cvar.c_str());
         }
         else if (tok == epi::kTokenNumber)
         {

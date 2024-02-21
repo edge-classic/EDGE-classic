@@ -563,14 +563,14 @@ void G_SpawnVoodooDolls(player_t *p)
 }
 
 // number of wanted dogs (1-3)
-DEF_CVAR(dogs, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(dogs, "0", kConsoleVariableFlagArchive)
 
 void G_SpawnHelper(int pnum)
 {
     if (pnum == 0)
         return;
 
-    if (pnum > dogs.d)
+    if (pnum > dogs.d_)
         return;
 
     spawnpoint_t *point = G_FindCoopPlayer(pnum + 1);

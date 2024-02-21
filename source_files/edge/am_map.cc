@@ -49,11 +49,11 @@
 #include "r_modes.h"
 #include "str_compare.h"
 
-DEF_CVAR(automap_debug_bsp, "0", 0)
-DEF_CVAR(automap_debug_collisions, "0", 0)
-DEF_CVAR(automap_gridsize, "128", CVAR_ARCHIVE)
-DEF_CVAR(automap_keydoor_text, "0", CVAR_ARCHIVE)
-DEF_CVAR(automap_smoothing, "1", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_bsp, "0", kConsoleVariableFlagNone)
+EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_collisions, "0", kConsoleVariableFlagNone)
+EDGE_DEFINE_CONSOLE_VARIABLE(automap_gridsize, "128", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(automap_keydoor_text, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(automap_smoothing, "1", kConsoleVariableFlagArchive)
 
 // Automap colors
 
@@ -173,7 +173,7 @@ static AutomapArrowStyle current_arrow_type = kAutomapArrowStyleDoom;
 bool rotate_map            = false;
 bool automap_keydoor_blink = false;
 
-extern cvar_c r_doubleframes;
+extern ConsoleVariable r_doubleframes;
 
 extern style_c *automap_style;  // FIXME: put in header
 
@@ -407,9 +407,9 @@ bool AutomapResponder(event_t *ev)
 
         // -ACB- 1998/08/10 Use DDF Lang Reference
         if (follow_player)
-            CON_PlayerMessageLDF(consoleplayer, "AutoMapFollowOn");
+            ConsolePlayerMessageLDF(consoleplayer, "AutoMapFollowOn");
         else
-            CON_PlayerMessageLDF(consoleplayer, "AutoMapFollowOff");
+            ConsolePlayerMessageLDF(consoleplayer, "AutoMapFollowOff");
 
         return true;
     }
@@ -419,9 +419,9 @@ bool AutomapResponder(event_t *ev)
         grid = !grid;
         // -ACB- 1998/08/10 Use DDF Lang Reference
         if (grid)
-            CON_PlayerMessageLDF(consoleplayer, "AutoMapGridOn");
+            ConsolePlayerMessageLDF(consoleplayer, "AutoMapGridOn");
         else
-            CON_PlayerMessageLDF(consoleplayer, "AutoMapGridOff");
+            ConsolePlayerMessageLDF(consoleplayer, "AutoMapGridOff");
 
         return true;
     }
@@ -429,7 +429,7 @@ bool AutomapResponder(event_t *ev)
     if (E_MatchesKey(key_automap_mark, sym))
     {
         // -ACB- 1998/08/10 Use DDF Lang Reference
-        CON_PlayerMessage(consoleplayer, "%s %d", language["AutoMapMarkedSpot"],
+        ConsolePlayerMessage(consoleplayer, "%s %d", language["AutoMapMarkedSpot"],
                           mark_point_number + 1);
         AddMark();
         return true;
@@ -438,7 +438,7 @@ bool AutomapResponder(event_t *ev)
     if (E_MatchesKey(key_automap_clear, sym))
     {
         // -ACB- 1998/08/10 Use DDF Lang Reference
-        CON_PlayerMessageLDF(consoleplayer, "AutoMapMarksClear");
+        ConsolePlayerMessageLDF(consoleplayer, "AutoMapMarksClear");
         ClearMarks();
         return true;
     }
@@ -530,7 +530,7 @@ static void DrawMLine(AutomapLine *ml, RGBAColor rgb, bool thick = true)
 {
     if (hide_lines) return;
 
-    if (!automap_smoothing.d) thick = false;
+    if (!automap_smoothing.d_) thick = false;
 
     float x1 = MapToFrameCoordinatesX(ml->a.x, 0);
     float y1 = MapToFrameCoordinatesY(ml->a.y, 0);
@@ -564,7 +564,7 @@ static void DrawMLineDoor(AutomapLine *ml, RGBAColor rgb)
     // Lobo 2023: Make keyed doors pulse
     if (automap_keydoor_blink)
     {
-        linewidth = gametic % (32 * (r_doubleframes.d ? 2 : 1));
+        linewidth = gametic % (32 * (r_doubleframes.d_ ? 2 : 1));
 
         if (linewidth >= 16)
             linewidth = 2.0 + (linewidth * 0.1f);
@@ -649,7 +649,7 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey,
 {
     if (hide_lines) return;
 
-    if (automap_keydoor_text.d ==
+    if (automap_keydoor_text.d_ ==
         0)  // Only if we have Keyed Doors Named turned on
         return;
 
@@ -684,11 +684,11 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey,
     float TextSize = 0.4f * map_scale;
     if (map_scale > 5.0f)  // only draw the text if we're zoomed in?
     {
-        if (automap_keydoor_text.d == 1)
+        if (automap_keydoor_text.d_ == 1)
         {
             HUD_DrawText(x1, y1, CleanName.c_str(), TextSize);
         }
-        else if (automap_keydoor_text.d > 1)
+        else if (automap_keydoor_text.d_ > 1)
         {
             if (TheObject)
             {
@@ -735,7 +735,7 @@ static void DrawGrid()
 {
     AutomapLine ml;
 
-    int grid_size = HMM_MAX(4, automap_gridsize.d);
+    int grid_size = HMM_MAX(4, automap_gridsize.d_);
 
     int mx0 = int(map_center_x);
     int my0 = int(map_center_y);
@@ -833,7 +833,7 @@ static void AutomapWalkSeg(seg_t *seg)
 
     if (seg->miniseg)
     {
-        if (automap_debug_bsp.d)
+        if (automap_debug_bsp.d_)
         {
             if (seg->partner && seg > seg->partner) return;
 
@@ -1085,7 +1085,7 @@ static constexpr uint8_t kAutomapThinTriangleGuyLines =
 
 static void AutomapDrawPlayer(mobj_t *mo)
 {
-    if (automap_debug_collisions.d)
+    if (automap_debug_collisions.d_)
         DrawObjectBounds(mo, am_colors[kAutomapColorPlayer]);
 
     if (!netgame)
@@ -1146,7 +1146,7 @@ static void AutomapWalkThing(mobj_t *mo)
     else if (mo->extendedflags & kExtendedFlagMonster)
         index = kAutomapColorMonster;
 
-    if (automap_debug_collisions.d)
+    if (automap_debug_collisions.d_)
     {
         DrawObjectBounds(mo, am_colors[index]);
         return;

@@ -284,7 +284,7 @@ static void RAD_CheckForTime(const char *info, void *storage)
         return;
     }
 
-    *dest = RoundToInt(val * (float)kTicRate);
+    *dest = RoundToInteger(val * (float)kTicRate);
 }
 
 static ArmourType RAD_CheckForArmourType(const char *info)
@@ -562,12 +562,12 @@ static void RAD_ComputeScriptCRC(rad_script_t *scr)
     scr->crc += (int)scr->max_players;
     scr->crc += (int)scr->repeat_count;
 
-    scr->crc += (int)RoundToInt(scr->x);
-    scr->crc += (int)RoundToInt(scr->y);
-    scr->crc += (int)RoundToInt(scr->z);
-    scr->crc += (int)RoundToInt(scr->rad_x);
-    scr->crc += (int)RoundToInt(scr->rad_y);
-    scr->crc += (int)RoundToInt(scr->rad_z);
+    scr->crc += (int)RoundToInteger(scr->x);
+    scr->crc += (int)RoundToInteger(scr->y);
+    scr->crc += (int)RoundToInteger(scr->z);
+    scr->crc += (int)RoundToInteger(scr->rad_x);
+    scr->crc += (int)RoundToInteger(scr->rad_y);
+    scr->crc += (int)RoundToInteger(scr->rad_z);
     scr->crc += scr->sector_tag;
     scr->crc += scr->sector_index;
 

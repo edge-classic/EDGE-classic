@@ -79,7 +79,7 @@
 
 static bool level_active = false;
 
-DEF_CVAR(udmf_strict, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(udmf_strict, "0", kConsoleVariableFlagArchive)
 
 //
 // MAP related Lookup tables.
@@ -139,7 +139,7 @@ static std::string udmf_lump;
 // There is two values for every line: side0 and side1.
 static int *temp_line_sides;
 
-DEF_CVAR(m_goobers, "0", 0)
+EDGE_DEFINE_CONSOLE_VARIABLE(m_goobers, "0", kConsoleVariableFlagNone)
 
 struct musinfo_mapping_s
 {
@@ -427,7 +427,7 @@ static void LoadSectors(int lump)
         ss->c_h = AlignedLittleEndianS16(ms->ceil_h);
 
         // return to wolfenstein?
-        if (m_goobers.d)
+        if (m_goobers.d_)
         {
             ss->f_h = 0;
             ss->c_h = (ms->floor_h == ms->ceil_h) ? 0 : 128.0f;
@@ -1698,7 +1698,7 @@ static void LoadUDMFSectors()
             ss->c_h      = cz;
 
             // return to wolfenstein?
-            if (m_goobers.d)
+            if (m_goobers.d_)
             {
                 ss->f_h = 0;
                 ss->c_h = (AlmostEquals(fz, cz)) ? 0 : 128.0f;
@@ -2005,7 +2005,7 @@ static void LoadUDMFSideDefs()
 
             if (sd->top.image == nullptr)
             {
-                if (m_goobers.d)
+                if (m_goobers.d_)
                     sd->top.image = W_ImageLookup(bottom_tex, kImageNamespaceTexture);
                 else
                     sd->top.image = W_ImageLookup(top_tex, kImageNamespaceTexture);
@@ -2556,7 +2556,7 @@ static void LoadUDMFCounts()
         {
             lex.Next(section);
 
-            if (udmf_strict.d)
+            if (udmf_strict.d_)
             {
                 if (section != "doom" && section != "heretic" && section != "edge-classic" &&
                     section != "zdoomtranslated")
@@ -2648,7 +2648,7 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
 
     if (sd->top.image == nullptr)
     {
-        if (m_goobers.d)
+        if (m_goobers.d_)
             sd->top.image = W_ImageLookup(upper_tex, kImageNamespaceTexture);
         else
             sd->top.image = W_ImageLookup(upper_tex, kImageNamespaceTexture);

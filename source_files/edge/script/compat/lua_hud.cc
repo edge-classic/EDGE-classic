@@ -13,7 +13,7 @@
 #include "rad_trig.h"
 #include "r_colormap.h"
 
-extern cvar_c      r_doubleframes;
+extern ConsoleVariable      r_doubleframes;
 extern bool        erraticism_active;
 extern std::string w_map_title;
 
@@ -145,7 +145,7 @@ static int HD_check_automap(lua_State *L)
 //
 static int HD_get_time(lua_State *L)
 {
-    int time = I_GetTime() / (r_doubleframes.d ? 2 : 1);
+    int time = I_GetTime() / (r_doubleframes.d_? 2 : 1);
     lua_pushnumber(L, (double)time);
     return 1;
 }
@@ -709,7 +709,7 @@ static int HD_play_sound(lua_State *L)
 //
 static int HD_screen_aspect(lua_State *L)
 {
-    lua_pushnumber(L, std::ceil(v_pixelaspect.f * 100.0) / 100.0);
+    lua_pushnumber(L, std::ceil(v_pixelaspect.f_ * 100.0) / 100.0);
     return 1;
 }
 

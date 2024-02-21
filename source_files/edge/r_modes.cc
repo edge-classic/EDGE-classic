@@ -50,14 +50,14 @@ int SCREENBITS;
 int DISPLAYMODE;
 
 scrmode_c borderless_mode;
-DEF_CVAR(tf_screenwidth, "0", CVAR_ARCHIVE)
-DEF_CVAR(tf_screenheight, "0", CVAR_ARCHIVE)
-DEF_CVAR(tf_screendepth, "0", CVAR_ARCHIVE)
-DEF_CVAR(tf_displaymode, "-1", CVAR_ARCHIVE)
-DEF_CVAR(tw_screenwidth, "0", CVAR_ARCHIVE)
-DEF_CVAR(tw_screenheight, "0", CVAR_ARCHIVE)
-DEF_CVAR(tw_screendepth, "0", CVAR_ARCHIVE)
-DEF_CVAR(tw_displaymode, "-1", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(tf_screenwidth, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(tf_screenheight, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(tf_screendepth, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(tf_displaymode, "-1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(tw_screenwidth, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(tw_screenheight, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(tw_screendepth, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(tw_displaymode, "-1", kConsoleVariableFlagArchive)
 
 std::vector<scrmode_c *> screen_modes;
 
@@ -230,18 +230,18 @@ void R_ToggleFullscreen(void)
     scrmode_c toggle;
     if (DISPLAYMODE > scrmode_c::SCR_WINDOW)
     {
-        toggle.depth        = tw_screendepth.d;
-        toggle.height       = tw_screenheight.d;
-        toggle.width        = tw_screenwidth.d;
+        toggle.depth        = tw_screendepth.d_;
+        toggle.height       = tw_screenheight.d_;
+        toggle.width        = tw_screenwidth.d_;
         toggle.display_mode = scrmode_c::SCR_WINDOW;
         R_ChangeResolution(&toggle);
     }
     else
     {
-        toggle.depth        = tf_screendepth.d;
-        toggle.height       = tf_screenheight.d;
-        toggle.width        = tf_screenwidth.d;
-        toggle.display_mode = tf_displaymode.d;
+        toggle.depth        = tf_screendepth.d_;
+        toggle.height       = tf_screenheight.d_;
+        toggle.width        = tf_screenwidth.d_;
+        toggle.display_mode = tf_displaymode.d_;
         R_ChangeResolution(&toggle);
     }
     R_SoftInitResolution();
@@ -299,7 +299,7 @@ static bool DoExecuteChangeResolution(scrmode_c *mode)
 
     I_DeterminePixelAspect();
 
-    I_Printf("Pixel aspect: %1.3f\n", v_pixelaspect.f);
+    I_Printf("Pixel aspect: %1.3f\n", v_pixelaspect.f_);
 
     // gfx card doesn't like to switch too rapidly
     I_Sleep(250);

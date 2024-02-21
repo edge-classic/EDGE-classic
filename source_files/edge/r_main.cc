@@ -37,11 +37,11 @@ int glmax_clip_planes;
 int glmax_tex_size;
 int glmax_tex_units;
 
-DEF_CVAR(r_nearclip, "4", CVAR_ARCHIVE)
-DEF_CVAR(r_farclip, "64000", CVAR_ARCHIVE)
-DEF_CVAR(r_culling, "0", CVAR_ARCHIVE)
-DEF_CVAR_CLAMPED(r_culldist, "3000", CVAR_ARCHIVE, 1000.0f, 16000.0f)
-DEF_CVAR(r_cullfog, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_nearclip, "4", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_farclip, "64000", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_culling, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(r_culldist, "3000", kConsoleVariableFlagArchive, 1000.0f, 16000.0f)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_cullfog, "0", kConsoleVariableFlagArchive)
 
 //
 // RGL_SetupMatrices2D
@@ -106,8 +106,8 @@ void RGL_SetupMatrices3D(void)
 
     glLoadIdentity();
 
-    glFrustum(-view_x_slope * r_nearclip.f, view_x_slope * r_nearclip.f, -view_y_slope * r_nearclip.f,
-              view_y_slope * r_nearclip.f, r_nearclip.f, r_farclip.f);
+    glFrustum(-view_x_slope * r_nearclip.f_, view_x_slope * r_nearclip.f_, -view_y_slope * r_nearclip.f_,
+              view_y_slope * r_nearclip.f_, r_nearclip.f_, r_farclip.f_);
 
     // calculate look-at matrix
 
@@ -120,7 +120,7 @@ void RGL_SetupMatrices3D(void)
 
     // turn on lighting.  Some drivers (e.g. TNT2) don't work properly
     // without it.
-    if (r_colorlighting.d)
+    if (r_colorlighting.d_)
     {
         glEnable(GL_LIGHTING);
         glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
@@ -128,7 +128,7 @@ void RGL_SetupMatrices3D(void)
     else
         glDisable(GL_LIGHTING);
 
-    if (r_colormaterial.d)
+    if (r_colormaterial.d_)
     {
         glEnable(GL_COLOR_MATERIAL);
         glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);

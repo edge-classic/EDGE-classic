@@ -40,7 +40,7 @@ int Find(std::string longName, int *numParams = nullptr);
 std::string Value(std::string longName, int *numParams = nullptr);
 
 void CheckBooleanParm(std::string parm, bool *boolval, bool reverse);
-void CheckBooleanCVar(std::string parm, cvar_c *var, bool reverse);
+void CheckBooleanCVar(std::string parm, ConsoleVariable *var, bool reverse);
 
 void ApplyResponseFile(std::string name);
 

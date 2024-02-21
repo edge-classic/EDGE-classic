@@ -37,7 +37,7 @@
 
 // #include <vector>
 
-extern cvar_c r_doubleframes;
+extern ConsoleVariable r_doubleframes;
 
 // we're limited to one wipe at a time...
 static wipetype_e cur_wipe_effect = WIPE_None;
@@ -370,7 +370,7 @@ bool RGL_DoWipe(void)
 
     // determine how many tics since we started.  If this is the first
     // call to DoWipe() since InitWipe(), then the clock starts now.
-    int nowtime = I_GetTime() / (r_doubleframes.d ? 2 : 1);
+    int nowtime = I_GetTime() / (r_doubleframes.d_? 2 : 1);
     int tics    = 0;
 
     if (cur_wipe_lasttime >= 0)

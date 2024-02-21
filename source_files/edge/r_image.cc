@@ -79,7 +79,7 @@ extern image_data_c *ReadAsEpiBlock(image_c *rim);
 
 extern epi::File *OpenUserFileOrLump(ImageDefinition *def);
 
-extern cvar_c r_doubleframes;
+extern ConsoleVariable r_doubleframes;
 
 extern void DeleteSkyTextures(void);
 extern void DeleteColourmapTextures(void);
@@ -155,7 +155,7 @@ static void do_Animate(real_image_container_c &bucket)
 
         SYS_ASSERT(rim->anim.count > 0);
 
-        rim->anim.count -= (!r_doubleframes.d || !(hudtic & 1)) ? 1 : 0;
+        rim->anim.count -= (!r_doubleframes.d_|| !(hudtic & 1)) ? 1 : 0;
 
         if (rim->anim.count == 0 && rim->anim.cur->anim.next)
         {
@@ -1335,7 +1335,7 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
 
     if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
     {
-        rim->swirled_gametic = hudtic / (r_doubleframes.d ? 2 : 1);
+        rim->swirled_gametic = hudtic / (r_doubleframes.d_? 2 : 1);
         tmp_img->Swirl(rim->swirled_gametic,
                        rim->liquid_type); // Using leveltime disabled swirl for intermission screens
     }
@@ -1880,7 +1880,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim, const Colormap *trans, bool d
 
     if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
     {
-        if (!erraticism_active && !time_stop_active && rim->swirled_gametic != hudtic / (r_doubleframes.d ? 2 : 1))
+        if (!erraticism_active && !time_stop_active && rim->swirled_gametic != hudtic / (r_doubleframes.d_? 2 : 1))
         {
             if (rc->tex_id != 0)
             {

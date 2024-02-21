@@ -52,7 +52,7 @@ class abstract_music_c
 
 /* VARIABLES */
 
-extern cvar_c mus_volume;
+extern ConsoleVariable mus_volume;
 extern int    entry_playing;
 extern bool   var_pc_speaker_mode;
 

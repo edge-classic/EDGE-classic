@@ -54,8 +54,8 @@ extern void        VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char 
 bool netgame = false;
 
 // 70Hz
-DEF_CVAR(r_doubleframes, "1", CVAR_ARCHIVE)
-DEF_CVAR(n_busywait, "1", CVAR_ROM)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_doubleframes, "1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(n_busywait, "1", kConsoleVariableFlagReadOnly)
 
 #if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
 HANDLE windows_timer = nullptr;
@@ -176,9 +176,9 @@ void N_GrabTiccmds(void)
         memcpy(&p->cmd, p->in_cmds + buf, sizeof(ticcmd_t));
     }
     if (LUA_UseLuaHud())
-        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
+        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "gametic", gametic / (r_doubleframes.d_? 2 : 1));
     else
-        VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
+        VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d_? 2 : 1));
 
     gametic++;
 }
@@ -250,7 +250,7 @@ int N_TryRunTics()
             realtics        = nowtime - last_tryrun_tic;
             last_tryrun_tic = nowtime;
 
-            if (!n_busywait.d && realtics <= 0)
+            if (!n_busywait.d_&& realtics <= 0)
             {
                 I_Sleep(5);
             }
@@ -285,7 +285,7 @@ int N_TryRunTics()
     {
         N_NetUpdate();
 
-        if (!n_busywait.d && (maketic < gametic + tics))
+        if (!n_busywait.d_&& (maketic < gametic + tics))
         {
             I_Sleep(5);
         }

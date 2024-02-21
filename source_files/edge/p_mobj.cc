@@ -75,11 +75,11 @@
 
 #define DEBUG_MOBJ 0
 
-extern cvar_c r_doubleframes;
+extern ConsoleVariable r_doubleframes;
 
-DEF_CVAR(g_cullthinkers, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(g_cullthinkers, "0", kConsoleVariableFlagArchive)
 
-DEF_CVAR(g_gravity, "1.0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(g_gravity, "1.0", kConsoleVariableFlagArchive)
 
 // List of all objects in map.
 mobj_t *mobjlisthead;
@@ -818,7 +818,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
     float xmove = mo->mom.X;
     float ymove = mo->mom.Y;
 
-    if (do_extra && r_doubleframes.d) // 70Hz
+    if (do_extra && r_doubleframes.d_) // 70Hz
     {
         xmove *= 0.52;
         ymove *= 0.52;
@@ -1046,7 +1046,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
     }
 
     // 70hz : adjust friction to account for extra tic
-    if (do_extra && r_doubleframes.d)
+    if (do_extra && r_doubleframes.d_)
     {
         friction = sqrt(friction);
     }
@@ -1096,7 +1096,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
     // -KM- 1998/11/25 Gravity is now not precalculated so that
     //  menu changes affect instantly.
     float gravity =
-        props->gravity / 8.0f * (float)level_flags.menu_grav / kGravityDefault * g_gravity.f; // New global gravity menu item
+        props->gravity / 8.0f * (float)level_flags.menu_grav / kGravityDefault * g_gravity.f_; // New global gravity menu item
 
     // check for smooth step up
     if (mo->player && mo->player->mo == mo && mo->z < mo->floorz)
@@ -1108,7 +1108,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
 
     zmove = mo->mom.Z * (1.0f - props->viscosity);
 
-    if (do_extra && r_doubleframes.d) // 70 Hz
+    if (do_extra && r_doubleframes.d_) // 70 Hz
         zmove *= 0.52;
 
     if (mo->on_slope && mo->z > mo->floorz && std::abs(mo->z - mo->floorz) < 6.0f) // 1/4 of default step size
@@ -1155,11 +1155,11 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
             bool  fly_or_swim =
                 mo->player && (mo->player->swimming || mo->player->powers[kPowerTypeJetpack] > 0 || mo->on_ladder >= 0);
 
-            if (mo->player && gravity > 0 && -zmove > (OOF_SPEED / (r_doubleframes.d ? 2 : 1)) && !fly_or_swim)
+            if (mo->player && gravity > 0 && -zmove > (OOF_SPEED / (r_doubleframes.d_? 2 : 1)) && !fly_or_swim)
             {
                 // Squat down. Decrease viewheight for a moment after hitting the
                 // ground (hard), and utter appropriate sound.
-                mo->player->deltaviewheight = zmove / 8.0f * (r_doubleframes.d ? 2.0 : 1.0); // 70Hz
+                mo->player->deltaviewheight = zmove / 8.0f * (r_doubleframes.d_? 2.0 : 1.0); // 70Hz
                 if (mo->info->maxfall_ > 0 && -mo->mom.Z > hurt_momz)
                 {
                     if (!(mo->player->cheats & CF_GODMODE) && mo->player->powers[kPowerTypeInvulnerable] < 1)
@@ -1237,7 +1237,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
         if (!(mo->flags & kMapObjectFlagNoGravity) && !(mo->player && mo->player->powers[kPowerTypeJetpack] > 0) && !(mo->on_ladder >= 0))
         {
             // 70 Hz: apply gravity only on real tics
-            if (!extra_tic || !r_doubleframes.d)
+            if (!extra_tic || !r_doubleframes.d_)
                 mo->mom.Z -= gravity / (mo->mbf21flags & kMBF21FlagLowGravity ? 8 : 1);
         }
     }
@@ -1258,7 +1258,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
             bool  fly_or_swim =
                 mo->player && (mo->player->swimming || mo->player->powers[kPowerTypeJetpack] > 0 || mo->on_ladder >= 0);
 
-            if (mo->player && gravity < 0 && zmove > (OOF_SPEED / (r_doubleframes.d ? 2 : 1)) && !fly_or_swim)
+            if (mo->player && gravity < 0 && zmove > (OOF_SPEED / (r_doubleframes.d_? 2 : 1)) && !fly_or_swim)
             {
                 mo->player->deltaviewheight = zmove / 8.0f;
                 S_StartFX(mo->info->oof_sound_, P_MobjGetSfxCategory(mo), mo);
@@ -1318,7 +1318,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
         if (!(mo->flags & kMapObjectFlagNoGravity) && !(mo->player && mo->player->powers[kPowerTypeJetpack] > 0) && !(mo->on_ladder >= 0))
         {
             // 70 Hz: apply gravity only on real tics
-            if (!extra_tic || !r_doubleframes.d)
+            if (!extra_tic || !r_doubleframes.d_)
                 mo->mom.Z += -gravity / (mo->mbf21flags & kMBF21FlagLowGravity ? 8 : 1);
         }
     }
@@ -1369,7 +1369,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
 
     mobj->ClearStaleRefs();
 
-    if (!extra_tic || !r_doubleframes.d)
+    if (!extra_tic || !r_doubleframes.d_)
     {
         SYS_ASSERT(mobj->state);
         SYS_ASSERT(mobj->refcount >= 0);
@@ -1410,7 +1410,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
     {
         P_CalcFullProperties(mobj, &player_props);
 
-        if (!extra_tic || !r_doubleframes.d)
+        if (!extra_tic || !r_doubleframes.d_)
         {
             mobj->mom.X += player_props.push.X;
             mobj->mom.Y += player_props.push.Y;
@@ -1434,7 +1434,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
                     if (!((mobj->flags & kMapObjectFlagNoGravity) || (flags & kSectorFlagPushAll)) &&
                         (mobj->z <= mobj->floorz + 1.0f || (flags & kSectorFlagWholeRegion)))
                     {
-                        if (!extra_tic || !r_doubleframes.d)
+                        if (!extra_tic || !r_doubleframes.d_)
                         {
                             float push_mul = 1.0f;
 
@@ -1466,7 +1466,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
     if (mobj->flags & kMapObjectFlagMissile)
         do_extra = true;
 
-    if (!r_doubleframes.d || !extra_tic || do_extra)
+    if (!r_doubleframes.d_|| !extra_tic || do_extra)
     {
         if (do_extra && mobj->subsector->sector->floor_vertex_slope)
         {
@@ -1492,7 +1492,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
     }
 
     // FIXME factor out the player-related code from the rest
-    if (extra_tic && r_doubleframes.d)
+    if (extra_tic && r_doubleframes.d_)
         return;
 
     if (mobj->fuse >= 0)
@@ -1890,10 +1890,10 @@ void P_RunMobjThinkers(bool extra_tic)
         {
             if (time_stop_active)
                 continue;
-            if (!r_doubleframes.d)
+            if (!r_doubleframes.d_)
             {
-                if (!g_cullthinkers.d || (gametic / 2 %
-                                              RoundToInt(1 + R_PointToDist(players[consoleplayer]->mo->x,
+                if (!g_cullthinkers.d_|| (gametic / 2 %
+                                              RoundToInteger(1 + R_PointToDist(players[consoleplayer]->mo->x,
                                                                         players[consoleplayer]->mo->y, mo->x, mo->y) /
                                                               1500) ==
                                           0))
@@ -1905,15 +1905,15 @@ void P_RunMobjThinkers(bool extra_tic)
                 {
                     if (!(mo->flags & kMapObjectFlagMissile))
                         continue;
-                    else if (!g_cullthinkers.d ||
-                             ((gametic / 4) % RoundToInt(1 + R_PointToDist(players[consoleplayer]->mo->x,
+                    else if (!g_cullthinkers.d_||
+                             ((gametic / 4) % RoundToInteger(1 + R_PointToDist(players[consoleplayer]->mo->x,
                                                                         players[consoleplayer]->mo->y, mo->x, mo->y) /
                                                               1500) ==
                               0))
                         P_MobjThinker(mo, extra_tic);
                 }
-                else if (!g_cullthinkers.d ||
-                         ((gametic / 4) % RoundToInt(1 + R_PointToDist(players[consoleplayer]->mo->x,
+                else if (!g_cullthinkers.d_||
+                         ((gametic / 4) % RoundToInteger(1 + R_PointToDist(players[consoleplayer]->mo->x,
                                                                     players[consoleplayer]->mo->y, mo->x, mo->y) /
                                                           1500) ==
                           0))

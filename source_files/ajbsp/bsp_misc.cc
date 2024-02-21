@@ -689,8 +689,8 @@ Vertex *NewVertexDegenerate(Vertex *start, Vertex *end)
     dx /= dlen;
     dy /= dlen;
 
-    while (RoundToInt(vert->x_) == RoundToInt(start->x_) &&
-           RoundToInt(vert->y_) == RoundToInt(start->y_))
+    while (RoundToInteger(vert->x_) == RoundToInteger(start->x_) &&
+           RoundToInteger(vert->y_) == RoundToInteger(start->y_))
     {
         vert->x_ += dx;
         vert->y_ += dy;

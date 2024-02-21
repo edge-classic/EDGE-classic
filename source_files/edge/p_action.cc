@@ -3123,7 +3123,7 @@ void P_ActStandardLook(mobj_t *object)
     if (object->flags & kMapObjectFlagStealth)
         object->vis_target = VISIBLE;
 
-    if (g_aggression.d)
+    if (g_aggression.d_)
         if (CreateAggression(object) || CreateAggression(object))
             return;
 

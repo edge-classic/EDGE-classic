@@ -50,7 +50,7 @@
 
 #include "str_util.h"
 
-extern cvar_c r_forceflatlighting;
+extern ConsoleVariable r_forceflatlighting;
 
 // -AJA- 1999/06/30: added this
 uint8_t playpal_data[14][256][3];
@@ -68,7 +68,7 @@ static bool loaded_playpal = false;
 // Radiation suit, green shift.
 #define RADIATION_PAL 13
 
-DEF_CVAR(v_secbright, "5", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(v_secbright, "5", kConsoleVariableFlagArchive)
 
 // colour indices from palette
 int pal_black, pal_white, pal_gray239;
@@ -745,7 +745,7 @@ class colormap_shader_c : public abstract_shader_c
         }
 
         local_gl_vert_t *glvert =
-            RGL_BeginUnit(shape, num_vert, GL_MODULATE, tex, (simple_cmap || r_dumbmulti.d) ? GL_MODULATE : GL_DECAL,
+            RGL_BeginUnit(shape, num_vert, GL_MODULATE, tex, (simple_cmap || r_dumbmulti.d_) ? GL_MODULATE : GL_DECAL,
                           fade_tex, *pass_var, blending, fc_to_use, fd_to_use);
 
         for (int v_idx = 0; v_idx < num_vert; v_idx++)
@@ -880,15 +880,15 @@ class colormap_shader_c : public abstract_shader_c
   public:
     void Update()
     {
-        if (fade_tex == 0 || (r_forceflatlighting.d && lt_model != kLightingModelFlat) ||
-            (!r_forceflatlighting.d && lt_model != currmap->episode_->lighting_))
+        if (fade_tex == 0 || (r_forceflatlighting.d_&& lt_model != kLightingModelFlat) ||
+            (!r_forceflatlighting.d_&& lt_model != currmap->episode_->lighting_))
         {
             if (fade_tex != 0)
             {
                 glDeleteTextures(1, &fade_tex);
             }
 
-            if (r_forceflatlighting.d)
+            if (r_forceflatlighting.d_)
                 lt_model = kLightingModelFlat;
             else
                 lt_model = currmap->episode_->lighting_;
@@ -950,7 +950,7 @@ abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props, 
 
     shader->Update();
 
-    int lit_Nom = props->lightlevel + light_add + ((v_secbright.d - 5) * 10);
+    int lit_Nom = props->lightlevel + light_add + ((v_secbright.d_- 5) * 10);
 
     if (!(props->colourmap && (props->colourmap->special_ & kColorSpecialNoFlash)) || ren_extralight > 250)
     {

@@ -433,7 +433,7 @@ static void DrawLevelFinished(void)
             HUD_TileImage(-240, 0, 820, 200, leaving_bg_image);
         else
         {
-            if (r_titlescaling.d) // Fill Border
+            if (r_titlescaling.d_) // Fill Border
             {
                 if (!leaving_bg_image->blurred_version)
                     W_ImageStoreBlurred(leaving_bg_image, 0.75f);
@@ -596,7 +596,7 @@ static void DrawEnteringLevel(void)
             HUD_TileImage(-240, 0, 820, 200, entering_bg_image);
         else
         {
-            if (r_titlescaling.d) // Fill Border
+            if (r_titlescaling.d_) // Fill Border
             {
                 if (!entering_bg_image->blurred_version)
                     W_ImageStoreBlurred(entering_bg_image, 0.75f);
@@ -1815,7 +1815,7 @@ void WI_Drawer(void)
                 HUD_TileImage(-240, 0, 820, 200, bg_image); // Lobo: Widescreen support
             else
             {
-                if (r_titlescaling.d) // Fill Border
+                if (r_titlescaling.d_) // Fill Border
                 {
                     if (!bg_image->blurred_version)
                         W_ImageStoreBlurred(bg_image, 0.75f);

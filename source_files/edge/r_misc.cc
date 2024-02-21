@@ -49,7 +49,7 @@
 
 #include "AlmostEquals.h"
 
-DEF_CVAR(r_fov, "90", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_fov, "90", kConsoleVariableFlagArchive)
 
 int viewwindow_x;
 int viewwindow_y;

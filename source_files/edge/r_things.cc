@@ -71,10 +71,10 @@ extern bool erraticism_active;
 
 #define DEBUG 0
 
-DEF_CVAR(r_crosshair, "0", CVAR_ARCHIVE)     // shape
-DEF_CVAR(r_crosscolor, "0", CVAR_ARCHIVE)    // 0 .. 7
-DEF_CVAR(r_crosssize, "16.0", CVAR_ARCHIVE)  // pixels on a 320x200 screen
-DEF_CVAR(r_crossbright, "1.0", CVAR_ARCHIVE) // 1.0 is normal
+EDGE_DEFINE_CONSOLE_VARIABLE(r_crosshair, "0", kConsoleVariableFlagArchive)     // shape
+EDGE_DEFINE_CONSOLE_VARIABLE(r_crosscolor, "0", kConsoleVariableFlagArchive)    // 0 .. 7
+EDGE_DEFINE_CONSOLE_VARIABLE(r_crosssize, "16.0", kConsoleVariableFlagArchive)  // pixels on a 320x200 screen
+EDGE_DEFINE_CONSOLE_VARIABLE(r_crossbright, "1.0", kConsoleVariableFlagArchive) // 1.0 is normal
 
 float sprite_skew;
 
@@ -172,7 +172,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
     if (which == ps_crosshair)
     {
         if (!player->weapons[player->ready_wp].info->ignore_crosshair_scaling_)
-            ratio = r_crosssize.f / w;
+            ratio = r_crosssize.f_ / w;
 
         w *= ratio;
         h *= ratio;
@@ -310,7 +310,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
         if (fc_to_use != kRGBANoValue)
         {
-            int          mix_factor = RoundToInt(255.0f * (fd_to_use * 75));
+            int          mix_factor = RoundToInteger(255.0f * (fd_to_use * 75));
             RGBAColor mixme = epi::MixRGBA(epi::MakeRGBA(data.col[0].mod_R, data.col[0].mod_G, data.col[0].mod_B), fc_to_use, mix_factor);
             data.col[0].mod_R = epi::GetRGBARed(mixme);
             data.col[0].mod_G = epi::GetRGBAGreen(mixme);
@@ -427,15 +427,15 @@ static const RGBAColor crosshair_colors[8] = {
 
 static void DrawStdCrossHair(void)
 {
-    if (r_crosshair.d <= 0 || r_crosshair.d > 9)
+    if (r_crosshair.d_<= 0 || r_crosshair.d_> 9)
         return;
 
-    if (r_crosssize.f < 0.1 || r_crossbright.f < 0.1)
+    if (r_crosssize.f_ < 0.1 || r_crossbright.f_ < 0.1)
         return;
 
-    if (!crosshair_image || crosshair_which != r_crosshair.d)
+    if (!crosshair_image || crosshair_which != r_crosshair.d_)
     {
-        crosshair_which = r_crosshair.d;
+        crosshair_which = r_crosshair.d_;
 
         crosshair_image = W_ImageLookup(epi::StringFormat("STANDARD_CROSSHAIR_%d", crosshair_which).c_str());
     }
@@ -453,10 +453,10 @@ static void DrawStdCrossHair(void)
 
     xh_count += xh_dir;
 
-    RGBAColor color     = crosshair_colors[r_crosscolor.d & 7];
+    RGBAColor color     = crosshair_colors[r_crosscolor.d_& 7];
     float    intensity = 1.0f - xh_count / 100.0f;
 
-    intensity *= r_crossbright.f;
+    intensity *= r_crossbright.f_;
 
     float r = epi::GetRGBARed(color) * intensity / 255.0f;
     float g = epi::GetRGBAGreen(color) * intensity / 255.0f;
@@ -465,7 +465,7 @@ static void DrawStdCrossHair(void)
     float x = viewwindow_x + viewwindow_w / 2;
     float y = viewwindow_y + viewwindow_h / 2;
 
-    float w = RoundToInt(SCREENWIDTH * r_crosssize.f / 640.0f);
+    float w = RoundToInteger(SCREENWIDTH * r_crosssize.f_ / 640.0f);
 
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);

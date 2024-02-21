@@ -36,13 +36,13 @@
 
 // FIXME: Combine all these SDL bool vars into an int/enum'd flags structure
 
-extern cvar_c r_doubleframes;
+extern ConsoleVariable r_doubleframes;
 
 // Work around for alt-tabbing
 bool alt_is_down;
 bool eat_mouse_motion = true;
 
-DEF_CVAR(in_keypad, "1", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(in_keypad, "1", kConsoleVariableFlagArchive)
 
 bool nojoy; // what a wowser, joysticks completely disabled
 
@@ -66,7 +66,7 @@ bool left_trigger_pulled  = false;
 int TranslateSDLKey(SDL_Scancode key)
 {
     // if keypad is not wanted, convert to normal keys
-    if (!in_keypad.d)
+    if (!in_keypad.d_)
     {
         if (SDL_SCANCODE_KP_1 <= key && key < SDL_SCANCODE_KP_0)
             return '0' + (key - 88);
@@ -432,7 +432,7 @@ static void HandleGamepadTriggerEvent(SDL_Event *ev)
 
     event_t event;
 
-    int thresh = RoundToInt(*joy_deads[current_axis] * 32767.0f);
+    int thresh = RoundToInteger(*joy_deads[current_axis] * 32767.0f);
     int input  = ev->caxis.value;
 
     if (current_axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
@@ -856,7 +856,7 @@ int I_GetTime(void)
 {
     Uint32 t = SDL_GetTicks();
 
-    int factor = (r_doubleframes.d ? 70 : 35);
+    int factor = (r_doubleframes.d_? 70 : 35);
 
     // more complex than "t*70/1000" to give more accuracy
     return (t / 1000) * factor + (t % 1000) * factor / 1000;

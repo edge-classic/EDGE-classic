@@ -20,51 +20,47 @@
 // Originally based on the ZDoom console code, by Randy Heit
 // (rheit@iastate.edu).  Randy Heit has given his permission to
 // release this code under the GPL, for which the EDGE Team is very
-// grateful.  The original GPL'd version `c_consol.c' can be found
-// in the contrib/ directory.
-//
+// grateful.
 
+#include <stdarg.h>
 #include <string.h>
 
-#include "i_defs_gl.h"
-
-#include "font.h"
-#include "language.h"
-
-#include "str_compare.h"
-#include "str_util.h"
+#include <vector>
 
 #include "con_main.h"
 #include "con_var.h"
 #include "e_input.h"
 #include "e_player.h"
+#include "edge_profiling.h"
+#include "font.h"
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_stuff.h"
 #include "hu_style.h"
+#include "i_defs_gl.h"
 #include "i_system.h"
+#include "language.h"
 #include "m_argv.h"
 #include "r_draw.h"
 #include "r_image.h"
 #include "r_modes.h"
 #include "r_wipe.h"
+#include "str_compare.h"
+#include "str_util.h"
 #include "w_files.h"
 #include "w_wad.h"
-#include "edge_profiling.h"
-#include <stdarg.h>
-#include <vector>
 
-#define CON_WIPE_TICS 12
+static constexpr uint8_t kConsoleWipeTics = 12;
 
-DEF_CVAR(debug_fps, "0", CVAR_ARCHIVE)
-DEF_CVAR(debug_pos, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(debug_fps, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(debug_position, "0", kConsoleVariableFlagArchive)
 
-static visible_t con_visible;
+static ConsoleVisibility console_visible;
 
 // stores the console toggle effect
-static int     conwipeactive = 0;
-static int     conwipepos    = 0;
-static font_c *con_font;
+static int     console_wipe_active   = 0;
+static int     console_wipe_position = 0;
+static font_c *console_font;
 font_c        *endoom_font;
 
 // the console's background
@@ -74,94 +70,95 @@ static RGBAColor current_color;
 
 extern void E_ProgressMessage(const char *message);
 
-extern cvar_c v_pixelaspect;
+extern ConsoleVariable v_pixelaspect;
 
-// TODO: console var
-#define MAX_CON_LINES 160
+static constexpr uint8_t kMaximumConsoleLines = 160;
 
 // For Quit Screen ENDOOM (create once, always store)
-console_line_c *quit_lines[ENDOOM_LINES];
+ConsoleLine *quit_lines[kEndoomLines];
 static int      quit_used_lines        = 0;
 static bool     quit_partial_last_line = false;
 
 // entry [0] is the bottom-most one
-static console_line_c *console_lines[MAX_CON_LINES];
-static int             con_used_lines        = 0;
-static bool            con_partial_last_line = false;
+static ConsoleLine *console_lines[kMaximumConsoleLines];
+static int             console_used_lines        = 0;
+static bool            console_partial_last_line = false;
 
 // the console row that is displayed at the bottom of screen, -1 if cmdline
 // is the bottom one.
-static int bottomrow = -1;
+static int bottom_row = -1;
 
-#define MAX_CON_INPUT 255
+static constexpr uint8_t kMaximumConsoleInput = 255;
 
-static char input_line[MAX_CON_INPUT + 2];
-static int  input_pos = 0;
+static char input_line[kMaximumConsoleInput + 2];
+static int  input_position = 0;
 
-int           con_cursor;
-extern cvar_c r_doubleframes;
+int           console_cursor;
+extern ConsoleVariable r_doubleframes;
 
-#define KEYREPEATDELAY ((250 * kTicRate) / 1000)
-#define KEYREPEATRATE  (kTicRate / 15)
+static constexpr uint8_t kConsoleKeyRepeatDelay = ((250 * kTicRate) / 1000);
+static constexpr uint8_t kConsoleKeyRepeatRate  = (kTicRate / 15);
 
 // HISTORY
 
-// TODO: console var to control history size
-#define MAX_CMD_HISTORY 100
+static constexpr uint8_t kConsoleMaximumCommandHistory = 100;
 
-static std::string *cmd_history[MAX_CMD_HISTORY];
+static std::string *cmd_history[kConsoleMaximumCommandHistory];
 
-static int cmd_used_hist = 0;
+static int command_used_history = 0;
 
-// when browsing the cmdhistory, this shows the current index. Otherwise it's -1.
-static int cmd_hist_pos = -1;
+// when browsing the cmdhistory, this shows the current index. Otherwise it's
+// -1.
+static int command_history_position = -1;
 
 // always type ev_keydown
 static int repeat_key;
 static int repeat_countdown;
 
-// tells whether shift is pressed, and pgup/dn should scroll to top/bottom of linebuffer.
-static bool KeysShifted;
+// tells whether shift is pressed, and pgup/dn should scroll to top/bottom of
+// linebuffer.
+static bool keys_shifted;
 
-static bool TabbedLast;
+static bool tabbed_last;
 
-static int scroll_dir;
+static int scroll_direction;
 
-static void CON_AddLine(const char *s, bool partial)
+static void ConsoleAddLine(const char *s, bool partial)
 {
-    if (con_partial_last_line)
+    if (console_partial_last_line)
     {
         SYS_ASSERT(console_lines[0]);
 
         console_lines[0]->Append(s);
 
-        con_partial_last_line = partial;
+        console_partial_last_line = partial;
         return;
     }
 
     // scroll everything up
 
-    delete console_lines[MAX_CON_LINES - 1];
+    delete console_lines[kMaximumConsoleLines - 1];
 
-    for (int i = MAX_CON_LINES - 1; i > 0; i--)
+    for (int i = kMaximumConsoleLines - 1; i > 0; i--)
         console_lines[i] = console_lines[i - 1];
 
     RGBAColor col = current_color;
 
-    if (col == SG_GRAY_RGBA32 && (epi::StringPrefixCaseCompareASCII(s, "WARNING") == 0))
+    if (col == SG_GRAY_RGBA32 &&
+        (epi::StringPrefixCaseCompareASCII(s, "WARNING") == 0))
         col = SG_DARK_ORANGE_RGBA32;
 
-    console_lines[0] = new console_line_c(s, col);
+    console_lines[0] = new ConsoleLine(s, col);
 
-    con_partial_last_line = partial;
+    console_partial_last_line = partial;
 
-    if (con_used_lines < MAX_CON_LINES)
-        con_used_lines++;
+    if (console_used_lines < kMaximumConsoleLines) console_used_lines++;
 }
 
-static void CON_EndoomAddLine(uint8_t endoom_byte, const char *s, bool partial)
+static void ConsoleEndoomAddLine(uint8_t endoom_byte, const char *s,
+                                 bool partial)
 {
-    if (con_partial_last_line)
+    if (console_partial_last_line)
     {
         SYS_ASSERT(console_lines[0]);
 
@@ -169,33 +166,33 @@ static void CON_EndoomAddLine(uint8_t endoom_byte, const char *s, bool partial)
 
         console_lines[0]->AppendEndoom(endoom_byte);
 
-        con_partial_last_line = partial;
+        console_partial_last_line = partial;
         return;
     }
 
     // scroll everything up
 
-    delete console_lines[MAX_CON_LINES - 1];
+    delete console_lines[kMaximumConsoleLines - 1];
 
-    for (int i = MAX_CON_LINES - 1; i > 0; i--)
+    for (int i = kMaximumConsoleLines - 1; i > 0; i--)
         console_lines[i] = console_lines[i - 1];
 
     RGBAColor col = current_color;
 
-    if (col == SG_GRAY_RGBA32 && (epi::StringPrefixCaseCompareASCII(s, "WARNING") == 0))
+    if (col == SG_GRAY_RGBA32 &&
+        (epi::StringPrefixCaseCompareASCII(s, "WARNING") == 0))
         col = SG_DARK_ORANGE_RGBA32;
 
-    console_lines[0] = new console_line_c(s, col);
+    console_lines[0] = new ConsoleLine(s, col);
 
     console_lines[0]->AppendEndoom(endoom_byte);
 
-    con_partial_last_line = partial;
+    console_partial_last_line = partial;
 
-    if (con_used_lines < MAX_CON_LINES)
-        con_used_lines++;
+    if (console_used_lines < kMaximumConsoleLines) console_used_lines++;
 }
 
-static void CON_QuitAddLine(const char *s, bool partial)
+static void ConsoleQuitAddLine(const char *s, bool partial)
 {
     if (quit_partial_last_line)
     {
@@ -209,22 +206,22 @@ static void CON_QuitAddLine(const char *s, bool partial)
 
     // scroll everything up
 
-    delete quit_lines[ENDOOM_LINES - 1];
+    delete quit_lines[kEndoomLines - 1];
 
-    for (int i = ENDOOM_LINES - 1; i > 0; i--)
+    for (int i = kEndoomLines - 1; i > 0; i--)
         quit_lines[i] = quit_lines[i - 1];
 
     RGBAColor col = current_color;
 
-    quit_lines[0] = new console_line_c(s, col);
+    quit_lines[0] = new ConsoleLine(s, col);
 
     quit_partial_last_line = partial;
 
-    if (quit_used_lines < ENDOOM_LINES)
-        quit_used_lines++;
+    if (quit_used_lines < kEndoomLines) quit_used_lines++;
 }
 
-static void CON_QuitEndoomAddLine(uint8_t endoom_byte, const char *s, bool partial)
+static void ConsoleQuitEndoomAddLine(uint8_t endoom_byte, const char *s,
+                                     bool partial)
 {
     if (quit_partial_last_line)
     {
@@ -240,71 +237,65 @@ static void CON_QuitEndoomAddLine(uint8_t endoom_byte, const char *s, bool parti
 
     // scroll everything up
 
-    delete quit_lines[ENDOOM_LINES - 1];
+    delete quit_lines[kEndoomLines - 1];
 
-    for (int i = ENDOOM_LINES - 1; i > 0; i--)
+    for (int i = kEndoomLines - 1; i > 0; i--)
         quit_lines[i] = quit_lines[i - 1];
 
     RGBAColor col = current_color;
 
-    quit_lines[0] = new console_line_c(s, col);
+    quit_lines[0] = new ConsoleLine(s, col);
 
     quit_lines[0]->AppendEndoom(endoom_byte);
 
     quit_partial_last_line = partial;
 
-    if (quit_used_lines < ENDOOM_LINES)
-        quit_used_lines++;
+    if (quit_used_lines < kEndoomLines) quit_used_lines++;
 }
 
-static void CON_AddCmdHistory(const char *s)
+static void ConsoleAddCmdHistory(const char *s)
 {
     // don't add if same as previous command
-    if (cmd_used_hist > 0)
-        if (strcmp(s, cmd_history[0]->c_str()) == 0)
-            return;
+    if (command_used_history > 0)
+        if (strcmp(s, cmd_history[0]->c_str()) == 0) return;
 
     // scroll everything up
-    delete cmd_history[MAX_CMD_HISTORY - 1];
+    delete cmd_history[kConsoleMaximumCommandHistory - 1];
 
-    for (int i = MAX_CMD_HISTORY - 1; i > 0; i--)
+    for (int i = kConsoleMaximumCommandHistory - 1; i > 0; i--)
         cmd_history[i] = cmd_history[i - 1];
 
     cmd_history[0] = new std::string(s);
 
-    if (cmd_used_hist < MAX_CMD_HISTORY)
-        cmd_used_hist++;
+    if (command_used_history < kConsoleMaximumCommandHistory)
+        command_used_history++;
 }
 
-static void CON_ClearInputLine(void)
+static void ConsoleClearInputLine(void)
 {
-    input_line[0] = 0;
-    input_pos     = 0;
+    input_line[0]  = 0;
+    input_position = 0;
 }
 
-void CON_SetVisible(visible_t v)
+void ConsoleSetVisible(ConsoleVisibility v)
 {
-    if (v == vs_toggle)
+    if (v == kConsoleVisibilityToggle)
     {
-        v = (con_visible == vs_notvisible) ? vs_maximal : vs_notvisible;
+        v = (console_visible == kConsoleVisibilityNotVisible) ? kConsoleVisibilityMaximal : kConsoleVisibilityNotVisible;
 
-        scroll_dir = 0;
+        scroll_direction = 0;
     }
 
-    if (con_visible == v)
-        return;
+    if (console_visible == v) return;
 
-    con_visible = v;
+    console_visible = v;
 
-    if (v == vs_maximal)
+    if (v == kConsoleVisibilityMaximal) { tabbed_last = false; }
+
+    if (!console_wipe_active)
     {
-        TabbedLast = false;
-    }
-
-    if (!conwipeactive)
-    {
-        conwipeactive = true;
-        conwipepos    = (v == vs_maximal) ? 0 : CON_WIPE_TICS;
+        console_wipe_active   = true;
+        console_wipe_position = (v == kConsoleVisibilityMaximal) ? 0 : kConsoleWipeTics;
     }
 }
 
@@ -312,18 +303,13 @@ static void StripWhitespace(char *src)
 {
     const char *start = src;
 
-    while (*start && epi::IsSpaceASCII(*start))
-        start++;
+    while (*start && epi::IsSpaceASCII(*start)) start++;
 
     const char *end = src + strlen(src);
 
-    while (end > start && epi::IsSpaceASCII(end[-1]))
-        end--;
+    while (end > start && epi::IsSpaceASCII(end[-1])) end--;
 
-    while (start < end)
-    {
-        *src++ = *start++;
-    }
+    while (start < end) { *src++ = *start++; }
 
     *src = 0;
 }
@@ -339,7 +325,7 @@ static void SplitIntoLines(char *src)
         {
             *dest++ = 0;
 
-            CON_AddLine(line, false);
+            ConsoleAddLine(line, false);
 
             line = dest;
 
@@ -352,10 +338,7 @@ static void SplitIntoLines(char *src)
 
     *dest++ = 0;
 
-    if (line[0])
-    {
-        CON_AddLine(line, true);
-    }
+    if (line[0]) { ConsoleAddLine(line, true); }
 
     current_color = SG_GRAY_RGBA32;
 }
@@ -371,7 +354,7 @@ static void EndoomSplitIntoLines(uint8_t endoom_byte, char *src)
         {
             *dest++ = 0;
 
-            CON_AddLine(line, false);
+            ConsoleAddLine(line, false);
 
             line = dest;
 
@@ -384,10 +367,7 @@ static void EndoomSplitIntoLines(uint8_t endoom_byte, char *src)
 
     *dest++ = 0;
 
-    if (line[0])
-    {
-        CON_EndoomAddLine(endoom_byte, line, true);
-    }
+    if (line[0]) { ConsoleEndoomAddLine(endoom_byte, line, true); }
 
     current_color = SG_GRAY_RGBA32;
 }
@@ -403,7 +383,7 @@ static void QuitSplitIntoLines(char *src)
         {
             *dest++ = 0;
 
-            CON_QuitAddLine(line, false);
+            ConsoleQuitAddLine(line, false);
 
             line = dest;
 
@@ -416,10 +396,7 @@ static void QuitSplitIntoLines(char *src)
 
     *dest++ = 0;
 
-    if (line[0])
-    {
-        CON_QuitAddLine(line, true);
-    }
+    if (line[0]) { ConsoleQuitAddLine(line, true); }
 
     current_color = SG_GRAY_RGBA32;
 }
@@ -429,22 +406,16 @@ static void QuitEndoomSplitIntoLines(uint8_t endoom_byte, char *src)
     char *dest = src;
     char *line = dest;
 
-    while (*src)
-    {
-        *dest++ = *src++;
-    }
+    while (*src) { *dest++ = *src++; }
 
     *dest++ = 0;
 
-    if (line[0])
-    {
-        CON_QuitEndoomAddLine(endoom_byte, line, true);
-    }
+    if (line[0]) { ConsoleQuitEndoomAddLine(endoom_byte, line, true); }
 
     current_color = SG_GRAY_RGBA32;
 }
 
-void CON_Printf(const char *message, ...)
+void ConsolePrintf(const char *message, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -456,7 +427,7 @@ void CON_Printf(const char *message, ...)
     SplitIntoLines(buffer);
 }
 
-void CON_EndoomPrintf(uint8_t endoom_byte, const char *message, ...)
+void ConsoleEndoomPrintf(uint8_t endoom_byte, const char *message, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -468,7 +439,7 @@ void CON_EndoomPrintf(uint8_t endoom_byte, const char *message, ...)
     EndoomSplitIntoLines(endoom_byte, buffer);
 }
 
-void CON_QuitPrintf(const char *message, ...)
+void ConsoleQuitPrintf(const char *message, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -480,7 +451,7 @@ void CON_QuitPrintf(const char *message, ...)
     QuitSplitIntoLines(buffer);
 }
 
-void CON_QuitEndoomPrintf(uint8_t endoom_byte, const char *message, ...)
+void ConsoleQuitEndoomPrintf(uint8_t endoom_byte, const char *message, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -492,7 +463,7 @@ void CON_QuitEndoomPrintf(uint8_t endoom_byte, const char *message, ...)
     QuitEndoomSplitIntoLines(endoom_byte, buffer);
 }
 
-void CON_Message(const char *message, ...)
+void ConsoleMessage(const char *message, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -511,7 +482,7 @@ void CON_Message(const char *message, ...)
     SplitIntoLines(buffer);
 }
 
-void CON_MessageLDF(const char *lookup, ...)
+void ConsoleMessageLDF(const char *lookup, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -529,7 +500,7 @@ void CON_MessageLDF(const char *lookup, ...)
     SplitIntoLines(buffer);
 }
 
-void CON_ImportantMessageLDF(const char *lookup, ...)
+void ConsoleImportantMessageLDF(const char *lookup, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -547,10 +518,7 @@ void CON_ImportantMessageLDF(const char *lookup, ...)
     SplitIntoLines(buffer);
 }
 
-void CON_MessageColor(RGBAColor col)
-{
-    current_color = col;
-}
+void ConsoleMessageColor(RGBAColor col) { current_color = col; }
 
 static int   XMUL;
 static int   FNSZ;
@@ -563,15 +531,16 @@ static void CalcSizes()
     else
         FNSZ = 24;
 
-    FNSZ_ratio = FNSZ / con_font->def->default_size_;
-    if (con_font->def->type_ == kFontTypeImage)
-        XMUL = RoundToInt((con_font->im_mono_width + con_font->spacing) * (FNSZ / con_font->im_char_height));
+    FNSZ_ratio = FNSZ / console_font->def->default_size_;
+    if (console_font->def->type_ == kFontTypeImage)
+        XMUL =
+            RoundToInteger((console_font->im_mono_width + console_font->spacing) *
+                       (FNSZ / console_font->im_char_height));
 }
 
 static void SolidBox(int x, int y, int w, int h, RGBAColor col, float alpha)
 {
-    if (alpha < 0.99f)
-        glEnable(GL_BLEND);
+    if (alpha < 0.99f) glEnable(GL_BLEND);
 
     sg_color sgcol = sg_make_color_1i(col);
 
@@ -598,22 +567,27 @@ static void HorizontalLine(int y, RGBAColor col)
 
 static void DrawChar(int x, int y, char ch, RGBAColor col)
 {
-    if (x + FNSZ < 0)
-        return;
+    if (x + FNSZ < 0) return;
 
     sg_color sgcol = sg_make_color_1i(col);
 
     glColor4f(sgcol.r, sgcol.g, sgcol.b, 1.0f);
 
-    if (con_font->def->type_ == kFontTypeTrueType)
+    if (console_font->def->type_ == kFontTypeTrueType)
     {
-        float chwidth  = con_font->CharWidth(ch);
-        XMUL           = RoundToInt(chwidth * FNSZ_ratio / v_pixelaspect.f);
-        float width    = (chwidth - con_font->spacing) * FNSZ_ratio / v_pixelaspect.f;
+        float chwidth = console_font->CharWidth(ch);
+        XMUL          = RoundToInteger(chwidth * FNSZ_ratio / v_pixelaspect.f_);
+        float width =
+            (chwidth - console_font->spacing) * FNSZ_ratio / v_pixelaspect.f_;
         float x_adjust = (XMUL - width) / 2;
-        float y_adjust = con_font->ttf_glyph_map.at((uint8_t)ch).y_shift[current_font_size] * FNSZ_ratio;
-        float height   = con_font->ttf_glyph_map.at((uint8_t)ch).height[current_font_size] * FNSZ_ratio;
-        stbtt_aligned_quad *q = con_font->ttf_glyph_map.at((uint8_t)ch).char_quad[current_font_size];
+        float y_adjust = console_font->ttf_glyph_map.at((uint8_t)ch)
+                             .y_shift[current_font_size] *
+                         FNSZ_ratio;
+        float height = console_font->ttf_glyph_map.at((uint8_t)ch)
+                           .height[current_font_size] *
+                       FNSZ_ratio;
+        stbtt_aligned_quad *q = console_font->ttf_glyph_map.at((uint8_t)ch)
+                                    .char_quad[current_font_size];
         glBegin(GL_POLYGON);
         glTexCoord2f(q->s0, q->t0);
         glVertex2f(x + x_adjust, y - y_adjust);
@@ -630,10 +604,10 @@ static void DrawChar(int x, int y, char ch, RGBAColor col)
     uint8_t px = (uint8_t)ch % 16;
     uint8_t py = 15 - (uint8_t)ch / 16;
 
-    float tx1 = (px)*con_font->font_image->ratio_w;
-    float tx2 = (px + 1) * con_font->font_image->ratio_w;
-    float ty1 = (py)*con_font->font_image->ratio_h;
-    float ty2 = (py + 1) * con_font->font_image->ratio_h;
+    float tx1 = (px)*console_font->font_image->ratio_w;
+    float tx2 = (px + 1) * console_font->font_image->ratio_w;
+    float ty1 = (py)*console_font->font_image->ratio_h;
+    float ty2 = (py + 1) * console_font->font_image->ratio_h;
 
     glBegin(GL_POLYGON);
 
@@ -652,10 +626,10 @@ static void DrawChar(int x, int y, char ch, RGBAColor col)
     glEnd();
 }
 
-static void DrawEndoomChar(float x, float y, char ch, RGBAColor col, RGBAColor col2, bool blink, int enwidth)
+static void DrawEndoomChar(float x, float y, char ch, RGBAColor col,
+                           RGBAColor col2, bool blink, int enwidth)
 {
-    if (x + FNSZ < 0)
-        return;
+    if (x + FNSZ < 0) return;
 
     sg_color sgcol = sg_make_color_1i(col2);
 
@@ -681,8 +655,7 @@ static void DrawEndoomChar(float x, float y, char ch, RGBAColor col, RGBAColor c
 
     glColor4f(sgcol.r, sgcol.g, sgcol.b, 1.0f);
 
-    if (blink && con_cursor >= 16)
-        ch = 0x20;
+    if (blink && console_cursor >= 16) ch = 0x20;
 
     uint8_t px = (uint8_t)ch % 16;
     uint8_t py = 15 - (uint8_t)ch / 16;
@@ -713,10 +686,11 @@ static void DrawEndoomChar(float x, float y, char ch, RGBAColor col, RGBAColor c
 // writes the text on coords (x,y) of the console
 static void DrawText(int x, int y, const char *s, RGBAColor col)
 {
-    if (con_font->def->type_ == kFontTypeImage)
+    if (console_font->def->type_ == kFontTypeImage)
     {
         // Always whiten the font when used with console output
-        GLuint tex_id = W_ImageCache(con_font->font_image, true, (const Colormap *)0, true);
+        GLuint tex_id = W_ImageCache(console_font->font_image, true,
+                                     (const Colormap *)0, true);
 
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -725,24 +699,27 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
         glEnable(GL_ALPHA_TEST);
         glAlphaFunc(GL_GREATER, 0);
     }
-    else if (con_font->def->type_ == kFontTypeTrueType)
+    else if (console_font->def->type_ == kFontTypeTrueType)
     {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_TEXTURE_2D);
-        if ((var_smoothing && con_font->def->ttf_smoothing_ == FontDefinition::kTrueTypeSmoothOnDemand) ||
-            con_font->def->ttf_smoothing_ == FontDefinition::kTrueTypeSmoothAlways)
-            glBindTexture(GL_TEXTURE_2D, con_font->ttf_smoothed_tex_id[current_font_size]);
+        if ((var_smoothing && console_font->def->ttf_smoothing_ ==
+                                  FontDefinition::kTrueTypeSmoothOnDemand) ||
+            console_font->def->ttf_smoothing_ ==
+                FontDefinition::kTrueTypeSmoothAlways)
+            glBindTexture(GL_TEXTURE_2D,
+                          console_font->ttf_smoothed_tex_id[current_font_size]);
         else
-            glBindTexture(GL_TEXTURE_2D, con_font->ttf_tex_id[current_font_size]);
+            glBindTexture(GL_TEXTURE_2D,
+                          console_font->ttf_tex_id[current_font_size]);
     }
 
     bool draw_cursor = false;
 
     if (s == input_line)
     {
-        if (con_cursor < 16)
-            draw_cursor = true;
+        if (console_cursor < 16) draw_cursor = true;
     }
 
     int pos = 0;
@@ -750,17 +727,20 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
     {
         DrawChar(x, y, *s, col);
 
-        if (con_font->def->type_ == kFontTypeTrueType)
+        if (console_font->def->type_ == kFontTypeTrueType)
         {
             if (s + 1)
             {
-                x += (float)stbtt_GetGlyphKernAdvance(con_font->ttf_info, con_font->GetGlyphIndex(*s),
-                                                      con_font->GetGlyphIndex(*(s + 1))) *
-                     con_font->ttf_kern_scale[current_font_size] * FNSZ_ratio / v_pixelaspect.f;
+                x +=
+                    (float)stbtt_GetGlyphKernAdvance(
+                        console_font->ttf_info, console_font->GetGlyphIndex(*s),
+                        console_font->GetGlyphIndex(*(s + 1))) *
+                    console_font->ttf_kern_scale[current_font_size] *
+                    FNSZ_ratio / v_pixelaspect.f_;
             }
         }
 
-        if (pos == input_pos && draw_cursor)
+        if (pos == input_position && draw_cursor)
         {
             DrawChar(x, y, 95, col);
             draw_cursor = false;
@@ -768,24 +748,24 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
 
         x += XMUL;
 
-        if (x >= SCREENWIDTH)
-            break;
+        if (x >= SCREENWIDTH) break;
     }
 
-    if (draw_cursor)
-        DrawChar(x, y, 95, col);
+    if (draw_cursor) DrawChar(x, y, 95, col);
 
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
     glDisable(GL_BLEND);
 }
 
-static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
+static void EndoomDrawText(int x, int y, ConsoleLine *endoom_line)
 {
     // Always whiten the font when used with console output
-    GLuint tex_id = W_ImageCache(endoom_font->font_image, true, (const Colormap *)0, true);
+    GLuint tex_id =
+        W_ImageCache(endoom_font->font_image, true, (const Colormap *)0, true);
 
-    int enwidth = RoundToInt((float)endoom_font->im_mono_width * ((float)FNSZ / endoom_font->im_mono_width) / 2);
+    int enwidth = RoundToInteger((float)endoom_font->im_mono_width *
+                             ((float)FNSZ / endoom_font->im_mono_width) / 2);
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -796,15 +776,14 @@ static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
 
     for (int i = 0; i < 80; i++)
     {
-        uint8_t info = endoom_line->endoom_bytes.at(i);
+        uint8_t info = endoom_line->endoom_bytes_.at(i);
 
-        DrawEndoomChar(x, y, endoom_line->line.at(i), endoom_colors[info & 15], endoom_colors[(info >> 4) & 7],
-                       info & 128, enwidth);
+        DrawEndoomChar(x, y, endoom_line->line_.at(i), endoom_colors[info & 15],
+                       endoom_colors[(info >> 4) & 7], info & 128, enwidth);
 
         x += enwidth;
 
-        if (x >= SCREENWIDTH)
-            break;
+        if (x >= SCREENWIDTH) break;
     }
 
     glDisable(GL_TEXTURE_2D);
@@ -812,23 +791,21 @@ static void EndoomDrawText(int x, int y, console_line_c *endoom_line)
     glDisable(GL_BLEND);
 }
 
-void CON_SetupFont(void)
+void ConsoleSetupFont(void)
 {
-    if (!con_font)
+    if (!console_font)
     {
         FontDefinition *DEF = fontdefs.Lookup("CON_FONT_2");
-        if (!DEF)
-            I_Error("CON_FONT_2 definition missing from DDFFONT!\n");
-        con_font = hu_fonts.Lookup(DEF);
-        SYS_ASSERT(con_font);
-        con_font->Load();
+        if (!DEF) I_Error("CON_FONT_2 definition missing from DDFFONT!\n");
+        console_font = hu_fonts.Lookup(DEF);
+        SYS_ASSERT(console_font);
+        console_font->Load();
     }
 
     if (!endoom_font)
     {
         FontDefinition *DEF = fontdefs.Lookup("ENDFONT");
-        if (!DEF)
-            I_Error("ENDFONT definition missing from DDFFONT!\n");
+        if (!DEF) I_Error("ENDFONT definition missing from DDFFONT!\n");
         endoom_font = hu_fonts.Lookup(DEF);
         SYS_ASSERT(endoom_font);
         endoom_font->Load();
@@ -837,20 +814,18 @@ void CON_SetupFont(void)
     if (!console_style)
     {
         StyleDefinition *def = styledefs.Lookup("CONSOLE");
-        if (!def)
-            def = default_style;
+        if (!def) def = default_style;
         console_style = hu_styles.Lookup(def);
     }
 
     CalcSizes();
 }
 
-void CON_Drawer(void)
+void ConsoleDrawer(void)
 {
-    CON_SetupFont();
+    ConsoleSetupFont();
 
-    if (con_visible == vs_notvisible && !conwipeactive)
-        return;
+    if (console_visible == kConsoleVisibilityNotVisible && !console_wipe_active) return;
 
     // -- background --
 
@@ -858,8 +833,8 @@ void CON_Drawer(void)
 
     int y = SCREENHEIGHT;
 
-    if (conwipeactive)
-        y = y - CON_GFX_HT * (conwipepos) / CON_WIPE_TICS;
+    if (console_wipe_active)
+        y = y - CON_GFX_HT * (console_wipe_position) / kConsoleWipeTics;
     else
         y = y - CON_GFX_HT;
 
@@ -867,37 +842,37 @@ void CON_Drawer(void)
     {
         const image_c *img = console_style->bg_image;
 
-        HUD_RawImage(0, y, SCREENWIDTH, y + CON_GFX_HT, img, 0.0, 0.0, IM_RIGHT(img), IM_TOP(img),
-                     console_style->def->bg_.translucency_, kRGBANoValue, nullptr, 0, 0);
+        HUD_RawImage(0, y, SCREENWIDTH, y + CON_GFX_HT, img, 0.0, 0.0,
+                     IM_RIGHT(img), IM_TOP(img),
+                     console_style->def->bg_.translucency_, kRGBANoValue,
+                     nullptr, 0, 0);
     }
     else
     {
         SolidBox(0, y, SCREENWIDTH, SCREENHEIGHT - y,
-                 console_style->def->bg_.colour_ != kRGBANoValue ? console_style->def->bg_.colour_ : SG_BLACK_RGBA32,
+                 console_style->def->bg_.colour_ != kRGBANoValue
+                     ? console_style->def->bg_.colour_
+                     : SG_BLACK_RGBA32,
                  console_style->def->bg_.translucency_);
     }
 
-    y += FNSZ / 4 + (con_font->def->type_ == kFontTypeTrueType ? FNSZ : 0);
+    y += FNSZ / 4 + (console_font->def->type_ == kFontTypeTrueType ? FNSZ : 0);
 
     // -- input line --
 
-    if (bottomrow == -1)
+    if (bottom_row == -1)
     {
         DrawText(0, y, ">", SG_MAGENTA_RGBA32);
 
-        if (cmd_hist_pos >= 0)
+        if (command_history_position >= 0)
         {
-            std::string text = cmd_history[cmd_hist_pos]->c_str();
+            std::string text = cmd_history[command_history_position]->c_str();
 
-            if (con_cursor < 16)
-                text.append("_");
+            if (console_cursor < 16) text.append("_");
 
             DrawText(XMUL, y, text.c_str(), SG_MAGENTA_RGBA32);
         }
-        else
-        {
-            DrawText(XMUL, y, input_line, SG_MAGENTA_RGBA32);
-        }
+        else { DrawText(XMUL, y, input_line, SG_MAGENTA_RGBA32); }
 
         y += FNSZ;
     }
@@ -906,44 +881,43 @@ void CON_Drawer(void)
 
     // -- text lines --
 
-    for (int i = HMM_MAX(0, bottomrow); i < MAX_CON_LINES; i++)
+    for (int i = HMM_MAX(0, bottom_row); i < kMaximumConsoleLines; i++)
     {
-        console_line_c *CL = console_lines[i];
+        ConsoleLine *CL = console_lines[i];
 
-        if (!CL)
-            break;
+        if (!CL) break;
 
-        if (epi::StringPrefixCompare(CL->line, "--------") == 0)
-            HorizontalLine(y + FNSZ / 2, CL->color);
-        else if (CL->endoom_bytes.size() == 80 && CL->line.size() == 80) // 80 ENDOOM characters + newline
+        if (epi::StringPrefixCompare(CL->line_, "--------") == 0)
+            HorizontalLine(y + FNSZ / 2, CL->color_);
+        else if (CL->endoom_bytes_.size() == 80 &&
+                 CL->line_.size() == 80)  // 80 ENDOOM characters + newline
             EndoomDrawText(0, y, CL);
         else
-            DrawText(0, y, CL->line.c_str(), CL->color);
+            DrawText(0, y, CL->line_.c_str(), CL->color_);
 
         y += FNSZ;
 
-        if (y >= SCREENHEIGHT)
-            break;
+        if (y >= SCREENHEIGHT) break;
     }
 }
 
 static void GotoEndOfLine(void)
 {
-    if (cmd_hist_pos < 0)
-        input_pos = strlen(input_line);
+    if (command_history_position < 0)
+        input_position = strlen(input_line);
     else
-        input_pos = strlen(cmd_history[cmd_hist_pos]->c_str());
+        input_position = strlen(cmd_history[command_history_position]->c_str());
 
-    con_cursor = 0;
+    console_cursor = 0;
 }
 
 static void EditHistory(void)
 {
-    if (cmd_hist_pos >= 0)
+    if (command_history_position >= 0)
     {
-        strcpy(input_line, cmd_history[cmd_hist_pos]->c_str());
+        strcpy(input_line, cmd_history[command_history_position]->c_str());
 
-        cmd_hist_pos = -1;
+        command_history_position = -1;
     }
 }
 
@@ -951,79 +925,77 @@ static void InsertChar(char ch)
 {
     // make room for new character, shift the trailing NUL too
 
-    for (int j = MAX_CON_INPUT - 2; j >= input_pos; j--)
+    for (int j = kMaximumConsoleInput - 2; j >= input_position; j--)
         input_line[j + 1] = input_line[j];
 
-    input_line[MAX_CON_INPUT - 1] = 0;
+    input_line[kMaximumConsoleInput - 1] = 0;
 
-    input_line[input_pos++] = ch;
+    input_line[input_position++] = ch;
 }
 
 static char KeyToCharacter(int key, bool shift, bool ctrl)
 {
-    if (ctrl)
-        return 0;
+    if (ctrl) return 0;
 
-    if (key < 32 || key > 126)
-        return 0;
+    if (key < 32 || key > 126) return 0;
 
-    if (!shift)
-        return (char)key;
+    if (!shift) return (char)key;
 
     // the following assumes a US keyboard layout
     switch (key)
     {
-    case '1':
-        return '!';
-    case '2':
-        return '@';
-    case '3':
-        return '#';
-    case '4':
-        return '$';
-    case '5':
-        return '%';
-    case '6':
-        return '^';
-    case '7':
-        return '&';
-    case '8':
-        return '*';
-    case '9':
-        return '(';
-    case '0':
-        return ')';
+        case '1':
+            return '!';
+        case '2':
+            return '@';
+        case '3':
+            return '#';
+        case '4':
+            return '$';
+        case '5':
+            return '%';
+        case '6':
+            return '^';
+        case '7':
+            return '&';
+        case '8':
+            return '*';
+        case '9':
+            return '(';
+        case '0':
+            return ')';
 
-    case '`':
-        return '~';
-    case '-':
-        return '_';
-    case '=':
-        return '+';
-    case '\\':
-        return '|';
-    case '[':
-        return '{';
-    case ']':
-        return '}';
-    case ';':
-        return ':';
-    case '\'':
-        return '"';
-    case ',':
-        return '<';
-    case '.':
-        return '>';
-    case '/':
-        return '?';
-    case '@':
-        return '\'';
+        case '`':
+            return '~';
+        case '-':
+            return '_';
+        case '=':
+            return '+';
+        case '\\':
+            return '|';
+        case '[':
+            return '{';
+        case ']':
+            return '}';
+        case ';':
+            return ':';
+        case '\'':
+            return '"';
+        case ',':
+            return '<';
+        case '.':
+            return '>';
+        case '/':
+            return '?';
+        case '@':
+            return '\'';
     }
 
     return epi::ToUpperASCII(key);
 }
 
-static void ListCompletions(std::vector<const char *> &list, int word_len, int max_row, RGBAColor color)
+static void ListCompletions(std::vector<const char *> &list, int word_len,
+                            int max_row, RGBAColor color)
 {
     int max_col = SCREENWIDTH / XMUL - 4;
     max_col     = HMM_Clamp(24, max_col, 78);
@@ -1045,8 +1017,7 @@ static void ListCompletions(std::vector<const char *> &list, int word_len, int m
         const char *dotpos = strchr(name, '.');
         if (dotpos && dotpos > name + word_len)
         {
-            if (last_ja == dotpos[-1])
-                continue;
+            if (last_ja == dotpos[-1]) continue;
 
             last_ja = dotpos[-1];
 
@@ -1062,16 +1033,16 @@ static void ListCompletions(std::vector<const char *> &list, int word_len, int m
 
         if (n_len >= max_col * 2 / 3)
         {
-            CON_MessageColor(color);
-            CON_Printf("  %s\n", name);
+            ConsoleMessageColor(color);
+            ConsolePrintf("  %s\n", name);
             max_row--;
             continue;
         }
 
         if (buf_len + 1 + n_len > max_col)
         {
-            CON_MessageColor(color);
-            CON_Printf("  %s\n", buffer);
+            ConsoleMessageColor(color);
+            ConsolePrintf("  %s\n", buffer);
             max_row--;
 
             buf_len         = 0;
@@ -1079,14 +1050,13 @@ static void ListCompletions(std::vector<const char *> &list, int word_len, int m
 
             if (max_row <= 0)
             {
-                CON_MessageColor(color);
-                CON_Printf("  etc...\n");
+                ConsoleMessageColor(color);
+                ConsolePrintf("  etc...\n");
                 break;
             }
         }
 
-        if (buf_len > 0)
-            buffer[buf_len++] = ' ';
+        if (buf_len > 0) buffer[buf_len++] = ' ';
 
         strcpy(buffer + buf_len, name);
 
@@ -1095,8 +1065,8 @@ static void ListCompletions(std::vector<const char *> &list, int word_len, int m
 
     if (buf_len > 0)
     {
-        CON_MessageColor(color);
-        CON_Printf("  %s\n", buffer);
+        ConsoleMessageColor(color);
+        ConsolePrintf("  %s\n", buffer);
     }
 }
 
@@ -1106,13 +1076,11 @@ static void TabComplete(void)
 
     // check if we are positioned after a word
     {
-        if (input_pos == 0)
-            return;
+        if (input_position == 0) return;
 
-        if (epi::IsDigitASCII(input_line[0]))
-            return;
+        if (epi::IsDigitASCII(input_line[0])) return;
 
-        for (int i = 0; i < input_pos; i++)
+        for (int i = 0; i < input_position; i++)
         {
             char ch = input_line[i];
 
@@ -1121,67 +1089,67 @@ static void TabComplete(void)
         }
     }
 
-    char save_ch          = input_line[input_pos];
-    input_line[input_pos] = 0;
+    char save_ch               = input_line[input_position];
+    input_line[input_position] = 0;
 
     std::vector<const char *> match_cmds;
     std::vector<const char *> match_vars;
     std::vector<const char *> match_keys;
 
-    int num_cmd = CON_MatchAllCmds(match_cmds, input_line);
-    int num_var = CON_MatchAllVars(match_vars, input_line);
-    int num_key = 0; ///  E_MatchAllKeys(match_keys, input_line);
+    int num_cmd = ConsoleMatchAllCmds(match_cmds, input_line);
+    int num_var = ConsoleMatchAllVariables(match_vars, input_line);
+    int num_key = 0;  ///  E_MatchAllKeys(match_keys, input_line);
 
     // we have an unambiguous match, no need to print anything
     if (num_cmd + num_var + num_key == 1)
     {
-        input_line[input_pos] = save_ch;
+        input_line[input_position] = save_ch;
 
-        const char *name = (num_var > 0) ? match_vars[0] : (num_key > 0) ? match_keys[0] : match_cmds[0];
+        const char *name = (num_var > 0)   ? match_vars[0]
+                           : (num_key > 0) ? match_keys[0]
+                                           : match_cmds[0];
 
-        SYS_ASSERT((int)strlen(name) >= input_pos);
+        SYS_ASSERT((int)strlen(name) >= input_position);
 
-        for (name += input_pos; *name; name++)
-            InsertChar(*name);
+        for (name += input_position; *name; name++) InsertChar(*name);
 
-        if (save_ch != ' ')
-            InsertChar(' ');
+        if (save_ch != ' ') InsertChar(' ');
 
-        con_cursor = 0;
+        console_cursor = 0;
         return;
     }
 
     // show what we were trying to match
-    CON_MessageColor(SG_LIGHT_BLUE_RGBA32);
-    CON_Printf(">%s\n", input_line);
+    ConsoleMessageColor(SG_LIGHT_BLUE_RGBA32);
+    ConsolePrintf(">%s\n", input_line);
 
-    input_line[input_pos] = save_ch;
+    input_line[input_position] = save_ch;
 
     if (num_cmd + num_var + num_key == 0)
     {
-        CON_Printf("No matches.\n");
+        ConsolePrintf("No matches.\n");
         return;
     }
 
     if (match_vars.size() > 0)
     {
-        CON_Printf("%u Possible variables:\n", (int)match_vars.size());
+        ConsolePrintf("%u Possible variables:\n", (int)match_vars.size());
 
-        ListCompletions(match_vars, input_pos, 7, SG_SPRING_GREEN_RGBA32);
+        ListCompletions(match_vars, input_position, 7, SG_SPRING_GREEN_RGBA32);
     }
 
     if (match_keys.size() > 0)
     {
-        CON_Printf("%u Possible keys:\n", (int)match_keys.size());
+        ConsolePrintf("%u Possible keys:\n", (int)match_keys.size());
 
-        ListCompletions(match_keys, input_pos, 4, SG_SPRING_GREEN_RGBA32);
+        ListCompletions(match_keys, input_position, 4, SG_SPRING_GREEN_RGBA32);
     }
 
     if (match_cmds.size() > 0)
     {
-        CON_Printf("%u Possible commands:\n", (int)match_cmds.size());
+        ConsolePrintf("%u Possible commands:\n", (int)match_cmds.size());
 
-        ListCompletions(match_cmds, input_pos, 3, SG_SPRING_GREEN_RGBA32);
+        ListCompletions(match_cmds, input_position, 3, SG_SPRING_GREEN_RGBA32);
     }
 
     // Add as many common characters as possible
@@ -1190,23 +1158,19 @@ static void TabComplete(void)
     // begin by lumping all completions into one list
     unsigned int i;
 
-    for (i = 0; i < match_keys.size(); i++)
-        match_vars.push_back(match_keys[i]);
+    for (i = 0; i < match_keys.size(); i++) match_vars.push_back(match_keys[i]);
 
-    for (i = 0; i < match_cmds.size(); i++)
-        match_vars.push_back(match_cmds[i]);
+    for (i = 0; i < match_cmds.size(); i++) match_vars.push_back(match_cmds[i]);
 
-    int pos = input_pos;
+    int pos = input_position;
 
     for (;;)
     {
         char ch = match_vars[0][pos];
-        if (!ch)
-            return;
+        if (!ch) return;
 
         for (i = 1; i < match_vars.size(); i++)
-            if (match_vars[i][pos] != ch)
-                return;
+            if (match_vars[i][pos] != ch) return;
 
         InsertChar(ch);
 
@@ -1214,210 +1178,206 @@ static void TabComplete(void)
     }
 }
 
-void CON_HandleKey(int key, bool shift, bool ctrl)
+void ConsoleHandleKey(int key, bool shift, bool ctrl)
 {
     switch (key)
     {
-    case KEYD_RALT:
-    case KEYD_RCTRL:
-        // Do nothing
-        break;
-
-    case KEYD_RSHIFT:
-        // SHIFT was pressed
-        KeysShifted = true;
-        break;
-
-    case KEYD_PGUP:
-        if (shift)
-            // Move to top of console buffer
-            bottomrow = HMM_MAX(-1, con_used_lines - 10);
-        else
-            // Start scrolling console buffer up
-            scroll_dir = +1;
-        break;
-
-    case KEYD_PGDN:
-        if (shift)
-            // Move to bottom of console buffer
-            bottomrow = -1;
-        else
-            // Start scrolling console buffer down
-            scroll_dir = -1;
-        break;
-
-    case KEYD_WHEEL_UP:
-        bottomrow += 4;
-        if (bottomrow > HMM_MAX(-1, con_used_lines - 10))
-            bottomrow = HMM_MAX(-1, con_used_lines - 10);
-        break;
-
-    case KEYD_WHEEL_DN:
-        bottomrow -= 4;
-        if (bottomrow < -1)
-            bottomrow = -1;
-        break;
-
-    case KEYD_HOME:
-        // Move cursor to start of line
-        input_pos  = 0;
-        con_cursor = 0;
-        break;
-
-    case KEYD_END:
-        // Move cursor to end of line
-        GotoEndOfLine();
-        break;
-
-    case KEYD_UPARROW:
-        // Move to previous entry in the command history
-        if (cmd_hist_pos < cmd_used_hist - 1)
-        {
-            cmd_hist_pos++;
-            GotoEndOfLine();
-        }
-        TabbedLast = false;
-        break;
-
-    case KEYD_DOWNARROW:
-        // Move to next entry in the command history
-        if (cmd_hist_pos > -1)
-        {
-            cmd_hist_pos--;
-            GotoEndOfLine();
-        }
-        TabbedLast = false;
-        break;
-
-    case KEYD_LEFTARROW:
-        // Move cursor left one character
-        if (input_pos > 0)
-            input_pos--;
-
-        con_cursor = 0;
-        break;
-
-    case KEYD_RIGHTARROW:
-        // Move cursor right one character
-        if (cmd_hist_pos < 0)
-        {
-            if (input_line[input_pos] != 0)
-                input_pos++;
-        }
-        else
-        {
-            if (cmd_history[cmd_hist_pos]->c_str()[input_pos] != 0)
-                input_pos++;
-        }
-        con_cursor = 0;
-        break;
-
-    case KEYD_ENTER:
-        EditHistory();
-
-        // Execute command line (ENTER)
-        StripWhitespace(input_line);
-
-        if (strlen(input_line) == 0)
-        {
-            CON_MessageColor(SG_LIGHT_BLUE_RGBA32);
-            CON_Printf(">\n");
-        }
-        else
-        {
-            // Add it to history & draw it
-            CON_AddCmdHistory(input_line);
-
-            CON_MessageColor(SG_LIGHT_BLUE_RGBA32);
-            CON_Printf(">%s\n", input_line);
-
-            // Run it!
-            CON_TryCommand(input_line);
-        }
-
-        CON_ClearInputLine();
-
-        // Bring user back to current line after entering command
-        bottomrow -= MAX_CON_LINES;
-        if (bottomrow < -1)
-            bottomrow = -1;
-
-        TabbedLast = false;
-        break;
-
-    case KEYD_BACKSPACE:
-        // Erase character to left of cursor
-        EditHistory();
-
-        if (input_pos > 0)
-        {
-            input_pos--;
-
-            // shift characters back
-            for (int j = input_pos; j < MAX_CON_INPUT - 2; j++)
-                input_line[j] = input_line[j + 1];
-        }
-
-        TabbedLast = false;
-        con_cursor = 0;
-        break;
-
-    case KEYD_DELETE:
-        // Erase charater under cursor
-        EditHistory();
-
-        if (input_line[input_pos] != 0)
-        {
-            // shift characters back
-            for (int j = input_pos; j < MAX_CON_INPUT - 2; j++)
-                input_line[j] = input_line[j + 1];
-        }
-
-        TabbedLast = false;
-        con_cursor = 0;
-        break;
-
-    case KEYD_TAB:
-        // Try to do tab-completion
-        TabComplete();
-        break;
-
-    case KEYD_ESCAPE:
-        // Close console, clear command line, but if we're in the
-        // fullscreen console mode, there's nothing to fall back on
-        // if it's closed.
-        CON_ClearInputLine();
-
-        cmd_hist_pos = -1;
-        TabbedLast   = false;
-
-        CON_SetVisible(vs_notvisible);
-        break;
-
-    // Allow screenshotting of console too - Dasho
-    case KEYD_F1:
-    case KEYD_PRTSCR:
-        G_DeferredScreenShot();
-        break;
-
-    default: {
-        char ch = KeyToCharacter(key, shift, ctrl);
-
-        // ignore non-printable characters
-        if (ch == 0)
+        case KEYD_RALT:
+        case KEYD_RCTRL:
+            // Do nothing
             break;
 
-        // no room?
-        if (input_pos >= MAX_CON_INPUT - 1)
+        case KEYD_RSHIFT:
+            // SHIFT was pressed
+            keys_shifted = true;
             break;
 
-        EditHistory();
-        InsertChar(ch);
+        case KEYD_PGUP:
+            if (shift)
+                // Move to top of console buffer
+                bottom_row = HMM_MAX(-1, console_used_lines - 10);
+            else
+                // Start scrolling console buffer up
+                scroll_direction = +1;
+            break;
 
-        TabbedLast = false;
-        con_cursor = 0;
-    }
-    break;
+        case KEYD_PGDN:
+            if (shift)
+                // Move to bottom of console buffer
+                bottom_row = -1;
+            else
+                // Start scrolling console buffer down
+                scroll_direction = -1;
+            break;
+
+        case KEYD_WHEEL_UP:
+            bottom_row += 4;
+            if (bottom_row > HMM_MAX(-1, console_used_lines - 10))
+                bottom_row = HMM_MAX(-1, console_used_lines - 10);
+            break;
+
+        case KEYD_WHEEL_DN:
+            bottom_row -= 4;
+            if (bottom_row < -1) bottom_row = -1;
+            break;
+
+        case KEYD_HOME:
+            // Move cursor to start of line
+            input_position = 0;
+            console_cursor = 0;
+            break;
+
+        case KEYD_END:
+            // Move cursor to end of line
+            GotoEndOfLine();
+            break;
+
+        case KEYD_UPARROW:
+            // Move to previous entry in the command history
+            if (command_history_position < command_used_history - 1)
+            {
+                command_history_position++;
+                GotoEndOfLine();
+            }
+            tabbed_last = false;
+            break;
+
+        case KEYD_DOWNARROW:
+            // Move to next entry in the command history
+            if (command_history_position > -1)
+            {
+                command_history_position--;
+                GotoEndOfLine();
+            }
+            tabbed_last = false;
+            break;
+
+        case KEYD_LEFTARROW:
+            // Move cursor left one character
+            if (input_position > 0) input_position--;
+
+            console_cursor = 0;
+            break;
+
+        case KEYD_RIGHTARROW:
+            // Move cursor right one character
+            if (command_history_position < 0)
+            {
+                if (input_line[input_position] != 0) input_position++;
+            }
+            else
+            {
+                if (cmd_history[command_history_position]
+                        ->c_str()[input_position] != 0)
+                    input_position++;
+            }
+            console_cursor = 0;
+            break;
+
+        case KEYD_ENTER:
+            EditHistory();
+
+            // Execute command line (ENTER)
+            StripWhitespace(input_line);
+
+            if (strlen(input_line) == 0)
+            {
+                ConsoleMessageColor(SG_LIGHT_BLUE_RGBA32);
+                ConsolePrintf(">\n");
+            }
+            else
+            {
+                // Add it to history & draw it
+                ConsoleAddCmdHistory(input_line);
+
+                ConsoleMessageColor(SG_LIGHT_BLUE_RGBA32);
+                ConsolePrintf(">%s\n", input_line);
+
+                // Run it!
+                ConsoleTryCommand(input_line);
+            }
+
+            ConsoleClearInputLine();
+
+            // Bring user back to current line after entering command
+            bottom_row -= kMaximumConsoleLines;
+            if (bottom_row < -1) bottom_row = -1;
+
+            tabbed_last = false;
+            break;
+
+        case KEYD_BACKSPACE:
+            // Erase character to left of cursor
+            EditHistory();
+
+            if (input_position > 0)
+            {
+                input_position--;
+
+                // shift characters back
+                for (int j = input_position; j < kMaximumConsoleInput - 2; j++)
+                    input_line[j] = input_line[j + 1];
+            }
+
+            tabbed_last    = false;
+            console_cursor = 0;
+            break;
+
+        case KEYD_DELETE:
+            // Erase charater under cursor
+            EditHistory();
+
+            if (input_line[input_position] != 0)
+            {
+                // shift characters back
+                for (int j = input_position; j < kMaximumConsoleInput - 2; j++)
+                    input_line[j] = input_line[j + 1];
+            }
+
+            tabbed_last    = false;
+            console_cursor = 0;
+            break;
+
+        case KEYD_TAB:
+            // Try to do tab-completion
+            TabComplete();
+            break;
+
+        case KEYD_ESCAPE:
+            // Close console, clear command line, but if we're in the
+            // fullscreen console mode, there's nothing to fall back on
+            // if it's closed.
+            ConsoleClearInputLine();
+
+            command_history_position = -1;
+            tabbed_last              = false;
+
+            ConsoleSetVisible(kConsoleVisibilityNotVisible);
+            break;
+
+        // Allow screenshotting of console too - Dasho
+        case KEYD_F1:
+        case KEYD_PRTSCR:
+            G_DeferredScreenShot();
+            break;
+
+        default:
+        {
+            char ch = KeyToCharacter(key, shift, ctrl);
+
+            // ignore non-printable characters
+            if (ch == 0) break;
+
+            // no room?
+            if (input_position >= kMaximumConsoleInput - 1) break;
+
+            EditHistory();
+            InsertChar(ch);
+
+            tabbed_last    = false;
+            console_cursor = 0;
+        }
+        break;
     }
 }
 
@@ -1427,71 +1387,66 @@ static int GetKeycode(event_t *ev)
 
     switch (sym)
     {
-    case KEYD_TAB:
-    case KEYD_PGUP:
-    case KEYD_PGDN:
-    case KEYD_HOME:
-    case KEYD_END:
-    case KEYD_LEFTARROW:
-    case KEYD_RIGHTARROW:
-    case KEYD_BACKSPACE:
-    case KEYD_DELETE:
-    case KEYD_UPARROW:
-    case KEYD_DOWNARROW:
-    case KEYD_WHEEL_UP:
-    case KEYD_WHEEL_DN:
-    case KEYD_ENTER:
-    case KEYD_ESCAPE:
-    case KEYD_RSHIFT:
-    case KEYD_F1:
-    case KEYD_PRTSCR:
-        return sym;
+        case KEYD_TAB:
+        case KEYD_PGUP:
+        case KEYD_PGDN:
+        case KEYD_HOME:
+        case KEYD_END:
+        case KEYD_LEFTARROW:
+        case KEYD_RIGHTARROW:
+        case KEYD_BACKSPACE:
+        case KEYD_DELETE:
+        case KEYD_UPARROW:
+        case KEYD_DOWNARROW:
+        case KEYD_WHEEL_UP:
+        case KEYD_WHEEL_DN:
+        case KEYD_ENTER:
+        case KEYD_ESCAPE:
+        case KEYD_RSHIFT:
+        case KEYD_F1:
+        case KEYD_PRTSCR:
+            return sym;
 
-    default:
-        break;
+        default:
+            break;
     }
 
-    if (HU_IS_PRINTABLE(sym))
-        return sym;
+    if (HU_IS_PRINTABLE(sym)) return sym;
 
     return -1;
 }
 
-bool CON_Responder(event_t *ev)
+bool ConsoleResponder(event_t *ev)
 {
-    if (ev->type != ev_keyup && ev->type != ev_keydown)
-        return false;
+    if (ev->type != ev_keyup && ev->type != ev_keydown) return false;
 
     if (ev->type == ev_keydown && E_MatchesKey(key_console, ev->value.key.sym))
     {
         E_ClearInput();
-        CON_SetVisible(vs_toggle);
+        ConsoleSetVisible(kConsoleVisibilityToggle);
         return true;
     }
 
-    if (con_visible == vs_notvisible)
-        return false;
+    if (console_visible == kConsoleVisibilityNotVisible) return false;
 
     int key = GetKeycode(ev);
-    if (key < 0)
-        return true;
+    if (key < 0) return true;
 
     if (ev->type == ev_keyup)
     {
-        if (key == repeat_key)
-            repeat_countdown = 0;
+        if (key == repeat_key) repeat_countdown = 0;
 
         switch (key)
         {
-        case KEYD_PGUP:
-        case KEYD_PGDN:
-            scroll_dir = 0;
-            break;
-        case KEYD_RSHIFT:
-            KeysShifted = false;
-            break;
-        default:
-            break;
+            case KEYD_PGUP:
+            case KEYD_PGDN:
+                scroll_direction = 0;
+                break;
+            case KEYD_RSHIFT:
+                keys_shifted = false;
+                break;
+            default:
+                break;
         }
     }
     else
@@ -1499,79 +1454,77 @@ bool CON_Responder(event_t *ev)
         // Okay, fine. Most keys don't repeat
         switch (key)
         {
-        case KEYD_RIGHTARROW:
-        case KEYD_LEFTARROW:
-        case KEYD_UPARROW:
-        case KEYD_DOWNARROW:
-        case KEYD_SPACE:
-        case KEYD_BACKSPACE:
-        case KEYD_DELETE:
-            repeat_countdown = KEYREPEATDELAY * (r_doubleframes.d ? 2 : 1);
-            break;
-        default:
-            repeat_countdown = 0;
-            break;
+            case KEYD_RIGHTARROW:
+            case KEYD_LEFTARROW:
+            case KEYD_UPARROW:
+            case KEYD_DOWNARROW:
+            case KEYD_SPACE:
+            case KEYD_BACKSPACE:
+            case KEYD_DELETE:
+                repeat_countdown =
+                    kConsoleKeyRepeatDelay * (r_doubleframes.d_? 2 : 1);
+                break;
+            default:
+                repeat_countdown = 0;
+                break;
         }
 
         repeat_key = key;
 
-        CON_HandleKey(key, KeysShifted, false);
+        ConsoleHandleKey(key, keys_shifted, false);
     }
 
-    return true; // eat all keyboard events
+    return true;  // eat all keyboard events
 }
 
-void CON_Ticker(void)
+void ConsoleTicker(void)
 {
     int add = 1;
-    if (r_doubleframes.d && !(hudtic & 1))
-        add = 0;
+    if (r_doubleframes.d_&& !(hudtic & 1)) add = 0;
 
-    con_cursor = (con_cursor + add) & 31;
+    console_cursor = (console_cursor + add) & 31;
 
-    if (con_visible != vs_notvisible)
+    if (console_visible != kConsoleVisibilityNotVisible)
     {
         // Handle repeating keys
-        switch (scroll_dir)
+        switch (scroll_direction)
         {
-        case +1:
-            if (bottomrow < MAX_CON_LINES - 10)
-                bottomrow++;
-            break;
+            case +1:
+                if (bottom_row < kMaximumConsoleLines - 10) bottom_row++;
+                break;
 
-        case -1:
-            if (bottomrow > -1)
-                bottomrow--;
-            break;
+            case -1:
+                if (bottom_row > -1) bottom_row--;
+                break;
 
-        default:
-            if (repeat_countdown)
-            {
-                repeat_countdown -= 1;
-
-                while (repeat_countdown <= 0)
+            default:
+                if (repeat_countdown)
                 {
-                    repeat_countdown += KEYREPEATRATE * (r_doubleframes.d ? 2 : 1);
-                    CON_HandleKey(repeat_key, KeysShifted, false);
+                    repeat_countdown -= 1;
+
+                    while (repeat_countdown <= 0)
+                    {
+                        repeat_countdown +=
+                            kConsoleKeyRepeatRate * (r_doubleframes.d_? 2 : 1);
+                        ConsoleHandleKey(repeat_key, keys_shifted, false);
+                    }
                 }
-            }
-            break;
+                break;
         }
     }
 
-    if (conwipeactive)
+    if (console_wipe_active)
     {
-        if (con_visible == vs_notvisible)
+        if (console_visible == kConsoleVisibilityNotVisible)
         {
-            conwipepos--;
-            if (conwipepos <= 0)
-                conwipeactive = false;
+            console_wipe_position--;
+            if (console_wipe_position <= 0) console_wipe_active = false;
         }
         else
         {
-            conwipepos++;
-            if (conwipepos >= CON_WIPE_TICS)
-                conwipeactive = false;
+            console_wipe_position++;
+            if (console_wipe_position >= kConsoleWipeTics)
+                console_wipe_active = false;
         }
     }
 }
@@ -1579,37 +1532,36 @@ void CON_Ticker(void)
 //
 // Initialises the console
 //
-void CON_InitConsole(void)
+void ConsoleInit(void)
 {
-    CON_SortVars();
+    ConsoleSortVariables();
 
-    con_used_lines = 0;
-    cmd_used_hist  = 0;
+    console_used_lines   = 0;
+    command_used_history = 0;
 
-    bottomrow    = -1;
-    cmd_hist_pos = -1;
+    bottom_row               = -1;
+    command_history_position = -1;
 
-    CON_ClearInputLine();
+    ConsoleClearInputLine();
 
     current_color = SG_GRAY_RGBA32;
 
-    CON_AddLine("", false);
-    CON_AddLine("", false);
+    ConsoleAddLine("", false);
+    ConsoleAddLine("", false);
 }
 
-void CON_Start(void)
+void ConsoleStart(void)
 {
-    con_visible = vs_notvisible;
-    con_cursor  = 0;
+    console_visible = kConsoleVisibilityNotVisible;
+    console_cursor  = 0;
     E_ProgressMessage("Starting console...");
 }
 
-void CON_ShowFPS(void)
+void ConsoleShowFPS(void)
 {
-    if (debug_fps.d == 0)
-        return;
+    if (debug_fps.d_== 0) return;
 
-    CON_SetupFont();
+    ConsoleSetupFont();
 
     // -AJA- 2022: reworked for better accuracy, ability to show WORST time
 
@@ -1617,7 +1569,7 @@ void CON_ShowFPS(void)
     static uint32_t last_time = 0;
     uint32_t        time      = I_GetMicros();
     uint32_t        diff      = time - last_time;
-    last_time              = time;
+    last_time                 = time;
 
     // last computed value, state to compute average
     static float avg_shown   = 100.00;
@@ -1649,22 +1601,21 @@ void CON_ShowFPS(void)
     int x = SCREENWIDTH - XMUL * 16;
     int y = SCREENHEIGHT - FNSZ * 2;
 
-    if (abs(debug_fps.d) >= 2)
-        y -= FNSZ;
+    if (abs(debug_fps.d_) >= 2) y -= FNSZ;
 
-    if (abs(debug_fps.d) >= 3)
-        y -= (FNSZ * 4);
+    if (abs(debug_fps.d_) >= 3) y -= (FNSZ * 4);
 
     SolidBox(x, y, SCREENWIDTH, SCREENHEIGHT, SG_BLACK_RGBA32, 0.5);
 
     x += XMUL;
-    y = SCREENHEIGHT - FNSZ - FNSZ * (con_font->def->type_ == kFontTypeTrueType ? -0.5 : 0.5);
+    y = SCREENHEIGHT - FNSZ -
+        FNSZ * (console_font->def->type_ == kFontTypeTrueType ? -0.5 : 0.5);
 
     // show average...
 
     char textbuf[128];
 
-    if (debug_fps.d < 0)
+    if (debug_fps.d_< 0)
         sprintf(textbuf, " %6.2f ms", avg_shown);
     else
         sprintf(textbuf, " %6.2f fps", 1000 / avg_shown);
@@ -1673,11 +1624,11 @@ void CON_ShowFPS(void)
 
     // show worst...
 
-    if (abs(debug_fps.d) >= 2)
+    if (abs(debug_fps.d_) >= 2)
     {
         y -= FNSZ;
 
-        if (debug_fps.d < 0)
+        if (debug_fps.d_< 0)
             sprintf(textbuf, " %6.2f max", worst_shown);
         else if (worst_shown > 0)
             sprintf(textbuf, " %6.2f min", 1000 / worst_shown);
@@ -1687,40 +1638,37 @@ void CON_ShowFPS(void)
 
     // show frame metrics...
 
-    if (abs(debug_fps.d) >= 3)
+    if (abs(debug_fps.d_) >= 3)
     {
-        y -= FNSZ;        
+        y -= FNSZ;
         sprintf(textbuf, "%i runit", ecframe_stats.draw_runits);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-        y -= FNSZ;        
+        y -= FNSZ;
         sprintf(textbuf, "%i wall", ecframe_stats.draw_wallparts);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-        y -= FNSZ;        
+        y -= FNSZ;
         sprintf(textbuf, "%i plane", ecframe_stats.draw_planes);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-        y -= FNSZ;        
+        y -= FNSZ;
         sprintf(textbuf, "%i thing", ecframe_stats.draw_things);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-        y -= FNSZ;        
+        y -= FNSZ;
         sprintf(textbuf, "%i state", ecframe_stats.draw_statechange);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
-        y -= FNSZ;        
+        y -= FNSZ;
         sprintf(textbuf, "%i texture", ecframe_stats.draw_texchange);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
     }
-
 }
 
-void CON_ShowPosition(void)
+void ConsoleShowPosition(void)
 {
-    if (debug_pos.d <= 0)
-        return;
+    if (debug_position.d_<= 0) return;
 
-    CON_SetupFont();
+    ConsoleSetupFont();
 
     player_t *p = players[displayplayer];
-    if (p == nullptr)
-        return;
+    if (p == nullptr) return;
 
     char textbuf[128];
 
@@ -1730,7 +1678,7 @@ void CON_ShowPosition(void)
     SolidBox(x, y - FNSZ * 10, XMUL * 16, FNSZ * 10 + 2, SG_BLACK_RGBA32, 0.5);
 
     x += XMUL;
-    y -= FNSZ * (con_font->def->type_ == kFontTypeTrueType ? 0.25 : 1.25);
+    y -= FNSZ * (console_font->def->type_ == kFontTypeTrueType ? 0.25 : 1.25);
     sprintf(textbuf, "    x: %d", (int)p->mo->x);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
@@ -1767,93 +1715,92 @@ void CON_ShowPosition(void)
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 }
 
-void CON_PrintEndoom()
+void ConsolePrintEndoom()
 {
-    int   length = 0;
+    int      length = 0;
     uint8_t *data   = nullptr;
 
     data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
-    if (!data)
-        data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
-    if (!data)
-        data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
-    if (!data)
-        data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
+    if (!data) data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
+    if (!data) data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
+    if (!data) data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
     if (!data)
     {
-        CON_Printf("CON_PrintEndoom: No ENDOOM screen found!\n");
+        ConsolePrintf("ConsolePrintEndoom: No ENDOOM screen found!\n");
         return;
     }
     if (length != 4000)
     {
-        CON_Printf("CON_PrintEndoom: Lump exists, but is malformed! (Length not equal to 4000 bytes)\n");
+        ConsolePrintf(
+            "ConsolePrintEndoom: Lump exists, but is malformed! (Length not "
+            "equal "
+            "to 4000 bytes)\n");
         delete[] data;
         return;
     }
-    CON_Printf("\n\n");
+    ConsolePrintf("\n\n");
     int row_counter = 0;
     for (int i = 0; i < 4000; i += 2)
     {
-        CON_EndoomPrintf(data[i + 1], "%c",
-                         ((int)data[i] == 0 || (int)data[i] == 255) ? 0x20
-                                                                    : (int)data[i]); // Fix crumpled up ENDOOMs lol
+        ConsoleEndoomPrintf(data[i + 1], "%c",
+                            ((int)data[i] == 0 || (int)data[i] == 255)
+                                ? 0x20
+                                : (int)data[i]);  // Fix crumpled up ENDOOMs lol
         row_counter++;
         if (row_counter == 80)
         {
-            CON_Printf("\n");
+            ConsolePrintf("\n");
             row_counter = 0;
         }
     }
-    CON_Printf("\n");
+    ConsolePrintf("\n");
     delete[] data;
 }
 
-void CON_CreateQuitScreen()
+void ConsoleCreateQuitScreen()
 {
-    int   length = 0;
+    int      length = 0;
     uint8_t *data   = nullptr;
 
     data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
-    if (!data)
-        data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
-    if (!data)
-        data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
-    if (!data)
-        data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
+    if (!data) data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
+    if (!data) data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
+    if (!data) data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
     if (!data)
     {
-        CON_Printf("No ENDOOM screen found for this WAD!\n");
+        ConsolePrintf("No ENDOOM screen found for this WAD!\n");
         return;
     }
     if (length != 4000)
     {
-        CON_Printf("CON_CreateQuitScreen: ENDOOM exists, but is malformed! (Length not equal to 4000 bytes)\n");
+        ConsolePrintf(
+            "ConsoleCreateQuitScreen: ENDOOM exists, but is malformed! (Length "
+            "not equal to 4000 bytes)\n");
         delete[] data;
         return;
     }
     int row_counter = 0;
     for (int i = 0; i < 4000; i += 2)
     {
-        CON_QuitEndoomPrintf(
+        ConsoleQuitEndoomPrintf(
             data[i + 1], "%c",
-            ((uint8_t)data[i] == 0 || (uint8_t)data[i] == 255) ? 0x20 : (uint8_t)data[i]);
+            ((uint8_t)data[i] == 0 || (uint8_t)data[i] == 255)
+                ? 0x20
+                : (uint8_t)data[i]);
         row_counter++;
         if (row_counter == 80)
         {
-            CON_QuitPrintf("\n");
+            ConsoleQuitPrintf("\n");
             row_counter = 0;
         }
     }
     delete[] data;
 }
 
-void CON_ClearLines()
+void ConsoleClearLines()
 {
-    for (int i = 0; i < con_used_lines; i++)
-    {
-        console_lines[i]->Clear();
-    }
-    con_used_lines = 0;
+    for (int i = 0; i < console_used_lines; i++) { console_lines[i]->Clear(); }
+    console_used_lines = 0;
 }
 
 //--- editor settings ---

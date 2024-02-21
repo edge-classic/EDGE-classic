@@ -47,8 +47,8 @@ bool fast_forward_active;
 
 bool erraticism_active = false;
 
-extern cvar_c g_erraticism;
-extern cvar_c r_doubleframes;
+extern ConsoleVariable g_erraticism;
+extern ConsoleVariable r_doubleframes;
 
 //
 // P_Ticker
@@ -66,7 +66,7 @@ void P_Ticker(bool extra_tic)
 
     erraticism_active = false;
 
-    if (g_erraticism.d)
+    if (g_erraticism.d_)
     {
         bool keep_thinking = P_PlayerThink(players[consoleplayer], extra_tic);
 
@@ -89,24 +89,24 @@ void P_Ticker(bool extra_tic)
                 P_PlayerThink(players[pnum], extra_tic);
     }
 
-    if (!extra_tic || !r_doubleframes.d)
+    if (!extra_tic || !r_doubleframes.d_)
         RAD_RunTriggers();
 
     P_RunForces(extra_tic);
     P_RunMobjThinkers(extra_tic);
 
-    if (!extra_tic || !r_doubleframes.d)
+    if (!extra_tic || !r_doubleframes.d_)
         P_RunLights();
 
     P_RunActivePlanes();
     P_RunActiveSliders();
 
-    if (!extra_tic || !r_doubleframes.d)
+    if (!extra_tic || !r_doubleframes.d_)
         P_RunAmbientSFX();
 
     P_UpdateSpecials(extra_tic);
 
-    if (extra_tic && r_doubleframes.d)
+    if (extra_tic && r_doubleframes.d_)
         return;
 
     P_MobjItemRespawn();

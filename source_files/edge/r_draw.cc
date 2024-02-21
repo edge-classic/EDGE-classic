@@ -43,10 +43,10 @@ void RGL_NewScreenSize(int width, int height, int bits)
 void RGL_DrawImage(float x, float y, float w, float h, const image_c *image, float tx1, float ty1, float tx2, float ty2,
                    const Colormap *textmap, float alpha, const Colormap *palremap)
 {
-    int x1 = RoundToInt(x);
-    int y1 = RoundToInt(y);
-    int x2 = RoundToInt(x + w + 0.25f);
-    int y2 = RoundToInt(y + h + 0.25f);
+    int x1 = RoundToInteger(x);
+    int y1 = RoundToInteger(y);
+    int x2 = RoundToInteger(x + w + 0.25f);
+    int y2 = RoundToInteger(y + h + 0.25f);
 
     if (x1 == x2 || y1 == y2)
         return;

@@ -43,7 +43,7 @@
 
 #include <math.h>
 
-extern cvar_c      r_doubleframes;
+extern ConsoleVariable      r_doubleframes;
 extern coal::vm_c *ui_vm;
 
 extern void VM_SetFloat(coal::vm_c *vm, const char *mod, const char *name, double value);
@@ -184,7 +184,7 @@ static void HD_get_time(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    int time = I_GetTime() / (r_doubleframes.d ? 2 : 1);
+    int time = I_GetTime() / (r_doubleframes.d_? 2 : 1);
     vm->ReturnFloat((double)time);
 }
 
@@ -755,7 +755,7 @@ static void HD_screen_aspect(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    float TempAspect = std::ceil(v_pixelaspect.f * 100.0) / 100.0;
+    float TempAspect = std::ceil(v_pixelaspect.f_ * 100.0) / 100.0;
 
     vm->ReturnFloat(TempAspect);
 }

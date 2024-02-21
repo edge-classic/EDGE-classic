@@ -53,7 +53,7 @@
 
 #include "AlmostEquals.h"
 
-extern cvar_c r_doubleframes;
+extern ConsoleVariable r_doubleframes;
 
 // Level exit timer
 bool levelTimer;
@@ -1391,7 +1391,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
             if (failedsecurity)
             {
                 if (special->failedmessage_ != "")
-                    CON_PlayerMessageLDF(thing->player->pnum, special->failedmessage_.c_str());
+                    ConsolePlayerMessageLDF(thing->player->pnum, special->failedmessage_.c_str());
 
                 if (special->failed_sfx_)
                     S_StartFX(special->failed_sfx_, SNCAT_Level, thing);
@@ -1757,7 +1757,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
     if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= f_h && mouth_z <= c_h && player->powers[kPowerTypeScuba] <= 0)
     {
         int subtract = 1;
-        if ((r_doubleframes.d && extra_tic) || !should_choke)
+        if ((r_doubleframes.d_&& extra_tic) || !should_choke)
             subtract = 0;
         player->air_in_lungs -= subtract;
         player->underwater = true;
@@ -1845,7 +1845,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
     else if (player->powers[kPowerTypeAcidSuit] && !special->damage_.bypass_all_)
         factor = 0;
 
-    if (r_doubleframes.d && extra_tic)
+    if (r_doubleframes.d_&& extra_tic)
         factor = 0;
 
     if (factor > 0 && (leveltime % (1 + special->damage_.delay_)) == 0)
@@ -1862,7 +1862,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
 
         if (!DEATHMATCH())
         {
-            CON_ImportantMessageLDF("FoundSecret"); // Lobo: get text from language.ddf
+            ConsoleImportantMessageLDF("FoundSecret"); // Lobo: get text from language.ddf
 
             S_StartFX(player->mo->info->secretsound_, SNCAT_UI, player->mo);
             // S_StartFX(player->mo->info->secretsound_,
@@ -2002,12 +2002,12 @@ static inline void ApplyScroll(HMM_Vec2 &offset, const HMM_Vec2 &delta, unsigned
 void P_UpdateSpecials(bool extra_tic)
 {
     // For anim stuff
-    float factor = r_doubleframes.d ? 0.5f : 1.0f;
+    float factor = r_doubleframes.d_? 0.5f : 1.0f;
 
     // LEVEL TIMER
     if (levelTimer == true)
     {
-        levelTimeCount -= (r_doubleframes.d && extra_tic) ? 0 : 1;
+        levelTimeCount -= (r_doubleframes.d_&& extra_tic) ? 0 : 1;
 
         if (!levelTimeCount)
             G_ExitLevel(1);
@@ -2097,7 +2097,7 @@ void P_UpdateSpecials(bool extra_tic)
                     special_ref->scroll_type_ & BoomScrollerTypeDisplace ? lineanims[i].last_height : sec_ref->orig_height;
                 float sy = tdy * ((sec_ref->f_h + sec_ref->c_h) - heightref);
                 float sx = tdx * ((sec_ref->f_h + sec_ref->c_h) - heightref);
-                if (r_doubleframes.d && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
+                if (r_doubleframes.d_&& special_ref->scroll_type_ & BoomScrollerTypeDisplace)
                 {
                     sy *= 2;
                     sx *= 2;
@@ -2147,7 +2147,7 @@ void P_UpdateSpecials(bool extra_tic)
                     special_ref->scroll_type_ & BoomScrollerTypeDisplace ? lineanims[i].last_height : sec_ref->orig_height;
                 float sy = x_speed * ((sec_ref->f_h + sec_ref->c_h) - heightref);
                 float sx = y_speed * ((sec_ref->f_h + sec_ref->c_h) - heightref);
-                if (r_doubleframes.d && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
+                if (r_doubleframes.d_&& special_ref->scroll_type_ & BoomScrollerTypeDisplace)
                 {
                     sy *= 2;
                     sx *= 2;
@@ -2374,7 +2374,7 @@ void P_UpdateSpecials(bool extra_tic)
                        ((sec_ref->f_h + sec_ref->c_h) - heightref);
             float sx = line_ref->length / 32.0f * line_ref->dx / line_ref->length *
                        ((sec_ref->f_h + sec_ref->c_h) - heightref);
-            if (r_doubleframes.d && special_ref->scroll_type_ & BoomScrollerTypeDisplace)
+            if (r_doubleframes.d_&& special_ref->scroll_type_ & BoomScrollerTypeDisplace)
             {
                 sy *= 2;
                 sx *= 2;
@@ -2445,7 +2445,7 @@ void P_UpdateSpecials(bool extra_tic)
     }
 
     // DO BUTTONS
-    if (!r_doubleframes.d || !extra_tic)
+    if (!r_doubleframes.d_|| !extra_tic)
         P_UpdateButtons();
 }
 
@@ -2631,7 +2631,7 @@ void P_SpawnSpecials2(int autotag)
 
             sector->props.push.X += epi::BAMCos(secSpecial->push_angle_) * mul;
             sector->props.push.Y += epi::BAMSin(secSpecial->push_angle_) * mul;
-            sector->props.push.Z += secSpecial->push_zspeed_ / (r_doubleframes.d ? 89.2f : 100.0f);
+            sector->props.push.Z += secSpecial->push_zspeed_ / (r_doubleframes.d_? 89.2f : 100.0f);
         }
 
         // Scrollers

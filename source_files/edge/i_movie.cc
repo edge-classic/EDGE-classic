@@ -204,7 +204,7 @@ void E_PlayMovie(const std::string &name)
 		else // Zoom
 		{
 			frame_height = SCREENHEIGHT;
-			frame_width = RoundToInt((float)SCREENHEIGHT * movie_ratio);
+			frame_width = RoundToInteger((float)SCREENHEIGHT * movie_ratio);
 		}
 	}
 	else if (movie->scaling_ == kMovieScalingNoScale)
@@ -215,7 +215,7 @@ void E_PlayMovie(const std::string &name)
 	else if (movie->scaling_ == kMovieScalingZoom)
 	{
 		frame_height = SCREENHEIGHT;
-		frame_width = RoundToInt((float)SCREENHEIGHT * movie_ratio);
+		frame_width = RoundToInteger((float)SCREENHEIGHT * movie_ratio);
 	}
 	else // Stretch, aspect ratio gets BTFO potentially
 	{

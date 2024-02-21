@@ -32,7 +32,7 @@
 extern bool   automap_active;
 extern bool   rotate_map;
 extern bool   automap_keydoor_blink;
-extern cvar_c automap_keydoor_text;
+extern ConsoleVariable automap_keydoor_text;
 
 struct AutomapPoint
 {

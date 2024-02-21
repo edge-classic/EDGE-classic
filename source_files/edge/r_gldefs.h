@@ -37,13 +37,13 @@
 
 #define BUFFER_OFFSET(i) ((void *)(i))
 
-extern cvar_c r_colorlighting;
-extern cvar_c r_colormaterial;
+extern ConsoleVariable r_colorlighting;
+extern ConsoleVariable r_colormaterial;
 
-extern cvar_c r_dumbsky;
-extern cvar_c r_dumbmulti;
-extern cvar_c r_dumbcombine;
-extern cvar_c r_dumbclamp;
+extern ConsoleVariable r_dumbsky;
+extern ConsoleVariable r_dumbmulti;
+extern ConsoleVariable r_dumbcombine;
+extern ConsoleVariable r_dumbclamp;
 
 //
 //  RGL_MAIN
@@ -76,8 +76,8 @@ extern float ren_blu_mul;
 
 extern const Colormap *ren_fx_colmap;
 
-extern cvar_c r_nearclip;
-extern cvar_c r_farclip;
+extern ConsoleVariable r_nearclip;
+extern ConsoleVariable r_farclip;
 
 #define APPROX_DIST2(dx, dy) ((dx) + (dy)-0.5f * HMM_MIN((dx), (dy)))
 

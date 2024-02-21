@@ -39,7 +39,7 @@
 
 #include "m_random.h"
 
-extern cvar_c r_doubleframes;
+extern ConsoleVariable r_doubleframes;
 
 // user interface VM
 coal::vm_c *ui_vm = nullptr;
@@ -182,7 +182,7 @@ static void SYS_edge_version(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnFloat(edgeversion.f);
+    vm->ReturnFloat(edgeversion.f_);
 }
 
 //------------------------------------------------------------------------
@@ -195,7 +195,7 @@ static void MATH_rint(coal::vm_c *vm, int argc)
     (void)argc;
 
     double val = *vm->AccessParam(0);
-    vm->ReturnFloat(RoundToInt(val));
+    vm->ReturnFloat(RoundToInteger(val));
 }
 
 // math.floor(val)
@@ -488,7 +488,7 @@ void VM_LoadScripts()
 
     unread_scripts.clear();
 
-    VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d ? 2 : 1));
+    VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d_? 2 : 1));
 
     if (W_IsLumpInPwad("STBAR"))
     {

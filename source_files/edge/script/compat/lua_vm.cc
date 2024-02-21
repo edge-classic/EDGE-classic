@@ -9,7 +9,7 @@
 #include "edge_profiling.h"
 
 // Enable Lua debugging
-DEF_CVAR(lua_debug, "0", CVAR_ROM)
+EDGE_DEFINE_CONSOLE_VARIABLE(lua_debug, "0", kConsoleVariableFlagReadOnly)
 
 static void LUA_Error(const char *msg, const char *luaerror)
 {
@@ -84,7 +84,7 @@ static int LUA_MsgHandler(lua_State *L)
 
 int LUA_DoFile(lua_State *L, const char *filename, const char *source)
 {
-    if (lua_debug.d)
+    if (lua_debug.d_)
     {
         lua_getglobal(L, "__ec_debugger_source");
         lua_getfield(L, -1, filename);
@@ -108,7 +108,7 @@ int LUA_DoFile(lua_State *L, const char *filename, const char *source)
                   lua_tostring(L, -1));
     }
 
-    if (lua_debug.d)
+    if (lua_debug.d_)
     {
         status = dbg_pcall(L, 0, LUA_MULTRET, 0);
     }
@@ -149,7 +149,7 @@ void LUA_CallGlobalFunction(lua_State *L, const char *function_name)
     int top = lua_gettop(L);
     lua_getglobal(L, function_name);
     int status = 0;
-    if (lua_debug.d)
+    if (lua_debug.d_)
     {
         status = dbg_pcall(L, 0, 0, 0);
     }
@@ -212,7 +212,7 @@ static void LUA_Sandbox(lua_State *L)
     LUA_Sandbox_Module(L, "_G", base_functions);
 
     // if debugging is enabled, load debug/io libs and sandbox
-    if (lua_debug.d)
+    if (lua_debug.d_)
     {
         // open the debug library and io libraries
         luaL_requiref(L, LUA_DBLIBNAME, luaopen_debug, 1);
@@ -262,7 +262,7 @@ lua_State *LUA_CreateVM()
 
     LUA_Sandbox(L);
 
-    if (lua_debug.d)
+    if (lua_debug.d_)
     {
         lua_newtable(L);
         lua_setglobal(L, "__ec_debugger_source");

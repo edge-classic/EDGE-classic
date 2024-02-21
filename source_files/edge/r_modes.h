@@ -80,14 +80,14 @@ extern int                      DISPLAYMODE;
 extern scrmode_c                borderless_mode;
 extern std::vector<scrmode_c *> screen_modes;
 // CVARs related to Alt+Enter toggling
-extern cvar_c tf_screenwidth;
-extern cvar_c tf_screenheight;
-extern cvar_c tf_screendepth;
-extern cvar_c tf_displaymode;
-extern cvar_c tw_screenwidth;
-extern cvar_c tw_screenheight;
-extern cvar_c tw_screendepth;
-extern cvar_c tw_displaymode;
+extern ConsoleVariable tf_screenwidth;
+extern ConsoleVariable tf_screenheight;
+extern ConsoleVariable tf_screendepth;
+extern ConsoleVariable tf_displaymode;
+extern ConsoleVariable tw_screenwidth;
+extern ConsoleVariable tw_screenheight;
+extern ConsoleVariable tw_screendepth;
+extern ConsoleVariable tw_displaymode;
 
 // Exported Func
 bool R_DepthIsEquivalent(int depth1, int depth2);

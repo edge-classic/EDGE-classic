@@ -48,8 +48,8 @@
 
 bool var_obituaries = true;
 
-extern cvar_c g_gore;
-extern cvar_c player_dm_dr;
+extern ConsoleVariable g_gore;
+extern ConsoleVariable player_dm_dr;
 
 typedef struct
 {
@@ -89,7 +89,7 @@ static bool P_CheckForBenefit(Benefit *list, int kind)
 static void GiveCounter(pickup_info_t *pu, Benefit *be)
 {
     int cntr = be->sub.type;
-    int num  = RoundToInt(be->amount);
+    int num  = RoundToInteger(be->amount);
 
     if (cntr < 0 || cntr >= kTotalCounterTypes)
         I_Error("GiveCounter: bad type %i", cntr);
@@ -127,7 +127,7 @@ static void GiveCounter(pickup_info_t *pu, Benefit *be)
 static void GiveCounterLimit(pickup_info_t *pu, Benefit *be)
 {
     int cntr  = be->sub.type;
-    int limit = RoundToInt(be->amount);
+    int limit = RoundToInteger(be->amount);
 
     if (cntr < 0 || cntr >= kTotalCounterTypes)
         I_Error("GiveCounterLimit: bad type %i", cntr);
@@ -156,7 +156,7 @@ static void GiveCounterLimit(pickup_info_t *pu, Benefit *be)
 static void GiveInventory(pickup_info_t *pu, Benefit *be)
 {
     int inv = be->sub.type;
-    int num = RoundToInt(be->amount);
+    int num = RoundToInteger(be->amount);
 
     if (inv < 0 || inv >= kTotalInventoryTypes)
         I_Error("GiveInventory: bad type %i", inv);
@@ -194,7 +194,7 @@ static void GiveInventory(pickup_info_t *pu, Benefit *be)
 static void GiveInventoryLimit(pickup_info_t *pu, Benefit *be)
 {
     int inv   = be->sub.type;
-    int limit = RoundToInt(be->amount);
+    int limit = RoundToInteger(be->amount);
 
     if (inv < 0 || inv >= kTotalInventoryTypes)
         I_Error("GiveInventoryLimit: bad type %i", inv);
@@ -228,12 +228,12 @@ static void GiveAmmo(pickup_info_t *pu, Benefit *be)
         return;
 
     int ammo = be->sub.type;
-    int num  = RoundToInt(be->amount);
+    int num  = RoundToInteger(be->amount);
 
     // -AJA- in old deathmatch, weapons give 2.5 times more ammo
     if (deathmatch == 1 && P_CheckForBenefit(pu->list, kBenefitTypeWeapon) && pu->special && !pu->dropped)
     {
-        num = RoundToInt(be->amount * 2.5);
+        num = RoundToInteger(be->amount * 2.5);
     }
 
     if (ammo == kAmmunitionTypeNoAmmo || num <= 0)
@@ -308,7 +308,7 @@ static void GiveAmmo(pickup_info_t *pu, Benefit *be)
 static void GiveAmmoLimit(pickup_info_t *pu, Benefit *be)
 {
     int ammo  = be->sub.type;
-    int limit = RoundToInt(be->amount);
+    int limit = RoundToInteger(be->amount);
 
     if (ammo == kAmmunitionTypeNoAmmo)
         return;
@@ -892,7 +892,7 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
 
         if (special->info->pickup_message_ != "" && language.IsValidRef(special->info->pickup_message_.c_str()))
         {
-            CON_PlayerMessage(info.player->pnum, "%s", language[special->info->pickup_message_]);
+            ConsolePlayerMessage(info.player->pnum, "%s", language[special->info->pickup_message_]);
         }
 
         if (sound)
@@ -981,7 +981,7 @@ static void DoObituary(const char *format, mobj_t *victim, mobj_t *killer)
 
     std::string msg = PatternSubst(format, keywords);
 
-    CON_PlayerMessage(victim->player->pnum, "%s", msg.c_str());
+    ConsolePlayerMessage(victim->player->pnum, "%s", msg.c_str());
 }
 
 void P_ObituaryMessage(mobj_t *victim, mobj_t *killer, const DamageClass *damtype)
@@ -1153,7 +1153,7 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool
     if (state == 0)
         state = target->info->death_state_;
 
-    if (g_gore.d == 2 &&
+    if (g_gore.d_== 2 &&
         (target->flags & kMapObjectFlagCountKill)) // Hopefully the only things with blood/gore are monsters and not "barrels", etc
     {
         state = 0;
@@ -1459,14 +1459,14 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         // Bot Deathmatch Damange Resistance check
         if (DEATHMATCH() && !player->isBot() && source && source->player && source->player->isBot())
         {
-            if (player_dm_dr.d < 9)
+            if (player_dm_dr.d_< 9)
             {
-                float mul = 1.90f - (player_dm_dr.d * 0.10f);
+                float mul = 1.90f - (player_dm_dr.d_* 0.10f);
                 damage *= mul;
             }
-            else if (player_dm_dr.d > 9)
+            else if (player_dm_dr.d_> 9)
             {
-                float mul = 0.10f + ((18 - player_dm_dr.d) * 0.10f);
+                float mul = 0.10f + ((18 - player_dm_dr.d_) * 0.10f);
                 damage    = HMM_MAX(0.1f, damage * mul);
             }
         }

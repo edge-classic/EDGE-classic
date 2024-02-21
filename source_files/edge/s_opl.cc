@@ -20,6 +20,7 @@
 
 #include "file.h"
 #include "filesystem.h"
+#include "i_system.h"
 #include "sound_types.h"
 #include "str_util.h"
 #include "playlist.h"
@@ -48,7 +49,7 @@ extern int  dev_freq;
 
 bool opl_disabled = false;
 
-DEF_CVAR(s_genmidi, "GENMIDI", CVAR_ARCHIVE|CVAR_PATH)
+EDGE_DEFINE_CONSOLE_VARIABLE(s_genmidi, "GENMIDI", (ConsoleVariableFlag)(kConsoleVariableFlagArchive|kConsoleVariableFlagFilepath))
 
 extern std::vector<std::string> available_genmidis;
 
@@ -66,13 +67,13 @@ bool S_StartupOPL(void)
 
     // Check if CVAR value is still good
     bool cvar_good = false;
-    if (s_genmidi.s == "GENMIDI")
+    if (s_genmidi.s_ == "GENMIDI")
         cvar_good = true;
     else
     {
         for (size_t i = 0; i < available_genmidis.size(); i++)
         {
-            if (epi::StringCaseCompareASCII(s_genmidi.s, available_genmidis.at(i)) == 0)
+            if (epi::StringCaseCompareASCII(s_genmidi.s_, available_genmidis.at(i)) == 0)
                 cvar_good = true;
         }
     }
@@ -87,7 +88,7 @@ bool S_StartupOPL(void)
     uint8_t        *data = nullptr;
     epi::File *F    = nullptr;
 
-    if (s_genmidi.s == "GENMIDI")
+    if (s_genmidi.s_ == "GENMIDI")
     {
         data = W_OpenPackOrLumpInMemory("GENMIDI", {".op2"}, &length);
         if (!data)
@@ -98,7 +99,7 @@ bool S_StartupOPL(void)
     }
     else
     {
-        F = epi::FileOpen(s_genmidi.s, epi::kFileAccessRead | epi::kFileAccessBinary);
+        F = epi::FileOpen(s_genmidi.s_, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (!F)
         {
             I_Warning("S_StartupOPL: Error opening GENMIDI!\n");

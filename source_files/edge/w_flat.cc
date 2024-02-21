@@ -47,9 +47,9 @@
 #include "w_wad.h"
 #include "w_texture.h"
 
-DEF_CVAR(r_precache_tex, "1", CVAR_ARCHIVE)
-DEF_CVAR(r_precache_sprite, "1", CVAR_ARCHIVE)
-DEF_CVAR(r_precache_model, "1", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_precache_tex, "1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_precache_sprite, "1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_precache_model, "1", kConsoleVariableFlagArchive)
 
 //
 // R_AddFlatAnim
@@ -423,13 +423,13 @@ void W_PrecacheTextures(void)
 //
 void W_PrecacheLevel(void)
 {
-    if (r_precache_sprite.d)
+    if (r_precache_sprite.d_)
         W_PrecacheSprites();
 
-    if (r_precache_tex.d)
+    if (r_precache_tex.d_)
         W_PrecacheTextures();
 
-    if (r_precache_model.d)
+    if (r_precache_model.d_)
         W_PrecacheModels();
 
     RGL_PreCacheSky();

@@ -333,7 +333,7 @@ bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const TeleportDefinition 
             if (player == players[displayplayer] && reduce_flash)
             {
                 fog->vis_target = fog->visibility = INVISIBLE;
-                CON_ImportantMessageLDF("Teleporting...");
+                ConsoleImportantMessageLDF("Teleporting...");
             }
         }
     }

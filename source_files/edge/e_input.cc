@@ -43,13 +43,13 @@
 #include "r_misc.h"
 #include "str_util.h"
 
-extern bool CON_Responder(event_t *ev);
+extern bool ConsoleResponder(event_t *ev);
 extern bool M_Responder(event_t *ev);
 extern bool G_Responder(event_t *ev);
 
 extern int I_JoyGetAxis(int n);
 
-extern cvar_c r_doubleframes;
+extern ConsoleVariable r_doubleframes;
 
 //
 // EVENT HANDLING
@@ -148,31 +148,31 @@ static int joy_last_raw[4];
 static float ball_deltas[6] = {0, 0, 0, 0, 0, 0};
 static float joy_forces[6]  = {0, 0, 0, 0, 0, 0};
 
-DEF_CVAR_CLAMPED(joy_dead0, "0.30", CVAR_ARCHIVE, 0.01f, 0.99f)
-DEF_CVAR_CLAMPED(joy_dead1, "0.30", CVAR_ARCHIVE, 0.01f, 0.99f)
-DEF_CVAR_CLAMPED(joy_dead2, "0.30", CVAR_ARCHIVE, 0.01f, 0.99f)
-DEF_CVAR_CLAMPED(joy_dead3, "0.30", CVAR_ARCHIVE, 0.01f, 0.99f)
-DEF_CVAR_CLAMPED(joy_dead4, "0.30", CVAR_ARCHIVE, 0.01f, 0.99f)
-DEF_CVAR_CLAMPED(joy_dead5, "0.30", CVAR_ARCHIVE, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joy_dead0, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joy_dead1, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joy_dead2, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joy_dead3, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joy_dead4, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joy_dead5, "0.30", kConsoleVariableFlagArchive, 0.01f, 0.99f)
 float *joy_deads[6] = {
-    &joy_dead0.f, &joy_dead1.f, &joy_dead2.f, &joy_dead3.f, &joy_dead4.f, &joy_dead5.f,
+    &joy_dead0.f_, &joy_dead1.f_, &joy_dead2.f_, &joy_dead3.f_, &joy_dead4.f_, &joy_dead5.f_,
 };
 
-DEF_CVAR(in_running, "1", CVAR_ARCHIVE)
-DEF_CVAR(in_stageturn, "1", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(in_running, "1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(in_stageturn, "1", kConsoleVariableFlagArchive)
 
-DEF_CVAR(debug_mouse, "0", 0)
-DEF_CVAR(debug_joyaxis, "0", 0)
+EDGE_DEFINE_CONSOLE_VARIABLE(debug_mouse, "0", kConsoleVariableFlagNone)
+EDGE_DEFINE_CONSOLE_VARIABLE(debug_joyaxis, "0", kConsoleVariableFlagNone)
 
-DEF_CVAR(mouse_xsens, "10.0", CVAR_ARCHIVE)
-DEF_CVAR(mouse_ysens, "10.0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(mouse_xsens, "10.0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(mouse_ysens, "10.0", kConsoleVariableFlagArchive)
 
 // Speed controls
-DEF_CVAR(turnspeed, "1.0", CVAR_ARCHIVE)
-DEF_CVAR(vlookspeed, "1.0", CVAR_ARCHIVE)
-DEF_CVAR(forwardspeed, "1.0", CVAR_ARCHIVE)
-DEF_CVAR(sidespeed, "1.0", CVAR_ARCHIVE)
-DEF_CVAR(flyspeed, "1.0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(turnspeed, "1.0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(vlookspeed, "1.0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(forwardspeed, "1.0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(sidespeed, "1.0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(flyspeed, "1.0", kConsoleVariableFlagArchive)
 
 static float JoyAxisFromRaw(int raw, float dead)
 {
@@ -208,7 +208,7 @@ static void UpdateJoyAxis(int n)
     if ((joy_axis[n] + 1) & 1)
         force = -force;
 
-    if (debug_joyaxis.d == n + 1)
+    if (debug_joyaxis.d_== n + 1)
         I_Printf("Axis%d : raw %+05d --> %+7.3f\n", n + 1, raw, force);
 
     int axis = (joy_axis[n] + 1) >> 1;
@@ -308,7 +308,7 @@ void E_BuildTiccmd(ticcmd_t *cmd)
     bool strafe = E_IsKeyPressed(key_strafe);
     int  speed  = E_IsKeyPressed(key_speed) ? 1 : 0;
 
-    if (in_running.d)
+    if (in_running.d_)
         speed = !speed;
 
     //
@@ -325,7 +325,7 @@ void E_BuildTiccmd(ticcmd_t *cmd)
         turnheld = 0;
 
     // slow turn ?
-    if (turnheld < SLOWTURNTICS && in_stageturn.d)
+    if (turnheld < SLOWTURNTICS && in_stageturn.d_)
         t_speed = 2;
 
     int m_speed = speed;
@@ -336,20 +336,20 @@ void E_BuildTiccmd(ticcmd_t *cmd)
         mlookheld = 0;
 
     // slow mlook ?
-    if (mlookheld < SLOWTURNTICS && in_stageturn.d)
+    if (mlookheld < SLOWTURNTICS && in_stageturn.d_)
         m_speed = 2;
 
     // Turning
     if (!strafe)
     {
-        float turn = angleturn[t_speed] / (r_doubleframes.d ? 2 : 1) * joy_forces[AXIS_TURN];
+        float turn = angleturn[t_speed] / (r_doubleframes.d_? 2 : 1) * joy_forces[AXIS_TURN];
 
-        turn *= turnspeed.f;
+        turn *= turnspeed.f_;
 
         // -ACB- 1998/09/06 Angle Turn Speed Control
         turn += angleturn[t_speed] * ball_deltas[AXIS_TURN] / 64.0;
 
-        cmd->angleturn = RoundToInt(turn);
+        cmd->angleturn = RoundToInteger(turn);
     }
 
     // MLook
@@ -357,25 +357,25 @@ void E_BuildTiccmd(ticcmd_t *cmd)
         // -ACB- 1998/07/02 Use VertAngle for Look/up down.
         float mlook = mlookturn[m_speed] * joy_forces[AXIS_MLOOK];
 
-        mlook *= vlookspeed.f;
+        mlook *= vlookspeed.f_;
 
         mlook += mlookturn[m_speed] * ball_deltas[AXIS_MLOOK] / 64.0;
 
-        cmd->mlookturn = RoundToInt(mlook);
+        cmd->mlookturn = RoundToInteger(mlook);
     }
 
     // Forward [ no change for 70Hz ]
     {
         float forward = forwardmove[speed] * joy_forces[AXIS_FORWARD];
 
-        forward *= forwardspeed.f;
+        forward *= forwardspeed.f_;
 
         // -ACB- 1998/09/06 Forward Move Speed Control
         forward += forwardmove[speed] * ball_deltas[AXIS_FORWARD] / 64.0;
 
         forward = HMM_Clamp(-MAXPLMOVE, forward, MAXPLMOVE);
 
-        cmd->forwardmove = RoundToInt(forward);
+        cmd->forwardmove = RoundToInteger(forward);
     }
 
     // Sideways [ no change for 70Hz ]
@@ -385,7 +385,7 @@ void E_BuildTiccmd(ticcmd_t *cmd)
         if (strafe)
             side += sidemove[speed] * joy_forces[AXIS_TURN];
 
-        side *= sidespeed.f;
+        side *= sidespeed.f_;
 
         // -ACB- 1998/09/06 Side Move Speed Control
         side += sidemove[speed] * ball_deltas[AXIS_STRAFE] / 64.0;
@@ -395,20 +395,20 @@ void E_BuildTiccmd(ticcmd_t *cmd)
 
         side = HMM_Clamp(-MAXPLMOVE, side, MAXPLMOVE);
 
-        cmd->sidemove = RoundToInt(side);
+        cmd->sidemove = RoundToInteger(side);
     }
 
     // Upwards  -MH- 1998/08/18 Fly Up/Down movement
     {
         float upward = upwardmove[speed] * joy_forces[AXIS_FLY];
 
-        upward *= flyspeed.f;
+        upward *= flyspeed.f_;
 
         upward += upwardmove[speed] * ball_deltas[AXIS_FLY] / 64.0;
 
         upward = HMM_Clamp(-MAXPLMOVE, upward, MAXPLMOVE);
 
-        cmd->upwardmove = RoundToInt(upward);
+        cmd->upwardmove = RoundToInteger(upward);
     }
 
     // ---Buttons---
@@ -492,7 +492,7 @@ void E_BuildTiccmd(ticcmd_t *cmd)
     {
         if (allowautorun)
         {
-            in_running   = in_running.d ? 0 : 1;
+            in_running   = in_running.d_? 0 : 1;
             allowautorun = false;
         }
     }
@@ -574,10 +574,10 @@ bool INP_Responder(event_t *ev)
         if ((mouse_yaxis + 1) & 1)
             dy = -dy;
 
-        dx *= mouse_xsens.f;
-        dy *= mouse_ysens.f;
+        dx *= mouse_xsens.f_;
+        dy *= mouse_ysens.f_;
 
-        if (debug_mouse.d)
+        if (debug_mouse.d_)
             I_Printf("Mouse %+04d %+04d --> %+7.2f %+7.2f\n", ev->value.mouse.dx, ev->value.mouse.dy, dx, dy);
 
         // -AJA- 1999/07/27: Mlook key like quake's.
@@ -684,7 +684,7 @@ void E_ProcessEvents(void)
     {
         ev = &events[eventtail];
 
-        if (CON_Responder(ev))
+        if (ConsoleResponder(ev))
             continue; // Console ate the event
 
         if (chat_on && HU_Responder(ev))

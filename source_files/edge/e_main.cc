@@ -93,10 +93,10 @@
 #include "script/compat/lua_compat.h"
 #include "edge_profiling.h"
 
-extern cvar_c r_doubleframes;
-extern cvar_c n_busywait;
+extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable n_busywait;
 
-extern cvar_c v_gamma;
+extern ConsoleVariable v_gamma;
 
 ECFrameStats ecframe_stats;
 
@@ -172,29 +172,29 @@ std::string home_dir;
 std::string save_dir;
 std::string shot_dir;
 
-// not using DEF_CVAR here since var name != cvar name
-cvar_c m_language("language", "ENGLISH", CVAR_ARCHIVE);
+// not using EDGE_DEFINE_CONSOLE_VARIABLE here since var name != cvar name
+ConsoleVariable m_language("language", "ENGLISH", kConsoleVariableFlagArchive);
 
-DEF_CVAR(logfilename, "edge-classic.log", CVAR_NO_RESET)
-DEF_CVAR(configfilename, "edge-classic.cfg", CVAR_NO_RESET)
-DEF_CVAR(debugfilename, "debug.txt", CVAR_NO_RESET)
-DEF_CVAR(windowtitle, "EDGE-Classic", CVAR_NO_RESET)
-DEF_CVAR(edgeversion, "1.37", CVAR_NO_RESET)
-DEF_CVAR(orgname, "EDGE Team", CVAR_NO_RESET)
-DEF_CVAR(appname, "EDGE-Classic", CVAR_NO_RESET)
-DEF_CVAR(homepage, "https://edge-classic.github.io", CVAR_NO_RESET)
+EDGE_DEFINE_CONSOLE_VARIABLE(logfilename, "edge-classic.log", kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(configfilename, "edge-classic.cfg", kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(debugfilename, "debug.txt", kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(windowtitle, "EDGE-Classic", kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(edgeversion, "1.37", kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(orgname, "EDGE Team", kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(appname, "EDGE-Classic", kConsoleVariableFlagNoReset)
+EDGE_DEFINE_CONSOLE_VARIABLE(homepage, "https://edge-classic.github.io", kConsoleVariableFlagNoReset)
 
-DEF_CVAR_CLAMPED(r_overlay, "0", CVAR_ARCHIVE, 0, 6)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(r_overlay, "0", kConsoleVariableFlagArchive, 0, 6)
 
-DEF_CVAR_CLAMPED(r_titlescaling, "0", CVAR_ARCHIVE, 0, 1)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(r_titlescaling, "0", kConsoleVariableFlagArchive, 0, 1)
 
-DEF_CVAR(g_aggression, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(g_aggression, "0", kConsoleVariableFlagArchive)
 
-DEF_CVAR(ddf_strict, "0", CVAR_ARCHIVE)
-DEF_CVAR(ddf_lax, "0", CVAR_ARCHIVE)
-DEF_CVAR(ddf_quiet, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(ddf_strict, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(ddf_lax, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(ddf_quiet, "0", kConsoleVariableFlagArchive)
 
-DEF_CVAR(skip_intros, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(skip_intros, "0", kConsoleVariableFlagArchive)
 
 static const image_c *loading_image = nullptr;
 const image_c        *menu_backdrop = nullptr;
@@ -228,7 +228,7 @@ class startup_progress_c
         HUD_FrameSetup();
         if (loading_image)
         {
-            if (r_titlescaling.d) // Fill Border
+            if (r_titlescaling.d_) // Fill Border
             {
                 if (!loading_image->blurred_version)
                     W_ImageStoreBlurred(loading_image, 0.75f);
@@ -247,26 +247,26 @@ class startup_progress_c
             y += 10;
         }
 
-        if (!hud_overlays.at(r_overlay.d).empty())
+        if (!hud_overlays.at(r_overlay.d_).empty())
         {
-            const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), kImageNamespaceGraphic, ILF_Null);
+            const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d_).c_str(), kImageNamespaceGraphic, ILF_Null);
             if (overlay)
                 HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
                              SCREENHEIGHT / IM_HEIGHT(overlay));
         }
 
-        if (v_gamma.f < 0)
+        if (v_gamma.f_ < 0)
         {
-            int col = (1.0f + v_gamma.f) * 255;
+            int col = (1.0f + v_gamma.f_) * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_ZERO, GL_SRC_COLOR);
             HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
-        else if (v_gamma.f > 0)
+        else if (v_gamma.f_ > 0)
         {
-            int col = v_gamma.f * 255;
+            int col = v_gamma.f_ * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_DST_COLOR, GL_ONE);
             HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
@@ -424,9 +424,9 @@ static void SetGlobalVars(void)
     argv::CheckBooleanCVar("lax", &ddf_lax, false);
     argv::CheckBooleanCVar("warn", &ddf_quiet, true);
 
-    strict_errors = ddf_strict.d ? true : false;
-    lax_errors    = ddf_lax.d ? true : false;
-    no_warnings   = ddf_quiet.d ? true : false;
+    strict_errors = ddf_strict.d_? true : false;
+    lax_errors    = ddf_lax.d_? true : false;
+    no_warnings   = ddf_quiet.d_? true : false;
 }
 
 //
@@ -477,13 +477,13 @@ static void SpecialWadVerify(void)
 
     I_Printf("EDGE_DEFS.EPK version %1.2f found.\n", real_ver);
 
-    if (real_ver < edgeversion.f)
+    if (real_ver < edgeversion.f_)
     {
-        I_Error("EDGE_DEFS.EPK is an older version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f);
+        I_Error("EDGE_DEFS.EPK is an older version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f_);
     }
-    else if (real_ver > edgeversion.f)
+    else if (real_ver > edgeversion.f_)
     {
-        I_Warning("EDGE_DEFS.EPK is a newer version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f);
+        I_Warning("EDGE_DEFS.EPK is a newer version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f_);
     }
 }
 
@@ -492,7 +492,7 @@ static void SpecialWadVerify(void)
 //
 static void ShowNotice(void)
 {
-    CON_MessageColor(epi::MakeRGBA(64, 192, 255));
+    ConsoleMessageColor(epi::MakeRGBA(64, 192, 255));
 
     I_Printf("%s", language["Notice"]);
 }
@@ -651,28 +651,28 @@ void E_Display(void)
     // process mouse and keyboard events
     N_NetUpdate();
 
-    CON_Drawer();
+    ConsoleDrawer();
 
-    if (!hud_overlays.at(r_overlay.d).empty())
+    if (!hud_overlays.at(r_overlay.d_).empty())
     {
-        const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d).c_str(), kImageNamespaceGraphic, ILF_Null);
+        const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d_).c_str(), kImageNamespaceGraphic, ILF_Null);
         if (overlay)
             HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
                          SCREENHEIGHT / IM_HEIGHT(overlay));
     }
 
-    if (v_gamma.f < 0)
+    if (v_gamma.f_ < 0)
     {
-        int col = (1.0f + v_gamma.f) * 255;
+        int col = (1.0f + v_gamma.f_) * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
         HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }
-    else if (v_gamma.f > 0)
+    else if (v_gamma.f_ > 0)
     {
-        int col = v_gamma.f * 255;
+        int col = v_gamma.f_ * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_DST_COLOR, GL_ONE);
         HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
@@ -709,7 +709,7 @@ static void E_TitleDrawer(void)
 {
     if (title_image)
     {
-        if (r_titlescaling.d) // Fill Border
+        if (r_titlescaling.d_) // Fill Border
         {
             if (!title_image->blurred_version)
                 W_ImageStoreBlurred(title_image, 0.75f);
@@ -896,7 +896,7 @@ void E_AdvanceTitle(void)
         // Only play title movies once
         if (!g->titlemovie_.empty() && !g->movie_played_)
         {
-            if (skip_intros.d)
+            if (skip_intros.d_)
                 g->movie_played_ = true;
             else
             {
@@ -935,14 +935,14 @@ void E_AdvanceTitle(void)
         if (title_pic == 0 && g->titlemusic_ > 0)
             S_ChangeMusic(g->titlemusic_, false);
 
-        title_countdown = g->titletics_ * (r_doubleframes.d ? 2 : 1);
+        title_countdown = g->titletics_ * (r_doubleframes.d_? 2 : 1);
         return;
     }
 
     // not found
 
     title_image     = nullptr;
-    title_countdown = kTicRate * (r_doubleframes.d ? 2 : 1);
+    title_countdown = kTicRate * (r_doubleframes.d_? 2 : 1);
 }
 
 void E_StartTitle(void)
@@ -1006,7 +1006,7 @@ void InitDirectories(void)
     }
     else
     {
-        cfgfile = epi::PathAppend(game_dir, configfilename.s);
+        cfgfile = epi::PathAppend(game_dir, configfilename.s_);
         if (epi::TestFileAccess(cfgfile) || argv::Find("portable") > 0)
             home_dir = game_dir;
         else
@@ -1035,7 +1035,7 @@ void InitDirectories(void)
     }
 
     if (cfgfile.empty())
-        cfgfile = epi::PathAppend(home_dir, configfilename.s);
+        cfgfile = epi::PathAppend(home_dir, configfilename.s_);
 
     // edge_defs.epk file
     s = argv::Value("defs");
@@ -1596,7 +1596,7 @@ static void CheckTurbo(void)
         if (turbo_scale > 400)
             turbo_scale = 400;
 
-        CON_MessageLDF("TurboScale", turbo_scale);
+        ConsoleMessageLDF("TurboScale", turbo_scale);
     }
 
     E_SetTurboScale(turbo_scale);
@@ -1623,11 +1623,11 @@ static void ShowDateAndVersion(void)
 
 static void SetupLogAndDebugFiles(void)
 {
-    // -AJA- 2003/11/08 The log file gets all CON_Printfs, I_Printfs,
+    // -AJA- 2003/11/08 The log file gets all ConsolePrintfs, I_Printfs,
     //                  I_Warnings and I_Errors.
 
-    std::string log_fn = epi::PathAppend(home_dir, logfilename.s);
-    std::string debug_fn = epi::PathAppend(home_dir, debugfilename.s);
+    std::string log_fn = epi::PathAppend(home_dir, logfilename.s_);
+    std::string debug_fn = epi::PathAppend(home_dir, debugfilename.s_);
 
 
     logfile   = nullptr;
@@ -1646,7 +1646,7 @@ static void SetupLogAndDebugFiles(void)
     //                  Moved here to setup debug file for DDF Parsing...
     //
     // -ES- 1999/08/01 Debugfiles can now be used without -DDEVELOPERS, and
-    //                 then logs all the CON_Printfs, I_Printfs and I_Errors.
+    //                 then logs all the ConsolePrintfs, I_Printfs and I_Errors.
     //
     // -ACB- 1999/10/02 Don't print to console, since we don't have a console yet.
 
@@ -1904,7 +1904,7 @@ static void E_Shutdown(void);
 
 static void E_Startup(void)
 {
-    CON_InitConsole();
+    ConsoleInit();
 
     // -AJA- 2000/02/02: initialise global gameflags to defaults
     global_flags = default_gameflags;
@@ -1926,7 +1926,7 @@ static void E_Startup(void)
 
     M_LoadDefaults();
 
-    CON_HandleProgramArgs();
+    ConsoleHandleProgramArguments();
     SetGlobalVars();
 
     DoSystemStartup();
@@ -1958,8 +1958,8 @@ static void E_Startup(void)
     E_PickMenuScreen();
 
     HU_Init();
-    CON_Start();
-    CON_CreateQuitScreen();
+    ConsoleStart();
+    ConsoleCreateQuitScreen();
     SpecialWadVerify();
     W_BuildNodes();
     M_InitMiscConVars();
@@ -2122,7 +2122,7 @@ void E_Main(int argc, const char **argv)
 
     E_InitialState();
 
-    CON_MessageColor(SG_YELLOW_RGBA32);
+    ConsoleMessageColor(SG_YELLOW_RGBA32);
     I_Printf("%s v%s initialisation complete.\n", appname.c_str(), edgeversion.c_str());
 
     I_Debugf("- Entering game loop...\n");
@@ -2136,7 +2136,7 @@ void E_Main(int argc, const char **argv)
 
         if (app_state & APP_STATE_ACTIVE)
             E_Tick();
-        else if (!n_busywait.d)
+        else if (!n_busywait.d_)
         {
             I_Sleep(5);
         }
@@ -2188,7 +2188,7 @@ void E_Tick(void)
         G_Ticker();
 
         // user interface stuff (skull anim, etc)
-        CON_Ticker();
+        ConsoleTicker();
         M_Ticker();
         S_SoundTicker();
         S_MusicTicker();

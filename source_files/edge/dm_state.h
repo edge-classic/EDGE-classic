@@ -115,7 +115,7 @@ extern std::string shot_dir;
 extern bool precache;
 
 // if true, enable HOM detection (hall of mirrors effect)
-extern cvar_c debug_hom;
+extern ConsoleVariable debug_hom;
 
 extern int save_page;
 

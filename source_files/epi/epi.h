@@ -35,8 +35,8 @@ void I_Debugf(const char *message, ...);
 
 // Move these to dedicated EPI math file - Dasho
 #include <math.h>
-inline int RoundToInt(float x) { return (int)roundf(x); }
-inline int RoundToInt(double x) { return (int)round(x); }
+inline int RoundToInteger(float x) { return (int)roundf(x); }
+inline int RoundToInteger(double x) { return (int)round(x); }
 
 // assertion macro
 #define SYS_ASSERT(cond)                                                   \

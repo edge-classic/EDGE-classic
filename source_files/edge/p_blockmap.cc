@@ -86,9 +86,9 @@ int dlmap_height;
 mobj_t **dlmap_things = nullptr;
 
 extern std::unordered_set<abstract_shader_c *> seen_dlights;
-extern cvar_c                                  r_culling;
+extern ConsoleVariable                                  r_culling;
 
-DEF_CVAR(r_maxdlights, "0", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(r_maxdlights, "0", kConsoleVariableFlagArchive)
 
 void P_CreateThingBlockMap(void)
 {
@@ -863,7 +863,7 @@ void P_DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, fl
                 if (mo->state->bright <= 0 || mo->dlight.r <= 0)
                     continue;
 
-                if (r_culling.d && R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f)
+                if (r_culling.d_&& R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f_)
                     continue;
 
                 // check whether radius touches the given bbox
@@ -877,9 +877,9 @@ void P_DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, fl
                 if (!mo->dlight.shader)
                     mo->dlight.shader = MakeDLightShader(mo);
 
-                if (r_maxdlights.d > 0 && seen_dlights.count(mo->dlight.shader) == 0)
+                if (r_maxdlights.d_> 0 && seen_dlights.count(mo->dlight.shader) == 0)
                 {
-                    if ((int)seen_dlights.size() >= r_maxdlights.d * 20)
+                    if ((int)seen_dlights.size() >= r_maxdlights.d_* 20)
                         continue;
                     else
                     {
@@ -908,7 +908,7 @@ void P_SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
         if (mo->state->bright <= 0 || mo->dlight.r <= 0)
             continue;
 
-        if (r_culling.d && R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f)
+        if (r_culling.d_&& R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f_)
             continue;
 
         // check whether radius touches the given bbox

@@ -119,41 +119,41 @@
 int  option_menuon = 0;
 bool fkey_menu     = false;
 
-extern cvar_c m_language;
-extern cvar_c r_crosshair;
-extern cvar_c r_crosscolor;
-extern cvar_c r_crosssize;
-extern cvar_c s_genmidi;
-extern cvar_c s_soundfont;
-extern cvar_c r_overlay;
-extern cvar_c g_erraticism;
-extern cvar_c r_doubleframes;
-extern cvar_c r_culling;
-extern cvar_c r_culldist;
-extern cvar_c r_cullfog;
-extern cvar_c g_cullthinkers;
-extern cvar_c r_maxdlights;
-extern cvar_c v_sync;
-extern cvar_c g_bobbing;
-extern cvar_c g_gore;
+extern ConsoleVariable m_language;
+extern ConsoleVariable r_crosshair;
+extern ConsoleVariable r_crosscolor;
+extern ConsoleVariable r_crosssize;
+extern ConsoleVariable s_genmidi;
+extern ConsoleVariable s_soundfont;
+extern ConsoleVariable r_overlay;
+extern ConsoleVariable g_erraticism;
+extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable r_culling;
+extern ConsoleVariable r_culldist;
+extern ConsoleVariable r_cullfog;
+extern ConsoleVariable g_cullthinkers;
+extern ConsoleVariable r_maxdlights;
+extern ConsoleVariable v_sync;
+extern ConsoleVariable g_bobbing;
+extern ConsoleVariable g_gore;
 
 // extern cvar_c automap_keydoor_text;
 
-extern cvar_c v_secbright;
-extern cvar_c v_gamma;
-extern cvar_c r_titlescaling;
-extern cvar_c r_skystretch;
-extern cvar_c r_forceflatlighting;
+extern ConsoleVariable v_secbright;
+extern ConsoleVariable v_gamma;
+extern ConsoleVariable r_titlescaling;
+extern ConsoleVariable r_skystretch;
+extern ConsoleVariable r_forceflatlighting;
 
 static int monitor_size;
 
 extern int    joystick_device;
-extern cvar_c joy_dead0;
-extern cvar_c joy_dead1;
-extern cvar_c joy_dead2;
-extern cvar_c joy_dead3;
-extern cvar_c joy_dead4;
-extern cvar_c joy_dead5;
+extern ConsoleVariable joy_dead0;
+extern ConsoleVariable joy_dead1;
+extern ConsoleVariable joy_dead2;
+extern ConsoleVariable joy_dead3;
+extern ConsoleVariable joy_dead4;
+extern ConsoleVariable joy_dead5;
 
 extern SDL_Joystick *joy_info;
 extern int           I_JoyGetAxis(int n);
@@ -161,57 +161,57 @@ extern int           I_JoyGetAxis(int n);
 extern int entry_playing;
 
 // submenus
-static void M_KeyboardOptions(int keypressed, cvar_c *cvar = nullptr);
-static void M_VideoOptions(int keypressed, cvar_c *cvar = nullptr);
-static void M_GameplayOptions(int keypressed, cvar_c *cvar = nullptr);
-static void M_PerformanceOptions(int keypressed, cvar_c *cvar = nullptr);
-static void M_AccessibilityOptions(int keypressed, cvar_c *cvar = nullptr);
-static void M_AnalogueOptions(int keypressed, cvar_c *cvar = nullptr);
-static void M_SoundOptions(int keypressed, cvar_c *cvar = nullptr);
+static void M_KeyboardOptions(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_VideoOptions(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_GameplayOptions(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_PerformanceOptions(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_AccessibilityOptions(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_AnalogueOptions(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_SoundOptions(int keypressed, ConsoleVariable *cvar = nullptr);
 
 static void M_Key2String(int key, char *deststring);
 
 // Use these when a menu option does nothing special other than update a value
-static void M_UpdateCVARFromFloat(int keypressed, cvar_c *cvar = nullptr);
-static void M_UpdateCVARFromInt(int keypressed, cvar_c *cvar = nullptr);
+static void M_UpdateCVARFromFloat(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_UpdateCVARFromInt(int keypressed, ConsoleVariable *cvar = nullptr);
 
 // -ACB- 1998/08/09 "Does Map allow these changes?" procedures.
-static void M_ChangeMonsterRespawn(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeItemRespawn(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeTrue3d(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeAutoAim(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeFastparm(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeRespawn(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangePassMissile(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeBobbing(int keypressed, cvar_c *cvar = nullptr);
+static void M_ChangeMonsterRespawn(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeItemRespawn(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeTrue3d(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeAutoAim(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeFastparm(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeRespawn(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangePassMissile(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeBobbing(int keypressed, ConsoleVariable *cvar = nullptr);
 // static void M_ChangeBlood(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeMLook(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeJumping(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeCrouching(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeExtra(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeMonitorSize(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeKicking(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeWeaponSwitch(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeMipMap(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangePCSpeakerMode(int keypressed, cvar_c *cvar = nullptr);
+static void M_ChangeMLook(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeJumping(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeCrouching(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeExtra(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeMonitorSize(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeKicking(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeWeaponSwitch(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeMipMap(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangePCSpeakerMode(int keypressed, ConsoleVariable *cvar = nullptr);
 
 // -ES- 1998/08/20 Added resolution options
 // -ACB- 1998/08/29 Moved to top and tried different system
 
 static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int centrex);
-static void M_ResolutionOptions(int keypressed, cvar_c *cvar = nullptr);
-static void M_OptionSetResolution(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeResSize(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeResFull(int keypressed, cvar_c *cvar = nullptr);
+static void M_ResolutionOptions(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_OptionSetResolution(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeResSize(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeResFull(int keypressed, ConsoleVariable *cvar = nullptr);
 
-void M_HostNetGame(int keypressed, cvar_c *cvar = nullptr);
-void M_JoinNetGame(int keypressed, cvar_c *cvar = nullptr);
+void M_HostNetGame(int keypressed, ConsoleVariable *cvar = nullptr);
+void M_JoinNetGame(int keypressed, ConsoleVariable *cvar = nullptr);
 
 static void M_LanguageDrawer(int x, int y, int deltay);
-static void M_ChangeLanguage(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeMIDIPlayer(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeSoundfont(int keypressed, cvar_c *cvar = nullptr);
-static void M_ChangeGENMIDI(int keypressed, cvar_c *cvar = nullptr);
+static void M_ChangeLanguage(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeMIDIPlayer(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeSoundfont(int keypressed, ConsoleVariable *cvar = nullptr);
+static void M_ChangeGENMIDI(int keypressed, ConsoleVariable *cvar = nullptr);
 static void InitMonitorSize();
 
 static char YesNo[]  = "Off/On"; // basic on/off
@@ -275,11 +275,11 @@ typedef struct optmenuitem_s
     int   numtypes;
     void *switchvar;
 
-    void (*routine)(int keypressed, cvar_c *cvar);
+    void (*routine)(int keypressed, ConsoleVariable *cvar);
 
     const char *help;
 
-    cvar_c *cvar_to_change;
+    ConsoleVariable *cvar_to_change;
 
     // For options tracking a floating point variable/range
     float increment;
@@ -322,7 +322,7 @@ static int keyscan;
 
 static style_c *opt_def_style;
 
-static void M_ChangeMixChan(int keypressed, cvar_c *cvar)
+static void M_ChangeMixChan(int keypressed, ConsoleVariable *cvar)
 {
     S_ChangeChannelNum();
 }
@@ -387,24 +387,24 @@ static menuinfo_t main_optmenu = {
 // -ACB- 1998/07/15 Altered menu structure
 
 static optmenuitem_t vidoptions[] = {
-    {OPT_FracSlider, "Gamma Adjustment", nullptr, 0, &v_gamma.f, M_UpdateCVARFromFloat, nullptr, &v_gamma, 0.10f, -1.0f, 1.0f,
+    {OPT_FracSlider, "Gamma Adjustment", nullptr, 0, &v_gamma.f_, M_UpdateCVARFromFloat, nullptr, &v_gamma, 0.10f, -1.0f, 1.0f,
      "%0.2f"},
-    {OPT_Switch, "Sector Brightness", SecBrights, 11, &v_secbright.d, M_UpdateCVARFromInt, nullptr, &v_secbright},
-    {OPT_Boolean, "Lighting Mode", "Indexed/Flat", 2, &r_forceflatlighting.d, M_UpdateCVARFromInt, nullptr,
+    {OPT_Switch, "Sector Brightness", SecBrights, 11, &v_secbright.d_, M_UpdateCVARFromInt, nullptr, &v_secbright},
+    {OPT_Boolean, "Lighting Mode", "Indexed/Flat", 2, &r_forceflatlighting.d_, M_UpdateCVARFromInt, nullptr,
      &r_forceflatlighting},
-    {OPT_Switch, "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d, M_UpdateCVARFromInt, nullptr, &r_doubleframes},
+    {OPT_Switch, "Framerate Target", "35 FPS/70 FPS", 2, &r_doubleframes.d_, M_UpdateCVARFromInt, nullptr, &r_doubleframes},
     {OPT_Switch, "Smoothing", YesNo, 2, &var_smoothing, M_ChangeMipMap, nullptr},
     {OPT_Switch, "Upscale Textures", Hq2xMode, 4, &hq2x_scaling, M_ChangeMipMap,
      "Only affects paletted (Doom format) textures"},
-    {OPT_Switch, "Title/Intermission Scaling", "Normal/Fill Border", 2, &r_titlescaling.d, M_UpdateCVARFromInt, nullptr,
+    {OPT_Switch, "Title/Intermission Scaling", "Normal/Fill Border", 2, &r_titlescaling.d_, M_UpdateCVARFromInt, nullptr,
      &r_titlescaling},
-    {OPT_Switch, "Sky Scaling", SkyScaleMode, 4, &r_skystretch.d, M_UpdateCVARFromInt,
+    {OPT_Switch, "Sky Scaling", SkyScaleMode, 4, &r_skystretch.d_, M_UpdateCVARFromInt,
      "Vanilla will be forced when Mouselook is Off", &r_skystretch},
     {OPT_Switch, "Dynamic Lighting", YesNo, 2, &use_dlights, nullptr, nullptr},
-    {OPT_Switch, "Overlay", VidOverlays, 7, &r_overlay.d, M_UpdateCVARFromInt, nullptr, &r_overlay},
-    {OPT_Switch, "Crosshair", CrossH, 10, &r_crosshair.d, M_UpdateCVARFromInt, nullptr, &r_crosshair},
-    {OPT_Switch, "Crosshair Color", CrosshairColor, 8, &r_crosscolor.d, M_UpdateCVARFromInt, nullptr, &r_crosscolor},
-    {OPT_FracSlider, "Crosshair Size", nullptr, 0, &r_crosssize.f, M_UpdateCVARFromFloat, nullptr, &r_crosssize, 1.0f, 2.0f,
+    {OPT_Switch, "Overlay", VidOverlays, 7, &r_overlay.d_, M_UpdateCVARFromInt, nullptr, &r_overlay},
+    {OPT_Switch, "Crosshair", CrossH, 10, &r_crosshair.d_, M_UpdateCVARFromInt, nullptr, &r_crosshair},
+    {OPT_Switch, "Crosshair Color", CrosshairColor, 8, &r_crosscolor.d_, M_UpdateCVARFromInt, nullptr, &r_crosscolor},
+    {OPT_FracSlider, "Crosshair Size", nullptr, 0, &r_crosssize.f_, M_UpdateCVARFromFloat, nullptr, &r_crosssize, 1.0f, 2.0f,
      64.0f, "%g Pixels"},
     {OPT_Boolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr, nullptr},
     {OPT_Switch, "Invulnerability", Invuls, NUM_INVULFX, &var_invul_fx, nullptr, nullptr},
@@ -423,7 +423,7 @@ static menuinfo_t video_optmenu = {
 //
 static optmenuitem_t resoptions[] = {
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {OPT_Switch, "V-Sync", "Off/Standard/Adaptive", 3, &v_sync.d, M_UpdateCVARFromInt,
+    {OPT_Switch, "V-Sync", "Off/Standard/Adaptive", 3, &v_sync.d_, M_UpdateCVARFromInt,
      "Will fallback to Standard if Adaptive is not supported", &v_sync},
     {OPT_Switch, "Aspect Ratio", MonitSiz, 6, &monitor_size, M_ChangeMonitorSize, "Only applies to Fullscreen Modes"},
     {OPT_Function, "New Mode", nullptr, 0, nullptr, M_ChangeResFull, nullptr},
@@ -447,9 +447,9 @@ static menuinfo_t res_optmenu = {
 static optmenuitem_t analogueoptions[] = {
     {OPT_Switch, "Mouse X Axis", MouseAxis, 11, &mouse_xaxis, nullptr, nullptr},
     {OPT_Switch, "Mouse Y Axis", MouseAxis, 11, &mouse_yaxis, nullptr, nullptr},
-    {OPT_FracSlider, "X Sensitivity", nullptr, 0, &mouse_xsens.f, M_UpdateCVARFromFloat, nullptr, &mouse_xsens, 0.25f, 1.0f,
+    {OPT_FracSlider, "X Sensitivity", nullptr, 0, &mouse_xsens.f_, M_UpdateCVARFromFloat, nullptr, &mouse_xsens, 0.25f, 1.0f,
      15.0f, "%0.2f"},
-    {OPT_FracSlider, "Y Sensitivity", nullptr, 0, &mouse_ysens.f, M_UpdateCVARFromFloat, nullptr, &mouse_ysens, 0.25f, 1.0f,
+    {OPT_FracSlider, "Y Sensitivity", nullptr, 0, &mouse_ysens.f_, M_UpdateCVARFromFloat, nullptr, &mouse_ysens, 0.25f, 1.0f,
      15.0f, "%0.2f"},
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {OPT_Switch, "Gamepad", JoyDevs, 5, &joystick_device, nullptr, nullptr},
@@ -457,26 +457,26 @@ static optmenuitem_t analogueoptions[] = {
     {OPT_Switch, "Left Stick Y", JoyAxis, 13, &joy_axis[1], nullptr, nullptr},
     {OPT_Switch, "Right Stick X", JoyAxis, 13, &joy_axis[2], nullptr, nullptr},
     {OPT_Switch, "Right Stick Y", JoyAxis, 13, &joy_axis[3], nullptr, nullptr},
-    {OPT_FracSlider, "Left X Deadzone", nullptr, 0, &joy_dead0.f, M_UpdateCVARFromFloat, nullptr, &joy_dead0, 0.01f, 0.0f,
+    {OPT_FracSlider, "Left X Deadzone", nullptr, 0, &joy_dead0.f_, M_UpdateCVARFromFloat, nullptr, &joy_dead0, 0.01f, 0.0f,
      0.99f, "%0.2f"},
-    {OPT_FracSlider, "Left Y Deadzone", nullptr, 0, &joy_dead1.f, M_UpdateCVARFromFloat, nullptr, &joy_dead1, 0.01f, 0.0f,
+    {OPT_FracSlider, "Left Y Deadzone", nullptr, 0, &joy_dead1.f_, M_UpdateCVARFromFloat, nullptr, &joy_dead1, 0.01f, 0.0f,
      0.99f, "%0.2f"},
-    {OPT_FracSlider, "Right X Deadzone", nullptr, 0, &joy_dead2.f, M_UpdateCVARFromFloat, nullptr, &joy_dead2, 0.01f, 0.0f,
+    {OPT_FracSlider, "Right X Deadzone", nullptr, 0, &joy_dead2.f_, M_UpdateCVARFromFloat, nullptr, &joy_dead2, 0.01f, 0.0f,
      0.99f, "%0.2f"},
-    {OPT_FracSlider, "Right Y Deadzone", nullptr, 0, &joy_dead3.f, M_UpdateCVARFromFloat, nullptr, &joy_dead3, 0.01f, 0.0f,
+    {OPT_FracSlider, "Right Y Deadzone", nullptr, 0, &joy_dead3.f_, M_UpdateCVARFromFloat, nullptr, &joy_dead3, 0.01f, 0.0f,
      0.99f, "%0.2f"},
-    {OPT_FracSlider, "Left Trigger Deadzone", nullptr, 0, &joy_dead4.f, M_UpdateCVARFromFloat, nullptr, &joy_dead4, 0.01f,
+    {OPT_FracSlider, "Left Trigger Deadzone", nullptr, 0, &joy_dead4.f_, M_UpdateCVARFromFloat, nullptr, &joy_dead4, 0.01f,
      0.0f, 0.99f, "%0.2f"},
-    {OPT_FracSlider, "Right Trigger Deadzone", nullptr, 0, &joy_dead5.f, M_UpdateCVARFromFloat, nullptr, &joy_dead5, 0.01f,
+    {OPT_FracSlider, "Right Trigger Deadzone", nullptr, 0, &joy_dead5.f_, M_UpdateCVARFromFloat, nullptr, &joy_dead5, 0.01f,
      0.0f, 0.99f, "%0.2f"},
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {OPT_FracSlider, "Turning Speed", nullptr, 0, &turnspeed.f, M_UpdateCVARFromFloat, nullptr, &turnspeed, 0.10f, 0.10f,
+    {OPT_FracSlider, "Turning Speed", nullptr, 0, &turnspeed.f_, M_UpdateCVARFromFloat, nullptr, &turnspeed, 0.10f, 0.10f,
      3.0f, "%0.2f"},
-    {OPT_FracSlider, "Vertical Look Speed", nullptr, 0, &vlookspeed.f, M_UpdateCVARFromFloat, nullptr, &vlookspeed, 0.10f,
+    {OPT_FracSlider, "Vertical Look Speed", nullptr, 0, &vlookspeed.f_, M_UpdateCVARFromFloat, nullptr, &vlookspeed, 0.10f,
      0.10f, 3.0f, "%0.2f"},
-    {OPT_FracSlider, "Forward Move Speed", nullptr, 0, &forwardspeed.f, M_UpdateCVARFromFloat, nullptr, &forwardspeed, 0.10f,
+    {OPT_FracSlider, "Forward Move Speed", nullptr, 0, &forwardspeed.f_, M_UpdateCVARFromFloat, nullptr, &forwardspeed, 0.10f,
      0.10f, 3.0f, "%0.2f"},
-    {OPT_FracSlider, "Side Move Speed", nullptr, 0, &sidespeed.f, M_UpdateCVARFromFloat, nullptr, &sidespeed, 0.10f, 0.10f,
+    {OPT_FracSlider, "Side Move Speed", nullptr, 0, &sidespeed.f_, M_UpdateCVARFromFloat, nullptr, &sidespeed, 0.10f, 0.10f,
      3.0f, "%0.2f"},
 };
 
@@ -490,9 +490,9 @@ static menuinfo_t analogue_optmenu = {
 // -AJA- 2007/03/14 Added new sound menu
 //
 static optmenuitem_t soundoptions[] = {
-    {OPT_FracSlider, "Sound Volume", nullptr, 0, &sfx_volume.f, M_UpdateCVARFromFloat, nullptr, &sfx_volume, 0.05f, 0.0f,
+    {OPT_FracSlider, "Sound Volume", nullptr, 0, &sfx_volume.f_, M_UpdateCVARFromFloat, nullptr, &sfx_volume, 0.05f, 0.0f,
      1.0f, "%0.2f"},
-    {OPT_FracSlider, "Movie/Music Volume", nullptr, 0, &mus_volume.f, M_UpdateCVARFromFloat, nullptr, &mus_volume, 0.05f, 0.0f,
+    {OPT_FracSlider, "Movie/Music Volume", nullptr, 0, &mus_volume.f_, M_UpdateCVARFromFloat, nullptr, &mus_volume, 0.05f, 0.0f,
      1.0f, "%0.2f"},
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {OPT_Switch, "Stereo", StereoNess, 3, &var_sound_stereo, nullptr, "NeedRestart"},
@@ -518,9 +518,9 @@ static menuinfo_t sound_optmenu = {
 //
 //
 static optmenuitem_t f4soundoptions[] = {
-    {OPT_FracSlider, "Sound Volume", nullptr, 0, &sfx_volume.f, M_UpdateCVARFromFloat, nullptr, &sfx_volume, 0.05f, 0.0f,
+    {OPT_FracSlider, "Sound Volume", nullptr, 0, &sfx_volume.f_, M_UpdateCVARFromFloat, nullptr, &sfx_volume, 0.05f, 0.0f,
      1.0f, "%0.2f"},
-    {OPT_FracSlider, "Music Volume", nullptr, 0, &mus_volume.f, M_UpdateCVARFromFloat, nullptr, &mus_volume, 0.05f, 0.0f,
+    {OPT_FracSlider, "Music Volume", nullptr, 0, &mus_volume.f_, M_UpdateCVARFromFloat, nullptr, &mus_volume, 0.05f, 0.0f,
      1.0f, "%0.2f"},
 };
 
@@ -551,7 +551,7 @@ static optmenuitem_t playoptions[] = {
 
     {OPT_Boolean, "Obituary Messages", YesNo, 2, &var_obituaries, nullptr, nullptr},
 
-    {OPT_Switch, "Blood Level", "Normal/Extra/None", 3, &g_gore.d, M_UpdateCVARFromInt, "Blood", &g_gore},
+    {OPT_Switch, "Blood Level", "Normal/Extra/None", 3, &g_gore.d_, M_UpdateCVARFromInt, "Blood", &g_gore},
 
     {OPT_Boolean, "Extras", YesNo, 2, &global_flags.have_extra, M_ChangeExtra, nullptr},
 
@@ -559,10 +559,10 @@ static optmenuitem_t playoptions[] = {
 
     {OPT_Boolean, "Shoot-thru Scenery", YesNo, 2, &global_flags.pass_missile, M_ChangePassMissile, nullptr},
 
-    {OPT_Boolean, "Erraticism", YesNo, 2, &g_erraticism.d, M_UpdateCVARFromInt,
+    {OPT_Boolean, "Erraticism", YesNo, 2, &g_erraticism.d_, M_UpdateCVARFromInt,
      "Time only advances when you move or fire", &g_erraticism},
 
-    {OPT_FracSlider, "Gravity", nullptr, 0, &g_gravity.f, M_UpdateCVARFromFloat, "Gravity", &g_gravity, 0.10f, 0.0f, 2.0f,
+    {OPT_FracSlider, "Gravity", nullptr, 0, &g_gravity.f_, M_UpdateCVARFromFloat, "Gravity", &g_gravity, 0.10f, 0.0f, 2.0f,
      "%gx"},
 
     {OPT_Boolean, "Respawn Enemies", YesNo, 2, &global_flags.respawn, M_ChangeRespawn, nullptr},
@@ -582,15 +582,15 @@ static menuinfo_t gameplay_optmenu = {
 //
 static optmenuitem_t perfoptions[] = {
     {OPT_Switch, "Detail Level", Details, 3, &detail_level, M_ChangeMipMap, nullptr},
-    {OPT_Boolean, "Draw Distance Culling", YesNo, 2, &r_culling.d, M_UpdateCVARFromInt,
+    {OPT_Boolean, "Draw Distance Culling", YesNo, 2, &r_culling.d_, M_UpdateCVARFromInt,
      "Sector/Level Fog will be disabled when this is On", &r_culling},
-    {OPT_FracSlider, "Maximum Draw Distance", nullptr, 0, &r_culldist.f, M_UpdateCVARFromFloat,
+    {OPT_FracSlider, "Maximum Draw Distance", nullptr, 0, &r_culldist.f_, M_UpdateCVARFromFloat,
      "Only effective when Draw Distance Culling is On", &r_culldist, 200.0f, 1000.0f, 8000.0f, "%g Units"},
-    {OPT_Switch, "Outdoor Culling Fog Color", "Match Sky/White/Grey/Black", 4, &r_cullfog.d, M_UpdateCVARFromInt,
+    {OPT_Switch, "Outdoor Culling Fog Color", "Match Sky/White/Grey/Black", 4, &r_cullfog.d_, M_UpdateCVARFromInt,
      "Only effective when Draw Distance Culling is On", &r_cullfog},
-    {OPT_Boolean, "Slow Thinkers Over Distance", YesNo, 2, &g_cullthinkers.d, M_UpdateCVARFromInt,
+    {OPT_Boolean, "Slow Thinkers Over Distance", YesNo, 2, &g_cullthinkers.d_, M_UpdateCVARFromInt,
      "Only recommended for extreme monster/projectile counts", &g_cullthinkers},
-    {OPT_Switch, "Maximum Dynamic Lights", DLightMax, 6, &r_maxdlights.d, M_UpdateCVARFromInt,
+    {OPT_Switch, "Maximum Dynamic Lights", DLightMax, 6, &r_maxdlights.d_, M_UpdateCVARFromInt,
      "Control how many dynamic lights are rendered per tick", &r_maxdlights},
 };
 
@@ -608,11 +608,11 @@ static menuinfo_t perf_optmenu = {perfoptions,
 //
 //
 static optmenuitem_t accessibilityoptions[] = {
-    {OPT_Switch, "View Bobbing", "Full/Head Only/Weapon Only/None", 4, &g_bobbing.d, M_ChangeBobbing,
+    {OPT_Switch, "View Bobbing", "Full/Head Only/Weapon Only/None", 4, &g_bobbing.d_, M_ChangeBobbing,
      "May help with motion sickness"},
     {OPT_Switch, "Reduce Flashing", YesNo, 2, &reduce_flash, nullptr, "May help with epilepsy or photosensitivity"},
     {OPT_Boolean, "Automap: Keyed Doors Pulse", YesNo, 2, &automap_keydoor_blink, nullptr, "Can help locate doors more easily"},
-    {OPT_Switch, "Automap: Keyed Doors Overlay", "Nothing/Text/Graphic", 3, &automap_keydoor_text.d, M_UpdateCVARFromInt,
+    {OPT_Switch, "Automap: Keyed Doors Overlay", "Nothing/Text/Graphic", 3, &automap_keydoor_text.d_, M_UpdateCVARFromInt,
      "Required key shown visually", &automap_keydoor_text},
 };
 
@@ -1024,7 +1024,7 @@ void M_OptDrawer()
             fontType  = StyleDefinition::kTextSectionAlternate;
             TEXTscale = style->def->text_[fontType].scale_;
             HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
-                         epi::GetStem(s_soundfont.s).c_str());
+                         epi::GetStem(s_soundfont.s_).c_str());
         }
 
         // Draw current GENMIDI
@@ -1033,7 +1033,7 @@ void M_OptDrawer()
             fontType  = StyleDefinition::kTextSectionAlternate;
             TEXTscale = style->def->text_[fontType].scale_;
             HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
-                         s_genmidi.s.empty() ? "Default" : epi::GetStem(s_genmidi.s).c_str());
+                         s_genmidi.s_.empty() ? "Default" : epi::GetStem(s_genmidi.s_).c_str());
         }
 
         // -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -1637,7 +1637,7 @@ bool M_OptResponder(event_t *ev, int ch)
 //
 // M_VideoOptions
 //
-static void M_VideoOptions(int keypressed, cvar_c *cvar)
+static void M_VideoOptions(int keypressed, ConsoleVariable *cvar)
 {
     curr_menu = &video_optmenu;
     curr_item = curr_menu->items + curr_menu->pos;
@@ -1652,7 +1652,7 @@ static void M_VideoOptions(int keypressed, cvar_c *cvar)
 // -ES- 1998/08/20 Added
 // -ACB 1999/10/03 rewrote to Use scrmodes array.
 //
-static void M_ResolutionOptions(int keypressed, cvar_c *cvar)
+static void M_ResolutionOptions(int keypressed, ConsoleVariable *cvar)
 {
     new_scrmode.width        = SCREENWIDTH;
     new_scrmode.height       = SCREENHEIGHT;
@@ -1666,7 +1666,7 @@ static void M_ResolutionOptions(int keypressed, cvar_c *cvar)
 //
 // M_AnalogueOptions
 //
-static void M_AnalogueOptions(int keypressed, cvar_c *cvar)
+static void M_AnalogueOptions(int keypressed, ConsoleVariable *cvar)
 {
     curr_menu = &analogue_optmenu;
     curr_item = curr_menu->items + curr_menu->pos;
@@ -1675,7 +1675,7 @@ static void M_AnalogueOptions(int keypressed, cvar_c *cvar)
 //
 // M_SoundOptions
 //
-static void M_SoundOptions(int keypressed, cvar_c *cvar)
+static void M_SoundOptions(int keypressed, ConsoleVariable *cvar)
 {
     curr_menu = &sound_optmenu;
     curr_item = curr_menu->items + curr_menu->pos;
@@ -1694,7 +1694,7 @@ void M_F4SoundOptions(int choice)
 //
 // M_GameplayOptions
 //
-static void M_GameplayOptions(int keypressed, cvar_c *cvar)
+static void M_GameplayOptions(int keypressed, ConsoleVariable *cvar)
 {
     // not allowed in netgames (changing most of these options would
     // break synchronisation with the other machines).
@@ -1708,7 +1708,7 @@ static void M_GameplayOptions(int keypressed, cvar_c *cvar)
 //
 // M_PerformanceOptions
 //
-static void M_PerformanceOptions(int keypressed, cvar_c *cvar)
+static void M_PerformanceOptions(int keypressed, ConsoleVariable *cvar)
 {
     // not allowed in netgames (changing most of these options would
     // break synchronisation with the other machines).
@@ -1722,7 +1722,7 @@ static void M_PerformanceOptions(int keypressed, cvar_c *cvar)
 //
 // M_AccessibilityOptions
 //
-static void M_AccessibilityOptions(int keypressed, cvar_c *cvar)
+static void M_AccessibilityOptions(int keypressed, ConsoleVariable *cvar)
 {
     // not allowed in netgames (changing most of these options would
     // break synchronisation with the other machines).
@@ -1736,7 +1736,7 @@ static void M_AccessibilityOptions(int keypressed, cvar_c *cvar)
 //
 // M_KeyboardOptions
 //
-static void M_KeyboardOptions(int keypressed, cvar_c *cvar)
+static void M_KeyboardOptions(int keypressed, ConsoleVariable *cvar)
 {
     curr_menu = all_key_menus[curr_key_menu];
 
@@ -1770,21 +1770,21 @@ static void M_Key2String(int key, char *deststring)
 
 static void InitMonitorSize()
 {
-    if (v_monitorsize.f > 2.00)
+    if (v_monitorsize.f_ > 2.00)
         monitor_size = 5;
-    else if (v_monitorsize.f > 1.70)
+    else if (v_monitorsize.f_ > 1.70)
         monitor_size = 4;
-    else if (v_monitorsize.f > 1.55)
+    else if (v_monitorsize.f_ > 1.55)
         monitor_size = 3;
-    else if (v_monitorsize.f > 1.40)
+    else if (v_monitorsize.f_ > 1.40)
         monitor_size = 2;
-    else if (v_monitorsize.f > 1.30)
+    else if (v_monitorsize.f_ > 1.30)
         monitor_size = 1;
     else
         monitor_size = 0;
 }
 
-static void M_ChangeMonitorSize(int key, cvar_c *cvar)
+static void M_ChangeMonitorSize(int key, ConsoleVariable *cvar)
 {
     static const float ratios[6] = {
         1.25000, 1.33333, 1.50000, // 5:4     4:3   3:2
@@ -1810,7 +1810,7 @@ static void M_ChangeMonitorSize(int key, cvar_c *cvar)
     level_flags.more_blood = global_flags.more_blood;
 }*/
 
-static void M_ChangeMLook(int keypressed, cvar_c *cvar)
+static void M_ChangeMLook(int keypressed, ConsoleVariable *cvar)
 {
     if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagMlook))
         return;
@@ -1818,7 +1818,7 @@ static void M_ChangeMLook(int keypressed, cvar_c *cvar)
     level_flags.mlook = global_flags.mlook;
 }
 
-static void M_ChangeJumping(int keypressed, cvar_c *cvar)
+static void M_ChangeJumping(int keypressed, ConsoleVariable *cvar)
 {
     if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagJumping))
         return;
@@ -1826,7 +1826,7 @@ static void M_ChangeJumping(int keypressed, cvar_c *cvar)
     level_flags.jump = global_flags.jump;
 }
 
-static void M_ChangeCrouching(int keypressed, cvar_c *cvar)
+static void M_ChangeCrouching(int keypressed, ConsoleVariable *cvar)
 {
     if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagCrouching))
         return;
@@ -1834,7 +1834,7 @@ static void M_ChangeCrouching(int keypressed, cvar_c *cvar)
     level_flags.crouch = global_flags.crouch;
 }
 
-static void M_ChangeExtra(int keypressed, cvar_c *cvar)
+static void M_ChangeExtra(int keypressed, ConsoleVariable *cvar)
 {
     if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagExtras))
         return;
@@ -1847,7 +1847,7 @@ static void M_ChangeExtra(int keypressed, cvar_c *cvar)
 //
 // -ACB- 1998/08/09 New DDF settings, check that map allows the settings
 //
-static void M_ChangeMonsterRespawn(int keypressed, cvar_c *cvar)
+static void M_ChangeMonsterRespawn(int keypressed, ConsoleVariable *cvar)
 {
     if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagResRespawn))
         return;
@@ -1855,7 +1855,7 @@ static void M_ChangeMonsterRespawn(int keypressed, cvar_c *cvar)
     level_flags.res_respawn = global_flags.res_respawn;
 }
 
-static void M_ChangeItemRespawn(int keypressed, cvar_c *cvar)
+static void M_ChangeItemRespawn(int keypressed, ConsoleVariable *cvar)
 {
     if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagItemRespawn))
         return;
@@ -1863,7 +1863,7 @@ static void M_ChangeItemRespawn(int keypressed, cvar_c *cvar)
     level_flags.itemrespawn = global_flags.itemrespawn;
 }
 
-static void M_ChangeTrue3d(int keypressed, cvar_c *cvar)
+static void M_ChangeTrue3d(int keypressed, ConsoleVariable *cvar)
 {
     if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagTrue3D))
         return;
@@ -1871,7 +1871,7 @@ static void M_ChangeTrue3d(int keypressed, cvar_c *cvar)
     level_flags.true3dgameplay = global_flags.true3dgameplay;
 }
 
-static void M_ChangeAutoAim(int keypressed, cvar_c *cvar)
+static void M_ChangeAutoAim(int keypressed, ConsoleVariable *cvar)
 {
     if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagAutoAim))
         return;
@@ -1879,7 +1879,7 @@ static void M_ChangeAutoAim(int keypressed, cvar_c *cvar)
     level_flags.autoaim = global_flags.autoaim;
 }
 
-static void M_ChangeRespawn(int keypressed, cvar_c *cvar)
+static void M_ChangeRespawn(int keypressed, ConsoleVariable *cvar)
 {
     if (gameskill == sk_nightmare)
         return;
@@ -1890,7 +1890,7 @@ static void M_ChangeRespawn(int keypressed, cvar_c *cvar)
     level_flags.respawn = global_flags.respawn;
 }
 
-static void M_ChangeFastparm(int keypressed, cvar_c *cvar)
+static void M_ChangeFastparm(int keypressed, ConsoleVariable *cvar)
 {
     if (gameskill == sk_nightmare)
         return;
@@ -1901,20 +1901,20 @@ static void M_ChangeFastparm(int keypressed, cvar_c *cvar)
     level_flags.fastparm = global_flags.fastparm;
 }
 
-static void M_ChangePassMissile(int keypressed, cvar_c *cvar)
+static void M_ChangePassMissile(int keypressed, ConsoleVariable *cvar)
 {
     level_flags.pass_missile = global_flags.pass_missile;
 }
 
 // this used by both MIPMIP, SMOOTHING and DETAIL options
-static void M_ChangeMipMap(int keypressed, cvar_c *cvar)
+static void M_ChangeMipMap(int keypressed, ConsoleVariable *cvar)
 {
     W_DeleteAllImages();
 }
 
-static void M_ChangeBobbing(int keypressed, cvar_c *cvar)
+static void M_ChangeBobbing(int keypressed, ConsoleVariable *cvar)
 {
-    g_bobbing        = g_bobbing.d;
+    g_bobbing        = g_bobbing.d_;
     player_t *player = players[consoleplayer];
     if (player)
     {
@@ -1928,19 +1928,19 @@ static void M_ChangeBobbing(int keypressed, cvar_c *cvar)
     }
 }
 
-static void M_UpdateCVARFromFloat(int keypressed, cvar_c *cvar)
+static void M_UpdateCVARFromFloat(int keypressed, ConsoleVariable *cvar)
 {
     SYS_ASSERT(cvar);
-    cvar->operator=(cvar->f);
+    cvar->operator=(cvar->f_);
 }
 
-static void M_UpdateCVARFromInt(int keypressed, cvar_c *cvar)
+static void M_UpdateCVARFromInt(int keypressed, ConsoleVariable *cvar)
 {
     SYS_ASSERT(cvar);
-    cvar->operator=(cvar->d);
+    cvar->operator=(cvar->d_);
 }
 
-static void M_ChangeKicking(int keypressed, cvar_c *cvar)
+static void M_ChangeKicking(int keypressed, ConsoleVariable *cvar)
 {
     if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagKicking))
         return;
@@ -1948,7 +1948,7 @@ static void M_ChangeKicking(int keypressed, cvar_c *cvar)
     level_flags.kicking = global_flags.kicking;
 }
 
-static void M_ChangeWeaponSwitch(int keypressed, cvar_c *cvar)
+static void M_ChangeWeaponSwitch(int keypressed, ConsoleVariable *cvar)
 {
     if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagWeaponSwitch))
         return;
@@ -1956,7 +1956,7 @@ static void M_ChangeWeaponSwitch(int keypressed, cvar_c *cvar)
     level_flags.weapon_switch = global_flags.weapon_switch;
 }
 
-static void M_ChangePCSpeakerMode(int keypressed, cvar_c *cvar)
+static void M_ChangePCSpeakerMode(int keypressed, ConsoleVariable *cvar)
 {
     // Clear SFX cache and restart music
     S_StopAllFX();
@@ -1969,7 +1969,7 @@ static void M_ChangePCSpeakerMode(int keypressed, cvar_c *cvar)
 //
 // -AJA- 2000/04/16 Run-time language changing...
 //
-static void M_ChangeLanguage(int keypressed, cvar_c *cvar)
+static void M_ChangeLanguage(int keypressed, ConsoleVariable *cvar)
 {
     if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_GP_LEFT)
     {
@@ -2010,7 +2010,7 @@ static void M_ChangeLanguage(int keypressed, cvar_c *cvar)
 // M_ChangeMIDIPlayer
 //
 //
-static void M_ChangeMIDIPlayer(int keypressed, cvar_c *cvar)
+static void M_ChangeMIDIPlayer(int keypressed, ConsoleVariable *cvar)
 {
     PlaylistEntry *playing = playlist.Find(entry_playing);
     if (var_midi_player == 1 ||
@@ -2024,12 +2024,12 @@ static void M_ChangeMIDIPlayer(int keypressed, cvar_c *cvar)
 // M_ChangeSoundfont
 //
 //
-static void M_ChangeSoundfont(int keypressed, cvar_c *cvar)
+static void M_ChangeSoundfont(int keypressed, ConsoleVariable *cvar)
 {
     int sf_pos = -1;
     for (int i = 0; i < (int)available_soundfonts.size(); i++)
     {
-        if (epi::StringCaseCompareASCII(s_soundfont.s, available_soundfonts.at(i)) == 0)
+        if (epi::StringCaseCompareASCII(s_soundfont.s_, available_soundfonts.at(i)) == 0)
         {
             sf_pos = i;
             break;
@@ -2067,12 +2067,12 @@ static void M_ChangeSoundfont(int keypressed, cvar_c *cvar)
 // M_ChangeGENMIDI
 //
 //
-static void M_ChangeGENMIDI(int keypressed, cvar_c *cvar)
+static void M_ChangeGENMIDI(int keypressed, ConsoleVariable *cvar)
 {
     int op2_pos = -1;
     for (int i = 0; i < (int)available_genmidis.size(); i++)
     {
-        if (epi::StringCaseCompareASCII(s_genmidi.s, available_genmidis.at(i)) == 0)
+        if (epi::StringCaseCompareASCII(s_genmidi.s_, available_genmidis.at(i)) == 0)
         {
             op2_pos = i;
             break;
@@ -2082,7 +2082,7 @@ static void M_ChangeGENMIDI(int keypressed, cvar_c *cvar)
     if (op2_pos < 0)
     {
         I_Warning("M_ChangeGENMIDI: Could not read list of available GENMIDIs. Falling back to default!\n");
-        s_genmidi.s = "";
+        s_genmidi.s_ = "";
         return;
     }
 
@@ -2111,7 +2111,7 @@ static void M_ChangeGENMIDI(int keypressed, cvar_c *cvar)
 //
 // -ACB- 1998/08/29 Resolution Changes...
 //
-static void M_ChangeResSize(int keypressed, cvar_c *cvar)
+static void M_ChangeResSize(int keypressed, ConsoleVariable *cvar)
 {
     if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_GP_LEFT)
     {
@@ -2128,7 +2128,7 @@ static void M_ChangeResSize(int keypressed, cvar_c *cvar)
 //
 // -AJA- 2005/01/02: Windowed vs Fullscreen
 //
-static void M_ChangeResFull(int keypressed, cvar_c *cvar)
+static void M_ChangeResFull(int keypressed, ConsoleVariable *cvar)
 {
     if (keypressed == KEYD_LEFTARROW || keypressed == KEYD_GP_LEFT)
     {
@@ -2143,7 +2143,7 @@ static void M_ChangeResFull(int keypressed, cvar_c *cvar)
 //
 // M_OptionSetResolution
 //
-static void M_OptionSetResolution(int keypressed, cvar_c *cvar)
+static void M_OptionSetResolution(int keypressed, ConsoleVariable *cvar)
 {
     if (R_ChangeResolution(&new_scrmode))
     {
@@ -2196,7 +2196,7 @@ static void M_OptionSetResolution(int keypressed, cvar_c *cvar)
 extern void M_NetHostBegun(void);
 extern void M_NetJoinBegun(void);
 
-void M_HostNetGame(int keypressed, cvar_c *cvar)
+void M_HostNetGame(int keypressed, ConsoleVariable *cvar)
 {
     option_menuon  = 0;
     netgame_menuon = 1;
@@ -2204,7 +2204,7 @@ void M_HostNetGame(int keypressed, cvar_c *cvar)
     M_NetHostBegun();
 }
 
-void M_JoinNetGame(int keypressed, cvar_c *cvar)
+void M_JoinNetGame(int keypressed, ConsoleVariable *cvar)
 {
 #if 0
 	option_menuon  = 0;

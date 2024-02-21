@@ -547,7 +547,7 @@ float font_c::CharWidth(char ch)
     {
         auto find_glyph = ttf_glyph_map.find((uint8_t)ch);
         if (find_glyph != ttf_glyph_map.end())
-            return (find_glyph->second.width[current_font_size] + spacing) * v_pixelaspect.f;
+            return (find_glyph->second.width[current_font_size] + spacing) * v_pixelaspect.f_;
         else
         {
             ttf_char_t character;
@@ -570,7 +570,7 @@ float font_c::CharWidth(char ch)
             }
             character.glyph_index = stbtt_FindGlyphIndex(ttf_info, cp437_unicode_values[(uint8_t)ch]);
             ttf_glyph_map.try_emplace((uint8_t)ch, character);
-            return (character.width[current_font_size] + spacing) * v_pixelaspect.f;
+            return (character.width[current_font_size] + spacing) * v_pixelaspect.f_;
         }
     }
 

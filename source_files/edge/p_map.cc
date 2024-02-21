@@ -54,18 +54,18 @@
 
 #define RAISE_RADIUS 32
 
-static void gore_cb(cvar_c *self)
+static void gore_cb(ConsoleVariable *self)
 {
-    if (self->d == 2) // No blood
+    if (self->d_ == 2) // No blood
         return;
 
     if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagMoreBlood))
         return;
 
-    level_flags.more_blood = global_flags.more_blood = self->d;
+    level_flags.more_blood = global_flags.more_blood = self->d_;
 }
 
-DEF_CVAR_CB_CLAMPED(g_gore, "0", CVAR_ARCHIVE, gore_cb, 0, 2)
+EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(g_gore, "0", kConsoleVariableFlagArchive, gore_cb, 0, 2)
 
 // Forward declaration for ShootCheckGap
 static bool PTR_ShootTraverse(intercept_t *in, void *dataptr);
@@ -2205,7 +2205,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
     // Spawn bullet puffs or blood spots,
     // depending on target type.
 
-    bool use_blood = (mo->flags & kMapObjectFlagShootable) && !(mo->flags & kMapObjectFlagNoBlood) && (g_gore.d < 2);
+    bool use_blood = (mo->flags & kMapObjectFlagShootable) && !(mo->flags & kMapObjectFlagNoBlood) && (g_gore.d_< 2);
 
     if (mo->flags & kMapObjectFlagShootable)
     {
@@ -2723,7 +2723,7 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
     // crunch bodies to giblets
     if (thing->health <= 0)
     {
-        if (thing->info->gib_state_ && !(thing->extendedflags & kExtendedFlagGibbed) && g_gore.d < 2)
+        if (thing->info->gib_state_ && !(thing->extendedflags & kExtendedFlagGibbed) && g_gore.d_< 2)
         {
             thing->extendedflags |= kExtendedFlagGibbed;
             // P_SetMobjStateDeferred(thing, thing->info->gib_state_, 0);
@@ -2763,7 +2763,7 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
         P_DamageMobj(thing, nullptr, nullptr, crush_damage, nullptr);
 
         // spray blood in a random direction
-        if (g_gore.d < 2)
+        if (g_gore.d_< 2)
         {
             mo = P_MobjCreateObject(thing->x, thing->y, MO_MIDZ(thing), thing->info->blood_);
 

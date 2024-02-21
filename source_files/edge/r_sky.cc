@@ -45,13 +45,13 @@ bool custom_sky_box;
 // needed for SKY
 extern image_data_c *ReadAsEpiBlock(image_c *rim);
 
-extern cvar_c r_culling;
+extern ConsoleVariable r_culling;
 
 static sg_color sky_cap_color;
 
 static SkyStretch current_sky_stretch = kSkyStretchUnset;
 
-DEF_CVAR_CLAMPED(r_skystretch, "0", CVAR_ARCHIVE, 0, 3);
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(r_skystretch, "0", kConsoleVariableFlagArchive, 0, 3);
 
 typedef struct sec_sky_ring_s
 {
@@ -238,8 +238,8 @@ static void RGL_SetupSkyMatrices(void)
         glPushMatrix();
 
         glLoadIdentity();
-        glFrustum(-view_x_slope * r_nearclip.f, view_x_slope * r_nearclip.f, -view_y_slope * r_nearclip.f,
-                  view_y_slope * r_nearclip.f, r_nearclip.f, r_farclip.f);
+        glFrustum(-view_x_slope * r_nearclip.f_, view_x_slope * r_nearclip.f_, -view_y_slope * r_nearclip.f_,
+                  view_y_slope * r_nearclip.f_, r_nearclip.f_, r_farclip.f_);
 
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
@@ -255,8 +255,8 @@ static void RGL_SetupSkyMatrices(void)
         glPushMatrix();
 
         glLoadIdentity();
-        glFrustum(-view_x_slope * r_nearclip.f, view_x_slope * r_nearclip.f, -view_y_slope * r_nearclip.f,
-                  view_y_slope * r_nearclip.f, r_nearclip.f, r_farclip.f * 4.0);
+        glFrustum(-view_x_slope * r_nearclip.f_, view_x_slope * r_nearclip.f_, -view_y_slope * r_nearclip.f_,
+                  view_y_slope * r_nearclip.f_, r_nearclip.f_, r_farclip.f_ * 4.0);
 
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
@@ -265,9 +265,9 @@ static void RGL_SetupSkyMatrices(void)
         glRotatef(270.0f - epi::DegreesFromBAM(viewvertangle), 1.0f, 0.0f, 0.0f);
         glRotatef(90.0f - epi::DegreesFromBAM(viewangle), 0.0f, 0.0f, 1.0f);
         if (current_sky_stretch == kSkyStretchStretch)
-            glTranslatef(0.0f, 0.0f, (r_farclip.f * 2 * 0.15)); // Draw center above horizon a little
+            glTranslatef(0.0f, 0.0f, (r_farclip.f_ * 2 * 0.15)); // Draw center above horizon a little
         else
-            glTranslatef(0.0f, 0.0f, -(r_farclip.f * 2 * 0.15)); // Draw center below horizon a little
+            glTranslatef(0.0f, 0.0f, -(r_farclip.f_ * 2 * 0.15)); // Draw center below horizon a little
     }
 }
 
@@ -376,14 +376,14 @@ static void RGL_DrawSkyCylinder(void)
     else if (!level_flags.mlook)
         current_sky_stretch = kSkyStretchVanilla;
     else
-        current_sky_stretch = (SkyStretch)r_skystretch.d;
+        current_sky_stretch = (SkyStretch)r_skystretch.d_;
 
     // Center skybox a bit below the camera view
     RGL_SetupSkyMatrices();
 
     glDisable(GL_TEXTURE_2D);
 
-    float dist     = r_farclip.f * 2.0f;
+    float dist     = r_farclip.f_ * 2.0f;
     float cap_dist = dist * 2.0f; // Ensure the caps extend beyond the cylindrical projection
                                   // Calculate some stuff based on sky height
     float sky_h_ratio;
@@ -409,7 +409,7 @@ static void RGL_DrawSkyCylinder(void)
         fd_to_use = view_props->fog_density;
     }
 
-    if (!r_culling.d && fc_to_use != kRGBANoValue)
+    if (!r_culling.d_&& fc_to_use != kRGBANoValue)
     {
         sg_color fc = sg_make_color_1i(fc_to_use);
         glClearColor(fc.r, fc.g, fc.b, fc.a);
@@ -523,7 +523,7 @@ static void RGL_DrawSkyCylinder(void)
 
     glDisable(GL_BLEND);
     glDisable(GL_ALPHA_TEST);
-    if (!r_culling.d && current_fog_rgb != kRGBANoValue)
+    if (!r_culling.d_&& current_fog_rgb != kRGBANoValue)
         glDisable(GL_FOG);
 
     RGL_RevertSkyMatrices();
@@ -531,7 +531,7 @@ static void RGL_DrawSkyCylinder(void)
 
 static void RGL_DrawSkyBox(void)
 {
-    float dist = r_farclip.f / 2.0f;
+    float dist = r_farclip.f_ / 2.0f;
 
     int SK = RGL_UpdateSkyBoxTextures();
 
@@ -542,7 +542,7 @@ static void RGL_DrawSkyBox(void)
     float v0 = 0.0f;
     float v1 = 1.0f;
 
-    if (r_dumbclamp.d)
+    if (r_dumbclamp.d_)
     {
         float size = fake_box[SK].face_size;
 
@@ -559,7 +559,7 @@ static void RGL_DrawSkyBox(void)
     col[2] = LT_BLU(255);
     col[3] = 1.0f;
 
-    if (r_colormaterial.d || !r_colorlighting.d)
+    if (r_colormaterial.d_|| !r_colorlighting.d_)
         glColor4fv(col);
     else
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, col);
@@ -573,7 +573,7 @@ static void RGL_DrawSkyBox(void)
         fd_to_use = view_props->fog_density;
     }
 
-    if (!r_culling.d && fc_to_use != kRGBANoValue)
+    if (!r_culling.d_&& fc_to_use != kRGBANoValue)
     {
         sg_color fc = sg_make_color_1i(fc_to_use);
         glClearColor(fc.r, fc.g, fc.b, fc.a);
@@ -692,7 +692,7 @@ static void RGL_DrawSkyBox(void)
     glEnd();
 
     glDisable(GL_TEXTURE_2D);
-    if (!r_culling.d && current_fog_rgb != kRGBANoValue)
+    if (!r_culling.d_&& current_fog_rgb != kRGBANoValue)
         glDisable(GL_FOG);
 
     RGL_RevertSkyMatrices();
@@ -711,10 +711,10 @@ void RGL_FinishSky(void)
 
     glDepthMask(GL_FALSE);
 
-    if (r_culling.d)
+    if (r_culling.d_)
         glDisable(GL_DEPTH_TEST);
 
-    if (!r_dumbsky.d)
+    if (!r_dumbsky.d_)
         glDepthFunc(GL_GREATER);
 
 #if defined(EDGE_GL_ES2)
@@ -727,7 +727,7 @@ void RGL_FinishSky(void)
     else
         RGL_DrawSkyCylinder();
 
-    if (r_culling.d)
+    if (r_culling.d_)
         glEnable(GL_DEPTH_TEST);
 
     glDepthFunc(GL_LEQUAL);
@@ -740,7 +740,7 @@ void RGL_DrawSkyPlane(subsector_t *sub, float h)
 {
     need_to_draw_sky = true;
 
-    if (r_dumbsky.d)
+    if (r_dumbsky.d_)
         return;
 
     MIR_Height(h);
@@ -785,7 +785,7 @@ void RGL_DrawSkyWall(seg_t *seg, float h1, float h2)
 {
     need_to_draw_sky = true;
 
-    if (r_dumbsky.d)
+    if (r_dumbsky.d_)
         return;
 
     float x1 = seg->v1->X;

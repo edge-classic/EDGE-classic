@@ -79,7 +79,7 @@ static std::list<sound_data_c *> playing_qbufs;
 
 static mix_channel_c *queue_chan;
 
-DEF_CVAR(sfx_volume, "0.15", CVAR_ARCHIVE)
+EDGE_DEFINE_CONSOLE_VARIABLE(sfx_volume, "0.15", kConsoleVariableFlagArchive)
 
 static bool sfxpaused = false;
 
@@ -148,7 +148,7 @@ void mix_channel_c::ComputeVolume()
 
     float MAX_VOL = (1 << (16 - SAFE_BITS)) - 3;
 
-    MAX_VOL = (boss ? MAX_VOL : MAX_VOL / dist) * sfx_volume.f;
+    MAX_VOL = (boss ? MAX_VOL : MAX_VOL / dist) * sfx_volume.f_;
 
     if (def)
         MAX_VOL *= def->volume_;
@@ -169,7 +169,7 @@ void mix_channel_c::ComputeMusicVolume()
 {
     float MAX_VOL = (1 << (16 - SAFE_BITS)) - 3;
 
-    MAX_VOL = MAX_VOL * mus_volume.f * mus_player_gain; // This last one is an internal value and won't exceed 1.0,
+    MAX_VOL = MAX_VOL * mus_volume.f_ * mus_player_gain; // This last one is an internal value and won't exceed 1.0,
                                                         // so MAX_VOL should be consistent
 
     volume_L = (int)MAX_VOL;

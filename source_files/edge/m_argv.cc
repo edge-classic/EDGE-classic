@@ -194,7 +194,7 @@ void argv::CheckBooleanParm(std::string parm, bool *boolval, bool reverse)
     }
 }
 
-void argv::CheckBooleanCVar(std::string parm, cvar_c *var, bool reverse)
+void argv::CheckBooleanCVar(std::string parm, ConsoleVariable *var, bool reverse)
 {
     if (Find(parm) > 0)
     {

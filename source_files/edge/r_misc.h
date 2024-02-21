@@ -60,7 +60,7 @@ extern int linecount;
 extern BAMAngle normalfov, zoomedfov;
 extern bool    viewiszoomed;
 
-extern cvar_c r_fov;
+extern ConsoleVariable r_fov;
 
 extern int framecount;
 
@@ -69,8 +69,8 @@ extern struct mobj_s *background_camera_mo;
 #define DOOM_SCREEN_ASPECT (320.0f / 200.0f)
 #define DOOHMM_PIXEL_ASPECT  (5.0f / 6.0f)
 
-extern cvar_c v_pixelaspect;
-extern cvar_c v_monitorsize;
+extern ConsoleVariable v_pixelaspect;
+extern ConsoleVariable v_monitorsize;
 
 // Values/tables adapted from Quake 3 GPL release
 #define FUNCTABLE_SIZE 1024

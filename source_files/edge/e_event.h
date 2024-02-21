@@ -23,28 +23,27 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __E_EVENT_H__
-#define __E_EVENT_H__
+#pragma once
 
 //
 // Event handling.
 //
 
-// Input event types.
 // -KM- 1998/09/01 Amalgamate joystick/mouse into analogue
-typedef enum
+enum InputEventType
 {
-    ev_keydown,
-    ev_keyup,
-    ev_mouse
-} evtype_t;
+    kInputEventKeyDown,
+    kInputEventKeyUp,
+    kInputEventKeyMouse
+};
 
 // Event structure.
-typedef struct
+struct InputEvent
 {
-    evtype_t type;
+    InputEventType type;
 
-    union {
+    union
+    {
         struct
         {
             int sym;
@@ -56,9 +55,7 @@ typedef struct
             int dy;
         } mouse;
     } value;
-} event_t;
-
-#endif // __E_EVENT_H__
+};
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

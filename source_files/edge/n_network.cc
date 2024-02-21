@@ -110,12 +110,12 @@ static void PreInput()
 {
     // process input
     I_ControlGetEvents();
-    E_ProcessEvents();
+    EventProcessEvents();
 }
 
 static void PostInput()
 {
-    E_UpdateKeyState();
+    EventUpdateKeyState();
 }
 
 static bool N_BuildTiccmds(void)
@@ -173,7 +173,7 @@ void N_GrabTiccmds(void)
         if (!p)
             continue;
 
-        memcpy(&p->cmd, p->in_cmds + buf, sizeof(ticcmd_t));
+        memcpy(&p->cmd, p->in_cmds + buf, sizeof(EventTicCommand));
     }
     if (LUA_UseLuaHud())
         LUA_SetFloat(LUA_GetGlobalVM(), "sys", "gametic", gametic / (r_doubleframes.d_? 2 : 1));

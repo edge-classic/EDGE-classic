@@ -85,7 +85,7 @@ int key_quick_load;
 int key_quit_edge;
 int key_gamma_toggle;
 
-extern bool E_MatchesKey(int keyvar, int key);
+extern bool EventMatchesKey(int keyvar, int key);
 
 extern ConsoleVariable v_secbright;
 
@@ -1863,11 +1863,11 @@ void M_StopMessage(void)
 //
 // -KM- 1998/09/01 Analogue binding, and hat support
 //
-bool M_Responder(event_t *ev)
+bool M_Responder(InputEvent *ev)
 {
     int i;
 
-    if (ev->type != ev_keydown)
+    if (ev->type != kInputEventKeyDown)
         return false;
 
     int ch = ev->value.key.sym;
@@ -2027,47 +2027,47 @@ bool M_Responder(event_t *ev)
     if (!menuactive)
     {
 
-        if (E_MatchesKey(key_screenshot, ch))
+        if (EventMatchesKey(key_screenshot, ch))
         {
             ch = KEYD_SCREENSHOT;
         }
-        if (E_MatchesKey(key_save_game, ch))
+        if (EventMatchesKey(key_save_game, ch))
         {
             ch = KEYD_SAVEGAME;
         }
-        if (E_MatchesKey(key_load_game, ch))
+        if (EventMatchesKey(key_load_game, ch))
         {
             ch = KEYD_LOADGAME;
         }
-        if (E_MatchesKey(key_sound_controls, ch))
+        if (EventMatchesKey(key_sound_controls, ch))
         {
             ch = KEYD_SOUNDCONTROLS;
         }
-        if (E_MatchesKey(key_options_menu, ch))
+        if (EventMatchesKey(key_options_menu, ch))
         {
             ch = KEYD_OPTIONSMENU;
         }
-        if (E_MatchesKey(key_quick_save, ch))
+        if (EventMatchesKey(key_quick_save, ch))
         {
             ch = KEYD_QUICKSAVE;
         }
-        if (E_MatchesKey(key_end_game, ch))
+        if (EventMatchesKey(key_end_game, ch))
         {
             ch = KEYD_ENDGAME;
         }
-        if (E_MatchesKey(key_message_toggle, ch))
+        if (EventMatchesKey(key_message_toggle, ch))
         {
             ch = KEYD_MESSAGETOGGLE;
         }
-        if (E_MatchesKey(key_quick_load, ch))
+        if (EventMatchesKey(key_quick_load, ch))
         {
             ch = KEYD_QUICKLOAD;
         }
-        if (E_MatchesKey(key_quit_edge, ch))
+        if (EventMatchesKey(key_quit_edge, ch))
         {
             ch = KEYD_QUITEDGE;
         }
-        if (E_MatchesKey(key_gamma_toggle, ch))
+        if (EventMatchesKey(key_gamma_toggle, ch))
         {
             ch = KEYD_GAMMATOGGLE;
         }

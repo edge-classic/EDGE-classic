@@ -43,7 +43,7 @@ typedef struct
 } cheatseq_t;
 
 int  M_CheckCheat(cheatseq_t *cht, char key);
-bool M_CheatResponder(event_t *ev);
+bool M_CheatResponder(InputEvent *ev);
 void M_CheatInit(void);
 
 #endif // __M_CHEAT__

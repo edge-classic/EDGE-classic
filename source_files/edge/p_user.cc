@@ -119,7 +119,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
     if (!cur_sec->exfloor_used && !cur_sec->heightsec && onground)
         sink_mult -= cur_sec->sink_depth;
 
-    if (g_erraticism.d_&& leveltime > 0 && (!player->cmd.forwardmove && !player->cmd.sidemove) &&
+    if (g_erraticism.d_&& leveltime > 0 && (!player->cmd.forward_move && !player->cmd.side_move) &&
         ((AlmostEquals(player->mo->height, player->mo->info->height_) ||
           AlmostEquals(player->mo->height, player->mo->info->crouchheight_)) &&
          (AlmostEquals(player->deltaviewheight, 0.0f) || sink_mult < 1.0f)))
@@ -275,7 +275,7 @@ void P_PlayerJump(player_t *pl, float dz, int wait)
 
 static void MovePlayer(player_t *player, bool extra_tic)
 {
-    ticcmd_t *cmd;
+    EventTicCommand *cmd;
     mobj_t   *mo = player->mo;
 
     bool onground = player->mo->z <= player->mo->floorz;
@@ -297,9 +297,9 @@ static void MovePlayer(player_t *player, bool extra_tic)
     cmd = &player->cmd;
 
     if (player->zoom_fov > 0)
-        cmd->angleturn /= ZOOM_ANGLE_DIV;
+        cmd->angle_turn /= ZOOM_ANGLE_DIV;
 
-    player->mo->angle -= (BAMAngle)(cmd->angleturn << 16);
+    player->mo->angle -= (BAMAngle)(cmd->angle_turn << 16);
 
     // EDGE Feature: Vertical Look (Mlook)
     //
@@ -309,9 +309,9 @@ static void MovePlayer(player_t *player, bool extra_tic)
     if (level_flags.mlook)
     {
         if (player->zoom_fov > 0)
-            cmd->mlookturn /= ZOOM_ANGLE_DIV;
+            cmd->mouselook_turn /= ZOOM_ANGLE_DIV;
 
-        BAMAngle V = player->mo->vertangle + (BAMAngle)(cmd->mlookturn << 16);
+        BAMAngle V = player->mo->vertangle + (BAMAngle)(cmd->mouselook_turn << 16);
 
         if (V < kBAMAngle180 && V > MLOOK_LIMIT)
             V = MLOOK_LIMIT;
@@ -329,7 +329,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
     //
     // -ACB- 1998/07/02 Re-routed via Ticcmd
     //
-    if (cmd->extbuttons & EBT_CENTER)
+    if (cmd->extended_buttons & kExtendedButtonCodeCenter)
         player->mo->vertangle = 0;
 
     // compute XY and Z speeds, taking swimming (etc) into account
@@ -381,13 +381,13 @@ static void MovePlayer(player_t *player, bool extra_tic)
     U_vec[1] = -ev * dy * base_xy_speed;
     U_vec[2] = eh * base_z_speed;
 
-    player->mo->mom.X += F_vec[0] * cmd->forwardmove + S_vec[0] * cmd->sidemove + U_vec[0] * cmd->upwardmove;
+    player->mo->mom.X += F_vec[0] * cmd->forward_move + S_vec[0] * cmd->side_move + U_vec[0] * cmd->upward_move;
 
-    player->mo->mom.Y += F_vec[1] * cmd->forwardmove + S_vec[1] * cmd->sidemove + U_vec[1] * cmd->upwardmove;
+    player->mo->mom.Y += F_vec[1] * cmd->forward_move + S_vec[1] * cmd->side_move + U_vec[1] * cmd->upward_move;
 
     if (flying || swimming || !onground || onladder)
     {
-        player->mo->mom.Z += F_vec[2] * cmd->forwardmove + S_vec[2] * cmd->sidemove + U_vec[2] * cmd->upwardmove;
+        player->mo->mom.Z += F_vec[2] * cmd->forward_move + S_vec[2] * cmd->side_move + U_vec[2] * cmd->upward_move;
     }
 
     if (flying && !swimming)
@@ -404,11 +404,11 @@ static void MovePlayer(player_t *player, bool extra_tic)
             if ((leveltime & 10) == 0)
                 S_StartFX(sfx_jpflow, sfx_cat, player->mo); // fuel low
         }
-        else if (cmd->upwardmove > 0)
+        else if (cmd->upward_move > 0)
             S_StartFX(sfx_jprise, sfx_cat, player->mo);
-        else if (cmd->upwardmove < 0)
+        else if (cmd->upward_move < 0)
             S_StartFX(sfx_jpdown, sfx_cat, player->mo);
-        else if (cmd->forwardmove || cmd->sidemove)
+        else if (cmd->forward_move || cmd->side_move)
             S_StartFX((onground ? sfx_jpidle : sfx_jpmove), sfx_cat, player->mo);
         else
             S_StartFX(sfx_jpidle, sfx_cat, player->mo);
@@ -416,7 +416,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
 
     if (player->mo->state == &states[player->mo->info->idle_state_])
     {
-        if (!jumping && !flying && (onground || swimming) && (cmd->forwardmove || cmd->sidemove))
+        if (!jumping && !flying && (onground || swimming) && (cmd->forward_move || cmd->side_move))
         {
             // enter the CHASE (i.e. walking) states
             if (player->mo->info->chase_state_)
@@ -431,7 +431,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
 
     if (!extra_tic || !r_doubleframes.d_)
     {
-        if (level_flags.jump && mo->info->jumpheight_ > 0 && (cmd->upwardmove > 4))
+        if (level_flags.jump && mo->info->jumpheight_ > 0 && (cmd->upward_move > 4))
         {
             if (!jumping && !crouching && !swimming && !flying && onground && !onladder)
             {
@@ -443,7 +443,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
 
     // EDGE Feature: Crouching
 
-    if (level_flags.crouch && mo->info->crouchheight_ > 0 && (player->cmd.upwardmove < -4) && !player->wet_feet &&
+    if (level_flags.crouch && mo->info->crouchheight_ > 0 && (player->cmd.upward_move < -4) && !player->wet_feet &&
         !jumping && onground)
     // NB: no ladder check, onground is sufficient
     {
@@ -470,7 +470,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
 
     // EDGE Feature: Zooming
     //
-    if (cmd->extbuttons & EBT_ZOOM)
+    if (cmd->extended_buttons & kExtendedButtonCodeZoom)
     {
         int fov = 0;
 
@@ -583,7 +583,7 @@ static void DeathThink(player_t *player, bool extra_tic)
     if (deathmatch >= 3 && player->mo->movecount > player->mo->info->respawntime_)
         return;
 
-    if (player->cmd.buttons & BT_USE)
+    if (player->cmd.buttons & kButtonCodeUse)
         player->playerstate = PST_REBORN;
 }
 
@@ -661,11 +661,11 @@ static void P_UpdatePowerups(player_t *player)
 }
 
 // Does the thinking of the console player, i.e. read from input
-void P_ConsolePlayerBuilder(const player_t *pl, void *data, ticcmd_t *dest)
+void P_ConsolePlayerBuilder(const player_t *pl, void *data, EventTicCommand *dest)
 {
-    E_BuildTiccmd(dest);
+    EventBuildTicCommand(dest);
 
-    dest->player_idx = pl->pnum;
+    dest->player_index = pl->pnum;
 }
 
 bool P_PlayerSwitchWeapon(player_t *player, WeaponDefinition *choice)
@@ -716,7 +716,7 @@ void P_DumpMobjsTemp(void)
 
 bool P_PlayerThink(player_t *player, bool extra_tic)
 {
-    ticcmd_t *cmd = &player->cmd;
+    EventTicCommand *cmd = &player->cmd;
 
     SYS_ASSERT(player->mo);
 
@@ -761,9 +761,9 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
     {
         if (player->mo->flags & kMapObjectFlagJustAttacked)
         {
-            cmd->angleturn   = 0;
-            cmd->forwardmove = 64;
-            cmd->sidemove    = 0;
+            cmd->angle_turn   = 0;
+            cmd->forward_move = 64;
+            cmd->side_move    = 0;
             player->mo->flags &= ~kMapObjectFlagJustAttacked;
         }
     }
@@ -807,9 +807,9 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
         if (!cur_sec->exfloor_used && !cur_sec->heightsec && cur_sec->sink_depth > 0 &&
             player->mo->z <= player->mo->floorz)
             sinking = true;
-        if (cmd->forwardmove == 0 && cmd->sidemove == 0 && !player->swimming && cmd->upwardmove <= 0 &&
-            !(cmd->buttons & (BT_ATTACK | BT_USE | BT_CHANGE | EBT_SECONDATK | EBT_RELOAD | EBT_ACTION1 | EBT_ACTION2 |
-                              EBT_INVUSE | EBT_THIRDATK | EBT_FOURTHATK)) &&
+        if (cmd->forward_move == 0 && cmd->side_move == 0 && !player->swimming && cmd->upward_move <= 0 &&
+            !(cmd->buttons & (kButtonCodeAttack | kButtonCodeUse | kButtonCodeChangeWeapon | kExtendedButtonCodeSecondAttack | kExtendedButtonCodeReload | kExtendedButtonCodeAction1 | kExtendedButtonCodeAction2 |
+                              kExtendedButtonCodeInventoryUse | kExtendedButtonCodeThirdAttack | kExtendedButtonCodeFourthAttack)) &&
             ((AlmostEquals(player->mo->height, player->mo->info->height_) ||
               AlmostEquals(player->mo->height, player->mo->info->crouchheight_)) &&
              (AlmostEquals(player->deltaviewheight, 0.0f) || sinking)))
@@ -842,18 +842,18 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
         outdoor_reverb = true;
 
     // Check for weapon change.
-    if (cmd->buttons & BT_CHANGE)
+    if (cmd->buttons & kButtonCodeChangeWeapon)
     {
         // The actual changing of the weapon is done when the weapon
         // psprite can do it (read: not in the middle of an attack).
 
-        int key = (cmd->buttons & BT_WEAPONMASK) >> BT_WEAPONSHIFT;
+        int key = (cmd->buttons & kButtonCodeWeaponMask) >> kButtonCodeWeaponMaskShift;
 
-        if (key == BT_NEXT_WEAPON)
+        if (key == kButtonCodeNextWeapon)
         {
             P_NextPrevWeapon(player, +1);
         }
-        else if (key == BT_PREV_WEAPON)
+        else if (key == kButtonCodePreviousWeapon)
         {
             P_NextPrevWeapon(player, -1);
         }
@@ -864,7 +864,7 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
     }
 
     // check for use
-    if (cmd->buttons & BT_USE)
+    if (cmd->buttons & kButtonCodeUse)
     {
         if (!player->usedown)
         {
@@ -877,16 +877,16 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
         player->usedown = false;
     }
 
-    player->actiondown[0] = (cmd->extbuttons & EBT_ACTION1) ? true : false;
-    player->actiondown[1] = (cmd->extbuttons & EBT_ACTION2) ? true : false;
+    player->actiondown[0] = (cmd->extended_buttons & kExtendedButtonCodeAction1) ? true : false;
+    player->actiondown[1] = (cmd->extended_buttons & kExtendedButtonCodeAction2) ? true : false;
 
     if (LUA_UseLuaHud())
         LUA_SetVector3(LUA_GetGlobalVM(), "player", "inventory_event_handler",
-                       HMM_Vec3{{cmd->extbuttons & EBT_INVPREV ? 1.0f : 0.0f, cmd->extbuttons & EBT_INVUSE ? 1.0f : 0.0f,
-                                   cmd->extbuttons & EBT_INVNEXT ? 1.0f : 0.0f}});
+                       HMM_Vec3{{cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious ? 1.0f : 0.0f, cmd->extended_buttons & kExtendedButtonCodeInventoryUse ? 1.0f : 0.0f,
+                                   cmd->extended_buttons & kExtendedButtonCodeInventoryNext ? 1.0f : 0.0f}});
     else
-        VM_SetVector(ui_vm, "player", "inventory_event_handler", cmd->extbuttons & EBT_INVPREV ? 1 : 0,
-                     cmd->extbuttons & EBT_INVUSE ? 1 : 0, cmd->extbuttons & EBT_INVNEXT ? 1 : 0);
+        VM_SetVector(ui_vm, "player", "inventory_event_handler", cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious ? 1 : 0,
+                     cmd->extended_buttons & kExtendedButtonCodeInventoryUse ? 1 : 0, cmd->extended_buttons & kExtendedButtonCodeInventoryNext ? 1 : 0);
 
     // FIXME separate code more cleanly
     if (extra_tic && r_doubleframes.d_)

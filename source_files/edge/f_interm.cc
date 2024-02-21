@@ -1716,7 +1716,7 @@ bool WI_CheckForAccelerate(void)
         if (!player)
             continue;
 
-        if (player->cmd.buttons & BT_ATTACK)
+        if (player->cmd.buttons & kButtonCodeAttack)
         {
             if (!player->attackdown[0])
             {
@@ -1727,7 +1727,7 @@ bool WI_CheckForAccelerate(void)
         else
             player->attackdown[0] = false;
 
-        if (player->cmd.buttons & BT_USE)
+        if (player->cmd.buttons & kButtonCodeUse)
         {
             if (!player->usedown)
             {

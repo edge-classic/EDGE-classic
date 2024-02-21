@@ -267,7 +267,7 @@ void HandleKeyEvent(SDL_Event *ev)
 
     SDL_Scancode sym = ev->key.keysym.scancode;
 
-    event_t event;
+    InputEvent event;
     event.value.key.sym = TranslateSDLKey(sym);
 
     // handle certain keys which don't behave normally
@@ -278,15 +278,15 @@ void HandleKeyEvent(SDL_Event *ev)
 #endif
         if (ev->type != SDL_KEYDOWN)
             return;
-        event.type = ev_keydown;
-        E_PostEvent(&event);
+        event.type = kInputEventKeyDown;
+        EventPostEvent(&event);
 
-        event.type = ev_keyup;
-        E_PostEvent(&event);
+        event.type = kInputEventKeyUp;
+        EventPostEvent(&event);
         return;
     }
 
-    event.type = (ev->type == SDL_KEYDOWN) ? ev_keydown : ev_keyup;
+    event.type = (ev->type == SDL_KEYDOWN) ? kInputEventKeyDown : kInputEventKeyUp;
 
 #ifdef DEBUG_KB
     L_WriteDebug("   HandleKey: sym=%d scan=%d --> key=%d\n", sym, ev->key.keysym.scancode, event.value.key);
@@ -325,19 +325,19 @@ void HandleKeyEvent(SDL_Event *ev)
 #endif
 
     if (event.value.key.sym == KEYD_LALT)
-        alt_is_down = (event.type == ev_keydown);
+        alt_is_down = (event.type == kInputEventKeyDown);
 
-    E_PostEvent(&event);
+    EventPostEvent(&event);
 }
 
 void HandleMouseButtonEvent(SDL_Event *ev)
 {
-    event_t event;
+    InputEvent event;
 
     if (ev->type == SDL_MOUSEBUTTONDOWN)
-        event.type = ev_keydown;
+        event.type = kInputEventKeyDown;
     else if (ev->type == SDL_MOUSEBUTTONUP)
-        event.type = ev_keyup;
+        event.type = kInputEventKeyUp;
     else
         return;
 
@@ -366,16 +366,16 @@ void HandleMouseButtonEvent(SDL_Event *ev)
         return;
     }
 
-    E_PostEvent(&event);
+    EventPostEvent(&event);
 }
 
 void HandleMouseWheelEvent(SDL_Event *ev)
 {
-    event_t event;
-    event_t release;
+    InputEvent event;
+    InputEvent release;
 
-    event.type   = ev_keydown;
-    release.type = ev_keyup;
+    event.type   = kInputEventKeyDown;
+    release.type = kInputEventKeyUp;
 
     if (ev->wheel.y > 0)
     {
@@ -391,8 +391,8 @@ void HandleMouseWheelEvent(SDL_Event *ev)
     {
         return;
     }
-    E_PostEvent(&event);
-    E_PostEvent(&release);
+    EventPostEvent(&event);
+    EventPostEvent(&release);
 }
 
 static void HandleGamepadButtonEvent(SDL_Event *ev)
@@ -401,12 +401,12 @@ static void HandleGamepadButtonEvent(SDL_Event *ev)
     if (ev->cbutton.which != gamepad_inst)
         return;
 
-    event_t event;
+    InputEvent event;
 
     if (ev->type == SDL_CONTROLLERBUTTONDOWN)
-        event.type = ev_keydown;
+        event.type = kInputEventKeyDown;
     else if (ev->type == SDL_CONTROLLERBUTTONUP)
-        event.type = ev_keyup;
+        event.type = kInputEventKeyUp;
     else
         return;
 
@@ -415,7 +415,7 @@ static void HandleGamepadButtonEvent(SDL_Event *ev)
 
     event.value.key.sym = KEYD_GP_A + ev->cbutton.button;
 
-    E_PostEvent(&event);
+    EventPostEvent(&event);
 }
 
 static void HandleGamepadTriggerEvent(SDL_Event *ev)
@@ -430,9 +430,9 @@ static void HandleGamepadTriggerEvent(SDL_Event *ev)
     if (current_axis != SDL_CONTROLLER_AXIS_TRIGGERLEFT && current_axis != SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
         return;
 
-    event_t event;
+    InputEvent event;
 
-    int thresh = RoundToInteger(*joy_deads[current_axis] * 32767.0f);
+    int thresh = RoundToInteger(*joystick_deadzones[current_axis] * 32767.0f);
     int input  = ev->caxis.value;
 
     if (current_axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
@@ -442,14 +442,14 @@ static void HandleGamepadTriggerEvent(SDL_Event *ev)
         {
             if (!left_trigger_pulled)
                 return;
-            event.type          = ev_keyup;
+            event.type          = kInputEventKeyUp;
             left_trigger_pulled = false;
         }
         else
         {
             if (left_trigger_pulled)
                 return;
-            event.type          = ev_keydown;
+            event.type          = kInputEventKeyDown;
             left_trigger_pulled = true;
         }
     }
@@ -460,19 +460,19 @@ static void HandleGamepadTriggerEvent(SDL_Event *ev)
         {
             if (!right_trigger_pulled)
                 return;
-            event.type           = ev_keyup;
+            event.type           = kInputEventKeyUp;
             right_trigger_pulled = false;
         }
         else
         {
             if (right_trigger_pulled)
                 return;
-            event.type           = ev_keydown;
+            event.type           = kInputEventKeyDown;
             right_trigger_pulled = true;
         }
     }
 
-    E_PostEvent(&event);
+    EventPostEvent(&event);
 }
 
 void HandleMouseMotionEvent(SDL_Event *ev)
@@ -484,13 +484,13 @@ void HandleMouseMotionEvent(SDL_Event *ev)
 
     if (dx || dy)
     {
-        event_t event;
+        InputEvent event;
 
-        event.type           = ev_mouse;
+        event.type           = kInputEventKeyMouse;
         event.value.mouse.dx = dx;
         event.value.mouse.dy = -dy; // -AJA- positive should be "up"
 
-        E_PostEvent(&event);
+        EventPostEvent(&event);
     }
 }
 

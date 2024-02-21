@@ -149,7 +149,7 @@ class DeathBot
    public:
     void Think();
     void DeathThink();
-    void ConvertTiccmd(ticcmd_t *dest);
+    void ConvertTiccmd(EventTicCommand *dest);
     void Respawn();
     void EndLevel();
 

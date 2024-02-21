@@ -23,7 +23,7 @@
 //
 //----------------------------------------------------------------------------
 //
-// -MH- 1998/07/02 Added key_flyup and key_flydown variables (no logic yet)
+// -MH- 1998/07/02 Added key_fly_up and key_fly_down variables (no logic yet)
 // -MH- 1998/08/18 Flyup and flydown logic
 //
 

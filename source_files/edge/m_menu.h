@@ -61,7 +61,7 @@ extern struct SoundEffect *sfx_swtchx;
 // Even when the menu is not displayed,
 // this can resize the view and change game parameters.
 // Does all the real work of the menu interaction.
-bool M_Responder(event_t *ev);
+bool M_Responder(InputEvent *ev);
 
 // Called by main loop,
 // only used for menu (skull cursor) animation.

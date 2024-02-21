@@ -985,7 +985,7 @@ void InitDirectories(void)
     if (!s.empty())
         game_dir = s;
 
-    brandingfile = epi::PathAppend(game_dir, EDGEBRANDINGFILE);
+    brandingfile = epi::PathAppend(game_dir, kBrandingFileName);
 
     M_LoadBranding();
 
@@ -1053,13 +1053,13 @@ void InitDirectories(void)
     }
 
     // cache directory
-    cache_dir = epi::PathAppend(home_dir, CACHEDIR);
+    cache_dir = epi::PathAppend(home_dir, kCacheDirectory);
 
     if (!epi::IsDirectory(cache_dir))
         epi::MakeDirectory(cache_dir);
 
     // savegame directory
-    save_dir = epi::PathAppend(home_dir, SAVEGAMEDIR);
+    save_dir = epi::PathAppend(home_dir, kSaveGameDirectory);
 
     if (!epi::IsDirectory(save_dir))
         epi::MakeDirectory(save_dir);
@@ -1067,7 +1067,7 @@ void InitDirectories(void)
     SV_ClearSlot("current");
 
     // screenshot directory
-    shot_dir = epi::PathAppend(home_dir, SCRNSHOTDIR);
+    shot_dir = epi::PathAppend(home_dir, kScreenshotDirectory);
 
     if (!epi::IsDirectory(shot_dir))
         epi::MakeDirectory(shot_dir);
@@ -1130,7 +1130,7 @@ static void IdentifyVersion(void)
     else
     {
         if (!epi::TestFileAccess(epkfile))
-            I_Error("IdentifyVersion: Could not find required %s.%s!\n", REQUIREDEPK, "epk");
+            I_Error("IdentifyVersion: Could not find required %s.%s!\n", kRequiredEPK, "epk");
         W_AddFilename(epkfile, FLKIND_EEPK);
     }
 
@@ -1599,7 +1599,7 @@ static void CheckTurbo(void)
         ConsoleMessageLDF("TurboScale", turbo_scale);
     }
 
-    E_SetTurboScale(turbo_scale);
+    EventSetTurboScale(turbo_scale);
 }
 
 static void ShowDateAndVersion(void)
@@ -2153,7 +2153,7 @@ void E_Main(int argc, const char **argv)
 //
 void E_Idle(void)
 {
-    E_ReleaseAllKeys();
+    EventReleaseAllKeys();
 }
 
 //
@@ -2171,7 +2171,7 @@ void E_Tick(void)
     // Update display, next frame, with current state.
     E_Display();
 
-    // this also runs the responder chain via E_ProcessEvents
+    // this also runs the responder chain via EventProcessEvents
     int counts = N_TryRunTics();
 
     // ignore this assertion if in a menu; switching between 35/70FPS

@@ -1070,8 +1070,8 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
 
         // I_Debugf("Actual speed = %1.4f\n", mo->player->actual_speed);
 
-        if (fabs(mo->mom.X) < STOPSPEED && fabs(mo->mom.Y) < STOPSPEED && mo->player->cmd.forwardmove == 0 &&
-            mo->player->cmd.sidemove == 0)
+        if (fabs(mo->mom.X) < STOPSPEED && fabs(mo->mom.Y) < STOPSPEED && mo->player->cmd.forward_move == 0 &&
+            mo->player->cmd.side_move == 0)
         {
             mo->mom.X = mo->mom.Y = 0;
         }
@@ -1340,7 +1340,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
 
     if (mo->player)
     {
-        if (fabs(mo->mom.Z) < STOPSPEED && mo->player->cmd.upwardmove == 0)
+        if (fabs(mo->mom.Z) < STOPSPEED && mo->player->cmd.upward_move == 0)
         {
             mo->mom.Z = 0;
         }

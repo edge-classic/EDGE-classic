@@ -200,7 +200,7 @@ static void CheatGiveWeapons(player_t *pl, int key = -2)
     P_UpdateAvailWeapons(pl);
 }
 
-bool M_CheatResponder(event_t *ev)
+bool M_CheatResponder(InputEvent *ev)
 {
 #ifdef NOCHEATS
     return false;
@@ -214,7 +214,7 @@ bool M_CheatResponder(event_t *ev)
         return false;
 
     // if a user keypress...
-    if (ev->type != ev_keydown)
+    if (ev->type != kInputEventKeyDown)
         return false;
 
     char key = (char)ev->value.key.sym;

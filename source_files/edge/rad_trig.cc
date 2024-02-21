@@ -237,7 +237,7 @@ class rts_menu_c
             return key - '0';
 
         if (key == KEYD_SPACE || key == KEYD_ENTER || key == 'Y' || key == KEYD_GP_A || key == KEYD_MOUSE1 ||
-            E_MatchesKey(key_use, key))
+            EventMatchesKey(key_use, key))
             return current_choice + 1;
 
         return -1; /* invalid */
@@ -1036,9 +1036,9 @@ void RAD_Drawer(void)
         RAD_MenuDrawer();
 }
 
-bool RAD_Responder(event_t *ev)
+bool RAD_Responder(InputEvent *ev)
 {
-    if (ev->type != ev_keydown)
+    if (ev->type != kInputEventKeyDown)
         return false;
 
     if (!rts_menuactive)

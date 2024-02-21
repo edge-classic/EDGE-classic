@@ -144,9 +144,9 @@ static bool ButtonDown(player_t *p, int ATK)
 
     /*
         if (ATK == 0)
-            return (p->cmd.buttons & BT_ATTACK);
+            return (p->cmd.buttons & kButtonCodeAttack);
         else
-            return (p->cmd.extbuttons & EBT_SECONDATK);
+            return (p->cmd.extended_buttons & kExtendedButtonCodeSecondAttack);
 
     */
 
@@ -154,16 +154,16 @@ static bool ButtonDown(player_t *p, int ATK)
     switch (ATK)
     {
     case 0:
-        tempbuttons = p->cmd.buttons & BT_ATTACK;
+        tempbuttons = p->cmd.buttons & kButtonCodeAttack;
         break;
     case 1:
-        tempbuttons = p->cmd.extbuttons & EBT_SECONDATK;
+        tempbuttons = p->cmd.extended_buttons & kExtendedButtonCodeSecondAttack;
         break;
     case 2:
-        tempbuttons = p->cmd.extbuttons & EBT_THIRDATK;
+        tempbuttons = p->cmd.extended_buttons & kExtendedButtonCodeThirdAttack;
         break;
     case 3:
-        tempbuttons = p->cmd.extbuttons & EBT_FOURTHATK;
+        tempbuttons = p->cmd.extended_buttons & kExtendedButtonCodeFourthAttack;
         break;
     default:
         // should never happen
@@ -913,7 +913,7 @@ void P_MovePsprites(player_t *p)
 
 static void BobWeapon(player_t *p, WeaponDefinition *info)
 {
-    if (g_bobbing.d_== 1 || g_bobbing.d_== 3 || (g_erraticism.d_&& (!p->cmd.forwardmove && !p->cmd.sidemove)))
+    if (g_bobbing.d_== 1 || g_bobbing.d_== 3 || (g_erraticism.d_&& (!p->cmd.forward_move && !p->cmd.side_move)))
         return;
 
     pspdef_t *psp = &p->psprites[p->action_psp];
@@ -1061,7 +1061,7 @@ void A_WeaponReady(mobj_t *mo)
                 break;
             }
 
-            if ((p->cmd.extbuttons & EBT_RELOAD) && (info->clip_size_[ATK] > 0) && (info->specials_[ATK] & WeaponFlagManualReload) &&
+            if ((p->cmd.extended_buttons & kExtendedButtonCodeReload) && (info->clip_size_[ATK] > 0) && (info->specials_[ATK] & WeaponFlagManualReload) &&
                 info->reload_state_[ATK])
             {
                 bool reload = WeaponCanReload(p, p->ready_wp, ATK, true);

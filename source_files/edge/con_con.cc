@@ -111,7 +111,7 @@ static int command_used_history = 0;
 // -1.
 static int command_history_position = -1;
 
-// always type ev_keydown
+// always type kInputEventKeyDown
 static int repeat_key;
 static int repeat_countdown;
 
@@ -1381,7 +1381,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
     }
 }
 
-static int GetKeycode(event_t *ev)
+static int GetKeycode(InputEvent *ev)
 {
     int sym = ev->value.key.sym;
 
@@ -1416,13 +1416,13 @@ static int GetKeycode(event_t *ev)
     return -1;
 }
 
-bool ConsoleResponder(event_t *ev)
+bool ConsoleResponder(InputEvent *ev)
 {
-    if (ev->type != ev_keyup && ev->type != ev_keydown) return false;
+    if (ev->type != kInputEventKeyUp && ev->type != kInputEventKeyDown) return false;
 
-    if (ev->type == ev_keydown && E_MatchesKey(key_console, ev->value.key.sym))
+    if (ev->type == kInputEventKeyDown && EventMatchesKey(key_console, ev->value.key.sym))
     {
-        E_ClearInput();
+        EventClearInput();
         ConsoleSetVisible(kConsoleVisibilityToggle);
         return true;
     }
@@ -1432,7 +1432,7 @@ bool ConsoleResponder(event_t *ev)
     int key = GetKeycode(ev);
     if (key < 0) return true;
 
-    if (ev->type == ev_keyup)
+    if (ev->type == kInputEventKeyUp)
     {
         if (key == repeat_key) repeat_countdown = 0;
 

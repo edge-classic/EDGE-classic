@@ -91,7 +91,7 @@ extern std::string exe_path;
 void I_StartupControl(void);
 
 // Causes all control devices to send their events to the engine via
-// the E_PostEvent() function.
+// the EventPostEvent() function.
 void I_ControlGetEvents(void);
 
 // Shuts down all control devices.  This is the opposite of

@@ -229,9 +229,9 @@ void HU_Ticker(void)
         if (pnum == consoleplayer)
             continue;
 
-        char c = p->cmd.chatchar;
+        char c = p->cmd.chat_character;
 
-        p->cmd.chatchar = 0;
+        p->cmd.chat_character = 0;
 
         if (c)
         {
@@ -250,14 +250,14 @@ char HU_DequeueChatChar(void)
     return 0; // TODO
 }
 
-bool HU_Responder(event_t *ev)
+bool HU_Responder(InputEvent *ev)
 {
-    if (ev->type != ev_keyup && ev->type != ev_keydown)
+    if (ev->type != kInputEventKeyUp && ev->type != kInputEventKeyDown)
         return false;
 
     int c = ev->value.key.sym;
 
-    if (ev->type != ev_keydown)
+    if (ev->type != kInputEventKeyDown)
         return false;
 
     // TODO: chat stuff

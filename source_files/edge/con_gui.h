@@ -26,7 +26,7 @@ void ConsoleStart(void);
 
 void ConsoleTicker(void);
 
-bool ConsoleResponder(event_t *ev);
+bool ConsoleResponder(InputEvent *ev);
 
 void ConsoleDrawer(void);
 

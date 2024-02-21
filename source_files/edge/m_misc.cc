@@ -23,7 +23,7 @@
 //
 //----------------------------------------------------------------------------
 //
-// -MH- 1998/07/02  Added key_flyup and key_flydown
+// -MH- 1998/07/02  Added key_fly_up and key_fly_down
 // -MH- 1998/07/02 "shootupdown" --> "true3dgameplay"
 // -ACB- 2000/06/02 Removed Control Defaults
 //
@@ -126,13 +126,13 @@ static default_t defaults[] = {
 
     // -KM- 1998/09/01 Useless mouse/joy stuff removed,
     //                 analogue binding added
-    {CFGT_Int, "mouse_axis_x", &mouse_xaxis, CFGDEF_MOUSE_XAXIS},
-    {CFGT_Int, "mouse_axis_y", &mouse_yaxis, CFGDEF_MOUSE_YAXIS},
+    {CFGT_Int, "mouse_axis_x", &mouse_x_axis, CFGDEF_MOUSE_XAXIS},
+    {CFGT_Int, "mouse_axis_y", &mouse_y_axis, CFGDEF_MOUSE_YAXIS},
 
-    {CFGT_Int, "joy_axis1", &joy_axis[0], 7},
-    {CFGT_Int, "joy_axis2", &joy_axis[1], 6},
-    {CFGT_Int, "joy_axis3", &joy_axis[2], 1},
-    {CFGT_Int, "joy_axis4", &joy_axis[3], 4},
+    {CFGT_Int, "joystick_axis1", &joystick_axis[0], 7},
+    {CFGT_Int, "joystick_axis2", &joystick_axis[1], 6},
+    {CFGT_Int, "joystick_axis3", &joystick_axis[2], 1},
+    {CFGT_Int, "joystick_axis4", &joystick_axis[3], 4},
 
     {CFGT_Int, "screen_hud", &screen_hud, CFGDEF_SCREEN_HUD},
     {CFGT_Int, "save_page", &save_page, 0},
@@ -149,26 +149,26 @@ static default_t defaults[] = {
     {CFGT_Key, "key_left", &key_left, CFGDEF_KEY_LEFT},
     {CFGT_Key, "key_up", &key_up, CFGDEF_KEY_UP},
     {CFGT_Key, "key_down", &key_down, CFGDEF_KEY_DOWN},
-    {CFGT_Key, "key_lookup", &key_lookup, CFGDEF_KEY_LOOKUP},
-    {CFGT_Key, "key_lookdown", &key_lookdown, CFGDEF_KEY_LOOKDOWN},
-    {CFGT_Key, "key_lookcenter", &key_lookcenter, CFGDEF_KEY_LOOKCENTER},
+    {CFGT_Key, "key_look_up", &key_look_up, CFGDEF_KEY_LOOKUP},
+    {CFGT_Key, "key_look_down", &key_look_down, CFGDEF_KEY_LOOKDOWN},
+    {CFGT_Key, "key_look_center", &key_look_center, CFGDEF_KEY_LOOKCENTER},
 
     // -ES- 1999/03/28 Zoom Key
     {CFGT_Key, "key_zoom", &key_zoom, CFGDEF_KEY_ZOOM},
-    {CFGT_Key, "key_strafeleft", &key_strafeleft, CFGDEF_KEY_STRAFELEFT},
-    {CFGT_Key, "key_straferight", &key_straferight, CFGDEF_KEY_STRAFERIGHT},
+    {CFGT_Key, "key_strafe_left", &key_strafe_left, CFGDEF_KEY_STRAFELEFT},
+    {CFGT_Key, "key_strafe_right", &key_strafe_right, CFGDEF_KEY_STRAFERIGHT},
 
     // -ACB- for -MH- 1998/07/02 Flying Keys
-    {CFGT_Key, "key_flyup", &key_flyup, CFGDEF_KEY_FLYUP},
-    {CFGT_Key, "key_flydown", &key_flydown, CFGDEF_KEY_FLYDOWN},
+    {CFGT_Key, "key_fly_up", &key_fly_up, CFGDEF_KEY_FLYUP},
+    {CFGT_Key, "key_fly_down", &key_fly_down, CFGDEF_KEY_FLYDOWN},
 
     {CFGT_Key, "key_fire", &key_fire, CFGDEF_KEY_FIRE},
     {CFGT_Key, "key_use", &key_use, CFGDEF_KEY_USE},
     {CFGT_Key, "key_strafe", &key_strafe, CFGDEF_KEY_STRAFE},
     {CFGT_Key, "key_speed", &key_speed, CFGDEF_KEY_SPEED},
     {CFGT_Key, "key_autorun", &key_autorun, CFGDEF_KEY_AUTORUN},
-    {CFGT_Key, "key_nextweapon", &key_nextweapon, CFGDEF_KEY_NEXTWEAPON},
-    {CFGT_Key, "key_prevweapon", &key_prevweapon, CFGDEF_KEY_PREVWEAPON},
+    {CFGT_Key, "key_next_weapon", &key_next_weapon, CFGDEF_KEY_NEXTWEAPON},
+    {CFGT_Key, "key_previous_weapon", &key_previous_weapon, CFGDEF_KEY_PREVWEAPON},
 
     {CFGT_Key, "key_180", &key_180, CFGDEF_KEY_180},
     {CFGT_Key, "key_map", &key_map, CFGDEF_KEY_MAP},
@@ -176,10 +176,10 @@ static default_t defaults[] = {
     {CFGT_Key, "key_console", &key_console, CFGDEF_KEY_CONSOLE}, // -AJA- 2007/08/15.
     {CFGT_Key, "key_pause", &key_pause, KEYD_PAUSE},             // -AJA- 2010/06/13.
 
-    {CFGT_Key, "key_mlook", &key_mlook, CFGDEF_KEY_MLOOK},             // -AJA- 1999/07/27.
-    {CFGT_Key, "key_secondatk", &key_secondatk, CFGDEF_KEY_SECONDATK}, // -AJA- 2000/02/08.
-    {CFGT_Key, "key_thirdatk", &key_thirdatk, 0},                      //
-    {CFGT_Key, "key_fourthatk", &key_fourthatk, 0},                    //
+    {CFGT_Key, "key_mouselook", &key_mouselook, CFGDEF_KEY_MLOOK},             // -AJA- 1999/07/27.
+    {CFGT_Key, "key_second_attack", &key_second_attack, CFGDEF_KEY_SECONDATK}, // -AJA- 2000/02/08.
+    {CFGT_Key, "key_third_attack", &key_third_attack, 0},                      //
+    {CFGT_Key, "key_fourth_attack", &key_fourth_attack, 0},                    //
     {CFGT_Key, "key_reload", &key_reload, CFGDEF_KEY_RELOAD},          // -AJA- 2004/11/11.
     {CFGT_Key, "key_action1", &key_action1, CFGDEF_KEY_ACTION1},       // -AJA- 2009/09/07
     {CFGT_Key, "key_action2", &key_action2, CFGDEF_KEY_ACTION2},       // -AJA- 2009/09/07
@@ -207,9 +207,9 @@ static default_t defaults[] = {
     {CFGT_Key, "key_automap_mark", &key_automap_mark, 'm'},
     {CFGT_Key, "key_automap_clear", &key_automap_clear, 'c'},
 
-    {CFGT_Key, "key_inv_prev", &key_inv_prev, CFGDEF_KEY_PREVINV},
-    {CFGT_Key, "key_inv_use", &key_inv_use, CFGDEF_KEY_USEINV},
-    {CFGT_Key, "key_inv_next", &key_inv_next, CFGDEF_KEY_NEXTINV},
+    {CFGT_Key, "key_inventory_previous", &key_inventory_previous, CFGDEF_KEY_PREVINV},
+    {CFGT_Key, "key_inventory_use", &key_inventory_use, CFGDEF_KEY_USEINV},
+    {CFGT_Key, "key_inventory_next", &key_inventory_next, CFGDEF_KEY_NEXTINV},
 
     {CFGT_Key, "key_screenshot", &key_screenshot, KEYD_F1},
     {CFGT_Key, "key_save_game", &key_save_game, KEYD_F2},

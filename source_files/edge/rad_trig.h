@@ -45,7 +45,7 @@ void RAD_ClearWUDsByMap(const std::string &mapname);
 void           RAD_RunTriggers(void);
 void           RAD_Ticker(void);
 void           RAD_Drawer(void);
-bool           RAD_Responder(event_t *ev);
+bool           RAD_Responder(InputEvent *ev);
 bool           RAD_WithinRadius(mobj_t *mo, rad_script_t *r);
 rad_script_t  *RAD_FindScriptByName(const char *map_name, const char *name);
 rad_trigger_t *RAD_FindTriggerByName(const char *name);

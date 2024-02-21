@@ -1115,7 +1115,7 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool
 
         // don't immediately restart when USE key was pressed
         if (target->player == players[consoleplayer])
-            E_ClearInput();
+            EventClearInput();
     }
 
     int state    = 0;

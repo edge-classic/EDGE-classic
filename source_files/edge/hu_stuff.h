@@ -56,7 +56,7 @@ extern bool chat_on;
 void HU_Init(void);
 void HU_Start(void);
 
-bool HU_Responder(event_t *ev);
+bool HU_Responder(InputEvent *ev);
 
 void HU_StartMessage(const char *msg);
 void HU_StartImportantMessage(const char *msg);

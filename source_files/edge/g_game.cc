@@ -256,7 +256,7 @@ void LoadLevel_Bits(void)
     ConsoleSetVisible(kConsoleVisibilityNotVisible);
 
     // clear cmd building stuff
-    E_ClearInput();
+    EventClearInput();
 
 #ifdef EDGE_WEB
     S_ResumeAudioDevice();
@@ -321,12 +321,12 @@ void G_DoLoadLevel(void)
 //
 // Get info needed to make ticcmd_ts for the players.
 //
-bool G_Responder(event_t *ev)
+bool G_Responder(InputEvent *ev)
 {
     // any other key pops up menu
     if (gameaction == ga_nothing && (gamestate == GS_TITLESCREEN))
     {
-        if (ev->type == ev_keydown)
+        if (ev->type == kInputEventKeyDown)
         {
             M_StartControlPanel();
             S_StartFX(sfx_swtchn, SNCAT_UI);
@@ -336,7 +336,7 @@ bool G_Responder(event_t *ev)
         return false;
     }
 
-    if (ev->type == ev_keydown && E_MatchesKey(key_show_players, ev->value.key.sym))
+    if (ev->type == kInputEventKeyDown && EventMatchesKey(key_show_players, ev->value.key.sym))
     {
         if (gamestate == GS_LEVEL) //!!!! && !DEATHMATCH())
         {
@@ -345,7 +345,7 @@ bool G_Responder(event_t *ev)
         }
     }
 
-    if (!netgame && ev->type == ev_keydown && E_MatchesKey(key_pause, ev->value.key.sym))
+    if (!netgame && ev->type == kInputEventKeyDown && EventMatchesKey(key_pause, ev->value.key.sym))
     {
         paused = !paused;
 
@@ -388,7 +388,7 @@ bool G_Responder(event_t *ev)
             return true; // finale ate the event
     }
 
-    return INP_Responder(ev);
+    return EventInputResponderResponder(ev);
 }
 
 static void CheckPlayersReborn(void)

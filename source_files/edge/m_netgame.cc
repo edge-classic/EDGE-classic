@@ -507,7 +507,7 @@ void M_DrawHostMenu(void)
     HL_WriteText(ng_host_style, (host_pos == idx) ? StyleDefinition::kTextSectionHelp : StyleDefinition::kTextSectionText, CenterX, y, "Start");
 }
 
-bool M_NetHostResponder(event_t *ev, int ch)
+bool M_NetHostResponder(InputEvent *ev, int ch)
 {
     if (ch == KEYD_ENTER || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
     {
@@ -614,7 +614,7 @@ static void ListAccept()
     NetGameStartLevel();
 }
 
-bool M_NetListResponder(event_t *ev, int ch)
+bool M_NetListResponder(InputEvent *ev, int ch)
 {
     if (ch == KEYD_ENTER || ch == KEYD_GP_A)
     {
@@ -669,7 +669,7 @@ void M_NetGameDrawer(void)
     I_Error("INTERNAL ERROR: netgame_menuon=%d\n", netgame_menuon);
 }
 
-bool M_NetGameResponder(event_t *ev, int ch)
+bool M_NetGameResponder(InputEvent *ev, int ch)
 {
     switch (ch)
     {

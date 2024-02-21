@@ -1369,30 +1369,30 @@ void DeathBot::DeathThink()
     }
 }
 
-void DeathBot::ConvertTiccmd(ticcmd_t *dest)
+void DeathBot::ConvertTiccmd(EventTicCommand *dest)
 {
     // we assume caller has cleared the ticcmd_t to zero.
 
     mobj_t *mo = pl_->mo;
 
-    if (cmd_.attack) dest->buttons |= BT_ATTACK;
+    if (cmd_.attack) dest->buttons |= kButtonCodeAttack;
 
-    if (cmd_.attack2) dest->extbuttons |= EBT_SECONDATK;
+    if (cmd_.attack2) dest->extended_buttons |= kExtendedButtonCodeSecondAttack;
 
-    if (cmd_.use) dest->buttons |= BT_USE;
+    if (cmd_.use) dest->buttons |= kButtonCodeUse;
 
-    if (cmd_.jump) dest->upwardmove = 0x20;
+    if (cmd_.jump) dest->upward_move = 0x20;
 
     if (cmd_.weapon != -1)
     {
-        dest->buttons |= BT_CHANGE;
-        dest->buttons |= (cmd_.weapon << BT_WEAPONSHIFT) & BT_WEAPONMASK;
+        dest->buttons |= kButtonCodeChangeWeapon;
+        dest->buttons |= (cmd_.weapon << kButtonCodeWeaponMaskShift) & kButtonCodeWeaponMask;
     }
 
-    dest->player_idx = pl_->pnum;
+    dest->player_index = pl_->pnum;
 
-    dest->angleturn = (mo->angle - look_angle_) >> 16;
-    dest->mlookturn = (epi::BAMFromATan(look_slope_) - mo->vertangle) >> 16;
+    dest->angle_turn = (mo->angle - look_angle_) >> 16;
+    dest->mouselook_turn = (epi::BAMFromATan(look_slope_) - mo->vertangle) >> 16;
 
     if (cmd_.speed != 0)
     {
@@ -1402,8 +1402,8 @@ void DeathBot::ConvertTiccmd(ticcmd_t *dest)
         float fwd  = epi::BAMCos(a) * cmd_.speed;
         float side = epi::BAMSin(a) * cmd_.speed;
 
-        dest->forwardmove = (int)fwd;
-        dest->sidemove    = -(int)side;
+        dest->forward_move = (int)fwd;
+        dest->side_move    = -(int)side;
     }
 }
 
@@ -1444,9 +1444,9 @@ void P_BotCreate(player_t *p, bool recreate)
     if (!recreate) sprintf(p->playername, "Bot%d", p->pnum + 1);
 }
 
-void P_BotPlayerBuilder(const player_t *p, void *data, ticcmd_t *cmd)
+void P_BotPlayerBuilder(const player_t *p, void *data, EventTicCommand *cmd)
 {
-    memset(cmd, 0, sizeof(ticcmd_t));
+    memset(cmd, 0, sizeof(EventTicCommand));
 
     if (gamestate != GS_LEVEL) return;
 

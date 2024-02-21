@@ -155,7 +155,7 @@ typedef struct player_s
 
     // actions to perform.  Comes either from the local computer or over
     // the network in multiplayer mode.
-    ticcmd_t cmd;
+    EventTicCommand cmd;
 
     playerstate_e playerstate;
 
@@ -324,7 +324,7 @@ typedef struct player_s
     // last frame for weapon models
     int weapon_last_frame;
 
-    ticcmd_t in_cmds[BACKUPTICS];
+    EventTicCommand in_cmds[BACKUPTICS];
 
     int in_tic; /* tic number of next input command expected */
 
@@ -333,7 +333,7 @@ typedef struct player_s
     net_node_c *node;
 
     // This function will be called to initialise the ticcmd_t.
-    void (*builder)(const struct player_s *, void *data, ticcmd_t *dest);
+    void (*builder)(const struct player_s *, void *data, EventTicCommand *dest);
     void *build_data;
 
   public:
@@ -346,8 +346,8 @@ typedef struct player_s
 } player_t;
 
 // Player ticcmd builders
-void P_ConsolePlayerBuilder(const player_t *p, void *data, ticcmd_t *dest);
-void P_BotPlayerBuilder(const player_t *p, void *data, ticcmd_t *dest);
+void P_ConsolePlayerBuilder(const player_t *p, void *data, EventTicCommand *dest);
+void P_BotPlayerBuilder(const player_t *p, void *data, EventTicCommand *dest);
 
 void G_ClearBodyQueue(void);
 void G_DeathMatchSpawnPlayer(player_t *p);

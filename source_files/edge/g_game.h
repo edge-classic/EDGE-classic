@@ -123,7 +123,7 @@ void G_ExitToHub(int map_number, int tag);
 
 void G_BigStuff(void);
 void G_Ticker(void);
-bool G_Responder(event_t *ev);
+bool G_Responder(InputEvent *ev);
 
 bool G_CheckWhenAppear(AppearsFlag appear);
 

@@ -316,12 +316,12 @@ static void ChangeWindowScale(float factor)
 //
 // Handle events (user inputs) in automap mode
 //
-bool AutomapResponder(event_t *ev)
+bool AutomapResponder(InputEvent *ev)
 {
     int sym = ev->value.key.sym;
 
     // check the enable/disable key
-    if (ev->type == ev_keydown && E_MatchesKey(key_map, sym))
+    if (ev->type == kInputEventKeyDown && EventMatchesKey(key_map, sym))
     {
         if (automap_active)
             AutomapHide();
@@ -334,18 +334,18 @@ bool AutomapResponder(event_t *ev)
 
     // --- handle key releases ---
 
-    if (ev->type == ev_keyup)
+    if (ev->type == kInputEventKeyUp)
     {
-        if (E_MatchesKey(key_automap_left, sym) ||
-            E_MatchesKey(key_automap_right, sym))
+        if (EventMatchesKey(key_automap_left, sym) ||
+            EventMatchesKey(key_automap_right, sym))
             panning_x = 0;
 
-        if (E_MatchesKey(key_automap_up, sym) ||
-            E_MatchesKey(key_automap_down, sym))
+        if (EventMatchesKey(key_automap_up, sym) ||
+            EventMatchesKey(key_automap_down, sym))
             panning_y = 0;
 
-        if (E_MatchesKey(key_automap_zoom_in, sym) ||
-            E_MatchesKey(key_automap_zoom_out, sym))
+        if (EventMatchesKey(key_automap_zoom_in, sym) ||
+            EventMatchesKey(key_automap_zoom_out, sym))
             zooming = -1;
 
         return false;
@@ -353,7 +353,7 @@ bool AutomapResponder(event_t *ev)
 
     // --- handle key presses ---
 
-    if (ev->type != ev_keydown) return false;
+    if (ev->type != kInputEventKeyDown) return false;
 
     // Had to move the automap cheat check up here thanks to Heretic's 'ravmap'
     // cheat - Dasho -ACB- 1999/09/28 Proper casting -AJA- 2022: allow this in
@@ -368,40 +368,40 @@ bool AutomapResponder(event_t *ev)
 
     if (!follow_player)
     {
-        if (E_MatchesKey(key_automap_left, sym))
+        if (EventMatchesKey(key_automap_left, sym))
         {
             panning_x = -FrameToMapScale(kAutomapFrameBufferPanIncrement);
             return true;
         }
-        else if (E_MatchesKey(key_automap_right, sym))
+        else if (EventMatchesKey(key_automap_right, sym))
         {
             panning_x = FrameToMapScale(kAutomapFrameBufferPanIncrement);
             return true;
         }
-        else if (E_MatchesKey(key_automap_up, sym))
+        else if (EventMatchesKey(key_automap_up, sym))
         {
             panning_y = FrameToMapScale(kAutomapFrameBufferPanIncrement);
             return true;
         }
-        else if (E_MatchesKey(key_automap_down, sym))
+        else if (EventMatchesKey(key_automap_down, sym))
         {
             panning_y = -FrameToMapScale(kAutomapFrameBufferPanIncrement);
             return true;
         }
     }
 
-    if (E_MatchesKey(key_automap_zoom_in, sym))
+    if (EventMatchesKey(key_automap_zoom_in, sym))
     {
         zooming = kAutomapZoomPerTic;
         return true;
     }
-    else if (E_MatchesKey(key_automap_zoom_out, sym))
+    else if (EventMatchesKey(key_automap_zoom_out, sym))
     {
         zooming = 1.0 / kAutomapZoomPerTic;
         return true;
     }
 
-    if (E_MatchesKey(key_automap_follow, sym))
+    if (EventMatchesKey(key_automap_follow, sym))
     {
         follow_player = !follow_player;
 
@@ -414,7 +414,7 @@ bool AutomapResponder(event_t *ev)
         return true;
     }
 
-    if (E_MatchesKey(key_automap_grid, sym))
+    if (EventMatchesKey(key_automap_grid, sym))
     {
         grid = !grid;
         // -ACB- 1998/08/10 Use DDF Lang Reference
@@ -426,7 +426,7 @@ bool AutomapResponder(event_t *ev)
         return true;
     }
 
-    if (E_MatchesKey(key_automap_mark, sym))
+    if (EventMatchesKey(key_automap_mark, sym))
     {
         // -ACB- 1998/08/10 Use DDF Lang Reference
         ConsolePlayerMessage(consoleplayer, "%s %d", language["AutoMapMarkedSpot"],
@@ -435,7 +435,7 @@ bool AutomapResponder(event_t *ev)
         return true;
     }
 
-    if (E_MatchesKey(key_automap_clear, sym))
+    if (EventMatchesKey(key_automap_clear, sym))
     {
         // -ACB- 1998/08/10 Use DDF Lang Reference
         ConsolePlayerMessageLDF(consoleplayer, "AutoMapMarksClear");

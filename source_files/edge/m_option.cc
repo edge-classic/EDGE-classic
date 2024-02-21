@@ -445,18 +445,18 @@ static menuinfo_t res_optmenu = {
 //
 
 static optmenuitem_t analogueoptions[] = {
-    {OPT_Switch, "Mouse X Axis", MouseAxis, 11, &mouse_xaxis, nullptr, nullptr},
-    {OPT_Switch, "Mouse Y Axis", MouseAxis, 11, &mouse_yaxis, nullptr, nullptr},
-    {OPT_FracSlider, "X Sensitivity", nullptr, 0, &mouse_xsens.f_, M_UpdateCVARFromFloat, nullptr, &mouse_xsens, 0.25f, 1.0f,
+    {OPT_Switch, "Mouse X Axis", MouseAxis, 11, &mouse_x_axis, nullptr, nullptr},
+    {OPT_Switch, "Mouse Y Axis", MouseAxis, 11, &mouse_y_axis, nullptr, nullptr},
+    {OPT_FracSlider, "X Sensitivity", nullptr, 0, &mouse_x_sensitivity.f_, M_UpdateCVARFromFloat, nullptr, &mouse_x_sensitivity, 0.25f, 1.0f,
      15.0f, "%0.2f"},
-    {OPT_FracSlider, "Y Sensitivity", nullptr, 0, &mouse_ysens.f_, M_UpdateCVARFromFloat, nullptr, &mouse_ysens, 0.25f, 1.0f,
+    {OPT_FracSlider, "Y Sensitivity", nullptr, 0, &mouse_y_sensitivity.f_, M_UpdateCVARFromFloat, nullptr, &mouse_y_sensitivity, 0.25f, 1.0f,
      15.0f, "%0.2f"},
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {OPT_Switch, "Gamepad", JoyDevs, 5, &joystick_device, nullptr, nullptr},
-    {OPT_Switch, "Left Stick X", JoyAxis, 13, &joy_axis[0], nullptr, nullptr},
-    {OPT_Switch, "Left Stick Y", JoyAxis, 13, &joy_axis[1], nullptr, nullptr},
-    {OPT_Switch, "Right Stick X", JoyAxis, 13, &joy_axis[2], nullptr, nullptr},
-    {OPT_Switch, "Right Stick Y", JoyAxis, 13, &joy_axis[3], nullptr, nullptr},
+    {OPT_Switch, "Left Stick X", JoyAxis, 13, &joystick_axis[0], nullptr, nullptr},
+    {OPT_Switch, "Left Stick Y", JoyAxis, 13, &joystick_axis[1], nullptr, nullptr},
+    {OPT_Switch, "Right Stick X", JoyAxis, 13, &joystick_axis[2], nullptr, nullptr},
+    {OPT_Switch, "Right Stick Y", JoyAxis, 13, &joystick_axis[3], nullptr, nullptr},
     {OPT_FracSlider, "Left X Deadzone", nullptr, 0, &joy_dead0.f_, M_UpdateCVARFromFloat, nullptr, &joy_dead0, 0.01f, 0.0f,
      0.99f, "%0.2f"},
     {OPT_FracSlider, "Left Y Deadzone", nullptr, 0, &joy_dead1.f_, M_UpdateCVARFromFloat, nullptr, &joy_dead1, 0.01f, 0.0f,
@@ -470,13 +470,13 @@ static optmenuitem_t analogueoptions[] = {
     {OPT_FracSlider, "Right Trigger Deadzone", nullptr, 0, &joy_dead5.f_, M_UpdateCVARFromFloat, nullptr, &joy_dead5, 0.01f,
      0.0f, 0.99f, "%0.2f"},
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {OPT_FracSlider, "Turning Speed", nullptr, 0, &turnspeed.f_, M_UpdateCVARFromFloat, nullptr, &turnspeed, 0.10f, 0.10f,
+    {OPT_FracSlider, "Turning Speed", nullptr, 0, &turn_speed.f_, M_UpdateCVARFromFloat, nullptr, &turn_speed, 0.10f, 0.10f,
      3.0f, "%0.2f"},
-    {OPT_FracSlider, "Vertical Look Speed", nullptr, 0, &vlookspeed.f_, M_UpdateCVARFromFloat, nullptr, &vlookspeed, 0.10f,
+    {OPT_FracSlider, "Vertical Look Speed", nullptr, 0, &vertical_look_speed.f_, M_UpdateCVARFromFloat, nullptr, &vertical_look_speed, 0.10f,
      0.10f, 3.0f, "%0.2f"},
-    {OPT_FracSlider, "Forward Move Speed", nullptr, 0, &forwardspeed.f_, M_UpdateCVARFromFloat, nullptr, &forwardspeed, 0.10f,
+    {OPT_FracSlider, "Forward Move Speed", nullptr, 0, &forward_speed.f_, M_UpdateCVARFromFloat, nullptr, &forward_speed, 0.10f,
      0.10f, 3.0f, "%0.2f"},
-    {OPT_FracSlider, "Side Move Speed", nullptr, 0, &sidespeed.f_, M_UpdateCVARFromFloat, nullptr, &sidespeed, 0.10f, 0.10f,
+    {OPT_FracSlider, "Side Move Speed", nullptr, 0, &side_speed.f_, M_UpdateCVARFromFloat, nullptr, &side_speed, 0.10f, 0.10f,
      3.0f, "%0.2f"},
 };
 
@@ -630,14 +630,14 @@ static optmenuitem_t move_keyconfig[] = {
     {OPT_KeyConfig, "Walk Forward", nullptr, 0, &key_up, nullptr, nullptr},
     {OPT_KeyConfig, "Walk Backwards", nullptr, 0, &key_down, nullptr, nullptr},
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {OPT_KeyConfig, "Strafe Left", nullptr, 0, &key_strafeleft, nullptr, nullptr},
-    {OPT_KeyConfig, "Strafe Right", nullptr, 0, &key_straferight, nullptr, nullptr},
+    {OPT_KeyConfig, "Strafe Left", nullptr, 0, &key_strafe_left, nullptr, nullptr},
+    {OPT_KeyConfig, "Strafe Right", nullptr, 0, &key_strafe_right, nullptr, nullptr},
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {OPT_KeyConfig, "Turn Left", nullptr, 0, &key_left, nullptr, nullptr},
     {OPT_KeyConfig, "Turn Right", nullptr, 0, &key_right, nullptr, nullptr},
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {OPT_KeyConfig, "Up / Jump", nullptr, 0, &key_flyup, nullptr, nullptr},
-    {OPT_KeyConfig, "Down / Crouch", nullptr, 0, &key_flydown, nullptr, nullptr},
+    {OPT_KeyConfig, "Up / Jump", nullptr, 0, &key_fly_up, nullptr, nullptr},
+    {OPT_KeyConfig, "Down / Crouch", nullptr, 0, &key_fly_down, nullptr, nullptr},
 };
 
 static menuinfo_t movement_optmenu = {
@@ -652,11 +652,11 @@ static menuinfo_t movement_optmenu = {
 //
 static optmenuitem_t attack_keyconfig[] = {
     {OPT_KeyConfig, "Primary Attack", nullptr, 0, &key_fire, nullptr, nullptr},
-    {OPT_KeyConfig, "Secondary Attack", nullptr, 0, &key_secondatk, nullptr, nullptr},
-    {OPT_KeyConfig, "Third Attack", nullptr, 0, &key_thirdatk, nullptr, nullptr},
-    {OPT_KeyConfig, "Fourth Attack", nullptr, 0, &key_fourthatk, nullptr, nullptr},
-    {OPT_KeyConfig, "Next Weapon", nullptr, 0, &key_nextweapon, nullptr, nullptr},
-    {OPT_KeyConfig, "Previous Weapon", nullptr, 0, &key_prevweapon, nullptr, nullptr},
+    {OPT_KeyConfig, "Secondary Attack", nullptr, 0, &key_second_attack, nullptr, nullptr},
+    {OPT_KeyConfig, "Third Attack", nullptr, 0, &key_third_attack, nullptr, nullptr},
+    {OPT_KeyConfig, "Fourth Attack", nullptr, 0, &key_fourth_attack, nullptr, nullptr},
+    {OPT_KeyConfig, "Next Weapon", nullptr, 0, &key_next_weapon, nullptr, nullptr},
+    {OPT_KeyConfig, "Previous Weapon", nullptr, 0, &key_previous_weapon, nullptr, nullptr},
     {OPT_KeyConfig, "Weapon Reload", nullptr, 0, &key_reload, nullptr, nullptr},
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {OPT_KeyConfig, "Zoom in/out", nullptr, 0, &key_zoom, nullptr, nullptr},
@@ -667,10 +667,10 @@ static menuinfo_t attack_optmenu = {
     language["MenuBinding"]};
 
 static optmenuitem_t look_keyconfig[] = {
-    {OPT_KeyConfig, "Look Up", nullptr, 0, &key_lookup, nullptr, nullptr},
-    {OPT_KeyConfig, "Look Down", nullptr, 0, &key_lookdown, nullptr, nullptr},
-    {OPT_KeyConfig, "Center View", nullptr, 0, &key_lookcenter, nullptr, nullptr},
-    {OPT_KeyConfig, "Mouse Look", nullptr, 0, &key_mlook, nullptr, nullptr},
+    {OPT_KeyConfig, "Look Up", nullptr, 0, &key_look_up, nullptr, nullptr},
+    {OPT_KeyConfig, "Look Down", nullptr, 0, &key_look_down, nullptr, nullptr},
+    {OPT_KeyConfig, "Center View", nullptr, 0, &key_look_center, nullptr, nullptr},
+    {OPT_KeyConfig, "Mouse Look", nullptr, 0, &key_mouselook, nullptr, nullptr},
 };
 
 static menuinfo_t look_optmenu = {
@@ -749,9 +749,9 @@ static menuinfo_t automap_optmenu = {automap_keyconfig,
 //  KEY CONFIG : INVENTORY
 //
 static optmenuitem_t inventory_keyconfig[] = {
-    {OPT_KeyConfig, "Previous Item", nullptr, 0, &key_inv_prev, nullptr, nullptr},
-    {OPT_KeyConfig, "Use Item", nullptr, 0, &key_inv_use, nullptr, nullptr},
-    {OPT_KeyConfig, "Next Item", nullptr, 0, &key_inv_next, nullptr, nullptr},
+    {OPT_KeyConfig, "Previous Item", nullptr, 0, &key_inventory_previous, nullptr, nullptr},
+    {OPT_KeyConfig, "Use Item", nullptr, 0, &key_inventory_use, nullptr, nullptr},
+    {OPT_KeyConfig, "Next Item", nullptr, 0, &key_inventory_next, nullptr, nullptr},
 };
 
 static menuinfo_t inventory_optmenu = {inventory_keyconfig,
@@ -1257,7 +1257,7 @@ static void KeyMenu_Prev()
 //
 // M_OptResponder
 //
-bool M_OptResponder(event_t *ev, int ch)
+bool M_OptResponder(InputEvent *ev, int ch)
 {
     ///--  	if (testticker != -1)
     ///--  		return true;
@@ -1269,7 +1269,7 @@ bool M_OptResponder(event_t *ev, int ch)
     {
         int *blah;
 
-        if (ev->type != ev_keydown)
+        if (ev->type != kInputEventKeyDown)
             return false;
         int key = ev->value.key.sym;
 
@@ -1759,12 +1759,12 @@ static void M_Key2String(int key, char *deststring)
         return;
     }
 
-    strcpy(deststring, E_GetKeyName(key1));
+    strcpy(deststring, EventGetKeyName(key1));
 
     if (key2 != 0)
     {
         strcat(deststring, " or ");
-        strcat(deststring, E_GetKeyName(key2));
+        strcat(deststring, EventGetKeyName(key2));
     }
 }
 

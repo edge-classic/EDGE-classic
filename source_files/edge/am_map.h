@@ -47,7 +47,7 @@ struct AutomapLine
 void AutomapInitLevel(void);
 
 // Called by main loop.
-bool AutomapResponder(event_t *ev);
+bool AutomapResponder(InputEvent *ev);
 
 // Called by main loop.
 void AutomapTicker(void);

@@ -277,12 +277,12 @@ void F_StartFinale(const FinaleDefinition *F, gameaction_e newaction)
     DoStartFinale();
 }
 
-bool F_Responder(event_t *event)
+bool F_Responder(InputEvent *event)
 {
     SYS_ASSERT(gamestate == GS_FINALE);
 
     // FIXME: use WI_CheckAccelerate() in netgames
-    if (event->type != ev_keydown)
+    if (event->type != kInputEventKeyDown)
         return false;
 
     if (finalecount > kTicRate)

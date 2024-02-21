@@ -23,7 +23,7 @@
 //
 //----------------------------------------------------------------------------
 //
-// 1998/07/02 -MH- Added key_flyup and key_flydown
+// 1998/07/02 -MH- Added key_fly_up and key_fly_down
 //
 
 #ifndef __M_MISC__

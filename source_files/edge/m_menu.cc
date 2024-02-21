@@ -2076,7 +2076,7 @@ bool M_Responder(event_t *ev)
         {
         case KEYD_MINUS: // Screen size down
 
-            if (automapactive || chat_on)
+            if (automap_active || chat_on)
                 return false;
 
             screen_hud = (screen_hud - 1 + NUMHUD) % NUMHUD;
@@ -2086,7 +2086,7 @@ bool M_Responder(event_t *ev)
 
         case KEYD_EQUALS: // Screen size up
 
-            if (automapactive || chat_on)
+            if (automap_active || chat_on)
                 return false;
 
             screen_hud = (screen_hud + 1) % NUMHUD;

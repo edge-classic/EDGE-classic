@@ -137,7 +137,7 @@ extern cvar_c v_sync;
 extern cvar_c g_bobbing;
 extern cvar_c g_gore;
 
-// extern cvar_c am_keydoortext;
+// extern cvar_c automap_keydoor_text;
 
 extern cvar_c v_secbright;
 extern cvar_c v_gamma;
@@ -406,7 +406,7 @@ static optmenuitem_t vidoptions[] = {
     {OPT_Switch, "Crosshair Color", CrosshairColor, 8, &r_crosscolor.d, M_UpdateCVARFromInt, nullptr, &r_crosscolor},
     {OPT_FracSlider, "Crosshair Size", nullptr, 0, &r_crosssize.f, M_UpdateCVARFromFloat, nullptr, &r_crosssize, 1.0f, 2.0f,
      64.0f, "%g Pixels"},
-    {OPT_Boolean, "Map Rotation", YesNo, 2, &rotatemap, nullptr, nullptr},
+    {OPT_Boolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr, nullptr},
     {OPT_Switch, "Invulnerability", Invuls, NUM_INVULFX, &var_invul_fx, nullptr, nullptr},
 #ifndef EDGE_WEB
     {OPT_Switch, "Wipe method", WIPE_EnumStr, WIPE_NUMWIPES, &wipe_method, nullptr, nullptr},
@@ -611,9 +611,9 @@ static optmenuitem_t accessibilityoptions[] = {
     {OPT_Switch, "View Bobbing", "Full/Head Only/Weapon Only/None", 4, &g_bobbing.d, M_ChangeBobbing,
      "May help with motion sickness"},
     {OPT_Switch, "Reduce Flashing", YesNo, 2, &reduce_flash, nullptr, "May help with epilepsy or photosensitivity"},
-    {OPT_Boolean, "Automap: Keyed Doors Pulse", YesNo, 2, &am_keydoorblink, nullptr, "Can help locate doors more easily"},
-    {OPT_Switch, "Automap: Keyed Doors Overlay", "Nothing/Text/Graphic", 3, &am_keydoortext.d, M_UpdateCVARFromInt,
-     "Required key shown visually", &am_keydoortext},
+    {OPT_Boolean, "Automap: Keyed Doors Pulse", YesNo, 2, &automap_keydoor_blink, nullptr, "Can help locate doors more easily"},
+    {OPT_Switch, "Automap: Keyed Doors Overlay", "Nothing/Text/Graphic", 3, &automap_keydoor_text.d, M_UpdateCVARFromInt,
+     "Required key shown visually", &automap_keydoor_text},
 };
 
 static menuinfo_t accessibility_optmenu = {
@@ -723,17 +723,17 @@ static menuinfo_t weapon_optmenu = {
 //  KEY CONFIG : AUTOMAP
 //
 static optmenuitem_t automap_keyconfig[] = {
-    {OPT_KeyConfig, "Pan Up", nullptr, 0, &key_am_up, nullptr, nullptr},
-    {OPT_KeyConfig, "Pan Down", nullptr, 0, &key_am_down, nullptr, nullptr},
-    {OPT_KeyConfig, "Pan Left", nullptr, 0, &key_am_left, nullptr, nullptr},
-    {OPT_KeyConfig, "Pan Right", nullptr, 0, &key_am_right, nullptr, nullptr},
+    {OPT_KeyConfig, "Pan Up", nullptr, 0, &key_automap_up, nullptr, nullptr},
+    {OPT_KeyConfig, "Pan Down", nullptr, 0, &key_automap_down, nullptr, nullptr},
+    {OPT_KeyConfig, "Pan Left", nullptr, 0, &key_automap_left, nullptr, nullptr},
+    {OPT_KeyConfig, "Pan Right", nullptr, 0, &key_automap_right, nullptr, nullptr},
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {OPT_KeyConfig, "Follow Mode", nullptr, 0, &key_am_follow, nullptr, nullptr},
-    {OPT_KeyConfig, "Show Grid", nullptr, 0, &key_am_grid, nullptr, nullptr},
-    {OPT_KeyConfig, "Zoom In", nullptr, 0, &key_am_zoomin, nullptr, nullptr},
-    {OPT_KeyConfig, "Zoom Out", nullptr, 0, &key_am_zoomout, nullptr, nullptr},
-    {OPT_KeyConfig, "Add Mark", nullptr, 0, &key_am_mark, nullptr, nullptr},
-    {OPT_KeyConfig, "Clear Marks", nullptr, 0, &key_am_clear, nullptr, nullptr},
+    {OPT_KeyConfig, "Follow Mode", nullptr, 0, &key_automap_follow, nullptr, nullptr},
+    {OPT_KeyConfig, "Show Grid", nullptr, 0, &key_automap_grid, nullptr, nullptr},
+    {OPT_KeyConfig, "Zoom In", nullptr, 0, &key_automap_zoom_in, nullptr, nullptr},
+    {OPT_KeyConfig, "Zoom Out", nullptr, 0, &key_automap_zoom_out, nullptr, nullptr},
+    {OPT_KeyConfig, "Add Mark", nullptr, 0, &key_automap_mark, nullptr, nullptr},
+    {OPT_KeyConfig, "Clear Marks", nullptr, 0, &key_automap_clear, nullptr, nullptr},
 };
 
 static menuinfo_t automap_optmenu = {automap_keyconfig,

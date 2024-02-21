@@ -252,7 +252,7 @@ void F_StartFinale(const FinaleDefinition *F, gameaction_e newaction)
     SYS_ASSERT(F);
 
     newgameaction = newaction;
-    automapactive = false;
+    automap_active = false;
 
     finalestage_e stage = FindValidFinale(F, f_text);
 

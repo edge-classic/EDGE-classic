@@ -36,7 +36,7 @@
 #include "hu_draw.h"
 #include "r_misc.h"
 #include "r_modes.h"
-#include "am_map.h" // AM_Drawer
+#include "am_map.h" // AutomapDrawer
 #include "r_colormap.h"
 #include "s_sound.h"
 #include "rad_trig.h" //Lobo: need this to access RTS
@@ -175,7 +175,7 @@ static void HD_check_automap(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnFloat(automapactive ? 1 : 0);
+    vm->ReturnFloat(automap_active ? 1 : 0);
 }
 
 // hud.get_time()
@@ -625,7 +625,7 @@ static void HD_render_automap(coal::vm_c *vm, int argc)
     int   old_state;
     float old_zoom;
 
-    AM_GetState(&old_state, &old_zoom);
+    AutomapGetState(&old_state, &old_zoom);
 
     int new_state = old_state;
     new_state &= ~ui_hud_automap_flags[0];
@@ -635,11 +635,11 @@ static void HD_render_automap(coal::vm_c *vm, int argc)
     if (ui_hud_automap_zoom > 0.1)
         new_zoom = ui_hud_automap_zoom;
 
-    AM_SetState(new_state, new_zoom);
+    AutomapSetState(new_state, new_zoom);
 
     HUD_RenderAutomap(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
 
-    AM_SetState(old_state, old_zoom);
+    AutomapSetState(old_state, old_zoom);
 }
 
 // hud.automap_color(which, color)
@@ -650,14 +650,14 @@ static void HD_automap_color(coal::vm_c *vm, int argc)
 
     int which = (int)*vm->AccessParam(0);
 
-    if (which < 1 || which > AM_NUM_COLORS)
+    if (which < 1 || which > kTotalAutomapColors)
         I_Error("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
     RGBAColor rgb = VM_VectorToColor(vm->AccessParam(1));
 
-    AM_SetColor(which, rgb);
+    AutomapSetColor(which, rgb);
 }
 
 // hud.automap_option(which, value)
@@ -700,7 +700,7 @@ static void HD_automap_player_arrow(coal::vm_c *vm, int argc)
 
     int arrow = (int)*vm->AccessParam(0);
 
-    AM_SetArrow((automap_arrow_e)arrow);
+    AutomapSetArrow((AutomapArrowStyle)arrow);
 }
 
 // hud.set_render_who(index)

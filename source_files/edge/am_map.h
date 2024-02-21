@@ -23,100 +23,88 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __AMMAP_H__
-#define __AMMAP_H__
+#pragma once
 
-#include "types.h"
-
-#include "dm_defs.h"
+#include "con_var.h"
 #include "e_event.h"
 #include "p_mobj.h"
 
-extern bool   automapactive;
-extern bool   rotatemap;
-extern bool   am_keydoorblink;
-extern cvar_c am_keydoortext;
+extern bool   automap_active;
+extern bool   rotate_map;
+extern bool   automap_keydoor_blink;
+extern cvar_c automap_keydoor_text;
 
-//
-// Automap drawing structs
-//
-typedef struct
+struct AutomapPoint
 {
     float x, y;
-} mpoint_t;
+};
 
-typedef struct
+struct AutomapLine
 {
-    mpoint_t a, b;
-} mline_t;
+    AutomapPoint a, b;
+};
 
-void AM_InitLevel(void);
-
-// Called by main loop.
-bool AM_Responder(event_t *ev);
+void AutomapInitLevel(void);
 
 // Called by main loop.
-void AM_Ticker(void);
+bool AutomapResponder(event_t *ev);
+
+// Called by main loop.
+void AutomapTicker(void);
 
 // Called to draw the automap on the screen.
-void AM_Render(float x, float y, float w, float h, mobj_t *focus);
+void AutomapRender(float x, float y, float w, float h, mobj_t *focus);
 
 // Called to force the automap to quit
 // if the level is completed while it is up.
-void AM_Stop(void);
+void AutomapStop(void);
 
 // color setting API
 
 // NOTE: these numbers here must match the COAL API script
-typedef enum
+enum AutomapColor
 {
-    AMCOL_Grid = 0,
+    kAutomapColorGrid = 0,
+    kAutomapColorAllmap,
+    kAutomapColorWall,
+    kAutomapColorStep,
+    kAutomapColorLedge,
+    kAutomapColorCeil,
+    kAutomapColorSecret,
+    kAutomapColorPlayer,
+    kAutomapColorMonster,
+    kAutomapColorCorpse,
+    kAutomapColorItem,
+    kAutomapColorMissile,
+    kAutomapColorScenery,
+    kTotalAutomapColors
+};
 
-    AMCOL_Allmap,
-    AMCOL_Wall,
-    AMCOL_Step,
-    AMCOL_Ledge,
-    AMCOL_Ceil,
-    AMCOL_Secret,
-
-    AMCOL_Player,
-    AMCOL_Monster,
-    AMCOL_Corpse,
-    AMCOL_Item,
-    AMCOL_Missile,
-    AMCOL_Scenery,
-
-    AM_NUM_COLORS
-} automap_color_e;
-
-void AM_SetColor(int which, RGBAColor color);
+void AutomapSetColor(int which, RGBAColor color);
 
 // NOTE: the bit numbers here must match the COAL API script
-typedef enum
+enum AutomapState
 {
-    AMST_Grid      = (1 << 0), // draw the grid
-    AMST_Follow    = (1 << 4), // follow the player
-    AMST_Rotate    = (1 << 5), // rotate the map (disables grid)
-    AMST_HideLines = (1 << 6), // turn off all line drawing
+    kAutomapStateGrid      = (1 << 0),  // draw the grid
+    kAutomapStateFollow    = (1 << 4),  // follow the player
+    kAutomapStateRotate    = (1 << 5),  // rotate the map (disables grid)
+    kAutomapStateHideLines = (1 << 6),  // turn off all line drawing
+    kAutomapStateThings    = (1 << 3),  // draw all objects
+    kAutomapStateWalls     = (1 << 2),  // draw all walls (like IDDT)
+    kAutomapStateAllmap    = (1 << 1),  // draw like Allmap powerup
+};
 
-    AMST_Things = (1 << 3), // draw all objects
-    AMST_Walls  = (1 << 2), // draw all walls (like IDDT)
-    AMST_Allmap = (1 << 1), // draw like Allmap powerup
-} automap_state_e;
-
-typedef enum
+enum AutomapArrowStyle
 {
-    AMARW_DOOM,
-    AMARW_HERETIC,
-    AMARW_NUMTYPES
-} automap_arrow_e;
+    kAutomapArrowStyleDoom,
+    kAutomapArrowStyleHeretic,
+    kTotalAutomapArrowStyles
+};
 
-void AM_SetArrow(automap_arrow_e type);
+void AutomapSetArrow(AutomapArrowStyle type);
 
-void AM_GetState(int *state, float *zoom);
-void AM_SetState(int state, float zoom);
-
-#endif /* __AMMAP_H__ */
+void AutomapGetState(int *state, float *zoom);
+void AutomapSetState(int state, float zoom);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

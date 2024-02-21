@@ -1326,7 +1326,7 @@ void HUD_RenderAutomap(float x, float y, float w, float h, mobj_t *player, int f
         }
     }
 
-    AM_Render(x, y, w, h, player);
+    AutomapRender(x, y, w, h, player);
 
     HUD_PopScissor();
 }

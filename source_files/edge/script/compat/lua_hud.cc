@@ -137,7 +137,7 @@ static int HD_which_hud(lua_State *L)
 //
 static int HD_check_automap(lua_State *L)
 {
-    lua_pushboolean(L, automapactive ? 1 : 0);
+    lua_pushboolean(L, automap_active ? 1 : 0);
     return 1;
 }
 
@@ -579,7 +579,7 @@ static int HD_render_automap(lua_State *L)
     int   old_state;
     float old_zoom;
 
-    AM_GetState(&old_state, &old_zoom);
+    AutomapGetState(&old_state, &old_zoom);
 
     int new_state = old_state;
     new_state &= ~ui_hud_automap_flags[0];
@@ -589,11 +589,11 @@ static int HD_render_automap(lua_State *L)
     if (ui_hud_automap_zoom > 0.1)
         new_zoom = ui_hud_automap_zoom;
 
-    AM_SetState(new_state, new_zoom);
+    AutomapSetState(new_state, new_zoom);
 
     HUD_RenderAutomap(x, y, w, h, ui_hud_who->mo, flags);
 
-    AM_SetState(old_state, old_zoom);
+    AutomapSetState(old_state, old_zoom);
 
     return 0;
 }
@@ -604,14 +604,14 @@ static int HD_automap_color(lua_State *L)
 {
     int which = (int)luaL_checknumber(L, 1);
 
-    if (which < 1 || which > AM_NUM_COLORS)
+    if (which < 1 || which > kTotalAutomapColors)
         I_Error("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
     RGBAColor rgb = HD_VectorToColor(LUA_CheckVector3(L, 2));
 
-    AM_SetColor(which, rgb);
+    AutomapSetColor(which, rgb);
 
     return 0;
 }
@@ -654,7 +654,7 @@ static int HD_automap_player_arrow(lua_State *L)
 {
     int arrow = (int)luaL_checknumber(L, 1);
 
-    AM_SetArrow((automap_arrow_e)arrow);
+    AutomapSetArrow((AutomapArrowStyle)arrow);
 
     return 0;
 }

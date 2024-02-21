@@ -108,18 +108,18 @@ extern int key_action2; // -AJA- 2009/09/07
 // -AJA- 2010/06/13: weapon and automap stuff
 extern int key_weapons[10];
 
-extern int key_am_up;
-extern int key_am_down;
-extern int key_am_left;
-extern int key_am_right;
+extern int key_automap_up;
+extern int key_automap_down;
+extern int key_automap_left;
+extern int key_automap_right;
 
-extern int key_am_zoomin;
-extern int key_am_zoomout;
+extern int key_automap_zoom_in;
+extern int key_automap_zoom_out;
 
-extern int key_am_follow;
-extern int key_am_grid;
-extern int key_am_mark;
-extern int key_am_clear;
+extern int key_automap_follow;
+extern int key_automap_grid;
+extern int key_automap_mark;
+extern int key_automap_clear;
 
 // Dasho: Inventory handling
 extern int key_inv_prev;

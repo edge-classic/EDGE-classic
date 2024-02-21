@@ -1028,7 +1028,7 @@ static void RAD_MenuDrawer(void)
 
 void RAD_Drawer(void)
 {
-    if (!automapactive)
+    if (!automap_active)
         RAD_DisplayTips();
 
     if (rts_menuactive)

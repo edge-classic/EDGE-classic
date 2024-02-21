@@ -3737,7 +3737,7 @@ void P_SetupLevel(void)
 
     P_SpawnSpecials2(currmap->autotag_);
 
-    AM_InitLevel();
+    AutomapInitLevel();
 
     RGL_UpdateSkyBoxTextures();
 

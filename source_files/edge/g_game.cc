@@ -370,7 +370,7 @@ bool G_Responder(event_t *ev)
         if (RAD_Responder(ev))
             return true; // RTS system ate it
 
-        if (AM_Responder(ev))
+        if (AutomapResponder(ev))
             return true; // automap ate it
 
         if (HU_Responder(ev))
@@ -512,7 +512,7 @@ void G_Ticker(void)
         N_GrabTiccmds();
 
         P_Ticker(false);
-        AM_Ticker();
+        AutomapTicker();
         HU_Ticker();
         RAD_Ticker();
 
@@ -673,15 +673,15 @@ static void G_DoCompleted(void)
         G_PlayerFinishLevel(p, exit_hub_tag > 0);
     }
 
-    if (automapactive)
-        AM_Stop();
+    if (automap_active)
+        AutomapStop();
 
     if (rts_menuactive)
         RAD_FinishMenu(0);
 
     BOT_EndLevel();
 
-    automapactive = false;
+    automap_active = false;
 
     // handle "no stat" levels
     if (currmap->wistyle_ == kIntermissionStyleNone || exit_skipall)
@@ -772,7 +772,7 @@ static bool G_LoadGameFromFile(std::string filename, bool is_hub)
             I_Error("LOAD-HUB: No such map %s !  Check WADS\n", globs->level);
 
         G_SetDisplayPlayer(consoleplayer);
-        automapactive = false;
+        automap_active = false;
 
         N_ResetTics();
     }
@@ -1182,7 +1182,7 @@ static void InitNew(newgame_params_c &params)
 
     P_WriteRandomState(params.random_seed);
 
-    automapactive = false;
+    automap_active = false;
 
     gameskill  = params.skill;
     deathmatch = params.deathmatch;

@@ -1109,8 +1109,8 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool
         P_DropWeapon(target->player);
 
         // don't die in auto map, switch view prior to dying
-        if (target->player == players[consoleplayer] && automapactive)
-            AM_Stop();
+        if (target->player == players[consoleplayer] && automap_active)
+            AutomapStop();
 
         // don't immediately restart when USE key was pressed
         if (target->player == players[consoleplayer])

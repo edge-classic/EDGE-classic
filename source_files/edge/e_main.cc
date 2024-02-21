@@ -377,7 +377,7 @@ static void SetGlobalVars(void)
     }
 
     // -AJA- 1999/10/18: Reworked these with argv::CheckBooleanParm
-    argv::CheckBooleanParm("rotatemap", &rotatemap, false);
+    argv::CheckBooleanParm("rotate_map", &rotate_map, false);
     argv::CheckBooleanParm("sound", &nosound, true);
     argv::CheckBooleanParm("music", &nomusic, true);
     argv::CheckBooleanParm("itemrespawn", &global_flags.itemrespawn, false);
@@ -395,7 +395,7 @@ static void SetGlobalVars(void)
     argv::CheckBooleanParm("weaponswitch", &global_flags.weapon_switch, false);
     argv::CheckBooleanParm("autoload", &autoquickload, false);
 
-    argv::CheckBooleanParm("am_keydoorblink", &am_keydoorblink, false);
+    argv::CheckBooleanParm("automap_keydoor_blink", &automap_keydoor_blink, false);
 
     if (argv::Find("infight") > 0)
         g_aggression = 1;

@@ -26,7 +26,7 @@
 // -KM- 1998/09/27 Dynamic Colourmaps
 //
 
-#include "i_defs.h"
+
 #include "i_defs_gl.h"
 
 #include <math.h>
@@ -38,6 +38,7 @@
 #include "n_network.h"
 #include "p_local.h"
 #include "p_mobj.h"
+#include "r_bsp.h"
 #include "r_colormap.h"
 #include "r_defs.h"
 #include "r_draw.h"

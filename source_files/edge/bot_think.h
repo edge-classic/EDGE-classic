@@ -23,63 +23,63 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __P_BOT_H__
-#define __P_BOT_H__
+#pragma once
 
-#include "types.h"
-#include "p_mobj.h"
 #include "e_ticcmd.h"
+#include "math_bam.h"
+#include "p_mobj.h"
 #include "r_defs.h"
 
-class bot_path_c;
+class BotPath;
 
 // specific tasks which the bot needs/wants to do.
 // these can occur in combination with the behaviors above, e.g. while
 // attacking something a bot may still want to pickup some health or
 // use a lift.
-enum bot_task_e
+enum BotTask
 {
-    TASK_None = 0, // no task right now
-    TASK_GetItem,  // pickup a nearby item (in tracer)
-    TASK_OpenDoor, // open a door
-    TASK_UseLift,  // lower a lift, ride it to top
+    kBotTaskNone = 0,  // no task right now
+    kBotTaskGetItem,   // pickup a nearby item (in tracer)
+    kBotTaskOpenDoor,  // open a door
+    kBotTaskUseLift,   // lower a lift, ride it to top
 };
 
-// stages for TASK_OpenDoor
-enum task_open_door_e
+// stages for kBotTaskOpenDoor
+enum BotOpenDoorTask
 {
-    TKDOOR_Approach = 0, // walk to door and face it
-    TKDOOR_Use      = 1, // press USE button, wait for it to open
+    kBotOpenDoorTaskApproach = 0,  // walk to door and face it
+    kBotOpenDoorTaskUse      = 1,  // press USE button, wait for it to open
 };
 
-// stages for TASK_UseLift
-enum task_use_lift_e
+// stages for kBotTaskUseLift
+enum BotUseLiftTask
 {
-    TKLIFT_Approach = 0, // walk to lift and face it
-    TKLIFT_Use      = 1, // press USE button, wait for it to lower
-    TKLIFT_Ride     = 2, // hop on lift, ride it to the top
+    kBotUseLiftTaskApproach = 0,  // walk to lift and face it
+    kBotUseLiftTaskUse      = 1,  // press USE button, wait for it to lower
+    kBotUseLiftTaskRide     = 2,  // hop on lift, ride it to the top
 };
 
 // results of FollowPath()
-enum bot_follow_path_e
+enum BotFollowPathResult
 {
-    FOLLOW_OK = 0, // going okay...
-    FOLLOW_Done,   // reached end of path
-    FOLLOW_Failed  // got stuck somewhere
+    kBotFollowPathResultOK = 0,  // going okay...
+    kBotFollowPathResultDone,    // reached end of path
+    kBotFollowPathResultFailed   // got stuck somewhere
 };
 
 // This describes what action the bot wants to do.
-// It will be translated to a ticcmd_t by P_BotPlayerBuilder.
+// It will be translated to a TicCommand by P_BotPlayerBuilder.
 
-struct botcmd_t
+struct BotCommand
 {
     // desired movement
-    int     speed;
+    int      speed;
     BAMAngle direction;
 
     // buttons
     bool attack;
     bool attack2;
+    // Add attack3/4? - Dasho
     bool use;
     bool jump;
 
@@ -87,73 +87,73 @@ struct botcmd_t
     int weapon;
 };
 
-class bot_t
+class DeathBot
 {
-  public:
-    struct player_s *pl = nullptr;
+   public:
+    struct player_s *pl_ = nullptr;
 
-    bot_task_e task = TASK_None;
+    BotTask task_ = kBotTaskNone;
 
-    BAMAngle look_angle = 0;
-    float   look_slope = 0;
+    BAMAngle look_angle_ = 0;
+    float    look_slope_ = 0;
 
     // 0 = go straight, -1 = left, +1 = right
-    int weave      = 0;
-    int weave_time = 0;
+    int weave_      = 0;
+    int weave_time_ = 0;
 
     // 0 = no strafing, -1 = left, +1 = right.  only used when fighting.
-    int strafe_dir  = 0;
-    int strafe_time = 0;
+    int strafe_dir_  = 0;
+    int strafe_time_ = 0;
 
     // we lose patience for every tic which we cannot see our target
-    int     patience    = 0;
-    bool    see_enemy   = false;
-    BAMAngle enemy_angle = 0;
-    float   enemy_slope = 0;
-    float   enemy_dist  = 0;
+    int      patience_    = 0;
+    bool     see_enemy_   = false;
+    BAMAngle enemy_angle_ = 0;
+    float    enemy_slope_ = 0;
+    float    enemy_dist_  = 0;
 
-    int dead_time   = 0; // increases when dead
-    int look_time   = 0; // when to look for items
-    int weapon_time = 0; // when to reconsider weapons
+    int dead_time_   = 0;  // increases when dead
+    int look_time_   = 0;  // when to look for items
+    int weapon_time_ = 0;  // when to reconsider weapons
 
     // last position, to check if we actually moved
-    float last_x       = 0;
-    float last_y       = 0;
-    bool  hit_obstacle = false;
-    bool  near_leader  = false;
+    float last_x_       = 0;
+    float last_y_       = 0;
+    bool  hit_obstacle_ = false;
+    bool  near_leader_  = false;
 
     // -- pathing info --
     // used for DM roaming, COOP follow-the-leader, and getting items.
     // main_goal is final target.  travel_time detects losing the path.
     // path_wait is when we need a path, but are waiting a bit.
-    bot_path_c *path = nullptr;
-    position_c  roam_goal{0, 0, 0};
-    int         travel_time = 0;
-    int         path_wait   = 0;
+    BotPath   *path_ = nullptr;
+    position_c roam_goal_{0, 0, 0};
+    int        travel_time_ = 0;
+    int        path_wait_   = 0;
 
-    // information for TASK_GetItem (+ the pathing info)
-    int item_time = 0;
+    // information for kBotTaskGetItem (+ the pathing info)
+    int item_time_ = 0;
 
-    // information for TASK_OpenDoor
-    int          door_stage = 0;
-    int          door_time  = 0;
-    const seg_t *door_seg   = nullptr;
+    // information for kBotTaskOpenDoor
+    int          door_stage_ = 0;
+    int          door_time_  = 0;
+    const seg_t *door_seg_   = nullptr;
 
-    // information for TASK_UseLift
-    int          lift_stage = 0;
-    int          lift_time  = 0;
-    const seg_t *lift_seg   = nullptr;
+    // information for kBotTaskUseLift
+    int          lift_stage_ = 0;
+    int          lift_time_  = 0;
+    const seg_t *lift_seg_   = nullptr;
 
-    botcmd_t cmd;
+    BotCommand cmd_;
 
-  public:
+   public:
     void Think();
     void DeathThink();
     void ConvertTiccmd(ticcmd_t *dest);
     void Respawn();
     void EndLevel();
 
-  private:
+   private:
     float DistTo(position_c pos) const;
 
     void  SelectWeapon();
@@ -171,9 +171,9 @@ class bot_t
     void Strafe(bool right);
     void StrafeAroundEnemy();
 
-    bot_follow_path_e FollowPath(bool do_look);
-    void              DetectObstacle();
-    void              Meander();
+    BotFollowPathResult FollowPath(bool do_look);
+    void                DetectObstacle();
+    void                Meander();
 
     void LookAround();
     void LookForEnemies(float radius);
@@ -186,12 +186,12 @@ class bot_t
 
     bool IsBarrel(const mobj_t *mo);
 
-    void Think_Roam();
-    void Think_Help();
-    void Think_Fight();
-    void Think_GetItem();
-    void Think_OpenDoor();
-    void Think_UseLift();
+    void ThinkRoam();
+    void ThinkHelp();
+    void ThinkFight();
+    void ThinkGetItem();
+    void ThinkOpenDoor();
+    void ThinkUseLift();
 
     void PainResponse();
     void FinishGetItem();
@@ -203,17 +203,15 @@ class bot_t
 
     void DeletePath();
 
-  public:
+   public:
     float EvalItem(const mobj_t *mo);
     float EvalEnemy(const mobj_t *mo);
 };
 
 void P_BotCreate(struct player_s *pl, bool recreate);
 
-void BOT_BeginLevel(void);
-void BOT_EndLevel(void);
-
-#endif // __P_BOT_H__
+void BotBeginLevel(void);
+void BotEndLevel(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

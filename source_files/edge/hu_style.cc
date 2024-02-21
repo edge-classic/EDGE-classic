@@ -16,13 +16,12 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 #include "hu_style.h"
 #include "hu_draw.h"
 
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "r_local.h"
 #include "r_colormap.h"
 #include "r_draw.h"
 #include "r_modes.h"

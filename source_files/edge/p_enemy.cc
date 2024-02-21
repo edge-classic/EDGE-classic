@@ -29,7 +29,7 @@
 //       and removed some X_Random()-X_Random() things.
 //
 
-#include "i_defs.h"
+
 
 #include "dm_data.h"
 #include "dm_state.h"
@@ -37,6 +37,7 @@
 #include "m_random.h"
 #include "p_action.h"
 #include "p_local.h"
+#include "r_misc.h"
 #include "s_sound.h"
 #include "w_wad.h"
 

@@ -26,7 +26,7 @@
 // -KM- 1998/09/27 Lights generalised for ddf
 //
 
-#include "i_defs.h"
+
 
 #include <list>
 #include <vector>

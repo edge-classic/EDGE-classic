@@ -18,8 +18,6 @@
 
 #include <string.h>
 
-#include "i_defs.h"
-
 #include "con_var.h"
 #include "con_main.h"
 

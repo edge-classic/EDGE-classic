@@ -19,6 +19,8 @@
 #ifndef __DM_STRUCTS_H__
 #define __DM_STRUCTS_H__
 
+#include <stdint.h>
+
 /* ----- The wad structures ---------------------- */
 
 // wad header

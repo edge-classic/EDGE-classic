@@ -19,7 +19,7 @@
 #ifndef __RAD_PLAYER_H__
 #define __RAD_PLAYER_H__
 
-#include "i_defs.h"
+
 
 #include "sound_data.h"
 

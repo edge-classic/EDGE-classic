@@ -16,7 +16,12 @@
 //
 //----------------------------------------------------------------------------
 
+#pragma once
+
 #include "epi_sdl.h"
+
+#include <string>
+#include <vector>
 
 extern std::vector<std::string> available_soundfonts;
 

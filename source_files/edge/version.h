@@ -16,6 +16,10 @@
 //
 //----------------------------------------------------------------------------
 
+#pragma once
+
+#include "con_var.h"
+
 extern cvar_c windowtitle;
 extern cvar_c edgeversion;
 extern cvar_c appname;

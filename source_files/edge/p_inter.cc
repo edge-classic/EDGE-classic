@@ -23,7 +23,7 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 
 #include "am_map.h"
 #include "con_main.h"
@@ -34,6 +34,7 @@
 #include "m_random.h"
 #include "p_local.h"
 #include "rad_trig.h"
+#include "r_misc.h"
 #include "s_sound.h"
 #include "str_util.h"
 

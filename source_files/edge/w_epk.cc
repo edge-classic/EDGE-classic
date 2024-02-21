@@ -16,7 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 #include "l_deh.h"
 #include "r_image.h"
 #include "w_files.h"

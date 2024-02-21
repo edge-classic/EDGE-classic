@@ -35,7 +35,7 @@
 #ifndef __SV_MAIN_H__
 #define __SV_MAIN_H__
 
-#include "i_defs.h"
+
 
 #include "dm_defs.h"
 #include "e_player.h"

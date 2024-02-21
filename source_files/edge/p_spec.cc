@@ -27,7 +27,7 @@
 //
 //
 
-#include "i_defs.h"
+
 
 #include <limits.h>
 
@@ -42,6 +42,7 @@
 #include "p_local.h"
 #include "p_spec.h"
 #include "rad_trig.h"
+#include "r_misc.h"
 #include "s_blit.h"
 #include "s_sound.h"
 #include "s_music.h"

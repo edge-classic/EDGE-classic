@@ -23,7 +23,7 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 
 #include <map>
 #include <unordered_map>
@@ -42,6 +42,7 @@
 #include "dm_structs.h"
 #include "e_main.h"
 #include "g_game.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_bbox.h"
 #include "m_math.h"
@@ -50,7 +51,9 @@
 #include "p_local.h"
 #include "p_setup.h"
 #include "am_map.h"
+#include "r_bsp.h"
 #include "r_gldefs.h"
+#include "r_misc.h"
 #include "r_sky.h"
 #include "s_sound.h"
 #include "s_music.h"

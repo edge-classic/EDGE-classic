@@ -29,7 +29,7 @@
 //
 // -ES- 2000/02/14: Removed thinker system.
 
-#include "i_defs.h"
+
 #include "p_tick.h"
 
 #include "dm_state.h"

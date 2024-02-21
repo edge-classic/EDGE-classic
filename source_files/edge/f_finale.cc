@@ -28,7 +28,7 @@
 // -KM- 1998/11/25 Finale generalised.
 //
 
-#include "i_defs.h"
+
 #include "i_defs_gl.h"
 
 #include "main.h"

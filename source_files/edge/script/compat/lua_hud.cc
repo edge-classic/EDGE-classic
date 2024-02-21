@@ -1,5 +1,5 @@
 
-#include "i_defs.h"
+#include "i_system.h"
 #include "e_player.h"
 #include "hu_draw.h"
 #include "dm_state.h"

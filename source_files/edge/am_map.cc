@@ -35,7 +35,6 @@
 #include "e_input.h"
 #include "hu_draw.h"
 #include "hu_style.h"
-#include "i_defs.h"
 #include "i_defs_gl.h"
 #include "m_argv.h"
 #include "m_bbox.h"
@@ -43,8 +42,10 @@
 #include "m_misc.h"
 #include "n_network.h"
 #include "p_local.h"
+#include "r_bsp.h"
 #include "r_colormap.h"
 #include "r_draw.h"
+#include "r_gldefs.h"
 #include "r_modes.h"
 #include "str_compare.h"
 

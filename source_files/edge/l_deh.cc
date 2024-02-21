@@ -23,8 +23,10 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 #include "l_deh.h"
+
+#include "con_var.h"
 
 // EPI
 #include "file.h"

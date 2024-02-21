@@ -39,17 +39,19 @@
 // -AJA- 1999/08/08: Replaced some P_Random()-P_Random() stuff.
 //
 
-#include "i_defs.h"
+
 #include "p_action.h"
 
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "g_game.h"
+#include "i_system.h"
 #include "m_misc.h"
 #include "m_random.h"
 #include "p_local.h"
 #include "p_weapon.h"
+#include "r_misc.h"
 #include "r_state.h"
 #include "rad_trig.h"
 #include "s_sound.h"

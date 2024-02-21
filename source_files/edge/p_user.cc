@@ -23,7 +23,7 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 
 #include <float.h>
 
@@ -32,11 +32,13 @@
 #include "dm_state.h"
 #include "e_input.h"
 #include "g_game.h"
+#include "i_system.h"
 #include "m_random.h"
 #include "n_network.h"
 #include "bot_think.h"
 #include "p_local.h"
 #include "rad_trig.h"
+#include "r_misc.h"
 #include "s_blit.h"
 #include "s_sound.h"
 

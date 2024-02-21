@@ -29,6 +29,7 @@
 #ifndef __R_MAIN_H__
 #define __R_MAIN_H__
 
+#include "con_var.h"
 #include "w_flat.h"
 #include "r_defs.h"
 

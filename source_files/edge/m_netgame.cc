@@ -23,7 +23,7 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 
 #include "main.h"
 #include "font.h"
@@ -45,7 +45,6 @@
 #include "m_netgame.h"
 #include "n_network.h"
 #include "p_setup.h"
-#include "r_local.h"
 #include "s_sound.h"
 #include "sv_chunk.h"
 #include "sv_main.h"

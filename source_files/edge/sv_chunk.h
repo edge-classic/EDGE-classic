@@ -29,7 +29,7 @@
 #ifndef __SV_CHUNK_H__
 #define __SV_CHUNK_H__
 
-#include "i_defs.h"
+
 #include "p_local.h"
 
 #define DATA_END_MARKER "ENDE"

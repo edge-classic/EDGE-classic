@@ -26,6 +26,7 @@
 #ifndef __RGL_DEFS__
 #define __RGL_DEFS__
 
+#include "con_var.h"
 #include "main.h"
 #include "image.h"
 

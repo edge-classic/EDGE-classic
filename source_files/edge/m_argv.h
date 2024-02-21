@@ -24,6 +24,8 @@
 #include <string>
 #include <vector>
 
+#include "con_var.h"
+
 namespace argv
 {
 

@@ -32,6 +32,7 @@
 #ifndef __P_MOBJ_H__
 #define __P_MOBJ_H__
 
+#include "con_var.h"
 #include "types.h"
 #include "m_math.h"
 

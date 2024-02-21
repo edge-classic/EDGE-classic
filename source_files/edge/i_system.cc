@@ -16,7 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 #include "epi_sdl.h"
 #include "epi_windows.h"
 
@@ -26,6 +26,7 @@
 #include "con_main.h"
 #include "dm_defs.h"
 #include "e_main.h"
+#include "i_system.h"
 #include "g_game.h"
 #include "m_argv.h"
 #include "m_menu.h"

@@ -26,6 +26,8 @@
 #ifndef __P_BLOCKMAP_H__
 #define __P_BLOCKMAP_H__
 
+#include "r_defs.h"
+
 // mapblocks are used to check movement
 // against lines and things
 #define BLOCKMAP_UNIT 128

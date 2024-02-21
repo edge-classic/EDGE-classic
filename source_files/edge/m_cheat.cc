@@ -35,13 +35,14 @@
 // -ACB- 1999/09/19 CD Audio cheats removed.
 //
 
-#include "i_defs.h"
+
 #include "m_cheat.h"
 
 #include "con_main.h"
 #include "main.h"
 #include "dstrings.h"
 #include "g_game.h"
+#include "i_system.h"
 #include "m_menu.h"
 #include "s_sound.h"
 #include "s_music.h"

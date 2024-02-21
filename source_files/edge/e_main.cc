@@ -31,11 +31,12 @@
 // -MH- 1998/08/19 added up/down movement variables
 //
 
-#include "i_defs.h"
+
 #include "epi_sdl.h"
 #include "e_main.h"
 #include "i_defs_gl.h"
 #include "i_movie.h"
+#include "i_system.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -69,9 +70,9 @@
 #include "n_network.h"
 #include "p_setup.h"
 #include "p_spec.h"
-#include "r_local.h"
 #include "rad_trig.h"
 #include "r_gldefs.h"
+#include "r_misc.h"
 #include "r_wipe.h"
 #include "s_sound.h"
 #include "s_music.h"

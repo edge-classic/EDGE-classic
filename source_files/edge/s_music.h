@@ -26,6 +26,8 @@
 #ifndef __S_MUSIC_H__
 #define __S_MUSIC_H__
 
+#include "con_var.h"
+
 /* abstract base class */
 class abstract_music_c
 {

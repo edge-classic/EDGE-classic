@@ -23,11 +23,12 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 #include "epi_sdl.h"
 
 #include <list>
 
+#include "i_system.h"
 #include "m_misc.h"
 #include "r_misc.h"  // R_PointToAngle
 #include "p_local.h" // P_ApproxDistance

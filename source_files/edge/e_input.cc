@@ -27,9 +27,10 @@
 // -MH- 1998/08/18 Flyup and flydown logic
 //
 
-#include "i_defs.h"
+
 #include "epi_sdl.h"
 
+#include "con_var.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_event.h"

@@ -33,11 +33,12 @@
 //   -  Button off_sound field.
 //
 
-#include "i_defs.h"
+
 
 #include "str_util.h"
 
 #include "rad_trig.h"
+#include "r_misc.h"
 #include "sv_chunk.h"
 #include "sv_main.h"
 

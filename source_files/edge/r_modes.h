@@ -29,7 +29,7 @@
 #ifndef __VIDEORES_H__
 #define __VIDEORES_H__
 
-#include "i_defs.h"
+#include "con_var.h"
 
 // Macros
 #define FROM_320(x) ((x) * SCREENWIDTH / 320)

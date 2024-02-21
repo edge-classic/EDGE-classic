@@ -19,7 +19,7 @@
 // -AJA- 2000/10/09: Began work on this new unit system.
 //
 
-#include "i_defs.h"
+
 #include "i_defs_gl.h"
 
 #include <vector>

@@ -27,7 +27,7 @@
 #define __R_STATE_H__
 
 // Need data structure definitions.
-#include "i_defs.h"
+
 #include "w_flat.h"
 #include "m_math.h"
 #include "r_defs.h"

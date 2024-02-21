@@ -16,7 +16,7 @@
 //
 //------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 
 #include "coal.h"
 
@@ -34,6 +34,7 @@
 #include "e_player.h"
 #include "hu_font.h"
 #include "hu_draw.h"
+#include "r_misc.h"
 #include "r_modes.h"
 #include "r_image.h"
 #include "r_sky.h"

@@ -32,7 +32,7 @@
 // -AJA- 2000/01/04: Split off parsing code into rad_pars.c.
 //
 
-#include "i_defs.h"
+
 
 #include "file.h"
 #include "filesystem.h"
@@ -55,6 +55,7 @@
 #include "rad_trig.h"
 #include "rad_act.h"
 #include "r_defs.h"
+#include "r_misc.h"
 #include "am_map.h"
 #include "r_colormap.h"
 #include "r_draw.h"

@@ -35,7 +35,7 @@
 //   + make gap routines I_Error if overflow limit.
 //
 
-#include "i_defs.h"
+
 
 #include <float.h>
 
@@ -48,6 +48,7 @@
 #include "m_bbox.h"
 #include "p_local.h"
 #include "p_spec.h"
+#include "r_bsp.h"
 #include "r_state.h"
 
 #include "AlmostEquals.h"

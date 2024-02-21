@@ -19,7 +19,7 @@
 #ifndef __S_OPL_H__
 #define __S_OPL_H__
 
-#include "i_defs.h"
+#include "s_music.h"
 
 extern bool opl_disabled;
 

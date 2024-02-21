@@ -16,7 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 #include "i_sound.h"
 
 #include <fcntl.h>
@@ -29,8 +29,10 @@
 #include <sys/time.h>
 #endif
 
+#include "epi.h"
 #include "file.h"
 #include "filesystem.h"
+#include "i_system.h"
 #include "str_util.h"
 #include "str_compare.h"
 #include "m_argv.h"

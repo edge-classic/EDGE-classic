@@ -26,6 +26,7 @@
 #ifndef __E_MAIN__
 #define __E_MAIN__
 
+#include "con_var.h"
 #include "e_event.h"
 
 void E_Main(int argc, const char **argv);

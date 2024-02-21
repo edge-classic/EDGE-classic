@@ -26,7 +26,6 @@
 
 #include <string.h>
 
-#include "i_defs.h"
 #include "i_defs_gl.h"
 
 #include "font.h"
@@ -43,6 +42,7 @@
 #include "hu_draw.h"
 #include "hu_stuff.h"
 #include "hu_style.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "r_draw.h"
 #include "r_image.h"

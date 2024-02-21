@@ -31,7 +31,7 @@
 //   -  do some optimisation
 //
 
-#include "i_defs.h"
+
 #include "i_defs_gl.h"
 
 #include <limits.h>

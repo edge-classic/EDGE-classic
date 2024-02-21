@@ -16,8 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __CON_VAR_H__
-#define __CON_VAR_H__
+#pragma once
 
 #include <vector>
 #include <string>
@@ -130,8 +129,6 @@ int CON_PrintVars(const char *match, bool show_default);
 
 // write all cvars to the config file.
 void CON_WriteVars(FILE *f);
-
-#endif // __CON_VAR_H__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

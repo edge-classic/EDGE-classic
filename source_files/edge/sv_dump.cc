@@ -24,7 +24,7 @@
 //   - implement DumpWADS and DumpVIEW.
 //
 
-#include "i_defs.h"
+
 
 #include "g_game.h"
 #include "sv_chunk.h"

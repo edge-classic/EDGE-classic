@@ -23,8 +23,9 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 #include "i_defs_gl.h" // needed for r_shader.h
+#include "i_system.h"
 
 #include <float.h>
 
@@ -38,6 +39,9 @@
 #include "m_bbox.h"
 #include "p_local.h"
 #include "p_spec.h"
+#include "r_bsp.h"
+#include "r_gldefs.h"
+#include "r_misc.h"
 #include "r_shader.h"
 #include "r_state.h"
 

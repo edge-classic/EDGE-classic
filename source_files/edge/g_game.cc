@@ -23,7 +23,7 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 
 #include <string.h>
 #include <time.h>
@@ -39,6 +39,7 @@
 #include "e_main.h"
 #include "f_finale.h"
 #include "g_game.h"
+#include "i_system.h"
 #include "m_cheat.h"
 #include "m_menu.h"
 #include "m_random.h"
@@ -55,6 +56,7 @@
 #include "sv_chunk.h"
 #include "sv_main.h"
 #include "r_colormap.h"
+#include "r_misc.h"
 #include "version.h"
 #include "w_wad.h"
 #include "f_interm.h"
@@ -247,7 +249,7 @@ void LoadLevel_Bits(void)
     exit_skipall = false;
     exit_hub_tag = 0;
 
-    BOT_BeginLevel();
+    BotBeginLevel();
 
     gamestate = GS_LEVEL;
 
@@ -679,7 +681,7 @@ static void G_DoCompleted(void)
     if (rts_menuactive)
         RAD_FinishMenu(0);
 
-    BOT_EndLevel();
+    BotEndLevel();
 
     automap_active = false;
 
@@ -1226,7 +1228,7 @@ static void G_DoEndGame(void)
 
     if (gamestate == GS_LEVEL)
     {
-        BOT_EndLevel();
+        BotEndLevel();
 
         // FIXME: P_ShutdownLevel()
     }

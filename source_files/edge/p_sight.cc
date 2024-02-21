@@ -35,7 +35,7 @@
 //  extrafloors that block the view.
 //
 
-#include "i_defs.h"
+
 
 #include <math.h>
 
@@ -46,6 +46,8 @@
 #include "dm_structs.h"
 #include "m_bbox.h"
 #include "p_local.h"
+#include "r_bsp.h"
+#include "r_misc.h"
 #include "r_state.h"
 
 #include "AlmostEquals.h"

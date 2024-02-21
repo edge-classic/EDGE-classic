@@ -23,9 +23,9 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
-#include "i_defs_gl.h"
 
+#include "i_defs_gl.h"
+#include "i_system.h"
 #include "image_data.h"
 
 #include "m_random.h"

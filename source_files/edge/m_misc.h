@@ -29,6 +29,7 @@
 #ifndef __M_MISC__
 #define __M_MISC__
 
+#include "con_var.h"
 #include "file.h"
 
 //

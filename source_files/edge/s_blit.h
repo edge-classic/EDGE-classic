@@ -26,6 +26,8 @@
 #ifndef __S_BLIT__
 #define __S_BLIT__
 
+#include "con_var.h"
+
 #include "sound_data.h"
 
 #include "types.h"

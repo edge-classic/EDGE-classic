@@ -48,8 +48,8 @@
 // -AJA- 1999/09/15: Removed P_SpawnMobj itself :-).
 //
 
-#include "i_defs.h"
-#include "i_defs_gl.h" // we need r_shader.h
+
+#include "i_defs_gl.h"
 #include "p_mobj.h"
 
 #include "con_main.h"
@@ -58,9 +58,11 @@
 #include "g_game.h"
 #include "f_interm.h"
 #include "hu_stuff.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_random.h"
 #include "p_local.h"
+#include "r_gldefs.h"
 #include "r_misc.h"
 #include "r_shader.h"
 #include "s_sound.h"

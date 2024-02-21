@@ -19,7 +19,7 @@
 #ifndef __FLACPLAYER_H__
 #define __FLACPLAYER_H__
 
-#include "i_defs.h"
+
 
 #include "sound_data.h"
 

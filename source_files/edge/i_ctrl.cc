@@ -16,7 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 #include "i_video.h" // epi_sdl.h is also covered here - Dasho
 
 #include "dm_defs.h"
@@ -24,6 +24,8 @@
 #include "e_event.h"
 #include "e_input.h"
 #include "e_main.h"
+#include "epi.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "r_modes.h"
 

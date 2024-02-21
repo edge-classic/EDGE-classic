@@ -28,7 +28,7 @@
 // -AJA- 1999/07/12: Now uses colmap.ddf.
 //
 
-#include "i_defs.h"
+
 
 // EPI
 #include "endianess.h"

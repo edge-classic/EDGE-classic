@@ -33,6 +33,7 @@
 
 #include "types.h"
 
+#include "con_var.h"
 // We need globally shared data structures,
 //  for defining the global state variables.
 #include "dm_data.h"

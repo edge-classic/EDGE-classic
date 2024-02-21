@@ -31,8 +31,9 @@
 //   -  do some optimisation
 //
 
-#include "i_defs.h"
+
 #include "i_defs_gl.h"
+#include "i_system.h"
 
 #include <limits.h>
 #include <list>
@@ -60,6 +61,7 @@
 #include "r_defs.h"
 #include "r_gldefs.h"
 #include "r_image.h"
+#include "r_misc.h"
 #include "r_sky.h"
 #include "r_texgl.h"
 #include "r_colormap.h"

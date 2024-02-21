@@ -23,8 +23,9 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 #include "i_defs_gl.h"
+#include "i_system.h"
 
 #include <limits.h>
 

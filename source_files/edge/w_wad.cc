@@ -33,7 +33,7 @@
 // -MH- 1998/03/04
 //
 
-#include "i_defs.h"
+#include "i_system.h"
 
 #include <limits.h>
 

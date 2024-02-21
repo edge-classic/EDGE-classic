@@ -19,7 +19,9 @@
 //------------------------------------------------------------------------
 
 #include <string.h>
-#include "i_defs.h"
+
+#include "epi.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "str_util.h"
 #include "str_compare.h"

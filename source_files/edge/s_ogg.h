@@ -21,7 +21,7 @@
 #ifndef __OGGPLAYER_H__
 #define __OGGPLAYER_H__
 
-#include "i_defs.h"
+#include "s_music.h"
 
 #include "sound_data.h"
 

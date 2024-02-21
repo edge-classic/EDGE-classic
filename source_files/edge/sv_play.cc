@@ -28,7 +28,7 @@
 //   psprite_t       [PSPR]
 //
 
-#include "i_defs.h"
+
 
 #include "bot_think.h"
 #include "sv_chunk.h"

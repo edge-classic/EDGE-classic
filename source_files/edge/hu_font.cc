@@ -16,7 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 #include "i_defs_gl.h"
 
 #include "main.h"
@@ -28,9 +28,9 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "hu_font.h"
-#include "r_local.h"
 #include "r_colormap.h"
 #include "r_draw.h"
+#include "r_misc.h"
 #include "r_texgl.h"
 #include "r_modes.h"
 #include "r_image.h"

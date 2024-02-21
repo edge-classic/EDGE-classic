@@ -29,11 +29,10 @@
 #ifndef __P_LOCAL__
 #define __P_LOCAL__
 
-#ifndef __R_LOCAL__
-#include "r_local.h"
-#endif
-
+#include "con_var.h"
+#include "e_player.h"
 #include "p_blockmap.h" // HACK!
+#include "r_defs.h"
 
 #define DEATHVIEWHEIGHT 6.0f
 #define CROUCH_SLOWDOWN 0.5f

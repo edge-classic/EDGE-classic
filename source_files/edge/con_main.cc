@@ -18,8 +18,6 @@
 
 #include <string.h>
 
-#include "i_defs.h"
-
 #include "filesystem.h"
 #include "math_crc.h"
 #include "str_util.h"

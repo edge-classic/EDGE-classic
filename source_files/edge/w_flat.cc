@@ -27,7 +27,7 @@
 // -KM- 1998/09/27 Colourmaps can be dynamically changed.
 // -ES- 2000/02/12 Moved most of this module to w_texture.c.
 
-#include "i_defs.h"
+
 
 #include <vector>
 #include <algorithm>

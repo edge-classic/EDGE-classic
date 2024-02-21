@@ -26,6 +26,7 @@
 #ifndef __E_INPUT_H__
 #define __E_INPUT_H__
 
+#include "con_var.h"
 #include "e_event.h"
 #include "e_ticcmd.h"
 

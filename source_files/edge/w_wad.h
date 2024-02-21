@@ -26,6 +26,8 @@
 #ifndef __W_WAD__
 #define __W_WAD__
 
+#include <vector>
+
 #include "dm_defs.h"
 
 #include "file.h"

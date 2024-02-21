@@ -28,8 +28,9 @@
 // -KM- 1998/07/21 Add support for message input.
 //
 
-#include "i_defs.h"
+
 #include "i_defs_gl.h"
+#include "i_system.h"
 
 #include "filesystem.h"
 #include "image_funcs.h"
@@ -56,7 +57,6 @@
 #include "n_network.h"
 #include "p_setup.h"
 #include "am_map.h"
-#include "r_local.h"
 #include "r_draw.h"
 #include "r_modes.h"
 #include "r_colormap.h"

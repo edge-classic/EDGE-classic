@@ -19,7 +19,7 @@
 // -AJA- 1999/10/24: Split these off from the rad_trig.c file.
 //
 
-#include "i_defs.h"
+
 
 #include <limits.h>
 
@@ -31,6 +31,7 @@
 #include "hu_stuff.h"
 #include "g_game.h"
 #include "i_movie.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_menu.h"
 #include "m_random.h"
@@ -39,6 +40,7 @@
 #include "rad_trig.h"
 #include "rad_act.h"
 #include "r_defs.h"
+#include "r_misc.h"
 #include "r_sky.h"
 #include "s_sound.h"
 #include "s_music.h"

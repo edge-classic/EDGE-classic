@@ -29,7 +29,7 @@
 
 #include <string.h>
 
-#include "i_defs.h"
+
 
 #include "endianess.h"
 
@@ -38,6 +38,7 @@
 #include "e_player.h"
 #include "g_game.h"
 #include "hu_stuff.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_random.h"
 #include "bot_think.h"
@@ -415,7 +416,7 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
 
     if (p->isBot())
     {
-        bot_t *bot = (bot_t *)p->build_data;
+        DeathBot *bot = (DeathBot *)p->build_data;
         SYS_ASSERT(bot);
 
         bot->Respawn();

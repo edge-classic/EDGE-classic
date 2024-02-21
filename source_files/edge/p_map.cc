@@ -36,7 +36,7 @@
 //       PIT_Check* routines similiarly.
 //
 
-#include "i_defs.h"
+
 
 #include <float.h>
 
@@ -47,6 +47,7 @@
 #include "m_math.h" // Vert slope intercept check
 #include "m_random.h"
 #include "p_local.h"
+#include "r_misc.h"
 #include "s_sound.h"
 
 #include "AlmostEquals.h"

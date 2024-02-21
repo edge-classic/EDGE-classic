@@ -16,7 +16,7 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 
 #include <limits.h>
 #include <stdlib.h>
@@ -32,6 +32,7 @@
 #include "e_main.h"
 #include "g_game.h"
 #include "e_player.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_random.h"
 

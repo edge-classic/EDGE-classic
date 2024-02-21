@@ -26,7 +26,7 @@
 // -KM- 1998/11/25 Added/Changed stuff for weapons.ddf
 //
 
-#include "i_defs.h"
+
 #include "p_weapon.h"
 
 #include "e_event.h"

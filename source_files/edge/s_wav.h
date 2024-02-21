@@ -19,7 +19,7 @@
 #ifndef __WAVLOADER_H__
 #define __WAVLOADER_H__
 
-#include "i_defs.h"
+
 
 #include "sound_data.h"
 

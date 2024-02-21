@@ -23,9 +23,10 @@
 //
 //----------------------------------------------------------------------------
 
-#include "i_defs.h"
+
 #include "m_random.h"
 #include <random>
+#include "i_system.h"
 
 std::ranlux24_base                            m_rand;
 std::ranlux24_base                            p_rand;

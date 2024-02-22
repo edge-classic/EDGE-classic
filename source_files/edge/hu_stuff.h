@@ -23,50 +23,24 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __HU_STUFF_H__
-#define __HU_STUFF_H__
+#pragma once
 
 #include "e_event.h"
-#include "r_defs.h"
 
-extern int showMessages;
-
-//
-// Globally visible constants.
-//
-
-#define HU_BROADCAST 5
-
-#define HU_MSGX      0
-#define HU_MSGY      0
-#define HU_MSGWIDTH  64 // in characters
-#define HU_MSGHEIGHT 1  // in lines
-
-#define HU_MSGTIMEOUT    (4 * kTicRate)
-#define HU_IMPMSGTIMEOUT (2 * kTicRate) // how long the "found a secret" message is displayed
-
-#define HU_IS_PRINTABLE(c) ((c) >= 32 && (c) <= 126)
-
-extern bool chat_on;
+extern int show_messages;
 
 //
 // HEADS UP TEXT
 //
 
-void HU_Init(void);
-void HU_Start(void);
+void HUDInit(void);
+void HUDStart(void);
 
-bool HU_Responder(InputEvent *ev);
+void HUDStartMessage(const char *msg);
+void HUDStartImportantMessage(const char *msg);
 
-void HU_StartMessage(const char *msg);
-void HU_StartImportantMessage(const char *msg);
-
-void HU_Ticker(void);
-void HU_Drawer(void);
-void HU_QueueChatChar(char c);
-char HU_DequeueChatChar(void);
-
-#endif // __HU_STUFF_H__
+void HUDTicker(void);
+void HUDDrawer(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

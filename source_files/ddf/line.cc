@@ -1712,9 +1712,9 @@ LineType *LineTypeContainer::Lookup(const int id)
     int slot = (((id) + kLookupCacheSize) % kLookupCacheSize);
 
     // check the cache
-    if (lookup_cache_[slot] && lookup_cache_[slot]->number_ == id)
+    if (lookupatch_font_cache_[slot] && lookupatch_font_cache_[slot]->number_ == id)
     {
-        return lookup_cache_[slot];
+        return lookupatch_font_cache_[slot];
     }
 
     for (auto iter = rbegin(); iter != rend(); iter++)
@@ -1724,7 +1724,7 @@ LineType *LineTypeContainer::Lookup(const int id)
         if (l->number_ == id)
         {
             // update the cache
-            lookup_cache_[slot] = l;
+            lookupatch_font_cache_[slot] = l;
             return l;
         }
     }
@@ -1746,7 +1746,7 @@ void LineTypeContainer::Reset()
         line = nullptr;
     }
     clear();
-    memset(lookup_cache_, 0, sizeof(LineType *) * kLookupCacheSize);
+    memset(lookupatch_font_cache_, 0, sizeof(LineType *) * kLookupCacheSize);
 }
 
 //--- editor settings ---

@@ -23,19 +23,17 @@
 //
 //----------------------------------------------------------------------------
 
-
-
 #include "hu_stuff.h"
-#include "hu_style.h"
-#include "hu_draw.h"
 
-#include "con_main.h"
 #include "con_gui.h"
+#include "con_main.h"
 #include "dm_state.h"
 #include "e_input.h"
 #include "e_main.h"
-#include "g_game.h"
 #include "f_interm.h"
+#include "g_game.h"
+#include "hu_draw.h"
+#include "hu_style.h"
 #include "m_menu.h"
 #include "n_network.h"
 #include "s_sound.h"
@@ -44,90 +42,84 @@
 //
 // Locally used constants, shortcuts.
 //
-// -ACB- 1998/08/09 Removed the HU_TITLE stuff; Use currmap->description.
+// -ACB- 1998/08/09 Removed the HUDTITLE stuff; Use current_map->description.
 //
-#define HU_TITLEHEIGHT 1
-#define HU_TITLEX      0
-#define HU_TITLEY      (200 - 32 - 10)
 
-#define HU_INPUTX      HU_MSGX
-#define HU_INPUTY      (HU_MSGY + HU_MSGHEIGHT * 8)
-#define HU_INPUTWIDTH  64
-#define HU_INPUTHEIGHT 1
+static constexpr uint16_t kHUDMessageTimeout          = (4 * kTicRate);
+static constexpr uint16_t kHUDImportantMessageTimeout = (4 * kTicRate);
 
-bool chat_on;
-
-std::string w_map_title;
+std::string current_map_title;
 
 static bool message_on;
 static bool important_message_on;
 static bool message_no_overwrite;
 
-static std::string w_message;
-static std::string w_important_message;
+static std::string current_message;
+static std::string current_important_message_message;
 static int         message_counter;
 static int         important_message_counter;
 
-style_c *automap_style;
-style_c *message_style;
-style_c *important_message_style;
+Style *automap_style;
+Style *message_style;
+Style *important_message_style;
 
 //
 // Heads-up Init
 //
-void HU_Init(void)
+void HUDInit(void)
 {
     // should use language["HeadsUpInit"], but LDF hasn't been loaded yet
     E_ProgressMessage("Setting up HUD...\n");
-    hudtic = 0;
+    hud_tic = 0;
 }
 
-// -ACB- 1998/08/09 Used currmap to set the map name in string
-void HU_Start(void)
+// -ACB- 1998/08/09 Used current_map to set the map name in string
+void HUDStart(void)
 {
     const char *string;
 
-    SYS_ASSERT(currmap);
+    SYS_ASSERT(current_map);
 
     StyleDefinition *map_styledef = styledefs.Lookup("AUTOMAP");
-    if (!map_styledef)
-        map_styledef = default_style;
-    automap_style = hu_styles.Lookup(map_styledef);
+    if (!map_styledef) map_styledef = default_style;
+    automap_style = hud_styles.Lookup(map_styledef);
 
     StyleDefinition *messages_styledef = styledefs.Lookup("MESSAGES");
-    if (!messages_styledef)
-        messages_styledef = default_style;
-    message_style = hu_styles.Lookup(messages_styledef);
+    if (!messages_styledef) messages_styledef = default_style;
+    message_style = hud_styles.Lookup(messages_styledef);
 
-    StyleDefinition *important_messages_styledef = styledefs.Lookup("IMPORTANT_MESSAGES");
+    StyleDefinition *important_messages_styledef =
+        styledefs.Lookup("IMPORTANT_MESSAGES");
     if (!important_messages_styledef)
         important_messages_styledef = default_style;
-    important_message_style = hu_styles.Lookup(important_messages_styledef);
+    important_message_style = hud_styles.Lookup(important_messages_styledef);
 
     message_on           = false;
     important_message_on = false;
     message_no_overwrite = false;
 
-    // -ACB- 1998/08/09 Use currmap settings
-    // if (currmap->description && language.IsValidRef(currmap->description))
-    if (currmap->description_ != "") // Lobo 2022: if it's wrong, show it anyway
+    // -ACB- 1998/08/09 Use current_map settings
+    // if (current_map->description &&
+    // language.IsValidRef(current_map->description))
+    if (current_map->description_ !=
+        "")  // Lobo 2022: if it's wrong, show it anyway
     {
         I_Printf("\n");
         I_Printf("--------------------------------------------------\n");
 
         ConsoleMessageColor(SG_GREEN_RGBA32);
 
-        string = language[currmap->description_];
+        string = language[current_map->description_];
         I_Printf("Entering %s\n", string);
 
-        w_map_title = std::string(string);
+        current_map_title = std::string(string);
     }
 
-    // Reset hudtic each map so it doesn't go super high? - Dasho
-    hudtic = 0;
+    // Reset hud_tic each map so it doesn't go super high? - Dasho
+    hud_tic = 0;
 }
 
-void HU_Drawer(void)
+void HUDDrawer(void)
 {
     ConsoleShowFPS();
     ConsoleShowPosition();
@@ -136,72 +128,75 @@ void HU_Drawer(void)
     short y;
     if (message_on)
     {
-
         tempY = 0;
-        tempY += message_style->fonts[0]->StringLines(w_message.c_str()) *
-                 (message_style->fonts[0]->NominalHeight() * message_style->def->text_[0].scale_);
+        tempY += message_style->fonts_[0]->StringLines(current_message.c_str()) *
+                 (message_style->fonts_[0]->NominalHeight() *
+                  message_style->definition_->text_[0].scale_);
         tempY /= 2;
-        if (message_style->fonts[0]->StringLines(w_message.c_str()) > 1)
-            tempY += message_style->fonts[0]->NominalHeight() * message_style->def->text_[0].scale_;
+        if (message_style->fonts_[0]->StringLines(current_message.c_str()) > 1)
+            tempY += message_style->fonts_[0]->NominalHeight() *
+                     message_style->definition_->text_[0].scale_;
 
         y = tempY;
 
         message_style->DrawBackground();
-        HUD_SetAlignment(0, 0); // center it
-        HUD_SetAlpha(message_style->def->text_->translucency_);
-        HL_WriteText(message_style, 0, 160, y, w_message.c_str());
-        HUD_SetAlignment();
-        HUD_SetAlpha();
+        HUDSetAlignment(0, 0);  // center it
+        HUDSetAlpha(message_style->definition_->text_->translucency_);
+        HUDWriteText(message_style, 0, 160, y, current_message.c_str());
+        HUDSetAlignment();
+        HUDSetAlpha();
     }
 
     if (important_message_on)
     {
         tempY = 0;
-        tempY -= important_message_style->fonts[0]->StringLines(w_important_message.c_str()) *
-                 (important_message_style->fonts[0]->NominalHeight() * important_message_style->def->text_[0].scale_);
+        tempY -= important_message_style->fonts_[0]->StringLines(
+                     current_important_message_message.c_str()) *
+                 (important_message_style->fonts_[0]->NominalHeight() *
+                  important_message_style->definition_->text_[0].scale_);
         tempY /= 2;
         y = 90 - tempY;
         important_message_style->DrawBackground();
-        HUD_SetAlignment(0, 0); // center it
-        HUD_SetAlpha(important_message_style->def->text_->translucency_);
-        HL_WriteText(important_message_style, 0, 160, y, w_important_message.c_str());
-        HUD_SetAlignment();
-        HUD_SetAlpha();
+        HUDSetAlignment(0, 0);  // center it
+        HUDSetAlpha(important_message_style->definition_->text_->translucency_);
+        HUDWriteText(important_message_style, 0, 160, y,
+                     current_important_message_message.c_str());
+        HUDSetAlignment();
+        HUDSetAlpha();
     }
 
     // TODO: chat messages
 }
 
 // Starts displaying the message.
-void HU_StartMessage(const char *msg)
+void HUDStartMessage(const char *msg)
 {
     // only display message if necessary
     if (!message_no_overwrite)
     {
-        w_message = std::string(msg);
+        current_message = std::string(msg);
 
         message_on           = true;
-        message_counter      = HU_MSGTIMEOUT;
+        message_counter      = kHUDMessageTimeout;
         message_no_overwrite = false;
     }
 }
 
 // Starts displaying the message.
-void HU_StartImportantMessage(const char *msg)
+void HUDStartImportantMessage(const char *msg)
 {
-
     // only display message if necessary
     if (!message_no_overwrite)
     {
-        w_important_message = std::string(msg);
+        current_important_message_message = std::string(msg);
 
         important_message_on      = true;
-        important_message_counter = HU_IMPMSGTIMEOUT;
+        important_message_counter = kHUDImportantMessageTimeout;
         message_no_overwrite      = false;
     }
 }
 
-void HU_Ticker(void)
+void HUDTicker(void)
 {
     // tick down message counter if message is up
     if (message_counter && !--message_counter)
@@ -215,65 +210,6 @@ void HU_Ticker(void)
         important_message_on = false;
         message_no_overwrite = false;
     }
-
-    // check for incoming chat characters
-    if (!netgame)
-        return;
-
-    for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-    {
-        player_t *p = players[pnum];
-        if (!p)
-            continue;
-
-        if (pnum == consoleplayer)
-            continue;
-
-        char c = p->cmd.chat_character;
-
-        p->cmd.chat_character = 0;
-
-        if (c)
-        {
-            /* TODO: chat stuff */
-        }
-    }
-}
-
-void HU_QueueChatChar(char c)
-{
-    // TODO
-}
-
-char HU_DequeueChatChar(void)
-{
-    return 0; // TODO
-}
-
-bool HU_Responder(InputEvent *ev)
-{
-    if (ev->type != kInputEventKeyUp && ev->type != kInputEventKeyDown)
-        return false;
-
-    int c = ev->value.key.sym;
-
-    if (ev->type != kInputEventKeyDown)
-        return false;
-
-    // TODO: chat stuff
-    if (false)
-    {
-        //...
-        return true;
-    }
-
-    if (c == KEYD_ENTER)
-    {
-        message_on      = true;
-        message_counter = HU_MSGTIMEOUT;
-    }
-
-    return false;
 }
 
 //--- editor settings ---

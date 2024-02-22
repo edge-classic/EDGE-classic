@@ -15,7 +15,7 @@
 
 extern ConsoleVariable      r_doubleframes;
 extern bool        erraticism_active;
-extern std::string w_map_title;
+extern std::string current_map_title;
 
 extern image_data_c *ReadAsEpiBlock(image_c *rim);
 extern image_data_c *R_PalettisedToRGB(image_data_c *src, const uint8_t *palette, int opacity);
@@ -59,7 +59,7 @@ static int HD_coord_sys(lua_State *L)
     if (w < 64 || h < 64)
         I_Error("Bad hud.coord_sys size: %fx%f\n", w, h);
 
-    HUD_SetCoordSys(w, h);
+    HUDSetCoordinateSystem(w, h);
 
     LUA_SetFloat(L, "hud", "x_left", hud_x_left);
     LUA_SetFloat(L, "hud", "x_right", hud_x_right);
@@ -85,7 +85,7 @@ static int HD_game_mode(lua_State *L)
 //
 static int HD_game_name(lua_State *L)
 {
-    GameDefinition *g = currmap->episode_;
+    GameDefinition *g = current_map->episode_;
     SYS_ASSERT(g);
 
     lua_pushstring(L, g->name_.c_str());
@@ -97,7 +97,7 @@ static int HD_game_name(lua_State *L)
 // Lobo: December 2023
 static int HD_game_skill(lua_State *L)
 {
-    lua_pushinteger(L, gameskill);
+    lua_pushinteger(L, game_skill);
     return 1;
 }
 
@@ -105,7 +105,7 @@ static int HD_game_skill(lua_State *L)
 //
 static int HD_map_name(lua_State *L)
 {
-    lua_pushstring(L, currmap->name_.c_str());
+    lua_pushstring(L, current_map->name_.c_str());
     return 1;
 }
 
@@ -113,7 +113,7 @@ static int HD_map_name(lua_State *L)
 //
 static int HD_map_title(lua_State *L)
 {
-    lua_pushstring(L, w_map_title.c_str());
+    lua_pushstring(L, current_map_title.c_str());
     return 1;
 }
 
@@ -121,7 +121,7 @@ static int HD_map_title(lua_State *L)
 //
 static int HD_map_author(lua_State *L)
 {
-    lua_pushstring(L, currmap->author_.c_str());
+    lua_pushstring(L, current_map->author_.c_str());
     return 1;
 }
 
@@ -162,13 +162,13 @@ static int HD_text_font(lua_State *L)
     if (!DEF)
         I_Error("hud.text_font: Bad font name: %s\n", font_name);
 
-    font_c *font = hu_fonts.Lookup(DEF);
+    Font *font = hud_fonts.Lookup(DEF);
     SYS_ASSERT(font);
 
     if (!font)
         I_Error("hud.text_font: Bad font name: %s\n", font_name);
 
-    HUD_SetFont(font);
+    HUDSetFont(font);
 
     return 0;
 }
@@ -179,7 +179,7 @@ static int HD_text_color(lua_State *L)
 {
     RGBAColor color = HD_VectorToColor(LUA_CheckVector3(L, 1));
 
-    HUD_SetTextColor(color);
+    HUDSetTextColor(color);
 
     return 0;
 }
@@ -193,7 +193,7 @@ static int HD_set_scale(lua_State *L)
     if (scale <= 0)
         I_Error("hud.set_scale: Bad scale value: %1.3f\n", scale);
 
-    HUD_SetScale(scale);
+    HUDSetScale(scale);
 
     return 0;
 }
@@ -204,7 +204,7 @@ static int HD_set_alpha(lua_State *L)
 {
     float alpha = (float)luaL_checknumber(L, 1);
 
-    HUD_SetAlpha(alpha);
+    HUDSetAlpha(alpha);
 
     return 0;
 }
@@ -220,7 +220,7 @@ static int HD_solid_box(lua_State *L)
 
     RGBAColor rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
 
-    HUD_SolidBox(x, y, x + w, y + h, rgb);
+    HUDSolidBox(x, y, x + w, y + h, rgb);
 
     return 0;
 }
@@ -236,7 +236,7 @@ static int HD_solid_line(lua_State *L)
 
     RGBAColor rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
 
-    HUD_SolidLine(x1, y1, x2, y2, rgb);
+    HUDSolidLine(x1, y1, x2, y2, rgb);
 
     return 0;
 }
@@ -252,7 +252,7 @@ static int HD_thin_box(lua_State *L)
 
     RGBAColor rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
 
-    HUD_ThinBox(x, y, x + w, y + h, rgb);
+    HUDThinBox(x, y, x + w, y + h, rgb);
 
     return 0;
 }
@@ -273,7 +273,7 @@ static int HD_gradient_box(lua_State *L)
     cols[2] = HD_VectorToColor(LUA_CheckVector3(L, 7));
     cols[3] = HD_VectorToColor(LUA_CheckVector3(L, 8));
 
-    HUD_GradientBox(x, y, x + w, y + h, cols);
+    HUDGradientBox(x, y, x + w, y + h, cols);
 
     return 0;
 }
@@ -295,9 +295,9 @@ static int HD_draw_image(lua_State *L)
     if (img)
     {
         if (noOffset)
-            HUD_DrawImageNoOffset(x, y, img);
+            HUDDrawImageNoOffset(x, y, img);
         else
-            HUD_DrawImage(x, y, img);
+            HUDDrawImage(x, y, img);
     }
 
     return 0;
@@ -320,10 +320,10 @@ static int HD_scroll_image(lua_State *L)
     if (img)
     {
         if (noOffset)
-            HUD_ScrollImageNoOffset(
+            HUDScrollImageNoOffset(
                 x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
         else
-            HUD_ScrollImage(x, y, img, -sx,
+            HUDScrollImage(x, y, img, -sx,
                             -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
     }
 
@@ -349,9 +349,9 @@ static int HD_stretch_image(lua_State *L)
     if (img)
     {
         if (noOffset)
-            HUD_StretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
+            HUDStretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
         else
-            HUD_StretchImage(x, y, w, h, img, 0.0, 0.0);
+            HUDStretchImage(x, y, w, h, img, 0.0, 0.0);
     }
 
     return 0;
@@ -375,7 +375,7 @@ static int HD_tile_image(lua_State *L)
 
     if (img)
     {
-        HUD_TileImage(x, y, w, h, img, offset_x, offset_y);
+        HUDTileImage(x, y, w, h, img, offset_x, offset_y);
     }
 
     return 0;
@@ -392,7 +392,7 @@ static int HD_draw_text(lua_State *L)
 
     double size = luaL_optnumber(L, 4, 0);
 
-    HUD_DrawText(x, y, str, size);
+    HUDDrawText(x, y, str, size);
 
     return 0;
 }
@@ -440,9 +440,9 @@ static int HD_draw_num2(lua_State *L)
             *--pos = '-';
     }
 
-    HUD_SetAlignment(+1, -1);
-    HUD_DrawText(x, y, pos, size);
-    HUD_SetAlignment();
+    HUDSetAlignment(+1, -1);
+    HUDDrawText(x, y, pos, size);
+    HUDSetAlignment();
 
     return 0;
 }
@@ -493,13 +493,13 @@ static int HD_draw_number(lua_State *L)
 
     if (align_right == 0)
     {
-        HUD_DrawText(x, y, pos, size);
+        HUDDrawText(x, y, pos, size);
     }
     else
     {
-        HUD_SetAlignment(+1, -1);
-        HUD_DrawText(x, y, pos, size);
-        HUD_SetAlignment();
+        HUDSetAlignment(+1, -1);
+        HUDDrawText(x, y, pos, size);
+        HUDSetAlignment();
     }
 
     return 0;
@@ -561,7 +561,7 @@ static int HD_render_world(lua_State *L)
     float h     = (float)luaL_checknumber(L, 4);
     int   flags = (int)luaL_optnumber(L, 5, 0);
 
-    HUD_RenderWorld(x, y, w, h, ui_hud_who->mo, flags);
+    HUDRenderWorld(x, y, w, h, ui_hud_who->mo, flags);
 
     return 0;
 }
@@ -591,7 +591,7 @@ static int HD_render_automap(lua_State *L)
 
     AutomapSetState(new_state, new_zoom);
 
-    HUD_RenderAutomap(x, y, w, h, ui_hud_who->mo, flags);
+    HUDRenderAutomap(x, y, w, h, ui_hud_who->mo, flags);
 
     AutomapSetState(old_state, old_zoom);
 
@@ -906,7 +906,7 @@ static int HD_get_image_width(lua_State *L)
 
     if (img)
     {
-        lua_pushinteger(L, HUD_GetImageWidth(img));
+        lua_pushinteger(L, HUDGetImageWidth(img));
     }
     else
     {
@@ -926,7 +926,7 @@ static int HD_get_image_height(lua_State *L)
 
     if (img)
     {
-        lua_pushinteger(L, HUD_GetImageHeight(img));
+        lua_pushinteger(L, HUDGetImageHeight(img));
     }
     else
     {
@@ -1017,7 +1017,7 @@ void LUA_RegisterHudLibrary(lua_State *L)
 
 void LUA_RunHud(void)
 {
-    HUD_Reset();
+    HUDReset();
 
     ui_hud_who    = players[displayplayer];
     ui_player_who = players[displayplayer];
@@ -1028,5 +1028,5 @@ void LUA_RunHud(void)
 
     LUA_CallGlobalFunction(global_lua_state, "draw_all");
 
-    HUD_Reset();
+    HUDReset();
 }

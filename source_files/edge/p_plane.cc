@@ -408,7 +408,7 @@ static bool MovePlane(plane_move_t *plane)
         break;
 
     case DIRECTION_WAIT:
-        plane->waited -= (!r_doubleframes.d_|| !(gametic & 1)) ? 1 : 0;
+        plane->waited -= (!r_doubleframes.d_|| !(game_tic & 1)) ? 1 : 0;
         if (plane->waited <= 0)
         {
             int   dir;
@@ -1222,7 +1222,7 @@ static bool MoveSlider(slider_move_t *smov)
     {
     // WAITING
     case 0:
-        smov->waited -= (!r_doubleframes.d_|| !(gametic & 1)) ? 1 : 0;
+        smov->waited -= (!r_doubleframes.d_|| !(game_tic & 1)) ? 1 : 0;
         if (smov->waited <= 0)
         {
             if (SliderCanClose(smov->line))

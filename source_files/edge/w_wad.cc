@@ -1384,15 +1384,15 @@ void W_ReadUMAPINFOLumps(void)
                 }
             }
 
-            if (Maps.maps[i].nextmap[0])
+            if (Maps.maps[i].next_map[0])
             {
-                temp_level->nextmapname_ = Maps.maps[i].nextmap;
-                epi::StringUpperASCII(temp_level->nextmapname_);
+                temp_level->next_mapname_ = Maps.maps[i].next_map;
+                epi::StringUpperASCII(temp_level->next_mapname_);
             }
 
             if (Maps.maps[i].intertext)
             {
-                if (!epi::StringCaseCompareASCII(temp_level->nextmapname_, "MAP07"))
+                if (!epi::StringCaseCompareASCII(temp_level->next_mapname_, "MAP07"))
                 {
                     // Clear out some of our defaults on certain maps
                     MapDefinition *conflict_level = mapdefs.Lookup("MAP07");
@@ -1402,7 +1402,7 @@ void W_ReadUMAPINFOLumps(void)
                         conflict_level->f_pre_.text_flat_.clear();
                     }
                 }
-                if (!epi::StringCaseCompareASCII(temp_level->nextmapname_, "MAP21"))
+                if (!epi::StringCaseCompareASCII(temp_level->next_mapname_, "MAP21"))
                 {
                     // Clear out some of our defaults on certain maps
                     MapDefinition *conflict_level = mapdefs.Lookup("MAP21");
@@ -1412,7 +1412,7 @@ void W_ReadUMAPINFOLumps(void)
                         conflict_level->f_pre_.text_flat_.clear();
                     }
                 }
-                if (!epi::StringCaseCompareASCII(temp_level->nextmapname_, "MAP31"))
+                if (!epi::StringCaseCompareASCII(temp_level->next_mapname_, "MAP31"))
                 {
                     // Clear out some of our defaults on certain maps
                     MapDefinition *conflict_level = mapdefs.Lookup("MAP31");
@@ -1422,7 +1422,7 @@ void W_ReadUMAPINFOLumps(void)
                         conflict_level->f_pre_.text_flat_.clear();
                     }
                 }
-                if (!epi::StringCaseCompareASCII(temp_level->nextmapname_, "MAP32"))
+                if (!epi::StringCaseCompareASCII(temp_level->next_mapname_, "MAP32"))
                 {
                     // Clear out some of our defaults on certain maps
                     MapDefinition *conflict_level = mapdefs.Lookup("MAP32");
@@ -1552,7 +1552,7 @@ void W_ReadUMAPINFOLumps(void)
                         language.AddOrReplace(temp_ref.c_str(), temp_value.c_str());
 
                         // hack for shitty dbp shennanigans :/
-                        if (temp_level->nextmapname_ == temp_level->secretmapname_)
+                        if (temp_level->next_mapname_ == temp_level->secretmapname_)
                         {
                             temp_level->f_end_.text_    = temp_ref;
                             temp_level->f_end_.picwait_ = 700; // 20 seconds
@@ -1628,7 +1628,7 @@ void W_ReadUMAPINFOLumps(void)
 
             if (Maps.maps[i].endpic[0])
             {
-                temp_level->nextmapname_.clear();
+                temp_level->next_mapname_.clear();
                 temp_level->f_end_.pics_.clear();
                 temp_level->f_end_.pics_.push_back(Maps.maps[i].endpic);
                 epi::StringUpperASCII(temp_level->f_end_.pics_.back());
@@ -1637,19 +1637,19 @@ void W_ReadUMAPINFOLumps(void)
 
             if (Maps.maps[i].dobunny)
             {
-                temp_level->nextmapname_.clear();
+                temp_level->next_mapname_.clear();
                 temp_level->f_end_.dobunny_ = true;
             }
 
             if (Maps.maps[i].docast)
             {
-                temp_level->nextmapname_.clear();
+                temp_level->next_mapname_.clear();
                 temp_level->f_end_.docast_ = true;
             }
 
             if (Maps.maps[i].endgame)
             {
-                temp_level->nextmapname_.clear();
+                temp_level->next_mapname_.clear();
             }
 
             if (Maps.maps[i].partime > 0)

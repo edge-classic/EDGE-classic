@@ -473,10 +473,10 @@ void SV_PlayerFinaliseElems(void)
         I_Error("LOADGAME: No players !!\n");
 
     if (consoleplayer < 0)
-        G_SetConsolePlayer(first);
+        GameSetConsolePlayer(first);
 
     if (displayplayer < 0)
-        G_SetDisplayPlayer(consoleplayer);
+        GameSetDisplayPlayer(consoleplayer);
 }
 
 //----------------------------------------------------------------------------

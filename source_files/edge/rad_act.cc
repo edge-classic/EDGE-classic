@@ -56,7 +56,7 @@
 
 #include "AlmostEquals.h"
 
-static style_c *rts_tip_style;
+static Style *rts_tip_style;
 
 // current tip slots
 drawtip_t tip_slots[MAXTIPSLOT];
@@ -161,7 +161,7 @@ static void SendTip(rad_trigger_t *R, s_tip_t *tip, int slot)
 //
 void RAD_DisplayTips(void)
 {
-    HUD_Reset();
+    HUDReset();
 
     // lookup styles
     StyleDefinition *def;
@@ -169,7 +169,7 @@ void RAD_DisplayTips(void)
     def = styledefs.Lookup("RTS_TIP");
     if (!def)
         def = default_style;
-    rts_tip_style = hu_styles.Lookup(def);
+    rts_tip_style = hud_styles.Lookup(def);
 
     for (int slot = 0; slot < MAXTIPSLOT; slot++)
     {
@@ -207,30 +207,30 @@ void RAD_DisplayTips(void)
         if (alpha < 0.02f)
             continue;
 
-        HUD_SetScale(current->scale);
-        HUD_SetTextColor(current->color);
-        HUD_SetAlpha(alpha);
+        HUDSetScale(current->scale);
+        HUDSetTextColor(current->color);
+        HUDSetAlpha(alpha);
 
         if (current->p.left_just)
-            HUD_SetAlignment(-1, 0);
+            HUDSetAlignment(-1, 0);
         else
-            HUD_SetAlignment(0, 0);
+            HUDSetAlignment(0, 0);
 
         float x = current->p.x_pos * 320.0f;
         float y = current->p.y_pos * 200.0f;
 
-        if (rts_tip_style->fonts[StyleDefinition::kTextSectionText])
-            HUD_SetFont(rts_tip_style->fonts[StyleDefinition::kTextSectionText]);
+        if (rts_tip_style->fonts_[StyleDefinition::kTextSectionText])
+            HUDSetFont(rts_tip_style->fonts_[StyleDefinition::kTextSectionText]);
 
         if (current->tip_graphic)
-            HUD_DrawImage(x, y, current->tip_graphic);
+            HUDDrawImage(x, y, current->tip_graphic);
         else
-            HUD_DrawText(x, y, current->tip_text);
+            HUDDrawText(x, y, current->tip_text);
 
-        HUD_SetAlignment();
-        HUD_SetAlpha();
-        HUD_SetScale();
-        HUD_SetTextColor();
+        HUDSetAlignment();
+        HUDSetAlpha();
+        HUDSetScale();
+        HUDSetTextColor();
     }
 }
 
@@ -380,7 +380,7 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
     }
 
     // -AJA- 2007/09/04: allow individual when_appear flags
-    if (!G_CheckWhenAppear(t->appear))
+    if (!GameCheckWhenAppear(t->appear))
         return;
 
     // -AJA- 1999/10/02: -nomonsters check.
@@ -626,9 +626,9 @@ void RAD_ActGotoMap(rad_trigger_t *R, void *param)
 
     // Warp to level n
     if (go->is_hub)
-        G_ExitToHub(go->map_name, go->tag);
+        GameExitToHub(go->map_name, go->tag);
     else
-        G_ExitToLevel(go->map_name, 5, go->skip_all);
+        GameExitToLevel(go->map_name, 5, go->skip_all);
 }
 
 void RAD_ActExitLevel(rad_trigger_t *R, void *param)
@@ -636,15 +636,15 @@ void RAD_ActExitLevel(rad_trigger_t *R, void *param)
     s_exit_t *exit = (s_exit_t *)param;
 
     if (exit->is_secret)
-        G_SecretExitLevel(exit->exittime);
+        GameSecretExitLevel(exit->exit_time);
     else
-        G_ExitLevel(exit->exittime);
+        GameExitLevel(exit->exit_time);
 }
 
 // Lobo November 2021
 void RAD_ActExitGame(rad_trigger_t *R, void *param)
 {
-    G_DeferredEndGame();
+    GameDeferredEndGame();
 }
 
 void RAD_ActPlaySound(rad_trigger_t *R, void *param)
@@ -823,7 +823,7 @@ void RAD_ActSkill(rad_trigger_t *R, void *param)
     // -ACB- 1998/07/30 replaced respawnmonsters with respawnsetting.
     // -ACB- 1998/08/27 removed fastparm temporaryly.
 
-    gameskill = skill->skill;
+    game_skill = skill->skill;
 
     level_flags.fastparm = skill->fastmonsters;
     level_flags.respawn  = skill->respawn;
@@ -1198,7 +1198,7 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
 {
     player_t *p = GetWhoDunnit(R);
 
-    spawnpoint_t *point = G_FindCoopPlayer(1); // start 1
+    spawnpoint_t *point = GameFindCoopPlayer(1); // start 1
 
     if (!point)
         return; // should never happen but who knows...

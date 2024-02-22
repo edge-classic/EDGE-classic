@@ -909,7 +909,7 @@ class MapObjectDefinitionContainer : public std::vector<MapObjectDefinition *>
     ~MapObjectDefinitionContainer();
 
    private:
-    MapObjectDefinition *lookup_cache_[kLookupCacheSize];
+    MapObjectDefinition *lookupatch_font_cache_[kLookupCacheSize];
 
    public:
     // List Management

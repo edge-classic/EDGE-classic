@@ -175,7 +175,7 @@ bool automap_keydoor_blink = false;
 
 extern ConsoleVariable r_doubleframes;
 
-extern style_c *automap_style;  // FIXME: put in header
+extern Style *automap_style;  // FIXME: put in header
 
 // translates between frame-buffer and map distances
 static inline float MapToFrameDistanceX(float x)
@@ -542,7 +542,7 @@ static void DrawMLine(AutomapLine *ml, RGBAColor rgb, bool thick = true)
     float dx = MapToFrameDistanceX(-map_center_x);
     float dy = MapToFrameDistanceY(-map_center_y);
 
-    HUD_SolidLine(x1, y1, x2, y2, rgb, thick ? 1.5f : 1.0f, thick, dx, dy);
+    HUDSolidLine(x1, y1, x2, y2, rgb, thick ? 1.5f : 1.0f, thick, dx, dy);
 }
 
 // Lobo 2022: keyed doors automap colouring
@@ -564,7 +564,7 @@ static void DrawMLineDoor(AutomapLine *ml, RGBAColor rgb)
     // Lobo 2023: Make keyed doors pulse
     if (automap_keydoor_blink)
     {
-        linewidth = gametic % (32 * (r_doubleframes.d_ ? 2 : 1));
+        linewidth = game_tic % (32 * (r_doubleframes.d_ ? 2 : 1));
 
         if (linewidth >= 16)
             linewidth = 2.0 + (linewidth * 0.1f);
@@ -572,7 +572,7 @@ static void DrawMLineDoor(AutomapLine *ml, RGBAColor rgb)
             linewidth = 2.0 - (linewidth * 0.1f);
     }
 
-    HUD_SolidLine(x1, y1, x2, y2, rgb, linewidth, true, dx, dy);
+    HUDSolidLine(x1, y1, x2, y2, rgb, linewidth, true, dx, dy);
 }
 
 static AutomapLine player_dagger[] = {
@@ -624,7 +624,7 @@ static void DrawLineCharacter(AutomapLine *lineguy, int lineguylines,
         bx = bx * MapToFrameDistanceX(radius);
         by = by * MapToFrameDistanceY(radius);
 
-        HUD_SolidLine(cx + ax, cy - ay, cx + bx, cy - by, rgb);
+        HUDSolidLine(cx + ax, cy - ay, cx + bx, cy - by, rgb);
     }
 }
 
@@ -676,17 +676,17 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey,
     float x1 = MapToFrameCoordinatesX(midx, map_center_x);
     float y1 = MapToFrameCoordinatesY(midy, map_center_y);
 
-    font_c *am_font = automap_style->fonts[0];
+    Font *am_font = automap_style->fonts_[0];
 
-    HUD_SetFont(am_font);
-    HUD_SetAlignment(0, 0);  // centre the characters
-    HUD_SetTextColor(rgb);
+    HUDSetFont(am_font);
+    HUDSetAlignment(0, 0);  // centre the characters
+    HUDSetTextColor(rgb);
     float TextSize = 0.4f * map_scale;
     if (map_scale > 5.0f)  // only draw the text if we're zoomed in?
     {
         if (automap_keydoor_text.d_ == 1)
         {
-            HUD_DrawText(x1, y1, CleanName.c_str(), TextSize);
+            HUDDrawText(x1, y1, CleanName.c_str(), TextSize);
         }
         else if (automap_keydoor_text.d_ > 1)
         {
@@ -703,16 +703,16 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey,
 
                     if (epi::StringCaseCompareASCII("DUMMY_SPRITE",
                                                     img->name) != 0)
-                        HUD_DrawImageNoOffset(x1, y1, img);
-                    // HUD_StretchImage(x1, y1, 16, 16, img, 0.0, 0.0);
+                        HUDDrawImageNoOffset(x1, y1, img);
+                    // HUDStretchImage(x1, y1, 16, 16, img, 0.0, 0.0);
                 }
             }
         }
     }
 
-    HUD_SetFont();
-    HUD_SetTextColor();
-    HUD_SetAlignment();
+    HUDSetFont();
+    HUDSetTextColor();
+    HUDSetAlignment();
 
     /*
     // *********************
@@ -1245,10 +1245,10 @@ static void AutomapWalkBSPNode(unsigned int bspnum)
 
 static void DrawMarks(void)
 {
-    font_c *am_font = automap_style->fonts[0];
+    Font *am_font = automap_style->fonts_[0];
 
-    HUD_SetFont(am_font);
-    HUD_SetAlignment(0, 0);  // centre the characters
+    HUDSetFont(am_font);
+    HUDSetAlignment(0, 0);  // centre the characters
 
     char buffer[4];
 
@@ -1263,12 +1263,12 @@ static void DrawMarks(void)
         buffer[0] = ('1' + i);
         buffer[1] = 0;
 
-        HUD_DrawText(MapToFrameCoordinatesX(mx, map_center_x),
+        HUDDrawText(MapToFrameCoordinatesX(mx, map_center_x),
                      MapToFrameCoordinatesY(my, map_center_y), buffer);
     }
 
-    HUD_SetFont();
-    HUD_SetAlignment();
+    HUDSetFont();
+    HUDSetAlignment();
 }
 
 void AutomapRender(float x, float y, float w, float h, mobj_t *focus)
@@ -1289,23 +1289,23 @@ void AutomapRender(float x, float y, float w, float h, mobj_t *focus)
 
     SYS_ASSERT(automap_style);
 
-    if (automap_style->bg_image)
+    if (automap_style->background_image_)
     {
-        float old_alpha = HUD_GetAlpha();
-        HUD_SetAlpha(automap_style->def->bg_.translucency_);
-        if (automap_style->def->special_ == 0)
-            HUD_StretchImage(-90, 0, 500, 200, automap_style->bg_image, 0.0,
+        float old_alpha = HUDGetAlpha();
+        HUDSetAlpha(automap_style->definition_->bg_.translucency_);
+        if (automap_style->definition_->special_ == 0)
+            HUDStretchImage(-90, 0, 500, 200, automap_style->background_image_, 0.0,
                              0.0);
         else
-            HUD_TileImage(-90, 0, 500, 200, automap_style->bg_image, 0.0, 0.0);
-        HUD_SetAlpha(old_alpha);
+            HUDTileImage(-90, 0, 500, 200, automap_style->background_image_, 0.0, 0.0);
+        HUDSetAlpha(old_alpha);
     }
-    else if (automap_style->def->bg_.colour_ != kRGBANoValue)
+    else if (automap_style->definition_->bg_.colour_ != kRGBANoValue)
     {
-        float old_alpha = HUD_GetAlpha();
-        HUD_SetAlpha(automap_style->def->bg_.translucency_);
-        HUD_SolidBox(x, y, x + w, y + h, automap_style->def->bg_.colour_);
-        HUD_SetAlpha(old_alpha);
+        float old_alpha = HUDGetAlpha();
+        HUDSetAlpha(automap_style->definition_->bg_.translucency_);
+        HUDSolidBox(x, y, x + w, y + h, automap_style->definition_->bg_.colour_);
+        HUDSetAlpha(old_alpha);
     }
 
     if (grid && !rotate_map) DrawGrid();

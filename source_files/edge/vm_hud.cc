@@ -58,7 +58,7 @@ player_t *ui_hud_who = nullptr;
 
 extern player_t *ui_player_who;
 
-extern std::string w_map_title;
+extern std::string current_map_title;
 
 extern bool erraticism_active;
 
@@ -101,7 +101,7 @@ static void HD_coord_sys(coal::vm_c *vm, int argc)
     if (w < 64 || h < 64)
         I_Error("Bad hud.coord_sys size: %dx%d\n", w, h);
 
-    HUD_SetCoordSys(w, h);
+    HUDSetCoordinateSystem(w, h);
 
     VM_SetFloat(ui_vm, "hud", "x_left", hud_x_left);
     VM_SetFloat(ui_vm, "hud", "x_right", hud_x_right);
@@ -127,7 +127,7 @@ static void HD_game_name(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    GameDefinition *g = currmap->episode_;
+    GameDefinition *g = current_map->episode_;
     SYS_ASSERT(g);
 
     vm->ReturnString(g->name_.c_str());
@@ -139,7 +139,7 @@ static void HD_map_name(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnString(currmap->name_.c_str());
+    vm->ReturnString(current_map->name_.c_str());
 }
 
 // hud.map_title()
@@ -148,7 +148,7 @@ static void HD_map_title(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnString(w_map_title.c_str());
+    vm->ReturnString(current_map_title.c_str());
 }
 
 // hud.map_author()
@@ -157,7 +157,7 @@ static void HD_map_author(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnString(currmap->author_.c_str());
+    vm->ReturnString(current_map->author_.c_str());
 }
 
 // hud.which_hud()
@@ -202,13 +202,13 @@ static void HD_text_font(coal::vm_c *vm, int argc)
     if (!DEF)
         I_Error("hud.text_font: Bad font name: %s\n", font_name);
 
-    font_c *font = hu_fonts.Lookup(DEF);
+    Font *font = hud_fonts.Lookup(DEF);
     SYS_ASSERT(font);
 
     if (!font)
         I_Error("hud.text_font: Bad font name: %s\n", font_name);
 
-    HUD_SetFont(font);
+    HUDSetFont(font);
 }
 
 // hud.text_color(rgb)
@@ -221,7 +221,7 @@ static void HD_text_color(coal::vm_c *vm, int argc)
 
     RGBAColor color = VM_VectorToColor(v);
 
-    HUD_SetTextColor(color);
+    HUDSetTextColor(color);
 }
 
 // hud.set_scale(value)
@@ -235,7 +235,7 @@ static void HD_set_scale(coal::vm_c *vm, int argc)
     if (scale <= 0)
         I_Error("hud.set_scale: Bad scale value: %1.3f\n", scale);
 
-    HUD_SetScale(scale);
+    HUDSetScale(scale);
 }
 
 // hud.set_alpha(value)
@@ -246,7 +246,7 @@ static void HD_set_alpha(coal::vm_c *vm, int argc)
 
     float alpha = *vm->AccessParam(0);
 
-    HUD_SetAlpha(alpha);
+    HUDSetAlpha(alpha);
 }
 
 // hud.solid_box(x, y, w, h, color)
@@ -262,7 +262,7 @@ static void HD_solid_box(coal::vm_c *vm, int argc)
 
     RGBAColor rgb = VM_VectorToColor(vm->AccessParam(4));
 
-    HUD_SolidBox(x, y, x + w, y + h, rgb);
+    HUDSolidBox(x, y, x + w, y + h, rgb);
 }
 
 // hud.solid_line(x1, y1, x2, y2, color)
@@ -278,7 +278,7 @@ static void HD_solid_line(coal::vm_c *vm, int argc)
 
     RGBAColor rgb = VM_VectorToColor(vm->AccessParam(4));
 
-    HUD_SolidLine(x1, y1, x2, y2, rgb);
+    HUDSolidLine(x1, y1, x2, y2, rgb);
 }
 
 // hud.thin_box(x, y, w, h, color)
@@ -294,7 +294,7 @@ static void HD_thin_box(coal::vm_c *vm, int argc)
 
     RGBAColor rgb = VM_VectorToColor(vm->AccessParam(4));
 
-    HUD_ThinBox(x, y, x + w, y + h, rgb);
+    HUDThinBox(x, y, x + w, y + h, rgb);
 }
 
 // hud.gradient_box(x, y, w, h, TL, BL, TR, BR)
@@ -315,7 +315,7 @@ static void HD_gradient_box(coal::vm_c *vm, int argc)
     cols[2] = VM_VectorToColor(vm->AccessParam(6));
     cols[3] = VM_VectorToColor(vm->AccessParam(7));
 
-    HUD_GradientBox(x, y, x + w, y + h, cols);
+    HUDGradientBox(x, y, x + w, y + h, cols);
 }
 
 // hud.draw_image(x, y, name, [noOffset])
@@ -337,9 +337,9 @@ static void HD_draw_image(coal::vm_c *vm, int argc)
     if (img)
     {
         if (noOffset)
-            HUD_DrawImageNoOffset(x, y, img);
+            HUDDrawImageNoOffset(x, y, img);
         else
-            HUD_DrawImage(x, y, img);
+            HUDDrawImage(x, y, img);
     }
 }
 
@@ -362,10 +362,10 @@ static void HD_scroll_image(coal::vm_c *vm, int argc)
     if (img)
     {
         if (noOffset)
-            HUD_ScrollImageNoOffset(
+            HUDScrollImageNoOffset(
                 x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
         else
-            HUD_ScrollImage(x, y, img, -sx,
+            HUDScrollImage(x, y, img, -sx,
                             -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
     }
 }
@@ -391,9 +391,9 @@ static void HD_stretch_image(coal::vm_c *vm, int argc)
     if (img)
     {
         if (noOffset)
-            HUD_StretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
+            HUDStretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
         else
-            HUD_StretchImage(x, y, w, h, img, 0.0, 0.0);
+            HUDStretchImage(x, y, w, h, img, 0.0, 0.0);
     }
 }
 
@@ -417,7 +417,7 @@ static void HD_tile_image(coal::vm_c *vm, int argc)
 
     if (img)
     {
-        HUD_TileImage(x, y, w, h, img, offset_x, offset_y);
+        HUDTileImage(x, y, w, h, img, offset_x, offset_y);
     }
 }
 
@@ -434,7 +434,7 @@ static void HD_draw_text(coal::vm_c *vm, int argc)
 
     double *size = vm->AccessParam(3);
 
-    HUD_DrawText(x, y, str, size ? *size : 0);
+    HUDDrawText(x, y, str, size ? *size : 0);
 }
 
 // hud.draw_num2(x, y, len, num, [size])
@@ -482,9 +482,9 @@ static void HD_draw_num2(coal::vm_c *vm, int argc)
             *--pos = '-';
     }
 
-    HUD_SetAlignment(+1, -1);
-    HUD_DrawText(x, y, pos, size ? *size : 0);
-    HUD_SetAlignment();
+    HUDSetAlignment(+1, -1);
+    HUDDrawText(x, y, pos, size ? *size : 0);
+    HUDSetAlignment();
 }
 
 // Lobo November 2021:
@@ -535,13 +535,13 @@ static void HD_draw_number(coal::vm_c *vm, int argc)
 
     if (align_right == 0)
     {
-        HUD_DrawText(x, y, pos, size ? *size : 0);
+        HUDDrawText(x, y, pos, size ? *size : 0);
     }
     else
     {
-        HUD_SetAlignment(+1, -1);
-        HUD_DrawText(x, y, pos, size ? *size : 0);
-        HUD_SetAlignment();
+        HUDSetAlignment(+1, -1);
+        HUDDrawText(x, y, pos, size ? *size : 0);
+        HUDSetAlignment();
     }
 }
 
@@ -606,7 +606,7 @@ static void HD_render_world(coal::vm_c *vm, int argc)
 
     double *flags = vm->AccessParam(4);
 
-    HUD_RenderWorld(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
+    HUDRenderWorld(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
 }
 
 // hud.render_automap(x, y, w, h, [flags])
@@ -637,7 +637,7 @@ static void HD_render_automap(coal::vm_c *vm, int argc)
 
     AutomapSetState(new_state, new_zoom);
 
-    HUD_RenderAutomap(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
+    HUDRenderAutomap(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
 
     AutomapSetState(old_state, old_zoom);
 }
@@ -955,7 +955,7 @@ static void HD_get_image_width(coal::vm_c *vm, int argc)
 
     if (img)
     {
-        vm->ReturnFloat(HUD_GetImageWidth(img));
+        vm->ReturnFloat(HUDGetImageWidth(img));
     }
     else
     {
@@ -974,7 +974,7 @@ static void HD_get_image_height(coal::vm_c *vm, int argc)
 
     if (img)
     {
-        vm->ReturnFloat(HUD_GetImageHeight(img));
+        vm->ReturnFloat(HUDGetImageHeight(img));
     }
     else
     {
@@ -1089,7 +1089,7 @@ void VM_EndLevel(void)
 
 void VM_RunHud(void)
 {
-    HUD_Reset();
+    HUDReset();
 
     ui_hud_who    = players[displayplayer];
     ui_player_who = players[displayplayer];
@@ -1100,7 +1100,7 @@ void VM_RunHud(void)
 
     VM_CallFunction(ui_vm, "draw_all");
 
-    HUD_Reset();
+    HUDReset();
 }
 
 //--- editor settings ---

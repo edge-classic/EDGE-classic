@@ -31,7 +31,7 @@ int N_NetUpdate();
 // returns number of ticks to run (always > 0).
 int N_TryRunTics();
 
-// restart tic counters (maketic, gametic) at zero.
+// restart tic counters (maketic, game_tic) at zero.
 void N_ResetTics(void);
 
 void N_GrabTiccmds(void);

@@ -81,7 +81,7 @@ static constexpr uint8_t kFinaleTextWaitTime = 250;
 
 static const char *finale_text;
 
-static gameaction_e            new_game_action;
+static GameAction            new_game_action;
 static const FinaleDefinition *finale;
 
 static void CastInitNew(int num);
@@ -92,8 +92,8 @@ static const image_c *finale_text_background;
 static float          finale_text_background_scale = 1.0f;
 static RGBAColor      finale_text_color;
 
-static style_c *finale_level_text_style;
-static style_c *finale_cast_style;
+static Style *finale_level_text_style;
+static Style *finale_cast_style;
 
 // forward dec
 static void DoBumpFinale(void);
@@ -160,14 +160,14 @@ static void DoStartFinale(void)
             break;
 
         case kFinaleStageBunny:
-            if (currmap->episode_)
-                S_ChangeMusic(currmap->episode_->special_music_, true);
+            if (current_map->episode_)
+                S_ChangeMusic(current_map->episode_->special_music_, true);
             break;
 
         case kFinaleStageCast:
             CastInitNew(2);
-            if (currmap->episode_)
-                S_ChangeMusic(currmap->episode_->special_music_, true);
+            if (current_map->episode_)
+                S_ChangeMusic(current_map->episode_->special_music_, true);
             break;
 
         default:
@@ -188,7 +188,7 @@ static void DoBumpFinale(void)
 
     if (stage != kFinaleStageDone)
     {
-        if (gamestate != GS_INTERMISSION) E_ForceWipe();
+        if (game_state != GS_INTERMISSION) E_ForceWipe();
 
         finale_stage = stage;
 
@@ -197,13 +197,13 @@ static void DoBumpFinale(void)
     }
 
     // capture the screen _before_ changing any global state
-    if (new_game_action != ga_nothing)
+    if (new_game_action != kGameActionNothing)
     {
         E_ForceWipe();
-        gameaction = new_game_action;
+        game_action = new_game_action;
     }
 
-    gamestate = GS_NOTHING;  // hack ???  (cannot leave as GS_FINALE)
+    game_state = GS_NOTHING;  // hack ???  (cannot leave as GS_FINALE)
 }
 
 static void LookupFinaleStuff(void)
@@ -225,17 +225,17 @@ static void LookupFinaleStuff(void)
     {
         StyleDefinition *def = styledefs.Lookup("INTERLEVEL TEXT");
         if (!def) def = default_style;
-        finale_level_text_style = hu_styles.Lookup(def);
+        finale_level_text_style = hud_styles.Lookup(def);
     }
     if (!finale_cast_style)
     {
         StyleDefinition *def = styledefs.Lookup("CAST_SCREEN");
         if (!def) def = default_style;
-        finale_cast_style = hu_styles.Lookup(def);
+        finale_cast_style = hud_styles.Lookup(def);
     }
 }
 
-void FinaleStart(const FinaleDefinition *F, gameaction_e newaction)
+void FinaleStart(const FinaleDefinition *F, GameAction newaction)
 {
     SYS_ASSERT(F);
 
@@ -246,7 +246,7 @@ void FinaleStart(const FinaleDefinition *F, gameaction_e newaction)
 
     if (stage == kFinaleStageDone)
     {
-        if (new_game_action != ga_nothing) gameaction = new_game_action;
+        if (new_game_action != kGameActionNothing) game_action = new_game_action;
 
         return /* false */;
     }
@@ -259,14 +259,14 @@ void FinaleStart(const FinaleDefinition *F, gameaction_e newaction)
 
     LookupFinaleStuff();
 
-    gamestate = GS_FINALE;
+    game_state = GS_FINALE;
 
     DoStartFinale();
 }
 
 bool FinaleResponder(InputEvent *event)
 {
-    SYS_ASSERT(gamestate == GS_FINALE);
+    SYS_ASSERT(game_state == GS_FINALE);
 
     // FIXME: use WI_CheckAccelerate() in netgames
     if (event->type != kInputEventKeyDown) return false;
@@ -285,7 +285,7 @@ bool FinaleResponder(InputEvent *event)
 
 void FinaleTicker(void)
 {
-    SYS_ASSERT(gamestate == GS_FINALE);
+    SYS_ASSERT(game_state == GS_FINALE);
 
     // advance animation
     finale_count++;
@@ -345,14 +345,14 @@ void FinaleTicker(void)
 
     if (finale_stage == kFinaleStageDone)
     {
-        if (new_game_action != ga_nothing)
+        if (new_game_action != kGameActionNothing)
         {
-            gameaction = new_game_action;
+            game_action = new_game_action;
 
             // don't come here again (for E_ForceWipe)
-            new_game_action = ga_nothing;
+            new_game_action = kGameActionNothing;
 
-            if (gamestate == GS_FINALE) E_ForceWipe();
+            if (game_state == GS_FINALE) E_ForceWipe();
         }
     }
 }
@@ -362,15 +362,15 @@ static void TextWrite(void)
     // 98-7-10 KM erase the entire screen to a tiled background
     if (finale_text_background)
     {
-        HUD_SetScale(finale_text_background_scale);
+        HUDSetScale(finale_text_background_scale);
 
         if (finale->text_flat_[0])
         {
             // AJA 2022: make the flats be square, not squished
-            HUD_SetCoordSys(266, 200);
+            HUDSetCoordinateSystem(266, 200);
 
             // Lobo: if it's a flat, tile it
-            HUD_TileImage(hud_x_left, 0, hud_x_right - hud_x_left, 200,
+            HUDTileImage(hud_x_left, 0, hud_x_right - hud_x_left, 200,
                           finale_text_background);  // Lobo: Widescreen support
         }
         else
@@ -379,17 +379,17 @@ static void TextWrite(void)
             {
                 if (!finale_text_background->blurred_version)
                     W_ImageStoreBlurred(finale_text_background, 0.75f);
-                HUD_StretchImage(-320, -200, 960, 600,
+                HUDStretchImage(-320, -200, 960, 600,
                                  finale_text_background->blurred_version, 0, 0);
             }
-            HUD_DrawImageTitleWS(finale_text_background);
+            HUDDrawImageTitleWS(finale_text_background);
         }
 
         // reset coordinate system
-        HUD_Reset();
+        HUDReset();
     }
 
-    style_c *style;
+    Style *style;
     style      = finale_level_text_style;
     int t_type = StyleDefinition::kTextSectionText;
 
@@ -404,28 +404,28 @@ static void TextWrite(void)
 
     SYS_ASSERT(finale);
 
-    // HUD_SetFont();
-    // HUD_SetScale();
-    HUD_SetTextColor(finale_text_color);  // set a default
+    // HUDSetFont();
+    // HUDSetScale();
+    HUDSetTextColor(finale_text_color);  // set a default
 
     float txtscale = 0.9;  // set a default
-    if (style->def->text_[t_type].scale_)
+    if (style->definition_->text_[t_type].scale_)
     {
-        txtscale = style->def->text_[t_type].scale_;
-        HUD_SetScale(txtscale);
+        txtscale = style->definition_->text_[t_type].scale_;
+        HUDSetScale(txtscale);
     }
 
-    if (style->def->text_[t_type].colmap_)
+    if (style->definition_->text_[t_type].colmap_)
     {
-        const Colormap *colmap = style->def->text_[t_type].colmap_;
-        HUD_SetTextColor(V_GetFontColor(colmap));
+        const Colormap *colmap = style->definition_->text_[t_type].colmap_;
+        HUDSetTextColor(V_GetFontColor(colmap));
     }
 
     int h = 11;  // set a default
-    if (style->fonts[t_type])
+    if (style->fonts_[t_type])
     {
-        HUD_SetFont(style->fonts[t_type]);
-        h = style->fonts[t_type]->NominalHeight();
+        HUDSetFont(style->fonts_[t_type]);
+        h = style->fonts_[t_type]->NominalHeight();
         h = h + (3 * txtscale);  // bit of spacing
         h = h * txtscale;
     }
@@ -441,7 +441,7 @@ static void TextWrite(void)
     {
         if (count == 0 || *ch == 0)
         {
-            HUD_DrawText(cx, cy, line);
+            HUDDrawText(cx, cy, line);
             break;
         }
 
@@ -450,7 +450,7 @@ static void TextWrite(void)
 
         if (c == '\n' || pos > (int)sizeof(line) - 4)
         {
-            HUD_DrawText(cx, cy, line);
+            HUDDrawText(cx, cy, line);
 
             pos     = 0;
             line[0] = 0;
@@ -464,9 +464,9 @@ static void TextWrite(void)
     }
 
     // set back to defaults
-    HUD_SetFont();
-    HUD_SetScale();
-    HUD_SetTextColor();
+    HUDSetFont();
+    HUDSetScale();
+    HUDSetTextColor();
 }
 
 //
@@ -699,43 +699,43 @@ static void CastDrawer(void)
 
     const image_c *image;
 
-    if (finale_cast_style->bg_image) { finale_cast_style->DrawBackground(); }
+    if (finale_cast_style->background_image_) { finale_cast_style->DrawBackground(); }
     else
     {
         image = W_ImageLookup("BOSSBACK");
         if (r_titlescaling.d_)  // Fill Border
         {
             if (!image->blurred_version) W_ImageStoreBlurred(image, 0.75f);
-            HUD_StretchImage(-320, -200, 960, 600, image->blurred_version, 0,
+            HUDStretchImage(-320, -200, 960, 600, image->blurred_version, 0,
                              0);
         }
-        HUD_DrawImageTitleWS(image);
+        HUDDrawImageTitleWS(image);
     }
 
-    HUD_SetAlignment(0, -1);
+    HUDSetAlignment(0, -1);
 
-    if (finale_cast_style->def->text_[StyleDefinition::kTextSectionText]
+    if (finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText]
             .colmap_)
     {
-        HUD_SetTextColor(V_GetFontColor(
-            finale_cast_style->def->text_[StyleDefinition::kTextSectionText]
+        HUDSetTextColor(V_GetFontColor(
+            finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText]
                 .colmap_));
     }
-    else { HUD_SetTextColor(SG_YELLOW_RGBA32); }
+    else { HUDSetTextColor(SG_YELLOW_RGBA32); }
 
     TempScale =
-        finale_cast_style->def->text_[StyleDefinition::kTextSectionText].scale_;
-    HUD_SetScale(TempScale);
+        finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
+    HUDSetScale(TempScale);
 
-    if (finale_cast_style->fonts[StyleDefinition::kTextSectionText])
+    if (finale_cast_style->fonts_[StyleDefinition::kTextSectionText])
     {
-        HUD_SetFont(
-            finale_cast_style->fonts[StyleDefinition::kTextSectionText]);
+        HUDSetFont(
+            finale_cast_style->fonts_[StyleDefinition::kTextSectionText]);
     }
 
-    HUD_DrawText(160, 180, cast_title);
+    HUDDrawText(160, 180, cast_title);
 
-    HUD_Reset();
+    HUDReset();
 
     bool flip;
 
@@ -743,18 +743,18 @@ static void CastDrawer(void)
     float scale_x, scale_y;
 
     TempScale =
-        finale_cast_style->def->text_[StyleDefinition::kTextSectionHeader]
+        finale_cast_style->definition_->text_[StyleDefinition::kTextSectionHeader]
             .scale_;
     if (TempScale < 1.0 || TempScale > 1.0)
     {
         scale_y =
-            finale_cast_style->def->text_[StyleDefinition::kTextSectionHeader]
+            finale_cast_style->definition_->text_[StyleDefinition::kTextSectionHeader]
                 .scale_;
     }
     else
         scale_y = 3;
 
-    HUD_GetCastPosition(&pos_x, &pos_y, &scale_x, &scale_y);
+    HUDGetCastPosition(&pos_x, &pos_y, &scale_x, &scale_y);
 
     if (cast_state->flags & kStateFrameFlagModel)
     {
@@ -840,9 +840,9 @@ static void BunnyScroll(void)
     if (scrolled > (TempWidth + CenterX)) scrolled = (TempWidth + CenterX);
     if (scrolled < 0) scrolled = 0;
 
-    HUD_StretchImage(CenterX - scrolled, 0, TempWidth, TempHeight, p1, 0.0,
+    HUDStretchImage(CenterX - scrolled, 0, TempWidth, TempHeight, p1, 0.0,
                      0.0);
-    HUD_StretchImage((CenterX + TempWidth) - (scrolled + 1), 0, TempWidth,
+    HUDStretchImage((CenterX + TempWidth) - (scrolled + 1), 0, TempWidth,
                      TempHeight, p2, 0.0, 0.0);
 
     if (finale_count < 1130) return;
@@ -851,7 +851,7 @@ static void BunnyScroll(void)
     {
         p1 = W_ImageLookup("END0");
 
-        HUD_DrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
+        HUDDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
         laststage = 0;
         return;
     }
@@ -870,12 +870,12 @@ static void BunnyScroll(void)
 
     p1 = W_ImageLookup(name);
 
-    HUD_DrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
+    HUDDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
 }
 
 void FinaleDrawer(void)
 {
-    SYS_ASSERT(gamestate == GS_FINALE);
+    SYS_ASSERT(game_state == GS_FINALE);
 
     switch (finale_stage)
     {
@@ -898,10 +898,10 @@ void FinaleDrawer(void)
             if (r_titlescaling.d_)  // Fill Border
             {
                 if (!image->blurred_version) W_ImageStoreBlurred(image, 0.75f);
-                HUD_StretchImage(-320, -200, 960, 600, image->blurred_version,
+                HUDStretchImage(-320, -200, 960, 600, image->blurred_version,
                                  0, 0);
             }
-            HUD_DrawImageTitleWS(image);
+            HUDDrawImageTitleWS(image);
             break;
         }
 

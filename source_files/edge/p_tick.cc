@@ -114,9 +114,9 @@ void P_Ticker(bool extra_tic)
     // for par times
     leveltime++;
 
-    if (leveltime >= exittime && gameaction == ga_nothing)
+    if (leveltime >= exit_time && game_action == kGameActionNothing)
     {
-        gameaction = ga_intermission;
+        game_action = kGameActionIntermission;
     }
 }
 

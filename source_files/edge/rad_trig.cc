@@ -77,7 +77,7 @@ class rts_menu_c
 
     rad_trigger_t *trigger;
 
-    style_c *style;
+    Style *style;
 
     std::string title;
 
@@ -87,7 +87,7 @@ class rts_menu_c
     int current_choice;
 
   public:
-    rts_menu_c(s_show_menu_t *menu, rad_trigger_t *_trigger, style_c *_style)
+    rts_menu_c(s_show_menu_t *menu, rad_trigger_t *_trigger, Style *_style)
         : trigger(_trigger), style(_style), title(), choices()
     {
         const char *text = menu->title;
@@ -167,56 +167,56 @@ class rts_menu_c
     {
         style->DrawBackground();
 
-        HUD_Reset();
+        HUDReset();
 
-        HUD_SetAlignment(0, -1);
+        HUDSetAlignment(0, -1);
 
-        HUD_SetScale(style->def->text_[2].scale_); // LOBO: Use TITLE.SCALE from styles.ddf
-        HUD_SetFont(style->fonts[2]);            // LOBO: Use TITLE.FONT from styles.ddf
+        HUDSetScale(style->definition_->text_[2].scale_); // LOBO: Use TITLE.SCALE from styles.ddf
+        HUDSetFont(style->fonts_[2]);            // LOBO: Use TITLE.FONT from styles.ddf
 
-        float total_h = HUD_StringHeight(title.c_str());
-        total_h += HUD_FontHeight() * (NumChoices() + 1);
+        float total_h = HUDStringHeight(title.c_str());
+        total_h += HUDFontHeight() * (NumChoices() + 1);
 
         float y = 100 - total_h / 2.0f;
 
-        if (style->def->text_[2].colmap_)
+        if (style->definition_->text_[2].colmap_)
         {
-            HUD_SetTextColor(V_GetFontColor(style->def->text_[2].colmap_)); // LOBO: Use TITLE.COLOURMAP from styles.ddf
+            HUDSetTextColor(V_GetFontColor(style->definition_->text_[2].colmap_)); // LOBO: Use TITLE.COLOURMAP from styles.ddf
         }
         else
         {
-            HUD_SetTextColor(SG_WHITE_RGBA32);
+            HUDSetTextColor(SG_WHITE_RGBA32);
         }
 
-        HUD_DrawText(160, y, title.c_str());
+        HUDDrawText(160, y, title.c_str());
 
-        HUD_SetScale();
-        HUD_SetFont();
-        HUD_SetTextColor();
+        HUDSetScale();
+        HUDSetFont();
+        HUDSetTextColor();
 
-        HUD_SetScale(style->def->text_[0].scale_); // LOBO: Use TEXT.SCALE from styles.ddf
-        HUD_SetFont(style->fonts[0]);            // LOBO: Use TEXT.FONT from styles.ddf
+        HUDSetScale(style->definition_->text_[0].scale_); // LOBO: Use TEXT.SCALE from styles.ddf
+        HUDSetFont(style->fonts_[0]);            // LOBO: Use TEXT.FONT from styles.ddf
 
-        y += HUD_StringHeight(title.c_str());
-        y += HUD_FontHeight();
+        y += HUDStringHeight(title.c_str());
+        y += HUDFontHeight();
 
-        if (style->def->text_[0].colmap_)
+        if (style->definition_->text_[0].colmap_)
         {
-            HUD_SetTextColor(V_GetFontColor(style->def->text_[0].colmap_)); // LOBO: Use TEXT.COLOURMAP from styles.ddf
+            HUDSetTextColor(V_GetFontColor(style->definition_->text_[0].colmap_)); // LOBO: Use TEXT.COLOURMAP from styles.ddf
         }
         else
         {
-            HUD_SetTextColor(SG_LIGHT_BLUE_RGBA32);
+            HUDSetTextColor(SG_LIGHT_BLUE_RGBA32);
         }
 
-        for (int c = 0; c < NumChoices(); c++, y += HUD_FontHeight())
+        for (int c = 0; c < NumChoices(); c++, y += HUDFontHeight())
         {
-            HUD_DrawText(160, y, choices[c].c_str());
+            HUDDrawText(160, y, choices[c].c_str());
         }
-        HUD_SetScale();
-        HUD_SetFont();
-        HUD_SetAlignment();
-        HUD_SetTextColor();
+        HUDSetScale();
+        HUDSetFont();
+        HUDSetAlignment();
+        HUDSetTextColor();
     }
 
     int CheckKey(int key)
@@ -527,7 +527,7 @@ static int RAD_AllPlayersCheckCond(rad_script_t *r, int mask)
     {
         player_t *p = players[pnum];
 
-        if (p && (mask & (1 << pnum)) && G_CheckConditions(p->mo, r->cond_trig))
+        if (p && (mask & (1 << pnum)) && GameCheckConditions(p->mo, r->cond_trig))
             result |= (1 << pnum);
     }
 
@@ -900,7 +900,7 @@ void RAD_SpawnTriggers(const char *map_name)
             continue;
 
         // -AJA- 1999/09/25: Added skill checks.
-        if (!G_CheckWhenAppear(scr->appear))
+        if (!GameCheckWhenAppear(scr->appear))
             continue;
 
         // -AJA- 2000/02/03: Added player num checks.
@@ -997,7 +997,7 @@ void RAD_StartMenu(rad_trigger_t *R, s_show_menu_t *menu)
     if (!def)
         def = default_style;
 
-    rts_curr_menu  = new rts_menu_c(menu, R, hu_styles.Lookup(def));
+    rts_curr_menu  = new rts_menu_c(menu, R, hud_styles.Lookup(def));
     rts_menuactive = true;
 }
 

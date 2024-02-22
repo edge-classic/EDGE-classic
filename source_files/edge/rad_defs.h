@@ -319,7 +319,7 @@ typedef struct s_jump_s
 typedef struct s_exit_s
 {
     // exit time, in tics
-    int exittime = 0;
+    int exit_time = 0;
 
     bool is_secret = false;
 } s_exit_t;

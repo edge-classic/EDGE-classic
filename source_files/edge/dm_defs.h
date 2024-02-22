@@ -40,7 +40,7 @@ typedef enum
     GS_LEVEL,
     GS_INTERMISSION,
     GS_FINALE,
-} gamestate_e;
+} game_state_e;
 
 //
 // Difficulty/skill settings/filters.

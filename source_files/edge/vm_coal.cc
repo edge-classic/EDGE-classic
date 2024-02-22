@@ -488,7 +488,7 @@ void VM_LoadScripts()
 
     unread_scripts.clear();
 
-    VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d_? 2 : 1));
+    VM_SetFloat(ui_vm, "sys", "game_tic", game_tic / (r_doubleframes.d_? 2 : 1));
 
     if (W_IsLumpInPwad("STBAR"))
     {

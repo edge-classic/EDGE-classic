@@ -62,10 +62,10 @@ extern ConsoleVariable bot_skill;
 
 int  netgame_menuon;
 
-static style_c *ng_host_style;
-static style_c *ng_list_style;
+static Style *ng_host_style;
+static Style *ng_list_style;
 
-static newgame_params_c *ng_params;
+static NewGameParameters *ng_params;
 
 static int host_pos;
 
@@ -77,33 +77,33 @@ static void ListAccept(void);
 
 EDGE_DEFINE_CONSOLE_VARIABLE(player_dm_dr, "9", kConsoleVariableFlagArchive)
 
-static void DrawKeyword(int index, style_c *style, int y, const char *keyword, const char *value)
+static void DrawKeyword(int index, Style *style, int y, const char *keyword, const char *value)
 {
     int x = 160;
 
     bool is_selected = (index == host_pos);
 
     x = x - 10;
-    x = x - (style->fonts[StyleDefinition::kTextSectionText]->StringWidth(keyword) * style->def->text_[StyleDefinition::kTextSectionText].scale_);
-    HL_WriteText(style, (index < 0) ? 3 : is_selected ? 2 : 0, x, y, keyword);
+    x = x - (style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(keyword) * style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
+    HUDWriteText(style, (index < 0) ? 3 : is_selected ? 2 : 0, x, y, keyword);
 
     x = 160;
-    HL_WriteText(style, StyleDefinition::kTextSectionAlternate, x + 10, y, value);
+    HUDWriteText(style, StyleDefinition::kTextSectionAlternate, x + 10, y, value);
 
     if (is_selected)
     {
-        if (style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeImage)
+        if (style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeImage)
         {
             int cursor = 16;
-            HL_WriteText(style, StyleDefinition::kTextSectionTitle,
-                         x - style->fonts[StyleDefinition::kTextSectionTitle]->StringWidth((const char *)&cursor) / 2, y,
+            HUDWriteText(style, StyleDefinition::kTextSectionTitle,
+                         x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth((const char *)&cursor) / 2, y,
                          (const char *)&cursor);
         }
-        else if (style->fonts[StyleDefinition::kTextSectionAlternate]->def->type_ == kFontTypeTrueType)
-            HL_WriteText(style, StyleDefinition::kTextSectionTitle, x - style->fonts[StyleDefinition::kTextSectionTitle]->StringWidth("+") / 2, y,
+        else if (style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType)
+            HUDWriteText(style, StyleDefinition::kTextSectionTitle, x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("+") / 2, y,
                          "+");
         else
-            HL_WriteText(style, StyleDefinition::kTextSectionTitle, x - style->fonts[StyleDefinition::kTextSectionTitle]->StringWidth("*") / 2, y,
+            HUDWriteText(style, StyleDefinition::kTextSectionTitle, x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("*") / 2, y,
                          "*");
     }
 }
@@ -220,19 +220,19 @@ void M_NetHostBegun(void)
     if (ng_params)
         delete ng_params;
 
-    ng_params = new newgame_params_c;
+    ng_params = new NewGameParameters;
 
     ng_params->CopyFlags(&global_flags);
 
-    ng_params->map = G_LookupMap("1");
+    ng_params->map_ = GameLookupMap("1");
 
-    if (!ng_params->map)
-        ng_params->map = mapdefs[0];
+    if (!ng_params->map_)
+        ng_params->map_ = mapdefs[0];
 
     host_want_bots = 0;
 }
 
-static void ChangeGame(newgame_params_c *param, int dir)
+static void ChangeGame(NewGameParameters *param, int dir)
 {
     GameDefinition *closest  = nullptr;
     GameDefinition *furthest = nullptr;
@@ -241,10 +241,10 @@ static void ChangeGame(newgame_params_c *param, int dir)
     {
         MapDefinition *first_map = mapdefs.Lookup(def->firstmap_.c_str());
 
-        if (!first_map || !G_MapExists(first_map))
+        if (!first_map || !GameMapExists(first_map))
             continue;
 
-        const char *old_name = param->map->episode_->name_.c_str();
+        const char *old_name = param->map_->episode_->name_.c_str();
         const char *new_name = def->name_.c_str();
 
         int compare = DDF_CompareName(new_name, old_name);
@@ -264,36 +264,36 @@ static void ChangeGame(newgame_params_c *param, int dir)
         }
     }
 
-    I_Debugf("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n", dir, ng_params->map->episode_->name_.c_str(),
+    I_Debugf("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n", dir, ng_params->map_->episode_->name_.c_str(),
              closest ? closest->name_.c_str() : "none", furthest ? furthest->name_.c_str() : "none");
 
     if (closest)
     {
-        param->map = mapdefs.Lookup(closest->firstmap_.c_str());
-        SYS_ASSERT(param->map);
+        param->map_ = mapdefs.Lookup(closest->firstmap_.c_str());
+        SYS_ASSERT(param->map_);
         return;
     }
 
     // could not find the next/previous map, hence wrap around
     if (furthest)
     {
-        param->map = mapdefs.Lookup(furthest->firstmap_.c_str());
-        SYS_ASSERT(param->map);
+        param->map_ = mapdefs.Lookup(furthest->firstmap_.c_str());
+        SYS_ASSERT(param->map_);
         return;
     }
 }
 
-static void ChangeLevel(newgame_params_c *param, int dir)
+static void ChangeLevel(NewGameParameters *param, int dir)
 {
     MapDefinition *closest  = nullptr;
     MapDefinition *furthest = nullptr;
 
     for (MapDefinition *def : mapdefs)
     {
-        if (def->episode_ != param->map->episode_)
+        if (def->episode_ != param->map_->episode_)
             continue;
 
-        const char *old_name = param->map->name_.c_str();
+        const char *old_name = param->map_->name_.c_str();
         const char *new_name = def->name_.c_str();
 
         int compare = DDF_CompareName(new_name, old_name);
@@ -315,13 +315,13 @@ static void ChangeLevel(newgame_params_c *param, int dir)
 
     if (closest)
     {
-        param->map = closest;
+        param->map_ = closest;
         return;
     }
 
     // could not find the next/previous map, hence wrap around
     if (furthest)
-        param->map = furthest;
+        param->map_ = furthest;
 }
 
 static void HostChangeOption(int opt, int key)
@@ -340,22 +340,22 @@ static void HostChangeOption(int opt, int key)
 
     case 2: // Mode
     {
-        ng_params->deathmatch += dir;
+        ng_params->deathmatch_ += dir;
 
-        if (ng_params->deathmatch < 0)
-            ng_params->deathmatch = 2;
-        else if (ng_params->deathmatch > 2)
-            ng_params->deathmatch = 0;
+        if (ng_params->deathmatch_ < 0)
+            ng_params->deathmatch_ = 2;
+        else if (ng_params->deathmatch_ > 2)
+            ng_params->deathmatch_ = 0;
 
         break;
     }
 
     case 3: // Skill
-        ng_params->skill = (skill_t)((int)ng_params->skill + dir);
-        if ((int)ng_params->skill < (int)sk_baby || (int)ng_params->skill > 250)
-            ng_params->skill = sk_nightmare;
-        else if ((int)ng_params->skill > (int)sk_nightmare)
-            ng_params->skill = sk_baby;
+        ng_params->skill_ = (skill_t)((int)ng_params->skill_ + dir);
+        if ((int)ng_params->skill_ < (int)sk_baby || (int)ng_params->skill_ > 250)
+            ng_params->skill_ = sk_nightmare;
+        else if ((int)ng_params->skill_ > (int)sk_nightmare)
+            ng_params->skill_ = sk_baby;
 
         break;
 
@@ -382,27 +382,27 @@ static void HostChangeOption(int opt, int key)
         break;
 
     case 7: // Monsters
-        if (ng_params->flags->fastparm)
+        if (ng_params->flags_->fastparm)
         {
-            ng_params->flags->fastparm   = false;
-            ng_params->flags->nomonsters = (dir > 0);
+            ng_params->flags_->fastparm   = false;
+            ng_params->flags_->nomonsters = (dir > 0);
         }
-        else if (ng_params->flags->nomonsters == (dir < 0))
+        else if (ng_params->flags_->nomonsters == (dir < 0))
         {
-            ng_params->flags->fastparm   = true;
-            ng_params->flags->nomonsters = false;
+            ng_params->flags_->fastparm   = true;
+            ng_params->flags_->nomonsters = false;
         }
         else
-            ng_params->flags->nomonsters = (dir < 0);
+            ng_params->flags_->nomonsters = (dir < 0);
 
         break;
 
     case 8: // Item-Respawn
-        ng_params->flags->itemrespawn = !ng_params->flags->itemrespawn;
+        ng_params->flags_->itemrespawn = !ng_params->flags_->itemrespawn;
         break;
 
     case 9: // Team-Damage
-        ng_params->flags->team_damage = !ng_params->flags->team_damage;
+        ng_params->flags_->team_damage = !ng_params->flags_->team_damage;
         break;
 
     default:
@@ -415,7 +415,7 @@ static void HostAccept(void)
     // create local player and bots
     ng_params->SinglePlayer(host_want_bots);
 
-    ng_params->level_skip = true;
+    ng_params->level_skip_ = true;
 
     netgame_menuon = 3;
 
@@ -432,36 +432,36 @@ void M_DrawHostMenu(void)
 
     int CenterX;
     CenterX = 160;
-    CenterX -= (ng_host_style->fonts[StyleDefinition::kTextSectionHeader]->StringWidth("Bot Match Settings") *
-                ng_host_style->def->text_[StyleDefinition::kTextSectionHeader].scale_) /
+    CenterX -= (ng_host_style->fonts_[StyleDefinition::kTextSectionHeader]->StringWidth("Bot Match Settings") *
+                ng_host_style->definition_->text_[StyleDefinition::kTextSectionHeader].scale_) /
                2;
 
-    HL_WriteText(ng_host_style, StyleDefinition::kTextSectionHeader, CenterX, 25, "Bot Match Settings");
+    HUDWriteText(ng_host_style, StyleDefinition::kTextSectionHeader, CenterX, 25, "Bot Match Settings");
 
     int y      = 40;
     int idx    = 0;
     int deltay = 2 +
-                 (ng_host_style->fonts[StyleDefinition::kTextSectionText]->NominalHeight() *
-                  ng_host_style->def->text_[StyleDefinition::kTextSectionText].scale_) +
-                 ng_host_style->def->entry_spacing_;
+                 (ng_host_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() *
+                  ng_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_) +
+                 ng_host_style->definition_->entry_spacing_;
 
-    if (!ng_params->map->episode_->description_.empty())
-        DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode_->description_.c_str()]);
+    if (!ng_params->map_->episode_->description_.empty())
+        DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map_->episode_->description_.c_str()]);
     else
-        DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map->episode_name_.c_str()]);
+        DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map_->episode_name_.c_str()]);
 
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, ng_host_style, y, "Level", ng_params->map->name_.c_str());
+    DrawKeyword(idx, ng_host_style, y, "Level", ng_params->map_->name_.c_str());
     y += deltay + (deltay / 2);
     idx++;
 
-    DrawKeyword(idx, ng_host_style, y, "Mode", GetModeName(ng_params->deathmatch));
+    DrawKeyword(idx, ng_host_style, y, "Mode", GetModeName(ng_params->deathmatch_));
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, ng_host_style, y, "Skill", GetSkillName(ng_params->skill));
+    DrawKeyword(idx, ng_host_style, y, "Skill", GetSkillName(ng_params->skill_));
     y += deltay;
     idx++;
 
@@ -479,32 +479,32 @@ void M_DrawHostMenu(void)
     y += deltay;
     idx++;
 
-    int x = 150 - (ng_host_style->fonts[StyleDefinition::kTextSectionText]->StringWidth("(Deathmatch Only)") *
-                   ng_host_style->def->text_[StyleDefinition::kTextSectionText].scale_);
-    HL_WriteText(ng_host_style, idx - 1 == host_pos ? 2 : 0, x, y, "(Deathmatch Only)");
+    int x = 150 - (ng_host_style->fonts_[StyleDefinition::kTextSectionText]->StringWidth("(Deathmatch Only)") *
+                   ng_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
+    HUDWriteText(ng_host_style, idx - 1 == host_pos ? 2 : 0, x, y, "(Deathmatch Only)");
     y += deltay;
 
     DrawKeyword(idx, ng_host_style, y, "Monsters",
-                ng_params->flags->nomonsters ? "OFF"
-                : ng_params->flags->fastparm ? "FAST"
+                ng_params->flags_->nomonsters ? "OFF"
+                : ng_params->flags_->fastparm ? "FAST"
                                              : "ON");
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, ng_host_style, y, "Item Respawn", ng_params->flags->itemrespawn ? "ON" : "OFF");
+    DrawKeyword(idx, ng_host_style, y, "Item Respawn", ng_params->flags_->itemrespawn ? "ON" : "OFF");
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, ng_host_style, y, "Team Damage", ng_params->flags->team_damage ? "ON" : "OFF");
+    DrawKeyword(idx, ng_host_style, y, "Team Damage", ng_params->flags_->team_damage ? "ON" : "OFF");
     y += (deltay * 2);
     idx++;
 
     CenterX = 160;
-    CenterX -= (ng_host_style->fonts[StyleDefinition::kTextSectionText]->StringWidth("Start") *
-                ng_host_style->def->text_[StyleDefinition::kTextSectionText].scale_) /
+    CenterX -= (ng_host_style->fonts_[StyleDefinition::kTextSectionText]->StringWidth("Start") *
+                ng_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_) /
                2;
 
-    HL_WriteText(ng_host_style, (host_pos == idx) ? StyleDefinition::kTextSectionHelp : StyleDefinition::kTextSectionText, CenterX, y, "Start");
+    HUDWriteText(ng_host_style, (host_pos == idx) ? StyleDefinition::kTextSectionHelp : StyleDefinition::kTextSectionText, CenterX, y, "Start");
 }
 
 bool M_NetHostResponder(InputEvent *ev, int ch)
@@ -555,16 +555,16 @@ static void NetGameStartLevel(void)
     // -KM- 1998/12/17 Clear the intermission.
     IntermissionClear();
 
-    G_DeferredNewGame(*ng_params);
+    GameDeferredNewGame(*ng_params);
 }
 
 void M_DrawPlayerList(void)
 {
-    HUD_SetAlpha(0.64f);
-    HUD_SolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
-    HUD_SetAlpha();
+    HUDSetAlpha(0.64f);
+    HUDSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
+    HUDSetAlpha();
 
-    HL_WriteText(ng_list_style, 2, 80, 10, "PLAYER LIST");
+    HUDWriteText(ng_list_style, 2, 80, 10, "PLAYER LIST");
 
     int y = 30;
     int i;
@@ -575,9 +575,9 @@ void M_DrawPlayerList(void)
     ///		if (! (ng_params->players[i] & PFL_Bot))
     ///			humans++;
 
-    for (i = 0; i < ng_params->total_players; i++)
+    for (i = 0; i < ng_params->total_players_; i++)
     {
-        int flags = ng_params->players[i];
+        int flags = ng_params->players_[i];
 
         if (flags & PFL_Bot)
             continue;
@@ -586,22 +586,22 @@ void M_DrawPlayerList(void)
 
         int bots_here = 0;
 
-        for (int j = 0; j < ng_params->total_players; j++)
+        for (int j = 0; j < ng_params->total_players_; j++)
         {
-            if ((ng_params->players[j] & PFL_Bot) && (ng_params->nodes[j] == ng_params->nodes[i]))
+            if ((ng_params->players_[j] & PFL_Bot) && (ng_params->nodes_[j] == ng_params->nodes_[i]))
                 bots_here++;
         }
 
-        HL_WriteText(ng_list_style, (flags & PFL_Network) ? 0 : 3, 20, y, epi::StringFormat("PLAYER %d", humans).c_str());
+        HUDWriteText(ng_list_style, (flags & PFL_Network) ? 0 : 3, 20, y, epi::StringFormat("PLAYER %d", humans).c_str());
 
-        HL_WriteText(ng_list_style, 1, 100, y, "Local");
+        HUDWriteText(ng_list_style, 1, 100, y, "Local");
 
-        HL_WriteText(ng_list_style, (flags & PFL_Network) ? 0 : 3, 200, y,
+        HUDWriteText(ng_list_style, (flags & PFL_Network) ? 0 : 3, 200, y,
                      epi::StringFormat("%d BOTS", bots_here).c_str());
         y += 10;
     }
 
-    HL_WriteText(ng_list_style, 2, 40, 140, "Press <ENTER> to Start Game");
+    HUDWriteText(ng_list_style, 2, 40, 140, "Press <ENTER> to Start Game");
 }
 
 static void ListAccept()
@@ -640,18 +640,18 @@ void M_NetGameInit(void)
 
     // load styles
     StyleDefinition *def;
-    style_c    *ng_default;
+    Style    *ng_default;
 
     def = styledefs.Lookup("OPTIONS");
     if (!def)
         def = default_style;
-    ng_default = hu_styles.Lookup(def);
+    ng_default = hud_styles.Lookup(def);
 
     def           = styledefs.Lookup("HOST NETGAME");
-    ng_host_style = def ? hu_styles.Lookup(def) : ng_default;
+    ng_host_style = def ? hud_styles.Lookup(def) : ng_default;
 
     def           = styledefs.Lookup("NET PLAYER LIST");
-    ng_list_style = def ? hu_styles.Lookup(def) : ng_default;
+    ng_list_style = def ? hud_styles.Lookup(def) : ng_default;
 }
 
 void M_NetGameDrawer(void)

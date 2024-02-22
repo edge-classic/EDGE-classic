@@ -54,7 +54,7 @@
 #include "dm_state.h"
 #include "e_search.h"
 #include "e_main.h"
-#include "hu_draw.h" // hudtic
+#include "hu_draw.h" // hud_tic
 #include "m_argv.h"
 #include "m_misc.h"
 #include "p_local.h"
@@ -155,7 +155,7 @@ static void do_Animate(real_image_container_c &bucket)
 
         SYS_ASSERT(rim->anim.count > 0);
 
-        rim->anim.count -= (!r_doubleframes.d_|| !(hudtic & 1)) ? 1 : 0;
+        rim->anim.count -= (!r_doubleframes.d_|| !(hud_tic & 1)) ? 1 : 0;
 
         if (rim->anim.count == 0 && rim->anim.cur->anim.next)
         {
@@ -308,7 +308,7 @@ static image_c *NewImage(int width, int height, int opacity = OPAC_Unknown)
 
     rim->liquid_type = LIQ_None;
 
-    rim->swirled_gametic = 0;
+    rim->swirled_game_tic = 0;
 
     return rim;
 }
@@ -1335,8 +1335,8 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
 
     if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
     {
-        rim->swirled_gametic = hudtic / (r_doubleframes.d_? 2 : 1);
-        tmp_img->Swirl(rim->swirled_gametic,
+        rim->swirled_game_tic = hud_tic / (r_doubleframes.d_? 2 : 1);
+        tmp_img->Swirl(rim->swirled_game_tic,
                        rim->liquid_type); // Using leveltime disabled swirl for intermission screens
     }
 
@@ -1880,7 +1880,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim, const Colormap *trans, bool d
 
     if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
     {
-        if (!erraticism_active && !time_stop_active && rim->swirled_gametic != hudtic / (r_doubleframes.d_? 2 : 1))
+        if (!erraticism_active && !time_stop_active && rim->swirled_game_tic != hud_tic / (r_doubleframes.d_? 2 : 1))
         {
             if (rc->tex_id != 0)
             {
@@ -2005,7 +2005,7 @@ bool W_InitImages(void)
 void W_UpdateImageAnims(void)
 {
     do_Animate(real_graphics);
-    if (gamestate < GS_LEVEL)
+    if (game_state < GS_LEVEL)
     {
         do_Animate(real_textures);
         do_Animate(real_flats);

@@ -597,7 +597,7 @@ void P_ActBrainMissileExplode(mobj_t *mo)
 
 void P_ActBrainDie(mobj_t *bossbrain)
 {
-    G_ExitLevel(kTicRate);
+    GameExitLevel(kTicRate);
 }
 
 void P_ActBrainSpit(mobj_t *shooter)
@@ -608,7 +608,7 @@ void P_ActBrainSpit(mobj_t *shooter)
 
     easy ^= 1;
 
-    if (gameskill <= sk_easy && (!easy))
+    if (game_skill <= sk_easy && (!easy))
         return;
 
     // shoot out a cube

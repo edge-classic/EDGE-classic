@@ -141,7 +141,7 @@ class MapDefinition
     int force_off_;
 
     // name of the next normal level
-    std::string nextmapname_;
+    std::string next_mapname_;
 
     // name of the secret level
     std::string secretmapname_;

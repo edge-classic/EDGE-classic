@@ -232,7 +232,7 @@ int ConsoleCommandArgList(char **argv, int argc)
 
 int ConsoleCommandScreenShot(char **argv, int argc)
 {
-    G_DeferredScreenShot();
+    GameDeferredScreenShot();
 
     return 0;
 }
@@ -392,7 +392,7 @@ int ConsoleCommandShowMaps(char **argv, int argc)
 
     for (int i = 0; i < mapdefs.size(); i++)
     {
-        if (G_MapExists(mapdefs[i]) && mapdefs[i]->episode_)
+        if (GameMapExists(mapdefs[i]) && mapdefs[i]->episode_)
             I_Printf("  %s           %s\n", mapdefs[i]->name_.c_str(),
                      language[mapdefs[i]->description_.c_str()]);
     }

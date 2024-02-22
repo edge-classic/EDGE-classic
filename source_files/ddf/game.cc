@@ -51,7 +51,7 @@ static const DDFCommandList gamedef_commands[] = {
     DF("PERCENT_SOUND", percent_, DDF_MainLookupSound),
     DF("DONE_SOUND", done_, DDF_MainLookupSound),
     DF("ENDMAP_SOUND", endmap_, DDF_MainLookupSound),
-    DF("NEXTMAP_SOUND", nextmap_, DDF_MainLookupSound),
+    DF("NEXTMAP_SOUND", next_map_, DDF_MainLookupSound),
     DF("ACCEL_SOUND", accel_snd_, DDF_MainLookupSound),
     DF("FRAG_SOUND", frag_snd_, DDF_MainLookupSound),
     DF("FIRSTMAP", firstmap_, DDF_MainGetLumpName),
@@ -691,7 +691,7 @@ void GameDefinition::CopyDetail(GameDefinition &src)
     percent_       = src.percent_;
     done_          = src.done_;
     endmap_        = src.endmap_;
-    nextmap_       = src.nextmap_;
+    next_map_       = src.next_map_;
     accel_snd_     = src.accel_snd_;
     frag_snd_      = src.frag_snd_;
     no_skill_menu_ = src.no_skill_menu_;
@@ -740,7 +740,7 @@ void GameDefinition::Default()
     percent_   = nullptr;
     done_      = nullptr;
     endmap_    = nullptr;
-    nextmap_   = nullptr;
+    next_map_   = nullptr;
     accel_snd_ = nullptr;
     frag_snd_  = nullptr;
 

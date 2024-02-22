@@ -259,7 +259,7 @@ static void GiveAmmo(pickup_info_t *pu, Benefit *be)
     // In Nightmare you need the extra ammo, in "baby" you are given double
     if (pu->special)
     {
-        if ((gameskill == sk_baby) || (gameskill == sk_nightmare))
+        if ((game_skill == sk_baby) || (game_skill == sk_nightmare))
             num <<= 1;
     }
 
@@ -1426,7 +1426,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         }
 
         // take half damage in trainer mode
-        if (gameskill == sk_baby)
+        if (game_skill == sk_baby)
             damage /= 2.0f;
 
         // preliminary check: immunity and resistance

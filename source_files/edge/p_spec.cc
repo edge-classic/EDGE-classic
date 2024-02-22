@@ -1271,7 +1271,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
     }
 #endif
 
-    if (!G_CheckWhenAppear(special->appear_))
+    if (!GameCheckWhenAppear(special->appear_))
     {
         if (line)
             line->special = nullptr;
@@ -1449,17 +1449,17 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
 
     if (special->e_exit_ == kExitTypeNormal)
     {
-        G_ExitLevel(5);
+        GameExitLevel(5);
         texSwitch = true;
     }
     else if (special->e_exit_ == kExitTypeSecret)
     {
-        G_SecretExitLevel(5);
+        GameSecretExitLevel(5);
         texSwitch = true;
     }
     else if (special->e_exit_ == kExitTypeHub)
     {
-        G_ExitToHub(special->hub_exit_, line ? line->tag : tag);
+        GameExitToHub(special->hub_exit_, line ? line->tag : tag);
         texSwitch = true;
     }
 
@@ -1741,12 +1741,12 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
     const SectorType *special = props->special;
     float               damage, factor;
 
-    bool extra_tic = ((gametic & 1) == 1);
+    bool extra_tic = ((game_tic & 1) == 1);
 
     if (!special || c_h < f_h)
         return;
 
-    if (!G_CheckWhenAppear(special->appear_))
+    if (!GameCheckWhenAppear(special->appear_))
         return;
 
     // breathing support
@@ -1883,9 +1883,9 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
             props->special = nullptr;
 
             if (special->e_exit_ == kExitTypeSecret)
-                G_SecretExitLevel(1);
+                GameSecretExitLevel(1);
             else
-                G_ExitLevel(1);
+                GameExitLevel(1);
         }
     }
 }
@@ -2010,7 +2010,7 @@ void P_UpdateSpecials(bool extra_tic)
         levelTimeCount -= (r_doubleframes.d_&& extra_tic) ? 0 : 1;
 
         if (!levelTimeCount)
-            G_ExitLevel(1);
+            GameExitLevel(1);
     }
 
     for (size_t i = 0; i < lightanims.size(); i++)
@@ -2509,7 +2509,7 @@ void P_SpawnSpecials1(void)
         }
 
         // -AJA- 1999/10/23: weed out non-appearing lines.
-        if (!G_CheckWhenAppear(special->appear_))
+        if (!GameCheckWhenAppear(special->appear_))
         {
             lines[i].special = nullptr;
             continue;
@@ -2593,7 +2593,7 @@ void P_SpawnSpecials2(int autotag)
 
         secSpecial = sector->props.special;
 
-        if (!G_CheckWhenAppear(secSpecial->appear_))
+        if (!GameCheckWhenAppear(secSpecial->appear_))
         {
             P_SectorChangeSpecial(sector, 0);
             continue;

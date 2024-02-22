@@ -69,7 +69,7 @@ void RGL_SetupMatrices2D(void)
 //
 // RGL_SetupMatricesWorld2D
 //
-// Setup the GL matrices for drawing 2D stuff within the "world" rendered by HUD_RenderWorld
+// Setup the GL matrices for drawing 2D stuff within the "world" rendered by HUDRenderWorld
 //
 void RGL_SetupMatricesWorld2D(void)
 {

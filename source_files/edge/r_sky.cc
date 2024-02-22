@@ -24,7 +24,7 @@
 #include "image_data.h"
 
 #include "dm_state.h"
-#include "g_game.h" // currmap
+#include "g_game.h" // current_map
 #include "m_math.h"
 #include "r_misc.h"
 #include "w_flat.h"
@@ -371,8 +371,8 @@ static void RGL_DrawSkyCylinder(void)
 {
     GLuint sky = W_ImageCache(sky_image, false, ren_fx_colmap);
 
-    if (currmap->forced_skystretch_ > kSkyStretchUnset)
-        current_sky_stretch = currmap->forced_skystretch_;
+    if (current_map->forced_skystretch_ > kSkyStretchUnset)
+        current_sky_stretch = current_map->forced_skystretch_;
     else if (!level_flags.mlook)
         current_sky_stretch = kSkyStretchVanilla;
     else
@@ -400,8 +400,8 @@ static void RGL_DrawSkyCylinder(void)
         solid_sky_h = sky_h_ratio * 0.75f;
     float cap_z = dist * sky_h_ratio;
 
-    RGBAColor fc_to_use = currmap->outdoor_fog_color_;
-    float    fd_to_use = 0.01f * currmap->outdoor_fog_density_;
+    RGBAColor fc_to_use = current_map->outdoor_fog_color_;
+    float    fd_to_use = 0.01f * current_map->outdoor_fog_density_;
     // check for sector fog
     if (fc_to_use == kRGBANoValue)
     {
@@ -564,8 +564,8 @@ static void RGL_DrawSkyBox(void)
     else
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, col);
 
-    RGBAColor fc_to_use = currmap->outdoor_fog_color_;
-    float    fd_to_use = 0.01f * currmap->outdoor_fog_density_;
+    RGBAColor fc_to_use = current_map->outdoor_fog_color_;
+    float    fd_to_use = 0.01f * current_map->outdoor_fog_density_;
     // check for sector fog
     if (fc_to_use == kRGBANoValue)
     {

@@ -131,7 +131,7 @@ static bool solid_mode;
 
 static std::list<drawsub_c *> drawsubs;
 
-static std::unordered_map<const image_c *, GLuint> frame_texids;
+static std::unordered_map<const image_c *, GLuint> frame_texture_ids;
 
 // ========= MIRROR STUFF ===========
 
@@ -461,11 +461,11 @@ static void MIR_Pop()
 static GLuint R_ImageCache(const image_c *image, bool anim = true, const Colormap *trans = nullptr)
 {
     // (need to load the image to know the opacity)
-    auto frameid = frame_texids.find(image);
-    if (frameid == frame_texids.end())
+    auto frameid = frame_texture_ids.find(image);
+    if (frameid == frame_texture_ids.end())
     {
         GLuint tex_id = W_ImageCache(image, true, ren_fx_colmap);
-        frame_texids.emplace(image, tex_id);
+        frame_texture_ids.emplace(image, tex_id);
         return tex_id;
     }
     else
@@ -616,7 +616,7 @@ typedef struct wall_plane_data_s
 // Adapted from Quake 3 GPL release - Dasho (not used yet, but might be for future effects)
 /*static void CalcScrollTexCoords( float x_scroll, float y_scroll, HMM_Vec2 *texc )
 {
-    float timeScale = gametic / (r_doubleframes.d_? 200.0f : 100.0f);
+    float timeScale = game_tic / (r_doubleframes.d_? 200.0f : 100.0f);
     float adjustedScrollS, adjustedScrollT;
 
     adjustedScrollS = x_scroll * timeScale;
@@ -1019,12 +1019,12 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
         tex_x2 = tmp_x;
     }
 
-    SYS_ASSERT(currmap);
+    SYS_ASSERT(current_map);
 
     int lit_adjust = 0;
 
     // do the N/S/W/E bizzo...
-    if (!r_forceflatlighting.d_&& currmap->episode_->lighting_ == kLightingModelDoom && props->lightlevel > 0)
+    if (!r_forceflatlighting.d_&& current_map->episode_->lighting_ == kLightingModelDoom && props->lightlevel > 0)
     {
         if (AlmostEquals(cur_seg->v1->Y, cur_seg->v2->Y))
             lit_adjust -= 16;
@@ -1502,13 +1502,13 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
     {
         if (IS_SKY(seg->sidedef->sector->ceil))
         {
-            sec_fc = currmap->outdoor_fog_color_;
-            sec_fd = 0.01f * currmap->outdoor_fog_density_;
+            sec_fc = current_map->outdoor_fog_color_;
+            sec_fd = 0.01f * current_map->outdoor_fog_density_;
         }
         else
         {
-            sec_fc = currmap->indoor_fog_color_;
-            sec_fd = 0.01f * currmap->indoor_fog_density_;
+            sec_fc = current_map->indoor_fog_color_;
+            sec_fd = 0.01f * current_map->indoor_fog_density_;
         }
     }
     RGBAColor other_fc = (other ? other->props.fog_color : kRGBANoValue);
@@ -1519,13 +1519,13 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         {
             if (IS_SKY(other->ceil))
             {
-                other_fc = currmap->outdoor_fog_color_;
-                other_fd = 0.01f * currmap->outdoor_fog_density_;
+                other_fc = current_map->outdoor_fog_color_;
+                other_fd = 0.01f * current_map->outdoor_fog_density_;
             }
             else
             {
-                other_fc = currmap->indoor_fog_color_;
-                other_fd = 0.01f * currmap->indoor_fog_density_;
+                other_fc = current_map->indoor_fog_color_;
+                other_fd = 0.01f * current_map->indoor_fog_density_;
             }
         }
     }
@@ -3253,8 +3253,8 @@ static void RGL_RenderTrueBSP(void)
 
     RGL_SetupMatrices3D();
 
-    frame_texids.clear();
-    frame_texids.reserve(1024);
+    frame_texture_ids.clear();
+    frame_texture_ids.reserve(1024);
 
     glClear(GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);

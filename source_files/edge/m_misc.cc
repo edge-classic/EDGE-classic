@@ -47,7 +47,7 @@
 #include "e_player.h"
 #include "g_game.h"
 #include "hu_draw.h"
-#include "hu_stuff.h" // only for showMessages
+#include "hu_stuff.h" // only for show_messages
 #include "m_argv.h"
 #include "m_menu.h"
 #include "m_misc.h"
@@ -92,7 +92,7 @@ static default_t defaults[] = {
     {CFGT_Boolean, "dynamic_reverb", &dynamic_reverb, 0},
     {CFGT_Int, "mix_channels", &var_mix_channels, CFGDEF_MIX_CHANNELS},
 
-    {CFGT_Int, "show_messages", &showMessages, CFGDEF_SHOWMESSAGES},
+    {CFGT_Int, "show_messages", &show_messages, CFGDEF_SHOWMESSAGES},
 
     // -ES- 1998/11/28 Save fade settings
     {CFGT_Int, "reduce_flash", &reduce_flash, 0},

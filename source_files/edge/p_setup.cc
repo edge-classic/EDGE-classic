@@ -154,7 +154,7 @@ static std::unordered_map<std::string, musinfo_mapping_s> musinfo_tracks;
 
 static void GetMUSINFOTracksForLevel(void)
 {
-    if (musinfo_tracks.count(currmap->name_) && musinfo_tracks[currmap->name_].processed)
+    if (musinfo_tracks.count(current_map->name_) && musinfo_tracks[current_map->name_].processed)
         return;
     int   raw_length = 0;
     uint8_t *raw_musinfo   = W_OpenPackOrLumpInMemory("MUSINFO", {".txt"}, &raw_length);
@@ -165,8 +165,8 @@ static void GetMUSINFOTracksForLevel(void)
     memcpy(musinfo.data(), raw_musinfo, raw_length);
     delete[] raw_musinfo;
     epi::Lexer lex(musinfo);
-    if (!musinfo_tracks.count(currmap->name_))
-        musinfo_tracks.try_emplace({currmap->name_, {}});
+    if (!musinfo_tracks.count(current_map->name_))
+        musinfo_tracks.try_emplace({current_map->name_, {}});
     for (;;)
     {
         std::string       section;
@@ -175,7 +175,7 @@ static void GetMUSINFOTracksForLevel(void)
         if (tok != epi::kTokenNumber && tok != epi::kTokenIdentifier)
             break;
         
-        if (epi::StringCaseCompareASCII(section, currmap->name_) != 0)
+        if (epi::StringCaseCompareASCII(section, current_map->name_) != 0)
             continue;
         
         // Parse "block" for current map
@@ -201,7 +201,7 @@ static void GetMUSINFOTracksForLevel(void)
                 int ddf_track = playlist.FindLast(value.c_str());
                 if (ddf_track != -1) // Entry exists
                 {
-                    musinfo_tracks[currmap->name_].mappings.try_emplace(mus_number, ddf_track);
+                    musinfo_tracks[current_map->name_].mappings.try_emplace(mus_number, ddf_track);
                 }
                 else
                 {
@@ -212,7 +212,7 @@ static void GetMUSINFOTracksForLevel(void)
                     dynamic_plentry->type_     = kDDFMusicUnknown;
                     dynamic_plentry->infotype_ = kDDFMusicDataLump;
                     playlist.push_back(dynamic_plentry);
-                    musinfo_tracks[currmap->name_].mappings.try_emplace(mus_number, dynamic_plentry->number_);
+                    musinfo_tracks[current_map->name_].mappings.try_emplace(mus_number, dynamic_plentry->number_);
                 }
                 mus_number = -1;
             }
@@ -292,14 +292,14 @@ static void LoadVertexes(int lump)
     vertex_t           *li;
 
     if (!W_VerifyLumpName(lump, "VERTEXES"))
-        I_Error("Bad WAD: level %s missing VERTEXES.\n", currmap->lump_.c_str());
+        I_Error("Bad WAD: level %s missing VERTEXES.\n", current_map->lump_.c_str());
 
     // Determine number of lumps:
     //  total lump length / vertex record length.
     numvertexes = W_LumpLength(lump) / sizeof(raw_vertex_t);
 
     if (numvertexes == 0)
-        I_Error("Bad WAD: level %s contains 0 vertexes.\n", currmap->lump_.c_str());
+        I_Error("Bad WAD: level %s contains 0 vertexes.\n", current_map->lump_.c_str());
 
     vertexes = new vertex_t[numvertexes];
 
@@ -401,13 +401,13 @@ static void LoadSectors(int lump)
         // Check if SECTORS is immediately after THINGS/LINEDEFS/SIDEDEFS/VERTEXES
         lump -= 3;
         if (!W_VerifyLumpName(lump, "SECTORS"))
-            I_Error("Bad WAD: level %s missing SECTORS.\n", currmap->lump_.c_str());
+            I_Error("Bad WAD: level %s missing SECTORS.\n", current_map->lump_.c_str());
     }
 
     numsectors = W_LumpLength(lump) / sizeof(raw_sector_t);
 
     if (numsectors == 0)
-        I_Error("Bad WAD: level %s contains 0 sectors.\n", currmap->lump_.c_str());
+        I_Error("Bad WAD: level %s contains 0 sectors.\n", current_map->lump_.c_str());
 
     sectors = new sector_t[numsectors];
     Z_Clear(sectors, sector_t, numsectors);
@@ -570,7 +570,7 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
     // count deathmatch start positions
     if (info->playernum_ < 0)
     {
-        G_AddDeathmatchStart(point);
+        GameAddDeathmatchStart(point);
         return nullptr;
     }
 
@@ -585,19 +585,19 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
 
             point.tag = sec->tag;
 
-            G_AddHubStart(point);
+            GameAddHubStart(point);
             return nullptr;
         }
 
         // -AJA- 2004/12/30: for duplicate players, the LAST one must
         //       be used (so levels with Voodoo dolls work properly).
-        spawnpoint_t *prev = G_FindCoopPlayer(info->playernum_);
+        spawnpoint_t *prev = GameFindCoopPlayer(info->playernum_);
 
         if (!prev)
-            G_AddCoopStart(point);
+            GameAddCoopStart(point);
         else
         {
-            G_AddVoodooDoll(*prev);
+            GameAddVoodooDoll(*prev);
 
             // overwrite one in the Coop list with new location
             memcpy(prev, &point, sizeof(point));
@@ -624,12 +624,12 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
 
     int bit;
 
-    if (gameskill == sk_baby)
+    if (game_skill == sk_baby)
         bit = 1;
-    else if (gameskill == sk_nightmare)
+    else if (game_skill == sk_nightmare)
         bit = 4;
     else
-        bit = 1 << (gameskill - 1);
+        bit = 1 << (game_skill - 1);
 
     if ((options & bit) == 0)
         return nullptr;
@@ -693,12 +693,12 @@ static void LoadThings(int lump)
     const MapObjectDefinition  *objtype;
 
     if (!W_VerifyLumpName(lump, "THINGS"))
-        I_Error("Bad WAD: level %s missing THINGS.\n", currmap->lump_.c_str());
+        I_Error("Bad WAD: level %s missing THINGS.\n", current_map->lump_.c_str());
 
     mapthing_NUM = W_LumpLength(lump) / sizeof(raw_thing_t);
 
     if (mapthing_NUM == 0)
-        I_Error("Bad WAD: level %s contains 0 things.\n", currmap->lump_.c_str());
+        I_Error("Bad WAD: level %s contains 0 things.\n", current_map->lump_.c_str());
 
     data = W_LoadLump(lump);
     mapthing_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
@@ -754,7 +754,7 @@ static void LoadThings(int lump)
 
         sector_t *sec = R_PointInSubsector(x, y)->sector;
 
-        if ((objtype->hyperflags_ & kHyperFlagMusicChanger) && !musinfo_tracks[currmap->name_].processed)
+        if ((objtype->hyperflags_ & kHyperFlagMusicChanger) && !musinfo_tracks[current_map->name_].processed)
         {
             // This really should only be used with the original DoomEd number range
             if (objtype->number_ >= 14100 && objtype->number_ < 14165)
@@ -762,14 +762,14 @@ static void LoadThings(int lump)
                 int mus_number = -1;
 
                 if (objtype->number_ == 14100) // Default for level
-                    mus_number = currmap->music_;
-                else if (musinfo_tracks[currmap->name_].mappings.count(objtype->number_ - 14100))
-                    mus_number = musinfo_tracks[currmap->name_].mappings[objtype->number_ - 14100];
+                    mus_number = current_map->music_;
+                else if (musinfo_tracks[current_map->name_].mappings.count(objtype->number_ - 14100))
+                    mus_number = musinfo_tracks[current_map->name_].mappings[objtype->number_ - 14100];
                 // Track found; make ad-hoc RTS script for music changing
                 if (mus_number != -1)
                 {
                     std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
-                    mus_rts.append(epi::StringFormat("START_MAP %s\n", currmap->name_.c_str()));
+                    mus_rts.append(epi::StringFormat("START_MAP %s\n", current_map->name_.c_str()));
                     mus_rts.append(epi::StringFormat("  SECTOR_TRIGGER_INDEX %d\n", sec - sectors));
                     mus_rts.append("    TAGGED_INDEPENDENT\n");
                     mus_rts.append("    TAGGED_REPEATABLE\n");
@@ -807,7 +807,7 @@ static void LoadThings(int lump)
 
     // Mark MUSINFO for this level as done processing, even if it was empty,
     // so we can avoid re-checks
-    musinfo_tracks[currmap->name_].processed = true;
+    musinfo_tracks[current_map->name_].processed = true;
 
     delete[] data;
 }
@@ -827,12 +827,12 @@ static void LoadHexenThings(int lump)
     const MapObjectDefinition        *objtype;
 
     if (!W_VerifyLumpName(lump, "THINGS"))
-        I_Error("Bad WAD: level %s missing THINGS.\n", currmap->lump_.c_str());
+        I_Error("Bad WAD: level %s missing THINGS.\n", current_map->lump_.c_str());
 
     mapthing_NUM = W_LumpLength(lump) / sizeof(raw_hexen_thing_t);
 
     if (mapthing_NUM == 0)
-        I_Error("Bad WAD: level %s contains 0 things.\n", currmap->lump_.c_str());
+        I_Error("Bad WAD: level %s contains 0 things.\n", current_map->lump_.c_str());
 
     data = W_LoadLump(lump);
     mapthing_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
@@ -921,7 +921,7 @@ static inline void ComputeLinedefData(line_t *ld, int side0, int side1)
     // handle missing RIGHT sidedef (idea taken from MBF)
     if (side0 == -1)
     {
-        I_Warning("Bad WAD: level %s linedef #%d is missing RIGHT side\n", currmap->lump_.c_str(), (int)(ld - lines));
+        I_Warning("Bad WAD: level %s linedef #%d is missing RIGHT side\n", current_map->lump_.c_str(), (int)(ld - lines));
         side0 = 0;
     }
 
@@ -929,7 +929,7 @@ static inline void ComputeLinedefData(line_t *ld, int side0, int side1)
     {
         I_Warning("Bad WAD: level %s has linedef #%d marked TWOSIDED, "
                   "but it has only one side.\n",
-                  currmap->lump_.c_str(), (int)(ld - lines));
+                  current_map->lump_.c_str(), (int)(ld - lines));
 
         ld->flags &= ~MLF_TwoSided;
     }
@@ -949,12 +949,12 @@ static void LoadLineDefs(int lump)
     //       "wall tiles" properly.
 
     if (!W_VerifyLumpName(lump, "LINEDEFS"))
-        I_Error("Bad WAD: level %s missing LINEDEFS.\n", currmap->lump_.c_str());
+        I_Error("Bad WAD: level %s missing LINEDEFS.\n", current_map->lump_.c_str());
 
     numlines = W_LumpLength(lump) / sizeof(raw_linedef_t);
 
     if (numlines == 0)
-        I_Error("Bad WAD: level %s contains 0 linedefs.\n", currmap->lump_.c_str());
+        I_Error("Bad WAD: level %s contains 0 linedefs.\n", current_map->lump_.c_str());
 
     lines = new line_t[numlines];
 
@@ -1029,12 +1029,12 @@ static void LoadHexenLineDefs(int lump)
     // -AJA- 2001/08/04: wrote this, based on the Hexen specs.
 
     if (!W_VerifyLumpName(lump, "LINEDEFS"))
-        I_Error("Bad WAD: level %s missing LINEDEFS.\n", currmap->lump_.c_str());
+        I_Error("Bad WAD: level %s missing LINEDEFS.\n", current_map->lump_.c_str());
 
     numlines = W_LumpLength(lump) / sizeof(raw_hexen_linedef_t);
 
     if (numlines == 0)
-        I_Error("Bad WAD: level %s contains 0 linedefs.\n", currmap->lump_.c_str());
+        I_Error("Bad WAD: level %s contains 0 linedefs.\n", current_map->lump_.c_str());
 
     lines = new line_t[numlines];
 
@@ -1372,7 +1372,7 @@ static void LoadXGL3Nodes(int lumpnum)
         seg_t **prevptr = &ss->segs;
 
         if (countsegs == 0)
-            I_Error("LoadXGL3Nodes: level %s has invalid SSECTORS.\n", currmap->lump_.c_str());
+            I_Error("LoadXGL3Nodes: level %s has invalid SSECTORS.\n", current_map->lump_.c_str());
 
         ss->sector    = nullptr;
         ss->thinglist = nullptr;
@@ -2074,13 +2074,13 @@ static void LoadUDMFSideDefs()
 
         if (side0 >= nummapsides)
         {
-            I_Warning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", currmap->lump_.c_str(), i);
+            I_Warning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", current_map->lump_.c_str(), i);
             side0 = nummapsides - 1;
         }
 
         if (side1 != -1 && side1 >= nummapsides)
         {
-            I_Warning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", currmap->lump_.c_str(), i);
+            I_Warning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", current_map->lump_.c_str(), i);
             side1 = nummapsides - 1;
         }
 
@@ -2442,7 +2442,7 @@ static void LoadUDMFThings()
 
             sector_t *sec = R_PointInSubsector(x, y)->sector;
 
-            if ((objtype->hyperflags_ & kHyperFlagMusicChanger) && !musinfo_tracks[currmap->name_].processed)
+            if ((objtype->hyperflags_ & kHyperFlagMusicChanger) && !musinfo_tracks[current_map->name_].processed)
             {
                 // This really should only be used with the original DoomEd number range
                 if (objtype->number_ >= 14100 && objtype->number_ < 14165)
@@ -2450,16 +2450,16 @@ static void LoadUDMFThings()
                     int mus_number = -1;
 
                     if (objtype->number_ == 14100) // Default for level
-                        mus_number = currmap->music_;
-                    else if (musinfo_tracks[currmap->name_].mappings.count(objtype->number_ - 14100))
+                        mus_number = current_map->music_;
+                    else if (musinfo_tracks[current_map->name_].mappings.count(objtype->number_ - 14100))
                     {
-                        mus_number = musinfo_tracks[currmap->name_].mappings[objtype->number_ - 14100];
+                        mus_number = musinfo_tracks[current_map->name_].mappings[objtype->number_ - 14100];
                     }
                     // Track found; make ad-hoc RTS script for music changing
                     if (mus_number != -1)
                     {
                         std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
-                        mus_rts.append(epi::StringFormat("START_MAP %s\n", currmap->name_.c_str()));
+                        mus_rts.append(epi::StringFormat("START_MAP %s\n", current_map->name_.c_str()));
                         mus_rts.append(epi::StringFormat("  SECTOR_TRIGGER_INDEX %d\n", sec - sectors));
                         mus_rts.append("    TAGGED_INDEPENDENT\n");
                         mus_rts.append("    TAGGED_REPEATABLE\n");
@@ -2531,7 +2531,7 @@ static void LoadUDMFThings()
 
     // Mark MUSINFO for this level as done processing, even if it was empty,
     // so we can avoid re-checks
-    musinfo_tracks[currmap->name_].processed = true;
+    musinfo_tracks[current_map->name_].processed = true;
 
     I_Debugf("LoadUDMFThings: finished parsing TEXTMAP\n");
 }
@@ -2563,7 +2563,7 @@ static void LoadUDMFCounts()
                 {
                     I_Warning("UDMF: %s uses unsupported namespace \"%s\"!\nSupported namespaces are \"doom\", "
                               "\"heretic\", \"edge-classic\", or \"zdoomtranslated\"!\n",
-                              currmap->lump_.c_str(), section.c_str());
+                              current_map->lump_.c_str(), section.c_str());
                 }
             }
 
@@ -2635,7 +2635,7 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
 
     if (sec_num < 0)
     {
-        I_Warning("Level %s has sidedef with bad sector ref (%d)\n", currmap->lump_.c_str(), sec_num);
+        I_Warning("Level %s has sidedef with bad sector ref (%d)\n", current_map->lump_.c_str(), sec_num);
         sec_num = 0;
     }
     sd->sector = &sectors[sec_num];
@@ -2705,12 +2705,12 @@ static void LoadSideDefs(int lump)
     int nummapsides;
 
     if (!W_VerifyLumpName(lump, "SIDEDEFS"))
-        I_Error("Bad WAD: level %s missing SIDEDEFS.\n", currmap->lump_.c_str());
+        I_Error("Bad WAD: level %s missing SIDEDEFS.\n", current_map->lump_.c_str());
 
     nummapsides = W_LumpLength(lump) / sizeof(raw_sidedef_t);
 
     if (nummapsides == 0)
-        I_Error("Bad WAD: level %s contains 0 sidedefs.\n", currmap->lump_.c_str());
+        I_Error("Bad WAD: level %s contains 0 sidedefs.\n", current_map->lump_.c_str());
 
     sides = new side_t[numsides];
 
@@ -2734,13 +2734,13 @@ static void LoadSideDefs(int lump)
 
         if (side0 >= nummapsides)
         {
-            I_Warning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", currmap->lump_.c_str(), i);
+            I_Warning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", current_map->lump_.c_str(), i);
             side0 = nummapsides - 1;
         }
 
         if (side1 != -1 && side1 >= nummapsides)
         {
-            I_Warning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", currmap->lump_.c_str(), i);
+            I_Warning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", current_map->lump_.c_str(), i);
             side1 = nummapsides - 1;
         }
 
@@ -3587,9 +3587,9 @@ void ShutdownLevel(void)
 void P_SetupLevel(void)
 {
     // Sets up the current level using the skill passed and the
-    // information in currmap.
+    // information in current_map.
     //
-    // -ACB- 1998/08/09 Use currmap to ref lump and par time
+    // -ACB- 1998/08/09 Use current_map to ref lump and par time
 
     if (level_active)
         ShutdownLevel();
@@ -3600,12 +3600,12 @@ void P_SetupLevel(void)
     seen_monsters.clear();
 
     // get lump for map header e.g. MAP01
-    int lumpnum = W_CheckNumForName_MAP(currmap->lump_.c_str());
+    int lumpnum = W_CheckNumForName_MAP(current_map->lump_.c_str());
     if (lumpnum < 0)
-        I_Error("No such level: %s\n", currmap->lump_.c_str());
+        I_Error("No such level: %s\n", current_map->lump_.c_str());
 
     // get lump for XGL3 nodes from an XWA file
-    int xgl_lump = W_CheckNumForName_XGL(currmap->lump_.c_str());
+    int xgl_lump = W_CheckNumForName_XGL(current_map->lump_.c_str());
 
     // ignore XGL nodes if it occurs _before_ the normal level marker.
     // [ something has gone horribly wrong if this happens! ]
@@ -3707,14 +3707,14 @@ void P_SetupLevel(void)
     for (int j = 0; j < numsectors; j++)
         P_RecomputeGapsAroundSector(sectors + j);
 
-    G_ClearBodyQueue();
+    GameClearBodyQueue();
 
     // set up world state
     // (must be before loading things to create Extrafloors)
     P_SpawnSpecials1();
 
     // -AJA- 1999/10/21: Clear out player starts (ready to load).
-    G_ClearPlayerStarts();
+    GameClearPlayerStarts();
 
     unknown_thing_map.clear();
 
@@ -3738,7 +3738,7 @@ void P_SetupLevel(void)
 
     CreateVertexSeclists();
 
-    P_SpawnSpecials2(currmap->autotag_);
+    P_SpawnSpecials2(current_map->autotag_);
 
     AutomapInitLevel();
 
@@ -3753,7 +3753,7 @@ void P_SetupLevel(void)
 
     // FIXME: cache sounds (esp. for player)
 
-    S_ChangeMusic(currmap->music_, true); // start level music
+    S_ChangeMusic(current_map->music_, true); // start level music
 
     level_active = true;
 }
@@ -3765,7 +3765,7 @@ void P_Init(void)
     // There should not yet exist a player
     SYS_ASSERT(numplayers == 0);
 
-    G_ClearPlayerStarts();
+    GameClearPlayerStarts();
 }
 
 LineType *P_LookupLineType(int num)

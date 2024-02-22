@@ -35,7 +35,7 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_main.h"
-#include "g_game.h" // currmap
+#include "g_game.h" // current_map
 #include "e_player.h"
 #include "m_argv.h"
 #include "r_misc.h"
@@ -734,13 +734,13 @@ class colormap_shader_c : public abstract_shader_c
         {
             if (IS_SKY(sec->ceil))
             {
-                fc_to_use = currmap->outdoor_fog_color_;
-                fd_to_use = 0.01f * currmap->outdoor_fog_density_;
+                fc_to_use = current_map->outdoor_fog_color_;
+                fd_to_use = 0.01f * current_map->outdoor_fog_density_;
             }
             else
             {
-                fc_to_use = currmap->indoor_fog_color_;
-                fd_to_use = 0.01f * currmap->indoor_fog_density_;
+                fc_to_use = current_map->indoor_fog_color_;
+                fd_to_use = 0.01f * current_map->indoor_fog_density_;
             }
         }
 
@@ -881,7 +881,7 @@ class colormap_shader_c : public abstract_shader_c
     void Update()
     {
         if (fade_tex == 0 || (r_forceflatlighting.d_&& lt_model != kLightingModelFlat) ||
-            (!r_forceflatlighting.d_&& lt_model != currmap->episode_->lighting_))
+            (!r_forceflatlighting.d_&& lt_model != current_map->episode_->lighting_))
         {
             if (fade_tex != 0)
             {
@@ -891,7 +891,7 @@ class colormap_shader_c : public abstract_shader_c
             if (r_forceflatlighting.d_)
                 lt_model = kLightingModelFlat;
             else
-                lt_model = currmap->episode_->lighting_;
+                lt_model = current_map->episode_->lighting_;
 
             MakeColormapTexture(0);
         }

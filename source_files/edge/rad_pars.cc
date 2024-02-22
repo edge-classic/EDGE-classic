@@ -1297,12 +1297,12 @@ static void RAD_ParseExitLevel(param_set_t &pars)
 
     s_exit_t *exit = new s_exit_t;
 
-    exit->exittime  = 10;
+    exit->exit_time  = 10;
     exit->is_secret = DDF_CompareName("SECRETEXIT", pars[0]) == 0;
 
     if (pars.size() >= 2)
     {
-        RAD_CheckForTime(pars[1], &exit->exittime);
+        RAD_CheckForTime(pars[1], &exit->exit_time);
     }
 
     AddStateToScript(this_rad, 0, RAD_ActExitLevel, exit);

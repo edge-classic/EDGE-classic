@@ -81,7 +81,7 @@ static std::vector<spawnpoint_t> hub_starts;
 
 static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub);
 
-void G_ClearPlayerStarts(void)
+void GameClearPlayerStarts(void)
 {
     dm_starts.clear();
     coop_starts.clear();
@@ -89,14 +89,14 @@ void G_ClearPlayerStarts(void)
     hub_starts.clear();
 }
 
-void G_ClearBodyQueue(void)
+void GameClearBodyQueue(void)
 {
     memset(bodyqueue, 0, sizeof(bodyqueue));
 
     bodyqueue_size = 0;
 }
 
-void G_AddBodyToQueue(mobj_t *mo)
+void GameAddBodyToQueue(mobj_t *mo)
 {
     // flush an old corpse if needed
     if (bodyqueue_size >= MAX_BODIES)
@@ -118,7 +118,7 @@ void G_AddBodyToQueue(mobj_t *mo)
 // Called when a player completes a level.
 // For HUB changes, we keep powerups and keycards
 //
-void G_PlayerFinishLevel(player_t *p, bool keep_cards)
+void GamePlayerFinishLevel(player_t *p, bool keep_cards)
 {
     if (!keep_cards)
     {
@@ -233,7 +233,7 @@ void player_s::Reborn()
 // Returns false if the player cannot be respawned at the given spot
 // because something is occupying it.
 //
-static bool G_CheckSpot(player_t *player, const spawnpoint_t *point)
+static bool GameCheckSpot(player_t *player, const spawnpoint_t *point)
 {
     float x = point->x;
     float y = point->y;
@@ -260,7 +260,7 @@ static bool G_CheckSpot(player_t *player, const spawnpoint_t *point)
     if (!P_CheckAbsPosition(player->mo, x, y, z))
         return false;
 
-    G_AddBodyToQueue(player->mo);
+    GameAddBodyToQueue(player->mo);
 
     // spawn a teleport fog
     // (temp fix for teleport effect)
@@ -273,12 +273,12 @@ static bool G_CheckSpot(player_t *player, const spawnpoint_t *point)
 }
 
 //
-// G_SetConsolePlayer
+// GameSetConsolePlayer
 //
 // Note: we don't rely on current value being valid, hence can use
 //       these functions during initialisation.
 //
-void G_SetConsolePlayer(int pnum)
+void GameSetConsolePlayer(int pnum)
 {
     consoleplayer = pnum;
 
@@ -302,9 +302,9 @@ void G_SetConsolePlayer(int pnum)
 }
 
 //
-// G_SetDisplayPlayer
+// GameSetDisplayPlayer
 //
-void G_SetDisplayPlayer(int pnum)
+void GameSetDisplayPlayer(int pnum)
 {
     displayplayer = pnum;
 
@@ -317,7 +317,7 @@ void G_SetDisplayPlayer(int pnum)
     players[pnum]->playerflags |= PFL_Display;
 }
 
-void G_ToggleDisplayPlayer(void)
+void GameToggleDisplayPlayer(void)
 {
     for (int i = 1; i <= MAXPLAYERS; i++)
     {
@@ -325,7 +325,7 @@ void G_ToggleDisplayPlayer(void)
 
         if (players[pnum])
         {
-            G_SetDisplayPlayer(pnum);
+            GameSetDisplayPlayer(pnum);
             break;
         }
     }
@@ -446,12 +446,12 @@ static void P_SpawnVoodooDoll(player_t *p, const spawnpoint_t *point)
 }
 
 //
-// G_DeathMatchSpawnPlayer
+// GameDeathMatchSpawnPlayer
 //
 // Spawns a player at one of the random deathmatch spots.
 // Called at level load and each death.
 //
-void G_DeathMatchSpawnPlayer(player_t *p)
+void GameDeathMatchSpawnPlayer(player_t *p)
 {
     if (p->pnum >= (int)dm_starts.size())
         I_Warning("Few deathmatch spots, %d recommended.\n", p->pnum + 1);
@@ -464,7 +464,7 @@ void G_DeathMatchSpawnPlayer(player_t *p)
         {
             int i = (begin + j) % (int)dm_starts.size();
 
-            if (G_CheckSpot(p, &dm_starts[i]))
+            if (GameCheckSpot(p, &dm_starts[i]))
                 return;
         }
     }
@@ -476,7 +476,7 @@ void G_DeathMatchSpawnPlayer(player_t *p)
         {
             int i = (begin + j) % (int)coop_starts.size();
 
-            if (G_CheckSpot(p, &coop_starts[i]))
+            if (GameCheckSpot(p, &coop_starts[i]))
                 return;
         }
     }
@@ -485,16 +485,16 @@ void G_DeathMatchSpawnPlayer(player_t *p)
 }
 
 //
-// G_CoopSpawnPlayer
+// GameCoopSpawnPlayer
 //
 // Spawns a player at one of the single player spots.
 // Called at level load and each death.
 //
-void G_CoopSpawnPlayer(player_t *p)
+void GameCoopSpawnPlayer(player_t *p)
 {
-    spawnpoint_t *point = G_FindCoopPlayer(p->pnum + 1);
+    spawnpoint_t *point = GameFindCoopPlayer(p->pnum + 1);
 
-    if (point && G_CheckSpot(p, point))
+    if (point && GameCheckSpot(p, point))
         return;
 
     I_Warning("Player %d start is invalid.\n", p->pnum + 1);
@@ -506,14 +506,14 @@ void G_CoopSpawnPlayer(player_t *p)
     {
         int i = (begin + j) % (int)coop_starts.size();
 
-        if (G_CheckSpot(p, &coop_starts[i]))
+        if (GameCheckSpot(p, &coop_starts[i]))
             return;
     }
 
     I_Error("No usable player start found!\n");
 }
 
-static spawnpoint_t *G_FindHubPlayer(int pnum, int tag)
+static spawnpoint_t *GameFindHubPlayer(int pnum, int tag)
 {
     int count = 0;
 
@@ -539,17 +539,17 @@ static spawnpoint_t *G_FindHubPlayer(int pnum, int tag)
     return nullptr; /* NOT REACHED */
 }
 
-void G_HubSpawnPlayer(player_t *p, int tag)
+void GameHubSpawnPlayer(player_t *p, int tag)
 {
     SYS_ASSERT(!p->mo);
 
-    spawnpoint_t *point = G_FindHubPlayer(p->pnum + 1, tag);
+    spawnpoint_t *point = GameFindHubPlayer(p->pnum + 1, tag);
 
     // assume player will fit (too bad otherwise)
     P_SpawnPlayer(p, point, true);
 }
 
-void G_SpawnVoodooDolls(player_t *p)
+void GameSpawnVoodooDolls(player_t *p)
 {
     for (int i = 0; i < (int)voodoo_dolls.size(); i++)
     {
@@ -565,7 +565,7 @@ void G_SpawnVoodooDolls(player_t *p)
 // number of wanted dogs (1-3)
 EDGE_DEFINE_CONSOLE_VARIABLE(dogs, "0", kConsoleVariableFlagArchive)
 
-void G_SpawnHelper(int pnum)
+void GameSpawnHelper(int pnum)
 {
     if (pnum == 0)
         return;
@@ -573,7 +573,7 @@ void G_SpawnHelper(int pnum)
     if (pnum > dogs.d_)
         return;
 
-    spawnpoint_t *point = G_FindCoopPlayer(pnum + 1);
+    spawnpoint_t *point = GameFindCoopPlayer(pnum + 1);
     if (point == nullptr)
         return;
 
@@ -589,7 +589,7 @@ void G_SpawnHelper(int pnum)
     mo->side = ~0;
 }
 
-bool G_CheckConditions(mobj_t *mo, ConditionCheck *cond)
+bool GameCheckConditions(mobj_t *mo, ConditionCheck *cond)
 {
     player_t *p = mo->player;
     bool      temp;
@@ -830,27 +830,27 @@ bool G_CheckConditions(mobj_t *mo, ConditionCheck *cond)
     return true;
 }
 
-void G_AddDeathmatchStart(const spawnpoint_t &point)
+void GameAddDeathmatchStart(const spawnpoint_t &point)
 {
     dm_starts.push_back(point);
 }
 
-void G_AddHubStart(const spawnpoint_t &point)
+void GameAddHubStart(const spawnpoint_t &point)
 {
     hub_starts.push_back(point);
 }
 
-void G_AddCoopStart(const spawnpoint_t &point)
+void GameAddCoopStart(const spawnpoint_t &point)
 {
     coop_starts.push_back(point);
 }
 
-void G_AddVoodooDoll(const spawnpoint_t &point)
+void GameAddVoodooDoll(const spawnpoint_t &point)
 {
     voodoo_dolls.push_back(point);
 }
 
-spawnpoint_t *G_FindCoopPlayer(int pnum)
+spawnpoint_t *GameFindCoopPlayer(int pnum)
 {
     for (int i = 0; i < (int)coop_starts.size(); i++)
     {
@@ -864,7 +864,7 @@ spawnpoint_t *G_FindCoopPlayer(int pnum)
     return nullptr; // not found
 }
 
-void G_MarkPlayerAvatars(void)
+void GameMarkPlayerAvatars(void)
 {
     for (int i = 0; i < MAXPLAYERS; i++)
     {
@@ -875,7 +875,7 @@ void G_MarkPlayerAvatars(void)
     }
 }
 
-void G_RemoveOldAvatars(void)
+void GameRemoveOldAvatars(void)
 {
     mobj_t *mo;
     mobj_t *next;

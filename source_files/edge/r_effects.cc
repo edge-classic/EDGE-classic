@@ -21,7 +21,7 @@
 
 #include "dm_state.h"
 #include "e_player.h"
-#include "hu_draw.h" // HUD_* functions
+#include "hu_draw.h" // HUD* functions
 #include "m_misc.h"
 #include "r_misc.h"
 #include "r_colormap.h"
@@ -191,12 +191,12 @@ void RGL_ColourmapEffect(player_t *player)
         }
         else
         {
-            float old_alpha = HUD_GetAlpha();
-            HUD_SetAlpha(0.0f);
+            float old_alpha = HUDGetAlpha();
+            HUDSetAlpha(0.0f);
             s = HMM_MAX(0.5f, s);
-            HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+            HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
                         epi::MakeRGBA(RoundToInteger(s * 255), RoundToInteger(s * 255), RoundToInteger(s * 255)), 25.0f);
-            HUD_SetAlpha(old_alpha);
+            HUDSetAlpha(old_alpha);
         }
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
@@ -213,7 +213,7 @@ void RGL_PaletteEffect(player_t *player)
 
     float s = EffectStrength(player);
 
-    float old_alpha = HUD_GetAlpha();
+    float old_alpha = HUDGetAlpha();
 
     if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 && player->effect_colourmap &&
         (player->effect_left & 8 || reduce_flash))
@@ -228,8 +228,8 @@ void RGL_PaletteEffect(player_t *player)
             glColor4f(r, g, b, 0.20f * s);
         else
         {
-            HUD_SetAlpha(0.20f * s);
-            HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+            HUDSetAlpha(0.20f * s);
+            HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
                         epi::MakeRGBA(RoundToInteger(r * 255), RoundToInteger(g * 255), RoundToInteger(b * 255)), 25.0f);
         }
     }
@@ -249,8 +249,8 @@ void RGL_PaletteEffect(player_t *player)
                       (float)rgb_data[2] / (float)rgb_max, (float)rgb_max / 255.0f);
         else
         {
-            HUD_SetAlpha((float)rgb_max / 255.0f);
-            HUD_ThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+            HUDSetAlpha((float)rgb_max / 255.0f);
+            HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
                         epi::MakeRGBA(RoundToInteger((float)rgb_data[0] / rgb_max * 255),
                                  RoundToInteger((float)rgb_data[1] / rgb_max * 255),
                                  RoundToInteger((float)rgb_data[2] / rgb_max * 255)),
@@ -258,7 +258,7 @@ void RGL_PaletteEffect(player_t *player)
         }
     }
 
-    HUD_SetAlpha(old_alpha);
+    HUDSetAlpha(old_alpha);
 
     if (!reduce_flash)
     {

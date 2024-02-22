@@ -1892,7 +1892,7 @@ void P_RunMobjThinkers(bool extra_tic)
                 continue;
             if (!r_doubleframes.d_)
             {
-                if (!g_cullthinkers.d_|| (gametic / 2 %
+                if (!g_cullthinkers.d_|| (game_tic / 2 %
                                               RoundToInteger(1 + R_PointToDist(players[consoleplayer]->mo->x,
                                                                         players[consoleplayer]->mo->y, mo->x, mo->y) /
                                                               1500) ==
@@ -1906,14 +1906,14 @@ void P_RunMobjThinkers(bool extra_tic)
                     if (!(mo->flags & kMapObjectFlagMissile))
                         continue;
                     else if (!g_cullthinkers.d_||
-                             ((gametic / 4) % RoundToInteger(1 + R_PointToDist(players[consoleplayer]->mo->x,
+                             ((game_tic / 4) % RoundToInteger(1 + R_PointToDist(players[consoleplayer]->mo->x,
                                                                         players[consoleplayer]->mo->y, mo->x, mo->y) /
                                                               1500) ==
                               0))
                         P_MobjThinker(mo, extra_tic);
                 }
                 else if (!g_cullthinkers.d_||
-                         ((gametic / 4) % RoundToInteger(1 + R_PointToDist(players[consoleplayer]->mo->x,
+                         ((game_tic / 4) % RoundToInteger(1 + R_PointToDist(players[consoleplayer]->mo->x,
                                                                     players[consoleplayer]->mo->y, mo->x, mo->y) /
                                                           1500) ==
                           0))
@@ -2241,7 +2241,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
     mobj->currentattack = nullptr;
     mobj->on_ladder     = -1;
 
-    if (gameskill != sk_nightmare)
+    if (game_skill != sk_nightmare)
         mobj->reactiontime = info->reactiontime_;
 
     mobj->lastlook = P_Random() % MAXPLAYERS;

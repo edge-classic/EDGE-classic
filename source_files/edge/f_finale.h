@@ -38,7 +38,7 @@ void FinaleTicker(void);
 void FinaleDrawer(void);
 
 // -KM- 1998/11/25 Finales generalised.
-void FinaleStart(const FinaleDefinition *f, gameaction_e newaction);
+void FinaleStart(const FinaleDefinition *f, GameAction newaction);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

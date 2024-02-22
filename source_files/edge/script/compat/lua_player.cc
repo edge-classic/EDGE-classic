@@ -1460,7 +1460,7 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
             BenefitName = "AMMO";
             BenefitType = (int)list->sub.type + 1;
             BenefitAmount = (int)list->amount;
-            if ((gameskill == sk_baby) || (gameskill == sk_nightmare))
+            if ((game_skill == sk_baby) || (game_skill == sk_nightmare))
                 BenefitAmount <<= 1; //double the ammo
             if(BenefitAmount > 1 && obj->flags & kMapObjectFlagDropped)
                 BenefitAmount /= 2; //dropped ammo gives half
@@ -2036,7 +2036,7 @@ static int Game_info(lua_State *L)
 
     //---------------
     // game.name
-    GameDefinition *g = currmap->episode_;
+    GameDefinition *g = current_map->episode_;
     SYS_ASSERT(g);
 
     if (g->description_.empty())
@@ -2067,7 +2067,7 @@ static int Game_info(lua_State *L)
 
     //---------------
     // game.skill
-    lua_pushinteger(L, gameskill);
+    lua_pushinteger(L, game_skill);
     lua_setfield(L, -2, "skill");   //add to GAME Table
     //---------------
 
@@ -2085,19 +2085,19 @@ static int Map_info(lua_State *L)
 
     //---------------
     // MAP.name
-    lua_pushstring(L, currmap->name_.c_str());
+    lua_pushstring(L, current_map->name_.c_str());
     lua_setfield(L, -2, "name");   //add to MAP Table
     //---------------
 
     //---------------
     // MAP.title
-    lua_pushstring(L, language[currmap->description_]);
+    lua_pushstring(L, language[current_map->description_]);
     lua_setfield(L, -2, "title");   //add to MAP Table
     //---------------
 
     //---------------
     // MAP.author
-    lua_pushstring(L, currmap->author_.c_str());
+    lua_pushstring(L, current_map->author_.c_str());
     lua_setfield(L, -2, "author");   //add to MAP Table
     //---------------
 

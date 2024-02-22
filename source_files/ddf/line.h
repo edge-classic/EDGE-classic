@@ -751,7 +751,7 @@ class LineTypeContainer : public std::vector<LineType *>
     ~LineTypeContainer();
 
    private:
-    LineType *lookup_cache_[kLookupCacheSize];
+    LineType *lookupatch_font_cache_[kLookupCacheSize];
 
    public:
     LineType *Lookup(int num);
@@ -884,7 +884,7 @@ class SectorTypeContainer : public std::vector<SectorType *>
     ~SectorTypeContainer();
 
    private:
-    SectorType *lookup_cache_[kLookupCacheSize];
+    SectorType *lookupatch_font_cache_[kLookupCacheSize];
 
    public:
     SectorType *Lookup(int num);

@@ -225,25 +225,25 @@ class startup_progress_c
     void drawIt()
     {
         I_StartFrame();
-        HUD_FrameSetup();
+        HUDFrameSetup();
         if (loading_image)
         {
             if (r_titlescaling.d_) // Fill Border
             {
                 if (!loading_image->blurred_version)
                     W_ImageStoreBlurred(loading_image, 0.75f);
-                HUD_StretchImage(-320, -200, 960, 600, loading_image->blurred_version, 0, 0);
+                HUDStretchImage(-320, -200, 960, 600, loading_image->blurred_version, 0, 0);
             }
-            HUD_DrawImageTitleWS(loading_image);
-            HUD_SolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
+            HUDDrawImageTitleWS(loading_image);
+            HUDSolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
         }
         int y = 26;
         for (int i = 0; i < (int)startup_messages.size(); i++)
         {
             if (startup_messages[i].size() > 32)
-                HUD_DrawText(26, y, startup_messages[i].substr(0, 29).append("...").c_str());
+                HUDDrawText(26, y, startup_messages[i].substr(0, 29).append("...").c_str());
             else
-                HUD_DrawText(26, y, startup_messages[i].c_str());
+                HUDDrawText(26, y, startup_messages[i].c_str());
             y += 10;
         }
 
@@ -251,7 +251,7 @@ class startup_progress_c
         {
             const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d_).c_str(), kImageNamespaceGraphic, ILF_Null);
             if (overlay)
-                HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
+                HUDRawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
                              SCREENHEIGHT / IM_HEIGHT(overlay));
         }
 
@@ -260,7 +260,7 @@ class startup_progress_c
             int col = (1.0f + v_gamma.f_) * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-            HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+            HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
@@ -269,7 +269,7 @@ class startup_progress_c
             int col = v_gamma.f_ * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_DST_COLOR, GL_ONE);
-            HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+            HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
@@ -537,7 +537,7 @@ static void M_DisplayPause(void)
     float x = 160 - w / 2;
     float y = 10;
 
-    HUD_StretchImage(x, y, w, h, pause_image, 0.0, 0.0);
+    HUDStretchImage(x, y, w, h, pause_image, 0.0, 0.0);
 }
 
 wipetype_e wipe_method = WIPE_Melt;
@@ -552,7 +552,7 @@ void E_ForceWipe(void)
     // Disabled on the platform until can be better integrated
     return;
 #endif
-    if (gamestate == GS_NOTHING)
+    if (game_state == GS_NOTHING)
         return;
 
     if (wipe_method == WIPE_None)
@@ -583,9 +583,9 @@ void E_Display(void)
     // Start the frame - should we need to.
     I_StartFrame();
 
-    HUD_FrameSetup();
+    HUDFrameSetup();
 
-    switch (gamestate)
+    switch (game_state)
     {
     case GS_LEVEL:
         R_PaletteStuff();
@@ -601,7 +601,7 @@ void E_Display(void)
             need_save_screenshot = false;
         }
 
-        HU_Drawer();
+        HUDDrawer();
         RAD_Drawer();
         break;
 
@@ -657,7 +657,7 @@ void E_Display(void)
     {
         const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d_).c_str(), kImageNamespaceGraphic, ILF_Null);
         if (overlay)
-            HUD_RawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
+            HUDRawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
                          SCREENHEIGHT / IM_HEIGHT(overlay));
     }
 
@@ -666,7 +666,7 @@ void E_Display(void)
         int col = (1.0f + v_gamma.f_) * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-        HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+        HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }
@@ -675,7 +675,7 @@ void E_Display(void)
         int col = v_gamma.f_ * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_DST_COLOR, GL_ONE);
-        HUD_SolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+        HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }
@@ -685,7 +685,7 @@ void E_Display(void)
         m_screenshot_required = false;
         M_ScreenShot(true);
     }
-    else if (screenshot_rate && (gamestate >= GS_LEVEL))
+    else if (screenshot_rate && (game_state >= GS_LEVEL))
     {
         SYS_ASSERT(singletics);
 
@@ -713,13 +713,13 @@ static void E_TitleDrawer(void)
         {
             if (!title_image->blurred_version)
                 W_ImageStoreBlurred(title_image, 0.75f);
-            HUD_StretchImage(-320, -200, 960, 600, title_image->blurred_version, 0, 0);
+            HUDStretchImage(-320, -200, 960, 600, title_image->blurred_version, 0, 0);
         }
-        HUD_DrawImageTitleWS(title_image);
+        HUDDrawImageTitleWS(title_image);
     }
     else
     {
-        HUD_SolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
+        HUDSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
     }
 }
 
@@ -947,8 +947,8 @@ void E_AdvanceTitle(void)
 
 void E_StartTitle(void)
 {
-    gameaction = ga_nothing;
-    gamestate  = GS_TITLESCREEN;
+    game_action = kGameActionNothing;
+    game_state  = GS_TITLESCREEN;
 
     paused = false;
 
@@ -1957,7 +1957,7 @@ static void E_Startup(void)
     E_PickLoadingScreen();
     E_PickMenuScreen();
 
-    HU_Init();
+    HUDInit();
     ConsoleStart();
     ConsoleCreateQuitScreen();
     SpecialWadVerify();
@@ -2014,7 +2014,7 @@ static void E_InitialState(void)
     ps = argv::Value("loadgame");
     if (!ps.empty())
     {
-        G_DeferredLoadGame(atoi(ps.c_str()));
+        GameDeferredLoadGame(atoi(ps.c_str()));
         return;
     }
 
@@ -2072,28 +2072,28 @@ static void E_InitialState(void)
         return;
     }
 
-    newgame_params_c params;
+    NewGameParameters params;
 
-    params.skill      = warp_skill;
-    params.deathmatch = warp_deathmatch;
-    params.level_skip = true;
+    params.skill_      = warp_skill;
+    params.deathmatch_ = warp_deathmatch;
+    params.level_skip_ = true;
 
     if (warp_map.length() > 0)
-        params.map = G_LookupMap(warp_map.c_str());
+        params.map_ = GameLookupMap(warp_map.c_str());
     else
-        params.map = G_LookupMap("1");
+        params.map_ = GameLookupMap("1");
 
-    if (!params.map)
+    if (!params.map_)
         I_Error("-warp: no such level '%s'\n", warp_map.c_str());
 
-    SYS_ASSERT(G_MapExists(params.map));
-    SYS_ASSERT(params.map->episode_);
+    SYS_ASSERT(GameMapExists(params.map_));
+    SYS_ASSERT(params.map_->episode_);
 
-    params.random_seed = I_PureRandom();
+    params.random_seed_ = I_PureRandom();
 
     params.SinglePlayer(bots);
 
-    G_DeferredNewGame(params);
+    GameDeferredNewGame(params);
 }
 
 //
@@ -2166,7 +2166,7 @@ void E_Tick(void)
 {
     EDGE_ZoneScoped;
     
-    G_BigStuff();
+    GameBigStuff();
 
     // Update display, next frame, with current state.
     E_Display();
@@ -2185,7 +2185,7 @@ void E_Tick(void)
     for (; counts > 0; counts--)
     {
         // run a step in the physics (etc)
-        G_Ticker();
+        GameTicker();
 
         // user interface stuff (skull anim, etc)
         ConsoleTicker();

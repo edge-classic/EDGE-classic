@@ -42,7 +42,7 @@ struct MapEntry
     char *intertextsecret;
     char *authorname;
     char  levelpic[9];
-    char  nextmap[9];
+    char  next_map[9];
     char  nextsecret[9];
     char  music[9];
     char  skytexture[9];

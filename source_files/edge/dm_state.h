@@ -47,7 +47,7 @@ extern gameflags_t global_flags;
 extern gameflags_t level_flags;
 
 // Selected by user.
-extern skill_t gameskill;
+extern skill_t game_skill;
 
 // Flag: true only if started as net deathmatch.
 // An enum might handle altdeath/cooperative better.
@@ -80,10 +80,10 @@ extern bool fast_forward_active;
 extern bool autoquickload;
 
 //?
-extern gamestate_e gamestate;
+extern game_state_e game_state;
 
 extern int maketic;
-extern int gametic;
+extern int game_tic;
 
 #define DEATHMATCH() (deathmatch > 0)
 #define COOP_MATCH() (deathmatch == 0 && numplayers > 1)

@@ -66,9 +66,9 @@ class FontDefinition
         kTrueTypeSmoothNever    = 2
     };
 
-    std::string ttf_name_;
-    int         ttf_smoothing_;
-    std::string ttf_smoothing_string_;  // User convenience
+    std::string truetype_name_;
+    int         truetype_smoothing_;
+    std::string truetype_smoothing_string_;  // User convenience
 
    private:
     // disable copy construct and assignment operator

@@ -23,51 +23,50 @@
 //
 //----------------------------------------------------------------------------
 
+#include "g_game.h"
 
-
+#include <limits.h>
 #include <string.h>
 #include <time.h>
-#include <limits.h>
 
-#include "endianess.h"
-#include "str_util.h"
-#include "filesystem.h"
-
+#include "am_map.h"
+#include "bot_think.h"
 #include "con_main.h"
 #include "dstrings.h"
 #include "e_input.h"
 #include "e_main.h"
+#include "endianess.h"
 #include "f_finale.h"
-#include "g_game.h"
+#include "f_interm.h"
+#include "filesystem.h"
 #include "i_system.h"
 #include "m_cheat.h"
 #include "m_menu.h"
 #include "m_random.h"
 #include "n_network.h"
-#include "bot_think.h"
 #include "p_setup.h"
 #include "p_tick.h"
-#include "rad_trig.h"
-#include "am_map.h"
-#include "r_sky.h"
-#include "r_modes.h"
-#include "s_sound.h"
-#include "s_music.h"
-#include "sv_chunk.h"
-#include "sv_main.h"
 #include "r_colormap.h"
 #include "r_misc.h"
-#include "version.h"
-#include "w_wad.h"
-#include "f_interm.h"
-#include "vm_coal.h"
+#include "r_modes.h"
+#include "r_sky.h"
+#include "rad_trig.h"
+#include "s_music.h"
+#include "s_sound.h"
 #include "script/compat/lua_compat.h"
 #include "str_compare.h"
+#include "str_util.h"
+#include "sv_chunk.h"
+#include "sv_main.h"
+#include "version.h"
+#include "vm_coal.h"
+#include "w_wad.h"
+
 extern ConsoleVariable r_doubleframes;
 
-gamestate_e gamestate = GS_NOTHING;
+game_state_e game_state = GS_NOTHING;
 
-gameaction_e gameaction = ga_nothing;
+GameAction game_action = kGameActionNothing;
 
 bool paused        = false;
 bool pistol_starts = false;
@@ -85,9 +84,9 @@ bool precache = true;
 // after hitting the exit switch/killing the boss.  So that you see the
 // switch change or the boss die.
 
-int  exittime     = INT_MAX;
-bool exit_skipall = false; // -AJA- temporary (maybe become "exit_mode")
-int  exit_hub_tag = 0;
+int  exit_time     = INT_MAX;
+bool exit_skip_all = false;  // -AJA- temporary (maybe become "exit_mode")
+int  exit_hub_tag  = 0;
 
 int key_show_players;
 
@@ -102,14 +101,14 @@ int key_show_players;
 
 int deathmatch;
 
-skill_t gameskill = sk_medium;
+skill_t game_skill = sk_medium;
 
 // -ACB- 2004/05/25 We need to store our current/next mapdefs
-const MapDefinition *currmap = nullptr;
-const MapDefinition *nextmap = nullptr;
+const MapDefinition *current_map = nullptr;
+const MapDefinition *next_map    = nullptr;
 
-int             curr_hub_tag = 0; // affects where players are spawned
-const MapDefinition *curr_hub_first;   // first map in group of hubs
+int                  current_hub_tag = 0;  // affects where players are spawned
+const MapDefinition *current_hub_first;    // first map in group of hubs
 
 // -KM- 1998/12/16 These flags hold everything needed about a level
 gameflags_t level_flags;
@@ -118,28 +117,28 @@ gameflags_t level_flags;
 
 static int  defer_load_slot;
 static int  defer_save_slot;
-static char defer_save_desc[32];
+static char defer_save_description[32];
 
 // deferred stuff...
-static newgame_params_c *defer_params = nullptr;
+static NewGameParameters *defer_params = nullptr;
 
-static void G_DoNewGame(void);
-static void G_DoLoadGame(void);
-static void G_DoCompleted(void);
-static void G_DoSaveGame(void);
-static void G_DoEndGame(void);
+static void GameDoNewGame(void);
+static void GameDoLoadGame(void);
+static void GameDoCompleted(void);
+static void GameDoSaveGame(void);
+static void GameDoEndGame(void);
 
-static void InitNew(newgame_params_c &params);
+static void InitNew(NewGameParameters &params);
 static void RespawnPlayer(player_t *p);
 static void SpawnInitialPlayers(void);
 
-static bool G_LoadGameFromFile(std::string filename, bool is_hub = false);
-static bool G_SaveGameToFile(std::string filename, const char *description);
+static bool GameLoadGameFromFile(std::string filename, bool is_hub = false);
+static bool GameSaveGameToFile(std::string filename, const char *description);
 
 void LoadLevel_Bits(void)
 {
-    if (currmap == nullptr)
-        I_Error("G_DoLoadLevel: No Current Map selected");
+    if (current_map == nullptr)
+        I_Error("GameDoLoadLevel: No Current Map selected");
 
 #ifdef EDGE_WEB
     S_PauseAudioDevice();
@@ -153,9 +152,10 @@ void LoadLevel_Bits(void)
     //
     // -ACB- 1998/08/09 Reference current map for sky name.
 
-    sky_image = W_ImageLookup(currmap->sky_.c_str(), kImageNamespaceTexture);
+    sky_image =
+        W_ImageLookup(current_map->sky_.c_str(), kImageNamespaceTexture);
 
-    gamestate = GS_NOTHING; // FIXME: needed ???
+    game_state = GS_NOTHING;  // FIXME: needed ???
 
     // -AJA- FIXME: this background camera stuff is a mess
     background_camera_mo = nullptr;
@@ -163,10 +163,10 @@ void LoadLevel_Bits(void)
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
         player_t *p = players[pnum];
-        if (!p)
-            continue;
+        if (!p) continue;
 
-        if (p->playerstate == PST_DEAD || (currmap->force_on_ & kMapFlagResetPlayer) || pistol_starts)
+        if (p->playerstate == PST_DEAD ||
+            (current_map->force_on_ & kMapFlagResetPlayer) || pistol_starts)
         {
             p->playerstate = PST_REBORN;
         }
@@ -177,10 +177,10 @@ void LoadLevel_Bits(void)
     // -KM- 1998/12/16 Make map flags actually do stuff.
     // -AJA- 2000/02/02: Made it more generic.
 
-#define HANDLE_FLAG(var, specflag)                                                                                     \
-    if (currmap->force_on_ & (specflag))                                                                                \
-        (var) = true;                                                                                                  \
-    else if (currmap->force_off_ & (specflag))                                                                          \
+#define HANDLE_FLAG(var, specflag)                 \
+    if (current_map->force_on_ & (specflag))       \
+        (var) = true;                              \
+    else if (current_map->force_off_ & (specflag)) \
         (var) = false;
 
     HANDLE_FLAG(level_flags.jump, kMapFlagJumping);
@@ -202,21 +202,21 @@ void LoadLevel_Bits(void)
 
 #undef HANDLE_FLAG
 
-    if (currmap->force_on_ & kMapFlagAutoAim)
+    if (current_map->force_on_ & kMapFlagAutoAim)
     {
-        if (currmap->force_on_ & kMapFlagAutoAimMlook)
+        if (current_map->force_on_ & kMapFlagAutoAimMlook)
             level_flags.autoaim = AA_MLOOK;
         else
             level_flags.autoaim = AA_ON;
     }
-    else if (currmap->force_off_ & kMapFlagAutoAim)
+    else if (current_map->force_off_ & kMapFlagAutoAim)
         level_flags.autoaim = AA_OFF;
 
     //
-    // Note: It should be noted that only the gameskill is
-    // passed as the level is already defined in currmap,
-    // The method for changing currmap, is using by
-    // G_DeferredNewGame.
+    // Note: It should be noted that only the game_skill is
+    // passed as the level is already defined in current_map,
+    // The method for changing current_map, is using by
+    // GameDeferredNewGame.
     //
     // -ACB- 1998/08/09 New P_SetupLevel
     // -KM- 1998/11/25 P_SetupLevel accepts the autotag
@@ -224,13 +224,13 @@ void LoadLevel_Bits(void)
     RAD_ClearTriggers();
     RAD_FinishMenu(0);
 
-    intermission_stats.kills = intermission_stats.items = intermission_stats.secrets = 0;
+    intermission_stats.kills       = intermission_stats.items =
+        intermission_stats.secrets = 0;
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
         player_t *p = players[pnum];
-        if (!p)
-            continue;
+        if (!p) continue;
 
         p->killcount = p->secretcount = p->itemcount = 0;
         p->mo                                        = nullptr;
@@ -243,15 +243,15 @@ void LoadLevel_Bits(void)
 
     P_SetupLevel();
 
-    RAD_SpawnTriggers(currmap->name_.c_str());
+    RAD_SpawnTriggers(current_map->name_.c_str());
 
-    exittime     = INT_MAX;
-    exit_skipall = false;
-    exit_hub_tag = 0;
+    exit_time     = INT_MAX;
+    exit_skip_all = false;
+    exit_hub_tag  = 0;
 
     BotBeginLevel();
 
-    gamestate = GS_LEVEL;
+    game_state = GS_LEVEL;
 
     ConsoleSetVisible(kConsoleVisibilityNotVisible);
 
@@ -267,25 +267,24 @@ void LoadLevel_Bits(void)
 
 //
 // REQUIRED STATE:
-//   (a) currmap
-//   (b) curr_hub_tag
+//   (a) current_map
+//   (b) current_hub_tag
 //   (c) players[], numplayers (etc)
-//   (d) gameskill + deathmatch
+//   (d) game_skill + deathmatch
 //   (e) level_flags
 //
-//   ??  exittime
+//   ??  exit_time
 //
-void G_DoLoadLevel(void)
+void GameDoLoadLevel(void)
 {
-    HU_Start();
+    HUDStart();
 
-    if (curr_hub_tag == 0)
-        SV_ClearSlot("current");
+    if (current_hub_tag == 0) SV_ClearSlot("current");
 
-    if (curr_hub_tag > 0)
+    if (current_hub_tag > 0)
     {
         // HUB system: check for loading a previously visited map
-        const char *mapname = SV_MapName(currmap);
+        const char *mapname = SV_MapName(current_map);
 
         std::string fn(SV_FileName("current", mapname));
 
@@ -293,14 +292,15 @@ void G_DoLoadLevel(void)
         {
             I_Printf("Loading HUB...\n");
 
-            if (!G_LoadGameFromFile(fn, true))
+            if (!GameLoadGameFromFile(fn, true))
                 I_Error("LOAD-HUB failed with filename: %s\n", fn.c_str());
 
             SpawnInitialPlayers();
 
-            // Need to investigate if VM_BeginLevel() needs to go here too now - Dasho
+            // Need to investigate if VM_BeginLevel() needs to go here too now -
+            // Dasho
 
-            G_RemoveOldAvatars();
+            GameRemoveOldAvatars();
 
             P_HubFastForward();
             return;
@@ -317,14 +317,14 @@ void G_DoLoadLevel(void)
 }
 
 //
-// G_Responder
+// GameResponder
 //
 // Get info needed to make ticcmd_ts for the players.
 //
-bool G_Responder(InputEvent *ev)
+bool GameResponder(InputEvent *ev)
 {
     // any other key pops up menu
-    if (gameaction == ga_nothing && (gamestate == GS_TITLESCREEN))
+    if (game_action == kGameActionNothing && (game_state == GS_TITLESCREEN))
     {
         if (ev->type == kInputEventKeyDown)
         {
@@ -336,16 +336,18 @@ bool G_Responder(InputEvent *ev)
         return false;
     }
 
-    if (ev->type == kInputEventKeyDown && EventMatchesKey(key_show_players, ev->value.key.sym))
+    if (ev->type == kInputEventKeyDown &&
+        EventMatchesKey(key_show_players, ev->value.key.sym))
     {
-        if (gamestate == GS_LEVEL) //!!!! && !DEATHMATCH())
+        if (game_state == GS_LEVEL)  //!!!! && !DEATHMATCH())
         {
-            G_ToggleDisplayPlayer();
+            GameToggleDisplayPlayer();
             return true;
         }
     }
 
-    if (!netgame && ev->type == kInputEventKeyDown && EventMatchesKey(key_pause, ev->value.key.sym))
+    if (!netgame && ev->type == kInputEventKeyDown &&
+        EventMatchesKey(key_pause, ev->value.key.sym))
     {
         paused = !paused;
 
@@ -367,25 +369,18 @@ bool G_Responder(InputEvent *ev)
         return true;
     }
 
-    if (gamestate == GS_LEVEL)
+    if (game_state == GS_LEVEL)
     {
-        if (RAD_Responder(ev))
-            return true; // RTS system ate it
+        if (RAD_Responder(ev)) return true;  // RTS system ate it
 
-        if (AutomapResponder(ev))
-            return true; // automap ate it
+        if (AutomapResponder(ev)) return true;  // automap ate it
 
-        if (HU_Responder(ev))
-            return true; // chat ate the event
-
-        if (M_CheatResponder(ev))
-            return true; // cheat code at it
+        if (M_CheatResponder(ev)) return true;  // cheat code at it
     }
 
-    if (gamestate == GS_FINALE)
+    if (game_state == GS_FINALE)
     {
-        if (FinaleResponder(ev))
-            return true; // finale ate the event
+        if (FinaleResponder(ev)) return true;  // finale ate the event
     }
 
     return EventInputResponderResponder(ev);
@@ -397,22 +392,21 @@ static void CheckPlayersReborn(void)
     {
         player_t *p = players[pnum];
 
-        if (!p || p->playerstate != PST_REBORN)
-            continue;
+        if (!p || p->playerstate != PST_REBORN) continue;
 
         if (SP_MATCH())
         {
             // reload the level
             E_ForceWipe();
-            gameaction = ga_loadlevel;
+            game_action = kGameActionLoadLevel;
 
             // -AJA- if we are on a HUB map, then we must go all the
             //       way back to the beginning.
-            if (curr_hub_first)
+            if (current_hub_first)
             {
-                currmap        = curr_hub_first;
-                curr_hub_tag   = 0;
-                curr_hub_first = nullptr;
+                current_map       = current_hub_first;
+                current_hub_tag   = 0;
+                current_hub_first = nullptr;
             }
             return;
         }
@@ -421,78 +415,77 @@ static void CheckPlayersReborn(void)
     }
 }
 
-void G_BigStuff(void)
+void GameBigStuff(void)
 {
     // do things to change the game state
-    while (gameaction != ga_nothing)
+    while (game_action != kGameActionNothing)
     {
-        gameaction_e action = gameaction;
-        gameaction          = ga_nothing;
+        GameAction action = game_action;
+        game_action       = kGameActionNothing;
 
         switch (action)
         {
-        case ga_newgame:
-            G_DoNewGame();
-            break;
+            case kGameActionNewGame:
+                GameDoNewGame();
+                break;
 
-        case ga_loadlevel:
-            G_DoLoadLevel();
-            break;
+            case kGameActionLoadLevel:
+                GameDoLoadLevel();
+                break;
 
-        case ga_loadgame:
-            G_DoLoadGame();
-            break;
+            case kGameActionLoadGame:
+                GameDoLoadGame();
+                break;
 
-        case ga_savegame:
-            G_DoSaveGame();
-            break;
+            case kGameActionSaveGame:
+                GameDoSaveGame();
+                break;
 
-        case ga_intermission:
-            G_DoCompleted();
-            break;
+            case kGameActionIntermission:
+                GameDoCompleted();
+                break;
 
-        case ga_finale:
-            SYS_ASSERT(nextmap);
-            currmap        = nextmap;
-            curr_hub_tag   = 0;
-            curr_hub_first = nullptr;
-            FinaleStart(&currmap->f_pre_, ga_loadlevel);
-            break;
+            case kGameActionFinale:
+                SYS_ASSERT(next_map);
+                current_map       = next_map;
+                current_hub_tag   = 0;
+                current_hub_first = nullptr;
+                FinaleStart(&current_map->f_pre_, kGameActionLoadLevel);
+                break;
 
-        case ga_endgame:
-            G_DoEndGame();
-            break;
+            case kGameActionEndGame:
+                GameDoEndGame();
+                break;
 
-        default:
-            I_Error("G_BigStuff: Unknown gameaction %d", gameaction);
-            break;
+            default:
+                I_Error("GameBigStuff: Unknown game_action %d", game_action);
+                break;
         }
     }
 }
 
-void G_Ticker(void)
+void GameTicker(void)
 {
-
-    bool extra_tic = (gametic & 1) == 1;
+    bool extra_tic = (game_tic & 1) == 1;
 
     if (extra_tic && r_doubleframes.d_)
     {
-        switch (gamestate)
+        switch (game_state)
         {
-        case GS_LEVEL:
-            // get commands
-            N_GrabTiccmds();
+            case GS_LEVEL:
+                // get commands
+                N_GrabTiccmds();
 
-            //!!!  P_Ticker();
-            P_Ticker(true);
-            break;
+                //!!!  P_Ticker();
+                P_Ticker(true);
+                break;
 
-        case GS_INTERMISSION:
-        case GS_FINALE:
-            N_GrabTiccmds();
-            break;
-        default:
-            break;
+            case GS_INTERMISSION:
+            case GS_FINALE:
+                N_GrabTiccmds();
+                break;
+            default:
+                break;
         }
         // ANIMATE FLATS AND TEXTURES GLOBALLY
         W_UpdateImageAnims();
@@ -503,55 +496,54 @@ void G_Ticker(void)
     W_UpdateImageAnims();
 
     // do main actions
-    switch (gamestate)
+    switch (game_state)
     {
-    case GS_TITLESCREEN:
-        E_TitleTicker();
-        break;
+        case GS_TITLESCREEN:
+            E_TitleTicker();
+            break;
 
-    case GS_LEVEL:
-        // get commands
-        N_GrabTiccmds();
+        case GS_LEVEL:
+            // get commands
+            N_GrabTiccmds();
 
-        P_Ticker(false);
-        AutomapTicker();
-        HU_Ticker();
-        RAD_Ticker();
+            P_Ticker(false);
+            AutomapTicker();
+            HUDTicker();
+            RAD_Ticker();
 
-        // do player reborns if needed
-        CheckPlayersReborn();
-        break;
+            // do player reborns if needed
+            CheckPlayersReborn();
+            break;
 
-    case GS_INTERMISSION:
-        N_GrabTiccmds();
-        IntermissionTicker();
-        break;
+        case GS_INTERMISSION:
+            N_GrabTiccmds();
+            IntermissionTicker();
+            break;
 
-    case GS_FINALE:
-        N_GrabTiccmds();
-        FinaleTicker();
-        break;
+        case GS_FINALE:
+            N_GrabTiccmds();
+            FinaleTicker();
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 }
 
 static void RespawnPlayer(player_t *p)
 {
     // first disassociate the corpse (if any)
-    if (p->mo)
-        p->mo->player = nullptr;
+    if (p->mo) p->mo->player = nullptr;
 
     p->mo = nullptr;
 
     // spawn at random spot if in death match
     if (DEATHMATCH())
-        G_DeathMatchSpawnPlayer(p);
-    else if (curr_hub_tag > 0)
-        G_HubSpawnPlayer(p, curr_hub_tag);
+        GameDeathMatchSpawnPlayer(p);
+    else if (current_hub_tag > 0)
+        GameHubSpawnPlayer(p, current_hub_tag);
     else
-        G_CoopSpawnPlayer(p); // respawn at the start
+        GameCoopSpawnPlayer(p);  // respawn at the start
 }
 
 static void SpawnInitialPlayers(void)
@@ -565,133 +557,124 @@ static void SpawnInitialPlayers(void)
         if (p == nullptr)
         {
             // no real player, maybe spawn a helper dog?
-            G_SpawnHelper(pnum);
+            GameSpawnHelper(pnum);
             continue;
         }
 
         RespawnPlayer(p);
 
-        if (!DEATHMATCH())
-            G_SpawnVoodooDolls(p);
+        if (!DEATHMATCH()) GameSpawnVoodooDolls(p);
     }
 
     // check for missing player start.
     if (players[consoleplayer]->mo == nullptr)
         I_Error("Missing player start !\n");
 
-    G_SetDisplayPlayer(consoleplayer); // view the guy you are playing
+    GameSetDisplayPlayer(consoleplayer);  // view the guy you are playing
 }
 
-void G_DeferredScreenShot(void)
-{
-    m_screenshot_required = true;
-}
+void GameDeferredScreenShot(void) { m_screenshot_required = true; }
 
 // -KM- 1998/11/25 Added time param which is the time to wait before
 //  actually exiting level.
-void G_ExitLevel(int time)
+void GameExitLevel(int time)
 {
-    nextmap      = G_LookupMap(currmap->nextmapname_.c_str());
-    exittime     = leveltime + time;
-    exit_skipall = false;
-    exit_hub_tag = 0;
+    next_map      = GameLookupMap(current_map->next_mapname_.c_str());
+    exit_time     = leveltime + time;
+    exit_skip_all = false;
+    exit_hub_tag  = 0;
 }
 
 // -ACB- 1998/08/08 We don't have support for the german edition
 //                  removed the check for map31.
-void G_SecretExitLevel(int time)
+void GameSecretExitLevel(int time)
 {
-    nextmap      = G_LookupMap(currmap->secretmapname_.c_str());
-    exittime     = leveltime + time;
-    exit_skipall = false;
-    exit_hub_tag = 0;
+    next_map      = GameLookupMap(current_map->secretmapname_.c_str());
+    exit_time     = leveltime + time;
+    exit_skip_all = false;
+    exit_hub_tag  = 0;
 }
 
-void G_ExitToLevel(char *name, int time, bool skip_all)
+void GameExitToLevel(char *name, int time, bool skip_all)
 {
-    nextmap      = G_LookupMap(name);
-    exittime     = leveltime + time;
-    exit_skipall = skip_all;
-    exit_hub_tag = 0;
+    next_map      = GameLookupMap(name);
+    exit_time     = leveltime + time;
+    exit_skip_all = skip_all;
+    exit_hub_tag  = 0;
 }
 
-void G_ExitToHub(const char *map_name, int tag)
+void GameExitToHub(const char *map_name, int tag)
 {
-    if (tag <= 0)
-        I_Error("Hub exit line/command: bad tag %d\n", tag);
+    if (tag <= 0) I_Error("Hub exit line/command: bad tag %d\n", tag);
 
-    nextmap = G_LookupMap(map_name);
-    if (!nextmap)
-        I_Error("G_ExitToHub: No such map %s !\n", map_name);
+    next_map = GameLookupMap(map_name);
+    if (!next_map) I_Error("GameExitToHub: No such map %s !\n", map_name);
 
-    exittime     = leveltime + 5;
-    exit_skipall = true;
-    exit_hub_tag = tag;
+    exit_time     = leveltime + 5;
+    exit_skip_all = true;
+    exit_hub_tag  = tag;
 }
 
-void G_ExitToHub(int map_number, int tag)
+void GameExitToHub(int map_number, int tag)
 {
-    SYS_ASSERT(currmap);
+    SYS_ASSERT(current_map);
 
     char name_buf[32];
 
     // bit hackish: decided whether to use MAP## or E#M#
-    if (currmap->name_[0] == 'E')
+    if (current_map->name_[0] == 'E')
     {
         sprintf(name_buf, "E%dM%d", 1 + (map_number / 10), map_number % 10);
     }
     else
         sprintf(name_buf, "MAP%02d", map_number);
 
-    G_ExitToHub(name_buf, tag);
+    GameExitToHub(name_buf, tag);
 }
 
 //
 // REQUIRED STATE:
-//   (a) currmap, nextmap
+//   (a) current_map, next_map
 //   (b) players[]
 //   (c) leveltime
-//   (d) exit_skipall
+//   (d) exit_skip_all
 //   (d) exit_hub_tag
 //   (e) intermission_stats.kills (etc)
 //
-static void G_DoCompleted(void)
+static void GameDoCompleted(void)
 {
-    SYS_ASSERT(currmap);
+    SYS_ASSERT(current_map);
 
     E_ForceWipe();
 
-    exittime = INT_MAX;
+    exit_time = INT_MAX;
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
         player_t *p = players[pnum];
-        if (!p)
-            continue;
+        if (!p) continue;
 
         p->leveltime = leveltime;
 
         // take away cards and stuff
-        G_PlayerFinishLevel(p, exit_hub_tag > 0);
+        GamePlayerFinishLevel(p, exit_hub_tag > 0);
     }
 
-    if (automap_active)
-        AutomapStop();
+    if (automap_active) AutomapStop();
 
-    if (rts_menuactive)
-        RAD_FinishMenu(0);
+    if (rts_menuactive) RAD_FinishMenu(0);
 
     BotEndLevel();
 
     automap_active = false;
 
     // handle "no stat" levels
-    if (currmap->wistyle_ == kIntermissionStyleNone || exit_skipall)
+    if (current_map->wistyle_ == kIntermissionStyleNone || exit_skip_all)
     {
-        if (exit_skipall && nextmap)
+        if (exit_skip_all && next_map)
         {
             if (exit_hub_tag <= 0)
-                curr_hub_first = nullptr;
+                current_hub_first = nullptr;
             else
             {
                 // save current map for HUB system
@@ -699,49 +682,49 @@ static void G_DoCompleted(void)
 
                 // remember avatars of players, so we can remove them
                 // when we return to this level.
-                G_MarkPlayerAvatars();
+                GameMarkPlayerAvatars();
 
-                const char *mapname = SV_MapName(currmap);
+                const char *mapname = SV_MapName(current_map);
 
                 std::string fn(SV_FileName("current", mapname));
 
-                if (!G_SaveGameToFile(fn, "__HUB_SAVE__"))
+                if (!GameSaveGameToFile(fn, "__HUB_SAVE__"))
                     I_Error("SAVE-HUB failed with filename: %s\n", fn.c_str());
 
-                if (!curr_hub_first)
-                    curr_hub_first = currmap;
+                if (!current_hub_first) current_hub_first = current_map;
             }
 
-            currmap      = nextmap;
-            curr_hub_tag = exit_hub_tag;
+            current_map     = next_map;
+            current_hub_tag = exit_hub_tag;
 
-            gameaction = ga_loadlevel;
+            game_action = kGameActionLoadLevel;
         }
         else
         {
-            FinaleStart(&currmap->f_end_, nextmap ? ga_finale : ga_nothing);
+            FinaleStart(&current_map->f_end_,
+                        next_map ? kGameActionFinale : kGameActionNothing);
         }
 
         return;
     }
 
-    intermission_stats.current_level  = currmap;
-    intermission_stats.next_level = nextmap;
+    intermission_stats.current_level = current_map;
+    intermission_stats.next_level    = next_map;
 
-    gamestate = GS_INTERMISSION;
+    game_state = GS_INTERMISSION;
 
     IntermissionStart();
 }
 
-void G_DeferredLoadGame(int slot)
+void GameDeferredLoadGame(int slot)
 {
     // Can be called by the startup code or the menu task.
 
     defer_load_slot = slot;
-    gameaction      = ga_loadgame;
+    game_action     = kGameActionLoadGame;
 }
 
-static bool G_LoadGameFromFile(std::string filename, bool is_hub)
+static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 {
     if (!SV_OpenReadFile(filename))
     {
@@ -762,36 +745,35 @@ static bool G_LoadGameFromFile(std::string filename, bool is_hub)
 
     saveglobals_t *globs = SV_LoadGLOB();
 
-    if (!globs)
-        I_Error("LOAD-GAME: Bad savegame file (no GLOB)\n");
+    if (!globs) I_Error("LOAD-GAME: Bad savegame file (no GLOB)\n");
 
     // --- pull info from global structure ---
 
     if (is_hub)
     {
-        currmap = G_LookupMap(globs->level);
-        if (!currmap)
+        current_map = GameLookupMap(globs->level);
+        if (!current_map)
             I_Error("LOAD-HUB: No such map %s !  Check WADS\n", globs->level);
 
-        G_SetDisplayPlayer(consoleplayer);
+        GameSetDisplayPlayer(consoleplayer);
         automap_active = false;
 
         N_ResetTics();
     }
     else
     {
-        newgame_params_c params;
+        NewGameParameters params;
 
-        params.map = G_LookupMap(globs->level);
-        if (!params.map)
+        params.map_ = GameLookupMap(globs->level);
+        if (!params.map_)
             I_Error("LOAD-GAME: No such map %s !  Check WADS\n", globs->level);
 
-        SYS_ASSERT(params.map->episode_);
+        SYS_ASSERT(params.map_->episode_);
 
-        params.skill      = (skill_t)globs->skill;
-        params.deathmatch = (globs->netgame >= 2) ? (globs->netgame - 1) : 0;
+        params.skill_      = (skill_t)globs->skill;
+        params.deathmatch_ = (globs->netgame >= 2) ? (globs->netgame - 1) : 0;
 
-        params.random_seed = globs->p_random;
+        params.random_seed_ = globs->p_random;
 
         // this player is a dummy one, replaced during actual load
         params.SinglePlayer(0);
@@ -800,17 +782,21 @@ static bool G_LoadGameFromFile(std::string filename, bool is_hub)
 
         InitNew(params);
 
-        curr_hub_tag   = globs->hub_tag;
-        curr_hub_first = globs->hub_first ? G_LookupMap(globs->hub_first) : nullptr;
+        current_hub_tag = globs->hub_tag;
+        current_hub_first =
+            globs->hub_first ? GameLookupMap(globs->hub_first) : nullptr;
     }
 
     LoadLevel_Bits();
 
     // -- Check LEVEL consistency (crc) --
 
-    if (globs->mapsector.count != numsectors || globs->mapsector.crc != mapsector_CRC.GetCRC() ||
-        globs->mapline.count != numlines || globs->mapline.crc != mapline_CRC.GetCRC() ||
-        globs->mapthing.count != mapthing_NUM || globs->mapthing.crc != mapthing_CRC.GetCRC())
+    if (globs->mapsector.count != numsectors ||
+        globs->mapsector.crc != mapsector_CRC.GetCRC() ||
+        globs->mapline.count != numlines ||
+        globs->mapline.crc != mapline_CRC.GetCRC() ||
+        globs->mapthing.count != mapthing_NUM ||
+        globs->mapthing.crc != mapthing_CRC.GetCRC())
     {
         SV_CloseReadFile();
 
@@ -820,22 +806,21 @@ static bool G_LoadGameFromFile(std::string filename, bool is_hub)
     if (!is_hub)
     {
         leveltime = globs->level_time;
-        exittime  = globs->exit_time;
+        exit_time = globs->exit_time;
 
-        intermission_stats.kills  = globs->total_kills;
-        intermission_stats.items  = globs->total_items;
+        intermission_stats.kills   = globs->total_kills;
+        intermission_stats.items   = globs->total_items;
         intermission_stats.secrets = globs->total_secrets;
     }
 
-    if (globs->sky_image) // backwards compat (sky_image added 2003/12/19)
+    if (globs->sky_image)  // backwards compat (sky_image added 2003/12/19)
         sky_image = globs->sky_image;
 
     // clear line/sector lookup caches
     DDF_BoomClearGenTypes();
 
     if (SV_LoadEverything() && SV_GetError() == 0)
-    {
-        /* all went well */
+    { /* all went well */
     }
     else
     {
@@ -850,7 +835,7 @@ static bool G_LoadGameFromFile(std::string filename, bool is_hub)
     SV_FinishLoad();
     SV_CloseReadFile();
 
-    return true; // OK
+    return true;  // OK
 }
 
 //
@@ -859,48 +844,48 @@ static bool G_LoadGameFromFile(std::string filename, bool is_hub)
 //
 //   ?? nothing else ??
 //
-static void G_DoLoadGame(void)
+static void GameDoLoadGame(void)
 {
     E_ForceWipe();
 
     const char *dir_name = SV_SlotName(defer_load_slot);
-    I_Debugf("G_DoLoadGame : %s\n", dir_name);
+    I_Debugf("GameDoLoadGame : %s\n", dir_name);
 
     SV_ClearSlot("current");
     SV_CopySlot(dir_name, "current");
 
     std::string fn(SV_FileName("current", "head"));
 
-    if (!G_LoadGameFromFile(fn))
+    if (!GameLoadGameFromFile(fn))
     {
         // !!! FIXME: what to do?
     }
 
-    HU_Start();
+    HUDStart();
 
     V_SetPalette(PALETTE_NORMAL, 0);
 
     if (LUA_UseLuaHud())
-        LUA_LoadGame(); 
+        LUA_LoadGame();
     else
         VM_LoadGame();
 }
 
 //
-// G_DeferredSaveGame
+// GameDeferredSaveGame
 //
 // Called by the menu task.
 // Description is a 24 byte text string
 //
-void G_DeferredSaveGame(int slot, const char *description)
+void GameDeferredSaveGame(int slot, const char *description)
 {
     defer_save_slot = slot;
-    strcpy(defer_save_desc, description);
+    strcpy(defer_save_description, description);
 
-    gameaction = ga_savegame;
+    game_action = kGameActionSaveGame;
 }
 
-static bool G_SaveGameToFile(std::string filename, const char *description)
+static bool GameSaveGameToFile(std::string filename, const char *description)
 {
     time_t cur_time;
     char   timebuf[100];
@@ -922,20 +907,22 @@ static bool G_SaveGameToFile(std::string filename, const char *description)
     // --- fill in global structure ---
 
     // globs->game  = SV_DupString(game_base.c_str());
-    globs->game      = SV_DupString(currmap->episode_name_.c_str());
-    globs->level     = SV_DupString(currmap->name_.c_str());
+    globs->game      = SV_DupString(current_map->episode_name_.c_str());
+    globs->level     = SV_DupString(current_map->name_.c_str());
     globs->flags     = level_flags;
-    globs->hub_tag   = curr_hub_tag;
-    globs->hub_first = curr_hub_first ? SV_DupString(curr_hub_first->name_.c_str()) : nullptr;
+    globs->hub_tag   = current_hub_tag;
+    globs->hub_first = current_hub_first
+                           ? SV_DupString(current_hub_first->name_.c_str())
+                           : nullptr;
 
-    globs->skill    = gameskill;
+    globs->skill    = game_skill;
     globs->netgame  = netgame ? (1 + deathmatch) : 0;
     globs->p_random = P_ReadRandomState();
 
-    globs->console_player = consoleplayer; // NB: not used
+    globs->console_player = consoleplayer;  // NB: not used
 
     globs->level_time = leveltime;
-    globs->exit_time  = exittime;
+    globs->exit_time  = exit_time;
 
     globs->total_kills   = intermission_stats.kills;
     globs->total_items   = intermission_stats.items;
@@ -972,19 +959,19 @@ static bool G_SaveGameToFile(std::string filename, const char *description)
     S_ResumeAudioDevice();
 #endif
 
-    return true; // OK
+    return true;  // OK
 }
 
-static void G_DoSaveGame(void)
+static void GameDoSaveGame(void)
 {
     if (LUA_UseLuaHud())
-        LUA_SaveGame(); 
+        LUA_SaveGame();
     else
         VM_SaveGame();
 
     std::string fn(SV_FileName("current", "head"));
 
-    if (G_SaveGameToFile(fn, defer_save_desc))
+    if (GameSaveGameToFile(fn, defer_save_description))
     {
         const char *dir_name = SV_SlotName(defer_save_slot);
 
@@ -998,11 +985,11 @@ static void G_DoSaveGame(void)
         // !!! FIXME: what to do?
     }
 
-    defer_save_desc[0] = 0;
+    defer_save_description[0] = 0;
 }
 
 //
-// G_InitNew Stuff
+// GameInitNew Stuff
 //
 // Can be called by the startup code or the menu task.
 // consoleplayer, displayplayer, players[] are setup.
@@ -1010,86 +997,87 @@ static void G_DoSaveGame(void)
 
 //---> newgame_params_c class
 
-newgame_params_c::newgame_params_c()
-    : skill(sk_medium), deathmatch(0), map(nullptr), random_seed(0), total_players(0), flags(nullptr)
+NewGameParameters::NewGameParameters()
+    : skill_(sk_medium),
+      deathmatch_(0),
+      map_(nullptr),
+      random_seed_(0),
+      total_players_(0),
+      flags_(nullptr)
 {
     for (int i = 0; i < MAXPLAYERS; i++)
     {
-        players[i] = PFL_NOPLAYER;
-        nodes[i]   = nullptr;
+        players_[i] = PFL_NOPLAYER;
+        nodes_[i]   = nullptr;
     }
 }
 
-newgame_params_c::newgame_params_c(const newgame_params_c &src)
+NewGameParameters::NewGameParameters(const NewGameParameters &src)
 {
-    skill      = src.skill;
-    deathmatch = src.deathmatch;
+    skill_      = src.skill_;
+    deathmatch_ = src.deathmatch_;
 
-    map = src.map;
+    map_ = src.map_;
 
-    random_seed   = src.random_seed;
-    total_players = src.total_players;
+    random_seed_   = src.random_seed_;
+    total_players_ = src.total_players_;
 
     for (int i = 0; i < MAXPLAYERS; i++)
     {
-        players[i] = src.players[i];
-        nodes[i]   = src.nodes[i];
+        players_[i] = src.players_[i];
+        nodes_[i]   = src.nodes_[i];
     }
 
-    flags = nullptr;
+    flags_ = nullptr;
 
-    if (src.flags)
-        CopyFlags(src.flags);
+    if (src.flags_) CopyFlags(src.flags_);
 }
 
-newgame_params_c::~newgame_params_c()
+NewGameParameters::~NewGameParameters()
 {
-    if (flags)
-        delete flags;
+    if (flags_) delete flags_;
 }
 
-void newgame_params_c::SinglePlayer(int num_bots)
+void NewGameParameters::SinglePlayer(int num_bots)
 {
-    total_players = 1 + num_bots;
-    players[0]    = PFL_Zero; // i.e. !BOT and !NETWORK
-    nodes[0]      = nullptr;
+    total_players_ = 1 + num_bots;
+    players_[0]    = PFL_Zero;  // i.e. !BOT and !NETWORK
+    nodes_[0]      = nullptr;
 
     for (int pnum = 1; pnum <= num_bots; pnum++)
     {
-        players[pnum] = PFL_Bot;
-        nodes[pnum]   = nullptr;
+        players_[pnum] = PFL_Bot;
+        nodes_[pnum]   = nullptr;
     }
 }
 
-void newgame_params_c::CopyFlags(const gameflags_t *F)
+void NewGameParameters::CopyFlags(const gameflags_t *F)
 {
-    if (flags)
-        delete flags;
+    if (flags_) delete flags_;
 
-    flags = new gameflags_t;
+    flags_ = new gameflags_t;
 
-    memcpy(flags, F, sizeof(gameflags_t));
+    memcpy(flags_, F, sizeof(gameflags_t));
 }
 
 //
-// This is the procedure that changes the currmap
+// This is the procedure that changes the current_map
 // at the start of the game and outside the normal
 // progression of the game. All thats needed is the
 // skill and the name (The name in the DDF File itself).
 //
-void G_DeferredNewGame(newgame_params_c &params)
+void GameDeferredNewGame(NewGameParameters &params)
 {
-    SYS_ASSERT(params.map);
+    SYS_ASSERT(params.map_);
 
-    defer_params = new newgame_params_c(params);
+    defer_params = new NewGameParameters(params);
 
-    if (params.level_skip)
-        defer_params->level_skip = true;
+    if (params.level_skip_) defer_params->level_skip_ = true;
 
-    gameaction = ga_newgame;
+    game_action = kGameActionNewGame;
 }
 
-bool G_MapExists(const MapDefinition *map)
+bool GameMapExists(const MapDefinition *map)
 {
     return (W_CheckNumForName(map->lump_.c_str()) >= 0);
 }
@@ -1098,7 +1086,7 @@ bool G_MapExists(const MapDefinition *map)
 // REQUIRED STATE:
 //   (a) defer_params
 //
-static void G_DoNewGame(void)
+static void GameDoNewGame(void)
 {
     SYS_ASSERT(defer_params);
 
@@ -1109,7 +1097,7 @@ static void G_DoNewGame(void)
 
     InitNew(*defer_params);
 
-    bool skip_pre = defer_params->level_skip;
+    bool skip_pre = defer_params->level_skip_;
 
     delete defer_params;
     defer_params = nullptr;
@@ -1122,9 +1110,9 @@ static void G_DoNewGame(void)
     // -AJA- 2003/10/09: support for pre-level briefing screen on first map.
     //       FIXME: kludgy. All this game logic desperately needs rethinking.
     if (skip_pre)
-        gameaction = ga_loadlevel;
+        game_action = kGameActionLoadLevel;
     else
-        FinaleStart(&currmap->f_pre_, ga_loadlevel);
+        FinaleStart(&current_map->f_pre_, kGameActionLoadLevel);
 }
 
 //
@@ -1139,7 +1127,7 @@ static void G_DoNewGame(void)
 // REQUIRED STATE:
 //   ?? nothing ??
 //
-static void InitNew(newgame_params_c &params)
+static void InitNew(NewGameParameters &params)
 {
     // --- create players ---
 
@@ -1147,57 +1135,58 @@ static void InitNew(newgame_params_c &params)
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
-        if (params.players[pnum] == PFL_NOPLAYER)
-            continue;
+        if (params.players_[pnum] == PFL_NOPLAYER) continue;
 
-        P_CreatePlayer(pnum, (params.players[pnum] & PFL_Bot) ? true : false);
+        P_CreatePlayer(pnum, (params.players_[pnum] & PFL_Bot) ? true : false);
 
-        if (consoleplayer < 0 && !(params.players[pnum] & PFL_Bot) && !(params.players[pnum] & PFL_Network))
+        if (consoleplayer < 0 && !(params.players_[pnum] & PFL_Bot) &&
+            !(params.players_[pnum] & PFL_Network))
         {
-            G_SetConsolePlayer(pnum);
+            GameSetConsolePlayer(pnum);
         }
 
-        players[pnum]->node = params.nodes[pnum];
+        players[pnum]->node = params.nodes_[pnum];
     }
 
-    if (numplayers != params.total_players)
-        I_Error("Internal Error: InitNew: player miscount (%d != %d)\n", numplayers, params.total_players);
+    if (numplayers != params.total_players_)
+        I_Error("Internal Error: InitNew: player miscount (%d != %d)\n",
+                numplayers, params.total_players_);
 
     if (consoleplayer < 0)
         I_Error("Internal Error: InitNew: no local players!\n");
 
-    G_SetDisplayPlayer(consoleplayer);
+    GameSetDisplayPlayer(consoleplayer);
 
     if (paused)
     {
         paused = false;
-        S_ResumeMusic(); // -ACB- 1999/10/07 New Music API
+        S_ResumeMusic();  // -ACB- 1999/10/07 New Music API
         S_ResumeSound();
     }
 
-    currmap        = params.map;
-    curr_hub_tag   = 0;
-    curr_hub_first = nullptr;
+    current_map       = params.map_;
+    current_hub_tag   = 0;
+    current_hub_first = nullptr;
 
-    if (params.skill > sk_nightmare)
-        params.skill = sk_nightmare;
+    if (params.skill_ > sk_nightmare) params.skill_ = sk_nightmare;
 
-    P_WriteRandomState(params.random_seed);
+    P_WriteRandomState(params.random_seed_);
 
     automap_active = false;
 
-    gameskill  = params.skill;
-    deathmatch = params.deathmatch;
+    game_skill = params.skill_;
+    deathmatch = params.deathmatch_;
 
-    // L_WriteDebug("G_InitNew: Deathmatch %d Skill %d\n", params.deathmatch, (int)params.skill);
+    // L_WriteDebug("GameInitNew: Deathmatch %d Skill %d\n", params.deathmatch,
+    // (int)params.skill);
 
     // copy global flags into the level-specific flags
-    if (params.flags)
-        level_flags = *params.flags;
+    if (params.flags_)
+        level_flags = *params.flags_;
     else
         level_flags = global_flags;
 
-    if (params.skill == sk_nightmare)
+    if (params.skill_ == sk_nightmare)
     {
         level_flags.fastparm = true;
         level_flags.respawn  = true;
@@ -1206,11 +1195,12 @@ static void InitNew(newgame_params_c &params)
     N_ResetTics();
 }
 
-void G_DeferredEndGame(void)
+void GameDeferredEndGame(void)
 {
-    if (gamestate == GS_LEVEL || gamestate == GS_INTERMISSION || gamestate == GS_FINALE)
+    if (game_state == GS_LEVEL || game_state == GS_INTERMISSION ||
+        game_state == GS_FINALE)
     {
-        gameaction = ga_endgame;
+        game_action = kGameActionEndGame;
     }
 }
 
@@ -1218,7 +1208,7 @@ void G_DeferredEndGame(void)
 // REQUIRED STATE:
 //    ?? nothing ??
 //
-static void G_DoEndGame(void)
+static void GameDoEndGame(void)
 {
     E_ForceWipe();
 
@@ -1226,14 +1216,14 @@ static void G_DoEndGame(void)
 
     SV_ClearSlot("current");
 
-    if (gamestate == GS_LEVEL)
+    if (game_state == GS_LEVEL)
     {
         BotEndLevel();
 
         // FIXME: P_ShutdownLevel()
     }
 
-    gamestate = GS_NOTHING;
+    game_state = GS_NOTHING;
 
     V_SetPalette(PALETTE_NORMAL, 0);
 
@@ -1244,32 +1234,28 @@ static void G_DoEndGame(void)
     E_StartTitle();
 }
 
-bool G_CheckWhenAppear(AppearsFlag appear)
+bool GameCheckWhenAppear(AppearsFlag appear)
 {
-    if (!(appear & (1 << gameskill)))
-        return false;
+    if (!(appear & (1 << game_skill))) return false;
 
-    if (SP_MATCH() && !(appear & kAppearsWhenSingle))
-        return false;
+    if (SP_MATCH() && !(appear & kAppearsWhenSingle)) return false;
 
-    if (COOP_MATCH() && !(appear & kAppearsWhenCoop))
-        return false;
+    if (COOP_MATCH() && !(appear & kAppearsWhenCoop)) return false;
 
-    if (DEATHMATCH() && !(appear & kAppearsWhenDeathMatch))
-        return false;
+    if (DEATHMATCH() && !(appear & kAppearsWhenDeathMatch)) return false;
 
     return true;
 }
 
-MapDefinition *G_LookupMap(const char *refname)
+MapDefinition *GameLookupMap(const char *refname)
 {
     MapDefinition *m = mapdefs.Lookup(refname);
 
-    if (m && G_MapExists(m))
-        return m;
+    if (m && GameMapExists(m)) return m;
 
     // -AJA- handle numbers (like original DOOM)
-    if (strlen(refname) <= 2 && epi::IsDigitASCII(refname[0]) && (!refname[1] || epi::IsDigitASCII(refname[1])))
+    if (strlen(refname) <= 2 && epi::IsDigitASCII(refname[0]) &&
+        (!refname[1] || epi::IsDigitASCII(refname[1])))
     {
         int num = atoi(refname);
         // first try map names ending in ## (single digit treated as 0#)
@@ -1278,22 +1264,24 @@ MapDefinition *G_LookupMap(const char *refname)
         {
             if (mapdefs[i]->name_.size() >= 2)
             {
-                if (epi::StringCaseCompareASCII(map_check, mapdefs[i]->name_.substr(mapdefs[i]->name_.size() - 2)) == 0 &&
-                    G_MapExists(mapdefs[i]) && mapdefs[i]->episode_)
+                if (epi::StringCaseCompareASCII(
+                        map_check, mapdefs[i]->name_.substr(
+                                       mapdefs[i]->name_.size() - 2)) == 0 &&
+                    GameMapExists(mapdefs[i]) && mapdefs[i]->episode_)
                     return mapdefs[i];
             }
         }
 
         // otherwise try X#X# (episodic) style names
-        if (1 <= num && num <= 9)
-            num = num + 10;
+        if (1 <= num && num <= 9) num = num + 10;
         map_check = epi::StringFormat("E%dM%d", num / 10, num % 10);
         for (int i = mapdefs.size() - 1; i >= 0; i--)
         {
             if (mapdefs[i]->name_.size() == 4)
             {
-                if (mapdefs[i]->name_[1] == map_check[1] && mapdefs[i]->name_[3] == map_check[3] &&
-                    G_MapExists(mapdefs[i]) && mapdefs[i]->episode_)
+                if (mapdefs[i]->name_[1] == map_check[1] &&
+                    mapdefs[i]->name_[3] == map_check[3] &&
+                    GameMapExists(mapdefs[i]) && mapdefs[i]->episode_)
                     return mapdefs[i];
             }
         }

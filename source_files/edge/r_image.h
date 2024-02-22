@@ -101,7 +101,7 @@ class image_c
 
     liquid_type_e liquid_type;
 
-    int swirled_gametic;
+    int swirled_game_tic;
 
     bool is_font;
 

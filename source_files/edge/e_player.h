@@ -349,32 +349,32 @@ typedef struct player_s
 void P_ConsolePlayerBuilder(const player_t *p, void *data, EventTicCommand *dest);
 void P_BotPlayerBuilder(const player_t *p, void *data, EventTicCommand *dest);
 
-void G_ClearBodyQueue(void);
-void G_DeathMatchSpawnPlayer(player_t *p);
-void G_CoopSpawnPlayer(player_t *p);
-void G_HubSpawnPlayer(player_t *p, int tag);
-void G_SpawnVoodooDolls(player_t *p);
-void G_SpawnHelper(int pnum);
+void GameClearBodyQueue(void);
+void GameDeathMatchSpawnPlayer(player_t *p);
+void GameCoopSpawnPlayer(player_t *p);
+void GameHubSpawnPlayer(player_t *p, int tag);
+void GameSpawnVoodooDolls(player_t *p);
+void GameSpawnHelper(int pnum);
 
-void G_SetConsolePlayer(int pnum);
-void G_SetDisplayPlayer(int pnum);
-void G_ToggleDisplayPlayer(void);
+void GameSetConsolePlayer(int pnum);
+void GameSetDisplayPlayer(int pnum);
+void GameToggleDisplayPlayer(void);
 
-void G_PlayerReborn(player_t *player, const MapObjectDefinition *info);
-void G_PlayerFinishLevel(player_t *p, bool keep_cards);
-void G_MarkPlayerAvatars(void);
-void G_RemoveOldAvatars(void);
+void GamePlayerReborn(player_t *player, const MapObjectDefinition *info);
+void GamePlayerFinishLevel(player_t *p, bool keep_cards);
+void GameMarkPlayerAvatars(void);
+void GameRemoveOldAvatars(void);
 
-bool G_CheckConditions(mobj_t *mo, ConditionCheck *cond);
+bool GameCheckConditions(mobj_t *mo, ConditionCheck *cond);
 
-void G_ClearPlayerStarts(void);
+void GameClearPlayerStarts(void);
 
-void G_AddDeathmatchStart(const spawnpoint_t &point);
-void G_AddCoopStart(const spawnpoint_t &point);
-void G_AddHubStart(const spawnpoint_t &point);
-void G_AddVoodooDoll(const spawnpoint_t &point);
+void GameAddDeathmatchStart(const spawnpoint_t &point);
+void GameAddCoopStart(const spawnpoint_t &point);
+void GameAddHubStart(const spawnpoint_t &point);
+void GameAddVoodooDoll(const spawnpoint_t &point);
 
-spawnpoint_t *G_FindCoopPlayer(int pnum);
+spawnpoint_t *GameFindCoopPlayer(int pnum);
 
 #endif // __E_PLAYER_H__
 

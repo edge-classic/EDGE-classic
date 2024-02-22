@@ -132,28 +132,28 @@ void M_ChangeLevelCheat(const char *string)
 
     // NOTE WELL: following assumes single player
 
-    newgame_params_c params;
+    NewGameParameters params;
 
-    params.skill      = gameskill;
-    params.deathmatch = deathmatch;
+    params.skill_      = game_skill;
+    params.deathmatch_ = deathmatch;
 
-    params.map = G_LookupMap(string);
-    if (!params.map)
+    params.map_ = GameLookupMap(string);
+    if (!params.map_)
     {
         ConsoleMessageLDF("ImpossibleChange");
         return;
     }
 
-    SYS_ASSERT(G_MapExists(params.map));
-    SYS_ASSERT(params.map->episode_);
+    SYS_ASSERT(GameMapExists(params.map_));
+    SYS_ASSERT(params.map_->episode_);
 
-    params.random_seed = I_PureRandom();
+    params.random_seed_ = I_PureRandom();
 
     params.SinglePlayer(numbots);
 
-    params.level_skip = true;
+    params.level_skip_ = true;
 
-    G_DeferredNewGame(params);
+    GameDeferredNewGame(params);
 
     ConsoleMessageLDF("LevelChange");
 }

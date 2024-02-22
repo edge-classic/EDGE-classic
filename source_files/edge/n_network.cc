@@ -61,16 +61,16 @@ EDGE_DEFINE_CONSOLE_VARIABLE(n_busywait, "1", kConsoleVariableFlagReadOnly)
 HANDLE windows_timer = nullptr;
 #endif
 
-// gametic is the tic about to (or currently being) run.
+// game_tic is the tic about to (or currently being) run.
 // maketic is the tic that hasn't had control made for it yet.
 //
-// NOTE 1: it is a system-wide INVARIANT that gametic <= maketic, since
+// NOTE 1: it is a system-wide INVARIANT that game_tic <= maketic, since
 //         we cannot run a physics step without a ticcmd for each player.
 //
-// NOTE 2: maketic - gametic is number of buffered (un-run) ticcmds,
+// NOTE 2: maketic - game_tic is number of buffered (un-run) ticcmds,
 //         and it must be <= BACKUPTICS (the maximum buffered ticcmds).
 
-int gametic;
+int game_tic;
 int maketic;
 
 static int last_update_tic; // last time N_NetUpdate  was called
@@ -127,7 +127,7 @@ static bool N_BuildTiccmds(void)
     if (numplayers == 0)
         return false;
 
-    if (maketic >= gametic + BACKUPTICS)
+    if (maketic >= game_tic + BACKUPTICS)
         return false;
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
@@ -152,20 +152,20 @@ static bool N_BuildTiccmds(void)
 void N_GrabTiccmds(void)
 {
     // this is called from G_Ticker, and is the only place allowed to
-    // bump `gametic` (allowing the game simulation to advance).
+    // bump `game_tic` (allowing the game simulation to advance).
     //
     // all we actually do here is grab the ticcmd for each local player
     // (i.e. ones created earler in N_BuildTiccmds).
 
-    // gametic <= maketic is a system-wide invariant.  However, new levels
+    // game_tic <= maketic is a system-wide invariant.  However, new levels
     // levels are loaded during G_Ticker(), which resets them both to zero,
     // hence we need to handle that particular case here.
-    SYS_ASSERT(gametic <= maketic);
+    SYS_ASSERT(game_tic <= maketic);
 
-    if (gametic == maketic)
+    if (game_tic == maketic)
         return;
 
-    int buf = gametic % BACKUPTICS;
+    int buf = game_tic % BACKUPTICS;
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
@@ -176,11 +176,11 @@ void N_GrabTiccmds(void)
         memcpy(&p->cmd, p->in_cmds + buf, sizeof(EventTicCommand));
     }
     if (LUA_UseLuaHud())
-        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "gametic", gametic / (r_doubleframes.d_? 2 : 1));
+        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "game_tic", game_tic / (r_doubleframes.d_? 2 : 1));
     else
-        VM_SetFloat(ui_vm, "sys", "gametic", gametic / (r_doubleframes.d_? 2 : 1));
+        VM_SetFloat(ui_vm, "sys", "game_tic", game_tic / (r_doubleframes.d_? 2 : 1));
 
-    gametic++;
+    game_tic++;
 }
 
 //----------------------------------------------------------------------------
@@ -263,10 +263,10 @@ int N_TryRunTics()
         return realtics;
     }
 
-    SYS_ASSERT(gametic <= maketic);
+    SYS_ASSERT(game_tic <= maketic);
 
     // decide how many tics to run...
-    int tics = maketic - gametic;
+    int tics = maketic - game_tic;
 
     // -AJA- been staring at this all day, still can't explain it.
     //       my best guess is that we *usually* need an extra tic so that
@@ -277,15 +277,15 @@ int N_TryRunTics()
         tics = HMM_MAX(HMM_MIN(tics, realtics), 1);
 
 #ifdef DEBUG_TICS
-    I_Debugf("=== maketic %d gametic %d | real %d using %d\n", maketic, gametic, realtics, tics);
+    I_Debugf("=== maketic %d game_tic %d | real %d using %d\n", maketic, game_tic, realtics, tics);
 #endif
 
     // wait for new tics if needed
-    while (maketic < gametic + tics)
+    while (maketic < game_tic + tics)
     {
         N_NetUpdate();
 
-        if (!n_busywait.d_&& (maketic < gametic + tics))
+        if (!n_busywait.d_&& (maketic < game_tic + tics))
         {
             I_Sleep(5);
         }
@@ -296,7 +296,7 @@ int N_TryRunTics()
 
 void N_ResetTics(void)
 {
-    maketic = gametic = 0;
+    maketic = game_tic = 0;
 
     last_update_tic = last_tryrun_tic = I_GetTime();
 }

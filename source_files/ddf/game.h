@@ -175,7 +175,7 @@ class GameDefinition
     struct SoundEffect *percent_;
     struct SoundEffect *done_;
     struct SoundEffect *endmap_;
-    struct SoundEffect *nextmap_;
+    struct SoundEffect *next_map_;
     struct SoundEffect *accel_snd_;
     struct SoundEffect *frag_snd_;
 

@@ -426,7 +426,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
 
     // EDGE Feature: Jump Code
     //
-    // -ACB- 1998/08/09 Check that jumping is allowed in the currmap
+    // -ACB- 1998/08/09 Check that jumping is allowed in the current_map
     //                  Make player pause before jumping again
 
     if (!extra_tic || !r_doubleframes.d_)
@@ -778,9 +778,9 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
             player->mo->subsector->sector->props.special = nullptr;
 
             if (do_exit == kExitTypeSecret)
-                G_SecretExitLevel(1);
+                GameSecretExitLevel(1);
             else
-                G_ExitLevel(1);
+                GameExitLevel(1);
         }
         return true;
     }

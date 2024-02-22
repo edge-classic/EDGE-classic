@@ -78,7 +78,7 @@ static const DDFCommandList level_commands[] = {
     DF("SKY_STRETCH", forced_skystretch_, DDF_LevelGetSkyStretch),
     DF("MUSIC_ENTRY", music_, DDF_MainGetNumeric),
     DF("SURROUND_FLAT", surround_, DDF_MainGetLumpName),
-    DF("NEXT_MAP", nextmapname_, DDF_MainGetLumpName),
+    DF("NEXT_MAP", next_mapname_, DDF_MainGetLumpName),
     DF("SECRET_MAP", secretmapname_, DDF_MainGetLumpName),
     DF("AUTOTAG", autotag_, DDF_MainGetNumeric),
     DF("PARTIME", partime_, DDF_MainGetTime),
@@ -423,7 +423,7 @@ void MapDefinition::CopyDetail(MapDefinition &src)
     force_on_  = src.force_on_;
     force_off_ = src.force_off_;
 
-    nextmapname_   = src.nextmapname_;
+    next_mapname_   = src.next_mapname_;
     secretmapname_ = src.secretmapname_;
 
     autotag_ = src.autotag_;
@@ -463,7 +463,7 @@ void MapDefinition::Default()
     force_on_  = kMapFlagNone;
     force_off_ = kMapFlagNone;
 
-    nextmapname_.clear();
+    next_mapname_.clear();
     secretmapname_.clear();
 
     autotag_ = 0;

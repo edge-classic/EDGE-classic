@@ -60,11 +60,11 @@ static ConsoleVisibility console_visible;
 // stores the console toggle effect
 static int     console_wipe_active   = 0;
 static int     console_wipe_position = 0;
-static font_c *console_font;
-font_c        *endoom_font;
+static Font *console_font;
+Font        *endoom_font;
 
 // the console's background
-static style_c *console_style;
+static Style *console_style;
 
 static RGBAColor current_color;
 
@@ -475,7 +475,7 @@ void ConsoleMessage(const char *message, ...)
 
     va_end(argptr);
 
-    HU_StartMessage(buffer);
+    HUDStartMessage(buffer);
 
     strcat(buffer, "\n");
 
@@ -493,7 +493,7 @@ void ConsoleMessageLDF(const char *lookup, ...)
     vsprintf(buffer, lookup, argptr);
     va_end(argptr);
 
-    HU_StartMessage(buffer);
+    HUDStartMessage(buffer);
 
     strcat(buffer, "\n");
 
@@ -511,7 +511,7 @@ void ConsoleImportantMessageLDF(const char *lookup, ...)
     vsprintf(buffer, lookup, argptr);
     va_end(argptr);
 
-    HU_StartImportantMessage(buffer);
+    HUDStartImportantMessage(buffer);
 
     strcat(buffer, "\n");
 
@@ -531,11 +531,11 @@ static void CalcSizes()
     else
         FNSZ = 24;
 
-    FNSZ_ratio = FNSZ / console_font->def->default_size_;
-    if (console_font->def->type_ == kFontTypeImage)
+    FNSZ_ratio = FNSZ / console_font->definition_->default_size_;
+    if (console_font->definition_->type_ == kFontTypeImage)
         XMUL =
-            RoundToInteger((console_font->im_mono_width + console_font->spacing) *
-                       (FNSZ / console_font->im_char_height));
+            RoundToInteger((console_font->image_monospace_width_ + console_font->spacing_) *
+                       (FNSZ / console_font->image_character_height_));
 }
 
 static void SolidBox(int x, int y, int w, int h, RGBAColor col, float alpha)
@@ -573,21 +573,21 @@ static void DrawChar(int x, int y, char ch, RGBAColor col)
 
     glColor4f(sgcol.r, sgcol.g, sgcol.b, 1.0f);
 
-    if (console_font->def->type_ == kFontTypeTrueType)
+    if (console_font->definition_->type_ == kFontTypeTrueType)
     {
         float chwidth = console_font->CharWidth(ch);
         XMUL          = RoundToInteger(chwidth * FNSZ_ratio / v_pixelaspect.f_);
         float width =
-            (chwidth - console_font->spacing) * FNSZ_ratio / v_pixelaspect.f_;
+            (chwidth - console_font->spacing_) * FNSZ_ratio / v_pixelaspect.f_;
         float x_adjust = (XMUL - width) / 2;
-        float y_adjust = console_font->ttf_glyph_map.at((uint8_t)ch)
+        float y_adjust = console_font->truetype_glyph_map_.at((uint8_t)ch)
                              .y_shift[current_font_size] *
                          FNSZ_ratio;
-        float height = console_font->ttf_glyph_map.at((uint8_t)ch)
+        float height = console_font->truetype_glyph_map_.at((uint8_t)ch)
                            .height[current_font_size] *
                        FNSZ_ratio;
-        stbtt_aligned_quad *q = console_font->ttf_glyph_map.at((uint8_t)ch)
-                                    .char_quad[current_font_size];
+        stbtt_aligned_quad *q = console_font->truetype_glyph_map_.at((uint8_t)ch)
+                                    .character_quad[current_font_size];
         glBegin(GL_POLYGON);
         glTexCoord2f(q->s0, q->t0);
         glVertex2f(x + x_adjust, y - y_adjust);
@@ -604,10 +604,10 @@ static void DrawChar(int x, int y, char ch, RGBAColor col)
     uint8_t px = (uint8_t)ch % 16;
     uint8_t py = 15 - (uint8_t)ch / 16;
 
-    float tx1 = (px)*console_font->font_image->ratio_w;
-    float tx2 = (px + 1) * console_font->font_image->ratio_w;
-    float ty1 = (py)*console_font->font_image->ratio_h;
-    float ty2 = (py + 1) * console_font->font_image->ratio_h;
+    float tx1 = (px)*console_font->font_image_->ratio_w;
+    float tx2 = (px + 1) * console_font->font_image_->ratio_w;
+    float ty1 = (py)*console_font->font_image_->ratio_h;
+    float ty2 = (py + 1) * console_font->font_image_->ratio_h;
 
     glBegin(GL_POLYGON);
 
@@ -660,11 +660,11 @@ static void DrawEndoomChar(float x, float y, char ch, RGBAColor col,
     uint8_t px = (uint8_t)ch % 16;
     uint8_t py = 15 - (uint8_t)ch / 16;
 
-    float tx1 = (px)*endoom_font->font_image->ratio_w;
-    float tx2 = (px + 1) * endoom_font->font_image->ratio_w;
+    float tx1 = (px)*endoom_font->font_image_->ratio_w;
+    float tx2 = (px + 1) * endoom_font->font_image_->ratio_w;
 
-    float ty1 = (py)*endoom_font->font_image->ratio_h;
-    float ty2 = (py + 1) * endoom_font->font_image->ratio_h;
+    float ty1 = (py)*endoom_font->font_image_->ratio_h;
+    float ty2 = (py + 1) * endoom_font->font_image_->ratio_h;
 
     glBegin(GL_POLYGON);
 
@@ -686,10 +686,10 @@ static void DrawEndoomChar(float x, float y, char ch, RGBAColor col,
 // writes the text on coords (x,y) of the console
 static void DrawText(int x, int y, const char *s, RGBAColor col)
 {
-    if (console_font->def->type_ == kFontTypeImage)
+    if (console_font->definition_->type_ == kFontTypeImage)
     {
         // Always whiten the font when used with console output
-        GLuint tex_id = W_ImageCache(console_font->font_image, true,
+        GLuint tex_id = W_ImageCache(console_font->font_image_, true,
                                      (const Colormap *)0, true);
 
         glEnable(GL_TEXTURE_2D);
@@ -699,20 +699,20 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
         glEnable(GL_ALPHA_TEST);
         glAlphaFunc(GL_GREATER, 0);
     }
-    else if (console_font->def->type_ == kFontTypeTrueType)
+    else if (console_font->definition_->type_ == kFontTypeTrueType)
     {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_TEXTURE_2D);
-        if ((var_smoothing && console_font->def->ttf_smoothing_ ==
+        if ((var_smoothing && console_font->definition_->truetype_smoothing_ ==
                                   FontDefinition::kTrueTypeSmoothOnDemand) ||
-            console_font->def->ttf_smoothing_ ==
+            console_font->definition_->truetype_smoothing_ ==
                 FontDefinition::kTrueTypeSmoothAlways)
             glBindTexture(GL_TEXTURE_2D,
-                          console_font->ttf_smoothed_tex_id[current_font_size]);
+                          console_font->truetype_smoothed_texture_id_[current_font_size]);
         else
             glBindTexture(GL_TEXTURE_2D,
-                          console_font->ttf_tex_id[current_font_size]);
+                          console_font->truetype_texture_id_[current_font_size]);
     }
 
     bool draw_cursor = false;
@@ -727,15 +727,15 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
     {
         DrawChar(x, y, *s, col);
 
-        if (console_font->def->type_ == kFontTypeTrueType)
+        if (console_font->definition_->type_ == kFontTypeTrueType)
         {
             if (s + 1)
             {
                 x +=
                     (float)stbtt_GetGlyphKernAdvance(
-                        console_font->ttf_info, console_font->GetGlyphIndex(*s),
+                        console_font->truetype_info_, console_font->GetGlyphIndex(*s),
                         console_font->GetGlyphIndex(*(s + 1))) *
-                    console_font->ttf_kern_scale[current_font_size] *
+                    console_font->truetype_kerning_scale_[current_font_size] *
                     FNSZ_ratio / v_pixelaspect.f_;
             }
         }
@@ -762,10 +762,10 @@ static void EndoomDrawText(int x, int y, ConsoleLine *endoom_line)
 {
     // Always whiten the font when used with console output
     GLuint tex_id =
-        W_ImageCache(endoom_font->font_image, true, (const Colormap *)0, true);
+        W_ImageCache(endoom_font->font_image_, true, (const Colormap *)0, true);
 
-    int enwidth = RoundToInteger((float)endoom_font->im_mono_width *
-                             ((float)FNSZ / endoom_font->im_mono_width) / 2);
+    int enwidth = RoundToInteger((float)endoom_font->image_monospace_width_ *
+                             ((float)FNSZ / endoom_font->image_monospace_width_) / 2);
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -797,7 +797,7 @@ void ConsoleSetupFont(void)
     {
         FontDefinition *DEF = fontdefs.Lookup("CON_FONT_2");
         if (!DEF) I_Error("CON_FONT_2 definition missing from DDFFONT!\n");
-        console_font = hu_fonts.Lookup(DEF);
+        console_font = hud_fonts.Lookup(DEF);
         SYS_ASSERT(console_font);
         console_font->Load();
     }
@@ -806,7 +806,7 @@ void ConsoleSetupFont(void)
     {
         FontDefinition *DEF = fontdefs.Lookup("ENDFONT");
         if (!DEF) I_Error("ENDFONT definition missing from DDFFONT!\n");
-        endoom_font = hu_fonts.Lookup(DEF);
+        endoom_font = hud_fonts.Lookup(DEF);
         SYS_ASSERT(endoom_font);
         endoom_font->Load();
     }
@@ -815,7 +815,7 @@ void ConsoleSetupFont(void)
     {
         StyleDefinition *def = styledefs.Lookup("CONSOLE");
         if (!def) def = default_style;
-        console_style = hu_styles.Lookup(def);
+        console_style = hud_styles.Lookup(def);
     }
 
     CalcSizes();
@@ -838,25 +838,25 @@ void ConsoleDrawer(void)
     else
         y = y - CON_GFX_HT;
 
-    if (console_style->bg_image != nullptr)
+    if (console_style->background_image_ != nullptr)
     {
-        const image_c *img = console_style->bg_image;
+        const image_c *img = console_style->background_image_;
 
-        HUD_RawImage(0, y, SCREENWIDTH, y + CON_GFX_HT, img, 0.0, 0.0,
+        HUDRawImage(0, y, SCREENWIDTH, y + CON_GFX_HT, img, 0.0, 0.0,
                      IM_RIGHT(img), IM_TOP(img),
-                     console_style->def->bg_.translucency_, kRGBANoValue,
+                     console_style->definition_->bg_.translucency_, kRGBANoValue,
                      nullptr, 0, 0);
     }
     else
     {
         SolidBox(0, y, SCREENWIDTH, SCREENHEIGHT - y,
-                 console_style->def->bg_.colour_ != kRGBANoValue
-                     ? console_style->def->bg_.colour_
+                 console_style->definition_->bg_.colour_ != kRGBANoValue
+                     ? console_style->definition_->bg_.colour_
                      : SG_BLACK_RGBA32,
-                 console_style->def->bg_.translucency_);
+                 console_style->definition_->bg_.translucency_);
     }
 
-    y += FNSZ / 4 + (console_font->def->type_ == kFontTypeTrueType ? FNSZ : 0);
+    y += FNSZ / 4 + (console_font->definition_->type_ == kFontTypeTrueType ? FNSZ : 0);
 
     // -- input line --
 
@@ -1358,7 +1358,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
         // Allow screenshotting of console too - Dasho
         case KEYD_F1:
         case KEYD_PRTSCR:
-            G_DeferredScreenShot();
+            GameDeferredScreenShot();
             break;
 
         default:
@@ -1411,7 +1411,7 @@ static int GetKeycode(InputEvent *ev)
             break;
     }
 
-    if (HU_IS_PRINTABLE(sym)) return sym;
+    if (epi::IsPrintASCII(sym)) return sym;
 
     return -1;
 }
@@ -1480,7 +1480,7 @@ bool ConsoleResponder(InputEvent *ev)
 void ConsoleTicker(void)
 {
     int add = 1;
-    if (r_doubleframes.d_&& !(hudtic & 1)) add = 0;
+    if (r_doubleframes.d_&& !(hud_tic & 1)) add = 0;
 
     console_cursor = (console_cursor + add) & 31;
 
@@ -1609,7 +1609,7 @@ void ConsoleShowFPS(void)
 
     x += XMUL;
     y = SCREENHEIGHT - FNSZ -
-        FNSZ * (console_font->def->type_ == kFontTypeTrueType ? -0.5 : 0.5);
+        FNSZ * (console_font->definition_->type_ == kFontTypeTrueType ? -0.5 : 0.5);
 
     // show average...
 
@@ -1678,7 +1678,7 @@ void ConsoleShowPosition(void)
     SolidBox(x, y - FNSZ * 10, XMUL * 16, FNSZ * 10 + 2, SG_BLACK_RGBA32, 0.5);
 
     x += XMUL;
-    y -= FNSZ * (console_font->def->type_ == kFontTypeTrueType ? 0.25 : 1.25);
+    y -= FNSZ * (console_font->definition_->type_ == kFontTypeTrueType ? 0.25 : 1.25);
     sprintf(textbuf, "    x: %d", (int)p->mo->x);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 

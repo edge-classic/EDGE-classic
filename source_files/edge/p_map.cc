@@ -59,7 +59,7 @@ static void gore_cb(ConsoleVariable *self)
     if (self->d_ == 2) // No blood
         return;
 
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagMoreBlood))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagMoreBlood))
         return;
 
     level_flags.more_blood = global_flags.more_blood = self->d_;
@@ -200,7 +200,7 @@ static bool PIT_StompThing(mobj_t *thing, void *data)
         }
     }
 
-    if (!tm_I.mover->player && (currmap->force_off_ & kMapFlagStomp))
+    if (!tm_I.mover->player && (current_map->force_off_ & kMapFlagStomp))
         return false;
 
     P_TelefragMobj(thing, tm_I.mover, nullptr);

@@ -587,9 +587,9 @@ SectorType *SectorTypeContainer::Lookup(const int id)
     int slot = DDF_SectHashFunc(id);
 
     // check the cache
-    if (lookup_cache_[slot] && lookup_cache_[slot]->number_ == id)
+    if (lookupatch_font_cache_[slot] && lookupatch_font_cache_[slot]->number_ == id)
     {
-        return lookup_cache_[slot];
+        return lookupatch_font_cache_[slot];
     }
 
     for (auto iter = rbegin(); iter != rend(); iter++)
@@ -599,7 +599,7 @@ SectorType *SectorTypeContainer::Lookup(const int id)
         if (s->number_ == id)
         {
             // update the cache
-            lookup_cache_[slot] = s;
+            lookupatch_font_cache_[slot] = s;
             return s;
         }
     }
@@ -621,7 +621,7 @@ void SectorTypeContainer::Reset()
         sec = nullptr;
     }
     clear();
-    memset(lookup_cache_, 0, sizeof(SectorType *) * kLookupCacheSize);
+    memset(lookupatch_font_cache_, 0, sizeof(SectorType *) * kLookupCacheSize);
 }
 
 //--- editor settings ---

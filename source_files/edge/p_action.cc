@@ -1608,9 +1608,9 @@ void P_ActCreateSmokeTrail(mobj_t *projectile)
 // projectile will not chase its target.
 //
 // As this code is based on the revenant tracer, it did use
-// a bit check on the current gametic - which was why every so
+// a bit check on the current game_tic - which was why every so
 // often a revenant fires a missile straight and not one that
-// homes in on its target: If the gametic has bits 1+2 on
+// homes in on its target: If the game_tic has bits 1+2 on
 // (which boils down to 1 in every 4 tics), the trick in this
 // is that - in conjuntion with the tic count for the
 // tracing object's states - the tracing will always fail or

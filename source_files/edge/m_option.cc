@@ -41,7 +41,7 @@
 // -ACB- 1998/07/30 Remove M_SetRespawn and the newnmrespawn &
 //                  respawnmonsters. Used new respawnsetting variable.
 //
-// -ACB- 1998/08/10 Edited the menu's to reflect the fact that currmap
+// -ACB- 1998/08/10 Edited the menu's to reflect the fact that current_map
 //                  flags can prevent changes.
 //
 // -ES-  1998/08/21 Added resolution options
@@ -198,7 +198,7 @@ static void M_ChangePCSpeakerMode(int keypressed, ConsoleVariable *cvar = nullpt
 // -ES- 1998/08/20 Added resolution options
 // -ACB- 1998/08/29 Moved to top and tried different system
 
-static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int centrex);
+static void M_ResOptDrawer(Style *style, int topy, int bottomy, int dy, int centrex);
 static void M_ResolutionOptions(int keypressed, ConsoleVariable *cvar = nullptr);
 static void M_OptionSetResolution(int keypressed, ConsoleVariable *cvar = nullptr);
 static void M_ChangeResSize(int keypressed, ConsoleVariable *cvar = nullptr);
@@ -296,7 +296,7 @@ typedef struct menuinfo_s
     optmenuitem_t *items;
     int            item_num;
 
-    style_c **style_var;
+    Style **style_var;
 
     int menu_center;
 
@@ -320,7 +320,7 @@ static int            curr_key_menu;
 
 static int keyscan;
 
-static style_c *opt_def_style;
+static Style *opt_def_style;
 
 static void M_ChangeMixChan(int keypressed, ConsoleVariable *cvar)
 {
@@ -372,7 +372,7 @@ static optmenuitem_t mainoptions[] = {
 #endif
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {OPT_Function, "Language", nullptr, 0, nullptr, M_ChangeLanguage, nullptr},
-    {OPT_Switch, "Messages", YesNo, 2, &showMessages, nullptr, "Messages"},
+    {OPT_Switch, "Messages", YesNo, 2, &show_messages, nullptr, "Messages"},
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {OPT_Function, "Start Bot Match", nullptr, 0, nullptr, M_HostNetGame, nullptr},
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
@@ -829,7 +829,7 @@ static char keystring2[] = "Press a key for this action";
 //
 void M_OptCheckNetgame(void)
 {
-    if (gamestate >= GS_LEVEL)
+    if (game_state >= GS_LEVEL)
     {
         strcpy(mainoptions[HOSTNET_POS + 0].name, "Leave Game");
         mainoptions[HOSTNET_POS + 0].routine = &M_EndGame;
@@ -869,7 +869,7 @@ void M_OptMenuInit()
     def = styledefs.Lookup("OPTIONS");
     if (!def)
         def = default_style;
-    opt_def_style = hu_styles.Lookup(def);
+    opt_def_style = hud_styles.Lookup(def);
 
     // Lobo 2022: load our ddflang stuff
     main_optmenu.name          = language["MenuOptions"];
@@ -906,38 +906,38 @@ void M_OptDrawer()
     int          curry, deltay, menutop;
     unsigned int k;
 
-    style_c *style = curr_menu->style_var[0];
+    Style *style = curr_menu->style_var[0];
     SYS_ASSERT(style);
 
     style->DrawBackground();
 
-    if (!style->fonts[StyleDefinition::kTextSectionText])
+    if (!style->fonts_[StyleDefinition::kTextSectionText])
         return;
 
     int fontType;
 
-    if (!style->fonts[StyleDefinition::kTextSectionHeader])
+    if (!style->fonts_[StyleDefinition::kTextSectionHeader])
         fontType = StyleDefinition::kTextSectionText;
     else
         fontType = StyleDefinition::kTextSectionHeader;
 
     int   font_h;
     int   CenterX;
-    float TEXTscale = style->def->text_[fontType].scale_;
+    float TEXTscale = style->definition_->text_[fontType].scale_;
 
-    font_h = style->fonts[fontType]->NominalHeight();
+    font_h = style->fonts_[fontType]->NominalHeight();
     font_h *= TEXTscale;
     menutop = font_h / 2;
 
     CenterX = 160;
-    CenterX -= (style->fonts[fontType]->StringWidth(curr_menu->name) * TEXTscale * 1.5) / 2;
+    CenterX -= (style->fonts_[fontType]->StringWidth(curr_menu->name) * TEXTscale * 1.5) / 2;
 
     // Lobo 2022
-    HL_WriteText(style, fontType, CenterX, menutop, curr_menu->name, 1.5);
+    HUDWriteText(style, fontType, CenterX, menutop, curr_menu->name, 1.5);
 
     fontType  = StyleDefinition::kTextSectionText;
-    TEXTscale = style->def->text_[fontType].scale_;
-    font_h    = style->fonts[fontType]->NominalHeight();
+    TEXTscale = style->definition_->text_[fontType].scale_;
+    font_h    = style->fonts_[fontType]->NominalHeight();
     font_h *= TEXTscale;
     menutop = 68 - ((curr_menu->item_num * font_h) / 2);
     if (curr_menu->key_page[0])
@@ -945,37 +945,37 @@ void M_OptDrawer()
 
     // These don't seem used after this point in the function - Dasho
     // CenterX = 160;
-    // CenterX -= (style->fonts[fontType]->StringWidth(curr_menu->name) * 1.5) / 2;
+    // CenterX -= (style->fonts_[fontType]->StringWidth(curr_menu->name) * 1.5) / 2;
 
     // now, draw all the menuitems
-    deltay = 1 + font_h + style->def->entry_spacing_;
+    deltay = 1 + font_h + style->definition_->entry_spacing_;
 
     curry = menutop + 25;
 
     if (curr_menu->key_page[0])
     {
         fontType = StyleDefinition::kTextSectionTitle;
-        TEXTscale = style->def->text_[fontType].scale_;
+        TEXTscale = style->definition_->text_[fontType].scale_;
 
         if (curr_key_menu > 0)
-            HL_WriteText(style, fontType, 60, 200 - deltay * 4, "< PREV");
+            HUDWriteText(style, fontType, 60, 200 - deltay * 4, "< PREV");
 
         if (curr_key_menu < NUM_KEY_MENUS - 1)
-            HL_WriteText(style, fontType, 260 - style->fonts[fontType]->StringWidth("NEXT >") * TEXTscale, 200 - deltay * 4,
+            HUDWriteText(style, fontType, 260 - style->fonts_[fontType]->StringWidth("NEXT >") * TEXTscale, 200 - deltay * 4,
                          "NEXT >");
 
         fontType = StyleDefinition::kTextSectionHelp;
-        TEXTscale = style->def->text_[fontType].scale_;
+        TEXTscale = style->definition_->text_[fontType].scale_;
 
-        HL_WriteText(style, fontType, 160 - style->fonts[fontType]->StringWidth(curr_menu->key_page) * TEXTscale / 2, curry,
+        HUDWriteText(style, fontType, 160 - style->fonts_[fontType]->StringWidth(curr_menu->key_page) * TEXTscale / 2, curry,
                      curr_menu->key_page);
         curry += font_h * 2;
 
         if (keyscan)
-            HL_WriteText(style, fontType, 160 - (style->fonts[fontType]->StringWidth(keystring2) * TEXTscale / 2),
+            HUDWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(keystring2) * TEXTscale / 2),
                          200 - deltay * 2, keystring2);
         else
-            HL_WriteText(style, fontType, 160 - (style->fonts[fontType]->StringWidth(keystring1) * TEXTscale / 2),
+            HUDWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(keystring1) * TEXTscale / 2),
                          200 - deltay * 2, keystring1);
     }
     else if (curr_menu == &res_optmenu)
@@ -1003,17 +1003,17 @@ void M_OptDrawer()
         if (is_selected)
         {
             fontType  = StyleDefinition::kTextSectionTitle;
-            TEXTscale = style->def->text_[fontType].scale_;
+            TEXTscale = style->definition_->text_[fontType].scale_;
         }
         else
         {
             fontType  = StyleDefinition::kTextSectionText;
-            TEXTscale = style->def->text_[fontType].scale_;
+            TEXTscale = style->definition_->text_[fontType].scale_;
         }
 
-        HL_WriteText(style, fontType,
+        HUDWriteText(style, fontType,
                      (curr_menu->menu_center) -
-                         (style->fonts[fontType]->StringWidth(
+                         (style->fonts_[fontType]->StringWidth(
                               curr_menu->items[i].name) *
                           TEXTscale),
                      curry, curr_menu->items[i].name);
@@ -1022,8 +1022,8 @@ void M_OptDrawer()
         if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeSoundfont)
         {
             fontType  = StyleDefinition::kTextSectionAlternate;
-            TEXTscale = style->def->text_[fontType].scale_;
-            HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
+            TEXTscale = style->definition_->text_[fontType].scale_;
+            HUDWriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                          epi::GetStem(s_soundfont.s_).c_str());
         }
 
@@ -1031,8 +1031,8 @@ void M_OptDrawer()
         if (curr_menu == &sound_optmenu && curr_menu->items[i].routine == M_ChangeGENMIDI)
         {
             fontType  = StyleDefinition::kTextSectionAlternate;
-            TEXTscale = style->def->text_[fontType].scale_;
-            HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
+            TEXTscale = style->definition_->text_[fontType].scale_;
+            HUDWriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                          s_genmidi.s_.empty() ? "Default" : epi::GetStem(s_genmidi.s_).c_str());
         }
 
@@ -1040,31 +1040,31 @@ void M_OptDrawer()
         if (is_selected)
         {
             fontType  = StyleDefinition::kTextSectionTitle;
-            TEXTscale = style->def->text_[fontType].scale_;
-            if (style->fonts[fontType]->def->type_ == kFontTypeImage)
+            TEXTscale = style->definition_->text_[fontType].scale_;
+            if (style->fonts_[fontType]->definition_->type_ == kFontTypeImage)
             {
                 int cursor = 16;
-                HL_WriteText(style, fontType, (curr_menu->menu_center + 4), curry, (const char *)&cursor);
+                HUDWriteText(style, fontType, (curr_menu->menu_center + 4), curry, (const char *)&cursor);
             }
-            else if (style->fonts[fontType]->def->type_ == kFontTypeTrueType)
-                HL_WriteText(style, fontType, (curr_menu->menu_center + 4), curry, "+");
+            else if (style->fonts_[fontType]->definition_->type_ == kFontTypeTrueType)
+                HUDWriteText(style, fontType, (curr_menu->menu_center + 4), curry, "+");
             else
-                HL_WriteText(style, fontType, (curr_menu->menu_center + 4), curry, "*");
+                HUDWriteText(style, fontType, (curr_menu->menu_center + 4), curry, "*");
 
             if (curr_menu->items[i].help)
             {
                 fontType  = StyleDefinition::kTextSectionHelp;
-                TEXTscale = style->def->text_[fontType].scale_;
+                TEXTscale = style->definition_->text_[fontType].scale_;
                 const char *help = language[curr_menu->items[i].help];
 
-                HL_WriteText(style, fontType, 160 - (style->fonts[fontType]->StringWidth(help) * TEXTscale / 2),
+                HUDWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(help) * TEXTscale / 2),
                              200 - deltay * 2, help);
             }
         }
 
         // I believe it's all T_ALT
         fontType  = StyleDefinition::kTextSectionAlternate;
-        TEXTscale = style->def->text_[fontType].scale_;
+        TEXTscale = style->definition_->text_[fontType].scale_;
 
         switch (curr_menu->items[i].type)
         {
@@ -1074,7 +1074,7 @@ void M_OptDrawer()
             {
                 if (joystick_device == 0)
                 {
-                    HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry, "None");
+                    HUDWriteText(style, fontType, (curr_menu->menu_center) + 15, curry, "None");
                     break;
                 }
                 else
@@ -1082,13 +1082,13 @@ void M_OptDrawer()
                     const char *joyname = SDL_JoystickNameForIndex(joystick_device - 1);
                     if (joyname)
                     {
-                        HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
+                        HUDWriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                                      epi::StringFormat("%d - %s", joystick_device, joyname).c_str());
                         break;
                     }
                     else
                     {
-                        HL_WriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
+                        HUDWriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                                      epi::StringFormat("%d - Not Connected", joystick_device).c_str());
                         break;
                     }
@@ -1120,7 +1120,7 @@ void M_OptDrawer()
                 sprintf(tempstring, "Invalid");
             }
 
-            HL_WriteText(style, StyleDefinition::kTextSectionAlternate, (curr_menu->menu_center) + 15, curry, tempstring);
+            HUDWriteText(style, StyleDefinition::kTextSectionAlternate, (curr_menu->menu_center) + 15, curry, tempstring);
             break;
         }
 
@@ -1142,7 +1142,7 @@ void M_OptDrawer()
         case OPT_KeyConfig: {
             k = *(int *)(curr_menu->items[i].switchvar);
             M_Key2String(k, tempstring);
-            HL_WriteText(style, fontType, (curr_menu->menu_center + 15), curry, tempstring);
+            HUDWriteText(style, fontType, (curr_menu->menu_center + 15), curry, tempstring);
             break;
         }
 
@@ -1161,7 +1161,7 @@ void M_OptDrawer()
 //
 // -ACB- 1999/10/03 Written
 //
-static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int centrex)
+static void M_ResOptDrawer(Style *style, int topy, int bottomy, int dy, int centrex)
 {
     char tempstring[80];
 
@@ -1172,32 +1172,32 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
     y += (dy * 3);
 
     int fontType  = StyleDefinition::kTextSectionAlternate;
-    float TEXTscale = style->def->text_[fontType].scale_;
+    float TEXTscale = style->definition_->text_[fontType].scale_;
 
     sprintf(tempstring, "%s",
             new_scrmode.display_mode == 2
                 ? "Borderless Fullscreen"
                 : (new_scrmode.display_mode == scrmode_c::SCR_FULLSCREEN ? "Exclusive Fullscreen" : "Windowed"));
-    HL_WriteText(style, fontType, centrex + 15, y, tempstring);
+    HUDWriteText(style, fontType, centrex + 15, y, tempstring);
 
     if (new_scrmode.display_mode < 2)
     {
         y += dy;
         sprintf(tempstring, "%dx%d", new_scrmode.width, new_scrmode.height);
-        HL_WriteText(style, fontType, centrex + 15, y, tempstring);
+        HUDWriteText(style, fontType, centrex + 15, y, tempstring);
     }
 
     // Draw selected resolution and mode:
     y = bottomy;
 
     fontType  = StyleDefinition::kTextSectionHelp;
-    TEXTscale = style->def->text_[fontType].scale_;
+    TEXTscale = style->definition_->text_[fontType].scale_;
 
     sprintf(tempstring, "Current Resolution:");
-    HL_WriteText(style, fontType, 160 - (style->fonts[fontType]->StringWidth(tempstring) * TEXTscale / 2), y, tempstring);
+    HUDWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(tempstring) * TEXTscale / 2), y, tempstring);
 
     fontType  = StyleDefinition::kTextSectionAlternate;
-    TEXTscale = style->def->text_[fontType].scale_;
+    TEXTscale = style->definition_->text_[fontType].scale_;
 
     y += dy;
     y += 5;
@@ -1207,7 +1207,7 @@ static void M_ResOptDrawer(style_c *style, int topy, int bottomy, int dy, int ce
         sprintf(tempstring, "%d x %d %s", SCREENWIDTH, SCREENHEIGHT,
                 DISPLAYMODE == 1 ? "Exclusive Fullscreen" : "Windowed");
 
-    HL_WriteText(style, fontType, 160 - (style->fonts[fontType]->StringWidth(tempstring) * TEXTscale / 2), y, tempstring);
+    HUDWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(tempstring) * TEXTscale / 2), y, tempstring);
 }
 
 //
@@ -1223,11 +1223,11 @@ static void M_LanguageDrawer(int x, int y, int deltay)
     // This seems unused for now - Dasho
     /*float ALTscale = 1.0;
 
-    if(opt_def_style->def->text[StyleDefinition::kTextSectionAlternate].scale)
+    if(opt_def_style->definition_->text[StyleDefinition::kTextSectionAlternate].scale)
     {
-        ALTscale=opt_def_style->def->text[StyleDefinition::kTextSectionAlternate].scale;
+        ALTscale=opt_def_style->definition_->text[StyleDefinition::kTextSectionAlternate].scale;
     }*/
-    HL_WriteText(opt_def_style, StyleDefinition::kTextSectionAlternate, x + 15, y + deltay * LANGUAGE_POS, language.GetName());
+    HUDWriteText(opt_def_style, StyleDefinition::kTextSectionAlternate, x + 15, y + deltay * LANGUAGE_POS, language.GetName());
 }
 
 static void KeyMenu_Next()
@@ -1804,7 +1804,7 @@ static void M_ChangeMonitorSize(int key, ConsoleVariable *cvar)
 //
 /*static void M_ChangeBlood(int keypressed, cvar_c *cvar)
 {
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagMoreBlood))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagMoreBlood))
         return;
 
     level_flags.more_blood = global_flags.more_blood;
@@ -1812,7 +1812,7 @@ static void M_ChangeMonitorSize(int key, ConsoleVariable *cvar)
 
 static void M_ChangeMLook(int keypressed, ConsoleVariable *cvar)
 {
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagMlook))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagMlook))
         return;
 
     level_flags.mlook = global_flags.mlook;
@@ -1820,7 +1820,7 @@ static void M_ChangeMLook(int keypressed, ConsoleVariable *cvar)
 
 static void M_ChangeJumping(int keypressed, ConsoleVariable *cvar)
 {
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagJumping))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagJumping))
         return;
 
     level_flags.jump = global_flags.jump;
@@ -1828,7 +1828,7 @@ static void M_ChangeJumping(int keypressed, ConsoleVariable *cvar)
 
 static void M_ChangeCrouching(int keypressed, ConsoleVariable *cvar)
 {
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagCrouching))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagCrouching))
         return;
 
     level_flags.crouch = global_flags.crouch;
@@ -1836,7 +1836,7 @@ static void M_ChangeCrouching(int keypressed, ConsoleVariable *cvar)
 
 static void M_ChangeExtra(int keypressed, ConsoleVariable *cvar)
 {
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagExtras))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagExtras))
         return;
 
     level_flags.have_extra = global_flags.have_extra;
@@ -1849,7 +1849,7 @@ static void M_ChangeExtra(int keypressed, ConsoleVariable *cvar)
 //
 static void M_ChangeMonsterRespawn(int keypressed, ConsoleVariable *cvar)
 {
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagResRespawn))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagResRespawn))
         return;
 
     level_flags.res_respawn = global_flags.res_respawn;
@@ -1857,7 +1857,7 @@ static void M_ChangeMonsterRespawn(int keypressed, ConsoleVariable *cvar)
 
 static void M_ChangeItemRespawn(int keypressed, ConsoleVariable *cvar)
 {
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagItemRespawn))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagItemRespawn))
         return;
 
     level_flags.itemrespawn = global_flags.itemrespawn;
@@ -1865,7 +1865,7 @@ static void M_ChangeItemRespawn(int keypressed, ConsoleVariable *cvar)
 
 static void M_ChangeTrue3d(int keypressed, ConsoleVariable *cvar)
 {
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagTrue3D))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagTrue3D))
         return;
 
     level_flags.true3dgameplay = global_flags.true3dgameplay;
@@ -1873,7 +1873,7 @@ static void M_ChangeTrue3d(int keypressed, ConsoleVariable *cvar)
 
 static void M_ChangeAutoAim(int keypressed, ConsoleVariable *cvar)
 {
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagAutoAim))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagAutoAim))
         return;
 
     level_flags.autoaim = global_flags.autoaim;
@@ -1881,10 +1881,10 @@ static void M_ChangeAutoAim(int keypressed, ConsoleVariable *cvar)
 
 static void M_ChangeRespawn(int keypressed, ConsoleVariable *cvar)
 {
-    if (gameskill == sk_nightmare)
+    if (game_skill == sk_nightmare)
         return;
 
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagRespawn))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagRespawn))
         return;
 
     level_flags.respawn = global_flags.respawn;
@@ -1892,10 +1892,10 @@ static void M_ChangeRespawn(int keypressed, ConsoleVariable *cvar)
 
 static void M_ChangeFastparm(int keypressed, ConsoleVariable *cvar)
 {
-    if (gameskill == sk_nightmare)
+    if (game_skill == sk_nightmare)
         return;
 
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagFastParm))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagFastParm))
         return;
 
     level_flags.fastparm = global_flags.fastparm;
@@ -1942,7 +1942,7 @@ static void M_UpdateCVARFromInt(int keypressed, ConsoleVariable *cvar)
 
 static void M_ChangeKicking(int keypressed, ConsoleVariable *cvar)
 {
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagKicking))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagKicking))
         return;
 
     level_flags.kicking = global_flags.kicking;
@@ -1950,7 +1950,7 @@ static void M_ChangeKicking(int keypressed, ConsoleVariable *cvar)
 
 static void M_ChangeWeaponSwitch(int keypressed, ConsoleVariable *cvar)
 {
-    if (currmap && ((currmap->force_on_ | currmap->force_off_) & kMapFlagWeaponSwitch))
+    if (current_map && ((current_map->force_on_ | current_map->force_off_) & kMapFlagWeaponSwitch))
         return;
 
     level_flags.weapon_switch = global_flags.weapon_switch;

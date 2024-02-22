@@ -542,7 +542,7 @@ void S_SoundTicker(void)
 
     I_LockAudio();
     {
-        if (gamestate == GS_LEVEL)
+        if (game_state == GS_LEVEL)
         {
             SYS_ASSERT(::numplayers > 0);
 

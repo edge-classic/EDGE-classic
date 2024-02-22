@@ -1448,7 +1448,7 @@ void P_BotPlayerBuilder(const player_t *p, void *data, EventTicCommand *cmd)
 {
     memset(cmd, 0, sizeof(EventTicCommand));
 
-    if (gamestate != GS_LEVEL) return;
+    if (game_state != GS_LEVEL) return;
 
     DeathBot *bot = (DeathBot *)data;
     SYS_ASSERT(bot);

@@ -39,9 +39,9 @@ static const DDFCommandList font_commands[] = {
     DDF_FIELD("TYPE", type_, DDF_FontGetType),
     DDF_FIELD("PATCHES", patches_, DDF_FontGetPatch),
     DDF_FIELD("IMAGE", image_name_, DDF_MainGetString),
-    DDF_FIELD("TTF", ttf_name_, DDF_MainGetString),
+    DDF_FIELD("TTF", truetype_name_, DDF_MainGetString),
     DDF_FIELD("DEFAULT_SIZE", default_size_, DDF_MainGetFloat),
-    DDF_FIELD("TTF_SMOOTHING", ttf_smoothing_string_, DDF_MainGetString),
+    DDF_FIELD("TTF_SMOOTHING", truetype_smoothing_string_, DDF_MainGetString),
     DDF_FIELD("MISSING_PATCH", missing_patch_, DDF_MainGetString),
     DDF_FIELD("SPACING", spacing_, DDF_MainGetFloat),
 
@@ -111,21 +111,21 @@ static void FontFinishEntry(void)
         DDF_Error("Missing font image name.\n");
 
     if (dynamic_font->type_ == kFontTypeTrueType &&
-        dynamic_font->ttf_name_.empty())
+        dynamic_font->truetype_name_.empty())
         DDF_Error("Missing font TTF/OTF lump/file name.\n");
 
     if (dynamic_font->type_ == kFontTypeTrueType &&
-        !dynamic_font->ttf_smoothing_string_.empty())
+        !dynamic_font->truetype_smoothing_string_.empty())
     {
-        if (epi::StringCaseCompareASCII(dynamic_font->ttf_smoothing_string_,
+        if (epi::StringCaseCompareASCII(dynamic_font->truetype_smoothing_string_,
                                         "NEVER") == 0)
-            dynamic_font->ttf_smoothing_ = dynamic_font->kTrueTypeSmoothNever;
+            dynamic_font->truetype_smoothing_ = dynamic_font->kTrueTypeSmoothNever;
         else if (epi::StringCaseCompareASCII(
-                     dynamic_font->ttf_smoothing_string_, "ALWAYS") == 0)
-            dynamic_font->ttf_smoothing_ = dynamic_font->kTrueTypeSmoothAlways;
+                     dynamic_font->truetype_smoothing_string_, "ALWAYS") == 0)
+            dynamic_font->truetype_smoothing_ = dynamic_font->kTrueTypeSmoothAlways;
         else if (epi::StringCaseCompareASCII(
-                     dynamic_font->ttf_smoothing_string_, "ON_DEMAND") == 0)
-            dynamic_font->ttf_smoothing_ =
+                     dynamic_font->truetype_smoothing_string_, "ON_DEMAND") == 0)
+            dynamic_font->truetype_smoothing_ =
                 dynamic_font->kTrueTypeSmoothOnDemand;
     }
 }
@@ -270,10 +270,10 @@ void FontDefinition::CopyDetail(const FontDefinition &src)
     image_name_           = src.image_name_;
     missing_patch_        = src.missing_patch_;
     spacing_              = src.spacing_;
-    ttf_name_             = src.ttf_name_;
+    truetype_name_             = src.truetype_name_;
     default_size_         = src.default_size_;
-    ttf_smoothing_        = src.ttf_smoothing_;
-    ttf_smoothing_string_ = src.ttf_smoothing_string_;
+    truetype_smoothing_        = src.truetype_smoothing_;
+    truetype_smoothing_string_ = src.truetype_smoothing_string_;
 }
 
 //
@@ -285,11 +285,11 @@ void FontDefinition::Default()
     patches_       = nullptr;
     default_size_  = 0.0;
     spacing_       = 0.0;
-    ttf_smoothing_ = kTrueTypeSmoothOnDemand;
-    ttf_smoothing_string_.clear();
+    truetype_smoothing_ = kTrueTypeSmoothOnDemand;
+    truetype_smoothing_string_.clear();
     image_name_.clear();
     missing_patch_.clear();
-    ttf_name_.clear();
+    truetype_name_.clear();
 }
 
 //

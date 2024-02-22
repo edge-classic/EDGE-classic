@@ -16,61 +16,56 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __HU_STYLE__
-#define __HU_STYLE__
+#pragma once
 
-#include "style.h"
 #include "hu_font.h"
-#include "r_image.h"
+#include "style.h"
 
-class style_c
+class Style
 {
-    friend class style_container_c;
+    friend class StyleContainer;
 
-  public:
-    style_c(StyleDefinition *_def);
-    ~style_c();
+   public:
+    Style(StyleDefinition *definition);
+    ~Style();
 
-    StyleDefinition *def;
+    StyleDefinition *definition_;
 
-    font_c *fonts[StyleDefinition::kTotalTextSections];
+    Font *fonts_[StyleDefinition::kTotalTextSections];
 
-    const image_c *bg_image;
+    const image_c *background_image_;
 
-  public:
+   public:
     void Load();
 
     // Drawing functions
     void DrawBackground();
 };
 
-class style_container_c : public std::vector<style_c *>
+class StyleContainer : public std::vector<Style *>
 {
-  public:
-    style_container_c()
+   public:
+    StyleContainer() {}
+    ~StyleContainer()
     {
-    }
-    ~style_container_c()
-    {
-      for (auto iter = begin(); iter != end(); iter++)
-      {
-          style_c *s = *iter;
-          delete s;
-          s = nullptr;
-      }
+        for (std::vector<Style *>::iterator iter = begin(), iter_end = end();
+             iter != iter_end; iter++)
+        {
+            Style *s = *iter;
+            delete s;
+            s = nullptr;
+        }
     }
 
-  public:
+   public:
     // Search Functions
-    style_c *Lookup(StyleDefinition *def);
+    Style *Lookup(StyleDefinition *definition);
 };
 
-extern style_container_c hu_styles;
+extern StyleContainer hud_styles;
 
-// compatibility crud */
-void HL_WriteText(style_c *style, int text_type, int x, int y, const char *str, float scale = 1.0f);
-
-#endif // __HU_STYLE__
+void HUDWriteText(Style *style, int text_type, int x, int y, const char *str,
+                  float scale = 1.0f);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

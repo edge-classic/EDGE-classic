@@ -44,7 +44,7 @@
 
 extern bool ConsoleResponder(InputEvent *ev);
 extern bool M_Responder(InputEvent *ev);
-extern bool G_Responder(InputEvent *ev);
+extern bool GameResponder(InputEvent *ev);
 
 extern int I_JoyGetAxis(int n);
 
@@ -526,7 +526,7 @@ void EventBuildTicCommand(EventTicCommand *cmd)
     else
         allow_inventory_next = true;
 
-    cmd->chat_character = HU_DequeueChatChar();
+    cmd->chat_character = 0;
 
     for (int k = 0; k < 6; k++) ball_deltas[k] = 0;
 }
@@ -680,12 +680,9 @@ void EventProcessEvents(void)
 
         if (ConsoleResponder(ev)) continue;  // Console ate the event
 
-        if (chat_on && HU_Responder(ev))
-            continue;  // let chat eat the event first of all
-
         if (M_Responder(ev)) continue;  // menu ate the event
 
-        G_Responder(ev);  // let game eat it, nobody else wanted it
+        GameResponder(ev);  // let game eat it, nobody else wanted it
     }
 }
 

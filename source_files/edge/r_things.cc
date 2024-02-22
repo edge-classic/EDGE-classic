@@ -36,7 +36,7 @@
 #include "dm_data.h"
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "g_game.h" //currmap
+#include "g_game.h" //current_map
 #include "p_local.h"
 #include "r_colormap.h"
 #include "r_defs.h"
@@ -292,13 +292,13 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
     {
         if (IS_SKY(player->mo->subsector->sector->ceil))
         {
-            fc_to_use = currmap->outdoor_fog_color_;
-            fd_to_use = 0.01f * currmap->outdoor_fog_density_;
+            fc_to_use = current_map->outdoor_fog_color_;
+            fd_to_use = 0.01f * current_map->outdoor_fog_density_;
         }
         else
         {
-            fc_to_use = currmap->indoor_fog_color_;
-            fd_to_use = 0.01f * currmap->indoor_fog_density_;
+            fc_to_use = current_map->indoor_fog_color_;
+            fd_to_use = 0.01f * current_map->indoor_fog_density_;
         }
     }
 
@@ -1434,13 +1434,13 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
     {
         if (IS_SKY(mo->subsector->sector->ceil))
         {
-            fc_to_use = currmap->outdoor_fog_color_;
-            fd_to_use = 0.01f * currmap->outdoor_fog_density_;
+            fc_to_use = current_map->outdoor_fog_color_;
+            fd_to_use = 0.01f * current_map->outdoor_fog_density_;
         }
         else
         {
-            fc_to_use = currmap->indoor_fog_color_;
-            fd_to_use = 0.01f * currmap->indoor_fog_density_;
+            fc_to_use = current_map->indoor_fog_color_;
+            fd_to_use = 0.01f * current_map->indoor_fog_density_;
         }
     }
 

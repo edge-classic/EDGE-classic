@@ -406,10 +406,10 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 break;
             case epi::kENameNext:
                 {
-                    Z_Clear(val->nextmap, char, 9);
+                    Z_Clear(val->next_map, char, 9);
                     if (value.size() > 8)
                         I_Error("UMAPINFO: Mapname for \"next\" over 8 characters!\n");
-                    epi::CStringCopyMax(val->nextmap, value.data(), 8);
+                    epi::CStringCopyMax(val->next_map, value.data(), 8);
                 }
                 break;
             case epi::kENameNextsecret:
@@ -662,14 +662,14 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
     // Some fallback handling
     if (!val->nextsecret[0])
     {
-        if (val->nextmap[0])
-            epi::CStringCopyMax(val->nextsecret, val->nextmap, 8);
+        if (val->next_map[0])
+            epi::CStringCopyMax(val->nextsecret, val->next_map, 8);
     }
     if (!val->enterpic[0])
     {
         for (size_t i = 0; i < Maps.mapcount; i++)
         {
-            if (!strcmp(val->mapname, Maps.maps[i].nextmap))
+            if (!strcmp(val->mapname, Maps.maps[i].next_map))
             {
                 if (Maps.maps[i].exitpic[0])
                     epi::CStringCopyMax(val->enterpic, Maps.maps[i].exitpic, 8);

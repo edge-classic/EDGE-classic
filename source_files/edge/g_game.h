@@ -60,7 +60,7 @@ extern gameaction_e gameaction;
 //    ga_savegame    : defer_save_slot, defer_save_desc
 //
 //    ga_loadlevel   : currmap, players, gameskill+dm+level_flags ETC
-//    ga_intermission: currmap, nextmap, players, wi_stats ETC
+//    ga_intermission: currmap, nextmap, players, intermission_stats ETC
 //    ga_finale      : nextmap, players
 
 class newgame_params_c

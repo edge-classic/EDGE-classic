@@ -970,7 +970,7 @@ static int PL_items(lua_State *L)
 // Lobo: November 2021
 static int PL_map_enemies(lua_State *L)
 {
-    lua_pushinteger(L, wi_stats.kills);
+    lua_pushinteger(L, intermission_stats.kills);
     return 1;
 }
 
@@ -978,7 +978,7 @@ static int PL_map_enemies(lua_State *L)
 // Lobo: November 2021
 static int PL_map_secrets(lua_State *L)
 {
-    lua_pushinteger(L, wi_stats.secret);
+    lua_pushinteger(L, intermission_stats.secrets);
     return 1;
 }
 
@@ -986,7 +986,7 @@ static int PL_map_secrets(lua_State *L)
 // Lobo: November 2021
 static int PL_map_items(lua_State *L)
 {
-    lua_pushinteger(L, wi_stats.items);
+    lua_pushinteger(L, intermission_stats.items);
     return 1;
 }
 
@@ -2103,19 +2103,19 @@ static int Map_info(lua_State *L)
 
     //---------------
     // MAP.secrets
-    lua_pushinteger(L, wi_stats.secret);
+    lua_pushinteger(L, intermission_stats.secrets);
     lua_setfield(L, -2, "secrets");   //add to MAP Table
     //---------------
 
     //---------------
     // MAP.enemies
-    lua_pushinteger(L, wi_stats.kills);
+    lua_pushinteger(L, intermission_stats.kills);
     lua_setfield(L, -2, "enemies");   //add to MAP Table
     //---------------
 
     //---------------
     // MAP.items
-    lua_pushinteger(L, wi_stats.items);
+    lua_pushinteger(L, intermission_stats.items);
     lua_setfield(L, -2, "items");   //add to MAP Table
     //---------------    
 

@@ -224,7 +224,7 @@ void LoadLevel_Bits(void)
     RAD_ClearTriggers();
     RAD_FinishMenu(0);
 
-    wi_stats.kills = wi_stats.items = wi_stats.secret = 0;
+    intermission_stats.kills = intermission_stats.items = intermission_stats.secrets = 0;
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
@@ -524,7 +524,7 @@ void G_Ticker(void)
 
     case GS_INTERMISSION:
         N_GrabTiccmds();
-        WI_Ticker();
+        IntermissionTicker();
         break;
 
     case GS_FINALE:
@@ -653,7 +653,7 @@ void G_ExitToHub(int map_number, int tag)
 //   (c) leveltime
 //   (d) exit_skipall
 //   (d) exit_hub_tag
-//   (e) wi_stats.kills (etc)
+//   (e) intermission_stats.kills (etc)
 //
 static void G_DoCompleted(void)
 {
@@ -725,12 +725,12 @@ static void G_DoCompleted(void)
         return;
     }
 
-    wi_stats.cur  = currmap;
-    wi_stats.next = nextmap;
+    intermission_stats.current_level  = currmap;
+    intermission_stats.next_level = nextmap;
 
     gamestate = GS_INTERMISSION;
 
-    WI_Start();
+    IntermissionStart();
 }
 
 void G_DeferredLoadGame(int slot)
@@ -822,9 +822,9 @@ static bool G_LoadGameFromFile(std::string filename, bool is_hub)
         leveltime = globs->level_time;
         exittime  = globs->exit_time;
 
-        wi_stats.kills  = globs->total_kills;
-        wi_stats.items  = globs->total_items;
-        wi_stats.secret = globs->total_secrets;
+        intermission_stats.kills  = globs->total_kills;
+        intermission_stats.items  = globs->total_items;
+        intermission_stats.secrets = globs->total_secrets;
     }
 
     if (globs->sky_image) // backwards compat (sky_image added 2003/12/19)
@@ -937,9 +937,9 @@ static bool G_SaveGameToFile(std::string filename, const char *description)
     globs->level_time = leveltime;
     globs->exit_time  = exittime;
 
-    globs->total_kills   = wi_stats.kills;
-    globs->total_items   = wi_stats.items;
-    globs->total_secrets = wi_stats.secret;
+    globs->total_kills   = intermission_stats.kills;
+    globs->total_items   = intermission_stats.items;
+    globs->total_secrets = intermission_stats.secrets;
 
     globs->sky_image = sky_image;
 

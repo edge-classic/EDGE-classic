@@ -20,7 +20,7 @@
 
 #include "types.h"
 
-class IntermissionMapPosition
+class IntermissionMapPositionInfo
 {
    public:
     std::string name_;
@@ -28,34 +28,34 @@ class IntermissionMapPosition
     int x_, y_;
 
    public:
-    IntermissionMapPosition();
-    IntermissionMapPosition(IntermissionMapPosition &rhs);
-    ~IntermissionMapPosition();
+    IntermissionMapPositionInfo();
+    IntermissionMapPositionInfo(IntermissionMapPositionInfo &rhs);
+    ~IntermissionMapPositionInfo();
 
    public:
-    IntermissionMapPosition &operator=(IntermissionMapPosition &rhs);
+    IntermissionMapPositionInfo &operator=(IntermissionMapPositionInfo &rhs);
 
    private:
-    void Copy(IntermissionMapPosition &src);
+    void Copy(IntermissionMapPositionInfo &src);
 };
 
-class IntermissionMapPositionContainer
-    : public std::vector<IntermissionMapPosition *>
+class IntermissionMapPositionInfoContainer
+    : public std::vector<IntermissionMapPositionInfo *>
 {
    public:
-    IntermissionMapPositionContainer();
-    IntermissionMapPositionContainer(IntermissionMapPositionContainer &rhs);
-    ~IntermissionMapPositionContainer();
+    IntermissionMapPositionInfoContainer();
+    IntermissionMapPositionInfoContainer(IntermissionMapPositionInfoContainer &rhs);
+    ~IntermissionMapPositionInfoContainer();
 
    private:
-    void Copy(IntermissionMapPositionContainer &src);
+    void Copy(IntermissionMapPositionInfoContainer &src);
 
    public:
-    IntermissionMapPositionContainer &operator=(
-        IntermissionMapPositionContainer &rhs);
+    IntermissionMapPositionInfoContainer &operator=(
+        IntermissionMapPositionInfoContainer &rhs);
 };
 
-class IntermissionFrame
+class IntermissionFrameInfo
 {
    public:
     std::string pic_;    // Name of pic to display.
@@ -63,74 +63,74 @@ class IntermissionFrame
     int         x_, y_;  // Position on screen where this goes
 
    public:
-    IntermissionFrame();
-    IntermissionFrame(IntermissionFrame &rhs);
-    ~IntermissionFrame();
+    IntermissionFrameInfo();
+    IntermissionFrameInfo(IntermissionFrameInfo &rhs);
+    ~IntermissionFrameInfo();
 
    public:
     void               Default(void);
-    IntermissionFrame &operator=(IntermissionFrame &rhs);
+    IntermissionFrameInfo &operator=(IntermissionFrameInfo &rhs);
 
    private:
-    void Copy(IntermissionFrame &src);
+    void Copy(IntermissionFrameInfo &src);
 };
 
-class IntermissionFrameContainer : public std::vector<IntermissionFrame *>
+class IntermissionFrameInfoContainer : public std::vector<IntermissionFrameInfo *>
 {
    public:
-    IntermissionFrameContainer();
-    IntermissionFrameContainer(IntermissionFrameContainer &rhs);
-    ~IntermissionFrameContainer();
+    IntermissionFrameInfoContainer();
+    IntermissionFrameInfoContainer(IntermissionFrameInfoContainer &rhs);
+    ~IntermissionFrameInfoContainer();
 
    private:
-    void Copy(IntermissionFrameContainer &rhs);
+    void Copy(IntermissionFrameInfoContainer &rhs);
 
    public:
-    IntermissionFrameContainer &operator=(IntermissionFrameContainer &rhs);
+    IntermissionFrameInfoContainer &operator=(IntermissionFrameInfoContainer &rhs);
 };
 
-class IntermissionAnimation
+class IntermissionAnimationInfo
 {
    public:
     enum AnimationType
     {
-        kIntermissionAnimationNormal,
-        kIntermissionAnimationLevel
+        kIntermissionAnimationInfoNormal,
+        kIntermissionAnimationInfoLevel
     };
 
     AnimationType type_;
 
     std::string level_;
 
-    IntermissionFrameContainer frames_;
+    IntermissionFrameInfoContainer frames_;
 
    public:
-    IntermissionAnimation();
-    IntermissionAnimation(IntermissionAnimation &rhs);
-    ~IntermissionAnimation();
+    IntermissionAnimationInfo();
+    IntermissionAnimationInfo(IntermissionAnimationInfo &rhs);
+    ~IntermissionAnimationInfo();
 
    public:
-    IntermissionAnimation &operator=(IntermissionAnimation &rhs);
+    IntermissionAnimationInfo &operator=(IntermissionAnimationInfo &rhs);
     void                   Default(void);
 
    private:
-    void Copy(IntermissionAnimation &rhs);
+    void Copy(IntermissionAnimationInfo &rhs);
 };
 
-class IntermissionAnimationContainer
-    : public std::vector<IntermissionAnimation *>
+class IntermissionAnimationInfoContainer
+    : public std::vector<IntermissionAnimationInfo *>
 {
    public:
-    IntermissionAnimationContainer();
-    IntermissionAnimationContainer(IntermissionAnimationContainer &rhs);
-    ~IntermissionAnimationContainer();
+    IntermissionAnimationInfoContainer();
+    IntermissionAnimationInfoContainer(IntermissionAnimationInfoContainer &rhs);
+    ~IntermissionAnimationInfoContainer();
 
    private:
-    void Copy(IntermissionAnimationContainer &src);
+    void Copy(IntermissionAnimationInfoContainer &src);
 
    public:
-    IntermissionAnimationContainer &operator=(
-        IntermissionAnimationContainer &rhs);
+    IntermissionAnimationInfoContainer &operator=(
+        IntermissionAnimationInfoContainer &rhs);
 };
 
 enum LightingModel
@@ -160,12 +160,12 @@ class GameDefinition
 
     std::string name_;
 
-    IntermissionAnimationContainer   anims_;
-    IntermissionMapPositionContainer mappos_;
+    IntermissionAnimationInfoContainer   anims_;
+    IntermissionMapPositionInfoContainer mappos_;
 
     std::string background_;
     std::string splatpic_;
-    std::string yah_[2];
+    std::string you_are_here_[2];
 
     // -AJA- 1999/10/22: background cameras.
     std::string bg_camera_;

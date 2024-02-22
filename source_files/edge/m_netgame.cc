@@ -553,7 +553,7 @@ void M_NetHostTicker(void)
 static void NetGameStartLevel(void)
 {
     // -KM- 1998/12/17 Clear the intermission.
-    WI_Clear();
+    IntermissionClear();
 
     G_DeferredNewGame(*ng_params);
 }

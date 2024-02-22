@@ -39,7 +39,7 @@
 #include "r_image.h"
 #include "r_sky.h"
 
-#include "f_interm.h" //Lobo: need this to get access to wi_stats
+#include "f_interm.h" //Lobo: need this to get access to intermission_stats
 #include "rad_trig.h" //Lobo: need this to access RTS
 
 #include <charconv>
@@ -941,21 +941,21 @@ static void PL_items(coal::vm_c *vm, int argc)
 // Lobo: November 2021
 static void PL_map_enemies(coal::vm_c *vm, int argc)
 {
-    vm->ReturnFloat(wi_stats.kills);
+    vm->ReturnFloat(intermission_stats.kills);
 }
 
 // player.map_secrets()
 // Lobo: November 2021
 static void PL_map_secrets(coal::vm_c *vm, int argc)
 {
-    vm->ReturnFloat(wi_stats.secret);
+    vm->ReturnFloat(intermission_stats.secrets);
 }
 
 // player.map_items()
 // Lobo: November 2021
 static void PL_map_items(coal::vm_c *vm, int argc)
 {
-    vm->ReturnFloat(wi_stats.items);
+    vm->ReturnFloat(intermission_stats.items);
 }
 
 // player.floor_flat()

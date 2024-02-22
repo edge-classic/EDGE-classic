@@ -606,7 +606,7 @@ void E_Display(void)
         break;
 
     case GS_INTERMISSION:
-        WI_Drawer();
+        IntermissionDrawer();
         break;
 
     case GS_FINALE:

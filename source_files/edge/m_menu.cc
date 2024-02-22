@@ -1406,7 +1406,7 @@ static void ReallyDoStartLevel(skill_t skill, GameDefinition *g)
 static void DoStartLevel(skill_t skill)
 {
     // -KM- 1998/12/17 Clear the intermission.
-    WI_Clear();
+    IntermissionClear();
 
     // find episode
     GameDefinition            *g = nullptr;

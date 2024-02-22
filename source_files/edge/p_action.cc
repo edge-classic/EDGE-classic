@@ -56,7 +56,7 @@
 #include "rad_trig.h"
 #include "s_sound.h"
 #include "w_wad.h"
-#include "f_interm.h" // wi_stats
+#include "f_interm.h" // intermission_stats
 
 #include "AlmostEquals.h"
 
@@ -2249,9 +2249,9 @@ static void ObjectSpawning(mobj_t *parent, BAMAngle angle)
     if (P_MapCheckBlockingLine(parent, child))
     {
         if (child->flags & kMapObjectFlagCountKill)
-            wi_stats.kills--;
+            intermission_stats.kills--;
         if (child->flags & kMapObjectFlagCountItem)
-            wi_stats.items--;
+            intermission_stats.items--;
         // -KM- 1999/01/31 Explode objects over remove them.
         // -AJA- 2000/02/01: Remove now the default.
         if (attack->flags_ & kAttackFlagKillFailedSpawn)
@@ -2273,9 +2273,9 @@ static void ObjectSpawning(mobj_t *parent, BAMAngle angle)
     if (!P_TryMove(child, child->x, child->y))
     {
         if (child->flags & kMapObjectFlagCountKill)
-            wi_stats.kills--;
+            intermission_stats.kills--;
         if (child->flags & kMapObjectFlagCountItem)
-            wi_stats.items--;
+            intermission_stats.items--;
         if (attack->flags_ & kAttackFlagKillFailedSpawn)
         {
             P_KillMobj(parent, child, nullptr);

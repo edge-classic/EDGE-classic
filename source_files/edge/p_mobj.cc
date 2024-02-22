@@ -2325,10 +2325,10 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
     // spawnthings should not be counted just doesn't work).
 
     if (mobj->flags & kMapObjectFlagCountKill)
-        wi_stats.kills++;
+        intermission_stats.kills++;
 
     if (mobj->flags & kMapObjectFlagCountItem)
-        wi_stats.items++;
+        intermission_stats.items++;
 
     mobj->lastheard = -1; // For now, the last player we heard
     //

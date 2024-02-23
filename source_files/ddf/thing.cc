@@ -2482,7 +2482,7 @@ void MapObjectDefinition::DLightCompatibility(void)
 
 MapObjectDefinitionContainer::MapObjectDefinitionContainer()
 {
-    memset(lookupatch_font_cache_, 0, sizeof(MapObjectDefinition *) * kLookupCacheSize);
+    memset(lookup_cache_, 0, sizeof(MapObjectDefinition *) * kLookupCacheSize);
 }
 
 MapObjectDefinitionContainer::~MapObjectDefinitionContainer()
@@ -2569,9 +2569,9 @@ const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(int id)
     int slot = (((id) + kLookupCacheSize) % kLookupCacheSize);
 
     // check the cache
-    if (lookupatch_font_cache_[slot] && lookupatch_font_cache_[slot]->number_ == id)
+    if (lookup_cache_[slot] && lookup_cache_[slot]->number_ == id)
     {
-        return lookupatch_font_cache_[slot];
+        return lookup_cache_[slot];
     }
 
     for (std::vector<MapObjectDefinition *>::reverse_iterator iter = rbegin(),
@@ -2583,7 +2583,7 @@ const MapObjectDefinition *MapObjectDefinitionContainer::Lookup(int id)
         if (m->number_ == id)
         {
             // update the cache
-            lookupatch_font_cache_[slot] = m;
+            lookup_cache_[slot] = m;
             return m;
         }
     }

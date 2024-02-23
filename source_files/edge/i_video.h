@@ -18,4 +18,4 @@
 
 #include "epi_sdl.h"
 
-extern SDL_Window *my_vis;
+extern SDL_Window *program_window;

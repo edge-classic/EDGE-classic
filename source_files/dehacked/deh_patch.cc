@@ -156,13 +156,13 @@ enum ObjectKind
 
 void DetectMsg(const char *kind)
 {
-    I_Printf("Detected %s patch file from DEHACKED v%d.%d\n", kind,
+    EDGEPrintf("Detected %s patch file from DEHACKED v%d.%d\n", kind,
              dhe_ver / 10, dhe_ver % 10);
 }
 
 void VersionMsg(void)
 {
-    I_Printf("Patch format %d, for DOOM EXE %d.%d%s\n", patch_fmt,
+    EDGEPrintf("Patch format %d, for DOOM EXE %d.%d%s\n", patch_fmt,
              doom_ver / 10, doom_ver % 10, (doom_ver == 16) ? "66" : "");
 }
 
@@ -204,7 +204,7 @@ void GetRawString(char *buf, int max_len)
 
         if (len >= max_len)
         {
-            I_Error(
+            EDGEError(
                 "Dehacked: Error - Text string exceeds internal buffer "
                 "length.\n"
                 "[> %d characters, from binary patch file]\n",
@@ -236,7 +236,7 @@ const char *ObjectName(int o_kind)
             return "sprite";
 
         default:
-            I_Error("Dehacked: Error - Illegal object kind: %d\n", o_kind);
+            EDGEError("Dehacked: Error - Illegal object kind: %d\n", o_kind);
     }
 
     return nullptr;  // not reached
@@ -244,7 +244,7 @@ const char *ObjectName(int o_kind)
 
 void MarkObject(int o_kind, int o_num)
 {
-    I_Printf("[%d] MODIFIED\n", o_num);
+    EDGEPrintf("[%d] MODIFIED\n", o_num);
 
     switch (o_kind)
     {
@@ -268,7 +268,7 @@ void MarkObject(int o_kind, int o_num)
             break;
 
         default:
-            I_Error("Dehacked: Error - Illegal object kind: %d\n", o_kind);
+            EDGEError("Dehacked: Error - Illegal object kind: %d\n", o_kind);
     }
 }
 
@@ -276,7 +276,7 @@ void GetInt(int o_kind, int o_num, int *dest)
 {
     int temp = GetRawInt();
 
-    I_Printf("Int: %d\n", temp);
+    EDGEPrintf("Int: %d\n", temp);
 
     if (*dest == temp) return;
 
@@ -289,7 +289,7 @@ void GetFlags(int o_kind, int o_num, int *dest)
 {
     int temp = GetRawInt();
 
-    I_Printf("Flags: 0x%08x\n", temp);
+    EDGEPrintf("Flags: 0x%08x\n", temp);
 
     // prevent the BOOM/MBF specific flags from being set
     // from binary patch files.
@@ -306,13 +306,13 @@ void GetFrame(int o_kind, int o_num, int *dest)
 {
     int temp = GetRawInt();
 
-    I_Printf("Frame: %d\n", temp);
+    EDGEPrintf("Frame: %d\n", temp);
 
     if (doom_ver == 12)
     {
         if (temp < 0 || temp >= kV12Frames)
         {
-            I_Debugf(
+            EDGEDebugf(
                 "Dehacked: Warning - Found illegal V1.2 frame number: %d\n",
                 temp);
             return;
@@ -323,7 +323,7 @@ void GetFrame(int o_kind, int o_num, int *dest)
 
     if (temp < 0 || temp >= kTotalStates)
     {
-        I_Debugf("Dehacked: Warning - Found illegal frame number: %d\n", temp);
+        EDGEDebugf("Dehacked: Warning - Found illegal frame number: %d\n", temp);
         return;
     }
 
@@ -336,13 +336,13 @@ void GetSprite(int o_kind, int o_num, int *dest)
 {
     int temp = GetRawInt();
 
-    I_Printf("Sprite: %d\n", temp);
+    EDGEPrintf("Sprite: %d\n", temp);
 
     if (doom_ver == 12)
     {
         if (temp < 0 || temp >= kV12Sprites)
         {
-            I_Debugf(
+            EDGEDebugf(
                 "Dehacked: Warning - Found illegal V1.2 sprite number: %d\n",
                 temp);
             return;
@@ -353,7 +353,7 @@ void GetSprite(int o_kind, int o_num, int *dest)
 
     if (temp < 0 || temp >= kTotalSprites)
     {
-        I_Debugf("Dehacked: Warning - Found illegal sprite number: %d\n", temp);
+        EDGEDebugf("Dehacked: Warning - Found illegal sprite number: %d\n", temp);
         return;
     }
 
@@ -364,13 +364,13 @@ void GetSound(int o_kind, int o_num, int *dest)
 {
     int temp = GetRawInt();
 
-    I_Printf("Sound: %d\n", temp);
+    EDGEPrintf("Sound: %d\n", temp);
 
     if (doom_ver == 12)
     {
         if (temp < 0 || temp >= kV12Sounds)
         {
-            I_Debugf(
+            EDGEDebugf(
                 "Dehacked: Warning - Found illegal V1.2 sound number: %d\n",
                 temp);
             return;
@@ -381,7 +381,7 @@ void GetSound(int o_kind, int o_num, int *dest)
 
     if (temp < 0 || temp >= kTotalSoundEffects)
     {
-        I_Debugf("Dehacked: Warning - Found illegal sound number: %d\n", temp);
+        EDGEDebugf("Dehacked: Warning - Found illegal sound number: %d\n", temp);
         return;
     }
 
@@ -394,11 +394,11 @@ void GetAmmoType(int o_kind, int o_num, int *dest)
 {
     int temp = GetRawInt();
 
-    I_Printf("AmmoType: %d\n", temp);
+    EDGEPrintf("AmmoType: %d\n", temp);
 
     if (temp < 0 || temp > 5)
     {
-        I_Debugf("Dehacked: Warning - Found illegal ammo type: %d\n", temp);
+        EDGEDebugf("Dehacked: Warning - Found illegal ammo type: %d\n", temp);
         return;
     }
 
@@ -451,10 +451,10 @@ const char *PrettyTextString(const char *t)
 
 void ReadBinaryThing(int mt_num)
 {
-    I_Printf("\n--- ReadBinaryThing %d ---\n", mt_num);
+    EDGEPrintf("\n--- ReadBinaryThing %d ---\n", mt_num);
 
     if (file_error)
-        I_Error("Dehacked: Error - File error reading binary thing table.\n");
+        EDGEError("Dehacked: Error - File error reading binary thing table.\n");
 
     DehackedMapObjectDefinition *mobj = things::GetModifiedMobj(mt_num);
 
@@ -488,10 +488,10 @@ void ReadBinaryThing(int mt_num)
 
 void ReadBinaryAmmo(void)
 {
-    I_Printf("\n--- ReadBinaryAmmo ---\n");
+    EDGEPrintf("\n--- ReadBinaryAmmo ---\n");
 
     if (file_error)
-        I_Error("Dehacked: Error - File error reading binary ammo table.\n");
+        EDGEError("Dehacked: Error - File error reading binary ammo table.\n");
 
     GetInt(kObjectKindAmmo, 0, ammo::player_max + 0);
     GetInt(kObjectKindAmmo, 1, ammo::player_max + 1);
@@ -506,10 +506,10 @@ void ReadBinaryAmmo(void)
 
 void ReadBinaryWeapon(int wp_num)
 {
-    I_Printf("\n--- ReadBinaryWeapon %d ---\n", wp_num);
+    EDGEPrintf("\n--- ReadBinaryWeapon %d ---\n", wp_num);
 
     if (file_error)
-        I_Error("Dehacked: Error - File error reading binary weapon table.\n");
+        EDGEError("Dehacked: Error - File error reading binary weapon table.\n");
 
     WeaponInfo *weap = weapon_info + wp_num;
 
@@ -524,10 +524,10 @@ void ReadBinaryWeapon(int wp_num)
 
 void ReadBinaryFrame(int st_num)
 {
-    I_Printf("\n--- ReadBinaryFrame %d ---\n", st_num);
+    EDGEPrintf("\n--- ReadBinaryFrame %d ---\n", st_num);
 
     if (file_error)
-        I_Error("Dehacked: Error - File error reading binary frame table.\n");
+        EDGEError("Dehacked: Error - File error reading binary frame table.\n");
 
     State *state = frames::GetModifiedState(st_num);
 
@@ -545,10 +545,10 @@ void ReadBinaryFrame(int st_num)
 
 void ReadBinarySound(int s_num)
 {
-    I_Printf("\n--- ReadBinarySound %d ---\n", s_num);
+    EDGEPrintf("\n--- ReadBinarySound %d ---\n", s_num);
 
     if (file_error)
-        I_Error("Dehacked: Error - File error reading binary sound table.\n");
+        EDGEError("Dehacked: Error - File error reading binary sound table.\n");
 
     GetRawInt();  // ignore sound name pointer
     GetRawInt();  // ignore singularity
@@ -565,26 +565,26 @@ void ReadBinarySound(int s_num)
 
 void ReadBinarySprite(int spr_num)
 {
-    I_Printf("\n--- ReadBinarySprite %d ---\n", spr_num);
+    EDGEPrintf("\n--- ReadBinarySprite %d ---\n", spr_num);
 
     if (file_error)
-        I_Error("Dehacked: Error - File error reading binary sprite table.\n");
+        EDGEError("Dehacked: Error - File error reading binary sprite table.\n");
 
     GetRawInt();  // ignore sprite name pointer
 }
 
 void ReadBinaryText(int tx_num)
 {
-    I_Printf("\n--- ReadBinaryText %d ---\n", tx_num);
+    EDGEPrintf("\n--- ReadBinaryText %d ---\n", tx_num);
 
     if (file_error)
-        I_Error("Dehacked: Error - File error reading binary text table.\n");
+        EDGEError("Dehacked: Error - File error reading binary text table.\n");
 
     static char text_buf[kMaximumTextStringLength + 8];
 
     GetRawString(text_buf, kMaximumTextStringLength);
 
-    // I_Printf("\"%s\"\n", PrettyTextString(text_buf));
+    // EDGEPrintf("\"%s\"\n", PrettyTextString(text_buf));
 
     text_strings::ReplaceBinaryString(tx_num, text_buf);
 }
@@ -789,7 +789,7 @@ void GetNextLine(void)
         if (ch == EOF)
         {
             if (pat_buf->Error())
-                I_Debugf("Dehacked: Warning - Read error on input file.\n");
+                EDGEDebugf("Dehacked: Warning - Read error on input file.\n");
 
             break;
         }
@@ -818,7 +818,7 @@ void GetNextLine(void)
         line_buf[len++] = (char)ch;
 
         if (len == kMaximumLineLength)
-            I_Debugf("Dehacked: Warning - Truncating very long line (#%d).\n",
+            EDGEDebugf("Dehacked: Warning - Truncating very long line (#%d).\n",
                      line_num);
     }
 
@@ -872,7 +872,7 @@ bool ValidateObject(void)
                 break;
 
             default:
-                I_Error("Dehacked: Error - Bad active_section value %d\n",
+                EDGEError("Dehacked: Error - Bad active_section value %d\n",
                         active_section);
         }
     }
@@ -903,14 +903,14 @@ bool ValidateObject(void)
                 break;
 
             default:
-                I_Error("Dehacked: Error - Bad active_section value %d\n",
+                EDGEError("Dehacked: Error - Bad active_section value %d\n",
                         active_section);
         }
     }
 
     if (active_obj < min_obj || active_obj > max_obj)
     {
-        I_Debugf("Dehacked: Warning - Line %d: Illegal %s number: %d.\n",
+        EDGEDebugf("Dehacked: Warning - Line %d: Illegal %s number: %d.\n",
                  line_num, section_name[active_section], active_obj);
 
         syncing = true;
@@ -942,7 +942,7 @@ bool CheckNewSection(void)
 
             if (active_section == BEX_PARS || active_section == BEX_HELPER)
             {
-                I_Debugf("Dehacked: Warning - Ignoring BEX %s section.\n",
+                EDGEDebugf("Dehacked: Warning - Ignoring BEX %s section.\n",
                          section_name[i]);
             }
 
@@ -987,7 +987,7 @@ void ReadTextString(char *dest, int len)
     {
         if ((dest - begin) >= kMaximumTextStringLength)
         {
-            I_Error(
+            EDGEError(
                 "Dehacked: Error - Text string exceeds internal buffer "
                 "length.\n"
                 "[> %d characters, starting on line %d]\n",
@@ -1002,7 +1002,7 @@ void ReadTextString(char *dest, int len)
         }
 
         if (pat_buf->EndOfFile())
-            I_Error(
+            EDGEError(
                 "Dehacked: Error - End of file while reading Text "
                 "replacement.\n");
 
@@ -1018,7 +1018,7 @@ void ReadTextString(char *dest, int len)
 
 void ProcessTextSection(int len1, int len2)
 {
-    I_Printf("TEXT REPLACE: %d %d\n", len1, len2);
+    EDGEPrintf("TEXT REPLACE: %d %d\n", len1, len2);
 
     static char text_1[kMaximumTextStringLength + 8];
     static char text_2[kMaximumTextStringLength + 8];
@@ -1030,8 +1030,8 @@ void ProcessTextSection(int len1, int len2)
     ReadTextString(text_1, len1);
     ReadTextString(text_2, len2);
 
-    I_Printf("- Before <%s>\n", text_1);
-    I_Printf("- After  <%s>\n", text_2);
+    EDGEPrintf("- Before <%s>\n", text_1);
+    EDGEPrintf("- After  <%s>\n", text_2);
 
     if (len1 == 4 && len2 == 4)
         if (sprites::ReplaceSprite(text_1, text_2)) return;
@@ -1045,7 +1045,7 @@ void ProcessTextSection(int len1, int len2)
 
     if (text_strings::ReplaceString(text_1, text_2)) return;
 
-    I_Debugf("Dehacked: Warning - Cannot match text: \"%s\"\n",
+    EDGEDebugf("Dehacked: Warning - Cannot match text: \"%s\"\n",
              PrettyTextString(text_1));
 }
 
@@ -1061,7 +1061,7 @@ void ReadBexTextString(char *dest)  // upto kMaximumTextStringLength chars
     {
         if ((dest - begin) >= kMaximumTextStringLength)
         {
-            I_Error(
+            EDGEError(
                 "Dehacked: Error - Bex String exceeds internal buffer length.\n"
                 "[> %d characters, starting on line %d]\n",
                 kMaximumTextStringLength, start_line);
@@ -1082,7 +1082,7 @@ void ReadBexTextString(char *dest)  // upto kMaximumTextStringLength chars
             do  // need a loop to ignore comment lines
             {
                 if (pat_buf->EndOfFile())
-                    I_Error(
+                    EDGEError(
                         "Dehacked: Error - End of file while reading Bex "
                         "String replacement.\n");
 
@@ -1106,10 +1106,10 @@ void ReadBexTextString(char *dest)  // upto kMaximumTextStringLength chars
 
 void ProcessBexString(void)
 {
-    I_Printf("BEX STRING REPLACE: %s\n", line_buf);
+    EDGEPrintf("BEX STRING REPLACE: %s\n", line_buf);
 
     if (strlen(line_buf) >= 100)
-        I_Error("Dehacked: Error - Bex string name too long !\nLine %d: %s\n",
+        EDGEError("Dehacked: Error - Bex string name too long !\nLine %d: %s\n",
                 line_num, line_buf);
 
     char bex_field[104];
@@ -1122,10 +1122,10 @@ void ProcessBexString(void)
 
     ReadBexTextString(text_buf);
 
-    I_Printf("- Replacement <%s>\n", text_buf);
+    EDGEPrintf("- Replacement <%s>\n", text_buf);
 
     if (!text_strings::ReplaceBexString(bex_field, text_buf))
-        I_Debugf("Dehacked: Warning - Line %d: unknown BEX string name: %s\n",
+        EDGEDebugf("Dehacked: Warning - Line %d: unknown BEX string name: %s\n",
                  line_num, bex_field);
 }
 
@@ -1133,14 +1133,14 @@ void ProcessLine(void)
 {
     SYS_ASSERT(active_section >= 0);
 
-    I_Printf("Section %d Object %d : <%s>\n", active_section, active_obj,
+    EDGEPrintf("Section %d Object %d : <%s>\n", active_section, active_obj,
              line_buf);
 
     if (active_section == BEX_PARS || active_section == BEX_HELPER) return;
 
     if (!equal_pos)
     {
-        I_Debugf("Dehacked: Warning - Ignoring line: %s\n", line_buf);
+        EDGEDebugf("Dehacked: Warning - Ignoring line: %s\n", line_buf);
         return;
     }
 
@@ -1164,14 +1164,14 @@ void ProcessLine(void)
 
     if (line_buf[0] == 0)
     {
-        I_Debugf(
+        EDGEDebugf(
             "Dehacked: Warning - Line %d: No field name before equal sign.\n",
             line_num);
         return;
     }
     else if (equal_pos[0] == 0)
     {
-        I_Debugf("Dehacked: Warning - Line %d: No value after equal sign.\n",
+        EDGEDebugf("Dehacked: Warning - Line %d: No value after equal sign.\n",
                  line_num);
         return;
     }
@@ -1196,7 +1196,7 @@ void ProcessLine(void)
     {
         if (sscanf(equal_pos, " %i ", &num_value) != 1)
         {
-            I_Debugf("Dehacked: Warning - Line %d: unreadable %s value: %s\n",
+            EDGEDebugf("Dehacked: Warning - Line %d: unreadable %s value: %s\n",
                      line_num, section_name[active_section], equal_pos);
             return;
         }
@@ -1250,7 +1250,7 @@ void ProcessLine(void)
             break;
 
         default:
-            I_Error("Dehacked: Error - Bad active_section value %d\n",
+            EDGEError("Dehacked: Error - Bad active_section value %d\n",
                     active_section);
     }
 }
@@ -1273,7 +1273,7 @@ DehackedResult LoadDiff(bool no_header)
 
         if (line_buf[0] == 0 || line_buf[0] == '#') continue;
 
-        // I_Printf("LINE %d: <%s>\n", line_num, line_buf);
+        // EDGEPrintf("LINE %d: <%s>\n", line_num, line_buf);
 
         if (epi::StringPrefixCaseCompareASCII(line_buf, "Doom version") == 0)
         {
@@ -1334,7 +1334,7 @@ DehackedResult LoadDiff(bool no_header)
 
         if (epi::StringPrefixCaseCompareASCII(line_buf, "include") == 0)
         {
-            I_Printf("- Warning: BEX INCLUDE directive not supported!\n");
+            EDGEPrintf("- Warning: BEX INCLUDE directive not supported!\n");
             continue;
         }
 
@@ -1427,7 +1427,7 @@ DehackedResult patch::Load(InputBuffer *buf)
     {
         pat_buf->UngetCharacter(tempver);
 
-        I_Printf("Missing header -- assuming text-based BEX patch !\n");
+        EDGEPrintf("Missing header -- assuming text-based BEX patch !\n");
         dhe_ver = 31;
         result  = LoadDiff(true);
     }
@@ -1437,7 +1437,7 @@ DehackedResult patch::Load(InputBuffer *buf)
         result = kDehackedConversionParseError;
     }
 
-    I_Printf("\n");
+    EDGEPrintf("\n");
     pat_buf = nullptr;
 
     return result;

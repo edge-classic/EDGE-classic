@@ -44,23 +44,23 @@ OPLPlayer *edge_opl = nullptr;
 
 #define OPL_SAMPLES 1024
 
-extern bool dev_stereo;
-extern int  dev_freq;
+extern bool sound_device_stereo;
+extern int  sound_device_frequency;
 
 bool opl_disabled = false;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(s_genmidi, "GENMIDI", (ConsoleVariableFlag)(kConsoleVariableFlagArchive|kConsoleVariableFlagFilepath))
 
-extern std::vector<std::string> available_genmidis;
+extern std::vector<std::string> available_opl_banks;
 
 bool S_StartupOPL(void)
 {
-    I_Printf("Initializing OPL player...\n");
+    EDGEPrintf("Initializing OPL player...\n");
 
     if (edge_opl)
         delete edge_opl;
 
-    edge_opl = new OPLPlayer(dev_freq);
+    edge_opl = new OPLPlayer(sound_device_frequency);
 
     if (!edge_opl)
         return false;
@@ -71,16 +71,16 @@ bool S_StartupOPL(void)
         cvar_good = true;
     else
     {
-        for (size_t i = 0; i < available_genmidis.size(); i++)
+        for (size_t i = 0; i < available_opl_banks.size(); i++)
         {
-            if (epi::StringCaseCompareASCII(s_genmidi.s_, available_genmidis.at(i)) == 0)
+            if (epi::StringCaseCompareASCII(s_genmidi.s_, available_opl_banks.at(i)) == 0)
                 cvar_good = true;
         }
     }
 
     if (!cvar_good)
     {
-        I_Warning("Cannot find previously used GENMIDI %s, falling back to default!\n", s_genmidi.c_str());
+        EDGEWarning("Cannot find previously used GENMIDI %s, falling back to default!\n", s_genmidi.c_str());
         s_genmidi = "GENMIDI";
     }
 
@@ -93,7 +93,7 @@ bool S_StartupOPL(void)
         data = W_OpenPackOrLumpInMemory("GENMIDI", {".op2"}, &length);
         if (!data)
         {
-            I_Debugf("no GENMIDI lump !\n");
+            EDGEDebugf("no GENMIDI lump !\n");
             return false;
         }
     }
@@ -102,7 +102,7 @@ bool S_StartupOPL(void)
         F = epi::FileOpen(s_genmidi.s_, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (!F)
         {
-            I_Warning("S_StartupOPL: Error opening GENMIDI!\n");
+            EDGEWarning("S_StartupOPL: Error opening GENMIDI!\n");
             return false;
         }
         length = F->GetLength();
@@ -111,7 +111,7 @@ bool S_StartupOPL(void)
 
     if (!data)
     {
-        I_Warning("S_StartupOPL: Error loading instruments!\n");
+        EDGEWarning("S_StartupOPL: Error loading instruments!\n");
         if (F)
             delete F;
         return false;
@@ -119,7 +119,7 @@ bool S_StartupOPL(void)
 
     if (!edge_opl->loadPatches((const uint8_t *)data, (size_t)length))
     {
-        I_Warning("S_StartupOPL: Error loading instruments!\n");
+        EDGEWarning("S_StartupOPL: Error loading instruments!\n");
         delete F;
         delete[] data;
         return false;
@@ -164,7 +164,7 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
     }
 }
 
-class opl_player_c : public abstract_music_c
+class opl_player_c : public AbstractMusicPlayer
 {
   private:
     enum status_e
@@ -290,9 +290,9 @@ class opl_player_c : public abstract_music_c
         opl_iface->onPcmRender          = playSynth;
         opl_iface->onPcmRender_userData = this;
 
-        opl_iface->pcmSampleRate = dev_freq;
+        opl_iface->pcmSampleRate = sound_device_frequency;
         opl_iface->pcmFrameSize =
-            2 /*channels*/ * 2 /*size of one sample*/; // OPL3 is 2 'channels' regardless of the dev_stereo setting
+            2 /*channels*/ * 2 /*size of one sample*/; // OPL3 is 2 'channels' regardless of the sound_device_stereo setting
 
         opl_iface->rt_deviceSwitch  = rtDeviceSwitch;
         opl_iface->rt_currentDevice = rtCurrentDevice;
@@ -374,14 +374,14 @@ class opl_player_c : public abstract_music_c
         while (status == PLAYING && !var_pc_speaker_mode)
         {
             sound_data_c *buf =
-                S_QueueGetFreeBuffer(OPL_SAMPLES, dev_stereo ? SBUF_Interleaved : SBUF_Mono);
+                S_QueueGetFreeBuffer(OPL_SAMPLES, sound_device_stereo ? SBUF_Interleaved : SBUF_Mono);
 
             if (!buf)
                 break;
 
             if (StreamIntoBuffer(buf))
             {
-                S_QueueAddBuffer(buf, dev_freq);
+                S_QueueAddBuffer(buf, sound_device_frequency);
             }
             else
             {
@@ -400,7 +400,7 @@ class opl_player_c : public abstract_music_c
 
         bool song_done = false;
 
-        if (!dev_stereo)
+        if (!sound_device_stereo)
             data_buf = mono_buffer;
         else
             data_buf = buf->data_L;
@@ -412,7 +412,7 @@ class opl_player_c : public abstract_music_c
 
         buf->length = played / (2 * sizeof(int16_t));
 
-        if (!dev_stereo)
+        if (!sound_device_stereo)
             ConvertToMono(buf->data_L, mono_buffer, buf->length);
 
         if (song_done) /* EOF */
@@ -427,7 +427,7 @@ class opl_player_c : public abstract_music_c
     }
 };
 
-abstract_music_c *S_PlayOPL(uint8_t *data, int length, bool loop, int type)
+AbstractMusicPlayer *S_PlayOPL(uint8_t *data, int length, bool loop, int type)
 {
 
     if (opl_disabled)
@@ -440,7 +440,7 @@ abstract_music_c *S_PlayOPL(uint8_t *data, int length, bool loop, int type)
 
     if (!player)
     {
-        I_Debugf("OPL player: error initializing!\n");
+        EDGEDebugf("OPL player: error initializing!\n");
         delete[] data;
         return nullptr;
     }
@@ -465,7 +465,7 @@ abstract_music_c *S_PlayOPL(uint8_t *data, int length, bool loop, int type)
 
     if (!player->LoadTrack(data, length, rate)) // Lobo: quietly log it instead of completely exiting EDGE
     {
-        I_Debugf("OPL player: failed to load MIDI file!\n");
+        EDGEDebugf("OPL player: failed to load MIDI file!\n");
         delete[] data;
         delete player;
         return nullptr;

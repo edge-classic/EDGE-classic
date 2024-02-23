@@ -56,7 +56,7 @@ void VM_Printer(const char *msg, ...)
 
     buffer[sizeof(buffer) - 1] = 0;
 
-    I_Printf("COAL: %s", buffer);
+    EDGEPrintf("COAL: %s", buffer);
 }
 
 // VM_GetFloat/VM_GetString/VM_GetVector usage:
@@ -133,10 +133,10 @@ void VM_CallFunction(coal::vm_c *vm, const char *name)
     int func = vm->FindFunction(name);
 
     if (func == coal::vm_c::NOT_FOUND)
-        I_Error("Missing coal function: %s\n", name);
+        EDGEError("Missing coal function: %s\n", name);
 
     if (vm->Execute(func) != 0)
-        I_Error("Coal script terminated with an error.\n");
+        EDGEError("Coal script terminated with an error.\n");
 }
 
 //------------------------------------------------------------------------
@@ -151,7 +151,7 @@ static void SYS_error(coal::vm_c *vm, int argc)
 
     const char *s = vm->AccessParamString(0);
 
-    I_Error("%s\n", s);
+    EDGEError("%s\n", s);
 }
 
 // sys.print(str)
@@ -162,7 +162,7 @@ static void SYS_print(coal::vm_c *vm, int argc)
 
     const char *s = vm->AccessParamString(0);
 
-    I_Printf("%s\n", s);
+    EDGEPrintf("%s\n", s);
 }
 
 // sys.debug_print(str)
@@ -173,7 +173,7 @@ static void SYS_debug_print(coal::vm_c *vm, int argc)
 
     const char *s = vm->AccessParamString(0);
 
-    I_Debugf("%s\n", s);
+    EDGEDebugf("%s\n", s);
 }
 
 // sys.edge_version()
@@ -305,7 +305,7 @@ static void MATH_log(coal::vm_c *vm, int argc)
     double val = *vm->AccessParam(0);
 
     if (val <= 0)
-        I_Error("math.log: illegal input: %g\n", val);
+        EDGEError("math.log: illegal input: %g\n", val);
 
     vm->ReturnFloat(log(val));
 }
@@ -480,10 +480,10 @@ void VM_LoadScripts()
         const char *name = info.source.c_str();
         char       *data = (char *)info.data.c_str(); // FIXME make param to CompileFile be a std::string&
 
-        I_Printf("Compiling: %s\n", name);
+        EDGEPrintf("Compiling: %s\n", name);
 
         if (!ui_vm->CompileFile(data, name))
-            I_Error("Errors compiling %s\nPlease see debug.txt for details.", name);
+            EDGEError("Errors compiling %s\nPlease see debug.txt for details.", name);
     }
 
     unread_scripts.clear();

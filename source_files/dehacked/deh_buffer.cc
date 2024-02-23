@@ -41,7 +41,7 @@ InputBuffer::InputBuffer(const char *data, int length)
     : data_(data), pointer_(data), length_(length)
 {
     if (length_ < 0)
-        I_Error("Dehacked: Error - Illegal length of lump (%d bytes)\n",
+        EDGEError("Dehacked: Error - Illegal length of lump (%d bytes)\n",
                 length_);
 }
 

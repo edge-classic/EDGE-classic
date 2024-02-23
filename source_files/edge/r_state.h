@@ -132,7 +132,7 @@ class gl_state_c
             enableScissorTest_ = enabled;
             break;
         default:
-            I_Error("Unknown GL State %i", cap);
+            EDGEError("Unknown GL State %i", cap);
         }
 
         if (enabled)
@@ -144,7 +144,7 @@ class gl_state_c
             glDisable(cap);
         }
 
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void disable(GLenum cap)
@@ -161,7 +161,7 @@ class gl_state_c
 
         depthMask_ = enable;
         glDepthMask(enable ? GL_TRUE : GL_FALSE);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void cullFace(GLenum mode)
@@ -173,7 +173,7 @@ class gl_state_c
 
         cullFace_ = mode;
         glCullFace(mode);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void alphaFunc(GLenum func, GLfloat ref)
@@ -187,7 +187,7 @@ class gl_state_c
         alphaFuncRef_ = ref;
 
         glAlphaFunc(alphaFunc_, alphaFuncRef_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void activeTexture(GLenum activeTexture)
@@ -199,7 +199,7 @@ class gl_state_c
 
         activeTexture_ = activeTexture;
         glActiveTexture(activeTexture_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void bindTexture(GLuint textureid)
@@ -212,8 +212,8 @@ class gl_state_c
 
         bindTexture2D_[index] = textureid;
         glBindTexture(GL_TEXTURE_2D, textureid);
-        ecframe_stats.draw_texchange++;
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_texture_change++;
+        ecframe_stats.draw_state_change++;
     }
 
     void polygonOffset(GLfloat factor, GLfloat units)
@@ -226,7 +226,7 @@ class gl_state_c
         polygonOffsetFactor_ = factor;
         polygonOffsetUnits_  = units;
         glPolygonOffset(polygonOffsetFactor_, polygonOffsetUnits_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void clearColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
@@ -242,7 +242,7 @@ class gl_state_c
         clearBlue_  = blue;
         clearAlpha_ = alpha;
         glClearColor(clearRed_, clearGreen_, clearBlue_, clearAlpha_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void fogMode(GLint fogMode)
@@ -254,7 +254,7 @@ class gl_state_c
 
         fogMode_ = fogMode;
         glFogi(GL_FOG_MODE, fogMode_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void fogColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
@@ -271,7 +271,7 @@ class gl_state_c
         fogColor_[3] = alpha;
 
         glFogfv(GL_FOG_COLOR, fogColor_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void fogStart(GLfloat start)
@@ -283,7 +283,7 @@ class gl_state_c
 
         fogStart_ = start;
         glFogf(GL_FOG_START, fogStart_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void fogEnd(GLfloat end)
@@ -295,7 +295,7 @@ class gl_state_c
 
         fogEnd_ = end;
         glFogf(GL_FOG_END, fogEnd_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void fogDensity(GLfloat density)
@@ -307,7 +307,7 @@ class gl_state_c
 
         fogDensity_ = density;
         glFogf(GL_FOG_DENSITY, fogDensity_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void blendFunc(GLenum sfactor, GLenum dfactor)
@@ -320,7 +320,7 @@ class gl_state_c
         blendSFactor_ = sfactor;
         blendDFactor_ = dfactor;
         glBlendFunc(blendSFactor_, blendDFactor_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void texEnvMode(GLint param)
@@ -334,7 +334,7 @@ class gl_state_c
 
         texEnvMode_[index] = param;
         glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, texEnvMode_[index]);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void texEnvCombineRGB(GLint param)
@@ -348,7 +348,7 @@ class gl_state_c
 
         texEnvCombineRGB_[index] = param;
         glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, texEnvCombineRGB_[index]);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void texEnvSource0RGB(GLint param)
@@ -362,7 +362,7 @@ class gl_state_c
 
         texEnvSource0RGB_[index] = param;
         glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, texEnvSource0RGB_[index]);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void texWrapT(GLint param)
@@ -376,7 +376,7 @@ class gl_state_c
 
         texWrapT_[index] = param;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texWrapT_[index]);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     void resetDefaultState()
@@ -410,24 +410,24 @@ class gl_state_c
     {
         enableBlend_ = false;
         glDisable(GL_BLEND);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
 
         blendSFactor_ = GL_SRC_ALPHA;
         blendDFactor_ = GL_ONE_MINUS_SRC_ALPHA;
         glBlendFunc(blendSFactor_, blendDFactor_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
 
         for (int i = 0; i < 2; i++)
         {
             enableTexture2D_[i] = false;
             bindTexture2D_[i]   = 0;
             glActiveTexture(GL_TEXTURE0 + i);
-            ecframe_stats.draw_statechange++;
+            ecframe_stats.draw_state_change++;
             glBindTexture(GL_TEXTURE_2D, 0);
-            ecframe_stats.draw_texchange++;
-            ecframe_stats.draw_statechange++;
+            ecframe_stats.draw_texture_change++;
+            ecframe_stats.draw_state_change++;
             glDisable(GL_TEXTURE_2D);
-            ecframe_stats.draw_statechange++;
+            ecframe_stats.draw_state_change++;
 
             texEnvMode_[i]       = 0;
             texEnvCombineRGB_[i] = 0;
@@ -437,69 +437,69 @@ class gl_state_c
 
         activeTexture_ = GL_TEXTURE0;
         glActiveTexture(activeTexture_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
 
         enableAlphaTest_ = false;
         glDisable(GL_ALPHA_TEST);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
 
         alphaFunc_    = GL_GREATER;
         alphaFuncRef_ = 0.0f;
 
         glAlphaFunc(alphaFunc_, alphaFuncRef_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
 
         depthMask_ = true;
         glDepthMask(GL_TRUE);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
 
         cullFace_ = GL_BACK;
         glCullFace(cullFace_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
         enableCullFace_ = false;
         glDisable(GL_CULL_FACE);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
 
         clearRed_   = 0.0f;
         clearGreen_ = 0.0f;
         clearBlue_  = 0.0f;
         clearAlpha_ = 1.0f;
         glClearColor(clearRed_, clearGreen_, clearBlue_, clearAlpha_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
 
         fogMode_ = GL_LINEAR;
         glFogi(GL_FOG_MODE, fogMode_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
 
         fogColor_[0] = 0.0f;
         fogColor_[1] = 0.0f;
         fogColor_[2] = 0.0f;
         fogColor_[3] = 1.0f;
         glFogfv(GL_FOG_COLOR, fogColor_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
 
         enableFog_ = false;
         glDisable(GL_FOG);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
         fogStart_ = 0.0f;
         fogEnd_   = 0.0f;
         glFogf(GL_FOG_START, fogStart_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
         glFogf(GL_FOG_END, fogEnd_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
 
         fogDensity_ = 0.0f;
         glFogf(GL_FOG_DENSITY, fogDensity_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
 
         polygonOffsetFactor_ = 0;
         polygonOffsetUnits_  = 0;
         glPolygonOffset(polygonOffsetFactor_, polygonOffsetUnits_);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
 
         enableScissorTest_ = false;
         glDisable(GL_SCISSOR_TEST);
-        ecframe_stats.draw_statechange++;
+        ecframe_stats.draw_state_change++;
     }
 
     int frameStateChanges_ = 0;

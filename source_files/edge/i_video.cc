@@ -16,45 +16,50 @@
 //
 //----------------------------------------------------------------------------
 
-
 #include "i_video.h"
+
+#include "edge_profiling.h"
 #include "i_defs_gl.h"
 #include "i_system.h"
-#include "version.h"
-
-#include <signal.h>
-
 #include "m_argv.h"
 #include "m_misc.h"
 #include "r_modes.h"
 #include "str_compare.h"
 #include "str_util.h"
-#include "edge_profiling.h"
+#include "version.h"
 
-SDL_Window *my_vis;
+SDL_Window *program_window;
 
 int graphics_shutdown = 0;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(in_grab, "1", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(v_sync, "0", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(v_gamma, "0", kConsoleVariableFlagArchive, -1.0, 1.0)
+// I think grab_mouse should be an internal bool instead of a cvar...why would a
+// user need to adjust this on the fly? - Dasho
+EDGE_DEFINE_CONSOLE_VARIABLE(grab_mouse, "1", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(vsync, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(gamma_correction, "0",
+                                     kConsoleVariableFlagArchive, -1.0, 1.0)
 
 // this is the Monitor Size setting, really an aspect ratio.
 // it defaults to 16:9, as that is the most common monitor size nowadays.
-EDGE_DEFINE_CONSOLE_VARIABLE(v_monitorsize, "1.77777", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(monitor_aspect_ratio, "1.77777",
+                             kConsoleVariableFlagArchive)
 
-// these are zero until I_StartupGraphics is called.
+// these are zero until EDGEStartupGraphics is called.
 // after that they never change (we assume the desktop won't become other
 // resolutions while EC is running).
-EDGE_DEFINE_CONSOLE_VARIABLE(v_desktop_width, "0", kConsoleVariableFlagReadOnly)
-EDGE_DEFINE_CONSOLE_VARIABLE(v_desktop_height, "0", kConsoleVariableFlagReadOnly)
+EDGE_DEFINE_CONSOLE_VARIABLE(desktop_resolution_width, "0",
+                             kConsoleVariableFlagReadOnly)
+EDGE_DEFINE_CONSOLE_VARIABLE(desktop_resolution_height, "0",
+                             kConsoleVariableFlagReadOnly)
 
-EDGE_DEFINE_CONSOLE_VARIABLE(v_pixelaspect, "1.0", kConsoleVariableFlagReadOnly);
+EDGE_DEFINE_CONSOLE_VARIABLE(pixel_aspect_ratio, "1.0",
+                             kConsoleVariableFlagReadOnly);
 
 // when > 0, this will force the pixel_aspect to a particular value, for
 // cases where a normal logic fails.  however, it will apply to *all* modes,
 // including windowed mode.
-EDGE_DEFINE_CONSOLE_VARIABLE(v_force_pixelaspect, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(forced_pixel_aspect_ratio, "0",
+                             kConsoleVariableFlagArchive)
 
 static bool grab_state;
 
@@ -62,30 +67,22 @@ extern ConsoleVariable r_farclip;
 extern ConsoleVariable r_culling;
 extern ConsoleVariable r_culldist;
 
-void I_GrabCursor(bool enable)
+void EDGEGrabCursor(bool enable)
 {
-
 #ifdef EDGE_WEB
     // On web, cursor lock is exclusively handled by selecting canvas
     return;
 #endif
 
-    if (!my_vis || graphics_shutdown)
-        return;
+    if (!program_window || graphics_shutdown) return;
 
     grab_state = enable;
 
-    if (grab_state && in_grab.d_)
-    {
-        SDL_SetRelativeMouseMode(SDL_TRUE);
-    }
-    else
-    {
-        SDL_SetRelativeMouseMode(SDL_FALSE);
-    }
+    if (grab_state && grab_mouse.d_) { SDL_SetRelativeMouseMode(SDL_TRUE); }
+    else { SDL_SetRelativeMouseMode(SDL_FALSE); }
 }
 
-void I_DeterminePixelAspect()
+void EDGEDeterminePixelAspect()
 {
     // the pixel aspect is the shape of pixels on the monitor for the current
     // video mode.  on modern LCDs (etc) it is usuall 1.0 (1:1).  knowing this
@@ -94,23 +91,25 @@ void I_DeterminePixelAspect()
     // 0.833333, and we must adjust image drawing to get "correct" results.
 
     // allow user to override
-    if (v_force_pixelaspect.f_ > 0.1)
+    if (forced_pixel_aspect_ratio.f_ > 0.1)
     {
-        v_pixelaspect = v_force_pixelaspect.f_;
+        pixel_aspect_ratio = forced_pixel_aspect_ratio.f_;
         return;
     }
 
     // if not a fullscreen mode, check for a modern LCD (etc) monitor -- they
     // will have square pixels (1:1 aspect).
-    bool is_crt = (v_desktop_width.d_< v_desktop_height.d_* 7 / 5);
+    bool is_crt =
+        (desktop_resolution_width.d_ < desktop_resolution_height.d_ * 7 / 5);
 
     bool is_fullscreen = (DISPLAYMODE > 0);
-    if (is_fullscreen && SCREENWIDTH == v_desktop_width.d_&& SCREENHEIGHT == v_desktop_height.d_&& graphics_shutdown)
+    if (is_fullscreen && SCREENWIDTH == desktop_resolution_width.d_ &&
+        SCREENHEIGHT == desktop_resolution_height.d_ && graphics_shutdown)
         is_fullscreen = false;
 
     if (!is_fullscreen && !is_crt)
     {
-        v_pixelaspect = 1.0f;
+        pixel_aspect_ratio = 1.0f;
         return;
     }
 
@@ -119,35 +118,33 @@ void I_DeterminePixelAspect()
     // video mode is filling the whole monitor (i.e. the monitor is not doing
     // any letter-boxing or pillar-boxing).  DPI setting does not matter here.
 
-    v_pixelaspect = v_monitorsize.f_ * (float)SCREENHEIGHT / (float)SCREENWIDTH;
+    pixel_aspect_ratio =
+        monitor_aspect_ratio.f_ * (float)SCREENHEIGHT / (float)SCREENWIDTH;
 }
 
-void I_StartupGraphics(void)
+void EDGEStartupGraphics(void)
 {
     std::string driver = argv::Value("videodriver");
 
     if (driver.empty())
     {
         const char *check = SDL_getenv("SDL_VIDEODRIVER");
-        if (check)
-            driver = check;
+        if (check) driver = check;
     }
 
-    if (driver.empty())
-        driver = "default";
+    if (driver.empty()) driver = "default";
 
     if (epi::StringCaseCompareASCII(driver, "default") != 0)
     {
         SDL_setenv("SDL_VIDEODRIVER", driver.c_str(), 1);
     }
 
-    I_Printf("SDL_Video_Driver: %s\n", driver.c_str());
+    EDGEPrintf("SDL_Video_Driver: %s\n", driver.c_str());
 
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
-        I_Error("Couldn't init SDL VIDEO!\n%s\n", SDL_GetError());
+        EDGEError("Couldn't init SDL VIDEO!\n%s\n", SDL_GetError());
 
-    if (argv::Find("nograb") > 0)
-        in_grab = 0;
+    if (argv::Find("nograb") > 0) grab_mouse = 0;
 
     // -AJA- FIXME these are wrong (probably ignored though)
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
@@ -167,15 +164,16 @@ void I_StartupGraphics(void)
     SDL_DisplayMode info;
     SDL_GetDesktopDisplayMode(0, &info);
 
-    v_desktop_width  = info.w;
-    v_desktop_height = info.h;
+    desktop_resolution_width  = info.w;
+    desktop_resolution_height = info.h;
 
-    if (SCREENWIDTH > v_desktop_width.d_)
-        SCREENWIDTH = v_desktop_width.d_;
-    if (SCREENHEIGHT > v_desktop_height.d_)
-        SCREENHEIGHT = v_desktop_height.d_;
+    if (SCREENWIDTH > desktop_resolution_width.d_)
+        SCREENWIDTH = desktop_resolution_width.d_;
+    if (SCREENHEIGHT > desktop_resolution_height.d_)
+        SCREENHEIGHT = desktop_resolution_height.d_;
 
-    I_Printf("Desktop resolution: %dx%d\n", v_desktop_width.d_, v_desktop_height.d_);
+    EDGEPrintf("Desktop resolution: %dx%d\n", desktop_resolution_width.d_,
+               desktop_resolution_height.d_);
 
     int num_modes = SDL_GetNumDisplayModes(0);
 
@@ -184,41 +182,44 @@ void I_StartupGraphics(void)
         SDL_DisplayMode possible_mode;
         SDL_GetDisplayMode(0, i, &possible_mode);
 
-        if (possible_mode.w > v_desktop_width.d_|| possible_mode.h > v_desktop_height.d_)
+        if (possible_mode.w > desktop_resolution_width.d_ ||
+            possible_mode.h > desktop_resolution_height.d_)
             continue;
 
-        scrmode_c test_mode;
+        DisplayMode test_mode;
 
         test_mode.width        = possible_mode.w;
         test_mode.height       = possible_mode.h;
         test_mode.depth        = SDL_BITSPERPIXEL(possible_mode.format);
-        test_mode.display_mode = scrmode_c::SCR_FULLSCREEN;
+        test_mode.display_mode = DisplayMode::SCR_FULLSCREEN;
 
-        if ((test_mode.width & 15) != 0)
-            continue;
+        if ((test_mode.width & 15) != 0) continue;
 
-        if (test_mode.depth == 15 || test_mode.depth == 16 || test_mode.depth == 24 || test_mode.depth == 32)
+        if (test_mode.depth == 15 || test_mode.depth == 16 ||
+            test_mode.depth == 24 || test_mode.depth == 32)
         {
             R_AddResolution(&test_mode);
 
-            if (test_mode.width < v_desktop_width.d_&& test_mode.height < v_desktop_height.d_)
+            if (test_mode.width < desktop_resolution_width.d_ &&
+                test_mode.height < desktop_resolution_height.d_)
             {
-                scrmode_c win_mode    = test_mode;
-                win_mode.display_mode = scrmode_c::SCR_WINDOW;
+                DisplayMode win_mode  = test_mode;
+                win_mode.display_mode = DisplayMode::SCR_WINDOW;
                 R_AddResolution(&win_mode);
             }
         }
     }
 
-    // If needed, set the default window toggle mode to the largest non-native res
-    if (tw_displaymode.d_== scrmode_c::SCR_INVALID)
+    // If needed, set the default window toggle mode to the largest non-native
+    // res
+    if (tw_displaymode.d_ == DisplayMode::SCR_INVALID)
     {
         for (size_t i = 0; i < screen_modes.size(); i++)
         {
-            scrmode_c *check = screen_modes[i];
-            if (check->display_mode == scrmode_c::SCR_WINDOW)
+            DisplayMode *check = screen_modes[i];
+            if (check->display_mode == DisplayMode::SCR_WINDOW)
             {
-                tw_displaymode  = scrmode_c::SCR_WINDOW;
+                tw_displaymode  = DisplayMode::SCR_WINDOW;
                 tw_screenheight = check->height;
                 tw_screenwidth  = check->width;
                 tw_screendepth  = check->depth;
@@ -228,24 +229,24 @@ void I_StartupGraphics(void)
     }
 
     // Fill in borderless mode scrmode with the native display info
-    borderless_mode.display_mode = scrmode_c::SCR_BORDERLESS;
+    borderless_mode.display_mode = DisplayMode::SCR_BORDERLESS;
     borderless_mode.width        = info.w;
     borderless_mode.height       = info.h;
     borderless_mode.depth        = SDL_BITSPERPIXEL(info.format);
 
     // If needed, also make the default fullscreen toggle mode borderless
-    if (tf_displaymode.d_== scrmode_c::SCR_INVALID)
+    if (tf_displaymode.d_ == DisplayMode::SCR_INVALID)
     {
-        tf_displaymode  = scrmode_c::SCR_BORDERLESS;
+        tf_displaymode  = DisplayMode::SCR_BORDERLESS;
         tf_screenwidth  = info.w;
         tf_screenheight = info.h;
         tf_screendepth  = (int)SDL_BITSPERPIXEL(info.format);
     }
 
-    I_Printf("I_StartupGraphics: initialisation OK\n");
+    EDGEPrintf("EDGEStartupGraphics: initialisation OK\n");
 }
 
-static bool I_CreateWindow(scrmode_c *mode)
+static bool I_CreateWindow(DisplayMode *mode)
 {
     std::string temp_title = windowtitle.s_;
     temp_title.append(" ").append(edgeversion.s_);
@@ -256,59 +257,63 @@ static bool I_CreateWindow(scrmode_c *mode)
     int resizeable = 0;
 #endif
 
-    my_vis =
-        SDL_CreateWindow(temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, mode->width, mode->height,
-                         SDL_WINDOW_OPENGL |
-                             (mode->display_mode == scrmode_c::SCR_BORDERLESS
-                                  ? (SDL_WINDOW_FULLSCREEN_DESKTOP)
-                                  : (mode->display_mode == scrmode_c::SCR_FULLSCREEN ? SDL_WINDOW_FULLSCREEN : 0)) |
-                             resizeable);
+    program_window = SDL_CreateWindow(
+        temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        mode->width, mode->height,
+        SDL_WINDOW_OPENGL |
+            (mode->display_mode == DisplayMode::SCR_BORDERLESS
+                 ? (SDL_WINDOW_FULLSCREEN_DESKTOP)
+                 : (mode->display_mode == DisplayMode::SCR_FULLSCREEN
+                        ? SDL_WINDOW_FULLSCREEN
+                        : 0)) |
+            resizeable);
 
-    if (my_vis == nullptr)
+    if (program_window == nullptr)
     {
-        I_Printf("Failed to create window: %s\n", SDL_GetError());
+        EDGEPrintf("Failed to create window: %s\n", SDL_GetError());
         return false;
     }
 
-    if (mode->display_mode == scrmode_c::SCR_BORDERLESS)
-        SDL_GetWindowSize(my_vis, &borderless_mode.width, &borderless_mode.height);
+    if (mode->display_mode == DisplayMode::SCR_BORDERLESS)
+        SDL_GetWindowSize(program_window, &borderless_mode.width,
+                          &borderless_mode.height);
 
-    if (mode->display_mode == scrmode_c::SCR_WINDOW)
+    if (mode->display_mode == DisplayMode::SCR_WINDOW)
     {
         tw_screendepth  = mode->depth;
         tw_screenheight = mode->height;
         tw_screenwidth  = mode->width;
-        tw_displaymode  = scrmode_c::SCR_WINDOW;
+        tw_displaymode  = DisplayMode::SCR_WINDOW;
     }
-    else if (mode->display_mode == scrmode_c::SCR_FULLSCREEN)
+    else if (mode->display_mode == DisplayMode::SCR_FULLSCREEN)
     {
         tf_screendepth  = mode->depth;
         tf_screenheight = mode->height;
         tf_screenwidth  = mode->width;
-        tf_displaymode  = scrmode_c::SCR_FULLSCREEN;
+        tf_displaymode  = DisplayMode::SCR_FULLSCREEN;
     }
     else
     {
         tf_screendepth  = borderless_mode.depth;
         tf_screenheight = borderless_mode.height;
         tf_screenwidth  = borderless_mode.width;
-        tf_displaymode  = scrmode_c::SCR_BORDERLESS;
+        tf_displaymode  = DisplayMode::SCR_BORDERLESS;
     }
 
-    if (SDL_GL_CreateContext(my_vis) == nullptr)
-        I_Error("Failed to create OpenGL context.\n");
+    if (SDL_GL_CreateContext(program_window) == nullptr)
+        EDGEError("Failed to create OpenGL context.\n");
 
-    if (v_sync.d_== 2)
+    if (vsync.d_ == 2)
     {
         // Fallback to normal VSync if Adaptive doesn't work
         if (SDL_GL_SetSwapInterval(-1) == -1)
         {
-            v_sync = 1;
-            SDL_GL_SetSwapInterval(v_sync.d_);
+            vsync = 1;
+            SDL_GL_SetSwapInterval(vsync.d_);
         }
     }
     else
-        SDL_GL_SetSwapInterval(v_sync.d_);
+        SDL_GL_SetSwapInterval(vsync.d_);
 
 #ifndef EDGE_GL_ES2
     gladLoaderLoadGL();
@@ -317,55 +322,60 @@ static bool I_CreateWindow(scrmode_c *mode)
     return true;
 }
 
-bool I_SetScreenSize(scrmode_c *mode)
+bool EDGESetScreenSize(DisplayMode *mode)
 {
-    I_GrabCursor(false);
+    EDGEGrabCursor(false);
 
-    I_Printf("I_SetScreenSize: trying %dx%d %dbpp (%s)\n", mode->width, mode->height, mode->depth,
-             mode->display_mode == scrmode_c::SCR_BORDERLESS
-                 ? "borderless"
-                 : (mode->display_mode == scrmode_c::SCR_FULLSCREEN ? "fullscreen" : "windowed"));
+    EDGEPrintf(
+        "EDGESetScreenSize: trying %dx%d %dbpp (%s)\n", mode->width,
+        mode->height, mode->depth,
+        mode->display_mode == DisplayMode::SCR_BORDERLESS
+            ? "borderless"
+            : (mode->display_mode == DisplayMode::SCR_FULLSCREEN ? "fullscreen"
+                                                                 : "windowed"));
 
-    if (my_vis == nullptr)
+    if (program_window == nullptr)
     {
-        if (!I_CreateWindow(mode))
-        {
-            return false;
-        }
+        if (!I_CreateWindow(mode)) { return false; }
     }
-    else if (mode->display_mode == scrmode_c::SCR_BORDERLESS)
+    else if (mode->display_mode == DisplayMode::SCR_BORDERLESS)
     {
-        SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN_DESKTOP);
-        SDL_GetWindowSize(my_vis, &borderless_mode.width, &borderless_mode.height);
+        SDL_SetWindowFullscreen(program_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        SDL_GetWindowSize(program_window, &borderless_mode.width,
+                          &borderless_mode.height);
 
-        I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
+        EDGEPrintf("EDGESetScreenSize: mode now %dx%d %dbpp\n", mode->width,
+                   mode->height, mode->depth);
     }
-    else if (mode->display_mode == scrmode_c::SCR_FULLSCREEN)
+    else if (mode->display_mode == DisplayMode::SCR_FULLSCREEN)
     {
-        SDL_SetWindowFullscreen(my_vis, SDL_WINDOW_FULLSCREEN);
+        SDL_SetWindowFullscreen(program_window, SDL_WINDOW_FULLSCREEN);
         SDL_DisplayMode *new_mode = new SDL_DisplayMode;
         new_mode->h               = mode->height;
         new_mode->w               = mode->width;
-        SDL_SetWindowDisplayMode(my_vis, new_mode);
-        SDL_SetWindowSize(my_vis, mode->width, mode->height);
+        SDL_SetWindowDisplayMode(program_window, new_mode);
+        SDL_SetWindowSize(program_window, mode->width, mode->height);
         delete new_mode;
         new_mode = nullptr;
 
-        I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
+        EDGEPrintf("EDGESetScreenSize: mode now %dx%d %dbpp\n", mode->width,
+                   mode->height, mode->depth);
     }
     else /* SCR_WINDOW */
     {
-        SDL_SetWindowFullscreen(my_vis, 0);
-        SDL_SetWindowSize(my_vis, mode->width, mode->height);
-        SDL_SetWindowPosition(my_vis, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        SDL_SetWindowFullscreen(program_window, 0);
+        SDL_SetWindowSize(program_window, mode->width, mode->height);
+        SDL_SetWindowPosition(program_window, SDL_WINDOWPOS_CENTERED,
+                              SDL_WINDOWPOS_CENTERED);
 
-        I_Printf("I_SetScreenSize: mode now %dx%d %dbpp\n", mode->width, mode->height, mode->depth);
+        EDGEPrintf("EDGESetScreenSize: mode now %dx%d %dbpp\n", mode->width,
+                   mode->height, mode->depth);
     }
 
     // -AJA- turn off cursor -- BIG performance increase.
     //       Plus, the combination of no-cursor + grab gives
     //       continuous relative mouse motion.
-    I_GrabCursor(true);
+    EDGEGrabCursor(true);
 
 #ifdef DEVELOPERS
     // override SDL signal handlers (the so-called "parachute").
@@ -376,12 +386,12 @@ bool I_SetScreenSize(scrmode_c *mode)
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    SDL_GL_SwapWindow(my_vis);
+    SDL_GL_SwapWindow(program_window);
 
     return true;
 }
 
-void I_StartFrame(void)
+void EDGEStartFrame(void)
 {
     ecframe_stats.Clear();
     glClearColor(0, 0, 0, 1.0f);
@@ -392,51 +402,52 @@ void I_StartFrame(void)
         r_farclip.f_ = 64000.0;
 }
 
-void I_FinishFrame(void)
+void EDGEFinishFrame(void)
 {
-    SDL_GL_SwapWindow(my_vis);
-    
-    EDGE_TracyPlot("draw_runits", (int64_t) ecframe_stats.draw_runits);
-    EDGE_TracyPlot("draw_wallparts", (int64_t) ecframe_stats.draw_wallparts);
-    EDGE_TracyPlot("draw_planes", (int64_t) ecframe_stats.draw_planes);
-    EDGE_TracyPlot("draw_things", (int64_t) ecframe_stats.draw_things);
-    EDGE_TracyPlot("draw_lightiterator", (int64_t) ecframe_stats.draw_lightiterator);
-    EDGE_TracyPlot("draw_sectorglowiterator", (int64_t) ecframe_stats.draw_sectorglowiterator);
-    
+    SDL_GL_SwapWindow(program_window);
+
+    EDGE_TracyPlot("draw_render_units", (int64_t)ecframe_stats.draw_render_units);
+    EDGE_TracyPlot("draw_wall_parts", (int64_t)ecframe_stats.draw_wall_parts);
+    EDGE_TracyPlot("draw_planes", (int64_t)ecframe_stats.draw_planes);
+    EDGE_TracyPlot("draw_things", (int64_t)ecframe_stats.draw_things);
+    EDGE_TracyPlot("draw_light_iterator",
+                   (int64_t)ecframe_stats.draw_light_iterator);
+    EDGE_TracyPlot("draw_sector_glow_iterator",
+                   (int64_t)ecframe_stats.draw_sector_glow_iterator);
+
     EDGE_FrameMark;
 
-    if (in_grab.CheckModified())
-        I_GrabCursor(grab_state);
+    if (grab_mouse.CheckModified()) EDGEGrabCursor(grab_state);
 
-    if (v_sync.CheckModified())
+    if (vsync.CheckModified())
     {
-        if (v_sync.d_== 2)
+        if (vsync.d_ == 2)
         {
             // Fallback to normal VSync if Adaptive doesn't work
             if (SDL_GL_SetSwapInterval(-1) == -1)
             {
-                v_sync = 1;
-                SDL_GL_SetSwapInterval(v_sync.d_);
+                vsync = 1;
+                SDL_GL_SetSwapInterval(vsync.d_);
             }
         }
         else
-            SDL_GL_SetSwapInterval(v_sync.d_);
+            SDL_GL_SetSwapInterval(vsync.d_);
     }
 
-    if (v_monitorsize.CheckModified() || v_force_pixelaspect.CheckModified())
-        I_DeterminePixelAspect();
+    if (monitor_aspect_ratio.CheckModified() ||
+        forced_pixel_aspect_ratio.CheckModified())
+        EDGEDeterminePixelAspect();
 }
 
-void I_ShutdownGraphics(void)
+void EDGEShutdownGraphics(void)
 {
-    if (graphics_shutdown)
-        return;
+    if (graphics_shutdown) return;
 
     graphics_shutdown = 1;
 
     if (SDL_WasInit(SDL_INIT_EVERYTHING))
     {
-        I_DeterminePixelAspect();
+        EDGEDeterminePixelAspect();
 
         SDL_Quit();
     }

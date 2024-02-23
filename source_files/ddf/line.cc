@@ -323,7 +323,7 @@ static void LinedefParseField(const char *field, const char *contents,
                               int index, bool is_last)
 {
 #if (DEBUG_DDF)
-    I_Debugf("LINEDEF_PARSE: %s = %s;\n", field, contents);
+    EDGEDebugf("LINEDEF_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_CompareName(field, "TEMPLATE") == 0)

@@ -106,8 +106,8 @@ extern std::string brandingfile;
 extern std::string game_base;
 
 extern std::string cache_dir;
-extern std::string game_dir;
-extern std::string home_dir;
+extern std::string game_directory;
+extern std::string home_directory;
 extern std::string save_dir;
 extern std::string shot_dir;
 

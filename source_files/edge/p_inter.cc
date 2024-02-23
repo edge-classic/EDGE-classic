@@ -92,7 +92,7 @@ static void GiveCounter(pickup_info_t *pu, Benefit *be)
     int num  = RoundToInteger(be->amount);
 
     if (cntr < 0 || cntr >= kTotalCounterTypes)
-        I_Error("GiveCounter: bad type %i", cntr);
+        EDGEError("GiveCounter: bad type %i", cntr);
 
     if (pu->lose_em)
     {
@@ -130,7 +130,7 @@ static void GiveCounterLimit(pickup_info_t *pu, Benefit *be)
     int limit = RoundToInteger(be->amount);
 
     if (cntr < 0 || cntr >= kTotalCounterTypes)
-        I_Error("GiveCounterLimit: bad type %i", cntr);
+        EDGEError("GiveCounterLimit: bad type %i", cntr);
 
     if ((!pu->lose_em && limit < pu->player->counters[cntr].max) ||
         (pu->lose_em && limit > pu->player->counters[cntr].max))
@@ -159,7 +159,7 @@ static void GiveInventory(pickup_info_t *pu, Benefit *be)
     int num = RoundToInteger(be->amount);
 
     if (inv < 0 || inv >= kTotalInventoryTypes)
-        I_Error("GiveInventory: bad type %i", inv);
+        EDGEError("GiveInventory: bad type %i", inv);
 
     if (pu->lose_em)
     {
@@ -197,7 +197,7 @@ static void GiveInventoryLimit(pickup_info_t *pu, Benefit *be)
     int limit = RoundToInteger(be->amount);
 
     if (inv < 0 || inv >= kTotalInventoryTypes)
-        I_Error("GiveInventoryLimit: bad type %i", inv);
+        EDGEError("GiveInventoryLimit: bad type %i", inv);
 
     if ((!pu->lose_em && limit < pu->player->inventory[inv].max) ||
         (pu->lose_em && limit > pu->player->inventory[inv].max))
@@ -240,7 +240,7 @@ static void GiveAmmo(pickup_info_t *pu, Benefit *be)
         return;
 
     if (ammo < 0 || ammo >= kTotalAmmunitionTypes)
-        I_Error("GiveAmmo: bad type %i", ammo);
+        EDGEError("GiveAmmo: bad type %i", ammo);
 
     if (pu->lose_em)
     {
@@ -314,7 +314,7 @@ static void GiveAmmoLimit(pickup_info_t *pu, Benefit *be)
         return;
 
     if (ammo < 0 || ammo >= kTotalAmmunitionTypes)
-        I_Error("GiveAmmoLimit: bad type %i", ammo);
+        EDGEError("GiveAmmoLimit: bad type %i", ammo);
 
     if ((!pu->lose_em && limit < pu->player->ammo[ammo].max) || (pu->lose_em && limit > pu->player->ammo[ammo].max))
     {
@@ -999,7 +999,7 @@ void P_ObituaryMessage(mobj_t *victim, mobj_t *killer, const DamageClass *damtyp
             return;
         }
 
-        I_Debugf("Missing obituary entry in LDF: '%s'\n", ref);
+        EDGEDebugf("Missing obituary entry in LDF: '%s'\n", ref);
     }
 
     if (killer)
@@ -1514,7 +1514,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
                     break;
 
                 default:
-                    I_Error("INTERNAL ERROR in P_DamageMobj: bad armour %d\n", i);
+                    EDGEError("INTERNAL ERROR in P_DamageMobj: bad armour %d\n", i);
                 }
             }
 

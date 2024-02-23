@@ -264,7 +264,7 @@ static void ChangeGame(NewGameParameters *param, int dir)
         }
     }
 
-    I_Debugf("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n", dir, ng_params->map_->episode_->name_.c_str(),
+    EDGEDebugf("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n", dir, ng_params->map_->episode_->name_.c_str(),
              closest ? closest->name_.c_str() : "none", furthest ? furthest->name_.c_str() : "none");
 
     if (closest)
@@ -666,7 +666,7 @@ void M_NetGameDrawer(void)
         return;
     }
 
-    I_Error("INTERNAL ERROR: netgame_menuon=%d\n", netgame_menuon);
+    EDGEError("INTERNAL ERROR: netgame_menuon=%d\n", netgame_menuon);
 }
 
 bool M_NetGameResponder(InputEvent *ev, int ch)

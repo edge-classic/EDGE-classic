@@ -138,7 +138,7 @@ static spriteframe_c *WhatFrame(spritedef_c *def, const char *name, int pos)
             break;
 
         default:
-            I_Warning("Sprite lump %s has illegal frame.\n", name);
+            EDGEWarning("Sprite lump %s has illegal frame.\n", name);
             return nullptr;
         }
 
@@ -182,7 +182,7 @@ static int WhatRot(spriteframe_c *frame, const char *name, int pos)
         rot = (rot_ch - 'A') + 10;
     else
     {
-        I_Warning("Sprite lump %s has illegal rotation.\n", name);
+        EDGEWarning("Sprite lump %s has illegal rotation.\n", name);
         return -1;
     }
 
@@ -210,7 +210,7 @@ static int WhatRot(spriteframe_c *frame, const char *name, int pos)
             return 0 + (rot - 1) * 2;
 
     default:
-        I_Error("INTERNAL ERROR: frame->rots = %d\n", frame->rots);
+        EDGEError("INTERNAL ERROR: frame->rots = %d\n", frame->rots);
         return -1; /* NOT REACHED */
     }
 }
@@ -233,7 +233,7 @@ static void InstallSpriteLump(spritedef_c *def, int lump, const char *lumpname, 
 
     if (frame->images[rot])
     {
-        // I_Warning("Sprite %s has two lumps mapped to it (frame %c).\n",
+        // EDGEWarning("Sprite %s has two lumps mapped to it (frame %c).\n",
         // lumpname, lumpname[pos]);
         return;
     }
@@ -262,7 +262,7 @@ static void InstallSpritePack(spritedef_c *def, pack_file_c *pack, std::string s
 
     if (frame->images[rot])
     {
-        // I_Warning("Sprite %s has two lumps mapped to it (frame %c).\n",
+        // EDGEWarning("Sprite %s has two lumps mapped to it (frame %c).\n",
         // lumpname, lumpname[pos]);
         return;
     }
@@ -288,7 +288,7 @@ static void InstallSpriteImage(spritedef_c *def, const image_c *img, const char 
 
     if (frame->images[rot])
     {
-        // I_Warning("Sprite %s has two images mapped to it (frame %c)\n",
+        // EDGEWarning("Sprite %s has two images mapped to it (frame %c)\n",
         // img_name, img_name[pos]);
         return;
     }
@@ -449,7 +449,7 @@ static void FillSpriteFramesUser()
                     offset_check = W_OpenLump(images[L]->source.graphic.lump);
 
                 if (!offset_check)
-                    I_Error("FillSpriteFramesUser: Error loading %s!\n", images[L]->name.c_str());
+                    EDGEError("FillSpriteFramesUser: Error loading %s!\n", images[L]->name.c_str());
 
                 uint8_t header[32];
                 memset(header, 255, sizeof(header));
@@ -520,7 +520,7 @@ static void MarkCompletedFrames(void)
 
             if (rot_count < frame->rots)
             {
-                I_Warning("Sprite %s:%c is missing rotations (%d of %d).\n", def->name.c_str(), frame_ch,
+                EDGEWarning("Sprite %s:%c is missing rotations (%d of %d).\n", def->name.c_str(), frame_ch,
                           frame->rots - rot_count, frame->rots);
 
                 // try to fix cases where some dumbass used A1 instead of A0
@@ -547,12 +547,12 @@ static void CheckSpriteFrames(spritedef_c *def)
     for (int i = 0; i < def->numframes; i++)
         if (!def->frames[i].finished)
         {
-            I_Debugf("Frame %d/%d in sprite %s is not finished\n", 1 + i, def->numframes, def->name.c_str());
+            EDGEDebugf("Frame %d/%d in sprite %s is not finished\n", 1 + i, def->numframes, def->name.c_str());
             missing++;
         }
 
     if (missing > 0 && missing < def->numframes)
-        I_Warning("Missing %d frames in sprite: %s\n", missing, def->name.c_str());
+        EDGEWarning("Missing %d frames in sprite: %s\n", missing, def->name.c_str());
 
     // free some memory for completely missing sprites
     if (missing == def->numframes)
@@ -580,11 +580,11 @@ void W_InitSprites(void)
     numsprites = (int)ddf_sprite_names.size();
 
     if (numsprites <= 1)
-        I_Error("Missing sprite definitions !!\n");
+        EDGEError("Missing sprite definitions !!\n");
 
     E_ProgressMessage("Finding sprite patches...");
 
-    I_Printf("W_InitSprites: Finding sprite patches\n");
+    EDGEPrintf("W_InitSprites: Finding sprite patches\n");
 
     // 1. Allocate sprite definitions (ignore nullptr sprite, #0)
 
@@ -765,7 +765,7 @@ void W_PrecacheSprites(void)
             continue;
 
         /* Lobo 2022: info overload. Shut up.
-                I_Debugf("Precaching sprite: %s\n", def->name);
+                EDGEDebugf("Precaching sprite: %s\n", def->name);
         */
 
         SYS_ASSERT(def->frames);

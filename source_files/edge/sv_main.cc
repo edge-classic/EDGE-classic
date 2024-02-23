@@ -348,7 +348,7 @@ void SV_MainTestPrimitives(void)
 	int version;
 
 	if (! SV_OpenWriteFile("savegame/prim.tst", 0x7654))
-		I_Error("SV_MainTestPrimitives: couldn't create output\n");
+		EDGEError("SV_MainTestPrimitives: couldn't create output\n");
 
 	SV_PutByte(0x00);
 	SV_PutByte(0x55);
@@ -398,48 +398,48 @@ void SV_MainTestPrimitives(void)
 	// ------------------------------------------------------------ //
 
 	if (! SV_OpenReadFile("savegame/prim.tst"))
-		I_Error("SV_MainTestPrimitives: couldn't open input\n");
+		EDGEError("SV_MainTestPrimitives: couldn't open input\n");
 
 	if (! SV_VerifyHeader(&version))
-		I_Error("SV_MainTestPrimitives: couldn't open input\n");
+		EDGEError("SV_MainTestPrimitives: couldn't open input\n");
 
-	L_WriteDebug("TEST HEADER: version=0x%04x\n", version);
+	EDGEDebugf("TEST HEADER: version=0x%04x\n", version);
 
 	for (i=0; i < 4; i++)
 	{
 		unsigned int val = SV_GetByte();
-		L_WriteDebug("TEST BYTE: 0x%02x %d\n", val, (char) val);
+		EDGEDebugf("TEST BYTE: 0x%02x %d\n", val, (char) val);
 	}
 
 	for (i=0; i < 4; i++)
 	{
 		unsigned int val = SV_GetShort();
-		L_WriteDebug("TEST SHORT: 0x%02x %d\n", val, (short) val);
+		EDGEDebugf("TEST SHORT: 0x%02x %d\n", val, (short) val);
 	}
 
 	for (i=0; i < 4; i++)
 	{
 		unsigned int val = SV_GetInt();
-		L_WriteDebug("TEST INT: 0x%02x %d\n", val, (int) val);
+		EDGEDebugf("TEST INT: 0x%02x %d\n", val, (int) val);
 	}
 
 	for (i=0; i < 7; i++)
 	{
 		BAMAngle val = SV_GetAngle();
-		L_WriteDebug("TEST ANGLE: 0x%08x = %1.6f\n", (unsigned int) val,
+		EDGEDebugf("TEST ANGLE: 0x%08x = %1.6f\n", (unsigned int) val,
 				ANG_2_FLOAT(val));
 	}
 
 	for (i=0; i < 17; i++)
 	{
 		float val = SV_GetFloat();
-		L_WriteDebug("TEST FLOAT: %1.6f\n", val);
+		EDGEDebugf("TEST FLOAT: %1.6f\n", val);
 	}
 
 	for (i=0; i < 5; i++)
 	{
 		const char *val = SV_GetString();
-		L_WriteDebug("TEST STRING: [%s]\n", val ? val : "--nullptr--");
+		EDGEDebugf("TEST STRING: [%s]\n", val ? val : "--nullptr--");
 		SV_FreeString(val);
 	}
 
@@ -447,7 +447,7 @@ void SV_MainTestPrimitives(void)
 	{
 		char val[6];
 		SV_GetMarker(val);
-		L_WriteDebug("TEST MARKER: [%s]\n", val);
+		EDGEDebugf("TEST MARKER: [%s]\n", val);
 	}
 
 	SV_CloseReadFile();
@@ -504,18 +504,18 @@ void SV_ClearSlot(const char *slot_name)
 
     if (!ReadDirectory(fsd, full_dir, "*.*"))
     {
-        I_Debugf("Failed to read directory: %s\n", full_dir.c_str());
+        EDGEDebugf("Failed to read directory: %s\n", full_dir.c_str());
         return;
     }
 
-    I_Debugf("SV_ClearSlot: removing %d files\n", (int)fsd.size());
+    EDGEDebugf("SV_ClearSlot: removing %d files\n", (int)fsd.size());
 
     for (size_t i = 0; i < fsd.size(); i++)
     {
         if (fsd[i].is_dir)
             continue;
         std::string cur_file = epi::PathAppend(full_dir, epi::GetFilename(fsd[i].name));
-        I_Debugf("  Deleting %s\n", cur_file.c_str());
+        EDGEDebugf("  Deleting %s\n", cur_file.c_str());
 
         epi::FileDelete(cur_file);
     }
@@ -530,11 +530,11 @@ void SV_CopySlot(const char *src_name, const char *dest_name)
 
     if (!ReadDirectory(fsd, src_dir, "*.*"))
     {
-        I_Error("SV_CopySlot: failed to read dir: %s\n", src_dir.c_str());
+        EDGEError("SV_CopySlot: failed to read dir: %s\n", src_dir.c_str());
         return;
     }
 
-    I_Debugf("SV_CopySlot: copying %d files\n", (int)fsd.size());
+    EDGEDebugf("SV_CopySlot: copying %d files\n", (int)fsd.size());
 
     for (size_t i = 0; i < fsd.size(); i++)
     {
@@ -545,10 +545,10 @@ void SV_CopySlot(const char *src_name, const char *dest_name)
         std::string src_file  = epi::PathAppend(src_dir, fn);
         std::string dest_file = epi::PathAppend(dest_dir, fn);
 
-        I_Debugf("  Copying %s --> %s\n", src_file.c_str(), dest_file.c_str());
+        EDGEDebugf("  Copying %s --> %s\n", src_file.c_str(), dest_file.c_str());
 
         if (!epi::FileCopy(src_file, dest_file))
-            I_Error("SV_CopySlot: failed to copy '%s' to '%s'\n", src_file.c_str(),
+            EDGEError("SV_CopySlot: failed to copy '%s' to '%s'\n", src_file.c_str(),
                     dest_file.c_str());
     }
 }

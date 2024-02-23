@@ -104,13 +104,13 @@ void HUDStart(void)
     if (current_map->description_ !=
         "")  // Lobo 2022: if it's wrong, show it anyway
     {
-        I_Printf("\n");
-        I_Printf("--------------------------------------------------\n");
+        EDGEPrintf("\n");
+        EDGEPrintf("--------------------------------------------------\n");
 
         ConsoleMessageColor(SG_GREEN_RGBA32);
 
         string = language[current_map->description_];
-        I_Printf("Entering %s\n", string);
+        EDGEPrintf("Entering %s\n", string);
 
         current_map_title = std::string(string);
     }

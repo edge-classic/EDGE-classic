@@ -215,7 +215,7 @@ static void UpdateJoystickAxis(int n)
     if ((joystick_axis[n] + 1) & 1) force = -force;
 
     if (debug_joyaxis.d_ == n + 1)
-        I_Printf("Axis%d : raw %+05d --> %+7.3f\n", n + 1, raw, force);
+        EDGEPrintf("Axis%d : raw %+05d --> %+7.3f\n", n + 1, raw, force);
 
     int axis = (joystick_axis[n] + 1) >> 1;
 
@@ -231,9 +231,9 @@ bool EventIsKeyPressed(int keyvar)
 {
 #ifdef DEVELOPERS
     if ((keyvar >> 16) > kTotalKeys)
-        I_Error("Invalid key!");
+        EDGEError("Invalid key!");
     else if ((keyvar & 0xffff) > kTotalKeys)
-        I_Error("Invalid key!");
+        EDGEError("Invalid key!");
 #endif
 
     if (game_key_down[keyvar >> 16] & kGameKeyDown) return true;
@@ -570,7 +570,7 @@ bool EventInputResponderResponder(InputEvent *ev)
             dy *= mouse_y_sensitivity.f_;
 
             if (debug_mouse.d_)
-                I_Printf("Mouse %+04d %+04d --> %+7.2f %+7.2f\n",
+                EDGEPrintf("Mouse %+04d %+04d --> %+7.2f %+7.2f\n",
                          ev->value.mouse.dx, ev->value.mouse.dy, dx, dy);
 
             // -AJA- 1999/07/27: Mlook key like quake's.
@@ -660,7 +660,7 @@ void EventPostEvent(InputEvent *ev)
 #ifdef DEBUG_KEY_EV  //!!!!
     if (ev->type == kInputEventKeyDown || ev->type == kInputEventKeyUp)
     {
-        I_Debugf("EVENT @ %08x %d %s\n", I_GetMillies(), ev->value.key,
+        EDGEDebugf("EVENT @ %08x %d %s\n", EDGEGetMillies(), ev->value.key,
                  (ev->type == kInputEventKeyUp) ? "DOWN" : "up");
     }
 #endif

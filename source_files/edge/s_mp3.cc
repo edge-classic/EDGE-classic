@@ -37,9 +37,9 @@
 
 #define MP3_SAMPLES 1024
 
-extern bool dev_stereo; // FIXME: encapsulation
+extern bool sound_device_stereo; // FIXME: encapsulation
 
-class mp3player_c : public abstract_music_c
+class mp3player_c : public AbstractMusicPlayer
 {
   public:
     mp3player_c();
@@ -128,7 +128,7 @@ bool mp3player_c::StreamIntoBuffer(sound_data_c *buf)
 {
     int16_t *data_buf;
 
-    if (is_stereo && !dev_stereo)
+    if (is_stereo && !sound_device_stereo)
         data_buf = mono_buffer;
     else
         data_buf = buf->data_L;
@@ -145,13 +145,13 @@ bool mp3player_c::StreamIntoBuffer(sound_data_c *buf)
 
     if (got_size < 0) /* ERROR */
     {
-        I_Debugf("[mp3player_c::StreamIntoBuffer] Failed\n");
+        EDGEDebugf("[mp3player_c::StreamIntoBuffer] Failed\n");
         return false;
     }
 
     buf->length = got_size;
 
-    if (is_stereo && !dev_stereo)
+    if (is_stereo && !sound_device_stereo)
         ConvertToMono(buf->data_L, mono_buffer, got_size);
 
     return (true);
@@ -166,14 +166,14 @@ bool mp3player_c::OpenMemory(uint8_t *data, int length)
 
     if (!drmp3_init_memory(mp3_dec, data, length, nullptr))
     {
-        I_Warning("mp3player_c: Could not open MP3 file.\n");
+        EDGEWarning("mp3player_c: Could not open MP3 file.\n");
         delete mp3_dec;
         return false;
     }
 
     if (mp3_dec->channels > 2)
     {
-        I_Warning("mp3player_c: MP3 has too many channels: %d\n", mp3_dec->channels);
+        EDGEWarning("mp3player_c: MP3 has too many channels: %d\n", mp3_dec->channels);
         drmp3_uninit(mp3_dec);
         return false;
     }
@@ -250,7 +250,7 @@ void mp3player_c::Ticker()
     while (status == PLAYING && !var_pc_speaker_mode)
     {
         sound_data_c *buf = S_QueueGetFreeBuffer(
-            MP3_SAMPLES, (is_stereo && dev_stereo) ? SBUF_Interleaved : SBUF_Mono);
+            MP3_SAMPLES, (is_stereo && sound_device_stereo) ? SBUF_Interleaved : SBUF_Mono);
 
         if (!buf)
             break;
@@ -273,7 +273,7 @@ void mp3player_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c *S_PlayMP3Music(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *S_PlayMP3Music(uint8_t *data, int length, bool looping)
 {
     mp3player_c *player = new mp3player_c();
 
@@ -295,13 +295,13 @@ bool S_LoadMP3Sound(sound_data_c *buf, const uint8_t *data, int length)
 
     if (!drmp3_init_memory(&mp3, data, length, nullptr))
     {
-        I_Warning("Failed to load MP3 sound (corrupt mp3?)\n");
+        EDGEWarning("Failed to load MP3 sound (corrupt mp3?)\n");
         return false;
     }
 
     if (mp3.channels > 2)
     {
-        I_Warning("MP3 SFX Loader: too many channels: %d\n", mp3.channels);
+        EDGEWarning("MP3 SFX Loader: too many channels: %d\n", mp3.channels);
         drmp3_uninit(&mp3);
         return false;
     }
@@ -311,12 +311,12 @@ bool S_LoadMP3Sound(sound_data_c *buf, const uint8_t *data, int length)
     if (framecount <=
         0) // I think the initial loading would fail if this were the case, but just as a sanity check - Dasho
     {
-        I_Warning("MP3 SFX Loader: no samples!\n");
+        EDGEWarning("MP3 SFX Loader: no samples!\n");
         drmp3_uninit(&mp3);
         return false;
     }
 
-    I_Debugf("MP3 SFX Loader: freq %d Hz, %d channels\n", mp3.sampleRate, mp3.channels);
+    EDGEDebugf("MP3 SFX Loader: freq %d Hz, %d channels\n", mp3.sampleRate, mp3.channels);
 
     bool is_stereo = (mp3.channels > 1);
 
@@ -329,7 +329,7 @@ bool S_LoadMP3Sound(sound_data_c *buf, const uint8_t *data, int length)
     gather.CommitChunk(drmp3_read_pcm_frames_s16(&mp3, framecount, buffer));
 
     if (!gather.Finalise(buf, is_stereo))
-        I_Warning("MP3 SFX Loader: no samples!\n");
+        EDGEWarning("MP3 SFX Loader: no samples!\n");
 
     drmp3_uninit(&mp3);
 

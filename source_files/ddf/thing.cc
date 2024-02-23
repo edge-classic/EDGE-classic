@@ -702,7 +702,7 @@ void ThingParseField(const char *field, const char *contents, int index,
                      bool is_last)
 {
 #if (DEBUG_DDF)
-    I_Debugf("THING_PARSE: %s = %s;\n", field, contents);
+    EDGEDebugf("THING_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_CompareName(field, "TEMPLATE") == 0)
@@ -812,7 +812,7 @@ static void ThingFinishEntry(void)
             DDF_Warning("DLIGHT_RADIUS value %1.1f too large (over 512).\n",
                         dynamic_mobj->dlight_[0].radius_);
         else if (dlight_radius_warnings == 3)
-            I_Warning("More too large DLIGHT_RADIUS values found....\n");
+            EDGEWarning("More too large DLIGHT_RADIUS values found....\n");
 
         dlight_radius_warnings++;
     }
@@ -869,7 +869,7 @@ static void ThingFinishEntry(void)
 
 static void ThingClearAll(void)
 {
-    I_Warning("Ignoring #CLEARALL in things.ddf\n");
+    EDGEWarning("Ignoring #CLEARALL in things.ddf\n");
 }
 
 void DDF_ReadThings(const std::string &data)
@@ -2183,8 +2183,8 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
     /*
     if(src.pickup_benefits_)
     {
-        I_Debugf("%s: Benefits info not inherited from '%s', ",name,
-    src.name_.c_str()); I_Debugf("You should define it explicitly.\n");
+        EDGEDebugf("%s: Benefits info not inherited from '%s', ",name,
+    src.name_.c_str()); EDGEDebugf("You should define it explicitly.\n");
     }
     */
 
@@ -2669,7 +2669,7 @@ const MapObjectDefinition *MapObjectDefinitionContainer::LookupPlayer(
         if (m->playernum_ == playernum) return m;
     }
 
-    I_Error("Missing DDF entry for player number %d\n", playernum);
+    EDGEError("Missing DDF entry for player number %d\n", playernum);
     return nullptr; /* NOT REACHED */
 }
 
@@ -2711,7 +2711,7 @@ const MapObjectDefinition *MapObjectDefinitionContainer::LookupDoorKey(
         }
     }
 
-    I_Warning("Missing DDF entry for key %d\n", theKey);
+    EDGEWarning("Missing DDF entry for key %d\n", theKey);
     return nullptr;
 }
 

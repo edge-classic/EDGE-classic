@@ -93,7 +93,7 @@ void R_AddFlatAnim(AnimationDefinition *anim)
 
         if (file < 0)
         {
-            I_Warning("Missing flat animation: %s-%s not in any wad.\n", anim->start_name_.c_str(),
+            EDGEWarning("Missing flat animation: %s-%s not in any wad.\n", anim->start_name_.c_str(),
                       anim->end_name_.c_str());
             return;
         }
@@ -267,7 +267,7 @@ void W_InitFlats(void)
 
     std::vector<int> flats;
 
-    I_Printf("W_InitFlats...\n");
+    EDGEPrintf("W_InitFlats...\n");
 
     // iterate over each file, creating our big array of flats
 
@@ -287,7 +287,7 @@ void W_InitFlats(void)
 
     if (flats.size() == 0)
     {
-        I_Warning("No flats found! Generating fallback flat!\n");
+        EDGEWarning("No flats found! Generating fallback flat!\n");
         W_MakeEdgeFlat();
         return;
     }
@@ -316,7 +316,7 @@ void W_InitFlats(void)
 #if 0 // DEBUGGING
 	for (j=0; j < numflats; j++)
 	{
-		L_WriteDebug("FLAT #%d:  lump=%d  name=[%s]\n", j,
+		EDGEDebugf("FLAT #%d:  lump=%d  name=[%s]\n", j,
 				flats[j], W_GetLumpName(flats[j]));
 	}
 #endif

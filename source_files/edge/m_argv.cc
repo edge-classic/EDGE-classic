@@ -61,7 +61,7 @@ void argv::Init(const int argc, const char *const *argv)
     wchar_t **win_argv = CommandLineToArgvW(GetCommandLineW(), &win_argc);
 
     if (!win_argv)
-        I_Error("argv::Init: Could not retrieve command line arguments!\n");
+        EDGEError("argv::Init: Could not retrieve command line arguments!\n");
 
     list.reserve(win_argc);
 
@@ -273,7 +273,7 @@ void argv::ApplyResponseFile(std::string name)
     // add arguments from the given file
     f = epi::FileOpenRaw(name, epi::kFileAccessRead | epi::kFileAccessBinary);
     if (!f)
-        I_Error("Couldn't open \"%s\" for reading!", name.c_str());
+        EDGEError("Couldn't open \"%s\" for reading!", name.c_str());
 
     for (; EOF != ParseOneFilename(f, buf);)
         list.push_back(strdup(buf));
@@ -286,7 +286,7 @@ void argv::ApplyResponseFile(std::string name)
 
 void argv::DebugDumpArgs(void)
 {
-    I_Printf("Command-line Options:\n");
+    EDGEPrintf("Command-line Options:\n");
 
     int i = 0;
 
@@ -297,7 +297,7 @@ void argv::DebugDumpArgs(void)
         if (i > 0 && i + 1 < int(list.size()) && !IsOption(i + 1))
             pair_it_up = true;
 
-        I_Printf("  %s %s\n", list[i].c_str(), pair_it_up ? list[i + 1].c_str() : "");
+        EDGEPrintf("  %s %s\n", list[i].c_str(), pair_it_up ? list[i + 1].c_str() : "");
 
         i += pair_it_up ? 2 : 1;
     }

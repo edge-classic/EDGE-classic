@@ -18,16 +18,11 @@
 //  Adapted from the EDGE 2.x RoQ/FFMPEG implementation
 //----------------------------------------------------------------------------
 
-
-#ifndef __I_MOVIE__
-#define __I_MOVIE__
+#pragma once
 
 #include <string>
-#include "epi_sdl.h"
 
-void E_PlayMovie(const std::string &name);
-
-#endif // __I_MOVIE__
+void EDGEPlayMovie(const std::string &name);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

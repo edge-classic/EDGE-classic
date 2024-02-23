@@ -250,18 +250,18 @@ mdl_model_c *MDL_LoadModel(epi::File *f)
 
     int version = AlignedLittleEndianS32(header.version);
 
-    I_Debugf("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
+    EDGEDebugf("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
              version);
 
     if (epi::StringPrefixCompare(header.ident, MDL_IDENTIFIER) != 0)
     {
-        I_Error("MDL_LoadModel: lump is not an MDL model!");
+        EDGEError("MDL_LoadModel: lump is not an MDL model!");
         return nullptr; /* NOT REACHED */
     }
 
     if (version != MDL_VERSION)
     {
-        I_Error("MDL_LoadModel: strange version!");
+        EDGEError("MDL_LoadModel: strange version!");
         return nullptr; /* NOT REACHED */
     }
 
@@ -285,7 +285,7 @@ mdl_model_c *MDL_LoadModel(epi::File *f)
         f->Read(&group, sizeof(int));
         if (AlignedLittleEndianS32(group))
         {
-            I_Error("MDL_LoadModel: Group skins unsupported!\n");
+            EDGEError("MDL_LoadModel: Group skins unsupported!\n");
             return nullptr; // Not reached
         }
 
@@ -327,11 +327,11 @@ mdl_model_c *MDL_LoadModel(epi::File *f)
         f->Read(frames[fr].frame.verts, num_verts * sizeof(raw_mdl_vertex_t));
     }
 
-    I_Debugf("  frames:%d  points:%d  tris: %d\n", num_frames, num_tris * 3, num_tris);
+    EDGEDebugf("  frames:%d  points:%d  tris: %d\n", num_frames, num_tris * 3, num_tris);
 
     md->verts_per_frame = num_verts;
 
-    I_Debugf("  verts_per_frame:%d\n", md->verts_per_frame);
+    EDGEDebugf("  verts_per_frame:%d\n", md->verts_per_frame);
 
     // convert glcmds into tris and points
     mdl_triangle_c *tri   = md->tris;
@@ -419,7 +419,7 @@ mdl_model_c *MDL_LoadModel(epi::File *f)
             //  Dasho: Maybe try to salvage bad MDL models?
             if (good_V->normal_idx >= MD_NUM_NORMALS)
             {
-                I_Debugf("Vert %d of Frame %d has an invalid normal index: %d\n", v, i, good_V->normal_idx);
+                EDGEDebugf("Vert %d of Frame %d has an invalid normal index: %d\n", v, i, good_V->normal_idx);
                 good_V->normal_idx = (good_V->normal_idx % MD_NUM_NORMALS);
             }
 
@@ -434,7 +434,7 @@ mdl_model_c *MDL_LoadModel(epi::File *f)
     delete[] frames;
     glGenBuffers(1, &md->vbo);
     if (md->vbo == 0)
-        I_Error("MDL_LoadModel: Failed to bind VBO!\n");
+        EDGEError("MDL_LoadModel: Failed to bind VBO!\n");
     glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
     glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), nullptr, GL_STREAM_DRAW);
     return md;
@@ -692,12 +692,12 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
     // check if frames are valid
     if (frame1 < 0 || frame1 >= md->num_frames)
     {
-        I_Debugf("Render model: bad frame %d\n", frame1);
+        EDGEDebugf("Render model: bad frame %d\n", frame1);
         return;
     }
     if (frame2 < 0 || frame2 >= md->num_frames)
     {
-        I_Debugf("Render model: bad frame %d\n", frame1);
+        EDGEDebugf("Render model: bad frame %d\n", frame1);
         return;
     }
 
@@ -795,7 +795,7 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
             skin_tex = md->skin_ids[0]; // Just use skin 0?
 
         if (skin_tex == 0)
-            I_Error("MDL Frame %s missing skins?\n", md->frames[frame1].name);
+            EDGEError("MDL Frame %s missing skins?\n", md->frames[frame1].name);
 
         data.im_right = (float)md->skin_width / (float)W_MakeValidSize(md->skin_width);
         data.im_top   = (float)md->skin_height / (float)W_MakeValidSize(md->skin_height);
@@ -1044,7 +1044,7 @@ void MDL_RenderModel_2D(mdl_model_c *md, const image_c *skin_img, int frame, flo
     GLuint skin_tex = md->skin_ids[0]; // Just use skin 0?
 
     if (skin_tex == 0)
-        I_Error("MDL Frame %s missing skins?\n", md->frames[frame].name);
+        EDGEError("MDL Frame %s missing skins?\n", md->frames[frame].name);
 
     xscale = yscale * info->model_scale_ * info->model_aspect_;
     yscale = yscale * info->model_scale_;

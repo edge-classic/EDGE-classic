@@ -168,7 +168,7 @@ static void do_Animate(real_image_container_c &bucket)
 #if 0
 static void do_DebugDump(real_image_container_c& bucket)
 {
-	L_WriteDebug("{\n");
+	EDGEDebugf("{\n");
 
 	real_image_container_c::iterator it;
 
@@ -176,13 +176,13 @@ static void do_DebugDump(real_image_container_c& bucket)
 	{
 		image_c *rim = *it;
 	
-		L_WriteDebug("   [%s] type %d: %dx%d < %dx%d\n",
+		EDGEDebugf("   [%s] type %d: %dx%d < %dx%d\n",
 			rim->name, rim->source_type,
 			rim->actual_w, rim->actual_h,
 			rim->total_w, rim->total_h);
 	}
 
-	L_WriteDebug("}\n");
+	EDGEDebugf("}\n");
 }
 #endif
 
@@ -359,7 +359,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
         // close it
         delete f;
 
-        I_Warning("Unsupported image format in '%s'\n", packfile_name);
+        EDGEWarning("Unsupported image format in '%s'\n", packfile_name);
         return nullptr;
     }
     else if (fmt == kUnknownImage)
@@ -394,7 +394,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
         }
         else
         {
-            I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
+            EDGEWarning("Graphic '%s' does not seem to be a graphic.\n", name);
             return nullptr;
         }
     }
@@ -416,7 +416,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
     {
         if (!Image_GetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
         {
-            I_Warning("Error scanning image in '%s'\n", packfile_name);
+            EDGEWarning("Error scanning image in '%s'\n", packfile_name);
             return nullptr;
         }
 
@@ -502,7 +502,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
         // close it
         delete f;
 
-        I_Warning("Unsupported image format in '%s' lump\n", W_GetLumpName(lump));
+        EDGEWarning("Unsupported image format in '%s' lump\n", W_GetLumpName(lump));
         return nullptr;
     }
     else if (fmt == kUnknownImage)
@@ -536,7 +536,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
         }
         else
         {
-            I_Warning("Graphic '%s' does not seem to be a graphic.\n", name);
+            EDGEWarning("Graphic '%s' does not seem to be a graphic.\n", name);
             return nullptr;
         }
     }
@@ -558,7 +558,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
     {
         if (!Image_GetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
         {
-            I_Warning("Error scanning image in '%s' lump\n", W_GetLumpName(lump));
+            EDGEWarning("Error scanning image in '%s' lump\n", W_GetLumpName(lump));
             return nullptr;
         }
 
@@ -721,7 +721,7 @@ static image_c *AddImage_DOOM(ImageDefinition *def, bool user_defined = false)
             break;
 
         default:
-            I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
+            EDGEError("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
         }
     }
     else
@@ -742,13 +742,13 @@ static image_c *AddImage_DOOM(ImageDefinition *def, bool user_defined = false)
             break;
 
         default:
-            I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
+            EDGEError("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
         }
     }
 
     if (rim == nullptr)
     {
-        I_Warning("Unable to add image lump: %s\n", lump_name);
+        EDGEWarning("Unable to add image lump: %s\n", lump_name);
         return nullptr;
     }
 
@@ -810,7 +810,7 @@ static image_c *AddImageUser(ImageDefinition *def)
         epi::File *f = OpenUserFileOrLump(def);
         if (f == nullptr)
         {
-            I_Warning("Unable to open image %s: %s\n", (def->type_ == kImageDataLump) ? "lump" : "file", filename);
+            EDGEWarning("Unable to open image %s: %s\n", (def->type_ == kImageDataLump) ? "lump" : "file", filename);
             return nullptr;
         }
 
@@ -845,21 +845,21 @@ static image_c *AddImageUser(ImageDefinition *def)
             if (fmt == kDoomImage)
                 return AddImage_DOOM(def, true);
 
-            I_Warning("Unknown image format in: %s\n", filename);
+            EDGEWarning("Unknown image format in: %s\n", filename);
             return nullptr;
         }
 
         if (fmt == kOtherImage)
         {
             delete f;
-            I_Warning("Unsupported image format in: %s\n", filename);
+            EDGEWarning("Unsupported image format in: %s\n", filename);
             return nullptr;
         }
 
         if (!Image_GetInfo(f, &width, &height, &bpp))
         {
             delete f;
-            I_Warning("Error occurred scanning image: %s\n", filename);
+            EDGEWarning("Error occurred scanning image: %s\n", filename);
             return nullptr;
         }
 
@@ -871,7 +871,7 @@ static image_c *AddImageUser(ImageDefinition *def)
     break;
 
     default:
-        I_Error("AddImageUser: Coding error, unknown type %d\n", def->type_);
+        EDGEError("AddImageUser: Coding error, unknown type %d\n", def->type_);
         return nullptr; /* NOT REACHED */
     }
 
@@ -920,7 +920,7 @@ static image_c *AddImageUser(ImageDefinition *def)
         break;
 
     default:
-        I_Error("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
+        EDGEError("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
     }
 
     if (def->special_ & kImageSpecialPrecache)
@@ -1035,7 +1035,7 @@ const image_c *W_ImageCreatePackSprite(std::string packname, pack_file_c *pack, 
 //
 void W_ImageCreateUser(void)
 {
-    I_Printf("Adding DDFIMAGE definitions...\n");
+    EDGEPrintf("Adding DDFIMAGE definitions...\n");
 
     for (auto def : imagedefs)
     {
@@ -1047,16 +1047,16 @@ void W_ImageCreateUser(void)
     }
 
 #if 0
-	L_WriteDebug("Textures -----------------------------\n");
+	EDGEDebugf("Textures -----------------------------\n");
 	do_DebugDump(real_textures);
 
-	L_WriteDebug("Flats ------------------------------\n");
+	EDGEDebugf("Flats ------------------------------\n");
 	do_DebugDump(real_flats);
 
-	L_WriteDebug("Sprites ------------------------------\n");
+	EDGEDebugf("Sprites ------------------------------\n");
 	do_DebugDump(real_sprites);
 
-	L_WriteDebug("Graphics ------------------------------\n");
+	EDGEDebugf("Graphics ------------------------------\n");
 	do_DebugDump(real_graphics);
 #endif
 }
@@ -1095,7 +1095,7 @@ void W_ImageAddTX(int lump, const char *name, bool hires)
             return;
         }
 
-        I_Warning("HIRES replacement '%s' has no counterpart.\n", name);
+        EDGEWarning("HIRES replacement '%s' has no counterpart.\n", name);
     }
 
     AddImage_Smart(name, IMSRC_TX_HI, lump, real_textures);
@@ -1124,7 +1124,7 @@ const image_c **W_ImageGetUserSprites(int *count)
 
     if (*count == 0)
     {
-        L_WriteDebug("W_ImageGetUserSprites(count = %d)\n", *count);
+        EDGEDebugf("W_ImageGetUserSprites(count = %d)\n", *count);
         return nullptr;
     }
 
@@ -1144,14 +1144,14 @@ const image_c **W_ImageGetUserSprites(int *count)
 #undef CMP
 
 #if 0 // DEBUGGING
-	L_WriteDebug("W_ImageGetUserSprites(count = %d)\n", *count);
-	L_WriteDebug("{\n");
+	EDGEDebugf("W_ImageGetUserSprites(count = %d)\n", *count);
+	EDGEDebugf("{\n");
 
 	for (pos = 0; pos < *count; pos++)
-		L_WriteDebug("   %p = [%s] %dx%d\n", array[pos], W_ImageGetName(array[pos]),
+		EDGEDebugf("   %p = [%s] %dx%d\n", array[pos], W_ImageGetName(array[pos]),
 			array[pos]->actual_w, array[pos]->actual_h);
 		
-	L_WriteDebug("}\n");
+	EDGEDebugf("}\n");
 #endif
 
     return array;
@@ -1438,7 +1438,7 @@ void UnloadImageOGL(cached_image_t *rc, image_c *rim)
 		}
 	}
 
-	I_Error("INTERNAL ERROR: UnloadImageOGL: no such RC in cache !\n");
+	EDGEError("INTERNAL ERROR: UnloadImageOGL: no such RC in cache !\n");
 }
 
 
@@ -1733,7 +1733,7 @@ const image_c *W_ImageParseSaveString(char type, const char *name)
         return W_ImageLookup(name, kImageNamespaceSprite);
 
     default:
-        I_Warning("W_ImageParseSaveString: unknown type '%c'\n", type);
+        EDGEWarning("W_ImageParseSaveString: unknown type '%c'\n", type);
         /* FALL THROUGH */
 
     case 'd': /* dummy */
@@ -1803,7 +1803,7 @@ void W_ImageMakeSaveString(const image_c *image, char *type, char *namebuf)
         return;
 
     default:
-        I_Error("W_ImageMakeSaveString: bad type %d\n", rim->source_type);
+        EDGEError("W_ImageMakeSaveString: bad type %d\n", rim->source_type);
         break;
     }
 }

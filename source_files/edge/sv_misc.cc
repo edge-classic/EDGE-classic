@@ -443,7 +443,7 @@ void *SV_ButtonGetElem(int index)
 {
     if (index < 0 || index >= (int)active_buttons.size())
     {
-        I_Warning("LOADGAME: Invalid Button: %d\n", index);
+        EDGEWarning("LOADGAME: Invalid Button: %d\n", index);
         index = 0;
     }
 
@@ -460,7 +460,7 @@ int SV_ButtonFindElem(button_t *elem)
         index++;
 
     if (LI == active_buttons.end())
-        I_Error("LOADGAME: No such LightPtr: %p\n", elem);
+        EDGEError("LOADGAME: No such LightPtr: %p\n", elem);
 
     return index;
 }
@@ -496,7 +496,7 @@ int SV_LightCountElems(void)
 void *SV_LightGetElem(int index)
 {
     if (index < 0 || index >= (int)active_lights.size())
-        I_Error("LOADGAME: Invalid Light: %d\n", index);
+        EDGEError("LOADGAME: Invalid Light: %d\n", index);
 
     return active_lights[index];
 }
@@ -511,7 +511,7 @@ int SV_LightFindElem(light_t *elem)
         index++;
 
     if (LI == active_lights.end())
-        I_Error("LOADGAME: No such LightPtr: %p\n", elem);
+        EDGEError("LOADGAME: No such LightPtr: %p\n", elem);
 
     return index;
 }
@@ -557,7 +557,7 @@ void *SV_TriggerGetElem(int index)
         index--;
 
     if (!cur)
-        I_Error("LOADGAME: Invalid Trigger: %d\n", index);
+        EDGEError("LOADGAME: Invalid Trigger: %d\n", index);
 
     SYS_ASSERT(index == 0);
     return cur;
@@ -572,7 +572,7 @@ int SV_TriggerFindElem(rad_trigger_t *elem)
         index++;
 
     if (!cur)
-        I_Error("LOADGAME: No such TriggerPtr: %p\n", elem);
+        EDGEError("LOADGAME: No such TriggerPtr: %p\n", elem);
 
     return index;
 }
@@ -624,7 +624,7 @@ void *SV_TipGetElem(int index)
 {
     if (index < 0 || index >= MAXTIPSLOT)
     {
-        I_Warning("LOADGAME: Invalid Tip: %d\n", index);
+        EDGEWarning("LOADGAME: Invalid Tip: %d\n", index);
         index = MAXTIPSLOT - 1;
     }
 
@@ -669,7 +669,7 @@ void *SV_PlaneMoveGetElem(int index)
     // Note: the index value starts at 0.
 
     if (index < 0 || index >= (int)active_planes.size())
-        I_Error("LOADGAME: Invalid PlaneMove: %d\n", index);
+        EDGEError("LOADGAME: Invalid PlaneMove: %d\n", index);
 
     return active_planes[index];
 }
@@ -688,7 +688,7 @@ int SV_PlaneMoveFindElem(plane_move_t *elem)
     }
 
     if (PMI == active_planes.end())
-        I_Error("LOADGAME: No such PlaneMove: %p\n", elem);
+        EDGEError("LOADGAME: No such PlaneMove: %p\n", elem);
 
     return index;
 }
@@ -727,7 +727,7 @@ void *SV_SliderMoveGetElem(int index)
     // Note: the index value starts at 0.
 
     if (index < 0 || index >= (int)active_sliders.size())
-        I_Error("LOADGAME: Invalid SliderMove: %d\n", index);
+        EDGEError("LOADGAME: Invalid SliderMove: %d\n", index);
 
     return active_sliders[index];
 }
@@ -746,7 +746,7 @@ int SV_SliderMoveFindElem(slider_move_t *elem)
     }
 
     if (SMI == active_sliders.end())
-        I_Error("LOADGAME: No such SliderMove: %p\n", elem);
+        EDGEError("LOADGAME: No such SliderMove: %p\n", elem);
 
     return index;
 }
@@ -799,7 +799,7 @@ bool SR_LightGetType(void *storage, int index, void *extra)
     }
 
     if (str[1] != ':')
-        I_Error("SR_LightGetType: invalid lighttype `%s'\n", str);
+        EDGEError("SR_LightGetType: invalid lighttype `%s'\n", str);
 
     number = strtol(str + 2, nullptr, 0);
 
@@ -814,7 +814,7 @@ bool SR_LightGetType(void *storage, int index, void *extra)
         (*dest)                   = &special->l_;
     }
     else
-        I_Error("SR_LightGetType: invalid lighttype `%s'\n", str);
+        EDGEError("SR_LightGetType: invalid lighttype `%s'\n", str);
 
     SV_FreeString(str);
     return true;
@@ -865,7 +865,7 @@ void SR_LightPutType(void *storage, int index, void *extra)
 
     // not found !
 
-    I_Warning("SAVEGAME: could not find lightdef_c %p !\n", src);
+    EDGEWarning("SAVEGAME: could not find lightdef_c %p !\n", src);
     SV_PutString("S:1");
 }
 
@@ -893,7 +893,7 @@ bool SR_TriggerGetState(void *storage, int index, void *extra)
 
     if (!temp)
     {
-        I_Warning("LOADGAME: invalid RTS state !\n");
+        EDGEWarning("LOADGAME: invalid RTS state !\n");
         temp = trig->info->last_state;
     }
 
@@ -923,7 +923,7 @@ void SR_TriggerPutState(void *storage, int index, void *extra)
     }
 
     if (!temp)
-        I_Error("INTERNAL ERROR: no such RTS state %p !\n", src);
+        EDGEError("INTERNAL ERROR: no such RTS state %p !\n", src);
 
     SV_PutInt(value);
 }
@@ -953,7 +953,7 @@ bool SR_TriggerGetScript(void *storage, int index, void *extra)
     SV_FreeString(swizzle);
 
     if (buffer[0] != 'B' || buffer[1] != ':')
-        I_Error("Corrupt savegame: bad script ref 1/4: `%s'\n", buffer);
+        EDGEError("Corrupt savegame: bad script ref 1/4: `%s'\n", buffer);
 
     // get map name
 
@@ -961,7 +961,7 @@ bool SR_TriggerGetScript(void *storage, int index, void *extra)
     base_p   = strchr(map_name, ':');
 
     if (base_p == nullptr || base_p == map_name || base_p[0] == 0)
-        I_Error("Corrupt savegame: bad script ref 2/4: `%s'\n", map_name);
+        EDGEError("Corrupt savegame: bad script ref 2/4: `%s'\n", map_name);
 
     // terminate the map name
     *base_p++ = 0;
@@ -972,7 +972,7 @@ bool SR_TriggerGetScript(void *storage, int index, void *extra)
     base_p = strchr(use_p, ':');
 
     if (base_p == nullptr || base_p == use_p || base_p[0] == 0)
-        I_Error("Corrupt savegame: bad script ref 3/4: `%s'\n", use_p);
+        EDGEError("Corrupt savegame: bad script ref 3/4: `%s'\n", use_p);
 
     *base_p++ = 0;
 
@@ -1002,7 +1002,7 @@ bool SR_TriggerGetScript(void *storage, int index, void *extra)
 
     if (!temp)
     {
-        I_Warning("LOADGAME: No such RTS script !!\n");
+        EDGEWarning("LOADGAME: No such RTS script !!\n");
         temp = r_scripts;
     }
 
@@ -1052,7 +1052,7 @@ void SR_TriggerPutScript(void *storage, int index, void *extra)
     }
 
     if (!temp)
-        I_Error("SR_TriggerPutScript: invalid ScriptPtr %p\n", src);
+        EDGEError("SR_TriggerPutScript: invalid ScriptPtr %p\n", src);
 
     sprintf(buffer, "B:%s:%d:%X", src->mapid, idx_val, src->crc.GetCRC());
 
@@ -1095,7 +1095,7 @@ bool SR_PlaneMoveGetType(void *storage, int index, void *extra)
     }
 
     if (str[1] != ':' || str[3] != ':')
-        I_Error("SR_PlaneMoveGetType: invalid movestr `%s'\n", str);
+        EDGEError("SR_PlaneMoveGetType: invalid movestr `%s'\n", str);
 
     is_ceil = false;
 
@@ -1104,7 +1104,7 @@ bool SR_PlaneMoveGetType(void *storage, int index, void *extra)
     else if (str[2] == 'C')
         is_ceil = true;
     else
-        I_Error("SR_PlaneMoveGetType: invalid floortype `%s'\n", str);
+        EDGEError("SR_PlaneMoveGetType: invalid floortype `%s'\n", str);
 
     number = strtol(str + 4, nullptr, 0);
 
@@ -1124,7 +1124,7 @@ bool SR_PlaneMoveGetType(void *storage, int index, void *extra)
         (*dest) = is_ceil ? &donut[number].c_ : &donut[number].f_;
     }
     else
-        I_Error("SR_PlaneMoveGetType: invalid srctype `%s'\n", str);
+        EDGEError("SR_PlaneMoveGetType: invalid srctype `%s'\n", str);
 
     SV_FreeString(str);
     return true;
@@ -1209,7 +1209,7 @@ void SR_PlaneMovePutType(void *storage, int index, void *extra)
 
     // not found !
 
-    I_Warning("SAVEGAME: could not find moving_plane %p !\n", src);
+    EDGEWarning("SAVEGAME: could not find moving_plane %p !\n", src);
     SV_PutString("L:C:1");
 }
 
@@ -1227,7 +1227,7 @@ bool SR_SliderGetInfo(void *storage, int index, void *extra)
     }
 
     if (str[0] != ':')
-        I_Error("SR_SliderGetInfo: invalid special `%s'\n", str);
+        EDGEError("SR_SliderGetInfo: invalid special `%s'\n", str);
 
     const LineType *ld_type = P_LookupLineType(strtol(str + 1, nullptr, 0));
 
@@ -1265,7 +1265,7 @@ void SR_SliderPutInfo(void *storage, int index, void *extra)
 
     // not found !
 
-    I_Warning("SAVEGAME: could not find sliding door %p !\n", src);
+    EDGEWarning("SAVEGAME: could not find sliding door %p !\n", src);
     SV_PutString(":1");
 }
 

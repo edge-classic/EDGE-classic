@@ -61,7 +61,7 @@ static bool FieldValidateValue(const FieldReference *reference, int new_val)
     if (new_val < 0 ||
         (new_val == 0 && reference->field_type == kFieldTypeOneOrGreater))
     {
-        I_Debugf("Dehacked: Warning - Line %d: bad value '%d' for %s\n",
+        EDGEDebugf("Dehacked: Warning - Line %d: bad value '%d' for %s\n",
                  patch::line_num, new_val, reference->dehacked_name);
         return false;
     }
@@ -98,7 +98,7 @@ static bool FieldValidateValue(const FieldReference *reference, int new_val)
                 break;
 
             default:
-                I_Error("Dehacked: Error - Bad field type %d\n",
+                EDGEError("Dehacked: Error - Bad field type %d\n",
                         reference->field_type);
         }
     }
@@ -125,14 +125,14 @@ static bool FieldValidateValue(const FieldReference *reference, int new_val)
                 break;
 
             default:
-                I_Error("Dehacked: Error - Bad field type %d\n",
+                EDGEError("Dehacked: Error - Bad field type %d\n",
                         reference->field_type);
         }
     }
 
     if (new_val < min_obj || new_val > max_obj)
     {
-        I_Debugf("Dehacked: Warning - Line %d: bad value '%d' for %s\n",
+        EDGEDebugf("Dehacked: Warning - Line %d: bad value '%d' for %s\n",
                  patch::line_num, new_val, reference->dehacked_name);
 
         return false;

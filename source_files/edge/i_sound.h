@@ -18,13 +18,13 @@
 
 #pragma once
 
-#include "epi_sdl.h"
-
 #include <string>
 #include <vector>
 
+#include "epi_sdl.h"
+
 extern std::vector<std::string> available_soundfonts;
 
-extern std::vector<std::string> available_genmidis;
+extern std::vector<std::string> available_opl_banks;
 
-extern SDL_AudioDeviceID mydev_id;
+extern SDL_AudioDeviceID current_sound_device;

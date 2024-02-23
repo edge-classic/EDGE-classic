@@ -100,7 +100,7 @@ void P_CreateThingBlockMap(void)
     dlmap_width  = (bmap_width * BLOCKMAP_UNIT + LIGHTMAP_UNIT - 1) / LIGHTMAP_UNIT;
     dlmap_height = (bmap_height * BLOCKMAP_UNIT + LIGHTMAP_UNIT - 1) / LIGHTMAP_UNIT;
 
-    I_Debugf("Blockmap size: %dx%d --> Lightmap size: %dx%x\n", bmap_width, bmap_height, dlmap_width, dlmap_height);
+    EDGEDebugf("Blockmap size: %dx%d --> Lightmap size: %dx%x\n", bmap_width, bmap_height, dlmap_width, dlmap_height);
 
     dlmap_things = new mobj_t *[dlmap_width * dlmap_height];
 
@@ -559,7 +559,7 @@ void P_SetThingPosition(mobj_t *mo)
 
     // -ES- 1999/12/04 The position must be unset before it's set again.
     if (mo->snext || mo->sprev || mo->bnext || mo->bprev)
-        I_Error("INTERNAL ERROR: Double P_SetThingPosition call.");
+        EDGEError("INTERNAL ERROR: Double P_SetThingPosition call.");
 
     SYS_ASSERT(!(mo->dlnext || mo->dlprev));
 
@@ -626,7 +626,7 @@ void P_SetThingPosition(mobj_t *mo)
 
 		if ((leveltime - last_time) > 5*TICRATE)
 		{
-			L_WriteDebug("TOUCHSTATS: Mv=%d Ht=%d Ms=%d Al=%d Fr=%d\n",
+			EDGEDebugf("TOUCHSTATS: Mv=%d Ht=%d Ms=%d Al=%d Fr=%d\n",
 				touchstat_moves, touchstat_hit, touchstat_miss,
 				touchstat_alloc, touchstat_free);
 
@@ -840,7 +840,7 @@ void P_DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, fl
                             void *data)
 {
     EDGE_ZoneScoped;
-    ecframe_stats.draw_lightiterator++;
+    ecframe_stats.draw_light_iterator++;
 
     int lx = LIGHTMAP_GET_X(x1) - 1;
     int ly = LIGHTMAP_GET_Y(y1) - 1;
@@ -898,7 +898,7 @@ void P_SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
                           void (*func)(mobj_t *, void *), void *data)
 {
     EDGE_ZoneScoped;
-    ecframe_stats.draw_sectorglowiterator++;
+    ecframe_stats.draw_sector_glow_iterator++;
     
     for (mobj_t *mo = sec->glow_things; mo; mo = mo->dlnext)
     {
@@ -1400,8 +1400,8 @@ void P_GenerateBlockMap(int min_x, int min_y, int max_x, int max_y)
 
     int btotal = bmap_width * bmap_height;
 
-    L_WriteDebug("GenerateBlockmap: MAP (%d,%d) -> (%d,%d)\n", min_x, min_y, max_x, max_y);
-    L_WriteDebug("GenerateBlockmap: BLOCKS %d x %d  TOTAL %d\n", bmap_width, bmap_height, btotal);
+    EDGEDebugf("GenerateBlockmap: MAP (%d,%d) -> (%d,%d)\n", min_x, min_y, max_x, max_y);
+    EDGEDebugf("GenerateBlockmap: BLOCKS %d x %d  TOTAL %d\n", bmap_width, bmap_height, btotal);
 
     // setup blk_cur_lines array.  Initially all pointers are nullptr, when
     // any lines get added then the dynamic array is created.
@@ -1414,7 +1414,7 @@ void P_GenerateBlockMap(int min_x, int min_y, int max_x, int max_y)
     for (int i = 0; i < numlines; i++)
         BlockAddLine(i);
 
-    // L_WriteDebug("GenerateBlockmap: TOTAL DATA=%d\n", blk_total_lines);
+    // EDGEDebugf("GenerateBlockmap: TOTAL DATA=%d\n", blk_total_lines);
 }
 
 //--- editor settings ---

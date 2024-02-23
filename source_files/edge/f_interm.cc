@@ -533,7 +533,7 @@ static void DrawOnLnode(IntermissionMapPosition *mappos,
     if (i < 2) { HUDDrawImage(mappos->info->x_, mappos->info->y_, images[i]); }
     else
     {
-        L_WriteDebug("Could not place patch on level '%s'\n",
+        EDGEDebugf("Could not place patch on level '%s'\n",
                      mappos->info->name_.c_str());
     }
 }
@@ -2008,7 +2008,7 @@ static void LoadData(void)
         for (j = 0; j < world_intermission.animations_[i].total_frames_; j++)
         {
             // FIXME!!! Shorten :)
-            L_WriteDebug("IntermissionLoadData: '%s'\n",
+            EDGEDebugf("IntermissionLoadData: '%s'\n",
                          world_intermission.animations_[i]
                              .frames_[j]
                              .info->pic_.c_str());

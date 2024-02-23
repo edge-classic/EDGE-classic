@@ -27,7 +27,7 @@
 
 /* FUNCTIONS */
 
-abstract_music_c *S_PlayMP3Music(uint8_t *data, int length, bool looping);
+AbstractMusicPlayer *S_PlayMP3Music(uint8_t *data, int length, bool looping);
 
 bool S_LoadMP3Sound(sound_data_c *buf, const uint8_t *data, int length);
 

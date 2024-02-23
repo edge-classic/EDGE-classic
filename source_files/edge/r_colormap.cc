@@ -85,7 +85,7 @@ void V_InitPalette(void)
     const uint8_t *pal        = (const uint8_t *)W_OpenPackOrLumpInMemory("PLAYPAL", {".pal"}, &pal_length);
 
     if (!pal)
-        I_Error("V_InitPalette: Error opening PLAYPAL!\n");
+        EDGEError("V_InitPalette: Error opening PLAYPAL!\n");
 
     // read in palette colours
     for (t = 0; t < 14; t++)
@@ -114,9 +114,9 @@ void V_InitPalette(void)
     pal_green1 = V_FindColour(64, 128, 48);
     pal_brown1 = V_FindColour(192, 128, 74);
 
-    I_Printf("Loaded global palette.\n");
+    EDGEPrintf("Loaded global palette.\n");
 
-    L_WriteDebug("Black:%d White:%d Red:%d Green:%d Blue:%d\n", pal_black, pal_white, pal_red, pal_green, pal_blue);
+    EDGEDebugf("Black:%d White:%d Red:%d Green:%d Blue:%d\n", pal_black, pal_white, pal_red, pal_green, pal_blue);
 }
 
 static int cur_palette = -1;
@@ -241,7 +241,7 @@ static void LoadColourmap(const Colormap *colm)
     {
         epi::File *f = W_OpenPackFile(colm->pack_name_);
         if (f == nullptr)
-            I_Error("No such colormap file: %s\n", colm->pack_name_.c_str());
+            EDGEError("No such colormap file: %s\n", colm->pack_name_.c_str());
         size = f->GetLength();
         data = f->LoadIntoMemory();
         delete f; // close file
@@ -253,7 +253,7 @@ static void LoadColourmap(const Colormap *colm)
 
     if ((colm->start_ + colm->length_) * 256 > size)
     {
-        I_Error("Colourmap [%s] is too small ! (LENGTH too big)\n", colm->name_.c_str());
+        EDGEError("Colourmap [%s] is too small ! (LENGTH too big)\n", colm->name_.c_str());
     }
 
     cache->size = colm->length_ * 256;
@@ -341,7 +341,7 @@ static int AnalyseColourmap(const uint8_t *table, int alpha, int *r, int *g, int
         b_div = HMM_MAX(4, HMM_MIN(4096, b_div));
 
 #if 0 // DEBUGGING
-		I_Printf("#%02x%02x%02x / #%02x%02x%02x = (%d,%d,%d)\n",
+		EDGEPrintf("#%02x%02x%02x / #%02x%02x%02x = (%d,%d,%d)\n",
 				 r1, g1, b1, r0, g0, b0, r_div, g_div, b_div);
 #endif
         r_tot += r_div * weight;
@@ -440,7 +440,7 @@ void TransformColourmap(Colormap *colmap)
         AnalyseColourmap(table, 0, &r, &g, &b);
 
 #if 0 // DEBUGGING
-		I_Debugf("COLMAP [%s] alpha %d --> (%d %d %d)\n",
+		EDGEDebugf("COLMAP [%s] alpha %d --> (%d %d %d)\n",
 				 colmap->name.c_str(), 0, r, g, b);
 #endif
 
@@ -451,8 +451,8 @@ void TransformColourmap(Colormap *colmap)
         colmap->gl_color_ = epi::MakeRGBA(r, g, b);
     }
 
-    L_WriteDebug("TransformColourmap [%s]\n", colmap->name_.c_str());
-    L_WriteDebug("- gl_color_   = #%06x\n", colmap->gl_color_);
+    EDGEDebugf("TransformColourmap [%s]\n", colmap->name_.c_str());
+    EDGEDebugf("- gl_color_   = #%06x\n", colmap->gl_color_);
 }
 
 void V_GetColmapRGB(const Colormap *colmap, float *r, float *g, float *b)
@@ -496,7 +496,7 @@ RGBAColor V_ParseFontColor(const char *name, bool strict)
         int       r, g, b;
 
         if (sscanf(name, " #%2x%2x%2x ", &r, &g, &b) != 3)
-            I_Error("Bad RGB colour value: %s\n", name);
+            EDGEError("Bad RGB colour value: %s\n", name);
 
         rgb = epi::MakeRGBA((uint8_t)r, (uint8_t)g, (uint8_t)b);
     }
@@ -507,9 +507,9 @@ RGBAColor V_ParseFontColor(const char *name, bool strict)
         if (!colmap)
         {
             if (strict)
-                I_Error("Unknown colormap: '%s'\n", name);
+                EDGEError("Unknown colormap: '%s'\n", name);
             else
-                I_Debugf("Unknown colormap: '%s'\n", name);
+                EDGEDebugf("Unknown colormap: '%s'\n", name);
 
             return SG_MAGENTA_RGBA32;
         }

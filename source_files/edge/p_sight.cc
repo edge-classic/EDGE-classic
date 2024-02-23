@@ -271,7 +271,7 @@ static bool CheckSightBSP(unsigned int bspnum)
         int     s1, s2;
 
 #if (DEBUG_SIGHT >= 2)
-        L_WriteDebug("CheckSightBSP: node %d (%1.1f,%1.1f) + (%1.1f,%1.1f)\n", bspnum, node->div.x, node->div.y,
+        EDGEDebugf("CheckSightBSP: node %d (%1.1f,%1.1f) + (%1.1f,%1.1f)\n", bspnum, node->div.x, node->div.y,
                      node->div.dx, node->div.dy);
 #endif
 
@@ -280,7 +280,7 @@ static bool CheckSightBSP(unsigned int bspnum)
         s2 = P_PointOnDivlineSide(sight_I.dest.X, sight_I.dest.Y, &node->div);
 
 #if (DEBUG_SIGHT >= 2)
-        L_WriteDebug("  Sides: %d %d\n", s1, s2);
+        EDGEDebugf("  Sides: %d %d\n", s1, s2);
 #endif
 
         // If sides are different, we must recursively check both.
@@ -304,7 +304,7 @@ static bool CheckSightBSP(unsigned int bspnum)
         subsector_t *sub = subsectors + bspnum;
 
 #if (DEBUG_SIGHT >= 2)
-        L_WriteDebug("  Subsec %d  SEC %d\n", bspnum, sub->sector - sectors);
+        EDGEDebugf("  Subsec %d  SEC %d\n", bspnum, sub->sector - sectors);
 #endif
 
         if (sub->sector->exfloor_used > 0)
@@ -340,7 +340,7 @@ static bool CheckSightIntercepts(float slope)
     float cur_h;
 
 #if (DEBUG_SIGHT >= 1)
-    L_WriteDebug("INTERCEPTS  slope %1.0f\n", slope);
+    EDGEDebugf("INTERCEPTS  slope %1.0f\n", slope);
 #endif
 
     for (i = 0; i < (int)wall_icpts.size(); i++, last_h = cur_h)
@@ -350,7 +350,7 @@ static bool CheckSightIntercepts(float slope)
         cur_h = sight_I.src_z + slope * wall_icpts[i].frac;
 
 #if (DEBUG_SIGHT >= 1)
-        L_WriteDebug("  %d/%d  FRAC %1.4f  SEC %d  H=%1.4f/%1.4f\n", i + 1, wall_icpts.size(), wall_icpts[i].frac,
+        EDGEDebugf("  %d/%d  FRAC %1.4f  SEC %d  H=%1.4f/%1.4f\n", i + 1, wall_icpts.size(), wall_icpts[i].frac,
                      wall_icpts[i].sector - sectors, last_h, cur_h);
 #endif
 
@@ -363,7 +363,7 @@ static bool CheckSightIntercepts(float slope)
             float z2 = sec->sight_gaps[j].c;
 
 #if (DEBUG_SIGHT >= 3)
-            L_WriteDebug("    SIGHT GAP [%d] = %1.1f .. %1.1f\n", j, z1, z2);
+            EDGEDebugf("    SIGHT GAP [%d] = %1.1f .. %1.1f\n", j, z1, z2);
 #endif
 
             if (z1 <= last_h && last_h <= z2 && z1 <= cur_h && cur_h <= z2)
@@ -472,13 +472,13 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
     }
 
 #if (DEBUG_SIGHT >= 1)
-    L_WriteDebug("\n");
-    L_WriteDebug("P_CheckSight:\n");
-    L_WriteDebug("  Src: [%s] @ (%1.0f,%1.0f) in sub %d SEC %d\n", src->info->name, sight_I.src.x, sight_I.src.y,
+    EDGEDebugf("\n");
+    EDGEDebugf("P_CheckSight:\n");
+    EDGEDebugf("  Src: [%s] @ (%1.0f,%1.0f) in sub %d SEC %d\n", src->info->name, sight_I.src.x, sight_I.src.y,
                  sight_I.src_sub - subsectors, sight_I.src_sub->sector - sectors);
-    L_WriteDebug("  Dest: [%s] @ (%1.0f,%1.0f) in sub %d SEC %d\n", dest->info->name, sight_I.dest.x, sight_I.dest.y,
+    EDGEDebugf("  Dest: [%s] @ (%1.0f,%1.0f) in sub %d SEC %d\n", dest->info->name, sight_I.dest.x, sight_I.dest.y,
                  sight_I.dest_sub - subsectors, sight_I.dest_sub->sector - sectors);
-    L_WriteDebug("  Angle: %1.0f\n", ANG_2_FLOAT(sight_I.angle));
+    EDGEDebugf("  Angle: %1.0f\n", ANG_2_FLOAT(sight_I.angle));
 #endif
 
     if (sight_I.top_slope < dist_a * -src->info->sight_slope_)

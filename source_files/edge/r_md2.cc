@@ -321,18 +321,18 @@ md2_model_c *MD2_LoadModel(epi::File *f)
 
     int version = AlignedLittleEndianS32(header.version);
 
-    I_Debugf("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
+    EDGEDebugf("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
              version);
 
     if (epi::StringPrefixCompare(header.ident, MD2_IDENTIFIER) != 0)
     {
-        I_Error("MD2_LoadModel: lump is not an MD2 model!");
+        EDGEError("MD2_LoadModel: lump is not an MD2 model!");
         return nullptr; /* NOT REACHED */
     }
 
     if (version != MD2_VERSION)
     {
-        I_Error("MD2_LoadModel: strange version!");
+        EDGEError("MD2_LoadModel: strange version!");
         return nullptr; /* NOT REACHED */
     }
 
@@ -370,13 +370,13 @@ md2_model_c *MD2_LoadModel(epi::File *f)
         md2_sts[st].t = AlignedLittleEndianU16(md2_sts[st].t);
     }
 
-    I_Debugf("  frames:%d  points:%d  triangles: %d\n", num_frames, num_tris * 3, num_tris);
+    EDGEDebugf("  frames:%d  points:%d  triangles: %d\n", num_frames, num_tris * 3, num_tris);
 
     md2_model_c *md = new md2_model_c(num_frames, num_points, num_tris);
 
     md->verts_per_frame = AlignedLittleEndianS32(header.num_vertices);
 
-    I_Debugf("  verts_per_frame:%d\n", md->verts_per_frame);
+    EDGEDebugf("  verts_per_frame:%d\n", md->verts_per_frame);
 
     // convert raw tris
     md2_triangle_c *tri   = md->tris;
@@ -446,9 +446,9 @@ md2_model_c *MD2_LoadModel(epi::File *f)
         md->frames[i].name = CopyFrameName(&raw_frame);
 
 #ifdef DEBUG_MD2_LOAD
-        I_Debugf("  __FRAME_%d__[%s]\n", i + 1, md->frames[i].name);
-        I_Debugf("    scale: %1.2f, %1.2f, %1.2f\n", scale[0], scale[1], scale[2]);
-        I_Debugf("    translate: %1.2f, %1.2f, %1.2f\n", translate[0], translate[1], translate[2]);
+        EDGEDebugf("  __FRAME_%d__[%s]\n", i + 1, md->frames[i].name);
+        EDGEDebugf("    scale: %1.2f, %1.2f, %1.2f\n", scale[0], scale[1], scale[2]);
+        EDGEDebugf("    translate: %1.2f, %1.2f, %1.2f\n", translate[0], translate[1], translate[2]);
 #endif
 
         f->Read(raw_verts, md->verts_per_frame * sizeof(raw_md2_vertex_t));
@@ -467,10 +467,10 @@ md2_model_c *MD2_LoadModel(epi::File *f)
             good_V->z = (int)raw_V->z * scale[2] + translate[2];
 
 #ifdef DEBUG_MD2_LOAD
-            I_Debugf("    __VERT_%d__\n", v);
-            I_Debugf("      raw: %d,%d,%d\n", raw_V->x, raw_V->y, raw_V->z);
-            I_Debugf("      normal: %d\n", raw_V->light_normal);
-            I_Debugf("      good: %1.2f, %1.2f, %1.2f\n", good_V->x, good_V->y, good_V->z);
+            EDGEDebugf("    __VERT_%d__\n", v);
+            EDGEDebugf("      raw: %d,%d,%d\n", raw_V->x, raw_V->y, raw_V->z);
+            EDGEDebugf("      normal: %d\n", raw_V->light_normal);
+            EDGEDebugf("      good: %1.2f, %1.2f, %1.2f\n", good_V->x, good_V->y, good_V->z);
 #endif
             good_V->normal_idx = raw_V->light_normal;
 
@@ -479,7 +479,7 @@ md2_model_c *MD2_LoadModel(epi::File *f)
             //  Dasho: Maybe try to salvage bad MD2 models?
             if (good_V->normal_idx >= MD_NUM_NORMALS)
             {
-                I_Debugf("Vert %d of Frame %d has an invalid normal index: %d\n", v, i, good_V->normal_idx);
+                EDGEDebugf("Vert %d of Frame %d has an invalid normal index: %d\n", v, i, good_V->normal_idx);
                 good_V->normal_idx = (good_V->normal_idx % MD_NUM_NORMALS);
             }
 
@@ -493,7 +493,7 @@ md2_model_c *MD2_LoadModel(epi::File *f)
 
     glGenBuffers(1, &md->vbo);
     if (md->vbo == 0)
-        I_Error("MD2_LoadModel: Failed to bind VBO!\n");
+        EDGEError("MD2_LoadModel: Failed to bind VBO!\n");
     glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
     glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), nullptr, GL_STREAM_DRAW);
 
@@ -612,23 +612,23 @@ md2_model_c *MD3_LoadModel(epi::File *f)
 
     int version = AlignedLittleEndianS32(header.version);
 
-    I_Debugf("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
+    EDGEDebugf("MODEL IDENT: [%c%c%c%c] VERSION: %d", header.ident[0], header.ident[1], header.ident[2], header.ident[3],
              version);
 
     if (strncmp(header.ident, MD3_IDENTIFIER, 4) != 0)
     {
-        I_Error("MD3_LoadModel: lump is not an MD3 model!");
+        EDGEError("MD3_LoadModel: lump is not an MD3 model!");
         return nullptr; /* NOT REACHED */
     }
 
     if (version != MD3_VERSION)
     {
-        I_Error("MD3_LoadModel: strange version!");
+        EDGEError("MD3_LoadModel: strange version!");
         return nullptr; /* NOT REACHED */
     }
 
     if (AlignedLittleEndianS32(header.num_meshes) > 1)
-        I_Warning("Ignoring extra meshes in MD3 model.\n");
+        EDGEWarning("Ignoring extra meshes in MD3 model.\n");
 
     /* LOAD MESH #1 */
 
@@ -644,7 +644,7 @@ md2_model_c *MD3_LoadModel(epi::File *f)
     int num_verts  = AlignedLittleEndianS32(mesh.num_verts);
     int num_tris   = AlignedLittleEndianS32(mesh.num_tris);
 
-    I_Debugf("  frames:%d  verts:%d  triangles: %d\n", num_frames, num_verts, num_tris);
+    EDGEDebugf("  frames:%d  verts:%d  triangles: %d\n", num_frames, num_verts, num_tris);
 
     md2_model_c *md = new md2_model_c(num_frames, num_tris * 3, num_tris);
 
@@ -746,13 +746,13 @@ md2_model_c *MD3_LoadModel(epi::File *f)
 
         md->frames[i].name = CopyFrameName(&frame);
 
-        I_Debugf("Frame %d = '%s'\n", i + 1, md->frames[i].name);
+        EDGEDebugf("Frame %d = '%s'\n", i + 1, md->frames[i].name);
 
         // TODO: load in bbox (for visibility checking)
     }
     glGenBuffers(1, &md->vbo);
     if (md->vbo == 0)
-        I_Error("MD3_LoadModel: Failed to create VBO!\n");
+        EDGEError("MD3_LoadModel: Failed to create VBO!\n");
     glBindBuffer(GL_ARRAY_BUFFER, md->vbo);
     glBufferData(GL_ARRAY_BUFFER, md->num_tris * 3 * sizeof(local_gl_vert_t), nullptr, GL_STREAM_DRAW);
     return md;
@@ -995,12 +995,12 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
     // check if frames are valid
     if (frame1 < 0 || frame1 >= md->num_frames)
     {
-        I_Debugf("Render model: bad frame %d\n", frame1);
+        EDGEDebugf("Render model: bad frame %d\n", frame1);
         return;
     }
     if (frame2 < 0 || frame2 >= md->num_frames)
     {
-        I_Debugf("Render model: bad frame %d\n", frame1);
+        EDGEDebugf("Render model: bad frame %d\n", frame1);
         return;
     }
 

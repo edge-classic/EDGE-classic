@@ -291,7 +291,7 @@ void FUZZ_Update(void)
     {
         fuzz_image = W_ImageLookup("FUZZ_MAP", kImageNamespaceTexture, ILF_Exact | ILF_Null);
         if (!fuzz_image)
-            I_Error("Cannot find essential image: FUZZ_MAP\n");
+            EDGEError("Cannot find essential image: FUZZ_MAP\n");
     }
 
     fuzz_yoffset = ((framecount * 3) & 1023) / 256.0;

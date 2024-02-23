@@ -118,7 +118,7 @@ DehackedResult Convert(void)
     sounds::ConvertSFX();
     music ::ConvertMUS();
 
-    I_Printf("\n");
+    EDGEPrintf("\n");
 
     return kDehackedConversionOK;
 }
@@ -147,7 +147,7 @@ void DehackedStartup()
 {
     dehacked::Init();
 
-    I_Printf("*** DeHackEd -> EDGE Conversion ***\n");
+    EDGEPrintf("*** DeHackEd -> EDGE Conversion ***\n");
 }
 
 const char *DehackedGetError(void) { return dehacked::GetErrorMsg(); }

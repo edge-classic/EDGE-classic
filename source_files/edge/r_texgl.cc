@@ -73,7 +73,7 @@ int W_MakeValidSize(int value)
     if (value <= 4096)
         return 4096;
 
-    I_Error("Texture size (%d) too large !\n", value);
+    EDGEError("Texture size (%d) too large !\n", value);
     return -1; /* NOT REACHED */
 }
 
@@ -411,7 +411,7 @@ void R_BlackenClearAreas(image_data_c *img)
 
 void R_DumpImage(image_data_c *img)
 {
-    L_WriteDebug("DUMP IMAGE: size=%dx%d [%dx%d] bpp=%d\n", img->used_w, img->used_h, img->width, img->height,
+    EDGEDebugf("DUMP IMAGE: size=%dx%d [%dx%d] bpp=%d\n", img->used_w, img->used_h, img->width, img->height,
                  img->bpp);
 
     for (int y = img->height - 1; y >= 0; y--)
@@ -420,11 +420,11 @@ void R_DumpImage(image_data_c *img)
         {
             uint8_t pixel = img->PixelAt(x, y)[0];
 
-            // L_WriteDebug("%02x", pixel);
-            L_WriteDebug("%c", 'A' + (pixel % 26));
+            // EDGEDebugf("%02x", pixel);
+            EDGEDebugf("%c", 'A' + (pixel % 26));
         }
 
-        L_WriteDebug("\n");
+        EDGEDebugf("\n");
     }
 }
 

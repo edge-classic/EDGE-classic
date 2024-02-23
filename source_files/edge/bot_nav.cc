@@ -576,7 +576,7 @@ static BotPath *BotNavigateStorePath(position_c start, int start_id,
 
         // this should never happen
         if (link == nullptr)
-            I_Error("could not find link in path (%d -> %d)\n", prev_id,
+            EDGEError("could not find link in path (%d -> %d)\n", prev_id,
                     cur_id);
 
         BotNavigateStoreSegMiddle(path, link->flags, link->seg);

@@ -562,7 +562,7 @@ void text_strings::AlterCheat(const char *new_val)
 
     if (!ReplaceCheat(deh_field, new_val))
     {
-        I_Debugf("Dehacked: Warning - UNKNOWN CHEAT FIELD: %s\n", deh_field);
+        EDGEDebugf("Dehacked: Warning - UNKNOWN CHEAT FIELD: %s\n", deh_field);
     }
 }
 

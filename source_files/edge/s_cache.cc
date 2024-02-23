@@ -42,7 +42,7 @@
 #include "s_mp3.h"
 #include "s_wav.h"
 
-#include "dm_state.h" // game_dir
+#include "dm_state.h" // game_directory
 #include "m_argv.h"
 #include "m_misc.h"
 #include "m_random.h"
@@ -51,7 +51,7 @@
 #include "w_files.h"
 #include "w_wad.h"
 
-extern int  dev_freq;
+extern int  sound_device_frequency;
 extern bool var_pc_speaker_mode;
 
 static std::vector<sound_data_c *> fx_cache;
@@ -60,7 +60,7 @@ static void Load_Silence(sound_data_c *buf)
 {
     int length = 256;
 
-    buf->freq = dev_freq;
+    buf->freq = sound_device_frequency;
     buf->Allocate(length, SBUF_Mono);
 
     memset(buf->data_L, 0, length * sizeof(int16_t));
@@ -71,7 +71,7 @@ static bool Load_DOOM(sound_data_c *buf, const uint8_t *lump, int length)
     buf->freq = lump[2] + (lump[3] << 8);
 
     if (buf->freq < 8000 || buf->freq > 48000)
-        I_Warning("Sound Load: weird frequency: %d Hz\n", buf->freq);
+        EDGEWarning("Sound Load: weird frequency: %d Hz\n", buf->freq);
 
     if (buf->freq < 4000)
         buf->freq = 4000;
@@ -145,7 +145,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, sound_data_c *buf)
             F = W_OpenPackFile(def->pc_speaker_sound_);
             if (!F)
             {
-                std::string open_name = M_ComposeFileName(game_dir, def->pc_speaker_sound_);
+                std::string open_name = M_ComposeFileName(game_directory, def->pc_speaker_sound_);
                 F = epi::FileOpen(open_name, epi::kFileAccessRead | epi::kFileAccessBinary);
             }
             if (!F)
@@ -184,7 +184,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, sound_data_c *buf)
         else if (def->file_name_ != "")
         {
             // Why is this composed with the app dir? - Dasho
-            std::string fn = M_ComposeFileName(game_dir, def->file_name_);
+            std::string fn = M_ComposeFileName(game_directory, def->file_name_);
             F  = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
             if (!F)
             {

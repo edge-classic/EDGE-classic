@@ -40,7 +40,7 @@
 
 #include "AlmostEquals.h"
 
-extern void I_Error(const char *error, ...);
+extern void EDGEError(const char *error, ...);
 
 namespace coal
 {
@@ -223,7 +223,7 @@ void real_vm_c::RunError(const char *error, ...)
     /* clear the stack so SV/Host_Error can shutdown functions */
     exec.call_depth = 0;
 
-    I_Error(buffer);
+    EDGEError(buffer);
 }
 
 int real_vm_c::STR_Concat(const char *s1, const char *s2)

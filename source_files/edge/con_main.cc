@@ -197,22 +197,22 @@ int ConsoleCommandDir(char **argv, int argc)
 
     if (!ReadDirectory(fsd, path, mask.c_str()))
     {
-        I_Printf("Failed to read dir: %s\n", path.c_str());
+        EDGEPrintf("Failed to read dir: %s\n", path.c_str());
         return 1;
     }
 
     if (fsd.empty())
     {
-        I_Printf("No files found in provided path %s\n", path.c_str());
+        EDGEPrintf("No files found in provided path %s\n", path.c_str());
         return 0;
     }
 
-    I_Printf("Directory contents for %s matching %s\n",
+    EDGEPrintf("Directory contents for %s matching %s\n",
              epi::GetDirectory(fsd[0].name).c_str(), mask.c_str());
 
     for (size_t i = 0; i < fsd.size(); i++)
     {
-        I_Printf("%4d: %10d  %s  \"%s\"\n", (int)i + 1, (int)fsd[i].size,
+        EDGEPrintf("%4d: %10d  %s  \"%s\"\n", (int)i + 1, (int)fsd[i].size,
                  fsd[i].is_dir ? "DIR" : "   ",
                  epi::GetFilename(fsd[i].name).c_str());
     }
@@ -222,10 +222,10 @@ int ConsoleCommandDir(char **argv, int argc)
 
 int ConsoleCommandArgList(char **argv, int argc)
 {
-    I_Printf("Arguments:\n");
+    EDGEPrintf("Arguments:\n");
 
     for (int i = 0; i < argc; i++)
-        I_Printf(" %2d len:%d text:\"%s\"\n", i, (int)strlen(argv[i]), argv[i]);
+        EDGEPrintf(" %2d len:%d text:\"%s\"\n", i, (int)strlen(argv[i]), argv[i]);
 
     return 0;
 }
@@ -313,7 +313,7 @@ int ConsoleCommandShowFiles(char **argv, int argc)
 
 int ConsoleCommandOpenHome(char **argv, int argc)
 {
-    epi::OpenDirectory(home_dir);
+    epi::OpenDirectory(home_directory);
     return 0;
 }
 
@@ -353,11 +353,11 @@ int ConsoleCommandShowVars(char **argv, int argc)
 
     if (argc >= 2) match = argv[1];
 
-    I_Printf("Console Variables:\n");
+    EDGEPrintf("Console Variables:\n");
 
     int total = ConsolePrintVariables(match, show_default);
 
-    if (total == 0) I_Printf("Nothing matched.\n");
+    if (total == 0) EDGEPrintf("Nothing matched.\n");
 
     return 0;
 }
@@ -368,7 +368,7 @@ int ConsoleCommandShowCmds(char **argv, int argc)
 
     if (argc >= 2) match = argv[1];
 
-    I_Printf("Console Commands:\n");
+    EDGEPrintf("Console Commands:\n");
 
     int total = 0;
 
@@ -377,23 +377,23 @@ int ConsoleCommandShowCmds(char **argv, int argc)
         if (match && *match)
             if (!strstr(builtin_commands[i].name, match)) continue;
 
-        I_Printf("  %-15s\n", builtin_commands[i].name);
+        EDGEPrintf("  %-15s\n", builtin_commands[i].name);
         total++;
     }
 
-    if (total == 0) I_Printf("Nothing matched.\n");
+    if (total == 0) EDGEPrintf("Nothing matched.\n");
 
     return 0;
 }
 
 int ConsoleCommandShowMaps(char **argv, int argc)
 {
-    I_Printf("Warp Name           Description\n");
+    EDGEPrintf("Warp Name           Description\n");
 
     for (int i = 0; i < mapdefs.size(); i++)
     {
         if (GameMapExists(mapdefs[i]) && mapdefs[i]->episode_)
-            I_Printf("  %s           %s\n", mapdefs[i]->name_.c_str(),
+            EDGEPrintf("  %s           %s\n", mapdefs[i]->name_.c_str(),
                      language[mapdefs[i]->description_.c_str()]);
     }
 
@@ -408,7 +408,7 @@ int ConsoleCommandShowKeys(char **argv, int argc)
 	if (argc >= 2)
 		match = argv[1];
 
-	I_Printf("Key Bindings:\n");
+	EDGEPrintf("Key Bindings:\n");
 
 	int total = 0;
 
@@ -420,12 +420,12 @@ int ConsoleCommandShowKeys(char **argv, int argc)
 
 		std::string keylist = all_binds[i].bind->FormatKeyList();
 
-		I_Printf("  %-15s %s\n", all_binds[i].name, keylist.c_str());
+		EDGEPrintf("  %-15s %s\n", all_binds[i].name, keylist.c_str());
 		total++;
 	}
 
 	if (total == 0)
-		I_Printf("Nothing matched.\n");
+		EDGEPrintf("Nothing matched.\n");
 #endif
     return 0;
 }
@@ -441,27 +441,27 @@ int ConsoleCommandShowGamepads(char **argv, int argc)
 
 int ConsoleCommandHelp(char **argv, int argc)
 {
-    I_Printf("Welcome to the EDGE Console.\n");
-    I_Printf("\n");
-    I_Printf("Use the 'showcmds' command to list all commands.\n");
-    I_Printf("The 'showvars' command will list all variables.\n");
-    I_Printf("Both of these can take a keyword to match the names with.\n");
-    I_Printf("\n");
-    I_Printf("To show the value of a variable, just type its name.\n");
-    I_Printf("To change it, follow the name with a space and the new value.\n");
-    I_Printf("\n");
-    I_Printf("Press ESC key to close the console.\n");
-    I_Printf("The PGUP and PGDN keys scroll the console up and down.\n");
-    I_Printf("The UP and DOWN arrow keys let you recall previous commands.\n");
-    I_Printf("\n");
-    I_Printf("Have a nice day!\n");
+    EDGEPrintf("Welcome to the EDGE Console.\n");
+    EDGEPrintf("\n");
+    EDGEPrintf("Use the 'showcmds' command to list all commands.\n");
+    EDGEPrintf("The 'showvars' command will list all variables.\n");
+    EDGEPrintf("Both of these can take a keyword to match the names with.\n");
+    EDGEPrintf("\n");
+    EDGEPrintf("To show the value of a variable, just type its name.\n");
+    EDGEPrintf("To change it, follow the name with a space and the new value.\n");
+    EDGEPrintf("\n");
+    EDGEPrintf("Press ESC key to close the console.\n");
+    EDGEPrintf("The PGUP and PGDN keys scroll the console up and down.\n");
+    EDGEPrintf("The UP and DOWN arrow keys let you recall previous commands.\n");
+    EDGEPrintf("\n");
+    EDGEPrintf("Have a nice day!\n");
 
     return 0;
 }
 
 int ConsoleCommandVersion(char **argv, int argc)
 {
-    I_Printf("%s v%s\n", appname.c_str(), edgeversion.c_str());
+    EDGEPrintf("%s v%s\n", appname.c_str(), edgeversion.c_str());
     return 0;
 }
 
@@ -637,10 +637,10 @@ void ConsoleTryCommand(const char *cmd)
         if (argc <= 1)
         {
             if (var->flags_ & kConsoleVariableFlagFilepath)
-                I_Printf("%s \"%s\"\n", argv[0],
+                EDGEPrintf("%s \"%s\"\n", argv[0],
                          epi::SanitizePath(var->s_).c_str());
             else
-                I_Printf("%s \"%s\"\n", argv[0], var->c_str());
+                EDGEPrintf("%s \"%s\"\n", argv[0], var->c_str());
         }
         else if (argc - 1 >= 2)  // Assume string with spaces; concat args into
                                  // one string and try it
@@ -657,7 +657,7 @@ void ConsoleTryCommand(const char *cmd)
                 *var = concatter.c_str();
         }
         else if ((var->flags_ & kConsoleVariableFlagReadOnly) != 0)
-            I_Printf("The cvar '%s' is read only.\n", var->name_);
+            EDGEPrintf("The cvar '%s' is read only.\n", var->name_);
         else
         {
             if (var->flags_ & kConsoleVariableFlagFilepath)
@@ -679,7 +679,7 @@ void ConsoleTryCommand(const char *cmd)
 		{
 			std::string keylist = kink->bind->FormatKeyList();
 
-			I_Printf("%s %s\n", argv[0], keylist.c_str());
+			EDGEPrintf("%s %s\n", argv[0], keylist.c_str());
 		}
 		else
 		{
@@ -691,7 +691,7 @@ void ConsoleTryCommand(const char *cmd)
 	}
 #endif
 
-    I_Printf("Unknown console command: %s\n", argv[0]);
+    EDGEPrintf("Unknown console command: %s\n", argv[0]);
 
     KillArgs(argv, argc);
     return;

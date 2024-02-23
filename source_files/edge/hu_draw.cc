@@ -119,7 +119,7 @@ void HUDSetCoordinateSystem(int width, int height)
     side_dist = side_dist * (sw / 320.0f) / (sh / 200.0f);
 
     // compensate for monitor's pixel aspect
-    side_dist = side_dist * v_pixelaspect.f_;
+    side_dist = side_dist * pixel_aspect_ratio.f_;
 
     // compensate for Doom's 5:6 pixel aspect ratio.
     if (true) { side_dist = side_dist / DOOHMM_PIXEL_ASPECT; }
@@ -1364,7 +1364,7 @@ void HUDGetCastPosition(float *x, float *y, float *scale_x, float *scale_y)
 
     // FIXME REVIEW THIS
     //*scale_y = 4.0;
-    *scale_x = *scale_y / v_pixelaspect.f_;
+    *scale_x = *scale_y / pixel_aspect_ratio.f_;
 }
 
 //--- editor settings ---

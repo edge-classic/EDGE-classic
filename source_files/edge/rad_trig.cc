@@ -264,7 +264,7 @@ rad_script_t *RAD_FindScriptByName(const char *map_name, const char *name)
             return scr;
     }
 
-    I_Error("RTS: No such script `%s' on map %s.\n", name, map_name);
+    EDGEError("RTS: No such script `%s' on map %s.\n", name, map_name);
     return nullptr;
 }
 
@@ -281,7 +281,7 @@ rad_trigger_t *RAD_FindTriggerByName(const char *name)
             return trig;
     }
 
-    I_Warning("RTS: No such trigger `%s'.\n", name);
+    EDGEWarning("RTS: No such trigger `%s'.\n", name);
     return nullptr;
 }
 
@@ -345,7 +345,7 @@ void RAD_EnableByTag(mobj_t *actor, uint32_t tag, bool disable, s_tagtype_e tagt
     rad_trigger_t *trig;
 
     // if (tag <= 0)
-    // I_Error("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
+    // EDGEError("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
@@ -378,7 +378,7 @@ void RAD_EnableByTag(mobj_t *actor, const char *name, bool disable)
     uint32_t tag = epi::StringHash32(name);
 
     // if (tag <= 0)
-    // I_Error("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
+    // EDGEError("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
@@ -411,7 +411,7 @@ bool RAD_IsActiveByTag(mobj_t *actor, const char *name)
     uint32_t tag = epi::StringHash32(name);
 
     // if (tag <= 0)
-    // I_Error("INTERNAL ERROR: RAD_IsActiveByTag: bad tag %d\n", tag);
+    // EDGEError("INTERNAL ERROR: RAD_IsActiveByTag: bad tag %d\n", tag);
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
@@ -550,7 +550,7 @@ static bool RAD_CheckBossTrig(rad_trigger_t *trig, s_ondeath_t *cond)
             cond->cached_info = mobjtypes.Lookup(cond->thing_type);
 
             if (cond->cached_info == nullptr)
-                I_Error("RTS ONDEATH: Unknown thing type %d.\n", cond->thing_type);
+                EDGEError("RTS ONDEATH: Unknown thing type %d.\n", cond->thing_type);
         }
     }
 
@@ -582,7 +582,7 @@ static bool RAD_CheckHeightTrig(rad_trigger_t *trig, s_onheight_t *cond)
         if (cond->sec_num >= 0)
         {
             if (cond->sec_num >= numsectors)
-                I_Error("RTS ONHEIGHT: no such sector %d.\n", cond->sec_num);
+                EDGEError("RTS ONHEIGHT: no such sector %d.\n", cond->sec_num);
 
             cond->cached_sector = &sectors[cond->sec_num];
         }
@@ -890,7 +890,7 @@ void RAD_SpawnTriggers(const char *map_name)
 
 #ifdef DEVELOPERS
     if (active_triggers)
-        I_Error("RAD_SpawnTriggers without RAD_ClearTriggers\n");
+        EDGEError("RAD_SpawnTriggers without RAD_ClearTriggers\n");
 #endif
 
     for (scr = r_scripts; scr; scr = scr->next)

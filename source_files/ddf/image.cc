@@ -82,7 +82,7 @@ static void ImageStartEntry(const char *name, bool extend)
 {
     if (!name || !name[0]) DDF_Error("New image entry is missing a name!\n");
 
-    //	I_Debugf("ImageStartEntry [%s]\n", name);
+    //	EDGEDebugf("ImageStartEntry [%s]\n", name);
 
     ImageNamespace belong = kImageNamespaceGraphic;
 
@@ -131,7 +131,7 @@ static void ImageParseField(const char *field, const char *contents, int index,
                             bool is_last)
 {
 #if (DEBUG_DDF)
-    I_Debugf("IMAGE_PARSE: %s = %s;\n", field, contents);
+    EDGEDebugf("IMAGE_PARSE: %s = %s;\n", field, contents);
 #endif
 
     // ensure previous patches are cleared when beginning a new set
@@ -170,7 +170,7 @@ static void ImageFinishEntry(void)
 
 static void ImageClearAll(void)
 {
-    I_Warning("Ignoring #CLEARALL in images.ddf\n");
+    EDGEWarning("Ignoring #CLEARALL in images.ddf\n");
 }
 
 void DDF_ReadImages(const std::string &data)

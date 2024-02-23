@@ -25,7 +25,7 @@
 
 /* FUNCTIONS */
 
-abstract_music_c *S_PlayM4PMusic(uint8_t *data, int length, bool looping);
+AbstractMusicPlayer *S_PlayM4PMusic(uint8_t *data, int length, bool looping);
 
 #endif /* __M4P_PLAYER_H__ */
 

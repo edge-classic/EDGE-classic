@@ -90,11 +90,11 @@ float   listen_z;
 BAMAngle listen_angle;
 
 // FIXME: extern == hack
-extern int dev_freq;
-extern int dev_bytes_per_sample;
-extern int dev_frag_pairs;
+extern int sound_device_frequency;
+extern int sound_device_bytes_per_sample;
+extern int sound_device_samples_per_buffer;
 
-extern bool dev_stereo;
+extern bool sound_device_stereo;
 
 mix_channel_c::mix_channel_c() : state(CHAN_Empty), data(nullptr)
 {
@@ -107,13 +107,13 @@ mix_channel_c::~mix_channel_c()
 void mix_channel_c::ComputeDelta()
 {
     // frequency close enough ?
-    if (data->freq > (dev_freq - dev_freq / 100) && data->freq < (dev_freq + dev_freq / 100))
+    if (data->freq > (sound_device_frequency - sound_device_frequency / 100) && data->freq < (sound_device_frequency + sound_device_frequency / 100))
     {
         delta = (1 << 10);
     }
     else
     {
-        delta = (fixed22_t)floor((float)data->freq * 1024.0f / dev_freq);
+        delta = (fixed22_t)floor((float)data->freq * 1024.0f / sound_device_frequency);
     }
 }
 
@@ -124,7 +124,7 @@ void mix_channel_c::ComputeVolume()
 
     if (pos && category >= SNCAT_Opponent)
     {
-        if (dev_stereo)
+        if (sound_device_stereo)
         {
             BAMAngle angle = R_PointToAngle(listen_x, listen_y, pos->x, pos->y);
 
@@ -275,8 +275,8 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 
 static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 {
-    if (!dev_stereo)
-        I_Error("INTERNAL ERROR: tried to mix an interleaved buffer in MONO mode.\n");
+    if (!sound_device_stereo)
+        EDGEError("INTERNAL ERROR: tried to mix an interleaved buffer in MONO mode.\n");
 
     SYS_ASSERT(pairs > 0);
 
@@ -344,7 +344,7 @@ static void MixOneChannel(mix_channel_c *chan, int pairs)
 
         if (chan->data->mode == SBUF_Interleaved)
             MixInterleaved(chan, dest, count);
-        else if (dev_stereo)
+        else if (sound_device_stereo)
             MixStereo(chan, dest, count);
         else
             MixMono(chan, dest, count);
@@ -364,7 +364,7 @@ static void MixOneChannel(mix_channel_c *chan, int pairs)
             chan->offset = 0;
         }
 
-        dest += count * (dev_stereo ? 2 : 1);
+        dest += count * (sound_device_stereo ? 2 : 1);
         pairs -= count;
     }
 }
@@ -425,7 +425,7 @@ static void MixQueues(int pairs)
 
         if (chan->data->mode == SBUF_Interleaved)
             MixInterleaved(chan, dest, count);
-        else if (dev_stereo)
+        else if (sound_device_stereo)
             MixStereo(chan, dest, count);
         else
             MixMono(chan, dest, count);
@@ -447,24 +447,24 @@ static void MixQueues(int pairs)
                 break;
         }
 
-        dest += count * (dev_stereo ? 2 : 1);
+        dest += count * (sound_device_stereo ? 2 : 1);
         pairs -= count;
     }
 }
 
 void S_MixAllChannels(void *stream, int len)
 {
-    if (nosound || len <= 0)
+    if (no_sound || len <= 0)
         return;
 
-    int pairs = len / dev_bytes_per_sample;
+    int pairs = len / sound_device_bytes_per_sample;
 
     int samples = pairs;
-    if (dev_stereo)
+    if (sound_device_stereo)
         samples *= 2;
 
     // check that we're not getting too much data
-    SYS_ASSERT(pairs <= dev_frag_pairs);
+    SYS_ASSERT(pairs <= sound_device_samples_per_buffer);
 
     SYS_ASSERT(mix_buffer && samples <= mix_buf_len);
 
@@ -506,7 +506,7 @@ void S_InitChannels(int total)
         mix_chan[i] = new mix_channel_c();
 
     // allocate mixer buffer
-    mix_buf_len = dev_frag_pairs * (dev_stereo ? 2 : 1);
+    mix_buf_len = sound_device_samples_per_buffer * (sound_device_stereo ? 2 : 1);
     mix_buffer  = new int[mix_buf_len];
 }
 
@@ -638,10 +638,10 @@ void S_ResumeSound(void)
 
 void S_QueueInit(void)
 {
-    if (nosound)
+    if (no_sound)
         return;
 
-    I_LockAudio();
+    EDGELockAudio();
     {
         if (free_qbufs.empty())
         {
@@ -659,15 +659,15 @@ void S_QueueInit(void)
 
         queue_chan->ComputeMusicVolume();
     }
-    I_UnlockAudio();
+    EDGEUnlockAudio();
 }
 
 void S_QueueShutdown(void)
 {
-    if (nosound)
+    if (no_sound)
         return;
 
-    I_LockAudio();
+    EDGELockAudio();
     {
         if (queue_chan)
         {
@@ -689,17 +689,17 @@ void S_QueueShutdown(void)
             queue_chan = nullptr;
         }
     }
-    I_UnlockAudio();
+    EDGEUnlockAudio();
 }
 
 void S_QueueStop(void)
 {
-    if (nosound)
+    if (no_sound)
         return;
 
     SYS_ASSERT(queue_chan);
 
-    I_LockAudio();
+    EDGELockAudio();
     {
         for (; !playing_qbufs.empty(); playing_qbufs.pop_front())
         {
@@ -709,17 +709,17 @@ void S_QueueStop(void)
         queue_chan->state = CHAN_Finished;
         queue_chan->data  = nullptr;
     }
-    I_UnlockAudio();
+    EDGEUnlockAudio();
 }
 
 sound_data_c *S_QueueGetFreeBuffer(int samples, int buf_mode)
 {
-    if (nosound)
+    if (no_sound)
         return nullptr;
 
     sound_data_c *buf = nullptr;
 
-    I_LockAudio();
+    EDGELockAudio();
     {
         if (!free_qbufs.empty())
         {
@@ -729,17 +729,17 @@ sound_data_c *S_QueueGetFreeBuffer(int samples, int buf_mode)
             buf->Allocate(samples, buf_mode);
         }
     }
-    I_UnlockAudio();
+    EDGEUnlockAudio();
 
     return buf;
 }
 
 void S_QueueAddBuffer(sound_data_c *buf, int freq)
 {
-    SYS_ASSERT(!nosound);
+    SYS_ASSERT(!no_sound);
     SYS_ASSERT(buf);
 
-    I_LockAudio();
+    EDGELockAudio();
     {
         buf->freq = freq;
 
@@ -750,19 +750,19 @@ void S_QueueAddBuffer(sound_data_c *buf, int freq)
             QueueNextBuffer();
         }
     }
-    I_UnlockAudio();
+    EDGEUnlockAudio();
 }
 
 void S_QueueReturnBuffer(sound_data_c *buf)
 {
-    SYS_ASSERT(!nosound);
+    SYS_ASSERT(!no_sound);
     SYS_ASSERT(buf);
 
-    I_LockAudio();
+    EDGELockAudio();
     {
         free_qbufs.push_back(buf);
     }
-    I_UnlockAudio();
+    EDGEUnlockAudio();
 }
 
 //--- editor settings ---

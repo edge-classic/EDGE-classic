@@ -130,7 +130,7 @@ static light_image_c *GetLightImage(const MapObjectDefinition *info, int DL)
         const image_c *image = W_ImageLookup(shape, kImageNamespaceGraphic, ILF_Null);
 
         if (!image)
-            I_Error("Missing dynamic light graphic: %s\n", shape);
+            EDGEError("Missing dynamic light graphic: %s\n", shape);
 
         light_image_c *lim = new light_image_c(shape, image);
 
@@ -141,7 +141,7 @@ static light_image_c *GetLightImage(const MapObjectDefinition *info, int DL)
         else
         {
             // FIXME !!!! we need the EPI::BASIC_IMAGE in order to compute the curve
-            I_Error("Custom DLIGHT shapes not yet supported.\n");
+            EDGEError("Custom DLIGHT shapes not yet supported.\n");
         }
 
         D_info->cache_data_ = lim;

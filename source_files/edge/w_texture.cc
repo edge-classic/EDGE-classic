@@ -139,7 +139,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 
         int offset = AlignedLittleEndianS32(*directory);
         if (offset < 0 || offset > maxoff)
-            I_Error("W_InitTextures: bad texture directory");
+            EDGEError("W_InitTextures: bad texture directory");
 
         const raw_texture_t *mtexture = (const raw_texture_t *)((const uint8_t *)maptex + offset);
 
@@ -150,14 +150,14 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
         //  which have this issue
         if (!patchcount)
         {
-            I_Warning("W_InitTextures: Texture '%.8s' has no patches\n", mtexture->name);
-            // I_Error("W_InitTextures: Texture '%.8s' has no patches", mtexture->name);
+            EDGEWarning("W_InitTextures: Texture '%.8s' has no patches\n", mtexture->name);
+            // EDGEError("W_InitTextures: Texture '%.8s' has no patches", mtexture->name);
             patchcount = 0; // mark it as a dud
         }
 
         int width = AlignedLittleEndianS16(mtexture->width);
         if (width == 0)
-            I_Error("W_InitTextures: Texture '%.8s' has zero width", mtexture->name);
+            EDGEError("W_InitTextures: Texture '%.8s' has zero width", mtexture->name);
 
         // -ES- Allocate texture, patches and columnlump/ofs in one big chunk
         int base_size = sizeof(texturedef_t) + sizeof(texpatch_t) * (patchcount - 1);
@@ -202,7 +202,7 @@ static void InstallTextureLumps(int file, const wadtex_resource_c *WT)
 
             if (patch->patch == -1)
             {
-                I_Warning("Missing patch '%.8s' in texture \'%.8s\'\n", patch_names[pname].c_str(), texture->name);
+                EDGEWarning("Missing patch '%.8s' in texture \'%.8s\'\n", patch_names[pname].c_str(), texture->name);
 
                 // mark texture as a dud
                 texture->patchcount = 0;
@@ -299,7 +299,7 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
 
         int offset = AlignedLittleEndianS32(*directory);
         if (offset < 0 || offset > maxoff)
-            I_Error("W_InitTextures: bad texture directory");
+            EDGEError("W_InitTextures: bad texture directory");
 
         const raw_strife_texture_t *mtexture = (const raw_strife_texture_t *)((const uint8_t *)maptex + offset);
 
@@ -310,14 +310,14 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
         //  which have this issue
         if (!patchcount)
         {
-            I_Warning("W_InitTextures: Texture '%.8s' has no patches\n", mtexture->name);
-            // I_Error("W_InitTextures: Texture '%.8s' has no patches", mtexture->name);
+            EDGEWarning("W_InitTextures: Texture '%.8s' has no patches\n", mtexture->name);
+            // EDGEError("W_InitTextures: Texture '%.8s' has no patches", mtexture->name);
             patchcount = 0; // mark it as a dud
         }
 
         int width = AlignedLittleEndianS16(mtexture->width);
         if (width == 0)
-            I_Error("W_InitTextures: Texture '%.8s' has zero width", mtexture->name);
+            EDGEError("W_InitTextures: Texture '%.8s' has zero width", mtexture->name);
 
         // -ES- Allocate texture, patches and columnlump/ofs in one big chunk
         int base_size = sizeof(texturedef_t) + sizeof(texpatch_t) * (patchcount - 1);
@@ -362,7 +362,7 @@ static void InstallTextureLumpsStrife(int file, const wadtex_resource_c *WT)
 
             if (patch->patch == -1)
             {
-                I_Warning("Missing patch '%.8s' in texture \'%.8s\'\n", patch_names[pname].c_str(), texture->name);
+                EDGEWarning("Missing patch '%.8s' in texture \'%.8s\'\n", patch_names[pname].c_str(), texture->name);
 
                 // mark texture as a dud
                 texture->patchcount = 0;
@@ -398,7 +398,7 @@ void W_InitTextures(void)
     texturedef_t **cur;
     int            numtextures = 0;
 
-    I_Printf("Initializing Textures...\n");
+    EDGEPrintf("Initializing Textures...\n");
 
     SYS_ASSERT(tex_sets.empty());
 
@@ -431,8 +431,8 @@ void W_InitTextures(void)
 
     if (tex_sets.empty())
     {
-        // I_Error("No textures found !  Make sure the chosen IWAD is valid.\n");
-        I_Warning("No textures found! Generating fallback texture!\n");
+        // EDGEError("No textures found !  Make sure the chosen IWAD is valid.\n");
+        EDGEWarning("No textures found! Generating fallback texture!\n");
         W_MakeEdgeTex();
         return;
     }
@@ -482,10 +482,10 @@ void W_InitTextures(void)
 	{
 		if (textures[j] == nullptr)
 		{
-			L_WriteDebug("TEXTURE #%d was a dupicate\n", j);
+			EDGEDebugf("TEXTURE #%d was a dupicate\n", j);
 			continue;
 		}
-		L_WriteDebug("TEXTURE #%d:  name=[%s]  file=%d  size=%dx%d\n", j,
+		EDGEDebugf("TEXTURE #%d:  name=[%s]  file=%d  size=%dx%d\n", j,
 				textures[j]->name, textures[j]->file,
 				textures[j]->width, textures[j]->height);
 	}

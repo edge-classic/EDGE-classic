@@ -95,7 +95,7 @@ bool ANSIFile::Seek(int offset, int seekpoint)
         }
 
         default:
-            I_Error("ANSIFile::Seek : illegal seekpoint value.\n");
+            EDGEError("ANSIFile::Seek : illegal seekpoint value.\n");
             return false; /* NOT REACHED */
     }
 
@@ -128,7 +128,7 @@ uint8_t *File::LoadIntoMemory(int max_size)
 
     if (actual_size < 0)
     {
-        I_Warning("File::LoadIntoMemory : position > length.\n");
+        EDGEWarning("File::LoadIntoMemory : position > length.\n");
         actual_size = 0;
     }
 
@@ -215,7 +215,7 @@ unsigned int SubFile::Write(const void *src, unsigned int size)
     (void)src;
     (void)size;
 
-    I_Error("SubFile::Write called.\n");
+    EDGEError("SubFile::Write called.\n");
 
     return 0; /* read only, cobber */
 }
@@ -317,7 +317,7 @@ unsigned int MemFile::Write(const void *src, unsigned int size)
     (void)src;
     (void)size;
 
-    I_Error("MemFile::Write called.\n");
+    EDGEError("MemFile::Write called.\n");
 
     return 0; /* read only, cobber */
 }

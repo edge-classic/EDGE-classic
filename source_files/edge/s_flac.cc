@@ -38,10 +38,10 @@
 
 #define FLAC_FRAMES 1024
 
-extern bool dev_stereo; // FIXME: encapsulation
-extern int  dev_freq;
+extern bool sound_device_stereo; // FIXME: encapsulation
+extern int  sound_device_frequency;
 
-class flacplayer_c : public abstract_music_c
+class flacplayer_c : public AbstractMusicPlayer
 {
   public:
     flacplayer_c();
@@ -123,7 +123,7 @@ bool flacplayer_c::StreamIntoBuffer(sound_data_c *buf)
 
     bool song_done = false;
 
-    if (!dev_stereo)
+    if (!sound_device_stereo)
         data_buf = mono_buffer;
     else
         data_buf = buf->data_L;
@@ -137,7 +137,7 @@ bool flacplayer_c::StreamIntoBuffer(sound_data_c *buf)
 
     buf->freq = flac_track->sampleRate;
 
-    if (!dev_stereo)
+    if (!sound_device_stereo)
         ConvertToMono(buf->data_L, mono_buffer, buf->length);
 
     if (song_done) /* EOF */
@@ -159,7 +159,7 @@ bool flacplayer_c::OpenMemory(uint8_t *data, int length)
 
     if (!flac_track)
     {
-        I_Warning("S_PlayFLACMusic: Error opening song!\n");
+        EDGEWarning("S_PlayFLACMusic: Error opening song!\n");
         return false;
     }
 
@@ -234,7 +234,7 @@ void flacplayer_c::Ticker()
     while (status == PLAYING && !var_pc_speaker_mode)
     {
         sound_data_c *buf =
-            S_QueueGetFreeBuffer(FLAC_FRAMES, (dev_stereo) ? SBUF_Interleaved : SBUF_Mono);
+            S_QueueGetFreeBuffer(FLAC_FRAMES, (sound_device_stereo) ? SBUF_Interleaved : SBUF_Mono);
 
         if (!buf)
             break;
@@ -261,7 +261,7 @@ void flacplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c *S_PlayFLACMusic(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *S_PlayFLACMusic(uint8_t *data, int length, bool looping)
 {
     flacplayer_c *player = new flacplayer_c();
 

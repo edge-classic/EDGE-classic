@@ -148,7 +148,7 @@ static void SectorParseField(const char *field, const char *contents, int index,
                              bool is_last)
 {
 #if (DEBUG_DDF)
-    I_Debugf("SECTOR_PARSE: %s = %s;\n", field, contents);
+    EDGEDebugf("SECTOR_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_CompareName(field, "TEMPLATE") == 0)

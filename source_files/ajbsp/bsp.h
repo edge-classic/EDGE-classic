@@ -48,7 +48,7 @@ enum BuildResult
     // everything went peachy keen
     kBuildOK = 0,
 
-    // not used at the moment, I think we just throw I_Error if needed - Dasho
+    // not used at the moment, I think we just throw EDGEError if needed - Dasho
     kBuildError
 };
 

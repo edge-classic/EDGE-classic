@@ -281,7 +281,7 @@ static void EnableCustomEnv(GLuint env, bool enable)
         break;
 
     default:
-        I_Error("INTERNAL ERROR: no such custom env: %08x\n", env);
+        EDGEError("INTERNAL ERROR: no such custom env: %08x\n", env);
     }
 }
 
@@ -368,7 +368,7 @@ void RGL_DrawUnits(void)
 
     for (int j = 0; j < cur_unit; j++)
     {
-        ecframe_stats.draw_runits++;
+        ecframe_stats.draw_render_units++;
 
         local_gl_unit_t *unit = local_unit_map[j];
 

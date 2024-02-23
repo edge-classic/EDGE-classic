@@ -60,7 +60,7 @@ void DDF_BoomClearGenTypes(void)
 //
 void DDF_BoomMakeGenSector(SectorType *sec, int number)
 {
-    //  I_Debugf("- Making Generalized Sector 0x%03x\n", number);
+    //  EDGEDebugf("- Making Generalized Sector 0x%03x\n", number);
 
     // handle lower 5 bits: Lighting
     switch (number & 0x1F)
@@ -748,7 +748,7 @@ static void MakeBoomCrusher(LineType *line, int number)
 //
 void DDF_BoomMakeGenLine(LineType *line, int number)
 {
-    //	I_Debugf("- Making Generalized Linedef 0x%04x\n", number);
+    //	EDGEDebugf("- Making Generalized Linedef 0x%04x\n", number);
 
     // trigger values are the same for all ranges
     HandleLineTrigger(line, number & 0x7);

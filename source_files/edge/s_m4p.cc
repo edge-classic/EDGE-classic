@@ -34,10 +34,10 @@
 
 #define M4P_BUFFER 1024
 
-extern bool dev_stereo; // FIXME: encapsulation
-extern int  dev_freq;
+extern bool sound_device_stereo; // FIXME: encapsulation
+extern int  sound_device_frequency;
 
-class m4pplayer_c : public abstract_music_c
+class m4pplayer_c : public AbstractMusicPlayer
 {
   public:
     m4pplayer_c();
@@ -114,7 +114,7 @@ bool m4pplayer_c::StreamIntoBuffer(sound_data_c *buf)
 
     bool song_done = false;
 
-    if (!dev_stereo)
+    if (!sound_device_stereo)
         data_buf = mono_buffer;
     else
         data_buf = buf->data_L;
@@ -123,7 +123,7 @@ bool m4pplayer_c::StreamIntoBuffer(sound_data_c *buf)
 
     buf->length = M4P_BUFFER / 2;
 
-    if (!dev_stereo)
+    if (!sound_device_stereo)
         ConvertToMono(buf->data_L, mono_buffer, buf->length);
 
     if (song_done) /* EOF */
@@ -142,9 +142,9 @@ bool m4pplayer_c::OpenMemory(uint8_t *data, int length)
 {
     SYS_ASSERT(data);
 
-    if (!m4p_LoadFromData(data, length, dev_freq, M4P_BUFFER))
+    if (!m4p_LoadFromData(data, length, sound_device_frequency, M4P_BUFFER))
     {
-        I_Warning("M4P: failure to load song!\n");
+        EDGEWarning("M4P: failure to load song!\n");
         return false;
     }
 
@@ -214,7 +214,7 @@ void m4pplayer_c::Ticker()
     while (status == PLAYING && !var_pc_speaker_mode)
     {
         sound_data_c *buf =
-            S_QueueGetFreeBuffer(M4P_BUFFER, (dev_stereo) ? SBUF_Interleaved : SBUF_Mono);
+            S_QueueGetFreeBuffer(M4P_BUFFER, (sound_device_stereo) ? SBUF_Interleaved : SBUF_Mono);
 
         if (!buf)
             break;
@@ -223,7 +223,7 @@ void m4pplayer_c::Ticker()
         {
             if (buf->length > 0)
             {
-                S_QueueAddBuffer(buf, dev_freq);
+                S_QueueAddBuffer(buf, sound_device_frequency);
             }
             else
             {
@@ -241,7 +241,7 @@ void m4pplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c *S_PlayM4PMusic(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *S_PlayM4PMusic(uint8_t *data, int length, bool looping)
 {
     m4pplayer_c *player = new m4pplayer_c();
 

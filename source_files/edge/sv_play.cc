@@ -320,7 +320,7 @@ int SV_PlayerCountElems(void)
 void *SV_PlayerGetElem(int index)
 {
     if (index >= numplayers)
-        I_Error("LOADGAME: Invalid player index: %d\n", index);
+        EDGEError("LOADGAME: Invalid player index: %d\n", index);
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
@@ -337,7 +337,7 @@ void *SV_PlayerGetElem(int index)
         index--;
     }
 
-    I_Error("Internal error in SV_PlayerGetElem: index not found.\n");
+    EDGEError("Internal error in SV_PlayerGetElem: index not found.\n");
     return nullptr;
 }
 
@@ -360,19 +360,19 @@ int SV_PlayerFindElem(player_t *elem)
         index++; // only count non-nullptr pointers
     }
 
-    I_Error("Internal error in SV_PlayerFindElem: No such PlayerPtr: %p\n", elem);
+    EDGEError("Internal error in SV_PlayerFindElem: No such PlayerPtr: %p\n", elem);
     return 0;
 }
 
 void SV_PlayerCreateElems(int num_elems)
 {
-    I_Debugf("SV_PlayerCreateElems...\n");
+    EDGEDebugf("SV_PlayerCreateElems...\n");
 
     // free existing players (sets all pointers to nullptr)
     P_DestroyAllPlayers();
 
     if (num_elems > MAXPLAYERS)
-        I_Error("LOADGAME: too many players (%d)\n", num_elems);
+        EDGEError("LOADGAME: too many players (%d)\n", num_elems);
 
     numplayers = num_elems;
     numbots    = 0;
@@ -435,16 +435,16 @@ void SV_PlayerFinaliseElems(void)
             continue;
 
         if (p->pnum < 0)
-            I_Error("LOADGAME: player did not load (index %d) !\n", pnum);
+            EDGEError("LOADGAME: player did not load (index %d) !\n", pnum);
 
         if (p->pnum >= MAXPLAYERS)
-            I_Error("LOADGAME: player with bad index (%d) !\n", p->pnum);
+            EDGEError("LOADGAME: player with bad index (%d) !\n", p->pnum);
 
         if (!p->mo)
-            I_Error("LOADGAME: Player %d has no mobj !\n", p->pnum);
+            EDGEError("LOADGAME: Player %d has no mobj !\n", p->pnum);
 
         if (players[p->pnum])
-            I_Error("LOADGAME: Two players with same number !\n");
+            EDGEError("LOADGAME: Two players with same number !\n");
 
         players[p->pnum] = p;
 
@@ -470,7 +470,7 @@ void SV_PlayerFinaliseElems(void)
     }
 
     if (first < 0)
-        I_Error("LOADGAME: No players !!\n");
+        EDGEError("LOADGAME: No players !!\n");
 
     if (consoleplayer < 0)
         GameSetConsolePlayer(first);
@@ -684,14 +684,14 @@ bool SR_PlayerGetState(void *storage, int index, void *extra)
     base_p = strchr(buffer, ':');
 
     if (base_p == nullptr || base_p[0] == 0)
-        I_Error("Corrupt savegame: bad weapon state 1: `%s'\n", buffer);
+        EDGEError("Corrupt savegame: bad weapon state 1: `%s'\n", buffer);
 
     *base_p++ = 0;
 
     off_p = strchr(base_p, ':');
 
     if (off_p == nullptr || off_p[0] == 0)
-        I_Error("Corrupt savegame: bad weapon state 2: `%s'\n", base_p);
+        EDGEError("Corrupt savegame: bad weapon state 2: `%s'\n", base_p);
 
     *off_p++ = 0;
 
@@ -701,7 +701,7 @@ bool SR_PlayerGetState(void *storage, int index, void *extra)
 
     actual = weapondefs.Lookup(buffer);
     if (!actual)
-        I_Error("LOADGAME: no such weapon %s for state %s:%s\n", buffer, base_p, off_p);
+        EDGEError("LOADGAME: no such weapon %s for state %s:%s\n", buffer, base_p, off_p);
 
     // find base state
     offset = strtol(off_p, nullptr, 0) - 1;
@@ -710,14 +710,14 @@ bool SR_PlayerGetState(void *storage, int index, void *extra)
 
     if (!base)
     {
-        I_Warning("LOADGAME: no such label `%s' for weapon state.\n", base_p);
+        EDGEWarning("LOADGAME: no such label `%s' for weapon state.\n", base_p);
 
         offset = 0;
         base   = actual->ready_state_;
     }
 
 #if 0
-	L_WriteDebug("Unswizzled weapon state `%s:%s:%s' -> %d\n", 
+	EDGEDebugf("Unswizzled weapon state `%s:%s:%s' -> %d\n", 
 		buffer, base_p, off_p, base + offset);
 #endif
 
@@ -757,7 +757,7 @@ void SR_PlayerPutState(void *storage, int index, void *extra)
 
     if (s_num < 0 || s_num >= num_states)
     {
-        I_Warning("SAVEGAME: weapon is in invalid state %d\n", s_num);
+        EDGEWarning("SAVEGAME: weapon is in invalid state %d\n", s_num);
         s_num = weapondefs[0]->state_grp_[0].first;
     }
 
@@ -775,7 +775,7 @@ void SR_PlayerPutState(void *storage, int index, void *extra)
 
     if (!actual)
     {
-        I_Warning("SAVEGAME: weapon state %d cannot be found !!\n", s_num);
+        EDGEWarning("SAVEGAME: weapon state %d cannot be found !!\n", s_num);
         actual = weapondefs[0];
         s_num  = actual->state_grp_[0].first;
     }
@@ -792,7 +792,7 @@ void SR_PlayerPutState(void *storage, int index, void *extra)
                                     1 + s_num - base));
 
 #if 0
-	L_WriteDebug("Swizzled state of weapon %d -> `%s'\n", s_num, buf.c_str());
+	EDGEDebugf("Swizzled state of weapon %d -> `%s'\n", s_num, buf.c_str());
 #endif
 
     SV_PutString(buf.c_str());

@@ -192,7 +192,7 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
         count += frames::BeginGroup('S', info->spawnstate);
 
         if (count != 2)
-            I_Debugf(
+            EDGEDebugf(
                 "Dehacked: Warning - Brain cube is missing spawn/fire "
                 "states.\n");
 
@@ -221,7 +221,7 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
 
     if (count == 0)
     {
-        I_Debugf("Dehacked: Warning - Attack [%s] has no states.\n",
+        EDGEDebugf("Dehacked: Warning - Attack [%s] has no states.\n",
                  things::GetMobjName(mt_num) + 1);
         frames::force_fullbright = false;
         return;
@@ -405,7 +405,7 @@ void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
         }
 
     if (!ext)
-        I_Error("Dehacked: Error - Missing attack %s in extra table.\n",
+        EDGEError("Dehacked: Error - Missing attack %s in extra table.\n",
                 things::GetMobjName(mt_num) + 1);
 
     wad::Printf("ATTACKTYPE = %s;\n", ext->atk_type);
@@ -479,7 +479,7 @@ void Attacks::ConvertAttack(const DehackedMapObjectDefinition *info, int mt_num,
     if (frames::attack_slot[0] || frames::attack_slot[1] ||
         frames::attack_slot[2])
     {
-        I_Debugf(
+        EDGEDebugf(
             "Dehacked: Warning - Attack [%s] contained an attacking action.\n",
             things::GetMobjName(mt_num) + 1);
         things::HandleAttacks(info, mt_num);
@@ -801,7 +801,7 @@ int ParseBits(const FlagName *list, char *bit_str)
             if (sscanf(token, " %i ", &flags) == 1)
                 new_flags |= flags;
             else
-                I_Debugf(
+                EDGEDebugf(
                     "Dehacked: Warning - Line %d: unreadable BITS value: %s\n",
                     patch::line_num, token);
 
@@ -815,7 +815,7 @@ int ParseBits(const FlagName *list, char *bit_str)
 
         if (list[i].bex == nullptr)
         {
-            I_Debugf("Dehacked: Warning - Line %d: unknown BITS mnemonic: %s\n",
+            EDGEDebugf("Dehacked: Warning - Line %d: unknown BITS mnemonic: %s\n",
                      patch::line_num, token);
             continue;
         }
@@ -1192,7 +1192,7 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
 
         if (0 == frames::BeginGroup('E', tfog->spawnstate))
         {
-            I_Debugf("Dehacked: Warning - Teleport fog has no spawn states.\n");
+            EDGEDebugf("Dehacked: Warning - Teleport fog has no spawn states.\n");
             return;
         }
 
@@ -1222,7 +1222,7 @@ void HandleFrames(const DehackedMapObjectDefinition *info, int mt_num)
         // with teleport target (handled above) and brain spit targets.
 
         if (mt_num != kMT_BOSSTARGET)
-            I_Debugf("Dehacked: Warning - Mobj [%s:%d] has no states.\n",
+            EDGEDebugf("Dehacked: Warning - Mobj [%s:%d] has no states.\n",
                      GetMobjName(mt_num), info->doomednum);
 
         wad::Printf("TRANSLUCENCY = 0%%;\n");
@@ -1420,7 +1420,7 @@ void HandleItem(const DehackedMapObjectDefinition *info, int mt_num)
 
     if (pu->benefit == nullptr)  // not found
     {
-        I_Debugf(
+        EDGEDebugf(
             "Dehacked: Warning - Unknown pickup sprite \"%s\" for item [%s]\n",
             sprites::GetOriginalName(spr_num), GetMobjName(mt_num));
         return;
@@ -1598,7 +1598,7 @@ void things::HandleAttacks(const DehackedMapObjectDefinition *info, int mt_num)
     }
     else if (info->meleestate && info->name[0] != '*')
     {
-        I_Debugf(
+        EDGEDebugf(
             "Dehacked: Warning - No close attack in melee states of [%s].\n",
             GetMobjName(mt_num));
         wad::Printf("CLOSE_ATTACK = DEMON_CLOSECOMBAT; // dummy attack\n");
@@ -1823,7 +1823,7 @@ void things::AlterThing(int new_val)
 
     if (!FieldAlter(mobj_field, field_name, raw_obj, new_val))
     {
-        I_Debugf("Dehacked: Warning - UNKNOWN THING FIELD: %s\n", field_name);
+        EDGEDebugf("Dehacked: Warning - UNKNOWN THING FIELD: %s\n", field_name);
     }
 }
 

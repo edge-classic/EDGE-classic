@@ -202,7 +202,7 @@ bool P_Move(mobj_t *actor, bool path)
             return false;
 
         if ((unsigned)actor->movedir >= 8)
-            I_Error("Weird actor->movedir!");
+            EDGEError("Weird actor->movedir!");
 
         tryx = actor->x + actor->speed * xspeed[actor->movedir];
         tryy = actor->y + actor->speed * yspeed[actor->movedir];

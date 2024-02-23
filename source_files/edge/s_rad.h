@@ -25,7 +25,7 @@
 
 /* FUNCTIONS */
 
-abstract_music_c *S_PlayRADMusic(uint8_t *data, int length, bool looping);
+AbstractMusicPlayer *S_PlayRADMusic(uint8_t *data, int length, bool looping);
 
 #endif /* __RAD_PLAYER_H__ */
 

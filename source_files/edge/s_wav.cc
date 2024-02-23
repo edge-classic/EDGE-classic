@@ -32,7 +32,7 @@
 #define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"
 
-extern bool dev_stereo; // FIXME: encapsulation
+extern bool sound_device_stereo; // FIXME: encapsulation
 
 // The following structs and PC Speaker Conversion routine are adapted from the SLADE codebase,
 // specifically https://github.com/sirjuddington/SLADE/blob/master/src/MainEditor/Conversions.cpp
@@ -91,7 +91,7 @@ uint8_t *Convert_PCSpeaker(const uint8_t *data, int *length)
 
     if (*length < 4)
     {
-        I_Warning("Invalid PC Speaker Sound\n");
+        EDGEWarning("Invalid PC Speaker Sound\n");
         return nullptr;
     }
 
@@ -102,12 +102,12 @@ uint8_t *Convert_PCSpeaker(const uint8_t *data, int *length)
     // Format checks
     if (header.zero != 0) // Check for magic number
     {
-        I_Warning("Invalid Doom PC Speaker Sound\n");
+        EDGEWarning("Invalid Doom PC Speaker Sound\n");
         return nullptr;
     }
     if (header.samples > (*length - 4) || header.samples < 4) // Check for sane values
     {
-        I_Warning("Invalid Doom PC Speaker Sound\n");
+        EDGEWarning("Invalid Doom PC Speaker Sound\n");
         return nullptr;
     }
     numsamples = header.samples;
@@ -125,7 +125,7 @@ uint8_t *Convert_PCSpeaker(const uint8_t *data, int *length)
     {
         if (osamples[s] > 127)
         {
-            I_Warning("Invalid PC Speaker counter value: %d > 127", osamples[s]);
+            EDGEWarning("Invalid PC Speaker counter value: %d > 127", osamples[s]);
             return nullptr;
         }
         if (osamples[s] > 0)
@@ -210,13 +210,13 @@ bool S_LoadWAVSound(sound_data_c *buf, uint8_t *data, int length, bool pc_speake
 
     if (!drwav_init_memory(&wav, data, length, nullptr))
     {
-        I_Warning("Failed to load WAV sound (corrupt wav?)\n");
+        EDGEWarning("Failed to load WAV sound (corrupt wav?)\n");
         return false;
     }
 
     if (wav.channels > 2)
     {
-        I_Warning("WAV SFX Loader: too many channels: %d\n", wav.channels);
+        EDGEWarning("WAV SFX Loader: too many channels: %d\n", wav.channels);
         drwav_uninit(&wav);
         return false;
     }
@@ -224,12 +224,12 @@ bool S_LoadWAVSound(sound_data_c *buf, uint8_t *data, int length, bool pc_speake
     if (wav.totalPCMFrameCount <=
         0) // I think the initial loading would fail if this were the case, but just as a sanity check - Dasho
     {
-        I_Warning("WAV SFX Loader: no samples!\n");
+        EDGEWarning("WAV SFX Loader: no samples!\n");
         drwav_uninit(&wav);
         return false;
     }
 
-    I_Debugf("WAV SFX Loader: freq %d Hz, %d channels\n", wav.sampleRate, wav.channels);
+    EDGEDebugf("WAV SFX Loader: freq %d Hz, %d channels\n", wav.sampleRate, wav.channels);
 
     bool is_stereo = (wav.channels > 1);
 
@@ -242,7 +242,7 @@ bool S_LoadWAVSound(sound_data_c *buf, uint8_t *data, int length, bool pc_speake
     gather.CommitChunk(drwav_read_pcm_frames_s16(&wav, wav.totalPCMFrameCount, buffer));
 
     if (!gather.Finalise(buf, is_stereo))
-        I_Warning("WAV SFX Loader: no samples!\n");
+        EDGEWarning("WAV SFX Loader: no samples!\n");
 
     drwav_uninit(&wav);
 

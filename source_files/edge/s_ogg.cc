@@ -44,7 +44,7 @@
 #define VORBIS_IMPL
 #include "minivorbis.h"
 
-extern bool dev_stereo; // FIXME: encapsulation
+extern bool sound_device_stereo; // FIXME: encapsulation
 
 struct datalump_t
 {
@@ -54,7 +54,7 @@ struct datalump_t
     size_t size;
 };
 
-class oggplayer_c : public abstract_music_c
+class oggplayer_c : public AbstractMusicPlayer
 {
   public:
     oggplayer_c();
@@ -251,7 +251,7 @@ bool oggplayer_c::StreamIntoBuffer(sound_data_c *buf)
     {
         int16_t *data_buf;
 
-        if (is_stereo && !dev_stereo)
+        if (is_stereo && !sound_device_stereo)
             data_buf = mono_buffer;
         else
             data_buf = buf->data_L + samples * (is_stereo ? 2 : 1);
@@ -280,14 +280,14 @@ bool oggplayer_c::StreamIntoBuffer(sound_data_c *buf)
 
             err_msg += GetError(got_size);
 
-            // FIXME: using I_Error is too harsh
-            I_Error("%s", err_msg.c_str());
+            // FIXME: using EDGEError is too harsh
+            EDGEError("%s", err_msg.c_str());
             return false; /* NOT REACHED */
         }
 
         got_size /= (is_stereo ? 2 : 1) * sizeof(int16_t);
 
-        if (is_stereo && !dev_stereo)
+        if (is_stereo && !sound_device_stereo)
             ConvertToMono(buf->data_L + samples, mono_buffer, got_size);
 
         samples += got_size;
@@ -321,7 +321,7 @@ bool oggplayer_c::OpenMemory(uint8_t *data, int length)
         std::string err_msg("[oggplayer_c::OpenMemory] Failed: ");
 
         err_msg += GetError(result);
-        I_Warning("%s\n", err_msg.c_str());
+        EDGEWarning("%s\n", err_msg.c_str());
         ov_clear(&ogg_stream);
         ogg_lump->data = nullptr; // this is deleted after the function returns false
         delete ogg_lump;
@@ -398,7 +398,7 @@ void oggplayer_c::Ticker()
     while (status == PLAYING && !var_pc_speaker_mode)
     {
         sound_data_c *buf =
-            S_QueueGetFreeBuffer(OGGV_NUM_SAMPLES, (is_stereo && dev_stereo) ? SBUF_Interleaved : SBUF_Mono);
+            S_QueueGetFreeBuffer(OGGV_NUM_SAMPLES, (is_stereo && sound_device_stereo) ? SBUF_Interleaved : SBUF_Mono);
 
         if (!buf)
             break;
@@ -418,7 +418,7 @@ void oggplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c *S_PlayOGGMusic(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *S_PlayOGGMusic(uint8_t *data, int length, bool looping)
 {
     oggplayer_c *player = new oggplayer_c();
 
@@ -455,7 +455,7 @@ bool S_LoadOGGSound(sound_data_c *buf, const uint8_t *data, int length)
 
     if (result < 0)
     {
-        I_Warning("Failed to load OGG sound (corrupt ogg?) error=%d\n", result);
+        EDGEWarning("Failed to load OGG sound (corrupt ogg?) error=%d\n", result);
 
         return false;
     }
@@ -463,11 +463,11 @@ bool S_LoadOGGSound(sound_data_c *buf, const uint8_t *data, int length)
     vorbis_info *vorbis_inf = ov_info(&ogg_stream, -1);
     SYS_ASSERT(vorbis_inf);
 
-    I_Debugf("OGG SFX Loader: freq %d Hz, %d channels\n", (int)vorbis_inf->rate, (int)vorbis_inf->channels);
+    EDGEDebugf("OGG SFX Loader: freq %d Hz, %d channels\n", (int)vorbis_inf->rate, (int)vorbis_inf->channels);
 
     if (vorbis_inf->channels > 2)
     {
-        I_Warning("OGG Sfx Loader: too many channels: %d\n", vorbis_inf->channels);
+        EDGEWarning("OGG Sfx Loader: too many channels: %d\n", vorbis_inf->channels);
 
         ogg_lump.size = 0;
         ov_clear(&ogg_stream);
@@ -507,7 +507,7 @@ bool S_LoadOGGSound(sound_data_c *buf, const uint8_t *data, int length)
         {
             gather.DiscardChunk();
 
-            I_Warning("Problem occurred while loading OGG (%d)\n", got_size);
+            EDGEWarning("Problem occurred while loading OGG (%d)\n", got_size);
             break;
         }
 
@@ -517,7 +517,7 @@ bool S_LoadOGGSound(sound_data_c *buf, const uint8_t *data, int length)
     }
 
     if (!gather.Finalise(buf, is_stereo))
-        I_Error("OGG SFX Loader: no samples!\n");
+        EDGEError("OGG SFX Loader: no samples!\n");
 
     ov_clear(&ogg_stream);
 

@@ -227,7 +227,7 @@ void P_UpdateButtons(void)
                 break;
 
             case BWH_None:
-                I_Error("INTERNAL ERROR: bwhere is BWH_None!\n");
+                EDGEError("INTERNAL ERROR: bwhere is BWH_None!\n");
             }
 
             if (b->off_sound)

@@ -51,7 +51,7 @@ char wad_msg_buf[1024];
 void NewLump(DDFType type)
 {
     if (dest_container == nullptr)
-        I_Error("Dehacked: Error - WAD_NewLump: no container!\n");
+        EDGEError("Dehacked: Error - WAD_NewLump: no container!\n");
 
     dest_container->push_back({type, "", ""});
 
@@ -61,7 +61,7 @@ void NewLump(DDFType type)
 void Printf(const char *str, ...)
 {
     if (cur_lump == nullptr)
-        I_Error("Dehacked: Error - WAD_Printf: not started.\n");
+        EDGEError("Dehacked: Error - WAD_Printf: not started.\n");
 
     va_list args;
 

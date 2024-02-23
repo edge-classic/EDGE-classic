@@ -95,7 +95,7 @@ void SV_BeginLoad(bool is_hub)
     savestruct_t *S;
     savearray_t  *A;
 
-    L_WriteDebug("SV_BeginLoad...\n");
+    EDGEDebugf("SV_BeginLoad...\n");
 
     loaded_struct_list = nullptr;
     loaded_array_list  = nullptr;
@@ -130,7 +130,7 @@ void SV_FinishLoad(void)
     // Finalise all the arrays, and free some stuff after loading
     // has finished.
 
-    L_WriteDebug("SV_FinishLoad...\n");
+    EDGEDebugf("SV_FinishLoad...\n");
 
     while (loaded_struct_list)
     {
@@ -191,7 +191,7 @@ static void StructSkipField(savefield_t *field)
         break;
 
     default:
-        I_Error("SV_LoadStruct: BAD TYPE IN FIELD.\n");
+        EDGEError("SV_LoadStruct: BAD TYPE IN FIELD.\n");
     }
 }
 
@@ -273,7 +273,7 @@ static bool SV_LoadSTRU(void)
     S->marker = SV_GetString();
 
     if (strlen(S->marker) != 4)
-        I_Error("LOADGAME: Corrupt savegame (STRU bad marker)\n");
+        EDGEError("LOADGAME: Corrupt savegame (STRU bad marker)\n");
 
     S->fields = new savefield_t[numfields + 1];
 
@@ -337,7 +337,7 @@ static bool SV_LoadARRY(void)
     A->sdef = SV_LookupLoadedStruct(struct_name);
 
     if (A->sdef == nullptr)
-        I_Error("LOADGAME: Coding Error ! (no STRU `%s' for ARRY)\n", struct_name);
+        EDGEError("LOADGAME: Coding Error ! (no STRU `%s' for ARRY)\n", struct_name);
 
     SV_FreeString(struct_name);
 
@@ -359,7 +359,7 @@ static bool SV_LoadDATA(void)
     savearray_t *A = SV_LookupLoadedArray(array_name);
 
     if (!A)
-        I_Error("LOADGAME: Coding Error ! (no ARRY `%s' for DATA)\n", array_name);
+        EDGEError("LOADGAME: Coding Error ! (no ARRY `%s' for DATA)\n", array_name);
 
     SV_FreeString(array_name);
 
@@ -374,7 +374,7 @@ static bool SV_LoadDATA(void)
             sv_current_elem = (*A->counterpart->get_elem)(i);
 
             if (!sv_current_elem)
-                I_Error("SV_LoadDATA: FIXME: skip elems\n");
+                EDGEError("SV_LoadDATA: FIXME: skip elems\n");
 
             if (!SV_LoadStruct(sv_current_elem, A->sdef))
                 return false;
@@ -451,7 +451,7 @@ bool SV_LoadEverything(void)
             continue;
         }
 
-        I_Warning("LOADGAME: Unexpected top-level chunk [%s]\n", marker);
+        EDGEWarning("LOADGAME: Unexpected top-level chunk [%s]\n", marker);
 
         if (!SV_SkipReadChunk(marker))
             return false;

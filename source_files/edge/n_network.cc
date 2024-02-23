@@ -82,7 +82,7 @@ static int last_tryrun_tic; // last time N_TryRunTics was called
 
 void N_InitNetwork(void)
 {
-    srand(I_PureRandom());
+    srand(EDGEPureRandom());
 
     N_ResetTics();
 
@@ -109,7 +109,7 @@ void N_Shutdown(void)
 static void PreInput()
 {
     // process input
-    I_ControlGetEvents();
+    EDGEControlGetEvents();
     EventProcessEvents();
 }
 
@@ -138,7 +138,7 @@ static bool N_BuildTiccmds(void)
         if (!p->builder)
             continue;
 #if 0
-		I_Debugf("N_BuildTiccmds: pnum %d netgame %c\n", pnum, netgame ? 'Y' : 'n');
+		EDGEDebugf("N_BuildTiccmds: pnum %d netgame %c\n", pnum, netgame ? 'Y' : 'n');
 #endif
         int buf = maketic % BACKUPTICS;
 
@@ -190,7 +190,7 @@ int N_NetUpdate()
     // if enough time has elapsed, process input events and build one
     // or more ticcmds for the local players.
 
-    int nowtime = I_GetTime();
+    int nowtime = EDGEGetTime();
 
     // singletic update is syncronous
     if (singletics)
@@ -214,7 +214,7 @@ int N_NetUpdate()
 
 #if 0
 		if (newtics > 0 && numplayers > 0)
-			I_Debugf("N_NetUpdate: lost tics: %d\n", newtics);
+			EDGEDebugf("N_NetUpdate: lost tics: %d\n", newtics);
 #endif
     }
 
@@ -238,7 +238,7 @@ int N_TryRunTics()
     last_tryrun_tic = nowtime;
 
 #ifdef DEBUG_TICS
-    I_Debugf("N_TryRunTics: now %d last_tryrun %d --> real %d\n", nowtime, nowtime - realtics, realtics);
+    EDGEDebugf("N_TryRunTics: now %d last_tryrun %d --> real %d\n", nowtime, nowtime - realtics, realtics);
 #endif
 
     // simpler handling when no game in progress
@@ -252,7 +252,7 @@ int N_TryRunTics()
 
             if (!n_busywait.d_&& realtics <= 0)
             {
-                I_Sleep(5);
+                EDGESleep(5);
             }
         }
 
@@ -277,7 +277,7 @@ int N_TryRunTics()
         tics = HMM_MAX(HMM_MIN(tics, realtics), 1);
 
 #ifdef DEBUG_TICS
-    I_Debugf("=== maketic %d game_tic %d | real %d using %d\n", maketic, game_tic, realtics, tics);
+    EDGEDebugf("=== maketic %d game_tic %d | real %d using %d\n", maketic, game_tic, realtics, tics);
 #endif
 
     // wait for new tics if needed
@@ -287,7 +287,7 @@ int N_TryRunTics()
 
         if (!n_busywait.d_&& (maketic < game_tic + tics))
         {
-            I_Sleep(5);
+            EDGESleep(5);
         }
     }
 
@@ -298,7 +298,7 @@ void N_ResetTics(void)
 {
     maketic = game_tic = 0;
 
-    last_update_tic = last_tryrun_tic = I_GetTime();
+    last_update_tic = last_tryrun_tic = EDGEGetTime();
 }
 
 //--- editor settings ---

@@ -38,8 +38,8 @@ typedef struct BW_MidiRtInterface FluidInterface;
 
 #define FLUID_NUM_SAMPLES  4096
 
-extern bool dev_stereo;
-extern int  dev_freq;
+extern bool sound_device_stereo;
+extern int  sound_device_frequency;
 
 bool fluid_disabled = false;
 
@@ -47,7 +47,7 @@ fluid_synth_t *edge_fluid = nullptr;
 fluid_settings_t *edge_fluid_settings = nullptr;
 fluid_sfloader_t *edge_fluid_sfloader = nullptr;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(s_soundfont, "", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(midi_soundfont, "", kConsoleVariableFlagArchive)
 
 EDGE_DEFINE_CONSOLE_VARIABLE(s_fluidgain, "0.3", (ConsoleVariableFlag)(kConsoleVariableFlagArchive|kConsoleVariableFlagFilepath))
 
@@ -57,7 +57,7 @@ static void FluidError(int level, char* message, void* data)
 {
     (void)level;
     (void)data;
-    I_Error("Fluidlite: %s\n", message);
+    EDGEError("Fluidlite: %s\n", message);
 }
 
 static void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
@@ -81,13 +81,13 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
 
 bool S_StartupFluid(void)
 {
-    I_Printf("Initializing FluidLite...\n");
+    EDGEPrintf("Initializing FluidLite...\n");
 
     // Check for presence of previous CVAR value's file
     bool cvar_good = false;
     for (size_t i = 0; i < available_soundfonts.size(); i++)
     {
-        if (epi::StringCaseCompareASCII(s_soundfont.s_, available_soundfonts.at(i)) == 0)
+        if (epi::StringCaseCompareASCII(midi_soundfont.s_, available_soundfonts.at(i)) == 0)
         {
             cvar_good = true;
             break;
@@ -96,10 +96,10 @@ bool S_StartupFluid(void)
 
     if (!cvar_good)
     {
-        I_Warning("Cannot find previously used soundfont %s, falling back to default!\n", s_soundfont.c_str());
-        s_soundfont = epi::SanitizePath(epi::PathAppend(game_dir, "soundfont/Default.sf2"));
-        if (!epi::FileExists(s_soundfont.s_))
-            I_Error("Fluidlite: Cannot locate default soundfont (Default.sf2)! Please check the /soundfont directory "
+        EDGEWarning("Cannot find previously used soundfont %s, falling back to default!\n", midi_soundfont.c_str());
+        midi_soundfont = epi::SanitizePath(epi::PathAppend(game_directory, "soundfont/Default.sf2"));
+        if (!epi::FileExists(midi_soundfont.s_))
+            EDGEError("Fluidlite: Cannot locate default soundfont (Default.sf2)! Please check the /soundfont directory "
                     "of your EDGE-Classic install!\n");
     }
 
@@ -112,7 +112,7 @@ bool S_StartupFluid(void)
     fluid_settings_setstr(edge_fluid_settings, "synth.reverb.active", "no");
     fluid_settings_setstr(edge_fluid_settings, "synth.chorus.active", "no");
     fluid_settings_setnum(edge_fluid_settings, "synth.gain", s_fluidgain.f_);
-    fluid_settings_setnum(edge_fluid_settings, "synth.sample-rate", dev_freq);
+    fluid_settings_setnum(edge_fluid_settings, "synth.sample-rate", sound_device_frequency);
     fluid_settings_setnum(edge_fluid_settings, "synth.polyphony", 64);
 	edge_fluid = new_fluid_synth(edge_fluid_settings);
 
@@ -124,9 +124,9 @@ bool S_StartupFluid(void)
 	edge_fluid_sfloader->fileapi->fopen = edge_fluid_fopen;
 	fluid_synth_add_sfloader(edge_fluid, edge_fluid_sfloader);
 
-    if (fluid_synth_sfload(edge_fluid, s_soundfont.c_str(), 1) == -1)
+    if (fluid_synth_sfload(edge_fluid, midi_soundfont.c_str(), 1) == -1)
 	{
-		I_Warning("FluidLite: Initialization failure.\n");
+		EDGEWarning("FluidLite: Initialization failure.\n");
         delete_fluid_synth(edge_fluid);
         delete_fluid_settings(edge_fluid_settings);
         return false;
@@ -143,7 +143,7 @@ void S_RestartFluid(void)
     if (fluid_disabled)
 		return;
 
-	I_Printf("Restarting FluidLite...\n");
+	EDGEPrintf("Restarting FluidLite...\n");
 
 	int old_entry = entry_playing;
 
@@ -166,7 +166,7 @@ void S_RestartFluid(void)
 	return; // OK!
 }
 
-class fluid_player_c : public abstract_music_c
+class fluid_player_c : public AbstractMusicPlayer
 {
   private:
     enum status_e
@@ -277,7 +277,7 @@ class fluid_player_c : public abstract_music_c
 		fluid_iface->onPcmRender = playSynth;
 		fluid_iface->onPcmRender_userData = this;
 
-		fluid_iface->pcmSampleRate = dev_freq;
+		fluid_iface->pcmSampleRate = sound_device_frequency;
 		fluid_iface->pcmFrameSize = 2 /*channels*/ * 2 /*size of one sample*/;
 
 		fluid_iface->rt_deviceSwitch = rtDeviceSwitch;
@@ -368,14 +368,14 @@ class fluid_player_c : public abstract_music_c
         while (status == PLAYING && !var_pc_speaker_mode)
         {
             sound_data_c *buf = S_QueueGetFreeBuffer(FLUID_NUM_SAMPLES, 
-					dev_stereo ? SBUF_Interleaved : SBUF_Mono);
+					sound_device_stereo ? SBUF_Interleaved : SBUF_Mono);
 
             if (!buf)
                 break;
 
             if (StreamIntoBuffer(buf))
             {
-                S_QueueAddBuffer(buf, dev_freq);
+                S_QueueAddBuffer(buf, sound_device_frequency);
             }
             else
             {
@@ -394,7 +394,7 @@ class fluid_player_c : public abstract_music_c
 
         bool song_done = false;
 
-        if (!dev_stereo)
+        if (!sound_device_stereo)
             data_buf = mono_buffer;
         else
             data_buf = buf->data_L;
@@ -406,7 +406,7 @@ class fluid_player_c : public abstract_music_c
 
 		buf->length = played / 4;
 
-        if (!dev_stereo)
+        if (!sound_device_stereo)
             ConvertToMono(buf->data_L, mono_buffer, buf->length);
 
         if (song_done) /* EOF */
@@ -421,7 +421,7 @@ class fluid_player_c : public abstract_music_c
     }
 };
 
-abstract_music_c *S_PlayFluid(uint8_t *data, int length, bool loop)
+AbstractMusicPlayer *S_PlayFluid(uint8_t *data, int length, bool loop)
 {
     if (fluid_disabled)
 	{
@@ -433,14 +433,14 @@ abstract_music_c *S_PlayFluid(uint8_t *data, int length, bool loop)
 
     if (!player)
     {
-        I_Debugf("FluidLite player: error initializing!\n");
+        EDGEDebugf("FluidLite player: error initializing!\n");
         delete[] data;
         return nullptr;
     }
 
     if (!player->LoadTrack(data, length)) // Lobo: quietly log it instead of completely exiting EDGE
     {
-        I_Debugf("FluidLite player: failed to load MIDI file!\n");
+        EDGEDebugf("FluidLite player: failed to load MIDI file!\n");
         delete[] data;
         delete player;
         return nullptr;

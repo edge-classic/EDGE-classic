@@ -70,7 +70,7 @@ static RGBAColor current_color;
 
 extern void E_ProgressMessage(const char *message);
 
-extern ConsoleVariable v_pixelaspect;
+extern ConsoleVariable pixel_aspect_ratio;
 
 static constexpr uint8_t kMaximumConsoleLines = 160;
 
@@ -576,9 +576,9 @@ static void DrawChar(int x, int y, char ch, RGBAColor col)
     if (console_font->definition_->type_ == kFontTypeTrueType)
     {
         float chwidth = console_font->CharWidth(ch);
-        XMUL          = RoundToInteger(chwidth * FNSZ_ratio / v_pixelaspect.f_);
+        XMUL          = RoundToInteger(chwidth * FNSZ_ratio / pixel_aspect_ratio.f_);
         float width =
-            (chwidth - console_font->spacing_) * FNSZ_ratio / v_pixelaspect.f_;
+            (chwidth - console_font->spacing_) * FNSZ_ratio / pixel_aspect_ratio.f_;
         float x_adjust = (XMUL - width) / 2;
         float y_adjust = console_font->truetype_glyph_map_.at((uint8_t)ch)
                              .y_shift[current_font_size] *
@@ -736,7 +736,7 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
                         console_font->truetype_info_, console_font->GetGlyphIndex(*s),
                         console_font->GetGlyphIndex(*(s + 1))) *
                     console_font->truetype_kerning_scale_[current_font_size] *
-                    FNSZ_ratio / v_pixelaspect.f_;
+                    FNSZ_ratio / pixel_aspect_ratio.f_;
             }
         }
 
@@ -796,7 +796,7 @@ void ConsoleSetupFont(void)
     if (!console_font)
     {
         FontDefinition *DEF = fontdefs.Lookup("CON_FONT_2");
-        if (!DEF) I_Error("CON_FONT_2 definition missing from DDFFONT!\n");
+        if (!DEF) EDGEError("CON_FONT_2 definition missing from DDFFONT!\n");
         console_font = hud_fonts.Lookup(DEF);
         SYS_ASSERT(console_font);
         console_font->Load();
@@ -805,7 +805,7 @@ void ConsoleSetupFont(void)
     if (!endoom_font)
     {
         FontDefinition *DEF = fontdefs.Lookup("ENDFONT");
-        if (!DEF) I_Error("ENDFONT definition missing from DDFFONT!\n");
+        if (!DEF) EDGEError("ENDFONT definition missing from DDFFONT!\n");
         endoom_font = hud_fonts.Lookup(DEF);
         SYS_ASSERT(endoom_font);
         endoom_font->Load();
@@ -1567,7 +1567,7 @@ void ConsoleShowFPS(void)
 
     // get difference since last call
     static uint32_t last_time = 0;
-    uint32_t        time      = I_GetMicros();
+    uint32_t        time      = EDGEGetMicros();
     uint32_t        diff      = time - last_time;
     last_time                 = time;
 
@@ -1641,10 +1641,10 @@ void ConsoleShowFPS(void)
     if (abs(debug_fps.d_) >= 3)
     {
         y -= FNSZ;
-        sprintf(textbuf, "%i runit", ecframe_stats.draw_runits);
+        sprintf(textbuf, "%i runit", ecframe_stats.draw_render_units);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
-        sprintf(textbuf, "%i wall", ecframe_stats.draw_wallparts);
+        sprintf(textbuf, "%i wall", ecframe_stats.draw_wall_parts);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
         sprintf(textbuf, "%i plane", ecframe_stats.draw_planes);
@@ -1653,10 +1653,10 @@ void ConsoleShowFPS(void)
         sprintf(textbuf, "%i thing", ecframe_stats.draw_things);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
-        sprintf(textbuf, "%i state", ecframe_stats.draw_statechange);
+        sprintf(textbuf, "%i state", ecframe_stats.draw_state_change);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
         y -= FNSZ;
-        sprintf(textbuf, "%i texture", ecframe_stats.draw_texchange);
+        sprintf(textbuf, "%i texture", ecframe_stats.draw_texture_change);
         DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
     }
 }

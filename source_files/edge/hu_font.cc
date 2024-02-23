@@ -156,7 +156,7 @@ void Font::LoadPatches()
         for (int ch = pat->char1; ch <= pat->char2; ch++, BumpPatchName(pname))
         {
 #if 0  // DEBUG
-			I_Printf("- LoadFont [%s] : char %d = %s\n", definition_->name.c_str(), ch, pname);
+			EDGEPrintf("- LoadFont [%s] : char %d = %s\n", definition_->name.c_str(), ch, pname);
 #endif
             int idx = ch - first;
             SYS_ASSERT(0 <= idx && idx < total);
@@ -212,7 +212,7 @@ void Font::LoadPatches()
     if (atlas)
     {
         // Uncomment this to save the generated atlas. Note: will be inverted.
-        /*std::string atlas_png = epi::PathAppend(home_dir,
+        /*std::string atlas_png = epi::PathAppend(home_directory,
         epi::StringFormat("atlas_%s.png", definition_->name.c_str())); if
         (epi::FileExists(atlas_png)) epi::FS_Remove(atlas_png);
         PNG_Save(atlas_png, atlas->data);*/
@@ -252,12 +252,12 @@ void Font::LoadPatches()
         delete atlas;
     }
     else
-        I_Error("Failed to create atlas for patch font %s!\n",
+        EDGEError("Failed to create atlas for patch font %s!\n",
                 definition_->name_.c_str());
 
     if (patch_font_cache_.atlas_rectangles.empty())
     {
-        I_Warning("Font [%s] has no loaded patches !\n",
+        EDGEWarning("Font [%s] has no loaded patches !\n",
                   definition_->name_.c_str());
         patch_font_cache_.width = patch_font_cache_.height = 7;
         return;
@@ -306,10 +306,10 @@ void Font::LoadFontImage()
                 W_ImageLookup(definition_->image_name_.c_str(),
                               kImageNamespaceGraphic, ILF_Exact | ILF_Null);
         else
-            I_Error("LoadFontImage: nullptr image name provided for font %s!",
+            EDGEError("LoadFontImage: nullptr image name provided for font %s!",
                     definition_->name_.c_str());
         if (!font_image_)
-            I_Error("LoadFontImage: Image %s not found for font %s!",
+            EDGEError("LoadFontImage: Image %s not found for font %s!",
                     definition_->image_name_.c_str(),
                     definition_->name_.c_str());
         int char_height = font_image_->actual_h / 16;
@@ -355,7 +355,7 @@ void Font::LoadFontTTF()
     {
         if (definition_->truetype_name_.empty())
         {
-            I_Error("LoadFontTTF: No TTF file/lump name provided for font %s!",
+            EDGEError("LoadFontTTF: No TTF file/lump name provided for font %s!",
                     definition_->name_.c_str());
         }
 
@@ -384,7 +384,7 @@ void Font::LoadFontTTF()
                     W_CheckNumForName(definition_->truetype_name_.c_str()));
 
             if (!F)
-                I_Error("LoadFontTTF: '%s' not found for font %s.\n",
+                EDGEError("LoadFontTTF: '%s' not found for font %s.\n",
                         definition_->truetype_name_.c_str(),
                         definition_->name_.c_str());
 
@@ -397,7 +397,7 @@ void Font::LoadFontTTF()
         {
             truetype_info_ = new stbtt_fontinfo;
             if (!stbtt_InitFont(truetype_info_, truetype_buffer_, 0))
-                I_Error("LoadFontTTF: Could not initialize font %s.\n",
+                EDGEError("LoadFontTTF: Could not initialize font %s.\n",
                         definition_->name_.c_str());
         }
 
@@ -444,7 +444,7 @@ void Font::LoadFontTTF()
         }
 
         if (ref.glyph_index == 0)
-            I_Error("LoadFontTTF: No suitable characters in font %s.\n",
+            EDGEError("LoadFontTTF: No suitable characters in font %s.\n",
                     definition_->name_.c_str());
 
         for (int i = 0; i < 3; i++)
@@ -545,7 +545,7 @@ void Font::Load()
             break;
 
         default:
-            I_Error("Coding error, unknown font type %d\n", definition_->type_);
+            EDGEError("Coding error, unknown font type %d\n", definition_->type_);
             break; /* NOT REACHED */
     }
 }
@@ -561,7 +561,7 @@ float Font::NominalWidth() const
     if (definition_->type_ == kFontTypeTrueType)
         return truetype_character_width_[current_font_size] + spacing_;
 
-    I_Error("font_c::NominalWidth : unknown FONT type %d\n",
+    EDGEError("font_c::NominalWidth : unknown FONT type %d\n",
             definition_->type_);
     return 1; /* NOT REACHED */
 }
@@ -575,7 +575,7 @@ float Font::NominalHeight() const
     if (definition_->type_ == kFontTypeTrueType)
         return truetype_character_height_[current_font_size];
 
-    I_Error("font_c::NominalHeight : unknown FONT type %d\n",
+    EDGEError("font_c::NominalHeight : unknown FONT type %d\n",
             definition_->type_);
     return 1; /* NOT REACHED */
 }
@@ -634,7 +634,7 @@ float Font::CharWidth(char ch)
         auto find_glyph = truetype_glyph_map_.find((uint8_t)ch);
         if (find_glyph != truetype_glyph_map_.end())
             return (find_glyph->second.width[current_font_size] + spacing_) *
-                   v_pixelaspect.f_;
+                   pixel_aspect_ratio.f_;
         else
         {
             TrueTypeCharacter character;
@@ -669,7 +669,7 @@ float Font::CharWidth(char ch)
                 truetype_info_, kCP437UnicodeValues[(uint8_t)ch]);
             truetype_glyph_map_.try_emplace((uint8_t)ch, character);
             return (character.width[current_font_size] + spacing_) *
-                   v_pixelaspect.f_;
+                   pixel_aspect_ratio.f_;
         }
     }
 

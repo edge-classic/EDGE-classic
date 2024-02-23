@@ -79,7 +79,7 @@ static void FixParseField(const char *field, const char *contents, int index,
                           bool is_last)
 {
 #if (DEBUG_DDF)
-    I_Debugf("FIX_PARSE: %s = %s;\n", field, contents);
+    EDGEDebugf("FIX_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_MainParseField(fix_commands, field, contents,

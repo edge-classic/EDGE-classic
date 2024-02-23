@@ -69,8 +69,8 @@ extern struct mobj_s *background_camera_mo;
 #define DOOM_SCREEN_ASPECT (320.0f / 200.0f)
 #define DOOHMM_PIXEL_ASPECT  (5.0f / 6.0f)
 
-extern ConsoleVariable v_pixelaspect;
-extern ConsoleVariable v_monitorsize;
+extern ConsoleVariable pixel_aspect_ratio;
+extern ConsoleVariable monitor_aspect_ratio;
 
 // Values/tables adapted from Quake 3 GPL release
 #define FUNCTABLE_SIZE 1024

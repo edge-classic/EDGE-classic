@@ -47,10 +47,10 @@
 // music slider value
 EDGE_DEFINE_CONSOLE_VARIABLE(mus_volume, "0.15", kConsoleVariableFlagArchive)
 
-bool nomusic = false;
+bool no_music = false;
 
 // Current music handle
-static abstract_music_c *music_player;
+static AbstractMusicPlayer *music_player;
 
 int         entry_playing = -1;
 static bool entry_looped;
@@ -58,7 +58,7 @@ bool        var_pc_speaker_mode = false;
 
 void S_ChangeMusic(int entrynum, bool loop)
 {
-    if (nomusic)
+    if (no_music)
         return;
 
     // -AJA- playlist number 0 reserved to mean "no music"
@@ -81,7 +81,7 @@ void S_ChangeMusic(int entrynum, bool loop)
     const PlaylistEntry *play = playlist.Find(entrynum);
     if (!play)
     {
-        I_Warning("Could not find music entry [%d]\n", entrynum);
+        EDGEWarning("Could not find music entry [%d]\n", entrynum);
         return;
     }
 
@@ -91,12 +91,12 @@ void S_ChangeMusic(int entrynum, bool loop)
     switch (play->infotype_)
     {
     case kDDFMusicDataFile: {
-        std::string fn = M_ComposeFileName(game_dir, play->info_);
+        std::string fn = M_ComposeFileName(game_directory, play->info_);
 
         F = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (!F)
         {
-            I_Warning("S_ChangeMusic: Can't Find File '%s'\n", fn.c_str());
+            EDGEWarning("S_ChangeMusic: Can't Find File '%s'\n", fn.c_str());
             return;
         }
         break;
@@ -106,7 +106,7 @@ void S_ChangeMusic(int entrynum, bool loop)
         F = W_OpenPackFile(play->info_);
         if (!F)
         {
-            I_Warning("S_ChangeMusic: PK3 entry '%s' not found.\n", play->info_.c_str());
+            EDGEWarning("S_ChangeMusic: PK3 entry '%s' not found.\n", play->info_.c_str());
             return;
         }
         break;
@@ -116,7 +116,7 @@ void S_ChangeMusic(int entrynum, bool loop)
         int lump = W_CheckNumForName(play->info_.c_str());
         if (lump < 0)
         {
-            I_Warning("S_ChangeMusic: LUMP '%s' not found.\n", play->info_.c_str());
+            EDGEWarning("S_ChangeMusic: LUMP '%s' not found.\n", play->info_.c_str());
             return;
         }
 
@@ -125,7 +125,7 @@ void S_ChangeMusic(int entrynum, bool loop)
     }
 
     default:
-        I_Printf("S_ChangeMusic: invalid method %d for MUS/MIDI\n", play->infotype_);
+        EDGEPrintf("S_ChangeMusic: invalid method %d for MUS/MIDI\n", play->infotype_);
         return;
     }
 
@@ -135,14 +135,14 @@ void S_ChangeMusic(int entrynum, bool loop)
     if (!data)
     {
         delete F;
-        I_Warning("S_ChangeMusic: Error loading data.\n");
+        EDGEWarning("S_ChangeMusic: Error loading data.\n");
         return;
     }
     if (length < 4)
     {
         delete F;
         delete data;
-        I_Printf("S_ChangeMusic: ignored short data (%d bytes)\n", length);
+        EDGEPrintf("S_ChangeMusic: ignored short data (%d bytes)\n", length);
         return;
     }
 
@@ -218,7 +218,7 @@ void S_ChangeMusic(int entrynum, bool loop)
     default:
         delete F;
         delete data;
-        I_Printf("S_ChangeMusic: unknown format\n");
+        EDGEPrintf("S_ChangeMusic: unknown format\n");
         break;
     }
 }

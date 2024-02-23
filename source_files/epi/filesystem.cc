@@ -625,7 +625,7 @@ bool OpenDirectory(const std::string &src)
     // that is guaranteed to be an 'error'
     if (SDL_OpenURL(StringFormat("file:///%s", src.c_str()).c_str()) == -1)
     {
-        I_Warning("OpenDirectory failed to open requested path %s\nError: %s\n",
+        EDGEWarning("OpenDirectory failed to open requested path %s\nError: %s\n",
                   src.c_str(), SDL_GetError());
         return false;
     }

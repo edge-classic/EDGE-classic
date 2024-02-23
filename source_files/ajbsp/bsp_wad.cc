@@ -36,8 +36,8 @@ namespace ajbsp
 {
 
 #if DEBUG_WAD
-#define FileMessage I_Debugf
-#define LumpWarning I_Debugf
+#define FileMessage EDGEDebugf
+#define LumpWarning EDGEDebugf
 #else
 void FileMessage(const char *format, ...) { (void)format; }
 
@@ -70,7 +70,7 @@ Lump::Lump(WadFile *parent, const RawWadEntry *entry) : parent_(parent)
     lump_length_ = AlignedLittleEndianU32(entry->size);
 
 #if DEBUG_WAD
-    I_Debugf("new lump '%s' @ %d len:%d\n", name, lump_start, lump_length);
+    EDGEDebugf("new lump '%s' @ %d len:%d\n", name, lump_start, lump_length);
 #endif
 }
 
@@ -272,15 +272,15 @@ retry:
 
     // determine total size (seek to end)
     if (fseek(fp, 0, SEEK_END) != 0)
-        I_Error("AJBSP: Error determining WAD size.\n");
+        EDGEError("AJBSP: Error determining WAD size.\n");
 
     w->total_size_ = (int)ftell(fp);
 
 #if DEBUG_WAD
-    I_Debugf("total_size = %d\n", w->total_size);
+    EDGEDebugf("total_size = %d\n", w->total_size);
 #endif
 
-    if (w->total_size_ < 0) I_Error("AJBSP: Error determining WAD size.\n");
+    if (w->total_size_ < 0) EDGEError("AJBSP: Error determining WAD size.\n");
 
     w->ReadDirectory();
     w->DetectLevels();
@@ -309,7 +309,7 @@ WadFile *WadFile::OpenMem(std::string filename, uint8_t *raw_wad,
 
     w->total_size_ = raw_length;
 
-    if (w->total_size_ < 0) I_Error("AJBSP: Nonsensical WAD size.\n");
+    if (w->total_size_ < 0) EDGEError("AJBSP: Nonsensical WAD size.\n");
 
     w->ReadDirectory();
     w->DetectLevels();
@@ -553,7 +553,7 @@ Lump *WadFile::FindLumpInNamespace(const char *name, char group)
             break;
 
         default:
-            I_Error("AJBSP: FindLumpInNamespace: bad group '%c'\n", group);
+            EDGEError("AJBSP: FindLumpInNamespace: bad group '%c'\n", group);
     }
 
     return nullptr;  // not found!
@@ -572,10 +572,10 @@ void WadFile::ReadDirectory()
 
     if (memory_file_pointer_ &&
         memory_file_pointer_->Read(&header, sizeof(header)) != sizeof(header))
-        I_Error("AJBSP: Error reading WAD header.\n");
+        EDGEError("AJBSP: Error reading WAD header.\n");
     else if (file_pointer_ &&
              fread(&header, sizeof(header), 1, file_pointer_) != 1)
-        I_Error("AJBSP: Error reading WAD header.\n");
+        EDGEError("AJBSP: Error reading WAD header.\n");
 
     // WISH: check ident for PWAD or IWAD
 
@@ -585,16 +585,16 @@ void WadFile::ReadDirectory()
     directory_count_ = AlignedLittleEndianS32(header.num_entries);
 
     if (directory_count_ < 0 || directory_count_ > 32000)
-        I_Error("AJBSP: Bad WAD header, too many entries (%d)\n",
+        EDGEError("AJBSP: Bad WAD header, too many entries (%d)\n",
                 directory_count_);
 
     if (memory_file_pointer_ &&
         !memory_file_pointer_->Seek(directory_start_,
                                     epi::File::kSeekpointStart))
-        I_Error("AJBSP: Error seeking to WAD directory_.\n");
+        EDGEError("AJBSP: Error seeking to WAD directory_.\n");
     else if (file_pointer_ &&
              fseek(file_pointer_, directory_start_, SEEK_SET) != 0)
-        I_Error("AJBSP: Error seeking to WAD directory_.\n");
+        EDGEError("AJBSP: Error seeking to WAD directory_.\n");
 
     for (int i = 0; i < directory_count_; i++)
     {
@@ -602,10 +602,10 @@ void WadFile::ReadDirectory()
 
         if (memory_file_pointer_ &&
             memory_file_pointer_->Read(&entry, sizeof(entry)) != sizeof(entry))
-            I_Error("AJBSP: Error reading WAD directory_.\n");
+            EDGEError("AJBSP: Error reading WAD directory_.\n");
         else if (file_pointer_ &&
                  fread(&entry, sizeof(entry), 1, file_pointer_) != 1)
-            I_Error("AJBSP: Error reading WAD directory_.\n");
+            EDGEError("AJBSP: Error reading WAD directory_.\n");
 
         Lump *lump = new Lump(this, &entry);
 
@@ -633,7 +633,7 @@ void WadFile::DetectLevels()
         {
             levels_.push_back(k);
 #if DEBUG_WAD
-            I_Debugf("Detected level : %s (UDMF)\n", directory_[k]->name_);
+            EDGEDebugf("Detected level : %s (UDMF)\n", directory_[k]->name_);
 #endif
             continue;
         }
@@ -659,7 +659,7 @@ void WadFile::DetectLevels()
             levels_.push_back(k);
 
 #if DEBUG_WAD
-            I_Debugf("Detected level : %s\n", directory_[k]->name_);
+            EDGEDebugf("Detected level : %s\n", directory_[k]->name_);
 #endif
         }
     }
@@ -782,7 +782,7 @@ void WadFile::ProcessNamespaces()
             }
 
 #if DEBUG_WAD
-            I_Debugf("Namespace %c lump : %s\n", active, name);
+            EDGEDebugf("Namespace %c lump : %s\n", active, name);
 #endif
 
             switch (active)
@@ -801,7 +801,7 @@ void WadFile::ProcessNamespaces()
                     break;
 
                 default:
-                    I_Error("AJBSP: ProcessNamespaces: active = 0x%02x\n",
+                    EDGEError("AJBSP: ProcessNamespaces: active = 0x%02x\n",
                             (int)active);
             }
         }
@@ -817,10 +817,10 @@ void WadFile::ProcessNamespaces()
 void WadFile::BeginWrite()
 {
     if (mode_ == 'r')
-        I_Error("AJBSP: WadFile::BeginWrite() called on read-only file\n");
+        EDGEError("AJBSP: WadFile::BeginWrite() called on read-only file\n");
 
     if (begun_write_)
-        I_Error(
+        EDGEError(
             "AJBSP: WadFile::BeginWrite() called again without EndWrite()\n");
 
     // put the size into a quantum state
@@ -832,7 +832,7 @@ void WadFile::BeginWrite()
 void WadFile::EndWrite()
 {
     if (!begun_write_)
-        I_Error("AJBSP: WadFile::EndWrite() called without BeginWrite()\n");
+        EDGEError("AJBSP: WadFile::EndWrite() called without BeginWrite()\n");
 
     begun_write_ = false;
 
@@ -1016,12 +1016,12 @@ int WadFile::PositionForWrite(int max_size)
     //       needlessly complex and hard to follow.
 
     if (fseek(file_pointer_, 0, SEEK_END) < 0)
-        I_Error("AJBSP: Error seeking to new write position.\n");
+        EDGEError("AJBSP: Error seeking to new write position.\n");
 
     total_size_ = (int)ftell(file_pointer_);
 
     if (total_size_ < 0)
-        I_Error("AJBSP: Error seeking to new write position.\n");
+        EDGEError("AJBSP: Error seeking to new write position.\n");
 
     if (want_pos > total_size_)
     {
@@ -1035,11 +1035,11 @@ int WadFile::PositionForWrite(int max_size)
     else
     {
         if (fseek(file_pointer_, want_pos, SEEK_SET) < 0)
-            I_Error("AJBSP: Error seeking to new write position.\n");
+            EDGEError("AJBSP: Error seeking to new write position.\n");
     }
 
 #if DEBUG_WAD
-    I_Debugf("POSITION FOR WRITE: %d  (total_size %d)\n", want_pos, total_size);
+    EDGEDebugf("POSITION FOR WRITE: %d  (total_size %d)\n", want_pos, total_size);
 #endif
 
     return want_pos;
@@ -1052,7 +1052,7 @@ bool WadFile::FinishLump(int final_size)
     // sanity check
     if (begun_max_size_ >= 0)
         if (final_size > begun_max_size_)
-            I_Error("AJBSP: Internal Error: wrote too much in lump (%d > %d)\n",
+            EDGEError("AJBSP: Internal Error: wrote too much in lump (%d > %d)\n",
                     final_size, begun_max_size_);
 
     int pos = (int)ftell(file_pointer_);
@@ -1093,8 +1093,8 @@ void WadFile::WriteDirectory()
     directory_count_ = NumLumps();
 
 #if DEBUG_WAD
-    I_Debugf("WriteDirectory...\n");
-    I_Debugf("dir_start:%d  dir_count:%d\n", dir_start, dir_count);
+    EDGEDebugf("WriteDirectory...\n");
+    EDGEDebugf("dir_start:%d  dir_count:%d\n", dir_start, dir_count);
 #endif
 
     for (int k = 0; k < directory_count_; k++)
@@ -1107,7 +1107,7 @@ void WadFile::WriteDirectory()
         lump->MakeEntry(&entry);
 
         if (fwrite(&entry, sizeof(entry), 1, file_pointer_) != 1)
-            I_Error("AJBSP: Error writing WAD directory_.\n");
+            EDGEError("AJBSP: Error writing WAD directory_.\n");
     }
 
     fflush(file_pointer_);
@@ -1115,10 +1115,10 @@ void WadFile::WriteDirectory()
     total_size_ = (int)ftell(file_pointer_);
 
 #if DEBUG_WAD
-    I_Debugf("total_size: %d\n", total_size);
+    EDGEDebugf("total_size: %d\n", total_size);
 #endif
 
-    if (total_size_ < 0) I_Error("AJBSP: Error determining WAD size.\n");
+    if (total_size_ < 0) EDGEError("AJBSP: Error determining WAD size.\n");
 
     // update header at start of file
 
@@ -1132,7 +1132,7 @@ void WadFile::WriteDirectory()
     header.num_entries = AlignedLittleEndianU32(directory_count_);
 
     if (fwrite(&header, sizeof(header), 1, file_pointer_) != 1)
-        I_Error("AJBSP: Error writing WAD header.\n");
+        EDGEError("AJBSP: Error writing WAD header.\n");
 
     fflush(file_pointer_);
 }

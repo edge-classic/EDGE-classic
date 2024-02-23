@@ -306,7 +306,7 @@ void ProcessSubDir(pack_file_c *pack, std::string &fullpath)
 
     if (!epi::WalkDirectory(fsd, fullpath))
     {
-        I_Warning("Failed to read dir: %s\n", fullpath.c_str());
+        EDGEWarning("Failed to read dir: %s\n", fullpath.c_str());
         return;
     }
 
@@ -318,7 +318,7 @@ void ProcessSubDir(pack_file_c *pack, std::string &fullpath)
         {
             if (epi::GetExtension(fsd[i].name).empty())
             {
-                I_Warning("%s has no extension. Bare filenames are not supported for mounted directories.\n",
+                EDGEWarning("%s has no extension. Bare filenames are not supported for mounted directories.\n",
                           fsd[i].name.c_str());
                 continue;
             }
@@ -338,7 +338,7 @@ static pack_file_c *ProcessFolder(data_file_c *df)
 
     if (!epi::ReadDirectory(fsd, df->name, "*.*"))
     {
-        I_Error("Failed to read dir: %s\n", df->name.c_str());
+        EDGEError("Failed to read dir: %s\n", df->name.c_str());
     }
 
     pack_file_c *pack = new pack_file_c(df, true);
@@ -356,7 +356,7 @@ static pack_file_c *ProcessFolder(data_file_c *df)
         {
             if (epi::GetExtension(fsd[i].name).empty())
             {
-                I_Warning("%s has no extension. Bare filenames are not supported for mounted directories.\n",
+                EDGEWarning("%s has no extension. Bare filenames are not supported for mounted directories.\n",
                           fsd[i].name.c_str());
                 continue;
             }
@@ -380,7 +380,7 @@ epi::File *pack_file_c::OpenEntry_Folder(size_t dir, size_t index)
 
     // this generally won't happen, file was found during a dir scan
     if (F == nullptr)
-        I_Error("Failed to open file: %s\n", filename.c_str());
+        EDGEError("Failed to open file: %s\n", filename.c_str());
 
     return F;
 }
@@ -415,10 +415,10 @@ static pack_file_c *ProcessZip(data_file_c *df)
         case MZ_ZIP_FILE_OPEN_FAILED:
         case MZ_ZIP_FILE_READ_FAILED:
         case MZ_ZIP_FILE_SEEK_FAILED:
-            I_Error("Failed to open EPK file: %s\n", df->name.c_str());
+            EDGEError("Failed to open EPK file: %s\n", df->name.c_str());
             break;
         default:
-            I_Error("Not a EPK file (or is corrupted): %s\n", df->name.c_str());
+            EDGEError("Not a EPK file (or is corrupted): %s\n", df->name.c_str());
         }
     }
 
@@ -440,7 +440,7 @@ static pack_file_c *ProcessZip(data_file_c *df)
 
         if (epi::GetExtension(filename).empty())
         {
-            I_Warning("%s has no extension. Bare EPK filenames are not supported.\n", filename);
+            EDGEWarning("%s has no extension. Bare EPK filenames are not supported.\n", filename);
             continue;
         }
 
@@ -538,7 +538,7 @@ class epk_file_c : public epi::File
         (void)src;
         (void)count;
         // not implemented
-        I_Error("epk_file_c::Write called, but this is not implemented!\n");
+        EDGEError("epk_file_c::Write called, but this is not implemented!\n");
         return 0;
     }
 
@@ -673,7 +673,7 @@ static void ProcessDDFInPack(pack_file_c *pack)
 
             if (ent.HasExtension(".deh") || ent.HasExtension(".bex"))
             {
-                I_Printf("Converting DEH file%s: %s\n", pack->is_folder ? "" : " in EPK", ent.name.c_str());
+                EDGEPrintf("Converting DEH file%s: %s\n", pack->is_folder ? "" : " in EPK", ent.name.c_str());
 
                 int         length = -1;
                 const uint8_t *data   = pack->LoadEntry(dir, entry, length);
@@ -715,7 +715,7 @@ static void ProcessCoalAPIInPack(pack_file_c *pack)
             }
         }
     }
-    I_Error("coal_api.ec not found in edge_defs; unable to initialize COAL!\n");
+    EDGEError("coal_api.ec not found in edge_defs; unable to initialize COAL!\n");
 }
 
 static void ProcessCoalHUDInPack(pack_file_c *pack)
@@ -780,7 +780,7 @@ static void ProcessLuaAPIInPack(pack_file_c *pack)
             }
         }
     }
-    I_Error("edge_api.lua not found in edge_defs; unable to initialize LUA!\n");
+    EDGEError("edge_api.lua not found in edge_defs; unable to initialize LUA!\n");
 }
 
 static void ProcessLuaHUDInPack(pack_file_c *pack)
@@ -862,7 +862,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
                 if (!add_it)
                     continue;
 
-                I_Debugf("- Adding image file in EPK: %s\n", entry.packpath.c_str());
+                EDGEDebugf("- Adding image file in EPK: %s\n", entry.packpath.c_str());
 
                 if (dir_name == "textures")
                     AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_textures);
@@ -875,7 +875,7 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
             }
             else
             {
-                I_Warning("Unknown image type in EPK: %s\n", entry.name.c_str());
+                EDGEWarning("Unknown image type in EPK: %s\n", entry.name.c_str());
             }
         }
     }
@@ -980,7 +980,7 @@ void Pack_ProcessHiresSubstitutions(pack_file_c *pack, int pack_index)
             if (W_CheckFileNumForName(texname.c_str()) > pack_index)
                 continue;
 
-            I_Debugf("- Adding Hires substitute from EPK: %s\n", entry.packpath.c_str());
+            EDGEDebugf("- Adding Hires substitute from EPK: %s\n", entry.packpath.c_str());
 
             const image_c *rim = W_ImageDoLookup(real_textures, texname.c_str(), -2);
             if (rim && rim->source_type != IMSRC_User)
@@ -1012,13 +1012,13 @@ void Pack_ProcessHiresSubstitutions(pack_file_c *pack, int pack_index)
                 continue;
             }
 
-            I_Warning("HIRES replacement '%s' has no counterpart.\n", texname.c_str());
+            EDGEWarning("HIRES replacement '%s' has no counterpart.\n", texname.c_str());
 
             AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_textures);
         }
         else
         {
-            I_Warning("Unknown image type in EPK: %s\n", entry.name.c_str());
+            EDGEWarning("Unknown image type in EPK: %s\n", entry.name.c_str());
         }
     }
 }
@@ -1322,7 +1322,7 @@ void Pack_ProcessAll(data_file_c *df, size_t file_index)
     // parse the WADFIXES file from edge_defs folder or `edge_defs.epk` immediately
     if ((df->kind == FLKIND_EFolder || df->kind == FLKIND_EEPK) && file_index == 0)
     {
-        I_Printf("Loading WADFIXES\n");
+        EDGEPrintf("Loading WADFIXES\n");
         epi::File *wadfixes = Pack_FileOpen(df->pack, "wadfixes.ddf");
         if (wadfixes)
             DDF_ReadFixes(wadfixes->ReadText());

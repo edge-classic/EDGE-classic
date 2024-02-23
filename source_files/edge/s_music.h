@@ -29,13 +29,13 @@
 #include "con_var.h"
 
 /* abstract base class */
-class abstract_music_c
+class AbstractMusicPlayer
 {
   public:
-    abstract_music_c()
+    AbstractMusicPlayer()
     {
     }
-    virtual ~abstract_music_c()
+    virtual ~AbstractMusicPlayer()
     {
     }
 

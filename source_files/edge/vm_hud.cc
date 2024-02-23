@@ -99,7 +99,7 @@ static void HD_coord_sys(coal::vm_c *vm, int argc)
     int h = (int)*vm->AccessParam(1);
 
     if (w < 64 || h < 64)
-        I_Error("Bad hud.coord_sys size: %dx%d\n", w, h);
+        EDGEError("Bad hud.coord_sys size: %dx%d\n", w, h);
 
     HUDSetCoordinateSystem(w, h);
 
@@ -184,7 +184,7 @@ static void HD_get_time(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    int time = I_GetTime() / (r_doubleframes.d_? 2 : 1);
+    int time = EDGEGetTime() / (r_doubleframes.d_? 2 : 1);
     vm->ReturnFloat((double)time);
 }
 
@@ -200,13 +200,13 @@ static void HD_text_font(coal::vm_c *vm, int argc)
     SYS_ASSERT(DEF);
 
     if (!DEF)
-        I_Error("hud.text_font: Bad font name: %s\n", font_name);
+        EDGEError("hud.text_font: Bad font name: %s\n", font_name);
 
     Font *font = hud_fonts.Lookup(DEF);
     SYS_ASSERT(font);
 
     if (!font)
-        I_Error("hud.text_font: Bad font name: %s\n", font_name);
+        EDGEError("hud.text_font: Bad font name: %s\n", font_name);
 
     HUDSetFont(font);
 }
@@ -233,7 +233,7 @@ static void HD_set_scale(coal::vm_c *vm, int argc)
     float scale = *vm->AccessParam(0);
 
     if (scale <= 0)
-        I_Error("hud.set_scale: Bad scale value: %1.3f\n", scale);
+        EDGEError("hud.set_scale: Bad scale value: %1.3f\n", scale);
 
     HUDSetScale(scale);
 }
@@ -452,7 +452,7 @@ static void HD_draw_num2(coal::vm_c *vm, int argc)
     double *size = vm->AccessParam(4);
 
     if (len < 1 || len > 20)
-        I_Error("hud.draw_number: bad field length: %d\n", len);
+        EDGEError("hud.draw_number: bad field length: %d\n", len);
 
     bool is_neg = false;
 
@@ -503,7 +503,7 @@ static void HD_draw_number(coal::vm_c *vm, int argc)
     double *size        = vm->AccessParam(5);
 
     if (len < 1 || len > 20)
-        I_Error("hud.draw_number: bad field length: %d\n", len);
+        EDGEError("hud.draw_number: bad field length: %d\n", len);
 
     bool is_neg = false;
 
@@ -651,7 +651,7 @@ static void HD_automap_color(coal::vm_c *vm, int argc)
     int which = (int)*vm->AccessParam(0);
 
     if (which < 1 || which > kTotalAutomapColors)
-        I_Error("hud.automap_color: bad color number: %d\n", which);
+        EDGEError("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
@@ -670,7 +670,7 @@ static void HD_automap_option(coal::vm_c *vm, int argc)
     int value = (int)*vm->AccessParam(1);
 
     if (which < 1 || which > 7)
-        I_Error("hud.automap_color: bad color number: %d\n", which);
+        EDGEError("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
@@ -712,7 +712,7 @@ static void HD_set_render_who(coal::vm_c *vm, int argc)
     int index = (int)*vm->AccessParam(0);
 
     if (index < 0 || index >= numplayers)
-        I_Error("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
+        EDGEError("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
 
     if (index == 0)
     {
@@ -746,7 +746,7 @@ static void HD_play_sound(coal::vm_c *vm, int argc)
     if (fx)
         S_StartFX(fx);
     else
-        I_Warning("hud.play_sound: unknown sfx '%s'\n", name);
+        EDGEWarning("hud.play_sound: unknown sfx '%s'\n", name);
 }
 
 // hud.screen_aspect()
@@ -755,7 +755,7 @@ static void HD_screen_aspect(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    float TempAspect = std::ceil(v_pixelaspect.f_ * 100.0) / 100.0;
+    float TempAspect = std::ceil(pixel_aspect_ratio.f_ * 100.0) / 100.0;
 
     vm->ReturnFloat(TempAspect);
 }

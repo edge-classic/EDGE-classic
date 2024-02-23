@@ -118,7 +118,7 @@ static void GameParseField(const char *field, const char *contents, int index,
                            bool is_last)
 {
 #if (DEBUG_DDF)
-    I_Debugf("GAME_PARSE: %s = %s;\n", field, contents);
+    EDGEDebugf("GAME_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_CompareName(field, "TEMPLATE") == 0)
@@ -186,7 +186,7 @@ void DDF_GameInit(void) { GameClearAll(); }
 
 void DDF_GameCleanUp(void)
 {
-    if (gamedefs.empty()) I_Error("There are no games defined in DDF !\n");
+    if (gamedefs.empty()) EDGEError("There are no games defined in DDF !\n");
 }
 
 static void DDF_GameAddFrame(void)

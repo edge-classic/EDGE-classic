@@ -177,7 +177,7 @@ void R_ComputeSkyHeights(void)
             sec->sky_h = rings[i].max_h;
 
 #if 0 // DEBUG CODE
-		L_WriteDebug("SKY: sec %d  group %d  max_h %1.1f\n", i,
+		EDGEDebugf("SKY: sec %d  group %d  max_h %1.1f\n", i,
 				rings[i].group, rings[i].max_h);
 #endif
     }
@@ -845,7 +845,7 @@ int RGL_UpdateSkyBoxTextures(void)
     if (W_LoboDisableSkybox(sky_image->name.c_str()))
     {
         info->face[WSKY_North] = nullptr;
-        // I_Printf("Skybox turned OFF\n");
+        // EDGEPrintf("Skybox turned OFF\n");
     }
 
     // Set colors for culling fog and faux skybox caps - Dasho

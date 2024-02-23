@@ -72,7 +72,7 @@
 //
 bool save_screenshot_valid = false;
 
-extern ConsoleVariable s_soundfont;
+extern ConsoleVariable midi_soundfont;
 extern bool   var_pc_speaker_mode;
 int           var_midi_player  = 0;
 int           var_sound_stereo = 0;
@@ -235,7 +235,7 @@ void M_SaveDefaults(void)
     FILE *f = epi::FileOpenRaw(cfgfile, epi::kFileAccessWrite | epi::kFileAccessBinary);
     if (!f)
     {
-        I_Warning("Couldn't open config file %s for writing.", cfgfile.c_str());
+        EDGEWarning("Couldn't open config file %s for writing.", cfgfile.c_str());
         return; // can't write the file, but don't complain
     }
 
@@ -299,9 +299,9 @@ void M_ResetDefaults(int _dummy, ConsoleVariable *_dummy_cvar)
 
     ConsoleResetAllVariables();
 
-    // Set default SF2 location in s_soundfont CVAR
+    // Set default SF2 location in midi_soundfont CVAR
     // We can't store this as a CVAR default since it is path-dependent
-    s_soundfont = epi::SanitizePath(epi::PathAppend(game_dir, "soundfont/Default.sf2"));
+    midi_soundfont = epi::SanitizePath(epi::PathAppend(game_directory, "soundfont/Default.sf2"));
 
     // Needed so that Smoothing/Upscaling is properly reset
     W_DeleteAllImages();
@@ -325,7 +325,7 @@ static void ParseConfigBlock(epi::Lexer &lex)
             return;
 
         if (tok == epi::kTokenError)
-            I_Error("ParseConfig: error parsing file!\n");
+            EDGEError("ParseConfig: error parsing file!\n");
 
         tok = lex.Next(value);
 
@@ -334,7 +334,7 @@ static void ParseConfigBlock(epi::Lexer &lex)
             return;
 
         if (tok == epi::kTokenError)
-            I_Error("ParseConfig: malformed value for key %s!\n", key.c_str());
+            EDGEError("ParseConfig: malformed value for key %s!\n", key.c_str());
 
         if (tok == epi::kTokenString)
         {
@@ -385,14 +385,14 @@ void M_LoadDefaults(void)
     // set everything to base values
     M_ResetDefaults(0);
 
-    I_Printf("M_LoadDefaults from %s\n", cfgfile.c_str());
+    EDGEPrintf("M_LoadDefaults from %s\n", cfgfile.c_str());
 
     epi::File *file = epi::FileOpen(cfgfile, epi::kFileAccessRead);
 
     if (!file)
     {
-        I_Warning("Couldn't open config file %s for reading.\n", cfgfile.c_str());
-        I_Warning("Resetting config to RECOMMENDED values...\n");
+        EDGEWarning("Couldn't open config file %s for reading.\n", cfgfile.c_str());
+        EDGEWarning("Resetting config to RECOMMENDED values...\n");
         return;
     }
     // load the file into this string
@@ -478,9 +478,9 @@ void M_ScreenShot(bool show_msg)
     if (show_msg)
     {
         if (result)
-            I_Printf("Captured to file: %s\n", fn.c_str());
+            EDGEPrintf("Captured to file: %s\n", fn.c_str());
         else
-            I_Printf("Error saving file: %s\n", fn.c_str());
+            EDGEPrintf("Error saving file: %s\n", fn.c_str());
     }
 
     delete img;
@@ -507,9 +507,9 @@ void M_MakeSaveScreenShot(void)
     result = JPEG_Save(filename, img);
 
     if (result)
-        I_Printf("Captured to file: %s\n", filename.c_str());
+        EDGEPrintf("Captured to file: %s\n", filename.c_str());
     else
-        I_Printf("Error saving file: %s\n", filename.c_str());
+        EDGEPrintf("Error saving file: %s\n", filename.c_str());
 
     delete img;
 
@@ -559,9 +559,9 @@ void M_WarnError(const char *error, ...)
     SYS_ASSERT(message_buf[4095] == 0);
 
     if (strict_errors)
-        I_Error("%s", message_buf);
+        EDGEError("%s", message_buf);
     else if (!no_warnings)
-        I_Warning("%s", message_buf);
+        EDGEWarning("%s", message_buf);
 }
 
 void M_DebugError(const char *error, ...)
@@ -583,21 +583,21 @@ void M_DebugError(const char *error, ...)
     SYS_ASSERT(message_buf[4095] == 0);
 
     if (strict_errors)
-        I_Error("%s", message_buf);
+        EDGEError("%s", message_buf);
     else if (!no_warnings)
-        I_Debugf("%s", message_buf);
+        EDGEDebugf("%s", message_buf);
 }
 
-extern FILE *debugfile; // FIXME
+extern FILE *debug_file; // FIXME
 
-void I_Debugf(const char *message, ...)
+void EDGEDebugf(const char *message, ...)
 {
     // Write into the debug file.
     //
     // -ACB- 1999/09/22: From #define to Procedure
     // -AJA- 2001/02/07: Moved here from platform codes.
     //
-    if (!debugfile)
+    if (!debug_file)
         return;
 
     char message_buf[4096];
@@ -614,15 +614,15 @@ void I_Debugf(const char *message, ...)
     // I hope nobody is printing strings longer than 4096 chars...
     SYS_ASSERT(message_buf[4095] == 0);
 
-    fprintf(debugfile, "%s", message_buf);
-    fflush(debugfile);
+    fprintf(debug_file, "%s", message_buf);
+    fflush(debug_file);
 }
 
-extern FILE *logfile; // FIXME: make file_c and unify with debugfile
+extern FILE *log_file; // FIXME: make file_c and unify with debug_file
 
-void I_Logf(const char *message, ...)
+void EDGELogf(const char *message, ...)
 {
-    if (!logfile)
+    if (!log_file)
         return;
 
     char message_buf[4096];
@@ -639,8 +639,8 @@ void I_Logf(const char *message, ...)
     // I hope nobody is printing strings longer than 4096 chars...
     SYS_ASSERT(message_buf[4095] == 0);
 
-    fprintf(logfile, "%s", message_buf);
-    fflush(logfile);
+    fprintf(log_file, "%s", message_buf);
+    fflush(log_file);
 }
 
 //--- editor settings ---

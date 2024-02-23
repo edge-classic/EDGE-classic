@@ -57,7 +57,7 @@ static int HD_coord_sys(lua_State *L)
     double h = luaL_checknumber(L, 2);
 
     if (w < 64 || h < 64)
-        I_Error("Bad hud.coord_sys size: %fx%f\n", w, h);
+        EDGEError("Bad hud.coord_sys size: %fx%f\n", w, h);
 
     HUDSetCoordinateSystem(w, h);
 
@@ -145,7 +145,7 @@ static int HD_check_automap(lua_State *L)
 //
 static int HD_get_time(lua_State *L)
 {
-    int time = I_GetTime() / (r_doubleframes.d_? 2 : 1);
+    int time = EDGEGetTime() / (r_doubleframes.d_? 2 : 1);
     lua_pushnumber(L, (double)time);
     return 1;
 }
@@ -160,13 +160,13 @@ static int HD_text_font(lua_State *L)
     SYS_ASSERT(DEF);
 
     if (!DEF)
-        I_Error("hud.text_font: Bad font name: %s\n", font_name);
+        EDGEError("hud.text_font: Bad font name: %s\n", font_name);
 
     Font *font = hud_fonts.Lookup(DEF);
     SYS_ASSERT(font);
 
     if (!font)
-        I_Error("hud.text_font: Bad font name: %s\n", font_name);
+        EDGEError("hud.text_font: Bad font name: %s\n", font_name);
 
     HUDSetFont(font);
 
@@ -191,7 +191,7 @@ static int HD_set_scale(lua_State *L)
     float scale = luaL_checknumber(L, 1);
 
     if (scale <= 0)
-        I_Error("hud.set_scale: Bad scale value: %1.3f\n", scale);
+        EDGEError("hud.set_scale: Bad scale value: %1.3f\n", scale);
 
     HUDSetScale(scale);
 
@@ -410,7 +410,7 @@ static int HD_draw_num2(lua_State *L)
     double size = luaL_optnumber(L, 5, 0);
 
     if (len < 1 || len > 20)
-        I_Error("hud.draw_number: bad field length: %d\n", len);
+        EDGEError("hud.draw_number: bad field length: %d\n", len);
 
     bool is_neg = false;
 
@@ -461,7 +461,7 @@ static int HD_draw_number(lua_State *L)
     double size        = luaL_optnumber(L, 6, 0);
 
     if (len < 1 || len > 20)
-        I_Error("hud.draw_number: bad field length: %d\n", len);
+        EDGEError("hud.draw_number: bad field length: %d\n", len);
 
     bool is_neg = false;
 
@@ -605,7 +605,7 @@ static int HD_automap_color(lua_State *L)
     int which = (int)luaL_checknumber(L, 1);
 
     if (which < 1 || which > kTotalAutomapColors)
-        I_Error("hud.automap_color: bad color number: %d\n", which);
+        EDGEError("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
@@ -624,7 +624,7 @@ static int HD_automap_option(lua_State *L)
     int value = (int)luaL_checknumber(L, 2);
 
     if (which < 1 || which > 7)
-        I_Error("hud.automap_color: bad color number: %d\n", which);
+        EDGEError("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
@@ -666,7 +666,7 @@ static int HD_set_render_who(lua_State *L)
     int index = (int)luaL_checknumber(L, 1);
 
     if (index < 0 || index >= numplayers)
-        I_Error("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
+        EDGEError("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
 
     if (index == 0)
     {
@@ -700,7 +700,7 @@ static int HD_play_sound(lua_State *L)
     if (fx)
         S_StartFX(fx);
     else
-        I_Warning("hud.play_sound: unknown sfx '%s'\n", name);
+        EDGEWarning("hud.play_sound: unknown sfx '%s'\n", name);
 
     return 0;
 }
@@ -709,7 +709,7 @@ static int HD_play_sound(lua_State *L)
 //
 static int HD_screen_aspect(lua_State *L)
 {
-    lua_pushnumber(L, std::ceil(v_pixelaspect.f_ * 100.0) / 100.0);
+    lua_pushnumber(L, std::ceil(pixel_aspect_ratio.f_ * 100.0) / 100.0);
     return 1;
 }
 

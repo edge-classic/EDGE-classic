@@ -167,7 +167,7 @@ static void LevelParseField(const char *field, const char *contents, int index,
                             bool is_last)
 {
 #if (DEBUG_DDF)
-    I_Debugf("LEVEL_PARSE: %s = %s;\n", field, contents);
+    EDGEDebugf("LEVEL_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_CompareName(field, "TEMPLATE") == 0)
@@ -238,7 +238,7 @@ void DDF_LevelInit(void) { LevelClearAll(); }
 
 void DDF_LevelCleanUp(void)
 {
-    if (mapdefs.empty()) I_Error("There are no levels defined in DDF !\n");
+    if (mapdefs.empty()) EDGEError("There are no levels defined in DDF !\n");
 
     mapdefs.shrink_to_fit();
 
@@ -254,7 +254,7 @@ void DDF_LevelCleanUp(void)
         m->episode_ = gamedefs.Lookup(m->episode_name_.c_str());
 
         if (m->episode_name_.empty())
-            I_Printf("WARNING: Cannot find episode name for map entry [%s]\n",
+            EDGEPrintf("WARNING: Cannot find episode name for map entry [%s]\n",
                      m->name_.c_str());
     }
 }

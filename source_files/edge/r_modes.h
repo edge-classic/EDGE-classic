@@ -36,7 +36,7 @@
 #define FROM_200(y) ((y) * SCREENHEIGHT / 200)
 
 // Screen mode information
-class scrmode_c
+class DisplayMode
 {
   public:
     int width;
@@ -53,21 +53,21 @@ class scrmode_c
     };
 
   public:
-    scrmode_c() : width(0), height(0), depth(0), display_mode(SCR_WINDOW)
+    DisplayMode() : width(0), height(0), depth(0), display_mode(SCR_WINDOW)
     {
     }
 
-    scrmode_c(int _w, int _h, int _depth, int _display_mode)
+    DisplayMode(int _w, int _h, int _depth, int _display_mode)
         : width(_w), height(_h), depth(_depth), display_mode(_display_mode)
     {
     }
 
-    scrmode_c(const scrmode_c &other)
+    DisplayMode(const DisplayMode &other)
         : width(other.width), height(other.height), depth(other.depth), display_mode(other.display_mode)
     {
     }
 
-    ~scrmode_c()
+    ~DisplayMode()
     {
     }
 };
@@ -77,8 +77,8 @@ extern int                      SCREENWIDTH;
 extern int                      SCREENHEIGHT;
 extern int                      SCREENBITS;
 extern int                      DISPLAYMODE;
-extern scrmode_c                borderless_mode;
-extern std::vector<scrmode_c *> screen_modes;
+extern DisplayMode                borderless_mode;
+extern std::vector<DisplayMode *> screen_modes;
 // CVARs related to Alt+Enter toggling
 extern ConsoleVariable tf_screenwidth;
 extern ConsoleVariable tf_screenheight;
@@ -92,7 +92,7 @@ extern ConsoleVariable tw_displaymode;
 // Exported Func
 bool R_DepthIsEquivalent(int depth1, int depth2);
 
-void R_AddResolution(scrmode_c *mode);
+void R_AddResolution(DisplayMode *mode);
 void R_DumpResList(void);
 
 typedef enum
@@ -101,7 +101,7 @@ typedef enum
     RESINC_DisplayMode,
 } increment_res_e;
 
-bool R_IncrementResolution(scrmode_c *mode, int what, int dir);
+bool R_IncrementResolution(DisplayMode *mode, int what, int dir);
 // update the given screen mode with the next highest (dir=1)
 // or next lowest (dir=-1) attribute given by 'what' parameter,
 // either the size, depth or fullscreen/windowed mode.  Returns
@@ -111,7 +111,7 @@ bool R_IncrementResolution(scrmode_c *mode, int what, int dir);
 void R_ToggleFullscreen(void);
 
 void R_InitialResolution(void);
-bool R_ChangeResolution(scrmode_c *mode);
+bool R_ChangeResolution(DisplayMode *mode);
 
 void R_SoftInitResolution(void);
 

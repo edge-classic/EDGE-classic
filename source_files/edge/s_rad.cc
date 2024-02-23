@@ -33,8 +33,8 @@
 #include "opal.h"
 #include "radplay.h"
 
-extern bool dev_stereo; // FIXME: encapsulation
-extern int  dev_freq;
+extern bool sound_device_stereo; // FIXME: encapsulation
+extern int  sound_device_frequency;
 
 #define RAD_BLOCK_SIZE 1024
 
@@ -42,7 +42,7 @@ extern int  dev_freq;
 Opal      *edge_opal = nullptr;
 RADPlayer *edge_rad  = nullptr;
 
-class radplayer_c : public abstract_music_c
+class radplayer_c : public AbstractMusicPlayer
 {
   public:
     radplayer_c();
@@ -104,7 +104,7 @@ radplayer_c::~radplayer_c()
 void radplayer_c::PostOpenInit()
 {
     samp_count  = 0;
-    samp_update = dev_freq / samp_rate;
+    samp_update = sound_device_frequency / samp_rate;
     // Loaded, but not playing
     status = STOPPED;
 }
@@ -127,7 +127,7 @@ bool radplayer_c::StreamIntoBuffer(sound_data_c *buf)
     bool song_done = false;
     int  samples   = 0;
 
-    if (!dev_stereo)
+    if (!sound_device_stereo)
         data_buf = mono_buffer;
     else
         data_buf = buf->data_L;
@@ -146,7 +146,7 @@ bool radplayer_c::StreamIntoBuffer(sound_data_c *buf)
 
     buf->length = samples;
 
-    if (!dev_stereo)
+    if (!sound_device_stereo)
         ConvertToMono(buf->data_L, mono_buffer, buf->length);
 
     if (song_done) /* EOF */
@@ -167,11 +167,11 @@ bool radplayer_c::OpenMemory(uint8_t *data, int length)
 
     if (err)
     {
-        I_Warning("RAD: Cannot play tune: %s\n", err);
+        EDGEWarning("RAD: Cannot play tune: %s\n", err);
         return false;
     }
 
-    edge_opal = new Opal(dev_freq);
+    edge_opal = new Opal(sound_device_frequency);
     edge_rad  = new RADPlayer;
     edge_rad->Init(
         data, [](void *arg, uint16_t reg_num, uint8_t val) { edge_opal->Port(reg_num, val); }, 0);
@@ -180,7 +180,7 @@ bool radplayer_c::OpenMemory(uint8_t *data, int length)
 
     if (samp_rate <= 0)
     {
-        I_Warning("RAD: failure to load song!\n");
+        EDGEWarning("RAD: failure to load song!\n");
         delete edge_rad;
         edge_rad = nullptr;
         delete edge_opal;
@@ -258,7 +258,7 @@ void radplayer_c::Ticker()
     while (status == PLAYING && !var_pc_speaker_mode)
     {
         sound_data_c *buf =
-            S_QueueGetFreeBuffer(RAD_BLOCK_SIZE, (dev_stereo) ? SBUF_Interleaved : SBUF_Mono);
+            S_QueueGetFreeBuffer(RAD_BLOCK_SIZE, (sound_device_stereo) ? SBUF_Interleaved : SBUF_Mono);
 
         if (!buf)
             break;
@@ -267,7 +267,7 @@ void radplayer_c::Ticker()
         {
             if (buf->length > 0)
             {
-                S_QueueAddBuffer(buf, dev_freq);
+                S_QueueAddBuffer(buf, sound_device_frequency);
             }
             else
             {
@@ -285,7 +285,7 @@ void radplayer_c::Ticker()
 
 //----------------------------------------------------------------------------
 
-abstract_music_c *S_PlayRADMusic(uint8_t *data, int length, bool looping)
+AbstractMusicPlayer *S_PlayRADMusic(uint8_t *data, int length, bool looping)
 {
     radplayer_c *player = new radplayer_c();
 

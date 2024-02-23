@@ -48,12 +48,12 @@ void ConvertDehacked(const uint8_t *data, int length, const std::string &source)
 
     if (ret != kDehackedConversionOK)
     {
-        I_Printf("Dehacked: FAILED to add lump:\n");
-        I_Printf("- %s\n", DehackedGetError());
+        EDGEPrintf("Dehacked: FAILED to add lump:\n");
+        EDGEPrintf("- %s\n", DehackedGetError());
 
         DehackedShutdown();
 
-        I_Error("Failed to convert Dehacked file: %s\n", source.c_str());
+        EDGEError("Failed to convert Dehacked file: %s\n", source.c_str());
     }
 
     std::vector<DDFFile> col;
@@ -64,7 +64,7 @@ void ConvertDehacked(const uint8_t *data, int length, const std::string &source)
 
     if (ret != kDehackedConversionOK)
     {
-        I_Error("Failed to convert Dehacked file: %s\n", source.c_str());
+        EDGEError("Failed to convert Dehacked file: %s\n", source.c_str());
     }
 
     if (debug_dehacked.d_> 0)

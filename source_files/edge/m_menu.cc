@@ -568,7 +568,7 @@ void M_ReadSaveStrings(void)
                 }
                 else
                 {
-                    I_Warning("Error reading savegame screenshot %s!\n", fn.c_str());
+                    EDGEWarning("Error reading savegame screenshot %s!\n", fn.c_str());
                     ex_slots[i].save_imdata = nullptr;
                     ex_slots[i].save_texture_id  = 0; // just in case
                     ex_slots[i].save_impage = save_page;
@@ -1257,7 +1257,7 @@ void M_DrawNewGame(void)
 static void CreateEpisodeMenu(void)
 {
     if (gamedefs.empty())
-        I_Error("No defined episodes !\n");
+        EDGEError("No defined episodes !\n");
 
     EpisodeMenu          = new menuitem_t[gamedefs.size()];
     EpisodeMenuSkipSkill = new bool[gamedefs.size()];
@@ -1303,7 +1303,7 @@ static void CreateEpisodeMenu(void)
     }
 
     if (e == 0)
-        I_Error("No available episodes !\n");
+        EDGEError("No available episodes !\n");
 
     EpiDef.numitems  = e;
     EpiDef.menuitems = EpisodeMenu;
@@ -1381,7 +1381,7 @@ static void ReallyDoStartLevel(skill_t skill, GameDefinition *g)
     params.skill_      = skill;
     params.deathmatch_ = 0;
 
-    params.random_seed_ = I_PureRandom();
+    params.random_seed_ = EDGEPureRandom();
 
     params.SinglePlayer(0);
 
@@ -1446,7 +1446,7 @@ static void DoStartLevel(skill_t skill)
     // Sanity checking...
     if (!g)
     {
-        I_Warning("Internal Error: no episode for '%s'.\n", chosen_episode.c_str());
+        EDGEWarning("Internal Error: no episode for '%s'.\n", chosen_episode.c_str());
         M_ClearMenus();
         return;
     }
@@ -1454,7 +1454,7 @@ static void DoStartLevel(skill_t skill)
     const MapDefinition *map = GameLookupMap(g->firstmap_.c_str());
     if (!map)
     {
-        I_Warning("Cannot find map for '%s' (episode %s)\n", g->firstmap_.c_str(), chosen_episode.c_str());
+        EDGEWarning("Cannot find map for '%s' (episode %s)\n", g->firstmap_.c_str(), chosen_episode.c_str());
         M_ClearMenus();
         return;
     }
@@ -1599,15 +1599,15 @@ static void QuitResponse(int ch)
 
     // -ACB- 1999/09/20 New exit code order
     // Write the default config file first
-    I_Printf("Saving system defaults...\n");
+    EDGEPrintf("Saving system defaults...\n");
     M_SaveDefaults();
 
-    I_Printf("Exiting...\n");
+    EDGEPrintf("Exiting...\n");
 
     E_EngineShutdown();
-    I_SystemShutdown();
+    EDGESystemShutdown();
 
-    I_CloseProgram(EXIT_SUCCESS);
+    EDGECloseProgram(EXIT_SUCCESS);
 }
 
 //
@@ -1625,7 +1625,7 @@ static void QuitResponse(int ch)
 void M_QuitEDGE(int choice)
 {
 #if EDGE_WEB
-    I_Printf("Quit ignored on web platform\n");
+    EDGEPrintf("Quit ignored on web platform\n");
     return;
 #endif
 
@@ -1669,19 +1669,19 @@ void M_ImmediateQuit()
 {
 
 #if EDGE_WEB
-    I_Printf("Quit ignored on web platform\n");
+    EDGEPrintf("Quit ignored on web platform\n");
     return;
 #endif
 
-    I_Printf("Saving system defaults...\n");
+    EDGEPrintf("Saving system defaults...\n");
     M_SaveDefaults();
 
-    I_Printf("Exiting...\n");
+    EDGEPrintf("Exiting...\n");
 
     E_EngineShutdown();
-    I_SystemShutdown();
+    EDGESystemShutdown();
 
-    I_CloseProgram(EXIT_SUCCESS);
+    EDGECloseProgram(EXIT_SUCCESS);
 }
 
 //----------------------------------------------------------------------------
@@ -2395,7 +2395,7 @@ static void DrawMessage(void)
 
     if (message_key_routine == QuitResponse && !exit_style->background_image_) // Respect dialog styles with custom backgrounds
     {
-        I_StartFrame(); // To clear and ensure solid black background regardless of style
+        EDGEStartFrame(); // To clear and ensure solid black background regardless of style
 
         if (exit_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_)
         {
@@ -3056,7 +3056,7 @@ void M_Ticker(void)
     // update language if it changed
     if (m_language.CheckModified())
         if (!language.Select(m_language.c_str()))
-            I_Printf("Unknown language: %s\n", m_language.c_str());
+            EDGEPrintf("Unknown language: %s\n", m_language.c_str());
 
     if (option_menuon)
     {
@@ -3177,9 +3177,9 @@ void M_Init(void)
     if (W_IsLumpInPwad("M_NMARE"))
         custom_MenuDifficulty = true;
 
-    I_Debugf("custom_MenuMain =%d \n", custom_MenuMain);
-    I_Debugf("custom_MenuEpisode =%d \n", custom_MenuEpisode);
-    I_Debugf("custom_MenuDifficulty =%d \n", custom_MenuDifficulty);
+    EDGEDebugf("custom_MenuMain =%d \n", custom_MenuMain);
+    EDGEDebugf("custom_MenuEpisode =%d \n", custom_MenuEpisode);
+    EDGEDebugf("custom_MenuDifficulty =%d \n", custom_MenuDifficulty);
 
     menu_doom = W_ImageLookup("M_DOOM");
 

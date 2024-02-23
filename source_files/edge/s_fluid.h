@@ -27,7 +27,7 @@ bool S_StartupFluid(void);
 
 void S_RestartFluid(void);
 
-abstract_music_c *S_PlayFluid(uint8_t *data, int length, bool loop);
+AbstractMusicPlayer *S_PlayFluid(uint8_t *data, int length, bool loop);
 
 #endif /* __S_FLUID_H__ */
 

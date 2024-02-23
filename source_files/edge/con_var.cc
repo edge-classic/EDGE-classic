@@ -63,7 +63,7 @@ ConsoleVariable &ConsoleVariable::operator=(int value)
 {
     if (value < min_ || value > max_)
     {
-        I_Warning(
+        EDGEWarning(
             "Value %d exceeds lower/upper limits for %s! Resetting to default "
             "value!\n",
             value, name_);
@@ -86,7 +86,7 @@ ConsoleVariable &ConsoleVariable::operator=(float value)
 {
     if (value < min_ || value > max_)
     {
-        I_Warning(
+        EDGEWarning(
             "Value %g exceeds lower/upper limits for %s! Resetting to default "
             "value!\n",
             value, name_);
@@ -161,7 +161,7 @@ void ConsoleVariable::ParseString()
     f_ = atof(s_.c_str());
     if (f_ < min_ || f_ > max_)
     {
-        I_Warning(
+        EDGEWarning(
             "Value %g exceeds lower/upper limits for %s! Resetting to default "
             "value!\n",
             f_, name_);
@@ -296,7 +296,7 @@ void ConsoleHandleProgramArguments(void)
 
         if (p >= argv::list.size() || argv::IsOption(p))
         {
-            I_Warning("Missing value for option: %s\n", s.c_str());
+            EDGEWarning("Missing value for option: %s\n", s.c_str());
             continue;
         }
 
@@ -317,10 +317,10 @@ int ConsolePrintVariables(const char *match, bool show_default)
             if (!strstr(var->name_, match)) continue;
 
         if (show_default)
-            I_Printf("  %-20s \"%s\" (%s)\n", var->name_, var->c_str(),
+            EDGEPrintf("  %-20s \"%s\" (%s)\n", var->name_, var->c_str(),
                      var->def_);
         else
-            I_Printf("  %-20s \"%s\"\n", var->name_, var->c_str());
+            EDGEPrintf("  %-20s \"%s\"\n", var->name_, var->c_str());
 
         total++;
     }

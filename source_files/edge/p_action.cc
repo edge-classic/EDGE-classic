@@ -483,7 +483,7 @@ void P_BringCorpseToLife(mobj_t *corpse)
     else if (info->idle_state_)
         P_SetMobjState(corpse, info->idle_state_);
     else
-        I_Error("Object %s has no RESURRECT states.\n", info->name_.c_str());
+        EDGEError("Object %s has no RESURRECT states.\n", info->name_.c_str());
 }
 
 void P_ActResetSpreadCount(mobj_t *mo)
@@ -675,7 +675,7 @@ void P_ActSetSkin(mobj_t *mo)
         int skin = ((int *)st->action_par)[0];
 
         if (skin < 0 || skin > 9)
-            I_Error("Thing [%s]: Bad skin number %d in SET_SKIN action.\n", mo->info->name_.c_str(), skin);
+            EDGEError("Thing [%s]: Bad skin number %d in SET_SKIN action.\n", mo->info->name_.c_str(), skin);
 
         mo->model_skin = skin;
     }
@@ -848,7 +848,7 @@ void P_ActMakeAmbientSound(mobj_t *mo)
     if (mo->info->seesound_)
         S_StartFX(mo->info->seesound_, P_MobjGetSfxCategory(mo), mo);
     else
-        I_Debugf("%s has no ambient sound\n", mo->info->name_.c_str());
+        EDGEDebugf("%s has no ambient sound\n", mo->info->name_.c_str());
 }
 
 void P_ActMakeAmbientSoundRandom(mobj_t *mo)
@@ -864,7 +864,7 @@ void P_ActMakeAmbientSoundRandom(mobj_t *mo)
             S_StartFX(mo->info->seesound_, P_MobjGetSfxCategory(mo), mo);
     }
     else
-        I_Debugf("%s has no ambient sound\n", mo->info->name_.c_str());
+        EDGEDebugf("%s has no ambient sound\n", mo->info->name_.c_str());
 }
 
 void P_ActMakeActiveSound(mobj_t *mo)
@@ -877,7 +877,7 @@ void P_ActMakeActiveSound(mobj_t *mo)
     if (mo->info->activesound_)
         S_StartFX(mo->info->activesound_, P_MobjGetSfxCategory(mo), mo);
     else
-        I_Debugf("%s has no ambient sound\n", mo->info->name_.c_str());
+        EDGEDebugf("%s has no ambient sound\n", mo->info->name_.c_str());
 }
 
 void P_ActMakeDyingSound(mobj_t *mo)
@@ -892,7 +892,7 @@ void P_ActMakeDyingSound(mobj_t *mo)
     if (sound)
         S_StartFX(sound, P_MobjGetSfxCategory(mo), mo, SfxFlags(mo->info));
     else
-        I_Debugf("%s has no death sound\n", mo->info->name_.c_str());
+        EDGEDebugf("%s has no death sound\n", mo->info->name_.c_str());
 }
 
 void P_ActMakePainSound(mobj_t *mo)
@@ -902,7 +902,7 @@ void P_ActMakePainSound(mobj_t *mo)
     if (mo->info->painsound_)
         S_StartFX(mo->info->painsound_, P_MobjGetSfxCategory(mo), mo, SfxFlags(mo->info));
     else
-        I_Debugf("%s has no pain sound\n", mo->info->name_.c_str());
+        EDGEDebugf("%s has no pain sound\n", mo->info->name_.c_str());
 }
 
 void P_ActMakeOverKillSound(mobj_t *mo)
@@ -910,7 +910,7 @@ void P_ActMakeOverKillSound(mobj_t *mo)
     if (mo->info->overkill_sound_)
         S_StartFX(mo->info->overkill_sound_, P_MobjGetSfxCategory(mo), mo, SfxFlags(mo->info));
     else
-        I_Debugf("%s has no overkill sound\n", mo->info->name_.c_str());
+        EDGEDebugf("%s has no overkill sound\n", mo->info->name_.c_str());
 }
 
 void P_ActMakeCloseAttemptSound(mobj_t *mo)
@@ -918,7 +918,7 @@ void P_ActMakeCloseAttemptSound(mobj_t *mo)
     // Attempting close combat sound
 
     if (!mo->info->closecombat_)
-        I_Error("Object [%s] used CLOSEATTEMPTSND action, "
+        EDGEError("Object [%s] used CLOSEATTEMPTSND action, "
                 "but has no CLOSE_ATTACK\n",
                 mo->info->name_.c_str());
 
@@ -927,7 +927,7 @@ void P_ActMakeCloseAttemptSound(mobj_t *mo)
     if (sound)
         S_StartFX(sound, P_MobjGetSfxCategory(mo), mo);
     else
-        I_Debugf("%s has no close combat attempt sound\n", mo->info->name_.c_str());
+        EDGEDebugf("%s has no close combat attempt sound\n", mo->info->name_.c_str());
 }
 
 void P_ActMakeRangeAttemptSound(mobj_t *mo)
@@ -935,7 +935,7 @@ void P_ActMakeRangeAttemptSound(mobj_t *mo)
     // Attempting range attack sound
 
     if (!mo->info->rangeattack_)
-        I_Error("Object [%s] used RANGEATTEMPTSND action, "
+        EDGEError("Object [%s] used RANGEATTEMPTSND action, "
                 "but has no RANGE_ATTACK\n",
                 mo->info->name_.c_str());
 
@@ -944,7 +944,7 @@ void P_ActMakeRangeAttemptSound(mobj_t *mo)
     if (sound)
         S_StartFX(sound, P_MobjGetSfxCategory(mo), mo);
     else
-        I_Debugf("%s has no range attack attempt sound\n", mo->info->name_.c_str());
+        EDGEDebugf("%s has no range attack attempt sound\n", mo->info->name_.c_str());
 }
 
 //-------------------------------------------------------------------
@@ -965,7 +965,7 @@ void P_ActDamageExplosion(mobj_t *object)
 #ifdef DEVELOPERS
     if (!damage)
     {
-        L_WriteDebug("%s caused no explosion damage\n", object->info->name.c_str());
+        EDGEDebugf("%s caused no explosion damage\n", object->info->name.c_str());
         return;
     }
 #endif
@@ -992,7 +992,7 @@ void P_ActThrust(mobj_t *object)
 #ifdef DEVELOPERS
     if (!damage)
     {
-        L_WriteDebug("%s caused no thrust\n", object->info->name.c_str());
+        EDGEDebugf("%s caused no thrust\n", object->info->name.c_str());
         return;
     }
 #endif
@@ -1318,7 +1318,7 @@ static inline bool Weakness_CheckHit(mobj_t *target, const AttackDefinition *att
     if (target->height < 1)
         return false;
 
-    // I_Debugf("Weakness_CheckHit: target=[%s] classes=0x%08x\n", target->info->name.c_str(), weak->classes);
+    // EDGEDebugf("Weakness_CheckHit: target=[%s] classes=0x%08x\n", target->info->name.c_str(), weak->classes);
 
     // compute vertical position.  Clamping it means that a missile
     // which hits the target on the head (coming sharply down) will
@@ -1326,7 +1326,7 @@ static inline bool Weakness_CheckHit(mobj_t *target, const AttackDefinition *att
     z = (z - target->z) / target->height;
     z = HMM_Clamp(0.01f, z, 0.99f);
 
-    // I_Debugf("HEIGHT CHECK: %1.2f < %1.2f < %1.2f\n",
+    // EDGEDebugf("HEIGHT CHECK: %1.2f < %1.2f < %1.2f\n",
     //		  weak->height[0], z, weak->height[1]);
 
     if (z < weak->height_[0] || z > weak->height_[1])
@@ -1336,7 +1336,7 @@ static inline bool Weakness_CheckHit(mobj_t *target, const AttackDefinition *att
 
     ang -= target->angle;
 
-    // I_Debugf("ANGLE CHECK: %1.2f < %1.2f < %1.2f\n",
+    // EDGEDebugf("ANGLE CHECK: %1.2f < %1.2f < %1.2f\n",
     //		 ANG_2_FLOAT(weak->angle[0]), ANG_2_FLOAT(ang),
     //		 ANG_2_FLOAT(weak->angle[1]));
 
@@ -1467,7 +1467,7 @@ int P_MissileContact(mobj_t *object, mobj_t *target)
     if (!damage)
     {
 #ifdef DEVELOPERS
-        L_WriteDebug("%s missile did zero damage.\n", object->info->name.c_str());
+        EDGEDebugf("%s missile did zero damage.\n", object->info->name.c_str());
 #endif
         return 0;
     }
@@ -1553,7 +1553,7 @@ int P_BulletContact(mobj_t *source, mobj_t *target, float damage, const DamageCl
     if (!damage)
     {
 #ifdef DEVELOPERS
-        L_WriteDebug("%s's shoot/combat attack did zero damage.\n", source->info->name.c_str());
+        EDGEDebugf("%s's shoot/combat attack did zero damage.\n", source->info->name.c_str());
 #endif
         return 0;
     }
@@ -2086,7 +2086,7 @@ void P_ActEffectTracker(mobj_t *object)
         P_DamageMobj(target, object, object, damage, &attack->damage_);
 #ifdef DEVELOPERS
     else
-        L_WriteDebug("%s + %s attack has zero damage\n", object->info->name.c_str(), tracker->info->name.c_str());
+        EDGEDebugf("%s + %s attack has zero damage\n", object->info->name.c_str(), tracker->info->name.c_str());
 #endif
 
     // -ACB- 2000/03/11 Check for zero mass
@@ -2104,7 +2104,7 @@ void P_ActEffectTracker(mobj_t *object)
 
 #ifdef DEVELOPERS
     if (!tracker->info->explode_damage_.nominal)
-        L_WriteDebug("%s + %s explosion has zero damage\n", object->info->name.c_str(), tracker->info->name.c_str());
+        EDGEDebugf("%s + %s explosion has zero damage\n", object->info->name.c_str(), tracker->info->name.c_str());
 #endif
 
     DAMAGE_COMPUTE(damage, &tracker->info->explode_damage_);
@@ -2151,7 +2151,7 @@ void P_ActPsychicEffect(mobj_t *object)
         P_DamageMobj(target, object, object, damage, &attack->damage_);
 #ifdef DEVELOPERS
     else
-        L_WriteDebug("%s + %s attack has zero damage\n", object->info->name.c_str(), tracker->info->name.c_str());
+        EDGEDebugf("%s + %s attack has zero damage\n", object->info->name.c_str(), tracker->info->name.c_str());
 #endif
 }
 
@@ -2176,7 +2176,7 @@ static void ShootToSpot(mobj_t *object)
 
     if (spot == nullptr)
     {
-        I_Warning("No [%s] objects found for BossBrain shooter.\n", spot_type->name_.c_str());
+        EDGEWarning("No [%s] objects found for BossBrain shooter.\n", spot_type->name_.c_str());
         return;
     }
 
@@ -2213,7 +2213,7 @@ static void ObjectSpawning(mobj_t *parent, BAMAngle angle)
 
     if (!shoottype)
     {
-        I_Error("Object [%s] uses spawning attack [%s], but no object "
+        EDGEError("Object [%s] uses spawning attack [%s], but no object "
                 "specified.\n",
                 parent->info->name_.c_str(), attack->name_.c_str());
     }
@@ -2539,7 +2539,7 @@ void P_ActDropItem(mobj_t *mo)
 void P_ActSpawn(mobj_t *mo)
 {
     if (!mo->state || !mo->state->action_par)
-        I_Error("SPAWN() action used without a object name!\n");
+        EDGEError("SPAWN() action used without a object name!\n");
 
     MobjStringReference *ref = (MobjStringReference *)mo->state->action_par;
 
@@ -2750,7 +2750,7 @@ static void P_DoAttack(mobj_t *object)
     default: // THIS SHOULD NOT HAPPEN
     {
         if (strict_errors)
-            I_Error("P_DoAttack: %s has an unknown attack type.\n", object->info->name_.c_str());
+            EDGEError("P_DoAttack: %s has an unknown attack type.\n", object->info->name_.c_str());
         break;
     }
     }
@@ -3017,7 +3017,7 @@ static bool CreateAggression(mobj_t *mo)
     block_x = abs(block_x + bmap_width) % bmap_width;
     block_y = abs(block_y + bmap_height) % bmap_height;
 
-    //  I_Debugf("BLOCKMAP POS: %3d %3d  (size: %d %d)\n", block_x, block_y, bmap_width, bmap_height);
+    //  EDGEDebugf("BLOCKMAP POS: %3d %3d  (size: %d %d)\n", block_x, block_y, bmap_width, bmap_height);
 
     int bnum = block_y * bmap_width + block_x;
 
@@ -3068,7 +3068,7 @@ static bool CreateAggression(mobj_t *mo)
         // OK, you got me
         mo->SetTarget(other);
 
-        I_Debugf("Created aggression : %s --> %s\n", mo->info->name_.c_str(), other->info->name_.c_str());
+        EDGEDebugf("Created aggression : %s --> %s\n", mo->info->name_.c_str(), other->info->name_.c_str());
 
         if (mo->info->seesound_)
             S_StartFX(mo->info->seesound_, P_MobjGetSfxCategory(mo), mo, SfxFlags(mo->info));
@@ -3450,7 +3450,7 @@ void P_ActKeenDie(mobj_t *mo)
             return; // other Keen not dead
     }
 
-    L_WriteDebug("P_ActKeenDie: ALL DEAD, activating...\n");
+    EDGEDebugf("P_ActKeenDie: ALL DEAD, activating...\n");
 
     P_RemoteActivation(nullptr, 2 /* door type */, 666 /* tag */, 0, kLineTriggerAny);
 }
@@ -3678,7 +3678,7 @@ void P_ActBecome(struct mobj_s *mo)
 {
     if (!mo->state || !mo->state->action_par)
     {
-        I_Error("BECOME action used in [%s] without arguments!\n", mo->info->name_.c_str());
+        EDGEError("BECOME action used in [%s] without arguments!\n", mo->info->name_.c_str());
         return; /* NOT REACHED */
     }
 
@@ -3747,7 +3747,7 @@ void P_ActBecome(struct mobj_s *mo)
 
     int state = P_MobjFindLabel(mo, become->start_.label_.c_str());
     if (state == 0)
-        I_Error("BECOME action: frame '%s' in [%s] not found!\n", become->start_.label_.c_str(), mo->info->name_.c_str());
+        EDGEError("BECOME action: frame '%s' in [%s] not found!\n", become->start_.label_.c_str(), mo->info->name_.c_str());
 
     state += become->start_.offset_;
 
@@ -3822,7 +3822,7 @@ void P_ActUnBecome(struct mobj_s *mo)
 
     int state = P_MobjFindLabel(mo, "IDLE");
     if (state == 0)
-        I_Error("UNBECOME action: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name_.c_str());
+        EDGEError("UNBECOME action: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name_.c_str());
 
     P_SetMobjStateDeferred(mo, state, 0);
 }
@@ -3832,7 +3832,7 @@ void P_ActMorph(struct mobj_s *mo)
 {
     if (!mo->state || !mo->state->action_par)
     {
-        I_Error("MORPH action used in [%s] without arguments!\n", mo->info->name_.c_str());
+        EDGEError("MORPH action used in [%s] without arguments!\n", mo->info->name_.c_str());
         return; /* NOT REACHED */
     }
 
@@ -3901,7 +3901,7 @@ void P_ActMorph(struct mobj_s *mo)
 
     int state = P_MobjFindLabel(mo, morph->start_.label_.c_str());
     if (state == 0)
-        I_Error("MORPH action: frame '%s' in [%s] not found!\n", morph->start_.label_.c_str(), mo->info->name_.c_str());
+        EDGEError("MORPH action: frame '%s' in [%s] not found!\n", morph->start_.label_.c_str(), mo->info->name_.c_str());
 
     state += morph->start_.offset_;
 
@@ -3980,7 +3980,7 @@ void P_ActUnMorph(struct mobj_s *mo)
 
     int state = P_MobjFindLabel(mo, "IDLE");
     if (state == 0)
-        I_Error("UNMORPH action: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name_.c_str());
+        EDGEError("UNMORPH action: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name_.c_str());
 
     P_SetMobjStateDeferred(mo, state, 0);
 }

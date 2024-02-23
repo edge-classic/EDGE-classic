@@ -498,7 +498,7 @@ static void SortSpriteLumps(wad_file_c *wad)
 		{
 			lump = wad->sprite_lumps[i];
 
-			I_Debugf("Sorted sprite %d = lump %d [%s]\n", i, lump, lumpinfo[lump].name);
+			EDGEDebugf("Sorted sprite %d = lump %d [%s]\n", i, lump, lumpinfo[lump].name);
 		}
 	}
 #endif
@@ -644,7 +644,7 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
     else if (IsS_END(lump_p->name))
     {
         if (!within_sprite_list)
-            I_Warning("Unexpected S_END marker in wad.\n");
+            EDGEWarning("Unexpected S_END marker in wad.\n");
 
         lump_p->kind       = LMKIND_Marker;
         within_sprite_list = false;
@@ -659,7 +659,7 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
     else if (IsF_END(lump_p->name))
     {
         if (!within_flat_list)
-            I_Warning("Unexpected F_END marker in wad.\n");
+            EDGEWarning("Unexpected F_END marker in wad.\n");
 
         lump_p->kind     = LMKIND_Marker;
         within_flat_list = false;
@@ -674,7 +674,7 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
     else if (IsP_END(lump_p->name))
     {
         if (!within_patch_list)
-            I_Warning("Unexpected P_END marker in wad.\n");
+            EDGEWarning("Unexpected P_END marker in wad.\n");
 
         lump_p->kind      = LMKIND_Marker;
         within_patch_list = false;
@@ -689,7 +689,7 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
     else if (IsC_END(lump_p->name))
     {
         if (!within_colmap_list)
-            I_Warning("Unexpected C_END marker in wad.\n");
+            EDGEWarning("Unexpected C_END marker in wad.\n");
 
         lump_p->kind       = LMKIND_Marker;
         within_colmap_list = false;
@@ -704,7 +704,7 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
     else if (IsTX_END(lump_p->name))
     {
         if (!within_tex_list)
-            I_Warning("Unexpected TX_END marker in wad.\n");
+            EDGEWarning("Unexpected TX_END marker in wad.\n");
 
         lump_p->kind    = LMKIND_Marker;
         within_tex_list = false;
@@ -719,7 +719,7 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
     else if (IsHI_END(lump_p->name))
     {
         if (!within_hires_list)
-            I_Warning("Unexpected HI_END marker in wad.\n");
+            EDGEWarning("Unexpected HI_END marker in wad.\n");
 
         lump_p->kind      = LMKIND_Marker;
         within_hires_list = false;
@@ -734,7 +734,7 @@ static void AddLump(data_file_c *df, const char *raw_name, int pos, int size, in
     else if (IsXG_END(lump_p->name))
     {
         if (!within_xgl_list)
-            I_Warning("Unexpected XG_END marker in wad.\n");
+            EDGEWarning("Unexpected XG_END marker in wad.\n");
 
         lump_p->kind    = LMKIND_Marker;
         within_xgl_list = false;
@@ -811,14 +811,14 @@ static void CheckForLevel(wad_file_c *wad, int lump, const char *name, const raw
     {
         if (strlen(name) > 5)
         {
-            I_Warning("Level name '%s' is too long !!\n", name);
+            EDGEWarning("Level name '%s' is too long !!\n", name);
             return;
         }
 
         // check for duplicates (Slige sometimes does this)
         if (wad->HasLevel(name))
         {
-            I_Warning("Duplicate level '%s' ignored.\n", name);
+            EDGEWarning("Duplicate level '%s' ignored.\n", name);
             return;
         }
 
@@ -852,7 +852,7 @@ int W_CheckForUniqueLumps(epi::File *file)
 
     if (!file)
     {
-        I_Warning("W_CheckForUniqueLumps: Received null file_c pointer!\n");
+        EDGEWarning("W_CheckForUniqueLumps: Received null file_c pointer!\n");
         return -1;
     }
 
@@ -942,15 +942,15 @@ void ProcessFixersForWad(data_file_c *df)
     {
         if (W_CheckNumForName("MAP33") > -1 && W_CheckNumForName("DMENUPIC") > -1)
         {
-            std::string fix_path = epi::PathAppend(game_dir, "edge_fixes/doom2_bfg.epk");
+            std::string fix_path = epi::PathAppend(game_directory, "edge_fixes/doom2_bfg.epk");
             if (epi::TestFileAccess(fix_path))
             {
                 W_AddPending(fix_path, FLKIND_EPK);
 
-                I_Printf("WADFIXES: Applying fixes for Doom 2 BFG Edition\n");
+                EDGEPrintf("WADFIXES: Applying fixes for Doom 2 BFG Edition\n");
             }
             else
-                I_Warning("WADFIXES: Doom 2 BFG Edition detected, but fix not found in edge_fixes directory!\n");
+                EDGEWarning("WADFIXES: Doom 2 BFG Edition detected, but fix not found in edge_fixes directory!\n");
             return;
         }
     }
@@ -966,17 +966,17 @@ void ProcessFixersForWad(data_file_c *df)
     {
         if (epi::StringCaseCompareASCII(fix_checker, fixdefs[i]->md5_string_) == 0)
         {
-            std::string fix_path = epi::PathAppend(game_dir, "edge_fixes");
+            std::string fix_path = epi::PathAppend(game_directory, "edge_fixes");
             fix_path = epi::PathAppend(fix_path, fix_checker.append(".epk"));
             if (epi::TestFileAccess(fix_path))
             {
                 W_AddPending(fix_path, FLKIND_EPK);
 
-                I_Printf("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name_.c_str());
+                EDGEPrintf("WADFIXES: Applying fixes for %s\n", fixdefs[i]->name_.c_str());
             }
             else
             {
-                I_Warning("WADFIXES: %s defined, but no fix WAD located in edge_fixes!\n", fixdefs[i]->name_.c_str());
+                EDGEWarning("WADFIXES: %s defined, but no fix WAD located in edge_fixes!\n", fixdefs[i]->name_.c_str());
                 return;
             }
         }
@@ -991,7 +991,7 @@ void ProcessDehackedInWad(data_file_c *df)
 
     const char *lump_name = lumpinfo[deh_lump].name;
 
-    I_Printf("Converting [%s] lump in: %s\n", lump_name, df->name.c_str());
+    EDGEPrintf("Converting [%s] lump in: %s\n", lump_name, df->name.c_str());
 
     int         length = -1;
     const uint8_t *data   = (const uint8_t *)W_LoadLump(deh_lump, &length);
@@ -1017,7 +1017,7 @@ static void ProcessDDFInWad(data_file_c *df)
 
         if (lump >= 0)
         {
-            I_Printf("Loading %s lump in %s\n", W_GetLumpName(lump), bare_filename.c_str());
+            EDGEPrintf("Loading %s lump in %s\n", W_GetLumpName(lump), bare_filename.c_str());
 
             std::string data   = W_LoadString(lump);
             std::string source = W_GetLumpName(lump);
@@ -1083,7 +1083,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 
     if (animated >= 0)
     {
-        I_Printf("Loading ANIMATED from: %s\n", df->name.c_str());
+        EDGEPrintf("Loading ANIMATED from: %s\n", df->name.c_str());
 
         int   length = -1;
         uint8_t *data   = W_LoadLump(animated, &length);
@@ -1094,7 +1094,7 @@ static void ProcessBoomStuffInWad(data_file_c *df)
 
     if (switches >= 0)
     {
-        I_Printf("Loading SWITCHES from: %s\n", df->name.c_str());
+        EDGEPrintf("Loading SWITCHES from: %s\n", df->name.c_str());
 
         int   length = -1;
         uint8_t *data   = W_LoadLump(switches, &length);
@@ -1133,7 +1133,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
         // Homebrew levels?
         if (strncmp(header.identification, "PWAD", 4) != 0)
         {
-            I_Error("Wad file %s doesn't have IWAD or PWAD id\n", df->name.c_str());
+            EDGEError("Wad file %s doesn't have IWAD or PWAD id\n", df->name.c_str());
         }
     }
 
@@ -1170,19 +1170,19 @@ void ProcessWad(data_file_c *df, size_t file_index)
     // check for unclosed sprite/flat/patch lists
     const char *filename = df->name.c_str();
     if (within_sprite_list)
-        I_Warning("Missing S_END marker in %s.\n", filename);
+        EDGEWarning("Missing S_END marker in %s.\n", filename);
     if (within_flat_list)
-        I_Warning("Missing F_END marker in %s.\n", filename);
+        EDGEWarning("Missing F_END marker in %s.\n", filename);
     if (within_patch_list)
-        I_Warning("Missing P_END marker in %s.\n", filename);
+        EDGEWarning("Missing P_END marker in %s.\n", filename);
     if (within_colmap_list)
-        I_Warning("Missing C_END marker in %s.\n", filename);
+        EDGEWarning("Missing C_END marker in %s.\n", filename);
     if (within_tex_list)
-        I_Warning("Missing TX_END marker in %s.\n", filename);
+        EDGEWarning("Missing TX_END marker in %s.\n", filename);
     if (within_hires_list)
-        I_Warning("Missing HI_END marker in %s.\n", filename);
+        EDGEWarning("Missing HI_END marker in %s.\n", filename);
     if (within_xgl_list)
-        I_Warning("Missing XG_END marker in %s.\n", filename);
+        EDGEWarning("Missing XG_END marker in %s.\n", filename);
 
     SortLumps();
 
@@ -1194,7 +1194,7 @@ void ProcessWad(data_file_c *df, size_t file_index)
 
     wad->md5_string = dir_md5.ToString();
 
-    I_Debugf("   md5hash = %s\n", wad->md5_string.c_str());
+    EDGEDebugf("   md5hash = %s\n", wad->md5_string.c_str());
 
     delete[] raw_info;
 
@@ -1218,17 +1218,17 @@ std::string W_BuildNodesForWad(data_file_c *df)
 
     std::string xwa_filename = epi::PathAppend(cache_dir, cache_name);
 
-    I_Debugf("XWA filename: %s\n", xwa_filename.c_str());
+    EDGEDebugf("XWA filename: %s\n", xwa_filename.c_str());
 
     // check whether an XWA file for this map exists in the cache
     bool exists = epi::TestFileAccess(xwa_filename);
 
     if (!exists)
     {
-        I_Printf("Building XGL nodes for: %s\n", df->name.c_str());
+        EDGEPrintf("Building XGL nodes for: %s\n", df->name.c_str());
 
-        I_Debugf("# source: '%s'\n", df->name.c_str());
-        I_Debugf("#   dest: '%s'\n", xwa_filename.c_str());
+        EDGEDebugf("# source: '%s'\n", df->name.c_str());
+        EDGEDebugf("#   dest: '%s'\n", xwa_filename.c_str());
 
         ajbsp::ResetInfo();
 
@@ -1260,7 +1260,7 @@ std::string W_BuildNodesForWad(data_file_c *df)
             delete mem_wad;
         }
 
-        I_Debugf("AJ_BuildNodes: FINISHED\n");
+        EDGEDebugf("AJ_BuildNodes: FINISHED\n");
 
         epi::SyncFilesystem();
     }
@@ -1278,7 +1278,7 @@ void W_ReadUMAPINFOLumps(void)
                 continue;
             else
             {
-                L_WriteDebug("Parsing UMAPINFO lump in %s\n", df->name.c_str());
+                EDGEDebugf("Parsing UMAPINFO lump in %s\n", df->name.c_str());
                 Parse_UMAPINFO(W_LoadString(df->wad->umapinfo_lump));
             }
         }
@@ -1288,7 +1288,7 @@ void W_ReadUMAPINFOLumps(void)
                 continue;
             else
             {
-                L_WriteDebug("Parsing UMAPINFO.txt in %s\n", df->name.c_str());
+                EDGEDebugf("Parsing UMAPINFO.txt in %s\n", df->name.c_str());
                 epi::File *uinfo = Pack_FileOpen(df->pack, "UMAPINFO.txt");
                 if (uinfo)
                 {
@@ -1313,21 +1313,21 @@ void W_ReadUMAPINFOLumps(void)
                 for (auto c : mapname.substr(3))
                 {
                     if (!epi::IsDigitASCII(c))
-                        I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
+                        EDGEError("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
                 }
             }
             else if (mapname.size() > 3 && mapname[0] == 'E' && mapname[2] == 'M')
             {
                 if (!epi::IsDigitASCII(mapname[1]))
-                    I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
+                    EDGEError("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
                 for (auto c : mapname.substr(3))
                 {
                     if (!epi::IsDigitASCII(c))
-                        I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
+                        EDGEError("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
                 }
             }
             else
-                I_Error("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
+                EDGEError("UMAPINFO: Bad map name: %s!\n", mapname.c_str());
 
             MapDefinition *temp_level = mapdefs.Lookup(mapname.c_str());
             if (!temp_level)
@@ -1738,7 +1738,7 @@ void W_ReadUMAPINFOLumps(void)
                     }
                 }
                 if (!good_epi)
-                    I_Error("UMAPINFO: No valid episode found for level %s\n", temp_level->name_.c_str());
+                    EDGEError("UMAPINFO: No valid episode found for level %s\n", temp_level->name_.c_str());
             }
             // Validate important things
             if (temp_level->sky_.empty())
@@ -1873,7 +1873,7 @@ int W_CheckNumForName(const char *name)
 
     if (strlen(name) > 8)
     {
-        I_Debugf("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
+        EDGEDebugf("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
         return -1;
     }
 
@@ -1904,7 +1904,7 @@ int W_CheckFileNumForName(const char *name)
 
     if (strlen(name) > 8)
     {
-        I_Debugf("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
+        EDGEDebugf("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
         return -1;
     }
 
@@ -1932,7 +1932,7 @@ int W_CheckNumForName_GFX(const char *name)
 
     if (strlen(name) > 8)
     {
-        I_Debugf("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
+        EDGEDebugf("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
         return -1;
     }
 
@@ -1964,7 +1964,7 @@ int W_CheckNumForName_XGL(const char *name)
 
     if (strlen(name) > 8)
     {
-        I_Warning("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
+        EDGEWarning("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
         return -1;
     }
 
@@ -1994,7 +1994,7 @@ int W_CheckNumForName_MAP(const char *name)
 
     if (strlen(name) > 8)
     {
-        I_Warning("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
+        EDGEWarning("W_CheckNumForName: Name '%s' longer than 8 chars!\n", name);
         return -1;
     }
 
@@ -2025,7 +2025,7 @@ int W_GetNumForName(const char *name)
     int i;
 
     if ((i = W_CheckNumForName(name)) == -1)
-        I_Error("W_GetNumForName: \'%.8s\' not found!", name);
+        EDGEError("W_GetNumForName: \'%.8s\' not found!", name);
 
     return i;
 }
@@ -2048,7 +2048,7 @@ int W_CheckNumForTexPatch(const char *name)
     {
 #ifdef DEVELOPERS
         if (i > 8)
-            I_Error("W_CheckNumForTexPatch: '%s' longer than 8 chars!", name);
+            EDGEError("W_CheckNumForTexPatch: '%s' longer than 8 chars!", name);
 #endif
         buf[i] = epi::ToUpperASCII(name[i]);
     }
@@ -2104,7 +2104,7 @@ bool W_VerifyLumpName(int lump, const char *name)
 int W_LumpLength(int lump)
 {
     if (!W_VerifyLump(lump))
-        I_Error("W_LumpLength: %i >= numlumps", lump);
+        EDGEError("W_LumpLength: %i >= numlumps", lump);
 
     return lumpinfo[lump].size;
 }
@@ -2214,7 +2214,7 @@ int W_GetKindForLump(int lump)
 static void W_RawReadLump(int lump, void *dest)
 {
     if (!W_VerifyLump(lump))
-        I_Error("W_ReadLump: %i >= numlumps", lump);
+        EDGEError("W_ReadLump: %i >= numlumps", lump);
 
     lumpinfo_t  *L  = &lumpinfo[lump];
     data_file_c *df = data_files[L->file];
@@ -2224,7 +2224,7 @@ static void W_RawReadLump(int lump, void *dest)
     int c = df->file->Read(dest, L->size);
 
     if (c < L->size)
-        I_Error("W_ReadLump: only read %i of %i on lump %i", c, L->size, lump);
+        EDGEError("W_ReadLump: only read %i of %i on lump %i", c, L->size, lump);
 }
 
 //
@@ -2359,7 +2359,7 @@ static const char *LumpKindString(lump_kind_e kind)
 
 void W_ShowLumps(int for_file, const char *match)
 {
-    I_Printf("Lump list:\n");
+    EDGEPrintf("Lump list:\n");
 
     int total = 0;
 
@@ -2374,12 +2374,12 @@ void W_ShowLumps(int for_file, const char *match)
             if (!strstr(L->name, match))
                 continue;
 
-        I_Printf(" %4d %-9s %2d %-6s %7d @ 0x%08x\n", i + 1, L->name, L->file + 1, LumpKindString(L->kind), L->size,
+        EDGEPrintf(" %4d %-9s %2d %-6s %7d @ 0x%08x\n", i + 1, L->name, L->file + 1, LumpKindString(L->kind), L->size,
                  L->position);
         total++;
     }
 
-    I_Printf("Total: %d\n", total);
+    EDGEPrintf("Total: %d\n", total);
 }
 
 int W_LoboFindSkyImage(int for_file, const char *match)
@@ -2400,14 +2400,14 @@ int W_LoboFindSkyImage(int for_file, const char *match)
         switch (L->kind)
         {
         case LMKIND_Patch:
-            /*I_Printf(" %4d %-9s %2d %-6s %7d @ 0x%08x\n",
+            /*EDGEPrintf(" %4d %-9s %2d %-6s %7d @ 0x%08x\n",
              i+1, L->name,
              L->file+1, LumpKind_Strings[L->kind],
              L->size, L->position); */
             total++;
             break;
         case LMKIND_Normal:
-            /*I_Printf(" %4d %-9s %2d %-6s %7d @ 0x%08x\n",
+            /*EDGEPrintf(" %4d %-9s %2d %-6s %7d @ 0x%08x\n",
              i+1, L->name,
              L->file+1, LumpKind_Strings[L->kind],
              L->size, L->position); */
@@ -2418,9 +2418,9 @@ int W_LoboFindSkyImage(int for_file, const char *match)
         }
     }
 
-    I_Printf("FindSkyPatch: file %i,  match %s, count: %i\n", for_file, match, total);
+    EDGEPrintf("FindSkyPatch: file %i,  match %s, count: %i\n", for_file, match, total);
 
-    // I_Printf("Total: %d\n", total);
+    // EDGEPrintf("Total: %d\n", total);
     return total;
 }
 
@@ -2465,7 +2465,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
                 // we only want pwads
                 if (data_files[filenum]->kind == FLKIND_PWad || data_files[filenum]->kind == FLKIND_PackWAD)
                 {
-                    I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name.c_str(),
+                    EDGEDebugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name.c_str(),
                              tempImage->source_type, lumpnum, filenum);
                     TurnOffSkyBox = false;
                     return TurnOffSkyBox; // get out of here
@@ -2486,7 +2486,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
         }
         else if (tempImage->source_type == IMSRC_User) // texture from images.ddf
         {
-            I_Debugf("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name.c_str(), tempImage->source_type);
+            EDGEDebugf("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name.c_str(), tempImage->source_type);
             TurnOffSkyBox = true; // turn off or not? hmmm...
             return TurnOffSkyBox;
         }
@@ -2520,7 +2520,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
         }
     }
 
-    I_Debugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name.c_str(), tempImage->source_type,
+    EDGEDebugf("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name.c_str(), tempImage->source_type,
              lumpnum, filenum);
     return TurnOffSkyBox;
 }

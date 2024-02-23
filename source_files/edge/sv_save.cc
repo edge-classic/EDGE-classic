@@ -39,14 +39,14 @@
 
 void SV_BeginSave(void)
 {
-    L_WriteDebug("SV_BeginSave...\n");
+    EDGEDebugf("SV_BeginSave...\n");
 
     P_ClearAllStaleRefs();
 }
 
 void SV_FinishSave(void)
 {
-    L_WriteDebug("SV_FinishSave...\n");
+    EDGEDebugf("SV_FinishSave...\n");
 }
 
 void SV_SaveStruct(void *base, savestruct_t *info)

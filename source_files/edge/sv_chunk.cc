@@ -132,7 +132,7 @@ int SV_GetError(void)
 
 bool SV_OpenReadFile(std::string filename)
 {
-    L_WriteDebug("Opening savegame file (R): %s\n", filename.c_str());
+    EDGEDebugf("Opening savegame file (R): %s\n", filename.c_str());
 
     chunk_stack_size = 0;
     last_error       = 0;
@@ -152,12 +152,12 @@ bool SV_CloseReadFile(void)
     SYS_ASSERT(current_fp);
 
     if (chunk_stack_size > 0)
-        I_Error("SV_CloseReadFile: Too many Pushes (missing Pop somewhere).\n");
+        EDGEError("SV_CloseReadFile: Too many Pushes (missing Pop somewhere).\n");
 
     fclose(current_fp);
 
     if (last_error)
-        I_Warning("LOADGAME: Error(s) occurred during reading.\n");
+        EDGEWarning("LOADGAME: Error(s) occurred during reading.\n");
 
     return true;
 }
@@ -172,7 +172,7 @@ bool SV_VerifyHeader(int *version)
 
     if (!CheckMagic())
     {
-        I_Warning("LOADGAME: Bad magic in savegame file\n");
+        EDGEWarning("LOADGAME: Bad magic in savegame file\n");
         return false;
     }
 
@@ -187,7 +187,7 @@ bool SV_VerifyHeader(int *version)
 
     if (last_error)
     {
-        I_Warning("LOADGAME: Bad header in savegame file\n");
+        EDGEWarning("LOADGAME: Bad header in savegame file\n");
         return false;
     }
 
@@ -211,7 +211,7 @@ bool SV_VerifyContents(void)
 
         if (!VerifyMarker(start_marker))
         {
-            I_Warning("LOADGAME: Verify failed: Invalid start marker: "
+            EDGEWarning("LOADGAME: Verify failed: Invalid start marker: "
                       "%02X %02X %02X %02X\n",
                       start_marker[0], start_marker[1], start_marker[2], start_marker[3]);
             return false;
@@ -228,7 +228,7 @@ bool SV_VerifyContents(void)
 
         if ((orig_len & 3) != 0 || file_len > MAX_COMP_SIZE(orig_len))
         {
-            I_Warning("LOADGAME: Verify failed: Chunk has bad size: "
+            EDGEWarning("LOADGAME: Verify failed: Chunk has bad size: "
                       "(file=%d orig=%d)\n",
                       file_len, orig_len);
             return false;
@@ -241,7 +241,7 @@ bool SV_VerifyContents(void)
         // run out of data ?
         if (last_error)
         {
-            I_Warning("LOADGAME: Verify failed: Chunk corrupt or "
+            EDGEWarning("LOADGAME: Verify failed: Chunk corrupt or "
                       "File truncated.\n");
             return false;
         }
@@ -250,7 +250,7 @@ bool SV_VerifyContents(void)
     // check trailer
     if (!CheckMagic())
     {
-        I_Warning("LOADGAME: Verify failed: Bad trailer.\n");
+        EDGEWarning("LOADGAME: Verify failed: Bad trailer.\n");
         return false;
     }
 
@@ -262,7 +262,7 @@ bool SV_VerifyContents(void)
 
     if (read_crc != final_crc.GetCRC())
     {
-        I_Warning("LOADGAME: Verify failed: Bad CRC: %08X != %08X\n", current_crc.GetCRC(), read_crc);
+        EDGEWarning("LOADGAME: Verify failed: Bad CRC: %08X != %08X\n", current_crc.GetCRC(), read_crc);
         return false;
     }
 
@@ -288,7 +288,7 @@ unsigned char SV_GetByte(void)
 
         if (c == EOF)
         {
-            I_Error("LOADGAME: Corrupt Savegame (reached EOF).\n");
+            EDGEError("LOADGAME: Corrupt Savegame (reached EOF).\n");
             last_error = 1;
             return 0;
         }
@@ -299,8 +299,8 @@ unsigned char SV_GetByte(void)
         {
             static int pos = 0;
             pos++;
-            L_WriteDebug("%08X: %02X \n", ftell(current_fp), c);
-            //			L_WriteDebug("0.%02X%s", result, ((pos % 10)==0) ? "\n" : " ");
+            EDGEDebugf("%08X: %02X \n", ftell(current_fp), c);
+            //			EDGEDebugf("0.%02X%s", result, ((pos % 10)==0) ? "\n" : " ");
         }
 #endif
 
@@ -315,7 +315,7 @@ unsigned char SV_GetByte(void)
 
     if (cur->pos == cur->end)
     {
-        I_Error("LOADGAME: Corrupt Savegame (reached end of [%s] chunk).\n", cur->s_mark);
+        EDGEError("LOADGAME: Corrupt Savegame (reached end of [%s] chunk).\n", cur->s_mark);
         last_error = 2;
         return 0;
     }
@@ -327,7 +327,7 @@ unsigned char SV_GetByte(void)
     {
         static int pos = 0;
         pos++;
-        L_WriteDebug("%d.%02X%s", chunk_stack_size, result, ((pos % 10) == 0) ? "\n" : " ");
+        EDGEDebugf("%d.%02X%s", chunk_stack_size, result, ((pos % 10) == 0) ? "\n" : " ");
     }
 #endif
 
@@ -340,7 +340,7 @@ bool SV_PushReadChunk(const char *id)
     unsigned int file_len;
 
     if (chunk_stack_size >= MAX_CHUNK_DEPTH)
-        I_Error("SV_PushReadChunk: Too many Pushes (missing Pop somewhere).\n");
+        EDGEError("SV_PushReadChunk: Too many Pushes (missing Pop somewhere).\n");
 
     // read chunk length
     file_len = SV_GetInt();
@@ -397,7 +397,7 @@ bool SV_PushReadChunk(const char *id)
             int res = uncompress(cur->start, &out_len, file_data, file_len);
 
             if (res != Z_OK)
-                I_Error("LOADGAME: ReadChunk [%s] failed: ZLIB uncompress error.\n", id);
+                EDGEError("LOADGAME: ReadChunk [%s] failed: ZLIB uncompress error.\n", id);
 
             decomp_len = (unsigned int)out_len;
         }
@@ -432,7 +432,7 @@ bool SV_PopReadChunk(void)
     chunk_t *cur;
 
     if (chunk_stack_size == 0)
-        I_Error("SV_PopReadChunk: Too many Pops (missing Push somewhere).\n");
+        EDGEError("SV_PopReadChunk: Too many Pops (missing Push somewhere).\n");
 
     cur = &chunk_stack[chunk_stack_size - 1];
 
@@ -476,7 +476,7 @@ bool SV_SkipReadChunk(const char *id)
 
 bool SV_OpenWriteFile(std::string filename, int version)
 {
-    L_WriteDebug("Opening savegame file (W): %s\n", filename.c_str());
+    EDGEDebugf("Opening savegame file (W): %s\n", filename.c_str());
 
     chunk_stack_size = 0;
     last_error       = 0;
@@ -487,7 +487,7 @@ bool SV_OpenWriteFile(std::string filename, int version)
 
     if (!current_fp)
     {
-        I_Warning("SAVEGAME: Couldn't open file: %s\n", filename.c_str());
+        EDGEWarning("SAVEGAME: Couldn't open file: %s\n", filename.c_str());
         return false;
     }
 
@@ -505,7 +505,7 @@ bool SV_CloseWriteFile(void)
     SYS_ASSERT(current_fp);
 
     if (chunk_stack_size != 0)
-        I_Error("SV_CloseWriteFile: Too many Pushes (missing Pop somewhere).\n");
+        EDGEError("SV_CloseWriteFile: Too many Pushes (missing Pop somewhere).\n");
 
     // write trailer
 
@@ -517,7 +517,7 @@ bool SV_CloseWriteFile(void)
     SV_PutInt(final_crc.GetCRC());
 
     if (last_error)
-        I_Warning("SAVEGAME: Error(s) occurred during writing.\n");
+        EDGEWarning("SAVEGAME: Error(s) occurred during writing.\n");
 
     fclose(current_fp);
 
@@ -529,7 +529,7 @@ bool SV_PushWriteChunk(const char *id)
     chunk_t *cur;
 
     if (chunk_stack_size >= MAX_CHUNK_DEPTH)
-        I_Error("SV_PushWriteChunk: Too many Pushes (missing Pop somewhere).\n");
+        EDGEError("SV_PushWriteChunk: Too many Pushes (missing Pop somewhere).\n");
 
     // create new chunk_t
     cur = &chunk_stack[chunk_stack_size];
@@ -557,7 +557,7 @@ bool SV_PopWriteChunk(void)
     int      len;
 
     if (chunk_stack_size == 0)
-        I_Error("SV_PopWriteChunk: Too many Pops (missing Push somewhere).\n");
+        EDGEError("SV_PopWriteChunk: Too many Pops (missing Push somewhere).\n");
 
     cur = &chunk_stack[chunk_stack_size - 1];
 
@@ -590,7 +590,7 @@ bool SV_PopWriteChunk(void)
         if (res != Z_OK || (int)out_len >= len)
         {
 #if (DEBUG_COMPRESS)
-            L_WriteDebug("WriteChunk UNCOMPRESSED (res %d != %d, out_len %d >= %d)\n", res, Z_OK, (int)out_len, len);
+            EDGEDebugf("WriteChunk UNCOMPRESSED (res %d != %d, out_len %d >= %d)\n", res, Z_OK, (int)out_len, len);
 #endif
             // compression failed, so write uncompressed
             memcpy(out_buf, cur->start, len);
@@ -599,7 +599,7 @@ bool SV_PopWriteChunk(void)
 #if (DEBUG_COMPRESS)
         else
         {
-            L_WriteDebug("WriteChunk compress (res %d == %d, out_len %d < %d)\n", res, Z_OK, (int)out_len, len);
+            EDGEDebugf("WriteChunk compress (res %d == %d, out_len %d < %d)\n", res, Z_OK, (int)out_len, len);
         }
 #endif
 
@@ -643,7 +643,7 @@ void SV_PutByte(unsigned char value)
     {
         static int pos = 0;
         pos++;
-        L_WriteDebug("%d.%02x%s", chunk_stack_size, value, ((pos % 10) == 0) ? "\n" : " ");
+        EDGEDebugf("%d.%02x%s", chunk_stack_size, value, ((pos % 10) == 0) ? "\n" : " ");
     }
 #endif
 
@@ -657,7 +657,7 @@ void SV_PutByte(unsigned char value)
 
         if (ferror(current_fp))
         {
-            I_Warning("SAVEGAME: Write error occurred !\n");
+            EDGEWarning("SAVEGAME: Write error occurred !\n");
             last_error = 3;
             return;
         }
@@ -802,7 +802,7 @@ void SV_PutMarker(const char *id)
 {
     int i;
 
-    // I_Printf("ID: %s\n", id);
+    // EDGEPrintf("ID: %s\n", id);
 
     SYS_ASSERT(id);
     SYS_ASSERT(strlen(id) == 4);
@@ -819,7 +819,7 @@ const char *SV_GetString(void)
         return nullptr;
 
     if (type != STRING_MARKER)
-        I_Error("Corrupt savegame (invalid string).\n");
+        EDGEError("Corrupt savegame (invalid string).\n");
 
     int len = SV_GetShort();
 

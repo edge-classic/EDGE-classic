@@ -1251,7 +1251,7 @@ static void HitSlideLine(line_t *ld)
 
     if (deltaangle > kBAMAngle180)
         deltaangle += kBAMAngle180;
-    // I_Error ("SlideLine: ang>kBAMAngle180");
+    // EDGEError ("SlideLine: ang>kBAMAngle180");
 
     float movelen = P_ApproxDistance(tmxmove, tmymove);
     float newlen  = movelen * epi::BAMCos(deltaangle);

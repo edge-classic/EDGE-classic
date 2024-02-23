@@ -240,7 +240,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
     player->viewz = player->viewheight + bob_z;
 
 #if 0 // DEBUG
-I_Debugf("Jump:%d bob_z:%1.2f  z:%1.2f  height:%1.2f delta:%1.2f --> viewz:%1.3f\n",
+EDGEDebugf("Jump:%d bob_z:%1.2f  z:%1.2f  height:%1.2f delta:%1.2f --> viewz:%1.3f\n",
 		 player->jumpwait, bob_z, player->mo->z,
 		 player->viewheight, player->deltaviewheight,
 		 player->mo->z + player->viewz);
@@ -702,16 +702,16 @@ void P_DumpMobjsTemp(void)
 
     int index = 0;
 
-    I_Warning("MOBJs:\n");
+    EDGEWarning("MOBJs:\n");
 
     for (mo = mobjlisthead; mo; mo = mo->next, index++)
     {
-        I_Warning(" %4d: %p next:%p prev:%p [%s] at (%1.0f,%1.0f,%1.0f) states=%d > %d tics=%d\n", index, mo, mo->next,
+        EDGEWarning(" %4d: %p next:%p prev:%p [%s] at (%1.0f,%1.0f,%1.0f) states=%d > %d tics=%d\n", index, mo, mo->next,
                   mo->prev, mo->info->name_.c_str(), mo->x, mo->y, mo->z, (int)(mo->state ? mo->state - states : -1),
                   (int)(mo->next_state ? mo->next_state - states : -1), mo->tics);
     }
 
-    I_Warning("END OF MOBJs\n");
+    EDGEWarning("END OF MOBJs\n");
 }
 
 bool P_PlayerThink(player_t *player, bool extra_tic)
@@ -725,10 +725,10 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
 #if 0 // DEBUG ONLY
 	{
 		touch_node_t *tn;
-		L_WriteDebug("Player %d Touch List:\n", player->pnum);
+		EDGEDebugf("Player %d Touch List:\n", player->pnum);
 		for (tn = mo->touch_sectors; tn; tn=tn->mo_next)
 		{
-			L_WriteDebug("  SEC %d  Other = %s\n", tn->sec - sectors,
+			EDGEDebugf("  SEC %d  Other = %s\n", tn->sec - sectors,
 				tn->sec_next ? tn->sec_next->mo->info->name_ :
 			tn->sec_prev ? tn->sec_prev->mo->info->name_ : "(None)");
 
@@ -744,7 +744,7 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
     if (player->attacker && player->attacker->isRemoved())
     {
         P_DumpMobjsTemp();
-        I_Error("INTERNAL ERROR: player has a removed attacker. \n");
+        EDGEError("INTERNAL ERROR: player has a removed attacker. \n");
     }
 
     if (player->damagecount <= 0)
@@ -1079,7 +1079,7 @@ bool P_AddWeapon(player_t *player, WeaponDefinition *info, int *index)
     // cannot own weapons if sprites are missing
     if (!P_CheckWeaponSprite(info))
     {
-        I_Warning("WEAPON %s has no sprites and will not be added!\n", info->name_.c_str());
+        EDGEWarning("WEAPON %s has no sprites and will not be added!\n", info->name_.c_str());
         return false;
     }
 
@@ -1121,7 +1121,7 @@ bool P_AddWeapon(player_t *player, WeaponDefinition *info, int *index)
     if (index)
         (*index) = slot;
 
-    L_WriteDebug("P_AddWeapon: [%s] @ %d\n", info->name_.c_str(), slot);
+    EDGEDebugf("P_AddWeapon: [%s] @ %d\n", info->name_.c_str(), slot);
 
     player->weapons[slot].owned        = true;
     player->weapons[slot].info         = info;
@@ -1190,7 +1190,7 @@ bool P_RemoveWeapon(player_t *player, WeaponDefinition *info)
     if (slot >= MAXWEAPONS)
         return false;
 
-    L_WriteDebug("P_RemoveWeapon: [%s] @ %d\n", info->name_.c_str(), slot);
+    EDGEDebugf("P_RemoveWeapon: [%s] @ %d\n", info->name_.c_str(), slot);
 
     player->weapons[slot].owned = false;
 

@@ -27,7 +27,7 @@
 
 /* FUNCTIONS */
 
-abstract_music_c *S_PlayOGGMusic(uint8_t *data, int length, bool looping);
+AbstractMusicPlayer *S_PlayOGGMusic(uint8_t *data, int length, bool looping);
 
 bool S_LoadOGGSound(sound_data_c *buf, const uint8_t *data, int length);
 

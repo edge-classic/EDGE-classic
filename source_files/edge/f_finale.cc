@@ -120,7 +120,7 @@ static bool HasFinale(const FinaleDefinition *F, FinaleStage cur)
             return F->docast_;
 
         default:
-            I_Error("Bad parameter passed to HasFinale().\n");
+            EDGEError("Bad parameter passed to HasFinale().\n");
     }
 
     return false; /* NOT REACHED */
@@ -151,7 +151,7 @@ static void DoStartFinale(void)
             break;
 
         case kFinaleStageMovie:
-            E_PlayMovie(finale->movie_);
+            EDGEPlayMovie(finale->movie_);
             DoBumpFinale();
             break;
 
@@ -171,7 +171,7 @@ static void DoStartFinale(void)
             break;
 
         default:
-            I_Error("DoStartFinale: bad stage #%d\n", (int)finale_stage);
+            EDGEError("DoStartFinale: bad stage #%d\n", (int)finale_stage);
             break;
     }
 
@@ -339,7 +339,7 @@ void FinaleTicker(void)
             break;
 
         default:
-            I_Error("FinaleTicker: bad finale_stage #%d\n", (int)finale_stage);
+            EDGEError("FinaleTicker: bad finale_stage #%d\n", (int)finale_stage);
             break;
     }
 
@@ -914,7 +914,7 @@ void FinaleDrawer(void)
             break;
 
         default:
-            I_Error("FinaleDrawer: bad finale_stage #%d\n", (int)finale_stage);
+            EDGEError("FinaleDrawer: bad finale_stage #%d\n", (int)finale_stage);
             break;
     }
 }

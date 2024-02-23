@@ -161,7 +161,7 @@ static void PlaylistParseField(const char *field, const char *contents,
                                int index, bool is_last)
 {
 #if (DEBUG_DDF)
-    I_Debugf("PLAYLIST_PARSE: %s = %s;\n", field, contents);
+    EDGEDebugf("PLAYLIST_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_CompareName(field, "MUSICINFO") == 0)

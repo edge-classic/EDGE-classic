@@ -84,7 +84,7 @@ static void SwitchParseField(const char *field, const char *contents, int index,
                              bool is_last)
 {
 #if (DEBUG_DDF)
-    I_Debugf("SWITCH_PARSE: %s = %s;\n", field, contents);
+    EDGEDebugf("SWITCH_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_MainParseField(switch_commands, field, contents,
@@ -135,13 +135,13 @@ void DDF_ReadSwitch(const std::string &data)
     epi::array_iterator_c it;
     SwitchDefinition     *sw;
 
-    I_Debugf("DDF_ReadSW: Switch List:\n");
+    EDGEDebugf("DDF_ReadSW: Switch List:\n");
 
     for (it = switchdefs.GetBaseIterator(); it.IsValid(); it++)
     {
         sw = ITERATOR_TO_TYPE(it, SwitchDefinition *);
 
-        I_Debugf("  Num: %d  ON: '%s'  OFF: '%s'\n", i, sw->on_name,
+        EDGEDebugf("  Num: %d  ON: '%s'  OFF: '%s'\n", i, sw->on_name,
                  sw->off_name);
     }
 #endif
@@ -240,7 +240,7 @@ void DDF_ConvertSWITCHES(const uint8_t *data, int size)
         memcpy(on_name, data + 9, 8);
         on_name[8] = 0;
 
-        I_Debugf("- SWITCHES LUMP: off '%s' : on '%s'\n", off_name, on_name);
+        EDGEDebugf("- SWITCHES LUMP: off '%s' : on '%s'\n", off_name, on_name);
 
         // ignore zero-length names
         if (off_name[0] == 0 || on_name[0] == 0) continue;

@@ -124,7 +124,7 @@ extern ConsoleVariable r_crosshair;
 extern ConsoleVariable r_crosscolor;
 extern ConsoleVariable r_crosssize;
 extern ConsoleVariable s_genmidi;
-extern ConsoleVariable s_soundfont;
+extern ConsoleVariable midi_soundfont;
 extern ConsoleVariable r_overlay;
 extern ConsoleVariable g_erraticism;
 extern ConsoleVariable r_doubleframes;
@@ -133,14 +133,14 @@ extern ConsoleVariable r_culldist;
 extern ConsoleVariable r_cullfog;
 extern ConsoleVariable g_cullthinkers;
 extern ConsoleVariable r_maxdlights;
-extern ConsoleVariable v_sync;
+extern ConsoleVariable vsync;
 extern ConsoleVariable g_bobbing;
 extern ConsoleVariable g_gore;
 
 // extern cvar_c automap_keydoor_text;
 
 extern ConsoleVariable v_secbright;
-extern ConsoleVariable v_gamma;
+extern ConsoleVariable gamma_correction;
 extern ConsoleVariable r_titlescaling;
 extern ConsoleVariable r_skystretch;
 extern ConsoleVariable r_forceflatlighting;
@@ -155,7 +155,7 @@ extern ConsoleVariable joy_dead3;
 extern ConsoleVariable joy_dead4;
 extern ConsoleVariable joy_dead5;
 
-extern SDL_Joystick *joy_info;
+extern SDL_Joystick *joystick_info;
 extern int           I_JoyGetAxis(int n);
 
 extern int entry_playing;
@@ -244,10 +244,10 @@ static char SecBrights[] = "-50/-40/-30/-20/-10/Default/+10/+20/+30/+40/+50";
 static char DLightMax[] = "Unlimited/20/40/60/80/100";
 
 // Screen resolution changes
-static scrmode_c new_scrmode;
+static DisplayMode new_scrmode;
 
 extern std::vector<std::string> available_soundfonts;
-extern std::vector<std::string> available_genmidis;
+extern std::vector<std::string> available_opl_banks;
 
 //
 //  OPTION STRUCTURES
@@ -344,7 +344,7 @@ static int M_GetCurrentSwitchValue(optmenuitem_t *item)
     }
 
     default: {
-        I_Error("M_GetCurrentSwitchValue: Menu item type is not a switch!\n");
+        EDGEError("M_GetCurrentSwitchValue: Menu item type is not a switch!\n");
         break;
     }
     }
@@ -387,7 +387,7 @@ static menuinfo_t main_optmenu = {
 // -ACB- 1998/07/15 Altered menu structure
 
 static optmenuitem_t vidoptions[] = {
-    {OPT_FracSlider, "Gamma Adjustment", nullptr, 0, &v_gamma.f_, M_UpdateCVARFromFloat, nullptr, &v_gamma, 0.10f, -1.0f, 1.0f,
+    {OPT_FracSlider, "Gamma Adjustment", nullptr, 0, &gamma_correction.f_, M_UpdateCVARFromFloat, nullptr, &gamma_correction, 0.10f, -1.0f, 1.0f,
      "%0.2f"},
     {OPT_Switch, "Sector Brightness", SecBrights, 11, &v_secbright.d_, M_UpdateCVARFromInt, nullptr, &v_secbright},
     {OPT_Boolean, "Lighting Mode", "Indexed/Flat", 2, &r_forceflatlighting.d_, M_UpdateCVARFromInt, nullptr,
@@ -423,8 +423,8 @@ static menuinfo_t video_optmenu = {
 //
 static optmenuitem_t resoptions[] = {
     {OPT_Plain, "", nullptr, 0, nullptr, nullptr, nullptr},
-    {OPT_Switch, "V-Sync", "Off/Standard/Adaptive", 3, &v_sync.d_, M_UpdateCVARFromInt,
-     "Will fallback to Standard if Adaptive is not supported", &v_sync},
+    {OPT_Switch, "V-Sync", "Off/Standard/Adaptive", 3, &vsync.d_, M_UpdateCVARFromInt,
+     "Will fallback to Standard if Adaptive is not supported", &vsync},
     {OPT_Switch, "Aspect Ratio", MonitSiz, 6, &monitor_size, M_ChangeMonitorSize, "Only applies to Fullscreen Modes"},
     {OPT_Function, "New Mode", nullptr, 0, nullptr, M_ChangeResFull, nullptr},
     {OPT_Function, "New Resolution", nullptr, 0, nullptr, M_ChangeResSize, nullptr},
@@ -1024,7 +1024,7 @@ void M_OptDrawer()
             fontType  = StyleDefinition::kTextSectionAlternate;
             TEXTscale = style->definition_->text_[fontType].scale_;
             HUDWriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
-                         epi::GetStem(s_soundfont.s_).c_str());
+                         epi::GetStem(midi_soundfont.s_).c_str());
         }
 
         // Draw current GENMIDI
@@ -1177,7 +1177,7 @@ static void M_ResOptDrawer(Style *style, int topy, int bottomy, int dy, int cent
     sprintf(tempstring, "%s",
             new_scrmode.display_mode == 2
                 ? "Borderless Fullscreen"
-                : (new_scrmode.display_mode == scrmode_c::SCR_FULLSCREEN ? "Exclusive Fullscreen" : "Windowed"));
+                : (new_scrmode.display_mode == DisplayMode::SCR_FULLSCREEN ? "Exclusive Fullscreen" : "Windowed"));
     HUDWriteText(style, fontType, centrex + 15, y, tempstring);
 
     if (new_scrmode.display_mode < 2)
@@ -1602,7 +1602,7 @@ bool M_OptResponder(InputEvent *ev, int ch)
         default:
             break;
         }
-        I_Error("Invalid menu type!");
+        EDGEError("Invalid menu type!");
     }
     case KEYD_ESCAPE:
     case KEYD_MOUSE2:
@@ -1770,15 +1770,15 @@ static void M_Key2String(int key, char *deststring)
 
 static void InitMonitorSize()
 {
-    if (v_monitorsize.f_ > 2.00)
+    if (monitor_aspect_ratio.f_ > 2.00)
         monitor_size = 5;
-    else if (v_monitorsize.f_ > 1.70)
+    else if (monitor_aspect_ratio.f_ > 1.70)
         monitor_size = 4;
-    else if (v_monitorsize.f_ > 1.55)
+    else if (monitor_aspect_ratio.f_ > 1.55)
         monitor_size = 3;
-    else if (v_monitorsize.f_ > 1.40)
+    else if (monitor_aspect_ratio.f_ > 1.40)
         monitor_size = 2;
-    else if (v_monitorsize.f_ > 1.30)
+    else if (monitor_aspect_ratio.f_ > 1.30)
         monitor_size = 1;
     else
         monitor_size = 0;
@@ -1793,7 +1793,7 @@ static void M_ChangeMonitorSize(int key, ConsoleVariable *cvar)
 
     monitor_size = HMM_Clamp(0, monitor_size, 5);
 
-    v_monitorsize = ratios[monitor_size];
+    monitor_aspect_ratio = ratios[monitor_size];
 }
 
 //
@@ -2029,7 +2029,7 @@ static void M_ChangeSoundfont(int keypressed, ConsoleVariable *cvar)
     int sf_pos = -1;
     for (int i = 0; i < (int)available_soundfonts.size(); i++)
     {
-        if (epi::StringCaseCompareASCII(s_soundfont.s_, available_soundfonts.at(i)) == 0)
+        if (epi::StringCaseCompareASCII(midi_soundfont.s_, available_soundfonts.at(i)) == 0)
         {
             sf_pos = i;
             break;
@@ -2038,8 +2038,8 @@ static void M_ChangeSoundfont(int keypressed, ConsoleVariable *cvar)
 
     if (sf_pos < 0)
     {
-        I_Warning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
-        s_soundfont = epi::SanitizePath(epi::PathAppend(game_dir, "soundfont/Default.sf2"));
+        EDGEWarning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
+        midi_soundfont = epi::SanitizePath(epi::PathAppend(game_directory, "soundfont/Default.sf2"));
         return;
     }
 
@@ -2059,7 +2059,7 @@ static void M_ChangeSoundfont(int keypressed, ConsoleVariable *cvar)
     }
 
     // update cvar
-    s_soundfont = available_soundfonts.at(sf_pos);
+    midi_soundfont = available_soundfonts.at(sf_pos);
     S_RestartFluid();
 }
 
@@ -2070,9 +2070,9 @@ static void M_ChangeSoundfont(int keypressed, ConsoleVariable *cvar)
 static void M_ChangeGENMIDI(int keypressed, ConsoleVariable *cvar)
 {
     int op2_pos = -1;
-    for (int i = 0; i < (int)available_genmidis.size(); i++)
+    for (int i = 0; i < (int)available_opl_banks.size(); i++)
     {
-        if (epi::StringCaseCompareASCII(s_genmidi.s_, available_genmidis.at(i)) == 0)
+        if (epi::StringCaseCompareASCII(s_genmidi.s_, available_opl_banks.at(i)) == 0)
         {
             op2_pos = i;
             break;
@@ -2081,7 +2081,7 @@ static void M_ChangeGENMIDI(int keypressed, ConsoleVariable *cvar)
 
     if (op2_pos < 0)
     {
-        I_Warning("M_ChangeGENMIDI: Could not read list of available GENMIDIs. Falling back to default!\n");
+        EDGEWarning("M_ChangeGENMIDI: Could not read list of available GENMIDIs. Falling back to default!\n");
         s_genmidi.s_ = "";
         return;
     }
@@ -2091,18 +2091,18 @@ static void M_ChangeGENMIDI(int keypressed, ConsoleVariable *cvar)
         if (op2_pos - 1 >= 0)
             op2_pos--;
         else
-            op2_pos = available_genmidis.size() - 1;
+            op2_pos = available_opl_banks.size() - 1;
     }
     else if (keypressed == KEYD_RIGHTARROW || keypressed == KEYD_GP_RIGHT)
     {
-        if (op2_pos + 1 >= (int)available_genmidis.size())
+        if (op2_pos + 1 >= (int)available_opl_banks.size())
             op2_pos = 0;
         else
             op2_pos++;
     }
 
     // update cvar
-    s_genmidi = available_genmidis.at(op2_pos);
+    s_genmidi = available_opl_banks.at(op2_pos);
     S_RestartOPL();
 }
 
@@ -2147,7 +2147,7 @@ static void M_OptionSetResolution(int keypressed, ConsoleVariable *cvar)
 {
     if (R_ChangeResolution(&new_scrmode))
     {
-        if (new_scrmode.display_mode > scrmode_c::SCR_WINDOW)
+        if (new_scrmode.display_mode > DisplayMode::SCR_WINDOW)
         {
             tf_screendepth  = new_scrmode.depth;
             tf_screenheight = new_scrmode.height;

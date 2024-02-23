@@ -49,7 +49,7 @@ static int PL_set_who(lua_State *L)
     int index = luaL_checknumber(L, 1);
 
     if (index < 0 || index >= numplayers)
-        I_Error("player.set_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
+        EDGEError("player.set_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
 
     if (index == 0)
     {
@@ -150,7 +150,7 @@ static int PL_armor(lua_State *L)
     int kind = (int)luaL_checknumber(L, 1);
 
     if (kind < 1 || kind > kTotalArmourTypes)
-        I_Error("player.armor: bad armor index: %d\n", kind);
+        EDGEError("player.armor: bad armor index: %d\n", kind);
 
     kind--;
     // lua_pushnumber(L, floor(ui_player_who->armours[kind] + 0.99));
@@ -337,7 +337,7 @@ static int PL_has_key(lua_State *L)
     int key = (int)luaL_checknumber(L, 1);
 
     if (key < 1 || key > 16)
-        I_Error("player.has_key: bad key number: %d\n", key);
+        EDGEError("player.has_key: bad key number: %d\n", key);
 
     key--;
 
@@ -354,7 +354,7 @@ static int PL_has_power(lua_State *L)
     int power = (int)luaL_checknumber(L, 1);
 
     if (power < 1 || power > kTotalPowerTypes)
-        I_Error("player.has_power: bad powerup number: %d\n", power);
+        EDGEError("player.has_power: bad powerup number: %d\n", power);
 
     power--;
 
@@ -375,7 +375,7 @@ static int PL_power_left(lua_State *L)
     int power = (int)luaL_checknumber(L, 1);
 
     if (power < 1 || power > kTotalPowerTypes)
-        I_Error("player.power_left: bad powerup number: %d\n", power);
+        EDGEError("player.power_left: bad powerup number: %d\n", power);
 
     power--;
 
@@ -395,7 +395,7 @@ static int PL_has_weapon_slot(lua_State *L)
     int slot = (int)luaL_checknumber(L, 1);
 
     if (slot < 0 || slot > 9)
-        I_Error("player.has_weapon_slot: bad slot number: %d\n", slot);
+        EDGEError("player.has_weapon_slot: bad slot number: %d\n", slot);
 
     int value = ui_player_who->avail_weapons[slot] ? 1 : 0;
 
@@ -551,7 +551,7 @@ static int PL_weapon_state(lua_State *L)
     WeaponDefinition *oldWep = weapondefs.Lookup(weapon_name);
     if (!oldWep)
     {
-        I_Error("player.weapon_state: Unknown weapon name '%s'.\n", weapon_name);
+        EDGEError("player.weapon_state: Unknown weapon name '%s'.\n", weapon_name);
     }
 
     int pw_index;
@@ -576,7 +576,7 @@ static int PL_weapon_state(lua_State *L)
 
     int state = DDF_StateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
     if (state == 0)
-        I_Error("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
+        EDGEError("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;
 
     LUA_SetPspriteDeferred(ui_player_who, ps_weapon, state); // refresh the sprite
@@ -592,7 +592,7 @@ static int PL_ammo(lua_State *L)
     int ammo = (int)luaL_checknumber(L, 1);
 
     if (ammo < 1 || ammo > kTotalAmmunitionTypes)
-        I_Error("player.ammo: bad ammo number: %d\n", ammo);
+        EDGEError("player.ammo: bad ammo number: %d\n", ammo);
 
     ammo--;
 
@@ -607,7 +607,7 @@ static int PL_ammomax(lua_State *L)
     int ammo = (int)luaL_checknumber(L, 1);
 
     if (ammo < 1 || ammo > kTotalAmmunitionTypes)
-        I_Error("player.ammomax: bad ammo number: %d\n", ammo);
+        EDGEError("player.ammomax: bad ammo number: %d\n", ammo);
 
     ammo--;
 
@@ -622,7 +622,7 @@ static int PL_inventory(lua_State *L)
     int inv = (int)luaL_checknumber(L, 1);
 
     if (inv < 1 || inv > kTotalInventoryTypes)
-        I_Error("player.inventory: bad inv number: %d\n", inv);
+        EDGEError("player.inventory: bad inv number: %d\n", inv);
 
     inv--;
 
@@ -637,7 +637,7 @@ static int PL_inventorymax(lua_State *L)
     int inv = (int)luaL_checknumber(L, 1);
 
     if (inv < 1 || inv > kTotalInventoryTypes)
-        I_Error("player.inventorymax: bad inv number: %d\n", inv);
+        EDGEError("player.inventorymax: bad inv number: %d\n", inv);
 
     inv--;
 
@@ -652,7 +652,7 @@ static int PL_counter(lua_State *L)
     int cntr = (int)luaL_checknumber(L, 1);
 
     if (cntr < 1 || cntr > kTotalCounterTypes)
-        I_Error("player.counter: bad counter number: %d\n", cntr);
+        EDGEError("player.counter: bad counter number: %d\n", cntr);
 
     cntr--;
 
@@ -667,7 +667,7 @@ static int PL_counter_max(lua_State *L)
     int cntr = (int)luaL_checknumber(L, 1);
 
     if (cntr < 1 || cntr > kTotalCounterTypes)
-        I_Error("player.counter_max: bad counter number: %d\n", cntr);
+        EDGEError("player.counter_max: bad counter number: %d\n", cntr);
 
     cntr--;
 
@@ -683,15 +683,15 @@ static int PL_set_counter(lua_State *L)
     int amt  = (int)luaL_checknumber(L, 2);
 
     if (cntr < 1 || cntr > kTotalCounterTypes)
-        I_Error("player.set_counter: bad counter number: %d\n", cntr);
+        EDGEError("player.set_counter: bad counter number: %d\n", cntr);
 
     cntr--;
 
     if (amt < 0)
-        I_Error("player.set_counter: target amount cannot be negative!\n");
+        EDGEError("player.set_counter: target amount cannot be negative!\n");
 
     if (amt > ui_player_who->counters[cntr].max)
-        I_Error("player.set_counter: target amount %d exceeds limit for counter number %d\n", amt, cntr);
+        EDGEError("player.set_counter: target amount %d exceeds limit for counter number %d\n", amt, cntr);
 
     ui_player_who->counters[cntr].num = amt;
 
@@ -737,7 +737,7 @@ static int PL_ammo_type(lua_State *L)
     int ATK = (int)luaL_checknumber(L, 1);
 
     if (ATK < 1 || ATK > 2)
-        I_Error("player.ammo_type: bad attack number: %d\n", ATK);
+        EDGEError("player.ammo_type: bad attack number: %d\n", ATK);
 
     ATK--;
 
@@ -761,7 +761,7 @@ static int PL_ammo_pershot(lua_State *L)
     int ATK = (int)luaL_checknumber(L, 1);
 
     if (ATK < 1 || ATK > 2)
-        I_Error("player.ammo_pershot: bad attack number: %d\n", ATK);
+        EDGEError("player.ammo_pershot: bad attack number: %d\n", ATK);
 
     ATK--;
 
@@ -785,7 +785,7 @@ static int PL_clip_ammo(lua_State *L)
     int ATK = (int)luaL_checknumber(L, 1);
 
     if (ATK < 1 || ATK > 2)
-        I_Error("player.clip_ammo: bad attack number: %d\n", ATK);
+        EDGEError("player.clip_ammo: bad attack number: %d\n", ATK);
 
     ATK--;
 
@@ -809,7 +809,7 @@ static int PL_clip_size(lua_State *L)
     int ATK = (int)luaL_checknumber(L, 1);
 
     if (ATK < 1 || ATK > 2)
-        I_Error("player.clip_size: bad attack number: %d\n", ATK);
+        EDGEError("player.clip_size: bad attack number: %d\n", ATK);
 
     ATK--;
 
@@ -1035,7 +1035,7 @@ static int PL_play_footstep(lua_State *L)
 {
     const char *flat = luaL_checkstring(L, 1);
     if (!flat)
-        I_Error("player.play_footstep: No flat name given!\n");
+        EDGEError("player.play_footstep: No flat name given!\n");
 
     FlatDefinition *current_flatdef = flatdefs.Find(flat);
 
@@ -1068,7 +1068,7 @@ static int PL_use_inventory(lua_State *L)
     std::string script_name = "INVENTORY";
 
     if (inv < 1 || inv > kTotalInventoryTypes)
-        I_Error("player.use_inventory: bad inventory number: %d\n", inv);
+        EDGEError("player.use_inventory: bad inventory number: %d\n", inv);
 
     if (inv < 10)
         script_name.append("0").append(std::to_string(inv));
@@ -1347,7 +1347,7 @@ static int PL_query_object(lua_State *L)
     int whatinfo    = (int)luaL_checknumber(L, 2);
 
     if (whatinfo < 1 || whatinfo > 5)
-        I_Error("player.query_object: bad whatInfo number: %d\n", whatinfo);
+        EDGEError("player.query_object: bad whatInfo number: %d\n", whatinfo);
 
     mobj_t *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
     if (!obj)
@@ -1906,10 +1906,10 @@ static int PL_query_weapon(lua_State *L)
     int secattackinfo = (int)luaL_optnumber(L, 3, 0);
 
     if (whatinfo < 1 || whatinfo > 9)
-        I_Error("player.query_weapon: bad whatInfo number: %d\n", whatinfo);
+        EDGEError("player.query_weapon: bad whatInfo number: %d\n", whatinfo);
 
     if (secattackinfo < 0 || secattackinfo > 1)
-        I_Error("player.query_weapon: bad secAttackInfo number: %d\n", whatinfo);
+        EDGEError("player.query_weapon: bad secAttackInfo number: %d\n", whatinfo);
 
     mobj_t *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
     if (!obj)

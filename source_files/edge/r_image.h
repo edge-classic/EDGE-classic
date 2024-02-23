@@ -270,9 +270,7 @@ void           W_DrawSavePic(const uint8_t *pixels);
 void W_MakeEdgeFlat(void);
 void W_MakeEdgeTex(void);
 
-#ifdef USING_GL_TYPES
 GLuint W_ImageCache(const image_c *image, bool anim = true, const Colormap *trans = nullptr, bool do_whiten = false);
-#endif
 void W_ImagePreCache(const image_c *image);
 
 // -AJA- planned....

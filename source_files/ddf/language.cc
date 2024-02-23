@@ -129,7 +129,7 @@ static void LanguageParseField(const char *field, const char *contents,
                                int index, bool is_last)
 {
 #if (DEBUG_DDF)
-    EDGEDebugf("LANGUAGE_PARSE: %s = %s;\n", field, contents);
+    LogDebug("LANGUAGE_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (!is_last)
@@ -171,7 +171,7 @@ void DDF_LanguageInit(void)
 
 void DDF_LanguageCleanUp(void)
 {
-    if (language.GetChoiceCount() == 0) EDGEError("Missing languages !\n");
+    if (language.GetChoiceCount() == 0) FatalError("Missing languages !\n");
 }
 
 language_c::language_c() { current = -1; }
@@ -263,7 +263,7 @@ const char *language_c::GetName(int idx)
 
     // caller must ensure index is valid
     if (idx < 0 || idx >= (int)choices.size())
-        EDGEError("Bug in code calling language_c::GetName\n");
+        FatalError("Bug in code calling language_c::GetName\n");
 
     return choices[idx]->name.c_str();
 }

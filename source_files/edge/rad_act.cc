@@ -142,7 +142,7 @@ static void SendTip(rad_trigger_t *R, s_tip_t *tip, int slot)
     // send message to the console (unless it would clog it up)
     if (current->tip_text && current->tip_text != R->last_con_message)
     {
-        ConsolePrintf("%s\n", current->tip_text);
+        ConsolePrint("%s\n", current->tip_text);
         R->last_con_message = current->tip_text;
     }
 
@@ -161,7 +161,7 @@ static void SendTip(rad_trigger_t *R, s_tip_t *tip, int slot)
 //
 void RAD_DisplayTips(void)
 {
-    HUDReset();
+    HudReset();
 
     // lookup styles
     StyleDefinition *def;
@@ -207,30 +207,30 @@ void RAD_DisplayTips(void)
         if (alpha < 0.02f)
             continue;
 
-        HUDSetScale(current->scale);
-        HUDSetTextColor(current->color);
-        HUDSetAlpha(alpha);
+        HudSetScale(current->scale);
+        HudSetTextColor(current->color);
+        HudSetAlpha(alpha);
 
         if (current->p.left_just)
-            HUDSetAlignment(-1, 0);
+            HudSetAlignment(-1, 0);
         else
-            HUDSetAlignment(0, 0);
+            HudSetAlignment(0, 0);
 
         float x = current->p.x_pos * 320.0f;
         float y = current->p.y_pos * 200.0f;
 
         if (rts_tip_style->fonts_[StyleDefinition::kTextSectionText])
-            HUDSetFont(rts_tip_style->fonts_[StyleDefinition::kTextSectionText]);
+            HudSetFont(rts_tip_style->fonts_[StyleDefinition::kTextSectionText]);
 
         if (current->tip_graphic)
-            HUDDrawImage(x, y, current->tip_graphic);
+            HudDrawImage(x, y, current->tip_graphic);
         else
-            HUDDrawText(x, y, current->tip_text);
+            HudDrawText(x, y, current->tip_text);
 
-        HUDSetAlignment();
-        HUDSetAlpha();
-        HUDSetScale();
-        HUDSetTextColor();
+        HudSetAlignment();
+        HudSetAlpha();
+        HudSetScale();
+        HudSetTextColor();
     }
 }
 
@@ -372,9 +372,9 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
     if (minfo == nullptr)
     {
         if (t->thing_name)
-            EDGEWarning("Unknown thing type: %s in RTS trigger.\n", t->thing_name);
+            LogWarning("Unknown thing type: %s in RTS trigger.\n", t->thing_name);
         else
-            EDGEWarning("Unknown thing type: %d in RTS trigger.\n", t->thing_type);
+            LogWarning("Unknown thing type: %d in RTS trigger.\n", t->thing_type);
 
         return;
     }
@@ -537,7 +537,7 @@ void RAD_ActDamageMonsters(rad_trigger_t *R, void *param)
         info = mobjtypes.Lookup(mon->thing_type);
 
         if (info == nullptr)
-            EDGEError("RTS DAMAGE_MONSTERS: Unknown thing type %d.\n", mon->thing_type);
+            FatalError("RTS DAMAGE_MONSTERS: Unknown thing type %d.\n", mon->thing_type);
     }
 
     // scan the mobj list
@@ -580,14 +580,14 @@ void RAD_ActThingEvent(rad_trigger_t *R, void *param)
         info = mobjtypes.Lookup(tev->thing_name);
 
         if (info == nullptr)
-            EDGEError("RTS THING_EVENT: Unknown thing name '%s'.\n", tev->thing_name);
+            FatalError("RTS THING_EVENT: Unknown thing name '%s'.\n", tev->thing_name);
     }
     else if (tev->thing_type > 0)
     {
         info = mobjtypes.Lookup(tev->thing_type);
 
         if (info == nullptr)
-            EDGEError("RTS THING_EVENT: Unknown thing type %d.\n", tev->thing_type);
+            FatalError("RTS THING_EVENT: Unknown thing type %d.\n", tev->thing_type);
     }
 
     // scan the mobj list
@@ -692,7 +692,7 @@ void RAD_ActPlayMovie(rad_trigger_t *R, void *param)
 {
     s_movie_t *mov = (s_movie_t *)param;
 
-    EDGEPlayMovie(mov->movie);
+    PlayMovie(mov->movie);
 }
 
 void RAD_ActChangeTex(rad_trigger_t *R, void *param)
@@ -855,7 +855,7 @@ void RAD_ActMoveSector(rad_trigger_t *R, void *param)
     if (t->tag == 0)
     {
         if (t->secnum < 0 || t->secnum >= numsectors)
-            EDGEError("RTS SECTORV: no such sector %d.\n", t->secnum);
+            FatalError("RTS SECTORV: no such sector %d.\n", t->secnum);
 
         MoveOneSector(sectors + t->secnum, t);
         return;
@@ -886,7 +886,7 @@ void RAD_ActLightSector(rad_trigger_t *R, void *param)
     if (t->tag == 0)
     {
         if (t->secnum < 0 || t->secnum >= numsectors)
-            EDGEError("RTS SECTORL: no such sector %d.\n", t->secnum);
+            FatalError("RTS SECTORL: no such sector %d.\n", t->secnum);
 
         LightOneSector(sectors + t->secnum, t);
         return;
@@ -1034,7 +1034,7 @@ void RAD_ActJump(rad_trigger_t *R, void *param)
         t->cache_state = RAD_FindStateByLabel(R->info, t->label);
 
         if (!t->cache_state)
-            EDGEError("RTS: No such label `%s' for JUMP primitive.\n", t->label);
+            FatalError("RTS: No such label `%s' for JUMP primitive.\n", t->label);
     }
 
     R->state = t->cache_state;
@@ -1113,10 +1113,10 @@ void RAD_ActJumpOn(rad_trigger_t *R, void *param)
     }
 
     if (!cache_state && label)
-        EDGEError("RTS: No such label `%s' for JUMP_ON primitive.\n", label);
+        FatalError("RTS: No such label `%s' for JUMP_ON primitive.\n", label);
 
     if (!cache_state)
-        EDGEError("RTS: No state to jump to!\n");
+        FatalError("RTS: No state to jump to!\n");
 
     // Jumps have a one tic surcharge, to prevent accidental infinite
     // loops within radius scripts.
@@ -1176,7 +1176,7 @@ void RAD_ActWaitUntilDead(rad_trigger_t *R, void *param)
 
     if (R->wud_count == 0)
     {
-        EDGEDebugf("RTS: waiting forever, no %s found\n", wud->mon_names[0]);
+        LogDebug("RTS: waiting forever, no %s found\n", wud->mon_names[0]);
         R->wud_count = 1;
     }
 }
@@ -1313,11 +1313,11 @@ void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param)
 
     if (!oldWep)
     {
-        EDGEError("RTS: No such weapon `%s' for REPLACE_WEAPON.\n", weaparg->old_weapon);
+        FatalError("RTS: No such weapon `%s' for REPLACE_WEAPON.\n", weaparg->old_weapon);
     }
     if (!newWep)
     {
-        EDGEError("RTS: No such weapon `%s' for REPLACE_WEAPON.\n", weaparg->new_weapon);
+        FatalError("RTS: No such weapon `%s' for REPLACE_WEAPON.\n", weaparg->new_weapon);
     }
 
     int i;
@@ -1350,7 +1350,7 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
 
     if (!oldWep)
     {
-        EDGEError("RTS WEAPON_EVENT: Unknown weapon name '%s'.\n", tev->weapon_name);
+        FatalError("RTS WEAPON_EVENT: Unknown weapon name '%s'.\n", tev->weapon_name);
     }
 
     int pw_index;
@@ -1372,7 +1372,7 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
 
     int state = DDF_StateFindLabel(oldWep->state_grp_, tev->label, true /* quiet */);
     if (state == 0)
-        EDGEError("RTS WEAPON_EVENT: frame '%s' in [%s] not found!\n", tev->label, tev->weapon_name);
+        FatalError("RTS WEAPON_EVENT: frame '%s' in [%s] not found!\n", tev->label, tev->weapon_name);
     state += tev->offset;
 
     RAD_SetPspriteDeferred(p, ps_weapon, state); // refresh the sprite
@@ -1434,7 +1434,7 @@ void P_ActReplace(struct mobj_s *mo, const MapObjectDefinition *newThing)
 
     int state = P_MobjFindLabel(mo, "IDLE"); // nothing fancy, always default to idle
     if (state == 0)
-        EDGEError("RTS REPLACE_THING: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name_.c_str());
+        FatalError("RTS REPLACE_THING: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name_.c_str());
 
     P_SetMobjStateDeferred(mo, state, 0);
 }
@@ -1462,16 +1462,16 @@ void RAD_ActReplaceThing(rad_trigger_t *R, void *param)
     if (!oldThing)
     {
         if (thingarg->old_thing_type > -1)
-            EDGEError("RTS: No such old thing %d for REPLACE_THING.\n", thingarg->old_thing_type);
+            FatalError("RTS: No such old thing %d for REPLACE_THING.\n", thingarg->old_thing_type);
         else // never get this far
-            EDGEError("RTS: No such old thing '%s' for REPLACE_THING.\n", thingarg->old_thing_name);
+            FatalError("RTS: No such old thing '%s' for REPLACE_THING.\n", thingarg->old_thing_name);
     }
     if (!newThing)
     {
         if (thingarg->new_thing_type > -1)
-            EDGEError("RTS: No such new thing %d for REPLACE_THING.\n", thingarg->new_thing_type);
+            FatalError("RTS: No such new thing %d for REPLACE_THING.\n", thingarg->new_thing_type);
         else // never get this far
-            EDGEError("RTS: No such new thing '%s' for REPLACE_THING.\n", thingarg->new_thing_name);
+            FatalError("RTS: No such new thing '%s' for REPLACE_THING.\n", thingarg->new_thing_name);
     }
 
     // scan the mobj list

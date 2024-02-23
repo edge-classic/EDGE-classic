@@ -235,7 +235,7 @@ void M_SaveDefaults(void)
     FILE *f = epi::FileOpenRaw(cfgfile, epi::kFileAccessWrite | epi::kFileAccessBinary);
     if (!f)
     {
-        EDGEWarning("Couldn't open config file %s for writing.", cfgfile.c_str());
+        LogWarning("Couldn't open config file %s for writing.", cfgfile.c_str());
         return; // can't write the file, but don't complain
     }
 
@@ -325,7 +325,7 @@ static void ParseConfigBlock(epi::Lexer &lex)
             return;
 
         if (tok == epi::kTokenError)
-            EDGEError("ParseConfig: error parsing file!\n");
+            FatalError("ParseConfig: error parsing file!\n");
 
         tok = lex.Next(value);
 
@@ -334,7 +334,7 @@ static void ParseConfigBlock(epi::Lexer &lex)
             return;
 
         if (tok == epi::kTokenError)
-            EDGEError("ParseConfig: malformed value for key %s!\n", key.c_str());
+            FatalError("ParseConfig: malformed value for key %s!\n", key.c_str());
 
         if (tok == epi::kTokenString)
         {
@@ -385,14 +385,14 @@ void M_LoadDefaults(void)
     // set everything to base values
     M_ResetDefaults(0);
 
-    EDGEPrintf("M_LoadDefaults from %s\n", cfgfile.c_str());
+    LogPrint("M_LoadDefaults from %s\n", cfgfile.c_str());
 
     epi::File *file = epi::FileOpen(cfgfile, epi::kFileAccessRead);
 
     if (!file)
     {
-        EDGEWarning("Couldn't open config file %s for reading.\n", cfgfile.c_str());
-        EDGEWarning("Resetting config to RECOMMENDED values...\n");
+        LogWarning("Couldn't open config file %s for reading.\n", cfgfile.c_str());
+        LogWarning("Resetting config to RECOMMENDED values...\n");
         return;
     }
     // load the file into this string
@@ -478,9 +478,9 @@ void M_ScreenShot(bool show_msg)
     if (show_msg)
     {
         if (result)
-            EDGEPrintf("Captured to file: %s\n", fn.c_str());
+            LogPrint("Captured to file: %s\n", fn.c_str());
         else
-            EDGEPrintf("Error saving file: %s\n", fn.c_str());
+            LogPrint("Error saving file: %s\n", fn.c_str());
     }
 
     delete img;
@@ -507,9 +507,9 @@ void M_MakeSaveScreenShot(void)
     result = JPEG_Save(filename, img);
 
     if (result)
-        EDGEPrintf("Captured to file: %s\n", filename.c_str());
+        LogPrint("Captured to file: %s\n", filename.c_str());
     else
-        EDGEPrintf("Error saving file: %s\n", filename.c_str());
+        LogPrint("Error saving file: %s\n", filename.c_str());
 
     delete img;
 
@@ -559,9 +559,9 @@ void M_WarnError(const char *error, ...)
     SYS_ASSERT(message_buf[4095] == 0);
 
     if (strict_errors)
-        EDGEError("%s", message_buf);
+        FatalError("%s", message_buf);
     else if (!no_warnings)
-        EDGEWarning("%s", message_buf);
+        LogWarning("%s", message_buf);
 }
 
 void M_DebugError(const char *error, ...)
@@ -583,14 +583,14 @@ void M_DebugError(const char *error, ...)
     SYS_ASSERT(message_buf[4095] == 0);
 
     if (strict_errors)
-        EDGEError("%s", message_buf);
+        FatalError("%s", message_buf);
     else if (!no_warnings)
-        EDGEDebugf("%s", message_buf);
+        LogDebug("%s", message_buf);
 }
 
 extern FILE *debug_file; // FIXME
 
-void EDGEDebugf(const char *message, ...)
+void LogDebug(const char *message, ...)
 {
     // Write into the debug file.
     //
@@ -619,29 +619,6 @@ void EDGEDebugf(const char *message, ...)
 }
 
 extern FILE *log_file; // FIXME: make file_c and unify with debug_file
-
-void EDGELogf(const char *message, ...)
-{
-    if (!log_file)
-        return;
-
-    char message_buf[4096];
-
-    message_buf[4095] = 0;
-
-    // Print the message into a text string
-    va_list argptr;
-
-    va_start(argptr, message);
-    vsprintf(message_buf, message, argptr);
-    va_end(argptr);
-
-    // I hope nobody is printing strings longer than 4096 chars...
-    SYS_ASSERT(message_buf[4095] == 0);
-
-    fprintf(log_file, "%s", message_buf);
-    fflush(log_file);
-}
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

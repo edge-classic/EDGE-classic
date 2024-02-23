@@ -144,7 +144,7 @@ bool m4pplayer_c::OpenMemory(uint8_t *data, int length)
 
     if (!m4p_LoadFromData(data, length, sound_device_frequency, M4P_BUFFER))
     {
-        EDGEWarning("M4P: failure to load song!\n");
+        LogWarning("M4P: failure to load song!\n");
         return false;
     }
 

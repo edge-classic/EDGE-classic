@@ -218,9 +218,9 @@ void R_InitShaderTables()
 void R_Init(void)
 {
     if (language["RefreshDaemon"])
-        EDGEPrintf("%s", language["RefreshDaemon"]);
+        LogPrint("%s", language["RefreshDaemon"]);
     else
-        EDGEPrintf("Unknown Refresh Daemon");
+        LogPrint("Unknown Refresh Daemon");
 
     R_InitShaderTables();
 
@@ -360,7 +360,7 @@ drawthing_t *R_GetDrawThing()
 {
     if (drawthing_pos >= MAX_DRAW_THINGS)
     {
-        EDGEError("Max Draw Things Exceeded");
+        FatalError("Max Draw Things Exceeded");
     }
 
     return &drawthings[drawthing_pos++];
@@ -370,7 +370,7 @@ drawfloor_t *R_GetDrawFloor()
 {
     if (drawfloor_pos >= MAX_DRAW_FLOORS)
     {
-        EDGEError("Max Draw Floors Exceeded");
+        FatalError("Max Draw Floors Exceeded");
     }
 
     return &drawfloors[drawfloor_pos++];
@@ -380,7 +380,7 @@ drawseg_c *R_GetDrawSeg()
 {
     if (drawseg_pos >= MAX_DRAW_SEGS)
     {
-        EDGEError("Max Draw Segs Exceeded");
+        FatalError("Max Draw Segs Exceeded");
     }
 
     return &drawsegs[drawseg_pos++];
@@ -390,7 +390,7 @@ drawsub_c *R_GetDrawSub()
 {
     if (drawsub_pos >= MAX_DRAW_SUBS)
     {
-        EDGEError("Max Draw Subs Exceeded");
+        FatalError("Max Draw Subs Exceeded");
     }
 
     return &drawsubs[drawsub_pos++];
@@ -400,7 +400,7 @@ drawmirror_c *R_GetDrawMirror()
 {
     if (drawmirror_pos >= MAX_DRAW_MIRRORS)
     {
-        EDGEError("Max Draw Mirrors Exceeded");
+        FatalError("Max Draw Mirrors Exceeded");
     }
 
     return &drawmirrors[drawmirror_pos++];

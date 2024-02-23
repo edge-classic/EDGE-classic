@@ -1048,7 +1048,7 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     float ty0    = IM_TOP(image) - tex_top_h * ty_mul;
 
 #if (DEBUG >= 3)
-    EDGEDebugf("WALL (%d,%d,%d) -> (%d,%d,%d)\n", (int)x1, (int)y1, (int)top, (int)x2, (int)y2, (int)bottom);
+    LogDebug("WALL (%d,%d,%d) -> (%d,%d,%d)\n", (int)x1, (int)y1, (int)top, (int)x2, (int)y2, (int)bottom);
 #endif
 
     // -AJA- 2007/08/07: ugly code here ensures polygon edges
@@ -1276,7 +1276,7 @@ static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f, float tex_top
             break;
 
         default:
-            EDGEError("INTERNAL ERROR: unknown slidemove type!\n");
+            FatalError("INTERNAL ERROR: unknown slidemove type!\n");
             return; /* NOT REACHED */
         }
 
@@ -2033,7 +2033,7 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
         float lx2 = HMM_MAX(HMM_MAX(sx, sx2), HMM_MAX(ex, ex2));
         float ly2 = HMM_MAX(HMM_MAX(sy, sy2), HMM_MAX(ey, ey2));
 
-        //		EDGEDebugf("Flood BBox size: %1.0f x %1.0f\n", lx2-lx1, ly2-ly1);
+        //		LogDebug("Flood BBox size: %1.0f x %1.0f\n", lx2-lx1, ly2-ly1);
 
         P_DynamicLightIterator(lx1, ly1, data.plane_h, lx2, ly2, data.plane_h, DLIT_Flood, &data);
     }
@@ -2064,7 +2064,7 @@ static void RGL_DrawSeg(drawfloor_t *dfloor, seg_t *seg, bool mirror_sub = false
     float c_max = dfloor->is_highest ? +32767.0 : dfloor->c_h;
 
 #if (DEBUG >= 3)
-    EDGEDebugf("   BUILD WALLS %1.1f .. %1.1f\n", f_min, c1);
+    LogDebug("   BUILD WALLS %1.1f .. %1.1f\n", f_min, c1);
 #endif
 
     // handle TRANSLUCENT + THICK floors (a bit of a hack)
@@ -2746,7 +2746,7 @@ static void RGL_WalkSubsector(int num)
     cur_sub = sub;
 
 #if (DEBUG >= 1)
-    EDGEDebugf("\nVISITING SUBSEC %d (sector %d)\n\n", num, sub->sector - sectors);
+    LogDebug("\nVISITING SUBSEC %d (sector %d)\n\n", num, sub->sector - sectors);
 #endif
 
     drawsub_c *K = R_GetDrawSub();
@@ -3105,7 +3105,7 @@ static void RGL_DrawSubsector(drawsub_c *dsub, bool mirror_sub)
     subsector_t *sub = dsub->sub;
 
 #if (DEBUG >= 1)
-    EDGEDebugf("\nREVISITING SUBSEC %d\n\n", (int)(sub - subsectors));
+    LogDebug("\nREVISITING SUBSEC %d\n\n", (int)(sub - subsectors));
 #endif
 
     cur_sub = sub;
@@ -3319,7 +3319,7 @@ static void RGL_RenderTrueBSP(void)
     }
 
 #if (DEBUG >= 3)
-    EDGEDebugf("\n\n");
+    LogDebug("\n\n");
 #endif
 }
 

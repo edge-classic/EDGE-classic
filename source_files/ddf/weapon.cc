@@ -428,7 +428,7 @@ static void WeaponParseField(const char *field, const char *contents, int index,
                              bool is_last)
 {
 #if (DEBUG_DDF)
-    EDGEDebugf("WEAPON_PARSE: %s = %s;\n", field, contents);
+    LogDebug("WEAPON_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_CompareName(field, "TEMPLATE") == 0)

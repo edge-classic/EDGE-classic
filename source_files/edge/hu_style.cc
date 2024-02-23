@@ -63,7 +63,7 @@ void Style::DrawBackground()
 
     if (alpha < 0.02) return;
 
-    HUDSetAlpha(alpha);
+    HudSetAlpha(alpha);
 
     float WS_x = -130;  // Lobo: fixme, this should be calculated, not arbitrary
                         // hardcoded ;)
@@ -78,32 +78,32 @@ void Style::DrawBackground()
         }
 
         if (definition_->bg_.colour_ != kRGBANoValue)
-            HUDSolidBox(WS_x, 0, WS_w, 200, definition_->bg_.colour_);
+            HudSolidBox(WS_x, 0, WS_w, 200, definition_->bg_.colour_);
         /*else
-            HUDSolidBox(WS_x, 0, WS_w, 200, T_BLACK);
+            HudSolidBox(WS_x, 0, WS_w, 200, T_BLACK);
 */
-        HUDSetAlpha();
+        HudSetAlpha();
         return;
     }
 
     if (definition_->special_ &
         (kStyleSpecialTiled | kStyleSpecialTiledNoScale))
     {
-        HUDSetScale(definition_->bg_.scale_);
+        HudSetScale(definition_->bg_.scale_);
 
-        // HUDTileImage(0, 0, 320, 200, background_image_);
-        HUDTileImage(WS_x, 0, WS_w, 200, background_image_, 0.0, 0.0);
-        HUDSetScale();
+        // HudTileImage(0, 0, 320, 200, background_image_);
+        HudTileImage(WS_x, 0, WS_w, 200, background_image_, 0.0, 0.0);
+        HudSetScale();
     }
     // Lobo: handle our new special
     if (definition_->special_ & kStyleSpecialStretchFullScreen)
     {
-        HUDSetScale(definition_->bg_.scale_);
+        HudSetScale(definition_->bg_.scale_);
 
-        HUDStretchImage(WS_x, 0, WS_w, 200, background_image_, 0.0, 0.0);
-        // HUDDrawImage(CenterX, 0, background_image_);
+        HudStretchImage(WS_x, 0, WS_w, 200, background_image_, 0.0, 0.0);
+        // HudDrawImage(CenterX, 0, background_image_);
 
-        HUDSetScale();
+        HudSetScale();
     }
 
     // Lobo: positioning and size will be determined by images.ddf
@@ -116,14 +116,14 @@ void Style::DrawBackground()
         CenterX -=
             (background_image_->actual_w * background_image_->scale_x) / 2;
 
-        HUDSetScale(definition_->bg_.scale_);
-        // HUDStretchImage(0, 0, 320, 200, background_image_);
-        HUDDrawImage(CenterX, 0, background_image_);
+        HudSetScale(definition_->bg_.scale_);
+        // HudStretchImage(0, 0, 320, 200, background_image_);
+        HudDrawImage(CenterX, 0, background_image_);
 
-        HUDSetScale();
+        HudSetScale();
     }
 
-    HUDSetAlpha();
+    HudSetAlpha();
 }
 
 // ---> StyleContainer class
@@ -154,23 +154,23 @@ Style *StyleContainer::Lookup(StyleDefinition *definition)
 }
 
 //
-// HUDWriteText
+// HudWriteText
 //
-void HUDWriteText(Style *style, int text_type, int x, int y, const char *str,
+void HudWriteText(Style *style, int text_type, int x, int y, const char *str,
                   float scale)
 {
-    HUDSetFont(style->fonts_[text_type]);
-    HUDSetScale(scale * style->definition_->text_[text_type].scale_);
+    HudSetFont(style->fonts_[text_type]);
+    HudSetScale(scale * style->definition_->text_[text_type].scale_);
 
     const Colormap *colmap = style->definition_->text_[text_type].colmap_;
 
-    if (colmap) HUDSetTextColor(V_GetFontColor(colmap));
+    if (colmap) HudSetTextColor(V_GetFontColor(colmap));
 
-    HUDDrawText(x, y, str);
+    HudDrawText(x, y, str);
 
-    HUDSetFont();
-    HUDSetScale();
-    HUDSetTextColor();
+    HudSetFont();
+    HudSetScale();
+    HudSetTextColor();
 }
 
 //--- editor settings ---

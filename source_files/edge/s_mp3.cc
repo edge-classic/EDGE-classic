@@ -145,7 +145,7 @@ bool mp3player_c::StreamIntoBuffer(sound_data_c *buf)
 
     if (got_size < 0) /* ERROR */
     {
-        EDGEDebugf("[mp3player_c::StreamIntoBuffer] Failed\n");
+        LogDebug("[mp3player_c::StreamIntoBuffer] Failed\n");
         return false;
     }
 
@@ -166,14 +166,14 @@ bool mp3player_c::OpenMemory(uint8_t *data, int length)
 
     if (!drmp3_init_memory(mp3_dec, data, length, nullptr))
     {
-        EDGEWarning("mp3player_c: Could not open MP3 file.\n");
+        LogWarning("mp3player_c: Could not open MP3 file.\n");
         delete mp3_dec;
         return false;
     }
 
     if (mp3_dec->channels > 2)
     {
-        EDGEWarning("mp3player_c: MP3 has too many channels: %d\n", mp3_dec->channels);
+        LogWarning("mp3player_c: MP3 has too many channels: %d\n", mp3_dec->channels);
         drmp3_uninit(mp3_dec);
         return false;
     }
@@ -295,13 +295,13 @@ bool S_LoadMP3Sound(sound_data_c *buf, const uint8_t *data, int length)
 
     if (!drmp3_init_memory(&mp3, data, length, nullptr))
     {
-        EDGEWarning("Failed to load MP3 sound (corrupt mp3?)\n");
+        LogWarning("Failed to load MP3 sound (corrupt mp3?)\n");
         return false;
     }
 
     if (mp3.channels > 2)
     {
-        EDGEWarning("MP3 SFX Loader: too many channels: %d\n", mp3.channels);
+        LogWarning("MP3 SFX Loader: too many channels: %d\n", mp3.channels);
         drmp3_uninit(&mp3);
         return false;
     }
@@ -311,12 +311,12 @@ bool S_LoadMP3Sound(sound_data_c *buf, const uint8_t *data, int length)
     if (framecount <=
         0) // I think the initial loading would fail if this were the case, but just as a sanity check - Dasho
     {
-        EDGEWarning("MP3 SFX Loader: no samples!\n");
+        LogWarning("MP3 SFX Loader: no samples!\n");
         drmp3_uninit(&mp3);
         return false;
     }
 
-    EDGEDebugf("MP3 SFX Loader: freq %d Hz, %d channels\n", mp3.sampleRate, mp3.channels);
+    LogDebug("MP3 SFX Loader: freq %d Hz, %d channels\n", mp3.sampleRate, mp3.channels);
 
     bool is_stereo = (mp3.channels > 1);
 
@@ -329,7 +329,7 @@ bool S_LoadMP3Sound(sound_data_c *buf, const uint8_t *data, int length)
     gather.CommitChunk(drmp3_read_pcm_frames_s16(&mp3, framecount, buffer));
 
     if (!gather.Finalise(buf, is_stereo))
-        EDGEWarning("MP3 SFX Loader: no samples!\n");
+        LogWarning("MP3 SFX Loader: no samples!\n");
 
     drmp3_uninit(&mp3);
 

@@ -568,7 +568,7 @@ void M_ReadSaveStrings(void)
                 }
                 else
                 {
-                    EDGEWarning("Error reading savegame screenshot %s!\n", fn.c_str());
+                    LogWarning("Error reading savegame screenshot %s!\n", fn.c_str());
                     ex_slots[i].save_imdata = nullptr;
                     ex_slots[i].save_texture_id  = 0; // just in case
                     ex_slots[i].save_impage = save_page;
@@ -667,18 +667,18 @@ static void M_DrawSaveLoadCommon(int row, int row2, Style *style, float LineHeig
     std::string temp_string = epi::StringFormat("PAGE %d", save_page + 1);
 
     if (save_page > 0)
-        HUDWriteText(style, text_type, x - 4, y, "< PREV");
+        HudWriteText(style, text_type, x - 4, y, "< PREV");
 
     x += style->fonts_[text_type]->StringWidth("< PREV") * txtscale;
     x += 30;
 
-    HUDWriteText(style, text_type, x, y, temp_string.c_str());
+    HudWriteText(style, text_type, x, y, temp_string.c_str());
 
     x += style->fonts_[text_type]->StringWidth(temp_string.c_str()) * txtscale;
     x += 30;
 
     if (save_page < SAVE_PAGES - 1)
-        HUDWriteText(style, text_type, x, y, "NEXT >");
+        HudWriteText(style, text_type, x, y, "NEXT >");
 
     info = ex_slots + itemOn;
     SYS_ASSERT(0 <= itemOn && itemOn < SAVE_SLOTS);
@@ -697,8 +697,8 @@ static void M_DrawSaveLoadCommon(int row, int row2, Style *style, float LineHeig
 
     const Colormap *colmap = style->definition_->text_[text_type].colmap_;
     RGBAColor           col    = V_GetFontColor(colmap);
-    // HUDThinBox(x - 5, y - 5, x + 95, y + 50, col);
-    HUDThinBox(x - 5, y - 5, x + 95, y + 115, col);
+    // HudThinBox(x - 5, y - 5, x + 95, y + 50, col);
+    HudThinBox(x - 5, y - 5, x + 95, y + 115, col);
 
     if (saveStringEnter || info->empty || info->corrupt)
         return;
@@ -708,22 +708,22 @@ static void M_DrawSaveLoadCommon(int row, int row2, Style *style, float LineHeig
         temp_string = temp_string.substr(1);
     size_t timesplit = temp_string.find("  ");
     SYS_ASSERT(timesplit != std::string::npos && temp_string.size() > timesplit + 2);
-    HUDWriteText(style, text_type, x, y, temp_string.substr(0, timesplit).c_str());
+    HudWriteText(style, text_type, x, y, temp_string.substr(0, timesplit).c_str());
     y += LineHeight;
     y += style->definition_->entry_spacing_;
-    HUDWriteText(style, text_type, x, y, temp_string.substr(timesplit + 2).c_str());
+    HudWriteText(style, text_type, x, y, temp_string.substr(timesplit + 2).c_str());
     y += LineHeight;
     y += style->definition_->entry_spacing_;
 
     temp_string = info->gamename;
     temp_string = LoboStringReplaceAll(temp_string, std::string("_"), std::string(" "));
-    HUDWriteText(style, text_type, x, y, temp_string.c_str());
+    HudWriteText(style, text_type, x, y, temp_string.c_str());
 
     y += LineHeight;
     y += style->definition_->entry_spacing_;
     
     temp_string = info->mapname;
-    HUDWriteText(style, text_type, x, y, temp_string.c_str());
+    HudWriteText(style, text_type, x, y, temp_string.c_str());
 
     y += LineHeight;
     y += style->definition_->entry_spacing_;
@@ -746,7 +746,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, Style *style, float LineHeig
         temp_string = language["MenuDifficulty5"];
         break;
     }
-    HUDWriteText(style, text_type, x, y, temp_string.c_str());
+    HudWriteText(style, text_type, x, y, temp_string.c_str());
 
     /*int BottomY = 0;
     BottomY = style->definition_->text[StyleDefinition::kTextSectionHelp].y_offset;
@@ -757,7 +757,7 @@ static void M_DrawSaveLoadCommon(int row, int row2, Style *style, float LineHeig
     {
         y += 20;
         // BottomY -= y;
-        HUDStretchFromImageData(x - 3, y, 95,
+        HudStretchFromImageData(x - 3, y, 95,
                                  (style->definition_->text_[text_type].y_offset_ + style->definition_->entry_spacing_ + 114) - y,
                                  info->save_imdata, info->save_texture_id, OPAC_Solid);
     }
@@ -772,7 +772,7 @@ void M_DrawLoad(void)
     int   TempX = 0;
     int   TempY = 0;
 
-    float old_alpha = HUDGetAlpha();
+    float old_alpha = HudGetAlpha();
 
     Style *style = LoadDef.style_var[0];
 
@@ -784,16 +784,16 @@ void M_DrawLoad(void)
     else
         fontType = StyleDefinition::kTextSectionHeader;
 
-    HUDSetAlpha(style->definition_->text_[fontType].translucency_);
+    HudSetAlpha(style->definition_->text_[fontType].translucency_);
 
     // 1. Draw the header i.e. "Load Game"
     TempX = CenterMenuText(style, fontType, language["MainLoadGame"]);
     TempY = 5;
     TempY += style->definition_->text_[fontType].y_offset_;
 
-    HUDWriteText(style, fontType, TempX, TempY, language["MainLoadGame"]);
+    HudWriteText(style, fontType, TempX, TempY, language["MainLoadGame"]);
 
-    HUDSetAlpha(old_alpha);
+    HudSetAlpha(old_alpha);
 
     TempX = 0;
     TempY = 0;
@@ -805,7 +805,7 @@ void M_DrawLoad(void)
     TempY += style->definition_->entry_spacing_;
 
     RGBAColor col = V_GetFontColor(style->definition_->text_[fontType].colmap_);
-    HUDThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
+    HudThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
     // 2. draw the save games
     for (i = 0; i < SAVE_SLOTS; i++)
@@ -826,21 +826,21 @@ void M_DrawLoad(void)
                 // truetype_reference_yshift_ is important for TTF fonts.
                 float y_shift = style->fonts_[StyleDefinition::kTextSectionSelected]->truetype_reference_yshift_[current_font_size]; // * txtscale;
 
-                HUDSetAlpha(0.33f);
-                HUDSolidBox(TempX - 3, TempY - 2 + (y_shift/2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
-                HUDSetAlpha(old_alpha);
+                HudSetAlpha(0.33f);
+                HudSolidBox(TempX - 3, TempY - 2 + (y_shift/2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+                HudSetAlpha(old_alpha);
             }
             else
             {
-                HUDSetAlpha(0.33f);
-                HUDSolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
-                HUDSetAlpha(old_alpha);
+                HudSetAlpha(0.33f);
+                HudSolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
+                HudSetAlpha(old_alpha);
             }
         }
         if (style->fonts_[fontType]->definition_->type_ == kFontTypeTrueType)
-            HUDWriteText(style, fontType, TempX, TempY - (LineHeight / 2), ex_slots[i].desc);
+            HudWriteText(style, fontType, TempX, TempY - (LineHeight / 2), ex_slots[i].desc);
         else
-            HUDWriteText(style, fontType, TempX, TempY - 1, ex_slots[i].desc);
+            HudWriteText(style, fontType, TempX, TempY - 1, ex_slots[i].desc);
         TempY += LineHeight + (LineHeight / 2);
         TempY += style->definition_->entry_spacing_;
     }
@@ -889,7 +889,7 @@ void M_DrawSave(void)
     int   TempX = 0;
     int   TempY = 0;
 
-    float old_alpha = HUDGetAlpha();
+    float old_alpha = HudGetAlpha();
 
     Style *style = SaveDef.style_var[0];
 
@@ -903,16 +903,16 @@ void M_DrawSave(void)
 
     float txtscale = style->definition_->text_[fontType].scale_;
 
-    HUDSetAlpha(style->definition_->text_[fontType].translucency_);
+    HudSetAlpha(style->definition_->text_[fontType].translucency_);
 
     // 1. Draw the header i.e. "Load Game"
     TempX = CenterMenuText(style, fontType, language["MainSaveGame"]);
     TempY = 5;
     TempY += style->definition_->text_[fontType].y_offset_;
 
-    HUDWriteText(style, fontType, TempX, TempY, language["MainSaveGame"]);
+    HudWriteText(style, fontType, TempX, TempY, language["MainSaveGame"]);
 
-    HUDSetAlpha(old_alpha);
+    HudSetAlpha(old_alpha);
 
     fontType = StyleDefinition::kTextSectionText;
     TempX = 0;
@@ -922,7 +922,7 @@ void M_DrawSave(void)
     TempY += style->definition_->entry_spacing_;
 
     RGBAColor col = V_GetFontColor(style->definition_->text_[fontType].colmap_);
-    HUDThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
+    HudThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
     // 2. draw the save games
     for (i = 0; i < SAVE_SLOTS; i++)
@@ -947,15 +947,15 @@ void M_DrawSave(void)
                 // truetype_reference_yshift_ is important for TTF fonts.
                 float y_shift = style->fonts_[fontType]->truetype_reference_yshift_[current_font_size]; // * txtscale;
 
-                HUDSetAlpha(0.33f);
-                HUDSolidBox(TempX - 3, TempY - 2 + (y_shift/2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
-                HUDSetAlpha(old_alpha);
+                HudSetAlpha(0.33f);
+                HudSolidBox(TempX - 3, TempY - 2 + (y_shift/2), TempX + 173, TempY + LineHeight + 2 + y_shift, col);
+                HudSetAlpha(old_alpha);
             }
             else
             {
-                HUDSetAlpha(0.33f);
-                HUDSolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
-                HUDSetAlpha(old_alpha);
+                HudSetAlpha(0.33f);
+                HudSolidBox(TempX - 3, TempY - 2, TempX + 173, TempY + LineHeight + 2, col);
+                HudSetAlpha(old_alpha);
             }
         }
 
@@ -980,20 +980,20 @@ void M_DrawSave(void)
 
         if (style->fonts_[fontType]->definition_->type_ == kFontTypeTrueType)
         {
-            HUDWriteText(style, fontType, TempX, TempY - (LineHeight / 2), ex_slots[i].desc);
+            HudWriteText(style, fontType, TempX, TempY - (LineHeight / 2), ex_slots[i].desc);
 
             if (entering_save)
             {
-                HUDWriteText(style, fontType, TempX + len, TempY - (LineHeight / 2), "_");
+                HudWriteText(style, fontType, TempX + len, TempY - (LineHeight / 2), "_");
             }
         }
         else
         {
-            HUDWriteText(style, fontType, TempX, TempY - 1, ex_slots[i].desc);
+            HudWriteText(style, fontType, TempX, TempY - 1, ex_slots[i].desc);
 
             if (entering_save)
             {
-                HUDWriteText(style, fontType, TempX + len, TempY - 1, "_");
+                HudWriteText(style, fontType, TempX + len, TempY - 1, "_");
             }
         }
 
@@ -1150,7 +1150,7 @@ void M_QuickLoad(void)
 //
 void M_DrawReadThis1(void)
 {
-    HUDDrawImageTitleWS(menu_readthis[0]);
+    HudDrawImageTitleWS(menu_readthis[0]);
 }
 
 //
@@ -1158,7 +1158,7 @@ void M_DrawReadThis1(void)
 //
 void M_DrawReadThis2(void)
 {
-    HUDDrawImageTitleWS(menu_readthis[1]);
+    HudDrawImageTitleWS(menu_readthis[1]);
 }
 
 void M_DrawMainMenu(void)
@@ -1169,7 +1169,7 @@ void M_DrawMainMenu(void)
     else
         CenterX = CenterMenuImage(menu_doom);
 
-    HUDDrawImage(CenterX, 2, menu_doom);
+    HudDrawImage(CenterX, 2, menu_doom);
 }
 
 void M_DrawNewGame(void)
@@ -1186,9 +1186,9 @@ void M_DrawNewGame(void)
 
     float txtscale = style->definition_->text_[fontType].scale_;
 
-    float old_alpha = HUDGetAlpha();
+    float old_alpha = HudGetAlpha();
 
-    HUDSetAlpha(style->definition_->text_[fontType].translucency_);
+    HudSetAlpha(style->definition_->text_[fontType].translucency_);
 
     if (custom_MenuDifficulty == false)
     {
@@ -1196,20 +1196,20 @@ void M_DrawNewGame(void)
             x = CenterMenuText(style, fontType, language["MainNewGame"]);
         else
             x = 94;
-        HUDWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_, 14 + style->definition_->text_[fontType].y_offset_,
+        HudWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_, 14 + style->definition_->text_[fontType].y_offset_,
                      language["MainNewGame"]);
 
-        HUDSetAlpha(old_alpha);
+        HudSetAlpha(old_alpha);
         fontType = StyleDefinition::kTextSectionTitle;
         txtscale = style->definition_->text_[fontType].scale_;
-        HUDSetAlpha(style->definition_->text_[fontType].translucency_);
+        HudSetAlpha(style->definition_->text_[fontType].translucency_);
 
         if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
             x = CenterMenuText(style, fontType, language["MenuSkill"]);
         else
             x = 54;
 
-        HUDWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_, 38 + style->definition_->text_[fontType].y_offset_,
+        HudWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_, 38 + style->definition_->text_[fontType].y_offset_,
                      language["MenuSkill"]);
     }
     else
@@ -1220,16 +1220,16 @@ void M_DrawNewGame(void)
         else
             x = CenterMenuImage2(style, fontType, menu_newgame);
 
-        HUDStretchImage(x, 14 + style->definition_->text_[fontType].y_offset_, IM_WIDTH(menu_newgame) * txtscale,
+        HudStretchImage(x, 14 + style->definition_->text_[fontType].y_offset_, IM_WIDTH(menu_newgame) * txtscale,
                          IM_HEIGHT(menu_newgame) * txtscale, menu_newgame, 0.0, 0.0, colmap);
 
-        // HUDDrawImage(x + style->definition_->text[fontType].x_offset,
+        // HudDrawImage(x + style->definition_->text[fontType].x_offset,
         //	14 + style->definition_->text[fontType].y_offset, menu_newgame, colmap);
 
-        HUDSetAlpha(old_alpha);
+        HudSetAlpha(old_alpha);
         fontType = StyleDefinition::kTextSectionTitle;
         txtscale = style->definition_->text_[fontType].scale_;
-        HUDSetAlpha(style->definition_->text_[fontType].translucency_);
+        HudSetAlpha(style->definition_->text_[fontType].translucency_);
 
         x = 54;
         if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
@@ -1240,13 +1240,13 @@ void M_DrawNewGame(void)
                 x = CenterMenuImage2(style, fontType, menu_skill);
         }
         colmap = style->definition_->text_[fontType].colmap_;
-        HUDStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_, IM_WIDTH(menu_skill) * txtscale,
+        HudStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_, IM_WIDTH(menu_skill) * txtscale,
                          IM_HEIGHT(menu_skill) * txtscale, menu_skill, 0.0, 0.0, colmap);
 
-        // HUDDrawImage(x + style->definition_->text[fontType].x_offset,
+        // HudDrawImage(x + style->definition_->text[fontType].x_offset,
         //	38 + style->definition_->text[fontType].y_offset, menu_skill, colmap);
     }
-    HUDSetAlpha(old_alpha);
+    HudSetAlpha(old_alpha);
 }
 
 //
@@ -1257,7 +1257,7 @@ void M_DrawNewGame(void)
 static void CreateEpisodeMenu(void)
 {
     if (gamedefs.empty())
-        EDGEError("No defined episodes !\n");
+        FatalError("No defined episodes !\n");
 
     EpisodeMenu          = new menuitem_t[gamedefs.size()];
     EpisodeMenuSkipSkill = new bool[gamedefs.size()];
@@ -1303,7 +1303,7 @@ static void CreateEpisodeMenu(void)
     }
 
     if (e == 0)
-        EDGEError("No available episodes !\n");
+        FatalError("No available episodes !\n");
 
     EpiDef.numitems  = e;
     EpiDef.menuitems = EpisodeMenu;
@@ -1342,15 +1342,15 @@ void M_DrawEpisode(void)
 
     float txtscale = style->definition_->text_[fontType].scale_;
 
-    float old_alpha = HUDGetAlpha();
-    HUDSetAlpha(style->definition_->text_[fontType].translucency_);
+    float old_alpha = HudGetAlpha();
+    HudSetAlpha(style->definition_->text_[fontType].translucency_);
 
     if (custom_MenuEpisode == false)
     {
         if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentCenter)
             x = CenterMenuText(style, fontType, language["MenuWhichEpisode"]);
 
-        HUDWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_, 38 + style->definition_->text_[fontType].y_offset_,
+        HudWriteText(style, fontType, x + style->definition_->text_[fontType].x_offset_, 38 + style->definition_->text_[fontType].y_offset_,
                      language["MenuWhichEpisode"]);
     }
     else
@@ -1364,14 +1364,14 @@ void M_DrawEpisode(void)
         }
 
         const Colormap *colmap = style->definition_->text_[fontType].colmap_;
-        HUDStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_, IM_WIDTH(menu_episode) * txtscale,
+        HudStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_, IM_WIDTH(menu_episode) * txtscale,
                          IM_HEIGHT(menu_episode) * txtscale, menu_episode, 0.0, 0.0, colmap);
 
-        // HUDDrawImage(x + episode_style->definition_->text[fontType].x_offset,
+        // HudDrawImage(x + episode_style->definition_->text[fontType].x_offset,
         //	38 + episode_style->definition_->text[fontType].y_offset, menu_episode, colmap);
     }
 
-    HUDSetAlpha(old_alpha);
+    HudSetAlpha(old_alpha);
 }
 
 static void ReallyDoStartLevel(skill_t skill, GameDefinition *g)
@@ -1381,7 +1381,7 @@ static void ReallyDoStartLevel(skill_t skill, GameDefinition *g)
     params.skill_      = skill;
     params.deathmatch_ = 0;
 
-    params.random_seed_ = EDGEPureRandom();
+    params.random_seed_ = PureRandomNumber();
 
     params.SinglePlayer(0);
 
@@ -1446,7 +1446,7 @@ static void DoStartLevel(skill_t skill)
     // Sanity checking...
     if (!g)
     {
-        EDGEWarning("Internal Error: no episode for '%s'.\n", chosen_episode.c_str());
+        LogWarning("Internal Error: no episode for '%s'.\n", chosen_episode.c_str());
         M_ClearMenus();
         return;
     }
@@ -1454,7 +1454,7 @@ static void DoStartLevel(skill_t skill)
     const MapDefinition *map = GameLookupMap(g->firstmap_.c_str());
     if (!map)
     {
-        EDGEWarning("Cannot find map for '%s' (episode %s)\n", g->firstmap_.c_str(), chosen_episode.c_str());
+        LogWarning("Cannot find map for '%s' (episode %s)\n", g->firstmap_.c_str(), chosen_episode.c_str());
         M_ClearMenus();
         return;
     }
@@ -1501,9 +1501,9 @@ void M_ChangeMessages(int choice)
     show_messages = 1 - show_messages;
 
     if (show_messages)
-        ConsolePrintf("%s\n", language["MessagesOn"]);
+        ConsolePrint("%s\n", language["MessagesOn"]);
     else
-        ConsolePrintf("%s\n", language["MessagesOff"]);
+        ConsolePrint("%s\n", language["MessagesOff"]);
 }
 
 static void EndGameResponse(int ch)
@@ -1599,15 +1599,15 @@ static void QuitResponse(int ch)
 
     // -ACB- 1999/09/20 New exit code order
     // Write the default config file first
-    EDGEPrintf("Saving system defaults...\n");
+    LogPrint("Saving system defaults...\n");
     M_SaveDefaults();
 
-    EDGEPrintf("Exiting...\n");
+    LogPrint("Exiting...\n");
 
     E_EngineShutdown();
-    EDGESystemShutdown();
+    SystemShutdown();
 
-    EDGECloseProgram(EXIT_SUCCESS);
+    CloseProgram(EXIT_SUCCESS);
 }
 
 //
@@ -1625,7 +1625,7 @@ static void QuitResponse(int ch)
 void M_QuitEDGE(int choice)
 {
 #if EDGE_WEB
-    EDGEPrintf("Quit ignored on web platform\n");
+    LogPrint("Quit ignored on web platform\n");
     return;
 #endif
 
@@ -1669,19 +1669,19 @@ void M_ImmediateQuit()
 {
 
 #if EDGE_WEB
-    EDGEPrintf("Quit ignored on web platform\n");
+    LogPrint("Quit ignored on web platform\n");
     return;
 #endif
 
-    EDGEPrintf("Saving system defaults...\n");
+    LogPrint("Saving system defaults...\n");
     M_SaveDefaults();
 
-    EDGEPrintf("Exiting...\n");
+    LogPrint("Exiting...\n");
 
     E_EngineShutdown();
-    EDGESystemShutdown();
+    SystemShutdown();
 
-    EDGECloseProgram(EXIT_SUCCESS);
+    CloseProgram(EXIT_SUCCESS);
 }
 
 //----------------------------------------------------------------------------
@@ -1706,13 +1706,13 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
         if (colmap)
             slider_color = V_GetFontColor(colmap);
 
-        HUDThinBox(x,
+        HudThinBox(x,
                     y + (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
                              ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->truetype_reference_yshift_[current_font_size]
                              : 0),
                     x + (thermWidth * step) - step, y + opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->NominalHeight(),
                     slider_color);
-        HUDSolidBox(x,
+        HudSolidBox(x,
                      y + (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
                               ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->truetype_reference_yshift_[current_font_size]
                               : 0),
@@ -1723,18 +1723,18 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div)
         // Note: the (step+1) here is for compatibility with the original
         // code.  It seems required to make the thermo bar tile properly.
 
-        HUDStretchImage(x, y, step + 1, IM_HEIGHT(therm_l) / div, therm_l, 0.0, 0.0);
+        HudStretchImage(x, y, step + 1, IM_HEIGHT(therm_l) / div, therm_l, 0.0, 0.0);
 
         for (i = 0, x += step; i < thermWidth; i++, x += step)
         {
-            HUDStretchImage(x, y, step + 1, IM_HEIGHT(therm_m) / div, therm_m, 0.0, 0.0);
+            HudStretchImage(x, y, step + 1, IM_HEIGHT(therm_m) / div, therm_m, 0.0, 0.0);
         }
 
-        HUDStretchImage(x, y, step + 1, IM_HEIGHT(therm_r) / div, therm_r, 0.0, 0.0);
+        HudStretchImage(x, y, step + 1, IM_HEIGHT(therm_r) / div, therm_r, 0.0, 0.0);
 
         x = basex + step + thermDot * step;
 
-        HUDStretchImage(x, y, step + 1, IM_HEIGHT(therm_o) / div, therm_o, 0.0, 0.0);
+        HudStretchImage(x, y, step + 1, IM_HEIGHT(therm_o) / div, therm_o, 0.0, 0.0);
     }
 }
 
@@ -1765,14 +1765,14 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
         if (colmap)
             slider_color = V_GetFontColor(colmap);
 
-        HUDThinBox(x,
+        HudThinBox(x,
                     y + (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
                              ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->truetype_reference_yshift_[current_font_size]
                              : 0),
                     x + 50.0f, y + opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->NominalHeight() + (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
                              ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->truetype_reference_yshift_[current_font_size]/2
                              : 0), slider_color);
-        HUDSolidBox(x,
+        HudSolidBox(x,
                      y + (opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType
                               ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->truetype_reference_yshift_[current_font_size]
                               : 0),
@@ -1781,7 +1781,7 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
                              ? opt_style->fonts_[StyleDefinition::kTextSectionAlternate]->truetype_reference_yshift_[current_font_size]/2
                              : 0), slider_color);
         if (!actual_val.empty())
-            HUDWriteText(opt_style, StyleDefinition::kTextSectionAlternate, x + 50.0f + step, y, actual_val.c_str());
+            HudWriteText(opt_style, StyleDefinition::kTextSectionAlternate, x + 50.0f + step, y, actual_val.c_str());
     }
     else
     {
@@ -1790,20 +1790,20 @@ void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, fl
 
         int i = 0;
 
-        HUDStretchImage(x, y, step + 1, IM_HEIGHT(therm_l) / div, therm_l, 0.0, 0.0);
+        HudStretchImage(x, y, step + 1, IM_HEIGHT(therm_l) / div, therm_l, 0.0, 0.0);
 
         for (x += step; i < (50 / step); i++, x += step)
         {
-            HUDStretchImage(x, y, step + 1, IM_HEIGHT(therm_m) / div, therm_m, 0.0, 0.0);
+            HudStretchImage(x, y, step + 1, IM_HEIGHT(therm_m) / div, therm_m, 0.0, 0.0);
         }
 
-        HUDStretchImage(x, y, step + 1, IM_HEIGHT(therm_r) / div, therm_r, 0.0, 0.0);
+        HudStretchImage(x, y, step + 1, IM_HEIGHT(therm_r) / div, therm_r, 0.0, 0.0);
 
-        HUDStretchImage(basex + ((thermDot - min) / increment) * scale_step + 1, y, step + 1, IM_HEIGHT(therm_o) / div,
+        HudStretchImage(basex + ((thermDot - min) / increment) * scale_step + 1, y, step + 1, IM_HEIGHT(therm_o) / div,
                          therm_o, 0.0, 0.0);
 
         if (!actual_val.empty())
-            HUDWriteText(opt_style, StyleDefinition::kTextSectionAlternate,
+            HudWriteText(opt_style, StyleDefinition::kTextSectionAlternate,
                          basex + (((max - min) / increment) * scale_step) + (step * 2 + 2), y, actual_val.c_str());
     }
 }
@@ -2395,20 +2395,20 @@ static void DrawMessage(void)
 
     if (message_key_routine == QuitResponse && !exit_style->background_image_) // Respect dialog styles with custom backgrounds
     {
-        EDGEStartFrame(); // To clear and ensure solid black background regardless of style
+        StartFrame(); // To clear and ensure solid black background regardless of style
 
         if (exit_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_)
         {
-            HUDSetTextColor(V_GetFontColor(exit_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_));
+            HudSetTextColor(V_GetFontColor(exit_style->definition_->text_[StyleDefinition::kTextSectionText].colmap_));
         }
 
         if (exit_style->fonts_[StyleDefinition::kTextSectionText])
         {
-            HUDSetFont(exit_style->fonts_[StyleDefinition::kTextSectionText]);
+            HudSetFont(exit_style->fonts_[StyleDefinition::kTextSectionText]);
         }
-        HUDSetScale(exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
+        HudSetScale(exit_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
 
-        HUDDrawQuitScreen();
+        HudDrawQuitScreen();
         return;
     }
 
@@ -2452,9 +2452,9 @@ static void DrawMessage(void)
 
             if (s.size() > 0)
             {
-                HUDSetAlignment(0, -1); // center it
-                HUDWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
-                HUDSetAlignment(-1, -1); // set it back to usual
+                HudSetAlignment(0, -1); // center it
+                HudWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
+                HudSetAlignment(-1, -1); // set it back to usual
             }
 
             y += exit_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight();
@@ -2479,9 +2479,9 @@ static void DrawMessage(void)
 
             if (s.size() > 0)
             {
-                HUDSetAlignment(0, -1); // center it
-                HUDWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
-                HUDSetAlignment(-1, -1); // set it back to usual
+                HudSetAlignment(0, -1); // center it
+                HudWriteText(exit_style, StyleDefinition::kTextSectionText, 160, y, s.c_str());
+                HudSetAlignment(-1, -1); // set it back to usual
             }
 
             y += exit_style->fonts_[0]->NominalHeight();
@@ -2510,7 +2510,7 @@ void M_DrawCursor(Style *style, bool graphical_item)
     short TempX            = 0;
     short TempY            = 0;
 
-    float old_alpha = HUDGetAlpha();
+    float old_alpha = HudGetAlpha();
 
     float txtscale = style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
 
@@ -2532,7 +2532,7 @@ void M_DrawCursor(Style *style, bool graphical_item)
     if (cursor) // we're using a graphic for the cursor
         graphical_cursor = true;
 
-    HUDSetAlpha(style->definition_->cursor_.translucency_);
+    HudSetAlpha(style->definition_->cursor_.translucency_);
 
     //-------------------------------------------------------------
     // 2. Start drawing our cursor. We have to check if the
@@ -2606,10 +2606,10 @@ void M_DrawCursor(Style *style, bool graphical_item)
 
             if (graphical_cursor == true)
             {
-                HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
+                HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
 
             // Right cursor
             TempX = currentMenu->menuitems[itemOn].x + WidestLine + TempSpacer;
@@ -2628,10 +2628,10 @@ void M_DrawCursor(Style *style, bool graphical_item)
 
             if (graphical_cursor == true)
             {
-                HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
+                HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
         }
         else
         {
@@ -2652,10 +2652,10 @@ void M_DrawCursor(Style *style, bool graphical_item)
 
             if (graphical_cursor == true)
             {
-                HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
+                HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
 
             // Right cursor
             if (graphical_item == false)
@@ -2678,10 +2678,10 @@ void M_DrawCursor(Style *style, bool graphical_item)
             }
             if (graphical_cursor == true)
             {
-                HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             }
             else
-                HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
+                HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
         }
     }
     else if (style->definition_->cursor_.position_ == StyleDefinition::kAlignmentCenter)
@@ -2700,10 +2700,10 @@ void M_DrawCursor(Style *style, bool graphical_item)
             TempY -= (cursor->offset_y * txtscale);
 
             if (style->definition_->cursor_.border_)
-                HUDStretchImage(currentMenu->menuitems[itemOn].x, TempY, WidestLine, TallestLine, cursor, 0.0, 0.0,
+                HudStretchImage(currentMenu->menuitems[itemOn].x, TempY, WidestLine, TallestLine, cursor, 0.0, 0.0,
                                  colmap);
             else
-                HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+                HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
         }
         else
         {
@@ -2714,7 +2714,7 @@ void M_DrawCursor(Style *style, bool graphical_item)
             {
                 TempY -= (currentMenu->menuitems[itemOn].image->offset_y * txtscale);
             }
-            HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
+            HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
         }
     }
     else if (style->definition_->cursor_.position_ == StyleDefinition::kAlignmentRight)
@@ -2748,10 +2748,10 @@ void M_DrawCursor(Style *style, bool graphical_item)
 
         if (graphical_cursor == true)
         {
-            HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+            HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
         }
         else
-            HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
+            HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
     }
     else
     {
@@ -2769,15 +2769,15 @@ void M_DrawCursor(Style *style, bool graphical_item)
         }
         if (graphical_cursor == true)
         {
-            HUDStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
+            HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0, 0.0, colmap);
             /*
             char mbuffer[200];
             sprintf(mbuffer, "CX%d MX%d", TempX, currentMenu->menuitems[itemOn].x);
-            HUDWriteText(style,StyleDefinition::kTextSectionText, 10, 185, mbuffer, 0.7f);
+            HudWriteText(style,StyleDefinition::kTextSectionText, 10, 185, mbuffer, 0.7f);
             */
         }
         else
-            HUDWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
+            HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY, style->definition_->cursor_.cursor_string_.c_str());
     }
 
     if (graphical_cursor == true)
@@ -2785,7 +2785,7 @@ void M_DrawCursor(Style *style, bool graphical_item)
         cursor->offset_x = old_offset_x;
         cursor->offset_y = old_offset_y;
     }
-    HUDSetAlpha(old_alpha);
+    HudSetAlpha(old_alpha);
 }
 
 //
@@ -2809,7 +2809,7 @@ void M_DrawItems(Style *style, bool graphical_item)
 
     max = currentMenu->numitems;
 
-    float old_alpha = HUDGetAlpha();
+    float old_alpha = HudGetAlpha();
 
     float txtscale = style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
 
@@ -2885,7 +2885,7 @@ void M_DrawItems(Style *style, bool graphical_item)
             ShortestLine = 20.0f;
             TallestLine  = 20.0f;
             WidestLine   = 121.0f;
-            HUDSetAlpha(old_alpha);
+            HudSetAlpha(old_alpha);
             // We have empty menu items so don't draw anything...
             return;
         }
@@ -2913,7 +2913,7 @@ void M_DrawItems(Style *style, bool graphical_item)
             }
         }
 
-        HUDSetAlpha(style->definition_->text_[textstyle].translucency_);
+        HudSetAlpha(style->definition_->text_[textstyle].translucency_);
 
         if (style->definition_->entry_alignment_ == StyleDefinition::kAlignmentRight)
             TempX = currentMenu->menuitems[j].x + WidestLine - currentMenu->menuitems[j].width;
@@ -2922,7 +2922,7 @@ void M_DrawItems(Style *style, bool graphical_item)
 
         if (graphical_item == false) // We're going text-based menu items
         {
-            HUDWriteText(style, textstyle, TempX, currentMenu->menuitems[j].y, currentMenu->menuitems[j].name);
+            HudWriteText(style, textstyle, TempX, currentMenu->menuitems[j].y, currentMenu->menuitems[j].name);
         }
         else // We're going graphical menu items
         {
@@ -2943,14 +2943,14 @@ void M_DrawItems(Style *style, bool graphical_item)
             const Colormap *colmap = style->definition_->text_[textstyle].colmap_;
             // colourmap_c *colmap = nullptr;
 
-            // HUDStretchImage() will apply image.offset_x again so subtract it first
+            // HudStretchImage() will apply image.offset_x again so subtract it first
             TempX -= (currentMenu->menuitems[j].image->offset_x * txtscale);
-            HUDStretchImage(TempX, currentMenu->menuitems[j].y, currentMenu->menuitems[j].width,
+            HudStretchImage(TempX, currentMenu->menuitems[j].y, currentMenu->menuitems[j].width,
                              currentMenu->menuitems[j].height, currentMenu->menuitems[j].image, 0.0, 0.0, colmap);
         }
-        HUDSetAlpha(old_alpha);
+        HudSetAlpha(old_alpha);
     }
-    HUDSetAlpha(old_alpha);
+    HudSetAlpha(old_alpha);
 }
 
 //
@@ -2972,11 +2972,11 @@ void M_Drawer(void)
                 W_ImageStoreBlurred(menu_backdrop, 0.75f);
                 menu_backdrop->blurred_version->grayscale = true;
             }
-            HUDStretchImage(-320, -200, 960, 600, menu_backdrop->blurred_version, 0, 0);
+            HudStretchImage(-320, -200, 960, 600, menu_backdrop->blurred_version, 0, 0);
         }
         else
-            HUDSolidBox(-320, -200, 960, 600, 0);
-        HUDDrawImageTitleWS(menu_backdrop);
+            HudSolidBox(-320, -200, 960, 600, 0);
+        HudDrawImageTitleWS(menu_backdrop);
     }
 
     // Horiz. & Vertically center string and print it.
@@ -3056,7 +3056,7 @@ void M_Ticker(void)
     // update language if it changed
     if (m_language.CheckModified())
         if (!language.Select(m_language.c_str()))
-            EDGEPrintf("Unknown language: %s\n", m_language.c_str());
+            LogPrint("Unknown language: %s\n", m_language.c_str());
 
     if (option_menuon)
     {
@@ -3177,9 +3177,9 @@ void M_Init(void)
     if (W_IsLumpInPwad("M_NMARE"))
         custom_MenuDifficulty = true;
 
-    EDGEDebugf("custom_MenuMain =%d \n", custom_MenuMain);
-    EDGEDebugf("custom_MenuEpisode =%d \n", custom_MenuEpisode);
-    EDGEDebugf("custom_MenuDifficulty =%d \n", custom_MenuDifficulty);
+    LogDebug("custom_MenuMain =%d \n", custom_MenuMain);
+    LogDebug("custom_MenuEpisode =%d \n", custom_MenuEpisode);
+    LogDebug("custom_MenuDifficulty =%d \n", custom_MenuDifficulty);
 
     menu_doom = W_ImageLookup("M_DOOM");
 

@@ -128,7 +128,7 @@ const char *ammo::GetAmmo(int type)
             return "NOAMMO";
     }
 
-    EDGEError("Dehacked: Internal Error - Bad ammo type %d\n", type);
+    FatalError("Dehacked: Internal Error - Bad ammo type %d\n", type);
     return nullptr;
 }
 
@@ -145,7 +145,7 @@ void ammo::AlterAmmo(int new_val)
 
     if (!max_m && !per_m)
     {
-        EDGEDebugf("Dehacked: Warning - UNKNOWN AMMO FIELD: %s\n", deh_field);
+        LogDebug("Dehacked: Warning - UNKNOWN AMMO FIELD: %s\n", deh_field);
         return;
     }
 
@@ -153,7 +153,7 @@ void ammo::AlterAmmo(int new_val)
 
     if (new_val < 0)
     {
-        EDGEDebugf("Dehacked: Warning - Bad value '%d' for AMMO field: %s\n",
+        LogDebug("Dehacked: Warning - Bad value '%d' for AMMO field: %s\n",
                  new_val, deh_field);
         return;
     }

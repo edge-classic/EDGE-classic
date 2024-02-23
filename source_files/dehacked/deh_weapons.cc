@@ -192,7 +192,7 @@ void HandleMBF21Flags(const WeaponInfo *info, int w_num)
     if (got_a_flag) wad::Printf(";\n");
 
     if (cur_f != 0)
-        EDGEDebugf(
+        LogDebug(
             "Dehacked: Warning - Unconverted flags 0x%08x in weapontype %d\n",
             cur_f, w_num);
 }
@@ -229,7 +229,7 @@ void HandleFrames(const WeaponInfo *info, int w_num)
 
     if (count == 0)
     {
-        EDGEDebugf("Dehacked: Warning - Weapon [%s] has no states.\n",
+        LogDebug("Dehacked: Warning - Weapon [%s] has no states.\n",
                  info->ddf_name);
         return;
     }
@@ -253,7 +253,7 @@ void HandleAttacks(const WeaponInfo *info, int w_num)
     if (count == 0) return;
 
     if (count > 1)
-        EDGEDebugf("Dehacked: Warning - Multiple attacks used in weapon [%s]\n",
+        LogDebug("Dehacked: Warning - Multiple attacks used in weapon [%s]\n",
                  info->ddf_name);
 
     wad::Printf("\n");
@@ -338,7 +338,7 @@ void weapons::AlterWeapon(int new_val)
 
     if (!FieldAlter(weapon_field, field_name, raw_obj, new_val))
     {
-        EDGEDebugf("Dehacked: Warning - UNKNOWN WEAPON FIELD: %s\n", field_name);
+        LogDebug("Dehacked: Warning - UNKNOWN WEAPON FIELD: %s\n", field_name);
         return;
     }
 

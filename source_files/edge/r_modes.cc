@@ -123,21 +123,21 @@ void R_AddResolution(DisplayMode *mode)
 
 void R_DumpResList(void)
 {
-    EDGEPrintf("Available Resolutions:\n");
+    LogPrint("Available Resolutions:\n");
 
     for (int i = 0; i < (int)screen_modes.size(); i++)
     {
         DisplayMode *cur = screen_modes[i];
 
         if (i > 0 && (i % 3) == 0)
-            EDGEPrintf("\n");
+            LogPrint("\n");
 
-        EDGEPrintf("  %4dx%4d @ %02d %s", cur->width, cur->height, cur->depth,
+        LogPrint("  %4dx%4d @ %02d %s", cur->width, cur->height, cur->depth,
                  cur->display_mode == cur->SCR_BORDERLESS ? "BL"
                                                           : (cur->display_mode == cur->SCR_FULLSCREEN ? "FS " : "win"));
     }
 
-    EDGEPrintf("\n");
+    LogPrint("\n");
 }
 
 bool R_IncrementResolution(DisplayMode *mode, int what, int dir)
@@ -251,7 +251,7 @@ void R_ToggleFullscreen(void)
 
 void R_SoftInitResolution(void)
 {
-    EDGEDebugf("R_SoftInitResolution...\n");
+    LogDebug("R_SoftInitResolution...\n");
 
     RGL_NewScreenSize(SCREENWIDTH, SCREENHEIGHT, SCREENBITS);
 
@@ -269,7 +269,7 @@ void R_SoftInitResolution(void)
     RGL_SoftInit();
     RGL_SoftInitUnits(); // -ACB- 2004/02/15 Needed to sort vars lost in res change
 
-    EDGEDebugf("-  returning true.\n");
+    LogDebug("-  returning true.\n");
 
     return;
 }
@@ -280,7 +280,7 @@ static bool DoExecuteChangeResolution(DisplayMode *mode)
 
     W_DeleteAllImages();
 
-    bool was_ok = EDGESetScreenSize(mode);
+    bool was_ok = SetScreenSize(mode);
 
     if (!was_ok)
         return false;
@@ -297,13 +297,13 @@ static bool DoExecuteChangeResolution(DisplayMode *mode)
     else
         current_font_size = 2;
 
-    EDGEDeterminePixelAspect();
+    DeterminePixelAspect();
 
-    EDGEPrintf("Pixel aspect: %1.3f\n", pixel_aspect_ratio.f_);
+    LogPrint("Pixel aspect: %1.3f\n", pixel_aspect_ratio.f_);
 
     // gfx card doesn't like to switch too rapidly
-    EDGESleep(250);
-    EDGESleep(250);
+    SleepForMilliseconds(250);
+    SleepForMilliseconds(250);
 
     return true;
 }
@@ -344,7 +344,7 @@ struct Compare_Res_pred
 
 void R_InitialResolution(void)
 {
-    EDGEDebugf("R_InitialResolution...\n");
+    LogDebug("R_InitialResolution...\n");
 
     if (DISPLAYMODE == 2)
     {
@@ -366,7 +366,7 @@ void R_InitialResolution(void)
         return;
     }
 
-    EDGEDebugf("- Looking for another mode to try...\n");
+    LogDebug("- Looking for another mode to try...\n");
 
     // sort modes into a good order, choosing sizes near the
     // request size first, and different depths/fullness last.
@@ -380,17 +380,17 @@ void R_InitialResolution(void)
     }
 
     // FOOBAR!
-    EDGEError("Unable to set any resolutions!");
+    FatalError("Unable to set any resolutions!");
 }
 
 bool R_ChangeResolution(DisplayMode *mode)
 {
-    EDGEDebugf("R_ChangeResolution...\n");
+    LogDebug("R_ChangeResolution...\n");
 
     if (DoExecuteChangeResolution(mode->display_mode == 2 ? &borderless_mode : mode))
         return true;
 
-    EDGEDebugf("- Failed : switching back...\n");
+    LogDebug("- Failed : switching back...\n");
 
     DisplayMode old_mode;
 
@@ -403,7 +403,7 @@ bool R_ChangeResolution(DisplayMode *mode)
         return false;
 
     // This ain't good - current and previous resolutions do not work.
-    EDGEError("Switch back to old resolution failed!\n");
+    FatalError("Switch back to old resolution failed!\n");
     return false; /* NOT REACHED */
 }
 

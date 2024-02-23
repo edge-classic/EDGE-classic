@@ -702,7 +702,7 @@ void ThingParseField(const char *field, const char *contents, int index,
                      bool is_last)
 {
 #if (DEBUG_DDF)
-    EDGEDebugf("THING_PARSE: %s = %s;\n", field, contents);
+    LogDebug("THING_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_CompareName(field, "TEMPLATE") == 0)
@@ -812,7 +812,7 @@ static void ThingFinishEntry(void)
             DDF_Warning("DLIGHT_RADIUS value %1.1f too large (over 512).\n",
                         dynamic_mobj->dlight_[0].radius_);
         else if (dlight_radius_warnings == 3)
-            EDGEWarning("More too large DLIGHT_RADIUS values found....\n");
+            LogWarning("More too large DLIGHT_RADIUS values found....\n");
 
         dlight_radius_warnings++;
     }
@@ -869,7 +869,7 @@ static void ThingFinishEntry(void)
 
 static void ThingClearAll(void)
 {
-    EDGEWarning("Ignoring #CLEARALL in things.ddf\n");
+    LogWarning("Ignoring #CLEARALL in things.ddf\n");
 }
 
 void DDF_ReadThings(const std::string &data)
@@ -2183,8 +2183,8 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
     /*
     if(src.pickup_benefits_)
     {
-        EDGEDebugf("%s: Benefits info not inherited from '%s', ",name,
-    src.name_.c_str()); EDGEDebugf("You should define it explicitly.\n");
+        LogDebug("%s: Benefits info not inherited from '%s', ",name,
+    src.name_.c_str()); LogDebug("You should define it explicitly.\n");
     }
     */
 
@@ -2669,7 +2669,7 @@ const MapObjectDefinition *MapObjectDefinitionContainer::LookupPlayer(
         if (m->playernum_ == playernum) return m;
     }
 
-    EDGEError("Missing DDF entry for player number %d\n", playernum);
+    FatalError("Missing DDF entry for player number %d\n", playernum);
     return nullptr; /* NOT REACHED */
 }
 
@@ -2711,7 +2711,7 @@ const MapObjectDefinition *MapObjectDefinitionContainer::LookupDoorKey(
         }
     }
 
-    EDGEWarning("Missing DDF entry for key %d\n", theKey);
+    LogWarning("Missing DDF entry for key %d\n", theKey);
     return nullptr;
 }
 

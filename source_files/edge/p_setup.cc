@@ -238,7 +238,7 @@ static void CheckEvilutionBug(uint8_t *data, int length)
     if (memcmp(data, Y_key_data, 10) != 0)
         return;
 
-    EDGEPrintf("Detected TNT MAP31 bug, adding fix.\n");
+    LogPrint("Detected TNT MAP31 bug, adding fix.\n");
 
     data[8] &= ~MTF_NOT_SINGLE;
 }
@@ -281,7 +281,7 @@ static void CheckDoom2Map05Bug(uint8_t *data, int length)
     if (data[24] == 9) // check just in case
         data[24] = 0;  // set tag to 0 instead of 9
 
-    EDGEPrintf("Detected Doom2 MAP05 bug, adding fix.\n");
+    LogPrint("Detected Doom2 MAP05 bug, adding fix.\n");
 }
 
 static void LoadVertexes(int lump)
@@ -292,14 +292,14 @@ static void LoadVertexes(int lump)
     vertex_t           *li;
 
     if (!W_VerifyLumpName(lump, "VERTEXES"))
-        EDGEError("Bad WAD: level %s missing VERTEXES.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing VERTEXES.\n", current_map->lump_.c_str());
 
     // Determine number of lumps:
     //  total lump length / vertex record length.
     numvertexes = W_LumpLength(lump) / sizeof(raw_vertex_t);
 
     if (numvertexes == 0)
-        EDGEError("Bad WAD: level %s contains 0 vertexes.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s contains 0 vertexes.\n", current_map->lump_.c_str());
 
     vertexes = new vertex_t[numvertexes];
 
@@ -334,7 +334,7 @@ static void SegCommonStuff(seg_t *seg, int linedef_in)
     else
     {
         if (linedef_in >= numlines) // sanity check
-            EDGEError("Bad GWA file: seg #%d has invalid linedef.\n", (int)(seg - segs));
+            FatalError("Bad GWA file: seg #%d has invalid linedef.\n", (int)(seg - segs));
 
         seg->miniseg = false;
         seg->linedef = &lines[linedef_in];
@@ -347,7 +347,7 @@ static void SegCommonStuff(seg_t *seg, int linedef_in)
         seg->sidedef = seg->linedef->side[seg->side];
 
         if (!seg->sidedef)
-            EDGEError("Bad GWA file: missing side for seg #%d\n", (int)(seg - segs));
+            FatalError("Bad GWA file: missing side for seg #%d\n", (int)(seg - segs));
 
         seg->frontsector = seg->sidedef->sector;
 
@@ -401,13 +401,13 @@ static void LoadSectors(int lump)
         // Check if SECTORS is immediately after THINGS/LINEDEFS/SIDEDEFS/VERTEXES
         lump -= 3;
         if (!W_VerifyLumpName(lump, "SECTORS"))
-            EDGEError("Bad WAD: level %s missing SECTORS.\n", current_map->lump_.c_str());
+            FatalError("Bad WAD: level %s missing SECTORS.\n", current_map->lump_.c_str());
     }
 
     numsectors = W_LumpLength(lump) / sizeof(raw_sector_t);
 
     if (numsectors == 0)
-        EDGEError("Bad WAD: level %s contains 0 sectors.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s contains 0 sectors.\n", current_map->lump_.c_str());
 
     sectors = new sector_t[numsectors];
     Z_Clear(sectors, sector_t, numsectors);
@@ -461,12 +461,12 @@ static void LoadSectors(int lump)
 
         if (!ss->floor.image)
         {
-            EDGEWarning("Bad Level: sector #%d has missing floor texture.\n", i);
+            LogWarning("Bad Level: sector #%d has missing floor texture.\n", i);
             ss->floor.image = W_ImageLookup("FLAT1", kImageNamespaceFlat);
         }
         if (!ss->ceil.image)
         {
-            EDGEWarning("Bad Level: sector #%d has missing ceiling texture.\n", i);
+            LogWarning("Bad Level: sector #%d has missing ceiling texture.\n", i);
             ss->ceil.image = ss->floor.image;
         }
 
@@ -545,9 +545,9 @@ static void UnknownThingWarning(int type, float x, float y)
         count = unknown_thing_map[type];
 
     if (count < 2)
-        EDGEWarning("Unknown thing type %i at (%1.0f, %1.0f)\n", type, x, y);
+        LogWarning("Unknown thing type %i at (%1.0f, %1.0f)\n", type, x, y);
     else if (count == 2)
-        EDGEWarning("More unknown things of type %i found...\n", type);
+        LogWarning("More unknown things of type %i found...\n", type);
 
     unknown_thing_map[type] = count + 1;
 }
@@ -581,7 +581,7 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
         if (sec->props.special && sec->props.special->hub_)
         {
             if (sec->tag <= 0)
-                EDGEWarning("HUB_START in sector without tag @ (%1.0f %1.0f)\n", x, y);
+                LogWarning("HUB_START in sector without tag @ (%1.0f %1.0f)\n", x, y);
 
             point.tag = sec->tag;
 
@@ -693,12 +693,12 @@ static void LoadThings(int lump)
     const MapObjectDefinition  *objtype;
 
     if (!W_VerifyLumpName(lump, "THINGS"))
-        EDGEError("Bad WAD: level %s missing THINGS.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing THINGS.\n", current_map->lump_.c_str());
 
     mapthing_NUM = W_LumpLength(lump) / sizeof(raw_thing_t);
 
     if (mapthing_NUM == 0)
-        EDGEError("Bad WAD: level %s contains 0 things.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s contains 0 things.\n", current_map->lump_.c_str());
 
     data = W_LoadLump(lump);
     mapthing_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
@@ -827,12 +827,12 @@ static void LoadHexenThings(int lump)
     const MapObjectDefinition        *objtype;
 
     if (!W_VerifyLumpName(lump, "THINGS"))
-        EDGEError("Bad WAD: level %s missing THINGS.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing THINGS.\n", current_map->lump_.c_str());
 
     mapthing_NUM = W_LumpLength(lump) / sizeof(raw_hexen_thing_t);
 
     if (mapthing_NUM == 0)
-        EDGEError("Bad WAD: level %s contains 0 things.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s contains 0 things.\n", current_map->lump_.c_str());
 
     data = W_LoadLump(lump);
     mapthing_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
@@ -921,13 +921,13 @@ static inline void ComputeLinedefData(line_t *ld, int side0, int side1)
     // handle missing RIGHT sidedef (idea taken from MBF)
     if (side0 == -1)
     {
-        EDGEWarning("Bad WAD: level %s linedef #%d is missing RIGHT side\n", current_map->lump_.c_str(), (int)(ld - lines));
+        LogWarning("Bad WAD: level %s linedef #%d is missing RIGHT side\n", current_map->lump_.c_str(), (int)(ld - lines));
         side0 = 0;
     }
 
     if ((ld->flags & MLF_TwoSided) && ((side0 == -1) || (side1 == -1)))
     {
-        EDGEWarning("Bad WAD: level %s has linedef #%d marked TWOSIDED, "
+        LogWarning("Bad WAD: level %s has linedef #%d marked TWOSIDED, "
                   "but it has only one side.\n",
                   current_map->lump_.c_str(), (int)(ld - lines));
 
@@ -949,12 +949,12 @@ static void LoadLineDefs(int lump)
     //       "wall tiles" properly.
 
     if (!W_VerifyLumpName(lump, "LINEDEFS"))
-        EDGEError("Bad WAD: level %s missing LINEDEFS.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing LINEDEFS.\n", current_map->lump_.c_str());
 
     numlines = W_LumpLength(lump) / sizeof(raw_linedef_t);
 
     if (numlines == 0)
-        EDGEError("Bad WAD: level %s contains 0 linedefs.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s contains 0 linedefs.\n", current_map->lump_.c_str());
 
     lines = new line_t[numlines];
 
@@ -1029,12 +1029,12 @@ static void LoadHexenLineDefs(int lump)
     // -AJA- 2001/08/04: wrote this, based on the Hexen specs.
 
     if (!W_VerifyLumpName(lump, "LINEDEFS"))
-        EDGEError("Bad WAD: level %s missing LINEDEFS.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing LINEDEFS.\n", current_map->lump_.c_str());
 
     numlines = W_LumpLength(lump) / sizeof(raw_hexen_linedef_t);
 
     if (numlines == 0)
-        EDGEError("Bad WAD: level %s contains 0 linedefs.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s contains 0 linedefs.\n", current_map->lump_.c_str());
 
     lines = new line_t[numlines];
 
@@ -1181,24 +1181,24 @@ static void LoadXGL3Nodes(int lumpnum)
     std::vector<uint8_t> zgldata;
     uint8_t             *td = nullptr;
 
-    EDGEDebugf("LoadXGL3Nodes:\n");
+    LogDebug("LoadXGL3Nodes:\n");
 
     xglen   = W_LumpLength(lumpnum);
     xgldata = (uint8_t *)W_LoadLump(lumpnum);
     if (!xgldata)
-        EDGEError("LoadXGL3Nodes: Couldn't load lump\n");
+        FatalError("LoadXGL3Nodes: Couldn't load lump\n");
 
     if (xglen < 12)
     {
         delete[] xgldata;
-        EDGEError("LoadXGL3Nodes: Lump too short\n");
+        FatalError("LoadXGL3Nodes: Lump too short\n");
     }
 
     if (!memcmp(xgldata, "XGL3", 4))
-        EDGEDebugf(" AJBSP uncompressed GL nodes v3\n");
+        LogDebug(" AJBSP uncompressed GL nodes v3\n");
     else if (!memcmp(xgldata, "ZGL3", 4))
     {
-        EDGEDebugf(" AJBSP compressed GL nodes v3\n");
+        LogDebug(" AJBSP compressed GL nodes v3\n");
         zgldata.resize(xglen);
         z_stream zgl_stream;
         memset(&zgl_stream, 0, sizeof(z_stream));
@@ -1225,7 +1225,7 @@ static void LoadXGL3Nodes(int lumpnum)
                 break;
             }
             else
-                EDGEError("LoadXGL3Nodes: Failed to decompress ZGL3 nodes!\n");
+                FatalError("LoadXGL3Nodes: Failed to decompress ZGL3 nodes!\n");
         }
     }
     else
@@ -1233,7 +1233,7 @@ static void LoadXGL3Nodes(int lumpnum)
         static char xgltemp[6];
         epi::CStringCopyMax(xgltemp, (char *)xgldata, 4);
         delete[] xgldata;
-        EDGEError("LoadXGL3Nodes: Unrecognized node type %s\n", xgltemp);
+        FatalError("LoadXGL3Nodes: Unrecognized node type %s\n", xgltemp);
     }
 
     if (!zgldata.empty())
@@ -1247,13 +1247,13 @@ static void LoadXGL3Nodes(int lumpnum)
     if (oVerts > numvertexes)
     {
         delete[] xgldata;
-        EDGEError("LoadXGL3Nodes: Vertex/Node mismatch\n");
+        FatalError("LoadXGL3Nodes: Vertex/Node mismatch\n");
     }
 
     // 2nd u32 is the number of extra vertexes added by ajbsp
     int nVerts = epi::UnalignedLittleEndianU32(td);
     td += 4;
-    EDGEDebugf("LoadXGL3Nodes: Orig Verts = %d, New Verts = %d, Map Verts = %d\n", oVerts, nVerts, numvertexes);
+    LogDebug("LoadXGL3Nodes: Orig Verts = %d, New Verts = %d, Map Verts = %d\n", oVerts, nVerts, numvertexes);
 
     gl_vertexes     = new vertex_t[nVerts];
     num_gl_vertexes = nVerts;
@@ -1277,9 +1277,9 @@ static void LoadXGL3Nodes(int lumpnum)
     if (numsubsectors <= 0)
     {
         delete[] xgldata;
-        EDGEError("LoadXGL3Nodes: No subsectors\n");
+        FatalError("LoadXGL3Nodes: No subsectors\n");
     }
-    EDGEDebugf("LoadXGL3Nodes: Num SSECTORS = %d\n", numsubsectors);
+    LogDebug("LoadXGL3Nodes: Num SSECTORS = %d\n", numsubsectors);
 
     subsectors = new subsector_t[numsubsectors];
     Z_Clear(subsectors, subsector_t, numsubsectors);
@@ -1300,9 +1300,9 @@ static void LoadXGL3Nodes(int lumpnum)
     if (numsegs != xglSegs)
     {
         delete[] xgldata;
-        EDGEError("LoadXGL3Nodes: Incorrect number of segs in nodes\n");
+        FatalError("LoadXGL3Nodes: Incorrect number of segs in nodes\n");
     }
-    EDGEDebugf("LoadXGL3Nodes: Num SEGS = %d\n", numsegs);
+    LogDebug("LoadXGL3Nodes: Num SEGS = %d\n", numsegs);
 
     segs = new seg_t[numsegs];
     Z_Clear(segs, seg_t, numsegs);
@@ -1346,7 +1346,7 @@ static void LoadXGL3Nodes(int lumpnum)
         seg->front_sub = seg->back_sub = SUB_INVALID;
     }
 
-    EDGEDebugf("LoadXGL3Nodes: Post-process subsectors\n");
+    LogDebug("LoadXGL3Nodes: Post-process subsectors\n");
     // go back and fill in subsectors
     subsector_t *ss = subsectors;
     xglSegs         = 0;
@@ -1372,7 +1372,7 @@ static void LoadXGL3Nodes(int lumpnum)
         seg_t **prevptr = &ss->segs;
 
         if (countsegs == 0)
-            EDGEError("LoadXGL3Nodes: level %s has invalid SSECTORS.\n", current_map->lump_.c_str());
+            FatalError("LoadXGL3Nodes: level %s has invalid SSECTORS.\n", current_map->lump_.c_str());
 
         ss->sector    = nullptr;
         ss->thinglist = nullptr;
@@ -1390,20 +1390,20 @@ static void LoadXGL3Nodes(int lumpnum)
             cur->front_sub = ss;
             cur->back_sub  = nullptr;
 
-            // EDGEDebugf("  ssec = %d, seg = %d\n", i, firstseg + j);
+            // LogDebug("  ssec = %d, seg = %d\n", i, firstseg + j);
         }
-        // EDGEDebugf("LoadZNodes: ssec = %d, fseg = %d, cseg = %d\n", i, firstseg, countsegs);
+        // LogDebug("LoadZNodes: ssec = %d, fseg = %d, cseg = %d\n", i, firstseg, countsegs);
 
         *prevptr = nullptr;
     }
     delete[] ss_temp; // CA 9.30.18: allocated with new but released using delete, added [] between delete and ss_temp
 
-    EDGEDebugf("LoadXGL3Nodes: Read GL nodes\n");
+    LogDebug("LoadXGL3Nodes: Read GL nodes\n");
     // finally, read the nodes
     // NOTE: no nodes is okay (a basic single sector map). -AJA-
     numnodes = epi::UnalignedLittleEndianU32(td);
     td += 4;
-    EDGEDebugf("LoadXGL3Nodes: Num nodes = %d\n", numnodes);
+    LogDebug("LoadXGL3Nodes: Num nodes = %d\n", numnodes);
 
     nodes = new node_t[numnodes + 1];
     Z_Clear(nodes, node_t, numnodes);
@@ -1445,10 +1445,10 @@ static void LoadXGL3Nodes(int lumpnum)
 
     AssignSubsectorsToSectors();
 
-    EDGEDebugf("LoadXGL3Nodes: Setup root node\n");
+    LogDebug("LoadXGL3Nodes: Setup root node\n");
     SetupRootNode();
 
-    EDGEDebugf("LoadXGL3Nodes: Finished\n");
+    LogDebug("LoadXGL3Nodes: Finished\n");
     delete[] xgldata;
     zgldata.clear();
 }
@@ -1457,7 +1457,7 @@ static void LoadUDMFVertexes()
 {
     epi::Lexer lex(udmf_lump);
 
-    EDGEDebugf("LoadUDMFVertexes: parsing TEXTMAP\n");
+    LogDebug("LoadUDMFVertexes: parsing TEXTMAP\n");
     int cur_vertex = 0;
 
     for (;;)
@@ -1469,19 +1469,19 @@ static void LoadUDMFVertexes()
             break;
 
         if (tok != epi::kTokenIdentifier)
-            EDGEError("Malformed TEXTMAP lump.\n");
+            FatalError("Malformed TEXTMAP lump.\n");
 
         // check namespace
         if (lex.Match("="))
         {
             lex.Next(section);
             if (!lex.Match(";"))
-                EDGEError("Malformed TEXTMAP lump: missing ';'\n");
+                FatalError("Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
         if (!lex.Match("{"))
-            EDGEError("Malformed TEXTMAP lump: missing '{'\n");
+            FatalError("Malformed TEXTMAP lump: missing '{'\n");
 
         if (section == "vertex")
         {
@@ -1497,21 +1497,21 @@ static void LoadUDMFVertexes()
                 epi::TokenKind block_tok = lex.Next(key);
 
                 if (block_tok == epi::kTokenEOF)
-                    EDGEError("Malformed TEXTMAP lump: unclosed block\n");
+                    FatalError("Malformed TEXTMAP lump: unclosed block\n");
 
                 if (block_tok != epi::kTokenIdentifier)
-                    EDGEError("Malformed TEXTMAP lump: missing key\n");
+                    FatalError("Malformed TEXTMAP lump: missing key\n");
 
                 if (!lex.Match("="))
-                    EDGEError("Malformed TEXTMAP lump: missing '='\n");
+                    FatalError("Malformed TEXTMAP lump: missing '='\n");
 
                 block_tok = lex.Next(value);
 
                 if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
-                    EDGEError("Malformed TEXTMAP lump: missing value\n");
+                    FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
-                    EDGEError("Malformed TEXTMAP lump: missing ';'\n");
+                    FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
                 epi::EName key_ename(key, true);
 
@@ -1548,14 +1548,14 @@ static void LoadUDMFVertexes()
     }
     SYS_ASSERT(cur_vertex == numvertexes);
 
-    EDGEDebugf("LoadUDMFVertexes: finished parsing TEXTMAP\n");
+    LogDebug("LoadUDMFVertexes: finished parsing TEXTMAP\n");
 }
 
 static void LoadUDMFSectors()
 {
     epi::Lexer lex(udmf_lump);
 
-    EDGEDebugf("LoadUDMFSectors: parsing TEXTMAP\n");
+    LogDebug("LoadUDMFSectors: parsing TEXTMAP\n");
     int cur_sector = 0;
 
     for (;;)
@@ -1567,19 +1567,19 @@ static void LoadUDMFSectors()
             break;
 
         if (tok != epi::kTokenIdentifier)
-            EDGEError("Malformed TEXTMAP lump.\n");
+            FatalError("Malformed TEXTMAP lump.\n");
 
         // check namespace
         if (lex.Match("="))
         {
             lex.Next(section);
             if (!lex.Match(";"))
-                EDGEError("Malformed TEXTMAP lump: missing ';'\n");
+                FatalError("Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
         if (!lex.Match("{"))
-            EDGEError("Malformed TEXTMAP lump: missing '{'\n");
+            FatalError("Malformed TEXTMAP lump: missing '{'\n");
 
         if (section == "sector")
         {
@@ -1606,21 +1606,21 @@ static void LoadUDMFSectors()
                 epi::TokenKind block_tok = lex.Next(key);
 
                 if (block_tok == epi::kTokenEOF)
-                    EDGEError("Malformed TEXTMAP lump: unclosed block\n");
+                    FatalError("Malformed TEXTMAP lump: unclosed block\n");
 
                 if (block_tok != epi::kTokenIdentifier)
-                    EDGEError("Malformed TEXTMAP lump: missing key\n");
+                    FatalError("Malformed TEXTMAP lump: missing key\n");
 
                 if (!lex.Match("="))
-                    EDGEError("Malformed TEXTMAP lump: missing '='\n");
+                    FatalError("Malformed TEXTMAP lump: missing '='\n");
 
                 block_tok = lex.Next(value);
 
                 if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
-                    EDGEError("Malformed TEXTMAP lump: missing value\n");
+                    FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
-                    EDGEError("Malformed TEXTMAP lump: missing ';'\n");
+                    FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
                 epi::EName key_ename(key, true);
 
@@ -1749,12 +1749,12 @@ static void LoadUDMFSectors()
 
             if (!ss->floor.image)
             {
-                EDGEWarning("Bad Level: sector #%d has missing floor texture.\n", cur_sector);
+                LogWarning("Bad Level: sector #%d has missing floor texture.\n", cur_sector);
                 ss->floor.image = W_ImageLookup("FLAT1", kImageNamespaceFlat);
             }
             if (!ss->ceil.image)
             {
-                EDGEWarning("Bad Level: sector #%d has missing ceiling texture.\n", cur_sector);
+                LogWarning("Bad Level: sector #%d has missing ceiling texture.\n", cur_sector);
                 ss->ceil.image = ss->floor.image;
             }
 
@@ -1844,14 +1844,14 @@ static void LoadUDMFSectors()
     }
     SYS_ASSERT(cur_sector == numsectors);
 
-    EDGEDebugf("LoadUDMFSectors: finished parsing TEXTMAP\n");
+    LogDebug("LoadUDMFSectors: finished parsing TEXTMAP\n");
 }
 
 static void LoadUDMFSideDefs()
 {
     epi::Lexer lex(udmf_lump);
 
-    EDGEDebugf("LoadUDMFSectors: parsing TEXTMAP\n");
+    LogDebug("LoadUDMFSectors: parsing TEXTMAP\n");
 
     sides = new side_t[numsides];
     Z_Clear(sides, side_t, numsides);
@@ -1867,19 +1867,19 @@ static void LoadUDMFSideDefs()
             break;
 
         if (tok != epi::kTokenIdentifier)
-            EDGEError("Malformed TEXTMAP lump.\n");
+            FatalError("Malformed TEXTMAP lump.\n");
 
         // check namespace
         if (lex.Match("="))
         {
             lex.Next(section);
             if (!lex.Match(";"))
-                EDGEError("Malformed TEXTMAP lump: missing ';'\n");
+                FatalError("Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
         if (!lex.Match("{"))
-            EDGEError("Malformed TEXTMAP lump: missing '{'\n");
+            FatalError("Malformed TEXTMAP lump: missing '{'\n");
 
         if (section == "sidedef")
         {
@@ -1906,21 +1906,21 @@ static void LoadUDMFSideDefs()
                 epi::TokenKind block_tok = lex.Next(key);
 
                 if (block_tok == epi::kTokenEOF)
-                    EDGEError("Malformed TEXTMAP lump: unclosed block\n");
+                    FatalError("Malformed TEXTMAP lump: unclosed block\n");
 
                 if (block_tok != epi::kTokenIdentifier)
-                    EDGEError("Malformed TEXTMAP lump: missing key\n");
+                    FatalError("Malformed TEXTMAP lump: missing key\n");
 
                 if (!lex.Match("="))
-                    EDGEError("Malformed TEXTMAP lump: missing '='\n");
+                    FatalError("Malformed TEXTMAP lump: missing '='\n");
 
                 block_tok = lex.Next(value);
 
                 if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
-                    EDGEError("Malformed TEXTMAP lump: missing value\n");
+                    FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
-                    EDGEError("Malformed TEXTMAP lump: missing ';'\n");
+                    FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
                 epi::EName key_ename(key, true);
 
@@ -2055,7 +2055,7 @@ static void LoadUDMFSideDefs()
         }
     }
 
-    EDGEDebugf("LoadUDMFSideDefs: post-processing linedefs & sidedefs\n");
+    LogDebug("LoadUDMFSideDefs: post-processing linedefs & sidedefs\n");
 
     // post-process linedefs & sidedefs
 
@@ -2074,13 +2074,13 @@ static void LoadUDMFSideDefs()
 
         if (side0 >= nummapsides)
         {
-            EDGEWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", current_map->lump_.c_str(), i);
             side0 = nummapsides - 1;
         }
 
         if (side1 != -1 && side1 >= nummapsides)
         {
-            EDGEWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", current_map->lump_.c_str(), i);
             side1 = nummapsides - 1;
         }
 
@@ -2110,14 +2110,14 @@ static void LoadUDMFSideDefs()
 
     SYS_ASSERT(sd == sides + numsides);
 
-    EDGEDebugf("LoadUDMFSideDefs: finished parsing TEXTMAP\n");
+    LogDebug("LoadUDMFSideDefs: finished parsing TEXTMAP\n");
 }
 
 static void LoadUDMFLineDefs()
 {
     epi::Lexer lex(udmf_lump);
 
-    EDGEDebugf("LoadUDMFLineDefs: parsing TEXTMAP\n");
+    LogDebug("LoadUDMFLineDefs: parsing TEXTMAP\n");
 
     int cur_line = 0;
 
@@ -2130,19 +2130,19 @@ static void LoadUDMFLineDefs()
             break;
 
         if (tok != epi::kTokenIdentifier)
-            EDGEError("Malformed TEXTMAP lump.\n");
+            FatalError("Malformed TEXTMAP lump.\n");
 
         // check namespace
         if (lex.Match("="))
         {
             lex.Next(section);
             if (!lex.Match(";"))
-                EDGEError("Malformed TEXTMAP lump: missing ';'\n");
+                FatalError("Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
         if (!lex.Match("{"))
-            EDGEError("Malformed TEXTMAP lump: missing '{'\n");
+            FatalError("Malformed TEXTMAP lump: missing '{'\n");
 
         if (section == "linedef")
         {
@@ -2159,21 +2159,21 @@ static void LoadUDMFLineDefs()
                 epi::TokenKind block_tok = lex.Next(key);
 
                 if (block_tok == epi::kTokenEOF)
-                    EDGEError("Malformed TEXTMAP lump: unclosed block\n");
+                    FatalError("Malformed TEXTMAP lump: unclosed block\n");
 
                 if (block_tok != epi::kTokenIdentifier)
-                    EDGEError("Malformed TEXTMAP lump: missing key\n");
+                    FatalError("Malformed TEXTMAP lump: missing key\n");
 
                 if (!lex.Match("="))
-                    EDGEError("Malformed TEXTMAP lump: missing '='\n");
+                    FatalError("Malformed TEXTMAP lump: missing '='\n");
 
                 block_tok = lex.Next(value);
 
                 if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
-                    EDGEError("Malformed TEXTMAP lump: missing value\n");
+                    FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
-                    EDGEError("Malformed TEXTMAP lump: missing ';'\n");
+                    FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
                 epi::EName key_ename(key, true);
 
@@ -2291,14 +2291,14 @@ static void LoadUDMFLineDefs()
     }
     SYS_ASSERT(cur_line == numlines);
 
-    EDGEDebugf("LoadUDMFLineDefs: finished parsing TEXTMAP\n");
+    LogDebug("LoadUDMFLineDefs: finished parsing TEXTMAP\n");
 }
 
 static void LoadUDMFThings()
 {
     epi::Lexer lex(udmf_lump);
 
-    EDGEDebugf("LoadUDMFThings: parsing TEXTMAP\n");
+    LogDebug("LoadUDMFThings: parsing TEXTMAP\n");
     for (;;)
     {
         std::string       section;
@@ -2308,19 +2308,19 @@ static void LoadUDMFThings()
             break;
 
         if (tok != epi::kTokenIdentifier)
-            EDGEError("Malformed TEXTMAP lump.\n");
+            FatalError("Malformed TEXTMAP lump.\n");
 
         // check namespace
         if (lex.Match("="))
         {
             lex.Next(section);
             if (!lex.Match(";"))
-                EDGEError("Malformed TEXTMAP lump: missing ';'\n");
+                FatalError("Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
         if (!lex.Match("{"))
-            EDGEError("Malformed TEXTMAP lump: missing '{'\n");
+            FatalError("Malformed TEXTMAP lump: missing '{'\n");
 
         if (section == "thing")
         {
@@ -2343,21 +2343,21 @@ static void LoadUDMFThings()
                 epi::TokenKind block_tok = lex.Next(key);
 
                 if (block_tok == epi::kTokenEOF)
-                    EDGEError("Malformed TEXTMAP lump: unclosed block\n");
+                    FatalError("Malformed TEXTMAP lump: unclosed block\n");
 
                 if (block_tok != epi::kTokenIdentifier)
-                    EDGEError("Malformed TEXTMAP lump: missing key\n");
+                    FatalError("Malformed TEXTMAP lump: missing key\n");
 
                 if (!lex.Match("="))
-                    EDGEError("Malformed TEXTMAP lump: missing '='\n");
+                    FatalError("Malformed TEXTMAP lump: missing '='\n");
 
                 block_tok = lex.Next(value);
 
                 if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
-                    EDGEError("Malformed TEXTMAP lump: missing value\n");
+                    FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
-                    EDGEError("Malformed TEXTMAP lump: missing ';'\n");
+                    FatalError("Malformed TEXTMAP lump: missing ';'\n");
 
                 epi::EName key_ename(key, true);
 
@@ -2533,7 +2533,7 @@ static void LoadUDMFThings()
     // so we can avoid re-checks
     musinfo_tracks[current_map->name_].processed = true;
 
-    EDGEDebugf("LoadUDMFThings: finished parsing TEXTMAP\n");
+    LogDebug("LoadUDMFThings: finished parsing TEXTMAP\n");
 }
 
 static void LoadUDMFCounts()
@@ -2549,7 +2549,7 @@ static void LoadUDMFCounts()
             break;
 
         if (tok != epi::kTokenIdentifier)
-            EDGEError("Malformed TEXTMAP lump.\n");
+            FatalError("Malformed TEXTMAP lump.\n");
 
         // check namespace
         if (lex.Match("="))
@@ -2561,19 +2561,19 @@ static void LoadUDMFCounts()
                 if (section != "doom" && section != "heretic" && section != "edge-classic" &&
                     section != "zdoomtranslated")
                 {
-                    EDGEWarning("UDMF: %s uses unsupported namespace \"%s\"!\nSupported namespaces are \"doom\", "
+                    LogWarning("UDMF: %s uses unsupported namespace \"%s\"!\nSupported namespaces are \"doom\", "
                               "\"heretic\", \"edge-classic\", or \"zdoomtranslated\"!\n",
                               current_map->lump_.c_str(), section.c_str());
                 }
             }
 
             if (!lex.Match(";"))
-                EDGEError("Malformed TEXTMAP lump: missing ';'\n");
+                FatalError("Malformed TEXTMAP lump: missing ';'\n");
             continue;
         }
 
         if (!lex.Match("{"))
-            EDGEError("Malformed TEXTMAP lump: missing '{'\n");
+            FatalError("Malformed TEXTMAP lump: missing '{'\n");
 
         epi::EName section_ename(section, true);
 
@@ -2635,7 +2635,7 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
 
     if (sec_num < 0)
     {
-        EDGEWarning("Level %s has sidedef with bad sector ref (%d)\n", current_map->lump_.c_str(), sec_num);
+        LogWarning("Level %s has sidedef with bad sector ref (%d)\n", current_map->lump_.c_str(), sec_num);
         sec_num = 0;
     }
     sd->sector = &sectors[sec_num];
@@ -2705,12 +2705,12 @@ static void LoadSideDefs(int lump)
     int nummapsides;
 
     if (!W_VerifyLumpName(lump, "SIDEDEFS"))
-        EDGEError("Bad WAD: level %s missing SIDEDEFS.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing SIDEDEFS.\n", current_map->lump_.c_str());
 
     nummapsides = W_LumpLength(lump) / sizeof(raw_sidedef_t);
 
     if (nummapsides == 0)
-        EDGEError("Bad WAD: level %s contains 0 sidedefs.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s contains 0 sidedefs.\n", current_map->lump_.c_str());
 
     sides = new side_t[numsides];
 
@@ -2734,13 +2734,13 @@ static void LoadSideDefs(int lump)
 
         if (side0 >= nummapsides)
         {
-            EDGEWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", current_map->lump_.c_str(), i);
             side0 = nummapsides - 1;
         }
 
         if (side1 != -1 && side1 >= nummapsides)
         {
-            EDGEWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", current_map->lump_.c_str(), i);
             side1 = nummapsides - 1;
         }
 
@@ -2876,7 +2876,7 @@ static void SetupWallTiles(void)
 		numwalltiles += num_0 + num_1;
 	}
 
-	// EDGEPrintf("%dK used for wall tiles.\n", (numwalltiles *
+	// LogPrint("%dK used for wall tiles.\n", (numwalltiles *
 	//    sizeof(wall_tile_t) + 1023) / 1024);
 
 	SYS_ASSERT(numwalltiles > 0);
@@ -2944,7 +2944,7 @@ static void SetupVertGaps(void)
 
     numvertgaps = line_gaps + sect_sight_gaps;
 
-    // EDGEPrintf("%dK used for vert gaps.\n", (numvertgaps *
+    // LogPrint("%dK used for vert gaps.\n", (numvertgaps *
     //    sizeof(vgap_t) + 1023) / 1024);
 
     // zero is now impossible
@@ -3023,7 +3023,7 @@ static void DetectDeepWaterTrick(void)
             if (self_subs[j] != 1)
                 continue;
 #if 0
-			EDGEDebugf("Subsector [%d] @ (%1.0f,%1.0f) sec %d --> %d\n", j,
+			LogDebug("Subsector [%d] @ (%1.0f,%1.0f) sec %d --> %d\n", j,
 				(sub->bbox[BOXLEFT] + sub->bbox[BOXRIGHT]) / 2.0,
 				(sub->bbox[BOXBOTTOM] + sub->bbox[BOXTOP]) / 2.0,
 				sub->sector - sectors, self_subs[j]);
@@ -3036,7 +3036,7 @@ static void DetectDeepWaterTrick(void)
 
                 int k = seg->back_sub - subsectors;
 #if 0
-				EDGEDebugf("  Seg [%d] back_sub %d (back_sect %d)\n", seg - segs, k,
+				LogDebug("  Seg [%d] back_sub %d (back_sect %d)\n", seg - segs, k,
 					seg->back_sub->sector - sectors);
 #endif
                 if (self_subs[k] & 2)
@@ -3050,7 +3050,7 @@ static void DetectDeepWaterTrick(void)
             {
                 sub->deep_ref = Xseg->back_sub->deep_ref ? Xseg->back_sub->deep_ref : Xseg->back_sub->sector;
 #if 0
-				EDGEDebugf("  Updating (from seg %d) --> SEC %d\n", Xseg - segs,
+				LogDebug("  Updating (from seg %d) --> SEC %d\n", Xseg - segs,
 					sub->deep_ref - sectors);
 #endif
                 self_subs[j] = 3;
@@ -3152,7 +3152,7 @@ void GroupLines(void)
             }
         }
         if (line_p - sector->lines != sector->linecount)
-            EDGEError("GroupLines: miscounted");
+            FatalError("GroupLines: miscounted");
 
         // Allow vertex slope if a triangular sector or a rectangular
         // sector in which two adjacent verts have an identical z-height
@@ -3435,7 +3435,7 @@ static void CreateVertexSeclists(void)
 
     Z_Clear(v_seclists, vertex_seclist_t, num_triples);
 
-    EDGEDebugf("Created %d seclists from %d vertices (%1.1f%%)\n", num_triples, numvertexes,
+    LogDebug("Created %d seclists from %d vertices (%1.1f%%)\n", num_triples, numvertexes,
                  num_triples * 100 / (float)numvertexes);
 
     // multiple passes for each linedef:
@@ -3520,7 +3520,7 @@ void ShutdownLevel(void)
 
 #ifdef DEVELOPERS
     if (!level_active)
-        EDGEError("ShutdownLevel: no level to shut down!");
+        FatalError("ShutdownLevel: no level to shut down!");
 #endif
 
     level_active = false;
@@ -3602,7 +3602,7 @@ void P_SetupLevel(void)
     // get lump for map header e.g. MAP01
     int lumpnum = W_CheckNumForName_MAP(current_map->lump_.c_str());
     if (lumpnum < 0)
-        EDGEError("No such level: %s\n", current_map->lump_.c_str());
+        FatalError("No such level: %s\n", current_map->lump_.c_str());
 
     // get lump for XGL3 nodes from an XWA file
     int xgl_lump = W_CheckNumForName_XGL(current_map->lump_.c_str());
@@ -3614,7 +3614,7 @@ void P_SetupLevel(void)
 
     // shouldn't happen (as during startup we checked for XWA files)
     if (xgl_lump < 0)
-        EDGEError("Internal error: missing XGL nodes.\n");
+        FatalError("Internal error: missing XGL nodes.\n");
 
     // -CW- 2017/01/29: check for UDMF map lump
     if (W_VerifyLumpName(lumpnum + 1, "TEXTMAP"))
@@ -3627,7 +3627,7 @@ void P_SetupLevel(void)
         udmf_lump.resize(raw_length);
         memcpy(udmf_lump.data(), raw_udmf, raw_length);
         if (udmf_lump.empty())
-            EDGEError("Internal error: can't load UDMF lump.\n");
+            FatalError("Internal error: can't load UDMF lump.\n");
         delete[] raw_udmf;
     }
     else
@@ -3662,7 +3662,7 @@ void P_SetupLevel(void)
 
         if (W_VerifyLump(lumpnum + ML_BEHAVIOR) && W_VerifyLumpName(lumpnum + ML_BEHAVIOR, "BEHAVIOR"))
         {
-            EDGEDebugf("Detected Hexen level.\n");
+            LogDebug("Detected Hexen level.\n");
             hexen_level = true;
         }
 
@@ -3733,7 +3733,7 @@ void P_SetupLevel(void)
 
         // OK, CRC values have now been computed
 #ifdef DEVELOPERS
-    EDGEDebugf("MAP CRCS: S=%08x L=%08x T=%08x\n", mapsector_CRC.crc, mapline_CRC.crc, mapthing_CRC.crc);
+    LogDebug("MAP CRCS: S=%08x L=%08x T=%08x\n", mapsector_CRC.crc, mapline_CRC.crc, mapthing_CRC.crc);
 #endif
 
     CreateVertexSeclists();
@@ -3782,7 +3782,7 @@ LineType *P_LookupLineType(int num)
     if (DDF_IsBoomLineType(num))
         return DDF_BoomGetGenLine(num);
 
-    EDGEWarning("P_LookupLineType(): Unknown linedef type %d\n", num);
+    LogWarning("P_LookupLineType(): Unknown linedef type %d\n", num);
 
     return linetypes.Lookup(0); // template line
 }
@@ -3801,7 +3801,7 @@ SectorType *P_LookupSectorType(int num)
     if (DDF_IsBoomSectorType(num))
         return DDF_BoomGetGenSector(num);
 
-    EDGEWarning("P_LookupSectorType(): Unknown sector type %d\n", num);
+    LogWarning("P_LookupSectorType(): Unknown sector type %d\n", num);
 
     return sectortypes.Lookup(0); // template sector
 }

@@ -271,7 +271,7 @@ static image_data_c *ReadTextureAsEpiBlock(image_c *rim)
             int offset = AlignedLittleEndianS32(realpatch->columnofs[x - x1]);
 
             if (offset < 0 || offset >= realsize)
-                EDGEError("Bad image offset 0x%08x in image [%s]\n", offset, rim->name.c_str());
+                FatalError("Bad image offset 0x%08x in image [%s]\n", offset, rim->name.c_str());
 
             const column_t *patchcol = (const column_t *)((const uint8_t *)realpatch + offset);
 
@@ -323,7 +323,7 @@ static image_data_c *ReadPatchAsEpiBlock(image_c *rim)
         delete f;
 
         if (!img)
-            EDGEError("Error loading image in lump: %s\n", packfile_name ? packfile_name : W_GetLumpName(lump));
+            FatalError("Error loading image in lump: %s\n", packfile_name ? packfile_name : W_GetLumpName(lump));
 
         return img;
     }
@@ -358,7 +358,7 @@ static image_data_c *ReadPatchAsEpiBlock(image_c *rim)
             realsize  = f->GetLength();
         }
         else
-            EDGEError("ReadPatchAsEpiBlock: Failed to load %s!\n", packfile_name);
+            FatalError("ReadPatchAsEpiBlock: Failed to load %s!\n", packfile_name);
         delete f;
     }
     else
@@ -382,7 +382,7 @@ static image_data_c *ReadPatchAsEpiBlock(image_c *rim)
         int offset = AlignedLittleEndianS32(realpatch->columnofs[x]);
 
         if (offset < 0 || offset >= realsize)
-            EDGEError("Bad image offset 0x%08x in image [%s]\n", offset, rim->name.c_str());
+            FatalError("Bad image offset 0x%08x in image [%s]\n", offset, rim->name.c_str());
 
         const column_t *patchcol = (const column_t *)((const uint8_t *)realpatch + offset);
 
@@ -490,7 +490,7 @@ static image_data_c *CreateUserFileImage(image_c *rim, ImageDefinition *def)
     epi::File *f = OpenUserFileOrLump(def);
 
     if (!f)
-        EDGEError("Missing image file: %s\n", def->info_.c_str());
+        FatalError("Missing image file: %s\n", def->info_.c_str());
 
     image_data_c *img = Image_Load(f);
 
@@ -498,7 +498,7 @@ static image_data_c *CreateUserFileImage(image_c *rim, ImageDefinition *def)
     delete f;
 
     if (!img)
-        EDGEError("Error occurred loading image file: %s\n", def->info_.c_str());
+        FatalError("Error occurred loading image file: %s\n", def->info_.c_str());
 
     rim->opacity = R_DetermineOpacity(img, &rim->is_empty);
 
@@ -548,7 +548,7 @@ static image_data_c *ReadUserAsEpiBlock(image_c *rim)
         return CreateUserFileImage(rim, def);
 
     default:
-        EDGEError("ReadUserAsEpiBlock: Coding error, unknown type %d\n", def->type_);
+        FatalError("ReadUserAsEpiBlock: Coding error, unknown type %d\n", def->type_);
     }
 
     return nullptr; /* NOT REACHED */
@@ -587,7 +587,7 @@ image_data_c *ReadAsEpiBlock(image_c *rim)
         return ReadUserAsEpiBlock(rim);
 
     default:
-        EDGEError("ReadAsBlock: unknown source_type %d !\n", rim->source_type);
+        FatalError("ReadAsBlock: unknown source_type %d !\n", rim->source_type);
         return nullptr;
     }
 }

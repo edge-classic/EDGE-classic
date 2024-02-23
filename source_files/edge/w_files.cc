@@ -74,7 +74,7 @@ int W_GetNumFiles()
 
 size_t W_AddFilename(std::string file, filekind_e kind)
 {
-    EDGEDebugf("Added filename: %s\n", file.c_str());
+    LogDebug("Added filename: %s\n", file.c_str());
 
     size_t index = data_files.size();
 
@@ -109,7 +109,7 @@ static void DEH_ConvertFile(std::string &filename)
     epi::File *F = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
     if (F == nullptr)
     {
-        EDGEPrintf("FAILED to open file: %s\n", filename.c_str());
+        LogPrint("FAILED to open file: %s\n", filename.c_str());
         return;
     }
 
@@ -118,7 +118,7 @@ static void DEH_ConvertFile(std::string &filename)
 
     if (data == nullptr)
     {
-        EDGEPrintf("FAILED to read file: %s\n", filename.c_str());
+        LogPrint("FAILED to read file: %s\n", filename.c_str());
         delete F;
         return;
     }
@@ -137,19 +137,19 @@ static void W_ExternalDDF(data_file_c *df)
     std::string bare_name = epi::GetFilename(df->name);
 
     if (type == kDDFTypeUNKNOWN)
-        EDGEError("Unknown DDF filename: %s\n", bare_name.c_str());
+        FatalError("Unknown DDF filename: %s\n", bare_name.c_str());
 
-    EDGEPrintf("Reading DDF file: %s\n", df->name.c_str());
+    LogPrint("Reading DDF file: %s\n", df->name.c_str());
 
     epi::File *F = epi::FileOpen(df->name, epi::kFileAccessRead);
     if (F == nullptr)
-        EDGEError("Couldn't open file: %s\n", df->name.c_str());
+        FatalError("Couldn't open file: %s\n", df->name.c_str());
 
     // WISH: load directly into a std::string
 
     char *raw_data = (char *)F->LoadIntoMemory();
     if (raw_data == nullptr)
-        EDGEError("Couldn't read file: %s\n", df->name.c_str());
+        FatalError("Couldn't read file: %s\n", df->name.c_str());
 
     std::string data(raw_data);
     delete[] raw_data;
@@ -159,17 +159,17 @@ static void W_ExternalDDF(data_file_c *df)
 
 static void W_ExternalRTS(data_file_c *df)
 {
-    EDGEPrintf("Reading RTS script: %s\n", df->name.c_str());
+    LogPrint("Reading RTS script: %s\n", df->name.c_str());
 
     epi::File *F = epi::FileOpen(df->name, epi::kFileAccessRead);
     if (F == nullptr)
-        EDGEError("Couldn't open file: %s\n", df->name.c_str());
+        FatalError("Couldn't open file: %s\n", df->name.c_str());
 
     // WISH: load directly into a std::string
 
     char *raw_data = (char *)F->LoadIntoMemory();
     if (raw_data == nullptr)
-        EDGEError("Couldn't read file: %s\n", df->name.c_str());
+        FatalError("Couldn't read file: %s\n", df->name.c_str());
 
     std::string data(raw_data);
     delete[] raw_data;
@@ -185,14 +185,14 @@ void ProcessFile(data_file_c *df)
     // open a WAD/PK3 file and add contents to directory
     std::string filename = df->name;
 
-    EDGEPrintf("  Processing: %s\n", filename.c_str());
+    LogPrint("  Processing: %s\n", filename.c_str());
 
     if (df->kind <= FLKIND_XWad)
     {
         epi::File *file = epi::FileOpen(filename, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (file == nullptr)
         {
-            EDGEError("Couldn't open file: %s\n", filename.c_str());
+            FatalError("Couldn't open file: %s\n", filename.c_str());
             return;
         }
 
@@ -223,7 +223,7 @@ void ProcessFile(data_file_c *df)
     else if (df->kind == FLKIND_Deh)
     {
         // handle stand-alone DeHackEd patches
-        EDGEPrintf("Converting DEH file: %s\n", df->name.c_str());
+        LogPrint("Converting DEH file: %s\n", df->name.c_str());
 
         DEH_ConvertFile(df->name);
     }
@@ -406,13 +406,13 @@ static const char *FileKindString(filekind_e kind)
 
 void W_ShowFiles()
 {
-    EDGEPrintf("File list:\n");
+    LogPrint("File list:\n");
 
     for (int i = 0; i < (int)data_files.size(); i++)
     {
         data_file_c *df = data_files[i];
 
-        EDGEPrintf(" %2d: %-4s \"%s\"\n", i + 1, FileKindString(df->kind), df->name.c_str());
+        LogPrint(" %2d: %-4s \"%s\"\n", i + 1, FileKindString(df->kind), df->name.c_str());
     }
 }
 

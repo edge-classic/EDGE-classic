@@ -155,7 +155,7 @@ static void StyleParseField(const char *field, const char *contents, int index,
                             bool is_last)
 {
 #if (DEBUG_DDF)
-    EDGEDebugf("STYLE_PARSE: %s = %s;\n", field, contents);
+    LogDebug("STYLE_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_MainParseField(style_commands, field, contents,
@@ -197,7 +197,7 @@ static void StyleFinishEntry(void)
 
 static void StyleClearAll(void)
 {
-    EDGEWarning("Ignoring #CLEARALL in styles.ddf\n");
+    LogWarning("Ignoring #CLEARALL in styles.ddf\n");
 }
 
 void DDF_ReadStyles(const std::string &data)
@@ -227,14 +227,14 @@ void DDF_StyleInit(void)
 
 void DDF_StyleCleanUp(void)
 {
-    if (styledefs.empty()) EDGEError("There are no styles defined in DDF !\n");
+    if (styledefs.empty()) FatalError("There are no styles defined in DDF !\n");
 
     default_style = styledefs.Lookup("DEFAULT");
 
     if (!default_style)
-        EDGEError("Styles.ddf is missing the [DEFAULT] style.\n");
+        FatalError("Styles.ddf is missing the [DEFAULT] style.\n");
     else if (!default_style->text_[0].font_)
-        EDGEWarning("The [DEFAULT] style is missing TEXT.FONT\n");
+        LogWarning("The [DEFAULT] style is missing TEXT.FONT\n");
 
     styledefs.shrink_to_fit();
 }

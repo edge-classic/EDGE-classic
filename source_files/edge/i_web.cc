@@ -38,23 +38,23 @@ static int web_deferred_screen_width  = -1;
 static int web_deferred_screen_height = -1;
 static int web_deferred_menu          = -1;
 
-static void EDGEWebSyncScreenSize(int width, int height)
+static void WebSyncScreenSize(int width, int height)
 {
     SDL_SetWindowSize(program_window, width, height);
     SCREENWIDTH  = (int)width;
     SCREENHEIGHT = (int)height;
     SCREENBITS   = 24;
     DISPLAYMODE  = 0;
-    EDGEDeterminePixelAspect();
+    DeterminePixelAspect();
 
     R_SoftInitResolution();
 }
 
-void EDGEWebTick(void)
+void WebTick(void)
 {
     if (web_deferred_screen_width != -1)
     {
-        EDGEWebSyncScreenSize(web_deferred_screen_width,
+        WebSyncScreenSize(web_deferred_screen_width,
                             web_deferred_screen_height);
         web_deferred_screen_width = web_deferred_screen_height = -1;
     }
@@ -69,14 +69,14 @@ void EDGEWebTick(void)
 
     // We always do this once here, although the engine may
     // makes in own calls to keep on top of the event processing
-    EDGEControlGetEvents();
+    ControlGetEvents();
 
     if (app_state & APP_STATE_ACTIVE) E_Tick();
 }
 
 extern "C"
 {
-    static EM_BOOL EDGEWebHandlePointerLockChange(
+    static EM_BOOL WebHandlePointerLockChange(
         int eventType, const EmscriptenPointerlockChangeEvent *changeEvent,
         void *userData)
     {
@@ -86,7 +86,7 @@ extern "C"
         return 0;
     }
 
-    static EM_BOOL EDGEWebWindowResizedCallback(int         eventType,
+    static EM_BOOL WebWindowResizedCallback(int         eventType,
                                               const void *reserved,
                                               void       *userData)
     {
@@ -95,7 +95,7 @@ extern "C"
 
         printf("window fullscreen resized %i %i\n", (int)width, (int)height);
 
-        EDGEWebSyncScreenSize(width, height);
+        WebSyncScreenSize(width, height);
 
         EM_ASM_({
             if (Module.onFullscreen) { Module.onFullscreen(); }
@@ -104,25 +104,25 @@ extern "C"
         return true;
     }
 
-    void EMSCRIPTEN_KEEPALIVE EDGEWebSetFullscreen(int fullscreen)
+    void EMSCRIPTEN_KEEPALIVE WebSetFullscreen(int fullscreen)
     {
         if (fullscreen)
         {
             EmscriptenFullscreenStrategy strategy;
             strategy.scaleMode     = EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_STDDEF;
             strategy.filteringMode = EMSCRIPTEN_FULLSCREEN_FILTERING_DEFAULT;
-            strategy.canvasResizedCallback = EDGEWebWindowResizedCallback;
+            strategy.canvasResizedCallback = WebWindowResizedCallback;
             emscripten_enter_soft_fullscreen("canvas", &strategy);
         }
         else { emscripten_exit_soft_fullscreen(); }
     }
 
-    void EMSCRIPTEN_KEEPALIVE EDGEWebOpenGameMenu(int open)
+    void EMSCRIPTEN_KEEPALIVE WebOpenGameMenu(int open)
     {
         web_deferred_menu = open;
     }
 
-    void EMSCRIPTEN_KEEPALIVE EDGEWebSyncScreenSize()
+    void EMSCRIPTEN_KEEPALIVE WebSyncScreenSize()
     {
         double width, height;
         emscripten_get_element_css_size("canvas", &width, &height);
@@ -131,19 +131,19 @@ extern "C"
         web_deferred_screen_height = (int)height;
     }
 
-    void EMSCRIPTEN_KEEPALIVE EDGEWebMain(int argc, const char **argv)
+    void EMSCRIPTEN_KEEPALIVE WebMain(int argc, const char **argv)
     {
         // Note: We're using the max framerate which feels smoother in testing
         // Though raises a console error in debug warning about not using
         // requestAnimationFrame
-        emscripten_set_main_loop(EDGEWebTick, 70, 0);
+        emscripten_set_main_loop(WebTick, 70, 0);
 
         emscripten_set_pointerlockchange_callback(
             EMSCRIPTEN_EVENT_TARGET_DOCUMENT, nullptr, 0,
-            EDGEWebHandlePointerLockChange);
+            WebHandlePointerLockChange);
 
         if (SDL_Init(0) < 0)
-            EDGEError("Couldn't init SDL!!\n%s\n", SDL_GetError());
+            FatalError("Couldn't init SDL!!\n%s\n", SDL_GetError());
 
         executable_path = SDL_GetBasePath();
 
@@ -186,7 +186,7 @@ extern "C"
                             console.error(`Error mounting home dir $ { err }`);
                             return;
                         }
-                        Module._EDGEWebMain($0, $1);
+                        Module._WebMain($0, $1);
                     });
             },
             argc, argv);

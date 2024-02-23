@@ -88,7 +88,7 @@ static void FontParseField(const char *field, const char *contents, int index,
                            bool is_last)
 {
 #if (DEBUG_DDF)
-    EDGEDebugf("FONT_PARSE: %s = %s;\n", field, contents);
+    LogDebug("FONT_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_MainParseField(font_commands, field, contents,
@@ -132,7 +132,7 @@ static void FontFinishEntry(void)
 
 static void FontClearAll(void)
 {
-    EDGEWarning("Ignoring #CLEARALL in fonts.ddf\n");
+    LogWarning("Ignoring #CLEARALL in fonts.ddf\n");
 }
 
 void DDF_ReadFonts(const std::string &data)
@@ -162,7 +162,7 @@ void DDF_FontInit(void)
 
 void DDF_FontCleanUp(void)
 {
-    if (fontdefs.empty()) EDGEError("There are no fonts defined in DDF !\n");
+    if (fontdefs.empty()) FatalError("There are no fonts defined in DDF !\n");
 
     fontdefs.shrink_to_fit();  // <-- Reduce to allocated size
 }

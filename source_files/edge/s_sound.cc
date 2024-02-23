@@ -223,7 +223,7 @@ static int FindChannelToKill(int kill_cat, int real_cat, int new_score)
     int kill_idx   = -1;
     int kill_score = (1 << 30);
 
-    // EDGEPrintf("FindChannelToKill: cat:%d new_score:%d\n", kill_cat, new_score);
+    // LogPrint("FindChannelToKill: cat:%d new_score:%d\n", kill_cat, new_score);
     for (int j = 0; j < num_chan; j++)
     {
         mix_channel_c *chan = mix_chan[j];
@@ -235,7 +235,7 @@ static int FindChannelToKill(int kill_cat, int real_cat, int new_score)
             continue;
 
         int score = ChannelScore(chan->def, chan->category, chan->pos, chan->boss);
-        // EDGEPrintf("> [%d] '%s' = %d\n", j, chan->def->name.c_str(), score);
+        // LogPrint("> [%d] '%s' = %d\n", j, chan->def->name.c_str(), score);
         //  find one with LOWEST score
         if (score < kill_score)
         {
@@ -243,7 +243,7 @@ static int FindChannelToKill(int kill_cat, int real_cat, int new_score)
             kill_score = score;
         }
     }
-    // EDGEPrintf("kill_idx = %d\n", kill_idx);
+    // LogPrint("kill_idx = %d\n", kill_idx);
     SYS_ASSERT(kill_idx >= 0);
 
     if (kill_cat != real_cat)
@@ -266,7 +266,7 @@ void S_Init(void)
 
     int want_chan = channel_counts[var_mix_channels];
 
-    EDGEPrintf("EDGEStartupSound: Init %d mixing channels\n", want_chan);
+    LogPrint("StartupSound: Init %d mixing channels\n", want_chan);
 
     // setup channels
     S_InitChannels(want_chan);
@@ -314,16 +314,16 @@ SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
 
 static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, position_c *pos, int flags, sound_data_c *buf)
 {
-    // EDGEPrintf("S_PlaySound on idx #%d DEF:%p\n", idx, def);
+    // LogPrint("S_PlaySound on idx #%d DEF:%p\n", idx, def);
 
-    // EDGEPrintf("Looked up def: %p, caching...\n", def);
+    // LogPrint("Looked up def: %p, caching...\n", def);
 
     mix_channel_c *chan = mix_chan[idx];
 
     chan->state = CHAN_Playing;
     chan->data  = buf;
 
-    // EDGEPrintf("chan=%p data=%p\n", chan, chan->data);
+    // LogPrint("chan=%p data=%p\n", chan, chan->data);
 
     chan->def      = def;
     chan->pos      = pos;
@@ -341,7 +341,7 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, posit
 
     chan->ComputeDelta();
 
-    // EDGEPrintf("FINISHED: delta=0x%lx\n", chan->delta);
+    // LogPrint("FINISHED: delta=0x%lx\n", chan->delta);
 }
 
 static void DoStartFX(SoundEffectDefinition *def, int category, position_c *pos, int flags, sound_data_c *buf)
@@ -352,12 +352,12 @@ static void DoStartFX(SoundEffectDefinition *def, int category, position_c *pos,
 
     if (k >= 0)
     {
-        // EDGEPrintf("@ already playing on #%d\n", k);
+        // LogPrint("@ already playing on #%d\n", k);
         mix_channel_c *chan = mix_chan[k];
 
         if (def->looping_ && def == chan->def)
         {
-            // EDGEPrintf("@@ RE-LOOPING\n");
+            // LogPrint("@@ RE-LOOPING\n");
             chan->loop = true;
             return;
         }
@@ -366,7 +366,7 @@ static void DoStartFX(SoundEffectDefinition *def, int category, position_c *pos,
             if (chan->def->precious_)
                 return;
 
-            // EDGEPrintf("@@ Killing sound for SINGULAR\n");
+            // LogPrint("@@ Killing sound for SINGULAR\n");
             S_KillChannel(k);
             S_PlaySound(k, def, category, pos, flags, buf);
             return;
@@ -381,7 +381,7 @@ static void DoStartFX(SoundEffectDefinition *def, int category, position_c *pos,
             k = -1;
     }
 
-    // EDGEPrintf("@ free channel = #%d\n", k);
+    // LogPrint("@ free channel = #%d\n", k);
     if (k < 0)
     {
         // all channels are in use.
@@ -396,18 +396,18 @@ static void DoStartFX(SoundEffectDefinition *def, int category, position_c *pos,
         {
             // we haven't reached our quota yet, hence kill a hog.
             kill_cat = FindBiggestHog(category);
-            // EDGEPrintf("@ biggest hog: %d\n", kill_cat);
+            // LogPrint("@ biggest hog: %d\n", kill_cat);
         }
 
         SYS_ASSERT(cat_counts[kill_cat] >= cat_limits[kill_cat]);
 
         k = FindChannelToKill(kill_cat, category, new_score);
 
-        // if (k<0) EDGEPrintf("- new score too low\n");
+        // if (k<0) LogPrint("- new score too low\n");
         if (k < 0)
             return;
 
-        // EDGEPrintf("- killing channel %d (kill_cat:%d)  my_cat:%d\n", k, kill_cat, category);
+        // LogPrint("- killing channel %d (kill_cat:%d)  my_cat:%d\n", k, kill_cat, category);
         S_KillChannel(k);
     }
 
@@ -425,7 +425,7 @@ void S_StartFX(SoundEffect *sfx, int category, position_c *pos, int flags)
     SYS_ASSERT(0 <= category && category < SNCAT_NUMTYPES);
 
     if (category >= SNCAT_Opponent && !pos)
-        EDGEError("S_StartFX: position missing for category: %d\n", category);
+        FatalError("S_StartFX: position missing for category: %d\n", category);
 
     SoundEffectDefinition *def = LookupEffectDef(sfx);
     SYS_ASSERT(def);
@@ -445,7 +445,7 @@ void S_StartFX(SoundEffect *sfx, int category, position_c *pos, int flags)
         flags |= (def->precious_ ? FX_Precious : 0);
     }
 
-    // EDGEPrintf("StartFX: '%s' cat:%d flags:0x%04x\n", def->name.c_str(), category, flags);
+    // LogPrint("StartFX: '%s' cat:%d flags:0x%04x\n", def->name.c_str(), category, flags);
 
     while (cat_limits[category] == 0)
         category++;
@@ -467,11 +467,11 @@ void S_StartFX(SoundEffect *sfx, int category, position_c *pos, int flags)
             buf->Mix_Reverb(dynamic_reverb, room_area, outdoor_reverb, 0, 0, 0);
     }
 
-    EDGELockAudio();
+    LockAudio();
     {
         DoStartFX(def, category, pos, flags, buf);
     }
-    EDGEUnlockAudio();
+    UnlockAudio();
 }
 
 void S_StopFX(position_c *pos)
@@ -479,7 +479,7 @@ void S_StopFX(position_c *pos)
     if (no_sound)
         return;
 
-    EDGELockAudio();
+    LockAudio();
     {
         for (int i = 0; i < num_chan; i++)
         {
@@ -487,12 +487,12 @@ void S_StopFX(position_c *pos)
 
             if (chan->state == CHAN_Playing && chan->pos == pos)
             {
-                // EDGEPrintf("S_StopFX: killing #%d\n", i);
+                // LogPrint("S_StopFX: killing #%d\n", i);
                 S_KillChannel(i);
             }
         }
     }
-    EDGEUnlockAudio();
+    UnlockAudio();
 }
 
 void S_StopLevelFX(void)
@@ -500,7 +500,7 @@ void S_StopLevelFX(void)
     if (no_sound)
         return;
 
-    EDGELockAudio();
+    LockAudio();
     {
         for (int i = 0; i < num_chan; i++)
         {
@@ -512,7 +512,7 @@ void S_StopLevelFX(void)
             }
         }
     }
-    EDGEUnlockAudio();
+    UnlockAudio();
 }
 
 void S_StopAllFX(void)
@@ -520,7 +520,7 @@ void S_StopAllFX(void)
     if (no_sound)
         return;
 
-    EDGELockAudio();
+    LockAudio();
     {
         for (int i = 0; i < num_chan; i++)
         {
@@ -532,7 +532,7 @@ void S_StopAllFX(void)
             }
         }
     }
-    EDGEUnlockAudio();
+    UnlockAudio();
 }
 
 void S_SoundTicker(void)
@@ -540,7 +540,7 @@ void S_SoundTicker(void)
     if (no_sound)
         return;
 
-    EDGELockAudio();
+    LockAudio();
     {
         if (game_state == GS_LEVEL)
         {
@@ -556,7 +556,7 @@ void S_SoundTicker(void)
             S_UpdateSounds(nullptr, 0);
         }
     }
-    EDGEUnlockAudio();
+    UnlockAudio();
 }
 
 void S_ChangeChannelNum(void)
@@ -564,7 +564,7 @@ void S_ChangeChannelNum(void)
     if (no_sound)
         return;
 
-    EDGELockAudio();
+    LockAudio();
     {
         int want_chan = channel_counts[var_mix_channels];
 
@@ -572,7 +572,7 @@ void S_ChangeChannelNum(void)
 
         SetupCategoryLimits();
     }
-    EDGEUnlockAudio();
+    UnlockAudio();
 }
 
 void S_PrecacheSounds(void)

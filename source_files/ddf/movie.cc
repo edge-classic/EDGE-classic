@@ -78,7 +78,7 @@ static void MovieParseField(const char *field, const char *contents, int index,
                             bool is_last)
 {
 #if (DEBUG_DDF)
-    EDGEDebugf("MOVIE_PARSE: %s = %s;\n", field, contents);
+    LogDebug("MOVIE_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_MainParseField(movie_commands, field, contents,
@@ -97,7 +97,7 @@ static void MovieFinishEntry(void)
 
 static void MovieClearAll(void)
 {
-    EDGEWarning("Ignoring #CLEARALL in movies.ddf\n");
+    LogWarning("Ignoring #CLEARALL in movies.ddf\n");
 }
 
 void DDF_ReadMovies(const std::string &data)

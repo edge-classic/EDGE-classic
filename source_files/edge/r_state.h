@@ -132,7 +132,7 @@ class gl_state_c
             enableScissorTest_ = enabled;
             break;
         default:
-            EDGEError("Unknown GL State %i", cap);
+            FatalError("Unknown GL State %i", cap);
         }
 
         if (enabled)

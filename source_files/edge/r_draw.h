@@ -38,7 +38,7 @@ void RGL_ReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer);
 // This routine should inform the lower level system(s) that the
 // screen has changed size/depth.  New size/depth is given.  Must be
 // called before any rendering has occurred (e.g. just before
-// EDGEStartFrame).
+// StartFrame).
 void RGL_NewScreenSize(int width, int height, int bits);
 
 #endif /* __R_DRAW_H__ */

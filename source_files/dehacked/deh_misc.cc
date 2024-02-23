@@ -126,7 +126,7 @@ void miscellaneous::AlterMisc(int new_val)
     {
         if (new_val < 1)
         {
-            EDGEDebugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
+            LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
                      new_val, misc_name);
             return;
         }
@@ -139,7 +139,7 @@ void miscellaneous::AlterMisc(int new_val)
     {
         if (new_val < 1)
         {
-            EDGEDebugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
+            LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
                      new_val, misc_name);
             return;
         }
@@ -154,7 +154,7 @@ void miscellaneous::AlterMisc(int new_val)
     {
         if (new_val != 202 && new_val != 221)
         {
-            EDGEDebugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
+            LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
                      new_val, misc_name);
             return;
         }
@@ -180,19 +180,19 @@ void miscellaneous::AlterMisc(int new_val)
 
     if (!info->deh_name)
     {
-        EDGEDebugf("Dehacked: Warning - UNKNOWN MISC FIELD: %s\n", misc_name);
+        LogDebug("Dehacked: Warning - UNKNOWN MISC FIELD: %s\n", misc_name);
         return;
     }
 
     if (!info->var)
     {
-        EDGEDebugf("Dehacked: Warning - Ignoring MISC field: %s\n", misc_name);
+        LogDebug("Dehacked: Warning - Ignoring MISC field: %s\n", misc_name);
         return;
     }
 
     if (new_val < info->minimum)  // mainly here to disallow negative values
     {
-        EDGEDebugf("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
+        LogDebug("Dehacked: Warning - Bad value '%d' for MISC field: %s\n",
                  new_val, misc_name);
         new_val = info->minimum;
     }

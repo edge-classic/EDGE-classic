@@ -43,7 +43,7 @@ std::wstring UTF8ToWString(std::string_view instring)
         size_t res =
             utf8proc_iterate(utf8ptr + utf8pos, utf8len - utf8pos, &u32c);
         if (res < 0)
-            EDGEError("Failed to convert %s to a wide string!\n",
+            FatalError("Failed to convert %s to a wide string!\n",
                     std::string(instring).c_str());
         else
             utf8pos += res;
@@ -81,10 +81,10 @@ std::string WStringToUTF8(std::wstring_view instring)
             {
                 // print what was safely converted if present
                 if (!outstring.empty())
-                    EDGEError("Failure to convert %s from a wide string!\n",
+                    FatalError("Failure to convert %s from a wide string!\n",
                             outstring.c_str());
                 else
-                    EDGEError("Wide string to UTF-8 conversion failure!\n");
+                    FatalError("Wide string to UTF-8 conversion failure!\n");
             }
         }
         else
@@ -97,10 +97,10 @@ std::string WStringToUTF8(std::wstring_view instring)
         {
             // print what was safely converted if present
             if (!outstring.empty())
-                EDGEError("Failure to convert %s from a wide string!\n",
+                FatalError("Failure to convert %s from a wide string!\n",
                         outstring.c_str());
             else
-                EDGEError("Wide string to UTF-8 conversion failure!\n");
+                FatalError("Wide string to UTF-8 conversion failure!\n");
         }
         if (u8c[0]) outstring.push_back(u8c[0]);
         if (u8c[1]) outstring.push_back(u8c[1]);
@@ -219,7 +219,7 @@ char *CStringNew(int length)
 
     char *s = (char *)calloc(length + 1, 1);
 
-    if (!s) EDGEError("Out of memory (%d bytes for string)\n", length);
+    if (!s) FatalError("Out of memory (%d bytes for string)\n", length);
 
     return s;
 }
@@ -232,7 +232,7 @@ char *CStringDuplicate(const char *original, int limit)
     {
         char *s = strdup(original);
 
-        if (!s) EDGEError("Out of memory (copy string)\n");
+        if (!s) FatalError("Out of memory (copy string)\n");
 
         return s;
     }

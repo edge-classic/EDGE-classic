@@ -55,7 +55,7 @@ extern std::vector<std::string> available_opl_banks;
 
 bool S_StartupOPL(void)
 {
-    EDGEPrintf("Initializing OPL player...\n");
+    LogPrint("Initializing OPL player...\n");
 
     if (edge_opl)
         delete edge_opl;
@@ -80,7 +80,7 @@ bool S_StartupOPL(void)
 
     if (!cvar_good)
     {
-        EDGEWarning("Cannot find previously used GENMIDI %s, falling back to default!\n", s_genmidi.c_str());
+        LogWarning("Cannot find previously used GENMIDI %s, falling back to default!\n", s_genmidi.c_str());
         s_genmidi = "GENMIDI";
     }
 
@@ -93,7 +93,7 @@ bool S_StartupOPL(void)
         data = W_OpenPackOrLumpInMemory("GENMIDI", {".op2"}, &length);
         if (!data)
         {
-            EDGEDebugf("no GENMIDI lump !\n");
+            LogDebug("no GENMIDI lump !\n");
             return false;
         }
     }
@@ -102,7 +102,7 @@ bool S_StartupOPL(void)
         F = epi::FileOpen(s_genmidi.s_, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (!F)
         {
-            EDGEWarning("S_StartupOPL: Error opening GENMIDI!\n");
+            LogWarning("S_StartupOPL: Error opening GENMIDI!\n");
             return false;
         }
         length = F->GetLength();
@@ -111,7 +111,7 @@ bool S_StartupOPL(void)
 
     if (!data)
     {
-        EDGEWarning("S_StartupOPL: Error loading instruments!\n");
+        LogWarning("S_StartupOPL: Error loading instruments!\n");
         if (F)
             delete F;
         return false;
@@ -119,7 +119,7 @@ bool S_StartupOPL(void)
 
     if (!edge_opl->loadPatches((const uint8_t *)data, (size_t)length))
     {
-        EDGEWarning("S_StartupOPL: Error loading instruments!\n");
+        LogWarning("S_StartupOPL: Error loading instruments!\n");
         delete F;
         delete[] data;
         return false;
@@ -440,7 +440,7 @@ AbstractMusicPlayer *S_PlayOPL(uint8_t *data, int length, bool loop, int type)
 
     if (!player)
     {
-        EDGEDebugf("OPL player: error initializing!\n");
+        LogDebug("OPL player: error initializing!\n");
         delete[] data;
         return nullptr;
     }
@@ -465,7 +465,7 @@ AbstractMusicPlayer *S_PlayOPL(uint8_t *data, int length, bool loop, int type)
 
     if (!player->LoadTrack(data, length, rate)) // Lobo: quietly log it instead of completely exiting EDGE
     {
-        EDGEDebugf("OPL player: failed to load MIDI file!\n");
+        LogDebug("OPL player: failed to load MIDI file!\n");
         delete[] data;
         delete player;
         return nullptr;

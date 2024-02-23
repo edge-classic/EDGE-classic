@@ -787,7 +787,7 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
 
     if (epi::StringCaseCompareASCII(act_name, "BRAINSPIT") == 0)
     {
-        EDGEDebugf(
+        LogDebug(
             "Dehacked: Warning - Multiple range attacks used with "
             "kA_BrainSpit.\n");
         return;
@@ -800,7 +800,7 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
     {
         if (group != 'L' && group != 'M')
         {
-            EDGEDebugf(
+            LogDebug(
                 "Dehacked: Warning - Not enough attack slots for "
                 "COMBOATTACK.\n");
         }
@@ -825,7 +825,7 @@ void frames::UpdateAttacks(char group, char *act_name, int action)
                 break;
 
             default:
-                EDGEError("Dehacked: Error - Bad attack kind %d\n", kind1);
+                FatalError("Dehacked: Error - Bad attack kind %d\n", kind1);
         }
     }
 
@@ -872,7 +872,7 @@ const char *frames::GroupToName(char group)
             return "FLASH";
 
         default:
-            EDGEError("Dehacked: Error - GroupToName: BAD GROUP '%c'\n", group);
+            FatalError("Dehacked: Error - GroupToName: BAD GROUP '%c'\n", group);
     }
 
     return nullptr;
@@ -886,7 +886,7 @@ const char *frames::RedirectorName(int next_st)
     // which we collected/processed as a group.
     if (group_for_state.find(next_st) == group_for_state.end())
     {
-        EDGEDebugf("Dehacked: Warning - Redirection to state %d FAILED\n",
+        LogDebug("Dehacked: Warning - Redirection to state %d FAILED\n",
                  next_st);
         return "IDLE";
     }
@@ -995,7 +995,7 @@ void frames::SpecialAction(char *act_name, const State *st)
 
             if (!things::IsSpawnable(kMT_num))
             {
-                EDGEDebugf(
+                LogDebug(
                     "Dehacked: Warning - Action kA_SPAWN unusable type (%d)\n",
                     kMT_num);
                 strcpy(act_name, "NOTHING");
@@ -1031,7 +1031,7 @@ void frames::SpecialAction(char *act_name, const State *st)
         break;
 
         default:
-            EDGEError("Dehacked: Error - Bad special action %d\n", st->action);
+            FatalError("Dehacked: Error - Bad special action %d\n", st->action);
     }
 }
 
@@ -1054,7 +1054,7 @@ void frames::OutputState(char group, int cur, bool do_action)
         act_flags |= kActionFlagThingState;
 
     if (action_info[action].act_flags & kActionFlagUnimplemented)
-        EDGEDebugf(
+        LogDebug(
             "Dehacked: Warning - Frame %d: action %s is not yet supported.\n",
             cur, bex_name);
 
@@ -1079,12 +1079,12 @@ void frames::OutputState(char group, int cur, bool do_action)
         epi::StringCaseCompareASCII(act_name, "NOTHING") != 0)
     {
         if (weap_act)
-            EDGEDebugf(
+            LogDebug(
                 "Dehacked: Warning - Frame %d: weapon action %s used in "
                 "thing.\n",
                 cur, bex_name);
         else
-            EDGEDebugf(
+            LogDebug(
                 "Dehacked: Warning - Frame %d: thing action %s used in "
                 "weapon.\n",
                 cur, bex_name);
@@ -1282,7 +1282,7 @@ void frames::AlterFrame(int new_val)
 
     if (epi::StringCaseCompareASCII(field_name, "Action pointer") == 0)
     {
-        EDGEDebugf(
+        LogDebug(
             "Dehacked: Warning - Line %d: raw Action pointer not supported.\n",
             patch::line_num);
         return;
@@ -1312,7 +1312,7 @@ void frames::AlterFrame(int new_val)
 
     if (!FieldAlter(frame_field, field_name, (int *)st, new_val))
     {
-        EDGEDebugf("Dehacked: Warning - UNKNOWN FRAME FIELD: %s\n", field_name);
+        LogDebug("Dehacked: Warning - UNKNOWN FRAME FIELD: %s\n", field_name);
         return;
     }
 
@@ -1336,13 +1336,13 @@ void frames::AlterPointer(int new_val)
 
     if (epi::StringCaseCompareASCII(deh_field, "Codep Frame") != 0)
     {
-        EDGEDebugf("Dehacked: Warning - UNKNOWN POINTER FIELD: %s\n", deh_field);
+        LogDebug("Dehacked: Warning - UNKNOWN POINTER FIELD: %s\n", deh_field);
         return;
     }
 
     if (new_val < 0 || new_val >= kTotalMBFStates)
     {
-        EDGEDebugf(
+        LogDebug(
             "Dehacked: Warning - Line %d: Illegal Codep frame number: %d\n",
             patch::line_num, new_val);
         return;
@@ -1357,7 +1357,7 @@ void frames::AlterBexCodePtr(const char *new_action)
 
     if (epi::StringPrefixCaseCompareASCII(bex_field, "FRAME ") != 0)
     {
-        EDGEDebugf(
+        LogDebug(
             "Dehacked: Warning - Line %d: bad code pointer '%s' - must begin "
             "with FRAME.\n",
             patch::line_num, bex_field);
@@ -1368,14 +1368,14 @@ void frames::AlterBexCodePtr(const char *new_action)
 
     if (sscanf(bex_field + 6, " %i ", &st_num) != 1)
     {
-        EDGEDebugf("Dehacked: Warning - Line %d: unreadable FRAME number: %s\n",
+        LogDebug("Dehacked: Warning - Line %d: unreadable FRAME number: %s\n",
                  patch::line_num, bex_field + 6);
         return;
     }
 
     if (st_num < 0 || st_num > 32767)
     {
-        EDGEDebugf("Dehacked: Warning - Line %d: illegal FRAME number: %d\n",
+        LogDebug("Dehacked: Warning - Line %d: illegal FRAME number: %d\n",
                  patch::line_num, st_num);
         return;
     }
@@ -1402,7 +1402,7 @@ void frames::AlterBexCodePtr(const char *new_action)
         }
     }
 
-    EDGEDebugf("Dehacked: Warning - Line %d: unknown action %s for CODEPTR.\n",
+    LogDebug("Dehacked: Warning - Line %d: unknown action %s for CODEPTR.\n",
              patch::line_num, new_action);
 }
 

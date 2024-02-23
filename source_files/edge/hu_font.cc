@@ -156,7 +156,7 @@ void Font::LoadPatches()
         for (int ch = pat->char1; ch <= pat->char2; ch++, BumpPatchName(pname))
         {
 #if 0  // DEBUG
-			EDGEPrintf("- LoadFont [%s] : char %d = %s\n", definition_->name.c_str(), ch, pname);
+			LogPrint("- LoadFont [%s] : char %d = %s\n", definition_->name.c_str(), ch, pname);
 #endif
             int idx = ch - first;
             SYS_ASSERT(0 <= idx && idx < total);
@@ -252,12 +252,12 @@ void Font::LoadPatches()
         delete atlas;
     }
     else
-        EDGEError("Failed to create atlas for patch font %s!\n",
+        FatalError("Failed to create atlas for patch font %s!\n",
                 definition_->name_.c_str());
 
     if (patch_font_cache_.atlas_rectangles.empty())
     {
-        EDGEWarning("Font [%s] has no loaded patches !\n",
+        LogWarning("Font [%s] has no loaded patches !\n",
                   definition_->name_.c_str());
         patch_font_cache_.width = patch_font_cache_.height = 7;
         return;
@@ -306,10 +306,10 @@ void Font::LoadFontImage()
                 W_ImageLookup(definition_->image_name_.c_str(),
                               kImageNamespaceGraphic, ILF_Exact | ILF_Null);
         else
-            EDGEError("LoadFontImage: nullptr image name provided for font %s!",
+            FatalError("LoadFontImage: nullptr image name provided for font %s!",
                     definition_->name_.c_str());
         if (!font_image_)
-            EDGEError("LoadFontImage: Image %s not found for font %s!",
+            FatalError("LoadFontImage: Image %s not found for font %s!",
                     definition_->image_name_.c_str(),
                     definition_->name_.c_str());
         int char_height = font_image_->actual_h / 16;
@@ -355,7 +355,7 @@ void Font::LoadFontTTF()
     {
         if (definition_->truetype_name_.empty())
         {
-            EDGEError("LoadFontTTF: No TTF file/lump name provided for font %s!",
+            FatalError("LoadFontTTF: No TTF file/lump name provided for font %s!",
                     definition_->name_.c_str());
         }
 
@@ -384,7 +384,7 @@ void Font::LoadFontTTF()
                     W_CheckNumForName(definition_->truetype_name_.c_str()));
 
             if (!F)
-                EDGEError("LoadFontTTF: '%s' not found for font %s.\n",
+                FatalError("LoadFontTTF: '%s' not found for font %s.\n",
                         definition_->truetype_name_.c_str(),
                         definition_->name_.c_str());
 
@@ -397,7 +397,7 @@ void Font::LoadFontTTF()
         {
             truetype_info_ = new stbtt_fontinfo;
             if (!stbtt_InitFont(truetype_info_, truetype_buffer_, 0))
-                EDGEError("LoadFontTTF: Could not initialize font %s.\n",
+                FatalError("LoadFontTTF: Could not initialize font %s.\n",
                         definition_->name_.c_str());
         }
 
@@ -444,7 +444,7 @@ void Font::LoadFontTTF()
         }
 
         if (ref.glyph_index == 0)
-            EDGEError("LoadFontTTF: No suitable characters in font %s.\n",
+            FatalError("LoadFontTTF: No suitable characters in font %s.\n",
                     definition_->name_.c_str());
 
         for (int i = 0; i < 3; i++)
@@ -545,7 +545,7 @@ void Font::Load()
             break;
 
         default:
-            EDGEError("Coding error, unknown font type %d\n", definition_->type_);
+            FatalError("Coding error, unknown font type %d\n", definition_->type_);
             break; /* NOT REACHED */
     }
 }
@@ -561,7 +561,7 @@ float Font::NominalWidth() const
     if (definition_->type_ == kFontTypeTrueType)
         return truetype_character_width_[current_font_size] + spacing_;
 
-    EDGEError("font_c::NominalWidth : unknown FONT type %d\n",
+    FatalError("font_c::NominalWidth : unknown FONT type %d\n",
             definition_->type_);
     return 1; /* NOT REACHED */
 }
@@ -575,7 +575,7 @@ float Font::NominalHeight() const
     if (definition_->type_ == kFontTypeTrueType)
         return truetype_character_height_[current_font_size];
 
-    EDGEError("font_c::NominalHeight : unknown FONT type %d\n",
+    FatalError("font_c::NominalHeight : unknown FONT type %d\n",
             definition_->type_);
     return 1; /* NOT REACHED */
 }

@@ -280,8 +280,8 @@ bool oggplayer_c::StreamIntoBuffer(sound_data_c *buf)
 
             err_msg += GetError(got_size);
 
-            // FIXME: using EDGEError is too harsh
-            EDGEError("%s", err_msg.c_str());
+            // FIXME: using FatalError is too harsh
+            FatalError("%s", err_msg.c_str());
             return false; /* NOT REACHED */
         }
 
@@ -321,7 +321,7 @@ bool oggplayer_c::OpenMemory(uint8_t *data, int length)
         std::string err_msg("[oggplayer_c::OpenMemory] Failed: ");
 
         err_msg += GetError(result);
-        EDGEWarning("%s\n", err_msg.c_str());
+        LogWarning("%s\n", err_msg.c_str());
         ov_clear(&ogg_stream);
         ogg_lump->data = nullptr; // this is deleted after the function returns false
         delete ogg_lump;
@@ -455,7 +455,7 @@ bool S_LoadOGGSound(sound_data_c *buf, const uint8_t *data, int length)
 
     if (result < 0)
     {
-        EDGEWarning("Failed to load OGG sound (corrupt ogg?) error=%d\n", result);
+        LogWarning("Failed to load OGG sound (corrupt ogg?) error=%d\n", result);
 
         return false;
     }
@@ -463,11 +463,11 @@ bool S_LoadOGGSound(sound_data_c *buf, const uint8_t *data, int length)
     vorbis_info *vorbis_inf = ov_info(&ogg_stream, -1);
     SYS_ASSERT(vorbis_inf);
 
-    EDGEDebugf("OGG SFX Loader: freq %d Hz, %d channels\n", (int)vorbis_inf->rate, (int)vorbis_inf->channels);
+    LogDebug("OGG SFX Loader: freq %d Hz, %d channels\n", (int)vorbis_inf->rate, (int)vorbis_inf->channels);
 
     if (vorbis_inf->channels > 2)
     {
-        EDGEWarning("OGG Sfx Loader: too many channels: %d\n", vorbis_inf->channels);
+        LogWarning("OGG Sfx Loader: too many channels: %d\n", vorbis_inf->channels);
 
         ogg_lump.size = 0;
         ov_clear(&ogg_stream);
@@ -507,7 +507,7 @@ bool S_LoadOGGSound(sound_data_c *buf, const uint8_t *data, int length)
         {
             gather.DiscardChunk();
 
-            EDGEWarning("Problem occurred while loading OGG (%d)\n", got_size);
+            LogWarning("Problem occurred while loading OGG (%d)\n", got_size);
             break;
         }
 
@@ -517,7 +517,7 @@ bool S_LoadOGGSound(sound_data_c *buf, const uint8_t *data, int length)
     }
 
     if (!gather.Finalise(buf, is_stereo))
-        EDGEError("OGG SFX Loader: no samples!\n");
+        FatalError("OGG SFX Loader: no samples!\n");
 
     ov_clear(&ogg_stream);
 

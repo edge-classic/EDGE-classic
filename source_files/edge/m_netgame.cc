@@ -85,25 +85,25 @@ static void DrawKeyword(int index, Style *style, int y, const char *keyword, con
 
     x = x - 10;
     x = x - (style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(keyword) * style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
-    HUDWriteText(style, (index < 0) ? 3 : is_selected ? 2 : 0, x, y, keyword);
+    HudWriteText(style, (index < 0) ? 3 : is_selected ? 2 : 0, x, y, keyword);
 
     x = 160;
-    HUDWriteText(style, StyleDefinition::kTextSectionAlternate, x + 10, y, value);
+    HudWriteText(style, StyleDefinition::kTextSectionAlternate, x + 10, y, value);
 
     if (is_selected)
     {
         if (style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeImage)
         {
             int cursor = 16;
-            HUDWriteText(style, StyleDefinition::kTextSectionTitle,
+            HudWriteText(style, StyleDefinition::kTextSectionTitle,
                          x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth((const char *)&cursor) / 2, y,
                          (const char *)&cursor);
         }
         else if (style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType)
-            HUDWriteText(style, StyleDefinition::kTextSectionTitle, x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("+") / 2, y,
+            HudWriteText(style, StyleDefinition::kTextSectionTitle, x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("+") / 2, y,
                          "+");
         else
-            HUDWriteText(style, StyleDefinition::kTextSectionTitle, x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("*") / 2, y,
+            HudWriteText(style, StyleDefinition::kTextSectionTitle, x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("*") / 2, y,
                          "*");
     }
 }
@@ -264,7 +264,7 @@ static void ChangeGame(NewGameParameters *param, int dir)
         }
     }
 
-    EDGEDebugf("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n", dir, ng_params->map_->episode_->name_.c_str(),
+    LogDebug("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n", dir, ng_params->map_->episode_->name_.c_str(),
              closest ? closest->name_.c_str() : "none", furthest ? furthest->name_.c_str() : "none");
 
     if (closest)
@@ -436,7 +436,7 @@ void M_DrawHostMenu(void)
                 ng_host_style->definition_->text_[StyleDefinition::kTextSectionHeader].scale_) /
                2;
 
-    HUDWriteText(ng_host_style, StyleDefinition::kTextSectionHeader, CenterX, 25, "Bot Match Settings");
+    HudWriteText(ng_host_style, StyleDefinition::kTextSectionHeader, CenterX, 25, "Bot Match Settings");
 
     int y      = 40;
     int idx    = 0;
@@ -481,7 +481,7 @@ void M_DrawHostMenu(void)
 
     int x = 150 - (ng_host_style->fonts_[StyleDefinition::kTextSectionText]->StringWidth("(Deathmatch Only)") *
                    ng_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
-    HUDWriteText(ng_host_style, idx - 1 == host_pos ? 2 : 0, x, y, "(Deathmatch Only)");
+    HudWriteText(ng_host_style, idx - 1 == host_pos ? 2 : 0, x, y, "(Deathmatch Only)");
     y += deltay;
 
     DrawKeyword(idx, ng_host_style, y, "Monsters",
@@ -504,7 +504,7 @@ void M_DrawHostMenu(void)
                 ng_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_) /
                2;
 
-    HUDWriteText(ng_host_style, (host_pos == idx) ? StyleDefinition::kTextSectionHelp : StyleDefinition::kTextSectionText, CenterX, y, "Start");
+    HudWriteText(ng_host_style, (host_pos == idx) ? StyleDefinition::kTextSectionHelp : StyleDefinition::kTextSectionText, CenterX, y, "Start");
 }
 
 bool M_NetHostResponder(InputEvent *ev, int ch)
@@ -560,11 +560,11 @@ static void NetGameStartLevel(void)
 
 void M_DrawPlayerList(void)
 {
-    HUDSetAlpha(0.64f);
-    HUDSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
-    HUDSetAlpha();
+    HudSetAlpha(0.64f);
+    HudSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
+    HudSetAlpha();
 
-    HUDWriteText(ng_list_style, 2, 80, 10, "PLAYER LIST");
+    HudWriteText(ng_list_style, 2, 80, 10, "PLAYER LIST");
 
     int y = 30;
     int i;
@@ -592,16 +592,16 @@ void M_DrawPlayerList(void)
                 bots_here++;
         }
 
-        HUDWriteText(ng_list_style, (flags & PFL_Network) ? 0 : 3, 20, y, epi::StringFormat("PLAYER %d", humans).c_str());
+        HudWriteText(ng_list_style, (flags & PFL_Network) ? 0 : 3, 20, y, epi::StringFormat("PLAYER %d", humans).c_str());
 
-        HUDWriteText(ng_list_style, 1, 100, y, "Local");
+        HudWriteText(ng_list_style, 1, 100, y, "Local");
 
-        HUDWriteText(ng_list_style, (flags & PFL_Network) ? 0 : 3, 200, y,
+        HudWriteText(ng_list_style, (flags & PFL_Network) ? 0 : 3, 200, y,
                      epi::StringFormat("%d BOTS", bots_here).c_str());
         y += 10;
     }
 
-    HUDWriteText(ng_list_style, 2, 40, 140, "Press <ENTER> to Start Game");
+    HudWriteText(ng_list_style, 2, 40, 140, "Press <ENTER> to Start Game");
 }
 
 static void ListAccept()
@@ -666,7 +666,7 @@ void M_NetGameDrawer(void)
         return;
     }
 
-    EDGEError("INTERNAL ERROR: netgame_menuon=%d\n", netgame_menuon);
+    FatalError("INTERNAL ERROR: netgame_menuon=%d\n", netgame_menuon);
 }
 
 bool M_NetGameResponder(InputEvent *ev, int ch)

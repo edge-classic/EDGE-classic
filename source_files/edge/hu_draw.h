@@ -28,7 +28,7 @@
 #include "hu_font.h"
 
 // X coordinates of left and right edges of screen.
-// updated by calls to HUDSetCoordinateSystem() or HUDReset().
+// updated by calls to HudSetCoordinateSystem() or HudReset().
 extern float                    hud_x_left;
 extern float                    hud_x_right;
 extern float                    hud_x_middle;
@@ -36,31 +36,31 @@ extern float                    hud_visible_top;
 extern float                    hud_visible_bottom;
 extern std::vector<std::string> hud_overlays;
 
-void HUDSetCoordinateSystem(int width, int height);
+void HudSetCoordinateSystem(int width, int height);
 
-void  HUDSetFont(Font *font = nullptr);
-void  HUDSetScale(float scale = 1.0f);
-void  HUDSetTextColor(RGBAColor color = kRGBANoValue);
-void  HUDSetAlpha(float alpha = 1.0f);
-float HUDGetAlpha(void);
+void  HudSetFont(Font *font = nullptr);
+void  HudSetScale(float scale = 1.0f);
+void  HudSetTextColor(RGBAColor color = kRGBANoValue);
+void  HudSetAlpha(float alpha = 1.0f);
+float HudGetAlpha(void);
 
 // xa is -1 for left, 0 for centred, +1 for right
 // ya is -1 for top,  0 for centred, +! for bottom
-void HUDSetAlignment(int xa = -1, int ya = -1);
+void HudSetAlignment(int xa = -1, int ya = -1);
 
 // resets the coord sys to 320x200, and resets all properties
-void HUDReset();
+void HudReset();
 
-void HUDFrameSetup(void);
+void HudFrameSetup(void);
 
 // manage the current clip rectangle.  The first push enables the
 // scissor test, subsequent pushes merely shrink the area, and the
 // last pop disables the scissor test.
-void HUDPushScissor(float x1, float y1, float x2, float y2,
+void HudPushScissor(float x1, float y1, float x2, float y2,
                     bool expand = false);
-void HUDPopScissor();
+void HudPopScissor();
 
-void HUDRawImage(float hx1, float hy1, float hx2, float hy2,
+void HudRawImage(float hx1, float hy1, float hx2, float hy2,
                  const image_c *image, float tx1, float ty1, float tx2,
                  float ty2, float alpha = 1.0f,
                  RGBAColor       text_col = kRGBANoValue,
@@ -69,72 +69,72 @@ void HUDRawImage(float hx1, float hy1, float hx2, float hy2,
 
 // Draw a solid colour box (possibly translucent) in the given
 // rectangle.
-void HUDSolidBox(float x1, float y1, float x2, float y2, RGBAColor col);
+void HudSolidBox(float x1, float y1, float x2, float y2, RGBAColor col);
 
 // Draw a solid colour line (possibly translucent) between the two
 // end points.  Coordinates are inclusive.  Drawing will be clipped
 // to the current scissor rectangle.  The dx/dy fields are used by
 // the automap code to reduce the wobblies.
-void HUDSolidLine(float x1, float y1, float x2, float y2, RGBAColor col,
+void HudSolidLine(float x1, float y1, float x2, float y2, RGBAColor col,
                   float thickness = 1, bool smooth = true, float dx = 0,
                   float dy = 0);
 
 // Draw a thin outline of a box.
-void HUDThinBox(float x1, float y1, float x2, float y2, RGBAColor col,
+void HudThinBox(float x1, float y1, float x2, float y2, RGBAColor col,
                 float thickness = 0.0f);
 
-// Like HUDSolidBox but the colors of each corner (TL, BL, TR, BR) can
+// Like HudSolidBox but the colors of each corner (TL, BL, TR, BR) can
 // be specified individually.
-void HUDGradientBox(float x1, float y1, float x2, float y2, RGBAColor *cols);
+void HudGradientBox(float x1, float y1, float x2, float y2, RGBAColor *cols);
 
-void HUDDrawImage(float x, float y, const image_c *image,
+void HudDrawImage(float x, float y, const image_c *image,
                   const Colormap *colmap = nullptr);
-void HUDDrawImageNoOffset(float x, float y, const image_c *image);
-void HUDScrollImage(float x, float y, const image_c *image, float sx, float sy);
-void HUDScrollImageNoOffset(float x, float y, const image_c *image, float sx,
+void HudDrawImageNoOffset(float x, float y, const image_c *image);
+void HudScrollImage(float x, float y, const image_c *image, float sx, float sy);
+void HudScrollImageNoOffset(float x, float y, const image_c *image, float sx,
                             float sy);
-void HUDDrawImageTitleWS(const image_c *image);
-void HUDStretchImage(float x, float y, float w, float h, const image_c *image,
+void HudDrawImageTitleWS(const image_c *image);
+void HudStretchImage(float x, float y, float w, float h, const image_c *image,
                      float sx, float sy, const Colormap *colmap = nullptr);
-void HUDStretchImageNoOffset(float x, float y, float w, float h,
+void HudStretchImageNoOffset(float x, float y, float w, float h,
                              const image_c *image, float sx, float sy);
-void HUDTileImage(float x, float y, float w, float h, const image_c *image,
+void HudTileImage(float x, float y, float w, float h, const image_c *image,
                   float offset_x = 0.0f, float offset_y = 0.0f);
 
 // Functions for when we want to draw without having an image_c
-void HUDStretchFromImageData(float x, float y, float w, float h,
+void HudStretchFromImageData(float x, float y, float w, float h,
                              const image_data_c *img, unsigned int tex_id,
                              image_opacity_e opacity);
 
 extern int hud_tic;
 
-float HUDFontWidth(void);
-float HUDFontHeight(void);
+float HudFontWidth(void);
+float HudFontHeight(void);
 
-float HUDStringWidth(const char *str);
-float HUDStringHeight(const char *str);
+float HudStringWidth(const char *str);
+float HudStringHeight(const char *str);
 
-void HUDDrawChar(float left_x, float top_y, const image_c *img, char ch,
+void HudDrawChar(float left_x, float top_y, const image_c *img, char ch,
                  float size = 0);
 
 // draw a text string with the current font, current color (etc).
-void HUDDrawText(float x, float y, const char *str, float size = 0);
+void HudDrawText(float x, float y, const char *str, float size = 0);
 
 // Draw the ENDOOM/Quit screen
-void HUDDrawQuitScreen();
+void HudDrawQuitScreen();
 
 // render a view of the world using the given camera object.
-void HUDRenderWorld(float x, float y, float w, float h, mobj_t *camera,
+void HudRenderWorld(float x, float y, float w, float h, mobj_t *camera,
                     int flags);
 
 // render the automap
-void HUDRenderAutomap(float x, float y, float w, float h, mobj_t *focus,
+void HudRenderAutomap(float x, float y, float w, float h, mobj_t *focus,
                       int flags);
 
-void HUDGetCastPosition(float *x, float *y, float *scale_x, float *scale_y);
+void HudGetCastPosition(float *x, float *y, float *scale_x, float *scale_y);
 
-float HUDGetImageWidth(const image_c *img);
-float HUDGetImageHeight(const image_c *img);
+float HudGetImageWidth(const image_c *img);
+float HudGetImageHeight(const image_c *img);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

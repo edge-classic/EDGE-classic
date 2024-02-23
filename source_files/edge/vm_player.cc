@@ -74,7 +74,7 @@ static void PL_set_who(coal::vm_c *vm, int argc)
     int index = (int)*vm->AccessParam(0);
 
     if (index < 0 || index >= numplayers)
-        EDGEError("player.set_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
+        FatalError("player.set_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
 
     if (index == 0)
     {
@@ -167,7 +167,7 @@ static void PL_armor(coal::vm_c *vm, int argc)
     int kind = (int)*vm->AccessParam(0);
 
     if (kind < 1 || kind > kTotalArmourTypes)
-        EDGEError("player.armor: bad armor index: %d\n", kind);
+        FatalError("player.armor: bad armor index: %d\n", kind);
 
     kind--;
     // vm->ReturnFloat(floor(ui_player_who->armours[kind] + 0.99));
@@ -336,7 +336,7 @@ static void PL_has_key(coal::vm_c *vm, int argc)
     int key = (int)*vm->AccessParam(0);
 
     if (key < 1 || key > 16)
-        EDGEError("player.has_key: bad key number: %d\n", key);
+        FatalError("player.has_key: bad key number: %d\n", key);
 
     key--;
 
@@ -352,7 +352,7 @@ static void PL_has_power(coal::vm_c *vm, int argc)
     int power = (int)*vm->AccessParam(0);
 
     if (power < 1 || power > kTotalPowerTypes)
-        EDGEError("player.has_power: bad powerup number: %d\n", power);
+        FatalError("player.has_power: bad powerup number: %d\n", power);
 
     power--;
 
@@ -372,7 +372,7 @@ static void PL_power_left(coal::vm_c *vm, int argc)
     int power = (int)*vm->AccessParam(0);
 
     if (power < 1 || power > kTotalPowerTypes)
-        EDGEError("player.power_left: bad powerup number: %d\n", power);
+        FatalError("player.power_left: bad powerup number: %d\n", power);
 
     power--;
 
@@ -391,7 +391,7 @@ static void PL_has_weapon_slot(coal::vm_c *vm, int argc)
     int slot = (int)*vm->AccessParam(0);
 
     if (slot < 0 || slot > 9)
-        EDGEError("player.has_weapon_slot: bad slot number: %d\n", slot);
+        FatalError("player.has_weapon_slot: bad slot number: %d\n", slot);
 
     int value = ui_player_who->avail_weapons[slot] ? 1 : 0;
 
@@ -543,7 +543,7 @@ static void PL_weapon_state(coal::vm_c *vm, int argc)
     WeaponDefinition *oldWep = weapondefs.Lookup(weapon_name);
     if (!oldWep)
     {
-        EDGEError("player.weapon_state: Unknown weapon name '%s'.\n", weapon_name);
+        FatalError("player.weapon_state: Unknown weapon name '%s'.\n", weapon_name);
     }
 
     int pw_index;
@@ -568,7 +568,7 @@ static void PL_weapon_state(coal::vm_c *vm, int argc)
 
     int state = DDF_StateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
     if (state == 0)
-        EDGEError("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
+        FatalError("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;
 
     COAL_SetPspriteDeferred(ui_player_who, ps_weapon, state); // refresh the sprite
@@ -583,7 +583,7 @@ static void PL_ammo(coal::vm_c *vm, int argc)
     int ammo = (int)*vm->AccessParam(0);
 
     if (ammo < 1 || ammo > kTotalAmmunitionTypes)
-        EDGEError("player.ammo: bad ammo number: %d\n", ammo);
+        FatalError("player.ammo: bad ammo number: %d\n", ammo);
 
     ammo--;
 
@@ -597,7 +597,7 @@ static void PL_ammomax(coal::vm_c *vm, int argc)
     int ammo = (int)*vm->AccessParam(0);
 
     if (ammo < 1 || ammo > kTotalAmmunitionTypes)
-        EDGEError("player.ammomax: bad ammo number: %d\n", ammo);
+        FatalError("player.ammomax: bad ammo number: %d\n", ammo);
 
     ammo--;
 
@@ -611,7 +611,7 @@ static void PL_inventory(coal::vm_c *vm, int argc)
     int inv = (int)*vm->AccessParam(0);
 
     if (inv < 1 || inv > kTotalInventoryTypes)
-        EDGEError("player.inventory: bad inv number: %d\n", inv);
+        FatalError("player.inventory: bad inv number: %d\n", inv);
 
     inv--;
 
@@ -625,7 +625,7 @@ static void PL_inventorymax(coal::vm_c *vm, int argc)
     int inv = (int)*vm->AccessParam(0);
 
     if (inv < 1 || inv > kTotalInventoryTypes)
-        EDGEError("player.inventorymax: bad inv number: %d\n", inv);
+        FatalError("player.inventorymax: bad inv number: %d\n", inv);
 
     inv--;
 
@@ -639,7 +639,7 @@ static void PL_counter(coal::vm_c *vm, int argc)
     int cntr = (int)*vm->AccessParam(0);
 
     if (cntr < 1 || cntr > kTotalCounterTypes)
-        EDGEError("player.counter: bad counter number: %d\n", cntr);
+        FatalError("player.counter: bad counter number: %d\n", cntr);
 
     cntr--;
 
@@ -653,7 +653,7 @@ static void PL_counter_max(coal::vm_c *vm, int argc)
     int cntr = (int)*vm->AccessParam(0);
 
     if (cntr < 1 || cntr > kTotalCounterTypes)
-        EDGEError("player.counter_max: bad counter number: %d\n", cntr);
+        FatalError("player.counter_max: bad counter number: %d\n", cntr);
 
     cntr--;
 
@@ -665,21 +665,21 @@ static void PL_counter_max(coal::vm_c *vm, int argc)
 static void PL_set_counter(coal::vm_c *vm, int argc)
 {
     if (argc != 2)
-        EDGEError("player.set_counter: wrong number of arguments given\n");
+        FatalError("player.set_counter: wrong number of arguments given\n");
 
     int cntr = (int)*vm->AccessParam(0);
     int amt  = (int)*vm->AccessParam(1);
 
     if (cntr < 1 || cntr > kTotalCounterTypes)
-        EDGEError("player.set_counter: bad counter number: %d\n", cntr);
+        FatalError("player.set_counter: bad counter number: %d\n", cntr);
 
     cntr--;
 
     if (amt < 0)
-        EDGEError("player.set_counter: target amount cannot be negative!\n");
+        FatalError("player.set_counter: target amount cannot be negative!\n");
 
     if (amt > ui_player_who->counters[cntr].max)
-        EDGEError("player.set_counter: target amount %d exceeds limit for counter number %d\n", amt, cntr);
+        FatalError("player.set_counter: target amount %d exceeds limit for counter number %d\n", amt, cntr);
 
     ui_player_who->counters[cntr].num = amt;
 }
@@ -722,7 +722,7 @@ static void PL_ammo_type(coal::vm_c *vm, int argc)
     int ATK = (int)*vm->AccessParam(0);
 
     if (ATK < 1 || ATK > 2)
-        EDGEError("player.ammo_type: bad attack number: %d\n", ATK);
+        FatalError("player.ammo_type: bad attack number: %d\n", ATK);
 
     ATK--;
 
@@ -745,7 +745,7 @@ static void PL_ammo_pershot(coal::vm_c *vm, int argc)
     int ATK = (int)*vm->AccessParam(0);
 
     if (ATK < 1 || ATK > 2)
-        EDGEError("player.ammo_pershot: bad attack number: %d\n", ATK);
+        FatalError("player.ammo_pershot: bad attack number: %d\n", ATK);
 
     ATK--;
 
@@ -768,7 +768,7 @@ static void PL_clip_ammo(coal::vm_c *vm, int argc)
     int ATK = (int)*vm->AccessParam(0);
 
     if (ATK < 1 || ATK > 2)
-        EDGEError("player.clip_ammo: bad attack number: %d\n", ATK);
+        FatalError("player.clip_ammo: bad attack number: %d\n", ATK);
 
     ATK--;
 
@@ -791,7 +791,7 @@ static void PL_clip_size(coal::vm_c *vm, int argc)
     int ATK = (int)*vm->AccessParam(0);
 
     if (ATK < 1 || ATK > 2)
-        EDGEError("player.clip_size: bad attack number: %d\n", ATK);
+        FatalError("player.clip_size: bad attack number: %d\n", ATK);
 
     ATK--;
 
@@ -1000,7 +1000,7 @@ static void PL_play_footstep(coal::vm_c *vm, int argc)
 {
     const char *flat = vm->AccessParamString(0);
     if (!flat)
-        EDGEError("player.play_footstep: No flat name given!\n");
+        FatalError("player.play_footstep: No flat name given!\n");
 
     FlatDefinition *current_flatdef = flatdefs.Find(flat);
 
@@ -1031,12 +1031,12 @@ static void PL_use_inventory(coal::vm_c *vm, int argc)
     std::string script_name = "INVENTORY";
     int         inv         = 0;
     if (!num)
-        EDGEError("player.use_inventory: can't parse inventory number!\n");
+        FatalError("player.use_inventory: can't parse inventory number!\n");
     else
         inv = (int)*num;
 
     if (inv < 1 || inv > kTotalInventoryTypes)
-        EDGEError("player.use_inventory: bad inventory number: %d\n", inv);
+        FatalError("player.use_inventory: bad inventory number: %d\n", inv);
 
     if (inv < 10)
         script_name.append("0").append(std::to_string(inv));
@@ -1316,20 +1316,20 @@ static void PL_query_object(coal::vm_c *vm, int argc)
     int     maxdistance = 512;
 
     if (argc != 2)
-        EDGEError("player.query_object: wrong number of arguments given\n");
+        FatalError("player.query_object: wrong number of arguments given\n");
 
     if (!whati)
-        EDGEError("player.query_object: can't parse WhatInfo!\n");
+        FatalError("player.query_object: can't parse WhatInfo!\n");
     else
         whatinfo = (int)*whati;
 
     if (!maxd)
-        EDGEError("player.query_object: can't parse MaxDistance!\n");
+        FatalError("player.query_object: can't parse MaxDistance!\n");
     else
         maxdistance = (int)*maxd;
 
     if (whatinfo < 1 || whatinfo > 5)
-        EDGEError("player.query_object: bad whatInfo number: %d\n", whatinfo);
+        FatalError("player.query_object: bad whatInfo number: %d\n", whatinfo);
 
     mobj_t *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
     if (!obj)
@@ -1355,7 +1355,7 @@ static void MO_query_tagged(coal::vm_c *vm, int argc)
 {
 
     if (argc != 2)
-        EDGEError("mapobject.query_tagged: wrong number of arguments given\n");
+        FatalError("mapobject.query_tagged: wrong number of arguments given\n");
 
     double *argTag   = vm->AccessParam(0);
     double *argInfo  = vm->AccessParam(1);
@@ -1393,7 +1393,7 @@ static void MO_count(coal::vm_c *vm, int argc)
     int     thingid = 0;
 
     if (!num)
-        EDGEError("mapobjects.count: can't parse thing id/type!\n");
+        FatalError("mapobjects.count: can't parse thing id/type!\n");
     else
         thingid = (int)*num;
 
@@ -1423,12 +1423,12 @@ static void PL_query_weapon(coal::vm_c *vm, int argc)
     int secattackinfo = 0;
 
     if (!maxd)
-        EDGEError("player.query_weapon: can't parse MaxDistance!\n");
+        FatalError("player.query_weapon: can't parse MaxDistance!\n");
     else
         maxdistance = (int)*maxd;
 
     if (!whati)
-        EDGEError("player.query_weapon: can't parse WhatInfo!\n");
+        FatalError("player.query_weapon: can't parse WhatInfo!\n");
     else
         whatinfo = (int)*whati;
 
@@ -1436,10 +1436,10 @@ static void PL_query_weapon(coal::vm_c *vm, int argc)
         secattackinfo = (int)*secattack;
 
     if (whatinfo < 1 || whatinfo > 9)
-        EDGEError("player.query_weapon: bad whatInfo number: %d\n", whatinfo);
+        FatalError("player.query_weapon: bad whatInfo number: %d\n", whatinfo);
 
     if (secattackinfo < 0 || secattackinfo > 1)
-        EDGEError("player.query_weapon: bad secAttackInfo number: %d\n", whatinfo);
+        FatalError("player.query_weapon: bad secAttackInfo number: %d\n", whatinfo);
 
     mobj_t *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
     if (!obj)

@@ -167,56 +167,56 @@ class rts_menu_c
     {
         style->DrawBackground();
 
-        HUDReset();
+        HudReset();
 
-        HUDSetAlignment(0, -1);
+        HudSetAlignment(0, -1);
 
-        HUDSetScale(style->definition_->text_[2].scale_); // LOBO: Use TITLE.SCALE from styles.ddf
-        HUDSetFont(style->fonts_[2]);            // LOBO: Use TITLE.FONT from styles.ddf
+        HudSetScale(style->definition_->text_[2].scale_); // LOBO: Use TITLE.SCALE from styles.ddf
+        HudSetFont(style->fonts_[2]);            // LOBO: Use TITLE.FONT from styles.ddf
 
-        float total_h = HUDStringHeight(title.c_str());
-        total_h += HUDFontHeight() * (NumChoices() + 1);
+        float total_h = HudStringHeight(title.c_str());
+        total_h += HudFontHeight() * (NumChoices() + 1);
 
         float y = 100 - total_h / 2.0f;
 
         if (style->definition_->text_[2].colmap_)
         {
-            HUDSetTextColor(V_GetFontColor(style->definition_->text_[2].colmap_)); // LOBO: Use TITLE.COLOURMAP from styles.ddf
+            HudSetTextColor(V_GetFontColor(style->definition_->text_[2].colmap_)); // LOBO: Use TITLE.COLOURMAP from styles.ddf
         }
         else
         {
-            HUDSetTextColor(SG_WHITE_RGBA32);
+            HudSetTextColor(SG_WHITE_RGBA32);
         }
 
-        HUDDrawText(160, y, title.c_str());
+        HudDrawText(160, y, title.c_str());
 
-        HUDSetScale();
-        HUDSetFont();
-        HUDSetTextColor();
+        HudSetScale();
+        HudSetFont();
+        HudSetTextColor();
 
-        HUDSetScale(style->definition_->text_[0].scale_); // LOBO: Use TEXT.SCALE from styles.ddf
-        HUDSetFont(style->fonts_[0]);            // LOBO: Use TEXT.FONT from styles.ddf
+        HudSetScale(style->definition_->text_[0].scale_); // LOBO: Use TEXT.SCALE from styles.ddf
+        HudSetFont(style->fonts_[0]);            // LOBO: Use TEXT.FONT from styles.ddf
 
-        y += HUDStringHeight(title.c_str());
-        y += HUDFontHeight();
+        y += HudStringHeight(title.c_str());
+        y += HudFontHeight();
 
         if (style->definition_->text_[0].colmap_)
         {
-            HUDSetTextColor(V_GetFontColor(style->definition_->text_[0].colmap_)); // LOBO: Use TEXT.COLOURMAP from styles.ddf
+            HudSetTextColor(V_GetFontColor(style->definition_->text_[0].colmap_)); // LOBO: Use TEXT.COLOURMAP from styles.ddf
         }
         else
         {
-            HUDSetTextColor(SG_LIGHT_BLUE_RGBA32);
+            HudSetTextColor(SG_LIGHT_BLUE_RGBA32);
         }
 
-        for (int c = 0; c < NumChoices(); c++, y += HUDFontHeight())
+        for (int c = 0; c < NumChoices(); c++, y += HudFontHeight())
         {
-            HUDDrawText(160, y, choices[c].c_str());
+            HudDrawText(160, y, choices[c].c_str());
         }
-        HUDSetScale();
-        HUDSetFont();
-        HUDSetAlignment();
-        HUDSetTextColor();
+        HudSetScale();
+        HudSetFont();
+        HudSetAlignment();
+        HudSetTextColor();
     }
 
     int CheckKey(int key)
@@ -264,7 +264,7 @@ rad_script_t *RAD_FindScriptByName(const char *map_name, const char *name)
             return scr;
     }
 
-    EDGEError("RTS: No such script `%s' on map %s.\n", name, map_name);
+    FatalError("RTS: No such script `%s' on map %s.\n", name, map_name);
     return nullptr;
 }
 
@@ -281,7 +281,7 @@ rad_trigger_t *RAD_FindTriggerByName(const char *name)
             return trig;
     }
 
-    EDGEWarning("RTS: No such trigger `%s'.\n", name);
+    LogWarning("RTS: No such trigger `%s'.\n", name);
     return nullptr;
 }
 
@@ -345,7 +345,7 @@ void RAD_EnableByTag(mobj_t *actor, uint32_t tag, bool disable, s_tagtype_e tagt
     rad_trigger_t *trig;
 
     // if (tag <= 0)
-    // EDGEError("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
+    // FatalError("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
@@ -378,7 +378,7 @@ void RAD_EnableByTag(mobj_t *actor, const char *name, bool disable)
     uint32_t tag = epi::StringHash32(name);
 
     // if (tag <= 0)
-    // EDGEError("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
+    // FatalError("INTERNAL ERROR: RAD_EnableByTag: bad tag %d\n", tag);
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
@@ -411,7 +411,7 @@ bool RAD_IsActiveByTag(mobj_t *actor, const char *name)
     uint32_t tag = epi::StringHash32(name);
 
     // if (tag <= 0)
-    // EDGEError("INTERNAL ERROR: RAD_IsActiveByTag: bad tag %d\n", tag);
+    // FatalError("INTERNAL ERROR: RAD_IsActiveByTag: bad tag %d\n", tag);
 
     for (trig = active_triggers; trig; trig = trig->next)
     {
@@ -550,7 +550,7 @@ static bool RAD_CheckBossTrig(rad_trigger_t *trig, s_ondeath_t *cond)
             cond->cached_info = mobjtypes.Lookup(cond->thing_type);
 
             if (cond->cached_info == nullptr)
-                EDGEError("RTS ONDEATH: Unknown thing type %d.\n", cond->thing_type);
+                FatalError("RTS ONDEATH: Unknown thing type %d.\n", cond->thing_type);
         }
     }
 
@@ -582,7 +582,7 @@ static bool RAD_CheckHeightTrig(rad_trigger_t *trig, s_onheight_t *cond)
         if (cond->sec_num >= 0)
         {
             if (cond->sec_num >= numsectors)
-                EDGEError("RTS ONHEIGHT: no such sector %d.\n", cond->sec_num);
+                FatalError("RTS ONHEIGHT: no such sector %d.\n", cond->sec_num);
 
             cond->cached_sector = &sectors[cond->sec_num];
         }
@@ -890,7 +890,7 @@ void RAD_SpawnTriggers(const char *map_name)
 
 #ifdef DEVELOPERS
     if (active_triggers)
-        EDGEError("RAD_SpawnTriggers without RAD_ClearTriggers\n");
+        FatalError("RAD_SpawnTriggers without RAD_ClearTriggers\n");
 #endif
 
     for (scr = r_scripts; scr; scr = scr->next)

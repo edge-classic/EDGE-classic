@@ -118,7 +118,7 @@ void MarkPolyobjSector(Sector *sector)
     if (sector == nullptr) return;
 
 #if DEBUG_POLYOBJ
-    EDGEDebugf("  Marking SECTOR %d\n", sector->index);
+    LogDebug("  Marking SECTOR %d\n", sector->index);
 #endif
 
     /* already marked ? */
@@ -167,7 +167,7 @@ void MarkPolyobjPoint(double x, double y)
                                   (int)L->end->y_))
         {
 #if DEBUG_POLYOBJ
-            EDGEDebugf("  Touching line was %d\n", L->index);
+            LogDebug("  Touching line was %d\n", L->index);
 #endif
 
             if (L->left != nullptr) MarkPolyobjSector(L->left->sector);
@@ -215,7 +215,7 @@ void MarkPolyobjPoint(double x, double y)
 
     if (best_match == nullptr)
     {
-        EDGEPrintf("Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
+        LogPrint("Bad polyobj thing at (%1.0f,%1.0f).\n", x, y);
         current_build_info.total_warnings++;
         return;
     }
@@ -224,7 +224,7 @@ void MarkPolyobjPoint(double x, double y)
     double y2 = best_match->end->y_;
 
 #if DEBUG_POLYOBJ
-    EDGEDebugf("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
+    LogDebug("  Closest line was %d Y=%1.0f..%1.0f (dist=%1.1f)\n",
              best_match->index, y1, y2, best_dist);
 #endif
 
@@ -232,7 +232,7 @@ void MarkPolyobjPoint(double x, double y)
 #if DEBUG_POLYOBJ
     if (fabs(best_dist) < kEpsilon)
     {
-        EDGEDebugf("  Polyobj FAILURE: directly on the line (%d)\n",
+        LogDebug("  Polyobj FAILURE: directly on the line (%d)\n",
                  best_match->index);
     }
 #endif
@@ -246,13 +246,13 @@ void MarkPolyobjPoint(double x, double y)
         sector = best_match->left ? best_match->left->sector : nullptr;
 
 #if DEBUG_POLYOBJ
-    EDGEDebugf("  Sector %d contains the polyobj.\n",
+    LogDebug("  Sector %d contains the polyobj.\n",
              sector ? sector->index : -1);
 #endif
 
     if (sector == nullptr)
     {
-        EDGEPrintf("Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
+        LogPrint("Invalid Polyobj thing at (%1.0f,%1.0f).\n", x, y);
         current_build_info.total_warnings++;
         return;
     }
@@ -319,7 +319,7 @@ void DetectPolyobjSectors(bool is_udmf)
     }
 
 #if DEBUG_POLYOBJ
-    EDGEDebugf("Using %s style polyobj things\n",
+    LogDebug("Using %s style polyobj things\n",
              hexen_style ? "HEXEN" : "ZDOOM");
 #endif
 
@@ -347,7 +347,7 @@ void DetectPolyobjSectors(bool is_udmf)
         }
 
 #if DEBUG_POLYOBJ
-        EDGEDebugf("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
+        LogDebug("Thing %d at (%1.0f,%1.0f) is a polyobj spawner.\n", i, x, y);
 #endif
 
         MarkPolyobjPoint(x, y);
@@ -454,7 +454,7 @@ void PruneVerticesAtEnd(void)
 
     if (unused > 0)
     {
-        EDGEDebugf("    Pruned %d unused vertices at end\n", unused);
+        LogDebug("    Pruned %d unused vertices at end\n", unused);
     }
 
     num_old_vert = level_vertices.size();
@@ -612,11 +612,11 @@ void CalculateWallTips()
     {
         Vertex *V = level_vertices[k];
 
-        EDGEDebugf("WallTips for vertex %d:\n", k);
+        LogDebug("WallTips for vertex %d:\n", k);
 
         for (WallTip *tip = V->tip_set; tip; tip = tip->next)
         {
-            EDGEDebugf("  Angle=%1.1f left=%d right=%d\n", tip->angle,
+            LogDebug("  Angle=%1.1f left=%d right=%d\n", tip->angle,
                      tip->open_left ? 1 : 0, tip->open_right ? 1 : 0);
         }
     }
@@ -684,7 +684,7 @@ Vertex *NewVertexDegenerate(Vertex *start, Vertex *end)
     vert->y_ = start->x_;
 
     if (AlmostEquals(dlen, 0.0))
-        EDGEError("AJBSP: NewVertexDegenerate: bad delta!\n");
+        FatalError("AJBSP: NewVertexDegenerate: bad delta!\n");
 
     dx /= dlen;
     dy /= dlen;

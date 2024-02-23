@@ -224,26 +224,26 @@ class startup_progress_c
 
     void drawIt()
     {
-        EDGEStartFrame();
-        HUDFrameSetup();
+        StartFrame();
+        HudFrameSetup();
         if (loading_image)
         {
             if (r_titlescaling.d_) // Fill Border
             {
                 if (!loading_image->blurred_version)
                     W_ImageStoreBlurred(loading_image, 0.75f);
-                HUDStretchImage(-320, -200, 960, 600, loading_image->blurred_version, 0, 0);
+                HudStretchImage(-320, -200, 960, 600, loading_image->blurred_version, 0, 0);
             }
-            HUDDrawImageTitleWS(loading_image);
-            HUDSolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
+            HudDrawImageTitleWS(loading_image);
+            HudSolidBox(25, 25, 295, 175, SG_BLACK_RGBA32);
         }
         int y = 26;
         for (int i = 0; i < (int)startup_messages.size(); i++)
         {
             if (startup_messages[i].size() > 32)
-                HUDDrawText(26, y, startup_messages[i].substr(0, 29).append("...").c_str());
+                HudDrawText(26, y, startup_messages[i].substr(0, 29).append("...").c_str());
             else
-                HUDDrawText(26, y, startup_messages[i].c_str());
+                HudDrawText(26, y, startup_messages[i].c_str());
             y += 10;
         }
 
@@ -251,7 +251,7 @@ class startup_progress_c
         {
             const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d_).c_str(), kImageNamespaceGraphic, ILF_Null);
             if (overlay)
-                HUDRawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
+                HudRawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
                              SCREENHEIGHT / IM_HEIGHT(overlay));
         }
 
@@ -260,7 +260,7 @@ class startup_progress_c
             int col = (1.0f + gamma_correction.f_) * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-            HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+            HudSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
@@ -269,12 +269,12 @@ class startup_progress_c
             int col = gamma_correction.f_ * 255;
             glEnable(GL_BLEND);
             glBlendFunc(GL_DST_COLOR, GL_ONE);
-            HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+            HudSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
         }
 
-        EDGEFinishFrame();
+        FinishFrame();
     }
 };
 
@@ -306,7 +306,7 @@ static void SetGlobalVars(void)
     if (!s.empty())
     {
         if (DISPLAYMODE == 2)
-            EDGEWarning("Current display mode set to borderless fullscreen. Provided width of %d will be ignored!\n",
+            LogWarning("Current display mode set to borderless fullscreen. Provided width of %d will be ignored!\n",
                       atoi(s.c_str()));
         else
             SCREENWIDTH = atoi(s.c_str());
@@ -316,7 +316,7 @@ static void SetGlobalVars(void)
     if (!s.empty())
     {
         if (DISPLAYMODE == 2)
-            EDGEWarning("Current display mode set to borderless fullscreen. Provided height of %d will be ignored!\n",
+            LogWarning("Current display mode set to borderless fullscreen. Provided height of %d will be ignored!\n",
                       atoi(s.c_str()));
         else
             SCREENHEIGHT = atoi(s.c_str());
@@ -326,7 +326,7 @@ static void SetGlobalVars(void)
     if (p > 0 && p + 2 < int(argv::list.size()) && !argv::IsOption(p + 1) && !argv::IsOption(p + 2))
     {
         if (DISPLAYMODE == 2)
-            EDGEWarning(
+            LogWarning(
                 "Current display mode set to borderless fullscreen. Provided resolution of %dx%d will be ignored!\n",
                 atoi(argv::list[p + 1].c_str()), atoi(argv::list[p + 2].c_str()));
         else
@@ -352,7 +352,7 @@ static void SetGlobalVars(void)
     if (SCREENBITS > 32)
         SCREENBITS = 32;
 
-    // If borderless fullscreen mode, override any provided dimensions so EDGEStartupGraphics will scale to native res
+    // If borderless fullscreen mode, override any provided dimensions so StartupGraphics will scale to native res
     if (DISPLAYMODE == 2)
     {
         SCREENWIDTH  = 100000;
@@ -441,10 +441,10 @@ void SetLanguage(void)
     if (language.Select(m_language.c_str()))
         return;
 
-    EDGEWarning("Invalid language: '%s'\n", m_language.c_str());
+    LogWarning("Invalid language: '%s'\n", m_language.c_str());
 
     if (!language.Select(0))
-        EDGEError("Unable to select any language!");
+        FatalError("Unable to select any language!");
 
     m_language = language.GetName();
 }
@@ -459,7 +459,7 @@ static void SpecialWadVerify(void)
     epi::File *data = W_OpenPackFile("/version.txt");
 
     if (!data)
-        EDGEError("Version file not found. Get edge_defs.epk at https://github.com/edge-classic/EDGE-classic");
+        FatalError("Version file not found. Get edge_defs.epk at https://github.com/edge-classic/EDGE-classic");
 
     // parse version number
     std::string verstring = data->ReadText();
@@ -475,15 +475,15 @@ static void SpecialWadVerify(void)
 
     float real_ver = epk_ver / 100.0;
 
-    EDGEPrintf("EDGE_DEFS.EPK version %1.2f found.\n", real_ver);
+    LogPrint("EDGE_DEFS.EPK version %1.2f found.\n", real_ver);
 
     if (real_ver < edgeversion.f_)
     {
-        EDGEError("EDGE_DEFS.EPK is an older version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f_);
+        FatalError("EDGE_DEFS.EPK is an older version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f_);
     }
     else if (real_ver > edgeversion.f_)
     {
-        EDGEWarning("EDGE_DEFS.EPK is a newer version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f_);
+        LogWarning("EDGE_DEFS.EPK is a newer version (got %1.2f, expected %1.2f)\n", real_ver, edgeversion.f_);
     }
 }
 
@@ -494,7 +494,7 @@ static void ShowNotice(void)
 {
     ConsoleMessageColor(epi::MakeRGBA(64, 192, 255));
 
-    EDGEPrintf("%s", language["Notice"]);
+    LogPrint("%s", language["Notice"]);
 }
 
 static void DoSystemStartup(void)
@@ -502,9 +502,9 @@ static void DoSystemStartup(void)
     // startup the system now
     W_InitImages();
 
-    EDGEDebugf("- System startup begun.\n");
+    LogDebug("- System startup begun.\n");
 
-    EDGESystemStartup();
+    SystemStartup();
 
     // -ES- 1998/09/11 Use R_ChangeResolution to enter gfx mode
 
@@ -512,14 +512,14 @@ static void DoSystemStartup(void)
 
     // -KM- 1998/09/27 Change res now, so music doesn't start before
     // screen.  Reset clock too.
-    EDGEDebugf("- Changing Resolution...\n");
+    LogDebug("- Changing Resolution...\n");
 
     R_InitialResolution();
 
     RGL_Init();
     R_SoftInitResolution();
 
-    EDGEDebugf("- System startup done.\n");
+    LogDebug("- System startup done.\n");
 }
 
 static void M_DisplayPause(void)
@@ -537,7 +537,7 @@ static void M_DisplayPause(void)
     float x = 160 - w / 2;
     float y = 10;
 
-    HUDStretchImage(x, y, w, h, pause_image, 0.0, 0.0);
+    HudStretchImage(x, y, w, h, pause_image, 0.0, 0.0);
 }
 
 wipetype_e wipe_method = WIPE_Melt;
@@ -581,9 +581,9 @@ void E_Display(void)
         return; // for comparative timing / profiling
 
     // Start the frame - should we need to.
-    EDGEStartFrame();
+    StartFrame();
 
-    HUDFrameSetup();
+    HudFrameSetup();
 
     switch (game_state)
     {
@@ -601,7 +601,7 @@ void E_Display(void)
             need_save_screenshot = false;
         }
 
-        HUDDrawer();
+        HudDrawer();
         RAD_Drawer();
         break;
 
@@ -657,7 +657,7 @@ void E_Display(void)
     {
         const image_c *overlay = W_ImageLookup(hud_overlays.at(r_overlay.d_).c_str(), kImageNamespaceGraphic, ILF_Null);
         if (overlay)
-            HUDRawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
+            HudRawImage(0, 0, SCREENWIDTH, SCREENHEIGHT, overlay, 0, 0, SCREENWIDTH / IM_WIDTH(overlay),
                          SCREENHEIGHT / IM_HEIGHT(overlay));
     }
 
@@ -666,7 +666,7 @@ void E_Display(void)
         int col = (1.0f + gamma_correction.f_) * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-        HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+        HudSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }
@@ -675,7 +675,7 @@ void E_Display(void)
         int col = gamma_correction.f_ * 255;
         glEnable(GL_BLEND);
         glBlendFunc(GL_DST_COLOR, GL_ONE);
-        HUDSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
+        HudSolidBox(hud_x_left, 0, hud_x_right, 200, epi::MakeRGBA(col, col, col));
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
     }
@@ -693,7 +693,7 @@ void E_Display(void)
             M_ScreenShot(false);
     }
 
-    EDGEFinishFrame(); // page flip or blit buffer
+    FinishFrame(); // page flip or blit buffer
 }
 
 //
@@ -713,13 +713,13 @@ static void E_TitleDrawer(void)
         {
             if (!title_image->blurred_version)
                 W_ImageStoreBlurred(title_image, 0.75f);
-            HUDStretchImage(-320, -200, 960, 600, title_image->blurred_version, 0, 0);
+            HudStretchImage(-320, -200, 960, 600, title_image->blurred_version, 0, 0);
         }
-        HUDDrawImageTitleWS(title_image);
+        HudDrawImageTitleWS(title_image);
     }
     else
     {
-        HUDSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
+        HudSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
     }
 }
 
@@ -900,7 +900,7 @@ void E_AdvanceTitle(void)
                 g->movie_played_ = true;
             else
             {
-                EDGEPlayMovie(g->titlemovie_);
+                PlayMovie(g->titlemovie_);
                 g->movie_played_ = true;
             }
             continue;
@@ -1031,7 +1031,7 @@ void InitDirectories(void)
     if (!epi::IsDirectory(home_directory))
     {
         if (!epi::MakeDirectory(home_directory))
-            EDGEError("InitDirectories: Could not create directory at %s!\n", home_directory.c_str());
+            FatalError("InitDirectories: Could not create directory at %s!\n", home_directory.c_str());
     }
 
     if (cfgfile.empty())
@@ -1081,7 +1081,7 @@ static void PurgeCache(void)
 
     if (!ReadDirectory(fsd, cache_dir, "*.*"))
     {
-        EDGEError("PurgeCache: Failed to read '%s' directory!\n", cache_dir.c_str());
+        FatalError("PurgeCache: Failed to read '%s' directory!\n", cache_dir.c_str());
     }
     else
     {
@@ -1130,11 +1130,11 @@ static void IdentifyVersion(void)
     else
     {
         if (!epi::TestFileAccess(epkfile))
-            EDGEError("IdentifyVersion: Could not find required %s.%s!\n", kRequiredEPK, "epk");
+            FatalError("IdentifyVersion: Could not find required %s.%s!\n", kRequiredEPK, "epk");
         W_AddFilename(epkfile, FLKIND_EEPK);
     }
 
-    EDGEDebugf("- Identify Version\n");
+    LogDebug("- Identify Version\n");
 
     // Check -iwad parameter, find out if it is the IWADs directory
     std::string              iwad_par;
@@ -1153,13 +1153,13 @@ static void IdentifyVersion(void)
         {
             int game_check = CheckPackForGameFiles(iwad_par, FLKIND_IFolder);
             if (game_check < 0)
-                EDGEError("Folder %s passed via -iwad parameter, but no IWAD or EDGEGAME file detected!\n",
+                FatalError("Folder %s passed via -iwad parameter, but no IWAD or EDGEGAME file detected!\n",
                         iwad_par.c_str());
             else
             {
                 game_base = game_checker[game_check].base;
                 W_AddFilename(iwad_par, FLKIND_IFolder);
-                EDGEDebugf("GAME BASE = [%s]\n", game_base.c_str());
+                LogDebug("GAME BASE = [%s]\n", game_base.c_str());
                 return;
             }
         }
@@ -1231,7 +1231,7 @@ static void IdentifyVersion(void)
             auto selected_game = game_paths.begin();
             game_base = game_checker[selected_game->first].base;
             W_AddFilename(selected_game->second.first, selected_game->second.second);
-            EDGEDebugf("GAME BASE = [%s]\n", game_base.c_str());
+            LogDebug("GAME BASE = [%s]\n", game_base.c_str());
             return;
         }
         else if (!game_paths.empty())
@@ -1245,15 +1245,15 @@ static void IdentifyVersion(void)
             picker_data.buttons = game_buttons.data();
             int button_hit = 0;
             if (SDL_ShowMessageBox(&picker_data, &button_hit) != 0)
-                EDGEError("Error in game selection dialog!\n");
+                FatalError("Error in game selection dialog!\n");
             else if (button_hit == -1)
-                EDGEError("Game selection cancelled.\n");
+                FatalError("Game selection cancelled.\n");
             else
             {
                 game_base = game_checker[button_hit].base;
                 auto selected_game = game_paths.at(button_hit);
                 W_AddFilename(selected_game.first, selected_game.second);
-                EDGEDebugf("GAME BASE = [%s]\n", game_base.c_str());
+                LogDebug("GAME BASE = [%s]\n", game_base.c_str());
                 return;
             }
         }
@@ -1334,10 +1334,10 @@ static void IdentifyVersion(void)
                     if (epi::TestFileAccess(iwad_file))
                         goto foundindoomwadpath;
                 }
-                EDGEError("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
+                FatalError("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
             }
             else
-                EDGEError("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
+                FatalError("IdentifyVersion: Unable to access specified '%s'", fn.c_str());
         }
 
     foundindoomwadpath:
@@ -1355,7 +1355,7 @@ static void IdentifyVersion(void)
                 W_AddFilename(iwad_file, FLKIND_IWad);
             }
             else
-                EDGEError("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
+                FatalError("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
         }
         else
         {
@@ -1366,7 +1366,7 @@ static void IdentifyVersion(void)
                 W_AddFilename(iwad_file, FLKIND_IPK);
             }
             else
-                EDGEError("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
+                FatalError("IdentifyVersion: Could not identify '%s' as a valid IWAD!\n", fn.c_str());
         }
     }
     else
@@ -1401,7 +1401,7 @@ static void IdentifyVersion(void)
 
             if (!ReadDirectory(fsd, location, "*.wad"))
             {
-                EDGEDebugf("IdentifyVersion: No WADs found in '%s' directory!\n", location.c_str());
+                LogDebug("IdentifyVersion: No WADs found in '%s' directory!\n", location.c_str());
             }
             else
             {
@@ -1429,7 +1429,7 @@ static void IdentifyVersion(void)
             }
             if (!ReadDirectory(fsd, location, "*.epk"))
             {
-                EDGEDebugf("IdentifyVersion: No EPKs found in '%s' directory!\n", location.c_str());
+                LogDebug("IdentifyVersion: No EPKs found in '%s' directory!\n", location.c_str());
             }
             else
             {
@@ -1466,7 +1466,7 @@ static void IdentifyVersion(void)
 
                 if (!ReadDirectory(fsd, location, "*.wad"))
                 {
-                    EDGEDebugf("IdentifyVersion: No WADs found in '%s' directory!\n", location.c_str());
+                    LogDebug("IdentifyVersion: No WADs found in '%s' directory!\n", location.c_str());
                 }
                 else
                 {
@@ -1494,7 +1494,7 @@ static void IdentifyVersion(void)
                 }
                 if (!ReadDirectory(fsd, location, "*.epk"))
                 {
-                    EDGEDebugf("IdentifyVersion: No EPKs found in '%s' directory!\n", location.c_str());
+                    LogDebug("IdentifyVersion: No EPKs found in '%s' directory!\n", location.c_str());
                 }
                 else
                 {
@@ -1521,7 +1521,7 @@ static void IdentifyVersion(void)
         }
 
         if (game_paths.empty())
-            EDGEError("IdentifyVersion: No IWADs or standalone packs found!\n");
+            FatalError("IdentifyVersion: No IWADs or standalone packs found!\n");
         else if (game_paths.size() == 1)
         {
             auto selected_game = game_paths.begin();
@@ -1539,9 +1539,9 @@ static void IdentifyVersion(void)
             picker_data.buttons = game_buttons.data();
             int button_hit = 0;
             if (SDL_ShowMessageBox(&picker_data, &button_hit) != 0)
-                EDGEError("Error in game selection dialog!\n");
+                FatalError("Error in game selection dialog!\n");
             else if (button_hit == -1)
-                EDGEError("Game selection cancelled.\n");
+                FatalError("Game selection cancelled.\n");
             else
             {
                 game_base = game_checker[button_hit].base;
@@ -1551,7 +1551,7 @@ static void IdentifyVersion(void)
         }
     }
 
-    EDGEDebugf("GAME BASE = [%s]\n", game_base.c_str());
+    LogDebug("GAME BASE = [%s]\n", game_base.c_str());
 }
 
 // Add game-specific base EPKs (widepix, skyboxes, etc) - Dasho
@@ -1572,7 +1572,7 @@ static void Add_Base(void)
             W_AddFilename(base_path, FLKIND_EEPK);
         else
         {
-            EDGEError("%s not found for the %s IWAD! Check the /edge_base folder of your %s install!\n",
+            FatalError("%s not found for the %s IWAD! Check the /edge_base folder of your %s install!\n",
                 epi::GetFilename(base_path).c_str(), game_base.c_str(), appname.c_str());
         }
     }
@@ -1610,21 +1610,21 @@ static void ShowDateAndVersion(void)
     time(&cur_time);
     strftime(timebuf, 99, "%I:%M %p on %d/%b/%Y", localtime(&cur_time));
 
-    EDGEDebugf("[Log file created at %s]\n\n", timebuf);
-    EDGEDebugf("[Debug file created at %s]\n\n", timebuf);
+    LogDebug("[Log file created at %s]\n\n", timebuf);
+    LogDebug("[Debug file created at %s]\n\n", timebuf);
 
-    EDGEPrintf("%s v%s compiled on " __DATE__ " at " __TIME__ "\n", appname.c_str(), edgeversion.c_str());
-    EDGEPrintf("%s homepage is at %s\n", appname.c_str(), homepage.c_str());
+    LogPrint("%s v%s compiled on " __DATE__ " at " __TIME__ "\n", appname.c_str(), edgeversion.c_str());
+    LogPrint("%s homepage is at %s\n", appname.c_str(), homepage.c_str());
 
-    EDGEPrintf("Executable path: '%s'\n", executable_path.c_str());
+    LogPrint("Executable path: '%s'\n", executable_path.c_str());
 
     argv::DebugDumpArgs();
 }
 
 static void SetupLogAndDebugFiles(void)
 {
-    // -AJA- 2003/11/08 The log file gets all ConsolePrintfs, EDGEPrintfs,
-    //                  EDGEWarnings and EDGEErrors.
+    // -AJA- 2003/11/08 The log file gets all ConsolePrints, LogPrints,
+    //                  LogWarnings and FatalErrors.
 
     std::string log_fn = epi::PathAppend(home_directory, log_filename.s_);
     std::string debug_fn = epi::PathAppend(home_directory, debug_filename.s_);
@@ -1638,7 +1638,7 @@ static void SetupLogAndDebugFiles(void)
         log_file = epi::FileOpenRaw(log_fn, epi::kFileAccessWrite);
 
         if (!log_file)
-            EDGEError("[E_Startup] Unable to create log file\n");
+            FatalError("[E_Startup] Unable to create log file\n");
     }
 
     //
@@ -1646,7 +1646,7 @@ static void SetupLogAndDebugFiles(void)
     //                  Moved here to setup debug file for DDF Parsing...
     //
     // -ES- 1999/08/01 Debugfiles can now be used without -DDEVELOPERS, and
-    //                 then logs all the ConsolePrintfs, EDGEPrintfs and EDGEErrors.
+    //                 then logs all the ConsolePrints, LogPrints and FatalErrors.
     //
     // -ACB- 1999/10/02 Don't print to console, since we don't have a console yet.
 
@@ -1656,7 +1656,7 @@ static void SetupLogAndDebugFiles(void)
         debug_file = epi::FileOpenRaw(debug_fn, epi::kFileAccessWrite);
 
         if (!debug_file)
-            EDGEError("[E_Startup] Unable to create debug_file");
+            FatalError("[E_Startup] Unable to create debug_file");
     }
 }
 
@@ -1673,7 +1673,7 @@ static void AddSingleCmdLineFile(std::string name, bool ignore_unknown)
     epi::StringLowerASCII(ext);
 
     if (ext == ".edm")
-        EDGEError("Demos are not supported\n");
+        FatalError("Demos are not supported\n");
 
     filekind_e kind;
 
@@ -1690,7 +1690,7 @@ static void AddSingleCmdLineFile(std::string name, bool ignore_unknown)
     else
     {
         if (!ignore_unknown)
-            EDGEError("unknown file type: %s\n", name.c_str());
+            FatalError("unknown file type: %s\n", name.c_str());
         return;
     }
 
@@ -1739,7 +1739,7 @@ static void AddCommandLineFiles(void)
                 epi::StringCaseCompareASCII(ext, ".epk") == 0 || epi::StringCaseCompareASCII(ext, ".vwad") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".deh") == 0 || epi::StringCaseCompareASCII(ext, ".bex") == 0)
             {
-                EDGEError("Illegal filename for -script: %s\n", argv::list[p].c_str());
+                FatalError("Illegal filename for -script: %s\n", argv::list[p].c_str());
             }
 
             std::string filename = M_ComposeFileName(game_directory, argv::list[p]);
@@ -1765,7 +1765,7 @@ static void AddCommandLineFiles(void)
                 epi::StringCaseCompareASCII(ext, ".zip") == 0 || epi::StringCaseCompareASCII(ext, ".vwad") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".rts") == 0)
             {
-                EDGEError("Illegal filename for -deh: %s\n", argv::list[p].c_str());
+                FatalError("Illegal filename for -deh: %s\n", argv::list[p].c_str());
             }
 
             std::string filename = M_ComposeFileName(game_directory, argv::list[p]);
@@ -1811,7 +1811,7 @@ static void Add_Autoload(void)
 
     if (!ReadDirectory(fsd, folder, "*.*"))
     {
-        EDGEWarning("Failed to read %s directory!\n", folder.c_str());
+        LogWarning("Failed to read %s directory!\n", folder.c_str());
     }
     else
     {
@@ -1825,7 +1825,7 @@ static void Add_Autoload(void)
     folder = epi::PathAppend(folder, game_base);
     if (!ReadDirectory(fsd, folder, "*.*"))
     {
-        EDGEWarning("Failed to read %s directory!\n", folder.c_str());
+        LogWarning("Failed to read %s directory!\n", folder.c_str());
     }
     else
     {
@@ -1845,7 +1845,7 @@ static void Add_Autoload(void)
 
     if (!ReadDirectory(fsd, folder, "*.*"))
     {
-        EDGEWarning("Failed to read %s directory!\n", folder.c_str());
+        LogWarning("Failed to read %s directory!\n", folder.c_str());
     }
     else
     {
@@ -1861,7 +1861,7 @@ static void Add_Autoload(void)
         epi::MakeDirectory(folder);
     if (!ReadDirectory(fsd, folder, "*.*"))
     {
-        EDGEWarning("Failed to read %s directory!\n", folder.c_str());
+        LogWarning("Failed to read %s directory!\n", folder.c_str());
     }
     else
     {
@@ -1875,7 +1875,7 @@ static void Add_Autoload(void)
 
 static void InitDDF(void)
 {
-    EDGEDebugf("- Initialising DDF\n");
+    LogDebug("- Initialising DDF\n");
 
     DDF_Init();
 }
@@ -1888,7 +1888,7 @@ void E_EngineShutdown(void)
     for (int loop = 0; loop < 30; loop++)
     {
         S_SoundTicker();
-        EDGESleep(50);
+        SleepForMilliseconds(50);
     }
 
     P_Shutdown();
@@ -1914,8 +1914,8 @@ static void E_Startup(void)
     // Version check ?
     if (argv::Find("version") > 0)
     {
-        // -AJA- using EDGEError here, since EDGEPrintf crashes this early on
-        EDGEError("\n%s version is %s\n", appname.c_str(), edgeversion.c_str());
+        // -AJA- using FatalError here, since LogPrint crashes this early on
+        FatalError("\n%s version is %s\n", appname.c_str(), edgeversion.c_str());
     }
 
     SetupLogAndDebugFiles();
@@ -1944,7 +1944,7 @@ static void E_Startup(void)
     // Must be done after WAD and DDF loading to check for potential
     // overrides of lump-specific image/sound/DDF defines
     W_DoPackSubstitutions();
-    EDGEStartupMusic(); // Must be done after all files loaded to locate appropriate GENMIDI lump
+    StartupMusic(); // Must be done after all files loaded to locate appropriate GENMIDI lump
     V_InitPalette();
 
     DDF_CleanUp();
@@ -1957,7 +1957,7 @@ static void E_Startup(void)
     E_PickLoadingScreen();
     E_PickMenuScreen();
 
-    HUDInit();
+    HudInit();
     ConsoleStart();
     ConsoleCreateQuitScreen();
     SpecialWadVerify();
@@ -1999,7 +1999,7 @@ static void E_Shutdown(void)
 
 static void E_InitialState(void)
 {
-    EDGEDebugf("- Setting up Initial State...\n");
+    LogDebug("- Setting up Initial State...\n");
 
     std::string ps;
 
@@ -2008,7 +2008,7 @@ static void E_InitialState(void)
 
     if (argv::Find("playdemo") > 0 || argv::Find("timedemo") > 0 || argv::Find("record") > 0)
     {
-        EDGEError("Demos are no longer supported\n");
+        FatalError("Demos are no longer supported\n");
     }
 
     ps = argv::Value("loadgame");
@@ -2067,7 +2067,7 @@ static void E_InitialState(void)
     // start the appropriate game based on parms
     if (!warp)
     {
-        EDGEDebugf("- Startup: showing title screen.\n");
+        LogDebug("- Startup: showing title screen.\n");
         E_StartTitle();
         return;
     }
@@ -2084,12 +2084,12 @@ static void E_InitialState(void)
         params.map_ = GameLookupMap("1");
 
     if (!params.map_)
-        EDGEError("-warp: no such level '%s'\n", warp_map.c_str());
+        FatalError("-warp: no such level '%s'\n", warp_map.c_str());
 
     SYS_ASSERT(GameMapExists(params.map_));
     SYS_ASSERT(params.map_->episode_);
 
-    params.random_seed_ = EDGEPureRandom();
+    params.random_seed_ = PureRandomNumber();
 
     params.SinglePlayer(bots);
 
@@ -2123,22 +2123,22 @@ void E_Main(int argc, const char **argv)
     E_InitialState();
 
     ConsoleMessageColor(SG_YELLOW_RGBA32);
-    EDGEPrintf("%s v%s initialisation complete.\n", appname.c_str(), edgeversion.c_str());
+    LogPrint("%s v%s initialisation complete.\n", appname.c_str(), edgeversion.c_str());
 
-    EDGEDebugf("- Entering game loop...\n");
+    LogDebug("- Entering game loop...\n");
 
 #ifndef EDGE_WEB
     while (!(app_state & APP_STATE_PENDING_QUIT))
     {
         // We always do this once here, although the engine may
         // makes in own calls to keep on top of the event processing
-        EDGEControlGetEvents();
+        ControlGetEvents();
 
         if (app_state & APP_STATE_ACTIVE)
             E_Tick();
         else if (!n_busywait.d_)
         {
-            EDGESleep(5);
+            SleepForMilliseconds(5);
         }
     }
 #else

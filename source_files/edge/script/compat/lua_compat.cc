@@ -37,13 +37,13 @@ void LUA_LoadScripts()
 {
     if (LUA_GetLuaHudDetected() && VM_GetCoalDetected())
     {
-        EDGEWarning("Lua and COAL huds detected, selecting Lua hud\n");
+        LogWarning("Lua and COAL huds detected, selecting Lua hud\n");
     }
 
     int top = lua_gettop(global_lua_state);
     for (auto &info : pending_scripts)
     {
-        EDGEPrintf("Compiling: %s\n", info.source.c_str());
+        LogPrint("Compiling: %s\n", info.source.c_str());
         
         int results = LUA_DoFile(global_lua_state, info.source.c_str(), info.data.c_str());
         if (results)

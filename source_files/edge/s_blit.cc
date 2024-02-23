@@ -276,7 +276,7 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
 static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 {
     if (!sound_device_stereo)
-        EDGEError("INTERNAL ERROR: tried to mix an interleaved buffer in MONO mode.\n");
+        FatalError("INTERNAL ERROR: tried to mix an interleaved buffer in MONO mode.\n");
 
     SYS_ASSERT(pairs > 0);
 
@@ -641,7 +641,7 @@ void S_QueueInit(void)
     if (no_sound)
         return;
 
-    EDGELockAudio();
+    LockAudio();
     {
         if (free_qbufs.empty())
         {
@@ -659,7 +659,7 @@ void S_QueueInit(void)
 
         queue_chan->ComputeMusicVolume();
     }
-    EDGEUnlockAudio();
+    UnlockAudio();
 }
 
 void S_QueueShutdown(void)
@@ -667,7 +667,7 @@ void S_QueueShutdown(void)
     if (no_sound)
         return;
 
-    EDGELockAudio();
+    LockAudio();
     {
         if (queue_chan)
         {
@@ -689,7 +689,7 @@ void S_QueueShutdown(void)
             queue_chan = nullptr;
         }
     }
-    EDGEUnlockAudio();
+    UnlockAudio();
 }
 
 void S_QueueStop(void)
@@ -699,7 +699,7 @@ void S_QueueStop(void)
 
     SYS_ASSERT(queue_chan);
 
-    EDGELockAudio();
+    LockAudio();
     {
         for (; !playing_qbufs.empty(); playing_qbufs.pop_front())
         {
@@ -709,7 +709,7 @@ void S_QueueStop(void)
         queue_chan->state = CHAN_Finished;
         queue_chan->data  = nullptr;
     }
-    EDGEUnlockAudio();
+    UnlockAudio();
 }
 
 sound_data_c *S_QueueGetFreeBuffer(int samples, int buf_mode)
@@ -719,7 +719,7 @@ sound_data_c *S_QueueGetFreeBuffer(int samples, int buf_mode)
 
     sound_data_c *buf = nullptr;
 
-    EDGELockAudio();
+    LockAudio();
     {
         if (!free_qbufs.empty())
         {
@@ -729,7 +729,7 @@ sound_data_c *S_QueueGetFreeBuffer(int samples, int buf_mode)
             buf->Allocate(samples, buf_mode);
         }
     }
-    EDGEUnlockAudio();
+    UnlockAudio();
 
     return buf;
 }
@@ -739,7 +739,7 @@ void S_QueueAddBuffer(sound_data_c *buf, int freq)
     SYS_ASSERT(!no_sound);
     SYS_ASSERT(buf);
 
-    EDGELockAudio();
+    LockAudio();
     {
         buf->freq = freq;
 
@@ -750,7 +750,7 @@ void S_QueueAddBuffer(sound_data_c *buf, int freq)
             QueueNextBuffer();
         }
     }
-    EDGEUnlockAudio();
+    UnlockAudio();
 }
 
 void S_QueueReturnBuffer(sound_data_c *buf)
@@ -758,11 +758,11 @@ void S_QueueReturnBuffer(sound_data_c *buf)
     SYS_ASSERT(!no_sound);
     SYS_ASSERT(buf);
 
-    EDGELockAudio();
+    LockAudio();
     {
         free_qbufs.push_back(buf);
     }
-    EDGEUnlockAudio();
+    UnlockAudio();
 }
 
 //--- editor settings ---

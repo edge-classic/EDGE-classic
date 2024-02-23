@@ -76,14 +76,14 @@ class ConsoleLine
 void ConsoleTryCommand(const char *cmd);
 
 #ifdef __GNUC__
-void ConsolePrintf(const char *message, ...)
+void ConsolePrint(const char *message, ...)
     __attribute__((format(printf, 1, 2)));
 void ConsoleMessage(const char *message, ...)
     __attribute__((format(printf, 1, 2)));
 void ConsolePlayerMessage(int plyr, const char *message, ...)
     __attribute__((format(printf, 2, 3)));
 #else
-void ConsolePrintf(const char *message, ...);
+void ConsolePrint(const char *message, ...);
 void ConsoleMessage(const char *message, ...);
 void ConsolePlayerMessage(int plyr, const char *message, ...);
 #endif
@@ -103,7 +103,7 @@ void ConsoleImportantMessageLDF(const char *lookup, ...);
 // Looks up in LDF.
 void ConsolePlayerMessageLDF(int plyr, const char *message, ...);
 
-// this color will apply to the next ConsoleMessage or ConsolePrintf call.
+// this color will apply to the next ConsoleMessage or ConsolePrint call.
 void ConsoleMessageColor(RGBAColor col);
 
 // Displays/Hides the console.

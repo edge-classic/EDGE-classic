@@ -99,9 +99,9 @@ static void HD_coord_sys(coal::vm_c *vm, int argc)
     int h = (int)*vm->AccessParam(1);
 
     if (w < 64 || h < 64)
-        EDGEError("Bad hud.coord_sys size: %dx%d\n", w, h);
+        FatalError("Bad hud.coord_sys size: %dx%d\n", w, h);
 
-    HUDSetCoordinateSystem(w, h);
+    HudSetCoordinateSystem(w, h);
 
     VM_SetFloat(ui_vm, "hud", "x_left", hud_x_left);
     VM_SetFloat(ui_vm, "hud", "x_right", hud_x_right);
@@ -184,7 +184,7 @@ static void HD_get_time(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    int time = EDGEGetTime() / (r_doubleframes.d_? 2 : 1);
+    int time = GetTime() / (r_doubleframes.d_? 2 : 1);
     vm->ReturnFloat((double)time);
 }
 
@@ -200,15 +200,15 @@ static void HD_text_font(coal::vm_c *vm, int argc)
     SYS_ASSERT(DEF);
 
     if (!DEF)
-        EDGEError("hud.text_font: Bad font name: %s\n", font_name);
+        FatalError("hud.text_font: Bad font name: %s\n", font_name);
 
     Font *font = hud_fonts.Lookup(DEF);
     SYS_ASSERT(font);
 
     if (!font)
-        EDGEError("hud.text_font: Bad font name: %s\n", font_name);
+        FatalError("hud.text_font: Bad font name: %s\n", font_name);
 
-    HUDSetFont(font);
+    HudSetFont(font);
 }
 
 // hud.text_color(rgb)
@@ -221,7 +221,7 @@ static void HD_text_color(coal::vm_c *vm, int argc)
 
     RGBAColor color = VM_VectorToColor(v);
 
-    HUDSetTextColor(color);
+    HudSetTextColor(color);
 }
 
 // hud.set_scale(value)
@@ -233,9 +233,9 @@ static void HD_set_scale(coal::vm_c *vm, int argc)
     float scale = *vm->AccessParam(0);
 
     if (scale <= 0)
-        EDGEError("hud.set_scale: Bad scale value: %1.3f\n", scale);
+        FatalError("hud.set_scale: Bad scale value: %1.3f\n", scale);
 
-    HUDSetScale(scale);
+    HudSetScale(scale);
 }
 
 // hud.set_alpha(value)
@@ -246,7 +246,7 @@ static void HD_set_alpha(coal::vm_c *vm, int argc)
 
     float alpha = *vm->AccessParam(0);
 
-    HUDSetAlpha(alpha);
+    HudSetAlpha(alpha);
 }
 
 // hud.solid_box(x, y, w, h, color)
@@ -262,7 +262,7 @@ static void HD_solid_box(coal::vm_c *vm, int argc)
 
     RGBAColor rgb = VM_VectorToColor(vm->AccessParam(4));
 
-    HUDSolidBox(x, y, x + w, y + h, rgb);
+    HudSolidBox(x, y, x + w, y + h, rgb);
 }
 
 // hud.solid_line(x1, y1, x2, y2, color)
@@ -278,7 +278,7 @@ static void HD_solid_line(coal::vm_c *vm, int argc)
 
     RGBAColor rgb = VM_VectorToColor(vm->AccessParam(4));
 
-    HUDSolidLine(x1, y1, x2, y2, rgb);
+    HudSolidLine(x1, y1, x2, y2, rgb);
 }
 
 // hud.thin_box(x, y, w, h, color)
@@ -294,7 +294,7 @@ static void HD_thin_box(coal::vm_c *vm, int argc)
 
     RGBAColor rgb = VM_VectorToColor(vm->AccessParam(4));
 
-    HUDThinBox(x, y, x + w, y + h, rgb);
+    HudThinBox(x, y, x + w, y + h, rgb);
 }
 
 // hud.gradient_box(x, y, w, h, TL, BL, TR, BR)
@@ -315,7 +315,7 @@ static void HD_gradient_box(coal::vm_c *vm, int argc)
     cols[2] = VM_VectorToColor(vm->AccessParam(6));
     cols[3] = VM_VectorToColor(vm->AccessParam(7));
 
-    HUDGradientBox(x, y, x + w, y + h, cols);
+    HudGradientBox(x, y, x + w, y + h, cols);
 }
 
 // hud.draw_image(x, y, name, [noOffset])
@@ -337,9 +337,9 @@ static void HD_draw_image(coal::vm_c *vm, int argc)
     if (img)
     {
         if (noOffset)
-            HUDDrawImageNoOffset(x, y, img);
+            HudDrawImageNoOffset(x, y, img);
         else
-            HUDDrawImage(x, y, img);
+            HudDrawImage(x, y, img);
     }
 }
 
@@ -362,10 +362,10 @@ static void HD_scroll_image(coal::vm_c *vm, int argc)
     if (img)
     {
         if (noOffset)
-            HUDScrollImageNoOffset(
+            HudScrollImageNoOffset(
                 x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
         else
-            HUDScrollImage(x, y, img, -sx,
+            HudScrollImage(x, y, img, -sx,
                             -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
     }
 }
@@ -391,9 +391,9 @@ static void HD_stretch_image(coal::vm_c *vm, int argc)
     if (img)
     {
         if (noOffset)
-            HUDStretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
+            HudStretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
         else
-            HUDStretchImage(x, y, w, h, img, 0.0, 0.0);
+            HudStretchImage(x, y, w, h, img, 0.0, 0.0);
     }
 }
 
@@ -417,7 +417,7 @@ static void HD_tile_image(coal::vm_c *vm, int argc)
 
     if (img)
     {
-        HUDTileImage(x, y, w, h, img, offset_x, offset_y);
+        HudTileImage(x, y, w, h, img, offset_x, offset_y);
     }
 }
 
@@ -434,7 +434,7 @@ static void HD_draw_text(coal::vm_c *vm, int argc)
 
     double *size = vm->AccessParam(3);
 
-    HUDDrawText(x, y, str, size ? *size : 0);
+    HudDrawText(x, y, str, size ? *size : 0);
 }
 
 // hud.draw_num2(x, y, len, num, [size])
@@ -452,7 +452,7 @@ static void HD_draw_num2(coal::vm_c *vm, int argc)
     double *size = vm->AccessParam(4);
 
     if (len < 1 || len > 20)
-        EDGEError("hud.draw_number: bad field length: %d\n", len);
+        FatalError("hud.draw_number: bad field length: %d\n", len);
 
     bool is_neg = false;
 
@@ -482,9 +482,9 @@ static void HD_draw_num2(coal::vm_c *vm, int argc)
             *--pos = '-';
     }
 
-    HUDSetAlignment(+1, -1);
-    HUDDrawText(x, y, pos, size ? *size : 0);
-    HUDSetAlignment();
+    HudSetAlignment(+1, -1);
+    HudDrawText(x, y, pos, size ? *size : 0);
+    HudSetAlignment();
 }
 
 // Lobo November 2021:
@@ -503,7 +503,7 @@ static void HD_draw_number(coal::vm_c *vm, int argc)
     double *size        = vm->AccessParam(5);
 
     if (len < 1 || len > 20)
-        EDGEError("hud.draw_number: bad field length: %d\n", len);
+        FatalError("hud.draw_number: bad field length: %d\n", len);
 
     bool is_neg = false;
 
@@ -535,13 +535,13 @@ static void HD_draw_number(coal::vm_c *vm, int argc)
 
     if (align_right == 0)
     {
-        HUDDrawText(x, y, pos, size ? *size : 0);
+        HudDrawText(x, y, pos, size ? *size : 0);
     }
     else
     {
-        HUDSetAlignment(+1, -1);
-        HUDDrawText(x, y, pos, size ? *size : 0);
-        HUDSetAlignment();
+        HudSetAlignment(+1, -1);
+        HudDrawText(x, y, pos, size ? *size : 0);
+        HudSetAlignment();
     }
 }
 
@@ -606,7 +606,7 @@ static void HD_render_world(coal::vm_c *vm, int argc)
 
     double *flags = vm->AccessParam(4);
 
-    HUDRenderWorld(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
+    HudRenderWorld(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
 }
 
 // hud.render_automap(x, y, w, h, [flags])
@@ -637,7 +637,7 @@ static void HD_render_automap(coal::vm_c *vm, int argc)
 
     AutomapSetState(new_state, new_zoom);
 
-    HUDRenderAutomap(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
+    HudRenderAutomap(x, y, w, h, ui_hud_who->mo, flags ? (int)*flags : 0);
 
     AutomapSetState(old_state, old_zoom);
 }
@@ -651,7 +651,7 @@ static void HD_automap_color(coal::vm_c *vm, int argc)
     int which = (int)*vm->AccessParam(0);
 
     if (which < 1 || which > kTotalAutomapColors)
-        EDGEError("hud.automap_color: bad color number: %d\n", which);
+        FatalError("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
@@ -670,7 +670,7 @@ static void HD_automap_option(coal::vm_c *vm, int argc)
     int value = (int)*vm->AccessParam(1);
 
     if (which < 1 || which > 7)
-        EDGEError("hud.automap_color: bad color number: %d\n", which);
+        FatalError("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
@@ -712,7 +712,7 @@ static void HD_set_render_who(coal::vm_c *vm, int argc)
     int index = (int)*vm->AccessParam(0);
 
     if (index < 0 || index >= numplayers)
-        EDGEError("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
+        FatalError("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
 
     if (index == 0)
     {
@@ -746,7 +746,7 @@ static void HD_play_sound(coal::vm_c *vm, int argc)
     if (fx)
         S_StartFX(fx);
     else
-        EDGEWarning("hud.play_sound: unknown sfx '%s'\n", name);
+        LogWarning("hud.play_sound: unknown sfx '%s'\n", name);
 }
 
 // hud.screen_aspect()
@@ -955,7 +955,7 @@ static void HD_get_image_width(coal::vm_c *vm, int argc)
 
     if (img)
     {
-        vm->ReturnFloat(HUDGetImageWidth(img));
+        vm->ReturnFloat(HudGetImageWidth(img));
     }
     else
     {
@@ -974,7 +974,7 @@ static void HD_get_image_height(coal::vm_c *vm, int argc)
 
     if (img)
     {
-        vm->ReturnFloat(HUDGetImageHeight(img));
+        vm->ReturnFloat(HudGetImageHeight(img));
     }
     else
     {
@@ -986,7 +986,7 @@ static void HD_get_image_height(coal::vm_c *vm, int argc)
 // HUD Functions
 //------------------------------------------------------------------------
 
-void VM_RegisterHUD()
+void VM_RegisterHud()
 {
     // query functions
     ui_vm->AddNativeFunction("hud.game_mode", HD_game_mode);
@@ -1089,7 +1089,7 @@ void VM_EndLevel(void)
 
 void VM_RunHud(void)
 {
-    HUDReset();
+    HudReset();
 
     ui_hud_who    = players[displayplayer];
     ui_player_who = players[displayplayer];
@@ -1100,7 +1100,7 @@ void VM_RunHud(void)
 
     VM_CallFunction(ui_vm, "draw_all");
 
-    HUDReset();
+    HudReset();
 }
 
 //--- editor settings ---

@@ -71,7 +71,7 @@ static bool Load_DOOM(sound_data_c *buf, const uint8_t *lump, int length)
     buf->freq = lump[2] + (lump[3] << 8);
 
     if (buf->freq < 8000 || buf->freq > 48000)
-        EDGEWarning("Sound Load: weird frequency: %d Hz\n", buf->freq);
+        LogWarning("Sound Load: weird frequency: %d Hz\n", buf->freq);
 
     if (buf->freq < 4000)
         buf->freq = 4000;

@@ -602,11 +602,11 @@ void RGL_DrawWeaponModel(player_t *p)
 
     if (!skin_img && md->md2_model)
     {
-        // EDGEDebugf("Render model: no skin %d\n", skin_num);
+        // LogDebug("Render model: no skin %d\n", skin_num);
         skin_img = W_ImageForDummySkin();
     }
 
-    // EDGEDebugf("Rendering weapon model!\n");
+    // LogDebug("Rendering weapon model!\n");
 
     float x = viewx + viewright.X * psp->sx / 8.0;
     float y = viewy + viewright.Y * psp->sx / 8.0;
@@ -1194,7 +1194,7 @@ static void RGL_DrawModel(drawthing_t *dthing)
 
     if (!skin_img && md->md2_model)
     {
-        // EDGEDebugf("Render model: no skin %d\n", mo->model_skin);
+        // LogDebug("Render model: no skin %d\n", mo->model_skin);
         skin_img = W_ImageForDummySkin();
     }
 

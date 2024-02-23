@@ -56,7 +56,7 @@ static void FindModelFrameNames(md2_model_c *md, int model_num)
 {
     int missing = 0;
 
-    EDGEDebugf("Finding frame names for model '%s'...\n", ddf_model_names[model_num].c_str());
+    LogDebug("Finding frame names for model '%s'...\n", ddf_model_names[model_num].c_str());
 
     for (int stnum = 1; stnum < num_states; stnum++)
     {
@@ -82,12 +82,12 @@ static void FindModelFrameNames(md2_model_c *md, int model_num)
         else
         {
             missing++;
-            EDGEPrintf("-- no such frame '%s'\n", st->model_frame);
+            LogPrint("-- no such frame '%s'\n", st->model_frame);
         }
     }
 
     if (missing > 0)
-        EDGEError("Failed to find %d frames for model '%s' (see EDGE.LOG)\n", missing,
+        FatalError("Failed to find %d frames for model '%s' (see EDGE.LOG)\n", missing,
                 ddf_model_names[model_num].c_str());
 }
 
@@ -95,7 +95,7 @@ static void FindModelFrameNames(mdl_model_c *md, int model_num)
 {
     int missing = 0;
 
-    EDGEDebugf("Finding frame names for model '%s'...\n", ddf_model_names[model_num].c_str());
+    LogDebug("Finding frame names for model '%s'...\n", ddf_model_names[model_num].c_str());
 
     for (int stnum = 1; stnum < num_states; stnum++)
     {
@@ -121,12 +121,12 @@ static void FindModelFrameNames(mdl_model_c *md, int model_num)
         else
         {
             missing++;
-            EDGEPrintf("-- no such frame '%s'\n", st->model_frame);
+            LogPrint("-- no such frame '%s'\n", st->model_frame);
         }
     }
 
     if (missing > 0)
-        EDGEError("Failed to find %d frames for model '%s' (see EDGE.LOG)\n", missing,
+        FatalError("Failed to find %d frames for model '%s' (see EDGE.LOG)\n", missing,
                 ddf_model_names[model_num].c_str());
 }
 
@@ -165,14 +165,14 @@ modeldef_c *LoadModelFromLump(int model_num)
             f = W_OpenPackFile(packname);
             if (f)
             {
-                EDGEDebugf("Loading MD3 model from pack file : %s\n", packname.c_str());
+                LogDebug("Loading MD3 model from pack file : %s\n", packname.c_str());
                 def->md2_model = MD3_LoadModel(f);
                 pack_file      = true;
             }
         }
         else
         {
-            EDGEDebugf("Loading MD3 model from lump : %s\n", lumpname.c_str());
+            LogDebug("Loading MD3 model from lump : %s\n", lumpname.c_str());
             f = W_OpenLump(lumpname.c_str());
             if (f)
                 def->md2_model = MD3_LoadModel(f);
@@ -197,14 +197,14 @@ modeldef_c *LoadModelFromLump(int model_num)
                 f = W_OpenPackFile(packname);
                 if (f)
                 {
-                    EDGEDebugf("Loading MD2 model from pack file : %s\n", packname.c_str());
+                    LogDebug("Loading MD2 model from pack file : %s\n", packname.c_str());
                     def->md2_model = MD2_LoadModel(f);
                     pack_file      = true;
                 }
             }
             else
             {
-                EDGEDebugf("Loading MD2 model from lump : %s\n", lumpname.c_str());
+                LogDebug("Loading MD2 model from lump : %s\n", lumpname.c_str());
                 f = W_OpenLump(lumpname.c_str());
                 if (f)
                     def->md2_model = MD2_LoadModel(f);
@@ -230,14 +230,14 @@ modeldef_c *LoadModelFromLump(int model_num)
                 f = W_OpenPackFile(packname);
                 if (f)
                 {
-                    EDGEDebugf("Loading MDL model from pack file : %s\n", packname.c_str());
+                    LogDebug("Loading MDL model from pack file : %s\n", packname.c_str());
                     def->mdl_model = MDL_LoadModel(f);
                     pack_file      = true;
                 }
             }
             else
             {
-                EDGEDebugf("Loading MDL model from lump : %s\n", lumpname.c_str());
+                LogDebug("Loading MDL model from lump : %s\n", lumpname.c_str());
                 f = W_OpenLump(lumpname.c_str());
                 if (f)
                     def->mdl_model = MDL_LoadModel(f);
@@ -246,7 +246,7 @@ modeldef_c *LoadModelFromLump(int model_num)
     }
 
     if (!f)
-        EDGEError("Missing model lump for: %s\n!", basename.c_str());
+        FatalError("Missing model lump for: %s\n!", basename.c_str());
 
     SYS_ASSERT(def->md2_model || def->mdl_model);
 
@@ -281,9 +281,9 @@ modeldef_c *LoadModelFromLump(int model_num)
         if (!def->skins[1]) // What happened to skin 0? - Dasho
         {
             if (pack_file)
-                EDGEError("Missing model skin: %s1\n", basename.c_str());
+                FatalError("Missing model skin: %s1\n", basename.c_str());
             else
-                EDGEError("Missing model skin: %sSKN1\n", basename.c_str());
+                FatalError("Missing model skin: %sSKN1\n", basename.c_str());
         }
     }
 
@@ -304,7 +304,7 @@ void W_InitModels(void)
 
     E_ProgressMessage("Setting up models...");
 
-    EDGEPrintf("W_InitModels: Setting up\n");
+    LogPrint("W_InitModels: Setting up\n");
 
     models = new modeldef_c *[nummodels];
 
@@ -388,7 +388,7 @@ void W_PrecacheModels(void)
     {
         if (model_present[i])
         {
-            EDGEDebugf("Precaching model: %s\n", ddf_model_names[i].c_str());
+            LogDebug("Precaching model: %s\n", ddf_model_names[i].c_str());
 
             modeldef_c *def = W_GetModel(i);
 

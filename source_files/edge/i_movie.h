@@ -22,7 +22,7 @@
 
 #include <string>
 
-void EDGEPlayMovie(const std::string &name);
+void PlayMovie(const std::string &name);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

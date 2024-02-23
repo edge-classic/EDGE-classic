@@ -393,7 +393,7 @@ void *SV_SideGetElem(int index)
 {
     if (index < 0 || index >= numsides)
     {
-        EDGEWarning("LOADGAME: Invalid Side: %d\n", index);
+        LogWarning("LOADGAME: Invalid Side: %d\n", index);
         index = 0;
     }
 
@@ -414,7 +414,7 @@ void SV_SideCreateElems(int num_elems)
      */
 
     if (num_elems != numsides)
-        EDGEError("LOADGAME: SIDE MISMATCH !  (%d != %d)\n", num_elems, numsides);
+        FatalError("LOADGAME: SIDE MISMATCH !  (%d != %d)\n", num_elems, numsides);
 }
 
 void SV_SideFinaliseElems(void)
@@ -435,7 +435,7 @@ void *SV_LineGetElem(int index)
 {
     if (index < 0 || index >= numlines)
     {
-        EDGEWarning("LOADGAME: Invalid Line: %d\n", index);
+        LogWarning("LOADGAME: Invalid Line: %d\n", index);
         index = 0;
     }
 
@@ -455,7 +455,7 @@ void SV_LineCreateElems(int num_elems)
     // and defaults are initialised there.
 
     if (num_elems != numlines)
-        EDGEError("LOADGAME: LINE MISMATCH !  (%d != %d)\n", num_elems, numlines);
+        FatalError("LOADGAME: LINE MISMATCH !  (%d != %d)\n", num_elems, numlines);
 }
 
 //
@@ -513,7 +513,7 @@ void *SV_ExfloorGetElem(int index)
 {
     if (index < 0 || index >= numextrafloors)
     {
-        EDGEWarning("LOADGAME: Invalid Extrafloor: %d\n", index);
+        LogWarning("LOADGAME: Invalid Extrafloor: %d\n", index);
         index = 0;
     }
 
@@ -534,7 +534,7 @@ void SV_ExfloorCreateElems(int num_elems)
      */
 
     if (num_elems != numextrafloors)
-        EDGEError("LOADGAME: Extrafloor MISMATCH !  (%d != %d)\n", num_elems, numextrafloors);
+        FatalError("LOADGAME: Extrafloor MISMATCH !  (%d != %d)\n", num_elems, numextrafloors);
 }
 
 void SV_ExfloorFinaliseElems(void)
@@ -552,7 +552,7 @@ void SV_ExfloorFinaliseElems(void)
 
         if (!ef->ef_line->special || !(ef->ef_line->special->ef_.type_ & kExtraFloorTypePresent))
         {
-            EDGEWarning("LOADGAME: Missing Extrafloor Special !\n");
+            LogWarning("LOADGAME: Missing Extrafloor Special !\n");
             ef->ef_info = &linetypes.Lookup(0)->ef_;
             continue;
         }
@@ -574,7 +574,7 @@ void *SV_SectorGetElem(int index)
 {
     if (index < 0 || index >= numsectors)
     {
-        EDGEWarning("LOADGAME: Invalid Sector: %d\n", index);
+        LogWarning("LOADGAME: Invalid Sector: %d\n", index);
         index = 0;
     }
 
@@ -594,7 +594,7 @@ void SV_SectorCreateElems(int num_elems)
     // and defaults are initialised there.
 
     if (num_elems != numsectors)
-        EDGEError("LOADGAME: SECTOR MISMATCH !  (%d != %d)\n", num_elems, numsectors);
+        FatalError("LOADGAME: SECTOR MISMATCH !  (%d != %d)\n", num_elems, numsectors);
 
     // clear animate list
 }
@@ -694,13 +694,13 @@ bool SR_LevelGetSurfPtr(void *storage, int index, void *extra)
     }
 
     if (str[1] != ':')
-        EDGEError("SR_LevelGetSurfPtr: invalid surface string `%s'\n", str);
+        FatalError("SR_LevelGetSurfPtr: invalid surface string `%s'\n", str);
 
     num = strtol(str + 2, nullptr, 0);
 
     if (num < 0 || num >= numsectors)
     {
-        EDGEWarning("SR_LevelGetSurfPtr: bad sector ref %d\n", num);
+        LogWarning("SR_LevelGetSurfPtr: bad sector ref %d\n", num);
         num = 0;
     }
 
@@ -709,7 +709,7 @@ bool SR_LevelGetSurfPtr(void *storage, int index, void *extra)
     else if (str[0] == 'C')
         (*dest) = &sectors[num].ceil;
     else
-        EDGEError("SR_LevelGetSurfPtr: invalid surface plane `%s'\n", str);
+        FatalError("SR_LevelGetSurfPtr: invalid surface plane `%s'\n", str);
 
     SV_FreeString(str);
     return true;
@@ -753,7 +753,7 @@ void SR_LevelPutSurfPtr(void *storage, int index, void *extra)
         }
     }
 
-    EDGEWarning("SR_LevelPutSurfPtr: surface %p not found !\n", src);
+    LogWarning("SR_LevelPutSurfPtr: surface %p not found !\n", src);
     SV_PutString("F:0");
 }
 
@@ -771,7 +771,7 @@ bool SR_LevelGetImage(void *storage, int index, void *extra)
     }
 
     if (str[1] != ':')
-        EDGEWarning("SR_LevelGetImage: invalid image string `%s'\n", str);
+        LogWarning("SR_LevelGetImage: invalid image string `%s'\n", str);
 
     (*dest) = W_ImageParseSaveString(str[0], str + 2);
 
@@ -853,7 +853,7 @@ bool SR_LineGetSpecial(void *storage, int index, void *extra)
     }
 
     if (str[0] != ':')
-        EDGEError("SR_LineGetSpecial: invalid special `%s'\n", str);
+        FatalError("SR_LineGetSpecial: invalid special `%s'\n", str);
 
     (*dest) = P_LookupLineType(strtol(str + 1, nullptr, 0));
 
@@ -896,7 +896,7 @@ bool SR_SectorGetSpecial(void *storage, int index, void *extra)
     }
 
     if (str[0] != ':')
-        EDGEError("SR_SectorGetSpecial: invalid special `%s'\n", str);
+        FatalError("SR_SectorGetSpecial: invalid special `%s'\n", str);
 
     (*dest) = P_LookupSectorType(strtol(str + 1, nullptr, 0));
 
@@ -963,7 +963,7 @@ bool SR_SectorGetPropRef(void *storage, int index, void *extra)
 
     if (num < 0 || num >= numsectors)
     {
-        EDGEWarning("SR_SectorGetPropRef: bad sector ref %d\n", num);
+        LogWarning("SR_SectorGetPropRef: bad sector ref %d\n", num);
         num = 0;
     }
 
@@ -999,7 +999,7 @@ void SR_SectorPutPropRef(void *storage, int index, void *extra)
 
     if (i >= numsectors)
     {
-        EDGEWarning("SR_SectorPutPropRef: properties %p not found !\n", src);
+        LogWarning("SR_SectorPutPropRef: properties %p not found !\n", src);
         i = 0;
     }
 

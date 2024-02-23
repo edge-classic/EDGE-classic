@@ -54,7 +54,7 @@ static bool GlobDumpVARI(void)
         return false;
     }
 
-    EDGEDebugf("      Var: %s=%s\n", var_name, var_data);
+    LogDebug("      Var: %s=%s\n", var_name, var_data);
 
     SV_FreeString(var_name);
     SV_FreeString(var_data);
@@ -64,7 +64,7 @@ static bool GlobDumpVARI(void)
 
 static bool GlobDumpWADS(void)
 {
-    EDGEDebugf("      Wad info\n");
+    LogDebug("      Wad info\n");
 
     //!!! IMPLEMENT THIS
     return true;
@@ -72,7 +72,7 @@ static bool GlobDumpWADS(void)
 
 static bool GlobDumpVIEW(void)
 {
-    EDGEDebugf("      Screenshot\n");
+    LogDebug("      Screenshot\n");
 
     //!!! IMPLEMENT THIS
     return true;
@@ -82,7 +82,7 @@ static bool SV_DumpGLOB(void)
 {
     char marker[6];
 
-    EDGEDebugf("   Global Area:\n");
+    LogDebug("   Global Area:\n");
 
     // read through all the chunks, picking the bits we need
 
@@ -90,7 +90,7 @@ static bool SV_DumpGLOB(void)
     {
         if (SV_GetError() != 0)
         {
-            EDGEDebugf("   *  Unknown Error !\n");
+            LogDebug("   *  Unknown Error !\n");
             return false;
         }
 
@@ -116,16 +116,16 @@ static bool SV_DumpGLOB(void)
         }
 
         // skip unknown chunk
-        EDGEDebugf("      Unknown GLOB chunk [%s]\n", marker);
+        LogDebug("      Unknown GLOB chunk [%s]\n", marker);
 
         if (!SV_SkipReadChunk(marker))
         {
-            EDGEDebugf("   *  Skipping unknown chunk failed !\n");
+            LogDebug("   *  Skipping unknown chunk failed !\n");
             return false;
         }
     }
 
-    EDGEDebugf("   *  End of globals\n");
+    LogDebug("   *  End of globals\n");
 
     return true;
 }
@@ -146,7 +146,7 @@ static bool SV_DumpSTRU(void)
     struct_name = SV_GetString();
     marker      = SV_GetString();
 
-    EDGEDebugf("   Struct def: %s  Fields: %d  Marker: [%s]\n", struct_name, fields, marker);
+    LogDebug("   Struct def: %s  Fields: %d  Marker: [%s]\n", struct_name, fields, marker);
 
     SV_FreeString(struct_name);
     SV_FreeString(marker);
@@ -177,7 +177,7 @@ static bool SV_DumpSTRU(void)
         else
             sprintf(count_buf, "[%d]", count);
 
-        EDGEDebugf("      Field: %s%s  Kind: %s%s  Size: %d\n", field_name, count_buf,
+        LogDebug("      Field: %s%s  Kind: %s%s  Size: %d\n", field_name, count_buf,
                      (kind == SFKIND_Numeric)  ? "Numeric"
                      : (kind == SFKIND_String) ? "String"
                      : (kind == SFKIND_Index)  ? "Index in "
@@ -203,7 +203,7 @@ static bool SV_DumpARRY(void)
     array_name  = SV_GetString();
     struct_name = SV_GetString();
 
-    EDGEDebugf("   Array def: %s  Count: %d  Struct: %s\n", array_name, count, struct_name);
+    LogDebug("   Array def: %s  Count: %d  Struct: %s\n", array_name, count, struct_name);
 
     SV_FreeString(array_name);
     SV_FreeString(struct_name);
@@ -215,7 +215,7 @@ static bool SV_DumpDATA(void)
 {
     const char *array_name = SV_GetString();
 
-    EDGEDebugf("   Data for array %s  Size: %d\n", array_name, SV_RemainingChunkSize());
+    LogDebug("   Data for array %s  Size: %d\n", array_name, SV_RemainingChunkSize());
 
     SV_FreeString(array_name);
 
@@ -237,40 +237,40 @@ void SV_DumpSaveGame(int slot)
 
     std::string fn(G_FileNameFromSlot(slot));
 
-    EDGEDebugf("DUMPING SAVE GAME: %d  FILE: %s\n", slot, fn.c_str());
+    LogDebug("DUMPING SAVE GAME: %d  FILE: %s\n", slot, fn.c_str());
 
     if (!SV_OpenReadFile(fn.c_str()))
     {
-        EDGEDebugf("*  Unable to open file !\n");
+        LogDebug("*  Unable to open file !\n");
         return;
     }
 
-    EDGEDebugf("   File opened OK.\n");
+    LogDebug("   File opened OK.\n");
 
     if (!SV_VerifyHeader(&version))
     {
-        EDGEDebugf("*  VerifyHeader failed !\n");
+        LogDebug("*  VerifyHeader failed !\n");
         SV_CloseReadFile();
         return;
     }
 
-    EDGEDebugf("   Header OK.  Version: %x.%02x  PL: %x\n", (version >> 16) & 0xFF, (version >> 8) & 0xFF,
+    LogDebug("   Header OK.  Version: %x.%02x  PL: %x\n", (version >> 16) & 0xFF, (version >> 8) & 0xFF,
                  version & 0xFF);
 
     if (!SV_VerifyContents())
     {
-        EDGEDebugf("*  VerifyContents failed !\n");
+        LogDebug("*  VerifyContents failed !\n");
         SV_CloseReadFile();
         return;
     }
 
-    EDGEDebugf("   Body OK.\n");
+    LogDebug("   Body OK.\n");
 
     for (;;)
     {
         if (SV_GetError() != 0)
         {
-            EDGEDebugf("   Unknown Error !\n");
+            LogDebug("   Unknown Error !\n");
             break;
         }
 
@@ -278,7 +278,7 @@ void SV_DumpSaveGame(int slot)
 
         if (strcmp(marker, DATA_END_MARKER) == 0)
         {
-            EDGEDebugf("   End-of-Data marker found.\n");
+            LogDebug("   End-of-Data marker found.\n");
             break;
         }
 
@@ -289,13 +289,13 @@ void SV_DumpSaveGame(int slot)
 
             if (!SV_DumpGLOB())
             {
-                EDGEDebugf("   Error while dumping [GLOB]\n");
+                LogDebug("   Error while dumping [GLOB]\n");
                 break;
             }
 
             if (!SV_PopReadChunk())
             {
-                EDGEDebugf("   Error popping [GLOB]\n");
+                LogDebug("   Error popping [GLOB]\n");
                 break;
             }
 
@@ -309,13 +309,13 @@ void SV_DumpSaveGame(int slot)
 
             if (!SV_DumpSTRU())
             {
-                EDGEDebugf("   Error while dumping [STRU]\n");
+                LogDebug("   Error while dumping [STRU]\n");
                 break;
             }
 
             if (!SV_PopReadChunk())
             {
-                EDGEDebugf("   Error popping [STRU]\n");
+                LogDebug("   Error popping [STRU]\n");
                 break;
             }
 
@@ -329,13 +329,13 @@ void SV_DumpSaveGame(int slot)
 
             if (!SV_DumpARRY())
             {
-                EDGEDebugf("   Error while dumping [ARRY]\n");
+                LogDebug("   Error while dumping [ARRY]\n");
                 break;
             }
 
             if (!SV_PopReadChunk())
             {
-                EDGEDebugf("   Error popping [ARRY]\n");
+                LogDebug("   Error popping [ARRY]\n");
                 break;
             }
 
@@ -349,13 +349,13 @@ void SV_DumpSaveGame(int slot)
 
             if (!SV_DumpDATA())
             {
-                EDGEDebugf("   Error while dumping [DATA]\n");
+                LogDebug("   Error while dumping [DATA]\n");
                 break;
             }
 
             if (!SV_PopReadChunk())
             {
-                EDGEDebugf("   Error popping [DATA]\n");
+                LogDebug("   Error popping [DATA]\n");
                 break;
             }
 
@@ -363,18 +363,18 @@ void SV_DumpSaveGame(int slot)
         }
 
         // skip unknown chunk
-        EDGEDebugf("   Unknown top-level chunk [%s]\n", marker);
+        LogDebug("   Unknown top-level chunk [%s]\n", marker);
 
         if (!SV_SkipReadChunk(marker))
         {
-            EDGEDebugf("   Skipping unknown chunk failed !\n");
+            LogDebug("   Skipping unknown chunk failed !\n");
             break;
         }
     }
 
     SV_CloseReadFile();
 
-    EDGEDebugf("*  DUMP FINISHED\n");
+    LogDebug("*  DUMP FINISHED\n");
 }
 
 //--- editor settings ---

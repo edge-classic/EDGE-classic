@@ -120,7 +120,7 @@ static bool HasFinale(const FinaleDefinition *F, FinaleStage cur)
             return F->docast_;
 
         default:
-            EDGEError("Bad parameter passed to HasFinale().\n");
+            FatalError("Bad parameter passed to HasFinale().\n");
     }
 
     return false; /* NOT REACHED */
@@ -151,7 +151,7 @@ static void DoStartFinale(void)
             break;
 
         case kFinaleStageMovie:
-            EDGEPlayMovie(finale->movie_);
+            PlayMovie(finale->movie_);
             DoBumpFinale();
             break;
 
@@ -171,7 +171,7 @@ static void DoStartFinale(void)
             break;
 
         default:
-            EDGEError("DoStartFinale: bad stage #%d\n", (int)finale_stage);
+            FatalError("DoStartFinale: bad stage #%d\n", (int)finale_stage);
             break;
     }
 
@@ -339,7 +339,7 @@ void FinaleTicker(void)
             break;
 
         default:
-            EDGEError("FinaleTicker: bad finale_stage #%d\n", (int)finale_stage);
+            FatalError("FinaleTicker: bad finale_stage #%d\n", (int)finale_stage);
             break;
     }
 
@@ -362,15 +362,15 @@ static void TextWrite(void)
     // 98-7-10 KM erase the entire screen to a tiled background
     if (finale_text_background)
     {
-        HUDSetScale(finale_text_background_scale);
+        HudSetScale(finale_text_background_scale);
 
         if (finale->text_flat_[0])
         {
             // AJA 2022: make the flats be square, not squished
-            HUDSetCoordinateSystem(266, 200);
+            HudSetCoordinateSystem(266, 200);
 
             // Lobo: if it's a flat, tile it
-            HUDTileImage(hud_x_left, 0, hud_x_right - hud_x_left, 200,
+            HudTileImage(hud_x_left, 0, hud_x_right - hud_x_left, 200,
                           finale_text_background);  // Lobo: Widescreen support
         }
         else
@@ -379,14 +379,14 @@ static void TextWrite(void)
             {
                 if (!finale_text_background->blurred_version)
                     W_ImageStoreBlurred(finale_text_background, 0.75f);
-                HUDStretchImage(-320, -200, 960, 600,
+                HudStretchImage(-320, -200, 960, 600,
                                  finale_text_background->blurred_version, 0, 0);
             }
-            HUDDrawImageTitleWS(finale_text_background);
+            HudDrawImageTitleWS(finale_text_background);
         }
 
         // reset coordinate system
-        HUDReset();
+        HudReset();
     }
 
     Style *style;
@@ -404,27 +404,27 @@ static void TextWrite(void)
 
     SYS_ASSERT(finale);
 
-    // HUDSetFont();
-    // HUDSetScale();
-    HUDSetTextColor(finale_text_color);  // set a default
+    // HudSetFont();
+    // HudSetScale();
+    HudSetTextColor(finale_text_color);  // set a default
 
     float txtscale = 0.9;  // set a default
     if (style->definition_->text_[t_type].scale_)
     {
         txtscale = style->definition_->text_[t_type].scale_;
-        HUDSetScale(txtscale);
+        HudSetScale(txtscale);
     }
 
     if (style->definition_->text_[t_type].colmap_)
     {
         const Colormap *colmap = style->definition_->text_[t_type].colmap_;
-        HUDSetTextColor(V_GetFontColor(colmap));
+        HudSetTextColor(V_GetFontColor(colmap));
     }
 
     int h = 11;  // set a default
     if (style->fonts_[t_type])
     {
-        HUDSetFont(style->fonts_[t_type]);
+        HudSetFont(style->fonts_[t_type]);
         h = style->fonts_[t_type]->NominalHeight();
         h = h + (3 * txtscale);  // bit of spacing
         h = h * txtscale;
@@ -441,7 +441,7 @@ static void TextWrite(void)
     {
         if (count == 0 || *ch == 0)
         {
-            HUDDrawText(cx, cy, line);
+            HudDrawText(cx, cy, line);
             break;
         }
 
@@ -450,7 +450,7 @@ static void TextWrite(void)
 
         if (c == '\n' || pos > (int)sizeof(line) - 4)
         {
-            HUDDrawText(cx, cy, line);
+            HudDrawText(cx, cy, line);
 
             pos     = 0;
             line[0] = 0;
@@ -464,9 +464,9 @@ static void TextWrite(void)
     }
 
     // set back to defaults
-    HUDSetFont();
-    HUDSetScale();
-    HUDSetTextColor();
+    HudSetFont();
+    HudSetScale();
+    HudSetTextColor();
 }
 
 //
@@ -706,36 +706,36 @@ static void CastDrawer(void)
         if (r_titlescaling.d_)  // Fill Border
         {
             if (!image->blurred_version) W_ImageStoreBlurred(image, 0.75f);
-            HUDStretchImage(-320, -200, 960, 600, image->blurred_version, 0,
+            HudStretchImage(-320, -200, 960, 600, image->blurred_version, 0,
                              0);
         }
-        HUDDrawImageTitleWS(image);
+        HudDrawImageTitleWS(image);
     }
 
-    HUDSetAlignment(0, -1);
+    HudSetAlignment(0, -1);
 
     if (finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText]
             .colmap_)
     {
-        HUDSetTextColor(V_GetFontColor(
+        HudSetTextColor(V_GetFontColor(
             finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText]
                 .colmap_));
     }
-    else { HUDSetTextColor(SG_YELLOW_RGBA32); }
+    else { HudSetTextColor(SG_YELLOW_RGBA32); }
 
     TempScale =
         finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText].scale_;
-    HUDSetScale(TempScale);
+    HudSetScale(TempScale);
 
     if (finale_cast_style->fonts_[StyleDefinition::kTextSectionText])
     {
-        HUDSetFont(
+        HudSetFont(
             finale_cast_style->fonts_[StyleDefinition::kTextSectionText]);
     }
 
-    HUDDrawText(160, 180, cast_title);
+    HudDrawText(160, 180, cast_title);
 
-    HUDReset();
+    HudReset();
 
     bool flip;
 
@@ -754,7 +754,7 @@ static void CastDrawer(void)
     else
         scale_y = 3;
 
-    HUDGetCastPosition(&pos_x, &pos_y, &scale_x, &scale_y);
+    HudGetCastPosition(&pos_x, &pos_y, &scale_x, &scale_y);
 
     if (cast_state->flags & kStateFrameFlagModel)
     {
@@ -840,9 +840,9 @@ static void BunnyScroll(void)
     if (scrolled > (TempWidth + CenterX)) scrolled = (TempWidth + CenterX);
     if (scrolled < 0) scrolled = 0;
 
-    HUDStretchImage(CenterX - scrolled, 0, TempWidth, TempHeight, p1, 0.0,
+    HudStretchImage(CenterX - scrolled, 0, TempWidth, TempHeight, p1, 0.0,
                      0.0);
-    HUDStretchImage((CenterX + TempWidth) - (scrolled + 1), 0, TempWidth,
+    HudStretchImage((CenterX + TempWidth) - (scrolled + 1), 0, TempWidth,
                      TempHeight, p2, 0.0, 0.0);
 
     if (finale_count < 1130) return;
@@ -851,7 +851,7 @@ static void BunnyScroll(void)
     {
         p1 = W_ImageLookup("END0");
 
-        HUDDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
+        HudDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
         laststage = 0;
         return;
     }
@@ -870,7 +870,7 @@ static void BunnyScroll(void)
 
     p1 = W_ImageLookup(name);
 
-    HUDDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
+    HudDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
 }
 
 void FinaleDrawer(void)
@@ -898,10 +898,10 @@ void FinaleDrawer(void)
             if (r_titlescaling.d_)  // Fill Border
             {
                 if (!image->blurred_version) W_ImageStoreBlurred(image, 0.75f);
-                HUDStretchImage(-320, -200, 960, 600, image->blurred_version,
+                HudStretchImage(-320, -200, 960, 600, image->blurred_version,
                                  0, 0);
             }
-            HUDDrawImageTitleWS(image);
+            HudDrawImageTitleWS(image);
             break;
         }
 
@@ -914,7 +914,7 @@ void FinaleDrawer(void)
             break;
 
         default:
-            EDGEError("FinaleDrawer: bad finale_stage #%d\n", (int)finale_stage);
+            FatalError("FinaleDrawer: bad finale_stage #%d\n", (int)finale_stage);
             break;
     }
 }

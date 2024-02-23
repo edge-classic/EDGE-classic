@@ -350,7 +350,7 @@ void sounds::AlterSound(int new_val)
 
     if (epi::StringCaseCompareASCII(deh_field, "Offset") == 0)
     {
-        EDGEDebugf(
+        LogDebug(
             "Dehacked: Warning - Line %d: raw sound Offset not supported.\n",
             patch::line_num);
         return;
@@ -360,7 +360,7 @@ void sounds::AlterSound(int new_val)
     {
         if (new_val < 0)
         {
-            EDGEDebugf(
+            LogDebug(
                 "Dehacked: Warning - Line %d: bad sound priority value: %d.\n",
                 patch::line_num, new_val);
             new_val = 0;
@@ -372,7 +372,7 @@ void sounds::AlterSound(int new_val)
         return;
     }
 
-    EDGEDebugf("Dehacked: Warning - UNKNOWN SOUND FIELD: %s\n", deh_field);
+    LogDebug("Dehacked: Warning - UNKNOWN SOUND FIELD: %s\n", deh_field);
 }
 
 const char *sounds::GetEdgeSfxName(int sound_id)
@@ -470,7 +470,7 @@ void sounds::WriteSound(int sound_id)
 
     const char *ddf_name = GetEdgeSfxName(sound_id);
     if (ddf_name == nullptr)
-        EDGEError("Dehacked: Error - No DDF name for sound %d ??\n", sound_id);
+        FatalError("Dehacked: Error - No DDF name for sound %d ??\n", sound_id);
 
     wad::Printf("[%s]\n", ddf_name);
 
@@ -556,7 +556,7 @@ void sounds::AlterBexSound(const char *new_val)
 
     if (strlen(new_val) < 1 || strlen(new_val) > 6)
     {
-        EDGEDebugf("Dehacked: Warning - Bad length for sound name '%s'.\n",
+        LogDebug("Dehacked: Warning - Bad length for sound name '%s'.\n",
                  new_val);
         return;
     }
@@ -567,7 +567,7 @@ void sounds::AlterBexSound(const char *new_val)
         int num = atoi(old_val);
         if (num < 1 || num > 32767)
         {
-            EDGEDebugf(
+            LogDebug(
                 "Dehacked: Warning - Line %d: illegal sound number '%s'.\n",
                 patch::line_num, old_val);
         }
@@ -581,13 +581,13 @@ void sounds::AlterBexSound(const char *new_val)
 
     if (strlen(old_val) < 1 || strlen(old_val) > 6)
     {
-        EDGEDebugf("Dehacked: Warning - Bad length for sound name '%s'.\n",
+        LogDebug("Dehacked: Warning - Bad length for sound name '%s'.\n",
                  old_val);
         return;
     }
 
     if (!ReplaceSound(old_val, new_val))
-        EDGEDebugf("Dehacked: Warning - Line %d: unknown sound name '%s'.\n",
+        LogDebug("Dehacked: Warning - Line %d: unknown sound name '%s'.\n",
                  patch::line_num, old_val);
 }
 

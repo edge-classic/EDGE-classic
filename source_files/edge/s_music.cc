@@ -81,7 +81,7 @@ void S_ChangeMusic(int entrynum, bool loop)
     const PlaylistEntry *play = playlist.Find(entrynum);
     if (!play)
     {
-        EDGEWarning("Could not find music entry [%d]\n", entrynum);
+        LogWarning("Could not find music entry [%d]\n", entrynum);
         return;
     }
 
@@ -96,7 +96,7 @@ void S_ChangeMusic(int entrynum, bool loop)
         F = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (!F)
         {
-            EDGEWarning("S_ChangeMusic: Can't Find File '%s'\n", fn.c_str());
+            LogWarning("S_ChangeMusic: Can't Find File '%s'\n", fn.c_str());
             return;
         }
         break;
@@ -106,7 +106,7 @@ void S_ChangeMusic(int entrynum, bool loop)
         F = W_OpenPackFile(play->info_);
         if (!F)
         {
-            EDGEWarning("S_ChangeMusic: PK3 entry '%s' not found.\n", play->info_.c_str());
+            LogWarning("S_ChangeMusic: PK3 entry '%s' not found.\n", play->info_.c_str());
             return;
         }
         break;
@@ -116,7 +116,7 @@ void S_ChangeMusic(int entrynum, bool loop)
         int lump = W_CheckNumForName(play->info_.c_str());
         if (lump < 0)
         {
-            EDGEWarning("S_ChangeMusic: LUMP '%s' not found.\n", play->info_.c_str());
+            LogWarning("S_ChangeMusic: LUMP '%s' not found.\n", play->info_.c_str());
             return;
         }
 
@@ -125,7 +125,7 @@ void S_ChangeMusic(int entrynum, bool loop)
     }
 
     default:
-        EDGEPrintf("S_ChangeMusic: invalid method %d for MUS/MIDI\n", play->infotype_);
+        LogPrint("S_ChangeMusic: invalid method %d for MUS/MIDI\n", play->infotype_);
         return;
     }
 
@@ -135,14 +135,14 @@ void S_ChangeMusic(int entrynum, bool loop)
     if (!data)
     {
         delete F;
-        EDGEWarning("S_ChangeMusic: Error loading data.\n");
+        LogWarning("S_ChangeMusic: Error loading data.\n");
         return;
     }
     if (length < 4)
     {
         delete F;
         delete data;
-        EDGEPrintf("S_ChangeMusic: ignored short data (%d bytes)\n", length);
+        LogPrint("S_ChangeMusic: ignored short data (%d bytes)\n", length);
         return;
     }
 
@@ -218,7 +218,7 @@ void S_ChangeMusic(int entrynum, bool loop)
     default:
         delete F;
         delete data;
-        EDGEPrintf("S_ChangeMusic: unknown format\n");
+        LogPrint("S_ChangeMusic: unknown format\n");
         break;
     }
 }

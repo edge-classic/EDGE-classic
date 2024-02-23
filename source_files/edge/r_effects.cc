@@ -191,12 +191,12 @@ void RGL_ColourmapEffect(player_t *player)
         }
         else
         {
-            float old_alpha = HUDGetAlpha();
-            HUDSetAlpha(0.0f);
+            float old_alpha = HudGetAlpha();
+            HudSetAlpha(0.0f);
             s = HMM_MAX(0.5f, s);
-            HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+            HudThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
                         epi::MakeRGBA(RoundToInteger(s * 255), RoundToInteger(s * 255), RoundToInteger(s * 255)), 25.0f);
-            HUDSetAlpha(old_alpha);
+            HudSetAlpha(old_alpha);
         }
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
@@ -213,7 +213,7 @@ void RGL_PaletteEffect(player_t *player)
 
     float s = EffectStrength(player);
 
-    float old_alpha = HUDGetAlpha();
+    float old_alpha = HudGetAlpha();
 
     if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 && player->effect_colourmap &&
         (player->effect_left & 8 || reduce_flash))
@@ -228,8 +228,8 @@ void RGL_PaletteEffect(player_t *player)
             glColor4f(r, g, b, 0.20f * s);
         else
         {
-            HUDSetAlpha(0.20f * s);
-            HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+            HudSetAlpha(0.20f * s);
+            HudThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
                         epi::MakeRGBA(RoundToInteger(r * 255), RoundToInteger(g * 255), RoundToInteger(b * 255)), 25.0f);
         }
     }
@@ -249,8 +249,8 @@ void RGL_PaletteEffect(player_t *player)
                       (float)rgb_data[2] / (float)rgb_max, (float)rgb_max / 255.0f);
         else
         {
-            HUDSetAlpha((float)rgb_max / 255.0f);
-            HUDThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+            HudSetAlpha((float)rgb_max / 255.0f);
+            HudThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
                         epi::MakeRGBA(RoundToInteger((float)rgb_data[0] / rgb_max * 255),
                                  RoundToInteger((float)rgb_data[1] / rgb_max * 255),
                                  RoundToInteger((float)rgb_data[2] / rgb_max * 255)),
@@ -258,7 +258,7 @@ void RGL_PaletteEffect(player_t *player)
         }
     }
 
-    HUDSetAlpha(old_alpha);
+    HudSetAlpha(old_alpha);
 
     if (!reduce_flash)
     {
@@ -291,7 +291,7 @@ void FUZZ_Update(void)
     {
         fuzz_image = W_ImageLookup("FUZZ_MAP", kImageNamespaceTexture, ILF_Exact | ILF_Null);
         if (!fuzz_image)
-            EDGEError("Cannot find essential image: FUZZ_MAP\n");
+            FatalError("Cannot find essential image: FUZZ_MAP\n");
     }
 
     fuzz_yoffset = ((framecount * 3) & 1023) / 256.0;

@@ -88,7 +88,7 @@ static void ColmapParseField(const char *field, const char *contents, int index,
                              bool is_last)
 {
 #if (DEBUG_DDF)
-    EDGEDebugf("COLMAP_PARSE: %s = %s;\n", field, contents);
+    LogDebug("COLMAP_PARSE: %s = %s;\n", field, contents);
 #endif
 
     // -AJA- backwards compatibility cruft...
@@ -147,7 +147,7 @@ static void ColmapFinishEntry(void)
 
 static void ColmapClearAll(void)
 {
-    EDGEWarning("Ignoring #CLEARALL in colormap.ddf\n");
+    LogWarning("Ignoring #CLEARALL in colormap.ddf\n");
 }
 
 void DDF_ReadColourMaps(const std::string &data)
@@ -310,7 +310,7 @@ void DDF_AddRawColourmap(const char *name, int size, const char *pack_name)
 {
     if (size < 256)
     {
-        EDGEWarning("WAD Colourmap '%s' too small (%d < %d)\n", name, size, 256);
+        LogWarning("WAD Colourmap '%s' too small (%d < %d)\n", name, size, 256);
         return;
     }
 
@@ -349,7 +349,7 @@ void DDF_AddRawColourmap(const char *name, int size, const char *pack_name)
 
     DDF_AddFile(kDDFTypeColourMap, text, pack_name ? pack_name : name);
 
-    EDGEDebugf("- Added RAW colormap '%s' start=0 length=%s\n", name, length_buf);
+    LogDebug("- Added RAW colormap '%s' start=0 length=%s\n", name, length_buf);
 }
 
 //--- editor settings ---

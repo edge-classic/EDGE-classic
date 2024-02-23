@@ -96,7 +96,7 @@ static void SoundParseField(const char *field, const char *contents, int index,
                             bool is_last)
 {
 #if (DEBUG_DDF)
-    EDGEDebugf("SOUND_PARSE: %s = %s;\n", field, contents);
+    LogDebug("SOUND_PARSE: %s = %s;\n", field, contents);
 #endif
 
     // -AJA- ignore these for backwards compatibility
@@ -122,7 +122,7 @@ static void SoundFinishEntry(void)
 
 static void SoundClearAll(void)
 {
-    EDGEWarning("Ignoring #CLEARALL in sounds.ddf\n");
+    LogWarning("Ignoring #CLEARALL in sounds.ddf\n");
 }
 
 void DDF_ReadSFX(const std::string &data)

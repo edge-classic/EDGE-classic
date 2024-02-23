@@ -195,7 +195,7 @@ int TranslateSDLKey(SDL_Scancode key)
 void HandleFocusGain(void)
 {
     // Hide cursor and grab input
-    EDGEGrabCursor(true);
+    GrabCursor(true);
 
     // Ignore any pending mouse motion
     eat_mouse_motion = true;
@@ -206,7 +206,7 @@ void HandleFocusGain(void)
 
 void HandleFocusLost(void)
 {
-    EDGEGrabCursor(false);
+    GrabCursor(false);
 
     E_Idle();
 
@@ -257,7 +257,7 @@ void HandleKeyEvent(SDL_Event *ev)
         R_ToggleFullscreen();
         if (DISPLAYMODE == DisplayMode::SCR_WINDOW)
         {
-            EDGEGrabCursor(false);
+            GrabCursor(false);
             need_mouse_recapture = true;
         }
         return;
@@ -441,7 +441,7 @@ static void I_OpenJoystick(int index)
     joystick_info = SDL_JoystickOpen(index - 1);
     if (!joystick_info)
     {
-        EDGEPrintf("Unable to open joystick %d (SDL error)\n", index);
+        LogPrint("Unable to open joystick %d (SDL error)\n", index);
         return;
     }
 
@@ -451,7 +451,7 @@ static void I_OpenJoystick(int index)
 
     if (!gamepad_info)
     {
-        EDGEPrintf("Unable to open joystick %s as a gamepad!\n",
+        LogPrint("Unable to open joystick %s as a gamepad!\n",
                  SDL_JoystickName(joystick_info));
         SDL_JoystickClose(joystick_info);
         joystick_info = nullptr;
@@ -487,11 +487,11 @@ static void I_OpenJoystick(int index)
             gp_num_buttons++;
     }
 
-    EDGEPrintf("Opened gamepad %d : %s\n", current_joystick, name);
-    EDGEPrintf("Sticks:%d Triggers: %d Buttons: %d Touchpads: %d\n",
+    LogPrint("Opened gamepad %d : %s\n", current_joystick, name);
+    LogPrint("Sticks:%d Triggers: %d Buttons: %d Touchpads: %d\n",
              gp_total_joysticksticks, gp_num_triggers, gp_num_buttons,
              SDL_GameControllerGetNumTouchpads(gamepad_info));
-    EDGEPrintf("Rumble:%s Trigger Rumble: %s LED: %s\n",
+    LogPrint("Rumble:%s Trigger Rumble: %s LED: %s\n",
              SDL_GameControllerHasRumble(gamepad_info) ? "Yes" : "No",
              SDL_GameControllerHasRumbleTriggers(gamepad_info) ? "Yes" : "No",
              SDL_GameControllerHasLED(gamepad_info) ? "Yes" : "No");
@@ -545,7 +545,7 @@ static void CheckJoystickChanged(void)
         SDL_JoystickClose(joystick_info);
         joystick_info = nullptr;
 
-        EDGEPrintf("Closed joystick %d\n", current_joystick);
+        LogPrint("Closed joystick %d\n", current_joystick);
         current_joystick = 0;
 
         current_gamepad = -1;
@@ -589,7 +589,7 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
                 SCREENHEIGHT = sdl_ev->window.data2;
                 SCREENBITS   = 24;
                 DISPLAYMODE  = 0;
-                EDGEDeterminePixelAspect();
+                DeterminePixelAspect();
             }
 #endif
 
@@ -612,7 +612,7 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
 #else
             if (need_mouse_recapture)
             {
-                EDGEGrabCursor(true);
+                GrabCursor(true);
                 need_mouse_recapture = false;
                 break;
             }
@@ -694,42 +694,42 @@ void I_ShowGamepads(void)
 {
     if (no_joystick)
     {
-        EDGEPrintf("Gamepad system is disabled.\n");
+        LogPrint("Gamepad system is disabled.\n");
         return;
     }
 
     if (total_joysticks == 0)
     {
-        EDGEPrintf("No gamepads found.\n");
+        LogPrint("No gamepads found.\n");
         return;
     }
 
-    EDGEPrintf("Gamepads:\n");
+    LogPrint("Gamepads:\n");
 
     for (int i = 0; i < total_joysticks; i++)
     {
         const char *name = SDL_GameControllerNameForIndex(i);
         if (!name) name = "(UNKNOWN)";
 
-        EDGEPrintf("  %2d : %s\n", i + 1, name);
+        LogPrint("  %2d : %s\n", i + 1, name);
     }
 }
 
-void EDGEStartupJoystick(void)
+void StartupJoystick(void)
 {
     current_joystick = 0;
     joystick_device  = 0;
 
     if (argv::Find("no_joystick") > 0)
     {
-        EDGEPrintf("EDGEStartupControl: Gamepad system disabled.\n");
+        LogPrint("StartupControl: Gamepad system disabled.\n");
         no_joystick = true;
         return;
     }
 
     if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) < 0)
     {
-        EDGEPrintf("EDGEStartupControl: Couldn't init SDL GAMEPAD!\n");
+        LogPrint("StartupControl: Couldn't init SDL GAMEPAD!\n");
         no_joystick = true;
         return;
     }
@@ -738,7 +738,7 @@ void EDGEStartupJoystick(void)
 
     total_joysticks = SDL_NumJoysticks();
 
-    EDGEPrintf("EDGEStartupControl: %d gamepads found.\n", total_joysticks);
+    LogPrint("StartupControl: %d gamepads found.\n", total_joysticks);
 
     if (total_joysticks == 0)
         return;
@@ -751,14 +751,14 @@ void EDGEStartupJoystick(void)
 
 /****** Input Event Generation ******/
 
-void EDGEStartupControl(void)
+void StartupControl(void)
 {
     alt_is_down = false;
 
-    EDGEStartupJoystick();
+    StartupJoystick();
 }
 
-void EDGEControlGetEvents(void)
+void ControlGetEvents(void)
 {
     EDGE_ZoneScoped;
 
@@ -773,7 +773,7 @@ void EDGEControlGetEvents(void)
     }
 }
 
-void EDGEShutdownControl(void)
+void ShutdownControl(void)
 {
     if (gamepad_info)
     {
@@ -787,7 +787,7 @@ void EDGEShutdownControl(void)
     }
 }
 
-int EDGEGetTime(void)
+int GetTime(void)
 {
     Uint32 t = SDL_GetTicks();
 
@@ -797,7 +797,7 @@ int EDGEGetTime(void)
     return (t / 1000) * factor + (t % 1000) * factor / 1000;
 }
 
-int EDGEGetMillies(void) { return SDL_GetTicks(); }
+int GetMilliseconds(void) { return SDL_GetTicks(); }
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -57,7 +57,7 @@ static void FluidError(int level, char* message, void* data)
 {
     (void)level;
     (void)data;
-    EDGEError("Fluidlite: %s\n", message);
+    FatalError("Fluidlite: %s\n", message);
 }
 
 static void *edge_fluid_fopen(fluid_fileapi_t *fileapi, const char *filename)
@@ -81,7 +81,7 @@ static void ConvertToMono(int16_t *dest, const int16_t *src, int len)
 
 bool S_StartupFluid(void)
 {
-    EDGEPrintf("Initializing FluidLite...\n");
+    LogPrint("Initializing FluidLite...\n");
 
     // Check for presence of previous CVAR value's file
     bool cvar_good = false;
@@ -96,10 +96,10 @@ bool S_StartupFluid(void)
 
     if (!cvar_good)
     {
-        EDGEWarning("Cannot find previously used soundfont %s, falling back to default!\n", midi_soundfont.c_str());
+        LogWarning("Cannot find previously used soundfont %s, falling back to default!\n", midi_soundfont.c_str());
         midi_soundfont = epi::SanitizePath(epi::PathAppend(game_directory, "soundfont/Default.sf2"));
         if (!epi::FileExists(midi_soundfont.s_))
-            EDGEError("Fluidlite: Cannot locate default soundfont (Default.sf2)! Please check the /soundfont directory "
+            FatalError("Fluidlite: Cannot locate default soundfont (Default.sf2)! Please check the /soundfont directory "
                     "of your EDGE-Classic install!\n");
     }
 
@@ -126,7 +126,7 @@ bool S_StartupFluid(void)
 
     if (fluid_synth_sfload(edge_fluid, midi_soundfont.c_str(), 1) == -1)
 	{
-		EDGEWarning("FluidLite: Initialization failure.\n");
+		LogWarning("FluidLite: Initialization failure.\n");
         delete_fluid_synth(edge_fluid);
         delete_fluid_settings(edge_fluid_settings);
         return false;
@@ -143,7 +143,7 @@ void S_RestartFluid(void)
     if (fluid_disabled)
 		return;
 
-	EDGEPrintf("Restarting FluidLite...\n");
+	LogPrint("Restarting FluidLite...\n");
 
 	int old_entry = entry_playing;
 
@@ -433,14 +433,14 @@ AbstractMusicPlayer *S_PlayFluid(uint8_t *data, int length, bool loop)
 
     if (!player)
     {
-        EDGEDebugf("FluidLite player: error initializing!\n");
+        LogDebug("FluidLite player: error initializing!\n");
         delete[] data;
         return nullptr;
     }
 
     if (!player->LoadTrack(data, length)) // Lobo: quietly log it instead of completely exiting EDGE
     {
-        EDGEDebugf("FluidLite player: failed to load MIDI file!\n");
+        LogDebug("FluidLite player: failed to load MIDI file!\n");
         delete[] data;
         delete player;
         return nullptr;

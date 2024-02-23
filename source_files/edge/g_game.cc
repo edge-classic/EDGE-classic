@@ -138,7 +138,7 @@ static bool GameSaveGameToFile(std::string filename, const char *description);
 void LoadLevel_Bits(void)
 {
     if (current_map == nullptr)
-        EDGEError("GameDoLoadLevel: No Current Map selected");
+        FatalError("GameDoLoadLevel: No Current Map selected");
 
 #ifdef EDGE_WEB
     S_PauseAudioDevice();
@@ -277,7 +277,7 @@ void LoadLevel_Bits(void)
 //
 void GameDoLoadLevel(void)
 {
-    HUDStart();
+    HudStart();
 
     if (current_hub_tag == 0) SV_ClearSlot("current");
 
@@ -290,10 +290,10 @@ void GameDoLoadLevel(void)
 
         if (epi::TestFileAccess(fn))
         {
-            EDGEPrintf("Loading HUB...\n");
+            LogPrint("Loading HUB...\n");
 
             if (!GameLoadGameFromFile(fn, true))
-                EDGEError("LOAD-HUB failed with filename: %s\n", fn.c_str());
+                FatalError("LOAD-HUB failed with filename: %s\n", fn.c_str());
 
             SpawnInitialPlayers();
 
@@ -355,13 +355,13 @@ bool GameResponder(InputEvent *ev)
         {
             S_PauseMusic();
             S_PauseSound();
-            EDGEGrabCursor(false);
+            GrabCursor(false);
         }
         else
         {
             S_ResumeMusic();
             S_ResumeSound();
-            EDGEGrabCursor(true);
+            GrabCursor(true);
         }
 
         // explicit as probably killed the initial effect
@@ -458,7 +458,7 @@ void GameBigStuff(void)
                 break;
 
             default:
-                EDGEError("GameBigStuff: Unknown game_action %d", game_action);
+                FatalError("GameBigStuff: Unknown game_action %d", game_action);
                 break;
         }
     }
@@ -508,7 +508,7 @@ void GameTicker(void)
 
             P_Ticker(false);
             AutomapTicker();
-            HUDTicker();
+            HudTicker();
             RAD_Ticker();
 
             // do player reborns if needed
@@ -548,7 +548,7 @@ static void RespawnPlayer(player_t *p)
 
 static void SpawnInitialPlayers(void)
 {
-    EDGEDebugf("Deathmatch %d\n", deathmatch);
+    LogDebug("Deathmatch %d\n", deathmatch);
 
     // spawn the active players
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
@@ -568,7 +568,7 @@ static void SpawnInitialPlayers(void)
 
     // check for missing player start.
     if (players[consoleplayer]->mo == nullptr)
-        EDGEError("Missing player start !\n");
+        FatalError("Missing player start !\n");
 
     GameSetDisplayPlayer(consoleplayer);  // view the guy you are playing
 }
@@ -605,10 +605,10 @@ void GameExitToLevel(char *name, int time, bool skip_all)
 
 void GameExitToHub(const char *map_name, int tag)
 {
-    if (tag <= 0) EDGEError("Hub exit line/command: bad tag %d\n", tag);
+    if (tag <= 0) FatalError("Hub exit line/command: bad tag %d\n", tag);
 
     next_map = GameLookupMap(map_name);
-    if (!next_map) EDGEError("GameExitToHub: No such map %s !\n", map_name);
+    if (!next_map) FatalError("GameExitToHub: No such map %s !\n", map_name);
 
     exit_time     = leveltime + 5;
     exit_skip_all = true;
@@ -678,7 +678,7 @@ static void GameDoCompleted(void)
             else
             {
                 // save current map for HUB system
-                EDGEPrintf("Saving HUB...\n");
+                LogPrint("Saving HUB...\n");
 
                 // remember avatars of players, so we can remove them
                 // when we return to this level.
@@ -689,7 +689,7 @@ static void GameDoCompleted(void)
                 std::string fn(SV_FileName("current", mapname));
 
                 if (!GameSaveGameToFile(fn, "__HUB_SAVE__"))
-                    EDGEError("SAVE-HUB failed with filename: %s\n", fn.c_str());
+                    FatalError("SAVE-HUB failed with filename: %s\n", fn.c_str());
 
                 if (!current_hub_first) current_hub_first = current_map;
             }
@@ -728,7 +728,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 {
     if (!SV_OpenReadFile(filename))
     {
-        EDGEPrintf("LOAD-GAME: cannot open %s\n", filename.c_str());
+        LogPrint("LOAD-GAME: cannot open %s\n", filename.c_str());
         return false;
     }
 
@@ -736,7 +736,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 
     if (!SV_VerifyHeader(&version) || !SV_VerifyContents())
     {
-        EDGEPrintf("LOAD-GAME: Savegame is corrupt !\n");
+        LogPrint("LOAD-GAME: Savegame is corrupt !\n");
         SV_CloseReadFile();
         return false;
     }
@@ -745,7 +745,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 
     saveglobals_t *globs = SV_LoadGLOB();
 
-    if (!globs) EDGEError("LOAD-GAME: Bad savegame file (no GLOB)\n");
+    if (!globs) FatalError("LOAD-GAME: Bad savegame file (no GLOB)\n");
 
     // --- pull info from global structure ---
 
@@ -753,7 +753,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
     {
         current_map = GameLookupMap(globs->level);
         if (!current_map)
-            EDGEError("LOAD-HUB: No such map %s !  Check WADS\n", globs->level);
+            FatalError("LOAD-HUB: No such map %s !  Check WADS\n", globs->level);
 
         GameSetDisplayPlayer(consoleplayer);
         automap_active = false;
@@ -766,7 +766,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 
         params.map_ = GameLookupMap(globs->level);
         if (!params.map_)
-            EDGEError("LOAD-GAME: No such map %s !  Check WADS\n", globs->level);
+            FatalError("LOAD-GAME: No such map %s !  Check WADS\n", globs->level);
 
         SYS_ASSERT(params.map_->episode_);
 
@@ -800,7 +800,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
     {
         SV_CloseReadFile();
 
-        EDGEError("LOAD-GAME: Level data does not match !  Check WADs\n");
+        FatalError("LOAD-GAME: Level data does not match !  Check WADs\n");
     }
 
     if (!is_hub)
@@ -827,7 +827,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
         // something went horribly wrong...
         // FIXME (oneday) : show message & go back to title screen
 
-        EDGEError("Bad Save Game !\n");
+        FatalError("Bad Save Game !\n");
     }
 
     SV_FreeGLOB(globs);
@@ -849,7 +849,7 @@ static void GameDoLoadGame(void)
     E_ForceWipe();
 
     const char *dir_name = SV_SlotName(defer_load_slot);
-    EDGEDebugf("GameDoLoadGame : %s\n", dir_name);
+    LogDebug("GameDoLoadGame : %s\n", dir_name);
 
     SV_ClearSlot("current");
     SV_CopySlot(dir_name, "current");
@@ -861,7 +861,7 @@ static void GameDoLoadGame(void)
         // !!! FIXME: what to do?
     }
 
-    HUDStart();
+    HudStart();
 
     V_SetPalette(PALETTE_NORMAL, 0);
 
@@ -894,7 +894,7 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
 
     if (!SV_OpenWriteFile(filename, 0xEC))
     {
-        EDGEPrintf("Unable to create savegame file: %s\n", filename.c_str());
+        LogPrint("Unable to create savegame file: %s\n", filename.c_str());
         return false; /* NOT REACHED */
     }
 
@@ -978,7 +978,7 @@ static void GameDoSaveGame(void)
         SV_ClearSlot(dir_name);
         SV_CopySlot("current", dir_name);
 
-        ConsolePrintf("%s", language["GameSaved"]);
+        ConsolePrint("%s", language["GameSaved"]);
     }
     else
     {
@@ -1149,11 +1149,11 @@ static void InitNew(NewGameParameters &params)
     }
 
     if (numplayers != params.total_players_)
-        EDGEError("Internal Error: InitNew: player miscount (%d != %d)\n",
+        FatalError("Internal Error: InitNew: player miscount (%d != %d)\n",
                 numplayers, params.total_players_);
 
     if (consoleplayer < 0)
-        EDGEError("Internal Error: InitNew: no local players!\n");
+        FatalError("Internal Error: InitNew: no local players!\n");
 
     GameSetDisplayPlayer(consoleplayer);
 
@@ -1177,7 +1177,7 @@ static void InitNew(NewGameParameters &params)
     game_skill = params.skill_;
     deathmatch = params.deathmatch_;
 
-    // EDGEDebugf("GameInitNew: Deathmatch %d Skill %d\n", params.deathmatch,
+    // LogDebug("GameInitNew: Deathmatch %d Skill %d\n", params.deathmatch,
     // (int)params.skill);
 
     // copy global flags into the level-specific flags

@@ -118,7 +118,7 @@ void Seg::Recompute()
 
     p_length_ = hypot(pdx_, pdy_);
 
-    if (p_length_ <= 0) EDGEError("AJBSP: Seg %p has zero p_length_.\n", this);
+    if (p_length_ <= 0) FatalError("AJBSP: Seg %p has zero p_length_.\n", this);
 
     p_perp_ = psy_ * pdx_ - psx_ * pdy_;
     p_para_ = -psx_ * pdx_ - psy_ * pdy_;
@@ -140,10 +140,10 @@ Seg *SplitSeg(Seg *old_seg, double x, double y)
 {
 #if DEBUG_SPLIT
     if (old_seg->linedef)
-        EDGEDebugf("Splitting Linedef %d (%p) at (%1.1f,%1.1f)\n",
+        LogDebug("Splitting Linedef %d (%p) at (%1.1f,%1.1f)\n",
                  old_seg->linedef->index, old_seg, x, y);
     else
-        EDGEDebugf("Splitting Miniseg %p at (%1.1f,%1.1f)\n", old_seg, x, y);
+        LogDebug("Splitting Miniseg %p at (%1.1f,%1.1f)\n", old_seg, x, y);
 #endif
 
     Vertex *new_vert = NewVertexFromSplitSeg(old_seg, x, y);
@@ -160,7 +160,7 @@ Seg *SplitSeg(Seg *old_seg, double x, double y)
     new_seg->Recompute();
 
 #if DEBUG_SPLIT
-    EDGEDebugf("Splitting Vertex is %04X at (%1.1f,%1.1f)\n", new_vert->index,
+    LogDebug("Splitting Vertex is %04X at (%1.1f,%1.1f)\n", new_vert->index,
              new_vert->x, new_vert->y);
 #endif
 
@@ -169,7 +169,7 @@ Seg *SplitSeg(Seg *old_seg, double x, double y)
     if (old_seg->partner_)
     {
 #if DEBUG_SPLIT
-        EDGEDebugf("Splitting partner %p\n", old_seg->partner_);
+        LogDebug("Splitting partner %p\n", old_seg->partner_);
 #endif
 
         new_seg->partner_ = NewSeg();
@@ -497,7 +497,7 @@ double EvalPartition(QuadTree *tree, Seg *part, double best_cost)
     if (info.real_left == 0 || info.real_right == 0)
     {
 #if DEBUG_PICKNODE
-        EDGEDebugf("Eval : No real segs on %s%sside\n",
+        LogDebug("Eval : No real segs on %s%sside\n",
                  info.real_left ? "" : "left ",
                  info.real_right ? "" : "right ");
 #endif
@@ -604,7 +604,7 @@ bool PickNodeWorker(QuadTree *part_list, QuadTree *tree, Seg **best,
     for (Seg *part = part_list->list_; part; part = part->next_)
     {
 #if DEBUG_PICKNODE
-        EDGEDebugf("PickNode:   %sSEG %p  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+        LogDebug("PickNode:   %sSEG %p  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
                  part->linedef ? "" : "MINI", part, part->start->x,
                  part->start->y, part->end->x, part->end->y);
 #endif
@@ -648,7 +648,7 @@ static Seg *PickNode(QuadTree *tree)
     double best_cost = 1.0e99;
 
 #if DEBUG_PICKNODE
-    EDGEDebugf("PickNode: BEGUN (depth %d)\n", depth);
+    LogDebug("PickNode: BEGUN (depth %d)\n", depth);
 #endif
 
     /* -AJA- here is the logic for "fast mode".  We look for segs which
@@ -658,7 +658,7 @@ static Seg *PickNode(QuadTree *tree)
     if (tree->real_num_ >= kSegFastModeThreshold)
     {
 #if DEBUG_PICKNODE
-        EDGEDebugf("PickNode: Looking for Fast node...\n");
+        LogDebug("PickNode: Looking for Fast node...\n");
 #endif
 
         best = FindFastSeg(tree);
@@ -666,7 +666,7 @@ static Seg *PickNode(QuadTree *tree)
         if (best != nullptr)
         {
 #if DEBUG_PICKNODE
-            EDGEDebugf(
+            LogDebug(
                 "PickNode: Using Fast node (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
                 best->start->x, best->start->y, best->end->x, best->end->y);
 #endif
@@ -830,13 +830,13 @@ static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list,
     Intersection *cut, *next;
 
 #if DEBUG_CUTLIST
-    EDGEDebugf("CUT LIST:\n");
-    EDGEDebugf("PARTITION: (%1.1f,%1.1f) += (%1.1f,%1.1f)\n", part->psx_,
+    LogDebug("CUT LIST:\n");
+    LogDebug("PARTITION: (%1.1f,%1.1f) += (%1.1f,%1.1f)\n", part->psx_,
              part->psy_, part->pdx_, part->pdy_);
 
     for (cut = cut_list; cut; cut = cut->next)
     {
-        EDGEDebugf("  Vertex %8X (%1.1f,%1.1f)  Along %1.2f  [%d/%d]  %s\n",
+        LogDebug("  Vertex %8X (%1.1f,%1.1f)  Along %1.2f  [%d/%d]  %s\n",
                  cut->vertex->index, cut->vertex->x, cut->vertex->y,
                  cut->along_dist, cut->open_before ? 1 : 0,
                  cut->open_after ? 1 : 0, cut->self_ref ? "SELFREF" : "");
@@ -853,7 +853,7 @@ static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list,
         double len = next->along_dist - cut->along_dist;
         if (len < -0.001)
         {
-            EDGEError("AJBSP: Bad order in intersect list: %1.3f > %1.3f\n",
+            FatalError("AJBSP: Bad order in intersect list: %1.3f > %1.3f\n",
                     cut->along_dist, next->along_dist);
         }
 
@@ -899,10 +899,10 @@ static void AddMinisegs(Intersection *cut_list, Seg *part, Seg **left_list,
         ListAddSeg(left_list, buddy);
 
 #if DEBUG_CUTLIST
-        EDGEDebugf("AddMiniseg: %p RIGHT  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+        LogDebug("AddMiniseg: %p RIGHT  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
                  seg->start_->x, seg->start_->y, seg->end_->x, seg->end_->y);
 
-        EDGEDebugf("AddMiniseg: %p LEFT   (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+        LogDebug("AddMiniseg: %p LEFT   (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
                  buddy->start->x, buddy->start->y, buddy->end->x,
                  buddy->end->y);
 #endif
@@ -1149,7 +1149,7 @@ Seg *CreateOneSeg(Linedef *line, Vertex *start, Vertex *end, Sidedef *side,
     // check for bad sidedef
     if (side->sector == nullptr)
     {
-        EDGEPrintf("Bad sidedef on linedef #%d (Z_CheckHeap error)\n",
+        LogPrint("Bad sidedef on linedef #%d (Z_CheckHeap error)\n",
                  line->index);
         current_build_info.total_warnings++;
     }
@@ -1196,7 +1196,7 @@ Seg *CreateSegs()
         if (hypot(line->start->x_ - line->end->x_,
                   line->start->y_ - line->end->y_) >= 32000)
         {
-            EDGEPrintf("Linedef #%d is VERY long, it may cause problems\n",
+            LogPrint("Linedef #%d is VERY long, it may cause problems\n",
                      line->index);
             current_build_info.total_warnings++;
         }
@@ -1208,7 +1208,7 @@ Seg *CreateSegs()
         }
         else
         {
-            EDGEPrintf("Linedef #%d has no right sidedef!\n", line->index);
+            LogPrint("Linedef #%d has no right sidedef!\n", line->index);
             current_build_info.total_warnings++;
         }
 
@@ -1231,7 +1231,7 @@ Seg *CreateSegs()
         {
             if (line->two_sided)
             {
-                EDGEPrintf("Linedef #%d is 2s but has no left sidedef\n",
+                LogPrint("Linedef #%d is 2s but has no left sidedef\n",
                          line->index);
                 current_build_info.total_warnings++;
                 line->two_sided = false;
@@ -1296,7 +1296,7 @@ void Subsector::ClockwiseOrder()
     Seg *seg;
 
 #if DEBUG_SUBSEC
-    EDGEDebugf("Subsec: Clockwising %d\n", index);
+    LogDebug("Subsec: Clockwising %d\n", index);
 #endif
 
     std::vector<Seg *> array;
@@ -1369,11 +1369,11 @@ void Subsector::ClockwiseOrder()
     }
 
 #if DEBUG_SORTER
-    EDGEDebugf("Sorted SEGS around (%1.1f,%1.1f)\n", mid_x, mid_y);
+    LogDebug("Sorted SEGS around (%1.1f,%1.1f)\n", mid_x, mid_y);
 
     for (seg = seg_list; seg; seg = seg->next)
     {
-        EDGEDebugf("  Seg %p: Angle %1.6f  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg,
+        LogDebug("  Seg %p: Angle %1.6f  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n", seg,
                  seg->cmp_angle, seg->start_->x, seg->start_->y, seg->end_->x,
                  seg->end_->y);
     }
@@ -1401,7 +1401,7 @@ void Subsector::SanityCheckClosed() const
 
     if (gaps > 0)
     {
-        EDGEPrintf(
+        LogPrint(
             "Subsector #%d near (%1.1f,%1.1f) is not closed "
             "(%d gaps, %d segs)\n",
             index_, mid_x_, mid_y_, gaps, total);
@@ -1410,7 +1410,7 @@ void Subsector::SanityCheckClosed() const
 #if DEBUG_SUBSEC
         for (seg = seg_list; seg; seg = seg->next)
         {
-            EDGEDebugf("  SEG %p  (%1.1f,%1.1f) --> (%1.1f,%1.1f)\n", seg,
+            LogDebug("  SEG %p  (%1.1f,%1.1f) --> (%1.1f,%1.1f)\n", seg,
                      seg->start_->x, seg->start_->y, seg->end_->x,
                      seg->end_->y);
         }
@@ -1423,14 +1423,14 @@ void Subsector::SanityCheckHasRealSeg() const
     for (Seg *seg = seg_list_; seg; seg = seg->next_)
         if (seg->linedef_ != nullptr) return;
 
-    EDGEError("AJBSP: Subsector #%d near (%1.1f,%1.1f) has no real seg!\n",
+    FatalError("AJBSP: Subsector #%d near (%1.1f,%1.1f) has no real seg!\n",
             index_, mid_x_, mid_y_);
 }
 
 void Subsector::RenumberSegs(int &cur_seg_index)
 {
 #if DEBUG_SUBSEC
-    EDGEDebugf("Subsec: Renumbering %d\n", index);
+    LogDebug("Subsec: Renumbering %d\n", index);
 #endif
 
     seg_count_ = 0;
@@ -1443,7 +1443,7 @@ void Subsector::RenumberSegs(int &cur_seg_index)
         seg_count_++;
 
 #if DEBUG_SUBSEC
-        EDGEDebugf("Subsec:   %d: Seg %p  Index %d\n", seg_count, seg,
+        LogDebug("Subsec:   %d: Seg %p  Index %d\n", seg_count, seg,
                  seg->index);
 #endif
     }
@@ -1466,7 +1466,7 @@ Subsector *CreateSubsec(QuadTree *tree)
     sub->DetermineMiddle();
 
 #if DEBUG_SUBSEC
-    EDGEDebugf("Subsec: Creating %d\n", sub->index);
+    LogDebug("Subsec: Creating %d\n", sub->index);
 #endif
 
     return sub;
@@ -1487,7 +1487,7 @@ void DebugShowSegs(const Seg *list)
 {
     for (const Seg *seg = list; seg; seg = seg->next)
     {
-        EDGEDebugf("Build:   %sSEG %p  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
+        LogDebug("Build:   %sSEG %p  (%1.1f,%1.1f) -> (%1.1f,%1.1f)\n",
                  seg->linedef ? "" : "MINI", seg, seg->start_->x,
                  seg->start_->y, seg->end_->x, seg->end_->y);
     }
@@ -1501,7 +1501,7 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */,
     *S = nullptr;
 
 #if DEBUG_BUILDER
-    EDGEDebugf("Build: BEGUN @ %d\n", depth);
+    LogDebug("Build: BEGUN @ %d\n", depth);
     DebugShowSegs(list);
 #endif
 
@@ -1516,7 +1516,7 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */,
     if (part == nullptr)
     {
 #if DEBUG_BUILDER
-        EDGEDebugf("Build: CONVEX\n");
+        LogDebug("Build: CONVEX\n");
 #endif
 
         *S = CreateSubsec(tree);
@@ -1526,7 +1526,7 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */,
     }
 
 #if DEBUG_BUILDER
-    EDGEDebugf("Build: PARTITION %p (%1.0f,%1.0f) -> (%1.0f,%1.0f)\n", part,
+    LogDebug("Build: PARTITION %p (%1.0f,%1.0f) -> (%1.0f,%1.0f)\n", part,
              part->start->x, part->start->y, part->end->x, part->end->y);
 #endif
 
@@ -1545,17 +1545,17 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */,
 
     /* sanity checks... */
     if (rights == nullptr)
-        EDGEError("AJBSP: Separated seg-list has empty RIGHT side\n");
+        FatalError("AJBSP: Separated seg-list has empty RIGHT side\n");
 
     if (lefts == nullptr)
-        EDGEError("AJBSP: Separated seg-list has empty LEFT side\n");
+        FatalError("AJBSP: Separated seg-list has empty LEFT side\n");
 
     if (cut_list != nullptr) AddMinisegs(cut_list, part, &lefts, &rights);
 
     node->SetPartition(part);
 
 #if DEBUG_BUILDER
-    EDGEDebugf("Build: Going LEFT\n");
+    LogDebug("Build: Going LEFT\n");
 #endif
 
     BuildResult ret;
@@ -1566,7 +1566,7 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */,
     if (ret != kBuildOK) return ret;
 
 #if DEBUG_BUILDER
-    EDGEDebugf("Build: Going RIGHT\n");
+    LogDebug("Build: Going RIGHT\n");
 #endif
 
     // recursively build the right side
@@ -1575,7 +1575,7 @@ BuildResult BuildNodes(Seg *list, int depth, BoundingBox *bounds /* output */,
     if (ret != kBuildOK) return ret;
 
 #if DEBUG_BUILDER
-    EDGEDebugf("Build: DONE\n");
+    LogDebug("Build: DONE\n");
 #endif
 
     return kBuildOK;

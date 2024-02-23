@@ -162,7 +162,7 @@ void GamePlayerFinishLevel(player_t *p, bool keep_cards)
 //
 void player_s::Reborn()
 {
-    EDGEDebugf("player_s::Reborn\n");
+    LogDebug("player_s::Reborn\n");
 
     playerstate = PST_LIVE;
 
@@ -347,11 +347,11 @@ static void P_SpawnPlayer(player_t *p, const spawnpoint_t *point, bool is_hub)
     // -AJA- 2004/04/14: Use DDF entry from level thing.
 
     if (point->info == nullptr)
-        EDGEError("P_SpawnPlayer: No such item type!");
+        FatalError("P_SpawnPlayer: No such item type!");
 
     const MapObjectDefinition *info = point->info;
 
-    EDGEDebugf("* P_SpawnPlayer %d @ %1.0f,%1.0f\n", point->info->playernum_, point->x, point->y);
+    LogDebug("* P_SpawnPlayer %d @ %1.0f,%1.0f\n", point->info->playernum_, point->x, point->y);
 
     if (info->playernum_ <= 0)
         info = mobjtypes.LookupPlayer(p->pnum + 1);
@@ -430,7 +430,7 @@ static void P_SpawnVoodooDoll(player_t *p, const spawnpoint_t *point)
     SYS_ASSERT(info);
     SYS_ASSERT(info->playernum_ > 0);
 
-    EDGEDebugf("* P_SpawnVoodooDoll %d @ %1.0f,%1.0f\n", p->pnum + 1, point->x, point->y);
+    LogDebug("* P_SpawnVoodooDoll %d @ %1.0f,%1.0f\n", p->pnum + 1, point->x, point->y);
 
     mobj_t *mobj = P_MobjCreateObject(point->x, point->y, point->z, info);
 
@@ -454,7 +454,7 @@ static void P_SpawnVoodooDoll(player_t *p, const spawnpoint_t *point)
 void GameDeathMatchSpawnPlayer(player_t *p)
 {
     if (p->pnum >= (int)dm_starts.size())
-        EDGEWarning("Few deathmatch spots, %d recommended.\n", p->pnum + 1);
+        LogWarning("Few deathmatch spots, %d recommended.\n", p->pnum + 1);
 
     int begin = P_Random();
 
@@ -481,7 +481,7 @@ void GameDeathMatchSpawnPlayer(player_t *p)
         }
     }
 
-    EDGEError("No usable DM start found!");
+    FatalError("No usable DM start found!");
 }
 
 //
@@ -497,7 +497,7 @@ void GameCoopSpawnPlayer(player_t *p)
     if (point && GameCheckSpot(p, point))
         return;
 
-    EDGEWarning("Player %d start is invalid.\n", p->pnum + 1);
+    LogWarning("Player %d start is invalid.\n", p->pnum + 1);
 
     int begin = p->pnum;
 
@@ -510,7 +510,7 @@ void GameCoopSpawnPlayer(player_t *p)
             return;
     }
 
-    EDGEError("No usable player start found!\n");
+    FatalError("No usable player start found!\n");
 }
 
 static spawnpoint_t *GameFindHubPlayer(int pnum, int tag)
@@ -532,9 +532,9 @@ static spawnpoint_t *GameFindHubPlayer(int pnum, int tag)
     }
 
     if (count == 0)
-        EDGEError("Missing hub starts with tag %d\n", tag);
+        FatalError("Missing hub starts with tag %d\n", tag);
     else
-        EDGEError("No usable hub start for player %d (tag %d)\n", pnum + 1, tag);
+        FatalError("No usable hub start for player %d (tag %d)\n", pnum + 1, tag);
 
     return nullptr; /* NOT REACHED */
 }
@@ -894,7 +894,7 @@ void GameRemoveOldAvatars(void)
             SYS_ASSERT(mo->target->player);
             SYS_ASSERT(mo->target->player->mo);
 
-            // EDGEDebugf("Updating avatar reference: %p --> %p\n", mo->target, mo->target->player->mo);
+            // LogDebug("Updating avatar reference: %p --> %p\n", mo->target, mo->target->player->mo);
 
             mo->SetTarget(mo->target->player->mo);
         }
@@ -920,7 +920,7 @@ void GameRemoveOldAvatars(void)
 
         if (mo->hyperflags & kHyperFlagRememberOldAvatars)
         {
-            EDGEDebugf("Removing old avatar: %p\n", mo);
+            LogDebug("Removing old avatar: %p\n", mo);
 
             P_RemoveMobj(mo);
         }

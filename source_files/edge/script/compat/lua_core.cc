@@ -32,7 +32,7 @@
 static int SYS_error(lua_State *L)
 {
     const char *s = luaL_checkstring(L, 1);
-    EDGEError("%s\n", s);
+    FatalError("%s\n", s);
     return 0;
 }
 
@@ -41,7 +41,7 @@ static int SYS_error(lua_State *L)
 static int SYS_print(lua_State *L)
 {
     const char *s = luaL_checkstring(L, 1);
-    EDGEPrintf("%s\n", s);
+    LogPrint("%s\n", s);
     return 0;
 }
 
@@ -50,7 +50,7 @@ static int SYS_print(lua_State *L)
 static int SYS_debug_print(lua_State *L)
 {
     const char *s = luaL_checkstring(L, 1);
-    EDGEDebugf("%s\n", s);
+    LogDebug("%s\n", s);
     return 0;
 }
 

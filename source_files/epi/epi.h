@@ -20,15 +20,15 @@
 
 /* Important functions provided by Engine code */
 #ifdef __GNUC__
-void EDGEError(const char *error, ...) __attribute__((format(printf, 1, 2)));
-void EDGEWarning(const char *warning, ...) __attribute__((format(printf, 1, 2)));
-void EDGEPrintf(const char *message, ...) __attribute__((format(printf, 1, 2)));
-void EDGEDebugf(const char *message, ...) __attribute__((format(printf, 1, 2)));
+void FatalError(const char *error, ...) __attribute__((format(printf, 1, 2)));
+void LogWarning(const char *warning, ...) __attribute__((format(printf, 1, 2)));
+void LogPrint(const char *message, ...) __attribute__((format(printf, 1, 2)));
+void LogDebug(const char *message, ...) __attribute__((format(printf, 1, 2)));
 #else
-void EDGEError(const char *error, ...);
-void EDGEWarning(const char *warning, ...);
-void EDGEPrintf(const char *message, ...);
-void EDGEDebugf(const char *message, ...);
+void FatalError(const char *error, ...);
+void LogWarning(const char *warning, ...);
+void LogPrint(const char *message, ...);
+void LogDebug(const char *message, ...);
 #endif
 
 // basic macros
@@ -41,7 +41,7 @@ inline int RoundToInteger(double x) { return (int)round(x); }
 // assertion macro
 #define SYS_ASSERT(cond)                                                   \
     ((cond) ? (void)0                                                      \
-            : EDGEError("Assertion '%s' failed (%s:%d).\n", #cond, __FILE__, \
+            : FatalError("Assertion '%s' failed (%s:%d).\n", #cond, __FILE__, \
                       __LINE__))
 
 //

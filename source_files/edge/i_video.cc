@@ -44,7 +44,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(gamma_correction, "0",
 EDGE_DEFINE_CONSOLE_VARIABLE(monitor_aspect_ratio, "1.77777",
                              kConsoleVariableFlagArchive)
 
-// these are zero until EDGEStartupGraphics is called.
+// these are zero until StartupGraphics is called.
 // after that they never change (we assume the desktop won't become other
 // resolutions while EC is running).
 EDGE_DEFINE_CONSOLE_VARIABLE(desktop_resolution_width, "0",
@@ -67,7 +67,7 @@ extern ConsoleVariable r_farclip;
 extern ConsoleVariable r_culling;
 extern ConsoleVariable r_culldist;
 
-void EDGEGrabCursor(bool enable)
+void GrabCursor(bool enable)
 {
 #ifdef EDGE_WEB
     // On web, cursor lock is exclusively handled by selecting canvas
@@ -82,7 +82,7 @@ void EDGEGrabCursor(bool enable)
     else { SDL_SetRelativeMouseMode(SDL_FALSE); }
 }
 
-void EDGEDeterminePixelAspect()
+void DeterminePixelAspect()
 {
     // the pixel aspect is the shape of pixels on the monitor for the current
     // video mode.  on modern LCDs (etc) it is usuall 1.0 (1:1).  knowing this
@@ -122,7 +122,7 @@ void EDGEDeterminePixelAspect()
         monitor_aspect_ratio.f_ * (float)SCREENHEIGHT / (float)SCREENWIDTH;
 }
 
-void EDGEStartupGraphics(void)
+void StartupGraphics(void)
 {
     std::string driver = argv::Value("videodriver");
 
@@ -139,10 +139,10 @@ void EDGEStartupGraphics(void)
         SDL_setenv("SDL_VIDEODRIVER", driver.c_str(), 1);
     }
 
-    EDGEPrintf("SDL_Video_Driver: %s\n", driver.c_str());
+    LogPrint("SDL_Video_Driver: %s\n", driver.c_str());
 
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
-        EDGEError("Couldn't init SDL VIDEO!\n%s\n", SDL_GetError());
+        FatalError("Couldn't init SDL VIDEO!\n%s\n", SDL_GetError());
 
     if (argv::Find("nograb") > 0) grab_mouse = 0;
 
@@ -172,7 +172,7 @@ void EDGEStartupGraphics(void)
     if (SCREENHEIGHT > desktop_resolution_height.d_)
         SCREENHEIGHT = desktop_resolution_height.d_;
 
-    EDGEPrintf("Desktop resolution: %dx%d\n", desktop_resolution_width.d_,
+    LogPrint("Desktop resolution: %dx%d\n", desktop_resolution_width.d_,
                desktop_resolution_height.d_);
 
     int num_modes = SDL_GetNumDisplayModes(0);
@@ -243,10 +243,10 @@ void EDGEStartupGraphics(void)
         tf_screendepth  = (int)SDL_BITSPERPIXEL(info.format);
     }
 
-    EDGEPrintf("EDGEStartupGraphics: initialisation OK\n");
+    LogPrint("StartupGraphics: initialisation OK\n");
 }
 
-static bool I_CreateWindow(DisplayMode *mode)
+static bool InitializeWindow(DisplayMode *mode)
 {
     std::string temp_title = windowtitle.s_;
     temp_title.append(" ").append(edgeversion.s_);
@@ -270,7 +270,7 @@ static bool I_CreateWindow(DisplayMode *mode)
 
     if (program_window == nullptr)
     {
-        EDGEPrintf("Failed to create window: %s\n", SDL_GetError());
+        LogPrint("Failed to create window: %s\n", SDL_GetError());
         return false;
     }
 
@@ -301,7 +301,7 @@ static bool I_CreateWindow(DisplayMode *mode)
     }
 
     if (SDL_GL_CreateContext(program_window) == nullptr)
-        EDGEError("Failed to create OpenGL context.\n");
+        FatalError("Failed to create OpenGL context.\n");
 
     if (vsync.d_ == 2)
     {
@@ -322,12 +322,12 @@ static bool I_CreateWindow(DisplayMode *mode)
     return true;
 }
 
-bool EDGESetScreenSize(DisplayMode *mode)
+bool SetScreenSize(DisplayMode *mode)
 {
-    EDGEGrabCursor(false);
+    GrabCursor(false);
 
-    EDGEPrintf(
-        "EDGESetScreenSize: trying %dx%d %dbpp (%s)\n", mode->width,
+    LogPrint(
+        "SetScreenSize: trying %dx%d %dbpp (%s)\n", mode->width,
         mode->height, mode->depth,
         mode->display_mode == DisplayMode::SCR_BORDERLESS
             ? "borderless"
@@ -336,7 +336,7 @@ bool EDGESetScreenSize(DisplayMode *mode)
 
     if (program_window == nullptr)
     {
-        if (!I_CreateWindow(mode)) { return false; }
+        if (!InitializeWindow(mode)) { return false; }
     }
     else if (mode->display_mode == DisplayMode::SCR_BORDERLESS)
     {
@@ -344,7 +344,7 @@ bool EDGESetScreenSize(DisplayMode *mode)
         SDL_GetWindowSize(program_window, &borderless_mode.width,
                           &borderless_mode.height);
 
-        EDGEPrintf("EDGESetScreenSize: mode now %dx%d %dbpp\n", mode->width,
+        LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width,
                    mode->height, mode->depth);
     }
     else if (mode->display_mode == DisplayMode::SCR_FULLSCREEN)
@@ -358,7 +358,7 @@ bool EDGESetScreenSize(DisplayMode *mode)
         delete new_mode;
         new_mode = nullptr;
 
-        EDGEPrintf("EDGESetScreenSize: mode now %dx%d %dbpp\n", mode->width,
+        LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width,
                    mode->height, mode->depth);
     }
     else /* SCR_WINDOW */
@@ -368,14 +368,14 @@ bool EDGESetScreenSize(DisplayMode *mode)
         SDL_SetWindowPosition(program_window, SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED);
 
-        EDGEPrintf("EDGESetScreenSize: mode now %dx%d %dbpp\n", mode->width,
+        LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width,
                    mode->height, mode->depth);
     }
 
     // -AJA- turn off cursor -- BIG performance increase.
     //       Plus, the combination of no-cursor + grab gives
     //       continuous relative mouse motion.
-    EDGEGrabCursor(true);
+    GrabCursor(true);
 
 #ifdef DEVELOPERS
     // override SDL signal handlers (the so-called "parachute").
@@ -391,7 +391,7 @@ bool EDGESetScreenSize(DisplayMode *mode)
     return true;
 }
 
-void EDGEStartFrame(void)
+void StartFrame(void)
 {
     ecframe_stats.Clear();
     glClearColor(0, 0, 0, 1.0f);
@@ -402,7 +402,7 @@ void EDGEStartFrame(void)
         r_farclip.f_ = 64000.0;
 }
 
-void EDGEFinishFrame(void)
+void FinishFrame(void)
 {
     SDL_GL_SwapWindow(program_window);
 
@@ -417,7 +417,7 @@ void EDGEFinishFrame(void)
 
     EDGE_FrameMark;
 
-    if (grab_mouse.CheckModified()) EDGEGrabCursor(grab_state);
+    if (grab_mouse.CheckModified()) GrabCursor(grab_state);
 
     if (vsync.CheckModified())
     {
@@ -436,10 +436,10 @@ void EDGEFinishFrame(void)
 
     if (monitor_aspect_ratio.CheckModified() ||
         forced_pixel_aspect_ratio.CheckModified())
-        EDGEDeterminePixelAspect();
+        DeterminePixelAspect();
 }
 
-void EDGEShutdownGraphics(void)
+void ShutdownGraphics(void)
 {
     if (graphics_shutdown) return;
 
@@ -447,7 +447,7 @@ void EDGEShutdownGraphics(void)
 
     if (SDL_WasInit(SDL_INIT_EVERYTHING))
     {
-        EDGEDeterminePixelAspect();
+        DeterminePixelAspect();
 
         SDL_Quit();
     }

@@ -147,7 +147,7 @@ void M_ChangeLevelCheat(const char *string)
     SYS_ASSERT(GameMapExists(params.map_));
     SYS_ASSERT(params.map_->episode_);
 
-    params.random_seed_ = EDGEPureRandom();
+    params.random_seed_ = PureRandomNumber();
 
     params.SinglePlayer(numbots);
 

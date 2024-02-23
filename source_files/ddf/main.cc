@@ -123,12 +123,12 @@ void DDF_Error(const char *err, ...)
     }
 
     // check for buffer overflow
-    if (buffer[2047] != 0) EDGEError("Buffer overflow in DDF_Error\n");
+    if (buffer[2047] != 0) FatalError("Buffer overflow in DDF_Error\n");
 
     // add a blank line for readability under DOS/Linux.
-    EDGEPrintf("\n");
+    LogPrint("\n");
 
-    EDGEError("%s", buffer);
+    FatalError("%s", buffer);
 }
 
 void DDF_Warning(const char *err, ...)
@@ -142,23 +142,23 @@ void DDF_Warning(const char *err, ...)
     vsprintf(buffer, err, argptr);
     va_end(argptr);
 
-    EDGEWarning("%s", buffer);
+    LogWarning("%s", buffer);
 
     if (!cur_ddf_filename.empty())
     {
-        EDGEPrintf("  problem occurred near line %d of %s\n", cur_ddf_line_num,
+        LogPrint("  problem occurred near line %d of %s\n", cur_ddf_line_num,
                  cur_ddf_filename.c_str());
     }
 
     if (!cur_ddf_entryname.empty())
     {
-        EDGEPrintf("  problem occurred in entry: %s\n",
+        LogPrint("  problem occurred in entry: %s\n",
                  cur_ddf_entryname.c_str());
     }
 
     if (!cur_ddf_linedata.empty())
     {
-        EDGEPrintf("  with line contents: %s\n", cur_ddf_linedata.c_str());
+        LogPrint("  with line contents: %s\n", cur_ddf_linedata.c_str());
     }
 }
 
@@ -173,23 +173,23 @@ void DDF_Debug(const char *err, ...)
     vsprintf(buffer, err, argptr);
     va_end(argptr);
 
-    EDGEDebugf("%s", buffer);
+    LogDebug("%s", buffer);
 
     if (!cur_ddf_filename.empty())
     {
-        EDGEDebugf("  problem occurred near line %d of %s\n", cur_ddf_line_num,
+        LogDebug("  problem occurred near line %d of %s\n", cur_ddf_line_num,
                  cur_ddf_filename.c_str());
     }
 
     if (!cur_ddf_entryname.empty())
     {
-        EDGEDebugf("  problem occurred in entry: %s\n",
+        LogDebug("  problem occurred in entry: %s\n",
                  cur_ddf_entryname.c_str());
     }
 
     if (!cur_ddf_linedata.empty())
     {
-        EDGEDebugf("  with line contents: %s\n", cur_ddf_linedata.c_str());
+        LogDebug("  with line contents: %s\n", cur_ddf_linedata.c_str());
     }
 }
 
@@ -320,7 +320,7 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
 {
     FILE *fp = fopen(filename, "r");
 
-    if (!fp) EDGEError("Couldn't open DDF file: %s\n", filename);
+    if (!fp) FatalError("Couldn't open DDF file: %s\n", filename);
 
     bool in_comment = false;
 
@@ -378,13 +378,13 @@ void DDF_GetLumpNameForFile(const char *filename, char *lumpname)
             }
 
             fclose(fp);
-            EDGEError("Unknown marker <%s> in DDF file: %s\n", tag_buf, filename);
+            FatalError("Unknown marker <%s> in DDF file: %s\n", tag_buf, filename);
         }
         break;
     }
 
     fclose(fp);
-    EDGEError("Missing <..> marker in DDF file: %s\n", filename);
+    FatalError("Missing <..> marker in DDF file: %s\n", filename);
 }
 
 //
@@ -660,7 +660,7 @@ static DDFReadCharReturn DDF_MainProcessChar(char character, std::string &token,
             }
 
         default:  // doh!
-            EDGEError(
+            FatalError(
                 "DDF_MainProcessChar: INTERNAL ERROR: "
                 "Bad status value %d !\n",
                 status);
@@ -970,11 +970,11 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
             case kDDFReadCharReturnOK:
 #if (DEBUG_DDFREAD)
                 charcount++;
-                EDGEDebugf("%c", character);
+                LogDebug("%c", character);
                 if (charcount == 75)
                 {
                     charcount = 0;
-                    EDGEDebugf("\n");
+                    LogDebug("\n");
                 }
 #endif
                 break;
@@ -2136,7 +2136,7 @@ void DDF_AddCollection(std::vector<DDFFile> &col, const std::string &source)
 
 void DDF_DumpFile(const std::string &data)
 {
-    EDGEDebugf("\n");
+    LogDebug("\n");
 
     // we need to break it into lines
     std::string line;
@@ -2150,12 +2150,12 @@ void DDF_DumpFile(const std::string &data)
 
         if (data[pos] == '\n')
         {
-            EDGEDebugf("%s", line.c_str());
+            LogDebug("%s", line.c_str());
             line.clear();
         }
     }
 
-    if (line.size() > 0) EDGEDebugf("%s", line.c_str());
+    if (line.size() > 0) LogDebug("%s", line.c_str());
 }
 
 void DDF_DumpCollection(const std::vector<DDFFile> &col)
@@ -2169,7 +2169,7 @@ static void DDF_ParseUnreadFile(size_t d)
     {
         if (it.type == ddf_readers[d].type)
         {
-            EDGEPrintf("Parsing %s from: %s\n", ddf_readers[d].lump_name,
+            LogPrint("Parsing %s from: %s\n", ddf_readers[d].lump_name,
                      it.source.c_str());
 
             if (it.type == kDDFTypeRadScript)

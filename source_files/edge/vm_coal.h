@@ -29,7 +29,7 @@ void VM_QuitCoal();
 void VM_AddScript(int type, std::string &data, const std::string &source);
 void VM_LoadScripts();
 
-void VM_RegisterHUD();
+void VM_RegisterHud();
 void VM_RegisterPlaysim();
 
 // HUD stuff

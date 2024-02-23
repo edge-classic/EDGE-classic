@@ -344,7 +344,7 @@ static int M_GetCurrentSwitchValue(optmenuitem_t *item)
     }
 
     default: {
-        EDGEError("M_GetCurrentSwitchValue: Menu item type is not a switch!\n");
+        FatalError("M_GetCurrentSwitchValue: Menu item type is not a switch!\n");
         break;
     }
     }
@@ -933,7 +933,7 @@ void M_OptDrawer()
     CenterX -= (style->fonts_[fontType]->StringWidth(curr_menu->name) * TEXTscale * 1.5) / 2;
 
     // Lobo 2022
-    HUDWriteText(style, fontType, CenterX, menutop, curr_menu->name, 1.5);
+    HudWriteText(style, fontType, CenterX, menutop, curr_menu->name, 1.5);
 
     fontType  = StyleDefinition::kTextSectionText;
     TEXTscale = style->definition_->text_[fontType].scale_;
@@ -958,24 +958,24 @@ void M_OptDrawer()
         TEXTscale = style->definition_->text_[fontType].scale_;
 
         if (curr_key_menu > 0)
-            HUDWriteText(style, fontType, 60, 200 - deltay * 4, "< PREV");
+            HudWriteText(style, fontType, 60, 200 - deltay * 4, "< PREV");
 
         if (curr_key_menu < NUM_KEY_MENUS - 1)
-            HUDWriteText(style, fontType, 260 - style->fonts_[fontType]->StringWidth("NEXT >") * TEXTscale, 200 - deltay * 4,
+            HudWriteText(style, fontType, 260 - style->fonts_[fontType]->StringWidth("NEXT >") * TEXTscale, 200 - deltay * 4,
                          "NEXT >");
 
         fontType = StyleDefinition::kTextSectionHelp;
         TEXTscale = style->definition_->text_[fontType].scale_;
 
-        HUDWriteText(style, fontType, 160 - style->fonts_[fontType]->StringWidth(curr_menu->key_page) * TEXTscale / 2, curry,
+        HudWriteText(style, fontType, 160 - style->fonts_[fontType]->StringWidth(curr_menu->key_page) * TEXTscale / 2, curry,
                      curr_menu->key_page);
         curry += font_h * 2;
 
         if (keyscan)
-            HUDWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(keystring2) * TEXTscale / 2),
+            HudWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(keystring2) * TEXTscale / 2),
                          200 - deltay * 2, keystring2);
         else
-            HUDWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(keystring1) * TEXTscale / 2),
+            HudWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(keystring1) * TEXTscale / 2),
                          200 - deltay * 2, keystring1);
     }
     else if (curr_menu == &res_optmenu)
@@ -1011,7 +1011,7 @@ void M_OptDrawer()
             TEXTscale = style->definition_->text_[fontType].scale_;
         }
 
-        HUDWriteText(style, fontType,
+        HudWriteText(style, fontType,
                      (curr_menu->menu_center) -
                          (style->fonts_[fontType]->StringWidth(
                               curr_menu->items[i].name) *
@@ -1023,7 +1023,7 @@ void M_OptDrawer()
         {
             fontType  = StyleDefinition::kTextSectionAlternate;
             TEXTscale = style->definition_->text_[fontType].scale_;
-            HUDWriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
+            HudWriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                          epi::GetStem(midi_soundfont.s_).c_str());
         }
 
@@ -1032,7 +1032,7 @@ void M_OptDrawer()
         {
             fontType  = StyleDefinition::kTextSectionAlternate;
             TEXTscale = style->definition_->text_[fontType].scale_;
-            HUDWriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
+            HudWriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                          s_genmidi.s_.empty() ? "Default" : epi::GetStem(s_genmidi.s_).c_str());
         }
 
@@ -1044,12 +1044,12 @@ void M_OptDrawer()
             if (style->fonts_[fontType]->definition_->type_ == kFontTypeImage)
             {
                 int cursor = 16;
-                HUDWriteText(style, fontType, (curr_menu->menu_center + 4), curry, (const char *)&cursor);
+                HudWriteText(style, fontType, (curr_menu->menu_center + 4), curry, (const char *)&cursor);
             }
             else if (style->fonts_[fontType]->definition_->type_ == kFontTypeTrueType)
-                HUDWriteText(style, fontType, (curr_menu->menu_center + 4), curry, "+");
+                HudWriteText(style, fontType, (curr_menu->menu_center + 4), curry, "+");
             else
-                HUDWriteText(style, fontType, (curr_menu->menu_center + 4), curry, "*");
+                HudWriteText(style, fontType, (curr_menu->menu_center + 4), curry, "*");
 
             if (curr_menu->items[i].help)
             {
@@ -1057,7 +1057,7 @@ void M_OptDrawer()
                 TEXTscale = style->definition_->text_[fontType].scale_;
                 const char *help = language[curr_menu->items[i].help];
 
-                HUDWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(help) * TEXTscale / 2),
+                HudWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(help) * TEXTscale / 2),
                              200 - deltay * 2, help);
             }
         }
@@ -1074,7 +1074,7 @@ void M_OptDrawer()
             {
                 if (joystick_device == 0)
                 {
-                    HUDWriteText(style, fontType, (curr_menu->menu_center) + 15, curry, "None");
+                    HudWriteText(style, fontType, (curr_menu->menu_center) + 15, curry, "None");
                     break;
                 }
                 else
@@ -1082,13 +1082,13 @@ void M_OptDrawer()
                     const char *joyname = SDL_JoystickNameForIndex(joystick_device - 1);
                     if (joyname)
                     {
-                        HUDWriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
+                        HudWriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                                      epi::StringFormat("%d - %s", joystick_device, joyname).c_str());
                         break;
                     }
                     else
                     {
-                        HUDWriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
+                        HudWriteText(style, fontType, (curr_menu->menu_center) + 15, curry,
                                      epi::StringFormat("%d - Not Connected", joystick_device).c_str());
                         break;
                     }
@@ -1120,7 +1120,7 @@ void M_OptDrawer()
                 sprintf(tempstring, "Invalid");
             }
 
-            HUDWriteText(style, StyleDefinition::kTextSectionAlternate, (curr_menu->menu_center) + 15, curry, tempstring);
+            HudWriteText(style, StyleDefinition::kTextSectionAlternate, (curr_menu->menu_center) + 15, curry, tempstring);
             break;
         }
 
@@ -1142,7 +1142,7 @@ void M_OptDrawer()
         case OPT_KeyConfig: {
             k = *(int *)(curr_menu->items[i].switchvar);
             M_Key2String(k, tempstring);
-            HUDWriteText(style, fontType, (curr_menu->menu_center + 15), curry, tempstring);
+            HudWriteText(style, fontType, (curr_menu->menu_center + 15), curry, tempstring);
             break;
         }
 
@@ -1178,13 +1178,13 @@ static void M_ResOptDrawer(Style *style, int topy, int bottomy, int dy, int cent
             new_scrmode.display_mode == 2
                 ? "Borderless Fullscreen"
                 : (new_scrmode.display_mode == DisplayMode::SCR_FULLSCREEN ? "Exclusive Fullscreen" : "Windowed"));
-    HUDWriteText(style, fontType, centrex + 15, y, tempstring);
+    HudWriteText(style, fontType, centrex + 15, y, tempstring);
 
     if (new_scrmode.display_mode < 2)
     {
         y += dy;
         sprintf(tempstring, "%dx%d", new_scrmode.width, new_scrmode.height);
-        HUDWriteText(style, fontType, centrex + 15, y, tempstring);
+        HudWriteText(style, fontType, centrex + 15, y, tempstring);
     }
 
     // Draw selected resolution and mode:
@@ -1194,7 +1194,7 @@ static void M_ResOptDrawer(Style *style, int topy, int bottomy, int dy, int cent
     TEXTscale = style->definition_->text_[fontType].scale_;
 
     sprintf(tempstring, "Current Resolution:");
-    HUDWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(tempstring) * TEXTscale / 2), y, tempstring);
+    HudWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(tempstring) * TEXTscale / 2), y, tempstring);
 
     fontType  = StyleDefinition::kTextSectionAlternate;
     TEXTscale = style->definition_->text_[fontType].scale_;
@@ -1207,7 +1207,7 @@ static void M_ResOptDrawer(Style *style, int topy, int bottomy, int dy, int cent
         sprintf(tempstring, "%d x %d %s", SCREENWIDTH, SCREENHEIGHT,
                 DISPLAYMODE == 1 ? "Exclusive Fullscreen" : "Windowed");
 
-    HUDWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(tempstring) * TEXTscale / 2), y, tempstring);
+    HudWriteText(style, fontType, 160 - (style->fonts_[fontType]->StringWidth(tempstring) * TEXTscale / 2), y, tempstring);
 }
 
 //
@@ -1227,7 +1227,7 @@ static void M_LanguageDrawer(int x, int y, int deltay)
     {
         ALTscale=opt_def_style->definition_->text[StyleDefinition::kTextSectionAlternate].scale;
     }*/
-    HUDWriteText(opt_def_style, StyleDefinition::kTextSectionAlternate, x + 15, y + deltay * LANGUAGE_POS, language.GetName());
+    HudWriteText(opt_def_style, StyleDefinition::kTextSectionAlternate, x + 15, y + deltay * LANGUAGE_POS, language.GetName());
 }
 
 static void KeyMenu_Next()
@@ -1602,7 +1602,7 @@ bool M_OptResponder(InputEvent *ev, int ch)
         default:
             break;
         }
-        EDGEError("Invalid menu type!");
+        FatalError("Invalid menu type!");
     }
     case KEYD_ESCAPE:
     case KEYD_MOUSE2:
@@ -2038,7 +2038,7 @@ static void M_ChangeSoundfont(int keypressed, ConsoleVariable *cvar)
 
     if (sf_pos < 0)
     {
-        EDGEWarning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
+        LogWarning("M_ChangeSoundfont: Could not read list of available soundfonts. Falling back to default!\n");
         midi_soundfont = epi::SanitizePath(epi::PathAppend(game_directory, "soundfont/Default.sf2"));
         return;
     }
@@ -2081,7 +2081,7 @@ static void M_ChangeGENMIDI(int keypressed, ConsoleVariable *cvar)
 
     if (op2_pos < 0)
     {
-        EDGEWarning("M_ChangeGENMIDI: Could not read list of available GENMIDIs. Falling back to default!\n");
+        LogWarning("M_ChangeGENMIDI: Could not read list of available GENMIDIs. Falling back to default!\n");
         s_genmidi.s_ = "";
         return;
     }

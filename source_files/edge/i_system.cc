@@ -46,16 +46,16 @@ extern HANDLE windows_timer;
 static constexpr int16_t kMessageBufferSize = 4096;
 static char message_buffer[kMessageBufferSize];
 
-void EDGESystemStartup(void)
+void SystemStartup(void)
 {
-    EDGEStartupGraphics();  // SDL requires this to be called first
-    EDGEStartupControl();
-    EDGEStartupSound();
+    StartupGraphics();  // SDL requires this to be called first
+    StartupControl();
+    StartupSound();
 }
 
-void EDGECloseProgram(int exitnum) { exit(exitnum); }
+void CloseProgram(int exitnum) { exit(exitnum); }
 
-void EDGEWarning(const char *warning, ...)
+void LogWarning(const char *warning, ...)
 {
     va_list argptr;
 
@@ -63,10 +63,10 @@ void EDGEWarning(const char *warning, ...)
     vsprintf(message_buffer, warning, argptr);
     va_end(argptr);
 
-    EDGEPrintf("WARNING: %s", message_buffer);
+    LogPrint("WARNING: %s", message_buffer);
 }
 
-void EDGEError(const char *error, ...)
+void FatalError(const char *error, ...)
 {
     va_list argptr;
 
@@ -86,14 +86,14 @@ void EDGEError(const char *error, ...)
         fflush(debug_file);
     }
 
-    EDGESystemShutdown();
+    SystemShutdown();
 
-    EDGEMessageBox(message_buffer, "EDGE-Classic Error");
+    ShowMessageBox(message_buffer, "EDGE-Classic Error");
 
-    EDGECloseProgram(EXIT_FAILURE);
+    CloseProgram(EXIT_FAILURE);
 }
 
-void EDGEPrintf(const char *message, ...)
+void LogPrint(const char *message, ...)
 {
     va_list argptr;
 
@@ -103,13 +103,19 @@ void EDGEPrintf(const char *message, ...)
     vsnprintf(printbuf, sizeof(printbuf), message, argptr);
     va_end(argptr);
 
-    EDGELogf("%s", printbuf);
+    SYS_ASSERT(printbuf[kMessageBufferSize - 1] == 0);
+
+    if (log_file)
+    {
+        fprintf(log_file, "%s", printbuf);
+        fflush(log_file);
+    }
 
     // If debuging enabled, print to the debug_file
-    EDGEDebugf("%s", printbuf);
+    LogDebug("%s", printbuf);
 
     // Send the message to the console.
-    ConsolePrintf("%s", printbuf);
+    ConsolePrint("%s", printbuf);
 
 #ifdef EDGE_WEB
     // Send to debug console in browser
@@ -117,27 +123,27 @@ void EDGEPrintf(const char *message, ...)
 #endif
 }
 
-void EDGEMessageBox(const char *message, const char *title)
+void ShowMessageBox(const char *message, const char *title)
 {
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, nullptr);
 }
 
-int EDGEPureRandom(void)
+int PureRandomNumber(void)
 {
     int P1 = (int)time(nullptr);
-    int P2 = (int)EDGEGetMicros();
+    int P2 = (int)GetMicroseconds();
 
     return (P1 ^ P2) & 0x7FFFFFFF;
 }
 
-uint32_t EDGEGetMicros(void)
+uint32_t GetMicroseconds(void)
 {
     return (uint32_t)std::chrono::duration_cast<std::chrono::microseconds>(
                std::chrono::system_clock::now().time_since_epoch())
         .count();
 }
 
-void EDGESleep(int millisecs)
+void SleepForMilliseconds(int millisecs)
 {
 #if !defined(__MINGW32__) && \
     (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
@@ -159,14 +165,14 @@ void EDGESleep(int millisecs)
     SDL_Delay(millisecs);
 }
 
-void EDGESystemShutdown(void)
+void SystemShutdown(void)
 {
-    // make sure audio is unlocked (e.g. EDGEError occurred)
-    EDGEUnlockAudio();
+    // make sure audio is unlocked (e.g. FatalError occurred)
+    UnlockAudio();
 
-    EDGEShutdownSound();
-    EDGEShutdownControl();
-    EDGEShutdownGraphics();
+    ShutdownSound();
+    ShutdownControl();
+    ShutdownGraphics();
 
     if (log_file)
     {

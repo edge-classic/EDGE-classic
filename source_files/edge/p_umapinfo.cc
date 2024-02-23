@@ -361,18 +361,18 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
         epi::TokenKind tok = lex.Next(key);
 
         if (tok == epi::kTokenEOF)
-            EDGEError("Malformed UMAPINFO lump: unclosed block\n");
+            FatalError("Malformed UMAPINFO lump: unclosed block\n");
 
         if (tok != epi::kTokenIdentifier)
-            EDGEError("Malformed UMAPINFO lump: missing key\n");
+            FatalError("Malformed UMAPINFO lump: missing key\n");
 
         if (!lex.Match("="))
-            EDGEError("Malformed UMAPINFO lump: missing '='\n");
+            FatalError("Malformed UMAPINFO lump: missing '='\n");
 
         tok = lex.Next(value);
 
         if (tok == epi::kTokenEOF || tok == epi::kTokenError || value == "}")
-            EDGEError("Malformed UMAPINFO lump: missing value\n");
+            FatalError("Malformed UMAPINFO lump: missing value\n");
 
         epi::EName key_ename(key, true);
 
@@ -408,7 +408,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 {
                     Z_Clear(val->next_map, char, 9);
                     if (value.size() > 8)
-                        EDGEError("UMAPINFO: Mapname for \"next\" over 8 characters!\n");
+                        FatalError("UMAPINFO: Mapname for \"next\" over 8 characters!\n");
                     epi::CStringCopyMax(val->next_map, value.data(), 8);
                 }
                 break;
@@ -416,7 +416,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 {
                     Z_Clear(val->nextsecret, char, 9);
                     if (value.size() > 8)
-                        EDGEError("UMAPINFO: Mapname for \"nextsecret\" over 8 characters!\n");
+                        FatalError("UMAPINFO: Mapname for \"nextsecret\" over 8 characters!\n");
                     epi::CStringCopyMax(val->nextsecret, value.data(), 8);
                 }
                 break;
@@ -424,7 +424,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 {
                     Z_Clear(val->levelpic, char, 9);
                     if (value.size() > 8)
-                        EDGEError("UMAPINFO: Entry for \"levelpic\" over 8 characters!\n");
+                        FatalError("UMAPINFO: Entry for \"levelpic\" over 8 characters!\n");
                     epi::CStringCopyMax(val->levelpic, value.data(), 8);
                 }
                 break;
@@ -432,7 +432,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 {
                     Z_Clear(val->skytexture, char, 9);
                     if (value.size() > 8)
-                        EDGEError("UMAPINFO: Entry for \"skytexture\" over 8 characters!\n");
+                        FatalError("UMAPINFO: Entry for \"skytexture\" over 8 characters!\n");
                     epi::CStringCopyMax(val->skytexture, value.data(), 8);
                 }
                 break;
@@ -440,7 +440,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 {
                     Z_Clear(val->music, char, 9);
                     if (value.size() > 8)
-                        EDGEError("UMAPINFO: Entry for \"music\" over 8 characters!\n");
+                        FatalError("UMAPINFO: Entry for \"music\" over 8 characters!\n");
                     epi::CStringCopyMax(val->music, value.data(), 8);
                 }
                 break;
@@ -448,7 +448,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 {
                     Z_Clear(val->endpic, char, 9);
                     if (value.size() > 8)
-                        EDGEError("UMAPINFO: Entry for \"endpic\" over 8 characters!\n");
+                        FatalError("UMAPINFO: Entry for \"endpic\" over 8 characters!\n");
                     epi::CStringCopyMax(val->endpic, value.data(), 8);
                 }
                 break;
@@ -465,7 +465,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 {
                     Z_Clear(val->exitpic, char, 9);
                     if (value.size() > 8)
-                        EDGEError("UMAPINFO: Entry for \"exitpic\" over 8 characters!\n");
+                        FatalError("UMAPINFO: Entry for \"exitpic\" over 8 characters!\n");
                     epi::CStringCopyMax(val->exitpic, value.data(), 8);
                 }
                 break;
@@ -473,7 +473,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 {
                     Z_Clear(val->enterpic, char, 9);
                     if (value.size() > 8)
-                        EDGEError("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
+                        FatalError("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
                     epi::CStringCopyMax(val->enterpic, value.data(), 8);
                 }
                 break;
@@ -517,7 +517,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 {
                     Z_Clear(val->interbackdrop, char, 9);
                     if (value.size() > 8)
-                        EDGEError("UMAPINFO: Entry for \"interbackdrop\" over 8 characters!\n");
+                        FatalError("UMAPINFO: Entry for \"interbackdrop\" over 8 characters!\n");
                     epi::CStringCopyMax(val->interbackdrop, value.data(), 8);
                 }
                 break;
@@ -525,7 +525,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                 {
                     Z_Clear(val->intermusic, char, 9);
                     if (value.size() > 8)
-                        EDGEError("UMAPINFO: Entry for \"intermusic\" over 8 characters!\n");
+                        FatalError("UMAPINFO: Entry for \"intermusic\" over 8 characters!\n");
                     epi::CStringCopyMax(val->intermusic, value.data(), 8);
                 }
                 break;
@@ -575,7 +575,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                                 }
                             }
                             if (!um_template)
-                                EDGEError("UMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
+                                FatalError("UMAPINFO: No custom episode template exists for this IWAD! Check DDFGAME!\n");
                             new_epi = new GameDefinition;
                             new_epi->CopyDetail(*um_template);
                             new_epi->firstmap_ = val->mapname;
@@ -585,7 +585,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                         std::string alttext;
                         std::string epikey; // Do we use this?
                         if (value.size() > 8)
-                            EDGEError("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
+                            FatalError("UMAPINFO: Entry for \"enterpic\" over 8 characters!\n");
                         epi::CStringCopyMax(lumpname, value.data(), 8);
                         if (lex.Match(","))
                         {
@@ -616,7 +616,7 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                         int  actor_num   = -1;
                         int  actor_check = epi::EName(value, true).GetIndex();
                         if (!ActorNames.count(actor_check))
-                            EDGEError("UMAPINFO: Unknown thing type %s\n", value.c_str());
+                            FatalError("UMAPINFO: Unknown thing type %s\n", value.c_str());
                         else
                             actor_num = ActorNames[actor_check];
                         if (actor_num == -1)
@@ -624,11 +624,11 @@ static void ParseUMAPINFOEntry(epi::Lexer &lex, MapEntry *val)
                         else
                         {
                             if (!lex.Match(","))
-                                EDGEError("UMAPINFO: \"bossaction\" key missing line special!\n");
+                                FatalError("UMAPINFO: \"bossaction\" key missing line special!\n");
                             lex.Next(value);
                             special = epi::LexInteger(value);
                             if (!lex.Match(","))
-                                EDGEError("UMAPINFO: \"bossaction\" key missing tag!\n");
+                                FatalError("UMAPINFO: \"bossaction\" key missing tag!\n");
                             lex.Next(value);
                             tag = epi::LexInteger(value);
                             if (tag != 0 || special == 11 || special == 51 || special == 52 || special == 124)
@@ -698,12 +698,12 @@ void Parse_UMAPINFO(const std::string &buffer)
             break;
 
         if (tok != epi::kTokenIdentifier || epi::StringCaseCompareASCII(section, "MAP") != 0)
-            EDGEError("Malformed UMAPINFO lump.\n");
+            FatalError("Malformed UMAPINFO lump.\n");
 
         tok = lex.Next(section);
 
         if (tok != epi::kTokenIdentifier)
-            EDGEError("UMAPINFO: No mapname for map entry!\n");
+            FatalError("UMAPINFO: No mapname for map entry!\n");
 
         unsigned int i      = 0;
         MapEntry     parsed = {0};
@@ -711,7 +711,7 @@ void Parse_UMAPINFO(const std::string &buffer)
         epi::CStringCopyMax(parsed.mapname, section.data(), section.size());
 
         if (!lex.Match("{"))
-            EDGEError("Malformed UMAPINFO lump: missing '{'\n");
+            FatalError("Malformed UMAPINFO lump: missing '{'\n");
 
         ParseUMAPINFOEntry(lex, &parsed);
         // Does this map entry already exist? If yes, replace it.

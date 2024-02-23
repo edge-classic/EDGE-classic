@@ -91,7 +91,7 @@ uint8_t *Convert_PCSpeaker(const uint8_t *data, int *length)
 
     if (*length < 4)
     {
-        EDGEWarning("Invalid PC Speaker Sound\n");
+        LogWarning("Invalid PC Speaker Sound\n");
         return nullptr;
     }
 
@@ -102,12 +102,12 @@ uint8_t *Convert_PCSpeaker(const uint8_t *data, int *length)
     // Format checks
     if (header.zero != 0) // Check for magic number
     {
-        EDGEWarning("Invalid Doom PC Speaker Sound\n");
+        LogWarning("Invalid Doom PC Speaker Sound\n");
         return nullptr;
     }
     if (header.samples > (*length - 4) || header.samples < 4) // Check for sane values
     {
-        EDGEWarning("Invalid Doom PC Speaker Sound\n");
+        LogWarning("Invalid Doom PC Speaker Sound\n");
         return nullptr;
     }
     numsamples = header.samples;
@@ -125,7 +125,7 @@ uint8_t *Convert_PCSpeaker(const uint8_t *data, int *length)
     {
         if (osamples[s] > 127)
         {
-            EDGEWarning("Invalid PC Speaker counter value: %d > 127", osamples[s]);
+            LogWarning("Invalid PC Speaker counter value: %d > 127", osamples[s]);
             return nullptr;
         }
         if (osamples[s] > 0)
@@ -210,13 +210,13 @@ bool S_LoadWAVSound(sound_data_c *buf, uint8_t *data, int length, bool pc_speake
 
     if (!drwav_init_memory(&wav, data, length, nullptr))
     {
-        EDGEWarning("Failed to load WAV sound (corrupt wav?)\n");
+        LogWarning("Failed to load WAV sound (corrupt wav?)\n");
         return false;
     }
 
     if (wav.channels > 2)
     {
-        EDGEWarning("WAV SFX Loader: too many channels: %d\n", wav.channels);
+        LogWarning("WAV SFX Loader: too many channels: %d\n", wav.channels);
         drwav_uninit(&wav);
         return false;
     }
@@ -224,12 +224,12 @@ bool S_LoadWAVSound(sound_data_c *buf, uint8_t *data, int length, bool pc_speake
     if (wav.totalPCMFrameCount <=
         0) // I think the initial loading would fail if this were the case, but just as a sanity check - Dasho
     {
-        EDGEWarning("WAV SFX Loader: no samples!\n");
+        LogWarning("WAV SFX Loader: no samples!\n");
         drwav_uninit(&wav);
         return false;
     }
 
-    EDGEDebugf("WAV SFX Loader: freq %d Hz, %d channels\n", wav.sampleRate, wav.channels);
+    LogDebug("WAV SFX Loader: freq %d Hz, %d channels\n", wav.sampleRate, wav.channels);
 
     bool is_stereo = (wav.channels > 1);
 
@@ -242,7 +242,7 @@ bool S_LoadWAVSound(sound_data_c *buf, uint8_t *data, int length, bool pc_speake
     gather.CommitChunk(drwav_read_pcm_frames_s16(&wav, wav.totalPCMFrameCount, buffer));
 
     if (!gather.Finalise(buf, is_stereo))
-        EDGEWarning("WAV SFX Loader: no samples!\n");
+        LogWarning("WAV SFX Loader: no samples!\n");
 
     drwav_uninit(&wav);
 

@@ -32,14 +32,14 @@ extern "C"
     int main(int argc, char *argv[])
     {
         if (SDL_Init(0) < 0)
-            EDGEError("Couldn't init SDL!!\n%s\n", SDL_GetError());
+            FatalError("Couldn't init SDL!!\n%s\n", SDL_GetError());
 
         executable_path = SDL_GetBasePath();
 
 #ifdef _WIN32
         // -AJA- change current dir to match executable
         if (!epi::CurrentDirectorySet(executable_path))
-            EDGEError("Couldn't set program directory to %s!!\n",
+            FatalError("Couldn't set program directory to %s!!\n",
                     executable_path.c_str());
 #endif
 

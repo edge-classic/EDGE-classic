@@ -32,7 +32,7 @@
 //   Touch Node code.
 //
 // TODO HERE:
-//   + make gap routines EDGEError if overflow limit.
+//   + make gap routines FatalError if overflow limit.
 //
 
 
@@ -328,7 +328,7 @@ static int GAP_RemoveSolid(vgap_t *dest, int d_num, float z1, float z2)
 
 #ifdef DEVELOPERS
     if (z1 > z2)
-        EDGEError("RemoveSolid: z1 > z2");
+        FatalError("RemoveSolid: z1 > z2");
 #endif
 
     for (d = 0; d < d_num; d++)
@@ -476,7 +476,7 @@ static void GAP_Dump(vgap_t *gaps, int num)
 	int j;
 
 	for (j=0; j < num; j++)
-		EDGEDebugf("  GAP %d/%d  %1.1f .. %1.1f\n", j+1, num,
+		LogDebug("  GAP %d/%d  %1.1f .. %1.1f\n", j+1, num,
 		gaps[j].f, gaps[j].c);
 }
 #endif
@@ -680,20 +680,20 @@ void P_DumpExtraFloors(const sector_t *sec)
 {
     const extrafloor_t *ef;
 
-    EDGEDebugf("EXTRAFLOORS IN Sector %d  (%d used, %d max)\n", (int)(sec - sectors), sec->exfloor_used,
+    LogDebug("EXTRAFLOORS IN Sector %d  (%d used, %d max)\n", (int)(sec - sectors), sec->exfloor_used,
                  sec->exfloor_max);
 
-    EDGEDebugf("  Basic height: %1.1f .. %1.1f\n", sec->f_h, sec->c_h);
+    LogDebug("  Basic height: %1.1f .. %1.1f\n", sec->f_h, sec->c_h);
 
     for (ef = sec->bottom_ef; ef; ef = ef->higher)
     {
-        EDGEDebugf("  Solid %s: %1.1f .. %1.1f\n", (ef->ef_info->type & kExtraFloorTypeThick) ? "Thick" : "Thin", ef->bottom_h,
+        LogDebug("  Solid %s: %1.1f .. %1.1f\n", (ef->ef_info->type & kExtraFloorTypeThick) ? "Thick" : "Thin", ef->bottom_h,
                      ef->top_h);
     }
 
     for (ef = sec->bottom_liq; ef; ef = ef->higher)
     {
-        EDGEDebugf("  Liquid %s: %1.1f .. %1.1f\n", (ef->ef_info->type & kExtraFloorTypeThick) ? "Thick" : "Thin", ef->bottom_h,
+        LogDebug("  Liquid %s: %1.1f .. %1.1f\n", (ef->ef_info->type & kExtraFloorTypeThick) ? "Thick" : "Thin", ef->bottom_h,
                      ef->top_h);
     }
 }
@@ -752,7 +752,7 @@ void P_AddExtraFloor(sector_t *sec, line_t *line)
     SYS_ASSERT(sec->exfloor_used <= sec->exfloor_max);
 
     if (sec->exfloor_used == sec->exfloor_max)
-        EDGEError("INTERNAL ERROR: extrafloor overflow in sector %d\n", (int)(sec - sectors));
+        FatalError("INTERNAL ERROR: extrafloor overflow in sector %d\n", (int)(sec - sectors));
 
     newbie = sec->exfloor_first + sec->exfloor_used;
     sec->exfloor_used++;
@@ -773,7 +773,7 @@ void P_AddExtraFloor(sector_t *sec, line_t *line)
     newbie->top_h    = (ef_info->type_ & kExtraFloorTypeThick) ? ctrl->c_h : newbie->bottom_h;
 
     if (newbie->top_h < newbie->bottom_h)
-        EDGEError("Bad Extrafloor in sector #%d: "
+        FatalError("Bad Extrafloor in sector #%d: "
                 "z range is %1.0f / %1.0f\n",
                 (int)(sec - sectors), newbie->bottom_h, newbie->top_h);
 
@@ -835,17 +835,17 @@ void P_AddExtraFloor(sector_t *sec, line_t *line)
         break;
 
     case EXFIT_StuckInCeiling:
-        EDGEWarning("Extrafloor with z range of %1.0f / %1.0f is stuck "
+        LogWarning("Extrafloor with z range of %1.0f / %1.0f is stuck "
                   "in sector #%d's ceiling.\n",
                   newbie->bottom_h, newbie->top_h, (int)(sec - sectors));
 
     case EXFIT_StuckInFloor:
-        EDGEWarning("Extrafloor with z range of %1.0f / %1.0f is stuck "
+        LogWarning("Extrafloor with z range of %1.0f / %1.0f is stuck "
                   "in sector #%d's floor.\n",
                   newbie->bottom_h, newbie->top_h, (int)(sec - sectors));
 
     default:
-        EDGEWarning("Extrafloor with z range of %1.0f / %1.0f is stuck "
+        LogWarning("Extrafloor with z range of %1.0f / %1.0f is stuck "
                   "in sector #%d in another extrafloor.\n",
                   newbie->bottom_h, newbie->top_h, (int)(sec - sectors));
     }

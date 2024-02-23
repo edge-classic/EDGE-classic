@@ -45,8 +45,8 @@
 // -ACB- 1998/08/09 Removed the HUDTITLE stuff; Use current_map->description.
 //
 
-static constexpr uint16_t kHUDMessageTimeout          = (4 * kTicRate);
-static constexpr uint16_t kHUDImportantMessageTimeout = (4 * kTicRate);
+static constexpr uint16_t kHudMessageTimeout          = (4 * kTicRate);
+static constexpr uint16_t kHudImportantMessageTimeout = (4 * kTicRate);
 
 std::string current_map_title;
 
@@ -66,7 +66,7 @@ Style *important_message_style;
 //
 // Heads-up Init
 //
-void HUDInit(void)
+void HudInit(void)
 {
     // should use language["HeadsUpInit"], but LDF hasn't been loaded yet
     E_ProgressMessage("Setting up HUD...\n");
@@ -74,7 +74,7 @@ void HUDInit(void)
 }
 
 // -ACB- 1998/08/09 Used current_map to set the map name in string
-void HUDStart(void)
+void HudStart(void)
 {
     const char *string;
 
@@ -104,13 +104,13 @@ void HUDStart(void)
     if (current_map->description_ !=
         "")  // Lobo 2022: if it's wrong, show it anyway
     {
-        EDGEPrintf("\n");
-        EDGEPrintf("--------------------------------------------------\n");
+        LogPrint("\n");
+        LogPrint("--------------------------------------------------\n");
 
         ConsoleMessageColor(SG_GREEN_RGBA32);
 
         string = language[current_map->description_];
-        EDGEPrintf("Entering %s\n", string);
+        LogPrint("Entering %s\n", string);
 
         current_map_title = std::string(string);
     }
@@ -119,7 +119,7 @@ void HUDStart(void)
     hud_tic = 0;
 }
 
-void HUDDrawer(void)
+void HudDrawer(void)
 {
     ConsoleShowFPS();
     ConsoleShowPosition();
@@ -140,11 +140,11 @@ void HUDDrawer(void)
         y = tempY;
 
         message_style->DrawBackground();
-        HUDSetAlignment(0, 0);  // center it
-        HUDSetAlpha(message_style->definition_->text_->translucency_);
-        HUDWriteText(message_style, 0, 160, y, current_message.c_str());
-        HUDSetAlignment();
-        HUDSetAlpha();
+        HudSetAlignment(0, 0);  // center it
+        HudSetAlpha(message_style->definition_->text_->translucency_);
+        HudWriteText(message_style, 0, 160, y, current_message.c_str());
+        HudSetAlignment();
+        HudSetAlpha();
     }
 
     if (important_message_on)
@@ -157,19 +157,19 @@ void HUDDrawer(void)
         tempY /= 2;
         y = 90 - tempY;
         important_message_style->DrawBackground();
-        HUDSetAlignment(0, 0);  // center it
-        HUDSetAlpha(important_message_style->definition_->text_->translucency_);
-        HUDWriteText(important_message_style, 0, 160, y,
+        HudSetAlignment(0, 0);  // center it
+        HudSetAlpha(important_message_style->definition_->text_->translucency_);
+        HudWriteText(important_message_style, 0, 160, y,
                      current_important_message_message.c_str());
-        HUDSetAlignment();
-        HUDSetAlpha();
+        HudSetAlignment();
+        HudSetAlpha();
     }
 
     // TODO: chat messages
 }
 
 // Starts displaying the message.
-void HUDStartMessage(const char *msg)
+void HudStartMessage(const char *msg)
 {
     // only display message if necessary
     if (!message_no_overwrite)
@@ -177,13 +177,13 @@ void HUDStartMessage(const char *msg)
         current_message = std::string(msg);
 
         message_on           = true;
-        message_counter      = kHUDMessageTimeout;
+        message_counter      = kHudMessageTimeout;
         message_no_overwrite = false;
     }
 }
 
 // Starts displaying the message.
-void HUDStartImportantMessage(const char *msg)
+void HudStartImportantMessage(const char *msg)
 {
     // only display message if necessary
     if (!message_no_overwrite)
@@ -191,12 +191,12 @@ void HUDStartImportantMessage(const char *msg)
         current_important_message_message = std::string(msg);
 
         important_message_on      = true;
-        important_message_counter = kHUDImportantMessageTimeout;
+        important_message_counter = kHudImportantMessageTimeout;
         message_no_overwrite      = false;
     }
 }
 
-void HUDTicker(void)
+void HudTicker(void)
 {
     // tick down message counter if message is up
     if (message_counter && !--message_counter)

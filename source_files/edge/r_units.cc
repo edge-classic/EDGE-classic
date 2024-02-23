@@ -281,7 +281,7 @@ static void EnableCustomEnv(GLuint env, bool enable)
         break;
 
     default:
-        EDGEError("INTERNAL ERROR: no such custom env: %08x\n", env);
+        FatalError("INTERNAL ERROR: no such custom env: %08x\n", env);
     }
 }
 

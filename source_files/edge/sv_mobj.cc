@@ -274,7 +274,7 @@ void *SV_MobjGetElem(int index)
         index--;
 
     if (!cur)
-        EDGEError("LOADGAME: Invalid Mobj: %d\n", index);
+        FatalError("LOADGAME: Invalid Mobj: %d\n", index);
 
     SYS_ASSERT(index == 0);
 
@@ -295,7 +295,7 @@ int SV_MobjFindElem(mobj_t *elem)
         index++;
 
     if (!cur)
-        EDGEError("LOADGAME: No such MobjPtr: %p\n", elem);
+        FatalError("LOADGAME: No such MobjPtr: %p\n", elem);
 
     return index;
 }
@@ -393,7 +393,7 @@ void *SV_ItemqGetElem(int index)
         index--;
 
     if (!cur)
-        EDGEError("LOADGAME: Invalid ItemInQue: %d\n", index);
+        FatalError("LOADGAME: Invalid ItemInQue: %d\n", index);
 
     SYS_ASSERT(index == 0);
     return cur;
@@ -413,7 +413,7 @@ int SV_ItemqFindElem(iteminque_t *elem)
         index++;
 
     if (!cur)
-        EDGEError("LOADGAME: No such ItemInQue ptr: %p\n", elem);
+        FatalError("LOADGAME: No such ItemInQue ptr: %p\n", elem);
 
     return index;
 }
@@ -458,7 +458,7 @@ void SV_ItemqFinaliseElems(void)
         if (cur->spawnpoint.info)
             continue;
 
-        EDGEWarning("LOADGAME: discarding empty ItemInQue\n");
+        LogWarning("LOADGAME: discarding empty ItemInQue\n");
 
         if (next)
             next->prev = cur->prev;
@@ -539,7 +539,7 @@ bool SR_MobjGetType(void *storage, int index, void *extra)
     if (!*dest)
     {
         // Note: a missing 'info' field will be fixed up later
-        EDGEWarning("LOADGAME: no such thing type '%s'\n", name);
+        LogWarning("LOADGAME: no such thing type '%s'\n", name);
     }
 
     SV_FreeString(name);
@@ -655,14 +655,14 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
     base_p = strchr(buffer, ':');
 
     if (base_p == nullptr || base_p[0] == 0)
-        EDGEError("Corrupt savegame: bad state 1/2: `%s'\n", buffer);
+        FatalError("Corrupt savegame: bad state 1/2: `%s'\n", buffer);
 
     *base_p++ = 0;
 
     off_p = strchr(base_p, ':');
 
     if (off_p == nullptr || off_p[0] == 0)
-        EDGEError("Corrupt savegame: bad state 2/2: `%s'\n", base_p);
+        FatalError("Corrupt savegame: bad state 2/2: `%s'\n", base_p);
 
     *off_p++ = 0;
 
@@ -674,7 +674,7 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
         // Do we care about those in the disabled group?
         actual = mobjtypes.Lookup(buffer);
         if (!actual)
-            EDGEError("LOADGAME: no such thing %s for state %s:%s\n", buffer, base_p, off_p);
+            FatalError("LOADGAME: no such thing %s for state %s:%s\n", buffer, base_p, off_p);
     }
 
     // find base state
@@ -684,7 +684,7 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
 
     if (!base)
     {
-        EDGEWarning("LOADGAME: no such label `%s' for state.\n", base_p);
+        LogWarning("LOADGAME: no such label `%s' for state.\n", base_p);
         offset = 0;
 
         if (actual->idle_state_)
@@ -700,7 +700,7 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
     }
 
 #if 0
-	EDGEDebugf("Unswizzled state `%s:%s:%s' -> %d\n", 
+	LogDebug("Unswizzled state `%s:%s:%s' -> %d\n", 
 		buffer, base_p, off_p, base + offset);
 #endif
 
@@ -753,7 +753,7 @@ void SR_MobjPutState(void *storage, int index, void *extra)
     // object has no states ?
     if (mo->info->state_grp_.empty())
     {
-        EDGEWarning("SAVEGAME: object [%s] has no states !!\n", mo->info->name_.c_str());
+        LogWarning("SAVEGAME: object [%s] has no states !!\n", mo->info->name_.c_str());
         SV_PutString(nullptr);
         return;
     }
@@ -763,7 +763,7 @@ void SR_MobjPutState(void *storage, int index, void *extra)
 
     if (s_num < 0 || s_num >= num_states)
     {
-        EDGEWarning("SAVEGAME: object [%s] is in invalid state %d\n", mo->info->name_.c_str(), s_num);
+        LogWarning("SAVEGAME: object [%s] is in invalid state %d\n", mo->info->name_.c_str(), s_num);
 
         if (mo->info->idle_state_)
             s_num = mo->info->idle_state_;
@@ -783,7 +783,7 @@ void SR_MobjPutState(void *storage, int index, void *extra)
 
     if (!DDF_StateGroupHasState(actual->state_grp_, s_num))
     {
-        EDGEWarning("SAVEGAME: object [%s] is in AWOL state %d\n", mo->info->name_.c_str(), s_num);
+        LogWarning("SAVEGAME: object [%s] is in AWOL state %d\n", mo->info->name_.c_str(), s_num);
 
         bool state_found = false;
 
@@ -801,14 +801,14 @@ void SR_MobjPutState(void *storage, int index, void *extra)
 
         if (!state_found)
         {
-            EDGEWarning("-- ARGH: state %d cannot be found !!\n", s_num);
+            LogWarning("-- ARGH: state %d cannot be found !!\n", s_num);
             SV_PutString("*:*:1");
             return;
         }
 
         if (actual->name_.empty())
         {
-            EDGEWarning("-- OOPS: state %d found in unnamed object !!\n", s_num);
+            LogWarning("-- OOPS: state %d found in unnamed object !!\n", s_num);
             SV_PutString("*:*:1");
             return;
         }
@@ -826,7 +826,7 @@ void SR_MobjPutState(void *storage, int index, void *extra)
             states[base].label ? states[base].label : "*", 1 + s_num - base);
 
 #if 0
-	EDGEDebugf("Swizzled state %d of [%s] -> `%s'\n", 
+	LogDebug("Swizzled state %d of [%s] -> `%s'\n", 
 		s_num, mo->info->name_, swizzle);
 #endif
 

@@ -16,7 +16,7 @@ static void LUA_Error(const char *msg, const char *luaerror)
     std::string error(luaerror);
     std::replace(error.begin(), error.end(), '\t', '>');
 
-    EDGEError((msg + error).c_str());
+    FatalError((msg + error).c_str());
 }
 
 static void LUA_GetRequirePackPath(const char *name, std::string &out)
@@ -37,7 +37,7 @@ static int LUA_PackLoader(lua_State *L)
 
     if (!file)
     {
-        EDGEError("LUA: %s.lua: NOT FOUND\n", name);
+        FatalError("LUA: %s.lua: NOT FOUND\n", name);
         return 0;
     }
 
@@ -58,7 +58,7 @@ static int LUA_PackSearcher(lua_State *L)
 
     if (W_CheckPackForName(pack_name) == -1)
     {
-        EDGEError("LUA: Unable to load file %s", pack_name.c_str());
+        FatalError("LUA: Unable to load file %s", pack_name.c_str());
         return 0;
     }
 
@@ -90,7 +90,7 @@ int LUA_DoFile(lua_State *L, const char *filename, const char *source)
         lua_getfield(L, -1, filename);
         if (lua_isstring(L, -1))
         {
-            EDGEWarning("LUA: Redundant execution of %s", filename);
+            LogWarning("LUA: Redundant execution of %s", filename);
             lua_pop(L, 2);
             return 0;
         }
@@ -136,7 +136,7 @@ static int  LUA_DbgNOP(lua_State *L)
     if (!dbg_nop_warn)
     {
         dbg_nop_warn = true;
-        EDGEWarning("LUA: dbg() called without lua_debug being set.  Please check that a stray dbg call didn't get left "
+        LogWarning("LUA: dbg() called without lua_debug being set.  Please check that a stray dbg call didn't get left "
                   "in source.");
     }
     return 0;
@@ -174,7 +174,7 @@ static int LUA_Sandbox_Warning(lua_State *L)
 {
     const char *function_name = luaL_checkstring(L, lua_upvalueindex(1));
 
-    EDGEWarning("LUA: Called sandbox disabled function %s\n", function_name);
+    LogWarning("LUA: Called sandbox disabled function %s\n", function_name);
 
     return 0;
 }

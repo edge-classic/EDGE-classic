@@ -60,12 +60,12 @@ void SoundFillCallback(void *udata, Uint8 *stream, int len)
     S_MixAllChannels(stream, len);
 }
 
-static bool EDGETryOpenSound(int want_freq, bool want_stereo)
+static bool TryOpenSound(int want_freq, bool want_stereo)
 {
     SDL_AudioSpec trydev;
     SDL_zero(trydev);
 
-    EDGEPrintf("EDGEStartupSound: trying %d Hz %s\n", want_freq,
+    LogPrint("StartupSound: trying %d Hz %s\n", want_freq,
              want_stereo ? "Stereo" : "Mono");
 
     trydev.freq     = want_freq;
@@ -79,12 +79,12 @@ static bool EDGETryOpenSound(int want_freq, bool want_stereo)
 
     if (current_sound_device > 0) return true;
 
-    EDGEPrintf("  failed: %s\n", SDL_GetError());
+    LogPrint("  failed: %s\n", SDL_GetError());
 
     return false;
 }
 
-void EDGEStartupSound(void)
+void StartupSound(void)
 {
     if (no_sound) return;
 
@@ -103,11 +103,11 @@ void EDGEStartupSound(void)
         SDL_setenv("SDL_AUDIODRIVER", driver.c_str(), 1);
     }
 
-    EDGEPrintf("SDL_Audio_Driver: %s\n", driver.c_str());
+    LogPrint("SDL_Audio_Driver: %s\n", driver.c_str());
 
     if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
     {
-        EDGEPrintf("EDGEStartupSound: Couldn't init SDL AUDIO! %s\n",
+        LogPrint("StartupSound: Couldn't init SDL AUDIO! %s\n",
                  SDL_GetError());
         no_sound = true;
         return;
@@ -121,11 +121,11 @@ void EDGEStartupSound(void)
 
     bool success = false;
 
-    if (EDGETryOpenSound(want_freq, want_stereo)) success = true;
+    if (TryOpenSound(want_freq, want_stereo)) success = true;
 
     if (!success)
     {
-        EDGEPrintf("EDGEStartupSound: Unable to find a working sound mode!\n");
+        LogPrint("StartupSound: Unable to find a working sound mode!\n");
         no_sound = true;
         return;
     }
@@ -136,7 +136,7 @@ void EDGEStartupSound(void)
 
     if (sound_device_check.format != AUDIO_S16SYS)
     {
-        EDGEPrintf("EDGEStartupSound: unsupported format: %d\n",
+        LogPrint("StartupSound: unsupported format: %d\n",
                  sound_device_check.format);
         SDL_CloseAudioDevice(current_sound_device);
         no_sound = true;
@@ -145,7 +145,7 @@ void EDGEStartupSound(void)
 
     if (sound_device_check.channels >= 3)
     {
-        EDGEPrintf("EDGEStartupSound: unsupported channel num: %d\n",
+        LogPrint("StartupSound: unsupported channel num: %d\n",
                  sound_device_check.channels);
         SDL_CloseAudioDevice(current_sound_device);
 
@@ -154,14 +154,14 @@ void EDGEStartupSound(void)
     }
 
     if (want_stereo && sound_device_check.channels != 2)
-        EDGEPrintf("EDGEStartupSound: stereo sound not available.\n");
+        LogPrint("StartupSound: stereo sound not available.\n");
     else if (!want_stereo && sound_device_check.channels != 1)
-        EDGEPrintf("EDGEStartupSound: mono sound not available.\n");
+        LogPrint("StartupSound: mono sound not available.\n");
 
     if (sound_device_check.freq < (want_freq - want_freq / 100) ||
         sound_device_check.freq > (want_freq + want_freq / 100))
     {
-        EDGEPrintf("EDGEStartupSound: %d Hz sound not available.\n", want_freq);
+        LogPrint("StartupSound: %d Hz sound not available.\n", want_freq);
     }
 
     sound_device_bytes_per_sample = (sound_device_check.channels) * 2;
@@ -179,13 +179,13 @@ void EDGEStartupSound(void)
         var_sound_stereo = sound_device_stereo ? 1 : 0;
 
     // display some useful stuff
-    EDGEPrintf("EDGEStartupSound: Success @ %d Hz %s\n", sound_device_frequency,
+    LogPrint("StartupSound: Success @ %d Hz %s\n", sound_device_frequency,
              sound_device_stereo ? "Stereo" : "Mono");
 
     return;
 }
 
-void EDGEShutdownSound(void)
+void ShutdownSound(void)
 {
     if (no_sound) return;
 
@@ -196,19 +196,19 @@ void EDGEShutdownSound(void)
     SDL_CloseAudioDevice(current_sound_device);
 }
 
-void EDGELockAudio(void)
+void LockAudio(void)
 {
     if (audio_is_locked)
     {
-        EDGEUnlockAudio();
-        EDGEError("EDGELockAudio: called twice without unlock!\n");
+        UnlockAudio();
+        FatalError("LockAudio: called twice without unlock!\n");
     }
 
     SDL_LockAudioDevice(current_sound_device);
     audio_is_locked = true;
 }
 
-void EDGEUnlockAudio(void)
+void UnlockAudio(void)
 {
     if (audio_is_locked)
     {
@@ -217,7 +217,7 @@ void EDGEUnlockAudio(void)
     }
 }
 
-void EDGEStartupMusic(void)
+void StartupMusic(void)
 {
     // Check for soundfonts and instrument banks
     std::vector<epi::DirectoryEntry> sfd;
@@ -232,7 +232,7 @@ void EDGEStartupMusic(void)
 
     if (!ReadDirectory(sfd, soundfont_dir, "*.*"))
     {
-        EDGEWarning("EDGEStartupMusic: Failed to read '%s' directory!\n",
+        LogWarning("StartupMusic: Failed to read '%s' directory!\n",
                   soundfont_dir.c_str());
     }
     else
@@ -266,7 +266,7 @@ void EDGEStartupMusic(void)
 
         if (!ReadDirectory(sfd, soundfont_dir, "*.*"))
         {
-            EDGEWarning("EDGEStartupMusic: Failed to read '%s' directory!\n",
+            LogWarning("StartupMusic: Failed to read '%s' directory!\n",
                       soundfont_dir.c_str());
         }
         else

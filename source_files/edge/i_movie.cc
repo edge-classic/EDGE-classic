@@ -53,7 +53,7 @@ static bool MovieSetupAudioStream(int rate)
 
     if (!movie_audio_stream)
     {
-        EDGEWarning("EDGEPlayMovie: Failed to setup audio stream: %s\n",
+        LogWarning("PlayMovie: Failed to setup audio stream: %s\n",
                   SDL_GetError());
         return false;
     }
@@ -106,13 +106,13 @@ void MovieVideoCallback(plm_t *mpeg, plm_frame_t *frame, void *user)
     need_canvas_update = true;
 }
 
-void EDGEPlayMovie(const std::string &name)
+void PlayMovie(const std::string &name)
 {
     MovieDefinition *movie = moviedefs.Lookup(name.c_str());
 
     if (!movie)
     {
-        EDGEWarning("EDGEPlayMovie: Movie definition %s not found!\n",
+        LogWarning("PlayMovie: Movie definition %s not found!\n",
                   name.c_str());
         return;
     }
@@ -140,7 +140,7 @@ void EDGEPlayMovie(const std::string &name)
 
     if (!bytes)
     {
-        EDGEWarning("EDGEPlayMovie: Could not open %s!\n", movie->info_.c_str());
+        LogWarning("PlayMovie: Could not open %s!\n", movie->info_.c_str());
         return;
     }
 
@@ -160,7 +160,7 @@ void EDGEPlayMovie(const std::string &name)
 
     if (!decoder)
     {
-        EDGEWarning("EDGEPlayMovie: Could not open %s!\n", name.c_str());
+        LogWarning("PlayMovie: Could not open %s!\n", name.c_str());
         delete[] bytes;
         return;
     }
@@ -250,11 +250,11 @@ void EDGEPlayMovie(const std::string &name)
 
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    EDGEFinishFrame();
-    EDGEStartFrame();
+    FinishFrame();
+    StartFrame();
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    EDGEFinishFrame();
+    FinishFrame();
 
     RGL_SetupMatrices2D();
 
@@ -279,7 +279,7 @@ void EDGEPlayMovie(const std::string &name)
 
         if (need_canvas_update)
         {
-            EDGEStartFrame();
+            StartFrame();
 
             glEnable(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, canvas);
@@ -329,14 +329,14 @@ void EDGEPlayMovie(const std::string &name)
             if (skip_bar_active)
             {
                 // Draw black box at bottom of screen
-                HUDSolidBox(hud_x_left, 196, hud_x_right, 200, SG_BLACK_RGBA32);
+                HudSolidBox(hud_x_left, 196, hud_x_right, 200, SG_BLACK_RGBA32);
 
                 // Draw progress
-                HUDSolidBox(hud_x_left, 197, hud_x_right * (skip_time / 0.9f),
+                HudSolidBox(hud_x_left, 197, hud_x_right * (skip_time / 0.9f),
                             199, SG_WHITE_RGBA32);
             }
 
-            EDGEFinishFrame();
+            FinishFrame();
 
             need_canvas_update = false;
         }
@@ -376,7 +376,7 @@ void EDGEPlayMovie(const std::string &name)
     {
         double current_time = (double)SDL_GetTicks() / 1000.0;
         fadeout             = current_time - last_time;
-        EDGEStartFrame();
+        StartFrame();
 
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, canvas);
@@ -419,7 +419,7 @@ void EDGEPlayMovie(const std::string &name)
 
         glDisable(GL_BLEND);
 
-        EDGEFinishFrame();
+        FinishFrame();
     }
     plm_destroy(decoder);
     decoder = nullptr;
@@ -440,11 +440,11 @@ void EDGEPlayMovie(const std::string &name)
     }
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    EDGEFinishFrame();
-    EDGEStartFrame();
+    FinishFrame();
+    StartFrame();
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    EDGEFinishFrame();
+    FinishFrame();
     S_ResumeMusic();
     return;
 }

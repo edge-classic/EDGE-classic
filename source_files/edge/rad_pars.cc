@@ -47,7 +47,7 @@ static char *Z_StrDup(const char *s)
 {
     char *dup = strdup(s);
     if (dup == nullptr)
-        EDGEError("out of memory\n");
+        FatalError("out of memory\n");
     return dup;
 }
 static void Z_StrFree(const char *s)
@@ -117,12 +117,12 @@ void RAD_Error(const char *err, ...)
 
     // check for buffer overflow
     if (buffer[2047] != 0)
-        EDGEError("Buffer overflow in RAD_Error.\n");
+        FatalError("Buffer overflow in RAD_Error.\n");
 
     // add a blank line for readability in the log file
-    EDGEPrintf("\n");
+    LogPrint("\n");
 
-    EDGEError("%s", buffer);
+    FatalError("%s", buffer);
 }
 
 void RAD_Warning(const char *err, ...)
@@ -137,10 +137,10 @@ void RAD_Warning(const char *err, ...)
     vsprintf(buffer, err, argptr);
     va_end(argptr);
 
-    EDGEWarning("\n");
-    EDGEWarning("Found problem near line %d of %s\n", rad_cur_linenum, rad_cur_filename);
-    EDGEWarning("Line contents: %s\n", rad_cur_line.c_str());
-    EDGEWarning("%s", buffer);
+    LogWarning("\n");
+    LogWarning("Found problem near line %d of %s\n", rad_cur_linenum, rad_cur_filename);
+    LogWarning("Line contents: %s\n", rad_cur_line.c_str());
+    LogWarning("%s", buffer);
 }
 
 void RAD_WarnError(const char *err, ...)
@@ -280,7 +280,7 @@ static void RAD_CheckForTime(const char *info, void *storage)
     float val;
     if (sscanf(info, "%f", &val) != 1)
     {
-        EDGEWarning("Bad time value '%s'.\n", info);
+        LogWarning("Bad time value '%s'.\n", info);
         return;
     }
 
@@ -351,7 +351,7 @@ static char *RAD_UnquoteString(const char *s)
     {
 #ifdef DEVELOPERS
         if (s[0] == 0)
-            EDGEError("INTERNAL ERROR: bad string.\n");
+            FatalError("INTERNAL ERROR: bad string.\n");
 #endif
 
         // -AJA- 1999/09/07: check for \n
@@ -2525,7 +2525,7 @@ void RAD_ReadScript(const std::string &data, const std::string &source)
 {
     // FIXME store source somewhere, like rad_cur_filename
 
-    EDGEDebugf("RTS: Loading LUMP (size=%d)\n", (int)data.size());
+    LogDebug("RTS: Loading LUMP (size=%d)\n", (int)data.size());
 
     // WISH: a more helpful filename
     rad_cur_filename = "RSCRIPT";
@@ -2541,7 +2541,7 @@ void RAD_ReadScript(const std::string &data, const std::string &source)
             break;
 
 #if (DEBUG_RTS)
-        EDGEDebugf("RTS LINE: '%s'\n", rad_cur_line.c_str());
+        LogDebug("RTS LINE: '%s'\n", rad_cur_line.c_str());
 #endif
 
         RAD_ParseLine();

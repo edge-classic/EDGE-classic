@@ -250,7 +250,7 @@ image_atlas_c *Image_Pack(const std::unordered_map<int, image_data_c *> &im_pack
 		if (atlas_h < atlas_w)
 			atlas_h = atlas_w;
 		if (atlas_w > 4096 || atlas_h > 4096)
-			EDGEError("Image_Pack: Atlas exceeds maximum allowed texture size (4096x4096)!");
+			FatalError("Image_Pack: Atlas exceeds maximum allowed texture size (4096x4096)!");
 		stbrp_init_target(&ctx, atlas_w, atlas_h, nodes, 4096);
 		packres = stbrp_pack_rects(&ctx, rects.data(), rects.size());
 	}

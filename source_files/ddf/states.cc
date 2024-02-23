@@ -115,7 +115,7 @@ void DDF_StateInit(void)
 {
     // create states array with a single 'S_NULL' state
     states = (State *)malloc(sizeof(State));
-    if (states == nullptr) EDGEError("could not allocate states\n");
+    if (states == nullptr) FatalError("could not allocate states\n");
 
     states[0]  = template_state;
     num_states = 1;
@@ -352,7 +352,7 @@ void DDF_StateReadState(const char *info, const char *label,
     num_states += 1;
 
     states = (State *)realloc(states, num_states * sizeof(State));
-    if (states == nullptr) EDGEError("could not allocate states\n");
+    if (states == nullptr) FatalError("could not allocate states\n");
 
     cur = &states[num_states - 1];
 

@@ -189,7 +189,7 @@ static void GV_GetImage(const char *info, void *storage)
     }
 
     if (info[1] != ':')
-        EDGEWarning("GV_GetImage: invalid image string `%s'\n", info);
+        LogWarning("GV_GetImage: invalid image string `%s'\n", info);
 
     (*dest) = W_ImageParseSaveString(info[0], info + 2);
 }
@@ -370,7 +370,7 @@ static bool GlobReadVARI(saveglobals_t *globs)
     }
     else
     {
-        EDGEDebugf("GlobReadVARI: unknown global: %s\n", var_name);
+        LogDebug("GlobReadVARI: unknown global: %s\n", var_name);
     }
 
     SV_FreeString(var_name);
@@ -427,7 +427,7 @@ saveglobals_t *SV_LoadGLOB(void)
         }
 
         // skip chunk
-        EDGEWarning("LOADGAME: Unknown GLOB chunk [%s]\n", marker);
+        LogWarning("LOADGAME: Unknown GLOB chunk [%s]\n", marker);
 
         if (!SV_SkipReadChunk(marker))
             break;

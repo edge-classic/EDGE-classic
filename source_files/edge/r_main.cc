@@ -69,7 +69,7 @@ void RGL_SetupMatrices2D(void)
 //
 // RGL_SetupMatricesWorld2D
 //
-// Setup the GL matrices for drawing 2D stuff within the "world" rendered by HUDRenderWorld
+// Setup the GL matrices for drawing 2D stuff within the "world" rendered by HudRenderWorld
 //
 void RGL_SetupMatricesWorld2D(void)
 {
@@ -157,22 +157,22 @@ void RGL_CheckExtensions(void)
     std::string glstr_renderer(SafeStr(glGetString(GL_RENDERER)));
     std::string glstr_vendor(SafeStr(glGetString(GL_VENDOR)));
 
-    EDGEPrintf("OpenGL: Version: %s\n", glstr_version.c_str());
-    EDGEPrintf("OpenGL: Renderer: %s\n", glstr_renderer.c_str());
-    EDGEPrintf("OpenGL: Vendor: %s\n", glstr_vendor.c_str());
+    LogPrint("OpenGL: Version: %s\n", glstr_version.c_str());
+    LogPrint("OpenGL: Renderer: %s\n", glstr_renderer.c_str());
+    LogPrint("OpenGL: Vendor: %s\n", glstr_vendor.c_str());
 
     // Check for a windows software renderer
     if (epi::StringCaseCompareASCII(glstr_vendor, "Microsoft Corporation") == 0)
     {
         if (epi::StringCaseCompareASCII(glstr_renderer, "GDI Generic") == 0)
         {
-            EDGEError("OpenGL: SOFTWARE Renderer!\n");
+            FatalError("OpenGL: SOFTWARE Renderer!\n");
         }
     }
 
 #ifndef EDGE_GL_ES2
     if (!GLAD_GL_VERSION_1_5)
-        EDGEError("OpenGL supported version below minimum! (Requires OpenGL 1.5).\n");
+        FatalError("OpenGL supported version below minimum! (Requires OpenGL 1.5).\n");
 #endif
 }
 
@@ -215,7 +215,7 @@ void RGL_SoftInit(void)
 //
 void RGL_Init(void)
 {
-    EDGEPrintf("OpenGL: Initialising...\n");
+    LogPrint("OpenGL: Initialising...\n");
 
     RGL_CheckExtensions();
 
@@ -237,7 +237,7 @@ void RGL_Init(void)
         glmax_tex_units   = max_tex_units;
     }
 
-    EDGEPrintf("OpenGL: Lights: %d  Clips: %d  Tex: %d  Units: %d\n", glmax_lights, glmax_clip_planes, glmax_tex_size,
+    LogPrint("OpenGL: Lights: %d  Clips: %d  Tex: %d  Units: %d\n", glmax_lights, glmax_clip_planes, glmax_tex_size,
              glmax_tex_units);
 
     RGL_SoftInit();

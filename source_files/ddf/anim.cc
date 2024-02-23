@@ -108,7 +108,7 @@ static void AnimParseField(const char *field, const char *contents, int index,
                            bool is_last)
 {
 #if (DEBUG_DDF)
-    EDGEDebugf("ANIM_PARSE: %s = %s;\n", field, contents);
+    LogDebug("ANIM_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_MainParseField(anim_commands, field, contents,
@@ -273,7 +273,7 @@ void DDF_ConvertANIMATED(const uint8_t *data, int size)
         memcpy(first, data + 10, 8);
         last[8] = 0;
 
-        EDGEDebugf("- ANIMATED LUMP: start '%s' : end '%s'\n", first, last);
+        LogDebug("- ANIMATED LUMP: start '%s' : end '%s'\n", first, last);
 
         // ignore zero-length names
         if (first[0] == 0 || last[0] == 0) continue;

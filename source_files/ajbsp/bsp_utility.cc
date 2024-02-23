@@ -37,7 +37,7 @@ void *UtilCalloc(int size)
     void *ret = calloc(1, size);
 
     if (!ret)
-        EDGEError("AJBSP: Out of memory (cannot allocate %d bytes)\n", size);
+        FatalError("AJBSP: Out of memory (cannot allocate %d bytes)\n", size);
 
     return ret;
 }
@@ -50,7 +50,7 @@ void *UtilRealloc(void *old, int size)
     void *ret = realloc(old, size);
 
     if (!ret)
-        EDGEError("AJBSP: Out of memory (cannot reallocate %d bytes)\n", size);
+        FatalError("AJBSP: Out of memory (cannot reallocate %d bytes)\n", size);
 
     return ret;
 }
@@ -60,7 +60,7 @@ void *UtilRealloc(void *old, int size)
 //
 void UtilFree(void *data)
 {
-    if (data == nullptr) EDGEError("AJBSP: Trying to free a nullptr pointer\n");
+    if (data == nullptr) FatalError("AJBSP: Trying to free a nullptr pointer\n");
 
     free(data);
 }

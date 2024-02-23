@@ -41,7 +41,7 @@
 
 #include "AlmostEquals.h"
 
-extern void EDGEError(const char *error, ...);
+extern void FatalError(const char *error, ...);
 
 namespace coal
 {
@@ -167,7 +167,7 @@ void real_vm_c::CompileError(const char *error, ...)
     vsprintf(buffer, error, argptr);
     va_end(argptr);
 
-    EDGEError("%s:%i: %s", comp.source_file, comp.source_line, buffer);
+    FatalError("%s:%i: %s", comp.source_file, comp.source_line, buffer);
 }
 
 void real_vm_c::LEX_String()

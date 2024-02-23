@@ -57,9 +57,9 @@ static int HD_coord_sys(lua_State *L)
     double h = luaL_checknumber(L, 2);
 
     if (w < 64 || h < 64)
-        EDGEError("Bad hud.coord_sys size: %fx%f\n", w, h);
+        FatalError("Bad hud.coord_sys size: %fx%f\n", w, h);
 
-    HUDSetCoordinateSystem(w, h);
+    HudSetCoordinateSystem(w, h);
 
     LUA_SetFloat(L, "hud", "x_left", hud_x_left);
     LUA_SetFloat(L, "hud", "x_right", hud_x_right);
@@ -145,7 +145,7 @@ static int HD_check_automap(lua_State *L)
 //
 static int HD_get_time(lua_State *L)
 {
-    int time = EDGEGetTime() / (r_doubleframes.d_? 2 : 1);
+    int time = GetTime() / (r_doubleframes.d_? 2 : 1);
     lua_pushnumber(L, (double)time);
     return 1;
 }
@@ -160,15 +160,15 @@ static int HD_text_font(lua_State *L)
     SYS_ASSERT(DEF);
 
     if (!DEF)
-        EDGEError("hud.text_font: Bad font name: %s\n", font_name);
+        FatalError("hud.text_font: Bad font name: %s\n", font_name);
 
     Font *font = hud_fonts.Lookup(DEF);
     SYS_ASSERT(font);
 
     if (!font)
-        EDGEError("hud.text_font: Bad font name: %s\n", font_name);
+        FatalError("hud.text_font: Bad font name: %s\n", font_name);
 
-    HUDSetFont(font);
+    HudSetFont(font);
 
     return 0;
 }
@@ -179,7 +179,7 @@ static int HD_text_color(lua_State *L)
 {
     RGBAColor color = HD_VectorToColor(LUA_CheckVector3(L, 1));
 
-    HUDSetTextColor(color);
+    HudSetTextColor(color);
 
     return 0;
 }
@@ -191,9 +191,9 @@ static int HD_set_scale(lua_State *L)
     float scale = luaL_checknumber(L, 1);
 
     if (scale <= 0)
-        EDGEError("hud.set_scale: Bad scale value: %1.3f\n", scale);
+        FatalError("hud.set_scale: Bad scale value: %1.3f\n", scale);
 
-    HUDSetScale(scale);
+    HudSetScale(scale);
 
     return 0;
 }
@@ -204,7 +204,7 @@ static int HD_set_alpha(lua_State *L)
 {
     float alpha = (float)luaL_checknumber(L, 1);
 
-    HUDSetAlpha(alpha);
+    HudSetAlpha(alpha);
 
     return 0;
 }
@@ -220,7 +220,7 @@ static int HD_solid_box(lua_State *L)
 
     RGBAColor rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
 
-    HUDSolidBox(x, y, x + w, y + h, rgb);
+    HudSolidBox(x, y, x + w, y + h, rgb);
 
     return 0;
 }
@@ -236,7 +236,7 @@ static int HD_solid_line(lua_State *L)
 
     RGBAColor rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
 
-    HUDSolidLine(x1, y1, x2, y2, rgb);
+    HudSolidLine(x1, y1, x2, y2, rgb);
 
     return 0;
 }
@@ -252,7 +252,7 @@ static int HD_thin_box(lua_State *L)
 
     RGBAColor rgb = HD_VectorToColor(LUA_CheckVector3(L, 5));
 
-    HUDThinBox(x, y, x + w, y + h, rgb);
+    HudThinBox(x, y, x + w, y + h, rgb);
 
     return 0;
 }
@@ -273,7 +273,7 @@ static int HD_gradient_box(lua_State *L)
     cols[2] = HD_VectorToColor(LUA_CheckVector3(L, 7));
     cols[3] = HD_VectorToColor(LUA_CheckVector3(L, 8));
 
-    HUDGradientBox(x, y, x + w, y + h, cols);
+    HudGradientBox(x, y, x + w, y + h, cols);
 
     return 0;
 }
@@ -295,9 +295,9 @@ static int HD_draw_image(lua_State *L)
     if (img)
     {
         if (noOffset)
-            HUDDrawImageNoOffset(x, y, img);
+            HudDrawImageNoOffset(x, y, img);
         else
-            HUDDrawImage(x, y, img);
+            HudDrawImage(x, y, img);
     }
 
     return 0;
@@ -320,10 +320,10 @@ static int HD_scroll_image(lua_State *L)
     if (img)
     {
         if (noOffset)
-            HUDScrollImageNoOffset(
+            HudScrollImageNoOffset(
                 x, y, img, -sx, -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
         else
-            HUDScrollImage(x, y, img, -sx,
+            HudScrollImage(x, y, img, -sx,
                             -sy); // Invert sx/sy so that user can enter positive X for right and positive Y for up
     }
 
@@ -349,9 +349,9 @@ static int HD_stretch_image(lua_State *L)
     if (img)
     {
         if (noOffset)
-            HUDStretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
+            HudStretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
         else
-            HUDStretchImage(x, y, w, h, img, 0.0, 0.0);
+            HudStretchImage(x, y, w, h, img, 0.0, 0.0);
     }
 
     return 0;
@@ -375,7 +375,7 @@ static int HD_tile_image(lua_State *L)
 
     if (img)
     {
-        HUDTileImage(x, y, w, h, img, offset_x, offset_y);
+        HudTileImage(x, y, w, h, img, offset_x, offset_y);
     }
 
     return 0;
@@ -392,7 +392,7 @@ static int HD_draw_text(lua_State *L)
 
     double size = luaL_optnumber(L, 4, 0);
 
-    HUDDrawText(x, y, str, size);
+    HudDrawText(x, y, str, size);
 
     return 0;
 }
@@ -410,7 +410,7 @@ static int HD_draw_num2(lua_State *L)
     double size = luaL_optnumber(L, 5, 0);
 
     if (len < 1 || len > 20)
-        EDGEError("hud.draw_number: bad field length: %d\n", len);
+        FatalError("hud.draw_number: bad field length: %d\n", len);
 
     bool is_neg = false;
 
@@ -440,9 +440,9 @@ static int HD_draw_num2(lua_State *L)
             *--pos = '-';
     }
 
-    HUDSetAlignment(+1, -1);
-    HUDDrawText(x, y, pos, size);
-    HUDSetAlignment();
+    HudSetAlignment(+1, -1);
+    HudDrawText(x, y, pos, size);
+    HudSetAlignment();
 
     return 0;
 }
@@ -461,7 +461,7 @@ static int HD_draw_number(lua_State *L)
     double size        = luaL_optnumber(L, 6, 0);
 
     if (len < 1 || len > 20)
-        EDGEError("hud.draw_number: bad field length: %d\n", len);
+        FatalError("hud.draw_number: bad field length: %d\n", len);
 
     bool is_neg = false;
 
@@ -493,13 +493,13 @@ static int HD_draw_number(lua_State *L)
 
     if (align_right == 0)
     {
-        HUDDrawText(x, y, pos, size);
+        HudDrawText(x, y, pos, size);
     }
     else
     {
-        HUDSetAlignment(+1, -1);
-        HUDDrawText(x, y, pos, size);
-        HUDSetAlignment();
+        HudSetAlignment(+1, -1);
+        HudDrawText(x, y, pos, size);
+        HudSetAlignment();
     }
 
     return 0;
@@ -561,7 +561,7 @@ static int HD_render_world(lua_State *L)
     float h     = (float)luaL_checknumber(L, 4);
     int   flags = (int)luaL_optnumber(L, 5, 0);
 
-    HUDRenderWorld(x, y, w, h, ui_hud_who->mo, flags);
+    HudRenderWorld(x, y, w, h, ui_hud_who->mo, flags);
 
     return 0;
 }
@@ -591,7 +591,7 @@ static int HD_render_automap(lua_State *L)
 
     AutomapSetState(new_state, new_zoom);
 
-    HUDRenderAutomap(x, y, w, h, ui_hud_who->mo, flags);
+    HudRenderAutomap(x, y, w, h, ui_hud_who->mo, flags);
 
     AutomapSetState(old_state, old_zoom);
 
@@ -605,7 +605,7 @@ static int HD_automap_color(lua_State *L)
     int which = (int)luaL_checknumber(L, 1);
 
     if (which < 1 || which > kTotalAutomapColors)
-        EDGEError("hud.automap_color: bad color number: %d\n", which);
+        FatalError("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
@@ -624,7 +624,7 @@ static int HD_automap_option(lua_State *L)
     int value = (int)luaL_checknumber(L, 2);
 
     if (which < 1 || which > 7)
-        EDGEError("hud.automap_color: bad color number: %d\n", which);
+        FatalError("hud.automap_color: bad color number: %d\n", which);
 
     which--;
 
@@ -666,7 +666,7 @@ static int HD_set_render_who(lua_State *L)
     int index = (int)luaL_checknumber(L, 1);
 
     if (index < 0 || index >= numplayers)
-        EDGEError("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
+        FatalError("hud.set_render_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
 
     if (index == 0)
     {
@@ -700,7 +700,7 @@ static int HD_play_sound(lua_State *L)
     if (fx)
         S_StartFX(fx);
     else
-        EDGEWarning("hud.play_sound: unknown sfx '%s'\n", name);
+        LogWarning("hud.play_sound: unknown sfx '%s'\n", name);
 
     return 0;
 }
@@ -906,7 +906,7 @@ static int HD_get_image_width(lua_State *L)
 
     if (img)
     {
-        lua_pushinteger(L, HUDGetImageWidth(img));
+        lua_pushinteger(L, HudGetImageWidth(img));
     }
     else
     {
@@ -926,7 +926,7 @@ static int HD_get_image_height(lua_State *L)
 
     if (img)
     {
-        lua_pushinteger(L, HUDGetImageHeight(img));
+        lua_pushinteger(L, HudGetImageHeight(img));
     }
     else
     {
@@ -1017,7 +1017,7 @@ void LUA_RegisterHudLibrary(lua_State *L)
 
 void LUA_RunHud(void)
 {
-    HUDReset();
+    HudReset();
 
     ui_hud_who    = players[displayplayer];
     ui_player_who = players[displayplayer];
@@ -1028,5 +1028,5 @@ void LUA_RunHud(void)
 
     LUA_CallGlobalFunction(global_lua_state, "draw_all");
 
-    HUDReset();
+    HudReset();
 }

@@ -141,7 +141,7 @@ static float GetSecHeightReference(TriggerHeightReference ref, sector_t *sec, se
         return P_FindRaiseToTexture(sec);
 
     default:
-        EDGEError("GetSecHeightReference: undefined reference %d\n", ref);
+        FatalError("GetSecHeightReference: undefined reference %d\n", ref);
     }
 
     return 0;
@@ -514,7 +514,7 @@ static bool MovePlane(plane_move_t *plane)
         break;
 
     default:
-        EDGEError("MovePlane: Unknown direction %d", plane->direction);
+        FatalError("MovePlane: Unknown direction %d", plane->direction);
     }
 
     return false;
@@ -644,7 +644,7 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const PlaneMoverDefin
     }
 
 #if 0 // DEBUG
-    EDGEDebugf("SEC_ACT: %d type %d %s start %1.0f dest %1.0f\n",
+    LogDebug("SEC_ACT: %d type %d %s start %1.0f dest %1.0f\n",
                  sector - sectors, def->type, 
                  def->is_ceiling_ ? "CEIL" : "FLOOR", 
                  start, dest);
@@ -1012,7 +1012,7 @@ bool EV_DoPlane(sector_t *sec, const PlaneMoverDefinition *def, sector_t *model)
     // Do sector action
     if (sec->floor_vertex_slope || sec->ceil_vertex_slope)
     {
-        EDGEWarning("Plane movers are not supported for vertex slopes! (Sector %u)\n", int(sec - sectors));
+        LogWarning("Plane movers are not supported for vertex slopes! (Sector %u)\n", int(sec - sectors));
         return false;
     }
     plane_move_t *secaction = P_SetupSectorAction(sec, def, model);
@@ -1330,7 +1330,7 @@ static bool MoveSlider(slider_move_t *smov)
         break;
 
     default:
-        EDGEError("MoveSlider: Unknown direction %d", smov->direction);
+        FatalError("MoveSlider: Unknown direction %d", smov->direction);
     }
 
     return false;

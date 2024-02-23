@@ -167,7 +167,7 @@ bool radplayer_c::OpenMemory(uint8_t *data, int length)
 
     if (err)
     {
-        EDGEWarning("RAD: Cannot play tune: %s\n", err);
+        LogWarning("RAD: Cannot play tune: %s\n", err);
         return false;
     }
 
@@ -180,7 +180,7 @@ bool radplayer_c::OpenMemory(uint8_t *data, int length)
 
     if (samp_rate <= 0)
     {
-        EDGEWarning("RAD: failure to load song!\n");
+        LogWarning("RAD: failure to load song!\n");
         delete edge_rad;
         edge_rad = nullptr;
         delete edge_opal;

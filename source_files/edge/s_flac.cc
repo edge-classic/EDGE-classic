@@ -159,7 +159,7 @@ bool flacplayer_c::OpenMemory(uint8_t *data, int length)
 
     if (!flac_track)
     {
-        EDGEWarning("S_PlayFLACMusic: Error opening song!\n");
+        LogWarning("S_PlayFLACMusic: Error opening song!\n");
         return false;
     }
 

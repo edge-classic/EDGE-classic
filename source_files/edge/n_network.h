@@ -25,7 +25,7 @@ void N_InitNetwork(void);
 void N_Shutdown(void);
 
 // Create any new ticcmds and broadcast to other players.
-// returns value of EDGEGetTime().
+// returns value of GetTime().
 int N_NetUpdate();
 
 // returns number of ticks to run (always > 0).

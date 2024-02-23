@@ -207,7 +207,7 @@ static void AttackParseField(const char *field, const char *contents, int index,
                              bool is_last)
 {
 #if (DEBUG_DDF)
-    EDGEDebugf("ATTACK_PARSE: %s = %s;\n", field, contents);
+    LogDebug("ATTACK_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_CompareName(field, "TEMPLATE") == 0)
@@ -339,7 +339,7 @@ static void AttackFinishEntry(void)
 
 static void AttackClearAll(void)
 {
-    EDGEWarning("Ignoring #CLEARALL in attacks.ddf\n");
+    LogWarning("Ignoring #CLEARALL in attacks.ddf\n");
 }
 
 void DDF_ReadAtks(const std::string &data)

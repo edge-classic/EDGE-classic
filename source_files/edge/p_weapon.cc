@@ -1564,7 +1564,7 @@ static void DoWeaponShoot(mobj_t *mo, int ATK)
         attack = (AttackDefinition *)psp->state->action_par;
 
     if (!attack)
-        EDGEError("Weapon [%s] missing attack for %s action.\n", info->name_.c_str(), ATK ? "XXXSHOOT" : "SHOOT");
+        FatalError("Weapon [%s] missing attack for %s action.\n", info->name_.c_str(), ATK ? "XXXSHOOT" : "SHOOT");
 
     // Some do not need ammunition anyway.
     // Return if current ammunition sufficient.
@@ -1674,7 +1674,7 @@ void A_WeaponEject(mobj_t *mo)
         attack = (AttackDefinition *)psp->state->action_par;
 
     if (!attack)
-        EDGEError("Weapon [%s] missing attack for EJECT action.\n", info->name_.c_str());
+        FatalError("Weapon [%s] missing attack for EJECT action.\n", info->name_.c_str());
 
     P_PlayerAttack(mo, attack);
 }
@@ -1872,7 +1872,7 @@ void A_WeaponSetSkin(mobj_t *mo)
         int skin = ((int *)st->action_par)[0];
 
         if (skin < 0 || skin > 9)
-            EDGEError("Weapon [%s]: Bad skin number %d in SET_SKIN action.\n", info->name_.c_str(), skin);
+            FatalError("Weapon [%s]: Bad skin number %d in SET_SKIN action.\n", info->name_.c_str(), skin);
 
         p->weapons[p->ready_wp].model_skin = skin;
     }
@@ -1924,7 +1924,7 @@ void A_WeaponBecome(mobj_t *mo)
 
     if (!psp->state || !psp->state->action_par)
     {
-        EDGEError("BECOME used in weapon [%s] without a label !\n", oldWep->name_.c_str());
+        FatalError("BECOME used in weapon [%s] without a label !\n", oldWep->name_.c_str());
         return; /* NOT REACHED */
     }
 
@@ -1942,7 +1942,7 @@ void A_WeaponBecome(mobj_t *mo)
 
     int state = DDF_StateFindLabel(newWep->state_grp_, become->start_.label_.c_str(), true /* quiet */);
     if (state == 0)
-        EDGEError("BECOME action: frame '%s' in [%s] not found!\n", become->start_.label_.c_str(), newWep->name_.c_str());
+        FatalError("BECOME action: frame '%s' in [%s] not found!\n", become->start_.label_.c_str(), newWep->name_.c_str());
 
     state += become->start_.offset_;
     P_SetPspriteDeferred(p, ps_weapon, state); // refresh the sprite

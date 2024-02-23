@@ -38,7 +38,7 @@ static int p_step  = 1;
 
 void M_Random_Init(void)
 {
-    m_rand.seed(EDGEGetMicros());
+    m_rand.seed(GetMicroseconds());
 }
 
 //

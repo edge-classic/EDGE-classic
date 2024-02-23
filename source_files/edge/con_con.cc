@@ -415,7 +415,7 @@ static void QuitEndoomSplitIntoLines(uint8_t endoom_byte, char *src)
     current_color = SG_GRAY_RGBA32;
 }
 
-void ConsolePrintf(const char *message, ...)
+void ConsolePrint(const char *message, ...)
 {
     va_list argptr;
     char    buffer[1024];
@@ -475,7 +475,7 @@ void ConsoleMessage(const char *message, ...)
 
     va_end(argptr);
 
-    HUDStartMessage(buffer);
+    HudStartMessage(buffer);
 
     strcat(buffer, "\n");
 
@@ -493,7 +493,7 @@ void ConsoleMessageLDF(const char *lookup, ...)
     vsprintf(buffer, lookup, argptr);
     va_end(argptr);
 
-    HUDStartMessage(buffer);
+    HudStartMessage(buffer);
 
     strcat(buffer, "\n");
 
@@ -511,7 +511,7 @@ void ConsoleImportantMessageLDF(const char *lookup, ...)
     vsprintf(buffer, lookup, argptr);
     va_end(argptr);
 
-    HUDStartImportantMessage(buffer);
+    HudStartImportantMessage(buffer);
 
     strcat(buffer, "\n");
 
@@ -796,7 +796,7 @@ void ConsoleSetupFont(void)
     if (!console_font)
     {
         FontDefinition *DEF = fontdefs.Lookup("CON_FONT_2");
-        if (!DEF) EDGEError("CON_FONT_2 definition missing from DDFFONT!\n");
+        if (!DEF) FatalError("CON_FONT_2 definition missing from DDFFONT!\n");
         console_font = hud_fonts.Lookup(DEF);
         SYS_ASSERT(console_font);
         console_font->Load();
@@ -805,7 +805,7 @@ void ConsoleSetupFont(void)
     if (!endoom_font)
     {
         FontDefinition *DEF = fontdefs.Lookup("ENDFONT");
-        if (!DEF) EDGEError("ENDFONT definition missing from DDFFONT!\n");
+        if (!DEF) FatalError("ENDFONT definition missing from DDFFONT!\n");
         endoom_font = hud_fonts.Lookup(DEF);
         SYS_ASSERT(endoom_font);
         endoom_font->Load();
@@ -842,7 +842,7 @@ void ConsoleDrawer(void)
     {
         const image_c *img = console_style->background_image_;
 
-        HUDRawImage(0, y, SCREENWIDTH, y + CON_GFX_HT, img, 0.0, 0.0,
+        HudRawImage(0, y, SCREENWIDTH, y + CON_GFX_HT, img, 0.0, 0.0,
                      IM_RIGHT(img), IM_TOP(img),
                      console_style->definition_->bg_.translucency_, kRGBANoValue,
                      nullptr, 0, 0);
@@ -1034,7 +1034,7 @@ static void ListCompletions(std::vector<const char *> &list, int word_len,
         if (n_len >= max_col * 2 / 3)
         {
             ConsoleMessageColor(color);
-            ConsolePrintf("  %s\n", name);
+            ConsolePrint("  %s\n", name);
             max_row--;
             continue;
         }
@@ -1042,7 +1042,7 @@ static void ListCompletions(std::vector<const char *> &list, int word_len,
         if (buf_len + 1 + n_len > max_col)
         {
             ConsoleMessageColor(color);
-            ConsolePrintf("  %s\n", buffer);
+            ConsolePrint("  %s\n", buffer);
             max_row--;
 
             buf_len         = 0;
@@ -1051,7 +1051,7 @@ static void ListCompletions(std::vector<const char *> &list, int word_len,
             if (max_row <= 0)
             {
                 ConsoleMessageColor(color);
-                ConsolePrintf("  etc...\n");
+                ConsolePrint("  etc...\n");
                 break;
             }
         }
@@ -1066,7 +1066,7 @@ static void ListCompletions(std::vector<const char *> &list, int word_len,
     if (buf_len > 0)
     {
         ConsoleMessageColor(color);
-        ConsolePrintf("  %s\n", buffer);
+        ConsolePrint("  %s\n", buffer);
     }
 }
 
@@ -1121,33 +1121,33 @@ static void TabComplete(void)
 
     // show what we were trying to match
     ConsoleMessageColor(SG_LIGHT_BLUE_RGBA32);
-    ConsolePrintf(">%s\n", input_line);
+    ConsolePrint(">%s\n", input_line);
 
     input_line[input_position] = save_ch;
 
     if (num_cmd + num_var + num_key == 0)
     {
-        ConsolePrintf("No matches.\n");
+        ConsolePrint("No matches.\n");
         return;
     }
 
     if (match_vars.size() > 0)
     {
-        ConsolePrintf("%u Possible variables:\n", (int)match_vars.size());
+        ConsolePrint("%u Possible variables:\n", (int)match_vars.size());
 
         ListCompletions(match_vars, input_position, 7, SG_SPRING_GREEN_RGBA32);
     }
 
     if (match_keys.size() > 0)
     {
-        ConsolePrintf("%u Possible keys:\n", (int)match_keys.size());
+        ConsolePrint("%u Possible keys:\n", (int)match_keys.size());
 
         ListCompletions(match_keys, input_position, 4, SG_SPRING_GREEN_RGBA32);
     }
 
     if (match_cmds.size() > 0)
     {
-        ConsolePrintf("%u Possible commands:\n", (int)match_cmds.size());
+        ConsolePrint("%u Possible commands:\n", (int)match_cmds.size());
 
         ListCompletions(match_cmds, input_position, 3, SG_SPRING_GREEN_RGBA32);
     }
@@ -1283,7 +1283,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
             if (strlen(input_line) == 0)
             {
                 ConsoleMessageColor(SG_LIGHT_BLUE_RGBA32);
-                ConsolePrintf(">\n");
+                ConsolePrint(">\n");
             }
             else
             {
@@ -1291,7 +1291,7 @@ void ConsoleHandleKey(int key, bool shift, bool ctrl)
                 ConsoleAddCmdHistory(input_line);
 
                 ConsoleMessageColor(SG_LIGHT_BLUE_RGBA32);
-                ConsolePrintf(">%s\n", input_line);
+                ConsolePrint(">%s\n", input_line);
 
                 // Run it!
                 ConsoleTryCommand(input_line);
@@ -1567,7 +1567,7 @@ void ConsoleShowFPS(void)
 
     // get difference since last call
     static uint32_t last_time = 0;
-    uint32_t        time      = EDGEGetMicros();
+    uint32_t        time      = GetMicroseconds();
     uint32_t        diff      = time - last_time;
     last_time                 = time;
 
@@ -1726,19 +1726,19 @@ void ConsolePrintEndoom()
     if (!data) data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
     if (!data)
     {
-        ConsolePrintf("ConsolePrintEndoom: No ENDOOM screen found!\n");
+        ConsolePrint("ConsolePrintEndoom: No ENDOOM screen found!\n");
         return;
     }
     if (length != 4000)
     {
-        ConsolePrintf(
+        ConsolePrint(
             "ConsolePrintEndoom: Lump exists, but is malformed! (Length not "
             "equal "
             "to 4000 bytes)\n");
         delete[] data;
         return;
     }
-    ConsolePrintf("\n\n");
+    ConsolePrint("\n\n");
     int row_counter = 0;
     for (int i = 0; i < 4000; i += 2)
     {
@@ -1749,11 +1749,11 @@ void ConsolePrintEndoom()
         row_counter++;
         if (row_counter == 80)
         {
-            ConsolePrintf("\n");
+            ConsolePrint("\n");
             row_counter = 0;
         }
     }
-    ConsolePrintf("\n");
+    ConsolePrint("\n");
     delete[] data;
 }
 
@@ -1768,12 +1768,12 @@ void ConsoleCreateQuitScreen()
     if (!data) data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
     if (!data)
     {
-        ConsolePrintf("No ENDOOM screen found for this WAD!\n");
+        ConsolePrint("No ENDOOM screen found for this WAD!\n");
         return;
     }
     if (length != 4000)
     {
-        ConsolePrintf(
+        ConsolePrint(
             "ConsoleCreateQuitScreen: ENDOOM exists, but is malformed! (Length "
             "not equal to 4000 bytes)\n");
         delete[] data;

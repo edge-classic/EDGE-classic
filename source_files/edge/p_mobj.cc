@@ -137,17 +137,17 @@ void P_DumpMobjs(void)
 
     int index = 0;
 
-    EDGEDebugf("MOBJs:\n");
+    LogDebug("MOBJs:\n");
 
     for (mo = mobjlisthead; mo; mo = mo->next, index++)
     {
-        EDGEDebugf(" %4d: %p next:%p prev:%p [%s] at (%1.0f,%1.0f,%1.0f) states=%d > %d tics=%d\n", index, mo,
+        LogDebug(" %4d: %p next:%p prev:%p [%s] at (%1.0f,%1.0f,%1.0f) states=%d > %d tics=%d\n", index, mo,
                      mo->next, mo->prev, mo->info->name_.c_str(), mo->x, mo->y, mo->z,
                      (int)(mo->state ? mo->state - states : -1), (int)(mo->next_state ? mo->next_state - states : -1),
                      mo->tics);
     }
 
-    EDGEDebugf("END OF MOBJs\n");
+    LogDebug("END OF MOBJs\n");
 }
 #endif
 
@@ -971,7 +971,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
                     ground_h = HMM_MAX(blockline->frontsector->f_h, blockline->backsector->f_h);
                 }
 
-                // EDGEDebugf("ground_h: %1.0f  mo_Z: %1.0f\n", ground_h, mo->z);
+                // LogDebug("ground_h: %1.0f  mo_Z: %1.0f\n", ground_h, mo->z);
 
                 if (mo->z < ground_h - 20.5f && mo->z > ground_h - mo->height * 1.4)
                 {
@@ -1068,7 +1068,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
 
         mo->player->actual_speed = (mo->player->actual_speed * 0.8 + speed * 0.2);
 
-        // EDGEDebugf("Actual speed = %1.4f\n", mo->player->actual_speed);
+        // LogDebug("Actual speed = %1.4f\n", mo->player->actual_speed);
 
         if (fabs(mo->mom.X) < STOPSPEED && fabs(mo->mom.Y) < STOPSPEED && mo->player->cmd.forward_move == 0 &&
             mo->player->cmd.side_move == 0)
@@ -1355,7 +1355,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
 static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
 {
     if (mobj->next == (mobj_t *)-1)
-        EDGEError("P_MobjThinker INTERNAL ERROR: mobj has been freed");
+        FatalError("P_MobjThinker INTERNAL ERROR: mobj has been freed");
 
     if (mobj->isRemoved())
         return;
@@ -1609,12 +1609,12 @@ static void DeleteMobj(mobj_t *mo)
 {
     if (mo->refcount != 0)
     {
-        EDGEError("INTERNAL ERROR: DeleteMobh with refcount %d", mo->refcount);
+        FatalError("INTERNAL ERROR: DeleteMobh with refcount %d", mo->refcount);
         return;
     }
 
 #if (DEBUG_MOBJ > 0)
-    EDGEDebugf("tics=%05d  DELETE %p [%s]\n", leveltime, mo, mo->info ? mo->info->name_.c_str() : "???");
+    LogDebug("tics=%05d  DELETE %p [%s]\n", leveltime, mo, mo->info ? mo->info->name_.c_str() : "???");
 #endif
 
     // Sound might still be playing, so use remove the
@@ -1724,14 +1724,14 @@ static void AddMobjToList(mobj_t *mo)
         seen_monsters.insert(mo->info);
 
 #if (DEBUG_MOBJ > 0)
-    EDGEDebugf("tics=%05d  ADD %p [%s]\n", leveltime, mo, mo->info ? mo->info->name_.c_str() : "???");
+    LogDebug("tics=%05d  ADD %p [%s]\n", leveltime, mo, mo->info ? mo->info->name_.c_str() : "???");
 #endif
 }
 
 static void RemoveMobjFromList(mobj_t *mo)
 {
 #if (DEBUG_MOBJ > 0)
-    EDGEDebugf("tics=%05d  REMOVE %p [%s]\n", leveltime, mo, mo->info ? mo->info->name_.c_str() : "???");
+    LogDebug("tics=%05d  REMOVE %p [%s]\n", leveltime, mo, mo->info ? mo->info->name_.c_str() : "???");
 #endif
 
     if (mo->prev != nullptr)
@@ -1771,7 +1771,7 @@ void P_RemoveMobj(mobj_t *mo)
 
     if (mo->isRemoved())
     {
-        EDGEDebugf("Warning: object %p already removed.\n", mo);
+        LogDebug("Warning: object %p already removed.\n", mo);
         return;
     }
 
@@ -2133,7 +2133,7 @@ void P_MobjItemRespawn(void)
 
         if (objtype == nullptr)
         {
-            EDGEError("P_MobjItemRespawn: No such item type!");
+            FatalError("P_MobjItemRespawn: No such item type!");
             return; // shouldn't happen.
         }
 
@@ -2203,7 +2203,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
     mobj_t *mobj = new mobj_t;
 
 #if (DEBUG_MOBJ > 0)
-    EDGEDebugf("tics=%05d  CREATE %p [%s]  AT %1.0f,%1.0f,%1.0f\n", leveltime, mobj, info->name.c_str(), x, y, z);
+    LogDebug("tics=%05d  CREATE %p [%s]  AT %1.0f,%1.0f,%1.0f\n", leveltime, mobj, info->name.c_str(), x, y, z);
 #endif
 
     mobj->info             = info;

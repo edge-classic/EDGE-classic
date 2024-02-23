@@ -82,7 +82,7 @@ static void FlatParseField(const char *field, const char *contents, int index,
                            bool is_last)
 {
 #if (DEBUG_DDF)
-    EDGEDebugf("FLAT_PARSE: %s = %s;\n", field, contents);
+    LogDebug("FLAT_PARSE: %s = %s;\n", field, contents);
 #endif
 
     if (DDF_MainParseField(flat_commands, field, contents,

@@ -88,7 +88,7 @@ void StartupSound(void)
 {
     if (no_sound) return;
 
-    std::string driver = argv::Value("audiodriver");
+    std::string driver = ArgumentValue("audiodriver");
 
     if (driver.empty())
     {
@@ -116,8 +116,8 @@ void StartupSound(void)
     int  want_freq   = 44100;
     bool want_stereo = (var_sound_stereo >= 1);
 
-    if (argv::Find("mono") > 0) want_stereo = false;
-    if (argv::Find("stereo") > 0) want_stereo = true;
+    if (ArgumentFind("mono") > 0) want_stereo = false;
+    if (ArgumentFind("stereo") > 0) want_stereo = true;
 
     bool success = false;
 

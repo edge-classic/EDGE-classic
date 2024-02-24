@@ -720,7 +720,7 @@ void StartupJoystick(void)
     current_joystick = 0;
     joystick_device  = 0;
 
-    if (argv::Find("no_joystick") > 0)
+    if (ArgumentFind("no_joystick") > 0)
     {
         LogPrint("StartupControl: Gamepad system disabled.\n");
         no_joystick = true;

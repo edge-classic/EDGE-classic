@@ -2123,7 +2123,7 @@ DDFType DDF_FilenameToType(const std::string &path)
 
 void DDF_AddFile(DDFType type, std::string &data, const std::string &source)
 {
-    unread_ddf.push_back({type, "", source});
+    unread_ddf.push_back({type, source, ""});
 
     // transfer the caller's data
     unread_ddf.back().data.swap(data);

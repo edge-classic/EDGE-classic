@@ -295,14 +295,14 @@ static void SetGlobalVars(void)
     std::string s;
 
     // Screen Resolution Check...
-    if (argv::Find("borderless") > 0)
+    if (ArgumentFind("borderless") > 0)
         DISPLAYMODE = 2;
-    else if (argv::Find("fullscreen") > 0)
+    else if (ArgumentFind("fullscreen") > 0)
         DISPLAYMODE = 1;
-    else if (argv::Find("windowed") > 0)
+    else if (ArgumentFind("windowed") > 0)
         DISPLAYMODE = 0;
 
-    s = argv::Value("width");
+    s = ArgumentValue("width");
     if (!s.empty())
     {
         if (DISPLAYMODE == 2)
@@ -312,7 +312,7 @@ static void SetGlobalVars(void)
             SCREENWIDTH = atoi(s.c_str());
     }
 
-    s = argv::Value("height");
+    s = ArgumentValue("height");
     if (!s.empty())
     {
         if (DISPLAYMODE == 2)
@@ -322,22 +322,22 @@ static void SetGlobalVars(void)
             SCREENHEIGHT = atoi(s.c_str());
     }
 
-    p = argv::Find("res");
-    if (p > 0 && p + 2 < int(argv::list.size()) && !argv::IsOption(p + 1) && !argv::IsOption(p + 2))
+    p = ArgumentFind("res");
+    if (p > 0 && p + 2 < int(program_argument_list.size()) && !ArgumentIsOption(p + 1) && !ArgumentIsOption(p + 2))
     {
         if (DISPLAYMODE == 2)
             LogWarning(
                 "Current display mode set to borderless fullscreen. Provided resolution of %dx%d will be ignored!\n",
-                atoi(argv::list[p + 1].c_str()), atoi(argv::list[p + 2].c_str()));
+                atoi(program_argument_list[p + 1].c_str()), atoi(program_argument_list[p + 2].c_str()));
         else
         {
-            SCREENWIDTH  = atoi(argv::list[p + 1].c_str());
-            SCREENHEIGHT = atoi(argv::list[p + 2].c_str());
+            SCREENWIDTH  = atoi(program_argument_list[p + 1].c_str());
+            SCREENHEIGHT = atoi(program_argument_list[p + 2].c_str());
         }
     }
 
     // Bits per pixel check....
-    s = argv::Value("bpp");
+    s = ArgumentValue("bpp");
     if (!s.empty())
     {
         SCREENBITS = atoi(s.c_str());
@@ -360,69 +360,69 @@ static void SetGlobalVars(void)
     }
 
     // sprite kludge (TrueBSP)
-    p = argv::Find("spritekludge");
+    p = ArgumentFind("spritekludge");
     if (p > 0)
     {
-        if (p + 1 < int(argv::list.size()) && !argv::IsOption(p + 1))
-            sprite_kludge = atoi(argv::list[p + 1].c_str());
+        if (p + 1 < int(program_argument_list.size()) && !ArgumentIsOption(p + 1))
+            sprite_kludge = atoi(program_argument_list[p + 1].c_str());
 
         if (!sprite_kludge)
             sprite_kludge = 1;
     }
 
-    s = argv::Value("screenshot");
+    s = ArgumentValue("screenshot");
     if (!s.empty())
     {
         screenshot_rate = atoi(s.c_str());
         singletics      = true;
     }
 
-    // -AJA- 1999/10/18: Reworked these with argv::CheckBooleanParm
-    argv::CheckBooleanParm("rotate_map", &rotate_map, false);
-    argv::CheckBooleanParm("sound", &no_sound, true);
-    argv::CheckBooleanParm("music", &no_music, true);
-    argv::CheckBooleanParm("itemrespawn", &global_flags.itemrespawn, false);
-    argv::CheckBooleanParm("mlook", &global_flags.mlook, false);
-    argv::CheckBooleanParm("monsters", &global_flags.nomonsters, true);
-    argv::CheckBooleanParm("fast", &global_flags.fastparm, false);
-    argv::CheckBooleanParm("extras", &global_flags.have_extra, false);
-    argv::CheckBooleanParm("kick", &global_flags.kicking, false);
-    argv::CheckBooleanParm("singletics", &singletics, false);
-    argv::CheckBooleanParm("true3d", &global_flags.true3dgameplay, false);
-    argv::CheckBooleanParm("blood", &global_flags.more_blood, false);
-    argv::CheckBooleanParm("cheats", &global_flags.cheats, false);
-    argv::CheckBooleanParm("jumping", &global_flags.jump, false);
-    argv::CheckBooleanParm("crouching", &global_flags.crouch, false);
-    argv::CheckBooleanParm("weaponswitch", &global_flags.weapon_switch, false);
-    argv::CheckBooleanParm("autoload", &autoquickload, false);
+    // -AJA- 1999/10/18: Reworked these with ArgumentCheckBooleanParameter
+    ArgumentCheckBooleanParameter("rotate_map", &rotate_map, false);
+    ArgumentCheckBooleanParameter("sound", &no_sound, true);
+    ArgumentCheckBooleanParameter("music", &no_music, true);
+    ArgumentCheckBooleanParameter("itemrespawn", &global_flags.itemrespawn, false);
+    ArgumentCheckBooleanParameter("mlook", &global_flags.mlook, false);
+    ArgumentCheckBooleanParameter("monsters", &global_flags.nomonsters, true);
+    ArgumentCheckBooleanParameter("fast", &global_flags.fastparm, false);
+    ArgumentCheckBooleanParameter("extras", &global_flags.have_extra, false);
+    ArgumentCheckBooleanParameter("kick", &global_flags.kicking, false);
+    ArgumentCheckBooleanParameter("singletics", &singletics, false);
+    ArgumentCheckBooleanParameter("true3d", &global_flags.true3dgameplay, false);
+    ArgumentCheckBooleanParameter("blood", &global_flags.more_blood, false);
+    ArgumentCheckBooleanParameter("cheats", &global_flags.cheats, false);
+    ArgumentCheckBooleanParameter("jumping", &global_flags.jump, false);
+    ArgumentCheckBooleanParameter("crouching", &global_flags.crouch, false);
+    ArgumentCheckBooleanParameter("weaponswitch", &global_flags.weapon_switch, false);
+    ArgumentCheckBooleanParameter("autoload", &autoquickload, false);
 
-    argv::CheckBooleanParm("automap_keydoor_blink", &automap_keydoor_blink, false);
+    ArgumentCheckBooleanParameter("automap_keydoor_blink", &automap_keydoor_blink, false);
 
-    if (argv::Find("infight") > 0)
+    if (ArgumentFind("infight") > 0)
         g_aggression = 1;
 
-    if (argv::Find("dlights") > 0)
+    if (ArgumentFind("dlights") > 0)
         use_dlights = 1;
-    else if (argv::Find("nodlights") > 0)
+    else if (ArgumentFind("nodlights") > 0)
         use_dlights = 0;
 
     if (!global_flags.respawn)
     {
-        if (argv::Find("newnmrespawn") > 0)
+        if (ArgumentFind("newnmrespawn") > 0)
         {
             global_flags.res_respawn = true;
             global_flags.respawn     = true;
         }
-        else if (argv::Find("respawn") > 0)
+        else if (ArgumentFind("respawn") > 0)
         {
             global_flags.respawn = true;
         }
     }
 
     // check for strict and no-warning options
-    argv::CheckBooleanCVar("strict", &ddf_strict, false);
-    argv::CheckBooleanCVar("lax", &ddf_lax, false);
-    argv::CheckBooleanCVar("warn", &ddf_quiet, true);
+    ArgumentCheckBooleanConsoleVariable("strict", &ddf_strict, false);
+    ArgumentCheckBooleanConsoleVariable("lax", &ddf_lax, false);
+    ArgumentCheckBooleanConsoleVariable("warn", &ddf_quiet, true);
 
     strict_errors = ddf_strict.d_? true : false;
     lax_errors    = ddf_lax.d_? true : false;
@@ -434,7 +434,7 @@ static void SetGlobalVars(void)
 //
 void SetLanguage(void)
 {
-    std::string want_lang = argv::Value("lang");
+    std::string want_lang = ArgumentValue("lang");
     if (!want_lang.empty())
         m_language = want_lang;
 
@@ -981,7 +981,7 @@ void InitDirectories(void)
     std::string s = SDL_GetBasePath();
 
     game_directory = s;
-    s        = argv::Value("game");
+    s        = ArgumentValue("game");
     if (!s.empty())
         game_directory = s;
 
@@ -995,11 +995,11 @@ void InitDirectories(void)
     if (epi::TestFileAccess(parms))
     {
         // Insert it right after the app parameter
-        argv::ApplyResponseFile(parms);
+        ArgumentApplyResponseFile(parms);
     }
 
     // config file - check for portable config
-    s = argv::Value("config");
+    s = ArgumentValue("config");
     if (!s.empty())
     {
         cfgfile = s;
@@ -1007,7 +1007,7 @@ void InitDirectories(void)
     else
     {
         cfgfile = epi::PathAppend(game_directory, configfilename.s_);
-        if (epi::TestFileAccess(cfgfile) || argv::Find("portable") > 0)
+        if (epi::TestFileAccess(cfgfile) || ArgumentFind("portable") > 0)
             home_directory = game_directory;
         else
             cfgfile.clear();
@@ -1015,7 +1015,7 @@ void InitDirectories(void)
 
     if (home_directory.empty())
     {
-        s = argv::Value("home");
+        s = ArgumentValue("home");
         if (!s.empty())
             home_directory = s;
     }
@@ -1038,7 +1038,7 @@ void InitDirectories(void)
         cfgfile = epi::PathAppend(home_directory, configfilename.s_);
 
     // edge_defs.epk file
-    s = argv::Value("defs");
+    s = ArgumentValue("defs");
     if (!s.empty())
     {
         epkfile = s;
@@ -1142,7 +1142,7 @@ static void IdentifyVersion(void)
     std::string              iwad_dir;
     std::vector<std::string> iwad_dir_vector;
 
-    std::string s = argv::Value("iwad");
+    std::string s = ArgumentValue("iwad");
 
     iwad_par = s;
 
@@ -1170,9 +1170,9 @@ static void IdentifyVersion(void)
         // Remove them from the arg list if they are valid to avoid them potentially being added as PWADs
         std::vector<SDL_MessageBoxButtonData> game_buttons;
         std::unordered_map<int, std::pair<std::string, filekind_e>> game_paths;
-        for (size_t p = 1; p < argv::list.size() && !argv::IsOption(p); p++)
+        for (size_t p = 1; p < program_argument_list.size() && !ArgumentIsOption(p); p++)
         {
-            std::string dnd = argv::list[p];
+            std::string dnd = program_argument_list[p];
             int test_index = -1;
             if (epi::IsDirectory(dnd))
             {
@@ -1187,7 +1187,7 @@ static void IdentifyVersion(void)
                         temp_button.text = game_checker[test_index].display_name.c_str();
                         game_buttons.push_back(temp_button);
                     }
-                    argv::list.erase(argv::list.begin()+p--);
+                    program_argument_list.erase(program_argument_list.begin()+p--);
                 }
             }
             else if (epi::StringCaseCompareASCII(epi::GetExtension(dnd), ".epk") == 0)
@@ -1203,7 +1203,7 @@ static void IdentifyVersion(void)
                         temp_button.text = game_checker[test_index].display_name.c_str();
                         game_buttons.push_back(temp_button);
                     }
-                    argv::list.erase(argv::list.begin()+p--);
+                    program_argument_list.erase(program_argument_list.begin()+p--);
                 }  
             }
             else if (epi::StringCaseCompareASCII(epi::GetExtension(dnd), ".wad") == 0)
@@ -1222,7 +1222,7 @@ static void IdentifyVersion(void)
                         temp_button.text = game_checker[test_index].display_name.c_str();
                         game_buttons.push_back(temp_button);
                     }
-                    argv::list.erase(argv::list.begin()+p--);
+                    program_argument_list.erase(program_argument_list.begin()+p--);
                 }
             }
         }
@@ -1582,12 +1582,12 @@ static void CheckTurbo(void)
 {
     int turbo_scale = 100;
 
-    int p = argv::Find("turbo");
+    int p = ArgumentFind("turbo");
 
     if (p > 0)
     {
-        if (p + 1 < int(argv::list.size()) && !argv::IsOption(p + 1))
-            turbo_scale = atoi(argv::list[p + 1].c_str());
+        if (p + 1 < int(program_argument_list.size()) && !ArgumentIsOption(p + 1))
+            turbo_scale = atoi(program_argument_list[p + 1].c_str());
         else
             turbo_scale = 200;
 
@@ -1618,7 +1618,7 @@ static void ShowDateAndVersion(void)
 
     LogPrint("Executable path: '%s'\n", executable_path.c_str());
 
-    argv::DebugDumpArgs();
+    ArgumentDebugDump();
 }
 
 static void SetupLogAndDebugFiles(void)
@@ -1633,7 +1633,7 @@ static void SetupLogAndDebugFiles(void)
     log_file   = nullptr;
     debug_file = nullptr;
 
-    if (argv::Find("nolog") < 0)
+    if (ArgumentFind("nolog") < 0)
     {
         log_file = epi::FileOpenRaw(log_fn, epi::kFileAccessWrite);
 
@@ -1650,7 +1650,7 @@ static void SetupLogAndDebugFiles(void)
     //
     // -ACB- 1999/10/02 Don't print to console, since we don't have a console yet.
 
-    /// int p = argv::Find("debug");
+    /// int p = ArgumentFind("debug");
     if (true)
     {
         debug_file = epi::FileOpenRaw(debug_fn, epi::kFileAccessWrite);
@@ -1704,45 +1704,45 @@ static void AddCommandLineFiles(void)
 
     int p;
 
-    for (p = 1; p < int(argv::list.size()) && !argv::IsOption(p); p++)
+    for (p = 1; p < int(program_argument_list.size()) && !ArgumentIsOption(p); p++)
     {
-        AddSingleCmdLineFile(argv::list[p], false);
+        AddSingleCmdLineFile(program_argument_list[p], false);
     }
 
     // next handle the -file option (we allow multiple uses)
 
-    p = argv::Find("file");
+    p = ArgumentFind("file");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::StringCompare(argv::list[p], "-file") == 0))
+    while (p > 0 && p < int(program_argument_list.size()) && (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-file") == 0))
     {
         // the parms after p are wadfile/lump names,
         // go until end of parms or another '-' preceded parm
-        if (!argv::IsOption(p))
-            AddSingleCmdLineFile(argv::list[p], false);
+        if (!ArgumentIsOption(p))
+            AddSingleCmdLineFile(program_argument_list[p], false);
 
         p++;
     }
 
     // scripts....
 
-    p = argv::Find("script");
+    p = ArgumentFind("script");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::StringCompare(argv::list[p], "-script") == 0))
+    while (p > 0 && p < int(program_argument_list.size()) && (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-script") == 0))
     {
         // the parms after p are script filenames,
         // go until end of parms or another '-' preceded parm
-        if (!argv::IsOption(p))
+        if (!ArgumentIsOption(p))
         {
-            std::string ext = epi::GetExtension(argv::list[p]);
+            std::string ext = epi::GetExtension(program_argument_list[p]);
             // sanity check...
             if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".pk3") == 0 || epi::StringCaseCompareASCII(ext, ".zip") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".epk") == 0 || epi::StringCaseCompareASCII(ext, ".vwad") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".deh") == 0 || epi::StringCaseCompareASCII(ext, ".bex") == 0)
             {
-                FatalError("Illegal filename for -script: %s\n", argv::list[p].c_str());
+                FatalError("Illegal filename for -script: %s\n", program_argument_list[p].c_str());
             }
 
-            std::string filename = M_ComposeFileName(game_directory, argv::list[p]);
+            std::string filename = M_ComposeFileName(game_directory, program_argument_list[p]);
             W_AddFilename(filename, FLKIND_RTS);
         }
 
@@ -1751,24 +1751,24 @@ static void AddCommandLineFiles(void)
 
     // dehacked/bex....
 
-    p = argv::Find("deh");
+    p = ArgumentFind("deh");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::StringCompare(argv::list[p], "-deh") == 0))
+    while (p > 0 && p < int(program_argument_list.size()) && (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-deh") == 0))
     {
         // the parms after p are Dehacked/BEX filenames,
         // go until end of parms or another '-' preceded parm
-        if (!argv::IsOption(p))
+        if (!ArgumentIsOption(p))
         {
-            std::string ext = epi::GetExtension(argv::list[p]);
+            std::string ext = epi::GetExtension(program_argument_list[p]);
             // sanity check...
             if (epi::StringCaseCompareASCII(ext, ".wad") == 0 || epi::StringCaseCompareASCII(ext, ".epk") == 0 || epi::StringCaseCompareASCII(ext, ".pk3") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".zip") == 0 || epi::StringCaseCompareASCII(ext, ".vwad") == 0 ||
                 epi::StringCaseCompareASCII(ext, ".ddf") == 0 || epi::StringCaseCompareASCII(ext, ".rts") == 0)
             {
-                FatalError("Illegal filename for -deh: %s\n", argv::list[p].c_str());
+                FatalError("Illegal filename for -deh: %s\n", program_argument_list[p].c_str());
             }
 
-            std::string filename = M_ComposeFileName(game_directory, argv::list[p]);
+            std::string filename = M_ComposeFileName(game_directory, program_argument_list[p]);
             W_AddFilename(filename, FLKIND_Deh);
         }
 
@@ -1777,15 +1777,15 @@ static void AddCommandLineFiles(void)
 
     // directories....
 
-    p = argv::Find("dir");
+    p = ArgumentFind("dir");
 
-    while (p > 0 && p < int(argv::list.size()) && (!argv::IsOption(p) || epi::StringCompare(argv::list[p], "-dir") == 0))
+    while (p > 0 && p < int(program_argument_list.size()) && (!ArgumentIsOption(p) || epi::StringCompare(program_argument_list[p], "-dir") == 0))
     {
         // the parms after p are directory names,
         // go until end of parms or another '-' preceded parm
-        if (!argv::IsOption(p))
+        if (!ArgumentIsOption(p))
         {
-            std::string dirname = M_ComposeFileName(game_directory, argv::list[p]);
+            std::string dirname = M_ComposeFileName(game_directory, program_argument_list[p]);
             W_AddFilename(dirname, FLKIND_Folder);
         }
 
@@ -1794,7 +1794,7 @@ static void AddCommandLineFiles(void)
 
     // handle -ddf option (backwards compatibility)
 
-    std::string ps = argv::Value("ddf");
+    std::string ps = ArgumentValue("ddf");
 
     if (!ps.empty())
     {
@@ -1912,7 +1912,7 @@ static void E_Startup(void)
     InitDirectories();
 
     // Version check ?
-    if (argv::Find("version") > 0)
+    if (ArgumentFind("version") > 0)
     {
         // -AJA- using FatalError here, since LogPrint crashes this early on
         FatalError("\n%s version is %s\n", appname.c_str(), edgeversion.c_str());
@@ -2006,12 +2006,12 @@ static void E_InitialState(void)
     // do loadgames first, as they contain all of the
     // necessary state already (in the savegame).
 
-    if (argv::Find("playdemo") > 0 || argv::Find("timedemo") > 0 || argv::Find("record") > 0)
+    if (ArgumentFind("playdemo") > 0 || ArgumentFind("timedemo") > 0 || ArgumentFind("record") > 0)
     {
         FatalError("Demos are no longer supported\n");
     }
 
-    ps = argv::Value("loadgame");
+    ps = ArgumentValue("loadgame");
     if (!ps.empty())
     {
         GameDeferredLoadGame(atoi(ps.c_str()));
@@ -2027,11 +2027,11 @@ static void E_InitialState(void)
 
     int bots = 0;
 
-    ps = argv::Value("bots");
+    ps = ArgumentValue("bots");
     if (!ps.empty())
         bots = atoi(ps.c_str());
 
-    ps = argv::Value("warp");
+    ps = ArgumentValue("warp");
     if (!ps.empty())
     {
         warp     = true;
@@ -2039,7 +2039,7 @@ static void E_InitialState(void)
     }
 
     // -KM- 1999/01/29 Use correct skill: 1 is easiest, not 0
-    ps = argv::Value("skill");
+    ps = ArgumentValue("skill");
     if (!ps.empty())
     {
         warp       = true;
@@ -2047,17 +2047,17 @@ static void E_InitialState(void)
     }
 
     // deathmatch check...
-    int pp = argv::Find("deathmatch");
+    int pp = ArgumentFind("deathmatch");
     if (pp > 0)
     {
         warp_deathmatch = 1;
 
-        if (pp + 1 < int(argv::list.size()) && !argv::IsOption(pp + 1))
-            warp_deathmatch = HMM_MAX(1, atoi(argv::list[pp + 1].c_str()));
+        if (pp + 1 < int(program_argument_list.size()) && !ArgumentIsOption(pp + 1))
+            warp_deathmatch = HMM_MAX(1, atoi(program_argument_list[pp + 1].c_str()));
 
         warp = true;
     }
-    else if (argv::Find("altdeath") > 0)
+    else if (ArgumentFind("altdeath") > 0)
     {
         warp_deathmatch = 2;
 
@@ -2116,7 +2116,7 @@ void E_Main(int argc, const char **argv)
 
     // Implemented here - since we need to bring the memory manager up first
     // -ACB- 2004/05/31
-    argv::Init(argc, argv);
+    ArgumentParse(argc, argv);
 
     E_Startup();
 

@@ -423,9 +423,9 @@ void M_LoadBranding(void)
 
 void M_InitMiscConVars(void)
 {
-    if (argv::Find("hqscale") > 0 || argv::Find("hqall") > 0)
+    if (ArgumentFind("hqscale") > 0 || ArgumentFind("hqall") > 0)
         hq2x_scaling = 3;
-    else if (argv::Find("nohqscale") > 0)
+    else if (ArgumentFind("nohqscale") > 0)
         hq2x_scaling = 0;
 }
 

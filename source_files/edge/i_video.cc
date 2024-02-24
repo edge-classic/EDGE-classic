@@ -124,7 +124,7 @@ void DeterminePixelAspect()
 
 void StartupGraphics(void)
 {
-    std::string driver = argv::Value("videodriver");
+    std::string driver = ArgumentValue("videodriver");
 
     if (driver.empty())
     {
@@ -144,7 +144,7 @@ void StartupGraphics(void)
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
         FatalError("Couldn't init SDL VIDEO!\n%s\n", SDL_GetError());
 
-    if (argv::Find("nograb") > 0) grab_mouse = 0;
+    if (ArgumentFind("nograb") > 0) grab_mouse = 0;
 
     // -AJA- FIXME these are wrong (probably ignored though)
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);

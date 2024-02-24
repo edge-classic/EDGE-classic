@@ -282,11 +282,11 @@ int ConsoleMatchAllVariables(std::vector<const char *> &list,
 
 void ConsoleHandleProgramArguments(void)
 {
-    for (size_t p = 1; p < argv::list.size(); p++)
+    for (size_t p = 1; p < program_argument_list.size(); p++)
     {
-        if (!argv::IsOption(p)) continue;
+        if (!ArgumentIsOption(p)) continue;
 
-        std::string s = argv::list[p];
+        std::string s = program_argument_list[p];
 
         ConsoleVariable *var = ConsoleFindVariable(s.data() + 1);
 
@@ -294,7 +294,7 @@ void ConsoleHandleProgramArguments(void)
 
         p++;
 
-        if (p >= argv::list.size() || argv::IsOption(p))
+        if (p >= program_argument_list.size() || ArgumentIsOption(p))
         {
             LogWarning("Missing value for option: %s\n", s.c_str());
             continue;
@@ -302,7 +302,7 @@ void ConsoleHandleProgramArguments(void)
 
         // FIXME allow kConsoleVariableFlagReadOnly here ?
 
-        *var = argv::list[p].c_str();
+        *var = program_argument_list[p].c_str();
     }
 }
 

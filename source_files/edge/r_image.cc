@@ -1989,9 +1989,9 @@ static void W_CreateDummyImages(void)
 bool W_InitImages(void)
 {
     // check options
-    if (argv::Find("nosmoothing") > 0)
+    if (ArgumentFind("nosmoothing") > 0)
         var_smoothing = 0;
-    else if (argv::Find("smoothing") > 0)
+    else if (ArgumentFind("smoothing") > 0)
         var_smoothing = 1;
 
     W_CreateDummyImages();

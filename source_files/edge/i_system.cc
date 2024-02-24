@@ -98,6 +98,7 @@ void LogPrint(const char *message, ...)
     va_list argptr;
 
     char printbuf[kMessageBufferSize];
+    printbuf[kMessageBufferSize - 1] = 0;
 
     va_start(argptr, message);
     vsnprintf(printbuf, sizeof(printbuf), message, argptr);

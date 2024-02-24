@@ -290,7 +290,7 @@ void GameSetConsolePlayer(int pnum)
 
     players[pnum]->playerflags |= PFL_Console;
 
-    if (argv::Find("testbot") > 0)
+    if (ArgumentFind("testbot") > 0)
     {
         P_BotCreate(players[pnum], false);
     }

@@ -522,15 +522,15 @@ static void SetupRootNode(void)
         root_node = NF_V5_SUBSECTOR | 0;
 
         // compute bbox for the single subsector
-        M_ClearBox(dummy_bbox);
+        BoundingBoxClear(dummy_bbox);
 
         int    i;
         seg_t *seg;
 
         for (i = 0, seg = segs; i < numsegs; i++, seg++)
         {
-            M_AddToBox(dummy_bbox, seg->v1->X, seg->v1->Y);
-            M_AddToBox(dummy_bbox, seg->v2->X, seg->v2->Y);
+            BoundingBoxAddPoint(dummy_bbox, seg->v1->X, seg->v1->Y);
+            BoundingBoxAddPoint(dummy_bbox, seg->v2->X, seg->v2->Y);
         }
     }
 }
@@ -893,24 +893,24 @@ static inline void ComputeLinedefData(line_t *ld, int side0, int side1)
 
     if (v1->X < v2->X)
     {
-        ld->bbox[BOXLEFT]  = v1->X;
-        ld->bbox[BOXRIGHT] = v2->X;
+        ld->bbox[kBoundingBoxLeft]  = v1->X;
+        ld->bbox[kBoundingBoxRight] = v2->X;
     }
     else
     {
-        ld->bbox[BOXLEFT]  = v2->X;
-        ld->bbox[BOXRIGHT] = v1->X;
+        ld->bbox[kBoundingBoxLeft]  = v2->X;
+        ld->bbox[kBoundingBoxRight] = v1->X;
     }
 
     if (v1->Y < v2->Y)
     {
-        ld->bbox[BOXBOTTOM] = v1->Y;
-        ld->bbox[BOXTOP]    = v2->Y;
+        ld->bbox[kBoundingBoxBottom] = v1->Y;
+        ld->bbox[kBoundingBoxTop]    = v2->Y;
     }
     else
     {
-        ld->bbox[BOXBOTTOM] = v2->Y;
-        ld->bbox[BOXTOP]    = v1->Y;
+        ld->bbox[kBoundingBoxBottom] = v2->Y;
+        ld->bbox[kBoundingBoxTop]    = v1->Y;
     }
 
     if (!udmf_level && side0 == 0xFFFF)
@@ -3024,8 +3024,8 @@ static void DetectDeepWaterTrick(void)
                 continue;
 #if 0
 			LogDebug("Subsector [%d] @ (%1.0f,%1.0f) sec %d --> %d\n", j,
-				(sub->bbox[BOXLEFT] + sub->bbox[BOXRIGHT]) / 2.0,
-				(sub->bbox[BOXBOTTOM] + sub->bbox[BOXTOP]) / 2.0,
+				(sub->bbox[kBoundingBoxLeft] + sub->bbox[kBoundingBoxRight]) / 2.0,
+				(sub->bbox[kBoundingBoxBottom] + sub->bbox[kBoundingBoxTop]) / 2.0,
 				sub->sector - sectors, self_subs[j]);
 #endif
             const seg_t *Xseg = 0;
@@ -3139,7 +3139,7 @@ void GroupLines(void)
 
     for (i = 0; i < numsectors; i++, sector++)
     {
-        M_ClearBox(bbox);
+        BoundingBoxClear(bbox);
         sector->lines = line_p;
         li            = lines;
         for (j = 0; j < numlines; j++, li++)
@@ -3147,8 +3147,8 @@ void GroupLines(void)
             if (li->frontsector == sector || li->backsector == sector)
             {
                 *line_p++ = li;
-                M_AddToBox(bbox, li->v1->X, li->v1->Y);
-                M_AddToBox(bbox, li->v2->X, li->v2->Y);
+                BoundingBoxAddPoint(bbox, li->v1->X, li->v1->Y);
+                BoundingBoxAddPoint(bbox, li->v2->X, li->v2->Y);
             }
         }
         if (line_p - sector->lines != sector->linecount)
@@ -3229,7 +3229,7 @@ void GroupLines(void)
             else
             {
                 sector->floor_vs_normal =
-                    M_TripleCrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
+                    MathTripleCrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
                 if (sector->f_h > sector->floor_vs_hilo.X)
                     sector->floor_vs_hilo.X = sector->f_h;
                 if (sector->f_h < sector->floor_vs_hilo.Y)
@@ -3240,7 +3240,7 @@ void GroupLines(void)
             else
             {
                 sector->ceil_vs_normal =
-                    M_TripleCrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
+                    MathTripleCrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
                 if (sector->c_h < sector->ceil_vs_hilo.Y)
                     sector->ceil_vs_hilo.Y = sector->c_h;
                 if (sector->c_h > sector->ceil_vs_hilo.X)
@@ -3326,7 +3326,7 @@ void GroupLines(void)
             {
                 sector->floor_vertex_slope = true;
                 sector->floor_vs_normal =
-                    M_TripleCrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
+                    MathTripleCrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
                 if (sector->f_h > sector->floor_vs_hilo.X)
                     sector->floor_vs_hilo.X = sector->f_h;
                 if (sector->f_h < sector->floor_vs_hilo.Y)
@@ -3338,7 +3338,7 @@ void GroupLines(void)
             {
                 sector->ceil_vertex_slope = true;
                 sector->ceil_vs_normal =
-                    M_TripleCrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
+                    MathTripleCrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
                 if (sector->c_h < sector->ceil_vs_hilo.Y)
                     sector->ceil_vs_hilo.Y = sector->c_h;
                 if (sector->c_h > sector->ceil_vs_hilo.X)
@@ -3349,8 +3349,8 @@ void GroupLines(void)
         }
 
         // set the degenmobj_t to the middle of the bounding box
-        sector->sfx_origin.x = (bbox[BOXRIGHT] + bbox[BOXLEFT]) / 2;
-        sector->sfx_origin.y = (bbox[BOXTOP] + bbox[BOXBOTTOM]) / 2;
+        sector->sfx_origin.x = (bbox[kBoundingBoxRight] + bbox[kBoundingBoxLeft]) / 2;
+        sector->sfx_origin.y = (bbox[kBoundingBoxTop] + bbox[kBoundingBoxBottom]) / 2;
         sector->sfx_origin.z = (sector->f_h + sector->c_h) / 2;
     }
 }

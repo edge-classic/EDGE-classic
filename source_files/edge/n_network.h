@@ -20,6 +20,7 @@
 #define __N_NETWORK_H__
 
 extern bool netgame;
+extern int game_tic;
 
 void N_InitNetwork(void);
 void N_Shutdown(void);

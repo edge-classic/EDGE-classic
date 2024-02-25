@@ -38,6 +38,7 @@
 #include "w_wad.h"
 
 #include "m_random.h"
+#include "n_network.h"
 
 extern ConsoleVariable r_doubleframes;
 

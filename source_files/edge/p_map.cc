@@ -416,10 +416,10 @@ bool P_CheckAbsPosition(mobj_t *thing, float x, float y, float z)
 
     float r = tm_I.mover->radius;
 
-    tm_I.bbox[BOXLEFT]   = x - r;
-    tm_I.bbox[BOXBOTTOM] = y - r;
-    tm_I.bbox[BOXRIGHT]  = x + r;
-    tm_I.bbox[BOXTOP]    = y + r;
+    tm_I.bbox[kBoundingBoxLeft]   = x - r;
+    tm_I.bbox[kBoundingBoxBottom] = y - r;
+    tm_I.bbox[kBoundingBoxRight]  = x + r;
+    tm_I.bbox[kBoundingBoxTop]    = y + r;
 
     // check things first.
 
@@ -575,7 +575,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
             if (std::isfinite(ix) && std::isfinite(iy))
             {
-                iz = M_LinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->floor_z_verts[2],
+                iz = MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->floor_z_verts[2],
                                              ld->frontsector->floor_vs_normal).Z;
                 if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size_)
                 {
@@ -592,7 +592,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
             if (std::isfinite(ix) && std::isfinite(iy))
             {
-                iz = M_LinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->floor_z_verts[2],
+                iz = MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->floor_z_verts[2],
                                              ld->backsector->floor_vs_normal).Z;
                 if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size_)
                 {
@@ -620,7 +620,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
                 if (std::isfinite(ix) && std::isfinite(iy))
                 {
-                    iz = M_LinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->floor_z_verts[2],
+                    iz = MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->floor_z_verts[2],
                                                  ld->backsector->floor_vs_normal).Z;
                     if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size_)
                     {
@@ -649,7 +649,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
                 if (std::isfinite(ix) && std::isfinite(iy))
                 {
-                    iz = M_LinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->floor_z_verts[2],
+                    iz = MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->floor_z_verts[2],
                                                  ld->frontsector->floor_vs_normal).Z;
                     if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size_)
                     {
@@ -667,7 +667,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
             if (std::isfinite(ix) && std::isfinite(iy))
             {
-                float icz = M_LinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->ceil_z_verts[2],
+                float icz = MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->ceil_z_verts[2],
                                                     ld->frontsector->ceil_vs_normal).Z;
                 if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
                 {
@@ -684,7 +684,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
             if (std::isfinite(ix) && std::isfinite(iy))
             {
-                float icz = M_LinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->ceil_z_verts[2],
+                float icz = MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->ceil_z_verts[2],
                                                     ld->backsector->ceil_vs_normal).Z;
                 if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
                 {
@@ -712,7 +712,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 if (std::isfinite(ix) && std::isfinite(iy))
                 {
                     float icz =
-                        M_LinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->ceil_z_verts[2],
+                        MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->ceil_z_verts[2],
                                                 ld->backsector->ceil_vs_normal).Z;
                     if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
                     {
@@ -741,7 +741,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 if (std::isfinite(ix) && std::isfinite(iy))
                 {
                     float icz =
-                        M_LinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->ceil_z_verts[2],
+                        MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->ceil_z_verts[2],
                                                 ld->frontsector->ceil_vs_normal).Z;
                     if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
                     {
@@ -974,7 +974,7 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
     {
         HMM_Vec3 line_a{{tm_I.x, tm_I.y, -40000}};
         HMM_Vec3 line_b{{tm_I.x, tm_I.y, 40000}};
-        float  z_test = M_LinePlaneIntersection(line_a, line_b, tm_I.sub->sector->floor_z_verts[2],
+        float  z_test = MathLinePlaneIntersection(line_a, line_b, tm_I.sub->sector->floor_z_verts[2],
                                                 tm_I.sub->sector->floor_vs_normal).Z;
         if (std::isfinite(z_test))
             tm_I.f_slope_z = z_test - tm_I.sub->sector->f_h;
@@ -984,7 +984,7 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
     {
         HMM_Vec3 line_a{{tm_I.x, tm_I.y, -40000}};
         HMM_Vec3 line_b{{tm_I.x, tm_I.y, 40000}};
-        float  z_test = M_LinePlaneIntersection(line_a, line_b, tm_I.sub->sector->ceil_z_verts[2],
+        float  z_test = MathLinePlaneIntersection(line_a, line_b, tm_I.sub->sector->ceil_z_verts[2],
                                                 tm_I.sub->sector->ceil_vs_normal).Z;
         if (std::isfinite(z_test))
             tm_I.c_slope_z = tm_I.sub->sector->c_h - z_test;
@@ -992,10 +992,10 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
 
     float r = tm_I.mover->radius;
 
-    tm_I.bbox[BOXLEFT]   = x - r;
-    tm_I.bbox[BOXBOTTOM] = y - r;
-    tm_I.bbox[BOXRIGHT]  = x + r;
-    tm_I.bbox[BOXTOP]    = y + r;
+    tm_I.bbox[kBoundingBoxLeft]   = x - r;
+    tm_I.bbox[kBoundingBoxBottom] = y - r;
+    tm_I.bbox[kBoundingBoxRight]  = x + r;
+    tm_I.bbox[kBoundingBoxTop]    = y + r;
 
     // The base floor / ceiling is from the sector that contains the
     // point.  Any contacted lines the step closer together will adjust them.
@@ -1651,7 +1651,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 // Test point against 2D projection of the slope side
                 if (std::abs(tri_v1.X - tri_v2.X) > std::abs(tri_v1.Y - tri_v2.Y))
                 {
-                    if (M_PointInTri({{tri_v1.X, tri_v1.Z}}, {{tri_v2.X, tri_v2.Z}},
+                    if (MathPointInTriangle({{tri_v1.X, tri_v1.Z}}, {{tri_v2.X, tri_v2.Z}},
                                      {{(tri_v1.Z > tri_v2.Z ? tri_v1.X : tri_v2.X), sec_check->f_h}}, {{sx, z}}))
                     {
                         if (shoot_I.puff)
@@ -1665,7 +1665,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 }
                 else
                 {
-                    if (M_PointInTri({{tri_v1.Y, tri_v1.Z}}, {{tri_v2.Y, tri_v2.Z}},
+                    if (MathPointInTriangle({{tri_v1.Y, tri_v1.Z}}, {{tri_v2.Y, tri_v2.Z}},
                                      {{(tri_v1.Z > tri_v2.Z ? tri_v1.Y : tri_v2.Y), sec_check->f_h}}, {{sy, z}}))
                     {
                         if (shoot_I.puff)
@@ -1715,7 +1715,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 // Test point against 2D projection of the slope side
                 if (std::abs(tri_v1.X - tri_v2.X) > std::abs(tri_v1.Y - tri_v2.Y))
                 {
-                    if (M_PointInTri({{tri_v1.X, tri_v1.Z}}, {{tri_v2.X, tri_v2.Z}},
+                    if (MathPointInTriangle({{tri_v1.X, tri_v1.Z}}, {{tri_v2.X, tri_v2.Z}},
                                      {{(tri_v1.Z < tri_v2.Z ? tri_v1.X : tri_v2.X), sec_check->c_h}}, {{sx, z}}))
                     {
                         if (shoot_I.puff)
@@ -1729,7 +1729,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 }
                 else
                 {
-                    if (M_PointInTri({{tri_v1.Y, tri_v1.Z}}, {{tri_v2.Y, tri_v2.Z}},
+                    if (MathPointInTriangle({{tri_v1.Y, tri_v1.Z}}, {{tri_v2.Y, tri_v2.Z}},
                                      {{(tri_v1.Z < tri_v2.Z ? tri_v1.Y : tri_v2.Y), sec_check->c_h}}, {{sy, z}}))
                     {
                         if (shoot_I.puff)
@@ -1757,7 +1757,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
         if (sec_check && sec_check->floor_vertex_slope)
         {
             // Check floor vertex slope intersect from shooter's angle
-            HMM_Vec3 shoota = M_LinePlaneIntersection(
+            HMM_Vec3 shoota = MathLinePlaneIntersection(
                 {{shoot_I.source->x, shoot_I.source->y, shoot_I.start_z}}, {{sx, sy, z}}, sec_check->floor_z_verts[2], sec_check->floor_vs_normal);
             sector_t *shoota_sec = R_PointInSubsector(shoota.X, shoota.Y)->sector;
             if (shoota_sec && shoota_sec == sec_check && shoota.Z <= sec_check->floor_vs_hilo.X &&
@@ -1775,7 +1775,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
             else if (sec_check->ceil_vertex_slope)
             {
                 // Check ceiling vertex slope intersect from shooter's angle
-                shoota = M_LinePlaneIntersection({{shoot_I.source->x, shoot_I.source->y, shoot_I.start_z}}, {{sx, sy, z}},
+                shoota = MathLinePlaneIntersection({{shoot_I.source->x, shoot_I.source->y, shoot_I.start_z}}, {{sx, sy, z}},
                                                  sec_check->ceil_z_verts[2], sec_check->ceil_vs_normal);
                 shoota_sec = R_PointInSubsector(shoota.X, shoota.Y)->sector;
                 if (shoota_sec && shoota_sec == sec_check && shoota.Z <= sec_check->ceil_vs_hilo.X &&
@@ -1799,7 +1799,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
         else if (sec_check && sec_check->ceil_vertex_slope)
         {
             // Check ceiling vertex slope intersect from shooter's angle
-            HMM_Vec3    shoota     = M_LinePlaneIntersection({{shoot_I.source->x, shoot_I.source->y, shoot_I.start_z}},
+            HMM_Vec3    shoota     = MathLinePlaneIntersection({{shoot_I.source->x, shoot_I.source->y, shoot_I.start_z}},
                                                            {{sx, sy, z}}, sec_check->ceil_z_verts[2], sec_check->ceil_vs_normal);
             sector_t *shoota_sec = R_PointInSubsector(shoota.X, shoota.Y)->sector;
             if (shoota_sec && shoota_sec == sec_check && shoota.Z <= sec_check->ceil_vs_hilo.X &&
@@ -1841,14 +1841,14 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
         bool cs_good = true;
         if (last_shoota_sec->floor_vertex_slope)
         {
-            if (z <= M_LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, last_shoota_sec->floor_z_verts[2],
+            if (z <= MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, last_shoota_sec->floor_z_verts[2],
                                              last_shoota_sec->floor_vs_normal)
                          .Z)
                 fs_good = false;
         }
         if (last_shoota_sec->ceil_vertex_slope)
         {
-            if (z >= M_LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, last_shoota_sec->ceil_z_verts[2],
+            if (z >= MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, last_shoota_sec->ceil_z_verts[2],
                                              last_shoota_sec->ceil_vs_normal)
                          .Z)
                 cs_good = false;
@@ -2109,7 +2109,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
             bool cs_good = true;
             if (last_shoota_sec->floor_vertex_slope)
             {
-                if (z <= M_LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, last_shoota_sec->floor_z_verts[2],
+                if (z <= MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, last_shoota_sec->floor_z_verts[2],
                                                  last_shoota_sec->floor_vs_normal)
                              .Z)
                     fs_good = false;
@@ -2121,7 +2121,7 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
             }
             if (last_shoota_sec->ceil_vertex_slope)
             {
-                if (z >= M_LinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, last_shoota_sec->ceil_z_verts[2],
+                if (z >= MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, last_shoota_sec->ceil_z_verts[2],
                                                  last_shoota_sec->ceil_vs_normal)
                              .Z)
                     cs_good = false;
@@ -3209,14 +3209,14 @@ static bool PIT_CheckBlockingLine(line_t *line, void *data)
         bool cs_good = true;
         if (slope_sec->floor_vertex_slope)
         {
-            if (mb2 <= M_LinePlaneIntersection({{mx2, my2, -40000}}, {{mx2, my2, 40000}}, slope_sec->floor_z_verts[2],
+            if (mb2 <= MathLinePlaneIntersection({{mx2, my2, -40000}}, {{mx2, my2, 40000}}, slope_sec->floor_z_verts[2],
                                                slope_sec->floor_vs_normal)
                            .Z)
                 fs_good = false;
         }
         if (slope_sec->ceil_vertex_slope)
         {
-            if (mt2 >= M_LinePlaneIntersection({{mx2, my2, -40000}}, {{mx2, my2, 40000}}, slope_sec->ceil_z_verts[2],
+            if (mt2 >= MathLinePlaneIntersection({{mx2, my2, -40000}}, {{mx2, my2, 40000}}, slope_sec->ceil_z_verts[2],
                                                slope_sec->ceil_vs_normal)
                            .Z)
                 cs_good = false;

@@ -32,6 +32,7 @@
 #include "AlmostEquals.h"
 #include "con_main.h"
 #include "con_var.h"
+#include "dm_data.h"
 #include "e_input.h"
 #include "hu_draw.h"
 #include "hu_style.h"
@@ -164,7 +165,7 @@ static int mark_point_number = 0;
 // specifies whether to follow the player around
 static bool follow_player = true;
 
-cheatseq_t cheat_automap = {0, 0};
+CheatSequence cheat_automap = {0, 0};
 
 static bool stopped = true;
 
@@ -358,7 +359,7 @@ bool AutomapResponder(InputEvent *ev)
     // Had to move the automap cheat check up here thanks to Heretic's 'ravmap'
     // cheat - Dasho -ACB- 1999/09/28 Proper casting -AJA- 2022: allow this in
     // deathmatch (as we don't have real multiplayer)
-    if (M_CheckCheat(&cheat_automap, (char)sym))
+    if (CheatCheckSequence(&cheat_automap, (char)sym))
     {
         cheating = (cheating + 1) % 3;
 
@@ -1182,10 +1183,10 @@ static void AutomapWalkSubsector(unsigned int num)
 //
 static bool AutomapCheckBBox(float *bspcoord)
 {
-    float L = bspcoord[BOXLEFT];
-    float R = bspcoord[BOXRIGHT];
-    float T = bspcoord[BOXTOP];
-    float B = bspcoord[BOXBOTTOM];
+    float L = bspcoord[kBoundingBoxLeft];
+    float R = bspcoord[kBoundingBoxRight];
+    float T = bspcoord[kBoundingBoxTop];
+    float B = bspcoord[kBoundingBoxBottom];
 
     if (rotate_map)
     {

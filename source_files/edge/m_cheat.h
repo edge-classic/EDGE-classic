@@ -23,30 +23,23 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __M_CHEAT__
-#define __M_CHEAT__
+#pragma once
 
-// -MH- 1998/06/17 for cheat to give jetpack
-// -KM- 1998-07-21 Added some extra headers in here
-#include "dm_defs.h"
-#include "dm_state.h"
 #include "e_event.h"
 
 //
 // CHEAT SEQUENCE PACKAGE
 //
 // -KM- 1998/07/21 Needed in am_map.c (iddt cheat)
-typedef struct
+struct CheatSequence
 {
     const char *sequence;
     const char *p;
-} cheatseq_t;
+};
 
-int  M_CheckCheat(cheatseq_t *cht, char key);
-bool M_CheatResponder(InputEvent *ev);
-void M_CheatInit(void);
-
-#endif // __M_CHEAT__
+int  CheatCheckSequence(CheatSequence *cheat, char key);
+bool CheatResponder(InputEvent *event);
+void CheatInitialize(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

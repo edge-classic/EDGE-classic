@@ -162,8 +162,8 @@ static bool CrossSubsector(subsector_t *sub)
         ld->validcount = validcount;
 
         // line outside of bbox ?
-        if (ld->bbox[BOXLEFT] > sight_I.bbox[BOXRIGHT] || ld->bbox[BOXRIGHT] < sight_I.bbox[BOXLEFT] ||
-            ld->bbox[BOXBOTTOM] > sight_I.bbox[BOXTOP] || ld->bbox[BOXTOP] < sight_I.bbox[BOXBOTTOM])
+        if (ld->bbox[kBoundingBoxLeft] > sight_I.bbox[kBoundingBoxRight] || ld->bbox[kBoundingBoxRight] < sight_I.bbox[kBoundingBoxLeft] ||
+            ld->bbox[kBoundingBoxBottom] > sight_I.bbox[kBoundingBoxTop] || ld->bbox[kBoundingBoxTop] < sight_I.bbox[kBoundingBoxBottom])
             continue;
 
         // does linedef cross LOS ?
@@ -495,10 +495,10 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
 
     sight_I.angle = R_PointToAngle(sight_I.src.x, sight_I.src.y, sight_I.dest.X, sight_I.dest.Y);
 
-    sight_I.bbox[BOXLEFT]   = HMM_MIN(sight_I.src.x, sight_I.dest.X);
-    sight_I.bbox[BOXRIGHT]  = HMM_MAX(sight_I.src.x, sight_I.dest.X);
-    sight_I.bbox[BOXBOTTOM] = HMM_MIN(sight_I.src.y, sight_I.dest.Y);
-    sight_I.bbox[BOXTOP]    = HMM_MAX(sight_I.src.y, sight_I.dest.Y);
+    sight_I.bbox[kBoundingBoxLeft]   = HMM_MIN(sight_I.src.x, sight_I.dest.X);
+    sight_I.bbox[kBoundingBoxRight]  = HMM_MAX(sight_I.src.x, sight_I.dest.X);
+    sight_I.bbox[kBoundingBoxBottom] = HMM_MIN(sight_I.src.y, sight_I.dest.Y);
+    sight_I.bbox[kBoundingBoxTop]    = HMM_MAX(sight_I.src.y, sight_I.dest.Y);
 
     wall_icpts.clear(); // FIXME
 
@@ -601,10 +601,10 @@ bool P_CheckSightToPoint(mobj_t *src, float x, float y, float z)
 
     sight_I.angle = R_PointToAngle(sight_I.src.x, sight_I.src.y, sight_I.dest.X, sight_I.dest.Y);
 
-    sight_I.bbox[BOXLEFT]   = HMM_MIN(sight_I.src.x, sight_I.dest.X);
-    sight_I.bbox[BOXRIGHT]  = HMM_MAX(sight_I.src.x, sight_I.dest.X);
-    sight_I.bbox[BOXBOTTOM] = HMM_MIN(sight_I.src.y, sight_I.dest.Y);
-    sight_I.bbox[BOXTOP]    = HMM_MAX(sight_I.src.y, sight_I.dest.Y);
+    sight_I.bbox[kBoundingBoxLeft]   = HMM_MIN(sight_I.src.x, sight_I.dest.X);
+    sight_I.bbox[kBoundingBoxRight]  = HMM_MAX(sight_I.src.x, sight_I.dest.X);
+    sight_I.bbox[kBoundingBoxBottom] = HMM_MIN(sight_I.src.y, sight_I.dest.Y);
+    sight_I.bbox[kBoundingBoxTop]    = HMM_MAX(sight_I.src.y, sight_I.dest.Y);
 
     wall_icpts.clear();
 

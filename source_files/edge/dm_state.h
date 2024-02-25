@@ -83,7 +83,6 @@ extern bool autoquickload;
 extern game_state_e game_state;
 
 extern int maketic;
-extern int game_tic;
 
 #define DEATHMATCH() (deathmatch > 0)
 #define COOP_MATCH() (deathmatch == 0 && numplayers > 1)

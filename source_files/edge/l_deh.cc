@@ -23,20 +23,11 @@
 //
 //----------------------------------------------------------------------------
 
-
 #include "l_deh.h"
 
 #include "con_var.h"
-
-// EPI
-#include "file.h"
-#include "filesystem.h"
-
-// DDF
-#include "main.h"
-
-// DEH_EDGE
 #include "deh_edge.h"
+#include "main.h"
 
 EDGE_DEFINE_CONSOLE_VARIABLE(debug_dehacked, "0", kConsoleVariableFlagArchive)
 
@@ -67,8 +58,7 @@ void ConvertDehacked(const uint8_t *data, int length, const std::string &source)
         FatalError("Failed to convert Dehacked file: %s\n", source.c_str());
     }
 
-    if (debug_dehacked.d_> 0)
-        DDF_DumpCollection(col);
+    if (debug_dehacked.d_ > 0) DDF_DumpCollection(col);
 
     DDF_AddCollection(col, source);
 }

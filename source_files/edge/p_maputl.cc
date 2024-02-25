@@ -217,8 +217,8 @@ int P_BoxOnLineSide(const float *tmbox, line_t *ld)
     switch (ld->slopetype)
     {
     case ST_HORIZONTAL:
-        p1 = tmbox[BOXTOP] > ld->v1->Y;
-        p2 = tmbox[BOXBOTTOM] > ld->v1->Y;
+        p1 = tmbox[kBoundingBoxTop] > ld->v1->Y;
+        p2 = tmbox[kBoundingBoxBottom] > ld->v1->Y;
         if (ld->dx < 0)
         {
             p1 ^= 1;
@@ -227,8 +227,8 @@ int P_BoxOnLineSide(const float *tmbox, line_t *ld)
         break;
 
     case ST_VERTICAL:
-        p1 = tmbox[BOXRIGHT] < ld->v1->X;
-        p2 = tmbox[BOXLEFT] < ld->v1->X;
+        p1 = tmbox[kBoundingBoxRight] < ld->v1->X;
+        p2 = tmbox[kBoundingBoxLeft] < ld->v1->X;
         if (ld->dy < 0)
         {
             p1 ^= 1;
@@ -237,13 +237,13 @@ int P_BoxOnLineSide(const float *tmbox, line_t *ld)
         break;
 
     case ST_POSITIVE:
-        p1 = P_PointOnDivlineSide(tmbox[BOXLEFT], tmbox[BOXTOP], &div);
-        p2 = P_PointOnDivlineSide(tmbox[BOXRIGHT], tmbox[BOXBOTTOM], &div);
+        p1 = P_PointOnDivlineSide(tmbox[kBoundingBoxLeft], tmbox[kBoundingBoxTop], &div);
+        p2 = P_PointOnDivlineSide(tmbox[kBoundingBoxRight], tmbox[kBoundingBoxBottom], &div);
         break;
 
     case ST_NEGATIVE:
-        p1 = P_PointOnDivlineSide(tmbox[BOXRIGHT], tmbox[BOXTOP], &div);
-        p2 = P_PointOnDivlineSide(tmbox[BOXLEFT], tmbox[BOXBOTTOM], &div);
+        p1 = P_PointOnDivlineSide(tmbox[kBoundingBoxRight], tmbox[kBoundingBoxTop], &div);
+        p2 = P_PointOnDivlineSide(tmbox[kBoundingBoxLeft], tmbox[kBoundingBoxBottom], &div);
         break;
     }
 
@@ -266,8 +266,8 @@ int P_BoxOnDivLineSide(const float *tmbox, divline_t *div)
 
     if (AlmostEquals(div->dy, 0.0f))
     {
-        p1 = tmbox[BOXTOP] > div->y;
-        p2 = tmbox[BOXBOTTOM] > div->y;
+        p1 = tmbox[kBoundingBoxTop] > div->y;
+        p2 = tmbox[kBoundingBoxBottom] > div->y;
 
         if (div->dx < 0)
         {
@@ -277,8 +277,8 @@ int P_BoxOnDivLineSide(const float *tmbox, divline_t *div)
     }
     else if (AlmostEquals(div->dx, 0.0f))
     {
-        p1 = tmbox[BOXRIGHT] < div->x;
-        p2 = tmbox[BOXLEFT] < div->x;
+        p1 = tmbox[kBoundingBoxRight] < div->x;
+        p2 = tmbox[kBoundingBoxLeft] < div->x;
 
         if (div->dy < 0)
         {
@@ -288,13 +288,13 @@ int P_BoxOnDivLineSide(const float *tmbox, divline_t *div)
     }
     else if (div->dy / div->dx > 0) // optimise ?
     {
-        p1 = P_PointOnDivlineSide(tmbox[BOXLEFT], tmbox[BOXTOP], div);
-        p2 = P_PointOnDivlineSide(tmbox[BOXRIGHT], tmbox[BOXBOTTOM], div);
+        p1 = P_PointOnDivlineSide(tmbox[kBoundingBoxLeft], tmbox[kBoundingBoxTop], div);
+        p2 = P_PointOnDivlineSide(tmbox[kBoundingBoxRight], tmbox[kBoundingBoxBottom], div);
     }
     else
     {
-        p1 = P_PointOnDivlineSide(tmbox[BOXRIGHT], tmbox[BOXTOP], div);
-        p2 = P_PointOnDivlineSide(tmbox[BOXLEFT], tmbox[BOXBOTTOM], div);
+        p1 = P_PointOnDivlineSide(tmbox[kBoundingBoxRight], tmbox[kBoundingBoxTop], div);
+        p2 = P_PointOnDivlineSide(tmbox[kBoundingBoxLeft], tmbox[kBoundingBoxBottom], div);
     }
 
     if (p1 == p2)
@@ -307,10 +307,10 @@ int P_ThingOnLineSide(const mobj_t *mo, line_t *ld)
 {
     float bbox[4];
 
-    bbox[BOXLEFT]   = mo->x - mo->radius;
-    bbox[BOXRIGHT]  = mo->x + mo->radius;
-    bbox[BOXBOTTOM] = mo->y - mo->radius;
-    bbox[BOXTOP]    = mo->y + mo->radius;
+    bbox[kBoundingBoxLeft]   = mo->x - mo->radius;
+    bbox[kBoundingBoxRight]  = mo->x + mo->radius;
+    bbox[kBoundingBoxBottom] = mo->y - mo->radius;
+    bbox[kBoundingBoxTop]    = mo->y + mo->radius;
 
     return P_BoxOnLineSide(bbox, ld);
 }
@@ -948,8 +948,8 @@ void P_RecomputeGapsAroundSector(sector_t *sec)
 
 static inline bool PST_CheckBBox(float *bspcoord, float *test)
 {
-    return (test[BOXRIGHT] < bspcoord[BOXLEFT] || test[BOXLEFT] > bspcoord[BOXRIGHT] ||
-            test[BOXTOP] < bspcoord[BOXBOTTOM] || test[BOXBOTTOM] > bspcoord[BOXTOP])
+    return (test[kBoundingBoxRight] < bspcoord[kBoundingBoxLeft] || test[kBoundingBoxLeft] > bspcoord[kBoundingBoxRight] ||
+            test[kBoundingBoxTop] < bspcoord[kBoundingBoxBottom] || test[kBoundingBoxBottom] > bspcoord[kBoundingBoxTop])
                ? false
                : true;
 }
@@ -1015,8 +1015,8 @@ static line_t *checkempty_line;
 
 static bool PST_CheckThingArea(mobj_t *mo)
 {
-    if (mo->x + mo->radius < checkempty_bbox[BOXLEFT] || mo->x - mo->radius > checkempty_bbox[BOXRIGHT] ||
-        mo->y + mo->radius < checkempty_bbox[BOXBOTTOM] || mo->y - mo->radius > checkempty_bbox[BOXTOP])
+    if (mo->x + mo->radius < checkempty_bbox[kBoundingBoxLeft] || mo->x - mo->radius > checkempty_bbox[kBoundingBoxRight] ||
+        mo->y + mo->radius < checkempty_bbox[kBoundingBoxBottom] || mo->y - mo->radius > checkempty_bbox[kBoundingBoxTop])
     {
         // keep looking
         return true;
@@ -1038,10 +1038,10 @@ static bool PST_CheckThingLine(mobj_t *mo)
     float bbox[4];
     int   side;
 
-    bbox[BOXLEFT]   = mo->x - mo->radius;
-    bbox[BOXRIGHT]  = mo->x + mo->radius;
-    bbox[BOXBOTTOM] = mo->y - mo->radius;
-    bbox[BOXTOP]    = mo->y + mo->radius;
+    bbox[kBoundingBoxLeft]   = mo->x - mo->radius;
+    bbox[kBoundingBoxRight]  = mo->x + mo->radius;
+    bbox[kBoundingBoxBottom] = mo->y - mo->radius;
+    bbox[kBoundingBoxTop]    = mo->y + mo->radius;
 
     // found a thing on the line ?
     side = P_BoxOnLineSide(bbox, checkempty_line);
@@ -1067,10 +1067,10 @@ static bool PST_CheckThingLine(mobj_t *mo)
 //
 bool P_ThingsInArea(float *bbox)
 {
-    checkempty_bbox[BOXLEFT]   = bbox[BOXLEFT];
-    checkempty_bbox[BOXRIGHT]  = bbox[BOXRIGHT];
-    checkempty_bbox[BOXBOTTOM] = bbox[BOXBOTTOM];
-    checkempty_bbox[BOXTOP]    = bbox[BOXTOP];
+    checkempty_bbox[kBoundingBoxLeft]   = bbox[kBoundingBoxLeft];
+    checkempty_bbox[kBoundingBoxRight]  = bbox[kBoundingBoxRight];
+    checkempty_bbox[kBoundingBoxBottom] = bbox[kBoundingBoxBottom];
+    checkempty_bbox[kBoundingBoxTop]    = bbox[kBoundingBoxTop];
 
     return !P_SubsecThingIterator(bbox, PST_CheckThingArea);
 }
@@ -1083,10 +1083,10 @@ bool P_ThingsOnSliderPath(line_t *ld)
 {
     line_t *temp_line = new line_t;
     memcpy(temp_line, ld, sizeof(line_t));
-    temp_line->bbox[BOXLEFT] -= 32;
-    temp_line->bbox[BOXRIGHT] += 32;
-    temp_line->bbox[BOXBOTTOM] -= 32;
-    temp_line->bbox[BOXTOP] += 32;
+    temp_line->bbox[kBoundingBoxLeft] -= 32;
+    temp_line->bbox[kBoundingBoxRight] += 32;
+    temp_line->bbox[kBoundingBoxBottom] -= 32;
+    temp_line->bbox[kBoundingBoxTop] += 32;
 
     checkempty_line = temp_line;
 

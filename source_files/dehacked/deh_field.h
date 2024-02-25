@@ -18,8 +18,10 @@
 
 #pragma once
 
-#include "deh_mobj.h"
+#include <stddef.h>
 #include <stdint.h>
+
+#include "deh_mobj.h"
 
 namespace dehacked
 {

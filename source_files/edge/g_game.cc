@@ -33,6 +33,7 @@
 #include "bot_think.h"
 #include "con_main.h"
 #include "dstrings.h"
+#include "dm_state.h"
 #include "e_input.h"
 #include "e_main.h"
 #include "endianess.h"
@@ -375,7 +376,7 @@ bool GameResponder(InputEvent *ev)
 
         if (AutomapResponder(ev)) return true;  // automap ate it
 
-        if (M_CheatResponder(ev)) return true;  // cheat code at it
+        if (CheatResponder(ev)) return true;  // cheat code at it
     }
 
     if (game_state == GS_FINALE)

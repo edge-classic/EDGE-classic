@@ -588,10 +588,10 @@ void P_SetThingPosition(mobj_t *mo)
 #endif
 
     pos.thing           = mo;
-    pos.bbox[BOXLEFT]   = mo->x - mo->radius;
-    pos.bbox[BOXRIGHT]  = mo->x + mo->radius;
-    pos.bbox[BOXBOTTOM] = mo->y - mo->radius;
-    pos.bbox[BOXTOP]    = mo->y + mo->radius;
+    pos.bbox[kBoundingBoxLeft]   = mo->x - mo->radius;
+    pos.bbox[kBoundingBoxRight]  = mo->x + mo->radius;
+    pos.bbox[kBoundingBoxBottom] = mo->y - mo->radius;
+    pos.bbox[kBoundingBoxTop]    = mo->y + mo->radius;
 
     SetPositionBSP(&pos, root_node);
 
@@ -786,8 +786,8 @@ bool P_BlockLinesIterator(float x1, float y1, float x2, float y2, bool (*func)(l
                 ld->validcount = validcount;
 
                 // check whether line touches the given bbox
-                if (ld->bbox[BOXRIGHT] <= x1 || ld->bbox[BOXLEFT] >= x2 || ld->bbox[BOXTOP] <= y1 ||
-                    ld->bbox[BOXBOTTOM] >= y2)
+                if (ld->bbox[kBoundingBoxRight] <= x1 || ld->bbox[kBoundingBoxLeft] >= x2 || ld->bbox[kBoundingBoxTop] <= y1 ||
+                    ld->bbox[kBoundingBoxBottom] >= y2)
                 {
                     continue;
                 }

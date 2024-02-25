@@ -105,12 +105,12 @@ mobj_t *view_cam_mo;
 
 float view_expand_w;
 
-static int checkcoord[12][4] = {{BOXRIGHT, BOXTOP, BOXLEFT, BOXBOTTOM},  {BOXRIGHT, BOXTOP, BOXLEFT, BOXTOP},
-                                {BOXRIGHT, BOXBOTTOM, BOXLEFT, BOXTOP},  {0},
-                                {BOXLEFT, BOXTOP, BOXLEFT, BOXBOTTOM},   {0},
-                                {BOXRIGHT, BOXBOTTOM, BOXRIGHT, BOXTOP}, {0},
-                                {BOXLEFT, BOXTOP, BOXRIGHT, BOXBOTTOM},  {BOXLEFT, BOXBOTTOM, BOXRIGHT, BOXBOTTOM},
-                                {BOXLEFT, BOXBOTTOM, BOXRIGHT, BOXTOP}};
+static int checkcoord[12][4] = {{kBoundingBoxRight, kBoundingBoxTop, kBoundingBoxLeft, kBoundingBoxBottom},  {kBoundingBoxRight, kBoundingBoxTop, kBoundingBoxLeft, kBoundingBoxTop},
+                                {kBoundingBoxRight, kBoundingBoxBottom, kBoundingBoxLeft, kBoundingBoxTop},  {0},
+                                {kBoundingBoxLeft, kBoundingBoxTop, kBoundingBoxLeft, kBoundingBoxBottom},   {0},
+                                {kBoundingBoxRight, kBoundingBoxBottom, kBoundingBoxRight, kBoundingBoxTop}, {0},
+                                {kBoundingBoxLeft, kBoundingBoxTop, kBoundingBoxRight, kBoundingBoxBottom},  {kBoundingBoxLeft, kBoundingBoxBottom, kBoundingBoxRight, kBoundingBoxBottom},
+                                {kBoundingBoxLeft, kBoundingBoxBottom, kBoundingBoxRight, kBoundingBoxTop}};
 
 // colour of the player's weapon
 extern int rgl_weapon_r;
@@ -998,9 +998,9 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     // must determine bbox _before_ mirror flipping
     float v_bbox[4];
 
-    M_ClearBox(v_bbox);
-    M_AddToBox(v_bbox, x1, y1);
-    M_AddToBox(v_bbox, x2, y2);
+    BoundingBoxClear(v_bbox);
+    BoundingBoxAddPoint(v_bbox, x1, y1);
+    BoundingBoxAddPoint(v_bbox, x2, y2);
 
     MIR_Coordinate(x1, y1);
     MIR_Coordinate(x2, y2);
@@ -1191,11 +1191,11 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
         float bottom = HMM_MIN(lz1, rz1);
         float top    = HMM_MAX(lz2, rz2);
 
-        P_DynamicLightIterator(v_bbox[BOXLEFT], v_bbox[BOXBOTTOM], bottom, v_bbox[BOXRIGHT], v_bbox[BOXTOP], top,
+        P_DynamicLightIterator(v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], bottom, v_bbox[kBoundingBoxRight], v_bbox[kBoundingBoxTop], top,
                                DLIT_Wall, &data);
 
-        P_SectorGlowIterator(cur_seg->frontsector, v_bbox[BOXLEFT], v_bbox[BOXBOTTOM], bottom, v_bbox[BOXRIGHT],
-                             v_bbox[BOXTOP], top, GLOWLIT_Wall, &data);
+        P_SectorGlowIterator(cur_seg->frontsector, v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], bottom, v_bbox[kBoundingBoxRight],
+                             v_bbox[kBoundingBoxTop], top, GLOWLIT_Wall, &data);
     }
 
     swirl_pass = 0;
@@ -2360,16 +2360,16 @@ bool RGL_CheckBBox(float *bspcoord)
         // need to find the bounding area of the transformed box.
         static float new_bbox[4];
 
-        M_ClearBox(new_bbox);
+        BoundingBoxClear(new_bbox);
 
         for (int p = 0; p < 4; p++)
         {
-            float tx = bspcoord[(p & 1) ? BOXLEFT : BOXRIGHT];
-            float ty = bspcoord[(p & 2) ? BOXBOTTOM : BOXTOP];
+            float tx = bspcoord[(p & 1) ? kBoundingBoxLeft : kBoundingBoxRight];
+            float ty = bspcoord[(p & 2) ? kBoundingBoxBottom : kBoundingBoxTop];
 
             MIR_Coordinate(tx, ty);
 
-            M_AddToBox(new_bbox, tx, ty);
+            BoundingBoxAddPoint(new_bbox, tx, ty);
         }
 
         bspcoord = new_bbox;
@@ -2379,16 +2379,16 @@ bool RGL_CheckBBox(float *bspcoord)
 
     // Find the corners of the box
     // that define the edges from current viewpoint.
-    if (viewx <= bspcoord[BOXLEFT])
+    if (viewx <= bspcoord[kBoundingBoxLeft])
         boxx = 0;
-    else if (viewx < bspcoord[BOXRIGHT])
+    else if (viewx < bspcoord[kBoundingBoxRight])
         boxx = 1;
     else
         boxx = 2;
 
-    if (viewy >= bspcoord[BOXTOP])
+    if (viewy >= bspcoord[kBoundingBoxTop])
         boxy = 0;
-    else if (viewy > bspcoord[BOXBOTTOM])
+    else if (viewy > bspcoord[kBoundingBoxBottom])
         boxy = 1;
     else
         boxy = 2;
@@ -2445,16 +2445,16 @@ bool RGL_CheckBBox(float *bspcoord)
         if (r_culling.d_)
         {
             float closest = 1000000.0f;
-            float check   = M_PointToSegDistance({{x1, y1}}, {{x2, y1}}, {{viewx, viewy}});
+            float check   = MathPointToSegDistance({{x1, y1}}, {{x2, y1}}, {{viewx, viewy}});
             if (check < closest)
                 closest = check;
-            check = M_PointToSegDistance({{x1, y1}}, {{x1, y2}}, {{viewx, viewy}});
+            check = MathPointToSegDistance({{x1, y1}}, {{x1, y2}}, {{viewx, viewy}});
             if (check < closest)
                 closest = check;
-            check = M_PointToSegDistance({{x2, y1}}, {{x2, y2}}, {{viewx, viewy}});
+            check = MathPointToSegDistance({{x2, y1}}, {{x2, y2}}, {{viewx, viewy}});
             if (check < closest)
                 closest = check;
-            check = M_PointToSegDistance({{x1, y2}}, {{x2, y2}}, {{viewx, viewy}});
+            check = MathPointToSegDistance({{x1, y2}}, {{x2, y2}}, {{viewx, viewy}});
             if (check < closest)
                 closest = check;
 
@@ -2548,7 +2548,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
 
     float v_bbox[4];
 
-    M_ClearBox(v_bbox);
+    BoundingBoxClear(v_bbox);
 
     int v_count = 0;
 
@@ -2561,7 +2561,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
             float z = h;
 
             // must do this before mirror adjustment
-            M_AddToBox(v_bbox, x, y);
+            BoundingBoxAddPoint(v_bbox, x, y);
 
             if (cur_sub->sector->floor_vertex_slope && face_dir > 0)
             {
@@ -2670,10 +2670,10 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
 
     if (use_dlights && ren_extralight < 250)
     {
-        P_DynamicLightIterator(v_bbox[BOXLEFT], v_bbox[BOXBOTTOM], h, v_bbox[BOXRIGHT], v_bbox[BOXTOP], h, DLIT_Plane,
+        P_DynamicLightIterator(v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], h, v_bbox[kBoundingBoxRight], v_bbox[kBoundingBoxTop], h, DLIT_Plane,
                                &data);
 
-        P_SectorGlowIterator(cur_sub->sector, v_bbox[BOXLEFT], v_bbox[BOXBOTTOM], h, v_bbox[BOXRIGHT], v_bbox[BOXTOP],
+        P_SectorGlowIterator(cur_sub->sector, v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], h, v_bbox[kBoundingBoxRight], v_bbox[kBoundingBoxTop],
                              h, GLOWLIT_Plane, &data);
     }
 
@@ -2868,7 +2868,7 @@ static void RGL_WalkSubsector(int num)
             float sx2 = seg->v2->X;
             float sy2 = seg->v2->Y;
 
-            if (M_PointToSegDistance({{sx1, sy1}}, {{sx2, sy2}}, {{viewx, viewy}}) <= (r_farclip.f_ + 500.0f))
+            if (MathPointToSegDistance({{sx1, sy1}}, {{sx2, sy2}}, {{viewx, viewy}}) <= (r_farclip.f_ + 500.0f))
             {
                 skip = false;
                 break;

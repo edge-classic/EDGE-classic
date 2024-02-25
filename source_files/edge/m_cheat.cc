@@ -35,87 +35,70 @@
 // -ACB- 1999/09/19 CD Audio cheats removed.
 //
 
-
 #include "m_cheat.h"
 
 #include "con_main.h"
-#include "main.h"
+#include "dm_state.h"
 #include "dstrings.h"
 #include "g_game.h"
 #include "i_system.h"
 #include "m_menu.h"
-#include "s_sound.h"
-#include "s_music.h"
+#include "main.h"
 #include "p_local.h"
 #include "p_mobj.h"
+#include "s_music.h"
+#include "s_sound.h"
 #include "w_wad.h"
 
 extern ConsoleVariable debug_fps;
 extern ConsoleVariable debug_position;
 
-//
-// CHEAT SEQUENCE PACKAGE
-//
-// This is so hackers couldn't discover the cheat codes.
-#define SCRAMBLE(a) (a)
-
-static int           firsttime = 1;
-static unsigned char cheat_xlate_table[256];
-
-static cheatseq_t cheat_powerup[9] = {
-    {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, // -MH- 1998/06/17  added "give jetpack" cheat
-    {0, 0}                                                          // -ACB- 1998/07/15  added "give nightvision" cheat
+static CheatSequence cheat_powerup[9] = {
+    {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},
+    {0, 0}, {0, 0}, {0, 0},  // -MH- 1998/06/17  added "give jetpack" cheat
+    {0, 0}                   // -ACB- 1998/07/15  added "give nightvision" cheat
 };
 
-static cheatseq_t cheat_mus       = {0, 0};
-static cheatseq_t cheat_mypos     = {0, 0};
-static cheatseq_t cheat_showstats = {0, 0};
-static cheatseq_t cheat_choppers  = {0, 0};
-static cheatseq_t cheat_clev      = {0, 0};
-static cheatseq_t cheat_killall   = {0, 0};
-static cheatseq_t cheat_suicide   = {0, 0};
-static cheatseq_t cheat_loaded    = {0, 0};
-static cheatseq_t cheat_takeall   = {0, 0};
-static cheatseq_t cheat_god       = {0, 0};
-static cheatseq_t cheat_ammo      = {0, 0};
-static cheatseq_t cheat_ammonokey = {0, 0};
-static cheatseq_t cheat_keys      = {0, 0};
-static cheatseq_t cheat_noclip    = {0, 0};
-static cheatseq_t cheat_noclip2   = {0, 0};
-static cheatseq_t cheat_hom       = {0, 0};
+static CheatSequence cheat_music           = {0, 0};
+static CheatSequence cheat_my_position     = {0, 0};
+static CheatSequence cheat_show_stats      = {0, 0};
+static CheatSequence cheat_choppers        = {0, 0};
+static CheatSequence cheat_change_level    = {0, 0};
+static CheatSequence cheat_kill_all        = {0, 0};
+static CheatSequence cheat_suicide         = {0, 0};
+static CheatSequence cheat_loaded          = {0, 0};
+static CheatSequence cheat_take_all        = {0, 0};
+static CheatSequence cheat_god             = {0, 0};
+static CheatSequence cheat_ammo            = {0, 0};
+static CheatSequence cheat_ammo_no_keys    = {0, 0};
+static CheatSequence cheat_keys            = {0, 0};
+static CheatSequence cheat_no_clipping     = {0, 0};
+static CheatSequence cheat_no_clipping2    = {0, 0};
+static CheatSequence cheat_hall_of_mirrors = {0, 0};
 
-static cheatseq_t cheat_giveweapon[11] = {
+static CheatSequence cheat_give_weapon[11] = {
     {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},
 };
 
 //
-// M_CheckCheat
+// CheatCheckSequence
 //
-// Called in M_CheatResponder module, which handles the input.
+// Called in CheatResponder module, which handles the input.
 // Returns a 1 if the cheat was successful, 0 if failed.
 //
-int M_CheckCheat(cheatseq_t *cht, char key)
+int CheatCheckSequence(CheatSequence *cht, char key)
 {
-    int i;
     int rc = 0;
 
-    if (firsttime)
-    {
-        firsttime = 0;
-        for (i = 0; i < 256; i++)
-            cheat_xlate_table[i] = SCRAMBLE(i);
-    }
+    if (!cht->p) cht->p = cht->sequence;  // initialise if first time
 
-    if (!cht->p)
-        cht->p = cht->sequence; // initialise if first time
-
-    if (cheat_xlate_table[(unsigned char)key] == *cht->p)
+    if ((unsigned char)key == (unsigned char)*cht->p)
         cht->p++;
     else
         cht->p = cht->sequence;
 
     if (*cht->p == 0)
-    { // end of sequence character
+    {  // end of sequence character
 
         cht->p = cht->sequence;
         rc     = 1;
@@ -127,8 +110,7 @@ int M_CheckCheat(cheatseq_t *cht, char key)
 void M_ChangeLevelCheat(const char *string)
 {
     // User pressed <ESC>
-    if (!string)
-        return;
+    if (!string) return;
 
     // NOTE WELL: following assumes single player
 
@@ -166,13 +148,11 @@ static void M_ChangeMusicCheat(const char *string)
     int entry_num;
 
     // User pressed <ESC>
-    if (!string)
-        return;
+    if (!string) return;
 
     entry_num = atoi(string);
 
-    if (!entry_num)
-        return;
+    if (!entry_num) return;
 
     S_ChangeMusic(entry_num, true);
     ConsoleMessageLDF("MusChange");
@@ -192,15 +172,14 @@ static void CheatGiveWeapons(player_t *pl, int key = -2)
     {
         for (int slot = 0; slot < MAXWEAPONS; slot++)
         {
-            if (pl->weapons[slot].info)
-                P_FillWeapon(pl, slot);
+            if (pl->weapons[slot].info) P_FillWeapon(pl, slot);
         }
     }
 
     P_UpdateAvailWeapons(pl);
 }
 
-bool M_CheatResponder(InputEvent *ev)
+bool CheatResponder(InputEvent *ev)
 {
 #ifdef NOCHEATS
     return false;
@@ -210,34 +189,28 @@ bool M_CheatResponder(InputEvent *ev)
     player_t *pl = players[consoleplayer];
 
     // disable cheats while in RTS menu
-    if (rts_menuactive)
-        return false;
+    if (rts_menuactive) return false;
 
     // if a user keypress...
-    if (ev->type != kInputEventKeyDown)
-        return false;
+    if (ev->type != kInputEventKeyDown) return false;
 
     char key = (char)ev->value.key.sym;
 
     // no cheating in bot deathmatch or if disallowed in levels.ddf
-    if (!level_flags.cheats || deathmatch)
-        return false;
+    if (!level_flags.cheats || deathmatch) return false;
 
-#if 0 //!!!! TEMP DISABLED, NETWORK DEBUGGING
+#if 0  //!!!! TEMP DISABLED, NETWORK DEBUGGING
 	if (netgame)
 		return false;
 #endif
 
     // 'dqd' cheat for toggleable god mode
-    if (M_CheckCheat(&cheat_god, key))
+    if (CheatCheckSequence(&cheat_god, key))
     {
         pl->cheats ^= CF_GODMODE;
         if (pl->cheats & CF_GODMODE)
         {
-            if (pl->mo)
-            {
-                pl->health = pl->mo->health = pl->mo->spawnhealth;
-            }
+            if (pl->mo) { pl->health = pl->mo->health = pl->mo->spawnhealth; }
             ConsoleMessageLDF("GodModeOn");
         }
         else
@@ -248,7 +221,7 @@ bool M_CheatResponder(InputEvent *ev)
     //
     // -ACB- 1998/06/26 removed backpack from this as backpack is variable
     //
-    else if (M_CheckCheat(&cheat_ammonokey, key))
+    else if (CheatCheckSequence(&cheat_ammo_no_keys, key))
     {
         pl->armours[CHEATARMOURTYPE] = CHEATARMOUR;
 
@@ -266,7 +239,7 @@ bool M_CheatResponder(InputEvent *ev)
     //
     // -ACB- 1998/06/26 removed backpack from this as backpack is variable
     //
-    else if (M_CheckCheat(&cheat_ammo, key))
+    else if (CheatCheckSequence(&cheat_ammo, key))
     {
         pl->armours[CHEATARMOURTYPE] = CHEATARMOUR;
 
@@ -281,21 +254,21 @@ bool M_CheatResponder(InputEvent *ev)
 
         ConsoleMessageLDF("VeryHappyAmmo");
     }
-    else if (M_CheckCheat(&cheat_keys, key))
+    else if (CheatCheckSequence(&cheat_keys, key))
     {
         pl->cards = kDoorKeyBitmask;
 
         ConsoleMessageLDF("UnlockCheat");
     }
-    else if (M_CheckCheat(&cheat_loaded, key))
+    else if (CheatCheckSequence(&cheat_loaded, key))
     {
         for (i = 0; i < kTotalAmmunitionTypes; i++)
             pl->ammo[i].num = pl->ammo[i].max;
 
         ConsoleMessageLDF("LoadedCheat");
     }
-#if 0 // FIXME: this crashes ?
-	else if (M_CheckCheat(&cheat_takeall, key))
+#if 0  // FIXME: this crashes ?
+	else if (CheatCheckSequence(&cheat_take_all, key))
 	{
 		P_GiveInitialBenefits(pl, pl->mo->info);
 
@@ -303,7 +276,7 @@ bool M_CheatResponder(InputEvent *ev)
 		ConsoleMessageLDF("StuffRemoval");
 	}
 #endif
-    else if (M_CheckCheat(&cheat_suicide, key))
+    else if (CheatCheckSequence(&cheat_suicide, key))
     {
         P_TelefragMobj(pl->mo, pl->mo, nullptr);
 
@@ -311,7 +284,7 @@ bool M_CheatResponder(InputEvent *ev)
         ConsoleMessageLDF("SuicideCheat");
     }
     // -ACB- 1998/08/27 Used Mobj linked-list code, much cleaner.
-    else if (M_CheckCheat(&cheat_killall, key))
+    else if (CheatCheckSequence(&cheat_kill_all, key))
     {
         int killcount = 0;
 
@@ -333,7 +306,8 @@ bool M_CheatResponder(InputEvent *ev)
     }
     // Simplified, accepting both "noclip" and "idspispopd".
     // no clipping mode cheat
-    else if (M_CheckCheat(&cheat_noclip, key) || M_CheckCheat(&cheat_noclip2, key))
+    else if (CheatCheckSequence(&cheat_no_clipping, key) ||
+             CheatCheckSequence(&cheat_no_clipping2, key))
     {
         pl->cheats ^= CF_NOCLIP;
 
@@ -342,9 +316,9 @@ bool M_CheatResponder(InputEvent *ev)
         else
             ConsoleMessageLDF("ClipOff");
     }
-    else if (M_CheckCheat(&cheat_hom, key))
+    else if (CheatCheckSequence(&cheat_hall_of_mirrors, key))
     {
-        debug_hom = debug_hom.d_? 0 : 1;
+        debug_hom = debug_hom.d_ ? 0 : 1;
 
         if (debug_hom.d_)
             ConsoleMessageLDF("HomDetectOn");
@@ -355,7 +329,7 @@ bool M_CheatResponder(InputEvent *ev)
     // 'behold?' power-up cheats
     for (i = 0; i < 9; i++)
     {
-        if (M_CheckCheat(&cheat_powerup[i], key))
+        if (CheatCheckSequence(&cheat_powerup[i], key))
         {
             if (!pl->powers[i])
                 pl->powers[i] = 60 * kTicRate;
@@ -369,9 +343,9 @@ bool M_CheatResponder(InputEvent *ev)
         }
     }
 
-#if 0 // -AJA- eh ?
-	// 'behold' power-up menu
-	if (M_CheckCheat(&cheat_powerup[9], key))
+#if 0  // -AJA- eh ?
+       // 'behold' power-up menu
+	if (CheatCheckSequence(&cheat_powerup[9], key))
 	{
 		ConsoleMessageLDF("BeholdNote");
 	}
@@ -380,14 +354,13 @@ bool M_CheatResponder(InputEvent *ev)
     // 'give#' power-up cheats
     for (i = 0; i < 10; i++)
     {
-        if (!M_CheckCheat(&cheat_giveweapon[i + 1], key))
-            continue;
+        if (!CheatCheckSequence(&cheat_give_weapon[i + 1], key)) continue;
 
         CheatGiveWeapons(pl, i);
     }
 
     // 'choppers' invulnerability & chainsaw
-    if (M_CheckCheat(&cheat_choppers, key))
+    if (CheatCheckSequence(&cheat_choppers, key))
     {
         WeaponDefinition *w = weapondefs.Lookup("CHAINSAW");
         if (w)
@@ -399,24 +372,25 @@ bool M_CheatResponder(InputEvent *ev)
     }
 
     // 'mypos' for player position
-    else if (M_CheckCheat(&cheat_mypos, key))
+    else if (CheatCheckSequence(&cheat_my_position, key))
     {
-        ConsoleMessage("ang=%f;x,y=(%f,%f)", epi::DegreesFromBAM(pl->mo->angle), pl->mo->x, pl->mo->y);
+        ConsoleMessage("ang=%f;x,y=(%f,%f)", epi::DegreesFromBAM(pl->mo->angle),
+                       pl->mo->x, pl->mo->y);
     }
 
-    if (M_CheckCheat(&cheat_clev, key))
+    if (CheatCheckSequence(&cheat_change_level, key))
     {
         // 'clev' change-level cheat
         M_StartMessageInput(language["LevelQ"], M_ChangeLevelCheat);
     }
-    else if (M_CheckCheat(&cheat_mus, key))
+    else if (CheatCheckSequence(&cheat_music, key))
     {
         // 'mus' cheat for changing music
         M_StartMessageInput(language["MusicQ"], M_ChangeMusicCheat);
     }
-    else if (M_CheckCheat(&cheat_showstats, key))
+    else if (CheatCheckSequence(&cheat_show_stats, key))
     {
-        debug_fps = debug_fps.d_? 0 : 1;
+        debug_fps      = debug_fps.d_ ? 0 : 1;
         debug_position = debug_fps.d_;
     }
 
@@ -426,19 +400,19 @@ bool M_CheatResponder(InputEvent *ev)
 // -KM- 1999/01/31 Loads cheats from languages file.
 // -ES- 1999/08/26 Removed M_ConvertCheat stuff, the cheat terminator is
 //      now just 0.
-void M_CheatInit(void)
+void CheatInitialize(void)
 {
     int  i;
     char temp[16];
 
     // Now what?
-    cheat_mus.sequence       = language["idmus"];
-    cheat_god.sequence       = language["iddqd"];
-    cheat_ammo.sequence      = language["idkfa"];
-    cheat_ammonokey.sequence = language["idfa"];
-    cheat_noclip.sequence    = language["idspispopd"];
-    cheat_noclip2.sequence   = language["idclip"];
-    cheat_hom.sequence       = language["idhom"];
+    cheat_music.sequence           = language["idmus"];
+    cheat_god.sequence             = language["iddqd"];
+    cheat_ammo.sequence            = language["idkfa"];
+    cheat_ammo_no_keys.sequence    = language["idfa"];
+    cheat_no_clipping.sequence     = language["idspispopd"];
+    cheat_no_clipping2.sequence    = language["idclip"];
+    cheat_hall_of_mirrors.sequence = language["idhom"];
 
     for (i = 0; i < 9; i++)
     {
@@ -446,22 +420,22 @@ void M_CheatInit(void)
         cheat_powerup[i].sequence = language[temp];
     }
 
-    cheat_choppers.sequence = language["idchoppers"];
-    cheat_clev.sequence     = language["idclev"];
-    cheat_mypos.sequence    = language["idmypos"];
+    cheat_choppers.sequence     = language["idchoppers"];
+    cheat_change_level.sequence = language["idclev"];
+    cheat_my_position.sequence  = language["idmypos"];
 
     // new cheats
-    cheat_killall.sequence   = language["idkillall"];
-    cheat_showstats.sequence = language["idinfo"];
-    cheat_suicide.sequence   = language["idsuicide"];
-    cheat_keys.sequence      = language["idunlock"];
-    cheat_loaded.sequence    = language["idloaded"];
-    cheat_takeall.sequence   = language["idtakeall"];
+    cheat_kill_all.sequence   = language["idkillall"];
+    cheat_show_stats.sequence = language["idinfo"];
+    cheat_suicide.sequence    = language["idsuicide"];
+    cheat_keys.sequence       = language["idunlock"];
+    cheat_loaded.sequence     = language["idloaded"];
+    cheat_take_all.sequence   = language["idtakeall"];
 
     for (i = 0; i < 11; i++)
     {
         sprintf(temp, "idgive%d", i);
-        cheat_giveweapon[i].sequence = language[temp];
+        cheat_give_weapon[i].sequence = language[temp];
     }
 }
 

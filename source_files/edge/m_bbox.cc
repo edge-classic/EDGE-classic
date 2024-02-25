@@ -23,54 +23,25 @@
 //
 //----------------------------------------------------------------------------
 
-
-
 #include <float.h>
 
 #include "m_bbox.h"
 
-void M_ClearBox(float *box)
+void BoundingBoxClear(float *box)
 {
-    box[BOXTOP] = box[BOXRIGHT] = -FLT_MAX;
-    box[BOXBOTTOM] = box[BOXLEFT] = FLT_MAX;
+    box[kBoundingBoxTop] = box[kBoundingBoxRight] = -FLT_MAX;
+    box[kBoundingBoxBottom] = box[kBoundingBoxLeft] = FLT_MAX;
 }
 
-void M_AddToBox(float *box, float x, float y)
+void BoundingBoxAddPoint(float *box, float x, float y)
 {
-    if (x < box[BOXLEFT])
-        box[BOXLEFT] = x;
+    if (x < box[kBoundingBoxLeft]) box[kBoundingBoxLeft] = x;
 
-    if (x > box[BOXRIGHT])
-        box[BOXRIGHT] = x;
+    if (x > box[kBoundingBoxRight]) box[kBoundingBoxRight] = x;
 
-    if (y < box[BOXBOTTOM])
-        box[BOXBOTTOM] = y;
+    if (y < box[kBoundingBoxBottom]) box[kBoundingBoxBottom] = y;
 
-    if (y > box[BOXTOP])
-        box[BOXTOP] = y;
-}
-
-void M_CopyBox(float *box, float *other)
-{
-    box[BOXLEFT]   = other[BOXLEFT];
-    box[BOXRIGHT]  = other[BOXRIGHT];
-    box[BOXTOP]    = other[BOXTOP];
-    box[BOXBOTTOM] = other[BOXBOTTOM];
-}
-
-void M_UnionBox(float *box, float *other)
-{
-    if (other[BOXLEFT] < box[BOXLEFT])
-        box[BOXLEFT] = other[BOXLEFT];
-
-    if (other[BOXRIGHT] > box[BOXRIGHT])
-        box[BOXRIGHT] = other[BOXRIGHT];
-
-    if (other[BOXBOTTOM] < box[BOXBOTTOM])
-        box[BOXBOTTOM] = other[BOXBOTTOM];
-
-    if (other[BOXTOP] > box[BOXTOP])
-        box[BOXTOP] = other[BOXTOP];
+    if (y > box[kBoundingBoxTop]) box[kBoundingBoxTop] = y;
 }
 
 //--- editor settings ---

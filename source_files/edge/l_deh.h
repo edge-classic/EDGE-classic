@@ -23,14 +23,12 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __L_DEH__
-#define __L_DEH__
+#pragma once
 
 #include <string>
 
-void ConvertDehacked(const uint8_t *data, int length, const std::string &source);
-
-#endif // __L_DEH__
+void ConvertDehacked(const uint8_t *data, int length,
+                     const std::string &source);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

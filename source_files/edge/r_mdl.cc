@@ -740,13 +740,13 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
 
     bool tilt = is_weapon || (mo->flags & kMapObjectFlagMissile) || (mo->hyperflags & kHyperFlagForceModelTilt);
 
-    M_Angle2Matrix(tilt ? ~mo->vertangle : 0, &data.kx_mat, &data.kz_mat);
+    MathBAMAngleToMatrix(tilt ? ~mo->vertangle : 0, &data.kx_mat, &data.kz_mat);
 
     BAMAngle ang = mo->angle + rotation;
 
     MIR_Angle(ang);
 
-    M_Angle2Matrix(~ang, &data.rx_mat, &data.ry_mat);
+    MathBAMAngleToMatrix(~ang, &data.rx_mat, &data.ry_mat);
 
     data.used_normals = (lerp < 0.5) ? data.frame1->used_normals : data.frame2->used_normals;
 

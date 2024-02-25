@@ -1979,7 +1979,7 @@ static void E_Startup(void)
     W_InitPicAnims();
     S_Init();
     N_InitNetwork();
-    M_CheatInit();
+    CheatInitialize();
     if (LUA_UseLuaHud())
     {
         LUA_Init();

@@ -39,6 +39,7 @@
 #include "f_interm.h"
 #include "m_argv.h"
 #include "m_random.h"
+#include "n_network.h"
 #include "p_local.h"
 #include "p_spec.h"
 #include "rad_trig.h"

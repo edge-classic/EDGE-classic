@@ -813,10 +813,10 @@ static void BotNavigateEnemiesInNode(unsigned int bspnum, DeathBot *bot,
     for (int c = 0; c < 2; c++)
     {
         // reject children outside of the bounds
-        if (node->bbox[c][BOXLEFT] > pos.x + radius) continue;
-        if (node->bbox[c][BOXRIGHT] < pos.x - radius) continue;
-        if (node->bbox[c][BOXBOTTOM] > pos.y + radius) continue;
-        if (node->bbox[c][BOXTOP] < pos.y - radius) continue;
+        if (node->bbox[c][kBoundingBoxLeft] > pos.x + radius) continue;
+        if (node->bbox[c][kBoundingBoxRight] < pos.x - radius) continue;
+        if (node->bbox[c][kBoundingBoxBottom] > pos.y + radius) continue;
+        if (node->bbox[c][kBoundingBoxTop] < pos.y - radius) continue;
 
         BotNavigateEnemiesInNode(node->children[c], bot, radius, best_mo,
                                  best_score);

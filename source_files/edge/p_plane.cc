@@ -28,6 +28,7 @@
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "m_random.h"
+#include "n_network.h"
 #include "p_local.h"
 #include "r_sky.h"
 #include "r_misc.h"

@@ -28,7 +28,7 @@
 // -AJA- 1999/07/19: Removed P_LineOpening.  Gaps are now stored
 //       in line_t, and updated whenever sector heights change.
 //
-// -AJA- 1999/07/21: Replaced some non-critical P_Randoms with M_Random.
+// -AJA- 1999/07/21: Replaced some non-critical Random8BitStatefuls with Random8BitStateless.
 //
 // -AJA- 1999/07/30: Big changes for extra floor handling. Split
 //       P_CheckPosition into two new routines (one handling absolute
@@ -1868,7 +1868,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
             if (current_flatdef->impactobject_)
             {
                 BAMAngle angle = shoot_I.angle + kBAMAngle180;
-                angle += (BAMAngle)(P_RandomNegPos() * (int)(kBAMAngle1 / 2));
+                angle += (BAMAngle)(Random8BitSkewToZeroStateful() * (int)(kBAMAngle1 / 2));
 
                 P_SpawnDebris(x, y, z, angle, current_flatdef->impactobject_);
                 // don't go any farther
@@ -2767,8 +2767,8 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
         {
             mo = P_MobjCreateObject(thing->x, thing->y, MO_MIDZ(thing), thing->info->blood_);
 
-            mo->mom.X = (float)(M_Random() - 128) / 4.0f;
-            mo->mom.Y = (float)(M_Random() - 128) / 4.0f;
+            mo->mom.X = (float)(Random8BitStateless() - 128) / 4.0f;
+            mo->mom.Y = (float)(Random8BitStateless() - 128) / 4.0f;
         }
     }
 

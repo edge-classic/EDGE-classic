@@ -303,7 +303,7 @@ SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
     int num;
 
     if (s->num > 1)
-        num = s->sounds[M_Random() % s->num];
+        num = s->sounds[Random8BitStateless() % s->num];
     else
         num = s->sounds[0];
 

@@ -145,12 +145,12 @@ static bool DoCacheLoad(SoundEffectDefinition *def, sound_data_c *buf)
             F = W_OpenPackFile(def->pc_speaker_sound_);
             if (!F)
             {
-                std::string open_name = M_ComposeFileName(game_directory, def->pc_speaker_sound_);
+                std::string open_name = epi::PathAppendIfNotAbsolute(game_directory, def->pc_speaker_sound_);
                 F = epi::FileOpen(open_name, epi::kFileAccessRead | epi::kFileAccessBinary);
             }
             if (!F)
             {
-                M_DebugError("SFX Loader: Missing sound: '%s'\n", def->pc_speaker_sound_.c_str());
+                PrintDebugOrError("SFX Loader: Missing sound: '%s'\n", def->pc_speaker_sound_.c_str());
                 return false;
             }
             fmt = Sound_FilenameToFormat(def->pc_speaker_sound_);
@@ -162,7 +162,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, sound_data_c *buf)
             if (lump < 0)
             {
                 // Just write a debug message for SFX lumps; this prevents spam amongst the various IWADs
-                M_DebugError("SFX Loader: Missing sound lump: %s\n", def->pc_speaker_sound_.c_str());
+                PrintDebugOrError("SFX Loader: Missing sound lump: %s\n", def->pc_speaker_sound_.c_str());
                 return false;
             }
             F = W_OpenLump(lump);
@@ -176,7 +176,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, sound_data_c *buf)
             F = W_OpenPackFile(def->pack_name_);
             if (!F)
             {
-                M_DebugError("SFX Loader: Missing sound in EPK: '%s'\n", def->pack_name_.c_str());
+                PrintDebugOrError("SFX Loader: Missing sound in EPK: '%s'\n", def->pack_name_.c_str());
                 return false;
             }
             fmt = Sound_FilenameToFormat(def->pack_name_);
@@ -184,11 +184,11 @@ static bool DoCacheLoad(SoundEffectDefinition *def, sound_data_c *buf)
         else if (def->file_name_ != "")
         {
             // Why is this composed with the app dir? - Dasho
-            std::string fn = M_ComposeFileName(game_directory, def->file_name_);
+            std::string fn = epi::PathAppendIfNotAbsolute(game_directory, def->file_name_);
             F  = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
             if (!F)
             {
-                M_DebugError("SFX Loader: Can't Find File '%s'\n", fn.c_str());
+                PrintDebugOrError("SFX Loader: Can't Find File '%s'\n", fn.c_str());
                 return false;
             }
             fmt = Sound_FilenameToFormat(def->file_name_);
@@ -200,7 +200,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, sound_data_c *buf)
             if (lump < 0)
             {
                 // Just write a debug message for SFX lumps; this prevents spam amongst the various IWADs
-                M_DebugError("SFX Loader: Missing sound lump: %s\n", def->lump_name_.c_str());
+                PrintDebugOrError("SFX Loader: Missing sound lump: %s\n", def->lump_name_.c_str());
                 return false;
             }
             F = W_OpenLump(lump);
@@ -218,13 +218,13 @@ static bool DoCacheLoad(SoundEffectDefinition *def, sound_data_c *buf)
 
     if (!data)
     {
-        M_WarnError("SFX Loader: Error loading data.\n");
+        PrintWarningOrError("SFX Loader: Error loading data.\n");
         return false;
     }
     if (length < 4)
     {
         delete[] data;
-        M_WarnError("SFX Loader: Ignored short data (%d bytes).\n", length);
+        PrintWarningOrError("SFX Loader: Ignored short data (%d bytes).\n", length);
         return false;
     }
 

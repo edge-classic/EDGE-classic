@@ -35,8 +35,8 @@
 //
 // -KM- 1998/09/27 Added sounds.ddf capability
 // -KM- 1998/12/21 New smooth visibility.
-// -AJA- 1999/07/21: Replaced some non-critical P_Randoms with M_Random.
-// -AJA- 1999/08/08: Replaced some P_Random()-P_Random() stuff.
+// -AJA- 1999/07/21: Replaced some non-critical Random8BitStatefuls with Random8BitStateless.
+// -AJA- 1999/08/08: Replaced some Random8BitStateful()-Random8BitStateful() stuff.
 //
 
 
@@ -338,7 +338,7 @@ static bool DecideRangeAttack(mobj_t *object)
 
     // now after modifing distance where applicable, we get the random number and
     // check if it is less than distance, if so no attack is made.
-    if (P_RandomTest(chance))
+    if (Random8BitTestStateful(chance))
         return false;
 
     return P_CheckSight(object, object->target);
@@ -374,16 +374,16 @@ void P_ActFaceTarget(mobj_t *object)
 
     if (target->flags & kMapObjectFlagFuzzy)
     {
-        object->angle += P_RandomNegPos() << (kBAMAngleBits - 11);
-        object->vertangle += epi::BAMFromATan(P_RandomNegPos() / 1024.0f);
+        object->angle += Random8BitSkewToZeroStateful() << (kBAMAngleBits - 11);
+        object->vertangle += epi::BAMFromATan(Random8BitSkewToZeroStateful() / 1024.0f);
     }
 
     if (target->visibility < VISIBLE)
     {
         float amount = (VISIBLE - target->visibility);
 
-        object->angle += (BAMAngle)(P_RandomNegPos() * (kBAMAngleBits - 12) * amount);
-        object->vertangle += epi::BAMFromATan(P_RandomNegPos() * amount / 2048.0f);
+        object->angle += (BAMAngle)(Random8BitSkewToZeroStateful() * (kBAMAngleBits - 12) * amount);
+        object->vertangle += epi::BAMFromATan(Random8BitSkewToZeroStateful() * amount / 2048.0f);
     }
 
     // don't look up/down too far...
@@ -645,8 +645,8 @@ void P_ActDLightRandom(mobj_t *mo)
         int low  = ((int *)st->action_par)[0];
         int high = ((int *)st->action_par)[1];
 
-        // Note: using M_Random so that gameplay is unaffected
-        float qty = low + (high - low) * M_Random() / 255.0f;
+        // Note: using Random8BitStateless so that gameplay is unaffected
+        float qty = low + (high - low) * Random8BitStateless() / 255.0f;
 
         if (mo->info->hyperflags_ & kHyperFlagQuadraticDynamicLight)
             qty = DynamicLightCompatibilityRadius(qty);
@@ -717,7 +717,7 @@ void P_ActTurnRandom(mobj_t *mo)
         turn = (int)epi::DegreesFromBAM(*(BAMAngle *)st->action_par);
     }
 
-    turn = turn * P_Random() / 90; // 10 bits of angle
+    turn = turn * Random8BitStateful() / 90; // 10 bits of angle
 
     if (turn < 0)
         mo->angle -= (BAMAngle)((-turn) << (kBAMAngleBits - 10));
@@ -803,7 +803,7 @@ void P_ActPlaySound(mobj_t *mo)
 
     if (!sound)
     {
-        M_WarnError("P_ActPlaySound: missing sound name in %s.\n", mo->info->name_.c_str());
+        PrintWarningOrError("P_ActPlaySound: missing sound name in %s.\n", mo->info->name_.c_str());
         return;
     }
 
@@ -823,7 +823,7 @@ void P_ActPlaySoundBoss(mobj_t *mo)
 
     if (!sound)
     {
-        M_WarnError("P_ActPlaySoundBoss: missing sound name in %s.\n", mo->info->name_.c_str());
+        PrintWarningOrError("P_ActPlaySoundBoss: missing sound name in %s.\n", mo->info->name_.c_str());
         return;
     }
 
@@ -860,7 +860,7 @@ void P_ActMakeAmbientSoundRandom(mobj_t *mo)
 
     if (mo->info->seesound_)
     {
-        if (M_Random() < 50)
+        if (Random8BitStateless() < 50)
             S_StartFX(mo->info->seesound_, P_MobjGetSfxCategory(mo), mo);
     }
     else
@@ -1041,7 +1041,7 @@ void P_ActExplode(mobj_t *object)
 //
 static void CheckMissileSpawn(mobj_t *projectile)
 {
-    projectile->tics -= P_Random() & 3;
+    projectile->tics -= Random8BitStateful() & 3;
 
     if (projectile->tics < 1)
         projectile->tics = 1;
@@ -1171,10 +1171,10 @@ static mobj_t *DoLaunchProjectile(mobj_t *source, float tx, float ty, float tz, 
         if (!(attack->flags_ & kAttackFlagPlayer))
         {
             if (target->flags & kMapObjectFlagFuzzy)
-                angle += P_RandomNegPos() << (kBAMAngleBits - 12);
+                angle += Random8BitSkewToZeroStateful() << (kBAMAngleBits - 12);
 
             if (target->visibility < VISIBLE)
-                angle += (BAMAngle)(P_RandomNegPos() * 64 * (VISIBLE - target->visibility));
+                angle += (BAMAngle)(Random8BitSkewToZeroStateful() * 64 * (VISIBLE - target->visibility));
         }
 
         sector_t *cur_target_sec = target->subsector->sector;
@@ -1195,10 +1195,10 @@ static mobj_t *DoLaunchProjectile(mobj_t *source, float tx, float ty, float tz, 
     if (!source->player || source->player->refire > 0)
     {
         if (attack->accuracy_angle_ > 0.0f)
-            angle += (attack->accuracy_angle_ >> 8) * P_RandomNegPos();
+            angle += (attack->accuracy_angle_ >> 8) * Random8BitSkewToZeroStateful();
 
         if (attack->accuracy_slope_ > 0.0f)
-            slope += attack->accuracy_slope_ * (P_RandomNegPos() / 255.0f);
+            slope += attack->accuracy_slope_ * (Random8BitSkewToZeroStateful() / 255.0f);
     }
 
     P_SetMobjDirAndSpeed(projectile, angle, slope, projectile->speed);
@@ -1584,7 +1584,7 @@ void P_ActCreateSmokeTrail(mobj_t *projectile)
 
     if (attack->puff_ == nullptr)
     {
-        M_WarnError("P_ActCreateSmokeTrail: attack %s has no PUFF object\n", attack->name_.c_str());
+        PrintWarningOrError("P_ActCreateSmokeTrail: attack %s has no PUFF object\n", attack->name_.c_str());
         return;
     }
 
@@ -1593,7 +1593,7 @@ void P_ActCreateSmokeTrail(mobj_t *projectile)
                                        projectile->y - projectile->mom.Y / 2.0f, projectile->z, attack->puff_);
 
     smoke->mom.Z = smoke->info->float_speed_;
-    smoke->tics -= M_Random() & 3;
+    smoke->tics -= Random8BitStateless() & 3;
 
     if (smoke->tics < 1)
         smoke->tics = 1;
@@ -1640,7 +1640,7 @@ void P_ActHomingProjectile(mobj_t *projectile)
     {
         projectile->extendedflags &= ~kExtendedFlagFirstTracerCheck;
 
-        if (P_RandomTest(attack->notracechance_))
+        if (Random8BitTestStateful(attack->notracechance_))
         {
             projectile->SetTarget(nullptr);
             return;
@@ -1800,7 +1800,7 @@ static void LaunchRandomSpread(mobj_t *mo)
     if (projectile == nullptr)
         return;
 
-    int i = P_Random() & 127;
+    int i = Random8BitStateful() & 127;
 
     if (i >> 1)
     {
@@ -1855,10 +1855,10 @@ static void ShotAttack(mobj_t *mo)
         if (!mo->player || mo->player->refire > 0)
         {
             if (attack->accuracy_angle_ > 0)
-                angle += (attack->accuracy_angle_ >> 8) * P_RandomNegPos();
+                angle += (attack->accuracy_angle_ >> 8) * Random8BitSkewToZeroStateful();
 
             if (attack->accuracy_slope_ > 0)
-                slope += attack->accuracy_slope_ * (P_RandomNegPos() / 255.0f);
+                slope += attack->accuracy_slope_ * (Random8BitSkewToZeroStateful() / 255.0f);
         }
 
         float damage;
@@ -2168,7 +2168,7 @@ static void ShootToSpot(mobj_t *object)
 
     if (spot_type == nullptr)
     {
-        M_WarnError("Thing [%s] used SHOOT_TO_SPOT attack, but has no SPIT_SPOT\n", object->info->name_.c_str());
+        PrintWarningOrError("Thing [%s] used SHOOT_TO_SPOT attack, but has no SPIT_SPOT\n", object->info->name_.c_str());
         return;
     }
 
@@ -2509,14 +2509,14 @@ void P_ActDropItem(mobj_t *mo)
 
     if (!info)
     {
-        M_WarnError("P_ActDropItem: %s specifies no item to drop.\n", mo->info->name_.c_str());
+        PrintWarningOrError("P_ActDropItem: %s specifies no item to drop.\n", mo->info->name_.c_str());
         return;
     }
 
     // unlike normal drops, these ones are displaced randomly
 
-    float dx = P_RandomNegPos() * mo->info->radius_ / 255.0f;
-    float dy = P_RandomNegPos() * mo->info->radius_ / 255.0f;
+    float dx = Random8BitSkewToZeroStateful() * mo->info->radius_ / 255.0f;
+    float dy = Random8BitSkewToZeroStateful() * mo->info->radius_ / 255.0f;
 
     mobj_t *item = P_MobjCreateObject(mo->x + dx, mo->y + dy, mo->floorz, info);
     SYS_ASSERT(item);
@@ -2610,9 +2610,9 @@ void P_ActPathFollow(mobj_t *mo)
             BAMAngle step = kBAMAngle30;
 
             if (diff < kBAMAngle180)
-                mo->angle += P_Random() * (step >> 8);
+                mo->angle += Random8BitStateful() * (step >> 8);
             else
-                mo->angle -= P_Random() * (step >> 8);
+                mo->angle -= Random8BitStateful() * (step >> 8);
 
             return;
         }
@@ -2636,8 +2636,8 @@ void P_ActPathFollow(mobj_t *mo)
         if (!P_Move(mo, true))
         {
             mo->movedir   = DI_EVASIVE;
-            mo->angle     = P_Random() << (kBAMAngleBits - 8);
-            mo->movecount = 1 + (P_Random() & 7);
+            mo->angle     = Random8BitStateful() << (kBAMAngleBits - 8);
+            mo->movecount = 1 + (Random8BitStateful() & 7);
         }
         return;
     }
@@ -2796,9 +2796,9 @@ void P_ActComboAttack(mobj_t *object)
     else
     {
         if (!object->info->closecombat_)
-            M_WarnError("%s hasn't got a close combat attack\n", object->info->name.c_str());
+            PrintWarningOrError("%s hasn't got a close combat attack\n", object->info->name.c_str());
         else
-            M_WarnError("%s hasn't got a range attack\n", object->info->name.c_str());
+            PrintWarningOrError("%s hasn't got a range attack\n", object->info->name.c_str());
     }
 #endif
 }
@@ -2822,7 +2822,7 @@ void P_ActMeleeAttack(mobj_t *object)
 
     if (!attack)
     {
-        M_WarnError("P_ActMeleeAttack: %s has no close combat attack.\n", object->info->name_.c_str());
+        PrintWarningOrError("P_ActMeleeAttack: %s has no close combat attack.\n", object->info->name_.c_str());
         return;
     }
 
@@ -2858,7 +2858,7 @@ void P_ActRangeAttack(mobj_t *object)
 
     if (!attack)
     {
-        M_WarnError("P_ActRangeAttack: %s hasn't got a range attack.\n", object->info->name_.c_str());
+        PrintWarningOrError("P_ActRangeAttack: %s hasn't got a range attack.\n", object->info->name_.c_str());
         return;
     }
 
@@ -2911,7 +2911,7 @@ void P_ActSpareAttack(mobj_t *object)
 #ifdef DEVELOPERS
     else
     {
-        M_WarnError("P_ActSpareAttack: %s hasn't got a spare attack\n", object->info->name.c_str());
+        PrintWarningOrError("P_ActSpareAttack: %s hasn't got a spare attack\n", object->info->name.c_str());
         return;
     }
 #endif
@@ -2945,7 +2945,7 @@ void P_ActRefireCheck(mobj_t *object)
         P_ActFaceTarget(object);
 
     // Random chance that object will keep firing regardless
-    if (P_RandomTest(attack->keepfirechance_))
+    if (Random8BitTestStateful(attack->keepfirechance_))
         return;
 
     target = object->target;
@@ -3008,8 +3008,8 @@ static bool CreateAggression(mobj_t *mo)
         return false;
 
     // pick a block in blockmap to check
-    int bdx = P_RandomNegPos() / 17;
-    int bdy = P_RandomNegPos() / 17;
+    int bdx = Random8BitSkewToZeroStateful() / 17;
+    int bdy = Random8BitSkewToZeroStateful() / 17;
 
     int block_x = BLOCKMAP_GET_X(mo->x) + bdx;
     int block_y = BLOCKMAP_GET_X(mo->y) + bdy;
@@ -3058,7 +3058,7 @@ static bool CreateAggression(mobj_t *mo)
 
         // fairly low chance of trying it, in case this block
         // contains many monsters (spread the love)
-        if (P_Random() > 99)
+        if (Random8BitStateful() > 99)
             continue;
 
         // sight check is expensive, do it last
@@ -3359,7 +3359,7 @@ void P_ActStandardChase(mobj_t *object)
         P_NewChaseDir(object);
 
     // make active sound
-    if (object->info->activesound_ && M_Random() < 3)
+    if (object->info->activesound_ && Random8BitStateless() < 3)
         S_StartFX(object->info->activesound_, P_MobjGetSfxCategory(object), object);
 }
 
@@ -3417,7 +3417,7 @@ void P_ActWalkSoundChase(mobj_t *object)
 {
     if (!object->info->walksound_)
     {
-        M_WarnError("WALKSOUND_CHASE: %s hasn't got a walksound_.\n", object->info->name_.c_str());
+        PrintWarningOrError("WALKSOUND_CHASE: %s hasn't got a walksound_.\n", object->info->name_.c_str());
         return;
     }
 
@@ -3547,7 +3547,7 @@ void P_ActCheckBlood(mobj_t *mo)
 
     if (level_flags.more_blood && mo->tics >= 0)
     {
-        int val = P_Random();
+        int val = Random8BitStateful();
 
         // exponential formula
         mo->tics = ((val * val * val) >> 18) * kTicRate + kTicRate;
@@ -3562,7 +3562,7 @@ void P_ActJump(mobj_t *mo)
 
     if (!mo->state || !mo->state->action_par)
     {
-        M_WarnError("JUMP action used in [%s] without a label !\n", mo->info->name_.c_str());
+        PrintWarningOrError("JUMP action used in [%s] without a label !\n", mo->info->name_.c_str());
         return;
     }
 
@@ -3571,7 +3571,7 @@ void P_ActJump(mobj_t *mo)
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
 
-    if (P_RandomTest(jump->chance))
+    if (Random8BitTestStateful(jump->chance))
     {
         mo->next_state = (mo->state->jumpstate == 0) ? nullptr : (states + mo->state->jumpstate);
     }
@@ -3590,7 +3590,7 @@ void P_ActJumpLiquid(mobj_t *mo)
 
     if (!mo->state || !mo->state->action_par)
     {
-        M_WarnError("JUMP_LIQUID action used in [%s] without a label !\n", mo->info->name_.c_str());
+        PrintWarningOrError("JUMP_LIQUID action used in [%s] without a label !\n", mo->info->name_.c_str());
         return;
     }
 
@@ -3599,7 +3599,7 @@ void P_ActJumpLiquid(mobj_t *mo)
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
 
-    if (P_RandomTest(jump->chance))
+    if (Random8BitTestStateful(jump->chance))
     {
         mo->next_state = (mo->state->jumpstate == 0) ? nullptr : (states + mo->state->jumpstate);
     }
@@ -3617,7 +3617,7 @@ void P_ActJumpSky(mobj_t *mo)
     }
     if (!mo->state || !mo->state->action_par)
     {
-        M_WarnError("JUMP_SKY action used in [%s] without a label !\n", mo->info->name_.c_str());
+        PrintWarningOrError("JUMP_SKY action used in [%s] without a label !\n", mo->info->name_.c_str());
         return;
     }
 
@@ -3626,7 +3626,7 @@ void P_ActJumpSky(mobj_t *mo)
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
 
-    if (P_RandomTest(jump->chance))
+    if (Random8BitTestStateful(jump->chance))
     {
         mo->next_state = (mo->state->jumpstate == 0) ? nullptr : (states + mo->state->jumpstate);
     }
@@ -3646,7 +3646,7 @@ void P_ActJumpStuck(mobj_t * mo)
 
     if (!mo->state || !mo->state->action_par)
     {
-        M_WarnError("JUMP_STUCK action used in [%s] without a label !\n",
+        PrintWarningOrError("JUMP_STUCK action used in [%s] without a label !\n",
                     mo->info->name_.c_str());
         return;
     }
@@ -3656,7 +3656,7 @@ void P_ActJumpStuck(mobj_t * mo)
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
 
-    if (P_RandomTest(jump->chance))
+    if (Random8BitTestStateful(jump->chance))
     {
         mo->next_state = (mo->state->jumpstate == 0) ?
             nullptr : (states + mo->state->jumpstate);

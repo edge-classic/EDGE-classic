@@ -189,7 +189,7 @@ bool CheatResponder(InputEvent *ev)
     player_t *pl = players[consoleplayer];
 
     // disable cheats while in RTS menu
-    if (rts_menuactive) return false;
+    if (rts_menu_active) return false;
 
     // if a user keypress...
     if (ev->type != kInputEventKeyDown) return false;
@@ -381,12 +381,12 @@ bool CheatResponder(InputEvent *ev)
     if (CheatCheckSequence(&cheat_change_level, key))
     {
         // 'clev' change-level cheat
-        M_StartMessageInput(language["LevelQ"], M_ChangeLevelCheat);
+        MenuStartMessageInput(language["LevelQ"], M_ChangeLevelCheat);
     }
     else if (CheatCheckSequence(&cheat_music, key))
     {
         // 'mus' cheat for changing music
-        M_StartMessageInput(language["MusicQ"], M_ChangeMusicCheat);
+        MenuStartMessageInput(language["MusicQ"], M_ChangeMusicCheat);
     }
     else if (CheatCheckSequence(&cheat_show_stats, key))
     {

@@ -16,88 +16,86 @@
 //
 //----------------------------------------------------------------------------
 
-
+#include "n_network.h"
 
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "types.h"
-#include "endianess.h"
-
-#include "n_network.h"
-
+#include "coal.h"
 #include "dm_state.h"
 #include "e_input.h"
 #include "e_main.h"
-#include "g_game.h"
 #include "e_player.h"
+#include "edge_profiling.h"
+#include "endianess.h"
+#include "epi_windows.h"
+#include "g_game.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_random.h"
-
-#include "str_util.h"
-
-#include "coal.h"
-#include "vm_coal.h" // for coal::vm_c
 #include "script/compat/lua_compat.h"
-#include "edge_profiling.h"
-
-#include "epi_windows.h"
+#include "str_util.h"
+#include "types.h"
+#include "vm_coal.h"  // for coal::vm_c
 
 extern coal::vm_c *ui_vm;
-extern void        VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value);
-
-// #define DEBUG_TICS 1
+extern void        VM_SetFloat(coal::vm_c *vm, const char *mod_name,
+                               const char *var_name, double value);
 
 // only true if packets are exchanged with a server
-bool netgame = false;
+bool network_game = false;
 
 // 70Hz
-EDGE_DEFINE_CONSOLE_VARIABLE(r_doubleframes, "1", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(n_busywait, "1", kConsoleVariableFlagReadOnly)
+EDGE_DEFINE_CONSOLE_VARIABLE(framerate_target_75, "1",
+                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(
+    n_busywait, "1",
+    kConsoleVariableFlagReadOnly)  // Not sure what to rename this yet - Dasho
 
-#if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
+#if !defined(__MINGW32__) && \
+    (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
 HANDLE windows_timer = nullptr;
 #endif
 
 // game_tic is the tic about to (or currently being) run.
-// maketic is the tic that hasn't had control made for it yet.
+// make_tic is the tic that hasn't had control made for it yet.
 //
-// NOTE 1: it is a system-wide INVARIANT that game_tic <= maketic, since
+// NOTE 1: it is a system-wide INVARIANT that game_tic <= make_tic, since
 //         we cannot run a physics step without a ticcmd for each player.
 //
-// NOTE 2: maketic - game_tic is number of buffered (un-run) ticcmds,
+// NOTE 2: make_tic - game_tic is number of buffered (un-run) ticcmds,
 //         and it must be <= BACKUPTICS (the maximum buffered ticcmds).
 
 int game_tic;
-int maketic;
+int make_tic;
 
-static int last_update_tic; // last time N_NetUpdate  was called
-static int last_tryrun_tic; // last time N_TryRunTics was called
+static int last_update_tic;   // last time NetworkUpdate  was called
+static int last_try_run_tic;  // last time NetworkTryRunTicCommands was called
 
 //----------------------------------------------------------------------------
 //  TIC HANDLING
 //----------------------------------------------------------------------------
 
-void N_InitNetwork(void)
+void NetworkInitialize(void)
 {
     srand(PureRandomNumber());
 
-    N_ResetTics();
+    NetworkResetTics();
 
-#if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
-    windows_timer = CreateWaitableTimerExW(nullptr, nullptr, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);
-    if (windows_timer != nullptr)
-    {
-        n_busywait = 0;
-    }
+#if !defined(__MINGW32__) && \
+    (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
+    windows_timer = CreateWaitableTimerExW(
+        nullptr, nullptr, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
+        TIMER_ALL_ACCESS);
+    if (windows_timer != nullptr) { n_busywait = 0; }
 #endif
 }
 
-void N_Shutdown(void)
+void NetworkShutdown(void)
 {
-#if !defined(__MINGW32__) && (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
+#if !defined(__MINGW32__) && \
+    (defined(WIN32) || defined(_WIN32) || defined(_WIN64))
     if (windows_timer)
     {
         CloseHandle(windows_timer);
@@ -113,179 +111,166 @@ static void PreInput()
     EventProcessEvents();
 }
 
-static void PostInput()
-{
-    EventUpdateKeyState();
-}
+static void PostInput() { EventUpdateKeyState(); }
 
-static bool N_BuildTiccmds(void)
+static bool NetworkBuildTicCommands(void)
 {
     // create player (and robot) ticcmds.
     // returns false if players cannot hold any more ticcmds.
-    // NOTE: this is the only place allowed to bump `maketics`.
+    // NOTE: this is the only place allowed to bump `make_tics`.
 
-    if (numplayers == 0)
-        return false;
+    if (numplayers == 0) return false;
 
-    if (maketic >= game_tic + BACKUPTICS)
-        return false;
+    if (make_tic >= game_tic + BACKUPTICS) return false;
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
         player_t *p = players[pnum];
-        if (!p)
-            continue;
-        if (!p->builder)
-            continue;
-#if 0
-		LogDebug("N_BuildTiccmds: pnum %d netgame %c\n", pnum, netgame ? 'Y' : 'n');
-#endif
-        int buf = maketic % BACKUPTICS;
+        if (!p) continue;
+        if (!p->builder) continue;
+
+        int buf = make_tic % BACKUPTICS;
 
         p->builder(p, p->build_data, &p->in_cmds[buf]);
     }
 
-    maketic++;
+    make_tic++;
     return true;
 }
 
-void N_GrabTiccmds(void)
+void NetworkGrabTicCommands(void)
 {
     // this is called from G_Ticker, and is the only place allowed to
     // bump `game_tic` (allowing the game simulation to advance).
     //
     // all we actually do here is grab the ticcmd for each local player
-    // (i.e. ones created earler in N_BuildTiccmds).
+    // (i.e. ones created earler in NetworkBuildTicCommands).
 
-    // game_tic <= maketic is a system-wide invariant.  However, new levels
+    // game_tic <= make_tic is a system-wide invariant.  However, new levels
     // levels are loaded during G_Ticker(), which resets them both to zero,
     // hence we need to handle that particular case here.
-    SYS_ASSERT(game_tic <= maketic);
+    SYS_ASSERT(game_tic <= make_tic);
 
-    if (game_tic == maketic)
-        return;
+    if (game_tic == make_tic) return;
 
     int buf = game_tic % BACKUPTICS;
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
         player_t *p = players[pnum];
-        if (!p)
-            continue;
+        if (!p) continue;
 
         memcpy(&p->cmd, p->in_cmds + buf, sizeof(EventTicCommand));
     }
     if (LUA_UseLuaHud())
-        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "game_tic", game_tic / (r_doubleframes.d_? 2 : 1));
+        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "game_tic",
+                     game_tic / (framerate_target_75.d_ ? 2 : 1));
     else
-        VM_SetFloat(ui_vm, "sys", "game_tic", game_tic / (r_doubleframes.d_? 2 : 1));
+        VM_SetFloat(ui_vm, "sys", "game_tic",
+                    game_tic / (framerate_target_75.d_ ? 2 : 1));
 
     game_tic++;
 }
 
 //----------------------------------------------------------------------------
 
-int N_NetUpdate()
+int NetworkUpdate()
 {
     // if enough time has elapsed, process input events and build one
     // or more ticcmds for the local players.
 
-    int nowtime = GetTime();
+    int now_time = GetTime();
 
     // singletic update is syncronous
-    if (singletics)
-        return nowtime;
+    if (single_tics) return now_time;
 
-    int newtics     = nowtime - last_update_tic;
-    last_update_tic = nowtime;
+    int new_tics    = now_time - last_update_tic;
+    last_update_tic = now_time;
 
-    if (newtics > 0)
+    if (new_tics > 0)
     {
         PreInput();
 
         // build and send new ticcmds for local players.
-        // N_BuildTiccmds returns false when buffers are full.
+        // NetworkBuildTicCommands returns false when buffers are full.
 
-        for (; newtics > 0; newtics--)
-            if (!N_BuildTiccmds())
-                break;
+        for (; new_tics > 0; new_tics--)
+            if (!NetworkBuildTicCommands()) break;
 
         PostInput();
 
 #if 0
-		if (newtics > 0 && numplayers > 0)
-			LogDebug("N_NetUpdate: lost tics: %d\n", newtics);
+		if (new_tics > 0 && numplayers > 0)
+			LogDebug("NetworkUpdate: lost tics: %d\n", new_tics);
 #endif
     }
 
-    return nowtime;
+    return now_time;
 }
 
-int N_TryRunTics()
+int NetworkTryRunTicCommands()
 {
     EDGE_ZoneScoped;
 
-    if (singletics)
+    if (single_tics)
     {
         PreInput();
-        N_BuildTiccmds();
+        NetworkBuildTicCommands();
         PostInput();
         return 1;
     }
 
-    int nowtime     = N_NetUpdate();
-    int realtics    = nowtime - last_tryrun_tic;
-    last_tryrun_tic = nowtime;
+    int now_time     = NetworkUpdate();
+    int real_tics    = now_time - last_try_run_tic;
+    last_try_run_tic = now_time;
 
 #ifdef DEBUG_TICS
-    LogDebug("N_TryRunTics: now %d last_tryrun %d --> real %d\n", nowtime, nowtime - realtics, realtics);
+    LogDebug("NetworkTryRunTicCommands: now %d last_try_run %d --> real %d\n",
+             now_time, now_time - real_tics, real_tics);
 #endif
 
     // simpler handling when no game in progress
     if (numplayers == 0)
     {
-        while (realtics <= 0)
+        while (real_tics <= 0)
         {
-            nowtime         = N_NetUpdate();
-            realtics        = nowtime - last_tryrun_tic;
-            last_tryrun_tic = nowtime;
+            now_time         = NetworkUpdate();
+            real_tics        = now_time - last_try_run_tic;
+            last_try_run_tic = now_time;
 
-            if (!n_busywait.d_&& realtics <= 0)
-            {
-                SleepForMilliseconds(5);
-            }
+            if (!n_busywait.d_ && real_tics <= 0) { SleepForMilliseconds(5); }
         }
 
         // this limit is rather arbitrary
-        if (realtics > kTicRate / 3)
-            realtics = kTicRate / 3;
+        if (real_tics > kTicRate / 3) real_tics = kTicRate / 3;
 
-        return realtics;
+        return real_tics;
     }
 
-    SYS_ASSERT(game_tic <= maketic);
+    SYS_ASSERT(game_tic <= make_tic);
 
     // decide how many tics to run...
-    int tics = maketic - game_tic;
+    int tics = make_tic - game_tic;
 
     // -AJA- been staring at this all day, still can't explain it.
     //       my best guess is that we *usually* need an extra tic so that
     //       the ticcmd queue cannot "run away" and we never catch up.
-    if (tics > realtics + 1)
-        tics = realtics + 1;
+    if (tics > real_tics + 1)
+        tics = real_tics + 1;
     else
-        tics = HMM_MAX(HMM_MIN(tics, realtics), 1);
+        tics = HMM_MAX(HMM_MIN(tics, real_tics), 1);
 
 #ifdef DEBUG_TICS
-    LogDebug("=== maketic %d game_tic %d | real %d using %d\n", maketic, game_tic, realtics, tics);
+    LogDebug("=== make_tic %d game_tic %d | real %d using %d\n", make_tic,
+             game_tic, real_tics, tics);
 #endif
 
     // wait for new tics if needed
-    while (maketic < game_tic + tics)
+    while (make_tic < game_tic + tics)
     {
-        N_NetUpdate();
+        NetworkUpdate();
 
-        if (!n_busywait.d_&& (maketic < game_tic + tics))
+        if (!n_busywait.d_ && (make_tic < game_tic + tics))
         {
             SleepForMilliseconds(5);
         }
@@ -294,11 +279,11 @@ int N_TryRunTics()
     return tics;
 }
 
-void N_ResetTics(void)
+void NetworkResetTics(void)
 {
-    maketic = game_tic = 0;
+    make_tic = game_tic = 0;
 
-    last_update_tic = last_tryrun_tic = GetTime();
+    last_update_tic = last_try_run_tic = GetTime();
 }
 
 //--- editor settings ---

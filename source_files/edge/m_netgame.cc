@@ -23,16 +23,15 @@
 //
 //----------------------------------------------------------------------------
 
-
-
-#include "main.h"
-#include "font.h"
+#include "m_netgame.h"
 
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "dstrings.h"
 #include "e_main.h"
+#include "f_interm.h"
+#include "font.h"
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_stuff.h"
@@ -42,32 +41,30 @@
 #include "m_misc.h"
 #include "m_option.h"
 #include "m_random.h"
-#include "m_netgame.h"
+#include "main.h"
 #include "n_network.h"
 #include "p_setup.h"
-#include "s_sound.h"
-#include "sv_chunk.h"
-#include "sv_main.h"
+#include "r_colormap.h"
 #include "r_draw.h"
 #include "r_modes.h"
-#include "r_colormap.h"
-#include "w_wad.h"
-#include "f_interm.h"
-
+#include "s_sound.h"
 #include "str_util.h"
+#include "sv_chunk.h"
+#include "sv_main.h"
+#include "w_wad.h"
 
-extern gameflags_t default_gameflags;
+extern gameflags_t default_game_flags;
 
 extern ConsoleVariable bot_skill;
 
-int  netgame_menuon;
+int network_game_menu_on;
 
-static Style *ng_host_style;
-static Style *ng_list_style;
+static Style *network_game_host_style;
+static Style *network_game_list_style;
 
-static NewGameParameters *ng_params;
+static NewGameParameters *network_game_parameters;
 
-static int host_pos;
+static int host_position;
 
 static int host_want_bots;
 
@@ -75,36 +72,52 @@ static int host_want_bots;
 
 static void ListAccept(void);
 
-EDGE_DEFINE_CONSOLE_VARIABLE(player_dm_dr, "9", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(player_deathmatch_damage_resistance, "9",
+                             kConsoleVariableFlagArchive)
 
-static void DrawKeyword(int index, Style *style, int y, const char *keyword, const char *value)
+static void DrawKeyword(int index, Style *style, int y, const char *keyword,
+                        const char *value)
 {
     int x = 160;
 
-    bool is_selected = (index == host_pos);
+    bool is_selected = (index == host_position);
 
     x = x - 10;
-    x = x - (style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(keyword) * style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
+    x = x -
+        (style->fonts_[StyleDefinition::kTextSectionText]->StringWidth(
+             keyword) *
+         style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
     HudWriteText(style, (index < 0) ? 3 : is_selected ? 2 : 0, x, y, keyword);
 
     x = 160;
-    HudWriteText(style, StyleDefinition::kTextSectionAlternate, x + 10, y, value);
+    HudWriteText(style, StyleDefinition::kTextSectionAlternate, x + 10, y,
+                 value);
 
     if (is_selected)
     {
-        if (style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeImage)
+        if (style->fonts_[StyleDefinition::kTextSectionAlternate]
+                ->definition_->type_ == kFontTypeImage)
         {
             int cursor = 16;
             HudWriteText(style, StyleDefinition::kTextSectionTitle,
-                         x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth((const char *)&cursor) / 2, y,
-                         (const char *)&cursor);
+                         x - style->fonts_[StyleDefinition::kTextSectionTitle]
+                                     ->StringWidth((const char *)&cursor) /
+                                 2,
+                         y, (const char *)&cursor);
         }
-        else if (style->fonts_[StyleDefinition::kTextSectionAlternate]->definition_->type_ == kFontTypeTrueType)
-            HudWriteText(style, StyleDefinition::kTextSectionTitle, x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("+") / 2, y,
-                         "+");
+        else if (style->fonts_[StyleDefinition::kTextSectionAlternate]
+                     ->definition_->type_ == kFontTypeTrueType)
+            HudWriteText(style, StyleDefinition::kTextSectionTitle,
+                         x - style->fonts_[StyleDefinition::kTextSectionTitle]
+                                     ->StringWidth("+") /
+                                 2,
+                         y, "+");
         else
-            HudWriteText(style, StyleDefinition::kTextSectionTitle, x - style->fonts_[StyleDefinition::kTextSectionTitle]->StringWidth("*") / 2, y,
-                         "*");
+            HudWriteText(style, StyleDefinition::kTextSectionTitle,
+                         x - style->fonts_[StyleDefinition::kTextSectionTitle]
+                                     ->StringWidth("*") /
+                                 2,
+                         y, "*");
     }
 }
 
@@ -112,14 +125,14 @@ static const char *GetModeName(char mode)
 {
     switch (mode)
     {
-    case 0:
-        return language["BotCoop"];
-    case 1:
-        return language["BotOldDM"];
-    case 2:
-        return language["BotNewDM"];
-    default:
-        return "????";
+        case 0:
+            return language["BotCoop"];
+        case 1:
+            return language["BotOldDM"];
+        case 2:
+            return language["BotNewDM"];
+        default:
+            return "????";
     }
 }
 
@@ -127,19 +140,19 @@ static const char *GetSkillName(skill_t skill)
 {
     switch (skill)
     {
-    case sk_baby:
-        return language["MenuDifficulty1"];
-    case sk_easy:
-        return language["MenuDifficulty2"];
-    case sk_medium:
-        return language["MenuDifficulty3"];
-    case sk_hard:
-        return language["MenuDifficulty4"];
-    case sk_nightmare:
-        return language["MenuDifficulty5"];
+        case sk_baby:
+            return language["MenuDifficulty1"];
+        case sk_easy:
+            return language["MenuDifficulty2"];
+        case sk_medium:
+            return language["MenuDifficulty3"];
+        case sk_hard:
+            return language["MenuDifficulty4"];
+        case sk_nightmare:
+            return language["MenuDifficulty5"];
 
-    default:
-        return "????";
+        default:
+            return "????";
     }
 }
 
@@ -147,87 +160,86 @@ static const char *GetBotSkillName(int sk)
 {
     switch (sk)
     {
-    case 0:
-        return language["BotDifficulty1"];
-    case 1:
-        return language["BotDifficulty2"];
-    case 2:
-        return language["BotDifficulty3"];
-    case 3:
-        return language["BotDifficulty4"];
-    case 4:
-        return language["BotDifficulty5"];
+        case 0:
+            return language["BotDifficulty1"];
+        case 1:
+            return language["BotDifficulty2"];
+        case 2:
+            return language["BotDifficulty3"];
+        case 3:
+            return language["BotDifficulty4"];
+        case 4:
+            return language["BotDifficulty5"];
 
-    default:
-        return "????";
+        default:
+            return "????";
     }
 }
 
-static const char *GetPlayerDamResName(int res)
+static const char *GetPlayerDamageResistanceNameName(int res)
 {
     switch (res)
     {
-    case 0:
-        return "-90%";
-    case 1:
-        return "-80%";
-    case 2:
-        return "-70%";
-    case 3:
-        return "-60%";
-    case 4:
-        return "-50%";
-    case 5:
-        return "-40%";
-    case 6:
-        return "-30%";
-    case 7:
-        return "-20%";
-    case 8:
-        return "-10%";
-    case 9:
-        return "Normal";
-    case 10:
-        return "+10%";
-    case 11:
-        return "+20%";
-    case 12:
-        return "+30%";
-    case 13:
-        return "+40%";
-    case 14:
-        return "+50%";
-    case 15:
-        return "+60%";
-    case 16:
-        return "+70%";
-    case 17:
-        return "+80%";
-    case 18:
-        return "+90%";
+        case 0:
+            return "-90%";
+        case 1:
+            return "-80%";
+        case 2:
+            return "-70%";
+        case 3:
+            return "-60%";
+        case 4:
+            return "-50%";
+        case 5:
+            return "-40%";
+        case 6:
+            return "-30%";
+        case 7:
+            return "-20%";
+        case 8:
+            return "-10%";
+        case 9:
+            return "Normal";
+        case 10:
+            return "+10%";
+        case 11:
+            return "+20%";
+        case 12:
+            return "+30%";
+        case 13:
+            return "+40%";
+        case 14:
+            return "+50%";
+        case 15:
+            return "+60%";
+        case 16:
+            return "+70%";
+        case 17:
+            return "+80%";
+        case 18:
+            return "+90%";
 
-    default:
-        return "????";
+        default:
+            return "????";
     }
 }
 
 //----------------------------------------------------------------------------
 
-void M_NetHostBegun(void)
+void OptionMenuNetworkHostBegun(void)
 {
-    host_pos = 0;
+    host_position = 0;
 
-    if (ng_params)
-        delete ng_params;
+    if (network_game_parameters) delete network_game_parameters;
 
-    ng_params = new NewGameParameters;
+    network_game_parameters = new NewGameParameters;
 
-    ng_params->CopyFlags(&global_flags);
+    network_game_parameters->CopyFlags(&global_flags);
 
-    ng_params->map_ = GameLookupMap("1");
+    network_game_parameters->map_ = GameLookupMap("1");
 
-    if (!ng_params->map_)
-        ng_params->map_ = mapdefs[0];
+    if (!network_game_parameters->map_)
+        network_game_parameters->map_ = mapdefs[0];
 
     host_want_bots = 0;
 }
@@ -241,31 +253,33 @@ static void ChangeGame(NewGameParameters *param, int dir)
     {
         MapDefinition *first_map = mapdefs.Lookup(def->firstmap_.c_str());
 
-        if (!first_map || !GameMapExists(first_map))
-            continue;
+        if (!first_map || !GameMapExists(first_map)) continue;
 
         const char *old_name = param->map_->episode_->name_.c_str();
         const char *new_name = def->name_.c_str();
 
         int compare = DDF_CompareName(new_name, old_name);
 
-        if (compare == 0)
-            continue;
+        if (compare == 0) continue;
 
         if (compare * dir > 0)
         {
-            if (!closest || dir * DDF_CompareName(new_name, closest->name_.c_str()) < 0)
+            if (!closest ||
+                dir * DDF_CompareName(new_name, closest->name_.c_str()) < 0)
                 closest = def;
         }
         else
         {
-            if (!furthest || dir * DDF_CompareName(new_name, furthest->name_.c_str()) < 0)
+            if (!furthest ||
+                dir * DDF_CompareName(new_name, furthest->name_.c_str()) < 0)
                 furthest = def;
         }
     }
 
-    LogDebug("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n", dir, ng_params->map_->episode_->name_.c_str(),
-             closest ? closest->name_.c_str() : "none", furthest ? furthest->name_.c_str() : "none");
+    LogDebug("DIR: %d  CURRENT: %s   CLOSEST: %s   FURTHEST: %s\n", dir,
+             network_game_parameters->map_->episode_->name_.c_str(),
+             closest ? closest->name_.c_str() : "none",
+             furthest ? furthest->name_.c_str() : "none");
 
     if (closest)
     {
@@ -290,25 +304,25 @@ static void ChangeLevel(NewGameParameters *param, int dir)
 
     for (MapDefinition *def : mapdefs)
     {
-        if (def->episode_ != param->map_->episode_)
-            continue;
+        if (def->episode_ != param->map_->episode_) continue;
 
         const char *old_name = param->map_->name_.c_str();
         const char *new_name = def->name_.c_str();
 
         int compare = DDF_CompareName(new_name, old_name);
 
-        if (compare == 0)
-            continue;
+        if (compare == 0) continue;
 
         if (compare * dir > 0)
         {
-            if (!closest || dir * DDF_CompareName(new_name, closest->name_.c_str()) < 0)
+            if (!closest ||
+                dir * DDF_CompareName(new_name, closest->name_.c_str()) < 0)
                 closest = def;
         }
         else
         {
-            if (!furthest || dir * DDF_CompareName(new_name, furthest->name_.c_str()) < 0)
+            if (!furthest ||
+                dir * DDF_CompareName(new_name, furthest->name_.c_str()) < 0)
                 furthest = def;
         }
     }
@@ -320,8 +334,7 @@ static void ChangeLevel(NewGameParameters *param, int dir)
     }
 
     // could not find the next/previous map, hence wrap around
-    if (furthest)
-        param->map_ = furthest;
+    if (furthest) param->map_ = furthest;
 }
 
 static void HostChangeOption(int opt, int key)
@@ -330,220 +343,261 @@ static void HostChangeOption(int opt, int key)
 
     switch (opt)
     {
-    case 0: // Game
-        ChangeGame(ng_params, dir);
-        break;
+        case 0:  // Game
+            ChangeGame(network_game_parameters, dir);
+            break;
 
-    case 1: // Level
-        ChangeLevel(ng_params, dir);
-        break;
+        case 1:  // Level
+            ChangeLevel(network_game_parameters, dir);
+            break;
 
-    case 2: // Mode
-    {
-        ng_params->deathmatch_ += dir;
-
-        if (ng_params->deathmatch_ < 0)
-            ng_params->deathmatch_ = 2;
-        else if (ng_params->deathmatch_ > 2)
-            ng_params->deathmatch_ = 0;
-
-        break;
-    }
-
-    case 3: // Skill
-        ng_params->skill_ = (skill_t)((int)ng_params->skill_ + dir);
-        if ((int)ng_params->skill_ < (int)sk_baby || (int)ng_params->skill_ > 250)
-            ng_params->skill_ = sk_nightmare;
-        else if ((int)ng_params->skill_ > (int)sk_nightmare)
-            ng_params->skill_ = sk_baby;
-
-        break;
-
-    case 4: // Bots
-        host_want_bots += dir;
-
-        if (host_want_bots < 0)
-            host_want_bots = 3;
-        else if (host_want_bots > 3)
-            host_want_bots = 0;
-
-        break;
-
-    case 5: // Bot Skill
-        bot_skill = bot_skill.d_+ dir;
-        bot_skill = HMM_Clamp(0, bot_skill.d_, 4);
-
-        break;
-
-    case 6:
-        player_dm_dr = player_dm_dr.d_+ dir;
-        player_dm_dr = HMM_Clamp(0, player_dm_dr.d_, 18);
-
-        break;
-
-    case 7: // Monsters
-        if (ng_params->flags_->fastparm)
+        case 2:  // Mode
         {
-            ng_params->flags_->fastparm   = false;
-            ng_params->flags_->nomonsters = (dir > 0);
+            network_game_parameters->deathmatch_ += dir;
+
+            if (network_game_parameters->deathmatch_ < 0)
+                network_game_parameters->deathmatch_ = 2;
+            else if (network_game_parameters->deathmatch_ > 2)
+                network_game_parameters->deathmatch_ = 0;
+
+            break;
         }
-        else if (ng_params->flags_->nomonsters == (dir < 0))
-        {
-            ng_params->flags_->fastparm   = true;
-            ng_params->flags_->nomonsters = false;
-        }
-        else
-            ng_params->flags_->nomonsters = (dir < 0);
 
-        break;
+        case 3:  // Skill
+            network_game_parameters->skill_ =
+                (skill_t)((int)network_game_parameters->skill_ + dir);
+            if ((int)network_game_parameters->skill_ < (int)sk_baby ||
+                (int)network_game_parameters->skill_ > 250)
+                network_game_parameters->skill_ = sk_nightmare;
+            else if ((int)network_game_parameters->skill_ > (int)sk_nightmare)
+                network_game_parameters->skill_ = sk_baby;
 
-    case 8: // Item-Respawn
-        ng_params->flags_->itemrespawn = !ng_params->flags_->itemrespawn;
-        break;
+            break;
 
-    case 9: // Team-Damage
-        ng_params->flags_->team_damage = !ng_params->flags_->team_damage;
-        break;
+        case 4:  // Bots
+            host_want_bots += dir;
 
-    default:
-        break;
+            if (host_want_bots < 0)
+                host_want_bots = 3;
+            else if (host_want_bots > 3)
+                host_want_bots = 0;
+
+            break;
+
+        case 5:  // Bot Skill
+            bot_skill = bot_skill.d_ + dir;
+            bot_skill = HMM_Clamp(0, bot_skill.d_, 4);
+
+            break;
+
+        case 6:
+            player_deathmatch_damage_resistance =
+                player_deathmatch_damage_resistance.d_ + dir;
+            player_deathmatch_damage_resistance =
+                HMM_Clamp(0, player_deathmatch_damage_resistance.d_, 18);
+
+            break;
+
+        case 7:  // Monsters
+            if (network_game_parameters->flags_->fastparm)
+            {
+                network_game_parameters->flags_->fastparm   = false;
+                network_game_parameters->flags_->nomonsters = (dir > 0);
+            }
+            else if (network_game_parameters->flags_->nomonsters == (dir < 0))
+            {
+                network_game_parameters->flags_->fastparm   = true;
+                network_game_parameters->flags_->nomonsters = false;
+            }
+            else
+                network_game_parameters->flags_->nomonsters = (dir < 0);
+
+            break;
+
+        case 8:  // Item-Respawn
+            network_game_parameters->flags_->itemrespawn =
+                !network_game_parameters->flags_->itemrespawn;
+            break;
+
+        case 9:  // Team-Damage
+            network_game_parameters->flags_->team_damage =
+                !network_game_parameters->flags_->team_damage;
+            break;
+
+        default:
+            break;
     }
 }
 
 static void HostAccept(void)
 {
     // create local player and bots
-    ng_params->SinglePlayer(host_want_bots);
+    network_game_parameters->SinglePlayer(host_want_bots);
 
-    ng_params->level_skip_ = true;
+    network_game_parameters->level_skip_ = true;
 
-    netgame_menuon = 3;
+    network_game_menu_on = 3;
 
 #if 1
     ListAccept();
 #endif
 }
 
-void M_DrawHostMenu(void)
+void OptionMenuDrawHostMenu(void)
 {
-    SYS_ASSERT(ng_host_style);
+    SYS_ASSERT(network_game_host_style);
 
-    ng_host_style->DrawBackground();
+    network_game_host_style->DrawBackground();
 
     int CenterX;
     CenterX = 160;
-    CenterX -= (ng_host_style->fonts_[StyleDefinition::kTextSectionHeader]->StringWidth("Bot Match Settings") *
-                ng_host_style->definition_->text_[StyleDefinition::kTextSectionHeader].scale_) /
-               2;
+    CenterX -=
+        (network_game_host_style->fonts_[StyleDefinition::kTextSectionHeader]
+             ->StringWidth("Bot Match Settings") *
+         network_game_host_style->definition_
+             ->text_[StyleDefinition::kTextSectionHeader]
+             .scale_) /
+        2;
 
-    HudWriteText(ng_host_style, StyleDefinition::kTextSectionHeader, CenterX, 25, "Bot Match Settings");
+    HudWriteText(network_game_host_style, StyleDefinition::kTextSectionHeader,
+                 CenterX, 25, "Bot Match Settings");
 
-    int y      = 40;
-    int idx    = 0;
-    int deltay = 2 +
-                 (ng_host_style->fonts_[StyleDefinition::kTextSectionText]->NominalHeight() *
-                  ng_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_) +
-                 ng_host_style->definition_->entry_spacing_;
+    int y   = 40;
+    int idx = 0;
+    int deltay =
+        2 +
+        (network_game_host_style->fonts_[StyleDefinition::kTextSectionText]
+             ->NominalHeight() *
+         network_game_host_style->definition_
+             ->text_[StyleDefinition::kTextSectionText]
+             .scale_) +
+        network_game_host_style->definition_->entry_spacing_;
 
-    if (!ng_params->map_->episode_->description_.empty())
-        DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map_->episode_->description_.c_str()]);
+    if (!network_game_parameters->map_->episode_->description_.empty())
+        DrawKeyword(idx, network_game_host_style, y, "Episode",
+                    language[network_game_parameters->map_->episode_
+                                 ->description_.c_str()]);
     else
-        DrawKeyword(idx, ng_host_style, y, "Episode", language[ng_params->map_->episode_name_.c_str()]);
+        DrawKeyword(
+            idx, network_game_host_style, y, "Episode",
+            language[network_game_parameters->map_->episode_name_.c_str()]);
 
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, ng_host_style, y, "Level", ng_params->map_->name_.c_str());
+    DrawKeyword(idx, network_game_host_style, y, "Level",
+                network_game_parameters->map_->name_.c_str());
     y += deltay + (deltay / 2);
     idx++;
 
-    DrawKeyword(idx, ng_host_style, y, "Mode", GetModeName(ng_params->deathmatch_));
+    DrawKeyword(idx, network_game_host_style, y, "Mode",
+                GetModeName(network_game_parameters->deathmatch_));
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, ng_host_style, y, "Skill", GetSkillName(ng_params->skill_));
+    DrawKeyword(idx, network_game_host_style, y, "Skill",
+                GetSkillName(network_game_parameters->skill_));
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, ng_host_style, y, "Bots", epi::StringFormat("%d", host_want_bots).c_str());
+    DrawKeyword(idx, network_game_host_style, y, "Bots",
+                epi::StringFormat("%d", host_want_bots).c_str());
     y += deltay;
     idx++;
 
     int skill = HMM_Clamp(0, bot_skill.d_, 4);
-    DrawKeyword(idx, ng_host_style, y, "Bot Skill", GetBotSkillName(skill));
+    DrawKeyword(idx, network_game_host_style, y, "Bot Skill",
+                GetBotSkillName(skill));
     y += deltay;
     idx++;
 
-    int dm_damage_resistance = HMM_Clamp(0, player_dm_dr.d_, 18);
-    DrawKeyword(idx, ng_host_style, y, "Player Damage Resistance", GetPlayerDamResName(dm_damage_resistance));
+    int dm_damage_resistance =
+        HMM_Clamp(0, player_deathmatch_damage_resistance.d_, 18);
+    DrawKeyword(idx, network_game_host_style, y, "Player Damage Resistance",
+                GetPlayerDamageResistanceNameName(dm_damage_resistance));
     y += deltay;
     idx++;
 
-    int x = 150 - (ng_host_style->fonts_[StyleDefinition::kTextSectionText]->StringWidth("(Deathmatch Only)") *
-                   ng_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_);
-    HudWriteText(ng_host_style, idx - 1 == host_pos ? 2 : 0, x, y, "(Deathmatch Only)");
+    int x = 150 -
+            (network_game_host_style->fonts_[StyleDefinition::kTextSectionText]
+                 ->StringWidth("(Deathmatch Only)") *
+             network_game_host_style->definition_
+                 ->text_[StyleDefinition::kTextSectionText]
+                 .scale_);
+    HudWriteText(network_game_host_style, idx - 1 == host_position ? 2 : 0, x,
+                 y, "(Deathmatch Only)");
     y += deltay;
 
-    DrawKeyword(idx, ng_host_style, y, "Monsters",
-                ng_params->flags_->nomonsters ? "OFF"
-                : ng_params->flags_->fastparm ? "FAST"
-                                             : "ON");
+    DrawKeyword(idx, network_game_host_style, y, "Monsters",
+                network_game_parameters->flags_->nomonsters ? "OFF"
+                : network_game_parameters->flags_->fastparm ? "FAST"
+                                                            : "ON");
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, ng_host_style, y, "Item Respawn", ng_params->flags_->itemrespawn ? "ON" : "OFF");
+    DrawKeyword(idx, network_game_host_style, y, "Item Respawn",
+                network_game_parameters->flags_->itemrespawn ? "ON" : "OFF");
     y += deltay;
     idx++;
 
-    DrawKeyword(idx, ng_host_style, y, "Team Damage", ng_params->flags_->team_damage ? "ON" : "OFF");
+    DrawKeyword(idx, network_game_host_style, y, "Team Damage",
+                network_game_parameters->flags_->team_damage ? "ON" : "OFF");
     y += (deltay * 2);
     idx++;
 
     CenterX = 160;
-    CenterX -= (ng_host_style->fonts_[StyleDefinition::kTextSectionText]->StringWidth("Start") *
-                ng_host_style->definition_->text_[StyleDefinition::kTextSectionText].scale_) /
-               2;
+    CenterX -=
+        (network_game_host_style->fonts_[StyleDefinition::kTextSectionText]
+             ->StringWidth("Start") *
+         network_game_host_style->definition_
+             ->text_[StyleDefinition::kTextSectionText]
+             .scale_) /
+        2;
 
-    HudWriteText(ng_host_style, (host_pos == idx) ? StyleDefinition::kTextSectionHelp : StyleDefinition::kTextSectionText, CenterX, y, "Start");
+    HudWriteText(network_game_host_style,
+                 (host_position == idx) ? StyleDefinition::kTextSectionHelp
+                                        : StyleDefinition::kTextSectionText,
+                 CenterX, y, "Start");
 }
 
-bool M_NetHostResponder(InputEvent *ev, int ch)
+bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
 {
     if (ch == KEYD_ENTER || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
     {
-        if (host_pos == (HOST_OPTIONS - 1))
+        if (host_position == (HOST_OPTIONS - 1))
         {
             HostAccept();
-            S_StartFX(sfx_pistol);
+            S_StartFX(sound_effect_pistol);
             return true;
         }
     }
 
     if (ch == KEYD_DOWNARROW || ch == KEYD_WHEEL_DN || ch == KEYD_GP_DOWN)
     {
-        host_pos = (host_pos + 1) % HOST_OPTIONS;
-        S_StartFX(sfx_pstop);
+        host_position = (host_position + 1) % HOST_OPTIONS;
+        S_StartFX(sound_effect_pstop);
         return true;
     }
     else if (ch == KEYD_UPARROW || ch == KEYD_WHEEL_UP || ch == KEYD_GP_UP)
     {
-        host_pos = (host_pos + HOST_OPTIONS - 1) % HOST_OPTIONS;
-        S_StartFX(sfx_pstop);
+        host_position = (host_position + HOST_OPTIONS - 1) % HOST_OPTIONS;
+        S_StartFX(sound_effect_pstop);
         return true;
     }
 
-    if (ch == KEYD_LEFTARROW || ch == KEYD_RIGHTARROW || ch == KEYD_GP_LEFT || ch == KEYD_GP_RIGHT ||
-        ch == KEYD_ENTER || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
+    if (ch == KEYD_LEFTARROW || ch == KEYD_RIGHTARROW || ch == KEYD_GP_LEFT ||
+        ch == KEYD_GP_RIGHT || ch == KEYD_ENTER || ch == KEYD_GP_A ||
+        ch == KEYD_MOUSE1)
     {
-        HostChangeOption(host_pos, ch);
-        S_StartFX(sfx_stnmov);
+        HostChangeOption(host_position, ch);
+        S_StartFX(sound_effect_stnmov);
         return true;
     }
 
     return false;
 }
 
-void M_NetHostTicker(void)
+void OptionMenuNetworkHostTicker(void)
 {
     // nothing needed
 }
@@ -555,66 +609,69 @@ static void NetGameStartLevel(void)
     // -KM- 1998/12/17 Clear the intermission.
     IntermissionClear();
 
-    GameDeferredNewGame(*ng_params);
+    GameDeferredNewGame(*network_game_parameters);
 }
 
-void M_DrawPlayerList(void)
+void OptionMenuDrawPlayerList(void)
 {
     HudSetAlpha(0.64f);
     HudSolidBox(0, 0, 320, 200, SG_BLACK_RGBA32);
     HudSetAlpha();
 
-    HudWriteText(ng_list_style, 2, 80, 10, "PLAYER LIST");
+    HudWriteText(network_game_list_style, 2, 80, 10, "PLAYER LIST");
 
     int y = 30;
     int i;
 
     int humans = 0;
 
-    ///	for (i = 0; i < ng_params->total_players; i++)
-    ///		if (! (ng_params->players[i] & PFL_Bot))
+    ///	for (i = 0; i < network_game_parameters->total_players; i++)
+    ///		if (! (network_game_parameters->players[i] & PFL_Bot))
     ///			humans++;
 
-    for (i = 0; i < ng_params->total_players_; i++)
+    for (i = 0; i < network_game_parameters->total_players_; i++)
     {
-        int flags = ng_params->players_[i];
+        int flags = network_game_parameters->players_[i];
 
-        if (flags & PFL_Bot)
-            continue;
+        if (flags & PFL_Bot) continue;
 
         humans++;
 
         int bots_here = 0;
 
-        for (int j = 0; j < ng_params->total_players_; j++)
+        for (int j = 0; j < network_game_parameters->total_players_; j++)
         {
-            if ((ng_params->players_[j] & PFL_Bot) && (ng_params->nodes_[j] == ng_params->nodes_[i]))
+            if ((network_game_parameters->players_[j] & PFL_Bot) &&
+                (network_game_parameters->nodes_[j] ==
+                 network_game_parameters->nodes_[i]))
                 bots_here++;
         }
 
-        HudWriteText(ng_list_style, (flags & PFL_Network) ? 0 : 3, 20, y, epi::StringFormat("PLAYER %d", humans).c_str());
+        HudWriteText(network_game_list_style, (flags & PFL_Network) ? 0 : 3, 20,
+                     y, epi::StringFormat("PLAYER %d", humans).c_str());
 
-        HudWriteText(ng_list_style, 1, 100, y, "Local");
+        HudWriteText(network_game_list_style, 1, 100, y, "Local");
 
-        HudWriteText(ng_list_style, (flags & PFL_Network) ? 0 : 3, 200, y,
-                     epi::StringFormat("%d BOTS", bots_here).c_str());
+        HudWriteText(network_game_list_style, (flags & PFL_Network) ? 0 : 3,
+                     200, y, epi::StringFormat("%d BOTS", bots_here).c_str());
         y += 10;
     }
 
-    HudWriteText(ng_list_style, 2, 40, 140, "Press <ENTER> to Start Game");
+    HudWriteText(network_game_list_style, 2, 40, 140,
+                 "Press <ENTER> to Start Game");
 }
 
 static void ListAccept()
 {
-    S_StartFX(sfx_pistol);
+    S_StartFX(sound_effect_pistol);
 
-    netgame_menuon = 0;
-    M_ClearMenus();
+    network_game_menu_on = 0;
+    MenuClear();
 
     NetGameStartLevel();
 }
 
-bool M_NetListResponder(InputEvent *ev, int ch)
+bool OptionMenuNetListResponder(InputEvent *ev, int ch)
 {
     if (ch == KEYD_ENTER || ch == KEYD_GP_A)
     {
@@ -625,85 +682,86 @@ bool M_NetListResponder(InputEvent *ev, int ch)
     return false;
 }
 
-void M_NetListTicker(void)
+void OptionMenuNetListTicker(void)
 {
     // nothing needed
 }
 
 //----------------------------------------------------------------------------
 
-void M_NetGameInit(void)
+void NetworkGameInitialize(void)
 {
-    netgame_menuon = 0;
+    network_game_menu_on = 0;
 
-    host_pos = 0;
+    host_position = 0;
 
     // load styles
     StyleDefinition *def;
-    Style    *ng_default;
+    Style           *ng_default;
 
     def = styledefs.Lookup("OPTIONS");
-    if (!def)
-        def = default_style;
+    if (!def) def = default_style;
     ng_default = hud_styles.Lookup(def);
 
-    def           = styledefs.Lookup("HOST NETGAME");
-    ng_host_style = def ? hud_styles.Lookup(def) : ng_default;
+    def                     = styledefs.Lookup("HOST NETGAME");
+    network_game_host_style = def ? hud_styles.Lookup(def) : ng_default;
 
-    def           = styledefs.Lookup("NET PLAYER LIST");
-    ng_list_style = def ? hud_styles.Lookup(def) : ng_default;
+    def                     = styledefs.Lookup("NET PLAYER LIST");
+    network_game_list_style = def ? hud_styles.Lookup(def) : ng_default;
 }
 
-void M_NetGameDrawer(void)
+void NetworkGameDrawer(void)
 {
-    switch (netgame_menuon)
+    switch (network_game_menu_on)
     {
-    case 1:
-        M_DrawHostMenu();
-        return;
-    case 3:
-        M_DrawPlayerList();
-        return;
+        case 1:
+            OptionMenuDrawHostMenu();
+            return;
+        case 3:
+            OptionMenuDrawPlayerList();
+            return;
     }
 
-    FatalError("INTERNAL ERROR: netgame_menuon=%d\n", netgame_menuon);
+    FatalError("INTERNAL ERROR: network_game_menu_on=%d\n",
+               network_game_menu_on);
 }
 
-bool M_NetGameResponder(InputEvent *ev, int ch)
+bool NetworkGameResponder(InputEvent *ev, int ch)
 {
     switch (ch)
     {
-    case KEYD_MOUSE2:
-    case KEYD_MOUSE3:
-    case KEYD_ESCAPE:
-    case KEYD_GP_B: {
-        netgame_menuon = 0;
-        M_ClearMenus();
+        case KEYD_MOUSE2:
+        case KEYD_MOUSE3:
+        case KEYD_ESCAPE:
+        case KEYD_GP_B:
+        {
+            network_game_menu_on = 0;
+            MenuClear();
 
-        S_StartFX(sfx_pistol);
-        return true;
-    }
+            S_StartFX(sound_effect_pistol);
+            return true;
+        }
     }
 
-    switch (netgame_menuon)
+    switch (network_game_menu_on)
     {
-    case 1:
-        return M_NetHostResponder(ev, ch);
-    case 3:
-        return M_NetListResponder(ev, ch);
+        case 1:
+            return OptionMenuNetworkHostResponder(ev, ch);
+        case 3:
+            return OptionMenuNetListResponder(ev, ch);
     }
 
     return false;
 }
 
-void M_NetGameTicker(void)
+void NetworkGameTicker(void)
 {
-    switch (netgame_menuon)
+    switch (network_game_menu_on)
     {
-    case 1:
-        return M_NetHostTicker();
-    case 3:
-        return M_NetListTicker();
+        case 1:
+            return OptionMenuNetworkHostTicker();
+        case 3:
+            return OptionMenuNetListTicker();
     }
 }
 

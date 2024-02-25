@@ -52,6 +52,8 @@ std::string GetDirectory(std::string_view path);
 std::string GetExtension(std::string_view path);
 std::string MakePathRelative(std::string_view parent, std::string_view child);
 std::string PathAppend(std::string_view parent, std::string_view child);
+std::string PathAppendIfNotAbsolute(std::string_view parent,
+                                    std::string_view child);
 std::string SanitizePath(std::string_view path);
 bool        IsPathAbsolute(std::string_view path);
 void        ReplaceExtension(std::string &path, std::string_view ext);

@@ -201,7 +201,7 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
 
     int16_t *src_L;
 
-    if (paused || menuactive)
+    if (paused || menu_active)
         src_L = chan->data->data_L;
     else
     {
@@ -236,7 +236,7 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
     int16_t *src_L;
     int16_t *src_R;
 
-    if (paused || menuactive)
+    if (paused || menu_active)
     {
         src_L = chan->data->data_L;
         src_R = chan->data->data_R;
@@ -282,7 +282,7 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
 
     int16_t *src_L;
 
-    if (paused || menuactive)
+    if (paused || menu_active)
         src_L = chan->data->data_L;
     else
     {

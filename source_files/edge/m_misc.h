@@ -26,64 +26,54 @@
 // 1998/07/02 -MH- Added key_fly_up and key_fly_down
 //
 
-#ifndef __M_MISC__
-#define __M_MISC__
+#pragma once
 
 #include "con_var.h"
-#include "file.h"
 
 //
 // MISC
 //
-typedef enum
+enum ConfigurationValueType
 {
-    CFGT_Int     = 0,
-    CFGT_Boolean = 1,
-    CFGT_Key     = 2,
-} cfg_type_e;
+    kConfigurationValueTypeInteger = 0,
+    kConfigurationValueTypeEnum    = 0,
+    kConfigurationValueTypeBoolean = 1,
+    kConfigurationValueTypeKey     = 2,
+};
 
-#define CFGT_Enum CFGT_Int
-
-typedef struct
+struct ConfigurationDefault
 {
     int         type;
     const char *name;
     void       *location;
-    int         defaultvalue;
-} default_t;
+    int         default_value;
+};
 
-void M_ResetDefaults(int _dummy, ConsoleVariable *_dummy_cvar = nullptr);
-void M_LoadDefaults(void);
-void M_LoadBranding(void);
-void M_SaveDefaults(void);
+void ConfigurationResetDefaults(int              dummy,
+                                ConsoleVariable *dummy_cvar = nullptr);
+void ConfigurationLoadDefaults(void);
+void ConfigurationLoadBranding(void);
+void ConfigurationSaveDefaults(void);
 
-void M_InitMiscConVars(void);
-void M_ScreenShot(bool show_msg);
-void M_MakeSaveScreenShot(void);
+void TakeScreenshot(bool show_msg);
+void CreateSaveScreenshot(void);
 
-std::string M_ComposeFileName(std::string dir, std::string file);
-epi::File          *M_OpenComposedEPIFile(std::string dir, std::string file);
 #ifdef __GNUC__
-void                  M_WarnError(const char *error, ...) __attribute__((format(printf, 1, 2)));
-void                  M_DebugError(const char *error, ...) __attribute__((format(printf, 1, 2)));
+void PrintWarningOrError(const char *error, ...)
+    __attribute__((format(printf, 1, 2)));
+void PrintDebugOrError(const char *error, ...)
+    __attribute__((format(printf, 1, 2)));
 #else
-void                  M_WarnError(const char *error, ...);
-void                  M_DebugError(const char *error, ...);
+void PrintWarningOrError(const char *error, ...);
+void PrintDebugOrError(const char *error, ...);
 #endif
 
 extern bool save_screenshot_valid;
-
-extern int display_desync;
-
 extern bool var_obituaries;
-
-extern int var_midi_player;
-extern int var_sound_stereo;
-extern int var_mix_channels;
-
+extern int  var_midi_player;
+extern int  var_sound_stereo;
+extern int  var_mix_channels;
 extern bool var_cache_sfx;
-
-#endif /* __M_MISC__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

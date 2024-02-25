@@ -466,8 +466,11 @@ epi::File *OpenUserFileOrLump(ImageDefinition *def)
     switch (def->type_)
     {
     case kImageDataFile:
+    {
         // -AJA- 2005/01/15: filenames in DDF relative to APPDIR
-        return M_OpenComposedEPIFile(game_directory.c_str(), def->info_.c_str());
+        std::string data_file = epi::PathAppendIfNotAbsolute(game_directory.c_str(), def->info_.c_str());
+        return epi::FileOpen(data_file, epi::kFileAccessRead | epi::kFileAccessBinary);
+    }
 
     case kImageDataPackage:
         return W_OpenPackFile(def->info_);

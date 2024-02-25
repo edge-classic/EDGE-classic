@@ -654,7 +654,7 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
     mo->spawnpoint = point;
 
     if (mo->state && mo->state->tics > 1)
-        mo->tics = 1 + (P_Random() % mo->state->tics);
+        mo->tics = 1 + (Random8BitStateful() % mo->state->tics);
 
     if (options & MTF_AMBUSH)
     {

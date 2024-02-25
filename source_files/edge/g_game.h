@@ -92,7 +92,7 @@ class NewGameParameters
 };
 
 //
-// Called by the Startup code & M_Responder; A normal game
+// Called by the Startup code & MenuResponder; A normal game
 // is started by calling the beginning map. The level jump
 // cheat can get us anywhere.
 //
@@ -100,7 +100,7 @@ class NewGameParameters
 //
 void GameDeferredNewGame(NewGameParameters &params);
 
-// Can be called by the startup code or M_Responder,
+// Can be called by the startup code or MenuResponder,
 // calls P_SetupLevel or W_EnterWorld.
 void GameDeferredLoadGame(int slot);
 void GameDeferredSaveGame(int slot, const char *description);

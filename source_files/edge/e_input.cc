@@ -43,12 +43,12 @@
 #include "str_util.h"
 
 extern bool ConsoleResponder(InputEvent *ev);
-extern bool M_Responder(InputEvent *ev);
+extern bool MenuResponder(InputEvent *ev);
 extern bool GameResponder(InputEvent *ev);
 
-extern int I_JoyGetAxis(int n);
+extern int JoystickGetAxis(int n);
 
-extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable framerate_target_75;
 
 //
 // EVENT HANDLING
@@ -148,21 +148,21 @@ static int joy_last_raw[4];
 static float ball_deltas[6] = {0, 0, 0, 0, 0, 0};
 static float joy_forces[6]  = {0, 0, 0, 0, 0, 0};
 
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joy_dead0, "0.30",
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_0, "0.30",
                                      kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joy_dead1, "0.30",
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_1, "0.30",
                                      kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joy_dead2, "0.30",
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_2, "0.30",
                                      kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joy_dead3, "0.30",
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_3, "0.30",
                                      kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joy_dead4, "0.30",
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_4, "0.30",
                                      kConsoleVariableFlagArchive, 0.01f, 0.99f)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joy_dead5, "0.30",
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(joystick_deadzone_axis_5, "0.30",
                                      kConsoleVariableFlagArchive, 0.01f, 0.99f)
 float *joystick_deadzones[6] = {
-    &joy_dead0.f_, &joy_dead1.f_, &joy_dead2.f_,
-    &joy_dead3.f_, &joy_dead4.f_, &joy_dead5.f_,
+    &joystick_deadzone_axis_0.f_, &joystick_deadzone_axis_1.f_, &joystick_deadzone_axis_2.f_,
+    &joystick_deadzone_axis_3.f_, &joystick_deadzone_axis_4.f_, &joystick_deadzone_axis_5.f_,
 };
 
 EDGE_DEFINE_CONSOLE_VARIABLE(in_running, "1", kConsoleVariableFlagArchive)
@@ -201,7 +201,7 @@ static void UpdateJoystickAxis(int n)
 {
     if (joystick_axis[n] == AXIS_DISABLE) return;
 
-    int raw = I_JoyGetAxis(n);
+    int raw = JoystickGetAxis(n);
     int old = joy_last_raw[n];
 
     joy_last_raw[n] = raw;
@@ -336,7 +336,7 @@ void EventBuildTicCommand(EventTicCommand *cmd)
     // Turning
     if (!strafe)
     {
-        float turn = angle_turn[t_speed] / (r_doubleframes.d_ ? 2 : 1) *
+        float turn = angle_turn[t_speed] / (framerate_target_75.d_ ? 2 : 1) *
                      joy_forces[AXIS_TURN];
 
         turn *= turn_speed.f_;
@@ -680,7 +680,7 @@ void EventProcessEvents(void)
 
         if (ConsoleResponder(ev)) continue;  // Console ate the event
 
-        if (M_Responder(ev)) continue;  // menu ate the event
+        if (MenuResponder(ev)) continue;  // menu ate the event
 
         GameResponder(ev);  // let game eat it, nobody else wanted it
     }

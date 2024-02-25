@@ -93,7 +93,7 @@
 #include "script/compat/lua_compat.h"
 #include "edge_profiling.h"
 
-extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable framerate_target_75;
 extern ConsoleVariable n_busywait;
 
 extern ConsoleVariable gamma_correction;
@@ -103,10 +103,10 @@ ECFrameStats ecframe_stats;
 // Application active?
 int app_state = APP_STATE_ACTIVE;
 
-bool singletics = false; // debug flag to cancel adaptiveness
+bool single_tics = false; // debug flag to cancel adaptiveness
 
 // -ES- 2000/02/13 Takes screenshot every screenshot_rate tics.
-// Must be used in conjunction with singletics.
+// Must be used in conjunction with single_tics.
 static int screenshot_rate;
 
 // For screenies...
@@ -120,7 +120,7 @@ bool custom_MenuDifficulty = false;
 FILE *log_file   = nullptr;
 FILE *debug_file = nullptr;
 
-gameflags_t default_gameflags = {
+gameflags_t default_game_flags = {
     false, // nomonsters
     false, // fastparm
 
@@ -150,7 +150,7 @@ gameflags_t default_gameflags = {
 // -KM- 1998/12/16 These flags are the users prefs and are copied to
 //   gameflags when a new level is started.
 // -AJA- 2000/02/02: Removed initialisation (done in code using
-//       `default_gameflags').
+//       `default_game_flags').
 
 gameflags_t global_flags;
 
@@ -374,7 +374,7 @@ static void SetGlobalVars(void)
     if (!s.empty())
     {
         screenshot_rate = atoi(s.c_str());
-        singletics      = true;
+        single_tics      = true;
     }
 
     // -AJA- 1999/10/18: Reworked these with ArgumentCheckBooleanParameter
@@ -387,7 +387,7 @@ static void SetGlobalVars(void)
     ArgumentCheckBooleanParameter("fast", &global_flags.fastparm, false);
     ArgumentCheckBooleanParameter("extras", &global_flags.have_extra, false);
     ArgumentCheckBooleanParameter("kick", &global_flags.kicking, false);
-    ArgumentCheckBooleanParameter("singletics", &singletics, false);
+    ArgumentCheckBooleanParameter("single_tics", &single_tics, false);
     ArgumentCheckBooleanParameter("true3d", &global_flags.true3dgameplay, false);
     ArgumentCheckBooleanParameter("blood", &global_flags.more_blood, false);
     ArgumentCheckBooleanParameter("cheats", &global_flags.cheats, false);
@@ -597,7 +597,7 @@ void E_Display(void)
             
         if (need_save_screenshot)
         {
-            M_MakeSaveScreenShot();
+            CreateSaveScreenshot();
             need_save_screenshot = false;
         }
 
@@ -646,10 +646,10 @@ void E_Display(void)
         M_DisplayPause();
 
     // menus go directly to the screen
-    M_Drawer(); // menu is drawn even on top of everything (except console)
+    MenuDrawer(); // menu is drawn even on top of everything (except console)
 
     // process mouse and keyboard events
-    N_NetUpdate();
+    NetworkUpdate();
 
     ConsoleDrawer();
 
@@ -683,14 +683,14 @@ void E_Display(void)
     if (m_screenshot_required)
     {
         m_screenshot_required = false;
-        M_ScreenShot(true);
+        TakeScreenshot(true);
     }
     else if (screenshot_rate && (game_state >= GS_LEVEL))
     {
-        SYS_ASSERT(singletics);
+        SYS_ASSERT(single_tics);
 
         if (leveltime % screenshot_rate == 0)
-            M_ScreenShot(false);
+            TakeScreenshot(false);
     }
 
     FinishFrame(); // page flip or blit buffer
@@ -935,14 +935,14 @@ void E_AdvanceTitle(void)
         if (title_pic == 0 && g->titlemusic_ > 0)
             S_ChangeMusic(g->titlemusic_, false);
 
-        title_countdown = g->titletics_ * (r_doubleframes.d_? 2 : 1);
+        title_countdown = g->titletics_ * (framerate_target_75.d_? 2 : 1);
         return;
     }
 
     // not found
 
     title_image     = nullptr;
-    title_countdown = kTicRate * (r_doubleframes.d_? 2 : 1);
+    title_countdown = kTicRate * (framerate_target_75.d_? 2 : 1);
 }
 
 void E_StartTitle(void)
@@ -987,7 +987,7 @@ void InitDirectories(void)
 
     brandingfile = epi::PathAppend(game_directory, kBrandingFileName);
 
-    M_LoadBranding();
+    ConfigurationLoadBranding();
 
     // add parameter file "appdir/parms" if it exists.
     std::string parms = epi::PathAppend(game_directory, "parms");
@@ -1694,7 +1694,7 @@ static void AddSingleCmdLineFile(std::string name, bool ignore_unknown)
         return;
     }
 
-    std::string filename = M_ComposeFileName(game_directory, name);
+    std::string filename = epi::PathAppendIfNotAbsolute(game_directory, name);
     W_AddFilename(filename, kind);
 }
 
@@ -1742,7 +1742,7 @@ static void AddCommandLineFiles(void)
                 FatalError("Illegal filename for -script: %s\n", program_argument_list[p].c_str());
             }
 
-            std::string filename = M_ComposeFileName(game_directory, program_argument_list[p]);
+            std::string filename = epi::PathAppendIfNotAbsolute(game_directory, program_argument_list[p]);
             W_AddFilename(filename, FLKIND_RTS);
         }
 
@@ -1768,7 +1768,7 @@ static void AddCommandLineFiles(void)
                 FatalError("Illegal filename for -deh: %s\n", program_argument_list[p].c_str());
             }
 
-            std::string filename = M_ComposeFileName(game_directory, program_argument_list[p]);
+            std::string filename = epi::PathAppendIfNotAbsolute(game_directory, program_argument_list[p]);
             W_AddFilename(filename, FLKIND_Deh);
         }
 
@@ -1785,7 +1785,7 @@ static void AddCommandLineFiles(void)
         // go until end of parms or another '-' preceded parm
         if (!ArgumentIsOption(p))
         {
-            std::string dirname = M_ComposeFileName(game_directory, program_argument_list[p]);
+            std::string dirname = epi::PathAppendIfNotAbsolute(game_directory, program_argument_list[p]);
             W_AddFilename(dirname, FLKIND_Folder);
         }
 
@@ -1798,7 +1798,7 @@ static void AddCommandLineFiles(void)
 
     if (!ps.empty())
     {
-        std::string filename = M_ComposeFileName(game_directory, ps);
+        std::string filename = epi::PathAppendIfNotAbsolute(game_directory, ps);
         W_AddFilename(filename, FLKIND_Folder);
     }
 }
@@ -1895,7 +1895,7 @@ void E_EngineShutdown(void)
 
     S_Shutdown();
     R_Shutdown();
-    N_Shutdown();
+    NetworkShutdown();
 }
 
 // Local Prototypes
@@ -1907,7 +1907,7 @@ static void E_Startup(void)
     ConsoleInit();
 
     // -AJA- 2000/02/02: initialise global gameflags to defaults
-    global_flags = default_gameflags;
+    global_flags = default_game_flags;
 
     InitDirectories();
 
@@ -1924,7 +1924,7 @@ static void E_Startup(void)
 
     ShowDateAndVersion();
 
-    M_LoadDefaults();
+    ConfigurationLoadDefaults();
 
     ConsoleHandleProgramArguments();
     SetGlobalVars();
@@ -1962,7 +1962,6 @@ static void E_Startup(void)
     ConsoleCreateQuitScreen();
     SpecialWadVerify();
     W_BuildNodes();
-    M_InitMiscConVars();
     ShowNotice();
 
     SV_MainInit();
@@ -1971,14 +1970,14 @@ static void E_Startup(void)
     W_ProcessTX_HI();
     W_InitModels();
 
-    M_Init();
+    MenuInitialize();
     R_Init();
     P_Init();
     P_MapInit();
     P_InitSwitchList();
     W_InitPicAnims();
     S_Init();
-    N_InitNetwork();
+    NetworkInitialize();
     CheatInitialize();
     if (LUA_UseLuaHud())
     {
@@ -1987,7 +1986,7 @@ static void E_Startup(void)
     }
     else
     {
-        VM_InitCoal();
+        VMenuInitializeCoal();
         VM_LoadScripts();
     }
 }
@@ -2111,8 +2110,8 @@ static void E_InitialState(void)
 //
 void E_Main(int argc, const char **argv)
 {
-    // Seed M_Random RNG
-    M_Random_Init();
+    // Seed Random8BitStateless RNG
+    RandomStatelessInit();
 
     // Implemented here - since we need to bring the memory manager up first
     // -ACB- 2004/05/31
@@ -2172,14 +2171,7 @@ void E_Tick(void)
     E_Display();
 
     // this also runs the responder chain via EventProcessEvents
-    int counts = N_TryRunTics();
-
-    // ignore this assertion if in a menu; switching between 35/70FPS
-    // in Video Options can occasionally produce a 'valid'
-    // zero count for N_TryRunTics()
-
-    if (!menuactive)
-        SYS_ASSERT(counts > 0);
+    int counts = NetworkTryRunTicCommands();
 
     // run the tics
     for (; counts > 0; counts--)
@@ -2189,12 +2181,12 @@ void E_Tick(void)
 
         // user interface stuff (skull anim, etc)
         ConsoleTicker();
-        M_Ticker();
+        MenuTicker();
         S_SoundTicker();
         S_MusicTicker();
 
         // process mouse and keyboard events
-        N_NetUpdate();
+        NetworkUpdate();
     }
 }
 

@@ -41,7 +41,7 @@ extern ConsoleLine    *quit_lines[kEndoomLines];
 extern int             console_cursor;
 extern Font         *endoom_font;
 extern ConsoleVariable r_overlay;
-extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable framerate_target_75;
 
 static Font *default_font;
 
@@ -266,7 +266,7 @@ void HudCalcScrollTexCoords(float x_scroll, float y_scroll, float *tx1,
 {
     float timeScale, adjustedScrollS, adjustedScrollT;
 
-    timeScale = game_tic / (r_doubleframes.d_ ? 200.0f : 100.0f);
+    timeScale = game_tic / (framerate_target_75.d_ ? 200.0f : 100.0f);
 
     adjustedScrollS = x_scroll * timeScale;
     adjustedScrollT = y_scroll * timeScale;

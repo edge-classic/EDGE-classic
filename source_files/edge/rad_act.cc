@@ -1025,7 +1025,7 @@ void RAD_ActJump(rad_trigger_t *R, void *param)
 {
     s_jump_t *t = (s_jump_t *)param;
 
-    if (!P_RandomTest(t->random_chance))
+    if (!Random8BitTestStateful(t->random_chance))
         return;
 
     if (!t->cache_state)
@@ -1062,7 +1062,7 @@ void RAD_ActShowMenu(rad_trigger_t *R, void *param)
     if (numplayers > 1 && (R->acti_players & (1 << consoleplayer)) == 0)
         return;
 
-    if (rts_menuactive)
+    if (rts_menu_active)
     {
         // this is very unlikely, since RTS triggers do not run while
         // an RTS menu is active.  This menu simply fails.

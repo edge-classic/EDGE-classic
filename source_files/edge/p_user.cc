@@ -55,7 +55,7 @@ extern coal::vm_c *ui_vm;
 extern void        VM_SetVector(coal::vm_c *vm, const char *mod_name, const char *var_name, double val_1, double val_2,
                                 double val_3);
 
-extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable framerate_target_75;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(g_erraticism, "0", kConsoleVariableFlagArchive)
 
@@ -163,7 +163,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
     // ----CALCULATE VIEWHEIGHT----
     if (player->playerstate == PST_LIVE)
     {
-        player->viewheight += player->deltaviewheight * (r_doubleframes.d_? 0.5 : 1);
+        player->viewheight += player->deltaviewheight * (framerate_target_75.d_? 0.5 : 1);
 
         if (player->viewheight > player->std_viewheight)
         {
@@ -194,7 +194,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
         {
             // use a weird number to minimise chance of hitting
             // zero when deltaviewheight goes neg -> positive.
-            if (!extra_tic || !r_doubleframes.d_)
+            if (!extra_tic || !framerate_target_75.d_)
                 player->deltaviewheight += 0.24162f;
         }
     }
@@ -231,7 +231,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
             bob_z *= (6 - player->jumpwait) / 6.0;
     }
 
-    if (r_doubleframes.d_)
+    if (framerate_target_75.d_)
         bob_z *= 0.5;
 
     if (g_bobbing.d_> 1)
@@ -335,8 +335,8 @@ static void MovePlayer(player_t *player, bool extra_tic)
     // compute XY and Z speeds, taking swimming (etc) into account
     // (we try to swim in view direction -- assumes no gravity).
 
-    base_xy_speed = player->mo->speed / (r_doubleframes.d_? 64.0f : 32.0f);
-    base_z_speed  = player->mo->speed / (r_doubleframes.d_? 57.0f : 64.0f);
+    base_xy_speed = player->mo->speed / (framerate_target_75.d_? 64.0f : 32.0f);
+    base_z_speed  = player->mo->speed / (framerate_target_75.d_? 57.0f : 64.0f);
 
     // Do not let the player control movement if not onground.
     // -MH- 1998/06/18  unless he has the JetPack!
@@ -429,13 +429,13 @@ static void MovePlayer(player_t *player, bool extra_tic)
     // -ACB- 1998/08/09 Check that jumping is allowed in the current_map
     //                  Make player pause before jumping again
 
-    if (!extra_tic || !r_doubleframes.d_)
+    if (!extra_tic || !framerate_target_75.d_)
     {
         if (level_flags.jump && mo->info->jumpheight_ > 0 && (cmd->upward_move > 4))
         {
             if (!jumping && !crouching && !swimming && !flying && onground && !onladder)
             {
-                P_PlayerJump(player, player->mo->info->jumpheight_ / (r_doubleframes.d_? 1.25f : 1.4f),
+                P_PlayerJump(player, player->mo->info->jumpheight_ / (framerate_target_75.d_? 1.25f : 1.4f),
                              player->mo->info->jump_delay_);
             }
         }
@@ -449,7 +449,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
     {
         if (mo->height > mo->info->crouchheight_)
         {
-            mo->height = HMM_MAX(mo->height - 2.0f / (r_doubleframes.d_? 2.0 : 1.0), mo->info->crouchheight_);
+            mo->height = HMM_MAX(mo->height - 2.0f / (framerate_target_75.d_? 2.0 : 1.0), mo->info->crouchheight_);
             mo->player->deltaviewheight = -1.0f;
         }
     }
@@ -457,7 +457,7 @@ static void MovePlayer(player_t *player, bool extra_tic)
     {
         if (mo->height < mo->info->height_)
         {
-            float new_height = HMM_MIN(mo->height + 2 / (r_doubleframes.d_? 2 : 1), mo->info->height_);
+            float new_height = HMM_MIN(mo->height + 2 / (framerate_target_75.d_? 2 : 1), mo->info->height_);
 
             // prevent standing up inside a solid area
             if ((mo->flags & kMapObjectFlagNoClip) || mo->z + new_height <= mo->ceilingz)
@@ -491,7 +491,7 @@ static void DeathThink(player_t *player, bool extra_tic)
 {
     int subtract = extra_tic ? 0 : 1;
 
-    if (!r_doubleframes.d_)
+    if (!framerate_target_75.d_)
         subtract = 1;
 
     // fall on your face when dying.
@@ -510,7 +510,7 @@ static void DeathThink(player_t *player, bool extra_tic)
 
     // fall to the ground
     if (player->viewheight > player->std_viewheight)
-        player->viewheight -= 1.0f / (r_doubleframes.d_? 2.0 : 1.0);
+        player->viewheight -= 1.0f / (framerate_target_75.d_? 2.0 : 1.0);
     else if (player->viewheight < player->std_viewheight)
         player->viewheight = player->std_viewheight;
 
@@ -544,7 +544,7 @@ static void DeathThink(player_t *player, bool extra_tic)
         }
         else
         {
-            unsigned int factor = r_doubleframes.d_? 2 : 1;
+            unsigned int factor = framerate_target_75.d_? 2 : 1;
             if (delta < kBAMAngle180)
                 delta /= (5 * factor);
             else
@@ -757,7 +757,7 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
         player->mo->flags &= ~kMapObjectFlagNoClip;
 
     // chain saw run forward
-    if (extra_tic || !r_doubleframes.d_)
+    if (extra_tic || !framerate_target_75.d_)
     {
         if (player->mo->flags & kMapObjectFlagJustAttacked)
         {
@@ -786,7 +786,7 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
     }
 
     int subtract = extra_tic ? 0 : 1;
-    if (!r_doubleframes.d_)
+    if (!framerate_target_75.d_)
         subtract = 1;
 
     // Move/Look around.  Reactiontime is used to prevent movement for a
@@ -889,7 +889,7 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
                      cmd->extended_buttons & kExtendedButtonCodeInventoryUse ? 1 : 0, cmd->extended_buttons & kExtendedButtonCodeInventoryNext ? 1 : 0);
 
     // FIXME separate code more cleanly
-    if (extra_tic && r_doubleframes.d_)
+    if (extra_tic && framerate_target_75.d_)
         return should_think;
 
     // decrement jumpwait counter

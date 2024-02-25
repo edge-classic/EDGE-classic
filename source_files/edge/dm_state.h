@@ -61,8 +61,8 @@ extern int deathmatch;
 // Note that there is no way to disable the
 //  status bar explicitely.
 extern bool statusbaractive;
-extern bool menuactive; // Menu overlayed?
-extern bool rts_menuactive;
+extern bool menu_active; // Menu overlayed?
+extern bool rts_menu_active;
 extern bool paused; // Game Pause?
 extern bool viewactive;
 extern bool nodrawers;
@@ -82,7 +82,7 @@ extern bool autoquickload;
 //?
 extern game_state_e game_state;
 
-extern int maketic;
+extern int make_tic;
 
 #define DEATHMATCH() (deathmatch > 0)
 #define COOP_MATCH() (deathmatch == 0 && numplayers > 1)
@@ -118,10 +118,10 @@ extern ConsoleVariable debug_hom;
 
 extern int save_page;
 
-extern int quickSaveSlot;
+extern int quicksave_slot;
 
 // debug flag to cancel adaptiveness
-extern bool singletics;
+extern bool single_tics;
 
 extern int bodyqueslot;
 

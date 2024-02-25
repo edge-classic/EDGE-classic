@@ -541,6 +541,27 @@ std::string PathAppend(std::string_view parent, std::string_view child)
     return new_path;
 }
 
+std::string PathAppendIfNotAbsolute(std::string_view parent,
+                                    std::string_view child)
+{
+    SYS_ASSERT(!parent.empty() && !child.empty());
+
+    std::string new_path;
+
+    if (IsPathAbsolute(child))
+        new_path = child;
+    else
+    {
+        if (IsDirectorySeparator(parent.back())) parent.remove_suffix(1);
+        new_path = parent;
+        new_path.push_back('/');
+        if (IsDirectorySeparator(child[0])) child.remove_prefix(1);
+        new_path.append(child);
+    }
+
+    return new_path;
+}
+
 std::string GetDirectory(std::string_view path)
 {
     SYS_ASSERT(!path.empty());
@@ -625,8 +646,9 @@ bool OpenDirectory(const std::string &src)
     // that is guaranteed to be an 'error'
     if (SDL_OpenURL(StringFormat("file:///%s", src.c_str()).c_str()) == -1)
     {
-        LogWarning("OpenDirectory failed to open requested path %s\nError: %s\n",
-                  src.c_str(), SDL_GetError());
+        LogWarning(
+            "OpenDirectory failed to open requested path %s\nError: %s\n",
+            src.c_str(), SDL_GetError());
         return false;
     }
     return true;

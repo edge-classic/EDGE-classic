@@ -31,7 +31,7 @@
 
 // FIXME: Combine all these SDL bool vars into an int/enum'd flags structure
 
-extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable framerate_target_75;
 
 // Work around for alt-tabbing
 bool alt_is_down;
@@ -427,7 +427,7 @@ void HandleMouseMotionEvent(SDL_Event *ev)
     }
 }
 
-int I_JoyGetAxis(int n)  // n begins at 0
+int JoystickGetAxis(int n)  // n begins at 0
 {
     if (no_joystick || !joystick_info || !gamepad_info) return 0;
 
@@ -791,7 +791,7 @@ int GetTime(void)
 {
     Uint32 t = SDL_GetTicks();
 
-    int factor = (r_doubleframes.d_ ? 70 : 35);
+    int factor = (framerate_target_75.d_ ? 70 : 35);
 
     // more complex than "t*70/1000" to give more accuracy
     return (t / 1000) * factor + (t % 1000) * factor / 1000;

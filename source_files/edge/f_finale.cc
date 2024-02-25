@@ -560,7 +560,7 @@ static void CastPerformAction(void)
             CAST_RangeAttack(cast_order->rangeattack_);
         }
     }
-    else if (cast_order->activesound_ && (M_Random() < 2) && !cast_death)
+    else if (cast_order->activesound_ && (Random8BitStateless() < 2) && !cast_death)
     {
         sfx = cast_order->activesound_;
     }
@@ -623,7 +623,7 @@ static void CastTicker(void)
     // -AJA- if there's a jumpstate, enter it occasionally
 
     if (cast_state->action == P_ActJump && cast_state->jumpstate &&
-        (M_Random() < 64))
+        (Random8BitStateless() < 64))
         st = cast_state->jumpstate;
     else
         st = cast_state->nextstate;
@@ -675,7 +675,7 @@ static void CastSkip(void)
     // go into death frame
     cast_death = true;
 
-    if (cast_order->overkill_state_ && (M_Random() < 32))
+    if (cast_order->overkill_state_ && (Random8BitStateless() < 32))
         cast_state = &states[cast_order->overkill_state_];
     else
     {
@@ -862,7 +862,7 @@ static void BunnyScroll(void)
 
     if (stage > laststage)
     {
-        S_StartFX(sfx_pistol);
+        S_StartFX(sound_effect_pistol);
         laststage = stage;
     }
 

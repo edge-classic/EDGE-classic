@@ -245,7 +245,7 @@ class rts_menu_c
 };
 
 // RTS menu active ?
-bool               rts_menuactive = false;
+bool               rts_menu_active = false;
 static rts_menu_c *rts_curr_menu  = nullptr;
 
 rad_script_t *RAD_FindScriptByName(const char *map_name, const char *name)
@@ -636,7 +636,7 @@ bool RAD_CheckReachedTrigger(mobj_t *thing)
     else if (scr->next_path_total == 1)
         choice = 0;
     else
-        choice = P_Random() % scr->next_path_total;
+        choice = Random8BitStateful() % scr->next_path_total;
 
     path = scr->next_in_path;
     SYS_ASSERT(path);
@@ -692,7 +692,7 @@ void RAD_RunTriggers(void)
         next = trig->next;
 
         // stop running all triggers when an RTS menu becomes active
-        if (rts_menuactive)
+        if (rts_menu_active)
             break;
 
         // Don't process, if disabled
@@ -803,7 +803,7 @@ void RAD_RunTriggers(void)
 
             trig->wait_tics += trig->state->tics;
 
-            if (trig->disabled || rts_menuactive)
+            if (trig->disabled || rts_menu_active)
                 break;
         }
 
@@ -982,7 +982,7 @@ void RAD_Init(void)
 
 void RAD_StartMenu(rad_trigger_t *R, s_show_menu_t *menu)
 {
-    SYS_ASSERT(!rts_menuactive);
+    SYS_ASSERT(!rts_menu_active);
 
     // find the right style
     StyleDefinition *def = nullptr;
@@ -998,12 +998,12 @@ void RAD_StartMenu(rad_trigger_t *R, s_show_menu_t *menu)
         def = default_style;
 
     rts_curr_menu  = new rts_menu_c(menu, R, hud_styles.Lookup(def));
-    rts_menuactive = true;
+    rts_menu_active = true;
 }
 
 void RAD_FinishMenu(int result)
 {
-    if (!rts_menuactive)
+    if (!rts_menu_active)
         return;
 
     SYS_ASSERT(rts_curr_menu);
@@ -1017,7 +1017,7 @@ void RAD_FinishMenu(int result)
     delete rts_curr_menu;
 
     rts_curr_menu  = nullptr;
-    rts_menuactive = false;
+    rts_menu_active = false;
 }
 
 static void RAD_MenuDrawer(void)
@@ -1032,7 +1032,7 @@ void RAD_Drawer(void)
     if (!automap_active)
         RAD_DisplayTips();
 
-    if (rts_menuactive)
+    if (rts_menu_active)
         RAD_MenuDrawer();
 }
 
@@ -1041,7 +1041,7 @@ bool RAD_Responder(InputEvent *ev)
     if (ev->type != kInputEventKeyDown)
         return false;
 
-    if (!rts_menuactive)
+    if (!rts_menu_active)
         return false;
 
     SYS_ASSERT(rts_curr_menu);

@@ -43,7 +43,7 @@
 
 #include <math.h>
 
-extern ConsoleVariable      r_doubleframes;
+extern ConsoleVariable      framerate_target_75;
 extern coal::vm_c *ui_vm;
 
 extern void VM_SetFloat(coal::vm_c *vm, const char *mod, const char *name, double value);
@@ -184,7 +184,7 @@ static void HD_get_time(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    int time = GetTime() / (r_doubleframes.d_? 2 : 1);
+    int time = GetTime() / (framerate_target_75.d_? 2 : 1);
     vm->ReturnFloat((double)time);
 }
 
@@ -551,7 +551,7 @@ static void HD_game_paused(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    if (paused || menuactive || rts_menuactive || time_stop_active || erraticism_active)
+    if (paused || menu_active || rts_menu_active || time_stop_active || erraticism_active)
     {
         vm->ReturnFloat(1);
     }

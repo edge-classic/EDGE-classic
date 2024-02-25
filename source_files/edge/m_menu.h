@@ -23,12 +23,12 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __M_MENU__
-#define __M_MENU__
+#pragma once
 
+#include <string>
+
+#include "con_var.h"
 #include "e_event.h"
-
-struct sfx_s;
 
 // Program stuff
 extern int key_screenshot;
@@ -44,14 +44,14 @@ extern int key_quit_edge;
 extern int key_gamma_toggle;
 
 // the so-called "bastard sfx" used for the menus
-extern struct SoundEffect *sfx_swtchn;
-extern struct SoundEffect *sfx_tink;
-extern struct SoundEffect *sfx_radio;
-extern struct SoundEffect *sfx_oof;
-extern struct SoundEffect *sfx_pstop;
-extern struct SoundEffect *sfx_stnmov;
-extern struct SoundEffect *sfx_pistol;
-extern struct SoundEffect *sfx_swtchx;
+extern struct SoundEffect *sound_effect_swtchn;
+extern struct SoundEffect *sound_effect_tink;
+extern struct SoundEffect *sound_effect_radio;
+extern struct SoundEffect *sound_effect_oof;
+extern struct SoundEffect *sound_effect_pstop;
+extern struct SoundEffect *sound_effect_stnmov;
+extern struct SoundEffect *sound_effect_pistol;
+extern struct SoundEffect *sound_effect_swtchx;
 
 //
 // MENUS
@@ -61,26 +61,27 @@ extern struct SoundEffect *sfx_swtchx;
 // Even when the menu is not displayed,
 // this can resize the view and change game parameters.
 // Does all the real work of the menu interaction.
-bool M_Responder(InputEvent *ev);
+bool MenuResponder(InputEvent *ev);
 
 // Called by main loop,
 // only used for menu (skull cursor) animation.
-void M_Ticker(void);
+void MenuTicker(void);
 
 // Called by main loop,
 // draws the menus directly into the screen buffer.
-void M_Drawer(void);
+void MenuDrawer(void);
 
 // Called by D_DoomMain,
 // loads the config file.
-void M_Init(void);
+void MenuInitialize(void);
 
 // Called by intro code to force menu up upon a keypress,
 // does nothing if menu is already up.
-void M_StartControlPanel(void);
+void MenuStartControlPanel(void);
 
 // 25-6-98 KM
-void M_StartMessage(const char *string, void (*routine)(int response), bool input);
+void MenuStartMessage(const char *string, void (*routine)(int response),
+                      bool        input);
 
 // -KM- 1998/07/21
 // String will be printed as a prompt.
@@ -88,17 +89,15 @@ void M_StartMessage(const char *string, void (*routine)(int response), bool inpu
 // and will be called with the input returned
 // or nullptr if user pressed escape.
 
-void M_StartMessageInput(const char *string, void (*routine)(const char *response));
+void MenuStartMessageInput(const char *string,
+                           void (*routine)(const char *response));
 
-void M_EndGame(int choice, ConsoleVariable *cvar = nullptr);
-void M_QuitEDGE(int choice);
-void M_ImmediateQuit(void);
-void M_DrawThermo(int x, int y, int thermWidth, int thermDot, int div);
-void M_DrawFracThermo(int x, int y, float thermDot, float increment, int div, float min, float max,
-                      std::string fmt_string);
-void M_ClearMenus(void);
-
-#endif // __M_MENU__
+void MenuEndGame(int choice, ConsoleVariable *cvar = nullptr);
+void MenuQuitEdge(int choice);
+void MenuImmediateQuit(void);
+void MenuDrawSlider(int x, int y, float slider_position, float increment,
+                    int div, float min, float max, std::string format_string);
+void MenuClear(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

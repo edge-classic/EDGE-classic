@@ -48,7 +48,7 @@ bool fast_forward_active;
 bool erraticism_active = false;
 
 extern ConsoleVariable g_erraticism;
-extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable framerate_target_75;
 
 //
 // P_Ticker
@@ -59,7 +59,7 @@ void P_Ticker(bool extra_tic)
         return;
 
     // pause if in menu and at least one tic has been run
-    if (!netgame && (menuactive || rts_menuactive) && !AlmostEquals(players[consoleplayer]->viewz, kFloatUnused))
+    if (!network_game && (menu_active || rts_menu_active) && !AlmostEquals(players[consoleplayer]->viewz, kFloatUnused))
     {
         return;
     }
@@ -89,24 +89,24 @@ void P_Ticker(bool extra_tic)
                 P_PlayerThink(players[pnum], extra_tic);
     }
 
-    if (!extra_tic || !r_doubleframes.d_)
+    if (!extra_tic || !framerate_target_75.d_)
         RAD_RunTriggers();
 
     P_RunForces(extra_tic);
     P_RunMobjThinkers(extra_tic);
 
-    if (!extra_tic || !r_doubleframes.d_)
+    if (!extra_tic || !framerate_target_75.d_)
         P_RunLights();
 
     P_RunActivePlanes();
     P_RunActiveSliders();
 
-    if (!extra_tic || !r_doubleframes.d_)
+    if (!extra_tic || !framerate_target_75.d_)
         P_RunAmbientSFX();
 
     P_UpdateSpecials(extra_tic);
 
-    if (extra_tic && r_doubleframes.d_)
+    if (extra_tic && framerate_target_75.d_)
         return;
 
     P_MobjItemRespawn();

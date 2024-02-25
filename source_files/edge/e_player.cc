@@ -456,7 +456,7 @@ void GameDeathMatchSpawnPlayer(player_t *p)
     if (p->pnum >= (int)dm_starts.size())
         LogWarning("Few deathmatch spots, %d recommended.\n", p->pnum + 1);
 
-    int begin = P_Random();
+    int begin = Random8BitStateful();
 
     if (dm_starts.size() > 0)
     {

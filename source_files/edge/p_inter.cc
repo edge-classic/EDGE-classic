@@ -49,7 +49,7 @@
 bool var_obituaries = true;
 
 extern ConsoleVariable g_gore;
-extern ConsoleVariable player_dm_dr;
+extern ConsoleVariable player_deathmatch_damage_resistance;
 
 typedef struct
 {
@@ -1168,13 +1168,13 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool
     if (target->hyperflags & kHyperFlagDehackedCompatibility)
     {
         P_SetMobjState(target, state);
-        target->tics -= P_Random() & 3;
+        target->tics -= Random8BitStateful() & 3;
         if (target->tics < 1)
             target->tics = 1;
     }
     else
     {
-        P_SetMobjStateDeferred(target, state, P_Random() & 3);
+        P_SetMobjStateDeferred(target, state, Random8BitStateful() & 3);
     }
 
     // Drop stuff. This determines the kind of object spawned
@@ -1385,7 +1385,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
           source->player->weapons[source->player->ready_wp].info->nothrust_))
     {
         // make fall forwards sometimes
-        if (damage < 40 && damage > target->health && target->z - inflictor->z > 64 && (P_Random() & 1))
+        if (damage < 40 && damage > target->health && target->z - inflictor->z > 64 && (Random8BitStateful() & 1))
         {
             P_ThrustMobj(target, inflictor, -damage * 4);
         }
@@ -1459,14 +1459,14 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         // Bot Deathmatch Damange Resistance check
         if (DEATHMATCH() && !player->isBot() && source && source->player && source->player->isBot())
         {
-            if (player_dm_dr.d_< 9)
+            if (player_deathmatch_damage_resistance.d_< 9)
             {
-                float mul = 1.90f - (player_dm_dr.d_* 0.10f);
+                float mul = 1.90f - (player_deathmatch_damage_resistance.d_* 0.10f);
                 damage *= mul;
             }
-            else if (player_dm_dr.d_> 9)
+            else if (player_deathmatch_damage_resistance.d_> 9)
             {
-                float mul = 0.10f + ((18 - player_dm_dr.d_) * 0.10f);
+                float mul = 0.10f + ((18 - player_deathmatch_damage_resistance.d_) * 0.10f);
                 damage    = HMM_MAX(0.1f, damage * mul);
             }
         }
@@ -1634,7 +1634,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         pain_chance = target->painchance; // Lobo 2023: use dynamic painchance
     // pain_chance = target->info->painchance_;
 
-    if (pain_chance > 0 && P_RandomTest(pain_chance))
+    if (pain_chance > 0 && Random8BitTestStateful(pain_chance))
     {
         // setup to hit back
         target->flags |= kMapObjectFlagJustHit;

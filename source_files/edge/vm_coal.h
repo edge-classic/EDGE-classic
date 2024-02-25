@@ -23,7 +23,7 @@
 bool VM_GetCoalDetected();
 void VM_SetCoalDetected(bool detected);
 
-void VM_InitCoal();
+void VMenuInitializeCoal();
 void VM_QuitCoal();
 
 void VM_AddScript(int type, std::string &data, const std::string &source);

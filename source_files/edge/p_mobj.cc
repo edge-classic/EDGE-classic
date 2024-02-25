@@ -40,7 +40,7 @@
 // -ACB- 1998/08/06 Implemented limitless mobjdef list, altered/removed all
 //                  mobjdef[] references.
 //
-// -AJA- 1999/07/21: Replaced some non-critical P_Randoms with M_Random.
+// -AJA- 1999/07/21: Replaced some non-critical Random8BitStatefuls with Random8BitStateless.
 //
 // -AJA- 1999/07/30: Removed redundant code from P_SpawnMobj (it was
 //                   virtually identical to P_MobjCreateObject).
@@ -76,7 +76,7 @@
 
 #define DEBUG_MOBJ 0
 
-extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable framerate_target_75;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(g_cullthinkers, "0", kConsoleVariableFlagArchive)
 
@@ -229,7 +229,7 @@ static void BounceOffWall(mobj_t *mo, line_t *wall)
         // random angle to bounce away.  And don't attenuate the speed (so
         // we can get far enough away).
 
-        angle = P_Random() << (kBAMAngleBits - 8);
+        angle = Random8BitStateful() << (kBAMAngleBits - 8);
     }
     else
     {
@@ -610,7 +610,7 @@ void P_MobjExplodeMissile(mobj_t *mo)
         S_StartFX(mo->info->deathsound_, SNCAT_Object, mo);
 
     // mobjdef used -ACB- 1998/08/06
-    P_SetMobjStateDeferred(mo, mo->info->death_state_, P_Random() & 3);
+    P_SetMobjStateDeferred(mo, mo->info->death_state_, Random8BitStateful() & 3);
 }
 
 static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, region_properties_t *new_p, float f_h,
@@ -819,7 +819,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
     float xmove = mo->mom.X;
     float ymove = mo->mom.Y;
 
-    if (do_extra && r_doubleframes.d_) // 70Hz
+    if (do_extra && framerate_target_75.d_) // 70Hz
     {
         xmove *= 0.52;
         ymove *= 0.52;
@@ -1047,7 +1047,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
     }
 
     // 70hz : adjust friction to account for extra tic
-    if (do_extra && r_doubleframes.d_)
+    if (do_extra && framerate_target_75.d_)
     {
         friction = sqrt(friction);
     }
@@ -1109,7 +1109,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
 
     zmove = mo->mom.Z * (1.0f - props->viscosity);
 
-    if (do_extra && r_doubleframes.d_) // 70 Hz
+    if (do_extra && framerate_target_75.d_) // 70 Hz
         zmove *= 0.52;
 
     if (mo->on_slope && mo->z > mo->floorz && std::abs(mo->z - mo->floorz) < 6.0f) // 1/4 of default step size
@@ -1156,11 +1156,11 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
             bool  fly_or_swim =
                 mo->player && (mo->player->swimming || mo->player->powers[kPowerTypeJetpack] > 0 || mo->on_ladder >= 0);
 
-            if (mo->player && gravity > 0 && -zmove > (OOF_SPEED / (r_doubleframes.d_? 2 : 1)) && !fly_or_swim)
+            if (mo->player && gravity > 0 && -zmove > (OOF_SPEED / (framerate_target_75.d_? 2 : 1)) && !fly_or_swim)
             {
                 // Squat down. Decrease viewheight for a moment after hitting the
                 // ground (hard), and utter appropriate sound.
-                mo->player->deltaviewheight = zmove / 8.0f * (r_doubleframes.d_? 2.0 : 1.0); // 70Hz
+                mo->player->deltaviewheight = zmove / 8.0f * (framerate_target_75.d_? 2.0 : 1.0); // 70Hz
                 if (mo->info->maxfall_ > 0 && -mo->mom.Z > hurt_momz)
                 {
                     if (!(mo->player->cheats & CF_GODMODE) && mo->player->powers[kPowerTypeInvulnerable] < 1)
@@ -1238,7 +1238,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
         if (!(mo->flags & kMapObjectFlagNoGravity) && !(mo->player && mo->player->powers[kPowerTypeJetpack] > 0) && !(mo->on_ladder >= 0))
         {
             // 70 Hz: apply gravity only on real tics
-            if (!extra_tic || !r_doubleframes.d_)
+            if (!extra_tic || !framerate_target_75.d_)
                 mo->mom.Z -= gravity / (mo->mbf21flags & kMBF21FlagLowGravity ? 8 : 1);
         }
     }
@@ -1259,7 +1259,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
             bool  fly_or_swim =
                 mo->player && (mo->player->swimming || mo->player->powers[kPowerTypeJetpack] > 0 || mo->on_ladder >= 0);
 
-            if (mo->player && gravity < 0 && zmove > (OOF_SPEED / (r_doubleframes.d_? 2 : 1)) && !fly_or_swim)
+            if (mo->player && gravity < 0 && zmove > (OOF_SPEED / (framerate_target_75.d_? 2 : 1)) && !fly_or_swim)
             {
                 mo->player->deltaviewheight = zmove / 8.0f;
                 S_StartFX(mo->info->oof_sound_, P_MobjGetSfxCategory(mo), mo);
@@ -1319,7 +1319,7 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
         if (!(mo->flags & kMapObjectFlagNoGravity) && !(mo->player && mo->player->powers[kPowerTypeJetpack] > 0) && !(mo->on_ladder >= 0))
         {
             // 70 Hz: apply gravity only on real tics
-            if (!extra_tic || !r_doubleframes.d_)
+            if (!extra_tic || !framerate_target_75.d_)
                 mo->mom.Z += -gravity / (mo->mbf21flags & kMBF21FlagLowGravity ? 8 : 1);
         }
     }
@@ -1370,7 +1370,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
 
     mobj->ClearStaleRefs();
 
-    if (!extra_tic || !r_doubleframes.d_)
+    if (!extra_tic || !framerate_target_75.d_)
     {
         SYS_ASSERT(mobj->state);
         SYS_ASSERT(mobj->refcount >= 0);
@@ -1411,7 +1411,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
     {
         P_CalcFullProperties(mobj, &player_props);
 
-        if (!extra_tic || !r_doubleframes.d_)
+        if (!extra_tic || !framerate_target_75.d_)
         {
             mobj->mom.X += player_props.push.X;
             mobj->mom.Y += player_props.push.Y;
@@ -1435,7 +1435,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
                     if (!((mobj->flags & kMapObjectFlagNoGravity) || (flags & kSectorFlagPushAll)) &&
                         (mobj->z <= mobj->floorz + 1.0f || (flags & kSectorFlagWholeRegion)))
                     {
-                        if (!extra_tic || !r_doubleframes.d_)
+                        if (!extra_tic || !framerate_target_75.d_)
                         {
                             float push_mul = 1.0f;
 
@@ -1467,7 +1467,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
     if (mobj->flags & kMapObjectFlagMissile)
         do_extra = true;
 
-    if (!r_doubleframes.d_|| !extra_tic || do_extra)
+    if (!framerate_target_75.d_|| !extra_tic || do_extra)
     {
         if (do_extra && mobj->subsector->sector->floor_vertex_slope)
         {
@@ -1493,7 +1493,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
     }
 
     // FIXME factor out the player-related code from the rest
-    if (extra_tic && r_doubleframes.d_)
+    if (extra_tic && framerate_target_75.d_)
         return;
 
     if (mobj->fuse >= 0)
@@ -1542,7 +1542,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
             return;
 
         // give a limited "random" chance that respawn don't respawn now
-        if (P_Random() > 32)
+        if (Random8BitStateful() > 32)
             return;
 
         // replaced respawnmonsters & newnmrespawn with respawnsetting
@@ -1891,7 +1891,7 @@ void P_RunMobjThinkers(bool extra_tic)
         {
             if (time_stop_active)
                 continue;
-            if (!r_doubleframes.d_)
+            if (!framerate_target_75.d_)
             {
                 if (!g_cullthinkers.d_|| (game_tic / 2 %
                                               RoundToInteger(1 + R_PointToDist(players[consoleplayer]->mo->x,
@@ -1941,7 +1941,7 @@ void P_SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDef
     th = P_MobjCreateObject(x, y, z, debris);
     P_SetMobjDirAndSpeed(th, angle, 2.0f, 0.25f);
 
-    th->tics -= P_Random() & 3;
+    th->tics -= Random8BitStateful() & 3;
 
     if (th->tics < 1)
         th->tics = 1;
@@ -1954,7 +1954,7 @@ void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAM
 {
     mobj_t *th;
 
-    z += (float)P_RandomNegPos() / 80.0f;
+    z += (float)Random8BitSkewToZeroStateful() / 80.0f;
 
     // -ACB- 1998/08/06 Specials table for non-negotiables....
     th = P_MobjCreateObject(x, y, z, puff);
@@ -1965,7 +1965,7 @@ void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAM
     // -AJA- 2011/03/14: set the angle
     th->angle = angle;
 
-    th->tics -= P_Random() & 3;
+    th->tics -= Random8BitStateful() & 3;
 
     if (th->tics < 1)
         th->tics = 1;
@@ -1984,19 +1984,19 @@ void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const
 
     angle += kBAMAngle180;
 
-    num = (int)(!level_flags.more_blood ? 1.0f : (M_Random() % 7) + (float)((HMM_MAX(damage / 4.0f, 7.0f))));
+    num = (int)(!level_flags.more_blood ? 1.0f : (Random8BitStateless() % 7) + (float)((HMM_MAX(damage / 4.0f, 7.0f))));
 
     while (num--)
     {
-        z += (float)(P_RandomNegPos() / 64.0f);
+        z += (float)(Random8BitSkewToZeroStateful() / 64.0f);
 
-        angle += (BAMAngle)(P_RandomNegPos() * (int)(kBAMAngle1 / 2));
+        angle += (BAMAngle)(Random8BitSkewToZeroStateful() * (int)(kBAMAngle1 / 2));
 
         th = P_MobjCreateObject(x, y, z, blood);
 
         P_SetMobjDirAndSpeed(th, angle, ((float)num + 12.0f) / 6.0f, (float)num / 4.0f);
 
-        th->tics -= P_Random() & 3;
+        th->tics -= Random8BitStateful() & 3;
 
         if (th->tics < 1)
             th->tics = 1;
@@ -2076,7 +2076,7 @@ bool P_HitLiquidFloor(mobj_t *thing)
         if (current_flatdef->impactobject_)
         {
             BAMAngle angle = thing->angle;
-            angle += (BAMAngle)(P_RandomNegPos() * (int)(kBAMAngle1 / 2));
+            angle += (BAMAngle)(Random8BitSkewToZeroStateful() * (int)(kBAMAngle1 / 2));
 
             P_SpawnDebris(thing->x, thing->y, thing->z, angle, current_flatdef->impactobject_);
 
@@ -2245,7 +2245,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
     if (game_skill != sk_nightmare)
         mobj->reactiontime = info->reactiontime_;
 
-    mobj->lastlook = P_Random() % MAXPLAYERS;
+    mobj->lastlook = Random8BitStateful() % MAXPLAYERS;
 
     //
     // Do not set the state with P_SetMobjState,

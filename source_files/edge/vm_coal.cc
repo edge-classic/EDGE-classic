@@ -40,7 +40,7 @@
 #include "m_random.h"
 #include "n_network.h"
 
-extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable framerate_target_75;
 
 // user interface VM
 coal::vm_c *ui_vm = nullptr;
@@ -222,7 +222,7 @@ static void MATH_random(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnFloat(C_Random() / double(0x10000));
+    vm->ReturnFloat(Random16BitStateless() / double(0x10000));
 }
 
 // Lobo November 2021: math.random2() always between 0 and 10
@@ -230,7 +230,7 @@ static void MATH_random2(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnFloat(C_Random() % 11);
+    vm->ReturnFloat(Random16BitStateless() % 11);
 }
 
 // math.cos(val)
@@ -442,7 +442,7 @@ class pending_coal_script_c
 
 static std::vector<pending_coal_script_c> unread_scripts;
 
-void VM_InitCoal()
+void VMenuInitializeCoal()
 {
     E_ProgressMessage("Starting COAL VM...");
 
@@ -489,7 +489,7 @@ void VM_LoadScripts()
 
     unread_scripts.clear();
 
-    VM_SetFloat(ui_vm, "sys", "game_tic", game_tic / (r_doubleframes.d_? 2 : 1));
+    VM_SetFloat(ui_vm, "sys", "game_tic", game_tic / (framerate_target_75.d_? 2 : 1));
 
     if (W_IsLumpInPwad("STBAR"))
     {

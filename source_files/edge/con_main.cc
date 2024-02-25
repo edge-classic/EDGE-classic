@@ -241,9 +241,9 @@ int ConsoleCommandQuitEDGE(char **argv, int argc)
 {
     if (argc >= 2 && epi::StringCaseCompareASCII(argv[1], "now") == 0)
         // this never returns
-        M_ImmediateQuit();
+        MenuImmediateQuit();
     else
-        M_QuitEDGE(0);
+        MenuQuitEdge(0);
 
     return 0;
 }
@@ -301,7 +301,7 @@ int ConsoleCommandPlaySound(char **argv, int argc)
 int ConsoleCommandResetVars(char **argv, int argc)
 {
     ConsoleResetAllVariables();
-    M_ResetDefaults(0);
+    ConfigurationResetDefaults(0);
     return 0;
 }
 

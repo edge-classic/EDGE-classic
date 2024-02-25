@@ -63,7 +63,7 @@
 #include "vm_coal.h"
 #include "w_wad.h"
 
-extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable framerate_target_75;
 
 game_state_e game_state = GS_NOTHING;
 
@@ -329,8 +329,8 @@ bool GameResponder(InputEvent *ev)
     {
         if (ev->type == kInputEventKeyDown)
         {
-            M_StartControlPanel();
-            S_StartFX(sfx_swtchn, SNCAT_UI);
+            MenuStartControlPanel();
+            S_StartFX(sound_effect_swtchn, SNCAT_UI);
             return true;
         }
 
@@ -347,7 +347,7 @@ bool GameResponder(InputEvent *ev)
         }
     }
 
-    if (!netgame && ev->type == kInputEventKeyDown &&
+    if (!network_game && ev->type == kInputEventKeyDown &&
         EventMatchesKey(key_pause, ev->value.key.sym))
     {
         paused = !paused;
@@ -366,7 +366,7 @@ bool GameResponder(InputEvent *ev)
         }
 
         // explicit as probably killed the initial effect
-        S_StartFX(sfx_swtchn, SNCAT_UI);
+        S_StartFX(sound_effect_swtchn, SNCAT_UI);
         return true;
     }
 
@@ -469,13 +469,13 @@ void GameTicker(void)
 {
     bool extra_tic = (game_tic & 1) == 1;
 
-    if (extra_tic && r_doubleframes.d_)
+    if (extra_tic && framerate_target_75.d_)
     {
         switch (game_state)
         {
             case GS_LEVEL:
                 // get commands
-                N_GrabTiccmds();
+                NetworkGrabTicCommands();
 
                 //!!!  P_Ticker();
                 P_Ticker(true);
@@ -483,7 +483,7 @@ void GameTicker(void)
 
             case GS_INTERMISSION:
             case GS_FINALE:
-                N_GrabTiccmds();
+                NetworkGrabTicCommands();
                 break;
             default:
                 break;
@@ -505,7 +505,7 @@ void GameTicker(void)
 
         case GS_LEVEL:
             // get commands
-            N_GrabTiccmds();
+            NetworkGrabTicCommands();
 
             P_Ticker(false);
             AutomapTicker();
@@ -517,12 +517,12 @@ void GameTicker(void)
             break;
 
         case GS_INTERMISSION:
-            N_GrabTiccmds();
+            NetworkGrabTicCommands();
             IntermissionTicker();
             break;
 
         case GS_FINALE:
-            N_GrabTiccmds();
+            NetworkGrabTicCommands();
             FinaleTicker();
             break;
 
@@ -663,7 +663,7 @@ static void GameDoCompleted(void)
 
     if (automap_active) AutomapStop();
 
-    if (rts_menuactive) RAD_FinishMenu(0);
+    if (rts_menu_active) RAD_FinishMenu(0);
 
     BotEndLevel();
 
@@ -759,7 +759,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
         GameSetDisplayPlayer(consoleplayer);
         automap_active = false;
 
-        N_ResetTics();
+        NetworkResetTics();
     }
     else
     {
@@ -917,8 +917,8 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
                            : nullptr;
 
     globs->skill    = game_skill;
-    globs->netgame  = netgame ? (1 + deathmatch) : 0;
-    globs->p_random = P_ReadRandomState();
+    globs->netgame  = network_game ? (1 + deathmatch) : 0;
+    globs->p_random = RandomStateRead();
 
     globs->console_player = consoleplayer;  // NB: not used
 
@@ -1094,7 +1094,7 @@ static void GameDoNewGame(void)
     E_ForceWipe();
 
     SV_ClearSlot("current");
-    quickSaveSlot = -1;
+    quicksave_slot = -1;
 
     InitNew(*defer_params);
 
@@ -1171,7 +1171,7 @@ static void InitNew(NewGameParameters &params)
 
     if (params.skill_ > sk_nightmare) params.skill_ = sk_nightmare;
 
-    P_WriteRandomState(params.random_seed_);
+    RandomStateWrite(params.random_seed_);
 
     automap_active = false;
 
@@ -1193,7 +1193,7 @@ static void InitNew(NewGameParameters &params)
         level_flags.respawn  = true;
     }
 
-    N_ResetTics();
+    NetworkResetTics();
 }
 
 void GameDeferredEndGame(void)

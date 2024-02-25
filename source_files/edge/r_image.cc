@@ -79,7 +79,7 @@ extern image_data_c *ReadAsEpiBlock(image_c *rim);
 
 extern epi::File *OpenUserFileOrLump(ImageDefinition *def);
 
-extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable framerate_target_75;
 
 extern void DeleteSkyTextures(void);
 extern void DeleteColourmapTextures(void);
@@ -155,7 +155,7 @@ static void do_Animate(real_image_container_c &bucket)
 
         SYS_ASSERT(rim->anim.count > 0);
 
-        rim->anim.count -= (!r_doubleframes.d_|| !(hud_tic & 1)) ? 1 : 0;
+        rim->anim.count -= (!framerate_target_75.d_|| !(hud_tic & 1)) ? 1 : 0;
 
         if (rim->anim.count == 0 && rim->anim.cur->anim.next)
         {
@@ -1335,7 +1335,7 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
 
     if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
     {
-        rim->swirled_game_tic = hud_tic / (r_doubleframes.d_? 2 : 1);
+        rim->swirled_game_tic = hud_tic / (framerate_target_75.d_? 2 : 1);
         tmp_img->Swirl(rim->swirled_game_tic,
                        rim->liquid_type); // Using leveltime disabled swirl for intermission screens
     }
@@ -1509,7 +1509,7 @@ static const image_c *BackupTexture(const char *tex_name, int flags)
     if (flags & ILF_Null)
         return nullptr;
 
-    M_WarnError("Unknown texture found in level: '%s'\n", tex_name);
+    PrintWarningOrError("Unknown texture found in level: '%s'\n", tex_name);
 
     image_c *dummy;
 
@@ -1560,7 +1560,7 @@ static const image_c *BackupFlat(const char *flat_name, int flags)
     if (flags & ILF_Null)
         return nullptr;
 
-    M_WarnError("Unknown flat found in level: '%s'\n", flat_name);
+    PrintWarningOrError("Unknown flat found in level: '%s'\n", flat_name);
 
     image_c *dummy = CreateDummyImage(flat_name, 0x11AA11, 0x115511);
 
@@ -1609,7 +1609,7 @@ static const image_c *BackupGraphic(const char *gfx_name, int flags)
     if (flags & ILF_Null)
         return nullptr;
 
-    M_DebugError("Unknown graphic: '%s'\n", gfx_name);
+    PrintDebugOrError("Unknown graphic: '%s'\n", gfx_name);
 
     image_c *dummy;
 
@@ -1880,7 +1880,7 @@ static cached_image_t *ImageCacheOGL(image_c *rim, const Colormap *trans, bool d
 
     if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
     {
-        if (!erraticism_active && !time_stop_active && rim->swirled_game_tic != hud_tic / (r_doubleframes.d_? 2 : 1))
+        if (!erraticism_active && !time_stop_active && rim->swirled_game_tic != hud_tic / (framerate_target_75.d_? 2 : 1))
         {
             if (rc->tex_id != 0)
             {
@@ -1993,6 +1993,11 @@ bool W_InitImages(void)
         var_smoothing = 0;
     else if (ArgumentFind("smoothing") > 0)
         var_smoothing = 1;
+
+    if (ArgumentFind("hqscale") > 0 || ArgumentFind("hqall") > 0)
+        hq2x_scaling = 3;
+    else if (ArgumentFind("nohqscale") > 0)
+        hq2x_scaling = 0;
 
     W_CreateDummyImages();
 

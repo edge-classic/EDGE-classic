@@ -37,7 +37,7 @@
 
 // #include <vector>
 
-extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable framerate_target_75;
 
 // we're limited to one wipe at a time...
 static wipetype_e cur_wipe_effect = WIPE_None;
@@ -130,11 +130,11 @@ static void RGL_Init_Melt(void)
 {
     int x, r;
 
-    melt_yoffs[0] = -(M_Random() % 16);
+    melt_yoffs[0] = -(Random8BitStateless() % 16);
 
     for (x = 1; x <= MELT_DIVS; x++)
     {
-        r = (M_Random() % 3) - 1;
+        r = (Random8BitStateless() % 3) - 1;
 
         melt_yoffs[x] = melt_yoffs[x - 1] + r;
         melt_yoffs[x] = HMM_MAX(-15, HMM_MIN(0, melt_yoffs[x]));
@@ -370,13 +370,13 @@ bool RGL_DoWipe(void)
 
     // determine how many tics since we started.  If this is the first
     // call to DoWipe() since InitWipe(), then the clock starts now.
-    int nowtime = GetTime() / (r_doubleframes.d_? 2 : 1);
+    int now_time = GetTime() / (framerate_target_75.d_? 2 : 1);
     int tics    = 0;
 
     if (cur_wipe_lasttime >= 0)
-        tics = HMM_MAX(0, nowtime - cur_wipe_lasttime);
+        tics = HMM_MAX(0, now_time - cur_wipe_lasttime);
 
-    cur_wipe_lasttime = nowtime;
+    cur_wipe_lasttime = now_time;
 
     // hack for large delays (like when loading a level)
     tics = HMM_MIN(6, tics);

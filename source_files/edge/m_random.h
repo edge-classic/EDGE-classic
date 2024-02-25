@@ -23,25 +23,24 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __M_RANDOM__
-#define __M_RANDOM__
+#pragma once
 
-#include "types.h"
-
-void M_Random_Init(void);
-int  M_Random(void);
-int  M_RandomNegPos(void);
-int  P_Random(void);
-int  C_Random(void);
-int  P_RandomNegPos(void);
-bool M_RandomTest(float chance);
-bool P_RandomTest(float chance);
+// A bit verbose, but hopefully describes what they do decently.
+// The "Stateful" suffixes increment and track the index and step
+// for its random number generator so that loading/saving a game
+// does not change the outcomes of functions that use them - Dasho
+void RandomStatelessInit(void);
+int  Random8BitStateless(void);
+int  Random8BitSkewToZeroStateless(void);
+int  Random8BitStateful(void);
+int  Random16BitStateless(void);
+int  Random8BitSkewToZeroStateful(void);
+bool Random8BitTestStateless(float chance);
+bool Random8BitTestStateful(float chance);
 
 // Savegame support
-int  P_ReadRandomState(void);
-void P_WriteRandomState(int value);
-
-#endif // __M_RANDOM__
+int  RandomStateRead(void);
+void RandomStateWrite(int value);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

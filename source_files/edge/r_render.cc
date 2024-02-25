@@ -49,7 +49,7 @@
 #include "r_things.h"
 #include "r_units.h"
 
-#include "n_network.h" // N_NetUpdate
+#include "n_network.h" // NetworkUpdate
 
 #include "AlmostEquals.h"
 
@@ -74,7 +74,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE(debug_hom, "0", kConsoleVariableFlagCheat)
 EDGE_DEFINE_CONSOLE_VARIABLE(r_forceflatlighting, "0", kConsoleVariableFlagArchive)
 
 extern ConsoleVariable r_culling;
-extern ConsoleVariable r_doubleframes;
+extern ConsoleVariable framerate_target_75;
 
 side_t   *sidedef;
 line_t   *linedef;
@@ -616,7 +616,7 @@ typedef struct wall_plane_data_s
 // Adapted from Quake 3 GPL release - Dasho (not used yet, but might be for future effects)
 /*static void CalcScrollTexCoords( float x_scroll, float y_scroll, HMM_Vec2 *texc )
 {
-    float timeScale = game_tic / (r_doubleframes.d_? 200.0f : 100.0f);
+    float timeScale = game_tic / (framerate_target_75.d_? 200.0f : 100.0f);
     float adjustedScrollS, adjustedScrollT;
 
     adjustedScrollS = x_scroll * timeScale;

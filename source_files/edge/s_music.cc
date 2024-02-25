@@ -91,7 +91,7 @@ void S_ChangeMusic(int entrynum, bool loop)
     switch (play->infotype_)
     {
     case kDDFMusicDataFile: {
-        std::string fn = M_ComposeFileName(game_directory, play->info_);
+        std::string fn = epi::PathAppendIfNotAbsolute(game_directory, play->info_);
 
         F = epi::FileOpen(fn, epi::kFileAccessRead | epi::kFileAccessBinary);
         if (!F)

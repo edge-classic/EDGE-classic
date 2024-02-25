@@ -61,8 +61,8 @@ void WebTick(void)
 
     if (web_deferred_menu != -1)
     {
-        if (web_deferred_menu) { M_StartControlPanel(); }
-        else { M_ClearMenus(); }
+        if (web_deferred_menu) { MenuStartControlPanel(); }
+        else { MenuClear(); }
 
         web_deferred_menu = -1;
     }

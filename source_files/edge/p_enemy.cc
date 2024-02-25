@@ -25,7 +25,7 @@
 //
 // -KM- 1998/09/27 Sounds.ddf stuff
 //
-// -AJA- 1999/07/21: Replaced some non-critical P_Randoms with M_Random,
+// -AJA- 1999/07/21: Replaced some non-critical Random8BitStatefuls with Random8BitStateless,
 //       and removed some X_Random()-X_Random() things.
 //
 
@@ -250,7 +250,7 @@ bool P_Move(mobj_t *actor, bool path)
             }
         }
 
-        return any_used && (P_Random() < 230 ? block_used : !block_used);
+        return any_used && (Random8BitStateful() < 230 ? block_used : !block_used);
     }
 
     actor->flags &= ~kMapObjectFlagInFloat;
@@ -292,7 +292,7 @@ static bool TryWalk(mobj_t *actor)
     if (!P_Move(actor, false))
         return false;
 
-    actor->movecount = P_Random() & 15;
+    actor->movecount = Random8BitStateful() & 15;
 
     return true;
 }
@@ -368,7 +368,7 @@ void P_NewChaseDir(mobj_t *object)
     }
 
     // try other directions
-    if (P_Random() > 200 || fabs(deltay) > fabs(deltax))
+    if (Random8BitStateful() > 200 || fabs(deltay) > fabs(deltax))
     {
         tdir = d[1];
         d[1] = d[2];
@@ -410,7 +410,7 @@ void P_NewChaseDir(mobj_t *object)
     }
 
     // randomly determine direction of search
-    if (P_Random() & 1)
+    if (Random8BitStateful() & 1)
     {
         for (tdir = DI_EAST; tdir <= DI_SOUTHEAST; tdir = (dirtype_e)((int)tdir + 1))
         {
@@ -531,7 +531,7 @@ mobj_t *P_LookForShootSpot(const MapObjectDefinition *spot_type)
     if (spots.empty())
         return nullptr;
 
-    int idx = C_Random() % (int)spots.size();
+    int idx = Random16BitStateless() % (int)spots.size();
 
     return spots[idx];
 }
@@ -553,7 +553,7 @@ static void SpawnDeathMissile(mobj_t *source, float x, float y, float z)
     th->mom.Y = -0.25f;
     th->mom.Z = (z - source->z) / 50.0f;
 
-    th->tics -= M_Random() & 7;
+    th->tics -= Random8BitStateless() & 7;
 
     if (th->tics < 1)
         th->tics = 1;
@@ -572,7 +572,7 @@ void P_ActBrainScream(mobj_t *bossbrain)
     for (x = min_x; x < max_x; x += 4)
     {
         y = bossbrain->y - 320.0f;
-        z = bossbrain->z + (P_Random() - 180.0f) * 2.0f;
+        z = bossbrain->z + (Random8BitStateful() - 180.0f) * 2.0f;
 
         SpawnDeathMissile(bossbrain, x, y, z);
     }
@@ -588,9 +588,9 @@ void P_ActBrainMissileExplode(mobj_t *mo)
     if (!mo->source)
         return;
 
-    x = mo->source->x + (P_Random() - 128.0f) * 4.0f;
+    x = mo->source->x + (Random8BitStateful() - 128.0f) * 4.0f;
     y = mo->source->y - 320.0f;
-    z = mo->source->z + (P_Random() - 180.0f) * 2.0f;
+    z = mo->source->z + (Random8BitStateful() - 180.0f) * 2.0f;
 
     SpawnDeathMissile(mo->source, x, y, z);
 }
@@ -629,7 +629,7 @@ void P_ActCubeSpawn(mobj_t *cube)
         return;
 
     // Randomly select monster to spawn.
-    r = P_Random();
+    r = Random8BitStateful();
 
     // Probability distribution (kind of :)),
     // decreasing likelihood.

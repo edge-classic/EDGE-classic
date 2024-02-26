@@ -13,7 +13,7 @@
 #include "rad_trig.h"
 #include "r_colormap.h"
 
-extern ConsoleVariable      framerate_target_75;
+extern ConsoleVariable      double_framerate;
 extern bool        erraticism_active;
 extern std::string current_map_title;
 
@@ -145,7 +145,7 @@ static int HD_check_automap(lua_State *L)
 //
 static int HD_get_time(lua_State *L)
 {
-    int time = GetTime() / (framerate_target_75.d_? 2 : 1);
+    int time = GetTime() / (double_framerate.d_? 2 : 1);
     lua_pushnumber(L, (double)time);
     return 1;
 }

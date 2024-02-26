@@ -37,7 +37,7 @@
 
 // #include <vector>
 
-extern ConsoleVariable framerate_target_75;
+extern ConsoleVariable double_framerate;
 
 // we're limited to one wipe at a time...
 static wipetype_e cur_wipe_effect = WIPE_None;
@@ -370,7 +370,7 @@ bool RGL_DoWipe(void)
 
     // determine how many tics since we started.  If this is the first
     // call to DoWipe() since InitWipe(), then the clock starts now.
-    int now_time = GetTime() / (framerate_target_75.d_? 2 : 1);
+    int now_time = GetTime() / (double_framerate.d_? 2 : 1);
     int tics    = 0;
 
     if (cur_wipe_lasttime >= 0)

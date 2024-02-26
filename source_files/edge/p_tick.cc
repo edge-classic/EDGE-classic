@@ -48,7 +48,7 @@ bool fast_forward_active;
 bool erraticism_active = false;
 
 extern ConsoleVariable g_erraticism;
-extern ConsoleVariable framerate_target_75;
+extern ConsoleVariable double_framerate;
 
 //
 // P_Ticker
@@ -89,24 +89,24 @@ void P_Ticker(bool extra_tic)
                 P_PlayerThink(players[pnum], extra_tic);
     }
 
-    if (!extra_tic || !framerate_target_75.d_)
+    if (!extra_tic || !double_framerate.d_)
         RAD_RunTriggers();
 
     P_RunForces(extra_tic);
     P_RunMobjThinkers(extra_tic);
 
-    if (!extra_tic || !framerate_target_75.d_)
+    if (!extra_tic || !double_framerate.d_)
         P_RunLights();
 
     P_RunActivePlanes();
     P_RunActiveSliders();
 
-    if (!extra_tic || !framerate_target_75.d_)
+    if (!extra_tic || !double_framerate.d_)
         P_RunAmbientSFX();
 
     P_UpdateSpecials(extra_tic);
 
-    if (extra_tic && framerate_target_75.d_)
+    if (extra_tic && double_framerate.d_)
         return;
 
     P_MobjItemRespawn();

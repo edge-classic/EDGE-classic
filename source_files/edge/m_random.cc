@@ -130,10 +130,10 @@ int Random8BitSkewToZeroStateful(void)
 //
 bool Random8BitTestStateless(float chance)
 {
-    return (chance <= 0)                                       ? false
-           : (chance >= 1)                                     ? true
+    return (chance <= 0)                               ? false
+           : (chance >= 1)                             ? true
            : (Random8BitStateless() / 255.0f < chance) ? true
-                                                               : false;
+                                                       : false;
 }
 
 //
@@ -141,10 +141,10 @@ bool Random8BitTestStateless(float chance)
 //
 bool Random8BitTestStateful(float chance)
 {
-    return (chance <= 0)                                      ? false
-           : (chance >= 1)                                    ? true
+    return (chance <= 0)                              ? false
+           : (chance >= 1)                            ? true
            : (Random8BitStateful() / 255.0f < chance) ? true
-                                                              : false;
+                                                      : false;
 }
 
 //

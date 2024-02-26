@@ -93,7 +93,7 @@
 #include "script/compat/lua_compat.h"
 #include "edge_profiling.h"
 
-extern ConsoleVariable framerate_target_75;
+extern ConsoleVariable double_framerate;
 extern ConsoleVariable n_busywait;
 
 extern ConsoleVariable gamma_correction;
@@ -935,14 +935,14 @@ void E_AdvanceTitle(void)
         if (title_pic == 0 && g->titlemusic_ > 0)
             S_ChangeMusic(g->titlemusic_, false);
 
-        title_countdown = g->titletics_ * (framerate_target_75.d_? 2 : 1);
+        title_countdown = g->titletics_ * (double_framerate.d_? 2 : 1);
         return;
     }
 
     // not found
 
     title_image     = nullptr;
-    title_countdown = kTicRate * (framerate_target_75.d_? 2 : 1);
+    title_countdown = kTicRate * (double_framerate.d_? 2 : 1);
 }
 
 void E_StartTitle(void)

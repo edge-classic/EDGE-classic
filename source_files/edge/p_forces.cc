@@ -46,7 +46,7 @@
 
 #define PUSH_FACTOR 64.0f // should be 128 ??
 
-extern ConsoleVariable framerate_target_75;
+extern ConsoleVariable double_framerate;
 
 std::vector<force_t *> active_forces;
 
@@ -215,7 +215,7 @@ void P_AddSectorForce(sector_t *sec, bool is_wind, float x_mag, float y_mag)
 void P_RunForces(bool extra_tic)
 {
     // TODO: review what needs updating here for 70 Hz
-    if (extra_tic && framerate_target_75.d_)
+    if (extra_tic && double_framerate.d_)
         return;
 
     std::vector<force_t *>::iterator FI;

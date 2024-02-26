@@ -31,7 +31,7 @@
 
 // FIXME: Combine all these SDL bool vars into an int/enum'd flags structure
 
-extern ConsoleVariable framerate_target_75;
+extern ConsoleVariable double_framerate;
 
 // Work around for alt-tabbing
 bool alt_is_down;
@@ -791,7 +791,7 @@ int GetTime(void)
 {
     Uint32 t = SDL_GetTicks();
 
-    int factor = (framerate_target_75.d_ ? 70 : 35);
+    int factor = (double_framerate.d_ ? 70 : 35);
 
     // more complex than "t*70/1000" to give more accuracy
     return (t / 1000) * factor + (t % 1000) * factor / 1000;

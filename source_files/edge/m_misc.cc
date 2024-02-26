@@ -78,214 +78,162 @@ int                    var_mix_channels = 0;
 static bool done_first_init = false;
 
 static ConfigurationDefault defaults[] = {
-    {kConfigurationValueTypeInteger, "screenwidth", &SCREENWIDTH,
-     CFGDEF_SCREENWIDTH},
-    {kConfigurationValueTypeInteger, "screenheight", &SCREENHEIGHT,
-     CFGDEF_SCREENHEIGHT},
-    {kConfigurationValueTypeInteger, "screendepth", &SCREENBITS,
-     CFGDEF_SCREENBITS},
-    {kConfigurationValueTypeInteger, "displaymode", &DISPLAYMODE,
-     CFGDEF_DISPLAYMODE},
+    {kConfigInteger, "screenwidth", &SCREENWIDTH, CFGDEF_SCREENWIDTH},
+    {kConfigInteger, "screenheight", &SCREENHEIGHT, CFGDEF_SCREENHEIGHT},
+    {kConfigInteger, "screendepth", &SCREENBITS, CFGDEF_SCREENBITS},
+    {kConfigInteger, "displaymode", &DISPLAYMODE, CFGDEF_DISPLAYMODE},
 
-    {kConfigurationValueTypeInteger, "sound_stereo", &var_sound_stereo,
-     CFGDEF_SOUND_STEREO},
-    {kConfigurationValueTypeBoolean, "pc_speaker_mode", &var_pc_speaker_mode,
-     0},
-    {kConfigurationValueTypeInteger, "midi_player", &var_midi_player, 0},
-    {kConfigurationValueTypeBoolean, "dynamic_reverb", &dynamic_reverb, 0},
-    {kConfigurationValueTypeInteger, "mix_channels", &var_mix_channels,
-     CFGDEF_MIX_CHANNELS},
+    {kConfigInteger, "sound_stereo", &var_sound_stereo, CFGDEF_SOUND_STEREO},
+    {kConfigBoolean, "pc_speaker_mode", &var_pc_speaker_mode, 0},
+    {kConfigInteger, "midi_player", &var_midi_player, 0},
+    {kConfigBoolean, "dynamic_reverb", &dynamic_reverb, 0},
+    {kConfigInteger, "mix_channels", &var_mix_channels, CFGDEF_MIX_CHANNELS},
 
-    {kConfigurationValueTypeInteger, "show_messages", &show_messages,
-     CFGDEF_SHOWMESSAGES},
+    {kConfigInteger, "show_messages", &show_messages, CFGDEF_SHOWMESSAGES},
 
     // -ES- 1998/11/28 Save fade settings
-    {kConfigurationValueTypeInteger, "reduce_flash", &reduce_flash, 0},
-    {kConfigurationValueTypeInteger, "invuln_fx", &var_invul_fx,
-     CFGDEF_INVUL_FX},
-    {kConfigurationValueTypeEnum, "wipe_method", &wipe_method,
-     CFGDEF_WIPE_METHOD},
-    {kConfigurationValueTypeBoolean, "rotate_map", &rotate_map,
-     CFGDEF_ROTATEMAP},
-    {kConfigurationValueTypeBoolean, "respawnsetting",
-     &global_flags.res_respawn, CFGDEF_RES_RESPAWN},
-    {kConfigurationValueTypeBoolean, "itemrespawn", &global_flags.itemrespawn,
+    {kConfigInteger, "reduce_flash", &reduce_flash, 0},
+    {kConfigInteger, "invuln_fx", &var_invul_fx, CFGDEF_INVUL_FX},
+    {kConfigEnum, "wipe_method", &wipe_method, CFGDEF_WIPE_METHOD},
+    {kConfigBoolean, "rotate_map", &rotate_map, CFGDEF_ROTATEMAP},
+    {kConfigBoolean, "respawnsetting", &global_flags.res_respawn,
+     CFGDEF_RES_RESPAWN},
+    {kConfigBoolean, "itemrespawn", &global_flags.itemrespawn,
      CFGDEF_ITEMRESPAWN},
-    {kConfigurationValueTypeBoolean, "respawn", &global_flags.respawn,
-     CFGDEF_RESPAWN},
-    {kConfigurationValueTypeBoolean, "fastparm", &global_flags.fastparm,
-     CFGDEF_FASTPARM},
-    {kConfigurationValueTypeBoolean, "true3dgameplay",
-     &global_flags.true3dgameplay, CFGDEF_TRUE3DGAMEPLAY},
-    {kConfigurationValueTypeEnum, "autoaim", &global_flags.autoaim,
-     CFGDEF_AUTOAIM},
-    {kConfigurationValueTypeBoolean, "shootthru_scenery",
-     &global_flags.pass_missile, CFGDEF_PASS_MISSILE},
-    {kConfigurationValueTypeInteger, "swirling_flats", &swirling_flats, 0},
+    {kConfigBoolean, "respawn", &global_flags.respawn, CFGDEF_RESPAWN},
+    {kConfigBoolean, "fastparm", &global_flags.fastparm, CFGDEF_FASTPARM},
+    {kConfigBoolean, "true3dgameplay", &global_flags.true3dgameplay,
+     CFGDEF_TRUE3DGAMEPLAY},
+    {kConfigEnum, "autoaim", &global_flags.autoaim, CFGDEF_AUTOAIM},
+    {kConfigBoolean, "shootthru_scenery", &global_flags.pass_missile,
+     CFGDEF_PASS_MISSILE},
+    {kConfigInteger, "swirling_flats", &swirling_flats, 0},
 
-    {kConfigurationValueTypeBoolean, "pistol_starts", &pistol_starts, 0},
-    {kConfigurationValueTypeBoolean, "automap_keydoor_blink",
-     &automap_keydoor_blink, CFGDEF_AM_KEYDOORBLINK},
+    {kConfigBoolean, "pistol_starts", &pistol_starts, 0},
+    {kConfigBoolean, "automap_keydoor_blink", &automap_keydoor_blink,
+     CFGDEF_AM_KEYDOORBLINK},
 
     // -KM- 1998/07/21 Save the blood setting
-    {kConfigurationValueTypeBoolean, "blood", &global_flags.more_blood,
-     CFGDEF_MORE_BLOOD},
-    {kConfigurationValueTypeBoolean, "extra", &global_flags.have_extra,
-     CFGDEF_HAVE_EXTRA},
-    {kConfigurationValueTypeBoolean, "weaponkick", &global_flags.kicking,
-     CFGDEF_KICKING},
-    {kConfigurationValueTypeBoolean, "weaponswitch",
-     &global_flags.weapon_switch, CFGDEF_WEAPON_SWITCH},
-    {kConfigurationValueTypeBoolean, "mlook", &global_flags.mlook,
-     CFGDEF_MLOOK},
-    {kConfigurationValueTypeBoolean, "jumping", &global_flags.jump,
-     CFGDEF_JUMP},
-    {kConfigurationValueTypeBoolean, "crouching", &global_flags.crouch,
-     CFGDEF_CROUCH},
-    {kConfigurationValueTypeInteger, "smoothing", &var_smoothing,
-     CFGDEF_USE_SMOOTHING},
-    {kConfigurationValueTypeInteger, "dlights", &use_dlights,
-     CFGDEF_USE_DLIGHTS},
-    {kConfigurationValueTypeInteger, "detail_level", &detail_level,
-     CFGDEF_DETAIL_LEVEL},
-    {kConfigurationValueTypeInteger, "hq2x_scaling", &hq2x_scaling,
-     CFGDEF_HQ2X_SCALING},
+    {kConfigBoolean, "blood", &global_flags.more_blood, CFGDEF_MORE_BLOOD},
+    {kConfigBoolean, "extra", &global_flags.have_extra, CFGDEF_HAVE_EXTRA},
+    {kConfigBoolean, "weaponkick", &global_flags.kicking, CFGDEF_KICKING},
+    {kConfigBoolean, "weaponswitch", &global_flags.weapon_switch,
+     CFGDEF_WEAPON_SWITCH},
+    {kConfigBoolean, "mlook", &global_flags.mlook, CFGDEF_MLOOK},
+    {kConfigBoolean, "jumping", &global_flags.jump, CFGDEF_JUMP},
+    {kConfigBoolean, "crouching", &global_flags.crouch, CFGDEF_CROUCH},
+    {kConfigInteger, "smoothing", &var_smoothing, CFGDEF_USE_SMOOTHING},
+    {kConfigInteger, "dlights", &use_dlights, CFGDEF_USE_DLIGHTS},
+    {kConfigInteger, "detail_level", &detail_level, CFGDEF_DETAIL_LEVEL},
+    {kConfigInteger, "hq2x_scaling", &hq2x_scaling, CFGDEF_HQ2X_SCALING},
 
     // -KM- 1998/09/01 Useless mouse/joy stuff removed,
     //                 analogue binding added
-    {kConfigurationValueTypeInteger, "mouse_axis_x", &mouse_x_axis,
-     CFGDEF_MOUSE_XAXIS},
-    {kConfigurationValueTypeInteger, "mouse_axis_y", &mouse_y_axis,
-     CFGDEF_MOUSE_YAXIS},
+    {kConfigInteger, "mouse_axis_x", &mouse_x_axis, CFGDEF_MOUSE_XAXIS},
+    {kConfigInteger, "mouse_axis_y", &mouse_y_axis, CFGDEF_MOUSE_YAXIS},
 
-    {kConfigurationValueTypeInteger, "joystick_axis1", &joystick_axis[0], 7},
-    {kConfigurationValueTypeInteger, "joystick_axis2", &joystick_axis[1], 6},
-    {kConfigurationValueTypeInteger, "joystick_axis3", &joystick_axis[2], 1},
-    {kConfigurationValueTypeInteger, "joystick_axis4", &joystick_axis[3], 4},
+    {kConfigInteger, "joystick_axis1", &joystick_axis[0], 7},
+    {kConfigInteger, "joystick_axis2", &joystick_axis[1], 6},
+    {kConfigInteger, "joystick_axis3", &joystick_axis[2], 1},
+    {kConfigInteger, "joystick_axis4", &joystick_axis[3], 4},
 
-    {kConfigurationValueTypeInteger, "screen_hud", &screen_hud,
-     CFGDEF_SCREEN_HUD},
-    {kConfigurationValueTypeInteger, "save_page", &save_page, 0},
-    {kConfigurationValueTypeBoolean, "png_scrshots", &png_scrshots,
-     CFGDEF_PNG_SCRSHOTS},
+    {kConfigInteger, "screen_hud", &screen_hud, CFGDEF_SCREEN_HUD},
+    {kConfigInteger, "save_page", &save_page, 0},
+    {kConfigBoolean, "png_scrshots", &png_scrshots, CFGDEF_PNG_SCRSHOTS},
 
     // -------------------- VARS --------------------
 
-    {kConfigurationValueTypeBoolean, "var_obituaries", &var_obituaries, 1},
-    {kConfigurationValueTypeBoolean, "var_cache_sfx", &var_cache_sfx, 1},
+    {kConfigBoolean, "var_obituaries", &var_obituaries, 1},
+    {kConfigBoolean, "var_cache_sfx", &var_cache_sfx, 1},
 
     // -------------------- KEYS --------------------
 
-    {kConfigurationValueTypeKey, "key_right", &key_right, CFGDEF_KEY_RIGHT},
-    {kConfigurationValueTypeKey, "key_left", &key_left, CFGDEF_KEY_LEFT},
-    {kConfigurationValueTypeKey, "key_up", &key_up, CFGDEF_KEY_UP},
-    {kConfigurationValueTypeKey, "key_down", &key_down, CFGDEF_KEY_DOWN},
-    {kConfigurationValueTypeKey, "key_look_up", &key_look_up,
-     CFGDEF_KEY_LOOKUP},
-    {kConfigurationValueTypeKey, "key_look_down", &key_look_down,
-     CFGDEF_KEY_LOOKDOWN},
-    {kConfigurationValueTypeKey, "key_look_center", &key_look_center,
-     CFGDEF_KEY_LOOKCENTER},
+    {kConfigKey, "key_right", &key_right, CFGDEF_KEY_RIGHT},
+    {kConfigKey, "key_left", &key_left, CFGDEF_KEY_LEFT},
+    {kConfigKey, "key_up", &key_up, CFGDEF_KEY_UP},
+    {kConfigKey, "key_down", &key_down, CFGDEF_KEY_DOWN},
+    {kConfigKey, "key_look_up", &key_look_up, CFGDEF_KEY_LOOKUP},
+    {kConfigKey, "key_look_down", &key_look_down, CFGDEF_KEY_LOOKDOWN},
+    {kConfigKey, "key_look_center", &key_look_center, CFGDEF_KEY_LOOKCENTER},
 
     // -ES- 1999/03/28 Zoom Key
-    {kConfigurationValueTypeKey, "key_zoom", &key_zoom, CFGDEF_KEY_ZOOM},
-    {kConfigurationValueTypeKey, "key_strafe_left", &key_strafe_left,
-     CFGDEF_KEY_STRAFELEFT},
-    {kConfigurationValueTypeKey, "key_strafe_right", &key_strafe_right,
-     CFGDEF_KEY_STRAFERIGHT},
+    {kConfigKey, "key_zoom", &key_zoom, CFGDEF_KEY_ZOOM},
+    {kConfigKey, "key_strafe_left", &key_strafe_left, CFGDEF_KEY_STRAFELEFT},
+    {kConfigKey, "key_strafe_right", &key_strafe_right, CFGDEF_KEY_STRAFERIGHT},
 
     // -ACB- for -MH- 1998/07/02 Flying Keys
-    {kConfigurationValueTypeKey, "key_fly_up", &key_fly_up, CFGDEF_KEY_FLYUP},
-    {kConfigurationValueTypeKey, "key_fly_down", &key_fly_down,
-     CFGDEF_KEY_FLYDOWN},
+    {kConfigKey, "key_fly_up", &key_fly_up, CFGDEF_KEY_FLYUP},
+    {kConfigKey, "key_fly_down", &key_fly_down, CFGDEF_KEY_FLYDOWN},
 
-    {kConfigurationValueTypeKey, "key_fire", &key_fire, CFGDEF_KEY_FIRE},
-    {kConfigurationValueTypeKey, "key_use", &key_use, CFGDEF_KEY_USE},
-    {kConfigurationValueTypeKey, "key_strafe", &key_strafe, CFGDEF_KEY_STRAFE},
-    {kConfigurationValueTypeKey, "key_speed", &key_speed, CFGDEF_KEY_SPEED},
-    {kConfigurationValueTypeKey, "key_autorun", &key_autorun,
-     CFGDEF_KEY_AUTORUN},
-    {kConfigurationValueTypeKey, "key_next_weapon", &key_next_weapon,
-     CFGDEF_KEY_NEXTWEAPON},
-    {kConfigurationValueTypeKey, "key_previous_weapon", &key_previous_weapon,
+    {kConfigKey, "key_fire", &key_fire, CFGDEF_KEY_FIRE},
+    {kConfigKey, "key_use", &key_use, CFGDEF_KEY_USE},
+    {kConfigKey, "key_strafe", &key_strafe, CFGDEF_KEY_STRAFE},
+    {kConfigKey, "key_speed", &key_speed, CFGDEF_KEY_SPEED},
+    {kConfigKey, "key_autorun", &key_autorun, CFGDEF_KEY_AUTORUN},
+    {kConfigKey, "key_next_weapon", &key_next_weapon, CFGDEF_KEY_NEXTWEAPON},
+    {kConfigKey, "key_previous_weapon", &key_previous_weapon,
      CFGDEF_KEY_PREVWEAPON},
 
-    {kConfigurationValueTypeKey, "key_180", &key_180, CFGDEF_KEY_180},
-    {kConfigurationValueTypeKey, "key_map", &key_map, CFGDEF_KEY_MAP},
-    {kConfigurationValueTypeKey, "key_talk", &key_talk, CFGDEF_KEY_TALK},
-    {kConfigurationValueTypeKey, "key_console", &key_console,
-     CFGDEF_KEY_CONSOLE},  // -AJA- 2007/08/15.
-    {kConfigurationValueTypeKey, "key_pause", &key_pause,
-     KEYD_PAUSE},  // -AJA- 2010/06/13.
+    {kConfigKey, "key_180", &key_180, CFGDEF_KEY_180},
+    {kConfigKey, "key_map", &key_map, CFGDEF_KEY_MAP},
+    {kConfigKey, "key_talk", &key_talk, CFGDEF_KEY_TALK},
+    {kConfigKey, "key_console", &key_console,
+     CFGDEF_KEY_CONSOLE},                               // -AJA- 2007/08/15.
+    {kConfigKey, "key_pause", &key_pause, KEYD_PAUSE},  // -AJA- 2010/06/13.
 
-    {kConfigurationValueTypeKey, "key_mouselook", &key_mouselook,
+    {kConfigKey, "key_mouselook", &key_mouselook,
      CFGDEF_KEY_MLOOK},  // -AJA- 1999/07/27.
-    {kConfigurationValueTypeKey, "key_second_attack", &key_second_attack,
+    {kConfigKey, "key_second_attack", &key_second_attack,
      CFGDEF_KEY_SECONDATK},  // -AJA- 2000/02/08.
-    {kConfigurationValueTypeKey, "key_third_attack", &key_third_attack, 0},  //
-    {kConfigurationValueTypeKey, "key_fourth_attack", &key_fourth_attack,
-     0},  //
-    {kConfigurationValueTypeKey, "key_reload", &key_reload,
+    {kConfigKey, "key_third_attack", &key_third_attack, 0},    //
+    {kConfigKey, "key_fourth_attack", &key_fourth_attack, 0},  //
+    {kConfigKey, "key_reload", &key_reload,
      CFGDEF_KEY_RELOAD},  // -AJA- 2004/11/11.
-    {kConfigurationValueTypeKey, "key_action1", &key_action1,
+    {kConfigKey, "key_action1", &key_action1,
      CFGDEF_KEY_ACTION1},  // -AJA- 2009/09/07
-    {kConfigurationValueTypeKey, "key_action2", &key_action2,
+    {kConfigKey, "key_action2", &key_action2,
      CFGDEF_KEY_ACTION2},  // -AJA- 2009/09/07
 
     // -AJA- 2010/06/13: weapon and automap keys
-    {kConfigurationValueTypeKey, "key_weapon1", &key_weapons[1], '1'},
-    {kConfigurationValueTypeKey, "key_weapon2", &key_weapons[2], '2'},
-    {kConfigurationValueTypeKey, "key_weapon3", &key_weapons[3], '3'},
-    {kConfigurationValueTypeKey, "key_weapon4", &key_weapons[4], '4'},
-    {kConfigurationValueTypeKey, "key_weapon5", &key_weapons[5], '5'},
-    {kConfigurationValueTypeKey, "key_weapon6", &key_weapons[6], '6'},
-    {kConfigurationValueTypeKey, "key_weapon7", &key_weapons[7], '7'},
-    {kConfigurationValueTypeKey, "key_weapon8", &key_weapons[8], '8'},
-    {kConfigurationValueTypeKey, "key_weapon9", &key_weapons[9], '9'},
-    {kConfigurationValueTypeKey, "key_weapon0", &key_weapons[0], '0'},
+    {kConfigKey, "key_weapon1", &key_weapons[1], '1'},
+    {kConfigKey, "key_weapon2", &key_weapons[2], '2'},
+    {kConfigKey, "key_weapon3", &key_weapons[3], '3'},
+    {kConfigKey, "key_weapon4", &key_weapons[4], '4'},
+    {kConfigKey, "key_weapon5", &key_weapons[5], '5'},
+    {kConfigKey, "key_weapon6", &key_weapons[6], '6'},
+    {kConfigKey, "key_weapon7", &key_weapons[7], '7'},
+    {kConfigKey, "key_weapon8", &key_weapons[8], '8'},
+    {kConfigKey, "key_weapon9", &key_weapons[9], '9'},
+    {kConfigKey, "key_weapon0", &key_weapons[0], '0'},
 
-    {kConfigurationValueTypeKey, "key_automap_up", &key_automap_up,
-     KEYD_UPARROW},
-    {kConfigurationValueTypeKey, "key_automap_down", &key_automap_down,
-     KEYD_DOWNARROW},
-    {kConfigurationValueTypeKey, "key_automap_left", &key_automap_left,
-     KEYD_LEFTARROW},
-    {kConfigurationValueTypeKey, "key_automap_right", &key_automap_right,
-     KEYD_RIGHTARROW},
-    {kConfigurationValueTypeKey, "key_automap_zoom_in", &key_automap_zoom_in,
-     '='},
-    {kConfigurationValueTypeKey, "key_automap_zoom_out", &key_automap_zoom_out,
-     '-'},
-    {kConfigurationValueTypeKey, "key_automap_follow", &key_automap_follow,
-     'f'},
-    {kConfigurationValueTypeKey, "key_automap_grid", &key_automap_grid, 'g'},
-    {kConfigurationValueTypeKey, "key_automap_mark", &key_automap_mark, 'm'},
-    {kConfigurationValueTypeKey, "key_automap_clear", &key_automap_clear, 'c'},
+    {kConfigKey, "key_automap_up", &key_automap_up, KEYD_UPARROW},
+    {kConfigKey, "key_automap_down", &key_automap_down, KEYD_DOWNARROW},
+    {kConfigKey, "key_automap_left", &key_automap_left, KEYD_LEFTARROW},
+    {kConfigKey, "key_automap_right", &key_automap_right, KEYD_RIGHTARROW},
+    {kConfigKey, "key_automap_zoom_in", &key_automap_zoom_in, '='},
+    {kConfigKey, "key_automap_zoom_out", &key_automap_zoom_out, '-'},
+    {kConfigKey, "key_automap_follow", &key_automap_follow, 'f'},
+    {kConfigKey, "key_automap_grid", &key_automap_grid, 'g'},
+    {kConfigKey, "key_automap_mark", &key_automap_mark, 'm'},
+    {kConfigKey, "key_automap_clear", &key_automap_clear, 'c'},
 
-    {kConfigurationValueTypeKey, "key_inventory_previous",
-     &key_inventory_previous, CFGDEF_KEY_PREVINV},
-    {kConfigurationValueTypeKey, "key_inventory_use", &key_inventory_use,
-     CFGDEF_KEY_USEINV},
-    {kConfigurationValueTypeKey, "key_inventory_next", &key_inventory_next,
-     CFGDEF_KEY_NEXTINV},
+    {kConfigKey, "key_inventory_previous", &key_inventory_previous,
+     CFGDEF_KEY_PREVINV},
+    {kConfigKey, "key_inventory_use", &key_inventory_use, CFGDEF_KEY_USEINV},
+    {kConfigKey, "key_inventory_next", &key_inventory_next, CFGDEF_KEY_NEXTINV},
 
-    {kConfigurationValueTypeKey, "key_screenshot", &key_screenshot, KEYD_F1},
-    {kConfigurationValueTypeKey, "key_save_game", &key_save_game, KEYD_F2},
-    {kConfigurationValueTypeKey, "key_load_game", &key_load_game, KEYD_F3},
-    {kConfigurationValueTypeKey, "key_sound_controls", &key_sound_controls,
-     KEYD_F4},
-    {kConfigurationValueTypeKey, "key_options_menu", &key_options_menu,
-     KEYD_F5},
-    {kConfigurationValueTypeKey, "key_quick_save", &key_quick_save, KEYD_F6},
-    {kConfigurationValueTypeKey, "key_end_game", &key_end_game, KEYD_F7},
-    {kConfigurationValueTypeKey, "key_message_toggle", &key_message_toggle,
-     KEYD_F8},
-    {kConfigurationValueTypeKey, "key_quick_load", &key_quick_load, KEYD_F9},
-    {kConfigurationValueTypeKey, "key_quit_edge", &key_quit_edge, KEYD_F10},
-    {kConfigurationValueTypeKey, "key_gamma_toggle", &key_gamma_toggle,
-     KEYD_F11},
-    {kConfigurationValueTypeKey, "key_show_players", &key_show_players,
-     KEYD_F12},
+    {kConfigKey, "key_screenshot", &key_screenshot, KEYD_F1},
+    {kConfigKey, "key_save_game", &key_save_game, KEYD_F2},
+    {kConfigKey, "key_load_game", &key_load_game, KEYD_F3},
+    {kConfigKey, "key_sound_controls", &key_sound_controls, KEYD_F4},
+    {kConfigKey, "key_options_menu", &key_options_menu, KEYD_F5},
+    {kConfigKey, "key_quick_save", &key_quick_save, KEYD_F6},
+    {kConfigKey, "key_end_game", &key_end_game, KEYD_F7},
+    {kConfigKey, "key_message_toggle", &key_message_toggle, KEYD_F8},
+    {kConfigKey, "key_quick_load", &key_quick_load, KEYD_F9},
+    {kConfigKey, "key_quit_edge", &key_quit_edge, KEYD_F10},
+    {kConfigKey, "key_gamma_toggle", &key_gamma_toggle, KEYD_F11},
+    {kConfigKey, "key_show_players", &key_show_players, KEYD_F12},
 };
 
 static int total_defaults = sizeof(defaults) / sizeof(defaults[0]);
@@ -314,17 +262,17 @@ void ConfigurationSaveDefaults(void)
 
         switch (defaults[i].type)
         {
-            case kConfigurationValueTypeInteger:
+            case kConfigInteger:
                 fprintf(f, "%s\t\t%i\n", defaults[i].name,
                         *(int *)defaults[i].location);
                 break;
 
-            case kConfigurationValueTypeBoolean:
+            case kConfigBoolean:
                 fprintf(f, "%s\t\t%i\n", defaults[i].name,
                         *(bool *)defaults[i].location ? 1 : 0);
                 break;
 
-            case kConfigurationValueTypeKey:
+            case kConfigKey:
                 v = *(int *)defaults[i].location;
                 fprintf(f, "%s\t\t0x%X\n", defaults[i].name, v);
                 break;
@@ -340,12 +288,12 @@ static void SetToBaseValue(ConfigurationDefault *def)
 {
     switch (def->type)
     {
-        case kConfigurationValueTypeInteger:
-        case kConfigurationValueTypeKey:
+        case kConfigInteger:
+        case kConfigKey:
             *(int *)(def->location) = def->default_value;
             break;
 
-        case kConfigurationValueTypeBoolean:
+        case kConfigBoolean:
             *(bool *)(def->location) = def->default_value ? true : false;
             break;
     }
@@ -416,13 +364,13 @@ static void ParseConfigBlock(epi::Lexer &lex)
             {
                 if (0 == epi::StringCompare(key.c_str(), defaults[i].name))
                 {
-                    if (defaults[i].type == kConfigurationValueTypeBoolean)
+                    if (defaults[i].type == kConfigBoolean)
                     {
                         *(bool *)defaults[i].location =
                             epi::LexInteger(value) ? true : false;
                     }
-                    else /* kConfigurationValueTypeInteger and
-                            kConfigurationValueTypeKey */
+                    else /* kConfigInteger and
+                            kConfigKey */
                     {
                         *(int *)defaults[i].location = epi::LexInteger(value);
                     }

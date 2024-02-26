@@ -48,7 +48,7 @@ extern bool GameResponder(InputEvent *ev);
 
 extern int JoystickGetAxis(int n);
 
-extern ConsoleVariable framerate_target_75;
+extern ConsoleVariable double_framerate;
 
 //
 // EVENT HANDLING
@@ -336,7 +336,7 @@ void EventBuildTicCommand(EventTicCommand *cmd)
     // Turning
     if (!strafe)
     {
-        float turn = angle_turn[t_speed] / (framerate_target_75.d_ ? 2 : 1) *
+        float turn = angle_turn[t_speed] / (double_framerate.d_ ? 2 : 1) *
                      joy_forces[AXIS_TURN];
 
         turn *= turn_speed.f_;

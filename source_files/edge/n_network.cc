@@ -47,7 +47,7 @@ extern void        VM_SetFloat(coal::vm_c *vm, const char *mod_name,
 bool network_game = false;
 
 // 70Hz
-EDGE_DEFINE_CONSOLE_VARIABLE(framerate_target_75, "1",
+EDGE_DEFINE_CONSOLE_VARIABLE(double_framerate, "1",
                              kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(
     n_busywait, "1",
@@ -164,10 +164,10 @@ void NetworkGrabTicCommands(void)
     }
     if (LUA_UseLuaHud())
         LUA_SetFloat(LUA_GetGlobalVM(), "sys", "game_tic",
-                     game_tic / (framerate_target_75.d_ ? 2 : 1));
+                     game_tic / (double_framerate.d_ ? 2 : 1));
     else
         VM_SetFloat(ui_vm, "sys", "game_tic",
-                    game_tic / (framerate_target_75.d_ ? 2 : 1));
+                    game_tic / (double_framerate.d_ ? 2 : 1));
 
     game_tic++;
 }

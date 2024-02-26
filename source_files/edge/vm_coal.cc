@@ -40,7 +40,7 @@
 #include "m_random.h"
 #include "n_network.h"
 
-extern ConsoleVariable framerate_target_75;
+extern ConsoleVariable double_framerate;
 
 // user interface VM
 coal::vm_c *ui_vm = nullptr;
@@ -489,7 +489,7 @@ void VM_LoadScripts()
 
     unread_scripts.clear();
 
-    VM_SetFloat(ui_vm, "sys", "game_tic", game_tic / (framerate_target_75.d_? 2 : 1));
+    VM_SetFloat(ui_vm, "sys", "game_tic", game_tic / (double_framerate.d_? 2 : 1));
 
     if (W_IsLumpInPwad("STBAR"))
     {

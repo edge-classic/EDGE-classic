@@ -43,7 +43,7 @@
 
 #include <math.h>
 
-extern ConsoleVariable      framerate_target_75;
+extern ConsoleVariable      double_framerate;
 extern coal::vm_c *ui_vm;
 
 extern void VM_SetFloat(coal::vm_c *vm, const char *mod, const char *name, double value);
@@ -184,7 +184,7 @@ static void HD_get_time(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    int time = GetTime() / (framerate_target_75.d_? 2 : 1);
+    int time = GetTime() / (double_framerate.d_? 2 : 1);
     vm->ReturnFloat((double)time);
 }
 

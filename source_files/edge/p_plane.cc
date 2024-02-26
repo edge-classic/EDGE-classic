@@ -56,7 +56,7 @@ extern std::vector<lineanim_t> lineanims;
 LineType donut[2];
 static int donut_setup = 0;
 
-extern ConsoleVariable framerate_target_75;
+extern ConsoleVariable double_framerate;
 
 static bool P_ActivateInStasis(int tag);
 static bool P_StasifySector(int tag);
@@ -241,7 +241,7 @@ static move_result_e AttemptMovePlane(sector_t *sector, float speed, float dest,
     bool past = false;
     bool nofit;
 
-    if (framerate_target_75.d_)
+    if (double_framerate.d_)
         speed *= 0.5f;
 
     //
@@ -409,7 +409,7 @@ static bool MovePlane(plane_move_t *plane)
         break;
 
     case DIRECTION_WAIT:
-        plane->waited -= (!framerate_target_75.d_|| !(game_tic & 1)) ? 1 : 0;
+        plane->waited -= (!double_framerate.d_|| !(game_tic & 1)) ? 1 : 0;
         if (plane->waited <= 0)
         {
             int   dir;
@@ -1217,13 +1217,13 @@ static bool MoveSlider(slider_move_t *smov)
 
     sector_t *sec = smov->line->frontsector;
 
-    float factor = framerate_target_75.d_? 0.5f : 1.0f;
+    float factor = double_framerate.d_? 0.5f : 1.0f;
 
     switch (smov->direction)
     {
     // WAITING
     case 0:
-        smov->waited -= (!framerate_target_75.d_|| !(game_tic & 1)) ? 1 : 0;
+        smov->waited -= (!double_framerate.d_|| !(game_tic & 1)) ? 1 : 0;
         if (smov->waited <= 0)
         {
             if (SliderCanClose(smov->line))
@@ -1441,7 +1441,7 @@ void P_RunActivePlanes(void)
                                    ((sec_ref->f_h + sec_ref->c_h) - heightref);
                         float sx = line_ref->length / 32.0f * line_ref->dx / line_ref->length *
                                    ((sec_ref->f_h + sec_ref->c_h) - heightref);
-                        if (framerate_target_75.d_&& special_ref->scroll_type_ & BoomScrollerTypeDisplace)
+                        if (double_framerate.d_&& special_ref->scroll_type_ & BoomScrollerTypeDisplace)
                         {
                             sy *= 2;
                             sx *= 2;
@@ -1491,7 +1491,7 @@ void P_RunActivePlanes(void)
                                                                                              : sec_ref->orig_height;
                             float sy        = tdy * ((sec_ref->f_h + sec_ref->c_h) - heightref);
                             float sx        = tdx * ((sec_ref->f_h + sec_ref->c_h) - heightref);
-                            if (framerate_target_75.d_&& special_ref->scroll_type_ & BoomScrollerTypeDisplace)
+                            if (double_framerate.d_&& special_ref->scroll_type_ & BoomScrollerTypeDisplace)
                             {
                                 sy *= 2;
                                 sx *= 2;
@@ -1553,7 +1553,7 @@ void P_RunActivePlanes(void)
                                                                                              : sec_ref->orig_height;
                             float sy        = x_speed * ((sec_ref->f_h + sec_ref->c_h) - heightref);
                             float sx        = y_speed * ((sec_ref->f_h + sec_ref->c_h) - heightref);
-                            if (framerate_target_75.d_&& special_ref->scroll_type_ & BoomScrollerTypeDisplace)
+                            if (double_framerate.d_&& special_ref->scroll_type_ & BoomScrollerTypeDisplace)
                             {
                                 sy *= 2;
                                 sx *= 2;

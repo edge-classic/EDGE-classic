@@ -123,7 +123,7 @@ extern ConsoleVariable s_genmidi;
 extern ConsoleVariable midi_soundfont;
 extern ConsoleVariable r_overlay;
 extern ConsoleVariable g_erraticism;
-extern ConsoleVariable framerate_target_75;
+extern ConsoleVariable double_framerate;
 extern ConsoleVariable r_culling;
 extern ConsoleVariable r_culldist;
 extern ConsoleVariable r_cullfog;
@@ -432,8 +432,8 @@ static OptionMenuItem vidoptions[] = {
      &r_forceflatlighting.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr,
      &r_forceflatlighting},
     {kOptionMenuItemTypeSwitch, "Framerate Target", "35 FPS/70 FPS", 2,
-     &framerate_target_75.d_, OptionMenuUpdateConsoleVariableFromInt,
-     nullptr, &framerate_target_75},
+     &double_framerate.d_, OptionMenuUpdateConsoleVariableFromInt,
+     nullptr, &double_framerate},
     {kOptionMenuItemTypeSwitch, "Smoothing", YesNo, 2, &var_smoothing,
      OptionMenuChangeMipMap, nullptr},
     {kOptionMenuItemTypeSwitch, "Upscale Textures",

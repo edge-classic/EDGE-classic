@@ -35,10 +35,10 @@
 //
 enum ConfigurationValueType
 {
-    kConfigurationValueTypeInteger = 0,
-    kConfigurationValueTypeEnum    = 0,
-    kConfigurationValueTypeBoolean = 1,
-    kConfigurationValueTypeKey     = 2,
+    kConfigInteger = 0,
+    kConfigEnum    = 0,
+    kConfigBoolean = 1,
+    kConfigKey     = 2,
 };
 
 struct ConfigurationDefault

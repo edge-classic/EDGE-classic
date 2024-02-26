@@ -63,7 +63,7 @@
 #include "vm_coal.h"
 #include "w_wad.h"
 
-extern ConsoleVariable framerate_target_75;
+extern ConsoleVariable double_framerate;
 
 game_state_e game_state = GS_NOTHING;
 
@@ -469,7 +469,7 @@ void GameTicker(void)
 {
     bool extra_tic = (game_tic & 1) == 1;
 
-    if (extra_tic && framerate_target_75.d_)
+    if (extra_tic && double_framerate.d_)
     {
         switch (game_state)
         {

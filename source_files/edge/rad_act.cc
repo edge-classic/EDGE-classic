@@ -1025,7 +1025,7 @@ void RAD_ActJump(rad_trigger_t *R, void *param)
 {
     s_jump_t *t = (s_jump_t *)param;
 
-    if (!Random8BitTestStateful(t->random_chance))
+    if (!RandomByteTestDeterministic(t->random_chance))
         return;
 
     if (!t->cache_state)

@@ -40,7 +40,7 @@
 // -ACB- 1998/08/06 Implemented limitless mobjdef list, altered/removed all
 //                  mobjdef[] references.
 //
-// -AJA- 1999/07/21: Replaced some non-critical Random8BitStatefuls with Random8BitStateless.
+// -AJA- 1999/07/21: Replaced some non-critical RandomByteDeterministics with RandomByte.
 //
 // -AJA- 1999/07/30: Removed redundant code from P_SpawnMobj (it was
 //                   virtually identical to P_MobjCreateObject).
@@ -229,7 +229,7 @@ static void BounceOffWall(mobj_t *mo, line_t *wall)
         // random angle to bounce away.  And don't attenuate the speed (so
         // we can get far enough away).
 
-        angle = Random8BitStateful() << (kBAMAngleBits - 8);
+        angle = RandomByteDeterministic() << (kBAMAngleBits - 8);
     }
     else
     {
@@ -610,7 +610,7 @@ void P_MobjExplodeMissile(mobj_t *mo)
         S_StartFX(mo->info->deathsound_, SNCAT_Object, mo);
 
     // mobjdef used -ACB- 1998/08/06
-    P_SetMobjStateDeferred(mo, mo->info->death_state_, Random8BitStateful() & 3);
+    P_SetMobjStateDeferred(mo, mo->info->death_state_, RandomByteDeterministic() & 3);
 }
 
 static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, region_properties_t *new_p, float f_h,
@@ -1542,7 +1542,7 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
             return;
 
         // give a limited "random" chance that respawn don't respawn now
-        if (Random8BitStateful() > 32)
+        if (RandomByteDeterministic() > 32)
             return;
 
         // replaced respawnmonsters & newnmrespawn with respawnsetting
@@ -1941,7 +1941,7 @@ void P_SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDef
     th = P_MobjCreateObject(x, y, z, debris);
     P_SetMobjDirAndSpeed(th, angle, 2.0f, 0.25f);
 
-    th->tics -= Random8BitStateful() & 3;
+    th->tics -= RandomByteDeterministic() & 3;
 
     if (th->tics < 1)
         th->tics = 1;
@@ -1954,7 +1954,7 @@ void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAM
 {
     mobj_t *th;
 
-    z += (float)Random8BitSkewToZeroStateful() / 80.0f;
+    z += (float)RandomByteSkewToZeroDeterministic() / 80.0f;
 
     // -ACB- 1998/08/06 Specials table for non-negotiables....
     th = P_MobjCreateObject(x, y, z, puff);
@@ -1965,7 +1965,7 @@ void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAM
     // -AJA- 2011/03/14: set the angle
     th->angle = angle;
 
-    th->tics -= Random8BitStateful() & 3;
+    th->tics -= RandomByteDeterministic() & 3;
 
     if (th->tics < 1)
         th->tics = 1;
@@ -1984,19 +1984,19 @@ void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const
 
     angle += kBAMAngle180;
 
-    num = (int)(!level_flags.more_blood ? 1.0f : (Random8BitStateless() % 7) + (float)((HMM_MAX(damage / 4.0f, 7.0f))));
+    num = (int)(!level_flags.more_blood ? 1.0f : (RandomByte() % 7) + (float)((HMM_MAX(damage / 4.0f, 7.0f))));
 
     while (num--)
     {
-        z += (float)(Random8BitSkewToZeroStateful() / 64.0f);
+        z += (float)(RandomByteSkewToZeroDeterministic() / 64.0f);
 
-        angle += (BAMAngle)(Random8BitSkewToZeroStateful() * (int)(kBAMAngle1 / 2));
+        angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() * (int)(kBAMAngle1 / 2));
 
         th = P_MobjCreateObject(x, y, z, blood);
 
         P_SetMobjDirAndSpeed(th, angle, ((float)num + 12.0f) / 6.0f, (float)num / 4.0f);
 
-        th->tics -= Random8BitStateful() & 3;
+        th->tics -= RandomByteDeterministic() & 3;
 
         if (th->tics < 1)
             th->tics = 1;
@@ -2076,7 +2076,7 @@ bool P_HitLiquidFloor(mobj_t *thing)
         if (current_flatdef->impactobject_)
         {
             BAMAngle angle = thing->angle;
-            angle += (BAMAngle)(Random8BitSkewToZeroStateful() * (int)(kBAMAngle1 / 2));
+            angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() * (int)(kBAMAngle1 / 2));
 
             P_SpawnDebris(thing->x, thing->y, thing->z, angle, current_flatdef->impactobject_);
 
@@ -2245,7 +2245,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
     if (game_skill != sk_nightmare)
         mobj->reactiontime = info->reactiontime_;
 
-    mobj->lastlook = Random8BitStateful() % MAXPLAYERS;
+    mobj->lastlook = RandomByteDeterministic() % MAXPLAYERS;
 
     //
     // Do not set the state with P_SetMobjState,

@@ -1168,13 +1168,13 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool
     if (target->hyperflags & kHyperFlagDehackedCompatibility)
     {
         P_SetMobjState(target, state);
-        target->tics -= Random8BitStateful() & 3;
+        target->tics -= RandomByteDeterministic() & 3;
         if (target->tics < 1)
             target->tics = 1;
     }
     else
     {
-        P_SetMobjStateDeferred(target, state, Random8BitStateful() & 3);
+        P_SetMobjStateDeferred(target, state, RandomByteDeterministic() & 3);
     }
 
     // Drop stuff. This determines the kind of object spawned
@@ -1385,7 +1385,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
           source->player->weapons[source->player->ready_wp].info->nothrust_))
     {
         // make fall forwards sometimes
-        if (damage < 40 && damage > target->health && target->z - inflictor->z > 64 && (Random8BitStateful() & 1))
+        if (damage < 40 && damage > target->health && target->z - inflictor->z > 64 && (RandomByteDeterministic() & 1))
         {
             P_ThrustMobj(target, inflictor, -damage * 4);
         }
@@ -1634,7 +1634,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         pain_chance = target->painchance; // Lobo 2023: use dynamic painchance
     // pain_chance = target->info->painchance_;
 
-    if (pain_chance > 0 && Random8BitTestStateful(pain_chance))
+    if (pain_chance > 0 && RandomByteTestDeterministic(pain_chance))
     {
         // setup to hit back
         target->flags |= kMapObjectFlagJustHit;

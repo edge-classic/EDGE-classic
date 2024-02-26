@@ -1651,7 +1651,7 @@ static void QuitResponse(int ch)
         {
             // cycle through all the quit sounds, until one of them exists
             // (some of the default quit sounds do not exist in DOOM 1)
-            start = i = Random8BitStateless() % numsounds;
+            start = i = RandomByte() % numsounds;
             do {
                 sprintf(refname, "QuitSnd%d", i + 1);
                 sprintf(sound, "DS%s", language[refname]);
@@ -1684,8 +1684,8 @@ static void QuitResponse(int ch)
 //
 // -KM- 1998/07/21 Reinstated counting quit messages, so adding them to
 // dstrings.c
-//                   is all you have to do.  Using Random8BitStateful for the random
-//                   number automatically kills the sync... (hence Random8BitStateless()...
+//                   is all you have to do.  Using RandomByteDeterministic for the random
+//                   number automatically kills the sync... (hence RandomByte()...
 //                   -AJA-).
 //
 // -KM- 1998/07/31 Removed Limit. So there.
@@ -1718,7 +1718,7 @@ void MenuQuitEdge(int choice)
     if (num_quitmessages > 0)
     {
         // Pick one at random
-        sprintf(ref, "QUITMSG%d", 1 + (Random8BitStateless() % num_quitmessages));
+        sprintf(ref, "QUITMSG%d", 1 + (RandomByte() % num_quitmessages));
 
         // Construct the quit message in full
         msg = epi::StringFormat("%s\n\n%s", language[ref],

@@ -636,7 +636,7 @@ bool RAD_CheckReachedTrigger(mobj_t *thing)
     else if (scr->next_path_total == 1)
         choice = 0;
     else
-        choice = Random8BitStateful() % scr->next_path_total;
+        choice = RandomByteDeterministic() % scr->next_path_total;
 
     path = scr->next_in_path;
     SYS_ASSERT(path);

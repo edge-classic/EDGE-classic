@@ -222,7 +222,7 @@ static void MATH_random(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnFloat(Random16BitStateless() / double(0x10000));
+    vm->ReturnFloat(RandomShort() / double(0x10000));
 }
 
 // Lobo November 2021: math.random2() always between 0 and 10
@@ -230,7 +230,7 @@ static void MATH_random2(coal::vm_c *vm, int argc)
 {
     (void)argc;
 
-    vm->ReturnFloat(Random16BitStateless() % 11);
+    vm->ReturnFloat(RandomShort() % 11);
 }
 
 // math.cos(val)

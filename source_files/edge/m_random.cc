@@ -37,13 +37,13 @@ std::uniform_int_distribution<unsigned short> unsigned_16_bit_roll(0, 0xFFFF);
 static int state_index = 0;
 static int state_step  = 1;
 
-void RandomStatelessInit(void)
+void RandomInit(void)
 {
     stateless_ranlux24_generator.seed(GetMicroseconds());
 }
 
 //
-// Random8BitStateless
+// RandomByte
 //
 // Returns a number from 0 to 255.
 //
@@ -51,32 +51,32 @@ void RandomStatelessInit(void)
 // that do not interfere with netgame synchronisation (for example,
 // selection of a random sound).
 //
-int Random8BitStateless(void)
+int RandomByte(void)
 {
     return unsigned_8_bit_roll(stateless_ranlux24_generator);
 }
 
 //
-// Random8BitSkewToZeroStateless
+// RandomByteSkewToZero
 //
 // Returns a number between -255 and 255, but skewed so that values near
 // zero have a higher probability.  Replaces
-// "Random8BitStateful()-Random8BitStateful()" in the code,
+// "RandomByteDeterministic()-RandomByteDeterministic()" in the code,
 // which as Lee Killough points out can produce different results depending upon
 // the order of evaluation.
 //
-// -AJA- Note: same usage rules as Random8BitStateful.
+// -AJA- Note: same usage rules as RandomByteDeterministic.
 //
-int Random8BitSkewToZeroStateless(void)
+int RandomByteSkewToZero(void)
 {
-    int r1 = Random8BitStateless();
-    int r2 = Random8BitStateless();
+    int r1 = RandomByte();
+    int r2 = RandomByte();
 
     return r1 - r2;
 }
 
 //
-// Random8BitStateful
+// RandomByteDeterministic
 //
 // Returns a number from 0 to 255.
 //
@@ -84,7 +84,7 @@ int Random8BitSkewToZeroStateless(void)
 // values that determine netgame synchronisation (for example,
 // which way a monster should travel).
 //
-int Random8BitStateful(void)
+int RandomByteDeterministic(void)
 {
     state_index += state_step;
     state_index &= 0xff;
@@ -97,53 +97,53 @@ int Random8BitStateful(void)
 }
 
 //
-// Random16BitStateless
+// RandomShort
 //
 // Returns a number from 0 to 65535 for COALAPI usage
 //
-int Random16BitStateless(void)
+int RandomShort(void)
 {
     return unsigned_16_bit_roll(stateless_ranlux24_generator);
 }
 
 //
-// Random8BitSkewToZeroStateful
+// RandomByteSkewToZeroDeterministic
 //
 // Returns a number between -255 and 255, but skewed so that values near
 // zero have a higher probability.  Replaces
-// "Random8BitStateful()-Random8BitStateful()" in the code,
+// "RandomByteDeterministic()-RandomByteDeterministic()" in the code,
 // which as Lee Killough points out can produce different results depending upon
 // the order of evaluation.
 //
-// -AJA- Note: same usage rules as Random8BitStateful.
+// -AJA- Note: same usage rules as RandomByteDeterministic.
 //
-int Random8BitSkewToZeroStateful(void)
+int RandomByteSkewToZeroDeterministic(void)
 {
-    int r1 = Random8BitStateful();
-    int r2 = Random8BitStateful();
+    int r1 = RandomByteDeterministic();
+    int r2 = RandomByteDeterministic();
 
     return r1 - r2;
 }
 
 //
-// Random8BitTestStateless
+// RandomByteTest
 //
-bool Random8BitTestStateless(float chance)
+bool RandomByteTest(float chance)
 {
     return (chance <= 0)                               ? false
            : (chance >= 1)                             ? true
-           : (Random8BitStateless() / 255.0f < chance) ? true
+           : (RandomByte() / 255.0f < chance) ? true
                                                        : false;
 }
 
 //
-// Random8BitTestStateful
+// RandomByteTestDeterministic
 //
-bool Random8BitTestStateful(float chance)
+bool RandomByteTestDeterministic(float chance)
 {
     return (chance <= 0)                              ? false
            : (chance >= 1)                            ? true
-           : (Random8BitStateful() / 255.0f < chance) ? true
+           : (RandomByteDeterministic() / 255.0f < chance) ? true
                                                       : false;
 }
 

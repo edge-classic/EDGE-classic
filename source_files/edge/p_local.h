@@ -71,9 +71,9 @@
         (var) = (dam)->nominal_;                                                                                        \
                                                                                                                        \
         if ((dam)->error_ > 0)                                                                                          \
-            (var) += (dam)->error_ * Random8BitSkewToZeroStateful() / 255.0f;                                                         \
+            (var) += (dam)->error_ * RandomByteSkewToZeroDeterministic() / 255.0f;                                                         \
         else if ((dam)->linear_max_ > 0)                                                                                \
-            (var) += ((dam)->linear_max_ - (var)) * Random8BitStateful() / 255.0f;                                                \
+            (var) += ((dam)->linear_max_ - (var)) * RandomByteDeterministic() / 255.0f;                                                \
                                                                                                                        \
         if ((var) < 0)                                                                                                 \
             (var) = 0;                                                                                                 \

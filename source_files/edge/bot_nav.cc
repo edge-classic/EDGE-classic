@@ -143,7 +143,7 @@ bool BotNavigateNextRoamPoint(position_c &out)
 
     for (int loop = 0; loop < 100; loop++)
     {
-        int idx = Random16BitStateless() % (int)big_items.size();
+        int idx = RandomShort() % (int)big_items.size();
 
         const big_item_c &item = big_items[idx];
 
@@ -686,7 +686,7 @@ static void BotNavigateItemsInSubsector(subsector_t *sub, DeathBot *bot,
         if (dist < radius * 0.25f) score = score * 2.0f;
 
         // randomize the score -- to break ties
-        score += (float)Random16BitStateless() / 65535.0f;
+        score += (float)RandomShort() / 65535.0f;
 
         if (score > best_score)
         {
@@ -784,7 +784,7 @@ static void BotNavigateEnemiesInSubsector(const subsector_t *sub, DeathBot *bot,
         if (dx > radius || dy > radius) continue;
 
         // pick one of the monsters at random
-        float score = (float)Random16BitStateless() / 65535.0f;
+        float score = (float)RandomShort() / 65535.0f;
 
         if (score > best_score)
         {

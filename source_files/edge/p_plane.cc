@@ -660,7 +660,7 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const PlaneMoverDefin
     }
     else if (def->type_ == kPlaneMoverContinuous)
     {
-        plane->direction = (Random8BitStateful() & 1) ? DIRECTION_UP : DIRECTION_DOWN;
+        plane->direction = (RandomByteDeterministic() & 1) ? DIRECTION_UP : DIRECTION_DOWN;
 
         if (plane->direction == DIRECTION_UP)
             plane->speed = def->speed_up_;

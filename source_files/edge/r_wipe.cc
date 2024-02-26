@@ -130,11 +130,11 @@ static void RGL_Init_Melt(void)
 {
     int x, r;
 
-    melt_yoffs[0] = -(Random8BitStateless() % 16);
+    melt_yoffs[0] = -(RandomByte() % 16);
 
     for (x = 1; x <= MELT_DIVS; x++)
     {
-        r = (Random8BitStateless() % 3) - 1;
+        r = (RandomByte() % 3) - 1;
 
         melt_yoffs[x] = melt_yoffs[x - 1] + r;
         melt_yoffs[x] = HMM_MAX(-15, HMM_MIN(0, melt_yoffs[x]));

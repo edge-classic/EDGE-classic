@@ -1034,7 +1034,7 @@ void A_WeaponReady(mobj_t *mo)
     // give that weapon a polish, soldier!
     if (info->idle_state_ && p->idlewait >= info->idle_wait_)
     {
-        if (Random8BitTestStateless(info->idle_chance_))
+        if (RandomByteTest(info->idle_chance_))
         {
             p->idlewait = 0;
             P_SetPspriteDeferred(p, ps_weapon, info->idle_state_);
@@ -1767,7 +1767,7 @@ void A_WeaponJump(mobj_t *mo)
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
 
-    if (Random8BitTestStateful(jump->chance))
+    if (RandomByteTestDeterministic(jump->chance))
     {
         psp->next_state = (psp->state->jumpstate == 0) ? nullptr : (states + psp->state->jumpstate);
     }
@@ -2070,9 +2070,9 @@ void A_TurnRandom(mobj_t *mo)
 
     // We want a random number between 0 and our parameter
     if (turn < 0) // between -x and 0
-        random_angle = turn + (0 - turn) * (Random16BitStateless() / double(0x10000));
+        random_angle = turn + (0 - turn) * (RandomShort() / double(0x10000));
     else // between 0 and x
-        random_angle = 0 + (turn - 0) * (Random16BitStateless() / double(0x10000));
+        random_angle = 0 + (turn - 0) * (RandomShort() / double(0x10000));
 
     turn      = current_angle + random_angle;
     mo->angle = epi::BAMFromDegrees(turn);

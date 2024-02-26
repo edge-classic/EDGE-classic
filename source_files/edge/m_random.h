@@ -26,17 +26,17 @@
 #pragma once
 
 // A bit verbose, but hopefully describes what they do decently.
-// The "Stateful" suffixes increment and track the index and step
+// The "Deterministic" suffixes increment and track the index and step
 // for its random number generator so that loading/saving a game
 // does not change the outcomes of functions that use them - Dasho
-void RandomStatelessInit(void);
-int  Random8BitStateless(void);
-int  Random8BitSkewToZeroStateless(void);
-int  Random8BitStateful(void);
-int  Random16BitStateless(void);
-int  Random8BitSkewToZeroStateful(void);
-bool Random8BitTestStateless(float chance);
-bool Random8BitTestStateful(float chance);
+void RandomInit(void);
+int  RandomByte(void);
+int  RandomByteSkewToZero(void);
+int  RandomByteDeterministic(void);
+int  RandomShort(void);
+int  RandomByteSkewToZeroDeterministic(void);
+bool RandomByteTest(float chance);
+bool RandomByteTestDeterministic(float chance);
 
 // Savegame support
 int  RandomStateRead(void);

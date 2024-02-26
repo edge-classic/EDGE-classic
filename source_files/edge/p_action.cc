@@ -35,8 +35,8 @@
 //
 // -KM- 1998/09/27 Added sounds.ddf capability
 // -KM- 1998/12/21 New smooth visibility.
-// -AJA- 1999/07/21: Replaced some non-critical Random8BitStatefuls with Random8BitStateless.
-// -AJA- 1999/08/08: Replaced some Random8BitStateful()-Random8BitStateful() stuff.
+// -AJA- 1999/07/21: Replaced some non-critical RandomByteDeterministics with RandomByte.
+// -AJA- 1999/08/08: Replaced some RandomByteDeterministic()-RandomByteDeterministic() stuff.
 //
 
 
@@ -338,7 +338,7 @@ static bool DecideRangeAttack(mobj_t *object)
 
     // now after modifing distance where applicable, we get the random number and
     // check if it is less than distance, if so no attack is made.
-    if (Random8BitTestStateful(chance))
+    if (RandomByteTestDeterministic(chance))
         return false;
 
     return P_CheckSight(object, object->target);
@@ -374,16 +374,16 @@ void P_ActFaceTarget(mobj_t *object)
 
     if (target->flags & kMapObjectFlagFuzzy)
     {
-        object->angle += Random8BitSkewToZeroStateful() << (kBAMAngleBits - 11);
-        object->vertangle += epi::BAMFromATan(Random8BitSkewToZeroStateful() / 1024.0f);
+        object->angle += RandomByteSkewToZeroDeterministic() << (kBAMAngleBits - 11);
+        object->vertangle += epi::BAMFromATan(RandomByteSkewToZeroDeterministic() / 1024.0f);
     }
 
     if (target->visibility < VISIBLE)
     {
         float amount = (VISIBLE - target->visibility);
 
-        object->angle += (BAMAngle)(Random8BitSkewToZeroStateful() * (kBAMAngleBits - 12) * amount);
-        object->vertangle += epi::BAMFromATan(Random8BitSkewToZeroStateful() * amount / 2048.0f);
+        object->angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() * (kBAMAngleBits - 12) * amount);
+        object->vertangle += epi::BAMFromATan(RandomByteSkewToZeroDeterministic() * amount / 2048.0f);
     }
 
     // don't look up/down too far...
@@ -645,8 +645,8 @@ void P_ActDLightRandom(mobj_t *mo)
         int low  = ((int *)st->action_par)[0];
         int high = ((int *)st->action_par)[1];
 
-        // Note: using Random8BitStateless so that gameplay is unaffected
-        float qty = low + (high - low) * Random8BitStateless() / 255.0f;
+        // Note: using RandomByte so that gameplay is unaffected
+        float qty = low + (high - low) * RandomByte() / 255.0f;
 
         if (mo->info->hyperflags_ & kHyperFlagQuadraticDynamicLight)
             qty = DynamicLightCompatibilityRadius(qty);
@@ -717,7 +717,7 @@ void P_ActTurnRandom(mobj_t *mo)
         turn = (int)epi::DegreesFromBAM(*(BAMAngle *)st->action_par);
     }
 
-    turn = turn * Random8BitStateful() / 90; // 10 bits of angle
+    turn = turn * RandomByteDeterministic() / 90; // 10 bits of angle
 
     if (turn < 0)
         mo->angle -= (BAMAngle)((-turn) << (kBAMAngleBits - 10));
@@ -860,7 +860,7 @@ void P_ActMakeAmbientSoundRandom(mobj_t *mo)
 
     if (mo->info->seesound_)
     {
-        if (Random8BitStateless() < 50)
+        if (RandomByte() < 50)
             S_StartFX(mo->info->seesound_, P_MobjGetSfxCategory(mo), mo);
     }
     else
@@ -1041,7 +1041,7 @@ void P_ActExplode(mobj_t *object)
 //
 static void CheckMissileSpawn(mobj_t *projectile)
 {
-    projectile->tics -= Random8BitStateful() & 3;
+    projectile->tics -= RandomByteDeterministic() & 3;
 
     if (projectile->tics < 1)
         projectile->tics = 1;
@@ -1171,10 +1171,10 @@ static mobj_t *DoLaunchProjectile(mobj_t *source, float tx, float ty, float tz, 
         if (!(attack->flags_ & kAttackFlagPlayer))
         {
             if (target->flags & kMapObjectFlagFuzzy)
-                angle += Random8BitSkewToZeroStateful() << (kBAMAngleBits - 12);
+                angle += RandomByteSkewToZeroDeterministic() << (kBAMAngleBits - 12);
 
             if (target->visibility < VISIBLE)
-                angle += (BAMAngle)(Random8BitSkewToZeroStateful() * 64 * (VISIBLE - target->visibility));
+                angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() * 64 * (VISIBLE - target->visibility));
         }
 
         sector_t *cur_target_sec = target->subsector->sector;
@@ -1195,10 +1195,10 @@ static mobj_t *DoLaunchProjectile(mobj_t *source, float tx, float ty, float tz, 
     if (!source->player || source->player->refire > 0)
     {
         if (attack->accuracy_angle_ > 0.0f)
-            angle += (attack->accuracy_angle_ >> 8) * Random8BitSkewToZeroStateful();
+            angle += (attack->accuracy_angle_ >> 8) * RandomByteSkewToZeroDeterministic();
 
         if (attack->accuracy_slope_ > 0.0f)
-            slope += attack->accuracy_slope_ * (Random8BitSkewToZeroStateful() / 255.0f);
+            slope += attack->accuracy_slope_ * (RandomByteSkewToZeroDeterministic() / 255.0f);
     }
 
     P_SetMobjDirAndSpeed(projectile, angle, slope, projectile->speed);
@@ -1593,7 +1593,7 @@ void P_ActCreateSmokeTrail(mobj_t *projectile)
                                        projectile->y - projectile->mom.Y / 2.0f, projectile->z, attack->puff_);
 
     smoke->mom.Z = smoke->info->float_speed_;
-    smoke->tics -= Random8BitStateless() & 3;
+    smoke->tics -= RandomByte() & 3;
 
     if (smoke->tics < 1)
         smoke->tics = 1;
@@ -1640,7 +1640,7 @@ void P_ActHomingProjectile(mobj_t *projectile)
     {
         projectile->extendedflags &= ~kExtendedFlagFirstTracerCheck;
 
-        if (Random8BitTestStateful(attack->notracechance_))
+        if (RandomByteTestDeterministic(attack->notracechance_))
         {
             projectile->SetTarget(nullptr);
             return;
@@ -1800,7 +1800,7 @@ static void LaunchRandomSpread(mobj_t *mo)
     if (projectile == nullptr)
         return;
 
-    int i = Random8BitStateful() & 127;
+    int i = RandomByteDeterministic() & 127;
 
     if (i >> 1)
     {
@@ -1855,10 +1855,10 @@ static void ShotAttack(mobj_t *mo)
         if (!mo->player || mo->player->refire > 0)
         {
             if (attack->accuracy_angle_ > 0)
-                angle += (attack->accuracy_angle_ >> 8) * Random8BitSkewToZeroStateful();
+                angle += (attack->accuracy_angle_ >> 8) * RandomByteSkewToZeroDeterministic();
 
             if (attack->accuracy_slope_ > 0)
-                slope += attack->accuracy_slope_ * (Random8BitSkewToZeroStateful() / 255.0f);
+                slope += attack->accuracy_slope_ * (RandomByteSkewToZeroDeterministic() / 255.0f);
         }
 
         float damage;
@@ -2515,8 +2515,8 @@ void P_ActDropItem(mobj_t *mo)
 
     // unlike normal drops, these ones are displaced randomly
 
-    float dx = Random8BitSkewToZeroStateful() * mo->info->radius_ / 255.0f;
-    float dy = Random8BitSkewToZeroStateful() * mo->info->radius_ / 255.0f;
+    float dx = RandomByteSkewToZeroDeterministic() * mo->info->radius_ / 255.0f;
+    float dy = RandomByteSkewToZeroDeterministic() * mo->info->radius_ / 255.0f;
 
     mobj_t *item = P_MobjCreateObject(mo->x + dx, mo->y + dy, mo->floorz, info);
     SYS_ASSERT(item);
@@ -2610,9 +2610,9 @@ void P_ActPathFollow(mobj_t *mo)
             BAMAngle step = kBAMAngle30;
 
             if (diff < kBAMAngle180)
-                mo->angle += Random8BitStateful() * (step >> 8);
+                mo->angle += RandomByteDeterministic() * (step >> 8);
             else
-                mo->angle -= Random8BitStateful() * (step >> 8);
+                mo->angle -= RandomByteDeterministic() * (step >> 8);
 
             return;
         }
@@ -2636,8 +2636,8 @@ void P_ActPathFollow(mobj_t *mo)
         if (!P_Move(mo, true))
         {
             mo->movedir   = DI_EVASIVE;
-            mo->angle     = Random8BitStateful() << (kBAMAngleBits - 8);
-            mo->movecount = 1 + (Random8BitStateful() & 7);
+            mo->angle     = RandomByteDeterministic() << (kBAMAngleBits - 8);
+            mo->movecount = 1 + (RandomByteDeterministic() & 7);
         }
         return;
     }
@@ -2945,7 +2945,7 @@ void P_ActRefireCheck(mobj_t *object)
         P_ActFaceTarget(object);
 
     // Random chance that object will keep firing regardless
-    if (Random8BitTestStateful(attack->keepfirechance_))
+    if (RandomByteTestDeterministic(attack->keepfirechance_))
         return;
 
     target = object->target;
@@ -3008,8 +3008,8 @@ static bool CreateAggression(mobj_t *mo)
         return false;
 
     // pick a block in blockmap to check
-    int bdx = Random8BitSkewToZeroStateful() / 17;
-    int bdy = Random8BitSkewToZeroStateful() / 17;
+    int bdx = RandomByteSkewToZeroDeterministic() / 17;
+    int bdy = RandomByteSkewToZeroDeterministic() / 17;
 
     int block_x = BLOCKMAP_GET_X(mo->x) + bdx;
     int block_y = BLOCKMAP_GET_X(mo->y) + bdy;
@@ -3058,7 +3058,7 @@ static bool CreateAggression(mobj_t *mo)
 
         // fairly low chance of trying it, in case this block
         // contains many monsters (spread the love)
-        if (Random8BitStateful() > 99)
+        if (RandomByteDeterministic() > 99)
             continue;
 
         // sight check is expensive, do it last
@@ -3359,7 +3359,7 @@ void P_ActStandardChase(mobj_t *object)
         P_NewChaseDir(object);
 
     // make active sound
-    if (object->info->activesound_ && Random8BitStateless() < 3)
+    if (object->info->activesound_ && RandomByte() < 3)
         S_StartFX(object->info->activesound_, P_MobjGetSfxCategory(object), object);
 }
 
@@ -3547,7 +3547,7 @@ void P_ActCheckBlood(mobj_t *mo)
 
     if (level_flags.more_blood && mo->tics >= 0)
     {
-        int val = Random8BitStateful();
+        int val = RandomByteDeterministic();
 
         // exponential formula
         mo->tics = ((val * val * val) >> 18) * kTicRate + kTicRate;
@@ -3571,7 +3571,7 @@ void P_ActJump(mobj_t *mo)
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
 
-    if (Random8BitTestStateful(jump->chance))
+    if (RandomByteTestDeterministic(jump->chance))
     {
         mo->next_state = (mo->state->jumpstate == 0) ? nullptr : (states + mo->state->jumpstate);
     }
@@ -3599,7 +3599,7 @@ void P_ActJumpLiquid(mobj_t *mo)
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
 
-    if (Random8BitTestStateful(jump->chance))
+    if (RandomByteTestDeterministic(jump->chance))
     {
         mo->next_state = (mo->state->jumpstate == 0) ? nullptr : (states + mo->state->jumpstate);
     }
@@ -3626,7 +3626,7 @@ void P_ActJumpSky(mobj_t *mo)
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
 
-    if (Random8BitTestStateful(jump->chance))
+    if (RandomByteTestDeterministic(jump->chance))
     {
         mo->next_state = (mo->state->jumpstate == 0) ? nullptr : (states + mo->state->jumpstate);
     }
@@ -3656,7 +3656,7 @@ void P_ActJumpStuck(mobj_t * mo)
     SYS_ASSERT(jump->chance >= 0);
     SYS_ASSERT(jump->chance <= 1);
 
-    if (Random8BitTestStateful(jump->chance))
+    if (RandomByteTestDeterministic(jump->chance))
     {
         mo->next_state = (mo->state->jumpstate == 0) ?
             nullptr : (states + mo->state->jumpstate);

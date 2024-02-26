@@ -2110,8 +2110,8 @@ static void E_InitialState(void)
 //
 void E_Main(int argc, const char **argv)
 {
-    // Seed Random8BitStateless RNG
-    RandomStatelessInit();
+    // Seed RandomByte RNG
+    RandomInit();
 
     // Implemented here - since we need to bring the memory manager up first
     // -ACB- 2004/05/31

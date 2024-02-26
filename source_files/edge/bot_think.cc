@@ -129,7 +129,7 @@ float DeathBot::EvalEnemy(const mobj_t *mo)
         return -1;
 
     // occasionally shoot barrels
-    if (IsBarrel(mo)) return (Random16BitStateless() % 100 < 20) ? +1 : -1;
+    if (IsBarrel(mo)) return (RandomShort() % 100 < 20) ? +1 : -1;
 
     if (0 == (mo->extendedflags & kExtendedFlagMonster) && !mo->player)
         return -1;
@@ -373,7 +373,7 @@ void DeathBot::LookForLeader()
         if (p2 == nullptr || p2->isBot()) continue;
 
         // when multiple humans, make it random who is picked
-        if (Random16BitStateless() % 100 < 90) continue;
+        if (RandomShort() % 100 < 90) continue;
 
         pl_->mo->SetSupportObj(p2->mo);
     }
@@ -461,7 +461,7 @@ void DeathBot::LookAround()
     if (look_time_ >= 0) return;
 
     // look for items every second or so
-    look_time_ = 20 + Random16BitStateless() % 20;
+    look_time_ = 20 + RandomShort() % 20;
 
     LookForItems(1024);
 }
@@ -469,7 +469,7 @@ void DeathBot::LookAround()
 void DeathBot::SelectWeapon()
 {
     // reconsider every second or so
-    weapon_time_ = 20 + Random16BitStateless() % 20;
+    weapon_time_ = 20 + RandomShort() % 20;
 
     // allow any weapon change to complete first
     if (pl_->pending_wp != WPSEL_NoChange) return;
@@ -554,7 +554,7 @@ void DeathBot::WeaveToward(const position_c &pos)
 
     if (weave_time_-- < 0)
     {
-        weave_time_ = 10 + Random16BitStateless() % 10;
+        weave_time_ = 10 + RandomShort() % 10;
 
         bool neg = weave_ < 0;
 
@@ -644,7 +644,7 @@ void DeathBot::StrafeAroundEnemy()
     {
         // pick a random strafe direction.
         // it will often be the same as before, that is okay.
-        int r = Random16BitStateless();
+        int r = RandomShort();
 
         if ((r & 3) == 0)
             strafe_dir_ = 0;
@@ -842,7 +842,7 @@ void DeathBot::ThinkHelp()
         if (!cur_near)
         {
             // wait a bit then find a path
-            path_wait_ = 10 + Random16BitStateless() % 10;
+            path_wait_ = 10 + RandomShort() % 10;
         }
     }
 
@@ -861,12 +861,12 @@ void DeathBot::ThinkHelp()
 
             case kBotFollowPathResultDone:
                 DeletePath();
-                path_wait_ = 4 + Random16BitStateless() % 4;
+                path_wait_ = 4 + RandomShort() % 4;
                 break;
 
             case kBotFollowPathResultFailed:
                 DeletePath();
-                path_wait_ = 30 + Random16BitStateless() % 10;
+                path_wait_ = 30 + RandomShort() % 10;
                 break;
         }
     }
@@ -876,7 +876,7 @@ void DeathBot::ThinkHelp()
     if (path_wait_-- < 0)
     {
         PathToLeader();
-        path_wait_ = 30 + Random16BitStateless() % 10;
+        path_wait_ = 30 + RandomShort() % 10;
     }
 
     // if somewhat close, attempt to follow player
@@ -968,19 +968,19 @@ void DeathBot::ThinkRoam()
                 // TODO look for other nearby items
 
                 DeletePath();
-                path_wait_ = 4 + Random16BitStateless() % 4;
+                path_wait_ = 4 + RandomShort() % 4;
                 break;
 
             case kBotFollowPathResultFailed:
                 DeletePath();
-                path_wait_ = 30 + Random16BitStateless() % 10;
+                path_wait_ = 30 + RandomShort() % 10;
                 break;
         }
     }
 
     if (path_wait_-- < 0)
     {
-        path_wait_ = 30 + Random16BitStateless() % 10;
+        path_wait_ = 30 + RandomShort() % 10;
 
         if (!BotNavigateNextRoamPoint(roam_goal_))
         {
@@ -1009,7 +1009,7 @@ void DeathBot::FinishGetItem()
     pl_->mo->SetTracer(nullptr);
 
     DeletePath();
-    path_wait_ = 4 + Random16BitStateless() % 4;
+    path_wait_ = 4 + RandomShort() % 4;
 
     // when fighting, look furthe for more items
     if (pl_->mo->target != nullptr)
@@ -1365,7 +1365,7 @@ void DeathBot::DeathThink()
     {
         dead_time_ = 0;
 
-        if (Random16BitStateless() % 100 < 35) cmd_.use = true;
+        if (RandomShort() % 100 < 35) cmd_.use = true;
     }
 }
 
@@ -1411,9 +1411,9 @@ void DeathBot::Respawn()
 {
     task_ = kBotTaskNone;
 
-    path_wait_   = Random16BitStateless() % 8;
-    look_time_   = Random16BitStateless() % 8;
-    weapon_time_ = Random16BitStateless() % 8;
+    path_wait_   = RandomShort() % 8;
+    look_time_   = RandomShort() % 8;
+    weapon_time_ = RandomShort() % 8;
 
     hit_obstacle_ = false;
     near_leader_  = false;

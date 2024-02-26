@@ -89,7 +89,7 @@ static void DoLight(light_t *light)
 
     case kLightSpecialTypeFlash: {
         // Dark
-        if (Random8BitTestStateless(type->chance_))
+        if (RandomByteTest(type->chance_))
         {
             if (reduce_flash)
                 light->sector->props.lightlevel = (light->maxlight + light->minlight) / 2;
@@ -164,7 +164,7 @@ static void DoLight(light_t *light)
 
     case kLightSpecialTypeFireFlicker: {
         // -ES- 2000/02/13 Changed this to original DOOM style flicker
-        int amount = (Random8BitStateless() & 7) * type->step_;
+        int amount = (RandomByte() & 7) * type->step_;
 
         if (light->sector->props.lightlevel - amount < light->minlight)
         {

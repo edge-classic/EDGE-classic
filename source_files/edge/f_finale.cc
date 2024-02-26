@@ -560,7 +560,7 @@ static void CastPerformAction(void)
             CAST_RangeAttack(cast_order->rangeattack_);
         }
     }
-    else if (cast_order->activesound_ && (Random8BitStateless() < 2) && !cast_death)
+    else if (cast_order->activesound_ && (RandomByte() < 2) && !cast_death)
     {
         sfx = cast_order->activesound_;
     }
@@ -623,7 +623,7 @@ static void CastTicker(void)
     // -AJA- if there's a jumpstate, enter it occasionally
 
     if (cast_state->action == P_ActJump && cast_state->jumpstate &&
-        (Random8BitStateless() < 64))
+        (RandomByte() < 64))
         st = cast_state->jumpstate;
     else
         st = cast_state->nextstate;
@@ -675,7 +675,7 @@ static void CastSkip(void)
     // go into death frame
     cast_death = true;
 
-    if (cast_order->overkill_state_ && (Random8BitStateless() < 32))
+    if (cast_order->overkill_state_ && (RandomByte() < 32))
         cast_state = &states[cast_order->overkill_state_];
     else
     {

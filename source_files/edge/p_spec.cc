@@ -587,8 +587,8 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const LineType *special)
     midy = (TheLine->v1->Y + TheLine->v2->Y) / 2;
     midz = ONFLOORZ;
 
-    float dx = Random8BitStateful() * info->radius_ / 255.0f;
-    float dy = Random8BitStateful() * info->radius_ / 255.0f;
+    float dx = RandomByteDeterministic() * info->radius_ / 255.0f;
+    float dy = RandomByteDeterministic() * info->radius_ / 255.0f;
 
     // move slightly forward to spawn the debris
     midx += dx + info->radius_;

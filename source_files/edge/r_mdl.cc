@@ -28,7 +28,7 @@
 
 #include "types.h"
 #include "endianess.h"
-#include "image_data.h"
+#include "im_data.h"
 #include "str_compare.h"
 #include "dm_state.h" // IS_SKY
 #include "g_game.h"   //current_map
@@ -290,13 +290,13 @@ mdl_model_c *MDL_LoadModel(epi::File *f)
         }
 
         f->Read(pixels, sheight * swidth * sizeof(uint8_t));
-        image_data_c *tmp_img = new image_data_c(swidth, sheight, 3);
+        ImageData *tmp_img = new ImageData(swidth, sheight, 3);
         // Expand 8 bits paletted image to RGB
         for (int j = 0; j < swidth * sheight; ++j)
         {
             for (int k = 0; k < 3; ++k)
             {
-                tmp_img->pixels[(j * 3) + k] = md_colormap[pixels[j]][k];
+                tmp_img->pixels_[(j * 3) + k] = md_colormap[pixels[j]][k];
             }
         }
         delete[] pixels;
@@ -808,10 +808,10 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
         {
             float r = mo->radius;
 
-            P_DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height, DLIT_Model,
+            DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height, DLIT_Model,
                                    &data);
 
-            P_SectorGlowIterator(mo->subsector->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
+            SectorGlowIterator(mo->subsector->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
                                  mo->z + mo->height, DLIT_Model, &data);
         }
     }

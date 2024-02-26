@@ -338,7 +338,7 @@ void SV_MobjFinaliseElems(void)
 
         // do not link zombie objects into the blockmap
         if (!mo->isRemoved())
-            P_SetThingPosition(mo);
+            SetThingPosition(mo);
 
         // handle reference counts
 

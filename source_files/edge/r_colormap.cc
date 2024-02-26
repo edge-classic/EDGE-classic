@@ -769,7 +769,7 @@ class colormap_shader_c : public abstract_shader_c
   private:
     void MakeColormapTexture(int mode)
     {
-        image_data_c img(256, 64, 4);
+        ImageData img(256, 64, 4);
 
         const uint8_t *map    = nullptr;
         int         length = 32;

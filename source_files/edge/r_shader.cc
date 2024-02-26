@@ -21,7 +21,7 @@
 
 #include "main.h"
 
-#include "image_data.h"
+#include "im_data.h"
 
 #include "p_mobj.h"
 #include "r_defs.h"

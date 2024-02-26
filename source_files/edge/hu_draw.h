@@ -103,7 +103,7 @@ void HudTileImage(float x, float y, float w, float h, const image_c *image,
 
 // Functions for when we want to draw without having an image_c
 void HudStretchFromImageData(float x, float y, float w, float h,
-                             const image_data_c *img, unsigned int tex_id,
+                             const ImageData *img, unsigned int tex_id,
                              image_opacity_e opacity);
 
 extern int hud_tic;

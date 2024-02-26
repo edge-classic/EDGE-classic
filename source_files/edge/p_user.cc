@@ -70,7 +70,7 @@ struct room_measure
 };
 
 // Test for "measuring" size of room
-static bool P_RoomPath(intercept_t *in, void *dataptr)
+static bool P_RoomPath(PathIntercept *in, void *dataptr)
 {
     room_measure *blocker = (room_measure *)dataptr;
 
@@ -929,25 +929,25 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
         float        line_lengths = 0;
         float        player_x     = player->mo->x;
         float        player_y     = player->mo->y;
-        P_PathTraverse(player_x, player_y, player_x, 32768.0f, PT_ADDLINES, P_RoomPath, &room_checker);
+        PathTraverse(player_x, player_y, player_x, 32768.0f, kPathAddLines, P_RoomPath, &room_checker);
         line_lengths += abs(room_checker.y - player_y);
-        P_PathTraverse(player_x, player_y, 32768.0f + player_x, 32768.0f + player_y, PT_ADDLINES, P_RoomPath,
+        PathTraverse(player_x, player_y, 32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
                        &room_checker);
         line_lengths += R_PointToDist(player_x, player_y, room_checker.x, room_checker.y);
-        P_PathTraverse(player_x, player_y, -32768.0f + player_x, 32768.0f + player_y, PT_ADDLINES, P_RoomPath,
+        PathTraverse(player_x, player_y, -32768.0f + player_x, 32768.0f + player_y, kPathAddLines, P_RoomPath,
                        &room_checker);
         line_lengths += R_PointToDist(player_x, player_y, room_checker.x, room_checker.y);
-        P_PathTraverse(player_x, player_y, player_x, -32768.0f, PT_ADDLINES, P_RoomPath, &room_checker);
+        PathTraverse(player_x, player_y, player_x, -32768.0f, kPathAddLines, P_RoomPath, &room_checker);
         line_lengths += abs(player_y - room_checker.y);
-        P_PathTraverse(player_x, player_y, -32768.0f + player_x, -32768.0f + player_y, PT_ADDLINES, P_RoomPath,
+        PathTraverse(player_x, player_y, -32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
                        &room_checker);
         line_lengths += R_PointToDist(player_x, player_y, room_checker.x, room_checker.y);
-        P_PathTraverse(player_x, player_y, 32768.0f + player_x, -32768.0f + player_y, PT_ADDLINES, P_RoomPath,
+        PathTraverse(player_x, player_y, 32768.0f + player_x, -32768.0f + player_y, kPathAddLines, P_RoomPath,
                        &room_checker);
         line_lengths += R_PointToDist(player_x, player_y, room_checker.x, room_checker.y);
-        P_PathTraverse(player_x, player_y, -32768.0f, player_y, PT_ADDLINES, P_RoomPath, &room_checker);
+        PathTraverse(player_x, player_y, -32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
         line_lengths += abs(player_x - room_checker.x);
-        P_PathTraverse(player_x, player_y, 32768.0f, player_y, PT_ADDLINES, P_RoomPath, &room_checker);
+        PathTraverse(player_x, player_y, 32768.0f, player_y, kPathAddLines, P_RoomPath, &room_checker);
         line_lengths += abs(room_checker.x - player_x);
         room_area = line_lengths / 8;
     }

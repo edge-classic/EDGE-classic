@@ -23,19 +23,19 @@
 //
 //----------------------------------------------------------------------------
 
-
-#include "i_defs_gl.h" // needed for r_shader.h
-#include "i_system.h"
-
 #include <float.h>
 
-#include <vector>
 #include <algorithm>
 #include <unordered_set>
+#include <vector>
 
+#include "AlmostEquals.h"
 #include "dm_data.h"
 #include "dm_defs.h"
 #include "dm_state.h"
+#include "edge_profiling.h"
+#include "i_defs_gl.h"  // needed for r_shader.h
+#include "i_system.h"
 #include "m_bbox.h"
 #include "p_local.h"
 #include "p_spec.h"
@@ -45,15 +45,10 @@
 #include "r_shader.h"
 #include "r_state.h"
 
-#include "AlmostEquals.h"
-#include "edge_profiling.h"
-
 // FIXME: have a proper API
 extern abstract_shader_c *MakeDLightShader(mobj_t *mo);
 extern abstract_shader_c *MakePlaneGlow(mobj_t *mo);
 extern abstract_shader_c *MakeWallGlow(mobj_t *mo);
-
-#define MAXRADIUS 128.0
 
 // BLOCKMAP
 //
@@ -65,70 +60,74 @@ extern abstract_shader_c *MakeWallGlow(mobj_t *mo);
 //
 // Blockmap size.
 // 23-6-98 KM Promotion of short * to int *
-int bmap_width  = 0;
-int bmap_height = 0; // size in mapblocks
+int blockmap_width  = 0;
+int blockmap_height = 0;  // size in mapblocks
 
 // origin of block map
-float bmap_orgx;
-float bmap_orgy;
+float blockmap_origin_x;
+float blockmap_origin_y;
 
-typedef std::list<line_t *> linedef_set_t;
-
-static linedef_set_t **bmap_lines = nullptr;
+static std::list<line_t *> **blockmap_lines = nullptr;
 
 // for thing chains
-mobj_t **bmap_things = nullptr;
+mobj_t **blockmap_things = nullptr;
 
 // for dynamic lights
-int dlmap_width;
-int dlmap_height;
+static int dynamic_light_blockmap_width;
+static int dynamic_light_blockmap_height;
 
-mobj_t **dlmap_things = nullptr;
+mobj_t **dynamic_light_blockmap_things = nullptr;
 
 extern std::unordered_set<abstract_shader_c *> seen_dlights;
-extern ConsoleVariable                                  r_culling;
+extern ConsoleVariable                         r_culling;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(r_maxdlights, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(max_dynamic_lights, "0",
+                             kConsoleVariableFlagArchive)
 
-void P_CreateThingBlockMap(void)
+void CreateThingBlockmap(void)
 {
-    bmap_things = new mobj_t *[bmap_width * bmap_height];
+    blockmap_things = new mobj_t *[blockmap_width * blockmap_height];
 
-    Z_Clear(bmap_things, mobj_t *, bmap_width * bmap_height);
+    Z_Clear(blockmap_things, mobj_t *, blockmap_width * blockmap_height);
 
     // compute size of dynamic light blockmap
-    dlmap_width  = (bmap_width * BLOCKMAP_UNIT + LIGHTMAP_UNIT - 1) / LIGHTMAP_UNIT;
-    dlmap_height = (bmap_height * BLOCKMAP_UNIT + LIGHTMAP_UNIT - 1) / LIGHTMAP_UNIT;
+    dynamic_light_blockmap_width =
+        (blockmap_width * kBlockmapUnitSize + kLightmapUnitSize - 1) /
+        kLightmapUnitSize;
+    dynamic_light_blockmap_height =
+        (blockmap_height * kBlockmapUnitSize + kLightmapUnitSize - 1) /
+        kLightmapUnitSize;
 
-    LogDebug("Blockmap size: %dx%d --> Lightmap size: %dx%x\n", bmap_width, bmap_height, dlmap_width, dlmap_height);
+    LogDebug("Blockmap size: %dx%d --> Lightmap size: %dx%x\n", blockmap_width,
+             blockmap_height, dynamic_light_blockmap_width,
+             dynamic_light_blockmap_height);
 
-    dlmap_things = new mobj_t *[dlmap_width * dlmap_height];
+    dynamic_light_blockmap_things = new mobj_t
+        *[dynamic_light_blockmap_width * dynamic_light_blockmap_height];
 
-    Z_Clear(dlmap_things, mobj_t *, dlmap_width * dlmap_height);
+    Z_Clear(dynamic_light_blockmap_things, mobj_t *,
+            dynamic_light_blockmap_width * dynamic_light_blockmap_height);
 }
 
-void P_DestroyBlockMap(void)
+void DestroyBlockmap(void)
 {
-    if (bmap_lines)
+    if (blockmap_lines)
     {
-        for (int i = 0; i < bmap_width * bmap_height; i++)
+        for (int i = 0; i < blockmap_width * blockmap_height; i++)
         {
-            if (bmap_lines[i])
-            {
-                delete bmap_lines[i];
-            }
+            if (blockmap_lines[i]) { delete blockmap_lines[i]; }
         }
     }
 
-    delete[] bmap_lines;
-    bmap_lines = nullptr;
-    delete[] bmap_things;
-    bmap_things = nullptr;
+    delete[] blockmap_lines;
+    blockmap_lines = nullptr;
+    delete[] blockmap_things;
+    blockmap_things = nullptr;
 
-    delete[] dlmap_things;
-    dlmap_things = nullptr;
+    delete[] dynamic_light_blockmap_things;
+    dynamic_light_blockmap_things = nullptr;
 
-    bmap_width = bmap_height = 0;
+    blockmap_width = blockmap_height = 0;
 }
 
 //--------------------------------------------------------------------------
@@ -162,10 +161,7 @@ static inline touch_node_t *TouchNodeAlloc(void)
         tn               = free_touch_nodes;
         free_touch_nodes = tn->mo_next;
     }
-    else
-    {
-        tn = new touch_node_t;
-    }
+    else { tn = new touch_node_t; }
 
     return tn;
 }
@@ -188,8 +184,7 @@ static inline void TouchNodeLinkIntoSector(touch_node_t *tn, sector_t *sec)
     tn->sec_next = sec->touch_things;
     tn->sec_prev = nullptr;
 
-    if (tn->sec_next)
-        tn->sec_next->sec_prev = tn;
+    if (tn->sec_next) tn->sec_next->sec_prev = tn;
 
     sec->touch_things = tn;
 }
@@ -201,16 +196,14 @@ static inline void TouchNodeLinkIntoThing(touch_node_t *tn, mobj_t *mo)
     tn->mo_next = mo->touch_sectors;
     tn->mo_prev = nullptr;
 
-    if (tn->mo_next)
-        tn->mo_next->mo_prev = tn;
+    if (tn->mo_next) tn->mo_next->mo_prev = tn;
 
     mo->touch_sectors = tn;
 }
 
 static inline void TouchNodeUnlinkFromSector(touch_node_t *tn)
 {
-    if (tn->sec_next)
-        tn->sec_next->sec_prev = tn->sec_prev;
+    if (tn->sec_next) tn->sec_next->sec_prev = tn->sec_prev;
 
     if (tn->sec_prev)
         tn->sec_prev->sec_next = tn->sec_next;
@@ -220,8 +213,7 @@ static inline void TouchNodeUnlinkFromSector(touch_node_t *tn)
 
 static inline void TouchNodeUnlinkFromThing(touch_node_t *tn)
 {
-    if (tn->mo_next)
-        tn->mo_next->mo_prev = tn->mo_prev;
+    if (tn->mo_next) tn->mo_next->mo_prev = tn->mo_prev;
 
     if (tn->mo_prev)
         tn->mo_prev->mo_next = tn->mo_next;
@@ -229,17 +221,16 @@ static inline void TouchNodeUnlinkFromThing(touch_node_t *tn)
         tn->mo->touch_sectors = tn->mo_next;
 }
 
-typedef struct setposbsp_s
+struct BspThingPosition
 {
     mobj_t *thing;
-
-    float bbox[4];
-} setposbsp_t;
+    float   bbox[4];
+};
 
 //
 // SetPositionBSP
 //
-static void SetPositionBSP(setposbsp_t *info, int nodenum)
+static void SetPositionBSP(BspThingPosition *info, int nodenum)
 {
     touch_node_t *tn;
     sector_t     *sec;
@@ -275,16 +266,14 @@ static void SetPositionBSP(setposbsp_t *info, int nodenum)
     {
         divline_t div;
 
-        if (seg->miniseg)
-            continue;
+        if (seg->miniseg) continue;
 
         div.x  = seg->v1->X;
         div.y  = seg->v1->Y;
         div.dx = seg->v2->X - div.x;
         div.dy = seg->v2->Y - div.y;
 
-        if (P_BoxOnDivLineSide(info->bbox, &div) == 1)
-            return;
+        if (P_BoxOnDivLineSide(info->bbox, &div) == 1) return;
     }
 
     // Perform linkage...
@@ -321,8 +310,7 @@ static void SetPositionBSP(setposbsp_t *info, int nodenum)
         SYS_ASSERT(tn->mo == info->thing);
 
         // sector already present ?
-        if (tn->sec == sec)
-            return;
+        if (tn->sec == sec) return;
     }
 
     // need to allocate a new touch node
@@ -333,7 +321,7 @@ static void SetPositionBSP(setposbsp_t *info, int nodenum)
 }
 
 //
-// P_UnsetThingPosition
+// UnsetThingPosition
 //
 // Unlinks a thing from block map and subsector.
 // On each position change, BLOCKMAP and other
@@ -343,7 +331,7 @@ static void SetPositionBSP(setposbsp_t *info, int nodenum)
 // -ES- 1999/12/04 Better error checking: Clear prev/next fields.
 // This catches errors which can occur if the position is unset twice.
 //
-void P_UnsetThingPosition(mobj_t *mo)
+void UnsetThingPosition(mobj_t *mo)
 {
     int blockx;
     int blocky;
@@ -392,10 +380,7 @@ void P_UnsetThingPosition(mobj_t *mo)
     // unlink from touching list.
     // NOTE: lazy unlinking -- see notes in r_defs.h
     //
-    for (tn = mo->touch_sectors; tn; tn = tn->mo_next)
-    {
-        tn->mo = nullptr;
-    }
+    for (tn = mo->touch_sectors; tn; tn = tn->mo_next) { tn->mo = nullptr; }
 
     // unlink from blockmap
     if (!(mo->flags & kMapObjectFlagNoBlockmap))
@@ -422,16 +407,17 @@ void P_UnsetThingPosition(mobj_t *mo)
         }
         else
         {
-            blockx = BLOCKMAP_GET_X(mo->x);
-            blocky = BLOCKMAP_GET_Y(mo->y);
+            blockx = BlockmapGetX(mo->x);
+            blocky = BlockmapGetY(mo->y);
 
-            if (blockx >= 0 && blockx < bmap_width && blocky >= 0 && blocky < bmap_height)
+            if (blockx >= 0 && blockx < blockmap_width && blocky >= 0 &&
+                blocky < blockmap_height)
             {
-                bnum = blocky * bmap_width + blockx;
+                bnum = blocky * blockmap_width + blockx;
 
-                SYS_ASSERT(bmap_things[bnum] == mo);
+                SYS_ASSERT(blockmap_things[bnum] == mo);
 
-                bmap_things[bnum] = mo->bnext;
+                blockmap_things[bnum] = mo->bnext;
             }
         }
 
@@ -440,7 +426,8 @@ void P_UnsetThingPosition(mobj_t *mo)
     }
 
     // unlink from dynamic light blockmap
-    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) && (mo->info->glow_type_ == kSectorGlowTypeNone))
+    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) &&
+        (mo->info->glow_type_ == kSectorGlowTypeNone))
     {
         if (mo->dlnext)
         {
@@ -463,15 +450,16 @@ void P_UnsetThingPosition(mobj_t *mo)
         }
         else
         {
-            blockx = LIGHTMAP_GET_X(mo->x);
-            blocky = LIGHTMAP_GET_Y(mo->y);
+            blockx = LightmapGetX(mo->x);
+            blocky = LightmapGetY(mo->y);
 
-            if (blockx >= 0 && blockx < dlmap_width && blocky >= 0 && blocky < dlmap_height)
+            if (blockx >= 0 && blockx < dynamic_light_blockmap_width &&
+                blocky >= 0 && blocky < dynamic_light_blockmap_height)
             {
-                bnum = blocky * dlmap_width + blockx;
+                bnum = blocky * dynamic_light_blockmap_width + blockx;
 
-                SYS_ASSERT(dlmap_things[bnum] == mo);
-                dlmap_things[bnum] = mo->dlnext;
+                SYS_ASSERT(dynamic_light_blockmap_things[bnum] == mo);
+                dynamic_light_blockmap_things[bnum] = mo->dlnext;
             }
         }
 
@@ -480,7 +468,8 @@ void P_UnsetThingPosition(mobj_t *mo)
     }
 
     // unlink from sector glow list
-    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) && (mo->info->glow_type_ != kSectorGlowTypeNone))
+    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) &&
+        (mo->info->glow_type_ != kSectorGlowTypeNone))
     {
         sector_t *sec = mo->subsector->sector;
 
@@ -519,15 +508,15 @@ void P_UnsetThingPosition(mobj_t *mo)
 }
 
 //
-// P_UnsetThingFinally
+// UnsetThingFinal
 //
 // Call when the thing is about to be removed for good.
 //
-void P_UnsetThingFinally(mobj_t *mo)
+void UnsetThingFinal(mobj_t *mo)
 {
     touch_node_t *tn;
 
-    P_UnsetThingPosition(mo);
+    UnsetThingPosition(mo);
 
     // clear out touch nodes
 
@@ -542,24 +531,24 @@ void P_UnsetThingFinally(mobj_t *mo)
 }
 
 //
-// P_SetThingPosition
+// SetThingPosition
 //
 // Links a thing into both a block and a subsector
 // based on it's x y.
 //
-void P_SetThingPosition(mobj_t *mo)
+void SetThingPosition(mobj_t *mo)
 {
     subsector_t *ss;
     int          blockx;
     int          blocky;
     int          bnum;
 
-    setposbsp_t   pos;
-    touch_node_t *tn;
+    BspThingPosition pos;
+    touch_node_t    *tn;
 
     // -ES- 1999/12/04 The position must be unset before it's set again.
     if (mo->snext || mo->sprev || mo->bnext || mo->bprev)
-        FatalError("INTERNAL ERROR: Double P_SetThingPosition call.");
+        FatalError("INTERNAL ERROR: Double SetThingPosition call.");
 
     SYS_ASSERT(!(mo->dlnext || mo->dlprev));
 
@@ -575,8 +564,7 @@ void P_SetThingPosition(mobj_t *mo)
         mo->snext = ss->thinglist;
         mo->sprev = nullptr;
 
-        if (ss->thinglist)
-            ss->thinglist->sprev = mo;
+        if (ss->thinglist) ss->thinglist->sprev = mo;
 
         ss->thinglist = mo;
     }
@@ -587,7 +575,7 @@ void P_SetThingPosition(mobj_t *mo)
     touchstat_moves++;
 #endif
 
-    pos.thing           = mo;
+    pos.thing                    = mo;
     pos.bbox[kBoundingBoxLeft]   = mo->x - mo->radius;
     pos.bbox[kBoundingBoxRight]  = mo->x + mo->radius;
     pos.bbox[kBoundingBoxBottom] = mo->y - mo->radius;
@@ -620,7 +608,7 @@ void P_SetThingPosition(mobj_t *mo)
         }
     }
 
-#if 0 // PROFILING
+#if 0  // PROFILING
 	{
 		static int last_time = 0;
 
@@ -641,20 +629,20 @@ void P_SetThingPosition(mobj_t *mo)
     // link into blockmap
     if (!(mo->flags & kMapObjectFlagNoBlockmap))
     {
-        blockx = BLOCKMAP_GET_X(mo->x);
-        blocky = BLOCKMAP_GET_Y(mo->y);
+        blockx = BlockmapGetX(mo->x);
+        blocky = BlockmapGetY(mo->y);
 
-        if (blockx >= 0 && blockx < bmap_width && blocky >= 0 && blocky < bmap_height)
+        if (blockx >= 0 && blockx < blockmap_width && blocky >= 0 &&
+            blocky < blockmap_height)
         {
-            bnum = blocky * bmap_width + blockx;
+            bnum = blocky * blockmap_width + blockx;
 
             mo->bprev = nullptr;
-            mo->bnext = bmap_things[bnum];
+            mo->bnext = blockmap_things[bnum];
 
-            if (bmap_things[bnum])
-                (bmap_things[bnum])->bprev = mo;
+            if (blockmap_things[bnum]) (blockmap_things[bnum])->bprev = mo;
 
-            bmap_things[bnum] = mo;
+            blockmap_things[bnum] = mo;
         }
         else
         {
@@ -664,22 +652,24 @@ void P_SetThingPosition(mobj_t *mo)
     }
 
     // link into dynamic light blockmap
-    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) && (mo->info->glow_type_ == kSectorGlowTypeNone))
+    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) &&
+        (mo->info->glow_type_ == kSectorGlowTypeNone))
     {
-        blockx = LIGHTMAP_GET_X(mo->x);
-        blocky = LIGHTMAP_GET_Y(mo->y);
+        blockx = LightmapGetX(mo->x);
+        blocky = LightmapGetY(mo->y);
 
-        if (blockx >= 0 && blockx < dlmap_width && blocky >= 0 && blocky < dlmap_height)
+        if (blockx >= 0 && blockx < dynamic_light_blockmap_width &&
+            blocky >= 0 && blocky < dynamic_light_blockmap_height)
         {
-            bnum = blocky * dlmap_width + blockx;
+            bnum = blocky * dynamic_light_blockmap_width + blockx;
 
             mo->dlprev = nullptr;
-            mo->dlnext = dlmap_things[bnum];
+            mo->dlnext = dynamic_light_blockmap_things[bnum];
 
-            if (dlmap_things[bnum])
-                (dlmap_things[bnum])->dlprev = mo;
+            if (dynamic_light_blockmap_things[bnum])
+                (dynamic_light_blockmap_things[bnum])->dlprev = mo;
 
-            dlmap_things[bnum] = mo;
+            dynamic_light_blockmap_things[bnum] = mo;
         }
         else
         {
@@ -689,48 +679,47 @@ void P_SetThingPosition(mobj_t *mo)
     }
 
     // link into sector glow list
-    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) && (mo->info->glow_type_ != kSectorGlowTypeNone))
+    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) &&
+        (mo->info->glow_type_ != kSectorGlowTypeNone))
     {
         sector_t *sec = mo->subsector->sector;
 
         mo->dlprev = nullptr;
         mo->dlnext = sec->glow_things;
 
-        if (sec->glow_things)
-            sec->glow_things->dlprev = mo;
+        if (sec->glow_things) sec->glow_things->dlprev = mo;
 
         sec->glow_things = mo;
     }
 }
 
 //
-// P_ChangeThingPosition
+// ChangeThingPosition
 //
 // New routine to "atomicly" move a thing.  Apart from object
 // construction and destruction, this routine should always be called
 // when moving a thing, rather than fiddling with the coordinates
 // directly (or even P_UnsetThingPos/P_SetThingPos pairs).
 //
-void P_ChangeThingPosition(mobj_t *mo, float x, float y, float z)
+void ChangeThingPosition(mobj_t *mo, float x, float y, float z)
 {
-    P_UnsetThingPosition(mo);
+    UnsetThingPosition(mo);
     {
         mo->x = x;
         mo->y = y;
         mo->z = z;
     }
-    P_SetThingPosition(mo);
+    SetThingPosition(mo);
 }
 
 //
-// P_FreeSectorTouchNodes
+// FreeSectorTouchNodes
 //
-void P_FreeSectorTouchNodes(sector_t *sec)
+void FreeSectorTouchNodes(sector_t *sec)
 {
     touch_node_t *tn;
 
-    for (tn = sec->touch_things; tn; tn = tn->sec_next)
-        TouchNodeFree(tn);
+    for (tn = sec->touch_things; tn; tn = tn->sec_next) TouchNodeFree(tn);
 }
 
 //--------------------------------------------------------------------------
@@ -744,56 +733,57 @@ void P_FreeSectorTouchNodes(sector_t *sec)
 //
 
 //
-// P_BlockLinesIterator
+// BlockmapLineIterator
 //
 // The validcount flags are used to avoid checking lines
 // that are marked in multiple mapblocks,
 // so increment validcount before the first call
-// to P_BlockLinesIterator, then make one or more calls
+// to BlockmapLineIterator, then make one or more calls
 // to it.
 //
-bool P_BlockLinesIterator(float x1, float y1, float x2, float y2, bool (*func)(line_t *, void *), void *data)
+bool BlockmapLineIterator(float x1, float y1, float x2, float y2,
+                          bool (*func)(line_t *, void *), void *data)
 {
     validcount++;
 
-    int lx = BLOCKMAP_GET_X(x1);
-    int ly = BLOCKMAP_GET_Y(y1);
-    int hx = BLOCKMAP_GET_X(x2);
-    int hy = BLOCKMAP_GET_Y(y2);
+    int lx = BlockmapGetX(x1);
+    int ly = BlockmapGetY(y1);
+    int hx = BlockmapGetX(x2);
+    int hy = BlockmapGetY(y2);
 
     lx = HMM_MAX(0, lx);
-    hx = HMM_MIN(bmap_width - 1, hx);
+    hx = HMM_MIN(blockmap_width - 1, hx);
     ly = HMM_MAX(0, ly);
-    hy = HMM_MIN(bmap_height - 1, hy);
+    hy = HMM_MIN(blockmap_height - 1, hy);
 
     for (int by = ly; by <= hy; by++)
         for (int bx = lx; bx <= hx; bx++)
         {
-            linedef_set_t *lset = bmap_lines[by * bmap_width + bx];
+            std::list<line_t *> *lset =
+                blockmap_lines[by * blockmap_width + bx];
 
-            if (!lset)
-                continue;
+            if (!lset) continue;
 
-            linedef_set_t::iterator LI;
+            std::list<line_t *>::iterator LI;
             for (LI = lset->begin(); LI != lset->end(); LI++)
             {
                 line_t *ld = *LI;
 
                 // has line already been checked ?
-                if (ld->validcount == validcount)
-                    continue;
+                if (ld->validcount == validcount) continue;
 
                 ld->validcount = validcount;
 
                 // check whether line touches the given bbox
-                if (ld->bbox[kBoundingBoxRight] <= x1 || ld->bbox[kBoundingBoxLeft] >= x2 || ld->bbox[kBoundingBoxTop] <= y1 ||
+                if (ld->bbox[kBoundingBoxRight] <= x1 ||
+                    ld->bbox[kBoundingBoxLeft] >= x2 ||
+                    ld->bbox[kBoundingBoxTop] <= y1 ||
                     ld->bbox[kBoundingBoxBottom] >= y2)
                 {
                     continue;
                 }
 
-                if (!func(ld, data))
-                    return false;
+                if (!func(ld, data)) return false;
             }
         }
 
@@ -801,90 +791,92 @@ bool P_BlockLinesIterator(float x1, float y1, float x2, float y2, bool (*func)(l
     return true;
 }
 
-bool P_BlockThingsIterator(float x1, float y1, float x2, float y2, bool (*func)(mobj_t *, void *), void *data)
+bool BlockmapThingIterator(float x1, float y1, float x2, float y2,
+                           bool (*func)(mobj_t *, void *), void *data)
 {
     // need to expand the source by one block because large
-    // things (radius limited to BLOCKMAP_UNIT) can overlap
+    // things (radius limited to kBlockmapUnitSize) can overlap
     // into adjacent blocks.
 
-    int lx = BLOCKMAP_GET_X(x1) - 1;
-    int ly = BLOCKMAP_GET_Y(y1) - 1;
-    int hx = BLOCKMAP_GET_X(x2) + 1;
-    int hy = BLOCKMAP_GET_Y(y2) + 1;
+    int lx = BlockmapGetX(x1) - 1;
+    int ly = BlockmapGetY(y1) - 1;
+    int hx = BlockmapGetX(x2) + 1;
+    int hy = BlockmapGetY(y2) + 1;
 
     lx = HMM_MAX(0, lx);
-    hx = HMM_MIN(bmap_width - 1, hx);
+    hx = HMM_MIN(blockmap_width - 1, hx);
     ly = HMM_MAX(0, ly);
-    hy = HMM_MIN(bmap_height - 1, hy);
+    hy = HMM_MIN(blockmap_height - 1, hy);
 
     for (int by = ly; by <= hy; by++)
         for (int bx = lx; bx <= hx; bx++)
         {
-            for (mobj_t *mo = bmap_things[by * bmap_width + bx]; mo; mo = mo->bnext)
+            for (mobj_t *mo = blockmap_things[by * blockmap_width + bx]; mo;
+                 mo         = mo->bnext)
             {
                 // check whether thing touches the given bbox
                 float r = mo->radius;
 
-                if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2)
+                if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 ||
+                    mo->y - r >= y2)
                     continue;
 
-                if (!func(mo, data))
-                    return false;
+                if (!func(mo, data)) return false;
             }
         }
 
     return true;
 }
 
-void P_DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, float z2, void (*func)(mobj_t *, void *),
-                            void *data)
+void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
+                          float z2, void (*func)(mobj_t *, void *), void *data)
 {
     EDGE_ZoneScoped;
     ecframe_stats.draw_light_iterator++;
 
-    int lx = LIGHTMAP_GET_X(x1) - 1;
-    int ly = LIGHTMAP_GET_Y(y1) - 1;
-    int hx = LIGHTMAP_GET_X(x2) + 1;
-    int hy = LIGHTMAP_GET_Y(y2) + 1;
+    int lx = LightmapGetX(x1) - 1;
+    int ly = LightmapGetY(y1) - 1;
+    int hx = LightmapGetX(x2) + 1;
+    int hy = LightmapGetY(y2) + 1;
 
     lx = HMM_MAX(0, lx);
-    hx = HMM_MIN(dlmap_width - 1, hx);
+    hx = HMM_MIN(dynamic_light_blockmap_width - 1, hx);
     ly = HMM_MAX(0, ly);
-    hy = HMM_MIN(dlmap_height - 1, hy);
+    hy = HMM_MIN(dynamic_light_blockmap_height - 1, hy);
 
     for (int by = ly; by <= hy; by++)
         for (int bx = lx; bx <= hx; bx++)
         {
-            for (mobj_t *mo = dlmap_things[by * dlmap_width + bx]; mo; mo = mo->dlnext)
+            for (mobj_t *mo = dynamic_light_blockmap_things
+                     [by * dynamic_light_blockmap_width + bx];
+                 mo; mo = mo->dlnext)
             {
                 SYS_ASSERT(mo->state);
 
                 // skip "off" lights
-                if (mo->state->bright <= 0 || mo->dlight.r <= 0)
-                    continue;
+                if (mo->state->bright <= 0 || mo->dlight.r <= 0) continue;
 
-                if (r_culling.d_&& R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f_)
+                if (r_culling.d_ &&
+                    R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f_)
                     continue;
 
                 // check whether radius touches the given bbox
                 float r = mo->dlight.r;
 
-                if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 || mo->y - r >= y2 || mo->z + r <= z1 ||
-                    mo->z - r >= z2)
+                if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 ||
+                    mo->y - r >= y2 || mo->z + r <= z1 || mo->z - r >= z2)
                     continue;
 
                 // create shader if necessary
                 if (!mo->dlight.shader)
                     mo->dlight.shader = MakeDLightShader(mo);
 
-                if (r_maxdlights.d_> 0 && seen_dlights.count(mo->dlight.shader) == 0)
+                if (max_dynamic_lights.d_ > 0 &&
+                    seen_dlights.count(mo->dlight.shader) == 0)
                 {
-                    if ((int)seen_dlights.size() >= r_maxdlights.d_* 20)
+                    if ((int)seen_dlights.size() >= max_dynamic_lights.d_ * 20)
                         continue;
-                    else
-                    {
-                        seen_dlights.insert(mo->dlight.shader);
-                    }
+                    else { seen_dlights.insert(mo->dlight.shader); }
                 }
 
                 //			mo->dlight.shader->CheckReset();
@@ -894,21 +886,22 @@ void P_DynamicLightIterator(float x1, float y1, float z1, float x2, float y2, fl
         }
 }
 
-void P_SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2, float y2, float z2,
-                          void (*func)(mobj_t *, void *), void *data)
+void SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
+                        float y2, float z2, void (*func)(mobj_t *, void *),
+                        void *data)
 {
     EDGE_ZoneScoped;
     ecframe_stats.draw_sector_glow_iterator++;
-    
+
     for (mobj_t *mo = sec->glow_things; mo; mo = mo->dlnext)
     {
         SYS_ASSERT(mo->state);
 
         // skip "off" lights
-        if (mo->state->bright <= 0 || mo->dlight.r <= 0)
-            continue;
+        if (mo->state->bright <= 0 || mo->dlight.r <= 0) continue;
 
-        if (r_culling.d_&& R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f_)
+        if (r_culling.d_ &&
+            R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f_)
             continue;
 
         // check whether radius touches the given bbox
@@ -917,7 +910,8 @@ void P_SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
         if (mo->info->glow_type_ == kSectorGlowTypeFloor && sec->f_h + r <= z1)
             continue;
 
-        if (mo->info->glow_type_ == kSectorGlowTypeCeiling && sec->c_h - r >= z1)
+        if (mo->info->glow_type_ == kSectorGlowTypeCeiling &&
+            sec->c_h - r >= z1)
             continue;
 
         // create shader if necessary
@@ -943,7 +937,7 @@ void P_SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
                     {
                         mo->dlight.shader = MakeWallGlow(mo);
                     }
-                    else // skip useless repeated checks
+                    else  // skip useless repeated checks
                     {
                         mo->dlight.bad_wall_glow = true;
                         continue;
@@ -967,19 +961,18 @@ void P_SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
 // INTERCEPT ROUTINES
 //
 
-static std::vector<intercept_t> intercepts;
+static std::vector<PathIntercept> intercepts;
 
 divline_t trace;
 
-float P_InterceptVector(divline_t *v2, divline_t *v1)
+float PathInterceptVector(divline_t *v2, divline_t *v1)
 {
     // Returns the fractional intercept point along the first divline.
     // This is only called by the addthings and addlines traversers.
 
     float den = (v1->dy * v2->dx) - (v1->dx * v2->dy);
 
-    if (AlmostEquals(den, 0.0f))
-        return 0; // parallel
+    if (AlmostEquals(den, 0.0f)) return 0;  // parallel
 
     float num = (v1->x - v2->x) * v1->dy + (v2->y - v1->y) * v1->dx;
 
@@ -997,14 +990,13 @@ static inline void PIT_AddLineIntercept(line_t *ld)
     // Returns true if earlyout and a solid line hit.
 
     // has line already been checked ?
-    if (ld->validcount == validcount)
-        return;
+    if (ld->validcount == validcount) return;
 
     ld->validcount = validcount;
 
     int       s1;
     int       s2;
-    float     frac;
+    float     along;
     divline_t div;
 
     div.x  = ld->v1->X;
@@ -1025,22 +1017,20 @@ static inline void PIT_AddLineIntercept(line_t *ld)
     }
 
     // line isn't crossed ?
-    if (s1 == s2)
-        return;
+    if (s1 == s2) return;
 
     // hit the line
 
-    frac = P_InterceptVector(&trace, &div);
+    along = PathInterceptVector(&trace, &div);
 
     // out of range?
-    if (frac < 0 || frac > 1)
-        return;
+    if (along < 0 || along > 1) return;
 
     // Intercept is a simple struct that can be memcpy()'d: Load
     // up a structure and get into the array
-    intercept_t in;
+    PathIntercept in;
 
-    in.frac  = frac;
+    in.along = along;
     in.thing = nullptr;
     in.line  = ld;
 
@@ -1061,7 +1051,7 @@ static inline void PIT_AddThingIntercept(mobj_t *thing)
 
     divline_t div;
 
-    float frac;
+    float along;
 
     tracepositive = (trace.dx >= 0) == (trace.dy >= 0);
 
@@ -1087,25 +1077,23 @@ static inline void PIT_AddThingIntercept(mobj_t *thing)
     s2 = P_PointOnDivlineSide(x2, y2, &trace);
 
     // line isn't crossed ?
-    if (s1 == s2)
-        return;
+    if (s1 == s2) return;
 
     div.x  = x1;
     div.y  = y1;
     div.dx = x2 - x1;
     div.dy = y2 - y1;
 
-    frac = P_InterceptVector(&trace, &div);
+    along = PathInterceptVector(&trace, &div);
 
     // out of range?
-    if (frac < 0 || frac > 1)
-        return;
+    if (along < 0 || along > 1) return;
 
     // Intercept is a simple struct that can be memcpy()'d: Load
     // up a structure and get into the array
-    intercept_t in;
+    PathIntercept in;
 
-    in.frac  = frac;
+    in.along = along;
     in.thing = thing;
     in.line  = nullptr;
 
@@ -1114,31 +1102,32 @@ static inline void PIT_AddThingIntercept(mobj_t *thing)
 
 struct Compare_Intercept_pred
 {
-    inline bool operator()(const intercept_t &A, const intercept_t &B) const
+    inline bool operator()(const PathIntercept &A, const PathIntercept &B) const
     {
-        return A.frac < B.frac;
+        return A.along < B.along;
     }
 };
 
 //
-// P_PathTraverse
+// PathTraverse
 //
 // Traces a line from x1,y1 to x2,y2,
 // calling the traverser function for each.
 // Returns true if the traverser function returns true
 // for all lines.
 //
-bool P_PathTraverse(float x1, float y1, float x2, float y2, int flags, bool (*func)(intercept_t *, void *), void *data)
+bool PathTraverse(float x1, float y1, float x2, float y2, int flags,
+                  bool (*func)(PathIntercept *, void *), void *data)
 {
     validcount++;
 
     intercepts.clear();
 
     // don't side exactly on a line
-    if (AlmostEquals(fmod(x1 - bmap_orgx, BLOCKMAP_UNIT), 0.0))
+    if (AlmostEquals(fmod(x1 - blockmap_origin_x, kBlockmapUnitSize), 0.0))
         x1 += 0.1f;
 
-    if (AlmostEquals(fmod(y1 - bmap_orgy, BLOCKMAP_UNIT), 0.0))
+    if (AlmostEquals(fmod(y1 - blockmap_origin_y, kBlockmapUnitSize), 0.0))
         y1 += 0.1f;
 
     trace.x  = x1;
@@ -1146,15 +1135,15 @@ bool P_PathTraverse(float x1, float y1, float x2, float y2, int flags, bool (*fu
     trace.dx = x2 - x1;
     trace.dy = y2 - y1;
 
-    x1 -= bmap_orgx;
-    y1 -= bmap_orgy;
-    x2 -= bmap_orgx;
-    y2 -= bmap_orgy;
+    x1 -= blockmap_origin_x;
+    y1 -= blockmap_origin_y;
+    x2 -= blockmap_origin_x;
+    y2 -= blockmap_origin_y;
 
-    int bx1 = (int)(x1 / BLOCKMAP_UNIT);
-    int by1 = (int)(y1 / BLOCKMAP_UNIT);
-    int bx2 = (int)(x2 / BLOCKMAP_UNIT);
-    int by2 = (int)(y2 / BLOCKMAP_UNIT);
+    int bx1 = (int)(x1 / kBlockmapUnitSize);
+    int by1 = (int)(y1 / kBlockmapUnitSize);
+    int bx2 = (int)(x2 / kBlockmapUnitSize);
+    int by2 = (int)(y2 / kBlockmapUnitSize);
 
     int bx_step;
     int by_step;
@@ -1169,14 +1158,14 @@ bool P_PathTraverse(float x1, float y1, float x2, float y2, int flags, bool (*fu
     if (bx2 > bx1 && (x2 - x1) > 0.001)
     {
         bx_step = 1;
-        partial = 1.0f - modf(x1 / BLOCKMAP_UNIT, &tmp);
+        partial = 1.0f - modf(x1 / kBlockmapUnitSize, &tmp);
 
         ystep = (y2 - y1) / fabs(x2 - x1);
     }
     else if (bx2 < bx1 && (x2 - x1) < -0.001)
     {
         bx_step = -1;
-        partial = modf(x1 / BLOCKMAP_UNIT, &tmp);
+        partial = modf(x1 / kBlockmapUnitSize, &tmp);
 
         ystep = (y2 - y1) / fabs(x2 - x1);
     }
@@ -1187,19 +1176,19 @@ bool P_PathTraverse(float x1, float y1, float x2, float y2, int flags, bool (*fu
         ystep   = 256.0f;
     }
 
-    float yintercept = y1 / BLOCKMAP_UNIT + partial * ystep;
+    float yintercept = y1 / kBlockmapUnitSize + partial * ystep;
 
     if (by2 > by1 && (y2 - y1) > 0.001)
     {
         by_step = 1;
-        partial = 1.0f - modf(y1 / BLOCKMAP_UNIT, &tmp);
+        partial = 1.0f - modf(y1 / kBlockmapUnitSize, &tmp);
 
         xstep = (x2 - x1) / fabs(y2 - y1);
     }
     else if (by2 < by1 && (y2 - y1) < -0.001)
     {
         by_step = -1;
-        partial = modf(y1 / BLOCKMAP_UNIT, &tmp);
+        partial = modf(y1 / kBlockmapUnitSize, &tmp);
 
         xstep = (x2 - x1) / fabs(y2 - y1);
     }
@@ -1210,7 +1199,7 @@ bool P_PathTraverse(float x1, float y1, float x2, float y2, int flags, bool (*fu
         xstep   = 256.0f;
     }
 
-    float xintercept = x1 / BLOCKMAP_UNIT + partial * xstep;
+    float xintercept = x1 / kBlockmapUnitSize + partial * xstep;
 
     // Step through map blocks.
     // Count is present to prevent a round off error
@@ -1220,15 +1209,16 @@ bool P_PathTraverse(float x1, float y1, float x2, float y2, int flags, bool (*fu
 
     for (int count = 0; count < 64; count++)
     {
-        if (0 <= bx && bx < bmap_width && 0 <= by && by < bmap_height)
+        if (0 <= bx && bx < blockmap_width && 0 <= by && by < blockmap_height)
         {
-            if (flags & PT_ADDLINES)
+            if (flags & kPathAddLines)
             {
-                linedef_set_t *lset = bmap_lines[by * bmap_width + bx];
+                std::list<line_t *> *lset =
+                    blockmap_lines[by * blockmap_width + bx];
 
                 if (lset)
                 {
-                    linedef_set_t::iterator LI;
+                    std::list<line_t *>::iterator LI;
                     for (LI = lset->begin(); LI != lset->end(); LI++)
                     {
                         PIT_AddLineIntercept(*LI);
@@ -1236,17 +1226,17 @@ bool P_PathTraverse(float x1, float y1, float x2, float y2, int flags, bool (*fu
                 }
             }
 
-            if (flags & PT_ADDTHINGS)
+            if (flags & kPathAddThings)
             {
-                for (mobj_t *mo = bmap_things[by * bmap_width + bx]; mo; mo = mo->bnext)
+                for (mobj_t *mo = blockmap_things[by * blockmap_width + bx]; mo;
+                     mo         = mo->bnext)
                 {
                     PIT_AddThingIntercept(mo);
                 }
             }
         }
 
-        if (bx == bx2 && by == by2)
-            break;
+        if (bx == bx2 && by == by2) break;
 
         if (by == (int)yintercept)
         {
@@ -1262,12 +1252,11 @@ bool P_PathTraverse(float x1, float y1, float x2, float y2, int flags, bool (*fu
 
     // go through the sorted list
 
-    if (intercepts.size() == 0)
-        return true;
+    if (intercepts.size() == 0) return true;
 
     std::sort(intercepts.begin(), intercepts.end(), Compare_Intercept_pred());
 
-    std::vector<intercept_t>::iterator I;
+    std::vector<PathIntercept>::iterator I;
 
     for (I = intercepts.begin(); I != intercepts.end(); I++)
     {
@@ -1289,10 +1278,9 @@ bool P_PathTraverse(float x1, float y1, float x2, float y2, int flags, bool (*fu
 
 static void BlockAdd(int bnum, line_t *ld)
 {
-    if (!bmap_lines[bnum])
-        bmap_lines[bnum] = new linedef_set_t;
+    if (!blockmap_lines[bnum]) blockmap_lines[bnum] = new std::list<line_t *>;
 
-    bmap_lines[bnum]->push_back(ld);
+    blockmap_lines[bnum]->push_back(ld);
 
     // blk_total_lines++;
 }
@@ -1312,10 +1300,10 @@ static void BlockAddLine(int line_num)
 
     float slope;
 
-    x0 = (int)(ld->v1->X - bmap_orgx);
-    y0 = (int)(ld->v1->Y - bmap_orgy);
-    x1 = (int)(ld->v2->X - bmap_orgx);
-    y1 = (int)(ld->v2->Y - bmap_orgy);
+    x0 = (int)(ld->v1->X - blockmap_origin_x);
+    y0 = (int)(ld->v1->Y - blockmap_origin_y);
+    x1 = (int)(ld->v2->X - blockmap_origin_x);
+    y1 = (int)(ld->v2->Y - blockmap_origin_y);
 
     // swap endpoints if horizontally backward
     if (x1 < x0)
@@ -1330,33 +1318,33 @@ static void BlockAddLine(int line_num)
         y1   = temp;
     }
 
-    SYS_ASSERT(0 <= x0 && (x0 / BLOCKMAP_UNIT) < bmap_width);
-    SYS_ASSERT(0 <= y0 && (y0 / BLOCKMAP_UNIT) < bmap_height);
-    SYS_ASSERT(0 <= x1 && (x1 / BLOCKMAP_UNIT) < bmap_width);
-    SYS_ASSERT(0 <= y1 && (y1 / BLOCKMAP_UNIT) < bmap_height);
+    SYS_ASSERT(0 <= x0 && (x0 / kBlockmapUnitSize) < blockmap_width);
+    SYS_ASSERT(0 <= y0 && (y0 / kBlockmapUnitSize) < blockmap_height);
+    SYS_ASSERT(0 <= x1 && (x1 / kBlockmapUnitSize) < blockmap_width);
+    SYS_ASSERT(0 <= y1 && (y1 / kBlockmapUnitSize) < blockmap_height);
 
     // check if this line spans multiple blocks.
 
-    x_dist = HMM_ABS((x1 / BLOCKMAP_UNIT) - (x0 / BLOCKMAP_UNIT));
-    y_dist = HMM_ABS((y1 / BLOCKMAP_UNIT) - (y0 / BLOCKMAP_UNIT));
+    x_dist = HMM_ABS((x1 / kBlockmapUnitSize) - (x0 / kBlockmapUnitSize));
+    y_dist = HMM_ABS((y1 / kBlockmapUnitSize) - (y0 / kBlockmapUnitSize));
 
     y_sign = (y1 >= y0) ? 1 : -1;
 
     // handle the simple cases: same column or same row
 
-    blocknum = (y0 / BLOCKMAP_UNIT) * bmap_width + (x0 / BLOCKMAP_UNIT);
+    blocknum =
+        (y0 / kBlockmapUnitSize) * blockmap_width + (x0 / kBlockmapUnitSize);
 
     if (y_dist == 0)
     {
-        for (i = 0; i <= x_dist; i++, blocknum++)
-            BlockAdd(blocknum, ld);
+        for (i = 0; i <= x_dist; i++, blocknum++) BlockAdd(blocknum, ld);
 
         return;
     }
 
     if (x_dist == 0)
     {
-        for (i = 0; i <= y_dist; i++, blocknum += y_sign * bmap_width)
+        for (i = 0; i <= y_dist; i++, blocknum += y_sign * blockmap_width)
             BlockAdd(blocknum, ld);
 
         return;
@@ -1384,35 +1372,36 @@ static void BlockAddLine(int line_num)
 
         for (j = 0; j <= y_dist; j++)
         {
-            blocknum = (sy / 128 + j * y_sign) * bmap_width + (sx / 128);
+            blocknum = (sy / 128 + j * y_sign) * blockmap_width + (sx / 128);
 
             BlockAdd(blocknum, ld);
         }
     }
 }
 
-void P_GenerateBlockMap(int min_x, int min_y, int max_x, int max_y)
+void GenerateBlockmap(int min_x, int min_y, int max_x, int max_y)
 {
-    bmap_orgx   = min_x - 8;
-    bmap_orgy   = min_y - 8;
-    bmap_width  = BLOCKMAP_GET_X(max_x) + 1;
-    bmap_height = BLOCKMAP_GET_Y(max_y) + 1;
+    blockmap_origin_x = min_x - 8;
+    blockmap_origin_y = min_y - 8;
+    blockmap_width    = BlockmapGetX(max_x) + 1;
+    blockmap_height   = BlockmapGetY(max_y) + 1;
 
-    int btotal = bmap_width * bmap_height;
+    int btotal = blockmap_width * blockmap_height;
 
-    LogDebug("GenerateBlockmap: MAP (%d,%d) -> (%d,%d)\n", min_x, min_y, max_x, max_y);
-    LogDebug("GenerateBlockmap: BLOCKS %d x %d  TOTAL %d\n", bmap_width, bmap_height, btotal);
+    LogDebug("GenerateBlockmap: MAP (%d,%d) -> (%d,%d)\n", min_x, min_y, max_x,
+             max_y);
+    LogDebug("GenerateBlockmap: BLOCKS %d x %d  TOTAL %d\n", blockmap_width,
+             blockmap_height, btotal);
 
     // setup blk_cur_lines array.  Initially all pointers are nullptr, when
     // any lines get added then the dynamic array is created.
 
-    bmap_lines = new linedef_set_t *[btotal];
+    blockmap_lines = new std::list<line_t *> *[btotal];
 
-    Z_Clear(bmap_lines, linedef_set_t *, btotal);
+    Z_Clear(blockmap_lines, std::list<line_t *> *, btotal);
 
     // process each linedef of the map
-    for (int i = 0; i < numlines; i++)
-        BlockAddLine(i);
+    for (int i = 0; i < numlines; i++) BlockAddLine(i);
 
     // LogDebug("GenerateBlockmap: TOTAL DATA=%d\n", blk_total_lines);
 }

@@ -16,70 +16,72 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_IMAGE_FUNCS_H__
-#define __EPI_IMAGE_FUNCS_H__
+#pragma once
+
+#include <unordered_map>
 
 #include "file.h"
-#include "image_data.h"
-#include <unordered_map>
+#include "im_data.h"
 
 enum ImageFormat
 {
-    kUnknownImage = 0,
-    kPNGImage,
-    kTGAImage,
-    kJPEGImage,
-    kDoomImage,
-    kOtherImage // e.g. gif, dds, bmp
+    kImageUnknown = 0,
+    kImagePng,
+    kImageTga,
+    kImageJpeg,
+    kImageDoom,
+    kImageOther  // e.g. gif, dds, bmp
 };
 
-class image_rect_c
+class ImageAtlasRectangle
 {
-    public:
+   public:
     // Normalized atlas x/y/width/height for texcoords
-        float tx;
-        float ty;
-        float tw;
-        float th;
+    float texture_coordinate_x;
+    float texture_coordinate_y;
+    float texture_coordinate_width;
+    float texture_coordinate_height;
     // Actual sub-image information
-        short iw;
-        short ih;
-        float off_x;
-        float off_y;
+    short image_width;
+    short image_height;
+    float offset_x;
+    float offset_y;
 };
 
-class image_atlas_c
+class ImageAtlas
 {
-	public:
-		image_data_c *data;
-		std::unordered_map<int, image_rect_c> rects;
+   public:
+    ImageData                                   *data_;
+    std::unordered_map<int, ImageAtlasRectangle> rectangles_;
 
-  public:
-    image_atlas_c(int _w, int _h);
-    ~image_atlas_c();
+   public:
+    ImageAtlas(int w, int h);
+    ~ImageAtlas();
 };
 
 // determine image format from the first 32 bytes (or so) of the file.
 // the file_size is the total size of the file or lump, and helps to
 // distinguish DOOM patch format from other things.
-ImageFormat Image_DetectFormat(uint8_t *header, int header_len, int file_size);
+ImageFormat ImageDetectFormat(uint8_t *header, int header_lengh, int file_size);
 
 // determine image format from the filename (by its extension).
-ImageFormat Image_FilenameToFormat(const std::string &filename);
+ImageFormat ImageFormatFromFilename(const std::string &filename);
 
 // loads the given image, which must be PNG, TGA or JPEG format.
 // Returns nullptr if something went wrong.  The result image will be RGB
 // or RGBA (never paletted).  The image size (width and height) will be
 // rounded to the next power-of-two.
-image_data_c *Image_Load(epi::File *f);
+ImageData *ImageLoad(epi::File *file);
 
 // given a collection of loaded images, pack and return the image data
 // for an atlas containing all of them. Does not assume that the incoming
 // data pointers should be deleted/freed. Images at a BPP of 3 will be
 // converted to BPP 4 with 255 for their pixel alpha values.
-// The integer keys for the associated image data can vary based on need, but are
-// generally a way of tracking which part of the atlas you are trying to retrieve
-image_atlas_c *Image_Pack(const std::unordered_map<int, image_data_c *> &im_pack_data);
+// The integer keys for the associated image data can vary based on need, but
+// are generally a way of tracking which part of the atlas you are trying to
+// retrieve
+ImageAtlas *ImagePack(
+    const std::unordered_map<int, ImageData *> &image_pack_data);
 
 // reads the principle information from the image header.
 // (should be much faster than loading the whole image).
@@ -88,18 +90,16 @@ image_atlas_c *Image_Pack(const std::unordered_map<int, image_data_c *> &im_pack
 //
 // NOTE: size returned here is the real size, and may be different
 // from the image returned by Load() which rounds to power-of-two.
-bool Image_GetInfo(epi::File *f, int *width, int *height, int *bpp);
+bool ImageGetInfo(epi::File *file, int *width, int *height, int *depth);
 
 // saves the image (in JPEG format) to the given file.  Returns false if
 // something went wrong.  The image _MUST_ be RGB (bpp == 3).
-bool JPEG_Save(std::string fn, image_data_c *img);
+bool ImageSaveJpeg(std::string filename, ImageData *image);
 
 // saves the image (in PNG format) to the given file.
 // Returns false if failed to save (e.g. file already exists).
 // The image _MUST_ be RGB or RGBA.
-bool PNG_Save(std::string fn, image_data_c *img);
-
-#endif /* __EPI_IMAGE_JPEG_H__ */
+bool ImageSavePng(std::string filename, ImageData *image);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

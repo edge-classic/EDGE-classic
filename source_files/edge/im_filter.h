@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------
-//  HQ2X : High-Quality 2x Graphics Resizing
-//----------------------------------------------------------------------------
+//  EDGE Image Filtering/Scaling
+//------------------------------------------------------------------------
 //
 //  Copyright (c) 2007-2024 The EDGE Team.
 //
@@ -15,37 +15,42 @@
 //  GNU General Public License for more details.
 //
 //----------------------------------------------------------------------------
+//  Blur is based on "C++ implementation of a fast Gaussian blur algorithm by
+//    Ivan Kutskir - Integer Version"
 //
-//  Based heavily on the code (C) 2003 Maxim Stepin, which is
+//  Copyright (C) 2017 Basile Fraboni
+//  Copyright (C) 2014 Ivan Kutskir
+//  All Rights Reserved
+//  You may use, distribute and modify this code under the
+//  terms of the MIT license. For further details please refer
+//  to : https://mit-license.org/
+//
+//----------------------------------------------------------------------------
+//
+//  HQ2x is based heavily on the code (C) 2003 Maxim Stepin, which is
 //  under the GNU LGPL (Lesser General Public License).
 //
 //  For more information, see: http://hiend3d.com/hq2x.html
 //
-//------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
-#ifndef __EPI_IMAGE_HQ2X_H__
-#define __EPI_IMAGE_HQ2X_H__
+#pragma once
 
-#include "image_data.h"
+#include "im_data.h"
 
-namespace Hq2x
-{
-/* ------ Functions ------------------------------------- */
+ImageData *ImageBlur(ImageData *image, float sigma);
 
-void Setup(const uint8_t *palette, int trans_pixel);
+void Hq2xPaletteSetup(const uint8_t *palette, int transparent_pixel);
 // initialises look-up tables based on the given palette.
 // The 'trans_pixel' gives a pixel index which is fully
 // transparent, or none when -1.
 
-image_data_c *Convert(image_data_c *img, bool solid, bool invert = false);
+ImageData *ImageHq2x(ImageData *image, bool solid, bool invert = false);
 // converts a single palettised image into an RGB or RGBA
 // image (depending on the solid parameter).  The Setup()
 // method must be called sometime prior to calling this
 // function, and this determines the palette of the input
 // image.
-} // namespace Hq2x
-
-#endif /* __EPI_IMAGE_HQ2X_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

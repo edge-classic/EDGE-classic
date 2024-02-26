@@ -624,7 +624,7 @@ void HudRawFromTexID(float hx1, float hy1, float hx2, float hy2,
 }
 
 void HudStretchFromImageData(float x, float y, float w, float h,
-                             const image_data_c *img, unsigned int tex_id,
+                             const ImageData *img, unsigned int tex_id,
                              image_opacity_e opacity)
 {
     if (current_x_alignment >= 0)
@@ -640,8 +640,8 @@ void HudStretchFromImageData(float x, float y, float w, float h,
     float y2 = HudToRealCoordinatesY(y);
 
     HudRawFromTexID(x1, y1, x2, y2, tex_id, opacity, 0, 0,
-                    (float)img->used_w / img->width,
-                    (float)img->used_h / img->height, current_alpha);
+                    (float)img->used_width_ / img->width_,
+                    (float)img->used_height_ / img->height_, current_alpha);
 }
 
 void HudStretchImage(float x, float y, float w, float h, const image_c *img,
@@ -1015,20 +1015,20 @@ void HudDrawChar(float left_x, float top_y, const image_c *img, char ch,
                                  ? current_font->definition_->default_size_
                                  : current_font->patch_font_cache_.atlas_rectangles
                                        .at(kCP437UnicodeValues[(uint8_t)ch])
-                                       .ih)) *
+                                       .image_height)) *
                 sc_y;
             x -= (current_font->patch_font_cache_.atlas_rectangles
                       .at(kCP437UnicodeValues[(uint8_t)ch])
-                      .off_x *
+                      .offset_x *
                   sc_x);
             y -= (current_font->patch_font_cache_.atlas_rectangles
                       .at(kCP437UnicodeValues[(uint8_t)ch])
-                      .off_y *
+                      .offset_y *
                   sc_y);
-            tx1 = current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).tx;
-            ty2 = current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).ty;
-            tx2 = tx1 + current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).tw;
-            ty1 = ty2 + current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).th;
+            tx1 = current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).texture_coordinate_x;
+            ty2 = current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).texture_coordinate_y;
+            tx2 = tx1 + current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).texture_coordinate_width;
+            ty1 = ty2 + current_font->patch_font_cache_.atlas_rectangles.at((uint8_t)ch).texture_coordinate_height;
         }
     }
     else  // spritesheet font

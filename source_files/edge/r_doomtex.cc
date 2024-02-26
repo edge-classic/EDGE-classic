@@ -40,9 +40,9 @@
 #include "file.h"
 #include "filesystem.h"
 
-#include "image_data.h"
-#include "image_hq2x.h"
-#include "image_funcs.h"
+#include "im_data.h"
+#include "im_filter.h"
+#include "im_funcs.h"
 
 #include "dm_state.h"
 #include "e_search.h"
@@ -98,7 +98,7 @@ static uint8_t dummy_graphic[DUMMY_X * DUMMY_Y] = {
 #define GAMMA_GRN(pix) GAMMA_CONV(PIXEL_GRN(pix))
 #define GAMMA_BLU(pix) GAMMA_CONV(PIXEL_BLU(pix))
 
-static void DrawColumnIntoEpiBlock(image_c *rim, image_data_c *img, const column_t *patchcol, int x, int y)
+static void DrawColumnIntoEpiBlock(image_c *rim, ImageData *img, const column_t *patchcol, int x, int y)
 {
     SYS_ASSERT(patchcol);
 
@@ -118,7 +118,7 @@ static void DrawColumnIntoEpiBlock(image_c *rim, image_data_c *img, const column
         int count = patchcol->length;
 
         const uint8_t *src  = (const uint8_t *)patchcol + 3;
-        uint8_t       *dest = img->pixels + x;
+        uint8_t       *dest = img->pixels_ + x;
 
         // logic for DeePsea's tall patches
         if (delta <= top)
@@ -160,7 +160,7 @@ static void DrawColumnIntoEpiBlock(image_c *rim, image_data_c *img, const column
 // Loads a flat from the wad and returns the image block for it.
 // Doesn't do any mipmapping (this is too "raw" if you follow).
 //
-static image_data_c *ReadFlatAsEpiBlock(image_c *rim)
+static ImageData *ReadFlatAsEpiBlock(image_c *rim)
 {
     SYS_ASSERT(rim->source_type == IMSRC_Flat || rim->source_type == IMSRC_Raw320x200);
 
@@ -170,9 +170,9 @@ static image_data_c *ReadFlatAsEpiBlock(image_c *rim)
     int w = rim->actual_w;
     int h = rim->actual_h;
 
-    image_data_c *img = new image_data_c(tw, th, 1);
+    ImageData *img = new ImageData(tw, th, 1);
 
-    uint8_t *dest = img->pixels;
+    uint8_t *dest = img->pixels_;
 
 #ifdef MAKE_TEXTURES_WHITE
     img->Clear(pal_white);
@@ -219,7 +219,7 @@ static image_data_c *ReadFlatAsEpiBlock(image_c *rim)
 //---- This routine will also update the `solid' flag
 //---- if texture turns out to be solid.
 //
-static image_data_c *ReadTextureAsEpiBlock(image_c *rim)
+static ImageData *ReadTextureAsEpiBlock(image_c *rim)
 {
     SYS_ASSERT(rim->source_type == IMSRC_Texture);
 
@@ -229,7 +229,7 @@ static image_data_c *ReadTextureAsEpiBlock(image_c *rim)
     int tw = rim->total_w;
     int th = rim->total_h;
 
-    image_data_c *img = new image_data_c(tw, th, 1);
+    ImageData *img = new ImageData(tw, th, 1);
 
 #ifdef MAKE_TEXTURES_WHITE
     img->Clear(pal_white);
@@ -299,7 +299,7 @@ static image_data_c *ReadTextureAsEpiBlock(image_c *rim)
 //---- This routine will also update the `solid' flag
 //---- if it turns out to be 100% solid.
 //
-static image_data_c *ReadPatchAsEpiBlock(image_c *rim)
+static ImageData *ReadPatchAsEpiBlock(image_c *rim)
 {
     SYS_ASSERT(rim->source_type == IMSRC_Graphic || rim->source_type == IMSRC_Sprite ||
                rim->source_type == IMSRC_TX_HI);
@@ -317,7 +317,7 @@ static image_data_c *ReadPatchAsEpiBlock(image_c *rim)
         else
             f = W_OpenLump(lump);
 
-        image_data_c *img = Image_Load(f);
+        ImageData *img = ImageLoad(f);
 
         // close it
         delete f;
@@ -331,7 +331,7 @@ static image_data_c *ReadPatchAsEpiBlock(image_c *rim)
     int tw = rim->total_w;
     int th = rim->total_h;
 
-    image_data_c *img = new image_data_c(tw, th, 1);
+    ImageData *img = new ImageData(tw, th, 1);
 
     // Clear initial pixels to either totally transparent, or totally
     // black (if we know the image should be solid).
@@ -374,8 +374,8 @@ static image_data_c *ReadPatchAsEpiBlock(image_c *rim)
     // 2023.11.07 - These were previously left as total_w/h, which accounts
     // for power-of-two sizing and was messing up patch font atlas generation.
     // Not sure if there are any bad side effects yet - Dasho
-    img->used_w = rim->actual_w;
-    img->used_h = rim->actual_h;
+    img->used_width_ = rim->actual_w;
+    img->used_height_ = rim->actual_h;
 
     for (int x = 0; x < rim->actual_w; x++)
     {
@@ -399,7 +399,7 @@ static image_data_c *ReadPatchAsEpiBlock(image_c *rim)
 //
 // Creates a dummy image.
 //
-static image_data_c *ReadDummyAsEpiBlock(image_c *rim)
+static ImageData *ReadDummyAsEpiBlock(image_c *rim)
 {
     SYS_ASSERT(rim->source_type == IMSRC_Dummy);
     SYS_ASSERT(rim->actual_w == rim->total_w);
@@ -407,7 +407,7 @@ static image_data_c *ReadDummyAsEpiBlock(image_c *rim)
     SYS_ASSERT(rim->total_w == DUMMY_X);
     SYS_ASSERT(rim->total_h == DUMMY_Y);
 
-    image_data_c *img = new image_data_c(DUMMY_X, DUMMY_Y, 4);
+    ImageData *img = new ImageData(DUMMY_X, DUMMY_Y, 4);
 
     // copy pixels
     for (int y = 0; y < DUMMY_Y; y++)
@@ -441,17 +441,17 @@ static image_data_c *ReadDummyAsEpiBlock(image_c *rim)
     return img;
 }
 
-static image_data_c *CreateUserColourImage(image_c *rim, ImageDefinition *def)
+static ImageData *CreateUserColourImage(image_c *rim, ImageDefinition *def)
 {
     int tw = HMM_MAX(rim->total_w, 1);
     int th = HMM_MAX(rim->total_h, 1);
 
-    image_data_c *img = new image_data_c(tw, th, 3);
+    ImageData *img = new ImageData(tw, th, 3);
 
-    uint8_t *dest = img->pixels;
+    uint8_t *dest = img->pixels_;
 
-    for (int y = 0; y < img->height; y++)
-        for (int x = 0; x < img->width; x++)
+    for (int y = 0; y < img->height_; y++)
+        for (int x = 0; x < img->width_; x++)
         {
             *dest++ = epi::GetRGBARed(def->colour_);
             *dest++ = epi::GetRGBAGreen(def->colour_);
@@ -488,14 +488,14 @@ epi::File *OpenUserFileOrLump(ImageDefinition *def)
     }
 }
 
-static image_data_c *CreateUserFileImage(image_c *rim, ImageDefinition *def)
+static ImageData *CreateUserFileImage(image_c *rim, ImageDefinition *def)
 {
     epi::File *f = OpenUserFileOrLump(def);
 
     if (!f)
         FatalError("Missing image file: %s\n", def->info_.c_str());
 
-    image_data_c *img = Image_Load(f);
+    ImageData *img = ImageLoad(f);
 
     // close it
     delete f;
@@ -511,8 +511,8 @@ static image_data_c *CreateUserFileImage(image_c *rim, ImageDefinition *def)
     if (def->fix_trans_ == kTransparencyFixBlacken)
         R_BlackenClearAreas(img);
 
-    SYS_ASSERT(rim->total_w == img->width);
-    SYS_ASSERT(rim->total_h == img->height);
+    SYS_ASSERT(rim->total_w == img->width_);
+    SYS_ASSERT(rim->total_h == img->height_);
 
     // CW: Textures MUST tile! If actual size not total size, manually tile
     // [ AJA: this does not make them tile, just fills in the black gaps ]
@@ -531,7 +531,7 @@ static image_data_c *CreateUserFileImage(image_c *rim, ImageDefinition *def)
 // Loads or Creates the user defined image.
 // Doesn't do any mipmapping (this is too "raw" if you follow).
 //
-static image_data_c *ReadUserAsEpiBlock(image_c *rim)
+static ImageData *ReadUserAsEpiBlock(image_c *rim)
 {
     SYS_ASSERT(rim->source_type == IMSRC_User);
 
@@ -567,7 +567,7 @@ static image_data_c *ReadUserAsEpiBlock(image_c *rim)
 //
 // Never returns nullptr.
 //
-image_data_c *ReadAsEpiBlock(image_c *rim)
+ImageData *ReadAsEpiBlock(image_c *rim)
 {
     switch (rim->source_type)
     {

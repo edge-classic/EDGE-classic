@@ -19,7 +19,7 @@
 #ifndef __RGL_TEXGL_H__
 #define __RGL_TEXGL_H__
 
-#include "image_data.h"
+#include "im_data.h"
 
 typedef enum
 {
@@ -31,17 +31,17 @@ typedef enum
     UPL_Thresh = (1 << 3), // threshhold alpha (to 0 or 255)
 } upload_texture_flag_e;
 
-GLuint R_UploadTexture(image_data_c *img, int flags = UPL_NONE, int max_pix = (1 << 30));
+GLuint R_UploadTexture(ImageData *img, int flags = UPL_NONE, int max_pix = (1 << 30));
 
-image_data_c *R_PalettisedToRGB(image_data_c *src, const uint8_t *palette, int opacity);
+ImageData *R_PalettisedToRGB(ImageData *src, const uint8_t *palette, int opacity);
 
-void R_PaletteRemapRGBA(image_data_c *img, const uint8_t *new_pal, const uint8_t *old_pal);
+void R_PaletteRemapRGBA(ImageData *img, const uint8_t *new_pal, const uint8_t *old_pal);
 
-int R_DetermineOpacity(image_data_c *img, bool *is_empty);
+int R_DetermineOpacity(ImageData *img, bool *is_empty);
 
-void R_BlackenClearAreas(image_data_c *img);
+void R_BlackenClearAreas(ImageData *img);
 
-void R_DumpImage(image_data_c *img);
+void R_DumpImage(ImageData *img);
 
 #endif /* __RGL_TEXGL_H__ */
 

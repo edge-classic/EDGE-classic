@@ -128,7 +128,7 @@ extern ConsoleVariable r_culling;
 extern ConsoleVariable r_culldist;
 extern ConsoleVariable r_cullfog;
 extern ConsoleVariable g_cullthinkers;
-extern ConsoleVariable r_maxdlights;
+extern ConsoleVariable max_dynamic_lights;
 extern ConsoleVariable vsync;
 extern ConsoleVariable g_bobbing;
 extern ConsoleVariable g_gore;
@@ -754,9 +754,9 @@ static OptionMenuItem perfoptions[] = {
      &g_cullthinkers.d_, OptionMenuUpdateConsoleVariableFromInt,
      "Only recommended for extreme monster/projectile counts", &g_cullthinkers},
     {kOptionMenuItemTypeSwitch, "Maximum Dynamic Lights",
-     "Unlimited/20/40/60/80/100", 6, &r_maxdlights.d_,
+     "Unlimited/20/40/60/80/100", 6, &max_dynamic_lights.d_,
      OptionMenuUpdateConsoleVariableFromInt,
-     "Control how many dynamic lights are rendered per tick", &r_maxdlights},
+     "Control how many dynamic lights are rendered per tick", &max_dynamic_lights},
 };
 
 static OptionMenuDefinition perf_optmenu = {

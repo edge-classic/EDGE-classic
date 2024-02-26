@@ -48,7 +48,7 @@
 #include "hu_style.h"
 #include "i_defs_gl.h"
 #include "i_system.h"
-#include "image_funcs.h"
+#include "im_funcs.h"
 #include "m_argv.h"
 #include "m_misc.h"
 #include "m_netgame.h"
@@ -84,7 +84,7 @@ extern bool EventMatchesKey(int keyvar, int key);
 
 extern ConsoleVariable v_secbright;
 
-extern unsigned int R_UploadTexture(image_data_c *img, int flags, int max_pix);
+extern unsigned int R_UploadTexture(ImageData *img, int flags, int max_pix);
 
 extern const image_c *menu_backdrop;
 
@@ -191,7 +191,7 @@ struct SaveSlotExtendedInformation
     float y;
     float width;
 
-    image_data_c *save_image_data = nullptr;
+    ImageData *save_image_data = nullptr;
     unsigned int  save_texture_id = 0;
     int           save_image_page = 0;
 };
@@ -579,7 +579,7 @@ void MenuReadSaveStrings(void)
             if (svimg_file)
             {
                 save_extended_information_slots[i].save_image_data =
-                    Image_Load(svimg_file);
+                    ImageLoad(svimg_file);
                 if (save_extended_information_slots[i].save_image_data)
                 {
                     save_extended_information_slots[i].save_texture_id =

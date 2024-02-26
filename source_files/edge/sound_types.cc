@@ -113,7 +113,7 @@ sound_format_e Sound_DetectFormat(uint8_t *data, int song_len)
         return FMT_SPK;
     }
 
-    return kUnknownImage;
+    return kImageUnknown;
 }
 
 sound_format_e Sound_FilenameToFormat(const std::string &filename)
@@ -157,7 +157,7 @@ sound_format_e Sound_FilenameToFormat(const std::string &filename)
     if (ext == ".lmp")
         return FMT_SPK;
 
-    return kUnknownImage;
+    return kImageUnknown;
 }
 
 //--- editor settings ---

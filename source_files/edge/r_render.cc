@@ -884,7 +884,7 @@ static void DLIT_Plane(mobj_t *mo, void *dataptr)
             return;
     }
 
-    // NOTE: distance already checked in P_DynamicLightIterator
+    // NOTE: distance already checked in DynamicLightIterator
 
     SYS_ASSERT(mo->dlight.shader);
 
@@ -1191,10 +1191,10 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
         float bottom = HMM_MIN(lz1, rz1);
         float top    = HMM_MAX(lz2, rz2);
 
-        P_DynamicLightIterator(v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], bottom, v_bbox[kBoundingBoxRight], v_bbox[kBoundingBoxTop], top,
+        DynamicLightIterator(v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], bottom, v_bbox[kBoundingBoxRight], v_bbox[kBoundingBoxTop], top,
                                DLIT_Wall, &data);
 
-        P_SectorGlowIterator(cur_seg->frontsector, v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], bottom, v_bbox[kBoundingBoxRight],
+        SectorGlowIterator(cur_seg->frontsector, v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], bottom, v_bbox[kBoundingBoxRight],
                              v_bbox[kBoundingBoxTop], top, GLOWLIT_Wall, &data);
     }
 
@@ -1859,7 +1859,7 @@ static void DLIT_Flood(mobj_t *mo, void *dataptr)
             return;
     }
 
-    // NOTE: distance already checked in P_DynamicLightIterator
+    // NOTE: distance already checked in DynamicLightIterator
 
     SYS_ASSERT(mo->dlight.shader);
 
@@ -2035,7 +2035,7 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
 
         //		LogDebug("Flood BBox size: %1.0f x %1.0f\n", lx2-lx1, ly2-ly1);
 
-        P_DynamicLightIterator(lx1, ly1, data.plane_h, lx2, ly2, data.plane_h, DLIT_Flood, &data);
+        DynamicLightIterator(lx1, ly1, data.plane_h, lx2, ly2, data.plane_h, DLIT_Flood, &data);
     }
 }
 
@@ -2670,10 +2670,10 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
 
     if (use_dlights && ren_extralight < 250)
     {
-        P_DynamicLightIterator(v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], h, v_bbox[kBoundingBoxRight], v_bbox[kBoundingBoxTop], h, DLIT_Plane,
+        DynamicLightIterator(v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], h, v_bbox[kBoundingBoxRight], v_bbox[kBoundingBoxTop], h, DLIT_Plane,
                                &data);
 
-        P_SectorGlowIterator(cur_sub->sector, v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], h, v_bbox[kBoundingBoxRight], v_bbox[kBoundingBoxTop],
+        SectorGlowIterator(cur_sub->sector, v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], h, v_bbox[kBoundingBoxRight], v_bbox[kBoundingBoxTop],
                              h, GLOWLIT_Plane, &data);
     }
 

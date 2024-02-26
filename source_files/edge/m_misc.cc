@@ -45,8 +45,8 @@
 #include "g_game.h"
 #include "hu_draw.h"
 #include "hu_stuff.h"  // only for show_messages
-#include "image_data.h"
-#include "image_funcs.h"
+#include "im_data.h"
+#include "im_funcs.h"
 #include "m_argv.h"
 #include "m_menu.h"
 #include "m_option.h"
@@ -466,7 +466,7 @@ void TakeScreenshot(bool show_msg)
         }
     }
 
-    image_data_c *img = new image_data_c(SCREENWIDTH, SCREENHEIGHT, 3);
+    ImageData *img = new ImageData(SCREENWIDTH, SCREENHEIGHT, 3);
 
     RGL_ReadScreen(0, 0, SCREENWIDTH, SCREENHEIGHT, img->PixelAt(0, 0));
 
@@ -475,8 +475,8 @@ void TakeScreenshot(bool show_msg)
 
     bool result;
 
-    if (png_scrshots) { result = PNG_Save(fn, img); }
-    else { result = JPEG_Save(fn, img); }
+    if (png_scrshots) { result = ImageSavePng(fn, img); }
+    else { result = ImageSaveJpeg(fn, img); }
 
     if (show_msg)
     {
@@ -499,7 +499,7 @@ void CreateSaveScreenshot(void)
 
     epi::FileDelete(filename);
 
-    image_data_c *img = new image_data_c(SCREENWIDTH, SCREENHEIGHT, 3);
+    ImageData *img = new ImageData(SCREENWIDTH, SCREENHEIGHT, 3);
 
     RGL_ReadScreen(0, 0, SCREENWIDTH, SCREENHEIGHT, img->PixelAt(0, 0));
 
@@ -507,7 +507,7 @@ void CreateSaveScreenshot(void)
     img->Invert();
 
     bool result;
-    result = JPEG_Save(filename, img);
+    result = ImageSaveJpeg(filename, img);
 
     if (result)
         LogPrint("Captured to file: %s\n", filename.c_str());

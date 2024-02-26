@@ -136,7 +136,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, sound_data_c *buf)
 {
     // open the file or lump, and read it into memory
     epi::File        *F;
-    sound_format_e fmt = kUnknownImage;
+    sound_format_e fmt = kImageUnknown;
 
     if (var_pc_speaker_mode)
     {

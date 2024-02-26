@@ -21,7 +21,7 @@
 
 typedef enum
 {
-    kUnknownImage = 0,
+    kImageUnknown = 0,
     FMT_WAV,
     FMT_FLAC,
     FMT_OGG,

@@ -17,8 +17,8 @@ extern ConsoleVariable      double_framerate;
 extern bool        erraticism_active;
 extern std::string current_map_title;
 
-extern image_data_c *ReadAsEpiBlock(image_c *rim);
-extern image_data_c *R_PalettisedToRGB(image_data_c *src, const uint8_t *palette, int opacity);
+extern ImageData *ReadAsEpiBlock(image_c *rim);
+extern ImageData *R_PalettisedToRGB(ImageData *src, const uint8_t *palette, int opacity);
 
 extern player_t *ui_player_who;
 
@@ -725,7 +725,7 @@ static int HD_get_average_color(lua_State *L)
     const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
+    ImageData *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     RGBAColor col = tmp_img_data->AverageColor(from_x, to_x, from_y, to_y);
     rgb.X = epi::GetRGBARed(col);
@@ -750,7 +750,7 @@ static int HD_get_lightest_color(lua_State *L)
     const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
+    ImageData *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     RGBAColor col = tmp_img_data->LightestColor(from_x, to_x, from_y, to_y);
     rgb.X = epi::GetRGBARed(col);
@@ -774,7 +774,7 @@ static int HD_get_darkest_color(lua_State *L)
     const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
+    ImageData *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     RGBAColor col = tmp_img_data->DarkestColor(from_x, to_x, from_y, to_y);
     rgb.X = epi::GetRGBARed(col);
@@ -798,7 +798,7 @@ static int HD_get_average_hue(lua_State *L)
     const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
+    ImageData *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     uint8_t temp_rgb[3];
     tmp_img_data->AverageHue(temp_rgb, nullptr, from_x, to_x, from_y, to_y);
@@ -821,7 +821,7 @@ static int HD_get_average_top_border_color(lua_State *L)
     const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
+    ImageData *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, tmp_img_c->actual_h - 1, tmp_img_c->actual_h);
     rgb.X = epi::GetRGBARed(col);
@@ -840,7 +840,7 @@ static int HD_get_average_bottom_border_color(lua_State *L)
     const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
-    image_data_c *tmp_img_data =
+    ImageData *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
     RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, 0, 1);
     rgb.X = epi::GetRGBARed(col);

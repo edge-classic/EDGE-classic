@@ -1783,7 +1783,7 @@ void P_RemoveMobj(mobj_t *mo)
     }
 
     // unlink from sector and block lists
-    P_UnsetThingFinally(mo);
+    UnsetThingFinal(mo);
 
     // mark as REMOVED
     mo->state      = nullptr;
@@ -1825,7 +1825,7 @@ void P_RemoveAllMobjs(bool loading)
         // Need to unlink from existing map in the case of loading a savegame
         if (loading)
         {
-            P_UnsetThingFinally(mo);
+            UnsetThingFinal(mo);
         }
 
         mo->refcount = 0;
@@ -2290,7 +2290,7 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
     }
 
     // set subsector and/or block links
-    P_SetThingPosition(mobj);
+    SetThingPosition(mobj);
 
     // -AJA- 1999/07/30: Updated for extra floors.
 

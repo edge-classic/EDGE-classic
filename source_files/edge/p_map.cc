@@ -68,7 +68,7 @@ static void gore_cb(ConsoleVariable *self)
 EDGE_DEFINE_CONSOLE_VARIABLE_WITH_CALLBACK_CLAMPED(g_gore, "0", kConsoleVariableFlagArchive, gore_cb, 0, 2)
 
 // Forward declaration for ShootCheckGap
-static bool PTR_ShootTraverse(intercept_t *in, void *dataptr);
+static bool PTR_ShootTraverse(PathIntercept *in, void *dataptr);
 
 typedef struct try_move_info_s
 {
@@ -235,7 +235,7 @@ bool P_TeleportMove(mobj_t *thing, float x, float y, float z)
 
     float r = thing->radius;
 
-    if (!P_BlockThingsIterator(x - r, y - r, x + r, y + r, PIT_StompThing))
+    if (!BlockmapThingIterator(x - r, y - r, x + r, y + r, PIT_StompThing))
         return false;
 
     // everything on the spot has been stomped,
@@ -244,7 +244,7 @@ bool P_TeleportMove(mobj_t *thing, float x, float y, float z)
     thing->floorz   = tm_I.floorz;
     thing->ceilingz = tm_I.ceilnz;
 
-    P_ChangeThingPosition(thing, x, y, z);
+    ChangeThingPosition(thing, x, y, z);
 
     return true;
 }
@@ -423,12 +423,12 @@ bool P_CheckAbsPosition(mobj_t *thing, float x, float y, float z)
 
     // check things first.
 
-    if (!P_BlockThingsIterator(x - r, y - r, x + r, y + r, PIT_CheckAbsThing))
+    if (!BlockmapThingIterator(x - r, y - r, x + r, y + r, PIT_CheckAbsThing))
         return false;
 
     // check lines
 
-    if (!P_BlockLinesIterator(x - r, y - r, x + r, y + r, PIT_CheckAbsLine))
+    if (!BlockmapLineIterator(x - r, y - r, x + r, y + r, PIT_CheckAbsLine))
         return false;
 
     return true;
@@ -1018,7 +1018,7 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
     {
         // check things first, possibly picking things up
 
-        if (!P_BlockThingsIterator(x - r, y - r, x + r, y + r, PIT_CheckRelThing))
+        if (!BlockmapThingIterator(x - r, y - r, x + r, y + r, PIT_CheckRelThing))
             return false;
     }
 
@@ -1026,7 +1026,7 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
 
     thing->on_ladder = -1;
 
-    if (!P_BlockLinesIterator(x - r, y - r, x + r, y + r, PIT_CheckRelLine))
+    if (!BlockmapLineIterator(x - r, y - r, x + r, y + r, PIT_CheckRelLine))
         return false;
 
     return true;
@@ -1119,7 +1119,7 @@ bool P_TryMove(mobj_t *thing, float x, float y)
             z = thing->ceilingz - thing->height;
     }
 
-    P_ChangeThingPosition(thing, x, y, z);
+    ChangeThingPosition(thing, x, y, z);
 
     thing->SetAboveMo(tm_I.above);
     thing->SetBelowMo(tm_I.below);
@@ -1260,7 +1260,7 @@ static void HitSlideLine(line_t *ld)
     tmymove = newlen * epi::BAMSin(lineangle);
 }
 
-static bool PTR_SlideTraverse(intercept_t *in, void *dataptr)
+static bool PTR_SlideTraverse(PathIntercept *in, void *dataptr)
 {
     line_t *ld = in->line;
 
@@ -1306,9 +1306,9 @@ static bool PTR_SlideTraverse(intercept_t *in, void *dataptr)
 
     // the line does block movement,
     // see if it is closer than best so far
-    if (in->frac < bestslidefrac)
+    if (in->along < bestslidefrac)
     {
-        bestslidefrac = in->frac;
+        bestslidefrac = in->along;
         bestslideline = ld;
     }
 
@@ -1362,9 +1362,9 @@ void P_SlideMove(mobj_t *mo, float x, float y)
 
         bestslidefrac = 1.0001f;
 
-        P_PathTraverse(leadx, leady, leadx + dx, leady + dy, PT_ADDLINES, PTR_SlideTraverse);
-        P_PathTraverse(trailx, leady, trailx + dx, leady + dy, PT_ADDLINES, PTR_SlideTraverse);
-        P_PathTraverse(leadx, traily, leadx + dx, traily + dy, PT_ADDLINES, PTR_SlideTraverse);
+        PathTraverse(leadx, leady, leadx + dx, leady + dy, kPathAddLines, PTR_SlideTraverse);
+        PathTraverse(trailx, leady, trailx + dx, leady + dy, kPathAddLines, PTR_SlideTraverse);
+        PathTraverse(leadx, traily, leadx + dx, traily + dy, kPathAddLines, PTR_SlideTraverse);
 
         // move up to the wall
         if (AlmostEquals(bestslidefrac, 1.0001f))
@@ -1416,9 +1416,9 @@ void P_SlideMove(mobj_t *mo, float x, float y)
 //
 // Sets aim_I.target and slope when a target is aimed at.
 //
-static bool PTR_AimTraverse(intercept_t *in, void *dataptr)
+static bool PTR_AimTraverse(PathIntercept *in, void *dataptr)
 {
-    float dist = aim_I.range * in->frac;
+    float dist = aim_I.range * in->along;
 
     if (dist < 0.01f)
         return true;
@@ -1508,9 +1508,9 @@ static bool PTR_AimTraverse(intercept_t *in, void *dataptr)
 // Sets aim_I.target and slope when a target is aimed at.
 // Same as above except targets everything except scenery
 //
-static bool PTR_AimTraverse2(intercept_t *in, void *dataptr)
+static bool PTR_AimTraverse2(PathIntercept *in, void *dataptr)
 {
-    float dist = aim_I.range * in->frac;
+    float dist = aim_I.range * in->along;
 
     if (dist < 0.01f)
         return true;
@@ -1765,7 +1765,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
             {
                 // It will strike the floor slope in this sector; see if it will hit a thing first, otherwise let it hit
                 // the slope
-                if (P_PathTraverse(sx, sy, shoota.X, shoota.Y, PT_ADDTHINGS, PTR_ShootTraverse))
+                if (PathTraverse(sx, sy, shoota.X, shoota.Y, kPathAddThings, PTR_ShootTraverse))
                 {
                     if (shoot_I.puff)
                         P_SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
@@ -1783,7 +1783,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
                 {
                     // It will strike the ceiling slope in this sector; see if it will hit a thing first, otherwise let
                     // it hit the slope
-                    if (P_PathTraverse(sx, sy, shoota.X, shoota.Y, PT_ADDTHINGS, PTR_ShootTraverse))
+                    if (PathTraverse(sx, sy, shoota.X, shoota.Y, kPathAddThings, PTR_ShootTraverse))
                     {
                         if (shoot_I.puff)
                             P_SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
@@ -1807,7 +1807,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
             {
                 // It will strike the ceiling slope in this sector; see if it will hit a thing first, otherwise let it
                 // hit the slope
-                if (P_PathTraverse(sx, sy, shoota.X, shoota.Y, PT_ADDTHINGS, PTR_ShootTraverse))
+                if (PathTraverse(sx, sy, shoota.X, shoota.Y, kPathAddThings, PTR_ShootTraverse))
                 {
                     if (shoot_I.puff)
                         P_SpawnPuff(shoota.X, shoota.Y, shoota.Z, shoot_I.puff, shoot_I.angle + kBAMAngle180);
@@ -1825,10 +1825,10 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
     if (IS_SKY(floor[0]))
         return false;
 
-    float frac = (f_h - shoot_I.start_z) / (shoot_I.slope * shoot_I.range);
+    float along = (f_h - shoot_I.start_z) / (shoot_I.slope * shoot_I.range);
 
-    float x = trace.x + trace.dx * frac;
-    float y = trace.y + trace.dy * frac;
+    float x = trace.x + trace.dx * along;
+    float y = trace.y + trace.dy * along;
 
     z = (z < shoot_I.prev_z) ? f_h + 2 : f_h - 2;
 
@@ -1997,9 +1997,9 @@ void P_UnblockLineEffectDebris(line_t *TheLine, const LineType *special)
     }
 }
 
-static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
+static bool PTR_ShootTraverse(PathIntercept *in, void *dataptr)
 {
-    float dist = shoot_I.range * in->frac;
+    float dist = shoot_I.range * in->along;
 
     if (dist < 0.1f)
         dist = 0.1f;
@@ -2010,10 +2010,10 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
         line_t *ld = in->line;
 
         // determine coordinates of intersect
-        float frac = in->frac;
-        float x    = trace.x + trace.dx * frac;
-        float y    = trace.y + trace.dy * frac;
-        float z    = shoot_I.start_z + frac * shoot_I.slope * shoot_I.range;
+        float along = in->along;
+        float x    = trace.x + trace.dx * along;
+        float y    = trace.y + trace.dy * along;
+        float z    = shoot_I.start_z + along * shoot_I.slope * shoot_I.range;
 
         int     sidenum = PointOnLineSide(trace.x, trace.y, ld);
         side_t *side    = ld->side[sidenum];
@@ -2196,11 +2196,11 @@ static bool PTR_ShootTraverse(intercept_t *in, void *dataptr)
         mo->slopesighthit = true;
 
     // position a bit closer
-    float frac = in->frac - 10.0f / shoot_I.range;
+    float along = in->along - 10.0f / shoot_I.range;
 
-    float x = trace.x + trace.dx * frac;
-    float y = trace.y + trace.dy * frac;
-    float z = shoot_I.start_z + frac * shoot_I.slope * shoot_I.range;
+    float x = trace.x + trace.dx * along;
+    float y = trace.y + trace.dy * along;
+    float z = shoot_I.start_z + along * shoot_I.slope * shoot_I.range;
 
     // Spawn bullet puffs or blood spots,
     // depending on target type.
@@ -2265,7 +2265,7 @@ mobj_t *P_AimLineAttack(mobj_t *t1, BAMAngle angle, float distance, float *slope
     aim_I.slope  = 0.0f;
     aim_I.target = nullptr;
 
-    P_PathTraverse(t1->x, t1->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, PTR_AimTraverse);
+    PathTraverse(t1->x, t1->y, x2, y2, kPathAddLines | kPathAddThings, PTR_AimTraverse);
 
     if (slope)
         (*slope) = aim_I.slope;
@@ -2297,7 +2297,7 @@ void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float
     shoot_I.prev_z  = shoot_I.start_z;
     shoot_I.puff    = puff;
 
-    P_PathTraverse(t1->x, t1->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, PTR_ShootTraverse);
+    PathTraverse(t1->x, t1->y, x2, y2, kPathAddLines | kPathAddThings, PTR_ShootTraverse);
 }
 
 //
@@ -2358,7 +2358,7 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance)
     // aim_I.topslope = 100.0f / 160.0f;
     // aim_I.bottomslope = -100.0f / 160.0f;
 
-    P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, PTR_AimTraverse2);
+    PathTraverse(source->x, source->y, x2, y2, kPathAddLines | kPathAddThings, PTR_AimTraverse2);
 
     if (!aim_I.target)
         return nullptr;
@@ -2427,7 +2427,7 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool 
     aim_I.range  = distance;
     aim_I.target = nullptr;
 
-    P_PathTraverse(source->x, source->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, PTR_AimTraverse);
+    PathTraverse(source->x, source->y, x2, y2, kPathAddLines | kPathAddThings, PTR_AimTraverse);
 
     if (!aim_I.target)
         return nullptr;
@@ -2477,7 +2477,7 @@ mobj_t *P_MapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool 
 static mobj_t *usething;
 static float   use_lower, use_upper;
 
-static bool PTR_UseTraverse(intercept_t *in, void *dataptr)
+static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
 {
     // intercept is a thing ?
     if (in->thing)
@@ -2566,7 +2566,7 @@ void P_UseLines(player_t *player)
     x2 = x1 + USERANGE * epi::BAMCos(angle);
     y2 = y1 + USERANGE * epi::BAMSin(angle);
 
-    P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES | PT_ADDTHINGS, PTR_UseTraverse);
+    PathTraverse(x1, y1, x2, y2, kPathAddLines | kPathAddThings, PTR_UseTraverse);
 }
 
 //
@@ -2693,7 +2693,7 @@ void P_RadiusAttack(mobj_t *spot, mobj_t *source, float radius, float damage, co
     //
     float r = bomb_I.range;
 
-    P_BlockThingsIterator(spot->x - r, spot->y - r, spot->x + r, spot->y + r, PIT_RadiusAttack);
+    BlockmapThingIterator(spot->x - r, spot->y - r, spot->x + r, spot->y + r, PIT_RadiusAttack);
 }
 
 //
@@ -3133,7 +3133,7 @@ mobj_t *P_MapFindCorpse(mobj_t *thing)
         raisertryx = thing->x + thing->speed * xspeed[thing->movedir];
         raisertryy = thing->y + thing->speed * yspeed[thing->movedir];
 
-        if (!P_BlockThingsIterator(raisertryx - RAISE_RADIUS, raisertryy - RAISE_RADIUS, raisertryx + RAISE_RADIUS,
+        if (!BlockmapThingIterator(raisertryx - RAISE_RADIUS, raisertryy - RAISE_RADIUS, raisertryx + RAISE_RADIUS,
                                    raisertryy + RAISE_RADIUS, PIT_CorpseCheck))
         {
             return corpsehit; // got one - return it
@@ -3253,7 +3253,7 @@ bool P_MapCheckBlockingLine(mobj_t *thing, mobj_t *spawnthing)
     blockline    = nullptr;
     mobj_hit_sky = false;
 
-    if (!P_BlockLinesIterator(HMM_MIN(mx1, mx2), HMM_MIN(my1, my2), HMM_MAX(mx1, mx2), HMM_MAX(my1, my2), PIT_CheckBlockingLine))
+    if (!BlockmapLineIterator(HMM_MIN(mx1, mx2), HMM_MIN(my1, my2), HMM_MAX(mx1, mx2), HMM_MAX(my1, my2), PIT_CheckBlockingLine))
     {
         return true;
     }

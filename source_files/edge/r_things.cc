@@ -29,8 +29,8 @@
 #include <math.h>
 
 #include "math_color.h"
-#include "image_data.h"
-#include "image_funcs.h"
+#include "im_data.h"
+#include "im_funcs.h"
 #include "str_util.h"
 
 #include "dm_data.h"
@@ -328,10 +328,10 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
             float r = 96;
 
-            P_DynamicLightIterator(data.lit_pos.X - r, data.lit_pos.Y - r, player->mo->z, data.lit_pos.X + r,
+            DynamicLightIterator(data.lit_pos.X - r, data.lit_pos.Y - r, player->mo->z, data.lit_pos.X + r,
                                    data.lit_pos.Y + r, player->mo->z + player->mo->height, DLIT_PSprite, &data);
 
-            P_SectorGlowIterator(player->mo->subsector->sector, data.lit_pos.X - r, data.lit_pos.Y - r, player->mo->z,
+            SectorGlowIterator(player->mo->subsector->sector, data.lit_pos.X - r, data.lit_pos.Y - r, player->mo->z,
                                  data.lit_pos.X + r, data.lit_pos.Y + r, player->mo->z + player->mo->height,
                                  DLIT_PSprite, &data);
         }
@@ -1415,10 +1415,10 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
         {
             float r = mo->radius + 32;
 
-            P_DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height, DLIT_Thing,
+            DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height, DLIT_Thing,
                                    &data);
 
-            P_SectorGlowIterator(mo->subsector->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
+            SectorGlowIterator(mo->subsector->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
                                  mo->z + mo->height, DLIT_Thing, &data);
         }
     }

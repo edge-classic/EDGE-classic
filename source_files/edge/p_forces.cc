@@ -140,7 +140,7 @@ static void DoForce(force_t *f)
             float y = f->point.Y;
             float r = f->radius;
 
-            P_BlockThingsIterator(x - r, y - r, x + r, y + r, PIT_PushThing);
+            BlockmapThingIterator(x - r, y - r, x + r, y + r, PIT_PushThing);
         }
         else // wind/current
         {

@@ -21,7 +21,7 @@
 
 #include <math.h>
 
-#include "image_data.h"
+#include "im_data.h"
 
 #include "dm_state.h"
 #include "g_game.h" // current_map
@@ -43,7 +43,7 @@ const image_c *sky_image;
 bool custom_sky_box;
 
 // needed for SKY
-extern image_data_c *ReadAsEpiBlock(image_c *rim);
+extern ImageData *ReadAsEpiBlock(image_c *rim);
 
 extern ConsoleVariable r_culling;
 
@@ -852,7 +852,7 @@ int RGL_UpdateSkyBoxTextures(void)
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     if (sky_image->source_palette >= 0)
         what_palette = (const uint8_t *)W_LoadLump(sky_image->source_palette);
-    image_data_c *tmp_img_data =
+    ImageData *tmp_img_data =
         R_PalettisedToRGB(ReadAsEpiBlock((image_c *)sky_image), what_palette, sky_image->opacity);
     cull_fog_color = sg_make_color_1i(tmp_img_data->AverageColor(0, sky_image->actual_w, 0, sky_image->actual_h / 2));
     sky_cap_color = sg_make_color_1i(tmp_img_data->AverageColor(0, sky_image->actual_w, sky_image->actual_h * 3 / 4, sky_image->actual_h));

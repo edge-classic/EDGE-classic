@@ -26,7 +26,7 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include "image_data.h"
+#include "im_data.h"
 
 #include "dm_state.h"
 #include "e_player.h"

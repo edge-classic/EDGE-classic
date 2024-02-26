@@ -1106,10 +1106,10 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
         {
             float r = mo->radius;
 
-            P_DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height, DLIT_Model,
+            DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height, DLIT_Model,
                                    &data);
 
-            P_SectorGlowIterator(mo->subsector->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
+            SectorGlowIterator(mo->subsector->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
                                  mo->z + mo->height, DLIT_Model, &data);
         }
     }

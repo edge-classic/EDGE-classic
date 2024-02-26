@@ -23,7 +23,7 @@
 #include <limits.h>
 #include <unordered_map>
 
-#include "image_data.h"
+#include "im_data.h"
 
 #include "e_search.h"
 #include "e_main.h"
@@ -77,16 +77,16 @@ int W_MakeValidSize(int value)
     return -1; /* NOT REACHED */
 }
 
-image_data_c *R_PalettisedToRGB(image_data_c *src, const uint8_t *palette, int opacity)
+ImageData *R_PalettisedToRGB(ImageData *src, const uint8_t *palette, int opacity)
 {
-    if (src->bpp == 1)
+    if (src->depth_ == 1)
     {
         int                bpp  = (opacity == OPAC_Solid) ? 3 : 4;
-        image_data_c *dest = new image_data_c(src->width, src->height, bpp);
-        dest->used_w            = src->used_w;
-        dest->used_h            = src->used_h;
-        for (int y = 0; y < src->height; y++)
-            for (int x = 0; x < src->width; x++)
+        ImageData *dest = new ImageData(src->width_, src->height_, bpp);
+        dest->used_width_            = src->used_width_;
+        dest->used_height_            = src->used_height_;
+        for (int y = 0; y < src->height_; y++)
+            for (int x = 0; x < src->width_; x++)
             {
                 uint8_t src_pix = src->PixelAt(x, y)[0];
 
@@ -115,20 +115,20 @@ image_data_c *R_PalettisedToRGB(image_data_c *src, const uint8_t *palette, int o
         return src;
 }
 
-GLuint R_UploadTexture(image_data_c *img, int flags, int max_pix)
+GLuint R_UploadTexture(ImageData *img, int flags, int max_pix)
 {
     /* Send the texture data to the GL, and returns the texture ID
      * assigned to it.
      */
 
-    SYS_ASSERT(img->bpp == 3 || img->bpp == 4);
+    SYS_ASSERT(img->depth_ == 3 || img->depth_ == 4);
 
     bool clamp  = (flags & UPL_Clamp) ? true : false;
     bool nomip  = (flags & UPL_MipMap) ? false : true;
     bool smooth = (flags & UPL_Smooth) ? true : false;
 
-    int total_w = img->width;
-    int total_h = img->height;
+    int total_w = img->width_;
+    int total_h = img->height_;
 
     int new_w, new_h;
 
@@ -187,7 +187,7 @@ GLuint R_UploadTexture(image_data_c *img, int flags, int max_pix)
 
     for (int mip = 0;; mip++)
     {
-        if (img->width != new_w || img->height != new_h)
+        if (img->width_ != new_w || img->height_ != new_h)
         {
             img->ShrinkMasked(new_w, new_h);
 
@@ -195,8 +195,8 @@ GLuint R_UploadTexture(image_data_c *img, int flags, int max_pix)
                 img->ThresholdAlpha((mip & 1) ? 96 : 144);
         }
 
-        glTexImage2D(GL_TEXTURE_2D, mip, (img->bpp == 3) ? GL_RGB : GL_RGBA, new_w, new_h, 0 /* border */,
-                     (img->bpp == 3) ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, img->PixelAt(0, 0));
+        glTexImage2D(GL_TEXTURE_2D, mip, (img->depth_ == 3) ? GL_RGB : GL_RGBA, new_w, new_h, 0 /* border */,
+                     (img->depth_ == 3) ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, img->PixelAt(0, 0));
 
         // stop if mipmapping disabled or we have reached the end
         if (nomip || !detail_level || (new_w == 1 && new_h == 1))
@@ -218,7 +218,7 @@ GLuint R_UploadTexture(image_data_c *img, int flags, int max_pix)
 
 //----------------------------------------------------------------------------
 
-void R_PaletteRemapRGBA(image_data_c *img, const uint8_t *new_pal, const uint8_t *old_pal)
+void R_PaletteRemapRGBA(ImageData *img, const uint8_t *new_pal, const uint8_t *old_pal)
 {
     const int max_prev = 16;
 
@@ -226,13 +226,13 @@ void R_PaletteRemapRGBA(image_data_c *img, const uint8_t *new_pal, const uint8_t
     uint8_t previous[max_prev * 6];
     int  num_prev = 0;
 
-    for (int y = 0; y < img->height; y++)
-        for (int x = 0; x < img->width; x++)
+    for (int y = 0; y < img->height_; y++)
+        for (int x = 0; x < img->width_; x++)
         {
             uint8_t *cur = img->PixelAt(x, y);
 
             // skip completely transparent pixels
-            if (img->bpp == 4 && cur[3] == 0)
+            if (img->depth_ == 4 && cur[3] == 0)
                 continue;
 
             // optimisation: if colour matches previous one, don't need
@@ -315,22 +315,22 @@ void R_PaletteRemapRGBA(image_data_c *img, const uint8_t *new_pal, const uint8_t
         }
 }
 
-int R_DetermineOpacity(image_data_c *img, bool *is_empty)
+int R_DetermineOpacity(ImageData *img, bool *is_empty)
 {
-    if (img->bpp == 3)
+    if (img->depth_ == 3)
     {
         *is_empty = false;
         return OPAC_Solid;
     }
 
-    if (img->bpp == 1)
+    if (img->depth_ == 1)
     {
 
         image_opacity_e opacity = OPAC_Solid;
         bool            empty   = true;
 
-        for (int y = 0; y < img->used_h; y++)
-            for (int x = 0; x < img->used_w; x++)
+        for (int y = 0; y < img->used_height_; y++)
+            for (int x = 0; x < img->used_width_; x++)
             {
                 uint8_t pix = img->PixelAt(x, y)[0];
 
@@ -345,14 +345,14 @@ int R_DetermineOpacity(image_data_c *img, bool *is_empty)
     }
     else
     {
-        SYS_ASSERT(img->bpp == 4);
+        SYS_ASSERT(img->depth_ == 4);
 
         image_opacity_e opacity   = OPAC_Solid;
         bool            is_masked = false;
         bool            empty     = true;
 
-        for (int y = 0; y < img->used_h; y++)
-            for (int x = 0; x < img->used_w; x++)
+        for (int y = 0; y < img->used_height_; y++)
+            for (int x = 0; x < img->used_width_; x++)
             {
                 uint8_t alpha = img->PixelAt(x, y)[3];
 
@@ -380,16 +380,16 @@ int R_DetermineOpacity(image_data_c *img, bool *is_empty)
     }
 }
 
-void R_BlackenClearAreas(image_data_c *img)
+void R_BlackenClearAreas(ImageData *img)
 {
     // makes sure that any totally transparent pixel (alpha == 0)
     // has a colour of black.
 
-    uint8_t *dest = img->pixels;
+    uint8_t *dest = img->pixels_;
 
-    int count = img->width * img->height;
+    int count = img->width_ * img->height_;
 
-    if (img->bpp == 1)
+    if (img->depth_ == 1)
     {
         for (; count > 0; count--, dest++)
         {
@@ -397,7 +397,7 @@ void R_BlackenClearAreas(image_data_c *img)
                 *dest = pal_black;
         }
     }
-    else if (img->bpp == 4)
+    else if (img->depth_ == 4)
     {
         for (; count > 0; count--, dest += 4)
         {
@@ -409,14 +409,14 @@ void R_BlackenClearAreas(image_data_c *img)
     }
 }
 
-void R_DumpImage(image_data_c *img)
+void R_DumpImage(ImageData *img)
 {
-    LogDebug("DUMP IMAGE: size=%dx%d [%dx%d] bpp=%d\n", img->used_w, img->used_h, img->width, img->height,
-                 img->bpp);
+    LogDebug("DUMP IMAGE: size=%dx%d [%dx%d] bpp=%d\n", img->used_width_, img->used_height_, img->width_, img->height_,
+                 img->depth_);
 
-    for (int y = img->height - 1; y >= 0; y--)
+    for (int y = img->height_ - 1; y >= 0; y--)
     {
-        for (int x = 0; x < img->width; x++)
+        for (int x = 0; x < img->width_; x++)
         {
             uint8_t pixel = img->PixelAt(x, y)[0];
 

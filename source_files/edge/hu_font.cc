@@ -23,7 +23,7 @@
 #include "filesystem.h"
 #include "font.h"
 #include "i_defs_gl.h"
-#include "image_data.h"
+#include "im_data.h"
 #include "main.h"
 #include "r_colormap.h"
 #include "r_draw.h"
@@ -40,7 +40,7 @@
 
 static constexpr uint8_t kDummyCharacterWidth = 8;
 
-extern image_data_c *ReadAsEpiBlock(image_c *rim);
+extern ImageData *ReadAsEpiBlock(image_c *rim);
 
 // all the fonts that's fit to print
 FontContainer hud_fonts;
@@ -117,31 +117,31 @@ void Font::LoadPatches()
     memset(images, 0, sizeof(const image_c *) * total);
 
     // Atlas Stuff
-    std::unordered_map<int, image_data_c *> patch_data;
-    std::vector<image_data_c *>             temp_imdata;
+    std::unordered_map<int, ImageData *> patch_data;
+    std::vector<ImageData *>             temp_imdata;
 
     missing                      = definition_->missing_patch_ != ""
                                        ? W_ImageLookup(definition_->missing_patch_.c_str(),
                                                        kImageNamespaceGraphic, ILF_Font | ILF_Null)
                                        : nullptr;
-    image_data_c *missing_imdata = nullptr;
+    ImageData *missing_imdata = nullptr;
 
     if (missing)
     {
-        image_data_c *tmp_img = ReadAsEpiBlock((image_c *)(missing));
-        if (tmp_img->bpp == 1)
+        ImageData *tmp_img = ReadAsEpiBlock((image_c *)(missing));
+        if (tmp_img->depth_ == 1)
         {
-            image_data_c *rgb_img = R_PalettisedToRGB(
+            ImageData *rgb_img = R_PalettisedToRGB(
                 tmp_img, (const uint8_t *)&playpal_data[0], missing->opacity);
             delete tmp_img;
             missing_imdata = rgb_img;
         }
         else
             missing_imdata = tmp_img;
-        missing_imdata->offset_x = missing->offset_x;
-        missing_imdata->offset_y = missing->offset_y;
-        missing_imdata->scale_x  = missing->scale_x;
-        missing_imdata->scale_y  = missing->scale_y;
+        missing_imdata->offset_x_ = missing->offset_x;
+        missing_imdata->offset_y_ = missing->offset_y;
+        missing_imdata->scale_x_  = missing->scale_x;
+        missing_imdata->scale_y_  = missing->scale_y;
     }
 
     // First pass, add the images that are good
@@ -166,20 +166,20 @@ void Font::LoadPatches()
 
             if (images[idx])
             {
-                image_data_c *tmp_img =
+                ImageData *tmp_img =
                     ReadAsEpiBlock((image_c *)(images[idx]));
-                if (tmp_img->bpp == 1)
+                if (tmp_img->depth_ == 1)
                 {
-                    image_data_c *rgb_img = R_PalettisedToRGB(
+                    ImageData *rgb_img = R_PalettisedToRGB(
                         tmp_img, (const uint8_t *)&playpal_data[0],
                         images[idx]->opacity);
                     delete tmp_img;
                     tmp_img = rgb_img;
                 }
-                tmp_img->offset_x = images[idx]->offset_x;
-                tmp_img->offset_y = images[idx]->offset_y;
-                tmp_img->scale_x  = images[idx]->scale_x;
-                tmp_img->scale_y  = images[idx]->scale_y;
+                tmp_img->offset_x_ = images[idx]->offset_x;
+                tmp_img->offset_y_ = images[idx]->offset_y;
+                tmp_img->scale_x_  = images[idx]->scale_x;
+                tmp_img->scale_y_  = images[idx]->scale_y;
                 patch_data.try_emplace(kCP437UnicodeValues[(uint8_t)ch],
                                        tmp_img);
                 temp_imdata.push_back(tmp_img);
@@ -206,7 +206,7 @@ void Font::LoadPatches()
         }
     }
 
-    image_atlas_c *atlas = Image_Pack(patch_data);
+    ImageAtlas *atlas = ImagePack(patch_data);
     for (auto patch : temp_imdata) delete patch;
     delete missing_imdata;
     if (atlas)
@@ -215,38 +215,38 @@ void Font::LoadPatches()
         /*std::string atlas_png = epi::PathAppend(home_directory,
         epi::StringFormat("atlas_%s.png", definition_->name.c_str())); if
         (epi::FileExists(atlas_png)) epi::FS_Remove(atlas_png);
-        PNG_Save(atlas_png, atlas->data);*/
-        patch_font_cache_.atlas_rectangles = atlas->rects;
+        ImageSavePng(atlas_png, atlas->data);*/
+        patch_font_cache_.atlas_rectangles = atlas->rectangles_;
         glGenTextures(1, &patch_font_cache_.atlas_texture_id);
         glBindTexture(GL_TEXTURE_2D, patch_font_cache_.atlas_texture_id);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data->width,
-                     atlas->data->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                     atlas->data->pixels);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data_->width_,
+                     atlas->data_->height_, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                     atlas->data_->pixels_);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glGenTextures(1, &patch_font_cache_.atlas_smoothed_texture_id);
         glBindTexture(GL_TEXTURE_2D,
                       patch_font_cache_.atlas_smoothed_texture_id);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data->width,
-                     atlas->data->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                     atlas->data->pixels);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data_->width_,
+                     atlas->data_->height_, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                     atlas->data_->pixels_);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        atlas->data->Whiten();
+        atlas->data_->Whiten();
         glGenTextures(1, &patch_font_cache_.atlas_whitened_texture_id);
         glBindTexture(GL_TEXTURE_2D,
                       patch_font_cache_.atlas_whitened_texture_id);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data->width,
-                     atlas->data->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                     atlas->data->pixels);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data_->width_,
+                     atlas->data_->height_, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                     atlas->data_->pixels_);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glGenTextures(1, &patch_font_cache_.atlas_whitened_smoothed_texture_id);
         glBindTexture(GL_TEXTURE_2D,
                       patch_font_cache_.atlas_whitened_smoothed_texture_id);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data->width,
-                     atlas->data->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                     atlas->data->pixels);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, atlas->data_->width_,
+                     atlas->data_->height_, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                     atlas->data_->pixels_);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         delete atlas;
@@ -263,7 +263,7 @@ void Font::LoadPatches()
         return;
     }
 
-    image_rect_c Nom;
+    ImageAtlasRectangle Nom;
 
     if (patch_font_cache_.atlas_rectangles.count(
             kCP437UnicodeValues[(uint8_t)('M')]))
@@ -284,15 +284,15 @@ void Font::LoadPatches()
     {
         patch_font_cache_.height = definition_->default_size_;
         patch_font_cache_.width =
-            definition_->default_size_ * (Nom.iw / Nom.ih);
+            definition_->default_size_ * (Nom.image_width / Nom.image_height);
         patch_font_cache_.ratio =
             patch_font_cache_.width / patch_font_cache_.height;
     }
     else
     {
-        patch_font_cache_.width  = Nom.iw;
-        patch_font_cache_.height = Nom.ih;
-        patch_font_cache_.ratio  = Nom.iw / Nom.ih;
+        patch_font_cache_.width  = Nom.image_width;
+        patch_font_cache_.height = Nom.image_height;
+        patch_font_cache_.ratio  = Nom.image_width / Nom.image_height;
     }
     spacing_ = definition_->spacing_;
 }
@@ -327,7 +327,7 @@ void Font::LoadFontImage()
         // Determine individual character widths and ratios
         individual_char_widths_ = new float[256];
         individual_char_ratios_ = new float[256];
-        image_data_c *char_data = ReadAsEpiBlock((image_c *)font_image_);
+        ImageData *char_data = ReadAsEpiBlock((image_c *)font_image_);
         for (int i = 0; i < 256; i++)
         {
             int px                     = i % 16;
@@ -681,14 +681,14 @@ float Font::CharWidth(char ch)
             kCP437UnicodeValues[(uint8_t)ch]))
         return kDummyCharacterWidth;
 
-    image_rect_c rect =
+    ImageAtlasRectangle rect =
         patch_font_cache_.atlas_rectangles.at(kCP437UnicodeValues[(uint8_t)ch]);
 
     if (definition_->default_size_ > 0.0)
-        return (definition_->default_size_ * ((float)rect.iw) / rect.ih) +
+        return (definition_->default_size_ * ((float)rect.image_width) / rect.image_height) +
                spacing_;
     else
-        return rect.iw + spacing_;
+        return rect.image_width + spacing_;
 }
 
 //

@@ -3081,9 +3081,9 @@ static void DoBlockMap()
         max_y = HMM_MAX((int)v->Y, max_y);
     }
 
-    P_GenerateBlockMap(min_x, min_y, max_x, max_y);
+    GenerateBlockmap(min_x, min_y, max_x, max_y);
 
-    P_CreateThingBlockMap();
+    CreateThingBlockmap();
 }
 
 //
@@ -3507,7 +3507,7 @@ static void P_RemoveSectorStuff(void)
 
     for (i = 0; i < numsectors; i++)
     {
-        P_FreeSectorTouchNodes(sectors + i);
+        FreeSectorTouchNodes(sectors + i);
 
         // Might still be playing a sound.
         S_StopFX(&sectors[i].sfx_origin);
@@ -3579,7 +3579,7 @@ void ShutdownLevel(void)
     delete[] v_seclists;
     v_seclists = nullptr;
 
-    P_DestroyBlockMap();
+    DestroyBlockmap();
 
     P_RemoveAllMobjs(false);
 }

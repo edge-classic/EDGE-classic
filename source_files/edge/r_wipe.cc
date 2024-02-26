@@ -26,7 +26,7 @@
 
 #include "i_defs_gl.h"
 #include "i_system.h"
-#include "image_data.h"
+#include "im_data.h"
 
 #include "m_random.h"
 #include "r_gldefs.h"
@@ -67,7 +67,7 @@ static void CaptureScreenAsTexture(bool speckly, bool spooky)
     int total_w = W_MakeValidSize(SCREENWIDTH);
     int total_h = W_MakeValidSize(SCREENHEIGHT);
 
-    image_data_c img(total_w, total_h, 4);
+    ImageData img(total_w, total_h, 4);
 
     img.Clear();
 
@@ -108,7 +108,7 @@ void RGL_BlackoutWipeTex(void)
     int total_w = W_MakeValidSize(SCREENWIDTH);
     int total_h = W_MakeValidSize(SCREENHEIGHT);
 
-    image_data_c img(total_w, total_h, 4);
+    ImageData img(total_w, total_h, 4);
 
     img.Clear();
 

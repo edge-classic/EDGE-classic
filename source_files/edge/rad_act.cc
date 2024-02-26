@@ -1383,7 +1383,7 @@ void P_ActReplace(struct mobj_s *mo, const MapObjectDefinition *newThing)
 
     // DO THE DEED !!
 
-    // P_UnsetThingPosition(mo);
+    // UnsetThingPosition(mo);
     {
         mo->info = newThing;
 
@@ -1430,7 +1430,7 @@ void P_ActReplace(struct mobj_s *mo, const MapObjectDefinition *newThing)
             }
         }
     }
-    // P_SetThingPosition(mo);
+    // SetThingPosition(mo);
 
     int state = P_MobjFindLabel(mo, "IDLE"); // nothing fancy, always default to idle
     if (state == 0)

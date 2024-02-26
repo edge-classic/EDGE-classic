@@ -43,10 +43,9 @@
 #include "filesystem.h"
 #include "flat.h"
 
-#include "image_data.h"
-#include "image_blur.h"
-#include "image_hq2x.h"
-#include "image_funcs.h"
+#include "im_data.h"
+#include "im_filter.h"
+#include "im_funcs.h"
 #include "str_util.h"
 #include "str_compare.h"
 #include "dm_data.h"
@@ -75,7 +74,7 @@ swirl_type_e swirling_flats = SWIRL_Vanilla;
 // LIGHTING DEBUGGING
 // #define MAKE_TEXTURES_WHITE  1
 
-extern image_data_c *ReadAsEpiBlock(image_c *rim);
+extern ImageData *ReadAsEpiBlock(image_c *rim);
 
 extern epi::File *OpenUserFileOrLump(ImageDefinition *def);
 
@@ -352,9 +351,9 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
     bool solid    = false;
 
     int  header_len = HMM_MIN((int)sizeof(header), packfile_len);
-    auto fmt        = Image_DetectFormat(header, header_len, packfile_len);
+    auto fmt        = ImageDetectFormat(header, header_len, packfile_len);
 
-    if (fmt == kOtherImage)
+    if (fmt == kImageOther)
     {
         // close it
         delete f;
@@ -362,7 +361,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
         LogWarning("Unsupported image format in '%s'\n", packfile_name);
         return nullptr;
     }
-    else if (fmt == kUnknownImage)
+    else if (fmt == kImageUnknown)
     {
         // close it
         delete f;
@@ -398,7 +397,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
             return nullptr;
         }
     }
-    else if (fmt == kDoomImage)
+    else if (fmt == kImageDoom)
     {
         // close it
         delete f;
@@ -414,7 +413,7 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
     }
     else // PNG, TGA or JPEG
     {
-        if (!Image_GetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
+        if (!ImageGetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
         {
             LogWarning("Error scanning image in '%s'\n", packfile_name);
             return nullptr;
@@ -495,9 +494,9 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
     bool solid    = false;
 
     int  header_len = HMM_MIN((int)sizeof(header), lump_len);
-    auto fmt        = Image_DetectFormat(header, header_len, lump_len);
+    auto fmt        = ImageDetectFormat(header, header_len, lump_len);
 
-    if (fmt == kOtherImage)
+    if (fmt == kImageOther)
     {
         // close it
         delete f;
@@ -505,7 +504,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
         LogWarning("Unsupported image format in '%s' lump\n", W_GetLumpName(lump));
         return nullptr;
     }
-    else if (fmt == kUnknownImage)
+    else if (fmt == kImageUnknown)
     {
         // close it
         delete f;
@@ -540,7 +539,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
             return nullptr;
         }
     }
-    else if (fmt == kDoomImage)
+    else if (fmt == kImageDoom)
     {
         // close it
         delete f;
@@ -556,7 +555,7 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
     }
     else // PNG, TGA or JPEG
     {
-        if (!Image_GetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
+        if (!ImageGetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
         {
             LogWarning("Error scanning image in '%s' lump\n", W_GetLumpName(lump));
             return nullptr;
@@ -819,7 +818,7 @@ static image_c *AddImageUser(ImageDefinition *def)
         // determine format and size information.
         // for FILE and PACK get format from filename, but note that when
         // it is wrong (like a PNG called "foo.jpeg"), it can still work.
-        ImageFormat fmt = kUnknownImage;
+        ImageFormat fmt = kImageUnknown;
 
         if (def->type_ == kImageDataLump)
         {
@@ -830,33 +829,33 @@ static image_c *AddImageUser(ImageDefinition *def)
             f->Seek(0, epi::File::kSeekpointStart);
 
             int header_len = HMM_MIN((int)sizeof(header), file_size);
-            fmt            = Image_DetectFormat(header, header_len, file_size);
+            fmt            = ImageDetectFormat(header, header_len, file_size);
         }
         else
-            fmt = Image_FilenameToFormat(def->info_);
+            fmt = ImageFormatFromFilename(def->info_);
 
         // when a lump uses DOOM patch format, use the other method.
-        // for lumps, assume kUnknownImage is a mis-detection of DOOM patch
+        // for lumps, assume kImageUnknown is a mis-detection of DOOM patch
         // and hope for the best.
-        if (fmt == kDoomImage || fmt == kUnknownImage)
+        if (fmt == kImageDoom || fmt == kImageUnknown)
         {
             delete f; // close file
 
-            if (fmt == kDoomImage)
+            if (fmt == kImageDoom)
                 return AddImage_DOOM(def, true);
 
             LogWarning("Unknown image format in: %s\n", filename);
             return nullptr;
         }
 
-        if (fmt == kOtherImage)
+        if (fmt == kImageOther)
         {
             delete f;
             LogWarning("Unsupported image format in: %s\n", filename);
             return nullptr;
         }
 
-        if (!Image_GetInfo(f, &width, &height, &bpp))
+        if (!ImageGetInfo(f, &width, &height, &bpp))
         {
             delete f;
             LogWarning("Error occurred scanning image: %s\n", filename);
@@ -1331,7 +1330,7 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
         what_pal_cached = true;
     }
 
-    image_data_c *tmp_img = ReadAsEpiBlock(rim);
+    ImageData *tmp_img = ReadAsEpiBlock(rim);
 
     if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
     {
@@ -1343,13 +1342,13 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
     if (rim->opacity == OPAC_Unknown)
         rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
 
-    if ((tmp_img->bpp == 1) && IM_ShouldHQ2X(rim))
+    if ((tmp_img->depth_ == 1) && IM_ShouldHQ2X(rim))
     {
         bool solid = (rim->opacity == OPAC_Solid);
 
-        Hq2x::Setup(what_palette, solid ? -1 : TRANS_PIXEL);
+        Hq2xPaletteSetup(what_palette, solid ? -1 : TRANS_PIXEL);
 
-        image_data_c *scaled_img = Hq2x::Convert(tmp_img, solid, false /* invert */);
+        ImageData *scaled_img = ImageHq2x(tmp_img, solid, false /* invert */);
 
         if (rim->is_font)
         {
@@ -1359,7 +1358,7 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
 
         if (rim->blur_sigma > 0.0f)
         {
-            image_data_c *blurred_img = Blur::Blur(scaled_img, rim->blur_sigma);
+            ImageData *blurred_img = ImageBlur(scaled_img, rim->blur_sigma);
             delete scaled_img;
             scaled_img = blurred_img;
         }
@@ -1367,9 +1366,9 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
         delete tmp_img;
         tmp_img = scaled_img;
     }
-    else if (tmp_img->bpp == 1)
+    else if (tmp_img->depth_ == 1)
     {
-        image_data_c *rgb_img = R_PalettisedToRGB(tmp_img, what_palette, rim->opacity);
+        ImageData *rgb_img = R_PalettisedToRGB(tmp_img, what_palette, rim->opacity);
 
         if (rim->is_font)
         {
@@ -1379,7 +1378,7 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
 
         if (rim->blur_sigma > 0.0f)
         {
-            image_data_c *blurred_img = Blur::Blur(rgb_img, rim->blur_sigma);
+            ImageData *blurred_img = ImageBlur(rgb_img, rim->blur_sigma);
             delete rgb_img;
             rgb_img = blurred_img;
         }
@@ -1387,7 +1386,7 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
         delete tmp_img;
         tmp_img = rgb_img;
     }
-    else if (tmp_img->bpp >= 3)
+    else if (tmp_img->depth_ >= 3)
     {
         if (rim->is_font)
         {
@@ -1396,7 +1395,7 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
         }
         if (rim->blur_sigma > 0.0f)
         {
-            image_data_c *blurred_img = Blur::Blur(tmp_img, rim->blur_sigma);
+            ImageData *blurred_img = ImageBlur(tmp_img, rim->blur_sigma);
             delete tmp_img;
             tmp_img = blurred_img;
         }
@@ -1405,7 +1404,7 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
     }
 
     if (rim->hsv_rotation || rim->hsv_saturation > -1 || rim->hsv_value)
-        tmp_img->SetHSV(rim->hsv_rotation, rim->hsv_saturation, rim->hsv_value);
+        tmp_img->SetHsv(rim->hsv_rotation, rim->hsv_saturation, rim->hsv_value);
 
     if (do_whiten)
         tmp_img->Whiten();

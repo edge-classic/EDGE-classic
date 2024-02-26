@@ -1037,7 +1037,7 @@ void P_ActExplode(mobj_t *object)
 // -AJA- 1999/08/22: Fixed a bug that occasionally caused the game to
 //       go into an infinite loop.  NOTE WELL: don't fiddle with the
 //       object's x & y directly, use P_TryMove instead, or
-//       P_ChangeThingPosition.
+//       ChangeThingPosition.
 //
 static void CheckMissileSpawn(mobj_t *projectile)
 {
@@ -1978,7 +1978,7 @@ void P_ActTrackerFollow(mobj_t *tracker)
 
     BAMAngle angle = destination->angle;
 
-    P_ChangeThingPosition(tracker, destination->x + 24 * epi::BAMCos(angle), destination->y + 24 * epi::BAMSin(angle),
+    ChangeThingPosition(tracker, destination->x + 24 * epi::BAMCos(angle), destination->y + 24 * epi::BAMSin(angle),
                           destination->z);
 }
 
@@ -2100,7 +2100,7 @@ void P_ActEffectTracker(mobj_t *object)
 
     // move the tracker between the object and the object's target
 
-    P_ChangeThingPosition(tracker, target->x - 24 * epi::BAMCos(angle), target->y - 24 * epi::BAMSin(angle), target->z);
+    ChangeThingPosition(tracker, target->x - 24 * epi::BAMCos(angle), target->y - 24 * epi::BAMSin(angle), target->z);
 
 #ifdef DEVELOPERS
     if (!tracker->info->explode_damage_.nominal)
@@ -2991,7 +2991,7 @@ void P_ActReloadReset(mobj_t *object)
 //-----------LOOKING AND CHASING---------------
 //---------------------------------------------
 
-extern mobj_t **bmap_things;
+extern mobj_t **blockmap_things;
 
 //
 // CreateAggression
@@ -3011,17 +3011,17 @@ static bool CreateAggression(mobj_t *mo)
     int bdx = RandomByteSkewToZeroDeterministic() / 17;
     int bdy = RandomByteSkewToZeroDeterministic() / 17;
 
-    int block_x = BLOCKMAP_GET_X(mo->x) + bdx;
-    int block_y = BLOCKMAP_GET_X(mo->y) + bdy;
+    int block_x = BlockmapGetX(mo->x) + bdx;
+    int block_y = BlockmapGetX(mo->y) + bdy;
 
-    block_x = abs(block_x + bmap_width) % bmap_width;
-    block_y = abs(block_y + bmap_height) % bmap_height;
+    block_x = abs(block_x + blockmap_width) % blockmap_width;
+    block_y = abs(block_y + blockmap_height) % blockmap_height;
 
-    //  LogDebug("BLOCKMAP POS: %3d %3d  (size: %d %d)\n", block_x, block_y, bmap_width, bmap_height);
+    //  LogDebug("BLOCKMAP POS: %3d %3d  (size: %d %d)\n", block_x, block_y, blockmap_width, blockmap_height);
 
-    int bnum = block_y * bmap_width + block_x;
+    int bnum = block_y * blockmap_width + block_x;
 
-    for (mobj_t *other = bmap_things[bnum]; other; other = other->bnext)
+    for (mobj_t *other = blockmap_things[bnum]; other; other = other->bnext)
     {
         if (!(other->info->extendedflags_ & kExtendedFlagMonster) || other->health <= 0)
             continue;
@@ -3693,7 +3693,7 @@ void P_ActBecome(struct mobj_s *mo)
     // DO THE DEED !!
     mo->preBecome = mo->info; // store what we used to be
 
-    P_UnsetThingPosition(mo);
+    UnsetThingPosition(mo);
     {
         mo->info = become->info_;
 
@@ -3743,7 +3743,7 @@ void P_ActBecome(struct mobj_s *mo)
             }
         }
     }
-    P_SetThingPosition(mo);
+    SetThingPosition(mo);
 
     int state = P_MobjFindLabel(mo, become->start_.label_.c_str());
     if (state == 0)
@@ -3768,7 +3768,7 @@ void P_ActUnBecome(struct mobj_s *mo)
     // DO THE DEED !!
     mo->preBecome = nullptr; // remove old reference
 
-    P_UnsetThingPosition(mo);
+    UnsetThingPosition(mo);
     {
         mo->info = preBecome;
 
@@ -3818,7 +3818,7 @@ void P_ActUnBecome(struct mobj_s *mo)
             }
         }
     }
-    P_SetThingPosition(mo);
+    SetThingPosition(mo);
 
     int state = P_MobjFindLabel(mo, "IDLE");
     if (state == 0)
@@ -3847,7 +3847,7 @@ void P_ActMorph(struct mobj_s *mo)
     // DO THE DEED !!
     mo->preBecome = mo->info; // store what we used to be
 
-    P_UnsetThingPosition(mo);
+    UnsetThingPosition(mo);
     {
         mo->info   = morph->info_;
         mo->health = mo->info->spawnhealth_; // Set health to full again
@@ -3897,7 +3897,7 @@ void P_ActMorph(struct mobj_s *mo)
             }
         }
     }
-    P_SetThingPosition(mo);
+    SetThingPosition(mo);
 
     int state = P_MobjFindLabel(mo, morph->start_.label_.c_str());
     if (state == 0)
@@ -3923,7 +3923,7 @@ void P_ActUnMorph(struct mobj_s *mo)
     // DO THE DEED !!
     mo->preBecome = nullptr; // remove old reference
 
-    P_UnsetThingPosition(mo);
+    UnsetThingPosition(mo);
     {
         mo->info = preBecome;
 
@@ -3976,7 +3976,7 @@ void P_ActUnMorph(struct mobj_s *mo)
             }
         }
     }
-    P_SetThingPosition(mo);
+    SetThingPosition(mo);
 
     int state = P_MobjFindLabel(mo, "IDLE");
     if (state == 0)

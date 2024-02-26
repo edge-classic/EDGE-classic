@@ -1891,7 +1891,7 @@ void E_EngineShutdown(void)
         SleepForMilliseconds(50);
     }
 
-    P_Shutdown();
+    LevelShutdown();
 
     S_Shutdown();
     R_Shutdown();
@@ -1972,7 +1972,7 @@ static void E_Startup(void)
 
     MenuInitialize();
     R_Init();
-    P_Init();
+    PlayerStateInit();
     P_MapInit();
     P_InitSwitchList();
     W_InitPicAnims();

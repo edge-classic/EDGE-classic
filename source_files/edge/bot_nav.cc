@@ -218,7 +218,7 @@ static position_c nav_finish_mid;
 
 position_c nav_area_c::get_middle() const
 {
-    float z = subsectors[id].sector->f_h;
+    float z = level_subsectors[id].sector->f_h;
 
     return position_c{mid_x, mid_y, z};
 }
@@ -335,21 +335,21 @@ static int BotNavigateCheckTeleporter(const seg_t *seg)
     const mobj_t *dest = P_FindTeleportMan(ld->tag, spec->t_.outspawnobj_);
     if (dest == nullptr) return -1;
 
-    return (int)(dest->subsector - subsectors);
+    return (int)(dest->subsector - level_subsectors);
 }
 
 static void BotNavigateCreateLinks()
 {
-    for (int i = 0; i < numsubsectors; i++)
+    for (int i = 0; i < total_level_subsectors; i++)
     {
         nav_areas.push_back(nav_area_c(i));
 
-        nav_areas.back().compute_middle(subsectors[i]);
+        nav_areas.back().compute_middle(level_subsectors[i]);
     }
 
-    for (int i = 0; i < numsubsectors; i++)
+    for (int i = 0; i < total_level_subsectors; i++)
     {
-        const subsector_t &sub = subsectors[i];
+        const subsector_t &sub = level_subsectors[i];
 
         nav_area_c &area = nav_areas[i];
         area.first_link  = (int)nav_links.size();
@@ -359,7 +359,7 @@ static void BotNavigateCreateLinks()
             // no link for a one-sided wall
             if (seg->back_sub == nullptr) continue;
 
-            int dest_id = (int)(seg->back_sub - subsectors);
+            int dest_id = (int)(seg->back_sub - level_subsectors);
 
             // ignore player-blocking lines
             if (!seg->miniseg)
@@ -399,8 +399,8 @@ static void BotNavigateCreateLinks()
 static float BotNavigateTraverseLinkCost(int cur, const nav_link_c &link,
                                          bool allow_doors)
 {
-    const sector_t *s1 = subsectors[cur].sector;
-    const sector_t *s2 = subsectors[link.dest_id].sector;
+    const sector_t *s1 = level_subsectors[cur].sector;
+    const sector_t *s2 = level_subsectors[link.dest_id].sector;
 
     float time   = link.length / RUNNING_SPEED;
     float f_diff = s2->f_h - s1->f_h;
@@ -454,7 +454,7 @@ static float BotNavigateTraverseLinkCost(int cur, const nav_link_c &link,
 
 static float BotNavigateEstimateH(const subsector_t *cur_sub)
 {
-    int  id = (int)(cur_sub - subsectors);
+    int  id = (int)(cur_sub - level_subsectors);
     auto p  = nav_areas[id].get_middle();
 
     float dist = R_PointToDist(p.x, p.y, nav_finish_mid.x, nav_finish_mid.y);
@@ -503,7 +503,7 @@ static void BotNavigateTryOpenArea(int idx, int parent, float cost)
         area.G      = cost;
 
         if (AlmostEquals(area.H, 0.0f))
-            area.H = BotNavigateEstimateH(&subsectors[idx]);
+            area.H = BotNavigateEstimateH(&level_subsectors[idx]);
     }
 }
 
@@ -611,8 +611,8 @@ BotPath *BotNavigateFindPath(const position_c *start, const position_c *finish,
     subsector_t *start_sub  = R_PointInSubsector(start->x, start->y);
     subsector_t *finish_sub = R_PointInSubsector(finish->x, finish->y);
 
-    int start_id  = (int)(start_sub - subsectors);
-    int finish_id = (int)(finish_sub - subsectors);
+    int start_id  = (int)(start_sub - level_subsectors);
+    int finish_id = (int)(finish_sub - level_subsectors);
 
     if (start_id == finish_id)
     {
@@ -706,7 +706,7 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, mobj_t *&best)
     position_c pos{bot->pl_->mo->x, bot->pl_->mo->y, bot->pl_->mo->z};
 
     subsector_t *start    = R_PointInSubsector(pos.x, pos.y);
-    int          start_id = (int)(start - subsectors);
+    int          start_id = (int)(start - level_subsectors);
 
     // the best thing so far...
     best             = nullptr;
@@ -741,7 +741,7 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, mobj_t *&best)
         area.open        = false;
 
         // visit the things
-        BotNavigateItemsInSubsector(&subsectors[cur], bot, pos, radius, cur,
+        BotNavigateItemsInSubsector(&level_subsectors[cur], bot, pos, radius, cur,
                                     best_id, best_score, best);
 
         // visit each neighbor node
@@ -801,12 +801,12 @@ static void BotNavigateEnemiesInNode(unsigned int bspnum, DeathBot *bot,
     if (bspnum & NF_V5_SUBSECTOR)
     {
         bspnum &= ~NF_V5_SUBSECTOR;
-        BotNavigateEnemiesInSubsector(&subsectors[bspnum], bot, radius, best_mo,
+        BotNavigateEnemiesInSubsector(&level_subsectors[bspnum], bot, radius, best_mo,
                                       best_score);
         return;
     }
 
-    const node_t *node = &nodes[bspnum];
+    const node_t *node = &level_nodes[bspnum];
 
     position_c pos{bot->pl_->mo->x, bot->pl_->mo->y, bot->pl_->mo->z};
 

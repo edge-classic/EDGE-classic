@@ -38,35 +38,26 @@
 //
 // Lookup tables for map data.
 //
-extern int       numvertexes;
-extern vertex_t *vertexes;
+extern int       total_level_vertexes;
+extern vertex_t *level_vertexes;
 
-extern int       num_gl_vertexes;
-extern vertex_t *gl_vertexes;
+extern int       total_level_sectors;
+extern sector_t *level_sectors;
 
-extern int    numsegs;
-extern seg_t *segs;
+extern int          total_level_subsectors;
+extern subsector_t *level_subsectors;
 
-extern int       numsectors;
-extern sector_t *sectors;
+extern int           total_level_extrafloors;
+extern extrafloor_t *level_extrafloors;
 
-extern int          numsubsectors;
-extern subsector_t *subsectors;
+extern int     total_level_nodes;
+extern node_t *level_nodes;
 
-extern int           numextrafloors;
-extern extrafloor_t *extrafloors;
+extern int     total_level_lines;
+extern line_t *level_lines;
 
-extern int     numnodes;
-extern node_t *nodes;
-
-extern int     numlines;
-extern line_t *lines;
-
-extern int     numsides;
-extern side_t *sides;
-
-extern int     numvertgaps;
-extern vgap_t *vertgaps;
+extern int     total_level_sides;
+extern side_t *level_sides;
 
 //
 // POV data.

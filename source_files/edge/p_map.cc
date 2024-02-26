@@ -522,7 +522,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
 
             // FIXME: if more than one ladder, choose best one
 
-            tm_I.mover->on_ladder = (ld - lines);
+            tm_I.mover->on_ladder = (ld - level_lines);
         } while (0);
     }
 

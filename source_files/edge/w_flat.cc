@@ -357,7 +357,7 @@ void W_InitPicAnims(void)
 void W_PrecacheTextures(void)
 {
     // maximum possible images
-    int max_image = 1 + 3 * numsides + 2 * numsectors;
+    int max_image = 1 + 3 * total_level_sides + 2 * total_level_sectors;
     int count     = 0;
 
     const image_c **images = new const image_c *[max_image];
@@ -366,28 +366,28 @@ void W_PrecacheTextures(void)
     images[count++] = sky_image;
 
     // add in sidedefs
-    for (int i = 0; i < numsides; i++)
+    for (int i = 0; i < total_level_sides; i++)
     {
-        if (sides[i].top.image)
-            images[count++] = sides[i].top.image;
+        if (level_sides[i].top.image)
+            images[count++] = level_sides[i].top.image;
 
-        if (sides[i].middle.image)
-            images[count++] = sides[i].middle.image;
+        if (level_sides[i].middle.image)
+            images[count++] = level_sides[i].middle.image;
 
-        if (sides[i].bottom.image)
-            images[count++] = sides[i].bottom.image;
+        if (level_sides[i].bottom.image)
+            images[count++] = level_sides[i].bottom.image;
     }
 
     SYS_ASSERT(count <= max_image);
 
     // add in planes
-    for (int i = 0; i < numsectors; i++)
+    for (int i = 0; i < total_level_sectors; i++)
     {
-        if (sectors[i].floor.image)
-            images[count++] = sectors[i].floor.image;
+        if (level_sectors[i].floor.image)
+            images[count++] = level_sectors[i].floor.image;
 
-        if (sectors[i].ceil.image)
-            images[count++] = sectors[i].ceil.image;
+        if (level_sectors[i].ceil.image)
+            images[count++] = level_sectors[i].ceil.image;
     }
 
     SYS_ASSERT(count <= max_image);

@@ -86,11 +86,11 @@ void R_ComputeSkyHeights(void)
 
     // --- initialise ---
 
-    sec_sky_ring_t *rings = new sec_sky_ring_t[numsectors];
+    sec_sky_ring_t *rings = new sec_sky_ring_t[total_level_sectors];
 
-    memset(rings, 0, numsectors * sizeof(sec_sky_ring_t));
+    memset(rings, 0, total_level_sectors * sizeof(sec_sky_ring_t));
 
-    for (i = 0, sec = sectors; i < numsectors; i++, sec++)
+    for (i = 0, sec = level_sectors; i < total_level_sectors; i++, sec++)
     {
         if (!IS_SKY(sec->ceil))
             continue;
@@ -110,7 +110,7 @@ void R_ComputeSkyHeights(void)
 
     // --- make the pass over linedefs ---
 
-    for (i = 0, ld = lines; i < numlines; i++, ld++)
+    for (i = 0, ld = level_lines; i < total_level_lines; i++, ld++)
     {
         sector_t       *sec1, *sec2;
         sec_sky_ring_t *ring1, *ring2, *tmp_R;
@@ -126,8 +126,8 @@ void R_ComputeSkyHeights(void)
         if (sec1 == sec2)
             continue;
 
-        ring1 = rings + (sec1 - sectors);
-        ring2 = rings + (sec2 - sectors);
+        ring1 = rings + (sec1 - level_sectors);
+        ring2 = rings + (sec2 - level_sectors);
 
         // we require sky on both sides
         if (ring1->group == 0 || ring2->group == 0)
@@ -171,7 +171,7 @@ void R_ComputeSkyHeights(void)
 
     // --- now store the results, and free up ---
 
-    for (i = 0, sec = sectors; i < numsectors; i++, sec++)
+    for (i = 0, sec = level_sectors; i < total_level_sectors; i++, sec++)
     {
         if (rings[i].group > 0)
             sec->sky_h = rings[i].max_h;

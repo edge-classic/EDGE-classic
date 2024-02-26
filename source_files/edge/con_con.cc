@@ -1707,11 +1707,11 @@ void ConsoleShowPosition(void)
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "  sec: %d", (int)(p->mo->subsector->sector - sectors));
+    sprintf(textbuf, "  sec: %d", (int)(p->mo->subsector->sector - level_sectors));
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "  sub: %d", (int)(p->mo->subsector - subsectors));
+    sprintf(textbuf, "  sub: %d", (int)(p->mo->subsector - level_subsectors));
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 }
 

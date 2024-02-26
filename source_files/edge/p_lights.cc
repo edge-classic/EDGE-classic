@@ -193,9 +193,9 @@ void EV_LightTurnOn(int tag, int bright)
 {
     /* TURN LINE'S TAG LIGHTS ON */
 
-    for (int i = 0; i < numsectors; i++)
+    for (int i = 0; i < total_level_sectors; i++)
     {
-        sector_t *sector = sectors + i;
+        sector_t *sector = level_sectors + i;
 
         if (sector->tag == tag)
         {

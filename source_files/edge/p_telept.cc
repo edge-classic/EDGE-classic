@@ -39,12 +39,12 @@
 
 mobj_t *P_FindTeleportMan(int tag, const MapObjectDefinition *info)
 {
-    for (int i = 0; i < numsectors; i++)
+    for (int i = 0; i < total_level_sectors; i++)
     {
-        if (sectors[i].tag != tag)
+        if (level_sectors[i].tag != tag)
             continue;
 
-        for (subsector_t *sub = sectors[i].subsectors; sub; sub = sub->sec_next)
+        for (subsector_t *sub = level_sectors[i].subsectors; sub; sub = sub->sec_next)
         {
             for (mobj_t *mo = sub->thinglist; mo; mo = mo->snext)
                 if (mo->info == info && !(mo->extendedflags & kExtendedFlagNeverTarget))
@@ -57,15 +57,15 @@ mobj_t *P_FindTeleportMan(int tag, const MapObjectDefinition *info)
 
 line_t *P_FindTeleportLine(int tag, line_t *original)
 {
-    for (int i = 0; i < numlines; i++)
+    for (int i = 0; i < total_level_lines; i++)
     {
-        if (lines[i].tag != tag)
+        if (level_lines[i].tag != tag)
             continue;
 
-        if (lines + i == original)
+        if (level_lines + i == original)
             continue;
 
-        return lines + i;
+        return level_lines + i;
     }
 
     return nullptr; // not found

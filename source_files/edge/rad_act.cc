@@ -783,11 +783,11 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
     // handle the line changers
     SYS_ASSERT(ctex->what < CHTEX_Sky);
 
-    for (int i = 0; i < numlines; i++)
+    for (int i = 0; i < total_level_lines; i++)
     {
-        side_t *side = (ctex->what <= CHTEX_RightLower) ? lines[i].side[0] : lines[i].side[1];
+        side_t *side = (ctex->what <= CHTEX_RightLower) ? level_lines[i].side[0] : level_lines[i].side[1];
 
-        if (lines[i].tag != ctex->tag || !side)
+        if (level_lines[i].tag != ctex->tag || !side)
             continue;
 
         if (ctex->subtag && side->sector->tag != ctex->subtag)
@@ -854,18 +854,18 @@ void RAD_ActMoveSector(rad_trigger_t *R, void *param)
     // SectorV compatibility
     if (t->tag == 0)
     {
-        if (t->secnum < 0 || t->secnum >= numsectors)
+        if (t->secnum < 0 || t->secnum >= total_level_sectors)
             FatalError("RTS SECTORV: no such sector %d.\n", t->secnum);
 
-        MoveOneSector(sectors + t->secnum, t);
+        MoveOneSector(level_sectors + t->secnum, t);
         return;
     }
 
     // OPTIMISE !
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        if (sectors[i].tag == t->tag)
-            MoveOneSector(sectors + i, t);
+        if (level_sectors[i].tag == t->tag)
+            MoveOneSector(level_sectors + i, t);
     }
 }
 
@@ -885,18 +885,18 @@ void RAD_ActLightSector(rad_trigger_t *R, void *param)
     // SectorL compatibility
     if (t->tag == 0)
     {
-        if (t->secnum < 0 || t->secnum >= numsectors)
+        if (t->secnum < 0 || t->secnum >= total_level_sectors)
             FatalError("RTS SECTORL: no such sector %d.\n", t->secnum);
 
-        LightOneSector(sectors + t->secnum, t);
+        LightOneSector(level_sectors + t->secnum, t);
         return;
     }
 
     // OPTIMISE !
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        if (sectors[i].tag == t->tag)
-            LightOneSector(sectors + i, t);
+        if (level_sectors[i].tag == t->tag)
+            LightOneSector(level_sectors + i, t);
     }
 }
 
@@ -905,35 +905,35 @@ void RAD_ActFogSector(rad_trigger_t *R, void *param)
     s_fogsector_t *t = (s_fogsector_t *)param;
     int            i;
 
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        if (sectors[i].tag == t->tag)
+        if (level_sectors[i].tag == t->tag)
         {
             if (!t->leave_color)
             {
                 if (t->colmap_color)
-                    sectors[i].props.fog_color = V_ParseFontColor(t->colmap_color);
+                    level_sectors[i].props.fog_color = V_ParseFontColor(t->colmap_color);
                 else // should only happen with a CLEAR directive
-                    sectors[i].props.fog_color = kRGBANoValue;
+                    level_sectors[i].props.fog_color = kRGBANoValue;
             }
             if (!t->leave_density)
             {
                 if (t->relative)
                 {
-                    sectors[i].props.fog_density += (0.01f * t->density);
-                    if (sectors[i].props.fog_density < 0.0001f)
-                        sectors[i].props.fog_density = 0;
-                    if (sectors[i].props.fog_density > 0.01f)
-                        sectors[i].props.fog_density = 0.01f;
+                    level_sectors[i].props.fog_density += (0.01f * t->density);
+                    if (level_sectors[i].props.fog_density < 0.0001f)
+                        level_sectors[i].props.fog_density = 0;
+                    if (level_sectors[i].props.fog_density > 0.01f)
+                        level_sectors[i].props.fog_density = 0.01f;
                 }
                 else
-                    sectors[i].props.fog_density = 0.01f * t->density;
+                    level_sectors[i].props.fog_density = 0.01f * t->density;
             }
-            for (int j = 0; j < sectors[i].linecount; j++)
+            for (int j = 0; j < level_sectors[i].linecount; j++)
             {
                 for (int k = 0; k < 2; k++)
                 {
-                    side_t *side_check = sectors[i].lines[j]->side[k];
+                    side_t *side_check = level_sectors[i].lines[j]->side[k];
                     if (side_check && side_check->middle.fogwall)
                     {
                         side_check->middle.image =
@@ -985,9 +985,9 @@ void RAD_ActUnblockLines(rad_trigger_t *R, void *param)
 
     int i;
 
-    for (i = 0; i < numlines; i++)
+    for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = lines + i;
+        line_t *ld = level_lines + i;
 
         if (ld->tag != ub->tag)
             continue;
@@ -1009,9 +1009,9 @@ void RAD_ActBlockLines(rad_trigger_t *R, void *param)
 
     int i;
 
-    for (i = 0; i < numlines; i++)
+    for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = lines + i;
+        line_t *ld = level_lines + i;
 
         if (ld->tag != ub->tag)
             continue;

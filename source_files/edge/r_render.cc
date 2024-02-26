@@ -915,7 +915,7 @@ static inline void GreetNeighbourSector(float *hts, int &num, vertex_seclist_t *
 
     for (int k = 0; k < (seclist->num * 2); k++)
     {
-        sector_t *sec = sectors + seclist->sec[k / 2];
+        sector_t *sec = level_sectors + seclist->sec[k / 2];
 
         float h = (k & 1) ? sec->c_h : sec->f_h;
 
@@ -2739,14 +2739,14 @@ static void RGL_WalkSubsector(int num)
 {
     EDGE_ZoneScoped;
 
-    subsector_t *sub    = &subsectors[num];
+    subsector_t *sub    = &level_subsectors[num];
     sector_t    *sector = sub->sector;
 
     // store subsector in a global var for other functions to use
     cur_sub = sub;
 
 #if (DEBUG >= 1)
-    LogDebug("\nVISITING SUBSEC %d (sector %d)\n\n", num, sub->sector - sectors);
+    LogDebug("\nVISITING SUBSEC %d (sector %d)\n\n", num, sub->sector - level_sectors);
 #endif
 
     drawsub_c *K = R_GetDrawSub();
@@ -3186,7 +3186,7 @@ static void RGL_WalkBSPNode(unsigned int bspnum)
         return;
     }
 
-    node = &nodes[bspnum];
+    node = &level_nodes[bspnum];
 
     // Decide which side the view point is on.
 

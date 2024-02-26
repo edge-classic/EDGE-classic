@@ -219,8 +219,8 @@ void LoadLevel_Bits(void)
     // The method for changing current_map, is using by
     // GameDeferredNewGame.
     //
-    // -ACB- 1998/08/09 New P_SetupLevel
-    // -KM- 1998/11/25 P_SetupLevel accepts the autotag
+    // -ACB- 1998/08/09 New LevelSetup
+    // -KM- 1998/11/25 LevelSetup accepts the autotag
     //
     RAD_ClearTriggers();
     RAD_FinishMenu(0);
@@ -242,7 +242,7 @@ void LoadLevel_Bits(void)
 
     leveltime = 0;
 
-    P_SetupLevel();
+    LevelSetup();
 
     RAD_SpawnTriggers(current_map->name_.c_str());
 
@@ -792,12 +792,12 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 
     // -- Check LEVEL consistency (crc) --
 
-    if (globs->mapsector.count != numsectors ||
-        globs->mapsector.crc != mapsector_CRC.GetCRC() ||
-        globs->mapline.count != numlines ||
-        globs->mapline.crc != mapline_CRC.GetCRC() ||
-        globs->mapthing.count != mapthing_NUM ||
-        globs->mapthing.crc != mapthing_CRC.GetCRC())
+    if (globs->mapsector.count != total_level_sectors ||
+        globs->mapsector.crc != map_sectors_crc.GetCRC() ||
+        globs->mapline.count != total_level_lines ||
+        globs->mapline.crc != map_lines_crc.GetCRC() ||
+        globs->mapthing.count != total_map_things ||
+        globs->mapthing.crc != map_things_crc.GetCRC())
     {
         SV_CloseReadFile();
 
@@ -937,12 +937,12 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
     globs->description = SV_DupString(description);
     globs->desc_date   = SV_DupString(timebuf);
 
-    globs->mapsector.count = numsectors;
-    globs->mapsector.crc   = mapsector_CRC.GetCRC();
-    globs->mapline.count   = numlines;
-    globs->mapline.crc     = mapline_CRC.GetCRC();
-    globs->mapthing.count  = mapthing_NUM;
-    globs->mapthing.crc    = mapthing_CRC.GetCRC();
+    globs->mapsector.count = total_level_sectors;
+    globs->mapsector.crc   = map_sectors_crc.GetCRC();
+    globs->mapline.count   = total_level_lines;
+    globs->mapline.crc     = map_lines_crc.GetCRC();
+    globs->mapthing.count  = total_map_things;
+    globs->mapthing.crc    = map_things_crc.GetCRC();
 
     SV_BeginSave();
 
@@ -1221,7 +1221,7 @@ static void GameDoEndGame(void)
     {
         BotEndLevel();
 
-        // FIXME: P_ShutdownLevel()
+        // FIXME: LevelShutdownLevel()
     }
 
     game_state = GS_NOTHING;

@@ -239,7 +239,7 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
 
     while (!(nodenum & NF_V5_SUBSECTOR))
     {
-        node_t *nd = nodes + nodenum;
+        node_t *nd = level_nodes + nodenum;
 
         int side = P_BoxOnDivLineSide(info->bbox, &nd->div);
 
@@ -260,7 +260,7 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
     // we don't actually split the thing's BBOX when it intersects with
     // a partition line.
 
-    sub = subsectors + (nodenum & ~NF_V5_SUBSECTOR);
+    sub = level_subsectors + (nodenum & ~NF_V5_SUBSECTOR);
 
     for (seg = sub->segs; seg; seg = seg->sub_next)
     {
@@ -1291,7 +1291,7 @@ static void BlockAddLine(int line_num)
     int x0, y0;
     int x1, y1;
 
-    line_t *ld = lines + line_num;
+    line_t *ld = level_lines + line_num;
 
     int blocknum;
 
@@ -1401,7 +1401,7 @@ void GenerateBlockmap(int min_x, int min_y, int max_x, int max_y)
     Z_Clear(blockmap_lines, std::list<line_t *> *, btotal);
 
     // process each linedef of the map
-    for (int i = 0; i < numlines; i++) BlockAddLine(i);
+    for (int i = 0; i < total_level_lines; i++) BlockAddLine(i);
 
     // LogDebug("GenerateBlockmap: TOTAL DATA=%d\n", blk_total_lines);
 }

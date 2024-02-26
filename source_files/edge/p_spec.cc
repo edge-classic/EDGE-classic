@@ -96,7 +96,7 @@ static bool DoDonut_wrapper(sector_t *s, const void *p1, void *p2)
 //
 side_t *P_GetSide(int currentSector, int line, int side)
 {
-    line_t *ldef = sectors[currentSector].lines[line];
+    line_t *ldef = level_sectors[currentSector].lines[line];
 
     return ldef->side[side];
 }
@@ -108,7 +108,7 @@ side_t *P_GetSide(int currentSector, int line, int side)
 //
 sector_t *P_GetSector(int currentSector, int line, int side)
 {
-    line_t *ldef = sectors[currentSector].lines[line];
+    line_t *ldef = level_sectors[currentSector].lines[line];
 
     return side ? ldef->backsector : ldef->frontsector;
 }
@@ -119,7 +119,7 @@ sector_t *P_GetSector(int currentSector, int line, int side)
 //
 int P_TwoSided(int sector, int line)
 {
-    return (sectors[sector].lines[line])->flags & MLF_TwoSided;
+    return (level_sectors[sector].lines[line])->flags & MLF_TwoSided;
 }
 
 //
@@ -214,7 +214,7 @@ float P_FindRaiseToTexture(sector_t *sec)
     int     i;
     side_t *side;
     float   minsize = (float)INT_MAX;
-    int     secnum  = sec - sectors;
+    int     secnum  = sec - level_sectors;
 
     for (i = 0; i < sec->linecount; i++)
     {
@@ -251,10 +251,10 @@ sector_t *P_FindSectorFromTag(int tag)
 {
     int i;
 
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        if (sectors[i].tag == tag)
-            return sectors + i;
+        if (level_sectors[i].tag == tag)
+            return level_sectors + i;
     }
 
     return nullptr;
@@ -650,11 +650,11 @@ static void P_LineEffect(line_t *target, line_t *source, const LineType *special
                 anim.scroll_line_ref    = source;
                 anim.side0_xoffspeed    = -source->side[0]->middle.offset.X / 8.0;
                 anim.side0_yoffspeed    = source->side[0]->middle.offset.Y / 8.0;
-                for (int i = 0; i < numlines; i++)
+                for (int i = 0; i < total_level_lines; i++)
                 {
-                    if (lines[i].tag == source->frontsector->tag)
+                    if (level_lines[i].tag == source->frontsector->tag)
                     {
-                        if (!lines[i].special || lines[i].special->count_ == 1)
+                        if (!level_lines[i].special || level_lines[i].special->count_ == 1)
                             anim.permanent = true;
                     }
                 }
@@ -717,11 +717,11 @@ static void P_LineEffect(line_t *target, line_t *source, const LineType *special
                     anim.scroll_line_ref    = source;
                     anim.dynamic_dx += x;
                     anim.dynamic_dy += y;
-                    for (int i = 0; i < numlines; i++)
+                    for (int i = 0; i < total_level_lines; i++)
                     {
-                        if (lines[i].tag == source->frontsector->tag)
+                        if (level_lines[i].tag == source->frontsector->tag)
                         {
-                            if (!lines[i].special || lines[i].special->count_ == 1)
+                            if (!level_lines[i].special || level_lines[i].special->count_ == 1)
                                 anim.permanent = true;
                         }
                     }
@@ -855,11 +855,11 @@ static void P_SectorEffect(sector_t *target, line_t *source, const LineType *spe
                 anim.scroll_sec_ref     = source->frontsector;
                 anim.scroll_special_ref = special;
                 anim.scroll_line_ref    = source;
-                for (int i = 0; i < numlines; i++)
+                for (int i = 0; i < total_level_lines; i++)
                 {
-                    if (lines[i].tag == source->frontsector->tag)
+                    if (level_lines[i].tag == source->frontsector->tag)
                     {
-                        if (!lines[i].special || lines[i].special->count_ == 1)
+                        if (!level_lines[i].special || level_lines[i].special->count_ == 1)
                             anim.permanent = true;
                     }
                 }
@@ -1004,7 +1004,7 @@ static void P_PortalEffect(line_t *ld)
 
     if (ld->side[1])
     {
-        LogWarning("Portal on line #%d disabled: Not one-sided!\n", (int)(ld - lines));
+        LogWarning("Portal on line #%d disabled: Not one-sided!\n", (int)(ld - level_lines));
         return;
     }
 
@@ -1016,15 +1016,15 @@ static void P_PortalEffect(line_t *ld)
 
     if (ld->tag <= 0)
     {
-        LogWarning("Portal on line #%d disabled: Missing tag.\n", (int)(ld - lines));
+        LogWarning("Portal on line #%d disabled: Missing tag.\n", (int)(ld - level_lines));
         return;
     }
 
     bool is_camera = (ld->special->portal_effect_ & kPortalEffectTypeCamera) ? true : false;
 
-    for (int i = 0; i < numlines; i++)
+    for (int i = 0; i < total_level_lines; i++)
     {
-        line_t *other = lines + i;
+        line_t *other = level_lines + i;
 
         if (other == ld)
             continue;
@@ -1037,7 +1037,7 @@ static void P_PortalEffect(line_t *ld)
 
         if (h1 < 1 || h2 < 1)
         {
-            LogWarning("Portal on line #%d disabled: sector is closed.\n", (int)(ld - lines));
+            LogWarning("Portal on line #%d disabled: sector is closed.\n", (int)(ld - level_lines));
             return;
         }
 
@@ -1052,13 +1052,13 @@ static void P_PortalEffect(line_t *ld)
 
         if (other->portal_pair)
         {
-            LogWarning("Portal on line #%d disabled: Partner already a portal.\n", (int)(ld - lines));
+            LogWarning("Portal on line #%d disabled: Partner already a portal.\n", (int)(ld - level_lines));
             return;
         }
 
         if (other->side[1])
         {
-            LogWarning("Portal on line #%d disabled: Partner not one-sided.\n", (int)(ld - lines));
+            LogWarning("Portal on line #%d disabled: Partner not one-sided.\n", (int)(ld - level_lines));
             return;
         }
 
@@ -1066,7 +1066,7 @@ static void P_PortalEffect(line_t *ld)
 
         if (h_ratio < 0.95f || h_ratio > 1.05f)
         {
-            LogWarning("Portal on line #%d disabled: Partner is different height.\n", (int)(ld - lines));
+            LogWarning("Portal on line #%d disabled: Partner is different height.\n", (int)(ld - level_lines));
             return;
         }
 
@@ -1074,7 +1074,7 @@ static void P_PortalEffect(line_t *ld)
 
         if (len_ratio < 0.95f || len_ratio > 1.05f)
         {
-            LogWarning("Portal on line #%d disabled: Partner is different length.\n", (int)(ld - lines));
+            LogWarning("Portal on line #%d disabled: Partner is different length.\n", (int)(ld - level_lines));
             return;
         }
 
@@ -1087,7 +1087,7 @@ static void P_PortalEffect(line_t *ld)
         return; // Success !!
     }
 
-    LogWarning("Portal on line #%d disabled: Cannot find partner!\n", (int)(ld - lines));
+    LogWarning("Portal on line #%d disabled: Cannot find partner!\n", (int)(ld - level_lines));
 }
 
 static slope_plane_t *DetailSlope_BoundIt(line_t *ld, sector_t *sec, float dz1, float dz2)
@@ -1118,11 +1118,11 @@ static slope_plane_t *DetailSlope_BoundIt(line_t *ld, sector_t *sec, float dz1, 
         }
     }
 
-    // LogDebug("DETAIL SLOPE in #%d: dists %1.3f -> %1.3f\n", (int)(sec - sectors), d_close, d_far);
+    // LogDebug("DETAIL SLOPE in #%d: dists %1.3f -> %1.3f\n", (int)(sec - level_sectors), d_close, d_far);
 
     if (d_far - d_close < 0.5)
     {
-        LogWarning("Detail slope in sector #%d disabled: no area?!?\n", (int)(sec - sectors));
+        LogWarning("Detail slope in sector #%d disabled: no area?!?\n", (int)(sec - level_sectors));
         return nullptr;
     }
 
@@ -1143,7 +1143,7 @@ static void DetailSlope_Floor(line_t *ld)
 {
     if (!ld->side[1])
     {
-        LogWarning("Detail slope on line #%d disabled: Not two-sided!\n", (int)(ld - lines));
+        LogWarning("Detail slope on line #%d disabled: Not two-sided!\n", (int)(ld - level_lines));
         return;
     }
 
@@ -1154,7 +1154,7 @@ static void DetailSlope_Floor(line_t *ld)
 
     if (fabs(z1 - z2) < 0.5)
     {
-        LogWarning("Detail slope on line #%d disabled: floors are same height\n", (int)(ld - lines));
+        LogWarning("Detail slope on line #%d disabled: floors are same height\n", (int)(ld - level_lines));
         return;
     }
 
@@ -1168,7 +1168,7 @@ static void DetailSlope_Floor(line_t *ld)
 
     if (sec->f_slope)
     {
-        LogWarning("Detail slope in sector #%d disabled: floor already sloped!\n", (int)(sec - sectors));
+        LogWarning("Detail slope in sector #%d disabled: floor already sloped!\n", (int)(sec - level_sectors));
         return;
     }
 
@@ -1192,7 +1192,7 @@ static void DetailSlope_Ceiling(line_t *ld)
 
     if (fabs(z1 - z2) < 0.5)
     {
-        LogWarning("Detail slope on line #%d disabled: ceilings are same height\n", (int)(ld - lines));
+        LogWarning("Detail slope on line #%d disabled: ceilings are same height\n", (int)(ld - level_lines));
         return;
     }
 
@@ -1206,7 +1206,7 @@ static void DetailSlope_Ceiling(line_t *ld)
 
     if (sec->c_slope)
     {
-        LogWarning("Detail slope in sector #%d disabled: ceiling already sloped!\n", (int)(sec - sectors));
+        LogWarning("Detail slope in sector #%d disabled: ceiling already sloped!\n", (int)(sec - level_sectors));
         return;
     }
 
@@ -1415,11 +1415,11 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
         }
         else
         {
-            for (i = 0; i < numlines; i++)
+            for (i = 0; i < total_level_lines; i++)
             {
-                if (lines[i].tag == tag)
+                if (level_lines[i].tag == tag)
                 {
-                    P_SpawnLineEffectDebris(lines + i, special);
+                    P_SpawnLineEffectDebris(level_lines + i, special);
                 }
             }
         }
@@ -1527,9 +1527,9 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
         }
         else if (tag)
         {
-            for (i = 0; i < numlines; i++)
+            for (i = 0; i < total_level_lines; i++)
             {
-                line_t *other = lines + i;
+                line_t *other = level_lines + i;
 
                 if (other->tag == tag && other != line)
                     if (EV_DoSlider(other, line, thing, special))
@@ -1593,11 +1593,11 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
         }
         else
         {
-            for (i = 0; i < numlines; i++)
+            for (i = 0; i < total_level_lines; i++)
             {
-                if (lines[i].tag == tag && &lines[i] != line)
+                if (level_lines[i].tag == tag && &level_lines[i] != line)
                 {
-                    P_LineEffect(lines + i, line, special);
+                    P_LineEffect(level_lines + i, line, special);
                     texSwitch = true;
                 }
             }
@@ -2499,37 +2499,37 @@ void P_SpawnSpecials1(void)
         levelTimeCount = time;
     }
 
-    for (i = 0; i < numlines; i++)
+    for (i = 0; i < total_level_lines; i++)
     {
-        const LineType *special = lines[i].special;
+        const LineType *special = level_lines[i].special;
 
         if (!special)
         {
-            lines[i].count = 0;
+            level_lines[i].count = 0;
             continue;
         }
 
         // -AJA- 1999/10/23: weed out non-appearing lines.
         if (!GameCheckWhenAppear(special->appear_))
         {
-            lines[i].special = nullptr;
+            level_lines[i].special = nullptr;
             continue;
         }
 
-        lines[i].count = special->count_;
+        level_lines[i].count = special->count_;
 
         // -AJA- 2007/12/29: Portal effects
         if (special->portal_effect_ != kPortalEffectTypeNone)
         {
-            P_PortalEffect(&lines[i]);
+            P_PortalEffect(&level_lines[i]);
         }
 
         // Extrafloor creation
-        if (special->ef_.type_ != kExtraFloorTypeNone && lines[i].tag > 0)
+        if (special->ef_.type_ != kExtraFloorTypeNone && level_lines[i].tag > 0)
         {
-            sector_t *ctrl = lines[i].frontsector;
+            sector_t *ctrl = level_lines[i].frontsector;
 
-            for (sector_t *tsec = P_FindSectorFromTag(lines[i].tag); tsec; tsec = tsec->tag_next)
+            for (sector_t *tsec = P_FindSectorFromTag(level_lines[i].tag); tsec; tsec = tsec->tag_next)
             {
                 // the OLD method of Boom deep water (the BOOMTEX flag)
                 if (special->ef_.type_ & kExtraFloorTypeBoomTex)
@@ -2541,12 +2541,12 @@ void P_SpawnSpecials1(void)
                     }
                 }
 
-                P_AddExtraFloor(tsec, &lines[i]);
+                P_AddExtraFloor(tsec, &level_lines[i]);
 
                 // transfer any translucency
                 if (special->translucency_ <= 0.99f)
                 {
-                    P_EFTransferTrans(ctrl, tsec, &lines[i], &special->ef_, special->translucency_);
+                    P_EFTransferTrans(ctrl, tsec, &level_lines[i], &special->ef_, special->translucency_);
                 }
 
                 // update the line gaps & things:
@@ -2559,17 +2559,17 @@ void P_SpawnSpecials1(void)
         // Detail slopes
         if (special->slope_type_ & kSlopeTypeDetailFloor)
         {
-            DetailSlope_Floor(&lines[i]);
+            DetailSlope_Floor(&level_lines[i]);
         }
         if (special->slope_type_ & kSlopeTypeDetailCeiling)
         {
-            DetailSlope_Ceiling(&lines[i]);
+            DetailSlope_Ceiling(&level_lines[i]);
         }
 
         // Handle our Glass line type now
         if (special->glass_)
         {
-            P_LineEffectDebris(&lines[i], special);
+            P_LineEffectDebris(&level_lines[i], special);
         }
     }
 }
@@ -2586,8 +2586,8 @@ void P_SpawnSpecials2(int autotag)
     // Init special SECTORs.
     //
 
-    sector = sectors;
-    for (i = 0; i < numsectors; i++, sector++)
+    sector = level_sectors;
+    for (i = 0; i < total_level_sectors; i++, sector++)
     {
         if (!sector->props.special)
             continue;
@@ -2682,46 +2682,46 @@ void P_SpawnSpecials2(int autotag)
     // -KM-  Removed Limit
     // -KM- 1998/09/01 Added lines.ddf support
     //
-    for (i = 0; i < numlines; i++)
+    for (i = 0; i < total_level_lines; i++)
     {
-        special = lines[i].special;
+        special = level_lines[i].special;
 
         if (!special)
             continue;
 
         if (special->s_xspeed_ || special->s_yspeed_)
         {
-            AdjustScrollParts(lines[i].side[0], 0, special->scroll_parts_, special->s_xspeed_, special->s_yspeed_);
+            AdjustScrollParts(level_lines[i].side[0], 0, special->scroll_parts_, special->s_xspeed_, special->s_yspeed_);
 
-            AdjustScrollParts(lines[i].side[1], 1, special->scroll_parts_, special->s_xspeed_, special->s_yspeed_);
+            AdjustScrollParts(level_lines[i].side[1], 1, special->scroll_parts_, special->s_xspeed_, special->s_yspeed_);
 
-            P_AddSpecialLine(lines + i);
+            P_AddSpecialLine(level_lines + i);
         }
 
         // -AJA- 1999/06/30: Translucency effect.
-        if (special->translucency_ <= 0.99f && lines[i].side[0])
-            lines[i].side[0]->middle.translucency = special->translucency_;
+        if (special->translucency_ <= 0.99f && level_lines[i].side[0])
+            level_lines[i].side[0]->middle.translucency = special->translucency_;
 
-        if (special->translucency_ <= 0.99f && lines[i].side[1])
-            lines[i].side[1]->middle.translucency = special->translucency_;
+        if (special->translucency_ <= 0.99f && level_lines[i].side[1])
+            level_lines[i].side[1]->middle.translucency = special->translucency_;
 
         if (special->autoline_)
         {
-            P_ActivateSpecialLine(&lines[i], lines[i].special, lines[i].tag, 0, nullptr, kLineTriggerAny, 1, 1);
+            P_ActivateSpecialLine(&level_lines[i], level_lines[i].special, level_lines[i].tag, 0, nullptr, kLineTriggerAny, 1, 1);
         }
 
         // -KM- 1998/11/25 This line should be pushed automatically
-        if (autotag && lines[i].special && lines[i].tag == autotag)
+        if (autotag && level_lines[i].special && level_lines[i].tag == autotag)
         {
-            P_ActivateSpecialLine(&lines[i], lines[i].special, lines[i].tag, 0, nullptr, kLineTriggerPushable, 1, 1);
+            P_ActivateSpecialLine(&level_lines[i], level_lines[i].special, level_lines[i].tag, 0, nullptr, kLineTriggerPushable, 1, 1);
         }
 
         // add lightanim for manual doors with tags
-        if (special->type_ == kLineTriggerManual && special->c_.type_ != kPlaneMoverUndefined && lines[i].tag)
+        if (special->type_ == kLineTriggerManual && special->c_.type_ != kPlaneMoverUndefined && level_lines[i].tag)
         {
             lightanim_t anim;
-            anim.light_line_ref = &lines[i];
-            anim.light_sec_ref  = lines[i].backsector;
+            anim.light_line_ref = &level_lines[i];
+            anim.light_sec_ref  = level_lines[i].backsector;
             for (sector_t *tsec = P_FindSectorFromTag(anim.light_line_ref->tag); tsec; tsec = tsec->tag_next)
             {
                 tsec->min_neighbor_light = P_FindMinSurroundingLight(tsec, tsec->props.lightlevel);

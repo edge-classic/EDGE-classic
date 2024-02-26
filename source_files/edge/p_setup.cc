@@ -23,24 +23,19 @@
 //
 //----------------------------------------------------------------------------
 
-
+#include "p_setup.h"
 
 #include <map>
 #include <unordered_map>
 
-#include "endianess.h"
-#include "math_crc.h"
-#include "str_lexer.h"
-#include "str_util.h"
-#include "str_ename.h"
-#include "str_compare.h"
-#include "main.h"
+#include "AlmostEquals.h"
+#include "am_map.h"
 #include "colormap.h"
-
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "dm_structs.h"
 #include "e_main.h"
+#include "endianess.h"
 #include "g_game.h"
 #include "i_system.h"
 #include "m_argv.h"
@@ -48,118 +43,106 @@
 #include "m_math.h"
 #include "m_misc.h"
 #include "m_random.h"
+#include "main.h"
+#include "math_crc.h"
+#include "miniz.h"  // ZGL3 nodes
 #include "p_local.h"
-#include "p_setup.h"
-#include "am_map.h"
 #include "r_bsp.h"
 #include "r_gldefs.h"
+#include "r_image.h"
 #include "r_misc.h"
 #include "r_sky.h"
-#include "s_sound.h"
+#include "rad_trig.h"  // MUSINFO changers
 #include "s_music.h"
+#include "s_sound.h"
+#include "str_compare.h"
+#include "str_ename.h"
+#include "str_lexer.h"
+#include "str_util.h"
 #include "sv_main.h"
-#include "r_image.h"
-#include "w_texture.h"
 #include "w_files.h"
+#include "w_texture.h"
 #include "w_wad.h"
-#include "rad_trig.h" // MUSINFO changers
 
-#include "miniz.h" // ZGL3 nodes
-
-#include "AlmostEquals.h"
-
-// debugging aide:
-#define FORCE_LOCATION 0
-#define FORCE_LOC_X    12766
-#define FORCE_LOC_Y    4600
-#define FORCE_LOC_ANG  0
-
-#define SEG_INVALID ((seg_t *)-3)
-#define SUB_INVALID ((subsector_t *)-3)
+#define EDGE_SEG_INVALID       ((seg_t *)-3)
+#define EDGE_SUBSECTOR_INVALID ((subsector_t *)-3)
 
 static bool level_active = false;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(udmf_strict, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(udmf_strict_namespace, "0",
+                             kConsoleVariableFlagArchive)
 
 //
 // MAP related Lookup tables.
 // Store VERTEXES, LINEDEFS, SIDEDEFS, etc.
 //
 
-int       numvertexes;
-vertex_t *vertexes = nullptr;
+int              total_level_vertexes;
+vertex_t        *level_vertexes = nullptr;
+static vertex_t *level_gl_vertexes;
+int              total_level_segs;
+seg_t           *level_segs;
+int              total_level_sectors;
+sector_t        *level_sectors;
+int              total_level_subsectors;
+subsector_t     *level_subsectors;
+int              total_level_extrafloors;
+extrafloor_t    *level_extrafloors;
+int              total_level_nodes;
+node_t          *level_nodes;
+int              total_level_lines;
+line_t          *level_lines;
+int              total_level_sides;
+side_t          *level_sides;
+static int       total_level_vertical_gaps;
+static vgap_t   *level_vertical_gaps;
 
-int       num_gl_vertexes;
-vertex_t *gl_vertexes;
+vertex_seclist_t *level_vertex_sector_lists;
 
-int    numsegs;
-seg_t *segs;
-
-int       numsectors;
-sector_t *sectors;
-
-int          numsubsectors;
-subsector_t *subsectors;
-
-int           numextrafloors;
-extrafloor_t *extrafloors;
-
-int     numnodes;
-node_t *nodes;
-
-int     numlines;
-line_t *lines;
-
-int     numsides;
-side_t *sides;
-
-int     numvertgaps;
-vgap_t *vertgaps;
-
-vertex_seclist_t *v_seclists;
-
-static line_t **linebuffer = nullptr;
+static line_t **level_line_buffer = nullptr;
 
 // bbox used
-static float dummy_bbox[4];
+static float dummy_bounding_box[4];
 
-epi::CRC32 mapsector_CRC;
-epi::CRC32 mapline_CRC;
-epi::CRC32 mapthing_CRC;
+epi::CRC32 map_sectors_crc;
+epi::CRC32 map_lines_crc;
+epi::CRC32 map_things_crc;
 
-int mapthing_NUM;
+int total_map_things;
 
 static bool hexen_level;
 
 static bool        udmf_level;
-static int         udmf_lumpnum;
+static int         udmf_lump_number;
 static std::string udmf_lump;
 
 // a place to store sidedef numbers of the loaded linedefs.
 // There is two values for every line: side0 and side1.
 static int *temp_line_sides;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(m_goobers, "0", kConsoleVariableFlagNone)
+EDGE_DEFINE_CONSOLE_VARIABLE(goobers, "0", kConsoleVariableFlagNone)
 
-struct musinfo_mapping_s
+// "Musinfo" is used here to refer to the traditional MUSINFO lump
+struct MusinfoMapping
 {
     std::unordered_map<int, int> mappings;
-    bool processed = false;
+    bool                         processed = false;
 };
 
-// This is wonky, but essentially the idea is to not continually create duplicate
-// RTS music changing scripts for the same level if warping back and forth, or
-// using a hub or somesuch that happens to have music changers
-static std::unordered_map<std::string, musinfo_mapping_s> musinfo_tracks;
+// This is wonky, but essentially the idea is to not continually create
+// duplicate RTS music changing scripts for the same level if warping back and
+// forth, or using a hub or somesuch that happens to have music changers
+static std::unordered_map<std::string, MusinfoMapping> musinfo_tracks;
 
-static void GetMUSINFOTracksForLevel(void)
+static void GetMusinfoTracksForLevel(void)
 {
-    if (musinfo_tracks.count(current_map->name_) && musinfo_tracks[current_map->name_].processed)
+    if (musinfo_tracks.count(current_map->name_) &&
+        musinfo_tracks[current_map->name_].processed)
         return;
-    int   raw_length = 0;
-    uint8_t *raw_musinfo   = W_OpenPackOrLumpInMemory("MUSINFO", {".txt"}, &raw_length);
-    if (!raw_musinfo)
-        return;
+    int      raw_length = 0;
+    uint8_t *raw_musinfo =
+        W_OpenPackOrLumpInMemory("MUSINFO", {".txt"}, &raw_length);
+    if (!raw_musinfo) return;
     std::string musinfo;
     musinfo.resize(raw_length);
     memcpy(musinfo.data(), raw_musinfo, raw_length);
@@ -169,50 +152,52 @@ static void GetMUSINFOTracksForLevel(void)
         musinfo_tracks.try_emplace({current_map->name_, {}});
     for (;;)
     {
-        std::string       section;
+        std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok != epi::kTokenNumber && tok != epi::kTokenIdentifier)
-            break;
-        
+        if (tok != epi::kTokenNumber && tok != epi::kTokenIdentifier) break;
+
         if (epi::StringCaseCompareASCII(section, current_map->name_) != 0)
             continue;
-        
+
         // Parse "block" for current map
         int mus_number = -1;
         for (;;)
         {
-            std::string       value;
+            std::string    value;
             epi::TokenKind block_tok = lex.Next(value);
 
-            if (block_tok != epi::kTokenNumber && block_tok != epi::kTokenIdentifier)
+            if (block_tok != epi::kTokenNumber &&
+                block_tok != epi::kTokenIdentifier)
                 return;
 
             // A valid map name should be the end of this block
-            if (mapdefs.Lookup(value.c_str()))
-                return;
+            if (mapdefs.Lookup(value.c_str())) return;
 
-            // This does have a bit of faith that the MUSINFO lump isn't malformed
+            // This does have a bit of faith that the MUSINFO lump isn't
+            // malformed
             if (mus_number == -1)
                 mus_number = epi::LexInteger(value);
             else
             {
                 // This mimics Lobo's ad-hoc playlist stuff for UMAPINFO
                 int ddf_track = playlist.FindLast(value.c_str());
-                if (ddf_track != -1) // Entry exists
+                if (ddf_track != -1)  // Entry exists
                 {
-                    musinfo_tracks[current_map->name_].mappings.try_emplace(mus_number, ddf_track);
+                    musinfo_tracks[current_map->name_].mappings.try_emplace(
+                        mus_number, ddf_track);
                 }
                 else
                 {
                     static PlaylistEntry *dynamic_plentry;
-                    dynamic_plentry           = new PlaylistEntry;
+                    dynamic_plentry            = new PlaylistEntry;
                     dynamic_plentry->number_   = playlist.FindFree();
                     dynamic_plentry->info_     = value;
                     dynamic_plentry->type_     = kDDFMusicUnknown;
                     dynamic_plentry->infotype_ = kDDFMusicDataLump;
                     playlist.push_back(dynamic_plentry);
-                    musinfo_tracks[current_map->name_].mappings.try_emplace(mus_number, dynamic_plentry->number_);
+                    musinfo_tracks[current_map->name_].mappings.try_emplace(
+                        mus_number, dynamic_plentry->number_);
                 }
                 mus_number = -1;
             }
@@ -226,17 +211,16 @@ static void CheckEvilutionBug(uint8_t *data, int length)
     // the yellow keycard from appearing (the "Multiplayer Only" flag
     // is set), and the level cannot be completed.  This fixes it.
 
-    static const uint8_t Y_key_data[] = {0x59, 0xf5, 0x48, 0xf8, 0, 0, 6, 0, 0x17, 0};
+    static const uint8_t Y_key_data[] = {0x59, 0xf5, 0x48, 0xf8, 0,
+                                         0,    6,    0,    0x17, 0};
 
     static const int Y_key_offset = 0x125C;
 
-    if (length < Y_key_offset + 10)
-        return;
+    if (length < Y_key_offset + 10) return;
 
     data += Y_key_offset;
 
-    if (memcmp(data, Y_key_data, 10) != 0)
-        return;
+    if (memcmp(data, Y_key_data, 10) != 0) return;
 
     LogPrint("Detected TNT MAP31 bug, adding fix.\n");
 
@@ -248,38 +232,36 @@ static void CheckDoom2Map05Bug(uint8_t *data, int length)
     // The IWAD for Doom2 has a bug in MAP05 where 2 sectors
     // are incorrectly tagged 9.  This fixes it.
 
-    static const uint8_t sector_4_data[] = {0x60, 0,    0xc8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
-                                         0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    0, 0, 9, 0};
+    static const uint8_t sector_4_data[] = {
+        0x60, 0,    0xc8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
+        0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    0, 0, 9, 0};
 
-    static const uint8_t sector_153_data[] = {0x98, 0,    0xe8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
-                                           0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    9, 0, 9, 0};
+    static const uint8_t sector_153_data[] = {
+        0x98, 0,    0xe8, 0,    0x46, 0x4c, 0x41, 0x54, 0x31, 0, 0, 0, 0x46,
+        0x4c, 0x41, 0x54, 0x31, 0x30, 0,    0,    0x70, 0,    9, 0, 9, 0};
 
-    static const int sector_4_offset   = 0x68; // 104
-    static const int sector_153_offset = 3978; // 0xf8a; //3978
+    static const int sector_4_offset   = 0x68;  // 104
+    static const int sector_153_offset = 3978;  // 0xf8a; //3978
 
-    if (length < sector_4_offset + 26)
-        return;
+    if (length < sector_4_offset + 26) return;
 
-    if (length < sector_153_offset + 26)
-        return;
+    if (length < sector_153_offset + 26) return;
 
     // Sector 4 first
     data += sector_4_offset;
 
-    if (memcmp(data, sector_4_data, 26) != 0)
-        return;
+    if (memcmp(data, sector_4_data, 26) != 0) return;
 
-    if (data[24] == 9) // check just in case
-        data[24] = 0;  // set tag to 0 instead of 9
+    if (data[24] == 9)  // check just in case
+        data[24] = 0;   // set tag to 0 instead of 9
 
     // now sector 153
     data += (sector_153_offset - sector_4_offset);
 
-    if (memcmp(data, sector_153_data, 26) != 0)
-        return;
+    if (memcmp(data, sector_153_data, 26) != 0) return;
 
-    if (data[24] == 9) // check just in case
-        data[24] = 0;  // set tag to 0 instead of 9
+    if (data[24] == 9)  // check just in case
+        data[24] = 0;   // set tag to 0 instead of 9
 
     LogPrint("Detected Doom2 MAP05 bug, adding fix.\n");
 }
@@ -292,29 +274,31 @@ static void LoadVertexes(int lump)
     vertex_t           *li;
 
     if (!W_VerifyLumpName(lump, "VERTEXES"))
-        FatalError("Bad WAD: level %s missing VERTEXES.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing VERTEXES.\n",
+                   current_map->lump_.c_str());
 
     // Determine number of lumps:
     //  total lump length / vertex record length.
-    numvertexes = W_LumpLength(lump) / sizeof(raw_vertex_t);
+    total_level_vertexes = W_LumpLength(lump) / sizeof(raw_vertex_t);
 
-    if (numvertexes == 0)
-        FatalError("Bad WAD: level %s contains 0 vertexes.\n", current_map->lump_.c_str());
+    if (total_level_vertexes == 0)
+        FatalError("Bad WAD: level %s contains 0 vertexes.\n",
+                   current_map->lump_.c_str());
 
-    vertexes = new vertex_t[numvertexes];
+    level_vertexes = new vertex_t[total_level_vertexes];
 
     // Load data into cache.
     data = W_LoadLump(lump);
 
     ml = (const raw_vertex_t *)data;
-    li = vertexes;
+    li = level_vertexes;
 
     // Copy and convert vertex coordinates,
     // internal representation as fixed.
-    for (i = 0; i < numvertexes; i++, li++, ml++)
+    for (i = 0; i < total_level_vertexes; i++, li++, ml++)
     {
-        li->X  = AlignedLittleEndianS16(ml->x);
-        li->Y  = AlignedLittleEndianS16(ml->y);
+        li->X = AlignedLittleEndianS16(ml->x);
+        li->Y = AlignedLittleEndianS16(ml->y);
         li->Z = -40000.0f;
         li->W = 40000.0f;
     }
@@ -327,17 +311,15 @@ static void SegCommonStuff(seg_t *seg, int linedef_in)
 {
     seg->frontsector = seg->backsector = nullptr;
 
-    if (linedef_in == -1)
-    {
-        seg->miniseg = true;
-    }
+    if (linedef_in == -1) { seg->miniseg = true; }
     else
     {
-        if (linedef_in >= numlines) // sanity check
-            FatalError("Bad GWA file: seg #%d has invalid linedef.\n", (int)(seg - segs));
+        if (linedef_in >= total_level_lines)  // sanity check
+            FatalError("Bad GWA file: seg #%d has invalid linedef.\n",
+                       (int)(seg - level_segs));
 
         seg->miniseg = false;
-        seg->linedef = &lines[linedef_in];
+        seg->linedef = &level_lines[linedef_in];
 
         float sx = seg->side ? seg->linedef->v2->X : seg->linedef->v1->X;
         float sy = seg->side ? seg->linedef->v2->Y : seg->linedef->v1->Y;
@@ -347,7 +329,8 @@ static void SegCommonStuff(seg_t *seg, int linedef_in)
         seg->sidedef = seg->linedef->side[seg->side];
 
         if (!seg->sidedef)
-            FatalError("Bad GWA file: missing side for seg #%d\n", (int)(seg - segs));
+            FatalError("Bad GWA file: missing side for seg #%d\n",
+                       (int)(seg - level_segs));
 
         seg->frontsector = seg->sidedef->sector;
 
@@ -355,8 +338,7 @@ static void SegCommonStuff(seg_t *seg, int linedef_in)
         {
             side_t *other = seg->linedef->side[seg->side ^ 1];
 
-            if (other)
-                seg->backsector = other->sector;
+            if (other) seg->backsector = other->sector;
         }
     }
 }
@@ -398,28 +380,31 @@ static void LoadSectors(int lump)
 
     if (!W_VerifyLumpName(lump, "SECTORS"))
     {
-        // Check if SECTORS is immediately after THINGS/LINEDEFS/SIDEDEFS/VERTEXES
+        // Check if SECTORS is immediately after
+        // THINGS/LINEDEFS/SIDEDEFS/VERTEXES
         lump -= 3;
         if (!W_VerifyLumpName(lump, "SECTORS"))
-            FatalError("Bad WAD: level %s missing SECTORS.\n", current_map->lump_.c_str());
+            FatalError("Bad WAD: level %s missing SECTORS.\n",
+                       current_map->lump_.c_str());
     }
 
-    numsectors = W_LumpLength(lump) / sizeof(raw_sector_t);
+    total_level_sectors = W_LumpLength(lump) / sizeof(raw_sector_t);
 
-    if (numsectors == 0)
-        FatalError("Bad WAD: level %s contains 0 sectors.\n", current_map->lump_.c_str());
+    if (total_level_sectors == 0)
+        FatalError("Bad WAD: level %s contains 0 sectors.\n",
+                   current_map->lump_.c_str());
 
-    sectors = new sector_t[numsectors];
-    Z_Clear(sectors, sector_t, numsectors);
+    level_sectors = new sector_t[total_level_sectors];
+    Z_Clear(level_sectors, sector_t, total_level_sectors);
 
     data = W_LoadLump(lump);
-    mapsector_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
+    map_sectors_crc.AddBlock((const uint8_t *)data, W_LumpLength(lump));
 
-    CheckDoom2Map05Bug((uint8_t *)data, W_LumpLength(lump)); // Lobo: 2023
+    CheckDoom2Map05Bug((uint8_t *)data, W_LumpLength(lump));  // Lobo: 2023
 
     ms = (const raw_sector_t *)data;
-    ss = sectors;
-    for (i = 0; i < numsectors; i++, ss++, ms++)
+    ss = level_sectors;
+    for (i = 0; i < total_level_sectors; i++, ss++, ms++)
     {
         char buffer[10];
 
@@ -427,7 +412,7 @@ static void LoadSectors(int lump)
         ss->c_h = AlignedLittleEndianS16(ms->ceil_h);
 
         // return to wolfenstein?
-        if (m_goobers.d_)
+        if (goobers.d_)
         {
             ss->f_h = 0;
             ss->c_h = (ms->floor_h == ms->ceil_h) ? 0 : 128.0f;
@@ -448,7 +433,8 @@ static void LoadSectors(int lump)
 
         if (ss->floor.image)
         {
-            FlatDefinition *current_flatdef = flatdefs.Find(ss->floor.image->name.c_str());
+            FlatDefinition *current_flatdef =
+                flatdefs.Find(ss->floor.image->name.c_str());
             if (current_flatdef)
             {
                 ss->bob_depth  = current_flatdef->bob_depth_;
@@ -466,7 +452,8 @@ static void LoadSectors(int lump)
         }
         if (!ss->ceil.image)
         {
-            LogWarning("Bad Level: sector #%d has missing ceiling texture.\n", i);
+            LogWarning("Bad Level: sector #%d has missing ceiling texture.\n",
+                       i);
             ss->ceil.image = ss->floor.image;
         }
 
@@ -505,7 +492,7 @@ static void LoadSectors(int lump)
         ss->sound_player = -1;
 
         // -AJA- 1999/07/29: Keep sectors with same tag in a list.
-        GroupSectorTags(ss, sectors, i);
+        GroupSectorTags(ss, level_sectors, i);
     }
 
     delete[] data;
@@ -513,24 +500,21 @@ static void LoadSectors(int lump)
 
 static void SetupRootNode(void)
 {
-    if (numnodes > 0)
-    {
-        root_node = numnodes - 1;
-    }
+    if (total_level_nodes > 0) { root_node = total_level_nodes - 1; }
     else
     {
         root_node = NF_V5_SUBSECTOR | 0;
 
         // compute bbox for the single subsector
-        BoundingBoxClear(dummy_bbox);
+        BoundingBoxClear(dummy_bounding_box);
 
         int    i;
         seg_t *seg;
 
-        for (i = 0, seg = segs; i < numsegs; i++, seg++)
+        for (i = 0, seg = level_segs; i < total_level_segs; i++, seg++)
         {
-            BoundingBoxAddPoint(dummy_bbox, seg->v1->X, seg->v1->Y);
-            BoundingBoxAddPoint(dummy_bbox, seg->v2->X, seg->v2->Y);
+            BoundingBoxAddPoint(dummy_bounding_box, seg->v1->X, seg->v1->Y);
+            BoundingBoxAddPoint(dummy_bounding_box, seg->v2->X, seg->v2->Y);
         }
     }
 }
@@ -552,7 +536,8 @@ static void UnknownThingWarning(int type, float x, float y)
     unknown_thing_map[type] = count + 1;
 }
 
-static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, float z, sector_t *sec, BAMAngle angle,
+static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y,
+                             float z, sector_t *sec, BAMAngle angle,
                              int options, int tag)
 {
     spawnpoint_t point;
@@ -581,7 +566,8 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
         if (sec->props.special && sec->props.special->hub_)
         {
             if (sec->tag <= 0)
-                LogWarning("HUB_START in sector without tag @ (%1.0f %1.0f)\n", x, y);
+                LogWarning("HUB_START in sector without tag @ (%1.0f %1.0f)\n",
+                           x, y);
 
             point.tag = sec->tag;
 
@@ -608,19 +594,16 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
     // check for apropriate skill level
     // -ES- 1999/04/13 Implemented Kester's Bugfix.
     // -AJA- 1999/10/21: Reworked again.
-    if (SP_MATCH() && (options & MTF_NOT_SINGLE))
-        return nullptr;
+    if (SP_MATCH() && (options & MTF_NOT_SINGLE)) return nullptr;
 
-    // Disable deathmatch weapons for vanilla coop...should probably be in the Gameplay Options menu - Dasho
-    if (COOP_MATCH() && (options & MTF_NOT_SINGLE))
-        return nullptr;
+    // Disable deathmatch weapons for vanilla coop...should probably be in the
+    // Gameplay Options menu - Dasho
+    if (COOP_MATCH() && (options & MTF_NOT_SINGLE)) return nullptr;
 
     // -AJA- 1999/09/22: Boom compatibility flags.
-    if (COOP_MATCH() && (options & MTF_NOT_COOP))
-        return nullptr;
+    if (COOP_MATCH() && (options & MTF_NOT_COOP)) return nullptr;
 
-    if (DEATHMATCH() && (options & MTF_NOT_DM))
-        return nullptr;
+    if (DEATHMATCH() && (options & MTF_NOT_DM)) return nullptr;
 
     int bit;
 
@@ -631,8 +614,7 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
     else
         bit = 1 << (game_skill - 1);
 
-    if ((options & bit) == 0)
-        return nullptr;
+    if ((options & bit) == 0) return nullptr;
 
     // don't spawn keycards in deathmatch
     if (DEATHMATCH() && (info->flags_ & kMapObjectFlagNotDeathmatch))
@@ -665,7 +647,7 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
     // -AJA- 2000/09/22: MBF compatibility flag
     if (options & MTF_FRIEND)
     {
-        mo->side = 1; //~0;
+        mo->side = 1;  //~0;
         mo->hyperflags |= kHyperFlagUltraLoyal;
         /*
         player_t *player;
@@ -675,33 +657,34 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y, 
         */
     }
     // Lobo 2022: added tagged mobj support ;)
-    if (tag > 0)
-        mo->tag = tag;
+    if (tag > 0) mo->tag = tag;
 
     return mo;
 }
 
 static void LoadThings(int lump)
 {
-    float   x, y, z;
+    float    x, y, z;
     BAMAngle angle;
-    int     options, typenum;
-    int     i;
+    int      options, typenum;
+    int      i;
 
-    const uint8_t     *data;
-    const raw_thing_t *mt;
-    const MapObjectDefinition  *objtype;
+    const uint8_t             *data;
+    const raw_thing_t         *mt;
+    const MapObjectDefinition *objtype;
 
     if (!W_VerifyLumpName(lump, "THINGS"))
-        FatalError("Bad WAD: level %s missing THINGS.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing THINGS.\n",
+                   current_map->lump_.c_str());
 
-    mapthing_NUM = W_LumpLength(lump) / sizeof(raw_thing_t);
+    total_map_things = W_LumpLength(lump) / sizeof(raw_thing_t);
 
-    if (mapthing_NUM == 0)
-        FatalError("Bad WAD: level %s contains 0 things.\n", current_map->lump_.c_str());
+    if (total_map_things == 0)
+        FatalError("Bad WAD: level %s contains 0 things.\n",
+                   current_map->lump_.c_str());
 
     data = W_LoadLump(lump);
-    mapthing_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
+    map_things_crc.AddBlock((const uint8_t *)data, W_LumpLength(lump));
 
     CheckEvilutionBug((uint8_t *)data, W_LumpLength(lump));
 
@@ -714,15 +697,14 @@ static void LoadThings(int lump)
 
     mt = (const raw_thing_t *)data;
 
-    for (i = 0; i < mapthing_NUM; i++)
+    for (i = 0; i < total_map_things; i++)
     {
         options = AlignedLittleEndianU16(mt[i].options);
 
-        if (options & MTF_RESERVED)
-            limit_options = true;
+        if (options & MTF_RESERVED) limit_options = true;
     }
 
-    for (i = 0; i < mapthing_NUM; i++, mt++)
+    for (i = 0; i < total_map_things; i++, mt++)
     {
         x       = (float)AlignedLittleEndianS16(mt->x);
         y       = (float)AlignedLittleEndianS16(mt->y);
@@ -730,17 +712,7 @@ static void LoadThings(int lump)
         typenum = AlignedLittleEndianU16(mt->type);
         options = AlignedLittleEndianU16(mt->options);
 
-        if (limit_options)
-            options &= 0x001F;
-
-#if (FORCE_LOCATION)
-        if (typenum == 1)
-        {
-            x     = FORCE_LOC_X;
-            y     = FORCE_LOC_Y;
-            angle = FORCE_LOC_ANG;
-        }
-#endif
+        if (limit_options) options &= 0x001F;
 
         objtype = mobjtypes.Lookup(typenum);
 
@@ -754,27 +726,34 @@ static void LoadThings(int lump)
 
         sector_t *sec = R_PointInSubsector(x, y)->sector;
 
-        if ((objtype->hyperflags_ & kHyperFlagMusicChanger) && !musinfo_tracks[current_map->name_].processed)
+        if ((objtype->hyperflags_ & kHyperFlagMusicChanger) &&
+            !musinfo_tracks[current_map->name_].processed)
         {
-            // This really should only be used with the original DoomEd number range
+            // This really should only be used with the original DoomEd number
+            // range
             if (objtype->number_ >= 14100 && objtype->number_ < 14165)
             {
                 int mus_number = -1;
 
-                if (objtype->number_ == 14100) // Default for level
+                if (objtype->number_ == 14100)  // Default for level
                     mus_number = current_map->music_;
-                else if (musinfo_tracks[current_map->name_].mappings.count(objtype->number_ - 14100))
-                    mus_number = musinfo_tracks[current_map->name_].mappings[objtype->number_ - 14100];
+                else if (musinfo_tracks[current_map->name_].mappings.count(
+                             objtype->number_ - 14100))
+                    mus_number = musinfo_tracks[current_map->name_]
+                                     .mappings[objtype->number_ - 14100];
                 // Track found; make ad-hoc RTS script for music changing
                 if (mus_number != -1)
                 {
                     std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
-                    mus_rts.append(epi::StringFormat("START_MAP %s\n", current_map->name_.c_str()));
-                    mus_rts.append(epi::StringFormat("  SECTOR_TRIGGER_INDEX %d\n", sec - sectors));
+                    mus_rts.append(epi::StringFormat(
+                        "START_MAP %s\n", current_map->name_.c_str()));
+                    mus_rts.append(epi::StringFormat(
+                        "  SECTOR_TRIGGER_INDEX %d\n", sec - level_sectors));
                     mus_rts.append("    TAGGED_INDEPENDENT\n");
                     mus_rts.append("    TAGGED_REPEATABLE\n");
                     mus_rts.append("    WAIT 30T\n");
-                    mus_rts.append(epi::StringFormat("    CHANGE_MUSIC %d\n", mus_number));
+                    mus_rts.append(
+                        epi::StringFormat("    CHANGE_MUSIC %d\n", mus_number));
                     mus_rts.append("    RETRIGGER\n");
                     mus_rts.append("  END_SECTOR_TRIGGER\n");
                     mus_rts.append("END_MAP\n\n");
@@ -797,8 +776,7 @@ static void LoadThings(int lump)
                 z = ef->top_h;
 
                 floor_num--;
-                if (floor_num == 0)
-                    break;
+                if (floor_num == 0) break;
             }
         }
 
@@ -816,29 +794,31 @@ static void LoadHexenThings(int lump)
 {
     // -AJA- 2001/08/04: wrote this, based on the Hexen specs.
 
-    float   x, y, z;
+    float    x, y, z;
     BAMAngle angle;
-    int     options, typenum;
-    int     tag;
-    int     i;
+    int      options, typenum;
+    int      tag;
+    int      i;
 
-    const uint8_t           *data;
-    const raw_hexen_thing_t *mt;
-    const MapObjectDefinition        *objtype;
+    const uint8_t             *data;
+    const raw_hexen_thing_t   *mt;
+    const MapObjectDefinition *objtype;
 
     if (!W_VerifyLumpName(lump, "THINGS"))
-        FatalError("Bad WAD: level %s missing THINGS.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing THINGS.\n",
+                   current_map->lump_.c_str());
 
-    mapthing_NUM = W_LumpLength(lump) / sizeof(raw_hexen_thing_t);
+    total_map_things = W_LumpLength(lump) / sizeof(raw_hexen_thing_t);
 
-    if (mapthing_NUM == 0)
-        FatalError("Bad WAD: level %s contains 0 things.\n", current_map->lump_.c_str());
+    if (total_map_things == 0)
+        FatalError("Bad WAD: level %s contains 0 things.\n",
+                   current_map->lump_.c_str());
 
     data = W_LoadLump(lump);
-    mapthing_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
+    map_things_crc.AddBlock((const uint8_t *)data, W_LumpLength(lump));
 
     mt = (const raw_hexen_thing_t *)data;
-    for (i = 0; i < mapthing_NUM; i++, mt++)
+    for (i = 0; i < total_map_things; i++, mt++)
     {
         x     = (float)AlignedLittleEndianS16(mt->x);
         y     = (float)AlignedLittleEndianS16(mt->y);
@@ -913,31 +893,31 @@ static inline void ComputeLinedefData(line_t *ld, int side0, int side1)
         ld->bbox[kBoundingBoxTop]    = v1->Y;
     }
 
-    if (!udmf_level && side0 == 0xFFFF)
-        side0 = -1;
-    if (!udmf_level && side1 == 0xFFFF)
-        side1 = -1;
+    if (!udmf_level && side0 == 0xFFFF) side0 = -1;
+    if (!udmf_level && side1 == 0xFFFF) side1 = -1;
 
     // handle missing RIGHT sidedef (idea taken from MBF)
     if (side0 == -1)
     {
-        LogWarning("Bad WAD: level %s linedef #%d is missing RIGHT side\n", current_map->lump_.c_str(), (int)(ld - lines));
+        LogWarning("Bad WAD: level %s linedef #%d is missing RIGHT side\n",
+                   current_map->lump_.c_str(), (int)(ld - level_lines));
         side0 = 0;
     }
 
     if ((ld->flags & MLF_TwoSided) && ((side0 == -1) || (side1 == -1)))
     {
-        LogWarning("Bad WAD: level %s has linedef #%d marked TWOSIDED, "
-                  "but it has only one side.\n",
-                  current_map->lump_.c_str(), (int)(ld - lines));
+        LogWarning(
+            "Bad WAD: level %s has linedef #%d marked TWOSIDED, "
+            "but it has only one side.\n",
+            current_map->lump_.c_str(), (int)(ld - level_lines));
 
         ld->flags &= ~MLF_TwoSided;
     }
 
-    temp_line_sides[(ld - lines) * 2 + 0] = side0;
-    temp_line_sides[(ld - lines) * 2 + 1] = side1;
+    temp_line_sides[(ld - level_lines) * 2 + 0] = side0;
+    temp_line_sides[(ld - level_lines) * 2 + 1] = side1;
 
-    numsides += (side1 == -1) ? 1 : 2;
+    total_level_sides += (side1 == -1) ? 1 : 2;
 }
 
 static void LoadLineDefs(int lump)
@@ -949,45 +929,50 @@ static void LoadLineDefs(int lump)
     //       "wall tiles" properly.
 
     if (!W_VerifyLumpName(lump, "LINEDEFS"))
-        FatalError("Bad WAD: level %s missing LINEDEFS.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing LINEDEFS.\n",
+                   current_map->lump_.c_str());
 
-    numlines = W_LumpLength(lump) / sizeof(raw_linedef_t);
+    total_level_lines = W_LumpLength(lump) / sizeof(raw_linedef_t);
 
-    if (numlines == 0)
-        FatalError("Bad WAD: level %s contains 0 linedefs.\n", current_map->lump_.c_str());
+    if (total_level_lines == 0)
+        FatalError("Bad WAD: level %s contains 0 linedefs.\n",
+                   current_map->lump_.c_str());
 
-    lines = new line_t[numlines];
+    level_lines = new line_t[total_level_lines];
 
-    Z_Clear(lines, line_t, numlines);
+    Z_Clear(level_lines, line_t, total_level_lines);
 
-    temp_line_sides = new int[numlines * 2];
+    temp_line_sides = new int[total_level_lines * 2];
 
     const uint8_t *data = W_LoadLump(lump);
-    mapline_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
+    map_lines_crc.AddBlock((const uint8_t *)data, W_LumpLength(lump));
 
-    line_t              *ld  = lines;
+    line_t              *ld  = level_lines;
     const raw_linedef_t *mld = (const raw_linedef_t *)data;
 
-    for (int i = 0; i < numlines; i++, mld++, ld++)
+    for (int i = 0; i < total_level_lines; i++, mld++, ld++)
     {
         ld->flags = AlignedLittleEndianU16(mld->flags);
         ld->tag   = HMM_MAX(0, AlignedLittleEndianS16(mld->tag));
-        ld->v1    = &vertexes[AlignedLittleEndianU16(mld->start)];
-        ld->v2    = &vertexes[AlignedLittleEndianU16(mld->end)];
+        ld->v1    = &level_vertexes[AlignedLittleEndianU16(mld->start)];
+        ld->v2    = &level_vertexes[AlignedLittleEndianU16(mld->end)];
 
         // Check for BoomClear flag bit and clear applicable specials
         // (PassThru may still be intentionally readded further down)
         if (ld->flags & MLF_ClearBoom)
             ld->flags &= ~(MLF_PassThru | MLF_BlockGrounded | MLF_BlockPlayers);
 
-        ld->special = P_LookupLineType(HMM_MAX(0, AlignedLittleEndianS16(mld->special)));
+        ld->special =
+            P_LookupLineType(HMM_MAX(0, AlignedLittleEndianS16(mld->special)));
 
         if (ld->special && ld->special->type_ == kLineTriggerWalkable)
             ld->flags |= MLF_PassThru;
 
         if (ld->special && ld->special->type_ == kLineTriggerNone &&
-            (ld->special->s_xspeed_ || ld->special->s_yspeed_ || ld->special->scroll_type_ > BoomScrollerTypeNone ||
-             ld->special->line_effect_ == kLineEffectTypeVectorScroll || ld->special->line_effect_ == kLineEffectTypeOffsetScroll ||
+            (ld->special->s_xspeed_ || ld->special->s_yspeed_ ||
+             ld->special->scroll_type_ > BoomScrollerTypeNone ||
+             ld->special->line_effect_ == kLineEffectTypeVectorScroll ||
+             ld->special->line_effect_ == kLineEffectTypeOffsetScroll ||
              ld->special->line_effect_ == kLineEffectTypeTaggedOffsetScroll))
             ld->flags |= MLF_PassThru;
 
@@ -997,7 +982,9 @@ static void LoadLineDefs(int lump)
         if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailCeiling)
             ld->flags |= MLF_PassThru;
 
-        if (ld->special && ld->special == linetypes.Lookup(0)) // Add passthru to unknown/templated
+        if (ld->special &&
+            ld->special ==
+                linetypes.Lookup(0))  // Add passthru to unknown/templated
             ld->flags |= MLF_PassThru;
 
         int side0 = AlignedLittleEndianU16(mld->side_R);
@@ -1010,13 +997,12 @@ static void LoadLineDefs(int lump)
 
         if (ld->tag && ld->special && ld->special->ef_.type_)
         {
-            for (int j = 0; j < numsectors; j++)
+            for (int j = 0; j < total_level_sectors; j++)
             {
-                if (sectors[j].tag != ld->tag)
-                    continue;
+                if (level_sectors[j].tag != ld->tag) continue;
 
-                sectors[j].exfloor_max++;
-                numextrafloors++;
+                level_sectors[j].exfloor_max++;
+                total_level_extrafloors++;
             }
         }
     }
@@ -1029,34 +1015,38 @@ static void LoadHexenLineDefs(int lump)
     // -AJA- 2001/08/04: wrote this, based on the Hexen specs.
 
     if (!W_VerifyLumpName(lump, "LINEDEFS"))
-        FatalError("Bad WAD: level %s missing LINEDEFS.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing LINEDEFS.\n",
+                   current_map->lump_.c_str());
 
-    numlines = W_LumpLength(lump) / sizeof(raw_hexen_linedef_t);
+    total_level_lines = W_LumpLength(lump) / sizeof(raw_hexen_linedef_t);
 
-    if (numlines == 0)
-        FatalError("Bad WAD: level %s contains 0 linedefs.\n", current_map->lump_.c_str());
+    if (total_level_lines == 0)
+        FatalError("Bad WAD: level %s contains 0 linedefs.\n",
+                   current_map->lump_.c_str());
 
-    lines = new line_t[numlines];
+    level_lines = new line_t[total_level_lines];
 
-    Z_Clear(lines, line_t, numlines);
+    Z_Clear(level_lines, line_t, total_level_lines);
 
-    temp_line_sides = new int[numlines * 2];
+    temp_line_sides = new int[total_level_lines * 2];
 
     const uint8_t *data = W_LoadLump(lump);
-    mapline_CRC.AddBlock((const uint8_t *)data, W_LumpLength(lump));
+    map_lines_crc.AddBlock((const uint8_t *)data, W_LumpLength(lump));
 
-    line_t                    *ld  = lines;
+    line_t                    *ld  = level_lines;
     const raw_hexen_linedef_t *mld = (const raw_hexen_linedef_t *)data;
 
-    for (int i = 0; i < numlines; i++, mld++, ld++)
+    for (int i = 0; i < total_level_lines; i++, mld++, ld++)
     {
         ld->flags = AlignedLittleEndianU16(mld->flags) & 0x00FF;
         ld->tag   = 0;
-        ld->v1    = &vertexes[AlignedLittleEndianU16(mld->start)];
-        ld->v2    = &vertexes[AlignedLittleEndianU16(mld->end)];
+        ld->v1    = &level_vertexes[AlignedLittleEndianU16(mld->start)];
+        ld->v2    = &level_vertexes[AlignedLittleEndianU16(mld->end)];
 
         // this ignores the activation bits -- oh well
-        ld->special = (mld->args[0] == 0) ? nullptr : linetypes.Lookup(1000 + mld->args[0]);
+        ld->special = (mld->args[0] == 0)
+                          ? nullptr
+                          : linetypes.Lookup(1000 + mld->args[0]);
 
         int side0 = AlignedLittleEndianU16(mld->side_R);
         int side1 = AlignedLittleEndianU16(mld->side_L);
@@ -1073,27 +1063,26 @@ static sector_t *DetermineSubsectorSector(subsector_t *ss, int pass)
 
     for (seg = ss->segs; seg != nullptr; seg = seg->sub_next)
     {
-        if (seg->miniseg)
-            continue;
+        if (seg->miniseg) continue;
 
         // ignore self-referencing linedefs
-        if (seg->frontsector == seg->backsector)
-            continue;
+        if (seg->frontsector == seg->backsector) continue;
 
         return seg->frontsector;
     }
 
     for (seg = ss->segs; seg != nullptr; seg = seg->sub_next)
     {
-        if (seg->partner == nullptr)
-            continue;
+        if (seg->partner == nullptr) continue;
 
-        // only do this for self-referencing linedefs if the original sector isn't tagged, otherwise
-        // save it for the next pass
-        if (seg->frontsector == seg->backsector && seg->frontsector && seg->frontsector->tag == 0)
+        // only do this for self-referencing linedefs if the original sector
+        // isn't tagged, otherwise save it for the next pass
+        if (seg->frontsector == seg->backsector && seg->frontsector &&
+            seg->frontsector->tag == 0)
             return seg->frontsector;
 
-        if (seg->frontsector != seg->backsector && seg->partner->front_sub->sector != nullptr)
+        if (seg->frontsector != seg->backsector &&
+            seg->partner->front_sub->sector != nullptr)
             return seg->partner->front_sub->sector;
     }
 
@@ -1101,13 +1090,11 @@ static sector_t *DetermineSubsectorSector(subsector_t *ss, int pass)
     {
         for (seg = ss->segs; seg != nullptr; seg = seg->sub_next)
         {
-            if (!seg->miniseg)
-                return seg->frontsector;
+            if (!seg->miniseg) return seg->frontsector;
         }
     }
 
-    if (pass == 2)
-        return &sectors[0];
+    if (pass == 2) return &level_sectors[0];
 
     return nullptr;
 }
@@ -1123,9 +1110,9 @@ static bool AssignSubsectorsPass(int pass)
     int  null_count = 0;
     bool progress   = false;
 
-    for (int i = 0; i < numsubsectors; i++)
+    for (int i = 0; i < total_level_subsectors; i++)
     {
-        subsector_t *ss = &subsectors[i];
+        subsector_t *ss = &level_subsectors[i];
 
         if (ss->sector == nullptr)
         {
@@ -1146,7 +1133,8 @@ static bool AssignSubsectorsPass(int pass)
     }
 
     /* DEBUG
-    fprintf(stderr, "** pass %d : %d : %d\n", pass, null_count, progress ? 1 : 0);
+    fprintf(stderr, "** pass %d : %d : %d\n", pass, null_count, progress ? 1 :
+    0);
     */
 
     return progress;
@@ -1159,24 +1147,20 @@ static void AssignSubsectorsToSectors()
     //           touching such lines should NOT be assigned to that line's
     //           sector, but rather to the "outer" sector.
 
-    while (AssignSubsectorsPass(0))
-    {
-    }
+    while (AssignSubsectorsPass(0)) {}
 
-    while (AssignSubsectorsPass(1))
-    {
-    }
+    while (AssignSubsectorsPass(1)) {}
 
     // the above *should* handle everything, so this pass is only needed
     // for extremely broken nodes or maps.
     AssignSubsectorsPass(2);
 }
 
-// Adapted from EDGE 2.X's ZNode loading routine; only handles XGL3/ZGL3 as that is all
-// our built-in AJBSP produces now
+// Adapted from EDGE 2.X's ZNode loading routine; only handles XGL3/ZGL3 as that
+// is all our built-in AJBSP produces now
 static void LoadXGL3Nodes(int lumpnum)
 {
-    int                 i, xglen = 0;
+    int                  i, xglen = 0;
     uint8_t             *xgldata = nullptr;
     std::vector<uint8_t> zgldata;
     uint8_t             *td = nullptr;
@@ -1185,8 +1169,7 @@ static void LoadXGL3Nodes(int lumpnum)
 
     xglen   = W_LumpLength(lumpnum);
     xgldata = (uint8_t *)W_LoadLump(lumpnum);
-    if (!xgldata)
-        FatalError("LoadXGL3Nodes: Couldn't load lump\n");
+    if (!xgldata) FatalError("LoadXGL3Nodes: Couldn't load lump\n");
 
     if (xglen < 12)
     {
@@ -1211,7 +1194,8 @@ static void LoadXGL3Nodes(int lumpnum)
         for (;;)
         {
             inflate_status = inflate(&zgl_stream, Z_NO_FLUSH);
-            if (inflate_status == MZ_OK || inflate_status == MZ_BUF_ERROR) // Need to resize output buffer
+            if (inflate_status == MZ_OK ||
+                inflate_status == MZ_BUF_ERROR)  // Need to resize output buffer
             {
                 zgldata.resize(zgldata.size() * 2);
                 zgl_stream.next_out  = &zgldata[zgl_stream.total_out];
@@ -1241,10 +1225,11 @@ static void LoadXGL3Nodes(int lumpnum)
     else
         td = &xgldata[4];
 
-    // after signature, 1st u32 is number of original vertexes - should be <= numvertexes
+    // after signature, 1st u32 is number of original vertexes - should be <=
+    // total_level_vertexes
     int oVerts = epi::UnalignedLittleEndianU32(td);
     td += 4;
-    if (oVerts > numvertexes)
+    if (oVerts > total_level_vertexes)
     {
         delete[] xgldata;
         FatalError("LoadXGL3Nodes: Vertex/Node mismatch\n");
@@ -1253,13 +1238,13 @@ static void LoadXGL3Nodes(int lumpnum)
     // 2nd u32 is the number of extra vertexes added by ajbsp
     int nVerts = epi::UnalignedLittleEndianU32(td);
     td += 4;
-    LogDebug("LoadXGL3Nodes: Orig Verts = %d, New Verts = %d, Map Verts = %d\n", oVerts, nVerts, numvertexes);
+    LogDebug("LoadXGL3Nodes: Orig Verts = %d, New Verts = %d, Map Verts = %d\n",
+             oVerts, nVerts, total_level_vertexes);
 
-    gl_vertexes     = new vertex_t[nVerts];
-    num_gl_vertexes = nVerts;
+    level_gl_vertexes = new vertex_t[nVerts];
 
     // fill in new vertexes
-    vertex_t *vv = gl_vertexes;
+    vertex_t *vv = level_gl_vertexes;
     for (i = 0; i < nVerts; i++, vv++)
     {
         // convert signed 16.16 fixed point to float
@@ -1272,21 +1257,21 @@ static void LoadXGL3Nodes(int lumpnum)
     }
 
     // new vertexes is followed by the subsectors
-    numsubsectors = epi::UnalignedLittleEndianS32(td);
+    total_level_subsectors = epi::UnalignedLittleEndianS32(td);
     td += 4;
-    if (numsubsectors <= 0)
+    if (total_level_subsectors <= 0)
     {
         delete[] xgldata;
         FatalError("LoadXGL3Nodes: No subsectors\n");
     }
-    LogDebug("LoadXGL3Nodes: Num SSECTORS = %d\n", numsubsectors);
+    LogDebug("LoadXGL3Nodes: Num SSECTORS = %d\n", total_level_subsectors);
 
-    subsectors = new subsector_t[numsubsectors];
-    Z_Clear(subsectors, subsector_t, numsubsectors);
+    level_subsectors = new subsector_t[total_level_subsectors];
+    Z_Clear(level_subsectors, subsector_t, total_level_subsectors);
 
-    int *ss_temp = new int[numsubsectors];
+    int *ss_temp = new int[total_level_subsectors];
     int  xglSegs = 0;
-    for (i = 0; i < numsubsectors; i++)
+    for (i = 0; i < total_level_subsectors; i++)
     {
         int countsegs = epi::UnalignedLittleEndianS32(td);
         td += 4;
@@ -1295,20 +1280,20 @@ static void LoadXGL3Nodes(int lumpnum)
     }
 
     // subsectors are followed by the segs
-    numsegs = epi::UnalignedLittleEndianS32(td);
+    total_level_segs = epi::UnalignedLittleEndianS32(td);
     td += 4;
-    if (numsegs != xglSegs)
+    if (total_level_segs != xglSegs)
     {
         delete[] xgldata;
         FatalError("LoadXGL3Nodes: Incorrect number of segs in nodes\n");
     }
-    LogDebug("LoadXGL3Nodes: Num SEGS = %d\n", numsegs);
+    LogDebug("LoadXGL3Nodes: Num SEGS = %d\n", total_level_segs);
 
-    segs = new seg_t[numsegs];
-    Z_Clear(segs, seg_t, numsegs);
-    seg_t *seg = segs;
+    level_segs = new seg_t[total_level_segs];
+    Z_Clear(level_segs, seg_t, total_level_segs);
+    seg_t *seg = level_segs;
 
-    for (i = 0; i < numsegs; i++, seg++)
+    for (i = 0; i < total_level_segs; i++, seg++)
     {
         unsigned int v1num;
         int          slinedef, partner, side;
@@ -1323,9 +1308,9 @@ static void LoadXGL3Nodes(int lumpnum)
         td += 1;
 
         if (v1num < (uint32_t)oVerts)
-            seg->v1 = &vertexes[v1num];
+            seg->v1 = &level_vertexes[v1num];
         else
-            seg->v1 = &gl_vertexes[v1num - oVerts];
+            seg->v1 = &level_gl_vertexes[v1num - oVerts];
 
         seg->side = side ? 1 : 0;
 
@@ -1333,8 +1318,8 @@ static void LoadXGL3Nodes(int lumpnum)
             seg->partner = nullptr;
         else
         {
-            SYS_ASSERT(partner < numsegs); // sanity check
-            seg->partner = &segs[partner];
+            SYS_ASSERT(partner < total_level_segs);  // sanity check
+            seg->partner = &level_segs[partner];
         }
 
         SegCommonStuff(seg, slinedef);
@@ -1342,29 +1327,33 @@ static void LoadXGL3Nodes(int lumpnum)
         // The following fields are filled out elsewhere:
         //     sub_next, front_sub, back_sub, frontsector, backsector.
 
-        seg->sub_next  = SEG_INVALID;
-        seg->front_sub = seg->back_sub = SUB_INVALID;
+        seg->sub_next  = EDGE_SEG_INVALID;
+        seg->front_sub = seg->back_sub = EDGE_SUBSECTOR_INVALID;
     }
 
     LogDebug("LoadXGL3Nodes: Post-process subsectors\n");
     // go back and fill in subsectors
-    subsector_t *ss = subsectors;
+    subsector_t *ss = level_subsectors;
     xglSegs         = 0;
-    for (i = 0; i < numsubsectors; i++, ss++)
+    for (i = 0; i < total_level_subsectors; i++, ss++)
     {
         int countsegs = ss_temp[i];
         int firstseg  = xglSegs;
         xglSegs += countsegs;
 
-        // go back and fill in v2 from v1 of next seg and do calcs that needed both
-        seg = &segs[firstseg];
+        // go back and fill in v2 from v1 of next seg and do calcs that needed
+        // both
+        seg = &level_segs[firstseg];
         for (int j = 0; j < countsegs; j++, seg++)
         {
-            seg->v2 = j == (countsegs - 1) ? segs[firstseg].v1 : segs[firstseg + j + 1].v1;
+            seg->v2 = j == (countsegs - 1) ? level_segs[firstseg].v1
+                                           : level_segs[firstseg + j + 1].v1;
 
-            seg->angle = R_PointToAngle(seg->v1->X, seg->v1->Y, seg->v2->X, seg->v2->Y);
+            seg->angle =
+                R_PointToAngle(seg->v1->X, seg->v1->Y, seg->v2->X, seg->v2->Y);
 
-            seg->length = R_PointToDist(seg->v1->X, seg->v1->Y, seg->v2->X, seg->v2->Y);
+            seg->length =
+                R_PointToDist(seg->v1->X, seg->v1->Y, seg->v2->X, seg->v2->Y);
         }
 
         // -AJA- 1999/09/23: New linked list for the segs of a subsector
@@ -1372,17 +1361,18 @@ static void LoadXGL3Nodes(int lumpnum)
         seg_t **prevptr = &ss->segs;
 
         if (countsegs == 0)
-            FatalError("LoadXGL3Nodes: level %s has invalid SSECTORS.\n", current_map->lump_.c_str());
+            FatalError("LoadXGL3Nodes: level %s has invalid SSECTORS.\n",
+                       current_map->lump_.c_str());
 
         ss->sector    = nullptr;
         ss->thinglist = nullptr;
 
         // this is updated when the nodes are loaded
-        ss->bbox = dummy_bbox;
+        ss->bbox = dummy_bounding_box;
 
         for (int j = 0; j < countsegs; j++)
         {
-            seg_t *cur = &segs[firstseg + j];
+            seg_t *cur = &level_segs[firstseg + j];
 
             *prevptr = cur;
             prevptr  = &cur->sub_next;
@@ -1392,24 +1382,26 @@ static void LoadXGL3Nodes(int lumpnum)
 
             // LogDebug("  ssec = %d, seg = %d\n", i, firstseg + j);
         }
-        // LogDebug("LoadZNodes: ssec = %d, fseg = %d, cseg = %d\n", i, firstseg, countsegs);
+        // LogDebug("LoadZNodes: ssec = %d, fseg = %d, cseg = %d\n", i,
+        // firstseg, countsegs);
 
         *prevptr = nullptr;
     }
-    delete[] ss_temp; // CA 9.30.18: allocated with new but released using delete, added [] between delete and ss_temp
+    delete[] ss_temp;  // CA 9.30.18: allocated with new but released using
+                       // delete, added [] between delete and ss_temp
 
     LogDebug("LoadXGL3Nodes: Read GL nodes\n");
     // finally, read the nodes
     // NOTE: no nodes is okay (a basic single sector map). -AJA-
-    numnodes = epi::UnalignedLittleEndianU32(td);
+    total_level_nodes = epi::UnalignedLittleEndianU32(td);
     td += 4;
-    LogDebug("LoadXGL3Nodes: Num nodes = %d\n", numnodes);
+    LogDebug("LoadXGL3Nodes: Num nodes = %d\n", total_level_nodes);
 
-    nodes = new node_t[numnodes + 1];
-    Z_Clear(nodes, node_t, numnodes);
-    node_t *nd = nodes;
+    level_nodes = new node_t[total_level_nodes + 1];
+    Z_Clear(level_nodes, node_t, total_level_nodes);
+    node_t *nd = level_nodes;
 
-    for (i = 0; i < numnodes; i++, nd++)
+    for (i = 0; i < total_level_nodes; i++, nd++)
     {
         nd->div.x = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
@@ -1437,8 +1429,9 @@ static void LoadXGL3Nodes(int lumpnum)
             // update bbox pointers in subsector
             if (nd->children[j] & NF_V5_SUBSECTOR)
             {
-                subsector_t *sss = subsectors + (nd->children[j] & ~NF_V5_SUBSECTOR);
-                sss->bbox        = &nd->bbox[j][0];
+                subsector_t *sss =
+                    level_subsectors + (nd->children[j] & ~NF_V5_SUBSECTOR);
+                sss->bbox = &nd->bbox[j][0];
             }
         }
     }
@@ -1462,11 +1455,10 @@ static void LoadUDMFVertexes()
 
     for (;;)
     {
-        std::string       section;
+        std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
-            break;
+        if (tok == epi::kTokenEOF) break;
 
         if (tok != epi::kTokenIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
@@ -1489,11 +1481,10 @@ static void LoadUDMFVertexes()
             float zf = -40000.0f, zc = 40000.0f;
             for (;;)
             {
-                if (lex.Match("}"))
-                    break;
+                if (lex.Match("}")) break;
 
-                std::string       key;
-                std::string       value;
+                std::string    key;
+                std::string    value;
                 epi::TokenKind block_tok = lex.Next(key);
 
                 if (block_tok == epi::kTokenEOF)
@@ -1507,7 +1498,8 @@ static void LoadUDMFVertexes()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
+                if (block_tok == epi::kTokenEOF ||
+                    block_tok == epi::kTokenError || value == "}")
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
@@ -1515,7 +1507,7 @@ static void LoadUDMFVertexes()
 
                 epi::EName key_ename(key, true);
 
-                switch(key_ename.GetIndex())
+                switch (key_ename.GetIndex())
                 {
                     case epi::kENameX:
                         x = epi::LexDouble(value);
@@ -1533,20 +1525,19 @@ static void LoadUDMFVertexes()
                         break;
                 }
             }
-            vertexes[cur_vertex] = {{{{{x, y, zf}}}, zc}};
+            level_vertexes[cur_vertex] = {{{{{x, y, zf}}}, zc}};
             cur_vertex++;
         }
-        else // consume other blocks
+        else  // consume other blocks
         {
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF)
-                    break;
+                if (lex.Match("}") || tok == epi::kTokenEOF) break;
             }
         }
     }
-    SYS_ASSERT(cur_vertex == numvertexes);
+    SYS_ASSERT(cur_vertex == total_level_vertexes);
 
     LogDebug("LoadUDMFVertexes: finished parsing TEXTMAP\n");
 }
@@ -1560,11 +1551,10 @@ static void LoadUDMFSectors()
 
     for (;;)
     {
-        std::string       section;
+        std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
-            break;
+        if (tok == epi::kTokenEOF) break;
 
         if (tok != epi::kTokenIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
@@ -1583,26 +1573,25 @@ static void LoadUDMFSectors()
 
         if (section == "sector")
         {
-            int      cz = 0, fz = 0;
-            float    fx = 0.0f, fy = 0.0f, cx = 0.0f, cy = 0.0f;
-            float    fx_sc = 1.0f, fy_sc = 1.0f, cx_sc = 1.0f, cy_sc = 1.0f;
-            float    rf = 0.0f, rc = 0.0f;
-            float    gravfactor = 1.0f;
-            int      light = 160, type = 0, tag = 0;
+            int       cz = 0, fz = 0;
+            float     fx = 0.0f, fy = 0.0f, cx = 0.0f, cy = 0.0f;
+            float     fx_sc = 1.0f, fy_sc = 1.0f, cx_sc = 1.0f, cy_sc = 1.0f;
+            float     rf = 0.0f, rc = 0.0f;
+            float     gravfactor = 1.0f;
+            int       light = 160, type = 0, tag = 0;
             RGBAColor fog_color   = SG_BLACK_RGBA32;
             RGBAColor light_color = SG_WHITE_RGBA32;
-            int      fog_density = 0;
-            char     floor_tex[10];
-            char     ceil_tex[10];
+            int       fog_density = 0;
+            char      floor_tex[10];
+            char      ceil_tex[10];
             strcpy(floor_tex, "-");
             strcpy(ceil_tex, "-");
             for (;;)
             {
-                if (lex.Match("}"))
-                    break;
+                if (lex.Match("}")) break;
 
-                std::string       key;
-                std::string       value;
+                std::string    key;
+                std::string    value;
                 epi::TokenKind block_tok = lex.Next(key);
 
                 if (block_tok == epi::kTokenEOF)
@@ -1616,7 +1605,8 @@ static void LoadUDMFSectors()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
+                if (block_tok == epi::kTokenEOF ||
+                    block_tok == epi::kTokenError || value == "}")
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
@@ -1624,7 +1614,7 @@ static void LoadUDMFSectors()
 
                 epi::EName key_ename(key, true);
 
-                switch(key_ename.GetIndex())
+                switch (key_ename.GetIndex())
                 {
                     case epi::kENameHeightfloor:
                         fz = epi::LexInteger(value);
@@ -1648,13 +1638,16 @@ static void LoadUDMFSectors()
                         tag = epi::LexInteger(value);
                         break;
                     case epi::kENameLightcolor:
-                        light_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
+                        light_color =
+                            ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
                         break;
                     case epi::kENameFadecolor:
-                        fog_color = ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
+                        fog_color =
+                            ((uint32_t)epi::LexInteger(value) << 8 | 0xFF);
                         break;
                     case epi::kENameFogdensity:
-                        fog_density = HMM_Clamp(0, epi::LexInteger(value), 1020);
+                        fog_density =
+                            HMM_Clamp(0, epi::LexInteger(value), 1020);
                         break;
                     case epi::kENameXpanningfloor:
                         fx = epi::LexDouble(value);
@@ -1693,12 +1686,12 @@ static void LoadUDMFSectors()
                         break;
                 }
             }
-            sector_t *ss = sectors + cur_sector;
+            sector_t *ss = level_sectors + cur_sector;
             ss->f_h      = fz;
             ss->c_h      = cz;
 
             // return to wolfenstein?
-            if (m_goobers.d_)
+            if (goobers.d_)
             {
                 ss->f_h = 0;
                 ss->c_h = (AlmostEquals(fz, cz)) ? 0 : 128.0f;
@@ -1737,7 +1730,8 @@ static void LoadUDMFSectors()
 
             if (ss->floor.image)
             {
-                FlatDefinition *current_flatdef = flatdefs.Find(ss->floor.image->name.c_str());
+                FlatDefinition *current_flatdef =
+                    flatdefs.Find(ss->floor.image->name.c_str());
                 if (current_flatdef)
                 {
                     ss->bob_depth  = current_flatdef->bob_depth_;
@@ -1749,12 +1743,15 @@ static void LoadUDMFSectors()
 
             if (!ss->floor.image)
             {
-                LogWarning("Bad Level: sector #%d has missing floor texture.\n", cur_sector);
+                LogWarning("Bad Level: sector #%d has missing floor texture.\n",
+                           cur_sector);
                 ss->floor.image = W_ImageLookup("FLAT1", kImageNamespaceFlat);
             }
             if (!ss->ceil.image)
             {
-                LogWarning("Bad Level: sector #%d has missing ceiling texture.\n", cur_sector);
+                LogWarning(
+                    "Bad Level: sector #%d has missing ceiling texture.\n",
+                    cur_sector);
                 ss->ceil.image = ss->floor.image;
             }
 
@@ -1777,20 +1774,23 @@ static void LoadUDMFSectors()
             ss->props.drag      = kDragDefault;
 
             // Allow UDMF sector light/fog information to override DDFSECT types
-            if (fog_color != SG_BLACK_RGBA32) // All black is the established UDMF "no fog" color
+            if (fog_color != SG_BLACK_RGBA32)  // All black is the established
+                                               // UDMF "no fog" color
             {
-                // Prevent UDMF-specified fog color from having our internal 'no value'...uh...value
-                if (fog_color == kRGBANoValue)
-                    fog_color ^= 0x00010100;
+                // Prevent UDMF-specified fog color from having our internal 'no
+                // value'...uh...value
+                if (fog_color == kRGBANoValue) fog_color ^= 0x00010100;
                 ss->props.fog_color = fog_color;
-                // Best-effort match for GZDoom's fogdensity values so that UDB, etc
-                // give predictable results
+                // Best-effort match for GZDoom's fogdensity values so that UDB,
+                // etc give predictable results
                 if (fog_density < 2)
                     ss->props.fog_density = 0.002f;
                 else
-                    ss->props.fog_density = 0.01f * ((float)fog_density / 1020.0f);
+                    ss->props.fog_density =
+                        0.01f * ((float)fog_density / 1020.0f);
             }
-            else if (ss->props.special && ss->props.special->fog_color_ != kRGBANoValue)
+            else if (ss->props.special &&
+                     ss->props.special->fog_color_ != kRGBANoValue)
             {
                 ss->props.fog_color   = ss->props.special->fog_color_;
                 ss->props.fog_density = 0.01f * ss->props.special->fog_density_;
@@ -1802,22 +1802,23 @@ static void LoadUDMFSectors()
             }
             if (light_color != SG_WHITE_RGBA32)
             {
-
-                if (light_color == kRGBANoValue)
-                    light_color ^= 0x00010100;
+                if (light_color == kRGBANoValue) light_color ^= 0x00010100;
                 // Make colormap if necessary
                 for (Colormap *cmap : colormaps)
                 {
-                    if (cmap->gl_color_ != kRGBANoValue && cmap->gl_color_ == light_color)
+                    if (cmap->gl_color_ != kRGBANoValue &&
+                        cmap->gl_color_ == light_color)
                     {
                         ss->props.colourmap = cmap;
                         break;
                     }
                 }
-                if (!ss->props.colourmap || ss->props.colourmap->gl_color_ != light_color)
+                if (!ss->props.colourmap ||
+                    ss->props.colourmap->gl_color_ != light_color)
                 {
                     Colormap *ad_hoc = new Colormap;
-                    ad_hoc->name_        = epi::StringFormat("UDMF_%d", light_color); // Internal
+                    ad_hoc->name_ =
+                        epi::StringFormat("UDMF_%d", light_color);  // Internal
                     ad_hoc->gl_color_   = light_color;
                     ss->props.colourmap = ad_hoc;
                     colormaps.push_back(ad_hoc);
@@ -1829,20 +1830,19 @@ static void LoadUDMFSectors()
             ss->sound_player = -1;
 
             // -AJA- 1999/07/29: Keep sectors with same tag in a list.
-            GroupSectorTags(ss, sectors, cur_sector);
+            GroupSectorTags(ss, level_sectors, cur_sector);
             cur_sector++;
         }
-        else // consume other blocks
+        else  // consume other blocks
         {
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF)
-                    break;
+                if (lex.Match("}") || tok == epi::kTokenEOF) break;
             }
         }
     }
-    SYS_ASSERT(cur_sector == numsectors);
+    SYS_ASSERT(cur_sector == total_level_sectors);
 
     LogDebug("LoadUDMFSectors: finished parsing TEXTMAP\n");
 }
@@ -1853,18 +1853,17 @@ static void LoadUDMFSideDefs()
 
     LogDebug("LoadUDMFSectors: parsing TEXTMAP\n");
 
-    sides = new side_t[numsides];
-    Z_Clear(sides, side_t, numsides);
+    level_sides = new side_t[total_level_sides];
+    Z_Clear(level_sides, side_t, total_level_sides);
 
     int nummapsides = 0;
 
     for (;;)
     {
-        std::string       section;
+        std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
-            break;
+        if (tok == epi::kTokenEOF) break;
 
         if (tok != epi::kTokenIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
@@ -1898,11 +1897,10 @@ static void LoadUDMFSideDefs()
             strcpy(middle_tex, "-");
             for (;;)
             {
-                if (lex.Match("}"))
-                    break;
+                if (lex.Match("}")) break;
 
-                std::string       key;
-                std::string       value;
+                std::string    key;
+                std::string    value;
                 epi::TokenKind block_tok = lex.Next(key);
 
                 if (block_tok == epi::kTokenEOF)
@@ -1916,7 +1914,8 @@ static void LoadUDMFSideDefs()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
+                if (block_tok == epi::kTokenEOF ||
+                    block_tok == epi::kTokenError || value == "}")
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
@@ -1924,7 +1923,7 @@ static void LoadUDMFSideDefs()
 
                 epi::EName key_ename(key, true);
 
-                switch(key_ename.GetIndex())
+                switch (key_ename.GetIndex())
                 {
                     case epi::kENameOffsetx:
                         x = epi::LexInteger(value);
@@ -1984,9 +1983,9 @@ static void LoadUDMFSideDefs()
                         break;
                 }
             }
-            SYS_ASSERT(nummapsides <= numsides); // sanity check
+            SYS_ASSERT(nummapsides <= total_level_sides);  // sanity check
 
-            side_t *sd = sides + nummapsides - 1;
+            side_t *sd = level_sides + nummapsides - 1;
 
             sd->top.translucency = VISIBLE;
             sd->top.offset.X     = x;
@@ -1999,20 +1998,25 @@ static void LoadUDMFSideDefs()
             sd->middle = sd->top;
             sd->bottom = sd->top;
 
-            sd->sector = &sectors[sec_num];
+            sd->sector = &level_sectors[sec_num];
 
-            sd->top.image = W_ImageLookup(top_tex, kImageNamespaceTexture, ILF_Null);
+            sd->top.image =
+                W_ImageLookup(top_tex, kImageNamespaceTexture, ILF_Null);
 
             if (sd->top.image == nullptr)
             {
-                if (m_goobers.d_)
-                    sd->top.image = W_ImageLookup(bottom_tex, kImageNamespaceTexture);
+                if (goobers.d_)
+                    sd->top.image =
+                        W_ImageLookup(bottom_tex, kImageNamespaceTexture);
                 else
-                    sd->top.image = W_ImageLookup(top_tex, kImageNamespaceTexture);
+                    sd->top.image =
+                        W_ImageLookup(top_tex, kImageNamespaceTexture);
             }
 
-            sd->middle.image = W_ImageLookup(middle_tex, kImageNamespaceTexture);
-            sd->bottom.image = W_ImageLookup(bottom_tex, kImageNamespaceTexture);
+            sd->middle.image =
+                W_ImageLookup(middle_tex, kImageNamespaceTexture);
+            sd->bottom.image =
+                W_ImageLookup(bottom_tex, kImageNamespaceTexture);
 
             // granular offsets
             sd->bottom.offset.X += lowx;
@@ -2035,22 +2039,27 @@ static void LoadUDMFSideDefs()
             sd->middle.boom_colmap = colormaps.Lookup(middle_tex);
             sd->bottom.boom_colmap = colormaps.Lookup(bottom_tex);
 
-            if (sd->top.image && fabs(sd->top.offset.Y) > IM_HEIGHT(sd->top.image))
-                sd->top.offset.Y = fmodf(sd->top.offset.Y, IM_HEIGHT(sd->top.image));
+            if (sd->top.image &&
+                fabs(sd->top.offset.Y) > IM_HEIGHT(sd->top.image))
+                sd->top.offset.Y =
+                    fmodf(sd->top.offset.Y, IM_HEIGHT(sd->top.image));
 
-            if (sd->middle.image && fabs(sd->middle.offset.Y) > IM_HEIGHT(sd->middle.image))
-                sd->middle.offset.Y = fmodf(sd->middle.offset.Y, IM_HEIGHT(sd->middle.image));
+            if (sd->middle.image &&
+                fabs(sd->middle.offset.Y) > IM_HEIGHT(sd->middle.image))
+                sd->middle.offset.Y =
+                    fmodf(sd->middle.offset.Y, IM_HEIGHT(sd->middle.image));
 
-            if (sd->bottom.image && fabs(sd->bottom.offset.Y) > IM_HEIGHT(sd->bottom.image))
-                sd->bottom.offset.Y = fmodf(sd->bottom.offset.Y, IM_HEIGHT(sd->bottom.image));
+            if (sd->bottom.image &&
+                fabs(sd->bottom.offset.Y) > IM_HEIGHT(sd->bottom.image))
+                sd->bottom.offset.Y =
+                    fmodf(sd->bottom.offset.Y, IM_HEIGHT(sd->bottom.image));
         }
-        else // consume other blocks
+        else  // consume other blocks
         {
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF)
-                    break;
+                if (lex.Match("}") || tok == epi::kTokenEOF) break;
             }
         }
     }
@@ -2061,11 +2070,11 @@ static void LoadUDMFSideDefs()
 
     SYS_ASSERT(temp_line_sides);
 
-    side_t *sd = sides;
+    side_t *sd = level_sides;
 
-    for (int i = 0; i < numlines; i++)
+    for (int i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = lines + i;
+        line_t *ld = level_lines + i;
 
         int side0 = temp_line_sides[i * 2 + 0];
         int side1 = temp_line_sides[i * 2 + 1];
@@ -2074,13 +2083,15 @@ static void LoadUDMFSideDefs()
 
         if (side0 >= nummapsides)
         {
-            LogWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n",
+                       current_map->lump_.c_str(), i);
             side0 = nummapsides - 1;
         }
 
         if (side1 != -1 && side1 >= nummapsides)
         {
-            LogWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n",
+                       current_map->lump_.c_str(), i);
             side1 = nummapsides - 1;
         }
 
@@ -2105,10 +2116,10 @@ static void LoadUDMFSideDefs()
             sd++;
         }
 
-        SYS_ASSERT(sd <= sides + numsides);
+        SYS_ASSERT(sd <= level_sides + total_level_sides);
     }
 
-    SYS_ASSERT(sd == sides + numsides);
+    SYS_ASSERT(sd == level_sides + total_level_sides);
 
     LogDebug("LoadUDMFSideDefs: finished parsing TEXTMAP\n");
 }
@@ -2123,11 +2134,10 @@ static void LoadUDMFLineDefs()
 
     for (;;)
     {
-        std::string       section;
+        std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
-            break;
+        if (tok == epi::kTokenEOF) break;
 
         if (tok != epi::kTokenIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
@@ -2151,11 +2161,10 @@ static void LoadUDMFLineDefs()
             int special = 0;
             for (;;)
             {
-                if (lex.Match("}"))
-                    break;
+                if (lex.Match("}")) break;
 
-                std::string       key;
-                std::string       value;
+                std::string    key;
+                std::string    value;
                 epi::TokenKind block_tok = lex.Next(key);
 
                 if (block_tok == epi::kTokenEOF)
@@ -2169,7 +2178,8 @@ static void LoadUDMFLineDefs()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
+                if (block_tok == epi::kTokenEOF ||
+                    block_tok == epi::kTokenError || value == "}")
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
@@ -2177,7 +2187,7 @@ static void LoadUDMFLineDefs()
 
                 epi::EName key_ename(key, true);
 
-                switch(key_ename.GetIndex())
+                switch (key_ename.GetIndex())
                 {
                     case epi::kENameId:
                         tag = epi::LexInteger(value);
@@ -2201,16 +2211,19 @@ static void LoadUDMFLineDefs()
                         flags |= (epi::LexBoolean(value) ? MLF_Blocking : 0);
                         break;
                     case epi::kENameBlockmonsters:
-                        flags |= (epi::LexBoolean(value) ? MLF_BlockMonsters : 0);
+                        flags |=
+                            (epi::LexBoolean(value) ? MLF_BlockMonsters : 0);
                         break;
                     case epi::kENameTwosided:
                         flags |= (epi::LexBoolean(value) ? MLF_TwoSided : 0);
                         break;
                     case epi::kENameDontpegtop:
-                        flags |= (epi::LexBoolean(value) ? MLF_UpperUnpegged : 0);
+                        flags |=
+                            (epi::LexBoolean(value) ? MLF_UpperUnpegged : 0);
                         break;
                     case epi::kENameDontpegbottom:
-                        flags |= (epi::LexBoolean(value) ? MLF_LowerUnpegged : 0);
+                        flags |=
+                            (epi::LexBoolean(value) ? MLF_LowerUnpegged : 0);
                         break;
                     case epi::kENameSecret:
                         flags |= (epi::LexBoolean(value) ? MLF_Secret : 0);
@@ -2228,7 +2241,8 @@ static void LoadUDMFLineDefs()
                         flags |= (epi::LexBoolean(value) ? MLF_PassThru : 0);
                         break;
                     case epi::kENameBlockplayers:
-                        flags |= (epi::LexBoolean(value) ? MLF_BlockPlayers : 0);
+                        flags |=
+                            (epi::LexBoolean(value) ? MLF_BlockPlayers : 0);
                         break;
                     case epi::kENameBlocksight:
                         flags |= (epi::LexBoolean(value) ? MLF_SightBlock : 0);
@@ -2237,12 +2251,12 @@ static void LoadUDMFLineDefs()
                         break;
                 }
             }
-            line_t *ld = lines + cur_line;
+            line_t *ld = level_lines + cur_line;
 
             ld->flags = flags;
             ld->tag   = HMM_MAX(0, tag);
-            ld->v1    = &vertexes[v1];
-            ld->v2    = &vertexes[v2];
+            ld->v1    = &level_vertexes[v1];
+            ld->v2    = &level_vertexes[v2];
 
             ld->special = P_LookupLineType(HMM_MAX(0, special));
 
@@ -2250,46 +2264,50 @@ static void LoadUDMFLineDefs()
                 ld->flags |= MLF_PassThru;
 
             if (ld->special && ld->special->type_ == kLineTriggerNone &&
-                (ld->special->s_xspeed_ || ld->special->s_yspeed_ || ld->special->scroll_type_ > BoomScrollerTypeNone ||
-                 ld->special->line_effect_ == kLineEffectTypeVectorScroll || ld->special->line_effect_ == kLineEffectTypeOffsetScroll ||
-                 ld->special->line_effect_ == kLineEffectTypeTaggedOffsetScroll))
+                (ld->special->s_xspeed_ || ld->special->s_yspeed_ ||
+                 ld->special->scroll_type_ > BoomScrollerTypeNone ||
+                 ld->special->line_effect_ == kLineEffectTypeVectorScroll ||
+                 ld->special->line_effect_ == kLineEffectTypeOffsetScroll ||
+                 ld->special->line_effect_ ==
+                     kLineEffectTypeTaggedOffsetScroll))
                 ld->flags |= MLF_PassThru;
 
             if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailFloor)
                 ld->flags |= MLF_PassThru;
 
-            if (ld->special && ld->special->slope_type_ & kSlopeTypeDetailCeiling)
+            if (ld->special &&
+                ld->special->slope_type_ & kSlopeTypeDetailCeiling)
                 ld->flags |= MLF_PassThru;
 
-            if (ld->special && ld->special == linetypes.Lookup(0)) // Add passthru to unknown/templated
+            if (ld->special &&
+                ld->special ==
+                    linetypes.Lookup(0))  // Add passthru to unknown/templated
                 ld->flags |= MLF_PassThru;
 
             ComputeLinedefData(ld, side0, side1);
 
             if (ld->tag && ld->special && ld->special->ef_.type_)
             {
-                for (int j = 0; j < numsectors; j++)
+                for (int j = 0; j < total_level_sectors; j++)
                 {
-                    if (sectors[j].tag != ld->tag)
-                        continue;
+                    if (level_sectors[j].tag != ld->tag) continue;
 
-                    sectors[j].exfloor_max++;
-                    numextrafloors++;
+                    level_sectors[j].exfloor_max++;
+                    total_level_extrafloors++;
                 }
             }
             cur_line++;
         }
-        else // consume other blocks
+        else  // consume other blocks
         {
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF)
-                    break;
+                if (lex.Match("}") || tok == epi::kTokenEOF) break;
             }
         }
     }
-    SYS_ASSERT(cur_line == numlines);
+    SYS_ASSERT(cur_line == total_level_lines);
 
     LogDebug("LoadUDMFLineDefs: finished parsing TEXTMAP\n");
 }
@@ -2301,11 +2319,10 @@ static void LoadUDMFThings()
     LogDebug("LoadUDMFThings: parsing TEXTMAP\n");
     for (;;)
     {
-        std::string       section;
+        std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
-            break;
+        if (tok == epi::kTokenEOF) break;
 
         if (tok != epi::kTokenIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
@@ -2324,22 +2341,21 @@ static void LoadUDMFThings()
 
         if (section == "thing")
         {
-            float             x = 0.0f, y = 0.0f, z = 0.0f;
-            BAMAngle           angle     = kBAMAngle0;
-            int               options   = MTF_NOT_SINGLE | MTF_NOT_DM | MTF_NOT_COOP;
-            int               typenum   = -1;
-            int               tag       = 0;
-            float             healthfac = 1.0f;
-            float             alpha     = 1.0f;
-            float             scale = 0.0f, scalex = 0.0f, scaley = 0.0f;
+            float    x = 0.0f, y = 0.0f, z = 0.0f;
+            BAMAngle angle     = kBAMAngle0;
+            int      options   = MTF_NOT_SINGLE | MTF_NOT_DM | MTF_NOT_COOP;
+            int      typenum   = -1;
+            int      tag       = 0;
+            float    healthfac = 1.0f;
+            float    alpha     = 1.0f;
+            float    scale = 0.0f, scalex = 0.0f, scaley = 0.0f;
             const MapObjectDefinition *objtype;
             for (;;)
             {
-                if (lex.Match("}"))
-                    break;
+                if (lex.Match("}")) break;
 
-                std::string       key;
-                std::string       value;
+                std::string    key;
+                std::string    value;
                 epi::TokenKind block_tok = lex.Next(key);
 
                 if (block_tok == epi::kTokenEOF)
@@ -2353,7 +2369,8 @@ static void LoadUDMFThings()
 
                 block_tok = lex.Next(value);
 
-                if (block_tok == epi::kTokenEOF || block_tok == epi::kTokenError || value == "}")
+                if (block_tok == epi::kTokenEOF ||
+                    block_tok == epi::kTokenError || value == "}")
                     FatalError("Malformed TEXTMAP lump: missing value\n");
 
                 if (!lex.Match(";"))
@@ -2400,13 +2417,16 @@ static void LoadUDMFThings()
                         options |= (epi::LexBoolean(value) ? MTF_AMBUSH : 0);
                         break;
                     case epi::kENameSingle:
-                        options &= (epi::LexBoolean(value) ? ~MTF_NOT_SINGLE : options);
+                        options &= (epi::LexBoolean(value) ? ~MTF_NOT_SINGLE
+                                                           : options);
                         break;
                     case epi::kENameDm:
-                        options &= (epi::LexBoolean(value) ? ~MTF_NOT_DM : options);
+                        options &=
+                            (epi::LexBoolean(value) ? ~MTF_NOT_DM : options);
                         break;
                     case epi::kENameCoop:
-                        options &= (epi::LexBoolean(value) ? ~MTF_NOT_COOP : options);
+                        options &=
+                            (epi::LexBoolean(value) ? ~MTF_NOT_COOP : options);
                         break;
                     case epi::kENameFriend:
                         options |= (epi::LexBoolean(value) ? MTF_FRIEND : 0);
@@ -2418,13 +2438,13 @@ static void LoadUDMFThings()
                         alpha = epi::LexDouble(value);
                         break;
                     case epi::kENameScale:
-                        scale     = epi::LexDouble(value);
+                        scale = epi::LexDouble(value);
                         break;
                     case epi::kENameScalex:
-                        scalex    = epi::LexDouble(value);
+                        scalex = epi::LexDouble(value);
                         break;
                     case epi::kENameScaley:
-                        scaley    = epi::LexDouble(value);
+                        scaley = epi::LexDouble(value);
                         break;
                     default:
                         break;
@@ -2442,29 +2462,37 @@ static void LoadUDMFThings()
 
             sector_t *sec = R_PointInSubsector(x, y)->sector;
 
-            if ((objtype->hyperflags_ & kHyperFlagMusicChanger) && !musinfo_tracks[current_map->name_].processed)
+            if ((objtype->hyperflags_ & kHyperFlagMusicChanger) &&
+                !musinfo_tracks[current_map->name_].processed)
             {
-                // This really should only be used with the original DoomEd number range
+                // This really should only be used with the original DoomEd
+                // number range
                 if (objtype->number_ >= 14100 && objtype->number_ < 14165)
                 {
                     int mus_number = -1;
 
-                    if (objtype->number_ == 14100) // Default for level
+                    if (objtype->number_ == 14100)  // Default for level
                         mus_number = current_map->music_;
-                    else if (musinfo_tracks[current_map->name_].mappings.count(objtype->number_ - 14100))
+                    else if (musinfo_tracks[current_map->name_].mappings.count(
+                                 objtype->number_ - 14100))
                     {
-                        mus_number = musinfo_tracks[current_map->name_].mappings[objtype->number_ - 14100];
+                        mus_number = musinfo_tracks[current_map->name_]
+                                         .mappings[objtype->number_ - 14100];
                     }
                     // Track found; make ad-hoc RTS script for music changing
                     if (mus_number != -1)
                     {
                         std::string mus_rts = "// MUSINFO SCRIPTS\n\n";
-                        mus_rts.append(epi::StringFormat("START_MAP %s\n", current_map->name_.c_str()));
-                        mus_rts.append(epi::StringFormat("  SECTOR_TRIGGER_INDEX %d\n", sec - sectors));
+                        mus_rts.append(epi::StringFormat(
+                            "START_MAP %s\n", current_map->name_.c_str()));
+                        mus_rts.append(
+                            epi::StringFormat("  SECTOR_TRIGGER_INDEX %d\n",
+                                              sec - level_sectors));
                         mus_rts.append("    TAGGED_INDEPENDENT\n");
                         mus_rts.append("    TAGGED_REPEATABLE\n");
                         mus_rts.append("    WAIT 30T\n");
-                        mus_rts.append(epi::StringFormat("    CHANGE_MUSIC %d\n", mus_number));
+                        mus_rts.append(epi::StringFormat(
+                            "    CHANGE_MUSIC %d\n", mus_number));
                         mus_rts.append("    RETRIGGER\n");
                         mus_rts.append("  END_SECTOR_TRIGGER\n");
                         mus_rts.append("END_MAP\n\n");
@@ -2478,13 +2506,14 @@ static void LoadUDMFThings()
             else
                 z += sec->f_h;
 
-            mobj_t *udmf_thing = SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
+            mobj_t *udmf_thing =
+                SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
 
             // check for UDMF-specific thing stuff
             if (udmf_thing)
             {
                 udmf_thing->vis_target = alpha;
-                udmf_thing->alpha = alpha;
+                udmf_thing->alpha      = alpha;
                 if (!AlmostEquals(healthfac, 1.0f))
                 {
                     if (healthfac < 0)
@@ -2498,17 +2527,19 @@ static void LoadUDMFThings()
                         udmf_thing->health *= healthfac;
                     }
                 }
-                // Treat 'scale' and 'scalex/scaley' as one or the other; don't try to juggle both
+                // Treat 'scale' and 'scalex/scaley' as one or the other; don't
+                // try to juggle both
                 if (!AlmostEquals(scale, 0.0f))
                 {
                     udmf_thing->scale = udmf_thing->model_scale = scale;
                     udmf_thing->height *= scale;
                     udmf_thing->radius *= scale;
                 }
-                else if (!AlmostEquals(scalex, 0.0f) || !AlmostEquals(scaley, 0.0f))
+                else if (!AlmostEquals(scalex, 0.0f) ||
+                         !AlmostEquals(scaley, 0.0f))
                 {
-                    float sx          = AlmostEquals(scalex, 0.0f) ? 1.0f : scalex;
-                    float sy          = AlmostEquals(scaley, 0.0f) ? 1.0f : scaley;
+                    float sx = AlmostEquals(scalex, 0.0f) ? 1.0f : scalex;
+                    float sy = AlmostEquals(scaley, 0.0f) ? 1.0f : scaley;
                     udmf_thing->scale = udmf_thing->model_scale = sy;
                     udmf_thing->aspect = udmf_thing->model_aspect = (sx / sy);
                     udmf_thing->height *= sy;
@@ -2516,15 +2547,14 @@ static void LoadUDMFThings()
                 }
             }
 
-            mapthing_NUM++;
+            total_map_things++;
         }
-        else // consume other blocks
+        else  // consume other blocks
         {
             for (;;)
             {
                 tok = lex.Next(section);
-                if (lex.Match("}") || tok == epi::kTokenEOF)
-                    break;
+                if (lex.Match("}") || tok == epi::kTokenEOF) break;
             }
         }
     }
@@ -2542,11 +2572,10 @@ static void LoadUDMFCounts()
 
     for (;;)
     {
-        std::string       section;
+        std::string    section;
         epi::TokenKind tok = lex.Next(section);
 
-        if (tok == epi::kTokenEOF)
-            break;
+        if (tok == epi::kTokenEOF) break;
 
         if (tok != epi::kTokenIdentifier)
             FatalError("Malformed TEXTMAP lump.\n");
@@ -2556,14 +2585,17 @@ static void LoadUDMFCounts()
         {
             lex.Next(section);
 
-            if (udmf_strict.d_)
+            if (udmf_strict_namespace.d_)
             {
-                if (section != "doom" && section != "heretic" && section != "edge-classic" &&
-                    section != "zdoomtranslated")
+                if (section != "doom" && section != "heretic" &&
+                    section != "edge-classic" && section != "zdoomtranslated")
                 {
-                    LogWarning("UDMF: %s uses unsupported namespace \"%s\"!\nSupported namespaces are \"doom\", "
-                              "\"heretic\", \"edge-classic\", or \"zdoomtranslated\"!\n",
-                              current_map->lump_.c_str(), section.c_str());
+                    LogWarning(
+                        "UDMF: %s uses unsupported namespace "
+                        "\"%s\"!\nSupported namespaces are \"doom\", "
+                        "\"heretic\", \"edge-classic\", or "
+                        "\"zdoomtranslated\"!\n",
+                        current_map->lump_.c_str(), section.c_str());
                 }
             }
 
@@ -2581,16 +2613,16 @@ static void LoadUDMFCounts()
         switch (section_ename.GetIndex())
         {
             case epi::kENameThing:
-                mapthing_NUM++;
+                total_map_things++;
                 break;
             case epi::kENameVertex:
-                numvertexes++;
+                total_level_vertexes++;
                 break;
             case epi::kENameSector:
-                numsectors++;
+                total_level_sectors++;
                 break;
             case epi::kENameLinedef:
-                numlines++;
+                total_level_lines++;
                 break;
             default:
                 break;
@@ -2600,21 +2632,21 @@ static void LoadUDMFCounts()
         for (;;)
         {
             tok = lex.Next(section);
-            if (lex.Match("}") || tok == epi::kTokenEOF)
-                break;
+            if (lex.Match("}") || tok == epi::kTokenEOF) break;
         }
     }
 
     // initialize arrays
-    vertexes = new vertex_t[numvertexes];
-    sectors  = new sector_t[numsectors];
-    Z_Clear(sectors, sector_t, numsectors);
-    lines = new line_t[numlines];
-    Z_Clear(lines, line_t, numlines);
-    temp_line_sides = new int[numlines * 2];
+    level_vertexes = new vertex_t[total_level_vertexes];
+    level_sectors  = new sector_t[total_level_sectors];
+    Z_Clear(level_sectors, sector_t, total_level_sectors);
+    level_lines = new line_t[total_level_lines];
+    Z_Clear(level_lines, line_t, total_level_lines);
+    temp_line_sides = new int[total_level_lines * 2];
 }
 
-static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_sided)
+static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd,
+                               bool two_sided)
 {
     char upper_tex[10];
     char middle_tex[10];
@@ -2635,10 +2667,11 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
 
     if (sec_num < 0)
     {
-        LogWarning("Level %s has sidedef with bad sector ref (%d)\n", current_map->lump_.c_str(), sec_num);
+        LogWarning("Level %s has sidedef with bad sector ref (%d)\n",
+                   current_map->lump_.c_str(), sec_num);
         sec_num = 0;
     }
-    sd->sector = &sectors[sec_num];
+    sd->sector = &level_sectors[sec_num];
 
     epi::CStringCopyMax(upper_tex, msd->upper_tex, 8);
     epi::CStringCopyMax(middle_tex, msd->mid_tex, 8);
@@ -2648,7 +2681,7 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
 
     if (sd->top.image == nullptr)
     {
-        if (m_goobers.d_)
+        if (goobers.d_)
             sd->top.image = W_ImageLookup(upper_tex, kImageNamespaceTexture);
         else
             sd->top.image = W_ImageLookup(upper_tex, kImageNamespaceTexture);
@@ -2671,13 +2704,17 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd, bool two_si
     if (sd->top.image && fabs(sd->top.offset.Y) > IM_HEIGHT(sd->top.image))
         sd->top.offset.Y = fmodf(sd->top.offset.Y, IM_HEIGHT(sd->top.image));
 
-    if (sd->middle.image && fabs(sd->middle.offset.Y) > IM_HEIGHT(sd->middle.image))
-        sd->middle.offset.Y = fmodf(sd->middle.offset.Y, IM_HEIGHT(sd->middle.image));
+    if (sd->middle.image &&
+        fabs(sd->middle.offset.Y) > IM_HEIGHT(sd->middle.image))
+        sd->middle.offset.Y =
+            fmodf(sd->middle.offset.Y, IM_HEIGHT(sd->middle.image));
 
-    if (sd->bottom.image && fabs(sd->bottom.offset.Y) > IM_HEIGHT(sd->bottom.image))
-        sd->bottom.offset.Y = fmodf(sd->bottom.offset.Y, IM_HEIGHT(sd->bottom.image));
+    if (sd->bottom.image &&
+        fabs(sd->bottom.offset.Y) > IM_HEIGHT(sd->bottom.image))
+        sd->bottom.offset.Y =
+            fmodf(sd->bottom.offset.Y, IM_HEIGHT(sd->bottom.image));
 
-#if 0 // -AJA- 2005/01/13: DISABLED (see my log for explanation) 
+#if 0  // -AJA- 2005/01/13: DISABLED (see my log for explanation) 
 	{
 		// -AJA- 2004/09/20: fix texture alignment for some rare cases
 		//       where the texture height is non-POW2 (e.g. 64x72) and
@@ -2705,27 +2742,29 @@ static void LoadSideDefs(int lump)
     int nummapsides;
 
     if (!W_VerifyLumpName(lump, "SIDEDEFS"))
-        FatalError("Bad WAD: level %s missing SIDEDEFS.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s missing SIDEDEFS.\n",
+                   current_map->lump_.c_str());
 
     nummapsides = W_LumpLength(lump) / sizeof(raw_sidedef_t);
 
     if (nummapsides == 0)
-        FatalError("Bad WAD: level %s contains 0 sidedefs.\n", current_map->lump_.c_str());
+        FatalError("Bad WAD: level %s contains 0 sidedefs.\n",
+                   current_map->lump_.c_str());
 
-    sides = new side_t[numsides];
+    level_sides = new side_t[total_level_sides];
 
-    Z_Clear(sides, side_t, numsides);
+    Z_Clear(level_sides, side_t, total_level_sides);
 
     data = W_LoadLump(lump);
     msd  = (const raw_sidedef_t *)data;
 
-    sd = sides;
+    sd = level_sides;
 
     SYS_ASSERT(temp_line_sides);
 
-    for (i = 0; i < numlines; i++)
+    for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = lines + i;
+        line_t *ld = level_lines + i;
 
         int side0 = temp_line_sides[i * 2 + 0];
         int side1 = temp_line_sides[i * 2 + 1];
@@ -2734,13 +2773,15 @@ static void LoadSideDefs(int lump)
 
         if (side0 >= nummapsides)
         {
-            LogWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n", current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad RIGHT side.\n",
+                       current_map->lump_.c_str(), i);
             side0 = nummapsides - 1;
         }
 
         if (side1 != -1 && side1 >= nummapsides)
         {
-            LogWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n", current_map->lump_.c_str(), i);
+            LogWarning("Bad WAD: level %s linedef #%d has bad LEFT side.\n",
+                       current_map->lump_.c_str(), i);
             side1 = nummapsides - 1;
         }
 
@@ -2757,10 +2798,10 @@ static void LoadSideDefs(int lump)
             sd++;
         }
 
-        SYS_ASSERT(sd <= sides + numsides);
+        SYS_ASSERT(sd <= level_sides + total_level_sides);
     }
 
-    SYS_ASSERT(sd == sides + numsides);
+    SYS_ASSERT(sd == level_sides + total_level_sides);
 
     delete[] data;
 }
@@ -2781,30 +2822,29 @@ static void SetupExtrafloors(void)
     int       i, ef_index = 0;
     sector_t *ss;
 
-    if (numextrafloors == 0)
-        return;
+    if (total_level_extrafloors == 0) return;
 
-    extrafloors = new extrafloor_t[numextrafloors];
+    level_extrafloors = new extrafloor_t[total_level_extrafloors];
 
-    Z_Clear(extrafloors, extrafloor_t, numextrafloors);
+    Z_Clear(level_extrafloors, extrafloor_t, total_level_extrafloors);
 
-    for (i = 0, ss = sectors; i < numsectors; i++, ss++)
+    for (i = 0, ss = level_sectors; i < total_level_sectors; i++, ss++)
     {
-        ss->exfloor_first = extrafloors + ef_index;
+        ss->exfloor_first = level_extrafloors + ef_index;
 
         ef_index += ss->exfloor_max;
 
-        SYS_ASSERT(ef_index <= numextrafloors);
+        SYS_ASSERT(ef_index <= total_level_extrafloors);
     }
 
-    SYS_ASSERT(ef_index == numextrafloors);
+    SYS_ASSERT(ef_index == total_level_extrafloors);
 }
 
 static void SetupSlidingDoors(void)
 {
-    for (int i = 0; i < numlines; i++)
+    for (int i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = lines + i;
+        line_t *ld = level_lines + i;
 
         if (!ld->special || ld->special->s_.type_ == kSlidingDoorTypeNone)
             continue;
@@ -2813,97 +2853,17 @@ static void SetupSlidingDoors(void)
             ld->slide_door = ld->special;
         else
         {
-            for (int k = 0; k < numlines; k++)
+            for (int k = 0; k < total_level_lines; k++)
             {
-                line_t *other = lines + k;
+                line_t *other = level_lines + k;
 
-                if (other->tag != ld->tag || other == ld)
-                    continue;
+                if (other->tag != ld->tag || other == ld) continue;
 
                 other->slide_door = ld->special;
             }
         }
     }
 }
-
-//
-// SetupWallTiles
-//
-// Computes how many wall tiles we'll need.  The tiles themselves are
-// created elsewhere.
-//
-#if 0 // NO LONGER USED
-static void SetupWallTiles(void)
-{
-	int i, wt_index;
-	int num_0, num_1;
-
-	for (i=0; i < numlines; i++)
-	{
-		line_t *ld = lines + i;
-
-		if (! ld->backsector)
-		{
-			num_0 = 1;
-			num_1 = 0;
-		}
-		else if (ld->frontsector == ld->backsector)
-		{
-			num_0 = 1;
-			num_1 = 1;
-		}
-		else if (ld->frontsector->tag == ld->backsector->tag)
-		{
-			SYS_ASSERT(ld->frontsector->exfloor_max ==
-				ld->backsector->exfloor_max);
-
-			num_0 = 3;  /* lower + middle + upper */
-			num_1 = 3;
-		}
-		else
-		{
-			// FIXME: only count THICK sides for extrafloors.
-
-			num_0 = 3 + ld->backsector->exfloor_max;
-			num_1 = 3 + ld->frontsector->exfloor_max;
-		}
-
-		ld->side[0]->tile_max = num_0;
-
-		if (ld->side[1])
-			ld->side[1]->tile_max = num_1;
-
-		numwalltiles += num_0 + num_1;
-	}
-
-	// LogPrint("%dK used for wall tiles.\n", (numwalltiles *
-	//    sizeof(wall_tile_t) + 1023) / 1024);
-
-	SYS_ASSERT(numwalltiles > 0);
-
-	walltiles = new wall_tile_t[numwalltiles];
-		
-	Z_Clear(walltiles, wall_tile_t, numwalltiles);
-
-	for (i=0, wt_index=0; i < numlines; i++)
-	{
-		line_t *ld = lines + i;
-
-		ld->side[0]->tiles = walltiles + wt_index;
-		wt_index += ld->side[0]->tile_max;
-
-		if (ld->side[1])
-		{
-			ld->side[1]->tiles = walltiles + wt_index;
-			wt_index += ld->side[1]->tile_max;
-		}
-
-		SYS_ASSERT(wt_index <= numwalltiles);
-	}
-
-	SYS_ASSERT(wt_index == numwalltiles);
-}
-#endif
 
 //
 // SetupVertGaps
@@ -2918,110 +2878,102 @@ static void SetupVertGaps(void)
 
     vgap_t *cur_gap;
 
-    for (i = 0; i < numlines; i++)
+    for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = lines + i;
+        line_t *ld = level_lines + i;
 
         ld->max_gaps = ld->backsector ? 1 : 0;
 
         // factor in extrafloors
         ld->max_gaps += ld->frontsector->exfloor_max;
 
-        if (ld->backsector)
-            ld->max_gaps += ld->backsector->exfloor_max;
+        if (ld->backsector) ld->max_gaps += ld->backsector->exfloor_max;
 
         line_gaps += ld->max_gaps;
     }
 
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        sector_t *sec = sectors + i;
+        sector_t *sec = level_sectors + i;
 
         sec->max_gaps = sec->exfloor_max + 1;
 
         sect_sight_gaps += sec->max_gaps;
     }
 
-    numvertgaps = line_gaps + sect_sight_gaps;
+    total_level_vertical_gaps = line_gaps + sect_sight_gaps;
 
-    // LogPrint("%dK used for vert gaps.\n", (numvertgaps *
+    // LogPrint("%dK used for vert gaps.\n", (total_level_vertical_gaps *
     //    sizeof(vgap_t) + 1023) / 1024);
 
     // zero is now impossible
-    SYS_ASSERT(numvertgaps > 0);
+    SYS_ASSERT(total_level_vertical_gaps > 0);
 
-    vertgaps = new vgap_t[numvertgaps];
+    level_vertical_gaps = new vgap_t[total_level_vertical_gaps];
 
-    Z_Clear(vertgaps, vgap_t, numvertgaps);
+    Z_Clear(level_vertical_gaps, vgap_t, total_level_vertical_gaps);
 
-    for (i = 0, cur_gap = vertgaps; i < numlines; i++)
+    for (i = 0, cur_gap = level_vertical_gaps; i < total_level_lines; i++)
     {
-        line_t *ld = lines + i;
+        line_t *ld = level_lines + i;
 
-        if (ld->max_gaps == 0)
-            continue;
+        if (ld->max_gaps == 0) continue;
 
         ld->gaps = cur_gap;
         cur_gap += ld->max_gaps;
     }
 
-    SYS_ASSERT(cur_gap == (vertgaps + line_gaps));
+    SYS_ASSERT(cur_gap == (level_vertical_gaps + line_gaps));
 
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        sector_t *sec = sectors + i;
+        sector_t *sec = level_sectors + i;
 
-        if (sec->max_gaps == 0)
-            continue;
+        if (sec->max_gaps == 0) continue;
 
         sec->sight_gaps = cur_gap;
         cur_gap += sec->max_gaps;
     }
 
-    SYS_ASSERT(cur_gap == (vertgaps + numvertgaps));
+    SYS_ASSERT(cur_gap == (level_vertical_gaps + total_level_vertical_gaps));
 }
 
 static void DetectDeepWaterTrick(void)
 {
-    uint8_t *self_subs = new uint8_t[numsubsectors];
+    uint8_t *self_subs = new uint8_t[total_level_subsectors];
 
-    memset(self_subs, 0, numsubsectors);
+    memset(self_subs, 0, total_level_subsectors);
 
-    for (int i = 0; i < numsegs; i++)
+    for (int i = 0; i < total_level_segs; i++)
     {
-        const seg_t *seg = segs + i;
+        const seg_t *seg = level_segs + i;
 
-        if (seg->miniseg)
-            continue;
+        if (seg->miniseg) continue;
 
         SYS_ASSERT(seg->front_sub);
 
-        if (seg->linedef->backsector && seg->linedef->frontsector == seg->linedef->backsector)
+        if (seg->linedef->backsector &&
+            seg->linedef->frontsector == seg->linedef->backsector)
         {
-            self_subs[seg->front_sub - subsectors] |= 1;
+            self_subs[seg->front_sub - level_subsectors] |= 1;
         }
-        else
-        {
-            self_subs[seg->front_sub - subsectors] |= 2;
-        }
+        else { self_subs[seg->front_sub - level_subsectors] |= 2; }
     }
 
     int count;
     int pass = 0;
 
-    do
-    {
+    do {
         pass++;
 
         count = 0;
 
-        for (int j = 0; j < numsubsectors; j++)
+        for (int j = 0; j < total_level_subsectors; j++)
         {
-            subsector_t *sub = subsectors + j;
+            subsector_t *sub = level_subsectors + j;
             const seg_t *seg;
 
-            if (self_subs[j] != 1)
-                continue;
+            if (self_subs[j] != 1) continue;
 #if 0
 			LogDebug("Subsector [%d] @ (%1.0f,%1.0f) sec %d --> %d\n", j,
 				(sub->bbox[kBoundingBoxLeft] + sub->bbox[kBoundingBoxRight]) / 2.0,
@@ -3034,21 +2986,22 @@ static void DetectDeepWaterTrick(void)
             {
                 SYS_ASSERT(seg->back_sub);
 
-                int k = seg->back_sub - subsectors;
+                int k = seg->back_sub - level_subsectors;
 #if 0
 				LogDebug("  Seg [%d] back_sub %d (back_sect %d)\n", seg - segs, k,
 					seg->back_sub->sector - sectors);
 #endif
                 if (self_subs[k] & 2)
                 {
-                    if (!Xseg)
-                        Xseg = seg;
+                    if (!Xseg) Xseg = seg;
                 }
             }
 
             if (Xseg)
             {
-                sub->deep_ref = Xseg->back_sub->deep_ref ? Xseg->back_sub->deep_ref : Xseg->back_sub->sector;
+                sub->deep_ref = Xseg->back_sub->deep_ref
+                                    ? Xseg->back_sub->deep_ref
+                                    : Xseg->back_sub->sector;
 #if 0
 				LogDebug("  Updating (from seg %d) --> SEC %d\n", Xseg - segs,
 					sub->deep_ref - sectors);
@@ -3065,15 +3018,15 @@ static void DetectDeepWaterTrick(void)
 
 static void DoBlockMap()
 {
-    int min_x = (int)vertexes[0].X;
-    int min_y = (int)vertexes[0].Y;
+    int min_x = (int)level_vertexes[0].X;
+    int min_y = (int)level_vertexes[0].Y;
 
-    int max_x = (int)vertexes[0].X;
-    int max_y = (int)vertexes[0].Y;
+    int max_x = (int)level_vertexes[0].X;
+    int max_y = (int)level_vertexes[0].Y;
 
-    for (int i = 1; i < numvertexes; i++)
+    for (int i = 1; i < total_level_vertexes; i++)
     {
-        vertex_t *v = vertexes + i;
+        vertex_t *v = level_vertexes + i;
 
         min_x = HMM_MIN((int)v->X, min_x);
         min_y = HMM_MIN((int)v->Y, min_y);
@@ -3104,22 +3057,20 @@ void GroupLines(void)
     line_t  **line_p;
 
     // setup remaining seg information
-    for (i = 0, seg = segs; i < numsegs; i++, seg++)
+    for (i = 0, seg = level_segs; i < total_level_segs; i++, seg++)
     {
-        if (seg->partner)
-            seg->back_sub = seg->partner->front_sub;
+        if (seg->partner) seg->back_sub = seg->partner->front_sub;
 
-        if (!seg->frontsector)
-            seg->frontsector = seg->front_sub->sector;
+        if (!seg->frontsector) seg->frontsector = seg->front_sub->sector;
 
         if (!seg->backsector && seg->back_sub)
             seg->backsector = seg->back_sub->sector;
     }
 
     // count number of lines in each sector
-    li    = lines;
+    li    = level_lines;
     total = 0;
-    for (i = 0; i < numlines; i++, li++)
+    for (i = 0; i < total_level_lines; i++, li++)
     {
         total++;
         li->frontsector->linecount++;
@@ -3132,17 +3083,17 @@ void GroupLines(void)
     }
 
     // build line tables for each sector
-    linebuffer = new line_t *[total];
+    level_line_buffer = new line_t *[total];
 
-    line_p = linebuffer;
-    sector = sectors;
+    line_p = level_line_buffer;
+    sector = level_sectors;
 
-    for (i = 0; i < numsectors; i++, sector++)
+    for (i = 0; i < total_level_sectors; i++, sector++)
     {
         BoundingBoxClear(bbox);
         sector->lines = line_p;
-        li            = lines;
-        for (j = 0; j < numlines; j++, li++)
+        li            = level_lines;
+        for (j = 0; j < total_level_lines; j++, li++)
         {
             if (li->frontsector == sector || li->backsector == sector)
             {
@@ -3165,71 +3116,82 @@ void GroupLines(void)
             {
                 vertex_t *vert   = sector->lines[j]->v1;
                 bool      add_it = true;
-                for (auto v : sector->floor_z_verts)
-                    if (AlmostEquals(v.X, vert->X) && AlmostEquals(v.Y, vert->Y))
+                for (HMM_Vec3 v : sector->floor_z_verts)
+                    if (AlmostEquals(v.X, vert->X) &&
+                        AlmostEquals(v.Y, vert->Y))
                         add_it = false;
                 if (add_it)
                 {
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_verts.push_back({{vert->X, vert->Y, vert->Z}});
+                        sector->floor_z_verts.push_back(
+                            {{vert->X, vert->Y, vert->Z}});
                         if (vert->Z > sector->floor_vs_hilo.X)
                             sector->floor_vs_hilo.X = vert->Z;
                         if (vert->Z < sector->floor_vs_hilo.Y)
                             sector->floor_vs_hilo.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back({{vert->X, vert->Y, sector->f_h}});
+                        sector->floor_z_verts.push_back(
+                            {{vert->X, vert->Y, sector->f_h}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
                         sector->ceil_vertex_slope = true;
-                        sector->ceil_z_verts.push_back({{vert->X, vert->Y, vert->W}});
+                        sector->ceil_z_verts.push_back(
+                            {{vert->X, vert->Y, vert->W}});
                         if (vert->W > sector->ceil_vs_hilo.X)
                             sector->ceil_vs_hilo.X = vert->W;
                         if (vert->W < sector->ceil_vs_hilo.Y)
                             sector->ceil_vs_hilo.Y = vert->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back({{vert->X, vert->Y, sector->c_h}});
+                        sector->ceil_z_verts.push_back(
+                            {{vert->X, vert->Y, sector->c_h}});
                 }
                 vert   = sector->lines[j]->v2;
                 add_it = true;
-                for (auto v : sector->floor_z_verts)
-                    if (AlmostEquals(v.X, vert->X) && AlmostEquals(v.Y, vert->Y))
+                for (HMM_Vec3 v : sector->floor_z_verts)
+                    if (AlmostEquals(v.X, vert->X) &&
+                        AlmostEquals(v.Y, vert->Y))
                         add_it = false;
                 if (add_it)
                 {
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_verts.push_back({{vert->X, vert->Y, vert->Z}});
+                        sector->floor_z_verts.push_back(
+                            {{vert->X, vert->Y, vert->Z}});
                         if (vert->Z > sector->floor_vs_hilo.X)
                             sector->floor_vs_hilo.X = vert->Z;
                         if (vert->Z < sector->floor_vs_hilo.Y)
                             sector->floor_vs_hilo.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back({{vert->X, vert->Y, sector->f_h}});
+                        sector->floor_z_verts.push_back(
+                            {{vert->X, vert->Y, sector->f_h}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
                         sector->ceil_vertex_slope = true;
-                        sector->ceil_z_verts.push_back({{vert->X, vert->Y, vert->W}});
+                        sector->ceil_z_verts.push_back(
+                            {{vert->X, vert->Y, vert->W}});
                         if (vert->W > sector->ceil_vs_hilo.X)
                             sector->ceil_vs_hilo.X = vert->W;
                         if (vert->W < sector->ceil_vs_hilo.Y)
                             sector->ceil_vs_hilo.Y = vert->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back({{vert->X, vert->Y, sector->c_h}});
+                        sector->ceil_z_verts.push_back(
+                            {{vert->X, vert->Y, sector->c_h}});
                 }
             }
             if (!sector->floor_vertex_slope)
                 sector->floor_z_verts.clear();
             else
             {
-                sector->floor_vs_normal =
-                    MathTripleCrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
+                sector->floor_vs_normal = MathTripleCrossProduct(
+                    sector->floor_z_verts[0], sector->floor_z_verts[1],
+                    sector->floor_z_verts[2]);
                 if (sector->f_h > sector->floor_vs_hilo.X)
                     sector->floor_vs_hilo.X = sector->f_h;
                 if (sector->f_h < sector->floor_vs_hilo.Y)
@@ -3239,8 +3201,9 @@ void GroupLines(void)
                 sector->ceil_z_verts.clear();
             else
             {
-                sector->ceil_vs_normal =
-                    MathTripleCrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
+                sector->ceil_vs_normal = MathTripleCrossProduct(
+                    sector->ceil_z_verts[0], sector->ceil_z_verts[1],
+                    sector->ceil_z_verts[2]);
                 if (sector->c_h < sector->ceil_vs_hilo.Y)
                     sector->ceil_vs_hilo.Y = sector->c_h;
                 if (sector->c_h > sector->ceil_vs_hilo.X)
@@ -3249,8 +3212,8 @@ void GroupLines(void)
         }
         if (sector->linecount == 4 && udmf_level)
         {
-            int floor_z_lines = 0;
-            int ceil_z_lines  = 0;
+            int floor_z_lines     = 0;
+            int ceil_z_lines      = 0;
             sector->floor_vs_hilo = {{-40000, 40000}};
             sector->ceil_vs_hilo  = {{-40000, 40000}};
             for (j = 0; j < 4; j++)
@@ -3259,64 +3222,76 @@ void GroupLines(void)
                 vertex_t *vert2     = sector->lines[j]->v2;
                 bool      add_it_v1 = true;
                 bool      add_it_v2 = true;
-                for (auto v : sector->floor_z_verts)
-                    if (AlmostEquals(v.X, vert->X) && AlmostEquals(v.Y, vert->Y))
+                for (HMM_Vec3 v : sector->floor_z_verts)
+                    if (AlmostEquals(v.X, vert->X) &&
+                        AlmostEquals(v.Y, vert->Y))
                         add_it_v1 = false;
-                for (auto v : sector->floor_z_verts)
-                    if (AlmostEquals(v.X, vert2->X) && AlmostEquals(v.Y, vert2->Y))
+                for (HMM_Vec3 v : sector->floor_z_verts)
+                    if (AlmostEquals(v.X, vert2->X) &&
+                        AlmostEquals(v.Y, vert2->Y))
                         add_it_v2 = false;
                 if (add_it_v1)
                 {
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
-                        sector->floor_z_verts.push_back({{vert->X, vert->Y, vert->Z}});
+                        sector->floor_z_verts.push_back(
+                            {{vert->X, vert->Y, vert->Z}});
                         if (vert->Z > sector->floor_vs_hilo.X)
                             sector->floor_vs_hilo.X = vert->Z;
                         if (vert->Z < sector->floor_vs_hilo.Y)
                             sector->floor_vs_hilo.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back({{vert->X, vert->Y, sector->f_h}});
+                        sector->floor_z_verts.push_back(
+                            {{vert->X, vert->Y, sector->f_h}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
-                        sector->ceil_z_verts.push_back({{vert->X, vert->Y, vert->W}});
+                        sector->ceil_z_verts.push_back(
+                            {{vert->X, vert->Y, vert->W}});
                         if (vert->W > sector->ceil_vs_hilo.X)
                             sector->ceil_vs_hilo.X = vert->W;
                         if (vert->W < sector->ceil_vs_hilo.Y)
                             sector->ceil_vs_hilo.Y = vert->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back({{vert->X, vert->Y, sector->c_h}});
+                        sector->ceil_z_verts.push_back(
+                            {{vert->X, vert->Y, sector->c_h}});
                 }
                 if (add_it_v2)
                 {
                     if (vert2->Z < 32767.0f && vert2->Z > -32768.0f)
                     {
-                        sector->floor_z_verts.push_back({{vert2->X, vert2->Y, vert2->Z}});
+                        sector->floor_z_verts.push_back(
+                            {{vert2->X, vert2->Y, vert2->Z}});
                         if (vert2->Z > sector->floor_vs_hilo.X)
                             sector->floor_vs_hilo.X = vert2->Z;
                         if (vert2->Z < sector->floor_vs_hilo.Y)
                             sector->floor_vs_hilo.Y = vert2->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back({{vert2->X, vert2->Y, sector->f_h}});
+                        sector->floor_z_verts.push_back(
+                            {{vert2->X, vert2->Y, sector->f_h}});
                     if (vert2->W < 32767.0f && vert2->W > -32768.0f)
                     {
-                        sector->ceil_z_verts.push_back({{vert2->X, vert2->Y, vert2->W}});
+                        sector->ceil_z_verts.push_back(
+                            {{vert2->X, vert2->Y, vert2->W}});
                         if (vert2->W > sector->ceil_vs_hilo.X)
                             sector->ceil_vs_hilo.X = vert2->W;
                         if (vert2->W < sector->ceil_vs_hilo.Y)
                             sector->ceil_vs_hilo.Y = vert2->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back({{vert2->X, vert2->Y, sector->c_h}});
+                        sector->ceil_z_verts.push_back(
+                            {{vert2->X, vert2->Y, sector->c_h}});
                 }
-                if ((vert->Z < 32767.0f && vert->Z > -32768.0f) && (vert2->Z < 32767.0f && vert2->Z > -32768.0f) &&
+                if ((vert->Z < 32767.0f && vert->Z > -32768.0f) &&
+                    (vert2->Z < 32767.0f && vert2->Z > -32768.0f) &&
                     AlmostEquals(vert->Z, vert2->Z))
                 {
                     floor_z_lines++;
                 }
-                if ((vert->W < 32767.0f && vert->W > -32768.0f) && (vert2->W < 32767.0f && vert2->W > -32768.0f) &&
+                if ((vert->W < 32767.0f && vert->W > -32768.0f) &&
+                    (vert2->W < 32767.0f && vert2->W > -32768.0f) &&
                     AlmostEquals(vert->W, vert2->W))
                 {
                     ceil_z_lines++;
@@ -3325,8 +3300,9 @@ void GroupLines(void)
             if (floor_z_lines == 1 && sector->floor_z_verts.size() == 4)
             {
                 sector->floor_vertex_slope = true;
-                sector->floor_vs_normal =
-                    MathTripleCrossProduct(sector->floor_z_verts[0], sector->floor_z_verts[1], sector->floor_z_verts[2]);
+                sector->floor_vs_normal    = MathTripleCrossProduct(
+                    sector->floor_z_verts[0], sector->floor_z_verts[1],
+                    sector->floor_z_verts[2]);
                 if (sector->f_h > sector->floor_vs_hilo.X)
                     sector->floor_vs_hilo.X = sector->f_h;
                 if (sector->f_h < sector->floor_vs_hilo.Y)
@@ -3337,8 +3313,9 @@ void GroupLines(void)
             if (ceil_z_lines == 1 && sector->ceil_z_verts.size() == 4)
             {
                 sector->ceil_vertex_slope = true;
-                sector->ceil_vs_normal =
-                    MathTripleCrossProduct(sector->ceil_z_verts[0], sector->ceil_z_verts[1], sector->ceil_z_verts[2]);
+                sector->ceil_vs_normal    = MathTripleCrossProduct(
+                    sector->ceil_z_verts[0], sector->ceil_z_verts[1],
+                    sector->ceil_z_verts[2]);
                 if (sector->c_h < sector->ceil_vs_hilo.Y)
                     sector->ceil_vs_hilo.Y = sector->c_h;
                 if (sector->c_h > sector->ceil_vs_hilo.X)
@@ -3349,41 +3326,38 @@ void GroupLines(void)
         }
 
         // set the degenmobj_t to the middle of the bounding box
-        sector->sfx_origin.x = (bbox[kBoundingBoxRight] + bbox[kBoundingBoxLeft]) / 2;
-        sector->sfx_origin.y = (bbox[kBoundingBoxTop] + bbox[kBoundingBoxBottom]) / 2;
+        sector->sfx_origin.x =
+            (bbox[kBoundingBoxRight] + bbox[kBoundingBoxLeft]) / 2;
+        sector->sfx_origin.y =
+            (bbox[kBoundingBoxTop] + bbox[kBoundingBoxBottom]) / 2;
         sector->sfx_origin.z = (sector->f_h + sector->c_h) / 2;
     }
 }
 
 static inline void AddSectorToVertices(int *branches, line_t *ld, sector_t *sec)
 {
-    if (!sec)
-        return;
+    if (!sec) return;
 
-    unsigned short sec_idx = sec - sectors;
+    unsigned short sec_idx = sec - level_sectors;
 
     for (int vert = 0; vert < 2; vert++)
     {
-        int v_idx = (vert ? ld->v2 : ld->v1) - vertexes;
+        int v_idx = (vert ? ld->v2 : ld->v1) - level_vertexes;
 
-        SYS_ASSERT(0 <= v_idx && v_idx < numvertexes);
+        SYS_ASSERT(0 <= v_idx && v_idx < total_level_vertexes);
 
-        if (branches[v_idx] < 0)
-            continue;
+        if (branches[v_idx] < 0) continue;
 
-        vertex_seclist_t *L = v_seclists + branches[v_idx];
+        vertex_seclist_t *L = level_vertex_sector_lists + branches[v_idx];
 
-        if (L->num >= SECLIST_MAX)
-            continue;
+        if (L->num >= SECLIST_MAX) continue;
 
         int pos;
 
         for (pos = 0; pos < L->num; pos++)
-            if (L->sec[pos] == sec_idx)
-                break;
+            if (L->sec[pos] == sec_idx) break;
 
-        if (pos < L->num)
-            continue; // already in there
+        if (pos < L->num) continue;  // already in there
 
         L->sec[L->num++] = sec_idx;
     }
@@ -3392,19 +3366,19 @@ static inline void AddSectorToVertices(int *branches, line_t *ld, sector_t *sec)
 static void CreateVertexSeclists(void)
 {
     // step 1: determine number of linedef branches at each vertex
-    int *branches = new int[numvertexes];
+    int *branches = new int[total_level_vertexes];
 
-    Z_Clear(branches, int, numvertexes);
+    Z_Clear(branches, int, total_level_vertexes);
 
     int i;
 
-    for (i = 0; i < numlines; i++)
+    for (i = 0; i < total_level_lines; i++)
     {
-        int v1_idx = lines[i].v1 - vertexes;
-        int v2_idx = lines[i].v2 - vertexes;
+        int v1_idx = level_lines[i].v1 - level_vertexes;
+        int v2_idx = level_lines[i].v2 - level_vertexes;
 
-        SYS_ASSERT(0 <= v1_idx && v1_idx < numvertexes);
-        SYS_ASSERT(0 <= v2_idx && v2_idx < numvertexes);
+        SYS_ASSERT(0 <= v1_idx && v1_idx < total_level_vertexes);
+        SYS_ASSERT(0 <= v2_idx && v2_idx < total_level_vertexes);
 
         branches[v1_idx] += 1;
         branches[v2_idx] += 1;
@@ -3414,7 +3388,7 @@ static void CreateVertexSeclists(void)
     //         and simultaneously give them index numbers.
     int num_triples = 0;
 
-    for (i = 0; i < numvertexes; i++)
+    for (i = 0; i < total_level_vertexes; i++)
     {
         if (branches[i] < 3)
             branches[i] = -1;
@@ -3426,17 +3400,18 @@ static void CreateVertexSeclists(void)
     {
         delete[] branches;
 
-        v_seclists = nullptr;
+        level_vertex_sector_lists = nullptr;
         return;
     }
 
     // step 3: create a vertex_seclist for those multi-branches
-    v_seclists = new vertex_seclist_t[num_triples];
+    level_vertex_sector_lists = new vertex_seclist_t[num_triples];
 
-    Z_Clear(v_seclists, vertex_seclist_t, num_triples);
+    Z_Clear(level_vertex_sector_lists, vertex_seclist_t, num_triples);
 
-    LogDebug("Created %d seclists from %d vertices (%1.1f%%)\n", num_triples, numvertexes,
-                 num_triples * 100 / (float)numvertexes);
+    LogDebug("Created %d seclists from %d vertices (%1.1f%%)\n", num_triples,
+             total_level_vertexes,
+             num_triples * 100 / (float)total_level_vertexes);
 
     // multiple passes for each linedef:
     //   pass #1 takes care of normal sectors
@@ -3445,9 +3420,9 @@ static void CreateVertexSeclists(void)
     // Rationale: normal sectors are more important, hence they
     //            should be allocated to the limited slots first.
 
-    for (i = 0; i < numlines; i++)
+    for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = lines + i;
+        line_t *ld = level_lines + i;
 
         for (int side = 0; side < 2; side++)
         {
@@ -3457,16 +3432,15 @@ static void CreateVertexSeclists(void)
         }
     }
 
-    for (i = 0; i < numlines; i++)
+    for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = lines + i;
+        line_t *ld = level_lines + i;
 
         for (int side = 0; side < 2; side++)
         {
             sector_t *sec = side ? ld->backsector : ld->frontsector;
 
-            if (!sec)
-                continue;
+            if (!sec) continue;
 
             extrafloor_t *ef;
 
@@ -3479,22 +3453,20 @@ static void CreateVertexSeclists(void)
     }
 
     // step 4: finally, update the segs that touch those vertices
-    for (i = 0; i < numsegs; i++)
+    for (i = 0; i < total_level_segs; i++)
     {
-        seg_t *sg = segs + i;
+        seg_t *sg = level_segs + i;
 
         for (int vert = 0; vert < 2; vert++)
         {
-            int v_idx = (vert ? sg->v2 : sg->v1) - vertexes;
+            int v_idx = (vert ? sg->v2 : sg->v1) - level_vertexes;
 
             // skip GL vertices
-            if (v_idx < 0 || v_idx >= numvertexes)
-                continue;
+            if (v_idx < 0 || v_idx >= total_level_vertexes) continue;
 
-            if (branches[v_idx] < 0)
-                continue;
+            if (branches[v_idx] < 0) continue;
 
-            sg->nb_sec[vert] = v_seclists + branches[v_idx];
+            sg->nb_sec[vert] = level_vertex_sector_lists + branches[v_idx];
         }
     }
 
@@ -3505,12 +3477,12 @@ static void P_RemoveSectorStuff(void)
 {
     int i;
 
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        FreeSectorTouchNodes(sectors + i);
+        FreeSectorTouchNodes(level_sectors + i);
 
         // Might still be playing a sound.
-        S_StopFX(&sectors[i].sfx_origin);
+        S_StopFX(&level_sectors[i].sfx_origin);
     }
 }
 
@@ -3519,8 +3491,7 @@ void ShutdownLevel(void)
     // Destroys everything on the level.
 
 #ifdef DEVELOPERS
-    if (!level_active)
-        FatalError("ShutdownLevel: no level to shut down!");
+    if (!level_active) FatalError("ShutdownLevel: no level to shut down!");
 #endif
 
     level_active = false;
@@ -3539,19 +3510,19 @@ void ShutdownLevel(void)
 
     DDF_BoomClearGenTypes();
 
-    delete[] segs;
-    segs = nullptr;
-    delete[] nodes;
-    nodes = nullptr;
-    delete[] vertexes;
-    vertexes = nullptr;
-    delete[] sides;
-    sides = nullptr;
-    delete[] lines;
-    lines = nullptr;
-    for (int i = 0; i < numsectors; i++)
+    delete[] level_segs;
+    level_segs = nullptr;
+    delete[] level_nodes;
+    level_nodes = nullptr;
+    delete[] level_vertexes;
+    level_vertexes = nullptr;
+    delete[] level_sides;
+    level_sides = nullptr;
+    delete[] level_lines;
+    level_lines = nullptr;
+    for (int i = 0; i < total_level_sectors; i++)
     {
-        sector_t *sec = &sectors[i];
+        sector_t *sec = &level_sectors[i];
         if (sec->f_slope)
         {
             delete sec->f_slope;
@@ -3563,36 +3534,35 @@ void ShutdownLevel(void)
             sec->c_slope = nullptr;
         }
     }
-    delete[] sectors;
-    sectors = nullptr;
-    delete[] subsectors;
-    subsectors = nullptr;
+    delete[] level_sectors;
+    level_sectors = nullptr;
+    delete[] level_subsectors;
+    level_subsectors = nullptr;
 
-    delete[] gl_vertexes;
-    gl_vertexes = nullptr;
-    delete[] extrafloors;
-    extrafloors = nullptr;
-    delete[] vertgaps;
-    vertgaps = nullptr;
-    delete[] linebuffer;
-    linebuffer = nullptr;
-    delete[] v_seclists;
-    v_seclists = nullptr;
+    delete[] level_gl_vertexes;
+    level_gl_vertexes = nullptr;
+    delete[] level_extrafloors;
+    level_extrafloors = nullptr;
+    delete[] level_vertical_gaps;
+    level_vertical_gaps = nullptr;
+    delete[] level_line_buffer;
+    level_line_buffer = nullptr;
+    delete[] level_vertex_sector_lists;
+    level_vertex_sector_lists = nullptr;
 
     DestroyBlockmap();
 
     P_RemoveAllMobjs(false);
 }
 
-void P_SetupLevel(void)
+void LevelSetup(void)
 {
     // Sets up the current level using the skill passed and the
     // information in current_map.
     //
     // -ACB- 1998/08/09 Use current_map to ref lump and par time
 
-    if (level_active)
-        ShutdownLevel();
+    if (level_active) ShutdownLevel();
 
     // -ACB- 1998/08/27 nullptr the head pointers for the linked lists....
     itemquehead  = nullptr;
@@ -3609,20 +3579,18 @@ void P_SetupLevel(void)
 
     // ignore XGL nodes if it occurs _before_ the normal level marker.
     // [ something has gone horribly wrong if this happens! ]
-    if (xgl_lump < lumpnum)
-        xgl_lump = -1;
+    if (xgl_lump < lumpnum) xgl_lump = -1;
 
     // shouldn't happen (as during startup we checked for XWA files)
-    if (xgl_lump < 0)
-        FatalError("Internal error: missing XGL nodes.\n");
+    if (xgl_lump < 0) FatalError("Internal error: missing XGL nodes.\n");
 
     // -CW- 2017/01/29: check for UDMF map lump
     if (W_VerifyLumpName(lumpnum + 1, "TEXTMAP"))
     {
         udmf_level          = true;
-        udmf_lumpnum        = lumpnum + 1;
-        int   raw_length    = 0;
-        uint8_t *raw_udmf   = W_LoadLump(udmf_lumpnum, &raw_length);
+        udmf_lump_number    = lumpnum + 1;
+        int      raw_length = 0;
+        uint8_t *raw_udmf   = W_LoadLump(udmf_lump_number, &raw_length);
         udmf_lump.clear();
         udmf_lump.resize(raw_length);
         memcpy(udmf_lump.data(), raw_udmf, raw_length);
@@ -3632,14 +3600,14 @@ void P_SetupLevel(void)
     }
     else
     {
-        udmf_level   = false;
-        udmf_lumpnum = -1;
+        udmf_level       = false;
+        udmf_lump_number = -1;
     }
 
     // clear CRC values
-    mapsector_CRC.Reset();
-    mapline_CRC.Reset();
-    mapthing_CRC.Reset();
+    map_sectors_crc.Reset();
+    map_lines_crc.Reset();
+    map_things_crc.Reset();
 
     // note: most of this ordering is important
     // 23-6-98 KM, eg, Sectors must be loaded before sidedefs,
@@ -3647,20 +3615,21 @@ void P_SetupLevel(void)
     // LineDefs + Vertexes must be loaded before BlockMap,
     // Sectors must be loaded before Segs
 
-    numsides       = 0;
-    numextrafloors = 0;
-    numvertgaps    = 0;
-    mapthing_NUM   = 0;
-    numvertexes    = 0;
-    numsectors     = 0;
-    numlines       = 0;
+    total_level_sides         = 0;
+    total_level_extrafloors   = 0;
+    total_level_vertical_gaps = 0;
+    total_map_things          = 0;
+    total_level_vertexes      = 0;
+    total_level_sectors       = 0;
+    total_level_lines         = 0;
 
     if (!udmf_level)
     {
         // check if the level is for Hexen
         hexen_level = false;
 
-        if (W_VerifyLump(lumpnum + ML_BEHAVIOR) && W_VerifyLumpName(lumpnum + ML_BEHAVIOR, "BEHAVIOR"))
+        if (W_VerifyLump(lumpnum + ML_BEHAVIOR) &&
+            W_VerifyLumpName(lumpnum + ML_BEHAVIOR, "BEHAVIOR"))
         {
             LogDebug("Detected Hexen level.\n");
             hexen_level = true;
@@ -3704,8 +3673,8 @@ void P_SetupLevel(void)
     R_ComputeSkyHeights();
 
     // compute sector and line gaps
-    for (int j = 0; j < numsectors; j++)
-        P_RecomputeGapsAroundSector(sectors + j);
+    for (int j = 0; j < total_level_sectors; j++)
+        P_RecomputeGapsAroundSector(level_sectors + j);
 
     GameClearBodyQueue();
 
@@ -3719,7 +3688,7 @@ void P_SetupLevel(void)
     unknown_thing_map.clear();
 
     // Must do before loading things
-    GetMUSINFOTracksForLevel();
+    GetMusinfoTracksForLevel();
 
     if (!udmf_level)
     {
@@ -3733,7 +3702,8 @@ void P_SetupLevel(void)
 
         // OK, CRC values have now been computed
 #ifdef DEVELOPERS
-    LogDebug("MAP CRCS: S=%08x L=%08x T=%08x\n", mapsector_CRC.crc, mapline_CRC.crc, mapthing_CRC.crc);
+    LogDebug("MAP CRCS: S=%08x L=%08x T=%08x\n", map_sectors_crc.crc,
+             map_lines_crc.crc, map_things_crc.crc);
 #endif
 
     CreateVertexSeclists();
@@ -3745,20 +3715,19 @@ void P_SetupLevel(void)
     RGL_UpdateSkyBoxTextures();
 
     // preload graphics
-    if (precache)
-        W_PrecacheLevel();
+    if (precache) W_PrecacheLevel();
 
     // setup categories based on game mode (SP/COOP/DM)
     S_ChangeChannelNum();
 
     // FIXME: cache sounds (esp. for player)
 
-    S_ChangeMusic(current_map->music_, true); // start level music
+    S_ChangeMusic(current_map->music_, true);  // start level music
 
     level_active = true;
 }
 
-void P_Init(void)
+void PlayerStateInit(void)
 {
     E_ProgressMessage(language["PlayState"]);
 
@@ -3770,48 +3739,39 @@ void P_Init(void)
 
 LineType *P_LookupLineType(int num)
 {
-    if (num <= 0)
-        return nullptr;
+    if (num <= 0) return nullptr;
 
     LineType *def = linetypes.Lookup(num);
 
     // DDF types always override
-    if (def)
-        return def;
+    if (def) return def;
 
-    if (DDF_IsBoomLineType(num))
-        return DDF_BoomGetGenLine(num);
+    if (DDF_IsBoomLineType(num)) return DDF_BoomGetGenLine(num);
 
     LogWarning("P_LookupLineType(): Unknown linedef type %d\n", num);
 
-    return linetypes.Lookup(0); // template line
+    return linetypes.Lookup(0);  // template line
 }
 
 SectorType *P_LookupSectorType(int num)
 {
-    if (num <= 0)
-        return nullptr;
+    if (num <= 0) return nullptr;
 
     SectorType *def = sectortypes.Lookup(num);
 
     // DDF types always override
-    if (def)
-        return def;
+    if (def) return def;
 
-    if (DDF_IsBoomSectorType(num))
-        return DDF_BoomGetGenSector(num);
+    if (DDF_IsBoomSectorType(num)) return DDF_BoomGetGenSector(num);
 
     LogWarning("P_LookupSectorType(): Unknown sector type %d\n", num);
 
-    return sectortypes.Lookup(0); // template sector
+    return sectortypes.Lookup(0);  // template sector
 }
 
-void P_Shutdown(void)
+void LevelShutdown(void)
 {
-    if (level_active)
-    {
-        ShutdownLevel();
-    }
+    if (level_active) { ShutdownLevel(); }
 }
 
 //--- editor settings ---

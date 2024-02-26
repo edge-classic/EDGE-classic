@@ -752,7 +752,7 @@ void P_AddExtraFloor(sector_t *sec, line_t *line)
     SYS_ASSERT(sec->exfloor_used <= sec->exfloor_max);
 
     if (sec->exfloor_used == sec->exfloor_max)
-        FatalError("INTERNAL ERROR: extrafloor overflow in sector %d\n", (int)(sec - sectors));
+        FatalError("INTERNAL ERROR: extrafloor overflow in sector %d\n", (int)(sec - level_sectors));
 
     newbie = sec->exfloor_first + sec->exfloor_used;
     sec->exfloor_used++;
@@ -775,7 +775,7 @@ void P_AddExtraFloor(sector_t *sec, line_t *line)
     if (newbie->top_h < newbie->bottom_h)
         FatalError("Bad Extrafloor in sector #%d: "
                 "z range is %1.0f / %1.0f\n",
-                (int)(sec - sectors), newbie->bottom_h, newbie->top_h);
+                (int)(sec - level_sectors), newbie->bottom_h, newbie->top_h);
 
     newbie->sector = sec;
     newbie->top    = top;
@@ -837,17 +837,17 @@ void P_AddExtraFloor(sector_t *sec, line_t *line)
     case EXFIT_StuckInCeiling:
         LogWarning("Extrafloor with z range of %1.0f / %1.0f is stuck "
                   "in sector #%d's ceiling.\n",
-                  newbie->bottom_h, newbie->top_h, (int)(sec - sectors));
+                  newbie->bottom_h, newbie->top_h, (int)(sec - level_sectors));
 
     case EXFIT_StuckInFloor:
         LogWarning("Extrafloor with z range of %1.0f / %1.0f is stuck "
                   "in sector #%d's floor.\n",
-                  newbie->bottom_h, newbie->top_h, (int)(sec - sectors));
+                  newbie->bottom_h, newbie->top_h, (int)(sec - level_sectors));
 
     default:
         LogWarning("Extrafloor with z range of %1.0f / %1.0f is stuck "
                   "in sector #%d in another extrafloor.\n",
-                  newbie->bottom_h, newbie->top_h, (int)(sec - sectors));
+                  newbie->bottom_h, newbie->top_h, (int)(sec - level_sectors));
     }
 
     // find place to link into.  cur will be the next higher extrafloor,
@@ -963,7 +963,7 @@ static bool TraverseSubsec(unsigned int bspnum, float *bbox, bool (*func)(mobj_t
     // just a normal node ?
     if (!(bspnum & NF_V5_SUBSECTOR))
     {
-        node = nodes + bspnum;
+        node = level_nodes + bspnum;
 
         // recursively check the children nodes
         // OPTIMISE: check against partition lines instead of bboxes.
@@ -985,7 +985,7 @@ static bool TraverseSubsec(unsigned int bspnum, float *bbox, bool (*func)(mobj_t
 
     // the sharp end: check all things in the subsector
 
-    sub = subsectors + (bspnum & ~NF_V5_SUBSECTOR);
+    sub = level_subsectors + (bspnum & ~NF_V5_SUBSECTOR);
 
     for (obj = sub->thinglist; obj; obj = obj->snext)
     {

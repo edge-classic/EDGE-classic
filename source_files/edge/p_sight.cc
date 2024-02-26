@@ -267,7 +267,7 @@ static bool CheckSightBSP(unsigned int bspnum)
 {
     while (!(bspnum & NF_V5_SUBSECTOR))
     {
-        node_t *node = nodes + bspnum;
+        node_t *node = level_nodes + bspnum;
         int     s1, s2;
 
 #if (DEBUG_SIGHT >= 2)
@@ -298,10 +298,10 @@ static bool CheckSightBSP(unsigned int bspnum)
 
     bspnum &= ~NF_V5_SUBSECTOR;
 
-    SYS_ASSERT(bspnum < (unsigned int)numsubsectors);
+    SYS_ASSERT(bspnum < (unsigned int)total_level_subsectors);
 
     {
-        subsector_t *sub = subsectors + bspnum;
+        subsector_t *sub = level_subsectors + bspnum;
 
 #if (DEBUG_SIGHT >= 2)
         LogDebug("  Subsec %d  SEC %d\n", bspnum, sub->sector - sectors);

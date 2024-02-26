@@ -248,12 +248,12 @@ subsector_t *R_PointInSubsector(float x, float y)
 
     while (!(nodenum & NF_V5_SUBSECTOR))
     {
-        node    = &nodes[nodenum];
+        node    = &level_nodes[nodenum];
         side    = P_PointOnDivlineSide(x, y, &node->div);
         nodenum = node->children[side];
     }
 
-    return &subsectors[nodenum & ~NF_V5_SUBSECTOR];
+    return &level_subsectors[nodenum & ~NF_V5_SUBSECTOR];
 }
 
 region_properties_t *R_PointGetProps(subsector_t *sub, float z)

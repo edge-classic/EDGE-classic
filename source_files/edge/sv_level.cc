@@ -159,7 +159,7 @@ savestruct_t sv_struct_side = {
 
 savearray_t sv_array_side = {
     nullptr,            // link in list
-    "sides",         // array name
+    "level_sides",         // array name
     &sv_struct_side, // array type
     true,            // define_me
     true,            // allow_hub
@@ -184,7 +184,7 @@ static line_t sv_dummy_line;
 static savefield_t sv_fields_line[] = {
     SF(flags, "flags", 1, SVT_INT, SR_GetInt, SR_PutInt), SF(tag, "tag", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(count, "count", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(side, "side", 1, SVT_INDEX("sides"), SR_SideGetSide, SR_SidePutSide),
+    SF(side, "side", 1, SVT_INDEX("level_sides"), SR_SideGetSide, SR_SidePutSide),
     SF(special, "special", 1, SVT_STRING, SR_LineGetSpecial, SR_LinePutSpecial),
     SF(slide_door, "slide_door", 1, SVT_STRING, SR_LineGetSpecial, SR_LinePutSpecial),
     SF(old_stored, "old_stored", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
@@ -211,7 +211,7 @@ savestruct_t sv_struct_line = {
 
 savearray_t sv_array_line = {
     nullptr,            // link in list
-    "lines",         // array name
+    "level_lines",         // array name
     &sv_struct_line, // array type
     true,            // define_me
     true,            // allow_hub
@@ -274,9 +274,9 @@ static extrafloor_t sv_dummy_exfloor;
 #define SV_F_BASE sv_dummy_exfloor
 
 static savefield_t sv_fields_exfloor[] = {
-    SF(higher, "higher", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(lower, "lower", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(sector, "sector", 1, SVT_INDEX("sectors"), SR_SectorGetSector, SR_SectorPutSector),
+    SF(higher, "higher", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(lower, "lower", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(sector, "sector", 1, SVT_INDEX("level_sectors"), SR_SectorGetSector, SR_SectorPutSector),
 
     SF(top_h, "top_h", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
     SF(bottom_h, "bottom_h", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
@@ -284,8 +284,8 @@ static savefield_t sv_fields_exfloor[] = {
     SF(bottom, "bottom", 1, SVT_STRING, SR_LevelGetSurfPtr, SR_LevelPutSurfPtr),
 
     SF(p, "p", 1, SVT_STRING, SR_SectorGetPropRef, SR_SectorPutPropRef),
-    SF(ef_line, "ef_line", 1, SVT_INDEX("lines"), SR_LineGetLine, SR_LinePutLine),
-    SF(ctrl_next, "ctrl_next", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(ef_line, "ef_line", 1, SVT_INDEX("level_lines"), SR_LineGetLine, SR_LinePutLine),
+    SF(ctrl_next, "ctrl_next", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
 
     // NOT HERE:
     //   - sector: can be regenerated.
@@ -307,7 +307,7 @@ savestruct_t sv_struct_exfloor = {
 
 savearray_t sv_array_exfloor = {
     nullptr,               // link in list
-    "extrafloors",      // array name
+    "level_extrafloors",      // array name
     &sv_struct_exfloor, // array type
     true,               // define_me
     true,               // allow_hub
@@ -338,13 +338,13 @@ static savefield_t sv_fields_sector[] = {
     SF(p, "p", 1, SVT_STRING, SR_SectorGetPropRef, SR_SectorPutPropRef),
 
     SF(exfloor_used, "exfloor_used", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(control_floors, "control_floors", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(control_floors, "control_floors", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
     SF(sound_player, "sound_player", 1, SVT_INT, SR_GetInt, SR_PutInt),
 
-    SF(bottom_ef, "bottom_ef", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(top_ef, "top_ef", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(bottom_liq, "bottom_liq", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(top_liq, "top_liq", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(bottom_ef, "bottom_ef", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(top_ef, "top_ef", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(bottom_liq, "bottom_liq", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(top_liq, "top_liq", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
     SF(old_stored, "old_stored", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
 
     // NOT HERE:
@@ -368,7 +368,7 @@ savestruct_t sv_struct_sector = {
 
 savearray_t sv_array_sector = {
     nullptr,              // link in list
-    "sectors",         // array name
+    "level_sectors",         // array name
     &sv_struct_sector, // array type
     true,              // define_me
     true,              // allow_hub
@@ -386,25 +386,25 @@ savearray_t sv_array_sector = {
 
 int SV_SideCountElems(void)
 {
-    return numsides;
+    return total_level_sides;
 }
 
 void *SV_SideGetElem(int index)
 {
-    if (index < 0 || index >= numsides)
+    if (index < 0 || index >= total_level_sides)
     {
         LogWarning("LOADGAME: Invalid Side: %d\n", index);
         index = 0;
     }
 
-    return sides + index;
+    return level_sides + index;
 }
 
 int SV_SideFindElem(side_t *elem)
 {
-    SYS_ASSERT(sides <= elem && elem < (sides + numsides));
+    SYS_ASSERT(level_sides <= elem && elem < (level_sides + total_level_sides));
 
-    return elem - sides;
+    return elem - level_sides;
 }
 
 void SV_SideCreateElems(int num_elems)
@@ -413,8 +413,8 @@ void SV_SideCreateElems(int num_elems)
      * are initialised there.
      */
 
-    if (num_elems != numsides)
-        FatalError("LOADGAME: SIDE MISMATCH !  (%d != %d)\n", num_elems, numsides);
+    if (num_elems != total_level_sides)
+        FatalError("LOADGAME: SIDE MISMATCH !  (%d != %d)\n", num_elems, total_level_sides);
 }
 
 void SV_SideFinaliseElems(void)
@@ -428,25 +428,25 @@ extern std::vector<slider_move_t *> active_sliders;
 
 int SV_LineCountElems(void)
 {
-    return numlines;
+    return total_level_lines;
 }
 
 void *SV_LineGetElem(int index)
 {
-    if (index < 0 || index >= numlines)
+    if (index < 0 || index >= total_level_lines)
     {
         LogWarning("LOADGAME: Invalid Line: %d\n", index);
         index = 0;
     }
 
-    return lines + index;
+    return level_lines + index;
 }
 
 int SV_LineFindElem(line_t *elem)
 {
-    SYS_ASSERT(lines <= elem && elem < (lines + numlines));
+    SYS_ASSERT(level_lines <= elem && elem < (level_lines + total_level_lines));
 
-    return elem - lines;
+    return elem - level_lines;
 }
 
 void SV_LineCreateElems(int num_elems)
@@ -454,8 +454,8 @@ void SV_LineCreateElems(int num_elems)
     // nothing much to do -- lines are created from level load,
     // and defaults are initialised there.
 
-    if (num_elems != numlines)
-        FatalError("LOADGAME: LINE MISMATCH !  (%d != %d)\n", num_elems, numlines);
+    if (num_elems != total_level_lines)
+        FatalError("LOADGAME: LINE MISMATCH !  (%d != %d)\n", num_elems, total_level_lines);
 }
 
 //
@@ -463,9 +463,9 @@ void SV_LineCreateElems(int num_elems)
 //
 void SV_LineFinaliseElems(void)
 {
-    for (int i = 0; i < numlines; i++)
+    for (int i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = lines + i;
+        line_t *ld = level_lines + i;
         side_t *s1, *s2;
 
         s1 = ld->side[0];
@@ -506,25 +506,25 @@ void SV_LineFinaliseElems(void)
 
 int SV_ExfloorCountElems(void)
 {
-    return numextrafloors;
+    return total_level_extrafloors;
 }
 
 void *SV_ExfloorGetElem(int index)
 {
-    if (index < 0 || index >= numextrafloors)
+    if (index < 0 || index >= total_level_extrafloors)
     {
         LogWarning("LOADGAME: Invalid Extrafloor: %d\n", index);
         index = 0;
     }
 
-    return extrafloors + index;
+    return level_extrafloors + index;
 }
 
 int SV_ExfloorFindElem(extrafloor_t *elem)
 {
-    SYS_ASSERT(extrafloors <= elem && elem < (extrafloors + numextrafloors));
+    SYS_ASSERT(level_extrafloors <= elem && elem < (level_extrafloors + total_level_extrafloors));
 
-    return elem - extrafloors;
+    return elem - level_extrafloors;
 }
 
 void SV_ExfloorCreateElems(int num_elems)
@@ -533,8 +533,8 @@ void SV_ExfloorCreateElems(int num_elems)
      * defaults are initialised there.
      */
 
-    if (num_elems != numextrafloors)
-        FatalError("LOADGAME: Extrafloor MISMATCH !  (%d != %d)\n", num_elems, numextrafloors);
+    if (num_elems != total_level_extrafloors)
+        FatalError("LOADGAME: Extrafloor MISMATCH !  (%d != %d)\n", num_elems, total_level_extrafloors);
 }
 
 void SV_ExfloorFinaliseElems(void)
@@ -542,9 +542,9 @@ void SV_ExfloorFinaliseElems(void)
     int i;
 
     // need to regenerate the ef_info fields
-    for (i = 0; i < numextrafloors; i++)
+    for (i = 0; i < total_level_extrafloors; i++)
     {
-        extrafloor_t *ef = extrafloors + i;
+        extrafloor_t *ef = level_extrafloors + i;
 
         // skip unused extrafloors
         if (ef->ef_line == nullptr)
@@ -567,25 +567,25 @@ extern std::vector<plane_move_t *> active_planes;
 
 int SV_SectorCountElems(void)
 {
-    return numsectors;
+    return total_level_sectors;
 }
 
 void *SV_SectorGetElem(int index)
 {
-    if (index < 0 || index >= numsectors)
+    if (index < 0 || index >= total_level_sectors)
     {
         LogWarning("LOADGAME: Invalid Sector: %d\n", index);
         index = 0;
     }
 
-    return sectors + index;
+    return level_sectors + index;
 }
 
 int SV_SectorFindElem(sector_t *elem)
 {
-    SYS_ASSERT(sectors <= elem && elem < (sectors + numsectors));
+    SYS_ASSERT(level_sectors <= elem && elem < (level_sectors + total_level_sectors));
 
-    return elem - sectors;
+    return elem - level_sectors;
 }
 
 void SV_SectorCreateElems(int num_elems)
@@ -593,17 +593,17 @@ void SV_SectorCreateElems(int num_elems)
     // nothing much to do -- sectors are created from level load,
     // and defaults are initialised there.
 
-    if (num_elems != numsectors)
-        FatalError("LOADGAME: SECTOR MISMATCH !  (%d != %d)\n", num_elems, numsectors);
+    if (num_elems != total_level_sectors)
+        FatalError("LOADGAME: SECTOR MISMATCH !  (%d != %d)\n", num_elems, total_level_sectors);
 
     // clear animate list
 }
 
 void SV_SectorFinaliseElems(void)
 {
-    for (int i = 0; i < numsectors; i++)
+    for (int i = 0; i < total_level_sectors; i++)
     {
-        sector_t *sec = sectors + i;
+        sector_t *sec = level_sectors + i;
 
         P_RecomputeGapsAroundSector(sec);
         ///---	P_RecomputeTilesInSector(sec);
@@ -698,16 +698,16 @@ bool SR_LevelGetSurfPtr(void *storage, int index, void *extra)
 
     num = strtol(str + 2, nullptr, 0);
 
-    if (num < 0 || num >= numsectors)
+    if (num < 0 || num >= total_level_sectors)
     {
         LogWarning("SR_LevelGetSurfPtr: bad sector ref %d\n", num);
         num = 0;
     }
 
     if (str[0] == 'F')
-        (*dest) = &sectors[num].floor;
+        (*dest) = &level_sectors[num].floor;
     else if (str[0] == 'C')
-        (*dest) = &sectors[num].ceil;
+        (*dest) = &level_sectors[num].ceil;
     else
         FatalError("SR_LevelGetSurfPtr: invalid surface plane `%s'\n", str);
 
@@ -737,15 +737,15 @@ void SR_LevelPutSurfPtr(void *storage, int index, void *extra)
     }
 
     // not optimal, but safe
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        if (src == &sectors[i].floor)
+        if (src == &level_sectors[i].floor)
         {
             sprintf(buffer, "F:%d", i);
             SV_PutString(buffer);
             return;
         }
-        else if (src == &sectors[i].ceil)
+        else if (src == &level_sectors[i].ceil)
         {
             sprintf(buffer, "C:%d", i);
             SV_PutString(buffer);
@@ -961,13 +961,13 @@ bool SR_SectorGetPropRef(void *storage, int index, void *extra)
 
     num = strtol(str, nullptr, 0);
 
-    if (num < 0 || num >= numsectors)
+    if (num < 0 || num >= total_level_sectors)
     {
         LogWarning("SR_SectorGetPropRef: bad sector ref %d\n", num);
         num = 0;
     }
 
-    (*dest) = &sectors[num].props;
+    (*dest) = &level_sectors[num].props;
 
     SV_FreeString(str);
     return true;
@@ -991,13 +991,13 @@ void SR_SectorPutPropRef(void *storage, int index, void *extra)
     }
 
     // not optimal, but safe
-    for (i = 0; i < numsectors; i++)
+    for (i = 0; i < total_level_sectors; i++)
     {
-        if (&sectors[i].props == src)
+        if (&level_sectors[i].props == src)
             break;
     }
 
-    if (i >= numsectors)
+    if (i >= total_level_sectors)
     {
         LogWarning("SR_SectorPutPropRef: properties %p not found !\n", src);
         i = 0;

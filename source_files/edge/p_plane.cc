@@ -524,7 +524,7 @@ static bool MovePlane(plane_move_t *plane)
 static sector_t *P_GSS(sector_t *sec, float dest, bool forc)
 {
     int       i;
-    int       secnum = sec - sectors;
+    int       secnum = sec - level_sectors;
     sector_t *sector;
 
     // 2023.06.10 - Reversed the order of iteration because it was returning
@@ -535,7 +535,7 @@ static sector_t *P_GSS(sector_t *sec, float dest, bool forc)
     {
         if (P_TwoSided(secnum, i))
         {
-            if (P_GetSide(secnum, i, 0)->sector - sectors == secnum)
+            if (P_GetSide(secnum, i, 0)->sector - level_sectors == secnum)
             {
                 sector = P_GetSector(secnum, i, 1);
 
@@ -560,7 +560,7 @@ static sector_t *P_GSS(sector_t *sec, float dest, bool forc)
     {
         if (P_TwoSided(secnum, i))
         {
-            if (P_GetSide(secnum, i, 0)->sector - sectors == secnum)
+            if (P_GetSide(secnum, i, 0)->sector - level_sectors == secnum)
             {
                 sector = P_GetSector(secnum, i, 1);
             }
@@ -646,7 +646,7 @@ static plane_move_t *P_SetupSectorAction(sector_t *sector, const PlaneMoverDefin
 
 #if 0 // DEBUG
     LogDebug("SEC_ACT: %d type %d %s start %1.0f dest %1.0f\n",
-                 sector - sectors, def->type, 
+                 sector - level_sectors, def->type, 
                  def->is_ceiling_ ? "CEIL" : "FLOOR", 
                  start, dest);
 #endif
@@ -1013,7 +1013,7 @@ bool EV_DoPlane(sector_t *sec, const PlaneMoverDefinition *def, sector_t *model)
     // Do sector action
     if (sec->floor_vertex_slope || sec->ceil_vertex_slope)
     {
-        LogWarning("Plane movers are not supported for vertex slopes! (Sector %u)\n", int(sec - sectors));
+        LogWarning("Plane movers are not supported for vertex slopes! (Sector %u)\n", int(sec - level_sectors));
         return false;
     }
     plane_move_t *secaction = P_SetupSectorAction(sec, def, model);

@@ -451,9 +451,9 @@ bool RAD_WithinRadius(mobj_t *mo, rad_script_t *r)
     }
 
     int sec_ind = r->sector_index;
-    if (sec_ind >= 0 && sec_ind <= numsectors)
+    if (sec_ind >= 0 && sec_ind <= total_level_sectors)
     {
-        if (mo->subsector->sector - sectors != sec_ind)
+        if (mo->subsector->sector - level_sectors != sec_ind)
             return false;
         if (r->rad_z >= 0 && fabs(r->z - MO_MIDZ(mo)) > r->rad_z + mo->height / 2)
             return false;
@@ -581,10 +581,10 @@ static bool RAD_CheckHeightTrig(rad_trigger_t *trig, s_onheight_t *cond)
     {
         if (cond->sec_num >= 0)
         {
-            if (cond->sec_num >= numsectors)
+            if (cond->sec_num >= total_level_sectors)
                 FatalError("RTS ONHEIGHT: no such sector %d.\n", cond->sec_num);
 
-            cond->cached_sector = &sectors[cond->sec_num];
+            cond->cached_sector = &level_sectors[cond->sec_num];
         }
         else
         {

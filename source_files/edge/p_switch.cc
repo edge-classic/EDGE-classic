@@ -99,20 +99,20 @@ static void StartButton(SwitchDefinition *sw, line_t *line, bwhere_e w, const im
 
 void P_ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials, bool noSound)
 {
-    for (int j = 0; j < numlines; j++)
+    for (int j = 0; j < total_level_lines; j++)
     {
-        if (line != &lines[j])
+        if (line != &level_lines[j])
         {
-            if (line->tag == 0 || line->tag != lines[j].tag || (specials & kLineSpecialSwitchSeparate) ||
-                (useAgain && line->special && line->special != lines[j].special))
+            if (line->tag == 0 || line->tag != level_lines[j].tag || (specials & kLineSpecialSwitchSeparate) ||
+                (useAgain && line->special && line->special != level_lines[j].special))
             {
                 continue;
             }
         }
 
-        side_t *side = lines[j].side[0];
+        side_t *side = level_lines[j].side[0];
 
-        position_c *sfx_origin = &lines[j].frontsector->sfx_origin;
+        position_c *sfx_origin = &level_lines[j].frontsector->sfx_origin;
 
         bwhere_e pos = BWH_None;
 
@@ -160,12 +160,12 @@ void P_ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials, bo
                 }
 
                 if (useAgain)
-                    StartButton(sw, &lines[j], pos, OLD_SW);
+                    StartButton(sw, &level_lines[j], pos, OLD_SW);
 
                 break;
             }
         } // it.IsValid() - switchdefs
-    }     // j < numlines
+    }     // j < total_level_lines
 }
 
 #undef CHECK_SW

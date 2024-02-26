@@ -101,7 +101,7 @@ class NewGameParameters
 void GameDeferredNewGame(NewGameParameters &params);
 
 // Can be called by the startup code or MenuResponder,
-// calls P_SetupLevel or W_EnterWorld.
+// calls LevelSetup or W_EnterWorld.
 void GameDeferredLoadGame(int slot);
 void GameDeferredSaveGame(int slot, const char *description);
 void GameDeferredScreenShot(void);

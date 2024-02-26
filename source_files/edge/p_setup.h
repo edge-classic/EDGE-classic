@@ -23,27 +23,22 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __P_SETUP__
-#define __P_SETUP__
-
-#include "dm_defs.h"
+#pragma once
 
 #include "math_crc.h"
 
-extern epi::CRC32 mapsector_CRC;
-extern epi::CRC32 mapline_CRC;
-extern epi::CRC32 mapthing_CRC;
+extern epi::CRC32 map_sectors_crc;
+extern epi::CRC32 map_lines_crc;
+extern epi::CRC32 map_things_crc;
 
-extern int mapthing_NUM;
+extern int total_map_things;
 
 // Called by startup code.
-void P_Init(void);
+void PlayerStateInit(void);
 
-void P_SetupLevel(void);
+void LevelSetup(void);
 
-void P_Shutdown(void);
-
-#endif /* __P_SETUP__ */
+void LevelShutdown(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

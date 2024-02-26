@@ -225,13 +225,13 @@ static void FindMinMaxBoundaries(void)
     map_maximum_x = -9e9;
     map_maximum_y = -9e9;
 
-    for (int i = 0; i < numvertexes; i++)
+    for (int i = 0; i < total_level_vertexes; i++)
     {
-        map_minimum_x = HMM_MIN(map_minimum_x, vertexes[i].X);
-        map_maximum_x = HMM_MAX(map_maximum_x, vertexes[i].X);
+        map_minimum_x = HMM_MIN(map_minimum_x, level_vertexes[i].X);
+        map_maximum_x = HMM_MAX(map_maximum_x, level_vertexes[i].X);
 
-        map_minimum_y = HMM_MIN(map_minimum_y, vertexes[i].Y);
-        map_maximum_y = HMM_MAX(map_maximum_y, vertexes[i].Y);
+        map_minimum_y = HMM_MIN(map_minimum_y, level_vertexes[i].Y);
+        map_maximum_y = HMM_MAX(map_maximum_y, level_vertexes[i].Y);
     }
 
     float map_w = map_maximum_x - map_minimum_x;
@@ -1162,7 +1162,7 @@ static void AutomapWalkThing(mobj_t *mo)
 //
 static void AutomapWalkSubsector(unsigned int num)
 {
-    subsector_t *sub = &subsectors[num];
+    subsector_t *sub = &level_subsectors[num];
 
     // handle each seg
     for (seg_t *seg = sub->segs; seg; seg = seg->sub_next)
@@ -1232,7 +1232,7 @@ static void AutomapWalkBSPNode(unsigned int bspnum)
         return;
     }
 
-    node = &nodes[bspnum];
+    node = &level_nodes[bspnum];
     side = 0;
 
     // Recursively divide right space

@@ -30,8 +30,8 @@
 
 #include "dm_state.h"
 
-#define BW_MidiSequencer FluidSequencer
-typedef struct BW_MidiRtInterface FluidInterface;
+#define MidiSequencer FluidSequencer
+typedef struct MidiRealTimeInterface FluidInterface;
 #include "midi_sequencer_impl.hpp"
 
 #include "fluidlite.h"
@@ -262,7 +262,7 @@ class fluid_player_c : public AbstractMusicPlayer
 	{
 		fluid_seq = new FluidSequencer;
 		fluid_iface = new FluidInterface;
-		memset(fluid_iface, 0, sizeof(BW_MidiRtInterface));
+		memset(fluid_iface, 0, sizeof(MidiRealTimeInterface));
 
 		fluid_iface->rtUserData = this;
 		fluid_iface->rt_noteOn  = rtNoteOn;
@@ -275,7 +275,7 @@ class fluid_player_c : public AbstractMusicPlayer
 		fluid_iface->rt_systemExclusive = rtSysEx;
 
 		fluid_iface->onPcmRender = playSynth;
-		fluid_iface->onPcmRender_userData = this;
+		fluid_iface->onPcmRender_userdata = this;
 
 		fluid_iface->pcmSampleRate = sound_device_frequency;
 		fluid_iface->pcmFrameSize = 2 /*channels*/ * 2 /*size of one sample*/;
@@ -283,12 +283,12 @@ class fluid_player_c : public AbstractMusicPlayer
 		fluid_iface->rt_deviceSwitch = rtDeviceSwitch;
 		fluid_iface->rt_currentDevice = rtCurrentDevice;
 
-		fluid_seq->setInterface(fluid_iface);
+		fluid_seq->SetInterface(fluid_iface);
 	}
 
 	bool LoadTrack(const uint8_t *data, int length)
 	{
-		return fluid_seq->loadMIDI(data, length);
+		return fluid_seq->LoadMidi(data, length);
 	}
 
     void Close(void)
@@ -399,9 +399,9 @@ class fluid_player_c : public AbstractMusicPlayer
         else
             data_buf = buf->data_L;
 
-        int played = fluid_seq->playStream((uint8_t *)data_buf, FLUID_NUM_SAMPLES);
+        int played = fluid_seq->PlayStream((uint8_t *)data_buf, FLUID_NUM_SAMPLES);
 
-        if (fluid_seq->positionAtEnd())
+        if (fluid_seq->PositionAtEnd())
 			song_done = true;
 
 		buf->length = played / 4;
@@ -413,7 +413,7 @@ class fluid_player_c : public AbstractMusicPlayer
         {
             if (!looping)
                 return false;
-            fluid_seq->rewind();
+            fluid_seq->Rewind();
             return true;
         }
 

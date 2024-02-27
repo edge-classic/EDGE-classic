@@ -34,8 +34,8 @@
 
 #include "dm_state.h"
 
-#define BW_MidiSequencer OPLSequencer
-typedef struct BW_MidiRtInterface OPLInterface;
+#define MidiSequencer OPLSequencer
+typedef struct MidiRealTimeInterface OPLInterface;
 #include "midi_sequencer_impl.hpp"
 
 #include "radmidi.h"
@@ -275,7 +275,7 @@ class opl_player_c : public AbstractMusicPlayer
     {
         opl_seq   = new OPLSequencer;
         opl_iface = new OPLInterface;
-        memset(opl_iface, 0, sizeof(BW_MidiRtInterface));
+        memset(opl_iface, 0, sizeof(MidiRealTimeInterface));
 
         opl_iface->rtUserData           = this;
         opl_iface->rt_noteOn            = rtNoteOn;
@@ -288,7 +288,7 @@ class opl_player_c : public AbstractMusicPlayer
         opl_iface->rt_systemExclusive   = rtSysEx;
 
         opl_iface->onPcmRender          = playSynth;
-        opl_iface->onPcmRender_userData = this;
+        opl_iface->onPcmRender_userdata = this;
 
         opl_iface->pcmSampleRate = sound_device_frequency;
         opl_iface->pcmFrameSize =
@@ -298,12 +298,12 @@ class opl_player_c : public AbstractMusicPlayer
         opl_iface->rt_currentDevice = rtCurrentDevice;
         opl_iface->rt_rawOPL        = rtRawOPL;
 
-        opl_seq->setInterface(opl_iface);
+        opl_seq->SetInterface(opl_iface);
     }
 
     bool LoadTrack(const uint8_t *data, int length, uint16_t rate)
     {
-        return opl_seq->loadMIDI(data, length, rate);
+        return opl_seq->LoadMidi(data, length, rate);
     }
 
     void Close(void)
@@ -405,9 +405,9 @@ class opl_player_c : public AbstractMusicPlayer
         else
             data_buf = buf->data_L;
 
-        int played = opl_seq->playStream((uint8_t *)(data_buf), OPL_SAMPLES);
+        int played = opl_seq->PlayStream((uint8_t *)(data_buf), OPL_SAMPLES);
 
-        if (opl_seq->positionAtEnd())
+        if (opl_seq->PositionAtEnd())
             song_done = true;
 
         buf->length = played / (2 * sizeof(int16_t));
@@ -419,7 +419,7 @@ class opl_player_c : public AbstractMusicPlayer
         {
             if (!looping)
                 return false;
-            opl_seq->rewind();
+            opl_seq->Rewind();
             return true;
         }
 

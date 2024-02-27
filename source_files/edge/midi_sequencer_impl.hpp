@@ -2,6 +2,7 @@
  * BW_Midi_Sequencer - MIDI Sequencer for C++
  *
  * Copyright (c) 2015-2022 Vitaly Novichkov <admin@wohlnet.ru>
+ * Copyright (c) 2024 The EDGE Team.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the "Software"),
@@ -17,74 +18,26 @@
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+ * OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "midi_sequencer.hpp"
-#include <stdio.h>
-#include <memory>
-#include <string.h>
-#include <errno.h>
-#include <iterator>  // std::back_inserter
-#include <algorithm> // std::copy
-#include <set>
+#pragma once
+
 #include <assert.h>
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
 
-#if defined(_WIN32) && !defined(__WATCOMC__)
-#ifdef _MSC_VER
-#ifdef _WIN64
-typedef __int64 ssize_t;
-#else
-typedef __int32 ssize_t;
-#endif
-#else
-#ifdef _WIN64
-typedef int64_t ssize_t;
-#else
-typedef int32_t ssize_t;
-#endif
-#endif
-#endif
+#include <algorithm>  // std::copy
+#include <iterator>   // std::back_inserter
+#include <memory>
+#include <set>
 
-#if defined(_MSC_VER) && _MSC_VER < 1900
-
-#define snprintf  c99_snprintf
-#define vsnprintf c99_vsnprintf
-
-__inline int c99_vsnprintf(char *outBuf, size_t size, const char *format, va_list ap)
-{
-    int count = -1;
-
-    if (size != 0)
-        count = _vsnprintf_s(outBuf, size, _TRUNCATE, format, ap);
-    if (count == -1)
-        count = _vscprintf(format, ap);
-
-    return count;
-}
-
-__inline int c99_snprintf(char *outBuf, size_t size, const char *format, ...)
-{
-    int     count;
-    va_list ap;
-
-    va_start(ap, format);
-    count = c99_vsnprintf(outBuf, size, format, ap);
-    va_end(ap);
-
-    return count;
-}
-#endif
-
-#ifndef BWMIDI_DISABLE_MUS_SUPPORT
 #include "cvt_mus2mid.hpp"
-#endif // MUS
-
-#ifndef BWMIDI_DISABLE_XMI_SUPPORT
 #include "cvt_xmi2mid.hpp"
-#endif // XMI
+#include "midi_sequencer.hpp"
 
 /**
  * @brief Utility function to read Big-Endian integer from raw binary data
@@ -92,13 +45,12 @@ __inline int c99_snprintf(char *outBuf, size_t size, const char *format, ...)
  * @param nbytes Count of bytes to parse integer
  * @return Extracted unsigned integer
  */
-static inline uint64_t readBEint(const void *buffer, size_t nbytes)
+static inline uint64_t ReadIntBigEndian(const void *buffer, size_t nbytes)
 {
     uint64_t       result = 0;
     const uint8_t *data   = (const uint8_t *)(buffer);
 
-    for (size_t n = 0; n < nbytes; ++n)
-        result = (result << 8) + data[n];
+    for (size_t n = 0; n < nbytes; ++n) result = (result << 8) + data[n];
 
     return result;
 }
@@ -109,7 +61,7 @@ static inline uint64_t readBEint(const void *buffer, size_t nbytes)
  * @param nbytes Count of bytes to parse integer
  * @return Extracted unsigned integer
  */
-static inline uint64_t readLEint(const void *buffer, size_t nbytes)
+static inline uint64_t ReadIntLittleEndian(const void *buffer, size_t nbytes)
 {
     uint64_t       result = 0;
     const uint8_t *data   = (const uint8_t *)(buffer);
@@ -121,49 +73,49 @@ static inline uint64_t readLEint(const void *buffer, size_t nbytes)
 }
 
 /**
- * @brief Secure Standard MIDI Variable-Length numeric value parser with anti-out-of-range protection
- * @param [_inout] ptr Pointer to memory block that contains begin of variable-length value, will be iterated forward
- * @param [_in end Pointer to end of memory block where variable-length value is stored (after end of track)
- * @param [_out] ok Reference to boolean which takes result of variable-length value parsing
+ * @brief Secure Standard MIDI Variable-Length numeric value parser with
+ * anti-out-of-range protection
+ * @param [_inout] ptr Pointer to memory block that contains begin of
+ * variable-length value, will be iterated forward
+ * @param [_in end Pointer to end of memory block where variable-length value is
+ * stored (after end of track)
+ * @param [_out] ok Reference to boolean which takes result of variable-length
+ * value parsing
  * @return Unsigned integer that conains parsed variable-length value
  */
-static inline uint64_t readVarLenEx(const uint8_t **ptr, const uint8_t *end, bool &ok)
+static inline uint64_t ReadVariableLengthValue(const uint8_t **ptr,
+                                               const uint8_t *end, bool &ok)
 {
     uint64_t result = 0;
     ok              = false;
 
     for (;;)
     {
-        if (*ptr >= end)
-            return 2;
+        if (*ptr >= end) return 2;
         unsigned char byte = *((*ptr)++);
         result             = (result << 7) + (byte & 0x7F);
-        if (!(byte & 0x80))
-            break;
+        if (!(byte & 0x80)) break;
     }
 
     ok = true;
     return result;
 }
 
-BW_MidiSequencer::MidiEvent::MidiEvent() : type(T_UNKNOWN), subtype(T_UNKNOWN), channel(0), isValid(1), absPosition(0)
+MidiSequencer::MidiTrackRow::MidiTrackRow()
+    : time_(0.0), delay_(0), absolute_position_(0), time_delay_(0.0)
 {
 }
 
-BW_MidiSequencer::MidiTrackRow::MidiTrackRow() : time(0.0), delay(0), absPos(0), timeDelay(0.0)
+void MidiSequencer::MidiTrackRow::Clear()
 {
+    time_              = 0.0;
+    delay_             = 0;
+    absolute_position_ = 0;
+    time_delay_        = 0.0;
+    events_.clear();
 }
 
-void BW_MidiSequencer::MidiTrackRow::clear()
-{
-    time      = 0.0;
-    delay     = 0;
-    absPos    = 0;
-    timeDelay = 0.0;
-    events.clear();
-}
-
-void BW_MidiSequencer::MidiTrackRow::sortEvents(bool *noteStates)
+void MidiSequencer::MidiTrackRow::SortEvents(bool *note_states)
 {
     typedef std::vector<MidiEvent> EvtArr;
     EvtArr                         sysEx;
@@ -172,70 +124,78 @@ void BW_MidiSequencer::MidiTrackRow::sortEvents(bool *noteStates)
     EvtArr                         controllers;
     EvtArr                         anyOther;
 
-    for (size_t i = 0; i < events.size(); i++)
+    for (size_t i = 0; i < events_.size(); i++)
     {
-        if (events[i].type == MidiEvent::T_NOTEOFF)
+        if (events_[i].type == MidiEvent::kNoteOff)
         {
-            if (noteOffs.capacity() == 0)
-                noteOffs.reserve(events.size());
-            noteOffs.push_back(events[i]);
+            if (noteOffs.capacity() == 0) noteOffs.reserve(events_.size());
+            noteOffs.push_back(events_[i]);
         }
-        else if (events[i].type == MidiEvent::T_SYSEX || events[i].type == MidiEvent::T_SYSEX2)
+        else if (events_[i].type == MidiEvent::kSysex ||
+                 events_[i].type == MidiEvent::kSysex2)
         {
-            if (sysEx.capacity() == 0)
-                sysEx.reserve(events.size());
-            sysEx.push_back(events[i]);
+            if (sysEx.capacity() == 0) sysEx.reserve(events_.size());
+            sysEx.push_back(events_[i]);
         }
-        else if ((events[i].type == MidiEvent::T_CTRLCHANGE) || (events[i].type == MidiEvent::T_PATCHCHANGE) ||
-                 (events[i].type == MidiEvent::T_WHEEL) || (events[i].type == MidiEvent::T_CHANAFTTOUCH))
+        else if ((events_[i].type == MidiEvent::kControlChange) ||
+                 (events_[i].type == MidiEvent::kPatchChange) ||
+                 (events_[i].type == MidiEvent::kPitchWheel) ||
+                 (events_[i].type == MidiEvent::kChannelAftertouch))
         {
             if (controllers.capacity() == 0)
-                controllers.reserve(events.size());
-            controllers.push_back(events[i]);
+                controllers.reserve(events_.size());
+            controllers.push_back(events_[i]);
         }
-        else if ((events[i].type == MidiEvent::T_SPECIAL) &&
-                 ((events[i].subtype == MidiEvent::ST_MARKER) || (events[i].subtype == MidiEvent::ST_DEVICESWITCH) ||
-                  (events[i].subtype == MidiEvent::ST_SONG_BEGIN_HOOK) ||
-                  (events[i].subtype == MidiEvent::ST_LOOPSTART) || (events[i].subtype == MidiEvent::ST_LOOPEND) ||
-                  (events[i].subtype == MidiEvent::ST_LOOPSTACK_BEGIN) ||
-                  (events[i].subtype == MidiEvent::ST_LOOPSTACK_END) ||
-                  (events[i].subtype == MidiEvent::ST_LOOPSTACK_BREAK)))
+        else if ((events_[i].type == MidiEvent::kSpecial) &&
+                 ((events_[i].sub_type == MidiEvent::kMarker) ||
+                  (events_[i].sub_type == MidiEvent::kDeviceSwitch) ||
+                  (events_[i].sub_type == MidiEvent::kSongBeginHook) ||
+                  (events_[i].sub_type == MidiEvent::kLoopStart) ||
+                  (events_[i].sub_type == MidiEvent::kLoopEnd) ||
+                  (events_[i].sub_type == MidiEvent::kLoopStackBegin) ||
+                  (events_[i].sub_type == MidiEvent::kLoopStackEnd) ||
+                  (events_[i].sub_type == MidiEvent::kLoopStackBreak)))
         {
-            if (metas.capacity() == 0)
-                metas.reserve(events.size());
-            metas.push_back(events[i]);
+            if (metas.capacity() == 0) metas.reserve(events_.size());
+            metas.push_back(events_[i]);
         }
         else
         {
-            if (anyOther.capacity() == 0)
-                anyOther.reserve(events.size());
-            anyOther.push_back(events[i]);
+            if (anyOther.capacity() == 0) anyOther.reserve(events_.size());
+            anyOther.push_back(events_[i]);
         }
     }
 
     /*
-     * If Note-Off and it's Note-On is on the same row - move this damned note off down!
+     * If Note-Off and it's Note-On is on the same row - move this damned note
+     * off down!
      */
-    if (noteStates)
+    if (note_states)
     {
         std::set<size_t> markAsOn;
         for (size_t i = 0; i < anyOther.size(); i++)
         {
             const MidiEvent e = anyOther[i];
-            if (e.type == MidiEvent::T_NOTEON)
+            if (e.type == MidiEvent::kNoteOn)
             {
-                const size_t note_i = (size_t)(e.channel * 255) + (e.data[0] & 0x7F);
+                const size_t note_i =
+                    (size_t)(e.channel * 255) + (e.data[0] & 0x7F);
                 // Check, was previously note is on or off
-                bool wasOn = noteStates[note_i];
+                bool wasOn = note_states[note_i];
                 markAsOn.insert(note_i);
-                // Detect zero-length notes are following previously pressed note
+                // Detect zero-length notes are following previously pressed
+                // note
                 int noteOffsOnSameNote = 0;
-                for (EvtArr::iterator j = noteOffs.begin(); j != noteOffs.end();)
+                for (EvtArr::iterator j = noteOffs.begin();
+                     j != noteOffs.end();)
                 {
-                    // If note was off, and note-off on same row with note-on - move it down!
-                    if (((*j).channel == e.channel) && ((*j).data[0] == e.data[0]))
+                    // If note was off, and note-off on same row with note-on -
+                    // move it down!
+                    if (((*j).channel == e.channel) &&
+                        ((*j).data[0] == e.data[0]))
                     {
-                        // If note is already off OR more than one note-off on same row and same note
+                        // If note is already off OR more than one note-off on
+                        // same row and same note
                         if (!wasOn || (noteOffsOnSameNote != 0))
                         {
                             anyOther.push_back(*j);
@@ -246,8 +206,8 @@ void BW_MidiSequencer::MidiTrackRow::sortEvents(bool *noteStates)
                         else
                         {
                             // When same row has many note-offs on same row
-                            // that means a zero-length note follows previous note
-                            // it must be shuted down
+                            // that means a zero-length note follows previous
+                            // note it must be shuted down
                             noteOffsOnSameNote++;
                         }
                     }
@@ -259,44 +219,56 @@ void BW_MidiSequencer::MidiTrackRow::sortEvents(bool *noteStates)
         // Mark other notes as released
         for (EvtArr::iterator j = noteOffs.begin(); j != noteOffs.end(); j++)
         {
-            size_t note_i      = (size_t)(j->channel * 255) + (j->data[0] & 0x7F);
-            noteStates[note_i] = false;
+            size_t note_i = (size_t)(j->channel * 255) + (j->data[0] & 0x7F);
+            note_states[note_i] = false;
         }
 
-        for (std::set<size_t>::iterator j = markAsOn.begin(); j != markAsOn.end(); j++)
-            noteStates[*j] = true;
+        for (std::set<size_t>::iterator j = markAsOn.begin();
+             j != markAsOn.end(); j++)
+            note_states[*j] = true;
     }
     /***********************************************************************************/
 
-    events.clear();
+    events_.clear();
     if (!sysEx.empty())
-        events.insert(events.end(), sysEx.begin(), sysEx.end());
+        events_.insert(events_.end(), sysEx.begin(), sysEx.end());
     if (!noteOffs.empty())
-        events.insert(events.end(), noteOffs.begin(), noteOffs.end());
+        events_.insert(events_.end(), noteOffs.begin(), noteOffs.end());
     if (!metas.empty())
-        events.insert(events.end(), metas.begin(), metas.end());
+        events_.insert(events_.end(), metas.begin(), metas.end());
     if (!controllers.empty())
-        events.insert(events.end(), controllers.begin(), controllers.end());
+        events_.insert(events_.end(), controllers.begin(), controllers.end());
     if (!anyOther.empty())
-        events.insert(events.end(), anyOther.begin(), anyOther.end());
+        events_.insert(events_.end(), anyOther.begin(), anyOther.end());
 }
 
-BW_MidiSequencer::BW_MidiSequencer()
-    : m_interface(nullptr), m_format(Format_MIDI), m_smfFormat(0), m_loopFormat(Loop_Default), m_loopEnabled(false),
-      m_loopHooksOnly(false), m_fullSongTimeLength(0.0), m_postSongWaitDelay(1.0), m_loopStartTime(-1.0),
-      m_loopEndTime(-1.0), m_tempoMultiplier(1.0), m_atEnd(false), m_loopCount(-1), m_loadTrackNumber(0),
-      m_trackSolo(~(size_t)(0)), m_triggerHandler(nullptr), m_triggerUserData(nullptr)
+MidiSequencer::MidiSequencer()
+    : midi_output_interface_(nullptr),
+      midi_format_(kFormatMidi),
+      midi_smf_format_(0),
+      midi_loop_format_(kLoopDefault),
+      midi_loop_enabled_(false),
+      midi_loop_hooks_only_(false),
+      midi_full_song_time_length_(0.0),
+      midi_post_song_wait_delay_(1.0),
+      midi_loop_start_time_(-1.0),
+      midi_loop_end_time_(-1.0),
+      midi_tempo_multiplier_(1.0),
+      midi_at_end_(false),
+      midi_loop_count_(-1),
+      midi_load_track_number_(0),
+      midi_track_solo_(~(size_t)(0)),
+      midi_trigger_handler_(nullptr),
+      midi_trigger_userdata_(nullptr)
 {
-    m_loop.reset();
-    m_loop.invalidLoop = false;
-    m_time.init();
+    midi_loop_.Reset();
+    midi_loop_.invalid_loop_ = false;
+    midi_time_.Init();
 }
 
-BW_MidiSequencer::~BW_MidiSequencer()
-{
-}
+MidiSequencer::~MidiSequencer() {}
 
-void BW_MidiSequencer::setInterface(const BW_MidiRtInterface *intrf)
+void MidiSequencer::SetInterface(const MidiRealTimeInterface *intrf)
 {
     // Interface must NOT be nullptr
     assert(intrf);
@@ -320,93 +292,96 @@ void BW_MidiSequencer::setInterface(const BW_MidiRtInterface *intrf)
 
     if (intrf->pcmSampleRate != 0 && intrf->pcmFrameSize != 0)
     {
-        m_time.sampleRate = intrf->pcmSampleRate;
-        m_time.frameSize  = intrf->pcmFrameSize;
-        m_time.reset();
+        midi_time_.sample_rate_ = intrf->pcmSampleRate;
+        midi_time_.frame_size_  = intrf->pcmFrameSize;
+        midi_time_.Reset();
     }
 
-    m_interface = intrf;
+    midi_output_interface_ = intrf;
 }
 
-int BW_MidiSequencer::playStream(uint8_t *stream, size_t length)
+int MidiSequencer::PlayStream(uint8_t *stream, size_t length)
 {
     int      count      = 0;
-    size_t   samples    = (size_t)(length / (size_t)(m_time.frameSize));
+    size_t   samples    = (size_t)(length / (size_t)(midi_time_.frame_size_));
     size_t   left       = samples;
     size_t   periodSize = 0;
     uint8_t *stream_pos = stream;
 
-    assert(m_interface->onPcmRender);
+    assert(midi_output_interface_->onPcmRender);
 
     while (left > 0)
     {
-        const double leftDelay = left / double(m_time.sampleRate);
-        const double maxDelay  = m_time.timeRest < leftDelay ? m_time.timeRest : leftDelay;
-        if ((positionAtEnd()) && (m_time.delay <= 0.0))
-            break; // Stop to fetch samples at reaching the song end with disabled loop
+        const double leftDelay = left / double(midi_time_.sample_rate_);
+        const double maxDelay  = midi_time_.time_rest_ < leftDelay
+                                     ? midi_time_.time_rest_
+                                     : leftDelay;
+        if ((PositionAtEnd()) && (midi_time_.delay_ <= 0.0))
+            break;  // Stop to fetch samples at reaching the song end with
+                    // disabled loop
 
-        m_time.timeRest -= maxDelay;
-        periodSize = (size_t)((double)(m_time.sampleRate) * maxDelay);
+        midi_time_.time_rest_ -= maxDelay;
+        periodSize = (size_t)((double)(midi_time_.sample_rate_) * maxDelay);
 
         if (stream)
         {
-            size_t generateSize = periodSize > left ? (size_t)(left) : (size_t)(periodSize);
-            m_interface->onPcmRender(m_interface->onPcmRender_userData, stream_pos, generateSize * m_time.frameSize);
-            stream_pos += generateSize * m_time.frameSize;
+            size_t generateSize =
+                periodSize > left ? (size_t)(left) : (size_t)(periodSize);
+            midi_output_interface_->onPcmRender(
+                midi_output_interface_->onPcmRender_userdata, stream_pos,
+                generateSize * midi_time_.frame_size_);
+            stream_pos += generateSize * midi_time_.frame_size_;
             count += generateSize;
             left -= generateSize;
             assert(left <= samples);
         }
 
-        if (m_time.timeRest <= 0.0)
+        if (midi_time_.time_rest_ <= 0.0)
         {
-            m_time.delay = Tick(m_time.delay, m_time.minDelay);
-            m_time.timeRest += m_time.delay;
+            midi_time_.delay_ =
+                Tick(midi_time_.delay_, midi_time_.minimum_delay_);
+            midi_time_.time_rest_ += midi_time_.delay_;
         }
     }
 
-    return count * (int)(m_time.frameSize);
+    return count * (int)(midi_time_.frame_size_);
 }
 
-BW_MidiSequencer::FileFormat BW_MidiSequencer::getFormat()
-{
-    return m_format;
-}
+MidiSequencer::FileFormat MidiSequencer::GetFormat() { return midi_format_; }
 
-size_t BW_MidiSequencer::getTrackCount() const
-{
-    return m_trackData.size();
-}
+size_t MidiSequencer::GetTrackCount() const { return midi_track_data_.size(); }
 
-bool BW_MidiSequencer::setTrackEnabled(size_t track, bool enable)
+bool MidiSequencer::SetTrackEnabled(size_t track, bool enable)
 {
-    size_t trackCount = m_trackData.size();
-    if (track >= trackCount)
-        return false;
-    m_trackDisable[track] = !enable;
+    size_t track_count = midi_track_data_.size();
+    if (track >= track_count) return false;
+    midi_track_disabled_[track] = !enable;
     return true;
 }
 
-bool BW_MidiSequencer::setChannelEnabled(size_t channel, bool enable)
+bool MidiSequencer::SetChannelEnabled(size_t channel, bool enable)
 {
-    if (channel >= 16)
-        return false;
+    if (channel >= 16) return false;
 
     if (!enable && m_channelDisable[channel] != !enable)
     {
         uint8_t ch = (uint8_t)(channel);
 
         // Releae all pedals
-        m_interface->rt_controllerChange(m_interface->rtUserData, ch, 64, 0);
-        m_interface->rt_controllerChange(m_interface->rtUserData, ch, 66, 0);
+        midi_output_interface_->rt_controllerChange(
+            midi_output_interface_->rtUserData, ch, 64, 0);
+        midi_output_interface_->rt_controllerChange(
+            midi_output_interface_->rtUserData, ch, 66, 0);
 
         // Release all notes on the channel now
         for (int i = 0; i < 127; ++i)
         {
-            if (m_interface->rt_noteOff)
-                m_interface->rt_noteOff(m_interface->rtUserData, ch, i);
-            if (m_interface->rt_noteOffVel)
-                m_interface->rt_noteOffVel(m_interface->rtUserData, ch, i, 0);
+            if (midi_output_interface_->rt_noteOff)
+                midi_output_interface_->rt_noteOff(
+                    midi_output_interface_->rtUserData, ch, i);
+            if (midi_output_interface_->rt_noteOffVel)
+                midi_output_interface_->rt_noteOffVel(
+                    midi_output_interface_->rtUserData, ch, i, 0);
         }
     }
 
@@ -414,159 +389,146 @@ bool BW_MidiSequencer::setChannelEnabled(size_t channel, bool enable)
     return true;
 }
 
-void BW_MidiSequencer::setSoloTrack(size_t track)
-{
-    m_trackSolo = track;
-}
+void MidiSequencer::SetSoloTrack(size_t track) { midi_track_solo_ = track; }
 
-void BW_MidiSequencer::setSongNum(int track)
+void MidiSequencer::SetSongNum(int track)
 {
-    m_loadTrackNumber = track;
+    midi_load_track_number_ = track;
 
-    if (!m_rawSongsData.empty() && m_format == Format_XMIDI) // Reload the song
+    if (!midi_raw_songs_data_.empty() &&
+        midi_format_ == kFormatXMidi)  // Reload the song
     {
-        if (m_loadTrackNumber >= (int)m_rawSongsData.size())
-            m_loadTrackNumber = m_rawSongsData.size() - 1;
+        if (midi_load_track_number_ >= (int)midi_raw_songs_data_.size())
+            midi_load_track_number_ = midi_raw_songs_data_.size() - 1;
 
-        if (m_interface && m_interface->rt_controllerChange)
+        if (midi_output_interface_ &&
+            midi_output_interface_->rt_controllerChange)
         {
             for (int i = 0; i < 15; i++)
-                m_interface->rt_controllerChange(m_interface->rtUserData, i, 123, 0);
+                midi_output_interface_->rt_controllerChange(
+                    midi_output_interface_->rtUserData, i, 123, 0);
         }
 
-        m_atEnd = false;
-        m_loop.fullReset();
-        m_loop.caughtStart = true;
+        midi_at_end_ = false;
+        midi_loop_.FullReset();
+        midi_loop_.caught_start_ = true;
 
-        m_smfFormat = 0;
+        midi_smf_format_ = 0;
 
-        epi::MemFile *mfr =
-            new epi::MemFile(m_rawSongsData[m_loadTrackNumber].data(), m_rawSongsData[m_loadTrackNumber].size());
-        parseSMF(mfr);
+        epi::MemFile *mfr = new epi::MemFile(
+            midi_raw_songs_data_[midi_load_track_number_].data(),
+            midi_raw_songs_data_[midi_load_track_number_].size());
+        ParseSmf(mfr);
 
-        m_format = Format_XMIDI;
+        midi_format_ = kFormatXMidi;
     }
 }
 
-int BW_MidiSequencer::getSongsCount()
+int MidiSequencer::GetSongsCount() { return (int)midi_raw_songs_data_.size(); }
+
+void MidiSequencer::SetTriggerHandler(TriggerHandler handler, void *userdata)
 {
-    return (int)m_rawSongsData.size();
+    midi_trigger_handler_  = handler;
+    midi_trigger_userdata_ = userdata;
 }
 
-void BW_MidiSequencer::setTriggerHandler(TriggerHandler handler, void *userData)
+const std::string &MidiSequencer::GetErrorString()
 {
-    m_triggerHandler  = handler;
-    m_triggerUserData = userData;
+    return midi_error_string_;
 }
 
-const std::string &BW_MidiSequencer::getErrorString()
+bool MidiSequencer::GetLoopEnabled() { return midi_loop_enabled_; }
+
+void MidiSequencer::SetLoopEnabled(bool enabled)
 {
-    return m_errorString;
+    midi_loop_enabled_ = enabled;
 }
 
-bool BW_MidiSequencer::getLoopEnabled()
+int MidiSequencer::GetLoopsCount()
 {
-    return m_loopEnabled;
+    return midi_loop_count_ >= 0 ? (midi_loop_count_ + 1) : midi_loop_count_;
 }
 
-void BW_MidiSequencer::setLoopEnabled(bool enabled)
+void MidiSequencer::SetLoopsCount(int loops)
 {
-    m_loopEnabled = enabled;
+    if (loops >= 1) loops -= 1;  // Internally, loops count has the 0 base
+    midi_loop_count_ = loops;
 }
 
-int BW_MidiSequencer::getLoopsCount()
+void MidiSequencer::SetLoopHooksOnly(bool enabled)
 {
-    return m_loopCount >= 0 ? (m_loopCount + 1) : m_loopCount;
+    midi_loop_hooks_only_ = enabled;
 }
 
-void BW_MidiSequencer::setLoopsCount(int loops)
+const std::string &MidiSequencer::GetMusicTitle() { return midi_music_title_; }
+
+const std::string &MidiSequencer::GetMusicCopyright()
 {
-    if (loops >= 1)
-        loops -= 1; // Internally, loops count has the 0 base
-    m_loopCount = loops;
+    return midi_music_copyright_;
 }
 
-void BW_MidiSequencer::setLoopHooksOnly(bool enabled)
+const std::vector<std::string> &MidiSequencer::GetTrackTitles()
 {
-    m_loopHooksOnly = enabled;
+    return midi_music_track_titles_;
 }
 
-const std::string &BW_MidiSequencer::getMusicTitle()
+const std::vector<MidiSequencer::MidiMarkerEntry> &MidiSequencer::GetMarkers()
 {
-    return m_musTitle;
+    return midi_music_markers_;
 }
 
-const std::string &BW_MidiSequencer::getMusicCopyright()
-{
-    return m_musCopyright;
-}
+bool MidiSequencer::PositionAtEnd() { return midi_at_end_; }
 
-const std::vector<std::string> &BW_MidiSequencer::getTrackTitles()
-{
-    return m_musTrackTitles;
-}
+double MidiSequencer::GetTempoMultiplier() { return midi_tempo_multiplier_; }
 
-const std::vector<BW_MidiSequencer::MIDI_MarkerEntry> &BW_MidiSequencer::getMarkers()
+void MidiSequencer::BuildSmfSetupReset(size_t track_count)
 {
-    return m_musMarkers;
-}
-
-bool BW_MidiSequencer::positionAtEnd()
-{
-    return m_atEnd;
-}
-
-double BW_MidiSequencer::getTempoMultiplier()
-{
-    return m_tempoMultiplier;
-}
-
-void BW_MidiSequencer::buildSmfSetupReset(size_t trackCount)
-{
-    m_fullSongTimeLength = 0.0;
-    m_loopStartTime      = -1.0;
-    m_loopEndTime        = -1.0;
-    m_loopFormat         = Loop_Default;
-    m_trackDisable.clear();
+    midi_full_song_time_length_ = 0.0;
+    midi_loop_start_time_       = -1.0;
+    midi_loop_end_time_         = -1.0;
+    midi_loop_format_           = kLoopDefault;
+    midi_track_disabled_.clear();
     memset(m_channelDisable, 0, sizeof(m_channelDisable));
-    m_trackSolo = ~(size_t)0;
-    m_musTitle.clear();
-    m_musCopyright.clear();
-    m_musTrackTitles.clear();
-    m_musMarkers.clear();
-    m_trackData.clear();
-    m_trackData.resize(trackCount, MidiTrackQueue());
-    m_trackDisable.resize(trackCount);
+    midi_track_solo_ = ~(size_t)0;
+    midi_music_title_.clear();
+    midi_music_copyright_.clear();
+    midi_music_track_titles_.clear();
+    midi_music_markers_.clear();
+    midi_track_data_.clear();
+    midi_track_data_.resize(track_count, std::list<MidiTrackRow>());
+    midi_track_disabled_.resize(track_count);
 
-    m_loop.reset();
-    m_loop.invalidLoop = false;
-    m_time.reset();
+    midi_loop_.Reset();
+    midi_loop_.invalid_loop_ = false;
+    midi_time_.Reset();
 
-    m_currentPosition.began           = false;
-    m_currentPosition.absTimePosition = 0.0;
-    m_currentPosition.wait            = 0.0;
-    m_currentPosition.track.clear();
-    m_currentPosition.track.resize(trackCount);
+    midi_current_position_.began                  = false;
+    midi_current_position_.absolute_time_position = 0.0;
+    midi_current_position_.wait                   = 0.0;
+    midi_current_position_.track.clear();
+    midi_current_position_.track.resize(track_count);
 }
 
-bool BW_MidiSequencer::buildSmfTrackData(const std::vector<std::vector<uint8_t>> &trackData)
+bool MidiSequencer::BuildSmfTrackData(
+    const std::vector<std::vector<uint8_t>> &track_data)
 {
-    const size_t trackCount = trackData.size();
-    buildSmfSetupReset(trackCount);
+    const size_t track_count = track_data.size();
+    BuildSmfSetupReset(track_count);
 
-    bool gotGlobalLoopStart = false, gotGlobalLoopEnd = false, gotStackLoopStart = false, gotLoopEventInThisRow = false;
+    bool gotGlobalLoopStart = false, gotGlobalLoopEnd = false,
+         gotStackLoopStart = false, gotLoopEventInThisRow = false;
 
     //! Tick position of loop start tag
-    uint64_t loopStartTicks = 0;
+    uint64_t loop_start_ticks = 0;
     //! Tick position of loop end tag
-    uint64_t loopEndTicks = 0;
+    uint64_t loop_end_ticks = 0;
     //! Full length of song in ticks
     uint64_t ticksSongLength = 0;
     //! Cache for error message strign
     char error[150];
 
     //! Caches note on/off states.
-    bool noteStates[16 * 255];
+    bool note_states[16 * 255];
     /* This is required to carefully detect zero-length notes           *
      * and avoid a move of "note-off" event over "note-on" while sort.  *
      * Otherwise, after sort those notes will play infinite sound       */
@@ -576,72 +538,81 @@ bool BW_MidiSequencer::buildSmfTrackData(const std::vector<std::vector<uint8_t>>
 
     /*
      * TODO: Make this be safer for memory in case of broken input data
-     * which may cause going away of available track data (and then give a crash!)
+     * which may cause going away of available track data (and then give a
+     * crash!)
      *
-     * POST: Check this more carefully for possible vulnuabilities are can crash this
+     * POST: Check this more carefully for possible vulnuabilities are can crash
+     * this
      */
-    for (size_t tk = 0; tk < trackCount; ++tk)
+    for (size_t tk = 0; tk < track_count; ++tk)
     {
         uint64_t       abs_position = 0;
         int            status       = 0;
         MidiEvent      event;
         bool           ok       = false;
-        const uint8_t *end      = trackData[tk].data() + trackData[tk].size();
-        const uint8_t *trackPtr = trackData[tk].data();
-        memset(noteStates, 0, sizeof(noteStates));
+        const uint8_t *end      = track_data[tk].data() + track_data[tk].size();
+        const uint8_t *trackPtr = track_data[tk].data();
+        memset(note_states, 0, sizeof(note_states));
 
         // Time delay that follows the first event in the track
         {
             MidiTrackRow evtPos;
-            if (m_format == Format_RSXX)
+            if (midi_format_ == kFormatRsxx)
                 ok = true;
             else
-                evtPos.delay = readVarLenEx(&trackPtr, end, ok);
+                evtPos.delay_ = ReadVariableLengthValue(&trackPtr, end, ok);
             if (!ok)
             {
                 int len = snprintf(error, 150,
-                                   "buildTrackData: Can't read variable-length value at begin of track %d.\n", (int)tk);
+                                   "buildTrackData: Can't read variable-length "
+                                   "value at begin of track %d.\n",
+                                   (int)tk);
                 if ((len > 0) && (len < 150))
-                    m_parsingErrorsString += std::string(error, (size_t)len);
+                    midi_parsing_errors_string_ +=
+                        std::string(error, (size_t)len);
                 return false;
             }
 
-            // HACK: Begin every track with "Reset all controllers" event to avoid controllers state break came from end
-            // of song
+            // HACK: Begin every track with "Reset all controllers" event to
+            // avoid controllers state break came from end of song
             if (tk == 0)
             {
                 MidiEvent resetEvent;
-                resetEvent.type    = MidiEvent::T_SPECIAL;
-                resetEvent.subtype = MidiEvent::ST_SONG_BEGIN_HOOK;
-                evtPos.events.push_back(resetEvent);
+                resetEvent.type     = MidiEvent::kSpecial;
+                resetEvent.sub_type = MidiEvent::kSongBeginHook;
+                evtPos.events_.push_back(resetEvent);
             }
 
-            evtPos.absPos = abs_position;
-            abs_position += evtPos.delay;
-            m_trackData[tk].push_back(evtPos);
+            evtPos.absolute_position_ = abs_position;
+            abs_position += evtPos.delay_;
+            midi_track_data_[tk].push_back(evtPos);
         }
 
         MidiTrackRow evtPos;
-        do
-        {
-            event = parseEvent(&trackPtr, end, status);
-            if (!event.isValid)
+        do {
+            event = ParseEvent(&trackPtr, end, status);
+            if (!event.is_valid)
             {
-                int len = snprintf(error, 150, "buildTrackData: Fail to parse event in the track %d.\n", (int)tk);
+                int len = snprintf(
+                    error, 150,
+                    "buildTrackData: Fail to parse event in the track %d.\n",
+                    (int)tk);
                 if ((len > 0) && (len < 150))
-                    m_parsingErrorsString += std::string(error, (size_t)len);
+                    midi_parsing_errors_string_ +=
+                        std::string(error, (size_t)len);
                 return false;
             }
 
-            evtPos.events.push_back(event);
-            if (event.type == MidiEvent::T_SPECIAL)
+            evtPos.events_.push_back(event);
+            if (event.type == MidiEvent::kSpecial)
             {
-                if (event.subtype == MidiEvent::ST_TEMPOCHANGE)
+                if (event.sub_type == MidiEvent::kTempoChange)
                 {
-                    event.absPosition = abs_position;
+                    event.absolute_tick_position = abs_position;
                     temposList.push_back(event);
                 }
-                else if (!m_loop.invalidLoop && (event.subtype == MidiEvent::ST_LOOPSTART))
+                else if (!midi_loop_.invalid_loop_ &&
+                         (event.sub_type == MidiEvent::kLoopStart))
                 {
                     /*
                      * loopStart is invalid when:
@@ -649,16 +620,17 @@ bool BW_MidiSequencer::buildSmfTrackData(const std::vector<std::vector<uint8_t>>
                      * - appears more than one time in same MIDI file
                      */
                     if (gotGlobalLoopStart || gotLoopEventInThisRow)
-                        m_loop.invalidLoop = true;
+                        midi_loop_.invalid_loop_ = true;
                     else
                     {
                         gotGlobalLoopStart = true;
-                        loopStartTicks     = abs_position;
+                        loop_start_ticks   = abs_position;
                     }
                     // In this row we got loop event, register this!
                     gotLoopEventInThisRow = true;
                 }
-                else if (!m_loop.invalidLoop && (event.subtype == MidiEvent::ST_LOOPEND))
+                else if (!midi_loop_.invalid_loop_ &&
+                         (event.sub_type == MidiEvent::kLoopEnd))
                 {
                     /*
                      * loopEnd is invalid when:
@@ -668,301 +640,304 @@ bool BW_MidiSequencer::buildSmfTrackData(const std::vector<std::vector<uint8_t>>
                      */
                     if (gotGlobalLoopEnd || gotLoopEventInThisRow)
                     {
-                        m_loop.invalidLoop = true;
-                        if (m_interface->onDebugMessage)
+                        midi_loop_.invalid_loop_ = true;
+                        if (midi_output_interface_->onDebugMessage)
                         {
-                            m_interface->onDebugMessage(
-                                m_interface->onDebugMessage_userData, "== Invalid loop detected! %s %s ==",
-                                (gotGlobalLoopEnd ? "[Caught more than 1 loopEnd!]" : ""),
-                                (gotLoopEventInThisRow ? "[loopEnd in same row as loopStart!]" : ""));
+                            midi_output_interface_->onDebugMessage(
+                                midi_output_interface_->onDebugMessage_userdata,
+                                "== Invalid loop detected! %s %s ==",
+                                (gotGlobalLoopEnd
+                                     ? "[Caught more than 1 loopEnd!]"
+                                     : ""),
+                                (gotLoopEventInThisRow
+                                     ? "[loopEnd in same row as loopStart!]"
+                                     : ""));
                         }
                     }
                     else
                     {
                         gotGlobalLoopEnd = true;
-                        loopEndTicks     = abs_position;
+                        loop_end_ticks   = abs_position;
                     }
                     // In this row we got loop event, register this!
                     gotLoopEventInThisRow = true;
                 }
-                else if (!m_loop.invalidLoop && (event.subtype == MidiEvent::ST_LOOPSTACK_BEGIN))
+                else if (!midi_loop_.invalid_loop_ &&
+                         (event.sub_type == MidiEvent::kLoopStackBegin))
                 {
                     if (!gotStackLoopStart)
                     {
                         if (!gotGlobalLoopStart)
-                            loopStartTicks = abs_position;
+                            loop_start_ticks = abs_position;
                         gotStackLoopStart = true;
                     }
 
-                    m_loop.stackUp();
-                    if (m_loop.stackLevel >= (int)(m_loop.stack.size()))
+                    midi_loop_.StackUp();
+                    if (midi_loop_.stack_level_ >=
+                        (int)(midi_loop_.stack_.size()))
                     {
                         LoopStackEntry e;
                         e.loops    = event.data[0];
                         e.infinity = (event.data[0] == 0);
                         e.start    = abs_position;
                         e.end      = abs_position;
-                        m_loop.stack.push_back(e);
+                        midi_loop_.stack_.push_back(e);
                     }
                 }
-                else if (!m_loop.invalidLoop && ((event.subtype == MidiEvent::ST_LOOPSTACK_END) ||
-                                                 (event.subtype == MidiEvent::ST_LOOPSTACK_BREAK)))
+                else if (!midi_loop_.invalid_loop_ &&
+                         ((event.sub_type == MidiEvent::kLoopStackEnd) ||
+                          (event.sub_type == MidiEvent::kLoopStackBreak)))
                 {
-                    if (m_loop.stackLevel <= -1)
+                    if (midi_loop_.stack_level_ <= -1)
                     {
-                        m_loop.invalidLoop = true; // Caught loop end without of loop start!
-                        if (m_interface->onDebugMessage)
+                        midi_loop_.invalid_loop_ =
+                            true;  // Caught loop end without of loop start!
+                        if (midi_output_interface_->onDebugMessage)
                         {
-                            m_interface->onDebugMessage(
-                                m_interface->onDebugMessage_userData,
-                                "== Invalid loop detected! [Caught loop end without of loop start] ==");
+                            midi_output_interface_->onDebugMessage(
+                                midi_output_interface_->onDebugMessage_userdata,
+                                "== Invalid loop detected! [Caught loop end "
+                                "without of loop start] ==");
                         }
                     }
                     else
                     {
-                        if (loopEndTicks < abs_position)
-                            loopEndTicks = abs_position;
-                        m_loop.getCurStack().end = abs_position;
-                        m_loop.stackDown();
+                        if (loop_end_ticks < abs_position)
+                            loop_end_ticks = abs_position;
+                        midi_loop_.GetCurrentStack().end = abs_position;
+                        midi_loop_.StackDown();
                     }
                 }
             }
 
-            if (event.subtype != MidiEvent::ST_ENDTRACK) // Don't try to read delta after EndOfTrack event!
+            if (event.sub_type !=
+                MidiEvent::kEndTrack)  // Don't try to read delta after
+                                       // EndOfTrack event!
             {
-                evtPos.delay = readVarLenEx(&trackPtr, end, ok);
+                evtPos.delay_ = ReadVariableLengthValue(&trackPtr, end, ok);
                 if (!ok)
                 {
-                    /* End of track has been reached! However, there is no EOT event presented */
-                    event.type    = MidiEvent::T_SPECIAL;
-                    event.subtype = MidiEvent::ST_ENDTRACK;
+                    /* End of track has been reached! However, there is no EOT
+                     * event presented */
+                    event.type     = MidiEvent::kSpecial;
+                    event.sub_type = MidiEvent::kEndTrack;
                 }
             }
 
-#ifdef ENABLE_END_SILENCE_SKIPPING
-            // Have track end on its own row? Clear any delay on the row before
-            if (event.subtype == MidiEvent::ST_ENDTRACK && evtPos.events.size() == 1)
+            if ((evtPos.delay_ > 0) || (event.sub_type == MidiEvent::kEndTrack))
             {
-                if (!m_trackData[tk].empty())
-                {
-                    MidiTrackRow &previous = m_trackData[tk].back();
-                    previous.delay         = 0;
-                    previous.timeDelay     = 0;
-                }
-            }
-#endif
-
-            if ((evtPos.delay > 0) || (event.subtype == MidiEvent::ST_ENDTRACK))
-            {
-                evtPos.absPos = abs_position;
-                abs_position += evtPos.delay;
-                evtPos.sortEvents(noteStates);
-                m_trackData[tk].push_back(evtPos);
-                evtPos.clear();
+                evtPos.absolute_position_ = abs_position;
+                abs_position += evtPos.delay_;
+                evtPos.SortEvents(note_states);
+                midi_track_data_[tk].push_back(evtPos);
+                evtPos.Clear();
                 gotLoopEventInThisRow = false;
             }
-        } while ((trackPtr <= end) && (event.subtype != MidiEvent::ST_ENDTRACK));
+        } while ((trackPtr <= end) && (event.sub_type != MidiEvent::kEndTrack));
 
-        if (ticksSongLength < abs_position)
-            ticksSongLength = abs_position;
+        if (ticksSongLength < abs_position) ticksSongLength = abs_position;
         // Set the chain of events begin
-        if (m_trackData[tk].size() > 0)
-            m_currentPosition.track[tk].pos = m_trackData[tk].begin();
+        if (midi_track_data_[tk].size() > 0)
+            midi_current_position_.track[tk].pos = midi_track_data_[tk].begin();
     }
 
     if (gotGlobalLoopStart && !gotGlobalLoopEnd)
     {
         gotGlobalLoopEnd = true;
-        loopEndTicks     = ticksSongLength;
+        loop_end_ticks   = ticksSongLength;
     }
 
     // loopStart must be located before loopEnd!
-    if (loopStartTicks >= loopEndTicks)
+    if (loop_start_ticks >= loop_end_ticks)
     {
-        m_loop.invalidLoop = true;
-        if (m_interface->onDebugMessage && (gotGlobalLoopStart || gotGlobalLoopEnd))
+        midi_loop_.invalid_loop_ = true;
+        if (midi_output_interface_->onDebugMessage &&
+            (gotGlobalLoopStart || gotGlobalLoopEnd))
         {
-            m_interface->onDebugMessage(m_interface->onDebugMessage_userData,
-                                        "== Invalid loop detected! [loopEnd is going before loopStart] ==");
+            midi_output_interface_->onDebugMessage(
+                midi_output_interface_->onDebugMessage_userdata,
+                "== Invalid loop detected! [loopEnd is "
+                "going before loopStart] ==");
         }
     }
 
-    buildTimeLine(temposList, loopStartTicks, loopEndTicks);
+    BuildTimeLine(temposList, loop_start_ticks, loop_end_ticks);
 
     return true;
 }
 
-void BW_MidiSequencer::buildTimeLine(const std::vector<MidiEvent> &tempos, uint64_t loopStartTicks,
-                                     uint64_t loopEndTicks)
+void MidiSequencer::BuildTimeLine(const std::vector<MidiEvent> &tempos,
+                                  uint64_t loop_start_ticks,
+                                  uint64_t loop_end_ticks)
 {
-    const size_t trackCount = m_trackData.size();
+    const size_t track_count = midi_track_data_.size();
     /********************************************************************************/
     // Calculate time basing on collected tempo events
     /********************************************************************************/
-    for (size_t tk = 0; tk < trackCount; ++tk)
+    for (size_t tk = 0; tk < track_count; ++tk)
     {
-        fraction<uint64_t> currentTempo       = m_tempo;
-        double             time               = 0.0;
-        size_t             tempo_change_index = 0;
-        MidiTrackQueue    &track              = m_trackData[tk];
-        if (track.empty())
-            continue; // Empty track is useless!
+        fraction<uint64_t>       currentTempo       = midi_tempo_;
+        double                   time               = 0.0;
+        size_t                   tempo_change_index = 0;
+        std::list<MidiTrackRow> &track              = midi_track_data_[tk];
+        if (track.empty()) continue;  // Empty track is useless!
 
-#ifdef DEBUG_TIME_CALCULATION
-        std::fprintf(stdout, "\n============Track %" PRIuPTR "=============\n", tk);
-        std::fflush(stdout);
-#endif
-
-        MidiTrackRow *posPrev = &(*(track.begin())); // First element
-        for (MidiTrackQueue::iterator it = track.begin(); it != track.end(); it++)
+        MidiTrackRow *posPrev = &(*(track.begin()));  // First element
+        for (std::list<MidiTrackRow>::iterator it = track.begin();
+             it != track.end(); it++)
         {
-#ifdef DEBUG_TIME_CALCULATION
-            bool tempoChanged = false;
-#endif
             MidiTrackRow &pos = *it;
-            if ((posPrev != &pos) && // Skip first event
-                (!tempos.empty()) && // Only when in-track tempo events are available
+            if ((posPrev != &pos) &&  // Skip first event
+                (!tempos.empty()) &&  // Only when in-track tempo events are
+                                      // available
                 (tempo_change_index < tempos.size()))
             {
                 // If tempo event is going between of current and previous event
-                if (tempos[tempo_change_index].absPosition <= pos.absPos)
+                if (tempos[tempo_change_index].absolute_tick_position <=
+                    pos.absolute_position_)
                 {
-                    // Stop points: begin point and tempo change points are before end point
+                    // Stop points: begin point and tempo change points are
+                    // before end point
                     std::vector<TempoChangePoint> points;
                     fraction<uint64_t>            t;
-                    TempoChangePoint              firstPoint = {posPrev->absPos, currentTempo};
+                    TempoChangePoint firstPoint = {posPrev->absolute_position_,
+                                                   currentTempo};
                     points.push_back(firstPoint);
 
-                    // Collect tempo change points between previous and current events
-                    do
-                    {
+                    // Collect tempo change points between previous and current
+                    // events
+                    do {
                         TempoChangePoint tempoMarker;
-                        const MidiEvent &tempoPoint = tempos[tempo_change_index];
-                        tempoMarker.absPos          = tempoPoint.absPosition;
-                        tempoMarker.tempo = m_invDeltaTicks * fraction<uint64_t>(readBEint(tempoPoint.data.data(),
-                                                                                           tempoPoint.data.size()));
+                        const MidiEvent &tempoPoint =
+                            tempos[tempo_change_index];
+                        tempoMarker.absolute_position =
+                            tempoPoint.absolute_tick_position;
+                        tempoMarker.tempo = midi_individual_tick_delta_ *
+                                            fraction<uint64_t>(ReadIntBigEndian(
+                                                tempoPoint.data.data(),
+                                                tempoPoint.data.size()));
                         points.push_back(tempoMarker);
                         tempo_change_index++;
-                    } while ((tempo_change_index < tempos.size()) &&
-                             (tempos[tempo_change_index].absPosition <= pos.absPos));
+                    } while (
+                        (tempo_change_index < tempos.size()) &&
+                        (tempos[tempo_change_index].absolute_tick_position <=
+                         pos.absolute_position_));
 
                     // Re-calculate time delay of previous event
-                    time -= posPrev->timeDelay;
-                    posPrev->timeDelay = 0.0;
+                    time -= posPrev->time_delay_;
+                    posPrev->time_delay_ = 0.0;
 
                     for (size_t i = 0, j = 1; j < points.size(); i++, j++)
                     {
-                        /* If one or more tempo events are appears between of two events,
-                         * calculate delays between each tempo point, begin and end */
+                        /* If one or more tempo events are appears between of
+                         * two events, calculate delays between each tempo
+                         * point, begin and end */
                         uint64_t midDelay = 0;
                         // Delay between points
-                        midDelay = points[j].absPos - points[i].absPos;
+                        midDelay = points[j].absolute_position -
+                                   points[i].absolute_position;
                         // Time delay between points
                         t = midDelay * currentTempo;
-                        posPrev->timeDelay += t.value();
+                        posPrev->time_delay_ += t.value();
 
                         // Apply next tempo
                         currentTempo = points[j].tempo;
-#ifdef DEBUG_TIME_CALCULATION
-                        tempoChanged = true;
-#endif
                     }
-                    // Then calculate time between last tempo change point and end point
+                    // Then calculate time between last tempo change point and
+                    // end point
                     TempoChangePoint tailTempo = points.back();
-                    uint64_t         postDelay = pos.absPos - tailTempo.absPos;
-                    t                          = postDelay * currentTempo;
-                    posPrev->timeDelay += t.value();
+                    uint64_t         postDelay =
+                        pos.absolute_position_ - tailTempo.absolute_position;
+                    t = postDelay * currentTempo;
+                    posPrev->time_delay_ += t.value();
 
                     // Store Common time delay
-                    posPrev->time = time;
-                    time += posPrev->timeDelay;
+                    posPrev->time_ = time;
+                    time += posPrev->time_delay_;
                 }
             }
 
-            fraction<uint64_t> t = pos.delay * currentTempo;
-            pos.timeDelay        = t.value();
-            pos.time             = time;
-            time += pos.timeDelay;
+            fraction<uint64_t> t = pos.delay_ * currentTempo;
+            pos.time_delay_      = t.value();
+            pos.time_            = time;
+            time += pos.time_delay_;
 
             // Capture markers after time value calculation
-            for (size_t i = 0; i < pos.events.size(); i++)
+            for (size_t i = 0; i < pos.events_.size(); i++)
             {
-                MidiEvent &e = pos.events[i];
-                if ((e.type == MidiEvent::T_SPECIAL) && (e.subtype == MidiEvent::ST_MARKER))
+                MidiEvent &e = pos.events_[i];
+                if ((e.type == MidiEvent::kSpecial) &&
+                    (e.sub_type == MidiEvent::kMarker))
                 {
-                    MIDI_MarkerEntry marker;
-                    marker.label     = std::string((char *)e.data.data(), e.data.size());
-                    marker.pos_ticks = pos.absPos;
-                    marker.pos_time  = pos.time;
-                    m_musMarkers.push_back(marker);
+                    MidiMarkerEntry marker;
+                    marker.label =
+                        std::string((char *)e.data.data(), e.data.size());
+                    marker.position_ticks = pos.absolute_position_;
+                    marker.position_time  = pos.time_;
+                    midi_music_markers_.push_back(marker);
                 }
             }
 
             // Capture loop points time positions
-            if (!m_loop.invalidLoop)
+            if (!midi_loop_.invalid_loop_)
             {
                 // Set loop points times
-                if (loopStartTicks == pos.absPos)
-                    m_loopStartTime = pos.time;
-                else if (loopEndTicks == pos.absPos)
-                    m_loopEndTime = pos.time;
+                if (loop_start_ticks == pos.absolute_position_)
+                    midi_loop_start_time_ = pos.time_;
+                else if (loop_end_ticks == pos.absolute_position_)
+                    midi_loop_end_time_ = pos.time_;
             }
-
-#ifdef DEBUG_TIME_CALCULATION
-            std::fprintf(stdout, "= %10" PRId64 " = %10f%s\n", pos.absPos, pos.time,
-                         tempoChanged ? " <----TEMPO CHANGED" : "");
-            std::fflush(stdout);
-#endif
-
             posPrev = &pos;
         }
 
-        if (time > m_fullSongTimeLength)
-            m_fullSongTimeLength = time;
+        if (time > midi_full_song_time_length_)
+            midi_full_song_time_length_ = time;
     }
 
-    m_fullSongTimeLength += m_postSongWaitDelay;
+    midi_full_song_time_length_ += midi_post_song_wait_delay_;
     // Set begin of the music
-    m_trackBeginPosition = m_currentPosition;
-    // Initial loop position will begin at begin of track until passing of the loop point
-    m_loopBeginPosition = m_currentPosition;
+    midi_track_begin_position_ = midi_current_position_;
+    // Initial loop position will begin at begin of track until passing of the
+    // loop point
+    midi_loop_begin_position_ = midi_current_position_;
     // Set lowest level of the loop stack
-    m_loop.stackLevel = -1;
+    midi_loop_.stack_level_ = -1;
 
     // Set the count of loops
-    m_loop.loopsCount = m_loopCount;
-    m_loop.loopsLeft  = m_loopCount;
+    midi_loop_.loops_count_ = midi_loop_count_;
+    midi_loop_.loops_left_  = midi_loop_count_;
 
     /********************************************************************************/
     // Find and set proper loop points
     /********************************************************************************/
-    if (!m_loop.invalidLoop && !m_currentPosition.track.empty())
+    if (!midi_loop_.invalid_loop_ && !midi_current_position_.track.empty())
     {
         unsigned     caughLoopStart = 0;
         bool         scanDone       = false;
-        const size_t ctrackCount    = m_currentPosition.track.size();
-        Position     rowPosition(m_currentPosition);
+        const size_t ctrack_count   = midi_current_position_.track.size();
+        Position     rowPosition(midi_current_position_);
 
         while (!scanDone)
         {
             const Position rowBeginPosition(rowPosition);
 
-            for (size_t tk = 0; tk < ctrackCount; ++tk)
+            for (size_t tk = 0; tk < ctrack_count; ++tk)
             {
                 Position::TrackInfo &track = rowPosition.track[tk];
                 if ((track.lastHandledEvent >= 0) && (track.delay <= 0))
                 {
                     // Check is an end of track has been reached
-                    if (track.pos == m_trackData[tk].end())
+                    if (track.pos == midi_track_data_[tk].end())
                     {
                         track.lastHandledEvent = -1;
                         continue;
                     }
 
-                    for (size_t i = 0; i < track.pos->events.size(); i++)
+                    for (size_t i = 0; i < track.pos->events_.size(); i++)
                     {
-                        const MidiEvent &evt = track.pos->events[i];
-                        if (evt.type == MidiEvent::T_SPECIAL && evt.subtype == MidiEvent::ST_LOOPSTART)
+                        const MidiEvent &evt = track.pos->events_[i];
+                        if (evt.type == MidiEvent::kSpecial &&
+                            evt.sub_type == MidiEvent::kLoopStart)
                         {
                             caughLoopStart++;
                             scanDone = true;
@@ -972,7 +947,7 @@ void BW_MidiSequencer::buildTimeLine(const std::vector<MidiEvent> &tempos, uint6
 
                     if (track.lastHandledEvent >= 0)
                     {
-                        track.delay += track.pos->delay;
+                        track.delay += track.pos->delay_;
                         track.pos++;
                     }
                 }
@@ -982,10 +957,11 @@ void BW_MidiSequencer::buildTimeLine(const std::vector<MidiEvent> &tempos, uint6
             uint64_t shortestDelay         = 0;
             bool     shortestDelayNotFound = true;
 
-            for (size_t tk = 0; tk < ctrackCount; ++tk)
+            for (size_t tk = 0; tk < ctrack_count; ++tk)
             {
                 Position::TrackInfo &track = rowPosition.track[tk];
-                if ((track.lastHandledEvent >= 0) && (shortestDelayNotFound || track.delay < shortestDelay))
+                if ((track.lastHandledEvent >= 0) &&
+                    (shortestDelayNotFound || track.delay < shortestDelay))
                 {
                     shortestDelay         = track.delay;
                     shortestDelayNotFound = false;
@@ -993,152 +969,31 @@ void BW_MidiSequencer::buildTimeLine(const std::vector<MidiEvent> &tempos, uint6
             }
 
             // Schedule the next playevent to be processed after that delay
-            for (size_t tk = 0; tk < ctrackCount; ++tk)
+            for (size_t tk = 0; tk < ctrack_count; ++tk)
                 rowPosition.track[tk].delay -= shortestDelay;
 
             if (caughLoopStart > 0)
             {
-                m_loopBeginPosition                 = rowBeginPosition;
-                m_loopBeginPosition.absTimePosition = m_loopStartTime;
-                scanDone                            = true;
+                midi_loop_begin_position_ = rowBeginPosition;
+                midi_loop_begin_position_.absolute_time_position =
+                    midi_loop_start_time_;
+                scanDone = true;
             }
 
-            if (shortestDelayNotFound)
-                break;
+            if (shortestDelayNotFound) break;
         }
     }
-
-    /********************************************************************************/
-    // Resolve "hell of all times" of too short drum notes:
-    // move too short percussion note-offs far far away as possible
-    /********************************************************************************/
-#if 0 // Use this to record WAVEs for comparison before/after implementing of this
-    if(m_format == Format_MIDI) // Percussion fix is needed for MIDI only, not for IMF/RSXX
-    {
-        //! Minimal real time in seconds
-#define DRUM_NOTE_MIN_TIME  0.03
-        //! Minimal ticks count
-#define DRUM_NOTE_MIN_TICKS 15
-        struct NoteState
-        {
-            double       delay;
-            uint64_t     delayTicks;
-            bool         isOn;
-            char         ___pad[7];
-        } drNotes[255];
-        size_t banks[16];
-
-        for(size_t tk = 0; tk < trackCount; ++tk)
-        {
-            memset(drNotes, 0, sizeof(drNotes));
-            memset(banks, 0, sizeof(banks));
-            MidiTrackQueue &track = m_trackData[tk];
-            if(track.empty())
-                continue; // Empty track is useless!
-
-            for(MidiTrackQueue::iterator it = track.begin(); it != track.end(); it++)
-            {
-                MidiTrackRow &pos = *it;
-
-                for(ssize_t e = 0; e < (ssize_t)pos.events.size(); e++)
-                {
-                    MidiEvent *et = &pos.events[(size_t)e];
-
-                    /* Set MSB/LSB bank */
-                    if(et->type == MidiEvent::T_CTRLCHANGE)
-                    {
-                        uint8_t ctrlno = et->data[0];
-                        uint8_t value =  et->data[1];
-                        switch(ctrlno)
-                        {
-                        case 0: // Set bank msb (GM bank)
-                            banks[et->channel] = (value << 8) | (banks[et->channel] & 0x00FF);
-                            break;
-                        case 32: // Set bank lsb (XG bank)
-                            banks[et->channel] = (banks[et->channel] & 0xFF00) | (value & 0x00FF);
-                            break;
-                        default:
-                            break;
-                        }
-                        continue;
-                    }
-
-                    bool percussion = (et->channel == 9) ||
-                                      banks[et->channel] == 0x7E00 || // XG SFX1/SFX2 channel (16128 signed decimal)
-                                      banks[et->channel] == 0x7F00;   // XG Percussion channel (16256 signed decimal)
-                    if(!percussion)
-                        continue;
-
-                    if(et->type == MidiEvent::T_NOTEON)
-                    {
-                        uint8_t     note = et->data[0] & 0x7F;
-                        NoteState   &ns = drNotes[note];
-                        ns.isOn = true;
-                        ns.delay = 0.0;
-                        ns.delayTicks = 0;
-                    }
-                    else if(et->type == MidiEvent::T_NOTEOFF)
-                    {
-                        uint8_t note = et->data[0] & 0x7F;
-                        NoteState &ns = drNotes[note];
-                        if(ns.isOn)
-                        {
-                            ns.isOn = false;
-                            if(ns.delayTicks < DRUM_NOTE_MIN_TICKS || ns.delay < DRUM_NOTE_MIN_TIME) // If note is too short
-                            {
-                                //Move it into next event position if that possible
-                                for(MidiTrackQueue::iterator itNext = it;
-                                    itNext != track.end();
-                                    itNext++)
-                                {
-                                    MidiTrackRow &posN = *itNext;
-                                    if(ns.delayTicks > DRUM_NOTE_MIN_TICKS && ns.delay > DRUM_NOTE_MIN_TIME)
-                                    {
-                                        // Put note-off into begin of next event list
-                                        posN.events.insert(posN.events.begin(), pos.events[(size_t)e]);
-                                        // Renive this event from a current row
-                                        pos.events.erase(pos.events.begin() + (int)e);
-                                        e--;
-                                        break;
-                                    }
-                                    ns.delay += posN.timeDelay;
-                                    ns.delayTicks += posN.delay;
-                                }
-                            }
-                            ns.delay = 0.0;
-                            ns.delayTicks = 0;
-                        }
-                    }
-                }
-
-                //Append time delays to sustaining notes
-                for(size_t no = 0; no < 128; no++)
-                {
-                    NoteState &ns = drNotes[no];
-                    if(ns.isOn)
-                    {
-                        ns.delay        += pos.timeDelay;
-                        ns.delayTicks   += pos.delay;
-                    }
-                }
-            }
-        }
-#undef DRUM_NOTE_MIN_TIME
-#undef DRUM_NOTE_MIN_TICKS
-    }
-#endif
 }
 
-bool BW_MidiSequencer::processEvents(bool isSeek)
+bool MidiSequencer::ProcessEvents(bool is_seek)
 {
-    if (m_currentPosition.track.size() == 0)
-        m_atEnd = true; // No MIDI track data to play
-    if (m_atEnd)
-        return false; // No more events in the queue
+    if (midi_current_position_.track.size() == 0)
+        midi_at_end_ = true;         // No MIDI track data to play
+    if (midi_at_end_) return false;  // No more events in the queue
 
-    m_loop.caughtEnd          = false;
-    const size_t   trackCount = m_currentPosition.track.size();
-    const Position rowBeginPosition(m_currentPosition);
+    midi_loop_.caught_end_     = false;
+    const size_t   track_count = midi_current_position_.track.size();
+    const Position rowBeginPosition(midi_current_position_);
     bool           doLoopJump             = false;
     unsigned       caughLoopStart         = 0;
     unsigned       caughLoopStackStart    = 0;
@@ -1146,101 +1001,87 @@ bool BW_MidiSequencer::processEvents(bool isSeek)
     double         caughLoopStackEndsTime = 0.0;
     unsigned       caughLoopStackBreaks   = 0;
 
-#ifdef DEBUG_TIME_CALCULATION
-    double maxTime = 0.0;
-#endif
-
-    for (size_t tk = 0; tk < trackCount; ++tk)
+    for (size_t tk = 0; tk < track_count; ++tk)
     {
-        Position::TrackInfo &track = m_currentPosition.track[tk];
+        Position::TrackInfo &track = midi_current_position_.track[tk];
         if ((track.lastHandledEvent >= 0) && (track.delay <= 0))
         {
             // Check is an end of track has been reached
-            if (track.pos == m_trackData[tk].end())
+            if (track.pos == midi_track_data_[tk].end())
             {
                 track.lastHandledEvent = -1;
                 break;
             }
 
             // Handle event
-            for (size_t i = 0; i < track.pos->events.size(); i++)
+            for (size_t i = 0; i < track.pos->events_.size(); i++)
             {
-                const MidiEvent &evt = track.pos->events[i];
-#ifdef ENABLE_BEGIN_SILENCE_SKIPPING
-                if (!m_currentPosition.began && (evt.type == MidiEvent::T_NOTEON))
-                    m_currentPosition.began = true;
-#endif
-                if (isSeek && (evt.type == MidiEvent::T_NOTEON))
-                    continue;
+                const MidiEvent &evt = track.pos->events_[i];
+
+                if (is_seek && (evt.type == MidiEvent::kNoteOn)) continue;
                 handleEvent(tk, evt, track.lastHandledEvent);
 
-                if (m_loop.caughtStart)
+                if (midi_loop_.caught_start_)
                 {
-                    if (m_interface->onloopStart) // Loop Start hook
-                        m_interface->onloopStart(m_interface->onloopStart_userData);
+                    if (midi_output_interface_->onloopStart)  // Loop Start hook
+                        midi_output_interface_->onloopStart(
+                            midi_output_interface_->onloopStart_userdata);
 
                     caughLoopStart++;
-                    m_loop.caughtStart = false;
+                    midi_loop_.caught_start_ = false;
                 }
 
-                if (m_loop.caughtStackStart)
+                if (midi_loop_.caught_stack_start_)
                 {
-                    if (m_interface->onloopStart && (m_loopStartTime >= track.pos->time)) // Loop Start hook
-                        m_interface->onloopStart(m_interface->onloopStart_userData);
+                    if (midi_output_interface_->onloopStart &&
+                        (midi_loop_start_time_ >=
+                         track.pos->time_))  // Loop Start hook
+                        midi_output_interface_->onloopStart(
+                            midi_output_interface_->onloopStart_userdata);
 
                     caughLoopStackStart++;
-                    m_loop.caughtStackStart = false;
+                    midi_loop_.caught_stack_start_ = false;
                 }
 
-                if (m_loop.caughtStackBreak)
+                if (midi_loop_.caught_stack_break_)
                 {
                     caughLoopStackBreaks++;
-                    m_loop.caughtStackBreak = false;
+                    midi_loop_.caught_stack_break_ = false;
                 }
 
-                if (m_loop.caughtEnd || m_loop.isStackEnd())
+                if (midi_loop_.caught_end_ || midi_loop_.IsStackEnd())
                 {
-                    if (m_loop.caughtStackEnd)
+                    if (midi_loop_.caught_stack_end_)
                     {
-                        m_loop.caughtStackEnd = false;
+                        midi_loop_.caught_stack_end_ = false;
                         caughLoopStackEnds++;
-                        caughLoopStackEndsTime = track.pos->time;
+                        caughLoopStackEndsTime = track.pos->time_;
                     }
                     doLoopJump = true;
-                    break; // Stop event handling on catching loopEnd event!
+                    break;  // Stop event handling on catching loopEnd event!
                 }
             }
 
-#ifdef DEBUG_TIME_CALCULATION
-            if (maxTime < track.pos->time)
-                maxTime = track.pos->time;
-#endif
             // Read next event time (unless the track just ended)
             if (track.lastHandledEvent >= 0)
             {
-                track.delay += track.pos->delay;
+                track.delay += track.pos->delay_;
                 track.pos++;
             }
 
-            if (doLoopJump)
-                break;
+            if (doLoopJump) break;
         }
     }
-
-#ifdef DEBUG_TIME_CALCULATION
-    std::fprintf(stdout, "                              \r");
-    std::fprintf(stdout, "Time: %10f; Audio: %10f\r", maxTime, m_currentPosition.absTimePosition);
-    std::fflush(stdout);
-#endif
 
     // Find a shortest delay from all track
     uint64_t shortestDelay         = 0;
     bool     shortestDelayNotFound = true;
 
-    for (size_t tk = 0; tk < trackCount; ++tk)
+    for (size_t tk = 0; tk < track_count; ++tk)
     {
-        Position::TrackInfo &track = m_currentPosition.track[tk];
-        if ((track.lastHandledEvent >= 0) && (shortestDelayNotFound || track.delay < shortestDelay))
+        Position::TrackInfo &track = midi_current_position_.track[tk];
+        if ((track.lastHandledEvent >= 0) &&
+            (shortestDelayNotFound || track.delay < shortestDelay))
         {
             shortestDelay         = track.delay;
             shortestDelayNotFound = false;
@@ -1248,26 +1089,24 @@ bool BW_MidiSequencer::processEvents(bool isSeek)
     }
 
     // Schedule the next playevent to be processed after that delay
-    for (size_t tk = 0; tk < trackCount; ++tk)
-        m_currentPosition.track[tk].delay -= shortestDelay;
+    for (size_t tk = 0; tk < track_count; ++tk)
+        midi_current_position_.track[tk].delay -= shortestDelay;
 
-    fraction<uint64_t> t = shortestDelay * m_tempo;
+    fraction<uint64_t> t = shortestDelay * midi_tempo_;
 
-#ifdef ENABLE_BEGIN_SILENCE_SKIPPING
-    if (m_currentPosition.began)
-#endif
-        m_currentPosition.wait += t.value();
+    midi_current_position_.wait += t.value();
 
-    if (caughLoopStart > 0 && m_loopBeginPosition.absTimePosition <= 0.0)
-        m_loopBeginPosition = rowBeginPosition;
+    if (caughLoopStart > 0 &&
+        midi_loop_begin_position_.absolute_time_position <= 0.0)
+        midi_loop_begin_position_ = rowBeginPosition;
 
     if (caughLoopStackStart > 0)
     {
         while (caughLoopStackStart > 0)
         {
-            m_loop.stackUp();
-            LoopStackEntry &s = m_loop.getCurStack();
-            s.startPosition   = rowBeginPosition;
+            midi_loop_.StackUp();
+            LoopStackEntry &s = midi_loop_.GetCurrentStack();
+            s.start_position  = rowBeginPosition;
             caughLoopStackStart--;
         }
         return true;
@@ -1277,11 +1116,11 @@ bool BW_MidiSequencer::processEvents(bool isSeek)
     {
         while (caughLoopStackBreaks > 0)
         {
-            LoopStackEntry &s = m_loop.getCurStack();
+            LoopStackEntry &s = midi_loop_.GetCurrentStack();
             s.loops           = 0;
             s.infinity        = false;
             // Quit the loop
-            m_loop.stackDown();
+            midi_loop_.StackDown();
             caughLoopStackBreaks--;
         }
     }
@@ -1290,24 +1129,31 @@ bool BW_MidiSequencer::processEvents(bool isSeek)
     {
         while (caughLoopStackEnds > 0)
         {
-            LoopStackEntry &s = m_loop.getCurStack();
+            LoopStackEntry &s = midi_loop_.GetCurrentStack();
             if (s.infinity)
             {
-                if (m_interface->onloopEnd && (m_loopEndTime >= caughLoopStackEndsTime)) // Loop End hook
+                if (midi_output_interface_->onloopEnd &&
+                    (midi_loop_end_time_ >=
+                     caughLoopStackEndsTime))  // Loop End hook
                 {
-                    m_interface->onloopEnd(m_interface->onloopEnd_userData);
-                    if (m_loopHooksOnly) // Stop song on reaching loop end
+                    midi_output_interface_->onloopEnd(
+                        midi_output_interface_->onloopEnd_userdata);
+                    if (midi_loop_hooks_only_)  // Stop song on reaching loop
+                                                // end
                     {
-                        m_atEnd = true;                                // Don't handle events anymore
-                        m_currentPosition.wait += m_postSongWaitDelay; // One second delay until stop playing
+                        midi_at_end_ = true;  // Don't handle events anymore
+                        midi_current_position_.wait +=
+                            midi_post_song_wait_delay_;  // One second delay
+                                                         // until stop playing
                     }
                 }
 
-                m_currentPosition     = s.startPosition;
-                m_loop.skipStackStart = true;
+                midi_current_position_       = s.start_position;
+                midi_loop_.skip_stack_start_ = true;
 
                 for (uint8_t i = 0; i < 16; i++)
-                    m_interface->rt_controllerChange(m_interface->rtUserData, i, 123, 0);
+                    midi_output_interface_->rt_controllerChange(
+                        midi_output_interface_->rtUserData, i, 123, 0);
 
                 return true;
             }
@@ -1316,24 +1162,25 @@ bool BW_MidiSequencer::processEvents(bool isSeek)
                 s.loops--;
                 if (s.loops > 0)
                 {
-                    m_currentPosition     = s.startPosition;
-                    m_loop.skipStackStart = true;
+                    midi_current_position_       = s.start_position;
+                    midi_loop_.skip_stack_start_ = true;
 
                     for (uint8_t i = 0; i < 16; i++)
-                        m_interface->rt_controllerChange(m_interface->rtUserData, i, 123, 0);
+                        midi_output_interface_->rt_controllerChange(
+                            midi_output_interface_->rtUserData, i, 123, 0);
 
                     return true;
                 }
                 else
                 {
                     // Quit the loop
-                    m_loop.stackDown();
+                    midi_loop_.StackDown();
                 }
             }
             else
             {
                 // Quit the loop
-                m_loop.stackDown();
+                midi_loop_.StackDown();
             }
             caughLoopStackEnds--;
         }
@@ -1341,68 +1188,79 @@ bool BW_MidiSequencer::processEvents(bool isSeek)
         return true;
     }
 
-    if (shortestDelayNotFound || m_loop.caughtEnd)
+    if (shortestDelayNotFound || midi_loop_.caught_end_)
     {
-        if (m_interface->onloopEnd) // Loop End hook
-            m_interface->onloopEnd(m_interface->onloopEnd_userData);
+        if (midi_output_interface_->onloopEnd)  // Loop End hook
+            midi_output_interface_->onloopEnd(
+                midi_output_interface_->onloopEnd_userdata);
 
         for (uint8_t i = 0; i < 16; i++)
-            m_interface->rt_controllerChange(m_interface->rtUserData, i, 123, 0);
+            midi_output_interface_->rt_controllerChange(
+                midi_output_interface_->rtUserData, i, 123, 0);
 
         // Loop if song end or loop end point has reached
-        m_loop.caughtEnd = false;
-        shortestDelay    = 0;
+        midi_loop_.caught_end_ = false;
+        shortestDelay          = 0;
 
-        if (!m_loopEnabled || (shortestDelayNotFound && m_loop.loopsCount >= 0 && m_loop.loopsLeft < 1) ||
-            m_loopHooksOnly)
+        if (!midi_loop_enabled_ ||
+            (shortestDelayNotFound && midi_loop_.loops_count_ >= 0 &&
+             midi_loop_.loops_left_ < 1) ||
+            midi_loop_hooks_only_)
         {
-            m_atEnd = true;                                // Don't handle events anymore
-            m_currentPosition.wait += m_postSongWaitDelay; // One second delay until stop playing
-            return true;                                   // We have caugh end here!
+            midi_at_end_ = true;  // Don't handle events anymore
+            midi_current_position_.wait +=
+                midi_post_song_wait_delay_;  // One second delay until stop
+                                             // playing
+            return true;                     // We have caugh end here!
         }
 
-        if (m_loop.temporaryBroken)
+        if (midi_loop_.temporary_broken_)
         {
-            m_currentPosition      = m_trackBeginPosition;
-            m_loop.temporaryBroken = false;
+            midi_current_position_       = midi_track_begin_position_;
+            midi_loop_.temporary_broken_ = false;
         }
-        else if (m_loop.loopsCount < 0 || m_loop.loopsLeft >= 1)
+        else if (midi_loop_.loops_count_ < 0 || midi_loop_.loops_left_ >= 1)
         {
-            m_currentPosition = m_loopBeginPosition;
-            if (m_loop.loopsCount >= 1)
-                m_loop.loopsLeft--;
+            midi_current_position_ = midi_loop_begin_position_;
+            if (midi_loop_.loops_count_ >= 1) midi_loop_.loops_left_--;
         }
     }
 
-    return true; // Has events in queue
+    return true;  // Has events in queue
 }
 
-BW_MidiSequencer::MidiEvent BW_MidiSequencer::parseEvent(const uint8_t **pptr, const uint8_t *end, int &status)
+MidiSequencer::MidiEvent MidiSequencer::ParseEvent(const uint8_t **pptr,
+                                                   const uint8_t  *end,
+                                                   int            &status)
 {
-    const uint8_t             *&ptr = *pptr;
-    BW_MidiSequencer::MidiEvent evt;
+    const uint8_t          *&ptr = *pptr;
+    MidiSequencer::MidiEvent evt;
 
     if (ptr + 1 > end)
     {
-        // When track doesn't ends on the middle of event data, it's must be fine
-        evt.type    = MidiEvent::T_SPECIAL;
-        evt.subtype = MidiEvent::ST_ENDTRACK;
+        // When track doesn't ends on the middle of event data, it's must be
+        // fine
+        evt.type     = MidiEvent::kSpecial;
+        evt.sub_type = MidiEvent::kEndTrack;
         return evt;
     }
 
     unsigned char byte = *(ptr++);
     bool          ok   = false;
 
-    if (byte == MidiEvent::T_SYSEX || byte == MidiEvent::T_SYSEX2) // Ignore SysEx
+    if (byte == MidiEvent::kSysex ||
+        byte == MidiEvent::kSysex2)  // Ignore SysEx
     {
-        uint64_t length = readVarLenEx(pptr, end, ok);
+        uint64_t length = ReadVariableLengthValue(pptr, end, ok);
         if (!ok || (ptr + length > end))
         {
-            m_parsingErrorsString += "parseEvent: Can't read SysEx event - Unexpected end of track data.\n";
-            evt.isValid = 0;
+            midi_parsing_errors_string_ +=
+                "ParseEvent: Can't read SysEx event - Unexpected end of track "
+                "data.\n";
+            evt.is_valid = 0;
             return evt;
         }
-        evt.type = MidiEvent::T_SYSEX;
+        evt.type = MidiEvent::kSysex;
         evt.data.clear();
         evt.data.push_back(byte);
         std::copy(ptr, ptr + length, std::back_inserter(evt.data));
@@ -1410,81 +1268,87 @@ BW_MidiSequencer::MidiEvent BW_MidiSequencer::parseEvent(const uint8_t **pptr, c
         return evt;
     }
 
-    if (byte == MidiEvent::T_SPECIAL)
+    if (byte == MidiEvent::kSpecial)
     {
         // Special event FF
         uint8_t  evtype = *(ptr++);
-        uint64_t length = readVarLenEx(pptr, end, ok);
+        uint64_t length = ReadVariableLengthValue(pptr, end, ok);
         if (!ok || (ptr + length > end))
         {
-            m_parsingErrorsString += "parseEvent: Can't read Special event - Unexpected end of track data.\n";
-            evt.isValid = 0;
+            midi_parsing_errors_string_ +=
+                "ParseEvent: Can't read Special event - Unexpected end of "
+                "track data.\n";
+            evt.is_valid = 0;
             return evt;
         }
         std::string data(length ? (const char *)ptr : nullptr, (size_t)length);
         ptr += (size_t)length;
 
-        evt.type    = byte;
-        evt.subtype = evtype;
+        evt.type     = byte;
+        evt.sub_type = evtype;
         evt.data.insert(evt.data.begin(), data.begin(), data.end());
 
-#if 0 /* Print all tempo events */
-        if(evt.subtype == MidiEvent::ST_TEMPOCHANGE)
+        /* TODO: Store those meta-strings separately and give ability to read
+         * them by external functions (to display song title and copyright in
+         * the player) */
+        if (evt.sub_type == MidiEvent::kCopyright)
         {
-            if(hooks.onDebugMessage)
-                hooks.onDebugMessage(hooks.onDebugMessage_userData, "Temp Change: %02X%02X%02X", evt.data[0], evt.data[1], evt.data[2]);
-        }
-#endif
-
-        /* TODO: Store those meta-strings separately and give ability to read them
-         * by external functions (to display song title and copyright in the player) */
-        if (evt.subtype == MidiEvent::ST_COPYRIGHT)
-        {
-            if (m_musCopyright.empty())
+            if (midi_music_copyright_.empty())
             {
-                m_musCopyright = std::string((const char *)evt.data.data(), evt.data.size());
-                m_musCopyright.push_back('\0'); /* ending fix for UTF16 strings */
-                if (m_interface->onDebugMessage)
-                    m_interface->onDebugMessage(m_interface->onDebugMessage_userData, "Music copyright: %s",
-                                                m_musCopyright.c_str());
+                midi_music_copyright_ =
+                    std::string((const char *)evt.data.data(), evt.data.size());
+                midi_music_copyright_.push_back(
+                    '\0'); /* ending fix for UTF16 strings */
+                if (midi_output_interface_->onDebugMessage)
+                    midi_output_interface_->onDebugMessage(
+                        midi_output_interface_->onDebugMessage_userdata,
+                        "Music copyright: %s", midi_music_copyright_.c_str());
             }
-            else if (m_interface->onDebugMessage)
+            else if (midi_output_interface_->onDebugMessage)
             {
                 std::string str((const char *)evt.data.data(), evt.data.size());
                 str.push_back('\0'); /* ending fix for UTF16 strings */
-                m_interface->onDebugMessage(m_interface->onDebugMessage_userData, "Extra copyright event: %s",
-                                            str.c_str());
+                midi_output_interface_->onDebugMessage(
+                    midi_output_interface_->onDebugMessage_userdata,
+                    "Extra copyright event: %s", str.c_str());
             }
         }
-        else if (evt.subtype == MidiEvent::ST_SQTRKTITLE)
+        else if (evt.sub_type == MidiEvent::kSequenceTrackTitle)
         {
-            if (m_musTitle.empty())
+            if (midi_music_title_.empty())
             {
-                m_musTitle = std::string((const char *)evt.data.data(), evt.data.size());
-                m_musTitle.push_back('\0'); /* ending fix for UTF16 strings */
-                if (m_interface->onDebugMessage)
-                    m_interface->onDebugMessage(m_interface->onDebugMessage_userData, "Music title: %s",
-                                                m_musTitle.c_str());
+                midi_music_title_ =
+                    std::string((const char *)evt.data.data(), evt.data.size());
+                midi_music_title_.push_back(
+                    '\0'); /* ending fix for UTF16 strings */
+                if (midi_output_interface_->onDebugMessage)
+                    midi_output_interface_->onDebugMessage(
+                        midi_output_interface_->onDebugMessage_userdata,
+                        "Music title: %s", midi_music_title_.c_str());
             }
             else
             {
                 std::string str((const char *)evt.data.data(), evt.data.size());
                 str.push_back('\0'); /* ending fix for UTF16 strings */
-                m_musTrackTitles.push_back(str);
-                if (m_interface->onDebugMessage)
-                    m_interface->onDebugMessage(m_interface->onDebugMessage_userData, "Track title: %s", str.c_str());
+                midi_music_track_titles_.push_back(str);
+                if (midi_output_interface_->onDebugMessage)
+                    midi_output_interface_->onDebugMessage(
+                        midi_output_interface_->onDebugMessage_userdata,
+                        "Track title: %s", str.c_str());
             }
         }
-        else if (evt.subtype == MidiEvent::ST_INSTRTITLE)
+        else if (evt.sub_type == MidiEvent::kInstrumentTitle)
         {
-            if (m_interface->onDebugMessage)
+            if (midi_output_interface_->onDebugMessage)
             {
                 std::string str((const char *)evt.data.data(), evt.data.size());
                 str.push_back('\0'); /* ending fix for UTF16 strings */
-                m_interface->onDebugMessage(m_interface->onDebugMessage_userData, "Instrument: %s", str.c_str());
+                midi_output_interface_->onDebugMessage(
+                    midi_output_interface_->onDebugMessage_userdata,
+                    "Instrument: %s", str.c_str());
             }
         }
-        else if (evt.subtype == MidiEvent::ST_MARKER)
+        else if (evt.sub_type == MidiEvent::kMarker)
         {
             // To lower
             for (size_t i = 0; i < data.size(); i++)
@@ -1496,55 +1360,59 @@ BW_MidiSequencer::MidiEvent BW_MidiSequencer::parseEvent(const uint8_t **pptr, c
             if (data == "loopstart")
             {
                 // Return a custom Loop Start event instead of Marker
-                evt.subtype = MidiEvent::ST_LOOPSTART;
-                evt.data.clear(); // Data is not needed
+                evt.sub_type = MidiEvent::kLoopStart;
+                evt.data.clear();  // Data is not needed
                 return evt;
             }
 
             if (data == "loopend")
             {
                 // Return a custom Loop End event instead of Marker
-                evt.subtype = MidiEvent::ST_LOOPEND;
-                evt.data.clear(); // Data is not needed
+                evt.sub_type = MidiEvent::kLoopEnd;
+                evt.data.clear();  // Data is not needed
                 return evt;
             }
 
             if (data.substr(0, 10) == "loopstart=")
             {
-                evt.type      = MidiEvent::T_SPECIAL;
-                evt.subtype   = MidiEvent::ST_LOOPSTACK_BEGIN;
+                evt.type      = MidiEvent::kSpecial;
+                evt.sub_type  = MidiEvent::kLoopStackBegin;
                 uint8_t loops = (uint8_t)(atoi(data.substr(10).c_str()));
                 evt.data.clear();
                 evt.data.push_back(loops);
 
-                if (m_interface->onDebugMessage)
+                if (midi_output_interface_->onDebugMessage)
                 {
-                    m_interface->onDebugMessage(m_interface->onDebugMessage_userData,
-                                                "Stack Marker Loop Start at %d to %d level with %d loops",
-                                                m_loop.stackLevel, m_loop.stackLevel + 1, loops);
+                    midi_output_interface_->onDebugMessage(
+                        midi_output_interface_->onDebugMessage_userdata,
+                        "Stack Marker Loop Start at %d to %d level with %d "
+                        "loops",
+                        midi_loop_.stack_level_, midi_loop_.stack_level_ + 1,
+                        loops);
                 }
                 return evt;
             }
 
             if (data.substr(0, 8) == "loopend=")
             {
-                evt.type    = MidiEvent::T_SPECIAL;
-                evt.subtype = MidiEvent::ST_LOOPSTACK_END;
+                evt.type     = MidiEvent::kSpecial;
+                evt.sub_type = MidiEvent::kLoopStackEnd;
                 evt.data.clear();
 
-                if (m_interface->onDebugMessage)
+                if (midi_output_interface_->onDebugMessage)
                 {
-                    m_interface->onDebugMessage(m_interface->onDebugMessage_userData,
-                                                "Stack Marker Loop %s at %d to %d level",
-                                                (evt.subtype == MidiEvent::ST_LOOPSTACK_END ? "End" : "Break"),
-                                                m_loop.stackLevel, m_loop.stackLevel - 1);
+                    midi_output_interface_->onDebugMessage(
+                        midi_output_interface_->onDebugMessage_userdata,
+                        "Stack Marker Loop %s at %d to %d level",
+                        (evt.sub_type == MidiEvent::kLoopStackEnd ? "End"
+                                                                  : "Break"),
+                        midi_loop_.stack_level_, midi_loop_.stack_level_ - 1);
                 }
                 return evt;
             }
         }
 
-        if (evtype == MidiEvent::ST_ENDTRACK)
-            status = -1; // Finalize track
+        if (evtype == MidiEvent::kEndTrack) status = -1;  // Finalize track
 
         return evt;
     }
@@ -1557,13 +1425,14 @@ BW_MidiSequencer::MidiEvent BW_MidiSequencer::parseEvent(const uint8_t **pptr, c
     }
 
     // Sys Com Song Select(Song #) [0-127]
-    if (byte == MidiEvent::T_SYSCOMSNGSEL)
+    if (byte == MidiEvent::kSysComSongSelect)
     {
         if (ptr + 1 > end)
         {
-            m_parsingErrorsString +=
-                "parseEvent: Can't read System Command Song Select event - Unexpected end of track data.\n";
-            evt.isValid = 0;
+            midi_parsing_errors_string_ +=
+                "ParseEvent: Can't read System Command Song Select event - "
+                "Unexpected end of track data.\n";
+            evt.is_valid = 0;
             return evt;
         }
         evt.type = byte;
@@ -1572,13 +1441,14 @@ BW_MidiSequencer::MidiEvent BW_MidiSequencer::parseEvent(const uint8_t **pptr, c
     }
 
     // Sys Com Song Position Pntr [LSB, MSB]
-    if (byte == MidiEvent::T_SYSCOMSPOSPTR)
+    if (byte == MidiEvent::kSysComSongPositionPointer)
     {
         if (ptr + 2 > end)
         {
-            m_parsingErrorsString +=
-                "parseEvent: Can't read System Command Position Pointer event - Unexpected end of track data.\n";
-            evt.isValid = 0;
+            midi_parsing_errors_string_ +=
+                "ParseEvent: Can't read System Command Position Pointer event "
+                "- Unexpected end of track data.\n";
+            evt.is_valid = 0;
             return evt;
         }
         evt.type = byte;
@@ -1594,570 +1464,569 @@ BW_MidiSequencer::MidiEvent BW_MidiSequencer::parseEvent(const uint8_t **pptr, c
 
     switch (evType)
     {
-    case MidiEvent::T_NOTEOFF: // 2 byte length
-    case MidiEvent::T_NOTEON:
-    case MidiEvent::T_NOTETOUCH:
-    case MidiEvent::T_CTRLCHANGE:
-    case MidiEvent::T_WHEEL:
-        if (ptr + 2 > end)
-        {
-            m_parsingErrorsString += "parseEvent: Can't read regular 2-byte event - Unexpected end of track data.\n";
-            evt.isValid = 0;
-            return evt;
-        }
-
-        evt.data.push_back(*(ptr++));
-        evt.data.push_back(*(ptr++));
-
-        if ((evType == MidiEvent::T_NOTEON) && (evt.data[1] == 0))
-        {
-            evt.type = MidiEvent::T_NOTEOFF; // Note ON with zero velocity is Note OFF!
-        }
-        else if (evType == MidiEvent::T_CTRLCHANGE)
-        {
-            // 111'th loopStart controller (RPG Maker and others)
-            if (m_format == Format_MIDI)
+        case MidiEvent::kNoteOff:  // 2 byte length
+        case MidiEvent::kNoteOn:
+        case MidiEvent::kNoteTouch:
+        case MidiEvent::kControlChange:
+        case MidiEvent::kPitchWheel:
+            if (ptr + 2 > end)
             {
-                switch (evt.data[0])
+                midi_parsing_errors_string_ +=
+                    "ParseEvent: Can't read regular 2-byte event - Unexpected "
+                    "end of track data.\n";
+                evt.is_valid = 0;
+                return evt;
+            }
+
+            evt.data.push_back(*(ptr++));
+            evt.data.push_back(*(ptr++));
+
+            if ((evType == MidiEvent::kNoteOn) && (evt.data[1] == 0))
+            {
+                evt.type = MidiEvent::kNoteOff;  // Note ON with zero velocity
+                                                 // is Note OFF!
+            }
+            else if (evType == MidiEvent::kControlChange)
+            {
+                // 111'th loopStart controller (RPG Maker and others)
+                if (midi_format_ == kFormatMidi)
                 {
-                case 110:
-                    if (m_loopFormat == Loop_Default)
+                    switch (evt.data[0])
                     {
-                        // Change event type to custom Loop Start event and clear data
-                        evt.type    = MidiEvent::T_SPECIAL;
-                        evt.subtype = MidiEvent::ST_LOOPSTART;
-                        evt.data.clear();
-                        m_loopFormat = Loop_HMI;
-                    }
-                    else if (m_loopFormat == Loop_HMI)
-                    {
-                        // Repeating of 110'th point is BAD practice, treat as EMIDI
-                        m_loopFormat = Loop_EMIDI;
-                    }
-                    break;
+                        case 110:
+                            if (midi_loop_format_ == kLoopDefault)
+                            {
+                                // Change event type to custom Loop Start event
+                                // and clear data
+                                evt.type     = MidiEvent::kSpecial;
+                                evt.sub_type = MidiEvent::kLoopStart;
+                                evt.data.clear();
+                                midi_loop_format_ = kLoopHmi;
+                            }
+                            else if (midi_loop_format_ == kLoopHmi)
+                            {
+                                // Repeating of 110'th point is BAD practice,
+                                // treat as EMIDI
+                                midi_loop_format_ = kLoopEMidi;
+                            }
+                            break;
 
-                case 111:
-                    if (m_loopFormat == Loop_HMI)
-                    {
-                        // Change event type to custom Loop End event and clear data
-                        evt.type    = MidiEvent::T_SPECIAL;
-                        evt.subtype = MidiEvent::ST_LOOPEND;
-                        evt.data.clear();
-                    }
-                    else if (m_loopFormat != Loop_EMIDI)
-                    {
-                        // Change event type to custom Loop Start event and clear data
-                        evt.type    = MidiEvent::T_SPECIAL;
-                        evt.subtype = MidiEvent::ST_LOOPSTART;
-                        evt.data.clear();
-                    }
-                    break;
+                        case 111:
+                            if (midi_loop_format_ == kLoopHmi)
+                            {
+                                // Change event type to custom Loop End event
+                                // and clear data
+                                evt.type     = MidiEvent::kSpecial;
+                                evt.sub_type = MidiEvent::kLoopEnd;
+                                evt.data.clear();
+                            }
+                            else if (midi_loop_format_ != kLoopEMidi)
+                            {
+                                // Change event type to custom Loop Start event
+                                // and clear data
+                                evt.type     = MidiEvent::kSpecial;
+                                evt.sub_type = MidiEvent::kLoopStart;
+                                evt.data.clear();
+                            }
+                            break;
 
-                case 113:
-                    if (m_loopFormat == Loop_EMIDI)
-                    {
-                        // EMIDI does using of CC113 with same purpose as CC7
-                        evt.data[0] = 7;
+                        case 113:
+                            if (midi_loop_format_ == kLoopEMidi)
+                            {
+                                // EMIDI does using of CC113 with same purpose
+                                // as CC7
+                                evt.data[0] = 7;
+                            }
+                            break;
                     }
-                    break;
-#if 0 // WIP
-                case 116:
-                    if(m_loopFormat == Loop_EMIDI)
+                }
+
+                if (midi_format_ == kFormatXMidi)
+                {
+                    switch (evt.data[0])
                     {
-                        evt.type = MidiEvent::T_SPECIAL;
-                        evt.subtype = MidiEvent::ST_LOOPSTACK_BEGIN;
-                        evt.data[0] = evt.data[1];
-                        evt.data.pop_back();
+                        case 116:  // For Loop Controller
+                            evt.type     = MidiEvent::kSpecial;
+                            evt.sub_type = MidiEvent::kLoopStackBegin;
+                            evt.data[0]  = evt.data[1];
+                            evt.data.pop_back();
 
-                        if(m_interface->onDebugMessage)
-                        {
-                            m_interface->onDebugMessage(
-                                m_interface->onDebugMessage_userData,
-                                "Stack EMIDI Loop Start at %d to %d level with %d loops",
-                                m_loop.stackLevel,
-                                m_loop.stackLevel + 1,
-                                evt.data[0]
-                            );
-                        }
+                            if (midi_output_interface_->onDebugMessage)
+                            {
+                                midi_output_interface_->onDebugMessage(
+                                    midi_output_interface_
+                                        ->onDebugMessage_userdata,
+                                    "Stack XMI Loop Start at %d to %d level "
+                                    "with %d loops",
+                                    midi_loop_.stack_level_,
+                                    midi_loop_.stack_level_ + 1, evt.data[0]);
+                            }
+                            break;
+
+                        case 117:  // Next/Break Loop Controller
+                            evt.type     = MidiEvent::kSpecial;
+                            evt.sub_type = evt.data[1] < 64
+                                               ? MidiEvent::kLoopStackBreak
+                                               : MidiEvent::kLoopStackEnd;
+                            evt.data.clear();
+
+                            if (midi_output_interface_->onDebugMessage)
+                            {
+                                midi_output_interface_->onDebugMessage(
+                                    midi_output_interface_
+                                        ->onDebugMessage_userdata,
+                                    "Stack XMI Loop %s at %d to %d level",
+                                    (evt.sub_type == MidiEvent::kLoopStackEnd
+                                         ? "End"
+                                         : "Break"),
+                                    midi_loop_.stack_level_,
+                                    midi_loop_.stack_level_ - 1);
+                            }
+                            break;
+
+                        case 119:  // Callback Trigger
+                            evt.type     = MidiEvent::kSpecial;
+                            evt.sub_type = MidiEvent::kCallbackTrigger;
+                            evt.data.assign(1, evt.data[1]);
+                            break;
                     }
-                    break;
-
-                case 117:  // Next/Break Loop Controller
-                    if(m_loopFormat == Loop_EMIDI)
-                    {
-                        evt.type = MidiEvent::T_SPECIAL;
-                        evt.subtype = MidiEvent::ST_LOOPSTACK_END;
-                        evt.data.clear();
-
-                        if(m_interface->onDebugMessage)
-                        {
-                            m_interface->onDebugMessage(
-                                m_interface->onDebugMessage_userData,
-                                "Stack EMIDI Loop End at %d to %d level",
-                                m_loop.stackLevel,
-                                m_loop.stackLevel - 1
-                            );
-                        }
-                    }
-                    break;
-#endif
                 }
             }
 
-            if (m_format == Format_XMIDI)
-            {
-                switch (evt.data[0])
-                {
-                case 116: // For Loop Controller
-                    evt.type    = MidiEvent::T_SPECIAL;
-                    evt.subtype = MidiEvent::ST_LOOPSTACK_BEGIN;
-                    evt.data[0] = evt.data[1];
-                    evt.data.pop_back();
-
-                    if (m_interface->onDebugMessage)
-                    {
-                        m_interface->onDebugMessage(m_interface->onDebugMessage_userData,
-                                                    "Stack XMI Loop Start at %d to %d level with %d loops",
-                                                    m_loop.stackLevel, m_loop.stackLevel + 1, evt.data[0]);
-                    }
-                    break;
-
-                case 117: // Next/Break Loop Controller
-                    evt.type    = MidiEvent::T_SPECIAL;
-                    evt.subtype = evt.data[1] < 64 ? MidiEvent::ST_LOOPSTACK_BREAK : MidiEvent::ST_LOOPSTACK_END;
-                    evt.data.clear();
-
-                    if (m_interface->onDebugMessage)
-                    {
-                        m_interface->onDebugMessage(m_interface->onDebugMessage_userData,
-                                                    "Stack XMI Loop %s at %d to %d level",
-                                                    (evt.subtype == MidiEvent::ST_LOOPSTACK_END ? "End" : "Break"),
-                                                    m_loop.stackLevel, m_loop.stackLevel - 1);
-                    }
-                    break;
-
-                case 119: // Callback Trigger
-                    evt.type    = MidiEvent::T_SPECIAL;
-                    evt.subtype = MidiEvent::ST_CALLBACK_TRIGGER;
-                    evt.data.assign(1, evt.data[1]);
-                    break;
-                }
-            }
-        }
-
-        return evt;
-    case MidiEvent::T_PATCHCHANGE: // 1 byte length
-    case MidiEvent::T_CHANAFTTOUCH:
-        if (ptr + 1 > end)
-        {
-            m_parsingErrorsString += "parseEvent: Can't read regular 1-byte event - Unexpected end of track data.\n";
-            evt.isValid = 0;
             return evt;
-        }
-        evt.data.push_back(*(ptr++));
-        return evt;
-    default:
-        break;
+        case MidiEvent::kPatchChange:  // 1 byte length
+        case MidiEvent::kChannelAftertouch:
+            if (ptr + 1 > end)
+            {
+                midi_parsing_errors_string_ +=
+                    "ParseEvent: Can't read regular 1-byte event - Unexpected "
+                    "end of track data.\n";
+                evt.is_valid = 0;
+                return evt;
+            }
+            evt.data.push_back(*(ptr++));
+            return evt;
+        default:
+            break;
     }
 
     return evt;
 }
 
-void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEvent &evt, int32_t &status)
+void MidiSequencer::handleEvent(size_t                          track,
+                                const MidiSequencer::MidiEvent &evt,
+                                int32_t                        &status)
 {
-    if (track == 0 && m_smfFormat < 2 && evt.type == MidiEvent::T_SPECIAL &&
-        (evt.subtype == MidiEvent::ST_TEMPOCHANGE || evt.subtype == MidiEvent::ST_TIMESIGNATURE))
+    if (track == 0 && midi_smf_format_ < 2 && evt.type == MidiEvent::kSpecial &&
+        (evt.sub_type == MidiEvent::kTempoChange ||
+         evt.sub_type == MidiEvent::kTimeSignature))
     {
         /* never reject track 0 timing events on SMF format != 2
            note: multi-track XMI convert to format 2 SMF */
     }
     else
     {
-        if (m_trackSolo != ~(size_t)(0) && track != m_trackSolo)
+        if (midi_track_solo_ != ~(size_t)(0) && track != midi_track_solo_)
             return;
-        if (m_trackDisable[track])
-            return;
+        if (midi_track_disabled_[track]) return;
     }
 
-    if (m_interface->onEvent)
+    if (midi_output_interface_->onEvent)
     {
-        m_interface->onEvent(m_interface->onEvent_userData, evt.type, evt.subtype, evt.channel, evt.data.data(),
-                             evt.data.size());
+        midi_output_interface_->onEvent(
+            midi_output_interface_->onEvent_userdata, evt.type, evt.sub_type,
+            evt.channel, evt.data.data(), evt.data.size());
     }
 
-    if (evt.type == MidiEvent::T_SYSEX || evt.type == MidiEvent::T_SYSEX2) // Ignore SysEx
+    if (evt.type == MidiEvent::kSysex ||
+        evt.type == MidiEvent::kSysex2)  // Ignore SysEx
     {
-        m_interface->rt_systemExclusive(m_interface->rtUserData, evt.data.data(), evt.data.size());
+        midi_output_interface_->rt_systemExclusive(
+            midi_output_interface_->rtUserData, evt.data.data(),
+            evt.data.size());
         return;
     }
 
-    if (evt.type == MidiEvent::T_SPECIAL)
+    if (evt.type == MidiEvent::kSpecial)
     {
         // Special event FF
-        uint_fast16_t evtype = evt.subtype;
+        uint_fast16_t evtype = evt.sub_type;
         uint64_t      length = (uint64_t)(evt.data.size());
-        const char   *data(length ? (const char *)(evt.data.data()) : "\0\0\0\0\0\0\0\0");
+        const char   *data(length ? (const char *)(evt.data.data())
+                                  : "\0\0\0\0\0\0\0\0");
 
-        if (m_interface->rt_metaEvent) // Meta event hook
-            m_interface->rt_metaEvent(m_interface->rtUserData, evtype, (const uint8_t *)(data),
-                                      size_t(length));
+        if (midi_output_interface_->rt_metaEvent)  // Meta event hook
+            midi_output_interface_->rt_metaEvent(
+                midi_output_interface_->rtUserData, evtype,
+                (const uint8_t *)(data), size_t(length));
 
-        if (evtype == MidiEvent::ST_ENDTRACK) // End Of Track
+        if (evtype == MidiEvent::kEndTrack)  // End Of Track
         {
             status = -1;
             return;
         }
 
-        if (evtype == MidiEvent::ST_TEMPOCHANGE) // Tempo change
+        if (evtype == MidiEvent::kTempoChange)  // Tempo change
         {
-            m_tempo = m_invDeltaTicks * fraction<uint64_t>(readBEint(evt.data.data(), evt.data.size()));
+            midi_tempo_ = midi_individual_tick_delta_ *
+                          fraction<uint64_t>(ReadIntBigEndian(evt.data.data(),
+                                                              evt.data.size()));
             return;
         }
 
-        if (evtype == MidiEvent::ST_MARKER) // Meta event
+        if (evtype == MidiEvent::kMarker)  // Meta event
         {
             // Do nothing! :-P
             return;
         }
 
-        if (evtype == MidiEvent::ST_DEVICESWITCH)
+        if (evtype == MidiEvent::kDeviceSwitch)
         {
-            if (m_interface->onDebugMessage)
-                m_interface->onDebugMessage(m_interface->onDebugMessage_userData, "Switching another device: %s", data);
-            if (m_interface->rt_deviceSwitch)
-                m_interface->rt_deviceSwitch(m_interface->rtUserData, track, data, size_t(length));
+            if (midi_output_interface_->onDebugMessage)
+                midi_output_interface_->onDebugMessage(
+                    midi_output_interface_->onDebugMessage_userdata,
+                    "Switching another device: %s", data);
+            if (midi_output_interface_->rt_deviceSwitch)
+                midi_output_interface_->rt_deviceSwitch(
+                    midi_output_interface_->rtUserData, track, data,
+                    size_t(length));
             return;
         }
 
         // Turn on Loop handling when loop is enabled
-        if (m_loopEnabled && !m_loop.invalidLoop)
+        if (midi_loop_enabled_ && !midi_loop_.invalid_loop_)
         {
-            if (evtype == MidiEvent::ST_LOOPSTART) // Special non-spec MIDI loop Start point
+            if (evtype == MidiEvent::kLoopStart)  // Special non-spec MIDI
+                                                  // loop Start point
             {
-                m_loop.caughtStart = true;
+                midi_loop_.caught_start_ = true;
                 return;
             }
 
-            if (evtype == MidiEvent::ST_LOOPEND) // Special non-spec MIDI loop End point
+            if (evtype ==
+                MidiEvent::kLoopEnd)  // Special non-spec MIDI loop End point
             {
-                m_loop.caughtEnd = true;
+                midi_loop_.caught_end_ = true;
                 return;
             }
 
-            if (evtype == MidiEvent::ST_LOOPSTACK_BEGIN)
+            if (evtype == MidiEvent::kLoopStackBegin)
             {
-                if (m_loop.skipStackStart)
+                if (midi_loop_.skip_stack_start_)
                 {
-                    m_loop.skipStackStart = false;
+                    midi_loop_.skip_stack_start_ = false;
                     return;
                 }
 
                 char   x      = data[0];
-                size_t slevel = (size_t)(m_loop.stackLevel + 1);
-                while (slevel >= m_loop.stack.size())
+                size_t slevel = (size_t)(midi_loop_.stack_level_ + 1);
+                while (slevel >= midi_loop_.stack_.size())
                 {
                     LoopStackEntry e;
                     e.loops    = x;
                     e.infinity = (x == 0);
                     e.start    = 0;
                     e.end      = 0;
-                    m_loop.stack.push_back(e);
+                    midi_loop_.stack_.push_back(e);
                 }
 
-                LoopStackEntry &s       = m_loop.stack[slevel];
-                s.loops                 = (int)(x);
-                s.infinity              = (x == 0);
-                m_loop.caughtStackStart = true;
+                LoopStackEntry &s              = midi_loop_.stack_[slevel];
+                s.loops                        = (int)(x);
+                s.infinity                     = (x == 0);
+                midi_loop_.caught_stack_start_ = true;
                 return;
             }
 
-            if (evtype == MidiEvent::ST_LOOPSTACK_END)
+            if (evtype == MidiEvent::kLoopStackEnd)
             {
-                m_loop.caughtStackEnd = true;
+                midi_loop_.caught_stack_end_ = true;
                 return;
             }
 
-            if (evtype == MidiEvent::ST_LOOPSTACK_BREAK)
+            if (evtype == MidiEvent::kLoopStackBreak)
             {
-                m_loop.caughtStackBreak = true;
+                midi_loop_.caught_stack_break_ = true;
                 return;
             }
         }
 
-        if (evtype == MidiEvent::ST_CALLBACK_TRIGGER)
+        if (evtype == MidiEvent::kCallbackTrigger)
         {
-#if 0 /* Print all callback triggers events */
-            if(m_interface->onDebugMessage)
-                m_interface->onDebugMessage(m_interface->onDebugMessage_userData, "Callback Trigger: %02X", evt.data[0]);
-#endif
-            if (m_triggerHandler)
-                m_triggerHandler(m_triggerUserData, (unsigned)(data[0]), track);
+            if (midi_trigger_handler_)
+                midi_trigger_handler_(midi_trigger_userdata_,
+                                      (unsigned)(data[0]), track);
             return;
         }
 
-        if (evtype == MidiEvent::ST_RAWOPL) // Special non-spec ADLMIDI special for IMF playback: Direct poke to AdLib
+        if (evtype ==
+            MidiEvent::kRawOpl)  // Special non-spec ADLMIDI special for IMF
+                                 // playback: Direct poke to AdLib
         {
-            if (m_interface->rt_rawOPL)
-                m_interface->rt_rawOPL(m_interface->rtUserData, (uint8_t)(data[0]),
-                                       (uint8_t)(data[1]));
+            if (midi_output_interface_->rt_rawOPL)
+                midi_output_interface_->rt_rawOPL(
+                    midi_output_interface_->rtUserData, (uint8_t)(data[0]),
+                    (uint8_t)(data[1]));
             return;
         }
 
-        if (evtype == MidiEvent::ST_SONG_BEGIN_HOOK)
+        if (evtype == MidiEvent::kSongBeginHook)
         {
-            if (m_interface->onSongStart)
-                m_interface->onSongStart(m_interface->onSongStart_userData);
+            if (midi_output_interface_->onSongStart)
+                midi_output_interface_->onSongStart(
+                    midi_output_interface_->onSongStart_userdata);
             return;
         }
 
         return;
     }
 
-    if (evt.type == MidiEvent::T_SYSCOMSNGSEL || evt.type == MidiEvent::T_SYSCOMSPOSPTR)
+    if (evt.type == MidiEvent::kSysComSongSelect ||
+        evt.type == MidiEvent::kSysComSongPositionPointer)
         return;
 
     size_t midCh = evt.channel;
-    if (m_interface->rt_currentDevice)
-        midCh += m_interface->rt_currentDevice(m_interface->rtUserData, track);
+    if (midi_output_interface_->rt_currentDevice)
+        midCh += midi_output_interface_->rt_currentDevice(
+            midi_output_interface_->rtUserData, track);
     status = evt.type;
 
     switch (evt.type)
     {
-    case MidiEvent::T_NOTEOFF: // Note off
-    {
-        if (midCh < 16 && m_channelDisable[midCh])
-            break; // Disabled channel
-        uint8_t note = evt.data[0];
-        uint8_t vol  = evt.data[1];
-        if (m_interface->rt_noteOff)
-            m_interface->rt_noteOff(m_interface->rtUserData, (uint8_t)(midCh), note);
-        if (m_interface->rt_noteOffVel)
-            m_interface->rt_noteOffVel(m_interface->rtUserData, (uint8_t)(midCh), note, vol);
-        break;
-    }
+        case MidiEvent::kNoteOff:  // Note off
+        {
+            if (midCh < 16 && m_channelDisable[midCh])
+                break;  // Disabled channel
+            uint8_t note = evt.data[0];
+            uint8_t vol  = evt.data[1];
+            if (midi_output_interface_->rt_noteOff)
+                midi_output_interface_->rt_noteOff(
+                    midi_output_interface_->rtUserData, (uint8_t)(midCh), note);
+            if (midi_output_interface_->rt_noteOffVel)
+                midi_output_interface_->rt_noteOffVel(
+                    midi_output_interface_->rtUserData, (uint8_t)(midCh), note,
+                    vol);
+            break;
+        }
 
-    case MidiEvent::T_NOTEON: // Note on
-    {
-        if (midCh < 16 && m_channelDisable[midCh])
-            break; // Disabled channel
-        uint8_t note = evt.data[0];
-        uint8_t vol  = evt.data[1];
-        m_interface->rt_noteOn(m_interface->rtUserData, (uint8_t)(midCh), note, vol);
-        break;
-    }
+        case MidiEvent::kNoteOn:  // Note on
+        {
+            if (midCh < 16 && m_channelDisable[midCh])
+                break;  // Disabled channel
+            uint8_t note = evt.data[0];
+            uint8_t vol  = evt.data[1];
+            midi_output_interface_->rt_noteOn(
+                midi_output_interface_->rtUserData, (uint8_t)(midCh), note,
+                vol);
+            break;
+        }
 
-    case MidiEvent::T_NOTETOUCH: // Note touch
-    {
-        uint8_t note = evt.data[0];
-        uint8_t vol  = evt.data[1];
-        m_interface->rt_noteAfterTouch(m_interface->rtUserData, (uint8_t)(midCh), note, vol);
-        break;
-    }
+        case MidiEvent::kNoteTouch:  // Note touch
+        {
+            uint8_t note = evt.data[0];
+            uint8_t vol  = evt.data[1];
+            midi_output_interface_->rt_noteAfterTouch(
+                midi_output_interface_->rtUserData, (uint8_t)(midCh), note,
+                vol);
+            break;
+        }
 
-    case MidiEvent::T_CTRLCHANGE: // Controller change
-    {
-        uint8_t ctrlno = evt.data[0];
-        uint8_t value  = evt.data[1];
-        m_interface->rt_controllerChange(m_interface->rtUserData, (uint8_t)(midCh), ctrlno, value);
-        break;
-    }
+        case MidiEvent::kControlChange:  // Controller change
+        {
+            uint8_t ctrlno = evt.data[0];
+            uint8_t value  = evt.data[1];
+            midi_output_interface_->rt_controllerChange(
+                midi_output_interface_->rtUserData, (uint8_t)(midCh), ctrlno,
+                value);
+            break;
+        }
 
-    case MidiEvent::T_PATCHCHANGE: // Patch change
-    {
-        m_interface->rt_patchChange(m_interface->rtUserData, (uint8_t)(midCh), evt.data[0]);
-        break;
-    }
+        case MidiEvent::kPatchChange:  // Patch change
+        {
+            midi_output_interface_->rt_patchChange(
+                midi_output_interface_->rtUserData, (uint8_t)(midCh),
+                evt.data[0]);
+            break;
+        }
 
-    case MidiEvent::T_CHANAFTTOUCH: // Channel after-touch
-    {
-        uint8_t chanat = evt.data[0];
-        m_interface->rt_channelAfterTouch(m_interface->rtUserData, (uint8_t)(midCh), chanat);
-        break;
-    }
+        case MidiEvent::kChannelAftertouch:  // Channel after-touch
+        {
+            uint8_t chanat = evt.data[0];
+            midi_output_interface_->rt_channelAfterTouch(
+                midi_output_interface_->rtUserData, (uint8_t)(midCh), chanat);
+            break;
+        }
 
-    case MidiEvent::T_WHEEL: // Wheel/pitch bend
-    {
-        uint8_t a = evt.data[0];
-        uint8_t b = evt.data[1];
-        m_interface->rt_pitchBend(m_interface->rtUserData, (uint8_t)(midCh), b, a);
-        break;
-    }
+        case MidiEvent::kPitchWheel:  // Wheel/pitch bend
+        {
+            uint8_t a = evt.data[0];
+            uint8_t b = evt.data[1];
+            midi_output_interface_->rt_pitchBend(
+                midi_output_interface_->rtUserData, (uint8_t)(midCh), b, a);
+            break;
+        }
 
-    default:
-        break;
-    } // switch
+        default:
+            break;
+    }  // switch
 }
 
-double BW_MidiSequencer::Tick(double s, double granularity)
+double MidiSequencer::Tick(double s, double granularity)
 {
-    assert(m_interface); // MIDI output interface must be defined!
+    assert(midi_output_interface_);  // MIDI output interface must be defined!
 
-    s *= m_tempoMultiplier;
-#ifdef ENABLE_BEGIN_SILENCE_SKIPPING
-    if (CurrentPositionNew.began)
-#endif
-        m_currentPosition.wait -= s;
-    m_currentPosition.absTimePosition += s;
+    s *= midi_tempo_multiplier_;
+    midi_current_position_.wait -= s;
+    midi_current_position_.absolute_time_position += s;
 
-    int antiFreezeCounter = 10000; // Limit 10000 loops to avoid freezing
-    while ((m_currentPosition.wait <= granularity * 0.5) && (antiFreezeCounter > 0))
+    int antiFreezeCounter = 10000;  // Limit 10000 loops to avoid freezing
+    while ((midi_current_position_.wait <= granularity * 0.5) &&
+           (antiFreezeCounter > 0))
     {
-        if (!processEvents())
-            break;
-        if (m_currentPosition.wait <= 0.0)
-            antiFreezeCounter--;
+        if (!ProcessEvents()) break;
+        if (midi_current_position_.wait <= 0.0) antiFreezeCounter--;
     }
 
     if (antiFreezeCounter <= 0)
-        m_currentPosition.wait += 1.0; /* Add extra 1 second when over 10000 events
-                                          with zero delay are been detected */
+        midi_current_position_.wait +=
+            1.0; /* Add extra 1 second when over 10000 events
+                    with zero delay are been detected */
 
-    if (m_currentPosition.wait < 0.0) // Avoid negative delay value!
+    if (midi_current_position_.wait < 0.0)  // Avoid negative delay value!
         return 0.0;
 
-    return m_currentPosition.wait;
+    return midi_current_position_.wait;
 }
 
-double BW_MidiSequencer::seek(double seconds, const double granularity)
+double MidiSequencer::Seek(double seconds, const double granularity)
 {
     if (seconds < 0.0)
-        return 0.0; // Seeking negative position is forbidden! :-P
+        return 0.0;  // Seeking negative position is forbidden! :-P
     const double granualityHalf = granularity * 0.5,
-                 s              = seconds; // m_setup.delay < m_setup.maxdelay ? m_setup.delay : m_setup.maxdelay;
+                 s = seconds;  // m_setup.delay_ < m_setup.maxdelay ?
+                               // m_setup.delay_ : m_setup.maxdelay;
 
     /* Attempt to go away out of song end must rewind position to begin */
-    if (seconds > m_fullSongTimeLength)
+    if (seconds > midi_full_song_time_length_)
     {
-        this->rewind();
+        this->Rewind();
         return 0.0;
     }
 
-    bool loopFlagState = m_loopEnabled;
-    // Turn loop pooints off because it causes wrong position rememberin on a quick seek
-    m_loopEnabled = false;
+    bool loopFlagState = midi_loop_enabled_;
+    // Turn loop pooints off because it causes wrong position rememberin on a
+    // quick seek
+    midi_loop_enabled_ = false;
 
     /*
      * Seeking search is similar to regular ticking, except of next things:
      * - We don't processsing arpeggio and vibrato
-     * - To keep correctness of the state after seek, begin every search from begin
+     * - To keep correctness of the state after seek, begin every search from
+     * begin
      * - All sustaining notes must be killed
      * - Ignore Note-On events
      */
-    this->rewind();
+    this->Rewind();
 
     /*
      * Set "loop Start" to false to prevent overwrite of loopStart position with
      * seek destinition position
      *
-     * TODO: Detect & set loopStart position on load time to don't break loop while seeking
+     * TODO: Detect & set loopStart position on load time to don't break loop
+     * while seeking
      */
-    m_loop.caughtStart = false;
+    midi_loop_.caught_start_ = false;
 
-    m_loop.temporaryBroken = (seconds >= m_loopEndTime);
+    midi_loop_.temporary_broken_ = (seconds >= midi_loop_end_time_);
 
-    while ((m_currentPosition.absTimePosition < seconds) && (m_currentPosition.absTimePosition < m_fullSongTimeLength))
+    while ((midi_current_position_.absolute_time_position < seconds) &&
+           (midi_current_position_.absolute_time_position <
+            midi_full_song_time_length_))
     {
-        m_currentPosition.wait -= s;
-        m_currentPosition.absTimePosition += s;
-        int    antiFreezeCounter = 10000; // Limit 10000 loops to avoid freezing
-        double dstWait           = m_currentPosition.wait + granualityHalf;
-        while ((m_currentPosition.wait <= granualityHalf) /*&& (antiFreezeCounter > 0)*/)
+        midi_current_position_.wait -= s;
+        midi_current_position_.absolute_time_position += s;
+        int antiFreezeCounter = 10000;  // Limit 10000 loops to avoid freezing
+        double dstWait        = midi_current_position_.wait + granualityHalf;
+        while ((midi_current_position_.wait <=
+                granualityHalf) /*&& (antiFreezeCounter > 0)*/)
         {
             // std::fprintf(stderr, "wait = %g...\n", CurrentPosition.wait);
-            if (!processEvents(true))
-                break;
-            // Avoid freeze because of no waiting increasing in more than 10000 cycles
-            if (m_currentPosition.wait <= dstWait)
+            if (!ProcessEvents(true)) break;
+            // Avoid freeze because of no waiting increasing in more than 10000
+            // cycles
+            if (midi_current_position_.wait <= dstWait)
                 antiFreezeCounter--;
             else
             {
-                dstWait           = m_currentPosition.wait + granualityHalf;
+                dstWait = midi_current_position_.wait + granualityHalf;
                 antiFreezeCounter = 10000;
             }
         }
         if (antiFreezeCounter <= 0)
-            m_currentPosition.wait += 1.0; /* Add extra 1 second when over 10000 events
-                                              with zero delay are been detected */
+            midi_current_position_.wait +=
+                1.0; /* Add extra 1 second when over 10000 events
+                        with zero delay are been detected */
     }
 
-    if (m_currentPosition.wait < 0.0)
-        m_currentPosition.wait = 0.0;
+    if (midi_current_position_.wait < 0.0) midi_current_position_.wait = 0.0;
 
-    if (m_atEnd)
+    if (midi_at_end_)
     {
-        this->rewind();
-        m_loopEnabled = loopFlagState;
+        this->Rewind();
+        midi_loop_enabled_ = loopFlagState;
         return 0.0;
     }
 
-    m_time.reset();
-    m_time.delay = m_currentPosition.wait;
+    midi_time_.Reset();
+    midi_time_.delay_ = midi_current_position_.wait;
 
-    m_loopEnabled = loopFlagState;
-    return m_currentPosition.wait;
+    midi_loop_enabled_ = loopFlagState;
+    return midi_current_position_.wait;
 }
 
-double BW_MidiSequencer::tell()
+double MidiSequencer::Tell()
 {
-    return m_currentPosition.absTimePosition;
+    return midi_current_position_.absolute_time_position;
 }
 
-double BW_MidiSequencer::timeLength()
+double MidiSequencer::TimeLength() { return midi_full_song_time_length_; }
+
+double MidiSequencer::GetLoopStart() { return midi_loop_start_time_; }
+
+double MidiSequencer::GetLoopEnd() { return midi_loop_end_time_; }
+
+void MidiSequencer::Rewind()
 {
-    return m_fullSongTimeLength;
+    midi_current_position_ = midi_track_begin_position_;
+    midi_at_end_           = false;
+
+    midi_loop_.loops_count_ = midi_loop_count_;
+    midi_loop_.Reset();
+    midi_loop_.caught_start_     = true;
+    midi_loop_.temporary_broken_ = false;
+    midi_time_.Reset();
 }
 
-double BW_MidiSequencer::getLoopStart()
-{
-    return m_loopStartTime;
-}
+void MidiSequencer::SetTempo(double tempo) { midi_tempo_multiplier_ = tempo; }
 
-double BW_MidiSequencer::getLoopEnd()
-{
-    return m_loopEndTime;
-}
-
-void BW_MidiSequencer::rewind()
-{
-    m_currentPosition = m_trackBeginPosition;
-    m_atEnd           = false;
-
-    m_loop.loopsCount = m_loopCount;
-    m_loop.reset();
-    m_loop.caughtStart     = true;
-    m_loop.temporaryBroken = false;
-    m_time.reset();
-}
-
-void BW_MidiSequencer::setTempo(double tempo)
-{
-    m_tempoMultiplier = tempo;
-}
-
-bool BW_MidiSequencer::loadMIDI(const uint8_t *data, size_t size, uint16_t rate)
+bool MidiSequencer::LoadMidi(const uint8_t *data, size_t size, uint16_t rate)
 {
     epi::MemFile *mfr = new epi::MemFile(data, size);
-    return loadMIDI(mfr, rate);
+    return LoadMidi(mfr, rate);
 }
 
-template <class T> class BufferGuard
+template <class T>
+class BufferGuard
 {
     T *m_ptr;
 
-  public:
-    BufferGuard() : m_ptr(nullptr)
-    {
-    }
+   public:
+    BufferGuard() : m_ptr(nullptr) {}
 
-    ~BufferGuard()
-    {
-        set();
-    }
+    ~BufferGuard() { set(); }
 
     void set(T *p = nullptr)
     {
-        if (m_ptr)
-            free(m_ptr);
+        if (m_ptr) free(m_ptr);
         m_ptr = p;
     }
 };
@@ -2178,8 +2047,7 @@ static bool detectRSXX(const char *head, epi::MemFile *mfr)
     {
         mfr->Seek(head[0] - 0x10, epi::File::kSeekpointStart);
         mfr->Read(headerBuf, 6);
-        if (memcmp(headerBuf, "rsxx}u", 6) == 0)
-            ret = true;
+        if (memcmp(headerBuf, "rsxx}u", 6) == 0) ret = true;
     }
 
     mfr->Seek(0, epi::File::kSeekpointStart);
@@ -2197,8 +2065,7 @@ static bool detectIMF(const char *head, epi::MemFile *mfr)
     uint8_t raw[4];
     size_t  end = (size_t)(head[0]) + 256 * (size_t)(head[1]);
 
-    if (end & 3)
-        return false;
+    if (end & 3) return false;
 
     size_t  backup_pos = mfr->GetPosition();
     int64_t sum1 = 0, sum2 = 0;
@@ -2206,8 +2073,7 @@ static bool detectIMF(const char *head, epi::MemFile *mfr)
 
     for (size_t n = 0; n < 16383; ++n)
     {
-        if (mfr->Read(raw, 4) != 4)
-            break;
+        if (mfr->Read(raw, 4) != 4) break;
         int64_t value1 = raw[0];
         value1 += raw[1] << 8;
         sum1 += value1;
@@ -2221,30 +2087,30 @@ static bool detectIMF(const char *head, epi::MemFile *mfr)
     return (sum1 > sum2);
 }
 
-bool BW_MidiSequencer::loadMIDI(epi::MemFile *mfr, uint16_t rate)
+bool MidiSequencer::LoadMidi(epi::MemFile *mfr, uint16_t rate)
 {
     size_t fsize = 0;
-    BW_MidiSequencer_UNUSED(fsize);
-    m_parsingErrorsString.clear();
+    (void)(fsize);
+    midi_parsing_errors_string_.clear();
 
-    assert(m_interface); // MIDI output interface must be defined!
+    assert(midi_output_interface_);  // MIDI output interface must be defined!
 
-    m_atEnd = false;
-    m_loop.fullReset();
-    m_loop.caughtStart = true;
+    midi_at_end_ = false;
+    midi_loop_.FullReset();
+    midi_loop_.caught_start_ = true;
 
-    m_format    = Format_MIDI;
-    m_smfFormat = 0;
+    midi_format_     = kFormatMidi;
+    midi_smf_format_ = 0;
 
-    m_rawSongsData.clear();
+    midi_raw_songs_data_.clear();
 
-    const size_t headerSize            = 4 + 4 + 2 + 2 + 2; // 14
+    const size_t headerSize            = 4 + 4 + 2 + 2 + 2;  // 14
     char         headerBuf[headerSize] = "";
 
     fsize = mfr->Read(headerBuf, headerSize);
     if (fsize < headerSize)
     {
-        m_errorString = "Unexpected end of file at header!\n";
+        midi_error_string_ = "Unexpected end of file at header!\n";
         delete mfr;
         return false;
     }
@@ -2252,58 +2118,55 @@ bool BW_MidiSequencer::loadMIDI(epi::MemFile *mfr, uint16_t rate)
     if (memcmp(headerBuf, "MThd\0\0\0\6", 8) == 0)
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return parseSMF(mfr);
+        return ParseSmf(mfr);
     }
 
     if (memcmp(headerBuf, "RIFF", 4) == 0)
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return parseRMI(mfr);
+        return ParseRmi(mfr);
     }
 
     if (memcmp(headerBuf, "GMF\x1", 4) == 0)
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return parseGMF(mfr);
+        return ParseGmf(mfr);
     }
 
-#ifndef BWMIDI_DISABLE_MUS_SUPPORT
     if (memcmp(headerBuf, "MUS\x1A", 4) == 0)
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return parseMUS(mfr);
+        return ParseMus(mfr);
     }
-#endif
 
-#ifndef BWMIDI_DISABLE_XMI_SUPPORT
-    if ((memcmp(headerBuf, "FORM", 4) == 0) && (memcmp(headerBuf + 8, "XDIR", 4) == 0))
+    if ((memcmp(headerBuf, "FORM", 4) == 0) &&
+        (memcmp(headerBuf + 8, "XDIR", 4) == 0))
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return parseXMI(mfr);
+        return ParseXmi(mfr);
     }
-#endif
 
     if (detectIMF(headerBuf, mfr))
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return parseIMF(mfr, rate);
+        return ParseImf(mfr, rate);
     }
 
     if (detectRSXX(headerBuf, mfr))
     {
         mfr->Seek(0, epi::File::kSeekpointStart);
-        return parseRSXX(mfr);
+        return ParseRsxx(mfr);
     }
 
-    m_errorString = "Unknown or unsupported file format";
+    midi_error_string_ = "Unknown or unsupported file format";
     delete mfr;
     return false;
 }
 
-bool BW_MidiSequencer::parseIMF(epi::MemFile *mfr, uint16_t rate)
+bool MidiSequencer::ParseImf(epi::MemFile *mfr, uint16_t rate)
 {
     const size_t deltaTicks   = 1;
-    const size_t trackCount   = 1;
+    const size_t track_count  = 1;
     uint32_t     imfTempo     = 0;
     size_t       imfEnd       = 0;
     uint64_t     abs_position = 0;
@@ -2314,33 +2177,34 @@ bool BW_MidiSequencer::parseIMF(epi::MemFile *mfr, uint16_t rate)
 
     switch (rate)
     {
-    case 280:
-        imfTempo = 3570;
-        break;
-    case 560:
-        imfTempo = 1785;
-        break;
-    case 700:
-        imfTempo = 1428;
-        break;
-    default:
-        imfTempo = 1428;
-        break;
+        case 280:
+            imfTempo = 3570;
+            break;
+        case 560:
+            imfTempo = 1785;
+            break;
+        case 700:
+            imfTempo = 1428;
+            break;
+        default:
+            imfTempo = 1428;
+            break;
     }
 
     std::vector<MidiEvent> temposList;
 
-    m_format = Format_IMF;
+    midi_format_ = kFormatImf;
 
-    buildSmfSetupReset(trackCount);
+    BuildSmfSetupReset(track_count);
 
-    m_invDeltaTicks = fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
-    m_tempo         = fraction<uint64_t>(1, (uint64_t)(deltaTicks) * 2);
+    midi_individual_tick_delta_ =
+        fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
+    midi_tempo_ = fraction<uint64_t>(1, (uint64_t)(deltaTicks) * 2);
 
     mfr->Seek(0, epi::File::kSeekpointStart);
     if (mfr->Read(imfRaw, 2) != 2)
     {
-        m_errorString = "Unexpected end of file at header!\n";
+        midi_error_string_ = "Unexpected end of file at header!\n";
         delete mfr;
         return false;
     }
@@ -2348,77 +2212,76 @@ bool BW_MidiSequencer::parseIMF(epi::MemFile *mfr, uint16_t rate)
     imfEnd = (size_t)(imfRaw[0]) + 256 * (size_t)(imfRaw[1]);
 
     // Define the playing tempo
-    event.type        = MidiEvent::T_SPECIAL;
-    event.subtype     = MidiEvent::ST_TEMPOCHANGE;
-    event.absPosition = 0;
+    event.type                   = MidiEvent::kSpecial;
+    event.sub_type               = MidiEvent::kTempoChange;
+    event.absolute_tick_position = 0;
     event.data.resize(4);
     event.data[0] = (uint8_t)((imfTempo >> 24) & 0xFF);
     event.data[1] = (uint8_t)((imfTempo >> 16) & 0xFF);
     event.data[2] = (uint8_t)((imfTempo >> 8) & 0xFF);
     event.data[3] = (uint8_t)((imfTempo & 0xFF));
-    evtPos.events.push_back(event);
+    evtPos.events_.push_back(event);
     temposList.push_back(event);
 
     // Define the draft for IMF events
-    event.type        = MidiEvent::T_SPECIAL;
-    event.subtype     = MidiEvent::ST_RAWOPL;
-    event.absPosition = 0;
+    event.type                   = MidiEvent::kSpecial;
+    event.sub_type               = MidiEvent::kRawOpl;
+    event.absolute_tick_position = 0;
     event.data.resize(2);
 
     mfr->Seek((imfEnd > 0) ? 2 : 0, epi::File::kSeekpointStart);
 
-    if (imfEnd == 0) // IMF Type 0 with unlimited file length
+    if (imfEnd == 0)  // IMF Type 0 with unlimited file length
         imfEnd = mfr->GetLength();
 
     while (mfr->GetPosition() < (int)imfEnd)
     {
-        if (mfr->Read(imfRaw, 4) != 4)
-            break;
+        if (mfr->Read(imfRaw, 4) != 4) break;
 
-        event.data[0]     = imfRaw[0]; // port index
-        event.data[1]     = imfRaw[1]; // port value
-        event.absPosition = abs_position;
-        event.isValid     = 1;
+        event.data[0]                = imfRaw[0];  // port index
+        event.data[1]                = imfRaw[1];  // port value
+        event.absolute_tick_position = abs_position;
+        event.is_valid               = 1;
 
-        evtPos.events.push_back(event);
-        evtPos.delay = (uint64_t)(imfRaw[2]) + 256 * (uint64_t)(imfRaw[3]);
+        evtPos.events_.push_back(event);
+        evtPos.delay_ = (uint64_t)(imfRaw[2]) + 256 * (uint64_t)(imfRaw[3]);
 
-        if (evtPos.delay > 0)
+        if (evtPos.delay_ > 0)
         {
-            evtPos.absPos = abs_position;
-            abs_position += evtPos.delay;
-            m_trackData[0].push_back(evtPos);
-            evtPos.clear();
+            evtPos.absolute_position_ = abs_position;
+            abs_position += evtPos.delay_;
+            midi_track_data_[0].push_back(evtPos);
+            evtPos.Clear();
         }
     }
 
     // Add final row
-    evtPos.absPos = abs_position;
-    abs_position += evtPos.delay;
-    m_trackData[0].push_back(evtPos);
+    evtPos.absolute_position_ = abs_position;
+    abs_position += evtPos.delay_;
+    midi_track_data_[0].push_back(evtPos);
 
-    if (!m_trackData[0].empty())
-        m_currentPosition.track[0].pos = m_trackData[0].begin();
+    if (!midi_track_data_[0].empty())
+        midi_current_position_.track[0].pos = midi_track_data_[0].begin();
 
-    buildTimeLine(temposList);
+    BuildTimeLine(temposList);
 
     delete mfr;
 
     return true;
 }
 
-bool BW_MidiSequencer::parseRSXX(epi::MemFile *mfr)
+bool MidiSequencer::ParseRsxx(epi::MemFile *mfr)
 {
     const size_t                      headerSize            = 14;
     char                              headerBuf[headerSize] = "";
     size_t                            fsize                 = 0;
-    size_t                            deltaTicks = 192, trackCount = 1;
+    size_t                            deltaTicks = 192, track_count = 1;
     std::vector<std::vector<uint8_t>> rawTrackData;
 
     fsize = mfr->Read(headerBuf, headerSize);
     if (fsize < headerSize)
     {
-        m_errorString = "Unexpected end of file at header!\n";
+        midi_error_string_ = "Unexpected end of file at header!\n";
         delete mfr;
         return false;
     }
@@ -2427,7 +2290,7 @@ bool BW_MidiSequencer::parseRSXX(epi::MemFile *mfr)
     char start = headerBuf[0];
     if (start < 0x5D)
     {
-        m_errorString = "RSXX song too short!\n";
+        midi_error_string_ = "RSXX song too short!\n";
         delete mfr;
         return false;
     }
@@ -2437,27 +2300,28 @@ bool BW_MidiSequencer::parseRSXX(epi::MemFile *mfr)
         mfr->Read(headerBuf, 6);
         if (memcmp(headerBuf, "rsxx}u", 6) == 0)
         {
-            m_format = Format_RSXX;
+            midi_format_ = kFormatRsxx;
             mfr->Seek(start, epi::File::kSeekpointStart);
-            trackCount = 1;
-            deltaTicks = 60;
+            track_count = 1;
+            deltaTicks  = 60;
         }
         else
         {
-            m_errorString = "Invalid RSXX header!\n";
+            midi_error_string_ = "Invalid RSXX header!\n";
             delete mfr;
             return false;
         }
     }
 
     rawTrackData.clear();
-    rawTrackData.resize(trackCount, std::vector<uint8_t>());
-    m_invDeltaTicks = fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
-    m_tempo         = fraction<uint64_t>(1, (uint64_t)(deltaTicks));
+    rawTrackData.resize(track_count, std::vector<uint8_t>());
+    midi_individual_tick_delta_ =
+        fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
+    midi_tempo_ = fraction<uint64_t>(1, (uint64_t)(deltaTicks));
 
     size_t totalGotten = 0;
 
-    for (size_t tk = 0; tk < trackCount; ++tk)
+    for (size_t tk = 0; tk < track_count; ++tk)
     {
         // Read track header
         size_t trackLength;
@@ -2472,7 +2336,9 @@ bool BW_MidiSequencer::parseRSXX(epi::MemFile *mfr)
         fsize = mfr->Read(&rawTrackData[tk][0], trackLength);
         if (fsize < trackLength)
         {
-            m_errorString = "MIDI Loader: Unexpected file ending while getting raw track data!\n";
+            midi_error_string_ =
+                "MIDI Loader: Unexpected file ending while getting raw track "
+                "data!\n";
             delete mfr;
             return false;
         }
@@ -2482,51 +2348,54 @@ bool BW_MidiSequencer::parseRSXX(epi::MemFile *mfr)
         rawTrackData[tk].push_back(0);
     }
 
-    for (size_t tk = 0; tk < trackCount; ++tk)
+    for (size_t tk = 0; tk < track_count; ++tk)
         totalGotten += rawTrackData[tk].size();
 
     if (totalGotten == 0)
     {
-        m_errorString = "MIDI Loader: Empty track data";
+        midi_error_string_ = "MIDI Loader: Empty track data";
         delete mfr;
         return false;
     }
 
     // Build new MIDI events table
-    if (!buildSmfTrackData(rawTrackData))
+    if (!BuildSmfTrackData(rawTrackData))
     {
-        m_errorString = "MIDI Loader: MIDI data parsing error has occouped!\n" + m_parsingErrorsString;
+        midi_error_string_ =
+            "MIDI Loader: MIDI data parsing error has occouped!\n" +
+            midi_parsing_errors_string_;
         delete mfr;
         return false;
     }
 
-    m_smfFormat       = 0;
-    m_loop.stackLevel = -1;
+    midi_smf_format_        = 0;
+    midi_loop_.stack_level_ = -1;
 
     delete mfr;
 
     return true;
 }
 
-bool BW_MidiSequencer::parseGMF(epi::MemFile *mfr)
+bool MidiSequencer::ParseGmf(epi::MemFile *mfr)
 {
     const size_t                      headerSize            = 14;
     char                              headerBuf[headerSize] = "";
     size_t                            fsize                 = 0;
-    size_t                            deltaTicks = 192, trackCount = 1;
+    size_t                            deltaTicks = 192, track_count = 1;
     std::vector<std::vector<uint8_t>> rawTrackData;
 
     fsize = mfr->Read(headerBuf, headerSize);
     if (fsize < headerSize)
     {
-        m_errorString = "Unexpected end of file at header!\n";
+        midi_error_string_ = "Unexpected end of file at header!\n";
         delete mfr;
         return false;
     }
 
     if (memcmp(headerBuf, "GMF\x1", 4) != 0)
     {
-        m_errorString = "MIDI Loader: Invalid format, GMF\\x1 signature is not found!\n";
+        midi_error_string_ =
+            "MIDI Loader: Invalid format, GMF\\x1 signature is not found!\n";
         delete mfr;
         return false;
     }
@@ -2534,13 +2403,14 @@ bool BW_MidiSequencer::parseGMF(epi::MemFile *mfr)
     mfr->Seek(7 - (long)(headerSize), epi::File::kSeekpointCurrent);
 
     rawTrackData.clear();
-    rawTrackData.resize(trackCount, std::vector<uint8_t>());
-    m_invDeltaTicks                        = fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
-    m_tempo                                = fraction<uint64_t>(1, (uint64_t)(deltaTicks) * 2);
+    rawTrackData.resize(track_count, std::vector<uint8_t>());
+    midi_individual_tick_delta_ =
+        fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
+    midi_tempo_ = fraction<uint64_t>(1, (uint64_t)(deltaTicks) * 2);
     static const unsigned char EndTag[4]   = {0xFF, 0x2F, 0x00, 0x00};
     size_t                     totalGotten = 0;
 
-    for (size_t tk = 0; tk < trackCount; ++tk)
+    for (size_t tk = 0; tk < track_count; ++tk)
     {
         // Read track header
         size_t trackLength;
@@ -2554,7 +2424,9 @@ bool BW_MidiSequencer::parseGMF(epi::MemFile *mfr)
         fsize = mfr->Read(&rawTrackData[tk][0], trackLength);
         if (fsize < trackLength)
         {
-            m_errorString = "MIDI Loader: Unexpected file ending while getting raw track data!\n";
+            midi_error_string_ =
+                "MIDI Loader: Unexpected file ending while getting raw track "
+                "data!\n";
             delete mfr;
             return false;
         }
@@ -2563,20 +2435,22 @@ bool BW_MidiSequencer::parseGMF(epi::MemFile *mfr)
         rawTrackData[tk].insert(rawTrackData[tk].end(), EndTag + 0, EndTag + 4);
     }
 
-    for (size_t tk = 0; tk < trackCount; ++tk)
+    for (size_t tk = 0; tk < track_count; ++tk)
         totalGotten += rawTrackData[tk].size();
 
     if (totalGotten == 0)
     {
-        m_errorString = "MIDI Loader: Empty track data";
+        midi_error_string_ = "MIDI Loader: Empty track data";
         delete mfr;
         return false;
     }
 
     // Build new MIDI events table
-    if (!buildSmfTrackData(rawTrackData))
+    if (!BuildSmfTrackData(rawTrackData))
     {
-        m_errorString = "MIDI Loader: : MIDI data parsing error has occouped!\n" + m_parsingErrorsString;
+        midi_error_string_ =
+            "MIDI Loader: : MIDI data parsing error has occouped!\n" +
+            midi_parsing_errors_string_;
         delete mfr;
         return false;
     }
@@ -2586,9 +2460,9 @@ bool BW_MidiSequencer::parseGMF(epi::MemFile *mfr)
     return true;
 }
 
-bool BW_MidiSequencer::parseSMF(epi::MemFile *mfr)
+bool MidiSequencer::ParseSmf(epi::MemFile *mfr)
 {
-    const size_t                      headerSize            = 14; // 4 + 4 + 2 + 2 + 2
+    const size_t                      headerSize = 14;  // 4 + 4 + 2 + 2 + 2
     char                              headerBuf[headerSize] = "";
     size_t                            fsize                 = 0;
     size_t                            deltaTicks = 192, TrackCount = 1;
@@ -2598,29 +2472,30 @@ bool BW_MidiSequencer::parseSMF(epi::MemFile *mfr)
     fsize = mfr->Read(headerBuf, headerSize);
     if (fsize < headerSize)
     {
-        m_errorString = "Unexpected end of file at header!\n";
+        midi_error_string_ = "Unexpected end of file at header!\n";
         delete mfr;
         return false;
     }
 
     if (memcmp(headerBuf, "MThd\0\0\0\6", 8) != 0)
     {
-        m_errorString = "MIDI Loader: Invalid format, MThd signature is not found!\n";
+        midi_error_string_ =
+            "MIDI Loader: Invalid format, MThd signature is not found!\n";
         delete mfr;
         return false;
     }
 
-    smfFormat  = (unsigned)(readBEint(headerBuf + 8, 2));
-    TrackCount = (size_t)(readBEint(headerBuf + 10, 2));
-    deltaTicks = (size_t)(readBEint(headerBuf + 12, 2));
+    smfFormat  = (unsigned)(ReadIntBigEndian(headerBuf + 8, 2));
+    TrackCount = (size_t)(ReadIntBigEndian(headerBuf + 10, 2));
+    deltaTicks = (size_t)(ReadIntBigEndian(headerBuf + 12, 2));
 
-    if (smfFormat > 2)
-        smfFormat = 1;
+    if (smfFormat > 2) smfFormat = 1;
 
     rawTrackData.clear();
     rawTrackData.resize(TrackCount, std::vector<uint8_t>());
-    m_invDeltaTicks = fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
-    m_tempo         = fraction<uint64_t>(1, (uint64_t)(deltaTicks) * 2);
+    midi_individual_tick_delta_ =
+        fraction<uint64_t>(1, 1000000l * (uint64_t)(deltaTicks));
+    midi_tempo_ = fraction<uint64_t>(1, (uint64_t)(deltaTicks) * 2);
 
     size_t totalGotten = 0;
 
@@ -2632,18 +2507,21 @@ bool BW_MidiSequencer::parseSMF(epi::MemFile *mfr)
         fsize = mfr->Read(headerBuf, 8);
         if ((fsize < 8) || (memcmp(headerBuf, "MTrk", 4) != 0))
         {
-            m_errorString = "MIDI Loader: Invalid format, MTrk signature is not found!\n";
+            midi_error_string_ =
+                "MIDI Loader: Invalid format, MTrk signature is not found!\n";
             delete mfr;
             return false;
         }
-        trackLength = (size_t)readBEint(headerBuf + 4, 4);
+        trackLength = (size_t)ReadIntBigEndian(headerBuf + 4, 4);
 
         // Read track data
         rawTrackData[tk].resize(trackLength);
         fsize = mfr->Read(&rawTrackData[tk][0], trackLength);
         if (fsize < trackLength)
         {
-            m_errorString = "MIDI Loader: Unexpected file ending while getting raw track data!\n";
+            midi_error_string_ =
+                "MIDI Loader: Unexpected file ending while getting raw track "
+                "data!\n";
             delete mfr;
             return false;
         }
@@ -2656,55 +2534,57 @@ bool BW_MidiSequencer::parseSMF(epi::MemFile *mfr)
 
     if (totalGotten == 0)
     {
-        m_errorString = "MIDI Loader: Empty track data";
+        midi_error_string_ = "MIDI Loader: Empty track data";
         delete mfr;
         return false;
     }
 
     // Build new MIDI events table
-    if (!buildSmfTrackData(rawTrackData))
+    if (!BuildSmfTrackData(rawTrackData))
     {
-        m_errorString = "MIDI Loader: MIDI data parsing error has occouped!\n" + m_parsingErrorsString;
+        midi_error_string_ =
+            "MIDI Loader: MIDI data parsing error has occouped!\n" +
+            midi_parsing_errors_string_;
         delete mfr;
         return false;
     }
 
-    m_smfFormat       = smfFormat;
-    m_loop.stackLevel = -1;
+    midi_smf_format_        = smfFormat;
+    midi_loop_.stack_level_ = -1;
 
     delete mfr;
 
     return true;
 }
 
-bool BW_MidiSequencer::parseRMI(epi::MemFile *mfr)
+bool MidiSequencer::ParseRmi(epi::MemFile *mfr)
 {
-    const size_t headerSize            = 4 + 4 + 2 + 2 + 2; // 14
+    const size_t headerSize            = 4 + 4 + 2 + 2 + 2;  // 14
     char         headerBuf[headerSize] = "";
 
     size_t fsize = mfr->Read(headerBuf, headerSize);
     if (fsize < headerSize)
     {
-        m_errorString = "Unexpected end of file at header!\n";
+        midi_error_string_ = "Unexpected end of file at header!\n";
         delete mfr;
         return false;
     }
 
     if (memcmp(headerBuf, "RIFF", 4) != 0)
     {
-        m_errorString = "MIDI Loader: Invalid format, RIFF signature is not found!\n";
+        midi_error_string_ =
+            "MIDI Loader: Invalid format, RIFF signature is not found!\n";
         delete mfr;
         return false;
     }
 
-    m_format = Format_MIDI;
+    midi_format_ = kFormatMidi;
 
     mfr->Seek(6l, epi::File::kSeekpointCurrent);
-    return parseSMF(mfr);
+    return ParseSmf(mfr);
 }
 
-#ifndef BWMIDI_DISABLE_MUS_SUPPORT
-bool BW_MidiSequencer::parseMUS(epi::MemFile *mfr)
+bool MidiSequencer::ParseMus(epi::MemFile *mfr)
 {
     const size_t         headerSize            = 14;
     char                 headerBuf[headerSize] = "";
@@ -2714,14 +2594,15 @@ bool BW_MidiSequencer::parseMUS(epi::MemFile *mfr)
     fsize = mfr->Read(headerBuf, headerSize);
     if (fsize < headerSize)
     {
-        m_errorString = "Unexpected end of file at header!\n";
+        midi_error_string_ = "Unexpected end of file at header!\n";
         delete mfr;
         return false;
     }
 
     if (memcmp(headerBuf, "MUS\x1A", 4) != 0)
     {
-        m_errorString = "MIDI Loader: Invalid format, MUS\\x1A signature is not found!\n";
+        midi_error_string_ =
+            "MIDI Loader: Invalid format, MUS\\x1A signature is not found!\n";
         delete mfr;
         return false;
     }
@@ -2732,14 +2613,14 @@ bool BW_MidiSequencer::parseMUS(epi::MemFile *mfr)
     uint8_t *mus = (uint8_t *)malloc(mus_len);
     if (!mus)
     {
-        m_errorString = "Out of memory!";
+        midi_error_string_ = "Out of memory!";
         delete mfr;
         return false;
     }
     fsize = mfr->Read(mus, mus_len);
     if (fsize < mus_len)
     {
-        m_errorString = "Failed to read MUS file data!\n";
+        midi_error_string_ = "Failed to read MUS file data!\n";
         delete mfr;
         return false;
     }
@@ -2750,16 +2631,14 @@ bool BW_MidiSequencer::parseMUS(epi::MemFile *mfr)
 
     uint8_t *mid     = nullptr;
     uint32_t mid_len = 0;
-    int      m2mret  = Convert_mus2midi(mus, (uint32_t)(mus_len), &mid, &mid_len, 0);
+    int m2mret = ConvertMusToMidi(mus, (uint32_t)(mus_len), &mid, &mid_len, 0);
 
-    if (mus)
-        free(mus);
+    if (mus) free(mus);
 
     if (m2mret < 0)
     {
-        m_errorString = "Invalid MUS/DMX data format!";
-        if (mid)
-            free(mid);
+        midi_error_string_ = "Invalid MUS/DMX data format!";
+        if (mid) free(mid);
         return false;
     }
     cvt_buf.set(mid);
@@ -2767,12 +2646,10 @@ bool BW_MidiSequencer::parseMUS(epi::MemFile *mfr)
     // Open converted MIDI file
     mfr = new epi::MemFile(mid, (size_t)(mid_len));
 
-    return parseSMF(mfr);
+    return ParseSmf(mfr);
 }
-#endif // BWMIDI_DISABLE_MUS_SUPPORT
 
-#ifndef BWMIDI_DISABLE_XMI_SUPPORT
-bool BW_MidiSequencer::parseXMI(epi::MemFile *mfr)
+bool MidiSequencer::ParseXmi(epi::MemFile *mfr)
 {
     const size_t                      headerSize            = 14;
     char                              headerBuf[headerSize] = "";
@@ -2783,21 +2660,22 @@ bool BW_MidiSequencer::parseXMI(epi::MemFile *mfr)
     fsize = mfr->Read(headerBuf, headerSize);
     if (fsize < headerSize)
     {
-        m_errorString = "Unexpected end of file at header!\n";
+        midi_error_string_ = "Unexpected end of file at header!\n";
         delete mfr;
         return false;
     }
 
     if (memcmp(headerBuf, "FORM", 4) != 0)
     {
-        m_errorString = "MIDI Loader: Invalid format, FORM signature is not found!\n";
+        midi_error_string_ =
+            "MIDI Loader: Invalid format, FORM signature is not found!\n";
         delete mfr;
         return false;
     }
 
     if (memcmp(headerBuf + 8, "XDIR", 4) != 0)
     {
-        m_errorString = "MIDI Loader: Invalid format\n";
+        midi_error_string_ = "MIDI Loader: Invalid format\n";
         delete mfr;
         return false;
     }
@@ -2808,7 +2686,7 @@ bool BW_MidiSequencer::parseXMI(epi::MemFile *mfr)
     uint8_t *mus = (uint8_t *)std::malloc(mus_len + 20);
     if (!mus)
     {
-        m_errorString = "Out of memory!";
+        midi_error_string_ = "Out of memory!";
         delete mfr;
         return false;
     }
@@ -2818,7 +2696,7 @@ bool BW_MidiSequencer::parseXMI(epi::MemFile *mfr)
     fsize = mfr->Read(mus, mus_len);
     if (fsize < mus_len)
     {
-        m_errorString = "Failed to read XMI file data!\n";
+        midi_error_string_ = "Failed to read XMI file data!\n";
         delete mfr;
         return false;
     }
@@ -2827,33 +2705,34 @@ bool BW_MidiSequencer::parseXMI(epi::MemFile *mfr)
     delete mfr;
     mfr = nullptr;
 
-    int m2mret = Convert_xmi2midi_multi(mus, (uint32_t)(mus_len + 20), song_buf, XMIDI_CONVERT_NOCONVERSION);
-    if (mus)
-        free(mus);
+    int m2mret = ConvertXmiToMidi(mus, (uint32_t)(mus_len + 20), song_buf,
+                                  kXmiNoConversion);
+    if (mus) free(mus);
     if (m2mret < 0)
     {
         song_buf.clear();
-        m_errorString = "Invalid XMI data format!";
+        midi_error_string_ = "Invalid XMI data format!";
         return false;
     }
 
-    if (m_loadTrackNumber >= (int)song_buf.size())
-        m_loadTrackNumber = song_buf.size() - 1;
+    if (midi_load_track_number_ >= (int)song_buf.size())
+        midi_load_track_number_ = song_buf.size() - 1;
 
     for (size_t i = 0; i < song_buf.size(); ++i)
     {
-        m_rawSongsData.push_back(song_buf[i]);
+        midi_raw_songs_data_.push_back(song_buf[i]);
     }
 
     song_buf.clear();
 
     // Open converted MIDI file
-    mfr = new epi::MemFile(m_rawSongsData[m_loadTrackNumber].data(), m_rawSongsData[m_loadTrackNumber].size());
+    mfr =
+        new epi::MemFile(midi_raw_songs_data_[midi_load_track_number_].data(),
+                         midi_raw_songs_data_[midi_load_track_number_].size());
     // Set format as XMIDI
-    m_format = Format_XMIDI;
+    midi_format_ = kFormatXMidi;
 
-    ret = parseSMF(mfr);
+    ret = ParseSmf(mfr);
 
     return ret;
 }
-#endif

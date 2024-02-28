@@ -1309,7 +1309,7 @@ void HudDrawQuitScreen()
     }
 }
 
-void HudRenderWorld(float x, float y, float w, float h, mobj_t *camera,
+void HudRenderWorld(float x, float y, float w, float h, MapObject *camera,
                     int flags)
 {
     HudPushScissor(x, y, x + w, y + h, (flags & 1) == 0);
@@ -1337,7 +1337,7 @@ void HudRenderWorld(float x, float y, float w, float h, mobj_t *camera,
     HudPopScissor();
 }
 
-void HudRenderAutomap(float x, float y, float w, float h, mobj_t *player,
+void HudRenderAutomap(float x, float y, float w, float h, MapObject *player,
                       int flags)
 {
     HudPushScissor(x, y, x + w, y + h, (flags & 1) == 0);

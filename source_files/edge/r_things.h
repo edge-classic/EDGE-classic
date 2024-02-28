@@ -30,7 +30,7 @@
 #include "r_gldefs.h"
 #include "w_sprite.h"
 
-void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo);
+void RGL_WalkThing(drawsub_c *dsub, MapObject *mo);
 void RGL_DrawSortThings(drawfloor_t *dfloor);
 
 void RGL_DrawWeaponSprites(player_t *p);

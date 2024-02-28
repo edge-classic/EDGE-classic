@@ -105,16 +105,16 @@ bool DeathBot::MeleeWeapon() const
     return pl_->weapons[wp_num].info->ammo_[0] == kAmmunitionTypeNoAmmo;
 }
 
-bool DeathBot::IsBarrel(const mobj_t *mo)
+bool DeathBot::IsBarrel(const MapObject *mo)
 {
-    if (mo->player) return false;
+    if (mo->player_) return false;
 
-    if (0 == (mo->extendedflags & kExtendedFlagMonster)) return false;
+    if (0 == (mo->extended_flags_ & kExtendedFlagMonster)) return false;
 
     return true;
 }
 
-float DeathBot::EvalEnemy(const mobj_t *mo)
+float DeathBot::EvalEnemy(const MapObject *mo)
 {
     // returns -1 to ignore, +1 to attack.
     // [ higher values are not possible, so no way to prioritize enemies ]
@@ -125,44 +125,44 @@ float DeathBot::EvalEnemy(const mobj_t *mo)
     // - target may not have the same supportobj as you.
     // - You must be able to see and shoot the target.
 
-    if (0 == (mo->flags & kMapObjectFlagShootable) || mo->health <= 0)
+    if (0 == (mo->flags_ & kMapObjectFlagShootable) || mo->health_ <= 0)
         return -1;
 
     // occasionally shoot barrels
     if (IsBarrel(mo)) return (RandomShort() % 100 < 20) ? +1 : -1;
 
-    if (0 == (mo->extendedflags & kExtendedFlagMonster) && !mo->player)
+    if (0 == (mo->extended_flags_ & kExtendedFlagMonster) && !mo->player_)
         return -1;
 
-    if (mo->player && mo->player == pl_) return -1;
+    if (mo->player_ && mo->player_ == pl_) return -1;
 
-    if (pl_->mo->supportobj == mo) return -1;
+    if (pl_->mo->support_object_ == mo) return -1;
 
-    if (!DEATHMATCH() && mo->player) return -1;
+    if (!DEATHMATCH() && mo->player_) return -1;
 
-    if (!DEATHMATCH() && mo->supportobj && mo->supportobj->player) return -1;
+    if (!DEATHMATCH() && mo->support_object_ && mo->support_object_->player_) return -1;
 
     // EXTERMINATE !!
 
     return 1.0;
 }
 
-float DeathBot::EvalItem(const mobj_t *mo)
+float DeathBot::EvalItem(const MapObject *mo)
 {
     // determine if an item is worth getting.
     // this depends on our current inventory, whether the game mode is COOP
     // or DEATHMATCH, and whether we are fighting or not.
 
-    if (0 == (mo->flags & kMapObjectFlagSpecial)) return -1;
+    if (0 == (mo->flags_ & kMapObjectFlagSpecial)) return -1;
 
-    bool fighting = (pl_->mo->target != nullptr);
+    bool fighting = (pl_->mo->target_ != nullptr);
 
     // do we *really* need some health?
-    bool want_health = (pl_->mo->health < 90);
-    bool need_health = (pl_->mo->health < 45);
+    bool want_health = (pl_->mo->health_ < 90);
+    bool need_health = (pl_->mo->health_ < 45);
 
     // handle weapons first (due to deathmatch rules)
-    for (const Benefit *B = mo->info->pickup_benefits_; B != nullptr;
+    for (const Benefit *B = mo->info_->pickup_benefits_; B != nullptr;
          B                = B->next)
     {
         if (B->type == kBenefitTypeWeapon)
@@ -170,7 +170,7 @@ float DeathBot::EvalItem(const mobj_t *mo)
             if (!HasWeapon(B->sub.weap)) return BotNavigateEvaluateBigItem(mo);
 
             // try to get ammo from a dropped weapon
-            if (mo->flags & kMapObjectFlagDropped) continue;
+            if (mo->flags_ & kMapObjectFlagDropped) continue;
 
             // cannot get the ammo from a placed weapon except in altdeath
             if (deathmatch != 2) return -1;
@@ -193,7 +193,7 @@ float DeathBot::EvalItem(const mobj_t *mo)
         }
     }
 
-    for (const Benefit *B = mo->info->pickup_benefits_; B != nullptr;
+    for (const Benefit *B = mo->info_->pickup_benefits_; B != nullptr;
          B                = B->next)
     {
         switch (B->type)
@@ -211,7 +211,7 @@ float DeathBot::EvalItem(const mobj_t *mo)
                 // ignore when fighting
                 if (fighting) return -1;
 
-                if (!CanGetArmour(B, mo->extendedflags)) continue;
+                if (!CanGetArmour(B, mo->extended_flags_)) continue;
 
                 return BotNavigateEvaluateBigItem(mo);
 
@@ -301,11 +301,11 @@ float DeathBot::EvaluateWeapon(int w_num, int &key) const
 
     // prefer smaller weapons for smaller monsters.
     // when not fighting, prefer biggest non-dangerous weapon.
-    if (pl_->mo->target == nullptr || DEATHMATCH())
+    if (pl_->mo->target_ == nullptr || DEATHMATCH())
     {
         if (!weapon->dangerous_) score += 1000.0f;
     }
-    else if (pl_->mo->target->spawnhealth > 250)
+    else if (pl_->mo->target_->spawn_health_ > 250)
     {
         if (weapon->priority_ > 5) score += 1000.0f;
     }
@@ -325,7 +325,7 @@ float DeathBot::EvaluateWeapon(int w_num, int &key) const
 
 //----------------------------------------------------------------------------
 
-float DeathBot::DistTo(position_c pos) const
+float DeathBot::DistTo(Position pos) const
 {
     float dx = fabs(pos.x - pl_->mo->x);
     float dy = fabs(pos.y - pl_->mo->y);
@@ -339,9 +339,9 @@ void DeathBot::PainResponse()
     if (pl_->attacker == pl_->mo) return;
 
     // ignore friendly fire -- shit happens
-    if (!DEATHMATCH() && pl_->attacker->player) return;
+    if (!DEATHMATCH() && pl_->attacker->player_) return;
 
-    if (pl_->attacker->health <= 0)
+    if (pl_->attacker->health_ <= 0)
     {
         pl_->attacker = nullptr;
         return;
@@ -349,7 +349,7 @@ void DeathBot::PainResponse()
 
     // TODO only update target if "threat" is greater than current target
 
-    if (pl_->mo->target == nullptr)
+    if (pl_->mo->target_ == nullptr)
     {
         if (IsEnemyVisible(pl_->attacker))
         {
@@ -364,7 +364,7 @@ void DeathBot::LookForLeader()
 {
     if (DEATHMATCH()) return;
 
-    if (pl_->mo->supportobj != nullptr) return;
+    if (pl_->mo->support_object_ != nullptr) return;
 
     for (int i = 0; i < MAXPLAYERS; i++)
     {
@@ -375,11 +375,11 @@ void DeathBot::LookForLeader()
         // when multiple humans, make it random who is picked
         if (RandomShort() % 100 < 90) continue;
 
-        pl_->mo->SetSupportObj(p2->mo);
+        pl_->mo->SetSupportObject(p2->mo);
     }
 }
 
-bool DeathBot::IsEnemyVisible(mobj_t *enemy)
+bool DeathBot::IsEnemyVisible(MapObject *enemy)
 {
     float dx = enemy->x - pl_->mo->x;
     float dy = enemy->y - pl_->mo->y;
@@ -396,7 +396,7 @@ bool DeathBot::IsEnemyVisible(mobj_t *enemy)
 void DeathBot::LookForEnemies(float radius)
 {
     // check sight of existing target
-    if (pl_->mo->target != nullptr)
+    if (pl_->mo->target_ != nullptr)
     {
         UpdateEnemy();
 
@@ -417,7 +417,7 @@ void DeathBot::LookForEnemies(float radius)
     // pick a random nearby monster, then check sight, since the enemy
     // may be on the other side of a wall.
 
-    mobj_t *enemy = BotNavigateFindEnemy(this, radius);
+    MapObject *enemy = BotNavigateFindEnemy(this, radius);
 
     if (enemy != nullptr)
     {
@@ -432,7 +432,7 @@ void DeathBot::LookForEnemies(float radius)
 
 void DeathBot::LookForItems(float radius)
 {
-    mobj_t  *item      = nullptr;
+    MapObject  *item      = nullptr;
     BotPath *item_path = BotNavigateFindThing(this, radius, item);
 
     if (item_path == nullptr) return;
@@ -494,13 +494,13 @@ void DeathBot::SelectWeapon()
     if (best != pl_->ready_wp) { cmd_.weapon = best_key; }
 }
 
-void DeathBot::MoveToward(const position_c &pos)
+void DeathBot::MoveToward(const Position &pos)
 {
     cmd_.speed     = MOVE_SPEED + (6.25 * bot_skill.d_);
     cmd_.direction = R_PointToAngle(pl_->mo->x, pl_->mo->y, pos.x, pos.y);
 }
 
-void DeathBot::WalkToward(const position_c &pos)
+void DeathBot::WalkToward(const Position &pos)
 {
     cmd_.speed     = (MOVE_SPEED + (3.125 * bot_skill.d_));
     cmd_.direction = R_PointToAngle(pl_->mo->x, pl_->mo->y, pos.x, pos.y);
@@ -509,20 +509,20 @@ void DeathBot::WalkToward(const position_c &pos)
 void DeathBot::TurnToward(BAMAngle want_angle, float want_slope, bool fast)
 {
     // horizontal (yaw) angle
-    BAMAngle delta = want_angle - pl_->mo->angle;
+    BAMAngle delta = want_angle - pl_->mo->angle_;
 
     if (delta < kBAMAngle180)
         delta = delta / (fast ? 3 : 8);
     else
         delta = kBAMAngle360 - (kBAMAngle360 - delta) / (fast ? 3 : 8);
 
-    look_angle_ = pl_->mo->angle + delta;
+    look_angle_ = pl_->mo->angle_ + delta;
 
     // vertical (pitch or mlook) angle
     if (want_slope < -2.0) want_slope = -2.0;
     if (want_slope > +2.0) want_slope = +2.0;
 
-    float diff = want_slope - epi::BAMTan(pl_->mo->vertangle);
+    float diff = want_slope - epi::BAMTan(pl_->mo->vertical_angle_);
 
     if (fabs(diff) < (fast ? (0.04 + (0.02 * bot_skill.f_)) : 0.04))
         look_slope_ = want_slope;
@@ -532,7 +532,7 @@ void DeathBot::TurnToward(BAMAngle want_angle, float want_slope, bool fast)
         look_slope_ += fast ? (0.03 + (0.015 * bot_skill.f_)) : 0.03;
 }
 
-void DeathBot::TurnToward(const mobj_t *mo, bool fast)
+void DeathBot::TurnToward(const MapObject *mo, bool fast)
 {
     float dx = mo->x - pl_->mo->x;
     float dy = mo->y - pl_->mo->y;
@@ -544,7 +544,7 @@ void DeathBot::TurnToward(const mobj_t *mo, bool fast)
     TurnToward(want_angle, want_slope, fast);
 }
 
-void DeathBot::WeaveToward(const position_c &pos)
+void DeathBot::WeaveToward(const Position &pos)
 {
     // usually try to move directly toward a wanted position.
     // but if something gets in our way, we try to "weave" around it,
@@ -574,20 +574,20 @@ void DeathBot::WeaveToward(const position_c &pos)
     if (weave_ == +2) cmd_.direction += kBAMAngle5 * 12;
 }
 
-void DeathBot::WeaveToward(const mobj_t *mo)
+void DeathBot::WeaveToward(const MapObject *mo)
 {
-    position_c pos{mo->x, mo->y, mo->z};
+    Position pos{mo->x, mo->y, mo->z};
 
     WeaveToward(pos);
 }
 
-void DeathBot::RetreatFrom(const mobj_t *enemy)
+void DeathBot::RetreatFrom(const MapObject *enemy)
 {
     float dx   = pl_->mo->x - enemy->x;
     float dy   = pl_->mo->y - enemy->y;
     float dlen = HMM_MAX(hypotf(dx, dy), 1.0f);
 
-    position_c pos{pl_->mo->x, pl_->mo->y, pl_->mo->z};
+    Position pos{pl_->mo->x, pl_->mo->y, pl_->mo->z};
 
     pos.x += 16.0f * (dx / dlen);
     pos.y += 16.0f * (dy / dlen);
@@ -598,12 +598,12 @@ void DeathBot::RetreatFrom(const mobj_t *enemy)
 void DeathBot::Strafe(bool right)
 {
     cmd_.speed     = MOVE_SPEED + (6.25 * bot_skill.d_);
-    cmd_.direction = pl_->mo->angle + (right ? kBAMAngle270 : kBAMAngle90);
+    cmd_.direction = pl_->mo->angle_ + (right ? kBAMAngle270 : kBAMAngle90);
 }
 
 void DeathBot::DetectObstacle()
 {
-    mobj_t *mo = pl_->mo;
+    MapObject *mo = pl_->mo;
 
     float dx = last_x_ - mo->x;
     float dy = last_y_ - mo->y;
@@ -621,10 +621,10 @@ void DeathBot::Meander()
 
 void DeathBot::UpdateEnemy()
 {
-    mobj_t *enemy = pl_->mo->target;
+    MapObject *enemy = pl_->mo->target_;
 
     // update angle, slope and distance, even if not seen
-    position_c pos = {enemy->x, enemy->y, enemy->z};
+    Position pos = {enemy->x, enemy->y, enemy->z};
 
     float dx = enemy->x - pl_->mo->x;
     float dy = enemy->y - pl_->mo->y;
@@ -676,8 +676,8 @@ void DeathBot::ShootTarget()
     if (weapon->dangerous_ && enemy_dist_ < 208) return;
 
     // check that we are facing the enemy
-    BAMAngle delta   = enemy_angle_ - pl_->mo->angle;
-    float    sl_diff = fabs(enemy_slope_ - epi::BAMTan(pl_->mo->vertangle));
+    BAMAngle delta   = enemy_angle_ - pl_->mo->angle_;
+    float    sl_diff = fabs(enemy_slope_ - epi::BAMTan(pl_->mo->vertical_angle_));
 
     if (delta > kBAMAngle180) delta = kBAMAngle360 - delta;
 
@@ -707,7 +707,7 @@ void DeathBot::ThinkFight()
     // face our foe
     TurnToward(enemy_angle_, enemy_slope_, true);
 
-    const mobj_t *enemy = pl_->mo->target;
+    const MapObject *enemy = pl_->mo->target_;
 
     // if lost sight, weave towards the target
     if (!see_enemy_)
@@ -773,7 +773,7 @@ void DeathBot::ThinkFight()
     StrafeAroundEnemy();
 }
 
-void DeathBot::WeaveNearLeader(const mobj_t *leader)
+void DeathBot::WeaveNearLeader(const MapObject *leader)
 {
     // pick a position some distance away, so that a human player
     // can get out of a narrow item closet (etc).
@@ -786,7 +786,7 @@ void DeathBot::WeaveNearLeader(const mobj_t *leader)
     dx = dx * 96.0f / dlen;
     dy = dy * 96.0f / dlen;
 
-    position_c pos{leader->x + dx, leader->y + dy, leader->z};
+    Position pos{leader->x + dx, leader->y + dy, leader->z};
 
     TurnToward(leader, false);
     WeaveToward(pos);
@@ -794,7 +794,7 @@ void DeathBot::WeaveNearLeader(const mobj_t *leader)
 
 void DeathBot::PathToLeader()
 {
-    mobj_t *leader = pl_->mo->supportobj;
+    MapObject *leader = pl_->mo->support_object_;
     SYS_ASSERT(leader);
 
     DeletePath();
@@ -817,12 +817,12 @@ void DeathBot::EstimateTravelTime()
 
 void DeathBot::ThinkHelp()
 {
-    mobj_t *leader = pl_->mo->supportobj;
+    MapObject *leader = pl_->mo->support_object_;
 
     // check if we are close to the leader, and can see them
     bool cur_near = false;
 
-    position_c pos  = {leader->x, leader->y, leader->z};
+    Position pos  = {leader->x, leader->y, leader->z};
     float      dist = DistTo(pos);
 
     // allow a bit of "hysteresis"
@@ -934,7 +934,7 @@ BotFollowPathResult DeathBot::FollowPath(bool do_look)
     // determine looking angle
     if (do_look)
     {
-        position_c dest = path_->CurrentDestination();
+        Position dest = path_->CurrentDestination();
 
         if (path_->along_ + 1 < path_->nodes_.size())
             dest = path_->nodes_[path_->along_ + 1].pos;
@@ -984,7 +984,7 @@ void DeathBot::ThinkRoam()
 
         if (!BotNavigateNextRoamPoint(roam_goal_))
         {
-            roam_goal_ = position_c{0, 0, 0};
+            roam_goal_ = Position{0, 0, 0};
             return;
         }
 
@@ -993,7 +993,7 @@ void DeathBot::ThinkRoam()
         // if no path found, try again soon
         if (path_ == nullptr)
         {
-            roam_goal_ = position_c{0, 0, 0};
+            roam_goal_ = Position{0, 0, 0};
             return;
         }
 
@@ -1012,7 +1012,7 @@ void DeathBot::FinishGetItem()
     path_wait_ = 4 + RandomShort() % 4;
 
     // when fighting, look furthe for more items
-    if (pl_->mo->target != nullptr)
+    if (pl_->mo->target_ != nullptr)
     {
         LookForItems(1024);
         return;
@@ -1024,7 +1024,7 @@ void DeathBot::FinishGetItem()
     if (task_ == kBotTaskGetItem) return;
 
     // continue to follow player
-    if (pl_->mo->supportobj != nullptr) return;
+    if (pl_->mo->support_object_ != nullptr) return;
 
     // otherwise we were roaming about, so re-establish path
     if (!(AlmostEquals(roam_goal_.x, 0.0f) &&
@@ -1035,7 +1035,7 @@ void DeathBot::FinishGetItem()
         // if no path found, try again soon
         if (path_ == nullptr)
         {
-            roam_goal_ = position_c{0, 0, 0};
+            roam_goal_ = Position{0, 0, 0};
             return;
         }
 
@@ -1046,14 +1046,14 @@ void DeathBot::FinishGetItem()
 void DeathBot::ThinkGetItem()
 {
     // item gone?  (either we picked it up, or someone else did)
-    if (pl_->mo->tracer == nullptr)
+    if (pl_->mo->tracer_ == nullptr)
     {
         FinishGetItem();
         return;
     }
 
     // if we are being chased, look at them, shoot sometimes
-    if (pl_->mo->target)
+    if (pl_->mo->target_)
     {
         UpdateEnemy();
 
@@ -1061,7 +1061,7 @@ void DeathBot::ThinkGetItem()
 
         if (see_enemy_) ShootTarget();
     }
-    else { TurnToward(pl_->mo->tracer, false); }
+    else { TurnToward(pl_->mo->tracer_, false); }
 
     // follow the path previously found
     if (path_ != nullptr)
@@ -1091,7 +1091,7 @@ void DeathBot::ThinkGetItem()
     }
 
     // move toward the item's location
-    WeaveToward(pl_->mo->tracer);
+    WeaveToward(pl_->mo->tracer_);
 }
 
 void DeathBot::FinishDoorOrLift(bool ok)
@@ -1102,7 +1102,7 @@ void DeathBot::FinishDoorOrLift(bool ok)
     else
     {
         DeletePath();
-        roam_goal_ = position_c{0, 0, 0};
+        roam_goal_ = Position{0, 0, 0};
     }
 }
 
@@ -1121,7 +1121,7 @@ void DeathBot::ThinkOpenDoor()
             float    dist = DistTo(path_->CurrentDestination());
             BAMAngle ang =
                 path_->nodes_[path_->along_].seg->angle + kBAMAngle90;
-            BAMAngle diff = ang - pl_->mo->angle;
+            BAMAngle diff = ang - pl_->mo->angle_;
 
             if (diff > kBAMAngle180) diff = kBAMAngle360 - diff;
 
@@ -1187,7 +1187,7 @@ void DeathBot::ThinkUseLift()
             float    dist = DistTo(path_->CurrentDestination());
             BAMAngle ang =
                 path_->nodes_[path_->along_].seg->angle + kBAMAngle90;
-            BAMAngle diff = ang - pl_->mo->angle;
+            BAMAngle diff = ang - pl_->mo->angle_;
 
             if (diff > kBAMAngle180) diff = kBAMAngle360 - diff;
 
@@ -1293,20 +1293,20 @@ void DeathBot::Think()
     // do nothing when game is paused
     if (paused) return;
 
-    mobj_t *mo = pl_->mo;
+    MapObject *mo = pl_->mo;
 
     // dead?
-    if (mo->health <= 0)
+    if (mo->health_ <= 0)
     {
         DeathThink();
         return;
     }
 
     // forget target (etc) if they died
-    if (mo->target && mo->target->health <= 0) mo->SetTarget(nullptr);
+    if (mo->target_ && mo->target_->health_ <= 0) mo->SetTarget(nullptr);
 
-    if (mo->supportobj && mo->supportobj->health <= 0)
-        mo->SetSupportObj(nullptr);
+    if (mo->support_object_ && mo->support_object_->health_ <= 0)
+        mo->SetSupportObject(nullptr);
 
     // hurt by somebody?
     if (pl_->attacker != nullptr) { PainResponse(); }
@@ -1337,14 +1337,14 @@ void DeathBot::Think()
     if (weapon_time_-- < 0) SelectWeapon();
 
     // if we have a target enemy, fight it or flee it
-    if (pl_->mo->target != nullptr)
+    if (pl_->mo->target_ != nullptr)
     {
         ThinkFight();
         return;
     }
 
     // if we have a leader (in co-op), follow them
-    if (pl_->mo->supportobj != nullptr)
+    if (pl_->mo->support_object_ != nullptr)
     {
         ThinkHelp();
         return;
@@ -1373,7 +1373,7 @@ void DeathBot::ConvertTiccmd(EventTicCommand *dest)
 {
     // we assume caller has cleared the ticcmd_t to zero.
 
-    mobj_t *mo = pl_->mo;
+    MapObject *mo = pl_->mo;
 
     if (cmd_.attack) dest->buttons |= kButtonCodeAttack;
 
@@ -1391,8 +1391,8 @@ void DeathBot::ConvertTiccmd(EventTicCommand *dest)
 
     dest->player_index = pl_->pnum;
 
-    dest->angle_turn = (mo->angle - look_angle_) >> 16;
-    dest->mouselook_turn = (epi::BAMFromATan(look_slope_) - mo->vertangle) >> 16;
+    dest->angle_turn = (mo->angle_ - look_angle_) >> 16;
+    dest->mouselook_turn = (epi::BAMFromATan(look_slope_) - mo->vertical_angle_) >> 16;
 
     if (cmd_.speed != 0)
     {
@@ -1417,7 +1417,7 @@ void DeathBot::Respawn()
 
     hit_obstacle_ = false;
     near_leader_  = false;
-    roam_goal_    = position_c{0, 0, 0};
+    roam_goal_    = Position{0, 0, 0};
 
     DeletePath();
 }

@@ -34,7 +34,7 @@
 
 // Forward declarations
 class SoundEffectDefinition;
-struct position_c;
+struct Position;
 
 // We use a 22.10 fixed point for sound offsets.  It's a reasonable
 // compromise between longest sound and accumulated round-off error.
@@ -57,7 +57,7 @@ class mix_channel_c
 
     int         category;
     SoundEffectDefinition   *def;
-    position_c *pos;
+    Position *pos;
 
     fixed22_t offset;
     fixed22_t length;
@@ -104,7 +104,7 @@ void S_MixAllChannels(void *stream, int len);
 // 'len' is the number of samples (for stereo: pairs)
 // to mix into the stream.
 
-void S_UpdateSounds(position_c *listener, BAMAngle angle);
+void S_UpdateSounds(Position *listener, BAMAngle angle);
 
 //-------- API for Synthesised MUSIC --------------------
 

@@ -170,7 +170,7 @@ enum DDFCheckFlagResult
 struct DDFActionCode
 {
     const char *actionname;
-    void (*action)(struct mobj_s *mo);
+    void (*action)(MapObject *mo);
 
     // -AJA- 1999/08/09: This function handles the argument when brackets
     // are present (e.g. "WEAPON_SHOOT(FIREBALL)").  nullptr if unused.

@@ -150,7 +150,7 @@ static float GetSecHeightReference(TriggerHeightReference ref, sector_t *sec, se
 
 #define RELOOP_TICKS 6
 
-static void MakeMovingSound(bool *started_var, SoundEffect *sfx, position_c *pos)
+static void MakeMovingSound(bool *started_var, SoundEffect *sfx, Position *pos)
 {
     if (!sfx || sfx->num < 1)
         return;
@@ -1026,7 +1026,7 @@ bool EV_DoPlane(sector_t *sec, const PlaneMoverDefinition *def, sector_t *model)
         return secaction ? true : false;
 }
 
-bool EV_ManualPlane(line_t *line, mobj_t *thing, const PlaneMoverDefinition *def)
+bool EV_ManualPlane(line_t *line, MapObject *thing, const PlaneMoverDefinition *def)
 {
     int side = 0; // only front sides can be used
 
@@ -1045,7 +1045,7 @@ bool EV_ManualPlane(line_t *line, mobj_t *thing, const PlaneMoverDefinition *def
             int olddir = pmov->direction;
 
             // only players close doors
-            if ((pmov->direction != DIRECTION_DOWN) && thing->player)
+            if ((pmov->direction != DIRECTION_DOWN) && thing->player_)
                 newdir = pmov->direction = DIRECTION_DOWN;
             else
                 newdir = pmov->direction = DIRECTION_UP;
@@ -1054,7 +1054,7 @@ bool EV_ManualPlane(line_t *line, mobj_t *thing, const PlaneMoverDefinition *def
             {
                 S_StartFX(def->sfxstart_, SNCAT_Level, &sec->sfx_origin);
 
-                pmov->sfxstarted = !thing->player;
+                pmov->sfxstarted = !thing->player_;
                 return true;
             }
         }
@@ -1340,7 +1340,7 @@ static bool MoveSlider(slider_move_t *smov)
 //
 // Handle thin horizontal sliding doors.
 //
-bool EV_DoSlider(line_t *door, line_t *act_line, mobj_t *thing, const LineType *special)
+bool EV_DoSlider(line_t *door, line_t *act_line, MapObject *thing, const LineType *special)
 {
     SYS_ASSERT(door);
 
@@ -1357,7 +1357,7 @@ bool EV_DoSlider(line_t *door, line_t *act_line, mobj_t *thing, const LineType *
         smov = door->slider_move;
 
         // only players close doors
-        if (smov->direction == DIRECTION_WAIT && thing && thing->player)
+        if (smov->direction == DIRECTION_WAIT && thing && thing->player_)
         {
             smov->waited = 0;
             return true;
@@ -1376,7 +1376,7 @@ bool EV_DoSlider(line_t *door, line_t *act_line, mobj_t *thing, const LineType *
     smov->target   = smov->line_len * smov->info->distance_;
 
     smov->direction  = DIRECTION_UP;
-    smov->sfxstarted = !(thing && thing->player);
+    smov->sfxstarted = !(thing && thing->player_);
     smov->final_open = (act_line && act_line->count == 1);
 
     door->slide_door  = special;

@@ -109,7 +109,7 @@ typedef struct drawthing_s
     struct drawthing_s *prev;
 
     // actual map object
-    mobj_t *mo;
+    MapObject *mo;
 
     bool is_model;
 
@@ -269,7 +269,7 @@ extern int detail_level;
 extern int use_dlights;
 extern int sprite_kludge;
 
-const image_c *R2_GetThingSprite(mobj_t *mo, bool *flip);
+const image_c *R2_GetThingSprite(MapObject *mo, bool *flip);
 const image_c *R2_GetOtherSprite(int sprite, int frame, bool *flip);
 
 //

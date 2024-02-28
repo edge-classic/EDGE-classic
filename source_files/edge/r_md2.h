@@ -33,7 +33,7 @@ md2_model_c *MD3_LoadModel(epi::File *f);
 short MD2_FindFrame(md2_model_c *md, const char *name);
 
 void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, int frame1, int frame2, float lerp,
-                     float x, float y, float z, mobj_t *mo, region_properties_t *props, float scale, float aspect,
+                     float x, float y, float z, MapObject *mo, region_properties_t *props, float scale, float aspect,
                      float bias, int rotation);
 
 void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame, float x, float y, float xscale,

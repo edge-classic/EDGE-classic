@@ -53,7 +53,7 @@ bool AutomapResponder(InputEvent *ev);
 void AutomapTicker(void);
 
 // Called to draw the automap on the screen.
-void AutomapRender(float x, float y, float w, float h, mobj_t *focus);
+void AutomapRender(float x, float y, float w, float h, MapObject *focus);
 
 // Called to force the automap to quit
 // if the level is completed while it is up.

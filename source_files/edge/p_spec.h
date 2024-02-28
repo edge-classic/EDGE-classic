@@ -168,10 +168,10 @@ void P_StopAmbientSectorSfx(void);
 void P_UpdateSpecials(bool extra_tic);
 
 // when needed
-bool P_UseSpecialLine(mobj_t *thing, line_t *line, int side, float open_bottom, float open_top);
-bool P_CrossSpecialLine(line_t *ld, int side, mobj_t *thing);
-void P_ShootSpecialLine(line_t *ld, int side, mobj_t *thing);
-void P_RemoteActivation(mobj_t *thing, int typenum, int tag, int side, LineTrigger method);
+bool P_UseSpecialLine(MapObject *thing, line_t *line, int side, float open_bottom, float open_top);
+bool P_CrossSpecialLine(line_t *ld, int side, MapObject *thing);
+void P_ShootSpecialLine(line_t *ld, int side, MapObject *thing);
+void P_RemoteActivation(MapObject *thing, int typenum, int tag, int side, LineTrigger method);
 void P_PlayerInSpecialSector(struct player_s *pl, sector_t *sec, bool should_choke = true);
 
 // Utilities...
@@ -209,12 +209,12 @@ void     P_DestroyAllSectorSFX(void);
 
 void EV_LightTurnOn(int tag, int bright);
 bool EV_DoDonut(sector_t *s1, struct SoundEffect *sfx[4]);
-bool EV_Teleport(line_t *line, int tag, mobj_t *thing, const TeleportDefinition *def);
-bool EV_ManualPlane(line_t *line, mobj_t *thing, const PlaneMoverDefinition *type);
+bool EV_Teleport(line_t *line, int tag, MapObject *thing, const TeleportDefinition *def);
+bool EV_ManualPlane(line_t *line, MapObject *thing, const PlaneMoverDefinition *type);
 // bool EV_ManualElevator(line_t * line, mobj_t * thing, const elevatordef_c * type);
 
 bool EV_DoPlane(sector_t *sec, const PlaneMoverDefinition *type, sector_t *model);
-bool EV_DoSlider(line_t *door, line_t *act_line, mobj_t *thing, const LineType *special);
+bool EV_DoSlider(line_t *door, line_t *act_line, MapObject *thing, const LineType *special);
 bool P_SectorIsLowering(sector_t *sec);
 
 void P_RunForces(bool extra_tic);

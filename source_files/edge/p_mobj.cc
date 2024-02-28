@@ -40,7 +40,8 @@
 // -ACB- 1998/08/06 Implemented limitless mobjdef list, altered/removed all
 //                  mobjdef[] references.
 //
-// -AJA- 1999/07/21: Replaced some non-critical RandomByteDeterministics with RandomByte.
+// -AJA- 1999/07/21: Replaced some non-critical RandomByteDeterministics with
+// RandomByte.
 //
 // -AJA- 1999/07/30: Removed redundant code from P_SpawnMobj (it was
 //                   virtually identical to P_MobjCreateObject).
@@ -48,16 +49,18 @@
 // -AJA- 1999/09/15: Removed P_SpawnMobj itself :-).
 //
 
-
-#include "i_defs_gl.h"
 #include "p_mobj.h"
 
+#include <list>
+
+#include "AlmostEquals.h"
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
-#include "g_game.h"
 #include "f_interm.h"
+#include "g_game.h"
 #include "hu_stuff.h"
+#include "i_defs_gl.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_random.h"
@@ -68,84 +71,83 @@
 #include "r_shader.h"
 #include "s_sound.h"
 
-#include "AlmostEquals.h"
-
-#include <list>
-
-#define LADDER_FRICTION 0.5f
-
 #define DEBUG_MOBJ 0
+
+static constexpr float kLadderFriction = 0.5f;
+
+static constexpr float kOofSpeed =
+    9.0f;  // Lobo: original value 20.0f too high, almost never played oof
+
+static constexpr uint8_t kMaxThinkLoop = 8;
 
 extern ConsoleVariable double_framerate;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(g_cullthinkers, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(distance_cull_thinkers, "0",
+                             kConsoleVariableFlagArchive)
 
-EDGE_DEFINE_CONSOLE_VARIABLE(g_gravity, "1.0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(gravity_factor, "1.0", kConsoleVariableFlagArchive)
 
 // List of all objects in map.
-mobj_t *mobjlisthead;
+MapObject *map_object_list_head;
 
 // List of item respawn objects
-iteminque_t *itemquehead;
+RespawnQueueItem *respawn_queue_head;
 
 std::unordered_set<const MapObjectDefinition *> seen_monsters;
 
 bool time_stop_active = false;
 
-static void P_AddItemToQueue(const mobj_t *mo)
+static void P_AddItemToQueue(const MapObject *mo)
 {
     // only respawn items in deathmatch or forced by level flags
-    if (!(deathmatch >= 2 || level_flags.itemrespawn))
-        return;
+    if (!(deathmatch >= 2 || level_flags.itemrespawn)) return;
 
-    iteminque_t *newbie = new iteminque_t;
+    RespawnQueueItem *newbie = new RespawnQueueItem;
 
-    newbie->spawnpoint = mo->spawnpoint;
-    newbie->time       = mo->info->respawntime_;
+    newbie->spawnpoint = mo->spawnpoint_;
+    newbie->time       = mo->info_->respawntime_;
 
     // add to end of list
 
-    if (itemquehead == nullptr)
+    if (respawn_queue_head == nullptr)
     {
-        newbie->next = nullptr;
-        newbie->prev = nullptr;
+        newbie->next     = nullptr;
+        newbie->previous = nullptr;
 
-        itemquehead = newbie;
+        respawn_queue_head = newbie;
     }
     else
     {
-        iteminque_t *tail = itemquehead;
+        RespawnQueueItem *tail = respawn_queue_head;
 
-        while (tail->next != nullptr)
-            tail = tail->next;
+        while (tail->next != nullptr) tail = tail->next;
 
-        newbie->next = nullptr;
-        newbie->prev = tail;
+        newbie->next     = nullptr;
+        newbie->previous = tail;
 
         tail->next = newbie;
     }
 }
 
-bool mobj_t::isRemoved() const
-{
-    return state == nullptr;
-}
+bool MapObject::IsRemoved() const { return state_ == nullptr; }
 
-#if 1 // DEBUGGING
+#if 1  // DEBUGGING
 void P_DumpMobjs(void)
 {
-    mobj_t *mo;
+    MapObject *mo;
 
     int index = 0;
 
     LogDebug("MOBJs:\n");
 
-    for (mo = mobjlisthead; mo; mo = mo->next, index++)
+    for (mo = map_object_list_head; mo; mo = mo->next_, index++)
     {
-        LogDebug(" %4d: %p next:%p prev:%p [%s] at (%1.0f,%1.0f,%1.0f) states=%d > %d tics=%d\n", index, mo,
-                     mo->next, mo->prev, mo->info->name_.c_str(), mo->x, mo->y, mo->z,
-                     (int)(mo->state ? mo->state - states : -1), (int)(mo->next_state ? mo->next_state - states : -1),
-                     mo->tics);
+        LogDebug(
+            " %4d: %p next:%p prev:%p [%s] at (%1.0f,%1.0f,%1.0f) states=%d > "
+            "%d tics=%d\n",
+            index, mo, mo->next_, mo->previous_, mo->info_->name_.c_str(),
+            mo->x, mo->y, mo->z, (int)(mo->state_ ? mo->state_ - states : -1),
+            (int)(mo->next_state_ ? mo->next_state_ - states : -1), mo->tics_);
     }
 
     LogDebug("END OF MOBJs\n");
@@ -171,24 +173,23 @@ static inline int PointOnLineSide(float x, float y, line_t *ld)
 //
 // -AJA- 1999/10/18: written.
 //
-static void EnterBounceStates(mobj_t *mo)
+static void EnterBounceStates(MapObject *mo)
 {
-    if (!mo->info->bounce_state_)
-        return;
+    if (!mo->info_->bounce_state_) return;
 
     // ignore if disarmed
-    if (mo->extendedflags & kExtendedFlagJustBounced)
-        return;
+    if (mo->extended_flags_ & kExtendedFlagJustBounced) return;
 
     // give deferred states a higher priority
-    if (!mo->state || !mo->next_state || (mo->next_state - states) != mo->state->nextstate)
+    if (!mo->state_ || !mo->next_state_ ||
+        (mo->next_state_ - states) != mo->state_->nextstate)
     {
         return;
     }
 
-    mo->extendedflags |= kExtendedFlagJustBounced;
+    mo->extended_flags_ |= kExtendedFlagJustBounced;
 
-    P_SetMobjState(mo, mo->info->bounce_state_);
+    P_SetMobjState(mo, mo->info_->bounce_state_);
 }
 
 //
@@ -196,7 +197,7 @@ static void EnterBounceStates(mobj_t *mo)
 //
 // -AJA- 1999/08/22: written.
 //
-static void BounceOffWall(mobj_t *mo, line_t *wall)
+static void BounceOffWall(MapObject *mo, line_t *wall)
 {
     BAMAngle angle;
     BAMAngle wall_angle;
@@ -205,25 +206,27 @@ static void BounceOffWall(mobj_t *mo, line_t *wall)
     divline_t div;
     float     dest_x, dest_y;
 
-    angle      = R_PointToAngle(0, 0, mo->mom.X, mo->mom.Y);
+    angle      = R_PointToAngle(0, 0, mo->momentum_.X, mo->momentum_.Y);
     wall_angle = R_PointToAngle(0, 0, wall->dx, wall->dy);
 
     diff = wall_angle - angle;
 
-    if (diff > kBAMAngle90 && diff < kBAMAngle270)
-        diff -= kBAMAngle180;
+    if (diff > kBAMAngle90 && diff < kBAMAngle270) diff -= kBAMAngle180;
 
     // -AJA- Prevent getting stuck at some walls...
 
-    dest_x = mo->x + epi::BAMCos(angle) * (mo->speed + mo->info->radius_) * 4.0f;
-    dest_y = mo->y + epi::BAMSin(angle) * (mo->speed + mo->info->radius_) * 4.0f;
+    dest_x =
+        mo->x + epi::BAMCos(angle) * (mo->speed_ + mo->info_->radius_) * 4.0f;
+    dest_y =
+        mo->y + epi::BAMSin(angle) * (mo->speed_ + mo->info_->radius_) * 4.0f;
 
     div.x  = wall->v1->X;
     div.y  = wall->v1->Y;
     div.dx = wall->dx;
     div.dy = wall->dy;
 
-    if (P_PointOnDivlineSide(mo->x, mo->y, &div) == P_PointOnDivlineSide(dest_x, dest_y, &div))
+    if (P_PointOnDivlineSide(mo->x, mo->y, &div) ==
+        P_PointOnDivlineSide(dest_x, dest_y, &div))
     {
         // Result is the same, thus we haven't crossed the line.  Choose a
         // random angle to bounce away.  And don't attenuate the speed (so
@@ -231,18 +234,15 @@ static void BounceOffWall(mobj_t *mo, line_t *wall)
 
         angle = RandomByteDeterministic() << (kBAMAngleBits - 8);
     }
-    else
-    {
-        angle += diff << 1;
-    }
+    else { angle += diff << 1; }
 
     // calculate new momentum
 
-    mo->speed *= mo->info->bounce_speed_;
+    mo->speed_ *= mo->info_->bounce_speed_;
 
-    mo->mom.X = epi::BAMCos(angle) * mo->speed;
-    mo->mom.Y = epi::BAMSin(angle) * mo->speed;
-    mo->angle = angle;
+    mo->momentum_.X = epi::BAMCos(angle) * mo->speed_;
+    mo->momentum_.Y = epi::BAMSin(angle) * mo->speed_;
+    mo->angle_      = angle;
 
     EnterBounceStates(mo);
 }
@@ -252,15 +252,15 @@ static void BounceOffWall(mobj_t *mo, line_t *wall)
 //
 // -AJA- 1999/10/18: written.
 //
-static void BounceOffPlane(mobj_t *mo, float dir)
+static void BounceOffPlane(MapObject *mo, float dir)
 {
     // calculate new momentum
 
-    mo->speed *= mo->info->bounce_speed_;
+    mo->speed_ *= mo->info_->bounce_speed_;
 
-    mo->mom.X = (float)(epi::BAMCos(mo->angle) * mo->speed);
-    mo->mom.Y = (float)(epi::BAMSin(mo->angle) * mo->speed);
-    mo->mom.Z = (float)(dir * mo->speed * mo->info->bounce_up_);
+    mo->momentum_.X = (float)(epi::BAMCos(mo->angle_) * mo->speed_);
+    mo->momentum_.Y = (float)(epi::BAMSin(mo->angle_) * mo->speed_);
+    mo->momentum_.Z = (float)(dir * mo->speed_ * mo->info_->bounce_up_);
 
     EnterBounceStates(mo);
 }
@@ -270,11 +270,12 @@ static void BounceOffPlane(mobj_t *mo, float dir)
 //
 // -AJA- 1999/09/25: written.
 //
-static bool CorpseShouldSlide(mobj_t *mo)
+static bool CorpseShouldSlide(MapObject *mo)
 {
     float floor, ceil;
 
-    if (-0.25f < mo->mom.X && mo->mom.X < 0.25f && -0.25f < mo->mom.Y && mo->mom.Y < 0.25f)
+    if (-0.25f < mo->momentum_.X && mo->momentum_.X < 0.25f &&
+        -0.25f < mo->momentum_.Y && mo->momentum_.Y < 0.25f)
     {
         return false;
     }
@@ -283,51 +284,51 @@ static bool CorpseShouldSlide(mobj_t *mo)
     float c_slope_z = 0;
 
     // Vertex slope check here?
-    if (mo->subsector->sector->floor_vertex_slope)
+    if (mo->subsector_->sector->floor_vertex_slope)
     {
         HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
         HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
-        float  z_test =
-            MathLinePlaneIntersection(line_a, line_b, mo->subsector->sector->floor_z_verts[2],
-                                    mo->subsector->sector->floor_vs_normal)
+        float    z_test =
+            MathLinePlaneIntersection(line_a, line_b,
+                                      mo->subsector_->sector->floor_z_verts[2],
+                                      mo->subsector_->sector->floor_vs_normal)
                 .Z;
-        if (std::isfinite(z_test))
-            f_slope_z = z_test - mo->subsector->sector->f_h;
+        if (isfinite(z_test)) f_slope_z = z_test - mo->subsector_->sector->f_h;
     }
 
-    if (mo->subsector->sector->ceil_vertex_slope)
+    if (mo->subsector_->sector->ceil_vertex_slope)
     {
         HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
         HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
-        float  z_test =
-            MathLinePlaneIntersection(line_a, line_b, mo->subsector->sector->ceil_z_verts[2],
-                                    mo->subsector->sector->ceil_vs_normal)
+        float    z_test =
+            MathLinePlaneIntersection(line_a, line_b,
+                                      mo->subsector_->sector->ceil_z_verts[2],
+                                      mo->subsector_->sector->ceil_vs_normal)
                 .Z;
-        if (std::isfinite(z_test))
-            c_slope_z = mo->subsector->sector->c_h - z_test;
+        if (isfinite(z_test)) c_slope_z = mo->subsector_->sector->c_h - z_test;
     }
 
-    P_ComputeThingGap(mo, mo->subsector->sector, mo->z, &floor, &ceil, f_slope_z, c_slope_z);
+    P_ComputeThingGap(mo, mo->subsector_->sector, mo->z, &floor, &ceil,
+                      f_slope_z, c_slope_z);
 
-    return (!AlmostEquals(mo->floorz, floor));
+    return (!AlmostEquals(mo->floor_z_, floor));
 }
 
 //
 // TeleportRespawn
 //
-static void TeleportRespawn(mobj_t *mobj)
+static void TeleportRespawn(MapObject *mobj)
 {
-    float             x, y, z, oldradius, oldheight;
-    const MapObjectDefinition *info = mobj->spawnpoint.info;
-    mobj_t           *new_mo;
-    int               oldflags;
+    float                      x, y, z, oldradius, oldheight;
+    const MapObjectDefinition *info = mobj->spawnpoint_.info;
+    MapObject                 *new_mo;
+    int                        oldflags;
 
-    if (!info)
-        return;
+    if (!info) return;
 
-    x = mobj->spawnpoint.x;
-    y = mobj->spawnpoint.y;
-    z = mobj->spawnpoint.z;
+    x = mobj->spawnpoint_.x;
+    y = mobj->spawnpoint_.y;
+    z = mobj->spawnpoint_.z;
 
     // something is occupying it's position?
 
@@ -335,21 +336,21 @@ static void TeleportRespawn(mobj_t *mobj)
     // -ACB- 2004/02/01 Check if the object can respawn in this position with
     // its correct radius. Should this check fail restore the old values back
     //
-    oldradius = mobj->radius;
-    oldheight = mobj->height;
-    oldflags  = mobj->flags;
+    oldradius = mobj->radius_;
+    oldheight = mobj->height_;
+    oldflags  = mobj->flags_;
 
-    mobj->radius = mobj->spawnpoint.info->radius_;
-    mobj->height = mobj->spawnpoint.info->height_;
+    mobj->radius_ = mobj->spawnpoint_.info->radius_;
+    mobj->height_ = mobj->spawnpoint_.info->height_;
 
-    if (info->flags_ & kMapObjectFlagSolid) // Should it be solid?
-        mobj->flags |= kMapObjectFlagSolid;
+    if (info->flags_ & kMapObjectFlagSolid)  // Should it be solid?
+        mobj->flags_ |= kMapObjectFlagSolid;
 
     if (!P_CheckAbsPosition(mobj, x, y, z))
     {
-        mobj->radius = oldradius;
-        mobj->height = oldheight;
-        mobj->flags  = oldflags;
+        mobj->radius_ = oldradius;
+        mobj->height_ = oldheight;
+        mobj->flags_  = oldflags;
         return;
     }
 
@@ -363,22 +364,21 @@ static void TeleportRespawn(mobj_t *mobj)
     // spawn a teleport fog at the new spot...
 
     // temp fix for teleport flash...
-    if (info->respawneffect_)
-        P_MobjCreateObject(x, y, z, info->respawneffect_);
+    if (info->respawneffect_) P_MobjCreateObject(x, y, z, info->respawneffect_);
 
     // spawn it, inheriting attributes from deceased one
     // -ACB- 1998/08/06 Create Object
     new_mo = P_MobjCreateObject(x, y, z, info);
 
-    new_mo->spawnpoint = mobj->spawnpoint;
-    new_mo->angle      = mobj->spawnpoint.angle;
-    new_mo->vertangle  = mobj->spawnpoint.vertangle;
-    new_mo->tag        = mobj->spawnpoint.tag;
+    new_mo->spawnpoint_     = mobj->spawnpoint_;
+    new_mo->angle_          = mobj->spawnpoint_.angle;
+    new_mo->vertical_angle_ = mobj->spawnpoint_.vertical_angle;
+    new_mo->tag_            = mobj->spawnpoint_.tag;
 
-    if (mobj->spawnpoint.flags & kMapObjectFlagAmbush)
-        new_mo->flags |= kMapObjectFlagAmbush;
+    if (mobj->spawnpoint_.flags & kMapObjectFlagAmbush)
+        new_mo->flags_ |= kMapObjectFlagAmbush;
 
-    new_mo->reactiontime = RESPAWN_DELAY;
+    new_mo->reaction_time_ = RESPAWN_DELAY;
 
     // remove the old monster.
     P_RemoveMobj(mobj);
@@ -389,48 +389,47 @@ static void TeleportRespawn(mobj_t *mobj)
 //
 // -ACB- 1998/07/29 Prevented respawning of ghosts
 //                  Make monster deaf, if originally deaf
-//                  Given a reaction time, delays monster starting up immediately.
-//                  Doesn't try to raise an object with no raisestate
+//                  Given a reaction time, delays monster starting up
+//                  immediately. Doesn't try to raise an object with no
+//                  raisestate
 //
-static void ResurrectRespawn(mobj_t *mobj)
+static void ResurrectRespawn(MapObject *mobj)
 {
-    float             x, y, z, oldradius, oldheight;
+    float                      x, y, z, oldradius, oldheight;
     const MapObjectDefinition *info;
-    int               oldflags;
+    int                        oldflags;
 
     x = mobj->x;
     y = mobj->y;
     z = mobj->z;
 
-    info = mobj->info;
+    info = mobj->info_;
 
     // cannot raise the unraisable
-    if (!info->raise_state_)
-        return;
+    if (!info->raise_state_) return;
 
     // don't respawn gibs
-    if (mobj->extendedflags & kExtendedFlagGibbed)
-        return;
+    if (mobj->extended_flags_ & kExtendedFlagGibbed) return;
 
     //
     // -ACB- 2004/02/01 Check if the object can respawn in this position with
     // its correct radius. Should this check fail restore the old values back
     //
-    oldradius = mobj->radius;
-    oldheight = mobj->height;
-    oldflags  = mobj->flags;
+    oldradius = mobj->radius_;
+    oldheight = mobj->height_;
+    oldflags  = mobj->flags_;
 
-    mobj->radius = info->radius_;
-    mobj->height = info->height_;
+    mobj->radius_ = info->radius_;
+    mobj->height_ = info->height_;
 
-    if (info->flags_ & kMapObjectFlagSolid) // Should it be solid?
-        mobj->flags |= kMapObjectFlagSolid;
+    if (info->flags_ & kMapObjectFlagSolid)  // Should it be solid?
+        mobj->flags_ |= kMapObjectFlagSolid;
 
     if (!P_CheckAbsPosition(mobj, x, y, z))
     {
-        mobj->radius = oldradius;
-        mobj->height = oldheight;
-        mobj->flags  = oldflags;
+        mobj->radius_ = oldradius;
+        mobj->height_ = oldheight;
+        mobj->flags_  = oldflags;
         return;
     }
 
@@ -440,30 +439,30 @@ static void ResurrectRespawn(mobj_t *mobj)
 
     P_SetMobjState(mobj, info->raise_state_);
 
-    SYS_ASSERT(!mobj->isRemoved());
+    SYS_ASSERT(!mobj->IsRemoved());
 
-    mobj->flags         = info->flags_;
-    mobj->extendedflags = info->extendedflags_;
-    mobj->hyperflags    = info->hyperflags_;
-    mobj->mbf21flags    = info->mbf21flags_;
-    mobj->health        = mobj->spawnhealth;
+    mobj->flags_          = info->flags_;
+    mobj->extended_flags_ = info->extended_flags_;
+    mobj->hyper_flags_    = info->hyper_flags_;
+    mobj->mbf21_flags_    = info->mbf21_flags_;
+    mobj->health_         = mobj->spawn_health_;
 
-    mobj->visibility = info->translucency_;
-    if (!AlmostEquals(mobj->alpha, 1.0f))
-        mobj->vis_target = mobj->alpha;
-    mobj->movecount  = 0; // -ACB- 1998/08/03 Don't head off in any direction
+    mobj->visibility_ = info->translucency_;
+    if (!AlmostEquals(mobj->alpha_, 1.0f))
+        mobj->target_visibility_ = mobj->alpha_;
+    mobj->move_count_ = 0;  // -ACB- 1998/08/03 Don't head off in any direction
 
-    mobj->painchance = info->painchance_;
+    mobj->pain_chance_ = info->pain_chance_;
 
     mobj->SetSource(nullptr);
     mobj->SetTarget(nullptr);
 
-    mobj->tag = mobj->spawnpoint.tag;
+    mobj->tag_ = mobj->spawnpoint_.tag;
 
-    if (mobj->spawnpoint.flags & kMapObjectFlagAmbush)
-        mobj->flags |= kMapObjectFlagAmbush;
+    if (mobj->spawnpoint_.flags & kMapObjectFlagAmbush)
+        mobj->flags_ |= kMapObjectFlagAmbush;
 
-    mobj->reactiontime = RESPAWN_DELAY;
+    mobj->reaction_time_ = RESPAWN_DELAY;
     return;
 }
 
@@ -472,11 +471,10 @@ static void ResurrectRespawn(mobj_t *mobj)
 //
 // Returns true if the mobj is still present.
 //
-bool P_SetMobjState(mobj_t *mobj, int state)
+bool P_SetMobjState(MapObject *mobj, int state)
 {
     // ignore removed objects
-    if (mobj->isRemoved())
-        return false;
+    if (mobj->IsRemoved()) return false;
 
     if (state == 0)
     {
@@ -487,39 +485,38 @@ bool P_SetMobjState(mobj_t *mobj, int state)
     State *st = &states[state];
 
     // model interpolation stuff
-    if ((st->flags & kStateFrameFlagModel) && (mobj->state->flags & kStateFrameFlagModel) && (st->sprite == mobj->state->sprite) &&
-        st->tics > 1)
+    if ((st->flags & kStateFrameFlagModel) &&
+        (mobj->state_->flags & kStateFrameFlagModel) &&
+        (st->sprite == mobj->state_->sprite) && st->tics > 1)
     {
-        mobj->model_last_frame = mobj->state->frame;
+        mobj->model_last_frame_ = mobj->state_->frame;
     }
     else
-        mobj->model_last_frame = -1;
+        mobj->model_last_frame_ = -1;
 
-    mobj->state      = st;
-    mobj->tics       = st->tics;
-    mobj->next_state = (st->nextstate == 0) ? nullptr : (states + st->nextstate);
+    mobj->state_ = st;
+    mobj->tics_  = st->tics;
+    mobj->next_state_ =
+        (st->nextstate == 0) ? nullptr : (states + st->nextstate);
 
-    if (st->action)
-        (*st->action)(mobj);
+    if (st->action) (*st->action)(mobj);
 
     return true;
 }
 
-bool P_SetMobjState2(mobj_t *mobj, int state)
+bool P_SetMobjState2(MapObject *mobj, int state)
 {
     // -AJA- 2010/07/10: mundo hack for DDF inheritance. When jumping
     //                   to an old state, check if a newer one exists.
 
-    if (mobj->isRemoved())
-        return false;
+    if (mobj->IsRemoved()) return false;
 
-    if (state == 0)
-        return P_SetMobjState(mobj, state);
+    if (state == 0) return P_SetMobjState(mobj, state);
 
-    SYS_ASSERT(!mobj->info->state_grp_.empty());
+    SYS_ASSERT(!mobj->info_->state_grp_.empty());
 
     // state is old?
-    if (state < mobj->info->state_grp_.back().first)
+    if (state < mobj->info_->state_grp_.back().first)
     {
         State *st = &states[state];
 
@@ -527,8 +524,7 @@ bool P_SetMobjState2(mobj_t *mobj, int state)
         {
             int new_state = P_MobjFindLabel(mobj, st->label);
 
-            if (new_state != 0)
-                state = new_state;
+            if (new_state != 0) state = new_state;
         }
     }
 
@@ -547,11 +543,10 @@ bool P_SetMobjState2(mobj_t *mobj, int state)
 //
 // -AJA- 1999/09/12: written.
 //
-bool P_SetMobjStateDeferred(mobj_t *mo, int stnum, int tic_skip)
+bool P_SetMobjStateDeferred(MapObject *mo, int stnum, int tic_skip)
 {
     // ignore removed objects
-    if (mo->isRemoved() || !mo->next_state)
-        return false;
+    if (mo->IsRemoved() || !mo->next_state_) return false;
 
     ///???	if (stnum == 0)
     ///???	{
@@ -559,10 +554,10 @@ bool P_SetMobjStateDeferred(mobj_t *mo, int stnum, int tic_skip)
     ///???		return false;
     ///???	}
 
-    mo->next_state = (stnum == 0) ? nullptr : (states + stnum);
+    mo->next_state_ = (stnum == 0) ? nullptr : (states + stnum);
 
-    mo->tics     = 0;
-    mo->tic_skip = tic_skip;
+    mo->tics_     = 0;
+    mo->tic_skip_ = tic_skip;
 
     return true;
 }
@@ -573,24 +568,25 @@ bool P_SetMobjStateDeferred(mobj_t *mo, int stnum, int tic_skip)
 // Look for the given label in the mobj's states.  Returns the state
 // number if found, otherwise 0.
 //
-int P_MobjFindLabel(mobj_t *mobj, const char *label)
+int P_MobjFindLabel(MapObject *mobj, const char *label)
 {
-    return DDF_StateFindLabel(mobj->info->state_grp_, label, true /* quiet */);
+    return DDF_StateFindLabel(mobj->info_->state_grp_, label, true /* quiet */);
 }
 
 //
 // P_SetMobjDirAndSpeed
 //
-void P_SetMobjDirAndSpeed(mobj_t *mo, BAMAngle angle, float slope, float speed)
+void P_SetMobjDirAndSpeed(MapObject *mo, BAMAngle angle, float slope,
+                          float speed)
 {
-    mo->angle     = angle;
-    mo->vertangle = epi::BAMFromATan(slope);
+    mo->angle_          = angle;
+    mo->vertical_angle_ = epi::BAMFromATan(slope);
 
-    mo->mom.Z = epi::BAMSin(mo->vertangle) * speed;
-    speed *= epi::BAMCos(mo->vertangle);
+    mo->momentum_.Z = epi::BAMSin(mo->vertical_angle_) * speed;
+    speed *= epi::BAMCos(mo->vertical_angle_);
 
-    mo->mom.X = epi::BAMCos(angle) * speed;
-    mo->mom.Y = epi::BAMSin(angle) * speed;
+    mo->momentum_.X = epi::BAMCos(angle) * speed;
+    mo->momentum_.Y = epi::BAMSin(angle) * speed;
 }
 
 //
@@ -599,38 +595,39 @@ void P_SetMobjDirAndSpeed(mobj_t *mo, BAMAngle angle, float slope, float speed)
 // -AJA- 1999/09/12: Now uses P_SetMobjStateDeferred, since this
 //       routine can be called by TryMove/PIT_CheckRelThing.
 //
-void P_MobjExplodeMissile(mobj_t *mo)
+void P_MobjExplodeMissile(MapObject *mo)
 {
-    mo->mom.X = mo->mom.Y = mo->mom.Z = 0;
+    mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
 
-    mo->flags &= ~(kMapObjectFlagMissile | kMapObjectFlagTouchy);
-    mo->extendedflags &= ~(kExtendedFlagBounce | kExtendedFlagUsable);
+    mo->flags_ &= ~(kMapObjectFlagMissile | kMapObjectFlagTouchy);
+    mo->extended_flags_ &= ~(kExtendedFlagBounce | kExtendedFlagUsable);
 
-    if (mo->info->deathsound_)
-        S_StartFX(mo->info->deathsound_, SNCAT_Object, mo);
+    if (mo->info_->deathsound_)
+        S_StartFX(mo->info_->deathsound_, SNCAT_Object, mo);
 
     // mobjdef used -ACB- 1998/08/06
-    P_SetMobjStateDeferred(mo, mo->info->death_state_, RandomByteDeterministic() & 3);
+    P_SetMobjStateDeferred(mo, mo->info_->death_state_,
+                           RandomByteDeterministic() & 3);
 }
 
-static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, region_properties_t *new_p, float f_h,
-                                       float c_h, const region_properties_t *p, bool iterate_pushers)
+static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
+                                       region_properties_t *new_p, float f_h,
+                                       float c_h, const region_properties_t *p,
+                                       bool iterate_pushers)
 {
-    int flags = p->special ? p->special->special_flags_ : kSectorFlagPushConstant;
+    int flags =
+        p->special ? p->special->special_flags_ : kSectorFlagPushConstant;
 
     float factor = 1.0f;
     float push_mul;
 
     SYS_ASSERT(tz > bz);
 
-    if (tz > c_h)
-        factor -= factor * (tz - c_h) / (tz - bz);
+    if (tz > c_h) factor -= factor * (tz - c_h) / (tz - bz);
 
-    if (bz < f_h)
-        factor -= factor * (f_h - bz) / (tz - bz);
+    if (bz < f_h) factor -= factor * (f_h - bz) / (tz - bz);
 
-    if (factor <= 0)
-        return;
+    if (factor <= 0) return;
 
     new_p->gravity += factor * p->gravity;
     new_p->viscosity += factor * p->viscosity;
@@ -638,32 +635,34 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
 
     if (iterate_pushers)
     {
-        int countx = 0;
-        int county = 0;
-        HMM_Vec2 cumulative = {{0,0}};
+        int      countx     = 0;
+        int      county     = 0;
+        HMM_Vec2 cumulative = {{0, 0}};
         // handle push sectors
-        for (touch_node_t *tn = mo->touch_sectors; tn ;tn=tn->mo_next)
+        for (touch_node_t *tn = mo->touch_sectors_; tn; tn = tn->mo_next)
         {
             if (tn->sec)
             {
                 region_properties_t tn_props = tn->sec->props;
                 if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
                 {
-                    SectorFlag tn_flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagPushConstant;
+                    SectorFlag tn_flags = tn_props.special
+                                              ? tn_props.special->special_flags_
+                                              : kSectorFlagPushConstant;
 
-                    if (!(tn_flags & kSectorFlagWholeRegion) && bz > tn->sec->f_h + 1)
+                    if (!(tn_flags & kSectorFlagWholeRegion) &&
+                        bz > tn->sec->f_h + 1)
                         continue;
 
                     push_mul = 1.0f;
 
                     if (!(tn_flags & kSectorFlagPushConstant))
                     {
-                        SYS_ASSERT(mo->info->mass_ > 0);
-                        push_mul = 100.0f / mo->info->mass_;
+                        SYS_ASSERT(mo->info_->mass_ > 0);
+                        push_mul = 100.0f / mo->info_->mass_;
                     }
 
-                    if (tn_flags & kSectorFlagProportional)
-                        push_mul *= factor;
+                    if (tn_flags & kSectorFlagProportional) push_mul *= factor;
 
                     if (tn_props.push.X)
                     {
@@ -679,30 +678,27 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
                 }
             }
         }
-        // Average it out a la ZDoom so we aren't getting sent to the shadow realm in certain Boom maps - Dasho
-        // Don't think it is necessary for z push at this time
-        if (countx)
-            new_p->push.X += (cumulative.X/countx);
-        if (county)
-            new_p->push.Y += (cumulative.Y/county);
+        // Average it out a la ZDoom so we aren't getting sent to the shadow
+        // realm in certain Boom maps - Dasho Don't think it is necessary for z
+        // push at this time
+        if (countx) new_p->push.X += (cumulative.X / countx);
+        if (county) new_p->push.Y += (cumulative.Y / county);
     }
     else
     {
         if (p->push.X || p->push.Y || p->push.Z)
-        {        
-            if (!(flags & kSectorFlagWholeRegion) && bz > f_h + 1)
-                return;
+        {
+            if (!(flags & kSectorFlagWholeRegion) && bz > f_h + 1) return;
 
             push_mul = 1.0f;
 
             if (!(flags & kSectorFlagPushConstant))
             {
-                SYS_ASSERT(mo->info->mass_ > 0);
-                push_mul = 100.0f / mo->info->mass_;
+                SYS_ASSERT(mo->info_->mass_ > 0);
+                push_mul = 100.0f / mo->info_->mass_;
             }
 
-            if (flags & kSectorFlagProportional)
-                push_mul *= factor;
+            if (flags & kSectorFlagProportional) push_mul *= factor;
 
             new_p->push.X += push_mul * p->push.X;
             new_p->push.Y += push_mul * p->push.Y;
@@ -721,15 +717,15 @@ static inline void AddRegionProperties(const mobj_t *mo, float bz, float tz, reg
 // Only used for players for now (too expensive to be used by
 // everything).
 //
-void P_CalcFullProperties(const mobj_t *mo, region_properties_t *new_p)
+void P_CalcFullProperties(const MapObject *mo, region_properties_t *new_p)
 {
-    sector_t *sector = mo->subsector->sector;
+    sector_t *sector = mo->subsector_->sector;
 
     extrafloor_t *S, *L, *C;
     float         floor_h;
 
     float bz = mo->z;
-    float tz = bz + mo->height;
+    float tz = bz + mo->height_;
 
     new_p->gravity   = 0;
     new_p->viscosity = 0;
@@ -737,7 +733,7 @@ void P_CalcFullProperties(const mobj_t *mo, region_properties_t *new_p)
 
     new_p->push.X = new_p->push.Y = new_p->push.Z = 0;
 
-    new_p->type    = 0; // these shouldn't be used
+    new_p->type    = 0;  // these shouldn't be used
     new_p->special = nullptr;
 
     // Note: friction not averaged: comes from region foot is in
@@ -745,8 +741,7 @@ void P_CalcFullProperties(const mobj_t *mo, region_properties_t *new_p)
 
     floor_h = sector->f_h;
 
-    if (sector->floor_vertex_slope)
-        floor_h = mo->floorz;
+    if (sector->floor_vertex_slope) floor_h = mo->floor_z_;
 
     S = sector->bottom_ef;
     L = sector->bottom_liq;
@@ -767,30 +762,29 @@ void P_CalcFullProperties(const mobj_t *mo, region_properties_t *new_p)
         SYS_ASSERT(C);
 
         // ignore "hidden" liquids
-        if (C->bottom_h < floor_h || C->bottom_h > sector->c_h)
-            continue;
+        if (C->bottom_h < floor_h || C->bottom_h > sector->c_h) continue;
 
-        if (bz < C->bottom_h)
-            new_p->friction = C->p->friction;
+        if (bz < C->bottom_h) new_p->friction = C->p->friction;
 
         AddRegionProperties(mo, bz, tz, new_p, floor_h, C->top_h, C->p, false);
 
         floor_h = C->top_h;
     }
 
-    AddRegionProperties(mo, bz, tz, new_p, floor_h, sector->c_h, sector->p, true);
+    AddRegionProperties(mo, bz, tz, new_p, floor_h, sector->c_h, sector->p,
+                        true);
 }
 
 //
 // P_XYMovement
 //
-static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extra_tic)
+static void P_XYMovement(MapObject *mo, const region_properties_t *props,
+                         bool extra_tic)
 {
-    bool do_extra = mo->player != nullptr; // 70 Hz
+    bool do_extra = mo->player_ != nullptr;  // 70 Hz
 
     // missiles should run every tic too
-    if (mo->flags & kMapObjectFlagMissile)
-        do_extra = true;
+    if (mo->flags_ & kMapObjectFlagMissile) do_extra = true;
 
     float orig_x = mo->x;
     float orig_y = mo->y;
@@ -802,34 +796,36 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
     float absx, absy;
     float maxstep;
 
-    if (fabs(mo->mom.X) > MAXMOVE)
+    if (fabs(mo->momentum_.X) > MAXMOVE)
     {
-        float factor = MAXMOVE / fabs(mo->mom.X);
-        mo->mom.X *= factor;
-        mo->mom.Y *= factor;
+        float factor = MAXMOVE / fabs(mo->momentum_.X);
+        mo->momentum_.X *= factor;
+        mo->momentum_.Y *= factor;
     }
 
-    if (fabs(mo->mom.Y) > MAXMOVE)
+    if (fabs(mo->momentum_.Y) > MAXMOVE)
     {
-        float factor = MAXMOVE / fabs(mo->mom.Y);
-        mo->mom.X *= factor;
-        mo->mom.Y *= factor;
+        float factor = MAXMOVE / fabs(mo->momentum_.Y);
+        mo->momentum_.X *= factor;
+        mo->momentum_.Y *= factor;
     }
 
-    float xmove = mo->mom.X;
-    float ymove = mo->mom.Y;
+    float xmove = mo->momentum_.X;
+    float ymove = mo->momentum_.Y;
 
-    if (do_extra && double_framerate.d_) // 70Hz
+    if (do_extra && double_framerate.d_)  // 70Hz
     {
         xmove *= 0.52;
         ymove *= 0.52;
     }
 
     // -AJA- 1999/07/31: Ride that rawhide :->
-    if (mo->above_mo && !(mo->above_mo->flags & kMapObjectFlagFloat) && mo->above_mo->floorz < (mo->z + mo->height + 1))
+    if (mo->above_object_ &&
+        !(mo->above_object_->flags_ & kMapObjectFlagFloat) &&
+        mo->above_object_->floor_z_ < (mo->z + mo->height_ + 1))
     {
-        mo->above_mo->mom.X += xmove * mo->info->ride_friction_;
-        mo->above_mo->mom.Y += ymove * mo->info->ride_friction_;
+        mo->above_object_->momentum_.X += xmove * mo->info_->ride_friction_;
+        mo->above_object_->momentum_.Y += ymove * mo->info_->ride_friction_;
     }
 
     // -AJA- 1999/10/09: Reworked viscosity.
@@ -840,8 +836,8 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
     //  the move into steps of max half radius for collision purposes.
 
     // Use half radius as max step, if not exceptionally small.
-    if (mo->radius > STEPMOVE)
-        maxstep = mo->radius / 2;
+    if (mo->radius_ > STEPMOVE)
+        maxstep = mo->radius_ / 2;
     else
         maxstep = STEPMOVE / 2;
 
@@ -881,8 +877,7 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
     }
 
     // Keep attempting moves until object has lost all momentum.
-    do
-    {
+    do {
         // if movement is more than half that of the maximum, attempt the move
         // in two halves or move.
         if (fabs(xmove) > fabs(xstep))
@@ -916,7 +911,9 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
             // NOTE: this is for solid lines.  The "pass over" case is
             // handled in P_TryMove().
 
-            if ((mo->flags & kMapObjectFlagMissile) && (!mo->currentattack || !(mo->currentattack->flags_ & kAttackFlagNoTriggerLines)))
+            if ((mo->flags_ & kMapObjectFlagMissile) &&
+                (!mo->current_attack_ ||
+                 !(mo->current_attack_->flags_ & kAttackFlagNoTriggerLines)))
             {
                 //
                 // -AJA- Seems this is called to handle this situation:
@@ -927,11 +924,15 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
                 //
                 if (spechit.size() > 0)
                 {
-                    for (auto iter = spechit.rbegin(); iter != spechit.rend(); iter++)
+                    for (std::vector<line_t *>::reverse_iterator
+                             iter     = spechit.rbegin(),
+                             iter_end = spechit.rend();
+                         iter != iter_end; iter++)
                     {
                         line_t *ld = *iter;
 
-                        P_ShootSpecialLine(ld, PointOnLineSide(mo->x, mo->y, ld), mo->source);
+                        P_ShootSpecialLine(
+                            ld, PointOnLineSide(mo->x, mo->y, ld), mo->source_);
                     }
                 }
 
@@ -939,10 +940,12 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
                 {
                     // P_ShootSpecialLine()->P_ActivateSpecialLine() can remove
                     //  the special so we need to get the info before calling it
-                    const LineType *tempspecial = blockline->special;
+                    const LineType            *tempspecial = blockline->special;
                     const MapObjectDefinition *DebrisThing;
 
-                    P_ShootSpecialLine(blockline, PointOnLineSide(mo->x, mo->y, blockline), mo->source);
+                    P_ShootSpecialLine(blockline,
+                                       PointOnLineSide(mo->x, mo->y, blockline),
+                                       mo->source_);
 
                     if (tempspecial->type_ == kLineTriggerShootable)
                     {
@@ -950,41 +953,47 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
                         if (tempspecial->effectobject_)
                         {
                             DebrisThing = tempspecial->effectobject_;
-                            P_SpawnDebris(mo->x, mo->y, mo->z, mo->angle + kBAMAngle180, DebrisThing);
+                            P_SpawnDebris(mo->x, mo->y, mo->z,
+                                          mo->angle_ + kBAMAngle180,
+                                          DebrisThing);
                         }
                     }
                 }
             }
 
             // -AJA- 2008/01/20: Jumping out of Water
-            if (blockline && blockline->backsector && mo->player && mo->player->mo == mo && mo->player->wet_feet &&
-                !mo->player->swimming && mo->player->jumpwait == 0 && mo->z > mo->floorz + 0.5f && mo->mom.Z >= 0.0f)
+            if (blockline && blockline->backsector && mo->player_ &&
+                mo->player_->mo == mo && mo->player_->wet_feet &&
+                !mo->player_->swimming && mo->player_->jumpwait == 0 &&
+                mo->z > mo->floor_z_ + 0.5f && mo->momentum_.Z >= 0.0f)
             {
                 float ground_h;
 
-                int i = P_FindThingGap(blockline->gaps, blockline->gap_num, mo->z + mo->height, mo->z + 2 * mo->height);
-                if (i >= 0)
-                {
-                    ground_h = blockline->gaps[i].f;
-                }
+                int i = P_FindThingGap(blockline->gaps, blockline->gap_num,
+                                       mo->z + mo->height_,
+                                       mo->z + 2 * mo->height_);
+                if (i >= 0) { ground_h = blockline->gaps[i].f; }
                 else
                 {
-                    ground_h = HMM_MAX(blockline->frontsector->f_h, blockline->backsector->f_h);
+                    ground_h = HMM_MAX(blockline->frontsector->f_h,
+                                       blockline->backsector->f_h);
                 }
 
                 // LogDebug("ground_h: %1.0f  mo_Z: %1.0f\n", ground_h, mo->z);
 
-                if (mo->z < ground_h - 20.5f && mo->z > ground_h - mo->height * 1.4)
+                if (mo->z < ground_h - 20.5f &&
+                    mo->z > ground_h - mo->height_ * 1.4)
                 {
-                    P_PlayerJump(mo->player, mo->info->jumpheight_, 2 * kTicRate);
+                    P_PlayerJump(mo->player_, mo->info_->jumpheight_,
+                                 2 * kTicRate);
                 }
             }
 
-            if (mo->info->flags_ & kMapObjectFlagSlide)
+            if (mo->info_->flags_ & kMapObjectFlagSlide)
             {
                 P_SlideMove(mo, ptryx, ptryy);
             }
-            else if (mo->extendedflags & kExtendedFlagBounce)
+            else if (mo->extended_flags_ & kExtendedFlagBounce)
             {
                 // -KM- 1999/01/31 Bouncy objects (grenades)
                 // -AJA- 1999/07/30: Moved up here.
@@ -1002,10 +1011,10 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
                 BounceOffWall(mo, blockline);
                 xmove = ymove = 0;
             }
-            else if (mo->flags & kMapObjectFlagMissile)
+            else if (mo->flags_ & kMapObjectFlagMissile)
             {
                 if (mobj_hit_sky)
-                    P_MobjRemoveMissile(mo); // New Procedure -ACB- 1998/07/30
+                    P_MobjRemoveMissile(mo);  // New Procedure -ACB- 1998/07/30
                 else
                     P_MobjExplodeMissile(mo);
 
@@ -1013,20 +1022,20 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
             }
             else
             {
-                xmove = ymove = 0;
-                mo->mom.X = mo->mom.Y = 0;
+                xmove = ymove   = 0;
+                mo->momentum_.X = mo->momentum_.Y = 0;
             }
         }
     } while (xmove || ymove);
 
-    if ((mo->extendedflags & kExtendedFlagNoFriction) || (mo->flags & kMapObjectFlagSkullFly))
+    if ((mo->extended_flags_ & kExtendedFlagNoFriction) ||
+        (mo->flags_ & kMapObjectFlagSkullFly))
         return;
 
-    if (mo->flags & kMapObjectFlagCorpse)
+    if (mo->flags_ & kMapObjectFlagCorpse)
     {
         // do not stop sliding if halfway off a step with some momentum
-        if (CorpseShouldSlide(mo))
-            return;
+        if (CorpseShouldSlide(mo)) return;
     }
 
     //
@@ -1039,42 +1048,44 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
     //
     float friction = props->friction;
 
-    if ((mo->z > mo->floorz) && !(mo->on_ladder >= 0) && !(mo->player && mo->player->powers[kPowerTypeJetpack] > 0) &&
-        !mo->on_slope)
+    if ((mo->z > mo->floor_z_) && !(mo->on_ladder_ >= 0) &&
+        !(mo->player_ && mo->player_->powers[kPowerTypeJetpack] > 0) &&
+        !mo->on_slope_)
     {
         // apply drag when airborne
         friction = props->drag;
     }
 
     // 70hz : adjust friction to account for extra tic
-    if (do_extra && double_framerate.d_)
+    if (do_extra && double_framerate.d_) { friction = sqrt(friction); }
+
+    // when we are confident that a mikoportal is being used, do not apply
+    // friction or drag to the voodoo doll
+    if (!mo->is_voodoo_ || !AlmostEquals(mo->floor_z_, -32768.0f) ||
+        AlmostEquals(mo->momentum_.Z, 0.0f))
     {
-        friction = sqrt(friction);
+        mo->momentum_.X *= friction;
+        mo->momentum_.Y *= friction;
     }
 
-    // when we are confident that a mikoportal is being used, do not apply friction or drag
-    // to the voodoo doll
-    if (!mo->is_voodoo || !AlmostEquals(mo->floorz, -32768.0f) || AlmostEquals(mo->mom.Z, 0.0f))
-    {
-        mo->mom.X *= friction;
-        mo->mom.Y *= friction;
-    }
-
-    if (mo->player)
+    if (mo->player_)
     {
         float x_diff = fabs(orig_x - mo->x);
         float y_diff = fabs(orig_y - mo->y);
 
         float speed = APPROX_DIST2(x_diff, y_diff);
 
-        mo->player->actual_speed = (mo->player->actual_speed * 0.8 + speed * 0.2);
+        mo->player_->actual_speed =
+            (mo->player_->actual_speed * 0.8 + speed * 0.2);
 
-        // LogDebug("Actual speed = %1.4f\n", mo->player->actual_speed);
+        // LogDebug("Actual speed = %1.4f\n", mo->player_->actual_speed);
 
-        if (fabs(mo->mom.X) < STOPSPEED && fabs(mo->mom.Y) < STOPSPEED && mo->player->cmd.forward_move == 0 &&
-            mo->player->cmd.side_move == 0)
+        if (fabs(mo->momentum_.X) < kStopSpeed &&
+            fabs(mo->momentum_.Y) < kStopSpeed &&
+            mo->player_->cmd.forward_move == 0 &&
+            mo->player_->cmd.side_move == 0)
         {
-            mo->mom.X = mo->mom.Y = 0;
+            mo->momentum_.X = mo->momentum_.Y = 0;
         }
     }
 }
@@ -1082,12 +1093,12 @@ static void P_XYMovement(mobj_t *mo, const region_properties_t *props, bool extr
 //
 // P_ZMovement
 //
-static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra_tic)
+static void P_ZMovement(MapObject *mo, const region_properties_t *props,
+                        bool extra_tic)
 {
-    bool do_extra = mo->player != nullptr; // 70 Hz
+    bool do_extra = mo->player_ != nullptr;  // 70 Hz
 
-    if (mo->flags & kMapObjectFlagMissile)
-        do_extra = true;
+    if (mo->flags_ & kMapObjectFlagMissile) do_extra = true;
 
     float dist;
     float delta;
@@ -1096,40 +1107,45 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
 
     // -KM- 1998/11/25 Gravity is now not precalculated so that
     //  menu changes affect instantly.
-    float gravity =
-        props->gravity / 8.0f * (float)level_flags.menu_grav / kGravityDefault * g_gravity.f_; // New global gravity menu item
+    float gravity = props->gravity / 8.0f * (float)level_flags.menu_grav /
+                    kGravityDefault *
+                    gravity_factor.f_;  // New global gravity menu item
 
     // check for smooth step up
-    if (mo->player && mo->player->mo == mo && mo->z < mo->floorz)
+    if (mo->player_ && mo->player_->mo == mo && mo->z < mo->floor_z_)
     {
-        mo->player->viewheight -= (mo->floorz - mo->z);
-        mo->player->viewz -= (mo->floorz - mo->z);
-        mo->player->deltaviewheight = (mo->player->std_viewheight - mo->player->viewheight) / 8.0f;
+        mo->player_->viewheight -= (mo->floor_z_ - mo->z);
+        mo->player_->viewz -= (mo->floor_z_ - mo->z);
+        mo->player_->deltaviewheight =
+            (mo->player_->std_viewheight - mo->player_->viewheight) / 8.0f;
     }
 
-    zmove = mo->mom.Z * (1.0f - props->viscosity);
+    zmove = mo->momentum_.Z * (1.0f - props->viscosity);
 
-    if (do_extra && double_framerate.d_) // 70 Hz
+    if (do_extra && double_framerate.d_)  // 70 Hz
         zmove *= 0.52;
 
-    if (mo->on_slope && mo->z > mo->floorz && std::abs(mo->z - mo->floorz) < 6.0f) // 1/4 of default step size
-        zmove_vs = mo->floorz - mo->z;
+    if (mo->on_slope_ && mo->z > mo->floor_z_ &&
+        std::abs(mo->z - mo->floor_z_) < 6.0f)  // 1/4 of default step size
+        zmove_vs = mo->floor_z_ - mo->z;
 
     // adjust height
     mo->z += zmove + zmove_vs;
 
-    if (mo->flags & kMapObjectFlagFloat && mo->target)
+    if (mo->flags_ & kMapObjectFlagFloat && mo->target_)
     {
         // float down towards target if too close
-        if (!(mo->flags & kMapObjectFlagSkullFly) && !(mo->flags & kMapObjectFlagInFloat))
+        if (!(mo->flags_ & kMapObjectFlagSkullFly) &&
+            !(mo->flags_ & kMapObjectFlagInFloat))
         {
-            dist  = P_ApproxDistance(mo->x - mo->target->x, mo->y - mo->target->y);
-            delta = mo->target->z + (mo->height / 2) - mo->z;
+            dist  = P_ApproxDistance(mo->x - mo->target_->x,
+                                     mo->y - mo->target_->y);
+            delta = mo->target_->z + (mo->height_ / 2) - mo->z;
 
             if (delta < 0 && dist < -(delta * 3))
-                mo->z -= mo->info->float_speed_;
+                mo->z -= mo->info_->float_speed_;
             else if (delta > 0 && dist < (delta * 3))
-                mo->z += mo->info->float_speed_;
+                mo->z += mo->info_->float_speed_;
         }
     }
 
@@ -1137,92 +1153,113 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
     //  HIT FLOOR ?
     //
 
-    if (mo->z <= mo->floorz)
+    if (mo->z <= mo->floor_z_)
     {
         // Test for mikoportal
-        if (mo->is_voodoo && AlmostEquals(mo->floorz, -32768.0f))
+        if (mo->is_voodoo_ && AlmostEquals(mo->floor_z_, -32768.0f))
         {
-            mo->z = mo->ceilingz - mo->height;
+            mo->z = mo->ceiling_z_ - mo->height_;
             P_TryMove(mo, mo->x, mo->y);
             return;
         }
 
-        if (mo->flags & kMapObjectFlagSkullFly)
-            mo->mom.Z = -mo->mom.Z;
+        if (mo->flags_ & kMapObjectFlagSkullFly)
+            mo->momentum_.Z = -mo->momentum_.Z;
 
-        if (mo->mom.Z < 0)
+        if (mo->momentum_.Z < 0)
         {
-            float hurt_momz = gravity * mo->info->maxfall_;
+            float hurt_momz = gravity * mo->info_->maxfall_;
             bool  fly_or_swim =
-                mo->player && (mo->player->swimming || mo->player->powers[kPowerTypeJetpack] > 0 || mo->on_ladder >= 0);
+                mo->player_ && (mo->player_->swimming ||
+                                mo->player_->powers[kPowerTypeJetpack] > 0 ||
+                                mo->on_ladder_ >= 0);
 
-            if (mo->player && gravity > 0 && -zmove > (OOF_SPEED / (double_framerate.d_? 2 : 1)) && !fly_or_swim)
+            if (mo->player_ && gravity > 0 &&
+                -zmove > (kOofSpeed / (double_framerate.d_ ? 2 : 1)) &&
+                !fly_or_swim)
             {
-                // Squat down. Decrease viewheight for a moment after hitting the
-                // ground (hard), and utter appropriate sound.
-                mo->player->deltaviewheight = zmove / 8.0f * (double_framerate.d_? 2.0 : 1.0); // 70Hz
-                if (mo->info->maxfall_ > 0 && -mo->mom.Z > hurt_momz)
+                // Squat down. Decrease viewheight for a moment after hitting
+                // the ground (hard), and utter appropriate sound.
+                mo->player_->deltaviewheight =
+                    zmove / 8.0f * (double_framerate.d_ ? 2.0 : 1.0);  // 70Hz
+                if (mo->info_->maxfall_ > 0 && -mo->momentum_.Z > hurt_momz)
                 {
-                    if (!(mo->player->cheats & CF_GODMODE) && mo->player->powers[kPowerTypeInvulnerable] < 1)
-                        S_StartFX(mo->info->fallpain_sound_, P_MobjGetSfxCategory(mo), mo);
+                    if (!(mo->player_->cheats & CF_GODMODE) &&
+                        mo->player_->powers[kPowerTypeInvulnerable] < 1)
+                        S_StartFX(mo->info_->fallpain_sound_,
+                                  P_MobjGetSfxCategory(mo), mo);
                     else
-                        S_StartFX(mo->info->oof_sound_, P_MobjGetSfxCategory(mo), mo);
+                        S_StartFX(mo->info_->oof_sound_,
+                                  P_MobjGetSfxCategory(mo), mo);
                 }
                 else
-                    S_StartFX(mo->info->oof_sound_, P_MobjGetSfxCategory(mo), mo);
+                    S_StartFX(mo->info_->oof_sound_, P_MobjGetSfxCategory(mo),
+                              mo);
 
                 P_HitLiquidFloor(mo);
             }
             // -KM- 1998/12/16 If bigger than max fall, take damage.
-            if (mo->info->maxfall_ > 0 && gravity > 0 && -mo->mom.Z > hurt_momz && (!mo->player || !fly_or_swim))
+            if (mo->info_->maxfall_ > 0 && gravity > 0 &&
+                -mo->momentum_.Z > hurt_momz && (!mo->player_ || !fly_or_swim))
             {
-                P_DamageMobj(mo, nullptr, nullptr, (-mo->mom.Z - hurt_momz), nullptr);
+                P_DamageMobj(mo, nullptr, nullptr,
+                             (-mo->momentum_.Z - hurt_momz), nullptr);
             }
 
             // -KM- 1999/01/31 Bouncy bouncy...
-            if (mo->extendedflags & kExtendedFlagBounce)
+            if (mo->extended_flags_ & kExtendedFlagBounce)
             {
                 BounceOffPlane(mo, +1.0f);
 
                 // don't bounce forever on the floor
-                if (!(mo->flags & kMapObjectFlagNoGravity) &&
-                    fabs(mo->mom.Z) < STOPSPEED + fabs(gravity / (mo->mbf21flags & kMBF21FlagLowGravity ? 8 : 1)))
+                if (!(mo->flags_ & kMapObjectFlagNoGravity) &&
+                    fabs(mo->momentum_.Z) <
+                        kStopSpeed +
+                            fabs(gravity /
+                                 (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8
+                                                                          : 1)))
                 {
-                    mo->mom.X = mo->mom.Y = mo->mom.Z = 0;
+                    mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
                 }
             }
             else
-                mo->mom.Z = 0;
+                mo->momentum_.Z = 0;
         }
 
-        if (mo->z - mo->mom.Z > mo->floorz)
-        { // Spawn splashes, etc.
+        if (mo->z - mo->momentum_.Z > mo->floor_z_)
+        {  // Spawn splashes, etc.
             P_HitLiquidFloor(mo);
         }
 
-        mo->z = mo->floorz;
+        mo->z = mo->floor_z_;
 
-        if ((mo->flags & kMapObjectFlagMissile) && !(mo->flags & kMapObjectFlagNoClip))
+        if ((mo->flags_ & kMapObjectFlagMissile) &&
+            !(mo->flags_ & kMapObjectFlagNoClip))
         {
             // -AJA- 2003/10/09: handle missiles that hit a monster on
             //       the head from a sharp downward angle (such a case
             //       is missed by PIT_CheckRelThing).  FIXME: more kludge.
 
-            if (mo->below_mo && (int)mo->floorz == (int)(mo->below_mo->z + mo->below_mo->info->height_) &&
-                (mo->below_mo->flags & kMapObjectFlagShootable) && (mo->source != mo->below_mo))
+            if (mo->below_object_ &&
+                (int)mo->floor_z_ == (int)(mo->below_object_->z +
+                                           mo->below_object_->info_->height_) &&
+                (mo->below_object_->flags_ & kMapObjectFlagShootable) &&
+                (mo->source_ != mo->below_object_))
             {
-                if (P_MissileContact(mo, mo->below_mo) < 0 || (mo->extendedflags & kExtendedFlagTunnel))
+                if (P_MissileContact(mo, mo->below_object_) < 0 ||
+                    (mo->extended_flags_ & kExtendedFlagTunnel))
                     return;
             }
 
             // if the floor is sky, don't explode missile -ACB- 1998/07/31
-            if (IS_SKY(mo->subsector->sector->floor) && mo->subsector->sector->f_h >= mo->floorz)
+            if (IS_SKY(mo->subsector_->sector->floor) &&
+                mo->subsector_->sector->f_h >= mo->floor_z_)
             {
                 P_MobjRemoveMissile(mo);
             }
             else
             {
-                if (!(mo->extendedflags & kExtendedFlagBounce))
+                if (!(mo->extended_flags_ & kExtendedFlagBounce))
                     P_MobjExplodeMissile(mo);
             }
             return;
@@ -1235,11 +1272,14 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
         // -MH- 1998/08/18 - Disable gravity while player has jetpack
         //                   (nearly forgot this one:-)
 
-        if (!(mo->flags & kMapObjectFlagNoGravity) && !(mo->player && mo->player->powers[kPowerTypeJetpack] > 0) && !(mo->on_ladder >= 0))
+        if (!(mo->flags_ & kMapObjectFlagNoGravity) &&
+            !(mo->player_ && mo->player_->powers[kPowerTypeJetpack] > 0) &&
+            !(mo->on_ladder_ >= 0))
         {
             // 70 Hz: apply gravity only on real tics
             if (!extra_tic || !double_framerate.d_)
-                mo->mom.Z -= gravity / (mo->mbf21flags & kMBF21FlagLowGravity ? 8 : 1);
+                mo->momentum_.Z -=
+                    gravity / (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1);
         }
     }
 
@@ -1247,63 +1287,79 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
     //  HIT CEILING ?
     //
 
-    if (mo->z + mo->height > mo->ceilingz)
+    if (mo->z + mo->height_ > mo->ceiling_z_)
     {
-        if (mo->flags & kMapObjectFlagSkullFly)
-            mo->mom.Z = -mo->mom.Z; // the skull slammed into something
+        if (mo->flags_ & kMapObjectFlagSkullFly)
+            mo->momentum_.Z =
+                -mo->momentum_.Z;  // the skull slammed into something
 
         // hit the ceiling
-        if (mo->mom.Z > 0)
+        if (mo->momentum_.Z > 0)
         {
-            float hurt_momz = gravity * mo->info->maxfall_;
+            float hurt_momz = gravity * mo->info_->maxfall_;
             bool  fly_or_swim =
-                mo->player && (mo->player->swimming || mo->player->powers[kPowerTypeJetpack] > 0 || mo->on_ladder >= 0);
+                mo->player_ && (mo->player_->swimming ||
+                                mo->player_->powers[kPowerTypeJetpack] > 0 ||
+                                mo->on_ladder_ >= 0);
 
-            if (mo->player && gravity < 0 && zmove > (OOF_SPEED / (double_framerate.d_? 2 : 1)) && !fly_or_swim)
+            if (mo->player_ && gravity < 0 &&
+                zmove > (kOofSpeed / (double_framerate.d_ ? 2 : 1)) &&
+                !fly_or_swim)
             {
-                mo->player->deltaviewheight = zmove / 8.0f;
-                S_StartFX(mo->info->oof_sound_, P_MobjGetSfxCategory(mo), mo);
+                mo->player_->deltaviewheight = zmove / 8.0f;
+                S_StartFX(mo->info_->oof_sound_, P_MobjGetSfxCategory(mo), mo);
             }
-            if (mo->info->maxfall_ > 0 && gravity < 0 && mo->mom.Z > hurt_momz && (!mo->player || !fly_or_swim))
+            if (mo->info_->maxfall_ > 0 && gravity < 0 &&
+                mo->momentum_.Z > hurt_momz && (!mo->player_ || !fly_or_swim))
             {
-                P_DamageMobj(mo, nullptr, nullptr, (mo->mom.Z - hurt_momz), nullptr);
+                P_DamageMobj(mo, nullptr, nullptr,
+                             (mo->momentum_.Z - hurt_momz), nullptr);
             }
 
             // -KM- 1999/01/31 More bouncing.
-            if (mo->extendedflags & kExtendedFlagBounce)
+            if (mo->extended_flags_ & kExtendedFlagBounce)
             {
                 BounceOffPlane(mo, -1.0f);
 
                 // don't bounce forever on the ceiling
-                if (!(mo->flags & kMapObjectFlagNoGravity) &&
-                    fabs(mo->mom.Z) < STOPSPEED + fabs(gravity / (mo->mbf21flags & kMBF21FlagLowGravity ? 8 : 1)))
+                if (!(mo->flags_ & kMapObjectFlagNoGravity) &&
+                    fabs(mo->momentum_.Z) <
+                        kStopSpeed +
+                            fabs(gravity /
+                                 (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8
+                                                                          : 1)))
                 {
-                    mo->mom.X = mo->mom.Y = mo->mom.Z = 0;
+                    mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
                 }
             }
             else
-                mo->mom.Z = 0;
+                mo->momentum_.Z = 0;
         }
 
-        mo->z = mo->ceilingz - mo->height;
+        mo->z = mo->ceiling_z_ - mo->height_;
 
-        if ((mo->flags & kMapObjectFlagMissile) && !(mo->flags & kMapObjectFlagNoClip))
+        if ((mo->flags_ & kMapObjectFlagMissile) &&
+            !(mo->flags_ & kMapObjectFlagNoClip))
         {
-            if (mo->above_mo && (int)mo->ceilingz == (int)(mo->above_mo->z) && (mo->above_mo->flags & kMapObjectFlagShootable) &&
-                (mo->source != mo->above_mo))
+            if (mo->above_object_ &&
+                (int)mo->ceiling_z_ == (int)(mo->above_object_->z) &&
+                (mo->above_object_->flags_ & kMapObjectFlagShootable) &&
+                (mo->source_ != mo->above_object_))
             {
-                if (P_MissileContact(mo, mo->above_mo) < 0 || (mo->extendedflags & kExtendedFlagTunnel))
+                if (P_MissileContact(mo, mo->above_object_) < 0 ||
+                    (mo->extended_flags_ & kExtendedFlagTunnel))
                     return;
             }
 
             // if the ceiling is sky, don't explode missile -ACB- 1998/07/31
-            if (IS_SKY(mo->subsector->sector->ceil) && mo->subsector->sector->c_h <= mo->ceilingz)
+            if (IS_SKY(mo->subsector_->sector->ceil) &&
+                mo->subsector_->sector->c_h <= mo->ceiling_z_)
             {
                 P_MobjRemoveMissile(mo);
             }
             else
             {
-                if (!(mo->extendedflags & kExtendedFlagBounce))
+                if (!(mo->extended_flags_ & kExtendedFlagBounce))
                     P_MobjExplodeMissile(mo);
             }
             return;
@@ -1316,11 +1372,15 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
         // -MH- 1998/08/18 - Disable gravity while player has jetpack
         //                   (nearly forgot this one:-)
 
-        if (!(mo->flags & kMapObjectFlagNoGravity) && !(mo->player && mo->player->powers[kPowerTypeJetpack] > 0) && !(mo->on_ladder >= 0))
+        if (!(mo->flags_ & kMapObjectFlagNoGravity) &&
+            !(mo->player_ && mo->player_->powers[kPowerTypeJetpack] > 0) &&
+            !(mo->on_ladder_ >= 0))
         {
             // 70 Hz: apply gravity only on real tics
             if (!extra_tic || !double_framerate.d_)
-                mo->mom.Z += -gravity / (mo->mbf21flags & kMBF21FlagLowGravity ? 8 : 1);
+                mo->momentum_.Z +=
+                    -gravity /
+                    (mo->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1);
         }
     }
 
@@ -1328,22 +1388,24 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
     P_TryMove(mo, mo->x, mo->y);
 
     // apply drag -- but not to frictionless things
-    if ((mo->extendedflags & kExtendedFlagNoFriction) || (mo->flags & kMapObjectFlagSkullFly))
+    if ((mo->extended_flags_ & kExtendedFlagNoFriction) ||
+        (mo->flags_ & kMapObjectFlagSkullFly))
         return;
 
     // ladders have friction
-    if (mo->on_ladder >= 0)
-        mo->mom.Z *= LADDER_FRICTION;
-    else if (mo->player && mo->player->powers[kPowerTypeJetpack] > 0)
-        mo->mom.Z *= props->friction;
+    if (mo->on_ladder_ >= 0)
+        mo->momentum_.Z *= kLadderFriction;
+    else if (mo->player_ && mo->player_->powers[kPowerTypeJetpack] > 0)
+        mo->momentum_.Z *= props->friction;
     else
-        mo->mom.Z *= props->drag;
+        mo->momentum_.Z *= props->drag;
 
-    if (mo->player)
+    if (mo->player_)
     {
-        if (fabs(mo->mom.Z) < STOPSPEED && mo->player->cmd.upward_move == 0)
+        if (fabs(mo->momentum_.Z) < kStopSpeed &&
+            mo->player_->cmd.upward_move == 0)
         {
-            mo->mom.Z = 0;
+            mo->momentum_.Z = 0;
         }
     }
 }
@@ -1351,71 +1413,71 @@ static void P_ZMovement(mobj_t *mo, const region_properties_t *props, bool extra
 //
 // P_MobjThinker
 //
-#define MAX_THINK_LOOP 8
-
-static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
+static void P_MobjThinker(MapObject *mobj, bool extra_tic)
 {
-    if (mobj->next == (mobj_t *)-1)
+    if (mobj->next_ == (MapObject *)-1)
         FatalError("P_MobjThinker INTERNAL ERROR: mobj has been freed");
 
-    if (mobj->isRemoved())
-        return;
+    if (mobj->IsRemoved()) return;
 
     const region_properties_t *props;
     region_properties_t        player_props;
 
-    mobj->old_z      = mobj->z;
-    mobj->old_floorz = mobj->floorz;
-    mobj->on_slope   = false;
+    mobj->old_z_       = mobj->z;
+    mobj->old_floor_z_ = mobj->floor_z_;
+    mobj->on_slope_    = false;
 
-    mobj->ClearStaleRefs();
+    mobj->ClearStaleReferences();
 
     if (!extra_tic || !double_framerate.d_)
     {
-        SYS_ASSERT(mobj->state);
-        SYS_ASSERT(mobj->refcount >= 0);
+        SYS_ASSERT(mobj->state_);
+        SYS_ASSERT(mobj->reference_count_ >= 0);
 
-        mobj->visibility = (15 * mobj->visibility + mobj->vis_target) / 16;
-        mobj->dlight.r   = (15 * mobj->dlight.r + mobj->dlight.target) / 16;
+        mobj->visibility_ =
+            (15 * mobj->visibility_ + mobj->target_visibility_) / 16;
+        mobj->dynamic_light_.r =
+            (15 * mobj->dynamic_light_.r + mobj->dynamic_light_.target) / 16;
 
         // position interpolation
-        if (mobj->lerp_num > 1)
+        if (mobj->interpolation_number_ > 1)
         {
-            mobj->lerp_pos++;
+            mobj->interpolation_position_++;
 
-            if (mobj->lerp_pos >= mobj->lerp_num)
+            if (mobj->interpolation_position_ >= mobj->interpolation_number_)
             {
-                mobj->lerp_pos = mobj->lerp_num = 0;
+                mobj->interpolation_position_ = mobj->interpolation_number_ = 0;
             }
         }
 
         // handle SKULLFLY attacks
-        if ((mobj->flags & kMapObjectFlagSkullFly) && AlmostEquals(mobj->mom.X, 0.0f) && AlmostEquals(mobj->mom.Y, 0.0f))
+        if ((mobj->flags_ & kMapObjectFlagSkullFly) &&
+            AlmostEquals(mobj->momentum_.X, 0.0f) &&
+            AlmostEquals(mobj->momentum_.Y, 0.0f))
         {
             // the skull slammed into something
-            mobj->flags &= ~kMapObjectFlagSkullFly;
-            mobj->mom.X = mobj->mom.Y = mobj->mom.Z = 0;
+            mobj->flags_ &= ~kMapObjectFlagSkullFly;
+            mobj->momentum_.X = mobj->momentum_.Y = mobj->momentum_.Z = 0;
 
-            P_SetMobjState(mobj, mobj->info->idle_state_);
+            P_SetMobjState(mobj, mobj->info_->idle_state_);
 
-            if (mobj->isRemoved())
-                return;
+            if (mobj->IsRemoved()) return;
         }
     }
 
     // determine properties, & handle push sectors
 
-    SYS_ASSERT(mobj->props);
+    SYS_ASSERT(mobj->region_properties_);
 
-    if (mobj->player)
+    if (mobj->player_)
     {
         P_CalcFullProperties(mobj, &player_props);
 
         if (!extra_tic || !double_framerate.d_)
         {
-            mobj->mom.X += player_props.push.X;
-            mobj->mom.Y += player_props.push.Y;
-            mobj->mom.Z += player_props.push.Z;
+            mobj->momentum_.X += player_props.push.X;
+            mobj->momentum_.Y += player_props.push.Y;
+            mobj->momentum_.Z += player_props.push.Z;
         }
 
         props = &player_props;
@@ -1423,127 +1485,123 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
     else
     {
         // handle push sectors
-        for (touch_node_t *tn = mobj->touch_sectors; tn ;tn=tn->mo_next)
+        for (touch_node_t *tn = mobj->touch_sectors_; tn; tn = tn->mo_next)
         {
             if (tn->sec)
             {
                 region_properties_t tn_props = tn->sec->props;
                 if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
                 {
-                    SectorFlag flags = tn_props.special ? tn_props.special->special_flags_ : kSectorFlagPushConstant;
+                    SectorFlag flags = tn_props.special
+                                           ? tn_props.special->special_flags_
+                                           : kSectorFlagPushConstant;
 
-                    if (!((mobj->flags & kMapObjectFlagNoGravity) || (flags & kSectorFlagPushAll)) &&
-                        (mobj->z <= mobj->floorz + 1.0f || (flags & kSectorFlagWholeRegion)))
+                    if (!((mobj->flags_ & kMapObjectFlagNoGravity) ||
+                          (flags & kSectorFlagPushAll)) &&
+                        (mobj->z <= mobj->floor_z_ + 1.0f ||
+                         (flags & kSectorFlagWholeRegion)))
                     {
                         if (!extra_tic || !double_framerate.d_)
                         {
                             float push_mul = 1.0f;
 
-                            SYS_ASSERT(mobj->info->mass_ > 0);
+                            SYS_ASSERT(mobj->info_->mass_ > 0);
                             if (!(flags & kSectorFlagPushConstant))
-                                push_mul = 100.0f / mobj->info->mass_;
+                                push_mul = 100.0f / mobj->info_->mass_;
 
-                            mobj->mom.X += push_mul * tn_props.push.X;
-                            mobj->mom.Y += push_mul * tn_props.push.Y;
-                            mobj->mom.Z += push_mul * tn_props.push.Z;
+                            mobj->momentum_.X += push_mul * tn_props.push.X;
+                            mobj->momentum_.Y += push_mul * tn_props.push.Y;
+                            mobj->momentum_.Z += push_mul * tn_props.push.Z;
                         }
                     }
                 }
             }
         }
 
-        props = mobj->props;
+        props = mobj->region_properties_;
 
         // Only damage grounded monsters (not players)
-        if (props->special && props->special->damage_.grounded_monsters_ && mobj->z <= mobj->floorz + 1.0f)
+        if (props->special && props->special->damage_.grounded_monsters_ &&
+            mobj->z <= mobj->floor_z_ + 1.0f)
         {
-            P_DamageMobj(mobj, nullptr, nullptr, 5.0, &props->special->damage_, false);
+            P_DamageMobj(mobj, nullptr, nullptr, 5.0, &props->special->damage_,
+                         false);
         }
     }
 
     // momentum movement
 
-    bool do_extra = mobj->player != nullptr; // 70 Hz
-    if (mobj->flags & kMapObjectFlagMissile)
-        do_extra = true;
+    bool do_extra = mobj->player_ != nullptr;  // 70 Hz
+    if (mobj->flags_ & kMapObjectFlagMissile) do_extra = true;
 
-    if (!double_framerate.d_|| !extra_tic || do_extra)
+    if (!double_framerate.d_ || !extra_tic || do_extra)
     {
-        if (do_extra && mobj->subsector->sector->floor_vertex_slope)
+        if (do_extra && mobj->subsector_->sector->floor_vertex_slope)
         {
-            if (AlmostEquals(mobj->old_z, mobj->old_floorz))
-                mobj->on_slope = true;
+            if (AlmostEquals(mobj->old_z_, mobj->old_floor_z_))
+                mobj->on_slope_ = true;
         }
 
-        if (!AlmostEquals(mobj->mom.X, 0.0f) || !AlmostEquals(mobj->mom.Y, 0.0f) || mobj->player)
+        if (!AlmostEquals(mobj->momentum_.X, 0.0f) ||
+            !AlmostEquals(mobj->momentum_.Y, 0.0f) || mobj->player_)
         {
             P_XYMovement(mobj, props, extra_tic);
 
-            if (mobj->isRemoved())
-                return;
+            if (mobj->IsRemoved()) return;
         }
 
-        if ((!AlmostEquals(mobj->z, mobj->floorz)) || !AlmostEquals(mobj->mom.Z, 0.0f)) //  || mobj->ride_em)
+        if ((!AlmostEquals(mobj->z, mobj->floor_z_)) ||
+            !AlmostEquals(mobj->momentum_.Z, 0.0f))  //  || mobj->ride_em)
         {
             P_ZMovement(mobj, props, extra_tic);
 
-            if (mobj->isRemoved())
-                return;
+            if (mobj->IsRemoved()) return;
         }
     }
 
     // FIXME factor out the player-related code from the rest
-    if (extra_tic && double_framerate.d_)
-        return;
+    if (extra_tic && double_framerate.d_) return;
 
-    if (mobj->fuse >= 0)
+    if (mobj->fuse_ >= 0)
     {
-        if (!--mobj->fuse)
-            P_MobjExplodeMissile(mobj);
+        if (!--mobj->fuse_) P_MobjExplodeMissile(mobj);
 
-        if (mobj->isRemoved())
-            return;
+        if (mobj->IsRemoved()) return;
     }
 
     // When morphtimeout is reached, we go to "MORPH" state if we
     //  have one. If there is no MORPH state then the mobj is removed
-    if (mobj->health > 0 && mobj->morphtimeout >= 0)
+    if (mobj->health_ > 0 && mobj->morph_timeout_ >= 0)
     {
-        if (!--mobj->morphtimeout)
-            P_SetMobjState(mobj, mobj->info->morph_state_);
+        if (!--mobj->morph_timeout_)
+            P_SetMobjState(mobj, mobj->info_->morph_state_);
 
-        if (mobj->isRemoved())
-            return;
+        if (mobj->IsRemoved()) return;
     }
 
-    if (mobj->tics < 0)
+    if (mobj->tics_ < 0)
     {
         // check for nightmare respawn
-        if (!(mobj->extendedflags & kExtendedFlagMonster))
-            return;
+        if (!(mobj->extended_flags_ & kExtendedFlagMonster)) return;
 
         // replaced respawnmonsters & newnmrespawn with respawnsetting
         // -ACB- 1998/07/30
-        if (!level_flags.respawn)
-            return;
+        if (!level_flags.respawn) return;
 
-        mobj->movecount++;
+        mobj->move_count_++;
 
         //
         // Uses movecount as a timer, when movecount hits 12*kTicRate the
         // object will try to respawn. So after 12 seconds the object will
         // try to respawn.
         //
-        if (mobj->movecount < mobj->info->respawntime_)
-            return;
+        if (mobj->move_count_ < mobj->info_->respawntime_) return;
 
         // if the first 5 bits of leveltime are on, don't respawn now...ok?
-        if (leveltime & 31)
-            return;
+        if (leveltime & 31) return;
 
         // give a limited "random" chance that respawn don't respawn now
-        if (RandomByteDeterministic() > 32)
-            return;
+        if (RandomByteDeterministic() > 32) return;
 
         // replaced respawnmonsters & newnmrespawn with respawnsetting
         // -ACB- 1998/07/30
@@ -1559,63 +1617,58 @@ static void P_MobjThinker(mobj_t *mobj, bool extra_tic)
     // -AJA- 1999/09/12: reworked for deferred states.
     // -AJA- 2000/10/17: reworked again.
 
-    for (int loop_count = 0; loop_count < MAX_THINK_LOOP; loop_count++)
+    for (int loop_count = 0; loop_count < kMaxThinkLoop; loop_count++)
     {
         if (level_flags.fastparm)
-            mobj->tics -= (1 * mobj->info->fast_ + mobj->tic_skip);
+            mobj->tics_ -= (1 * mobj->info_->fast_ + mobj->tic_skip_);
         else
-            mobj->tics -= (1 + mobj->tic_skip);
-            
-        mobj->tic_skip = 0;
+            mobj->tics_ -= (1 + mobj->tic_skip_);
 
-        if (mobj->tics >= 1)
-            break;
+        mobj->tic_skip_ = 0;
+
+        if (mobj->tics_ >= 1) break;
 
         // You can cycle through multiple states in a tic.
         // NOTE: returns false if object freed itself.
 
-        P_SetMobjState2(mobj, mobj->next_state ? (mobj->next_state - states) : 0);
+        P_SetMobjState2(mobj,
+                        mobj->next_state_ ? (mobj->next_state_ - states) : 0);
 
-        if (mobj->isRemoved())
-            return;
+        if (mobj->IsRemoved()) return;
 
-        if (mobj->tics != 0)
-            break;
+        if (mobj->tics_ != 0) break;
     }
 }
 
 //---------------------------------------------------------------------------
 
-void mobj_t::ClearStaleRefs()
+void MapObject::ClearStaleReferences()
 {
-    if (target && target->isRemoved())
-        SetTarget(nullptr);
-    if (source && source->isRemoved())
-        SetSource(nullptr);
-    if (tracer && tracer->isRemoved())
-        SetTracer(nullptr);
+    if (target_ && target_->IsRemoved()) SetTarget(nullptr);
+    if (source_ && source_->IsRemoved()) SetSource(nullptr);
+    if (tracer_ && tracer_->IsRemoved()) SetTracer(nullptr);
 
-    if (supportobj && supportobj->isRemoved())
-        SetSupportObj(nullptr);
-    if (above_mo && above_mo->isRemoved())
-        SetAboveMo(nullptr);
-    if (below_mo && below_mo->isRemoved())
-        SetBelowMo(nullptr);
+    if (support_object_ && support_object_->IsRemoved())
+        SetSupportObject(nullptr);
+    if (above_object_ && above_object_->IsRemoved()) SetAboveObject(nullptr);
+    if (below_object_ && below_object_->IsRemoved()) SetBelowObject(nullptr);
 }
 
 //
 // Finally destroy the map object.
 //
-static void DeleteMobj(mobj_t *mo)
+static void DeleteMobj(MapObject *mo)
 {
-    if (mo->refcount != 0)
+    if (mo->reference_count_ != 0)
     {
-        FatalError("INTERNAL ERROR: DeleteMobh with refcount %d", mo->refcount);
+        FatalError("INTERNAL ERROR: DeleteMobh with refcount %d",
+                   mo->reference_count_);
         return;
     }
 
 #if (DEBUG_MOBJ > 0)
-    LogDebug("tics=%05d  DELETE %p [%s]\n", leveltime, mo, mo->info ? mo->info->name_.c_str() : "???");
+    LogDebug("tics=%05d  DELETE %p [%s]\n", leveltime, mo,
+             mo->info_ ? mo->info_->name_.c_str() : "???");
 #endif
 
     // Sound might still be playing, so use remove the
@@ -1623,62 +1676,58 @@ static void DeleteMobj(mobj_t *mo)
 
     S_StopFX(mo);
 
-    if (mo->dlight.shader)
-        delete mo->dlight.shader;
+    if (mo->dynamic_light_.shader) delete mo->dynamic_light_.shader;
 
-    mo->next = (mobj_t *)-1;
-    mo->prev = (mobj_t *)-1;
+    mo->next_     = (MapObject *)-1;
+    mo->previous_ = (MapObject *)-1;
 
     delete mo;
 }
 
-static inline void UpdateMobjRef(mobj_t *self, mobj_t *&field, mobj_t *other)
+static inline void UpdateMobjRef(MapObject *self, MapObject *&field,
+                                 MapObject *other)
 {
     // prevent a reference to oneself
-    if (other == self)
-        other = nullptr;
+    if (other == self) other = nullptr;
 
     // never refer to a removed object
-    if (other != nullptr && other->isRemoved())
-        other = nullptr;
+    if (other != nullptr && other->IsRemoved()) other = nullptr;
 
-    if (field != nullptr)
-        field->refcount--;
+    if (field != nullptr) field->reference_count_--;
 
-    if (other != nullptr)
-        other->refcount++;
+    if (other != nullptr) other->reference_count_++;
 
     field = other;
 }
 
-void mobj_t::SetTarget(mobj_t *other)
+void MapObject::SetTarget(MapObject *other)
 {
-    UpdateMobjRef(this, target, other);
+    UpdateMobjRef(this, target_, other);
 }
 
-void mobj_t::SetSource(mobj_t *other)
+void MapObject::SetSource(MapObject *other)
 {
-    UpdateMobjRef(this, source, other);
+    UpdateMobjRef(this, source_, other);
 }
 
-void mobj_t::SetTracer(mobj_t *other)
+void MapObject::SetTracer(MapObject *other)
 {
-    UpdateMobjRef(this, tracer, other);
+    UpdateMobjRef(this, tracer_, other);
 }
 
-void mobj_t::SetSupportObj(mobj_t *other)
+void MapObject::SetSupportObject(MapObject *other)
 {
-    UpdateMobjRef(this, supportobj, other);
+    UpdateMobjRef(this, support_object_, other);
 }
 
-void mobj_t::SetAboveMo(mobj_t *other)
+void MapObject::SetAboveObject(MapObject *other)
 {
-    UpdateMobjRef(this, above_mo, other);
+    UpdateMobjRef(this, above_object_, other);
 }
 
-void mobj_t::SetBelowMo(mobj_t *other)
+void MapObject::SetBelowObject(MapObject *other)
 {
-    UpdateMobjRef(this, below_mo, other);
+    UpdateMobjRef(this, below_object_, other);
 }
 
 //
@@ -1688,68 +1737,69 @@ void mobj_t::SetBelowMo(mobj_t *other)
 //       really want to know is who spawned the original missile
 //       (the "instigator" of all the mayhem :-).
 //
-void mobj_t::SetRealSource(mobj_t *ref)
+void MapObject::SetRealSource(MapObject *ref)
 {
-    if (ref && ref->source && (ref->flags & kMapObjectFlagMissile))
-        ref = ref->source;
-    if (ref && ref->source && (ref->flags & kMapObjectFlagMissile))
-        ref = ref->source;
-    if (ref && ref->source && (ref->flags & kMapObjectFlagMissile))
-        ref = ref->source;
+    if (ref && ref->source_ && (ref->flags_ & kMapObjectFlagMissile))
+        ref = ref->source_;
+    if (ref && ref->source_ && (ref->flags_ & kMapObjectFlagMissile))
+        ref = ref->source_;
+    if (ref && ref->source_ && (ref->flags_ & kMapObjectFlagMissile))
+        ref = ref->source_;
 
     SetSource(ref);
 }
 
 void P_ClearAllStaleRefs(void)
 {
-    for (mobj_t *mo = mobjlisthead; mo != nullptr; mo = mo->next)
+    for (MapObject *mo = map_object_list_head; mo != nullptr; mo = mo->next_)
     {
-        mo->ClearStaleRefs();
+        mo->ClearStaleReferences();
     }
 }
 
-static void AddMobjToList(mobj_t *mo)
+static void AddMobjToList(MapObject *mo)
 {
-    mo->prev = nullptr;
-    mo->next = mobjlisthead;
+    mo->previous_ = nullptr;
+    mo->next_     = map_object_list_head;
 
-    if (mo->next != nullptr)
+    if (mo->next_ != nullptr)
     {
-        SYS_ASSERT(mo->next->prev == nullptr);
-        mo->next->prev = mo;
+        SYS_ASSERT(mo->next_->previous_ == nullptr);
+        mo->next_->previous_ = mo;
     }
 
-    mobjlisthead = mo;
+    map_object_list_head = mo;
 
-    if (seen_monsters.count(mo->info) == 0)
-        seen_monsters.insert(mo->info);
+    if (seen_monsters.count(mo->info_) == 0) seen_monsters.insert(mo->info_);
 
 #if (DEBUG_MOBJ > 0)
-    LogDebug("tics=%05d  ADD %p [%s]\n", leveltime, mo, mo->info ? mo->info->name_.c_str() : "???");
+    LogDebug("tics=%05d  ADD %p [%s]\n", leveltime, mo,
+             mo->info_ ? mo->info_->name_.c_str() : "???");
 #endif
 }
 
-static void RemoveMobjFromList(mobj_t *mo)
+static void RemoveMobjFromList(MapObject *mo)
 {
 #if (DEBUG_MOBJ > 0)
-    LogDebug("tics=%05d  REMOVE %p [%s]\n", leveltime, mo, mo->info ? mo->info->name_.c_str() : "???");
+    LogDebug("tics=%05d  REMOVE %p [%s]\n", leveltime, mo,
+             mo->info_ ? mo->info_->name_.c_str() : "???");
 #endif
 
-    if (mo->prev != nullptr)
+    if (mo->previous_ != nullptr)
     {
-        SYS_ASSERT(mo->prev->next == mo);
-        mo->prev->next = mo->next;
+        SYS_ASSERT(mo->previous_->next_ == mo);
+        mo->previous_->next_ = mo->next_;
     }
-    else // no previous, must be first item
+    else  // no previous, must be first item
     {
-        SYS_ASSERT(mobjlisthead == mo);
-        mobjlisthead = mo->next;
+        SYS_ASSERT(map_object_list_head == mo);
+        map_object_list_head = mo->next_;
     }
 
-    if (mo->next != nullptr)
+    if (mo->next_ != nullptr)
     {
-        SYS_ASSERT(mo->next->prev == mo);
-        mo->next->prev = mo->prev;
+        SYS_ASSERT(mo->next_->previous_ == mo);
+        mo->next_->previous_ = mo->previous_;
     }
 }
 
@@ -1761,23 +1811,24 @@ static void RemoveMobjFromList(mobj_t *mo)
 // the item-respawn-que, so it gets respawned if needed; The respawning
 // only happens if itemrespawn is set or the deathmatch mode is altdeath.
 //
-void P_RemoveMobj(mobj_t *mo)
+void P_RemoveMobj(MapObject *mo)
 {
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
         player_t *p = players[pnum];
-        if (p && p->attacker == mo)
-            p->attacker = nullptr;
+        if (p && p->attacker == mo) p->attacker = nullptr;
     }
 
-    if (mo->isRemoved())
+    if (mo->IsRemoved())
     {
         LogDebug("Warning: object %p already removed.\n", mo);
         return;
     }
 
-    if ((mo->info->flags_ & kMapObjectFlagSpecial) && 0 == (mo->extendedflags & kExtendedFlagNoRespawn) &&
-        0 == (mo->flags & (kMapObjectFlagMissile | kMapObjectFlagDropped)) && mo->spawnpoint.info)
+    if ((mo->info_->flags_ & kMapObjectFlagSpecial) &&
+        0 == (mo->extended_flags_ & kExtendedFlagNoRespawn) &&
+        0 == (mo->flags_ & (kMapObjectFlagMissile | kMapObjectFlagDropped)) &&
+        mo->spawnpoint_.info)
     {
         P_AddItemToQueue(mo);
     }
@@ -1786,59 +1837,56 @@ void P_RemoveMobj(mobj_t *mo)
     UnsetThingFinal(mo);
 
     // mark as REMOVED
-    mo->state      = nullptr;
-    mo->next_state = nullptr;
+    mo->state_      = nullptr;
+    mo->next_state_ = nullptr;
 
-    mo->flags         = 0;
-    mo->extendedflags = 0;
-    mo->hyperflags    = 0;
-    mo->health        = 0;
-    mo->tag           = 0;
-    mo->tics          = -1;
-    mo->wud_tags.clear();
+    mo->flags_          = 0;
+    mo->extended_flags_ = 0;
+    mo->hyper_flags_    = 0;
+    mo->health_         = 0;
+    mo->tag_            = 0;
+    mo->tics_           = -1;
+    mo->wait_until_dead_tags_.clear();
 
     // Clear all references to other mobjs
     mo->SetTarget(nullptr);
     mo->SetSource(nullptr);
     mo->SetTracer(nullptr);
 
-    mo->SetSupportObj(nullptr);
-    mo->SetAboveMo(nullptr);
-    mo->SetBelowMo(nullptr);
+    mo->SetSupportObject(nullptr);
+    mo->SetAboveObject(nullptr);
+    mo->SetBelowObject(nullptr);
 
     // NOTE: object is kept in mobjlist until no there are no more
     //       references to it, and until 5 seconds has elapsed (giving time
     //       for deaths sounds to play out).  such "zombie" objects may be
     //       legally stored and restored from savegames.
 
-    mo->fuse = kTicRate * 5;
+    mo->fuse_ = kTicRate * 5;
     // mo->morphtimeout = kTicRate * 5; //maybe we need this?
 }
 
 void P_RemoveAllMobjs(bool loading)
 {
-    while (mobjlisthead != nullptr)
+    while (map_object_list_head != nullptr)
     {
-        mobj_t *mo   = mobjlisthead;
-        mobjlisthead = mo->next;
+        MapObject *mo        = map_object_list_head;
+        map_object_list_head = mo->next_;
 
         // Need to unlink from existing map in the case of loading a savegame
-        if (loading)
-        {
-            UnsetThingFinal(mo);
-        }
+        if (loading) { UnsetThingFinal(mo); }
 
-        mo->refcount = 0;
+        mo->reference_count_ = 0;
         DeleteMobj(mo);
     }
 }
 
 void P_RemoveItemsInQue(void)
 {
-    while (itemquehead != nullptr)
+    while (respawn_queue_head != nullptr)
     {
-        iteminque_t *tmp = itemquehead;
-        itemquehead      = itemquehead->next;
+        RespawnQueueItem *tmp = respawn_queue_head;
+        respawn_queue_head    = respawn_queue_head->next;
 
         delete tmp;
     }
@@ -1852,8 +1900,8 @@ void P_RemoveItemsInQue(void)
 //
 void P_RunMobjThinkers(bool extra_tic)
 {
-    mobj_t *mo;
-    mobj_t *next;
+    MapObject *mo;
+    MapObject *next;
 
     time_stop_active = false;
 
@@ -1866,17 +1914,14 @@ void P_RunMobjThinkers(bool extra_tic)
         }
     }
 
-    for (mo = mobjlisthead; mo != nullptr; mo = next)
+    for (mo = map_object_list_head; mo != nullptr; mo = next)
     {
-        next = mo->next;
+        next = mo->next_;
 
-        if (mo->isRemoved())
+        if (mo->IsRemoved())
         {
-            if (mo->fuse > 0)
-            {
-                mo->fuse--;
-            }
-            else if (mo->refcount == 0)
+            if (mo->fuse_ > 0) { mo->fuse_--; }
+            else if (mo->reference_count_ == 0)
             {
                 RemoveMobjFromList(mo);
                 DeleteMobj(mo);
@@ -1885,38 +1930,48 @@ void P_RunMobjThinkers(bool extra_tic)
             continue;
         }
 
-        if (mo->player)
+        if (mo->player_)
             P_MobjThinker(mo, extra_tic);
         else
         {
-            if (time_stop_active)
-                continue;
+            if (time_stop_active) continue;
             if (!double_framerate.d_)
             {
-                if (!g_cullthinkers.d_|| (game_tic / 2 %
-                                              RoundToInteger(1 + R_PointToDist(players[consoleplayer]->mo->x,
-                                                                        players[consoleplayer]->mo->y, mo->x, mo->y) /
-                                                              1500) ==
-                                          0))
+                if (!distance_cull_thinkers.d_ ||
+                    (game_tic / 2 %
+                         RoundToInteger(
+                             1 + R_PointToDist(players[consoleplayer]->mo->x,
+                                               players[consoleplayer]->mo->y,
+                                               mo->x, mo->y) /
+                                     1500) ==
+                     0))
                     P_MobjThinker(mo, extra_tic);
             }
             else
             {
                 if (extra_tic)
                 {
-                    if (!(mo->flags & kMapObjectFlagMissile))
+                    if (!(mo->flags_ & kMapObjectFlagMissile))
                         continue;
-                    else if (!g_cullthinkers.d_||
-                             ((game_tic / 4) % RoundToInteger(1 + R_PointToDist(players[consoleplayer]->mo->x,
-                                                                        players[consoleplayer]->mo->y, mo->x, mo->y) /
-                                                              1500) ==
+                    else if (!distance_cull_thinkers.d_ ||
+                             ((game_tic / 4) %
+                                  RoundToInteger(
+                                      1 + R_PointToDist(
+                                              players[consoleplayer]->mo->x,
+                                              players[consoleplayer]->mo->y,
+                                              mo->x, mo->y) /
+                                              1500) ==
                               0))
                         P_MobjThinker(mo, extra_tic);
                 }
-                else if (!g_cullthinkers.d_||
-                         ((game_tic / 4) % RoundToInteger(1 + R_PointToDist(players[consoleplayer]->mo->x,
-                                                                    players[consoleplayer]->mo->y, mo->x, mo->y) /
-                                                          1500) ==
+                else if (!distance_cull_thinkers.d_ ||
+                         ((game_tic / 4) %
+                              RoundToInteger(
+                                  1 +
+                                  R_PointToDist(players[consoleplayer]->mo->x,
+                                                players[consoleplayer]->mo->y,
+                                                mo->x, mo->y) /
+                                      1500) ==
                           0))
                     P_MobjThinker(mo, extra_tic);
             }
@@ -1932,27 +1987,29 @@ void P_RunMobjThinkers(bool extra_tic)
 //
 // P_SpawnDebris
 //
-void P_SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDefinition *debris)
+void P_SpawnDebris(float x, float y, float z, BAMAngle angle,
+                   const MapObjectDefinition *debris)
 {
-    // if (!level_flags.have_extra && (splash->extendedflags & kExtendedFlagExtra)) return;
-    // if (! (splash->extendedflags & kExtendedFlagExtra)) return; //Optional extra
-    mobj_t *th;
+    // if (!level_flags.have_extra && (splash->extended_flags_ &
+    // kExtendedFlagExtra)) return; if (! (splash->extended_flags_ &
+    // kExtendedFlagExtra)) return; //Optional extra
+    MapObject *th;
 
     th = P_MobjCreateObject(x, y, z, debris);
     P_SetMobjDirAndSpeed(th, angle, 2.0f, 0.25f);
 
-    th->tics -= RandomByteDeterministic() & 3;
+    th->tics_ -= RandomByteDeterministic() & 3;
 
-    if (th->tics < 1)
-        th->tics = 1;
+    if (th->tics_ < 1) th->tics_ = 1;
 }
 
 //
 // P_SpawnPuff
 //
-void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAMAngle angle)
+void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff,
+                 BAMAngle angle)
 {
-    mobj_t *th;
+    MapObject *th;
 
     z += (float)RandomByteSkewToZeroDeterministic() / 80.0f;
 
@@ -1960,15 +2017,14 @@ void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAM
     th = P_MobjCreateObject(x, y, z, puff);
 
     // -AJA- 1999/07/14: DDF-itised.
-    th->mom.Z = puff->float_speed_;
+    th->momentum_.Z = puff->float_speed_;
 
     // -AJA- 2011/03/14: set the angle
-    th->angle = angle;
+    th->angle_ = angle;
 
-    th->tics -= RandomByteDeterministic() & 3;
+    th->tics_ -= RandomByteDeterministic() & 3;
 
-    if (th->tics < 1)
-        th->tics = 1;
+    if (th->tics_ < 1) th->tics_ = 1;
 }
 
 //
@@ -1977,35 +2033,40 @@ void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAM
 // -KM- 1998/11/25 Made more violent. :-)
 // -KM- 1999/01/31 Different blood objects for different mobjs.
 //
-void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const MapObjectDefinition *blood)
+void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle,
+                  const MapObjectDefinition *blood)
 {
-    int     num;
-    mobj_t *th;
+    int        num;
+    MapObject *th;
 
     angle += kBAMAngle180;
 
-    num = (int)(!level_flags.more_blood ? 1.0f : (RandomByte() % 7) + (float)((HMM_MAX(damage / 4.0f, 7.0f))));
+    num = (int)(!level_flags.more_blood
+                    ? 1.0f
+                    : (RandomByte() % 7) +
+                          (float)((HMM_MAX(damage / 4.0f, 7.0f))));
 
     while (num--)
     {
         z += (float)(RandomByteSkewToZeroDeterministic() / 64.0f);
 
-        angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() * (int)(kBAMAngle1 / 2));
+        angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() *
+                            (int)(kBAMAngle1 / 2));
 
         th = P_MobjCreateObject(x, y, z, blood);
 
-        P_SetMobjDirAndSpeed(th, angle, ((float)num + 12.0f) / 6.0f, (float)num / 4.0f);
+        P_SetMobjDirAndSpeed(th, angle, ((float)num + 12.0f) / 6.0f,
+                             (float)num / 4.0f);
 
-        th->tics -= RandomByteDeterministic() & 3;
+        th->tics_ -= RandomByteDeterministic() & 3;
 
-        if (th->tics < 1)
-            th->tics = 1;
+        if (th->tics_ < 1) th->tics_ = 1;
 
-        if (damage <= 12 && th->state && th->next_state)
-            P_SetMobjState(th, th->next_state - states);
+        if (damage <= 12 && th->state_ && th->next_state_)
+            P_SetMobjState(th, th->next_state_ - states);
 
-        if (damage <= 8 && th->state && th->next_state)
-            P_SetMobjState(th, th->next_state - states);
+        if (damage <= 8 && th->state_ && th->next_state_)
+            P_SetMobjState(th, th->next_state_ - states);
     }
 }
 
@@ -2015,34 +2076,39 @@ void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const
 //
 //---------------------------------------------------------------------------
 
-FlatDefinition *P_IsThingOnLiquidFloor(mobj_t *thing)
+FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
 {
     FlatDefinition *current_flatdef = nullptr;
 
     // If no 3D floors, just return the flat
-    if (thing->subsector->sector->exfloor_used == 0)
+    if (thing->subsector_->sector->exfloor_used == 0)
     {
-        current_flatdef = flatdefs.Find(thing->subsector->sector->floor.image->name.c_str());
+        current_flatdef =
+            flatdefs.Find(thing->subsector_->sector->floor.image->name.c_str());
     }
-    // Start from the lowest exfloor and check if the player is standing on it, then return the control sector's flat
+    // Start from the lowest exfloor and check if the player is standing on it,
+    // then return the control sector's flat
     else
     {
-        float         player_floor_height = thing->floorz;
-        extrafloor_t *floor_checker       = thing->subsector->sector->bottom_ef;
-        extrafloor_t *liquid_checker      = thing->subsector->sector->bottom_liq;
+        float         player_floor_height = thing->floor_z_;
+        extrafloor_t *floor_checker  = thing->subsector_->sector->bottom_ef;
+        extrafloor_t *liquid_checker = thing->subsector_->sector->bottom_liq;
         for (extrafloor_t *ef = floor_checker; ef; ef = ef->higher)
         {
             if (AlmostEquals(player_floor_height, ef->top_h))
-                current_flatdef = flatdefs.Find(ef->ef_line->frontsector->floor.image->name.c_str());
+                current_flatdef = flatdefs.Find(
+                    ef->ef_line->frontsector->floor.image->name.c_str());
         }
         for (extrafloor_t *ef = liquid_checker; ef; ef = ef->higher)
         {
             if (AlmostEquals(player_floor_height, ef->top_h))
-                current_flatdef = flatdefs.Find(ef->ef_line->frontsector->floor.image->name.c_str());
+                current_flatdef = flatdefs.Find(
+                    ef->ef_line->frontsector->floor.image->name.c_str());
         }
         // if (!current_flatdef)
-        //	current_flatdef = flatdefs.Find(thing->subsector->sector->floor.image->name); // Fallback if nothing else
-        //satisfies these conditions
+        //	current_flatdef =
+        // flatdefs.Find(thing->subsector_->sector->floor.image->name); //
+        // Fallback if nothing else satisfies these conditions
     }
 
     return current_flatdef;
@@ -2054,19 +2120,18 @@ FlatDefinition *P_IsThingOnLiquidFloor(mobj_t *thing)
 //
 //---------------------------------------------------------------------------
 
-bool P_HitLiquidFloor(mobj_t *thing)
+bool P_HitLiquidFloor(MapObject *thing)
 {
-    if (thing->flags & kMapObjectFlagFloat)
-        return false;
+    if (thing->flags_ & kMapObjectFlagFloat) return false;
 
     // marked as not making splashes (e.g. a leaf)
-    if (thing->hyperflags & kHyperFlagNoSplash)
-        return false;
+    if (thing->hyper_flags_ & kHyperFlagNoSplash) return false;
 
     // don't splash if landing on the edge above water/lava/etc....
-    if (thing->subsector->sector->floor_vertex_slope && thing->z > thing->floorz)
+    if (thing->subsector_->sector->floor_vertex_slope &&
+        thing->z > thing->floor_z_)
         return false;
-    else if (!AlmostEquals(thing->floorz, thing->subsector->sector->f_h))
+    else if (!AlmostEquals(thing->floor_z_, thing->subsector_->sector->f_h))
         return false;
 
     FlatDefinition *current_flatdef = P_IsThingOnLiquidFloor(thing);
@@ -2075,17 +2140,17 @@ bool P_HitLiquidFloor(mobj_t *thing)
     {
         if (current_flatdef->impactobject_)
         {
-            BAMAngle angle = thing->angle;
-            angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() * (int)(kBAMAngle1 / 2));
+            BAMAngle angle = thing->angle_;
+            angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() *
+                                (int)(kBAMAngle1 / 2));
 
-            P_SpawnDebris(thing->x, thing->y, thing->z, angle, current_flatdef->impactobject_);
+            P_SpawnDebris(thing->x, thing->y, thing->z, angle,
+                          current_flatdef->impactobject_);
 
-            S_StartFX(current_flatdef->footstep_, P_MobjGetSfxCategory(thing), thing);
+            S_StartFX(current_flatdef->footstep_, P_MobjGetSfxCategory(thing),
+                      thing);
         }
-        if (current_flatdef->liquid_.empty())
-        {
-            return false;
-        }
+        if (current_flatdef->liquid_.empty()) { return false; }
         else
             return true;
     }
@@ -2096,8 +2161,8 @@ bool P_HitLiquidFloor(mobj_t *thing)
 // P_MobjItemRespawn
 //
 // Replacement procedure for P_RespawnSpecials, uses a linked list to go through
-// the item-respawn-que. The time until respawn (in tics) is decremented every tic,
-// when the item-in-the-que has a time of zero is it respawned.
+// the item-respawn-que. The time until respawn (in tics) is decremented every
+// tic, when the item-in-the-que has a time of zero is it respawned.
 //
 // -ACB- 1998/07/30 Procedure written.
 // -KM- 1999/01/31 Custom respawn fog.
@@ -2105,24 +2170,22 @@ bool P_HitLiquidFloor(mobj_t *thing)
 void P_MobjItemRespawn(void)
 {
     // only respawn items in deathmatch or forced by level flags
-    if (!(deathmatch >= 2 || level_flags.itemrespawn))
-        return;
+    if (!(deathmatch >= 2 || level_flags.itemrespawn)) return;
 
-    float             x, y, z;
-    mobj_t           *mo;
+    float                      x, y, z;
+    MapObject                 *mo;
     const MapObjectDefinition *objtype;
 
-    iteminque_t *cur, *next;
+    RespawnQueueItem *cur, *next;
 
     // let's start from the beginning....
-    for (cur = itemquehead; cur; cur = next)
+    for (cur = respawn_queue_head; cur; cur = next)
     {
         next = cur->next;
 
         cur->time--;
 
-        if (cur->time > 0)
-            continue;
+        if (cur->time > 0) continue;
 
         // no time left, so respawn object
 
@@ -2135,7 +2198,7 @@ void P_MobjItemRespawn(void)
         if (objtype == nullptr)
         {
             FatalError("P_MobjItemRespawn: No such item type!");
-            return; // shouldn't happen.
+            return;  // shouldn't happen.
         }
 
         // spawn a teleport fog at the new spot
@@ -2145,21 +2208,20 @@ void P_MobjItemRespawn(void)
         // -ACB- 1998/08/06 Use MobjCreateObject
         mo = P_MobjCreateObject(x, y, z, objtype);
 
-        mo->angle      = cur->spawnpoint.angle;
-        mo->vertangle  = cur->spawnpoint.vertangle;
-        mo->spawnpoint = cur->spawnpoint;
+        mo->angle_          = cur->spawnpoint.angle;
+        mo->vertical_angle_ = cur->spawnpoint.vertical_angle;
+        mo->spawnpoint_     = cur->spawnpoint;
 
         // Taking this item-in-que out of the que, remove
         // any references by the previous and next items to
         // the current one.....
 
-        if (cur->next)
-            cur->next->prev = cur->prev;
+        if (cur->next) cur->next->previous = cur->previous;
 
-        if (cur->prev)
-            cur->prev->next = next;
+        if (cur->previous)
+            cur->previous->next = next;
         else
-            itemquehead = next;
+            respawn_queue_head = next;
 
         delete cur;
     }
@@ -2180,14 +2242,14 @@ void P_MobjItemRespawn(void)
 // -AJA- 1999/09/15: Functionality subsumed by DoRemoveMobj.
 // -ES- 1999/10/24 Removal Queue.
 //
-void P_MobjRemoveMissile(mobj_t *missile)
+void P_MobjRemoveMissile(MapObject *missile)
 {
     P_RemoveMobj(missile);
 
-    missile->mom.X = missile->mom.Y = missile->mom.Z = 0;
+    missile->momentum_.X = missile->momentum_.Y = missile->momentum_.Z = 0;
 
-    missile->flags &= ~(kMapObjectFlagMissile | kMapObjectFlagTouchy);
-    missile->extendedflags &= ~(kExtendedFlagBounce);
+    missile->flags_ &= ~(kMapObjectFlagMissile | kMapObjectFlagTouchy);
+    missile->extended_flags_ &= ~(kExtendedFlagBounce);
 }
 
 //
@@ -2199,53 +2261,54 @@ void P_MobjRemoveMissile(mobj_t *missile)
 //
 // -ACB- 1998/08/02 Procedure written.
 //
-mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition *info)
+MapObject *P_MobjCreateObject(float x, float y, float z,
+                              const MapObjectDefinition *info)
 {
-    mobj_t *mobj = new mobj_t;
+    MapObject *mobj = new MapObject;
 
 #if (DEBUG_MOBJ > 0)
-    LogDebug("tics=%05d  CREATE %p [%s]  AT %1.0f,%1.0f,%1.0f\n", leveltime, mobj, info->name.c_str(), x, y, z);
+    LogDebug("tics=%05d  CREATE %p [%s]  AT %1.0f,%1.0f,%1.0f\n", leveltime,
+             mobj, info->name.c_str(), x, y, z);
 #endif
 
-    mobj->info             = info;
-    mobj->x                = x;
-    mobj->y                = y;
-    mobj->radius           = info->radius_;
-    mobj->height           = info->height_;
-    mobj->scale            = info->scale_;
-    mobj->aspect           = info->aspect_;
-    mobj->flags            = info->flags_;
-    mobj->health           = info->spawnhealth_;
-    mobj->spawnhealth      = info->spawnhealth_;
-    mobj->speed            = info->speed_;
-    mobj->fuse             = info->fuse_;
-    mobj->side             = info->side_;
-    mobj->model_skin       = info->model_skin_;
-    mobj->model_last_frame = -1;
-    mobj->model_aspect     = info->model_aspect_;
-    mobj->model_scale      = info->model_scale_;
-    mobj->wud_tags.clear();
+    mobj->info_             = info;
+    mobj->x                 = x;
+    mobj->y                 = y;
+    mobj->radius_           = info->radius_;
+    mobj->height_           = info->height_;
+    mobj->scale_            = info->scale_;
+    mobj->aspect_           = info->aspect_;
+    mobj->flags_            = info->flags_;
+    mobj->health_           = info->spawn_health_;
+    mobj->spawn_health_     = info->spawn_health_;
+    mobj->speed_            = info->speed_;
+    mobj->fuse_             = info->fuse_;
+    mobj->side_             = info->side_;
+    mobj->model_skin_       = info->model_skin_;
+    mobj->model_last_frame_ = -1;
+    mobj->model_aspect_     = info->model_aspect_;
+    mobj->model_scale_      = info->model_scale_;
+    mobj->wait_until_dead_tags_.clear();
 
-    mobj->painchance = info->painchance_;
+    mobj->pain_chance_ = info->pain_chance_;
 
-    mobj->morphtimeout = info->morphtimeout_;
+    mobj->morph_timeout_ = info->morphtimeout_;
 
     if (level_flags.fastparm && info->fast_speed_ > -1)
-        mobj->speed = info->fast_speed_;
+        mobj->speed_ = info->fast_speed_;
 
     // -ACB- 1998/06/25 new mobj Stuff (1998/07/11 - invisibility added)
-    mobj->extendedflags = info->extendedflags_;
-    mobj->hyperflags    = info->hyperflags_;
-    mobj->mbf21flags    = info->mbf21flags_;
-    mobj->vis_target = mobj->visibility = info->translucency_;
+    mobj->extended_flags_    = info->extended_flags_;
+    mobj->hyper_flags_       = info->hyper_flags_;
+    mobj->mbf21_flags_       = info->mbf21_flags_;
+    mobj->target_visibility_ = mobj->visibility_ = info->translucency_;
 
-    mobj->currentattack = nullptr;
-    mobj->on_ladder     = -1;
+    mobj->current_attack_ = nullptr;
+    mobj->on_ladder_      = -1;
 
-    if (game_skill != sk_nightmare)
-        mobj->reactiontime = info->reactiontime_;
+    if (game_skill != sk_nightmare) mobj->reaction_time_ = info->reaction_time_;
 
-    mobj->lastlook = RandomByteDeterministic() % MAXPLAYERS;
+    mobj->last_look_ = RandomByteDeterministic() % MAXPLAYERS;
 
     //
     // Do not set the state with P_SetMobjState,
@@ -2266,15 +2329,15 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
     else
         st = &states[info->idle_state_];
 
-    mobj->state      = st;
-    mobj->tics       = 0;
-    mobj->next_state = st;
+    mobj->state_      = st;
+    mobj->tics_       = 0;
+    mobj->next_state_ = st;
 
-    SYS_ASSERT(!mobj->isRemoved());
+    SYS_ASSERT(!mobj->IsRemoved());
 
     // enable usable items
-    if (mobj->extendedflags & kExtendedFlagUsable)
-        mobj->flags |= kMapObjectFlagTouchy;
+    if (mobj->extended_flags_ & kExtendedFlagUsable)
+        mobj->flags_ |= kMapObjectFlagTouchy;
 
     // handle dynamic lights
     {
@@ -2282,8 +2345,9 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
 
         if (dinfo->type_ != kDynamicLightTypeNone)
         {
-            mobj->dlight.r = mobj->dlight.target = dinfo->radius_;
-            mobj->dlight.color                   = dinfo->colour_;
+            mobj->dynamic_light_.r = mobj->dynamic_light_.target =
+                dinfo->radius_;
+            mobj->dynamic_light_.color = dinfo->colour_;
 
             // leave 'shader' field as nullptr : renderer will create it
         }
@@ -2294,30 +2358,33 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
 
     // -AJA- 1999/07/30: Updated for extra floors.
 
-    sector_t *sec = mobj->subsector->sector;
+    sector_t *sec = mobj->subsector_->sector;
 
     float f_slope_z = 0;
     float c_slope_z = 0;
 
     if (sec->floor_vertex_slope)
     {
-        float sz = MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->floor_z_verts[2], sec->floor_vs_normal)
+        float sz = MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}},
+                                             sec->floor_z_verts[2],
+                                             sec->floor_vs_normal)
                        .Z;
-        if (std::isfinite(sz))
-            f_slope_z = sz - sec->f_h;
+        if (isfinite(sz)) f_slope_z = sz - sec->f_h;
     }
     if (sec->ceil_vertex_slope)
     {
-        float sz = MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}}, sec->ceil_z_verts[2], sec->ceil_vs_normal)
-                       .Z;
-        if (std::isfinite(sz))
-            c_slope_z = sec->c_h - sz;
+        float sz =
+            MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}},
+                                      sec->ceil_z_verts[2], sec->ceil_vs_normal)
+                .Z;
+        if (isfinite(sz)) c_slope_z = sec->c_h - sz;
     }
 
-    mobj->z = P_ComputeThingGap(mobj, sec, z, &mobj->floorz, &mobj->ceilingz, f_slope_z, c_slope_z);
+    mobj->z = P_ComputeThingGap(mobj, sec, z, &mobj->floor_z_,
+                                &mobj->ceiling_z_, f_slope_z, c_slope_z);
 
     // Find the real players height (TELEPORT WEAPONS).
-    mobj->origheight = z;
+    mobj->original_height_ = z;
 
     // update totals for countable items.  Doing it here means that
     // things spawned dynamically can be counted as well.  Whilst this
@@ -2325,13 +2392,11 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
     // when RTS comes into play -- trying to second guess which
     // spawnthings should not be counted just doesn't work).
 
-    if (mobj->flags & kMapObjectFlagCountKill)
-        intermission_stats.kills++;
+    if (mobj->flags_ & kMapObjectFlagCountKill) intermission_stats.kills++;
 
-    if (mobj->flags & kMapObjectFlagCountItem)
-        intermission_stats.items++;
+    if (mobj->flags_ & kMapObjectFlagCountItem) intermission_stats.items++;
 
-    mobj->lastheard = -1; // For now, the last player we heard
+    mobj->last_heard_ = -1;  // For now, the last player we heard
     //
     // -ACB- 1998/08/27 Mobj Linked-List Addition
     //
@@ -2350,19 +2415,17 @@ mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition 
 //
 // Returns the sound category for an object.
 //
-int P_MobjGetSfxCategory(const mobj_t *mo)
+int P_MobjGetSfxCategory(const MapObject *mo)
 {
-    if (mo->player)
+    if (mo->player_)
     {
-        if (mo->player == players[displayplayer])
-            return SNCAT_Player;
+        if (mo->player_ == players[displayplayer]) return SNCAT_Player;
 
         return SNCAT_Opponent;
     }
     else
     {
-        if (mo->extendedflags & kExtendedFlagMonster)
-            return SNCAT_Monster;
+        if (mo->extended_flags_ & kExtendedFlagMonster) return SNCAT_Monster;
 
         return SNCAT_Object;
     }

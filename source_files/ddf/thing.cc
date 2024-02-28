@@ -103,12 +103,12 @@ const DDFCommandList thing_commands[] = {
     DDF_SUB_LIST("EXPLODE_DAMAGE", explode_damage_, damage_commands),
     DDF_SUB_LIST("CHOKE_DAMAGE", choke_damage_, damage_commands),
 
-    DF("SPAWNHEALTH", spawnhealth_, DDF_MainGetFloat),
+    DF("SPAWNHEALTH", spawn_health_, DDF_MainGetFloat),
     DF("RADIUS", radius_, DDF_MainGetFloat),
     DF("HEIGHT", height_, DDF_MainGetFloat),
     DF("MASS", mass_, DDF_MainGetFloat), DF("SPEED", speed_, DDF_MainGetFloat),
     DF("FAST", fast_, DDF_MainGetFloat),
-    DF("EXTRA", extendedflags_, DDF_MobjGetExtra),
+    DF("EXTRA", extended_flags_, DDF_MobjGetExtra),
     DF("RESPAWN_TIME", respawntime_, DDF_MainGetTime),
     DF("FUSE", fuse_, DDF_MainGetTime), DF("LIFESPAN", fuse_, DDF_MainGetTime),
     DF("PALETTE_REMAP", palremap_, DDF_MainGetColourmap),
@@ -121,9 +121,9 @@ const DDFCommandList thing_commands[] = {
     DF("PICKUP_MESSAGE", pickup_message_, DDF_MainGetString),
     DF("PICKUP_EFFECT", pickup_effects_, DDF_MobjGetPickupEffect),
 
-    DF("PAINCHANCE", painchance_, DDF_MainGetPercent),
+    DF("PAINCHANCE", pain_chance_, DDF_MainGetPercent),
     DF("MINATTACK_CHANCE", minatkchance_, DDF_MainGetPercent),
-    DF("REACTION_TIME", reactiontime_, DDF_MainGetTime),
+    DF("REACTION_TIME", reaction_time_, DDF_MainGetTime),
     DF("JUMP_DELAY", jump_delay_, DDF_MainGetTime),
     DF("JUMP_HEIGHT", jumpheight_, DDF_MainGetFloat),
     DF("CROUCH_HEIGHT", crouchheight_, DDF_MainGetFloat),
@@ -749,15 +749,15 @@ static void ThingFinishEntry(void)
 
     // count-as-kill things are automatically monsters
     if (dynamic_mobj->flags_ & kMapObjectFlagCountKill)
-        dynamic_mobj->extendedflags_ |= kExtendedFlagMonster;
+        dynamic_mobj->extended_flags_ |= kExtendedFlagMonster;
 
     // countable items are always pick-up-able
     if (dynamic_mobj->flags_ & kMapObjectFlagCountItem)
-        dynamic_mobj->hyperflags_ |= kHyperFlagForcePickup;
+        dynamic_mobj->hyper_flags_ |= kHyperFlagForcePickup;
 
     // shootable things are always pushable
     if (dynamic_mobj->flags_ & kMapObjectFlagShootable)
-        dynamic_mobj->hyperflags_ |= kHyperFlagPushable;
+        dynamic_mobj->hyper_flags_ |= kHyperFlagPushable;
 
     // check stuff...
 
@@ -1686,7 +1686,7 @@ void DDF_MobjGetSpecial(const char *info)
     if (DDF_CompareName(info, "MISSILE") == 0)
     {
         dynamic_mobj->flags_ |= kMapObjectFlagMissile;
-        dynamic_mobj->extendedflags_ |=
+        dynamic_mobj->extended_flags_ |=
             kExtendedFlagCrossBlockingLines | kExtendedFlagNoFriction;
         return;
     }
@@ -1699,7 +1699,7 @@ void DDF_MobjGetSpecial(const char *info)
     if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
     {
         // wasn't a normal special.  Try the extended ones...
-        flag_ptr = &dynamic_mobj->extendedflags_;
+        flag_ptr = &dynamic_mobj->extended_flags_;
 
         res = DDF_MainCheckSpecialFlag(info, extended_specials, &flag_value,
                                        true, false);
@@ -1708,7 +1708,7 @@ void DDF_MobjGetSpecial(const char *info)
     if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
     {
         // -AJA- 2004/08/25: Try the hyper specials...
-        flag_ptr = &dynamic_mobj->hyperflags_;
+        flag_ptr = &dynamic_mobj->hyper_flags_;
 
         res = DDF_MainCheckSpecialFlag(info, hyper_specials, &flag_value, true,
                                        false);
@@ -1717,7 +1717,7 @@ void DDF_MobjGetSpecial(const char *info)
     if (res == kDDFCheckFlagUser || res == kDDFCheckFlagUnknown)
     {
         // Try the MBF21 specials...
-        flag_ptr = &dynamic_mobj->mbf21flags_;
+        flag_ptr = &dynamic_mobj->mbf21_flags_;
 
         res = DDF_MainCheckSpecialFlag(info, mbf21_specials, &flag_value, true,
                                        false);
@@ -2154,9 +2154,9 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
     reload_state_   = src.reload_state_;
     gib_state_      = src.gib_state_;
 
-    reactiontime_ = src.reactiontime_;
-    painchance_   = src.painchance_;
-    spawnhealth_  = src.spawnhealth_;
+    reaction_time_ = src.reaction_time_;
+    pain_chance_   = src.pain_chance_;
+    spawn_health_  = src.spawn_health_;
     speed_        = src.speed_;
     float_speed_  = src.float_speed_;
     radius_       = src.radius_;
@@ -2165,9 +2165,9 @@ void MapObjectDefinition::CopyDetail(MapObjectDefinition &src)
     mass_         = src.mass_;
 
     flags_         = src.flags_;
-    extendedflags_ = src.extendedflags_;
-    hyperflags_    = src.hyperflags_;
-    mbf21flags_    = src.mbf21flags_;
+    extended_flags_ = src.extended_flags_;
+    hyper_flags_    = src.hyper_flags_;
+    mbf21_flags_    = src.mbf21_flags_;
 
     explode_damage_ = src.explode_damage_;
     explode_radius_ = src.explode_radius_;
@@ -2315,9 +2315,9 @@ void MapObjectDefinition::Default()
     reload_state_   = 0;
     gib_state_      = 0;
 
-    reactiontime_ = 0;
-    painchance_   = 0.0f;
-    spawnhealth_  = 1000.0f;
+    reaction_time_ = 0;
+    pain_chance_   = 0.0f;
+    spawn_health_  = 1000.0f;
     speed_        = 0;
     float_speed_  = 2.0f;
     radius_       = 0;
@@ -2326,9 +2326,9 @@ void MapObjectDefinition::Default()
     mass_         = 100.0f;
 
     flags_         = 0;
-    extendedflags_ = 0;
-    hyperflags_    = 0;
-    mbf21flags_    = 0;
+    extended_flags_ = 0;
+    hyper_flags_    = 0;
+    mbf21_flags_    = 0;
 
     explode_damage_.Default(DamageClass::kDamageClassDefaultMobj);
     explode_radius_ = 0;
@@ -2463,7 +2463,7 @@ void MapObjectDefinition::DLightCompatibility(void)
                     DynamicLightCompatibilityRadius(dlight_[DL].radius_);
                 dlight_[DL].colour_ = epi::MakeRGBA(r, g, b);
 
-                hyperflags_ |= kHyperFlagQuadraticDynamicLight;
+                hyper_flags_ |= kHyperFlagQuadraticDynamicLight;
                 break;
 
             case kDynamicLightTypeCompatibilityLinear:

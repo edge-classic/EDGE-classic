@@ -106,7 +106,7 @@ static int PL_get_pos(lua_State *L)
 //
 static int PL_get_angle(lua_State *L)
 {
-    float value = epi::DegreesFromBAM(ui_player_who->mo->angle);
+    float value = epi::DegreesFromBAM(ui_player_who->mo->angle_);
 
     if (value > 360.0f)
         value -= 360.0f;
@@ -121,7 +121,7 @@ static int PL_get_angle(lua_State *L)
 //
 static int PL_get_mlook(lua_State *L)
 {
-    float value = epi::DegreesFromBAM(ui_player_who->mo->vertangle);
+    float value = epi::DegreesFromBAM(ui_player_who->mo->vertical_angle_);
 
     if (value > 180.0f)
         value -= 360.0f;
@@ -134,7 +134,7 @@ static int PL_get_mlook(lua_State *L)
 //
 static int PL_health(lua_State *L)
 {
-    float h = ui_player_who->health * 100 / ui_player_who->mo->spawnhealth;
+    float h = ui_player_who->health * 100 / ui_player_who->mo->spawn_health_;
 
     if (h < 98)
         h += 0.99f;
@@ -198,16 +198,16 @@ static int PL_under_water(lua_State *L)
 static int PL_on_ground(lua_State *L)
 {
     // not a 3D floor?
-    if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+    if (ui_player_who->mo->subsector_->sector->exfloor_used == 0)
     {
         // on the edge above water/lava/etc? Handles edge walker case
-        if (!AlmostEquals(ui_player_who->mo->floorz, ui_player_who->mo->subsector->sector->f_h) &&
-            !ui_player_who->mo->subsector->sector->floor_vertex_slope)
+        if (!AlmostEquals(ui_player_who->mo->floor_z_, ui_player_who->mo->subsector_->sector->f_h) &&
+            !ui_player_who->mo->subsector_->sector->floor_vertex_slope)
             lua_pushboolean(L, 0);
         else
         {
             // touching the floor? Handles jumping or flying
-            if (ui_player_who->mo->z <= ui_player_who->mo->floorz)
+            if (ui_player_who->mo->z <= ui_player_who->mo->floor_z_)
                 lua_pushboolean(L, 1);
             else
                 lua_pushboolean(L, 0);
@@ -215,7 +215,7 @@ static int PL_on_ground(lua_State *L)
     }
     else
     {
-        if (ui_player_who->mo->z <= ui_player_who->mo->floorz)
+        if (ui_player_who->mo->z <= ui_player_who->mo->floor_z_)
             lua_pushboolean(L, 1);
         else
             lua_pushboolean(L, 0);
@@ -244,7 +244,7 @@ static int PL_is_jumping(lua_State *L)
 //
 static int PL_is_crouching(lua_State *L)
 {
-    lua_pushboolean(L, (ui_player_who->mo->extendedflags & kExtendedFlagCrouching) ? 1 : 0);
+    lua_pushboolean(L, (ui_player_who->mo->extended_flags_ & kExtendedFlagCrouching) ? 1 : 0);
     return 1;
 }
 
@@ -322,7 +322,7 @@ static int PL_air_in_lungs(lua_State *L)
         return 1;
     }
 
-    float value = ui_player_who->air_in_lungs * 100.0f / ui_player_who->mo->info->lung_capacity_;
+    float value = ui_player_who->air_in_lungs * 100.0f / ui_player_who->mo->info_->lung_capacity_;
 
     value = HMM_Clamp(0.0f, value, 100.0f);
 
@@ -857,7 +857,7 @@ static int PL_hurt_by(lua_State *L)
     // getting hurt because of your own damn stupidity
     if (ui_player_who->attacker == ui_player_who->mo)
         lua_pushstring(L, "self");
-    else if (ui_player_who->attacker && (ui_player_who->attacker->side & ui_player_who->mo->side))
+    else if (ui_player_who->attacker && (ui_player_who->attacker->side_ & ui_player_who->mo->side_))
         lua_pushstring(L, "friend");
     else if (ui_player_who->attacker)
         lua_pushstring(L, "enemy");
@@ -873,7 +873,7 @@ static int PL_hurt_mon(lua_State *L)
 {
     if (ui_player_who->damagecount > 0 && ui_player_who->attacker && ui_player_who->attacker != ui_player_who->mo)
     {
-        lua_pushstring(L, ui_player_who->attacker->info->name_.c_str());
+        lua_pushstring(L, ui_player_who->attacker->info_->name_.c_str());
         return 1;
     }
 
@@ -897,10 +897,10 @@ static int PL_hurt_dir(lua_State *L)
 
     if (ui_player_who->attacker && ui_player_who->attacker != ui_player_who->mo)
     {
-        mobj_t *badguy = ui_player_who->attacker;
-        mobj_t *pmo    = ui_player_who->mo;
+        MapObject *badguy = ui_player_who->attacker;
+        MapObject *pmo    = ui_player_who->mo;
 
-        BAMAngle diff = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle;
+        BAMAngle diff = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle_;
 
         if (diff >= kBAMAngle45 && diff <= kBAMAngle135)
         {
@@ -924,8 +924,8 @@ static int PL_hurt_angle(lua_State *L)
 
     if (ui_player_who->attacker && ui_player_who->attacker != ui_player_who->mo)
     {
-        mobj_t *badguy = ui_player_who->attacker;
-        mobj_t *pmo    = ui_player_who->mo;
+        MapObject *badguy = ui_player_who->attacker;
+        MapObject *pmo    = ui_player_who->mo;
 
         BAMAngle real_a = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
 
@@ -995,16 +995,16 @@ static int PL_map_items(lua_State *L)
 static int PL_floor_flat(lua_State *L)
 {
     // If no 3D floors, just return the flat
-    if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+    if (ui_player_who->mo->subsector_->sector->exfloor_used == 0)
     {
-        lua_pushstring(L, ui_player_who->mo->subsector->sector->floor.image->name.c_str());
+        lua_pushstring(L, ui_player_who->mo->subsector_->sector->floor.image->name.c_str());
     }
     else
     {
         // Start from the lowest exfloor and check if the player is standing on it, then return the control sector's
         // flat
-        float         player_floor_height = ui_player_who->mo->floorz;
-        extrafloor_t *floor_checker       = ui_player_who->mo->subsector->sector->bottom_ef;
+        float         player_floor_height = ui_player_who->mo->floor_z_;
+        extrafloor_t *floor_checker       = ui_player_who->mo->subsector_->sector->bottom_ef;
         for (extrafloor_t *ef = floor_checker; ef; ef = ef->higher)
         {
             if (player_floor_height + 1 > ef->top_h)
@@ -1014,7 +1014,7 @@ static int PL_floor_flat(lua_State *L)
             }
         }
         // Fallback if nothing else satisfies these conditions
-        lua_pushstring(L, ui_player_who->mo->subsector->sector->floor.image->name.c_str());
+        lua_pushstring(L, ui_player_who->mo->subsector_->sector->floor.image->name.c_str());
     }
 
     return 1;
@@ -1024,7 +1024,7 @@ static int PL_floor_flat(lua_State *L)
 // Lobo: November 2021
 static int PL_sector_tag(lua_State *L)
 {
-    lua_pushinteger(L, ui_player_who->mo->subsector->sector->tag);
+    lua_pushinteger(L, ui_player_who->mo->subsector_->sector->tag);
     return 1;
 }
 
@@ -1119,16 +1119,16 @@ static std::string AuxStringReplaceAll(std::string str, const std::string &from,
 
 // GetMobjBenefits(mobj);
 //
-static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
+static std::string GetMobjBenefits(MapObject *obj, bool KillBenefits = false)
 {
     std::string temp_string;
     Benefit *list;
     int        temp_num = 0;
 
     if (KillBenefits)
-        list = obj->info->kill_benefits_;
+        list = obj->info_->kill_benefits_;
     else
-        list = obj->info->pickup_benefits_;
+        list = obj->info_->pickup_benefits_;
 
     for (; list != nullptr; list = list->next)
     {
@@ -1194,7 +1194,7 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
 
 // GetQueryInfoFromMobj(mobj, whatinfo)
 //
-static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
+static std::string GetQueryInfoFromMobj(MapObject *obj, int whatinfo)
 {
     int         temp_num = 0;
     std::string temp_string;
@@ -1205,11 +1205,11 @@ static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
         if (obj)
         {
             // try CAST_TITLE first
-            temp_string = language[obj->info->cast_title_];
+            temp_string = language[obj->info_->cast_title_];
 
             if (temp_string.empty()) // fallback to DDFTHING entry name
             {
-                temp_string = obj->info->name_;
+                temp_string = obj->info_->name_;
                 temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
             }
         }
@@ -1218,7 +1218,7 @@ static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
     case 2: // current health
         if (obj)
         {
-            temp_num    = obj->health;
+            temp_num    = obj->health_;
             temp_string = std::to_string(temp_num);
         }
         break;
@@ -1226,7 +1226,7 @@ static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
     case 3: // spawn health
         if (obj)
         {
-            temp_num    = obj->spawnhealth;
+            temp_num    = obj->spawn_health_;
             temp_string = std::to_string(temp_num);
         }
         break;
@@ -1254,19 +1254,19 @@ static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
 
 // GetQueryInfoFromWeapon(mobj, whatinfo, [secattackinfo])
 //
-static std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secattackinfo = false)
+static std::string GetQueryInfoFromWeapon(MapObject *obj, int whatinfo, bool secattackinfo = false)
 {
     int         temp_num = 0;
     std::string temp_string;
 
-    if (!obj->info->pickup_benefits_)
+    if (!obj->info_->pickup_benefits_)
         return "";
-    if (!obj->info->pickup_benefits_->sub.weap)
+    if (!obj->info_->pickup_benefits_->sub.weap)
         return "";
-    if (obj->info->pickup_benefits_->type != kBenefitTypeWeapon)
+    if (obj->info_->pickup_benefits_->type != kBenefitTypeWeapon)
         return "";
 
-    WeaponDefinition *objWep = obj->info->pickup_benefits_->sub.weap;
+    WeaponDefinition *objWep = obj->info_->pickup_benefits_->sub.weap;
     if (!objWep)
         return "";
 
@@ -1349,7 +1349,7 @@ static int PL_query_object(lua_State *L)
     if (whatinfo < 1 || whatinfo > 5)
         FatalError("player.query_object: bad whatInfo number: %d\n", whatinfo);
 
-    mobj_t *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
+    MapObject *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle_, maxdistance);
     if (!obj)
     {
         lua_pushstring(L, "");
@@ -1376,12 +1376,12 @@ static int MO_query_tagged(lua_State *L)
     int whattag  = (int)luaL_checknumber(L, 1);
     int whatinfo = (int)luaL_checknumber(L, 2);
 
-    mobj_t *mo;
+    MapObject *mo;
     std::string temp_value;
 
-    for (mo = mobjlisthead; mo; mo = mo->next)
+    for (mo = map_object_list_head; mo; mo = mo->next_)
     {
-        if (mo->tag == whattag)
+        if (mo->tag_ == whattag)
         {
             temp_value = GetQueryInfoFromMobj(mo, whatinfo);
             break;
@@ -1399,7 +1399,7 @@ static int MO_query_tagged(lua_State *L)
 
 // CreateLuaTable_Benefits(LuaState, mobj, Killbenefits);
 //
-static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits = false)
+static void CreateLuaTable_Benefits(lua_State *L, MapObject *obj, bool KillBenefits = false)
 {
     Benefit *list;
     std::string BenefitName;
@@ -1408,9 +1408,9 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
     int        BenefitLimit = 0;
 
     if (KillBenefits)
-        list = obj->info->kill_benefits_;
+        list = obj->info_->kill_benefits_;
     else
-        list = obj->info->pickup_benefits_;
+        list = obj->info_->pickup_benefits_;
     
     //how many benefits do we have?
     int NumberOfBenefits = 0;
@@ -1429,9 +1429,9 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
 
     int CurrentBenefit = 1; //counter
     if (KillBenefits)
-        list = obj->info->kill_benefits_; //need to grab these again
+        list = obj->info_->kill_benefits_; //need to grab these again
     else
-        list = obj->info->pickup_benefits_; //need to grab these again
+        list = obj->info_->pickup_benefits_; //need to grab these again
 
     for (; list != nullptr; list = list->next)
     {
@@ -1462,7 +1462,7 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
             BenefitAmount = (int)list->amount;
             if ((game_skill == sk_baby) || (game_skill == sk_nightmare))
                 BenefitAmount <<= 1; //double the ammo
-            if(BenefitAmount > 1 && obj->flags & kMapObjectFlagDropped)
+            if(BenefitAmount > 1 && obj->flags_ & kMapObjectFlagDropped)
                 BenefitAmount /= 2; //dropped ammo gives half
             BenefitLimit = (int)list->limit;
             break;
@@ -1561,7 +1561,7 @@ static void CreateLuaTable_Benefits(lua_State *L, mobj_t *obj, bool KillBenefits
 
 // CreateLuaTable_Mobj(LuaState, mobj)
 //
-static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
+static void CreateLuaTable_Mobj(lua_State *L, MapObject *mo)
 {
     std::string temp_value;
     int NumberOfItems = 12; //how many fields in a row
@@ -1569,10 +1569,10 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 
     //---------------
     // object.name
-    temp_value = language[mo->info->cast_title_];  // try CAST_TITLE first
+    temp_value = language[mo->info_->cast_title_];  // try CAST_TITLE first
     if (temp_value.empty()) // fallback to DDFTHING entry name
     {
-        temp_value = mo->info->name_;
+        temp_value = mo->info_->name_;
         temp_value = AuxStringReplaceAll(temp_value, std::string("_"), std::string(" "));
     }
 
@@ -1582,7 +1582,7 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 
     //---------------
     // object.tag
-    lua_pushinteger(L, (int)mo->tag);
+    lua_pushinteger(L, (int)mo->tag_);
     lua_setfield(L, -2, "tag");   //add to MOBJ Table
     //---------------
 
@@ -1590,13 +1590,13 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
     // object.type
     temp_value="SCENERY"; //default to scenery
 
-    if (mo->extendedflags & kExtendedFlagMonster)
+    if (mo->extended_flags_ & kExtendedFlagMonster)
         temp_value="MONSTER";
-    if (mo->flags & kMapObjectFlagSpecial)
+    if (mo->flags_ & kMapObjectFlagSpecial)
         temp_value="PICKUP";
-    if (mo->info->pickup_benefits_)
+    if (mo->info_->pickup_benefits_)
     {
-        if (mo->info->pickup_benefits_->type == kBenefitTypeWeapon)
+        if (mo->info_->pickup_benefits_->type == kBenefitTypeWeapon)
             temp_value="WEAPON";
     } 
 
@@ -1606,13 +1606,13 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 
     //---------------
     // object.currenthealth
-    lua_pushinteger(L, (int)mo->health);
+    lua_pushinteger(L, (int)mo->health_);
     lua_setfield(L, -2, "current_health");   //add to MOBJ Table
     //---------------
 
     //---------------
     // object.spawnhealth
-    lua_pushinteger(L, (int)mo->spawnhealth);
+    lua_pushinteger(L, (int)mo->spawn_health_);
     lua_setfield(L, -2, "spawn_health");   //add to MOBJ Table
     //---------------
 
@@ -1636,7 +1636,7 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 
     //---------------
     // object.angle
-    float value = epi::DegreesFromBAM(mo->angle);
+    float value = epi::DegreesFromBAM(mo->angle_);
     if (value > 360.0f)
         value -= 360.0f;
     if (value < 0)
@@ -1648,7 +1648,7 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 
     //---------------
     // object.mlook
-    value = epi::DegreesFromBAM(mo->vertangle);
+    value = epi::DegreesFromBAM(mo->vertical_angle_);
 
     if (value > 180.0f)
         value -= 360.0f;
@@ -1659,13 +1659,13 @@ static void CreateLuaTable_Mobj(lua_State *L, mobj_t *mo)
 
      //---------------
     // object.radius
-    lua_pushinteger(L, (int)mo->radius);
+    lua_pushinteger(L, (int)mo->radius_);
     lua_setfield(L, -2, "radius");   //add to MOBJ Table
     //---------------
 
     //---------------
     // object.benefits
-    if (mo->extendedflags & kExtendedFlagMonster)
+    if (mo->extended_flags_ & kExtendedFlagMonster)
         CreateLuaTable_Benefits(L, mo, true); //only want kill benefits
     else
         CreateLuaTable_Benefits(L, mo, false); //only want pickup benefits
@@ -1789,7 +1789,7 @@ static int MO_weapon_info(lua_State *L)
 {
     int maxdistance = (int)luaL_checknumber(L, 1);
 
-    mobj_t *mo = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
+    MapObject *mo = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle_, maxdistance);
     if (!mo)
     {
         lua_pushstring(L, "");
@@ -1797,23 +1797,23 @@ static int MO_weapon_info(lua_State *L)
     } 
     else
     {
-        if (!mo->info->pickup_benefits_)
+        if (!mo->info_->pickup_benefits_)
         {
             lua_pushstring(L, "");
             return 1;
         }
-        if (!mo->info->pickup_benefits_->sub.weap)
+        if (!mo->info_->pickup_benefits_->sub.weap)
         {
             lua_pushstring(L, "");
             return 1;
         }
-        if (mo->info->pickup_benefits_->type != kBenefitTypeWeapon)
+        if (mo->info_->pickup_benefits_->type != kBenefitTypeWeapon)
         {
             lua_pushstring(L, "");
             return 1;
         }
 
-        WeaponDefinition *objWep = mo->info->pickup_benefits_->sub.weap;
+        WeaponDefinition *objWep = mo->info_->pickup_benefits_->sub.weap;
         if (!objWep)
         {
             lua_pushstring(L, "");
@@ -1834,7 +1834,7 @@ static int MO_object_info(lua_State *L)
 {
     int maxdistance = (int)luaL_checknumber(L, 1);
 
-    mobj_t *mo = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
+    MapObject *mo = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle_, maxdistance);
     if (!mo)
     {
         lua_pushstring(L, "");
@@ -1853,12 +1853,12 @@ static int MO_object_info(lua_State *L)
 static int MO_tagged_info(lua_State *L)
 {
     int whattag  = (int)luaL_checknumber(L, 1);
-    mobj_t *mo;
+    MapObject *mo;
     std::string temp_value;
 
-    for (mo = mobjlisthead; mo; mo = mo->next)
+    for (mo = map_object_list_head; mo; mo = mo->next_)
     {
-        if (mo->tag == whattag)
+        if (mo->tag_ == whattag)
         {
             temp_value = "FOUNDIT";
             break;
@@ -1883,12 +1883,12 @@ static int MO_tagged_info(lua_State *L)
 static int MO_count(lua_State *L)
 {
     int thingid = (int)luaL_checknumber(L, 1);
-    mobj_t *mo;
+    MapObject *mo;
     double thingcount = 0;
 
-    for (mo = mobjlisthead; mo; mo = mo->next)
+    for (mo = map_object_list_head; mo; mo = mo->next_)
     {
-        if (mo->info->number_ == thingid && mo->health > 0)
+        if (mo->info_->number_ == thingid && mo->health_ > 0)
             thingcount++;
     }
 
@@ -1911,7 +1911,7 @@ static int PL_query_weapon(lua_State *L)
     if (secattackinfo < 0 || secattackinfo > 1)
         FatalError("player.query_weapon: bad secAttackInfo number: %d\n", whatinfo);
 
-    mobj_t *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
+    MapObject *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle_, maxdistance);
     if (!obj)
     {
         lua_pushstring(L, "");
@@ -1937,7 +1937,7 @@ static int PL_query_weapon(lua_State *L)
 // Lobo: May 2023
 static int PL_sector_light(lua_State *L)
 {
-    lua_pushnumber(L, ui_player_who->mo->subsector->sector->props.lightlevel);
+    lua_pushnumber(L, ui_player_who->mo->subsector_->sector->props.lightlevel);
     return 1;
 }
 
@@ -1946,17 +1946,17 @@ static int PL_sector_light(lua_State *L)
 static int PL_sector_floor_height(lua_State *L)
 {
     // If no 3D floors, just return the current sector floor height
-    if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+    if (ui_player_who->mo->subsector_->sector->exfloor_used == 0)
     {
-        lua_pushnumber(L, ui_player_who->mo->subsector->sector->f_h);
+        lua_pushnumber(L, ui_player_who->mo->subsector_->sector->f_h);
     }
     else
     {
         // Start from the lowest exfloor and check if the player is standing on it,
         //  then return the control sector floor height
         float         CurrentFloor        = 0;
-        float         player_floor_height = ui_player_who->mo->floorz;
-        extrafloor_t *floor_checker       = ui_player_who->mo->subsector->sector->bottom_ef;
+        float         player_floor_height = ui_player_who->mo->floor_z_;
+        extrafloor_t *floor_checker       = ui_player_who->mo->subsector_->sector->bottom_ef;
         for (extrafloor_t *ef = floor_checker; ef; ef = ef->higher)
         {
             if (CurrentFloor > ef->top_h)
@@ -1981,17 +1981,17 @@ static int PL_sector_floor_height(lua_State *L)
 static int PL_sector_ceiling_height(lua_State *L)
 {
     // If no 3D floors, just return the current sector ceiling height
-    if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+    if (ui_player_who->mo->subsector_->sector->exfloor_used == 0)
     {
-        lua_pushnumber(L, ui_player_who->mo->subsector->sector->c_h);
+        lua_pushnumber(L, ui_player_who->mo->subsector_->sector->c_h);
     }
     else
     {
         // Start from the lowest exfloor and check if the player is standing on it,
         //   then return the control sector ceiling height
         float         HighestCeiling      = 0;
-        float         player_floor_height = ui_player_who->mo->floorz;
-        extrafloor_t *floor_checker       = ui_player_who->mo->subsector->sector->bottom_ef;
+        float         player_floor_height = ui_player_who->mo->floor_z_;
+        extrafloor_t *floor_checker       = ui_player_who->mo->subsector_->sector->bottom_ef;
         for (extrafloor_t *ef = floor_checker; ef; ef = ef->higher)
         {
             if (player_floor_height + 1 > ef->top_h)
@@ -2005,7 +2005,7 @@ static int PL_sector_ceiling_height(lua_State *L)
             }
         }
         // Fallback if nothing else satisfies these conditions
-        lua_pushnumber(L, ui_player_who->mo->subsector->sector->c_h);
+        lua_pushnumber(L, ui_player_who->mo->subsector_->sector->c_h);
     }
 
     return 1;
@@ -2017,7 +2017,7 @@ static int PL_is_outside(lua_State *L)
 {
     // Doesn't account for extrafloors by design. Reasoning is that usually
     //  extrafloors will be platforms, not roofs...
-    if (ui_player_who->mo->subsector->sector->ceil.image != skyflatimage) // is it outdoors?
+    if (ui_player_who->mo->subsector_->sector->ceil.image != skyflatimage) // is it outdoors?
         lua_pushboolean(L, 0);
     else
         lua_pushboolean(L, 1);
@@ -2133,13 +2133,13 @@ static int Sector_info(lua_State *L)
 
     //---------------
     // SECTOR.tag
-    lua_pushinteger(L, ui_player_who->mo->subsector->sector->tag);
+    lua_pushinteger(L, ui_player_who->mo->subsector_->sector->tag);
     lua_setfield(L, -2, "tag");   //add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.lightlevel
-    lua_pushinteger(L, ui_player_who->mo->subsector->sector->props.lightlevel);
+    lua_pushinteger(L, ui_player_who->mo->subsector_->sector->props.lightlevel);
     lua_setfield(L, -2, "light_level");   //add to SECTOR Table
     //---------------
 
@@ -2148,18 +2148,18 @@ static int Sector_info(lua_State *L)
      float         CurrentSurface       = 0;
      
      //Default is to just return the current sector floor height
-    CurrentSurface = ui_player_who->mo->subsector->sector->f_h;
+    CurrentSurface = ui_player_who->mo->subsector_->sector->f_h;
 
     //While we're here, grab the floor flat too
-    temp_value = ui_player_who->mo->subsector->sector->floor.image->name;
+    temp_value = ui_player_who->mo->subsector_->sector->floor.image->name;
 
     // If we have 3D floors, search...
-    if (ui_player_who->mo->subsector->sector->exfloor_used != 0)
+    if (ui_player_who->mo->subsector_->sector->exfloor_used != 0)
     {
         // Start from the lowest exfloor and check if the player is standing on it,
         //  then return the control sector floor height
-        float         player_floor_height = ui_player_who->mo->floorz;
-        extrafloor_t *floor_checker       = ui_player_who->mo->subsector->sector->bottom_ef;
+        float         player_floor_height = ui_player_who->mo->floor_z_;
+        extrafloor_t *floor_checker       = ui_player_who->mo->subsector_->sector->bottom_ef;
         for (extrafloor_t *ef = floor_checker; ef; ef = ef->higher)
         {
             if (CurrentSurface > ef->top_h)
@@ -2190,16 +2190,16 @@ static int Sector_info(lua_State *L)
     // SECTOR.ceiling_height
 
     //default is to just return the current sector ceiling height
-    CurrentSurface = ui_player_who->mo->subsector->sector->c_h;
+    CurrentSurface = ui_player_who->mo->subsector_->sector->c_h;
 
     // If we have 3D floors, search...
-    if (ui_player_who->mo->subsector->sector->exfloor_used != 0)
+    if (ui_player_who->mo->subsector_->sector->exfloor_used != 0)
     {
         // Start from the lowest exfloor and check if the player is standing on it,
         //   then return the control sector ceiling height
         float         HighestCeiling      = 0;
-        float         player_floor_height = ui_player_who->mo->floorz;
-        extrafloor_t *floor_checker       = ui_player_who->mo->subsector->sector->bottom_ef;
+        float         player_floor_height = ui_player_who->mo->floor_z_;
+        extrafloor_t *floor_checker       = ui_player_who->mo->subsector_->sector->bottom_ef;
         for (extrafloor_t *ef = floor_checker; ef; ef = ef->higher)
         {
             if (player_floor_height + 1 > ef->top_h)
@@ -2221,7 +2221,7 @@ static int Sector_info(lua_State *L)
     // SECTOR.is_outside
     // Doesn't account for extrafloors by design. Reasoning is that usually
     //  extrafloors will be platforms, not roofs...
-    if (ui_player_who->mo->subsector->sector->ceil.image != skyflatimage) // is it outdoors?
+    if (ui_player_who->mo->subsector_->sector->ceil.image != skyflatimage) // is it outdoors?
         lua_pushboolean(L, 0);
     else
         lua_pushboolean(L, 1);
@@ -2231,7 +2231,7 @@ static int Sector_info(lua_State *L)
 
     //---------------
     // SECTOR.type
-    lua_pushinteger(L, ui_player_who->mo->subsector->sector->props.type);
+    lua_pushinteger(L, ui_player_who->mo->subsector_->sector->props.type);
     lua_setfield(L, -2, "type");   //add to SECTOR Table
     //---------------
 
@@ -2249,32 +2249,32 @@ static int Sector_info(lua_State *L)
 
     //---------------
     // SECTOR.gravity
-    lua_pushnumber(L, ui_player_who->mo->subsector->sector->props.gravity);
+    lua_pushnumber(L, ui_player_who->mo->subsector_->sector->props.gravity);
     lua_setfield(L, -2, "gravity");   //add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.friction
-    lua_pushnumber(L, ui_player_who->mo->subsector->sector->props.friction);
+    lua_pushnumber(L, ui_player_who->mo->subsector_->sector->props.friction);
     lua_setfield(L, -2, "friction");   //add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.viscosity
-    lua_pushnumber(L, ui_player_who->mo->subsector->sector->props.viscosity);
+    lua_pushnumber(L, ui_player_who->mo->subsector_->sector->props.viscosity);
     lua_setfield(L, -2, "viscosity");   //add to SECTOR Table
     //---------------   
 
     //---------------
     // SECTOR.drag
-    lua_pushnumber(L, ui_player_who->mo->subsector->sector->props.drag);
+    lua_pushnumber(L, ui_player_who->mo->subsector_->sector->props.drag);
     lua_setfield(L, -2, "drag");   //add to SECTOR Table
     //---------------
 
     //---------------
     // SECTOR.fogcolor
     HMM_Vec3    rgb;
-    RGBAColor tempcolor = ui_player_who->mo->subsector->sector->props.fog_color;
+    RGBAColor tempcolor = ui_player_who->mo->subsector_->sector->props.fog_color;
 
     rgb.X = -1;
     rgb.Y = -1;
@@ -2297,7 +2297,7 @@ static int Sector_info(lua_State *L)
     // SECTOR.fogdensity
 
     // Convert to approximate percentage (a value between 0 and 100)
-    float tempfogdensity =  (ui_player_who->mo->subsector->sector->props.fog_density / 0.01f) * 100;
+    float tempfogdensity =  (ui_player_who->mo->subsector_->sector->props.fog_density / 0.01f) * 100;
     tempfogdensity = ceil(tempfogdensity);
     lua_pushinteger(L, (int)tempfogdensity);
     lua_setfield(L, -2, "fog_density");   //add to SECTOR Table

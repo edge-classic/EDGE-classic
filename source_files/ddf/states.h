@@ -57,7 +57,7 @@ struct State
     const char *label;
 
     // routine to be performed
-    void (*action)(struct mobj_s *object);
+    void (*action)(class MapObject *object);
 
     // parameter for routine, or nullptr
     void *action_par;

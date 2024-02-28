@@ -126,7 +126,7 @@ static void PL_get_pos(coal::vm_c *vm, int argc)
 //
 static void PL_get_angle(coal::vm_c *vm, int argc)
 {
-    float value = epi::DegreesFromBAM(ui_player_who->mo->angle);
+    float value = epi::DegreesFromBAM(ui_player_who->mo->angle_);
 
     if (value > 360.0f)
         value -= 360.0f;
@@ -140,7 +140,7 @@ static void PL_get_angle(coal::vm_c *vm, int argc)
 //
 static void PL_get_mlook(coal::vm_c *vm, int argc)
 {
-    float value = epi::DegreesFromBAM(ui_player_who->mo->vertangle);
+    float value = epi::DegreesFromBAM(ui_player_who->mo->vertical_angle_);
 
     if (value > 180.0f)
         value -= 360.0f;
@@ -152,7 +152,7 @@ static void PL_get_mlook(coal::vm_c *vm, int argc)
 //
 static void PL_health(coal::vm_c *vm, int argc)
 {
-    float h = ui_player_who->health * 100 / ui_player_who->mo->spawnhealth;
+    float h = ui_player_who->health * 100 / ui_player_who->mo->spawn_health_;
 
     if (h < 98)
         h += 0.99f;
@@ -211,16 +211,16 @@ static void PL_under_water(coal::vm_c *vm, int argc)
 static void PL_on_ground(coal::vm_c *vm, int argc)
 {
     // not a 3D floor?
-    if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+    if (ui_player_who->mo->subsector_->sector->exfloor_used == 0)
     {
         // on the edge above water/lava/etc? Handles edge walker case
-        if (!AlmostEquals(ui_player_who->mo->floorz, ui_player_who->mo->subsector->sector->f_h) &&
-            !ui_player_who->mo->subsector->sector->floor_vertex_slope)
+        if (!AlmostEquals(ui_player_who->mo->floor_z_, ui_player_who->mo->subsector_->sector->f_h) &&
+            !ui_player_who->mo->subsector_->sector->floor_vertex_slope)
             vm->ReturnFloat(0);
         else
         {
             // touching the floor? Handles jumping or flying
-            if (ui_player_who->mo->z <= ui_player_who->mo->floorz)
+            if (ui_player_who->mo->z <= ui_player_who->mo->floor_z_)
                 vm->ReturnFloat(1);
             else
                 vm->ReturnFloat(0);
@@ -228,7 +228,7 @@ static void PL_on_ground(coal::vm_c *vm, int argc)
     }
     else
     {
-        if (ui_player_who->mo->z <= ui_player_who->mo->floorz)
+        if (ui_player_who->mo->z <= ui_player_who->mo->floor_z_)
             vm->ReturnFloat(1);
         else
             vm->ReturnFloat(0);
@@ -253,7 +253,7 @@ static void PL_is_jumping(coal::vm_c *vm, int argc)
 //
 static void PL_is_crouching(coal::vm_c *vm, int argc)
 {
-    vm->ReturnFloat((ui_player_who->mo->extendedflags & kExtendedFlagCrouching) ? 1 : 0);
+    vm->ReturnFloat((ui_player_who->mo->extended_flags_ & kExtendedFlagCrouching) ? 1 : 0);
 }
 
 // player.is_attacking()
@@ -322,7 +322,7 @@ static void PL_air_in_lungs(coal::vm_c *vm, int argc)
         return;
     }
 
-    float value = ui_player_who->air_in_lungs * 100.0f / ui_player_who->mo->info->lung_capacity_;
+    float value = ui_player_who->air_in_lungs * 100.0f / ui_player_who->mo->info_->lung_capacity_;
 
     value = HMM_Clamp(0.0f, value, 100.0f);
 
@@ -837,7 +837,7 @@ static void PL_hurt_by(coal::vm_c *vm, int argc)
     // getting hurt because of your own damn stupidity
     if (ui_player_who->attacker == ui_player_who->mo)
         vm->ReturnString("self");
-    else if (ui_player_who->attacker && (ui_player_who->attacker->side & ui_player_who->mo->side))
+    else if (ui_player_who->attacker && (ui_player_who->attacker->side_ & ui_player_who->mo->side_))
         vm->ReturnString("friend");
     else if (ui_player_who->attacker)
         vm->ReturnString("enemy");
@@ -851,7 +851,7 @@ static void PL_hurt_mon(coal::vm_c *vm, int argc)
 {
     if (ui_player_who->damagecount > 0 && ui_player_who->attacker && ui_player_who->attacker != ui_player_who->mo)
     {
-        vm->ReturnString(ui_player_who->attacker->info->name_.c_str());
+        vm->ReturnString(ui_player_who->attacker->info_->name_.c_str());
         return;
     }
 
@@ -873,10 +873,10 @@ static void PL_hurt_dir(coal::vm_c *vm, int argc)
 
     if (ui_player_who->attacker && ui_player_who->attacker != ui_player_who->mo)
     {
-        mobj_t *badguy = ui_player_who->attacker;
-        mobj_t *pmo    = ui_player_who->mo;
+        MapObject *badguy = ui_player_who->attacker;
+        MapObject *pmo    = ui_player_who->mo;
 
-        BAMAngle diff = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle;
+        BAMAngle diff = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle_;
 
         if (diff >= kBAMAngle45 && diff <= kBAMAngle135)
         {
@@ -899,8 +899,8 @@ static void PL_hurt_angle(coal::vm_c *vm, int argc)
 
     if (ui_player_who->attacker && ui_player_who->attacker != ui_player_who->mo)
     {
-        mobj_t *badguy = ui_player_who->attacker;
-        mobj_t *pmo    = ui_player_who->mo;
+        MapObject *badguy = ui_player_who->attacker;
+        MapObject *pmo    = ui_player_who->mo;
 
         BAMAngle real_a = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
 
@@ -963,16 +963,16 @@ static void PL_map_items(coal::vm_c *vm, int argc)
 static void PL_floor_flat(coal::vm_c *vm, int argc)
 {
     // If no 3D floors, just return the flat
-    if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+    if (ui_player_who->mo->subsector_->sector->exfloor_used == 0)
     {
-        vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name.c_str());
+        vm->ReturnString(ui_player_who->mo->subsector_->sector->floor.image->name.c_str());
     }
     else
     {
         // Start from the lowest exfloor and check if the player is standing on it, then return the control sector's
         // flat
-        float         player_floor_height = ui_player_who->mo->floorz;
-        extrafloor_t *floor_checker       = ui_player_who->mo->subsector->sector->bottom_ef;
+        float         player_floor_height = ui_player_who->mo->floor_z_;
+        extrafloor_t *floor_checker       = ui_player_who->mo->subsector_->sector->bottom_ef;
         for (extrafloor_t *ef = floor_checker; ef; ef = ef->higher)
         {
             if (player_floor_height + 1 > ef->top_h)
@@ -982,7 +982,7 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
             }
         }
         // Fallback if nothing else satisfies these conditions
-        vm->ReturnString(ui_player_who->mo->subsector->sector->floor.image->name.c_str());
+        vm->ReturnString(ui_player_who->mo->subsector_->sector->floor.image->name.c_str());
     }
 }
 
@@ -990,7 +990,7 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
 // Lobo: November 2021
 static void PL_sector_tag(coal::vm_c *vm, int argc)
 {
-    vm->ReturnFloat(ui_player_who->mo->subsector->sector->tag);
+    vm->ReturnFloat(ui_player_who->mo->subsector_->sector->tag);
 }
 
 // player.play_footstep(flat name)
@@ -1083,7 +1083,7 @@ static std::string AuxStringReplaceAll(std::string str, const std::string &from,
 
 // GetMobjBenefits(mobj);
 //
-static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
+static std::string GetMobjBenefits(MapObject *obj, bool KillBenefits = false)
 {
     std::string temp_string;
     temp_string.clear();
@@ -1091,9 +1091,9 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
     int        temp_num = 0;
 
     if (KillBenefits)
-        list = obj->info->kill_benefits_;
+        list = obj->info_->kill_benefits_;
     else
-        list = obj->info->pickup_benefits_;
+        list = obj->info_->pickup_benefits_;
 
     for (; list != nullptr; list = list->next)
     {
@@ -1158,7 +1158,7 @@ static std::string GetMobjBenefits(mobj_t *obj, bool KillBenefits = false)
 
 // GetQueryInfoFromMobj(mobj, whatinfo)
 //
-static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
+static std::string GetQueryInfoFromMobj(MapObject *obj, int whatinfo)
 {
     int         temp_num = 0;
     std::string temp_string;
@@ -1170,11 +1170,11 @@ static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
         if (obj)
         {
             // try CAST_TITLE first
-            temp_string = language[obj->info->cast_title_];
+            temp_string = language[obj->info_->cast_title_];
 
             if (temp_string.empty()) // fallback to DDFTHING entry name
             {
-                temp_string = obj->info->name_;
+                temp_string = obj->info_->name_;
                 temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
             }
         }
@@ -1183,7 +1183,7 @@ static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
     case 2: // current health
         if (obj)
         {
-            temp_num    = obj->health;
+            temp_num    = obj->health_;
             temp_string = std::to_string(temp_num);
         }
         break;
@@ -1191,7 +1191,7 @@ static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
     case 3: // spawn health
         if (obj)
         {
-            temp_num    = obj->spawnhealth;
+            temp_num    = obj->spawn_health_;
             temp_string = std::to_string(temp_num);
         }
         break;
@@ -1219,20 +1219,20 @@ static std::string GetQueryInfoFromMobj(mobj_t *obj, int whatinfo)
 
 // GetQueryInfoFromWeapon(mobj, whatinfo, [secattackinfo])
 //
-static std::string GetQueryInfoFromWeapon(mobj_t *obj, int whatinfo, bool secattackinfo = false)
+static std::string GetQueryInfoFromWeapon(MapObject *obj, int whatinfo, bool secattackinfo = false)
 {
     int         temp_num = 0;
     std::string temp_string;
     temp_string.clear();
 
-    if (!obj->info->pickup_benefits_)
+    if (!obj->info_->pickup_benefits_)
         return "";
-    if (!obj->info->pickup_benefits_->sub.weap)
+    if (!obj->info_->pickup_benefits_->sub.weap)
         return "";
-    if (obj->info->pickup_benefits_->type != kBenefitTypeWeapon)
+    if (obj->info_->pickup_benefits_->type != kBenefitTypeWeapon)
         return "";
 
-    WeaponDefinition *objWep = obj->info->pickup_benefits_->sub.weap;
+    WeaponDefinition *objWep = obj->info_->pickup_benefits_->sub.weap;
     if (!objWep)
         return "";
 
@@ -1331,7 +1331,7 @@ static void PL_query_object(coal::vm_c *vm, int argc)
     if (whatinfo < 1 || whatinfo > 5)
         FatalError("player.query_object: bad whatInfo number: %d\n", whatinfo);
 
-    mobj_t *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
+    MapObject *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle_, maxdistance);
     if (!obj)
     {
         vm->ReturnString("");
@@ -1365,14 +1365,14 @@ static void MO_query_tagged(coal::vm_c *vm, int argc)
     whattag  = (int)*argTag;
     whatinfo = (int)*argInfo;
 
-    mobj_t *mo;
+    MapObject *mo;
 
     std::string temp_value;
     temp_value.clear();
 
-    for (mo = mobjlisthead; mo; mo = mo->next)
+    for (mo = map_object_list_head; mo; mo = mo->next_)
     {
-        if (mo->tag == whattag)
+        if (mo->tag_ == whattag)
         {
             temp_value = GetQueryInfoFromMobj(mo, whatinfo);
             break;
@@ -1397,13 +1397,13 @@ static void MO_count(coal::vm_c *vm, int argc)
     else
         thingid = (int)*num;
 
-    mobj_t *mo;
+    MapObject *mo;
 
     double thingcount = 0;
 
-    for (mo = mobjlisthead; mo; mo = mo->next)
+    for (mo = map_object_list_head; mo; mo = mo->next_)
     {
-        if (mo->info->number_ == thingid && mo->health > 0)
+        if (mo->info_->number_ == thingid && mo->health_ > 0)
             thingcount++;
     }
 
@@ -1441,7 +1441,7 @@ static void PL_query_weapon(coal::vm_c *vm, int argc)
     if (secattackinfo < 0 || secattackinfo > 1)
         FatalError("player.query_weapon: bad secAttackInfo number: %d\n", whatinfo);
 
-    mobj_t *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle, maxdistance);
+    MapObject *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle_, maxdistance);
     if (!obj)
     {
         vm->ReturnString("");
@@ -1466,7 +1466,7 @@ static void PL_query_weapon(coal::vm_c *vm, int argc)
 // Lobo: May 2023
 static void PL_sector_light(coal::vm_c *vm, int argc)
 {
-    vm->ReturnFloat(ui_player_who->mo->subsector->sector->props.lightlevel);
+    vm->ReturnFloat(ui_player_who->mo->subsector_->sector->props.lightlevel);
 }
 
 // player.sector_floor_height()
@@ -1474,17 +1474,17 @@ static void PL_sector_light(coal::vm_c *vm, int argc)
 static void PL_sector_floor_height(coal::vm_c *vm, int argc)
 {
     // If no 3D floors, just return the current sector floor height
-    if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+    if (ui_player_who->mo->subsector_->sector->exfloor_used == 0)
     {
-        vm->ReturnFloat(ui_player_who->mo->subsector->sector->f_h);
+        vm->ReturnFloat(ui_player_who->mo->subsector_->sector->f_h);
     }
     else
     {
         // Start from the lowest exfloor and check if the player is standing on it,
         //  then return the control sector floor height
         float         CurrentFloor        = 0;
-        float         player_floor_height = ui_player_who->mo->floorz;
-        extrafloor_t *floor_checker       = ui_player_who->mo->subsector->sector->bottom_ef;
+        float         player_floor_height = ui_player_who->mo->floor_z_;
+        extrafloor_t *floor_checker       = ui_player_who->mo->subsector_->sector->bottom_ef;
         for (extrafloor_t *ef = floor_checker; ef; ef = ef->higher)
         {
             if (CurrentFloor > ef->top_h)
@@ -1507,17 +1507,17 @@ static void PL_sector_floor_height(coal::vm_c *vm, int argc)
 static void PL_sector_ceiling_height(coal::vm_c *vm, int argc)
 {
     // If no 3D floors, just return the current sector ceiling height
-    if (ui_player_who->mo->subsector->sector->exfloor_used == 0)
+    if (ui_player_who->mo->subsector_->sector->exfloor_used == 0)
     {
-        vm->ReturnFloat(ui_player_who->mo->subsector->sector->c_h);
+        vm->ReturnFloat(ui_player_who->mo->subsector_->sector->c_h);
     }
     else
     {
         // Start from the lowest exfloor and check if the player is standing on it,
         //   then return the control sector ceiling height
         float         HighestCeiling      = 0;
-        float         player_floor_height = ui_player_who->mo->floorz;
-        extrafloor_t *floor_checker       = ui_player_who->mo->subsector->sector->bottom_ef;
+        float         player_floor_height = ui_player_who->mo->floor_z_;
+        extrafloor_t *floor_checker       = ui_player_who->mo->subsector_->sector->bottom_ef;
         for (extrafloor_t *ef = floor_checker; ef; ef = ef->higher)
         {
             if (player_floor_height + 1 > ef->top_h)
@@ -1531,7 +1531,7 @@ static void PL_sector_ceiling_height(coal::vm_c *vm, int argc)
             }
         }
         // Fallback if nothing else satisfies these conditions
-        vm->ReturnFloat(ui_player_who->mo->subsector->sector->c_h);
+        vm->ReturnFloat(ui_player_who->mo->subsector_->sector->c_h);
     }
 }
 
@@ -1541,7 +1541,7 @@ static void PL_is_outside(coal::vm_c *vm, int argc)
 {
     // Doesn't account for extrafloors by design. Reasoning is that usually
     //  extrafloors will be platforms, not roofs...
-    if (ui_player_who->mo->subsector->sector->ceil.image != skyflatimage) // is it outdoors?
+    if (ui_player_who->mo->subsector_->sector->ceil.image != skyflatimage) // is it outdoors?
         vm->ReturnFloat(0);
     else
         vm->ReturnFloat(1);

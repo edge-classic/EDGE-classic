@@ -20,9 +20,9 @@
 // new savegame system.
 //
 // This file handles:
-//    mobj_t        [MOBJ]
+//    MapObject        [MOBJ]
 //    spawnspot_t   [SPWN]
-//    iteminque_t   [ITMQ]
+//    RespawnQueueItem   [ITMQ]
 //
 
 #include <string.h>
@@ -39,13 +39,13 @@
 
 // forward decls.
 int   SV_MobjCountElems(void);
-int   SV_MobjFindElem(mobj_t *elem);
+int   SV_MobjFindElem(MapObject *elem);
 void *SV_MobjGetElem(int index);
 void  SV_MobjCreateElems(int num_elems);
 void  SV_MobjFinaliseElems(void);
 
 int   SV_ItemqCountElems(void);
-int   SV_ItemqFindElem(iteminque_t *elem);
+int   SV_ItemqFindElem(RespawnQueueItem *elem);
 void *SV_ItemqGetElem(int index);
 void  SV_ItemqCreateElems(int num_elems);
 void  SV_ItemqFinaliseElems(void);
@@ -70,68 +70,68 @@ void SR_MobjPutWUDs(void *storage, int index, void *extra);
 //
 //  MOBJ STRUCTURE AND ARRAY
 //
-static mobj_t sv_dummy_mobj;
+static MapObject sv_dummy_mobj;
 
 #define SV_F_BASE sv_dummy_mobj
 
 static savefield_t sv_fields_mobj[] = {
     SF(x, "x", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), SF(y, "y", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(z, "z", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), SF(angle, "angle", 1, SVT_ANGLE, SR_GetAngle, SR_PutAngle),
-    SF(floorz, "floorz", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(ceilingz, "ceilingz", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(dropoffz, "dropoffz", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(radius, "radius", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(height, "height", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), 
-    SF(scale, "scale", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(aspect, "aspect", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(alpha, "alpha", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(mom, "mom", 1, SVT_VEC3, SR_GetVec3, SR_PutVec3),
-    SF(health, "health", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(spawnhealth, "spawnhealth", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(speed, "speed", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), SF(fuse, "fuse", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(morphtimeout, "morphtimeout", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(preBecome, "preBecome", 1, SVT_STRING, SR_MobjGetType, SR_MobjPutType),
-    SF(info, "info", 1, SVT_STRING, SR_MobjGetType, SR_MobjPutType),
-    SF(state, "state", 1, SVT_STRING, SR_MobjGetState, SR_MobjPutState),
-    SF(next_state, "next_state", 1, SVT_STRING, SR_MobjGetState, SR_MobjPutState),
-    SF(tics, "tics", 1, SVT_INT, SR_GetInt, SR_PutInt), SF(flags, "flags", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(extendedflags, "extendedflags", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(hyperflags, "hyperflags", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(movedir, "movedir", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(movecount, "movecount", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(reactiontime, "reactiontime", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(threshold, "threshold", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(model_skin, "model_skin", 1, SVT_INT, SR_GetInt, SR_PutInt), 
-    SF(model_scale, "model_scale", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(model_aspect, "model_aspect", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(tag, "tag", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(wud_tags, "wud_tags", 1, SVT_STRING, SR_MobjGetWUDs, SR_MobjPutWUDs),
-    SF(side, "side", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(player, "player", 1, SVT_INDEX("players"), SR_MobjGetPlayer, SR_MobjPutPlayer),
-    SF(spawnpoint, "spawnpoint", 1, SVT_STRUCT("spawnpoint_t"), SR_MobjGetSpawnPoint, SR_MobjPutSpawnPoint),
-    SF(origheight, "origheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(visibility, "visibility", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(vis_target, "vis_target", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(painchance, "painchance", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(vertangle, "vertangle", 1, SVT_FLOAT, SR_GetAngleFromSlope, SR_PutAngleToSlope),
-    SF(spreadcount, "spreadcount", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(currentattack, "currentattack", 1, SVT_STRING, SR_MobjGetAttack, SR_MobjPutAttack),
-    SF(source, "source", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(target, "target", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(tracer, "tracer", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(supportobj, "supportobj", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(above_mo, "above_mo", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(below_mo, "below_mo", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(ride_dx, "ride_dx", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(ride_dy, "ride_dy", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(on_ladder, "on_ladder", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(path_trigger, "path_trigger", 1, SVT_STRING, SR_TriggerGetScript, SR_TriggerPutScript),
-    SF(dlight.r, "dlight_qty", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(dlight.target, "dlight_target", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(dlight.color, "dlight_color", 1, SVT_RGBCOL, SR_GetRGB, SR_PutRGB),
-    SF(shot_count, "shot_count", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(lastheard, "lastheard", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(is_voodoo, "is_voodoo", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
+    SF(z, "z", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), SF(angle_, "angle", 1, SVT_ANGLE, SR_GetAngle, SR_PutAngle),
+    SF(floor_z_, "floorz", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(ceiling_z_, "ceilingz", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(dropoff_z_, "dropoffz", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(radius_, "radius", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(height_, "height", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), 
+    SF(scale_, "scale", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(aspect_, "aspect", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(alpha_, "alpha", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(momentum_, "mom", 1, SVT_VEC3, SR_GetVec3, SR_PutVec3),
+    SF(health_, "health", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(spawn_health_, "spawnhealth", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(speed_, "speed", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), SF(fuse_, "fuse", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(morph_timeout_, "morphtimeout", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(pre_become_, "preBecome", 1, SVT_STRING, SR_MobjGetType, SR_MobjPutType),
+    SF(info_, "info", 1, SVT_STRING, SR_MobjGetType, SR_MobjPutType),
+    SF(state_, "state", 1, SVT_STRING, SR_MobjGetState, SR_MobjPutState),
+    SF(next_state_, "next_state", 1, SVT_STRING, SR_MobjGetState, SR_MobjPutState),
+    SF(tics_, "tics", 1, SVT_INT, SR_GetInt, SR_PutInt), SF(flags_, "flags", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(extended_flags_, "extendedflags", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(hyper_flags_, "hyperflags", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(move_direction_, "movedir", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(move_count_, "movecount", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(reaction_time_, "reactiontime", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(threshold_, "threshold", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(model_skin_, "model_skin", 1, SVT_INT, SR_GetInt, SR_PutInt), 
+    SF(model_scale_, "model_scale", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(model_aspect_, "model_aspect", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(tag_, "tag", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(wait_until_dead_tags_, "wud_tags", 1, SVT_STRING, SR_MobjGetWUDs, SR_MobjPutWUDs),
+    SF(side_, "side", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(player_, "player", 1, SVT_INDEX("players"), SR_MobjGetPlayer, SR_MobjPutPlayer),
+    SF(spawnpoint_, "spawnpoint", 1, SVT_STRUCT("spawnpoint_t"), SR_MobjGetSpawnPoint, SR_MobjPutSpawnPoint),
+    SF(original_height_, "origheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(visibility_, "visibility", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(target_visibility_, "vis_target", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(pain_chance_, "painchance", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(vertical_angle_, "vertangle", 1, SVT_FLOAT, SR_GetAngleFromSlope, SR_PutAngleToSlope),
+    SF(spread_count_, "spreadcount", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(current_attack_, "currentattack", 1, SVT_STRING, SR_MobjGetAttack, SR_MobjPutAttack),
+    SF(source_, "source", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
+    SF(target_, "target", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
+    SF(tracer_, "tracer", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
+    SF(support_object_, "supportobj", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
+    SF(above_object_, "above_mo", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
+    SF(below_object_, "below_mo", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
+    SF(ride_delta_x_, "ride_dx", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(ride_delta_y_, "ride_dy", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(on_ladder_, "on_ladder", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(path_trigger_, "path_trigger", 1, SVT_STRING, SR_TriggerGetScript, SR_TriggerPutScript),
+    SF(dynamic_light_.r, "dlight_qty", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(dynamic_light_.target, "dlight_target", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(dynamic_light_.color, "dlight_color", 1, SVT_RGBCOL, SR_GetRGB, SR_PutRGB),
+    SF(shot_count_, "shot_count", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(last_heard_, "lastheard", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(is_voodoo_, "is_voodoo", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
     // NOT HERE:
     //   subsector & region: these are regenerated.
     //   next,prev,snext,sprev,bnext,bprev: links are regenerated.
@@ -173,7 +173,7 @@ savearray_t sv_array_mobj = {
 //
 //  SPAWNPOINT STRUCTURE
 //
-static spawnpoint_t sv_dummy_spawnpoint;
+static SpawnPoint sv_dummy_spawnpoint;
 
 #define SV_F_BASE sv_dummy_spawnpoint
 
@@ -182,7 +182,7 @@ static savefield_t sv_fields_spawnpoint[] = {
     SF(y, "y", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
     SF(z, "z", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
     SF(angle, "angle", 1, SVT_ANGLE, SR_GetAngle, SR_PutAngle),
-    SF(vertangle, "slope", 1, SVT_FLOAT, SR_GetAngleFromSlope, SR_PutAngleToSlope),
+    SF(vertical_angle, "slope", 1, SVT_FLOAT, SR_GetAngleFromSlope, SR_PutAngleToSlope),
     SF(info, "info", 1, SVT_STRING, SR_MobjGetType, SR_MobjPutType),
     SF(flags, "flags", 1, SVT_INT, SR_GetInt, SR_PutInt),
 
@@ -204,7 +204,7 @@ savestruct_t sv_struct_spawnpoint = {
 //
 //  ITEMINQUE STRUCTURE AND ARRAY
 //
-static iteminque_t sv_dummy_iteminque;
+static RespawnQueueItem sv_dummy_iteminque;
 
 #define SV_F_BASE sv_dummy_iteminque
 
@@ -219,7 +219,7 @@ static savefield_t sv_fields_iteminque[] = {
 
 savestruct_t sv_struct_iteminque = {
     nullptr,                // link in list
-    "iteminque_t",       // structure name
+    "RespawnQueueItem",       // structure name
     "itmq",              // start marker
     sv_fields_iteminque, // field descriptions
     SVDUMMY,             // dummy base
@@ -231,7 +231,7 @@ savestruct_t sv_struct_iteminque = {
 
 savearray_t sv_array_iteminque = {
     nullptr,                 // link in list
-    "itemquehead",        // array name
+    "respawn_queue_head",        // array name
     &sv_struct_iteminque, // array type
     true,                 // define_me
     true,                 // allow_hub
@@ -252,10 +252,10 @@ savearray_t sv_array_iteminque = {
 //
 int SV_MobjCountElems(void)
 {
-    mobj_t *cur;
+    MapObject *cur;
     int     count = 0;
 
-    for (cur = mobjlisthead; cur; cur = cur->next)
+    for (cur = map_object_list_head; cur; cur = cur->next_)
         count++;
 
     return count;
@@ -268,9 +268,9 @@ int SV_MobjCountElems(void)
 //
 void *SV_MobjGetElem(int index)
 {
-    mobj_t *cur;
+    MapObject *cur;
 
-    for (cur = mobjlisthead; cur && index > 0; cur = cur->next)
+    for (cur = map_object_list_head; cur && index > 0; cur = cur->next_)
         index--;
 
     if (!cur)
@@ -286,12 +286,12 @@ void *SV_MobjGetElem(int index)
 //
 // Returns the index number (starts at 0 here).
 //
-int SV_MobjFindElem(mobj_t *elem)
+int SV_MobjFindElem(MapObject *elem)
 {
-    mobj_t *cur;
+    MapObject *cur;
     int     index;
 
-    for (cur = mobjlisthead, index = 0; cur && cur != elem; cur = cur->next)
+    for (cur = map_object_list_head, index = 0; cur && cur != elem; cur = cur->next_)
         index++;
 
     if (!cur)
@@ -303,64 +303,64 @@ int SV_MobjFindElem(mobj_t *elem)
 void SV_MobjCreateElems(int num_elems)
 {
     // free existing mobjs
-    if (mobjlisthead)
+    if (map_object_list_head)
         P_RemoveAllMobjs(true);
 
-    SYS_ASSERT(mobjlisthead == nullptr);
+    SYS_ASSERT(map_object_list_head == nullptr);
 
     for (; num_elems > 0; num_elems--)
     {
-        mobj_t *cur = new mobj_t;
+        MapObject *cur = new MapObject;
 
-        cur->next = mobjlisthead;
-        cur->prev = nullptr;
+        cur->next_ = map_object_list_head;
+        cur->previous_ = nullptr;
 
-        if (mobjlisthead)
-            mobjlisthead->prev = cur;
+        if (map_object_list_head)
+            map_object_list_head->previous_ = cur;
 
-        mobjlisthead = cur;
+        map_object_list_head = cur;
 
         // initialise defaults
-        cur->info  = nullptr;
-        cur->state = cur->next_state = states + 1;
+        cur->info_  = nullptr;
+        cur->state_ = cur->next_state_ = states + 1;
 
-        cur->model_skin       = 1;
-        cur->model_last_frame = -1;
+        cur->model_skin_       = 1;
+        cur->model_last_frame_ = -1;
     }
 }
 
 void SV_MobjFinaliseElems(void)
 {
-    for (mobj_t *mo = mobjlisthead; mo != nullptr; mo = mo->next)
+    for (MapObject *mo = map_object_list_head; mo != nullptr; mo = mo->next_)
     {
-        if (mo->info == nullptr)
-            mo->info = mobjtypes.Lookup(0); // template
+        if (mo->info_ == nullptr)
+            mo->info_ = mobjtypes.Lookup(0); // template
 
         // do not link zombie objects into the blockmap
-        if (!mo->isRemoved())
+        if (!mo->IsRemoved())
             SetThingPosition(mo);
 
         // handle reference counts
 
-        if (mo->tracer)
-            mo->tracer->refcount++;
-        if (mo->source)
-            mo->source->refcount++;
-        if (mo->target)
-            mo->target->refcount++;
-        if (mo->supportobj)
-            mo->supportobj->refcount++;
-        if (mo->above_mo)
-            mo->above_mo->refcount++;
-        if (mo->below_mo)
-            mo->below_mo->refcount++;
+        if (mo->tracer_)
+            mo->tracer_->reference_count_++;
+        if (mo->source_)
+            mo->source_->reference_count_++;
+        if (mo->target_)
+            mo->target_->reference_count_++;
+        if (mo->support_object_)
+            mo->support_object_->reference_count_++;
+        if (mo->above_object_)
+            mo->above_object_->reference_count_++;
+        if (mo->below_object_)
+            mo->below_object_->reference_count_++;
 
         // sanity checks
 
         // Lobo fix for RTS ONDEATH actions not working
         // when loading a game
-        if (seen_monsters.count(mo->info) == 0)
-            seen_monsters.insert(mo->info);
+        if (seen_monsters.count(mo->info_) == 0)
+            seen_monsters.insert(mo->info_);
     }
 }
 
@@ -371,10 +371,10 @@ void SV_MobjFinaliseElems(void)
 //
 int SV_ItemqCountElems(void)
 {
-    iteminque_t *cur;
+    RespawnQueueItem *cur;
     int          count = 0;
 
-    for (cur = itemquehead; cur; cur = cur->next)
+    for (cur = respawn_queue_head; cur; cur = cur->next)
         count++;
 
     return count;
@@ -387,9 +387,9 @@ int SV_ItemqCountElems(void)
 //
 void *SV_ItemqGetElem(int index)
 {
-    iteminque_t *cur;
+    RespawnQueueItem *cur;
 
-    for (cur = itemquehead; cur && index > 0; cur = cur->next)
+    for (cur = respawn_queue_head; cur && index > 0; cur = cur->next)
         index--;
 
     if (!cur)
@@ -404,12 +404,12 @@ void *SV_ItemqGetElem(int index)
 //
 // Returns the index number (starts at 0 here).
 //
-int SV_ItemqFindElem(iteminque_t *elem)
+int SV_ItemqFindElem(RespawnQueueItem *elem)
 {
-    iteminque_t *cur;
+    RespawnQueueItem *cur;
     int          index;
 
-    for (cur = itemquehead, index = 0; cur && cur != elem; cur = cur->next)
+    for (cur = respawn_queue_head, index = 0; cur && cur != elem; cur = cur->next)
         index++;
 
     if (!cur)
@@ -425,19 +425,19 @@ void SV_ItemqCreateElems(int num_elems)
 {
     P_RemoveItemsInQue();
 
-    itemquehead = nullptr;
+    respawn_queue_head = nullptr;
 
     for (; num_elems > 0; num_elems--)
     {
-        iteminque_t *cur = new iteminque_t;
+        RespawnQueueItem *cur = new RespawnQueueItem;
 
-        cur->next = itemquehead;
-        cur->prev = nullptr;
+        cur->next = respawn_queue_head;
+        cur->previous = nullptr;
 
-        if (itemquehead)
-            itemquehead->prev = cur;
+        if (respawn_queue_head)
+            respawn_queue_head->previous = cur;
 
-        itemquehead = cur;
+        respawn_queue_head = cur;
 
         // initialise defaults: leave blank
     }
@@ -448,10 +448,10 @@ void SV_ItemqCreateElems(int num_elems)
 //
 void SV_ItemqFinaliseElems(void)
 {
-    iteminque_t *cur, *next;
+    RespawnQueueItem *cur, *next;
 
     // remove any dead wood
-    for (cur = itemquehead; cur; cur = next)
+    for (cur = respawn_queue_head; cur; cur = next)
     {
         next = cur->next;
 
@@ -461,12 +461,12 @@ void SV_ItemqFinaliseElems(void)
         LogWarning("LOADGAME: discarding empty ItemInQue\n");
 
         if (next)
-            next->prev = cur->prev;
+            next->previous = cur->previous;
 
-        if (cur->prev)
-            cur->prev->next = next;
+        if (cur->previous)
+            cur->previous->next = next;
         else
-            itemquehead = next;
+            respawn_queue_head = next;
 
         delete cur;
     }
@@ -495,17 +495,17 @@ void SR_MobjPutPlayer(void *storage, int index, void *extra)
 
 bool SR_MobjGetMobj(void *storage, int index, void *extra)
 {
-    mobj_t **dest = (mobj_t **)storage + index;
+    MapObject **dest = (MapObject **)storage + index;
 
     int swizzle = SV_GetInt();
 
-    *dest = (swizzle == 0) ? nullptr : (mobj_t *)SV_MobjGetElem(swizzle - 1);
+    *dest = (swizzle == 0) ? nullptr : (MapObject *)SV_MobjGetElem(swizzle - 1);
     return true;
 }
 
 void SR_MobjPutMobj(void *storage, int index, void *extra)
 {
-    mobj_t *elem = ((mobj_t **)storage)[index];
+    MapObject *elem = ((MapObject **)storage)[index];
 
     int swizzle;
 
@@ -555,7 +555,7 @@ void SR_MobjPutType(void *storage, int index, void *extra)
 
 bool SR_MobjGetSpawnPoint(void *storage, int index, void *extra)
 {
-    spawnpoint_t *dest = (spawnpoint_t *)storage + index;
+    SpawnPoint *dest = (SpawnPoint *)storage + index;
 
     if (sv_struct_spawnpoint.counterpart)
         return SV_LoadStruct(dest, sv_struct_spawnpoint.counterpart);
@@ -565,7 +565,7 @@ bool SR_MobjGetSpawnPoint(void *storage, int index, void *extra)
 
 void SR_MobjPutSpawnPoint(void *storage, int index, void *extra)
 {
-    spawnpoint_t *src = (spawnpoint_t *)storage + index;
+    SpawnPoint *src = (SpawnPoint *)storage + index;
 
     SV_SaveStruct(src, &sv_struct_spawnpoint);
 }
@@ -634,14 +634,14 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
     int   base, offset;
 
     const char       *swizzle;
-    const mobj_t     *mo = (mobj_t *)sv_current_elem;
+    const MapObject     *mo = (MapObject *)sv_current_elem;
     const MapObjectDefinition *actual;
 
     SYS_ASSERT(mo);
 
     swizzle = SV_GetString();
 
-    if (!swizzle || !mo->info)
+    if (!swizzle || !mo->info_)
     {
         *dest = nullptr;
         return true;
@@ -667,7 +667,7 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
     *off_p++ = 0;
 
     // find thing that contains the state
-    actual = mo->info;
+    actual = mo->info_;
 
     if (buffer[0] != '*')
     {
@@ -698,11 +698,6 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
         else
             base = 1;
     }
-
-#if 0
-	LogDebug("Unswizzled state `%s:%s:%s' -> %d\n", 
-		buffer, base_p, off_p, base + offset);
-#endif
 
     *dest = states + base + offset;
 
@@ -739,21 +734,21 @@ void SR_MobjPutState(void *storage, int index, void *extra)
 
     int s_num, base;
 
-    const mobj_t     *mo = (mobj_t *)sv_current_elem;
+    const MapObject     *mo = (MapObject *)sv_current_elem;
     const MapObjectDefinition *actual;
 
     SYS_ASSERT(mo);
 
-    if (S == nullptr || !mo->info)
+    if (S == nullptr || !mo->info_)
     {
         SV_PutString(nullptr);
         return;
     }
 
     // object has no states ?
-    if (mo->info->state_grp_.empty())
+    if (mo->info_->state_grp_.empty())
     {
-        LogWarning("SAVEGAME: object [%s] has no states !!\n", mo->info->name_.c_str());
+        LogWarning("SAVEGAME: object [%s] has no states !!\n", mo->info_->name_.c_str());
         SV_PutString(nullptr);
         return;
     }
@@ -763,14 +758,14 @@ void SR_MobjPutState(void *storage, int index, void *extra)
 
     if (s_num < 0 || s_num >= num_states)
     {
-        LogWarning("SAVEGAME: object [%s] is in invalid state %d\n", mo->info->name_.c_str(), s_num);
+        LogWarning("SAVEGAME: object [%s] is in invalid state %d\n", mo->info_->name_.c_str(), s_num);
 
-        if (mo->info->idle_state_)
-            s_num = mo->info->idle_state_;
-        else if (mo->info->spawn_state_)
-            s_num = mo->info->spawn_state_;
-        else if (mo->info->meander_state_)
-            s_num = mo->info->meander_state_;
+        if (mo->info_->idle_state_)
+            s_num = mo->info_->idle_state_;
+        else if (mo->info_->spawn_state_)
+            s_num = mo->info_->spawn_state_;
+        else if (mo->info_->meander_state_)
+            s_num = mo->info_->meander_state_;
         else
         {
             SV_PutString("*:*:1");
@@ -779,11 +774,11 @@ void SR_MobjPutState(void *storage, int index, void *extra)
     }
 
     // state gone AWOL into another object ?
-    actual = mo->info;
+    actual = mo->info_;
 
     if (!DDF_StateGroupHasState(actual->state_grp_, s_num))
     {
-        LogWarning("SAVEGAME: object [%s] is in AWOL state %d\n", mo->info->name_.c_str(), s_num);
+        LogWarning("SAVEGAME: object [%s] is in AWOL state %d\n", mo->info_->name_.c_str(), s_num);
 
         bool state_found = false;
 
@@ -822,13 +817,8 @@ void SR_MobjPutState(void *storage, int index, void *extra)
         base--;
     }
 
-    sprintf(swizzle, "%s:%s:%d", (actual == mo->info) ? "*" : actual->name_.c_str(),
+    sprintf(swizzle, "%s:%s:%d", (actual == mo->info_) ? "*" : actual->name_.c_str(),
             states[base].label ? states[base].label : "*", 1 + s_num - base);
-
-#if 0
-	LogDebug("Swizzled state %d of [%s] -> `%s'\n", 
-		s_num, mo->info->name_, swizzle);
-#endif
 
     SV_PutString(swizzle);
 }

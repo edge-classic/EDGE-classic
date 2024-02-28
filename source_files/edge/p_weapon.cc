@@ -391,8 +391,8 @@ static void GotoReloadState(player_t *p, int ATK)
     }
 
     // if player has reload states, use 'em baby
-    if (p->mo->info->reload_state_)
-        P_SetMobjStateDeferred(p->mo, p->mo->info->reload_state_, 0);
+    if (p->mo->info_->reload_state_)
+        P_SetMobjStateDeferred(p->mo, p->mo->info_->reload_state_, 0);
 }
 
 //
@@ -918,8 +918,8 @@ static void BobWeapon(player_t *p, WeaponDefinition *info)
 
     pspdef_t *psp = &p->psprites[p->action_psp];
 
-    float new_sx = p->mo->mom.Z ? psp->sx : 0;
-    float new_sy = p->mo->mom.Z ? psp->sy : 0;
+    float new_sx = p->mo->momentum_.Z ? psp->sx : 0;
+    float new_sy = p->mo->momentum_.Z ? psp->sy : 0;
 
     // bob the weapon based on movement speed
     if (p->powers[kPowerTypeJetpack] <= 0) // Don't bob when using jetpack
@@ -956,9 +956,9 @@ static void BobWeapon(player_t *p, WeaponDefinition *info)
 // Follows after getting weapon up,
 // or after previous attack/fire sequence.
 //
-void A_WeaponReady(mobj_t *mo)
+void A_WeaponReady(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     SYS_ASSERT(p->ready_wp != WPSEL_None);
@@ -1086,7 +1086,7 @@ void A_WeaponReady(mobj_t *mo)
     BobWeapon(p, info);
 }
 
-void A_WeaponEmpty(mobj_t *mo)
+void A_WeaponEmpty(MapObject *mo)
 {
     A_WeaponReady(mo);
 }
@@ -1098,9 +1098,9 @@ void A_WeaponEmpty(mobj_t *mo)
 //
 // -AJA- 1999/08/10: Reworked for multiple attacks.
 //
-static void DoReFire(mobj_t *mo, int ATK)
+static void DoReFire(MapObject *mo, int ATK)
 {
-    player_t *p = mo->player;
+    player_t *p = mo->player_;
 
     if (p->pending_wp >= 0 || p->health <= 0)
     {
@@ -1137,19 +1137,19 @@ static void DoReFire(mobj_t *mo, int ATK)
         SwitchAway(p, ATK, 0);
 }
 
-void A_ReFire(mobj_t *mo)
+void A_ReFire(MapObject *mo)
 {
     DoReFire(mo, 0);
 }
-void A_ReFireSA(mobj_t *mo)
+void A_ReFireSA(MapObject *mo)
 {
     DoReFire(mo, 1);
 }
-void A_ReFireTA(mobj_t *mo)
+void A_ReFireTA(MapObject *mo)
 {
     DoReFire(mo, 2);
 }
-void A_ReFireFA(mobj_t *mo)
+void A_ReFireFA(MapObject *mo)
 {
     DoReFire(mo, 3);
 }
@@ -1160,9 +1160,9 @@ void A_ReFireFA(mobj_t *mo)
 // The player can re-fire the weapon without lowering it entirely.
 // Unlike A_ReFire, this can re-fire to an arbitrary state
 //
-static void DoReFireTo(mobj_t *mo, int ATK)
+static void DoReFireTo(MapObject *mo, int ATK)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     if (p->pending_wp >= 0 || p->health <= 0)
@@ -1204,19 +1204,19 @@ static void DoReFireTo(mobj_t *mo, int ATK)
         SwitchAway(p, ATK, 0);
 }
 
-void A_ReFireTo(mobj_t *mo)
+void A_ReFireTo(MapObject *mo)
 {
     DoReFireTo(mo, 0);
 }
-void A_ReFireToSA(mobj_t *mo)
+void A_ReFireToSA(MapObject *mo)
 {
     DoReFireTo(mo, 1);
 }
-void A_ReFireToTA(mobj_t *mo)
+void A_ReFireToTA(MapObject *mo)
 {
     DoReFireTo(mo, 2);
 }
-void A_ReFireToFA(mobj_t *mo)
+void A_ReFireToFA(MapObject *mo)
 {
     DoReFireTo(mo, 3);
 }
@@ -1229,9 +1229,9 @@ void A_ReFireToFA(mobj_t *mo)
 //
 // -AJA- 1999/08/18: written.
 //
-static void DoNoFire(mobj_t *mo, int ATK, bool does_return)
+static void DoNoFire(MapObject *mo, int ATK, bool does_return)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     if (p->pending_wp >= 0 || p->health <= 0)
@@ -1270,42 +1270,42 @@ static void DoNoFire(mobj_t *mo, int ATK, bool does_return)
         SwitchAway(p, ATK, 0);
 }
 
-void A_NoFire(mobj_t *mo)
+void A_NoFire(MapObject *mo)
 {
     DoNoFire(mo, 0, false);
 }
-void A_NoFireSA(mobj_t *mo)
+void A_NoFireSA(MapObject *mo)
 {
     DoNoFire(mo, 1, false);
 }
-void A_NoFireTA(mobj_t *mo)
+void A_NoFireTA(MapObject *mo)
 {
     DoNoFire(mo, 2, false);
 }
-void A_NoFireFA(mobj_t *mo)
+void A_NoFireFA(MapObject *mo)
 {
     DoNoFire(mo, 3, false);
 }
-void A_NoFireReturn(mobj_t *mo)
+void A_NoFireReturn(MapObject *mo)
 {
     DoNoFire(mo, 0, true);
 }
-void A_NoFireReturnSA(mobj_t *mo)
+void A_NoFireReturnSA(MapObject *mo)
 {
     DoNoFire(mo, 1, true);
 }
-void A_NoFireReturnTA(mobj_t *mo)
+void A_NoFireReturnTA(MapObject *mo)
 {
     DoNoFire(mo, 2, true);
 }
-void A_NoFireReturnFA(mobj_t *mo)
+void A_NoFireReturnFA(MapObject *mo)
 {
     DoNoFire(mo, 3, true);
 }
 
-void A_WeaponKick(mobj_t *mo)
+void A_WeaponKick(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     float kick = 0.05f;
@@ -1334,9 +1334,9 @@ void A_WeaponKick(mobj_t *mo)
 // -KM- 1999/01/31 Check clip size.
 // -AJA- 1999/08/11: Reworked for new playerweapon_t field.
 //
-static void DoCheckReload(mobj_t *mo, int ATK)
+static void DoCheckReload(MapObject *mo, int ATK)
 {
-    player_t *p = mo->player;
+    player_t *p = mo->player_;
 
     if (p->pending_wp >= 0 || p->health <= 0)
     {
@@ -1354,28 +1354,28 @@ static void DoCheckReload(mobj_t *mo, int ATK)
         SwitchAway(p, ATK, 0);
 }
 
-void A_CheckReload(mobj_t *mo)
+void A_CheckReload(MapObject *mo)
 {
     DoCheckReload(mo, 0);
 }
-void A_CheckReloadSA(mobj_t *mo)
+void A_CheckReloadSA(MapObject *mo)
 {
     DoCheckReload(mo, 1);
 }
-void A_CheckReloadTA(mobj_t *mo)
+void A_CheckReloadTA(MapObject *mo)
 {
     DoCheckReload(mo, 2);
 }
-void A_CheckReloadFA(mobj_t *mo)
+void A_CheckReloadFA(MapObject *mo)
 {
     DoCheckReload(mo, 3);
 }
 
-void A_Lower(mobj_t *mo)
+void A_Lower(MapObject *mo)
 {
     // Lowers current weapon, and changes weapon at bottom
 
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     WeaponDefinition *info = p->weapons[p->ready_wp].info;
@@ -1427,9 +1427,9 @@ void A_Lower(mobj_t *mo)
     P_BringUpWeapon(p);
 }
 
-void A_Raise(mobj_t *mo)
+void A_Raise(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     WeaponDefinition *info = p->weapons[p->ready_wp].info;
@@ -1449,9 +1449,9 @@ void A_Raise(mobj_t *mo)
         GotoReadyState(p);
 }
 
-void A_SetCrosshair(mobj_t *mo)
+void A_SetCrosshair(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     if (psp->state->jumpstate == 0)
@@ -1460,9 +1460,9 @@ void A_SetCrosshair(mobj_t *mo)
     P_SetPspriteDeferred(p, ps_crosshair, psp->state->jumpstate);
 }
 
-void A_TargetJump(mobj_t *mo)
+void A_TargetJump(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     if (psp->state->jumpstate == 0)
@@ -1476,7 +1476,7 @@ void A_TargetJump(mobj_t *mo)
     if (!attack)
         return;
 
-    mobj_t *obj = P_MapTargetAutoAim(mo, mo->angle, attack->range_, true);
+    MapObject *obj = P_MapTargetAutoAim(mo, mo->angle_, attack->range_, true);
 
     if (!obj)
         return;
@@ -1484,9 +1484,9 @@ void A_TargetJump(mobj_t *mo)
     P_SetPspriteDeferred(p, ps_crosshair, psp->state->jumpstate);
 }
 
-void A_FriendJump(mobj_t *mo)
+void A_FriendJump(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     if (psp->state->jumpstate == 0)
@@ -1500,20 +1500,20 @@ void A_FriendJump(mobj_t *mo)
     if (!attack)
         return;
 
-    mobj_t *obj = P_MapTargetAutoAim(mo, mo->angle, attack->range_, true);
+    MapObject *obj = P_MapTargetAutoAim(mo, mo->angle_, attack->range_, true);
 
     if (!obj)
         return;
 
-    if ((obj->side & mo->side) == 0 || obj->target == mo)
+    if ((obj->side_ & mo->side_) == 0 || obj->target_ == mo)
         return;
 
     P_SetPspriteDeferred(p, ps_crosshair, psp->state->jumpstate);
 }
 
-static void DoGunFlash(mobj_t *mo, int ATK)
+static void DoGunFlash(MapObject *mo, int ATK)
 {
-    player_t *p = mo->player;
+    player_t *p = mo->player_;
 
     SYS_ASSERT(p->ready_wp >= 0);
 
@@ -1526,32 +1526,32 @@ static void DoGunFlash(mobj_t *mo, int ATK)
         P_SetPspriteDeferred(p, ps_flash, info->flash_state_[ATK]);
 
 #if 0 // the SHOOT actions already do this...
-		if (mo->info->missile_state_)
-			P_SetMobjStateDeferred(mo, mo->info->missile_state_, 0);
+		if (mo->info_->missile_state_)
+			P_SetMobjStateDeferred(mo, mo->info_->missile_state_, 0);
 #endif
     }
 }
 
-void A_GunFlash(mobj_t *mo)
+void A_GunFlash(MapObject *mo)
 {
     DoGunFlash(mo, 0);
 }
-void A_GunFlashSA(mobj_t *mo)
+void A_GunFlashSA(MapObject *mo)
 {
     DoGunFlash(mo, 1);
 }
-void A_GunFlashTA(mobj_t *mo)
+void A_GunFlashTA(MapObject *mo)
 {
     DoGunFlash(mo, 2);
 }
-void A_GunFlashFA(mobj_t *mo)
+void A_GunFlashFA(MapObject *mo)
 {
     DoGunFlash(mo, 3);
 }
 
-static void DoWeaponShoot(mobj_t *mo, int ATK)
+static void DoWeaponShoot(MapObject *mo, int ATK)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     SYS_ASSERT(p->ready_wp >= 0);
@@ -1599,13 +1599,13 @@ static void DoWeaponShoot(mobj_t *mo, int ATK)
         p->kick_offset = info->kick_;
     }
 
-    if (mo->target)
+    if (mo->target_)
     {
         if (info->hit_)
             S_StartFX(info->hit_, WeapSfxCat(p), mo);
 
         if (info->feedback_)
-            mo->flags |= kMapObjectFlagJustAttacked;
+            mo->flags_ |= kMapObjectFlagJustAttacked;
     }
     else
     {
@@ -1614,13 +1614,13 @@ static void DoWeaponShoot(mobj_t *mo, int ATK)
     }
 
     // show the player making the shot/attack...
-    if (attack && attack->attackstyle_ == kAttackStyleCloseCombat && mo->info->melee_state_)
+    if (attack && attack->attackstyle_ == kAttackStyleCloseCombat && mo->info_->melee_state_)
     {
-        P_SetMobjStateDeferred(mo, mo->info->melee_state_, 0);
+        P_SetMobjStateDeferred(mo, mo->info_->melee_state_, 0);
     }
-    else if (mo->info->missile_state_)
+    else if (mo->info_->missile_state_)
     {
-        P_SetMobjStateDeferred(mo, mo->info->missile_state_, 0);
+        P_SetMobjStateDeferred(mo, mo->info_->missile_state_, 0);
     }
 
     ATK = ATK_orig;
@@ -1640,19 +1640,19 @@ static void DoWeaponShoot(mobj_t *mo, int ATK)
     p->idlewait = 0;
 }
 
-void A_WeaponShoot(mobj_t *mo)
+void A_WeaponShoot(MapObject *mo)
 {
     DoWeaponShoot(mo, 0);
 }
-void A_WeaponShootSA(mobj_t *mo)
+void A_WeaponShootSA(MapObject *mo)
 {
     DoWeaponShoot(mo, 1);
 }
-void A_WeaponShootTA(mobj_t *mo)
+void A_WeaponShootTA(MapObject *mo)
 {
     DoWeaponShoot(mo, 2);
 }
-void A_WeaponShootFA(mobj_t *mo)
+void A_WeaponShootFA(MapObject *mo)
 {
     DoWeaponShoot(mo, 3);
 }
@@ -1662,9 +1662,9 @@ void A_WeaponShootFA(mobj_t *mo)
 //
 // -AJA- 1999/09/10: written.
 //
-void A_WeaponEject(mobj_t *mo)
+void A_WeaponEject(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     WeaponDefinition *info   = p->weapons[p->ready_wp].info;
@@ -1679,11 +1679,11 @@ void A_WeaponEject(mobj_t *mo)
     P_PlayerAttack(mo, attack);
 }
 
-void A_WeaponPlaySound(mobj_t *mo)
+void A_WeaponPlaySound(MapObject *mo)
 {
     // Generate an arbitrary sound from this weapon.
 
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     SoundEffect *sound = nullptr;
@@ -1700,56 +1700,56 @@ void A_WeaponPlaySound(mobj_t *mo)
     S_StartFX(sound, WeapSfxCat(p), mo);
 }
 
-void A_WeaponKillSound(mobj_t *mo)
+void A_WeaponKillSound(MapObject *mo)
 {
     // kill any current sound from this weapon
 
     S_StopFX(mo);
 }
 
-void A_SFXWeapon1(mobj_t *mo)
+void A_SFXWeapon1(MapObject *mo)
 {
-    player_t *p = mo->player;
+    player_t *p = mo->player_;
     S_StartFX(p->weapons[p->ready_wp].info->sound1_, WeapSfxCat(p), mo);
 }
 
-void A_SFXWeapon2(mobj_t *mo)
+void A_SFXWeapon2(MapObject *mo)
 {
-    player_t *p = mo->player;
+    player_t *p = mo->player_;
     S_StartFX(p->weapons[p->ready_wp].info->sound2_, WeapSfxCat(p), mo);
 }
 
-void A_SFXWeapon3(mobj_t *mo)
+void A_SFXWeapon3(MapObject *mo)
 {
-    player_t *p = mo->player;
+    player_t *p = mo->player_;
     S_StartFX(p->weapons[p->ready_wp].info->sound3_, WeapSfxCat(p), mo);
 }
 
 //
 // These three routines make a flash of light when a weapon fires.
 //
-void A_Light0(mobj_t *mo)
+void A_Light0(MapObject *mo)
 {
-    mo->player->extralight = 0;
+    mo->player_->extralight = 0;
 }
-void A_Light1(mobj_t *mo)
+void A_Light1(MapObject *mo)
 {
     if (!reduce_flash)
-        mo->player->extralight = 1;
+        mo->player_->extralight = 1;
     else
-        mo->player->extralight = 0;
+        mo->player_->extralight = 0;
 }
-void A_Light2(mobj_t *mo)
+void A_Light2(MapObject *mo)
 {
     if (!reduce_flash)
-        mo->player->extralight = 2;
+        mo->player_->extralight = 2;
     else
-        mo->player->extralight = 0;
+        mo->player_->extralight = 0;
 }
 
-void A_WeaponJump(mobj_t *mo)
+void A_WeaponJump(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     WeaponDefinition *info = p->weapons[p->ready_wp].info;
@@ -1774,9 +1774,9 @@ void A_WeaponJump(mobj_t *mo)
 }
 
 // Lobo: what the hell is this function for?
-void A_WeaponDJNE(mobj_t *mo)
+void A_WeaponDJNE(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     WeaponDefinition *info = p->weapons[p->ready_wp].info;
@@ -1802,9 +1802,9 @@ void A_WeaponDJNE(mobj_t *mo)
     }
 }
 
-void A_WeaponTransSet(mobj_t *mo)
+void A_WeaponTransSet(MapObject *mo)
 {
-    player_t *p     = mo->player;
+    player_t *p     = mo->player_;
     pspdef_t *psp   = &p->psprites[p->action_psp];
     float     value = VISIBLE;
 
@@ -1817,9 +1817,9 @@ void A_WeaponTransSet(mobj_t *mo)
     psp->visibility = psp->vis_target = value;
 }
 
-void A_WeaponTransFade(mobj_t *mo)
+void A_WeaponTransFade(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     float value = INVISIBLE;
@@ -1833,9 +1833,9 @@ void A_WeaponTransFade(mobj_t *mo)
     psp->vis_target = value;
 }
 
-void A_WeaponEnableRadTrig(mobj_t *mo)
+void A_WeaponEnableRadTrig(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     if (psp->state && psp->state->action_par)
@@ -1845,9 +1845,9 @@ void A_WeaponEnableRadTrig(mobj_t *mo)
     }
 }
 
-void A_WeaponDisableRadTrig(mobj_t *mo)
+void A_WeaponDisableRadTrig(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     if (psp->state && psp->state->action_par)
@@ -1857,9 +1857,9 @@ void A_WeaponDisableRadTrig(mobj_t *mo)
     }
 }
 
-void A_WeaponSetSkin(mobj_t *mo)
+void A_WeaponSetSkin(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     SYS_ASSERT(p->ready_wp >= 0);
@@ -1878,9 +1878,9 @@ void A_WeaponSetSkin(mobj_t *mo)
     }
 }
 
-void A_WeaponUnzoom(mobj_t *mo)
+void A_WeaponUnzoom(MapObject *mo)
 {
-    player_t *p = mo->player;
+    player_t *p = mo->player_;
 
     p->zoom_fov = 0;
 }
@@ -1915,9 +1915,9 @@ void P_FixWeaponClip(player_t *p, int slot)
     }
 }
 
-void A_WeaponBecome(mobj_t *mo)
+void A_WeaponBecome(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     WeaponDefinition *oldWep = p->weapons[p->ready_wp].info;
@@ -1954,9 +1954,9 @@ void A_WeaponBecome(mobj_t *mo)
     // P_SetPspriteDeferred(p,ps_weapon,p->weapons[p->ready_wp].info->ready_state);
 }
 
-void A_WeaponZoom(mobj_t *mo)
+void A_WeaponZoom(MapObject *mo)
 {
-    player_t *p = mo->player;
+    player_t *p = mo->player_;
 
     int fov = p->zoom_fov;
 
@@ -1972,19 +1972,19 @@ void A_WeaponZoom(mobj_t *mo)
     p->zoom_fov = fov;
 }
 
-void A_SetInvuln(struct mobj_s *mo)
+void A_SetInvuln(MapObject *mo)
 {
-    mo->hyperflags |= kHyperFlagInvulnerable;
+    mo->hyper_flags_ |= kHyperFlagInvulnerable;
 }
 
-void A_ClearInvuln(struct mobj_s *mo)
+void A_ClearInvuln(MapObject *mo)
 {
-    mo->hyperflags &= ~kHyperFlagInvulnerable;
+    mo->hyper_flags_ &= ~kHyperFlagInvulnerable;
 }
 
-void A_MoveFwd(mobj_t *mo)
+void A_MoveFwd(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     const State *st = psp->state;
@@ -1993,17 +1993,17 @@ void A_MoveFwd(mobj_t *mo)
     {
         float amount = *(float *)st->action_par;
 
-        float dx = epi::BAMCos(mo->angle);
-        float dy = epi::BAMSin(mo->angle);
+        float dx = epi::BAMCos(mo->angle_);
+        float dy = epi::BAMSin(mo->angle_);
 
-        mo->mom.X += dx * amount;
-        mo->mom.Y += dy * amount;
+        mo->momentum_.X += dx * amount;
+        mo->momentum_.Y += dy * amount;
     }
 }
 
-void A_MoveRight(mobj_t *mo)
+void A_MoveRight(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     const State *st = psp->state;
@@ -2012,50 +2012,50 @@ void A_MoveRight(mobj_t *mo)
     {
         float amount = *(float *)st->action_par;
 
-        float dx = epi::BAMCos(mo->angle - kBAMAngle90);
-        float dy = epi::BAMSin(mo->angle - kBAMAngle90);
+        float dx = epi::BAMCos(mo->angle_ - kBAMAngle90);
+        float dy = epi::BAMSin(mo->angle_ - kBAMAngle90);
 
-        mo->mom.X += dx * amount;
-        mo->mom.Y += dy * amount;
+        mo->momentum_.X += dx * amount;
+        mo->momentum_.Y += dy * amount;
     }
 }
 
-void A_MoveUp(mobj_t *mo)
+void A_MoveUp(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     const State *st = psp->state;
 
     if (st && st->action_par)
-        mo->mom.Z += *(float *)st->action_par;
+        mo->momentum_.Z += *(float *)st->action_par;
 }
 
-void A_StopMoving(mobj_t *mo)
+void A_StopMoving(MapObject *mo)
 {
-    mo->mom.X = mo->mom.Y = mo->mom.Z = 0;
+    mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
 }
 
-void A_TurnDir(mobj_t *mo)
+void A_TurnDir(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     const State *st = psp->state;
 
     if (st && st->action_par)
-        mo->angle += *(BAMAngle *)st->action_par;
+        mo->angle_ += *(BAMAngle *)st->action_par;
 }
 
-void A_TurnRandom(mobj_t *mo)
+void A_TurnRandom(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     const State *st            = psp->state;
     int            turn          = 359;
     int            random_angle  = 0;
-    int            current_angle = (int)epi::DegreesFromBAM(mo->angle);
+    int            current_angle = (int)epi::DegreesFromBAM(mo->angle_);
 
     if (current_angle >= 360)
         current_angle -= 360;
@@ -2075,18 +2075,18 @@ void A_TurnRandom(mobj_t *mo)
         random_angle = 0 + (turn - 0) * (RandomShort() / double(0x10000));
 
     turn      = current_angle + random_angle;
-    mo->angle = epi::BAMFromDegrees(turn);
+    mo->angle_ = epi::BAMFromDegrees(turn);
 }
 
-void A_MlookTurn(mobj_t *mo)
+void A_MlookTurn(MapObject *mo)
 {
-    player_t *p   = mo->player;
+    player_t *p   = mo->player_;
     pspdef_t *psp = &p->psprites[p->action_psp];
 
     const State *st = psp->state;
 
     if (st && st->action_par)
-        mo->vertangle += epi::BAMFromATan(*(float *)st->action_par);
+        mo->vertical_angle_ += epi::BAMFromATan(*(float *)st->action_par);
 }
 
 //--- editor settings ---

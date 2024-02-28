@@ -386,7 +386,7 @@ static bool CheckSightIntercepts(float slope)
 // When the subsector is the same, we only need to check whether a
 // non-SeeThrough extrafloor gets in the way.
 //
-static bool CheckSightSameSubsector(mobj_t *src, mobj_t *dest)
+static bool CheckSightSameSubsector(MapObject *src, MapObject *dest)
 {
     int       j;
     sector_t *sec;
@@ -399,9 +399,9 @@ static bool CheckSightSameSubsector(mobj_t *src, mobj_t *dest)
         lower_z = sight_I.src_z;
         upper_z = dest->z;
     }
-    else if (sight_I.src_z > dest->z + dest->height)
+    else if (sight_I.src_z > dest->z + dest->height_)
     {
-        lower_z = dest->z + dest->height;
+        lower_z = dest->z + dest->height_;
         upper_z = sight_I.src_z;
     }
     else
@@ -410,7 +410,7 @@ static bool CheckSightSameSubsector(mobj_t *src, mobj_t *dest)
     }
 
     // check all the sight gaps.
-    sec = src->subsector->sector;
+    sec = src->subsector_->sector;
 
     for (j = 0; j < sec->sight_gap_num; j++)
     {
@@ -424,10 +424,10 @@ static bool CheckSightSameSubsector(mobj_t *src, mobj_t *dest)
     return false;
 }
 
-bool P_CheckSight(mobj_t *src, mobj_t *dest)
+bool P_CheckSight(MapObject *src, MapObject *dest)
 {
     // -ACB- 1998/07/20 t2 is Invisible, t1 cannot possibly see it.
-    if (dest->visibility == INVISIBLE)
+    if (dest->visibility_ == INVISIBLE)
         return false;
 
     int n, num_div;
@@ -437,8 +437,8 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
 
     // First check for trivial rejection.
 
-    SYS_ASSERT(src->subsector);
-    SYS_ASSERT(dest->subsector);
+    SYS_ASSERT(src->subsector_);
+    SYS_ASSERT(dest->subsector_);
 
     // An unobstructed LOS is possible.
     // Now look from eyes of t1 to any part of t2.
@@ -446,28 +446,28 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
     validcount++;
 
     // The "eyes" of a thing is 75% of its height.
-    SYS_ASSERT(src->info);
-    sight_I.src_z = src->z + src->height * src->info->viewheight_;
+    SYS_ASSERT(src->info_);
+    sight_I.src_z = src->z + src->height_ * src->info_->viewheight_;
 
     sight_I.src.x   = src->x;
     sight_I.src.y   = src->y;
     sight_I.src.dx  = dest->x - src->x;
     sight_I.src.dy  = dest->y - src->y;
-    sight_I.src_sub = src->subsector;
+    sight_I.src_sub = src->subsector_;
 
     sight_I.dest.X   = dest->x;
     sight_I.dest.Y   = dest->y;
-    sight_I.dest_sub = dest->subsector;
+    sight_I.dest_sub = dest->subsector_;
 
     sight_I.bottom_slope = dest->z - sight_I.src_z;
-    sight_I.top_slope    = sight_I.bottom_slope + dest->height;
+    sight_I.top_slope    = sight_I.bottom_slope + dest->height_;
 
     // destination out of object's DDF slope range ?
     dist_a = P_ApproxDistance(sight_I.src.dx, sight_I.src.dy);
 
-    if (src->info->sight_distance_ > -1) // if we have sight_distance set
+    if (src->info_->sight_distance_ > -1) // if we have sight_distance set
     {
-        if (src->info->sight_distance_ < dist_a)
+        if (src->info_->sight_distance_ < dist_a)
             return false; // too far away for this thing to see
     }
 
@@ -481,14 +481,14 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
     LogDebug("  Angle: %1.0f\n", ANG_2_FLOAT(sight_I.angle));
 #endif
 
-    if (sight_I.top_slope < dist_a * -src->info->sight_slope_)
+    if (sight_I.top_slope < dist_a * -src->info_->sight_slope_)
         return false;
 
-    if (sight_I.bottom_slope > dist_a * src->info->sight_slope_)
+    if (sight_I.bottom_slope > dist_a * src->info_->sight_slope_)
         return false;
 
     // -AJA- handle the case where no linedefs are crossed
-    if (src->subsector == dest->subsector)
+    if (src->subsector_ == dest->subsector_)
     {
         return CheckSightSameSubsector(src, dest);
     }
@@ -521,10 +521,10 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
         float objslope;
         P_AimLineAttack(src, sight_I.angle, 64000, &objslope);
         P_LineAttack(src, sight_I.angle, 64000, objslope, 0, nullptr, nullptr);
-        bool slope_sight_good = dest->slopesighthit;
+        bool slope_sight_good = dest->slope_sight_hit_;
         if (slope_sight_good)
         {
-            dest->slopesighthit = false; // reset for future sight checks
+            dest->slope_sight_hit_ = false; // reset for future sight checks
             return true;
         }
         else
@@ -537,26 +537,26 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
     // points we test depends on the destination: 5 for players, 3 for
     // monsters, 1 for everything else.
 
-    if (dest->player)
+    if (dest->player_)
     {
         num_div         = 5;
         dest_heights[0] = dest->z;
-        dest_heights[1] = dest->z + dest->height * 0.25f;
-        dest_heights[2] = dest->z + dest->height * 0.50f;
-        dest_heights[3] = dest->z + dest->height * 0.75f;
-        dest_heights[4] = dest->z + dest->height;
+        dest_heights[1] = dest->z + dest->height_ * 0.25f;
+        dest_heights[2] = dest->z + dest->height_ * 0.50f;
+        dest_heights[3] = dest->z + dest->height_ * 0.75f;
+        dest_heights[4] = dest->z + dest->height_;
     }
-    else if (dest->extendedflags & kExtendedFlagMonster)
+    else if (dest->extended_flags_ & kExtendedFlagMonster)
     {
         num_div         = 3;
         dest_heights[0] = dest->z;
-        dest_heights[1] = dest->z + dest->height * 0.5f;
-        dest_heights[2] = dest->z + dest->height;
+        dest_heights[1] = dest->z + dest->height_ * 0.5f;
+        dest_heights[2] = dest->z + dest->height_;
     }
     else
     {
         num_div         = 1;
-        dest_heights[0] = dest->z + dest->height * 0.5f;
+        dest_heights[0] = dest->z + dest->height_ * 0.5f;
     }
 
     // use intercepts to check extrafloor heights
@@ -575,21 +575,21 @@ bool P_CheckSight(mobj_t *src, mobj_t *dest)
     return false;
 }
 
-bool P_CheckSightToPoint(mobj_t *src, float x, float y, float z)
+bool P_CheckSightToPoint(MapObject *src, float x, float y, float z)
 {
     subsector_t *dest_sub = R_PointInSubsector(x, y);
 
-    if (dest_sub == src->subsector)
+    if (dest_sub == src->subsector_)
         return true;
 
     validcount++;
 
     sight_I.src.x   = src->x;
     sight_I.src.y   = src->y;
-    sight_I.src_z   = src->z + src->height * src->info->viewheight_;
+    sight_I.src_z   = src->z + src->height_ * src->info_->viewheight_;
     sight_I.src.dx  = x - src->x;
     sight_I.src.dy  = y - src->y;
-    sight_I.src_sub = src->subsector;
+    sight_I.src_sub = src->subsector_;
 
     sight_I.dest.X   = x;
     sight_I.dest.Y   = y;
@@ -634,11 +634,11 @@ bool P_CheckSightToPoint(mobj_t *src, float x, float y, float z)
 // don't resurrect monsters that are completely out of view in another
 // vertical region.  Returns true if sight possible, false otherwise.
 //
-bool P_CheckSightApproxVert(mobj_t *src, mobj_t *dest)
+bool P_CheckSightApproxVert(MapObject *src, MapObject *dest)
 {
-    SYS_ASSERT(src->info);
+    SYS_ASSERT(src->info_);
 
-    sight_I.src_z = src->z + src->height * src->info->viewheight_;
+    sight_I.src_z = src->z + src->height_ * src->info_->viewheight_;
 
     return CheckSightSameSubsector(src, dest);
 }

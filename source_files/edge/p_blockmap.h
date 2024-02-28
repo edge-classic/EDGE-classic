@@ -66,7 +66,7 @@ struct PathIntercept
 {
     float along;  // along trace line
     // one of these will be nullptr
-    mobj_t *thing;
+    MapObject *thing;
     line_t *line;
 };
 
@@ -77,10 +77,10 @@ extern divline_t trace;
 void CreateThingBlockmap(void);
 void DestroyBlockmap(void);
 
-void SetThingPosition(mobj_t *mo);
-void UnsetThingPosition(mobj_t *mo);
-void UnsetThingFinal(mobj_t *mo);
-void ChangeThingPosition(mobj_t *mo, float x, float y, float z);
+void SetThingPosition(MapObject *mo);
+void UnsetThingPosition(MapObject *mo);
+void UnsetThingFinal(MapObject *mo);
+void ChangeThingPosition(MapObject *mo, float x, float y, float z);
 void FreeSectorTouchNodes(sector_t *sec);
 
 void GenerateBlockmap(int min_x, int min_y, int max_x, int max_y);
@@ -89,15 +89,15 @@ bool BlockmapLineIterator(float x1, float y1, float x2, float y2,
                           bool (*func)(line_t *, void *), void *data = nullptr);
 
 bool BlockmapThingIterator(float x1, float y1, float x2, float y2,
-                           bool (*func)(mobj_t *, void *),
+                           bool (*func)(MapObject *, void *),
                            void *data = nullptr);
 
 void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
-                          float z2, void (*func)(mobj_t *, void *),
+                          float z2, void (*func)(MapObject *, void *),
                           void *data = nullptr);
 
 void SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
-                        float y2, float z2, void (*func)(mobj_t *, void *),
+                        float y2, float z2, void (*func)(MapObject *, void *),
                         void *data = nullptr);
 
 float PathInterceptVector(divline_t *v2, divline_t *v1);

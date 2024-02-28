@@ -599,7 +599,7 @@ void S_ReallocChannels(int total)
     num_chan = total;
 }
 
-void S_UpdateSounds(position_c *listener, BAMAngle angle)
+void S_UpdateSounds(Position *listener, BAMAngle angle)
 {
     // NOTE: assume SDL_LockAudio has been called
 

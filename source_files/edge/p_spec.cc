@@ -571,7 +571,7 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const LineType *special)
     if (!info)
         return; // found nothing so exit
 
-    if (!level_flags.have_extra && (info->extendedflags_ & kExtendedFlagExtra))
+    if (!level_flags.have_extra && (info->extended_flags_ & kExtendedFlagExtra))
         return;
 
     // if it's shootable we've already handled this elsewhere
@@ -1251,7 +1251,7 @@ static void DetailSlope_Ceiling(line_t *ld)
 //
 // -ACB- 2001/01/14: Added Elevator Sector Type
 //
-static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag, int side, mobj_t *thing,
+static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag, int side, MapObject *thing,
                                   LineTrigger trig, int can_reach, int no_care_who)
 {
     bool texSwitch   = false;
@@ -1292,9 +1292,9 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
         return false;
 
     // -AJA- 1999/12/07: Height checking.
-    if (line && thing && thing->player && (special->special_flags_ & kLineSpecialMustReach) && !can_reach)
+    if (line && thing && thing->player_ && (special->special_flags_ & kLineSpecialMustReach) && !can_reach)
     {
-        S_StartFX(thing->info->noway_sound_, P_MobjGetSfxCategory(thing), thing);
+        S_StartFX(thing->info_->noway_sound_, P_MobjGetSfxCategory(thing), thing);
 
         return false;
     }
@@ -1302,16 +1302,16 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
     // Check this type of thing can trigger
     if (!no_care_who)
     {
-        if (thing && thing->player)
+        if (thing && thing->player_)
         {
             // Players can only trigger if the kTriggerActivatorPlayer is set
             if (!(special->obj_ & kTriggerActivatorPlayer))
                 return false;
 
-            if (thing->player->isBot() && (special->obj_ & kTriggerActivatorNoBot))
+            if (thing->player_->isBot() && (special->obj_ & kTriggerActivatorNoBot))
                 return false;
         }
-        else if (thing && (thing->info->extendedflags_ & kExtendedFlagMonster))
+        else if (thing && (thing->info_->extended_flags_ & kExtendedFlagMonster))
         {
             // Monsters can only trigger if the kTriggerActivatorMonster flag is set
             if (!(special->obj_ & kTriggerActivatorMonster))
@@ -1322,7 +1322,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
                 return false;
 
             // Monster is not allowed to trigger lines
-            if (thing->info->hyperflags_ & kHyperFlagNoTriggerLines)
+            if (thing->info_->hyper_flags_ & kHyperFlagNoTriggerLines)
                 return false;
         }
         else
@@ -1341,10 +1341,10 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
     // wouldn't otherwise cross (for now, the edge of a high dropoff)
     // Note: I believe this assumes no 3D floors, but I think it's a
     // very particular situation anyway - Dasho
-    if (trig == kLineTriggerWalkable && line->backsector && thing && (thing->info->extendedflags_ & kExtendedFlagMonster) &&
-        !(thing->flags & (kMapObjectFlagTeleport | kMapObjectFlagDropOff | kMapObjectFlagFloat)))
+    if (trig == kLineTriggerWalkable && line->backsector && thing && (thing->info_->extended_flags_ & kExtendedFlagMonster) &&
+        !(thing->flags_ & (kMapObjectFlagTeleport | kMapObjectFlagDropOff | kMapObjectFlagFloat)))
     {
-        if (std::abs(line->frontsector->f_h - line->backsector->f_h) > thing->info->step_size_)
+        if (std::abs(line->frontsector->f_h - line->backsector->f_h) > thing->info_->step_size_)
             return false;
     }
 
@@ -1358,7 +1358,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
             DoorKeyType cards;
 
             // Monsters/Missiles have no keys
-            if (!thing->player)
+            if (!thing->player_)
                 return false;
 
             //
@@ -1368,7 +1368,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
             //
             // -AJA- Reworked this for the 10 new keys.
             //
-            cards = thing->player->cards;
+            cards = thing->player_->cards;
 
             bool failedsecurity = false;
 
@@ -1392,7 +1392,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
             if (failedsecurity)
             {
                 if (special->failedmessage_ != "")
-                    ConsolePlayerMessageLDF(thing->player->pnum, special->failedmessage_.c_str());
+                    ConsolePlayerMessageLDF(thing->player_->pnum, special->failedmessage_.c_str());
 
                 if (special->failed_sfx_)
                     S_StartFX(special->failed_sfx_, SNCAT_Level, thing);
@@ -1689,7 +1689,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special, int tag
 // -KM- 1998/09/01 Now much simpler
 // -ACB- 1998/09/12 Return success/failure
 //
-bool P_CrossSpecialLine(line_t *ld, int side, mobj_t *thing)
+bool P_CrossSpecialLine(line_t *ld, int side, MapObject *thing)
 {
     return P_ActivateSpecialLine(ld, ld->special, ld->tag, side, thing, kLineTriggerWalkable, 1, 0);
 }
@@ -1697,7 +1697,7 @@ bool P_CrossSpecialLine(line_t *ld, int side, mobj_t *thing)
 //
 // Called when a thing shoots a special line.
 //
-void P_ShootSpecialLine(line_t *ld, int side, mobj_t *thing)
+void P_ShootSpecialLine(line_t *ld, int side, MapObject *thing)
 {
     P_ActivateSpecialLine(ld, ld->special, ld->tag, side, thing, kLineTriggerShootable, 1, 0);
 }
@@ -1715,9 +1715,9 @@ void P_ShootSpecialLine(line_t *ld, int side, mobj_t *thing)
 //       accessible.  Could be used for smarter switches, like one on
 //       a lower wall-part which is out of reach (e.g. MAP02).
 //
-bool P_UseSpecialLine(mobj_t *thing, line_t *line, int side, float open_bottom, float open_top)
+bool P_UseSpecialLine(MapObject *thing, line_t *line, int side, float open_bottom, float open_top)
 {
-    int can_reach = (thing->z < open_top) && (thing->z + thing->height + USE_Z_RANGE >= open_bottom);
+    int can_reach = (thing->z < open_top) && (thing->z + thing->height_ + USE_Z_RANGE >= open_bottom);
 
     return P_ActivateSpecialLine(line, line->special, line->tag, side, thing, kLineTriggerPushable, can_reach, 0);
 }
@@ -1728,7 +1728,7 @@ bool P_UseSpecialLine(mobj_t *thing, line_t *line, int side, float open_bottom, 
 //
 // -AJA- 1999/10/21: written.
 //
-void P_RemoteActivation(mobj_t *thing, int typenum, int tag, int side, LineTrigger method)
+void P_RemoteActivation(MapObject *thing, int typenum, int tag, int side, LineTrigger method)
 {
     const LineType *spec = P_LookupLineType(typenum);
 
@@ -1763,12 +1763,12 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
         player->air_in_lungs -= subtract;
         player->underwater = true;
 
-        if (subtract && player->air_in_lungs <= 0 && (leveltime % (1 + player->mo->info->choke_damage_.delay_)) == 0)
+        if (subtract && player->air_in_lungs <= 0 && (leveltime % (1 + player->mo->info_->choke_damage_.delay_)) == 0)
         {
-            DAMAGE_COMPUTE(damage, &player->mo->info->choke_damage_);
+            DAMAGE_COMPUTE(damage, &player->mo->info_->choke_damage_);
 
             if (damage)
-                P_DamageMobj(player->mo, nullptr, nullptr, damage, &player->mo->info->choke_damage_);
+                P_DamageMobj(player->mo, nullptr, nullptr, damage, &player->mo->info_->choke_damage_);
         }
     }
 
@@ -1865,8 +1865,8 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
         {
             ConsoleImportantMessageLDF("FoundSecret"); // Lobo: get text from language.ddf
 
-            S_StartFX(player->mo->info->secretsound_, SNCAT_UI, player->mo);
-            // S_StartFX(player->mo->info->secretsound_,
+            S_StartFX(player->mo->info_->secretsound_, SNCAT_UI, player->mo);
+            // S_StartFX(player->mo->info_->secretsound_,
             //		P_MobjGetSfxCategory(player->mo), player->mo);
         }
 
@@ -1877,7 +1877,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz, floa
     {
         player->cheats &= ~CF_GODMODE;
 
-        if (player->health < (player->mo->spawnhealth * 0.11f))
+        if (player->health < (player->mo->spawn_health_ * 0.11f))
         {
             // -KM- 1998/12/16 We don't want to alter the special type,
             //   modify the sector's attributes instead.
@@ -1904,7 +1904,7 @@ void P_PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
     float         ceil_h;
 
     float bz = player->mo->z;
-    float tz = player->mo->z + player->mo->height;
+    float tz = player->mo->z + player->mo->height_;
 
     bool was_underwater = player->underwater;
     bool was_airless = player->airless;
@@ -1949,25 +1949,25 @@ void P_PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
     }
 
     if (sec->floor_vertex_slope)
-        floor_h = player->mo->floorz;
+        floor_h = player->mo->floor_z_;
 
     if (sec->ceil_vertex_slope)
-        ceil_h = player->mo->ceilingz;
+        ceil_h = player->mo->ceiling_z_;
 
     PlayerInProperties(player, bz, tz, floor_h, ceil_h, sec->p, &swim_special, should_choke);
 
     // breathing support: handle gasping when leaving the water
     if ((was_underwater && !player->underwater) || (was_airless && !player->airless))
     {
-        if (player->air_in_lungs <= (player->mo->info->lung_capacity_ - player->mo->info->gasp_start_))
+        if (player->air_in_lungs <= (player->mo->info_->lung_capacity_ - player->mo->info_->gasp_start_))
         {
-            if (player->mo->info->gasp_sound_)
+            if (player->mo->info_->gasp_sound_)
             {
-                S_StartFX(player->mo->info->gasp_sound_, P_MobjGetSfxCategory(player->mo), player->mo);
+                S_StartFX(player->mo->info_->gasp_sound_, P_MobjGetSfxCategory(player->mo), player->mo);
             }
         }
 
-        player->air_in_lungs = player->mo->info->lung_capacity_;
+        player->air_in_lungs = player->mo->info_->lung_capacity_;
     }
 
 

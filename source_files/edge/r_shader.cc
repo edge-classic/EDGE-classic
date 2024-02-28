@@ -157,16 +157,16 @@ static light_image_c *GetLightImage(const MapObjectDefinition *info, int DL)
 class dynlight_shader_c : public abstract_shader_c
 {
   private:
-    mobj_t *mo;
+    MapObject *mo;
 
     light_image_c *lim[2];
 
   public:
-    dynlight_shader_c(mobj_t *object) : mo(object)
+    dynlight_shader_c(MapObject *object) : mo(object)
     {
         // Note: these are shared, we must not delete them
-        lim[0] = GetLightImage(mo->info, 0);
-        lim[1] = GetLightImage(mo->info, 1);
+        lim[0] = GetLightImage(mo->info_, 0);
+        lim[1] = GetLightImage(mo->info_, 1);
     }
 
     virtual ~dynlight_shader_c()
@@ -178,7 +178,7 @@ class dynlight_shader_c : public abstract_shader_c
     {
         float mx = mo->x;
         float my = mo->y;
-        float mz = MO_MIDZ(mo);
+        float mz = MapObjectMidZ(mo);
 
         MIR_Coordinate(mx, my);
         MIR_Height(mz);
@@ -221,19 +221,19 @@ class dynlight_shader_c : public abstract_shader_c
     inline float WhatRadius(int DL)
     {
         if (DL == 0)
-            return mo->dlight.r * MIR_XYScale();
+            return mo->dynamic_light_.r * MIR_XYScale();
 
-        return mo->info->dlight_[1].radius_ * mo->dlight.r / mo->info->dlight_[0].radius_ * MIR_XYScale();
+        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r / mo->info_->dlight_[0].radius_ * MIR_XYScale();
     }
 
     inline RGBAColor WhatColor(int DL)
     {
-        return (DL == 0) ? mo->dlight.color : mo->info->dlight_[1].colour_;
+        return (DL == 0) ? mo->dynamic_light_.color : mo->info_->dlight_[1].colour_;
     }
 
     inline DynamicLightType WhatType(int DL)
     {
-        return mo->info->dlight_[DL].type_;
+        return mo->info_->dlight_[DL].type_;
     }
 
   public:
@@ -241,7 +241,7 @@ class dynlight_shader_c : public abstract_shader_c
     {
         float mx = mo->x;
         float my = mo->y;
-        float mz = MO_MIDZ(mo);
+        float mz = MapObjectMidZ(mo);
 
         MIR_Coordinate(mx, my);
         MIR_Height(mz);
@@ -259,7 +259,7 @@ class dynlight_shader_c : public abstract_shader_c
 
             RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
-            float L = mo->state->bright / 255.0;
+            float L = mo->state_->bright / 255.0;
 
             if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
@@ -271,11 +271,11 @@ class dynlight_shader_c : public abstract_shader_c
         }
     }
 
-    virtual void Corner(multi_color_c *col, float nx, float ny, float nz, struct mobj_s *mod_pos, bool is_weapon)
+    virtual void Corner(multi_color_c *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
     {
         float mx = mo->x;
         float my = mo->y;
-        float mz = MO_MIDZ(mo);
+        float mz = MapObjectMidZ(mo);
 
         if (is_weapon)
         {
@@ -288,7 +288,7 @@ class dynlight_shader_c : public abstract_shader_c
 
         float dx = mod_pos->x;
         float dy = mod_pos->y;
-        float dz = MO_MIDZ(mod_pos);
+        float dz = MapObjectMidZ(mod_pos);
 
         MIR_Coordinate(dx, dy);
         MIR_Height(dz);
@@ -303,11 +303,11 @@ class dynlight_shader_c : public abstract_shader_c
         dy /= dist;
         dz /= dist;
 
-        dist = HMM_MAX(1.0, dist - mod_pos->radius * MIR_XYScale());
+        dist = HMM_MAX(1.0, dist - mod_pos->radius_ * MIR_XYScale());
 
         float L = 0.6 - 0.7 * (dx * nx + dy * ny + dz * nz);
 
-        L *= mo->state->bright / 255.0;
+        L *= mo->state_->bright / 255.0;
 
         for (int DL = 0; DL < 2; DL++)
         {
@@ -338,7 +338,7 @@ class dynlight_shader_c : public abstract_shader_c
 
             RGBAColor col = WhatColor(DL);
 
-            float L = mo->state->bright / 255.0;
+            float L = mo->state_->bright / 255.0;
 
             float R = L * epi::GetRGBARed(col) / 255.0;
             float G = L * epi::GetRGBAGreen(col) / 255.0;
@@ -350,8 +350,8 @@ class dynlight_shader_c : public abstract_shader_c
                               : is_additive           ? (GLuint)ENV_NONE
                                                       : GL_MODULATE,
                               (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->tex_id(), *pass_var, blending,
-                              *pass_var > 0 ? kRGBANoValue : mo->subsector->sector->props.fog_color,
-                              mo->subsector->sector->props.fog_density);
+                              *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->props.fog_color,
+                              mo->subsector_->sector->props.fog_density);
 
             for (int v_idx = 0; v_idx < num_vert; v_idx++)
             {
@@ -378,7 +378,7 @@ class dynlight_shader_c : public abstract_shader_c
     }
 };
 
-abstract_shader_c *MakeDLightShader(mobj_t *mo)
+abstract_shader_c *MakeDLightShader(MapObject *mo)
 {
     return new dynlight_shader_c(mo);
 }
@@ -390,15 +390,15 @@ abstract_shader_c *MakeDLightShader(mobj_t *mo)
 class plane_glow_c : public abstract_shader_c
 {
   private:
-    mobj_t *mo;
+    MapObject *mo;
 
     light_image_c *lim[2];
 
   public:
-    plane_glow_c(mobj_t *_glower) : mo(_glower)
+    plane_glow_c(MapObject *_glower) : mo(_glower)
     {
-        lim[0] = GetLightImage(mo->info, 0);
-        lim[1] = GetLightImage(mo->info, 1);
+        lim[0] = GetLightImage(mo->info_, 0);
+        lim[1] = GetLightImage(mo->info_, 1);
     }
 
     virtual ~plane_glow_c()
@@ -408,7 +408,7 @@ class plane_glow_c : public abstract_shader_c
   private:
     inline float Dist(const sector_t *sec, float z)
     {
-        if (mo->info->glow_type_ == kSectorGlowTypeFloor)
+        if (mo->info_->glow_type_ == kSectorGlowTypeFloor)
             return fabs(sec->f_h - z);
         else
             return fabs(sec->c_h - z); // kSectorGlowTypeCeiling
@@ -423,25 +423,25 @@ class plane_glow_c : public abstract_shader_c
     inline float WhatRadius(int DL)
     {
         if (DL == 0)
-            return mo->dlight.r * MIR_XYScale();
+            return mo->dynamic_light_.r * MIR_XYScale();
 
-        return mo->info->dlight_[1].radius_ * mo->dlight.r / mo->info->dlight_[0].radius_ * MIR_XYScale();
+        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r / mo->info_->dlight_[0].radius_ * MIR_XYScale();
     }
 
     inline RGBAColor WhatColor(int DL)
     {
-        return (DL == 0) ? mo->dlight.color : mo->info->dlight_[1].colour_;
+        return (DL == 0) ? mo->dynamic_light_.color : mo->info_->dlight_[1].colour_;
     }
 
     inline DynamicLightType WhatType(int DL)
     {
-        return mo->info->dlight_[DL].type_;
+        return mo->info_->dlight_[DL].type_;
     }
 
   public:
     virtual void Sample(multi_color_c *col, float x, float y, float z)
     {
-        const sector_t *sec = mo->subsector->sector;
+        const sector_t *sec = mo->subsector_->sector;
 
         float dist = Dist(sec, z);
 
@@ -452,7 +452,7 @@ class plane_glow_c : public abstract_shader_c
 
             RGBAColor new_col = lim[DL]->CurvePoint(dist / WhatRadius(DL), WhatColor(DL));
 
-            float L = mo->state->bright / 255.0;
+            float L = mo->state_->bright / 255.0;
 
             if (new_col != SG_BLACK_RGBA32 && L > 1 / 256.0)
             {
@@ -464,32 +464,32 @@ class plane_glow_c : public abstract_shader_c
         }
     }
 
-    virtual void Corner(multi_color_c *col, float nx, float ny, float nz, struct mobj_s *mod_pos, bool is_weapon)
+    virtual void Corner(multi_color_c *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
     {
-        const sector_t *sec = mo->subsector->sector;
+        const sector_t *sec = mo->subsector_->sector;
 
-        float dz = (mo->info->glow_type_ == kSectorGlowTypeFloor) ? +1 : -1;
+        float dz = (mo->info_->glow_type_ == kSectorGlowTypeFloor) ? +1 : -1;
         float dist;
 
         if (is_weapon)
         {
-            float weapon_z = mod_pos->z + mod_pos->height * mod_pos->info->shotheight_;
+            float weapon_z = mod_pos->z + mod_pos->height_ * mod_pos->info_->shotheight_;
 
-            if (mo->info->glow_type_ == kSectorGlowTypeFloor)
+            if (mo->info_->glow_type_ == kSectorGlowTypeFloor)
                 dist = weapon_z - sec->f_h;
             else
                 dist = sec->c_h - weapon_z;
         }
-        else if (mo->info->glow_type_ == kSectorGlowTypeFloor)
+        else if (mo->info_->glow_type_ == kSectorGlowTypeFloor)
             dist = mod_pos->z - sec->f_h;
         else
-            dist = sec->c_h - (mod_pos->z + mod_pos->height);
+            dist = sec->c_h - (mod_pos->z + mod_pos->height_);
 
         dist = HMM_MAX(1.0, fabs(dist));
 
         float L = 0.6 - 0.7 * (dz * nz);
 
-        L *= mo->state->bright / 255.0;
+        L *= mo->state_->bright / 255.0;
 
         for (int DL = 0; DL < 2; DL++)
         {
@@ -511,7 +511,7 @@ class plane_glow_c : public abstract_shader_c
     virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
                           void *data, shader_coord_func_t func)
     {
-        const sector_t *sec = mo->subsector->sector;
+        const sector_t *sec = mo->subsector_->sector;
 
         for (int DL = 0; DL < 2; DL++)
         {
@@ -522,7 +522,7 @@ class plane_glow_c : public abstract_shader_c
 
             RGBAColor col = WhatColor(DL);
 
-            float L = mo->state->bright / 255.0;
+            float L = mo->state_->bright / 255.0;
 
             float R = L * epi::GetRGBARed(col) / 255.0;
             float G = L * epi::GetRGBAGreen(col) / 255.0;
@@ -534,8 +534,8 @@ class plane_glow_c : public abstract_shader_c
                               : is_additive           ? (GLuint)ENV_NONE
                                                       : GL_MODULATE,
                               (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->tex_id(), *pass_var, blending,
-                              *pass_var > 0 ? kRGBANoValue : mo->subsector->sector->props.fog_color,
-                              mo->subsector->sector->props.fog_density);
+                              *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->props.fog_color,
+                              mo->subsector_->sector->props.fog_density);
 
             for (int v_idx = 0; v_idx < num_vert; v_idx++)
             {
@@ -560,7 +560,7 @@ class plane_glow_c : public abstract_shader_c
     }
 };
 
-abstract_shader_c *MakePlaneGlow(mobj_t *mo)
+abstract_shader_c *MakePlaneGlow(MapObject *mo)
 {
     return new plane_glow_c(mo);
 }
@@ -573,7 +573,7 @@ class wall_glow_c : public abstract_shader_c
 {
   private:
     line_t *ld;
-    mobj_t *mo;
+    MapObject *mo;
 
     float norm_x, norm_y; // normal
 
@@ -593,31 +593,31 @@ class wall_glow_c : public abstract_shader_c
     inline float WhatRadius(int DL)
     {
         if (DL == 0)
-            return mo->dlight.r * MIR_XYScale();
+            return mo->dynamic_light_.r * MIR_XYScale();
 
-        return mo->info->dlight_[1].radius_ * mo->dlight.r / mo->info->dlight_[0].radius_ * MIR_XYScale();
+        return mo->info_->dlight_[1].radius_ * mo->dynamic_light_.r / mo->info_->dlight_[0].radius_ * MIR_XYScale();
     }
 
     inline RGBAColor WhatColor(int DL)
     {
-        return (DL == 0) ? mo->dlight.color : mo->info->dlight_[1].colour_;
+        return (DL == 0) ? mo->dynamic_light_.color : mo->info_->dlight_[1].colour_;
     }
 
     inline DynamicLightType WhatType(int DL)
     {
-        return mo->info->dlight_[DL].type_;
+        return mo->info_->dlight_[DL].type_;
     }
 
   public:
-    wall_glow_c(mobj_t *_glower) : mo(_glower)
+    wall_glow_c(MapObject *_glower) : mo(_glower)
     {
-        SYS_ASSERT(mo->dlight.glow_wall);
-        ld     = mo->dlight.glow_wall;
+        SYS_ASSERT(mo->dynamic_light_.glow_wall);
+        ld     = mo->dynamic_light_.glow_wall;
         norm_x = (ld->v1->Y - ld->v2->Y) / ld->length;
         norm_y = (ld->v2->X - ld->v1->X) / ld->length;
         // Note: these are shared, we must not delete them
-        lim[0] = GetLightImage(mo->info, 0);
-        lim[1] = GetLightImage(mo->info, 1);
+        lim[0] = GetLightImage(mo->info_, 0);
+        lim[1] = GetLightImage(mo->info_, 1);
     }
 
     virtual ~wall_glow_c()
@@ -630,7 +630,7 @@ class wall_glow_c : public abstract_shader_c
 
         float L = std::log1p(dist);
 
-        L *= mo->state->bright / 255.0;
+        L *= mo->state_->bright / 255.0;
 
         for (int DL = 0; DL < 2; DL++)
         {
@@ -649,14 +649,14 @@ class wall_glow_c : public abstract_shader_c
         }
     }
 
-    virtual void Corner(multi_color_c *col, float nx, float ny, float nz, struct mobj_s *mod_pos,
+    virtual void Corner(multi_color_c *col, float nx, float ny, float nz, MapObject *mod_pos,
                         bool is_weapon = false)
     {
         float dist = Dist(mod_pos->x, mod_pos->y);
 
         float L = std::log1p(dist);
 
-        L *= mo->state->bright / 255.0;
+        L *= mo->state_->bright / 255.0;
 
         for (int DL = 0; DL < 2; DL++)
         {
@@ -678,7 +678,7 @@ class wall_glow_c : public abstract_shader_c
     virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
                           void *data, shader_coord_func_t func)
     {
-        const sector_t *sec = mo->subsector->sector;
+        const sector_t *sec = mo->subsector_->sector;
 
         for (int DL = 0; DL < 2; DL++)
         {
@@ -689,7 +689,7 @@ class wall_glow_c : public abstract_shader_c
 
             RGBAColor col = WhatColor(DL);
 
-            float L = mo->state->bright / 255.0;
+            float L = mo->state_->bright / 255.0;
 
             float R = L * epi::GetRGBARed(col) / 255.0;
             float G = L * epi::GetRGBAGreen(col) / 255.0;
@@ -701,8 +701,8 @@ class wall_glow_c : public abstract_shader_c
                               : is_additive           ? (GLuint)ENV_NONE
                                                       : GL_MODULATE,
                               (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->tex_id(), *pass_var, blending,
-                              *pass_var > 0 ? kRGBANoValue : mo->subsector->sector->props.fog_color,
-                              mo->subsector->sector->props.fog_density);
+                              *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->props.fog_color,
+                              mo->subsector_->sector->props.fog_density);
 
             for (int v_idx = 0; v_idx < num_vert; v_idx++)
             {
@@ -727,7 +727,7 @@ class wall_glow_c : public abstract_shader_c
     }
 };
 
-abstract_shader_c *MakeWallGlow(mobj_t *mo)
+abstract_shader_c *MakeWallGlow(MapObject *mo)
 {
     return new wall_glow_c(mo);
 }

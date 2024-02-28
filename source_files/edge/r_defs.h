@@ -82,7 +82,7 @@ struct region_properties_s;
 //
 typedef struct touch_node_s
 {
-    struct mobj_s       *mo      = nullptr;
+    class MapObject       *mo      = nullptr;
     struct touch_node_s *mo_next = nullptr;
     struct touch_node_s *mo_prev = nullptr;
 
@@ -301,7 +301,7 @@ typedef struct sector_s
     int sound_player;
 
     // origin for any sounds played by the sector
-    position_c sfx_origin;
+    Position sfx_origin;
 
     int             linecount;
     struct line_s **lines; // [linecount] size
@@ -310,7 +310,7 @@ typedef struct sector_s
     touch_node_t *touch_things;
 
     // list of sector glow things (linked via dlnext/dlprev)
-    mobj_t *glow_things;
+    MapObject *glow_things;
 
     // sky height for GL renderer
     float sky_h;
@@ -466,7 +466,7 @@ typedef struct subsector_s
     struct seg_s *segs;
 
     // list of mobjs in subsector
-    mobj_t *thinglist;
+    MapObject *thinglist;
 
     // pointer to bounding box (usually in parent node)
     float *bbox;

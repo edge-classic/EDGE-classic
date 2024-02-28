@@ -53,7 +53,7 @@
 // The maximum number of players, multiplayer/networking.
 #define MAXPLAYERS 16
 
-#define PLAYER_STOPSPEED 1.0
+#define PLAYER_kStopSpeed 1.0
 
 class net_node_c;
 
@@ -164,7 +164,7 @@ typedef struct player_s
 
     // map object that this player controls.  Will be nullptr outside of a
     // level (e.g. on the intermission screen).
-    mobj_t *mo;
+    MapObject *mo;
 
     // player's name
     char playername[MAX_PLAYNAME];
@@ -199,7 +199,7 @@ typedef struct player_s
     int zoom_fov;
 
     // This is only used between levels,
-    // mo->health is used during levels.
+    // mo->health_ is used during levels.
     float health;
 
     // Armour points for each type
@@ -266,7 +266,7 @@ typedef struct player_s
     int bonuscount;
 
     // Who did damage (nullptr for floors/ceilings).
-    mobj_t *attacker;
+    MapObject *attacker;
 
     // how much damage was done (used for status bar)
     float damage_pain;
@@ -365,16 +365,16 @@ void GamePlayerFinishLevel(player_t *p, bool keep_cards);
 void GameMarkPlayerAvatars(void);
 void GameRemoveOldAvatars(void);
 
-bool GameCheckConditions(mobj_t *mo, ConditionCheck *cond);
+bool GameCheckConditions(MapObject *mo, ConditionCheck *cond);
 
 void GameClearPlayerStarts(void);
 
-void GameAddDeathmatchStart(const spawnpoint_t &point);
-void GameAddCoopStart(const spawnpoint_t &point);
-void GameAddHubStart(const spawnpoint_t &point);
-void GameAddVoodooDoll(const spawnpoint_t &point);
+void GameAddDeathmatchStart(const SpawnPoint &point);
+void GameAddCoopStart(const SpawnPoint &point);
+void GameAddHubStart(const SpawnPoint &point);
+void GameAddVoodooDoll(const SpawnPoint &point);
 
-spawnpoint_t *GameFindCoopPlayer(int pnum);
+SpawnPoint *GameFindCoopPlayer(int pnum);
 
 #endif // __E_PLAYER_H__
 

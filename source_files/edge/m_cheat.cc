@@ -210,7 +210,7 @@ bool CheatResponder(InputEvent *ev)
         pl->cheats ^= CF_GODMODE;
         if (pl->cheats & CF_GODMODE)
         {
-            if (pl->mo) { pl->health = pl->mo->health = pl->mo->spawnhealth; }
+            if (pl->mo) { pl->health = pl->mo->health_ = pl->mo->spawn_health_; }
             ConsoleMessageLDF("GodModeOn");
         }
         else
@@ -270,7 +270,7 @@ bool CheatResponder(InputEvent *ev)
 #if 0  // FIXME: this crashes ?
 	else if (CheatCheckSequence(&cheat_take_all, key))
 	{
-		P_GiveInitialBenefits(pl, pl->mo->info);
+		P_GiveInitialBenefits(pl, pl->mo->info_);
 
 		// -ACB- 1998/08/26 Stuff removed language reference
 		ConsoleMessageLDF("StuffRemoval");
@@ -288,14 +288,14 @@ bool CheatResponder(InputEvent *ev)
     {
         int killcount = 0;
 
-        mobj_t *mo;
-        mobj_t *next;
+        MapObject *mo;
+        MapObject *next;
 
-        for (mo = mobjlisthead; mo; mo = next)
+        for (mo = map_object_list_head; mo; mo = next)
         {
-            next = mo->next;
+            next = mo->next_;
 
-            if ((mo->extendedflags & kExtendedFlagMonster) && (mo->health > 0))
+            if ((mo->extended_flags_ & kExtendedFlagMonster) && (mo->health_ > 0))
             {
                 P_TelefragMobj(mo, nullptr, nullptr);
                 killcount++;
@@ -374,7 +374,7 @@ bool CheatResponder(InputEvent *ev)
     // 'mypos' for player position
     else if (CheatCheckSequence(&cheat_my_position, key))
     {
-        ConsoleMessage("ang=%f;x,y=(%f,%f)", epi::DegreesFromBAM(pl->mo->angle),
+        ConsoleMessage("ang=%f;x,y=(%f,%f)", epi::DegreesFromBAM(pl->mo->angle_),
                        pl->mo->x, pl->mo->y);
     }
 

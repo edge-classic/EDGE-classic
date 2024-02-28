@@ -64,7 +64,7 @@ extern ConsoleVariable r_fov;
 
 extern int framecount;
 
-extern struct mobj_s *background_camera_mo;
+extern MapObject *background_camera_mo;
 
 #define DOOM_SCREEN_ASPECT (320.0f / 200.0f)
 #define DOOHMM_PIXEL_ASPECT  (5.0f / 6.0f)
@@ -97,7 +97,7 @@ void                 R_InitShaderTables();
 //
 
 // Renders the view for the next frame.
-void R_Render(int x, int y, int w, int h, mobj_t *camera, bool full_height, float expand_w);
+void R_Render(int x, int y, int w, int h, MapObject *camera, bool full_height, float expand_w);
 
 // Called by startup code.
 void R_Init(void);

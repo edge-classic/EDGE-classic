@@ -762,7 +762,7 @@ md2_model_c *MD3_LoadModel(epi::File *f)
 
 typedef struct model_coord_data_s
 {
-    mobj_t *mo;
+    MapObject *mo;
 
     md2_model_c *model;
 
@@ -877,7 +877,7 @@ static void ShadeNormals(abstract_shader_c *shader, model_coord_data_t *data, bo
     }
 }
 
-static void DLIT_Model(mobj_t *mo, void *dataptr)
+static void DLIT_Model(MapObject *mo, void *dataptr)
 {
     model_coord_data_t *data = (model_coord_data_t *)dataptr;
 
@@ -885,9 +885,9 @@ static void DLIT_Model(mobj_t *mo, void *dataptr)
     if (mo == data->mo)
         return;
 
-    SYS_ASSERT(mo->dlight.shader);
+    SYS_ASSERT(mo->dynamic_light_.shader);
 
-    ShadeNormals(mo->dlight.shader, data, false);
+    ShadeNormals(mo->dynamic_light_.shader, data, false);
 }
 
 static int MD2_MulticolMaxRGB(model_coord_data_t *data, bool additive)
@@ -989,7 +989,7 @@ static inline void ModelCoordFunc(model_coord_data_t *data, int v_idx, HMM_Vec3 
 }
 
 void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, int frame1, int frame2, float lerp,
-                     float x, float y, float z, mobj_t *mo, region_properties_t *props, float scale, float aspect,
+                     float x, float y, float z, MapObject *mo, region_properties_t *props, float scale, float aspect,
                      float bias, int rotation)
 {
     // check if frames are valid
@@ -1006,9 +1006,9 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
 
     model_coord_data_t data;
 
-    data.is_fuzzy = (mo->flags & kMapObjectFlagFuzzy) ? true : false;
+    data.is_fuzzy = (mo->flags_ & kMapObjectFlagFuzzy) ? true : false;
 
-    float trans = mo->visibility;
+    float trans = mo->visibility_;
 
     if (trans <= 0)
         return;
@@ -1025,7 +1025,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
     if (trans < 0.99f || skin_img->opacity == OPAC_Complex)
         blending |= BL_Alpha;
 
-    if (mo->hyperflags & kHyperFlagNoZBufferUpdate)
+    if (mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
         blending |= BL_NoZBuf;
 
     if (MIR_Reflective())
@@ -1051,11 +1051,11 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
     data.z_scale  = scale * MIR_ZScale();
     data.bias     = bias;
 
-    bool tilt = is_weapon || (mo->flags & kMapObjectFlagMissile) || (mo->hyperflags & kHyperFlagForceModelTilt);
+    bool tilt = is_weapon || (mo->flags_ & kMapObjectFlagMissile) || (mo->hyper_flags_ & kHyperFlagForceModelTilt);
 
-    MathBAMAngleToMatrix(tilt ? ~mo->vertangle : 0, &data.kx_mat, &data.kz_mat);
+    MathBAMAngleToMatrix(tilt ? ~mo->vertical_angle_ : 0, &data.kx_mat, &data.kz_mat);
 
-    BAMAngle ang = mo->angle + rotation;
+    BAMAngle ang = mo->angle_ + rotation;
 
     MIR_Angle(ang);
 
@@ -1093,24 +1093,24 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
     }
     else /* (! data.is_fuzzy) */
     {
-        skin_tex = W_ImageCache(skin_img, false, ren_fx_colmap ? ren_fx_colmap : is_weapon ? nullptr : mo->info->palremap_);
+        skin_tex = W_ImageCache(skin_img, false, ren_fx_colmap ? ren_fx_colmap : is_weapon ? nullptr : mo->info_->palremap_);
 
         data.im_right = IM_RIGHT(skin_img);
         data.im_top   = IM_TOP(skin_img);
 
-        abstract_shader_c *shader = R_GetColormapShader(props, mo->state->bright, mo->subsector->sector);
+        abstract_shader_c *shader = R_GetColormapShader(props, mo->state_->bright, mo->subsector_->sector);
 
         ShadeNormals(shader, &data, true);
 
         if (use_dlights && ren_extralight < 250)
         {
-            float r = mo->radius;
+            float r = mo->radius_;
 
-            DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height, DLIT_Model,
+            DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height_, DLIT_Model,
                                    &data);
 
-            SectorGlowIterator(mo->subsector->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
-                                 mo->z + mo->height, DLIT_Model, &data);
+            SectorGlowIterator(mo->subsector_->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
+                                 mo->z + mo->height_, DLIT_Model, &data);
         }
     }
 
@@ -1118,12 +1118,12 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
 
     int num_pass = data.is_fuzzy ? 1 : (detail_level > 0 ? 4 : 3);
 
-    RGBAColor fc_to_use = mo->subsector->sector->props.fog_color;
-    float    fd_to_use = mo->subsector->sector->props.fog_density;
+    RGBAColor fc_to_use = mo->subsector_->sector->props.fog_color;
+    float    fd_to_use = mo->subsector_->sector->props.fog_density;
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
     {
-        if (IS_SKY(mo->subsector->sector->ceil))
+        if (IS_SKY(mo->subsector_->sector->ceil))
         {
             fc_to_use = current_map->outdoor_fog_color_;
             fd_to_use = 0.01f * current_map->outdoor_fog_density_;

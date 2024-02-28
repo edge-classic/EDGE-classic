@@ -101,7 +101,7 @@ float plane_z_bob; // for floor/ceiling bob DDFSECT stuff
 BAMAngle clip_left, clip_right;
 BAMAngle clip_scope;
 
-mobj_t *view_cam_mo;
+MapObject *view_cam_mo;
 
 float view_expand_w;
 
@@ -828,13 +828,13 @@ static void PlaneCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Ve
     *lit_pos = *pos;
 }
 
-static void DLIT_Wall(mobj_t *mo, void *dataptr)
+static void DLIT_Wall(MapObject *mo, void *dataptr)
 {
     wall_coord_data_t *data = (wall_coord_data_t *)dataptr;
 
     // light behind the plane ?
-    if (!mo->info->dlight_[0].leaky_ && !data->mid_masked &&
-        !(mo->subsector->sector->floor_vertex_slope || mo->subsector->sector->ceil_vertex_slope))
+    if (!mo->info_->dlight_[0].leaky_ && !data->mid_masked &&
+        !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceil_vertex_slope))
     {
         float mx = mo->x;
         float my = mo->y;
@@ -847,62 +847,62 @@ static void DLIT_Wall(mobj_t *mo, void *dataptr)
             return;
     }
 
-    SYS_ASSERT(mo->dlight.shader);
+    SYS_ASSERT(mo->dynamic_light_.shader);
 
     int blending = (data->blending & ~BL_Alpha) | BL_Add;
 
-    mo->dlight.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id, data->trans, &data->pass, blending,
+    mo->dynamic_light_.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id, data->trans, &data->pass, blending,
                                 data->mid_masked, data, WallCoordFunc);
 }
 
-static void GLOWLIT_Wall(mobj_t *mo, void *dataptr)
+static void GLOWLIT_Wall(MapObject *mo, void *dataptr)
 {
     wall_coord_data_t *data = (wall_coord_data_t *)dataptr;
 
-    SYS_ASSERT(mo->dlight.shader);
+    SYS_ASSERT(mo->dynamic_light_.shader);
 
     int blending = (data->blending & ~BL_Alpha) | BL_Add;
 
-    mo->dlight.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id, data->trans, &data->pass, blending,
+    mo->dynamic_light_.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id, data->trans, &data->pass, blending,
                                 data->mid_masked, data, WallCoordFunc);
 }
 
-static void DLIT_Plane(mobj_t *mo, void *dataptr)
+static void DLIT_Plane(MapObject *mo, void *dataptr)
 {
     plane_coord_data_t *data = (plane_coord_data_t *)dataptr;
 
     // light behind the plane ?
-    if (!mo->info->dlight_[0].leaky_ &&
-        !(mo->subsector->sector->floor_vertex_slope || mo->subsector->sector->ceil_vertex_slope))
+    if (!mo->info_->dlight_[0].leaky_ &&
+        !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceil_vertex_slope))
     {
         float z = data->vert[0].Z;
 
         if (data->slope)
             z += Slope_GetHeight(data->slope, mo->x, mo->y);
 
-        if ((MO_MIDZ(mo) > z) != (data->normal.Z > 0))
+        if ((MapObjectMidZ(mo) > z) != (data->normal.Z > 0))
             return;
     }
 
     // NOTE: distance already checked in DynamicLightIterator
 
-    SYS_ASSERT(mo->dlight.shader);
+    SYS_ASSERT(mo->dynamic_light_.shader);
 
     int blending = (data->blending & ~BL_Alpha) | BL_Add;
 
-    mo->dlight.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id, data->trans, &data->pass, blending,
+    mo->dynamic_light_.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id, data->trans, &data->pass, blending,
                                 false /* masked */, data, PlaneCoordFunc);
 }
 
-static void GLOWLIT_Plane(mobj_t *mo, void *dataptr)
+static void GLOWLIT_Plane(MapObject *mo, void *dataptr)
 {
     plane_coord_data_t *data = (plane_coord_data_t *)dataptr;
 
-    SYS_ASSERT(mo->dlight.shader);
+    SYS_ASSERT(mo->dynamic_light_.shader);
 
     int blending = (data->blending & ~BL_Alpha) | BL_Add;
 
-    mo->dlight.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id, data->trans, &data->pass, blending, false,
+    mo->dynamic_light_.shader->WorldMix(GL_POLYGON, data->v_count, data->tex_id, data->trans, &data->pass, blending, false,
                                 data, PlaneCoordFunc);
 }
 
@@ -1847,21 +1847,21 @@ static void FloodCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Ve
     texc->Y = rx * data->y_mat.X + ry * data->y_mat.Y;
 }
 
-static void DLIT_Flood(mobj_t *mo, void *dataptr)
+static void DLIT_Flood(MapObject *mo, void *dataptr)
 {
     flood_emu_data_t *data = (flood_emu_data_t *)dataptr;
 
     // light behind the plane ?
-    if (!mo->info->dlight_[0].leaky_ &&
-        !(mo->subsector->sector->floor_vertex_slope || mo->subsector->sector->ceil_vertex_slope))
+    if (!mo->info_->dlight_[0].leaky_ &&
+        !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceil_vertex_slope))
     {
-        if ((MO_MIDZ(mo) > data->plane_h) != (data->normal.Z > 0))
+        if ((MapObjectMidZ(mo) > data->plane_h) != (data->normal.Z > 0))
             return;
     }
 
     // NOTE: distance already checked in DynamicLightIterator
 
-    SYS_ASSERT(mo->dlight.shader);
+    SYS_ASSERT(mo->dynamic_light_.shader);
 
     float sx = cur_seg->v1->X;
     float sy = cur_seg->v1->Y;
@@ -1884,7 +1884,7 @@ static void DLIT_Flood(mobj_t *mo, void *dataptr)
             data->vert[col * 2 + 1] = {{x, y, z + data->dh / data->piece_row}};
         }
 
-        mo->dlight.shader->WorldMix(GL_QUAD_STRIP, data->v_count, data->tex_id, 1.0, &data->pass, blending, false, data,
+        mo->dynamic_light_.shader->WorldMix(GL_QUAD_STRIP, data->v_count, data->tex_id, 1.0, &data->pass, blending, false, data,
                                     FloodCoordFunc);
     }
 }
@@ -2877,7 +2877,7 @@ static void RGL_WalkSubsector(int num)
 
         if (!skip)
         {
-            for (mobj_t *mo = sub->thinglist; mo; mo = mo->snext)
+            for (MapObject *mo = sub->thinglist; mo; mo = mo->subsector_next_)
             {
                 RGL_WalkThing(K, mo);
             }
@@ -2896,7 +2896,7 @@ static void RGL_WalkSubsector(int num)
     }
     else
     {
-        for (mobj_t *mo = sub->thinglist; mo; mo = mo->snext)
+        for (MapObject *mo = sub->thinglist; mo; mo = mo->subsector_next_)
         {
             RGL_WalkThing(K, mo);
         }
@@ -3146,7 +3146,7 @@ static void RGL_DrawSubsector(drawsub_c *dsub, bool mirror_sub)
 
 static void DoWeaponModel(void)
 {
-    player_t *pl = view_cam_mo->player;
+    player_t *pl = view_cam_mo->player_;
 
     if (!pl)
         return;
@@ -3246,7 +3246,7 @@ static void RGL_RenderTrueBSP(void)
 
     drawsubs.clear();
 
-    player_t *v_player = view_cam_mo->player;
+    player_t *v_player = view_cam_mo->player_;
 
     // handle powerup effects and BOOM colormaps
     RGL_RainbowEffect(v_player);
@@ -3323,7 +3323,7 @@ static void RGL_RenderTrueBSP(void)
 #endif
 }
 
-static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
+static void InitCamera(MapObject *mo, bool full_height, float expand_w)
 {
     float fov = HMM_Clamp(5, r_fov.f_, 175);
 
@@ -3347,11 +3347,11 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
 
     viewiszoomed = false;
 
-    if (mo->player && mo->player->zoom_fov > 0)
+    if (mo->player_ && mo->player_->zoom_fov > 0)
     {
         viewiszoomed = true;
 
-        float new_slope = tan(mo->player->zoom_fov * HMM_PI / 360.0);
+        float new_slope = tan(mo->player_->zoom_fov * HMM_PI / 360.0);
 
         view_y_slope *= new_slope / view_x_slope;
         view_x_slope = new_slope;
@@ -3365,31 +3365,31 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
     viewx     = mo->x;
     viewy     = mo->y;
     viewz     = mo->z;
-    viewangle = mo->angle;
+    viewangle = mo->angle_;
 
-    if (mo->player)
-        viewz += mo->player->viewz;
+    if (mo->player_)
+        viewz += mo->player_->viewz;
     else
-        viewz += mo->height * 9 / 10;
+        viewz += mo->height_ * 9 / 10;
 
-    viewsubsector = mo->subsector;
-    viewvertangle = mo->vertangle;
+    viewsubsector = mo->subsector_;
+    viewvertangle = mo->vertical_angle_;
     view_props    = R_PointGetProps(viewsubsector, viewz);
 
-    if (mo->player)
+    if (mo->player_)
     {
         if (!level_flags.mlook)
             viewvertangle = 0;
 
-        viewvertangle += epi::BAMFromATan(mo->player->kick_offset);
+        viewvertangle += epi::BAMFromATan(mo->player_->kick_offset);
 
         // No heads above the ceiling
-        if (viewz > mo->player->mo->ceilingz - 2)
-            viewz = mo->player->mo->ceilingz - 2;
+        if (viewz > mo->player_->mo->ceiling_z_ - 2)
+            viewz = mo->player_->mo->ceiling_z_ - 2;
 
         // No heads below the floor, please
-        if (viewz < mo->player->mo->floorz + 2)
-            viewz = mo->player->mo->floorz + 2;
+        if (viewz < mo->player_->mo->floor_z_ + 2)
+            viewz = mo->player_->mo->floor_z_ + 2;
     }
 
     // do some more stuff
@@ -3450,7 +3450,7 @@ static void InitCamera(mobj_t *mo, bool full_height, float expand_w)
     }
 }
 
-void R_Render(int x, int y, int w, int h, mobj_t *camera, bool full_height, float expand_w)
+void R_Render(int x, int y, int w, int h, MapObject *camera, bool full_height, float expand_w)
 {
     EDGE_ZoneScoped;
 

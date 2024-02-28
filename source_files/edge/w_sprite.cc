@@ -44,7 +44,7 @@
 #include "w_epk.h"
 #include "w_wad.h"
 
-#include "p_local.h" // mobjlisthead
+#include "p_local.h" // map_object_list_head
 
 #include "dm_data.h" // patch_t
 
@@ -739,14 +739,14 @@ void W_PrecacheSprites(void)
     uint8_t *sprite_present = new uint8_t[numsprites];
     memset(sprite_present, 0, numsprites);
 
-    for (mobj_t *mo = mobjlisthead; mo; mo = mo->next)
+    for (MapObject *mo = map_object_list_head; mo; mo = mo->next_)
     {
-        SYS_ASSERT(mo->state);
+        SYS_ASSERT(mo->state_);
 
-        if (mo->state->sprite < 1 || mo->state->sprite >= numsprites)
+        if (mo->state_->sprite < 1 || mo->state_->sprite >= numsprites)
             continue;
 
-        sprite_present[mo->state->sprite] = 1;
+        sprite_present[mo->state_->sprite] = 1;
     }
 
     for (int i = 1; i < numsprites; i++) // ignore 0

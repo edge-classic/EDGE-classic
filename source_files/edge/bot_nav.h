@@ -33,7 +33,7 @@ enum BotPathNodeFlag
 
 struct BotPathNode
 {
-    position_c   pos{0, 0, 0};
+    Position   pos{0, 0, 0};
     int          flags = kBotPathNodeNormal;
     const seg_t *seg   = nullptr;
 };
@@ -49,31 +49,31 @@ class BotPath
 
     bool Finished() const { return along_ == nodes_.size(); }
 
-    position_c CurrentDestination() const;
-    position_c CurrentFrom() const;
+    Position CurrentDestination() const;
+    Position CurrentFrom() const;
 
     float    CurrentLength() const;
     BAMAngle CurrentAngle() const;
 
-    bool ReachedDestination(const position_c *pos) const;
+    bool ReachedDestination(const Position *pos) const;
 };
 
 void BotNavigateAnalyseLevel();
 void BotNavigateFreeLevel();
 
-float BotNavigateEvaluateBigItem(const mobj_t *mo);
-bool  BotNavigateNextRoamPoint(position_c &out);
+float BotNavigateEvaluateBigItem(const MapObject *mo);
+bool  BotNavigateNextRoamPoint(Position &out);
 
 // attempt to find a traversible path, returns nullptr if failed.
-BotPath *BotNavigateFindPath(const position_c *start, const position_c *finish,
+BotPath *BotNavigateFindPath(const Position *start, const Position *finish,
                              int flags);
 
 // find an pickup item in a nearby area, returns nullptr if none found.
-BotPath *BotNavigateFindThing(DeathBot *bot, float radius, mobj_t *&best);
+BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best);
 
 // find an enemy to fight, or nullptr if none found.
 // caller is responsible to do a sight checks.
-mobj_t *BotNavigateFindEnemy(DeathBot *bot, float radius);
+MapObject *BotNavigateFindEnemy(DeathBot *bot, float radius);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

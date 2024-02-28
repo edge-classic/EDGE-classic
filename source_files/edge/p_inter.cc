@@ -57,7 +57,7 @@ typedef struct
     bool       lose_em; // lose stuff if true
 
     player_t *player;  // player picking it up
-    mobj_t   *special; // object to pick up
+    MapObject   *special; // object to pick up
     bool      dropped; // object was dropped by a monster
 
     int new_weap; // index (for player) of a new weapon, -1 = none
@@ -389,9 +389,9 @@ static void GiveHealth(pickup_info_t *pu, Benefit *be)
             return;
 
         pu->player->health -= be->amount;
-        pu->player->mo->health = pu->player->health;
+        pu->player->mo->health_ = pu->player->health;
 
-        if (pu->player->mo->health <= 0)
+        if (pu->player->mo->health_ <= 0)
         {
             P_KillMobj(nullptr, pu->player->mo);
             // return;
@@ -409,7 +409,7 @@ static void GiveHealth(pickup_info_t *pu, Benefit *be)
     if (pu->player->health > be->limit)
         pu->player->health = be->limit;
 
-    pu->player->mo->health = pu->player->health;
+    pu->player->mo->health_ = pu->player->health;
 
     pu->got_it = true;
 }
@@ -443,7 +443,7 @@ static void GiveArmour(pickup_info_t *pu, Benefit *be)
     float amount  = be->amount;
     float upgrade = 0;
 
-    if (!pu->special || (pu->special->extendedflags & kExtendedFlagSimpleArmour))
+    if (!pu->special || (pu->special->extended_flags_ & kExtendedFlagSimpleArmour))
     {
         float slack = be->limit - pu->player->armours[a_class];
 
@@ -485,9 +485,9 @@ static void GiveArmour(pickup_info_t *pu, Benefit *be)
     pu->player->armours[a_class] += amount;
 
     // -AJA- 2007/08/22: armor associations
-    if (pu->special && pu->special->info->armour_protect_ >= 0)
+    if (pu->special && pu->special->info_->armour_protect_ >= 0)
     {
-        pu->player->armour_types[a_class] = pu->special->info;
+        pu->player->armour_types[a_class] = pu->special->info_;
     }
 
     if (upgrade > 0)
@@ -582,7 +582,7 @@ static void GivePower(pickup_info_t *pu, Benefit *be)
     // special handling for scuba...
     if (be->sub.type == kPowerTypeScuba)
     {
-        pu->player->air_in_lungs = pu->player->mo->info->lung_capacity_;
+        pu->player->air_in_lungs = pu->player->mo->info_->lung_capacity_;
     }
 
     pu->got_it = true;
@@ -752,7 +752,7 @@ bool P_HasBenefitInList(player_t *player, Benefit *list)
 // benefits should be taken away instead.  Returns true if _any_
 // benefit was picked up (or lost), or false if none of them were.
 //
-bool P_GiveBenefitList(player_t *player, mobj_t *special, Benefit *list, bool lose_em)
+bool P_GiveBenefitList(player_t *player, MapObject *special, Benefit *list, bool lose_em)
 {
     pickup_info_t info;
 
@@ -779,7 +779,7 @@ bool P_GiveBenefitList(player_t *player, mobj_t *special, Benefit *list, bool lo
 //
 // RunPickupEffects
 //
-static void RunPickupEffects(player_t *player, mobj_t *special, PickupEffect *list)
+static void RunPickupEffects(player_t *player, MapObject *special, PickupEffect *list)
 {
     for (; list; list = list->next_)
     {
@@ -814,34 +814,34 @@ static void RunPickupEffects(player_t *player, mobj_t *special, PickupEffect *li
 //  picked up.  Picked up object is set to death frame instead
 //  of removed so that effects can happen.
 //
-void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
+void P_TouchSpecialThing(MapObject *special, MapObject *toucher)
 {
     float delta = special->z - toucher->z;
 
     // out of reach
-    if (delta > toucher->height || delta < -special->height)
+    if (delta > toucher->height_ || delta < -special->height_)
         return;
 
-    if (!toucher->player)
+    if (!toucher->player_)
         return;
 
     // Dead thing touching. Can happen with a sliding player corpse.
-    if (toucher->health <= 0)
+    if (toucher->health_ <= 0)
         return;
 
     // VOODOO DOLLS: Do not pick up the item if completely still
-    if (toucher->is_voodoo && AlmostEquals(toucher->mom.X, 0.0f) && AlmostEquals(toucher->mom.Y, 0.0f) &&
-        AlmostEquals(toucher->mom.Z, 0.0f))
+    if (toucher->is_voodoo_ && AlmostEquals(toucher->momentum_.X, 0.0f) && AlmostEquals(toucher->momentum_.Y, 0.0f) &&
+        AlmostEquals(toucher->momentum_.Z, 0.0f))
         return;
 
     // -KM- 1998/09/27 Sounds.ddf
-    SoundEffect *sound = special->info->activesound_;
+    SoundEffect *sound = special->info_->activesound_;
 
     pickup_info_t info;
 
-    info.player  = toucher->player;
+    info.player  = toucher->player_;
     info.special = special;
-    info.dropped = (special && (special->flags & kMapObjectFlagDropped)) ? true : false;
+    info.dropped = (special && (special->flags_ & kMapObjectFlagDropped)) ? true : false;
 
     info.new_weap = -1; // the most recently added weapon (must be new)
     info.new_ammo = -1; // got fresh ammo (old count was zero).
@@ -852,21 +852,21 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
     info.no_ammo = false;
 
     // First handle lost benefits
-    info.list    = special->info->lose_benefits_;
+    info.list    = special->info_->lose_benefits_;
     info.lose_em = true;
     DoGiveBenefitList(&info);
 
     // Run through the list of all pickup benefits...
-    info.list    = special->info->pickup_benefits_;
+    info.list    = special->info_->pickup_benefits_;
     info.lose_em = false;
     DoGiveBenefitList(&info);
 
-    if (special->flags & kMapObjectFlagCountItem)
+    if (special->flags_ & kMapObjectFlagCountItem)
     {
         info.player->itemcount++;
         info.got_it = true;
     }
-    else if (special->hyperflags & kHyperFlagForcePickup)
+    else if (special->hyper_flags_ & kHyperFlagForcePickup)
     {
         info.got_it  = true;
         info.keep_it = false;
@@ -877,9 +877,9 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
 
     if (!info.keep_it)
     {
-        special->health = 0;
+        special->health_ = 0;
         if (time_stop_active) // Hide pickup after gaining benefit while time stop is still active
-            special->visibility = INVISIBLE;
+            special->visibility_ = INVISIBLE;
         P_KillMobj(info.player->mo, special, nullptr);
     }
 
@@ -890,9 +890,9 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
         if (info.player->bonuscount > BONUS_LIMIT)
             info.player->bonuscount = BONUS_LIMIT;
 
-        if (special->info->pickup_message_ != "" && language.IsValidRef(special->info->pickup_message_.c_str()))
+        if (special->info_->pickup_message_ != "" && language.IsValidRef(special->info_->pickup_message_.c_str()))
         {
-            ConsolePlayerMessage(info.player->pnum, "%s", language[special->info->pickup_message_]);
+            ConsolePlayerMessage(info.player->pnum, "%s", language[special->info_->pickup_message_]);
         }
 
         if (sound)
@@ -911,7 +911,7 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
             P_TrySwitchNewWeapon(info.player, info.new_weap, (AmmunitionType)info.new_ammo);
     }
 
-    RunPickupEffects(info.player, special, special->info->pickup_effects_);
+    RunPickupEffects(info.player, special, special->info_->pickup_effects_);
 }
 
 // FIXME: move this into utility code
@@ -969,7 +969,7 @@ static std::string PatternSubst(const char *format, const std::vector<std::strin
     return result;
 }
 
-static void DoObituary(const char *format, mobj_t *victim, mobj_t *killer)
+static void DoObituary(const char *format, MapObject *victim, MapObject *killer)
 {
     std::vector<std::string> keywords;
 
@@ -981,10 +981,10 @@ static void DoObituary(const char *format, mobj_t *victim, mobj_t *killer)
 
     std::string msg = PatternSubst(format, keywords);
 
-    ConsolePlayerMessage(victim->player->pnum, "%s", msg.c_str());
+    ConsolePlayerMessage(victim->player_->pnum, "%s", msg.c_str());
 }
 
-void P_ObituaryMessage(mobj_t *victim, mobj_t *killer, const DamageClass *damtype)
+void P_ObituaryMessage(MapObject *victim, MapObject *killer, const DamageClass *damtype)
 {
     if (!var_obituaries)
         return;
@@ -1021,38 +1021,38 @@ void P_ObituaryMessage(mobj_t *victim, mobj_t *killer, const DamageClass *damtyp
 // -AJA- 1999/09/12: Now uses P_SetMobjStateDeferred, since this
 //       routine can be called by TryMove/PIT_CheckRelThing/etc.
 //
-void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool weak_spot)
+void P_KillMobj(MapObject *source, MapObject *target, const DamageClass *damtype, bool weak_spot)
 {
     // -AJA- 2006/09/10: Voodoo doll handling for coop
-    if (target->player && target->player->mo != target)
+    if (target->player_ && target->player_->mo != target)
     {
-        P_KillMobj(source, target->player->mo, damtype, weak_spot);
-        target->player = nullptr;
+        P_KillMobj(source, target->player_->mo, damtype, weak_spot);
+        target->player_ = nullptr;
     }
 
-    bool nofog = (target->flags & kMapObjectFlagSpecial);
+    bool nofog = (target->flags_ & kMapObjectFlagSpecial);
 
-    target->flags &= ~(kMapObjectFlagSpecial | kMapObjectFlagShootable | kMapObjectFlagFloat | kMapObjectFlagSkullFly | kMapObjectFlagTouchy);
-    target->extendedflags &= ~(kExtendedFlagBounce | kExtendedFlagUsable | kExtendedFlagClimbable);
+    target->flags_ &= ~(kMapObjectFlagSpecial | kMapObjectFlagShootable | kMapObjectFlagFloat | kMapObjectFlagSkullFly | kMapObjectFlagTouchy);
+    target->extended_flags_ &= ~(kExtendedFlagBounce | kExtendedFlagUsable | kExtendedFlagClimbable);
 
-    if (!(target->extendedflags & kExtendedFlagNoGravityOnKill))
-        target->flags &= ~kMapObjectFlagNoGravity;
+    if (!(target->extended_flags_ & kExtendedFlagNoGravityOnKill))
+        target->flags_ &= ~kMapObjectFlagNoGravity;
 
-    target->flags |= kMapObjectFlagCorpse | kMapObjectFlagDropOff;
-    target->height /= (4 / (target->mbf21flags & kMBF21FlagLowGravity ? 8 : 1));
+    target->flags_ |= kMapObjectFlagCorpse | kMapObjectFlagDropOff;
+    target->height_ /= (4 / (target->mbf21_flags_ & kMBF21FlagLowGravity ? 8 : 1));
 
     RAD_MonsterIsDead(target);
 
-    if (source && source->player)
+    if (source && source->player_)
     {
         // count for intermission
-        if (target->flags & kMapObjectFlagCountKill)
-            source->player->killcount++;
+        if (target->flags_ & kMapObjectFlagCountKill)
+            source->player_->killcount++;
 
-        if (target->info->kill_benefits_)
+        if (target->info_->kill_benefits_)
         {
             pickup_info_t info;
-            info.player  = source->player;
+            info.player  = source->player_;
             info.special = nullptr;
             info.dropped = false;
 
@@ -1064,66 +1064,66 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool
             info.silent  = false;
             info.no_ammo = false;
 
-            info.list    = target->info->kill_benefits_;
+            info.list    = target->info_->kill_benefits_;
             info.lose_em = false;
             DoGiveBenefitList(&info);
         }
 
-        if (target->player)
+        if (target->player_)
         {
             // Killed a team mate?
-            if (target->side & source->side)
+            if (target->side_ & source->side_)
             {
-                source->player->frags--;
-                source->player->totalfrags--;
+                source->player_->frags--;
+                source->player_->totalfrags--;
             }
             else
             {
-                source->player->frags++;
-                source->player->totalfrags++;
+                source->player_->frags++;
+                source->player_->totalfrags++;
             }
         }
     }
-    else if (SP_MATCH() && (target->flags & kMapObjectFlagCountKill))
+    else if (SP_MATCH() && (target->flags_ & kMapObjectFlagCountKill))
     {
         // count all monster deaths,
         // even those caused by other monsters
         players[consoleplayer]->killcount++;
     }
 
-    if (target->player)
+    if (target->player_)
     {
         P_ObituaryMessage(target, source, damtype);
 
         // count environment kills against you
         if (!source)
         {
-            target->player->frags--;
-            target->player->totalfrags--;
+            target->player_->frags--;
+            target->player_->totalfrags--;
         }
 
-        target->flags &= ~kMapObjectFlagSolid;
-        target->player->playerstate    = PST_DEAD;
-        target->player->std_viewheight = HMM_MIN(DEATHVIEWHEIGHT, target->height / 3);
-        target->player->actual_speed   = 0;
+        target->flags_ &= ~kMapObjectFlagSolid;
+        target->player_->playerstate    = PST_DEAD;
+        target->player_->std_viewheight = HMM_MIN(DEATHVIEWHEIGHT, target->height_ / 3);
+        target->player_->actual_speed   = 0;
 
-        P_DropWeapon(target->player);
+        P_DropWeapon(target->player_);
 
         // don't die in auto map, switch view prior to dying
-        if (target->player == players[consoleplayer] && automap_active)
+        if (target->player_ == players[consoleplayer] && automap_active)
             AutomapStop();
 
         // don't immediately restart when USE key was pressed
-        if (target->player == players[consoleplayer])
+        if (target->player_ == players[consoleplayer])
             EventClearInput();
     }
 
     int state    = 0;
     bool       overkill = false;
 
-    if (target->info->gib_health_ < 0 && target->health < target->info->gib_health_)
+    if (target->info_->gib_health_ < 0 && target->health_ < target->info_->gib_health_)
         overkill = true;
-    else if (target->health < -target->spawnhealth)
+    else if (target->health_ < -target->spawn_health_)
         overkill = true;
 
     if (weak_spot)
@@ -1140,8 +1140,8 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool
             state += damtype->overkill_.offset_;
     }
 
-    if (state == 0 && overkill && target->info->overkill_state_)
-        state = target->info->overkill_state_;
+    if (state == 0 && overkill && target->info_->overkill_state_)
+        state = target->info_->overkill_state_;
 
     if (state == 0 && damtype && damtype->death_.label_ != "")
     {
@@ -1151,26 +1151,26 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool
     }
 
     if (state == 0)
-        state = target->info->death_state_;
+        state = target->info_->death_state_;
 
     if (g_gore.d_== 2 &&
-        (target->flags & kMapObjectFlagCountKill)) // Hopefully the only things with blood/gore are monsters and not "barrels", etc
+        (target->flags_ & kMapObjectFlagCountKill)) // Hopefully the only things with blood/gore are monsters and not "barrels", etc
     {
         state = 0;
         if (!nofog)
         {
-            mobj_t *fog = P_MobjCreateObject(target->x, target->y, target->z, mobjtypes.Lookup("TELEPORT_FLASH"));
-            if (fog && fog->info->chase_state_)
-                P_SetMobjStateDeferred(fog, fog->info->chase_state_, 0);
+            MapObject *fog = P_MobjCreateObject(target->x, target->y, target->z, mobjtypes.Lookup("TELEPORT_FLASH"));
+            if (fog && fog->info_->chase_state_)
+                P_SetMobjStateDeferred(fog, fog->info_->chase_state_, 0);
         }
     }
 
-    if (target->hyperflags & kHyperFlagDehackedCompatibility)
+    if (target->hyper_flags_ & kHyperFlagDehackedCompatibility)
     {
         P_SetMobjState(target, state);
-        target->tics -= RandomByteDeterministic() & 3;
-        if (target->tics < 1)
-            target->tics = 1;
+        target->tics_ -= RandomByteDeterministic() & 3;
+        if (target->tics_ < 1)
+            target->tics_ = 1;
     }
     else
     {
@@ -1179,14 +1179,14 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool
 
     // Drop stuff. This determines the kind of object spawned
     // during the death frame of a thing.
-    const MapObjectDefinition *item = target->info->dropitem_;
+    const MapObjectDefinition *item = target->info_->dropitem_;
     if (item)
     {
-        mobj_t *mo = P_MobjCreateObject(target->x, target->y, target->floorz, item);
+        MapObject *mo = P_MobjCreateObject(target->x, target->y, target->floor_z_, item);
 
         // -ES- 1998/07/18 nullptr check to prevent crashing
         if (mo)
-            mo->flags |= kMapObjectFlagDropped;
+            mo->flags_ |= kMapObjectFlagDropped;
     }
 }
 
@@ -1203,18 +1203,18 @@ void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype, bool
 //
 // -AJA- 1999/11/06: Wrote this routine.
 //
-void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust)
+void P_ThrustMobj(MapObject *target, MapObject *inflictor, float thrust)
 {
     // check for immunity against the attack
-    if (target->hyperflags & kHyperFlagInvulnerable)
+    if (target->hyper_flags_ & kHyperFlagInvulnerable)
         return;
 
     // check for lead feet ;)
-    if (target->hyperflags & kHyperFlagImmovable)
+    if (target->hyper_flags_ & kHyperFlagImmovable)
         return;
 
-    if (inflictor && inflictor->currentattack &&
-        0 == (inflictor->currentattack->attack_class_ & ~target->info->immunity_))
+    if (inflictor && inflictor->current_attack_ &&
+        0 == (inflictor->current_attack_->attack_class_ & ~target->info_->immunity_))
     {
         return;
     }
@@ -1229,9 +1229,9 @@ void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust)
     BAMAngle angle = R_PointToAngle(0, 0, dx, dy);
 
     // -ACB- 2000/03/11 Div-by-zero check...
-    SYS_ASSERT(!AlmostEquals(target->info->mass_, 0.0f));
+    SYS_ASSERT(!AlmostEquals(target->info_->mass_, 0.0f));
 
-    float push = 12.0f * thrust / target->info->mass_;
+    float push = 12.0f * thrust / target->info_->mass_;
 
     // limit thrust to reasonable values
     if (push < -40.0f)
@@ -1239,15 +1239,15 @@ void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust)
     if (push > 40.0f)
         push = 40.0f;
 
-    target->mom.X += push * epi::BAMCos(angle);
-    target->mom.Y += push * epi::BAMSin(angle);
+    target->momentum_.X += push * epi::BAMCos(angle);
+    target->momentum_.Y += push * epi::BAMSin(angle);
 
     if (level_flags.true3dgameplay)
     {
-        float dz    = MO_MIDZ(target) - MO_MIDZ(inflictor);
+        float dz    = MapObjectMidZ(target) - MapObjectMidZ(inflictor);
         float slope = P_ApproxSlope(dx, dy, dz);
 
-        target->mom.Z += push * slope / 2;
+        target->momentum_.Z += push * slope / 2;
     }
 }
 
@@ -1264,13 +1264,13 @@ void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust)
 //
 // -Lobo- 2022/07/07: Created this routine.
 //
-void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust)
+void P_PushMobj(MapObject *target, MapObject *inflictor, float thrust)
 {
     /*
-    if(tm_I.mover->mom.x > tm_I.mover->mom.y)
-        ThrustSpeed = fabsf(tm_I.mover->mom.x);
+    if(tm_I.mover->momentum_.x > tm_I.mover->momentum_.y)
+        ThrustSpeed = fabsf(tm_I.mover->momentum_.x);
     else
-        ThrustSpeed = fabsf(tm_I.mover->mom.y);
+        ThrustSpeed = fabsf(tm_I.mover->momentum_.y);
     */
 
     float dx = target->x - inflictor->x;
@@ -1283,9 +1283,9 @@ void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust)
     BAMAngle angle = R_PointToAngle(0, 0, dx, dy);
 
     // -ACB- 2000/03/11 Div-by-zero check...
-    SYS_ASSERT(!AlmostEquals(target->info->mass_, 0.0f));
+    SYS_ASSERT(!AlmostEquals(target->info_->mass_, 0.0f));
 
-    float push = 12.0f * thrust / target->info->mass_;
+    float push = 12.0f * thrust / target->info_->mass_;
 
     // limit thrust to reasonable values
     if (push < -40.0f)
@@ -1293,15 +1293,15 @@ void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust)
     if (push > 40.0f)
         push = 40.0f;
 
-    target->mom.X += push * epi::BAMCos(angle);
-    target->mom.Y += push * epi::BAMSin(angle);
+    target->momentum_.X += push * epi::BAMCos(angle);
+    target->momentum_.Y += push * epi::BAMSin(angle);
 
     if (level_flags.true3dgameplay)
     {
-        float dz    = MO_MIDZ(target) - MO_MIDZ(inflictor);
+        float dz    = MapObjectMidZ(target) - MapObjectMidZ(inflictor);
         float slope = P_ApproxSlope(dx, dy, dz);
 
-        target->mom.Z += push * slope / 2;
+        target->momentum_.Z += push * slope / 2;
     }
 }
 
@@ -1324,68 +1324,68 @@ void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust)
 // -AJA- 1999/09/12: Now uses P_SetMobjStateDeferred, since this
 //       routine can be called by TryMove/PIT_CheckRelThing/etc.
 //
-void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damage, const DamageClass *damtype,
+void P_DamageMobj(MapObject *target, MapObject *inflictor, MapObject *source, float damage, const DamageClass *damtype,
                   bool weak_spot)
 {
-    if (target->isRemoved())
+    if (target->IsRemoved())
         return;
 
-    if (!(target->flags & kMapObjectFlagShootable))
+    if (!(target->flags_ & kMapObjectFlagShootable))
         return;
 
-    if (target->health <= 0)
+    if (target->health_ <= 0)
         return;
 
     // check for immunity against the attack
-    if (target->hyperflags & kHyperFlagInvulnerable)
+    if (target->hyper_flags_ & kHyperFlagInvulnerable)
         return;
 
-    if (!weak_spot && inflictor && inflictor->currentattack &&
-        0 == (inflictor->currentattack->attack_class_ & ~target->info->immunity_))
+    if (!weak_spot && inflictor && inflictor->current_attack_ &&
+        0 == (inflictor->current_attack_->attack_class_ & ~target->info_->immunity_))
     {
         return;
     }
 
     // sanity check : don't produce references to removed objects
-    if (inflictor && inflictor->isRemoved())
+    if (inflictor && inflictor->IsRemoved())
         inflictor = nullptr;
-    if (source && source->isRemoved())
+    if (source && source->IsRemoved())
         source = nullptr;
 
     // check for immortality
-    if (target->hyperflags & kHyperFlagImmortal)
+    if (target->hyper_flags_ & kHyperFlagImmortal)
         damage = 0.0f; // do no damage
 
     // check for partial resistance against the attack
-    if (!weak_spot && damage >= 0.1f && inflictor && inflictor->currentattack &&
-        0 == (inflictor->currentattack->attack_class_ & ~target->info->resistance_))
+    if (!weak_spot && damage >= 0.1f && inflictor && inflictor->current_attack_ &&
+        0 == (inflictor->current_attack_->attack_class_ & ~target->info_->resistance_))
     {
-        damage = HMM_MAX(0.1f, damage * target->info->resist_multiply_);
+        damage = HMM_MAX(0.1f, damage * target->info_->resist_multiply_);
     }
 
     // -ACB- 1998/07/12 Use Visibility Enum
     // A Damaged Stealth Creature becomes more visible
-    if (target->flags & kMapObjectFlagStealth)
-        target->vis_target = VISIBLE;
+    if (target->flags_ & kMapObjectFlagStealth)
+        target->target_visibility_ = VISIBLE;
 
-    if (target->flags & kMapObjectFlagSkullFly)
+    if (target->flags_ & kMapObjectFlagSkullFly)
     {
-        target->mom.X = target->mom.Y = target->mom.Z = 0;
-        target->flags &= ~kMapObjectFlagSkullFly;
+        target->momentum_.X = target->momentum_.Y = target->momentum_.Z = 0;
+        target->flags_ &= ~kMapObjectFlagSkullFly;
     }
 
-    player_t *player = target->player;
+    player_t *player = target->player_;
 
     // Some close combat weapons should not
     // inflict thrust and push the victim out of reach,
     // thus kick away unless using the chainsaw.
 
-    if (inflictor && !(target->flags & kMapObjectFlagNoClip) &&
-        !(source && source->player && source->player->ready_wp >= 0 &&
-          source->player->weapons[source->player->ready_wp].info->nothrust_))
+    if (inflictor && !(target->flags_ & kMapObjectFlagNoClip) &&
+        !(source && source->player_ && source->player_->ready_wp >= 0 &&
+          source->player_->weapons[source->player_->ready_wp].info->nothrust_))
     {
         // make fall forwards sometimes
-        if (damage < 40 && damage > target->health && target->z - inflictor->z > 64 && (RandomByteDeterministic() & 1))
+        if (damage < 40 && damage > target->health_ && target->z - inflictor->z > 64 && (RandomByteDeterministic() & 1))
         {
             P_ThrustMobj(target, inflictor, -damage * 4);
         }
@@ -1440,24 +1440,24 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
 
             const MapObjectDefinition *arm_info = player->armour_types[i];
 
-            if (!arm_info || !inflictor || !inflictor->currentattack)
+            if (!arm_info || !inflictor || !inflictor->current_attack_)
                 continue;
 
             // this armor does not provide any protection for this attack
-            if (0 != (inflictor->currentattack->attack_class_ & ~arm_info->armour_class_))
+            if (0 != (inflictor->current_attack_->attack_class_ & ~arm_info->armour_class_))
                 continue;
 
-            if (0 == (inflictor->currentattack->attack_class_ & ~arm_info->immunity_))
+            if (0 == (inflictor->current_attack_->attack_class_ & ~arm_info->immunity_))
                 return; /* immune : we can go home early! */
 
-            if (damage > 0.1f && 0 == (inflictor->currentattack->attack_class_ & ~arm_info->resistance_))
+            if (damage > 0.1f && 0 == (inflictor->current_attack_->attack_class_ & ~arm_info->resistance_))
             {
                 damage = HMM_MAX(0.1f, damage * arm_info->resist_multiply_);
             }
         }
 
         // Bot Deathmatch Damange Resistance check
-        if (DEATHMATCH() && !player->isBot() && source && source->player && source->player->isBot())
+        if (DEATHMATCH() && !player->isBot() && source && source->player_ && source->player_->isBot())
         {
             if (player_deathmatch_damage_resistance.d_< 9)
             {
@@ -1483,8 +1483,8 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
             const MapObjectDefinition *arm_info = player->armour_types[i];
 
             // this armor does not provide any protection for this attack
-            if (arm_info && inflictor && inflictor->currentattack &&
-                0 != (inflictor->currentattack->attack_class_ & ~arm_info->armour_class_))
+            if (arm_info && inflictor && inflictor->current_attack_ &&
+                0 != (inflictor->current_attack_->attack_class_ & ~arm_info->armour_class_))
             {
                 continue;
             }
@@ -1544,7 +1544,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
 
         // instakill sectors
         if (damtype && damtype->instakill_)
-            damage = target->player->health + 1;
+            damage = target->player_->health + 1;
 
         // add damage after armour / invuln detection
         if (damage > 0)
@@ -1570,11 +1570,11 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
     {
         // instakill sectors
         if (damtype && damtype->instakill_)
-            damage = target->health + 1;
+            damage = target->health_ + 1;
     }
 
     // do the damage
-    target->health -= damage;
+    target->health_ -= damage;
 
     if (player)
     {
@@ -1590,31 +1590,31 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
     // Lobo 2023: Handle attack flagged with the "PLAYER_ATTACK" special.
     //  This attack will always be treated as originating from the player, even if it's an indirect secondary attack.
     //  This way the player gets his VAMPIRE health and KillBenefits.
-    if (inflictor && inflictor->currentattack && (inflictor->currentattack->flags_ & kAttackFlagPlayer))
+    if (inflictor && inflictor->current_attack_ && (inflictor->current_attack_->flags_ & kAttackFlagPlayer))
     {
         player_t *CurrentPlayer;
         CurrentPlayer = players[consoleplayer];
 
         source = CurrentPlayer->mo;
 
-        if (source && source->isRemoved()) // Sanity check?
+        if (source && source->IsRemoved()) // Sanity check?
             source = nullptr;
     }
 
     // -AJA- 2007/11/06: vampire mode!
-    if (source && source != target && source->health < source->spawnhealth &&
-        ((source->hyperflags & kHyperFlagVampire) ||
-         (inflictor && inflictor->currentattack && (inflictor->currentattack->flags_ & kAttackFlagVampire))))
+    if (source && source != target && source->health_ < source->spawn_health_ &&
+        ((source->hyper_flags_ & kHyperFlagVampire) ||
+         (inflictor && inflictor->current_attack_ && (inflictor->current_attack_->flags_ & kAttackFlagVampire))))
     {
-        float qty = (target->player ? 0.5 : 0.25) * damage;
+        float qty = (target->player_ ? 0.5 : 0.25) * damage;
 
-        source->health = HMM_MIN(source->health + qty, source->spawnhealth);
+        source->health_ = HMM_MIN(source->health_ + qty, source->spawn_health_);
 
-        if (source->player)
-            source->player->health = HMM_MIN(source->player->health + qty, source->spawnhealth);
+        if (source->player_)
+            source->player_->health = HMM_MIN(source->player_->health + qty, source->spawn_health_);
     }
 
-    if (target->health <= 0)
+    if (target->health_ <= 0)
     {
         P_KillMobj(source, target, damtype, weak_spot);
         return;
@@ -1623,21 +1623,21 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
     // enter pain states
     float pain_chance;
 
-    if (target->flags & kMapObjectFlagSkullFly)
+    if (target->flags_ & kMapObjectFlagSkullFly)
         pain_chance = 0;
-    else if (weak_spot && target->info->weak_.painchance_ >= 0)
-        pain_chance = target->info->weak_.painchance_;
-    else if (target->info->resist_painchance_ >= 0 && inflictor && inflictor->currentattack &&
-             0 == (inflictor->currentattack->attack_class_ & ~target->info->resistance_))
-        pain_chance = target->info->resist_painchance_;
+    else if (weak_spot && target->info_->weak_.painchance_ >= 0)
+        pain_chance = target->info_->weak_.painchance_;
+    else if (target->info_->resist_painchance_ >= 0 && inflictor && inflictor->current_attack_ &&
+             0 == (inflictor->current_attack_->attack_class_ & ~target->info_->resistance_))
+        pain_chance = target->info_->resist_painchance_;
     else
-        pain_chance = target->painchance; // Lobo 2023: use dynamic painchance
+        pain_chance = target->pain_chance_; // Lobo 2023: use dynamic painchance
     // pain_chance = target->info->painchance_;
 
     if (pain_chance > 0 && RandomByteTestDeterministic(pain_chance))
     {
         // setup to hit back
-        target->flags |= kMapObjectFlagJustHit;
+        target->flags_ |= kMapObjectFlagJustHit;
 
         int state = 0;
 
@@ -1652,27 +1652,27 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
         }
 
         if (state == 0)
-            state = target->info->pain_state_;
+            state = target->info_->pain_state_;
 
         if (state != 0)
             P_SetMobjStateDeferred(target, state, 0);
     }
 
     // we're awake now...
-    target->reactiontime = 0;
+    target->reaction_time_ = 0;
 
-    bool ultra_loyal = (source && (target->hyperflags & kHyperFlagUltraLoyal) && (source->side & target->side) != 0);
+    bool ultra_loyal = (source && (target->hyper_flags_ & kHyperFlagUltraLoyal) && (source->side_ & target->side_) != 0);
 
-    if ((!target->threshold || target->extendedflags & kExtendedFlagNoGrudge) && source && source != target &&
-        (!(source->extendedflags & kExtendedFlagNeverTarget)) && !target->player && !ultra_loyal)
+    if ((!target->threshold_ || target->extended_flags_ & kExtendedFlagNoGrudge) && source && source != target &&
+        (!(source->extended_flags_ & kExtendedFlagNeverTarget)) && !target->player_ && !ultra_loyal)
     {
         // if not intent on another player, chase after this one
         target->SetTarget(source);
-        target->threshold = BASETHRESHOLD;
+        target->threshold_ = BASETHRESHOLD;
 
-        if (target->state == &states[target->info->idle_state_] && target->info->chase_state_)
+        if (target->state_ == &states[target->info_->idle_state_] && target->info_->chase_state_)
         {
-            P_SetMobjStateDeferred(target, target->info->chase_state_, 0);
+            P_SetMobjStateDeferred(target, target->info_->chase_state_, 0);
         }
     }
 }
@@ -1682,27 +1682,27 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float damag
 // of them.  Even the invulnerability powerup doesn't stop it.  Also
 // used for the kill-all cheat.  Inflictor and damtype can be nullptr.
 //
-void P_TelefragMobj(mobj_t *target, mobj_t *inflictor, const DamageClass *damtype)
+void P_TelefragMobj(MapObject *target, MapObject *inflictor, const DamageClass *damtype)
 {
-    if (target->health <= 0)
+    if (target->health_ <= 0)
         return;
 
-    target->health = -1000;
+    target->health_ = -1000;
 
-    if (target->flags & kMapObjectFlagStealth)
-        target->vis_target = VISIBLE;
+    if (target->flags_ & kMapObjectFlagStealth)
+        target->target_visibility_ = VISIBLE;
 
-    if (target->flags & kMapObjectFlagSkullFly)
+    if (target->flags_ & kMapObjectFlagSkullFly)
     {
-        target->mom.X = target->mom.Y = target->mom.Z = 0;
-        target->flags &= ~kMapObjectFlagSkullFly;
+        target->momentum_.X = target->momentum_.Y = target->momentum_.Z = 0;
+        target->flags_ &= ~kMapObjectFlagSkullFly;
     }
 
-    if (target->player)
+    if (target->player_)
     {
-        target->player->attacker    = inflictor;
-        target->player->damagecount = DAMAGE_LIMIT;
-        target->player->damage_pain = target->spawnhealth;
+        target->player_->attacker    = inflictor;
+        target->player_->damagecount = DAMAGE_LIMIT;
+        target->player_->damage_pain = target->spawn_health_;
     }
 
     P_KillMobj(inflictor, target, damtype);

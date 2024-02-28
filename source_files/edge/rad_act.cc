@@ -359,7 +359,7 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
 {
     s_thing_t *t = (s_thing_t *)param;
 
-    mobj_t           *mo;
+    MapObject           *mo;
     const MapObjectDefinition *minfo;
 
     // Spawn a new map object.
@@ -384,11 +384,11 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
         return;
 
     // -AJA- 1999/10/02: -nomonsters check.
-    if (level_flags.nomonsters && (minfo->extendedflags_ & kExtendedFlagMonster))
+    if (level_flags.nomonsters && (minfo->extended_flags_ & kExtendedFlagMonster))
         return;
 
     // -AJA- 1999/10/07: -noextra check.
-    if (!level_flags.have_extra && (minfo->extendedflags_ & kExtendedFlagExtra))
+    if (!level_flags.have_extra && (minfo->extended_flags_ & kExtendedFlagExtra))
         return;
 
     // -AJA- 1999/09/11: Support for supplying Z value.
@@ -410,25 +410,25 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
 
     P_SetMobjDirAndSpeed(mo, t->angle, t->slope, 0);
 
-    mo->tag = t->tag;
+    mo->tag_ = t->tag;
 
-    mo->spawnpoint.x         = t->x;
-    mo->spawnpoint.y         = t->y;
-    mo->spawnpoint.z         = t->z;
-    mo->spawnpoint.angle     = t->angle;
-    mo->spawnpoint.vertangle = epi::BAMFromATan(t->slope);
-    mo->spawnpoint.info      = minfo;
-    mo->spawnpoint.flags     = t->ambush ? kMapObjectFlagAmbush : 0;
-    mo->spawnpoint.tag       = t->tag;
+    mo->spawnpoint_.x         = t->x;
+    mo->spawnpoint_.y         = t->y;
+    mo->spawnpoint_.z         = t->z;
+    mo->spawnpoint_.angle     = t->angle;
+    mo->spawnpoint_.vertical_angle = epi::BAMFromATan(t->slope);
+    mo->spawnpoint_.info      = minfo;
+    mo->spawnpoint_.flags     = t->ambush ? kMapObjectFlagAmbush : 0;
+    mo->spawnpoint_.tag       = t->tag;
 
     if (t->ambush)
-        mo->flags |= kMapObjectFlagAmbush;
+        mo->flags_ |= kMapObjectFlagAmbush;
 
     // -AJA- 1999/09/25: If radius trigger is a path node, then
     //       setup the thing to follow the path.
 
     if (R->info->next_in_path)
-        mo->path_trigger = R->info;
+        mo->path_trigger_ = R->info;
 }
 
 void RAD_ActDamagePlayers(rad_trigger_t *R, void *param)
@@ -472,7 +472,7 @@ void RAD_ActHealPlayers(rad_trigger_t *R, void *param)
         else
             p->health += heal->heal_amount;
 
-        p->mo->health = p->health;
+        p->mo->health_ = p->health;
     }
 }
 
@@ -543,22 +543,22 @@ void RAD_ActDamageMonsters(rad_trigger_t *R, void *param)
     // scan the mobj list
     // FIXME: optimise for fixed-sized triggers
 
-    mobj_t *mo;
-    mobj_t *next;
+    MapObject *mo;
+    MapObject *next;
 
     player_t *player = GetWhoDunnit(R);
 
-    for (mo = mobjlisthead; mo != nullptr; mo = next)
+    for (mo = map_object_list_head; mo != nullptr; mo = next)
     {
-        next = mo->next;
+        next = mo->next_;
 
-        if (info && mo->info != info)
+        if (info && mo->info_ != info)
             continue;
 
-        if (tag && (mo->tag != tag))
+        if (tag && (mo->tag_ != tag))
             continue;
 
-        if (!(mo->extendedflags & kExtendedFlagMonster) || mo->health <= 0)
+        if (!(mo->extended_flags_ & kExtendedFlagMonster) || mo->health_ <= 0)
             continue;
 
         if (!RAD_WithinRadius(mo, R->info))
@@ -593,21 +593,21 @@ void RAD_ActThingEvent(rad_trigger_t *R, void *param)
     // scan the mobj list
     // FIXME: optimise for fixed-sized triggers
 
-    mobj_t *mo;
-    mobj_t *next;
+    MapObject *mo;
+    MapObject *next;
 
-    for (mo = mobjlisthead; mo != nullptr; mo = next)
+    for (mo = map_object_list_head; mo != nullptr; mo = next)
     {
-        next = mo->next;
+        next = mo->next_;
 
-        if (info && (mo->info != info))
+        if (info && (mo->info_ != info))
             continue;
 
-        if (tag && (mo->tag != tag))
+        if (tag && (mo->tag_ != tag))
             continue;
 
         // ignore certain things (e.g. corpses)
-        if (mo->health <= 0)
+        if (mo->health_ <= 0)
             continue;
 
         if (!RAD_WithinRadius(mo, R->info))
@@ -1145,31 +1145,31 @@ void RAD_ActWaitUntilDead(rad_trigger_t *R, void *param)
     R->wud_count = 0;
 
     // find all matching monsters
-    mobj_t *mo;
-    mobj_t *next;
+    MapObject *mo;
+    MapObject *next;
 
-    for (mo = mobjlisthead; mo != nullptr; mo = next)
+    for (mo = map_object_list_head; mo != nullptr; mo = next)
     {
-        next = mo->next;
+        next = mo->next_;
 
-        if (!mo->info)
+        if (!mo->info_)
             continue;
 
-        if (mo->health <= 0)
+        if (mo->health_ <= 0)
             continue;
 
-        if (!WUD_Match(wud, mo->info->name_.c_str()))
+        if (!WUD_Match(wud, mo->info_->name_.c_str()))
             continue;
 
         if (!RAD_WithinRadius(mo, R->info))
             continue;
 
         // mark the monster
-        mo->hyperflags |= kHyperFlagWaitUntilDead;
-        if (mo->wud_tags.empty())
-            mo->wud_tags = epi::StringFormat("%d", wud->tag);
+        mo->hyper_flags_ |= kHyperFlagWaitUntilDead;
+        if (mo->wait_until_dead_tags_.empty())
+            mo->wait_until_dead_tags_ = epi::StringFormat("%d", wud->tag);
         else
-            mo->wud_tags = epi::StringFormat("%s,%d", mo->wud_tags.c_str(), wud->tag);
+            mo->wait_until_dead_tags_ = epi::StringFormat("%s,%d", mo->wait_until_dead_tags_.c_str(), wud->tag);
 
         R->wud_count++;
     }
@@ -1198,20 +1198,20 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
 {
     player_t *p = GetWhoDunnit(R);
 
-    spawnpoint_t *point = GameFindCoopPlayer(1); // start 1
+    SpawnPoint *point = GameFindCoopPlayer(1); // start 1
 
     if (!point)
         return; // should never happen but who knows...
 
     // 1. Stop the player movement and turn him
-    p->mo->mom.X = p->mo->mom.Y = p->mo->mom.Z = 0;
+    p->mo->momentum_.X = p->mo->momentum_.Y = p->mo->momentum_.Z = 0;
     p->actual_speed                            = 0;
-    p->mo->angle                               = point->angle;
+    p->mo->angle_                               = point->angle;
 
     // 2. Don't move for a bit
     int waitAbit = 30;
 
-    p->mo->reactiontime = waitAbit;
+    p->mo->reaction_time_ = waitAbit;
 
     // 3. Do our teleport fog effect
     float x = point->x;
@@ -1219,15 +1219,15 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
     float z = point->z;
 
     // spawn teleport fog
-    mobj_t *fog;
+    MapObject *fog;
     x += 20 * epi::BAMCos(point->angle);
     y += 20 * epi::BAMSin(point->angle);
     fog = P_MobjCreateObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
     // never use this object as a teleport destination
-    fog->extendedflags |= kExtendedFlagNeverTarget;
+    fog->extended_flags_ |= kExtendedFlagNeverTarget;
 
-    if (fog->info->chase_state_)
-        P_SetMobjStateDeferred(fog, fog->info->chase_state_, 0);
+    if (fog->info_->chase_state_)
+        P_SetMobjStateDeferred(fog, fog->info_->chase_state_, 0);
 
     // 4. Teleport him
     //  Don't get stuck spawned in things: telefrag them.
@@ -1378,54 +1378,54 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
     RAD_SetPspriteDeferred(p, ps_weapon, state); // refresh the sprite
 }
 
-void P_ActReplace(struct mobj_s *mo, const MapObjectDefinition *newThing)
+void P_ActReplace(MapObject *mo, const MapObjectDefinition *newThing)
 {
 
     // DO THE DEED !!
 
     // UnsetThingPosition(mo);
     {
-        mo->info = newThing;
+        mo->info_ = newThing;
 
-        mo->radius = mo->info->radius_;
-        mo->height = mo->info->height_;
-        if (mo->info->fast_speed_ > -1 && level_flags.fastparm)
-            mo->speed = mo->info->fast_speed_;
+        mo->radius_ = mo->info_->radius_;
+        mo->height_ = mo->info_->height_;
+        if (mo->info_->fast_speed_ > -1 && level_flags.fastparm)
+            mo->speed_ = mo->info_->fast_speed_;
         else
-            mo->speed = mo->info->speed_;
+            mo->speed_ = mo->info_->speed_;
 
-        mo->health = mo->spawnhealth; // always top up health to full
+        mo->health_ = mo->spawn_health_; // always top up health to full
 
-        if (mo->flags & kMapObjectFlagAmbush) // preserve map editor AMBUSH flag
+        if (mo->flags_ & kMapObjectFlagAmbush) // preserve map editor AMBUSH flag
         {
-            mo->flags = mo->info->flags_;
-            mo->flags |= kMapObjectFlagAmbush;
+            mo->flags_ = mo->info_->flags_;
+            mo->flags_ |= kMapObjectFlagAmbush;
         }
         else
-            mo->flags = mo->info->flags_;
+            mo->flags_ = mo->info_->flags_;
 
-        mo->extendedflags = mo->info->extendedflags_;
-        mo->hyperflags    = mo->info->hyperflags_;
+        mo->extended_flags_ = mo->info_->extended_flags_;
+        mo->hyper_flags_    = mo->info_->hyper_flags_;
 
-        mo->vis_target       = mo->info->translucency_;
-        mo->currentattack    = nullptr;
-        mo->model_skin       = mo->info->model_skin_;
-        mo->model_last_frame = -1;
+        mo->target_visibility_       = mo->info_->translucency_;
+        mo->current_attack_    = nullptr;
+        mo->model_skin_       = mo->info_->model_skin_;
+        mo->model_last_frame_ = -1;
 
         // handle dynamic lights
         {
-            const DynamicLightDefinition *dinfo = &mo->info->dlight_[0];
+            const DynamicLightDefinition *dinfo = &mo->info_->dlight_[0];
 
             if (dinfo->type_ != kDynamicLightTypeNone)
             {
-                mo->dlight.target = dinfo->radius_;
-                mo->dlight.color  = dinfo->colour_;
+                mo->dynamic_light_.target = dinfo->radius_;
+                mo->dynamic_light_.color  = dinfo->colour_;
 
                 // make renderer re-create shader info
-                if (mo->dlight.shader)
+                if (mo->dynamic_light_.shader)
                 {
-                    // FIXME: delete mo->dlight.shader;
-                    mo->dlight.shader = nullptr;
+                    // FIXME: delete mo->dynamic_light_.shader;
+                    mo->dynamic_light_.shader = nullptr;
                 }
             }
         }
@@ -1434,7 +1434,7 @@ void P_ActReplace(struct mobj_s *mo, const MapObjectDefinition *newThing)
 
     int state = P_MobjFindLabel(mo, "IDLE"); // nothing fancy, always default to idle
     if (state == 0)
-        FatalError("RTS REPLACE_THING: frame '%s' in [%s] not found!\n", "IDLE", mo->info->name_.c_str());
+        FatalError("RTS REPLACE_THING: frame '%s' in [%s] not found!\n", "IDLE", mo->info_->name_.c_str());
 
     P_SetMobjStateDeferred(mo, state, 0);
 }
@@ -1477,14 +1477,14 @@ void RAD_ActReplaceThing(rad_trigger_t *R, void *param)
     // scan the mobj list
     // FIXME: optimise for fixed-sized triggers
 
-    mobj_t *mo;
-    mobj_t *next;
+    MapObject *mo;
+    MapObject *next;
 
-    for (mo = mobjlisthead; mo != nullptr; mo = next)
+    for (mo = map_object_list_head; mo != nullptr; mo = next)
     {
-        next = mo->next;
+        next = mo->next_;
 
-        if (oldThing && mo->info != oldThing)
+        if (oldThing && mo->info_ != oldThing)
             continue;
 
         if (!RAD_WithinRadius(mo, R->info))

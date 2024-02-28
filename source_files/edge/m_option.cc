@@ -127,7 +127,7 @@ extern ConsoleVariable double_framerate;
 extern ConsoleVariable r_culling;
 extern ConsoleVariable r_culldist;
 extern ConsoleVariable r_cullfog;
-extern ConsoleVariable g_cullthinkers;
+extern ConsoleVariable distance_cull_thinkers;
 extern ConsoleVariable max_dynamic_lights;
 extern ConsoleVariable vsync;
 extern ConsoleVariable g_bobbing;
@@ -706,8 +706,8 @@ static OptionMenuItem playoptions[] = {
      OptionMenuUpdateConsoleVariableFromInt,
      "Time only advances when you move or fire", &g_erraticism},
 
-    {kOptionMenuItemTypeSlider, "Gravity", nullptr, 0, &g_gravity.f_,
-     OptionMenuUpdateConsoleVariableFromFloat, "Gravity", &g_gravity, 0.10f,
+    {kOptionMenuItemTypeSlider, "Gravity", nullptr, 0, &gravity_factor.f_,
+     OptionMenuUpdateConsoleVariableFromFloat, "Gravity", &gravity_factor, 0.10f,
      0.0f, 2.0f, "%gx"},
 
     {kOptionMenuItemTypeBoolean, "Respawn Enemies", YesNo, 2,
@@ -751,8 +751,8 @@ static OptionMenuItem perfoptions[] = {
      OptionMenuUpdateConsoleVariableFromInt,
      "Only effective when Draw Distance Culling is On", &r_cullfog},
     {kOptionMenuItemTypeBoolean, "Slow Thinkers Over Distance", YesNo, 2,
-     &g_cullthinkers.d_, OptionMenuUpdateConsoleVariableFromInt,
-     "Only recommended for extreme monster/projectile counts", &g_cullthinkers},
+     &distance_cull_thinkers.d_, OptionMenuUpdateConsoleVariableFromInt,
+     "Only recommended for extreme monster/projectile counts", &distance_cull_thinkers},
     {kOptionMenuItemTypeSwitch, "Maximum Dynamic Lights",
      "Unlimited/20/40/60/80/100", 6, &max_dynamic_lights.d_,
      OptionMenuUpdateConsoleVariableFromInt,

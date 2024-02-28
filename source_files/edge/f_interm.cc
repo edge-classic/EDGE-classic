@@ -2064,9 +2064,9 @@ void IntermissionStart(void)
 
     if (gd->bg_camera_ != "")
     {
-        for (mobj_t *mo = mobjlisthead; mo != nullptr; mo = mo->next)
+        for (MapObject *mo = map_object_list_head; mo != nullptr; mo = mo->next_)
         {
-            if (DDF_CompareName(mo->info->name_.c_str(),
+            if (DDF_CompareName(mo->info_->name_.c_str(),
                                 gd->bg_camera_.c_str()) != 0)
                 continue;
 
@@ -2078,7 +2078,7 @@ void IntermissionStart(void)
                 player_t *p = players[pnum];
 
                 if (p && p->mo)
-                    p->mo->visibility = p->mo->vis_target = INVISIBLE;
+                    p->mo->visibility_ = p->mo->target_visibility_ = INVISIBLE;
             }
 
             break;

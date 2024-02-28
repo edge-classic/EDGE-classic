@@ -129,7 +129,7 @@ static float frame_width, frame_height;
 // (multiplying map coords by this value).
 static float frame_scale;
 
-static mobj_t *frame_focus;
+static MapObject *frame_focus;
 
 // location on map which the map is centred on
 static float map_center_x, map_center_y;
@@ -510,7 +510,7 @@ static void GetRotatedCoords(float sx, float sy, float &dx, float &dy)
         dx -= frame_focus->x;
         dy -= frame_focus->y;
 
-        Rotate(dx, dy, kBAMAngle90 - frame_focus->angle);
+        Rotate(dx, dy, kBAMAngle90 - frame_focus->angle_);
 
         dx += frame_focus->x;
         dy += frame_focus->y;
@@ -519,7 +519,7 @@ static void GetRotatedCoords(float sx, float sy, float &dx, float &dy)
 
 static inline BAMAngle GetRotatedAngle(BAMAngle src)
 {
-    if (rotate_map) return src + kBAMAngle90 - frame_focus->angle;
+    if (rotate_map) return src + kBAMAngle90 - frame_focus->angle_;
 
     return src;
 }
@@ -978,9 +978,9 @@ static void AutomapWalkSeg(seg_t *seg)
             }
         }
     }
-    else if (frame_focus->player &&
+    else if (frame_focus->player_ &&
              (show_allmap ||
-              !AlmostEquals(frame_focus->player->powers[kPowerTypeAllMap],
+              !AlmostEquals(frame_focus->player_->powers[kPowerTypeAllMap],
                             0.0f)))
     {
         if (!(line->flags & MLF_DontDraw))
@@ -988,9 +988,9 @@ static void AutomapWalkSeg(seg_t *seg)
     }
 }
 
-static void DrawObjectBounds(mobj_t *mo, RGBAColor rgb)
+static void DrawObjectBounds(MapObject *mo, RGBAColor rgb)
 {
-    float R = mo->radius;
+    float R = mo->radius_;
 
     if (R < 2) R = 2;
 
@@ -1084,7 +1084,7 @@ static AutomapLine thin_triangle_guy[] = {{{-0.5f, -0.7f}, {1.0f, 0.0f}},
 static constexpr uint8_t kAutomapThinTriangleGuyLines =
     (sizeof(thin_triangle_guy) / sizeof(AutomapLine));
 
-static void AutomapDrawPlayer(mobj_t *mo)
+static void AutomapDrawPlayer(MapObject *mo)
 {
     if (automap_debug_collisions.d_)
         DrawObjectBounds(mo, am_colors[kAutomapColorPlayer]);
@@ -1095,19 +1095,19 @@ static void AutomapDrawPlayer(mobj_t *mo)
         {
             case kAutomapArrowStyleHeretic:
                 DrawLineCharacter(player_dagger, kAutomapPlayerDaggerLines,
-                                  mo->radius, mo->angle,
+                                  mo->radius_, mo->angle_,
                                   am_colors[kAutomapColorPlayer], mo->x, mo->y);
                 break;
             case kAutomapArrowStyleDoom:
             default:
                 if (cheating)
                     DrawLineCharacter(cheat_player_arrow,
-                                      kAutomapCheatPlayerArrowLines, mo->radius,
-                                      mo->angle, am_colors[kAutomapColorPlayer],
+                                      kAutomapCheatPlayerArrowLines, mo->radius_,
+                                      mo->angle_, am_colors[kAutomapColorPlayer],
                                       mo->x, mo->y);
                 else
                     DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines,
-                                      mo->radius, mo->angle,
+                                      mo->radius_, mo->angle_,
                                       am_colors[kAutomapColorPlayer], mo->x,
                                       mo->y);
                 break;
@@ -1116,20 +1116,20 @@ static void AutomapDrawPlayer(mobj_t *mo)
     }
 
 #if 0  //!!!! TEMP DISABLED, NETWORK DEBUGGING
-	if (DEATHMATCH() && mo->player != p)
+	if (DEATHMATCH() && mo->player_ != p)
 		return;
 #endif
 
-    DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius,
-                      mo->angle, player_colors[mo->player->pnum & 0x07], mo->x,
+    DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_,
+                      mo->angle_, player_colors[mo->player_->pnum & 0x07], mo->x,
                       mo->y);
 }
 
-static void AutomapWalkThing(mobj_t *mo)
+static void AutomapWalkThing(MapObject *mo)
 {
     int index = kAutomapColorScenery;
 
-    if (mo->player && mo->player->mo == mo)
+    if (mo->player_ && mo->player_->mo == mo)
     {
         AutomapDrawPlayer(mo);
         return;
@@ -1138,13 +1138,13 @@ static void AutomapWalkThing(mobj_t *mo)
     if (!show_things) return;
 
     // -AJA- more colourful things
-    if (mo->flags & kMapObjectFlagSpecial)
+    if (mo->flags_ & kMapObjectFlagSpecial)
         index = kAutomapColorItem;
-    else if (mo->flags & kMapObjectFlagMissile)
+    else if (mo->flags_ & kMapObjectFlagMissile)
         index = kAutomapColorMissile;
-    else if (mo->extendedflags & kExtendedFlagMonster && mo->health <= 0)
+    else if (mo->extended_flags_ & kExtendedFlagMonster && mo->health_ <= 0)
         index = kAutomapColorCorpse;
-    else if (mo->extendedflags & kExtendedFlagMonster)
+    else if (mo->extended_flags_ & kExtendedFlagMonster)
         index = kAutomapColorMonster;
 
     if (automap_debug_collisions.d_)
@@ -1154,7 +1154,7 @@ static void AutomapWalkThing(mobj_t *mo)
     }
 
     DrawLineCharacter(thin_triangle_guy, kAutomapThinTriangleGuyLines,
-                      mo->radius, mo->angle, am_colors[index], mo->x, mo->y);
+                      mo->radius_, mo->angle_, am_colors[index], mo->x, mo->y);
 }
 
 //
@@ -1171,7 +1171,7 @@ static void AutomapWalkSubsector(unsigned int num)
     }
 
     // handle each thing
-    for (mobj_t *mo = sub->thinglist; mo; mo = mo->snext)
+    for (MapObject *mo = sub->thinglist; mo; mo = mo->subsector_next_)
     {
         AutomapWalkThing(mo);
     }
@@ -1272,7 +1272,7 @@ static void DrawMarks(void)
     HudSetAlignment();
 }
 
-void AutomapRender(float x, float y, float w, float h, mobj_t *focus)
+void AutomapRender(float x, float y, float w, float h, MapObject *focus)
 {
     frame_x      = x;
     frame_y      = y;

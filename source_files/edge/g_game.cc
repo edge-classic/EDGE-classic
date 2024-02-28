@@ -534,7 +534,7 @@ void GameTicker(void)
 static void RespawnPlayer(player_t *p)
 {
     // first disassociate the corpse (if any)
-    if (p->mo) p->mo->player = nullptr;
+    if (p->mo) p->mo->player_ = nullptr;
 
     p->mo = nullptr;
 

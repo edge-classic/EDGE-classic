@@ -27,8 +27,8 @@
 #define __S_SOUND_H__
 
 // Forward declarations
-struct position_c;
-struct mobj_s;
+struct Position;
+class MapObject;
 struct sfx_s;
 
 // for the sliders
@@ -87,9 +87,9 @@ typedef enum
 void S_Init(void);
 void S_Shutdown(void);
 
-void S_StartFX(struct SoundEffect *sfx, int category = SNCAT_UI, position_c *pos = nullptr, int flags = 0);
+void S_StartFX(struct SoundEffect *sfx, int category = SNCAT_UI, Position *pos = nullptr, int flags = 0);
 
-void S_StopFX(position_c *pos);
+void S_StopFX(Position *pos);
 void S_StopLevelFX(void);
 void S_StopAllFX(void);
 

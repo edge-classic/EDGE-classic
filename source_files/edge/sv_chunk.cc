@@ -40,7 +40,7 @@
 #define XOR_LEN    5
 
 #define STRING_MARKER  0xAA
-#define nullptrSTR_MARKER 0xDE
+#define NULLSTR_MARKER 0xDE
 
 #define EDGESAVE_MAGIC  "EdgeSave"
 #define FIRST_CHUNK_OFS 16L
@@ -787,7 +787,7 @@ void SV_PutString(const char *str)
 {
     if (str == nullptr)
     {
-        SV_PutByte(nullptrSTR_MARKER);
+        SV_PutByte(NULLSTR_MARKER);
         return;
     }
 
@@ -815,7 +815,7 @@ const char *SV_GetString(void)
 {
     int type = SV_GetByte();
 
-    if (type == nullptrSTR_MARKER)
+    if (type == NULLSTR_MARKER)
         return nullptr;
 
     if (type != STRING_MARKER)

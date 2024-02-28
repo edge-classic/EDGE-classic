@@ -112,7 +112,7 @@ void P_ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials, bo
 
         side_t *side = level_lines[j].side[0];
 
-        position_c *sfx_origin = &level_lines[j].frontsector->sfx_origin;
+        Position *sfx_origin = &level_lines[j].frontsector->sfx_origin;
 
         bwhere_e pos = BWH_None;
 

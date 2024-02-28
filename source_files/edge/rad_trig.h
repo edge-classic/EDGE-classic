@@ -46,21 +46,21 @@ void           RAD_RunTriggers(void);
 void           RAD_Ticker(void);
 void           RAD_Drawer(void);
 bool           RAD_Responder(InputEvent *ev);
-bool           RAD_WithinRadius(mobj_t *mo, rad_script_t *r);
+bool           RAD_WithinRadius(MapObject *mo, rad_script_t *r);
 rad_script_t  *RAD_FindScriptByName(const char *map_name, const char *name);
 rad_trigger_t *RAD_FindTriggerByName(const char *name);
 rts_state_t   *RAD_FindStateByLabel(rad_script_t *scr, char *label);
-void           RAD_EnableByTag(mobj_t *actor, uint32_t tag, bool disable, s_tagtype_e tagtype);
-void           RAD_EnableByTag(mobj_t *actor, const char *name, bool disable);
-bool           RAD_IsActiveByTag(mobj_t *actor, const char *name);
-void           RAD_MonsterIsDead(mobj_t *mo);
+void           RAD_EnableByTag(MapObject *actor, uint32_t tag, bool disable, s_tagtype_e tagtype);
+void           RAD_EnableByTag(MapObject *actor, const char *name, bool disable);
+bool           RAD_IsActiveByTag(MapObject *actor, const char *name);
+void           RAD_MonsterIsDead(MapObject *mo);
 
 // Menu support
 void RAD_StartMenu(rad_trigger_t *R, s_show_menu_t *menu);
 void RAD_FinishMenu(int result);
 
 // Path support
-bool RAD_CheckReachedTrigger(mobj_t *thing);
+bool RAD_CheckReachedTrigger(MapObject *thing);
 
 #endif /* __RAD_TRIG__ */
 

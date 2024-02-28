@@ -84,14 +84,14 @@
 //
 extern ConsoleVariable g_aggression;
 
-void P_PlayerAttack(mobj_t *playerobj, const AttackDefinition *attack);
-void P_SlammedIntoObject(mobj_t *object, mobj_t *objecthit);
-int  P_MissileContact(mobj_t *object, mobj_t *objecthit);
-int  P_BulletContact(mobj_t *object, mobj_t *objecthit, float damage, const DamageClass *damtype, float x, float y,
+void P_PlayerAttack(MapObject *playerobj, const AttackDefinition *attack);
+void P_SlammedIntoObject(MapObject *object, MapObject *objecthit);
+int  P_MissileContact(MapObject *object, MapObject *objecthit);
+int  P_BulletContact(MapObject *object, MapObject *objecthit, float damage, const DamageClass *damtype, float x, float y,
                      float z);
-void P_TouchyContact(mobj_t *touchy, mobj_t *victim);
-bool P_UseThing(mobj_t *user, mobj_t *thing, float open_bottom, float open_top);
-void P_BringCorpseToLife(mobj_t *corpse);
+void P_TouchyContact(MapObject *touchy, MapObject *victim);
+bool P_UseThing(MapObject *user, MapObject *thing, float open_bottom, float open_top);
+void P_BringCorpseToLife(MapObject *corpse);
 
 //
 // P_WEAPON
@@ -134,31 +134,31 @@ void P_PlayerJump(player_t *pl, float dz, int wait);
 #define ONCEILINGZ ((float)INT_MAX)
 
 // -ACB- 1998/07/30 Start Pointer the item-respawn-que.
-extern iteminque_t *itemquehead;
+extern RespawnQueueItem *respawn_queue_head;
 
 // -ACB- 1998/08/27 Start Pointer in the mobj list.
-extern mobj_t *mobjlisthead;
+extern MapObject *map_object_list_head;
 
-void       P_RemoveMobj(mobj_t *th);
-int P_MobjFindLabel(mobj_t *mobj, const char *label);
-bool       P_SetMobjState(mobj_t *mobj, int state);
-bool       P_SetMobjStateDeferred(mobj_t *mobj, int state, int tic_skip);
-void       P_SetMobjDirAndSpeed(mobj_t *mobj, BAMAngle angle, float slope, float speed);
+void       P_RemoveMobj(MapObject *th);
+int P_MobjFindLabel(MapObject *mobj, const char *label);
+bool       P_SetMobjState(MapObject *mobj, int state);
+bool       P_SetMobjStateDeferred(MapObject *mobj, int state, int tic_skip);
+void       P_SetMobjDirAndSpeed(MapObject *mobj, BAMAngle angle, float slope, float speed);
 void       P_RunMobjThinkers(bool extra_tic);
 void       P_SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDefinition *debris);
 void       P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAMAngle angle);
 void       P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const MapObjectDefinition *blood);
-void       P_CalcFullProperties(const mobj_t *mo, region_properties_t *newregp);
-bool       P_HitLiquidFloor(mobj_t *thing);
+void       P_CalcFullProperties(const MapObject *mo, region_properties_t *newregp);
+bool       P_HitLiquidFloor(MapObject *thing);
 
 // -ACB- 1998/08/02 New procedures for DDF etc...
 void    P_MobjItemRespawn(void);
-void    P_MobjRemoveMissile(mobj_t *missile);
-void    P_MobjExplodeMissile(mobj_t *missile);
-mobj_t *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition *type);
+void    P_MobjRemoveMissile(MapObject *missile);
+void    P_MobjExplodeMissile(MapObject *missile);
+MapObject *P_MobjCreateObject(float x, float y, float z, const MapObjectDefinition *type);
 
 // -ACB- 2005/05/06 Sound Effect Category Support
-int P_MobjGetSfxCategory(const mobj_t *mo);
+int P_MobjGetSfxCategory(const MapObject *mo);
 
 // Needed by savegame code.
 void P_RemoveAllMobjs(bool loading);
@@ -169,20 +169,20 @@ void P_ClearAllStaleRefs(void);
 // P_ENEMY
 //
 
-extern dirtype_e opposite[];
-extern dirtype_e diags[];
+extern DirectionType opposite[];
+extern DirectionType diags[];
 extern float     xspeed[8];
 extern float     yspeed[8];
 
 void    P_NoiseAlert(player_t *p);
-void    P_NoiseAlert(mobj_t *actor);
-void    P_NewChaseDir(mobj_t *actor);
-bool    P_CreateAggression(mobj_t *actor);
-bool    P_CheckMeleeRange(mobj_t *actor);
-bool    P_CheckMissileRange(mobj_t *actor);
-bool    P_Move(mobj_t *actor, bool path);
-bool    P_LookForPlayers(mobj_t *actor, BAMAngle range);
-mobj_t *P_LookForShootSpot(const MapObjectDefinition *spot_type);
+void    P_NoiseAlert(MapObject *actor);
+void    P_NewChaseDir(MapObject *actor);
+bool    P_CreateAggression(MapObject *actor);
+bool    P_CheckMeleeRange(MapObject *actor);
+bool    P_CheckMissileRange(MapObject *actor);
+bool    P_Move(MapObject *actor, bool path);
+bool    P_LookForPlayers(MapObject *actor, BAMAngle range);
+MapObject *P_LookForShootSpot(const MapObjectDefinition *spot_type);
 
 //
 // P_MAPUTL
@@ -195,11 +195,11 @@ int   P_PointOnDivlineThick(float x, float y, divline_t *div, float div_len, flo
 void  P_ComputeIntersection(divline_t *div, float x1, float y1, float x2, float y2, float *ix, float *iy);
 int   P_BoxOnLineSide(const float *tmbox, line_t *ld);
 int   P_BoxOnDivLineSide(const float *tmbox, divline_t *div);
-int   P_ThingOnLineSide(const mobj_t *mo, line_t *ld);
+int   P_ThingOnLineSide(const MapObject *mo, line_t *ld);
 
 int   P_FindThingGap(vgap_t *gaps, int gap_num, float z1, float z2);
 void  P_ComputeGaps(line_t *ld);
-float P_ComputeThingGap(mobj_t *thing, sector_t *sec, float z, float *f, float *c, float f_slope_z = 0.0f,
+float P_ComputeThingGap(MapObject *thing, sector_t *sec, float z, float *f, float *c, float f_slope_z = 0.0f,
                         float c_slope_z = 0.0f);
 void  P_AddExtraFloor(sector_t *sec, line_t *line);
 void  P_RecomputeGapsAroundSector(sector_t *sec);
@@ -250,33 +250,33 @@ extern line_t *blockline;
 extern linelist_c spechit;
 
 void    P_MapInit(void);
-bool    P_MapCheckBlockingLine(mobj_t *thing, mobj_t *spawnthing);
-mobj_t *P_MapFindCorpse(mobj_t *thing);
-mobj_t *P_MapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool force_aim);
-mobj_t *DoMapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool force_aim);
-void    P_TargetTheory(mobj_t *source, mobj_t *target, float *x, float *y, float *z);
+bool    P_MapCheckBlockingLine(MapObject *thing, MapObject *spawnthing);
+MapObject *P_MapFindCorpse(MapObject *thing);
+MapObject *P_MapTargetAutoAim(MapObject *source, BAMAngle angle, float distance, bool force_aim);
+MapObject *DoMapTargetAutoAim(MapObject *source, BAMAngle angle, float distance, bool force_aim);
+void    P_TargetTheory(MapObject *source, MapObject *target, float *x, float *y, float *z);
 
-mobj_t *P_AimLineAttack(mobj_t *t1, BAMAngle angle, float distance, float *slope);
+MapObject *P_AimLineAttack(MapObject *t1, BAMAngle angle, float distance, float *slope);
 void    P_UpdateMultipleFloors(sector_t *sector);
 bool    P_CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh);
 bool    P_SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush = 10, bool nocarething = false);
-bool    P_CheckAbsPosition(mobj_t *thing, float x, float y, float z);
-bool    P_CheckSight(mobj_t *src, mobj_t *dest);
-bool    P_CheckSightToPoint(mobj_t *src, float x, float y, float z);
-bool    P_CheckSightApproxVert(mobj_t *src, mobj_t *dest);
-void    P_RadiusAttack(mobj_t *spot, mobj_t *source, float radius, float damage, const DamageClass *damtype,
+bool    P_CheckAbsPosition(MapObject *thing, float x, float y, float z);
+bool    P_CheckSight(MapObject *src, MapObject *dest);
+bool    P_CheckSightToPoint(MapObject *src, float x, float y, float z);
+bool    P_CheckSightApproxVert(MapObject *src, MapObject *dest);
+void    P_RadiusAttack(MapObject *spot, MapObject *source, float radius, float damage, const DamageClass *damtype,
                        bool thrust_only);
 
-bool P_TeleportMove(mobj_t *thing, float x, float y, float z);
-bool P_TryMove(mobj_t *thing, float x, float y);
-void P_SlideMove(mobj_t *mo, float x, float y);
+bool P_TeleportMove(MapObject *thing, float x, float y, float z);
+bool P_TryMove(MapObject *thing, float x, float y);
+void P_SlideMove(MapObject *mo, float x, float y);
 void P_UseLines(player_t *player);
-void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float damage, const DamageClass *damtype,
+void P_LineAttack(MapObject *t1, BAMAngle angle, float distance, float slope, float damage, const DamageClass *damtype,
                   const MapObjectDefinition *puff);
 
 void P_UnblockLineEffectDebris(line_t *TheLine, const LineType *special);
 
-mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance);
+MapObject *GetMapTargetAimInfo(MapObject *source, BAMAngle angle, float distance);
 
 bool ReplaceMidTexFromPart(line_t *TheLine, ScrollingPart parts);
 
@@ -291,14 +291,14 @@ bool ReplaceMidTexFromPart(line_t *TheLine, ScrollingPart parts);
 // P_INTER
 //
 
-void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher);
-void P_ThrustMobj(mobj_t *target, mobj_t *inflictor, float thrust);
-void P_PushMobj(mobj_t *target, mobj_t *inflictor, float thrust);
-void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, float amount, const DamageClass *damtype = nullptr,
+void P_TouchSpecialThing(MapObject *special, MapObject *toucher);
+void P_ThrustMobj(MapObject *target, MapObject *inflictor, float thrust);
+void P_PushMobj(MapObject *target, MapObject *inflictor, float thrust);
+void P_DamageMobj(MapObject *target, MapObject *inflictor, MapObject *source, float amount, const DamageClass *damtype = nullptr,
                   bool weak_spot = false);
-void P_TelefragMobj(mobj_t *target, mobj_t *inflictor, const DamageClass *damtype = nullptr);
-void P_KillMobj(mobj_t *source, mobj_t *target, const DamageClass *damtype = nullptr, bool weak_spot = false);
-bool P_GiveBenefitList(player_t *player, mobj_t *special, Benefit *list, bool lose_em);
+void P_TelefragMobj(MapObject *target, MapObject *inflictor, const DamageClass *damtype = nullptr);
+void P_KillMobj(MapObject *source, MapObject *target, const DamageClass *damtype = nullptr, bool weak_spot = false);
+bool P_GiveBenefitList(player_t *player, MapObject *special, Benefit *list, bool lose_em);
 bool P_HasBenefitInList(player_t *player, Benefit *list);
 
 //

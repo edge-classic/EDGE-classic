@@ -83,7 +83,7 @@ int rgl_weapon_r;
 int rgl_weapon_g;
 int rgl_weapon_b;
 
-extern mobj_t *view_cam_mo;
+extern MapObject *view_cam_mo;
 extern float   view_expand_w;
 
 // The minimum distance between player and a visible sprite.
@@ -92,24 +92,24 @@ extern float   view_expand_w;
 static const image_c *crosshair_image;
 static int            crosshair_which;
 
-static float GetHoverDZ(mobj_t *mo, float bob_mult = 0)
+static float GetHoverDZ(MapObject *mo, float bob_mult = 0)
 {
     if (time_stop_active || erraticism_active)
-        return mo->phase;
+        return mo->phase_;
 
     // compute a different phase for different objects
     BAMAngle phase = (BAMAngle)(long long)mo;
     phase ^= (BAMAngle)(phase << 19);
     phase += (BAMAngle)(leveltime << (kBAMAngleBits - 6));
 
-    mo->phase = epi::BAMSin(phase);
+    mo->phase_ = epi::BAMSin(phase);
 
-    if (mo->hyperflags & kHyperFlagHover)
-        mo->phase *= 4.0f;
+    if (mo->hyper_flags_ & kHyperFlagHover)
+        mo->phase_ *= 4.0f;
     else if (bob_mult > 0)
-        mo->phase *= (mo->height * 0.5 * bob_mult);
+        mo->phase_ *= (mo->height_ * 0.5 * bob_mult);
 
-    return mo->phase;
+    return mo->phase_;
 }
 
 typedef struct
@@ -121,13 +121,13 @@ typedef struct
     multi_color_c col[4];
 } psprite_coord_data_t;
 
-static void DLIT_PSprite(mobj_t *mo, void *dataptr)
+static void DLIT_PSprite(MapObject *mo, void *dataptr)
 {
     psprite_coord_data_t *data = (psprite_coord_data_t *)dataptr;
 
-    SYS_ASSERT(mo->dlight.shader);
+    SYS_ASSERT(mo->dynamic_light_.shader);
 
-    mo->dlight.shader->Sample(data->col + 0, data->lit_pos.X, data->lit_pos.Y, data->lit_pos.Z);
+    mo->dynamic_light_.shader->Sample(data->col + 0, data->lit_pos.X, data->lit_pos.Y, data->lit_pos.Z);
 }
 
 static int GetMulticolMaxRGB(multi_color_c *cols, int num, bool additive)
@@ -165,9 +165,9 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
     float top   = IM_TOP(image);
     float ratio = 1.0f;
 
-    bool is_fuzzy = (player->mo->flags & kMapObjectFlagFuzzy) ? true : false;
+    bool is_fuzzy = (player->mo->flags_ & kMapObjectFlagFuzzy) ? true : false;
 
-    float trans = player->mo->visibility;
+    float trans = player->mo->visibility_;
 
     if (which == ps_crosshair)
     {
@@ -267,7 +267,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
     data.lit_pos.X = player->mo->x + viewcos * away;
     data.lit_pos.Y = player->mo->y + viewsin * away;
-    data.lit_pos.Z = player->mo->z + player->mo->height * player->mo->info->shotheight_;
+    data.lit_pos.Z = player->mo->z + player->mo->height_ * player->mo->info_->shotheight_;
 
     data.col[0].Clear();
 
@@ -285,12 +285,12 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
         trans    = 1.0f;
     }
 
-    RGBAColor fc_to_use = player->mo->subsector->sector->props.fog_color;
-    float    fd_to_use = player->mo->subsector->sector->props.fog_density;
+    RGBAColor fc_to_use = player->mo->subsector_->sector->props.fog_color;
+    float    fd_to_use = player->mo->subsector_->sector->props.fog_density;
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
     {
-        if (IS_SKY(player->mo->subsector->sector->ceil))
+        if (IS_SKY(player->mo->subsector_->sector->ceil))
         {
             fc_to_use = current_map->outdoor_fog_color_;
             fd_to_use = 0.01f * current_map->outdoor_fog_density_;
@@ -304,7 +304,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
     if (!is_fuzzy)
     {
-        abstract_shader_c *shader = R_GetColormapShader(props, state->bright, player->mo->subsector->sector);
+        abstract_shader_c *shader = R_GetColormapShader(props, state->bright, player->mo->subsector_->sector);
 
         shader->Sample(data.col + 0, data.lit_pos.X, data.lit_pos.Y, data.lit_pos.Z);
 
@@ -329,10 +329,10 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
             float r = 96;
 
             DynamicLightIterator(data.lit_pos.X - r, data.lit_pos.Y - r, player->mo->z, data.lit_pos.X + r,
-                                   data.lit_pos.Y + r, player->mo->z + player->mo->height, DLIT_PSprite, &data);
+                                   data.lit_pos.Y + r, player->mo->z + player->mo->height_, DLIT_PSprite, &data);
 
-            SectorGlowIterator(player->mo->subsector->sector, data.lit_pos.X - r, data.lit_pos.Y - r, player->mo->z,
-                                 data.lit_pos.X + r, data.lit_pos.Y + r, player->mo->z + player->mo->height,
+            SectorGlowIterator(player->mo->subsector_->sector, data.lit_pos.X - r, data.lit_pos.Y - r, player->mo->z,
+                                 data.lit_pos.X + r, data.lit_pos.Y + r, player->mo->z + player->mo->height_,
                                  DLIT_PSprite, &data);
         }
     }
@@ -678,17 +678,17 @@ static inline void LinkDrawthingIntoDrawfloor(drawfloor_t *dfloor, drawthing_t *
     dfloor->things = dthing;
 }
 
-static const image_c *R2_GetThingSprite2(mobj_t *mo, float mx, float my, bool *flip)
+static const image_c *R2_GetThingSprite2(MapObject *mo, float mx, float my, bool *flip)
 {
     // Note: can return nullptr for no image.
 
     // decide which patch to use for sprite relative to player
-    SYS_ASSERT(mo->state);
+    SYS_ASSERT(mo->state_);
 
-    if (mo->state->sprite == 0)
+    if (mo->state_->sprite == 0)
         return nullptr;
 
-    spriteframe_c *frame = W_GetSpriteFrame(mo->state->sprite, mo->state->frame);
+    spriteframe_c *frame = W_GetSpriteFrame(mo->state_->sprite, mo->state_->frame);
 
     if (!frame)
     {
@@ -701,7 +701,7 @@ static const image_c *R2_GetThingSprite2(mobj_t *mo, float mx, float my, bool *f
 
     if (frame->rots >= 8)
     {
-        BAMAngle ang = mo->angle;
+        BAMAngle ang = mo->angle_;
 
         MIR_Angle(ang);
 
@@ -970,39 +970,39 @@ static void R2_ClipSpriteVertically(drawsub_c *dsub, drawthing_t *dthing)
 #endif
 }
 
-void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
+void RGL_WalkThing(drawsub_c *dsub, MapObject *mo)
 {
     EDGE_ZoneScoped;
 
     /* Visit a single thing that exists in the current subsector */
 
-    SYS_ASSERT(mo->state);
+    SYS_ASSERT(mo->state_);
 
     // ignore the camera itself
     if (mo == view_cam_mo && num_active_mirrors == 0)
         return;
 
     // ignore invisible things
-    if (mo->visibility == INVISIBLE)
+    if (mo->visibility_ == INVISIBLE)
         return;
 
     // ignore things that are mid-teleport
-    if (mo->teleport_tic-- > 0)
+    if (mo->teleport_tic_-- > 0)
         return;
 
-    bool is_model = (mo->state->flags & kStateFrameFlagModel) ? true : false;
+    bool is_model = (mo->state_->flags & kStateFrameFlagModel) ? true : false;
 
     // transform the origin point
     float mx = mo->x, my = mo->y, mz = mo->z;
 
     // position interpolation
-    if (mo->lerp_num > 1)
+    if (mo->interpolation_number_ > 1)
     {
-        float along = mo->lerp_pos / (float)mo->lerp_num;
+        float along = mo->interpolation_position_ / (float)mo->interpolation_number_;
 
-        mx = mo->lerp_from.X + (mx - mo->lerp_from.X) * along;
-        my = mo->lerp_from.Y + (my - mo->lerp_from.Y) * along;
-        mz = mo->lerp_from.Z + (mz - mo->lerp_from.Z) * along;
+        mx = mo->interpolation_from_.X + (mx - mo->interpolation_from_.X) * along;
+        my = mo->interpolation_from_.Y + (my - mo->interpolation_from_.Y) * along;
+        mz = mo->interpolation_from_.Z + (mz - mo->interpolation_from_.Z) * along;
     }
 
     MIR_Coordinate(mx, my);
@@ -1027,7 +1027,7 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 
     float     sink_mult = 0;
     float     bob_mult  = 0;
-    sector_t *cur_sec   = mo->subsector->sector;
+    sector_t *cur_sec   = mo->subsector_->sector;
     if (!cur_sec->exfloor_used && !cur_sec->heightsec && abs(mo->z - cur_sec->f_h) < 1)
     {
         sink_mult = cur_sec->sink_depth;
@@ -1036,11 +1036,11 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 
     float hover_dz = 0;
 
-    if (mo->hyperflags & kHyperFlagHover || ((mo->flags & kMapObjectFlagSpecial || mo->flags & kMapObjectFlagCorpse) && bob_mult > 0))
+    if (mo->hyper_flags_ & kHyperFlagHover || ((mo->flags_ & kMapObjectFlagSpecial || mo->flags_ & kMapObjectFlagCorpse) && bob_mult > 0))
         hover_dz = GetHoverDZ(mo, bob_mult);
 
     if (sink_mult > 0)
-        hover_dz -= (mo->height * 0.5 * sink_mult);
+        hover_dz -= (mo->height_ * 0.5 * sink_mult);
 
     bool           spr_flip = false;
     const image_c *image    = nullptr;
@@ -1064,21 +1064,21 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
         if (spr_flip)
             side_offset = -side_offset;
 
-        float xscale = mo->scale * mo->aspect;
+        float xscale = mo->scale_ * mo->aspect_;
 
         pos1 = (sprite_width / -2.0f - side_offset) * xscale;
         pos2 = (sprite_width / +2.0f - side_offset) * xscale;
 
-        switch (mo->info->yalign_)
+        switch (mo->info_->yalign_)
         {
         case SpriteYAlignmentTopDown:
-            gzt = mo->z + mo->height + top_offset * mo->scale;
-            gzb = gzt - sprite_height * mo->scale;
+            gzt = mo->z + mo->height_ + top_offset * mo->scale_;
+            gzb = gzt - sprite_height * mo->scale_;
             break;
 
         case SpriteYAlignmentMiddle: {
-            float _mz = mo->z + mo->height * 0.5 + top_offset * mo->scale;
-            float dz  = sprite_height * 0.5 * mo->scale;
+            float _mz = mo->z + mo->height_ * 0.5 + top_offset * mo->scale_;
+            float dz  = sprite_height * 0.5 * mo->scale_;
 
             gzt = _mz + dz;
             gzb = _mz - dz;
@@ -1087,12 +1087,12 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
 
         case SpriteYAlignmentBottomUp:
         default:
-            gzb = mo->z + top_offset * mo->scale;
-            gzt = gzb + sprite_height * mo->scale;
+            gzb = mo->z + top_offset * mo->scale_;
+            gzt = gzb + sprite_height * mo->scale_;
             break;
         }
 
-        if (mo->hyperflags & kHyperFlagHover || (sink_mult > 0 || bob_mult > 0))
+        if (mo->hyper_flags_ & kHyperFlagHover || (sink_mult > 0 || bob_mult > 0))
         {
             gzt += hover_dz;
             gzb += hover_dz;
@@ -1102,40 +1102,40 @@ void RGL_WalkThing(drawsub_c *dsub, mobj_t *mo)
     // fix for sprites that sit wrongly into the floor/ceiling
     int y_clipping = YCLIP_Soft;
 
-    if (is_model || (mo->flags & kMapObjectFlagFuzzy) || ((mo->hyperflags & kHyperFlagHover) && AlmostEquals(sink_mult, 0.0f)))
+    if (is_model || (mo->flags_ & kMapObjectFlagFuzzy) || ((mo->hyper_flags_ & kHyperFlagHover) && AlmostEquals(sink_mult, 0.0f)))
     {
         y_clipping = YCLIP_Never;
     }
     // Lobo: new FLOOR_CLIP flag
-    else if (mo->hyperflags & kHyperFlagFloorClip || sink_mult > 0)
+    else if (mo->hyper_flags_ & kHyperFlagFloorClip || sink_mult > 0)
     {
         // do nothing? just skip the other elseifs below
         y_clipping = YCLIP_Hard;
     }
-    else if (sprite_kludge == 0 && gzb < mo->floorz)
+    else if (sprite_kludge == 0 && gzb < mo->floor_z_)
     {
         // explosion ?
-        if (mo->info->flags_ & kMapObjectFlagMissile)
+        if (mo->info_->flags_ & kMapObjectFlagMissile)
         {
             y_clipping = YCLIP_Hard;
         }
         else
         {
-            gzt += mo->floorz - gzb;
-            gzb = mo->floorz;
+            gzt += mo->floor_z_ - gzb;
+            gzb = mo->floor_z_;
         }
     }
-    else if (sprite_kludge == 0 && gzt > mo->ceilingz)
+    else if (sprite_kludge == 0 && gzt > mo->ceiling_z_)
     {
         // explosion ?
-        if (mo->info->flags_ & kMapObjectFlagMissile)
+        if (mo->info_->flags_ & kMapObjectFlagMissile)
         {
             y_clipping = YCLIP_Hard;
         }
         else
         {
-            gzb -= gzt - mo->ceilingz;
-            gzt = mo->ceilingz;
+            gzb -= gzt - mo->ceiling_z_;
+            gzt = mo->ceiling_z_;
         }
     }
 
@@ -1186,12 +1186,12 @@ static void RGL_DrawModel(drawthing_t *dthing)
 {
     EDGE_ZoneScoped;
 
-    mobj_t *mo = dthing->mo;
+    MapObject *mo = dthing->mo;
 
-    modeldef_c *md = W_GetModel(mo->state->sprite);
+    modeldef_c *md = W_GetModel(mo->state_->sprite);
 
-    const image_c *skin_img = md->skins[mo->model_skin];
-
+    const image_c *skin_img = md->skins[mo->model_skin_];
+ 
     if (!skin_img && md->md2_model)
     {
         // LogDebug("Render model: no skin %d\n", mo->model_skin);
@@ -1204,7 +1204,7 @@ static void RGL_DrawModel(drawthing_t *dthing)
 
     float     sink_mult = 0;
     float     bob_mult  = 0;
-    sector_t *cur_sec   = mo->subsector->sector;
+    sector_t *cur_sec   = mo->subsector_->sector;
     if (!cur_sec->exfloor_used && !cur_sec->heightsec && abs(mo->z - cur_sec->f_h) < 1)
     {
         sink_mult = cur_sec->sink_depth;
@@ -1212,35 +1212,35 @@ static void RGL_DrawModel(drawthing_t *dthing)
     }
 
     if (sink_mult > 0)
-        z -= mo->height * 0.5 * sink_mult;
+        z -= mo->height_ * 0.5 * sink_mult;
 
-    if (mo->hyperflags & kHyperFlagHover || ((mo->flags & kMapObjectFlagSpecial || mo->flags & kMapObjectFlagCorpse) && bob_mult > 0))
+    if (mo->hyper_flags_ & kHyperFlagHover || ((mo->flags_ & kMapObjectFlagSpecial || mo->flags_ & kMapObjectFlagCorpse) && bob_mult > 0))
         z += GetHoverDZ(mo, bob_mult);
 
-    int   last_frame = mo->state->frame;
+    int   last_frame = mo->state_->frame;
     float lerp       = 0.0;
 
-    if (mo->model_last_frame >= 0)
+    if (mo->model_last_frame_ >= 0)
     {
-        last_frame = mo->model_last_frame;
+        last_frame = mo->model_last_frame_;
 
-        SYS_ASSERT(mo->state->tics > 1);
+        SYS_ASSERT(mo->state_->tics > 1);
 
-        lerp = (mo->state->tics - mo->tics + 1) / (float)(mo->state->tics);
+        lerp = (mo->state_->tics - mo->tics_ + 1) / (float)(mo->state_->tics);
         lerp = HMM_Clamp(0, lerp, 1);
     }
 
     if (md->md2_model)
-        MD2_RenderModel(md->md2_model, skin_img, false, last_frame, mo->state->frame, lerp, dthing->mx, dthing->my, z,
-                        mo, mo->props, mo->model_scale, mo->model_aspect, mo->info->model_bias_, mo->info->model_rotate_);
+        MD2_RenderModel(md->md2_model, skin_img, false, last_frame, mo->state_->frame, lerp, dthing->mx, dthing->my, z,
+                        mo, mo->region_properties_, mo->model_scale_, mo->model_aspect_, mo->info_->model_bias_, mo->info_->model_rotate_);
     else if (md->mdl_model)
-        MDL_RenderModel(md->mdl_model, skin_img, false, last_frame, mo->state->frame, lerp, dthing->mx, dthing->my, z,
-                        mo, mo->props, mo->model_scale, mo->model_aspect, mo->info->model_bias_, mo->info->model_rotate_);
+        MDL_RenderModel(md->mdl_model, skin_img, false, last_frame, mo->state_->frame, lerp, dthing->mx, dthing->my, z,
+                        mo, mo->region_properties_, mo->model_scale_, mo->model_aspect_, mo->info_->model_bias_, mo->info_->model_rotate_);
 }
 
 typedef struct
 {
-    mobj_t *mo;
+    MapObject *mo;
 
     HMM_Vec3 vert[4];
     HMM_Vec2 texc[4];
@@ -1249,7 +1249,7 @@ typedef struct
     multi_color_c col[4];
 } thing_coord_data_t;
 
-static void DLIT_Thing(mobj_t *mo, void *dataptr)
+static void DLIT_Thing(MapObject *mo, void *dataptr)
 {
     thing_coord_data_t *data = (thing_coord_data_t *)dataptr;
 
@@ -1257,11 +1257,11 @@ static void DLIT_Thing(mobj_t *mo, void *dataptr)
     if (mo == data->mo)
         return;
 
-    SYS_ASSERT(mo->dlight.shader);
+    SYS_ASSERT(mo->dynamic_light_.shader);
 
     for (int v = 0; v < 4; v++)
     {
-        mo->dlight.shader->Sample(data->col + v, data->vert[v].X, data->vert[v].Y, data->vert[v].Z);
+        mo->dynamic_light_.shader->Sample(data->col + v, data->vert[v].X, data->vert[v].Y, data->vert[v].Z);
     }
 }
 
@@ -1277,11 +1277,11 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
         return;
     }
 
-    mobj_t *mo = dthing->mo;
+    MapObject *mo = dthing->mo;
 
-    bool is_fuzzy = (mo->flags & kMapObjectFlagFuzzy) ? true : false;
+    bool is_fuzzy = (mo->flags_ & kMapObjectFlagFuzzy) ? true : false;
 
-    float trans = mo->visibility;
+    float trans = mo->visibility_;
 
     float dx = 0, dy = 0;
 
@@ -1290,7 +1290,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
     const image_c *image = dthing->image;
 
-    GLuint tex_id = W_ImageCache(image, false, ren_fx_colmap ? ren_fx_colmap : dthing->mo->info->palremap_);
+    GLuint tex_id = W_ImageCache(image, false, ren_fx_colmap ? ren_fx_colmap : dthing->mo->info_->palremap_);
 
     //	float w = IM_WIDTH(image);
     float h     = IM_HEIGHT(image);
@@ -1314,8 +1314,8 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
         float _h    = dthing->orig_top - dthing->orig_bottom;
         float skew2 = _h;
 
-        if (mo->radius >= 1.0f && h > mo->radius)
-            skew2 = mo->radius;
+        if (mo->radius_ >= 1.0f && h > mo->radius_)
+            skew2 = mo->radius_;
 
         float _dx = viewcos * sprite_skew * skew2;
         float _dy = viewsin * sprite_skew * skew2;
@@ -1340,7 +1340,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
     float tex_y1 = dthing->bottom - dthing->orig_bottom;
     float tex_y2 = tex_y1 + (z1t - z1b);
 
-    float yscale = mo->scale * MIR_ZScale();
+    float yscale = mo->scale_ * MIR_ZScale();
 
     SYS_ASSERT(h > 0);
     tex_y1 = top * tex_y1 / (h * yscale);
@@ -1382,7 +1382,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
     if (trans < 0.99 || image->opacity == OPAC_Complex)
         blending |= BL_Alpha;
 
-    if (mo->hyperflags & kHyperFlagNoZBufferUpdate)
+    if (mo->hyper_flags_ & kHyperFlagNoZBufferUpdate)
         blending |= BL_NoZBuf;
 
     float  fuzz_mul = 0;
@@ -1404,7 +1404,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
     if (!is_fuzzy)
     {
-        abstract_shader_c *shader = R_GetColormapShader(dthing->props, mo->state->bright, mo->subsector->sector);
+        abstract_shader_c *shader = R_GetColormapShader(dthing->props, mo->state_->bright, mo->subsector_->sector);
 
         for (int v = 0; v < 4; v++)
         {
@@ -1413,13 +1413,13 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
         if (use_dlights && ren_extralight < 250)
         {
-            float r = mo->radius + 32;
+            float r = mo->radius_ + 32;
 
-            DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height, DLIT_Thing,
+            DynamicLightIterator(mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r, mo->z + mo->height_, DLIT_Thing,
                                    &data);
 
-            SectorGlowIterator(mo->subsector->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
-                                 mo->z + mo->height, DLIT_Thing, &data);
+            SectorGlowIterator(mo->subsector_->sector, mo->x - r, mo->y - r, mo->z, mo->x + r, mo->y + r,
+                                 mo->z + mo->height_, DLIT_Thing, &data);
         }
     }
 
@@ -1427,12 +1427,12 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
     int num_pass = is_fuzzy ? 1 : (detail_level > 0 ? 4 : 3);
 
-    RGBAColor fc_to_use = dthing->mo->subsector->sector->props.fog_color;
-    float    fd_to_use = dthing->mo->subsector->sector->props.fog_density;
+    RGBAColor fc_to_use = dthing->mo->subsector_->sector->props.fog_color;
+    float    fd_to_use = dthing->mo->subsector_->sector->props.fog_density;
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
     {
-        if (IS_SKY(mo->subsector->sector->ceil))
+        if (IS_SKY(mo->subsector_->sector->ceil))
         {
             fc_to_use = current_map->outdoor_fog_color_;
             fd_to_use = 0.01f * current_map->outdoor_fog_density_;
@@ -1481,8 +1481,8 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
             if (is_fuzzy)
             {
-                float ftx = (v_idx >= 2) ? (mo->radius * 2) : 0;
-                float fty = (v_idx == 1 || v_idx == 2) ? (mo->height) : 0;
+                float ftx = (v_idx >= 2) ? (mo->radius_ * 2) : 0;
+                float fty = (v_idx == 1 || v_idx == 2) ? (mo->height_) : 0;
 
                 dest->texc[1].X = ftx * fuzz_mul + fuzz_add.X;
                 dest->texc[1].Y = fty * fuzz_mul + fuzz_add.Y;

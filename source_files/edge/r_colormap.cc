@@ -707,13 +707,13 @@ class colormap_shader_c : public abstract_shader_c
         // FIXME: for foggy maps, need to adjust add_R/G/B too
     }
 
-    virtual void Corner(multi_color_c *col, float nx, float ny, float nz, struct mobj_s *mod_pos, bool is_weapon)
+    virtual void Corner(multi_color_c *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
     {
         // TODO: improve this (normal-ise a little bit)
 
         float mx = mod_pos->x;
         float my = mod_pos->y;
-        float mz = mod_pos->z + mod_pos->height / 2;
+        float mz = mod_pos->z + mod_pos->height_ / 2;
 
         if (is_weapon)
         {

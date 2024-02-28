@@ -139,7 +139,7 @@ static int FindFreeChannel(void)
     return -1; // not found
 }
 
-static int FindPlayingFX(SoundEffectDefinition *def, int cat, position_c *pos)
+static int FindPlayingFX(SoundEffectDefinition *def, int cat, Position *pos)
 {
     for (int i = 0; i < num_chan; i++)
     {
@@ -200,7 +200,7 @@ static void CountPlayingCats(void)
     }
 }
 
-static int ChannelScore(SoundEffectDefinition *def, int category, position_c *pos, bool boss)
+static int ChannelScore(SoundEffectDefinition *def, int category, Position *pos, bool boss)
 {
     // for full-volume sounds, use the priority from DDF
     if (category <= SNCAT_Weapon)
@@ -312,7 +312,7 @@ SoundEffectDefinition *LookupEffectDef(const SoundEffect *s)
     return sfxdefs[num];
 }
 
-static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, position_c *pos, int flags, sound_data_c *buf)
+static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, Position *pos, int flags, sound_data_c *buf)
 {
     // LogPrint("S_PlaySound on idx #%d DEF:%p\n", idx, def);
 
@@ -344,7 +344,7 @@ static void S_PlaySound(int idx, SoundEffectDefinition *def, int category, posit
     // LogPrint("FINISHED: delta=0x%lx\n", chan->delta);
 }
 
-static void DoStartFX(SoundEffectDefinition *def, int category, position_c *pos, int flags, sound_data_c *buf)
+static void DoStartFX(SoundEffectDefinition *def, int category, Position *pos, int flags, sound_data_c *buf)
 {
     CountPlayingCats();
 
@@ -414,7 +414,7 @@ static void DoStartFX(SoundEffectDefinition *def, int category, position_c *pos,
     S_PlaySound(k, def, category, pos, flags, buf);
 }
 
-void S_StartFX(SoundEffect *sfx, int category, position_c *pos, int flags)
+void S_StartFX(SoundEffect *sfx, int category, Position *pos, int flags)
 {
     if (no_sound || !sfx)
         return;
@@ -474,7 +474,7 @@ void S_StartFX(SoundEffect *sfx, int category, position_c *pos, int flags)
     UnlockAudio();
 }
 
-void S_StopFX(position_c *pos)
+void S_StopFX(Position *pos)
 {
     if (no_sound)
         return;
@@ -546,10 +546,10 @@ void S_SoundTicker(void)
         {
             SYS_ASSERT(::numplayers > 0);
 
-            mobj_t *pmo = ::players[displayplayer]->mo;
+            MapObject *pmo = ::players[displayplayer]->mo;
             SYS_ASSERT(pmo);
 
-            S_UpdateSounds(pmo, pmo->angle);
+            S_UpdateSounds(pmo, pmo->angle_);
         }
         else
         {

@@ -31,7 +31,7 @@
 #include "w_model.h"
 #include "w_wad.h"
 
-#include "p_local.h" // mobjlisthead
+#include "p_local.h" // map_object_list_head
 
 // Model storage
 static modeldef_c **models;
@@ -337,14 +337,14 @@ void W_PrecacheModels(void)
     memset(model_present, 0, nummodels);
 
     // mark all monsters (etc) in the level
-    for (mobj_t *mo = mobjlisthead; mo; mo = mo->next)
+    for (MapObject *mo = map_object_list_head; mo; mo = mo->next_)
     {
-        SYS_ASSERT(mo->state);
+        SYS_ASSERT(mo->state_);
 
-        if (!(mo->state->flags & kStateFrameFlagModel))
+        if (!(mo->state_->flags & kStateFrameFlagModel))
             continue;
 
-        int model = mo->state->sprite;
+        int model = mo->state_->sprite;
 
         const char *model_name = nullptr;
 

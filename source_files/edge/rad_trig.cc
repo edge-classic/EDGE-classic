@@ -340,7 +340,7 @@ void RAD_ClearWUDsByMap(const std::string &mapname)
 // either enables them or disables them (based on `disable').
 // Actor can be nullptr.
 //
-void RAD_EnableByTag(mobj_t *actor, uint32_t tag, bool disable, s_tagtype_e tagtype)
+void RAD_EnableByTag(MapObject *actor, uint32_t tag, bool disable, s_tagtype_e tagtype)
 {
     rad_trigger_t *trig;
 
@@ -371,7 +371,7 @@ void RAD_EnableByTag(mobj_t *actor, uint32_t tag, bool disable, s_tagtype_e tagt
 // either enables them or disables them (based on `disable').
 // Actor can be nullptr.
 //
-void RAD_EnableByTag(mobj_t *actor, const char *name, bool disable)
+void RAD_EnableByTag(MapObject *actor, const char *name, bool disable)
 {
     rad_trigger_t *trig;
 
@@ -404,7 +404,7 @@ void RAD_EnableByTag(mobj_t *actor, const char *name, bool disable)
 // check if it is active).
 // Actor can be nullptr.
 //
-bool RAD_IsActiveByTag(mobj_t *actor, const char *name)
+bool RAD_IsActiveByTag(MapObject *actor, const char *name)
 {
     rad_trigger_t *trig;
 
@@ -438,14 +438,14 @@ bool RAD_IsActiveByTag(mobj_t *actor, const char *name)
     */
 }
 
-bool RAD_WithinRadius(mobj_t *mo, rad_script_t *r)
+bool RAD_WithinRadius(MapObject *mo, rad_script_t *r)
 {
     int sec_tag = r->sector_tag;
     if (sec_tag > 0)
     {
-        if (mo->subsector->sector->tag != sec_tag)
+        if (mo->subsector_->sector->tag != sec_tag)
             return false;
-        if (r->rad_z >= 0 && fabs(r->z - MO_MIDZ(mo)) > r->rad_z + mo->height / 2)
+        if (r->rad_z >= 0 && fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
             return false;
         return true;
     }
@@ -453,20 +453,20 @@ bool RAD_WithinRadius(mobj_t *mo, rad_script_t *r)
     int sec_ind = r->sector_index;
     if (sec_ind >= 0 && sec_ind <= total_level_sectors)
     {
-        if (mo->subsector->sector - level_sectors != sec_ind)
+        if (mo->subsector_->sector - level_sectors != sec_ind)
             return false;
-        if (r->rad_z >= 0 && fabs(r->z - MO_MIDZ(mo)) > r->rad_z + mo->height / 2)
+        if (r->rad_z >= 0 && fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
             return false;
         return true;
     }
 
-    if (r->rad_x >= 0 && fabs(r->x - mo->x) > r->rad_x + mo->radius)
+    if (r->rad_x >= 0 && fabs(r->x - mo->x) > r->rad_x + mo->radius_)
         return false;
 
-    if (r->rad_y >= 0 && fabs(r->y - mo->y) > r->rad_y + mo->radius)
+    if (r->rad_y >= 0 && fabs(r->y - mo->y) > r->rad_y + mo->radius_)
         return false;
 
-    if (r->rad_z >= 0 && fabs(r->z - MO_MIDZ(mo)) > r->rad_z + mo->height / 2)
+    if (r->rad_z >= 0 && fabs(r->z - MapObjectMidZ(mo)) > r->rad_z + mo->height_ / 2)
     {
         return false;
     }
@@ -536,7 +536,7 @@ static int RAD_AllPlayersCheckCond(rad_script_t *r, int mask)
 
 static bool RAD_CheckBossTrig(rad_trigger_t *trig, s_ondeath_t *cond)
 {
-    mobj_t *mo;
+    MapObject *mo;
 
     int count = 0;
 
@@ -555,12 +555,12 @@ static bool RAD_CheckBossTrig(rad_trigger_t *trig, s_ondeath_t *cond)
     }
 
     // scan the remaining mobjs to see if all bosses are dead
-    for (mo = mobjlisthead; mo != nullptr; mo = mo->next)
+    for (mo = map_object_list_head; mo != nullptr; mo = mo->next_)
     {
         if (seen_monsters.count(cond->cached_info) == 0)
             return false; // Never on map?
 
-        if (mo->info == cond->cached_info && mo->health > 0)
+        if (mo->info_ == cond->cached_info && mo->health_ > 0)
         {
             count++;
 
@@ -600,9 +600,9 @@ static bool RAD_CheckHeightTrig(rad_trigger_t *trig, s_onheight_t *cond)
     return (cond->z1 <= h && h <= cond->z2);
 }
 
-bool RAD_CheckReachedTrigger(mobj_t *thing)
+bool RAD_CheckReachedTrigger(MapObject *thing)
 {
-    rad_script_t  *scr = (rad_script_t *)thing->path_trigger;
+    rad_script_t  *scr = (rad_script_t *)thing->path_trigger_;
     rad_trigger_t *trig;
 
     rts_path_t *path;
@@ -630,7 +630,7 @@ bool RAD_CheckReachedTrigger(mobj_t *thing)
 
     if (scr->next_path_total == 0)
     {
-        thing->path_trigger = nullptr;
+        thing->path_trigger_ = nullptr;
         return true;
     }
     else if (scr->next_path_total == 1)
@@ -652,7 +652,7 @@ bool RAD_CheckReachedTrigger(mobj_t *thing)
 
     SYS_ASSERT(path->cached_scr);
 
-    thing->path_trigger = path->cached_scr;
+    thing->path_trigger_ = path->cached_scr;
     return true;
 }
 
@@ -828,17 +828,17 @@ void RAD_RunTriggers(void)
     }
 }
 
-void RAD_MonsterIsDead(mobj_t *mo)
+void RAD_MonsterIsDead(MapObject *mo)
 {
-    if (mo->hyperflags & kHyperFlagWaitUntilDead)
+    if (mo->hyper_flags_ & kHyperFlagWaitUntilDead)
     {
-        mo->hyperflags &= ~kHyperFlagWaitUntilDead;
+        mo->hyper_flags_ &= ~kHyperFlagWaitUntilDead;
 
         rad_trigger_t *trig;
 
         for (trig = active_triggers; trig; trig = trig->next)
         {
-            for (auto tag : epi::SeparatedStringVector(mo->wud_tags, ','))
+            for (auto tag : epi::SeparatedStringVector(mo->wait_until_dead_tags_, ','))
             {
                 if (trig->wud_tag == atoi(tag.c_str()))
                     trig->wud_count--;

@@ -128,7 +128,7 @@ void RGL_RainbowEffect(player_t *player)
     }
 
     // AJA 2022: handle BOOM colormaps (linetype 242)
-    sector_t *sector = player->mo->subsector->sector;
+    sector_t *sector = player->mo->subsector_->sector;
 
     if (sector->heightsec != nullptr)
     {
@@ -297,7 +297,7 @@ void FUZZ_Update(void)
     fuzz_yoffset = ((framecount * 3) & 1023) / 256.0;
 }
 
-void FUZZ_Adjust(HMM_Vec2 *tc, mobj_t *mo)
+void FUZZ_Adjust(HMM_Vec2 *tc, MapObject *mo)
 {
     tc->X += fmod(mo->x / 520.0, 1.0);
     tc->Y += fmod(mo->y / 520.0, 1.0) + fuzz_yoffset;

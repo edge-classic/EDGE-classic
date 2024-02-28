@@ -75,7 +75,7 @@ typedef struct try_move_info_s
     // --- input --
 
     // thing trying to move
-    mobj_t *mover;
+    MapObject *mover;
     int     flags, extflags;
 
     // attempted destination
@@ -95,8 +95,8 @@ typedef struct try_move_info_s
     float dropoff;
 
     // objects that end up above and below us
-    mobj_t *above;
-    mobj_t *below;
+    MapObject *above;
+    MapObject *below;
 
     // -AJA- FIXME: this is a "quick fix" (hack).  If only one line is
     // hit, and TryMove decides the move is impossible, then we know
@@ -124,7 +124,7 @@ linelist_c spechit; // List of special lines that have been hit
 
 typedef struct shoot_trav_info_s
 {
-    mobj_t *source;
+    MapObject *source;
 
     float   range;
     float   start_z;
@@ -140,7 +140,7 @@ typedef struct shoot_trav_info_s
     float             prev_z;
 
     // output field:
-    mobj_t *target;
+    MapObject *target;
 } shoot_trav_info_t;
 
 static shoot_trav_info_t shoot_I;
@@ -163,9 +163,9 @@ static inline int PointOnLineSide(float x, float y, line_t *ld)
 // TELEPORT MOVE
 //
 
-static bool PIT_StompThing(mobj_t *thing, void *data)
+static bool PIT_StompThing(MapObject *thing, void *data)
 {
-    if (!(thing->flags & kMapObjectFlagShootable))
+    if (!(thing->flags_ & kMapObjectFlagShootable))
         return true;
 
     // check we aren't trying to stomp ourselves
@@ -173,10 +173,10 @@ static bool PIT_StompThing(mobj_t *thing, void *data)
         return true;
 
     // ignore old avatars (for Hub reloads), which get removed after loading
-    if (thing->hyperflags & kHyperFlagRememberOldAvatars)
+    if (thing->hyper_flags_ & kHyperFlagRememberOldAvatars)
         return true;
 
-    float blockdist = thing->radius + tm_I.mover->radius;
+    float blockdist = thing->radius_ + tm_I.mover->radius_;
 
     // check to see we hit it
     if (fabs(thing->x - tm_I.x) >= blockdist || fabs(thing->y - tm_I.y) >= blockdist)
@@ -185,14 +185,14 @@ static bool PIT_StompThing(mobj_t *thing, void *data)
     // -AJA- 1999/07/30: True 3d gameplay checks.
     if (level_flags.true3dgameplay)
     {
-        if (tm_I.z >= thing->z + thing->height)
+        if (tm_I.z >= thing->z + thing->height_)
         {
             // went over
-            tm_I.floorz = HMM_MAX(tm_I.floorz, thing->z + thing->height);
+            tm_I.floorz = HMM_MAX(tm_I.floorz, thing->z + thing->height_);
             return true;
         }
 
-        if (tm_I.z + tm_I.mover->height <= thing->z)
+        if (tm_I.z + tm_I.mover->height_ <= thing->z)
         {
             // went under
             tm_I.ceilnz = HMM_MIN(tm_I.ceilnz, thing->z);
@@ -200,7 +200,7 @@ static bool PIT_StompThing(mobj_t *thing, void *data)
         }
     }
 
-    if (!tm_I.mover->player && (current_map->force_off_ & kMapFlagStomp))
+    if (!tm_I.mover->player_ && (current_map->force_off_ & kMapFlagStomp))
         return false;
 
     P_TelefragMobj(thing, tm_I.mover, nullptr);
@@ -210,11 +210,11 @@ static bool PIT_StompThing(mobj_t *thing, void *data)
 //
 // Kill anything occupying the position
 //
-bool P_TeleportMove(mobj_t *thing, float x, float y, float z)
+bool P_TeleportMove(MapObject *thing, float x, float y, float z)
 {
     tm_I.mover    = thing;
-    tm_I.flags    = thing->flags;
-    tm_I.extflags = thing->extendedflags;
+    tm_I.flags    = thing->flags_;
+    tm_I.extflags = thing->extended_flags_;
 
     tm_I.x = x;
     tm_I.y = y;
@@ -233,7 +233,7 @@ bool P_TeleportMove(mobj_t *thing, float x, float y, float z)
     // -ACB- 2004/08/01 Don't think this is needed
     //	spechit.ZeroiseCount();
 
-    float r = thing->radius;
+    float r = thing->radius_;
 
     if (!BlockmapThingIterator(x - r, y - r, x + r, y + r, PIT_StompThing))
         return false;
@@ -241,8 +241,8 @@ bool P_TeleportMove(mobj_t *thing, float x, float y, float z)
     // everything on the spot has been stomped,
     // so link the thing into its new position
 
-    thing->floorz   = tm_I.floorz;
-    thing->ceilingz = tm_I.ceilnz;
+    thing->floor_z_   = tm_I.floorz;
+    thing->ceiling_z_ = tm_I.ceilnz;
 
     ChangeThingPosition(thing, x, y, z);
 
@@ -261,7 +261,7 @@ static bool PIT_CheckAbsLine(line_t *ld, void *data)
     // The spawning thing's position touches the given line.
     // If this should not be allowed, return false.
 
-    if (tm_I.mover->player && ld->special && (ld->special->portal_effect_ & kPortalEffectTypeStandard))
+    if (tm_I.mover->player_ && ld->special && (ld->special->portal_effect_ & kPortalEffectTypeStandard))
         return true;
 
     if (!ld->backsector || ld->gap_num == 0)
@@ -279,7 +279,7 @@ static bool PIT_CheckAbsLine(line_t *ld, void *data)
             return false;
 
         // block players ?
-        if (tm_I.mover->player &&
+        if (tm_I.mover->player_ &&
             ((ld->flags & MLF_BlockPlayers) || (ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockPlayers))))
         {
             return false;
@@ -289,7 +289,7 @@ static bool PIT_CheckAbsLine(line_t *ld, void *data)
         if ((tm_I.extflags & kExtendedFlagMonster) &&
             ((ld->flags & MLF_BlockGrounded) ||
              (ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockGroundedMonsters))) &&
-            (tm_I.mover->z <= tm_I.mover->floorz + 1.0f))
+            (tm_I.mover->z <= tm_I.mover->floor_z_ + 1.0f))
         {
             return false;
         }
@@ -307,12 +307,12 @@ static bool PIT_CheckAbsLine(line_t *ld, void *data)
         // -AJA- FIXME: this ONFLOORZ stuff is a DIRTY HACK!
         if (AlmostEquals(tm_I.z, ONFLOORZ) || AlmostEquals(tm_I.z, ONCEILINGZ))
         {
-            if (tm_I.mover->height <= (ld->gaps[i].c - ld->gaps[i].f))
+            if (tm_I.mover->height_ <= (ld->gaps[i].c - ld->gaps[i].f))
                 return true;
         }
         else
         {
-            if (ld->gaps[i].f <= tm_I.z && tm_I.z + tm_I.mover->height <= ld->gaps[i].c)
+            if (ld->gaps[i].f <= tm_I.z && tm_I.z + tm_I.mover->height_ <= ld->gaps[i].c)
                 return true;
         }
     }
@@ -320,7 +320,7 @@ static bool PIT_CheckAbsLine(line_t *ld, void *data)
     return false;
 }
 
-static bool PIT_CheckAbsThing(mobj_t *thing, void *data)
+static bool PIT_CheckAbsThing(MapObject *thing, void *data)
 {
     float blockdist;
     bool  solid;
@@ -328,10 +328,10 @@ static bool PIT_CheckAbsThing(mobj_t *thing, void *data)
     if (thing == tm_I.mover)
         return true;
 
-    if (!(thing->flags & (kMapObjectFlagSolid | kMapObjectFlagShootable)))
+    if (!(thing->flags_ & (kMapObjectFlagSolid | kMapObjectFlagShootable)))
         return true;
 
-    blockdist = thing->radius + tm_I.mover->radius;
+    blockdist = thing->radius_ + tm_I.mover->radius_;
 
     // Check that we didn't hit it
     if (fabs(thing->x - tm_I.x) >= blockdist || fabs(thing->y - tm_I.y) >= blockdist)
@@ -344,34 +344,34 @@ static bool PIT_CheckAbsThing(mobj_t *thing, void *data)
         if ((tm_I.flags & kMapObjectFlagMissile) || level_flags.true3dgameplay)
         {
             // overhead ?
-            if (tm_I.z >= thing->z + thing->height)
+            if (tm_I.z >= thing->z + thing->height_)
                 return true;
 
             // underneath ?
-            if (tm_I.z + tm_I.mover->height <= thing->z)
+            if (tm_I.z + tm_I.mover->height_ <= thing->z)
                 return true;
         }
     }
 
-    solid = (thing->flags & kMapObjectFlagSolid) ? true : false;
+    solid = (thing->flags_ & kMapObjectFlagSolid) ? true : false;
 
     // check for missiles making contact
     // -ACB- 1998/08/04 Procedure for missile contact
 
-    if (tm_I.mover->source && tm_I.mover->source == thing)
+    if (tm_I.mover->source_ && tm_I.mover->source_ == thing)
         return true;
 
     if (tm_I.flags & kMapObjectFlagMissile)
     {
         // ignore the missile's shooter
-        if (tm_I.mover->source && tm_I.mover->source == thing)
+        if (tm_I.mover->source_ && tm_I.mover->source_ == thing)
             return true;
 
-        if ((thing->hyperflags & kHyperFlagMissilesPassThrough) && level_flags.pass_missile)
+        if ((thing->hyper_flags_ & kHyperFlagMissilesPassThrough) && level_flags.pass_missile)
             return true;
 
         // thing isn't shootable, return depending on if the thing is solid.
-        if (!(thing->flags & kMapObjectFlagShootable))
+        if (!(thing->flags_ & kMapObjectFlagShootable))
             return !solid;
 
         if (P_MissileContact(tm_I.mover, thing) < 0)
@@ -382,7 +382,7 @@ static bool PIT_CheckAbsThing(mobj_t *thing, void *data)
 
     // -AJA- 2000/06/09: Follow MBF semantics: allow the non-solid
     // moving things to pass through solid things.
-    return !solid || (thing->flags & kMapObjectFlagNoClip) || !(tm_I.flags & kMapObjectFlagSolid);
+    return !solid || (thing->flags_ & kMapObjectFlagNoClip) || !(tm_I.flags & kMapObjectFlagSolid);
 }
 
 //
@@ -398,15 +398,15 @@ static bool PIT_CheckAbsThing(mobj_t *thing, void *data)
 // Only used for checking if an object can be spawned at a
 // particular location.
 //
-bool P_CheckAbsPosition(mobj_t *thing, float x, float y, float z)
+bool P_CheckAbsPosition(MapObject *thing, float x, float y, float z)
 {
     // can go anywhere
-    if (thing->flags & kMapObjectFlagNoClip)
+    if (thing->flags_ & kMapObjectFlagNoClip)
         return true;
 
     tm_I.mover    = thing;
-    tm_I.flags    = thing->flags;
-    tm_I.extflags = thing->extendedflags;
+    tm_I.flags    = thing->flags_;
+    tm_I.extflags = thing->extended_flags_;
 
     tm_I.x = x;
     tm_I.y = y;
@@ -414,7 +414,7 @@ bool P_CheckAbsPosition(mobj_t *thing, float x, float y, float z)
 
     tm_I.sub = R_PointInSubsector(x, y);
 
-    float r = tm_I.mover->radius;
+    float r = tm_I.mover->radius_;
 
     tm_I.bbox[kBoundingBoxLeft]   = x - r;
     tm_I.bbox[kBoundingBoxBottom] = y - r;
@@ -455,7 +455,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
     // so two special lines that are only 8 pixels apart
     // could be crossed in either order.
 
-    if (tm_I.mover->player && ld->special && (ld->special->portal_effect_ & kPortalEffectTypeStandard))
+    if (tm_I.mover->player_ && ld->special && (ld->special->portal_effect_ & kPortalEffectTypeStandard))
         return true;
 
     if (!ld->backsector)
@@ -482,9 +482,9 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
         if ((ld->flags & MLF_Blocking) || ((ld->flags & MLF_BlockMonsters) && (tm_I.extflags & kExtendedFlagMonster)) ||
             (((ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockGroundedMonsters)) ||
               (ld->flags & MLF_BlockGrounded)) &&
-             (tm_I.extflags & kExtendedFlagMonster) && (tm_I.mover->z <= tm_I.mover->floorz + 1.0f)) ||
+             (tm_I.extflags & kExtendedFlagMonster) && (tm_I.mover->z <= tm_I.mover->floor_z_ + 1.0f)) ||
             (((ld->special && (ld->special->line_effect_ & kLineEffectTypeBlockPlayers)) || (ld->flags & MLF_BlockPlayers)) &&
-             (tm_I.mover->player)))
+             (tm_I.mover->player_)))
         {
             blockline = ld;
             return false;
@@ -492,7 +492,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
     }
 
     // -AJA- for players, disable stepping up onto a lowering sector
-    if (tm_I.mover->player && !AlmostEquals(ld->frontsector->f_h, ld->backsector->f_h))
+    if (tm_I.mover->player_ && !AlmostEquals(ld->frontsector->f_h, ld->backsector->f_h))
     {
         if ((tm_I.mover->z < ld->frontsector->f_h && P_SectorIsLowering(ld->frontsector)) ||
             (tm_I.mover->z < ld->backsector->f_h && P_SectorIsLowering(ld->backsector)))
@@ -503,7 +503,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
     }
 
     // handle ladders (players only !)
-    if (tm_I.mover->player && ld->special && ld->special->ladder_.height_ > 0)
+    if (tm_I.mover->player_ && ld->special && ld->special->ladder_.height_ > 0)
     {
         float z1, z2;
         float pz1, pz2;
@@ -512,7 +512,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
         z2 = z1 + ld->special->ladder_.height_;
 
         pz1 = tm_I.mover->z;
-        pz2 = tm_I.mover->z + tm_I.mover->height;
+        pz2 = tm_I.mover->z + tm_I.mover->height_;
 
         do
         {
@@ -522,7 +522,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
 
             // FIXME: if more than one ladder, choose best one
 
-            tm_I.mover->on_ladder = (ld - level_lines);
+            tm_I.mover->on_ladder_ = (ld - level_lines);
         } while (0);
     }
 
@@ -547,7 +547,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
         }
 
         if (!AlmostEquals(f1, f2) && IS_SKY(ld->frontsector->floor) && IS_SKY(ld->backsector->floor) &&
-            tm_I.z + tm_I.mover->height < HMM_MAX(f1, f2))
+            tm_I.z + tm_I.mover->height_ < HMM_MAX(f1, f2))
         {
             mobj_hit_sky = true;
         }
@@ -565,7 +565,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
         divver.dy = ld->dy;
         float iz  = 0;
         // Prevent player from getting stuck if actually on linedef and moving parallel to it
-        if (P_PointOnDivlineThick(tm_I.mover->x, tm_I.mover->y, &divver, ld->length, tm_I.mover->radius) == 2)
+        if (P_PointOnDivlineThick(tm_I.mover->x, tm_I.mover->y, &divver, ld->length, tm_I.mover->radius_) == 2)
             return true;
         if (ld->frontsector->floor_vertex_slope && ld->frontsector->linecount == 4 &&
             R_PointInSubsector(tm_I.mover->x, tm_I.mover->y)->sector != ld->frontsector)
@@ -573,11 +573,11 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             float ix = 0;
             float iy = 0;
             P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
-            if (std::isfinite(ix) && std::isfinite(iy))
+            if (isfinite(ix) && isfinite(iy))
             {
                 iz = MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->floor_z_verts[2],
                                              ld->frontsector->floor_vs_normal).Z;
-                if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size_)
+                if (isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info_->step_size_)
                 {
                     blockline = ld;
                     return false;
@@ -590,11 +590,11 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             float ix = 0;
             float iy = 0;
             P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
-            if (std::isfinite(ix) && std::isfinite(iy))
+            if (isfinite(ix) && isfinite(iy))
             {
                 iz = MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->floor_z_verts[2],
                                              ld->backsector->floor_vs_normal).Z;
-                if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size_)
+                if (isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info_->step_size_)
                 {
                     blockline = ld;
                     return false;
@@ -607,7 +607,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             if (!ld->backsector->floor_vertex_slope)
             {
                 iz = ld->backsector->f_h;
-                if (tm_I.mover->z + tm_I.mover->info->step_size_ < iz)
+                if (tm_I.mover->z + tm_I.mover->info_->step_size_ < iz)
                 {
                     blockline = ld;
                     return false;
@@ -618,11 +618,11 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 float ix = 0;
                 float iy = 0;
                 P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
-                if (std::isfinite(ix) && std::isfinite(iy))
+                if (isfinite(ix) && isfinite(iy))
                 {
                     iz = MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->floor_z_verts[2],
                                                  ld->backsector->floor_vs_normal).Z;
-                    if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size_)
+                    if (isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info_->step_size_)
                     {
                         blockline = ld;
                         return false;
@@ -636,7 +636,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             if (!ld->frontsector->floor_vertex_slope)
             {
                 iz = ld->frontsector->f_h;
-                if (tm_I.mover->z + tm_I.mover->info->step_size_ < iz)
+                if (tm_I.mover->z + tm_I.mover->info_->step_size_ < iz)
                 {
                     blockline = ld;
                     return false;
@@ -647,11 +647,11 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 float ix = 0;
                 float iy = 0;
                 P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
-                if (std::isfinite(ix) && std::isfinite(iy))
+                if (isfinite(ix) && isfinite(iy))
                 {
                     iz = MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->floor_z_verts[2],
                                                  ld->frontsector->floor_vs_normal).Z;
-                    if (std::isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info->step_size_)
+                    if (isfinite(iz) && iz > tm_I.mover->z + tm_I.mover->info_->step_size_)
                     {
                         blockline = ld;
                         return false;
@@ -665,11 +665,11 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             float ix = 0;
             float iy = 0;
             P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
-            if (std::isfinite(ix) && std::isfinite(iy))
+            if (isfinite(ix) && isfinite(iy))
             {
                 float icz = MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->ceil_z_verts[2],
                                                     ld->frontsector->ceil_vs_normal).Z;
-                if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
+                if (isfinite(icz) && icz <= iz + tm_I.mover->height_)
                 {
                     blockline = ld;
                     return false;
@@ -682,11 +682,11 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
             float ix = 0;
             float iy = 0;
             P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
-            if (std::isfinite(ix) && std::isfinite(iy))
+            if (isfinite(ix) && isfinite(iy))
             {
                 float icz = MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->ceil_z_verts[2],
                                                     ld->backsector->ceil_vs_normal).Z;
-                if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
+                if (isfinite(icz) && icz <= iz + tm_I.mover->height_)
                 {
                     blockline = ld;
                     return false;
@@ -698,7 +698,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
         {
             if (!ld->backsector->ceil_vertex_slope)
             {
-                if (iz + tm_I.mover->height >= ld->backsector->c_h)
+                if (iz + tm_I.mover->height_ >= ld->backsector->c_h)
                 {
                     blockline = ld;
                     return false;
@@ -709,12 +709,12 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 float ix = 0;
                 float iy = 0;
                 P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
-                if (std::isfinite(ix) && std::isfinite(iy))
+                if (isfinite(ix) && isfinite(iy))
                 {
                     float icz =
                         MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->backsector->ceil_z_verts[2],
                                                 ld->backsector->ceil_vs_normal).Z;
-                    if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
+                    if (isfinite(icz) && icz <= iz + tm_I.mover->height_)
                     {
                         blockline = ld;
                         return false;
@@ -727,7 +727,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
         {
             if (!ld->frontsector->ceil_vertex_slope)
             {
-                if (iz + tm_I.mover->height >= ld->frontsector->c_h)
+                if (iz + tm_I.mover->height_ >= ld->frontsector->c_h)
                 {
                     blockline = ld;
                     return false;
@@ -738,12 +738,12 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
                 float ix = 0;
                 float iy = 0;
                 P_ComputeIntersection(&divver, tm_I.mover->x, tm_I.mover->y, tm_I.x, tm_I.y, &ix, &iy);
-                if (std::isfinite(ix) && std::isfinite(iy))
+                if (isfinite(ix) && isfinite(iy))
                 {
                     float icz =
                         MathLinePlaneIntersection({{ix, iy, -40000}}, {{ix, iy, 40000}}, ld->frontsector->ceil_z_verts[2],
                                                 ld->frontsector->ceil_vs_normal).Z;
-                    if (std::isfinite(icz) && icz <= iz + tm_I.mover->height)
+                    if (isfinite(icz) && icz <= iz + tm_I.mover->height_)
                     {
                         blockline = ld;
                         return false;
@@ -760,7 +760,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
     // be multiple gaps and we must choose one here, based on the thing's
     // current position (esp. Z).
 
-    int i = P_FindThingGap(ld->gaps, ld->gap_num, tm_I.z, tm_I.z + tm_I.mover->height);
+    int i = P_FindThingGap(ld->gaps, ld->gap_num, tm_I.z, tm_I.z + tm_I.mover->height_);
 
     // gap has been chosen. apply it.
 
@@ -783,7 +783,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
         tm_I.ceilnz = tm_I.floorz;
     }
 
-    if (tm_I.ceilnz < tm_I.floorz + tm_I.mover->height)
+    if (tm_I.ceilnz < tm_I.floorz + tm_I.mover->height_)
         blockline = ld;
 
     if (!blockline)
@@ -797,7 +797,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
     return true;
 }
 
-static bool PIT_CheckRelThing(mobj_t *thing, void *data)
+static bool PIT_CheckRelThing(MapObject *thing, void *data)
 {
     float blockdist;
     bool  solid;
@@ -805,24 +805,24 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
     if (thing == tm_I.mover)
         return true;
 
-    if (0 == (thing->flags & (kMapObjectFlagSolid | kMapObjectFlagSpecial | kMapObjectFlagShootable | kMapObjectFlagTouchy)))
+    if (0 == (thing->flags_ & (kMapObjectFlagSolid | kMapObjectFlagSpecial | kMapObjectFlagShootable | kMapObjectFlagTouchy)))
         return true;
 
-    blockdist = tm_I.mover->radius + thing->radius;
+    blockdist = tm_I.mover->radius_ + thing->radius_;
 
     // Check that we didn't hit it
     if (fabs(thing->x - tm_I.x) >= blockdist || fabs(thing->y - tm_I.y) >= blockdist)
         return true; // no we missed this thing
 
     // -KM- 1998/9/19 True 3d gameplay checks.
-    if (level_flags.true3dgameplay && !(thing->flags & kMapObjectFlagSpecial))
+    if (level_flags.true3dgameplay && !(thing->flags_ & kMapObjectFlagSpecial))
     {
-        float top_z = thing->z + thing->height;
+        float top_z = thing->z + thing->height_;
 
         // see if we went over
         if (tm_I.z >= top_z)
         {
-            if (top_z > tm_I.floorz && !(thing->flags & kMapObjectFlagMissile))
+            if (top_z > tm_I.floorz && !(thing->flags_ & kMapObjectFlagMissile))
             {
                 tm_I.floorz = top_z;
                 tm_I.below  = thing;
@@ -831,9 +831,9 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
         }
 
         // see if we went underneath
-        if (tm_I.z + tm_I.mover->height <= thing->z)
+        if (tm_I.z + tm_I.mover->height_ <= thing->z)
         {
-            if (thing->z < tm_I.ceilnz && !(thing->flags & kMapObjectFlagMissile))
+            if (thing->z < tm_I.ceilnz && !(thing->flags_ & kMapObjectFlagMissile))
             {
                 tm_I.ceilnz = thing->z;
             }
@@ -842,10 +842,10 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
 
         // -AJA- 1999/07/21: allow climbing on top of things.
 
-        if (top_z > tm_I.floorz && (thing->extendedflags & kExtendedFlagClimbable) &&
-            (tm_I.mover->player || (tm_I.extflags & kExtendedFlagMonster)) &&
+        if (top_z > tm_I.floorz && (thing->extended_flags_ & kExtendedFlagClimbable) &&
+            (tm_I.mover->player_ || (tm_I.extflags & kExtendedFlagMonster)) &&
             ((tm_I.flags & kMapObjectFlagDropOff) || (tm_I.extflags & kExtendedFlagEdgeWalker)) &&
-            (tm_I.z + tm_I.mover->info->step_size_ >= top_z))
+            (tm_I.z + tm_I.mover->info_->step_size_ >= top_z))
         {
             tm_I.floorz = top_z;
             tm_I.below  = thing;
@@ -857,7 +857,7 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
     // -ACB- 1998/08/04 Use procedure
     // -KM- 1998/09/01 After I noticed Skulls slamming into boxes of rockets...
 
-    solid = (thing->flags & kMapObjectFlagSolid) ? true : false;
+    solid = (thing->flags_ & kMapObjectFlagSolid) ? true : false;
 
     if ((tm_I.flags & kMapObjectFlagSkullFly) && solid)
     {
@@ -873,21 +873,21 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
     if (tm_I.flags & kMapObjectFlagMissile)
     {
         // see if it went over / under
-        if (tm_I.z > thing->z + thing->height)
+        if (tm_I.z > thing->z + thing->height_)
             return true; // overhead
 
-        if (tm_I.z + tm_I.mover->height < thing->z)
+        if (tm_I.z + tm_I.mover->height_ < thing->z)
             return true; // underneath
 
         // ignore the missile's shooter
-        if (tm_I.mover->source && tm_I.mover->source == thing)
+        if (tm_I.mover->source_ && tm_I.mover->source_ == thing)
             return true;
 
-        if ((thing->hyperflags & kHyperFlagMissilesPassThrough) && level_flags.pass_missile)
+        if ((thing->hyper_flags_ & kHyperFlagMissilesPassThrough) && level_flags.pass_missile)
             return true;
 
         // thing isn't shootable, return depending on if the thing is solid.
-        if (!(thing->flags & kMapObjectFlagShootable))
+        if (!(thing->flags_ & kMapObjectFlagShootable))
             return !solid;
 
         if (P_MissileContact(tm_I.mover, thing) < 0)
@@ -897,20 +897,20 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
     }
 
     // check for special pickup
-    if ((tm_I.flags & kMapObjectFlagPickup) && (thing->flags & kMapObjectFlagSpecial))
+    if ((tm_I.flags & kMapObjectFlagPickup) && (thing->flags_ & kMapObjectFlagSpecial))
     {
         // can remove thing
         P_TouchSpecialThing(thing, tm_I.mover);
     }
 
     // -AJA- 1999/08/21: check for touchy objects.
-    if ((thing->flags & kMapObjectFlagTouchy) && (tm_I.flags & kMapObjectFlagSolid) && !(thing->extendedflags & kExtendedFlagUsable))
+    if ((thing->flags_ & kMapObjectFlagTouchy) && (tm_I.flags & kMapObjectFlagSolid) && !(thing->extended_flags_ & kExtendedFlagUsable))
     {
         P_TouchyContact(thing, tm_I.mover);
         return !solid;
     }
 
-    if (thing->hyperflags & kHyperFlagShoveable)
+    if (thing->hyper_flags_ & kHyperFlagShoveable)
     { // Shoveable thing
         float ThrustSpeed = 8;
         P_PushMobj(thing, tm_I.mover, ThrustSpeed);
@@ -919,7 +919,7 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
 
     // -AJA- 2000/06/09: Follow MBF semantics: allow the non-solid
     // moving things to pass through solid things.
-    return !solid || (thing->flags & kMapObjectFlagNoClip) || !(tm_I.flags & kMapObjectFlagSolid);
+    return !solid || (thing->flags_ & kMapObjectFlagNoClip) || !(tm_I.flags & kMapObjectFlagSolid);
 }
 
 //
@@ -951,14 +951,14 @@ static bool PIT_CheckRelThing(mobj_t *thing, void *data)
 //  speciallines[]
 //  numspeciallines
 //
-static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
+static bool P_CheckRelPosition(MapObject *thing, float x, float y)
 {
     mobj_hit_sky = false;
     blockline    = nullptr;
 
     tm_I.mover    = thing;
-    tm_I.flags    = thing->flags;
-    tm_I.extflags = thing->extendedflags;
+    tm_I.flags    = thing->flags_;
+    tm_I.extflags = thing->extended_flags_;
 
     tm_I.x = x;
     tm_I.y = y;
@@ -976,7 +976,7 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
         HMM_Vec3 line_b{{tm_I.x, tm_I.y, 40000}};
         float  z_test = MathLinePlaneIntersection(line_a, line_b, tm_I.sub->sector->floor_z_verts[2],
                                                 tm_I.sub->sector->floor_vs_normal).Z;
-        if (std::isfinite(z_test))
+        if (isfinite(z_test))
             tm_I.f_slope_z = z_test - tm_I.sub->sector->f_h;
     }
 
@@ -986,11 +986,11 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
         HMM_Vec3 line_b{{tm_I.x, tm_I.y, 40000}};
         float  z_test = MathLinePlaneIntersection(line_a, line_b, tm_I.sub->sector->ceil_z_verts[2],
                                                 tm_I.sub->sector->ceil_vs_normal).Z;
-        if (std::isfinite(z_test))
+        if (isfinite(z_test))
             tm_I.c_slope_z = tm_I.sub->sector->c_h - z_test;
     }
 
-    float r = tm_I.mover->radius;
+    float r = tm_I.mover->radius_;
 
     tm_I.bbox[kBoundingBoxLeft]   = x - r;
     tm_I.bbox[kBoundingBoxBottom] = y - r;
@@ -1024,7 +1024,7 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
 
     // check lines
 
-    thing->on_ladder = -1;
+    thing->on_ladder_ = -1;
 
     if (!BlockmapLineIterator(x - r, y - r, x + r, y + r, PIT_CheckRelLine))
         return false;
@@ -1038,7 +1038,7 @@ static bool P_CheckRelPosition(mobj_t *thing, float x, float y)
 // Attempt to move to a new position,
 // crossing special lines unless kMapObjectFlagTeleport is set.
 //
-bool P_TryMove(mobj_t *thing, float x, float y)
+bool P_TryMove(MapObject *thing, float x, float y)
 {
     float   oldx;
     float   oldy;
@@ -1053,11 +1053,11 @@ bool P_TryMove(mobj_t *thing, float x, float y)
     if (!P_CheckRelPosition(thing, x, y))
         return false;
 
-    fell_off_thing = (thing->below_mo && !tm_I.below);
+    fell_off_thing = (thing->below_object_ && !tm_I.below);
 
-    if (!(thing->flags & kMapObjectFlagNoClip))
+    if (!(thing->flags_ & kMapObjectFlagNoClip))
     {
-        if (thing->height > tm_I.ceilnz - tm_I.floorz)
+        if (thing->height_ > tm_I.ceilnz - tm_I.floorz)
         {
             // doesn't fit
             if (!blockline && tm_I.line_count >= 1)
@@ -1068,7 +1068,7 @@ bool P_TryMove(mobj_t *thing, float x, float y)
         floatok     = true;
         float_destz = tm_I.floorz;
 
-        if (!(thing->flags & kMapObjectFlagTeleport) && (thing->z + thing->height > tm_I.ceilnz))
+        if (!(thing->flags_ & kMapObjectFlagTeleport) && (thing->z + thing->height_ > tm_I.ceilnz))
         {
             // mobj must lower itself to fit.
             if (!blockline && tm_I.line_count >= 1)
@@ -1076,7 +1076,7 @@ bool P_TryMove(mobj_t *thing, float x, float y)
             return false;
         }
 
-        if (!(thing->flags & kMapObjectFlagTeleport) && (thing->z + thing->info->step_size_) < tm_I.floorz)
+        if (!(thing->flags_ & kMapObjectFlagTeleport) && (thing->z + thing->info_->step_size_) < tm_I.floorz)
         {
             // too big a step up.
             if (!blockline && tm_I.line_count >= 1)
@@ -1084,18 +1084,18 @@ bool P_TryMove(mobj_t *thing, float x, float y)
             return false;
         }
 
-        if (!fell_off_thing && (thing->extendedflags & kExtendedFlagMonster) &&
-            !(thing->flags & (kMapObjectFlagTeleport | kMapObjectFlagDropOff | kMapObjectFlagFloat)) &&
-            (thing->z - thing->info->step_size_) > tm_I.floorz)
+        if (!fell_off_thing && (thing->extended_flags_ & kExtendedFlagMonster) &&
+            !(thing->flags_ & (kMapObjectFlagTeleport | kMapObjectFlagDropOff | kMapObjectFlagFloat)) &&
+            (thing->z - thing->info_->step_size_) > tm_I.floorz)
         {
             // too big a step down.
             return false;
         }
 
-        if (!fell_off_thing && (thing->extendedflags & kExtendedFlagMonster) &&
-            !((thing->flags & (kMapObjectFlagDropOff | kMapObjectFlagFloat)) || (thing->extendedflags & (kExtendedFlagEdgeWalker | kExtendedFlagWaterWalker))) &&
-            (tm_I.floorz - tm_I.dropoff > thing->info->step_size_) &&
-            (thing->floorz - thing->dropoffz <= thing->info->step_size_))
+        if (!fell_off_thing && (thing->extended_flags_ & kExtendedFlagMonster) &&
+            !((thing->flags_ & (kMapObjectFlagDropOff | kMapObjectFlagFloat)) || (thing->extended_flags_ & (kExtendedFlagEdgeWalker | kExtendedFlagWaterWalker))) &&
+            (tm_I.floorz - tm_I.dropoff > thing->info_->step_size_) &&
+            (thing->floor_z_ - thing->dropoff_z_ <= thing->info_->step_size_))
         {
             // don't stand over a dropoff.
             return false;
@@ -1106,30 +1106,30 @@ bool P_TryMove(mobj_t *thing, float x, float y)
 
     oldx            = thing->x;
     oldy            = thing->y;
-    thing->floorz   = tm_I.floorz;
-    thing->ceilingz = tm_I.ceilnz;
-    thing->dropoffz = tm_I.dropoff;
+    thing->floor_z_   = tm_I.floorz;
+    thing->ceiling_z_ = tm_I.ceilnz;
+    thing->dropoff_z_ = tm_I.dropoff;
 
     // -AJA- 1999/08/02: Improved kMapObjectFlagTeleport handling.
-    if (thing->flags & (kMapObjectFlagTeleport | kMapObjectFlagNoClip))
+    if (thing->flags_ & (kMapObjectFlagTeleport | kMapObjectFlagNoClip))
     {
-        if (z <= thing->floorz)
-            z = thing->floorz;
-        else if (z + thing->height > thing->ceilingz)
-            z = thing->ceilingz - thing->height;
+        if (z <= thing->floor_z_)
+            z = thing->floor_z_;
+        else if (z + thing->height_ > thing->ceiling_z_)
+            z = thing->ceiling_z_ - thing->height_;
     }
 
     ChangeThingPosition(thing, x, y, z);
 
-    thing->SetAboveMo(tm_I.above);
-    thing->SetBelowMo(tm_I.below);
+    thing->SetAboveObject(tm_I.above);
+    thing->SetBelowObject(tm_I.below);
 
     // if any special lines were hit, do the effect
-    if (!spechit.empty() && !(thing->flags & (kMapObjectFlagTeleport | kMapObjectFlagNoClip)))
+    if (!spechit.empty() && !(thing->flags_ & (kMapObjectFlagTeleport | kMapObjectFlagNoClip)))
     {
         // Thing doesn't change, so we check the notriggerlines flag once..
-        if (thing->player || (thing->extendedflags & kExtendedFlagMonster) ||
-            !(thing->currentattack && (thing->currentattack->flags_ & kAttackFlagNoTriggerLines)))
+        if (thing->player_ || (thing->extended_flags_ & kExtendedFlagMonster) ||
+            !(thing->current_attack_ && (thing->current_attack_->flags_ & kAttackFlagNoTriggerLines)))
         {
             for (auto iter = spechit.rbegin(); iter != spechit.rend(); iter++)
             {
@@ -1144,8 +1144,8 @@ bool P_TryMove(mobj_t *thing, float x, float y)
 
                     if (side != oldside)
                     {
-                        if (thing->flags & kMapObjectFlagMissile)
-                            P_ShootSpecialLine(ld, oldside, thing->source);
+                        if (thing->flags_ & kMapObjectFlagMissile)
+                            P_ShootSpecialLine(ld, oldside, thing->source_);
                         else
                             P_CrossSpecialLine(ld, oldside, thing);
                     }
@@ -1160,7 +1160,7 @@ bool P_TryMove(mobj_t *thing, float x, float y)
 //
 // P_ThingHeightClip
 //
-// Takes a valid thing and adjusts the thing->floorz, thing->ceilingz,
+// Takes a valid thing and adjusts the thing->floor_z_, thing->ceiling_z_,
 // and possibly thing->z.
 //
 // This is called for all nearby things whenever a sector changes height.
@@ -1168,39 +1168,39 @@ bool P_TryMove(mobj_t *thing, float x, float y)
 // If the thing doesn't fit, the z will be set to the lowest value
 // and false will be returned.
 //
-static bool P_ThingHeightClip(mobj_t *thing)
+static bool P_ThingHeightClip(MapObject *thing)
 {
-    bool onfloor = (fabs(thing->z - thing->floorz) < 1);
+    bool onfloor = (fabs(thing->z - thing->floor_z_) < 1);
 
-    if (!(thing->flags & kMapObjectFlagSolid))
+    if (!(thing->flags_ & kMapObjectFlagSolid))
     {
-        thing->radius = thing->radius / 2 - 1;
+        thing->radius_ = thing->radius_ / 2 - 1;
         P_CheckRelPosition(thing, thing->x, thing->y);
-        thing->radius = (thing->radius + 1) * 2;
+        thing->radius_ = (thing->radius_ + 1) * 2;
     }
     else
         P_CheckRelPosition(thing, thing->x, thing->y);
 
-    thing->floorz   = tm_I.floorz;
-    thing->ceilingz = tm_I.ceilnz;
-    thing->dropoffz = tm_I.dropoff;
+    thing->floor_z_   = tm_I.floorz;
+    thing->ceiling_z_ = tm_I.ceilnz;
+    thing->dropoff_z_ = tm_I.dropoff;
 
-    thing->SetAboveMo(tm_I.above);
-    thing->SetBelowMo(tm_I.below);
+    thing->SetAboveObject(tm_I.above);
+    thing->SetBelowObject(tm_I.below);
 
     if (onfloor)
     {
         // walking monsters rise and fall with the floor
-        thing->z = thing->floorz;
+        thing->z = thing->floor_z_;
     }
     else
     {
         // don't adjust a floating monster unless forced to
-        if (thing->z + thing->height > thing->ceilingz)
-            thing->z = thing->ceilingz - thing->height;
+        if (thing->z + thing->height_ > thing->ceiling_z_)
+            thing->z = thing->ceiling_z_ - thing->height_;
     }
 
-    if (thing->ceilingz - thing->floorz < thing->height)
+    if (thing->ceiling_z_ - thing->floor_z_ < thing->height_)
         return false;
 
     return true;
@@ -1217,7 +1217,7 @@ static line_t *bestslideline;
 static float tmxmove;
 static float tmymove;
 
-static mobj_t *slidemo;
+static MapObject *slidemo;
 
 //
 // P_HitSlideLine
@@ -1276,7 +1276,7 @@ static bool PTR_SlideTraverse(PathIntercept *in, void *dataptr)
     // -AJA- 2022: allow sliding along railings (etc)
     bool is_blocking = false;
 
-    if (slidemo->player != nullptr)
+    if (slidemo->player_ != nullptr)
     {
         if (0 != (ld->flags & (MLF_Blocking | MLF_BlockPlayers)))
             is_blocking = true;
@@ -1289,15 +1289,15 @@ static bool PTR_SlideTraverse(PathIntercept *in, void *dataptr)
         for (int i = 0; i < ld->gap_num; i++)
         {
             // check if it can fit in the space
-            if (slidemo->height > ld->gaps[i].c - ld->gaps[i].f)
+            if (slidemo->height_ > ld->gaps[i].c - ld->gaps[i].f)
                 continue;
 
             // check slide mobj is not too high
-            if (slidemo->z + slidemo->height > ld->gaps[i].c)
+            if (slidemo->z + slidemo->height_ > ld->gaps[i].c)
                 continue;
 
             // check slide mobj can step over
-            if (slidemo->z + slidemo->info->step_size_ < ld->gaps[i].f)
+            if (slidemo->z + slidemo->info_->step_size_ < ld->gaps[i].f)
                 continue;
 
             return true;
@@ -1325,7 +1325,7 @@ static bool PTR_SlideTraverse(PathIntercept *in, void *dataptr)
 //
 // -ACB- 1998/07/28 This is NO LONGER a kludgy mess; removed goto rubbish.
 //
-void P_SlideMove(mobj_t *mo, float x, float y)
+void P_SlideMove(MapObject *mo, float x, float y)
 {
     slidemo = mo;
 
@@ -1340,24 +1340,24 @@ void P_SlideMove(mobj_t *mo, float x, float y)
         // trace along the three leading corners
         if (dx > 0)
         {
-            leadx  = mo->x + mo->radius;
-            trailx = mo->x - mo->radius;
+            leadx  = mo->x + mo->radius_;
+            trailx = mo->x - mo->radius_;
         }
         else
         {
-            leadx  = mo->x - mo->radius;
-            trailx = mo->x + mo->radius;
+            leadx  = mo->x - mo->radius_;
+            trailx = mo->x + mo->radius_;
         }
 
         if (dy > 0)
         {
-            leady  = mo->y + mo->radius;
-            traily = mo->y - mo->radius;
+            leady  = mo->y + mo->radius_;
+            traily = mo->y - mo->radius_;
         }
         else
         {
-            leady  = mo->y - mo->radius;
-            traily = mo->y + mo->radius;
+            leady  = mo->y - mo->radius_;
+            traily = mo->y + mo->radius_;
         }
 
         bestslidefrac = 1.0001f;
@@ -1462,24 +1462,24 @@ static bool PTR_AimTraverse(PathIntercept *in, void *dataptr)
     }
 
     // shoot a thing
-    mobj_t *mo = in->thing;
+    MapObject *mo = in->thing;
 
     SYS_ASSERT(mo);
 
     if (mo == aim_I.source)
         return true; // can't shoot self
 
-    if (!(mo->flags & kMapObjectFlagShootable))
+    if (!(mo->flags_ & kMapObjectFlagShootable))
         return true; // has to be able to be shot
 
-    if (mo->hyperflags & kHyperFlagNoAutoaim)
+    if (mo->hyper_flags_ & kHyperFlagNoAutoaim)
         return true; // never should be aimed at
 
-    if (aim_I.source && !aim_I.forced && (aim_I.source->side & mo->side) != 0)
+    if (aim_I.source && !aim_I.forced && (aim_I.source->side_ & mo->side_) != 0)
         return true; // don't aim at our good friend
 
     // check angles to see if the thing can be aimed at
-    float thingtopslope = (mo->z + mo->height - aim_I.start_z) / dist;
+    float thingtopslope = (mo->z + mo->height_ - aim_I.start_z) / dist;
 
     if (thingtopslope < aim_I.bottomslope)
         return true; // shot over the thing
@@ -1554,32 +1554,32 @@ static bool PTR_AimTraverse2(PathIntercept *in, void *dataptr)
     }
 
     // shoot a thing
-    mobj_t *mo = in->thing;
+    MapObject *mo = in->thing;
 
     SYS_ASSERT(mo);
 
     if (mo == aim_I.source)
         return true; // can't shoot self
 
-    if (aim_I.source && (aim_I.source->side & mo->side) == 0) // not a friend
+    if (aim_I.source && (aim_I.source->side_ & mo->side_) == 0) // not a friend
     {
-        if (!(mo->extendedflags & kExtendedFlagMonster) && !(mo->flags & kMapObjectFlagSpecial))
+        if (!(mo->extended_flags_ & kExtendedFlagMonster) && !(mo->flags_ & kMapObjectFlagSpecial))
             return true; // scenery
     }
-    if (mo->extendedflags & kExtendedFlagMonster && mo->health <= 0)
+    if (mo->extended_flags_ & kExtendedFlagMonster && mo->health_ <= 0)
         return true; // don't aim at dead monsters
 
-    if (mo->flags & kMapObjectFlagCorpse)
+    if (mo->flags_ & kMapObjectFlagCorpse)
         return true; // don't aim at corpses
 
-    if (mo->flags & kMapObjectFlagNoBlockmap)
+    if (mo->flags_ & kMapObjectFlagNoBlockmap)
         return true; // don't aim at inert things
 
-    if (mo->flags & kMapObjectFlagNoSector)
+    if (mo->flags_ & kMapObjectFlagNoSector)
         return true; // don't aim at invisible things
 
     // check angles to see if the thing can be aimed at
-    float thingtopslope = (mo->z + mo->height - aim_I.start_z) / dist;
+    float thingtopslope = (mo->z + mo->height_ - aim_I.start_z) / dist;
 
     if (thingtopslope < aim_I.bottomslope)
         return true; // shot over the thing
@@ -1858,8 +1858,8 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h, surface
     }
 
     // Lobo 2021: respect our NO_TRIGGER_LINES attack flag
-    if (!shoot_I.source || !shoot_I.source->currentattack ||
-        !(shoot_I.source->currentattack->flags_ & kAttackFlagNoTriggerLines))
+    if (!shoot_I.source || !shoot_I.source->current_attack_ ||
+        !(shoot_I.source->current_attack_->flags_ & kAttackFlagNoTriggerLines))
     {
         const char *flat            = floor->image->name.c_str();
         FlatDefinition  *current_flatdef = flatdefs.Find(flat);
@@ -2053,8 +2053,8 @@ static bool PTR_ShootTraverse(PathIntercept *in, void *dataptr)
 
         //(2.) Line is a special, Cause action....
         // -AJA- honour the NO_TRIGGER_LINES attack special too
-        if (ld->special && (!shoot_I.source || !shoot_I.source->currentattack ||
-                            !(shoot_I.source->currentattack->flags_ & kAttackFlagNoTriggerLines)))
+        if (ld->special && (!shoot_I.source || !shoot_I.source->current_attack_ ||
+                            !(shoot_I.source->current_attack_->flags_ & kAttackFlagNoTriggerLines)))
         {
             P_ShootSpecialLine(ld, sidenum, shoot_I.source);
         }
@@ -2146,8 +2146,8 @@ static bool PTR_ShootTraverse(PathIntercept *in, void *dataptr)
         // Lobo:2022
         // Check if we're using EFFECT_OBJECT for this line
         // and spawn that as well as the previous bullet puff
-        if (tempspecial && (!shoot_I.source || !shoot_I.source->currentattack ||
-                            !(shoot_I.source->currentattack->flags_ & kAttackFlagNoTriggerLines)))
+        if (tempspecial && (!shoot_I.source || !shoot_I.source->current_attack_ ||
+                            !(shoot_I.source->current_attack_->flags_ & kAttackFlagNoTriggerLines)))
         {
             const MapObjectDefinition *info;
             info = tempspecial->effectobject_;
@@ -2164,7 +2164,7 @@ static bool PTR_ShootTraverse(PathIntercept *in, void *dataptr)
     }
 
     // shoot a thing
-    mobj_t *mo = in->thing;
+    MapObject *mo = in->thing;
 
     SYS_ASSERT(mo);
 
@@ -2173,11 +2173,11 @@ static bool PTR_ShootTraverse(PathIntercept *in, void *dataptr)
         return true;
 
     // got to able to shoot it
-    if (!(mo->flags & kMapObjectFlagShootable) && !(mo->extendedflags & kExtendedFlagBlockShots))
+    if (!(mo->flags_ & kMapObjectFlagShootable) && !(mo->extended_flags_ & kExtendedFlagBlockShots))
         return true;
 
     // check angles to see if the thing can be aimed at
-    float thingtopslope = (mo->z + mo->height - shoot_I.start_z) / dist;
+    float thingtopslope = (mo->z + mo->height_ - shoot_I.start_z) / dist;
 
     // shot over the thing ?
     if (thingtopslope < shoot_I.slope)
@@ -2192,8 +2192,8 @@ static bool PTR_ShootTraverse(PathIntercept *in, void *dataptr)
     // hit thing
 
     // Checking sight against target on vertex slope?
-    if (mo->subsector->sector || mo->subsector->sector->ceil_vertex_slope)
-        mo->slopesighthit = true;
+    if (mo->subsector_->sector || mo->subsector_->sector->ceil_vertex_slope)
+        mo->slope_sight_hit_ = true;
 
     // position a bit closer
     float along = in->along - 10.0f / shoot_I.range;
@@ -2205,9 +2205,9 @@ static bool PTR_ShootTraverse(PathIntercept *in, void *dataptr)
     // Spawn bullet puffs or blood spots,
     // depending on target type.
 
-    bool use_blood = (mo->flags & kMapObjectFlagShootable) && !(mo->flags & kMapObjectFlagNoBlood) && (g_gore.d_< 2);
+    bool use_blood = (mo->flags_ & kMapObjectFlagShootable) && !(mo->flags_ & kMapObjectFlagNoBlood) && (g_gore.d_< 2);
 
-    if (mo->flags & kMapObjectFlagShootable)
+    if (mo->flags_ & kMapObjectFlagShootable)
     {
         int what = P_BulletContact(shoot_I.source, mo, shoot_I.damage, shoot_I.damtype, x, y, z);
 
@@ -2221,8 +2221,8 @@ static bool PTR_ShootTraverse(PathIntercept *in, void *dataptr)
 
     if (use_blood)
     {
-        if (mo->info->blood_ != nullptr)
-            P_SpawnBlood(x, y, z, shoot_I.damage, shoot_I.angle, mo->info->blood_);
+        if (mo->info_->blood_ != nullptr)
+            P_SpawnBlood(x, y, z, shoot_I.damage, shoot_I.angle, mo->info_->blood_);
     }
     else
     {
@@ -2234,21 +2234,21 @@ static bool PTR_ShootTraverse(PathIntercept *in, void *dataptr)
     return false;
 }
 
-mobj_t *P_AimLineAttack(mobj_t *t1, BAMAngle angle, float distance, float *slope)
+MapObject *P_AimLineAttack(MapObject *t1, BAMAngle angle, float distance, float *slope)
 {
     float x2 = t1->x + distance * epi::BAMCos(angle);
     float y2 = t1->y + distance * epi::BAMSin(angle);
 
     Z_Clear(&aim_I, shoot_trav_info_t, 1);
 
-    if (t1->info)
-        aim_I.start_z = t1->z + t1->height * t1->info->shotheight_;
+    if (t1->info_)
+        aim_I.start_z = t1->z + t1->height_ * t1->info_->shotheight_;
     else
-        aim_I.start_z = t1->z + t1->height / 2 + 8;
+        aim_I.start_z = t1->z + t1->height_ / 2 + 8;
 
-    if (t1->player)
+    if (t1->player_)
     {
-        float vertslope = epi::BAMTan(t1->vertangle);
+        float vertslope = epi::BAMTan(t1->vertical_angle_);
 
         aim_I.topslope    = (vertslope * 256.0f + 100.0f) / 160.0f;
         aim_I.bottomslope = (vertslope * 256.0f - 100.0f) / 160.0f;
@@ -2273,7 +2273,7 @@ mobj_t *P_AimLineAttack(mobj_t *t1, BAMAngle angle, float distance, float *slope
     return aim_I.target;
 }
 
-void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float damage, const DamageClass *damtype,
+void P_LineAttack(MapObject *t1, BAMAngle angle, float distance, float slope, float damage, const DamageClass *damtype,
                   const MapObjectDefinition *puff)
 {
     // Note: Damtype can be nullptr.
@@ -2283,10 +2283,10 @@ void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float
 
     Z_Clear(&shoot_I, shoot_trav_info_t, 1);
 
-    if (t1->info)
-        shoot_I.start_z = t1->z + t1->height * t1->info->shotheight_;
+    if (t1->info_)
+        shoot_I.start_z = t1->z + t1->height_ * t1->info_->shotheight_;
     else
-        shoot_I.start_z = t1->z + t1->height / 2 + 8;
+        shoot_I.start_z = t1->z + t1->height_ / 2 + 8;
 
     shoot_I.source  = t1;
     shoot_I.range   = distance;
@@ -2308,30 +2308,30 @@ void P_LineAttack(mobj_t *t1, BAMAngle angle, float distance, float slope, float
 //
 // -AJA- 2005/02/07: Rewrote the DUMMYMOBJ stuff.
 //
-void P_TargetTheory(mobj_t *source, mobj_t *target, float *x, float *y, float *z)
+void P_TargetTheory(MapObject *source, MapObject *target, float *x, float *y, float *z)
 {
     if (target)
     {
         (*x) = target->x;
         (*y) = target->y;
-        (*z) = MO_MIDZ(target);
+        (*z) = MapObjectMidZ(target);
     }
     else
     {
         float start_z;
 
-        if (source->info)
-            start_z = source->z + source->height * source->info->shotheight_;
+        if (source->info_)
+            start_z = source->z + source->height_ * source->info_->shotheight_;
         else
-            start_z = source->z + source->height / 2 + 8;
+            start_z = source->z + source->height_ / 2 + 8;
 
-        (*x) = source->x + MISSILERANGE * epi::BAMCos(source->angle);
-        (*y) = source->y + MISSILERANGE * epi::BAMSin(source->angle);
-        (*z) = start_z + MISSILERANGE * epi::BAMTan(source->vertangle);
+        (*x) = source->x + MISSILERANGE * epi::BAMCos(source->angle_);
+        (*y) = source->y + MISSILERANGE * epi::BAMSin(source->angle_);
+        (*z) = start_z + MISSILERANGE * epi::BAMTan(source->vertical_angle_);
     }
 }
 
-mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance)
+MapObject *GetMapTargetAimInfo(MapObject *source, BAMAngle angle, float distance)
 {
     float x2, y2;
 
@@ -2343,16 +2343,16 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance)
     x2 = source->x + distance * epi::BAMCos(angle);
     y2 = source->y + distance * epi::BAMSin(angle);
 
-    if (source->info)
-        aim_I.start_z = source->z + source->height * source->info->shotheight_;
+    if (source->info_)
+        aim_I.start_z = source->z + source->height_ * source->info_->shotheight_;
     else
-        aim_I.start_z = source->z + source->height / 2 + 8;
+        aim_I.start_z = source->z + source->height_ / 2 + 8;
 
     aim_I.range  = distance;
     aim_I.target = nullptr;
 
     // Lobo: try and limit the vertical range somewhat
-    float vertslope   = epi::BAMTan(source->vertangle);
+    float vertslope   = epi::BAMTan(source->vertical_angle_);
     aim_I.topslope    = (100 + vertslope * 320) / 160.0f;
     aim_I.bottomslope = (-100 + vertslope * 576) / 160.0f;
     // aim_I.topslope = 100.0f / 160.0f;
@@ -2373,7 +2373,7 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance)
 
             slope = HMM_Clamp(-1.0f, slope, 1.0f);
 
-            source->vertangle = M_ATan(slope);
+            source->vertical_angle_ = M_ATan(slope);
         }
     */
     return aim_I.target;
@@ -2388,12 +2388,12 @@ mobj_t *GetMapTargetAimInfo(mobj_t *source, BAMAngle angle, float distance)
 // -ACB- 1998/09/01
 // -AJA- 1999/08/08: Added `force_aim' to fix chainsaw.
 //
-mobj_t *DoMapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool force_aim)
+MapObject *DoMapTargetAutoAim(MapObject *source, BAMAngle angle, float distance, bool force_aim)
 {
     float x2, y2;
 
     // -KM- 1999/01/31 Autoaim is an option.
-    if (source->player && !level_flags.autoaim && !force_aim)
+    if (source->player_ && !level_flags.autoaim && !force_aim)
     {
         return nullptr;
     }
@@ -2406,14 +2406,14 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool 
     x2 = source->x + distance * epi::BAMCos(angle);
     y2 = source->y + distance * epi::BAMSin(angle);
 
-    if (source->info)
-        aim_I.start_z = source->z + source->height * source->info->shotheight_;
+    if (source->info_)
+        aim_I.start_z = source->z + source->height_ * source->info_->shotheight_;
     else
-        aim_I.start_z = source->z + source->height / 2 + 8;
+        aim_I.start_z = source->z + source->height_ / 2 + 8;
 
-    if (source->player)
+    if (source->player_)
     {
-        float vertslope = epi::BAMTan(source->vertangle);
+        float vertslope = epi::BAMTan(source->vertical_angle_);
 
         aim_I.topslope    = (100 + vertslope * 256) / 160.0f;
         aim_I.bottomslope = (-100 + vertslope * 256) / 160.0f;
@@ -2434,22 +2434,22 @@ mobj_t *DoMapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool 
 
     // -KM- 1999/01/31 Look at the thing you aimed at.  Is sometimes
     //   useful, sometimes annoying :-)
-    if (source->player && level_flags.autoaim == AA_MLOOK)
+    if (source->player_ && level_flags.autoaim == AA_MLOOK)
     {
         float slope =
             P_ApproxSlope(source->x - aim_I.target->x, source->y - aim_I.target->y, aim_I.target->z - source->z);
 
         slope = HMM_Clamp(-1.0f, slope, 1.0f);
 
-        source->vertangle = epi::BAMFromATan(slope);
+        source->vertical_angle_ = epi::BAMFromATan(slope);
     }
 
     return aim_I.target;
 }
 
-mobj_t *P_MapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool force_aim)
+MapObject *P_MapTargetAutoAim(MapObject *source, BAMAngle angle, float distance, bool force_aim)
 {
-    mobj_t *target = DoMapTargetAutoAim(source, angle, distance, force_aim);
+    MapObject *target = DoMapTargetAutoAim(source, angle, distance, force_aim);
 
     // If that is a miss, aim slightly to the left or right
     if (!target)
@@ -2459,7 +2459,7 @@ mobj_t *P_MapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool 
         if (leveltime & 1)
             diff = 0 - diff;
 
-        mobj_t *T2 = DoMapTargetAutoAim(source, angle + diff, distance, force_aim);
+        MapObject *T2 = DoMapTargetAutoAim(source, angle + diff, distance, force_aim);
         if (T2)
             return T2;
 
@@ -2474,7 +2474,7 @@ mobj_t *P_MapTargetAutoAim(mobj_t *source, BAMAngle angle, float distance, bool 
 //
 // USE LINES
 //
-static mobj_t *usething;
+static MapObject *usething;
 static float   use_lower, use_upper;
 
 static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
@@ -2482,10 +2482,10 @@ static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
     // intercept is a thing ?
     if (in->thing)
     {
-        mobj_t *mo = in->thing;
+        MapObject *mo = in->thing;
 
         // not a usable thing ?
-        if (!(mo->extendedflags & kExtendedFlagUsable) || !mo->info->touch_state_)
+        if (!(mo->extended_flags_ & kExtendedFlagUsable) || !mo->info_->touch_state_)
             return true;
 
         if (!P_UseThing(usething, mo, use_lower, use_upper))
@@ -2516,7 +2516,7 @@ static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
         if (ld->gap_num == 0 || use_upper <= use_lower)
         {
             // can't use through a wall
-            S_StartFX(usething->info->noway_sound_, P_MobjGetSfxCategory(usething), usething);
+            S_StartFX(usething->info_->noway_sound_, P_MobjGetSfxCategory(usething), usething);
             return false;
         }
 
@@ -2559,7 +2559,7 @@ void P_UseLines(player_t *player)
     use_lower = -FLT_MAX;
     use_upper = FLT_MAX;
 
-    angle = player->mo->angle;
+    angle = player->mo->angle_;
 
     x1 = player->mo->x;
     y1 = player->mo->y;
@@ -2576,8 +2576,8 @@ void P_UseLines(player_t *player)
 typedef struct rds_atk_info_s
 {
     float           range;
-    mobj_t         *spot;
-    mobj_t         *source;
+    MapObject         *spot;
+    MapObject         *source;
     float           damage;
     const DamageClass *damtype;
     bool            thrust;
@@ -2596,7 +2596,7 @@ static rds_atk_info_t bomb_I;
 //
 // -KM-  1998/11/25 Fixed.  Added z movement for rocket jumping.
 //
-static bool PIT_RadiusAttack(mobj_t *thing, void *data)
+static bool PIT_RadiusAttack(MapObject *thing, void *data)
 {
     float dx, dy, dz;
     float dist;
@@ -2610,17 +2610,17 @@ static bool PIT_RadiusAttack(mobj_t *thing, void *data)
     // if (thing == bomb_I.spot)
     // return true;
 
-    if (!(thing->flags & kMapObjectFlagShootable))
+    if (!(thing->flags_ & kMapObjectFlagShootable))
         return true;
 
-    if ((thing->hyperflags & kHyperFlagFriendlyFireImmune) && bomb_I.source && (thing->side & bomb_I.source->side) != 0)
+    if ((thing->hyper_flags_ & kHyperFlagFriendlyFireImmune) && bomb_I.source && (thing->side_ & bomb_I.source->side_) != 0)
     {
         return true;
     }
 
     // MBF21: If in same splash group, don't damage it
-    if (thing->info->splash_group_ >= 0 && bomb_I.source->info->splash_group_ >= 0 &&
-        (thing->info->splash_group_ == bomb_I.source->info->splash_group_))
+    if (thing->info_->splash_group_ >= 0 && bomb_I.source->info_->splash_group_ >= 0 &&
+        (thing->info_->splash_group_ == bomb_I.source->info_->splash_group_))
     {
         return true;
     }
@@ -2629,25 +2629,25 @@ static bool PIT_RadiusAttack(mobj_t *thing, void *data)
     // Boss types take no damage from concussion.
     // -ACB- 1998/06/14 Changed enum reference to extended flag check.
     //
-    if (thing->info->extendedflags_ & kExtendedFlagExplodeImmune)
+    if (thing->info_->extended_flags_ & kExtendedFlagExplodeImmune)
     {
         if (!bomb_I.source)
             return true;
         // MBF21 FORCERADIUSDMG flag
-        if (!(bomb_I.source->mbf21flags & kMBF21FlagForceRadiusDamage))
+        if (!(bomb_I.source->mbf21_flags_ & kMBF21FlagForceRadiusDamage))
             return true;
     }
 
-    // -KM- 1999/01/31 Use thing->height/2
+    // -KM- 1999/01/31 Use thing->height_/2
     dx = (float)fabs(thing->x - bomb_I.spot->x);
     dy = (float)fabs(thing->y - bomb_I.spot->y);
-    dz = (float)fabs(MO_MIDZ(thing) - MO_MIDZ(bomb_I.spot));
+    dz = (float)fabs(MapObjectMidZ(thing) - MapObjectMidZ(bomb_I.spot));
 
     // dist is the distance to the *edge* of the thing
-    dist = HMM_MAX(dx, dy) - thing->radius;
+    dist = HMM_MAX(dx, dy) - thing->radius_;
 
     if (bomb_I.use_3d)
-        dist = HMM_MAX(dist, dz - thing->height / 2);
+        dist = HMM_MAX(dist, dz - thing->height_ / 2);
 
     if (dist < 0)
         dist = 0;
@@ -2676,7 +2676,7 @@ static bool PIT_RadiusAttack(mobj_t *thing, void *data)
 //
 // Note: Damtype can be nullptr.
 //
-void P_RadiusAttack(mobj_t *spot, mobj_t *source, float radius, float damage, const DamageClass *damtype, bool thrust_only)
+void P_RadiusAttack(MapObject *spot, MapObject *source, float radius, float damage, const DamageClass *damtype, bool thrust_only)
 {
     bomb_I.range   = radius;
     bomb_I.spot    = spot;
@@ -2703,9 +2703,9 @@ void P_RadiusAttack(mobj_t *spot, mobj_t *source, float radius, float damage, co
 static bool nofit;
 static int  crush_damage;
 
-static bool PIT_ChangeSector(mobj_t *thing, bool widening)
+static bool PIT_ChangeSector(MapObject *thing, bool widening)
 {
-    mobj_t *mo;
+    MapObject *mo;
 
     if (P_ThingHeightClip(thing))
     {
@@ -2714,23 +2714,23 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
     }
 
     // dropped items get removed by a falling ceiling
-    if (thing->flags & kMapObjectFlagDropped)
+    if (thing->flags_ & kMapObjectFlagDropped)
     {
         P_RemoveMobj(thing);
         return true;
     }
 
     // crunch bodies to giblets
-    if (thing->health <= 0)
+    if (thing->health_ <= 0)
     {
-        if (thing->info->gib_state_ && !(thing->extendedflags & kExtendedFlagGibbed) && g_gore.d_< 2)
+        if (thing->info_->gib_state_ && !(thing->extended_flags_ & kExtendedFlagGibbed) && g_gore.d_< 2)
         {
-            thing->extendedflags |= kExtendedFlagGibbed;
+            thing->extended_flags_ |= kExtendedFlagGibbed;
             // P_SetMobjStateDeferred(thing, thing->info->gib_state_, 0);
-            P_SetMobjState(thing, thing->info->gib_state_);
+            P_SetMobjState(thing, thing->info_->gib_state_);
         }
 
-        if (thing->player)
+        if (thing->player_)
         {
             if (!widening)
                 nofit = true;
@@ -2739,16 +2739,16 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
         }
 
         // just been crushed, isn't solid.
-        thing->flags &= ~kMapObjectFlagSolid;
+        thing->flags_ &= ~kMapObjectFlagSolid;
 
-        thing->height = 0;
-        thing->radius = 0;
+        thing->height_ = 0;
+        thing->radius_ = 0;
 
         return true;
     }
 
     // if thing is not shootable, can't be crushed
-    if (!(thing->flags & kMapObjectFlagShootable) || (thing->flags & kMapObjectFlagNoClip))
+    if (!(thing->flags_ & kMapObjectFlagShootable) || (thing->flags_ & kMapObjectFlagNoClip))
         return true;
 
     // -AJA- 2003/12/02: if the space is widening, we don't care if something
@@ -2765,10 +2765,10 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
         // spray blood in a random direction
         if (g_gore.d_< 2)
         {
-            mo = P_MobjCreateObject(thing->x, thing->y, MO_MIDZ(thing), thing->info->blood_);
+            mo = P_MobjCreateObject(thing->x, thing->y, MapObjectMidZ(thing), thing->info_->blood_);
 
-            mo->mom.X = (float)(RandomByte() - 128) / 4.0f;
-            mo->mom.Y = (float)(RandomByte() - 128) / 4.0f;
+            mo->momentum_.X = (float)(RandomByte() - 128) / 4.0f;
+            mo->momentum_.Y = (float)(RandomByte() - 128) / 4.0f;
         }
     }
 
@@ -2792,7 +2792,7 @@ static bool PIT_ChangeSector(mobj_t *thing, bool widening)
 static void ChangeSectorHeights(sector_t *sec, float f_h, float c_h, float f_dh, float c_dh)
 {
     touch_node_t *tn, *next;
-    mobj_t       *mo;
+    MapObject       *mo;
 
     bool widening = (f_dh <= 0) && (c_dh >= 0);
 
@@ -2803,17 +2803,6 @@ static void ChangeSectorHeights(sector_t *sec, float f_h, float c_h, float f_dh,
 
         mo = tn->mo;
         SYS_ASSERT(mo);
-
-#if 0
-		bz = mo->z;
-		tz = mo->z + mo->height;
-
-		// ignore things that are not in the space (e.g. in another
-		// extrafloor).
-		//
-		if (tz < f_h-1 || bz > c_h+1)
-			continue;
-#endif
 
         PIT_ChangeSector(mo, widening);
     }
@@ -3046,12 +3035,12 @@ bool P_SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush, bool
 //
 // -ACB- 1998/08/22
 //
-static mobj_t *corpsehit;
-static mobj_t *raiserobj;
+static MapObject *corpsehit;
+static MapObject *raiserobj;
 static float   raisertryx;
 static float   raisertryy;
 
-static bool PIT_CorpseCheck(mobj_t *thing, void *data)
+static bool PIT_CorpseCheck(MapObject *thing, void *data)
 {
     float maxdist;
     float oldradius;
@@ -3059,21 +3048,21 @@ static bool PIT_CorpseCheck(mobj_t *thing, void *data)
     int   oldflags;
     bool  check;
 
-    if (!(thing->flags & kMapObjectFlagCorpse))
+    if (!(thing->flags_ & kMapObjectFlagCorpse))
         return true; // not a corpse
 
-    if (thing->tics != -1)
+    if (thing->tics_ != -1)
         return true; // not lying still yet
 
-    if (thing->info->raise_state_ == 0)
+    if (thing->info_->raise_state_ == 0)
         return true; // monster doesn't have a raise state
 
     // -KM- 1998/12/21 Monster can't be resurrected.
-    if (thing->info->extendedflags_ & kExtendedFlagCannotResurrect)
+    if (thing->info_->extended_flags_ & kExtendedFlagCannotResurrect)
         return true;
 
     // -ACB- 1998/08/06 Use raiserobj for radius info
-    maxdist = thing->info->radius_ + raiserobj->radius;
+    maxdist = thing->info_->radius_ + raiserobj->radius_;
 
     if (fabs(thing->x - raisertryx) > maxdist || fabs(thing->y - raisertryy) > maxdist)
         return true; // not actually touching
@@ -3083,33 +3072,33 @@ static bool PIT_CorpseCheck(mobj_t *thing, void *data)
         return true;
 
     // -AJA- don't raise players unless on their side
-    if (thing->player && (raiserobj->info->side_ & thing->info->side_) == 0)
+    if (thing->player_ && (raiserobj->info_->side_ & thing->info_->side_) == 0)
         return true;
 
-    oldradius = thing->radius;
-    oldheight = thing->height;
-    oldflags  = thing->flags;
+    oldradius = thing->radius_;
+    oldheight = thing->height_;
+    oldflags  = thing->flags_;
 
     // -ACB- 1998/08/22 Check making sure with have the correct radius & height.
-    thing->radius = thing->info->radius_;
-    thing->height = thing->info->height_;
+    thing->radius_ = thing->info_->radius_;
+    thing->height_ = thing->info_->height_;
 
-    if (thing->info->flags_ & kMapObjectFlagSolid) // Should it be solid?
-        thing->flags |= kMapObjectFlagSolid;
+    if (thing->info_->flags_ & kMapObjectFlagSolid) // Should it be solid?
+        thing->flags_ |= kMapObjectFlagSolid;
 
     check = P_CheckAbsPosition(thing, thing->x, thing->y, thing->z);
 
     // -ACB- 1998/08/22 Restore radius & height: we are only checking.
-    thing->radius = oldradius;
-    thing->height = oldheight;
-    thing->flags  = oldflags;
+    thing->radius_ = oldradius;
+    thing->height_ = oldheight;
+    thing->flags_  = oldflags;
 
     // got one, so stop checking
     if (!check)
         return true; // doesn't fit here
 
     corpsehit        = thing;
-    corpsehit->mom.X = corpsehit->mom.Y = 0;
+    corpsehit->momentum_.X = corpsehit->momentum_.Y = 0;
     return false;
 }
 
@@ -3123,15 +3112,15 @@ static bool PIT_CorpseCheck(mobj_t *thing, void *data)
 //
 // -ACB- 1998/08/22
 //
-mobj_t *P_MapFindCorpse(mobj_t *thing)
+MapObject *P_MapFindCorpse(MapObject *thing)
 {
-    if (thing->movedir != DI_NODIR)
+    if (thing->move_direction_ != kDirectionNone)
     {
         raiserobj = thing;
 
         // check for corpses to raise
-        raisertryx = thing->x + thing->speed * xspeed[thing->movedir];
-        raisertryy = thing->y + thing->speed * yspeed[thing->movedir];
+        raisertryx = thing->x + thing->speed_ * xspeed[thing->move_direction_];
+        raisertryy = thing->y + thing->speed_ * yspeed[thing->move_direction_];
 
         if (!BlockmapThingIterator(raisertryx - RAISE_RADIUS, raisertryy - RAISE_RADIUS, raisertryx + RAISE_RADIUS,
                                    raisertryy + RAISE_RADIUS, PIT_CorpseCheck))
@@ -3239,16 +3228,16 @@ static bool PIT_CheckBlockingLine(line_t *line, void *data)
 //
 // -ACB- 1998/08/23
 //
-bool P_MapCheckBlockingLine(mobj_t *thing, mobj_t *spawnthing)
+bool P_MapCheckBlockingLine(MapObject *thing, MapObject *spawnthing)
 {
     mx1 = thing->x;
     my1 = thing->y;
     mx2 = spawnthing->x;
     my2 = spawnthing->y;
     mb2 = spawnthing->z;
-    mt2 = spawnthing->z + spawnthing->height;
+    mt2 = spawnthing->z + spawnthing->height_;
 
-    crosser = (spawnthing->extendedflags & kExtendedFlagCrossBlockingLines) ? true : false;
+    crosser = (spawnthing->extended_flags_ & kExtendedFlagCrossBlockingLines) ? true : false;
 
     blockline    = nullptr;
     mobj_hit_sky = false;

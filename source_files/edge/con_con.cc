@@ -1691,27 +1691,27 @@ void ConsoleShowPosition(void)
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "angle: %d", (int)epi::DegreesFromBAM(p->mo->angle));
+    sprintf(textbuf, "angle: %d", (int)epi::DegreesFromBAM(p->mo->angle_));
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "x mom: %.4f", p->mo->mom.X);
+    sprintf(textbuf, "x mom: %.4f", p->mo->momentum_.X);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "y mom: %.4f", p->mo->mom.Y);
+    sprintf(textbuf, "y mom: %.4f", p->mo->momentum_.Y);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "z mom: %.4f", p->mo->mom.Z);
+    sprintf(textbuf, "z mom: %.4f", p->mo->momentum_.Z);
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "  sec: %d", (int)(p->mo->subsector->sector - level_sectors));
+    sprintf(textbuf, "  sec: %d", (int)(p->mo->subsector_->sector - level_sectors));
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 
     y -= FNSZ;
-    sprintf(textbuf, "  sub: %d", (int)(p->mo->subsector - level_subsectors));
+    sprintf(textbuf, "  sub: %d", (int)(p->mo->subsector_ - level_subsectors));
     DrawText(x, y, textbuf, SG_WEB_GRAY_RGBA32);
 }
 

@@ -303,14 +303,14 @@ int P_BoxOnDivLineSide(const float *tmbox, divline_t *div)
     return -1;
 }
 
-int P_ThingOnLineSide(const mobj_t *mo, line_t *ld)
+int P_ThingOnLineSide(const MapObject *mo, line_t *ld)
 {
     float bbox[4];
 
-    bbox[kBoundingBoxLeft]   = mo->x - mo->radius;
-    bbox[kBoundingBoxRight]  = mo->x + mo->radius;
-    bbox[kBoundingBoxBottom] = mo->y - mo->radius;
-    bbox[kBoundingBoxTop]    = mo->y + mo->radius;
+    bbox[kBoundingBoxLeft]   = mo->x - mo->radius_;
+    bbox[kBoundingBoxRight]  = mo->x + mo->radius_;
+    bbox[kBoundingBoxBottom] = mo->y - mo->radius_;
+    bbox[kBoundingBoxTop]    = mo->y + mo->radius_;
 
     return P_BoxOnLineSide(bbox, ld);
 }
@@ -371,7 +371,7 @@ static int GAP_RemoveSolid(vgap_t *dest, int d_num, float z1, float z2)
     return new_num;
 }
 
-static int GAP_Construct(vgap_t *gaps, sector_t *sec, mobj_t *thing, float f_slope_z = 0, float c_slope_z = 0)
+static int GAP_Construct(vgap_t *gaps, sector_t *sec, MapObject *thing, float f_slope_z = 0, float c_slope_z = 0)
 {
     extrafloor_t *ef;
 
@@ -391,7 +391,7 @@ static int GAP_Construct(vgap_t *gaps, sector_t *sec, mobj_t *thing, float f_slo
 
     // -- handle WATER WALKERS --
 
-    if (!thing || !(thing->extendedflags & kExtendedFlagWaterWalker))
+    if (!thing || !(thing->extended_flags_ & kExtendedFlagWaterWalker))
         return num;
 
     for (ef = sec->bottom_liq; ef; ef = ef->higher)
@@ -573,7 +573,7 @@ int P_FindThingGap(vgap_t *gaps, int gap_num, float z1, float z2)
 // particular Z would have.  Returns the nominal Z height.  Some special
 // values of Z are recognised: ONFLOORZ & ONCEILINGZ.
 //
-float P_ComputeThingGap(mobj_t *thing, sector_t *sec, float z, float *f, float *c, float f_slope_z, float c_slope_z)
+float P_ComputeThingGap(MapObject *thing, sector_t *sec, float z, float *f, float *c, float f_slope_z, float c_slope_z)
 {
     vgap_t temp_gaps[100];
     int    temp_num;
@@ -584,9 +584,9 @@ float P_ComputeThingGap(mobj_t *thing, sector_t *sec, float z, float *f, float *
         z = sec->f_h;
 
     if (AlmostEquals(z, ONCEILINGZ))
-        z = sec->c_h - thing->height;
+        z = sec->c_h - thing->height_;
 
-    temp_num = P_FindThingGap(temp_gaps, temp_num, z, z + thing->height);
+    temp_num = P_FindThingGap(temp_gaps, temp_num, z, z + thing->height_);
 
     if (temp_num < 0)
     {
@@ -954,11 +954,11 @@ static inline bool PST_CheckBBox(float *bspcoord, float *test)
                : true;
 }
 
-static bool TraverseSubsec(unsigned int bspnum, float *bbox, bool (*func)(mobj_t *mo))
+static bool TraverseSubsec(unsigned int bspnum, float *bbox, bool (*func)(MapObject *mo))
 {
     subsector_t *sub;
     node_t      *node;
-    mobj_t      *obj;
+    MapObject      *obj;
 
     // just a normal node ?
     if (!(bspnum & NF_V5_SUBSECTOR))
@@ -987,7 +987,7 @@ static bool TraverseSubsec(unsigned int bspnum, float *bbox, bool (*func)(mobj_t
 
     sub = level_subsectors + (bspnum & ~NF_V5_SUBSECTOR);
 
-    for (obj = sub->thinglist; obj; obj = obj->snext)
+    for (obj = sub->thinglist; obj; obj = obj->subsector_next_)
     {
         if (!(*func)(obj))
             return false;
@@ -1005,7 +1005,7 @@ static bool TraverseSubsec(unsigned int bspnum, float *bbox, bool (*func)(mobj_t
 // If any function returns false, then this routine returns false and
 // nothing else is checked.  Otherwise true is returned.
 //
-bool P_SubsecThingIterator(float *bbox, bool (*func)(mobj_t *mo))
+bool P_SubsecThingIterator(float *bbox, bool (*func)(MapObject *mo))
 {
     return TraverseSubsec(root_node, bbox, func);
 }
@@ -1013,35 +1013,35 @@ bool P_SubsecThingIterator(float *bbox, bool (*func)(mobj_t *mo))
 static float   checkempty_bbox[4];
 static line_t *checkempty_line;
 
-static bool PST_CheckThingArea(mobj_t *mo)
+static bool PST_CheckThingArea(MapObject *mo)
 {
-    if (mo->x + mo->radius < checkempty_bbox[kBoundingBoxLeft] || mo->x - mo->radius > checkempty_bbox[kBoundingBoxRight] ||
-        mo->y + mo->radius < checkempty_bbox[kBoundingBoxBottom] || mo->y - mo->radius > checkempty_bbox[kBoundingBoxTop])
+    if (mo->x + mo->radius_ < checkempty_bbox[kBoundingBoxLeft] || mo->x - mo->radius_ > checkempty_bbox[kBoundingBoxRight] ||
+        mo->y + mo->radius_ < checkempty_bbox[kBoundingBoxBottom] || mo->y - mo->radius_ > checkempty_bbox[kBoundingBoxTop])
     {
         // keep looking
         return true;
     }
 
     // ignore corpses and pickup items
-    if (!(mo->flags & kMapObjectFlagSolid) && (mo->flags & kMapObjectFlagCorpse))
+    if (!(mo->flags_ & kMapObjectFlagSolid) && (mo->flags_ & kMapObjectFlagCorpse))
         return true;
 
-    if (mo->flags & kMapObjectFlagSpecial)
+    if (mo->flags_ & kMapObjectFlagSpecial)
         return true;
 
     // we've found a thing in that area: we can stop now
     return false;
 }
 
-static bool PST_CheckThingLine(mobj_t *mo)
+static bool PST_CheckThingLine(MapObject *mo)
 {
     float bbox[4];
     int   side;
 
-    bbox[kBoundingBoxLeft]   = mo->x - mo->radius;
-    bbox[kBoundingBoxRight]  = mo->x + mo->radius;
-    bbox[kBoundingBoxBottom] = mo->y - mo->radius;
-    bbox[kBoundingBoxTop]    = mo->y + mo->radius;
+    bbox[kBoundingBoxLeft]   = mo->x - mo->radius_;
+    bbox[kBoundingBoxRight]  = mo->x + mo->radius_;
+    bbox[kBoundingBoxBottom] = mo->y - mo->radius_;
+    bbox[kBoundingBoxTop]    = mo->y + mo->radius_;
 
     // found a thing on the line ?
     side = P_BoxOnLineSide(bbox, checkempty_line);
@@ -1050,10 +1050,10 @@ static bool PST_CheckThingLine(mobj_t *mo)
         return true;
 
     // ignore corpses and pickup items
-    if (!(mo->flags & kMapObjectFlagSolid) && (mo->flags & kMapObjectFlagCorpse))
+    if (!(mo->flags_ & kMapObjectFlagSolid) && (mo->flags_ & kMapObjectFlagCorpse))
         return true;
 
-    if (mo->flags & kMapObjectFlagSpecial)
+    if (mo->flags_ & kMapObjectFlagSpecial)
         return true;
 
     return false;

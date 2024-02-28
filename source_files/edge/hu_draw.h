@@ -124,11 +124,11 @@ void HudDrawText(float x, float y, const char *str, float size = 0);
 void HudDrawQuitScreen();
 
 // render a view of the world using the given camera object.
-void HudRenderWorld(float x, float y, float w, float h, mobj_t *camera,
+void HudRenderWorld(float x, float y, float w, float h, MapObject *camera,
                     int flags);
 
 // render the automap
-void HudRenderAutomap(float x, float y, float w, float h, mobj_t *focus,
+void HudRenderAutomap(float x, float y, float w, float h, MapObject *focus,
                       int flags);
 
 void HudGetCastPosition(float *x, float *y, float *scale_x, float *scale_y);

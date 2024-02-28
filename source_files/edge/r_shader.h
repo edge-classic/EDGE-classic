@@ -103,7 +103,7 @@ class abstract_shader_c
     virtual void Sample(multi_color_c *col, float x, float y, float z) = 0;
 
     // used for normal-based lighting (MD2 models)
-    virtual void Corner(multi_color_c *col, float nx, float ny, float nz, struct mobj_s *mod_pos,
+    virtual void Corner(multi_color_c *col, float nx, float ny, float nz, MapObject *mod_pos,
                         bool is_weapon = false) = 0;
 
     // used to render overlay textures (world polygons)

@@ -38,7 +38,7 @@
 #include "r_state.h"
 #include "thing.h"
 
-extern mobj_t *P_FindTeleportMan(int tag, const MapObjectDefinition *info);
+extern MapObject *P_FindTeleportMan(int tag, const MapObjectDefinition *info);
 extern line_t *p_FindTeleportLine(int tag, line_t *original);
 
 class big_item_c
@@ -52,11 +52,11 @@ class big_item_c
 
 static std::vector<big_item_c> big_items;
 
-float BotNavigateEvaluateBigItem(const mobj_t *mo)
+float BotNavigateEvaluateBigItem(const MapObject *mo)
 {
     AmmunitionType ammotype;
 
-    for (const Benefit *B = mo->info->pickup_benefits_; B != nullptr;
+    for (const Benefit *B = mo->info_->pickup_benefits_; B != nullptr;
          B                = B->next)
     {
         switch (B->type)
@@ -124,9 +124,9 @@ static void BotNavigateCollectBigItems()
     // items (e.g. weapons) tend to be well distributed around a map.
     // it will also be useful for finding a weapon after spawning.
 
-    for (const mobj_t *mo = mobjlisthead; mo != nullptr; mo = mo->next)
+    for (const MapObject *mo = map_object_list_head; mo != nullptr; mo = mo->next_)
     {
-        if ((mo->flags & kMapObjectFlagSpecial) == 0) continue;
+        if ((mo->flags_ & kMapObjectFlagSpecial) == 0) continue;
 
         float score = BotNavigateEvaluateBigItem(mo);
         if (score < 0) continue;
@@ -137,7 +137,7 @@ static void BotNavigateCollectBigItems()
     // TODO : if < 4, pad out with DM spawn spots or random locs
 }
 
-bool BotNavigateNextRoamPoint(position_c &out)
+bool BotNavigateNextRoamPoint(Position &out)
 {
     if (big_items.empty()) return false;
 
@@ -195,7 +195,7 @@ class nav_area_c
 
     ~nav_area_c() {}
 
-    position_c get_middle() const;
+    Position get_middle() const;
 
     void compute_middle(const subsector_t &sub);
 };
@@ -214,13 +214,13 @@ class nav_link_c
 static std::vector<nav_area_c> nav_areas;
 static std::vector<nav_link_c> nav_links;
 
-static position_c nav_finish_mid;
+static Position nav_finish_mid;
 
-position_c nav_area_c::get_middle() const
+Position nav_area_c::get_middle() const
 {
     float z = level_subsectors[id].sector->f_h;
 
-    return position_c{mid_x, mid_y, z};
+    return Position{mid_x, mid_y, z};
 }
 
 void nav_area_c::compute_middle(const subsector_t &sub)
@@ -332,10 +332,10 @@ static int BotNavigateCheckTeleporter(const seg_t *seg)
     // find the destination thing...
     if (spec->t_.outspawnobj_ == nullptr) return -1;
 
-    const mobj_t *dest = P_FindTeleportMan(ld->tag, spec->t_.outspawnobj_);
+    const MapObject *dest = P_FindTeleportMan(ld->tag, spec->t_.outspawnobj_);
     if (dest == nullptr) return -1;
 
-    return (int)(dest->subsector - level_subsectors);
+    return (int)(dest->subsector_ - level_subsectors);
 }
 
 static void BotNavigateCreateLinks()
@@ -513,7 +513,7 @@ static void BotNavigateStoreSegMiddle(BotPath *path, int flags,
     SYS_ASSERT(seg);
 
     // calc middle of the adjoining seg
-    position_c pos;
+    Position pos;
 
     pos.x = (seg->v1->X + seg->v2->X) * 0.5f;
     pos.y = (seg->v1->Y + seg->v2->Y) * 0.5f;
@@ -522,8 +522,8 @@ static void BotNavigateStoreSegMiddle(BotPath *path, int flags,
     path->nodes_.push_back(BotPathNode{pos, flags, seg});
 }
 
-static BotPath *BotNavigateStorePath(position_c start, int start_id,
-                                     position_c finish, int finish_id)
+static BotPath *BotNavigateStorePath(Position start, int start_id,
+                                     Position finish, int finish_id)
 {
     BotPath *path = new BotPath;
 
@@ -596,7 +596,7 @@ static BotPath *BotNavigateStorePath(position_c start, int start_id,
     return path;
 }
 
-BotPath *BotNavigateFindPath(const position_c *start, const position_c *finish,
+BotPath *BotNavigateFindPath(const Position *start, const Position *finish,
                              int flags)
 {
     // tries to find a path from start to finish.
@@ -670,11 +670,11 @@ BotPath *BotNavigateFindPath(const position_c *start, const position_c *finish,
 //----------------------------------------------------------------------------
 
 static void BotNavigateItemsInSubsector(subsector_t *sub, DeathBot *bot,
-                                        position_c &pos, float radius,
+                                        Position &pos, float radius,
                                         int sub_id, int &best_id,
-                                        float &best_score, mobj_t *&best_mo)
+                                        float &best_score, MapObject *&best_mo)
 {
-    for (mobj_t *mo = sub->thinglist; mo != nullptr; mo = mo->snext)
+    for (MapObject *mo = sub->thinglist; mo != nullptr; mo = mo->subsector_next_)
     {
         float score = bot->EvalItem(mo);
         if (score < 0) continue;
@@ -697,13 +697,13 @@ static void BotNavigateItemsInSubsector(subsector_t *sub, DeathBot *bot,
     }
 }
 
-BotPath *BotNavigateFindThing(DeathBot *bot, float radius, mobj_t *&best)
+BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best)
 {
     // find an item to pickup or enemy to fight.
     // each nearby thing (limited roughly by `radius') will be passed to the
     // EvalThing() method of the bot.  returns nullptr if nothing was found.
 
-    position_c pos{bot->pl_->mo->x, bot->pl_->mo->y, bot->pl_->mo->z};
+    Position pos{bot->pl_->mo->x, bot->pl_->mo->y, bot->pl_->mo->z};
 
     subsector_t *start    = R_PointInSubsector(pos.x, pos.y);
     int          start_id = (int)(start - level_subsectors);
@@ -771,10 +771,10 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, mobj_t *&best)
 //----------------------------------------------------------------------------
 
 static void BotNavigateEnemiesInSubsector(const subsector_t *sub, DeathBot *bot,
-                                          float radius, mobj_t *&best_mo,
+                                          float radius, MapObject *&best_mo,
                                           float &best_score)
 {
-    for (mobj_t *mo = sub->thinglist; mo != nullptr; mo = mo->snext)
+    for (MapObject *mo = sub->thinglist; mo != nullptr; mo = mo->subsector_next_)
     {
         if (bot->EvalEnemy(mo) < 0) continue;
 
@@ -795,7 +795,7 @@ static void BotNavigateEnemiesInSubsector(const subsector_t *sub, DeathBot *bot,
 }
 
 static void BotNavigateEnemiesInNode(unsigned int bspnum, DeathBot *bot,
-                                     float radius, mobj_t *&best_mo,
+                                     float radius, MapObject *&best_mo,
                                      float &best_score)
 {
     if (bspnum & NF_V5_SUBSECTOR)
@@ -808,7 +808,7 @@ static void BotNavigateEnemiesInNode(unsigned int bspnum, DeathBot *bot,
 
     const node_t *node = &level_nodes[bspnum];
 
-    position_c pos{bot->pl_->mo->x, bot->pl_->mo->y, bot->pl_->mo->z};
+    Position pos{bot->pl_->mo->x, bot->pl_->mo->y, bot->pl_->mo->z};
 
     for (int c = 0; c < 2; c++)
     {
@@ -823,13 +823,13 @@ static void BotNavigateEnemiesInNode(unsigned int bspnum, DeathBot *bot,
     }
 }
 
-mobj_t *BotNavigateFindEnemy(DeathBot *bot, float radius)
+MapObject *BotNavigateFindEnemy(DeathBot *bot, float radius)
 {
     // find an enemy to fight, or nullptr if none found.
     // caller is responsible to do a sight checks.
     // radius is the size of a square box (not a circle).
 
-    mobj_t *best_mo    = nullptr;
+    MapObject *best_mo    = nullptr;
     float   best_score = 0;
 
     BotNavigateEnemiesInNode(root_node, bot, radius, best_mo, best_score);
@@ -839,29 +839,29 @@ mobj_t *BotNavigateFindEnemy(DeathBot *bot, float radius)
 
 //----------------------------------------------------------------------------
 
-position_c BotPath::CurrentDestination() const { return nodes_.at(along_).pos; }
+Position BotPath::CurrentDestination() const { return nodes_.at(along_).pos; }
 
-position_c BotPath::CurrentFrom() const { return nodes_.at(along_ - 1).pos; }
+Position BotPath::CurrentFrom() const { return nodes_.at(along_ - 1).pos; }
 
 float BotPath::CurrentLength() const
 {
-    position_c src  = nodes_.at(along_ - 1).pos;
-    position_c dest = nodes_.at(along_ + 0).pos;
+    Position src  = nodes_.at(along_ - 1).pos;
+    Position dest = nodes_.at(along_ + 0).pos;
 
     return hypotf(dest.x - src.x, dest.y - src.y);
 }
 
 BAMAngle BotPath::CurrentAngle() const
 {
-    position_c src  = nodes_.at(along_ - 1).pos;
-    position_c dest = nodes_.at(along_ + 0).pos;
+    Position src  = nodes_.at(along_ - 1).pos;
+    Position dest = nodes_.at(along_ + 0).pos;
 
     return R_PointToAngle(src.x, src.y, dest.x, dest.y);
 }
 
-bool BotPath::ReachedDestination(const position_c *pos) const
+bool BotPath::ReachedDestination(const Position *pos) const
 {
-    position_c dest = CurrentDestination();
+    Position dest = CurrentDestination();
 
     // too low?
     if (pos->z < dest.z - 15.0) { return false; }
@@ -872,7 +872,7 @@ bool BotPath::ReachedDestination(const position_c *pos) const
     if (pos->y > dest.y + 64) return false;
 
     // check bot has entered the other half plane
-    position_c from = nodes_.at(along_ - 1).pos;
+    Position from = nodes_.at(along_ - 1).pos;
 
     float ux   = dest.x - from.x;
     float uy   = dest.y - from.y;

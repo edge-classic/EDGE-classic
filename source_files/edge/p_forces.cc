@@ -52,10 +52,10 @@ std::vector<force_t *> active_forces;
 
 static force_t *tm_force; // for PIT_PushThing
 
-static void WindCurrentForce(force_t *f, mobj_t *mo)
+static void WindCurrentForce(force_t *f, MapObject *mo)
 {
     float z1 = mo->z;
-    float z2 = z1 + mo->height;
+    float z2 = z1 + mo->height_;
 
     sector_t *sec = f->sector;
 
@@ -81,16 +81,16 @@ static void WindCurrentForce(force_t *f, mobj_t *mo)
             qty = 1.0f;
     }
 
-    mo->mom.X += qty * f->mag.X;
-    mo->mom.Y += qty * f->mag.Y;
+    mo->momentum_.X += qty * f->mag.X;
+    mo->momentum_.Y += qty * f->mag.Y;
 }
 
-static bool PIT_PushThing(mobj_t *mo, void *dataptr)
+static bool PIT_PushThing(MapObject *mo, void *dataptr)
 {
-    if (!(mo->hyperflags & kHyperFlagPushable))
+    if (!(mo->hyper_flags_ & kHyperFlagPushable))
         return true;
 
-    if (mo->flags & kMapObjectFlagNoClip)
+    if (mo->flags_ & kMapObjectFlagNoClip)
         return true;
 
     float dx = mo->x - tm_force->point.X;
@@ -117,8 +117,8 @@ static bool PIT_PushThing(mobj_t *mo, void *dataptr)
     // NOTE: magnitude is negative for PULL mode.
     speed = tm_force->magnitude * speed * speed;
 
-    mo->mom.X += speed * (dx / d_unit);
-    mo->mom.Y += speed * (dy / d_unit);
+    mo->momentum_.X += speed * (dx / d_unit);
+    mo->momentum_.Y += speed * (dy / d_unit);
 
     return true;
 }
@@ -147,7 +147,7 @@ static void DoForce(force_t *f)
             touch_node_t *nd;
 
             for (nd = sec->touch_things; nd; nd = nd->sec_next)
-                if (nd->mo->hyperflags & kHyperFlagPushable)
+                if (nd->mo->hyper_flags_ & kHyperFlagPushable)
                     WindCurrentForce(f, nd->mo);
         }
     }
@@ -180,8 +180,8 @@ void P_AddPointForce(sector_t *sec, float length)
 {
     // search for the point objects
     for (subsector_t *sub = sec->subsectors; sub; sub = sub->sec_next)
-        for (mobj_t *mo = sub->thinglist; mo; mo = mo->snext)
-            if (mo->hyperflags & kHyperFlagPointForce)
+        for (MapObject *mo = sub->thinglist; mo; mo = mo->subsector_next_)
+            if (mo->hyper_flags_ & kHyperFlagPointForce)
             {
                 force_t *f = P_NewForce();
 
@@ -190,7 +190,7 @@ void P_AddPointForce(sector_t *sec, float length)
                 f->point.Y   = mo->y;
                 f->point.Z   = mo->z + 28.0f;
                 f->radius    = length * 2.0f;
-                f->magnitude = length * mo->info->speed_ / PUSH_FACTOR / 24.0f;
+                f->magnitude = length * mo->info_->speed_ / PUSH_FACTOR / 24.0f;
                 f->sector    = sec;
             }
 }

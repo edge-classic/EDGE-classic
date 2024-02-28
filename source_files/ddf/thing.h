@@ -722,9 +722,9 @@ class MapObjectDefinition
     int gib_state_;
     int reload_state_;
 
-    int   reactiontime_;
-    float painchance_;
-    float spawnhealth_;
+    int   reaction_time_;
+    float pain_chance_;
+    float spawn_health_;
     float speed_;
     float float_speed_;
     float radius_;
@@ -733,9 +733,9 @@ class MapObjectDefinition
     float mass_;
 
     int flags_;
-    int extendedflags_;
-    int hyperflags_;
-    int mbf21flags_;
+    int extended_flags_;
+    int hyper_flags_;
+    int mbf21_flags_;
 
     DamageClass explode_damage_;
     float       explode_radius_;  // normally zero (radius == damage)

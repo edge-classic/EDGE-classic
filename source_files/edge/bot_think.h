@@ -127,7 +127,7 @@ class DeathBot
     // main_goal is final target.  travel_time detects losing the path.
     // path_wait is when we need a path, but are waiting a bit.
     BotPath   *path_ = nullptr;
-    position_c roam_goal_{0, 0, 0};
+    Position roam_goal_{0, 0, 0};
     int        travel_time_ = 0;
     int        path_wait_   = 0;
 
@@ -154,7 +154,7 @@ class DeathBot
     void EndLevel();
 
    private:
-    float DistTo(position_c pos) const;
+    float DistTo(Position pos) const;
 
     void  SelectWeapon();
     bool  HasWeapon(const WeaponDefinition *info) const;
@@ -162,12 +162,12 @@ class DeathBot
     float EvaluateWeapon(int w_num, int &key) const;
     bool  CanGetArmour(const Benefit *be, int extendedflags) const;
 
-    void MoveToward(const position_c &pos);
-    void WalkToward(const position_c &pos);
-    void WeaveToward(const position_c &pos);
-    void WeaveToward(const mobj_t *mo);
-    void WeaveNearLeader(const mobj_t *leader);
-    void RetreatFrom(const mobj_t *mo);
+    void MoveToward(const Position &pos);
+    void WalkToward(const Position &pos);
+    void WeaveToward(const Position &pos);
+    void WeaveToward(const MapObject *mo);
+    void WeaveNearLeader(const MapObject *leader);
+    void RetreatFrom(const MapObject *mo);
     void Strafe(bool right);
     void StrafeAroundEnemy();
 
@@ -182,9 +182,9 @@ class DeathBot
     void PathToLeader();
     void EstimateTravelTime();
     void UpdateEnemy();
-    bool IsEnemyVisible(mobj_t *mo);
+    bool IsEnemyVisible(MapObject *mo);
 
-    bool IsBarrel(const mobj_t *mo);
+    bool IsBarrel(const MapObject *mo);
 
     void ThinkRoam();
     void ThinkHelp();
@@ -198,14 +198,14 @@ class DeathBot
     void FinishDoorOrLift(bool ok);
 
     void TurnToward(BAMAngle angle, float slope, bool fast);
-    void TurnToward(const mobj_t *mo, bool fast);
+    void TurnToward(const MapObject *mo, bool fast);
     void ShootTarget();
 
     void DeletePath();
 
    public:
-    float EvalItem(const mobj_t *mo);
-    float EvalEnemy(const mobj_t *mo);
+    float EvalItem(const MapObject *mo);
+    float EvalEnemy(const MapObject *mo);
 };
 
 void P_BotCreate(struct player_s *pl, bool recreate);

@@ -609,7 +609,7 @@ typedef struct rad_trigger_s
     int menu_result = 0;
 
     // Sound handle
-    position_c sfx_origin = {0, 0, 0};
+    Position sfx_origin = {0, 0, 0};
 
     // used for WAIT_UNTIL_DEAD, normally zero
     int wud_tag   = 0;

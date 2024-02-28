@@ -85,7 +85,7 @@ float viewsin;
 
 player_t *viewplayer;
 
-mobj_t *background_camera_mo = nullptr;
+MapObject *background_camera_mo = nullptr;
 
 //
 // precalculated math tables

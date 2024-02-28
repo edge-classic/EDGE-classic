@@ -28,7 +28,7 @@
 #include "types.h"
 
 // Forward declarations
-struct mobj_s;
+class MapObject;
 struct sfx_s;
 
 class AttackDefinition;

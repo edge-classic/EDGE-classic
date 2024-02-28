@@ -536,17 +536,17 @@ static void UnknownThingWarning(int type, float x, float y)
     unknown_thing_map[type] = count + 1;
 }
 
-static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y,
+static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float y,
                              float z, sector_t *sec, BAMAngle angle,
                              int options, int tag)
 {
-    spawnpoint_t point;
+    SpawnPoint point;
 
     point.x         = x;
     point.y         = y;
     point.z         = z;
     point.angle     = angle;
-    point.vertangle = 0;
+    point.vertical_angle = 0;
     point.info      = info;
     point.flags     = 0;
     point.tag       = tag;
@@ -577,7 +577,7 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y,
 
         // -AJA- 2004/12/30: for duplicate players, the LAST one must
         //       be used (so levels with Voodoo dolls work properly).
-        spawnpoint_t *prev = GameFindCoopPlayer(info->playernum_);
+        SpawnPoint *prev = GameFindCoopPlayer(info->playernum_);
 
         if (!prev)
             GameAddCoopStart(point);
@@ -621,43 +621,43 @@ static mobj_t *SpawnMapThing(const MapObjectDefinition *info, float x, float y,
         return nullptr;
 
     // don't spawn any monsters if -nomonsters
-    if (level_flags.nomonsters && (info->extendedflags_ & kExtendedFlagMonster))
+    if (level_flags.nomonsters && (info->extended_flags_ & kExtendedFlagMonster))
         return nullptr;
 
     // -AJA- 1999/10/07: don't spawn extra things if -noextra.
-    if (!level_flags.have_extra && (info->extendedflags_ & kExtendedFlagExtra))
+    if (!level_flags.have_extra && (info->extended_flags_ & kExtendedFlagExtra))
         return nullptr;
 
     // spawn it now !
     // Use MobjCreateObject -ACB- 1998/08/06
-    mobj_t *mo = P_MobjCreateObject(x, y, z, info);
+    MapObject *mo = P_MobjCreateObject(x, y, z, info);
 
-    mo->angle      = angle;
-    mo->spawnpoint = point;
+    mo->angle_      = angle;
+    mo->spawnpoint_ = point;
 
-    if (mo->state && mo->state->tics > 1)
-        mo->tics = 1 + (RandomByteDeterministic() % mo->state->tics);
+    if (mo->state_ && mo->state_->tics > 1)
+        mo->tics_ = 1 + (RandomByteDeterministic() % mo->state_->tics);
 
     if (options & MTF_AMBUSH)
     {
-        mo->flags |= kMapObjectFlagAmbush;
-        mo->spawnpoint.flags |= kMapObjectFlagAmbush;
+        mo->flags_ |= kMapObjectFlagAmbush;
+        mo->spawnpoint_.flags |= kMapObjectFlagAmbush;
     }
 
     // -AJA- 2000/09/22: MBF compatibility flag
     if (options & MTF_FRIEND)
     {
-        mo->side = 1;  //~0;
-        mo->hyperflags |= kHyperFlagUltraLoyal;
+        mo->side_ = 1;  //~0;
+        mo->hyper_flags_ |= kHyperFlagUltraLoyal;
         /*
         player_t *player;
         player = players[0];
         mo->SetSupportObj(player->mo);
-        P_LookForPlayers(mo, mo->info->sight_angle_);
+        P_LookForPlayers(mo, mo->info_->sight_angle_);
         */
     }
     // Lobo 2022: added tagged mobj support ;)
-    if (tag > 0) mo->tag = tag;
+    if (tag > 0) mo->tag_ = tag;
 
     return mo;
 }
@@ -726,7 +726,7 @@ static void LoadThings(int lump)
 
         sector_t *sec = R_PointInSubsector(x, y)->sector;
 
-        if ((objtype->hyperflags_ & kHyperFlagMusicChanger) &&
+        if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) &&
             !musinfo_tracks[current_map->name_].processed)
         {
             // This really should only be used with the original DoomEd number
@@ -2462,7 +2462,7 @@ static void LoadUDMFThings()
 
             sector_t *sec = R_PointInSubsector(x, y)->sector;
 
-            if ((objtype->hyperflags_ & kHyperFlagMusicChanger) &&
+            if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) &&
                 !musinfo_tracks[current_map->name_].processed)
             {
                 // This really should only be used with the original DoomEd
@@ -2506,44 +2506,44 @@ static void LoadUDMFThings()
             else
                 z += sec->f_h;
 
-            mobj_t *udmf_thing =
+            MapObject *udmf_thing =
                 SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
 
             // check for UDMF-specific thing stuff
             if (udmf_thing)
             {
-                udmf_thing->vis_target = alpha;
-                udmf_thing->alpha      = alpha;
+                udmf_thing->target_visibility_ = alpha;
+                udmf_thing->alpha_      = alpha;
                 if (!AlmostEquals(healthfac, 1.0f))
                 {
                     if (healthfac < 0)
                     {
-                        udmf_thing->spawnhealth = fabs(healthfac);
-                        udmf_thing->health      = fabs(healthfac);
+                        udmf_thing->spawn_health_ = fabs(healthfac);
+                        udmf_thing->health_      = fabs(healthfac);
                     }
                     else
                     {
-                        udmf_thing->spawnhealth *= healthfac;
-                        udmf_thing->health *= healthfac;
+                        udmf_thing->spawn_health_ *= healthfac;
+                        udmf_thing->health_ *= healthfac;
                     }
                 }
                 // Treat 'scale' and 'scalex/scaley' as one or the other; don't
                 // try to juggle both
                 if (!AlmostEquals(scale, 0.0f))
                 {
-                    udmf_thing->scale = udmf_thing->model_scale = scale;
-                    udmf_thing->height *= scale;
-                    udmf_thing->radius *= scale;
+                    udmf_thing->scale_ = udmf_thing->model_scale_ = scale;
+                    udmf_thing->height_ *= scale;
+                    udmf_thing->radius_ *= scale;
                 }
                 else if (!AlmostEquals(scalex, 0.0f) ||
                          !AlmostEquals(scaley, 0.0f))
                 {
                     float sx = AlmostEquals(scalex, 0.0f) ? 1.0f : scalex;
                     float sy = AlmostEquals(scaley, 0.0f) ? 1.0f : scaley;
-                    udmf_thing->scale = udmf_thing->model_scale = sy;
-                    udmf_thing->aspect = udmf_thing->model_aspect = (sx / sy);
-                    udmf_thing->height *= sy;
-                    udmf_thing->radius *= sx;
+                    udmf_thing->scale_ = udmf_thing->model_scale_ = sy;
+                    udmf_thing->aspect_ = udmf_thing->model_aspect_ = (sx / sy);
+                    udmf_thing->height_ *= sy;
+                    udmf_thing->radius_ *= sx;
                 }
             }
 
@@ -2713,23 +2713,6 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd,
         fabs(sd->bottom.offset.Y) > IM_HEIGHT(sd->bottom.image))
         sd->bottom.offset.Y =
             fmodf(sd->bottom.offset.Y, IM_HEIGHT(sd->bottom.image));
-
-#if 0  // -AJA- 2005/01/13: DISABLED (see my log for explanation) 
-	{
-		// -AJA- 2004/09/20: fix texture alignment for some rare cases
-		//       where the texture height is non-POW2 (e.g. 64x72) and
-		//       a negative Y offset was used.
-
-		if (sd->top.offset.Y < 0 && sd->top.image)
-			sd->top.offset.Y += IM_HEIGHT(sd->top.image);
-
-		if (sd->middle.offset.Y < 0 && sd->middle.image)
-			sd->middle.offset.Y += IM_HEIGHT(sd->middle.image);
-
-		if (sd->bottom.offset.Y < 0 && sd->bottom.image)
-			sd->bottom.offset.Y += IM_HEIGHT(sd->bottom.image);
-	}
-#endif
 }
 
 static void LoadSideDefs(int lump)
@@ -3565,8 +3548,8 @@ void LevelSetup(void)
     if (level_active) ShutdownLevel();
 
     // -ACB- 1998/08/27 nullptr the head pointers for the linked lists....
-    itemquehead  = nullptr;
-    mobjlisthead = nullptr;
+    respawn_queue_head  = nullptr;
+    map_object_list_head = nullptr;
     seen_monsters.clear();
 
     // get lump for map header e.g. MAP01

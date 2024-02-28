@@ -381,7 +381,7 @@ extern savearray_t  *sv_known_arrays;
 bool SR_MobjGetMobj(void *storage, int index, void *extra);
 void SR_MobjPutMobj(void *storage, int index, void *extra);
 
-int   SV_MobjFindElem(mobj_t *elem);
+int   SV_MobjFindElem(MapObject *elem);
 void *SV_MobjGetElem(int index);
 
 int   SV_PlayerFindElem(player_t *elem);

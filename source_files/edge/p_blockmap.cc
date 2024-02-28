@@ -46,9 +46,9 @@
 #include "r_state.h"
 
 // FIXME: have a proper API
-extern abstract_shader_c *MakeDLightShader(mobj_t *mo);
-extern abstract_shader_c *MakePlaneGlow(mobj_t *mo);
-extern abstract_shader_c *MakeWallGlow(mobj_t *mo);
+extern abstract_shader_c *MakeDLightShader(MapObject *mo);
+extern abstract_shader_c *MakePlaneGlow(MapObject *mo);
+extern abstract_shader_c *MakeWallGlow(MapObject *mo);
 
 // BLOCKMAP
 //
@@ -70,13 +70,13 @@ float blockmap_origin_y;
 static std::list<line_t *> **blockmap_lines = nullptr;
 
 // for thing chains
-mobj_t **blockmap_things = nullptr;
+MapObject **blockmap_things = nullptr;
 
 // for dynamic lights
 static int dynamic_light_blockmap_width;
 static int dynamic_light_blockmap_height;
 
-mobj_t **dynamic_light_blockmap_things = nullptr;
+MapObject **dynamic_light_blockmap_things = nullptr;
 
 extern std::unordered_set<abstract_shader_c *> seen_dlights;
 extern ConsoleVariable                         r_culling;
@@ -86,9 +86,9 @@ EDGE_DEFINE_CONSOLE_VARIABLE(max_dynamic_lights, "0",
 
 void CreateThingBlockmap(void)
 {
-    blockmap_things = new mobj_t *[blockmap_width * blockmap_height];
+    blockmap_things = new MapObject *[blockmap_width * blockmap_height];
 
-    Z_Clear(blockmap_things, mobj_t *, blockmap_width * blockmap_height);
+    Z_Clear(blockmap_things, MapObject *, blockmap_width * blockmap_height);
 
     // compute size of dynamic light blockmap
     dynamic_light_blockmap_width =
@@ -102,10 +102,10 @@ void CreateThingBlockmap(void)
              blockmap_height, dynamic_light_blockmap_width,
              dynamic_light_blockmap_height);
 
-    dynamic_light_blockmap_things = new mobj_t
+    dynamic_light_blockmap_things = new MapObject
         *[dynamic_light_blockmap_width * dynamic_light_blockmap_height];
 
-    Z_Clear(dynamic_light_blockmap_things, mobj_t *,
+    Z_Clear(dynamic_light_blockmap_things, MapObject *,
             dynamic_light_blockmap_width * dynamic_light_blockmap_height);
 }
 
@@ -189,16 +189,16 @@ static inline void TouchNodeLinkIntoSector(touch_node_t *tn, sector_t *sec)
     sec->touch_things = tn;
 }
 
-static inline void TouchNodeLinkIntoThing(touch_node_t *tn, mobj_t *mo)
+static inline void TouchNodeLinkIntoThing(touch_node_t *tn, MapObject *mo)
 {
     tn->mo = mo;
 
-    tn->mo_next = mo->touch_sectors;
+    tn->mo_next = mo->touch_sectors_;
     tn->mo_prev = nullptr;
 
     if (tn->mo_next) tn->mo_next->mo_prev = tn;
 
-    mo->touch_sectors = tn;
+    mo->touch_sectors_ = tn;
 }
 
 static inline void TouchNodeUnlinkFromSector(touch_node_t *tn)
@@ -218,12 +218,12 @@ static inline void TouchNodeUnlinkFromThing(touch_node_t *tn)
     if (tn->mo_prev)
         tn->mo_prev->mo_next = tn->mo_next;
     else
-        tn->mo->touch_sectors = tn->mo_next;
+        tn->mo->touch_sectors_ = tn->mo_next;
 }
 
 struct BspThingPosition
 {
-    mobj_t *thing;
+    MapObject *thing;
     float   bbox[4];
 };
 
@@ -284,7 +284,7 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
     touchstat_miss++;
 #endif
 
-    for (tn = info->thing->touch_sectors; tn; tn = tn->mo_next)
+    for (tn = info->thing->touch_sectors_; tn; tn = tn->mo_next)
     {
         if (!tn->mo)
         {
@@ -331,7 +331,7 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
 // -ES- 1999/12/04 Better error checking: Clear prev/next fields.
 // This catches errors which can occur if the position is unset twice.
 //
-void UnsetThingPosition(mobj_t *mo)
+void UnsetThingPosition(MapObject *mo)
 {
     int blockx;
     int blocky;
@@ -340,69 +340,69 @@ void UnsetThingPosition(mobj_t *mo)
     touch_node_t *tn;
 
     // unlink from subsector
-    if (!(mo->flags & kMapObjectFlagNoSector))
+    if (!(mo->flags_ & kMapObjectFlagNoSector))
     {
         // (inert things don't need to be in subsector list)
 
-        if (mo->snext)
+        if (mo->subsector_next_)
         {
-            if (mo->snext->sprev)
+            if (mo->subsector_next_->subsector_previous_)
             {
-                SYS_ASSERT(mo->snext->sprev == mo);
+                SYS_ASSERT(mo->subsector_next_->subsector_previous_ == mo);
 
-                mo->snext->sprev = mo->sprev;
+                mo->subsector_next_->subsector_previous_ = mo->subsector_previous_;
             }
         }
 
-        if (mo->sprev)
+        if (mo->subsector_previous_)
         {
-            if (mo->sprev->snext)
+            if (mo->subsector_previous_->subsector_next_)
             {
-                SYS_ASSERT(mo->sprev->snext == mo);
+                SYS_ASSERT(mo->subsector_previous_->subsector_next_ == mo);
 
-                mo->sprev->snext = mo->snext;
+                mo->subsector_previous_->subsector_next_ = mo->subsector_next_;
             }
         }
         else
         {
-            if (mo->subsector->thinglist)
+            if (mo->subsector_->thinglist)
             {
-                SYS_ASSERT(mo->subsector->thinglist == mo);
+                SYS_ASSERT(mo->subsector_->thinglist == mo);
 
-                mo->subsector->thinglist = mo->snext;
+                mo->subsector_->thinglist = mo->subsector_next_;
             }
         }
 
-        mo->snext = nullptr;
-        mo->sprev = nullptr;
+        mo->subsector_next_ = nullptr;
+        mo->subsector_previous_ = nullptr;
     }
 
     // unlink from touching list.
     // NOTE: lazy unlinking -- see notes in r_defs.h
     //
-    for (tn = mo->touch_sectors; tn; tn = tn->mo_next) { tn->mo = nullptr; }
+    for (tn = mo->touch_sectors_; tn; tn = tn->mo_next) { tn->mo = nullptr; }
 
     // unlink from blockmap
-    if (!(mo->flags & kMapObjectFlagNoBlockmap))
+    if (!(mo->flags_ & kMapObjectFlagNoBlockmap))
     {
         // inert things don't need to be in blockmap
-        if (mo->bnext)
+        if (mo->blockmap_next_)
         {
-            if (mo->bnext->bprev)
+            if (mo->blockmap_next_->blockmap_previous_)
             {
-                SYS_ASSERT(mo->bnext->bprev == mo);
+                SYS_ASSERT(mo->blockmap_next_->blockmap_previous_ == mo);
 
-                mo->bnext->bprev = mo->bprev;
+                mo->blockmap_next_->blockmap_previous_ = mo->blockmap_previous_;
             }
         }
 
-        if (mo->bprev)
+        if (mo->blockmap_previous_)
         {
-            if (mo->bprev->bnext)
+            if (mo->blockmap_previous_->blockmap_next_)
             {
-                SYS_ASSERT(mo->bprev->bnext == mo);
+                SYS_ASSERT(mo->blockmap_previous_->blockmap_next_ == mo);
 
-                mo->bprev->bnext = mo->bnext;
+                mo->blockmap_previous_->blockmap_next_ = mo->blockmap_next_;
             }
         }
         else
@@ -417,35 +417,35 @@ void UnsetThingPosition(mobj_t *mo)
 
                 SYS_ASSERT(blockmap_things[bnum] == mo);
 
-                blockmap_things[bnum] = mo->bnext;
+                blockmap_things[bnum] = mo->blockmap_next_;
             }
         }
 
-        mo->bprev = nullptr;
-        mo->bnext = nullptr;
+        mo->blockmap_previous_ = nullptr;
+        mo->blockmap_next_ = nullptr;
     }
 
     // unlink from dynamic light blockmap
-    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) &&
-        (mo->info->glow_type_ == kSectorGlowTypeNone))
+    if (mo->info_ && (mo->info_->dlight_[0].type_ != kDynamicLightTypeNone) &&
+        (mo->info_->glow_type_ == kSectorGlowTypeNone))
     {
-        if (mo->dlnext)
+        if (mo->dynamic_light_next_)
         {
-            if (mo->dlnext->dlprev)
+            if (mo->dynamic_light_next_->dynamic_light_previous_)
             {
-                SYS_ASSERT(mo->dlnext->dlprev == mo);
+                SYS_ASSERT(mo->dynamic_light_next_->dynamic_light_previous_ == mo);
 
-                mo->dlnext->dlprev = mo->dlprev;
+                mo->dynamic_light_next_->dynamic_light_previous_ = mo->dynamic_light_previous_;
             }
         }
 
-        if (mo->dlprev)
+        if (mo->dynamic_light_previous_)
         {
-            if (mo->dlprev->dlnext)
+            if (mo->dynamic_light_previous_->dynamic_light_next_)
             {
-                SYS_ASSERT(mo->dlprev->dlnext == mo);
+                SYS_ASSERT(mo->dynamic_light_previous_->dynamic_light_next_ == mo);
 
-                mo->dlprev->dlnext = mo->dlnext;
+                mo->dynamic_light_previous_->dynamic_light_next_ = mo->dynamic_light_next_;
             }
         }
         else
@@ -459,37 +459,37 @@ void UnsetThingPosition(mobj_t *mo)
                 bnum = blocky * dynamic_light_blockmap_width + blockx;
 
                 SYS_ASSERT(dynamic_light_blockmap_things[bnum] == mo);
-                dynamic_light_blockmap_things[bnum] = mo->dlnext;
+                dynamic_light_blockmap_things[bnum] = mo->dynamic_light_next_;
             }
         }
 
-        mo->dlprev = nullptr;
-        mo->dlnext = nullptr;
+        mo->dynamic_light_previous_ = nullptr;
+        mo->dynamic_light_next_ = nullptr;
     }
 
     // unlink from sector glow list
-    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) &&
-        (mo->info->glow_type_ != kSectorGlowTypeNone))
+    if (mo->info_ && (mo->info_->dlight_[0].type_ != kDynamicLightTypeNone) &&
+        (mo->info_->glow_type_ != kSectorGlowTypeNone))
     {
-        sector_t *sec = mo->subsector->sector;
+        sector_t *sec = mo->subsector_->sector;
 
-        if (mo->dlnext)
+        if (mo->dynamic_light_next_)
         {
-            if (mo->dlnext->dlprev)
+            if (mo->dynamic_light_next_->dynamic_light_previous_)
             {
-                SYS_ASSERT(mo->dlnext->dlprev == mo);
+                SYS_ASSERT(mo->dynamic_light_next_->dynamic_light_previous_ == mo);
 
-                mo->dlnext->dlprev = mo->dlprev;
+                mo->dynamic_light_next_->dynamic_light_previous_ = mo->dynamic_light_previous_;
             }
         }
 
-        if (mo->dlprev)
+        if (mo->dynamic_light_previous_)
         {
-            if (mo->dlprev->dlnext)
+            if (mo->dynamic_light_previous_->dynamic_light_next_)
             {
-                SYS_ASSERT(mo->dlprev->dlnext == mo);
+                SYS_ASSERT(mo->dynamic_light_previous_->dynamic_light_next_ == mo);
 
-                mo->dlprev->dlnext = mo->dlnext;
+                mo->dynamic_light_previous_->dynamic_light_next_ = mo->dynamic_light_next_;
             }
         }
         else
@@ -498,12 +498,12 @@ void UnsetThingPosition(mobj_t *mo)
             {
                 SYS_ASSERT(sec->glow_things == mo);
 
-                sec->glow_things = mo->dlnext;
+                sec->glow_things = mo->dynamic_light_next_;
             }
         }
 
-        mo->dlprev = nullptr;
-        mo->dlnext = nullptr;
+        mo->dynamic_light_previous_ = nullptr;
+        mo->dynamic_light_next_ = nullptr;
     }
 }
 
@@ -512,7 +512,7 @@ void UnsetThingPosition(mobj_t *mo)
 //
 // Call when the thing is about to be removed for good.
 //
-void UnsetThingFinal(mobj_t *mo)
+void UnsetThingFinal(MapObject *mo)
 {
     touch_node_t *tn;
 
@@ -520,10 +520,10 @@ void UnsetThingFinal(mobj_t *mo)
 
     // clear out touch nodes
 
-    while (mo->touch_sectors)
+    while (mo->touch_sectors_)
     {
-        tn                = mo->touch_sectors;
-        mo->touch_sectors = tn->mo_next;
+        tn                = mo->touch_sectors_;
+        mo->touch_sectors_ = tn->mo_next;
 
         TouchNodeUnlinkFromSector(tn);
         TouchNodeFree(tn);
@@ -536,7 +536,7 @@ void UnsetThingFinal(mobj_t *mo)
 // Links a thing into both a block and a subsector
 // based on it's x y.
 //
-void SetThingPosition(mobj_t *mo)
+void SetThingPosition(MapObject *mo)
 {
     subsector_t *ss;
     int          blockx;
@@ -547,24 +547,24 @@ void SetThingPosition(mobj_t *mo)
     touch_node_t    *tn;
 
     // -ES- 1999/12/04 The position must be unset before it's set again.
-    if (mo->snext || mo->sprev || mo->bnext || mo->bprev)
+    if (mo->subsector_next_ || mo->subsector_previous_ || mo->blockmap_next_ || mo->blockmap_previous_)
         FatalError("INTERNAL ERROR: Double SetThingPosition call.");
 
-    SYS_ASSERT(!(mo->dlnext || mo->dlprev));
+    SYS_ASSERT(!(mo->dynamic_light_next_ || mo->dynamic_light_previous_));
 
     // link into subsector
     ss            = R_PointInSubsector(mo->x, mo->y);
-    mo->subsector = ss;
+    mo->subsector_ = ss;
 
     // determine properties
-    mo->props = R_PointGetProps(ss, mo->z + mo->height / 2);
+    mo->region_properties_ = R_PointGetProps(ss, mo->z + mo->height_ / 2);
 
-    if (!(mo->flags & kMapObjectFlagNoSector))
+    if (!(mo->flags_ & kMapObjectFlagNoSector))
     {
-        mo->snext = ss->thinglist;
-        mo->sprev = nullptr;
+        mo->subsector_next_ = ss->thinglist;
+        mo->subsector_previous_ = nullptr;
 
-        if (ss->thinglist) ss->thinglist->sprev = mo;
+        if (ss->thinglist) ss->thinglist->subsector_previous_ = mo;
 
         ss->thinglist = mo;
     }
@@ -576,16 +576,16 @@ void SetThingPosition(mobj_t *mo)
 #endif
 
     pos.thing                    = mo;
-    pos.bbox[kBoundingBoxLeft]   = mo->x - mo->radius;
-    pos.bbox[kBoundingBoxRight]  = mo->x + mo->radius;
-    pos.bbox[kBoundingBoxBottom] = mo->y - mo->radius;
-    pos.bbox[kBoundingBoxTop]    = mo->y + mo->radius;
+    pos.bbox[kBoundingBoxLeft]   = mo->x - mo->radius_;
+    pos.bbox[kBoundingBoxRight]  = mo->x + mo->radius_;
+    pos.bbox[kBoundingBoxBottom] = mo->y - mo->radius_;
+    pos.bbox[kBoundingBoxTop]    = mo->y + mo->radius_;
 
     SetPositionBSP(&pos, root_node);
 
     // handle any left-over unused touch nodes
 
-    for (tn = mo->touch_sectors; tn && tn->mo; tn = tn->mo_next)
+    for (tn = mo->touch_sectors_; tn && tn->mo; tn = tn->mo_next)
     { /* nothing here */
     }
 
@@ -594,7 +594,7 @@ void SetThingPosition(mobj_t *mo)
         if (tn->mo_prev)
             tn->mo_prev->mo_next = nullptr;
         else
-            mo->touch_sectors = nullptr;
+            mo->touch_sectors_ = nullptr;
 
         while (tn)
         {
@@ -627,7 +627,7 @@ void SetThingPosition(mobj_t *mo)
 #endif
 
     // link into blockmap
-    if (!(mo->flags & kMapObjectFlagNoBlockmap))
+    if (!(mo->flags_ & kMapObjectFlagNoBlockmap))
     {
         blockx = BlockmapGetX(mo->x);
         blocky = BlockmapGetY(mo->y);
@@ -637,23 +637,23 @@ void SetThingPosition(mobj_t *mo)
         {
             bnum = blocky * blockmap_width + blockx;
 
-            mo->bprev = nullptr;
-            mo->bnext = blockmap_things[bnum];
+            mo->blockmap_previous_ = nullptr;
+            mo->blockmap_next_ = blockmap_things[bnum];
 
-            if (blockmap_things[bnum]) (blockmap_things[bnum])->bprev = mo;
+            if (blockmap_things[bnum]) (blockmap_things[bnum])->blockmap_previous_ = mo;
 
             blockmap_things[bnum] = mo;
         }
         else
         {
             // thing is off the map
-            mo->bnext = mo->bprev = nullptr;
+            mo->blockmap_next_ = mo->blockmap_previous_ = nullptr;
         }
     }
 
     // link into dynamic light blockmap
-    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) &&
-        (mo->info->glow_type_ == kSectorGlowTypeNone))
+    if (mo->info_ && (mo->info_->dlight_[0].type_ != kDynamicLightTypeNone) &&
+        (mo->info_->glow_type_ == kSectorGlowTypeNone))
     {
         blockx = LightmapGetX(mo->x);
         blocky = LightmapGetY(mo->y);
@@ -663,31 +663,31 @@ void SetThingPosition(mobj_t *mo)
         {
             bnum = blocky * dynamic_light_blockmap_width + blockx;
 
-            mo->dlprev = nullptr;
-            mo->dlnext = dynamic_light_blockmap_things[bnum];
+            mo->dynamic_light_previous_ = nullptr;
+            mo->dynamic_light_next_ = dynamic_light_blockmap_things[bnum];
 
             if (dynamic_light_blockmap_things[bnum])
-                (dynamic_light_blockmap_things[bnum])->dlprev = mo;
+                (dynamic_light_blockmap_things[bnum])->dynamic_light_previous_ = mo;
 
             dynamic_light_blockmap_things[bnum] = mo;
         }
         else
         {
             // thing is off the map
-            mo->dlnext = mo->dlprev = nullptr;
+            mo->dynamic_light_next_ = mo->dynamic_light_previous_ = nullptr;
         }
     }
 
     // link into sector glow list
-    if (mo->info && (mo->info->dlight_[0].type_ != kDynamicLightTypeNone) &&
-        (mo->info->glow_type_ != kSectorGlowTypeNone))
+    if (mo->info_ && (mo->info_->dlight_[0].type_ != kDynamicLightTypeNone) &&
+        (mo->info_->glow_type_ != kSectorGlowTypeNone))
     {
-        sector_t *sec = mo->subsector->sector;
+        sector_t *sec = mo->subsector_->sector;
 
-        mo->dlprev = nullptr;
-        mo->dlnext = sec->glow_things;
+        mo->dynamic_light_previous_ = nullptr;
+        mo->dynamic_light_next_ = sec->glow_things;
 
-        if (sec->glow_things) sec->glow_things->dlprev = mo;
+        if (sec->glow_things) sec->glow_things->dynamic_light_previous_ = mo;
 
         sec->glow_things = mo;
     }
@@ -701,7 +701,7 @@ void SetThingPosition(mobj_t *mo)
 // when moving a thing, rather than fiddling with the coordinates
 // directly (or even P_UnsetThingPos/P_SetThingPos pairs).
 //
-void ChangeThingPosition(mobj_t *mo, float x, float y, float z)
+void ChangeThingPosition(MapObject *mo, float x, float y, float z)
 {
     UnsetThingPosition(mo);
     {
@@ -792,7 +792,7 @@ bool BlockmapLineIterator(float x1, float y1, float x2, float y2,
 }
 
 bool BlockmapThingIterator(float x1, float y1, float x2, float y2,
-                           bool (*func)(mobj_t *, void *), void *data)
+                           bool (*func)(MapObject *, void *), void *data)
 {
     // need to expand the source by one block because large
     // things (radius limited to kBlockmapUnitSize) can overlap
@@ -811,11 +811,11 @@ bool BlockmapThingIterator(float x1, float y1, float x2, float y2,
     for (int by = ly; by <= hy; by++)
         for (int bx = lx; bx <= hx; bx++)
         {
-            for (mobj_t *mo = blockmap_things[by * blockmap_width + bx]; mo;
-                 mo         = mo->bnext)
+            for (MapObject *mo = blockmap_things[by * blockmap_width + bx]; mo;
+                 mo         = mo->blockmap_next_)
             {
                 // check whether thing touches the given bbox
-                float r = mo->radius;
+                float r = mo->radius_;
 
                 if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 ||
                     mo->y - r >= y2)
@@ -829,7 +829,7 @@ bool BlockmapThingIterator(float x1, float y1, float x2, float y2,
 }
 
 void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
-                          float z2, void (*func)(mobj_t *, void *), void *data)
+                          float z2, void (*func)(MapObject *, void *), void *data)
 {
     EDGE_ZoneScoped;
     ecframe_stats.draw_light_iterator++;
@@ -847,39 +847,39 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
     for (int by = ly; by <= hy; by++)
         for (int bx = lx; bx <= hx; bx++)
         {
-            for (mobj_t *mo = dynamic_light_blockmap_things
+            for (MapObject *mo = dynamic_light_blockmap_things
                      [by * dynamic_light_blockmap_width + bx];
-                 mo; mo = mo->dlnext)
+                 mo; mo = mo->dynamic_light_next_)
             {
-                SYS_ASSERT(mo->state);
+                SYS_ASSERT(mo->state_);
 
                 // skip "off" lights
-                if (mo->state->bright <= 0 || mo->dlight.r <= 0) continue;
+                if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0) continue;
 
                 if (r_culling.d_ &&
                     R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f_)
                     continue;
 
                 // check whether radius touches the given bbox
-                float r = mo->dlight.r;
+                float r = mo->dynamic_light_.r;
 
                 if (mo->x + r <= x1 || mo->x - r >= x2 || mo->y + r <= y1 ||
                     mo->y - r >= y2 || mo->z + r <= z1 || mo->z - r >= z2)
                     continue;
 
                 // create shader if necessary
-                if (!mo->dlight.shader)
-                    mo->dlight.shader = MakeDLightShader(mo);
+                if (!mo->dynamic_light_.shader)
+                    mo->dynamic_light_.shader = MakeDLightShader(mo);
 
                 if (max_dynamic_lights.d_ > 0 &&
-                    seen_dlights.count(mo->dlight.shader) == 0)
+                    seen_dlights.count(mo->dynamic_light_.shader) == 0)
                 {
                     if ((int)seen_dlights.size() >= max_dynamic_lights.d_ * 20)
                         continue;
-                    else { seen_dlights.insert(mo->dlight.shader); }
+                    else { seen_dlights.insert(mo->dynamic_light_.shader); }
                 }
 
-                //			mo->dlight.shader->CheckReset();
+                //			mo->dynamic_light_.shader->CheckReset();
 
                 func(mo, data);
             }
@@ -887,41 +887,41 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
 }
 
 void SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
-                        float y2, float z2, void (*func)(mobj_t *, void *),
+                        float y2, float z2, void (*func)(MapObject *, void *),
                         void *data)
 {
     EDGE_ZoneScoped;
     ecframe_stats.draw_sector_glow_iterator++;
 
-    for (mobj_t *mo = sec->glow_things; mo; mo = mo->dlnext)
+    for (MapObject *mo = sec->glow_things; mo; mo = mo->dynamic_light_next_)
     {
-        SYS_ASSERT(mo->state);
+        SYS_ASSERT(mo->state_);
 
         // skip "off" lights
-        if (mo->state->bright <= 0 || mo->dlight.r <= 0) continue;
+        if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0) continue;
 
         if (r_culling.d_ &&
             R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f_)
             continue;
 
         // check whether radius touches the given bbox
-        float r = mo->dlight.r;
+        float r = mo->dynamic_light_.r;
 
-        if (mo->info->glow_type_ == kSectorGlowTypeFloor && sec->f_h + r <= z1)
+        if (mo->info_->glow_type_ == kSectorGlowTypeFloor && sec->f_h + r <= z1)
             continue;
 
-        if (mo->info->glow_type_ == kSectorGlowTypeCeiling &&
+        if (mo->info_->glow_type_ == kSectorGlowTypeCeiling &&
             sec->c_h - r >= z1)
             continue;
 
         // create shader if necessary
-        if (!mo->dlight.shader)
+        if (!mo->dynamic_light_.shader)
         {
-            if (mo->info->glow_type_ == kSectorGlowTypeWall)
+            if (mo->info_->glow_type_ == kSectorGlowTypeWall)
             {
-                if (mo->dlight.bad_wall_glow)
+                if (mo->dynamic_light_.bad_wall_glow)
                     continue;
-                else if (!mo->dlight.glow_wall)
+                else if (!mo->dynamic_light_.glow_wall)
                 {
                     // Use first line that the dlight mobj touches
                     // Ideally it is only touching one line
@@ -929,28 +929,28 @@ void SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
                     {
                         if (P_ThingOnLineSide(mo, sec->lines[i]) == -1)
                         {
-                            mo->dlight.glow_wall = sec->lines[i];
+                            mo->dynamic_light_.glow_wall = sec->lines[i];
                             break;
                         }
                     }
-                    if (mo->dlight.glow_wall)
+                    if (mo->dynamic_light_.glow_wall)
                     {
-                        mo->dlight.shader = MakeWallGlow(mo);
+                        mo->dynamic_light_.shader = MakeWallGlow(mo);
                     }
                     else  // skip useless repeated checks
                     {
-                        mo->dlight.bad_wall_glow = true;
+                        mo->dynamic_light_.bad_wall_glow = true;
                         continue;
                     }
                 }
                 else
-                    mo->dlight.shader = MakeWallGlow(mo);
+                    mo->dynamic_light_.shader = MakeWallGlow(mo);
             }
             else
-                mo->dlight.shader = MakePlaneGlow(mo);
+                mo->dynamic_light_.shader = MakePlaneGlow(mo);
         }
 
-        //		mo->dlight.shader->CheckReset();
+        //		mo->dynamic_light_.shader->CheckReset();
 
         func(mo, data);
     }
@@ -1037,7 +1037,7 @@ static inline void PIT_AddLineIntercept(line_t *ld)
     intercepts.push_back(in);
 }
 
-static inline void PIT_AddThingIntercept(mobj_t *thing)
+static inline void PIT_AddThingIntercept(MapObject *thing)
 {
     float x1;
     float y1;
@@ -1058,19 +1058,19 @@ static inline void PIT_AddThingIntercept(mobj_t *thing)
     // check a corner to corner crossection for hit
     if (tracepositive)
     {
-        x1 = thing->x - thing->radius;
-        y1 = thing->y + thing->radius;
+        x1 = thing->x - thing->radius_;
+        y1 = thing->y + thing->radius_;
 
-        x2 = thing->x + thing->radius;
-        y2 = thing->y - thing->radius;
+        x2 = thing->x + thing->radius_;
+        y2 = thing->y - thing->radius_;
     }
     else
     {
-        x1 = thing->x - thing->radius;
-        y1 = thing->y - thing->radius;
+        x1 = thing->x - thing->radius_;
+        y1 = thing->y - thing->radius_;
 
-        x2 = thing->x + thing->radius;
-        y2 = thing->y + thing->radius;
+        x2 = thing->x + thing->radius_;
+        y2 = thing->y + thing->radius_;
     }
 
     s1 = P_PointOnDivlineSide(x1, y1, &trace);
@@ -1228,8 +1228,8 @@ bool PathTraverse(float x1, float y1, float x2, float y2, int flags,
 
             if (flags & kPathAddThings)
             {
-                for (mobj_t *mo = blockmap_things[by * blockmap_width + bx]; mo;
-                     mo         = mo->bnext)
+                for (MapObject *mo = blockmap_things[by * blockmap_width + bx]; mo;
+                     mo         = mo->blockmap_next_)
                 {
                     PIT_AddThingIntercept(mo);
                 }

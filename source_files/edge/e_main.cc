@@ -1974,7 +1974,7 @@ static void E_Startup(void)
     R_Init();
     PlayerStateInit();
     P_MapInit();
-    P_InitSwitchList();
+    InitializeSwitchList();
     W_InitPicAnims();
     S_Init();
     NetworkInitialize();

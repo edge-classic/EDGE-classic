@@ -37,7 +37,7 @@
 
 #define TELE_FUDGE 0.1f
 
-MapObject *P_FindTeleportMan(int tag, const MapObjectDefinition *info)
+MapObject *FindTeleportMan(int tag, const MapObjectDefinition *info)
 {
     for (int i = 0; i < total_level_sectors; i++)
     {
@@ -55,7 +55,7 @@ MapObject *P_FindTeleportMan(int tag, const MapObjectDefinition *info)
     return nullptr; // not found
 }
 
-line_t *P_FindTeleportLine(int tag, line_t *original)
+line_t *FindTeleportLine(int tag, line_t *original)
 {
     for (int i = 0; i < total_level_lines; i++)
     {
@@ -72,7 +72,7 @@ line_t *P_FindTeleportLine(int tag, line_t *original)
 }
 
 //
-// EV_Teleport
+// TeleportMapObject
 //
 // Teleportation is an effect which is simulated by searching for the first
 // special[MOBJ_TELEPOS] in a sector with the same tag as the activation line,
@@ -106,7 +106,7 @@ line_t *P_FindTeleportLine(int tag, line_t *original)
 // -AJA- 2004/10/08: Reworked for Silent and Line-to-Line teleporters
 //                   (based on the logic in prBoom's p_telept.c code).
 //
-bool EV_Teleport(line_t *line, int tag, MapObject *thing, const TeleportDefinition *def)
+bool TeleportMapObject(line_t *line, int tag, MapObject *thing, const TeleportDefinition *def)
 {
     if (!thing)
         return false;
@@ -138,7 +138,7 @@ bool EV_Teleport(line_t *line, int tag, MapObject *thing, const TeleportDefiniti
         if (!line || tag <= 0)
             return false;
 
-        currline = P_FindTeleportLine(tag, line);
+        currline = FindTeleportLine(tag, line);
 
         if (!currline)
             return false;
@@ -160,7 +160,7 @@ bool EV_Teleport(line_t *line, int tag, MapObject *thing, const TeleportDefiniti
         if (!def->outspawnobj_)
             return false;
 
-        currmobj = P_FindTeleportMan(tag, def->outspawnobj_);
+        currmobj = FindTeleportMan(tag, def->outspawnobj_);
 
         if (!currmobj)
             return false;

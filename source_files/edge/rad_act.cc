@@ -500,7 +500,7 @@ void RAD_ActArmourPlayers(rad_trigger_t *R, void *param)
         if (p->armours[armour->type] > slack)
             p->armours[armour->type] = slack;
 
-        P_UpdateTotalArmour(p);
+        UpdateTotalArmour(p);
     }
 }
 
@@ -726,7 +726,7 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
 
         sector_t *tsec;
 
-        for (tsec = P_FindSectorFromTag(ctex->tag); tsec != nullptr; tsec = tsec->tag_next)
+        for (tsec = FindSectorFromTag(ctex->tag); tsec != nullptr; tsec = tsec->tag_next)
         {
             if (ctex->subtag)
             {
@@ -976,7 +976,7 @@ void RAD_ActActivateLinetype(rad_trigger_t *R, void *param)
 
     player_t *player = GetWhoDunnit(R);
 
-    P_RemoteActivation(player ? player->mo : nullptr, t->typenum, t->tag, 0, kLineTriggerAny);
+    RemoteActivation(player ? player->mo : nullptr, t->typenum, t->tag, 0, kLineTriggerAny);
 }
 
 void RAD_ActUnblockLines(rad_trigger_t *R, void *param)
@@ -1335,7 +1335,7 @@ void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param)
         RAD_SetPspriteDeferred(p, ps_weapon, p->weapons[p->ready_wp].info->ready_state_);
 
         P_FixWeaponClip(p, p->ready_wp); // handle the potential clip_size difference
-        P_UpdateAvailWeapons(p);
+        UpdateAvailWeapons(p);
     }
 }
 

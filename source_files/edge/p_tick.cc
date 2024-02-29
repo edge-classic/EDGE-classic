@@ -92,19 +92,19 @@ void P_Ticker(bool extra_tic)
     if (!extra_tic || !double_framerate.d_)
         RAD_RunTriggers();
 
-    P_RunForces(extra_tic);
-    P_RunMobjThinkers(extra_tic);
+    RunForces(extra_tic);
+    RunMobjThinkers(extra_tic);
 
     if (!extra_tic || !double_framerate.d_)
-        P_RunLights();
+        RunLights();
 
-    P_RunActivePlanes();
-    P_RunActiveSliders();
+    RunActivePlanes();
+    RunActiveSliders();
 
     if (!extra_tic || !double_framerate.d_)
-        P_RunAmbientSFX();
+        RunAmbientSounds();
 
-    P_UpdateSpecials(extra_tic);
+    UpdateSpecials(extra_tic);
 
     if (extra_tic && double_framerate.d_)
         return;
@@ -127,8 +127,8 @@ void P_HubFastForward(void)
     // close doors
     for (int i = 0; i < kTicRate * 8; i++)
     {
-        P_RunActivePlanes();
-        P_RunActiveSliders();
+        RunActivePlanes();
+        RunActiveSliders();
     }
 
     for (int k = 0; k < kTicRate / 3; k++)

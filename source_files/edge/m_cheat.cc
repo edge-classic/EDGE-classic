@@ -164,7 +164,7 @@ static void CheatGiveWeapons(player_t *pl, int key = -2)
     {
         if (info && !info->no_cheat_ && (key < 0 || info->bind_key_ == key))
         {
-            P_AddWeapon(pl, info, nullptr);
+            AddWeapon(pl, info, nullptr);
         }
     }
 
@@ -176,7 +176,7 @@ static void CheatGiveWeapons(player_t *pl, int key = -2)
         }
     }
 
-    P_UpdateAvailWeapons(pl);
+    UpdateAvailWeapons(pl);
 }
 
 bool CheatResponder(InputEvent *ev)
@@ -225,7 +225,7 @@ bool CheatResponder(InputEvent *ev)
     {
         pl->armours[CHEATARMOURTYPE] = CHEATARMOUR;
 
-        P_UpdateTotalArmour(pl);
+        UpdateTotalArmour(pl);
 
         for (i = 0; i < kTotalAmmunitionTypes; i++)
             pl->ammo[i].num = pl->ammo[i].max;
@@ -243,7 +243,7 @@ bool CheatResponder(InputEvent *ev)
     {
         pl->armours[CHEATARMOURTYPE] = CHEATARMOUR;
 
-        P_UpdateTotalArmour(pl);
+        UpdateTotalArmour(pl);
 
         for (i = 0; i < kTotalAmmunitionTypes; i++)
             pl->ammo[i].num = pl->ammo[i].max;
@@ -365,7 +365,7 @@ bool CheatResponder(InputEvent *ev)
         WeaponDefinition *w = weapondefs.Lookup("CHAINSAW");
         if (w)
         {
-            P_AddWeapon(pl, w, nullptr);
+            AddWeapon(pl, w, nullptr);
             pl->powers[kPowerTypeInvulnerable] = 1;
             ConsoleMessageLDF("CHOPPERSNote");
         }

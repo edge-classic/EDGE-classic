@@ -20,13 +20,13 @@
 // new savegame system.
 //
 // This file handles
-//    light_t         [LITE]
-//    button_t        [BUTN]
+//    LightSpecial         [LITE]
+//    Button        [BUTN]
 //    rad_trigger_t   [TRIG]
 //    drawtip_t       [DTIP]
 //
-//    plane_move_t    [PMOV]
-//    slider_move_t   [SMOV]
+//    PlaneMover    [PMOV]
+//    SlidingDoorMover   [SMOV]
 //
 // TODO HERE:
 //   +  Fix donuts.
@@ -47,13 +47,13 @@
 
 // forward decls.
 int   SV_ButtonCountElems(void);
-int   SV_ButtonFindElem(button_t *elem);
+int   SV_ButtonFindElem(Button *elem);
 void *SV_ButtonGetElem(int index);
 void  SV_ButtonCreateElems(int num_elems);
 void  SV_ButtonFinaliseElems(void);
 
 int   SV_LightCountElems(void);
-int   SV_LightFindElem(light_t *elem);
+int   SV_LightFindElem(LightSpecial *elem);
 void *SV_LightGetElem(int index);
 void  SV_LightCreateElems(int num_elems);
 void  SV_LightFinaliseElems(void);
@@ -71,13 +71,13 @@ void  SV_TipCreateElems(int num_elems);
 void  SV_TipFinaliseElems(void);
 
 int   SV_PlaneMoveCountElems(void);
-int   SV_PlaneMoveFindElem(plane_move_t *elem);
+int   SV_PlaneMoveFindElem(PlaneMover *elem);
 void *SV_PlaneMoveGetElem(int index);
 void  SV_PlaneMoveCreateElems(int num_elems);
 void  SV_PlaneMoveFinaliseElems(void);
 
 int   SV_SliderMoveCountElems(void);
-int   SV_SliderMoveFindElem(plane_move_t *elem);
+int   SV_SliderMoveFindElem(PlaneMover *elem);
 void *SV_SliderMoveGetElem(int index);
 void  SV_SliderMoveCreateElems(int num_elems);
 void  SV_SliderMoveFinaliseElems(void);
@@ -104,14 +104,14 @@ void SR_SliderPutInfo(void *storage, int index, void *extra);
 //
 //  BUTTON STRUCTURE
 //
-static button_t sv_dummy_button;
+static Button sv_dummy_button;
 
 #define SV_F_BASE sv_dummy_button
 
 static savefield_t sv_fields_button[] = {SF(line, "line", 1, SVT_INDEX("level_lines"), SR_LineGetLine, SR_LinePutLine),
                                          SF(where, "where", 1, SVT_ENUM, SR_GetEnum, SR_PutEnum),
-                                         SF(bimage, "bimage", 1, SVT_STRING, SR_LevelGetImage, SR_LevelPutImage),
-                                         SF(btimer, "btimer", 1, SVT_INT, SR_GetInt, SR_PutInt),
+                                         SF(button_image, "bimage", 1, SVT_STRING, SR_LevelGetImage, SR_LevelPutImage),
+                                         SF(button_timer, "btimer", 1, SVT_INT, SR_GetInt, SR_PutInt),
 
                                          // FIXME: off_sound
 
@@ -149,15 +149,15 @@ savearray_t sv_array_button = {
 //
 //  LIGHT STRUCTURE
 //
-static light_t sv_dummy_light;
+static LightSpecial sv_dummy_light;
 
 #define SV_F_BASE sv_dummy_light
 
 static savefield_t sv_fields_light[] = {
     SF(type, "type", 1, SVT_STRING, SR_LightGetType, SR_LightPutType),
     SF(sector, "sector", 1, SVT_INDEX("level_sectors"), SR_SectorGetSector, SR_SectorPutSector),
-    SF(count, "count", 1, SVT_INT, SR_GetInt, SR_PutInt), SF(minlight, "minlight", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(maxlight, "maxlight", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(count, "count", 1, SVT_INT, SR_GetInt, SR_PutInt), SF(minimum_light, "minlight", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(maximum_light, "maxlight", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(direction, "direction", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(fade_count, "fade_count", 1, SVT_INT, SR_GetInt, SR_PutInt),
 
@@ -320,7 +320,7 @@ savearray_t sv_array_drawtip = {
 //
 //  PLANEMOVE STRUCTURE
 //
-static plane_move_t sv_dummy_plane_move;
+static PlaneMover sv_dummy_plane_move;
 
 #define SV_F_BASE sv_dummy_plane_move
 
@@ -330,19 +330,19 @@ static savefield_t sv_fields_plane_move[] = {
 
     SF(is_ceiling, "is_ceiling", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
     SF(is_elevator, "is_elevator", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
-    SF(startheight, "startheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(destheight, "destheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(elev_height, "elevheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(start_height, "startheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(destination_height, "destheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(elevator_height, "elevheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
     SF(speed, "speed", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
     SF(crush, "crush", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
 
     SF(direction, "direction", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(olddirection, "olddirection", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(old_direction, "olddirection", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(tag, "tag", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(waited, "waited", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(sfxstarted, "sfxstarted", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
+    SF(sound_effect_started, "sfxstarted", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
 
-    SF(newspecial, "newspecial", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(new_special, "newspecial", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(new_image, "new_image", 1, SVT_STRING, SR_LevelGetImage, SR_LevelPutImage),
 
     SVFIELD_END};
@@ -379,7 +379,7 @@ savearray_t sv_array_plane_move = {
 //
 //  SLIDERMOVE STRUCTURE
 //
-static slider_move_t sv_dummy_slider_move;
+static SlidingDoorMover sv_dummy_slider_move;
 
 #define SV_F_BASE sv_dummy_slider_move
 
@@ -393,11 +393,11 @@ static savefield_t sv_fields_slider_move[] = {
     SF(direction, "direction", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(waited, "waited", 1, SVT_INT, SR_GetInt, SR_PutInt),
 
-    SF(sfxstarted, "sfxstarted", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
+    SF(sound_effect_started, "sfxstarted", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
     SF(final_open, "final_open", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
 
     // NOT HERE:
-    //   - line_len (can recreate)
+    //   - line_length (can recreate)
 
     SVFIELD_END};
 
@@ -431,11 +431,11 @@ savearray_t sv_array_slider_move = {
 
 //----------------------------------------------------------------------------
 
-extern std::vector<button_t *> active_buttons;
+extern std::vector<Button *> active_buttons;
 
 int SV_ButtonCountElems(void)
 {
-    // Note: also saves the unused button_ts (btimer == 0)
+    // Note: also saves the unused Buttons (button_timer == 0)
     return (int)active_buttons.size();
 }
 
@@ -450,11 +450,11 @@ void *SV_ButtonGetElem(int index)
     return active_buttons[index];
 }
 
-int SV_ButtonFindElem(button_t *elem)
+int SV_ButtonFindElem(Button *elem)
 {
     int index = 0;
 
-    std::vector<button_t *>::iterator LI;
+    std::vector<Button *>::iterator LI;
 
     for (LI = active_buttons.begin(); LI != active_buttons.end() && (*LI) != elem; LI++)
         index++;
@@ -467,13 +467,13 @@ int SV_ButtonFindElem(button_t *elem)
 
 void SV_ButtonCreateElems(int num_elems)
 {
-    P_ClearButtons();
+    ClearButtons();
 
     for (; num_elems > 0; num_elems--)
     {
-        button_t *b = new button_t;
+        Button *b = new Button;
 
-        Z_Clear(b, button_t, 1);
+        Z_Clear(b, Button, 1);
 
         active_buttons.push_back(b);
     }
@@ -486,7 +486,7 @@ void SV_ButtonFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-extern std::vector<light_t *> active_lights;
+extern std::vector<LightSpecial *> active_lights;
 
 int SV_LightCountElems(void)
 {
@@ -501,11 +501,11 @@ void *SV_LightGetElem(int index)
     return active_lights[index];
 }
 
-int SV_LightFindElem(light_t *elem)
+int SV_LightFindElem(LightSpecial *elem)
 {
     int index = 0;
 
-    std::vector<light_t *>::iterator LI;
+    std::vector<LightSpecial *>::iterator LI;
 
     for (LI = active_lights.begin(); LI != active_lights.end() && (*LI) != elem; LI++)
         index++;
@@ -518,11 +518,11 @@ int SV_LightFindElem(light_t *elem)
 
 void SV_LightCreateElems(int num_elems)
 {
-    P_DestroyAllLights();
+    DestroyAllLights();
 
     for (; num_elems > 0; num_elems--)
     {
-        light_t *cur = P_NewLight();
+        LightSpecial *cur = NewLight();
 
         // initialise defaults
         cur->type   = &sectortypes.Lookup(0)->l_;
@@ -657,7 +657,7 @@ void SV_TipFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-extern std::vector<plane_move_t *> active_planes;
+extern std::vector<PlaneMover *> active_planes;
 
 int SV_PlaneMoveCountElems(void)
 {
@@ -674,13 +674,13 @@ void *SV_PlaneMoveGetElem(int index)
     return active_planes[index];
 }
 
-int SV_PlaneMoveFindElem(plane_move_t *elem)
+int SV_PlaneMoveFindElem(PlaneMover *elem)
 {
     // returns the index value (starts at 0).
 
     int index = 0;
 
-    std::vector<plane_move_t *>::iterator PMI;
+    std::vector<PlaneMover *>::iterator PMI;
 
     for (PMI = active_planes.begin(); PMI != active_planes.end() && (*PMI) != elem; PMI++)
     {
@@ -695,16 +695,16 @@ int SV_PlaneMoveFindElem(plane_move_t *elem)
 
 void SV_PlaneMoveCreateElems(int num_elems)
 {
-    P_DestroyAllPlanes();
+    DestroyAllPlanes();
 
     for (; num_elems > 0; num_elems--)
     {
-        plane_move_t *pmov = new plane_move_t;
+        PlaneMover *pmov = new PlaneMover;
 
-        Z_Clear(pmov, plane_move_t, 1);
+        Z_Clear(pmov, PlaneMover, 1);
 
         // link it in
-        P_AddActivePlane(pmov);
+        AddActivePlane(pmov);
     }
 }
 
@@ -715,7 +715,7 @@ void SV_PlaneMoveFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-extern std::vector<slider_move_t *> active_sliders;
+extern std::vector<SlidingDoorMover *> active_sliders;
 
 int SV_SliderMoveCountElems(void)
 {
@@ -732,13 +732,13 @@ void *SV_SliderMoveGetElem(int index)
     return active_sliders[index];
 }
 
-int SV_SliderMoveFindElem(slider_move_t *elem)
+int SV_SliderMoveFindElem(SlidingDoorMover *elem)
 {
     // returns the index value (starts at 0).
 
     int index = 0;
 
-    std::vector<slider_move_t *>::iterator SMI;
+    std::vector<SlidingDoorMover *>::iterator SMI;
 
     for (SMI = active_sliders.begin(); SMI != active_sliders.end() && (*SMI) != elem; SMI++)
     {
@@ -753,29 +753,29 @@ int SV_SliderMoveFindElem(slider_move_t *elem)
 
 void SV_SliderMoveCreateElems(int num_elems)
 {
-    P_DestroyAllSliders();
+    DestroyAllSliders();
 
     for (; num_elems > 0; num_elems--)
     {
-        slider_move_t *smov = new slider_move_t;
+        SlidingDoorMover *smov = new SlidingDoorMover;
 
-        Z_Clear(smov, slider_move_t, 1);
+        Z_Clear(smov, SlidingDoorMover, 1);
 
         // link it in
-        P_AddActiveSlider(smov);
+        AddActiveSlider(smov);
     }
 }
 
 void SV_SliderMoveFinaliseElems(void)
 {
-    std::vector<slider_move_t *>::iterator SMI;
+    std::vector<SlidingDoorMover *>::iterator SMI;
 
     for (SMI = active_sliders.begin(); SMI != active_sliders.end(); SMI++)
     {
-        slider_move_t *smov = *SMI;
+        SlidingDoorMover *smov = *SMI;
 
         if (smov->line)
-            smov->line_len = R_PointToDist(0, 0, smov->line->dx, smov->line->dy);
+            smov->line_length = R_PointToDist(0, 0, smov->line->dx, smov->line->dy);
     }
 }
 

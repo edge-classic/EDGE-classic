@@ -36,9 +36,9 @@
 #include "s_sound.h"
 #include "w_texture.h"
 
-std::vector<button_t *> active_buttons;
+std::vector<Button *> active_buttons;
 
-void P_InitSwitchList(void)
+void InitializeSwitchList(void)
 {
     // only called at game initialization.
     for (auto sw : switchdefs)
@@ -51,19 +51,19 @@ void P_InitSwitchList(void)
 //
 // Start a button counting down till it turns off.
 //
-static void StartButton(SwitchDefinition *sw, line_t *line, bwhere_e w, const image_c *image)
+static void StartButton(SwitchDefinition *sw, line_t *line, ButtonPosition w, const image_c *image)
 {
     // See if button is already pressed
-    if (P_ButtonIsPressed(line))
+    if (ButtonIsPressed(line))
         return;
 
-    button_t *b = nullptr;
+    Button *b = nullptr;
 
-    std::vector<button_t *>::iterator BI;
+    std::vector<Button *>::iterator BI;
 
     for (BI = active_buttons.begin(); BI != active_buttons.end(); BI++)
     {
-        if ((*BI)->btimer == 0)
+        if ((*BI)->button_timer == 0)
         {
             b = *BI;
             break;
@@ -72,20 +72,20 @@ static void StartButton(SwitchDefinition *sw, line_t *line, bwhere_e w, const im
 
     if (!b)
     {
-        b = new button_t;
+        b = new Button;
 
         active_buttons.push_back(b);
     }
 
     b->line      = line;
     b->where     = w;
-    b->btimer    = sw->time_;
+    b->button_timer    = sw->time_;
     b->off_sound = sw->off_sfx_;
-    b->bimage    = image;
+    b->button_image    = image;
 }
 
 //
-// P_ChangeSwitchTexture
+// ChangeSwitchTexture
 //
 // Function that changes wall texture.
 // Tell it if switch is ok to use again.
@@ -97,7 +97,7 @@ static void StartButton(SwitchDefinition *sw, line_t *line, bwhere_e w, const im
 #define SET_SW(PART)   side->PART.image = sw->cache_.image[k ^ 1]
 #define OLD_SW         sw->cache_.image[k]
 
-void P_ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials, bool noSound)
+void ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials, bool noSound)
 {
     for (int j = 0; j < total_level_lines; j++)
     {
@@ -114,10 +114,10 @@ void P_ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials, bo
 
         Position *sfx_origin = &level_lines[j].frontsector->sfx_origin;
 
-        bwhere_e pos = BWH_None;
+        ButtonPosition pos = kButtonNone;
 
         // Note: reverse order, give priority to newer switches.
-        for (auto iter = switchdefs.rbegin(); iter != switchdefs.rend() && (pos == BWH_None); iter++)
+        for (auto iter = switchdefs.rbegin(); iter != switchdefs.rend() && (pos == kButtonNone); iter++)
         {
             SwitchDefinition *sw = *iter;
 
@@ -132,24 +132,24 @@ void P_ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials, bo
                 if (CHECK_SW(top))
                 {
                     SET_SW(top);
-                    pos = BWH_Top;
+                    pos = kButtonTop;
                     break;
                 }
                 else if (CHECK_SW(middle))
                 {
                     SET_SW(middle);
-                    pos = BWH_Middle;
+                    pos = kButtonMiddle;
                     break;
                 }
                 else if (CHECK_SW(bottom))
                 {
                     SET_SW(bottom);
-                    pos = BWH_Bottom;
+                    pos = kButtonBottom;
                     break;
                 }
             } // k < 2
 
-            if (pos != BWH_None)
+            if (pos != kButtonNone)
             {
                 // -KM- 98/07/31 Implement sounds
                 if (!noSound && sw->on_sfx_)
@@ -172,9 +172,9 @@ void P_ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials, bo
 #undef SET_SW
 #undef OLD_SW
 
-void P_ClearButtons(void)
+void ClearButtons(void)
 {
-    std::vector<button_t *>::iterator BI;
+    std::vector<Button *>::iterator BI;
 
     for (BI = active_buttons.begin(); BI != active_buttons.end(); BI++)
     {
@@ -183,51 +183,51 @@ void P_ClearButtons(void)
     active_buttons.clear();
 }
 
-bool P_ButtonIsPressed(line_t *ld)
+bool ButtonIsPressed(line_t *ld)
 {
-    std::vector<button_t *>::iterator BI;
+    std::vector<Button *>::iterator BI;
 
     for (BI = active_buttons.begin(); BI != active_buttons.end(); BI++)
     {
-        if ((*BI)->btimer > 0 && (*BI)->line == ld)
+        if ((*BI)->button_timer > 0 && (*BI)->line == ld)
             return true;
     }
 
     return false;
 }
 
-void P_UpdateButtons(void)
+void UpdateButtons(void)
 {
-    std::vector<button_t *>::iterator BI;
+    std::vector<Button *>::iterator BI;
 
     for (BI = active_buttons.begin(); BI != active_buttons.end(); BI++)
     {
-        button_t *b = *BI;
+        Button *b = *BI;
         SYS_ASSERT(b);
 
-        if (b->btimer == 0)
+        if (b->button_timer == 0)
             continue;
 
-        b->btimer--;
+        b->button_timer--;
 
-        if (b->btimer == 0)
+        if (b->button_timer == 0)
         {
             switch (b->where)
             {
-            case BWH_Top:
-                b->line->side[0]->top.image = b->bimage;
+            case kButtonTop:
+                b->line->side[0]->top.image = b->button_image;
                 break;
 
-            case BWH_Middle:
-                b->line->side[0]->middle.image = b->bimage;
+            case kButtonMiddle:
+                b->line->side[0]->middle.image = b->button_image;
                 break;
 
-            case BWH_Bottom:
-                b->line->side[0]->bottom.image = b->bimage;
+            case kButtonBottom:
+                b->line->side[0]->bottom.image = b->button_image;
                 break;
 
-            case BWH_None:
-                FatalError("INTERNAL ERROR: bwhere is BWH_None!\n");
+            case kButtonNone:
+                FatalError("INTERNAL ERROR: bwhere is kButtonNone!\n");
             }
 
             if (b->off_sound)
@@ -235,7 +235,7 @@ void P_UpdateButtons(void)
                 S_StartFX(b->off_sound, SNCAT_Level, &b->line->frontsector->sfx_origin);
             }
 
-            Z_Clear(b, button_t, 1);
+            Z_Clear(b, Button, 1);
         }
     }
 }

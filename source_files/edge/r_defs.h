@@ -291,8 +291,8 @@ typedef struct sector_s
     struct side_s   *heightsec_side;
 
     // movement thinkers, for quick look-up
-    struct plane_move_s *floor_move;
-    struct plane_move_s *ceil_move;
+    struct PlaneMover *floor_move;
+    struct PlaneMover *ceil_move;
 
     // 0 = untraversed, 1,2 = sndlines-1
     int soundtraversed;
@@ -443,7 +443,7 @@ typedef struct line_s
     const LineType *slide_door;
 
     // slider thinker, normally nullptr
-    struct slider_move_s *slider_move;
+    struct SlidingDoorMover *slider_move;
 
     struct line_s *portal_pair;
 

@@ -115,14 +115,14 @@ void P_FixWeaponClip(player_t *p, int slot);
 // P_USER
 //
 void P_CreatePlayer(int pnum, bool is_bot);
-void P_DestroyAllPlayers(void);
+void DestroyAllPlayers(void);
 void P_GiveInitialBenefits(player_t *player, const MapObjectDefinition *info);
 
 bool P_PlayerThink(player_t *player, bool extra_tic);
-void P_UpdateAvailWeapons(player_t *p);
-void P_UpdateTotalArmour(player_t *p);
+void UpdateAvailWeapons(player_t *p);
+void UpdateTotalArmour(player_t *p);
 
-bool P_AddWeapon(player_t *player, WeaponDefinition *info, int *index);
+bool AddWeapon(player_t *player, WeaponDefinition *info, int *index);
 bool P_RemoveWeapon(player_t *player, WeaponDefinition *info);
 bool P_PlayerSwitchWeapon(player_t *player, WeaponDefinition *choice);
 void P_PlayerJump(player_t *pl, float dz, int wait);
@@ -144,7 +144,7 @@ int P_MobjFindLabel(MapObject *mobj, const char *label);
 bool       P_SetMobjState(MapObject *mobj, int state);
 bool       P_SetMobjStateDeferred(MapObject *mobj, int state, int tic_skip);
 void       P_SetMobjDirAndSpeed(MapObject *mobj, BAMAngle angle, float slope, float speed);
-void       P_RunMobjThinkers(bool extra_tic);
+void       RunMobjThinkers(bool extra_tic);
 void       P_SpawnDebris(float x, float y, float z, BAMAngle angle, const MapObjectDefinition *debris);
 void       P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff, BAMAngle angle);
 void       P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle, const MapObjectDefinition *blood);
@@ -163,7 +163,7 @@ int P_MobjGetSfxCategory(const MapObject *mo);
 // Needed by savegame code.
 void P_RemoveAllMobjs(bool loading);
 void P_RemoveItemsInQue(void);
-void P_ClearAllStaleRefs(void);
+void ClearAllStaleRefs(void);
 
 //
 // P_ENEMY
@@ -176,7 +176,7 @@ extern float     yspeed[8];
 
 void    P_NoiseAlert(player_t *p);
 void    P_NoiseAlert(MapObject *actor);
-void    P_NewChaseDir(MapObject *actor);
+void    NewChaseDir(MapObject *actor);
 bool    P_CreateAggression(MapObject *actor);
 bool    P_CheckMeleeRange(MapObject *actor);
 bool    P_CheckMissileRange(MapObject *actor);
@@ -197,11 +197,11 @@ int   P_BoxOnLineSide(const float *tmbox, line_t *ld);
 int   P_BoxOnDivLineSide(const float *tmbox, divline_t *div);
 int   P_ThingOnLineSide(const MapObject *mo, line_t *ld);
 
-int   P_FindThingGap(vgap_t *gaps, int gap_num, float z1, float z2);
+int   FindThingGap(vgap_t *gaps, int gap_num, float z1, float z2);
 void  P_ComputeGaps(line_t *ld);
 float P_ComputeThingGap(MapObject *thing, sector_t *sec, float z, float *f, float *c, float f_slope_z = 0.0f,
                         float c_slope_z = 0.0f);
-void  P_AddExtraFloor(sector_t *sec, line_t *line);
+void  AddExtraFloor(sector_t *sec, line_t *line);
 void  P_RecomputeGapsAroundSector(sector_t *sec);
 void  P_FloodExtraFloors(sector_t *sector);
 
@@ -257,7 +257,7 @@ MapObject *DoMapTargetAutoAim(MapObject *source, BAMAngle angle, float distance,
 void    P_TargetTheory(MapObject *source, MapObject *target, float *x, float *y, float *z);
 
 MapObject *P_AimLineAttack(MapObject *t1, BAMAngle angle, float distance, float *slope);
-void    P_UpdateMultipleFloors(sector_t *sector);
+void    UpdateMultipleFloors(sector_t *sector);
 bool    P_CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh);
 bool    P_SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush = 10, bool nocarething = false);
 bool    P_CheckAbsPosition(MapObject *thing, float x, float y, float z);

@@ -354,7 +354,7 @@ static void GiveWeapon(pickup_info_t *pu, Benefit *be)
     // special handling for CO-OP and OLD DeathMatch
     if (numplayers > 1 && deathmatch != 2 && pu->special && !pu->dropped)
     {
-        if (!P_AddWeapon(pu->player, info, &pw_index))
+        if (!AddWeapon(pu->player, info, &pw_index))
         {
             pu->no_ammo = true;
             return;
@@ -366,7 +366,7 @@ static void GiveWeapon(pickup_info_t *pu, Benefit *be)
         return;
     }
 
-    if (!P_AddWeapon(pu->player, info, &pw_index))
+    if (!AddWeapon(pu->player, info, &pw_index))
         return;
 
     pu->new_weap = pw_index;
@@ -434,7 +434,7 @@ static void GiveArmour(pickup_info_t *pu, Benefit *be)
         if (pu->player->armours[a_class] < 0)
             pu->player->armours[a_class] = 0;
 
-        P_UpdateTotalArmour(pu->player);
+        UpdateTotalArmour(pu->player);
 
         pu->got_it = true;
         return;
@@ -507,7 +507,7 @@ static void GiveArmour(pickup_info_t *pu, Benefit *be)
         }
     }
 
-    P_UpdateTotalArmour(pu->player);
+    UpdateTotalArmour(pu->player);
 
     pu->got_it = true;
 }
@@ -1538,7 +1538,7 @@ void P_DamageMobj(MapObject *target, MapObject *inflictor, MapObject *source, fl
             player->armours[i] = 0;
         }
 
-        P_UpdateTotalArmour(player);
+        UpdateTotalArmour(player);
 
         player->attacker = source;
 

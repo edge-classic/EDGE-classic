@@ -241,7 +241,7 @@ bool P_Move(MapObject *actor, bool path)
         for (auto iter = spechit.rbegin(); iter != spechit.rend(); iter++)
         {
             line_t *ld = *iter;
-            if (P_UseSpecialLine(actor, ld, 0, -FLT_MAX, FLT_MAX))
+            if (UseSpecialLine(actor, ld, 0, -FLT_MAX, FLT_MAX))
             {
                 any_used = true;
 
@@ -298,7 +298,7 @@ static bool TryWalk(MapObject *actor)
 }
 
 // -ACB- 1998/09/06 actor is now an object; different movement choices.
-void P_NewChaseDir(MapObject *object)
+void NewChaseDir(MapObject *object)
 {
     float     deltax;
     float     deltay;

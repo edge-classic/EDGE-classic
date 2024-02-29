@@ -41,7 +41,7 @@ void SV_BeginSave(void)
 {
     LogDebug("SV_BeginSave...\n");
 
-    P_ClearAllStaleRefs();
+    ClearAllStaleRefs();
 }
 
 void SV_FinishSave(void)

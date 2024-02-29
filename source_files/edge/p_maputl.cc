@@ -482,7 +482,7 @@ static void GAP_Dump(vgap_t *gaps, int num)
 #endif
 
 //
-// P_FindThingGap
+// FindThingGap
 //
 // Find the best gap that the thing could fit in, given a certain Z
 // position (z1 is foot, z2 is head).  Assuming at least two gaps exist,
@@ -501,7 +501,7 @@ static void GAP_Dump(vgap_t *gaps, int num)
 //
 // Returns the gap number, or -1 if there are no gaps at all.
 //
-int P_FindThingGap(vgap_t *gaps, int gap_num, float z1, float z2)
+int FindThingGap(vgap_t *gaps, int gap_num, float z1, float z2)
 {
     int   i;
     float dist;
@@ -586,7 +586,7 @@ float P_ComputeThingGap(MapObject *thing, sector_t *sec, float z, float *f, floa
     if (AlmostEquals(z, ONCEILINGZ))
         z = sec->c_h - thing->height_;
 
-    temp_num = P_FindThingGap(temp_gaps, temp_num, z, z + thing->height_);
+    temp_num = FindThingGap(temp_gaps, temp_num, z, z + thing->height_);
 
     if (temp_num < 0)
     {
@@ -651,7 +651,7 @@ void P_ComputeGaps(line_t *ld)
     // handle horizontal sliders
     if (ld->slide_door)
     {
-        slider_move_t *smov = ld->slider_move;
+        SlidingDoorMover *smov = ld->slider_move;
 
         if (!smov)
             return;
@@ -729,7 +729,7 @@ exfloor_fit_e P_ExtraFloorFits(sector_t *sec, float z1, float z2)
     return EXFIT_Ok;
 }
 
-void P_AddExtraFloor(sector_t *sec, line_t *line)
+void AddExtraFloor(sector_t *sec, line_t *line)
 {
     sector_t              *ctrl = line->frontsector;
     const ExtraFloorDefinition *ef_info;

@@ -1206,7 +1206,7 @@ static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f, float tex_top
 {
 
     /* smov may be nullptr */
-    slider_move_t *smov = cur_seg->linedef->slider_move;
+    SlidingDoorMover *smov = cur_seg->linedef->slider_move;
 
     float opening = smov ? smov->opening : 0;
 

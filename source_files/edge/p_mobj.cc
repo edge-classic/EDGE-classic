@@ -97,7 +97,7 @@ std::unordered_set<const MapObjectDefinition *> seen_monsters;
 
 bool time_stop_active = false;
 
-static void P_AddItemToQueue(const MapObject *mo)
+static void AddItemToQueue(const MapObject *mo)
 {
     // only respawn items in deathmatch or forced by level flags
     if (!(deathmatch >= 2 || level_flags.itemrespawn)) return;
@@ -931,19 +931,19 @@ static void P_XYMovement(MapObject *mo, const region_properties_t *props,
                     {
                         line_t *ld = *iter;
 
-                        P_ShootSpecialLine(
+                        ShootSpecialLine(
                             ld, PointOnLineSide(mo->x, mo->y, ld), mo->source_);
                     }
                 }
 
                 if (blockline && blockline->special)
                 {
-                    // P_ShootSpecialLine()->P_ActivateSpecialLine() can remove
+                    // ShootSpecialLine()->P_ActivateSpecialLine() can remove
                     //  the special so we need to get the info before calling it
                     const LineType            *tempspecial = blockline->special;
                     const MapObjectDefinition *DebrisThing;
 
-                    P_ShootSpecialLine(blockline,
+                    ShootSpecialLine(blockline,
                                        PointOnLineSide(mo->x, mo->y, blockline),
                                        mo->source_);
 
@@ -969,7 +969,7 @@ static void P_XYMovement(MapObject *mo, const region_properties_t *props,
             {
                 float ground_h;
 
-                int i = P_FindThingGap(blockline->gaps, blockline->gap_num,
+                int i = FindThingGap(blockline->gaps, blockline->gap_num,
                                        mo->z + mo->height_,
                                        mo->z + 2 * mo->height_);
                 if (i >= 0) { ground_h = blockline->gaps[i].f; }
@@ -1749,7 +1749,7 @@ void MapObject::SetRealSource(MapObject *ref)
     SetSource(ref);
 }
 
-void P_ClearAllStaleRefs(void)
+void ClearAllStaleRefs(void)
 {
     for (MapObject *mo = map_object_list_head; mo != nullptr; mo = mo->next_)
     {
@@ -1830,7 +1830,7 @@ void P_RemoveMobj(MapObject *mo)
         0 == (mo->flags_ & (kMapObjectFlagMissile | kMapObjectFlagDropped)) &&
         mo->spawnpoint_.info)
     {
-        P_AddItemToQueue(mo);
+        AddItemToQueue(mo);
     }
 
     // unlink from sector and block lists
@@ -1893,12 +1893,12 @@ void P_RemoveItemsInQue(void)
 }
 
 //
-// P_RunMobjThinkers
+// RunMobjThinkers
 //
 // Cycle through all mobjs and let them think.
 // Also handles removed objects which have no more references.
 //
-void P_RunMobjThinkers(bool extra_tic)
+void RunMobjThinkers(bool extra_tic)
 {
     MapObject *mo;
     MapObject *next;

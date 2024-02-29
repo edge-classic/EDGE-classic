@@ -3485,11 +3485,11 @@ void ShutdownLevel(void)
 
     S_StopLevelFX();
 
-    P_DestroyAllForces();
-    P_DestroyAllLights();
-    P_DestroyAllPlanes();
-    P_DestroyAllSliders();
-    P_DestroyAllAmbientSFX();
+    DestroyAllForces();
+    DestroyAllLights();
+    DestroyAllPlanes();
+    DestroyAllSliders();
+    DestroyAllAmbientSounds();
 
     DDF_BoomClearGenTypes();
 
@@ -3663,7 +3663,7 @@ void LevelSetup(void)
 
     // set up world state
     // (must be before loading things to create Extrafloors)
-    P_SpawnSpecials1();
+    SpawnMapSpecials1();
 
     // -AJA- 1999/10/21: Clear out player starts (ready to load).
     GameClearPlayerStarts();
@@ -3691,7 +3691,7 @@ void LevelSetup(void)
 
     CreateVertexSeclists();
 
-    P_SpawnSpecials2(current_map->autotag_);
+    SpawnMapSpecials2(current_map->autotag_);
 
     AutomapInitLevel();
 

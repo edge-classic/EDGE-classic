@@ -369,7 +369,7 @@ void SV_PlayerCreateElems(int num_elems)
     LogDebug("SV_PlayerCreateElems...\n");
 
     // free existing players (sets all pointers to nullptr)
-    P_DestroyAllPlayers();
+    DestroyAllPlayers();
 
     if (num_elems > MAXPLAYERS)
         FatalError("LOADGAME: too many players (%d)\n", num_elems);
@@ -465,8 +465,8 @@ void SV_PlayerFinaliseElems(void)
         else
             p->builder = P_ConsolePlayerBuilder;
 
-        P_UpdateAvailWeapons(p);
-        P_UpdateTotalArmour(p);
+        UpdateAvailWeapons(p);
+        UpdateTotalArmour(p);
     }
 
     if (first < 0)

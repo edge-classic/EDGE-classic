@@ -99,7 +99,7 @@ static bool P_RoomPath(PathIntercept *in, void *dataptr)
     return true;
 }
 
-static void P_UpdatePowerups(player_t *player);
+static void UpdatePowerups(player_t *player);
 
 #define MAXBOB 16.0f
 
@@ -575,7 +575,7 @@ static void DeathThink(player_t *player, bool extra_tic)
     if (player->bonuscount)
         player->bonuscount -= subtract;
 
-    P_UpdatePowerups(player);
+    UpdatePowerups(player);
 
     // lose the zoom when dead
     player->zoom_fov = 0;
@@ -587,7 +587,7 @@ static void DeathThink(player_t *player, bool extra_tic)
         player->playerstate = PST_REBORN;
 }
 
-static void P_UpdatePowerups(player_t *player)
+static void UpdatePowerups(player_t *player)
 {
     float limit = FLT_MAX;
     int   pw;
@@ -835,7 +835,7 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
     if (player->mo->region_properties_->special || player->mo->subsector_->sector->exfloor_used > 0 || player->underwater ||
         player->swimming || player->airless)
     {
-        P_PlayerInSpecialSector(player, player->mo->subsector_->sector, should_think);
+        PlayerInSpecialSector(player, player->mo->subsector_->sector, should_think);
     }
 
     if (IS_SKY(player->mo->subsector_->sector->ceil))
@@ -904,7 +904,7 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
 
     // Counters, time dependend power ups.
 
-    P_UpdatePowerups(player);
+    UpdatePowerups(player);
 
     if (player->damagecount > 0)
         player->damagecount--;
@@ -1001,7 +1001,7 @@ void P_CreatePlayer(int pnum, bool is_bot)
     }
 }
 
-void P_DestroyAllPlayers(void)
+void DestroyAllPlayers(void)
 {
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
@@ -1023,7 +1023,7 @@ void P_DestroyAllPlayers(void)
     sfx_jpdown = sfx_jpflow = nullptr;
 }
 
-void P_UpdateAvailWeapons(player_t *p)
+void UpdateAvailWeapons(player_t *p)
 {
     // Must be called as soon as the player has received or lost
     // a weapon.  Updates the status bar icons.
@@ -1048,7 +1048,7 @@ void P_UpdateAvailWeapons(player_t *p)
     }
 }
 
-void P_UpdateTotalArmour(player_t *p)
+void UpdateTotalArmour(player_t *p)
 {
     int i;
 
@@ -1067,7 +1067,7 @@ void P_UpdateTotalArmour(player_t *p)
         p->totalarmour = 999.0f;
 }
 
-bool P_AddWeapon(player_t *player, WeaponDefinition *info, int *index)
+bool AddWeapon(player_t *player, WeaponDefinition *info, int *index)
 {
     // Returns true if player did not already have the weapon.
     // If successful and 'index' is non-nullptr, the new index is
@@ -1121,7 +1121,7 @@ bool P_AddWeapon(player_t *player, WeaponDefinition *info, int *index)
     if (index)
         (*index) = slot;
 
-    LogDebug("P_AddWeapon: [%s] @ %d\n", info->name_.c_str(), slot);
+    LogDebug("AddWeapon: [%s] @ %d\n", info->name_.c_str(), slot);
 
     player->weapons[slot].owned        = true;
     player->weapons[slot].info         = info;
@@ -1130,7 +1130,7 @@ bool P_AddWeapon(player_t *player, WeaponDefinition *info, int *index)
     player->weapons[slot].clip_size[1] = 0;
     player->weapons[slot].model_skin   = info->model_skin_;
 
-    P_UpdateAvailWeapons(player);
+    UpdateAvailWeapons(player);
 
     // for NoAmmo+Clip weapons, always begin with a full clip
     for (int ATK = 0; ATK < 2; ATK++)
@@ -1194,7 +1194,7 @@ bool P_RemoveWeapon(player_t *player, WeaponDefinition *info)
 
     player->weapons[slot].owned = false;
 
-    P_UpdateAvailWeapons(player);
+    UpdateAvailWeapons(player);
 
     // fix the key choices
     for (int w = 0; w <= 9; w++)
@@ -1282,11 +1282,11 @@ void P_GiveInitialBenefits(player_t *p, const MapObjectDefinition *info)
 
         int pw_index;
 
-        P_AddWeapon(p, w, &pw_index);
+        AddWeapon(p, w, &pw_index);
     }
 
     // refresh to remove all stuff from status bar
-    P_UpdateAvailWeapons(p);
+    UpdateAvailWeapons(p);
 }
 
 //--- editor settings ---

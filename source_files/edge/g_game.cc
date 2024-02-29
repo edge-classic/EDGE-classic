@@ -1132,7 +1132,7 @@ static void InitNew(NewGameParameters &params)
 {
     // --- create players ---
 
-    P_DestroyAllPlayers();
+    DestroyAllPlayers();
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
@@ -1213,7 +1213,7 @@ static void GameDoEndGame(void)
 {
     E_ForceWipe();
 
-    P_DestroyAllPlayers();
+    DestroyAllPlayers();
 
     SV_ClearSlot("current");
 

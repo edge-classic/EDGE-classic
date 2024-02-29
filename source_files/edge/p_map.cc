@@ -494,8 +494,8 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
     // -AJA- for players, disable stepping up onto a lowering sector
     if (tm_I.mover->player_ && !AlmostEquals(ld->frontsector->f_h, ld->backsector->f_h))
     {
-        if ((tm_I.mover->z < ld->frontsector->f_h && P_SectorIsLowering(ld->frontsector)) ||
-            (tm_I.mover->z < ld->backsector->f_h && P_SectorIsLowering(ld->backsector)))
+        if ((tm_I.mover->z < ld->frontsector->f_h && SectorIsLowering(ld->frontsector)) ||
+            (tm_I.mover->z < ld->backsector->f_h && SectorIsLowering(ld->backsector)))
         {
             blockline = ld;
             return false;
@@ -760,7 +760,7 @@ static bool PIT_CheckRelLine(line_t *ld, void *data)
     // be multiple gaps and we must choose one here, based on the thing's
     // current position (esp. Z).
 
-    int i = P_FindThingGap(ld->gaps, ld->gap_num, tm_I.z, tm_I.z + tm_I.mover->height_);
+    int i = FindThingGap(ld->gaps, ld->gap_num, tm_I.z, tm_I.z + tm_I.mover->height_);
 
     // gap has been chosen. apply it.
 
@@ -1145,9 +1145,9 @@ bool P_TryMove(MapObject *thing, float x, float y)
                     if (side != oldside)
                     {
                         if (thing->flags_ & kMapObjectFlagMissile)
-                            P_ShootSpecialLine(ld, oldside, thing->source_);
+                            ShootSpecialLine(ld, oldside, thing->source_);
                         else
-                            P_CrossSpecialLine(ld, oldside, thing);
+                            CrossSpecialLine(ld, oldside, thing);
                     }
                 }
             }
@@ -2018,7 +2018,7 @@ static bool PTR_ShootTraverse(PathIntercept *in, void *dataptr)
         int     sidenum = PointOnLineSide(trace.x, trace.y, ld);
         side_t *side    = ld->side[sidenum];
 
-        // P_ShootSpecialLine()->P_ActivateSpecialLine() can remove
+        // ShootSpecialLine()->P_ActivateSpecialLine() can remove
         //  the special so we need to get the info before calling it
         const LineType *tempspecial = ld->special;
 
@@ -2056,7 +2056,7 @@ static bool PTR_ShootTraverse(PathIntercept *in, void *dataptr)
         if (ld->special && (!shoot_I.source || !shoot_I.source->current_attack_ ||
                             !(shoot_I.source->current_attack_->flags_ & kAttackFlagNoTriggerLines)))
         {
-            P_ShootSpecialLine(ld, sidenum, shoot_I.source);
+            ShootSpecialLine(ld, sidenum, shoot_I.source);
         }
 
         // shot doesn't go through a one-sided line, since one sided lines
@@ -2524,7 +2524,7 @@ static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
         return true;
     }
 
-    P_UseSpecialLine(usething, ld, sidenum, use_lower, use_upper);
+    UseSpecialLine(usething, ld, sidenum, use_lower, use_upper);
 
     // can't use more than one special line in a row
     // -AJA- 1999/09/25: ...unless the line has the PASSTHRU flag
@@ -2840,7 +2840,7 @@ bool P_CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh)
     if (is_ceiling && dh < 0 && AlmostEquals(sec->c_h, sec->f_h))
     {
         if (sec->ceil_move)
-            sec->ceil_move->destheight = sec->f_h - dh;
+            sec->ceil_move->destination_height = sec->f_h - dh;
     }
 
     // don't allow a dummy sector to go FUBAR

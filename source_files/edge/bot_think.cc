@@ -1147,7 +1147,7 @@ void DeathBot::ThinkOpenDoor()
 
             // if closing, try to re-open
             const sector_t     *sector = door_seg_->back_sub->sector;
-            const plane_move_t *pm     = sector->ceil_move;
+            const PlaneMover *pm     = sector->ceil_move;
 
             if (pm != nullptr && pm->direction < 0)
             {
@@ -1213,7 +1213,7 @@ void DeathBot::ThinkUseLift()
 
             // if lift is raising, try to re-lower
             const sector_t     *sector = lift_seg_->back_sub->sector;
-            const plane_move_t *pm     = sector->floor_move;
+            const PlaneMover *pm     = sector->floor_move;
 
             if (pm != nullptr && pm->direction > 0)
             {

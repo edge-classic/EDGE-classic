@@ -105,7 +105,7 @@ void P_ActActivateLineType(MapObject *mo)
 
     // Note the `nullptr' here: this prevents the activation from failing
     // because the object isn't a PLAYER, for example.
-    P_RemoteActivation(nullptr, values[0], values[1], 0, kLineTriggerAny);
+    RemoteActivation(nullptr, values[0], values[1], 0, kLineTriggerAny);
 }
 
 //
@@ -3197,7 +3197,7 @@ void P_ActStandardMeander(MapObject *object)
 
     // move within supporting distance of player
     if (--object->move_count_ < 0 || !P_Move(object, false))
-        P_NewChaseDir(object);
+        NewChaseDir(object);
 
     // turn towards movement direction if not there yet
     if (object->move_direction_ < 8)
@@ -3223,7 +3223,7 @@ void P_ActPlayerSupportMeander(MapObject *object)
 
     // move within supporting distance of player
     if (--object->move_count_ < 0 || !P_Move(object, false))
-        P_NewChaseDir(object);
+        NewChaseDir(object);
 
     // turn towards movement direction if not there yet
     if (object->move_direction_ < 8)
@@ -3312,7 +3312,7 @@ void P_ActStandardChase(MapObject *object)
 
         // -KM- 1998/12/16 Nightmare mode set the fast parm.
         if (!level_flags.fastparm)
-            P_NewChaseDir(object);
+            NewChaseDir(object);
 
         return;
     }
@@ -3356,7 +3356,7 @@ void P_ActStandardChase(MapObject *object)
 
     // chase towards player
     if (--object->move_count_ < 0 || !P_Move(object, false))
-        P_NewChaseDir(object);
+        NewChaseDir(object);
 
     // make active sound
     if (object->info_->activesound_ && RandomByte() < 3)
@@ -3452,7 +3452,7 @@ void P_ActKeenDie(MapObject *mo)
 
     LogDebug("P_ActKeenDie: ALL DEAD, activating...\n");
 
-    P_RemoteActivation(nullptr, 2 /* door type */, 666 /* tag */, 0, kLineTriggerAny);
+    RemoteActivation(nullptr, 2 /* door type */, 666 /* tag */, 0, kLineTriggerAny);
 }
 
 void P_ActCheckMoving(MapObject *mo)

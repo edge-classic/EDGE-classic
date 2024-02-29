@@ -48,11 +48,11 @@
 
 extern ConsoleVariable double_framerate;
 
-std::vector<force_t *> active_forces;
+std::vector<Force *> active_forces;
 
-static force_t *tm_force; // for PIT_PushThing
+static Force *tm_force; // for PIT_PushThing
 
-static void WindCurrentForce(force_t *f, MapObject *mo)
+static void WindCurrentForce(Force *f, MapObject *mo)
 {
     float z1 = mo->z;
     float z2 = z1 + mo->height_;
@@ -81,8 +81,8 @@ static void WindCurrentForce(force_t *f, MapObject *mo)
             qty = 1.0f;
     }
 
-    mo->momentum_.X += qty * f->mag.X;
-    mo->momentum_.Y += qty * f->mag.Y;
+    mo->momentum_.X += qty * f->direction.X;
+    mo->momentum_.Y += qty * f->direction.Y;
 }
 
 static bool PIT_PushThing(MapObject *mo, void *dataptr)
@@ -126,7 +126,7 @@ static bool PIT_PushThing(MapObject *mo, void *dataptr)
 //
 // GENERALISED FORCE
 //
-static void DoForce(force_t *f)
+static void DoForce(Force *f)
 {
     sector_t *sec = f->sector;
 
@@ -153,9 +153,9 @@ static void DoForce(force_t *f)
     }
 }
 
-void P_DestroyAllForces(void)
+void DestroyAllForces(void)
 {
-    std::vector<force_t *>::iterator FI;
+    std::vector<Force *>::iterator FI;
 
     for (FI = active_forces.begin(); FI != active_forces.end(); FI++)
         delete (*FI);
@@ -166,24 +166,24 @@ void P_DestroyAllForces(void)
 //
 // Allocate and link in the force.
 //
-static force_t *P_NewForce(void)
+static Force *NewForce(void)
 {
-    force_t *f = new force_t;
+    Force *f = new Force;
 
-    Z_Clear(f, force_t, 1);
+    Z_Clear(f, Force, 1);
 
     active_forces.push_back(f);
     return f;
 }
 
-void P_AddPointForce(sector_t *sec, float length)
+void AddPointForce(sector_t *sec, float length)
 {
     // search for the point objects
     for (subsector_t *sub = sec->subsectors; sub; sub = sub->sec_next)
         for (MapObject *mo = sub->thinglist; mo; mo = mo->subsector_next_)
             if (mo->hyper_flags_ & kHyperFlagPointForce)
             {
-                force_t *f = P_NewForce();
+                Force *f = NewForce();
 
                 f->is_point  = true;
                 f->point.X   = mo->x;
@@ -195,30 +195,30 @@ void P_AddPointForce(sector_t *sec, float length)
             }
 }
 
-void P_AddSectorForce(sector_t *sec, bool is_wind, float x_mag, float y_mag)
+void AddSectorForce(sector_t *sec, bool is_wind, float x_mag, float y_mag)
 {
-    force_t *f = P_NewForce();
+    Force *f = NewForce();
 
     f->is_point = false;
     f->is_wind  = is_wind;
 
-    f->mag.X  = x_mag / PUSH_FACTOR;
-    f->mag.Y  = y_mag / PUSH_FACTOR;
+    f->direction.X  = x_mag / PUSH_FACTOR;
+    f->direction.Y  = y_mag / PUSH_FACTOR;
     f->sector = sec;
 }
 
 //
-// P_RunForces
+// RunForces
 //
 // Executes all force effects for the current tic.
 //
-void P_RunForces(bool extra_tic)
+void RunForces(bool extra_tic)
 {
     // TODO: review what needs updating here for 70 Hz
     if (extra_tic && double_framerate.d_)
         return;
 
-    std::vector<force_t *>::iterator FI;
+    std::vector<Force *>::iterator FI;
 
     for (FI = active_forces.begin(); FI != active_forces.end(); FI++)
     {

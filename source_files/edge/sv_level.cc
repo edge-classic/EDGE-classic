@@ -424,7 +424,7 @@ void SV_SideFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-extern std::vector<slider_move_t *> active_sliders;
+extern std::vector<SlidingDoorMover *> active_sliders;
 
 int SV_LineCountElems(void)
 {
@@ -478,7 +478,7 @@ void SV_LineFinaliseElems(void)
                    s1->bottom.net_scroll.Y || s1->top.old_scroll.X || s1->top.old_scroll.Y || s1->middle.old_scroll.X ||
                    s1->middle.old_scroll.Y || s1->bottom.old_scroll.X || s1->bottom.old_scroll.Y))
         {
-            P_AddSpecialLine(ld);
+            AddSpecialLine(ld);
         }
 
         if (s2 && (s2->top.scroll.X || s2->top.scroll.Y || s2->middle.scroll.X || s2->middle.scroll.Y ||
@@ -487,12 +487,12 @@ void SV_LineFinaliseElems(void)
                    s2->bottom.net_scroll.Y || s2->top.old_scroll.X || s2->top.old_scroll.Y || s2->middle.old_scroll.X ||
                    s2->middle.old_scroll.Y || s2->bottom.old_scroll.X || s2->bottom.old_scroll.Y))
         {
-            P_AddSpecialLine(ld);
+            AddSpecialLine(ld);
         }
     }
 
     // scan active parts, regenerate slider_move field
-    std::vector<slider_move_t *>::iterator SMI;
+    std::vector<SlidingDoorMover *>::iterator SMI;
 
     for (SMI = active_sliders.begin(); SMI != active_sliders.end(); SMI++)
     {
@@ -563,7 +563,7 @@ void SV_ExfloorFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-extern std::vector<plane_move_t *> active_planes;
+extern std::vector<PlaneMover *> active_planes;
 
 int SV_SectorCountElems(void)
 {
@@ -614,37 +614,37 @@ void SV_SectorFinaliseElems(void)
             sec->floor.net_scroll.X || sec->floor.net_scroll.Y || sec->ceil.net_scroll.X || sec->ceil.net_scroll.Y ||
             sec->floor.old_scroll.X || sec->floor.old_scroll.Y || sec->ceil.old_scroll.X || sec->ceil.old_scroll.Y)
         {
-            P_AddSpecialSector(sec);
+            AddSpecialSector(sec);
         }
     }
 
-    extern std::vector<lineanim_t> lineanims;
+    extern std::vector<lineanim_t> line_animations;
 
-    for (size_t i = 0; i < lineanims.size(); i++)
+    for (size_t i = 0; i < line_animations.size(); i++)
     {
-        if (lineanims[i].scroll_sec_ref)
+        if (line_animations[i].scroll_sec_ref)
         {
-            lineanims[i].scroll_sec_ref->ceil_move  = nullptr;
-            lineanims[i].scroll_sec_ref->floor_move = nullptr;
+            line_animations[i].scroll_sec_ref->ceil_move  = nullptr;
+            line_animations[i].scroll_sec_ref->floor_move = nullptr;
         }
     }
 
-    extern std::vector<lightanim_t> lightanims;
+    extern std::vector<lightanim_t> light_animations;
 
-    for (size_t i = 0; i < lightanims.size(); i++)
+    for (size_t i = 0; i < light_animations.size(); i++)
     {
-        if (lightanims[i].light_sec_ref)
+        if (light_animations[i].light_sec_ref)
         {
-            lightanims[i].light_sec_ref->ceil_move = nullptr;
+            light_animations[i].light_sec_ref->ceil_move = nullptr;
         }
     }
 
     // scan active parts, regenerate floor_move and ceil_move
-    std::vector<plane_move_t *>::iterator PMI;
+    std::vector<PlaneMover *>::iterator PMI;
 
     for (PMI = active_planes.begin(); PMI != active_planes.end(); PMI++)
     {
-        plane_move_t *pmov = *PMI;
+        PlaneMover *pmov = *PMI;
 
         SYS_ASSERT(pmov->sector);
 

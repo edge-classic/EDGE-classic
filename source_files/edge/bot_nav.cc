@@ -38,7 +38,7 @@
 #include "r_state.h"
 #include "thing.h"
 
-extern MapObject *P_FindTeleportMan(int tag, const MapObjectDefinition *info);
+extern MapObject *FindTeleportMan(int tag, const MapObjectDefinition *info);
 extern line_t *p_FindTeleportLine(int tag, line_t *original);
 
 class big_item_c
@@ -332,7 +332,7 @@ static int BotNavigateCheckTeleporter(const seg_t *seg)
     // find the destination thing...
     if (spec->t_.outspawnobj_ == nullptr) return -1;
 
-    const MapObject *dest = P_FindTeleportMan(ld->tag, spec->t_.outspawnobj_);
+    const MapObject *dest = FindTeleportMan(ld->tag, spec->t_.outspawnobj_);
     if (dest == nullptr) return -1;
 
     return (int)(dest->subsector_ - level_subsectors);

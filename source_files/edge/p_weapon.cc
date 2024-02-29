@@ -767,7 +767,7 @@ bool P_TryFillNewWeapon(player_t *p, int idx, AmmunitionType ammo, int *qty)
         if (!info->attack_state_[ATK])
             continue;
 
-        // note: NoAmmo+Clip weapons are handled in P_AddWeapon
+        // note: NoAmmo+Clip weapons are handled in AddWeapon
         if (info->ammo_[ATK] == kAmmunitionTypeNoAmmo || info->clip_size_[ATK] == 0)
             continue;
 
@@ -1949,7 +1949,7 @@ void A_WeaponBecome(MapObject *mo)
 
     P_FixWeaponClip(p, p->ready_wp); // handle the potential clip_size difference
 
-    P_UpdateAvailWeapons(p);
+    UpdateAvailWeapons(p);
 
     // P_SetPspriteDeferred(p,ps_weapon,p->weapons[p->ready_wp].info->ready_state);
 }

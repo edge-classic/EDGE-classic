@@ -34,8 +34,6 @@
 //
 //----------------------------------------------------------------------------
 
-
-
 #include <vector>
 
 #include "dm_defs.h"
@@ -44,13 +42,13 @@
 #include "p_local.h"
 #include "r_state.h"
 
-#define PUSH_FACTOR 64.0f // should be 128 ??
+constexpr float kPushFactor = 64.0f;  // should be 128 ?? (why? - Dasho)
 
 extern ConsoleVariable double_framerate;
 
 std::vector<Force *> active_forces;
 
-static Force *tm_force; // for PIT_PushThing
+static Force *current_force;  // for PushThingCallback
 
 static void WindCurrentForce(Force *f, MapObject *mo)
 {
@@ -66,44 +64,38 @@ static void WindCurrentForce(Force *f, MapObject *mo)
 
     if (f->is_wind)
     {
-        if (ef && z2 < ef->bottom_h)
-            return;
+        if (ef && z2 < ef->bottom_h) return;
 
-        if (z1 > (ef ? ef->bottom_h : sec->f_h) + 2.0f)
-            qty = 1.0f;
+        if (z1 > (ef ? ef->bottom_h : sec->f_h) + 2.0f) qty = 1.0f;
     }
-    else // Current
+    else  // Current
     {
-        if (z1 > (ef ? ef->bottom_h : sec->f_h) + 2.0f)
-            return;
+        if (z1 > (ef ? ef->bottom_h : sec->f_h) + 2.0f) return;
 
-        if (z2 < (ef ? ef->bottom_h : sec->c_h))
-            qty = 1.0f;
+        if (z2 < (ef ? ef->bottom_h : sec->c_h)) qty = 1.0f;
     }
 
     mo->momentum_.X += qty * f->direction.X;
     mo->momentum_.Y += qty * f->direction.Y;
 }
 
-static bool PIT_PushThing(MapObject *mo, void *dataptr)
+static bool PushThingCallback(MapObject *mo, void *dataptr)
 {
-    if (!(mo->hyper_flags_ & kHyperFlagPushable))
-        return true;
+    if (!(mo->hyper_flags_ & kHyperFlagPushable)) return true;
 
-    if (mo->flags_ & kMapObjectFlagNoClip)
-        return true;
+    if (mo->flags_ & kMapObjectFlagNoClip) return true;
 
-    float dx = mo->x - tm_force->point.X;
-    float dy = mo->y - tm_force->point.Y;
+    float dx = mo->x - current_force->point.X;
+    float dy = mo->y - current_force->point.Y;
 
-    float d_unit = P_ApproxDistance(dx, dy);
-    float dist   = d_unit * 2.0f / tm_force->radius;
+    float d_unit = ApproximateDistance(dx, dy);
+    float dist   = d_unit * 2.0f / current_force->radius;
 
-    if (dist >= 2.0f)
-        return true;
+    if (dist >= 2.0f) return true;
 
     // don't apply the force through walls
-    if (!P_CheckSightToPoint(mo, tm_force->point.X, tm_force->point.Y, tm_force->point.Z))
+    if (!CheckSightToPoint(mo, current_force->point.X, current_force->point.Y,
+                           current_force->point.Z))
         return true;
 
     float speed;
@@ -115,7 +107,7 @@ static bool PIT_PushThing(MapObject *mo, void *dataptr)
 
     // the speed factor is squared, giving similar results to BOOM.
     // NOTE: magnitude is negative for PULL mode.
-    speed = tm_force->magnitude * speed * speed;
+    speed = current_force->magnitude * speed * speed;
 
     mo->momentum_.X += speed * (dx / d_unit);
     mo->momentum_.Y += speed * (dy / d_unit);
@@ -134,15 +126,16 @@ static void DoForce(Force *f)
     {
         if (f->is_point)
         {
-            tm_force = f;
+            current_force = f;
 
             float x = f->point.X;
             float y = f->point.Y;
             float r = f->radius;
 
-            BlockmapThingIterator(x - r, y - r, x + r, y + r, PIT_PushThing);
+            BlockmapThingIterator(x - r, y - r, x + r, y + r,
+                                  PushThingCallback);
         }
-        else // wind/current
+        else  // wind/current
         {
             touch_node_t *nd;
 
@@ -190,7 +183,7 @@ void AddPointForce(sector_t *sec, float length)
                 f->point.Y   = mo->y;
                 f->point.Z   = mo->z + 28.0f;
                 f->radius    = length * 2.0f;
-                f->magnitude = length * mo->info_->speed_ / PUSH_FACTOR / 24.0f;
+                f->magnitude = length * mo->info_->speed_ / kPushFactor / 24.0f;
                 f->sector    = sec;
             }
 }
@@ -202,9 +195,9 @@ void AddSectorForce(sector_t *sec, bool is_wind, float x_mag, float y_mag)
     f->is_point = false;
     f->is_wind  = is_wind;
 
-    f->direction.X  = x_mag / PUSH_FACTOR;
-    f->direction.Y  = y_mag / PUSH_FACTOR;
-    f->sector = sec;
+    f->direction.X = x_mag / kPushFactor;
+    f->direction.Y = y_mag / kPushFactor;
+    f->sector      = sec;
 }
 
 //
@@ -215,8 +208,7 @@ void AddSectorForce(sector_t *sec, bool is_wind, float x_mag, float y_mag)
 void RunForces(bool extra_tic)
 {
     // TODO: review what needs updating here for 70 Hz
-    if (extra_tic && double_framerate.d_)
-        return;
+    if (extra_tic && double_framerate.d_) return;
 
     std::vector<Force *>::iterator FI;
 

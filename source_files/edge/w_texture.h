@@ -48,7 +48,7 @@ void                W_DoneWithTexture(const cached_tex_t *t);
 
 void W_PreCacheTextureNum(int texnum);
 
-// Called by P_Ticker for switches and animations,
+// Called by MapObjectTicker for switches and animations,
 // returns the texture number for the texture name.
 int W_TextureNumForName(const char *name);
 int W_CheckTextureNumForName(const char *name);

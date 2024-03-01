@@ -69,7 +69,7 @@ void PrintDebugOrError(const char *error, ...);
 #endif
 
 extern bool save_screenshot_valid;
-extern bool var_obituaries;
+extern bool show_obituaries;
 extern int  var_midi_player;
 extern int  var_sound_stereo;
 extern int  var_mix_channels;

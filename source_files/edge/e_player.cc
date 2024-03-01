@@ -250,7 +250,7 @@ static bool GameCheckSpot(player_t *player, const SpawnPoint *point)
         return true;  // OK
     }
 
-    if (!P_CheckAbsPosition(player->mo, x, y, z)) return false;
+    if (!CheckAbsolutePosition(player->mo, x, y, z)) return false;
 
     GameAddBodyToQueue(player->mo);
 
@@ -375,7 +375,7 @@ static void P_SpawnPlayer(player_t *p, const SpawnPoint *point, bool is_hub)
     p->actiondown[0] = p->actiondown[1] = false;
 
     // setup gun psprite
-    if (!is_hub || !SP_MATCH()) P_SetupPsprites(p);
+    if (!is_hub || !SP_MATCH()) SetupPlayerSprites(p);
 
     // give all cards in death match mode
     if (DEATHMATCH()) p->cards = kDoorKeyBitmask;
@@ -392,7 +392,7 @@ static void P_SpawnPlayer(player_t *p, const SpawnPoint *point, bool is_hub)
     vanilla/Boom compat, so I'm commenting this out. I had to do this previously
     for voodoo dolls because it would break certain maps. */
 
-    // P_TeleportMove(mobj, mobj->x, mobj->y, mobj->z);
+    // TeleportMove(mobj, mobj->x, mobj->y, mobj->z);
 
     if (COOP_MATCH() && !level_flags.team_damage)
         mobj->hyper_flags_ |= kHyperFlagFriendlyFireImmune;
@@ -619,7 +619,7 @@ bool GameCheckConditions(MapObject *mo, ConditionCheck *cond)
 
                 temp = false;
 
-                for (int i = 0; i < MAXWEAPONS; i++)
+                for (int i = 0; i < kMaximumWeapons; i++)
                 {
                     if (p->weapons[i].owned &&
                         p->weapons[i].info == cond->sub.weap)

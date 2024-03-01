@@ -67,7 +67,7 @@ struct PathIntercept
     float along;  // along trace line
     // one of these will be nullptr
     MapObject *thing;
-    line_t *line;
+    line_t    *line;
 };
 
 extern divline_t trace;

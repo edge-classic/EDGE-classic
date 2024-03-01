@@ -424,11 +424,11 @@ static int PL_has_weapon(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
 
-    for (int j = 0; j < MAXWEAPONS; j++)
+    for (int j = 0; j < kMaximumWeapons; j++)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[j];
+        PlayerWeapon *pw = &ui_player_who->weapons[j];
 
-        if (pw->owned && !(pw->flags & PLWEP_Removing) && DDF_CompareName(name, pw->info->name_.c_str()) == 0)
+        if (pw->owned && !(pw->flags & kPlayerWeaponRemoving) && DDF_CompareName(name, pw->info->name_.c_str()) == 0)
         {
             lua_pushboolean(L, 1);
             return 1;
@@ -461,9 +461,9 @@ static int PL_cur_weapon(lua_State *L)
     return 1;
 }
 
-static void LUA_SetPsprite(player_t *p, int position, int stnum, WeaponDefinition *info = nullptr)
+static void LUA_SetPlayerSprite(player_t *p, int position, int stnum, WeaponDefinition *info = nullptr)
 {
-    pspdef_t *psp = &p->psprites[position];
+    PlayerSprite *psp = &p->psprites[position];
 
     if (stnum == 0)
     {
@@ -509,18 +509,18 @@ static void LUA_SetPsprite(player_t *p, int position, int stnum, WeaponDefinitio
 }
 
 //
-// P_SetPspriteDeferred
+// SetPlayerSpriteDeferred
 //
 // -AJA- 2004/11/05: This is preferred method, doesn't run any actions,
-//       which (ideally) should only happen during P_MovePsprites().
+//       which (ideally) should only happen during MovePlayerSprites().
 //
-static void LUA_SetPspriteDeferred(player_t *p, int position, int stnum)
+static void LUA_SetPlayerSpriteDeferred(player_t *p, int position, int stnum)
 {
-    pspdef_t *psp = &p->psprites[position];
+    PlayerSprite *psp = &p->psprites[position];
 
     if (stnum == 0 || psp->state == nullptr)
     {
-        LUA_SetPsprite(p, position, stnum);
+        LUA_SetPlayerSprite(p, position, stnum);
         return;
     }
 
@@ -557,7 +557,7 @@ static int PL_weapon_state(lua_State *L)
     int pw_index;
 
     // see if player owns this kind of weapon
-    for (pw_index = 0; pw_index < MAXWEAPONS; pw_index++)
+    for (pw_index = 0; pw_index < kMaximumWeapons; pw_index++)
     {
         if (!ui_player_who->weapons[pw_index].owned)
             continue;
@@ -566,7 +566,7 @@ static int PL_weapon_state(lua_State *L)
             break;
     }
 
-    if (pw_index == MAXWEAPONS) // we dont have the weapon
+    if (pw_index == kMaximumWeapons) // we dont have the weapon
     {
         lua_pushboolean(L, 0);
         return 1;
@@ -579,7 +579,7 @@ static int PL_weapon_state(lua_State *L)
         FatalError("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;
 
-    LUA_SetPspriteDeferred(ui_player_who, ps_weapon, state); // refresh the sprite
+    LUA_SetPlayerSpriteDeferred(ui_player_who, kPlayerSpriteWeapon, state); // refresh the sprite
 
     lua_pushboolean(L, 1);
     return 1;
@@ -706,7 +706,7 @@ static int PL_main_ammo(lua_State *L)
 
     if (ui_player_who->ready_wp >= 0)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
+        PlayerWeapon *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
         if (pw->info->ammo_[0] != kAmmunitionTypeNoAmmo)
         {
@@ -745,7 +745,7 @@ static int PL_ammo_type(lua_State *L)
 
     if (ui_player_who->ready_wp >= 0)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
+        PlayerWeapon *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
         value = 1 + (int)pw->info->ammo_[ATK];
     }
@@ -769,7 +769,7 @@ static int PL_ammo_pershot(lua_State *L)
 
     if (ui_player_who->ready_wp >= 0)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
+        PlayerWeapon *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
         value = pw->info->ammopershot_[ATK];
     }
@@ -793,7 +793,7 @@ static int PL_clip_ammo(lua_State *L)
 
     if (ui_player_who->ready_wp >= 0)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
+        PlayerWeapon *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
         value = pw->clip_size[ATK];
     }
@@ -817,7 +817,7 @@ static int PL_clip_size(lua_State *L)
 
     if (ui_player_who->ready_wp >= 0)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
+        PlayerWeapon *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
         value = pw->info->clip_size_[ATK];
     }
@@ -834,7 +834,7 @@ static int PL_clip_is_shared(lua_State *L)
 
     if (ui_player_who->ready_wp >= 0)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
+        PlayerWeapon *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
         if (pw->info->shared_clip_)
             value = 1;

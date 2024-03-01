@@ -689,7 +689,7 @@ void E_Display(void)
     {
         SYS_ASSERT(single_tics);
 
-        if (leveltime % screenshot_rate == 0)
+        if (level_time_elapsed % screenshot_rate == 0)
             TakeScreenshot(false);
     }
 
@@ -1973,7 +1973,7 @@ static void E_Startup(void)
     MenuInitialize();
     R_Init();
     PlayerStateInit();
-    P_MapInit();
+    MapInitialize();
     InitializeSwitchList();
     W_InitPicAnims();
     S_Init();

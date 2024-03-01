@@ -122,7 +122,7 @@ extern ConsoleVariable r_crosssize;
 extern ConsoleVariable s_genmidi;
 extern ConsoleVariable midi_soundfont;
 extern ConsoleVariable r_overlay;
-extern ConsoleVariable g_erraticism;
+extern ConsoleVariable erraticism;
 extern ConsoleVariable double_framerate;
 extern ConsoleVariable r_culling;
 extern ConsoleVariable r_culldist;
@@ -130,8 +130,8 @@ extern ConsoleVariable r_cullfog;
 extern ConsoleVariable distance_cull_thinkers;
 extern ConsoleVariable max_dynamic_lights;
 extern ConsoleVariable vsync;
-extern ConsoleVariable g_bobbing;
-extern ConsoleVariable g_gore;
+extern ConsoleVariable view_bobbing;
+extern ConsoleVariable gore_level;
 
 // extern console_variable_c automap_keydoor_text;
 
@@ -687,11 +687,11 @@ static OptionMenuItem playoptions[] = {
     {kOptionMenuItemTypeBoolean, "Weapon Auto-Switch", YesNo, 2,
      &global_flags.weapon_switch, OptionMenuChangeWeaponSwitch, nullptr},
 
-    {kOptionMenuItemTypeBoolean, "Obituary Messages", YesNo, 2, &var_obituaries,
+    {kOptionMenuItemTypeBoolean, "Obituary Messages", YesNo, 2, &show_obituaries,
      nullptr, nullptr},
 
     {kOptionMenuItemTypeSwitch, "Blood Level", "Normal/Extra/None", 3,
-     &g_gore.d_, OptionMenuUpdateConsoleVariableFromInt, "Blood", &g_gore},
+     &gore_level.d_, OptionMenuUpdateConsoleVariableFromInt, "Blood", &gore_level},
 
     {kOptionMenuItemTypeBoolean, "Extras", YesNo, 2, &global_flags.have_extra,
      OptionMenuChangeExtra, nullptr},
@@ -702,9 +702,9 @@ static OptionMenuItem playoptions[] = {
     {kOptionMenuItemTypeBoolean, "Shoot-thru Scenery", YesNo, 2,
      &global_flags.pass_missile, OptionMenuChangePassMissile, nullptr},
 
-    {kOptionMenuItemTypeBoolean, "Erraticism", YesNo, 2, &g_erraticism.d_,
+    {kOptionMenuItemTypeBoolean, "Erraticism", YesNo, 2, &erraticism.d_,
      OptionMenuUpdateConsoleVariableFromInt,
-     "Time only advances when you move or fire", &g_erraticism},
+     "Time only advances when you move or fire", &erraticism},
 
     {kOptionMenuItemTypeSlider, "Gravity", nullptr, 0, &gravity_factor.f_,
      OptionMenuUpdateConsoleVariableFromFloat, "Gravity", &gravity_factor, 0.10f,
@@ -775,7 +775,7 @@ static OptionMenuDefinition perf_optmenu = {
 //
 static OptionMenuItem accessibilityoptions[] = {
     {kOptionMenuItemTypeSwitch, "View Bobbing",
-     "Full/Head Only/Weapon Only/None", 4, &g_bobbing.d_,
+     "Full/Head Only/Weapon Only/None", 4, &view_bobbing.d_,
      OptionMenuChangeBobbing, "May help with motion sickness"},
     {kOptionMenuItemTypeSwitch, "Reduce Flashing", YesNo, 2, &reduce_flash,
      nullptr, "May help with epilepsy or photosensitivity"},
@@ -2247,16 +2247,16 @@ static void OptionMenuChangeMipMap(int              key_pressed,
 static void OptionMenuChangeBobbing(int              key_pressed,
                                     ConsoleVariable *console_variable)
 {
-    g_bobbing        = g_bobbing.d_;
+    view_bobbing        = view_bobbing.d_;
     player_t *player = players[consoleplayer];
     if (player)
     {
         player->bob   = 0;
-        pspdef_t *psp = &player->psprites[player->action_psp];
+        PlayerSprite *psp = &player->psprites[player->action_psp];
         if (psp)
         {
-            psp->sx = 0;
-            psp->sy = 0;
+            psp->screen_x = 0;
+            psp->screen_y = 0;
         }
     }
 }

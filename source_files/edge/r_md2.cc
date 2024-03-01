@@ -47,7 +47,7 @@
 #include <stddef.h>
 #include <vector>
 
-extern float P_ApproxDistance(float dx, float dy, float dz);
+extern float ApproximateDistance(float dx, float dy, float dz);
 
 extern ConsoleVariable r_culling;
 extern ConsoleVariable r_cullfog;
@@ -1079,7 +1079,7 @@ void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, i
 
         if (!data.is_weapon && !viewiszoomed)
         {
-            float dist = P_ApproxDistance(mo->x - viewx, mo->y - viewy, mo->z - viewz);
+            float dist = ApproximateDistance(mo->x - viewx, mo->y - viewy, mo->z - viewz);
 
             data.fuzz_mul = 70.0 / HMM_Clamp(35, dist, 700);
         }

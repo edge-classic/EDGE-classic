@@ -143,7 +143,7 @@ static ConfigurationDefault defaults[] = {
 
     // -------------------- VARS --------------------
 
-    {kConfigBoolean, "var_obituaries", &var_obituaries, 1},
+    {kConfigBoolean, "show_obituaries", &show_obituaries, 1},
     {kConfigBoolean, "var_cache_sfx", &var_cache_sfx, 1},
 
     // -------------------- KEYS --------------------

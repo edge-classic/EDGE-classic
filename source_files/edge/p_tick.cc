@@ -29,9 +29,9 @@
 //
 // -ES- 2000/02/14: Removed thinker system.
 
-
 #include "p_tick.h"
 
+#include "AlmostEquals.h"
 #include "dm_state.h"
 #include "g_game.h"
 #include "n_network.h"
@@ -39,34 +39,32 @@
 #include "p_spec.h"
 #include "rad_trig.h"
 
-#include "AlmostEquals.h"
-
-int leveltime;
+int level_time_elapsed;
 
 bool fast_forward_active;
 
 bool erraticism_active = false;
 
-extern ConsoleVariable g_erraticism;
+extern ConsoleVariable erraticism;
 extern ConsoleVariable double_framerate;
 
 //
-// P_Ticker
+// MapObjectTicker
 //
-void P_Ticker(bool extra_tic)
+void MapObjectTicker(bool extra_tic)
 {
-    if (paused)
-        return;
+    if (paused) return;
 
     // pause if in menu and at least one tic has been run
-    if (!network_game && (menu_active || rts_menu_active) && !AlmostEquals(players[consoleplayer]->viewz, kFloatUnused))
+    if (!network_game && (menu_active || rts_menu_active) &&
+        !AlmostEquals(players[consoleplayer]->viewz, kFloatUnused))
     {
         return;
     }
 
     erraticism_active = false;
 
-    if (g_erraticism.d_)
+    if (erraticism.d_)
     {
         bool keep_thinking = P_PlayerThink(players[consoleplayer], extra_tic);
 
@@ -85,42 +83,37 @@ void P_Ticker(bool extra_tic)
     else
     {
         for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
-            if (players[pnum])
-                P_PlayerThink(players[pnum], extra_tic);
+            if (players[pnum]) P_PlayerThink(players[pnum], extra_tic);
     }
 
-    if (!extra_tic || !double_framerate.d_)
-        RAD_RunTriggers();
+    if (!extra_tic || !double_framerate.d_) RAD_RunTriggers();
 
     RunForces(extra_tic);
     RunMobjThinkers(extra_tic);
 
-    if (!extra_tic || !double_framerate.d_)
-        RunLights();
+    if (!extra_tic || !double_framerate.d_) RunLights();
 
     RunActivePlanes();
     RunActiveSliders();
 
-    if (!extra_tic || !double_framerate.d_)
-        RunAmbientSounds();
+    if (!extra_tic || !double_framerate.d_) RunAmbientSounds();
 
     UpdateSpecials(extra_tic);
 
-    if (extra_tic && double_framerate.d_)
-        return;
+    if (extra_tic && double_framerate.d_) return;
 
     P_MobjItemRespawn();
 
     // for par times
-    leveltime++;
+    level_time_elapsed++;
 
-    if (leveltime >= exit_time && game_action == kGameActionNothing)
+    if (level_time_elapsed >= exit_time && game_action == kGameActionNothing)
     {
         game_action = kGameActionIntermission;
     }
 }
 
-void P_HubFastForward(void)
+void HubFastForward(void)
 {
     fast_forward_active = true;
 
@@ -131,8 +124,7 @@ void P_HubFastForward(void)
         RunActiveSliders();
     }
 
-    for (int k = 0; k < kTicRate / 3; k++)
-        P_Ticker(false);
+    for (int k = 0; k < kTicRate / 3; k++) MapObjectTicker(false);
 
     fast_forward_active = false;
 }

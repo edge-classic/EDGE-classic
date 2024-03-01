@@ -536,20 +536,20 @@ static void UnknownThingWarning(int type, float x, float y)
     unknown_thing_map[type] = count + 1;
 }
 
-static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float y,
-                             float z, sector_t *sec, BAMAngle angle,
-                             int options, int tag)
+static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
+                                float y, float z, sector_t *sec, BAMAngle angle,
+                                int options, int tag)
 {
     SpawnPoint point;
 
-    point.x         = x;
-    point.y         = y;
-    point.z         = z;
-    point.angle     = angle;
+    point.x              = x;
+    point.y              = y;
+    point.z              = z;
+    point.angle          = angle;
     point.vertical_angle = 0;
-    point.info      = info;
-    point.flags     = 0;
-    point.tag       = tag;
+    point.info           = info;
+    point.flags          = 0;
+    point.tag            = tag;
 
     // -KM- 1999/01/31 Use playernum property.
     // count deathmatch start positions
@@ -621,7 +621,8 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x, float 
         return nullptr;
 
     // don't spawn any monsters if -nomonsters
-    if (level_flags.nomonsters && (info->extended_flags_ & kExtendedFlagMonster))
+    if (level_flags.nomonsters &&
+        (info->extended_flags_ & kExtendedFlagMonster))
         return nullptr;
 
     // -AJA- 1999/10/07: don't spawn extra things if -noextra.
@@ -2513,13 +2514,13 @@ static void LoadUDMFThings()
             if (udmf_thing)
             {
                 udmf_thing->target_visibility_ = alpha;
-                udmf_thing->alpha_      = alpha;
+                udmf_thing->alpha_             = alpha;
                 if (!AlmostEquals(healthfac, 1.0f))
                 {
                     if (healthfac < 0)
                     {
                         udmf_thing->spawn_health_ = fabs(healthfac);
-                        udmf_thing->health_      = fabs(healthfac);
+                        udmf_thing->health_       = fabs(healthfac);
                     }
                     else
                     {
@@ -3548,7 +3549,7 @@ void LevelSetup(void)
     if (level_active) ShutdownLevel();
 
     // -ACB- 1998/08/27 nullptr the head pointers for the linked lists....
-    respawn_queue_head  = nullptr;
+    respawn_queue_head   = nullptr;
     map_object_list_head = nullptr;
     seen_monsters.clear();
 
@@ -3657,7 +3658,7 @@ void LevelSetup(void)
 
     // compute sector and line gaps
     for (int j = 0; j < total_level_sectors; j++)
-        P_RecomputeGapsAroundSector(level_sectors + j);
+        RecomputeGapsAroundSector(level_sectors + j);
 
     GameClearBodyQueue();
 

@@ -605,9 +605,9 @@ void SV_SectorFinaliseElems(void)
     {
         sector_t *sec = level_sectors + i;
 
-        P_RecomputeGapsAroundSector(sec);
+        RecomputeGapsAroundSector(sec);
         ///---	P_RecomputeTilesInSector(sec);
-        P_FloodExtraFloors(sec);
+        FloodExtraFloors(sec);
 
         // check for animation
         if (sec->floor.scroll.X || sec->floor.scroll.Y || sec->ceil.scroll.X || sec->ceil.scroll.Y ||

@@ -222,7 +222,7 @@ typedef struct player_s
     weapon_selection_e pending_wp;
 
     // -AJA- 1999/08/11: Now uses playerweapon_t.
-    playerweapon_t weapons[MAXWEAPONS];
+    PlayerWeapon weapons[kMaximumWeapons];
 
     // current weapon choice for each key (1..9 and 0)
     weapon_selection_e key_choices[10];
@@ -283,7 +283,7 @@ typedef struct player_s
     int                effect_left; // tics remaining, maxed to EFFECT_MAX_TIME
 
     // Overlay view sprites (gun, etc).
-    pspdef_t psprites[NUMPSPRITES];
+    PlayerSprite psprites[kTotalPlayerSpriteTypes];
 
     // Current PSP for action
     int action_psp;

@@ -1279,7 +1279,7 @@ void W_ReadUMAPINFOLumps(void)
             else
             {
                 LogDebug("Parsing UMAPINFO lump in %s\n", df->name.c_str());
-                Parse_UMAPINFO(W_LoadString(df->wad->umapinfo_lump));
+                ParseUmapinfo(W_LoadString(df->wad->umapinfo_lump));
             }
         }
         else if (df->pack)
@@ -1292,7 +1292,7 @@ void W_ReadUMAPINFOLumps(void)
                 epi::File *uinfo = Pack_FileOpen(df->pack, "UMAPINFO.txt");
                 if (uinfo)
                 {
-                    Parse_UMAPINFO(uinfo->ReadText());
+                    ParseUmapinfo(uinfo->ReadText());
                     delete uinfo;
                 }
                 else

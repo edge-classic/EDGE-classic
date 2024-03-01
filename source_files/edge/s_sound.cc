@@ -35,8 +35,9 @@
 #include "s_cache.h"
 #include "s_blit.h"
 
-#include "p_local.h" // P_ApproxDistance
-#include "p_user.h"  // room_area
+#include "p_local.h" // ApproximateDistance
+
+extern float room_area;
 
 extern void E_ProgressMessage(const char *message);
 
@@ -211,7 +212,7 @@ static int ChannelScore(SoundEffectDefinition *def, int category, Position *pos,
     // for stuff in the level, use the distance
     SYS_ASSERT(pos);
 
-    float dist = boss ? 0 : P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
+    float dist = boss ? 0 : ApproximateDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
 
     int base_score = 999 - (int)(dist / 10.0);
 
@@ -433,7 +434,7 @@ void S_StartFX(SoundEffect *sfx, int category, Position *pos, int flags)
     // ignore very far away sounds
     if (category >= SNCAT_Opponent && !(flags & FX_Boss))
     {
-        float dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
+        float dist = ApproximateDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
 
         if (dist > def->max_distance_)
             return;

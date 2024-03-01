@@ -23,31 +23,29 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __P_PSPR__
-#define __P_PSPR__
+#pragma once
 
 #include "main.h"
 
 // maximum weapons player can hold at once
-#define MAXWEAPONS 64
+static constexpr uint8_t kMaximumWeapons = 64;
 
 //
 // Overlay psprites are scaled shapes
 // drawn directly on the view screen,
 // coordinates are given for a 320*200 view screen.
 //
-typedef enum
+enum PlayerSpriteType
 {
-    ps_weapon = 0,
-    ps_flash,
-    ps_crosshair,
-    ps_NOT_USED,
+    kPlayerSpriteWeapon = 0,
+    kPlayerSpriteFlash,
+    kPlayerSpriteCrosshair,
+    kPlayerSpriteUnused,
+    // -AJA- Savegame code relies on kTotalPlayerSpriteTypes == 4.
+    kTotalPlayerSpriteTypes
+};
 
-    // -AJA- Savegame code relies on NUMPSPRITES == 4.
-    NUMPSPRITES
-} psprnum_t;
-
-typedef struct
+struct PlayerSprite
 {
     // current state.  nullptr state means not active
     const State *state;
@@ -59,22 +57,23 @@ typedef struct
     int tics;
 
     // screen position values (0 is normal)
-    float sx, sy;
+    float screen_x, screen_y;
 
     // translucency values
     float visibility;
-    float vis_target;
-} pspdef_t;
+    float target_visibility;
+};
 
-typedef enum
+enum PlayerWeaponFlag
 {
-    PLWEP_Removing = 0x0001, // weapon is being removed (or upgraded)
-} playerweapon_flags_e;
+    kPlayerWeaponNoFlag   = 0,
+    kPlayerWeaponRemoving = 0x0001,  // weapon is being removed (or upgraded)
+};
 
 //
 // Per-player Weapon Info.
 //
-typedef struct
+struct PlayerWeapon
 {
     WeaponDefinition *info;
 
@@ -82,7 +81,7 @@ typedef struct
     bool owned;
 
     // various flags
-    int flags;
+    PlayerWeaponFlag flags;
 
     // current clip sizes
     int clip_size[4];
@@ -91,9 +90,7 @@ typedef struct
     int reload_count[4];
 
     int model_skin;
-} playerweapon_t;
-
-#endif // __P_PSPR__
+};
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

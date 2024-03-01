@@ -1803,13 +1803,14 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
         player->underwater = true;
 
         if (subtract && player->air_in_lungs <= 0 &&
-            (leveltime % (1 + player->mo->info_->choke_damage_.delay_)) == 0)
+            (level_time_elapsed %
+             (1 + player->mo->info_->choke_damage_.delay_)) == 0)
         {
             DAMAGE_COMPUTE(damage, &player->mo->info_->choke_damage_);
 
             if (damage)
-                P_DamageMobj(player->mo, nullptr, nullptr, damage,
-                             &player->mo->info_->choke_damage_);
+                DamageMapObject(player->mo, nullptr, nullptr, damage,
+                                &player->mo->info_->choke_damage_);
         }
     }
 
@@ -1877,10 +1878,10 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
         bool unless_damage = (special->damage_.damage_unless_ != nullptr);
         bool if_damage     = false;
         if (special->damage_.damage_unless_ &&
-            P_HasBenefitInList(player, special->damage_.damage_unless_))
+            HasBenefitInList(player, special->damage_.damage_unless_))
             unless_damage = false;
         if (special->damage_.damage_if_ &&
-            P_HasBenefitInList(player, special->damage_.damage_if_))
+            HasBenefitInList(player, special->damage_.damage_if_))
             if_damage = true;
         if (!unless_damage && !if_damage && !special->damage_.bypass_all_)
             factor = 0;
@@ -1891,13 +1892,13 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
 
     if (double_framerate.d_ && extra_tic) factor = 0;
 
-    if (factor > 0 && (leveltime % (1 + special->damage_.delay_)) == 0)
+    if (factor > 0 && (level_time_elapsed % (1 + special->damage_.delay_)) == 0)
     {
         DAMAGE_COMPUTE(damage, &special->damage_);
 
         if (damage || special->damage_.instakill_)
-            P_DamageMobj(player->mo, nullptr, nullptr, damage * factor,
-                         &special->damage_);
+            DamageMapObject(player->mo, nullptr, nullptr, damage * factor,
+                            &special->damage_);
     }
 
     if (special->secret_ && !props->secret_found)
@@ -2679,9 +2680,9 @@ void SpawnMapSpecials1(void)
                 }
 
                 // update the line gaps & things:
-                P_RecomputeGapsAroundSector(tsec);
+                RecomputeGapsAroundSector(tsec);
 
-                P_FloodExtraFloors(tsec);
+                FloodExtraFloors(tsec);
             }
         }
 

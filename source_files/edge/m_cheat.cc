@@ -170,9 +170,9 @@ static void CheatGiveWeapons(player_t *pl, int key = -2)
 
     if (key < 0)
     {
-        for (int slot = 0; slot < MAXWEAPONS; slot++)
+        for (int slot = 0; slot < kMaximumWeapons; slot++)
         {
-            if (pl->weapons[slot].info) P_FillWeapon(pl, slot);
+            if (pl->weapons[slot].info) FillWeapon(pl, slot);
         }
     }
 
@@ -278,7 +278,7 @@ bool CheatResponder(InputEvent *ev)
 #endif
     else if (CheatCheckSequence(&cheat_suicide, key))
     {
-        P_TelefragMobj(pl->mo, pl->mo, nullptr);
+        TelefragMapObject(pl->mo, pl->mo, nullptr);
 
         // -ACB- 1998/08/26 Suicide language reference
         ConsoleMessageLDF("SuicideCheat");
@@ -297,7 +297,7 @@ bool CheatResponder(InputEvent *ev)
 
             if ((mo->extended_flags_ & kExtendedFlagMonster) && (mo->health_ > 0))
             {
-                P_TelefragMobj(mo, nullptr, nullptr);
+                TelefragMapObject(mo, nullptr, nullptr);
                 killcount++;
             }
         }

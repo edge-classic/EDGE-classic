@@ -224,7 +224,7 @@ static inline void TouchNodeUnlinkFromThing(touch_node_t *tn)
 struct BspThingPosition
 {
     MapObject *thing;
-    float   bbox[4];
+    float      bbox[4];
 };
 
 //
@@ -241,7 +241,7 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
     {
         node_t *nd = level_nodes + nodenum;
 
-        int side = P_BoxOnDivLineSide(info->bbox, &nd->div);
+        int side = BoxOnDividingLineSide(info->bbox, &nd->div);
 
         // if box touches partition line, we must traverse both sides
         if (side == -1)
@@ -273,7 +273,7 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
         div.dx = seg->v2->X - div.x;
         div.dy = seg->v2->Y - div.y;
 
-        if (P_BoxOnDivLineSide(info->bbox, &div) == 1) return;
+        if (BoxOnDividingLineSide(info->bbox, &div) == 1) return;
     }
 
     // Perform linkage...
@@ -350,7 +350,8 @@ void UnsetThingPosition(MapObject *mo)
             {
                 SYS_ASSERT(mo->subsector_next_->subsector_previous_ == mo);
 
-                mo->subsector_next_->subsector_previous_ = mo->subsector_previous_;
+                mo->subsector_next_->subsector_previous_ =
+                    mo->subsector_previous_;
             }
         }
 
@@ -373,7 +374,7 @@ void UnsetThingPosition(MapObject *mo)
             }
         }
 
-        mo->subsector_next_ = nullptr;
+        mo->subsector_next_     = nullptr;
         mo->subsector_previous_ = nullptr;
     }
 
@@ -422,7 +423,7 @@ void UnsetThingPosition(MapObject *mo)
         }
 
         mo->blockmap_previous_ = nullptr;
-        mo->blockmap_next_ = nullptr;
+        mo->blockmap_next_     = nullptr;
     }
 
     // unlink from dynamic light blockmap
@@ -433,9 +434,11 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (mo->dynamic_light_next_->dynamic_light_previous_)
             {
-                SYS_ASSERT(mo->dynamic_light_next_->dynamic_light_previous_ == mo);
+                SYS_ASSERT(mo->dynamic_light_next_->dynamic_light_previous_ ==
+                           mo);
 
-                mo->dynamic_light_next_->dynamic_light_previous_ = mo->dynamic_light_previous_;
+                mo->dynamic_light_next_->dynamic_light_previous_ =
+                    mo->dynamic_light_previous_;
             }
         }
 
@@ -443,9 +446,11 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (mo->dynamic_light_previous_->dynamic_light_next_)
             {
-                SYS_ASSERT(mo->dynamic_light_previous_->dynamic_light_next_ == mo);
+                SYS_ASSERT(mo->dynamic_light_previous_->dynamic_light_next_ ==
+                           mo);
 
-                mo->dynamic_light_previous_->dynamic_light_next_ = mo->dynamic_light_next_;
+                mo->dynamic_light_previous_->dynamic_light_next_ =
+                    mo->dynamic_light_next_;
             }
         }
         else
@@ -464,7 +469,7 @@ void UnsetThingPosition(MapObject *mo)
         }
 
         mo->dynamic_light_previous_ = nullptr;
-        mo->dynamic_light_next_ = nullptr;
+        mo->dynamic_light_next_     = nullptr;
     }
 
     // unlink from sector glow list
@@ -477,9 +482,11 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (mo->dynamic_light_next_->dynamic_light_previous_)
             {
-                SYS_ASSERT(mo->dynamic_light_next_->dynamic_light_previous_ == mo);
+                SYS_ASSERT(mo->dynamic_light_next_->dynamic_light_previous_ ==
+                           mo);
 
-                mo->dynamic_light_next_->dynamic_light_previous_ = mo->dynamic_light_previous_;
+                mo->dynamic_light_next_->dynamic_light_previous_ =
+                    mo->dynamic_light_previous_;
             }
         }
 
@@ -487,9 +494,11 @@ void UnsetThingPosition(MapObject *mo)
         {
             if (mo->dynamic_light_previous_->dynamic_light_next_)
             {
-                SYS_ASSERT(mo->dynamic_light_previous_->dynamic_light_next_ == mo);
+                SYS_ASSERT(mo->dynamic_light_previous_->dynamic_light_next_ ==
+                           mo);
 
-                mo->dynamic_light_previous_->dynamic_light_next_ = mo->dynamic_light_next_;
+                mo->dynamic_light_previous_->dynamic_light_next_ =
+                    mo->dynamic_light_next_;
             }
         }
         else
@@ -503,7 +512,7 @@ void UnsetThingPosition(MapObject *mo)
         }
 
         mo->dynamic_light_previous_ = nullptr;
-        mo->dynamic_light_next_ = nullptr;
+        mo->dynamic_light_next_     = nullptr;
     }
 }
 
@@ -522,7 +531,7 @@ void UnsetThingFinal(MapObject *mo)
 
     while (mo->touch_sectors_)
     {
-        tn                = mo->touch_sectors_;
+        tn                 = mo->touch_sectors_;
         mo->touch_sectors_ = tn->mo_next;
 
         TouchNodeUnlinkFromSector(tn);
@@ -547,13 +556,14 @@ void SetThingPosition(MapObject *mo)
     touch_node_t    *tn;
 
     // -ES- 1999/12/04 The position must be unset before it's set again.
-    if (mo->subsector_next_ || mo->subsector_previous_ || mo->blockmap_next_ || mo->blockmap_previous_)
+    if (mo->subsector_next_ || mo->subsector_previous_ || mo->blockmap_next_ ||
+        mo->blockmap_previous_)
         FatalError("INTERNAL ERROR: Double SetThingPosition call.");
 
     SYS_ASSERT(!(mo->dynamic_light_next_ || mo->dynamic_light_previous_));
 
     // link into subsector
-    ss            = R_PointInSubsector(mo->x, mo->y);
+    ss             = R_PointInSubsector(mo->x, mo->y);
     mo->subsector_ = ss;
 
     // determine properties
@@ -561,7 +571,7 @@ void SetThingPosition(MapObject *mo)
 
     if (!(mo->flags_ & kMapObjectFlagNoSector))
     {
-        mo->subsector_next_ = ss->thinglist;
+        mo->subsector_next_     = ss->thinglist;
         mo->subsector_previous_ = nullptr;
 
         if (ss->thinglist) ss->thinglist->subsector_previous_ = mo;
@@ -638,9 +648,10 @@ void SetThingPosition(MapObject *mo)
             bnum = blocky * blockmap_width + blockx;
 
             mo->blockmap_previous_ = nullptr;
-            mo->blockmap_next_ = blockmap_things[bnum];
+            mo->blockmap_next_     = blockmap_things[bnum];
 
-            if (blockmap_things[bnum]) (blockmap_things[bnum])->blockmap_previous_ = mo;
+            if (blockmap_things[bnum])
+                (blockmap_things[bnum])->blockmap_previous_ = mo;
 
             blockmap_things[bnum] = mo;
         }
@@ -664,10 +675,11 @@ void SetThingPosition(MapObject *mo)
             bnum = blocky * dynamic_light_blockmap_width + blockx;
 
             mo->dynamic_light_previous_ = nullptr;
-            mo->dynamic_light_next_ = dynamic_light_blockmap_things[bnum];
+            mo->dynamic_light_next_     = dynamic_light_blockmap_things[bnum];
 
             if (dynamic_light_blockmap_things[bnum])
-                (dynamic_light_blockmap_things[bnum])->dynamic_light_previous_ = mo;
+                (dynamic_light_blockmap_things[bnum])->dynamic_light_previous_ =
+                    mo;
 
             dynamic_light_blockmap_things[bnum] = mo;
         }
@@ -685,7 +697,7 @@ void SetThingPosition(MapObject *mo)
         sector_t *sec = mo->subsector_->sector;
 
         mo->dynamic_light_previous_ = nullptr;
-        mo->dynamic_light_next_ = sec->glow_things;
+        mo->dynamic_light_next_     = sec->glow_things;
 
         if (sec->glow_things) sec->glow_things->dynamic_light_previous_ = mo;
 
@@ -812,7 +824,7 @@ bool BlockmapThingIterator(float x1, float y1, float x2, float y2,
         for (int bx = lx; bx <= hx; bx++)
         {
             for (MapObject *mo = blockmap_things[by * blockmap_width + bx]; mo;
-                 mo         = mo->blockmap_next_)
+                 mo            = mo->blockmap_next_)
             {
                 // check whether thing touches the given bbox
                 float r = mo->radius_;
@@ -829,7 +841,8 @@ bool BlockmapThingIterator(float x1, float y1, float x2, float y2,
 }
 
 void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
-                          float z2, void (*func)(MapObject *, void *), void *data)
+                          float z2, void (*func)(MapObject *, void *),
+                          void *data)
 {
     EDGE_ZoneScoped;
     ecframe_stats.draw_light_iterator++;
@@ -854,7 +867,8 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
                 SYS_ASSERT(mo->state_);
 
                 // skip "off" lights
-                if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0) continue;
+                if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0)
+                    continue;
 
                 if (r_culling.d_ &&
                     R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f_)
@@ -927,7 +941,7 @@ void SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
                     // Ideally it is only touching one line
                     for (int i = 0; i < sec->linecount; i++)
                     {
-                        if (P_ThingOnLineSide(mo, sec->lines[i]) == -1)
+                        if (ThingOnLineSide(mo, sec->lines[i]) == -1)
                         {
                             mo->dynamic_light_.glow_wall = sec->lines[i];
                             break;
@@ -1007,13 +1021,14 @@ static inline void PIT_AddLineIntercept(line_t *ld)
     // avoid precision problems with two routines
     if (trace.dx > 16 || trace.dy > 16 || trace.dx < -16 || trace.dy < -16)
     {
-        s1 = P_PointOnDivlineSide(ld->v1->X, ld->v1->Y, &trace);
-        s2 = P_PointOnDivlineSide(ld->v2->X, ld->v2->Y, &trace);
+        s1 = PointOnDividingLineSide(ld->v1->X, ld->v1->Y, &trace);
+        s2 = PointOnDividingLineSide(ld->v2->X, ld->v2->Y, &trace);
     }
     else
     {
-        s1 = P_PointOnDivlineSide(trace.x, trace.y, &div);
-        s2 = P_PointOnDivlineSide(trace.x + trace.dx, trace.y + trace.dy, &div);
+        s1 = PointOnDividingLineSide(trace.x, trace.y, &div);
+        s2 = PointOnDividingLineSide(trace.x + trace.dx, trace.y + trace.dy,
+                                     &div);
     }
 
     // line isn't crossed ?
@@ -1073,8 +1088,8 @@ static inline void PIT_AddThingIntercept(MapObject *thing)
         y2 = thing->y + thing->radius_;
     }
 
-    s1 = P_PointOnDivlineSide(x1, y1, &trace);
-    s2 = P_PointOnDivlineSide(x2, y2, &trace);
+    s1 = PointOnDividingLineSide(x1, y1, &trace);
+    s2 = PointOnDividingLineSide(x2, y2, &trace);
 
     // line isn't crossed ?
     if (s1 == s2) return;
@@ -1228,8 +1243,8 @@ bool PathTraverse(float x1, float y1, float x2, float y2, int flags,
 
             if (flags & kPathAddThings)
             {
-                for (MapObject *mo = blockmap_things[by * blockmap_width + bx]; mo;
-                     mo         = mo->blockmap_next_)
+                for (MapObject *mo = blockmap_things[by * blockmap_width + bx];
+                     mo; mo        = mo->blockmap_next_)
                 {
                     PIT_AddThingIntercept(mo);
                 }

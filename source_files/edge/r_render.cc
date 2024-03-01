@@ -583,9 +583,9 @@ static void DrawLaser(player_t *p)
 
 	RGL_FinishUnits();
 
-	if (leveltime != last_time)
+	if (level_time_elapsed != last_time)
 	{
-		last_time = leveltime;
+		last_time = level_time_elapsed;
 		countdown--;
 	}
 }
@@ -2191,8 +2191,8 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
             div.dx = clipper->v2->X - div.x;
             div.dy = clipper->v2->Y - div.y;
 
-            int s1 = P_PointOnDivlineSide(sx1, sy1, &div);
-            int s2 = P_PointOnDivlineSide(sx2, sy2, &div);
+            int s1 = PointOnDividingLineSide(sx1, sy1, &div);
+            int s2 = PointOnDividingLineSide(sx2, sy2, &div);
 
             // seg lies completely in front of clipper?
             if (s1 == 0 && s2 == 0)
@@ -2203,7 +2203,7 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
                 // seg crosses clipper, need to split it
                 float ix, iy;
 
-                P_ComputeIntersection(&div, sx1, sy1, sx2, sy2, &ix, &iy);
+                ComputeIntersection(&div, sx1, sy1, sx2, sy2, &ix, &iy);
 
                 if (s2 == 0)
                     sx2 = ix, sy2 = iy;
@@ -3213,7 +3213,7 @@ static void RGL_WalkBSPNode(unsigned int bspnum)
     nd_div.dx -= nd_div.x;
     nd_div.dy -= nd_div.y;
 
-    side = P_PointOnDivlineSide(viewx, viewy, &nd_div);
+    side = PointOnDividingLineSide(viewx, viewy, &nd_div);
 
     // Recursively divide front space.
     if (RGL_CheckBBox(node->bbox[side]))
@@ -3327,7 +3327,7 @@ static void InitCamera(MapObject *mo, bool full_height, float expand_w)
 {
     float fov = HMM_Clamp(5, r_fov.f_, 175);
 
-    wave_now    = leveltime / 100.0f;
+    wave_now    = level_time_elapsed / 100.0f;
     plane_z_bob = r_sintable[(int)((WAVETABLE_INCREMENT + wave_now) * FUNCTABLE_SIZE) & (FUNCTABLE_MASK)];
 
     view_x_slope = tan(90.0f * HMM_PI / 360.0);

@@ -33,7 +33,7 @@ inline float DynamicLightCompatibilityRadius(float x)
 //
 enum MapObjectFlag
 {
-    // Call P_TouchSpecialThing when touched.
+    // Call TouchSpecialThing when touched.
     kMapObjectFlagSpecial = (1 << 0),
     // Blocks.
     kMapObjectFlagSolid = (1 << 1),

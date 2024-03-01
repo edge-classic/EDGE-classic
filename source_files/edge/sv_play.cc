@@ -100,7 +100,7 @@ static savefield_t sv_fields_player[] = {
     SF(totalfrags, "totalfrags", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(ready_wp, "ready_wp", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(pending_wp, "pending_wp", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(weapons[0], "weapons", MAXWEAPONS, SVT_STRUCT("playerweapon_t"), SR_PlayerGetWeapon, SR_PlayerPutWeapon),
+    SF(weapons[0], "weapons", kMaximumWeapons, SVT_STRUCT("playerweapon_t"), SR_PlayerGetWeapon, SR_PlayerPutWeapon),
     SF(ammo[0], "ammo", kTotalAmmunitionTypes, SVT_STRUCT("playerammo_t"), SR_PlayerGetAmmo, SR_PlayerPutAmmo),
     SF(inventory[0], "inventory", kTotalInventoryTypes, SVT_STRUCT("playerinv_t"), SR_PlayerGetInv, SR_PlayerPutInv),
     SF(counters[0], "counters", kTotalCounterTypes, SVT_STRUCT("playercounter_t"), SR_PlayerGetCounter, SR_PlayerPutCounter),
@@ -114,7 +114,7 @@ static savefield_t sv_fields_player[] = {
     SF(underwater, "underwater", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
     SF(airless, "airless", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
     SF(flash, "flash_b", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
-    SF(psprites[0], "psprites", NUMPSPRITES, SVT_STRUCT("psprite_t"), SR_PlayerGetPSprite, SR_PlayerPutPSprite),
+    SF(psprites[0], "psprites", kTotalPlayerSpriteTypes, SVT_STRUCT("psprite_t"), SR_PlayerGetPSprite, SR_PlayerPutPSprite),
 
     // FIXME: swimming & wet_feet ???
 
@@ -160,7 +160,7 @@ savearray_t sv_array_player = {
 //
 //  WEAPON STRUCTURE
 //
-static playerweapon_t sv_dummy_playerweapon;
+static PlayerWeapon sv_dummy_playerweapon;
 
 #define SV_F_BASE sv_dummy_playerweapon
 
@@ -266,7 +266,7 @@ savestruct_t sv_struct_playerammo = {
 //
 //  PSPRITE STRUCTURE
 //
-static pspdef_t sv_dummy_psprite;
+static PlayerSprite sv_dummy_psprite;
 
 #define SV_F_BASE sv_dummy_psprite
 
@@ -275,7 +275,7 @@ static savefield_t sv_fields_psprite[] = {
     SF(next_state, "next_state", 1, SVT_STRING, SR_PlayerGetState, SR_PlayerPutState),
     SF(tics, "tics", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(visibility, "visibility", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(vis_target, "vis_target", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(target_visibility, "vis_target", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
 
     // NOT HERE:
     //   sx, sy: they can be regenerated.
@@ -399,16 +399,16 @@ void SV_PlayerCreateElems(int num_elems)
         p->remember_atk[3]   = -1;
         p->weapon_last_frame = -1;
 
-        for (int j = 0; j < NUMPSPRITES; j++)
+        for (int j = 0; j < kTotalPlayerSpriteTypes; j++)
         {
-            p->psprites[j].sx = 0;
-            p->psprites[j].sy = 0;
+            p->psprites[j].screen_x = 0;
+            p->psprites[j].screen_y = 0;
         }
 
         for (int k = 0; k < kTotalWeaponKeys; k++)
             p->key_choices[k] = WPSEL_None;
 
-        for (int w = 0; w < MAXWEAPONS; w++)
+        for (int w = 0; w < kMaximumWeapons; w++)
             p->weapons[w].model_skin = 1;
     }
 }
@@ -555,7 +555,7 @@ void SR_PlayerPutAmmo(void *storage, int index, void *extra)
 //
 bool SR_PlayerGetWeapon(void *storage, int index, void *extra)
 {
-    playerweapon_t *dest = (playerweapon_t *)storage + index;
+    PlayerWeapon *dest = (PlayerWeapon *)storage + index;
 
     if (sv_struct_playerweapon.counterpart)
         return SV_LoadStruct(dest, sv_struct_playerweapon.counterpart);
@@ -568,7 +568,7 @@ bool SR_PlayerGetWeapon(void *storage, int index, void *extra)
 //
 void SR_PlayerPutWeapon(void *storage, int index, void *extra)
 {
-    playerweapon_t *src = (playerweapon_t *)storage + index;
+    PlayerWeapon *src = (PlayerWeapon *)storage + index;
 
     SV_SaveStruct(src, &sv_struct_playerweapon);
 }
@@ -578,7 +578,7 @@ void SR_PlayerPutWeapon(void *storage, int index, void *extra)
 //
 bool SR_PlayerGetPSprite(void *storage, int index, void *extra)
 {
-    pspdef_t *dest = (pspdef_t *)storage + index;
+    PlayerSprite *dest = (PlayerSprite *)storage + index;
 
     //!!! FIXME: should skip if no counterpart
     if (sv_struct_psprite.counterpart)
@@ -592,7 +592,7 @@ bool SR_PlayerGetPSprite(void *storage, int index, void *extra)
 //
 void SR_PlayerPutPSprite(void *storage, int index, void *extra)
 {
-    pspdef_t *src = (pspdef_t *)storage + index;
+    PlayerSprite *src = (PlayerSprite *)storage + index;
 
     SV_SaveStruct(src, &sv_struct_psprite);
 }

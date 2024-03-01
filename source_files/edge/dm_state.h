@@ -73,7 +73,7 @@ extern bool noblit;
 extern BAMAngle viewanglebaseoffset;
 
 // Timer, for scores.
-extern int  leveltime; // tics in game play for par
+extern int  level_time_elapsed; // tics in game play for par
 extern bool fast_forward_active;
 
 // -AJA- 2000/12/07: auto quick-load feature

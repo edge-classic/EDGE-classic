@@ -322,7 +322,7 @@ class AttackDefinition
 
 enum AmmunitionType
 {
-    kAmmunitionTypeDontCare = -2,  // Only used for P_SelectNewWeapon()
+    kAmmunitionTypeDontCare = -2,  // Only used for SelectNewWeapon()
     kAmmunitionTypeNoAmmo   = -1,  // Unlimited for chainsaw / fist.
     kAmmunitionTypeBullet   = 0,   // Pistol / chaingun ammo.
     kAmmunitionTypeShell,          // Shotgun / double barreled shotgun.

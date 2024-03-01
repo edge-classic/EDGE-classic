@@ -402,7 +402,7 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
 
     // -ACB- 1998/07/10 New Check, so that spawned mobj's don't
     //                  spawn somewhere where they should not.
-    if (!P_CheckAbsPosition(mo, mo->x, mo->y, mo->z))
+    if (!CheckAbsolutePosition(mo, mo->x, mo->y, mo->z))
     {
         P_RemoveMobj(mo);
         return;
@@ -446,7 +446,7 @@ void RAD_ActDamagePlayers(rad_trigger_t *R, void *param)
         if (!RAD_WithinRadius(p->mo, R->info))
             continue;
 
-        P_DamageMobj(p->mo, nullptr, nullptr, damage->damage_amount, nullptr);
+        DamageMapObject(p->mo, nullptr, nullptr, damage->damage_amount, nullptr);
     }
 }
 
@@ -517,7 +517,7 @@ void RAD_ActBenefitPlayers(rad_trigger_t *R, void *param)
         if (!RAD_WithinRadius(p->mo, R->info))
             continue;
 
-        P_GiveBenefitList(p, nullptr, be->benefit, be->lose_it);
+        GiveBenefitList(p, nullptr, be->benefit, be->lose_it);
     }
 }
 
@@ -564,7 +564,7 @@ void RAD_ActDamageMonsters(rad_trigger_t *R, void *param)
         if (!RAD_WithinRadius(mo, R->info))
             continue;
 
-        P_DamageMobj(mo, nullptr, player ? player->mo : nullptr, mon->damage_amount, nullptr);
+        DamageMapObject(mo, nullptr, player ? player->mo : nullptr, mon->damage_amount, nullptr);
     }
 }
 
@@ -840,10 +840,10 @@ static void MoveOneSector(sector_t *sec, s_movesector_t *t)
     else
         dh = t->value - sec->f_h;
 
-    if (!P_CheckSolidSectorMove(sec, t->is_ceiling, dh))
+    if (!CheckSolidSectorMove(sec, t->is_ceiling, dh))
         return;
 
-    P_SolidSectorMove(sec, t->is_ceiling, dh);
+    SolidSectorMove(sec, t->is_ceiling, dh);
 }
 
 void RAD_ActMoveSector(rad_trigger_t *R, void *param)
@@ -1231,12 +1231,12 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
 
     // 4. Teleport him
     //  Don't get stuck spawned in things: telefrag them.
-    P_TeleportMove(p->mo, point->x, point->y, point->z);
+    TeleportMove(p->mo, point->x, point->y, point->z);
 }
 
-static void RAD_SetPsprite(player_t *p, int position, int stnum, WeaponDefinition *info = nullptr)
+static void RAD_SetPlayerSprite(player_t *p, int position, int stnum, WeaponDefinition *info = nullptr)
 {
-    pspdef_t *psp = &p->psprites[position];
+    PlayerSprite *psp = &p->psprites[position];
 
     if (stnum == 0)
     {
@@ -1282,18 +1282,18 @@ static void RAD_SetPsprite(player_t *p, int position, int stnum, WeaponDefinitio
 }
 
 //
-// P_SetPspriteDeferred
+// SetPlayerSpriteDeferred
 //
 // -AJA- 2004/11/05: This is preferred method, doesn't run any actions,
-//       which (ideally) should only happen during P_MovePsprites().
+//       which (ideally) should only happen during MovePlayerSprites().
 //
-void RAD_SetPspriteDeferred(player_t *p, int position, int stnum)
+void RAD_SetPlayerSpriteDeferred(player_t *p, int position, int stnum)
 {
-    pspdef_t *psp = &p->psprites[position];
+    PlayerSprite *psp = &p->psprites[position];
 
     if (stnum == 0 || psp->state == nullptr)
     {
-        RAD_SetPsprite(p, position, stnum);
+        RAD_SetPlayerSprite(p, position, stnum);
         return;
     }
 
@@ -1321,7 +1321,7 @@ void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param)
     }
 
     int i;
-    for (i = 0; i < MAXWEAPONS; i++)
+    for (i = 0; i < kMaximumWeapons; i++)
     {
         if (p->weapons[i].info == oldWep)
         {
@@ -1332,7 +1332,7 @@ void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param)
     // refresh the sprite
     if (p->weapons[p->ready_wp].info == newWep)
     {
-        RAD_SetPspriteDeferred(p, ps_weapon, p->weapons[p->ready_wp].info->ready_state_);
+        RAD_SetPlayerSpriteDeferred(p, kPlayerSpriteWeapon, p->weapons[p->ready_wp].info->ready_state_);
 
         P_FixWeaponClip(p, p->ready_wp); // handle the potential clip_size difference
         UpdateAvailWeapons(p);
@@ -1356,7 +1356,7 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
     int pw_index;
 
     // see if player owns this kind of weapon
-    for (pw_index = 0; pw_index < MAXWEAPONS; pw_index++)
+    for (pw_index = 0; pw_index < kMaximumWeapons; pw_index++)
     {
         if (!p->weapons[pw_index].owned)
             continue;
@@ -1365,7 +1365,7 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
             break;
     }
 
-    if (pw_index == MAXWEAPONS) // we dont have the weapon
+    if (pw_index == kMaximumWeapons) // we dont have the weapon
         return;
 
     p->ready_wp = (weapon_selection_e)pw_index; // insta-switch to it
@@ -1375,7 +1375,7 @@ void RAD_ActWeaponEvent(rad_trigger_t *R, void *param)
         FatalError("RTS WEAPON_EVENT: frame '%s' in [%s] not found!\n", tev->label, tev->weapon_name);
     state += tev->offset;
 
-    RAD_SetPspriteDeferred(p, ps_weapon, state); // refresh the sprite
+    RAD_SetPlayerSpriteDeferred(p, kPlayerSpriteWeapon, state); // refresh the sprite
 }
 
 void P_ActReplace(MapObject *mo, const MapObjectDefinition *newThing)

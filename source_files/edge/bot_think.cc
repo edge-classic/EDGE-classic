@@ -57,7 +57,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE(bot_skill, "2", kConsoleVariableFlagArchive)
 
 bool DeathBot::HasWeapon(const WeaponDefinition *info) const
 {
-    for (int i = 0; i < MAXWEAPONS; i++)
+    for (int i = 0; i < kMaximumWeapons; i++)
         if (pl_->weapons[i].owned && pl_->weapons[i].info == info) return true;
 
     return false;
@@ -277,7 +277,7 @@ float DeathBot::EvaluateWeapon(int w_num, int &key) const
     // this evaluates weapons owned by the bot (NOT ones in the map).
     // returns -1 when not actually usable (e.g. no ammo).
 
-    playerweapon_t *wp = &pl_->weapons[w_num];
+    PlayerWeapon *wp = &pl_->weapons[w_num];
 
     // don't have this weapon
     if (!wp->owned) return -1;
@@ -385,7 +385,7 @@ bool DeathBot::IsEnemyVisible(MapObject *enemy)
     float dy = enemy->y - pl_->mo->y;
     float dz = enemy->z - pl_->mo->z;
 
-    float slope = P_ApproxSlope(dx, dy, dz);
+    float slope = ApproximateSlope(dx, dy, dz);
 
     // require slope to not be excessive, e.g. caged imps in MAP13
     if (slope > 1.0f) return false;
@@ -478,7 +478,7 @@ void DeathBot::SelectWeapon()
     int   best_key   = -1;
     float best_score = 0;
 
-    for (int i = 0; i < MAXWEAPONS; i++)
+    for (int i = 0; i < kMaximumWeapons; i++)
     {
         int   key   = -1;
         float score = EvaluateWeapon(i, key);
@@ -539,7 +539,7 @@ void DeathBot::TurnToward(const MapObject *mo, bool fast)
     float dz = mo->z - pl_->mo->z;
 
     BAMAngle want_angle = R_PointToAngle(0, 0, dx, dy);
-    float    want_slope = P_ApproxSlope(dx, dy, dz);
+    float    want_slope = ApproximateSlope(dx, dy, dz);
 
     TurnToward(want_angle, want_slope, fast);
 }
@@ -631,7 +631,7 @@ void DeathBot::UpdateEnemy()
     float dz = enemy->z - pl_->mo->z;
 
     enemy_angle_ = R_PointToAngle(0, 0, dx, dy);
-    enemy_slope_ = P_ApproxSlope(dx, dy, dz);
+    enemy_slope_ = ApproximateSlope(dx, dy, dz);
     enemy_dist_  = DistTo(pos);
 
     // can see them?
@@ -944,7 +944,7 @@ BotFollowPathResult DeathBot::FollowPath(bool do_look)
         float dz = dest.z - pl_->mo->z;
 
         BAMAngle want_angle = R_PointToAngle(0, 0, dx, dy);
-        float    want_slope = P_ApproxSlope(dx, dy, dz);
+        float    want_slope = ApproximateSlope(dx, dy, dz);
 
         TurnToward(want_angle, want_slope, false);
     }

@@ -240,7 +240,7 @@ void LoadLevel_Bits(void)
     // Initial height of PointOfView will be set by player think.
     players[consoleplayer]->viewz = kFloatUnused;
 
-    leveltime = 0;
+    level_time_elapsed = 0;
 
     LevelSetup();
 
@@ -303,7 +303,7 @@ void GameDoLoadLevel(void)
 
             GameRemoveOldAvatars();
 
-            P_HubFastForward();
+            HubFastForward();
             return;
         }
     }
@@ -477,8 +477,8 @@ void GameTicker(void)
                 // get commands
                 NetworkGrabTicCommands();
 
-                //!!!  P_Ticker();
-                P_Ticker(true);
+                //!!!  MapObjectTicker();
+                MapObjectTicker(true);
                 break;
 
             case GS_INTERMISSION:
@@ -507,7 +507,7 @@ void GameTicker(void)
             // get commands
             NetworkGrabTicCommands();
 
-            P_Ticker(false);
+            MapObjectTicker(false);
             AutomapTicker();
             HudTicker();
             RAD_Ticker();
@@ -581,7 +581,7 @@ void GameDeferredScreenShot(void) { m_screenshot_required = true; }
 void GameExitLevel(int time)
 {
     next_map      = GameLookupMap(current_map->next_mapname_.c_str());
-    exit_time     = leveltime + time;
+    exit_time     = level_time_elapsed + time;
     exit_skip_all = false;
     exit_hub_tag  = 0;
 }
@@ -591,7 +591,7 @@ void GameExitLevel(int time)
 void GameSecretExitLevel(int time)
 {
     next_map      = GameLookupMap(current_map->secretmapname_.c_str());
-    exit_time     = leveltime + time;
+    exit_time     = level_time_elapsed + time;
     exit_skip_all = false;
     exit_hub_tag  = 0;
 }
@@ -599,7 +599,7 @@ void GameSecretExitLevel(int time)
 void GameExitToLevel(char *name, int time, bool skip_all)
 {
     next_map      = GameLookupMap(name);
-    exit_time     = leveltime + time;
+    exit_time     = level_time_elapsed + time;
     exit_skip_all = skip_all;
     exit_hub_tag  = 0;
 }
@@ -611,7 +611,7 @@ void GameExitToHub(const char *map_name, int tag)
     next_map = GameLookupMap(map_name);
     if (!next_map) FatalError("GameExitToHub: No such map %s !\n", map_name);
 
-    exit_time     = leveltime + 5;
+    exit_time     = level_time_elapsed + 5;
     exit_skip_all = true;
     exit_hub_tag  = tag;
 }
@@ -637,7 +637,7 @@ void GameExitToHub(int map_number, int tag)
 // REQUIRED STATE:
 //   (a) current_map, next_map
 //   (b) players[]
-//   (c) leveltime
+//   (c) level_time_elapsed
 //   (d) exit_skip_all
 //   (d) exit_hub_tag
 //   (e) intermission_stats.kills (etc)
@@ -655,7 +655,7 @@ static void GameDoCompleted(void)
         player_t *p = players[pnum];
         if (!p) continue;
 
-        p->leveltime = leveltime;
+        p->leveltime = level_time_elapsed;
 
         // take away cards and stuff
         GamePlayerFinishLevel(p, exit_hub_tag > 0);
@@ -806,7 +806,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 
     if (!is_hub)
     {
-        leveltime = globs->level_time;
+        level_time_elapsed = globs->level_time;
         exit_time = globs->exit_time;
 
         intermission_stats.kills   = globs->total_kills;
@@ -922,7 +922,7 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
 
     globs->console_player = consoleplayer;  // NB: not used
 
-    globs->level_time = leveltime;
+    globs->level_time = level_time_elapsed;
     globs->exit_time  = exit_time;
 
     globs->total_kills   = intermission_stats.kills;

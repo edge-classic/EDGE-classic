@@ -418,11 +418,11 @@ static void PL_has_weapon(coal::vm_c *vm, int argc)
 {
     const char *name = vm->AccessParamString(0);
 
-    for (int j = 0; j < MAXWEAPONS; j++)
+    for (int j = 0; j < kMaximumWeapons; j++)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[j];
+        PlayerWeapon *pw = &ui_player_who->weapons[j];
 
-        if (pw->owned && !(pw->flags & PLWEP_Removing) && DDF_CompareName(name, pw->info->name_.c_str()) == 0)
+        if (pw->owned && !(pw->flags & kPlayerWeaponRemoving) && DDF_CompareName(name, pw->info->name_.c_str()) == 0)
         {
             vm->ReturnFloat(1);
             return;
@@ -453,9 +453,9 @@ static void PL_cur_weapon(coal::vm_c *vm, int argc)
     vm->ReturnString(info->name_.c_str());
 }
 
-static void COAL_SetPsprite(player_t *p, int position, int stnum, WeaponDefinition *info = nullptr)
+static void COAL_SetPlayerSprite(player_t *p, int position, int stnum, WeaponDefinition *info = nullptr)
 {
-    pspdef_t *psp = &p->psprites[position];
+    PlayerSprite *psp = &p->psprites[position];
 
     if (stnum == 0)
     {
@@ -501,18 +501,18 @@ static void COAL_SetPsprite(player_t *p, int position, int stnum, WeaponDefiniti
 }
 
 //
-// P_SetPspriteDeferred
+// SetPlayerSpriteDeferred
 //
 // -AJA- 2004/11/05: This is preferred method, doesn't run any actions,
-//       which (ideally) should only happen during P_MovePsprites().
+//       which (ideally) should only happen during MovePlayerSprites().
 //
-static void COAL_SetPspriteDeferred(player_t *p, int position, int stnum)
+static void COAL_SetPlayerSpriteDeferred(player_t *p, int position, int stnum)
 {
-    pspdef_t *psp = &p->psprites[position];
+    PlayerSprite *psp = &p->psprites[position];
 
     if (stnum == 0 || psp->state == nullptr)
     {
-        COAL_SetPsprite(p, position, stnum);
+        COAL_SetPlayerSprite(p, position, stnum);
         return;
     }
 
@@ -549,7 +549,7 @@ static void PL_weapon_state(coal::vm_c *vm, int argc)
     int pw_index;
 
     // see if player owns this kind of weapon
-    for (pw_index = 0; pw_index < MAXWEAPONS; pw_index++)
+    for (pw_index = 0; pw_index < kMaximumWeapons; pw_index++)
     {
         if (!ui_player_who->weapons[pw_index].owned)
             continue;
@@ -558,7 +558,7 @@ static void PL_weapon_state(coal::vm_c *vm, int argc)
             break;
     }
 
-    if (pw_index == MAXWEAPONS) // we dont have the weapon
+    if (pw_index == kMaximumWeapons) // we dont have the weapon
     {
         vm->ReturnFloat(0);
         return;
@@ -571,7 +571,7 @@ static void PL_weapon_state(coal::vm_c *vm, int argc)
         FatalError("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
     // state += 1;
 
-    COAL_SetPspriteDeferred(ui_player_who, ps_weapon, state); // refresh the sprite
+    COAL_SetPlayerSpriteDeferred(ui_player_who, kPlayerSpriteWeapon, state); // refresh the sprite
 
     vm->ReturnFloat(1);
 }
@@ -692,7 +692,7 @@ static void PL_main_ammo(coal::vm_c *vm, int argc)
 
     if (ui_player_who->ready_wp >= 0)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
+        PlayerWeapon *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
         if (pw->info->ammo_[0] != kAmmunitionTypeNoAmmo)
         {
@@ -730,7 +730,7 @@ static void PL_ammo_type(coal::vm_c *vm, int argc)
 
     if (ui_player_who->ready_wp >= 0)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
+        PlayerWeapon *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
         value = 1 + (int)pw->info->ammo_[ATK];
     }
@@ -753,7 +753,7 @@ static void PL_ammo_pershot(coal::vm_c *vm, int argc)
 
     if (ui_player_who->ready_wp >= 0)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
+        PlayerWeapon *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
         value = pw->info->ammopershot_[ATK];
     }
@@ -776,7 +776,7 @@ static void PL_clip_ammo(coal::vm_c *vm, int argc)
 
     if (ui_player_who->ready_wp >= 0)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
+        PlayerWeapon *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
         value = pw->clip_size[ATK];
     }
@@ -799,7 +799,7 @@ static void PL_clip_size(coal::vm_c *vm, int argc)
 
     if (ui_player_who->ready_wp >= 0)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
+        PlayerWeapon *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
         value = pw->info->clip_size_[ATK];
     }
@@ -815,7 +815,7 @@ static void PL_clip_is_shared(coal::vm_c *vm, int argc)
 
     if (ui_player_who->ready_wp >= 0)
     {
-        playerweapon_t *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
+        PlayerWeapon *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
         if (pw->info->shared_clip_)
             value = 1;

@@ -249,7 +249,7 @@ subsector_t *R_PointInSubsector(float x, float y)
     while (!(nodenum & NF_V5_SUBSECTOR))
     {
         node    = &level_nodes[nodenum];
-        side    = P_PointOnDivlineSide(x, y, &node->div);
+        side    = PointOnDividingLineSide(x, y, &node->div);
         nodenum = node->children[side];
     }
 

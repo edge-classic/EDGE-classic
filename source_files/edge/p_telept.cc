@@ -23,52 +23,49 @@
 //
 //----------------------------------------------------------------------------
 
-
-
 #include "con_main.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "m_random.h"
 #include "p_local.h"
-#include "r_sky.h"
 #include "r_misc.h"
+#include "r_sky.h"
 #include "r_state.h"
 #include "s_sound.h"
 
-#define TELE_FUDGE 0.1f
+static constexpr float kTeleportFudge = 0.1f;
 
 MapObject *FindTeleportMan(int tag, const MapObjectDefinition *info)
 {
     for (int i = 0; i < total_level_sectors; i++)
     {
-        if (level_sectors[i].tag != tag)
-            continue;
+        if (level_sectors[i].tag != tag) continue;
 
-        for (subsector_t *sub = level_sectors[i].subsectors; sub; sub = sub->sec_next)
+        for (subsector_t *sub = level_sectors[i].subsectors; sub;
+             sub              = sub->sec_next)
         {
             for (MapObject *mo = sub->thinglist; mo; mo = mo->subsector_next_)
-                if (mo->info_ == info && !(mo->extended_flags_ & kExtendedFlagNeverTarget))
+                if (mo->info_ == info &&
+                    !(mo->extended_flags_ & kExtendedFlagNeverTarget))
                     return mo;
         }
     }
 
-    return nullptr; // not found
+    return nullptr;  // not found
 }
 
 line_t *FindTeleportLine(int tag, line_t *original)
 {
     for (int i = 0; i < total_level_lines; i++)
     {
-        if (level_lines[i].tag != tag)
-            continue;
+        if (level_lines[i].tag != tag) continue;
 
-        if (level_lines + i == original)
-            continue;
+        if (level_lines + i == original) continue;
 
         return level_lines + i;
     }
 
-    return nullptr; // not found
+    return nullptr;  // not found
 }
 
 //
@@ -86,10 +83,12 @@ line_t *FindTeleportLine(int tag, line_t *original)
 //
 // -ACB- 1998/09/12 Teleport delay setting from linedef.
 //
-// -ACB- 1998/09/13 used effect objects: the objects themselves make any sound and
+// -ACB- 1998/09/13 used effect objects: the objects themselves make any sound
+// and
 //                  the in effect object can be different to the out object.
 //
-// -ACB- 1998/09/13 Removed the missile checks: no need since this would have been
+// -ACB- 1998/09/13 Removed the missile checks: no need since this would have
+// been
 //                  Checked at the linedef stage.
 //
 // -KM- 1998/11/25 Changed Erik's code a bit, Teleport flash still appears.
@@ -106,10 +105,10 @@ line_t *FindTeleportLine(int tag, line_t *original)
 // -AJA- 2004/10/08: Reworked for Silent and Line-to-Line teleporters
 //                   (based on the logic in prBoom's p_telept.c code).
 //
-bool TeleportMapObject(line_t *line, int tag, MapObject *thing, const TeleportDefinition *def)
+bool TeleportMapObject(line_t *line, int tag, MapObject *thing,
+                       const TeleportDefinition *def)
 {
-    if (!thing)
-        return false;
+    if (!thing) return false;
 
     float oldx = thing->x;
     float oldy = thing->y;
@@ -122,26 +121,25 @@ bool TeleportMapObject(line_t *line, int tag, MapObject *thing, const TeleportDe
     BAMAngle new_ang;
 
     BAMAngle dest_ang;
-    BAMAngle source_ang = kBAMAngle90 + (line ? R_PointToAngle(0, 0, line->dx, line->dy) : 0);
+    BAMAngle source_ang =
+        kBAMAngle90 + (line ? R_PointToAngle(0, 0, line->dx, line->dy) : 0);
 
     MapObject *currmobj = nullptr;
-    line_t *currline = nullptr;
+    line_t    *currline = nullptr;
 
     bool flipped = (def->special_ & kTeleportSpecialFlipped) ? true : false;
 
     player_t *player = thing->player_;
-    if (player && player->mo != thing) // exclude voodoo dolls
+    if (player && player->mo != thing)  // exclude voodoo dolls
         player = nullptr;
 
     if (def->special_ & kTeleportSpecialLine)
     {
-        if (!line || tag <= 0)
-            return false;
+        if (!line || tag <= 0) return false;
 
         currline = FindTeleportLine(tag, line);
 
-        if (!currline)
-            return false;
+        if (!currline) return false;
 
         new_x = currline->v1->X + currline->dx / 2.0f;
         new_y = currline->v1->Y + currline->dy / 2.0f;
@@ -151,19 +149,18 @@ bool TeleportMapObject(line_t *line, int tag, MapObject *thing, const TeleportDe
         if (currline->backsector)
             new_z = HMM_MAX(new_z, currline->backsector->f_h);
 
-        dest_ang = R_PointToAngle(0, 0, currline->dx, currline->dy) + kBAMAngle90;
+        dest_ang =
+            R_PointToAngle(0, 0, currline->dx, currline->dy) + kBAMAngle90;
 
-        flipped = !flipped; // match Boom's logic
+        flipped = !flipped;  // match Boom's logic
     }
     else /* thing-based teleport */
     {
-        if (!def->outspawnobj_)
-            return false;
+        if (!def->outspawnobj_) return false;
 
         currmobj = FindTeleportMan(tag, def->outspawnobj_);
 
-        if (!currmobj)
-            return false;
+        if (!currmobj) return false;
 
         new_x = currmobj->x;
         new_y = currmobj->y;
@@ -174,8 +171,7 @@ bool TeleportMapObject(line_t *line, int tag, MapObject *thing, const TeleportDe
 
     /* --- Angle handling --- */
 
-    if (flipped)
-        dest_ang += kBAMAngle180;
+    if (flipped) dest_ang += kBAMAngle180;
 
     if (def->special_ & kTeleportSpecialRelative && currline)
         new_ang = thing->angle_ + (dest_ang - source_ang);
@@ -218,8 +214,8 @@ bool TeleportMapObject(line_t *line, int tag, MapObject *thing, const TeleportDe
             // is special (e.g. another teleporter), in order to prevent it
             // from being triggered.
 
-            new_x += TELE_FUDGE * epi::BAMCos(dest_ang);
-            new_y += TELE_FUDGE * epi::BAMSin(dest_ang);
+            new_x += kTeleportFudge * epi::BAMCos(dest_ang);
+            new_y += kTeleportFudge * epi::BAMSin(dest_ang);
         }
         else if (currmobj)
         {
@@ -246,8 +242,7 @@ bool TeleportMapObject(line_t *line, int tag, MapObject *thing, const TeleportDe
         new_z += thing->original_height_;
     }
 
-    if (!P_TeleportMove(thing, new_x, new_y, new_z))
-        return false;
+    if (!TeleportMove(thing, new_x, new_y, new_z)) return false;
 
     if (player)
     {
@@ -291,7 +286,9 @@ bool TeleportMapObject(line_t *line, int tag, MapObject *thing, const TeleportDe
 
     thing->angle_ = new_ang;
 
-    if (currmobj && 0 == (def->special_ & (kTeleportSpecialRelative | kTeleportSpecialSameAbsDir | kTeleportSpecialRotate)))
+    if (currmobj && 0 == (def->special_ & (kTeleportSpecialRelative |
+                                           kTeleportSpecialSameAbsDir |
+                                           kTeleportSpecialRotate)))
     {
         thing->vertical_angle_ = currmobj->vertical_angle_;
     }
@@ -321,8 +318,9 @@ bool TeleportMapObject(line_t *line, int tag, MapObject *thing, const TeleportDe
             //
             // -ES- 1998/10/29 When fading, we don't want to see the fog.
             //
-            fog = P_MobjCreateObject(new_x + 20.0f * epi::BAMCos(thing->angle_), new_y + 20.0f * epi::BAMSin(thing->angle_), new_z,
-                                     def->outspawnobj_);
+            fog = P_MobjCreateObject(new_x + 20.0f * epi::BAMCos(thing->angle_),
+                                     new_y + 20.0f * epi::BAMSin(thing->angle_),
+                                     new_z, def->outspawnobj_);
 
             // never use this object as a teleport destination
             fog->extended_flags_ |= kExtendedFlagNeverTarget;

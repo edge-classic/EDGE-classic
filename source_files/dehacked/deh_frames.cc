@@ -646,7 +646,7 @@ bool frames::SpreadGroupPass(bool alt_jumps)
 
         // check if this is the very first state of death or overkill sequence.
         // in vanilla Doom (and Boom/MBF/etc), a tics of -1 will be IGNORED when
-        // *entering* such a state due to this code in P_KillMobj:
+        // *entering* such a state due to this code in KillMapObject:
         //    ``` if (target->tics < 1)
         //            target->tics = 1;
         //    ```

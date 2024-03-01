@@ -165,7 +165,7 @@ static inline int PointOnLineSide(float x, float y, line_t *ld)
     div.dx = ld->dx;
     div.dy = ld->dy;
 
-    return P_PointOnDivlineSide(x, y, &div);
+    return PointOnDividingLineSide(x, y, &div);
 }
 
 //
@@ -225,8 +225,8 @@ static void BounceOffWall(MapObject *mo, line_t *wall)
     div.dx = wall->dx;
     div.dy = wall->dy;
 
-    if (P_PointOnDivlineSide(mo->x, mo->y, &div) ==
-        P_PointOnDivlineSide(dest_x, dest_y, &div))
+    if (PointOnDividingLineSide(mo->x, mo->y, &div) ==
+        PointOnDividingLineSide(dest_x, dest_y, &div))
     {
         // Result is the same, thus we haven't crossed the line.  Choose a
         // random angle to bounce away.  And don't attenuate the speed (so
@@ -308,8 +308,8 @@ static bool CorpseShouldSlide(MapObject *mo)
         if (isfinite(z_test)) c_slope_z = mo->subsector_->sector->c_h - z_test;
     }
 
-    P_ComputeThingGap(mo, mo->subsector_->sector, mo->z, &floor, &ceil,
-                      f_slope_z, c_slope_z);
+    ComputeThingGap(mo, mo->subsector_->sector, mo->z, &floor, &ceil, f_slope_z,
+                    c_slope_z);
 
     return (!AlmostEquals(mo->floor_z_, floor));
 }
@@ -346,7 +346,7 @@ static void TeleportRespawn(MapObject *mobj)
     if (info->flags_ & kMapObjectFlagSolid)  // Should it be solid?
         mobj->flags_ |= kMapObjectFlagSolid;
 
-    if (!P_CheckAbsPosition(mobj, x, y, z))
+    if (!CheckAbsolutePosition(mobj, x, y, z))
     {
         mobj->radius_ = oldradius;
         mobj->height_ = oldheight;
@@ -425,7 +425,7 @@ static void ResurrectRespawn(MapObject *mobj)
     if (info->flags_ & kMapObjectFlagSolid)  // Should it be solid?
         mobj->flags_ |= kMapObjectFlagSolid;
 
-    if (!P_CheckAbsPosition(mobj, x, y, z))
+    if (!CheckAbsolutePosition(mobj, x, y, z))
     {
         mobj->radius_ = oldradius;
         mobj->height_ = oldheight;
@@ -538,7 +538,7 @@ bool P_SetMobjState2(MapObject *mobj, int state)
 // The new state will entered when the P_MobjThinker code reaches it,
 // which may happen in the current tick, or at worst the next tick.
 //
-// Prevents re-entrancy into code like P_CheckRelPosition which is
+// Prevents re-entrancy into code like CheckRelativePosition which is
 // inherently non re-entrant.
 //
 // -AJA- 1999/09/12: written.
@@ -593,7 +593,7 @@ void P_SetMobjDirAndSpeed(MapObject *mo, BAMAngle angle, float slope,
 // P_MobjExplodeMissile
 //
 // -AJA- 1999/09/12: Now uses P_SetMobjStateDeferred, since this
-//       routine can be called by TryMove/PIT_CheckRelThing.
+//       routine can be called by TryMove/CheckRelativeThingCallback.
 //
 void P_MobjExplodeMissile(MapObject *mo)
 {
@@ -902,14 +902,14 @@ static void P_XYMovement(MapObject *mo, const region_properties_t *props,
             ymove = 0;
         }
 
-        int did_move = P_TryMove(mo, ptryx, ptryy);
+        int did_move = TryMove(mo, ptryx, ptryy);
 
         // unable to complete desired move ?
         if (!did_move)
         {
             // check for missiles hitting shootable lines
             // NOTE: this is for solid lines.  The "pass over" case is
-            // handled in P_TryMove().
+            // handled in TryMove().
 
             if ((mo->flags_ & kMapObjectFlagMissile) &&
                 (!mo->current_attack_ ||
@@ -917,39 +917,39 @@ static void P_XYMovement(MapObject *mo, const region_properties_t *props,
             {
                 //
                 // -AJA- Seems this is called to handle this situation:
-                // P_TryMove is called, but fails because missile would hit
+                // TryMove is called, but fails because missile would hit
                 // solid line.  BUT missile did pass over some special lines.
-                // These special lines were not activated in P_TryMove since it
+                // These special lines were not activated in TryMove since it
                 // failed.  Ugh !
                 //
-                if (spechit.size() > 0)
+                if (special_lines_hit.size() > 0)
                 {
                     for (std::vector<line_t *>::reverse_iterator
-                             iter     = spechit.rbegin(),
-                             iter_end = spechit.rend();
+                             iter     = special_lines_hit.rbegin(),
+                             iter_end = special_lines_hit.rend();
                          iter != iter_end; iter++)
                     {
                         line_t *ld = *iter;
 
-                        ShootSpecialLine(
-                            ld, PointOnLineSide(mo->x, mo->y, ld), mo->source_);
+                        ShootSpecialLine(ld, PointOnLineSide(mo->x, mo->y, ld),
+                                         mo->source_);
                     }
                 }
 
-                if (blockline && blockline->special)
+                if (block_line && block_line->special)
                 {
                     // ShootSpecialLine()->P_ActivateSpecialLine() can remove
                     //  the special so we need to get the info before calling it
-                    const LineType            *tempspecial = blockline->special;
+                    const LineType *tempspecial = block_line->special;
                     const MapObjectDefinition *DebrisThing;
 
-                    ShootSpecialLine(blockline,
-                                       PointOnLineSide(mo->x, mo->y, blockline),
-                                       mo->source_);
+                    ShootSpecialLine(block_line,
+                                     PointOnLineSide(mo->x, mo->y, block_line),
+                                     mo->source_);
 
                     if (tempspecial->type_ == kLineTriggerShootable)
                     {
-                        P_UnblockLineEffectDebris(blockline, tempspecial);
+                        P_UnblockLineEffectDebris(block_line, tempspecial);
                         if (tempspecial->effectobject_)
                         {
                             DebrisThing = tempspecial->effectobject_;
@@ -962,21 +962,21 @@ static void P_XYMovement(MapObject *mo, const region_properties_t *props,
             }
 
             // -AJA- 2008/01/20: Jumping out of Water
-            if (blockline && blockline->backsector && mo->player_ &&
+            if (block_line && block_line->backsector && mo->player_ &&
                 mo->player_->mo == mo && mo->player_->wet_feet &&
                 !mo->player_->swimming && mo->player_->jumpwait == 0 &&
                 mo->z > mo->floor_z_ + 0.5f && mo->momentum_.Z >= 0.0f)
             {
                 float ground_h;
 
-                int i = FindThingGap(blockline->gaps, blockline->gap_num,
-                                       mo->z + mo->height_,
-                                       mo->z + 2 * mo->height_);
-                if (i >= 0) { ground_h = blockline->gaps[i].f; }
+                int i =
+                    FindThingGap(block_line->gaps, block_line->gap_num,
+                                 mo->z + mo->height_, mo->z + 2 * mo->height_);
+                if (i >= 0) { ground_h = block_line->gaps[i].f; }
                 else
                 {
-                    ground_h = HMM_MAX(blockline->frontsector->f_h,
-                                       blockline->backsector->f_h);
+                    ground_h = HMM_MAX(block_line->frontsector->f_h,
+                                       block_line->backsector->f_h);
                 }
 
                 // LogDebug("ground_h: %1.0f  mo_Z: %1.0f\n", ground_h, mo->z);
@@ -998,9 +998,9 @@ static void P_XYMovement(MapObject *mo, const region_properties_t *props,
                 // -KM- 1999/01/31 Bouncy objects (grenades)
                 // -AJA- 1999/07/30: Moved up here.
 
-                if (!blockline)
+                if (!block_line)
                 {
-                    if (mobj_hit_sky)
+                    if (map_object_hit_sky)
                         P_MobjRemoveMissile(mo);
                     else
                         P_MobjExplodeMissile(mo);
@@ -1008,12 +1008,12 @@ static void P_XYMovement(MapObject *mo, const region_properties_t *props,
                     return;
                 }
 
-                BounceOffWall(mo, blockline);
+                BounceOffWall(mo, block_line);
                 xmove = ymove = 0;
             }
             else if (mo->flags_ & kMapObjectFlagMissile)
             {
-                if (mobj_hit_sky)
+                if (map_object_hit_sky)
                     P_MobjRemoveMissile(mo);  // New Procedure -ACB- 1998/07/30
                 else
                     P_MobjExplodeMissile(mo);
@@ -1138,8 +1138,8 @@ static void P_ZMovement(MapObject *mo, const region_properties_t *props,
         if (!(mo->flags_ & kMapObjectFlagSkullFly) &&
             !(mo->flags_ & kMapObjectFlagInFloat))
         {
-            dist  = P_ApproxDistance(mo->x - mo->target_->x,
-                                     mo->y - mo->target_->y);
+            dist  = ApproximateDistance(mo->x - mo->target_->x,
+                                        mo->y - mo->target_->y);
             delta = mo->target_->z + (mo->height_ / 2) - mo->z;
 
             if (delta < 0 && dist < -(delta * 3))
@@ -1159,7 +1159,7 @@ static void P_ZMovement(MapObject *mo, const region_properties_t *props,
         if (mo->is_voodoo_ && AlmostEquals(mo->floor_z_, -32768.0f))
         {
             mo->z = mo->ceiling_z_ - mo->height_;
-            P_TryMove(mo, mo->x, mo->y);
+            TryMove(mo, mo->x, mo->y);
             return;
         }
 
@@ -1202,8 +1202,8 @@ static void P_ZMovement(MapObject *mo, const region_properties_t *props,
             if (mo->info_->maxfall_ > 0 && gravity > 0 &&
                 -mo->momentum_.Z > hurt_momz && (!mo->player_ || !fly_or_swim))
             {
-                P_DamageMobj(mo, nullptr, nullptr,
-                             (-mo->momentum_.Z - hurt_momz), nullptr);
+                DamageMapObject(mo, nullptr, nullptr,
+                                (-mo->momentum_.Z - hurt_momz), nullptr);
             }
 
             // -KM- 1999/01/31 Bouncy bouncy...
@@ -1238,7 +1238,8 @@ static void P_ZMovement(MapObject *mo, const region_properties_t *props,
         {
             // -AJA- 2003/10/09: handle missiles that hit a monster on
             //       the head from a sharp downward angle (such a case
-            //       is missed by PIT_CheckRelThing).  FIXME: more kludge.
+            //       is missed by CheckRelativeThingCallback).  FIXME: more
+            //       kludge.
 
             if (mo->below_object_ &&
                 (int)mo->floor_z_ == (int)(mo->below_object_->z +
@@ -1312,8 +1313,8 @@ static void P_ZMovement(MapObject *mo, const region_properties_t *props,
             if (mo->info_->maxfall_ > 0 && gravity < 0 &&
                 mo->momentum_.Z > hurt_momz && (!mo->player_ || !fly_or_swim))
             {
-                P_DamageMobj(mo, nullptr, nullptr,
-                             (mo->momentum_.Z - hurt_momz), nullptr);
+                DamageMapObject(mo, nullptr, nullptr,
+                                (mo->momentum_.Z - hurt_momz), nullptr);
             }
 
             // -KM- 1999/01/31 More bouncing.
@@ -1385,7 +1386,7 @@ static void P_ZMovement(MapObject *mo, const region_properties_t *props,
     }
 
     // update the object's vertical region
-    P_TryMove(mo, mo->x, mo->y);
+    TryMove(mo, mo->x, mo->y);
 
     // apply drag -- but not to frictionless things
     if ((mo->extended_flags_ & kExtendedFlagNoFriction) ||
@@ -1524,8 +1525,8 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
         if (props->special && props->special->damage_.grounded_monsters_ &&
             mobj->z <= mobj->floor_z_ + 1.0f)
         {
-            P_DamageMobj(mobj, nullptr, nullptr, 5.0, &props->special->damage_,
-                         false);
+            DamageMapObject(mobj, nullptr, nullptr, 5.0,
+                            &props->special->damage_, false);
         }
     }
 
@@ -1597,8 +1598,9 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
         //
         if (mobj->move_count_ < mobj->info_->respawntime_) return;
 
-        // if the first 5 bits of leveltime are on, don't respawn now...ok?
-        if (leveltime & 31) return;
+        // if the first 5 bits of level_time_elapsed are on, don't respawn
+        // now...ok?
+        if (level_time_elapsed & 31) return;
 
         // give a limited "random" chance that respawn don't respawn now
         if (RandomByteDeterministic() > 32) return;
@@ -1667,7 +1669,7 @@ static void DeleteMobj(MapObject *mo)
     }
 
 #if (DEBUG_MOBJ > 0)
-    LogDebug("tics=%05d  DELETE %p [%s]\n", leveltime, mo,
+    LogDebug("tics=%05d  DELETE %p [%s]\n", level_time_elapsed, mo,
              mo->info_ ? mo->info_->name_.c_str() : "???");
 #endif
 
@@ -1773,7 +1775,7 @@ static void AddMobjToList(MapObject *mo)
     if (seen_monsters.count(mo->info_) == 0) seen_monsters.insert(mo->info_);
 
 #if (DEBUG_MOBJ > 0)
-    LogDebug("tics=%05d  ADD %p [%s]\n", leveltime, mo,
+    LogDebug("tics=%05d  ADD %p [%s]\n", level_time_elapsed, mo,
              mo->info_ ? mo->info_->name_.c_str() : "???");
 #endif
 }
@@ -1781,7 +1783,7 @@ static void AddMobjToList(MapObject *mo)
 static void RemoveMobjFromList(MapObject *mo)
 {
 #if (DEBUG_MOBJ > 0)
-    LogDebug("tics=%05d  REMOVE %p [%s]\n", leveltime, mo,
+    LogDebug("tics=%05d  REMOVE %p [%s]\n", level_time_elapsed, mo,
              mo->info_ ? mo->info_->name_.c_str() : "???");
 #endif
 
@@ -2267,8 +2269,8 @@ MapObject *P_MobjCreateObject(float x, float y, float z,
     MapObject *mobj = new MapObject;
 
 #if (DEBUG_MOBJ > 0)
-    LogDebug("tics=%05d  CREATE %p [%s]  AT %1.0f,%1.0f,%1.0f\n", leveltime,
-             mobj, info->name.c_str(), x, y, z);
+    LogDebug("tics=%05d  CREATE %p [%s]  AT %1.0f,%1.0f,%1.0f\n",
+             level_time_elapsed, mobj, info->name.c_str(), x, y, z);
 #endif
 
     mobj->info_             = info;
@@ -2380,8 +2382,8 @@ MapObject *P_MobjCreateObject(float x, float y, float z,
         if (isfinite(sz)) c_slope_z = sec->c_h - sz;
     }
 
-    mobj->z = P_ComputeThingGap(mobj, sec, z, &mobj->floor_z_,
-                                &mobj->ceiling_z_, f_slope_z, c_slope_z);
+    mobj->z = ComputeThingGap(mobj, sec, z, &mobj->floor_z_, &mobj->ceiling_z_,
+                              f_slope_z, c_slope_z);
 
     // Find the real players height (TELEPORT WEAPONS).
     mobj->original_height_ = z;

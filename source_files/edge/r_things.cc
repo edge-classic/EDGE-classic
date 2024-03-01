@@ -100,7 +100,7 @@ static float GetHoverDZ(MapObject *mo, float bob_mult = 0)
     // compute a different phase for different objects
     BAMAngle phase = (BAMAngle)(long long)mo;
     phase ^= (BAMAngle)(phase << 19);
-    phase += (BAMAngle)(leveltime << (kBAMAngleBits - 6));
+    phase += (BAMAngle)(level_time_elapsed << (kBAMAngleBits - 6));
 
     mo->phase_ = epi::BAMSin(phase);
 
@@ -144,7 +144,7 @@ static int GetMulticolMaxRGB(multi_color_c *cols, int num, bool additive)
     return result;
 }
 
-static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_properties_t *props,
+static void RGL_DrawPSprite(PlayerSprite *psp, int which, player_t *player, region_properties_t *props,
                             const State *state)
 {
     if (state->flags & kStateFrameFlagModel)
@@ -157,7 +157,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
     if (!image)
         return;
 
-    GLuint tex_id = W_ImageCache(image, false, (which == ps_crosshair) ? nullptr : ren_fx_colmap);
+    GLuint tex_id = W_ImageCache(image, false, (which == kPlayerSpriteCrosshair) ? nullptr : ren_fx_colmap);
 
     float w     = IM_WIDTH(image);
     float h     = IM_HEIGHT(image);
@@ -169,7 +169,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
 
     float trans = player->mo->visibility_;
 
-    if (which == ps_crosshair)
+    if (which == kPlayerSpriteCrosshair)
     {
         if (!player->weapons[player->ready_wp].info->ignore_crosshair_scaling_)
             ratio = r_crosssize.f_ / w;
@@ -181,7 +181,7 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
     }
 
     // Lobo: no sense having the zoom crosshair fuzzy
-    if (which == ps_weapon && viewiszoomed && player->weapons[player->ready_wp].info->zoom_state_ > 0)
+    if (which == kPlayerSpriteWeapon && viewiszoomed && player->weapons[player->ready_wp].info->zoom_state_ > 0)
     {
         is_fuzzy = false;
         trans    = 1.0f;
@@ -207,10 +207,10 @@ static void RGL_DrawPSprite(pspdef_t *psp, int which, player_t *player, region_p
     float coord_W = 320.0f * view_expand_w;
     float coord_H = 200.0f;
 
-    float tx1 = (coord_W - w) / 2.0 + psp->sx - IM_OFFSETX(image);
+    float tx1 = (coord_W - w) / 2.0 + psp->screen_x - IM_OFFSETX(image);
     float tx2 = tx1 + w;
 
-    float ty1 = -psp->sy + IM_OFFSETY(image) - ((h - IM_HEIGHT(image)) * 0.5f);
+    float ty1 = -psp->screen_y + IM_OFFSETY(image) - ((h - IM_HEIGHT(image)) * 0.5f);
 
     if (LUA_UseLuaHud())
     {
@@ -501,7 +501,7 @@ void RGL_DrawWeaponSprites(player_t *p)
     // special handling for zoom: show viewfinder
     if (viewiszoomed)
     {
-        pspdef_t *psp = &p->psprites[ps_weapon];
+        PlayerSprite *psp = &p->psprites[kPlayerSpriteWeapon];
 
         if ((p->ready_wp < 0) || (psp->state == 0))
             return;
@@ -512,7 +512,7 @@ void RGL_DrawWeaponSprites(player_t *p)
         // psprite drawing routines to occur (old EDGE behavior)
         if (w->zoom_state_ > 0)
         {
-            RGL_DrawPSprite(psp, ps_weapon, p, view_props, states + w->zoom_state_);
+            RGL_DrawPSprite(psp, kPlayerSpriteWeapon, p, view_props, states + w->zoom_state_);
             return;
         }
     }
@@ -532,9 +532,9 @@ void RGL_DrawWeaponSprites(player_t *p)
 
     if (FlashFirst == false)
     {
-        for (int i = 0; i < NUMPSPRITES; i++) // normal
+        for (int i = 0; i < kTotalPlayerSpriteTypes; i++) // normal
         {
-            pspdef_t *psp = &p->psprites[i];
+            PlayerSprite *psp = &p->psprites[i];
 
             if ((p->ready_wp < 0) || (psp->state == 0))
                 continue;
@@ -544,9 +544,9 @@ void RGL_DrawWeaponSprites(player_t *p)
     }
     else
     {
-        for (int i = NUMPSPRITES - 1; i >= 0; i--) // go backwards
+        for (int i = kTotalPlayerSpriteTypes - 1; i >= 0; i--) // go backwards
         {
-            pspdef_t *psp = &p->psprites[i];
+            PlayerSprite *psp = &p->psprites[i];
 
             if ((p->ready_wp < 0) || (psp->state == 0))
                 continue;
@@ -566,7 +566,7 @@ void RGL_DrawCrosshair(player_t *p)
     }
     else
     {
-        pspdef_t *psp = &p->psprites[ps_crosshair];
+        PlayerSprite *psp = &p->psprites[kPlayerSpriteCrosshair];
 
         if (p->ready_wp >= 0 && psp->state != 0)
             return;
@@ -581,7 +581,7 @@ void RGL_DrawWeaponModel(player_t *p)
     if (viewiszoomed && p->weapons[p->ready_wp].info->zoom_state_ > 0)
         return;
 
-    pspdef_t *psp = &p->psprites[ps_weapon];
+    PlayerSprite *psp = &p->psprites[kPlayerSpriteWeapon];
 
     if (p->ready_wp < 0)
         return;
@@ -602,19 +602,16 @@ void RGL_DrawWeaponModel(player_t *p)
 
     if (!skin_img && md->md2_model)
     {
-        // LogDebug("Render model: no skin %d\n", skin_num);
         skin_img = W_ImageForDummySkin();
     }
 
-    // LogDebug("Rendering weapon model!\n");
+    float x = viewx + viewright.X * psp->screen_x / 8.0;
+    float y = viewy + viewright.Y * psp->screen_x / 8.0;
+    float z = viewz + viewright.Z * psp->screen_x / 8.0;
 
-    float x = viewx + viewright.X * psp->sx / 8.0;
-    float y = viewy + viewright.Y * psp->sx / 8.0;
-    float z = viewz + viewright.Z * psp->sx / 8.0;
-
-    x -= viewup.X * psp->sy / 10.0;
-    y -= viewup.Y * psp->sy / 10.0;
-    z -= viewup.Z * psp->sy / 10.0;
+    x -= viewup.X * psp->screen_y / 10.0;
+    y -= viewup.Y * psp->screen_y / 10.0;
+    z -= viewup.Z * psp->screen_y / 10.0;
 
     x += viewforward.X * w->model_forward_;
     y += viewforward.Y * w->model_forward_;
@@ -1395,7 +1392,7 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
         blending = BL_Masked | BL_Alpha;
         trans    = 1.0f;
 
-        float dist = P_ApproxDistance(mo->x - viewx, mo->y - viewy, mo->z - viewz);
+        float dist = ApproximateDistance(mo->x - viewx, mo->y - viewy, mo->z - viewz);
 
         fuzz_mul = 0.8 / HMM_Clamp(20, dist, 700);
 

@@ -31,7 +31,7 @@
 #include "i_system.h"
 #include "m_misc.h"
 #include "r_misc.h"  // R_PointToAngle
-#include "p_local.h" // P_ApproxDistance
+#include "p_local.h" // ApproximateDistance
 
 #include "s_sound.h"
 #include "s_cache.h"
@@ -134,11 +134,11 @@ void mix_channel_c::ComputeVolume()
 
         if (!boss)
         {
-            dist = P_ApproxDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
+            dist = ApproximateDistance(listen_x - pos->x, listen_y - pos->y, listen_z - pos->z);
 
             if (players[consoleplayer] && players[consoleplayer]->mo)
             {
-                if (P_CheckSightToPoint(players[consoleplayer]->mo, pos->x, pos->y, pos->z))
+                if (CheckSightToPoint(players[consoleplayer]->mo, pos->x, pos->y, pos->z))
                     dist = HMM_MAX(1.25f, dist / 100.0f);
                 else
                     dist = HMM_MAX(1.25f, dist / 75.0f);

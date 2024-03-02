@@ -45,11 +45,11 @@ class abstract_shader_c;
 
 struct player_s;
 struct rad_script_s;
-struct region_properties_s;
+struct RegionProperties;
 struct State;
-struct subsector_s;
-struct touch_node_s;
-struct line_s;
+struct Subsector;
+struct TouchNode;
+struct Line;
 
 extern std::unordered_set<const MapObjectDefinition *> seen_monsters;
 
@@ -171,7 +171,7 @@ struct DynamicLightState
     float              target;  // target radius
     RGBAColor          color;
     abstract_shader_c *shader;
-    line_s            *glow_wall     = nullptr;
+    Line            *glow_wall     = nullptr;
     bool               bad_wall_glow = false;
 };
 
@@ -203,10 +203,10 @@ class MapObject : public Position
     float phase_ = 0.0f;
 
     // current subsector
-    struct subsector_s *subsector_ = nullptr;
+    struct Subsector *subsector_ = nullptr;
 
     // properties from extrafloor the thing is in
-    struct region_properties_s *region_properties_ = nullptr;
+    struct RegionProperties *region_properties_ = nullptr;
 
     // Vert slope stuff maybe
     float old_z_       = 0;
@@ -289,7 +289,7 @@ class MapObject : public Position
     // spread count for Ordered spreaders
     int spread_count_ = 0;
 
-    // If == validcount, already checked.
+    // If == valid_count, already checked.
     int valid_count_ = 0;
 
     // -ES- 1999/10/25 Reference Count.
@@ -346,7 +346,7 @@ class MapObject : public Position
     HMM_Vec3 interpolation_from_ = {{0, 0, 0}};
 
     // touch list: sectors this thing is in or touches
-    struct touch_node_s *touch_sectors_ = nullptr;
+    struct TouchNode *touch_sectors_ = nullptr;
 
     // linked list (map_object_list_head)
     MapObject *next_     = nullptr;

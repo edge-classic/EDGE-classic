@@ -795,22 +795,22 @@ static void DrawGrid()
 //
 // -AJA- 1999/12/07: written.
 //
-static bool CheckSimiliarRegions(sector_t *front, sector_t *back)
+static bool CheckSimiliarRegions(Sector *front, Sector *back)
 {
-    extrafloor_t *F, *B;
+    Extrafloor *F, *B;
 
     if (front->tag == back->tag) return true;
 
     // Note: doesn't worry about liquids
 
-    F = front->bottom_ef;
-    B = back->bottom_ef;
+    F = front->bottom_extrafloor;
+    B = back->bottom_extrafloor;
 
     while (F && B)
     {
-        if (!AlmostEquals(F->top_h, B->top_h)) return false;
+        if (!AlmostEquals(F->top_height, B->top_height)) return false;
 
-        if (!AlmostEquals(F->bottom_h, B->bottom_h)) return false;
+        if (!AlmostEquals(F->bottom_height, B->bottom_height)) return false;
 
         F = F->higher;
         B = B->higher;
@@ -824,13 +824,13 @@ static bool CheckSimiliarRegions(sector_t *front, sector_t *back)
 //
 // -AJA- This is now *lineseg* based, not linedef.
 //
-static void AutomapWalkSeg(seg_t *seg)
+static void AutomapWalkSeg(Seg *seg)
 {
     AutomapLine l;
-    line_t     *line;
+    Line     *line;
 
-    sector_t *front = seg->frontsector;
-    sector_t *back  = seg->backsector;
+    Sector *front = seg->front_sector;
+    Sector *back  = seg->back_sector;
 
     if (seg->miniseg)
     {
@@ -838,8 +838,8 @@ static void AutomapWalkSeg(seg_t *seg)
         {
             if (seg->partner && seg > seg->partner) return;
 
-            GetRotatedCoords(seg->v1->X, seg->v1->Y, l.a.x, l.a.y);
-            GetRotatedCoords(seg->v2->X, seg->v2->Y, l.b.x, l.b.y);
+            GetRotatedCoords(seg->vertex_1->X, seg->vertex_1->Y, l.a.x, l.a.y);
+            GetRotatedCoords(seg->vertex_2->X, seg->vertex_2->Y, l.b.x, l.b.y);
             DrawMLine(&l, epi::MakeRGBA(0, 0, 128), false);
         }
         return;
@@ -851,8 +851,8 @@ static void AutomapWalkSeg(seg_t *seg)
     // only draw segs on the _right_ side of linedefs
     if (line->side[1] == seg->sidedef) return;
 
-    GetRotatedCoords(seg->v1->X, seg->v1->Y, l.a.x, l.a.y);
-    GetRotatedCoords(seg->v2->X, seg->v2->Y, l.b.x, l.b.y);
+    GetRotatedCoords(seg->vertex_1->X, seg->vertex_1->Y, l.a.x, l.a.y);
+    GetRotatedCoords(seg->vertex_2->X, seg->vertex_2->Y, l.b.x, l.b.y);
 
     if ((line->flags & MLF_Mapped) || show_walls)
     {
@@ -946,9 +946,9 @@ static void AutomapWalkSeg(seg_t *seg)
                 else
                     DrawMLine(&l, am_colors[kAutomapColorWall]);
             }
-            else if (!AlmostEquals(back->f_h, front->f_h))
+            else if (!AlmostEquals(back->floor_height, front->floor_height))
             {
-                float diff = fabs(back->f_h - front->f_h);
+                float diff = fabs(back->floor_height - front->floor_height);
 
                 // floor level change
                 if (diff > 24)
@@ -956,13 +956,13 @@ static void AutomapWalkSeg(seg_t *seg)
                 else
                     DrawMLine(&l, am_colors[kAutomapColorStep]);
             }
-            else if (!AlmostEquals(back->c_h, front->c_h))
+            else if (!AlmostEquals(back->ceiling_height, front->ceiling_height))
             {
                 // ceiling level change
                 DrawMLine(&l, am_colors[kAutomapColorCeil]);
             }
-            else if ((front->exfloor_used > 0 || back->exfloor_used > 0) &&
-                     (front->exfloor_used != back->exfloor_used ||
+            else if ((front->extrafloor_used > 0 || back->extrafloor_used > 0) &&
+                     (front->extrafloor_used != back->extrafloor_used ||
                       !CheckSimiliarRegions(front, back)))
             {
                 // -AJA- 1999/10/09: extra floor change.
@@ -1162,16 +1162,16 @@ static void AutomapWalkThing(MapObject *mo)
 //
 static void AutomapWalkSubsector(unsigned int num)
 {
-    subsector_t *sub = &level_subsectors[num];
+    Subsector *sub = &level_subsectors[num];
 
     // handle each seg
-    for (seg_t *seg = sub->segs; seg; seg = seg->sub_next)
+    for (Seg *seg = sub->segs; seg; seg = seg->subsector_next)
     {
         AutomapWalkSeg(seg);
     }
 
     // handle each thing
-    for (MapObject *mo = sub->thinglist; mo; mo = mo->subsector_next_)
+    for (MapObject *mo = sub->thing_list; mo; mo = mo->subsector_next_)
     {
         AutomapWalkThing(mo);
     }
@@ -1222,7 +1222,7 @@ static bool AutomapCheckBBox(float *bspcoord)
 //
 static void AutomapWalkBSPNode(unsigned int bspnum)
 {
-    node_t *node;
+    BspNode *node;
     int     side;
 
     // Found a subsector?
@@ -1236,11 +1236,11 @@ static void AutomapWalkBSPNode(unsigned int bspnum)
     side = 0;
 
     // Recursively divide right space
-    if (AutomapCheckBBox(node->bbox[0]))
+    if (AutomapCheckBBox(node->bounding_boxes[0]))
         AutomapWalkBSPNode(node->children[side]);
 
     // Recursively divide back space
-    if (AutomapCheckBBox(node->bbox[side ^ 1]))
+    if (AutomapCheckBBox(node->bounding_boxes[side ^ 1]))
         AutomapWalkBSPNode(node->children[side ^ 1]);
 }
 

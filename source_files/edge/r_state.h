@@ -42,22 +42,22 @@ extern int       total_level_vertexes;
 extern vertex_t *level_vertexes;
 
 extern int       total_level_sectors;
-extern sector_t *level_sectors;
+extern Sector *level_sectors;
 
 extern int          total_level_subsectors;
-extern subsector_t *level_subsectors;
+extern Subsector *level_subsectors;
 
 extern int           total_level_extrafloors;
-extern extrafloor_t *level_extrafloors;
+extern Extrafloor *level_extrafloors;
 
 extern int     total_level_nodes;
-extern node_t *level_nodes;
+extern BspNode *level_nodes;
 
 extern int     total_level_lines;
-extern line_t *level_lines;
+extern Line *level_lines;
 
 extern int     total_level_sides;
-extern side_t *level_sides;
+extern Side *level_sides;
 
 //
 // POV data.

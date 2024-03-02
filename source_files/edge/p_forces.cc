@@ -55,24 +55,24 @@ static void WindCurrentForce(Force *f, MapObject *mo)
     float z1 = mo->z;
     float z2 = z1 + mo->height_;
 
-    sector_t *sec = f->sector;
+    Sector *sec = f->sector;
 
     // NOTE: assumes that BOOM's [242] linetype was used
-    extrafloor_t *ef = sec->bottom_liq ? sec->bottom_liq : sec->bottom_ef;
+    Extrafloor *ef = sec->bottom_liquid ? sec->bottom_liquid : sec->bottom_extrafloor;
 
     float qty = 0.5f;
 
     if (f->is_wind)
     {
-        if (ef && z2 < ef->bottom_h) return;
+        if (ef && z2 < ef->bottom_height) return;
 
-        if (z1 > (ef ? ef->bottom_h : sec->f_h) + 2.0f) qty = 1.0f;
+        if (z1 > (ef ? ef->bottom_height : sec->floor_height) + 2.0f) qty = 1.0f;
     }
     else  // Current
     {
-        if (z1 > (ef ? ef->bottom_h : sec->f_h) + 2.0f) return;
+        if (z1 > (ef ? ef->bottom_height : sec->floor_height) + 2.0f) return;
 
-        if (z2 < (ef ? ef->bottom_h : sec->c_h)) qty = 1.0f;
+        if (z2 < (ef ? ef->bottom_height : sec->ceiling_height)) qty = 1.0f;
     }
 
     mo->momentum_.X += qty * f->direction.X;
@@ -120,9 +120,9 @@ static bool PushThingCallback(MapObject *mo, void *dataptr)
 //
 static void DoForce(Force *f)
 {
-    sector_t *sec = f->sector;
+    Sector *sec = f->sector;
 
-    if (sec->props.type & MSF_Push)
+    if (sec->properties.type & MSF_Push)
     {
         if (f->is_point)
         {
@@ -137,11 +137,11 @@ static void DoForce(Force *f)
         }
         else  // wind/current
         {
-            touch_node_t *nd;
+            TouchNode *nd;
 
-            for (nd = sec->touch_things; nd; nd = nd->sec_next)
-                if (nd->mo->hyper_flags_ & kHyperFlagPushable)
-                    WindCurrentForce(f, nd->mo);
+            for (nd = sec->touch_things; nd; nd = nd->sector_next)
+                if (nd->map_object->hyper_flags_ & kHyperFlagPushable)
+                    WindCurrentForce(f, nd->map_object);
         }
     }
 }
@@ -169,11 +169,11 @@ static Force *NewForce(void)
     return f;
 }
 
-void AddPointForce(sector_t *sec, float length)
+void AddPointForce(Sector *sec, float length)
 {
     // search for the point objects
-    for (subsector_t *sub = sec->subsectors; sub; sub = sub->sec_next)
-        for (MapObject *mo = sub->thinglist; mo; mo = mo->subsector_next_)
+    for (Subsector *sub = sec->subsectors; sub; sub = sub->sector_next)
+        for (MapObject *mo = sub->thing_list; mo; mo = mo->subsector_next_)
             if (mo->hyper_flags_ & kHyperFlagPointForce)
             {
                 Force *f = NewForce();
@@ -188,7 +188,7 @@ void AddPointForce(sector_t *sec, float length)
             }
 }
 
-void AddSectorForce(sector_t *sec, bool is_wind, float x_mag, float y_mag)
+void AddSectorForce(Sector *sec, bool is_wind, float x_mag, float y_mag)
 {
     Force *f = NewForce();
 

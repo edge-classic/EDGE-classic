@@ -593,9 +593,9 @@ static bool RAD_CheckHeightTrig(rad_trigger_t *trig, s_onheight_t *cond)
     }
 
     if (cond->is_ceil)
-        h = cond->cached_sector->c_h;
+        h = cond->cached_sector->ceiling_height;
     else
-        h = cond->cached_sector->f_h;
+        h = cond->cached_sector->floor_height;
 
     return (cond->z1 <= h && h <= cond->z2);
 }
@@ -660,10 +660,10 @@ static void DoRemoveTrigger(rad_trigger_t *trig)
 {
     // handle tag linkage
     if (trig->tag_next)
-        trig->tag_next->tag_prev = trig->tag_prev;
+        trig->tag_next->tag_previous = trig->tag_previous;
 
-    if (trig->tag_prev)
-        trig->tag_prev->tag_next = trig->tag_next;
+    if (trig->tag_previous)
+        trig->tag_previous->tag_next = trig->tag_next;
 
     // unlink and free it
     if (trig->next)
@@ -674,7 +674,7 @@ static void DoRemoveTrigger(rad_trigger_t *trig)
     else
         active_triggers = trig->next;
 
-    S_StopFX(&trig->sfx_origin);
+    S_StopFX(&trig->sound_effects_origin);
 
     delete trig;
 }
@@ -848,7 +848,7 @@ void RAD_MonsterIsDead(MapObject *mo)
 }
 
 //
-// Called from RAD_SpawnTriggers to set the tag_next & tag_prev fields
+// Called from RAD_SpawnTriggers to set the tag_next & tag_previous fields
 // of each rad_trigger_t, keeping all triggers with the same tag in a
 // linked list for faster handling.
 //
@@ -856,7 +856,7 @@ void RAD_GroupTriggerTags(rad_trigger_t *trig)
 {
     rad_trigger_t *cur;
 
-    trig->tag_next = trig->tag_prev = nullptr;
+    trig->tag_next = trig->tag_previous = nullptr;
 
     // find first trigger with the same tag #
     for (cur = active_triggers; cur; cur = cur->next)
@@ -875,12 +875,12 @@ void RAD_GroupTriggerTags(rad_trigger_t *trig)
     // link it in
 
     trig->tag_next = cur;
-    trig->tag_prev = cur->tag_prev;
+    trig->tag_previous = cur->tag_previous;
 
-    if (cur->tag_prev)
-        cur->tag_prev->tag_next = trig;
+    if (cur->tag_previous)
+        cur->tag_previous->tag_next = trig;
 
-    cur->tag_prev = trig;
+    cur->tag_previous = trig;
 }
 
 void RAD_SpawnTriggers(const char *map_name)

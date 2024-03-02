@@ -32,7 +32,7 @@ mdl_model_c *MDL_LoadModel(epi::File *f);
 short MDL_FindFrame(mdl_model_c *md, const char *name);
 
 void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, int frame1, int frame2, float lerp,
-                     float x, float y, float z, MapObject *mo, region_properties_t *props, float scale, float aspect,
+                     float x, float y, float z, MapObject *mo, RegionProperties *props, float scale, float aspect,
                      float bias, int rotation);
 
 void MDL_RenderModel_2D(mdl_model_c *md, const image_c *skin_img, int frame, float x, float y, float xscale,

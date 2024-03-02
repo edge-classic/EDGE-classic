@@ -41,10 +41,10 @@ MapObject *FindTeleportMan(int tag, const MapObjectDefinition *info)
     {
         if (level_sectors[i].tag != tag) continue;
 
-        for (subsector_t *sub = level_sectors[i].subsectors; sub;
-             sub              = sub->sec_next)
+        for (Subsector *sub = level_sectors[i].subsectors; sub;
+             sub              = sub->sector_next)
         {
-            for (MapObject *mo = sub->thinglist; mo; mo = mo->subsector_next_)
+            for (MapObject *mo = sub->thing_list; mo; mo = mo->subsector_next_)
                 if (mo->info_ == info &&
                     !(mo->extended_flags_ & kExtendedFlagNeverTarget))
                     return mo;
@@ -54,7 +54,7 @@ MapObject *FindTeleportMan(int tag, const MapObjectDefinition *info)
     return nullptr;  // not found
 }
 
-line_t *FindTeleportLine(int tag, line_t *original)
+Line *FindTeleportLine(int tag, Line *original)
 {
     for (int i = 0; i < total_level_lines; i++)
     {
@@ -105,7 +105,7 @@ line_t *FindTeleportLine(int tag, line_t *original)
 // -AJA- 2004/10/08: Reworked for Silent and Line-to-Line teleporters
 //                   (based on the logic in prBoom's p_telept.c code).
 //
-bool TeleportMapObject(line_t *line, int tag, MapObject *thing,
+bool TeleportMapObject(Line *line, int tag, MapObject *thing,
                        const TeleportDefinition *def)
 {
     if (!thing) return false;
@@ -122,10 +122,10 @@ bool TeleportMapObject(line_t *line, int tag, MapObject *thing,
 
     BAMAngle dest_ang;
     BAMAngle source_ang =
-        kBAMAngle90 + (line ? R_PointToAngle(0, 0, line->dx, line->dy) : 0);
+        kBAMAngle90 + (line ? R_PointToAngle(0, 0, line->delta_x, line->delta_y) : 0);
 
     MapObject *currmobj = nullptr;
-    line_t    *currline = nullptr;
+    Line    *currline = nullptr;
 
     bool flipped = (def->special_ & kTeleportSpecialFlipped) ? true : false;
 
@@ -141,16 +141,16 @@ bool TeleportMapObject(line_t *line, int tag, MapObject *thing,
 
         if (!currline) return false;
 
-        new_x = currline->v1->X + currline->dx / 2.0f;
-        new_y = currline->v1->Y + currline->dy / 2.0f;
+        new_x = currline->vertex_1->X + currline->delta_x / 2.0f;
+        new_y = currline->vertex_1->Y + currline->delta_y / 2.0f;
 
-        new_z = currline->frontsector ? currline->frontsector->f_h : -32000;
+        new_z = currline->front_sector ? currline->front_sector->floor_height : -32000;
 
-        if (currline->backsector)
-            new_z = HMM_MAX(new_z, currline->backsector->f_h);
+        if (currline->back_sector)
+            new_z = HMM_MAX(new_z, currline->back_sector->floor_height);
 
         dest_ang =
-            R_PointToAngle(0, 0, currline->dx, currline->dy) + kBAMAngle90;
+            R_PointToAngle(0, 0, currline->delta_x, currline->delta_y) + kBAMAngle90;
 
         flipped = !flipped;  // match Boom's logic
     }
@@ -191,15 +191,15 @@ bool TeleportMapObject(line_t *line, int tag, MapObject *thing,
 
         float pos = 0;
 
-        if (fabs(line->dx) > fabs(line->dy))
-            pos = (oldx - line->v1->X) / line->dx;
+        if (fabs(line->delta_x) > fabs(line->delta_y))
+            pos = (oldx - line->vertex_1->X) / line->delta_x;
         else
-            pos = (oldy - line->v1->Y) / line->dy;
+            pos = (oldy - line->vertex_1->Y) / line->delta_y;
 
         if (currline)
         {
-            dx = currline->dx * (pos - 0.5f);
-            dy = currline->dy * (pos - 0.5f);
+            dx = currline->delta_x * (pos - 0.5f);
+            dy = currline->delta_y * (pos - 0.5f);
 
             if (flipped)
             {
@@ -219,8 +219,8 @@ bool TeleportMapObject(line_t *line, int tag, MapObject *thing,
         }
         else if (currmobj)
         {
-            dx = line->dx * (pos - 0.5f);
-            dy = line->dy * (pos - 0.5f);
+            dx = line->delta_x * (pos - 0.5f);
+            dy = line->delta_y * (pos - 0.5f);
 
             // we need to rotate the offset vector
             BAMAngle offset_ang = dest_ang - source_ang;

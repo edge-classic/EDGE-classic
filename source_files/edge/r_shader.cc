@@ -350,8 +350,8 @@ class dynlight_shader_c : public abstract_shader_c
                               : is_additive           ? (GLuint)ENV_NONE
                                                       : GL_MODULATE,
                               (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->tex_id(), *pass_var, blending,
-                              *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->props.fog_color,
-                              mo->subsector_->sector->props.fog_density);
+                              *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
+                              mo->subsector_->sector->properties.fog_density);
 
             for (int v_idx = 0; v_idx < num_vert; v_idx++)
             {
@@ -406,15 +406,15 @@ class plane_glow_c : public abstract_shader_c
     }
 
   private:
-    inline float Dist(const sector_t *sec, float z)
+    inline float Dist(const Sector *sec, float z)
     {
         if (mo->info_->glow_type_ == kSectorGlowTypeFloor)
-            return fabs(sec->f_h - z);
+            return fabs(sec->floor_height - z);
         else
-            return fabs(sec->c_h - z); // kSectorGlowTypeCeiling
+            return fabs(sec->ceiling_height - z); // kSectorGlowTypeCeiling
     }
 
-    inline void TexCoord(HMM_Vec2 *texc, float r, const sector_t *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
+    inline void TexCoord(HMM_Vec2 *texc, float r, const Sector *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
     {
         texc->X = 0.5;
         texc->Y = 0.5 + Dist(sec, lit_pos->Z) / r / 2.0;
@@ -441,7 +441,7 @@ class plane_glow_c : public abstract_shader_c
   public:
     virtual void Sample(multi_color_c *col, float x, float y, float z)
     {
-        const sector_t *sec = mo->subsector_->sector;
+        const Sector *sec = mo->subsector_->sector;
 
         float dist = Dist(sec, z);
 
@@ -466,7 +466,7 @@ class plane_glow_c : public abstract_shader_c
 
     virtual void Corner(multi_color_c *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
     {
-        const sector_t *sec = mo->subsector_->sector;
+        const Sector *sec = mo->subsector_->sector;
 
         float dz = (mo->info_->glow_type_ == kSectorGlowTypeFloor) ? +1 : -1;
         float dist;
@@ -476,14 +476,14 @@ class plane_glow_c : public abstract_shader_c
             float weapon_z = mod_pos->z + mod_pos->height_ * mod_pos->info_->shotheight_;
 
             if (mo->info_->glow_type_ == kSectorGlowTypeFloor)
-                dist = weapon_z - sec->f_h;
+                dist = weapon_z - sec->floor_height;
             else
-                dist = sec->c_h - weapon_z;
+                dist = sec->ceiling_height - weapon_z;
         }
         else if (mo->info_->glow_type_ == kSectorGlowTypeFloor)
-            dist = mod_pos->z - sec->f_h;
+            dist = mod_pos->z - sec->floor_height;
         else
-            dist = sec->c_h - (mod_pos->z + mod_pos->height_);
+            dist = sec->ceiling_height - (mod_pos->z + mod_pos->height_);
 
         dist = HMM_MAX(1.0, fabs(dist));
 
@@ -511,7 +511,7 @@ class plane_glow_c : public abstract_shader_c
     virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
                           void *data, shader_coord_func_t func)
     {
-        const sector_t *sec = mo->subsector_->sector;
+        const Sector *sec = mo->subsector_->sector;
 
         for (int DL = 0; DL < 2; DL++)
         {
@@ -534,8 +534,8 @@ class plane_glow_c : public abstract_shader_c
                               : is_additive           ? (GLuint)ENV_NONE
                                                       : GL_MODULATE,
                               (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->tex_id(), *pass_var, blending,
-                              *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->props.fog_color,
-                              mo->subsector_->sector->props.fog_density);
+                              *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
+                              mo->subsector_->sector->properties.fog_density);
 
             for (int v_idx = 0; v_idx < num_vert; v_idx++)
             {
@@ -572,7 +572,7 @@ abstract_shader_c *MakePlaneGlow(MapObject *mo)
 class wall_glow_c : public abstract_shader_c
 {
   private:
-    line_t *ld;
+    Line *ld;
     MapObject *mo;
 
     float norm_x, norm_y; // normal
@@ -581,10 +581,10 @@ class wall_glow_c : public abstract_shader_c
 
     inline float Dist(float x, float y)
     {
-        return (ld->v1->X - x) * norm_x + (ld->v1->Y - y) * norm_y;
+        return (ld->vertex_1->X - x) * norm_x + (ld->vertex_1->Y - y) * norm_y;
     }
 
-    inline void TexCoord(HMM_Vec2 *texc, float r, const sector_t *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
+    inline void TexCoord(HMM_Vec2 *texc, float r, const Sector *sec, const HMM_Vec3 *lit_pos, const HMM_Vec3 *normal)
     {
         texc->X = 0.5;
         texc->Y = 0.5 + Dist(lit_pos->X, lit_pos->Y) / r / 2.0;
@@ -613,8 +613,8 @@ class wall_glow_c : public abstract_shader_c
     {
         SYS_ASSERT(mo->dynamic_light_.glow_wall);
         ld     = mo->dynamic_light_.glow_wall;
-        norm_x = (ld->v1->Y - ld->v2->Y) / ld->length;
-        norm_y = (ld->v2->X - ld->v1->X) / ld->length;
+        norm_x = (ld->vertex_1->Y - ld->vertex_2->Y) / ld->length;
+        norm_y = (ld->vertex_2->X - ld->vertex_1->X) / ld->length;
         // Note: these are shared, we must not delete them
         lim[0] = GetLightImage(mo->info_, 0);
         lim[1] = GetLightImage(mo->info_, 1);
@@ -678,7 +678,7 @@ class wall_glow_c : public abstract_shader_c
     virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
                           void *data, shader_coord_func_t func)
     {
-        const sector_t *sec = mo->subsector_->sector;
+        const Sector *sec = mo->subsector_->sector;
 
         for (int DL = 0; DL < 2; DL++)
         {
@@ -701,8 +701,8 @@ class wall_glow_c : public abstract_shader_c
                               : is_additive           ? (GLuint)ENV_NONE
                                                       : GL_MODULATE,
                               (is_additive && !masked) ? 0 : tex, GL_MODULATE, lim[DL]->tex_id(), *pass_var, blending,
-                              *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->props.fog_color,
-                              mo->subsector_->sector->props.fog_density);
+                              *pass_var > 0 ? kRGBANoValue : mo->subsector_->sector->properties.fog_color,
+                              mo->subsector_->sector->properties.fog_density);
 
             for (int v_idx = 0; v_idx < num_vert; v_idx++)
             {

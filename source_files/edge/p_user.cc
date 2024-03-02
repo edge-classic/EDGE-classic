@@ -73,25 +73,25 @@ static bool P_RoomPath(PathIntercept *in, void *dataptr)
 
     if (in->line)
     {
-        line_t *ld = in->line;
+        Line *ld = in->line;
 
-        if (ld->backsector && ld->frontsector)
+        if (ld->back_sector && ld->front_sector)
         {
-            if ((IS_SKY(ld->backsector->ceil) &&
-                 !IS_SKY(ld->frontsector->ceil)) ||
-                (!IS_SKY(ld->backsector->ceil) &&
-                 IS_SKY(ld->frontsector->ceil)))
+            if ((IS_SKY(ld->back_sector->ceiling) &&
+                 !IS_SKY(ld->front_sector->ceiling)) ||
+                (!IS_SKY(ld->back_sector->ceiling) &&
+                 IS_SKY(ld->front_sector->ceiling)))
             {
-                blocker->X = (ld->v1->X + ld->v2->X) / 2;
-                blocker->Y = (ld->v1->Y + ld->v2->Y) / 2;
+                blocker->X = (ld->vertex_1->X + ld->vertex_2->X) / 2;
+                blocker->Y = (ld->vertex_1->Y + ld->vertex_2->Y) / 2;
                 return false;
             }
         }
 
         if (ld->blocked)
         {
-            blocker->X = (ld->v1->X + ld->v2->X) / 2;
-            blocker->Y = (ld->v1->Y + ld->v2->Y) / 2;
+            blocker->X = (ld->vertex_1->X + ld->vertex_2->X) / 2;
+            blocker->Y = (ld->vertex_1->Y + ld->vertex_2->Y) / 2;
             return false;
         }
     }
@@ -104,8 +104,8 @@ static void CalcHeight(player_t *player, bool extra_tic)
 {
     bool      onground  = player->mo->z <= player->mo->floor_z_;
     float     sink_mult = 1.0f;
-    sector_t *cur_sec   = player->mo->subsector_->sector;
-    if (!cur_sec->exfloor_used && !cur_sec->heightsec && onground)
+    Sector *cur_sec   = player->mo->subsector_->sector;
+    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && onground)
         sink_mult -= cur_sec->sink_depth;
 
     if (erraticism.d_ && level_time_elapsed > 0 &&
@@ -737,18 +737,18 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
 
 #if 0  // DEBUG ONLY
 	{
-		touch_node_t *tn;
+		TouchNode *tn;
 		LogDebug("Player %d Touch List:\n", player->pnum);
-		for (tn = mo->touch_sectors_; tn; tn=tn->mo_next)
+		for (tn = mo->touch_sectors_; tn; tn=tn->map_object_next)
 		{
-			LogDebug("  SEC %d  Other = %s\n", tn->sec - sectors,
-				tn->sec_next ? tn->sec_next->mo->info_->name_ :
-			tn->sec_prev ? tn->sec_prev->mo->info_->name_ : "(None)");
+			LogDebug("  SEC %d  Other = %s\n", tn->sector - sectors,
+				tn->sector_next ? tn->sector_next->mo->info_->name_ :
+			tn->sector_previous ? tn->sector_previous->mo->info_->name_ : "(None)");
 
-			SYS_ASSERT(tn->mo == mo);
-			if (tn->mo_next)
+			SYS_ASSERT(tn->map_object == mo);
+			if (tn->map_object_next)
 			{
-				SYS_ASSERT(tn->mo_next->mo_prev == tn);
+				SYS_ASSERT(tn->map_object_next->mo_prev == tn);
 			}
 		}
 	}
@@ -788,7 +788,7 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
         {
             ExitType do_exit = player->mo->region_properties_->special->e_exit_;
 
-            player->mo->subsector_->sector->props.special = nullptr;
+            player->mo->subsector_->sector->properties.special = nullptr;
 
             if (do_exit == kExitTypeSecret)
                 GameSecretExitLevel(1);
@@ -813,8 +813,8 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
     if (erraticism.d_)
     {
         bool      sinking = false;
-        sector_t *cur_sec = player->mo->subsector_->sector;
-        if (!cur_sec->exfloor_used && !cur_sec->heightsec &&
+        Sector *cur_sec = player->mo->subsector_->sector;
+        if (!cur_sec->extrafloor_used && !cur_sec->height_sector &&
             cur_sec->sink_depth > 0 && player->mo->z <= player->mo->floor_z_)
             sinking = true;
         if (cmd->forward_move == 0 && cmd->side_move == 0 &&
@@ -851,14 +851,14 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
     ddf_reverb_ratio = 0;
 
     if (player->mo->region_properties_->special ||
-        player->mo->subsector_->sector->exfloor_used > 0 ||
+        player->mo->subsector_->sector->extrafloor_used > 0 ||
         player->underwater || player->swimming || player->airless)
     {
         PlayerInSpecialSector(player, player->mo->subsector_->sector,
                               should_think);
     }
 
-    if (IS_SKY(player->mo->subsector_->sector->ceil)) outdoor_reverb = true;
+    if (IS_SKY(player->mo->subsector_->sector->ceiling)) outdoor_reverb = true;
 
     // Check for weapon change.
     if (cmd->buttons & kButtonCodeChangeWeapon)

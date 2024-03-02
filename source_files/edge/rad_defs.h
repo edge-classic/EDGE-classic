@@ -473,7 +473,7 @@ typedef struct s_onheight_s
 
     // sector pointer, computed the first time this ONHEIGHT condition
     // is tested.
-    sector_t *cached_sector = nullptr;
+    Sector *cached_sector = nullptr;
 } s_onheight_t;
 
 // WAIT_UNTIL_DEAD info
@@ -577,7 +577,7 @@ typedef struct rad_trigger_s
 
     // link for triggers with the same tag
     struct rad_trigger_s *tag_next = nullptr;
-    struct rad_trigger_s *tag_prev = nullptr;
+    struct rad_trigger_s *tag_previous = nullptr;
 
     // parent info of trigger
     rad_script_t *info = nullptr;
@@ -609,7 +609,7 @@ typedef struct rad_trigger_s
     int menu_result = 0;
 
     // Sound handle
-    Position sfx_origin = {0, 0, 0};
+    Position sound_effects_origin = {0, 0, 0};
 
     // used for WAIT_UNTIL_DEAD, normally zero
     int wud_tag   = 0;

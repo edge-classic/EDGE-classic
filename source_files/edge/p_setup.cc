@@ -64,8 +64,8 @@
 #include "w_texture.h"
 #include "w_wad.h"
 
-#define EDGE_SEG_INVALID       ((seg_t *)-3)
-#define EDGE_SUBSECTOR_INVALID ((subsector_t *)-3)
+#define EDGE_SEG_INVALID       ((Seg *)-3)
+#define EDGE_SUBSECTOR_INVALID ((Subsector *)-3)
 
 static bool level_active = false;
 
@@ -81,25 +81,25 @@ int              total_level_vertexes;
 vertex_t        *level_vertexes = nullptr;
 static vertex_t *level_gl_vertexes;
 int              total_level_segs;
-seg_t           *level_segs;
+Seg           *level_segs;
 int              total_level_sectors;
-sector_t        *level_sectors;
+Sector        *level_sectors;
 int              total_level_subsectors;
-subsector_t     *level_subsectors;
+Subsector     *level_subsectors;
 int              total_level_extrafloors;
-extrafloor_t    *level_extrafloors;
+Extrafloor    *level_extrafloors;
 int              total_level_nodes;
-node_t          *level_nodes;
+BspNode          *level_nodes;
 int              total_level_lines;
-line_t          *level_lines;
+Line          *level_lines;
 int              total_level_sides;
-side_t          *level_sides;
+Side          *level_sides;
 static int       total_level_vertical_gaps;
-static vgap_t   *level_vertical_gaps;
+static VerticalGap   *level_vertical_gaps;
 
-vertex_seclist_t *level_vertex_sector_lists;
+VertexSectorList *level_vertex_sector_lists;
 
-static line_t **level_line_buffer = nullptr;
+static Line **level_line_buffer = nullptr;
 
 // bbox used
 static float dummy_bounding_box[4];
@@ -307,9 +307,9 @@ static void LoadVertexes(int lump)
     delete[] data;
 }
 
-static void SegCommonStuff(seg_t *seg, int linedef_in)
+static void SegCommonStuff(Seg *seg, int linedef_in)
 {
-    seg->frontsector = seg->backsector = nullptr;
+    seg->front_sector = seg->back_sector = nullptr;
 
     if (linedef_in == -1) { seg->miniseg = true; }
     else
@@ -321,10 +321,10 @@ static void SegCommonStuff(seg_t *seg, int linedef_in)
         seg->miniseg = false;
         seg->linedef = &level_lines[linedef_in];
 
-        float sx = seg->side ? seg->linedef->v2->X : seg->linedef->v1->X;
-        float sy = seg->side ? seg->linedef->v2->Y : seg->linedef->v1->Y;
+        float sx = seg->side ? seg->linedef->vertex_2->X : seg->linedef->vertex_1->X;
+        float sy = seg->side ? seg->linedef->vertex_2->Y : seg->linedef->vertex_1->Y;
 
-        seg->offset = R_PointToDist(sx, sy, seg->v1->X, seg->v1->Y);
+        seg->offset = R_PointToDist(sx, sy, seg->vertex_1->X, seg->vertex_1->Y);
 
         seg->sidedef = seg->linedef->side[seg->side];
 
@@ -332,13 +332,13 @@ static void SegCommonStuff(seg_t *seg, int linedef_in)
             FatalError("Bad GWA file: missing side for seg #%d\n",
                        (int)(seg - level_segs));
 
-        seg->frontsector = seg->sidedef->sector;
+        seg->front_sector = seg->sidedef->sector;
 
         if (seg->linedef->flags & MLF_TwoSided)
         {
-            side_t *other = seg->linedef->side[seg->side ^ 1];
+            Side *other = seg->linedef->side[seg->side ^ 1];
 
-            if (other) seg->backsector = other->sector;
+            if (other) seg->back_sector = other->sector;
         }
     }
 }
@@ -346,26 +346,26 @@ static void SegCommonStuff(seg_t *seg, int linedef_in)
 //
 // GroupSectorTags
 //
-// Called during P_LoadSectors to set the tag_next & tag_prev fields of
+// Called during P_LoadSectors to set the tag_next & tag_previous fields of
 // each sector_t, which keep all sectors with the same tag in a linked
 // list for faster handling.
 //
 // -AJA- 1999/07/29: written.
 //
-static void GroupSectorTags(sector_t *dest, sector_t *seclist, int numsecs)
+static void GroupSectorTags(Sector *dest, Sector *seclist, int numsecs)
 {
     // NOTE: `numsecs' does not include the current sector.
 
-    dest->tag_next = dest->tag_prev = nullptr;
+    dest->tag_next = dest->tag_previous = nullptr;
 
     for (; numsecs > 0; numsecs--)
     {
-        sector_t *src = &seclist[numsecs - 1];
+        Sector *src = &seclist[numsecs - 1];
 
         if (src->tag == dest->tag)
         {
             src->tag_next  = dest;
-            dest->tag_prev = src;
+            dest->tag_previous = src;
             return;
         }
     }
@@ -376,7 +376,7 @@ static void LoadSectors(int lump)
     const uint8_t      *data;
     int                 i;
     const raw_sector_t *ms;
-    sector_t           *ss;
+    Sector           *ss;
 
     if (!W_VerifyLumpName(lump, "SECTORS"))
     {
@@ -394,8 +394,8 @@ static void LoadSectors(int lump)
         FatalError("Bad WAD: level %s contains 0 sectors.\n",
                    current_map->lump_.c_str());
 
-    level_sectors = new sector_t[total_level_sectors];
-    Z_Clear(level_sectors, sector_t, total_level_sectors);
+    level_sectors = new Sector[total_level_sectors];
+    Z_Clear(level_sectors, Sector, total_level_sectors);
 
     data = W_LoadLump(lump);
     map_sectors_crc.AddBlock((const uint8_t *)data, W_LumpLength(lump));
@@ -408,25 +408,25 @@ static void LoadSectors(int lump)
     {
         char buffer[10];
 
-        ss->f_h = AlignedLittleEndianS16(ms->floor_h);
-        ss->c_h = AlignedLittleEndianS16(ms->ceil_h);
+        ss->floor_height = AlignedLittleEndianS16(ms->floor_h);
+        ss->ceiling_height = AlignedLittleEndianS16(ms->ceil_h);
 
         // return to wolfenstein?
         if (goobers.d_)
         {
-            ss->f_h = 0;
-            ss->c_h = (ms->floor_h == ms->ceil_h) ? 0 : 128.0f;
+            ss->floor_height = 0;
+            ss->ceiling_height = (ms->floor_h == ms->ceil_h) ? 0 : 128.0f;
         }
 
-        ss->orig_height = (ss->f_h + ss->c_h);
+        ss->original_height = (ss->floor_height + ss->ceiling_height);
 
         ss->floor.translucency = VISIBLE;
-        ss->floor.x_mat.X      = 1;
-        ss->floor.x_mat.Y      = 0;
-        ss->floor.y_mat.X      = 0;
-        ss->floor.y_mat.Y      = 1;
+        ss->floor.x_matrix.X      = 1;
+        ss->floor.x_matrix.Y      = 0;
+        ss->floor.y_matrix.X      = 0;
+        ss->floor.y_matrix.Y      = 1;
 
-        ss->ceil = ss->floor;
+        ss->ceiling = ss->floor;
 
         epi::CStringCopyMax(buffer, ms->floor_tex, 8);
         ss->floor.image = W_ImageLookup(buffer, kImageNamespaceFlat);
@@ -443,51 +443,51 @@ static void LoadSectors(int lump)
         }
 
         epi::CStringCopyMax(buffer, ms->ceil_tex, 8);
-        ss->ceil.image = W_ImageLookup(buffer, kImageNamespaceFlat);
+        ss->ceiling.image = W_ImageLookup(buffer, kImageNamespaceFlat);
 
         if (!ss->floor.image)
         {
             LogWarning("Bad Level: sector #%d has missing floor texture.\n", i);
             ss->floor.image = W_ImageLookup("FLAT1", kImageNamespaceFlat);
         }
-        if (!ss->ceil.image)
+        if (!ss->ceiling.image)
         {
             LogWarning("Bad Level: sector #%d has missing ceiling texture.\n",
                        i);
-            ss->ceil.image = ss->floor.image;
+            ss->ceiling.image = ss->floor.image;
         }
 
         // convert negative tags to zero
         ss->tag = HMM_MAX(0, AlignedLittleEndianS16(ms->tag));
 
-        ss->props.lightlevel = AlignedLittleEndianS16(ms->light);
+        ss->properties.light_level = AlignedLittleEndianS16(ms->light);
 
         int type = AlignedLittleEndianS16(ms->special);
 
-        ss->props.type    = HMM_MAX(0, type);
-        ss->props.special = P_LookupSectorType(ss->props.type);
+        ss->properties.type    = HMM_MAX(0, type);
+        ss->properties.special = P_LookupSectorType(ss->properties.type);
 
-        ss->exfloor_max = 0;
+        ss->extrafloor_maximum = 0;
 
-        ss->props.colourmap = nullptr;
+        ss->properties.colourmap = nullptr;
 
-        ss->props.gravity   = kGravityDefault;
-        ss->props.friction  = kFrictionDefault;
-        ss->props.viscosity = kViscosityDefault;
-        ss->props.drag      = kDragDefault;
+        ss->properties.gravity   = kGravityDefault;
+        ss->properties.friction  = kFrictionDefault;
+        ss->properties.viscosity = kViscosityDefault;
+        ss->properties.drag      = kDragDefault;
 
-        if (ss->props.special && ss->props.special->fog_color_ != kRGBANoValue)
+        if (ss->properties.special && ss->properties.special->fog_color_ != kRGBANoValue)
         {
-            ss->props.fog_color   = ss->props.special->fog_color_;
-            ss->props.fog_density = 0.01f * ss->props.special->fog_density_;
+            ss->properties.fog_color   = ss->properties.special->fog_color_;
+            ss->properties.fog_density = 0.01f * ss->properties.special->fog_density_;
         }
         else
         {
-            ss->props.fog_color   = kRGBANoValue;
-            ss->props.fog_density = 0;
+            ss->properties.fog_color   = kRGBANoValue;
+            ss->properties.fog_density = 0;
         }
 
-        ss->p = &ss->props;
+        ss->active_properties = &ss->properties;
 
         ss->sound_player = -1;
 
@@ -509,12 +509,12 @@ static void SetupRootNode(void)
         BoundingBoxClear(dummy_bounding_box);
 
         int    i;
-        seg_t *seg;
+        Seg *seg;
 
         for (i = 0, seg = level_segs; i < total_level_segs; i++, seg++)
         {
-            BoundingBoxAddPoint(dummy_bounding_box, seg->v1->X, seg->v1->Y);
-            BoundingBoxAddPoint(dummy_bounding_box, seg->v2->X, seg->v2->Y);
+            BoundingBoxAddPoint(dummy_bounding_box, seg->vertex_1->X, seg->vertex_1->Y);
+            BoundingBoxAddPoint(dummy_bounding_box, seg->vertex_2->X, seg->vertex_2->Y);
         }
     }
 }
@@ -537,7 +537,7 @@ static void UnknownThingWarning(int type, float x, float y)
 }
 
 static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
-                                float y, float z, sector_t *sec, BAMAngle angle,
+                                float y, float z, Sector *sec, BAMAngle angle,
                                 int options, int tag)
 {
     SpawnPoint point;
@@ -563,7 +563,7 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
     if (info->playernum_ > 0)
     {
         // -AJA- 2009/10/07: Hub support
-        if (sec->props.special && sec->props.special->hub_)
+        if (sec->properties.special && sec->properties.special->hub_)
         {
             if (sec->tag <= 0)
                 LogWarning("HUB_START in sector without tag @ (%1.0f %1.0f)\n",
@@ -725,7 +725,7 @@ static void LoadThings(int lump)
             continue;
         }
 
-        sector_t *sec = R_PointInSubsector(x, y)->sector;
+        Sector *sec = R_PointInSubsector(x, y)->sector;
 
         if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) &&
             !musinfo_tracks[current_map->name_].processed)
@@ -763,18 +763,18 @@ static void LoadThings(int lump)
             }
         }
 
-        z = sec->f_h;
+        z = sec->floor_height;
 
         if (objtype->flags_ & kMapObjectFlagSpawnCeiling)
-            z = sec->c_h - objtype->height_;
+            z = sec->ceiling_height - objtype->height_;
 
         if ((options & MTF_RESERVED) == 0 && (options & MTF_EXFLOOR_MASK))
         {
             int floor_num = (options & MTF_EXFLOOR_MASK) >> MTF_EXFLOOR_SHIFT;
 
-            for (extrafloor_t *ef = sec->bottom_ef; ef; ef = ef->higher)
+            for (Extrafloor *ef = sec->bottom_extrafloor; ef; ef = ef->higher)
             {
-                z = ef->top_h;
+                z = ef->top_height;
 
                 floor_num--;
                 if (floor_num == 0) break;
@@ -840,12 +840,12 @@ static void LoadHexenThings(int lump)
             continue;
         }
 
-        sector_t *sec = R_PointInSubsector(x, y)->sector;
+        Sector *sec = R_PointInSubsector(x, y)->sector;
 
-        z += sec->f_h;
+        z += sec->floor_height;
 
         if (objtype->flags_ & kMapObjectFlagSpawnCeiling)
-            z = sec->c_h - objtype->height_;
+            z = sec->ceiling_height - objtype->height_;
 
         SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
     }
@@ -853,45 +853,45 @@ static void LoadHexenThings(int lump)
     delete[] data;
 }
 
-static inline void ComputeLinedefData(line_t *ld, int side0, int side1)
+static inline void ComputeLinedefData(Line *ld, int side0, int side1)
 {
-    vertex_t *v1 = ld->v1;
-    vertex_t *v2 = ld->v2;
+    vertex_t *v1 = ld->vertex_1;
+    vertex_t *v2 = ld->vertex_2;
 
-    ld->dx = v2->X - v1->X;
-    ld->dy = v2->Y - v1->Y;
+    ld->delta_x = v2->X - v1->X;
+    ld->delta_y = v2->Y - v1->Y;
 
-    if (AlmostEquals(ld->dx, 0.0f))
-        ld->slopetype = ST_VERTICAL;
-    else if (AlmostEquals(ld->dy, 0.0f))
-        ld->slopetype = ST_HORIZONTAL;
-    else if (ld->dy / ld->dx > 0)
-        ld->slopetype = ST_POSITIVE;
+    if (AlmostEquals(ld->delta_x, 0.0f))
+        ld->slope_type = kLineClipVertical;
+    else if (AlmostEquals(ld->delta_y, 0.0f))
+        ld->slope_type = kLineClipHorizontal;
+    else if (ld->delta_y / ld->delta_x > 0)
+        ld->slope_type = kLineClipPositive;
     else
-        ld->slopetype = ST_NEGATIVE;
+        ld->slope_type = kLineClipNegative;
 
-    ld->length = R_PointToDist(0, 0, ld->dx, ld->dy);
+    ld->length = R_PointToDist(0, 0, ld->delta_x, ld->delta_y);
 
     if (v1->X < v2->X)
     {
-        ld->bbox[kBoundingBoxLeft]  = v1->X;
-        ld->bbox[kBoundingBoxRight] = v2->X;
+        ld->bounding_box[kBoundingBoxLeft]  = v1->X;
+        ld->bounding_box[kBoundingBoxRight] = v2->X;
     }
     else
     {
-        ld->bbox[kBoundingBoxLeft]  = v2->X;
-        ld->bbox[kBoundingBoxRight] = v1->X;
+        ld->bounding_box[kBoundingBoxLeft]  = v2->X;
+        ld->bounding_box[kBoundingBoxRight] = v1->X;
     }
 
     if (v1->Y < v2->Y)
     {
-        ld->bbox[kBoundingBoxBottom] = v1->Y;
-        ld->bbox[kBoundingBoxTop]    = v2->Y;
+        ld->bounding_box[kBoundingBoxBottom] = v1->Y;
+        ld->bounding_box[kBoundingBoxTop]    = v2->Y;
     }
     else
     {
-        ld->bbox[kBoundingBoxBottom] = v2->Y;
-        ld->bbox[kBoundingBoxTop]    = v1->Y;
+        ld->bounding_box[kBoundingBoxBottom] = v2->Y;
+        ld->bounding_box[kBoundingBoxTop]    = v1->Y;
     }
 
     if (!udmf_level && side0 == 0xFFFF) side0 = -1;
@@ -939,24 +939,24 @@ static void LoadLineDefs(int lump)
         FatalError("Bad WAD: level %s contains 0 linedefs.\n",
                    current_map->lump_.c_str());
 
-    level_lines = new line_t[total_level_lines];
+    level_lines = new Line[total_level_lines];
 
-    Z_Clear(level_lines, line_t, total_level_lines);
+    Z_Clear(level_lines, Line, total_level_lines);
 
     temp_line_sides = new int[total_level_lines * 2];
 
     const uint8_t *data = W_LoadLump(lump);
     map_lines_crc.AddBlock((const uint8_t *)data, W_LumpLength(lump));
 
-    line_t              *ld  = level_lines;
+    Line              *ld  = level_lines;
     const raw_linedef_t *mld = (const raw_linedef_t *)data;
 
     for (int i = 0; i < total_level_lines; i++, mld++, ld++)
     {
         ld->flags = AlignedLittleEndianU16(mld->flags);
         ld->tag   = HMM_MAX(0, AlignedLittleEndianS16(mld->tag));
-        ld->v1    = &level_vertexes[AlignedLittleEndianU16(mld->start)];
-        ld->v2    = &level_vertexes[AlignedLittleEndianU16(mld->end)];
+        ld->vertex_1    = &level_vertexes[AlignedLittleEndianU16(mld->start)];
+        ld->vertex_2    = &level_vertexes[AlignedLittleEndianU16(mld->end)];
 
         // Check for BoomClear flag bit and clear applicable specials
         // (PassThru may still be intentionally readded further down)
@@ -993,7 +993,7 @@ static void LoadLineDefs(int lump)
 
         ComputeLinedefData(ld, side0, side1);
 
-        // check for possible extrafloors, updating the exfloor_max count
+        // check for possible extrafloors, updating the extrafloor_maximum count
         // for the sectors in question.
 
         if (ld->tag && ld->special && ld->special->ef_.type_)
@@ -1002,7 +1002,7 @@ static void LoadLineDefs(int lump)
             {
                 if (level_sectors[j].tag != ld->tag) continue;
 
-                level_sectors[j].exfloor_max++;
+                level_sectors[j].extrafloor_maximum++;
                 total_level_extrafloors++;
             }
         }
@@ -1025,24 +1025,24 @@ static void LoadHexenLineDefs(int lump)
         FatalError("Bad WAD: level %s contains 0 linedefs.\n",
                    current_map->lump_.c_str());
 
-    level_lines = new line_t[total_level_lines];
+    level_lines = new Line[total_level_lines];
 
-    Z_Clear(level_lines, line_t, total_level_lines);
+    Z_Clear(level_lines, Line, total_level_lines);
 
     temp_line_sides = new int[total_level_lines * 2];
 
     const uint8_t *data = W_LoadLump(lump);
     map_lines_crc.AddBlock((const uint8_t *)data, W_LumpLength(lump));
 
-    line_t                    *ld  = level_lines;
+    Line                    *ld  = level_lines;
     const raw_hexen_linedef_t *mld = (const raw_hexen_linedef_t *)data;
 
     for (int i = 0; i < total_level_lines; i++, mld++, ld++)
     {
         ld->flags = AlignedLittleEndianU16(mld->flags) & 0x00FF;
         ld->tag   = 0;
-        ld->v1    = &level_vertexes[AlignedLittleEndianU16(mld->start)];
-        ld->v2    = &level_vertexes[AlignedLittleEndianU16(mld->end)];
+        ld->vertex_1    = &level_vertexes[AlignedLittleEndianU16(mld->start)];
+        ld->vertex_2    = &level_vertexes[AlignedLittleEndianU16(mld->end)];
 
         // this ignores the activation bits -- oh well
         ld->special = (mld->args[0] == 0)
@@ -1058,40 +1058,40 @@ static void LoadHexenLineDefs(int lump)
     delete[] data;
 }
 
-static sector_t *DetermineSubsectorSector(subsector_t *ss, int pass)
+static Sector *DetermineSubsectorSector(Subsector *ss, int pass)
 {
-    const seg_t *seg;
+    const Seg *seg;
 
-    for (seg = ss->segs; seg != nullptr; seg = seg->sub_next)
+    for (seg = ss->segs; seg != nullptr; seg = seg->subsector_next)
     {
         if (seg->miniseg) continue;
 
         // ignore self-referencing linedefs
-        if (seg->frontsector == seg->backsector) continue;
+        if (seg->front_sector == seg->back_sector) continue;
 
-        return seg->frontsector;
+        return seg->front_sector;
     }
 
-    for (seg = ss->segs; seg != nullptr; seg = seg->sub_next)
+    for (seg = ss->segs; seg != nullptr; seg = seg->subsector_next)
     {
         if (seg->partner == nullptr) continue;
 
         // only do this for self-referencing linedefs if the original sector
         // isn't tagged, otherwise save it for the next pass
-        if (seg->frontsector == seg->backsector && seg->frontsector &&
-            seg->frontsector->tag == 0)
-            return seg->frontsector;
+        if (seg->front_sector == seg->back_sector && seg->front_sector &&
+            seg->front_sector->tag == 0)
+            return seg->front_sector;
 
-        if (seg->frontsector != seg->backsector &&
-            seg->partner->front_sub->sector != nullptr)
-            return seg->partner->front_sub->sector;
+        if (seg->front_sector != seg->back_sector &&
+            seg->partner->front_subsector->sector != nullptr)
+            return seg->partner->front_subsector->sector;
     }
 
     if (pass == 1)
     {
-        for (seg = ss->segs; seg != nullptr; seg = seg->sub_next)
+        for (seg = ss->segs; seg != nullptr; seg = seg->subsector_next)
         {
-            if (!seg->miniseg) return seg->frontsector;
+            if (!seg->miniseg) return seg->front_sector;
         }
     }
 
@@ -1113,7 +1113,7 @@ static bool AssignSubsectorsPass(int pass)
 
     for (int i = 0; i < total_level_subsectors; i++)
     {
-        subsector_t *ss = &level_subsectors[i];
+        Subsector *ss = &level_subsectors[i];
 
         if (ss->sector == nullptr)
         {
@@ -1127,7 +1127,7 @@ static bool AssignSubsectorsPass(int pass)
 
                 // link subsector into parent sector's list.
                 // order is not important, so add it to the head of the list.
-                ss->sec_next           = ss->sector->subsectors;
+                ss->sector_next           = ss->sector->subsectors;
                 ss->sector->subsectors = ss;
             }
         }
@@ -1267,8 +1267,8 @@ static void LoadXGL3Nodes(int lumpnum)
     }
     LogDebug("LoadXGL3Nodes: Num SSECTORS = %d\n", total_level_subsectors);
 
-    level_subsectors = new subsector_t[total_level_subsectors];
-    Z_Clear(level_subsectors, subsector_t, total_level_subsectors);
+    level_subsectors = new Subsector[total_level_subsectors];
+    Z_Clear(level_subsectors, Subsector, total_level_subsectors);
 
     int *ss_temp = new int[total_level_subsectors];
     int  xglSegs = 0;
@@ -1290,9 +1290,9 @@ static void LoadXGL3Nodes(int lumpnum)
     }
     LogDebug("LoadXGL3Nodes: Num SEGS = %d\n", total_level_segs);
 
-    level_segs = new seg_t[total_level_segs];
-    Z_Clear(level_segs, seg_t, total_level_segs);
-    seg_t *seg = level_segs;
+    level_segs = new Seg[total_level_segs];
+    Z_Clear(level_segs, Seg, total_level_segs);
+    Seg *seg = level_segs;
 
     for (i = 0; i < total_level_segs; i++, seg++)
     {
@@ -1309,9 +1309,9 @@ static void LoadXGL3Nodes(int lumpnum)
         td += 1;
 
         if (v1num < (uint32_t)oVerts)
-            seg->v1 = &level_vertexes[v1num];
+            seg->vertex_1 = &level_vertexes[v1num];
         else
-            seg->v1 = &level_gl_vertexes[v1num - oVerts];
+            seg->vertex_1 = &level_gl_vertexes[v1num - oVerts];
 
         seg->side = side ? 1 : 0;
 
@@ -1328,13 +1328,13 @@ static void LoadXGL3Nodes(int lumpnum)
         // The following fields are filled out elsewhere:
         //     sub_next, front_sub, back_sub, frontsector, backsector.
 
-        seg->sub_next  = EDGE_SEG_INVALID;
-        seg->front_sub = seg->back_sub = EDGE_SUBSECTOR_INVALID;
+        seg->subsector_next  = EDGE_SEG_INVALID;
+        seg->front_subsector = seg->back_subsector = EDGE_SUBSECTOR_INVALID;
     }
 
     LogDebug("LoadXGL3Nodes: Post-process subsectors\n");
     // go back and fill in subsectors
-    subsector_t *ss = level_subsectors;
+    Subsector *ss = level_subsectors;
     xglSegs         = 0;
     for (i = 0; i < total_level_subsectors; i++, ss++)
     {
@@ -1347,39 +1347,39 @@ static void LoadXGL3Nodes(int lumpnum)
         seg = &level_segs[firstseg];
         for (int j = 0; j < countsegs; j++, seg++)
         {
-            seg->v2 = j == (countsegs - 1) ? level_segs[firstseg].v1
-                                           : level_segs[firstseg + j + 1].v1;
+            seg->vertex_2 = j == (countsegs - 1) ? level_segs[firstseg].vertex_1
+                                           : level_segs[firstseg + j + 1].vertex_1;
 
             seg->angle =
-                R_PointToAngle(seg->v1->X, seg->v1->Y, seg->v2->X, seg->v2->Y);
+                R_PointToAngle(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
 
             seg->length =
-                R_PointToDist(seg->v1->X, seg->v1->Y, seg->v2->X, seg->v2->Y);
+                R_PointToDist(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
         }
 
         // -AJA- 1999/09/23: New linked list for the segs of a subsector
         //       (part of true bsp rendering).
-        seg_t **prevptr = &ss->segs;
+        Seg **prevptr = &ss->segs;
 
         if (countsegs == 0)
             FatalError("LoadXGL3Nodes: level %s has invalid SSECTORS.\n",
                        current_map->lump_.c_str());
 
         ss->sector    = nullptr;
-        ss->thinglist = nullptr;
+        ss->thing_list = nullptr;
 
         // this is updated when the nodes are loaded
-        ss->bbox = dummy_bounding_box;
+        ss->bounding_box = dummy_bounding_box;
 
         for (int j = 0; j < countsegs; j++)
         {
-            seg_t *cur = &level_segs[firstseg + j];
+            Seg *cur = &level_segs[firstseg + j];
 
             *prevptr = cur;
-            prevptr  = &cur->sub_next;
+            prevptr  = &cur->subsector_next;
 
-            cur->front_sub = ss;
-            cur->back_sub  = nullptr;
+            cur->front_subsector = ss;
+            cur->back_subsector  = nullptr;
 
             // LogDebug("  ssec = %d, seg = %d\n", i, firstseg + j);
         }
@@ -1398,27 +1398,27 @@ static void LoadXGL3Nodes(int lumpnum)
     td += 4;
     LogDebug("LoadXGL3Nodes: Num nodes = %d\n", total_level_nodes);
 
-    level_nodes = new node_t[total_level_nodes + 1];
-    Z_Clear(level_nodes, node_t, total_level_nodes);
-    node_t *nd = level_nodes;
+    level_nodes = new BspNode[total_level_nodes + 1];
+    Z_Clear(level_nodes, BspNode, total_level_nodes);
+    BspNode *nd = level_nodes;
 
     for (i = 0; i < total_level_nodes; i++, nd++)
     {
-        nd->div.x = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
+        nd->divider.x = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
-        nd->div.y = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
+        nd->divider.y = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
-        nd->div.dx = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
+        nd->divider.delta_x = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
-        nd->div.dy = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
+        nd->divider.delta_y = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
 
-        nd->div_len = R_PointToDist(0, 0, nd->div.dx, nd->div.dy);
+        nd->divider_length = R_PointToDist(0, 0, nd->divider.delta_x, nd->divider.delta_y);
 
         for (int j = 0; j < 2; j++)
             for (int k = 0; k < 4; k++)
             {
-                nd->bbox[j][k] = (float)epi::UnalignedLittleEndianS16(td);
+                nd->bounding_boxes[j][k] = (float)epi::UnalignedLittleEndianS16(td);
                 td += 2;
             }
 
@@ -1430,9 +1430,9 @@ static void LoadXGL3Nodes(int lumpnum)
             // update bbox pointers in subsector
             if (nd->children[j] & NF_V5_SUBSECTOR)
             {
-                subsector_t *sss =
+                Subsector *sss =
                     level_subsectors + (nd->children[j] & ~NF_V5_SUBSECTOR);
-                sss->bbox = &nd->bbox[j][0];
+                sss->bounding_box = &nd->bounding_boxes[j][0];
             }
         }
     }
@@ -1687,45 +1687,45 @@ static void LoadUDMFSectors()
                         break;
                 }
             }
-            sector_t *ss = level_sectors + cur_sector;
-            ss->f_h      = fz;
-            ss->c_h      = cz;
+            Sector *ss = level_sectors + cur_sector;
+            ss->floor_height      = fz;
+            ss->ceiling_height      = cz;
 
             // return to wolfenstein?
             if (goobers.d_)
             {
-                ss->f_h = 0;
-                ss->c_h = (AlmostEquals(fz, cz)) ? 0 : 128.0f;
+                ss->floor_height = 0;
+                ss->ceiling_height = (AlmostEquals(fz, cz)) ? 0 : 128.0f;
             }
 
-            ss->orig_height = (ss->f_h + ss->c_h);
+            ss->original_height = (ss->floor_height + ss->ceiling_height);
 
             ss->floor.translucency = VISIBLE;
-            ss->floor.x_mat.X      = 1;
-            ss->floor.x_mat.Y      = 0;
-            ss->floor.y_mat.X      = 0;
-            ss->floor.y_mat.Y      = 1;
+            ss->floor.x_matrix.X      = 1;
+            ss->floor.x_matrix.Y      = 0;
+            ss->floor.y_matrix.X      = 0;
+            ss->floor.y_matrix.Y      = 1;
 
-            ss->ceil = ss->floor;
+            ss->ceiling = ss->floor;
 
             // granular offsets
             ss->floor.offset.X += fx;
             ss->floor.offset.Y += fy;
-            ss->ceil.offset.X += cx;
-            ss->ceil.offset.Y += cy;
+            ss->ceiling.offset.X += cx;
+            ss->ceiling.offset.Y += cy;
 
             // rotations
             if (!AlmostEquals(rf, 0.0f))
                 ss->floor.rotation = epi::BAMFromDegrees(rf);
 
             if (!AlmostEquals(rc, 0.0f))
-                ss->ceil.rotation = epi::BAMFromDegrees(rc);
+                ss->ceiling.rotation = epi::BAMFromDegrees(rc);
 
             // granular scaling
-            ss->floor.x_mat.X = fx_sc;
-            ss->floor.y_mat.Y = fy_sc;
-            ss->ceil.x_mat.X  = cx_sc;
-            ss->ceil.y_mat.Y  = cy_sc;
+            ss->floor.x_matrix.X = fx_sc;
+            ss->floor.y_matrix.Y = fy_sc;
+            ss->ceiling.x_matrix.X  = cx_sc;
+            ss->ceiling.y_matrix.Y  = cy_sc;
 
             ss->floor.image = W_ImageLookup(floor_tex, kImageNamespaceFlat);
 
@@ -1740,7 +1740,7 @@ static void LoadUDMFSectors()
                 }
             }
 
-            ss->ceil.image = W_ImageLookup(ceil_tex, kImageNamespaceFlat);
+            ss->ceiling.image = W_ImageLookup(ceil_tex, kImageNamespaceFlat);
 
             if (!ss->floor.image)
             {
@@ -1748,31 +1748,31 @@ static void LoadUDMFSectors()
                            cur_sector);
                 ss->floor.image = W_ImageLookup("FLAT1", kImageNamespaceFlat);
             }
-            if (!ss->ceil.image)
+            if (!ss->ceiling.image)
             {
                 LogWarning(
                     "Bad Level: sector #%d has missing ceiling texture.\n",
                     cur_sector);
-                ss->ceil.image = ss->floor.image;
+                ss->ceiling.image = ss->floor.image;
             }
 
             // convert negative tags to zero
             ss->tag = HMM_MAX(0, tag);
 
-            ss->props.lightlevel = light;
+            ss->properties.light_level = light;
 
             // convert negative types to zero
-            ss->props.type    = HMM_MAX(0, type);
-            ss->props.special = P_LookupSectorType(ss->props.type);
+            ss->properties.type    = HMM_MAX(0, type);
+            ss->properties.special = P_LookupSectorType(ss->properties.type);
 
-            ss->exfloor_max = 0;
+            ss->extrafloor_maximum = 0;
 
-            ss->props.colourmap = nullptr;
+            ss->properties.colourmap = nullptr;
 
-            ss->props.gravity   = kGravityDefault * gravfactor;
-            ss->props.friction  = kFrictionDefault;
-            ss->props.viscosity = kViscosityDefault;
-            ss->props.drag      = kDragDefault;
+            ss->properties.gravity   = kGravityDefault * gravfactor;
+            ss->properties.friction  = kFrictionDefault;
+            ss->properties.viscosity = kViscosityDefault;
+            ss->properties.drag      = kDragDefault;
 
             // Allow UDMF sector light/fog information to override DDFSECT types
             if (fog_color != SG_BLACK_RGBA32)  // All black is the established
@@ -1781,25 +1781,25 @@ static void LoadUDMFSectors()
                 // Prevent UDMF-specified fog color from having our internal 'no
                 // value'...uh...value
                 if (fog_color == kRGBANoValue) fog_color ^= 0x00010100;
-                ss->props.fog_color = fog_color;
+                ss->properties.fog_color = fog_color;
                 // Best-effort match for GZDoom's fogdensity values so that UDB,
                 // etc give predictable results
                 if (fog_density < 2)
-                    ss->props.fog_density = 0.002f;
+                    ss->properties.fog_density = 0.002f;
                 else
-                    ss->props.fog_density =
+                    ss->properties.fog_density =
                         0.01f * ((float)fog_density / 1020.0f);
             }
-            else if (ss->props.special &&
-                     ss->props.special->fog_color_ != kRGBANoValue)
+            else if (ss->properties.special &&
+                     ss->properties.special->fog_color_ != kRGBANoValue)
             {
-                ss->props.fog_color   = ss->props.special->fog_color_;
-                ss->props.fog_density = 0.01f * ss->props.special->fog_density_;
+                ss->properties.fog_color   = ss->properties.special->fog_color_;
+                ss->properties.fog_density = 0.01f * ss->properties.special->fog_density_;
             }
             else
             {
-                ss->props.fog_color   = kRGBANoValue;
-                ss->props.fog_density = 0;
+                ss->properties.fog_color   = kRGBANoValue;
+                ss->properties.fog_density = 0;
             }
             if (light_color != SG_WHITE_RGBA32)
             {
@@ -1810,23 +1810,23 @@ static void LoadUDMFSectors()
                     if (cmap->gl_color_ != kRGBANoValue &&
                         cmap->gl_color_ == light_color)
                     {
-                        ss->props.colourmap = cmap;
+                        ss->properties.colourmap = cmap;
                         break;
                     }
                 }
-                if (!ss->props.colourmap ||
-                    ss->props.colourmap->gl_color_ != light_color)
+                if (!ss->properties.colourmap ||
+                    ss->properties.colourmap->gl_color_ != light_color)
                 {
                     Colormap *ad_hoc = new Colormap;
                     ad_hoc->name_ =
                         epi::StringFormat("UDMF_%d", light_color);  // Internal
                     ad_hoc->gl_color_   = light_color;
-                    ss->props.colourmap = ad_hoc;
+                    ss->properties.colourmap = ad_hoc;
                     colormaps.push_back(ad_hoc);
                 }
             }
 
-            ss->p = &ss->props;
+            ss->active_properties = &ss->properties;
 
             ss->sound_player = -1;
 
@@ -1854,8 +1854,8 @@ static void LoadUDMFSideDefs()
 
     LogDebug("LoadUDMFSectors: parsing TEXTMAP\n");
 
-    level_sides = new side_t[total_level_sides];
-    Z_Clear(level_sides, side_t, total_level_sides);
+    level_sides = new Side[total_level_sides];
+    Z_Clear(level_sides, Side, total_level_sides);
 
     int nummapsides = 0;
 
@@ -1986,15 +1986,15 @@ static void LoadUDMFSideDefs()
             }
             SYS_ASSERT(nummapsides <= total_level_sides);  // sanity check
 
-            side_t *sd = level_sides + nummapsides - 1;
+            Side *sd = level_sides + nummapsides - 1;
 
             sd->top.translucency = VISIBLE;
             sd->top.offset.X     = x;
             sd->top.offset.Y     = y;
-            sd->top.x_mat.X      = 1;
-            sd->top.x_mat.Y      = 0;
-            sd->top.y_mat.X      = 0;
-            sd->top.y_mat.Y      = 1;
+            sd->top.x_matrix.X      = 1;
+            sd->top.x_matrix.Y      = 0;
+            sd->top.y_matrix.X      = 0;
+            sd->top.y_matrix.Y      = 1;
 
             sd->middle = sd->top;
             sd->bottom = sd->top;
@@ -2028,17 +2028,17 @@ static void LoadUDMFSideDefs()
             sd->top.offset.Y += highy;
 
             // granular scaling
-            sd->bottom.x_mat.X = low_scx;
-            sd->middle.x_mat.X = mid_scx;
-            sd->top.x_mat.X    = high_scx;
-            sd->bottom.y_mat.Y = low_scy;
-            sd->middle.y_mat.Y = mid_scy;
-            sd->top.y_mat.Y    = high_scy;
+            sd->bottom.x_matrix.X = low_scx;
+            sd->middle.x_matrix.X = mid_scx;
+            sd->top.x_matrix.X    = high_scx;
+            sd->bottom.y_matrix.Y = low_scy;
+            sd->middle.y_matrix.Y = mid_scy;
+            sd->top.y_matrix.Y    = high_scy;
 
             // handle BOOM colormaps with [242] linetype
-            sd->top.boom_colmap    = colormaps.Lookup(top_tex);
-            sd->middle.boom_colmap = colormaps.Lookup(middle_tex);
-            sd->bottom.boom_colmap = colormaps.Lookup(bottom_tex);
+            sd->top.boom_colormap    = colormaps.Lookup(top_tex);
+            sd->middle.boom_colormap = colormaps.Lookup(middle_tex);
+            sd->bottom.boom_colormap = colormaps.Lookup(bottom_tex);
 
             if (sd->top.image &&
                 fabs(sd->top.offset.Y) > IM_HEIGHT(sd->top.image))
@@ -2071,11 +2071,11 @@ static void LoadUDMFSideDefs()
 
     SYS_ASSERT(temp_line_sides);
 
-    side_t *sd = level_sides;
+    Side *sd = level_sides;
 
     for (int i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = level_lines + i;
+        Line *ld = level_lines + i;
 
         int side0 = temp_line_sides[i * 2 + 0];
         int side1 = temp_line_sides[i * 2 + 1];
@@ -2099,10 +2099,10 @@ static void LoadUDMFSideDefs()
         ld->side[0] = sd;
         if (sd->middle.image && (side1 != -1))
         {
-            sd->midmask_offset  = sd->middle.offset.Y;
+            sd->middle_mask_offset  = sd->middle.offset.Y;
             sd->middle.offset.Y = 0;
         }
-        ld->frontsector = sd->sector;
+        ld->front_sector = sd->sector;
         sd++;
 
         if (side1 != -1)
@@ -2110,10 +2110,10 @@ static void LoadUDMFSideDefs()
             ld->side[1] = sd;
             if (sd->middle.image)
             {
-                sd->midmask_offset  = sd->middle.offset.Y;
+                sd->middle_mask_offset  = sd->middle.offset.Y;
                 sd->middle.offset.Y = 0;
             }
-            ld->backsector = sd->sector;
+            ld->back_sector = sd->sector;
             sd++;
         }
 
@@ -2252,12 +2252,12 @@ static void LoadUDMFLineDefs()
                         break;
                 }
             }
-            line_t *ld = level_lines + cur_line;
+            Line *ld = level_lines + cur_line;
 
             ld->flags = flags;
             ld->tag   = HMM_MAX(0, tag);
-            ld->v1    = &level_vertexes[v1];
-            ld->v2    = &level_vertexes[v2];
+            ld->vertex_1    = &level_vertexes[v1];
+            ld->vertex_2    = &level_vertexes[v2];
 
             ld->special = P_LookupLineType(HMM_MAX(0, special));
 
@@ -2293,7 +2293,7 @@ static void LoadUDMFLineDefs()
                 {
                     if (level_sectors[j].tag != ld->tag) continue;
 
-                    level_sectors[j].exfloor_max++;
+                    level_sectors[j].extrafloor_maximum++;
                     total_level_extrafloors++;
                 }
             }
@@ -2461,7 +2461,7 @@ static void LoadUDMFThings()
                 continue;
             }
 
-            sector_t *sec = R_PointInSubsector(x, y)->sector;
+            Sector *sec = R_PointInSubsector(x, y)->sector;
 
             if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) &&
                 !musinfo_tracks[current_map->name_].processed)
@@ -2503,9 +2503,9 @@ static void LoadUDMFThings()
             }
 
             if (objtype->flags_ & kMapObjectFlagSpawnCeiling)
-                z += sec->c_h - objtype->height_;
+                z += sec->ceiling_height - objtype->height_;
             else
-                z += sec->f_h;
+                z += sec->floor_height;
 
             MapObject *udmf_thing =
                 SpawnMapThing(objtype, x, y, z, sec, angle, options, tag);
@@ -2639,14 +2639,14 @@ static void LoadUDMFCounts()
 
     // initialize arrays
     level_vertexes = new vertex_t[total_level_vertexes];
-    level_sectors  = new sector_t[total_level_sectors];
-    Z_Clear(level_sectors, sector_t, total_level_sectors);
-    level_lines = new line_t[total_level_lines];
-    Z_Clear(level_lines, line_t, total_level_lines);
+    level_sectors  = new Sector[total_level_sectors];
+    Z_Clear(level_sectors, Sector, total_level_sectors);
+    level_lines = new Line[total_level_lines];
+    Z_Clear(level_lines, Line, total_level_lines);
     temp_line_sides = new int[total_level_lines * 2];
 }
 
-static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd,
+static void TransferMapSideDef(const raw_sidedef_t *msd, Side *sd,
                                bool two_sided)
 {
     char upper_tex[10];
@@ -2658,10 +2658,10 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd,
     sd->top.translucency = VISIBLE;
     sd->top.offset.X     = AlignedLittleEndianS16(msd->x_offset);
     sd->top.offset.Y     = AlignedLittleEndianS16(msd->y_offset);
-    sd->top.x_mat.X      = 1;
-    sd->top.x_mat.Y      = 0;
-    sd->top.y_mat.X      = 0;
-    sd->top.y_mat.Y      = 1;
+    sd->top.x_matrix.X      = 1;
+    sd->top.x_matrix.Y      = 0;
+    sd->top.y_matrix.X      = 0;
+    sd->top.y_matrix.Y      = 1;
 
     sd->middle = sd->top;
     sd->bottom = sd->top;
@@ -2692,13 +2692,13 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, side_t *sd,
     sd->bottom.image = W_ImageLookup(lower_tex, kImageNamespaceTexture);
 
     // handle BOOM colormaps with [242] linetype
-    sd->top.boom_colmap    = colormaps.Lookup(upper_tex);
-    sd->middle.boom_colmap = colormaps.Lookup(middle_tex);
-    sd->bottom.boom_colmap = colormaps.Lookup(lower_tex);
+    sd->top.boom_colormap    = colormaps.Lookup(upper_tex);
+    sd->middle.boom_colormap = colormaps.Lookup(middle_tex);
+    sd->bottom.boom_colormap = colormaps.Lookup(lower_tex);
 
     if (sd->middle.image && two_sided)
     {
-        sd->midmask_offset  = sd->middle.offset.Y;
+        sd->middle_mask_offset  = sd->middle.offset.Y;
         sd->middle.offset.Y = 0;
     }
 
@@ -2721,7 +2721,7 @@ static void LoadSideDefs(int lump)
     int                  i;
     const uint8_t       *data;
     const raw_sidedef_t *msd;
-    side_t              *sd;
+    Side              *sd;
 
     int nummapsides;
 
@@ -2735,9 +2735,9 @@ static void LoadSideDefs(int lump)
         FatalError("Bad WAD: level %s contains 0 sidedefs.\n",
                    current_map->lump_.c_str());
 
-    level_sides = new side_t[total_level_sides];
+    level_sides = new Side[total_level_sides];
 
-    Z_Clear(level_sides, side_t, total_level_sides);
+    Z_Clear(level_sides, Side, total_level_sides);
 
     data = W_LoadLump(lump);
     msd  = (const raw_sidedef_t *)data;
@@ -2748,7 +2748,7 @@ static void LoadSideDefs(int lump)
 
     for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = level_lines + i;
+        Line *ld = level_lines + i;
 
         int side0 = temp_line_sides[i * 2 + 0];
         int side1 = temp_line_sides[i * 2 + 1];
@@ -2771,14 +2771,14 @@ static void LoadSideDefs(int lump)
 
         ld->side[0] = sd;
         TransferMapSideDef(msd + side0, sd, (side1 != -1));
-        ld->frontsector = sd->sector;
+        ld->front_sector = sd->sector;
         sd++;
 
         if (side1 != -1)
         {
             ld->side[1] = sd;
             TransferMapSideDef(msd + side1, sd, true);
-            ld->backsector = sd->sector;
+            ld->back_sector = sd->sector;
             sd++;
         }
 
@@ -2793,7 +2793,7 @@ static void LoadSideDefs(int lump)
 //
 // SetupExtrafloors
 //
-// This is done after loading sectors (which sets exfloor_max to 0)
+// This is done after loading sectors (which sets extrafloor_maximum to 0)
 // and after loading linedefs (which increases it for each new
 // extrafloor).  So now we know the maximum number of extrafloors
 // that can ever be needed.
@@ -2804,19 +2804,19 @@ static void LoadSideDefs(int lump)
 static void SetupExtrafloors(void)
 {
     int       i, ef_index = 0;
-    sector_t *ss;
+    Sector *ss;
 
     if (total_level_extrafloors == 0) return;
 
-    level_extrafloors = new extrafloor_t[total_level_extrafloors];
+    level_extrafloors = new Extrafloor[total_level_extrafloors];
 
-    Z_Clear(level_extrafloors, extrafloor_t, total_level_extrafloors);
+    Z_Clear(level_extrafloors, Extrafloor, total_level_extrafloors);
 
     for (i = 0, ss = level_sectors; i < total_level_sectors; i++, ss++)
     {
-        ss->exfloor_first = level_extrafloors + ef_index;
+        ss->extrafloor_first = level_extrafloors + ef_index;
 
-        ef_index += ss->exfloor_max;
+        ef_index += ss->extrafloor_maximum;
 
         SYS_ASSERT(ef_index <= total_level_extrafloors);
     }
@@ -2828,7 +2828,7 @@ static void SetupSlidingDoors(void)
 {
     for (int i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = level_lines + i;
+        Line *ld = level_lines + i;
 
         if (!ld->special || ld->special->s_.type_ == kSlidingDoorTypeNone)
             continue;
@@ -2839,7 +2839,7 @@ static void SetupSlidingDoors(void)
         {
             for (int k = 0; k < total_level_lines; k++)
             {
-                line_t *other = level_lines + k;
+                Line *other = level_lines + k;
 
                 if (other->tag != ld->tag || other == ld) continue;
 
@@ -2860,29 +2860,29 @@ static void SetupVertGaps(void)
     int line_gaps       = 0;
     int sect_sight_gaps = 0;
 
-    vgap_t *cur_gap;
+    VerticalGap *cur_gap;
 
     for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = level_lines + i;
+        Line *ld = level_lines + i;
 
-        ld->max_gaps = ld->backsector ? 1 : 0;
+        ld->maximum_gaps = ld->back_sector ? 1 : 0;
 
         // factor in extrafloors
-        ld->max_gaps += ld->frontsector->exfloor_max;
+        ld->maximum_gaps += ld->front_sector->extrafloor_maximum;
 
-        if (ld->backsector) ld->max_gaps += ld->backsector->exfloor_max;
+        if (ld->back_sector) ld->maximum_gaps += ld->back_sector->extrafloor_maximum;
 
-        line_gaps += ld->max_gaps;
+        line_gaps += ld->maximum_gaps;
     }
 
     for (i = 0; i < total_level_sectors; i++)
     {
-        sector_t *sec = level_sectors + i;
+        Sector *sec = level_sectors + i;
 
-        sec->max_gaps = sec->exfloor_max + 1;
+        sec->maximum_gaps = sec->extrafloor_maximum + 1;
 
-        sect_sight_gaps += sec->max_gaps;
+        sect_sight_gaps += sec->maximum_gaps;
     }
 
     total_level_vertical_gaps = line_gaps + sect_sight_gaps;
@@ -2893,30 +2893,30 @@ static void SetupVertGaps(void)
     // zero is now impossible
     SYS_ASSERT(total_level_vertical_gaps > 0);
 
-    level_vertical_gaps = new vgap_t[total_level_vertical_gaps];
+    level_vertical_gaps = new VerticalGap[total_level_vertical_gaps];
 
-    Z_Clear(level_vertical_gaps, vgap_t, total_level_vertical_gaps);
+    Z_Clear(level_vertical_gaps, VerticalGap, total_level_vertical_gaps);
 
     for (i = 0, cur_gap = level_vertical_gaps; i < total_level_lines; i++)
     {
-        line_t *ld = level_lines + i;
+        Line *ld = level_lines + i;
 
-        if (ld->max_gaps == 0) continue;
+        if (ld->maximum_gaps == 0) continue;
 
         ld->gaps = cur_gap;
-        cur_gap += ld->max_gaps;
+        cur_gap += ld->maximum_gaps;
     }
 
     SYS_ASSERT(cur_gap == (level_vertical_gaps + line_gaps));
 
     for (i = 0; i < total_level_sectors; i++)
     {
-        sector_t *sec = level_sectors + i;
+        Sector *sec = level_sectors + i;
 
-        if (sec->max_gaps == 0) continue;
+        if (sec->maximum_gaps == 0) continue;
 
         sec->sight_gaps = cur_gap;
-        cur_gap += sec->max_gaps;
+        cur_gap += sec->maximum_gaps;
     }
 
     SYS_ASSERT(cur_gap == (level_vertical_gaps + total_level_vertical_gaps));
@@ -2930,18 +2930,18 @@ static void DetectDeepWaterTrick(void)
 
     for (int i = 0; i < total_level_segs; i++)
     {
-        const seg_t *seg = level_segs + i;
+        const Seg *seg = level_segs + i;
 
         if (seg->miniseg) continue;
 
-        SYS_ASSERT(seg->front_sub);
+        SYS_ASSERT(seg->front_subsector);
 
-        if (seg->linedef->backsector &&
-            seg->linedef->frontsector == seg->linedef->backsector)
+        if (seg->linedef->back_sector &&
+            seg->linedef->front_sector == seg->linedef->back_sector)
         {
-            self_subs[seg->front_sub - level_subsectors] |= 1;
+            self_subs[seg->front_subsector - level_subsectors] |= 1;
         }
-        else { self_subs[seg->front_sub - level_subsectors] |= 2; }
+        else { self_subs[seg->front_subsector - level_subsectors] |= 2; }
     }
 
     int count;
@@ -2954,8 +2954,8 @@ static void DetectDeepWaterTrick(void)
 
         for (int j = 0; j < total_level_subsectors; j++)
         {
-            subsector_t *sub = level_subsectors + j;
-            const seg_t *seg;
+            Subsector *sub = level_subsectors + j;
+            const Seg *seg;
 
             if (self_subs[j] != 1) continue;
 #if 0
@@ -2964,16 +2964,16 @@ static void DetectDeepWaterTrick(void)
 				(sub->bbox[kBoundingBoxBottom] + sub->bbox[kBoundingBoxTop]) / 2.0,
 				sub->sector - sectors, self_subs[j]);
 #endif
-            const seg_t *Xseg = 0;
+            const Seg *Xseg = 0;
 
-            for (seg = sub->segs; seg; seg = seg->sub_next)
+            for (seg = sub->segs; seg; seg = seg->subsector_next)
             {
-                SYS_ASSERT(seg->back_sub);
+                SYS_ASSERT(seg->back_subsector);
 
-                int k = seg->back_sub - level_subsectors;
+                int k = seg->back_subsector - level_subsectors;
 #if 0
 				LogDebug("  Seg [%d] back_sub %d (back_sect %d)\n", seg - segs, k,
-					seg->back_sub->sector - sectors);
+					seg->back_subsector->sector - sectors);
 #endif
                 if (self_subs[k] & 2)
                 {
@@ -2983,12 +2983,12 @@ static void DetectDeepWaterTrick(void)
 
             if (Xseg)
             {
-                sub->deep_ref = Xseg->back_sub->deep_ref
-                                    ? Xseg->back_sub->deep_ref
-                                    : Xseg->back_sub->sector;
+                sub->deep_water_reference = Xseg->back_subsector->deep_water_reference
+                                    ? Xseg->back_subsector->deep_water_reference
+                                    : Xseg->back_subsector->sector;
 #if 0
 				LogDebug("  Updating (from seg %d) --> SEC %d\n", Xseg - segs,
-					sub->deep_ref - sectors);
+					sub->deep_water_reference - sectors);
 #endif
                 self_subs[j] = 3;
 
@@ -3034,21 +3034,21 @@ void GroupLines(void)
     int       i;
     int       j;
     int       total;
-    line_t   *li;
-    sector_t *sector;
-    seg_t    *seg;
+    Line   *li;
+    Sector *sector;
+    Seg    *seg;
     float     bbox[4];
-    line_t  **line_p;
+    Line  **line_p;
 
     // setup remaining seg information
     for (i = 0, seg = level_segs; i < total_level_segs; i++, seg++)
     {
-        if (seg->partner) seg->back_sub = seg->partner->front_sub;
+        if (seg->partner) seg->back_subsector = seg->partner->front_subsector;
 
-        if (!seg->frontsector) seg->frontsector = seg->front_sub->sector;
+        if (!seg->front_sector) seg->front_sector = seg->front_subsector->sector;
 
-        if (!seg->backsector && seg->back_sub)
-            seg->backsector = seg->back_sub->sector;
+        if (!seg->back_sector && seg->back_subsector)
+            seg->back_sector = seg->back_subsector->sector;
     }
 
     // count number of lines in each sector
@@ -3057,17 +3057,17 @@ void GroupLines(void)
     for (i = 0; i < total_level_lines; i++, li++)
     {
         total++;
-        li->frontsector->linecount++;
+        li->front_sector->line_count++;
 
-        if (li->backsector && li->backsector != li->frontsector)
+        if (li->back_sector && li->back_sector != li->front_sector)
         {
             total++;
-            li->backsector->linecount++;
+            li->back_sector->line_count++;
         }
     }
 
     // build line tables for each sector
-    level_line_buffer = new line_t *[total];
+    level_line_buffer = new Line *[total];
 
     line_p = level_line_buffer;
     sector = level_sectors;
@@ -3079,28 +3079,28 @@ void GroupLines(void)
         li            = level_lines;
         for (j = 0; j < total_level_lines; j++, li++)
         {
-            if (li->frontsector == sector || li->backsector == sector)
+            if (li->front_sector == sector || li->back_sector == sector)
             {
                 *line_p++ = li;
-                BoundingBoxAddPoint(bbox, li->v1->X, li->v1->Y);
-                BoundingBoxAddPoint(bbox, li->v2->X, li->v2->Y);
+                BoundingBoxAddPoint(bbox, li->vertex_1->X, li->vertex_1->Y);
+                BoundingBoxAddPoint(bbox, li->vertex_2->X, li->vertex_2->Y);
             }
         }
-        if (line_p - sector->lines != sector->linecount)
+        if (line_p - sector->lines != sector->line_count)
             FatalError("GroupLines: miscounted");
 
         // Allow vertex slope if a triangular sector or a rectangular
         // sector in which two adjacent verts have an identical z-height
         // and the other two have it unset
-        if (sector->linecount == 3 && udmf_level)
+        if (sector->line_count == 3 && udmf_level)
         {
-            sector->floor_vs_hilo = {{-40000, 40000}};
-            sector->ceil_vs_hilo  = {{-40000, 40000}};
+            sector->floor_vertex_slope_high_low = {{-40000, 40000}};
+            sector->ceiling_vertex_slope_high_low  = {{-40000, 40000}};
             for (j = 0; j < 3; j++)
             {
-                vertex_t *vert   = sector->lines[j]->v1;
+                vertex_t *vert   = sector->lines[j]->vertex_1;
                 bool      add_it = true;
-                for (HMM_Vec3 v : sector->floor_z_verts)
+                for (HMM_Vec3 v : sector->floor_z_vertices)
                     if (AlmostEquals(v.X, vert->X) &&
                         AlmostEquals(v.Y, vert->Y))
                         add_it = false;
@@ -3109,33 +3109,33 @@ void GroupLines(void)
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_verts.push_back(
+                        sector->floor_z_vertices.push_back(
                             {{vert->X, vert->Y, vert->Z}});
-                        if (vert->Z > sector->floor_vs_hilo.X)
-                            sector->floor_vs_hilo.X = vert->Z;
-                        if (vert->Z < sector->floor_vs_hilo.Y)
-                            sector->floor_vs_hilo.Y = vert->Z;
+                        if (vert->Z > sector->floor_vertex_slope_high_low.X)
+                            sector->floor_vertex_slope_high_low.X = vert->Z;
+                        if (vert->Z < sector->floor_vertex_slope_high_low.Y)
+                            sector->floor_vertex_slope_high_low.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back(
-                            {{vert->X, vert->Y, sector->f_h}});
+                        sector->floor_z_vertices.push_back(
+                            {{vert->X, vert->Y, sector->floor_height}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
-                        sector->ceil_vertex_slope = true;
-                        sector->ceil_z_verts.push_back(
+                        sector->ceiling_vertex_slope = true;
+                        sector->ceiling_z_vertices.push_back(
                             {{vert->X, vert->Y, vert->W}});
-                        if (vert->W > sector->ceil_vs_hilo.X)
-                            sector->ceil_vs_hilo.X = vert->W;
-                        if (vert->W < sector->ceil_vs_hilo.Y)
-                            sector->ceil_vs_hilo.Y = vert->W;
+                        if (vert->W > sector->ceiling_vertex_slope_high_low.X)
+                            sector->ceiling_vertex_slope_high_low.X = vert->W;
+                        if (vert->W < sector->ceiling_vertex_slope_high_low.Y)
+                            sector->ceiling_vertex_slope_high_low.Y = vert->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back(
-                            {{vert->X, vert->Y, sector->c_h}});
+                        sector->ceiling_z_vertices.push_back(
+                            {{vert->X, vert->Y, sector->ceiling_height}});
                 }
-                vert   = sector->lines[j]->v2;
+                vert   = sector->lines[j]->vertex_2;
                 add_it = true;
-                for (HMM_Vec3 v : sector->floor_z_verts)
+                for (HMM_Vec3 v : sector->floor_z_vertices)
                     if (AlmostEquals(v.X, vert->X) &&
                         AlmostEquals(v.Y, vert->Y))
                         add_it = false;
@@ -3144,73 +3144,73 @@ void GroupLines(void)
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
                         sector->floor_vertex_slope = true;
-                        sector->floor_z_verts.push_back(
+                        sector->floor_z_vertices.push_back(
                             {{vert->X, vert->Y, vert->Z}});
-                        if (vert->Z > sector->floor_vs_hilo.X)
-                            sector->floor_vs_hilo.X = vert->Z;
-                        if (vert->Z < sector->floor_vs_hilo.Y)
-                            sector->floor_vs_hilo.Y = vert->Z;
+                        if (vert->Z > sector->floor_vertex_slope_high_low.X)
+                            sector->floor_vertex_slope_high_low.X = vert->Z;
+                        if (vert->Z < sector->floor_vertex_slope_high_low.Y)
+                            sector->floor_vertex_slope_high_low.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back(
-                            {{vert->X, vert->Y, sector->f_h}});
+                        sector->floor_z_vertices.push_back(
+                            {{vert->X, vert->Y, sector->floor_height}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
-                        sector->ceil_vertex_slope = true;
-                        sector->ceil_z_verts.push_back(
+                        sector->ceiling_vertex_slope = true;
+                        sector->ceiling_z_vertices.push_back(
                             {{vert->X, vert->Y, vert->W}});
-                        if (vert->W > sector->ceil_vs_hilo.X)
-                            sector->ceil_vs_hilo.X = vert->W;
-                        if (vert->W < sector->ceil_vs_hilo.Y)
-                            sector->ceil_vs_hilo.Y = vert->W;
+                        if (vert->W > sector->ceiling_vertex_slope_high_low.X)
+                            sector->ceiling_vertex_slope_high_low.X = vert->W;
+                        if (vert->W < sector->ceiling_vertex_slope_high_low.Y)
+                            sector->ceiling_vertex_slope_high_low.Y = vert->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back(
-                            {{vert->X, vert->Y, sector->c_h}});
+                        sector->ceiling_z_vertices.push_back(
+                            {{vert->X, vert->Y, sector->ceiling_height}});
                 }
             }
             if (!sector->floor_vertex_slope)
-                sector->floor_z_verts.clear();
+                sector->floor_z_vertices.clear();
             else
             {
-                sector->floor_vs_normal = MathTripleCrossProduct(
-                    sector->floor_z_verts[0], sector->floor_z_verts[1],
-                    sector->floor_z_verts[2]);
-                if (sector->f_h > sector->floor_vs_hilo.X)
-                    sector->floor_vs_hilo.X = sector->f_h;
-                if (sector->f_h < sector->floor_vs_hilo.Y)
-                    sector->floor_vs_hilo.Y = sector->f_h;
+                sector->floor_vertex_slope_normal = MathTripleCrossProduct(
+                    sector->floor_z_vertices[0], sector->floor_z_vertices[1],
+                    sector->floor_z_vertices[2]);
+                if (sector->floor_height > sector->floor_vertex_slope_high_low.X)
+                    sector->floor_vertex_slope_high_low.X = sector->floor_height;
+                if (sector->floor_height < sector->floor_vertex_slope_high_low.Y)
+                    sector->floor_vertex_slope_high_low.Y = sector->floor_height;
             }
-            if (!sector->ceil_vertex_slope)
-                sector->ceil_z_verts.clear();
+            if (!sector->ceiling_vertex_slope)
+                sector->ceiling_z_vertices.clear();
             else
             {
-                sector->ceil_vs_normal = MathTripleCrossProduct(
-                    sector->ceil_z_verts[0], sector->ceil_z_verts[1],
-                    sector->ceil_z_verts[2]);
-                if (sector->c_h < sector->ceil_vs_hilo.Y)
-                    sector->ceil_vs_hilo.Y = sector->c_h;
-                if (sector->c_h > sector->ceil_vs_hilo.X)
-                    sector->ceil_vs_hilo.X = sector->c_h;
+                sector->ceiling_vertex_slope_normal = MathTripleCrossProduct(
+                    sector->ceiling_z_vertices[0], sector->ceiling_z_vertices[1],
+                    sector->ceiling_z_vertices[2]);
+                if (sector->ceiling_height < sector->ceiling_vertex_slope_high_low.Y)
+                    sector->ceiling_vertex_slope_high_low.Y = sector->ceiling_height;
+                if (sector->ceiling_height > sector->ceiling_vertex_slope_high_low.X)
+                    sector->ceiling_vertex_slope_high_low.X = sector->ceiling_height;
             }
         }
-        if (sector->linecount == 4 && udmf_level)
+        if (sector->line_count == 4 && udmf_level)
         {
             int floor_z_lines     = 0;
             int ceil_z_lines      = 0;
-            sector->floor_vs_hilo = {{-40000, 40000}};
-            sector->ceil_vs_hilo  = {{-40000, 40000}};
+            sector->floor_vertex_slope_high_low = {{-40000, 40000}};
+            sector->ceiling_vertex_slope_high_low  = {{-40000, 40000}};
             for (j = 0; j < 4; j++)
             {
-                vertex_t *vert      = sector->lines[j]->v1;
-                vertex_t *vert2     = sector->lines[j]->v2;
+                vertex_t *vert      = sector->lines[j]->vertex_1;
+                vertex_t *vert2     = sector->lines[j]->vertex_2;
                 bool      add_it_v1 = true;
                 bool      add_it_v2 = true;
-                for (HMM_Vec3 v : sector->floor_z_verts)
+                for (HMM_Vec3 v : sector->floor_z_vertices)
                     if (AlmostEquals(v.X, vert->X) &&
                         AlmostEquals(v.Y, vert->Y))
                         add_it_v1 = false;
-                for (HMM_Vec3 v : sector->floor_z_verts)
+                for (HMM_Vec3 v : sector->floor_z_vertices)
                     if (AlmostEquals(v.X, vert2->X) &&
                         AlmostEquals(v.Y, vert2->Y))
                         add_it_v2 = false;
@@ -3218,55 +3218,55 @@ void GroupLines(void)
                 {
                     if (vert->Z < 32767.0f && vert->Z > -32768.0f)
                     {
-                        sector->floor_z_verts.push_back(
+                        sector->floor_z_vertices.push_back(
                             {{vert->X, vert->Y, vert->Z}});
-                        if (vert->Z > sector->floor_vs_hilo.X)
-                            sector->floor_vs_hilo.X = vert->Z;
-                        if (vert->Z < sector->floor_vs_hilo.Y)
-                            sector->floor_vs_hilo.Y = vert->Z;
+                        if (vert->Z > sector->floor_vertex_slope_high_low.X)
+                            sector->floor_vertex_slope_high_low.X = vert->Z;
+                        if (vert->Z < sector->floor_vertex_slope_high_low.Y)
+                            sector->floor_vertex_slope_high_low.Y = vert->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back(
-                            {{vert->X, vert->Y, sector->f_h}});
+                        sector->floor_z_vertices.push_back(
+                            {{vert->X, vert->Y, sector->floor_height}});
                     if (vert->W < 32767.0f && vert->W > -32768.0f)
                     {
-                        sector->ceil_z_verts.push_back(
+                        sector->ceiling_z_vertices.push_back(
                             {{vert->X, vert->Y, vert->W}});
-                        if (vert->W > sector->ceil_vs_hilo.X)
-                            sector->ceil_vs_hilo.X = vert->W;
-                        if (vert->W < sector->ceil_vs_hilo.Y)
-                            sector->ceil_vs_hilo.Y = vert->W;
+                        if (vert->W > sector->ceiling_vertex_slope_high_low.X)
+                            sector->ceiling_vertex_slope_high_low.X = vert->W;
+                        if (vert->W < sector->ceiling_vertex_slope_high_low.Y)
+                            sector->ceiling_vertex_slope_high_low.Y = vert->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back(
-                            {{vert->X, vert->Y, sector->c_h}});
+                        sector->ceiling_z_vertices.push_back(
+                            {{vert->X, vert->Y, sector->ceiling_height}});
                 }
                 if (add_it_v2)
                 {
                     if (vert2->Z < 32767.0f && vert2->Z > -32768.0f)
                     {
-                        sector->floor_z_verts.push_back(
+                        sector->floor_z_vertices.push_back(
                             {{vert2->X, vert2->Y, vert2->Z}});
-                        if (vert2->Z > sector->floor_vs_hilo.X)
-                            sector->floor_vs_hilo.X = vert2->Z;
-                        if (vert2->Z < sector->floor_vs_hilo.Y)
-                            sector->floor_vs_hilo.Y = vert2->Z;
+                        if (vert2->Z > sector->floor_vertex_slope_high_low.X)
+                            sector->floor_vertex_slope_high_low.X = vert2->Z;
+                        if (vert2->Z < sector->floor_vertex_slope_high_low.Y)
+                            sector->floor_vertex_slope_high_low.Y = vert2->Z;
                     }
                     else
-                        sector->floor_z_verts.push_back(
-                            {{vert2->X, vert2->Y, sector->f_h}});
+                        sector->floor_z_vertices.push_back(
+                            {{vert2->X, vert2->Y, sector->floor_height}});
                     if (vert2->W < 32767.0f && vert2->W > -32768.0f)
                     {
-                        sector->ceil_z_verts.push_back(
+                        sector->ceiling_z_vertices.push_back(
                             {{vert2->X, vert2->Y, vert2->W}});
-                        if (vert2->W > sector->ceil_vs_hilo.X)
-                            sector->ceil_vs_hilo.X = vert2->W;
-                        if (vert2->W < sector->ceil_vs_hilo.Y)
-                            sector->ceil_vs_hilo.Y = vert2->W;
+                        if (vert2->W > sector->ceiling_vertex_slope_high_low.X)
+                            sector->ceiling_vertex_slope_high_low.X = vert2->W;
+                        if (vert2->W < sector->ceiling_vertex_slope_high_low.Y)
+                            sector->ceiling_vertex_slope_high_low.Y = vert2->W;
                     }
                     else
-                        sector->ceil_z_verts.push_back(
-                            {{vert2->X, vert2->Y, sector->c_h}});
+                        sector->ceiling_z_vertices.push_back(
+                            {{vert2->X, vert2->Y, sector->ceiling_height}});
                 }
                 if ((vert->Z < 32767.0f && vert->Z > -32768.0f) &&
                     (vert2->Z < 32767.0f && vert2->Z > -32768.0f) &&
@@ -3281,44 +3281,44 @@ void GroupLines(void)
                     ceil_z_lines++;
                 }
             }
-            if (floor_z_lines == 1 && sector->floor_z_verts.size() == 4)
+            if (floor_z_lines == 1 && sector->floor_z_vertices.size() == 4)
             {
                 sector->floor_vertex_slope = true;
-                sector->floor_vs_normal    = MathTripleCrossProduct(
-                    sector->floor_z_verts[0], sector->floor_z_verts[1],
-                    sector->floor_z_verts[2]);
-                if (sector->f_h > sector->floor_vs_hilo.X)
-                    sector->floor_vs_hilo.X = sector->f_h;
-                if (sector->f_h < sector->floor_vs_hilo.Y)
-                    sector->floor_vs_hilo.Y = sector->f_h;
+                sector->floor_vertex_slope_normal    = MathTripleCrossProduct(
+                    sector->floor_z_vertices[0], sector->floor_z_vertices[1],
+                    sector->floor_z_vertices[2]);
+                if (sector->floor_height > sector->floor_vertex_slope_high_low.X)
+                    sector->floor_vertex_slope_high_low.X = sector->floor_height;
+                if (sector->floor_height < sector->floor_vertex_slope_high_low.Y)
+                    sector->floor_vertex_slope_high_low.Y = sector->floor_height;
             }
             else
-                sector->floor_z_verts.clear();
-            if (ceil_z_lines == 1 && sector->ceil_z_verts.size() == 4)
+                sector->floor_z_vertices.clear();
+            if (ceil_z_lines == 1 && sector->ceiling_z_vertices.size() == 4)
             {
-                sector->ceil_vertex_slope = true;
-                sector->ceil_vs_normal    = MathTripleCrossProduct(
-                    sector->ceil_z_verts[0], sector->ceil_z_verts[1],
-                    sector->ceil_z_verts[2]);
-                if (sector->c_h < sector->ceil_vs_hilo.Y)
-                    sector->ceil_vs_hilo.Y = sector->c_h;
-                if (sector->c_h > sector->ceil_vs_hilo.X)
-                    sector->ceil_vs_hilo.X = sector->c_h;
+                sector->ceiling_vertex_slope = true;
+                sector->ceiling_vertex_slope_normal    = MathTripleCrossProduct(
+                    sector->ceiling_z_vertices[0], sector->ceiling_z_vertices[1],
+                    sector->ceiling_z_vertices[2]);
+                if (sector->ceiling_height < sector->ceiling_vertex_slope_high_low.Y)
+                    sector->ceiling_vertex_slope_high_low.Y = sector->ceiling_height;
+                if (sector->ceiling_height > sector->ceiling_vertex_slope_high_low.X)
+                    sector->ceiling_vertex_slope_high_low.X = sector->ceiling_height;
             }
             else
-                sector->ceil_z_verts.clear();
+                sector->ceiling_z_vertices.clear();
         }
 
         // set the degenmobj_t to the middle of the bounding box
-        sector->sfx_origin.x =
+        sector->sound_effects_origin.x =
             (bbox[kBoundingBoxRight] + bbox[kBoundingBoxLeft]) / 2;
-        sector->sfx_origin.y =
+        sector->sound_effects_origin.y =
             (bbox[kBoundingBoxTop] + bbox[kBoundingBoxBottom]) / 2;
-        sector->sfx_origin.z = (sector->f_h + sector->c_h) / 2;
+        sector->sound_effects_origin.z = (sector->floor_height + sector->ceiling_height) / 2;
     }
 }
 
-static inline void AddSectorToVertices(int *branches, line_t *ld, sector_t *sec)
+static inline void AddSectorToVertices(int *branches, Line *ld, Sector *sec)
 {
     if (!sec) return;
 
@@ -3326,24 +3326,24 @@ static inline void AddSectorToVertices(int *branches, line_t *ld, sector_t *sec)
 
     for (int vert = 0; vert < 2; vert++)
     {
-        int v_idx = (vert ? ld->v2 : ld->v1) - level_vertexes;
+        int v_idx = (vert ? ld->vertex_2 : ld->vertex_1) - level_vertexes;
 
         SYS_ASSERT(0 <= v_idx && v_idx < total_level_vertexes);
 
         if (branches[v_idx] < 0) continue;
 
-        vertex_seclist_t *L = level_vertex_sector_lists + branches[v_idx];
+        VertexSectorList *L = level_vertex_sector_lists + branches[v_idx];
 
-        if (L->num >= SECLIST_MAX) continue;
+        if (L->total >= kVertexSectorListMaximum) continue;
 
         int pos;
 
-        for (pos = 0; pos < L->num; pos++)
-            if (L->sec[pos] == sec_idx) break;
+        for (pos = 0; pos < L->total; pos++)
+            if (L->sectors[pos] == sec_idx) break;
 
-        if (pos < L->num) continue;  // already in there
+        if (pos < L->total) continue;  // already in there
 
-        L->sec[L->num++] = sec_idx;
+        L->sectors[L->total++] = sec_idx;
     }
 }
 
@@ -3358,8 +3358,8 @@ static void CreateVertexSeclists(void)
 
     for (i = 0; i < total_level_lines; i++)
     {
-        int v1_idx = level_lines[i].v1 - level_vertexes;
-        int v2_idx = level_lines[i].v2 - level_vertexes;
+        int v1_idx = level_lines[i].vertex_1 - level_vertexes;
+        int v2_idx = level_lines[i].vertex_2 - level_vertexes;
 
         SYS_ASSERT(0 <= v1_idx && v1_idx < total_level_vertexes);
         SYS_ASSERT(0 <= v2_idx && v2_idx < total_level_vertexes);
@@ -3389,9 +3389,9 @@ static void CreateVertexSeclists(void)
     }
 
     // step 3: create a vertex_seclist for those multi-branches
-    level_vertex_sector_lists = new vertex_seclist_t[num_triples];
+    level_vertex_sector_lists = new VertexSectorList[num_triples];
 
-    Z_Clear(level_vertex_sector_lists, vertex_seclist_t, num_triples);
+    Z_Clear(level_vertex_sector_lists, VertexSectorList, num_triples);
 
     LogDebug("Created %d seclists from %d vertices (%1.1f%%)\n", num_triples,
              total_level_vertexes,
@@ -3406,11 +3406,11 @@ static void CreateVertexSeclists(void)
 
     for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = level_lines + i;
+        Line *ld = level_lines + i;
 
         for (int side = 0; side < 2; side++)
         {
-            sector_t *sec = side ? ld->backsector : ld->frontsector;
+            Sector *sec = side ? ld->back_sector : ld->front_sector;
 
             AddSectorToVertices(branches, ld, sec);
         }
@@ -3418,39 +3418,39 @@ static void CreateVertexSeclists(void)
 
     for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = level_lines + i;
+        Line *ld = level_lines + i;
 
         for (int side = 0; side < 2; side++)
         {
-            sector_t *sec = side ? ld->backsector : ld->frontsector;
+            Sector *sec = side ? ld->back_sector : ld->front_sector;
 
             if (!sec) continue;
 
-            extrafloor_t *ef;
+            Extrafloor *ef;
 
-            for (ef = sec->bottom_ef; ef; ef = ef->higher)
-                AddSectorToVertices(branches, ld, ef->ef_line->frontsector);
+            for (ef = sec->bottom_extrafloor; ef; ef = ef->higher)
+                AddSectorToVertices(branches, ld, ef->extrafloor_line->front_sector);
 
-            for (ef = sec->bottom_liq; ef; ef = ef->higher)
-                AddSectorToVertices(branches, ld, ef->ef_line->frontsector);
+            for (ef = sec->bottom_liquid; ef; ef = ef->higher)
+                AddSectorToVertices(branches, ld, ef->extrafloor_line->front_sector);
         }
     }
 
     // step 4: finally, update the segs that touch those vertices
     for (i = 0; i < total_level_segs; i++)
     {
-        seg_t *sg = level_segs + i;
+        Seg *sg = level_segs + i;
 
         for (int vert = 0; vert < 2; vert++)
         {
-            int v_idx = (vert ? sg->v2 : sg->v1) - level_vertexes;
+            int v_idx = (vert ? sg->vertex_2 : sg->vertex_1) - level_vertexes;
 
             // skip GL vertices
             if (v_idx < 0 || v_idx >= total_level_vertexes) continue;
 
             if (branches[v_idx] < 0) continue;
 
-            sg->nb_sec[vert] = level_vertex_sector_lists + branches[v_idx];
+            sg->vertex_sectors[vert] = level_vertex_sector_lists + branches[v_idx];
         }
     }
 
@@ -3466,7 +3466,7 @@ static void P_RemoveSectorStuff(void)
         FreeSectorTouchNodes(level_sectors + i);
 
         // Might still be playing a sound.
-        S_StopFX(&level_sectors[i].sfx_origin);
+        S_StopFX(&level_sectors[i].sound_effects_origin);
     }
 }
 
@@ -3506,16 +3506,16 @@ void ShutdownLevel(void)
     level_lines = nullptr;
     for (int i = 0; i < total_level_sectors; i++)
     {
-        sector_t *sec = &level_sectors[i];
-        if (sec->f_slope)
+        Sector *sec = &level_sectors[i];
+        if (sec->floor_slope)
         {
-            delete sec->f_slope;
-            sec->f_slope = nullptr;
+            delete sec->floor_slope;
+            sec->floor_slope = nullptr;
         }
-        if (sec->c_slope)
+        if (sec->ceiling_slope)
         {
-            delete sec->c_slope;
-            sec->c_slope = nullptr;
+            delete sec->ceiling_slope;
+            sec->ceiling_slope = nullptr;
         }
     }
     delete[] level_sectors;

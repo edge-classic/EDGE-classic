@@ -50,7 +50,7 @@ void InitializeSwitchList(void)
 //
 // Start a button counting down till it turns off.
 //
-static void StartButton(SwitchDefinition *sw, line_t *line, ButtonPosition w,
+static void StartButton(SwitchDefinition *sw, Line *line, ButtonPosition w,
                         const image_c *image)
 {
     // See if button is already pressed
@@ -94,7 +94,7 @@ static void StartButton(SwitchDefinition *sw, line_t *line, ButtonPosition w,
 #define EDGE_CHECK_SWITCH(PART) (sw->cache_.image[k] == side->PART.image)
 #define EDGE_SET_SWITCH(PART)   side->PART.image = sw->cache_.image[k ^ 1]
 
-void ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials,
+void ChangeSwitchTexture(Line *line, bool useAgain, LineSpecial specials,
                          bool noSound)
 {
     for (int j = 0; j < total_level_lines; j++)
@@ -110,9 +110,9 @@ void ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials,
             }
         }
 
-        side_t *side = level_lines[j].side[0];
+        Side *side = level_lines[j].side[0];
 
-        Position *sfx_origin = &level_lines[j].frontsector->sfx_origin;
+        Position *sound_effects_origin = &level_lines[j].front_sector->sound_effects_origin;
 
         ButtonPosition pos = kButtonNone;
 
@@ -156,8 +156,8 @@ void ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials,
                 // -KM- 98/07/31 Implement sounds
                 if (!noSound && sw->on_sfx_)
                 {
-                    SYS_ASSERT(sfx_origin);
-                    S_StartFX(sw->on_sfx_, SNCAT_Level, sfx_origin);
+                    SYS_ASSERT(sound_effects_origin);
+                    S_StartFX(sw->on_sfx_, SNCAT_Level, sound_effects_origin);
                     noSound = true;
                 }
 
@@ -185,7 +185,7 @@ void ClearButtons(void)
     active_buttons.clear();
 }
 
-bool ButtonIsPressed(line_t *ld)
+bool ButtonIsPressed(Line *ld)
 {
     for (std::vector<Button *>::iterator iter     = active_buttons.begin(),
                                          iter_end = active_buttons.end();
@@ -235,7 +235,7 @@ void UpdateButtons(void)
             if (b->off_sound)
             {
                 S_StartFX(b->off_sound, SNCAT_Level,
-                          &b->line->frontsector->sfx_origin);
+                          &b->line->front_sector->sound_effects_origin);
             }
 
             Z_Clear(b, Button, 1);

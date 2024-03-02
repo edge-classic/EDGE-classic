@@ -334,10 +334,10 @@ struct Compare_Res_pred
         }
         else
         {
-            int a_diff_h = HMM_ABS(SCREENHEIGHT - A->height);
-            int b_diff_h = HMM_ABS(SCREENHEIGHT - B->height);
+            int a_diffloor_height = HMM_ABS(SCREENHEIGHT - A->height);
+            int b_diffloor_height = HMM_ABS(SCREENHEIGHT - B->height);
 
-            return (a_diff_h < b_diff_h);
+            return (a_diffloor_height < b_diffloor_height);
         }
     }
 };

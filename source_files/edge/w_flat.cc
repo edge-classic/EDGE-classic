@@ -386,8 +386,8 @@ void W_PrecacheTextures(void)
         if (level_sectors[i].floor.image)
             images[count++] = level_sectors[i].floor.image;
 
-        if (level_sectors[i].ceil.image)
-            images[count++] = level_sectors[i].ceil.image;
+        if (level_sectors[i].ceiling.image)
+            images[count++] = level_sectors[i].ceiling.image;
     }
 
     SYS_ASSERT(count <= max_image);

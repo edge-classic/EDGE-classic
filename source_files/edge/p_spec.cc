@@ -60,26 +60,26 @@ int  level_time_count;
 //
 // Animating line and sector specials
 //
-std::list<line_t *>      active_line_animations;
-std::list<sector_t *>    active_sector_animations;
-std::vector<secanim_t>   sector_animations;
-std::vector<lineanim_t>  line_animations;
-std::vector<lightanim_t> light_animations;
+std::list<Line *>      active_line_animations;
+std::list<Sector *>    active_sector_animations;
+std::vector<SectorAnimation>   sector_animations;
+std::vector<LineAnimation>  line_animations;
+std::vector<LightAnimation> light_animations;
 
 static bool DoSectorsFromTag(int tag, const void *p1, void *p2,
-                             bool (*func)(sector_t *, const void *, void *));
+                             bool (*func)(Sector *, const void *, void *));
 
-static bool DoPlaneWrapper(sector_t *s, const void *p1, void *p2)
+static bool DoPlaneWrapper(Sector *s, const void *p1, void *p2)
 {
-    return RunPlaneMover(s, (const PlaneMoverDefinition *)p1, (sector_t *)p2);
+    return RunPlaneMover(s, (const PlaneMoverDefinition *)p1, (Sector *)p2);
 }
 
-static bool DoLightsWrapper(sector_t *s, const void *p1, void *p2)
+static bool DoLightsWrapper(Sector *s, const void *p1, void *p2)
 {
     return RunSectorLight(s, (const LightSpecialDefinition *)p1);
 }
 
-static bool DoDonutWrapper(sector_t *s, const void *p1, void *p2)
+static bool DoDonutWrapper(Sector *s, const void *p1, void *p2)
 {
     return RunDonutSpecial(s, (SoundEffect **)p2);
 }
@@ -92,9 +92,9 @@ static bool DoDonutWrapper(sector_t *s, const void *p1, void *p2)
 // Will return a side_t * given the number of the current sector,
 // the line number, and the side (0/1) that you want.
 //
-side_t *GetLineSidedef(int currentSector, int line, int side)
+Side *GetLineSidedef(int currentSector, int line, int side)
 {
-    line_t *ldef = level_sectors[currentSector].lines[line];
+    Line *ldef = level_sectors[currentSector].lines[line];
 
     return ldef->side[side];
 }
@@ -104,11 +104,11 @@ side_t *GetLineSidedef(int currentSector, int line, int side)
 //  given the number of the current sector,
 //  the line number and the side (0/1) that you want.
 //
-sector_t *GetLineSector(int currentSector, int line, int side)
+Sector *GetLineSector(int currentSector, int line, int side)
 {
-    line_t *ldef = level_sectors[currentSector].lines[line];
+    Line *ldef = level_sectors[currentSector].lines[line];
 
-    return side ? ldef->backsector : ldef->frontsector;
+    return side ? ldef->back_sector : ldef->front_sector;
 }
 
 //
@@ -123,19 +123,19 @@ int LineIsTwoSided(int sector, int line)
 //
 // Return sector_t * of sector next to current; nullptr if not two-sided line
 //
-sector_t *GetLineSectorAdjacent(const line_t *line, const sector_t *sec,
+Sector *GetLineSectorAdjacent(const Line *line, const Sector *sec,
                                 bool ignore_selfref)
 {
     if (!(line->flags & MLF_TwoSided)) return nullptr;
 
     // -AJA- 2011/03/31: follow BOOM's logic for self-ref linedefs, which
     //                   fixes the red door of MAP01 of 1024CLAU.wad
-    if (ignore_selfref && (line->frontsector == line->backsector))
+    if (ignore_selfref && (line->front_sector == line->back_sector))
         return nullptr;
 
-    if (line->frontsector == sec) return line->backsector;
+    if (line->front_sector == sec) return line->back_sector;
 
-    return line->frontsector;
+    return line->front_sector;
 }
 
 //
@@ -145,10 +145,10 @@ sector_t *GetLineSectorAdjacent(const line_t *line, const sector_t *sec,
 //       kick in !
 //
 #define EDGE_REFERENCE_PLANE_HEIGHT(sector) \
-    ((ref & kTriggerHeightReferenceCeiling) ? (sector)->c_h : (sector)->f_h)
+    ((ref & kTriggerHeightReferenceCeiling) ? (sector)->ceiling_height : (sector)->floor_height)
 
 float FindSurroundingHeight(const TriggerHeightReference ref,
-                            const sector_t              *sec)
+                            const Sector              *sec)
 {
     int   i, count;
     float height;
@@ -161,9 +161,9 @@ float FindSurroundingHeight(const TriggerHeightReference ref,
     else
         height = +32000.0f;
 
-    for (i = count = 0; i < sec->linecount; i++)
+    for (i = count = 0; i < sec->line_count; i++)
     {
-        sector_t *other = GetLineSectorAdjacent(sec->lines[i], sec, true);
+        Sector *other = GetLineSectorAdjacent(sec->lines[i], sec, true);
 
         if (!other) continue;
 
@@ -205,14 +205,14 @@ float FindSurroundingHeight(const TriggerHeightReference ref,
 //
 // -KM- 1998/09/01 Lines.ddf; used to be inlined in p_floors
 //
-float FindRaiseToTexture(sector_t *sec)
+float FindRaiseToTexture(Sector *sec)
 {
     int     i;
-    side_t *side;
+    Side *side;
     float   minsize = (float)INT_MAX;
     int     secnum  = sec - level_sectors;
 
-    for (i = 0; i < sec->linecount; i++)
+    for (i = 0; i < sec->line_count; i++)
     {
         if (LineIsTwoSided(secnum, i))
         {
@@ -234,7 +234,7 @@ float FindRaiseToTexture(sector_t *sec)
         }
     }
 
-    return sec->f_h + minsize;
+    return sec->floor_height + minsize;
 }
 
 //
@@ -243,7 +243,7 @@ float FindRaiseToTexture(sector_t *sec)
 // -KM- 1998/09/27 Doesn't need a line.
 // -AJA- 1999/09/29: Now returns a sector_t, and has no start.
 //
-sector_t *FindSectorFromTag(int tag)
+Sector *FindSectorFromTag(int tag)
 {
     int i;
 
@@ -258,22 +258,22 @@ sector_t *FindSectorFromTag(int tag)
 //
 // Find minimum light from an adjacent sector
 //
-int FindMinimumSurroundingLight(sector_t *sector, int max)
+int FindMinimumSurroundingLight(Sector *sector, int max)
 {
     int       i;
     int       min;
-    line_t   *line;
-    sector_t *check;
+    Line   *line;
+    Sector *check;
 
     min = max;
-    for (i = 0; i < sector->linecount; i++)
+    for (i = 0; i < sector->line_count; i++)
     {
         line  = sector->lines[i];
         check = GetLineSectorAdjacent(line, sector);
 
         if (!check) continue;
 
-        if (check->props.lightlevel < min) min = check->props.lightlevel;
+        if (check->properties.light_level < min) min = check->properties.light_level;
     }
     return min;
 }
@@ -281,30 +281,30 @@ int FindMinimumSurroundingLight(sector_t *sector, int max)
 //
 // Find maximum light from an adjacent sector
 //
-int FindMaxSurroundingLight(sector_t *sector, int min)
+int FindMaxSurroundingLight(Sector *sector, int min)
 {
     int       i;
     int       max;
-    line_t   *line;
-    sector_t *check;
+    Line   *line;
+    Sector *check;
 
     max = min;
-    for (i = 0; i < sector->linecount; i++)
+    for (i = 0; i < sector->line_count; i++)
     {
         line  = sector->lines[i];
         check = GetLineSectorAdjacent(line, sector);
 
         if (!check) continue;
 
-        if (check->props.lightlevel > max) max = check->props.lightlevel;
+        if (check->properties.light_level > max) max = check->properties.light_level;
     }
     return max;
 }
 
-void AddSpecialLine(line_t *ld)
+void AddSpecialLine(Line *ld)
 {
     // check if already linked
-    std::list<line_t *>::iterator LI;
+    std::list<Line *>::iterator LI;
 
     for (LI = active_line_animations.begin();
          LI != active_line_animations.end(); LI++)
@@ -315,10 +315,10 @@ void AddSpecialLine(line_t *ld)
     active_line_animations.push_back(ld);
 }
 
-void AddSpecialSector(sector_t *sec)
+void AddSpecialSector(Sector *sec)
 {
     // check if already linked
-    std::list<sector_t *>::iterator SI;
+    std::list<Sector *>::iterator SI;
 
     for (SI = active_sector_animations.begin();
          SI != active_sector_animations.end(); SI++)
@@ -329,7 +329,7 @@ void AddSpecialSector(sector_t *sec)
     active_sector_animations.push_back(sec);
 }
 
-static void AdjustScrollParts(side_t *side, bool left, ScrollingPart parts,
+static void AdjustScrollParts(Side *side, bool left, ScrollingPart parts,
                               float x_speed, float y_speed)
 {
     float xmul = (left && (parts & kScrollingPartLeftRevX)) ? -1 : 1;
@@ -359,7 +359,7 @@ static void AdjustScrollParts(side_t *side, bool left, ScrollingPart parts,
     }
 }
 
-static void AdjustScaleParts(side_t *side, bool left, ScrollingPart parts,
+static void AdjustScaleParts(Side *side, bool left, ScrollingPart parts,
                              float factor)
 {
     if (!side) return;
@@ -369,22 +369,22 @@ static void AdjustScaleParts(side_t *side, bool left, ScrollingPart parts,
 
     if (parts & (left ? kScrollingPartLeftUpper : kScrollingPartRightUpper))
     {
-        side->top.x_mat.X *= factor;
-        side->top.y_mat.Y *= factor;
+        side->top.x_matrix.X *= factor;
+        side->top.y_matrix.Y *= factor;
     }
     if (parts & (left ? kScrollingPartLeftMiddle : kScrollingPartRightMiddle))
     {
-        side->middle.x_mat.X *= factor;
-        side->middle.y_mat.Y *= factor;
+        side->middle.x_matrix.X *= factor;
+        side->middle.y_matrix.Y *= factor;
     }
     if (parts & (left ? kScrollingPartLeftLower : kScrollingPartRightLower))
     {
-        side->bottom.x_mat.X *= factor;
-        side->bottom.y_mat.Y *= factor;
+        side->bottom.x_matrix.X *= factor;
+        side->bottom.y_matrix.Y *= factor;
     }
 }
 
-static void AdjustStretchParts(side_t *side, bool left, ScrollingPart parts,
+static void AdjustStretchParts(Side *side, bool left, ScrollingPart parts,
                                float linelength, bool widthOnly)
 {
     if (!side) return;
@@ -398,31 +398,31 @@ static void AdjustStretchParts(side_t *side, bool left, ScrollingPart parts,
     {
         if (side->top.image) factor = IM_WIDTH(side->top.image) / linelength;
 
-        if (widthOnly) side->top.x_mat.X *= factor;
+        if (widthOnly) side->top.x_matrix.X *= factor;
 
-        if (!widthOnly) side->top.y_mat.Y *= factor;
+        if (!widthOnly) side->top.y_matrix.Y *= factor;
     }
     if (parts & (left ? kScrollingPartLeftMiddle : kScrollingPartRightMiddle))
     {
         if (side->middle.image)
             factor = IM_WIDTH(side->middle.image) / linelength;
 
-        if (widthOnly) side->middle.x_mat.X *= factor;
+        if (widthOnly) side->middle.x_matrix.X *= factor;
 
-        if (!widthOnly) side->middle.y_mat.Y *= factor;
+        if (!widthOnly) side->middle.y_matrix.Y *= factor;
     }
     if (parts & (left ? kScrollingPartLeftLower : kScrollingPartRightLower))
     {
         if (side->bottom.image)
             factor = IM_WIDTH(side->bottom.image) / linelength;
 
-        if (widthOnly) side->bottom.x_mat.X *= factor;
+        if (widthOnly) side->bottom.x_matrix.X *= factor;
 
-        if (!widthOnly) side->bottom.y_mat.Y *= factor;
+        if (!widthOnly) side->bottom.y_matrix.Y *= factor;
     }
 }
 
-static void AdjustSkewParts(side_t *side, bool left, ScrollingPart parts,
+static void AdjustSkewParts(Side *side, bool left, ScrollingPart parts,
                             float skew)
 {
     if (!side) return;
@@ -431,17 +431,17 @@ static void AdjustSkewParts(side_t *side, bool left, ScrollingPart parts,
         parts = (ScrollingPart)(kScrollingPartLeft | kScrollingPartRight);
 
     if (parts & (left ? kScrollingPartLeftUpper : kScrollingPartRightUpper))
-        side->top.y_mat.X = skew * side->top.y_mat.Y;
+        side->top.y_matrix.X = skew * side->top.y_matrix.Y;
 
     if (parts & (left ? kScrollingPartLeftMiddle : kScrollingPartRightMiddle))
-        side->middle.y_mat.X = skew * side->middle.y_mat.Y;
+        side->middle.y_matrix.X = skew * side->middle.y_matrix.Y;
 
     if (parts & (left ? kScrollingPartLeftLower : kScrollingPartRightLower))
-        side->bottom.y_mat.X = skew * side->bottom.y_mat.Y;
+        side->bottom.y_matrix.X = skew * side->bottom.y_matrix.Y;
 }
 
-static void AdjustLightParts(side_t *side, bool left, ScrollingPart parts,
-                             region_properties_t *p)
+static void AdjustLightParts(Side *side, bool left, ScrollingPart parts,
+                             RegionProperties *p)
 {
     if (!side) return;
 
@@ -449,16 +449,16 @@ static void AdjustLightParts(side_t *side, bool left, ScrollingPart parts,
         parts = (ScrollingPart)(kScrollingPartLeft | kScrollingPartRight);
 
     if (parts & (left ? kScrollingPartLeftUpper : kScrollingPartRightUpper))
-        side->top.override_p = p;
+        side->top.override_properties = p;
 
     if (parts & (left ? kScrollingPartLeftMiddle : kScrollingPartRightMiddle))
-        side->middle.override_p = p;
+        side->middle.override_properties = p;
 
     if (parts & (left ? kScrollingPartLeftLower : kScrollingPartRightLower))
-        side->bottom.override_p = p;
+        side->bottom.override_properties = p;
 }
 
-static float ScaleFactorForPlane(surface_t &surf, float line_len,
+static float ScaleFactorForPlane(MapSurface &surf, float line_len,
                                  bool use_height)
 {
     if (use_height)
@@ -467,7 +467,7 @@ static float ScaleFactorForPlane(surface_t &surf, float line_len,
         return IM_WIDTH(surf.image) / line_len;
 }
 
-static void P_EFTransferTrans(sector_t *ctrl, sector_t *sec, line_t *line,
+static void P_EFTransferTrans(Sector *ctrl, Sector *sec, Line *line,
                               const ExtraFloorDefinition *ef, float trans)
 {
     int i;
@@ -476,7 +476,7 @@ static void P_EFTransferTrans(sector_t *ctrl, sector_t *sec, line_t *line,
 
     if (ctrl->floor.translucency > trans) ctrl->floor.translucency = trans;
 
-    if (ctrl->ceil.translucency > trans) ctrl->ceil.translucency = trans;
+    if (ctrl->ceiling.translucency > trans) ctrl->ceiling.translucency = trans;
 
     // sides
 
@@ -484,14 +484,14 @@ static void P_EFTransferTrans(sector_t *ctrl, sector_t *sec, line_t *line,
 
     if (ef->type_ & (kExtraFloorTypeSideUpper | kExtraFloorTypeSideLower))
     {
-        for (i = 0; i < sec->linecount; i++)
+        for (i = 0; i < sec->line_count; i++)
         {
-            line_t *L = sec->lines[i];
-            side_t *S = nullptr;
+            Line *L = sec->lines[i];
+            Side *S = nullptr;
 
-            if (L->frontsector == sec)
+            if (L->front_sector == sec)
                 S = L->side[1];
-            else if (L->backsector == sec)
+            else if (L->back_sector == sec)
                 S = L->side[0];
 
             if (!S) continue;
@@ -515,7 +515,7 @@ static void P_EFTransferTrans(sector_t *ctrl, sector_t *sec, line_t *line,
 // BLOCK_SHOTS and BLOCK_SIGHT
 // without actually activating the line.
 //
-static void P_LineEffectDebris(line_t *TheLine, const LineType *special)
+static void P_LineEffectDebris(Line *TheLine, const LineType *special)
 {
     if (TheLine->side[0] && TheLine->side[1])
     {
@@ -541,7 +541,7 @@ static void P_LineEffectDebris(line_t *TheLine, const LineType *special)
 //
 // Lobo:2021 Spawn debris on our special linetype.
 //
-static void P_SpawnLineEffectDebris(line_t *TheLine, const LineType *special)
+static void P_SpawnLineEffectDebris(Line *TheLine, const LineType *special)
 {
     if (!special) return;  // found nothing so exit
 
@@ -562,8 +562,8 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const LineType *special)
     float midz = 0;
 
     // calculate midpoint
-    midx = (TheLine->v1->X + TheLine->v2->X) / 2;
-    midy = (TheLine->v1->Y + TheLine->v2->Y) / 2;
+    midx = (TheLine->vertex_1->X + TheLine->vertex_2->X) / 2;
+    midy = (TheLine->vertex_1->Y + TheLine->vertex_2->Y) / 2;
     midz = ONFLOORZ;
 
     float dx = RandomByteDeterministic() * info->radius_ / 255.0f;
@@ -575,8 +575,8 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const LineType *special)
 
     P_SpawnDebris(midx, midy, midz, 0 + kBAMAngle180, info);
 
-    midx = (TheLine->v1->X + TheLine->v2->X) / 2;
-    midy = (TheLine->v1->Y + TheLine->v2->Y) / 2;
+    midx = (TheLine->vertex_1->X + TheLine->vertex_2->X) / 2;
+    midy = (TheLine->vertex_1->Y + TheLine->vertex_2->Y) / 2;
 
     // move slightly backward to spawn the debris
     midx -= dx + info->radius_;
@@ -588,10 +588,10 @@ static void P_SpawnLineEffectDebris(line_t *TheLine, const LineType *special)
 //
 // Handles BOOM's line -> tagged line transfers.
 //
-static void P_LineEffect(line_t *target, line_t *source,
+static void P_LineEffect(Line *target, Line *source,
                          const LineType *special)
 {
-    float length = R_PointToDist(0, 0, source->dx, source->dy);
+    float length = R_PointToDist(0, 0, source->delta_x, source->delta_y);
     float factor = 64.0 / length;
 
     if ((special->line_effect_ & kLineEffectTypeTranslucency) &&
@@ -616,34 +616,34 @@ static void P_LineEffect(line_t *target, line_t *source,
     if ((special->line_effect_ & kLineEffectTypeTaggedOffsetScroll) &&
         target->side[0] && source->side[0])
     {
-        lineanim_t anim;
+        LineAnimation anim;
         anim.target = target;
         if (special->scroll_type_ == BoomScrollerTypeNone)
         {
-            anim.side0_xspeed = -source->side[0]->middle.offset.X / 8.0;
-            anim.side0_yspeed = source->side[0]->middle.offset.Y / 8.0;
+            anim.side_0_x_speed = -source->side[0]->middle.offset.X / 8.0;
+            anim.side_0_y_speed = source->side[0]->middle.offset.Y / 8.0;
         }
         else
         {
             // BOOM spec states that the front sector is the height reference
             // for displace/accel scrollers
-            if (source->frontsector)
+            if (source->front_sector)
             {
-                anim.scroll_sec_ref     = source->frontsector;
-                anim.scroll_special_ref = special;
-                anim.scroll_line_ref    = source;
-                anim.side0_xoffspeed = -source->side[0]->middle.offset.X / 8.0;
-                anim.side0_yoffspeed = source->side[0]->middle.offset.Y / 8.0;
+                anim.scroll_sector_reference     = source->front_sector;
+                anim.scroll_special_reference = special;
+                anim.scroll_line_reference    = source;
+                anim.side_0_x_offset_speed = -source->side[0]->middle.offset.X / 8.0;
+                anim.side_0_y_offset_speed = source->side[0]->middle.offset.Y / 8.0;
                 for (int i = 0; i < total_level_lines; i++)
                 {
-                    if (level_lines[i].tag == source->frontsector->tag)
+                    if (level_lines[i].tag == source->front_sector->tag)
                     {
                         if (!level_lines[i].special ||
                             level_lines[i].special->count_ == 1)
                             anim.permanent = true;
                     }
                 }
-                anim.last_height = anim.scroll_sec_ref->orig_height;
+                anim.last_height = anim.scroll_sector_reference->original_height;
             }
         }
         line_animations.push_back(anim);
@@ -652,12 +652,12 @@ static void P_LineEffect(line_t *target, line_t *source,
 
     if (special->line_effect_ & kLineEffectTypeVectorScroll)
     {
-        lineanim_t anim;
+        LineAnimation anim;
         anim.target = target;
-        float dx    = source->dx / 32.0f;
-        float dy    = source->dy / 32.0f;
-        float ldx   = target->dx;
-        float ldy   = target->dy;
+        float dx    = source->delta_x / 32.0f;
+        float dy    = source->delta_y / 32.0f;
+        float ldx   = target->delta_x;
+        float ldy   = target->delta_y;
         float x     = HMM_ABS(ldx);
         float y     = HMM_ABS(ldy);
         if (y > x) std::swap(x, y);
@@ -685,32 +685,32 @@ static void P_LineEffect(line_t *target, line_t *source,
         {
             if (special->scroll_type_ == BoomScrollerTypeNone)
             {
-                anim.side0_xspeed += x;
-                anim.side1_xspeed += x;
-                anim.side0_yspeed += y;
-                anim.side1_yspeed += y;
+                anim.side_0_x_speed += x;
+                anim.side_1_x_speed += x;
+                anim.side_0_y_speed += y;
+                anim.side_1_y_speed += y;
             }
             else
             {
                 // BOOM spec states that the front sector is the height
                 // reference for displace/accel scrollers
-                if (source->frontsector)
+                if (source->front_sector)
                 {
-                    anim.scroll_sec_ref     = source->frontsector;
-                    anim.scroll_special_ref = special;
-                    anim.scroll_line_ref    = source;
-                    anim.dynamic_dx += x;
-                    anim.dynamic_dy += y;
+                    anim.scroll_sector_reference     = source->front_sector;
+                    anim.scroll_special_reference = special;
+                    anim.scroll_line_reference    = source;
+                    anim.dynamic_delta_x += x;
+                    anim.dynamic_delta_y += y;
                     for (int i = 0; i < total_level_lines; i++)
                     {
-                        if (level_lines[i].tag == source->frontsector->tag)
+                        if (level_lines[i].tag == source->front_sector->tag)
                         {
                             if (!level_lines[i].special ||
                                 level_lines[i].special->count_ == 1)
                                 anim.permanent = true;
                         }
                     }
-                    anim.last_height = anim.scroll_sec_ref->orig_height;
+                    anim.last_height = anim.scroll_sector_reference->original_height;
                 }
             }
             line_animations.push_back(anim);
@@ -764,9 +764,9 @@ static void P_LineEffect(line_t *target, line_t *source,
     if (special->line_effect_ & kLineEffectTypeLightWall)
     {
         AdjustLightParts(target->side[0], 0, special->line_parts_,
-                         &source->frontsector->props);
+                         &source->front_sector->properties);
         AdjustLightParts(target->side[1], 1, special->line_parts_,
-                         &source->frontsector->props);
+                         &source->front_sector->properties);
     }
 
     // Lobo 2022: experimental partial sky transfer support
@@ -799,65 +799,65 @@ static void P_LineEffect(line_t *target, line_t *source,
 //
 // Handles BOOM's line -> tagged sector transfers.
 //
-static void SectorEffect(sector_t *target, line_t *source,
+static void SectorEffect(Sector *target, Line *source,
                          const LineType *special)
 {
     if (!target) return;
 
-    float    length = R_PointToDist(0, 0, source->dx, source->dy);
+    float    length = R_PointToDist(0, 0, source->delta_x, source->delta_y);
     BAMAngle angle =
-        kBAMAngle360 - R_PointToAngle(0, 0, -source->dx, -source->dy);
-    bool is_vert = fabs(source->dy) > fabs(source->dx);
+        kBAMAngle360 - R_PointToAngle(0, 0, -source->delta_x, -source->delta_y);
+    bool is_vert = fabs(source->delta_y) > fabs(source->delta_x);
 
     if (special->sector_effect_ & kSectorEffectTypeLightFloor)
-        target->floor.override_p = &source->frontsector->props;
+        target->floor.override_properties = &source->front_sector->properties;
 
     if (special->sector_effect_ & kSectorEffectTypeLightCeiling)
-        target->ceil.override_p = &source->frontsector->props;
+        target->ceiling.override_properties = &source->front_sector->properties;
 
     if (special->sector_effect_ & kSectorEffectTypeScrollFloor ||
         special->sector_effect_ & kSectorEffectTypeScrollCeiling ||
         special->sector_effect_ & kSectorEffectTypePushThings)
     {
-        secanim_t anim;
+        SectorAnimation anim;
         anim.target = target;
         if (special->scroll_type_ == BoomScrollerTypeNone)
         {
             if (special->sector_effect_ & kSectorEffectTypeScrollFloor)
             {
-                anim.floor_scroll.X -= source->dx / 32.0f;
-                anim.floor_scroll.Y -= source->dy / 32.0f;
+                anim.floor_scroll.X -= source->delta_x / 32.0f;
+                anim.floor_scroll.Y -= source->delta_y / 32.0f;
             }
             if (special->sector_effect_ & kSectorEffectTypeScrollCeiling)
             {
-                anim.ceil_scroll.X -= source->dx / 32.0f;
-                anim.ceil_scroll.Y -= source->dy / 32.0f;
+                anim.ceil_scroll.X -= source->delta_x / 32.0f;
+                anim.ceil_scroll.Y -= source->delta_y / 32.0f;
             }
             if (special->sector_effect_ & kSectorEffectTypePushThings)
             {
-                anim.push.X += source->dx / 32.0f * BOOM_CARRY_FACTOR;
-                anim.push.Y += source->dy / 32.0f * BOOM_CARRY_FACTOR;
+                anim.push.X += source->delta_x / 32.0f * BOOM_CARRY_FACTOR;
+                anim.push.Y += source->delta_y / 32.0f * BOOM_CARRY_FACTOR;
             }
         }
         else
         {
             // BOOM spec states that the front sector is the height reference
             // for displace/accel scrollers
-            if (source->frontsector)
+            if (source->front_sector)
             {
-                anim.scroll_sec_ref     = source->frontsector;
-                anim.scroll_special_ref = special;
-                anim.scroll_line_ref    = source;
+                anim.scroll_sector_reference     = source->front_sector;
+                anim.scroll_special_reference = special;
+                anim.scroll_line_reference    = source;
                 for (int i = 0; i < total_level_lines; i++)
                 {
-                    if (level_lines[i].tag == source->frontsector->tag)
+                    if (level_lines[i].tag == source->front_sector->tag)
                     {
                         if (!level_lines[i].special ||
                             level_lines[i].special->count_ == 1)
                             anim.permanent = true;
                     }
                 }
-                anim.last_height = anim.scroll_sec_ref->orig_height;
+                anim.last_height = anim.scroll_sector_reference->original_height;
             }
         }
         sector_animations.push_back(anim);
@@ -869,13 +869,13 @@ static void SectorEffect(sector_t *target, line_t *source,
         // TODO: this is not 100% correct, because the MSF_Friction flag is
         //       supposed to turn the custom friction on/off, but with this
         //       code, the custom value is either permanent or forgotten.
-        if (target->props.type & MSF_Friction)
+        if (target->properties.type & MSF_Friction)
         {
             if (length > 100)
-                target->props.friction =
+                target->properties.friction =
                     HMM_MIN(1.0f, 0.8125f + length / 1066.7f);
             else
-                target->props.friction = HMM_MAX(0.2f, length / 100.0f);
+                target->properties.friction = HMM_MAX(0.2f, length / 100.0f);
         }
     }
 
@@ -885,30 +885,30 @@ static void SectorEffect(sector_t *target, line_t *source,
     }
     if (special->sector_effect_ & kSectorEffectTypeWindForce)
     {
-        AddSectorForce(target, true /* is_wind */, source->dx, source->dy);
+        AddSectorForce(target, true /* is_wind */, source->delta_x, source->delta_y);
     }
     if (special->sector_effect_ & kSectorEffectTypeCurrentForce)
     {
-        AddSectorForce(target, false /* is_wind */, source->dx, source->dy);
+        AddSectorForce(target, false /* is_wind */, source->delta_x, source->delta_y);
     }
 
     if (special->sector_effect_ & kSectorEffectTypeResetFloor)
     {
-        target->floor.override_p = nullptr;
+        target->floor.override_properties = nullptr;
         target->floor.scroll.X = target->floor.scroll.Y = 0;
-        target->props.push.X = target->props.push.Y = target->props.push.Z = 0;
+        target->properties.push.X = target->properties.push.Y = target->properties.push.Z = 0;
     }
     if (special->sector_effect_ & kSectorEffectTypeResetCeiling)
     {
-        target->ceil.override_p = nullptr;
-        target->ceil.scroll.X = target->ceil.scroll.Y = 0;
+        target->ceiling.override_properties = nullptr;
+        target->ceiling.scroll.X = target->ceiling.scroll.Y = 0;
     }
 
     // set texture alignment
     if (special->sector_effect_ & kSectorEffectTypeAlignFloor)
     {
-        target->floor.offset.X = -source->v1->X;
-        target->floor.offset.Y = -source->v1->Y;
+        target->floor.offset.X = -source->vertex_1->X;
+        target->floor.offset.Y = -source->vertex_1->Y;
         if (source->side[0])  // Lobo: Experiment to read and apply line offsets
                               // to floor offsets
         {
@@ -919,15 +919,15 @@ static void SectorEffect(sector_t *target, line_t *source,
     }
     if (special->sector_effect_ & kSectorEffectTypeAlignCeiling)
     {
-        target->ceil.offset.X = -source->v1->X;
-        target->ceil.offset.Y = -source->v1->Y;
+        target->ceiling.offset.X = -source->vertex_1->X;
+        target->ceiling.offset.Y = -source->vertex_1->Y;
         if (source->side[0])  // Lobo: Experiment to read and apply line offsets
                               // to floor offsets
         {
-            target->ceil.offset.X += source->side[0]->bottom.offset.X;
-            target->ceil.offset.Y += source->side[0]->bottom.offset.Y;
+            target->ceiling.offset.X += source->side[0]->bottom.offset.X;
+            target->ceiling.offset.Y += source->side[0]->bottom.offset.Y;
         }
-        target->ceil.rotation = angle;
+        target->ceiling.rotation = angle;
     }
 
     // set texture scale
@@ -938,36 +938,36 @@ static void SectorEffect(sector_t *target, line_t *source,
         float factor =
             ScaleFactorForPlane(target->floor, length, is_vert && !aligned);
 
-        target->floor.x_mat.X *= factor;
-        target->floor.x_mat.Y *= factor;
-        target->floor.y_mat.X *= factor;
-        target->floor.y_mat.Y *= factor;
+        target->floor.x_matrix.X *= factor;
+        target->floor.x_matrix.Y *= factor;
+        target->floor.y_matrix.X *= factor;
+        target->floor.y_matrix.Y *= factor;
     }
     if (special->sector_effect_ & kSectorEffectTypeScaleCeiling)
     {
         bool aligned =
             (special->sector_effect_ & kSectorEffectTypeAlignCeiling) != 0;
         float factor =
-            ScaleFactorForPlane(target->ceil, length, is_vert && !aligned);
+            ScaleFactorForPlane(target->ceiling, length, is_vert && !aligned);
 
-        target->ceil.x_mat.X *= factor;
-        target->ceil.x_mat.Y *= factor;
-        target->ceil.y_mat.X *= factor;
-        target->ceil.y_mat.Y *= factor;
+        target->ceiling.x_matrix.X *= factor;
+        target->ceiling.x_matrix.Y *= factor;
+        target->ceiling.y_matrix.X *= factor;
+        target->ceiling.y_matrix.Y *= factor;
     }
 
     // killough 3/7/98 and AJA 2022:
     // support for drawn heights coming from different sector
     if (special->sector_effect_ & kSectorEffectTypeBoomHeights)
     {
-        target->heightsec      = source->frontsector;
-        target->heightsec_side = source->side[0];
+        target->height_sector      = source->front_sector;
+        target->height_sector_side = source->side[0];
         // Quick band-aid fix for Line 242 "windows" - Dasho
-        if (target->c_h - target->f_h < 1)
+        if (target->ceiling_height - target->floor_height < 1)
         {
-            target->c_h = source->frontsector->c_h;
-            target->f_h = source->frontsector->f_h;
-            for (int i = 0; i < target->linecount; i++)
+            target->ceiling_height = source->front_sector->ceiling_height;
+            target->floor_height = source->front_sector->floor_height;
+            for (int i = 0; i < target->line_count; i++)
             {
                 if (target->lines[i]->side[1])
                 {
@@ -977,10 +977,10 @@ static void SectorEffect(sector_t *target, line_t *source,
                         target->lines[i]->side[0]->middle.image ==
                             target->lines[i]->side[1]->middle.image)
                     {
-                        target->lines[i]->side[0]->midmask_offset = 0;
-                        target->lines[i]->side[1]->midmask_offset = 0;
-                        for (seg_t *seg          = target->subsectors->segs;
-                             seg != nullptr; seg = seg->sub_next)
+                        target->lines[i]->side[0]->middle_mask_offset = 0;
+                        target->lines[i]->side[1]->middle_mask_offset = 0;
+                        for (Seg *seg          = target->subsectors->segs;
+                             seg != nullptr; seg = seg->subsector_next)
                         {
                             if (seg->linedef == target->lines[i])
                                 seg->linedef->flags |= MLF_LowerUnpegged;
@@ -991,7 +991,7 @@ static void SectorEffect(sector_t *target, line_t *source,
         }
         else
         {
-            for (int i = 0; i < target->linecount; i++)
+            for (int i = 0; i < target->line_count; i++)
             {
                 if (target->lines[i]->side[1])
                     target->lines[i]->blocked = false;
@@ -1000,7 +1000,7 @@ static void SectorEffect(sector_t *target, line_t *source,
     }
 }
 
-static void P_PortalEffect(line_t *ld)
+static void P_PortalEffect(Line *ld)
 {
     // already linked?
     if (ld->portal_pair) return;
@@ -1030,14 +1030,14 @@ static void P_PortalEffect(line_t *ld)
 
     for (int i = 0; i < total_level_lines; i++)
     {
-        line_t *other = level_lines + i;
+        Line *other = level_lines + i;
 
         if (other == ld) continue;
 
         if (other->tag != ld->tag) continue;
 
-        float h1 = ld->frontsector->c_h - ld->frontsector->f_h;
-        float h2 = other->frontsector->c_h - other->frontsector->f_h;
+        float h1 = ld->front_sector->ceiling_height - ld->front_sector->floor_height;
+        float h2 = other->front_sector->ceiling_height - other->front_sector->floor_height;
 
         if (h1 < 1 || h2 < 1)
         {
@@ -1103,29 +1103,29 @@ static void P_PortalEffect(line_t *ld)
                (int)(ld - level_lines));
 }
 
-static slope_plane_t *DetailSlope_BoundIt(line_t *ld, sector_t *sec, float dz1,
+static SlopePlane *DetailSlope_BoundIt(Line *ld, Sector *sec, float dz1,
                                           float dz2)
 {
     // determine slope's 2D coordinates
     float d_close = 0;
     float d_far   = 0;
 
-    float nx = ld->dy / ld->length;
-    float ny = -ld->dx / ld->length;
+    float nx = ld->delta_y / ld->length;
+    float ny = -ld->delta_x / ld->length;
 
-    if (sec == ld->backsector)
+    if (sec == ld->back_sector)
     {
         nx = -nx;
         ny = -ny;
     }
 
-    for (int k = 0; k < sec->linecount; k++)
+    for (int k = 0; k < sec->line_count; k++)
     {
         for (int vert = 0; vert < 2; vert++)
         {
-            vertex_t *V = (vert == 0) ? sec->lines[k]->v1 : sec->lines[k]->v2;
+            vertex_t *V = (vert == 0) ? sec->lines[k]->vertex_1 : sec->lines[k]->vertex_2;
 
-            float dist = nx * (V->X - ld->v1->X) + ny * (V->Y - ld->v1->Y);
+            float dist = nx * (V->X - ld->vertex_1->X) + ny * (V->Y - ld->vertex_1->Y);
 
             d_close = HMM_MIN(d_close, dist);
             d_far   = HMM_MAX(d_far, dist);
@@ -1142,20 +1142,20 @@ static slope_plane_t *DetailSlope_BoundIt(line_t *ld, sector_t *sec, float dz1,
         return nullptr;
     }
 
-    slope_plane_t *result = new slope_plane_t;
+    SlopePlane *result = new SlopePlane;
 
-    result->x1  = ld->v1->X + nx * d_close;
-    result->y1  = ld->v1->Y + ny * d_close;
-    result->dz1 = dz1;
+    result->x1  = ld->vertex_1->X + nx * d_close;
+    result->y1  = ld->vertex_1->Y + ny * d_close;
+    result->delta_z1 = dz1;
 
-    result->x2  = ld->v1->X + nx * d_far;
-    result->y2  = ld->v1->Y + ny * d_far;
-    result->dz2 = dz2;
+    result->x2  = ld->vertex_1->X + nx * d_far;
+    result->y2  = ld->vertex_1->Y + ny * d_far;
+    result->delta_z2 = dz2;
 
     return result;
 }
 
-static void DetailSlope_Floor(line_t *ld)
+static void DetailSlope_Floor(Line *ld)
 {
     if (!ld->side[1])
     {
@@ -1164,10 +1164,10 @@ static void DetailSlope_Floor(line_t *ld)
         return;
     }
 
-    sector_t *sec = ld->frontsector;
+    Sector *sec = ld->front_sector;
 
-    float z1 = ld->backsector->f_h;
-    float z2 = ld->frontsector->f_h;
+    float z1 = ld->back_sector->floor_height;
+    float z2 = ld->front_sector->floor_height;
 
     if (fabs(z1 - z2) < 0.5)
     {
@@ -1179,13 +1179,13 @@ static void DetailSlope_Floor(line_t *ld)
 
     if (z1 > z2)
     {
-        sec = ld->backsector;
+        sec = ld->back_sector;
 
-        z1 = ld->frontsector->f_h;
-        z2 = ld->backsector->f_h;
+        z1 = ld->front_sector->floor_height;
+        z2 = ld->back_sector->floor_height;
     }
 
-    if (sec->f_slope)
+    if (sec->floor_slope)
     {
         LogWarning(
             "Detail slope in sector #%d disabled: floor already sloped!\n",
@@ -1198,17 +1198,17 @@ static void DetailSlope_Floor(line_t *ld)
     // limit height difference to no more than player step
     z1 = HMM_MAX(z1, z2 - 24.0);
 
-    sec->f_slope = DetailSlope_BoundIt(ld, sec, z1 - sec->f_h, z2 - sec->f_h);
+    sec->floor_slope = DetailSlope_BoundIt(ld, sec, z1 - sec->floor_height, z2 - sec->floor_height);
 }
 
-static void DetailSlope_Ceiling(line_t *ld)
+static void DetailSlope_Ceiling(Line *ld)
 {
     if (!ld->side[1]) return;
 
-    sector_t *sec = ld->frontsector;
+    Sector *sec = ld->front_sector;
 
-    float z1 = ld->frontsector->c_h;
-    float z2 = ld->backsector->c_h;
+    float z1 = ld->front_sector->ceiling_height;
+    float z2 = ld->back_sector->ceiling_height;
 
     if (fabs(z1 - z2) < 0.5)
     {
@@ -1220,13 +1220,13 @@ static void DetailSlope_Ceiling(line_t *ld)
 
     if (z1 > z2)
     {
-        sec = ld->backsector;
+        sec = ld->back_sector;
 
-        z1 = ld->backsector->c_h;
-        z2 = ld->frontsector->c_h;
+        z1 = ld->back_sector->ceiling_height;
+        z2 = ld->front_sector->ceiling_height;
     }
 
-    if (sec->c_slope)
+    if (sec->ceiling_slope)
     {
         LogWarning(
             "Detail slope in sector #%d disabled: ceiling already sloped!\n",
@@ -1241,7 +1241,7 @@ static void DetailSlope_Ceiling(line_t *ld)
 	z2 = HMM_MIN(z2, z1 + 16.0);
 #endif
 
-    sec->c_slope = DetailSlope_BoundIt(ld, sec, z2 - sec->c_h, z1 - sec->c_h);
+    sec->ceiling_slope = DetailSlope_BoundIt(ld, sec, z2 - sec->ceiling_height, z1 - sec->ceiling_height);
 }
 
 //
@@ -1275,7 +1275,7 @@ static void DetailSlope_Ceiling(line_t *ld)
 //
 // -ACB- 2001/01/14: Added Elevator Sector Type
 //
-static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
+static bool P_ActivateSpecialLine(Line *line, const LineType *special,
                                   int tag, int side, MapObject *thing,
                                   LineTrigger trig, int can_reach,
                                   int no_care_who)
@@ -1284,7 +1284,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
     bool playedSound = false;
 
     SoundEffect *sfx[4];
-    sector_t    *tsec;
+    Sector    *tsec;
 
     int i;
 
@@ -1367,12 +1367,12 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
     // wouldn't otherwise cross (for now, the edge of a high dropoff)
     // Note: I believe this assumes no 3D floors, but I think it's a
     // very particular situation anyway - Dasho
-    if (trig == kLineTriggerWalkable && line->backsector && thing &&
+    if (trig == kLineTriggerWalkable && line->back_sector && thing &&
         (thing->info_->extended_flags_ & kExtendedFlagMonster) &&
         !(thing->flags_ & (kMapObjectFlagTeleport | kMapObjectFlagDropOff |
                            kMapObjectFlagFloat)))
     {
-        if (std::abs(line->frontsector->f_h - line->backsector->f_h) >
+        if (std::abs(line->front_sector->floor_height - line->back_sector->floor_height) >
             thing->info_->step_size_)
             return false;
     }
@@ -1512,7 +1512,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
         else
         {
             texSwitch = DoSectorsFromTag(tag, &special->f_,
-                                         line ? line->frontsector : nullptr,
+                                         line ? line->front_sector : nullptr,
                                          DoPlaneWrapper);
         }
     }
@@ -1530,7 +1530,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
         else
         {
             texSwitch = DoSectorsFromTag(tag, &special->c_,
-                                         line ? line->frontsector : nullptr,
+                                         line ? line->front_sector : nullptr,
                                          DoPlaneWrapper);
         }
     }
@@ -1556,7 +1556,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
         {
             for (i = 0; i < total_level_lines; i++)
             {
-                line_t *other = level_lines + i;
+                Line *other = level_lines + i;
 
                 if (other->tag == tag && other != line)
                     if (RunSlidingDoor(other, line, thing, special))
@@ -1569,7 +1569,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
     {
         for (tsec = FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
         {
-            tsec->props.colourmap = special->use_colourmap_;
+            tsec->properties.colourmap = special->use_colourmap_;
             texSwitch             = true;
         }
     }
@@ -1578,7 +1578,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
     {
         for (tsec = FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
         {
-            tsec->props.gravity = special->gravity_;
+            tsec->properties.gravity = special->gravity_;
             texSwitch           = true;
         }
     }
@@ -1587,7 +1587,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
     {
         for (tsec = FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
         {
-            tsec->props.friction = special->friction_;
+            tsec->properties.friction = special->friction_;
             texSwitch            = true;
         }
     }
@@ -1596,7 +1596,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
     {
         for (tsec = FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
         {
-            tsec->props.viscosity = special->viscosity_;
+            tsec->properties.viscosity = special->viscosity_;
             texSwitch             = true;
         }
     }
@@ -1605,7 +1605,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
     {
         for (tsec = FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
         {
-            tsec->props.drag = special->drag_;
+            tsec->properties.drag = special->drag_;
             texSwitch        = true;
         }
     }
@@ -1637,9 +1637,9 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
         if (!tag)
         {
             if (special->special_flags_ & kLineSpecialBackSector)
-                SectorEffect(line->backsector, line, special);
+                SectorEffect(line->back_sector, line, special);
             else
-                SectorEffect(line->frontsector, line, special);
+                SectorEffect(line->front_sector, line, special);
 
             texSwitch = true;
         }
@@ -1680,7 +1680,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
         if (line)
         {
             S_StartFX(special->activate_sfx_, SNCAT_Level,
-                      &line->frontsector->sfx_origin);
+                      &line->front_sector->sound_effects_origin);
         }
         else if (thing)
         {
@@ -1721,7 +1721,7 @@ static bool P_ActivateSpecialLine(line_t *line, const LineType *special,
 // -KM- 1998/09/01 Now much simpler
 // -ACB- 1998/09/12 Return success/failure
 //
-bool CrossSpecialLine(line_t *ld, int side, MapObject *thing)
+bool CrossSpecialLine(Line *ld, int side, MapObject *thing)
 {
     return P_ActivateSpecialLine(ld, ld->special, ld->tag, side, thing,
                                  kLineTriggerWalkable, 1, 0);
@@ -1730,7 +1730,7 @@ bool CrossSpecialLine(line_t *ld, int side, MapObject *thing)
 //
 // Called when a thing shoots a special line.
 //
-void ShootSpecialLine(line_t *ld, int side, MapObject *thing)
+void ShootSpecialLine(Line *ld, int side, MapObject *thing)
 {
     P_ActivateSpecialLine(ld, ld->special, ld->tag, side, thing,
                           kLineTriggerShootable, 1, 0);
@@ -1749,7 +1749,7 @@ void ShootSpecialLine(line_t *ld, int side, MapObject *thing)
 //       accessible.  Could be used for smarter switches, like one on
 //       a lower wall-part which is out of reach (e.g. MAP02).
 //
-bool UseSpecialLine(MapObject *thing, line_t *line, int side, float open_bottom,
+bool UseSpecialLine(MapObject *thing, Line *line, int side, float open_bottom,
                     float open_top)
 {
     int can_reach = (thing->z < open_top) &&
@@ -1775,8 +1775,8 @@ void RemoteActivation(MapObject *thing, int typenum, int tag, int side,
 }
 
 static inline void PlayerInProperties(player_t *player, float bz, float tz,
-                                      float f_h, float c_h,
-                                      region_properties_t *props,
+                                      float floor_height, float ceiling_height,
+                                      RegionProperties *props,
                                       const SectorType   **swim_special,
                                       bool                 should_choke = true)
 {
@@ -1785,7 +1785,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
 
     bool extra_tic = ((game_tic & 1) == 1);
 
-    if (!special || c_h < f_h) return;
+    if (!special || ceiling_height < floor_height) return;
 
     if (!GameCheckWhenAppear(special->appear_)) return;
 
@@ -1794,8 +1794,8 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
     //
     float mouth_z = player->mo->z + player->viewz;
 
-    if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= f_h &&
-        mouth_z <= c_h && player->powers[kPowerTypeScuba] <= 0)
+    if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= floor_height &&
+        mouth_z <= ceiling_height && player->powers[kPowerTypeScuba] <= 0)
     {
         int subtract = 1;
         if ((double_framerate.d_ && extra_tic) || !should_choke) subtract = 0;
@@ -1814,14 +1814,14 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
         }
     }
 
-    if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= f_h &&
-        mouth_z <= c_h)
+    if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= floor_height &&
+        mouth_z <= ceiling_height)
     {
         player->airless = true;
     }
 
-    if ((special->special_flags_ & kSectorFlagSwimming) && mouth_z >= f_h &&
-        mouth_z <= c_h)
+    if ((special->special_flags_ & kSectorFlagSwimming) && mouth_z >= floor_height &&
+        mouth_z <= ceiling_height)
     {
         player->swimming = true;
         *swim_special    = special;
@@ -1830,7 +1830,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
     }
 
     if ((special->special_flags_ & kSectorFlagSwimming) &&
-        player->mo->z >= f_h && player->mo->z <= c_h)
+        player->mo->z >= floor_height && player->mo->z <= ceiling_height)
     {
         player->wet_feet = true;
         P_HitLiquidFloor(player->mo);
@@ -1857,19 +1857,19 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
         if (special->special_flags_ & kSectorFlagProportional)
         {
             // only partially in region -- mitigate damage
-            if (tz > c_h) factor -= factor * (tz - c_h) / (tz - bz);
+            if (tz > ceiling_height) factor -= factor * (tz - ceiling_height) / (tz - bz);
 
-            if (bz < f_h) factor -= factor * (f_h - bz) / (tz - bz);
+            if (bz < floor_height) factor -= factor * (floor_height - bz) / (tz - bz);
         }
         else
         {
-            if (bz > c_h || tz < f_h) factor = 0;
+            if (bz > ceiling_height || tz < floor_height) factor = 0;
         }
     }
     else
     {
         // Not touching the floor ?
-        if (player->mo->z > f_h + 2.0f) return;
+        if (player->mo->z > floor_height + 2.0f) return;
     }
 
     // Check for DAMAGE_UNLESS/DAMAGE_IF DDF specials
@@ -1942,9 +1942,9 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
 // -KM- 1998/09/27 Generalised for sectors.ddf
 // -AJA- 1999/10/09: Updated for new sector handling.
 //
-void PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
+void PlayerInSpecialSector(player_t *player, Sector *sec, bool should_choke)
 {
-    extrafloor_t *S, *L, *C;
+    Extrafloor *S, *L, *C;
     float         floor_h;
     float         ceil_h;
 
@@ -1963,15 +1963,15 @@ void PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
     player->wet_feet   = false;
 
     // traverse extrafloor list
-    floor_h = sec->f_h;
-    ceil_h  = sec->c_h;
+    floor_h = sec->floor_height;
+    ceil_h  = sec->ceiling_height;
 
-    S = sec->bottom_ef;
-    L = sec->bottom_liq;
+    S = sec->bottom_extrafloor;
+    L = sec->bottom_liquid;
 
     while (S || L)
     {
-        if (!L || (S && S->bottom_h < L->bottom_h))
+        if (!L || (S && S->bottom_height < L->bottom_height))
         {
             C = S;
             S = S->higher;
@@ -1985,19 +1985,19 @@ void PlayerInSpecialSector(player_t *player, sector_t *sec, bool should_choke)
         SYS_ASSERT(C);
 
         // ignore "hidden" liquids
-        if (C->bottom_h < floor_h || C->bottom_h > sec->c_h) continue;
+        if (C->bottom_height < floor_h || C->bottom_height > sec->ceiling_height) continue;
 
-        PlayerInProperties(player, bz, tz, floor_h, C->top_h, C->p,
+        PlayerInProperties(player, bz, tz, floor_h, C->top_height, C->properties,
                            &swim_special, should_choke);
 
-        floor_h = C->top_h;
+        floor_h = C->top_height;
     }
 
     if (sec->floor_vertex_slope) floor_h = player->mo->floor_z_;
 
-    if (sec->ceil_vertex_slope) ceil_h = player->mo->ceiling_z_;
+    if (sec->ceiling_vertex_slope) ceil_h = player->mo->ceiling_z_;
 
-    PlayerInProperties(player, bz, tz, floor_h, ceil_h, sec->p, &swim_special,
+    PlayerInProperties(player, bz, tz, floor_h, ceil_h, sec->active_properties, &swim_special,
                        should_choke);
 
     // breathing support: handle gasping when leaving the water
@@ -2062,26 +2062,26 @@ void UpdateSpecials(bool extra_tic)
 
     for (size_t i = 0; i < light_animations.size(); i++)
     {
-        struct sector_s *sec_ref  = light_animations[i].light_sec_ref;
-        line_s          *line_ref = light_animations[i].light_line_ref;
+        struct Sector *sec_ref  = light_animations[i].light_sector_reference;
+        Line          *line_ref = light_animations[i].light_line_reference;
 
         if (!sec_ref || !line_ref) continue;
 
         // Only do "normal" (raising) doors for now
-        if (sec_ref->ceil_move && sec_ref->ceil_move->destination_height >
-                                      sec_ref->ceil_move->start_height)
+        if (sec_ref->ceiling_move && sec_ref->ceiling_move->destination_height >
+                                      sec_ref->ceiling_move->start_height)
         {
-            float ratio = (sec_ref->c_h - sec_ref->ceil_move->start_height) /
-                          (sec_ref->ceil_move->destination_height -
-                           sec_ref->ceil_move->start_height);
-            for (sector_t *tsec =
-                     FindSectorFromTag(light_animations[i].light_line_ref->tag);
+            float ratio = (sec_ref->ceiling_height - sec_ref->ceiling_move->start_height) /
+                          (sec_ref->ceiling_move->destination_height -
+                           sec_ref->ceiling_move->start_height);
+            for (Sector *tsec =
+                     FindSectorFromTag(light_animations[i].light_line_reference->tag);
                  tsec; tsec = tsec->tag_next)
             {
-                tsec->props.lightlevel =
-                    (tsec->max_neighbor_light - tsec->min_neighbor_light) *
+                tsec->properties.light_level =
+                    (tsec->maximum_neighbor_light - tsec->minimum_neighbor_light) *
                         ratio +
-                    tsec->min_neighbor_light;
+                    tsec->minimum_neighbor_light;
             }
         }
     }
@@ -2091,7 +2091,7 @@ void UpdateSpecials(bool extra_tic)
         // Calculate net offset/scroll/push for walls
         for (size_t i = 0; i < line_animations.size(); i++)
         {
-            line_t *ld = line_animations[i].target;
+            Line *ld = line_animations[i].target;
             if (!ld) continue;
 
             // Add static values
@@ -2100,23 +2100,23 @@ void UpdateSpecials(bool extra_tic)
                 if (ld->side[0]->top.image)
                 {
                     ld->side[0]->top.net_scroll.X +=
-                        line_animations[i].side0_xspeed;
+                        line_animations[i].side_0_x_speed;
                     ld->side[0]->top.net_scroll.Y +=
-                        line_animations[i].side0_yspeed;
+                        line_animations[i].side_0_y_speed;
                 }
                 if (ld->side[0]->middle.image)
                 {
                     ld->side[0]->middle.net_scroll.X +=
-                        line_animations[i].side0_xspeed;
+                        line_animations[i].side_0_x_speed;
                     ld->side[0]->middle.net_scroll.Y +=
-                        line_animations[i].side0_yspeed;
+                        line_animations[i].side_0_y_speed;
                 }
                 if (ld->side[0]->bottom.image)
                 {
                     ld->side[0]->bottom.net_scroll.X +=
-                        line_animations[i].side0_xspeed;
+                        line_animations[i].side_0_x_speed;
                     ld->side[0]->bottom.net_scroll.Y +=
-                        line_animations[i].side0_yspeed;
+                        line_animations[i].side_0_y_speed;
                 }
             }
             if (ld->side[1])
@@ -2124,43 +2124,43 @@ void UpdateSpecials(bool extra_tic)
                 if (ld->side[1]->top.image)
                 {
                     ld->side[1]->top.net_scroll.X +=
-                        line_animations[i].side1_xspeed;
+                        line_animations[i].side_1_x_speed;
                     ld->side[1]->top.net_scroll.Y +=
-                        line_animations[i].side1_yspeed;
+                        line_animations[i].side_1_y_speed;
                 }
                 if (ld->side[1]->middle.image)
                 {
                     ld->side[1]->middle.net_scroll.X +=
-                        line_animations[i].side1_xspeed;
+                        line_animations[i].side_1_x_speed;
                     ld->side[1]->middle.net_scroll.Y +=
-                        line_animations[i].side1_yspeed;
+                        line_animations[i].side_1_y_speed;
                 }
                 if (ld->side[1]->bottom.image)
                 {
                     ld->side[1]->bottom.net_scroll.X +=
-                        line_animations[i].side1_xspeed;
+                        line_animations[i].side_1_x_speed;
                     ld->side[1]->bottom.net_scroll.Y +=
-                        line_animations[i].side1_yspeed;
+                        line_animations[i].side_1_y_speed;
                 }
             }
 
             // Update dynamic values
-            struct sector_s *sec_ref    = line_animations[i].scroll_sec_ref;
-            const LineType *special_ref = line_animations[i].scroll_special_ref;
-            line_s         *line_ref    = line_animations[i].scroll_line_ref;
+            struct Sector *sec_ref    = line_animations[i].scroll_sector_reference;
+            const LineType *special_ref = line_animations[i].scroll_special_reference;
+            Line         *line_ref    = line_animations[i].scroll_line_reference;
 
             if (!sec_ref || !special_ref || !line_ref) continue;
 
             if (special_ref->line_effect_ & kLineEffectTypeVectorScroll)
             {
-                float tdx = line_animations[i].dynamic_dx;
-                float tdy = line_animations[i].dynamic_dy;
+                float tdx = line_animations[i].dynamic_delta_x;
+                float tdy = line_animations[i].dynamic_delta_y;
                 float heightref =
                     special_ref->scroll_type_ & BoomScrollerTypeDisplace
                         ? line_animations[i].last_height
-                        : sec_ref->orig_height;
-                float sy = tdy * ((sec_ref->f_h + sec_ref->c_h) - heightref);
-                float sx = tdx * ((sec_ref->f_h + sec_ref->c_h) - heightref);
+                        : sec_ref->original_height;
+                float sy = tdy * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
+                float sx = tdx * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
                 if (double_framerate.d_ &&
                     special_ref->scroll_type_ & BoomScrollerTypeDisplace)
                 {
@@ -2206,16 +2206,16 @@ void UpdateSpecials(bool extra_tic)
             }
             if (special_ref->line_effect_ & kLineEffectTypeTaggedOffsetScroll)
             {
-                float x_speed = line_animations[i].side0_xoffspeed;
-                float y_speed = line_animations[i].side0_yoffspeed;
+                float x_speed = line_animations[i].side_0_x_offset_speed;
+                float y_speed = line_animations[i].side_0_y_offset_speed;
                 float heightref =
                     special_ref->scroll_type_ & BoomScrollerTypeDisplace
                         ? line_animations[i].last_height
-                        : sec_ref->orig_height;
+                        : sec_ref->original_height;
                 float sy =
-                    x_speed * ((sec_ref->f_h + sec_ref->c_h) - heightref);
+                    x_speed * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
                 float sx =
-                    y_speed * ((sec_ref->f_h + sec_ref->c_h) - heightref);
+                    y_speed * ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
                 if (double_framerate.d_ &&
                     special_ref->scroll_type_ & BoomScrollerTypeDisplace)
                 {
@@ -2241,18 +2241,18 @@ void UpdateSpecials(bool extra_tic)
                     }
                 }
             }
-            line_animations[i].last_height = sec_ref->f_h + sec_ref->c_h;
+            line_animations[i].last_height = sec_ref->floor_height + sec_ref->ceiling_height;
         }
     }
 
     // ANIMATE LINE SPECIALS
     // -KM- 1998/09/01 Lines.ddf
-    std::list<line_t *>::iterator LI;
+    std::list<Line *>::iterator LI;
 
     for (LI = active_line_animations.begin();
          LI != active_line_animations.end(); LI++)
     {
-        line_t *ld = *LI;
+        Line *ld = *LI;
 
         if (!ld->old_stored)
         {
@@ -2462,22 +2462,22 @@ void UpdateSpecials(bool extra_tic)
         // Calculate net offset/scroll/push for floor/ceilings
         for (size_t i = 0; i < sector_animations.size(); i++)
         {
-            sector_t *sec = sector_animations[i].target;
+            Sector *sec = sector_animations[i].target;
             if (!sec) continue;
 
             // Add static values
-            sec->props.net_push.X += sector_animations[i].push.X;
-            sec->props.net_push.Y += sector_animations[i].push.Y;
+            sec->properties.net_push.X += sector_animations[i].push.X;
+            sec->properties.net_push.Y += sector_animations[i].push.Y;
             sec->floor.net_scroll.X += sector_animations[i].floor_scroll.X;
             sec->floor.net_scroll.Y += sector_animations[i].floor_scroll.Y;
-            sec->ceil.net_scroll.X += sector_animations[i].ceil_scroll.X;
-            sec->ceil.net_scroll.Y += sector_animations[i].ceil_scroll.Y;
+            sec->ceiling.net_scroll.X += sector_animations[i].ceil_scroll.X;
+            sec->ceiling.net_scroll.Y += sector_animations[i].ceil_scroll.Y;
 
             // Update dynamic values
-            struct sector_s *sec_ref = sector_animations[i].scroll_sec_ref;
+            struct Sector *sec_ref = sector_animations[i].scroll_sector_reference;
             const LineType  *special_ref =
-                sector_animations[i].scroll_special_ref;
-            line_s *line_ref = sector_animations[i].scroll_line_ref;
+                sector_animations[i].scroll_special_reference;
+            Line *line_ref = sector_animations[i].scroll_line_reference;
 
             if (!sec_ref || !special_ref || !line_ref ||
                 !(special_ref->scroll_type_ & BoomScrollerTypeDisplace ||
@@ -2487,13 +2487,13 @@ void UpdateSpecials(bool extra_tic)
             float heightref =
                 special_ref->scroll_type_ & BoomScrollerTypeDisplace
                     ? sector_animations[i].last_height
-                    : sec_ref->orig_height;
-            float sy = line_ref->length / 32.0f * line_ref->dy /
+                    : sec_ref->original_height;
+            float sy = line_ref->length / 32.0f * line_ref->delta_y /
                        line_ref->length *
-                       ((sec_ref->f_h + sec_ref->c_h) - heightref);
-            float sx = line_ref->length / 32.0f * line_ref->dx /
+                       ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
+            float sx = line_ref->length / 32.0f * line_ref->delta_x /
                        line_ref->length *
-                       ((sec_ref->f_h + sec_ref->c_h) - heightref);
+                       ((sec_ref->floor_height + sec_ref->ceiling_height) - heightref);
             if (double_framerate.d_ &&
                 special_ref->scroll_type_ & BoomScrollerTypeDisplace)
             {
@@ -2502,8 +2502,8 @@ void UpdateSpecials(bool extra_tic)
             }
             if (special_ref->sector_effect_ & kSectorEffectTypePushThings)
             {
-                sec->props.net_push.Y += BOOM_CARRY_FACTOR * sy;
-                sec->props.net_push.X += BOOM_CARRY_FACTOR * sx;
+                sec->properties.net_push.Y += BOOM_CARRY_FACTOR * sy;
+                sec->properties.net_push.X += BOOM_CARRY_FACTOR * sx;
             }
             if (special_ref->sector_effect_ & kSectorEffectTypeScrollFloor)
             {
@@ -2512,41 +2512,41 @@ void UpdateSpecials(bool extra_tic)
             }
             if (special_ref->sector_effect_ & kSectorEffectTypeScrollCeiling)
             {
-                sec->ceil.net_scroll.Y -= sy;
-                sec->ceil.net_scroll.X -= sx;
+                sec->ceiling.net_scroll.Y -= sy;
+                sec->ceiling.net_scroll.X -= sx;
             }
-            sector_animations[i].last_height = sec_ref->f_h + sec_ref->c_h;
+            sector_animations[i].last_height = sec_ref->floor_height + sec_ref->ceiling_height;
         }
     }
 
     // ANIMATE SECTOR SPECIALS
-    std::list<sector_t *>::iterator SI;
+    std::list<Sector *>::iterator SI;
 
     for (SI = active_sector_animations.begin();
          SI != active_sector_animations.end(); SI++)
     {
-        sector_t *sec = *SI;
+        Sector *sec = *SI;
 
         if (!sec->old_stored)
         {
             sec->floor.old_scroll.X = sec->floor.offset.X;
             sec->floor.old_scroll.Y = sec->floor.offset.Y;
-            sec->ceil.old_scroll.X  = sec->ceil.offset.X;
-            sec->ceil.old_scroll.Y  = sec->ceil.offset.Y;
-            sec->props.old_push.X   = sec->props.push.X;
-            sec->props.old_push.Y   = sec->props.push.Y;
-            sec->props.old_push.Z   = sec->props.push.Z;
+            sec->ceiling.old_scroll.X  = sec->ceiling.offset.X;
+            sec->ceiling.old_scroll.Y  = sec->ceiling.offset.Y;
+            sec->properties.old_push.X   = sec->properties.push.X;
+            sec->properties.old_push.Y   = sec->properties.push.Y;
+            sec->properties.old_push.Z   = sec->properties.push.Z;
             sec->old_stored         = true;
         }
         else
         {
             sec->floor.scroll.X = sec->floor.old_scroll.X;
             sec->floor.scroll.Y = sec->floor.old_scroll.Y;
-            sec->ceil.scroll.X  = sec->ceil.old_scroll.X;
-            sec->ceil.scroll.Y  = sec->ceil.old_scroll.Y;
-            sec->props.push.X   = sec->props.old_push.X;
-            sec->props.push.Y   = sec->props.old_push.Y;
-            sec->props.push.Z   = sec->props.old_push.Z;
+            sec->ceiling.scroll.X  = sec->ceiling.old_scroll.X;
+            sec->ceiling.scroll.Y  = sec->ceiling.old_scroll.Y;
+            sec->properties.push.X   = sec->properties.old_push.X;
+            sec->properties.push.Y   = sec->properties.old_push.Y;
+            sec->properties.push.Z   = sec->properties.old_push.Z;
         }
 
         sec->floor.offset.X =
@@ -2557,21 +2557,21 @@ void UpdateSpecials(bool extra_tic)
             fmod(sec->floor.offset.Y +
                      (sec->floor.scroll.Y + sec->floor.net_scroll.Y) * factor,
                  sec->floor.image->actual_h);
-        sec->ceil.offset.X =
-            fmod(sec->ceil.offset.X +
-                     (sec->ceil.scroll.X + sec->ceil.net_scroll.X) * factor,
-                 sec->ceil.image->actual_w);
-        sec->ceil.offset.Y =
-            fmod(sec->ceil.offset.Y +
-                     (sec->ceil.scroll.Y + sec->ceil.net_scroll.Y) * factor,
-                 sec->ceil.image->actual_h);
-        sec->props.push.X = sec->props.push.X + sec->props.net_push.X;
-        sec->props.push.Y = sec->props.push.Y + sec->props.net_push.Y;
+        sec->ceiling.offset.X =
+            fmod(sec->ceiling.offset.X +
+                     (sec->ceiling.scroll.X + sec->ceiling.net_scroll.X) * factor,
+                 sec->ceiling.image->actual_w);
+        sec->ceiling.offset.Y =
+            fmod(sec->ceiling.offset.Y +
+                     (sec->ceiling.scroll.Y + sec->ceiling.net_scroll.Y) * factor,
+                 sec->ceiling.image->actual_h);
+        sec->properties.push.X = sec->properties.push.X + sec->properties.net_push.X;
+        sec->properties.push.Y = sec->properties.push.Y + sec->properties.net_push.Y;
 
         // Reset dynamic stuff
-        sec->props.net_push   = {{0, 0, 0}};
+        sec->properties.net_push   = {{0, 0, 0}};
         sec->floor.net_scroll = {{0, 0}};
-        sec->ceil.net_scroll  = {{0, 0}};
+        sec->ceiling.net_scroll  = {{0, 0}};
     }
 
     // DO BUTTONS
@@ -2655,17 +2655,17 @@ void SpawnMapSpecials1(void)
         // Extrafloor creation
         if (special->ef_.type_ != kExtraFloorTypeNone && level_lines[i].tag > 0)
         {
-            sector_t *ctrl = level_lines[i].frontsector;
+            Sector *ctrl = level_lines[i].front_sector;
 
-            for (sector_t *tsec = FindSectorFromTag(level_lines[i].tag); tsec;
+            for (Sector *tsec = FindSectorFromTag(level_lines[i].tag); tsec;
                  tsec           = tsec->tag_next)
             {
                 // the OLD method of Boom deep water (the BOOMTEX flag)
                 if (special->ef_.type_ & kExtraFloorTypeBoomTex)
                 {
-                    if (ctrl->f_h <= tsec->f_h)
+                    if (ctrl->floor_height <= tsec->floor_height)
                     {
-                        tsec->props.colourmap = ctrl->props.colourmap;
+                        tsec->properties.colourmap = ctrl->properties.colourmap;
                         continue;
                     }
                 }
@@ -2703,7 +2703,7 @@ void SpawnMapSpecials1(void)
 
 void SpawnMapSpecials2(int autotag)
 {
-    sector_t         *sector;
+    Sector         *sector;
     const SectorType *secSpecial;
     const LineType   *special;
 
@@ -2716,9 +2716,9 @@ void SpawnMapSpecials2(int autotag)
     sector = level_sectors;
     for (i = 0; i < total_level_sectors; i++, sector++)
     {
-        if (!sector->props.special) continue;
+        if (!sector->properties.special) continue;
 
-        secSpecial = sector->props.special;
+        secSpecial = sector->properties.special;
 
         if (!GameCheckWhenAppear(secSpecial->appear_))
         {
@@ -2732,7 +2732,7 @@ void SpawnMapSpecials2(int autotag)
         if (secSpecial->secret_) intermission_stats.secrets++;
 
         if (secSpecial->use_colourmap_)
-            sector->props.colourmap = secSpecial->use_colourmap_;
+            sector->properties.colourmap = secSpecial->use_colourmap_;
 
         if (secSpecial->ambient_sfx_)
             AddAmbientSounds(sector, secSpecial->ambient_sfx_);
@@ -2745,26 +2745,26 @@ void SpawnMapSpecials2(int autotag)
         if (secSpecial->c_.type_ != kPlaneMoverUndefined)
             RunPlaneMover(sector, &secSpecial->c_, sector);
 
-        sector->props.gravity   = secSpecial->gravity_;
-        sector->props.friction  = secSpecial->friction_;
-        sector->props.viscosity = secSpecial->viscosity_;
-        sector->props.drag      = secSpecial->drag_;
+        sector->properties.gravity   = secSpecial->gravity_;
+        sector->properties.friction  = secSpecial->friction_;
+        sector->properties.viscosity = secSpecial->viscosity_;
+        sector->properties.drag      = secSpecial->drag_;
 
         // compute pushing force
         if (secSpecial->push_speed_ > 0 || secSpecial->push_zspeed_ > 0)
         {
             float mul = secSpecial->push_speed_ / 100.0f;
 
-            sector->props.push.X += epi::BAMCos(secSpecial->push_angle_) * mul;
-            sector->props.push.Y += epi::BAMSin(secSpecial->push_angle_) * mul;
-            sector->props.push.Z += secSpecial->push_zspeed_ /
+            sector->properties.push.X += epi::BAMCos(secSpecial->push_angle_) * mul;
+            sector->properties.push.Y += epi::BAMSin(secSpecial->push_angle_) * mul;
+            sector->properties.push.Z += secSpecial->push_zspeed_ /
                                     (double_framerate.d_ ? 89.2f : 100.0f);
         }
 
         // Scrollers
         if (secSpecial->f_.scroll_speed_ > 0)
         {
-            secanim_t anim;
+            SectorAnimation anim;
             anim.target = sector;
 
             float dx = epi::BAMCos(secSpecial->f_.scroll_angle_);
@@ -2773,7 +2773,7 @@ void SpawnMapSpecials2(int autotag)
             anim.floor_scroll.X -= dx * secSpecial->f_.scroll_speed_ / 32.0f;
             anim.floor_scroll.Y -= dy * secSpecial->f_.scroll_speed_ / 32.0f;
 
-            anim.last_height = sector->orig_height;
+            anim.last_height = sector->original_height;
 
             sector_animations.push_back(anim);
 
@@ -2781,7 +2781,7 @@ void SpawnMapSpecials2(int autotag)
         }
         if (secSpecial->c_.scroll_speed_ > 0)
         {
-            secanim_t anim;
+            SectorAnimation anim;
             anim.target = sector;
 
             float dx = epi::BAMCos(secSpecial->c_.scroll_angle_);
@@ -2790,7 +2790,7 @@ void SpawnMapSpecials2(int autotag)
             anim.ceil_scroll.X -= dx * secSpecial->c_.scroll_speed_ / 32.0f;
             anim.ceil_scroll.Y -= dy * secSpecial->c_.scroll_speed_ / 32.0f;
 
-            anim.last_height = sector->orig_height;
+            anim.last_height = sector->original_height;
 
             sector_animations.push_back(anim);
 
@@ -2853,16 +2853,16 @@ void SpawnMapSpecials2(int autotag)
         if (special->type_ == kLineTriggerManual &&
             special->c_.type_ != kPlaneMoverUndefined && level_lines[i].tag)
         {
-            lightanim_t anim;
-            anim.light_line_ref = &level_lines[i];
-            anim.light_sec_ref  = level_lines[i].backsector;
-            for (sector_t *tsec = FindSectorFromTag(anim.light_line_ref->tag);
+            LightAnimation anim;
+            anim.light_line_reference = &level_lines[i];
+            anim.light_sector_reference  = level_lines[i].back_sector;
+            for (Sector *tsec = FindSectorFromTag(anim.light_line_reference->tag);
                  tsec; tsec     = tsec->tag_next)
             {
-                tsec->min_neighbor_light =
-                    FindMinimumSurroundingLight(tsec, tsec->props.lightlevel);
-                tsec->max_neighbor_light =
-                    FindMaxSurroundingLight(tsec, tsec->props.lightlevel);
+                tsec->minimum_neighbor_light =
+                    FindMinimumSurroundingLight(tsec, tsec->properties.light_level);
+                tsec->maximum_neighbor_light =
+                    FindMaxSurroundingLight(tsec, tsec->properties.light_level);
             }
             light_animations.push_back(anim);
         }
@@ -2876,9 +2876,9 @@ void SpawnMapSpecials2(int autotag)
 // -AJA- 1999/09/29: Updated for new tagged sector links.
 //
 static bool DoSectorsFromTag(int tag, const void *p1, void *p2,
-                             bool (*func)(sector_t *, const void *, void *))
+                             bool (*func)(Sector *, const void *, void *))
 {
-    sector_t *tsec;
+    Sector *tsec;
     bool      rtn = false;
 
     for (tsec = FindSectorFromTag(tag); tsec; tsec = tsec->tag_next)
@@ -2889,11 +2889,11 @@ static bool DoSectorsFromTag(int tag, const void *p1, void *p2,
     return rtn;
 }
 
-void SectorChangeSpecial(sector_t *sec, int new_type)
+void SectorChangeSpecial(Sector *sec, int new_type)
 {
-    sec->props.type = HMM_MAX(0, new_type);
+    sec->properties.type = HMM_MAX(0, new_type);
 
-    sec->props.special = P_LookupSectorType(sec->props.type);
+    sec->properties.special = P_LookupSectorType(sec->properties.type);
 }
 
 //--- editor settings ---

@@ -1146,8 +1146,8 @@ void DeathBot::ThinkOpenDoor()
             }
 
             // if closing, try to re-open
-            const sector_t     *sector = door_seg_->back_sub->sector;
-            const PlaneMover *pm     = sector->ceil_move;
+            const Sector     *sector = door_seg_->back_subsector->sector;
+            const PlaneMover *pm     = sector->ceiling_move;
 
             if (pm != nullptr && pm->direction < 0)
             {
@@ -1156,7 +1156,7 @@ void DeathBot::ThinkOpenDoor()
             }
 
             // already open?
-            if (sector->c_h > sector->f_h + 56.0f)
+            if (sector->ceiling_height > sector->floor_height + 56.0f)
             {
                 FinishDoorOrLift(true);
                 return;
@@ -1212,7 +1212,7 @@ void DeathBot::ThinkUseLift()
             }
 
             // if lift is raising, try to re-lower
-            const sector_t     *sector = lift_seg_->back_sub->sector;
+            const Sector     *sector = lift_seg_->back_subsector->sector;
             const PlaneMover *pm     = sector->floor_move;
 
             if (pm != nullptr && pm->direction > 0)
@@ -1222,7 +1222,7 @@ void DeathBot::ThinkUseLift()
             }
 
             // already lowered?
-            if (sector->f_h < lift_seg_->front_sub->sector->f_h + 24.0f)
+            if (sector->floor_height < lift_seg_->front_subsector->sector->floor_height + 24.0f)
             {
                 // navigation code added a place to stand
                 path_->along_ += 1;
@@ -1251,7 +1251,7 @@ void DeathBot::ThinkUseLift()
 
             WalkToward(path_->CurrentDestination());
 
-            const sector_t *lift_sec = lift_seg_->back_sub->sector;
+            const Sector *lift_sec = lift_seg_->back_subsector->sector;
 
             if (lift_sec->floor_move != nullptr)
             {
@@ -1263,7 +1263,7 @@ void DeathBot::ThinkUseLift()
             }
 
             // reached the top?
-            bool ok = pl_->mo->z > (lift_sec->f_h - 0.5);
+            bool ok = pl_->mo->z > (lift_sec->floor_height - 0.5);
 
             FinishDoorOrLift(ok);
             return;

@@ -657,13 +657,13 @@ void RAD_ActPlaySound(rad_trigger_t *R, void *param)
         flags |= FX_Boss;
 
     // Ambient sound
-    R->sfx_origin.x = ambient->x;
-    R->sfx_origin.y = ambient->y;
+    R->sound_effects_origin.x = ambient->x;
+    R->sound_effects_origin.y = ambient->y;
 
     if (AlmostEquals(ambient->z, ONFLOORZ))
-        R->sfx_origin.z = R_PointInSubsector(ambient->x, ambient->y)->sector->f_h;
+        R->sound_effects_origin.z = R_PointInSubsector(ambient->x, ambient->y)->sector->floor_height;
     else
-        R->sfx_origin.z = ambient->z;
+        R->sound_effects_origin.z = ambient->z;
 
     if (ambient->kind == PSOUND_BossMan)
     { // Lobo: want BOSSMAN to sound from the player
@@ -672,13 +672,13 @@ void RAD_ActPlaySound(rad_trigger_t *R, void *param)
     }
     else
     {
-        S_StartFX(ambient->sfx, SNCAT_Level, &R->sfx_origin, flags);
+        S_StartFX(ambient->sfx, SNCAT_Level, &R->sound_effects_origin, flags);
     }
 }
 
 void RAD_ActKillSound(rad_trigger_t *R, void *param)
 {
-    S_StopFX(&R->sfx_origin);
+    S_StopFX(&R->sound_effects_origin);
 }
 
 void RAD_ActChangeMusic(rad_trigger_t *R, void *param)
@@ -724,7 +724,7 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
     {
         bool must_recompute_sky = false;
 
-        sector_t *tsec;
+        Sector *tsec;
 
         for (tsec = FindSectorFromTag(ctex->tag); tsec != nullptr; tsec = tsec->tag_next)
         {
@@ -732,7 +732,7 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
             {
                 bool valid = false;
 
-                for (int i = 0; i < tsec->linecount; i++)
+                for (int i = 0; i < tsec->line_count; i++)
                 {
                     if (tsec->lines[i]->tag == ctex->subtag)
                     {
@@ -768,7 +768,7 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
                 }
             }
             else
-                tsec->ceil.image = image;
+                tsec->ceiling.image = image;
 
             if (image == skyflatimage)
                 must_recompute_sky = true;
@@ -785,7 +785,7 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
 
     for (int i = 0; i < total_level_lines; i++)
     {
-        side_t *side = (ctex->what <= CHTEX_RightLower) ? level_lines[i].side[0] : level_lines[i].side[1];
+        Side *side = (ctex->what <= CHTEX_RightLower) ? level_lines[i].side[0] : level_lines[i].side[1];
 
         if (level_lines[i].tag != ctex->tag || !side)
             continue;
@@ -829,16 +829,16 @@ void RAD_ActSkill(rad_trigger_t *R, void *param)
     level_flags.respawn  = skill->respawn;
 }
 
-static void MoveOneSector(sector_t *sec, s_movesector_t *t)
+static void MoveOneSector(Sector *sec, s_movesector_t *t)
 {
     float dh;
 
     if (t->relative)
         dh = t->value;
     else if (t->is_ceiling)
-        dh = t->value - sec->c_h;
+        dh = t->value - sec->ceiling_height;
     else
-        dh = t->value - sec->f_h;
+        dh = t->value - sec->floor_height;
 
     if (!CheckSolidSectorMove(sec, t->is_ceiling, dh))
         return;
@@ -869,12 +869,12 @@ void RAD_ActMoveSector(rad_trigger_t *R, void *param)
     }
 }
 
-static void LightOneSector(sector_t *sec, s_lightsector_t *t)
+static void LightOneSector(Sector *sec, s_lightsector_t *t)
 {
     if (t->relative)
-        sec->props.lightlevel += RoundToInteger(t->value);
+        sec->properties.light_level += RoundToInteger(t->value);
     else
-        sec->props.lightlevel = RoundToInteger(t->value);
+        sec->properties.light_level = RoundToInteger(t->value);
 }
 
 void RAD_ActLightSector(rad_trigger_t *R, void *param)
@@ -912,29 +912,29 @@ void RAD_ActFogSector(rad_trigger_t *R, void *param)
             if (!t->leave_color)
             {
                 if (t->colmap_color)
-                    level_sectors[i].props.fog_color = V_ParseFontColor(t->colmap_color);
+                    level_sectors[i].properties.fog_color = V_ParseFontColor(t->colmap_color);
                 else // should only happen with a CLEAR directive
-                    level_sectors[i].props.fog_color = kRGBANoValue;
+                    level_sectors[i].properties.fog_color = kRGBANoValue;
             }
             if (!t->leave_density)
             {
                 if (t->relative)
                 {
-                    level_sectors[i].props.fog_density += (0.01f * t->density);
-                    if (level_sectors[i].props.fog_density < 0.0001f)
-                        level_sectors[i].props.fog_density = 0;
-                    if (level_sectors[i].props.fog_density > 0.01f)
-                        level_sectors[i].props.fog_density = 0.01f;
+                    level_sectors[i].properties.fog_density += (0.01f * t->density);
+                    if (level_sectors[i].properties.fog_density < 0.0001f)
+                        level_sectors[i].properties.fog_density = 0;
+                    if (level_sectors[i].properties.fog_density > 0.01f)
+                        level_sectors[i].properties.fog_density = 0.01f;
                 }
                 else
-                    level_sectors[i].props.fog_density = 0.01f * t->density;
+                    level_sectors[i].properties.fog_density = 0.01f * t->density;
             }
-            for (int j = 0; j < level_sectors[i].linecount; j++)
+            for (int j = 0; j < level_sectors[i].line_count; j++)
             {
                 for (int k = 0; k < 2; k++)
                 {
-                    side_t *side_check = level_sectors[i].lines[j]->side[k];
-                    if (side_check && side_check->middle.fogwall)
+                    Side *side_check = level_sectors[i].lines[j]->side[k];
+                    if (side_check && side_check->middle.fog_wall)
                     {
                         side_check->middle.image =
                             nullptr; // will be rebuilt with proper color later
@@ -987,7 +987,7 @@ void RAD_ActUnblockLines(rad_trigger_t *R, void *param)
 
     for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = level_lines + i;
+        Line *ld = level_lines + i;
 
         if (ld->tag != ub->tag)
             continue;
@@ -1011,7 +1011,7 @@ void RAD_ActBlockLines(rad_trigger_t *R, void *param)
 
     for (i = 0; i < total_level_lines; i++)
     {
-        line_t *ld = level_lines + i;
+        Line *ld = level_lines + i;
 
         if (ld->tag != ub->tag)
             continue;

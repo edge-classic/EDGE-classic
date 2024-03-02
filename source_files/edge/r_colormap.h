@@ -80,8 +80,8 @@ void V_GetColmapRGB(const Colormap *colmap, float *r, float *g, float *b);
 RGBAColor V_GetFontColor(const Colormap *colmap);
 RGBAColor V_ParseFontColor(const char *name, bool strict = false);
 
-abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props, int light_add = 0,
-                                       sector_t *sec = nullptr);
+abstract_shader_c *R_GetColormapShader(const struct RegionProperties *props, int light_add = 0,
+                                       Sector *sec = nullptr);
 
 // colour indices from palette
 extern int pal_black, pal_white, pal_gray239;

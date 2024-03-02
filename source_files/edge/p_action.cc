@@ -1098,13 +1098,13 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty,
     float projy = source->y;
     float projz =
         source->z + attack->height_ * source->height_ / source->info_->height_;
-    sector_t *cur_source_sec = source->subsector_->sector;
+    Sector *cur_source_sec = source->subsector_->sector;
 
     if (source->player_)
         projz += (source->player_->viewz - source->player_->std_viewheight);
-    else if (cur_source_sec->sink_depth > 0 && !cur_source_sec->exfloor_used &&
-             !cur_source_sec->heightsec &&
-             abs(source->z - cur_source_sec->f_h) < 1)
+    else if (cur_source_sec->sink_depth > 0 && !cur_source_sec->extrafloor_used &&
+             !cur_source_sec->height_sector &&
+             abs(source->z - cur_source_sec->floor_height) < 1)
         projz -= (source->height_ * 0.5 * cur_source_sec->sink_depth);
 
     BAMAngle angle = source->angle_;
@@ -1180,11 +1180,11 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty,
                                     (VISIBLE - target->visibility_));
         }
 
-        sector_t *cur_target_sec = target->subsector_->sector;
+        Sector *cur_target_sec = target->subsector_->sector;
 
-        if (cur_target_sec->sink_depth > 0 && !cur_target_sec->exfloor_used &&
-            !cur_target_sec->heightsec &&
-            abs(target->z - cur_target_sec->f_h) < 1)
+        if (cur_target_sec->sink_depth > 0 && !cur_target_sec->extrafloor_used &&
+            !cur_target_sec->height_sector &&
+            abs(target->z - cur_target_sec->floor_height) < 1)
             tz -= (target->height_ * 0.5 * cur_target_sec->sink_depth);
     }
 
@@ -3651,7 +3651,7 @@ void P_ActJumpSky(MapObject *mo)
     //
     // Note: nothing to do with monsters physically jumping.
 
-    if (mo->subsector_->sector->ceil.image != skyflatimage)  // is it outdoors?
+    if (mo->subsector_->sector->ceiling.image != skyflatimage)  // is it outdoors?
     {
         return;
     }

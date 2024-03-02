@@ -650,7 +650,7 @@ class colormap_shader_c : public abstract_shader_c
     float    fog_density;
 
     // for DDFLEVL fog checks
-    sector_t *sec;
+    Sector *sec;
 
   public:
     colormap_shader_c(const Colormap *CM)
@@ -732,7 +732,7 @@ class colormap_shader_c : public abstract_shader_c
         // check for DDFLEVL fog
         if (fc_to_use == kRGBANoValue)
         {
-            if (IS_SKY(sec->ceil))
+            if (IS_SKY(sec->ceiling))
             {
                 fc_to_use = current_map->outdoor_fog_color_;
                 fd_to_use = 0.01f * current_map->outdoor_fog_density_;
@@ -917,7 +917,7 @@ class colormap_shader_c : public abstract_shader_c
         fog_density = _fog_density;
     }
 
-    void SetSector(sector_t *_sec)
+    void SetSector(Sector *_sec)
     {
         sec = _sec;
     }
@@ -925,7 +925,7 @@ class colormap_shader_c : public abstract_shader_c
 
 static colormap_shader_c *std_cmap_shader;
 
-abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props, int light_add, sector_t *sec)
+abstract_shader_c *R_GetColormapShader(const struct RegionProperties *props, int light_add, Sector *sec)
 {
     if (!std_cmap_shader)
         std_cmap_shader = new colormap_shader_c(nullptr);
@@ -950,7 +950,7 @@ abstract_shader_c *R_GetColormapShader(const struct region_properties_s *props, 
 
     shader->Update();
 
-    int lit_Nom = props->lightlevel + light_add + ((v_secbright.d_- 5) * 10);
+    int lit_Nom = props->light_level + light_add + ((v_secbright.d_- 5) * 10);
 
     if (!(props->colourmap && (props->colourmap->special_ & kColorSpecialNoFlash)) || ren_extralight > 250)
     {

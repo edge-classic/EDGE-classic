@@ -67,10 +67,10 @@ struct PathIntercept
     float along;  // along trace line
     // one of these will be nullptr
     MapObject *thing;
-    line_t    *line;
+    Line    *line;
 };
 
-extern divline_t trace;
+extern DividingLine trace;
 
 /* FUNCTIONS */
 
@@ -81,12 +81,12 @@ void SetThingPosition(MapObject *mo);
 void UnsetThingPosition(MapObject *mo);
 void UnsetThingFinal(MapObject *mo);
 void ChangeThingPosition(MapObject *mo, float x, float y, float z);
-void FreeSectorTouchNodes(sector_t *sec);
+void FreeSectorTouchNodes(Sector *sec);
 
 void GenerateBlockmap(int min_x, int min_y, int max_x, int max_y);
 
 bool BlockmapLineIterator(float x1, float y1, float x2, float y2,
-                          bool (*func)(line_t *, void *), void *data = nullptr);
+                          bool (*func)(Line *, void *), void *data = nullptr);
 
 bool BlockmapThingIterator(float x1, float y1, float x2, float y2,
                            bool (*func)(MapObject *, void *),
@@ -96,11 +96,11 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
                           float z2, void (*func)(MapObject *, void *),
                           void *data = nullptr);
 
-void SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
+void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2,
                         float y2, float z2, void (*func)(MapObject *, void *),
                         void *data = nullptr);
 
-float PathInterceptVector(divline_t *v2, divline_t *v1);
+float PathInterceptVector(DividingLine *v2, DividingLine *v1);
 
 bool PathTraverse(float x1, float y1, float x2, float y2, int flags,
                   bool (*func)(PathIntercept *, void *), void *data = nullptr);

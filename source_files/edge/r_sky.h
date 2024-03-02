@@ -51,8 +51,8 @@ void R_ComputeSkyHeights(void);
 void RGL_BeginSky(void);
 void RGL_FinishSky(void);
 
-void RGL_DrawSkyPlane(subsector_t *sub, float h);
-void RGL_DrawSkyWall(seg_t *seg, float h1, float h2);
+void RGL_DrawSkyPlane(Subsector *sub, float h);
+void RGL_DrawSkyWall(Seg *seg, float h1, float h2);
 
 int  RGL_UpdateSkyBoxTextures(void);
 void RGL_PreCacheSky(void);

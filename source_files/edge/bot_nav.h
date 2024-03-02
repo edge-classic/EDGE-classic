@@ -35,7 +35,7 @@ struct BotPathNode
 {
     Position   pos{0, 0, 0};
     int          flags = kBotPathNodeNormal;
-    const seg_t *seg   = nullptr;
+    const Seg *seg   = nullptr;
 };
 
 // a path from a start point to a finish one.

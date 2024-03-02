@@ -76,10 +76,10 @@ EDGE_DEFINE_CONSOLE_VARIABLE(r_forceflatlighting, "0", kConsoleVariableFlagArchi
 extern ConsoleVariable r_culling;
 extern ConsoleVariable double_framerate;
 
-side_t   *sidedef;
-line_t   *linedef;
-sector_t *frontsector;
-sector_t *backsector;
+Side   *sidedef;
+Line   *linedef;
+Sector *frontsector;
+Sector *backsector;
 
 unsigned int root_node;
 
@@ -121,11 +121,11 @@ extern float sprite_skew;
 
 // common stuff
 
-extern sector_t *frontsector;
-extern sector_t *backsector;
+extern Sector *frontsector;
+extern Sector *backsector;
 
-static subsector_t *cur_sub;
-static seg_t       *cur_seg;
+static Subsector *cur_sub;
+static Seg       *cur_seg;
 
 static bool solid_mode;
 
@@ -171,10 +171,10 @@ typedef struct mirror_info_s
   public:
     void ComputeMirror()
     {
-        seg_t *seg = def->seg;
+        Seg *seg = def->seg;
 
-        float sdx = seg->v2->X - seg->v1->X;
-        float sdy = seg->v2->Y - seg->v1->Y;
+        float sdx = seg->vertex_2->X - seg->vertex_1->X;
+        float sdy = seg->vertex_2->Y - seg->vertex_1->Y;
 
         float len_p2 = seg->length * seg->length;
 
@@ -186,8 +186,8 @@ typedef struct mirror_info_s
         yx = B;
         yy = -A;
 
-        xc = seg->v1->X * (1.0 - A) - seg->v1->Y * B;
-        yc = seg->v1->Y * (1.0 + A) - seg->v1->X * B;
+        xc = seg->vertex_1->X * (1.0 - A) - seg->vertex_1->Y * B;
+        yc = seg->vertex_1->Y * (1.0 + A) - seg->vertex_1->X * B;
 
         // Turn(a) = mir_angle + (0 - (a - mir_angle))
         //         = 2 * mir_angle - a
@@ -199,39 +199,39 @@ typedef struct mirror_info_s
         xy_scale = 1.0f;
     }
 
-    float GetAlong(const line_t *ld, float x, float y)
+    float GetAlong(const Line *ld, float x, float y)
     {
-        if (fabs(ld->dx) >= fabs(ld->dy))
-            return (x - ld->v1->X) / ld->dx;
+        if (fabs(ld->delta_x) >= fabs(ld->delta_y))
+            return (x - ld->vertex_1->X) / ld->delta_x;
         else
-            return (y - ld->v1->Y) / ld->dy;
+            return (y - ld->vertex_1->Y) / ld->delta_y;
     }
 
     void ComputePortal()
     {
-        seg_t  *seg   = def->seg;
-        line_t *other = seg->linedef->portal_pair;
+        Seg  *seg   = def->seg;
+        Line *other = seg->linedef->portal_pair;
 
         SYS_ASSERT(other);
 
-        float ax1 = seg->v1->X;
-        float ay1 = seg->v1->Y;
+        float ax1 = seg->vertex_1->X;
+        float ay1 = seg->vertex_1->Y;
 
-        float ax2 = seg->v2->X;
-        float ay2 = seg->v2->Y;
+        float ax2 = seg->vertex_2->X;
+        float ay2 = seg->vertex_2->Y;
 
         // find corresponding coords on partner line
         float along1 = GetAlong(seg->linedef, ax1, ay1);
         float along2 = GetAlong(seg->linedef, ax2, ay2);
 
-        float bx1 = other->v2->X - other->dx * along1;
-        float by1 = other->v2->Y - other->dy * along1;
+        float bx1 = other->vertex_2->X - other->delta_x * along1;
+        float by1 = other->vertex_2->Y - other->delta_y * along1;
 
-        float bx2 = other->v2->X - other->dx * along2;
-        float by2 = other->v2->Y - other->dy * along2;
+        float bx2 = other->vertex_2->X - other->delta_x * along2;
+        float by2 = other->vertex_2->Y - other->delta_y * along2;
 
         // compute rotation angle
-        tc = kBAMAngle180 + R_PointToAngle(0, 0, other->dx, other->dy) - seg->angle;
+        tc = kBAMAngle180 + R_PointToAngle(0, 0, other->delta_x, other->delta_y) - seg->angle;
 
         xx = epi::BAMCos(tc);
         xy = epi::BAMSin(tc);
@@ -254,11 +254,11 @@ typedef struct mirror_info_s
         yc = ay1 - bx1 * yx - by1 * yy;
 
         // heights
-        float a_h = (seg->frontsector->c_h - seg->frontsector->f_h);
-        float b_h = (other->frontsector->c_h - other->frontsector->f_h);
+        float a_h = (seg->front_sector->ceiling_height - seg->front_sector->floor_height);
+        float b_h = (other->front_sector->ceiling_height - other->front_sector->floor_height);
 
         z_scale = a_h / HMM_MAX(1, b_h);
-        zc      = seg->frontsector->f_h - other->frontsector->f_h * z_scale;
+        zc      = seg->front_sector->floor_height - other->front_sector->floor_height * z_scale;
     }
 
     void Compute()
@@ -344,7 +344,7 @@ bool MIR_Reflective(void)
     return result;
 }
 
-static bool MIR_SegOnPortal(seg_t *seg)
+static bool MIR_SegOnPortal(Seg *seg)
 {
     if (num_active_mirrors == 0)
         return false;
@@ -407,8 +407,8 @@ static void MIR_SetClippers()
 
         HMM_Vec2 v1, v2;
 
-        v1 = {{mir.def->seg->v1->X, mir.def->seg->v1->Y}};
-        v2 = {{mir.def->seg->v2->X, mir.def->seg->v2->Y}};
+        v1 = {{mir.def->seg->vertex_1->X, mir.def->seg->vertex_1->Y}};
+        v2 = {{mir.def->seg->vertex_2->X, mir.def->seg->vertex_2->Y}};
 
         for (int k = i - 1; k >= 0; k--)
         {
@@ -474,7 +474,7 @@ static GLuint R_ImageCache(const image_c *image, bool anim = true, const Colorma
     }
 }
 
-float Slope_GetHeight(slope_plane_t *slope, float x, float y)
+float Slope_GetHeight(SlopePlane *slope, float x, float y)
 {
     // FIXME: precompute (store in slope_plane_t)
     float dx = slope->x2 - slope->x1;
@@ -484,7 +484,7 @@ float Slope_GetHeight(slope_plane_t *slope, float x, float y)
 
     float along = ((x - slope->x1) * dx + (y - slope->y1) * dy) / d_len;
 
-    return slope->dz1 + along * (slope->dz2 - slope->dz1);
+    return slope->delta_z1 + along * (slope->delta_z2 - slope->delta_z1);
 }
 
 #if 0
@@ -594,7 +594,7 @@ static void DrawLaser(player_t *p)
 typedef struct wall_plane_data_s
 {
     HMM_Vec3    normal;
-    divline_t div;
+    DividingLine div;
 
     int   light;
     int   col[3];
@@ -709,7 +709,7 @@ typedef struct
     float R, G, B;
     float trans;
 
-    divline_t div;
+    DividingLine div;
 
     float tx0, ty0;
     float tx_mul, ty_mul;
@@ -741,13 +741,13 @@ static void WallCoordFunc(void *d, int v_idx, HMM_Vec3 *pos, float *rgb, HMM_Vec
 
     float along;
 
-    if (fabs(data->div.dx) > fabs(data->div.dy))
+    if (fabs(data->div.delta_x) > fabs(data->div.delta_y))
     {
-        along = (pos->X - data->div.x) / data->div.dx;
+        along = (pos->X - data->div.x) / data->div.delta_x;
     }
     else
     {
-        along = (pos->Y - data->div.y) / data->div.dy;
+        along = (pos->Y - data->div.y) / data->div.delta_y;
     }
 
     texc->X = data->tx0 + along * data->tx_mul;
@@ -783,7 +783,7 @@ typedef struct plane_coord_data_s
     // multiplier for plane_z_bob
     float bob_amount = 0;
 
-    slope_plane_t *slope;
+    SlopePlane *slope;
 
     BAMAngle rotation = 0;
 } plane_coord_data_t;
@@ -834,14 +834,14 @@ static void DLIT_Wall(MapObject *mo, void *dataptr)
 
     // light behind the plane ?
     if (!mo->info_->dlight_[0].leaky_ && !data->mid_masked &&
-        !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceil_vertex_slope))
+        !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceiling_vertex_slope))
     {
         float mx = mo->x;
         float my = mo->y;
 
         MIR_Coordinate(mx, my);
 
-        float dist = (mx - data->div.x) * data->div.dy - (my - data->div.y) * data->div.dx;
+        float dist = (mx - data->div.x) * data->div.delta_y - (my - data->div.y) * data->div.delta_x;
 
         if (dist < 0)
             return;
@@ -873,7 +873,7 @@ static void DLIT_Plane(MapObject *mo, void *dataptr)
 
     // light behind the plane ?
     if (!mo->info_->dlight_[0].leaky_ &&
-        !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceil_vertex_slope))
+        !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceiling_vertex_slope))
     {
         float z = data->vert[0].Z;
 
@@ -908,16 +908,16 @@ static void GLOWLIT_Plane(MapObject *mo, void *dataptr)
 
 #define MAX_EDGE_VERT 20
 
-static inline void GreetNeighbourSector(float *hts, int &num, vertex_seclist_t *seclist)
+static inline void GreetNeighbourSector(float *hts, int &num, VertexSectorList *seclist)
 {
     if (!seclist)
         return;
 
-    for (int k = 0; k < (seclist->num * 2); k++)
+    for (int k = 0; k < (seclist->total * 2); k++)
     {
-        sector_t *sec = level_sectors + seclist->sec[k / 2];
+        Sector *sec = level_sectors + seclist->sectors[k / 2];
 
-        float h = (k & 1) ? sec->c_h : sec->f_h;
+        float h = (k & 1) ? sec->ceiling_height : sec->floor_height;
 
         // does not intersect current height range?
         if (h <= hts[0] + 0.1 || h >= hts[num - 1] - 0.1)
@@ -966,8 +966,8 @@ typedef enum
 } wall_tile_flag_e;
 
 static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, float lz2, float x2, float y2, float rz1,
-                         float rz2, float tex_top_h, surface_t *surf, const image_c *image, bool mid_masked,
-                         bool opaque, float tex_x1, float tex_x2, region_properties_t *props = nullptr)
+                         float rz2, float tex_top_h, MapSurface *surf, const image_c *image, bool mid_masked,
+                         bool opaque, float tex_x1, float tex_x2, RegionProperties *props = nullptr)
 {
     // Note: tex_x1 and tex_x2 are in world coordinates.
     //       top, bottom and tex_top_h as well.
@@ -977,9 +977,9 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     (void)opaque;
 
     // if (! props)
-    //	props = surf->override_p ? surf->override_p : dfloor->props;
-    if (surf->override_p)
-        props = surf->override_p;
+    //	props = surf->override_properties ? surf->override_properties : dfloor->props;
+    if (surf->override_properties)
+        props = surf->override_properties;
 
     if (!props)
         props = dfloor->props;
@@ -1024,11 +1024,11 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     int lit_adjust = 0;
 
     // do the N/S/W/E bizzo...
-    if (!r_forceflatlighting.d_&& current_map->episode_->lighting_ == kLightingModelDoom && props->lightlevel > 0)
+    if (!r_forceflatlighting.d_&& current_map->episode_->lighting_ == kLightingModelDoom && props->light_level > 0)
     {
-        if (AlmostEquals(cur_seg->v1->Y, cur_seg->v2->Y))
+        if (AlmostEquals(cur_seg->vertex_1->Y, cur_seg->vertex_2->Y))
             lit_adjust -= 16;
-        else if (AlmostEquals(cur_seg->v1->X, cur_seg->v2->X))
+        else if (AlmostEquals(cur_seg->vertex_1->X, cur_seg->vertex_2->X))
             lit_adjust += 16;
     }
 
@@ -1036,15 +1036,15 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
     float total_h = IM_TOTAL_HEIGHT(image);
 
     /* convert tex_x1 and tex_x2 from world coords to texture coords */
-    tex_x1 = (tex_x1 * surf->x_mat.X) / total_w;
-    tex_x2 = (tex_x2 * surf->x_mat.X) / total_w;
+    tex_x1 = (tex_x1 * surf->x_matrix.X) / total_w;
+    tex_x2 = (tex_x2 * surf->x_matrix.X) / total_w;
 
     float tx0    = tex_x1;
     float tx_mul = tex_x2 - tex_x1;
 
     MIR_Height(tex_top_h);
 
-    float ty_mul = surf->y_mat.Y / (total_h * MIR_ZScale());
+    float ty_mul = surf->y_matrix.Y / (total_h * MIR_ZScale());
     float ty0    = IM_TOP(image) - tex_top_h * ty_mul;
 
 #if (DEBUG >= 3)
@@ -1067,8 +1067,8 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
 
     if (solid_mode && !mid_masked)
     {
-        GreetNeighbourSector(left_h, left_num, cur_seg->nb_sec[0]);
-        GreetNeighbourSector(right_h, right_num, cur_seg->nb_sec[1]);
+        GreetNeighbourSector(left_h, left_num, cur_seg->vertex_sectors[0]);
+        GreetNeighbourSector(right_h, right_num, cur_seg->vertex_sectors[1]);
 
 #if DEBUG_GREET_NEIGHBOUR
         SYS_ASSERT(left_num <= MAX_EDGE_VERT);
@@ -1140,8 +1140,8 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
 
     data.div.x  = x1;
     data.div.y  = y1;
-    data.div.dx = x2 - x1;
-    data.div.dy = y2 - y1;
+    data.div.delta_x = x2 - x1;
+    data.div.delta_y = y2 - y1;
 
     data.tx0    = tx0;
     data.ty0    = ty0;
@@ -1194,14 +1194,14 @@ static void DrawWallPart(drawfloor_t *dfloor, float x1, float y1, float lz1, flo
         DynamicLightIterator(v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], bottom, v_bbox[kBoundingBoxRight], v_bbox[kBoundingBoxTop], top,
                                DLIT_Wall, &data);
 
-        SectorGlowIterator(cur_seg->frontsector, v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], bottom, v_bbox[kBoundingBoxRight],
+        SectorGlowIterator(cur_seg->front_sector, v_bbox[kBoundingBoxLeft], v_bbox[kBoundingBoxBottom], bottom, v_bbox[kBoundingBoxRight],
                              v_bbox[kBoundingBoxTop], top, GLOWLIT_Wall, &data);
     }
 
     swirl_pass = 0;
 }
 
-static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f, float tex_top_h, surface_t *surf, bool opaque,
+static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f, float tex_top_h, MapSurface *surf, bool opaque,
                             float x_offset)
 {
 
@@ -1210,7 +1210,7 @@ static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f, float tex_top
 
     float opening = smov ? smov->opening : 0;
 
-    line_t *ld = cur_seg->linedef;
+    Line *ld = cur_seg->linedef;
 
     /// float im_width = IM_WIDTH(wt->surface->image);
 
@@ -1295,11 +1295,11 @@ static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f, float tex_top
         if (s_along >= e_along)
             continue;
 
-        float x1 = ld->v1->X + ld->dx * s_along / ld->length;
-        float y1 = ld->v1->Y + ld->dy * s_along / ld->length;
+        float x1 = ld->vertex_1->X + ld->delta_x * s_along / ld->length;
+        float y1 = ld->vertex_1->Y + ld->delta_y * s_along / ld->length;
 
-        float x2 = ld->v1->X + ld->dx * e_along / ld->length;
-        float y2 = ld->v1->Y + ld->dy * e_along / ld->length;
+        float x2 = ld->vertex_1->X + ld->delta_x * e_along / ld->length;
+        float y2 = ld->vertex_1->Y + ld->delta_y * e_along / ld->length;
 
         s_tex += x_offset;
         e_tex += x_offset;
@@ -1309,11 +1309,11 @@ static void DrawSlidingDoor(drawfloor_t *dfloor, float c, float f, float tex_top
 }
 
 // Mirror the texture on the back of the line
-static void DrawGlass(drawfloor_t *dfloor, float c, float f, float tex_top_h, surface_t *surf, bool opaque,
+static void DrawGlass(drawfloor_t *dfloor, float c, float f, float tex_top_h, MapSurface *surf, bool opaque,
                       float x_offset)
 {
 
-    line_t *ld = cur_seg->linedef;
+    Line *ld = cur_seg->linedef;
 
     // extent of current seg along the linedef
     float s_seg, e_seg;
@@ -1353,11 +1353,11 @@ static void DrawGlass(drawfloor_t *dfloor, float c, float f, float tex_top_h, su
 
     if (s_along < e_along)
     {
-        float x1 = ld->v1->X + ld->dx * s_along / ld->length;
-        float y1 = ld->v1->Y + ld->dy * s_along / ld->length;
+        float x1 = ld->vertex_1->X + ld->delta_x * s_along / ld->length;
+        float y1 = ld->vertex_1->Y + ld->delta_y * s_along / ld->length;
 
-        float x2 = ld->v1->X + ld->dx * e_along / ld->length;
-        float y2 = ld->v1->Y + ld->dy * e_along / ld->length;
+        float x2 = ld->vertex_1->X + ld->delta_x * e_along / ld->length;
+        float y2 = ld->vertex_1->Y + ld->delta_y * e_along / ld->length;
 
         s_tex += x_offset;
         e_tex += x_offset;
@@ -1366,8 +1366,8 @@ static void DrawGlass(drawfloor_t *dfloor, float c, float f, float tex_top_h, su
     }
 }
 
-static void DrawTile(seg_t *seg, drawfloor_t *dfloor, float lz1, float lz2, float rz1, float rz2, float tex_z,
-                     int flags, surface_t *surf)
+static void DrawTile(Seg *seg, drawfloor_t *dfloor, float lz1, float lz2, float rz1, float rz2, float tex_z,
+                     int flags, MapSurface *surf)
 {
     EDGE_ZoneScoped;
 
@@ -1391,7 +1391,7 @@ static void DrawTile(seg_t *seg, drawfloor_t *dfloor, float lz1, float lz2, floa
         tex_top_h += seg->sidedef->middle.offset.Y;
     }
 
-    bool opaque = (!seg->backsector) || (surf->translucency >= 0.99f && image->opacity == OPAC_Solid);
+    bool opaque = (!seg->back_sector) || (surf->translucency >= 0.99f && image->opacity == OPAC_Solid);
 
     // check for horizontal sliders
     if ((flags & WTILF_MidMask) && seg->linedef->slide_door)
@@ -1412,10 +1412,10 @@ static void DrawTile(seg_t *seg, drawfloor_t *dfloor, float lz1, float lz2, floa
         }
     }
 
-    float x1 = seg->v1->X;
-    float y1 = seg->v1->Y;
-    float x2 = seg->v2->X;
-    float y2 = seg->v2->Y;
+    float x1 = seg->vertex_1->X;
+    float y1 = seg->vertex_1->Y;
+    float x2 = seg->vertex_2->X;
+    float y2 = seg->vertex_2->Y;
 
     float tex_x1 = seg->offset;
     float tex_x2 = tex_x1 + seg->length;
@@ -1423,24 +1423,24 @@ static void DrawTile(seg_t *seg, drawfloor_t *dfloor, float lz1, float lz2, floa
     tex_x1 += x_offset;
     tex_x2 += x_offset;
 
-    if (seg->sidedef->sector->props.special && seg->sidedef->sector->props.special->floor_bob_ > 0)
+    if (seg->sidedef->sector->properties.special && seg->sidedef->sector->properties.special->floor_bob_ > 0)
     {
-        lz1 -= seg->sidedef->sector->props.special->floor_bob_;
-        rz1 -= seg->sidedef->sector->props.special->floor_bob_;
+        lz1 -= seg->sidedef->sector->properties.special->floor_bob_;
+        rz1 -= seg->sidedef->sector->properties.special->floor_bob_;
     }
 
-    if (seg->sidedef->sector->props.special && seg->sidedef->sector->props.special->ceiling_bob_ > 0)
+    if (seg->sidedef->sector->properties.special && seg->sidedef->sector->properties.special->ceiling_bob_ > 0)
     {
-        lz2 += seg->sidedef->sector->props.special->ceiling_bob_;
-        rz2 += seg->sidedef->sector->props.special->ceiling_bob_;
+        lz2 += seg->sidedef->sector->properties.special->ceiling_bob_;
+        rz2 += seg->sidedef->sector->properties.special->ceiling_bob_;
     }
 
     DrawWallPart(dfloor, x1, y1, lz1, lz2, x2, y2, rz1, rz2, tex_top_h, surf, image,
                  (flags & WTILF_MidMask) ? true : false, opaque, tex_x1, tex_x2,
-                 (flags & WTILF_MidMask) ? &seg->sidedef->sector->props : nullptr);
+                 (flags & WTILF_MidMask) ? &seg->sidedef->sector->properties : nullptr);
 }
 
-static inline void AddWallTile(seg_t *seg, drawfloor_t *dfloor, surface_t *surf, float z1, float z2, float tex_z,
+static inline void AddWallTile(Seg *seg, drawfloor_t *dfloor, MapSurface *surf, float z1, float z2, float tex_z,
                                int flags, float f_min, float c_max)
 {
     z1 = HMM_MAX(f_min, z1);
@@ -1452,7 +1452,7 @@ static inline void AddWallTile(seg_t *seg, drawfloor_t *dfloor, surface_t *surf,
     DrawTile(seg, dfloor, z1, z2, z1, z2, tex_z, flags, surf);
 }
 
-static inline void AddWallTile2(seg_t *seg, drawfloor_t *dfloor, surface_t *surf, float lz1, float lz2, float rz1,
+static inline void AddWallTile2(Seg *seg, drawfloor_t *dfloor, MapSurface *surf, float lz1, float lz2, float rz1,
                                 float rz2, float tex_z, int flags)
 {
     DrawTile(seg, dfloor, lz1, lz2, rz1, rz2, tex_z, flags, surf);
@@ -1460,17 +1460,17 @@ static inline void AddWallTile2(seg_t *seg, drawfloor_t *dfloor, surface_t *surf
 
 #define IM_HEIGHT_SAFE(im) ((im) ? IM_HEIGHT(im) : 0)
 
-static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float f_min, float c_max,
+static void ComputeWallTiles(Seg *seg, drawfloor_t *dfloor, int sidenum, float f_min, float c_max,
                              bool mirror_sub = false)
 {
     EDGE_ZoneScoped;
 
-    line_t    *ld = seg->linedef;
-    side_t    *sd = ld->side[sidenum];
-    sector_t  *sec, *other;
-    surface_t *surf;
+    Line    *ld = seg->linedef;
+    Side    *sd = ld->side[sidenum];
+    Sector  *sec, *other;
+    MapSurface *surf;
 
-    extrafloor_t *S, *L, *C;
+    Extrafloor *S, *L, *C;
     float         floor_h;
     float         tex_z;
 
@@ -1481,26 +1481,26 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         return;
 
     sec   = sd->sector;
-    other = sidenum ? ld->frontsector : ld->backsector;
+    other = sidenum ? ld->front_sector : ld->back_sector;
 
-    float slope_fh = sec->f_h;
-    if (sec->f_slope)
-        slope_fh += HMM_MIN(sec->f_slope->dz1, sec->f_slope->dz2);
+    float slope_fh = sec->floor_height;
+    if (sec->floor_slope)
+        slope_fh += HMM_MIN(sec->floor_slope->delta_z1, sec->floor_slope->delta_z2);
 
-    float slope_ch = sec->c_h;
-    if (sec->c_slope)
-        slope_ch += HMM_MAX(sec->c_slope->dz1, sec->c_slope->dz2);
+    float slope_ch = sec->ceiling_height;
+    if (sec->ceiling_slope)
+        slope_ch += HMM_MAX(sec->ceiling_slope->delta_z1, sec->ceiling_slope->delta_z2);
 
     // Boom compatibility -- invisible walkways
-    if (sec->heightsec != nullptr)
-        slope_fh = HMM_MIN(slope_fh, sec->heightsec->f_h);
+    if (sec->height_sector != nullptr)
+        slope_fh = HMM_MIN(slope_fh, sec->height_sector->floor_height);
 
-    RGBAColor sec_fc = sec->props.fog_color;
-    float    sec_fd = sec->props.fog_density;
+    RGBAColor sec_fc = sec->properties.fog_color;
+    float    sec_fd = sec->properties.fog_density;
     // check for DDFLEVL fog
     if (sec_fc == kRGBANoValue)
     {
-        if (IS_SKY(seg->sidedef->sector->ceil))
+        if (IS_SKY(seg->sidedef->sector->ceiling))
         {
             sec_fc = current_map->outdoor_fog_color_;
             sec_fd = 0.01f * current_map->outdoor_fog_density_;
@@ -1511,13 +1511,13 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
             sec_fd = 0.01f * current_map->indoor_fog_density_;
         }
     }
-    RGBAColor other_fc = (other ? other->props.fog_color : kRGBANoValue);
-    float    other_fd = (other ? other->props.fog_density : 0.0f);
+    RGBAColor other_fc = (other ? other->properties.fog_color : kRGBANoValue);
+    float    other_fd = (other ? other->properties.fog_density : 0.0f);
     if (other_fc == kRGBANoValue)
     {
         if (other)
         {
-            if (IS_SKY(other->ceil))
+            if (IS_SKY(other->ceiling))
             {
                 other_fc = current_map->outdoor_fog_color_;
                 other_fd = 0.01f * current_map->outdoor_fog_density_;
@@ -1530,7 +1530,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         }
     }
 
-    if (sd->middle.fogwall && r_culling.d_)
+    if (sd->middle.fog_wall && r_culling.d_)
         sd->middle.image = nullptr; // Don't delete image in case culling is toggled again
 
     if (!sd->middle.image && !r_culling.d_)
@@ -1541,7 +1541,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
             fw->opacity             = OPAC_Complex;
             sd->middle.image        = fw;
             sd->middle.translucency = other_fd * 100;
-            sd->middle.fogwall      = true;
+            sd->middle.fog_wall      = true;
         }
         else if (sec_fc != kRGBANoValue && other_fc != sec_fc)
         {
@@ -1549,7 +1549,7 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
             fw->opacity             = OPAC_Complex;
             sd->middle.image        = fw;
             sd->middle.translucency = sec_fd * 100;
-            sd->middle.fogwall      = true;
+            sd->middle.fog_wall      = true;
         }
     }
 
@@ -1559,150 +1559,150 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
             return;
 
         AddWallTile(seg, dfloor, &sd->middle, slope_fh, slope_ch,
-                    (ld->flags & MLF_LowerUnpegged) ? sec->f_h + (IM_HEIGHT_SAFE(sd->middle.image) / sd->middle.y_mat.Y)
-                                                    : sec->c_h,
+                    (ld->flags & MLF_LowerUnpegged) ? sec->floor_height + (IM_HEIGHT_SAFE(sd->middle.image) / sd->middle.y_matrix.Y)
+                                                    : sec->ceiling_height,
                     0, f_min, c_max);
         return;
     }
 
     // handle lower, upper and mid-masker
 
-    if (slope_fh < other->f_h || (sec->floor_vertex_slope || other->floor_vertex_slope))
+    if (slope_fh < other->floor_height || (sec->floor_vertex_slope || other->floor_vertex_slope))
     {
         if (!sec->floor_vertex_slope && other->floor_vertex_slope)
         {
-            float zv1 = seg->v1->Z;
-            float zv2 = seg->v2->Z;
+            float zv1 = seg->vertex_1->Z;
+            float zv2 = seg->vertex_2->Z;
             if (mirror_sub)
                 std::swap(zv1, zv2);
-            AddWallTile2(seg, dfloor, sd->bottom.image ? &sd->bottom : &other->floor, sec->f_h,
-                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->f_h, sec->f_h,
-                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->f_h,
-                         (ld->flags & MLF_LowerUnpegged) ? sec->c_h : HMM_MAX(sec->f_h, HMM_MAX(zv1, zv2)), 0);
+            AddWallTile2(seg, dfloor, sd->bottom.image ? &sd->bottom : &other->floor, sec->floor_height,
+                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->floor_height, sec->floor_height,
+                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->floor_height,
+                         (ld->flags & MLF_LowerUnpegged) ? sec->ceiling_height : HMM_MAX(sec->floor_height, HMM_MAX(zv1, zv2)), 0);
         }
         else if (sec->floor_vertex_slope && !other->floor_vertex_slope)
         {
-            float zv1 = seg->v1->Z;
-            float zv2 = seg->v2->Z;
+            float zv1 = seg->vertex_1->Z;
+            float zv2 = seg->vertex_2->Z;
             if (mirror_sub)
                 std::swap(zv1, zv2);
             AddWallTile2(seg, dfloor, sd->bottom.image ? &sd->bottom : &sec->floor,
-                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->f_h, other->f_h,
-                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->f_h, other->f_h,
-                         (ld->flags & MLF_LowerUnpegged) ? other->c_h : HMM_MAX(other->f_h, HMM_MAX(zv1, zv2)), 0);
+                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->floor_height, other->floor_height,
+                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->floor_height, other->floor_height,
+                         (ld->flags & MLF_LowerUnpegged) ? other->ceiling_height : HMM_MAX(other->floor_height, HMM_MAX(zv1, zv2)), 0);
         }
         else if (!sd->bottom.image && !debug_hom.d_)
         {
             lower_invis = true;
         }
-        else if (other->f_slope)
+        else if (other->floor_slope)
         {
             float lz1 = slope_fh;
             float rz1 = slope_fh;
 
-            float lz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v1->X, seg->v1->Y);
-            float rz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v2->X, seg->v2->Y);
+            float lz2 = other->floor_height + Slope_GetHeight(other->floor_slope, seg->vertex_1->X, seg->vertex_1->Y);
+            float rz2 = other->floor_height + Slope_GetHeight(other->floor_slope, seg->vertex_2->X, seg->vertex_2->Y);
 
             // Test fix for slope walls under 3D floors having 'flickering' light levels - Dasho
             if (dfloor->ef && seg->sidedef->sector->tag == dfloor->ef->sector->tag)
             {
-                dfloor->props->lightlevel              = dfloor->ef->p->lightlevel;
-                seg->sidedef->sector->props.lightlevel = dfloor->ef->p->lightlevel;
+                dfloor->props->light_level              = dfloor->ef->properties->light_level;
+                seg->sidedef->sector->properties.light_level = dfloor->ef->properties->light_level;
             }
 
             AddWallTile2(seg, dfloor, &sd->bottom, lz1, lz2, rz1, rz2,
-                         (ld->flags & MLF_LowerUnpegged) ? sec->c_h : other->f_h, 0);
+                         (ld->flags & MLF_LowerUnpegged) ? sec->ceiling_height : other->floor_height, 0);
         }
         else
         {
-            AddWallTile(seg, dfloor, &sd->bottom, slope_fh, other->f_h,
-                        (ld->flags & MLF_LowerUnpegged) ? sec->c_h : other->f_h, 0, f_min, c_max);
+            AddWallTile(seg, dfloor, &sd->bottom, slope_fh, other->floor_height,
+                        (ld->flags & MLF_LowerUnpegged) ? sec->ceiling_height : other->floor_height, 0, f_min, c_max);
         }
     }
 
-    if ((slope_ch > other->c_h || (sec->ceil_vertex_slope || other->ceil_vertex_slope)) &&
-        !(IS_SKY(sec->ceil) && IS_SKY(other->ceil)))
+    if ((slope_ch > other->ceiling_height || (sec->ceiling_vertex_slope || other->ceiling_vertex_slope)) &&
+        !(IS_SKY(sec->ceiling) && IS_SKY(other->ceiling)))
     {
-        if (!sec->ceil_vertex_slope && other->ceil_vertex_slope)
+        if (!sec->ceiling_vertex_slope && other->ceiling_vertex_slope)
         {
-            float zv1 = seg->v1->W;
-            float zv2 = seg->v2->W;
+            float zv1 = seg->vertex_1->W;
+            float zv2 = seg->vertex_2->W;
             if (mirror_sub)
                 std::swap(zv1, zv2);
-            AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &other->ceil, sec->c_h,
-                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->c_h, sec->c_h,
-                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->c_h,
-                         (ld->flags & MLF_UpperUnpegged) ? sec->f_h : HMM_MIN(zv1, zv2), 0);
+            AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &other->ceiling, sec->ceiling_height,
+                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : sec->ceiling_height, sec->ceiling_height,
+                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : sec->ceiling_height,
+                         (ld->flags & MLF_UpperUnpegged) ? sec->floor_height : HMM_MIN(zv1, zv2), 0);
         }
-        else if (sec->ceil_vertex_slope && !other->ceil_vertex_slope)
+        else if (sec->ceiling_vertex_slope && !other->ceiling_vertex_slope)
         {
-            float zv1 = seg->v1->W;
-            float zv2 = seg->v2->W;
+            float zv1 = seg->vertex_1->W;
+            float zv2 = seg->vertex_2->W;
             if (mirror_sub)
                 std::swap(zv1, zv2);
-            AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &sec->ceil, other->c_h,
-                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->c_h, other->c_h,
-                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->c_h,
-                         (ld->flags & MLF_UpperUnpegged) ? other->f_h : HMM_MIN(zv1, zv2), 0);
+            AddWallTile2(seg, dfloor, sd->top.image ? &sd->top : &sec->ceiling, other->ceiling_height,
+                         (zv1 < 32767.0f && zv1 > -32768.0f) ? zv1 : other->ceiling_height, other->ceiling_height,
+                         (zv2 < 32767.0f && zv2 > -32768.0f) ? zv2 : other->ceiling_height,
+                         (ld->flags & MLF_UpperUnpegged) ? other->floor_height : HMM_MIN(zv1, zv2), 0);
         }
         else if (!sd->top.image && !debug_hom.d_)
         {
             upper_invis = true;
         }
-        else if (other->c_slope)
+        else if (other->ceiling_slope)
         {
-            float lz1 = other->c_h + Slope_GetHeight(other->c_slope, seg->v1->X, seg->v1->Y);
-            float rz1 = other->c_h + Slope_GetHeight(other->c_slope, seg->v2->X, seg->v2->Y);
+            float lz1 = other->ceiling_height + Slope_GetHeight(other->ceiling_slope, seg->vertex_1->X, seg->vertex_1->Y);
+            float rz1 = other->ceiling_height + Slope_GetHeight(other->ceiling_slope, seg->vertex_2->X, seg->vertex_2->Y);
 
             float lz2 = slope_ch;
             float rz2 = slope_ch;
 
             AddWallTile2(seg, dfloor, &sd->top, lz1, lz2, rz1, rz2,
-                         (ld->flags & MLF_UpperUnpegged) ? sec->c_h : other->c_h + IM_HEIGHT_SAFE(sd->top.image), 0);
+                         (ld->flags & MLF_UpperUnpegged) ? sec->ceiling_height : other->ceiling_height + IM_HEIGHT_SAFE(sd->top.image), 0);
         }
         else
         {
-            AddWallTile(seg, dfloor, &sd->top, other->c_h, slope_ch,
-                        (ld->flags & MLF_UpperUnpegged) ? sec->c_h : other->c_h + IM_HEIGHT_SAFE(sd->top.image), 0,
+            AddWallTile(seg, dfloor, &sd->top, other->ceiling_height, slope_ch,
+                        (ld->flags & MLF_UpperUnpegged) ? sec->ceiling_height : other->ceiling_height + IM_HEIGHT_SAFE(sd->top.image), 0,
                         f_min, c_max);
         }
     }
 
     if (sd->middle.image)
     {
-        float f1 = HMM_MAX(sec->f_h, other->f_h);
-        float c1 = HMM_MIN(sec->c_h, other->c_h);
+        float f1 = HMM_MAX(sec->floor_height, other->floor_height);
+        float c1 = HMM_MIN(sec->ceiling_height, other->ceiling_height);
 
         float f2, c2;
 
-        if (sd->middle.fogwall)
+        if (sd->middle.fog_wall)
         {
-            float ofh = other->f_h;
-            if (other->f_slope)
+            float ofh = other->floor_height;
+            if (other->floor_slope)
             {
-                float lz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v1->X, seg->v1->Y);
-                float rz2 = other->f_h + Slope_GetHeight(other->f_slope, seg->v2->X, seg->v2->Y);
+                float lz2 = other->floor_height + Slope_GetHeight(other->floor_slope, seg->vertex_1->X, seg->vertex_1->Y);
+                float rz2 = other->floor_height + Slope_GetHeight(other->floor_slope, seg->vertex_2->X, seg->vertex_2->Y);
                 ofh = HMM_MIN(ofh, HMM_MIN(lz2, rz2));
             }
-            f2 = f1 = HMM_MAX(HMM_MIN(sec->f_h, slope_fh), ofh);
-            float och = other->c_h;
-            if (other->c_slope)
+            f2 = f1 = HMM_MAX(HMM_MIN(sec->floor_height, slope_fh), ofh);
+            float och = other->ceiling_height;
+            if (other->ceiling_slope)
             {
-                float lz2 = other->c_h + Slope_GetHeight(other->c_slope, seg->v1->X, seg->v1->Y);
-                float rz2 = other->c_h + Slope_GetHeight(other->c_slope, seg->v2->X, seg->v2->Y);
+                float lz2 = other->ceiling_height + Slope_GetHeight(other->ceiling_slope, seg->vertex_1->X, seg->vertex_1->Y);
+                float rz2 = other->ceiling_height + Slope_GetHeight(other->ceiling_slope, seg->vertex_2->X, seg->vertex_2->Y);
                 och = HMM_MAX(och, HMM_MAX(lz2, rz2));
             }
-            c2 = c1 = HMM_MIN(HMM_MAX(sec->c_h, slope_ch), och);
+            c2 = c1 = HMM_MIN(HMM_MAX(sec->ceiling_height, slope_ch), och);
         }
         else if (ld->flags & MLF_LowerUnpegged)
         {
-            f2 = f1 + sd->midmask_offset;
-            c2 = f2 + (IM_HEIGHT(sd->middle.image) / sd->middle.y_mat.Y);
+            f2 = f1 + sd->middle_mask_offset;
+            c2 = f2 + (IM_HEIGHT(sd->middle.image) / sd->middle.y_matrix.Y);
         }
         else
         {
-            c2 = c1 + sd->midmask_offset;
-            f2 = c2 - (IM_HEIGHT(sd->middle.image) / sd->middle.y_mat.Y);
+            c2 = c1 + sd->middle_mask_offset;
+            f2 = c2 - (IM_HEIGHT(sd->middle.image) / sd->middle.y_matrix.Y);
         }
 
         tex_z = c2;
@@ -1710,9 +1710,9 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         // hack for transparent doors
         {
             if (lower_invis)
-                f1 = sec->f_h;
+                f1 = sec->floor_height;
             if (upper_invis)
-                c1 = sec->c_h;
+                c1 = sec->ceiling_height;
         }
 
         // hack for "see-through" lines (same sector on both sides)
@@ -1736,14 +1736,14 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
     if (other->tag == sec->tag)
         return;
 
-    floor_h = other->f_h;
+    floor_h = other->floor_height;
 
-    S = other->bottom_ef;
-    L = other->bottom_liq;
+    S = other->bottom_extrafloor;
+    L = other->bottom_liquid;
 
     while (S || L)
     {
-        if (!L || (S && S->bottom_h < L->bottom_h))
+        if (!L || (S && S->bottom_height < L->bottom_height))
         {
             C = S;
             S = S->higher;
@@ -1759,39 +1759,39 @@ static void ComputeWallTiles(seg_t *seg, drawfloor_t *dfloor, int sidenum, float
         // ignore liquids in the middle of THICK solids, or below real
         // floor or above real ceiling
         //
-        if (C->bottom_h < floor_h || C->bottom_h > other->c_h)
+        if (C->bottom_height < floor_h || C->bottom_height > other->ceiling_height)
             continue;
 
-        if (C->ef_info->type_ & kExtraFloorTypeThick)
+        if (C->extrafloor_definition->type_ & kExtraFloorTypeThick)
         {
             int flags = WTILF_IsExtra;
 
             // -AJA- 1999/09/25: Better DDF control of side texture.
-            if (C->ef_info->type_ & kExtraFloorTypeSideUpper)
+            if (C->extrafloor_definition->type_ & kExtraFloorTypeSideUpper)
                 surf = &sd->top;
-            else if (C->ef_info->type_ & kExtraFloorTypeSideLower)
+            else if (C->extrafloor_definition->type_ & kExtraFloorTypeSideLower)
                 surf = &sd->bottom;
             else
             {
-                surf = &C->ef_line->side[0]->middle;
+                surf = &C->extrafloor_line->side[0]->middle;
 
                 flags |= WTILF_ExtraX;
 
-                if (C->ef_info->type_ & kExtraFloorTypeSideMidY)
+                if (C->extrafloor_definition->type_ & kExtraFloorTypeSideMidY)
                     flags |= WTILF_ExtraY;
             }
 
             if (!surf->image && !debug_hom.d_)
                 continue;
 
-            tex_z = (C->ef_line->flags & MLF_LowerUnpegged)
-                        ? C->bottom_h + (IM_HEIGHT_SAFE(surf->image) / surf->y_mat.Y)
-                        : C->top_h;
+            tex_z = (C->extrafloor_line->flags & MLF_LowerUnpegged)
+                        ? C->bottom_height + (IM_HEIGHT_SAFE(surf->image) / surf->y_matrix.Y)
+                        : C->top_height;
 
-            AddWallTile(seg, dfloor, surf, C->bottom_h, C->top_h, tex_z, flags, f_min, c_max);
+            AddWallTile(seg, dfloor, surf, C->bottom_height, C->top_height, tex_z, flags, f_min, c_max);
         }
 
-        floor_h = C->top_h;
+        floor_h = C->top_height;
     }
 }
 
@@ -1853,7 +1853,7 @@ static void DLIT_Flood(MapObject *mo, void *dataptr)
 
     // light behind the plane ?
     if (!mo->info_->dlight_[0].leaky_ &&
-        !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceil_vertex_slope))
+        !(mo->subsector_->sector->floor_vertex_slope || mo->subsector_->sector->ceiling_vertex_slope))
     {
         if ((MapObjectMidZ(mo) > data->plane_h) != (data->normal.Z > 0))
             return;
@@ -1863,11 +1863,11 @@ static void DLIT_Flood(MapObject *mo, void *dataptr)
 
     SYS_ASSERT(mo->dynamic_light_.shader);
 
-    float sx = cur_seg->v1->X;
-    float sy = cur_seg->v1->Y;
+    float sx = cur_seg->vertex_1->X;
+    float sy = cur_seg->vertex_1->Y;
 
-    float dx = cur_seg->v2->X - sx;
-    float dy = cur_seg->v2->Y - sy;
+    float dx = cur_seg->vertex_2->X - sx;
+    float dy = cur_seg->vertex_2->Y - sy;
 
     int blending = BL_Add;
 
@@ -1889,7 +1889,7 @@ static void DLIT_Flood(MapObject *mo, void *dataptr)
     }
 }
 
-static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_ref, int face_dir, float h1, float h2)
+static void EmulateFloodPlane(const drawfloor_t *dfloor, const Sector *flood_ref, int face_dir, float h1, float h2)
 {
     EDGE_ZoneScoped;
 
@@ -1898,7 +1898,7 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
     if (num_active_mirrors > 0)
         return;
 
-    const surface_t *surf = (face_dir > 0) ? &flood_ref->floor : &flood_ref->ceil;
+    const MapSurface *surf = (face_dir > 0) ? &flood_ref->floor : &flood_ref->ceiling;
 
     if (!surf->image)
         return;
@@ -1908,14 +1908,14 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
         return;
 
     // ignore transparent doors (TNT MAP02)
-    if (flood_ref->f_h >= flood_ref->c_h)
+    if (flood_ref->floor_height >= flood_ref->ceiling_height)
         return;
 
     // ignore fake 3D bridges (Batman MAP03)
-    if (cur_seg->linedef && cur_seg->linedef->frontsector == cur_seg->linedef->backsector)
+    if (cur_seg->linedef && cur_seg->linedef->front_sector == cur_seg->linedef->back_sector)
         return;
 
-    const region_properties_t *props = surf->override_p ? surf->override_p : &flood_ref->props;
+    const RegionProperties *props = surf->override_properties ? surf->override_properties : &flood_ref->properties;
 
     SYS_ASSERT(props);
 
@@ -1933,8 +1933,8 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
     data.image_w = IM_WIDTH(surf->image);
     data.image_h = IM_HEIGHT(surf->image);
 
-    data.x_mat = surf->x_mat;
-    data.y_mat = surf->y_mat;
+    data.x_mat = surf->x_matrix;
+    data.y_mat = surf->y_matrix;
 
     data.normal = {{0, 0, (float)face_dir}};
 
@@ -1970,11 +1970,11 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
 
     SYS_ASSERT(piece_col <= MAX_FLOOD_VERT);
 
-    float sx = cur_seg->v1->X;
-    float sy = cur_seg->v1->Y;
+    float sx = cur_seg->vertex_1->X;
+    float sy = cur_seg->vertex_1->Y;
 
-    float dx = cur_seg->v2->X - sx;
-    float dy = cur_seg->v2->Y - sy;
+    float dx = cur_seg->vertex_2->X - sx;
+    float dy = cur_seg->vertex_2->Y - sy;
     float dh = h2 - h1;
 
     data.piece_row = piece_row;
@@ -2015,8 +2015,8 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
         //       efficient to handle them here, and duplicate the striping
         //       code in the DLIT_Flood function.
 
-        float ex = cur_seg->v2->X;
-        float ey = cur_seg->v2->Y;
+        float ex = cur_seg->vertex_2->X;
+        float ey = cur_seg->vertex_2->Y;
 
         // compute bbox for finding dlights (use 'lit_pos' coords).
         float other_h = (face_dir > 0) ? h1 : h2;
@@ -2039,7 +2039,7 @@ static void EmulateFloodPlane(const drawfloor_t *dfloor, const sector_t *flood_r
     }
 }
 
-static void RGL_DrawSeg(drawfloor_t *dfloor, seg_t *seg, bool mirror_sub = false)
+static void RGL_DrawSeg(drawfloor_t *dfloor, Seg *seg, bool mirror_sub = false)
 {
     //
     // Analyses floor/ceiling heights, and add corresponding walls/floors
@@ -2052,51 +2052,51 @@ static void RGL_DrawSeg(drawfloor_t *dfloor, seg_t *seg, bool mirror_sub = false
     // mark the segment on the automap
     seg->linedef->flags |= MLF_Mapped;
 
-    frontsector = seg->front_sub->sector;
+    frontsector = seg->front_subsector->sector;
     backsector  = nullptr;
 
-    if (seg->back_sub)
-        backsector = seg->back_sub->sector;
+    if (seg->back_subsector)
+        backsector = seg->back_subsector->sector;
 
-    side_t *sd = seg->sidedef;
+    Side *sd = seg->sidedef;
 
-    float f_min = dfloor->is_lowest ? -32767.0 : dfloor->f_h;
-    float c_max = dfloor->is_highest ? +32767.0 : dfloor->c_h;
+    float f_min = dfloor->is_lowest ? -32767.0 : dfloor->floor_height;
+    float c_max = dfloor->is_highest ? +32767.0 : dfloor->ceiling_height;
 
 #if (DEBUG >= 3)
     LogDebug("   BUILD WALLS %1.1f .. %1.1f\n", f_min, c1);
 #endif
 
     // handle TRANSLUCENT + THICK floors (a bit of a hack)
-    if (dfloor->ef && !dfloor->is_highest && (dfloor->ef->ef_info->type_ & kExtraFloorTypeThick) &&
+    if (dfloor->ef && !dfloor->is_highest && (dfloor->ef->extrafloor_definition->type_ & kExtraFloorTypeThick) &&
         (dfloor->ef->top->translucency < 0.99f))
     {
-        c_max = dfloor->ef->top_h;
+        c_max = dfloor->ef->top_height;
     }
 
     ComputeWallTiles(seg, dfloor, seg->side, f_min, c_max, mirror_sub);
 
     // -AJA- 2004/04/21: Emulate Flat-Flooding TRICK
-    if (!debug_hom.d_&& solid_mode && dfloor->is_lowest && sd->bottom.image == nullptr && cur_seg->back_sub &&
-        cur_seg->back_sub->sector->f_h > cur_seg->front_sub->sector->f_h && cur_seg->back_sub->sector->f_h < viewz &&
-        cur_seg->back_sub->sector->heightsec == nullptr && cur_seg->front_sub->sector->heightsec == nullptr)
+    if (!debug_hom.d_&& solid_mode && dfloor->is_lowest && sd->bottom.image == nullptr && cur_seg->back_subsector &&
+        cur_seg->back_subsector->sector->floor_height > cur_seg->front_subsector->sector->floor_height && cur_seg->back_subsector->sector->floor_height < viewz &&
+        cur_seg->back_subsector->sector->height_sector == nullptr && cur_seg->front_subsector->sector->height_sector == nullptr)
     {
-        EmulateFloodPlane(dfloor, cur_seg->back_sub->sector, +1, cur_seg->front_sub->sector->f_h,
-                          cur_seg->back_sub->sector->f_h);
+        EmulateFloodPlane(dfloor, cur_seg->back_subsector->sector, +1, cur_seg->front_subsector->sector->floor_height,
+                          cur_seg->back_subsector->sector->floor_height);
     }
 
-    if (!debug_hom.d_&& solid_mode && dfloor->is_highest && sd->top.image == nullptr && cur_seg->back_sub &&
-        cur_seg->back_sub->sector->c_h < cur_seg->front_sub->sector->c_h && cur_seg->back_sub->sector->c_h > viewz &&
-        cur_seg->back_sub->sector->heightsec == nullptr && cur_seg->front_sub->sector->heightsec == nullptr)
+    if (!debug_hom.d_&& solid_mode && dfloor->is_highest && sd->top.image == nullptr && cur_seg->back_subsector &&
+        cur_seg->back_subsector->sector->ceiling_height < cur_seg->front_subsector->sector->ceiling_height && cur_seg->back_subsector->sector->ceiling_height > viewz &&
+        cur_seg->back_subsector->sector->height_sector == nullptr && cur_seg->front_subsector->sector->height_sector == nullptr)
     {
-        EmulateFloodPlane(dfloor, cur_seg->back_sub->sector, -1, cur_seg->back_sub->sector->c_h,
-                          cur_seg->front_sub->sector->c_h);
+        EmulateFloodPlane(dfloor, cur_seg->back_subsector->sector, -1, cur_seg->back_subsector->sector->ceiling_height,
+                          cur_seg->front_subsector->sector->ceiling_height);
     }
 }
 
 static void RGL_WalkBSPNode(unsigned int bspnum);
 
-static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, BAMAngle left, BAMAngle right, bool is_portal)
+static void RGL_WalkMirror(drawsub_c *dsub, Seg *seg, BAMAngle left, BAMAngle right, bool is_portal)
 {
     drawmirror_c *mir = R_GetDrawMirror();
     mir->Clear(seg);
@@ -2115,7 +2115,7 @@ static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, BAMAngle left, BAMAngle 
     // push mirror (translation matrix)
     MIR_Push(mir);
 
-    subsector_t *save_sub = cur_sub;
+    Subsector *save_sub = cur_sub;
 
     BAMAngle save_clip_L = clip_left;
     BAMAngle save_clip_R = clip_right;
@@ -2149,7 +2149,7 @@ static void RGL_WalkMirror(drawsub_c *dsub, seg_t *seg, BAMAngle left, BAMAngle 
 // Visit a single seg of the subsector, and for one-sided lines update
 // the 1D occlusion buffer.
 //
-static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
+static void RGL_WalkSeg(drawsub_c *dsub, Seg *seg)
 {
     EDGE_ZoneScoped;
 
@@ -2157,11 +2157,11 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
     if (MIR_SegOnPortal(seg))
         return;
 
-    float sx1 = seg->v1->X;
-    float sy1 = seg->v1->Y;
+    float sx1 = seg->vertex_1->X;
+    float sy1 = seg->vertex_1->Y;
 
-    float sx2 = seg->v2->X;
-    float sy2 = seg->v2->Y;
+    float sx2 = seg->vertex_2->X;
+    float sy2 = seg->vertex_2->Y;
 
     // when there are active mirror planes, segs not only need to
     // be flipped across them but also clipped across them.
@@ -2182,14 +2182,14 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
                 sy2         = tmp_y;
             }
 
-            seg_t *clipper = active_mirrors[i].def->seg;
+            Seg *clipper = active_mirrors[i].def->seg;
 
-            divline_t div;
+            DividingLine div;
 
-            div.x  = clipper->v1->X;
-            div.y  = clipper->v1->Y;
-            div.dx = clipper->v2->X - div.x;
-            div.dy = clipper->v2->Y - div.y;
+            div.x  = clipper->vertex_1->X;
+            div.y  = clipper->vertex_1->Y;
+            div.delta_x = clipper->vertex_2->X - div.x;
+            div.delta_y = clipper->vertex_2->Y - div.y;
 
             int s1 = PointOnDividingLineSide(sx1, sy1, &div);
             int s2 = PointOnDividingLineSide(sx2, sy2, &div);
@@ -2296,11 +2296,11 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
     dsub->segs.push_back(dseg);
 
-    sector_t *fsector = seg->front_sub->sector;
-    sector_t *bsector = nullptr;
+    Sector *fsector = seg->front_subsector->sector;
+    Sector *bsector = nullptr;
 
-    if (seg->back_sub)
-        bsector = seg->back_sub->sector;
+    if (seg->back_subsector)
+        bsector = seg->back_subsector->sector;
 
     // only 1 sided walls affect the 1D occlusion buffer
 
@@ -2311,33 +2311,33 @@ static void RGL_WalkSeg(drawsub_c *dsub, seg_t *seg)
 
     if (bsector && IS_SKY(fsector->floor) && IS_SKY(bsector->floor))
     {
-        if (fsector->f_h < bsector->f_h)
+        if (fsector->floor_height < bsector->floor_height)
         {
-            RGL_DrawSkyWall(seg, fsector->f_h, bsector->f_h);
+            RGL_DrawSkyWall(seg, fsector->floor_height, bsector->floor_height);
         }
     }
 
-    if (IS_SKY(fsector->ceil))
+    if (IS_SKY(fsector->ceiling))
     {
-        if (fsector->c_h < fsector->sky_h && (!bsector || !IS_SKY(bsector->ceil) || bsector->f_h >= fsector->c_h))
+        if (fsector->ceiling_height < fsector->sky_height && (!bsector || !IS_SKY(bsector->ceiling) || bsector->floor_height >= fsector->ceiling_height))
         {
-            RGL_DrawSkyWall(seg, fsector->c_h, fsector->sky_h);
+            RGL_DrawSkyWall(seg, fsector->ceiling_height, fsector->sky_height);
         }
-        else if (bsector && IS_SKY(bsector->ceil) && fsector->heightsec == nullptr && bsector->heightsec == nullptr)
+        else if (bsector && IS_SKY(bsector->ceiling) && fsector->height_sector == nullptr && bsector->height_sector == nullptr)
         {
-            float max_f = HMM_MAX(fsector->f_h, bsector->f_h);
+            float max_f = HMM_MAX(fsector->floor_height, bsector->floor_height);
 
-            if (bsector->c_h <= max_f && max_f < fsector->sky_h)
+            if (bsector->ceiling_height <= max_f && max_f < fsector->sky_height)
             {
-                RGL_DrawSkyWall(seg, max_f, fsector->sky_h);
+                RGL_DrawSkyWall(seg, max_f, fsector->sky_height);
             }
         }
     }
     // -AJA- 2004/08/29: Emulate Sky-Flooding TRICK
-    else if (!debug_hom.d_&& bsector && IS_SKY(bsector->ceil) && seg->sidedef->top.image == nullptr &&
-             bsector->c_h < fsector->c_h)
+    else if (!debug_hom.d_&& bsector && IS_SKY(bsector->ceiling) && seg->sidedef->top.image == nullptr &&
+             bsector->ceiling_height < fsector->ceiling_height)
     {
-        RGL_DrawSkyWall(seg, bsector->c_h, fsector->c_h);
+        RGL_DrawSkyWall(seg, bsector->ceiling_height, fsector->ceiling_height);
     }
 }
 
@@ -2466,7 +2466,7 @@ bool RGL_CheckBBox(float *bspcoord)
     return !RGL_1DOcclusionTest(angle_R, angle_L);
 }
 
-static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int face_dir)
+static void RGL_DrawPlane(drawfloor_t *dfloor, float h, MapSurface *surf, int face_dir)
 {
     EDGE_ZoneScoped;
 
@@ -2485,24 +2485,24 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
 
     ecframe_stats.draw_planes++;
 
-    region_properties_t *props = dfloor->props;
+    RegionProperties *props = dfloor->props;
 
     // more deep water hackitude
-    if (cur_sub->deep_ref && ((face_dir > 0 && dfloor->prev_R == nullptr) || (face_dir < 0 && dfloor->next_R == nullptr)))
+    if (cur_sub->deep_water_reference && ((face_dir > 0 && dfloor->prev_R == nullptr) || (face_dir < 0 && dfloor->next_R == nullptr)))
     {
-        props = &cur_sub->deep_ref->props;
+        props = &cur_sub->deep_water_reference->properties;
     }
 
-    if (surf->override_p)
-        props = surf->override_p;
+    if (surf->override_properties)
+        props = surf->override_properties;
 
-    slope_plane_t *slope = nullptr;
+    SlopePlane *slope = nullptr;
 
     if (face_dir > 0 && dfloor->is_lowest)
-        slope = cur_sub->sector->f_slope;
+        slope = cur_sub->sector->floor_slope;
 
     if (face_dir < 0 && dfloor->is_highest)
-        slope = cur_sub->sector->c_slope;
+        slope = cur_sub->sector->ceiling_slope;
 
     float trans = surf->translucency;
 
@@ -2515,7 +2515,7 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
         return;
 
     // ignore dud regions (floor >= ceiling)
-    if (dfloor->f_h > dfloor->c_h && !slope && !cur_sub->sector->ceil_vertex_slope)
+    if (dfloor->floor_height > dfloor->ceiling_height && !slope && !cur_sub->sector->ceiling_vertex_slope)
         return;
 
     // ignore empty subsectors
@@ -2530,8 +2530,8 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
         return;
 
     // count number of actual vertices
-    seg_t *seg;
-    for (seg = cur_sub->segs, num_vert = 0; seg; seg = seg->sub_next, num_vert++)
+    Seg *seg;
+    for (seg = cur_sub->segs, num_vert = 0; seg; seg = seg->subsector_next, num_vert++)
     {
         /* no other code needed */
     }
@@ -2552,12 +2552,12 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
 
     int v_count = 0;
 
-    for (seg = cur_sub->segs, i = 0; seg && (i < MAX_PLVERT); seg = seg->sub_next, i++)
+    for (seg = cur_sub->segs, i = 0; seg && (i < MAX_PLVERT); seg = seg->subsector_next, i++)
     {
         if (v_count < MAX_PLVERT)
         {
-            float x = seg->v1->X;
-            float y = seg->v1->Y;
+            float x = seg->vertex_1->X;
+            float y = seg->vertex_1->Y;
             float z = h;
 
             // must do this before mirror adjustment
@@ -2566,15 +2566,15 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
             if (cur_sub->sector->floor_vertex_slope && face_dir > 0)
             {
                 // floor - check vertex heights
-                if (seg->v1->Z < 32767.0f && seg->v1->Z > -32768.0f)
-                    z = seg->v1->Z;
+                if (seg->vertex_1->Z < 32767.0f && seg->vertex_1->Z > -32768.0f)
+                    z = seg->vertex_1->Z;
             }
 
-            if (cur_sub->sector->ceil_vertex_slope && face_dir < 0)
+            if (cur_sub->sector->ceiling_vertex_slope && face_dir < 0)
             {
                 // ceiling - check vertex heights
-                if (seg->v1->W < 32767.0f && seg->v1->W > -32768.0f)
-                    z = seg->v1->W;
+                if (seg->vertex_1->W < 32767.0f && seg->vertex_1->W > -32768.0f)
+                    z = seg->vertex_1->W;
             }
 
             if (slope)
@@ -2615,8 +2615,8 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
     data.ty0                 = surf->offset.Y;
     data.image_w             = IM_WIDTH(surf->image);
     data.image_h             = IM_HEIGHT(surf->image);
-    data.x_mat               = surf->x_mat;
-    data.y_mat               = surf->y_mat;
+    data.x_mat               = surf->x_matrix;
+    data.y_mat               = surf->y_matrix;
     float mir_scale          = MIR_XYScale();
     data.x_mat.X /= mir_scale;
     data.x_mat.Y /= mir_scale;
@@ -2630,12 +2630,12 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
     data.slope    = slope;
     data.rotation = surf->rotation;
 
-    if (cur_sub->sector->props.special)
+    if (cur_sub->sector->properties.special)
     {
         if (face_dir > 0)
-            data.bob_amount = cur_sub->sector->props.special->floor_bob_;
+            data.bob_amount = cur_sub->sector->properties.special->floor_bob_;
         else
-            data.bob_amount = cur_sub->sector->props.special->ceiling_bob_;
+            data.bob_amount = cur_sub->sector->properties.special->ceiling_bob_;
     }
 
     if (surf->image->liquid_type == LIQ_Thick)
@@ -2680,16 +2680,16 @@ static void RGL_DrawPlane(drawfloor_t *dfloor, float h, surface_t *surf, int fac
     swirl_pass = 0;
 }
 
-static inline void AddNewDrawFloor(drawsub_c *dsub, extrafloor_t *ef, float f_h, float c_h, float top_h,
-                                   surface_t *floor, surface_t *ceil, region_properties_t *props)
+static inline void AddNewDrawFloor(drawsub_c *dsub, Extrafloor *ef, float floor_height, float ceiling_height, float top_h,
+                                   MapSurface *floor, MapSurface *ceil, RegionProperties *props)
 {
     drawfloor_t *dfloor;
 
     dfloor = R_GetDrawFloor();
     dfloor->Clear();
 
-    dfloor->f_h   = f_h;
-    dfloor->c_h   = c_h;
+    dfloor->floor_height   = floor_height;
+    dfloor->ceiling_height   = ceiling_height;
     dfloor->top_h = top_h;
     dfloor->floor = floor;
     dfloor->ceil  = ceil;
@@ -2702,7 +2702,7 @@ static inline void AddNewDrawFloor(drawsub_c *dsub, extrafloor_t *ef, float f_h,
 
     // link it in, rendering order (very important)
 
-    if (dsub->floors_R == nullptr || f_h > viewz)
+    if (dsub->floors_R == nullptr || floor_height > viewz)
     {
         // add to head
         dfloor->next_R = dsub->floors_R;
@@ -2739,8 +2739,8 @@ static void RGL_WalkSubsector(int num)
 {
     EDGE_ZoneScoped;
 
-    subsector_t *sub    = &level_subsectors[num];
-    sector_t    *sector = sub->sector;
+    Subsector *sub    = &level_subsectors[num];
+    Sector    *sector = sub->sector;
 
     // store subsector in a global var for other functions to use
     cur_sub = sub;
@@ -2754,73 +2754,73 @@ static void RGL_WalkSubsector(int num)
 
     // --- handle sky (using the depth buffer) ---
 
-    if (IS_SKY(sub->sector->floor) && viewz > sub->sector->f_h)
+    if (IS_SKY(sub->sector->floor) && viewz > sub->sector->floor_height)
     {
-        RGL_DrawSkyPlane(sub, sub->sector->f_h);
+        RGL_DrawSkyPlane(sub, sub->sector->floor_height);
     }
 
-    if (IS_SKY(sub->sector->ceil) && viewz < sub->sector->sky_h)
+    if (IS_SKY(sub->sector->ceiling) && viewz < sub->sector->sky_height)
     {
-        RGL_DrawSkyPlane(sub, sub->sector->sky_h);
+        RGL_DrawSkyPlane(sub, sub->sector->sky_height);
     }
 
-    float floor_h = sector->f_h;
-    float ceil_h  = sector->c_h;
+    float floor_h = sector->floor_height;
+    float ceil_h  = sector->ceiling_height;
 
-    surface_t *floor_s = &sector->floor;
-    surface_t *ceil_s  = &sector->ceil;
+    MapSurface *floor_s = &sector->floor;
+    MapSurface *ceil_s  = &sector->ceiling;
 
-    region_properties_t *props = sector->p;
+    RegionProperties *props = sector->active_properties;
 
     // Boom compatibility -- deep water FX
-    if (sector->heightsec != nullptr)
+    if (sector->height_sector != nullptr)
     {
         // check which region the camera is in...
-        if (viewz > sector->heightsec->c_h) // A : above
+        if (viewz > sector->height_sector->ceiling_height) // A : above
         {
-            floor_h = sector->heightsec->c_h;
-            floor_s = &sector->heightsec->floor;
-            ceil_s  = &sector->heightsec->ceil;
-            props   = sector->heightsec->p;
+            floor_h = sector->height_sector->ceiling_height;
+            floor_s = &sector->height_sector->floor;
+            ceil_s  = &sector->height_sector->ceiling;
+            props   = sector->height_sector->active_properties;
         }
-        else if (viewz < sector->heightsec->f_h) // C : below
+        else if (viewz < sector->height_sector->floor_height) // C : below
         {
-            ceil_h  = sector->heightsec->f_h;
-            floor_s = &sector->heightsec->floor;
-            ceil_s  = &sector->heightsec->ceil;
-            props   = sector->heightsec->p;
+            ceil_h  = sector->height_sector->floor_height;
+            floor_s = &sector->height_sector->floor;
+            ceil_s  = &sector->height_sector->ceiling;
+            props   = sector->height_sector->active_properties;
         }
         else // B : middle for diddle
         {
-            floor_h = sector->heightsec->f_h;
-            ceil_h  = sector->heightsec->c_h;
+            floor_h = sector->height_sector->floor_height;
+            ceil_h  = sector->height_sector->ceiling_height;
         }
     }
     // -AJA- 2004/04/22: emulate the Deep-Water TRICK
-    else if (sub->deep_ref != nullptr)
+    else if (sub->deep_water_reference != nullptr)
     {
-        floor_h = sub->deep_ref->f_h;
-        floor_s = &sub->deep_ref->floor;
+        floor_h = sub->deep_water_reference->floor_height;
+        floor_s = &sub->deep_water_reference->floor;
 
-        ceil_h = sub->deep_ref->c_h;
-        ceil_s = &sub->deep_ref->ceil;
+        ceil_h = sub->deep_water_reference->ceiling_height;
+        ceil_s = &sub->deep_water_reference->ceiling;
     }
 
     // the OLD method of Boom deep water (the BOOMTEX flag)
-    extrafloor_t *boom_ef = sector->bottom_liq ? sector->bottom_liq : sector->bottom_ef;
-    if (boom_ef && (boom_ef->ef_info->type_ & kExtraFloorTypeBoomTex))
-        floor_s = &boom_ef->ef_line->frontsector->floor;
+    Extrafloor *boom_ef = sector->bottom_liquid ? sector->bottom_liquid : sector->bottom_extrafloor;
+    if (boom_ef && (boom_ef->extrafloor_definition->type_ & kExtraFloorTypeBoomTex))
+        floor_s = &boom_ef->extrafloor_line->front_sector->floor;
 
     // add in each extrafloor, traversing strictly upwards
 
-    extrafloor_t *S = sector->bottom_ef;
-    extrafloor_t *L = sector->bottom_liq;
+    Extrafloor *S = sector->bottom_extrafloor;
+    Extrafloor *L = sector->bottom_liquid;
 
     while (S || L)
     {
-        extrafloor_t *C = nullptr;
+        Extrafloor *C = nullptr;
 
-        if (!L || (S && S->bottom_h < L->bottom_h))
+        if (!L || (S && S->bottom_height < L->bottom_height))
         {
             C = S;
             S = S->higher;
@@ -2836,13 +2836,13 @@ static void RGL_WalkSubsector(int num)
         // ignore liquids in the middle of THICK solids, or below real
         // floor or above real ceiling
         //
-        if (C->bottom_h < floor_h || C->bottom_h > sector->c_h)
+        if (C->bottom_height < floor_h || C->bottom_height > sector->ceiling_height)
             continue;
 
-        AddNewDrawFloor(K, C, floor_h, C->bottom_h, C->top_h, floor_s, C->bottom, C->p);
+        AddNewDrawFloor(K, C, floor_h, C->bottom_height, C->top_height, floor_s, C->bottom, C->properties);
 
         floor_s = C->top;
-        floor_h = C->top_h;
+        floor_h = C->top_height;
     }
 
     AddNewDrawFloor(K, nullptr, floor_h, ceil_h, ceil_h, floor_s, ceil_s, props);
@@ -2857,16 +2857,16 @@ static void RGL_WalkSubsector(int num)
     {
         bool skip = true;
 
-        for (seg_t *seg = sub->segs; seg; seg = seg->sub_next)
+        for (Seg *seg = sub->segs; seg; seg = seg->subsector_next)
         {
             if (MIR_SegOnPortal(seg))
                 continue;
 
-            float sx1 = seg->v1->X;
-            float sy1 = seg->v1->Y;
+            float sx1 = seg->vertex_1->X;
+            float sy1 = seg->vertex_1->Y;
 
-            float sx2 = seg->v2->X;
-            float sy2 = seg->v2->Y;
+            float sx2 = seg->vertex_2->X;
+            float sy2 = seg->vertex_2->Y;
 
             if (MathPointToSegDistance({{sx1, sy1}}, {{sx2, sy2}}, {{viewx, viewy}}) <= (r_farclip.f_ + 500.0f))
             {
@@ -2877,12 +2877,12 @@ static void RGL_WalkSubsector(int num)
 
         if (!skip)
         {
-            for (MapObject *mo = sub->thinglist; mo; mo = mo->subsector_next_)
+            for (MapObject *mo = sub->thing_list; mo; mo = mo->subsector_next_)
             {
                 RGL_WalkThing(K, mo);
             }
             // clip 1D occlusion buffer.
-            for (seg_t *seg = sub->segs; seg; seg = seg->sub_next)
+            for (Seg *seg = sub->segs; seg; seg = seg->subsector_next)
             {
                 RGL_WalkSeg(K, seg);
             }
@@ -2896,12 +2896,12 @@ static void RGL_WalkSubsector(int num)
     }
     else
     {
-        for (MapObject *mo = sub->thinglist; mo; mo = mo->subsector_next_)
+        for (MapObject *mo = sub->thing_list; mo; mo = mo->subsector_next_)
         {
             RGL_WalkThing(K, mo);
         }
         // clip 1D occlusion buffer.
-        for (seg_t *seg = sub->segs; seg; seg = seg->sub_next)
+        for (Seg *seg = sub->segs; seg; seg = seg->subsector_next)
         {
             RGL_WalkSeg(K, seg);
         }
@@ -2949,7 +2949,7 @@ static void DrawMirrorPolygon(drawmirror_c *mir)
 
     float alpha = 0.15 + 0.10 * num_active_mirrors;
 
-    line_t *ld = mir->seg->linedef;
+    Line *ld = mir->seg->linedef;
     SYS_ASSERT(ld);
 
     if (ld->special)
@@ -2968,13 +2968,13 @@ static void DrawMirrorPolygon(drawmirror_c *mir)
     else
         glColor4f(1.0, 0.0, 0.0, alpha);
 
-    float x1 = mir->seg->v1->X;
-    float y1 = mir->seg->v1->Y;
-    float z1 = ld->frontsector->f_h;
+    float x1 = mir->seg->vertex_1->X;
+    float y1 = mir->seg->vertex_1->Y;
+    float z1 = ld->front_sector->floor_height;
 
-    float x2 = mir->seg->v2->X;
-    float y2 = mir->seg->v2->Y;
-    float z2 = ld->frontsector->c_h;
+    float x2 = mir->seg->vertex_2->X;
+    float y2 = mir->seg->vertex_2->Y;
+    float z2 = ld->front_sector->ceiling_height;
 
     MIR_Coordinate(x1, y1);
     MIR_Coordinate(x2, y2);
@@ -2993,10 +2993,10 @@ static void DrawMirrorPolygon(drawmirror_c *mir)
 
 static void DrawPortalPolygon(drawmirror_c *mir)
 {
-    line_t *ld = mir->seg->linedef;
+    Line *ld = mir->seg->linedef;
     SYS_ASSERT(ld);
 
-    const surface_t *surf = &mir->seg->sidedef->middle;
+    const MapSurface *surf = &mir->seg->sidedef->middle;
 
     if (!surf->image || !ld->special || !(ld->special->portal_effect_ & kPortalEffectTypeStandard))
     {
@@ -3022,13 +3022,13 @@ static void DrawPortalPolygon(drawmirror_c *mir)
     glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
 
     // get polygon coordinates
-    float x1 = mir->seg->v1->X;
-    float y1 = mir->seg->v1->Y;
-    float z1 = ld->frontsector->f_h;
+    float x1 = mir->seg->vertex_1->X;
+    float y1 = mir->seg->vertex_1->Y;
+    float z1 = ld->front_sector->floor_height;
 
-    float x2 = mir->seg->v2->X;
-    float y2 = mir->seg->v2->Y;
-    float z2 = ld->frontsector->c_h;
+    float x2 = mir->seg->vertex_2->X;
+    float y2 = mir->seg->vertex_2->Y;
+    float z2 = ld->front_sector->ceiling_height;
 
     MIR_Coordinate(x1, y1);
     MIR_Coordinate(x2, y2);
@@ -3043,11 +3043,11 @@ static void DrawPortalPolygon(drawmirror_c *mir)
     float ty1 = 0;
     float ty2 = (z2 - z1);
 
-    tx1 = tx1 * surf->x_mat.X / total_w;
-    tx2 = tx2 * surf->x_mat.X / total_w;
+    tx1 = tx1 * surf->x_matrix.X / total_w;
+    tx2 = tx2 * surf->x_matrix.X / total_w;
 
-    ty1 = ty1 * surf->y_mat.Y / total_h;
-    ty2 = ty2 * surf->y_mat.Y / total_h;
+    ty1 = ty1 * surf->y_matrix.Y / total_h;
+    ty2 = ty2 * surf->y_matrix.Y / total_h;
 
     glBegin(GL_POLYGON);
 
@@ -3102,7 +3102,7 @@ static void RGL_DrawSubsector(drawsub_c *dsub, bool mirror_sub)
 {
     EDGE_ZoneScoped;
 
-    subsector_t *sub = dsub->sub;
+    Subsector *sub = dsub->sub;
 
 #if (DEBUG >= 1)
     LogDebug("\nREVISITING SUBSEC %d\n\n", (int)(sub - subsectors));
@@ -3134,8 +3134,8 @@ static void RGL_DrawSubsector(drawsub_c *dsub, bool mirror_sub)
             RGL_DrawSeg(dfloor, (*SEGI)->seg, mirror_sub);
         }
 
-        RGL_DrawPlane(dfloor, dfloor->c_h, dfloor->ceil, -1);
-        RGL_DrawPlane(dfloor, dfloor->f_h, dfloor->floor, +1);
+        RGL_DrawPlane(dfloor, dfloor->ceiling_height, dfloor->ceil, -1);
+        RGL_DrawPlane(dfloor, dfloor->floor_height, dfloor->floor, +1);
 
         if (!solid_mode)
         {
@@ -3176,7 +3176,7 @@ static void RGL_WalkBSPNode(unsigned int bspnum)
 {
     EDGE_ZoneScoped;
 
-    node_t *node;
+    BspNode *node;
     int     side;
 
     // Found a subsector?
@@ -3190,37 +3190,37 @@ static void RGL_WalkBSPNode(unsigned int bspnum)
 
     // Decide which side the view point is on.
 
-    divline_t nd_div;
+    DividingLine nd_div;
 
-    nd_div.x  = node->div.x;
-    nd_div.y  = node->div.y;
-    nd_div.dx = node->div.x + node->div.dx;
-    nd_div.dy = node->div.y + node->div.dy;
+    nd_div.x  = node->divider.x;
+    nd_div.y  = node->divider.y;
+    nd_div.delta_x = node->divider.x + node->divider.delta_x;
+    nd_div.delta_y = node->divider.y + node->divider.delta_y;
 
     MIR_Coordinate(nd_div.x, nd_div.y);
-    MIR_Coordinate(nd_div.dx, nd_div.dy);
+    MIR_Coordinate(nd_div.delta_x, nd_div.delta_y);
 
     if (MIR_Reflective())
     {
         float tx  = nd_div.x;
-        nd_div.x  = nd_div.dx;
-        nd_div.dx = tx;
+        nd_div.x  = nd_div.delta_x;
+        nd_div.delta_x = tx;
         float ty  = nd_div.y;
-        nd_div.y  = nd_div.dy;
-        nd_div.dy = ty;
+        nd_div.y  = nd_div.delta_y;
+        nd_div.delta_y = ty;
     }
 
-    nd_div.dx -= nd_div.x;
-    nd_div.dy -= nd_div.y;
+    nd_div.delta_x -= nd_div.x;
+    nd_div.delta_y -= nd_div.y;
 
     side = PointOnDividingLineSide(viewx, viewy, &nd_div);
 
     // Recursively divide front space.
-    if (RGL_CheckBBox(node->bbox[side]))
+    if (RGL_CheckBBox(node->bounding_boxes[side]))
         RGL_WalkBSPNode(node->children[side]);
 
     // Recursively divide back space.
-    if (RGL_CheckBBox(node->bbox[side ^ 1]))
+    if (RGL_CheckBBox(node->bounding_boxes[side ^ 1]))
         RGL_WalkBSPNode(node->children[side ^ 1]);
 }
 
@@ -3466,7 +3466,7 @@ void R_Render(int x, int y, int w, int h, MapObject *camera, bool full_height, f
 
     // Profiling
     framecount++;
-    validcount++;
+    valid_count++;
 
     seen_dlights.clear();
     RGL_RenderTrueBSP();

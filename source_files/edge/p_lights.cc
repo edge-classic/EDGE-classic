@@ -56,7 +56,7 @@ static void DoLight(LightSpecial *light)
     {
         case kLightSpecialTypeSet:
         {
-            light->sector->props.lightlevel = light->maximum_light;
+            light->sector->properties.light_level = light->maximum_light;
 
             // count is 0, i.e. this light is now disabled
             return;
@@ -68,7 +68,7 @@ static void DoLight(LightSpecial *light)
 
             if (HMM_ABS(diff) < type->step_)
             {
-                light->sector->props.lightlevel = light->maximum_light;
+                light->sector->properties.light_level = light->maximum_light;
 
                 // count is 0, i.e. this light is now disabled
                 return;
@@ -80,7 +80,7 @@ static void DoLight(LightSpecial *light)
             else
                 light->minimum_light += type->step_;
 
-            light->sector->props.lightlevel = light->minimum_light;
+            light->sector->properties.light_level = light->minimum_light;
             light->count                    = type->brighttime_;
             break;
         }
@@ -91,43 +91,43 @@ static void DoLight(LightSpecial *light)
             if (RandomByteTest(type->chance_))
             {
                 if (reduce_flash)
-                    light->sector->props.lightlevel =
+                    light->sector->properties.light_level =
                         (light->maximum_light + light->minimum_light) / 2;
                 else
-                    light->sector->props.lightlevel = light->minimum_light;
+                    light->sector->properties.light_level = light->minimum_light;
                 light->count = type->darktime_;
             }
             else
             {
                 if (reduce_flash)
-                    light->sector->props.lightlevel =
+                    light->sector->properties.light_level =
                         (light->maximum_light + light->minimum_light) / 2;
                 else
-                    light->sector->props.lightlevel = light->maximum_light;
+                    light->sector->properties.light_level = light->maximum_light;
                 light->count = type->brighttime_;
             }
             break;
         }
 
         case kLightSpecialTypeStrobe:
-            if (light->sector->props.lightlevel == light->maximum_light)
+            if (light->sector->properties.light_level == light->maximum_light)
             {
                 // Go dark
                 if (reduce_flash)
-                    light->sector->props.lightlevel =
+                    light->sector->properties.light_level =
                         (light->maximum_light + light->minimum_light) / 2;
                 else
-                    light->sector->props.lightlevel = light->minimum_light;
+                    light->sector->properties.light_level = light->minimum_light;
                 light->count = type->darktime_;
             }
             else
             {
                 // Go Bright
                 if (reduce_flash)
-                    light->sector->props.lightlevel =
+                    light->sector->properties.light_level =
                         (light->maximum_light + light->minimum_light) / 2;
                 else
-                    light->sector->props.lightlevel = light->maximum_light;
+                    light->sector->properties.light_level = light->maximum_light;
                 light->count = type->brighttime_;
             }
             break;
@@ -136,10 +136,10 @@ static void DoLight(LightSpecial *light)
             if (light->direction == -1)
             {
                 // Go dark
-                light->sector->props.lightlevel -= type->step_;
-                if (light->sector->props.lightlevel <= light->minimum_light)
+                light->sector->properties.light_level -= type->step_;
+                if (light->sector->properties.light_level <= light->minimum_light)
                 {
-                    light->sector->props.lightlevel = light->minimum_light;
+                    light->sector->properties.light_level = light->minimum_light;
                     light->count                    = type->brighttime_;
                     light->direction                = +1;
                 }
@@ -148,10 +148,10 @@ static void DoLight(LightSpecial *light)
             else
             {
                 // Go Bright
-                light->sector->props.lightlevel += type->step_;
-                if (light->sector->props.lightlevel >= light->maximum_light)
+                light->sector->properties.light_level += type->step_;
+                if (light->sector->properties.light_level >= light->maximum_light)
                 {
-                    light->sector->props.lightlevel = light->maximum_light;
+                    light->sector->properties.light_level = light->maximum_light;
                     light->count                    = type->darktime_;
                     light->direction                = -1;
                 }
@@ -164,22 +164,22 @@ static void DoLight(LightSpecial *light)
             // -ES- 2000/02/13 Changed this to original DOOM style flicker
             int amount = (RandomByte() & 7) * type->step_;
 
-            if (light->sector->props.lightlevel - amount < light->minimum_light)
+            if (light->sector->properties.light_level - amount < light->minimum_light)
             {
                 if (reduce_flash)
-                    light->sector->props.lightlevel =
+                    light->sector->properties.light_level =
                         (light->maximum_light + light->minimum_light) / 2;
                 else
-                    light->sector->props.lightlevel = light->minimum_light;
+                    light->sector->properties.light_level = light->minimum_light;
                 light->count = type->darktime_;
             }
             else
             {
                 if (reduce_flash)
-                    light->sector->props.lightlevel =
+                    light->sector->properties.light_level =
                         (light->maximum_light + light->minimum_light) / 2;
                 else
-                    light->sector->props.lightlevel =
+                    light->sector->properties.light_level =
                         light->maximum_light - amount;
                 light->count = type->brighttime_;
             }
@@ -196,7 +196,7 @@ void RunLineTagLights(int tag, int bright)
 
     for (int i = 0; i < total_level_sectors; i++)
     {
-        sector_t *sector = level_sectors + i;
+        Sector *sector = level_sectors + i;
 
         if (sector->tag == tag)
         {
@@ -204,16 +204,16 @@ void RunLineTagLights(int tag, int bright)
             // surrounding sector
             if (!bright)
             {
-                for (int j = 0; j < sector->linecount; j++)
+                for (int j = 0; j < sector->line_count; j++)
                 {
-                    line_t *templine = sector->lines[j];
+                    Line *templine = sector->lines[j];
 
-                    sector_t *temp = GetLineSectorAdjacent(templine, sector);
+                    Sector *temp = GetLineSectorAdjacent(templine, sector);
 
                     if (!temp) continue;
 
-                    if (temp->props.lightlevel > bright)
-                        bright = temp->props.lightlevel;
+                    if (temp->properties.light_level > bright)
+                        bright = temp->properties.light_level;
                 }
             }
             // bright == 1 means to search for lowest light level
@@ -221,19 +221,19 @@ void RunLineTagLights(int tag, int bright)
             if (bright == 1)
             {
                 bright = 255;
-                for (int j = 0; j < sector->linecount; j++)
+                for (int j = 0; j < sector->line_count; j++)
                 {
-                    line_t *templine = sector->lines[j];
+                    Line *templine = sector->lines[j];
 
-                    sector_t *temp = GetLineSectorAdjacent(templine, sector);
+                    Sector *temp = GetLineSectorAdjacent(templine, sector);
 
                     if (!temp) continue;
 
-                    if (temp->props.lightlevel < bright)
-                        bright = temp->props.lightlevel;
+                    if (temp->properties.light_level < bright)
+                        bright = temp->properties.light_level;
                 }
             }
-            sector->props.lightlevel = bright;
+            sector->properties.light_level = bright;
         }
     }
 }
@@ -261,7 +261,7 @@ LightSpecial *NewLight(void)
     return light;
 }
 
-bool RunSectorLight(sector_t *sec, const LightSpecialDefinition *type)
+bool RunSectorLight(Sector *sec, const LightSpecialDefinition *type)
 {
     // check if a light effect already is running on this sector.
     LightSpecial *light = nullptr;
@@ -292,7 +292,7 @@ bool RunSectorLight(sector_t *sec, const LightSpecialDefinition *type)
         case kLightSpecialTypeSet:
         case kLightSpecialTypeFade:
         {
-            light->minimum_light = sec->props.lightlevel;
+            light->minimum_light = sec->properties.light_level;
             light->maximum_light = type->level_;
             light->count         = type->brighttime_;
             break;
@@ -301,8 +301,8 @@ bool RunSectorLight(sector_t *sec, const LightSpecialDefinition *type)
         default:
         {
             light->minimum_light =
-                FindMinimumSurroundingLight(sec, sec->props.lightlevel);
-            light->maximum_light = sec->props.lightlevel;
+                FindMinimumSurroundingLight(sec, sec->properties.light_level);
+            light->maximum_light = sec->properties.light_level;
             light->count = type->sync_ ? (level_time_elapsed % type->sync_) + 1
                                        : type->darktime_;
 
@@ -344,7 +344,7 @@ void RunLights(void)
 class ambientsfx_c
 {
    public:
-    sector_t *sector;
+    Sector *sector;
 
     SoundEffect *sfx;
 
@@ -352,7 +352,7 @@ class ambientsfx_c
     int count;
 
    public:
-    ambientsfx_c(sector_t *_sec, SoundEffect *_fx)
+    ambientsfx_c(Sector *_sec, SoundEffect *_fx)
         : sector(_sec), sfx(_fx), count(SECSFX_TIME)
     {
     }
@@ -362,7 +362,7 @@ class ambientsfx_c
 
 std::list<ambientsfx_c *> active_ambients;
 
-void AddAmbientSounds(sector_t *sec, SoundEffect *sfx)
+void AddAmbientSounds(Sector *sec, SoundEffect *sfx)
 {
     active_ambients.push_back(new ambientsfx_c(sec, sfx));
 }
@@ -375,7 +375,7 @@ void DestroyAllAmbientSounds(void)
 
         active_ambients.pop_front();
 
-        S_StopFX(&amb->sector->sfx_origin);
+        S_StopFX(&amb->sector->sound_effects_origin);
 
         delete amb;
     }
@@ -395,7 +395,7 @@ void RunAmbientSounds(void)
         {
             amb->count = SECSFX_TIME;
 
-            S_StartFX(amb->sfx, SNCAT_Level, &amb->sector->sfx_origin);
+            S_StartFX(amb->sfx, SNCAT_Level, &amb->sector->sound_effects_origin);
         }
     }
 }

@@ -71,57 +71,57 @@ float yspeed[8] = {0.0f, 0.7071067812f,  1.0f,  0.7071067812f,
 // Recursively traverse adjacent sectors,
 // sound blocking lines cut off traversal.
 //
-static void RecurseSound(sector_t *sec, int soundblocks, int player)
+static void RecurseSound(Sector *sec, int soundblocks, int player)
 {
     int       i;
-    line_t   *check;
-    sector_t *other;
+    Line   *check;
+    Sector *other;
 
     // has the sound flooded this sector
-    if (sec->validcount == validcount &&
-        sec->soundtraversed <= (soundblocks + 1))
+    if (sec->valid_count == valid_count &&
+        sec->sound_traversed <= (soundblocks + 1))
         return;
 
     // wake up all monsters in this sector
-    sec->validcount     = validcount;
-    sec->soundtraversed = soundblocks + 1;
+    sec->valid_count     = valid_count;
+    sec->sound_traversed = soundblocks + 1;
     sec->sound_player   = player;
 
     // Set any nearby monsters to have heard the player
-    touch_node_t *nd;
-    for (nd = sec->touch_things; nd; nd = nd->sec_next)
+    TouchNode *nd;
+    for (nd = sec->touch_things; nd; nd = nd->sector_next)
     {
-        if (nd->mo != nullptr)
+        if (nd->map_object != nullptr)
         {
-            if (!AlmostEquals(nd->mo->info_->hear_distance_,
+            if (!AlmostEquals(nd->map_object->info_->hear_distance_,
                               -1.0f))  // if we have hear_distance set
             {
                 float distance;
                 distance =
-                    ApproximateDistance(players[player]->mo->x - nd->mo->x,
-                                        players[player]->mo->y - nd->mo->y);
+                    ApproximateDistance(players[player]->mo->x - nd->map_object->x,
+                                        players[player]->mo->y - nd->map_object->y);
                 distance = ApproximateDistance(
-                    players[player]->mo->z - nd->mo->z, distance);
-                if (distance < nd->mo->info_->hear_distance_)
+                    players[player]->mo->z - nd->map_object->z, distance);
+                if (distance < nd->map_object->info_->hear_distance_)
                 {
-                    nd->mo->last_heard_ = player;
+                    nd->map_object->last_heard_ = player;
                 }
             }
             else  /// by default he heard
             {
-                nd->mo->last_heard_ = player;
+                nd->map_object->last_heard_ = player;
             }
         }
     }
 
-    for (i = 0; i < sec->linecount; i++)
+    for (i = 0; i < sec->line_count; i++)
     {
         check = sec->lines[i];
 
         if (!(check->flags & MLF_TwoSided)) continue;
 
         // -AJA- 1999/07/19: Gaps are now stored in line_t.
-        if (check->gap_num == 0) continue;  // closed door
+        if (check->gap_number == 0) continue;  // closed door
 
         // -AJA- 2001/11/11: handle closed Sliding doors
         if (check->slide_door && !check->slide_door->s_.see_through_ &&
@@ -130,10 +130,10 @@ static void RecurseSound(sector_t *sec, int soundblocks, int player)
             continue;
         }
 
-        if (check->frontsector == sec)
-            other = check->backsector;
+        if (check->front_sector == sec)
+            other = check->back_sector;
         else
-            other = check->frontsector;
+            other = check->front_sector;
 
         if (check->flags & MLF_SoundBlock)
         {
@@ -145,7 +145,7 @@ static void RecurseSound(sector_t *sec, int soundblocks, int player)
 
 void NoiseAlert(player_t *p)
 {
-    validcount++;
+    valid_count++;
 
     RecurseSound(p->mo->subsector_->sector, 0, p->pnum);
 }
@@ -153,7 +153,7 @@ void NoiseAlert(player_t *p)
 // Called by new NOISE_ALERT ddf action
 void P_ActNoiseAlert(MapObject *actor)
 {
-    validcount++;
+    valid_count++;
 
     int WhatPlayer = 0;
 
@@ -218,12 +218,12 @@ bool P_Move(MapObject *actor, bool path)
         bool any_used   = false;
         bool block_used = false;
 
-        for (std::vector<line_t *>::reverse_iterator
+        for (std::vector<Line *>::reverse_iterator
                  iter     = special_lines_hit.rbegin(),
                  iter_end = special_lines_hit.rend();
              iter != iter_end; iter++)
         {
-            line_t *ld = *iter;
+            Line *ld = *iter;
             if (UseSpecialLine(actor, ld, 0, -FLT_MAX, FLT_MAX))
             {
                 any_used = true;

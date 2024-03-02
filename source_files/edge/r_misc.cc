@@ -67,14 +67,14 @@ BAMAngle normalfov, zoomedfov;
 bool    viewiszoomed = false;
 
 // increment every time a check is made
-int validcount = 1;
+int valid_count = 1;
 
 // just for profiling purposes
 int framecount;
-int linecount;
+int line_count;
 
-subsector_t         *viewsubsector;
-region_properties_t *view_props;
+Subsector         *viewsubsector;
+RegionProperties *view_props;
 
 float viewx;
 float viewy;
@@ -238,9 +238,9 @@ void R_Shutdown(void)
     R2_FreeupBSP();
 }
 
-subsector_t *R_PointInSubsector(float x, float y)
+Subsector *R_PointInSubsector(float x, float y)
 {
-    node_t      *node;
+    BspNode      *node;
     int          side;
     unsigned int nodenum;
 
@@ -249,28 +249,28 @@ subsector_t *R_PointInSubsector(float x, float y)
     while (!(nodenum & NF_V5_SUBSECTOR))
     {
         node    = &level_nodes[nodenum];
-        side    = PointOnDividingLineSide(x, y, &node->div);
+        side    = PointOnDividingLineSide(x, y, &node->divider);
         nodenum = node->children[side];
     }
 
     return &level_subsectors[nodenum & ~NF_V5_SUBSECTOR];
 }
 
-region_properties_t *R_PointGetProps(subsector_t *sub, float z)
+RegionProperties *R_PointGetProps(Subsector *sub, float z)
 {
-    extrafloor_t *S, *L, *C;
+    Extrafloor *S, *L, *C;
     float         floor_h;
 
     // traverse extrafloors upwards
 
-    floor_h = sub->sector->f_h;
+    floor_h = sub->sector->floor_height;
 
-    S = sub->sector->bottom_ef;
-    L = sub->sector->bottom_liq;
+    S = sub->sector->bottom_extrafloor;
+    L = sub->sector->bottom_liquid;
 
     while (S || L)
     {
-        if (!L || (S && S->bottom_h < L->bottom_h))
+        if (!L || (S && S->bottom_height < L->bottom_height))
         {
             C = S;
             S = S->higher;
@@ -286,17 +286,17 @@ region_properties_t *R_PointGetProps(subsector_t *sub, float z)
         // ignore liquids in the middle of THICK solids, or below real
         // floor or above real ceiling
         //
-        if (C->bottom_h < floor_h || C->bottom_h > sub->sector->c_h)
+        if (C->bottom_height < floor_h || C->bottom_height > sub->sector->ceiling_height)
             continue;
 
-        if (z < C->top_h)
-            return C->p;
+        if (z < C->top_height)
+            return C->properties;
 
-        floor_h = C->top_h;
+        floor_h = C->top_height;
     }
 
     // extrafloors were exhausted, must be top area
-    return sub->sector->p;
+    return sub->sector->active_properties;
 }
 
 //----------------------------------------------------------------------------

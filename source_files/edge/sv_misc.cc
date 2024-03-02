@@ -221,7 +221,7 @@ static savefield_t sv_fields_trigger[] = {
 
     // NOT HERE
     //   - next & prev: can be regenerated.
-    //   - tag_next & tag_prev: ditto
+    //   - tag_next & tag_previous: ditto
     //   - sound: can be recomputed.
     //   - last_con_message: doesn't matter.
 
@@ -775,7 +775,7 @@ void SV_SliderMoveFinaliseElems(void)
         SlidingDoorMover *smov = *SMI;
 
         if (smov->line)
-            smov->line_length = R_PointToDist(0, 0, smov->line->dx, smov->line->dy);
+            smov->line_length = R_PointToDist(0, 0, smov->line->delta_x, smov->line->delta_y);
     }
 }
 

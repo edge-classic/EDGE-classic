@@ -144,7 +144,7 @@ static int GetMulticolMaxRGB(multi_color_c *cols, int num, bool additive)
     return result;
 }
 
-static void RGL_DrawPSprite(PlayerSprite *psp, int which, player_t *player, region_properties_t *props,
+static void RGL_DrawPSprite(PlayerSprite *psp, int which, player_t *player, RegionProperties *props,
                             const State *state)
 {
     if (state->flags & kStateFrameFlagModel)
@@ -285,12 +285,12 @@ static void RGL_DrawPSprite(PlayerSprite *psp, int which, player_t *player, regi
         trans    = 1.0f;
     }
 
-    RGBAColor fc_to_use = player->mo->subsector_->sector->props.fog_color;
-    float    fd_to_use = player->mo->subsector_->sector->props.fog_density;
+    RGBAColor fc_to_use = player->mo->subsector_->sector->properties.fog_color;
+    float    fd_to_use = player->mo->subsector_->sector->properties.fog_density;
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
     {
-        if (IS_SKY(player->mo->subsector_->sector->ceil))
+        if (IS_SKY(player->mo->subsector_->sector->ceiling))
         {
             fc_to_use = current_map->outdoor_fog_color_;
             fd_to_use = 0.01f * current_map->outdoor_fog_density_;
@@ -797,12 +797,12 @@ static void R2_ClipSpriteVertically(drawsub_c *dsub, drawthing_t *dthing)
 	// highest ceiling, OR by *solid* extrafloors (even translucent
 	// ones) -- UNLESS y_clipping == YCLIP_Hard.
 
-	f1 = dfloor->f_h;
-	c1 = dfloor->c_h;
+	f1 = dfloor->floor_height;
+	c1 = dfloor->ceiling_height;
 
 	// handle TRANSLUCENT + THICK floors (a bit of a hack)
-	if (dfloor->ef && dfloor->ef->ef_info && !dfloor->is_highest &&
-		(dfloor->ef->ef_info->type & kExtraFloorTypeThick) &&
+	if (dfloor->ef && dfloor->ef->extrafloor_definition && !dfloor->is_highest &&
+		(dfloor->ef->extrafloor_definition->type & kExtraFloorTypeThick) &&
 		(dfloor->ef->top->translucency < 0.99f))
 	{
 		c1 = dfloor->top_h;
@@ -837,9 +837,9 @@ static void R2_ClipSpriteVertically(drawsub_c *dsub, drawthing_t *dthing)
 			(dthing->top    <  f1 + SY_FUDGE))
 			break;
 
-		SYS_ASSERT(dfloor->lower->ef && dfloor->lower->ef->ef_info);
+		SYS_ASSERT(dfloor->lower->ef && dfloor->lower->ef->extrafloor_definition);
 
-		if (! (dfloor->lower->ef->ef_info->type & kExtraFloorTypeLiquid))
+		if (! (dfloor->lower->ef->extrafloor_definition->type & kExtraFloorTypeLiquid))
 			break;
 
 		// sprite must be split (bottom), make a copy.
@@ -866,12 +866,12 @@ static void R2_ClipSpriteVertically(drawsub_c *dsub, drawthing_t *dthing)
 		dthing = dnew;
 		dfloor = dfloor->lower;
 
-		f1 = dfloor->f_h;
-		c1 = dfloor->c_h;
+		f1 = dfloor->floor_height;
+		c1 = dfloor->ceiling_height;
 
 		// handle TRANSLUCENT + THICK floors (a bit of a hack)
-		if (dfloor->ef && dfloor->ef->ef_info && !dfloor->is_highest &&
-			(dfloor->ef->ef_info->type & kExtraFloorTypeThick) &&
+		if (dfloor->ef && dfloor->ef->extrafloor_definition && !dfloor->is_highest &&
+			(dfloor->ef->extrafloor_definition->type & kExtraFloorTypeThick) &&
 			(dfloor->ef->top->translucency < 0.99f))
 		{
 			c1 = dfloor->top_h;
@@ -908,9 +908,9 @@ static void R2_ClipSpriteVertically(drawsub_c *dsub, drawthing_t *dthing)
 			(dthing->top    <  c1 + SY_FUDGE))
 			break;
 
-		SYS_ASSERT(dfloor->ef && dfloor->ef->ef_info);
+		SYS_ASSERT(dfloor->ef && dfloor->ef->extrafloor_definition);
 
-		if (! (dfloor->ef->ef_info->type & kExtraFloorTypeLiquid))
+		if (! (dfloor->ef->extrafloor_definition->type & kExtraFloorTypeLiquid))
 			break;
 
 		// sprite must be split (top), make a copy.
@@ -937,12 +937,12 @@ static void R2_ClipSpriteVertically(drawsub_c *dsub, drawthing_t *dthing)
 		dthing = dnew;
 		dfloor = dfloor->higher;
 
-		f1 = dfloor->f_h;
-		c1 = dfloor->c_h;
+		f1 = dfloor->floor_height;
+		c1 = dfloor->ceiling_height;
 
 		// handle TRANSLUCENT + THICK floors (a bit of a hack)
-		if (dfloor->ef && dfloor->ef->ef_info && !dfloor->is_highest &&
-			(dfloor->ef->ef_info->type & kExtraFloorTypeThick) &&
+		if (dfloor->ef && dfloor->ef->extrafloor_definition && !dfloor->is_highest &&
+			(dfloor->ef->extrafloor_definition->type & kExtraFloorTypeThick) &&
 			(dfloor->ef->top->translucency < 0.99f))
 		{
 			c1 = dfloor->top_h;
@@ -1024,8 +1024,8 @@ void RGL_WalkThing(drawsub_c *dsub, MapObject *mo)
 
     float     sink_mult = 0;
     float     bob_mult  = 0;
-    sector_t *cur_sec   = mo->subsector_->sector;
-    if (!cur_sec->exfloor_used && !cur_sec->heightsec && abs(mo->z - cur_sec->f_h) < 1)
+    Sector *cur_sec   = mo->subsector_->sector;
+    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mo->z - cur_sec->floor_height) < 1)
     {
         sink_mult = cur_sec->sink_depth;
         bob_mult  = cur_sec->bob_depth;
@@ -1201,8 +1201,8 @@ static void RGL_DrawModel(drawthing_t *dthing)
 
     float     sink_mult = 0;
     float     bob_mult  = 0;
-    sector_t *cur_sec   = mo->subsector_->sector;
-    if (!cur_sec->exfloor_used && !cur_sec->heightsec && abs(mo->z - cur_sec->f_h) < 1)
+    Sector *cur_sec   = mo->subsector_->sector;
+    if (!cur_sec->extrafloor_used && !cur_sec->height_sector && abs(mo->z - cur_sec->floor_height) < 1)
     {
         sink_mult = cur_sec->sink_depth;
         bob_mult  = cur_sec->bob_depth;
@@ -1424,12 +1424,12 @@ void RGL_DrawThing(drawfloor_t *dfloor, drawthing_t *dthing)
 
     int num_pass = is_fuzzy ? 1 : (detail_level > 0 ? 4 : 3);
 
-    RGBAColor fc_to_use = dthing->mo->subsector_->sector->props.fog_color;
-    float    fd_to_use = dthing->mo->subsector_->sector->props.fog_density;
+    RGBAColor fc_to_use = dthing->mo->subsector_->sector->properties.fog_color;
+    float    fd_to_use = dthing->mo->subsector_->sector->properties.fog_density;
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
     {
-        if (IS_SKY(mo->subsector_->sector->ceil))
+        if (IS_SKY(mo->subsector_->sector->ceiling))
         {
             fc_to_use = current_map->outdoor_fog_color_;
             fd_to_use = 0.01f * current_map->outdoor_fog_density_;

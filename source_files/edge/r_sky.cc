@@ -81,8 +81,8 @@ typedef struct sec_sky_ring_s
 void R_ComputeSkyHeights(void)
 {
     int       i;
-    line_t   *ld;
-    sector_t *sec;
+    Line   *ld;
+    Sector *sec;
 
     // --- initialise ---
 
@@ -92,19 +92,19 @@ void R_ComputeSkyHeights(void)
 
     for (i = 0, sec = level_sectors; i < total_level_sectors; i++, sec++)
     {
-        if (!IS_SKY(sec->ceil))
+        if (!IS_SKY(sec->ceiling))
             continue;
 
         rings[i].group = (i + 1);
         rings[i].next = rings[i].prev = rings + i;
-        rings[i].max_h                = sec->c_h;
+        rings[i].max_h                = sec->ceiling_height;
 
         // leave some room for tall sprites
         static const float SPR_H_MAX = 256.0f;
 
-        if (sec->c_h < 30000.0f && (sec->c_h > sec->f_h) && (sec->c_h < sec->f_h + SPR_H_MAX))
+        if (sec->ceiling_height < 30000.0f && (sec->ceiling_height > sec->floor_height) && (sec->ceiling_height < sec->floor_height + SPR_H_MAX))
         {
-            rings[i].max_h = sec->f_h + SPR_H_MAX;
+            rings[i].max_h = sec->floor_height + SPR_H_MAX;
         }
     }
 
@@ -112,14 +112,14 @@ void R_ComputeSkyHeights(void)
 
     for (i = 0, ld = level_lines; i < total_level_lines; i++, ld++)
     {
-        sector_t       *sec1, *sec2;
+        Sector       *sec1, *sec2;
         sec_sky_ring_t *ring1, *ring2, *tmp_R;
 
         if (!ld->side[0] || !ld->side[1])
             continue;
 
-        sec1 = ld->frontsector;
-        sec2 = ld->backsector;
+        sec1 = ld->front_sector;
+        sec2 = ld->back_sector;
 
         SYS_ASSERT(sec1 && sec2);
 
@@ -174,12 +174,7 @@ void R_ComputeSkyHeights(void)
     for (i = 0, sec = level_sectors; i < total_level_sectors; i++, sec++)
     {
         if (rings[i].group > 0)
-            sec->sky_h = rings[i].max_h;
-
-#if 0 // DEBUG CODE
-		LogDebug("SKY: sec %d  group %d  max_h %1.1f\n", i,
-				rings[i].group, rings[i].max_h);
-#endif
+            sec->sky_height = rings[i].max_h;
     }
 
     delete[] rings;
@@ -736,7 +731,7 @@ void RGL_FinishSky(void)
     glDisable(GL_TEXTURE_2D);
 }
 
-void RGL_DrawSkyPlane(subsector_t *sub, float h)
+void RGL_DrawSkyPlane(Subsector *sub, float h)
 {
     need_to_draw_sky = true;
 
@@ -747,28 +742,28 @@ void RGL_DrawSkyPlane(subsector_t *sub, float h)
 
     glNormal3f(0, 0, (viewz > h) ? 1.0f : -1.0f);
 
-    seg_t *seg = sub->segs;
+    Seg *seg = sub->segs;
     if (!seg)
         return;
 
-    float x0 = seg->v1->X;
-    float y0 = seg->v1->Y;
+    float x0 = seg->vertex_1->X;
+    float y0 = seg->vertex_1->Y;
     MIR_Coordinate(x0, y0);
-    seg = seg->sub_next;
+    seg = seg->subsector_next;
     if (!seg)
         return;
 
-    float x1 = seg->v1->X;
-    float y1 = seg->v1->Y;
+    float x1 = seg->vertex_1->X;
+    float y1 = seg->vertex_1->Y;
     MIR_Coordinate(x1, y1);
-    seg = seg->sub_next;
+    seg = seg->subsector_next;
     if (!seg)
         return;
 
     while (seg)
     {
-        float x2 = seg->v1->X;
-        float y2 = seg->v1->Y;
+        float x2 = seg->vertex_1->X;
+        float y2 = seg->vertex_1->Y;
         MIR_Coordinate(x2, y2);
 
         glVertex3f(x0, y0, h);
@@ -777,21 +772,21 @@ void RGL_DrawSkyPlane(subsector_t *sub, float h)
 
         x1  = x2;
         y1  = y2;
-        seg = seg->sub_next;
+        seg = seg->subsector_next;
     }
 }
 
-void RGL_DrawSkyWall(seg_t *seg, float h1, float h2)
+void RGL_DrawSkyWall(Seg *seg, float h1, float h2)
 {
     need_to_draw_sky = true;
 
     if (r_dumbsky.d_)
         return;
 
-    float x1 = seg->v1->X;
-    float y1 = seg->v1->Y;
-    float x2 = seg->v2->X;
-    float y2 = seg->v2->Y;
+    float x1 = seg->vertex_1->X;
+    float y1 = seg->vertex_1->Y;
+    float x2 = seg->vertex_2->X;
+    float y2 = seg->vertex_2->Y;
 
     MIR_Coordinate(x1, y1);
     MIR_Coordinate(x2, y2);

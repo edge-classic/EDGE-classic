@@ -67,7 +67,7 @@ int blockmap_height = 0;  // size in mapblocks
 float blockmap_origin_x;
 float blockmap_origin_y;
 
-static std::list<line_t *> **blockmap_lines = nullptr;
+static std::list<Line *> **blockmap_lines = nullptr;
 
 // for thing chains
 MapObject **blockmap_things = nullptr;
@@ -146,11 +146,11 @@ int touchstat_free;
 
 // quick-alloc list
 // FIXME: incorporate into FlushCaches
-touch_node_t *free_touch_nodes;
+TouchNode *free_touch_nodes;
 
-static inline touch_node_t *TouchNodeAlloc(void)
+static inline TouchNode *TouchNodeAlloc(void)
 {
-    touch_node_t *tn;
+    TouchNode *tn;
 
 #ifdef DEVELOPERS
     touchstat_alloc++;
@@ -159,66 +159,66 @@ static inline touch_node_t *TouchNodeAlloc(void)
     if (free_touch_nodes)
     {
         tn               = free_touch_nodes;
-        free_touch_nodes = tn->mo_next;
+        free_touch_nodes = tn->map_object_next;
     }
-    else { tn = new touch_node_t; }
+    else { tn = new TouchNode; }
 
     return tn;
 }
 
-static inline void TouchNodeFree(touch_node_t *tn)
+static inline void TouchNodeFree(TouchNode *tn)
 {
 #ifdef DEVELOPERS
     touchstat_free++;
 #endif
 
     // PREV field is ignored in quick-alloc list
-    tn->mo_next      = free_touch_nodes;
+    tn->map_object_next      = free_touch_nodes;
     free_touch_nodes = tn;
 }
 
-static inline void TouchNodeLinkIntoSector(touch_node_t *tn, sector_t *sec)
+static inline void TouchNodeLinkIntoSector(TouchNode *tn, Sector *sec)
 {
-    tn->sec = sec;
+    tn->sector = sec;
 
-    tn->sec_next = sec->touch_things;
-    tn->sec_prev = nullptr;
+    tn->sector_next = sec->touch_things;
+    tn->sector_previous = nullptr;
 
-    if (tn->sec_next) tn->sec_next->sec_prev = tn;
+    if (tn->sector_next) tn->sector_next->sector_previous = tn;
 
     sec->touch_things = tn;
 }
 
-static inline void TouchNodeLinkIntoThing(touch_node_t *tn, MapObject *mo)
+static inline void TouchNodeLinkIntoThing(TouchNode *tn, MapObject *mo)
 {
-    tn->mo = mo;
+    tn->map_object = mo;
 
-    tn->mo_next = mo->touch_sectors_;
-    tn->mo_prev = nullptr;
+    tn->map_object_next = mo->touch_sectors_;
+    tn->map_object_previous = nullptr;
 
-    if (tn->mo_next) tn->mo_next->mo_prev = tn;
+    if (tn->map_object_next) tn->map_object_next->map_object_previous = tn;
 
     mo->touch_sectors_ = tn;
 }
 
-static inline void TouchNodeUnlinkFromSector(touch_node_t *tn)
+static inline void TouchNodeUnlinkFromSector(TouchNode *tn)
 {
-    if (tn->sec_next) tn->sec_next->sec_prev = tn->sec_prev;
+    if (tn->sector_next) tn->sector_next->sector_previous = tn->sector_previous;
 
-    if (tn->sec_prev)
-        tn->sec_prev->sec_next = tn->sec_next;
+    if (tn->sector_previous)
+        tn->sector_previous->sector_next = tn->sector_next;
     else
-        tn->sec->touch_things = tn->sec_next;
+        tn->sector->touch_things = tn->sector_next;
 }
 
-static inline void TouchNodeUnlinkFromThing(touch_node_t *tn)
+static inline void TouchNodeUnlinkFromThing(TouchNode *tn)
 {
-    if (tn->mo_next) tn->mo_next->mo_prev = tn->mo_prev;
+    if (tn->map_object_next) tn->map_object_next->map_object_previous = tn->map_object_previous;
 
-    if (tn->mo_prev)
-        tn->mo_prev->mo_next = tn->mo_next;
+    if (tn->map_object_previous)
+        tn->map_object_previous->map_object_next = tn->map_object_next;
     else
-        tn->mo->touch_sectors_ = tn->mo_next;
+        tn->map_object->touch_sectors_ = tn->map_object_next;
 }
 
 struct BspThingPosition
@@ -232,16 +232,16 @@ struct BspThingPosition
 //
 static void SetPositionBSP(BspThingPosition *info, int nodenum)
 {
-    touch_node_t *tn;
-    sector_t     *sec;
-    subsector_t  *sub;
-    seg_t        *seg;
+    TouchNode *tn;
+    Sector     *sec;
+    Subsector  *sub;
+    Seg        *seg;
 
     while (!(nodenum & NF_V5_SUBSECTOR))
     {
-        node_t *nd = level_nodes + nodenum;
+        BspNode *nd = level_nodes + nodenum;
 
-        int side = BoxOnDividingLineSide(info->bbox, &nd->div);
+        int side = BoxOnDividingLineSide(info->bbox, &nd->divider);
 
         // if box touches partition line, we must traverse both sides
         if (side == -1)
@@ -262,16 +262,16 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
 
     sub = level_subsectors + (nodenum & ~NF_V5_SUBSECTOR);
 
-    for (seg = sub->segs; seg; seg = seg->sub_next)
+    for (seg = sub->segs; seg; seg = seg->subsector_next)
     {
-        divline_t div;
+        DividingLine div;
 
         if (seg->miniseg) continue;
 
-        div.x  = seg->v1->X;
-        div.y  = seg->v1->Y;
-        div.dx = seg->v2->X - div.x;
-        div.dy = seg->v2->Y - div.y;
+        div.x  = seg->vertex_1->X;
+        div.y  = seg->vertex_1->Y;
+        div.delta_x = seg->vertex_2->X - div.x;
+        div.delta_y = seg->vertex_2->Y - div.y;
 
         if (BoxOnDividingLineSide(info->bbox, &div) == 1) return;
     }
@@ -284,14 +284,14 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
     touchstat_miss++;
 #endif
 
-    for (tn = info->thing->touch_sectors_; tn; tn = tn->mo_next)
+    for (tn = info->thing->touch_sectors_; tn; tn = tn->map_object_next)
     {
-        if (!tn->mo)
+        if (!tn->map_object)
         {
             // found unused touch node.  We reuse it.
-            tn->mo = info->thing;
+            tn->map_object = info->thing;
 
-            if (tn->sec != sec)
+            if (tn->sector != sec)
             {
                 TouchNodeUnlinkFromSector(tn);
                 TouchNodeLinkIntoSector(tn, sec);
@@ -307,10 +307,10 @@ static void SetPositionBSP(BspThingPosition *info, int nodenum)
             return;
         }
 
-        SYS_ASSERT(tn->mo == info->thing);
+        SYS_ASSERT(tn->map_object == info->thing);
 
         // sector already present ?
-        if (tn->sec == sec) return;
+        if (tn->sector == sec) return;
     }
 
     // need to allocate a new touch node
@@ -337,7 +337,7 @@ void UnsetThingPosition(MapObject *mo)
     int blocky;
     int bnum;
 
-    touch_node_t *tn;
+    TouchNode *tn;
 
     // unlink from subsector
     if (!(mo->flags_ & kMapObjectFlagNoSector))
@@ -366,11 +366,11 @@ void UnsetThingPosition(MapObject *mo)
         }
         else
         {
-            if (mo->subsector_->thinglist)
+            if (mo->subsector_->thing_list)
             {
-                SYS_ASSERT(mo->subsector_->thinglist == mo);
+                SYS_ASSERT(mo->subsector_->thing_list == mo);
 
-                mo->subsector_->thinglist = mo->subsector_next_;
+                mo->subsector_->thing_list = mo->subsector_next_;
             }
         }
 
@@ -381,7 +381,7 @@ void UnsetThingPosition(MapObject *mo)
     // unlink from touching list.
     // NOTE: lazy unlinking -- see notes in r_defs.h
     //
-    for (tn = mo->touch_sectors_; tn; tn = tn->mo_next) { tn->mo = nullptr; }
+    for (tn = mo->touch_sectors_; tn; tn = tn->map_object_next) { tn->map_object = nullptr; }
 
     // unlink from blockmap
     if (!(mo->flags_ & kMapObjectFlagNoBlockmap))
@@ -476,7 +476,7 @@ void UnsetThingPosition(MapObject *mo)
     if (mo->info_ && (mo->info_->dlight_[0].type_ != kDynamicLightTypeNone) &&
         (mo->info_->glow_type_ != kSectorGlowTypeNone))
     {
-        sector_t *sec = mo->subsector_->sector;
+        Sector *sec = mo->subsector_->sector;
 
         if (mo->dynamic_light_next_)
         {
@@ -523,7 +523,7 @@ void UnsetThingPosition(MapObject *mo)
 //
 void UnsetThingFinal(MapObject *mo)
 {
-    touch_node_t *tn;
+    TouchNode *tn;
 
     UnsetThingPosition(mo);
 
@@ -532,7 +532,7 @@ void UnsetThingFinal(MapObject *mo)
     while (mo->touch_sectors_)
     {
         tn                 = mo->touch_sectors_;
-        mo->touch_sectors_ = tn->mo_next;
+        mo->touch_sectors_ = tn->map_object_next;
 
         TouchNodeUnlinkFromSector(tn);
         TouchNodeFree(tn);
@@ -547,13 +547,13 @@ void UnsetThingFinal(MapObject *mo)
 //
 void SetThingPosition(MapObject *mo)
 {
-    subsector_t *ss;
+    Subsector *ss;
     int          blockx;
     int          blocky;
     int          bnum;
 
     BspThingPosition pos;
-    touch_node_t    *tn;
+    TouchNode    *tn;
 
     // -ES- 1999/12/04 The position must be unset before it's set again.
     if (mo->subsector_next_ || mo->subsector_previous_ || mo->blockmap_next_ ||
@@ -571,12 +571,12 @@ void SetThingPosition(MapObject *mo)
 
     if (!(mo->flags_ & kMapObjectFlagNoSector))
     {
-        mo->subsector_next_     = ss->thinglist;
+        mo->subsector_next_     = ss->thing_list;
         mo->subsector_previous_ = nullptr;
 
-        if (ss->thinglist) ss->thinglist->subsector_previous_ = mo;
+        if (ss->thing_list) ss->thing_list->subsector_previous_ = mo;
 
-        ss->thinglist = mo;
+        ss->thing_list = mo;
     }
 
     // link into touching list
@@ -595,23 +595,23 @@ void SetThingPosition(MapObject *mo)
 
     // handle any left-over unused touch nodes
 
-    for (tn = mo->touch_sectors_; tn && tn->mo; tn = tn->mo_next)
+    for (tn = mo->touch_sectors_; tn && tn->map_object; tn = tn->map_object_next)
     { /* nothing here */
     }
 
     if (tn)
     {
-        if (tn->mo_prev)
-            tn->mo_prev->mo_next = nullptr;
+        if (tn->map_object_previous)
+            tn->map_object_previous->map_object_next = nullptr;
         else
             mo->touch_sectors_ = nullptr;
 
         while (tn)
         {
-            touch_node_t *cur = tn;
-            tn                = tn->mo_next;
+            TouchNode *cur = tn;
+            tn                = tn->map_object_next;
 
-            SYS_ASSERT(!cur->mo);
+            SYS_ASSERT(!cur->map_object);
 
             TouchNodeUnlinkFromSector(cur);
             TouchNodeFree(cur);
@@ -694,7 +694,7 @@ void SetThingPosition(MapObject *mo)
     if (mo->info_ && (mo->info_->dlight_[0].type_ != kDynamicLightTypeNone) &&
         (mo->info_->glow_type_ != kSectorGlowTypeNone))
     {
-        sector_t *sec = mo->subsector_->sector;
+        Sector *sec = mo->subsector_->sector;
 
         mo->dynamic_light_previous_ = nullptr;
         mo->dynamic_light_next_     = sec->glow_things;
@@ -727,11 +727,11 @@ void ChangeThingPosition(MapObject *mo, float x, float y, float z)
 //
 // FreeSectorTouchNodes
 //
-void FreeSectorTouchNodes(sector_t *sec)
+void FreeSectorTouchNodes(Sector *sec)
 {
-    touch_node_t *tn;
+    TouchNode *tn;
 
-    for (tn = sec->touch_things; tn; tn = tn->sec_next) TouchNodeFree(tn);
+    for (tn = sec->touch_things; tn; tn = tn->sector_next) TouchNodeFree(tn);
 }
 
 //--------------------------------------------------------------------------
@@ -747,16 +747,16 @@ void FreeSectorTouchNodes(sector_t *sec)
 //
 // BlockmapLineIterator
 //
-// The validcount flags are used to avoid checking lines
+// The valid_count flags are used to avoid checking lines
 // that are marked in multiple mapblocks,
-// so increment validcount before the first call
+// so increment valid_count before the first call
 // to BlockmapLineIterator, then make one or more calls
 // to it.
 //
 bool BlockmapLineIterator(float x1, float y1, float x2, float y2,
-                          bool (*func)(line_t *, void *), void *data)
+                          bool (*func)(Line *, void *), void *data)
 {
-    validcount++;
+    valid_count++;
 
     int lx = BlockmapGetX(x1);
     int ly = BlockmapGetY(y1);
@@ -771,26 +771,26 @@ bool BlockmapLineIterator(float x1, float y1, float x2, float y2,
     for (int by = ly; by <= hy; by++)
         for (int bx = lx; bx <= hx; bx++)
         {
-            std::list<line_t *> *lset =
+            std::list<Line *> *lset =
                 blockmap_lines[by * blockmap_width + bx];
 
             if (!lset) continue;
 
-            std::list<line_t *>::iterator LI;
+            std::list<Line *>::iterator LI;
             for (LI = lset->begin(); LI != lset->end(); LI++)
             {
-                line_t *ld = *LI;
+                Line *ld = *LI;
 
                 // has line already been checked ?
-                if (ld->validcount == validcount) continue;
+                if (ld->valid_count == valid_count) continue;
 
-                ld->validcount = validcount;
+                ld->valid_count = valid_count;
 
                 // check whether line touches the given bbox
-                if (ld->bbox[kBoundingBoxRight] <= x1 ||
-                    ld->bbox[kBoundingBoxLeft] >= x2 ||
-                    ld->bbox[kBoundingBoxTop] <= y1 ||
-                    ld->bbox[kBoundingBoxBottom] >= y2)
+                if (ld->bounding_box[kBoundingBoxRight] <= x1 ||
+                    ld->bounding_box[kBoundingBoxLeft] >= x2 ||
+                    ld->bounding_box[kBoundingBoxTop] <= y1 ||
+                    ld->bounding_box[kBoundingBoxBottom] >= y2)
                 {
                     continue;
                 }
@@ -900,7 +900,7 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
         }
 }
 
-void SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
+void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2,
                         float y2, float z2, void (*func)(MapObject *, void *),
                         void *data)
 {
@@ -921,11 +921,11 @@ void SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
         // check whether radius touches the given bbox
         float r = mo->dynamic_light_.r;
 
-        if (mo->info_->glow_type_ == kSectorGlowTypeFloor && sec->f_h + r <= z1)
+        if (mo->info_->glow_type_ == kSectorGlowTypeFloor && sec->floor_height + r <= z1)
             continue;
 
         if (mo->info_->glow_type_ == kSectorGlowTypeCeiling &&
-            sec->c_h - r >= z1)
+            sec->ceiling_height - r >= z1)
             continue;
 
         // create shader if necessary
@@ -939,7 +939,7 @@ void SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
                 {
                     // Use first line that the dlight mobj touches
                     // Ideally it is only touching one line
-                    for (int i = 0; i < sec->linecount; i++)
+                    for (int i = 0; i < sec->line_count; i++)
                     {
                         if (ThingOnLineSide(mo, sec->lines[i]) == -1)
                         {
@@ -977,23 +977,23 @@ void SectorGlowIterator(sector_t *sec, float x1, float y1, float z1, float x2,
 
 static std::vector<PathIntercept> intercepts;
 
-divline_t trace;
+DividingLine trace;
 
-float PathInterceptVector(divline_t *v2, divline_t *v1)
+float PathInterceptVector(DividingLine *v2, DividingLine *v1)
 {
     // Returns the fractional intercept point along the first divline.
     // This is only called by the addthings and addlines traversers.
 
-    float den = (v1->dy * v2->dx) - (v1->dx * v2->dy);
+    float den = (v1->delta_y * v2->delta_x) - (v1->delta_x * v2->delta_y);
 
     if (AlmostEquals(den, 0.0f)) return 0;  // parallel
 
-    float num = (v1->x - v2->x) * v1->dy + (v2->y - v1->y) * v1->dx;
+    float num = (v1->x - v2->x) * v1->delta_y + (v2->y - v1->y) * v1->delta_x;
 
     return num / den;
 }
 
-static inline void PIT_AddLineIntercept(line_t *ld)
+static inline void PIT_AddLineIntercept(Line *ld)
 {
     // Looks for lines in the given block
     // that intercept the given trace
@@ -1004,30 +1004,30 @@ static inline void PIT_AddLineIntercept(line_t *ld)
     // Returns true if earlyout and a solid line hit.
 
     // has line already been checked ?
-    if (ld->validcount == validcount) return;
+    if (ld->valid_count == valid_count) return;
 
-    ld->validcount = validcount;
+    ld->valid_count = valid_count;
 
     int       s1;
     int       s2;
     float     along;
-    divline_t div;
+    DividingLine div;
 
-    div.x  = ld->v1->X;
-    div.y  = ld->v1->Y;
-    div.dx = ld->dx;
-    div.dy = ld->dy;
+    div.x  = ld->vertex_1->X;
+    div.y  = ld->vertex_1->Y;
+    div.delta_x = ld->delta_x;
+    div.delta_y = ld->delta_y;
 
     // avoid precision problems with two routines
-    if (trace.dx > 16 || trace.dy > 16 || trace.dx < -16 || trace.dy < -16)
+    if (trace.delta_x > 16 || trace.delta_y > 16 || trace.delta_x < -16 || trace.delta_y < -16)
     {
-        s1 = PointOnDividingLineSide(ld->v1->X, ld->v1->Y, &trace);
-        s2 = PointOnDividingLineSide(ld->v2->X, ld->v2->Y, &trace);
+        s1 = PointOnDividingLineSide(ld->vertex_1->X, ld->vertex_1->Y, &trace);
+        s2 = PointOnDividingLineSide(ld->vertex_2->X, ld->vertex_2->Y, &trace);
     }
     else
     {
         s1 = PointOnDividingLineSide(trace.x, trace.y, &div);
-        s2 = PointOnDividingLineSide(trace.x + trace.dx, trace.y + trace.dy,
+        s2 = PointOnDividingLineSide(trace.x + trace.delta_x, trace.y + trace.delta_y,
                                      &div);
     }
 
@@ -1064,11 +1064,11 @@ static inline void PIT_AddThingIntercept(MapObject *thing)
 
     bool tracepositive;
 
-    divline_t div;
+    DividingLine div;
 
     float along;
 
-    tracepositive = (trace.dx >= 0) == (trace.dy >= 0);
+    tracepositive = (trace.delta_x >= 0) == (trace.delta_y >= 0);
 
     // check a corner to corner crossection for hit
     if (tracepositive)
@@ -1096,8 +1096,8 @@ static inline void PIT_AddThingIntercept(MapObject *thing)
 
     div.x  = x1;
     div.y  = y1;
-    div.dx = x2 - x1;
-    div.dy = y2 - y1;
+    div.delta_x = x2 - x1;
+    div.delta_y = y2 - y1;
 
     along = PathInterceptVector(&trace, &div);
 
@@ -1134,7 +1134,7 @@ struct Compare_Intercept_pred
 bool PathTraverse(float x1, float y1, float x2, float y2, int flags,
                   bool (*func)(PathIntercept *, void *), void *data)
 {
-    validcount++;
+    valid_count++;
 
     intercepts.clear();
 
@@ -1147,8 +1147,8 @@ bool PathTraverse(float x1, float y1, float x2, float y2, int flags,
 
     trace.x  = x1;
     trace.y  = y1;
-    trace.dx = x2 - x1;
-    trace.dy = y2 - y1;
+    trace.delta_x = x2 - x1;
+    trace.delta_y = y2 - y1;
 
     x1 -= blockmap_origin_x;
     y1 -= blockmap_origin_y;
@@ -1228,12 +1228,12 @@ bool PathTraverse(float x1, float y1, float x2, float y2, int flags,
         {
             if (flags & kPathAddLines)
             {
-                std::list<line_t *> *lset =
+                std::list<Line *> *lset =
                     blockmap_lines[by * blockmap_width + bx];
 
                 if (lset)
                 {
-                    std::list<line_t *>::iterator LI;
+                    std::list<Line *>::iterator LI;
                     for (LI = lset->begin(); LI != lset->end(); LI++)
                     {
                         PIT_AddLineIntercept(*LI);
@@ -1291,9 +1291,9 @@ bool PathTraverse(float x1, float y1, float x2, float y2, int flags,
 //  BLOCKMAP GENERATION
 //
 
-static void BlockAdd(int bnum, line_t *ld)
+static void BlockAdd(int bnum, Line *ld)
 {
-    if (!blockmap_lines[bnum]) blockmap_lines[bnum] = new std::list<line_t *>;
+    if (!blockmap_lines[bnum]) blockmap_lines[bnum] = new std::list<Line *>;
 
     blockmap_lines[bnum]->push_back(ld);
 
@@ -1306,7 +1306,7 @@ static void BlockAddLine(int line_num)
     int x0, y0;
     int x1, y1;
 
-    line_t *ld = level_lines + line_num;
+    Line *ld = level_lines + line_num;
 
     int blocknum;
 
@@ -1315,10 +1315,10 @@ static void BlockAddLine(int line_num)
 
     float slope;
 
-    x0 = (int)(ld->v1->X - blockmap_origin_x);
-    y0 = (int)(ld->v1->Y - blockmap_origin_y);
-    x1 = (int)(ld->v2->X - blockmap_origin_x);
-    y1 = (int)(ld->v2->Y - blockmap_origin_y);
+    x0 = (int)(ld->vertex_1->X - blockmap_origin_x);
+    y0 = (int)(ld->vertex_1->Y - blockmap_origin_y);
+    x1 = (int)(ld->vertex_2->X - blockmap_origin_x);
+    y1 = (int)(ld->vertex_2->Y - blockmap_origin_y);
 
     // swap endpoints if horizontally backward
     if (x1 < x0)
@@ -1411,9 +1411,9 @@ void GenerateBlockmap(int min_x, int min_y, int max_x, int max_y)
     // setup blk_cur_lines array.  Initially all pointers are nullptr, when
     // any lines get added then the dynamic array is created.
 
-    blockmap_lines = new std::list<line_t *> *[btotal];
+    blockmap_lines = new std::list<Line *> *[btotal];
 
-    Z_Clear(blockmap_lines, std::list<line_t *> *, btotal);
+    Z_Clear(blockmap_lines, std::list<Line *> *, btotal);
 
     // process each linedef of the map
     for (int i = 0; i < total_level_lines; i++) BlockAddLine(i);

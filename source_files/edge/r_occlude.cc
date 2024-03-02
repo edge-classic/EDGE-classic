@@ -32,7 +32,7 @@ typedef struct angle_range_s
     struct angle_range_s *prev;
 } angle_range_t;
 
-static angle_range_t *occbuf_head = nullptr;
+static angle_range_t *occbufloor_heightead = nullptr;
 static angle_range_t *occbuf_tail = nullptr;
 
 static angle_range_t *free_range_chickens = nullptr;
@@ -40,13 +40,13 @@ static angle_range_t *free_range_chickens = nullptr;
 #ifdef DEBUG_OCC
 static void ValidateBuffer(void)
 {
-    if (!occbuf_head)
+    if (!occbufloor_heightead)
     {
         SYS_ASSERT(!occbuf_tail);
         return;
     }
 
-    for (angle_range_t *AR = occbuf_head; AR; AR = AR->next)
+    for (angle_range_t *AR = occbufloor_heightead; AR; AR = AR->next)
     {
         SYS_ASSERT(AR->low <= AR->high);
 
@@ -66,7 +66,7 @@ static void ValidateBuffer(void)
         }
         else
         {
-            SYS_ASSERT(AR == occbuf_head);
+            SYS_ASSERT(AR == occbufloor_heightead);
         }
     }
 }
@@ -77,13 +77,13 @@ void RGL_1DOcclusionClear(void)
     // Clear all angles in the whole buffer
     // )i.e. mark them as open / non-blocking).
 
-    if (occbuf_head)
+    if (occbufloor_heightead)
     {
         occbuf_tail->next = free_range_chickens;
 
-        free_range_chickens = occbuf_head;
+        free_range_chickens = occbufloor_heightead;
 
-        occbuf_head = nullptr;
+        occbufloor_heightead = nullptr;
         occbuf_tail = nullptr;
     }
 
@@ -124,7 +124,7 @@ static inline void LinkBefore(angle_range_t *X, angle_range_t *N)
     if (N->prev)
         N->prev->next = N;
     else
-        occbuf_head = N;
+        occbufloor_heightead = N;
 }
 
 static inline void LinkInTail(angle_range_t *N)
@@ -135,7 +135,7 @@ static inline void LinkInTail(angle_range_t *N)
     if (occbuf_tail)
         occbuf_tail->next = N;
     else
-        occbuf_head = N;
+        occbufloor_heightead = N;
 
     occbuf_tail = N;
 }
@@ -150,7 +150,7 @@ static inline void RemoveRange(angle_range_t *R)
     if (R->prev)
         R->prev->next = R->next;
     else
-        occbuf_head = R->next;
+        occbufloor_heightead = R->next;
 
     // add it to the quick-alloc list
     R->next = free_range_chickens;
@@ -161,7 +161,7 @@ static inline void RemoveRange(angle_range_t *R)
 
 static void DoSet(BAMAngle low, BAMAngle high)
 {
-    for (angle_range_t *AR = occbuf_head; AR; AR = AR->next)
+    for (angle_range_t *AR = occbufloor_heightead; AR; AR = AR->next)
     {
         if (high < AR->low)
         {
@@ -227,7 +227,7 @@ void RGL_1DOcclusionSet(BAMAngle low, BAMAngle high)
 
 static inline bool DoTest(BAMAngle low, BAMAngle high)
 {
-    for (angle_range_t *AR = occbuf_head; AR; AR = AR->next)
+    for (angle_range_t *AR = occbufloor_heightead; AR; AR = AR->next)
     {
         if (AR->low <= low && high <= AR->high)
             return true;

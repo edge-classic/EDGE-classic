@@ -129,7 +129,7 @@ typedef struct drawthing_s
     float tx, tz;
 
     // colourmap/lighting
-    region_properties_t *props;
+    RegionProperties *props;
 
     // world offsets for GL
     float left_dx, left_dy;
@@ -166,14 +166,14 @@ class drawfloor_t
     drawfloor_t *next_R, *prev_R;
 
     // heights for this floor
-    float f_h, c_h, top_h;
+    float floor_height, ceiling_height, top_h;
 
-    surface_t *floor, *ceil;
+    MapSurface *floor, *ceil;
 
-    extrafloor_t *ef;
+    Extrafloor *ef;
 
     // properties used herein
-    region_properties_t *props;
+    RegionProperties *props;
 
     // list of things
     // (not sorted until R2_DrawFloor is called).
@@ -194,7 +194,7 @@ class drawfloor_t
 class drawmirror_c
 {
   public:
-    seg_t *seg;
+    Seg *seg;
 
     BAMAngle left, right;
 
@@ -211,7 +211,7 @@ class drawmirror_c
     { /* FIXME !!!! */
     }
 
-    void Clear(seg_t *ss)
+    void Clear(Seg *ss)
     {
         seg = ss;
 
@@ -222,13 +222,13 @@ class drawmirror_c
 class drawseg_c // HOPEFULLY this can go away
 {
   public:
-    seg_t *seg;
+    Seg *seg;
 };
 
 class drawsub_c
 {
   public:
-    subsector_t *sub;
+    Subsector *sub;
 
     // floors, sorted in height order (lowest to highest).
     std::vector<drawfloor_t *> floors;
@@ -252,7 +252,7 @@ class drawsub_c
     { /* !!!! FIXME */
     }
 
-    void Clear(subsector_t *ss)
+    void Clear(Subsector *ss)
     {
         sub      = ss;
         visible  = false;

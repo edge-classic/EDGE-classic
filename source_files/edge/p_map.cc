@@ -89,7 +89,7 @@ struct MoveAttempt
 
     // --- output ---
 
-    subsector_t *subsector;
+    Subsector *subsector;
 
     // vertical space over all contacted lines
     float floor_z, ceiling_z;
@@ -105,14 +105,14 @@ struct MoveAttempt
     // to move most of the checks from TryMove into CheckRelLine.  It
     // definitely needs a lot of consideration.
 
-    line_t *line_which;
+    Line *line_which;
     int     line_count;
 };
 
 static MoveAttempt move_check;
 
 bool    map_object_hit_sky;
-line_t *block_line;
+Line *block_line;
 
 // If "float_ok" true, move would be ok if at float_destination_z.
 bool  float_ok;
@@ -148,14 +148,14 @@ static ShootAttempt shoot_check;
 static ShootAttempt aim_check;
 
 // convenience function
-static inline int PointOnLineSide(float x, float y, line_t *ld)
+static inline int PointOnLineSide(float x, float y, Line *ld)
 {
-    divline_t div;
+    DividingLine div;
 
-    div.x  = ld->v1->X;
-    div.y  = ld->v1->Y;
-    div.dx = ld->dx;
-    div.dy = ld->dy;
+    div.x  = ld->vertex_1->X;
+    div.y  = ld->vertex_1->Y;
+    div.delta_x = ld->delta_x;
+    div.delta_y = ld->delta_y;
 
     return PointOnDividingLineSide(x, y, &div);
 }
@@ -254,7 +254,7 @@ bool TeleportMove(MapObject *thing, float x, float y, float z)
 // ABSOLUTE POSITION CLIPPING
 //
 
-static bool CheckAbsoluteLineCallback(line_t *ld, void *data)
+static bool CheckAbsoluteLineCallback(Line *ld, void *data)
 {
     if (BoxOnLineSide(move_check.bounding_box, ld) != -1) return true;
 
@@ -265,7 +265,7 @@ static bool CheckAbsoluteLineCallback(line_t *ld, void *data)
         (ld->special->portal_effect_ & kPortalEffectTypeStandard))
         return true;
 
-    if (!ld->backsector || ld->gap_num == 0) return false;  // one sided line
+    if (!ld->back_sector || ld->gap_number == 0) return false;  // one sided line
 
     if (move_check.extended_flags & kExtendedFlagCrossBlockingLines)
     {
@@ -306,19 +306,19 @@ static bool CheckAbsoluteLineCallback(line_t *ld, void *data)
     }
 
     // does the thing fit in one of the line gaps ?
-    for (int i = 0; i < ld->gap_num; i++)
+    for (int i = 0; i < ld->gap_number; i++)
     {
         // -AJA- FIXME: this ONFLOORZ stuff is a DIRTY HACK!
         if (AlmostEquals(move_check.z, ONFLOORZ) ||
             AlmostEquals(move_check.z, ONCEILINGZ))
         {
-            if (move_check.mover->height_ <= (ld->gaps[i].c - ld->gaps[i].f))
+            if (move_check.mover->height_ <= (ld->gaps[i].ceiling - ld->gaps[i].floor))
                 return true;
         }
         else
         {
-            if (ld->gaps[i].f <= move_check.z &&
-                move_check.z + move_check.mover->height_ <= ld->gaps[i].c)
+            if (ld->gaps[i].floor <= move_check.z &&
+                move_check.z + move_check.mover->height_ <= ld->gaps[i].ceiling)
                 return true;
         }
     }
@@ -446,7 +446,7 @@ bool CheckAbsolutePosition(MapObject *thing, float x, float y, float z)
 // RELATIVE MOVEMENT CLIPPING
 //
 
-static bool CheckRelativeLineCallback(line_t *ld, void *data)
+static bool CheckRelativeLineCallback(Line *ld, void *data)
 {
     // Adjusts move_check.floor_z & move_check.ceiling_z as lines are contacted
 
@@ -466,7 +466,7 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
         (ld->special->portal_effect_ & kPortalEffectTypeStandard))
         return true;
 
-    if (!ld->backsector)
+    if (!ld->back_sector)
     {
         block_line = ld;
 
@@ -508,12 +508,12 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
 
     // -AJA- for players, disable stepping up onto a lowering sector
     if (move_check.mover->player_ &&
-        !AlmostEquals(ld->frontsector->f_h, ld->backsector->f_h))
+        !AlmostEquals(ld->front_sector->floor_height, ld->back_sector->floor_height))
     {
-        if ((move_check.mover->z < ld->frontsector->f_h &&
-             SectorIsLowering(ld->frontsector)) ||
-            (move_check.mover->z < ld->backsector->f_h &&
-             SectorIsLowering(ld->backsector)))
+        if ((move_check.mover->z < ld->front_sector->floor_height &&
+             SectorIsLowering(ld->front_sector)) ||
+            (move_check.mover->z < ld->back_sector->floor_height &&
+             SectorIsLowering(ld->back_sector)))
         {
             block_line = ld;
             return false;
@@ -527,7 +527,7 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
         float z1, z2;
         float pz1, pz2;
 
-        z1 = ld->frontsector->f_h + ld->side[0]->middle.offset.Y;
+        z1 = ld->front_sector->floor_height + ld->side[0]->middle.offset.Y;
         z2 = z1 + ld->special->ladder_.height_;
 
         pz1 = move_check.mover->z;
@@ -551,19 +551,19 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
         float f1, c1;
         float f2, c2;
 
-        f1 = ld->frontsector->f_h;
-        c1 = ld->frontsector->c_h;
-        f2 = ld->backsector->f_h;
-        c2 = ld->backsector->c_h;
+        f1 = ld->front_sector->floor_height;
+        c1 = ld->front_sector->ceiling_height;
+        f2 = ld->back_sector->floor_height;
+        c2 = ld->back_sector->ceiling_height;
 
-        if (!AlmostEquals(c1, c2) && IS_SKY(ld->frontsector->ceil) &&
-            IS_SKY(ld->backsector->ceil) && move_check.z > HMM_MIN(c1, c2))
+        if (!AlmostEquals(c1, c2) && IS_SKY(ld->front_sector->ceiling) &&
+            IS_SKY(ld->back_sector->ceiling) && move_check.z > HMM_MIN(c1, c2))
         {
             map_object_hit_sky = true;
         }
 
-        if (!AlmostEquals(f1, f2) && IS_SKY(ld->frontsector->floor) &&
-            IS_SKY(ld->backsector->floor) &&
+        if (!AlmostEquals(f1, f2) && IS_SKY(ld->front_sector->floor) &&
+            IS_SKY(ld->back_sector->floor) &&
             move_check.z + move_check.mover->height_ < HMM_MAX(f1, f2))
         {
             map_object_hit_sky = true;
@@ -573,14 +573,14 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
     // Only basic vertex slope checks will work here (simple rectangular slope
     // sides), but more detailed movement checks are made later on so it
     // shouldn't allow anything crazy - Dasho
-    if (ld->frontsector->floor_vertex_slope ||
-        ld->backsector->floor_vertex_slope)
+    if (ld->front_sector->floor_vertex_slope ||
+        ld->back_sector->floor_vertex_slope)
     {
-        divline_t divver;
-        divver.x  = ld->v1->X;
-        divver.y  = ld->v1->Y;
-        divver.dx = ld->dx;
-        divver.dy = ld->dy;
+        DividingLine divver;
+        divver.x  = ld->vertex_1->X;
+        divver.y  = ld->vertex_1->Y;
+        divver.delta_x = ld->delta_x;
+        divver.delta_y = ld->delta_y;
         float iz  = 0;
         // Prevent player from getting stuck if actually on linedef and moving
         // parallel to it
@@ -588,10 +588,10 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
                                      &divver, ld->length,
                                      move_check.mover->radius_) == 2)
             return true;
-        if (ld->frontsector->floor_vertex_slope &&
-            ld->frontsector->linecount == 4 &&
+        if (ld->front_sector->floor_vertex_slope &&
+            ld->front_sector->line_count == 4 &&
             R_PointInSubsector(move_check.mover->x, move_check.mover->y)
-                    ->sector != ld->frontsector)
+                    ->sector != ld->front_sector)
         {
             float ix = 0;
             float iy = 0;
@@ -602,8 +602,8 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
             {
                 iz = MathLinePlaneIntersection(
                          {{ix, iy, -40000}}, {{ix, iy, 40000}},
-                         ld->frontsector->floor_z_verts[2],
-                         ld->frontsector->floor_vs_normal)
+                         ld->front_sector->floor_z_vertices[2],
+                         ld->front_sector->floor_vertex_slope_normal)
                          .Z;
                 if (isfinite(iz) &&
                     iz > move_check.mover->z +
@@ -614,10 +614,10 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
                 }
             }
         }
-        else if (ld->backsector->floor_vertex_slope &&
-                 ld->backsector->linecount == 4 &&
+        else if (ld->back_sector->floor_vertex_slope &&
+                 ld->back_sector->line_count == 4 &&
                  R_PointInSubsector(move_check.mover->x, move_check.mover->y)
-                         ->sector != ld->backsector)
+                         ->sector != ld->back_sector)
         {
             float ix = 0;
             float iy = 0;
@@ -628,8 +628,8 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
             {
                 iz = MathLinePlaneIntersection({{ix, iy, -40000}},
                                                {{ix, iy, 40000}},
-                                               ld->backsector->floor_z_verts[2],
-                                               ld->backsector->floor_vs_normal)
+                                               ld->back_sector->floor_z_vertices[2],
+                                               ld->back_sector->floor_vertex_slope_normal)
                          .Z;
                 if (isfinite(iz) &&
                     iz > move_check.mover->z +
@@ -640,14 +640,14 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
                 }
             }
         }
-        else if (ld->frontsector->floor_vertex_slope &&
-                 ld->frontsector->linecount == 4 &&
+        else if (ld->front_sector->floor_vertex_slope &&
+                 ld->front_sector->line_count == 4 &&
                  R_PointInSubsector(move_check.mover->x, move_check.mover->y)
-                         ->sector == ld->frontsector)
+                         ->sector == ld->front_sector)
         {
-            if (!ld->backsector->floor_vertex_slope)
+            if (!ld->back_sector->floor_vertex_slope)
             {
-                iz = ld->backsector->f_h;
+                iz = ld->back_sector->floor_height;
                 if (move_check.mover->z + move_check.mover->info_->step_size_ <
                     iz)
                 {
@@ -666,8 +666,8 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
                 {
                     iz = MathLinePlaneIntersection(
                              {{ix, iy, -40000}}, {{ix, iy, 40000}},
-                             ld->backsector->floor_z_verts[2],
-                             ld->backsector->floor_vs_normal)
+                             ld->back_sector->floor_z_vertices[2],
+                             ld->back_sector->floor_vertex_slope_normal)
                              .Z;
                     if (isfinite(iz) &&
                         iz > move_check.mover->z +
@@ -679,14 +679,14 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
                 }
             }
         }
-        else if (ld->backsector->floor_vertex_slope &&
-                 ld->backsector->linecount == 4 &&
+        else if (ld->back_sector->floor_vertex_slope &&
+                 ld->back_sector->line_count == 4 &&
                  R_PointInSubsector(move_check.mover->x, move_check.mover->y)
-                         ->sector == ld->backsector)
+                         ->sector == ld->back_sector)
         {
-            if (!ld->frontsector->floor_vertex_slope)
+            if (!ld->front_sector->floor_vertex_slope)
             {
-                iz = ld->frontsector->f_h;
+                iz = ld->front_sector->floor_height;
                 if (move_check.mover->z + move_check.mover->info_->step_size_ <
                     iz)
                 {
@@ -705,8 +705,8 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
                 {
                     iz = MathLinePlaneIntersection(
                              {{ix, iy, -40000}}, {{ix, iy, 40000}},
-                             ld->frontsector->floor_z_verts[2],
-                             ld->frontsector->floor_vs_normal)
+                             ld->front_sector->floor_z_vertices[2],
+                             ld->front_sector->floor_vertex_slope_normal)
                              .Z;
                     if (isfinite(iz) &&
                         iz > move_check.mover->z +
@@ -718,10 +718,10 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
                 }
             }
         }
-        if (ld->frontsector->ceil_vertex_slope &&
-            ld->frontsector->linecount == 4 &&
+        if (ld->front_sector->ceiling_vertex_slope &&
+            ld->front_sector->line_count == 4 &&
             R_PointInSubsector(move_check.mover->x, move_check.mover->y)
-                    ->sector != ld->frontsector)
+                    ->sector != ld->front_sector)
         {
             float ix = 0;
             float iy = 0;
@@ -732,8 +732,8 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
             {
                 float icz = MathLinePlaneIntersection(
                                 {{ix, iy, -40000}}, {{ix, iy, 40000}},
-                                ld->frontsector->ceil_z_verts[2],
-                                ld->frontsector->ceil_vs_normal)
+                                ld->front_sector->ceiling_z_vertices[2],
+                                ld->front_sector->ceiling_vertex_slope_normal)
                                 .Z;
                 if (isfinite(icz) && icz <= iz + move_check.mover->height_)
                 {
@@ -742,10 +742,10 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
                 }
             }
         }
-        else if (ld->backsector->ceil_vertex_slope &&
-                 ld->backsector->linecount == 4 &&
+        else if (ld->back_sector->ceiling_vertex_slope &&
+                 ld->back_sector->line_count == 4 &&
                  R_PointInSubsector(move_check.mover->x, move_check.mover->y)
-                         ->sector != ld->backsector)
+                         ->sector != ld->back_sector)
         {
             float ix = 0;
             float iy = 0;
@@ -756,8 +756,8 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
             {
                 float icz = MathLinePlaneIntersection(
                                 {{ix, iy, -40000}}, {{ix, iy, 40000}},
-                                ld->backsector->ceil_z_verts[2],
-                                ld->backsector->ceil_vs_normal)
+                                ld->back_sector->ceiling_z_vertices[2],
+                                ld->back_sector->ceiling_vertex_slope_normal)
                                 .Z;
                 if (isfinite(icz) && icz <= iz + move_check.mover->height_)
                 {
@@ -766,14 +766,14 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
                 }
             }
         }
-        else if (ld->frontsector->ceil_vertex_slope &&
-                 ld->frontsector->linecount == 4 &&
+        else if (ld->front_sector->ceiling_vertex_slope &&
+                 ld->front_sector->line_count == 4 &&
                  R_PointInSubsector(move_check.mover->x, move_check.mover->y)
-                         ->sector == ld->frontsector)
+                         ->sector == ld->front_sector)
         {
-            if (!ld->backsector->ceil_vertex_slope)
+            if (!ld->back_sector->ceiling_vertex_slope)
             {
-                if (iz + move_check.mover->height_ >= ld->backsector->c_h)
+                if (iz + move_check.mover->height_ >= ld->back_sector->ceiling_height)
                 {
                     block_line = ld;
                     return false;
@@ -790,8 +790,8 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
                 {
                     float icz = MathLinePlaneIntersection(
                                     {{ix, iy, -40000}}, {{ix, iy, 40000}},
-                                    ld->backsector->ceil_z_verts[2],
-                                    ld->backsector->ceil_vs_normal)
+                                    ld->back_sector->ceiling_z_vertices[2],
+                                    ld->back_sector->ceiling_vertex_slope_normal)
                                     .Z;
                     if (isfinite(icz) && icz <= iz + move_check.mover->height_)
                     {
@@ -801,14 +801,14 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
                 }
             }
         }
-        else if (ld->backsector->ceil_vertex_slope &&
-                 ld->backsector->linecount == 4 &&
+        else if (ld->back_sector->ceiling_vertex_slope &&
+                 ld->back_sector->line_count == 4 &&
                  R_PointInSubsector(move_check.mover->x, move_check.mover->y)
-                         ->sector == ld->backsector)
+                         ->sector == ld->back_sector)
         {
-            if (!ld->frontsector->ceil_vertex_slope)
+            if (!ld->front_sector->ceiling_vertex_slope)
             {
-                if (iz + move_check.mover->height_ >= ld->frontsector->c_h)
+                if (iz + move_check.mover->height_ >= ld->front_sector->ceiling_height)
                 {
                     block_line = ld;
                     return false;
@@ -825,8 +825,8 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
                 {
                     float icz = MathLinePlaneIntersection(
                                     {{ix, iy, -40000}}, {{ix, iy, 40000}},
-                                    ld->frontsector->ceil_z_verts[2],
-                                    ld->frontsector->ceil_vs_normal)
+                                    ld->front_sector->ceiling_z_vertices[2],
+                                    ld->front_sector->ceiling_vertex_slope_normal)
                                     .Z;
                     if (isfinite(icz) && icz <= iz + move_check.mover->height_)
                     {
@@ -845,25 +845,25 @@ static bool CheckRelativeLineCallback(line_t *ld, void *data)
     // be multiple gaps and we must choose one here, based on the thing's
     // current position (esp. Z).
 
-    int i = FindThingGap(ld->gaps, ld->gap_num, move_check.z,
+    int i = FindThingGap(ld->gaps, ld->gap_number, move_check.z,
                          move_check.z + move_check.mover->height_);
 
     // gap has been chosen. apply it.
 
     if (i >= 0)
     {
-        if (ld->gaps[i].f >= move_check.floor_z &&
+        if (ld->gaps[i].floor >= move_check.floor_z &&
             !move_check.subsector->sector->floor_vertex_slope)
         {
-            move_check.floor_z = ld->gaps[i].f;
+            move_check.floor_z = ld->gaps[i].floor;
             move_check.below   = nullptr;
         }
 
-        if (ld->gaps[i].c < move_check.ceiling_z)
-            move_check.ceiling_z = ld->gaps[i].c;
+        if (ld->gaps[i].ceiling < move_check.ceiling_z)
+            move_check.ceiling_z = ld->gaps[i].ceiling;
 
-        if (ld->gaps[i].f < move_check.dropoff)
-            move_check.dropoff = ld->gaps[i].f;
+        if (ld->gaps[i].floor < move_check.dropoff)
+            move_check.dropoff = ld->gaps[i].floor;
     }
     else { move_check.ceiling_z = move_check.floor_z; }
 
@@ -1067,26 +1067,26 @@ static bool CheckRelativePosition(MapObject *thing, float x, float y)
         HMM_Vec3 line_b{{move_check.x, move_check.y, 40000}};
         float    z_test =
             MathLinePlaneIntersection(
-                line_a, line_b, move_check.subsector->sector->floor_z_verts[2],
-                move_check.subsector->sector->floor_vs_normal)
+                line_a, line_b, move_check.subsector->sector->floor_z_vertices[2],
+                move_check.subsector->sector->floor_vertex_slope_normal)
                 .Z;
         if (isfinite(z_test))
             move_check.floor_slope_z =
-                z_test - move_check.subsector->sector->f_h;
+                z_test - move_check.subsector->sector->floor_height;
     }
 
-    if (move_check.subsector->sector->ceil_vertex_slope)
+    if (move_check.subsector->sector->ceiling_vertex_slope)
     {
         HMM_Vec3 line_a{{move_check.x, move_check.y, -40000}};
         HMM_Vec3 line_b{{move_check.x, move_check.y, 40000}};
         float    z_test =
             MathLinePlaneIntersection(
-                line_a, line_b, move_check.subsector->sector->ceil_z_verts[2],
-                move_check.subsector->sector->ceil_vs_normal)
+                line_a, line_b, move_check.subsector->sector->ceiling_z_vertices[2],
+                move_check.subsector->sector->ceiling_vertex_slope_normal)
                 .Z;
         if (isfinite(z_test))
             move_check.ceiling_slope_z =
-                move_check.subsector->sector->c_h - z_test;
+                move_check.subsector->sector->ceiling_height - z_test;
     }
 
     float r = move_check.mover->radius_;
@@ -1144,7 +1144,7 @@ bool TryMove(MapObject *thing, float x, float y)
 {
     float   oldx;
     float   oldy;
-    line_t *ld;
+    Line *ld;
     bool    fell_off_thing;
 
     float z = thing->z;
@@ -1323,7 +1323,7 @@ static bool ThingHeightClip(MapObject *thing)
 // Allows the player to slide along any angled walls.
 //
 static float   best_slide_along;
-static line_t *best_slide_line;
+static Line *best_slide_line;
 
 static float slide_move_x;
 static float slide_move_y;
@@ -1336,15 +1336,15 @@ static MapObject *slide_map_object;
 // Adjusts the xmove / ymove
 // so that the next move will slide along the wall.
 //
-static void HitSlideLine(line_t *ld)
+static void HitSlideLine(Line *ld)
 {
-    if (ld->slopetype == ST_HORIZONTAL)
+    if (ld->slope_type == kLineClipHorizontal)
     {
         slide_move_y = 0;
         return;
     }
 
-    if (ld->slopetype == ST_VERTICAL)
+    if (ld->slope_type == kLineClipVertical)
     {
         slide_move_x = 0;
         return;
@@ -1352,7 +1352,7 @@ static void HitSlideLine(line_t *ld)
 
     int side = PointOnLineSide(slide_map_object->x, slide_map_object->y, ld);
 
-    BAMAngle lineangle = R_PointToAngle(0, 0, ld->dx, ld->dy);
+    BAMAngle lineangle = R_PointToAngle(0, 0, ld->delta_x, ld->delta_y);
 
     if (side == 1) lineangle += kBAMAngle180;
 
@@ -1371,7 +1371,7 @@ static void HitSlideLine(line_t *ld)
 
 static bool PTR_SlideTraverse(PathIntercept *in, void *dataptr)
 {
-    line_t *ld = in->line;
+    Line *ld = in->line;
 
     SYS_ASSERT(ld);
 
@@ -1395,19 +1395,19 @@ static bool PTR_SlideTraverse(PathIntercept *in, void *dataptr)
     {
         // -AJA- 1999/07/19: Gaps are now stored in line_t.
 
-        for (int i = 0; i < ld->gap_num; i++)
+        for (int i = 0; i < ld->gap_number; i++)
         {
             // check if it can fit in the space
-            if (slide_map_object->height_ > ld->gaps[i].c - ld->gaps[i].f)
+            if (slide_map_object->height_ > ld->gaps[i].ceiling - ld->gaps[i].floor)
                 continue;
 
             // check slide mobj is not too high
-            if (slide_map_object->z + slide_map_object->height_ > ld->gaps[i].c)
+            if (slide_map_object->z + slide_map_object->height_ > ld->gaps[i].ceiling)
                 continue;
 
             // check slide mobj can step over
             if (slide_map_object->z + slide_map_object->info_->step_size_ <
-                ld->gaps[i].f)
+                ld->gaps[i].floor)
                 continue;
 
             return true;
@@ -1533,9 +1533,9 @@ static bool PTR_AimTraverse(PathIntercept *in, void *dataptr)
 
     if (in->line)
     {
-        line_t *ld = in->line;
+        Line *ld = in->line;
 
-        if (!(ld->flags & MLF_TwoSided) || ld->gap_num == 0)
+        if (!(ld->flags & MLF_TwoSided) || ld->gap_number == 0)
             return false;  // stop
 
         // Crosses a two sided line.
@@ -1544,17 +1544,17 @@ static bool PTR_AimTraverse(PathIntercept *in, void *dataptr)
         //
         // -AJA- 1999/07/19: Gaps are now kept in line_t.
 
-        if (!AlmostEquals(ld->frontsector->f_h, ld->backsector->f_h))
+        if (!AlmostEquals(ld->front_sector->floor_height, ld->back_sector->floor_height))
         {
-            float maxfloor = HMM_MAX(ld->frontsector->f_h, ld->backsector->f_h);
+            float maxfloor = HMM_MAX(ld->front_sector->floor_height, ld->back_sector->floor_height);
             float slope    = (maxfloor - aim_check.start_z) / dist;
 
             if (slope > aim_check.bottom_slope) aim_check.bottom_slope = slope;
         }
 
-        if (!AlmostEquals(ld->frontsector->c_h, ld->backsector->c_h))
+        if (!AlmostEquals(ld->front_sector->ceiling_height, ld->back_sector->ceiling_height))
         {
-            float minceil = HMM_MIN(ld->frontsector->c_h, ld->backsector->c_h);
+            float minceil = HMM_MIN(ld->front_sector->ceiling_height, ld->back_sector->ceiling_height);
             float slope   = (minceil - aim_check.start_z) / dist;
 
             if (slope < aim_check.top_slope) aim_check.top_slope = slope;
@@ -1622,9 +1622,9 @@ static bool PTR_AimTraverse2(PathIntercept *in, void *dataptr)
 
     if (in->line)
     {
-        line_t *ld = in->line;
+        Line *ld = in->line;
 
-        if (!(ld->flags & MLF_TwoSided) || ld->gap_num == 0)
+        if (!(ld->flags & MLF_TwoSided) || ld->gap_number == 0)
             return false;  // stop
 
         // Crosses a two sided line.
@@ -1633,17 +1633,17 @@ static bool PTR_AimTraverse2(PathIntercept *in, void *dataptr)
         //
         // -AJA- 1999/07/19: Gaps are now kept in line_t.
 
-        if (!AlmostEquals(ld->frontsector->f_h, ld->backsector->f_h))
+        if (!AlmostEquals(ld->front_sector->floor_height, ld->back_sector->floor_height))
         {
-            float maxfloor = HMM_MAX(ld->frontsector->f_h, ld->backsector->f_h);
+            float maxfloor = HMM_MAX(ld->front_sector->floor_height, ld->back_sector->floor_height);
             float slope    = (maxfloor - aim_check.start_z) / dist;
 
             if (slope > aim_check.bottom_slope) aim_check.bottom_slope = slope;
         }
 
-        if (!AlmostEquals(ld->frontsector->c_h, ld->backsector->c_h))
+        if (!AlmostEquals(ld->front_sector->ceiling_height, ld->back_sector->ceiling_height))
         {
-            float minceil = HMM_MIN(ld->frontsector->c_h, ld->backsector->c_h);
+            float minceil = HMM_MIN(ld->front_sector->ceiling_height, ld->back_sector->ceiling_height);
             float slope   = (minceil - aim_check.start_z) / dist;
 
             if (slope < aim_check.top_slope) aim_check.top_slope = slope;
@@ -1705,36 +1705,36 @@ static bool PTR_AimTraverse2(PathIntercept *in, void *dataptr)
     return false;  // don't go any farther
 }
 
-static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
-                                 surface_t *floor, float c_h, surface_t *ceil,
-                                 sector_t *sec_check, line_t *ld)
+static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height,
+                                 MapSurface *floor, float ceiling_height, MapSurface *ceil,
+                                 Sector *sec_check, Line *ld)
 {
     /* Returns true if successfully passed gap */
 
     // perfectly horizontal shots cannot hit planes
     if (AlmostEquals(shoot_check.slope, 0.0f) &&
         (!sec_check ||
-         (!sec_check->floor_vertex_slope && !sec_check->ceil_vertex_slope)))
+         (!sec_check->floor_vertex_slope && !sec_check->ceiling_vertex_slope)))
         return true;
 
     if (sec_check && sec_check->floor_vertex_slope)
     {
-        if (sec_check->floor_vs_hilo.X > sec_check->f_h)
+        if (sec_check->floor_vertex_slope_high_low.X > sec_check->floor_height)
         {
             // Check to see if hitting the side of a vertex slope sector
             HMM_Vec3 tri_v1 = {{0, 0, 0}};
             HMM_Vec3 tri_v2 = {{0, 0, 0}};
-            for (auto v : sec_check->floor_z_verts)
+            for (auto v : sec_check->floor_z_vertices)
             {
-                if (AlmostEquals(ld->v1->X, v.X) &&
-                    AlmostEquals(ld->v1->Y, v.Y))
+                if (AlmostEquals(ld->vertex_1->X, v.X) &&
+                    AlmostEquals(ld->vertex_1->Y, v.Y))
                 {
                     tri_v1.X = v.X;
                     tri_v1.Y = v.Y;
                     tri_v1.Z = v.Z;
                 }
-                else if (AlmostEquals(ld->v2->X, v.X) &&
-                         AlmostEquals(ld->v2->Y, v.Y))
+                else if (AlmostEquals(ld->vertex_2->X, v.X) &&
+                         AlmostEquals(ld->vertex_2->Y, v.Y))
                 {
                     tri_v2.X = v.X;
                     tri_v2.Y = v.Y;
@@ -1743,14 +1743,14 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
             }
             if (AlmostEquals(tri_v1.Z, tri_v2.Z) &&
                 AlmostEquals(
-                    HMM_Clamp(HMM_MIN(sec_check->f_h, tri_v1.Z), z,
-                              HMM_MAX(sec_check->f_h, tri_v1.Z)),
+                    HMM_Clamp(HMM_MIN(sec_check->floor_height, tri_v1.Z), z,
+                              HMM_MAX(sec_check->floor_height, tri_v1.Z)),
                     z))  // Hitting rectangular side; no fancier check needed
             {
                 if (shoot_check.puff)
                 {
-                    sx -= trace.dx * 6.0f / shoot_check.range;
-                    sy -= trace.dy * 6.0f / shoot_check.range;
+                    sx -= trace.delta_x * 6.0f / shoot_check.range;
+                    sy -= trace.delta_y * 6.0f / shoot_check.range;
                     P_SpawnPuff(sx, sy, z, shoot_check.puff,
                                 shoot_check.angle + kBAMAngle180);
                 }
@@ -1765,13 +1765,13 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
                     if (MathPointInTriangle(
                             {{tri_v1.X, tri_v1.Z}}, {{tri_v2.X, tri_v2.Z}},
                             {{(tri_v1.Z > tri_v2.Z ? tri_v1.X : tri_v2.X),
-                              sec_check->f_h}},
+                              sec_check->floor_height}},
                             {{sx, z}}))
                     {
                         if (shoot_check.puff)
                         {
-                            sx -= trace.dx * 6.0f / shoot_check.range;
-                            sy -= trace.dy * 6.0f / shoot_check.range;
+                            sx -= trace.delta_x * 6.0f / shoot_check.range;
+                            sy -= trace.delta_y * 6.0f / shoot_check.range;
                             P_SpawnPuff(sx, sy, z, shoot_check.puff,
                                         shoot_check.angle + kBAMAngle180);
                         }
@@ -1783,7 +1783,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
                     if (MathPointInTriangle(
                             {{tri_v1.Y, tri_v1.Z}}, {{tri_v2.Y, tri_v2.Z}},
                             {{(tri_v1.Z > tri_v2.Z ? tri_v1.Y : tri_v2.Y),
-                              sec_check->f_h}},
+                              sec_check->floor_height}},
                             {{sy, z}}))
                     {
                         if (shoot_check.puff)
@@ -1795,24 +1795,24 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
             }
         }
     }
-    if (sec_check && sec_check->ceil_vertex_slope)
+    if (sec_check && sec_check->ceiling_vertex_slope)
     {
-        if (sec_check->ceil_vs_hilo.Y < sec_check->c_h)
+        if (sec_check->ceiling_vertex_slope_high_low.Y < sec_check->ceiling_height)
         {
             // Check to see if hitting the side of a vertex slope sector
             HMM_Vec3 tri_v1 = {{0, 0, 0}};
             HMM_Vec3 tri_v2 = {{0, 0, 0}};
-            for (auto v : sec_check->ceil_z_verts)
+            for (auto v : sec_check->ceiling_z_vertices)
             {
-                if (AlmostEquals(ld->v1->X, v.X) &&
-                    AlmostEquals(ld->v1->Y, v.Y))
+                if (AlmostEquals(ld->vertex_1->X, v.X) &&
+                    AlmostEquals(ld->vertex_1->Y, v.Y))
                 {
                     tri_v1.X = v.X;
                     tri_v1.Y = v.Y;
                     tri_v1.Z = v.Z;
                 }
-                else if (AlmostEquals(ld->v2->X, v.X) &&
-                         AlmostEquals(ld->v2->Y, v.Y))
+                else if (AlmostEquals(ld->vertex_2->X, v.X) &&
+                         AlmostEquals(ld->vertex_2->Y, v.Y))
                 {
                     tri_v2.X = v.X;
                     tri_v2.Y = v.Y;
@@ -1821,14 +1821,14 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
             }
             if (AlmostEquals(tri_v1.Z, tri_v2.Z) &&
                 AlmostEquals(
-                    HMM_Clamp(HMM_MIN(sec_check->c_h, tri_v1.Z), z,
-                              HMM_MAX(sec_check->c_h, tri_v1.Z)),
+                    HMM_Clamp(HMM_MIN(sec_check->ceiling_height, tri_v1.Z), z,
+                              HMM_MAX(sec_check->ceiling_height, tri_v1.Z)),
                     z))  // Hitting rectangular side; no fancier check needed
             {
                 if (shoot_check.puff)
                 {
-                    sx -= trace.dx * 6.0f / shoot_check.range;
-                    sy -= trace.dy * 6.0f / shoot_check.range;
+                    sx -= trace.delta_x * 6.0f / shoot_check.range;
+                    sy -= trace.delta_y * 6.0f / shoot_check.range;
                     P_SpawnPuff(sx, sy, z, shoot_check.puff,
                                 shoot_check.angle + kBAMAngle180);
                 }
@@ -1843,13 +1843,13 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
                     if (MathPointInTriangle(
                             {{tri_v1.X, tri_v1.Z}}, {{tri_v2.X, tri_v2.Z}},
                             {{(tri_v1.Z < tri_v2.Z ? tri_v1.X : tri_v2.X),
-                              sec_check->c_h}},
+                              sec_check->ceiling_height}},
                             {{sx, z}}))
                     {
                         if (shoot_check.puff)
                         {
-                            sx -= trace.dx * 6.0f / shoot_check.range;
-                            sy -= trace.dy * 6.0f / shoot_check.range;
+                            sx -= trace.delta_x * 6.0f / shoot_check.range;
+                            sy -= trace.delta_y * 6.0f / shoot_check.range;
                             P_SpawnPuff(sx, sy, z, shoot_check.puff,
                                         shoot_check.angle + kBAMAngle180);
                         }
@@ -1861,7 +1861,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
                     if (MathPointInTriangle(
                             {{tri_v1.Y, tri_v1.Z}}, {{tri_v2.Y, tri_v2.Z}},
                             {{(tri_v1.Z < tri_v2.Z ? tri_v1.Y : tri_v2.Y),
-                              sec_check->c_h}},
+                              sec_check->ceiling_height}},
                             {{sy, z}}))
                     {
                         if (shoot_check.puff)
@@ -1875,13 +1875,13 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
     }
 
     // check if hit the floor
-    if (shoot_check.previous_z > f_h && z < f_h)
+    if (shoot_check.previous_z > floor_height && z < floor_height)
     { /* nothing */
     }
     // check if hit the ceiling
-    else if (shoot_check.previous_z < c_h && z > c_h)
+    else if (shoot_check.previous_z < ceiling_height && z > ceiling_height)
     {
-        f_h   = c_h;
+        floor_height   = ceiling_height;
         floor = ceil;
     }
     else
@@ -1892,13 +1892,13 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
             HMM_Vec3 shoota = MathLinePlaneIntersection(
                 {{shoot_check.source->x, shoot_check.source->y,
                   shoot_check.start_z}},
-                {{sx, sy, z}}, sec_check->floor_z_verts[2],
-                sec_check->floor_vs_normal);
-            sector_t *shoota_sec =
+                {{sx, sy, z}}, sec_check->floor_z_vertices[2],
+                sec_check->floor_vertex_slope_normal);
+            Sector *shoota_sec =
                 R_PointInSubsector(shoota.X, shoota.Y)->sector;
             if (shoota_sec && shoota_sec == sec_check &&
-                shoota.Z <= sec_check->floor_vs_hilo.X &&
-                shoota.Z >= sec_check->floor_vs_hilo.Y)
+                shoota.Z <= sec_check->floor_vertex_slope_high_low.X &&
+                shoota.Z >= sec_check->floor_vertex_slope_high_low.Y)
             {
                 // It will strike the floor slope in this sector; see if it will
                 // hit a thing first, otherwise let it hit the slope
@@ -1912,18 +1912,18 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
                     return false;
                 }
             }
-            else if (sec_check->ceil_vertex_slope)
+            else if (sec_check->ceiling_vertex_slope)
             {
                 // Check ceiling vertex slope intersect from shooter's angle
                 shoota = MathLinePlaneIntersection(
                     {{shoot_check.source->x, shoot_check.source->y,
                       shoot_check.start_z}},
-                    {{sx, sy, z}}, sec_check->ceil_z_verts[2],
-                    sec_check->ceil_vs_normal);
+                    {{sx, sy, z}}, sec_check->ceiling_z_vertices[2],
+                    sec_check->ceiling_vertex_slope_normal);
                 shoota_sec = R_PointInSubsector(shoota.X, shoota.Y)->sector;
                 if (shoota_sec && shoota_sec == sec_check &&
-                    shoota.Z <= sec_check->ceil_vs_hilo.X &&
-                    shoota.Z >= sec_check->ceil_vs_hilo.Y)
+                    shoota.Z <= sec_check->ceiling_vertex_slope_high_low.X &&
+                    shoota.Z >= sec_check->ceiling_vertex_slope_high_low.Y)
                 {
                     // It will strike the ceiling slope in this sector; see if
                     // it will hit a thing first, otherwise let it hit the slope
@@ -1943,19 +1943,19 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
             else
                 return true;
         }
-        else if (sec_check && sec_check->ceil_vertex_slope)
+        else if (sec_check && sec_check->ceiling_vertex_slope)
         {
             // Check ceiling vertex slope intersect from shooter's angle
             HMM_Vec3 shoota = MathLinePlaneIntersection(
                 {{shoot_check.source->x, shoot_check.source->y,
                   shoot_check.start_z}},
-                {{sx, sy, z}}, sec_check->ceil_z_verts[2],
-                sec_check->ceil_vs_normal);
-            sector_t *shoota_sec =
+                {{sx, sy, z}}, sec_check->ceiling_z_vertices[2],
+                sec_check->ceiling_vertex_slope_normal);
+            Sector *shoota_sec =
                 R_PointInSubsector(shoota.X, shoota.Y)->sector;
             if (shoota_sec && shoota_sec == sec_check &&
-                shoota.Z <= sec_check->ceil_vs_hilo.X &&
-                shoota.Z >= sec_check->ceil_vs_hilo.Y)
+                shoota.Z <= sec_check->ceiling_vertex_slope_high_low.X &&
+                shoota.Z >= sec_check->ceiling_vertex_slope_high_low.Y)
             {
                 // It will strike the ceiling slope in this sector; see if it
                 // will hit a thing first, otherwise let it hit the slope
@@ -1980,18 +1980,18 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
     if (IS_SKY(floor[0])) return false;
 
     float along =
-        (f_h - shoot_check.start_z) / (shoot_check.slope * shoot_check.range);
+        (floor_height - shoot_check.start_z) / (shoot_check.slope * shoot_check.range);
 
-    float x = trace.x + trace.dx * along;
-    float y = trace.y + trace.dy * along;
+    float x = trace.x + trace.delta_x * along;
+    float y = trace.y + trace.delta_y * along;
 
-    z = (z < shoot_check.previous_z) ? f_h + 2 : f_h - 2;
+    z = (z < shoot_check.previous_z) ? floor_height + 2 : floor_height - 2;
 
     // Check for vert slope at potential puff point
-    sector_t *last_shoota_sec = R_PointInSubsector(x, y)->sector;
+    Sector *last_shoota_sec = R_PointInSubsector(x, y)->sector;
 
     if (last_shoota_sec && (last_shoota_sec->floor_vertex_slope ||
-                            last_shoota_sec->ceil_vertex_slope))
+                            last_shoota_sec->ceiling_vertex_slope))
     {
         bool fs_good = true;
         bool cs_good = true;
@@ -1999,17 +1999,17 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
         {
             if (z <=
                 MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}},
-                                          last_shoota_sec->floor_z_verts[2],
-                                          last_shoota_sec->floor_vs_normal)
+                                          last_shoota_sec->floor_z_vertices[2],
+                                          last_shoota_sec->floor_vertex_slope_normal)
                     .Z)
                 fs_good = false;
         }
-        if (last_shoota_sec->ceil_vertex_slope)
+        if (last_shoota_sec->ceiling_vertex_slope)
         {
             if (z >= MathLinePlaneIntersection({{x, y, -40000}},
                                                {{x, y, 40000}},
-                                               last_shoota_sec->ceil_z_verts[2],
-                                               last_shoota_sec->ceil_vs_normal)
+                                               last_shoota_sec->ceiling_z_vertices[2],
+                                               last_shoota_sec->ceiling_vertex_slope_normal)
                          .Z)
                 cs_good = false;
         }
@@ -2051,7 +2051,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float f_h,
 // Try and get a texture for our midtex.
 //-If we specified a LINE_PART copy that texture over.
 //-If not, just remove the current midtex we have (only on 2-sided lines).
-bool ReplaceMidTexFromPart(line_t *TheLine, ScrollingPart parts)
+bool ReplaceMidTexFromPart(Line *TheLine, ScrollingPart parts)
 {
     bool IsFront = true;
 
@@ -2063,7 +2063,7 @@ bool ReplaceMidTexFromPart(line_t *TheLine, ScrollingPart parts)
         if (!TheLine->side[1])  // back and 1-sided so no-go
             return false;
     }
-    side_t *side = (IsFront) ? TheLine->side[0] : TheLine->side[1];
+    Side *side = (IsFront) ? TheLine->side[0] : TheLine->side[1];
 
     const image_c *image = nullptr;
 
@@ -2103,7 +2103,7 @@ bool ReplaceMidTexFromPart(line_t *TheLine, ScrollingPart parts)
 //
 // Lobo:2021 Unblock and remove texture from our special debris linetype.
 //
-void P_UnblockLineEffectDebris(line_t *TheLine, const LineType *special)
+void P_UnblockLineEffectDebris(Line *TheLine, const LineType *special)
 {
     if (!TheLine) { return; }
 
@@ -2150,17 +2150,17 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
     // Intercept is a line?
     if (in->line)
     {
-        line_t *ld = in->line;
+        Line *ld = in->line;
 
         // determine coordinates of intersect
         float along = in->along;
-        float x     = trace.x + trace.dx * along;
-        float y     = trace.y + trace.dy * along;
+        float x     = trace.x + trace.delta_x * along;
+        float y     = trace.y + trace.delta_y * along;
         float z =
             shoot_check.start_z + along * shoot_check.slope * shoot_check.range;
 
         int     sidenum = PointOnLineSide(trace.x, trace.y, ld);
-        side_t *side    = ld->side[sidenum];
+        Side *side    = ld->side[sidenum];
 
         // ShootSpecialLine()->P_ActivateSpecialLine() can remove
         //  the special so we need to get the info before calling it
@@ -2172,26 +2172,26 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
         //(1.) check if shot has hit a floor or ceiling...
         if (side)
         {
-            extrafloor_t *ef;
-            surface_t    *floor_s   = &side->sector->floor;
-            float         floor_h   = side->sector->f_h;
-            sector_t     *sec_check = nullptr;
+            Extrafloor *ef;
+            MapSurface    *floor_s   = &side->sector->floor;
+            float         floor_h   = side->sector->floor_height;
+            Sector     *sec_check = nullptr;
             if (ld->side[sidenum ^ 1])
                 sec_check = ld->side[sidenum ^ 1]->sector;
 
             // FIXME: must go in correct order
-            for (ef = side->sector->bottom_ef; ef; ef = ef->higher)
+            for (ef = side->sector->bottom_extrafloor; ef; ef = ef->higher)
             {
-                if (!ShootCheckGap(x, y, z, floor_h, floor_s, ef->bottom_h,
+                if (!ShootCheckGap(x, y, z, floor_h, floor_s, ef->bottom_height,
                                    ef->bottom, sec_check, ld))
                     return false;
 
                 floor_s = ef->top;
-                floor_h = ef->top_h;
+                floor_h = ef->top_height;
             }
 
-            if (!ShootCheckGap(x, y, z, floor_h, floor_s, side->sector->c_h,
-                               &side->sector->ceil, sec_check, ld))
+            if (!ShootCheckGap(x, y, z, floor_h, floor_s, side->sector->ceiling_height,
+                               &side->sector->ceiling, sec_check, ld))
             {
                 return false;
             }
@@ -2210,15 +2210,15 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
         // shot doesn't go through a one-sided line, since one sided lines
         // do not have a sector on the other side.
 
-        if ((ld->flags & MLF_TwoSided) && ld->gap_num > 0 &&
+        if ((ld->flags & MLF_TwoSided) && ld->gap_number > 0 &&
             !(ld->flags & MLF_ShootBlock))
         {
-            SYS_ASSERT(ld->backsector);
+            SYS_ASSERT(ld->back_sector);
 
             // check all line gaps
-            for (int i = 0; i < ld->gap_num; i++)
+            for (int i = 0; i < ld->gap_number; i++)
             {
-                if (ld->gaps[i].f <= z && z <= ld->gaps[i].c)
+                if (ld->gaps[i].floor <= z && z <= ld->gaps[i].ceiling)
                 {
                     shoot_check.previous_z = z;
                     return true;
@@ -2227,32 +2227,32 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
         }
 
         // check if bullet hit a sky hack line...
-        if (ld->frontsector && ld->backsector)
+        if (ld->front_sector && ld->back_sector)
         {
-            if (IS_SKY(ld->frontsector->ceil) && IS_SKY(ld->backsector->ceil))
+            if (IS_SKY(ld->front_sector->ceiling) && IS_SKY(ld->back_sector->ceiling))
             {
-                float c1 = ld->frontsector->c_h;
-                float c2 = ld->backsector->c_h;
+                float c1 = ld->front_sector->ceiling_height;
+                float c2 = ld->back_sector->ceiling_height;
 
                 if (HMM_MIN(c1, c2) <= z && z <= HMM_MAX(c1, c2)) return false;
             }
 
-            if (IS_SKY(ld->frontsector->floor) && IS_SKY(ld->backsector->floor))
+            if (IS_SKY(ld->front_sector->floor) && IS_SKY(ld->back_sector->floor))
             {
-                float f1 = ld->frontsector->f_h;
-                float f2 = ld->backsector->f_h;
+                float f1 = ld->front_sector->floor_height;
+                float f2 = ld->back_sector->floor_height;
 
                 if (HMM_MIN(f1, f2) <= z && z <= HMM_MAX(f1, f2)) return false;
             }
         }
 
-        sector_t *last_shoota_sec = R_PointInSubsector(x, y)->sector;
+        Sector *last_shoota_sec = R_PointInSubsector(x, y)->sector;
 
         if (last_shoota_sec &&
-            ((ld->frontsector && (ld->frontsector->floor_vertex_slope ||
-                                  ld->frontsector->ceil_vertex_slope)) ||
-             (ld->backsector && (ld->backsector->floor_vertex_slope ||
-                                 ld->backsector->ceil_vertex_slope))))
+            ((ld->front_sector && (ld->front_sector->floor_vertex_slope ||
+                                  ld->front_sector->ceiling_vertex_slope)) ||
+             (ld->back_sector && (ld->back_sector->floor_vertex_slope ||
+                                 ld->back_sector->ceiling_vertex_slope))))
         {
             bool fs_good = true;
             bool cs_good = true;
@@ -2260,34 +2260,34 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
             {
                 if (z <=
                     MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}},
-                                              last_shoota_sec->floor_z_verts[2],
-                                              last_shoota_sec->floor_vs_normal)
+                                              last_shoota_sec->floor_z_vertices[2],
+                                              last_shoota_sec->floor_vertex_slope_normal)
                         .Z)
                     fs_good = false;
             }
             else
             {
-                if (z <= last_shoota_sec->f_h) fs_good = false;
+                if (z <= last_shoota_sec->floor_height) fs_good = false;
             }
-            if (last_shoota_sec->ceil_vertex_slope)
+            if (last_shoota_sec->ceiling_vertex_slope)
             {
                 if (z >=
                     MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}},
-                                              last_shoota_sec->ceil_z_verts[2],
-                                              last_shoota_sec->ceil_vs_normal)
+                                              last_shoota_sec->ceiling_z_vertices[2],
+                                              last_shoota_sec->ceiling_vertex_slope_normal)
                         .Z)
                     cs_good = false;
             }
             else
             {
-                if (z >= last_shoota_sec->c_h) cs_good = false;
+                if (z >= last_shoota_sec->ceiling_height) cs_good = false;
             }
             if (fs_good && cs_good) return true;
         }
 
         // position puff off the wall
-        x -= trace.dx * 6.0f / shoot_check.range;
-        y -= trace.dy * 6.0f / shoot_check.range;
+        x -= trace.delta_x * 6.0f / shoot_check.range;
+        y -= trace.delta_y * 6.0f / shoot_check.range;
 
         // Spawn bullet puffs.
         if (shoot_check.puff)
@@ -2343,14 +2343,14 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
     // hit thing
 
     // Checking sight against target on vertex slope?
-    if (mo->subsector_->sector || mo->subsector_->sector->ceil_vertex_slope)
+    if (mo->subsector_->sector || mo->subsector_->sector->ceiling_vertex_slope)
         mo->slope_sight_hit_ = true;
 
     // position a bit closer
     float along = in->along - 10.0f / shoot_check.range;
 
-    float x = trace.x + trace.dx * along;
-    float y = trace.y + trace.dy * along;
+    float x = trace.x + trace.delta_x * along;
+    float y = trace.y + trace.delta_y * along;
     float z =
         shoot_check.start_z + along * shoot_check.slope * shoot_check.range;
 
@@ -2659,26 +2659,26 @@ static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
         return false;
     }
 
-    line_t *ld = in->line;
+    Line *ld = in->line;
 
     SYS_ASSERT(ld);
 
     int sidenum = PointOnLineSide(use_thing->x, use_thing->y, ld);
     sidenum     = (sidenum == 1) ? 1 : 0;
 
-    side_t *side = ld->side[sidenum];
+    Side *side = ld->side[sidenum];
 
     // update open vertical range (extrafloors are NOT checked)
     if (side)
     {
-        use_lower = HMM_MAX(use_lower, side->sector->f_h);
-        use_upper = HMM_MIN(use_upper, side->sector->c_h);
+        use_lower = HMM_MAX(use_lower, side->sector->floor_height);
+        use_upper = HMM_MIN(use_upper, side->sector->ceiling_height);
     }
 
     if (!ld->special || ld->special->type_ == kLineTriggerShootable ||
         ld->special->type_ == kLineTriggerWalkable)
     {
-        if (ld->gap_num == 0 || use_upper <= use_lower)
+        if (ld->gap_number == 0 || use_upper <= use_lower)
         {
             // can't use through a wall
             S_StartFX(use_thing->info_->noway_sound_,
@@ -2958,19 +2958,19 @@ static bool ChangeSectorCallback(MapObject *thing, bool widening)
 // ChangeSectorHeights
 //
 // Checks all things in the given sector which is changing height.
-// The original space is in f_h..c_h, and the f_dh, c_dh parameters
+// The original space is in floor_height..ceiling_height, and the f_dh, c_dh parameters
 // give the amount the floor/ceiling is moving.
 //
 // Things will be moved vertically if they need to.  When
 // "crush_damage" is non-zero, things that no longer fit will be crushed
 // (and will also set the "no_fit" variable).
 //
-// NOTE: the heights (f_h, c_h) currently broken.
+// NOTE: the heights (floor_height, ceiling_height) currently broken.
 //
-static void ChangeSectorHeights(sector_t *sec, float f_h, float c_h, float f_dh,
+static void ChangeSectorHeights(Sector *sec, float floor_height, float ceiling_height, float f_dh,
                                 float c_dh)
 {
-    touch_node_t *tn, *next;
+    TouchNode *tn, *next;
     MapObject    *mo;
 
     bool widening = (f_dh <= 0) && (c_dh >= 0);
@@ -2978,9 +2978,9 @@ static void ChangeSectorHeights(sector_t *sec, float f_h, float c_h, float f_dh,
     for (tn = sec->touch_things; tn; tn = next)
     {
         // allow for thing removal
-        next = tn->sec_next;
+        next = tn->sector_next;
 
-        mo = tn->mo;
+        mo = tn->map_object;
         SYS_ASSERT(mo);
 
         ChangeSectorCallback(mo, widening);
@@ -2994,9 +2994,9 @@ static void ChangeSectorHeights(sector_t *sec, float f_h, float c_h, float f_dh,
 // Only checks againgst hitting other solid floors, things are NOT
 // considered here.  Returns true if OK, otherwise false.
 //
-bool CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh)
+bool CheckSolidSectorMove(Sector *sec, bool is_ceiling, float dh)
 {
-    extrafloor_t *ef;
+    Extrafloor *ef;
 
     if (AlmostEquals(dh, 0.0f)) return true;
 
@@ -3004,54 +3004,54 @@ bool CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh)
     // first check real sector
     //
 
-    if (is_ceiling && dh < 0 && sec->top_ef &&
-        (sec->c_h - dh < sec->top_ef->top_h))
+    if (is_ceiling && dh < 0 && sec->top_extrafloor &&
+        (sec->ceiling_height - dh < sec->top_extrafloor->top_height))
     {
         return false;
     }
 
-    if (!is_ceiling && dh > 0 && sec->bottom_ef &&
-        (sec->f_h + dh > sec->bottom_ef->bottom_h))
+    if (!is_ceiling && dh > 0 && sec->bottom_extrafloor &&
+        (sec->floor_height + dh > sec->bottom_extrafloor->bottom_height))
     {
         return false;
     }
 
     // Test fix for Doom 1 E3M4 crusher bug - Dasho
-    if (is_ceiling && dh < 0 && AlmostEquals(sec->c_h, sec->f_h))
+    if (is_ceiling && dh < 0 && AlmostEquals(sec->ceiling_height, sec->floor_height))
     {
-        if (sec->ceil_move) sec->ceil_move->destination_height = sec->f_h - dh;
+        if (sec->ceiling_move) sec->ceiling_move->destination_height = sec->floor_height - dh;
     }
 
     // don't allow a dummy sector to go FUBAR
     if (sec->control_floors)
     {
-        if (is_ceiling && (sec->c_h + dh < sec->f_h)) return false;
+        if (is_ceiling && (sec->ceiling_height + dh < sec->floor_height)) return false;
 
-        if (!is_ceiling && (sec->f_h + dh > sec->c_h)) return false;
+        if (!is_ceiling && (sec->floor_height + dh > sec->ceiling_height)) return false;
     }
 
     //
     // second, check attached extrafloors
     //
 
-    for (ef = sec->control_floors; ef; ef = ef->ctrl_next)
+    for (ef = sec->control_floors; ef; ef = ef->control_sector_next)
     {
         // liquids can go anywhere, anytime
-        if (ef->ef_info->type_ & kExtraFloorTypeLiquid) continue;
+        if (ef->extrafloor_definition->type_ & kExtraFloorTypeLiquid) continue;
 
         // moving a thin extrafloor ?
-        if (!is_ceiling && !(ef->ef_info->type_ & kExtraFloorTypeThick))
+        if (!is_ceiling && !(ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
         {
-            float new_h = ef->top_h + dh;
+            float new_h = ef->top_height + dh;
 
             if (dh > 0 &&
-                new_h > (ef->higher ? ef->higher->bottom_h : ef->sector->c_h))
+                new_h > (ef->higher ? ef->higher->bottom_height : ef->sector->ceiling_height))
             {
                 return false;
             }
 
             if (dh < 0 &&
-                new_h < (ef->lower ? ef->lower->top_h : ef->sector->f_h))
+                new_h < (ef->lower ? ef->lower->top_height : ef->sector->floor_height))
             {
                 return false;
             }
@@ -3059,14 +3059,14 @@ bool CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh)
         }
 
         // moving the top of a thick extrafloor ?
-        if (is_ceiling && (ef->ef_info->type_ & kExtraFloorTypeThick))
+        if (is_ceiling && (ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
         {
-            float new_h = ef->top_h + dh;
+            float new_h = ef->top_height + dh;
 
-            if (dh < 0 && new_h < ef->bottom_h) return false;
+            if (dh < 0 && new_h < ef->bottom_height) return false;
 
             if (dh > 0 &&
-                new_h > (ef->higher ? ef->higher->bottom_h : ef->sector->c_h))
+                new_h > (ef->higher ? ef->higher->bottom_height : ef->sector->ceiling_height))
             {
                 return false;
             }
@@ -3074,14 +3074,14 @@ bool CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh)
         }
 
         // moving the bottom of a thick extrafloor ?
-        if (!is_ceiling && (ef->ef_info->type_ & kExtraFloorTypeThick))
+        if (!is_ceiling && (ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
         {
-            float new_h = ef->bottom_h + dh;
+            float new_h = ef->bottom_height + dh;
 
-            if (dh > 0 && new_h > ef->top_h) return false;
+            if (dh > 0 && new_h > ef->top_height) return false;
 
             if (dh < 0 &&
-                new_h < (ef->lower ? ef->lower->top_h : ef->sector->f_h))
+                new_h < (ef->lower ? ef->lower->top_height : ef->sector->floor_height))
             {
                 return false;
             }
@@ -3103,10 +3103,10 @@ bool CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh)
 // they will take damage.  Returns true if at least one thing no
 // longers fits, otherwise false.
 //
-bool SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush,
+bool SolidSectorMove(Sector *sec, bool is_ceiling, float dh, int crush,
                      bool nocarething)
 {
-    extrafloor_t *ef;
+    Extrafloor *ef;
 
     if (AlmostEquals(dh, 0.0f)) return false;
 
@@ -3118,9 +3118,9 @@ bool SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush,
     //
 
     if (is_ceiling)
-        sec->c_h += dh;
+        sec->ceiling_height += dh;
     else
-        sec->f_h += dh;
+        sec->floor_height += dh;
 
     RecomputeGapsAroundSector(sec);
     FloodExtraFloors(sec);
@@ -3129,13 +3129,13 @@ bool SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush,
     {
         if (is_ceiling)
         {
-            float h = sec->top_ef ? sec->top_ef->top_h : sec->f_h;
-            ChangeSectorHeights(sec, h, sec->c_h, 0, dh);
+            float h = sec->top_extrafloor ? sec->top_extrafloor->top_height : sec->floor_height;
+            ChangeSectorHeights(sec, h, sec->ceiling_height, 0, dh);
         }
         else
         {
-            float h = sec->bottom_ef ? sec->bottom_ef->bottom_h : sec->c_h;
-            ChangeSectorHeights(sec, sec->f_h, h, dh, 0);
+            float h = sec->bottom_extrafloor ? sec->bottom_extrafloor->bottom_height : sec->ceiling_height;
+            ChangeSectorHeights(sec, sec->floor_height, h, dh, 0);
         }
     }
 
@@ -3143,14 +3143,14 @@ bool SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush,
     // second, update attached extrafloors
     //
 
-    for (ef = sec->control_floors; ef; ef = ef->ctrl_next)
+    for (ef = sec->control_floors; ef; ef = ef->control_sector_next)
     {
-        if (ef->ef_info->type_ & kExtraFloorTypeThick)
+        if (ef->extrafloor_definition->type_ & kExtraFloorTypeThick)
         {
-            ef->top_h    = sec->c_h;
-            ef->bottom_h = sec->f_h;
+            ef->top_height    = sec->ceiling_height;
+            ef->bottom_height = sec->floor_height;
         }
-        else { ef->top_h = ef->bottom_h = sec->f_h; }
+        else { ef->top_height = ef->bottom_height = sec->floor_height; }
 
         RecomputeGapsAroundSector(ef->sector);
         FloodExtraFloors(ef->sector);
@@ -3158,41 +3158,41 @@ bool SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush,
 
     if (!nocarething)
     {
-        for (ef = sec->control_floors; ef; ef = ef->ctrl_next)
+        for (ef = sec->control_floors; ef; ef = ef->control_sector_next)
         {
             // liquids can go anywhere, anytime
-            if (ef->ef_info->type_ & kExtraFloorTypeLiquid) continue;
+            if (ef->extrafloor_definition->type_ & kExtraFloorTypeLiquid) continue;
 
             // moving a thin extrafloor ?
-            if (!is_ceiling && !(ef->ef_info->type_ & kExtraFloorTypeThick))
+            if (!is_ceiling && !(ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
             {
                 if (dh > 0)
                 {
                     float h =
-                        ef->higher ? ef->higher->bottom_h : ef->sector->c_h;
-                    ChangeSectorHeights(ef->sector, ef->top_h, h, dh, 0);
+                        ef->higher ? ef->higher->bottom_height : ef->sector->ceiling_height;
+                    ChangeSectorHeights(ef->sector, ef->top_height, h, dh, 0);
                 }
                 else if (dh < 0)
                 {
-                    float h = ef->lower ? ef->lower->top_h : ef->sector->f_h;
-                    ChangeSectorHeights(ef->sector, h, ef->top_h, 0, dh);
+                    float h = ef->lower ? ef->lower->top_height : ef->sector->floor_height;
+                    ChangeSectorHeights(ef->sector, h, ef->top_height, 0, dh);
                 }
                 continue;
             }
 
             // moving the top of a thick extrafloor ?
-            if (is_ceiling && (ef->ef_info->type_ & kExtraFloorTypeThick))
+            if (is_ceiling && (ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
             {
-                float h = ef->higher ? ef->higher->bottom_h : ef->sector->c_h;
-                ChangeSectorHeights(ef->sector, ef->top_h, h, dh, 0);
+                float h = ef->higher ? ef->higher->bottom_height : ef->sector->ceiling_height;
+                ChangeSectorHeights(ef->sector, ef->top_height, h, dh, 0);
                 continue;
             }
 
             // moving the bottom of a thick extrafloor ?
-            if (!is_ceiling && (ef->ef_info->type_ & kExtraFloorTypeThick))
+            if (!is_ceiling && (ef->extrafloor_definition->type_ & kExtraFloorTypeThick))
             {
-                float h = ef->lower ? ef->lower->top_h : ef->sector->f_h;
-                ChangeSectorHeights(ef->sector, h, ef->bottom_h, 0, dh);
+                float h = ef->lower ? ef->lower->top_height : ef->sector->floor_height;
+                ChangeSectorHeights(ef->sector, h, ef->bottom_height, 0, dh);
                 continue;
             }
         }
@@ -3338,7 +3338,7 @@ static float mb2;
 // spawn object top
 static float mt2;
 
-static bool CheckBlockingLineCallback(line_t *line, void *data)
+static bool CheckBlockingLineCallback(Line *line, void *data)
 {
     // if the result is the same, we haven't crossed the line.
     if (PointOnLineSide(mx1, my1, line) == PointOnLineSide(mx2, my2, line))
@@ -3355,23 +3355,23 @@ static bool CheckBlockingLineCallback(line_t *line, void *data)
         return false;
     }
 
-    if (!(line->flags & MLF_TwoSided) || line->gap_num == 0)
+    if (!(line->flags & MLF_TwoSided) || line->gap_number == 0)
     {
         block_line = line;
         return false;
     }
 
-    for (int i = 0; i < line->gap_num; i++)
+    for (int i = 0; i < line->gap_number; i++)
     {
         // gap with no restriction ?
-        if (line->gaps[i].f <= mb2 && mt2 <= line->gaps[i].c) return true;
+        if (line->gaps[i].floor <= mb2 && mt2 <= line->gaps[i].ceiling) return true;
     }
 
     // Vertex slope check
-    sector_t *slope_sec = R_PointInSubsector(mx2, my2)->sector;
+    Sector *slope_sec = R_PointInSubsector(mx2, my2)->sector;
 
     if (slope_sec &&
-        (slope_sec->floor_vertex_slope || slope_sec->ceil_vertex_slope))
+        (slope_sec->floor_vertex_slope || slope_sec->ceiling_vertex_slope))
     {
         bool fs_good = true;
         bool cs_good = true;
@@ -3379,17 +3379,17 @@ static bool CheckBlockingLineCallback(line_t *line, void *data)
         {
             if (mb2 <= MathLinePlaneIntersection({{mx2, my2, -40000}},
                                                  {{mx2, my2, 40000}},
-                                                 slope_sec->floor_z_verts[2],
-                                                 slope_sec->floor_vs_normal)
+                                                 slope_sec->floor_z_vertices[2],
+                                                 slope_sec->floor_vertex_slope_normal)
                            .Z)
                 fs_good = false;
         }
-        if (slope_sec->ceil_vertex_slope)
+        if (slope_sec->ceiling_vertex_slope)
         {
             if (mt2 >= MathLinePlaneIntersection({{mx2, my2, -40000}},
                                                  {{mx2, my2, 40000}},
-                                                 slope_sec->ceil_z_verts[2],
-                                                 slope_sec->ceil_vs_normal)
+                                                 slope_sec->ceiling_z_vertices[2],
+                                                 slope_sec->ceiling_vertex_slope_normal)
                            .Z)
                 cs_good = false;
         }
@@ -3441,7 +3441,7 @@ bool MapCheckBlockingLine(MapObject *thing, MapObject *spawnthing)
 //
 void MapInitialize(void)
 {
-    for (line_t *s : special_lines_hit)
+    for (Line *s : special_lines_hit)
     {
         delete s;
         s = nullptr;

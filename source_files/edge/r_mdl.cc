@@ -686,7 +686,7 @@ static inline void ModelCoordFunc(model_coord_data_t *data, int v_idx, HMM_Vec3 
 }
 
 void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, int frame1, int frame2, float lerp,
-                     float x, float y, float z, MapObject *mo, region_properties_t *props, float scale, float aspect,
+                     float x, float y, float z, MapObject *mo, RegionProperties *props, float scale, float aspect,
                      float bias, int rotation)
 {
     // check if frames are valid
@@ -820,12 +820,12 @@ void MDL_RenderModel(mdl_model_c *md, const image_c *skin_img, bool is_weapon, i
 
     int num_pass = data.is_fuzzy ? 1 : (detail_level > 0 ? 4 : 3);
 
-    RGBAColor fc_to_use = mo->subsector_->sector->props.fog_color;
-    float    fd_to_use = mo->subsector_->sector->props.fog_density;
+    RGBAColor fc_to_use = mo->subsector_->sector->properties.fog_color;
+    float    fd_to_use = mo->subsector_->sector->properties.fog_density;
     // check for DDFLEVL fog
     if (fc_to_use == kRGBANoValue)
     {
-        if (IS_SKY(mo->subsector_->sector->ceil))
+        if (IS_SKY(mo->subsector_->sector->ceiling))
         {
             fc_to_use = current_map->outdoor_fog_color_;
             fd_to_use = 0.01f * current_map->outdoor_fog_density_;

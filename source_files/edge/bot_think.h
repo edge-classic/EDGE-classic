@@ -137,12 +137,12 @@ class DeathBot
     // information for kBotTaskOpenDoor
     int          door_stage_ = 0;
     int          door_time_  = 0;
-    const seg_t *door_seg_   = nullptr;
+    const Seg *door_seg_   = nullptr;
 
     // information for kBotTaskUseLift
     int          lift_stage_ = 0;
     int          lift_time_  = 0;
-    const seg_t *lift_seg_   = nullptr;
+    const Seg *lift_seg_   = nullptr;
 
     BotCommand cmd_;
 

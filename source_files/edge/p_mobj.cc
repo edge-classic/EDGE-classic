@@ -156,14 +156,14 @@ void P_DumpMobjs(void)
 
 // convenience function
 // -AJA- FIXME: duplicate code from p_map.c
-static inline int PointOnLineSide(float x, float y, line_t *ld)
+static inline int PointOnLineSide(float x, float y, Line *ld)
 {
-    divline_t div;
+    DividingLine div;
 
-    div.x  = ld->v1->X;
-    div.y  = ld->v1->Y;
-    div.dx = ld->dx;
-    div.dy = ld->dy;
+    div.x  = ld->vertex_1->X;
+    div.y  = ld->vertex_1->Y;
+    div.delta_x = ld->delta_x;
+    div.delta_y = ld->delta_y;
 
     return PointOnDividingLineSide(x, y, &div);
 }
@@ -197,17 +197,17 @@ static void EnterBounceStates(MapObject *mo)
 //
 // -AJA- 1999/08/22: written.
 //
-static void BounceOffWall(MapObject *mo, line_t *wall)
+static void BounceOffWall(MapObject *mo, Line *wall)
 {
     BAMAngle angle;
     BAMAngle wall_angle;
     BAMAngle diff;
 
-    divline_t div;
+    DividingLine div;
     float     dest_x, dest_y;
 
     angle      = R_PointToAngle(0, 0, mo->momentum_.X, mo->momentum_.Y);
-    wall_angle = R_PointToAngle(0, 0, wall->dx, wall->dy);
+    wall_angle = R_PointToAngle(0, 0, wall->delta_x, wall->delta_y);
 
     diff = wall_angle - angle;
 
@@ -220,10 +220,10 @@ static void BounceOffWall(MapObject *mo, line_t *wall)
     dest_y =
         mo->y + epi::BAMSin(angle) * (mo->speed_ + mo->info_->radius_) * 4.0f;
 
-    div.x  = wall->v1->X;
-    div.y  = wall->v1->Y;
-    div.dx = wall->dx;
-    div.dy = wall->dy;
+    div.x  = wall->vertex_1->X;
+    div.y  = wall->vertex_1->Y;
+    div.delta_x = wall->delta_x;
+    div.delta_y = wall->delta_y;
 
     if (PointOnDividingLineSide(mo->x, mo->y, &div) ==
         PointOnDividingLineSide(dest_x, dest_y, &div))
@@ -280,8 +280,8 @@ static bool CorpseShouldSlide(MapObject *mo)
         return false;
     }
 
-    float f_slope_z = 0;
-    float c_slope_z = 0;
+    float floor_slope_z = 0;
+    float ceiling_slope_z = 0;
 
     // Vertex slope check here?
     if (mo->subsector_->sector->floor_vertex_slope)
@@ -290,26 +290,26 @@ static bool CorpseShouldSlide(MapObject *mo)
         HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
         float    z_test =
             MathLinePlaneIntersection(line_a, line_b,
-                                      mo->subsector_->sector->floor_z_verts[2],
-                                      mo->subsector_->sector->floor_vs_normal)
+                                      mo->subsector_->sector->floor_z_vertices[2],
+                                      mo->subsector_->sector->floor_vertex_slope_normal)
                 .Z;
-        if (isfinite(z_test)) f_slope_z = z_test - mo->subsector_->sector->f_h;
+        if (isfinite(z_test)) floor_slope_z = z_test - mo->subsector_->sector->floor_height;
     }
 
-    if (mo->subsector_->sector->ceil_vertex_slope)
+    if (mo->subsector_->sector->ceiling_vertex_slope)
     {
         HMM_Vec3 line_a{{mo->x, mo->y, -40000}};
         HMM_Vec3 line_b{{mo->x, mo->y, 40000}};
         float    z_test =
             MathLinePlaneIntersection(line_a, line_b,
-                                      mo->subsector_->sector->ceil_z_verts[2],
-                                      mo->subsector_->sector->ceil_vs_normal)
+                                      mo->subsector_->sector->ceiling_z_vertices[2],
+                                      mo->subsector_->sector->ceiling_vertex_slope_normal)
                 .Z;
-        if (isfinite(z_test)) c_slope_z = mo->subsector_->sector->c_h - z_test;
+        if (isfinite(z_test)) ceiling_slope_z = mo->subsector_->sector->ceiling_height - z_test;
     }
 
-    ComputeThingGap(mo, mo->subsector_->sector, mo->z, &floor, &ceil, f_slope_z,
-                    c_slope_z);
+    ComputeThingGap(mo, mo->subsector_->sector, mo->z, &floor, &ceil, floor_slope_z,
+                    ceiling_slope_z);
 
     return (!AlmostEquals(mo->floor_z_, floor));
 }
@@ -611,8 +611,8 @@ void P_MobjExplodeMissile(MapObject *mo)
 }
 
 static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
-                                       region_properties_t *new_p, float f_h,
-                                       float c_h, const region_properties_t *p,
+                                       RegionProperties *new_p, float floor_height,
+                                       float ceiling_height, const RegionProperties *p,
                                        bool iterate_pushers)
 {
     int flags =
@@ -623,9 +623,9 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
 
     SYS_ASSERT(tz > bz);
 
-    if (tz > c_h) factor -= factor * (tz - c_h) / (tz - bz);
+    if (tz > ceiling_height) factor -= factor * (tz - ceiling_height) / (tz - bz);
 
-    if (bz < f_h) factor -= factor * (f_h - bz) / (tz - bz);
+    if (bz < floor_height) factor -= factor * (floor_height - bz) / (tz - bz);
 
     if (factor <= 0) return;
 
@@ -639,11 +639,11 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
         int      county     = 0;
         HMM_Vec2 cumulative = {{0, 0}};
         // handle push sectors
-        for (touch_node_t *tn = mo->touch_sectors_; tn; tn = tn->mo_next)
+        for (TouchNode *tn = mo->touch_sectors_; tn; tn = tn->map_object_next)
         {
-            if (tn->sec)
+            if (tn->sector)
             {
-                region_properties_t tn_props = tn->sec->props;
+                RegionProperties tn_props = tn->sector->properties;
                 if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
                 {
                     SectorFlag tn_flags = tn_props.special
@@ -651,7 +651,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
                                               : kSectorFlagPushConstant;
 
                     if (!(tn_flags & kSectorFlagWholeRegion) &&
-                        bz > tn->sec->f_h + 1)
+                        bz > tn->sector->floor_height + 1)
                         continue;
 
                     push_mul = 1.0f;
@@ -679,8 +679,8 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
             }
         }
         // Average it out a la ZDoom so we aren't getting sent to the shadow
-        // realm in certain Boom maps - Dasho Don't think it is necessary for z
-        // push at this time
+        // realm in certain Boom maps. Don't think it is necessary for z
+        // push at this time - Dasho
         if (countx) new_p->push.X += (cumulative.X / countx);
         if (county) new_p->push.Y += (cumulative.Y / county);
     }
@@ -688,7 +688,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
     {
         if (p->push.X || p->push.Y || p->push.Z)
         {
-            if (!(flags & kSectorFlagWholeRegion) && bz > f_h + 1) return;
+            if (!(flags & kSectorFlagWholeRegion) && bz > floor_height + 1) return;
 
             push_mul = 1.0f;
 
@@ -712,16 +712,16 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
 //
 // Calculates the properties (gravity etc..) acting on an object,
 // especially when the object is in multiple extrafloors with
-// different props.
+// different properties.
 //
 // Only used for players for now (too expensive to be used by
 // everything).
 //
-void P_CalcFullProperties(const MapObject *mo, region_properties_t *new_p)
+void P_CalcFullProperties(const MapObject *mo, RegionProperties *new_p)
 {
-    sector_t *sector = mo->subsector_->sector;
+    Sector *sector = mo->subsector_->sector;
 
-    extrafloor_t *S, *L, *C;
+    Extrafloor *S, *L, *C;
     float         floor_h;
 
     float bz = mo->z;
@@ -737,18 +737,18 @@ void P_CalcFullProperties(const MapObject *mo, region_properties_t *new_p)
     new_p->special = nullptr;
 
     // Note: friction not averaged: comes from region foot is in
-    new_p->friction = sector->p->friction;
+    new_p->friction = sector->active_properties->friction;
 
-    floor_h = sector->f_h;
+    floor_h = sector->floor_height;
 
     if (sector->floor_vertex_slope) floor_h = mo->floor_z_;
 
-    S = sector->bottom_ef;
-    L = sector->bottom_liq;
+    S = sector->bottom_extrafloor;
+    L = sector->bottom_liquid;
 
     while (S || L)
     {
-        if (!L || (S && S->bottom_h < L->bottom_h))
+        if (!L || (S && S->bottom_height < L->bottom_height))
         {
             C = S;
             S = S->higher;
@@ -762,23 +762,23 @@ void P_CalcFullProperties(const MapObject *mo, region_properties_t *new_p)
         SYS_ASSERT(C);
 
         // ignore "hidden" liquids
-        if (C->bottom_h < floor_h || C->bottom_h > sector->c_h) continue;
+        if (C->bottom_height < floor_h || C->bottom_height > sector->ceiling_height) continue;
 
-        if (bz < C->bottom_h) new_p->friction = C->p->friction;
+        if (bz < C->bottom_height) new_p->friction = C->properties->friction;
 
-        AddRegionProperties(mo, bz, tz, new_p, floor_h, C->top_h, C->p, false);
+        AddRegionProperties(mo, bz, tz, new_p, floor_h, C->top_height, C->properties, false);
 
-        floor_h = C->top_h;
+        floor_h = C->top_height;
     }
 
-    AddRegionProperties(mo, bz, tz, new_p, floor_h, sector->c_h, sector->p,
+    AddRegionProperties(mo, bz, tz, new_p, floor_h, sector->ceiling_height, sector->active_properties,
                         true);
 }
 
 //
 // P_XYMovement
 //
-static void P_XYMovement(MapObject *mo, const region_properties_t *props,
+static void P_XYMovement(MapObject *mo, const RegionProperties *props,
                          bool extra_tic)
 {
     bool do_extra = mo->player_ != nullptr;  // 70 Hz
@@ -924,12 +924,12 @@ static void P_XYMovement(MapObject *mo, const region_properties_t *props,
                 //
                 if (special_lines_hit.size() > 0)
                 {
-                    for (std::vector<line_t *>::reverse_iterator
+                    for (std::vector<Line *>::reverse_iterator
                              iter     = special_lines_hit.rbegin(),
                              iter_end = special_lines_hit.rend();
                          iter != iter_end; iter++)
                     {
-                        line_t *ld = *iter;
+                        Line *ld = *iter;
 
                         ShootSpecialLine(ld, PointOnLineSide(mo->x, mo->y, ld),
                                          mo->source_);
@@ -962,7 +962,7 @@ static void P_XYMovement(MapObject *mo, const region_properties_t *props,
             }
 
             // -AJA- 2008/01/20: Jumping out of Water
-            if (block_line && block_line->backsector && mo->player_ &&
+            if (block_line && block_line->back_sector && mo->player_ &&
                 mo->player_->mo == mo && mo->player_->wet_feet &&
                 !mo->player_->swimming && mo->player_->jumpwait == 0 &&
                 mo->z > mo->floor_z_ + 0.5f && mo->momentum_.Z >= 0.0f)
@@ -970,13 +970,13 @@ static void P_XYMovement(MapObject *mo, const region_properties_t *props,
                 float ground_h;
 
                 int i =
-                    FindThingGap(block_line->gaps, block_line->gap_num,
+                    FindThingGap(block_line->gaps, block_line->gap_number,
                                  mo->z + mo->height_, mo->z + 2 * mo->height_);
-                if (i >= 0) { ground_h = block_line->gaps[i].f; }
+                if (i >= 0) { ground_h = block_line->gaps[i].floor; }
                 else
                 {
-                    ground_h = HMM_MAX(block_line->frontsector->f_h,
-                                       block_line->backsector->f_h);
+                    ground_h = HMM_MAX(block_line->front_sector->floor_height,
+                                       block_line->back_sector->floor_height);
                 }
 
                 // LogDebug("ground_h: %1.0f  mo_Z: %1.0f\n", ground_h, mo->z);
@@ -1093,7 +1093,7 @@ static void P_XYMovement(MapObject *mo, const region_properties_t *props,
 //
 // P_ZMovement
 //
-static void P_ZMovement(MapObject *mo, const region_properties_t *props,
+static void P_ZMovement(MapObject *mo, const RegionProperties *props,
                         bool extra_tic)
 {
     bool do_extra = mo->player_ != nullptr;  // 70 Hz
@@ -1254,7 +1254,7 @@ static void P_ZMovement(MapObject *mo, const region_properties_t *props,
 
             // if the floor is sky, don't explode missile -ACB- 1998/07/31
             if (IS_SKY(mo->subsector_->sector->floor) &&
-                mo->subsector_->sector->f_h >= mo->floor_z_)
+                mo->subsector_->sector->floor_height >= mo->floor_z_)
             {
                 P_MobjRemoveMissile(mo);
             }
@@ -1353,8 +1353,8 @@ static void P_ZMovement(MapObject *mo, const region_properties_t *props,
             }
 
             // if the ceiling is sky, don't explode missile -ACB- 1998/07/31
-            if (IS_SKY(mo->subsector_->sector->ceil) &&
-                mo->subsector_->sector->c_h <= mo->ceiling_z_)
+            if (IS_SKY(mo->subsector_->sector->ceiling) &&
+                mo->subsector_->sector->ceiling_height <= mo->ceiling_z_)
             {
                 P_MobjRemoveMissile(mo);
             }
@@ -1421,8 +1421,8 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
 
     if (mobj->IsRemoved()) return;
 
-    const region_properties_t *props;
-    region_properties_t        player_props;
+    const RegionProperties *props;
+    RegionProperties        player_props;
 
     mobj->old_z_       = mobj->z;
     mobj->old_floor_z_ = mobj->floor_z_;
@@ -1486,11 +1486,11 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
     else
     {
         // handle push sectors
-        for (touch_node_t *tn = mobj->touch_sectors_; tn; tn = tn->mo_next)
+        for (TouchNode *tn = mobj->touch_sectors_; tn; tn = tn->map_object_next)
         {
-            if (tn->sec)
+            if (tn->sector)
             {
-                region_properties_t tn_props = tn->sec->props;
+                RegionProperties tn_props = tn->sector->properties;
                 if (tn_props.push.X || tn_props.push.Y || tn_props.push.Z)
                 {
                     SectorFlag flags = tn_props.special
@@ -2083,7 +2083,7 @@ FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
     FlatDefinition *current_flatdef = nullptr;
 
     // If no 3D floors, just return the flat
-    if (thing->subsector_->sector->exfloor_used == 0)
+    if (thing->subsector_->sector->extrafloor_used == 0)
     {
         current_flatdef =
             flatdefs.Find(thing->subsector_->sector->floor.image->name.c_str());
@@ -2093,19 +2093,19 @@ FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
     else
     {
         float         player_floor_height = thing->floor_z_;
-        extrafloor_t *floor_checker  = thing->subsector_->sector->bottom_ef;
-        extrafloor_t *liquid_checker = thing->subsector_->sector->bottom_liq;
-        for (extrafloor_t *ef = floor_checker; ef; ef = ef->higher)
+        Extrafloor *floor_checker  = thing->subsector_->sector->bottom_extrafloor;
+        Extrafloor *liquid_checker = thing->subsector_->sector->bottom_liquid;
+        for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
         {
-            if (AlmostEquals(player_floor_height, ef->top_h))
+            if (AlmostEquals(player_floor_height, ef->top_height))
                 current_flatdef = flatdefs.Find(
-                    ef->ef_line->frontsector->floor.image->name.c_str());
+                    ef->extrafloor_line->front_sector->floor.image->name.c_str());
         }
-        for (extrafloor_t *ef = liquid_checker; ef; ef = ef->higher)
+        for (Extrafloor *ef = liquid_checker; ef; ef = ef->higher)
         {
-            if (AlmostEquals(player_floor_height, ef->top_h))
+            if (AlmostEquals(player_floor_height, ef->top_height))
                 current_flatdef = flatdefs.Find(
-                    ef->ef_line->frontsector->floor.image->name.c_str());
+                    ef->extrafloor_line->front_sector->floor.image->name.c_str());
         }
         // if (!current_flatdef)
         //	current_flatdef =
@@ -2133,7 +2133,7 @@ bool P_HitLiquidFloor(MapObject *thing)
     if (thing->subsector_->sector->floor_vertex_slope &&
         thing->z > thing->floor_z_)
         return false;
-    else if (!AlmostEquals(thing->floor_z_, thing->subsector_->sector->f_h))
+    else if (!AlmostEquals(thing->floor_z_, thing->subsector_->sector->floor_height))
         return false;
 
     FlatDefinition *current_flatdef = P_IsThingOnLiquidFloor(thing);
@@ -2360,30 +2360,30 @@ MapObject *P_MobjCreateObject(float x, float y, float z,
 
     // -AJA- 1999/07/30: Updated for extra floors.
 
-    sector_t *sec = mobj->subsector_->sector;
+    Sector *sec = mobj->subsector_->sector;
 
-    float f_slope_z = 0;
-    float c_slope_z = 0;
+    float floor_slope_z = 0;
+    float ceiling_slope_z = 0;
 
     if (sec->floor_vertex_slope)
     {
         float sz = MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}},
-                                             sec->floor_z_verts[2],
-                                             sec->floor_vs_normal)
+                                             sec->floor_z_vertices[2],
+                                             sec->floor_vertex_slope_normal)
                        .Z;
-        if (isfinite(sz)) f_slope_z = sz - sec->f_h;
+        if (isfinite(sz)) floor_slope_z = sz - sec->floor_height;
     }
-    if (sec->ceil_vertex_slope)
+    if (sec->ceiling_vertex_slope)
     {
         float sz =
             MathLinePlaneIntersection({{x, y, -40000}}, {{x, y, 40000}},
-                                      sec->ceil_z_verts[2], sec->ceil_vs_normal)
+                                      sec->ceiling_z_vertices[2], sec->ceiling_vertex_slope_normal)
                 .Z;
-        if (isfinite(sz)) c_slope_z = sec->c_h - sz;
+        if (isfinite(sz)) ceiling_slope_z = sec->ceiling_height - sz;
     }
 
     mobj->z = ComputeThingGap(mobj, sec, z, &mobj->floor_z_, &mobj->ceiling_z_,
-                              f_slope_z, c_slope_z);
+                              floor_slope_z, ceiling_slope_z);
 
     // Find the real players height (TELEPORT WEAPONS).
     mobj->original_height_ = z;

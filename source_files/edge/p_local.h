@@ -154,7 +154,7 @@ void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff,
                  BAMAngle angle);
 void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle,
                   const MapObjectDefinition *blood);
-void P_CalcFullProperties(const MapObject *mo, region_properties_t *newregp);
+void P_CalcFullProperties(const MapObject *mo, RegionProperties *newregp);
 bool P_HitLiquidFloor(MapObject *thing);
 
 // -ACB- 1998/08/02 New procedures for DDF etc...
@@ -197,25 +197,25 @@ MapObject *P_LookForShootSpot(const MapObjectDefinition *spot_type);
 float ApproximateDistance(float dx, float dy);
 float ApproximateDistance(float dx, float dy, float dz);
 float ApproximateSlope(float dx, float dy, float dz);
-int   PointOnDividingLineSide(float x, float y, divline_t *div);
-int   PointOnDividingLineThick(float x, float y, divline_t *div, float div_len,
+int   PointOnDividingLineSide(float x, float y, DividingLine *div);
+int   PointOnDividingLineThick(float x, float y, DividingLine *div, float div_len,
                                float thickness);
-void ComputeIntersection(divline_t *div, float x1, float y1, float x2, float y2,
+void ComputeIntersection(DividingLine *div, float x1, float y1, float x2, float y2,
                          float *ix, float *iy);
-int  BoxOnLineSide(const float *tmbox, line_t *ld);
-int  BoxOnDividingLineSide(const float *tmbox, divline_t *div);
-int  ThingOnLineSide(const MapObject *mo, line_t *ld);
+int  BoxOnLineSide(const float *tmbox, Line *ld);
+int  BoxOnDividingLineSide(const float *tmbox, DividingLine *div);
+int  ThingOnLineSide(const MapObject *mo, Line *ld);
 
-int   FindThingGap(vgap_t *gaps, int gap_num, float z1, float z2);
-void  ComputeGaps(line_t *ld);
-float ComputeThingGap(MapObject *thing, sector_t *sec, float z, float *f,
-                      float *c, float f_slope_z = 0.0f, float c_slope_z = 0.0f);
-void  AddExtraFloor(sector_t *sec, line_t *line);
-void  RecomputeGapsAroundSector(sector_t *sec);
-void  FloodExtraFloors(sector_t *sector);
+int   FindThingGap(VerticalGap *gaps, int gap_num, float z1, float z2);
+void  ComputeGaps(Line *ld);
+float ComputeThingGap(MapObject *thing, Sector *sec, float z, float *f,
+                      float *c, float floor_slope_z = 0.0f, float ceiling_slope_z = 0.0f);
+void  AddExtraFloor(Sector *sec, Line *line);
+void  RecomputeGapsAroundSector(Sector *sec);
+void  FloodExtraFloors(Sector *sector);
 
 bool CheckAreaForThings(float *bbox);
-bool CheckSliderPathForThings(line_t *ld);
+bool CheckSliderPathForThings(Line *ld);
 
 typedef enum
 {
@@ -225,14 +225,14 @@ typedef enum
     EXFIT_StuckInExtraFloor
 } exfloor_fit_e;
 
-exfloor_fit_e CheckExtrafloorFit(sector_t *sec, float z1, float z2);
+exfloor_fit_e CheckExtrafloorFit(Sector *sec, float z1, float z2);
 
 //
 // P_MAP
 //
 
 // --> Line list class
-class linelist_c : public std::vector<line_t *>
+class linelist_c : public std::vector<Line *>
 {
    public:
     linelist_c() {}
@@ -240,7 +240,7 @@ class linelist_c : public std::vector<line_t *>
     {
         for (auto iter = begin(); iter != end(); iter++)
         {
-            line_t *l = *iter;
+            Line *l = *iter;
             delete l;
             l = nullptr;
         }
@@ -252,7 +252,7 @@ extern bool  float_ok;
 extern float float_destination_z;
 
 extern bool    map_object_hit_sky;
-extern line_t *block_line;
+extern Line *block_line;
 
 extern linelist_c special_lines_hit;
 
@@ -268,9 +268,9 @@ void P_TargetTheory(MapObject *source, MapObject *target, float *x, float *y,
 
 MapObject *P_AimLineAttack(MapObject *t1, BAMAngle angle, float distance,
                            float *slope);
-void       UpdateMultipleFloors(sector_t *sector);
-bool       CheckSolidSectorMove(sector_t *sec, bool is_ceiling, float dh);
-bool SolidSectorMove(sector_t *sec, bool is_ceiling, float dh, int crush = 10,
+void       UpdateMultipleFloors(Sector *sector);
+bool       CheckSolidSectorMove(Sector *sec, bool is_ceiling, float dh);
+bool SolidSectorMove(Sector *sec, bool is_ceiling, float dh, int crush = 10,
                      bool nocarething = false);
 bool CheckAbsolutePosition(MapObject *thing, float x, float y, float z);
 bool P_CheckSight(MapObject *src, MapObject *dest);
@@ -287,12 +287,12 @@ void P_LineAttack(MapObject *t1, BAMAngle angle, float distance, float slope,
                   float damage, const DamageClass *damtype,
                   const MapObjectDefinition *puff);
 
-void P_UnblockLineEffectDebris(line_t *TheLine, const LineType *special);
+void P_UnblockLineEffectDebris(Line *TheLine, const LineType *special);
 
 MapObject *GetMapTargetAimInfo(MapObject *source, BAMAngle angle,
                                float distance);
 
-bool ReplaceMidTexFromPart(line_t *TheLine, ScrollingPart parts);
+bool ReplaceMidTexFromPart(Line *TheLine, ScrollingPart parts);
 
 //
 // P_SETUP

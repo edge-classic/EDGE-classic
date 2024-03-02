@@ -23,19 +23,16 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __R_BSP__
-#define __R_BSP__
+#pragma once
 
 #include "r_defs.h"
 
-extern side_t   *sidedef;
-extern line_t   *linedef;
-extern sector_t *frontsector;
-extern sector_t *backsector;
+extern Side   *sidedef;
+extern Line   *linedef;
+extern Sector *frontsector;
+extern Sector *backsector;
 
 extern unsigned int root_node;
-
-#endif // __R_BSP__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -39,7 +39,7 @@ struct LightSpecial
     // type of light effect
     const LightSpecialDefinition *type;
 
-    sector_t *sector;
+    Sector *sector;
 
     // countdown value to next change, or 0 if disabled
     int count;
@@ -65,7 +65,7 @@ enum ButtonPosition
 
 struct Button
 {
-    line_t             *line;
+    Line             *line;
     ButtonPosition      where;
     const image_c      *button_image;
     int                 button_timer;
@@ -83,7 +83,7 @@ enum PlaneDirection
 struct PlaneMover
 {
     const PlaneMoverDefinition *type;
-    sector_t                   *sector;
+    Sector                   *sector;
 
     bool is_ceiling;
     bool is_elevator;
@@ -114,7 +114,7 @@ struct PlaneMover
 struct SlidingDoorMover
 {
     const SlidingDoor *info;
-    line_t            *line;
+    Line            *line;
 
     // current distance it has opened
     float opening;
@@ -147,7 +147,7 @@ struct Force
 
     HMM_Vec2 direction;  // wind/current
 
-    sector_t *sector;  // the affected sector
+    Sector *sector;  // the affected sector
 };
 
 // End-level timer (-TIMER option)
@@ -164,32 +164,32 @@ void SpawnMapSpecials2(int autotag);
 void UpdateSpecials(bool extra_tic);
 
 // when needed
-bool UseSpecialLine(MapObject *thing, line_t *line, int side, float open_bottom,
+bool UseSpecialLine(MapObject *thing, Line *line, int side, float open_bottom,
                     float open_top);
-bool CrossSpecialLine(line_t *ld, int side, MapObject *thing);
-void ShootSpecialLine(line_t *ld, int side, MapObject *thing);
+bool CrossSpecialLine(Line *ld, int side, MapObject *thing);
+void ShootSpecialLine(Line *ld, int side, MapObject *thing);
 void RemoteActivation(MapObject *thing, int typenum, int tag, int side,
                       LineTrigger method);
-void PlayerInSpecialSector(struct player_s *pl, sector_t *sec,
+void PlayerInSpecialSector(struct player_s *pl, Sector *sec,
                            bool should_choke = true);
 
 // Utilities...
 int       LineIsTwoSided(int sector, int line);
-side_t   *GetLineSidedef(int currentSector, int line, int side);
-sector_t *GetLineSector(int currentSector, int line, int side);
-sector_t *GetLineSectorAdjacent(const line_t *line, const sector_t *sec,
+Side   *GetLineSidedef(int currentSector, int line, int side);
+Sector *GetLineSector(int currentSector, int line, int side);
+Sector *GetLineSectorAdjacent(const Line *line, const Sector *sec,
                                 bool ignore_selfref = false);
 
 // Info Needs....
 float FindSurroundingHeight(const TriggerHeightReference ref,
-                            const sector_t              *sec);
+                            const Sector              *sec);
 float FindRaiseToTexture(
-    sector_t *sec);  // -KM- 1998/09/01 New func, old inline
-sector_t *FindSectorFromTag(int tag);
-int       FindMinimumSurroundingLight(sector_t *sector, int max);
+    Sector *sec);  // -KM- 1998/09/01 New func, old inline
+Sector *FindSectorFromTag(int tag);
+int       FindMinimumSurroundingLight(Sector *sector, int max);
 
 // start an action...
-bool RunSectorLight(sector_t *sec, const LightSpecialDefinition *type);
+bool RunSectorLight(Sector *sec, const LightSpecialDefinition *type);
 
 void RunActivePlanes(void);
 void RunActiveSliders(void);
@@ -199,45 +199,45 @@ void AddActiveSlider(SlidingDoorMover *smov);
 void DestroyAllPlanes(void);
 void DestroyAllSliders(void);
 
-void AddSpecialLine(line_t *ld);
-void AddSpecialSector(sector_t *sec);
-void SectorChangeSpecial(sector_t *sec, int new_type);
+void AddSpecialLine(Line *ld);
+void AddSpecialSector(Sector *sec);
+void SectorChangeSpecial(Sector *sec, int new_type);
 
 void          RunLights(void);
 LightSpecial *NewLight(void);
 void          DestroyAllLights(void);
 
 void RunLineTagLights(int tag, int bright);
-bool RunDonutSpecial(sector_t *s1, struct SoundEffect *sfx[4]);
-bool TeleportMapObject(line_t *line, int tag, MapObject *thing,
+bool RunDonutSpecial(Sector *s1, struct SoundEffect *sfx[4]);
+bool TeleportMapObject(Line *line, int tag, MapObject *thing,
                        const TeleportDefinition *def);
-bool RunManualPlaneMover(line_t *line, MapObject *thing,
+bool RunManualPlaneMover(Line *line, MapObject *thing,
                          const PlaneMoverDefinition *type);
 
-bool RunPlaneMover(sector_t *sec, const PlaneMoverDefinition *type,
-                   sector_t *model);
-bool RunSlidingDoor(line_t *door, line_t *act_line, MapObject *thing,
+bool RunPlaneMover(Sector *sec, const PlaneMoverDefinition *type,
+                   Sector *model);
+bool RunSlidingDoor(Line *door, Line *act_line, MapObject *thing,
                     const LineType *special);
-bool SectorIsLowering(sector_t *sec);
+bool SectorIsLowering(Sector *sec);
 
 void RunForces(bool extra_tic);
 void DestroyAllForces(void);
-void AddPointForce(sector_t *sec, float length);
-void AddSectorForce(sector_t *sec, bool is_wind, float x_mag, float y_mag);
+void AddPointForce(Sector *sec, float length);
+void AddSectorForce(Sector *sec, bool is_wind, float x_mag, float y_mag);
 
 void RunAmbientSounds(void);
-void AddAmbientSounds(sector_t *sec, struct SoundEffect *sfx);
+void AddAmbientSounds(Sector *sec, struct SoundEffect *sfx);
 void DestroyAllAmbientSounds(void);
 
 //
 //  P_SWITCH
 //
 void InitializeSwitchList(void);
-void ChangeSwitchTexture(line_t *line, bool useAgain, LineSpecial specials,
+void ChangeSwitchTexture(Line *line, bool useAgain, LineSpecial specials,
                          bool noSound);
 void ClearButtons(void);
 void UpdateButtons(void);
-bool ButtonIsPressed(line_t *ld);
+bool ButtonIsPressed(Line *ld);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

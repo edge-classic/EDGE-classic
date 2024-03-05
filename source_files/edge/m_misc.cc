@@ -78,10 +78,10 @@ int                    var_mix_channels = 0;
 static bool done_first_init = false;
 
 static ConfigurationDefault defaults[] = {
-    {kConfigInteger, "screenwidth", &SCREENWIDTH, CFGDEF_SCREENWIDTH},
-    {kConfigInteger, "screenheight", &SCREENHEIGHT, CFGDEF_SCREENHEIGHT},
-    {kConfigInteger, "screendepth", &SCREENBITS, CFGDEF_SCREENBITS},
-    {kConfigInteger, "displaymode", &DISPLAYMODE, CFGDEF_DISPLAYMODE},
+    {kConfigInteger, "screenwidth", &current_screen_width, CFGDEF_SCREENWIDTH},
+    {kConfigInteger, "screenheight", &current_screen_height, CFGDEF_SCREENHEIGHT},
+    {kConfigInteger, "screendepth", &current_screen_depth, CFGDEF_SCREENBITS},
+    {kConfigInteger, "displaymode", &current_window_mode, CFGDEF_DISPLAYMODE},
 
     {kConfigInteger, "sound_stereo", &var_sound_stereo, CFGDEF_SOUND_STEREO},
     {kConfigBoolean, "pc_speaker_mode", &var_pc_speaker_mode, 0},
@@ -93,8 +93,8 @@ static ConfigurationDefault defaults[] = {
 
     // -ES- 1998/11/28 Save fade settings
     {kConfigInteger, "reduce_flash", &reduce_flash, 0},
-    {kConfigInteger, "invuln_fx", &var_invul_fx, CFGDEF_INVUL_FX},
-    {kConfigEnum, "wipe_method", &wipe_method, CFGDEF_WIPE_METHOD},
+    {kConfigInteger, "invuln_fx", &invulnerability_effect, CFGDEF_INVUL_FX},
+    {kConfigEnum, "wipe_method", &wipe_method, CFGDEF_kScreenWipeMETHOD},
     {kConfigBoolean, "rotate_map", &rotate_map, CFGDEF_ROTATEMAP},
     {kConfigBoolean, "respawnsetting", &global_flags.res_respawn,
      CFGDEF_RES_RESPAWN},
@@ -122,8 +122,8 @@ static ConfigurationDefault defaults[] = {
     {kConfigBoolean, "mlook", &global_flags.mlook, CFGDEF_MLOOK},
     {kConfigBoolean, "jumping", &global_flags.jump, CFGDEF_JUMP},
     {kConfigBoolean, "crouching", &global_flags.crouch, CFGDEF_CROUCH},
-    {kConfigInteger, "smoothing", &var_smoothing, CFGDEF_USE_SMOOTHING},
-    {kConfigInteger, "dlights", &use_dlights, CFGDEF_USE_DLIGHTS},
+    {kConfigInteger, "smoothing", &image_smoothing, CFGDEF_USE_SMOOTHING},
+    {kConfigInteger, "dlights", &use_dynamic_lights, CFGDEF_USE_DLIGHTS},
     {kConfigInteger, "detail_level", &detail_level, CFGDEF_DETAIL_LEVEL},
     {kConfigInteger, "hq2x_scaling", &hq2x_scaling, CFGDEF_HQ2X_SCALING},
 
@@ -319,7 +319,7 @@ void ConfigurationResetDefaults(int dummy, ConsoleVariable *dummy_cvar)
         epi::PathAppend(game_directory, "soundfont/Default.sf2"));
 
     // Needed so that Smoothing/Upscaling is properly reset
-    W_DeleteAllImages();
+    DeleteAllImages();
 
     done_first_init = true;
 }
@@ -466,9 +466,9 @@ void TakeScreenshot(bool show_msg)
         }
     }
 
-    ImageData *img = new ImageData(SCREENWIDTH, SCREENHEIGHT, 3);
+    ImageData *img = new ImageData(current_screen_width, current_screen_height, 3);
 
-    RGL_ReadScreen(0, 0, SCREENWIDTH, SCREENHEIGHT, img->PixelAt(0, 0));
+    RendererReadScreen(0, 0, current_screen_width, current_screen_height, img->PixelAt(0, 0));
 
     // ReadScreen produces a bottom-up image, need to invert it
     img->Invert();
@@ -499,9 +499,9 @@ void CreateSaveScreenshot(void)
 
     epi::FileDelete(filename);
 
-    ImageData *img = new ImageData(SCREENWIDTH, SCREENHEIGHT, 3);
+    ImageData *img = new ImageData(current_screen_width, current_screen_height, 3);
 
-    RGL_ReadScreen(0, 0, SCREENWIDTH, SCREENHEIGHT, img->PixelAt(0, 0));
+    RendererReadScreen(0, 0, current_screen_width, current_screen_height, img->PixelAt(0, 0));
 
     // ReadScreen produces a bottom-up image, need to invert it
     img->Invert();

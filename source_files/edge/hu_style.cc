@@ -44,10 +44,10 @@ void Style::Load()
     {
         const char *name = definition_->bg_.image_name_.c_str();
 
-        background_image_ = W_ImageLookup(name, kImageNamespaceFlat, ILF_Null);
+        background_image_ = ImageLookup(name, kImageNamespaceFlat, kImageLookupNull);
 
         if (!background_image_)
-            background_image_ = W_ImageLookup(name, kImageNamespaceGraphic);
+            background_image_ = ImageLookup(name, kImageNamespaceGraphic);
     }
 
     for (int T = 0; T < StyleDefinition::kTotalTextSections; T++)
@@ -67,7 +67,7 @@ void Style::DrawBackground()
 
     float WS_x = -130;  // Lobo: fixme, this should be calculated, not arbitrary
                         // hardcoded ;)
-    float WS_w = SCREENWIDTH;  // 580;
+    float WS_w = current_screen_width;  // 580;
 
     if (!background_image_)
     {
@@ -114,7 +114,7 @@ void Style::DrawBackground()
 
         CenterX = 160;
         CenterX -=
-            (background_image_->actual_w * background_image_->scale_x) / 2;
+            (background_image_->actual_width_ * background_image_->scale_x_) / 2;
 
         HudSetScale(definition_->bg_.scale_);
         // HudStretchImage(0, 0, 320, 200, background_image_);
@@ -164,7 +164,7 @@ void HudWriteText(Style *style, int text_type, int x, int y, const char *str,
 
     const Colormap *colmap = style->definition_->text_[text_type].colmap_;
 
-    if (colmap) HudSetTextColor(V_GetFontColor(colmap));
+    if (colmap) HudSetTextColor(GetFontColor(colmap));
 
     HudDrawText(x, y, str);
 

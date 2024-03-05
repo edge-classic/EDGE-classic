@@ -43,11 +43,11 @@
 #include "m_misc.h"
 #include "n_network.h"
 #include "p_local.h"
-#include "r_bsp.h"
 #include "r_colormap.h"
 #include "r_draw.h"
 #include "r_gldefs.h"
 #include "r_modes.h"
+#include "sokol_color.h"
 #include "str_compare.h"
 
 EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_bsp, "0", kConsoleVariableFlagNone)
@@ -55,6 +55,8 @@ EDGE_DEFINE_CONSOLE_VARIABLE(automap_debug_collisions, "0", kConsoleVariableFlag
 EDGE_DEFINE_CONSOLE_VARIABLE(automap_gridsize, "128", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(automap_keydoor_text, "0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(automap_smoothing, "1", kConsoleVariableFlagArchive)
+
+extern unsigned int root_node;
 
 // Automap colors
 
@@ -699,11 +701,11 @@ static void DrawKeyOnLine(AutomapLine *ml, int theKey,
                       kStateFrameFlagModel))  // Can't handle 3d models...yet
                 {
                     bool           flip;
-                    const image_c *img = R2_GetOtherSprite(
+                    const Image *img = RendererGetOtherSprite(
                         idlestate->sprite, idlestate->frame, &flip);
 
                     if (epi::StringCaseCompareASCII("DUMMY_SPRITE",
-                                                    img->name) != 0)
+                                                    img->name_) != 0)
                         HudDrawImageNoOffset(x1, y1, img);
                     // HudStretchImage(x1, y1, 16, 16, img, 0.0, 0.0);
                 }
@@ -1114,11 +1116,6 @@ static void AutomapDrawPlayer(MapObject *mo)
         }
         return;
     }
-
-#if 0  //!!!! TEMP DISABLED, NETWORK DEBUGGING
-	if (DEATHMATCH() && mo->player_ != p)
-		return;
-#endif
 
     DrawLineCharacter(player_arrow, kAutomapPlayerArrowLines, mo->radius_,
                       mo->angle_, player_colors[mo->player_->pnum & 0x07], mo->x,

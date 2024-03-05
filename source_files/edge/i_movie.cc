@@ -32,6 +32,7 @@
 #include "w_wad.h"
 #define PL_MPEG_IMPLEMENTATION
 #include "pl_mpeg.h"
+#include "sokol_color.h"
 
 extern bool sound_device_stereo;
 extern int  sound_device_frequency;
@@ -202,16 +203,16 @@ void PlayMovie(const std::string &name)
     if (movie->scaling_ == kMovieScalingAutofit)
     {
         // If movie and display ratios match (ish), stretch it
-        if (fabs((float)SCREENWIDTH / SCREENHEIGHT / movie_ratio - 1.0f) <=
+        if (fabs((float)current_screen_width / current_screen_height / movie_ratio - 1.0f) <=
             0.10f)
         {
-            frame_height = SCREENHEIGHT;
-            frame_width  = SCREENWIDTH;
+            frame_height = current_screen_height;
+            frame_width  = current_screen_width;
         }
         else  // Zoom
         {
-            frame_height = SCREENHEIGHT;
-            frame_width  = RoundToInteger((float)SCREENHEIGHT * movie_ratio);
+            frame_height = current_screen_height;
+            frame_width  = RoundToInteger((float)current_screen_height * movie_ratio);
         }
     }
     else if (movie->scaling_ == kMovieScalingNoScale)
@@ -221,19 +222,19 @@ void PlayMovie(const std::string &name)
     }
     else if (movie->scaling_ == kMovieScalingZoom)
     {
-        frame_height = SCREENHEIGHT;
-        frame_width  = RoundToInteger((float)SCREENHEIGHT * movie_ratio);
+        frame_height = current_screen_height;
+        frame_width  = RoundToInteger((float)current_screen_height * movie_ratio);
     }
     else  // Stretch, aspect ratio gets BTFO potentially
     {
-        frame_height = SCREENHEIGHT;
-        frame_width  = SCREENWIDTH;
+        frame_height = current_screen_height;
+        frame_width  = current_screen_width;
     }
 
-    int vx1 = SCREENWIDTH / 2 - frame_width / 2;
-    int vx2 = SCREENWIDTH / 2 + frame_width / 2;
-    int vy1 = SCREENHEIGHT / 2 + frame_height / 2;
-    int vy2 = SCREENHEIGHT / 2 - frame_height / 2;
+    int vx1 = current_screen_width / 2 - frame_width / 2;
+    int vx2 = current_screen_width / 2 + frame_width / 2;
+    int vy1 = current_screen_height / 2 + frame_height / 2;
+    int vy2 = current_screen_height / 2 - frame_height / 2;
 
     int num_pixels = movie_width * movie_height * 3;
     rgb_data       = new uint8_t[num_pixels];
@@ -246,7 +247,7 @@ void PlayMovie(const std::string &name)
         plm_set_audio_stream(decoder, 0);
     }
 
-    RGL_BlackoutWipeTex();
+    RendererBlackoutWipeTexture();
 
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -256,7 +257,7 @@ void PlayMovie(const std::string &name)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     FinishFrame();
 
-    RGL_SetupMatrices2D();
+    RendererSetupMatrices2D();
 
     double last_time = (double)SDL_GetTicks() / 1000.0;
 

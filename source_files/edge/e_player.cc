@@ -42,6 +42,7 @@
 #include "m_random.h"
 #include "p_local.h"
 #include "script/compat/lua_compat.h"
+#include "sokol_color.h"
 #include "str_util.h"
 #include "vm_coal.h"  // For VM_EndLevel()
 

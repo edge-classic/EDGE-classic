@@ -497,13 +497,13 @@ void DeathBot::SelectWeapon()
 void DeathBot::MoveToward(const Position &pos)
 {
     cmd_.speed     = MOVE_SPEED + (6.25 * bot_skill.d_);
-    cmd_.direction = R_PointToAngle(pl_->mo->x, pl_->mo->y, pos.x, pos.y);
+    cmd_.direction = RendererPointToAngle(pl_->mo->x, pl_->mo->y, pos.x, pos.y);
 }
 
 void DeathBot::WalkToward(const Position &pos)
 {
     cmd_.speed     = (MOVE_SPEED + (3.125 * bot_skill.d_));
-    cmd_.direction = R_PointToAngle(pl_->mo->x, pl_->mo->y, pos.x, pos.y);
+    cmd_.direction = RendererPointToAngle(pl_->mo->x, pl_->mo->y, pos.x, pos.y);
 }
 
 void DeathBot::TurnToward(BAMAngle want_angle, float want_slope, bool fast)
@@ -538,7 +538,7 @@ void DeathBot::TurnToward(const MapObject *mo, bool fast)
     float dy = mo->y - pl_->mo->y;
     float dz = mo->z - pl_->mo->z;
 
-    BAMAngle want_angle = R_PointToAngle(0, 0, dx, dy);
+    BAMAngle want_angle = RendererPointToAngle(0, 0, dx, dy);
     float    want_slope = ApproximateSlope(dx, dy, dz);
 
     TurnToward(want_angle, want_slope, fast);
@@ -630,7 +630,7 @@ void DeathBot::UpdateEnemy()
     float dy = enemy->y - pl_->mo->y;
     float dz = enemy->z - pl_->mo->z;
 
-    enemy_angle_ = R_PointToAngle(0, 0, dx, dy);
+    enemy_angle_ = RendererPointToAngle(0, 0, dx, dy);
     enemy_slope_ = ApproximateSlope(dx, dy, dz);
     enemy_dist_  = DistTo(pos);
 
@@ -943,7 +943,7 @@ BotFollowPathResult DeathBot::FollowPath(bool do_look)
         float dy = dest.y - pl_->mo->y;
         float dz = dest.z - pl_->mo->z;
 
-        BAMAngle want_angle = R_PointToAngle(0, 0, dx, dy);
+        BAMAngle want_angle = RendererPointToAngle(0, 0, dx, dy);
         float    want_slope = ApproximateSlope(dx, dy, dz);
 
         TurnToward(want_angle, want_slope, false);

@@ -61,6 +61,7 @@
 #include "r_draw.h"
 #include "r_modes.h"
 #include "s_sound.h"
+#include "sokol_color.h"
 #include "w_wad.h"
 
 // Static Scripts.  Never change once all scripts have been read in.
@@ -181,7 +182,7 @@ class rts_menu_c
 
         if (style->definition_->text_[2].colmap_)
         {
-            HudSetTextColor(V_GetFontColor(style->definition_->text_[2].colmap_)); // LOBO: Use TITLE.COLOURMAP from styles.ddf
+            HudSetTextColor(GetFontColor(style->definition_->text_[2].colmap_)); // LOBO: Use TITLE.COLOURMAP from styles.ddf
         }
         else
         {
@@ -202,7 +203,7 @@ class rts_menu_c
 
         if (style->definition_->text_[0].colmap_)
         {
-            HudSetTextColor(V_GetFontColor(style->definition_->text_[0].colmap_)); // LOBO: Use TEXT.COLOURMAP from styles.ddf
+            HudSetTextColor(GetFontColor(style->definition_->text_[0].colmap_)); // LOBO: Use TEXT.COLOURMAP from styles.ddf
         }
         else
         {
@@ -588,7 +589,7 @@ static bool RAD_CheckHeightTrig(rad_trigger_t *trig, s_onheight_t *cond)
         }
         else
         {
-            cond->cached_sector = R_PointInSubsector(trig->info->x, trig->info->y)->sector;
+            cond->cached_sector = RendererPointInSubsector(trig->info->x, trig->info->y)->sector;
         }
     }
 

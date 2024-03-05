@@ -38,7 +38,7 @@
 //  for defining the global state variables.
 #include "dm_data.h"
 
-class image_c;
+class Image;
 
 extern bool devparm; // DEBUG: launched with -devparm
 
@@ -68,16 +68,9 @@ extern bool viewactive;
 extern bool nodrawers;
 extern bool noblit;
 
-// This one is related to the 3-screen display mode.
-// kBAMAngle90 = left side, kBAMAngle270 = right
-extern BAMAngle viewanglebaseoffset;
-
 // Timer, for scores.
 extern int  level_time_elapsed; // tics in game play for par
 extern bool fast_forward_active;
-
-// -AJA- 2000/12/07: auto quick-load feature
-extern bool autoquickload;
 
 //?
 extern game_state_e game_state;
@@ -114,7 +107,7 @@ extern std::string shot_dir;
 extern bool precache;
 
 // if true, enable HOM detection (hall of mirrors effect)
-extern ConsoleVariable debug_hom;
+extern ConsoleVariable debug_hall_of_mirrors;
 
 extern int save_page;
 
@@ -128,7 +121,7 @@ extern int bodyqueslot;
 // Needed to store the number of the dummy sky flat.
 // Used for rendering, as well as tracking projectiles etc.
 
-extern const image_c *skyflatimage;
+extern const Image *skyflatimage;
 
 #define IS_SKY(plane) ((plane).image == skyflatimage)
 
@@ -150,7 +143,7 @@ typedef enum
     NUM_INVULFX
 } invulfx_type_e;
 
-extern int var_invul_fx;
+extern int invulnerability_effect;
 
 #endif /*__D_STATE_H__*/
 

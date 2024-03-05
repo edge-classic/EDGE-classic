@@ -347,9 +347,9 @@ void P_ActFaceTarget(MapObject *object)
 
     object->flags_ &= ~kMapObjectFlagAmbush;
 
-    object->angle_ = R_PointToAngle(object->x, object->y, target->x, target->y);
+    object->angle_ = RendererPointToAngle(object->x, object->y, target->x, target->y);
 
-    float dist = R_PointToDist(object->x, object->y, target->x, target->y);
+    float dist = RendererPointToDistance(object->x, object->y, target->x, target->y);
 
     if (dist >= 0.1f)
     {
@@ -402,9 +402,9 @@ void P_ForceFaceTarget(MapObject *object)
 
     object->flags_ &= ~kMapObjectFlagAmbush;
 
-    object->angle_ = R_PointToAngle(object->x, object->y, target->x, target->y);
+    object->angle_ = RendererPointToAngle(object->x, object->y, target->x, target->y);
 
-    float dist = R_PointToDist(object->x, object->y, target->x, target->y);
+    float dist = RendererPointToDistance(object->x, object->y, target->x, target->y);
 
     if (dist >= 0.1f)
     {
@@ -1101,7 +1101,7 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty,
     Sector *cur_source_sec = source->subsector_->sector;
 
     if (source->player_)
-        projz += (source->player_->viewz - source->player_->std_viewheight);
+        projz += (source->player_->view_z - source->player_->std_viewheight);
     else if (cur_source_sec->sink_depth > 0 && !cur_source_sec->extrafloor_used &&
              !cur_source_sec->height_sector &&
              abs(source->z - cur_source_sec->floor_height) < 1)
@@ -1154,7 +1154,7 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty,
         S_StartFX(projectile->info_->seesound_, category, sfx_source, flags);
     }
 
-    angle = R_PointToAngle(projx, projy, tx, ty);
+    angle = RendererPointToAngle(projx, projy, tx, ty);
 
     // Now add the fact that the target may be difficult to spot and
     // make the projectile's target the same as the sources. Only
@@ -1341,7 +1341,7 @@ static inline bool Weakness_CheckHit(MapObject              *target,
 
     if (z < weak->height_[0] || z > weak->height_[1]) return false;
 
-    BAMAngle ang = R_PointToAngle(target->x, target->y, x, y);
+    BAMAngle ang = RendererPointToAngle(target->x, target->y, x, y);
 
     ang -= target->angle_;
 
@@ -1670,7 +1670,7 @@ void P_ActHomingProjectile(MapObject *projectile)
     if (!destination || destination->health_ <= 0) return;
 
     // change angle
-    BAMAngle exact = R_PointToAngle(projectile->x, projectile->y,
+    BAMAngle exact = RendererPointToAngle(projectile->x, projectile->y,
                                     destination->x, destination->y);
 
     if (exact != projectile->angle_)
@@ -1740,7 +1740,7 @@ void P_ActHomeToSpot(MapObject *projectile)
     }
 
     // calculate new angles
-    BAMAngle angle = R_PointToAngle(0, 0, dx, dy);
+    BAMAngle angle = RendererPointToAngle(0, 0, dx, dy);
     float    slope = ApproximateSlope(dx, dy, dz);
 
     P_SetMobjDirAndSpeed(projectile, angle, slope, projectile->speed_);
@@ -2618,7 +2618,7 @@ void P_ActPathFollow(MapObject *mo)
     float dx = mo->path_trigger_->x - mo->x;
     float dy = mo->path_trigger_->y - mo->y;
 
-    BAMAngle diff = R_PointToAngle(0, 0, dx, dy) - mo->angle_;
+    BAMAngle diff = RendererPointToAngle(0, 0, dx, dy) - mo->angle_;
 
     // movedir value:
     //   0 for slow turning.
@@ -3416,7 +3416,7 @@ void P_ActResurrectChase(MapObject *object)
     if (corpse)
     {
         object->angle_ =
-            R_PointToAngle(object->x, object->y, corpse->x, corpse->y);
+            RendererPointToAngle(object->x, object->y, corpse->x, corpse->y);
         if (object->info_->res_state_)
             P_SetMobjStateDeferred(object, object->info_->res_state_, 0);
 
@@ -3454,8 +3454,9 @@ void P_ActWalkSoundChase(MapObject *object)
 {
     if (!object->info_->walksound_)
     {
-        PrintWarningOrError("WALKSOUND_CHASE: %s hasn't got a walksound_.\n",
-                            object->info_->name_.c_str());
+        if (strict_errors)
+            FatalError("WALKSOUND_CHASE: %s hasn't got a walksound_.\n",
+                                object->info_->name_.c_str());
         return;
     }
 

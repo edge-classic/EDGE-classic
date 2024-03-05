@@ -178,7 +178,7 @@ static void GV_GetImage(const char *info, void *storage)
 {
     // based on SR_LevelGetImage...
 
-    const image_c **dest = (const image_c **)storage;
+    const Image **dest = (const Image **)storage;
 
     SYS_ASSERT(info && storage);
 
@@ -191,7 +191,7 @@ static void GV_GetImage(const char *info, void *storage)
     if (info[1] != ':')
         LogWarning("GV_GetImage: invalid image string `%s'\n", info);
 
-    (*dest) = W_ImageParseSaveString(info[0], info + 2);
+    (*dest) = ImageParseSaveString(info[0], info + 2);
 }
 
 //----------------------------------------------------------------------------
@@ -279,7 +279,7 @@ static const char *GV_PutImage(void *storage)
 {
     // based on SR_LevelPutImage...
 
-    const image_c **src = (const image_c **)storage;
+    const Image **src = (const Image **)storage;
     char            buffer[64];
 
     SYS_ASSERT(storage);
@@ -287,7 +287,7 @@ static const char *GV_PutImage(void *storage)
     if (*src == nullptr)
         return SV_DupString("");
 
-    W_ImageMakeSaveString(*src, buffer, buffer + 2);
+    ImageMakeSaveString(*src, buffer, buffer + 2);
     buffer[1] = ':';
 
     return SV_DupString(buffer);

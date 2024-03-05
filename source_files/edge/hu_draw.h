@@ -61,7 +61,7 @@ void HudPushScissor(float x1, float y1, float x2, float y2,
 void HudPopScissor();
 
 void HudRawImage(float hx1, float hy1, float hx2, float hy2,
-                 const image_c *image, float tx1, float ty1, float tx2,
+                 const Image *image, float tx1, float ty1, float tx2,
                  float ty2, float alpha = 1.0f,
                  RGBAColor       text_col = kRGBANoValue,
                  const Colormap *palremap = nullptr, float sx = 0.0,
@@ -87,24 +87,24 @@ void HudThinBox(float x1, float y1, float x2, float y2, RGBAColor col,
 // be specified individually.
 void HudGradientBox(float x1, float y1, float x2, float y2, RGBAColor *cols);
 
-void HudDrawImage(float x, float y, const image_c *image,
+void HudDrawImage(float x, float y, const Image *image,
                   const Colormap *colmap = nullptr);
-void HudDrawImageNoOffset(float x, float y, const image_c *image);
-void HudScrollImage(float x, float y, const image_c *image, float sx, float sy);
-void HudScrollImageNoOffset(float x, float y, const image_c *image, float sx,
+void HudDrawImageNoOffset(float x, float y, const Image *image);
+void HudScrollImage(float x, float y, const Image *image, float sx, float sy);
+void HudScrollImageNoOffset(float x, float y, const Image *image, float sx,
                             float sy);
-void HudDrawImageTitleWS(const image_c *image);
-void HudStretchImage(float x, float y, float w, float h, const image_c *image,
+void HudDrawImageTitleWS(const Image *image);
+void HudStretchImage(float x, float y, float w, float h, const Image *image,
                      float sx, float sy, const Colormap *colmap = nullptr);
 void HudStretchImageNoOffset(float x, float y, float w, float h,
-                             const image_c *image, float sx, float sy);
-void HudTileImage(float x, float y, float w, float h, const image_c *image,
+                             const Image *image, float sx, float sy);
+void HudTileImage(float x, float y, float w, float h, const Image *image,
                   float offset_x = 0.0f, float offset_y = 0.0f);
 
 // Functions for when we want to draw without having an image_c
 void HudStretchFromImageData(float x, float y, float w, float h,
                              const ImageData *img, unsigned int tex_id,
-                             image_opacity_e opacity);
+                             ImageOpacity opacity);
 
 extern int hud_tic;
 
@@ -114,7 +114,7 @@ float HudFontHeight(void);
 float HudStringWidth(const char *str);
 float HudStringHeight(const char *str);
 
-void HudDrawChar(float left_x, float top_y, const image_c *img, char ch,
+void HudDrawChar(float left_x, float top_y, const Image *img, char ch,
                  float size = 0);
 
 // draw a text string with the current font, current color (etc).
@@ -133,8 +133,8 @@ void HudRenderAutomap(float x, float y, float w, float h, MapObject *focus,
 
 void HudGetCastPosition(float *x, float *y, float *scale_x, float *scale_y);
 
-float HudGetImageWidth(const image_c *img);
-float HudGetImageHeight(const image_c *img);
+float HudGetImageWidth(const Image *img);
+float HudGetImageHeight(const Image *img);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

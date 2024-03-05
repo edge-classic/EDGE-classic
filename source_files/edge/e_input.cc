@@ -267,19 +267,6 @@ static void UpdateForces(void)
     AddKeyForce(AXIS_STRAFE, key_strafe_right, key_strafe_left);
 }
 
-#if 0  // UNUSED ???
-static int CmdChecksum(ticcmd_t * cmd)
-{
-	int i;
-	int sum = 0;
-
-	for (i = 0; i < (int)sizeof(ticcmd_t) / 4 - 1; i++)
-		sum += ((int *)cmd)[i];
-
-	return sum;
-}
-#endif
-
 //
 // EventBuildTicCommand
 //
@@ -657,7 +644,7 @@ void EventPostEvent(InputEvent *ev)
     events[event_head] = *ev;
     event_head         = (event_head + 1) % kMaximumInputEvents;
 
-#ifdef DEBUG_KEY_EV  //!!!!
+#ifdef EDGE_DEBUG_KEY_EV  //!!!!
     if (ev->type == kInputEventKeyDown || ev->type == kInputEventKeyUp)
     {
         LogDebug("EVENT @ %08x %d %s\n", GetMilliseconds(), ev->value.key,

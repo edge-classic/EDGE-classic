@@ -20,11 +20,11 @@
 
 #include "types.h"
 
-class image_c;
+class Image;
 
 struct SwitchCache
 {
-    const image_c *image[2];
+    const Image *image[2];
 };
 
 class SwitchDefinition

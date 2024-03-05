@@ -400,36 +400,6 @@ int ConsoleCommandShowMaps(char **argv, int argc)
     return 0;
 }
 
-int ConsoleCommandShowKeys(char **argv, int argc)
-{
-#if 0  // TODO
-	char *match = nullptr;
-
-	if (argc >= 2)
-		match = argv[1];
-
-	LogPrint("Key Bindings:\n");
-
-	int total = 0;
-
-	for (int i = 0; all_binds[i].name; i++)
-	{
-		if (match && *match)
-			if (! strstr(all_binds[i].name, match))
-				continue;
-
-		std::string keylist = all_binds[i].bind->FormatKeyList();
-
-		LogPrint("  %-15s %s\n", all_binds[i].name, keylist.c_str());
-		total++;
-	}
-
-	if (total == 0)
-		LogPrint("Nothing matched.\n");
-#endif
-    return 0;
-}
-
 int ConsoleCommandShowGamepads(char **argv, int argc)
 {
     (void)argv;
@@ -592,29 +562,6 @@ static int FindCommand(const char *name)
     return -1;  // not found
 }
 
-#if 0
-static void ProcessBind(key_link_t *link, char **argv, int argc)
-{
-	for (int i = 1; i < argc; i++)
-	{
-		if (epi::StringCaseCompareASCII(argv[i], "-c") == 0)
-		{
-			link->bind->Clear();
-			continue;
-		}
-
-		int keyd = E_KeyFromName(argv[i]);
-		if (keyd == 0)
-		{
-			ConsolePrint("Invalid key name: %s\n", argv[i]);
-			continue;
-		}
-
-		link->bind->Toggle(keyd);
-	}
-}
-#endif
-
 void ConsoleTryCommand(const char *cmd)
 {
     char *argv[kMaximumConsoleArguments];
@@ -669,27 +616,6 @@ void ConsoleTryCommand(const char *cmd)
         KillArgs(argv, argc);
         return;
     }
-
-#if 0
-	// hmmm I like it kinky...
-	key_link_t *kink = E_FindKeyBinding(argv[0]);
-	if (kink)
-	{
-		if (argc <= 1)
-		{
-			std::string keylist = kink->bind->FormatKeyList();
-
-			LogPrint("%s %s\n", argv[0], keylist.c_str());
-		}
-		else
-		{
-			ProcessBind(kink, argv, argc);
-		}
-
-		KillArgs(argv, argc);
-		return;
-	}
-#endif
 
     LogPrint("Unknown console command: %s\n", argv[0]);
 

@@ -57,7 +57,7 @@ class spriteframe_c
     uint8_t flip[16];
 
     // Images for each view angle
-    const image_c *images[16];
+    const Image *images[16];
 
     bool is_weapon;
 

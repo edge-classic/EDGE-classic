@@ -229,14 +229,7 @@ static void CalcHeight(player_t *player, bool extra_tic)
 
     if (view_bobbing.d_ > 1) bob_z = 0;
 
-    player->viewz = player->viewheight + bob_z;
-
-#if 0  // DEBUG
-LogDebug("Jump:%d bob_z:%1.2f  z:%1.2f  height:%1.2f delta:%1.2f --> viewz:%1.3f\n",
-		 player->jumpwait, bob_z, player->mo->z,
-		 player->viewheight, player->deltaviewheight,
-		 player->mo->z + player->viewz);
-#endif
+    player->view_z = player->viewheight + bob_z;
 }
 
 void P_PlayerJump(player_t *pl, float dz, int wait)
@@ -526,7 +519,7 @@ static void DeathThink(player_t *player, bool extra_tic)
         dz = (player->attacker->z + player->attacker->height_ / 2) -
              (player->mo->z + player->viewheight);
 
-        angle = R_PointToAngle(0, 0, dx, dy);
+        angle = RendererPointToAngle(0, 0, dx, dy);
         delta = angle - player->mo->angle_;
 
         slope   = ApproximateSlope(dx, dy, dz);
@@ -735,25 +728,6 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
 
     bool should_think = true;
 
-#if 0  // DEBUG ONLY
-	{
-		TouchNode *tn;
-		LogDebug("Player %d Touch List:\n", player->pnum);
-		for (tn = mo->touch_sectors_; tn; tn=tn->map_object_next)
-		{
-			LogDebug("  SEC %d  Other = %s\n", tn->sector - sectors,
-				tn->sector_next ? tn->sector_next->mo->info_->name_ :
-			tn->sector_previous ? tn->sector_previous->mo->info_->name_ : "(None)");
-
-			SYS_ASSERT(tn->map_object == mo);
-			if (tn->map_object_next)
-			{
-				SYS_ASSERT(tn->map_object_next->mo_prev == tn);
-			}
-		}
-	}
-#endif
-
     if (player->attacker && player->attacker->IsRemoved())
     {
         P_DumpMobjsTemp();
@@ -952,12 +926,12 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
                      32768.0f + player_y, kPathAddLines, P_RoomPath,
                      &room_checker);
         line_lengths +=
-            R_PointToDist(player_x, player_y, room_checker.X, room_checker.Y);
+            RendererPointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
         PathTraverse(player_x, player_y, -32768.0f + player_x,
                      32768.0f + player_y, kPathAddLines, P_RoomPath,
                      &room_checker);
         line_lengths +=
-            R_PointToDist(player_x, player_y, room_checker.X, room_checker.Y);
+            RendererPointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
         PathTraverse(player_x, player_y, player_x, -32768.0f, kPathAddLines,
                      P_RoomPath, &room_checker);
         line_lengths += abs(player_y - room_checker.Y);
@@ -965,12 +939,12 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
                      -32768.0f + player_y, kPathAddLines, P_RoomPath,
                      &room_checker);
         line_lengths +=
-            R_PointToDist(player_x, player_y, room_checker.X, room_checker.Y);
+            RendererPointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
         PathTraverse(player_x, player_y, 32768.0f + player_x,
                      -32768.0f + player_y, kPathAddLines, P_RoomPath,
                      &room_checker);
         line_lengths +=
-            R_PointToDist(player_x, player_y, room_checker.X, room_checker.Y);
+            RendererPointToDistance(player_x, player_y, room_checker.X, room_checker.Y);
         PathTraverse(player_x, player_y, -32768.0f, player_y, kPathAddLines,
                      P_RoomPath, &room_checker);
         line_lengths += abs(player_x - room_checker.X);

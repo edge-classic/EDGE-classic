@@ -32,6 +32,7 @@
 #include "filesystem.h"
 #include "str_compare.h"
 #include "str_util.h"
+#include "sokol_color.h"
 
 // EDGE
 #include "p_action.h"
@@ -1013,36 +1014,6 @@ void DDF_MainReadFile(DDFReadInfo *readinfo, const std::string &data)
     DDF_MainFreeDefines();
 }
 
-#if 0
-static XXX *parse_type;
-
-bool DDF_Load(epi::File *f)
-{
-	byte *data = f->LoadIntoMemory();
-	if (! data)
-		return false;
-
-	for (;;)
-	{
-		get token;
-
-		if (token == EOF) break;
-
-		if (token == WHITESPACE | COMMENTS) continue;
-
-		if (token == DIRECTIVE && entries == 0) handle directive;
-
-		if (token == TAG) set type
-
-		if (token == ENTRY) begin entry
-
-		else parse command to current entry
-	}
-
-	return true;
-}
-#endif
-
 //
 // DDF_MainGetNumeric
 //
@@ -1488,81 +1459,6 @@ void DDF_MainGetWhenAppear(const char *info, void *storage)
     if ((*result & kAppearsWhenNetBits) == 0)
         *result = (AppearsFlag)(*result | kAppearsWhenNetBits);
 }
-
-#if 0  // DEBUGGING ONLY
-void Test_ParseWhenAppear(void)
-{
-	when_appear_e val;
-
-	DDF_MainGetWhenAppear("1", &val);  printf("WNAP '1' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("3", &val);  printf("WNAP '3' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("5", &val);  printf("WNAP '5' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("7", &val);  printf("WNAP '7' --> 0x%04x\n", val);
-
-	DDF_MainGetWhenAppear("1:2", &val);  printf("WNAP '1:2' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("5:3:1", &val);  printf("WNAP '5:3:1' --> 0x%04x\n", val);
-
-	DDF_MainGetWhenAppear("1-3", &val);  printf("WNAP '1-3' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("4-5", &val);  printf("WNAP '4-5' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("0-2", &val);  printf("WNAP '0-2' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("3-6", &val);  printf("WNAP '3-6' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("5-1", &val);  printf("WNAP '5-1' --> 0x%04x\n", val);
-
-	DDF_MainGetWhenAppear("sp", &val);  printf("WNAP 'sp' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("coop", &val);  printf("WNAP 'coop' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("dm", &val);  printf("WNAP 'dm' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("sp:coop", &val);  printf("WNAP 'sp:coop' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("sp:dm", &val);  printf("WNAP 'sp:dm' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("sp:coop:dm", &val);  printf("WNAP 'sp:coop:dm' --> 0x%04x\n", val);
-
-	DDF_MainGetWhenAppear("sp:3", &val);  printf("WNAP 'sp:3' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("sp:3:4", &val);  printf("WNAP 'sp:3:4' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("sp:3-5", &val);  printf("WNAP 'sp:3-5' --> 0x%04x\n", val);
-
-	DDF_MainGetWhenAppear("sp:dm:3", &val);  printf("WNAP 'sp:dm:3' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("sp:dm:3:4", &val);  printf("WNAP 'sp:dm:3:4' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("sp:dm:3-5", &val);  printf("WNAP 'sp:dm:3-5' --> 0x%04x\n", val);
-
-	DDF_MainGetWhenAppear("DM:COOP:SP:3", &val);  printf("WNAP 'DM:COOP:SP:3' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("DM:COOP:SP:3:4", &val);  printf("WNAP 'DM:COOP:SP:3:4' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("DM:COOP:SP:3-5", &val);  printf("WNAP 'DM:COOP:SP:3-5' --> 0x%04x\n", val);
-
-	printf("------------------------------------------------------------\n");
-
-	DDF_MainGetWhenAppear("!1", &val);  printf("WNAP '!1' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!3", &val);  printf("WNAP '!3' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!5", &val);  printf("WNAP '!5' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!7", &val);  printf("WNAP '!7' --> 0x%04x\n", val);
-
-	DDF_MainGetWhenAppear("!1:2", &val);  printf("WNAP '!1:2' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!5:3:1", &val);  printf("WNAP '!5:3:1' --> 0x%04x\n", val);
-
-	DDF_MainGetWhenAppear("!1-3", &val);  printf("WNAP '!1-3' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!4-5", &val);  printf("WNAP '!4-5' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!0-2", &val);  printf("WNAP '!0-2' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!3-6", &val);  printf("WNAP '!3-6' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!5-1", &val);  printf("WNAP '!5-1' --> 0x%04x\n", val);
-
-	DDF_MainGetWhenAppear("!sp", &val);  printf("WNAP '!sp' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!coop", &val);  printf("WNAP '!coop' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!dm", &val);  printf("WNAP '!dm' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!sp:coop", &val);  printf("WNAP '!sp:coop' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!sp:dm", &val);  printf("WNAP '!sp:dm' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!sp:coop:dm", &val);  printf("WNAP '!sp:coop:dm' --> 0x%04x\n", val);
-
-	DDF_MainGetWhenAppear("!sp:3", &val);  printf("WNAP '!sp:3' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!sp:3:4", &val);  printf("WNAP '!sp:3:4' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!sp:3-5", &val);  printf("WNAP '!sp:3-5' --> 0x%04x\n", val);
-
-	DDF_MainGetWhenAppear("!sp:dm:3", &val);  printf("WNAP '!sp:dm:3' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!sp:dm:3:4", &val);  printf("WNAP '!sp:dm:3:4' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!sp:dm:3-5", &val);  printf("WNAP '!sp:dm:3-5' --> 0x%04x\n", val);
-
-	DDF_MainGetWhenAppear("!DM:COOP:SP:3", &val);  printf("WNAP '!DM:COOP:SP:3' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!DM:COOP:SP:3:4", &val);  printf("WNAP '!DM:COOP:SP:3:4' --> 0x%04x\n", val);
-	DDF_MainGetWhenAppear("!DM:COOP:SP:3-5", &val);  printf("WNAP '!DM:COOP:SP:3-5' --> 0x%04x\n", val);
-}
-#endif
 
 //
 // DDF_MainGetBitSet

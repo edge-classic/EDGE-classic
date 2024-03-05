@@ -55,6 +55,7 @@
 #include "r_state.h"
 #include "s_music.h"
 #include "s_sound.h"
+#include "sokol_color.h"
 #include "w_model.h"
 #include "w_wad.h"
 
@@ -88,7 +89,7 @@ static void CastInitNew(int num);
 static void CastTicker(void);
 static void CastSkip(void);
 
-static const image_c *finale_text_background;
+static const Image *finale_text_background;
 static float          finale_text_background_scale = 1.0f;
 static RGBAColor      finale_text_color;
 
@@ -212,14 +213,14 @@ static void LookupFinaleStuff(void)
 
     if (finale->text_flat_ != "")
         finale_text_background =
-            W_ImageLookup(finale->text_flat_.c_str(), kImageNamespaceFlat);
+            ImageLookup(finale->text_flat_.c_str(), kImageNamespaceFlat);
     else if (finale->text_back_ != "")
         finale_text_background =
-            W_ImageLookup(finale->text_back_.c_str(), kImageNamespaceGraphic);
+            ImageLookup(finale->text_back_.c_str(), kImageNamespaceGraphic);
     else
         finale_text_background = nullptr;
 
-    finale_text_color = V_GetFontColor(finale->text_colmap_);
+    finale_text_color = GetFontColor(finale->text_colmap_);
 
     if (!finale_level_text_style)
     {
@@ -377,10 +378,10 @@ static void TextWrite(void)
         {
             if (r_titlescaling.d_)  // Fill Border
             {
-                if (!finale_text_background->blurred_version)
-                    W_ImageStoreBlurred(finale_text_background, 0.75f);
+                if (!finale_text_background->blurred_version_)
+                    ImageStoreBlurred(finale_text_background, 0.75f);
                 HudStretchImage(-320, -200, 960, 600,
-                                 finale_text_background->blurred_version, 0, 0);
+                                 finale_text_background->blurred_version_, 0, 0);
             }
             HudDrawImageTitleWS(finale_text_background);
         }
@@ -418,7 +419,7 @@ static void TextWrite(void)
     if (style->definition_->text_[t_type].colmap_)
     {
         const Colormap *colmap = style->definition_->text_[t_type].colmap_;
-        HudSetTextColor(V_GetFontColor(colmap));
+        HudSetTextColor(GetFontColor(colmap));
     }
 
     int h = 11;  // set a default
@@ -697,16 +698,16 @@ static void CastDrawer(void)
 {
     float TempScale = 1.0;
 
-    const image_c *image;
+    const Image *image;
 
     if (finale_cast_style->background_image_) { finale_cast_style->DrawBackground(); }
     else
     {
-        image = W_ImageLookup("BOSSBACK");
+        image = ImageLookup("BOSSBACK");
         if (r_titlescaling.d_)  // Fill Border
         {
-            if (!image->blurred_version) W_ImageStoreBlurred(image, 0.75f);
-            HudStretchImage(-320, -200, 960, 600, image->blurred_version, 0,
+            if (!image->blurred_version_) ImageStoreBlurred(image, 0.75f);
+            HudStretchImage(-320, -200, 960, 600, image->blurred_version_, 0,
                              0);
         }
         HudDrawImageTitleWS(image);
@@ -717,7 +718,7 @@ static void CastDrawer(void)
     if (finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText]
             .colmap_)
     {
-        HudSetTextColor(V_GetFontColor(
+        HudSetTextColor(GetFontColor(
             finale_cast_style->definition_->text_[StyleDefinition::kTextSectionText]
                 .colmap_));
     }
@@ -760,18 +761,18 @@ static void CastDrawer(void)
     {
         modeldef_c *md = W_GetModel(cast_state->sprite);
 
-        const image_c *skin_img = md->skins[cast_order->model_skin_];
+        const Image *skin_img = md->skins[cast_order->model_skin_];
 
-        if (!skin_img) skin_img = W_ImageForDummySkin();
+        if (!skin_img) skin_img = ImageForDummySkin();
 
         glClear(GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
         if (md->md2_model)
-            MD2_RenderModel_2D(md->md2_model, skin_img, cast_state->frame,
+            Md2RenderModel2d(md->md2_model, skin_img, cast_state->frame,
                                pos_x, pos_y, scale_x, scale_y, cast_order);
         else if (md->mdl_model)
-            MDL_RenderModel_2D(md->mdl_model, skin_img, cast_state->frame,
+            MdlRenderModel2d(md->mdl_model, skin_img, cast_state->frame,
                                pos_x, pos_y, scale_x, scale_y, cast_order);
 
         glDisable(GL_DEPTH_TEST);
@@ -779,18 +780,18 @@ static void CastDrawer(void)
     }
 
     // draw the current frame in the middle of the screen
-    image = R2_GetOtherSprite(cast_state->sprite, cast_state->frame, &flip);
+    image = RendererGetOtherSprite(cast_state->sprite, cast_state->frame, &flip);
 
     if (!image) return;
 
     scale_x *= cast_order->scale_ * cast_order->aspect_;
     scale_y *= cast_order->scale_;
 
-    float width  = IM_WIDTH(image);
-    float height = IM_HEIGHT(image);
+    float width  = image->ScaledWidthActual();
+    float height = image->ScaledHeightActual();
 
-    float offset_x = IM_OFFSETX(image);
-    float offset_y = IM_OFFSETY(image);
+    float offset_x = image->ScaledOffsetX();
+    float offset_y = image->ScaledOffsetY();
 
     if (flip) offset_x = -offset_x;
 
@@ -800,9 +801,9 @@ static void CastDrawer(void)
     width *= scale_x;
     height *= scale_y;
 
-    RGL_DrawImage(pos_x - offset_x, pos_y + offset_y, width, height, image,
-                  flip ? IM_RIGHT(image) : 0, 0, flip ? 0 : IM_RIGHT(image),
-                  IM_TOP(image), nullptr, 1.0f, cast_order->palremap_);
+    RendererDrawImage(pos_x - offset_x, pos_y + offset_y, width, height, image,
+                  flip ? image->Right() : 0, 0, flip ? 0 : image->Right(),
+                  image->Top(), nullptr, 1.0f, cast_order->palremap_);
 }
 
 //
@@ -814,14 +815,14 @@ static void CastDrawer(void)
 static void BunnyScroll(void)
 {
     int            scrolled;
-    const image_c *p1;
-    const image_c *p2;
+    const Image *p1;
+    const Image *p2;
     char           name[10];
     int            stage;
     static int     laststage;
 
-    p1 = W_ImageLookup("PFUB2");
-    p2 = W_ImageLookup("PFUB1");
+    p1 = ImageLookup("PFUB2");
+    p2 = ImageLookup("PFUB1");
 
     float TempWidth  = 0;
     float TempHeight = 0;
@@ -829,12 +830,12 @@ static void BunnyScroll(void)
     float CenterX    = 0;
     // 1. Calculate scaling to apply.
     TempScale = 200;
-    TempScale /= p1->actual_h;
-    TempWidth  = p1->actual_w * TempScale;
-    TempHeight = p1->actual_h * TempScale;
+    TempScale /= p1->actual_height_;
+    TempWidth  = p1->actual_width_ * TempScale;
+    TempHeight = p1->actual_height_ * TempScale;
     // 2. Calculate centering on screen.
     CenterX = 160;
-    CenterX -= (p1->actual_w * TempScale) / 2;
+    CenterX -= (p1->actual_width_ * TempScale) / 2;
 
     scrolled = (TempWidth + CenterX) - (finale_count - 230) / 2;
     if (scrolled > (TempWidth + CenterX)) scrolled = (TempWidth + CenterX);
@@ -849,7 +850,7 @@ static void BunnyScroll(void)
 
     if (finale_count < 1180)
     {
-        p1 = W_ImageLookup("END0");
+        p1 = ImageLookup("END0");
 
         HudDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
         laststage = 0;
@@ -868,7 +869,7 @@ static void BunnyScroll(void)
 
     sprintf(name, "END%i", stage);
 
-    p1 = W_ImageLookup(name);
+    p1 = ImageLookup(name);
 
     HudDrawImage((320 - 13 * 8) / 2, (200 - 8 * 8) / 2, p1);
 }
@@ -890,15 +891,15 @@ void FinaleDrawer(void)
 
         case kFinaleStagePicture:
         {
-            const image_c *image =
-                W_ImageLookup(finale
+            const Image *image =
+                ImageLookup(finale
                                   ->pics_[HMM_MIN((size_t)picture_number,
                                                   finale->pics_.size() - 1)]
                                   .c_str());
             if (r_titlescaling.d_)  // Fill Border
             {
-                if (!image->blurred_version) W_ImageStoreBlurred(image, 0.75f);
-                HudStretchImage(-320, -200, 960, 600, image->blurred_version,
+                if (!image->blurred_version_) ImageStoreBlurred(image, 0.75f);
+                HudStretchImage(-320, -200, 960, 600, image->blurred_version_,
                                  0, 0);
             }
             HudDrawImageTitleWS(image);

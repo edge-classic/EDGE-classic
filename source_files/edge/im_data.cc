@@ -25,6 +25,7 @@
 #include "HandmadeMath.h"
 #include "epi.h"
 #include "math_color.h"
+#include "sokol_color.h"
 #include "tables.h"
 
 ImageData::ImageData(int width, int height, int depth)

@@ -18,8 +18,7 @@
 
 #pragma once
 
-#include "epi.h"
-#include "sokol_color.h"
+#include <stdint.h>
 
 // RGBA 8:8:8:8
 typedef uint32_t RGBAColor;

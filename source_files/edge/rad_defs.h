@@ -640,7 +640,7 @@ typedef struct drawtip_s
 
     // tip text DOH!
     const char    *tip_text;
-    const image_c *tip_graphic;
+    const Image *tip_graphic;
 
     // play a sound ?
     bool playsound;

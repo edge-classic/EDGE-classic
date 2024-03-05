@@ -291,9 +291,6 @@ void Hq2xPaletteSetup(const uint8_t *palette, int transparent_pixel)
         int u = 128 + ((-r * 38 - g * 74 + b * 111) >> 9);
         int v = 128 + ((r * 157 - g * 132 - b * 26) >> 9);
 
-#if 0  // DEBUGGING
-		fprintf(stderr, "[%d] #%02x%02x%02x -> YUV #%02x%02x%02x\n", c, r,g,b, Y,u,v);
-#endif
         pixel_yuv[c] = ((A << 24) + (Y << 16) + (u << 8) + v);
     }
 }

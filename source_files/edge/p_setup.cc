@@ -47,7 +47,6 @@
 #include "math_crc.h"
 #include "miniz.h"  // ZGL3 nodes
 #include "p_local.h"
-#include "r_bsp.h"
 #include "r_gldefs.h"
 #include "r_image.h"
 #include "r_misc.h"
@@ -55,6 +54,7 @@
 #include "rad_trig.h"  // MUSINFO changers
 #include "s_music.h"
 #include "s_sound.h"
+#include "sokol_color.h"
 #include "str_compare.h"
 #include "str_ename.h"
 #include "str_lexer.h"
@@ -66,6 +66,8 @@
 
 #define EDGE_SEG_INVALID       ((Seg *)-3)
 #define EDGE_SUBSECTOR_INVALID ((Subsector *)-3)
+
+extern unsigned int root_node;
 
 static bool level_active = false;
 
@@ -324,7 +326,7 @@ static void SegCommonStuff(Seg *seg, int linedef_in)
         float sx = seg->side ? seg->linedef->vertex_2->X : seg->linedef->vertex_1->X;
         float sy = seg->side ? seg->linedef->vertex_2->Y : seg->linedef->vertex_1->Y;
 
-        seg->offset = R_PointToDist(sx, sy, seg->vertex_1->X, seg->vertex_1->Y);
+        seg->offset = RendererPointToDistance(sx, sy, seg->vertex_1->X, seg->vertex_1->Y);
 
         seg->sidedef = seg->linedef->side[seg->side];
 
@@ -429,12 +431,12 @@ static void LoadSectors(int lump)
         ss->ceiling = ss->floor;
 
         epi::CStringCopyMax(buffer, ms->floor_tex, 8);
-        ss->floor.image = W_ImageLookup(buffer, kImageNamespaceFlat);
+        ss->floor.image = ImageLookup(buffer, kImageNamespaceFlat);
 
         if (ss->floor.image)
         {
             FlatDefinition *current_flatdef =
-                flatdefs.Find(ss->floor.image->name.c_str());
+                flatdefs.Find(ss->floor.image->name_.c_str());
             if (current_flatdef)
             {
                 ss->bob_depth  = current_flatdef->bob_depth_;
@@ -443,12 +445,12 @@ static void LoadSectors(int lump)
         }
 
         epi::CStringCopyMax(buffer, ms->ceil_tex, 8);
-        ss->ceiling.image = W_ImageLookup(buffer, kImageNamespaceFlat);
+        ss->ceiling.image = ImageLookup(buffer, kImageNamespaceFlat);
 
         if (!ss->floor.image)
         {
             LogWarning("Bad Level: sector #%d has missing floor texture.\n", i);
-            ss->floor.image = W_ImageLookup("FLAT1", kImageNamespaceFlat);
+            ss->floor.image = ImageLookup("FLAT1", kImageNamespaceFlat);
         }
         if (!ss->ceiling.image)
         {
@@ -725,7 +727,7 @@ static void LoadThings(int lump)
             continue;
         }
 
-        Sector *sec = R_PointInSubsector(x, y)->sector;
+        Sector *sec = RendererPointInSubsector(x, y)->sector;
 
         if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) &&
             !musinfo_tracks[current_map->name_].processed)
@@ -840,7 +842,7 @@ static void LoadHexenThings(int lump)
             continue;
         }
 
-        Sector *sec = R_PointInSubsector(x, y)->sector;
+        Sector *sec = RendererPointInSubsector(x, y)->sector;
 
         z += sec->floor_height;
 
@@ -870,7 +872,7 @@ static inline void ComputeLinedefData(Line *ld, int side0, int side1)
     else
         ld->slope_type = kLineClipNegative;
 
-    ld->length = R_PointToDist(0, 0, ld->delta_x, ld->delta_y);
+    ld->length = RendererPointToDistance(0, 0, ld->delta_x, ld->delta_y);
 
     if (v1->X < v2->X)
     {
@@ -1351,10 +1353,10 @@ static void LoadXGL3Nodes(int lumpnum)
                                            : level_segs[firstseg + j + 1].vertex_1;
 
             seg->angle =
-                R_PointToAngle(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
+                RendererPointToAngle(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
 
             seg->length =
-                R_PointToDist(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
+                RendererPointToDistance(seg->vertex_1->X, seg->vertex_1->Y, seg->vertex_2->X, seg->vertex_2->Y);
         }
 
         // -AJA- 1999/09/23: New linked list for the segs of a subsector
@@ -1413,7 +1415,7 @@ static void LoadXGL3Nodes(int lumpnum)
         nd->divider.delta_y = (float)epi::UnalignedLittleEndianS32(td) / 65536.0f;
         td += 4;
 
-        nd->divider_length = R_PointToDist(0, 0, nd->divider.delta_x, nd->divider.delta_y);
+        nd->divider_length = RendererPointToDistance(0, 0, nd->divider.delta_x, nd->divider.delta_y);
 
         for (int j = 0; j < 2; j++)
             for (int k = 0; k < 4; k++)
@@ -1727,12 +1729,12 @@ static void LoadUDMFSectors()
             ss->ceiling.x_matrix.X  = cx_sc;
             ss->ceiling.y_matrix.Y  = cy_sc;
 
-            ss->floor.image = W_ImageLookup(floor_tex, kImageNamespaceFlat);
+            ss->floor.image = ImageLookup(floor_tex, kImageNamespaceFlat);
 
             if (ss->floor.image)
             {
                 FlatDefinition *current_flatdef =
-                    flatdefs.Find(ss->floor.image->name.c_str());
+                    flatdefs.Find(ss->floor.image->name_.c_str());
                 if (current_flatdef)
                 {
                     ss->bob_depth  = current_flatdef->bob_depth_;
@@ -1740,13 +1742,13 @@ static void LoadUDMFSectors()
                 }
             }
 
-            ss->ceiling.image = W_ImageLookup(ceil_tex, kImageNamespaceFlat);
+            ss->ceiling.image = ImageLookup(ceil_tex, kImageNamespaceFlat);
 
             if (!ss->floor.image)
             {
                 LogWarning("Bad Level: sector #%d has missing floor texture.\n",
                            cur_sector);
-                ss->floor.image = W_ImageLookup("FLAT1", kImageNamespaceFlat);
+                ss->floor.image = ImageLookup("FLAT1", kImageNamespaceFlat);
             }
             if (!ss->ceiling.image)
             {
@@ -2002,22 +2004,22 @@ static void LoadUDMFSideDefs()
             sd->sector = &level_sectors[sec_num];
 
             sd->top.image =
-                W_ImageLookup(top_tex, kImageNamespaceTexture, ILF_Null);
+                ImageLookup(top_tex, kImageNamespaceTexture, kImageLookupNull);
 
             if (sd->top.image == nullptr)
             {
                 if (goobers.d_)
                     sd->top.image =
-                        W_ImageLookup(bottom_tex, kImageNamespaceTexture);
+                        ImageLookup(bottom_tex, kImageNamespaceTexture);
                 else
                     sd->top.image =
-                        W_ImageLookup(top_tex, kImageNamespaceTexture);
+                        ImageLookup(top_tex, kImageNamespaceTexture);
             }
 
             sd->middle.image =
-                W_ImageLookup(middle_tex, kImageNamespaceTexture);
+                ImageLookup(middle_tex, kImageNamespaceTexture);
             sd->bottom.image =
-                W_ImageLookup(bottom_tex, kImageNamespaceTexture);
+                ImageLookup(bottom_tex, kImageNamespaceTexture);
 
             // granular offsets
             sd->bottom.offset.X += lowx;
@@ -2041,19 +2043,19 @@ static void LoadUDMFSideDefs()
             sd->bottom.boom_colormap = colormaps.Lookup(bottom_tex);
 
             if (sd->top.image &&
-                fabs(sd->top.offset.Y) > IM_HEIGHT(sd->top.image))
+                fabs(sd->top.offset.Y) > sd->top.image->ScaledHeightActual())
                 sd->top.offset.Y =
-                    fmodf(sd->top.offset.Y, IM_HEIGHT(sd->top.image));
+                    fmodf(sd->top.offset.Y, sd->top.image->ScaledHeightActual());
 
             if (sd->middle.image &&
-                fabs(sd->middle.offset.Y) > IM_HEIGHT(sd->middle.image))
+                fabs(sd->middle.offset.Y) > sd->middle.image->ScaledHeightActual())
                 sd->middle.offset.Y =
-                    fmodf(sd->middle.offset.Y, IM_HEIGHT(sd->middle.image));
+                    fmodf(sd->middle.offset.Y, sd->middle.image->ScaledHeightActual());
 
             if (sd->bottom.image &&
-                fabs(sd->bottom.offset.Y) > IM_HEIGHT(sd->bottom.image))
+                fabs(sd->bottom.offset.Y) > sd->bottom.image->ScaledHeightActual())
                 sd->bottom.offset.Y =
-                    fmodf(sd->bottom.offset.Y, IM_HEIGHT(sd->bottom.image));
+                    fmodf(sd->bottom.offset.Y, sd->bottom.image->ScaledHeightActual());
         }
         else  // consume other blocks
         {
@@ -2461,7 +2463,7 @@ static void LoadUDMFThings()
                 continue;
             }
 
-            Sector *sec = R_PointInSubsector(x, y)->sector;
+            Sector *sec = RendererPointInSubsector(x, y)->sector;
 
             if ((objtype->hyper_flags_ & kHyperFlagMusicChanger) &&
                 !musinfo_tracks[current_map->name_].processed)
@@ -2678,18 +2680,18 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, Side *sd,
     epi::CStringCopyMax(middle_tex, msd->mid_tex, 8);
     epi::CStringCopyMax(lower_tex, msd->lower_tex, 8);
 
-    sd->top.image = W_ImageLookup(upper_tex, kImageNamespaceTexture, ILF_Null);
+    sd->top.image = ImageLookup(upper_tex, kImageNamespaceTexture, kImageLookupNull);
 
     if (sd->top.image == nullptr)
     {
         if (goobers.d_)
-            sd->top.image = W_ImageLookup(upper_tex, kImageNamespaceTexture);
+            sd->top.image = ImageLookup(upper_tex, kImageNamespaceTexture);
         else
-            sd->top.image = W_ImageLookup(upper_tex, kImageNamespaceTexture);
+            sd->top.image = ImageLookup(upper_tex, kImageNamespaceTexture);
     }
 
-    sd->middle.image = W_ImageLookup(middle_tex, kImageNamespaceTexture);
-    sd->bottom.image = W_ImageLookup(lower_tex, kImageNamespaceTexture);
+    sd->middle.image = ImageLookup(middle_tex, kImageNamespaceTexture);
+    sd->bottom.image = ImageLookup(lower_tex, kImageNamespaceTexture);
 
     // handle BOOM colormaps with [242] linetype
     sd->top.boom_colormap    = colormaps.Lookup(upper_tex);
@@ -2702,18 +2704,18 @@ static void TransferMapSideDef(const raw_sidedef_t *msd, Side *sd,
         sd->middle.offset.Y = 0;
     }
 
-    if (sd->top.image && fabs(sd->top.offset.Y) > IM_HEIGHT(sd->top.image))
-        sd->top.offset.Y = fmodf(sd->top.offset.Y, IM_HEIGHT(sd->top.image));
+    if (sd->top.image && fabs(sd->top.offset.Y) > sd->top.image->ScaledHeightActual())
+        sd->top.offset.Y = fmodf(sd->top.offset.Y, sd->top.image->ScaledHeightActual());
 
     if (sd->middle.image &&
-        fabs(sd->middle.offset.Y) > IM_HEIGHT(sd->middle.image))
+        fabs(sd->middle.offset.Y) > sd->middle.image->ScaledHeightActual())
         sd->middle.offset.Y =
-            fmodf(sd->middle.offset.Y, IM_HEIGHT(sd->middle.image));
+            fmodf(sd->middle.offset.Y, sd->middle.image->ScaledHeightActual());
 
     if (sd->bottom.image &&
-        fabs(sd->bottom.offset.Y) > IM_HEIGHT(sd->bottom.image))
+        fabs(sd->bottom.offset.Y) > sd->bottom.image->ScaledHeightActual())
         sd->bottom.offset.Y =
-            fmodf(sd->bottom.offset.Y, IM_HEIGHT(sd->bottom.image));
+            fmodf(sd->bottom.offset.Y, sd->bottom.image->ScaledHeightActual());
 }
 
 static void LoadSideDefs(int lump)
@@ -2958,12 +2960,7 @@ static void DetectDeepWaterTrick(void)
             const Seg *seg;
 
             if (self_subs[j] != 1) continue;
-#if 0
-			LogDebug("Subsector [%d] @ (%1.0f,%1.0f) sec %d --> %d\n", j,
-				(sub->bbox[kBoundingBoxLeft] + sub->bbox[kBoundingBoxRight]) / 2.0,
-				(sub->bbox[kBoundingBoxBottom] + sub->bbox[kBoundingBoxTop]) / 2.0,
-				sub->sector - sectors, self_subs[j]);
-#endif
+
             const Seg *Xseg = 0;
 
             for (seg = sub->segs; seg; seg = seg->subsector_next)
@@ -2971,10 +2968,7 @@ static void DetectDeepWaterTrick(void)
                 SYS_ASSERT(seg->back_subsector);
 
                 int k = seg->back_subsector - level_subsectors;
-#if 0
-				LogDebug("  Seg [%d] back_sub %d (back_sect %d)\n", seg - segs, k,
-					seg->back_subsector->sector - sectors);
-#endif
+
                 if (self_subs[k] & 2)
                 {
                     if (!Xseg) Xseg = seg;
@@ -2986,10 +2980,6 @@ static void DetectDeepWaterTrick(void)
                 sub->deep_water_reference = Xseg->back_subsector->deep_water_reference
                                     ? Xseg->back_subsector->deep_water_reference
                                     : Xseg->back_subsector->sector;
-#if 0
-				LogDebug("  Updating (from seg %d) --> SEC %d\n", Xseg - segs,
-					sub->deep_water_reference - sectors);
-#endif
                 self_subs[j] = 3;
 
                 count++;
@@ -3654,7 +3644,7 @@ void LevelSetup(void)
 
     DetectDeepWaterTrick();
 
-    R_ComputeSkyHeights();
+    ComputeSkyHeights();
 
     // compute sector and line gaps
     for (int j = 0; j < total_level_sectors; j++)
@@ -3696,7 +3686,7 @@ void LevelSetup(void)
 
     AutomapInitLevel();
 
-    RGL_UpdateSkyBoxTextures();
+    RendererUpdateSkyBoxTextures();
 
     // preload graphics
     if (precache) W_PrecacheLevel();

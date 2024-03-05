@@ -1193,7 +1193,7 @@ void ThrustMapObject(MapObject *target, MapObject *inflictor, float thrust)
     // don't thrust if at the same location (no angle)
     if (fabs(dx) < 1.0f && fabs(dy) < 1.0f) return;
 
-    BAMAngle angle = R_PointToAngle(0, 0, dx, dy);
+    BAMAngle angle = RendererPointToAngle(0, 0, dx, dy);
 
     // -ACB- 2000/03/11 Div-by-zero check...
     SYS_ASSERT(!AlmostEquals(target->info_->mass_, 0.0f));
@@ -1244,7 +1244,7 @@ void PushMapObject(MapObject *target, MapObject *inflictor, float thrust)
     // don't thrust if at the same location (no angle)
     if (fabs(dx) < 1.0f && fabs(dy) < 1.0f) return;
 
-    BAMAngle angle = R_PointToAngle(0, 0, dx, dy);
+    BAMAngle angle = RendererPointToAngle(0, 0, dx, dy);
 
     // -ACB- 2000/03/11 Div-by-zero check...
     SYS_ASSERT(!AlmostEquals(target->info_->mass_, 0.0f));

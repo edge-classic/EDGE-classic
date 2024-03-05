@@ -526,7 +526,7 @@ static float FNSZ_ratio;
 
 static void CalcSizes()
 {
-    if (SCREENWIDTH < 1024)
+    if (current_screen_width < 1024)
         FNSZ = 16;
     else
         FNSZ = 24;
@@ -562,7 +562,7 @@ static void HorizontalLine(int y, RGBAColor col)
 {
     float alpha = 1.0f;
 
-    SolidBox(0, y, SCREENWIDTH - 1, 1, col, alpha);
+    SolidBox(0, y, current_screen_width - 1, 1, col, alpha);
 }
 
 static void DrawChar(int x, int y, char ch, RGBAColor col)
@@ -604,10 +604,10 @@ static void DrawChar(int x, int y, char ch, RGBAColor col)
     uint8_t px = (uint8_t)ch % 16;
     uint8_t py = 15 - (uint8_t)ch / 16;
 
-    float tx1 = (px)*console_font->font_image_->ratio_w;
-    float tx2 = (px + 1) * console_font->font_image_->ratio_w;
-    float ty1 = (py)*console_font->font_image_->ratio_h;
-    float ty2 = (py + 1) * console_font->font_image_->ratio_h;
+    float tx1 = (px)*console_font->font_image_->width_ratio_;
+    float tx2 = (px + 1) * console_font->font_image_->width_ratio_;
+    float ty1 = (py)*console_font->font_image_->height_ratio_;
+    float ty2 = (py + 1) * console_font->font_image_->height_ratio_;
 
     glBegin(GL_POLYGON);
 
@@ -660,11 +660,11 @@ static void DrawEndoomChar(float x, float y, char ch, RGBAColor col,
     uint8_t px = (uint8_t)ch % 16;
     uint8_t py = 15 - (uint8_t)ch / 16;
 
-    float tx1 = (px)*endoom_font->font_image_->ratio_w;
-    float tx2 = (px + 1) * endoom_font->font_image_->ratio_w;
+    float tx1 = (px)*endoom_font->font_image_->width_ratio_;
+    float tx2 = (px + 1) * endoom_font->font_image_->width_ratio_;
 
-    float ty1 = (py)*endoom_font->font_image_->ratio_h;
-    float ty2 = (py + 1) * endoom_font->font_image_->ratio_h;
+    float ty1 = (py)*endoom_font->font_image_->height_ratio_;
+    float ty2 = (py + 1) * endoom_font->font_image_->height_ratio_;
 
     glBegin(GL_POLYGON);
 
@@ -689,7 +689,7 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
     if (console_font->definition_->type_ == kFontTypeImage)
     {
         // Always whiten the font when used with console output
-        GLuint tex_id = W_ImageCache(console_font->font_image_, true,
+        GLuint tex_id = ImageCache(console_font->font_image_, true,
                                      (const Colormap *)0, true);
 
         glEnable(GL_TEXTURE_2D);
@@ -704,7 +704,7 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_TEXTURE_2D);
-        if ((var_smoothing && console_font->definition_->truetype_smoothing_ ==
+        if ((image_smoothing && console_font->definition_->truetype_smoothing_ ==
                                   FontDefinition::kTrueTypeSmoothOnDemand) ||
             console_font->definition_->truetype_smoothing_ ==
                 FontDefinition::kTrueTypeSmoothAlways)
@@ -748,7 +748,7 @@ static void DrawText(int x, int y, const char *s, RGBAColor col)
 
         x += XMUL;
 
-        if (x >= SCREENWIDTH) break;
+        if (x >= current_screen_width) break;
     }
 
     if (draw_cursor) DrawChar(x, y, 95, col);
@@ -762,7 +762,7 @@ static void EndoomDrawText(int x, int y, ConsoleLine *endoom_line)
 {
     // Always whiten the font when used with console output
     GLuint tex_id =
-        W_ImageCache(endoom_font->font_image_, true, (const Colormap *)0, true);
+        ImageCache(endoom_font->font_image_, true, (const Colormap *)0, true);
 
     int enwidth = RoundToInteger((float)endoom_font->image_monospace_width_ *
                              ((float)FNSZ / endoom_font->image_monospace_width_) / 2);
@@ -783,7 +783,7 @@ static void EndoomDrawText(int x, int y, ConsoleLine *endoom_line)
 
         x += enwidth;
 
-        if (x >= SCREENWIDTH) break;
+        if (x >= current_screen_width) break;
     }
 
     glDisable(GL_TEXTURE_2D);
@@ -829,9 +829,9 @@ void ConsoleDrawer(void)
 
     // -- background --
 
-    int CON_GFX_HT = (SCREENHEIGHT * 3 / 5);
+    int CON_GFX_HT = (current_screen_height * 3 / 5);
 
-    int y = SCREENHEIGHT;
+    int y = current_screen_height;
 
     if (console_wipe_active)
         y = y - CON_GFX_HT * (console_wipe_position) / kConsoleWipeTics;
@@ -840,16 +840,16 @@ void ConsoleDrawer(void)
 
     if (console_style->background_image_ != nullptr)
     {
-        const image_c *img = console_style->background_image_;
+        const Image *img = console_style->background_image_;
 
-        HudRawImage(0, y, SCREENWIDTH, y + CON_GFX_HT, img, 0.0, 0.0,
-                     IM_RIGHT(img), IM_TOP(img),
+        HudRawImage(0, y, current_screen_width, y + CON_GFX_HT, img, 0.0, 0.0,
+                     img->Right(), img->Top(),
                      console_style->definition_->bg_.translucency_, kRGBANoValue,
                      nullptr, 0, 0);
     }
     else
     {
-        SolidBox(0, y, SCREENWIDTH, SCREENHEIGHT - y,
+        SolidBox(0, y, current_screen_width, current_screen_height - y,
                  console_style->definition_->bg_.colour_ != kRGBANoValue
                      ? console_style->definition_->bg_.colour_
                      : SG_BLACK_RGBA32,
@@ -897,7 +897,7 @@ void ConsoleDrawer(void)
 
         y += FNSZ;
 
-        if (y >= SCREENHEIGHT) break;
+        if (y >= current_screen_height) break;
     }
 }
 
@@ -997,7 +997,7 @@ static char KeyToCharacter(int key, bool shift, bool ctrl)
 static void ListCompletions(std::vector<const char *> &list, int word_len,
                             int max_row, RGBAColor color)
 {
-    int max_col = SCREENWIDTH / XMUL - 4;
+    int max_col = current_screen_width / XMUL - 4;
     max_col     = HMM_Clamp(24, max_col, 78);
 
     char buffer[200];
@@ -1598,17 +1598,17 @@ void ConsoleShowFPS(void)
         }
     }
 
-    int x = SCREENWIDTH - XMUL * 16;
-    int y = SCREENHEIGHT - FNSZ * 2;
+    int x = current_screen_width - XMUL * 16;
+    int y = current_screen_height - FNSZ * 2;
 
     if (abs(debug_fps.d_) >= 2) y -= FNSZ;
 
     if (abs(debug_fps.d_) >= 3) y -= (FNSZ * 4);
 
-    SolidBox(x, y, SCREENWIDTH, SCREENHEIGHT, SG_BLACK_RGBA32, 0.5);
+    SolidBox(x, y, current_screen_width, current_screen_height, SG_BLACK_RGBA32, 0.5);
 
     x += XMUL;
-    y = SCREENHEIGHT - FNSZ -
+    y = current_screen_height - FNSZ -
         FNSZ * (console_font->definition_->type_ == kFontTypeTrueType ? -0.5 : 0.5);
 
     // show average...
@@ -1672,8 +1672,8 @@ void ConsoleShowPosition(void)
 
     char textbuf[128];
 
-    int x = SCREENWIDTH - XMUL * 16;
-    int y = SCREENHEIGHT - FNSZ * 5;
+    int x = current_screen_width - XMUL * 16;
+    int y = current_screen_height - FNSZ * 5;
 
     SolidBox(x, y - FNSZ * 10, XMUL * 16, FNSZ * 10 + 2, SG_BLACK_RGBA32, 0.5);
 

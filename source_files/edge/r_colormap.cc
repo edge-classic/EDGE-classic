@@ -23,34 +23,31 @@
 //
 //----------------------------------------------------------------------------
 
-
-#include "i_defs_gl.h"
-#include "i_system.h"
-
-#include "main.h"
-#include "colormap.h"
-#include "game.h"
-
 #include "r_colormap.h"
+
+#include "colormap.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_main.h"
-#include "g_game.h" // current_map
 #include "e_player.h"
+#include "g_game.h"  // current_map
+#include "game.h"
+#include "i_defs_gl.h"
+#include "i_system.h"
 #include "m_argv.h"
-#include "r_misc.h"
+#include "main.h"
 #include "r_gldefs.h"
-#include "r_modes.h"
 #include "r_image.h"
+#include "r_misc.h"
+#include "r_modes.h"
 #include "r_shader.h"
 #include "r_texgl.h"
 #include "r_units.h"
+#include "str_util.h"
 #include "w_files.h"
 #include "w_wad.h"
 
-#include "str_util.h"
-
-extern ConsoleVariable r_forceflatlighting;
+extern ConsoleVariable force_flat_lighting;
 
 // -AJA- 1999/06/30: added this
 uint8_t playpal_data[14][256][3];
@@ -60,32 +57,59 @@ static bool loaded_playpal = false;
 
 // -AJA- 1999/07/03: moved these here from st_stuff.c:
 // Palette indices.
-// For damage/bonus red-/gold-shifts
-#define PAIN_PALS      1
-#define BONUS_PALS     9
-#define NUM_PAIN_PALS  8
-#define NUM_BONUS_PALS 4
-// Radiation suit, green shift.
-#define RADIATION_PAL 13
+// For bonus gold-shifts
 
-EDGE_DEFINE_CONSOLE_VARIABLE(v_secbright, "5", kConsoleVariableFlagArchive)
+static constexpr uint8_t kBonusPaletteIndex  = 9;
+static constexpr uint8_t kTotalBonusPalettes = 4;
+
+// Radiation suit, green shift.
+static constexpr uint8_t kRadiationPaletteIndex = 13;
+
+EDGE_DEFINE_CONSOLE_VARIABLE(sector_brightness_correction, "5",
+                             kConsoleVariableFlagArchive)
 
 // colour indices from palette
-int pal_black, pal_white, pal_gray239;
-int pal_red, pal_green, pal_blue;
-int pal_yellow, pal_green1, pal_brown1;
+int playpal_black, playpal_white, playpal_gray;
 
-static int V_FindPureColour(int which);
+//
+// Find the closest matching colour in the palette.
+//
+static int FindBestRgbMatch(int r, int g, int b)
+{
+    int i;
 
-void V_InitPalette(void)
+    int best      = 0;
+    int best_dist = 1 << 30;
+
+    for (i = 0; i < 256; i++)
+    {
+        int d_r = HMM_ABS(r - playpal_data[0][i][0]);
+        int d_g = HMM_ABS(g - playpal_data[0][i][1]);
+        int d_b = HMM_ABS(b - playpal_data[0][i][2]);
+
+        int dist = d_r * d_r + d_g * d_g + d_b * d_b;
+
+        if (dist == 0) return i;
+
+        if (dist < best_dist)
+        {
+            best      = i;
+            best_dist = dist;
+        }
+    }
+
+    return best;
+}
+
+void InitializePalette(void)
 {
     int t, i;
 
-    int         pal_length = 0;
-    const uint8_t *pal        = (const uint8_t *)W_OpenPackOrLumpInMemory("PLAYPAL", {".pal"}, &pal_length);
+    int            pal_length = 0;
+    const uint8_t *pal        = (const uint8_t *)W_OpenPackOrLumpInMemory(
+        "PLAYPAL", {".pal"}, &pal_length);
 
-    if (!pal)
-        FatalError("V_InitPalette: Error opening PLAYPAL!\n");
+    if (!pal) FatalError("InitializePalette: Error opening PLAYPAL!\n");
 
     // read in palette colours
     for (t = 0; t < 14; t++)
@@ -102,123 +126,39 @@ void V_InitPalette(void)
     loaded_playpal = true;
 
     // lookup useful colours
-    pal_black   = V_FindColour(0, 0, 0);
-    pal_white   = V_FindColour(255, 255, 255);
-    pal_gray239 = V_FindColour(239, 239, 239);
-
-    pal_red   = V_FindPureColour(0);
-    pal_green = V_FindPureColour(1);
-    pal_blue  = V_FindPureColour(2);
-
-    pal_yellow = V_FindColour(255, 255, 0);
-    pal_green1 = V_FindColour(64, 128, 48);
-    pal_brown1 = V_FindColour(192, 128, 74);
+    playpal_black = FindBestRgbMatch(0, 0, 0);
+    playpal_white = FindBestRgbMatch(255, 255, 255);
+    playpal_gray  = FindBestRgbMatch(239, 239, 239);
 
     LogPrint("Loaded global palette.\n");
 
-    LogDebug("Black:%d White:%d Red:%d Green:%d Blue:%d\n", pal_black, pal_white, pal_red, pal_green, pal_blue);
+    LogDebug("Black:%d White:%d Gray:%d\n", playpal_black, playpal_white,
+             playpal_gray);
 }
 
 static int cur_palette = -1;
 
-void V_InitColour(void)
-{
-}
-
-//
-// Find the closest matching colour in the palette.
-//
-int V_FindColour(int r, int g, int b)
-{
-    int i;
-
-    int best      = 0;
-    int best_dist = 1 << 30;
-
-    for (i = 0; i < 256; i++)
-    {
-        int d_r = HMM_ABS(r - playpal_data[0][i][0]);
-        int d_g = HMM_ABS(g - playpal_data[0][i][1]);
-        int d_b = HMM_ABS(b - playpal_data[0][i][2]);
-
-        int dist = d_r * d_r + d_g * d_g + d_b * d_b;
-
-        if (dist == 0)
-            return i;
-
-        if (dist < best_dist)
-        {
-            best      = i;
-            best_dist = dist;
-        }
-    }
-
-    return best;
-}
-
-//
-// Find the best match for the pure colour.  `which' is 0 for red, 1
-// for green and 2 for blue.
-//
-static int V_FindPureColour(int which)
-{
-    int i;
-
-    int best      = 0;
-    int best_dist = 1 << 30;
-
-    for (i = 0; i < 256; i++)
-    {
-        int a = playpal_data[0][i][which];
-        int b = playpal_data[0][i][(which + 1) % 3];
-        int c = playpal_data[0][i][(which + 2) % 3];
-        int d = HMM_MAX(b, c);
-
-        int dist = 255 - (a - d);
-
-        // the pure colour must shine through
-        if (a <= d)
-            continue;
-
-        if (dist < best_dist)
-        {
-            best      = i;
-            best_dist = dist;
-        }
-    }
-
-    return best;
-}
-
-void V_SetPalette(int type, float amount)
+void SetPalette(int type, float amount)
 {
     int palette = 0;
 
     // -AJA- 1999/09/17: fixes problems with black text etc.
-    if (!loaded_playpal)
-        return;
+    if (!loaded_playpal) return;
 
-    if (amount >= 0.95f)
-        amount = 0.95f;
+    if (amount >= 0.95f) amount = 0.95f;
 
     switch (type)
     {
-        // Pain color fading is now handled differently in V_IndexColourToRGB
-        // case PALETTE_PAIN:
-        // palette = (int)(PAIN_PALS + amount * NUM_PAIN_PALS);
-        // break;
+        case kPaletteBonus:
+            palette = (int)(kBonusPaletteIndex + amount * kTotalBonusPalettes);
+            break;
 
-    case PALETTE_BONUS:
-        palette = (int)(BONUS_PALS + amount * NUM_BONUS_PALS);
-        break;
-
-    case PALETTE_SUIT:
-        palette = RADIATION_PAL;
-        break;
+        case kPaletteSuit:
+            palette = kRadiationPaletteIndex;
+            break;
     }
 
-    if (palette == cur_palette)
-        return;
+    if (palette == cur_palette) return;
 
     cur_palette = palette;
 }
@@ -230,7 +170,7 @@ void V_SetPalette(int type, float amount)
 //
 static void LoadColourmap(const Colormap *colm)
 {
-    int   size;
+    int      size;
     uint8_t *data;
 
     // we are writing to const marked memory here. Here is the only place
@@ -244,16 +184,14 @@ static void LoadColourmap(const Colormap *colm)
             FatalError("No such colormap file: %s\n", colm->pack_name_.c_str());
         size = f->GetLength();
         data = f->LoadIntoMemory();
-        delete f; // close file
+        delete f;  // close file
     }
-    else
-    {
-        data = W_LoadLump(colm->lump_name_.c_str(), &size);
-    }
+    else { data = W_LoadLump(colm->lump_name_.c_str(), &size); }
 
     if ((colm->start_ + colm->length_) * 256 > size)
     {
-        FatalError("Colourmap [%s] is too small ! (LENGTH too big)\n", colm->name_.c_str());
+        FatalError("Colourmap [%s] is too small ! (LENGTH too big)\n",
+                   colm->name_.c_str());
     }
 
     cache->size = colm->length_ * 256;
@@ -264,19 +202,18 @@ static void LoadColourmap(const Colormap *colm)
     delete[] data;
 }
 
-const uint8_t *V_GetTranslationTable(const Colormap *colmap)
+static const uint8_t *GetTranslationTable(const Colormap *colmap)
 {
     // Do we need to load or recompute this colourmap ?
 
-    if (colmap->cache_.data == nullptr)
-        LoadColourmap(colmap);
+    if (colmap->cache_.data == nullptr) LoadColourmap(colmap);
 
     return (const uint8_t *)colmap->cache_.data;
 }
 
-void R_TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const Colormap *trans)
+void TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal,
+                      const Colormap *trans)
 {
-
     // is the colormap just using GL_COLOUR?
     if (trans->length_ == 0)
     {
@@ -294,7 +231,7 @@ void R_TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const Colormap
     else
     {
         // do the actual translation
-        const uint8_t *trans_table = V_GetTranslationTable(trans);
+        const uint8_t *trans_table = GetTranslationTable(trans);
 
         for (int j = 0; j < 256; j++)
         {
@@ -307,7 +244,8 @@ void R_TranslatePalette(uint8_t *new_pal, const uint8_t *old_pal, const Colormap
     }
 }
 
-static int AnalyseColourmap(const uint8_t *table, int alpha, int *r, int *g, int *b)
+static int AnalyseColourmap(const uint8_t *table, int alpha, int *r, int *g,
+                            int *b)
 {
     /* analyse whole colourmap */
     int r_tot = 0;
@@ -340,10 +278,6 @@ static int AnalyseColourmap(const uint8_t *table, int alpha, int *r, int *g, int
         g_div = HMM_MAX(4, HMM_MIN(4096, g_div));
         b_div = HMM_MAX(4, HMM_MIN(4096, b_div));
 
-#if 0 // DEBUGGING
-		LogPrint("#%02x%02x%02x / #%02x%02x%02x = (%d,%d,%d)\n",
-				 r1, g1, b1, r0, g0, b0, r_div, g_div, b_div);
-#endif
         r_tot += r_div * weight;
         g_tot += g_div * weight;
         b_tot += b_div * weight;
@@ -378,13 +312,6 @@ static int AnalyseColourmap(const uint8_t *table, int alpha, int *r, int *g, int
         int sg = (g0 * (*g) / 255 * (255 - alpha) + (*g) * alpha) / 255;
         int sb = (b0 * (*b) / 255 * (255 - alpha) + (*b) * alpha) / 255;
 
-        // FIXME: this is the INVULN function
-#if 0
-		sr = (HMM_MAX(0, (*r /2 + 128) - r0) * (255 - alpha) + (*r) * alpha) / 255;
-		sg = (HMM_MAX(0, (*g /2 + 128) - g0) * (255 - alpha) + (*g) * alpha) / 255;
-		sb = (HMM_MAX(0, (*b /2 + 128) - b0) * (255 - alpha) + (*b) * alpha) / 255;
-#endif
-
         int r1 = playpal_data[0][table[k]][0];
         int g1 = playpal_data[0][table[k]][1];
         int b1 = playpal_data[0][table[k]][2];
@@ -402,7 +329,8 @@ void TransformColourmap(Colormap *colmap)
 {
     const uint8_t *table = colmap->cache_.data;
 
-    if (table == nullptr && (!colmap->lump_name_.empty() || !colmap->pack_name_.empty()))
+    if (table == nullptr &&
+        (!colmap->lump_name_.empty() || !colmap->pack_name_.empty()))
     {
         LoadColourmap(colmap);
 
@@ -418,9 +346,9 @@ void TransformColourmap(Colormap *colmap)
             SYS_ASSERT(table);
 
             // for fonts, we only care about the GRAY colour
-            int r = playpal_data[0][table[pal_gray239]][0] * 255 / 239;
-            int g = playpal_data[0][table[pal_gray239]][1] * 255 / 239;
-            int b = playpal_data[0][table[pal_gray239]][2] * 255 / 239;
+            int r = playpal_data[0][table[playpal_gray]][0] * 255 / 239;
+            int g = playpal_data[0][table[playpal_gray]][1] * 255 / 239;
+            int b = playpal_data[0][table[playpal_gray]][2] * 255 / 239;
 
             r = HMM_MIN(255, HMM_MAX(0, r));
             g = HMM_MIN(255, HMM_MAX(0, g));
@@ -439,11 +367,6 @@ void TransformColourmap(Colormap *colmap)
         // int score =
         AnalyseColourmap(table, 0, &r, &g, &b);
 
-#if 0 // DEBUGGING
-		LogDebug("COLMAP [%s] alpha %d --> (%d %d %d)\n",
-				 colmap->name.c_str(), 0, r, g, b);
-#endif
-
         r = HMM_MIN(255, HMM_MAX(0, r));
         g = HMM_MIN(255, HMM_MAX(0, g));
         b = HMM_MIN(255, HMM_MAX(0, b));
@@ -455,7 +378,7 @@ void TransformColourmap(Colormap *colmap)
     LogDebug("- gl_color_   = #%06x\n", colmap->gl_color_);
 }
 
-void V_GetColmapRGB(const Colormap *colmap, float *r, float *g, float *b)
+void GetColormapRgb(const Colormap *colmap, float *r, float *g, float *b)
 {
     if (colmap->gl_color_ == kRGBANoValue)
     {
@@ -465,15 +388,14 @@ void V_GetColmapRGB(const Colormap *colmap, float *r, float *g, float *b)
 
     RGBAColor col = colmap->gl_color_;
 
-    (*r) = GAMMA_CONV((col >> 24) & 0xFF) / 255.0f;
-    (*g) = GAMMA_CONV((col >> 16) & 0xFF) / 255.0f;
-    (*b) = GAMMA_CONV((col >> 8) & 0xFF) / 255.0f;
+    (*r) = ((col >> 24) & 0xFF) / 255.0f;
+    (*g) = ((col >> 16) & 0xFF) / 255.0f;
+    (*b) = ((col >> 8) & 0xFF) / 255.0f;
 }
 
-RGBAColor V_GetFontColor(const Colormap *colmap)
+RGBAColor GetFontColor(const Colormap *colmap)
 {
-    if (!colmap)
-        return kRGBANoValue;
+    if (!colmap) return kRGBANoValue;
 
     if (colmap->font_colour_ == kRGBANoValue)
     {
@@ -484,16 +406,15 @@ RGBAColor V_GetFontColor(const Colormap *colmap)
     return colmap->font_colour_;
 }
 
-RGBAColor V_ParseFontColor(const char *name, bool strict)
+RGBAColor ParseFontColor(const char *name, bool strict)
 {
-    if (!name || !name[0])
-        return kRGBANoValue;
+    if (!name || !name[0]) return kRGBANoValue;
 
     RGBAColor rgb;
 
     if (name[0] == '#')
     {
-        int       r, g, b;
+        int r, g, b;
 
         if (sscanf(name, " #%2x%2x%2x ", &r, &g, &b) != 3)
             FatalError("Bad RGB colour value: %s\n", name);
@@ -514,11 +435,10 @@ RGBAColor V_ParseFontColor(const char *name, bool strict)
             return SG_MAGENTA_RGBA32;
         }
 
-        rgb = V_GetFontColor(colmap);
+        rgb = GetFontColor(colmap);
     }
 
-    if (rgb == kRGBANoValue)
-        rgb ^= 0x00010100;
+    if (rgb == kRGBANoValue) rgb ^= 0x00010100;
 
     return rgb;
 }
@@ -527,17 +447,21 @@ RGBAColor V_ParseFontColor(const char *name, bool strict)
 // Returns an RGB value from an index value - used the current
 // palette.  The byte pointer is assumed to point a 3-byte array.
 //
-void V_IndexColourToRGB(int indexcol, uint8_t *returncol, RGBAColor last_damage_colour, float damageAmount)
+void PalettedColourToRGB(int indexcol, uint8_t *returncol,
+                         RGBAColor last_damage_colour, float damageAmount)
 {
-    if ((cur_palette == PALETTE_NORMAL) || (cur_palette == PALETTE_PAIN))
+    if ((cur_palette == kPaletteNormal) || (cur_palette == kPalettePain))
     {
         float r = (float)epi::GetRGBARed(last_damage_colour) / 255.0;
         float g = (float)epi::GetRGBAGreen(last_damage_colour) / 255.0;
         float b = (float)epi::GetRGBABlue(last_damage_colour) / 255.0;
 
-        returncol[0] = (uint8_t)HMM_MAX(0, HMM_MIN(255, r * damageAmount * 2.5));
-        returncol[1] = (uint8_t)HMM_MAX(0, HMM_MIN(255, g * damageAmount * 2.5));
-        returncol[2] = (uint8_t)HMM_MAX(0, HMM_MIN(255, b * damageAmount * 2.5));
+        returncol[0] =
+            (uint8_t)HMM_MAX(0, HMM_MIN(255, r * damageAmount * 2.5));
+        returncol[1] =
+            (uint8_t)HMM_MAX(0, HMM_MIN(255, g * damageAmount * 2.5));
+        returncol[2] =
+            (uint8_t)HMM_MAX(0, HMM_MIN(255, b * damageAmount * 2.5));
     }
     else
     {
@@ -547,46 +471,14 @@ void V_IndexColourToRGB(int indexcol, uint8_t *returncol, RGBAColor last_damage_
     }
 }
 
-RGBAColor V_LookupColour(int col)
-{
-    int r = playpal_data[0][col][0];
-    int g = playpal_data[0][col][1];
-    int b = playpal_data[0][col][2];
-
-    return epi::MakeRGBA(r, g, b);
-}
-
-#if 0 // OLD BUT POTENTIALLY USEFUL
-static void SetupLightMap(LightingModel model)
-{
-	for (i=0; i < 256; i++)
-	{
-		// Approximation of standard Doom lighting: 
-		// (based on side-by-side comparison)
-		//    [0,72] --> [0,16]
-		//    [72,112] --> [16,56]
-		//    [112,255] --> [56,255]
-
-		if (i <= 72)
-			rgl_light_map[i] = i * 16 / 72;
-		else if (i <= 112)
-			rgl_light_map[i] = 16 + (i - 72) * 40 / 40;
-		else if (i < 255)
-			rgl_light_map[i] = 56 + (i - 112) * 200 / 144;
-		else
-			rgl_light_map[i] = 255;
-	}
-}
-#endif
-
 // -AJA- 1999/07/03: Rewrote this routine, since the palette handling
 // has been moved to v_colour.c/h (and made more flexible).  Later on it
 // might be good to DDF-ify all this, allowing other palette lumps and
 // being able to set priorities for the different effects.
 
-void R_PaletteStuff(void)
+void PaletteTicker(void)
 {
-    int   palette = PALETTE_NORMAL;
+    int   palette = kPaletteNormal;
     float amount  = 0;
 
     player_t *p = players[displayplayer];
@@ -596,31 +488,32 @@ void R_PaletteStuff(void)
 
     if (cnt)
     {
-        palette = PALETTE_PAIN;
-        amount  = (cnt + 7) / 160.0f; // 64.0f;
+        palette = kPalettePain;
+        amount  = (cnt + 7) / 160.0f;  // 64.0f;
     }
     else if (p->bonuscount)
     {
-        palette = PALETTE_BONUS;
+        palette = kPaletteBonus;
         amount  = (p->bonuscount + 7) / 32.0f;
     }
-    else if (p->powers[kPowerTypeAcidSuit] > 4 * 32 || fmod(p->powers[kPowerTypeAcidSuit], 16) >= 8)
+    else if (p->powers[kPowerTypeAcidSuit] > 4 * 32 ||
+             fmod(p->powers[kPowerTypeAcidSuit], 16) >= 8)
     {
-        palette = PALETTE_SUIT;
+        palette = kPaletteSuit;
         amount  = 1.0f;
     }
 
     // This routine will limit `amount' to acceptable values, and will
     // only update the video palette/colormaps when the palette actually
     // changes.
-    V_SetPalette(palette, amount);
+    SetPalette(palette, amount);
 }
 
 //----------------------------------------------------------------------------
 //  COLORMAP SHADERS
 //----------------------------------------------------------------------------
 
-int R_DoomLightingEquation(int L, float dist)
+static int DoomLightingEquation(int L, float dist)
 {
     /* L in the range 0 to 63 */
 
@@ -632,82 +525,85 @@ int R_DoomLightingEquation(int L, float dist)
     return HMM_Clamp(min_L, index, 31);
 }
 
-class colormap_shader_c : public abstract_shader_c
+class ColormapShader : public AbstractShader
 {
-  private:
-    const Colormap *colmap;
+   private:
+    const Colormap *colormap_;
 
-    int light_lev;
+    int light_level_;
 
-    GLuint fade_tex;
+    GLuint fade_texture_;
 
-    bool             simple_cmap;
-    LightingModel lt_model;
+    LightingModel lighting_model_;
 
-    RGBAColor whites[32];
+    RGBAColor whites_[32];
 
-    RGBAColor fog_color;
-    float    fog_density;
+    RGBAColor fog_color_;
+    float     fog_density_;
 
     // for DDFLEVL fog checks
-    Sector *sec;
+    Sector *sector_;
 
-  public:
-    colormap_shader_c(const Colormap *CM)
-        : colmap(CM), light_lev(255), fade_tex(0), simple_cmap(true), lt_model(kLightingModelDoom), fog_color(kRGBANoValue),
-          fog_density(0), sec(nullptr)
+   public:
+    ColormapShader(const Colormap *CM)
+        : colormap_(CM),
+          light_level_(255),
+          fade_texture_(0),
+          lighting_model_(kLightingModelDoom),
+          fog_color_(kRGBANoValue),
+          fog_density_(0),
+          sector_(nullptr)
     {
     }
 
-    virtual ~colormap_shader_c()
-    {
-        DeleteTex();
-    }
+    virtual ~ColormapShader() { DeleteTex(); }
 
-  private:
-    inline float DistFromViewplane(float x, float y, float z)
+   private:
+    inline float DistanceFromViewPlane(float x, float y, float z)
     {
-        float dx = (x - viewx) * viewforward.X;
-        float dy = (y - viewy) * viewforward.Y;
-        float dz = (z - viewz) * viewforward.Z;
+        float dx = (x - view_x) * view_forward.X;
+        float dy = (y - view_y) * view_forward.Y;
+        float dz = (z - view_z) * view_forward.Z;
 
         return dx + dy + dz;
     }
 
-    inline void TexCoord(local_gl_vert_t *v, int t, const HMM_Vec3 *lit_pos)
+    inline void TextureCoordinates(RendererVertex *v, int t,
+                                   const HMM_Vec3 *lit_pos)
     {
-        float dist = DistFromViewplane(lit_pos->X, lit_pos->Y, lit_pos->Z);
+        float dist = DistanceFromViewPlane(lit_pos->X, lit_pos->Y, lit_pos->Z);
 
-        int L = light_lev / 4; // need integer range 0-63
+        int L = light_level_ / 4;  // need integer range 0-63
 
-        v->texc[t].X = dist / 1600.0;
-        v->texc[t].Y = (L + 0.5) / 64.0;
+        v->texture_coordinates[t].X = dist / 1600.0;
+        v->texture_coordinates[t].Y = (L + 0.5) / 64.0;
     }
 
-  public:
-    virtual void Sample(multi_color_c *col, float x, float y, float z)
+   public:
+    virtual void Sample(ColorMixer *col, float x, float y, float z)
     {
         // FIXME: assumes standard COLORMAP
 
-        float dist = DistFromViewplane(x, y, z);
+        float dist = DistanceFromViewPlane(x, y, z);
 
         int cmap_idx;
 
-        if (lt_model >= kLightingModelFlat)
-            cmap_idx = HMM_Clamp(0, 42 - light_lev / 6, 31);
+        if (lighting_model_ >= kLightingModelFlat)
+            cmap_idx = HMM_Clamp(0, 42 - light_level_ / 6, 31);
         else
-            cmap_idx = R_DoomLightingEquation(light_lev / 4, dist);
+            cmap_idx = DoomLightingEquation(light_level_ / 4, dist);
 
-        RGBAColor WH = whites[cmap_idx];
+        RGBAColor WH = whites_[cmap_idx];
 
-        col->mod_R += epi::GetRGBARed(WH);
-        col->mod_G += epi::GetRGBAGreen(WH);
-        col->mod_B += epi::GetRGBABlue(WH);
+        col->modulate_red_ += epi::GetRGBARed(WH);
+        col->modulate_green_ += epi::GetRGBAGreen(WH);
+        col->modulate_blue_ += epi::GetRGBABlue(WH);
 
-        // FIXME: for foggy maps, need to adjust add_R/G/B too
+        // FIXME: for foggy maps, need to adjust add_red_/G/B too
     }
 
-    virtual void Corner(multi_color_c *col, float nx, float ny, float nz, MapObject *mod_pos, bool is_weapon)
+    virtual void Corner(ColorMixer *col, float nx, float ny, float nz,
+                        MapObject *mod_pos, bool is_weapon)
     {
         // TODO: improve this (normal-ise a little bit)
 
@@ -717,22 +613,23 @@ class colormap_shader_c : public abstract_shader_c
 
         if (is_weapon)
         {
-            mx += viewcos * 110;
-            my += viewsin * 110;
+            mx += view_cosine * 110;
+            my += view_sine * 110;
         }
 
         Sample(col, mx, my, mz);
     }
 
-    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha, int *pass_var, int blending, bool masked,
-                          void *data, shader_coord_func_t func)
+    virtual void WorldMix(GLuint shape, int num_vert, GLuint tex, float alpha,
+                          int *pass_var, int blending, bool masked, void *data,
+                          ShaderCoordinateFunction func)
     {
-        RGBAColor fc_to_use = fog_color;
-        float    fd_to_use = fog_density;
+        RGBAColor fc_to_use = fog_color_;
+        float     fd_to_use = fog_density_;
         // check for DDFLEVL fog
         if (fc_to_use == kRGBANoValue)
         {
-            if (IS_SKY(sec->ceiling))
+            if (IS_SKY(sector_->ceiling))
             {
                 fc_to_use = current_map->outdoor_fog_color_;
                 fd_to_use = 0.01f * current_map->outdoor_fog_density_;
@@ -744,40 +641,41 @@ class colormap_shader_c : public abstract_shader_c
             }
         }
 
-        local_gl_vert_t *glvert =
-            RGL_BeginUnit(shape, num_vert, GL_MODULATE, tex, (simple_cmap || r_dumbmulti.d_) ? GL_MODULATE : GL_DECAL,
-                          fade_tex, *pass_var, blending, fc_to_use, fd_to_use);
+        RendererVertex *glvert = RendererBeginUnit(
+            shape, num_vert, GL_MODULATE, tex, GL_MODULATE, fade_texture_,
+            *pass_var, blending, fc_to_use, fd_to_use);
 
         for (int v_idx = 0; v_idx < num_vert; v_idx++)
         {
-            local_gl_vert_t *dest = glvert + v_idx;
+            RendererVertex *dest = glvert + v_idx;
 
-            dest->rgba[3] = alpha;
+            dest->rgba_color[3] = alpha;
 
             HMM_Vec3 lit_pos;
 
-            (*func)(data, v_idx, &dest->pos, dest->rgba, &dest->texc[0], &dest->normal, &lit_pos);
+            (*func)(data, v_idx, &dest->position, dest->rgba_color,
+                    &dest->texture_coordinates[0], &dest->normal, &lit_pos);
 
-            TexCoord(dest, 1, &lit_pos);
+            TextureCoordinates(dest, 1, &lit_pos);
         }
 
-        RGL_EndUnit(num_vert);
+        RendererEndUnit(num_vert);
 
         (*pass_var) += 1;
     }
 
-  private:
-    void MakeColormapTexture(int mode)
+   private:
+    void MakeColormapTexture()
     {
         ImageData img(256, 64, 4);
 
         const uint8_t *map    = nullptr;
-        int         length = 32;
+        int            length = 32;
 
-        if (colmap && colmap->length_ > 0)
+        if (colormap_ && colormap_->length_ > 0)
         {
-            map    = V_GetTranslationTable(colmap);
-            length = colmap->length_;
+            map    = GetTranslationTable(colormap_);
+            length = colormap_->length_;
 
             for (int ci = 0; ci < 32; ci++)
             {
@@ -790,18 +688,19 @@ class colormap_shader_c : public abstract_shader_c
                 int g = playpal_data[0][new_col][1];
                 int b = playpal_data[0][new_col][2];
 
-                whites[ci] = epi::MakeRGBA(r, g, b);
+                whites_[ci] = epi::MakeRGBA(r, g, b);
             }
         }
-        else if (colmap) // GL_COLOUR
+        else if (colormap_)  // GL_COLOUR
         {
             for (int ci = 0; ci < 32; ci++)
             {
-                int r = epi::GetRGBARed(colmap->gl_color_) * (31 - ci) / 31;
-                int g = epi::GetRGBAGreen(colmap->gl_color_) * (31 - ci) / 31;
-                int b = epi::GetRGBABlue(colmap->gl_color_) * (31 - ci) / 31;
+                int r = epi::GetRGBARed(colormap_->gl_color_) * (31 - ci) / 31;
+                int g =
+                    epi::GetRGBAGreen(colormap_->gl_color_) * (31 - ci) / 31;
+                int b = epi::GetRGBABlue(colormap_->gl_color_) * (31 - ci) / 31;
 
-                whites[ci] = epi::MakeRGBA(r, g, b);
+                whites_[ci] = epi::MakeRGBA(r, g, b);
             }
         }
         else
@@ -810,7 +709,7 @@ class colormap_shader_c : public abstract_shader_c
             {
                 int ity = 255 - ci * 8 - ci / 5;
 
-                whites[ci] = epi::MakeRGBA(ity, ity, ity);
+                whites_[ci] = epi::MakeRGBA(ity, ity, ity);
             }
         }
 
@@ -824,7 +723,7 @@ class colormap_shader_c : public abstract_shader_c
 
                 int index;
 
-                if (lt_model >= kLightingModelFlat)
+                if (lighting_model_ >= kLightingModelFlat)
                 {
                     // FLAT lighting
                     index = HMM_Clamp(0, 42 - (L * 2 / 3), 31);
@@ -832,41 +731,20 @@ class colormap_shader_c : public abstract_shader_c
                 else
                 {
                     // DOOM lighting formula
-                    index = R_DoomLightingEquation(L, dist);
+                    index = DoomLightingEquation(L, dist);
                 }
 
-                // WTF  index = index * length / 32;
-
-                if (false) //!!!! (mode == 1)
+                // GL_MODULATE mode
+                if (colormap_)
                 {
-                    // GL_DECAL mode
-                    dest[0] = 0;
-                    dest[1] = 0;
-                    dest[2] = 0;
-                    dest[3] = 0 + index * 8;
+                    dest[0] = epi::GetRGBARed(whites_[index]);
+                    dest[1] = epi::GetRGBAGreen(whites_[index]);
+                    dest[2] = epi::GetRGBABlue(whites_[index]);
+                    dest[3] = 255;
                 }
-                else if (mode == 0)
+                else
                 {
-                    // GL_MODULATE mode
-                    if (colmap)
-                    {
-                        dest[0] = epi::GetRGBARed(whites[index]);
-                        dest[1] = epi::GetRGBAGreen(whites[index]);
-                        dest[2] = epi::GetRGBABlue(whites[index]);
-                        dest[3] = 255;
-                    }
-                    else
-                    {
-                        dest[0] = 255 - index * 8;
-                        dest[1] = dest[0];
-                        dest[2] = dest[0];
-                        dest[3] = 255;
-                    }
-                }
-                else if (mode == 2)
-                {
-                    // additive pass (OLD CARDS)
-                    dest[0] = index * 8 * 128 / 256;
+                    dest[0] = 255 - index * 8;
                     dest[1] = dest[0];
                     dest[2] = dest[0];
                     dest[3] = 255;
@@ -874,75 +752,70 @@ class colormap_shader_c : public abstract_shader_c
             }
         }
 
-        fade_tex = R_UploadTexture(&img, UPL_Smooth | UPL_Clamp);
+        fade_texture_ =
+            RendererUploadTexture(&img, kUploadSmooth | kUploadClamp);
     }
 
-  public:
+   public:
     void Update()
     {
-        if (fade_tex == 0 || (r_forceflatlighting.d_&& lt_model != kLightingModelFlat) ||
-            (!r_forceflatlighting.d_&& lt_model != current_map->episode_->lighting_))
+        if (fade_texture_ == 0 ||
+            (force_flat_lighting.d_ && lighting_model_ != kLightingModelFlat) ||
+            (!force_flat_lighting.d_ &&
+             lighting_model_ != current_map->episode_->lighting_))
         {
-            if (fade_tex != 0)
-            {
-                glDeleteTextures(1, &fade_tex);
-            }
+            if (fade_texture_ != 0) { glDeleteTextures(1, &fade_texture_); }
 
-            if (r_forceflatlighting.d_)
-                lt_model = kLightingModelFlat;
+            if (force_flat_lighting.d_)
+                lighting_model_ = kLightingModelFlat;
             else
-                lt_model = current_map->episode_->lighting_;
+                lighting_model_ = current_map->episode_->lighting_;
 
-            MakeColormapTexture(0);
+            MakeColormapTexture();
         }
     }
 
     void DeleteTex()
     {
-        if (fade_tex != 0)
+        if (fade_texture_ != 0)
         {
-            glDeleteTextures(1, &fade_tex);
-            fade_tex = 0;
+            glDeleteTextures(1, &fade_texture_);
+            fade_texture_ = 0;
         }
     }
 
-    void SetLight(int _level)
+    void SetLight(int level) { light_level_ = level; }
+
+    void SetFog(RGBAColor fog_color, float fog_density)
     {
-        light_lev = _level;
+        fog_color_   = fog_color;
+        fog_density_ = fog_density;
     }
 
-    void SetFog(RGBAColor _fog_color, float _fog_density)
-    {
-        fog_color   = _fog_color;
-        fog_density = _fog_density;
-    }
-
-    void SetSector(Sector *_sec)
-    {
-        sec = _sec;
-    }
+    void SetSector(Sector *sec) { sector_ = sec; }
 };
 
-static colormap_shader_c *std_cmap_shader;
+static ColormapShader *standard_colormap_shader;
 
-abstract_shader_c *R_GetColormapShader(const struct RegionProperties *props, int light_add, Sector *sec)
+AbstractShader *GetColormapShader(const struct RegionProperties *props,
+                                  int light_add, Sector *sec)
 {
-    if (!std_cmap_shader)
-        std_cmap_shader = new colormap_shader_c(nullptr);
+    if (!standard_colormap_shader)
+        standard_colormap_shader = new ColormapShader(nullptr);
 
-    colormap_shader_c *shader = std_cmap_shader;
+    ColormapShader *shader = standard_colormap_shader;
 
     if (props->colourmap)
     {
         if (props->colourmap->analysis_)
-            shader = (colormap_shader_c *)props->colourmap->analysis_;
+            shader = (ColormapShader *)props->colourmap->analysis_;
         else
         {
-            shader = new colormap_shader_c(props->colourmap);
+            shader = new ColormapShader(props->colourmap);
 
             // Intentional Const Override
-            Colormap *CM = (Colormap *)props->colourmap;
-            CM->analysis_    = shader;
+            Colormap *CM  = (Colormap *)props->colourmap;
+            CM->analysis_ = shader;
         }
     }
 
@@ -950,11 +823,14 @@ abstract_shader_c *R_GetColormapShader(const struct RegionProperties *props, int
 
     shader->Update();
 
-    int lit_Nom = props->light_level + light_add + ((v_secbright.d_- 5) * 10);
+    int lit_Nom = props->light_level + light_add +
+                  ((sector_brightness_correction.d_ - 5) * 10);
 
-    if (!(props->colourmap && (props->colourmap->special_ & kColorSpecialNoFlash)) || ren_extralight > 250)
+    if (!(props->colourmap &&
+          (props->colourmap->special_ & kColorSpecialNoFlash)) ||
+        render_view_extra_light > 250)
     {
-        lit_Nom += ren_extralight;
+        lit_Nom += render_view_extra_light;
     }
 
     lit_Nom = HMM_Clamp(0, lit_Nom, 255);
@@ -970,16 +846,15 @@ abstract_shader_c *R_GetColormapShader(const struct RegionProperties *props, int
 
 void DeleteColourmapTextures(void)
 {
-    if (std_cmap_shader)
-        std_cmap_shader->DeleteTex();
+    if (standard_colormap_shader) standard_colormap_shader->DeleteTex();
 
-    std_cmap_shader = nullptr;
+    standard_colormap_shader = nullptr;
 
-    for (auto cmap : colormaps)
+    for (Colormap *cmap : colormaps)
     {
         if (cmap->analysis_)
         {
-            colormap_shader_c *shader = (colormap_shader_c *)cmap->analysis_;
+            ColormapShader *shader = (ColormapShader *)cmap->analysis_;
 
             shader->DeleteTex();
         }

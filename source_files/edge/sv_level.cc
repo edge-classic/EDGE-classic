@@ -759,7 +759,7 @@ void SR_LevelPutSurfPtr(void *storage, int index, void *extra)
 
 bool SR_LevelGetImage(void *storage, int index, void *extra)
 {
-    const image_c **dest = (const image_c **)storage + index;
+    const Image **dest = (const Image **)storage + index;
     const char     *str;
 
     str = SV_GetString();
@@ -773,7 +773,7 @@ bool SR_LevelGetImage(void *storage, int index, void *extra)
     if (str[1] != ':')
         LogWarning("SR_LevelGetImage: invalid image string `%s'\n", str);
 
-    (*dest) = W_ImageParseSaveString(str[0], str + 2);
+    (*dest) = ImageParseSaveString(str[0], str + 2);
 
     SV_FreeString(str);
     return true;
@@ -790,7 +790,7 @@ bool SR_LevelGetImage(void *storage, int index, void *extra)
 //
 void SR_LevelPutImage(void *storage, int index, void *extra)
 {
-    const image_c *src = ((const image_c **)storage)[index];
+    const Image *src = ((const Image **)storage)[index];
 
     char buffer[64];
 
@@ -800,7 +800,7 @@ void SR_LevelPutImage(void *storage, int index, void *extra)
         return;
     }
 
-    W_ImageMakeSaveString(src, buffer, buffer + 2);
+    ImageMakeSaveString(src, buffer, buffer + 2);
     buffer[1] = ':';
 
     SV_PutString(buffer);

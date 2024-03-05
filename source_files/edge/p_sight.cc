@@ -45,11 +45,12 @@
 #include "dm_structs.h"
 #include "m_bbox.h"
 #include "p_local.h"
-#include "r_bsp.h"
 #include "r_misc.h"
 #include "r_state.h"
 
 #define DEBUG_SIGHT 0
+
+extern unsigned int root_node;
 
 struct LineOfSight
 {
@@ -484,7 +485,7 @@ bool P_CheckSight(MapObject *src, MapObject *dest)
     }
 
     sight_check.angle =
-        R_PointToAngle(sight_check.source.x, sight_check.source.y,
+        RendererPointToAngle(sight_check.source.x, sight_check.source.y,
                        sight_check.destination.X, sight_check.destination.Y);
 
     sight_check.bounding_box[kBoundingBoxLeft] =
@@ -573,7 +574,7 @@ bool P_CheckSight(MapObject *src, MapObject *dest)
 
 bool CheckSightToPoint(MapObject *src, float x, float y, float z)
 {
-    Subsector *dest_sub = R_PointInSubsector(x, y);
+    Subsector *dest_sub = RendererPointInSubsector(x, y);
 
     if (dest_sub == src->subsector_) return true;
 
@@ -595,7 +596,7 @@ bool CheckSightToPoint(MapObject *src, float x, float y, float z)
     sight_check.top_slope    = z + 1.0f - sight_check.source_z;
 
     sight_check.angle =
-        R_PointToAngle(sight_check.source.x, sight_check.source.y,
+        RendererPointToAngle(sight_check.source.x, sight_check.source.y,
                        sight_check.destination.X, sight_check.destination.Y);
 
     sight_check.bounding_box[kBoundingBoxLeft] =

@@ -39,16 +39,17 @@
 #include "m_bbox.h"
 #include "p_local.h"
 #include "p_spec.h"
-#include "r_bsp.h"
 #include "r_gldefs.h"
 #include "r_misc.h"
 #include "r_shader.h"
 #include "r_state.h"
 
 // FIXME: have a proper API
-extern abstract_shader_c *MakeDLightShader(MapObject *mo);
-extern abstract_shader_c *MakePlaneGlow(MapObject *mo);
-extern abstract_shader_c *MakeWallGlow(MapObject *mo);
+extern AbstractShader *MakeDLightShader(MapObject *mo);
+extern AbstractShader *MakePlaneGlow(MapObject *mo);
+extern AbstractShader *MakeWallGlow(MapObject *mo);
+
+extern unsigned int root_node;
 
 // BLOCKMAP
 //
@@ -78,8 +79,8 @@ static int dynamic_light_blockmap_height;
 
 MapObject **dynamic_light_blockmap_things = nullptr;
 
-extern std::unordered_set<abstract_shader_c *> seen_dlights;
-extern ConsoleVariable                         r_culling;
+extern std::unordered_set<AbstractShader *> seen_dynamic_lights;
+extern ConsoleVariable                         draw_culling;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(max_dynamic_lights, "0",
                              kConsoleVariableFlagArchive)
@@ -563,11 +564,11 @@ void SetThingPosition(MapObject *mo)
     SYS_ASSERT(!(mo->dynamic_light_next_ || mo->dynamic_light_previous_));
 
     // link into subsector
-    ss             = R_PointInSubsector(mo->x, mo->y);
+    ss             = RendererPointInSubsector(mo->x, mo->y);
     mo->subsector_ = ss;
 
     // determine properties
-    mo->region_properties_ = R_PointGetProps(ss, mo->z + mo->height_ / 2);
+    mo->region_properties_ = RendererPointGetProps(ss, mo->z + mo->height_ / 2);
 
     if (!(mo->flags_ & kMapObjectFlagNoSector))
     {
@@ -617,24 +618,6 @@ void SetThingPosition(MapObject *mo)
             TouchNodeFree(cur);
         }
     }
-
-#if 0  // PROFILING
-	{
-		static int last_time = 0;
-
-		if ((leveltime - last_time) > 5*TICRATE)
-		{
-			LogDebug("TOUCHSTATS: Mv=%d Ht=%d Ms=%d Al=%d Fr=%d\n",
-				touchstat_moves, touchstat_hit, touchstat_miss,
-				touchstat_alloc, touchstat_free);
-
-			touchstat_moves = touchstat_hit = touchstat_miss =
-				touchstat_alloc = touchstat_free = 0;
-
-			last_time = leveltime;
-		}
-	}
-#endif
 
     // link into blockmap
     if (!(mo->flags_ & kMapObjectFlagNoBlockmap))
@@ -870,8 +853,8 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
                 if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0)
                     continue;
 
-                if (r_culling.d_ &&
-                    R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f_)
+                if (draw_culling.d_ &&
+                    RendererPointToDistance(view_x, view_y, mo->x, mo->y) > renderer_far_clip.f_)
                     continue;
 
                 // check whether radius touches the given bbox
@@ -886,11 +869,11 @@ void DynamicLightIterator(float x1, float y1, float z1, float x2, float y2,
                     mo->dynamic_light_.shader = MakeDLightShader(mo);
 
                 if (max_dynamic_lights.d_ > 0 &&
-                    seen_dlights.count(mo->dynamic_light_.shader) == 0)
+                    seen_dynamic_lights.count(mo->dynamic_light_.shader) == 0)
                 {
-                    if ((int)seen_dlights.size() >= max_dynamic_lights.d_ * 20)
+                    if ((int)seen_dynamic_lights.size() >= max_dynamic_lights.d_ * 20)
                         continue;
-                    else { seen_dlights.insert(mo->dynamic_light_.shader); }
+                    else { seen_dynamic_lights.insert(mo->dynamic_light_.shader); }
                 }
 
                 //			mo->dynamic_light_.shader->CheckReset();
@@ -914,8 +897,8 @@ void SectorGlowIterator(Sector *sec, float x1, float y1, float z1, float x2,
         // skip "off" lights
         if (mo->state_->bright <= 0 || mo->dynamic_light_.r <= 0) continue;
 
-        if (r_culling.d_ &&
-            R_PointToDist(viewx, viewy, mo->x, mo->y) > r_farclip.f_)
+        if (draw_culling.d_ &&
+            RendererPointToDistance(view_x, view_y, mo->x, mo->y) > renderer_far_clip.f_)
             continue;
 
         // check whether radius touches the given bbox

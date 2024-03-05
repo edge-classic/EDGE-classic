@@ -52,7 +52,7 @@ modeldef_c::~modeldef_c()
     // TODO: free the skins
 }
 
-static void FindModelFrameNames(md2_model_c *md, int model_num)
+static void FindModelFrameNames(Md2Model *md, int model_num)
 {
     int missing = 0;
 
@@ -73,7 +73,7 @@ static void FindModelFrameNames(md2_model_c *md, int model_num)
 
         SYS_ASSERT(st->model_frame);
 
-        st->frame = MD2_FindFrame(md, st->model_frame);
+        st->frame = Md2FindFrame(md, st->model_frame);
 
         if (st->frame >= 0)
         {
@@ -91,7 +91,7 @@ static void FindModelFrameNames(md2_model_c *md, int model_num)
                 ddf_model_names[model_num].c_str());
 }
 
-static void FindModelFrameNames(mdl_model_c *md, int model_num)
+static void FindModelFrameNames(MdlModel *md, int model_num)
 {
     int missing = 0;
 
@@ -112,7 +112,7 @@ static void FindModelFrameNames(mdl_model_c *md, int model_num)
 
         SYS_ASSERT(st->model_frame);
 
-        st->frame = MDL_FindFrame(md, st->model_frame);
+        st->frame = MdlFindFrame(md, st->model_frame);
 
         if (st->frame >= 0)
         {
@@ -166,7 +166,7 @@ modeldef_c *LoadModelFromLump(int model_num)
             if (f)
             {
                 LogDebug("Loading MD3 model from pack file : %s\n", packname.c_str());
-                def->md2_model = MD3_LoadModel(f);
+                def->md2_model = Md3Load(f);
                 pack_file      = true;
             }
         }
@@ -175,7 +175,7 @@ modeldef_c *LoadModelFromLump(int model_num)
             LogDebug("Loading MD3 model from lump : %s\n", lumpname.c_str());
             f = W_OpenLump(lumpname.c_str());
             if (f)
-                def->md2_model = MD3_LoadModel(f);
+                def->md2_model = Md3Load(f);
         }
     }
 
@@ -198,7 +198,7 @@ modeldef_c *LoadModelFromLump(int model_num)
                 if (f)
                 {
                     LogDebug("Loading MD2 model from pack file : %s\n", packname.c_str());
-                    def->md2_model = MD2_LoadModel(f);
+                    def->md2_model = Md2Load(f);
                     pack_file      = true;
                 }
             }
@@ -207,7 +207,7 @@ modeldef_c *LoadModelFromLump(int model_num)
                 LogDebug("Loading MD2 model from lump : %s\n", lumpname.c_str());
                 f = W_OpenLump(lumpname.c_str());
                 if (f)
-                    def->md2_model = MD2_LoadModel(f);
+                    def->md2_model = Md2Load(f);
             }
         }
     }
@@ -231,7 +231,7 @@ modeldef_c *LoadModelFromLump(int model_num)
                 if (f)
                 {
                     LogDebug("Loading MDL model from pack file : %s\n", packname.c_str());
-                    def->mdl_model = MDL_LoadModel(f);
+                    def->mdl_model = MdlLoad(f);
                     pack_file      = true;
                 }
             }
@@ -240,7 +240,7 @@ modeldef_c *LoadModelFromLump(int model_num)
                 LogDebug("Loading MDL model from lump : %s\n", lumpname.c_str());
                 f = W_OpenLump(lumpname.c_str());
                 if (f)
-                    def->mdl_model = MDL_LoadModel(f);
+                    def->mdl_model = MdlLoad(f);
             }
         }
     }
@@ -260,17 +260,17 @@ modeldef_c *LoadModelFromLump(int model_num)
             if (pack_file)
             {
                 skinname      = epi::StringFormat("%s%d", basename.c_str(), i);
-                def->skins[i] = W_ImageLookup(skinname.c_str(), kImageNamespaceSprite, ILF_Null);
+                def->skins[i] = ImageLookup(skinname.c_str(), kImageNamespaceSprite, kImageLookupNull);
                 if (!def->skins[i])
                 {
                     skinname      = epi::StringFormat("%sSKN%d", basename.c_str(), i);
-                    def->skins[i] = W_ImageLookup(skinname.c_str(), kImageNamespaceSprite, ILF_Null);
+                    def->skins[i] = ImageLookup(skinname.c_str(), kImageNamespaceSprite, kImageLookupNull);
                 }
             }
             else
             {
                 skinname      = epi::StringFormat("%sSKN%d", basename.c_str(), i);
-                def->skins[i] = W_ImageLookup(skinname.c_str(), kImageNamespaceSprite, ILF_Null);
+                def->skins[i] = ImageLookup(skinname.c_str(), kImageNamespaceSprite, kImageLookupNull);
             }
         }
     }
@@ -396,7 +396,7 @@ void W_PrecacheModels(void)
             for (int n = 0; n < 10; n++)
             {
                 if (def && def->skins[n])
-                    W_ImagePreCache(def->skins[n]);
+                    ImagePrecache(def->skins[n]);
             }
         }
     }

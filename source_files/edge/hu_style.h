@@ -33,7 +33,7 @@ class Style
 
     Font *fonts_[StyleDefinition::kTotalTextSections];
 
-    const image_c *background_image_;
+    const Image *background_image_;
 
    public:
     void Load();

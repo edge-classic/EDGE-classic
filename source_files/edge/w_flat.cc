@@ -110,22 +110,22 @@ void R_AddFlatAnim(AnimationDefinition *anim)
         // determine animation sequence
         total = e_offset - s_offset + 1;
 
-        const image_c **flats = new const image_c *[total];
+        const Image **flats = new const Image *[total];
 
         // lookup each flat
         for (i = 0; i < total; i++)
         {
             const char *name = W_GetLumpName((*lumps)[s_offset + i]);
 
-            // Note we use W_ImageFromFlat() here.  It might seem like a good
+            // Note we use ImageFromFlat() here.  It might seem like a good
             // optimisation to use the lump number directly, but we can't do
             // that -- the lump list does NOT take overriding flats (in newer
             // pwads) into account.
 
-            flats[i] = W_ImageLookup(name, kImageNamespaceFlat, ILF_Null | ILF_Exact | ILF_NoNew);
+            flats[i] = ImageLookup(name, kImageNamespaceFlat, kImageLookupNull | kImageLookupExact | kImageLookupNoNew);
         }
 
-        W_AnimateImageSet(flats, total, anim->speed_);
+        AnimateImageSet(flats, total, anim->speed_);
         delete[] flats;
     }
 
@@ -136,14 +136,14 @@ void R_AddFlatAnim(AnimationDefinition *anim)
     if (total == 1)
         return;
 
-    const image_c **flats = new const image_c *[total];
+    const Image **flats = new const Image *[total];
 
     for (int i = 0; i < total; i++)
     {
-        flats[i] = W_ImageLookup(anim->pics_[i].c_str(), kImageNamespaceFlat, ILF_Null | ILF_Exact);
+        flats[i] = ImageLookup(anim->pics_[i].c_str(), kImageNamespaceFlat, kImageLookupNull | kImageLookupExact);
     }
 
-    W_AnimateImageSet(flats, total, anim->speed_);
+    AnimateImageSet(flats, total, anim->speed_);
     delete[] flats;
 }
 
@@ -188,16 +188,16 @@ void R_AddTextureAnim(AnimationDefinition *anim)
         SYS_ASSERT(s_offset <= e_offset);
 
         int             total = e_offset - s_offset + 1;
-        const image_c **texs  = new const image_c *[total];
+        const Image **texs  = new const Image *[total];
 
         // lookup each texture
         for (int i = 0; i < total; i++)
         {
             const char *name = W_TextureNameInSet(set, s_offset + i);
-            texs[i]          = W_ImageLookup(name, kImageNamespaceTexture, ILF_Null | ILF_Exact | ILF_NoNew);
+            texs[i]          = ImageLookup(name, kImageNamespaceTexture, kImageLookupNull | kImageLookupExact | kImageLookupNoNew);
         }
 
-        W_AnimateImageSet(texs, total, anim->speed_);
+        AnimateImageSet(texs, total, anim->speed_);
         delete[] texs;
 
         return;
@@ -210,14 +210,14 @@ void R_AddTextureAnim(AnimationDefinition *anim)
     if (total == 1)
         return;
 
-    const image_c **texs = new const image_c *[total];
+    const Image **texs = new const Image *[total];
 
     for (int i = 0; i < total; i++)
     {
-        texs[i] = W_ImageLookup(anim->pics_[i].c_str(), kImageNamespaceTexture, ILF_Null | ILF_Exact);
+        texs[i] = ImageLookup(anim->pics_[i].c_str(), kImageNamespaceTexture, kImageLookupNull | kImageLookupExact);
     }
 
-    W_AnimateImageSet(texs, total, anim->speed_);
+    AnimateImageSet(texs, total, anim->speed_);
     delete[] texs;
 }
 
@@ -233,14 +233,14 @@ void R_AddGraphicAnim(AnimationDefinition *anim)
     if (total == 1)
         return;
 
-    const image_c **users = new const image_c *[total];
+    const Image **users = new const Image *[total];
 
     for (int i = 0; i < total; i++)
     {
-        users[i] = W_ImageLookup(anim->pics_[i].c_str(), kImageNamespaceGraphic, ILF_Null | ILF_Exact);
+        users[i] = ImageLookup(anim->pics_[i].c_str(), kImageNamespaceGraphic, kImageLookupNull | kImageLookupExact);
     }
 
-    W_AnimateImageSet(users, total, anim->speed_);
+    AnimateImageSet(users, total, anim->speed_);
     delete[] users;
 }
 
@@ -288,7 +288,7 @@ void W_InitFlats(void)
     if (flats.size() == 0)
     {
         LogWarning("No flats found! Generating fallback flat!\n");
-        W_MakeEdgeFlat();
+        CreateFallbackFlat();
         return;
     }
 
@@ -313,15 +313,7 @@ void W_InitFlats(void)
         }
     }
 
-#if 0 // DEBUGGING
-	for (j=0; j < numflats; j++)
-	{
-		LogDebug("FLAT #%d:  lump=%d  name=[%s]\n", j,
-				flats[j], W_GetLumpName(flats[j]));
-	}
-#endif
-
-    W_ImageCreateFlats(flats);
+    CreateFlats(flats);
 }
 
 //
@@ -360,7 +352,7 @@ void W_PrecacheTextures(void)
     int max_image = 1 + 3 * total_level_sides + 2 * total_level_sectors;
     int count     = 0;
 
-    const image_c **images = new const image_c *[max_image];
+    const Image **images = new const Image *[max_image];
 
     // Sky texture is always present.
     images[count++] = sky_image;
@@ -395,7 +387,7 @@ void W_PrecacheTextures(void)
     // Sort the images, so we can ignore the duplicates
 
 #define CMP(a, b) (a < b)
-    QSORT(const image_c *, images, count, CUTOFF);
+    QSORT(const Image *, images, count, CUTOFF);
 #undef CMP
 
     for (int i = 0; i < count; i++)
@@ -408,7 +400,7 @@ void W_PrecacheTextures(void)
         if (images[i] == skyflatimage)
             continue;
 
-        W_ImagePreCache(images[i]);
+        ImagePrecache(images[i]);
     }
 
     delete[] images;
@@ -432,7 +424,7 @@ void W_PrecacheLevel(void)
     if (r_precache_model.d_)
         W_PrecacheModels();
 
-    RGL_PreCacheSky();
+    RendererPreCacheSky();
 }
 
 //--- editor settings ---

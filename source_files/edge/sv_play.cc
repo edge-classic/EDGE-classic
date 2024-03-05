@@ -85,7 +85,7 @@ static savefield_t sv_fields_player[] = {
     SF(playerflags, "playerflags", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(playername[0], "playername", 1, SVT_STRING, SR_PlayerGetName, SR_PlayerPutName),
     SF(mo, "mo", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(viewz, "viewz", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(view_z, "view_z", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
     SF(viewheight, "viewheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
     SF(deltaviewheight, "deltaviewheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
     SF(std_viewheight, "std_viewheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
@@ -716,11 +716,6 @@ bool SR_PlayerGetState(void *storage, int index, void *extra)
         base   = actual->ready_state_;
     }
 
-#if 0
-	LogDebug("Unswizzled weapon state `%s:%s:%s' -> %d\n", 
-		buffer, base_p, off_p, base + offset);
-#endif
-
     *dest = states + base + offset;
 
     return true;
@@ -790,10 +785,6 @@ void SR_PlayerPutState(void *storage, int index, void *extra)
 
     std::string buf(epi::StringFormat("%s:%s:%d", actual->name_.c_str(), states[base].label ? states[base].label : "*",
                                     1 + s_num - base));
-
-#if 0
-	LogDebug("Swizzled state of weapon %d -> `%s'\n", s_num, buf.c_str());
-#endif
 
     SV_PutString(buf.c_str());
 }

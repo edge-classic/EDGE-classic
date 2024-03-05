@@ -254,8 +254,8 @@ void HandleKeyEvent(SDL_Event *ev)
     if (event.value.key.sym == KEYD_ENTER && alt_is_down)
     {
         alt_is_down = false;
-        R_ToggleFullscreen();
-        if (DISPLAYMODE == DisplayMode::SCR_WINDOW)
+        ToggleFullscreen();
+        if (current_window_mode == kWindowModeWindowed)
         {
             GrabCursor(false);
             need_mouse_recapture = true;

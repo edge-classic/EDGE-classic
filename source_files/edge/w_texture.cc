@@ -433,7 +433,7 @@ void W_InitTextures(void)
     {
         // FatalError("No textures found !  Make sure the chosen IWAD is valid.\n");
         LogWarning("No textures found! Generating fallback texture!\n");
-        W_MakeEdgeTex();
+        CreateFallbackTexture();
         return;
     }
 
@@ -477,21 +477,7 @@ void W_InitTextures(void)
         }
     }
 
-#if 0 // DEBUGGING
-	for (j=0; j < numtextures; j++)
-	{
-		if (textures[j] == nullptr)
-		{
-			LogDebug("TEXTURE #%d was a dupicate\n", j);
-			continue;
-		}
-		LogDebug("TEXTURE #%d:  name=[%s]  file=%d  size=%dx%d\n", j,
-				textures[j]->name, textures[j]->file,
-				textures[j]->width, textures[j]->height);
-	}
-#endif
-
-    W_ImageCreateTextures(textures, numtextures);
+    CreateTextures(textures, numtextures);
 
     // free pointer array.  We need to keep the definitions in memory
     // for (a) the image system and (b) texture anims.

@@ -40,8 +40,8 @@
 // forward decl.
 class AttackDefinition;
 class MapObjectDefinition;
-class image_c;
-class abstract_shader_c;
+class Image;
+class AbstractShader;
 
 struct player_s;
 struct rad_script_s;
@@ -96,7 +96,7 @@ constexpr float kStopSpeed = 0.07f;
 //
 // Every MapObject is linked into a single sector
 // based on its origin coordinates.
-// The subsector_t is found with R_PointInSubsector(x,y),
+// The subsector_t is found with RendererPointInSubsector(x,y),
 // and the sector_t can be found with subsector->sector.
 // The sector links are only used by the rendering code,
 // the play simulation does not care about them at all.
@@ -170,7 +170,7 @@ struct DynamicLightState
     float              r;       // radius
     float              target;  // target radius
     RGBAColor          color;
-    abstract_shader_c *shader;
+    AbstractShader *shader;
     Line            *glow_wall     = nullptr;
     bool               bad_wall_glow = false;
 };

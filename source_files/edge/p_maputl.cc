@@ -47,8 +47,9 @@
 #include "m_bbox.h"
 #include "p_local.h"
 #include "p_spec.h"
-#include "r_bsp.h"
 #include "r_state.h"
+
+extern unsigned int root_node;
 
 //
 // ApproximateDistance
@@ -127,9 +128,9 @@ int PointOnDividingLineSide(float x, float y, DividingLine *div)
     float dx, dy;
     float left, right;
 
-    if (div->delta_x == 0.0f) return ((x <= div->x) ^ (div->delta_y > 0)) ? 0 : 1;
+    if (AlmostEquals(div->delta_x, 0.0f)) return ((x <= div->x) ^ (div->delta_y > 0)) ? 0 : 1;
 
-    if (div->delta_y == 0.0f) return ((y <= div->y) ^ (div->delta_x < 0)) ? 0 : 1;
+    if (AlmostEquals(div->delta_y, 0.0f)) return ((y <= div->y) ^ (div->delta_x < 0)) ? 0 : 1;
 
     dx = x - div->x;
     dy = y - div->y;

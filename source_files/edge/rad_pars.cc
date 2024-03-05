@@ -382,42 +382,6 @@ static bool CheckForBoolean(const char *s)
     return false;
 }
 
-#if 0 // UNUSED
-static void DoParsePlayerSet(const char *info, uint32_t *set)
-{
-	const char *p = info;
-	const char *next;
-
-	*set = 0;
-
-	if (DDF_CompareName(info, "ALL") == 0)
-	{
-		*set = ~0;
-		return;
-	}
-
-	for (;;)
-	{
-		if (! epi::IsDigitASCII(p[0]))
-			RAD_Error("Bad number in set of players: %s\n", info);
-
-		int num = strtol(p, (char **) &next, 10);
-
-		*set |= (1 << (num-1));
-
-		p = next;
-
-		if (p[0] == 0)
-			break;
-
-		if (p[0] != ':')
-			RAD_Error("Missing ':' in set of players: %s\n", info);
-
-		p++;
-	}
-}
-#endif
-
 // AddStateToScript
 //
 // Adds a new action state to the tail of the current set of states

@@ -23,25 +23,21 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __R_DRAW_H__
-#define __R_DRAW_H__
+#pragma once
 
-#include "main.h"
 #include "r_image.h"
 
 // Move to somewhere appropriate later -ACB- 2004/08/19
-void RGL_DrawImage(float x, float y, float w, float h, const image_c *image, float tx1, float ty1, float tx2, float ty2,
+void RendererDrawImage(float x, float y, float w, float h, const Image *image, float tx1, float ty1, float tx2, float ty2,
                    const Colormap *textmap = nullptr, float alpha = 1.0f, const Colormap *palremap = nullptr);
 
-void RGL_ReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer);
+void RendererReadScreen(int x, int y, int w, int h, uint8_t *rgb_buffer);
 
 // This routine should inform the lower level system(s) that the
 // screen has changed size/depth.  New size/depth is given.  Must be
 // called before any rendering has occurred (e.g. just before
 // StartFrame).
-void RGL_NewScreenSize(int width, int height, int bits);
-
-#endif /* __R_DRAW_H__ */
+void RendererNewScreenSize(int width, int height, int bits);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -154,12 +154,12 @@ void LoadLevel_Bits(void)
     // -ACB- 1998/08/09 Reference current map for sky name.
 
     sky_image =
-        W_ImageLookup(current_map->sky_.c_str(), kImageNamespaceTexture);
+        ImageLookup(current_map->sky_.c_str(), kImageNamespaceTexture);
 
     game_state = GS_NOTHING;  // FIXME: needed ???
 
     // -AJA- FIXME: this background camera stuff is a mess
-    background_camera_mo = nullptr;
+    background_camera_map_object = nullptr;
 
     for (int pnum = 0; pnum < MAXPLAYERS; pnum++)
     {
@@ -238,7 +238,7 @@ void LoadLevel_Bits(void)
     }
 
     // Initial height of PointOfView will be set by player think.
-    players[consoleplayer]->viewz = kFloatUnused;
+    players[consoleplayer]->view_z = kFloatUnused;
 
     level_time_elapsed = 0;
 
@@ -489,12 +489,12 @@ void GameTicker(void)
                 break;
         }
         // ANIMATE FLATS AND TEXTURES GLOBALLY
-        W_UpdateImageAnims();
+        AnimationTicker();
         return;
     }
 
     // ANIMATE FLATS AND TEXTURES GLOBALLY
-    W_UpdateImageAnims();
+    AnimationTicker();
 
     // do main actions
     switch (game_state)
@@ -864,7 +864,7 @@ static void GameDoLoadGame(void)
 
     HudStart();
 
-    V_SetPalette(PALETTE_NORMAL, 0);
+    SetPalette(kPaletteNormal, 0);
 
     if (LUA_UseLuaHud())
         LUA_LoadGame();
@@ -1226,7 +1226,7 @@ static void GameDoEndGame(void)
 
     game_state = GS_NOTHING;
 
-    V_SetPalette(PALETTE_NORMAL, 0);
+    SetPalette(kPaletteNormal, 0);
 
     S_StopMusic();
 

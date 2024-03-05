@@ -116,17 +116,17 @@ int  option_menu_on    = 0;
 bool function_key_menu = false;
 
 extern ConsoleVariable m_language;
-extern ConsoleVariable r_crosshair;
-extern ConsoleVariable r_crosscolor;
-extern ConsoleVariable r_crosssize;
+extern ConsoleVariable crosshair_style;
+extern ConsoleVariable crosshair_color;
+extern ConsoleVariable crosshair_size;
 extern ConsoleVariable s_genmidi;
 extern ConsoleVariable midi_soundfont;
 extern ConsoleVariable r_overlay;
 extern ConsoleVariable erraticism;
 extern ConsoleVariable double_framerate;
-extern ConsoleVariable r_culling;
+extern ConsoleVariable draw_culling;
 extern ConsoleVariable r_culldist;
-extern ConsoleVariable r_cullfog;
+extern ConsoleVariable cull_fog_color;
 extern ConsoleVariable distance_cull_thinkers;
 extern ConsoleVariable max_dynamic_lights;
 extern ConsoleVariable vsync;
@@ -135,11 +135,11 @@ extern ConsoleVariable gore_level;
 
 // extern console_variable_c automap_keydoor_text;
 
-extern ConsoleVariable v_secbright;
+extern ConsoleVariable sector_brightness_correction;
 extern ConsoleVariable gamma_correction;
 extern ConsoleVariable r_titlescaling;
-extern ConsoleVariable r_skystretch;
-extern ConsoleVariable r_forceflatlighting;
+extern ConsoleVariable sky_stretch_mode;
+extern ConsoleVariable force_flat_lighting;
 
 static int monitor_size;
 
@@ -255,7 +255,7 @@ static constexpr char JoystickAxis[] =
     "(Reversed)/Fly (Inverted)/Fly/Left Trigger/Right Trigger";
 
 // Screen resolution changes
-static DisplayMode new_display_mode;
+static DisplayMode new_window_mode;
 
 extern std::vector<std::string> available_soundfonts;
 extern std::vector<std::string> available_opl_banks;
@@ -426,15 +426,15 @@ static OptionMenuItem vidoptions[] = {
      &gamma_correction.f_, OptionMenuUpdateConsoleVariableFromFloat, nullptr,
      &gamma_correction, 0.10f, -1.0f, 1.0f, "%0.2f"},
     {kOptionMenuItemTypeSwitch, "Sector Brightness",
-     "-50/-40/-30/-20/-10/Default/+10/+20/+30/+40/+50", 11, &v_secbright.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &v_secbright},
+     "-50/-40/-30/-20/-10/Default/+10/+20/+30/+40/+50", 11, &sector_brightness_correction.d_,
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &sector_brightness_correction},
     {kOptionMenuItemTypeBoolean, "Lighting Mode", "Indexed/Flat", 2,
-     &r_forceflatlighting.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr,
-     &r_forceflatlighting},
+     &force_flat_lighting.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr,
+     &force_flat_lighting},
     {kOptionMenuItemTypeSwitch, "Framerate Target", "35 FPS/70 FPS", 2,
      &double_framerate.d_, OptionMenuUpdateConsoleVariableFromInt,
      nullptr, &double_framerate},
-    {kOptionMenuItemTypeSwitch, "Smoothing", YesNo, 2, &var_smoothing,
+    {kOptionMenuItemTypeSwitch, "Smoothing", YesNo, 2, &image_smoothing,
      OptionMenuChangeMipMap, nullptr},
     {kOptionMenuItemTypeSwitch, "Upscale Textures",
      "Off/UI Only/UI & Sprites/All", 4, &hq2x_scaling, OptionMenuChangeMipMap,
@@ -443,9 +443,9 @@ static OptionMenuItem vidoptions[] = {
      "Normal/Fill Border", 2, &r_titlescaling.d_,
      OptionMenuUpdateConsoleVariableFromInt, nullptr, &r_titlescaling},
     {kOptionMenuItemTypeSwitch, "Sky Scaling", "Mirror/Repeat/Stretch/Vanilla",
-     4, &r_skystretch.d_, OptionMenuUpdateConsoleVariableFromInt,
-     "Vanilla will be forced when Mouselook is Off", &r_skystretch},
-    {kOptionMenuItemTypeSwitch, "Dynamic Lighting", YesNo, 2, &use_dlights,
+     4, &sky_stretch_mode.d_, OptionMenuUpdateConsoleVariableFromInt,
+     "Vanilla will be forced when Mouselook is Off", &sky_stretch_mode},
+    {kOptionMenuItemTypeSwitch, "Dynamic Lighting", YesNo, 2, &use_dynamic_lights,
      nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Overlay",
      "None/Lines 1x/Lines 2x/Vertical 1x/Vertical 2x/Grill 1x/Grill 2x", 7,
@@ -453,22 +453,22 @@ static OptionMenuItem vidoptions[] = {
      &r_overlay},
     {kOptionMenuItemTypeSwitch, "Crosshair",
      "None/Dot/Angle/Plus/Spiked/Thin/Cross/Carat/Circle/Double", 10,
-     &r_crosshair.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr,
-     &r_crosshair},
+     &crosshair_style.d_, OptionMenuUpdateConsoleVariableFromInt, nullptr,
+     &crosshair_style},
     {kOptionMenuItemTypeSwitch, "Crosshair Color",
-     "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange", 8, &r_crosscolor.d_,
-     OptionMenuUpdateConsoleVariableFromInt, nullptr, &r_crosscolor},
-    {kOptionMenuItemTypeSlider, "Crosshair Size", nullptr, 0, &r_crosssize.f_,
-     OptionMenuUpdateConsoleVariableFromFloat, nullptr, &r_crosssize, 1.0f,
+     "White/Blue/Green/Cyan/Red/Pink/Yellow/Orange", 8, &crosshair_color.d_,
+     OptionMenuUpdateConsoleVariableFromInt, nullptr, &crosshair_color},
+    {kOptionMenuItemTypeSlider, "Crosshair Size", nullptr, 0, &crosshair_size.f_,
+     OptionMenuUpdateConsoleVariableFromFloat, nullptr, &crosshair_size, 1.0f,
      2.0f, 64.0f, "%g Pixels"},
     {kOptionMenuItemTypeBoolean, "Map Rotation", YesNo, 2, &rotate_map, nullptr,
      nullptr},
     {kOptionMenuItemTypeSwitch, "Invulnerability", "Simple/Textured",
-     NUM_INVULFX, &var_invul_fx, nullptr, nullptr},
+     NUM_INVULFX, &invulnerability_effect, nullptr, nullptr},
 #ifndef EDGE_WEB
     {kOptionMenuItemTypeSwitch, "Wipe method",
      "None/Melt/Crossfade/Pixelfade/Top/Bottom/Left/Right/Spooky/Doors",
-     WIPE_NUMWIPES, &wipe_method, nullptr, nullptr},
+     kTotalScreenWipeTypes, &wipe_method, nullptr, nullptr},
 #endif
     {kOptionMenuItemTypeBoolean, "Screenshot Format", "JPEG/PNG", 2,
      &png_scrshots, nullptr, nullptr},
@@ -740,16 +740,16 @@ static OptionMenuItem perfoptions[] = {
     {kOptionMenuItemTypeSwitch, "Detail Level", "Low/Medium/High", 3,
      &detail_level, OptionMenuChangeMipMap, nullptr},
     {kOptionMenuItemTypeBoolean, "Draw Distance Culling", YesNo, 2,
-     &r_culling.d_, OptionMenuUpdateConsoleVariableFromInt,
-     "Sector/Level Fog will be disabled when this is On", &r_culling},
+     &draw_culling.d_, OptionMenuUpdateConsoleVariableFromInt,
+     "Sector/Level Fog will be disabled when this is On", &draw_culling},
     {kOptionMenuItemTypeSlider, "Maximum Draw Distance", nullptr, 0,
      &r_culldist.f_, OptionMenuUpdateConsoleVariableFromFloat,
      "Only effective when Draw Distance Culling is On", &r_culldist, 200.0f,
      1000.0f, 8000.0f, "%g Units"},
     {kOptionMenuItemTypeSwitch, "Outdoor Culling Fog Color",
-     "Match Sky/White/Grey/Black", 4, &r_cullfog.d_,
+     "Match Sky/White/Grey/Black", 4, &cull_fog_color.d_,
      OptionMenuUpdateConsoleVariableFromInt,
-     "Only effective when Draw Distance Culling is On", &r_cullfog},
+     "Only effective when Draw Distance Culling is On", &cull_fog_color},
     {kOptionMenuItemTypeBoolean, "Slow Thinkers Over Distance", YesNo, 2,
      &distance_cull_thinkers.d_, OptionMenuUpdateConsoleVariableFromInt,
      "Only recommended for extreme monster/projectile counts", &distance_cull_thinkers},
@@ -1276,7 +1276,7 @@ void OptionMenuDrawer()
         if (current_menu == &res_optmenu &&
             current_menu->items[i].routine == OptionMenuChangeResSize)
         {
-            if (new_display_mode.display_mode == 2)
+            if (new_window_mode.window_mode == 2)
             {
                 curry += deltay;
                 continue;
@@ -1484,18 +1484,18 @@ static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy,
     float TEXTscale = style->definition_->text_[fontType].scale_;
 
     sprintf(tempstring, "%s",
-            new_display_mode.display_mode == 2
+            new_window_mode.window_mode == 2
                 ? "Borderless Fullscreen"
-                : (new_display_mode.display_mode == DisplayMode::SCR_FULLSCREEN
+                : (new_window_mode.window_mode == kWindowModeFullscreen
                        ? "Exclusive Fullscreen"
                        : "Windowed"));
     HudWriteText(style, fontType, centrex + 15, y, tempstring);
 
-    if (new_display_mode.display_mode < 2)
+    if (new_window_mode.window_mode < 2)
     {
         y += dy;
-        sprintf(tempstring, "%dx%d", new_display_mode.width,
-                new_display_mode.height);
+        sprintf(tempstring, "%dx%d", new_window_mode.width,
+                new_window_mode.height);
         HudWriteText(style, fontType, centrex + 15, y, tempstring);
     }
 
@@ -1516,11 +1516,11 @@ static void OptionMenuResOptDrawer(Style *style, int topy, int bottomy, int dy,
 
     y += dy;
     y += 5;
-    if (DISPLAYMODE == 2)
+    if (current_window_mode == 2)
         sprintf(tempstring, "%s", "Borderless Fullscreen");
     else
-        sprintf(tempstring, "%d x %d %s", SCREENWIDTH, SCREENHEIGHT,
-                DISPLAYMODE == 1 ? "Exclusive Fullscreen" : "Windowed");
+        sprintf(tempstring, "%d x %d %s", current_screen_width, current_screen_height,
+                current_window_mode == 1 ? "Exclusive Fullscreen" : "Windowed");
 
     HudWriteText(style, fontType,
                  160 - (style->fonts_[fontType]->StringWidth(tempstring) *
@@ -1638,7 +1638,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             do {
                 current_menu->pos++;
                 if (current_menu == &res_optmenu &&
-                    new_display_mode.display_mode == 2)
+                    new_window_mode.window_mode == 2)
                 {
                     if (current_menu->pos >= 0 &&
                         current_menu->pos < current_menu->item_number)
@@ -1662,7 +1662,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             do {
                 current_menu->pos++;
                 if (current_menu == &res_optmenu &&
-                    new_display_mode.display_mode == 2)
+                    new_window_mode.window_mode == 2)
                 {
                     if (current_menu->pos >= 0 &&
                         current_menu->pos < current_menu->item_number)
@@ -1695,7 +1695,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             do {
                 current_menu->pos--;
                 if (current_menu == &res_optmenu &&
-                    new_display_mode.display_mode == 2)
+                    new_window_mode.window_mode == 2)
                 {
                     if (current_menu->pos >= 0 &&
                         current_menu->pos < current_menu->item_number)
@@ -1719,7 +1719,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
             do {
                 current_menu->pos--;
                 if (current_menu == &res_optmenu &&
-                    new_display_mode.display_mode == 2)
+                    new_window_mode.window_mode == 2)
                 {
                     if (current_menu->pos >= 0 &&
                         current_menu->pos < current_menu->item_number)
@@ -1976,10 +1976,10 @@ static void OptionMenuVideoOptions(int              key_pressed,
 static void OptionMenuResolutionOptions(int              key_pressed,
                                         ConsoleVariable *console_variable)
 {
-    new_display_mode.width        = SCREENWIDTH;
-    new_display_mode.height       = SCREENHEIGHT;
-    new_display_mode.depth        = SCREENBITS;
-    new_display_mode.display_mode = DISPLAYMODE;
+    new_window_mode.width        = current_screen_width;
+    new_window_mode.height       = current_screen_height;
+    new_window_mode.depth        = current_screen_depth;
+    new_window_mode.window_mode = current_window_mode;
 
     current_menu = &res_optmenu;
     current_item = current_menu->items + current_menu->pos;
@@ -2241,7 +2241,7 @@ static void OptionMenuChangePassMissile(int              key_pressed,
 static void OptionMenuChangeMipMap(int              key_pressed,
                                    ConsoleVariable *console_variable)
 {
-    W_DeleteAllImages();
+    DeleteAllImages();
 }
 
 static void OptionMenuChangeBobbing(int              key_pressed,
@@ -2465,11 +2465,11 @@ static void OptionMenuChangeResSize(int              key_pressed,
 {
     if (key_pressed == KEYD_LEFTARROW || key_pressed == KEYD_GP_LEFT)
     {
-        R_IncrementResolution(&new_display_mode, RESINC_Size, -1);
+        IncrementResolution(&new_window_mode, kIncrementSize, -1);
     }
     else if (key_pressed == KEYD_RIGHTARROW || key_pressed == KEYD_GP_RIGHT)
     {
-        R_IncrementResolution(&new_display_mode, RESINC_Size, +1);
+        IncrementResolution(&new_window_mode, kIncrementSize, +1);
     }
 }
 
@@ -2483,11 +2483,11 @@ static void OptionMenuChangeResFull(int              key_pressed,
 {
     if (key_pressed == KEYD_LEFTARROW || key_pressed == KEYD_GP_LEFT)
     {
-        R_IncrementResolution(&new_display_mode, RESINC_DisplayMode, -1);
+        IncrementResolution(&new_window_mode, kIncrementWindowMode, -1);
     }
     else if (key_pressed == KEYD_RIGHTARROW || key_pressed == KEYD_GP_RIGHT)
     {
-        R_IncrementResolution(&new_display_mode, RESINC_DisplayMode, +1);
+        IncrementResolution(&new_window_mode, kIncrementWindowMode, +1);
     }
 }
 
@@ -2497,29 +2497,29 @@ static void OptionMenuChangeResFull(int              key_pressed,
 static void OptionMenuionSetResolution(int              key_pressed,
                                        ConsoleVariable *console_variable)
 {
-    if (R_ChangeResolution(&new_display_mode))
+    if (ChangeResolution(&new_window_mode))
     {
-        if (new_display_mode.display_mode > DisplayMode::SCR_WINDOW)
+        if (new_window_mode.window_mode > kWindowModeWindowed)
         {
-            tf_screendepth  = new_display_mode.depth;
-            tf_screenheight = new_display_mode.height;
-            tf_screenwidth  = new_display_mode.width;
-            tf_displaymode  = new_display_mode.display_mode;
+            toggle_fullscreen_depth  = new_window_mode.depth;
+            toggle_fullscreen_height = new_window_mode.height;
+            toggle_fullscreen_width  = new_window_mode.width;
+            toggle_fullscreen_window_mode  = new_window_mode.window_mode;
         }
         else
         {
-            tw_screendepth  = new_display_mode.depth;
-            tw_screenheight = new_display_mode.height;
-            tw_screenwidth  = new_display_mode.width;
-            tw_displaymode  = new_display_mode.display_mode;
+            toggle_windowed_depth  = new_window_mode.depth;
+            toggle_windowed_height = new_window_mode.height;
+            toggle_windowed_width  = new_window_mode.width;
+            toggle_windowed_window_mode  = new_window_mode.window_mode;
         }
-        R_SoftInitResolution();
+        SoftInitializeResolution();
     }
     else
     {
         std::string msg(epi::StringFormat(
-            language["ModeSelErr"], new_display_mode.width,
-            new_display_mode.height, (new_display_mode.depth < 20) ? 16 : 32));
+            language["ModeSelErr"], new_window_mode.width,
+            new_window_mode.height, (new_window_mode.depth < 20) ? 16 : 32));
 
         MenuStartMessage(msg.c_str(), nullptr, false);
     }

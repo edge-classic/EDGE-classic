@@ -16,39 +16,34 @@
 //
 //----------------------------------------------------------------------------
 
-
-#include "i_defs_gl.h"
-
 #include "dm_state.h"
 #include "e_player.h"
-#include "hu_draw.h" // HUD* functions
+#include "hu_draw.h"  // HUD* functions
+#include "i_defs_gl.h"
 #include "m_misc.h"
-#include "r_misc.h"
 #include "r_colormap.h"
 #include "r_image.h"
+#include "r_misc.h"
 #include "r_modes.h"
 #include "r_texgl.h"
 #include "w_wad.h"
 
-#define DEBUG 0
+int render_view_extra_light;
 
-int ren_extralight;
+float render_view_red_multiplier;
+float render_view_green_multiplier;
+float render_view_blue_multiplier;
 
-float ren_red_mul;
-float ren_grn_mul;
-float ren_blu_mul;
+const Colormap *render_view_effect_colormap;
 
-const Colormap *ren_fx_colmap;
-
-EDGE_DEFINE_CONSOLE_VARIABLE(r_fadepower, "1.0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(power_fade_out, "1", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(debug_fullbright, "0", kConsoleVariableFlagCheat)
 
 static inline float EffectStrength(player_t *player)
 {
-    if (player->effect_left >= EFFECT_MAX_TIME)
-        return 1.0f;
+    if (player->effect_left >= EFFECT_MAX_TIME) return 1.0f;
 
-    if (r_fadepower.d_|| reduce_flash)
+    if (power_fade_out.d_ || reduce_flash)
     {
         return player->effect_left / (float)EFFECT_MAX_TIME;
     }
@@ -57,72 +52,78 @@ static inline float EffectStrength(player_t *player)
 }
 
 //
-// RGL_RainbowEffect
+// RendererRainbowEffect
 //
 // Effects that modify all colours, e.g. nightvision green.
 //
-void RGL_RainbowEffect(player_t *player)
+void RendererRainbowEffect(player_t *player)
 {
-    ren_extralight = debug_fullbright.d_? 255 : player ? player->extralight * 4 : 0;
+    render_view_extra_light = debug_fullbright.d_ ? 255
+                              : player            ? player->extralight * 4
+                                                  : 0;
 
-    ren_red_mul = ren_grn_mul = ren_blu_mul = 1.0f;
+    render_view_red_multiplier      = render_view_green_multiplier =
+        render_view_blue_multiplier = 1.0f;
 
-    ren_fx_colmap = nullptr;
+    render_view_effect_colormap = nullptr;
 
-    if (!player)
-        return;
+    if (!player) return;
 
     float s = EffectStrength(player);
 
-    if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 && (player->effect_left & 8) && !reduce_flash)
+    if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 &&
+        (player->effect_left & 8) && !reduce_flash)
     {
-        if (var_invul_fx == INVULFX_Textured && !reduce_flash)
+        if (invulnerability_effect == INVULFX_Textured && !reduce_flash)
         {
-            ren_fx_colmap = player->effect_colourmap;
+            render_view_effect_colormap = player->effect_colourmap;
         }
         else
         {
-            ren_red_mul = 0.90f;
-            ///???		ren_red_mul += (1.0f - ren_red_mul) * (1.0f - s);
+            render_view_red_multiplier = 0.90f;
+            ///???		render_view_red_multiplier += (1.0f -
+            ///render_view_red_multiplier) * (1.0f - s);
 
-            ren_grn_mul = ren_red_mul;
-            ren_blu_mul = ren_red_mul;
+            render_view_green_multiplier = render_view_red_multiplier;
+            render_view_blue_multiplier  = render_view_red_multiplier;
         }
 
-        ren_extralight = 255;
+        render_view_extra_light = 255;
         return;
     }
 
-    if (s > 0 && player->powers[kPowerTypeNightVision] > 0 && player->effect_colourmap && !debug_fullbright.d_)
+    if (s > 0 && player->powers[kPowerTypeNightVision] > 0 &&
+        player->effect_colourmap && !debug_fullbright.d_)
     {
         float r, g, b;
 
-        V_GetColmapRGB(player->effect_colourmap, &r, &g, &b);
+        GetColormapRgb(player->effect_colourmap, &r, &g, &b);
 
-        ren_red_mul = 1.0f - (1.0f - r) * s;
-        ren_grn_mul = 1.0f - (1.0f - g) * s;
-        ren_blu_mul = 1.0f - (1.0f - b) * s;
+        render_view_red_multiplier   = 1.0f - (1.0f - r) * s;
+        render_view_green_multiplier = 1.0f - (1.0f - g) * s;
+        render_view_blue_multiplier  = 1.0f - (1.0f - b) * s;
 
-        ren_extralight = int(s * 255);
+        render_view_extra_light = int(s * 255);
         return;
     }
 
     if (s > 0 && player->powers[kPowerTypeInfrared] > 0 && !debug_fullbright.d_)
     {
-        ren_extralight = int(s * 255);
+        render_view_extra_light = int(s * 255);
         return;
     }
 
     // Lobo 2021: un-hardcode berserk color tint
-    if (s > 0 && player->powers[kPowerTypeBerserk] > 0 && player->effect_colourmap && !debug_fullbright.d_)
+    if (s > 0 && player->powers[kPowerTypeBerserk] > 0 &&
+        player->effect_colourmap && !debug_fullbright.d_)
     {
         float r, g, b;
 
-        V_GetColmapRGB(player->effect_colourmap, &r, &g, &b);
+        GetColormapRgb(player->effect_colourmap, &r, &g, &b);
 
-        ren_red_mul = 1.0f - (1.0f - r) * s;
-        ren_grn_mul = 1.0f - (1.0f - g) * s;
-        ren_blu_mul = 1.0f - (1.0f - b) * s;
+        render_view_red_multiplier   = 1.0f - (1.0f - r) * s;
+        render_view_green_multiplier = 1.0f - (1.0f - g) * s;
+        render_view_blue_multiplier  = 1.0f - (1.0f - b) * s;
 
         // fallthrough...
     }
@@ -135,34 +136,33 @@ void RGL_RainbowEffect(player_t *player)
         const Colormap *colmap = nullptr;
 
         // see which region the camera is in
-        if (viewz > sector->height_sector->ceiling_height)
+        if (view_z > sector->height_sector->ceiling_height)
             colmap = sector->height_sector_side->top.boom_colormap;
-        else if (viewz < sector->height_sector->floor_height)
+        else if (view_z < sector->height_sector->floor_height)
             colmap = sector->height_sector_side->bottom.boom_colormap;
         else
             colmap = sector->height_sector_side->middle.boom_colormap;
 
-        ren_fx_colmap = colmap;
+        render_view_effect_colormap = colmap;
     }
 }
 
 //
-// RGL_ColourmapEffect
+// RendererColourmapEffect
 //
 // For example: all white for invulnerability.
 //
-void RGL_ColourmapEffect(player_t *player)
+void RendererColourmapEffect(player_t *player)
 {
     int x1, y1;
     int x2, y2;
 
     float s = EffectStrength(player);
 
-    if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 && player->effect_colourmap &&
-        (player->effect_left & 8 || reduce_flash))
+    if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 &&
+        player->effect_colourmap && (player->effect_left & 8 || reduce_flash))
     {
-        if (var_invul_fx == INVULFX_Textured && !reduce_flash)
-            return;
+        if (invulnerability_effect == INVULFX_Textured && !reduce_flash) return;
 
         glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
 
@@ -174,11 +174,11 @@ void RGL_ColourmapEffect(player_t *player)
 
             glBegin(GL_QUADS);
 
-            x1 = viewwindow_x;
-            x2 = viewwindow_x + viewwindow_w;
+            x1 = view_window_x;
+            x2 = view_window_x + view_window_width;
 
-            y1 = viewwindow_y + viewwindow_h;
-            y2 = viewwindow_y;
+            y1 = view_window_y + view_window_height;
+            y2 = view_window_y;
 
             glVertex2i(x1, y1);
             glVertex2i(x2, y1);
@@ -194,8 +194,11 @@ void RGL_ColourmapEffect(player_t *player)
             float old_alpha = HudGetAlpha();
             HudSetAlpha(0.0f);
             s = HMM_MAX(0.5f, s);
-            HudThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                        epi::MakeRGBA(RoundToInteger(s * 255), RoundToInteger(s * 255), RoundToInteger(s * 255)), 25.0f);
+            HudThinBox(
+                hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+                epi::MakeRGBA(RoundToInteger(s * 255), RoundToInteger(s * 255),
+                              RoundToInteger(s * 255)),
+                25.0f);
             HudSetAlpha(old_alpha);
         }
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -203,11 +206,11 @@ void RGL_ColourmapEffect(player_t *player)
 }
 
 //
-// RGL_PaletteEffect
+// RendererPaletteEffect
 //
 // For example: red wash for pain.
 //
-void RGL_PaletteEffect(player_t *player)
+void RendererPaletteEffect(player_t *player)
 {
     uint8_t rgb_data[3];
 
@@ -215,46 +218,54 @@ void RGL_PaletteEffect(player_t *player)
 
     float old_alpha = HudGetAlpha();
 
-    if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 && player->effect_colourmap &&
-        (player->effect_left & 8 || reduce_flash))
+    if (s > 0 && player->powers[kPowerTypeInvulnerable] > 0 &&
+        player->effect_colourmap && (player->effect_left & 8 || reduce_flash))
     {
         return;
     }
-    else if (s > 0 && player->powers[kPowerTypeNightVision] > 0 && player->effect_colourmap)
+    else if (s > 0 && player->powers[kPowerTypeNightVision] > 0 &&
+             player->effect_colourmap)
     {
         float r, g, b;
-        V_GetColmapRGB(player->effect_colourmap, &r, &g, &b);
+        GetColormapRgb(player->effect_colourmap, &r, &g, &b);
         if (!reduce_flash)
             glColor4f(r, g, b, 0.20f * s);
         else
         {
             HudSetAlpha(0.20f * s);
-            HudThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                        epi::MakeRGBA(RoundToInteger(r * 255), RoundToInteger(g * 255), RoundToInteger(b * 255)), 25.0f);
+            HudThinBox(
+                hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
+                epi::MakeRGBA(RoundToInteger(r * 255), RoundToInteger(g * 255),
+                              RoundToInteger(b * 255)),
+                25.0f);
         }
     }
     else
     {
-        V_IndexColourToRGB(pal_black, rgb_data, player->last_damage_colour, player->damagecount);
+        PalettedColourToRGB(playpal_black, rgb_data, player->last_damage_colour,
+                           player->damagecount);
 
         int rgb_max = HMM_MAX(rgb_data[0], HMM_MAX(rgb_data[1], rgb_data[2]));
 
-        if (rgb_max == 0)
-            return;
+        if (rgb_max == 0) return;
 
         rgb_max = HMM_MIN(200, rgb_max);
 
         if (!reduce_flash)
-            glColor4f((float)rgb_data[0] / (float)rgb_max, (float)rgb_data[1] / (float)rgb_max,
-                      (float)rgb_data[2] / (float)rgb_max, (float)rgb_max / 255.0f);
+            glColor4f((float)rgb_data[0] / (float)rgb_max,
+                      (float)rgb_data[1] / (float)rgb_max,
+                      (float)rgb_data[2] / (float)rgb_max,
+                      (float)rgb_max / 255.0f);
         else
         {
             HudSetAlpha((float)rgb_max / 255.0f);
-            HudThinBox(hud_x_left, hud_visible_top, hud_x_right, hud_visible_bottom,
-                        epi::MakeRGBA(RoundToInteger((float)rgb_data[0] / rgb_max * 255),
-                                 RoundToInteger((float)rgb_data[1] / rgb_max * 255),
-                                 RoundToInteger((float)rgb_data[2] / rgb_max * 255)),
-                        25.0f);
+            HudThinBox(hud_x_left, hud_visible_top, hud_x_right,
+                       hud_visible_bottom,
+                       epi::MakeRGBA(
+                           RoundToInteger((float)rgb_data[0] / rgb_max * 255),
+                           RoundToInteger((float)rgb_data[1] / rgb_max * 255),
+                           RoundToInteger((float)rgb_data[2] / rgb_max * 255)),
+                       25.0f);
         }
     }
 
@@ -266,9 +277,9 @@ void RGL_PaletteEffect(player_t *player)
 
         glBegin(GL_QUADS);
 
-        glVertex2i(0, SCREENHEIGHT);
-        glVertex2i(SCREENWIDTH, SCREENHEIGHT);
-        glVertex2i(SCREENWIDTH, 0);
+        glVertex2i(0, current_screen_height);
+        glVertex2i(current_screen_width, current_screen_height);
+        glVertex2i(current_screen_width, 0);
         glVertex2i(0, 0);
 
         glEnd();
@@ -281,26 +292,26 @@ void RGL_PaletteEffect(player_t *player)
 //  FUZZY Emulation
 //----------------------------------------------------------------------------
 
-const image_c *fuzz_image;
+const Image *fuzz_image;
 
-float fuzz_yoffset;
+static float fuzz_y_offset;
 
-void FUZZ_Update(void)
+void FuzzUpdate(void)
 {
     if (!fuzz_image)
     {
-        fuzz_image = W_ImageLookup("FUZZ_MAP", kImageNamespaceTexture, ILF_Exact | ILF_Null);
-        if (!fuzz_image)
-            FatalError("Cannot find essential image: FUZZ_MAP\n");
+        fuzz_image = ImageLookup("FUZZ_MAP", kImageNamespaceTexture,
+                                   kImageLookupExact | kImageLookupNull);
+        if (!fuzz_image) FatalError("Cannot find essential image: FUZZ_MAP\n");
     }
 
-    fuzz_yoffset = ((framecount * 3) & 1023) / 256.0;
+    fuzz_y_offset = ((render_frame_count * 3) & 1023) / 256.0;
 }
 
-void FUZZ_Adjust(HMM_Vec2 *tc, MapObject *mo)
+void FuzzAdjust(HMM_Vec2 *tc, MapObject *mo)
 {
     tc->X += fmod(mo->x / 520.0, 1.0);
-    tc->Y += fmod(mo->y / 520.0, 1.0) + fuzz_yoffset;
+    tc->Y += fmod(mo->y / 520.0, 1.0) + fuzz_y_offset;
 }
 
 //--- editor settings ---

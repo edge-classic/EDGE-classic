@@ -238,7 +238,7 @@ static void InstallSpriteLump(spritedef_c *def, int lump, const char *lumpname, 
         return;
     }
 
-    frame->images[rot] = W_ImageCreateSprite(lumpname, lump, frame->is_weapon);
+    frame->images[rot] = CreateSprite(lumpname, lump, frame->is_weapon);
 
     frame->flip[rot] = flip;
 }
@@ -267,12 +267,12 @@ static void InstallSpritePack(spritedef_c *def, pack_file_c *pack, std::string s
         return;
     }
 
-    frame->images[rot] = W_ImageCreatePackSprite(packname, pack, frame->is_weapon);
+    frame->images[rot] = CreatePackSprite(packname, pack, frame->is_weapon);
 
     frame->flip[rot] = flip;
 }
 
-static void InstallSpriteImage(spritedef_c *def, const image_c *img, const char *img_name, int pos, uint8_t flip)
+static void InstallSpriteImage(spritedef_c *def, const Image *img, const char *img_name, int pos, uint8_t flip)
 {
     spriteframe_c *frame = WhatFrame(def, img_name, pos);
     if (!frame)
@@ -404,7 +404,7 @@ static void FillSpriteFrames(int file)
 static void FillSpriteFramesUser()
 {
     int             img_num;
-    const image_c **images = W_ImageGetUserSprites(&img_num);
+    const Image **images = GetUserSprites(&img_num);
 
     if (img_num == 0)
         return;
@@ -419,7 +419,7 @@ static void FillSpriteFramesUser()
         size_t      spr_len = sprname.size();
         for (; L < img_num; L++)
         {
-            const char *img_name = W_ImageGetName(images[L]);
+            const char *img_name = images[L]->name_.c_str();
 
             if (strlen(img_name) != spr_len + 2 && strlen(img_name) != spr_len + 4)
             {
@@ -438,18 +438,18 @@ static void FillSpriteFramesUser()
 
             // Fix offsets if Doom formatted
             // Not sure if this is the 'proper' place to do this yet - Dasho
-            if (images[L]->source.graphic.is_patch)
+            if (images[L]->source_.graphic.is_patch)
             {
                 // const override
-                image_c     *change_img   = (image_c *)images[L];
+                Image     *change_img   = (Image *)images[L];
                 epi::File *offset_check = nullptr;
-                if (images[L]->source.graphic.packfile_name)
-                    offset_check = W_OpenPackFile(images[L]->source.graphic.packfile_name);
+                if (images[L]->source_.graphic.packfile_name)
+                    offset_check = W_OpenPackFile(images[L]->source_.graphic.packfile_name);
                 else
-                    offset_check = W_OpenLump(images[L]->source.graphic.lump);
+                    offset_check = W_OpenLump(images[L]->source_.graphic.lump);
 
                 if (!offset_check)
-                    FatalError("FillSpriteFramesUser: Error loading %s!\n", images[L]->name.c_str());
+                    FatalError("FillSpriteFramesUser: Error loading %s!\n", images[L]->name_.c_str());
 
                 uint8_t header[32];
                 memset(header, 255, sizeof(header));
@@ -457,19 +457,19 @@ static void FillSpriteFramesUser()
                 delete offset_check;
 
                 const patch_t *pat   = (patch_t *)header;
-                change_img->offset_x = AlignedLittleEndianS16(pat->leftoffset);
-                change_img->offset_y = AlignedLittleEndianS16(pat->topoffset);
+                change_img->offset_x_ = AlignedLittleEndianS16(pat->leftoffset);
+                change_img->offset_y_ = AlignedLittleEndianS16(pat->topoffset);
                 // adjust sprite offsets so that (0,0) is normal
                 if (sprite_map[S]->HasWeapon())
                 {
-                    change_img->offset_x += (320.0f / 2.0f - change_img->actual_w / 2.0f); // loss of accuracy
-                    change_img->offset_y += (200.0f - 32.0f - change_img->actual_h);
+                    change_img->offset_x_ += (320.0f / 2.0f - change_img->actual_width_ / 2.0f); // loss of accuracy
+                    change_img->offset_y_ += (200.0f - 32.0f - change_img->actual_height_);
                 }
                 else
                 {
-                    // rim->offset_x -= rim->actual_w / 2;   // loss of accuracy
-                    change_img->offset_x -= ((float)change_img->actual_w) / 2.0f; // Lobo 2023: dancing eye fix
-                    change_img->offset_y -= change_img->actual_h;
+                    // rim->offset_x_ -= rim->actual_width_ / 2;   // loss of accuracy
+                    change_img->offset_x_ -= ((float)change_img->actual_width_) / 2.0f; // Lobo 2023: dancing eye fix
+                    change_img->offset_y_ -= change_img->actual_height_;
                 }
             }
 
@@ -753,8 +753,8 @@ void W_PrecacheSprites(void)
     {
         spritedef_c *def = sprites[i];
 
-        const image_c *cur_image;
-        const image_c *last_image = nullptr; // an optimisation
+        const Image *cur_image;
+        const Image *last_image = nullptr; // an optimisation
 
         if (def->numframes == 0)
             continue;
@@ -782,7 +782,7 @@ void W_PrecacheSprites(void)
                 if (cur_image == nullptr || cur_image == last_image)
                     continue;
 
-                W_ImagePreCache(cur_image);
+                ImagePrecache(cur_image);
 
                 last_image = cur_image;
             }

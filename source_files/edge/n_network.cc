@@ -163,10 +163,10 @@ void NetworkGrabTicCommands(void)
         memcpy(&p->cmd, p->in_cmds + buf, sizeof(EventTicCommand));
     }
     if (LUA_UseLuaHud())
-        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "game_tic",
+        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "gametic",
                      game_tic / (double_framerate.d_ ? 2 : 1));
     else
-        VM_SetFloat(ui_vm, "sys", "game_tic",
+        VM_SetFloat(ui_vm, "sys", "gametic",
                     game_tic / (double_framerate.d_ ? 2 : 1));
 
     game_tic++;
@@ -198,11 +198,6 @@ int NetworkUpdate()
             if (!NetworkBuildTicCommands()) break;
 
         PostInput();
-
-#if 0
-		if (new_tics > 0 && numplayers > 0)
-			LogDebug("NetworkUpdate: lost tics: %d\n", new_tics);
-#endif
     }
 
     return now_time;
@@ -224,7 +219,7 @@ int NetworkTryRunTicCommands()
     int real_tics    = now_time - last_try_run_tic;
     last_try_run_tic = now_time;
 
-#ifdef DEBUG_TICS
+#ifdef EDGE_DEBUG_TICS
     LogDebug("NetworkTryRunTicCommands: now %d last_try_run %d --> real %d\n",
              now_time, now_time - real_tics, real_tics);
 #endif
@@ -260,7 +255,7 @@ int NetworkTryRunTicCommands()
     else
         tics = HMM_MAX(HMM_MIN(tics, real_tics), 1);
 
-#ifdef DEBUG_TICS
+#ifdef EDGE_DEBUG_TICS
     LogDebug("=== make_tic %d game_tic %d | real %d using %d\n", make_tic,
              game_tic, real_tics, tics);
 #endif

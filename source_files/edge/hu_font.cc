@@ -40,7 +40,7 @@
 
 static constexpr uint8_t kDummyCharacterWidth = 8;
 
-extern ImageData *ReadAsEpiBlock(image_c *rim);
+extern ImageData *ReadAsEpiBlock(Image *rim);
 
 // all the fonts that's fit to print
 FontContainer hud_fonts;
@@ -96,8 +96,8 @@ void Font::LoadPatches()
     // range of characters
     int              first = 9999;
     int              last  = 0;
-    const image_c  **images;
-    const image_c   *missing;
+    const Image  **images;
+    const Image   *missing;
     const FontPatch *pat;
 
     // determine full range
@@ -113,35 +113,35 @@ void Font::LoadPatches()
     SYS_ASSERT(definition_->patches_);
     SYS_ASSERT(total >= 1);
 
-    images = new const image_c *[total];
-    memset(images, 0, sizeof(const image_c *) * total);
+    images = new const Image *[total];
+    memset(images, 0, sizeof(const Image *) * total);
 
     // Atlas Stuff
     std::unordered_map<int, ImageData *> patch_data;
     std::vector<ImageData *>             temp_imdata;
 
     missing                      = definition_->missing_patch_ != ""
-                                       ? W_ImageLookup(definition_->missing_patch_.c_str(),
-                                                       kImageNamespaceGraphic, ILF_Font | ILF_Null)
+                                       ? ImageLookup(definition_->missing_patch_.c_str(),
+                                                       kImageNamespaceGraphic, kImageLookupFont | kImageLookupNull)
                                        : nullptr;
     ImageData *missing_imdata = nullptr;
 
     if (missing)
     {
-        ImageData *tmp_img = ReadAsEpiBlock((image_c *)(missing));
+        ImageData *tmp_img = ReadAsEpiBlock((Image *)(missing));
         if (tmp_img->depth_ == 1)
         {
-            ImageData *rgb_img = R_PalettisedToRGB(
-                tmp_img, (const uint8_t *)&playpal_data[0], missing->opacity);
+            ImageData *rgb_img = RgbFromPalettised(
+                tmp_img, (const uint8_t *)&playpal_data[0], missing->opacity_);
             delete tmp_img;
             missing_imdata = rgb_img;
         }
         else
             missing_imdata = tmp_img;
-        missing_imdata->offset_x_ = missing->offset_x;
-        missing_imdata->offset_y_ = missing->offset_y;
-        missing_imdata->scale_x_  = missing->scale_x;
-        missing_imdata->scale_y_  = missing->scale_y;
+        missing_imdata->offset_x_ = missing->offset_x_;
+        missing_imdata->offset_y_ = missing->offset_y_;
+        missing_imdata->scale_x_  = missing->scale_x_;
+        missing_imdata->scale_y_  = missing->scale_y_;
     }
 
     // First pass, add the images that are good
@@ -155,31 +155,28 @@ void Font::LoadPatches()
 
         for (int ch = pat->char1; ch <= pat->char2; ch++, BumpPatchName(pname))
         {
-#if 0  // DEBUG
-			LogPrint("- LoadFont [%s] : char %d = %s\n", definition_->name.c_str(), ch, pname);
-#endif
             int idx = ch - first;
             SYS_ASSERT(0 <= idx && idx < total);
 
-            images[idx] = W_ImageLookup(pname, kImageNamespaceGraphic,
-                                        ILF_Font | ILF_Null);
+            images[idx] = ImageLookup(pname, kImageNamespaceGraphic,
+                                        kImageLookupFont | kImageLookupNull);
 
             if (images[idx])
             {
                 ImageData *tmp_img =
-                    ReadAsEpiBlock((image_c *)(images[idx]));
+                    ReadAsEpiBlock((Image *)(images[idx]));
                 if (tmp_img->depth_ == 1)
                 {
-                    ImageData *rgb_img = R_PalettisedToRGB(
+                    ImageData *rgb_img = RgbFromPalettised(
                         tmp_img, (const uint8_t *)&playpal_data[0],
-                        images[idx]->opacity);
+                        images[idx]->opacity_);
                     delete tmp_img;
                     tmp_img = rgb_img;
                 }
-                tmp_img->offset_x_ = images[idx]->offset_x;
-                tmp_img->offset_y_ = images[idx]->offset_y;
-                tmp_img->scale_x_  = images[idx]->scale_x;
-                tmp_img->scale_y_  = images[idx]->scale_y;
+                tmp_img->offset_x_ = images[idx]->offset_x_;
+                tmp_img->offset_y_ = images[idx]->offset_y_;
+                tmp_img->scale_x_  = images[idx]->scale_x_;
+                tmp_img->scale_y_  = images[idx]->scale_y_;
                 patch_data.try_emplace(kCP437UnicodeValues[(uint8_t)ch],
                                        tmp_img);
                 temp_imdata.push_back(tmp_img);
@@ -303,8 +300,8 @@ void Font::LoadFontImage()
     {
         if (!definition_->image_name_.empty())
             font_image_ =
-                W_ImageLookup(definition_->image_name_.c_str(),
-                              kImageNamespaceGraphic, ILF_Exact | ILF_Null);
+                ImageLookup(definition_->image_name_.c_str(),
+                              kImageNamespaceGraphic, kImageLookupExact | kImageLookupNull);
         else
             FatalError("LoadFontImage: nullptr image name provided for font %s!",
                     definition_->name_.c_str());
@@ -312,22 +309,22 @@ void Font::LoadFontImage()
             FatalError("LoadFontImage: Image %s not found for font %s!",
                     definition_->image_name_.c_str(),
                     definition_->name_.c_str());
-        int char_height = font_image_->actual_h / 16;
-        int char_width  = font_image_->actual_w / 16;
+        int char_height = font_image_->actual_height_ / 16;
+        int char_width  = font_image_->actual_width_ / 16;
         image_character_height_ =
             (definition_->default_size_ == 0.0 ? char_height
                                                : definition_->default_size_) *
-            font_image_->scale_y;
+            font_image_->scale_y_;
         image_character_width_ =
             (definition_->default_size_ == 0.0 ? char_width
                                                : definition_->default_size_) *
-            font_image_->scale_x;
+            font_image_->scale_x_;
         image_monospace_width_ = 0;
         spacing_               = definition_->spacing_;
         // Determine individual character widths and ratios
         individual_char_widths_ = new float[256];
         individual_char_ratios_ = new float[256];
-        ImageData *char_data = ReadAsEpiBlock((image_c *)font_image_);
+        ImageData *char_data = ReadAsEpiBlock((Image *)font_image_);
         for (int i = 0; i < 256; i++)
         {
             int px                     = i % 16;
@@ -336,7 +333,7 @@ void Font::LoadFontImage()
                                              px * char_width, py * char_height,
                                              px * char_width + char_width,
                                              py * char_height + char_height) *
-                                         font_image_->scale_x;
+                                         font_image_->scale_x_;
             if (definition_->default_size_ > 0.0)
                 individual_char_widths_[i] *=
                     (definition_->default_size_ / char_width);
@@ -580,7 +577,7 @@ float Font::NominalHeight() const
     return 1; /* NOT REACHED */
 }
 
-const image_c *Font::CharImage(char ch) const
+const Image *Font::CharImage(char ch) const
 {
     if (definition_->type_ == kFontTypeImage) return font_image_;
 
@@ -588,8 +585,8 @@ const image_c *Font::CharImage(char ch) const
     {
         if (truetype_glyph_map_.find((uint8_t)ch) != truetype_glyph_map_.end())
             // Create or return dummy image
-            return W_ImageLookup("FONT_DUMMY_IMAGE", kImageNamespaceGraphic,
-                                 ILF_Font);
+            return ImageLookup("FONT_DUMMY_IMAGE", kImageNamespaceGraphic,
+                                 kImageLookupFont);
         else
             return nullptr;
     }
@@ -600,8 +597,8 @@ const image_c *Font::CharImage(char ch) const
 
     if (patch_font_cache_.atlas_rectangles.count(
             kCP437UnicodeValues[(uint8_t)ch]))
-        return W_ImageLookup("FONT_DUMMY_IMAGE", kImageNamespaceGraphic,
-                             ILF_Font);
+        return ImageLookup("FONT_DUMMY_IMAGE", kImageNamespaceGraphic,
+                             kImageLookupFont);
     else
         return nullptr;
 }

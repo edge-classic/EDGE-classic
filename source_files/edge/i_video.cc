@@ -63,8 +63,8 @@ EDGE_DEFINE_CONSOLE_VARIABLE(forced_pixel_aspect_ratio, "0",
 
 static bool grab_state;
 
-extern ConsoleVariable r_farclip;
-extern ConsoleVariable r_culling;
+extern ConsoleVariable renderer_far_clip;
+extern ConsoleVariable draw_culling;
 extern ConsoleVariable r_culldist;
 
 void GrabCursor(bool enable)
@@ -102,9 +102,9 @@ void DeterminePixelAspect()
     bool is_crt =
         (desktop_resolution_width.d_ < desktop_resolution_height.d_ * 7 / 5);
 
-    bool is_fullscreen = (DISPLAYMODE > 0);
-    if (is_fullscreen && SCREENWIDTH == desktop_resolution_width.d_ &&
-        SCREENHEIGHT == desktop_resolution_height.d_ && graphics_shutdown)
+    bool is_fullscreen = (current_window_mode > 0);
+    if (is_fullscreen && current_screen_width == desktop_resolution_width.d_ &&
+        current_screen_height == desktop_resolution_height.d_ && graphics_shutdown)
         is_fullscreen = false;
 
     if (!is_fullscreen && !is_crt)
@@ -119,7 +119,7 @@ void DeterminePixelAspect()
     // any letter-boxing or pillar-boxing).  DPI setting does not matter here.
 
     pixel_aspect_ratio =
-        monitor_aspect_ratio.f_ * (float)SCREENHEIGHT / (float)SCREENWIDTH;
+        monitor_aspect_ratio.f_ * (float)current_screen_height / (float)current_screen_width;
 }
 
 void StartupGraphics(void)
@@ -167,10 +167,10 @@ void StartupGraphics(void)
     desktop_resolution_width  = info.w;
     desktop_resolution_height = info.h;
 
-    if (SCREENWIDTH > desktop_resolution_width.d_)
-        SCREENWIDTH = desktop_resolution_width.d_;
-    if (SCREENHEIGHT > desktop_resolution_height.d_)
-        SCREENHEIGHT = desktop_resolution_height.d_;
+    if (current_screen_width > desktop_resolution_width.d_)
+        current_screen_width = desktop_resolution_width.d_;
+    if (current_screen_height > desktop_resolution_height.d_)
+        current_screen_height = desktop_resolution_height.d_;
 
     LogPrint("Desktop resolution: %dx%d\n", desktop_resolution_width.d_,
                desktop_resolution_height.d_);
@@ -191,56 +191,56 @@ void StartupGraphics(void)
         test_mode.width        = possible_mode.w;
         test_mode.height       = possible_mode.h;
         test_mode.depth        = SDL_BITSPERPIXEL(possible_mode.format);
-        test_mode.display_mode = DisplayMode::SCR_FULLSCREEN;
+        test_mode.window_mode = kWindowModeFullscreen;
 
         if ((test_mode.width & 15) != 0) continue;
 
         if (test_mode.depth == 15 || test_mode.depth == 16 ||
             test_mode.depth == 24 || test_mode.depth == 32)
         {
-            R_AddResolution(&test_mode);
+            AddDisplayResolution(&test_mode);
 
             if (test_mode.width < desktop_resolution_width.d_ &&
                 test_mode.height < desktop_resolution_height.d_)
             {
                 DisplayMode win_mode  = test_mode;
-                win_mode.display_mode = DisplayMode::SCR_WINDOW;
-                R_AddResolution(&win_mode);
+                win_mode.window_mode = kWindowModeWindowed;
+                AddDisplayResolution(&win_mode);
             }
         }
     }
 
     // If needed, set the default window toggle mode to the largest non-native
     // res
-    if (tw_displaymode.d_ == DisplayMode::SCR_INVALID)
+    if (toggle_windowed_window_mode.d_ == kWindowModeInvalid)
     {
         for (size_t i = 0; i < screen_modes.size(); i++)
         {
             DisplayMode *check = screen_modes[i];
-            if (check->display_mode == DisplayMode::SCR_WINDOW)
+            if (check->window_mode == kWindowModeWindowed)
             {
-                tw_displaymode  = DisplayMode::SCR_WINDOW;
-                tw_screenheight = check->height;
-                tw_screenwidth  = check->width;
-                tw_screendepth  = check->depth;
+                toggle_windowed_window_mode  = kWindowModeWindowed;
+                toggle_windowed_height = check->height;
+                toggle_windowed_width  = check->width;
+                toggle_windowed_depth  = check->depth;
                 break;
             }
         }
     }
 
     // Fill in borderless mode scrmode with the native display info
-    borderless_mode.display_mode = DisplayMode::SCR_BORDERLESS;
+    borderless_mode.window_mode = kWindowModeBorderless;
     borderless_mode.width        = info.w;
     borderless_mode.height       = info.h;
     borderless_mode.depth        = SDL_BITSPERPIXEL(info.format);
 
     // If needed, also make the default fullscreen toggle mode borderless
-    if (tf_displaymode.d_ == DisplayMode::SCR_INVALID)
+    if (toggle_fullscreen_window_mode.d_ == kWindowModeInvalid)
     {
-        tf_displaymode  = DisplayMode::SCR_BORDERLESS;
-        tf_screenwidth  = info.w;
-        tf_screenheight = info.h;
-        tf_screendepth  = (int)SDL_BITSPERPIXEL(info.format);
+        toggle_fullscreen_window_mode  = kWindowModeBorderless;
+        toggle_fullscreen_width  = info.w;
+        toggle_fullscreen_height = info.h;
+        toggle_fullscreen_depth  = (int)SDL_BITSPERPIXEL(info.format);
     }
 
     LogPrint("StartupGraphics: initialisation OK\n");
@@ -261,9 +261,9 @@ static bool InitializeWindow(DisplayMode *mode)
         temp_title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         mode->width, mode->height,
         SDL_WINDOW_OPENGL |
-            (mode->display_mode == DisplayMode::SCR_BORDERLESS
+            (mode->window_mode == kWindowModeBorderless
                  ? (SDL_WINDOW_FULLSCREEN_DESKTOP)
-                 : (mode->display_mode == DisplayMode::SCR_FULLSCREEN
+                 : (mode->window_mode == kWindowModeFullscreen
                         ? SDL_WINDOW_FULLSCREEN
                         : 0)) |
             resizeable);
@@ -274,30 +274,30 @@ static bool InitializeWindow(DisplayMode *mode)
         return false;
     }
 
-    if (mode->display_mode == DisplayMode::SCR_BORDERLESS)
+    if (mode->window_mode == kWindowModeBorderless)
         SDL_GetWindowSize(program_window, &borderless_mode.width,
                           &borderless_mode.height);
 
-    if (mode->display_mode == DisplayMode::SCR_WINDOW)
+    if (mode->window_mode == kWindowModeWindowed)
     {
-        tw_screendepth  = mode->depth;
-        tw_screenheight = mode->height;
-        tw_screenwidth  = mode->width;
-        tw_displaymode  = DisplayMode::SCR_WINDOW;
+        toggle_windowed_depth  = mode->depth;
+        toggle_windowed_height = mode->height;
+        toggle_windowed_width  = mode->width;
+        toggle_windowed_window_mode  = kWindowModeWindowed;
     }
-    else if (mode->display_mode == DisplayMode::SCR_FULLSCREEN)
+    else if (mode->window_mode == kWindowModeFullscreen)
     {
-        tf_screendepth  = mode->depth;
-        tf_screenheight = mode->height;
-        tf_screenwidth  = mode->width;
-        tf_displaymode  = DisplayMode::SCR_FULLSCREEN;
+        toggle_fullscreen_depth  = mode->depth;
+        toggle_fullscreen_height = mode->height;
+        toggle_fullscreen_width  = mode->width;
+        toggle_fullscreen_window_mode  = kWindowModeFullscreen;
     }
     else
     {
-        tf_screendepth  = borderless_mode.depth;
-        tf_screenheight = borderless_mode.height;
-        tf_screenwidth  = borderless_mode.width;
-        tf_displaymode  = DisplayMode::SCR_BORDERLESS;
+        toggle_fullscreen_depth  = borderless_mode.depth;
+        toggle_fullscreen_height = borderless_mode.height;
+        toggle_fullscreen_width  = borderless_mode.width;
+        toggle_fullscreen_window_mode  = kWindowModeBorderless;
     }
 
     if (SDL_GL_CreateContext(program_window) == nullptr)
@@ -329,16 +329,16 @@ bool SetScreenSize(DisplayMode *mode)
     LogPrint(
         "SetScreenSize: trying %dx%d %dbpp (%s)\n", mode->width,
         mode->height, mode->depth,
-        mode->display_mode == DisplayMode::SCR_BORDERLESS
+        mode->window_mode == kWindowModeBorderless
             ? "borderless"
-            : (mode->display_mode == DisplayMode::SCR_FULLSCREEN ? "fullscreen"
+            : (mode->window_mode == kWindowModeFullscreen ? "fullscreen"
                                                                  : "windowed"));
 
     if (program_window == nullptr)
     {
         if (!InitializeWindow(mode)) { return false; }
     }
-    else if (mode->display_mode == DisplayMode::SCR_BORDERLESS)
+    else if (mode->window_mode == kWindowModeBorderless)
     {
         SDL_SetWindowFullscreen(program_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
         SDL_GetWindowSize(program_window, &borderless_mode.width,
@@ -347,7 +347,7 @@ bool SetScreenSize(DisplayMode *mode)
         LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width,
                    mode->height, mode->depth);
     }
-    else if (mode->display_mode == DisplayMode::SCR_FULLSCREEN)
+    else if (mode->window_mode == kWindowModeFullscreen)
     {
         SDL_SetWindowFullscreen(program_window, SDL_WINDOW_FULLSCREEN);
         SDL_DisplayMode *new_mode = new SDL_DisplayMode;
@@ -361,7 +361,7 @@ bool SetScreenSize(DisplayMode *mode)
         LogPrint("SetScreenSize: mode now %dx%d %dbpp\n", mode->width,
                    mode->height, mode->depth);
     }
-    else /* SCR_WINDOW */
+    else /* kWindowModeWindowed */
     {
         SDL_SetWindowFullscreen(program_window, 0);
         SDL_SetWindowSize(program_window, mode->width, mode->height);
@@ -396,10 +396,10 @@ void StartFrame(void)
     ecframe_stats.Clear();
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if (r_culling.d_)
-        r_farclip.f_ = r_culldist.f_;
+    if (draw_culling.d_)
+        renderer_far_clip.f_ = r_culldist.f_;
     else
-        r_farclip.f_ = 64000.0;
+        renderer_far_clip.f_ = 64000.0;
 }
 
 void FinishFrame(void)

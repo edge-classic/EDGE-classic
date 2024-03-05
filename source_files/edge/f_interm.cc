@@ -124,62 +124,62 @@ static Style *multiplayer_intermission_style;
 // GRAPHICS
 
 // background
-static const image_c *background_image;
-static const image_c *leaving_background_image;
-static const image_c *entering_background_image;
+static const Image *background_image;
+static const Image *leaving_background_image;
+static const Image *entering_background_image;
 
 bool tile_background          = false;
 bool tile_leaving_background  = false;
 bool tile_entering_background = false;
 
 // You Are Here graphic
-static const image_c *you_are_here[2] = {nullptr, nullptr};
+static const Image *you_are_here[2] = {nullptr, nullptr};
 
 // splat
-static const image_c *splat[2] = {nullptr, nullptr};
+static const Image *splat[2] = {nullptr, nullptr};
 
 // %, : graphics
-static const image_c *percent;
-static const image_c *colon;
+static const Image *percent;
+static const Image *colon;
 
 // 0-9 graphic
-static const image_c *digits[10];  // FIXME: use FONT/STYLE
+static const Image *digits[10];  // FIXME: use FONT/STYLE
 
 // minus sign
-static const image_c *wiminus;
+static const Image *wiminus;
 
 // "Finished!" graphics
-static const image_c *finished;
+static const Image *finished;
 
 // "Entering" graphic
-static const image_c *entering;
+static const Image *entering;
 
 // "secret"
-static const image_c *single_player_secret;
+static const Image *single_player_secret;
 
 // "Kills", "Scrt", "Items", "Frags"
-static const image_c *kills;
-static const image_c *secret;
-static const image_c *items;
-static const image_c *frags;
+static const Image *kills;
+static const Image *secret;
+static const Image *items;
+static const Image *frags;
 
 // Time sucks.
-static const image_c
+static const Image
     *time_image;  // -ACB- 1999/09/19 Removed Conflict with <time.h>
-static const image_c *par;
-static const image_c *sucks;
+static const Image *par;
+static const Image *sucks;
 
 // "killers", "victims"
-static const image_c *killers;
-static const image_c *victims;
+static const Image *killers;
+static const Image *victims;
 
 // "Total", your face, your dead face
-static const image_c *total;
-static const image_c *face;
-static const image_c *dead_face;
+static const Image *total;
+static const Image *face;
+static const Image *dead_face;
 
 // Name graphics of each level (centered)
-static const image_c *level_names[2];
+static const Image *level_names[2];
 
 //
 // -ACB- 2004/06/25 Short-term containers for
@@ -195,7 +195,7 @@ struct IntermissionMapPosition
 struct IntermissionFrame
 {
     IntermissionFrameInfo *info  = nullptr;
-    const image_c         *image = nullptr;  // cached image
+    const Image         *image = nullptr;  // cached image
 };
 
 class IntermissionAnimation
@@ -380,10 +380,10 @@ static void DrawLevelFinished(void)
         {
             if (r_titlescaling.d_)  // Fill Border
             {
-                if (!leaving_background_image->blurred_version)
-                    W_ImageStoreBlurred(leaving_background_image, 0.75f);
+                if (!leaving_background_image->blurred_version_)
+                    ImageStoreBlurred(leaving_background_image, 0.75f);
                 HudStretchImage(-320, -200, 960, 600,
-                                 leaving_background_image->blurred_version, 0,
+                                 leaving_background_image->blurred_version_, 0,
                                  0);
             }
             HudDrawImageTitleWS(leaving_background_image);
@@ -404,10 +404,10 @@ static void DrawLevelFinished(void)
     // If we have a custom mapname graphic e.g.CWILVxx then use that
     if (level_names[0])
     {
-        if (W_IsLumpInPwad(level_names[0]->name.c_str()))
+        if (W_IsLumpInPwad(level_names[0]->name_.c_str()))
         {
-            w1 = IM_WIDTH(level_names[0]);
-            h1 = IM_HEIGHT(level_names[0]);
+            w1 = level_names[0]->ScaledWidthActual();
+            h1 = level_names[0]->ScaledHeightActual();
             HudSetAlignment(-1, -1);  // center it
             if (w1 > 320)              // Too big? Shrink it to fit the screen
                 HudStretchImage(0, y, 320, h1, level_names[0], 0.0, 0.0);
@@ -489,10 +489,10 @@ static void DrawLevelFinished(void)
 
     HudSetAlignment(0, -1);  // center it
     // If we have a custom Finished graphic e.g.WIF then use that
-    if (W_IsLumpInPwad(finished->name.c_str()))
+    if (W_IsLumpInPwad(finished->name_.c_str()))
     {
-        w1 = IM_WIDTH(finished);
-        h1 = IM_HEIGHT(finished);
+        w1 = finished->ScaledWidthActual();
+        h1 = finished->ScaledHeightActual();
         HudSetAlignment(-1, -1);  // center it
         HudDrawImage(160 - w1 / 2, y * 5 / 4, finished);
     }
@@ -506,7 +506,7 @@ static void DrawLevelFinished(void)
 }
 
 static void DrawOnLnode(IntermissionMapPosition *mappos,
-                        const image_c           *images[2])
+                        const Image           *images[2])
 {
     int i;
 
@@ -517,11 +517,11 @@ static void DrawOnLnode(IntermissionMapPosition *mappos,
     {
         if (images[i] == nullptr) continue;
 
-        float left = mappos->info->x_ - IM_OFFSETX(images[i]);
-        float top  = mappos->info->y_ - IM_OFFSETY(images[i]);
+        float left = mappos->info->x_ - images[i]->ScaledOffsetX();
+        float top  = mappos->info->y_ - images[i]->ScaledOffsetY();
 
-        float right  = left + IM_WIDTH(images[i]);
-        float bottom = top + IM_HEIGHT(images[i]);
+        float right  = left + images[i]->ScaledWidthActual();
+        float bottom = top + images[i]->ScaledHeightActual();
 
         if (left >= 0 && right < 320 && top >= 0 && bottom < 200)
         {
@@ -559,10 +559,10 @@ static void DrawEnteringLevel(void)
         {
             if (r_titlescaling.d_)  // Fill Border
             {
-                if (!entering_background_image->blurred_version)
-                    W_ImageStoreBlurred(entering_background_image, 0.75f);
+                if (!entering_background_image->blurred_version_)
+                    ImageStoreBlurred(entering_background_image, 0.75f);
                 HudStretchImage(-320, -200, 960, 600,
-                                 entering_background_image->blurred_version, 0,
+                                 entering_background_image->blurred_version_, 0,
                                  0);
             }
             HudDrawImageTitleWS(entering_background_image);
@@ -581,10 +581,10 @@ static void DrawEnteringLevel(void)
     HudSetAlignment(0, -1);  // center it
 
     // If we have a custom Entering graphic e.g.WIENTER then use that
-    if (W_IsLumpInPwad(entering->name.c_str()))
+    if (W_IsLumpInPwad(entering->name_.c_str()))
     {
-        w1 = IM_WIDTH(entering);
-        h1 = IM_HEIGHT(entering);
+        w1 = entering->ScaledWidthActual();
+        h1 = entering->ScaledHeightActual();
         HudSetAlignment(-1, -1);  // center it
         HudDrawImage(160 - w1 / 2, y, entering);
     }
@@ -621,10 +621,10 @@ static void DrawEnteringLevel(void)
     // If we have a custom mapname graphic e.g.CWILVxx then use that
     if (level_names[1])
     {
-        if (W_IsLumpInPwad(level_names[1]->name.c_str()))
+        if (W_IsLumpInPwad(level_names[1]->name_.c_str()))
         {
-            w1 = IM_WIDTH(level_names[1]);
-            h1 = IM_HEIGHT(level_names[1]);
+            w1 = level_names[1]->ScaledWidthActual();
+            h1 = level_names[1]->ScaledHeightActual();
             HudSetAlignment(-1, -1);  // center it
             if (w1 > 320)              // Too big? Shrink it to fit the screen
                 HudStretchImage(0, y * 5 / 4, 320, h1, level_names[1], 0.0,
@@ -697,10 +697,10 @@ static float PercentWidth(std::string &s)
     float perc_width = 0;
     for (auto c : s)
     {
-        if (c == '%') { perc_width += IM_WIDTH(percent); }
+        if (c == '%') { perc_width += percent->ScaledWidthActual(); }
         else if (epi::IsDigitASCII(c))
         {
-            perc_width += IM_WIDTH(digits[c - 48]);
+            perc_width += digits[c - 48]->ScaledWidthActual();
         }
     }
     return perc_width;
@@ -713,12 +713,12 @@ static void DrawPercent(float x, float y, std::string &s)
         if (c == '%')
         {
             HudDrawImage(x, y, percent);
-            x += IM_WIDTH(percent);
+            x += percent->ScaledWidthActual();
         }
         else if (epi::IsDigitASCII(c))
         {
             HudDrawImage(x, y, digits[c - 48]);
-            x += IM_WIDTH(digits[c - 48]);
+            x += digits[c - 48]->ScaledWidthActual();
         }
     }
 }
@@ -785,8 +785,8 @@ static float TimeWidth(int t, bool drawText = false)
         if (t > 3599)
         {
             // "sucks"
-            if ((sucks) && (W_IsLumpInPwad(sucks->name.c_str())))
-                return IM_WIDTH(sucks);
+            if ((sucks) && (W_IsLumpInPwad(sucks->name_.c_str())))
+                return sucks->ScaledWidthActual();
             else
                 return single_player_intermission_style
                     ->fonts_[StyleDefinition::kTextSectionAlternate]
@@ -797,10 +797,10 @@ static float TimeWidth(int t, bool drawText = false)
             float time_width = 0;
             for (auto c : s)
             {
-                if (c == ':') { time_width += IM_WIDTH(colon); }
+                if (c == ':') { time_width += colon->ScaledWidthActual(); }
                 else if (epi::IsDigitASCII(c))
                 {
-                    time_width += IM_WIDTH(digits[c - 48]);
+                    time_width += digits[c - 48]->ScaledWidthActual();
                 }
             }
             return time_width;
@@ -864,7 +864,7 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
         if (t > 3599)
         {
             // "sucks"
-            if ((sucks) && (W_IsLumpInPwad(sucks->name.c_str())))
+            if ((sucks) && (W_IsLumpInPwad(sucks->name_.c_str())))
                 HudDrawImage(x, y, sucks);
             else
                 HudWriteText(single_player_intermission_style,
@@ -877,12 +877,12 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
                 if (c == ':')
                 {
                     HudDrawImage(x, y, colon);
-                    x += IM_WIDTH(colon);
+                    x += colon->ScaledWidthActual();
                 }
                 else if (epi::IsDigitASCII(c))
                 {
                     HudDrawImage(x, y, digits[c - 48]);
-                    x += IM_WIDTH(digits[c - 48]);
+                    x += digits[c - 48]->ScaledWidthActual();
                 }
             }
         }
@@ -893,7 +893,7 @@ static void IntermissionEnd(void)
 {
     E_ForceWipe();
 
-    background_camera_mo = nullptr;
+    background_camera_map_object = nullptr;
 
     FinaleStart(&current_map->f_end_, next_map ? kGameActionFinale : kGameActionNothing);
 }
@@ -1573,14 +1573,14 @@ static void UpdateSinglePlayerStats(void)
 static void DrawSinglePlayerStats(void)
 {
     // line height
-    float lh = IM_HEIGHT(digits[0]) * 3 / 2;
+    float lh = digits[0]->ScaledHeightActual() * 3 / 2;
 
     DrawLevelFinished();
 
     bool drawTextBased = true;
     if (kills != nullptr)
     {
-        if (W_IsLumpInPwad(kills->name.c_str()))
+        if (W_IsLumpInPwad(kills->name_.c_str()))
             drawTextBased = false;
         else
             drawTextBased = true;
@@ -1628,7 +1628,7 @@ static void DrawSinglePlayerStats(void)
         s = s + "%";
     }
 
-    if ((items) && (W_IsLumpInPwad(items->name.c_str())))
+    if ((items) && (W_IsLumpInPwad(items->name_.c_str())))
     {
         HudDrawImage(kSinglePlayerStateStatsX, kSinglePlayerStateStatsY + lh,
                       items);
@@ -1661,7 +1661,7 @@ static void DrawSinglePlayerStats(void)
     }
 
     if ((single_player_secret) &&
-        (W_IsLumpInPwad(single_player_secret->name.c_str())))
+        (W_IsLumpInPwad(single_player_secret->name_.c_str())))
     {
         HudDrawImage(kSinglePlayerStateStatsX,
                       kSinglePlayerStateStatsY + 2 * lh, single_player_secret);
@@ -1685,7 +1685,7 @@ static void DrawSinglePlayerStats(void)
                          kSinglePlayerStateStatsY + 2 * lh, s.c_str());
     }
 
-    if ((time_image) && (W_IsLumpInPwad(time_image->name.c_str())))
+    if ((time_image) && (W_IsLumpInPwad(time_image->name_.c_str())))
     {
         HudDrawImage(kSinglePlayerStateTimeX, kSinglePlayerStateTimeY,
                       time_image);
@@ -1704,7 +1704,7 @@ static void DrawSinglePlayerStats(void)
     // -KM- 1998/11/25 Removed episode check. Replaced with partime check
     if (intermission_stats.par_time)
     {
-        if ((par) && (W_IsLumpInPwad(par->name.c_str())))
+        if ((par) && (W_IsLumpInPwad(par->name_.c_str())))
         {
             HudDrawImage(170, kSinglePlayerStateTimeY, par);
             DrawTime(320 - kSinglePlayerStateTimeX - TimeWidth(count_par),
@@ -1821,9 +1821,9 @@ void IntermissionDrawer(void)
 
     HudReset();
 
-    if (background_camera_mo)
+    if (background_camera_map_object)
     {
-        HudRenderWorld(0, 0, 320, 200, background_camera_mo, 0);
+        HudRenderWorld(0, 0, 320, 200, background_camera_map_object, 0);
     }
     else
     {
@@ -1837,10 +1837,10 @@ void IntermissionDrawer(void)
             {
                 if (r_titlescaling.d_)  // Fill Border
                 {
-                    if (!background_image->blurred_version)
-                        W_ImageStoreBlurred(background_image, 0.75f);
+                    if (!background_image->blurred_version_)
+                        ImageStoreBlurred(background_image, 0.75f);
                     HudStretchImage(-320, -200, 960, 600,
-                                     background_image->blurred_version, 0, 0);
+                                     background_image->blurred_version_, 0, 0);
                 }
                 HudDrawImageTitleWS(background_image);
             }
@@ -1916,14 +1916,14 @@ static void LoadData(void)
     // Lobo 2022: if we have a per level image defined, use that instead
     if (intermission_stats.current_level->leavingbggraphic_ != "")
     {
-        leaving_background_image = W_ImageLookup(
+        leaving_background_image = ImageLookup(
             intermission_stats.current_level->leavingbggraphic_.c_str(),
-            kImageNamespaceFlat, ILF_Null);
+            kImageNamespaceFlat, kImageLookupNull);
         if (leaving_background_image)
             tile_leaving_background = true;
         else
         {
-            leaving_background_image = W_ImageLookup(
+            leaving_background_image = ImageLookup(
                 intermission_stats.current_level->leavingbggraphic_.c_str());
             tile_leaving_background = false;
         }
@@ -1931,76 +1931,76 @@ static void LoadData(void)
 
     if (intermission_stats.current_level->enteringbggraphic_ != "")
     {
-        entering_background_image = W_ImageLookup(
+        entering_background_image = ImageLookup(
             intermission_stats.current_level->enteringbggraphic_.c_str(),
-            kImageNamespaceFlat, ILF_Null);
+            kImageNamespaceFlat, kImageLookupNull);
         if (entering_background_image)
             tile_entering_background = true;
         else
         {
-            entering_background_image = W_ImageLookup(
+            entering_background_image = ImageLookup(
                 intermission_stats.current_level->enteringbggraphic_.c_str());
             tile_entering_background = false;
         }
     }
 
     background_image =
-        W_ImageLookup(gd->background_.c_str(), kImageNamespaceFlat, ILF_Null);
+        ImageLookup(gd->background_.c_str(), kImageNamespaceFlat, kImageLookupNull);
 
     if (background_image)
         tile_background = true;
     else
     {
-        background_image = W_ImageLookup(gd->background_.c_str());
+        background_image = ImageLookup(gd->background_.c_str());
         tile_background  = false;
     }
 
     level_names[0] =
-        W_ImageLookup(intermission_stats.current_level->namegraphic_.c_str());
+        ImageLookup(intermission_stats.current_level->namegraphic_.c_str());
 
     if (intermission_stats.next_level)
         level_names[1] =
-            W_ImageLookup(intermission_stats.next_level->namegraphic_.c_str());
+            ImageLookup(intermission_stats.next_level->namegraphic_.c_str());
 
     if (gd->you_are_here_[0] != "")
-        you_are_here[0] = W_ImageLookup(gd->you_are_here_[0].c_str());
+        you_are_here[0] = ImageLookup(gd->you_are_here_[0].c_str());
     if (gd->you_are_here_[1] != "")
-        you_are_here[1] = W_ImageLookup(gd->you_are_here_[1].c_str());
-    if (gd->splatpic_ != "") splat[0] = W_ImageLookup(gd->splatpic_.c_str());
+        you_are_here[1] = ImageLookup(gd->you_are_here_[1].c_str());
+    if (gd->splatpic_ != "") splat[0] = ImageLookup(gd->splatpic_.c_str());
 
-    wiminus = W_ImageLookup("WIMINUS");  //!!! FIXME: use the style!
-    percent = W_ImageLookup("WIPCOUNT");
-    colon   = W_ImageLookup("WICOLON");
+    wiminus = ImageLookup("WIMINUS");  //!!! FIXME: use the style!
+    percent = ImageLookup("WIPCOUNT");
+    colon   = ImageLookup("WICOLON");
 
-    finished = W_ImageLookup("WIF");
-    entering = W_ImageLookup("WIENTER");
-    kills    = W_ImageLookup("WIOSTK", kImageNamespaceGraphic, ILF_Null);
-    // kills = W_ImageLookup("WIOSTK");
-    secret = W_ImageLookup("WIOSTS");  // "scrt"
+    finished = ImageLookup("WIF");
+    entering = ImageLookup("WIENTER");
+    kills    = ImageLookup("WIOSTK", kImageNamespaceGraphic, kImageLookupNull);
+    // kills = ImageLookup("WIOSTK");
+    secret = ImageLookup("WIOSTS");  // "scrt"
 
     single_player_secret =
-        W_ImageLookup("WISCRT2", kImageNamespaceGraphic, ILF_Null);  // "secret"
+        ImageLookup("WISCRT2", kImageNamespaceGraphic, kImageLookupNull);  // "secret"
 
-    items      = W_ImageLookup("WIOSTI", kImageNamespaceGraphic, ILF_Null);
-    frags      = W_ImageLookup("WIFRGS");
-    time_image = W_ImageLookup("WITIME", kImageNamespaceGraphic, ILF_Null);
-    sucks      = W_ImageLookup("WISUCKS", kImageNamespaceGraphic, ILF_Null);
-    par        = W_ImageLookup("WIPAR", kImageNamespaceGraphic, ILF_Null);
-    killers    = W_ImageLookup("WIKILRS");  // "killers" (vertical)
+    items      = ImageLookup("WIOSTI", kImageNamespaceGraphic, kImageLookupNull);
+    frags      = ImageLookup("WIFRGS");
+    time_image = ImageLookup("WITIME", kImageNamespaceGraphic, kImageLookupNull);
+    sucks      = ImageLookup("WISUCKS", kImageNamespaceGraphic, kImageLookupNull);
+    par        = ImageLookup("WIPAR", kImageNamespaceGraphic, kImageLookupNull);
+    killers    = ImageLookup("WIKILRS");  // "killers" (vertical)
 
-    victims = W_ImageLookup("WIVCTMS");  // "victims" (horiz)
+    victims = ImageLookup("WIVCTMS");  // "victims" (horiz)
 
-    total = W_ImageLookup("WIMSTT");
-    face  = W_ImageLookup("STFST01");  // your face
+    total = ImageLookup("WIMSTT");
+    face  = ImageLookup("STFST01");  // your face
 
-    dead_face = W_ImageLookup("STFDEAD0");  // dead face
+    dead_face = ImageLookup("STFDEAD0");  // dead face
 
     for (i = 0; i < 10; i++)
     {
         // numbers 0-9
         char name[64];
         sprintf(name, "WINUM%d", i);
-        digits[i] = W_ImageLookup(name);
+        digits[i] = ImageLookup(name);
     }
 
     for (i = 0; i < world_intermission.total_animations_; i++)
@@ -2014,7 +2014,7 @@ static void LoadData(void)
                              .info->pic_.c_str());
 
             world_intermission.animations_[i].frames_[j].image =
-                W_ImageLookup(world_intermission.animations_[i]
+                ImageLookup(world_intermission.animations_[i]
                                   .frames_[j]
                                   .info->pic_.c_str());
         }
@@ -2060,7 +2060,7 @@ void IntermissionStart(void)
         InitCoopStats();
 
     // -AJA- 1999/10/22: background cameras.
-    background_camera_mo = nullptr;
+    background_camera_map_object = nullptr;
 
     if (gd->bg_camera_ != "")
     {
@@ -2070,7 +2070,7 @@ void IntermissionStart(void)
                                 gd->bg_camera_.c_str()) != 0)
                 continue;
 
-            background_camera_mo = mo;
+            background_camera_map_object = mo;
 
             // we don't want to see players
             for (int pnum = 0; pnum < MAXPLAYERS; pnum++)

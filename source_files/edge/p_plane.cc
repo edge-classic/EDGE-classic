@@ -70,8 +70,8 @@ static float HEIGHT(Sector *sec, bool is_ceiling)
     return sec->floor_height;
 }
 
-static const image_c *SECPIC(Sector *sec, bool is_ceiling,
-                             const image_c *new_image)
+static const Image *SECPIC(Sector *sec, bool is_ceiling,
+                             const Image *new_image)
 {
     if (new_image)
     {
@@ -83,7 +83,7 @@ static const image_c *SECPIC(Sector *sec, bool is_ceiling,
             if (new_image)
             {
                 FlatDefinition *current_flatdef =
-                    flatdefs.Find(new_image->name.c_str());
+                    flatdefs.Find(new_image->name_.c_str());
                 if (current_flatdef)
                 {
                     sec->bob_depth  = current_flatdef->bob_depth_;
@@ -100,7 +100,7 @@ static const image_c *SECPIC(Sector *sec, bool is_ceiling,
             }
         }
 
-        if (new_image == skyflatimage) R_ComputeSkyHeights();
+        if (new_image == skyflatimage) ComputeSkyHeights();
     }
 
     return is_ceiling ? sec->ceiling.image : sec->floor.image;
@@ -664,13 +664,6 @@ static PlaneMover *P_SetupSectorAction(Sector                   *sector,
         start += def->other_;
     }
 
-#if 0  // DEBUG
-    LogDebug("SEC_ACT: %d type %d %s start %1.0f dest %1.0f\n",
-                 sector - level_sectors, def->type, 
-                 def->is_ceiling_ ? "CEIL" : "FLOOR", 
-                 start, dest);
-#endif
-
     if (def->prewait_)
     {
         plane->direction          = kPlaneDirectionWait;
@@ -791,7 +784,7 @@ static PlaneMover *P_SetupSectorAction(Sector                   *sector,
         else if (def->tex_ != "")
         {
             plane->new_image =
-                W_ImageLookup(def->tex_.c_str(), kImageNamespaceFlat);
+                ImageLookup(def->tex_.c_str(), kImageNamespaceFlat);
             SECPIC(sector, def->is_ceiling_, plane->new_image);
         }
 
@@ -917,7 +910,7 @@ static PlaneMover *P_SetupSectorAction(Sector                   *sector,
     else if (def->tex_ != "")
     {
         plane->new_image =
-            W_ImageLookup(def->tex_.c_str(), kImageNamespaceFlat);
+            ImageLookup(def->tex_.c_str(), kImageNamespaceFlat);
     }
 
     AddActivePlane(plane);
@@ -946,7 +939,7 @@ static bool EV_BuildOneStair(Sector *sec, const PlaneMoverDefinition *def)
     Sector   *tsec;
     float       stairsize = def->dest_;
 
-    const image_c *image = sec->floor.image;
+    const Image *image = sec->floor.image;
 
     // new floor thinker
 
@@ -1214,7 +1207,7 @@ bool RunDonutSpecial(Sector *s1, SoundEffect *sfx[4])
             if (s2->floor.image)
             {
                 FlatDefinition *current_flatdef =
-                    flatdefs.Find(s2->floor.image->name.c_str());
+                    flatdefs.Find(s2->floor.image->name_.c_str());
                 if (current_flatdef)
                 {
                     s2->bob_depth  = current_flatdef->bob_depth_;
@@ -1419,7 +1412,7 @@ bool RunSlidingDoor(Line *door, Line *act_line, MapObject *thing,
     smov->info        = &special->s_;
     smov->line        = door;
     smov->opening     = 0.0f;
-    smov->line_length = R_PointToDist(0, 0, door->delta_x, door->delta_y);
+    smov->line_length = RendererPointToDistance(0, 0, door->delta_x, door->delta_y);
     smov->target      = smov->line_length * smov->info->distance_;
 
     smov->direction            = kPlaneDirectionUp;

@@ -168,7 +168,7 @@ void UnlockAudio(void);
 //
 // -ACB- 1999/09/20 Moved from I_Video.H
 
-class DisplayMode;
+struct DisplayMode;
 
 // Initialises the graphics system.  This should be called by
 // SystemStartup(), the main code never calls this function

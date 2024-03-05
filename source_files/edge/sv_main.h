@@ -41,7 +41,7 @@
 #include "e_player.h"
 #include "p_local.h"
 
-class image_c;
+class Image;
 class MapDefinition;
 
 //
@@ -303,7 +303,7 @@ typedef struct
     int skill;
     int netgame;
 
-    const image_c *sky_image; // -AJA- added 2003/12/19
+    const Image *sky_image; // -AJA- added 2003/12/19
 
     const char *description;
     const char *desc_date;

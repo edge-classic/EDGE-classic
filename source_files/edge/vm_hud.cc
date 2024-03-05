@@ -50,9 +50,9 @@ extern void VM_SetFloat(coal::vm_c *vm, const char *mod, const char *name, doubl
 extern void VM_CallFunction(coal::vm_c *vm, const char *name);
 
 // Needed for color functions
-extern ImageData *ReadAsEpiBlock(image_c *rim);
+extern ImageData *ReadAsEpiBlock(Image *rim);
 
-extern ImageData *R_PalettisedToRGB(ImageData *src, const uint8_t *palette, int opacity);
+extern ImageData *RgbFromPalettised(ImageData *src, const uint8_t *palette, int opacity);
 
 player_t *ui_hud_who = nullptr;
 
@@ -330,7 +330,7 @@ static void HD_draw_image(coal::vm_c *vm, int argc)
     float       y    = *vm->AccessParam(1);
     const char *name = vm->AccessParamString(2);
 
-    const image_c *img = W_ImageLookup(name, kImageNamespaceGraphic);
+    const Image *img = ImageLookup(name, kImageNamespaceGraphic);
 
     double *noOffset = vm->AccessParam(3);
 
@@ -356,7 +356,7 @@ static void HD_scroll_image(coal::vm_c *vm, int argc)
     float       sx   = *vm->AccessParam(3);
     float       sy   = *vm->AccessParam(4);
 
-    const image_c *img      = W_ImageLookup(name, kImageNamespaceGraphic);
+    const Image *img      = ImageLookup(name, kImageNamespaceGraphic);
     double        *noOffset = vm->AccessParam(5);
 
     if (img)
@@ -385,7 +385,7 @@ static void HD_stretch_image(coal::vm_c *vm, int argc)
 
     const char *name = vm->AccessParamString(4);
 
-    const image_c *img      = W_ImageLookup(name, kImageNamespaceGraphic);
+    const Image *img      = ImageLookup(name, kImageNamespaceGraphic);
     double        *noOffset = vm->AccessParam(5);
 
     if (img)
@@ -413,7 +413,7 @@ static void HD_tile_image(coal::vm_c *vm, int argc)
     float offset_x = *vm->AccessParam(5);
     float offset_y = *vm->AccessParam(6);
 
-    const image_c *img = W_ImageLookup(name, kImageNamespaceTexture);
+    const Image *img = ImageLookup(name, kImageNamespaceTexture);
 
     if (img)
     {
@@ -771,11 +771,11 @@ static void HD_get_average_color(coal::vm_c *vm, int argc)
     double        *from_y       = vm->AccessParam(3);
     double        *to_y         = vm->AccessParam(4);
     const uint8_t    *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
+    const Image *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette_);
     ImageData *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+        RgbFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     RGBAColor col = tmp_img_data->AverageColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                                to_y ? *to_y : 1000000);
     rgb[0] = epi::GetRGBARed(col);
@@ -796,11 +796,11 @@ static void HD_get_lightest_color(coal::vm_c *vm, int argc)
     double        *from_y       = vm->AccessParam(3);
     double        *to_y         = vm->AccessParam(4);
     const uint8_t    *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
+    const Image *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette_);
     ImageData *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+        RgbFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     RGBAColor col = tmp_img_data->LightestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                                 to_y ? *to_y : 1000000);
     rgb[0] = epi::GetRGBARed(col);
@@ -821,11 +821,11 @@ static void HD_get_darkest_color(coal::vm_c *vm, int argc)
     double        *from_y       = vm->AccessParam(3);
     double        *to_y         = vm->AccessParam(4);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
+    const Image *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette_);
     ImageData *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+        RgbFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     RGBAColor col = tmp_img_data->DarkestColor(from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                                to_y ? *to_y : 1000000);
     rgb[0] = epi::GetRGBARed(col);
@@ -846,11 +846,11 @@ static void HD_get_average_hue(coal::vm_c *vm, int argc)
     double        *from_y       = vm->AccessParam(3);
     double        *to_y         = vm->AccessParam(4);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
+    const Image *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette_);
     ImageData *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
+        RgbFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     uint8_t *temp_rgb = new uint8_t[3];
     tmp_img_data->AverageHue(temp_rgb, nullptr, from_x ? *from_x : -1, to_x ? *to_x : 1000000, from_y ? *from_y : -1,
                              to_y ? *to_y : 1000000);
@@ -871,12 +871,12 @@ static void HD_get_average_top_border_color(coal::vm_c *vm, int argc)
     double         rgb[3];
     const char    *name         = vm->AccessParamString(0);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
+    const Image *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette_);
     ImageData *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, tmp_img_c->actual_h - 1, tmp_img_c->actual_h);
+        RgbFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, tmp_img_c->actual_height_ - 1, tmp_img_c->actual_height_);
     rgb[0] = epi::GetRGBARed(col);
     rgb[1] = epi::GetRGBAGreen(col);
     rgb[2] = epi::GetRGBABlue(col);
@@ -890,12 +890,12 @@ static void HD_get_average_bottom_border_color(coal::vm_c *vm, int argc)
     double         rgb[3];
     const char    *name         = vm->AccessParamString(0);
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
-    const image_c *tmp_img_c    = W_ImageLookup(name, kImageNamespaceGraphic, 0);
-    if (tmp_img_c->source_palette >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette);
+    const Image *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
+    if (tmp_img_c->source_palette_ >= 0)
+        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette_);
     ImageData *tmp_img_data =
-        R_PalettisedToRGB(ReadAsEpiBlock((image_c *)tmp_img_c), what_palette, tmp_img_c->opacity);
-    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_w, 0, 1);
+        RgbFromPalettised(ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
+    RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_, 0, 1);
     rgb[0] = epi::GetRGBARed(col);
     rgb[1] = epi::GetRGBAGreen(col);
     rgb[2] = epi::GetRGBABlue(col);
@@ -951,7 +951,7 @@ static void HD_get_image_width(coal::vm_c *vm, int argc)
     (void)argc;
     const char *name = vm->AccessParamString(0);
 
-    const image_c *img = W_ImageLookup(name, kImageNamespaceGraphic);
+    const Image *img = ImageLookup(name, kImageNamespaceGraphic);
 
     if (img)
     {
@@ -970,7 +970,7 @@ static void HD_get_image_height(coal::vm_c *vm, int argc)
     (void)argc;
     const char *name = vm->AccessParamString(0);
 
-    const image_c *img = W_ImageLookup(name, kImageNamespaceGraphic);
+    const Image *img = ImageLookup(name, kImageNamespaceGraphic);
 
     if (img)
     {

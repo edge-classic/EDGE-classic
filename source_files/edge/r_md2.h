@@ -16,30 +16,28 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __R_MD2_H__
-#define __R_MD2_H__
+#pragma once
 
 #include "file.h"
-
-#include "r_defs.h"
 #include "p_mobj.h"
+#include "r_defs.h"
 
 // opaque handle for rest of the engine
-class md2_model_c;
+class Md2Model;
 
-md2_model_c *MD2_LoadModel(epi::File *f);
-md2_model_c *MD3_LoadModel(epi::File *f);
+Md2Model *Md2Load(epi::File *f);
+Md2Model *Md3Load(epi::File *f);
 
-short MD2_FindFrame(md2_model_c *md, const char *name);
+short Md2FindFrame(Md2Model *md, const char *name);
 
-void MD2_RenderModel(md2_model_c *md, const image_c *skin_img, bool is_weapon, int frame1, int frame2, float lerp,
-                     float x, float y, float z, MapObject *mo, RegionProperties *props, float scale, float aspect,
-                     float bias, int rotation);
+void Md2RenderModel(Md2Model *md, const Image *skin_img, bool is_weapon,
+                    int frame1, int frame2, float lerp, float x, float y,
+                    float z, MapObject *mo, RegionProperties *props,
+                    float scale, float aspect, float bias, int rotation);
 
-void MD2_RenderModel_2D(md2_model_c *md, const image_c *skin_img, int frame, float x, float y, float xscale,
-                        float yscale, const MapObjectDefinition *info);
-
-#endif /* __R_MD2_H__ */
+void Md2RenderModel2d(Md2Model *md, const Image *skin_img, int frame, float x,
+                      float y, float xscale, float yscale,
+                      const MapObjectDefinition *info);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -288,7 +288,7 @@ static void PL_is_using(coal::vm_c *vm, int argc)
 //
 static void PL_is_zoomed(coal::vm_c *vm, int argc)
 {
-    vm->ReturnFloat(viewiszoomed ? 1 : 0);
+    vm->ReturnFloat(view_is_zoomed ? 1 : 0);
 }
 
 // player.is_action1()
@@ -876,7 +876,7 @@ static void PL_hurt_dir(coal::vm_c *vm, int argc)
         MapObject *badguy = ui_player_who->attacker;
         MapObject *pmo    = ui_player_who->mo;
 
-        BAMAngle diff = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle_;
+        BAMAngle diff = RendererPointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle_;
 
         if (diff >= kBAMAngle45 && diff <= kBAMAngle135)
         {
@@ -902,7 +902,7 @@ static void PL_hurt_angle(coal::vm_c *vm, int argc)
         MapObject *badguy = ui_player_who->attacker;
         MapObject *pmo    = ui_player_who->mo;
 
-        BAMAngle real_a = R_PointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
+        BAMAngle real_a = RendererPointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
 
         value = epi::DegreesFromBAM(real_a);
 
@@ -965,7 +965,7 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
     // If no 3D floors, just return the flat
     if (ui_player_who->mo->subsector_->sector->extrafloor_used == 0)
     {
-        vm->ReturnString(ui_player_who->mo->subsector_->sector->floor.image->name.c_str());
+        vm->ReturnString(ui_player_who->mo->subsector_->sector->floor.image->name_.c_str());
     }
     else
     {
@@ -977,12 +977,12 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
         {
             if (player_floor_height + 1 > ef->top_height)
             {
-                vm->ReturnString(ef->top->image->name.c_str());
+                vm->ReturnString(ef->top->image->name_.c_str());
                 return;
             }
         }
         // Fallback if nothing else satisfies these conditions
-        vm->ReturnString(ui_player_who->mo->subsector_->sector->floor.image->name.c_str());
+        vm->ReturnString(ui_player_who->mo->subsector_->sector->floor.image->name_.c_str());
     }
 }
 

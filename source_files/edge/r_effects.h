@@ -23,47 +23,22 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __RGL_FX_H__
-#define __RGL_FX_H__
+#pragma once
 
 #include "e_player.h"
-#include "r_image.h"
 
-class screen_effect_def_c;
-
-class screen_fx_slot_c
-{
-  public:
-    screen_fx_slot_c();
-    ~screen_fx_slot_c()
-    {
-    }
-
-    const screen_effect_def_c *def;
-
-    bool active;
-
-    // number of powerup this is linked to, or -1 if none
-    int power_link;
-
-    // tics remaining (not used if linked)
-    int time;
-};
-
-void RGL_RainbowEffect(player_t *player);
-void RGL_ColourmapEffect(player_t *player);
-void RGL_PaletteEffect(player_t *player);
+void RendererRainbowEffect(player_t *player);
+void RendererColourmapEffect(player_t *player);
+void RendererPaletteEffect(player_t *player);
 
 //
 //  FUZZY Emulation
 //
 
-extern const image_c *fuzz_image;
+extern const Image *fuzz_image;
 
-void FUZZ_Update(void);
-void FUZZ_Adjust(HMM_Vec2 *tc, MapObject *mo);
-
-#endif /* __RGL_FX_H__ */
+void FuzzUpdate(void);
+void FuzzAdjust(HMM_Vec2 *tc, MapObject *mo);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -21,8 +21,8 @@
 
 #include "r_defs.h"
 
-class md2_model_c;
-class mdl_model_c;
+class Md2Model;
+class MdlModel;
 
 #define MAX_MODEL_SKINS 10
 
@@ -32,10 +32,10 @@ class modeldef_c
     // four letter model name (e.g. "TROO").
     char name[6];
 
-    md2_model_c *md2_model;
-    mdl_model_c *mdl_model;
+    Md2Model *md2_model;
+    MdlModel *mdl_model;
 
-    const image_c *skins[MAX_MODEL_SKINS];
+    const Image *skins[MAX_MODEL_SKINS];
 
   public:
     modeldef_c(const char *_prefix);

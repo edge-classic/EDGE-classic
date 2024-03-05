@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "math_color.h"
+#include "sokol_color.h"
 
 constexpr uint8_t kEndoomLines = 25;
 

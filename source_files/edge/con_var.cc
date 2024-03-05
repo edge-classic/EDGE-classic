@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "con_main.h"
+#include "epi.h"
 #include "filesystem.h"
 #include "m_argv.h"
 #include "str_compare.h"

@@ -26,85 +26,77 @@
 // -KM- 1998/09/27 Dynamic Colourmaps
 //
 
-
-#include "i_defs_gl.h"
+#include "r_misc.h"
 
 #include <math.h>
 
+#include "AlmostEquals.h"
 #include "dm_defs.h"
 #include "dm_state.h"
 #include "e_main.h"
+#include "i_defs_gl.h"
 #include "m_misc.h"
 #include "n_network.h"
 #include "p_local.h"
 #include "p_mobj.h"
-#include "r_bsp.h"
 #include "r_colormap.h"
 #include "r_defs.h"
 #include "r_draw.h"
 #include "r_gldefs.h"
-#include "r_misc.h"
 #include "r_modes.h"
 #include "r_units.h"
 
-#include "AlmostEquals.h"
+EDGE_DEFINE_CONSOLE_VARIABLE(field_of_view, "90", kConsoleVariableFlagArchive)
 
-EDGE_DEFINE_CONSOLE_VARIABLE(r_fov, "90", kConsoleVariableFlagArchive)
+extern unsigned int root_node;
 
-int viewwindow_x;
-int viewwindow_y;
-int viewwindow_w;
-int viewwindow_h;
+int view_window_x;
+int view_window_y;
+int view_window_width;
+int view_window_height;
 
-BAMAngle viewangle     = 0;
-BAMAngle viewvertangle = 0;
+BAMAngle view_angle          = 0;
+BAMAngle view_vertical_angle = 0;
 
-HMM_Vec3 viewforward;
-HMM_Vec3 viewup;
-HMM_Vec3 viewright;
+HMM_Vec3 view_forward;
+HMM_Vec3 view_up;
+HMM_Vec3 view_right;
 
-BAMAngle normalfov, zoomedfov;
-bool    viewiszoomed = false;
+BAMAngle normal_field_of_view, zoomed_field_of_view;
+bool     view_is_zoomed = false;
 
 // increment every time a check is made
 int valid_count = 1;
 
 // just for profiling purposes
-int framecount;
+int render_frame_count;
 int line_count;
 
-Subsector         *viewsubsector;
-RegionProperties *view_props;
+Subsector        *view_subsector;
+RegionProperties *view_properties;
 
-float viewx;
-float viewy;
-float viewz;
+float view_x;
+float view_y;
+float view_z;
 
-float viewcos;
-float viewsin;
+float view_cosine;
+float view_sine;
 
-player_t *viewplayer;
+player_t *view_player;
 
-MapObject *background_camera_mo = nullptr;
+MapObject *background_camera_map_object = nullptr;
 
 //
 // precalculated math tables
 //
 
-BAMAngle viewanglebaseoffset;
-BAMAngle viewangleoffset;
-
 int reduce_flash = 0;
 
-int var_invul_fx;
+int invulnerability_effect;
 
-float *r_sintable             = new float[FUNCTABLE_SIZE];
-float *r_squaretable          = new float[FUNCTABLE_SIZE];
-float *r_sawtoothtable        = new float[FUNCTABLE_SIZE];
-float *r_inversesawtoothtable = new float[FUNCTABLE_SIZE];
-float *r_triangletable        = new float[FUNCTABLE_SIZE];
+float sine_table[kSineTableSize];
 
-void R2_FreeupBSP(void);
+void RendererFreeupBSP(void);
 
 //
 // To get a global angle from cartesian coordinates,
@@ -114,7 +106,7 @@ void R2_FreeupBSP(void);
 // tangent (slope) value which is looked up in the
 // tantoangle[] table.
 
-static float atan2_approx(float y, float x)
+static float ApproximateAtan2(float y, float x)
 {
     // http://pubs.opengroup.org/onlinepubs/009695399/functions/atan2.html
     // Volkan SALMA
@@ -122,7 +114,7 @@ static float atan2_approx(float y, float x)
     const float ONEQTR_PI = HMM_PI / 4.0;
     const float THRQTR_PI = 3.0 * HMM_PI / 4.0;
     float       r, angle;
-    float       abs_y = fabs(y) + 1e-10f; // kludge to prevent 0/0 condition
+    float       abs_y = fabs(y) + 1e-10f;  // kludge to prevent 0/0 condition
     if (x < 0.0f)
     {
         r     = (x + abs_y) / (abs_y - x);
@@ -135,39 +127,41 @@ static float atan2_approx(float y, float x)
     }
     angle += (0.1963f * r * r - 0.9817f) * r;
     if (y < 0.0f)
-        return (-angle); // negate if in quad III or IV
+        return (-angle);  // negate if in quad III or IV
     else
         return (angle);
 }
 //
-BAMAngle R_PointToAngle(float x1, float y1, float x, float y, bool precise)
+BAMAngle RendererPointToAngle(float x1, float y1, float x, float y,
+                              bool precise)
 {
     x -= x1;
     y -= y1;
 
-    if (precise) 
+    if (precise)
     {
-        return (AlmostEquals(x, 0.0f) && AlmostEquals(y, 0.0f)) ? 0 : epi::BAMFromDegrees(atan2(y, x) * (180 / HMM_PI));
+        return (AlmostEquals(x, 0.0f) && AlmostEquals(y, 0.0f))
+                   ? 0
+                   : epi::BAMFromDegrees(atan2(y, x) * (180 / HMM_PI));
     }
 
-    return epi::BAMFromDegrees(atan2_approx(y, x) * (180 / HMM_PI));
-
+    return epi::BAMFromDegrees(ApproximateAtan2(y, x) * (180 / HMM_PI));
 }
 
-float R_PointToDist(float x1, float y1, float x2, float y2)
+float RendererPointToDistance(float x1, float y1, float x2, float y2)
 {
     BAMAngle angle;
-    float   dx;
-    float   dy;
-    float   temp;
-    float   dist;
+    float    dx;
+    float    dy;
+    float    temp;
+    float    dist;
 
     dx = (float)fabs(x2 - x1);
     dy = (float)fabs(y2 - y1);
 
-    if (dx == 0.0f)
+    if (AlmostEquals(dx, 0.0f))
         return dy;
-    else if (dy == 0.0f)
+    else if (AlmostEquals(dy, 0.0f))
         return dx;
 
     if (dy > dx)
@@ -185,62 +179,33 @@ float R_PointToDist(float x1, float y1, float x2, float y2)
     return dist;
 }
 
-void R_InitShaderTables()
-{
-    for (int i = 0; i < FUNCTABLE_SIZE; i++)
-    {
-        r_sintable[i]             = sin(DEG2RAD(i * 360.0f / ((float)(FUNCTABLE_SIZE - 1))));
-        r_squaretable[i]          = (i < FUNCTABLE_SIZE / 2) ? 1.0f : -1.0f;
-        r_sawtoothtable[i]        = (float)i / FUNCTABLE_SIZE;
-        r_inversesawtoothtable[i] = 1.0f - r_sawtoothtable[i];
-
-        if (i < FUNCTABLE_SIZE / 2)
-        {
-            if (i < FUNCTABLE_SIZE / 4)
-            {
-                r_triangletable[i] = (float)i / (FUNCTABLE_SIZE / 4);
-            }
-            else
-            {
-                r_triangletable[i] = 1.0f - r_triangletable[i - FUNCTABLE_SIZE / 4];
-            }
-        }
-        else
-        {
-            r_triangletable[i] = -r_triangletable[i - FUNCTABLE_SIZE / 2];
-        }
-    }
-}
-
 //
 // Called once at startup, to initialise some rendering stuff.
 //
-void R_Init(void)
+void RendererStartup(void)
 {
     if (language["RefreshDaemon"])
         LogPrint("%s", language["RefreshDaemon"]);
     else
         LogPrint("Unknown Refresh Daemon");
 
-    R_InitShaderTables();
+    for (int i = 0; i < kSineTableSize; i++)
+    {
+        sine_table[i] =
+            HMM_SINF(HMM_AngleDeg(i * 360.0f / ((float)(kSineTableMask))));
+    }
 
-    framecount = 0;
-
-    // -AJA- 1999/07/01: Setup colour tables.
-    V_InitColour();
+    render_frame_count = 0;
 }
 
 //
 // Called at shutdown
 //
-void R_Shutdown(void)
-{
-    R2_FreeupBSP();
-}
+void RendererShutdown(void) { RendererFreeupBSP(); }
 
-Subsector *R_PointInSubsector(float x, float y)
+Subsector *RendererPointInSubsector(float x, float y)
 {
-    BspNode      *node;
+    BspNode     *node;
     int          side;
     unsigned int nodenum;
 
@@ -256,10 +221,10 @@ Subsector *R_PointInSubsector(float x, float y)
     return &level_subsectors[nodenum & ~NF_V5_SUBSECTOR];
 }
 
-RegionProperties *R_PointGetProps(Subsector *sub, float z)
+RegionProperties *RendererPointGetProps(Subsector *sub, float z)
 {
     Extrafloor *S, *L, *C;
-    float         floor_h;
+    float       floor_h;
 
     // traverse extrafloors upwards
 
@@ -286,11 +251,11 @@ RegionProperties *R_PointGetProps(Subsector *sub, float z)
         // ignore liquids in the middle of THICK solids, or below real
         // floor or above real ceiling
         //
-        if (C->bottom_height < floor_h || C->bottom_height > sub->sector->ceiling_height)
+        if (C->bottom_height < floor_h ||
+            C->bottom_height > sub->sector->ceiling_height)
             continue;
 
-        if (z < C->top_height)
-            return C->properties;
+        if (z < C->top_height) return C->properties;
 
         floor_h = C->top_height;
     }
@@ -302,108 +267,108 @@ RegionProperties *R_PointGetProps(Subsector *sub, float z)
 //----------------------------------------------------------------------------
 
 // large buffers for cache coherency vs allocating each on heap
-#define MAX_DRAW_THINGS  32768
-#define MAX_DRAW_FLOORS  32768
-#define MAX_DRAW_SEGS    65536
-#define MAX_DRAW_SUBS    65536
-#define MAX_DRAW_MIRRORS 512
+static constexpr uint16_t kMaximumDrawThings     = 32768;
+static constexpr uint16_t kMaximumDrawFloors     = 32768;
+static constexpr uint32_t kMaximumDrawSegs       = 65536;
+static constexpr uint32_t kMaximumDrawSubsectors = 65536;
+static constexpr uint16_t kMaximumDrawMirrors    = 512;
 
-static std::vector<drawthing_t>  drawthings;
-static std::vector<drawfloor_t>  drawfloors;
-static std::vector<drawseg_c>    drawsegs;
-static std::vector<drawsub_c>    drawsubs;
-static std::vector<drawmirror_c> drawmirrors;
+static std::vector<DrawThing>     draw_things;
+static std::vector<DrawFloor>     draw_floors;
+static std::vector<DrawSeg>       draw_segs;
+static std::vector<DrawSubsector> draw_subsectors;
+static std::vector<DrawMirror>    draw_mirrors;
 
-static int drawthing_pos;
-static int drawfloor_pos;
-static int drawseg_pos;
-static int drawsub_pos;
-static int drawmirror_pos;
+static int draw_thing_position;
+static int draw_floor_position;
+static int draw_seg_position;
+static int draw_subsector_position;
+static int draw_mirror_position;
 
 //
-// R2_InitUtil
+// RendererInitialize
 //
 // One-time initialisation routine.
 //
-void R2_InitUtil(void)
+void RendererInitialize(void)
 {
-    drawthings.resize(MAX_DRAW_THINGS);
-    drawfloors.resize(MAX_DRAW_FLOORS);
-    drawsegs.resize(MAX_DRAW_SEGS);
-    drawsubs.resize(MAX_DRAW_SUBS);
-    drawmirrors.resize(MAX_DRAW_MIRRORS);
+    draw_things.resize(kMaximumDrawThings);
+    draw_floors.resize(kMaximumDrawFloors);
+    draw_segs.resize(kMaximumDrawSegs);
+    draw_subsectors.resize(kMaximumDrawSubsectors);
+    draw_mirrors.resize(kMaximumDrawMirrors);
 }
 
 // bsp clear function
 
-void R2_ClearBSP(void)
+void RendererClearBsp(void)
 {
-    drawthing_pos  = 0;
-    drawfloor_pos  = 0;
-    drawseg_pos    = 0;
-    drawsub_pos    = 0;
-    drawmirror_pos = 0;
+    draw_thing_position     = 0;
+    draw_floor_position     = 0;
+    draw_seg_position       = 0;
+    draw_subsector_position = 0;
+    draw_mirror_position    = 0;
 }
 
-void R2_FreeupBSP(void)
+void RendererFreeupBSP(void)
 {
-    drawthings.clear();
-    drawfloors.clear();
-    drawsegs.clear();
-    drawsubs.clear();
-    drawmirrors.clear();
+    draw_things.clear();
+    draw_floors.clear();
+    draw_segs.clear();
+    draw_subsectors.clear();
+    draw_mirrors.clear();
 
-    R2_ClearBSP();
+    RendererClearBsp();
 }
 
-drawthing_t *R_GetDrawThing()
+DrawThing *RendererGetDrawThing()
 {
-    if (drawthing_pos >= MAX_DRAW_THINGS)
+    if (draw_thing_position >= kMaximumDrawThings)
     {
         FatalError("Max Draw Things Exceeded");
     }
 
-    return &drawthings[drawthing_pos++];
+    return &draw_things[draw_thing_position++];
 }
 
-drawfloor_t *R_GetDrawFloor()
+DrawFloor *RendererGetDrawFloor()
 {
-    if (drawfloor_pos >= MAX_DRAW_FLOORS)
+    if (draw_floor_position >= kMaximumDrawFloors)
     {
         FatalError("Max Draw Floors Exceeded");
     }
 
-    return &drawfloors[drawfloor_pos++];
+    return &draw_floors[draw_floor_position++];
 }
 
-drawseg_c *R_GetDrawSeg()
+DrawSeg *RendererGetDrawSeg()
 {
-    if (drawseg_pos >= MAX_DRAW_SEGS)
+    if (draw_seg_position >= kMaximumDrawSegs)
     {
         FatalError("Max Draw Segs Exceeded");
     }
 
-    return &drawsegs[drawseg_pos++];
+    return &draw_segs[draw_seg_position++];
 }
 
-drawsub_c *R_GetDrawSub()
+DrawSubsector *RendererGetDrawSub()
 {
-    if (drawsub_pos >= MAX_DRAW_SUBS)
+    if (draw_subsector_position >= kMaximumDrawSubsectors)
     {
         FatalError("Max Draw Subs Exceeded");
     }
 
-    return &drawsubs[drawsub_pos++];
+    return &draw_subsectors[draw_subsector_position++];
 }
 
-drawmirror_c *R_GetDrawMirror()
+DrawMirror *RendererGetDrawMirror()
 {
-    if (drawmirror_pos >= MAX_DRAW_MIRRORS)
+    if (draw_mirror_position >= kMaximumDrawMirrors)
     {
         FatalError("Max Draw Mirrors Exceeded");
     }
 
-    return &drawmirrors[drawmirror_pos++];
+    return &draw_mirrors[draw_mirror_position++];
 }
 
 //--- editor settings ---

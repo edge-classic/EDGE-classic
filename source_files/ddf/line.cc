@@ -37,6 +37,7 @@
 #include "AlmostEquals.h"
 #include "local.h"
 #include "str_util.h"
+#include "sokol_color.h"
 
 #undef DF
 #define DF DDF_FIELD

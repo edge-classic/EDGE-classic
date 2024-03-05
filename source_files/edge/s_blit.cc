@@ -30,7 +30,7 @@
 
 #include "i_system.h"
 #include "m_misc.h"
-#include "r_misc.h"  // R_PointToAngle
+#include "r_misc.h"  // RendererPointToAngle
 #include "p_local.h" // ApproximateDistance
 
 #include "s_sound.h"
@@ -83,7 +83,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE(sfx_volume, "0.15", kConsoleVariableFlagArchive)
 
 static bool sfxpaused = false;
 
-// these are analogous to viewx/y/z/angle
+// these are analogous to view_x/y/z/angle
 float   listen_x;
 float   listen_y;
 float   listen_z;
@@ -126,7 +126,7 @@ void mix_channel_c::ComputeVolume()
     {
         if (sound_device_stereo)
         {
-            BAMAngle angle = R_PointToAngle(listen_x, listen_y, pos->x, pos->y);
+            BAMAngle angle = RendererPointToAngle(listen_x, listen_y, pos->x, pos->y);
 
             // same equation from original DOOM
             sep = 0.5f - 0.38f * epi::BAMSin(angle - listen_angle);
@@ -470,11 +470,6 @@ void S_MixAllChannels(void *stream, int len)
 
     // clear mixer buffer
     memset(mix_buffer, 0, mix_buf_len * sizeof(int));
-
-#if 0 // TESTING.. TESTING..
-	mix_buffer[ 0] =  CLIP_THRESHHOLD;
-	mix_buffer[33] = -CLIP_THRESHHOLD;
-#endif
 
     // add each channel
     for (int i = 0; i < num_chan; i++)

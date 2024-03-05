@@ -67,7 +67,7 @@ struct Button
 {
     Line             *line;
     ButtonPosition      where;
-    const image_c      *button_image;
+    const Image      *button_image;
     int                 button_timer;
     struct SoundEffect *off_sound;
 };
@@ -106,7 +106,7 @@ struct PlaneMover
     bool sound_effect_started;
 
     int            new_special;
-    const image_c *new_image;
+    const Image *new_image;
 
     bool nuke_me = false;  // for changers already at their dest height
 };

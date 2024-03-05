@@ -188,29 +188,10 @@ static void DDF_FontGetType(const char *info, void *storage)
 
 static int FontParseCharacter(const char *buf)
 {
-#if 0  // the main parser strips out all the " quotes
-	while (epi::IsSpaceASCII(*buf))
-		buf++;
-
-	if (buf[0] == '"')
-	{
-		// check for escaped quote
-		if (buf[1] == '\\' && buf[2] == '"')
-			return '"';
-
-		return buf[1];
-	}
-#endif
-
     if (buf[0] > 0 && epi::IsDigitASCII(buf[0]) && epi::IsDigitASCII(buf[1]))
         return atoi(buf);
 
     return buf[0];
-
-#if 0
-	DDF_Error("Malformed character name: %s\n", buf);
-	return 0;
-#endif
 }
 
 //

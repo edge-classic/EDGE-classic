@@ -30,7 +30,7 @@
 #include "main.h"
 #include "p_mobj.h"
 
-class image_c;
+class Image;
 
 //
 // INTERNAL MAP TYPES
@@ -132,7 +132,7 @@ struct RegionProperties
 //
 struct MapSurface
 {
-    const image_c *image;
+    const Image *image;
 
     float translucency;
 

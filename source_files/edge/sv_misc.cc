@@ -775,7 +775,7 @@ void SV_SliderMoveFinaliseElems(void)
         SlidingDoorMover *smov = *SMI;
 
         if (smov->line)
-            smov->line_length = R_PointToDist(0, 0, smov->line->delta_x, smov->line->delta_y);
+            smov->line_length = RendererPointToDistance(0, 0, smov->line->delta_x, smov->line->delta_y);
     }
 }
 

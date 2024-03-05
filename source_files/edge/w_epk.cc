@@ -865,13 +865,13 @@ void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index)
                 LogDebug("- Adding image file in EPK: %s\n", entry.packpath.c_str());
 
                 if (dir_name == "textures")
-                    AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_textures);
+                    AddPackImageSmart(texname.c_str(), kImageSourceTxHi, entry.packpath.c_str(), real_textures);
                 else if (dir_name == "graphics")
-                    AddImage_SmartPack(texname.c_str(), IMSRC_Graphic, entry.packpath.c_str(), real_graphics);
+                    AddPackImageSmart(texname.c_str(), kImageSourceGraphic, entry.packpath.c_str(), real_graphics);
                 else if (dir_name == "flats")
-                    AddImage_SmartPack(texname.c_str(), IMSRC_Flat, entry.packpath.c_str(), real_flats);
+                    AddPackImageSmart(texname.c_str(), kImageSourceFlat, entry.packpath.c_str(), real_flats);
                 else if (dir_name == "skins") // Not sure about this still
-                    AddImage_SmartPack(texname.c_str(), IMSRC_Sprite, entry.packpath.c_str(), real_sprites);
+                    AddPackImageSmart(texname.c_str(), kImageSourceSprite, entry.packpath.c_str(), real_sprites);
             }
             else
             {
@@ -982,39 +982,39 @@ void Pack_ProcessHiresSubstitutions(pack_file_c *pack, int pack_index)
 
             LogDebug("- Adding Hires substitute from EPK: %s\n", entry.packpath.c_str());
 
-            const image_c *rim = W_ImageDoLookup(real_textures, texname.c_str(), -2);
-            if (rim && rim->source_type != IMSRC_User)
+            const Image *rim = ImageContainerLookup(real_textures, texname.c_str(), -2);
+            if (rim && rim->source_type_ != kImageSourceUser)
             {
-                AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_textures, rim);
+                AddPackImageSmart(texname.c_str(), kImageSourceTxHi, entry.packpath.c_str(), real_textures, rim);
                 continue;
             }
 
-            rim = W_ImageDoLookup(real_flats, texname.c_str(), -2);
-            if (rim && rim->source_type != IMSRC_User)
+            rim = ImageContainerLookup(real_flats, texname.c_str(), -2);
+            if (rim && rim->source_type_ != kImageSourceUser)
             {
-                AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_flats, rim);
+                AddPackImageSmart(texname.c_str(), kImageSourceTxHi, entry.packpath.c_str(), real_flats, rim);
                 continue;
             }
 
-            rim = W_ImageDoLookup(real_sprites, texname.c_str(), -2);
-            if (rim && rim->source_type != IMSRC_User)
+            rim = ImageContainerLookup(real_sprites, texname.c_str(), -2);
+            if (rim && rim->source_type_ != kImageSourceUser)
             {
-                AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_sprites, rim);
+                AddPackImageSmart(texname.c_str(), kImageSourceTxHi, entry.packpath.c_str(), real_sprites, rim);
                 continue;
             }
 
             // we do it this way to force the original graphic to be loaded
-            rim = W_ImageLookup(texname.c_str(), kImageNamespaceGraphic, ILF_Exact | ILF_Null);
+            rim = ImageLookup(texname.c_str(), kImageNamespaceGraphic, kImageLookupExact | kImageLookupNull);
 
-            if (rim && rim->source_type != IMSRC_User)
+            if (rim && rim->source_type_ != kImageSourceUser)
             {
-                AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_graphics, rim);
+                AddPackImageSmart(texname.c_str(), kImageSourceTxHi, entry.packpath.c_str(), real_graphics, rim);
                 continue;
             }
 
-            LogWarning("HIRES replacement '%s' has no counterpart.\n", texname.c_str());
+            LogDebug("HIRES replacement '%s' has no counterpart.\n", texname.c_str());
 
-            AddImage_SmartPack(texname.c_str(), IMSRC_TX_HI, entry.packpath.c_str(), real_textures);
+            AddPackImageSmart(texname.c_str(), kImageSourceTxHi, entry.packpath.c_str(), real_textures);
         }
         else
         {

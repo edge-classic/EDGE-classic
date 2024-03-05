@@ -57,7 +57,7 @@ void MapObjectTicker(bool extra_tic)
 
     // pause if in menu and at least one tic has been run
     if (!network_game && (menu_active || rts_menu_active) &&
-        !AlmostEquals(players[consoleplayer]->viewz, kFloatUnused))
+        !AlmostEquals(players[consoleplayer]->view_z, kFloatUnused))
     {
         return;
     }

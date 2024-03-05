@@ -214,7 +214,7 @@ enum HyperFlag
     kHyperFlagNoAutoaim = (1 << 13),
     // -AJA- 2010/06/13: used for RTS command of same name
     kHyperFlagWaitUntilDead = (1 << 14),
-    // -AJA- 2010/12/23: force models to tilt by viewangle
+    // -AJA- 2010/12/23: force models to tilt by view_angle
     kHyperFlagForceModelTilt = (1 << 15),
     // -Lobo- 2021/10/24: immortal flag
     kHyperFlagImmortal = (1 << 16),

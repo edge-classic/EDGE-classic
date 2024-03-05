@@ -176,9 +176,9 @@ typedef struct player_s
     // Determine POV, including viewpoint bobbing during movement.
     // Focal origin above r.z
     // will be kFloatUnused until the first think.
-    float viewz;
+    float view_z;
 
-    // Base height above floor for viewz.  Tracks `std_viewheight' but
+    // Base height above floor for view_z.  Tracks `std_viewheight' but
     // is different when squatting (i.e. after a fall).
     float viewheight;
 

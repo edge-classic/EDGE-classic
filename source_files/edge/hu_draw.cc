@@ -32,8 +32,6 @@
 #include "r_units.h"
 #include "str_compare.h"
 
-static constexpr int16_t kDummyClamp = 789;
-
 // FIXME: this seems totally arbitrary, review it.
 static constexpr float kVerticalSpacing = 2.0f;
 
@@ -74,6 +72,8 @@ static float margin_y;
 static float margin_x_multiplier;
 static float margin_y_multiplier;
 
+static constexpr float kDoomPixelAspectRatio = (5.0f/6.0f);
+
 std::vector<std::string> hud_overlays = {
     "",
     "OVERLAY_LINES_1X",
@@ -98,8 +98,8 @@ void HudSetCoordinateSystem(int width, int height)
 {
     if (width < 1 || height < 1) return;
 
-    float sw = (float)SCREENWIDTH;
-    float sh = (float)SCREENHEIGHT;
+    float sw = (float)current_screen_width;
+    float sh = (float)current_screen_height;
 
     /* compute Y stuff */
 
@@ -122,7 +122,7 @@ void HudSetCoordinateSystem(int width, int height)
     side_dist = side_dist * pixel_aspect_ratio.f_;
 
     // compensate for Doom's 5:6 pixel aspect ratio.
-    if (true) { side_dist = side_dist / DOOHMM_PIXEL_ASPECT; }
+    side_dist = side_dist / kDoomPixelAspectRatio;
 
     hud_x_left  = hud_x_middle - side_dist;
     hud_x_right = hud_x_middle + side_dist;
@@ -188,7 +188,7 @@ void HudPushScissor(float x1, float y1, float x2, float y2, bool expand)
     if (expand && x1 < 1 && x2 > hud_x_middle * 2 - 1)
     {
         x1 = 0;
-        x2 = SCREENWIDTH;
+        x2 = current_screen_width;
     }
     else
     {
@@ -213,8 +213,8 @@ void HudPushScissor(float x1, float y1, float x2, float y2, bool expand)
         sx1 = HMM_MAX(sx1, 0);
         sy1 = HMM_MAX(sy1, 0);
 
-        sx2 = HMM_MIN(sx2, SCREENWIDTH);
-        sy2 = HMM_MIN(sy2, SCREENHEIGHT);
+        sx2 = HMM_MIN(sx2, current_screen_width);
+        sy2 = HMM_MIN(sy2, current_screen_height);
     }
     else
     {
@@ -291,32 +291,32 @@ void HudCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
 
     now = (phase + hud_tic / 100.0f * frequency);
 
-    if (swirling_flats == SWIRL_PARALLAX)
+    if (swirling_flats == kLiquidSwirlParallax)
     {
         frequency *= 2;
         if (hud_thick_liquid)
         {
             if (hud_swirl_pass == 1)
             {
-                *tx = *tx + r_sintable[(int)((x * 1.0 / 128 * 0.125 + now) *
-                                             FUNCTABLE_SIZE) &
-                                       (FUNCTABLE_MASK)] *
+                *tx = *tx + sine_table[(int)((x * 1.0 / 128 * 0.125 + now) *
+                                             kSineTableSize) &
+                                       (kSineTableMask)] *
                                 amplitude;
-                *ty = *ty + r_sintable[(int)((y * 1.0 / 128 * 0.125 + now) *
-                                             FUNCTABLE_SIZE) &
-                                       (FUNCTABLE_MASK)] *
+                *ty = *ty + sine_table[(int)((y * 1.0 / 128 * 0.125 + now) *
+                                             kSineTableSize) &
+                                       (kSineTableMask)] *
                                 amplitude;
             }
             else
             {
                 amplitude = 0;
-                *tx = *tx - r_sintable[(int)((x * 1.0 / 128 * 0.125 + now) *
-                                             FUNCTABLE_SIZE) &
-                                       (FUNCTABLE_MASK)] *
+                *tx = *tx - sine_table[(int)((x * 1.0 / 128 * 0.125 + now) *
+                                             kSineTableSize) &
+                                       (kSineTableMask)] *
                                 amplitude;
-                *ty = *ty - r_sintable[(int)((y * 1.0 / 128 * 0.125 + now) *
-                                             FUNCTABLE_SIZE) &
-                                       (FUNCTABLE_MASK)] *
+                *ty = *ty - sine_table[(int)((y * 1.0 / 128 * 0.125 + now) *
+                                             kSineTableSize) &
+                                       (kSineTableMask)] *
                                 amplitude;
             }
         }
@@ -325,25 +325,25 @@ void HudCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
             if (hud_swirl_pass == 1)
             {
                 amplitude = 0.025;
-                *tx = *tx + r_sintable[(int)((x * 1.0 / 128 * 0.125 + now) *
-                                             FUNCTABLE_SIZE) &
-                                       (FUNCTABLE_MASK)] *
+                *tx = *tx + sine_table[(int)((x * 1.0 / 128 * 0.125 + now) *
+                                             kSineTableSize) &
+                                       (kSineTableMask)] *
                                 amplitude;
-                *ty = *ty + r_sintable[(int)((y * 1.0 / 128 * 0.125 + now) *
-                                             FUNCTABLE_SIZE) &
-                                       (FUNCTABLE_MASK)] *
+                *ty = *ty + sine_table[(int)((y * 1.0 / 128 * 0.125 + now) *
+                                             kSineTableSize) &
+                                       (kSineTableMask)] *
                                 amplitude;
             }
             else
             {
                 amplitude = 0.015;
-                *tx = *tx - r_sintable[(int)((x * 1.0 / 128 * 0.125 + now) *
-                                             FUNCTABLE_SIZE) &
-                                       (FUNCTABLE_MASK)] *
+                *tx = *tx - sine_table[(int)((x * 1.0 / 128 * 0.125 + now) *
+                                             kSineTableSize) &
+                                       (kSineTableMask)] *
                                 amplitude;
-                *ty = *ty - r_sintable[(int)((y * 1.0 / 128 * 0.125 + now) *
-                                             FUNCTABLE_SIZE) &
-                                       (FUNCTABLE_MASK)] *
+                *ty = *ty - sine_table[(int)((y * 1.0 / 128 * 0.125 + now) *
+                                             kSineTableSize) &
+                                       (kSineTableMask)] *
                                 amplitude;
             }
         }
@@ -351,12 +351,12 @@ void HudCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
     else
     {
         *tx = *tx +
-              r_sintable[(int)((x * 1.0 / 128 * 0.125 + now) * FUNCTABLE_SIZE) &
-                         (FUNCTABLE_MASK)] *
+              sine_table[(int)((x * 1.0 / 128 * 0.125 + now) * kSineTableSize) &
+                         (kSineTableMask)] *
                   amplitude;
         *ty = *ty +
-              r_sintable[(int)((y * 1.0 / 128 * 0.125 + now) * FUNCTABLE_SIZE) &
-                         (FUNCTABLE_MASK)] *
+              sine_table[(int)((y * 1.0 / 128 * 0.125 + now) * kSineTableSize) &
+                         (kSineTableMask)] *
                   amplitude;
     }
 }
@@ -364,7 +364,7 @@ void HudCalcTurbulentTexCoords(float *tx, float *ty, float x, float y)
 //----------------------------------------------------------------------------
 
 void HudRawImage(float hx1, float hy1, float hx2, float hy2,
-                 const image_c *image, float tx1, float ty1, float tx2,
+                 const Image *image, float tx1, float ty1, float tx2,
                  float ty2, float alpha, RGBAColor text_col,
                  const Colormap *palremap, float sx, float sy, char ch)
 {
@@ -375,7 +375,7 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
 
     if (x1 >= x2 || y1 >= y2) return;
 
-    if (x2 < 0 || x1 > SCREENWIDTH || y2 < 0 || y1 > SCREENHEIGHT) return;
+    if (x2 < 0 || x1 > current_screen_width || y2 < 0 || y1 > current_screen_height) return;
 
     sg_color sgcol = sg_white;
 
@@ -388,14 +388,14 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
         do_whiten = true;
     }
 
-    if (epi::StringCaseCompareASCII(image->name, "FONT_DUMMY_IMAGE") == 0)
+    if (epi::StringCaseCompareASCII(image->name_, "FONT_DUMMY_IMAGE") == 0)
     {
         if (current_font->definition_->type_ == kFontTypeTrueType)
         {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glEnable(GL_TEXTURE_2D);
-            if ((var_smoothing &&
+            if ((image_smoothing &&
                  current_font->definition_->truetype_smoothing_ ==
                      FontDefinition::kTrueTypeSmoothOnDemand) ||
                 current_font->definition_->truetype_smoothing_ ==
@@ -412,7 +412,7 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
             glEnable(GL_ALPHA_TEST);
             glEnable(GL_BLEND);
             glEnable(GL_TEXTURE_2D);
-            if ((var_smoothing &&
+            if ((image_smoothing &&
                  current_font->definition_->truetype_smoothing_ ==
                      FontDefinition::kTrueTypeSmoothOnDemand) ||
                 current_font->definition_->truetype_smoothing_ ==
@@ -451,23 +451,23 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
         return;
     }
 
-    // GLuint tex_id = W_ImageCache(image, true, palremap, do_whiten);
-    GLuint tex_id = W_ImageCache(image, true, nullptr, do_whiten);
+    // GLuint tex_id = ImageCache(image, true, palremap, do_whiten);
+    GLuint tex_id = ImageCache(image, true, nullptr, do_whiten);
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex_id);
 
-    if (alpha >= 0.99f && image->opacity == OPAC_Solid)
+    if (alpha >= 0.99f && image->opacity_ == kOpacitySolid)
         glDisable(GL_ALPHA_TEST);
     else
     {
         glEnable(GL_ALPHA_TEST);
 
-        if (!(alpha < 0.11f || image->opacity == OPAC_Complex))
+        if (!(alpha < 0.11f || image->opacity_ == kOpacityComplex))
             glAlphaFunc(GL_GREATER, alpha * 0.66f);
     }
 
-    if (image->opacity == OPAC_Complex || alpha < 0.99f) glEnable(GL_BLEND);
+    if (image->opacity_ == kOpacityComplex || alpha < 0.99f) glEnable(GL_BLEND);
 
     GLint old_s_clamp = kDummyClamp;
     GLint old_t_clamp = kDummyClamp;
@@ -483,7 +483,7 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
         HudCalcScrollTexCoords(sx, sy, &tx1, &ty1, &tx2, &ty2);
     }
 
-    if (epi::StringCaseCompareASCII(image->name,
+    if (epi::StringCaseCompareASCII(image->name_,
                                     hud_overlays.at(r_overlay.d_)) == 0)
     {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -492,13 +492,13 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
 
     bool hud_swirl = false;
 
-    if (image->liquid_type > LIQ_None && swirling_flats > SWIRL_SMMU)
+    if (image->liquid_type_ > kLiquidImageNone && swirling_flats > kLiquidSwirlSmmu)
     {
         hud_swirl_pass = 1;
         hud_swirl      = true;
     }
 
-    if (image->liquid_type == LIQ_Thick) hud_thick_liquid = true;
+    if (image->liquid_type_ == kLiquidImageThick) hud_thick_liquid = true;
 
     glColor4f(sgcol.r, sgcol.g, sgcol.b, alpha);
 
@@ -524,7 +524,7 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
 
     glEnd();
 
-    if (hud_swirl && swirling_flats == SWIRL_PARALLAX)
+    if (hud_swirl && swirling_flats == kLiquidSwirlParallax)
     {
         hud_swirl_pass = 2;
         tx1 += 0.2;
@@ -571,7 +571,7 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
 }
 
 void HudRawFromTexID(float hx1, float hy1, float hx2, float hy2,
-                     unsigned int tex_id, image_opacity_e opacity, float tx1,
+                     unsigned int tex_id, ImageOpacity opacity, float tx1,
                      float ty1, float tx2, float ty2, float alpha)
 {
     int x1 = RoundToInteger(hx1);
@@ -581,22 +581,22 @@ void HudRawFromTexID(float hx1, float hy1, float hx2, float hy2,
 
     if (x1 >= x2 || y1 >= y2) return;
 
-    if (x2 < 0 || x1 > SCREENWIDTH || y2 < 0 || y1 > SCREENHEIGHT) return;
+    if (x2 < 0 || x1 > current_screen_width || y2 < 0 || y1 > current_screen_height) return;
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex_id);
 
-    if (alpha >= 0.99f && opacity == OPAC_Solid)
+    if (alpha >= 0.99f && opacity == kOpacitySolid)
         glDisable(GL_ALPHA_TEST);
     else
     {
         glEnable(GL_ALPHA_TEST);
 
-        if (!(alpha < 0.11f || opacity == OPAC_Complex))
+        if (!(alpha < 0.11f || opacity == kOpacityComplex))
             glAlphaFunc(GL_GREATER, alpha * 0.66f);
     }
 
-    if (opacity == OPAC_Complex || alpha < 0.99f) glEnable(GL_BLEND);
+    if (opacity == kOpacityComplex || alpha < 0.99f) glEnable(GL_BLEND);
 
     glColor4f(1.0f, 1.0f, 1.0f, alpha);
 
@@ -625,7 +625,7 @@ void HudRawFromTexID(float hx1, float hy1, float hx2, float hy2,
 
 void HudStretchFromImageData(float x, float y, float w, float h,
                              const ImageData *img, unsigned int tex_id,
-                             image_opacity_e opacity)
+                             ImageOpacity opacity)
 {
     if (current_x_alignment >= 0)
         x -= w / (current_x_alignment == 0 ? 2.0f : 1.0f);
@@ -644,7 +644,7 @@ void HudStretchFromImageData(float x, float y, float w, float h,
                     (float)img->used_height_ / img->height_, current_alpha);
 }
 
-void HudStretchImage(float x, float y, float w, float h, const image_c *img,
+void HudStretchImage(float x, float y, float w, float h, const Image *img,
                      float sx, float sy, const Colormap *colmap)
 {
     if (current_x_alignment >= 0)
@@ -653,8 +653,8 @@ void HudStretchImage(float x, float y, float w, float h, const image_c *img,
     if (current_y_alignment >= 0)
         y -= h / (current_y_alignment == 0 ? 2.0f : 1.0f);
 
-    x -= IM_OFFSETX(img);
-    y -= IM_OFFSETY(img);
+    x -= img->ScaledOffsetX();
+    y -= img->ScaledOffsetY();
 
     float x1 = HudToRealCoordinatesX(x);
     float x2 = HudToRealCoordinatesX(x + w);
@@ -664,16 +664,16 @@ void HudStretchImage(float x, float y, float w, float h, const image_c *img,
 
     RGBAColor text_col = kRGBANoValue;
 
-    if (colmap) { text_col = V_GetFontColor(colmap); }
+    if (colmap) { text_col = GetFontColor(colmap); }
 
-    // HudRawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img),
+    // HudRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(),
     // current_alpha, text_col, colmap, sx, sy);
-    HudRawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img),
+    HudRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(),
                 current_alpha, text_col, nullptr, sx, sy);
 }
 
 void HudStretchImageNoOffset(float x, float y, float w, float h,
-                             const image_c *img, float sx, float sy)
+                             const Image *img, float sx, float sy)
 {
     if (current_x_alignment >= 0)
         x -= w / (current_x_alignment == 0 ? 2.0f : 1.0f);
@@ -681,8 +681,8 @@ void HudStretchImageNoOffset(float x, float y, float w, float h,
     if (current_y_alignment >= 0)
         y -= h / (current_y_alignment == 0 ? 2.0f : 1.0f);
 
-    // x -= IM_OFFSETX(img);
-    // y -= IM_OFFSETY(img);
+    // x -= img->ScaledOffsetX();
+    // y -= img->ScaledOffsetY();
 
     float x1 = HudToRealCoordinatesX(x);
     float x2 = HudToRealCoordinatesX(x + w);
@@ -690,11 +690,11 @@ void HudStretchImageNoOffset(float x, float y, float w, float h,
     float y1 = HudToRealCoordinatesY(y + h);
     float y2 = HudToRealCoordinatesY(y);
 
-    HudRawImage(x1, y1, x2, y2, img, 0, 0, IM_RIGHT(img), IM_TOP(img),
+    HudRawImage(x1, y1, x2, y2, img, 0, 0, img->Right(), img->Top(),
                 current_alpha, kRGBANoValue, nullptr, sx, sy);
 }
 
-void HudDrawImageTitleWS(const image_c *title_image)
+void HudDrawImageTitleWS(const Image *title_image)
 {
     // Lobo: Widescreen titlescreen support.
     // In the case of titlescreens we will ignore any scaling
@@ -709,11 +709,11 @@ void HudDrawImageTitleWS(const image_c *title_image)
     // 1. Calculate scaling to apply.
 
     TempScale = 200;
-    TempScale /= title_image->actual_h;
+    TempScale /= title_image->actual_height_;
 
-    TempWidth = IM_WIDTH(title_image) *
+    TempWidth = title_image->ScaledWidthActual() *
                 TempScale;  // respect ASPECT in images.ddf at least
-    TempHeight = title_image->actual_h * TempScale;
+    TempHeight = title_image->actual_height_ * TempScale;
 
     // 2. Calculate centering on screen.
     CenterX = 160;
@@ -724,50 +724,50 @@ void HudDrawImageTitleWS(const image_c *title_image)
                     0.0, 0.0);
 }
 
-float HudGetImageWidth(const image_c *img)
+float HudGetImageWidth(const Image *img)
 {
-    return (IM_WIDTH(img) * current_scale);
+    return (img->ScaledWidthActual() * current_scale);
 }
 
-float HudGetImageHeight(const image_c *img)
+float HudGetImageHeight(const Image *img)
 {
-    return (IM_HEIGHT(img) * current_scale);
+    return (img->ScaledHeightActual() * current_scale);
 }
 
-void HudDrawImage(float x, float y, const image_c *img, const Colormap *colmap)
+void HudDrawImage(float x, float y, const Image *img, const Colormap *colmap)
 {
-    float w = IM_WIDTH(img) * current_scale;
-    float h = IM_HEIGHT(img) * current_scale;
+    float w = img->ScaledWidthActual() * current_scale;
+    float h = img->ScaledHeightActual() * current_scale;
 
     HudStretchImage(x, y, w, h, img, 0.0, 0.0, colmap);
 }
 
-void HudDrawImageNoOffset(float x, float y, const image_c *img)
+void HudDrawImageNoOffset(float x, float y, const Image *img)
 {
-    float w = IM_WIDTH(img) * current_scale;
-    float h = IM_HEIGHT(img) * current_scale;
+    float w = img->ScaledWidthActual() * current_scale;
+    float h = img->ScaledHeightActual() * current_scale;
 
     HudStretchImageNoOffset(x, y, w, h, img, 0.0, 0.0);
 }
 
-void HudScrollImage(float x, float y, const image_c *img, float sx, float sy)
+void HudScrollImage(float x, float y, const Image *img, float sx, float sy)
 {
-    float w = IM_WIDTH(img) * current_scale;
-    float h = IM_HEIGHT(img) * current_scale;
+    float w = img->ScaledWidthActual() * current_scale;
+    float h = img->ScaledHeightActual() * current_scale;
 
     HudStretchImage(x, y, w, h, img, sx, sy);
 }
 
-void HudScrollImageNoOffset(float x, float y, const image_c *img, float sx,
+void HudScrollImageNoOffset(float x, float y, const Image *img, float sx,
                             float sy)
 {
-    float w = IM_WIDTH(img) * current_scale;
-    float h = IM_HEIGHT(img) * current_scale;
+    float w = img->ScaledWidthActual() * current_scale;
+    float h = img->ScaledHeightActual() * current_scale;
 
     HudStretchImageNoOffset(x, y, w, h, img, sx, sy);
 }
 
-void HudTileImage(float x, float y, float w, float h, const image_c *img,
+void HudTileImage(float x, float y, float w, float h, const Image *img,
                   float offset_x, float offset_y)
 {
     if (current_x_alignment >= 0)
@@ -779,8 +779,8 @@ void HudTileImage(float x, float y, float w, float h, const image_c *img,
     offset_x /= w;
     offset_y /= -h;
 
-    float tx_scale = w / IM_TOTAL_WIDTH(img) / current_scale;
-    float ty_scale = h / IM_TOTAL_HEIGHT(img) / current_scale;
+    float tx_scale = w / img->ScaledWidthTotal() / current_scale;
+    float ty_scale = h / img->ScaledHeightTotal() / current_scale;
 
     float x1 = HudToRealCoordinatesX(x);
     float x2 = HudToRealCoordinatesX(x + w);
@@ -800,9 +800,9 @@ void HudSolidBox(float x1, float y1, float x2, float y2, RGBAColor col)
         y2 > hud_y_bottom - 1)
     {
         x1 = 0;
-        x2 = SCREENWIDTH;
+        x2 = current_screen_width;
         y1 = 0;
-        y2 = SCREENHEIGHT;
+        y2 = current_screen_height;
     }
     else
     {
@@ -968,19 +968,19 @@ float HudStringHeight(const char *str)
     return slines * HudFontHeight() + (slines - 1) * kVerticalSpacing;
 }
 
-void HudDrawChar(float left_x, float top_y, const image_c *img, char ch,
+void HudDrawChar(float left_x, float top_y, const Image *img, char ch,
                  float size)
 {
     float sc_x = current_scale;  // TODO * aspect;
     float sc_y = current_scale;
 
-    float x = left_x - IM_OFFSETX(img) * sc_x;
-    float y = top_y - IM_OFFSETY(img) * sc_y;
+    float x = left_x - img->ScaledOffsetX() * sc_x;
+    float y = top_y - img->ScaledOffsetY() * sc_y;
 
     float w, h;
     float tx1, tx2, ty1, ty2;
 
-    if (epi::StringCaseCompareASCII(img->name, "FONT_DUMMY_IMAGE") == 0)
+    if (epi::StringCaseCompareASCII(img->name_, "FONT_DUMMY_IMAGE") == 0)
     {
         if (current_font->definition_->type_ == kFontTypeTrueType)
         {
@@ -1040,16 +1040,16 @@ void HudDrawChar(float left_x, float top_y, const image_c *img, char ch,
         h      = (size > 0 ? size : current_font->image_character_height_) * sc_y;
         int px = (uint8_t)ch % 16;
         int py = 15 - (uint8_t)ch / 16;
-        tx1    = (px)*current_font->font_image_->ratio_w;
-        tx2    = (px + 1) * current_font->font_image_->ratio_w;
+        tx1    = (px)*current_font->font_image_->width_ratio_;
+        tx2    = (px + 1) * current_font->font_image_->width_ratio_;
         float char_texcoord_adjust =
             ((tx2 - tx1) - ((tx2 - tx1) * (current_font->CharWidth(ch) /
                                            current_font->image_character_width_))) /
             2;
         tx1 += char_texcoord_adjust;
         tx2 -= char_texcoord_adjust;
-        ty1 = (py)*current_font->font_image_->ratio_h;
-        ty2 = (py + 1) * current_font->font_image_->ratio_h;
+        ty1 = (py)*current_font->font_image_->height_ratio_;
+        ty2 = (py + 1) * current_font->font_image_->height_ratio_;
     }
 
     float x1 = HudToRealCoordinatesX(x);
@@ -1062,7 +1062,7 @@ void HudDrawChar(float left_x, float top_y, const image_c *img, char ch,
                 current_color, nullptr, 0.0, 0.0, ch);
 }
 
-void HudDrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img,
+void HudDrawEndoomChar(float left_x, float top_y, float FNX, const Image *img,
                        char ch, RGBAColor color1, RGBAColor color2, bool blink)
 {
     float w, h;
@@ -1074,10 +1074,10 @@ void HudDrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img,
 
     uint8_t px = character % 16;
     uint8_t py = 15 - character / 16;
-    tx1        = (px)*endoom_font->font_image_->ratio_w;
-    tx2        = (px + 1) * endoom_font->font_image_->ratio_w;
-    ty1        = (py)*endoom_font->font_image_->ratio_h;
-    ty2        = (py + 1) * endoom_font->font_image_->ratio_h;
+    tx1        = (px)*endoom_font->font_image_->width_ratio_;
+    tx2        = (px + 1) * endoom_font->font_image_->width_ratio_;
+    ty1        = (py)*endoom_font->font_image_->height_ratio_;
+    ty2        = (py + 1) * endoom_font->font_image_->height_ratio_;
 
     w = FNX;
     h = FNX * 2;
@@ -1104,16 +1104,16 @@ void HudDrawEndoomChar(float left_x, float top_y, float FNX, const image_c *img,
 
     glEnable(GL_TEXTURE_2D);
 
-    GLuint tex_id = W_ImageCache(img, true, (const Colormap *)0, true);
+    GLuint tex_id = ImageCache(img, true, (const Colormap *)0, true);
     glBindTexture(GL_TEXTURE_2D, tex_id);
 
-    if (img->opacity == OPAC_Solid)
+    if (img->opacity_ == kOpacitySolid)
         glDisable(GL_ALPHA_TEST);
     else
     {
         glEnable(GL_ALPHA_TEST);
 
-        if (img->opacity != OPAC_Complex) glAlphaFunc(GL_GREATER, 0.66f);
+        if (img->opacity_ != kOpacityComplex) glAlphaFunc(GL_GREATER, 0.66f);
     }
 
     glColor4f(sgcol.r, sgcol.g, sgcol.b, current_alpha);
@@ -1215,7 +1215,7 @@ void HudDrawText(float x, float y, const char *str, float size)
         {
             char ch = str[k];
 
-            const image_c *img = current_font->CharImage(ch);
+            const Image *img = current_font->CharImage(ch);
 
             if (img) HudDrawChar(cx, cy, img, ch, size);
 
@@ -1257,9 +1257,9 @@ void HudDrawQuitText(int line, float FNX, float FNY, float cx)
 {
     SYS_ASSERT(quit_lines[line]);
 
-    float cy = (float)SCREENHEIGHT - ((25 - line) * FNY);
+    float cy = (float)current_screen_height - ((25 - line) * FNY);
 
-    const image_c *img = endoom_font->font_image_;
+    const Image *img = endoom_font->font_image_;
 
     SYS_ASSERT(img);
 
@@ -1286,10 +1286,10 @@ void HudDrawQuitScreen()
     if (quit_lines[0])
     {
         float FNX =
-            HMM_MIN((float)SCREENWIDTH / 80.0f,
-                    320.0f / 80.0f * ((float)SCREENHEIGHT * 0.90f / 200.0f));
+            HMM_MIN((float)current_screen_width / 80.0f,
+                    320.0f / 80.0f * ((float)current_screen_height * 0.90f / 200.0f));
         float FNY = FNX * 2;
-        float cx  = HMM_MAX(0, (((float)SCREENWIDTH - (FNX * 80.0f)) / 2.0f));
+        float cx  = HMM_MAX(0, (((float)current_screen_width - (FNX * 80.0f)) / 2.0f));
         for (int i = 0; i < kEndoomLines; i++)
         {
             HudDrawQuitText(i, FNX, FNY, cx);
@@ -1332,7 +1332,7 @@ void HudRenderWorld(float x, float y, float w, float h, MapObject *camera,
     float x2 = xy[2];  // HudToRealCoordinatesX(x+w);
     float y2 = xy[3];  // HudToRealCoordinatesY(y+h);
 
-    R_Render(x1, y1, x2 - x1, y2 - y1, camera, full_height, expand_w);
+    RenderView(x1, y1, x2 - x1, y2 - y1, camera, full_height, expand_w);
 
     HudPopScissor();
 }

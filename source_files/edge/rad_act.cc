@@ -117,7 +117,7 @@ static void SetupTip(drawtip_t *cur)
         return;
 
     if (cur->color == kRGBANoValue)
-        cur->color = V_ParseFontColor(cur->p.color_name);
+        cur->color = ParseFontColor(cur->p.color_name);
 }
 
 static void SendTip(rad_trigger_t *R, s_tip_t *tip, int slot)
@@ -146,7 +146,7 @@ static void SendTip(rad_trigger_t *R, s_tip_t *tip, int slot)
         R->last_con_message = current->tip_text;
     }
 
-    current->tip_graphic = tip->tip_graphic ? W_ImageLookup(tip->tip_graphic) : nullptr;
+    current->tip_graphic = tip->tip_graphic ? ImageLookup(tip->tip_graphic) : nullptr;
     current->playsound   = tip->playsound ? true : false;
     // current->scale       = tip->tip_graphic ? tip->gfx_scale : 1.0f;
     current->scale     = tip->gfx_scale;
@@ -338,7 +338,7 @@ void RAD_ActTipProps(rad_trigger_t *R, void *param)
         current->p.left_just = tp->left_just;
 
     if (tp->color_name)
-        current->color = V_ParseFontColor(tp->color_name);
+        current->color = ParseFontColor(tp->color_name);
 
     if (tp->translucency >= 0)
     {
@@ -661,7 +661,7 @@ void RAD_ActPlaySound(rad_trigger_t *R, void *param)
     R->sound_effects_origin.y = ambient->y;
 
     if (AlmostEquals(ambient->z, ONFLOORZ))
-        R->sound_effects_origin.z = R_PointInSubsector(ambient->x, ambient->y)->sector->floor_height;
+        R->sound_effects_origin.z = RendererPointInSubsector(ambient->x, ambient->y)->sector->floor_height;
     else
         R->sound_effects_origin.z = ambient->z;
 
@@ -699,22 +699,22 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
 {
     s_changetex_t *ctex = (s_changetex_t *)param;
 
-    const image_c *image = nullptr;
+    const Image *image = nullptr;
 
     SYS_ASSERT(param);
 
     // find texture or flat
     if (ctex->what >= CHTEX_Floor)
-        image = W_ImageLookup(ctex->texname, kImageNamespaceFlat);
+        image = ImageLookup(ctex->texname, kImageNamespaceFlat);
     else
-        image = W_ImageLookup(ctex->texname, kImageNamespaceTexture);
+        image = ImageLookup(ctex->texname, kImageNamespaceTexture);
 
     if (ctex->what == CHTEX_Sky)
     {
         if (image)
         {
             sky_image = image;
-            RGL_UpdateSkyBoxTextures();
+            RendererUpdateSkyBoxTextures();
         }
         return;
     }
@@ -751,7 +751,7 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
                 // update sink/bob depth
                 if (image)
                 {
-                    FlatDefinition *current_flatdef = flatdefs.Find(image->name.c_str());
+                    FlatDefinition *current_flatdef = flatdefs.Find(image->name_.c_str());
                     if (current_flatdef)
                     {
                         tsec->bob_depth  = current_flatdef->bob_depth_;
@@ -775,7 +775,7 @@ void RAD_ActChangeTex(rad_trigger_t *R, void *param)
         }
 
         if (must_recompute_sky)
-            R_ComputeSkyHeights();
+            ComputeSkyHeights();
 
         return;
     }
@@ -912,7 +912,7 @@ void RAD_ActFogSector(rad_trigger_t *R, void *param)
             if (!t->leave_color)
             {
                 if (t->colmap_color)
-                    level_sectors[i].properties.fog_color = V_ParseFontColor(t->colmap_color);
+                    level_sectors[i].properties.fog_color = ParseFontColor(t->colmap_color);
                 else // should only happen with a CLEAR directive
                     level_sectors[i].properties.fog_color = kRGBANoValue;
             }

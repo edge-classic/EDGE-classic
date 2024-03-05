@@ -41,13 +41,13 @@ static int web_deferred_menu          = -1;
 static void WebSyncScreenSize(int width, int height)
 {
     SDL_SetWindowSize(program_window, width, height);
-    SCREENWIDTH  = (int)width;
-    SCREENHEIGHT = (int)height;
-    SCREENBITS   = 24;
-    DISPLAYMODE  = 0;
+    current_screen_width  = (int)width;
+    current_screen_height = (int)height;
+    current_screen_depth   = 24;
+    current_window_mode  = 0;
     DeterminePixelAspect();
 
-    R_SoftInitResolution();
+    SoftInitializeResolution();
 }
 
 void WebTick(void)

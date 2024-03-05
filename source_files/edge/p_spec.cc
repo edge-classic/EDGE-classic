@@ -220,16 +220,16 @@ float FindRaiseToTexture(Sector *sec)
 
             if (side->bottom.image)
             {
-                if (IM_HEIGHT(side->bottom.image) < minsize)
-                    minsize = IM_HEIGHT(side->bottom.image);
+                if (side->bottom.image->ScaledHeightActual() < minsize)
+                    minsize = side->bottom.image->ScaledHeightActual();
             }
 
             side = GetLineSidedef(secnum, i, 1);
 
             if (side->bottom.image)
             {
-                if (IM_HEIGHT(side->bottom.image) < minsize)
-                    minsize = IM_HEIGHT(side->bottom.image);
+                if (side->bottom.image->ScaledHeightActual() < minsize)
+                    minsize = side->bottom.image->ScaledHeightActual();
             }
         }
     }
@@ -396,7 +396,7 @@ static void AdjustStretchParts(Side *side, bool left, ScrollingPart parts,
 
     if (parts & (left ? kScrollingPartLeftUpper : kScrollingPartRightUpper))
     {
-        if (side->top.image) factor = IM_WIDTH(side->top.image) / linelength;
+        if (side->top.image) factor = side->top.image->ScaledWidthActual() / linelength;
 
         if (widthOnly) side->top.x_matrix.X *= factor;
 
@@ -405,7 +405,7 @@ static void AdjustStretchParts(Side *side, bool left, ScrollingPart parts,
     if (parts & (left ? kScrollingPartLeftMiddle : kScrollingPartRightMiddle))
     {
         if (side->middle.image)
-            factor = IM_WIDTH(side->middle.image) / linelength;
+            factor = side->middle.image->ScaledWidthActual() / linelength;
 
         if (widthOnly) side->middle.x_matrix.X *= factor;
 
@@ -414,7 +414,7 @@ static void AdjustStretchParts(Side *side, bool left, ScrollingPart parts,
     if (parts & (left ? kScrollingPartLeftLower : kScrollingPartRightLower))
     {
         if (side->bottom.image)
-            factor = IM_WIDTH(side->bottom.image) / linelength;
+            factor = side->bottom.image->ScaledWidthActual() / linelength;
 
         if (widthOnly) side->bottom.x_matrix.X *= factor;
 
@@ -462,9 +462,9 @@ static float ScaleFactorForPlane(MapSurface &surf, float line_len,
                                  bool use_height)
 {
     if (use_height)
-        return IM_HEIGHT(surf.image) / line_len;
+        return surf.image->ScaledHeightActual() / line_len;
     else
-        return IM_WIDTH(surf.image) / line_len;
+        return surf.image->ScaledWidthActual() / line_len;
 }
 
 static void P_EFTransferTrans(Sector *ctrl, Sector *sec, Line *line,
@@ -591,7 +591,7 @@ static void P_SpawnLineEffectDebris(Line *TheLine, const LineType *special)
 static void P_LineEffect(Line *target, Line *source,
                          const LineType *special)
 {
-    float length = R_PointToDist(0, 0, source->delta_x, source->delta_y);
+    float length = RendererPointToDistance(0, 0, source->delta_x, source->delta_y);
     float factor = 64.0 / length;
 
     if ((special->line_effect_ & kLineEffectTypeTranslucency) &&
@@ -773,7 +773,7 @@ static void P_LineEffect(Line *target, Line *source,
     if ((special->line_effect_ & kLineEffectTypeSkyTransfer) && source->side[0])
     {
         if (source->side[0]->top.image)
-            sky_image = W_ImageLookup(source->side[0]->top.image->name.c_str(),
+            sky_image = ImageLookup(source->side[0]->top.image->name_.c_str(),
                                       kImageNamespaceTexture);
     }
 
@@ -804,9 +804,9 @@ static void SectorEffect(Sector *target, Line *source,
 {
     if (!target) return;
 
-    float    length = R_PointToDist(0, 0, source->delta_x, source->delta_y);
+    float    length = RendererPointToDistance(0, 0, source->delta_x, source->delta_y);
     BAMAngle angle =
-        kBAMAngle360 - R_PointToAngle(0, 0, -source->delta_x, -source->delta_y);
+        kBAMAngle360 - RendererPointToAngle(0, 0, -source->delta_x, -source->delta_y);
     bool is_vert = fabs(source->delta_y) > fabs(source->delta_x);
 
     if (special->sector_effect_ & kSectorEffectTypeLightFloor)
@@ -1235,11 +1235,6 @@ static void DetailSlope_Ceiling(Line *ld)
     }
 
     ld->blocked = false;
-
-#if 0
-	// limit height difference to no more than this
-	z2 = HMM_MIN(z2, z1 + 16.0);
-#endif
 
     sec->ceiling_slope = DetailSlope_BoundIt(ld, sec, z2 - sec->ceiling_height, z1 - sec->ceiling_height);
 }
@@ -1792,7 +1787,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
     // breathing support
     // (Mouth is where the eye is !)
     //
-    float mouth_z = player->mo->z + player->viewz;
+    float mouth_z = player->mo->z + player->view_z;
 
     if ((special->special_flags_ & kSectorFlagAirLess) && mouth_z >= floor_height &&
         mouth_z <= ceiling_height && player->powers[kPowerTypeScuba] <= 0)
@@ -2361,13 +2356,13 @@ void UpdateSpecials(bool extra_tic)
                              (ld->side[0]->top.scroll.X +
                               ld->side[0]->top.net_scroll.X) *
                                  factor,
-                         ld->side[0]->top.image->actual_w);
+                         ld->side[0]->top.image->actual_width_);
                 ld->side[0]->top.offset.Y =
                     fmod(ld->side[0]->top.offset.Y +
                              (ld->side[0]->top.scroll.Y +
                               ld->side[0]->top.net_scroll.Y) *
                                  factor,
-                         ld->side[0]->top.image->actual_h);
+                         ld->side[0]->top.image->actual_height_);
                 ld->side[0]->top.net_scroll = {{0, 0}};
             }
             if (ld->side[0]->middle.image)
@@ -2377,13 +2372,13 @@ void UpdateSpecials(bool extra_tic)
                              (ld->side[0]->middle.scroll.X +
                               ld->side[0]->middle.net_scroll.X) *
                                  factor,
-                         ld->side[0]->middle.image->actual_w);
+                         ld->side[0]->middle.image->actual_width_);
                 ld->side[0]->middle.offset.Y =
                     fmod(ld->side[0]->middle.offset.Y +
                              (ld->side[0]->middle.scroll.Y +
                               ld->side[0]->middle.net_scroll.Y) *
                                  factor,
-                         ld->side[0]->middle.image->actual_h);
+                         ld->side[0]->middle.image->actual_height_);
                 ld->side[0]->middle.net_scroll = {{0, 0}};
             }
             if (ld->side[0]->bottom.image)
@@ -2393,13 +2388,13 @@ void UpdateSpecials(bool extra_tic)
                              (ld->side[0]->bottom.scroll.X +
                               ld->side[0]->bottom.net_scroll.X) *
                                  factor,
-                         ld->side[0]->bottom.image->actual_w);
+                         ld->side[0]->bottom.image->actual_width_);
                 ld->side[0]->bottom.offset.Y =
                     fmod(ld->side[0]->bottom.offset.Y +
                              (ld->side[0]->bottom.scroll.Y +
                               ld->side[0]->bottom.net_scroll.Y) *
                                  factor,
-                         ld->side[0]->bottom.image->actual_h);
+                         ld->side[0]->bottom.image->actual_height_);
                 ld->side[0]->bottom.net_scroll = {{0, 0}};
             }
         }
@@ -2413,13 +2408,13 @@ void UpdateSpecials(bool extra_tic)
                              (ld->side[1]->top.scroll.X +
                               ld->side[1]->top.net_scroll.X) *
                                  factor,
-                         ld->side[1]->top.image->actual_w);
+                         ld->side[1]->top.image->actual_width_);
                 ld->side[1]->top.offset.Y =
                     fmod(ld->side[1]->top.offset.Y +
                              (ld->side[1]->top.scroll.Y +
                               ld->side[1]->top.net_scroll.Y) *
                                  factor,
-                         ld->side[1]->top.image->actual_h);
+                         ld->side[1]->top.image->actual_height_);
                 ld->side[1]->top.net_scroll = {{0, 0}};
             }
             if (ld->side[1]->middle.image)
@@ -2429,13 +2424,13 @@ void UpdateSpecials(bool extra_tic)
                              (ld->side[1]->middle.scroll.X +
                               ld->side[1]->middle.net_scroll.X) *
                                  factor,
-                         ld->side[1]->middle.image->actual_w);
+                         ld->side[1]->middle.image->actual_width_);
                 ld->side[1]->middle.offset.Y =
                     fmod(ld->side[1]->middle.offset.Y +
                              (ld->side[1]->middle.scroll.Y +
                               ld->side[1]->middle.net_scroll.Y) *
                                  factor,
-                         ld->side[1]->middle.image->actual_h);
+                         ld->side[1]->middle.image->actual_height_);
                 ld->side[1]->middle.net_scroll = {{0, 0}};
             }
             if (ld->side[1]->bottom.image)
@@ -2445,13 +2440,13 @@ void UpdateSpecials(bool extra_tic)
                              (ld->side[1]->bottom.scroll.X +
                               ld->side[1]->bottom.net_scroll.X) *
                                  factor,
-                         ld->side[1]->bottom.image->actual_w);
+                         ld->side[1]->bottom.image->actual_width_);
                 ld->side[1]->bottom.offset.Y =
                     fmod(ld->side[1]->bottom.offset.Y +
                              (ld->side[1]->bottom.scroll.Y +
                               ld->side[1]->bottom.net_scroll.Y) *
                                  factor,
-                         ld->side[1]->bottom.image->actual_h);
+                         ld->side[1]->bottom.image->actual_height_);
                 ld->side[1]->bottom.net_scroll = {{0, 0}};
             }
         }
@@ -2552,19 +2547,19 @@ void UpdateSpecials(bool extra_tic)
         sec->floor.offset.X =
             fmod(sec->floor.offset.X +
                      (sec->floor.scroll.X + sec->floor.net_scroll.X) * factor,
-                 sec->floor.image->actual_w);
+                 sec->floor.image->actual_width_);
         sec->floor.offset.Y =
             fmod(sec->floor.offset.Y +
                      (sec->floor.scroll.Y + sec->floor.net_scroll.Y) * factor,
-                 sec->floor.image->actual_h);
+                 sec->floor.image->actual_height_);
         sec->ceiling.offset.X =
             fmod(sec->ceiling.offset.X +
                      (sec->ceiling.scroll.X + sec->ceiling.net_scroll.X) * factor,
-                 sec->ceiling.image->actual_w);
+                 sec->ceiling.image->actual_width_);
         sec->ceiling.offset.Y =
             fmod(sec->ceiling.offset.Y +
                      (sec->ceiling.scroll.Y + sec->ceiling.net_scroll.Y) * factor,
-                 sec->ceiling.image->actual_h);
+                 sec->ceiling.image->actual_height_);
         sec->properties.push.X = sec->properties.push.X + sec->properties.net_push.X;
         sec->properties.push.Y = sec->properties.push.Y + sec->properties.net_push.Y;
 

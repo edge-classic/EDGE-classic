@@ -489,19 +489,6 @@ static void SortSpriteLumps(wad_file_c *wad)
         return;
 
     std::sort(wad->sprite_lumps.begin(), wad->sprite_lumps.end(), Compare_lump_pred());
-
-#if 0 // DEBUGGING
-	{
-		int i, lump;
-    
-		for (i=0; i < wad->sprite_num; i++)
-		{
-			lump = wad->sprite_lumps[i];
-
-			LogDebug("Sorted sprite %d = lump %d [%s]\n", i, lump, lumpinfo[lump].name);
-		}
-	}
-#endif
 }
 
 //
@@ -1449,16 +1436,16 @@ void W_ReadUMAPINFOLumps(void)
 
                 if (Maps.maps[i].interbackdrop[0])
                 {
-                    const image_c *rim;
+                    const Image *rim;
 
                     std::string ibd_lookup = Maps.maps[i].interbackdrop;
                     epi::StringUpperASCII(ibd_lookup);
 
-                    rim = W_ImageLookup(ibd_lookup.c_str(), kImageNamespaceFlat, ILF_Null);
+                    rim = ImageLookup(ibd_lookup.c_str(), kImageNamespaceFlat, kImageLookupNull);
 
                     if (!rim) // no flat
                     {
-                        rim = W_ImageLookup(ibd_lookup.c_str(), kImageNamespaceGraphic, ILF_Null);
+                        rim = ImageLookup(ibd_lookup.c_str(), kImageNamespaceGraphic, kImageLookupNull);
 
                         if (!rim)                                     // no graphic
                             temp_level->f_end_.text_flat_ = "FLOOR4_8"; // should not happen
@@ -1559,15 +1546,15 @@ void W_ReadUMAPINFOLumps(void)
 
                             if (Maps.maps[i].interbackdrop[0])
                             {
-                                const image_c *rim;
+                                const Image *rim;
                                 std::string    ibd_lookup = Maps.maps[i].interbackdrop;
                                 epi::StringUpperASCII(ibd_lookup);
 
-                                rim = W_ImageLookup(ibd_lookup.c_str(), kImageNamespaceFlat, ILF_Null);
+                                rim = ImageLookup(ibd_lookup.c_str(), kImageNamespaceFlat, kImageLookupNull);
 
                                 if (!rim) // no flat
                                 {
-                                    rim = W_ImageLookup(ibd_lookup.c_str(), kImageNamespaceGraphic, ILF_Null);
+                                    rim = ImageLookup(ibd_lookup.c_str(), kImageNamespaceGraphic, kImageLookupNull);
 
                                     if (!rim)                                     // no graphic
                                         temp_level->f_end_.text_flat_ = "FLOOR4_8"; // should not happen
@@ -1589,15 +1576,15 @@ void W_ReadUMAPINFOLumps(void)
 
                             if (Maps.maps[i].interbackdrop[0])
                             {
-                                const image_c *rim;
+                                const Image *rim;
                                 std::string    ibd_lookup = Maps.maps[i].interbackdrop;
                                 epi::StringUpperASCII(ibd_lookup);
 
-                                rim = W_ImageLookup(ibd_lookup.c_str(), kImageNamespaceFlat, ILF_Null);
+                                rim = ImageLookup(ibd_lookup.c_str(), kImageNamespaceFlat, kImageLookupNull);
 
                                 if (!rim) // no flat
                                 {
-                                    rim = W_ImageLookup(ibd_lookup.c_str(), kImageNamespaceGraphic, ILF_Null);
+                                    rim = ImageLookup(ibd_lookup.c_str(), kImageNamespaceGraphic, kImageLookupNull);
 
                                     if (!rim)                                       // no graphic
                                         secret_level->f_pre_.text_flat_ = "FLOOR4_8"; // should not happen
@@ -2299,7 +2286,7 @@ void W_ProcessTX_HI(void)
         for (int i = 0; i < (int)wad->tx_lumps.size(); i++)
         {
             int lump = wad->tx_lumps[i];
-            W_ImageAddTX(lump, W_GetLumpName(lump), false);
+            ImageAddTxHx(lump, W_GetLumpName(lump), false);
         }
     }
 
@@ -2316,7 +2303,7 @@ void W_ProcessTX_HI(void)
             for (int i = 0; i < (int)df->wad->hires_lumps.size(); i++)
             {
                 int lump = df->wad->hires_lumps[i];
-                W_ImageAddTX(lump, W_GetLumpName(lump), true);
+                ImageAddTxHx(lump, W_GetLumpName(lump), true);
             }
         }
         else if (df->pack)
@@ -2442,18 +2429,18 @@ static const char *UserSkyBoxName(const char *base, int face)
 bool W_LoboDisableSkybox(const char *ActualSky)
 {
     bool           TurnOffSkyBox = false;
-    const image_c *tempImage;
+    const Image *tempImage;
     int            filenum = -1;
     int            lumpnum = -1;
 
     // First we should try for "SKY1_N" type names but only
     // use it if it's in a pwad i.e. a users skybox
-    tempImage = W_ImageLookup(UserSkyBoxName(ActualSky, 0), kImageNamespaceTexture, ILF_Null);
+    tempImage = ImageLookup(UserSkyBoxName(ActualSky, 0), kImageNamespaceTexture, kImageLookupNull);
     if (tempImage)
     {
-        if (tempImage->source_type == IMSRC_User) // from images.ddf
+        if (tempImage->source_type_ == kImageSourceUser) // from images.ddf
         {
-            lumpnum = W_CheckNumForName(tempImage->name.c_str());
+            lumpnum = W_CheckNumForName(tempImage->name_.c_str());
 
             if (lumpnum != -1)
             {
@@ -2465,8 +2452,8 @@ bool W_LoboDisableSkybox(const char *ActualSky)
                 // we only want pwads
                 if (data_files[filenum]->kind == FLKIND_PWad || data_files[filenum]->kind == FLKIND_PackWAD)
                 {
-                    LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name.c_str(),
-                             tempImage->source_type, lumpnum, filenum);
+                    LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name_.c_str(),
+                             tempImage->source_type_, lumpnum, filenum);
                     TurnOffSkyBox = false;
                     return TurnOffSkyBox; // get out of here
                 }
@@ -2476,23 +2463,23 @@ bool W_LoboDisableSkybox(const char *ActualSky)
 
     // If we're here then there are no user skyboxes.
     // Lets check for single texture ones instead.
-    tempImage = W_ImageLookup(ActualSky, kImageNamespaceTexture, ILF_Null);
+    tempImage = ImageLookup(ActualSky, kImageNamespaceTexture, kImageLookupNull);
 
     if (tempImage) // this should always be true but check just in case
     {
-        if (tempImage->source_type == IMSRC_Texture) // Normal doom format sky
+        if (tempImage->source_type_ == kImageSourceTexture) // Normal doom format sky
         {
-            filenum = W_GetFileForLump(tempImage->source.texture.tdef->patches->patch);
+            filenum = W_GetFileForLump(tempImage->source_.texture.tdef->patches->patch);
         }
-        else if (tempImage->source_type == IMSRC_User) // texture from images.ddf
+        else if (tempImage->source_type_ == kImageSourceUser) // texture from images.ddf
         {
-            LogDebug("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name.c_str(), tempImage->source_type);
+            LogDebug("SKYBOX: Sky is: %s. Type:%d  \n", tempImage->name_.c_str(), tempImage->source_type_);
             TurnOffSkyBox = true; // turn off or not? hmmm...
             return TurnOffSkyBox;
         }
         else // could be a png or jpg i.e. TX_ or HI_
         {
-            lumpnum = W_CheckNumForName(tempImage->name.c_str());
+            lumpnum = W_CheckNumForName(tempImage->name_.c_str());
             // lumpnum = tempImage->source.graphic.lump;
             if (lumpnum != -1)
             {
@@ -2500,7 +2487,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
             }
         }
 
-        if (tempImage->source_type == IMSRC_Dummy) // probably a skybox?
+        if (tempImage->source_type_ == kImageSourceDummy) // probably a skybox?
         {
             TurnOffSkyBox = false;
         }
@@ -2520,7 +2507,7 @@ bool W_LoboDisableSkybox(const char *ActualSky)
         }
     }
 
-    LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name.c_str(), tempImage->source_type,
+    LogDebug("SKYBOX: Sky is: %s. Type:%d lumpnum:%d filenum:%d \n", tempImage->name_.c_str(), tempImage->source_type_,
              lumpnum, filenum);
     return TurnOffSkyBox;
 }
@@ -2536,12 +2523,12 @@ bool W_IsLumpInPwad(const char *name)
         return false;
 
     // first check images.ddf
-    const image_c *tempImage;
+    const Image *tempImage;
 
-    tempImage = W_ImageLookup(name);
+    tempImage = ImageLookup(name);
     if (tempImage)
     {
-        if (tempImage->source_type == IMSRC_User) // from images.ddf
+        if (tempImage->source_type_ == kImageSourceUser) // from images.ddf
         {
             return true;
         }

@@ -74,7 +74,7 @@ class Font
     int   MaxFit(int pixel_w, const char *str);
     int   GetGlyphIndex(char ch);
 
-    const image_c *CharImage(char ch) const;
+    const Image *CharImage(char ch) const;
 
     PatchFontCache patch_font_cache_;
 
@@ -83,7 +83,7 @@ class Font
     float spacing_;
 
     // For IMAGE type
-    const image_c *font_image_;
+    const Image *font_image_;
     float          image_character_width_;
     float          image_character_height_;
     float         *individual_char_widths_;

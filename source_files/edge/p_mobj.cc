@@ -206,8 +206,8 @@ static void BounceOffWall(MapObject *mo, Line *wall)
     DividingLine div;
     float     dest_x, dest_y;
 
-    angle      = R_PointToAngle(0, 0, mo->momentum_.X, mo->momentum_.Y);
-    wall_angle = R_PointToAngle(0, 0, wall->delta_x, wall->delta_y);
+    angle      = RendererPointToAngle(0, 0, mo->momentum_.X, mo->momentum_.Y);
+    wall_angle = RendererPointToAngle(0, 0, wall->delta_x, wall->delta_y);
 
     diff = wall_angle - angle;
 
@@ -1073,7 +1073,7 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props,
         float x_diff = fabs(orig_x - mo->x);
         float y_diff = fabs(orig_y - mo->y);
 
-        float speed = APPROX_DIST2(x_diff, y_diff);
+        float speed = FastApproximateDistance(x_diff, y_diff);
 
         mo->player_->actual_speed =
             (mo->player_->actual_speed * 0.8 + speed * 0.2);
@@ -1115,7 +1115,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
     if (mo->player_ && mo->player_->mo == mo && mo->z < mo->floor_z_)
     {
         mo->player_->viewheight -= (mo->floor_z_ - mo->z);
-        mo->player_->viewz -= (mo->floor_z_ - mo->z);
+        mo->player_->view_z -= (mo->floor_z_ - mo->z);
         mo->player_->deltaviewheight =
             (mo->player_->std_viewheight - mo->player_->viewheight) / 8.0f;
     }
@@ -1942,7 +1942,7 @@ void RunMobjThinkers(bool extra_tic)
                 if (!distance_cull_thinkers.d_ ||
                     (game_tic / 2 %
                          RoundToInteger(
-                             1 + R_PointToDist(players[consoleplayer]->mo->x,
+                             1 + RendererPointToDistance(players[consoleplayer]->mo->x,
                                                players[consoleplayer]->mo->y,
                                                mo->x, mo->y) /
                                      1500) ==
@@ -1958,7 +1958,7 @@ void RunMobjThinkers(bool extra_tic)
                     else if (!distance_cull_thinkers.d_ ||
                              ((game_tic / 4) %
                                   RoundToInteger(
-                                      1 + R_PointToDist(
+                                      1 + RendererPointToDistance(
                                               players[consoleplayer]->mo->x,
                                               players[consoleplayer]->mo->y,
                                               mo->x, mo->y) /
@@ -1970,7 +1970,7 @@ void RunMobjThinkers(bool extra_tic)
                          ((game_tic / 4) %
                               RoundToInteger(
                                   1 +
-                                  R_PointToDist(players[consoleplayer]->mo->x,
+                                  RendererPointToDistance(players[consoleplayer]->mo->x,
                                                 players[consoleplayer]->mo->y,
                                                 mo->x, mo->y) /
                                       1500) ==
@@ -2086,7 +2086,7 @@ FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
     if (thing->subsector_->sector->extrafloor_used == 0)
     {
         current_flatdef =
-            flatdefs.Find(thing->subsector_->sector->floor.image->name.c_str());
+            flatdefs.Find(thing->subsector_->sector->floor.image->name_.c_str());
     }
     // Start from the lowest exfloor and check if the player is standing on it,
     // then return the control sector's flat
@@ -2099,13 +2099,13 @@ FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
         {
             if (AlmostEquals(player_floor_height, ef->top_height))
                 current_flatdef = flatdefs.Find(
-                    ef->extrafloor_line->front_sector->floor.image->name.c_str());
+                    ef->extrafloor_line->front_sector->floor.image->name_.c_str());
         }
         for (Extrafloor *ef = liquid_checker; ef; ef = ef->higher)
         {
             if (AlmostEquals(player_floor_height, ef->top_height))
                 current_flatdef = flatdefs.Find(
-                    ef->extrafloor_line->front_sector->floor.image->name.c_str());
+                    ef->extrafloor_line->front_sector->floor.image->name_.c_str());
         }
         // if (!current_flatdef)
         //	current_flatdef =

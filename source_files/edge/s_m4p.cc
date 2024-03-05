@@ -19,6 +19,7 @@
 
 
 #include "endianess.h"
+#include "epi.h"
 #include "file.h"
 #include "filesystem.h"
 #include "sound_gather.h"

@@ -31,50 +31,46 @@
 //   -  do some optimisation
 //
 
-
-#include "i_defs_gl.h"
-#include "i_system.h"
+#include "r_image.h"
 
 #include <limits.h>
+
 #include <list>
 
+#include "dm_data.h"
+#include "dm_defs.h"
+#include "dm_state.h"
+#include "e_main.h"
+#include "e_search.h"
 #include "endianess.h"
 #include "file.h"
 #include "filesystem.h"
 #include "flat.h"
-
+#include "hu_draw.h"  // hud_tic
+#include "i_defs_gl.h"
+#include "i_system.h"
 #include "im_data.h"
 #include "im_filter.h"
 #include "im_funcs.h"
-#include "str_util.h"
-#include "str_compare.h"
-#include "dm_data.h"
-#include "dm_defs.h"
-#include "dm_state.h"
-#include "e_search.h"
-#include "e_main.h"
-#include "hu_draw.h" // hud_tic
 #include "m_argv.h"
 #include "m_misc.h"
 #include "p_local.h"
+#include "r_colormap.h"
 #include "r_defs.h"
 #include "r_gldefs.h"
-#include "r_image.h"
 #include "r_misc.h"
 #include "r_sky.h"
 #include "r_texgl.h"
-#include "r_colormap.h"
-#include "w_texture.h"
+#include "str_compare.h"
+#include "str_util.h"
 #include "w_epk.h"
-#include "w_wad.h"
 #include "w_files.h"
+#include "w_texture.h"
+#include "w_wad.h"
 
-swirl_type_e swirling_flats = SWIRL_Vanilla;
+LiquidSwirl swirling_flats = kLiquidSwirlVanilla;
 
-// LIGHTING DEBUGGING
-// #define MAKE_TEXTURES_WHITE  1
-
-extern ImageData *ReadAsEpiBlock(image_c *rim);
+extern ImageData *ReadAsEpiBlock(Image *rim);
 
 extern epi::File *OpenUserFileOrLump(ImageDefinition *def);
 
@@ -87,250 +83,214 @@ extern bool erraticism_active;
 
 //
 // This structure is for "cached" images (i.e. ready to be used for
-// rendering), and is the non-opaque version of cached_image_t.  A
+// rendering), and is the non-opaque version of CachedImage.  A
 // single structure is used for all image modes (Block and OGL).
 //
 // Note: multiple modes and/or multiple mips of the same image_c can
 // indeed be present in the cache list at any one time.
 //
-typedef struct cached_image_s
+struct CachedImage
 {
     // parent image
-    image_c *parent;
+    Image *parent;
 
     // colormap used for translated image, normally nullptr
-    const Colormap *trans_map;
+    const Colormap *translation_map;
 
     // general hue of image (skewed towards pure colors)
     RGBAColor hue;
 
     // texture identifier within GL
-    GLuint tex_id;
+    GLuint texture_id;
 
     bool is_whitened;
-} cached_image_t;
+};
 
-image_c *W_ImageDoLookup(real_image_container_c &bucket, const char *name, int source_type
-                         /* use -2 to prevent USER override */)
+Image *ImageContainerLookup(std::list<Image *> &bucket, const char *name,
+                            int source_type
+                            /* use -2 to prevent USER override */)
 {
     // for a normal lookup, we want USER images to override
     if (source_type == -1)
     {
-        image_c *rim = W_ImageDoLookup(bucket, name, IMSRC_User); // recursion
-        if (rim)
-            return rim;
+        Image *rim =
+            ImageContainerLookup(bucket, name, kImageSourceUser);  // recursion
+        if (rim) return rim;
     }
 
-    real_image_container_c::reverse_iterator it;
+    std::list<Image *>::reverse_iterator it;
 
     // search backwards, we want newer image to override older ones
     for (it = bucket.rbegin(); it != bucket.rend(); it++)
     {
-        image_c *rim = *it;
+        Image *rim = *it;
 
-        if (source_type >= 0 && source_type != (int)rim->source_type)
-            continue;
+        if (source_type >= 0 && source_type != (int)rim->source_type_) continue;
 
-        if (epi::StringCaseCompareASCII(name, rim->name) == 0)
-            return rim;
+        if (epi::StringCaseCompareASCII(name, rim->name_) == 0) return rim;
     }
 
-    return nullptr; // not found
+    return nullptr;  // not found
 }
 
-static void do_Animate(real_image_container_c &bucket)
+static void do_Animate(std::list<Image *> &bucket)
 {
-    real_image_container_c::iterator it;
+    std::list<Image *>::iterator it;
 
     for (it = bucket.begin(); it != bucket.end(); it++)
     {
-        image_c *rim = *it;
+        Image *rim = *it;
 
-        if (rim->anim.speed == 0) // not animated ?
+        if (rim->animation_.speed == 0)  // not animated ?
             continue;
 
-        if (rim->liquid_type > LIQ_None && swirling_flats > SWIRL_Vanilla)
+        if (rim->liquid_type_ > kLiquidImageNone &&
+            swirling_flats > kLiquidSwirlVanilla)
             continue;
 
-        SYS_ASSERT(rim->anim.count > 0);
+        SYS_ASSERT(rim->animation_.count > 0);
 
-        rim->anim.count -= (!double_framerate.d_|| !(hud_tic & 1)) ? 1 : 0;
+        rim->animation_.count -=
+            (!double_framerate.d_ || !(hud_tic & 1)) ? 1 : 0;
 
-        if (rim->anim.count == 0 && rim->anim.cur->anim.next)
+        if (rim->animation_.count == 0 &&
+            rim->animation_.current->animation_.next)
         {
-            rim->anim.cur   = rim->anim.cur->anim.next;
-            rim->anim.count = rim->anim.speed;
+            rim->animation_.current = rim->animation_.current->animation_.next;
+            rim->animation_.count   = rim->animation_.speed;
         }
     }
 }
 
-#if 0
-static void do_DebugDump(real_image_container_c& bucket)
-{
-	LogDebug("{\n");
-
-	real_image_container_c::iterator it;
-
-	for (it = bucket.begin(); it != bucket.end(); it++)
-	{
-		image_c *rim = *it;
-	
-		LogDebug("   [%s] type %d: %dx%d < %dx%d\n",
-			rim->name, rim->source_type,
-			rim->actual_w, rim->actual_h,
-			rim->total_w, rim->total_h);
-	}
-
-	LogDebug("}\n");
-}
-#endif
-
-int var_smoothing = 1;
+int image_smoothing = 1;
 
 int hq2x_scaling = 1;
 
 // total set of images
-real_image_container_c real_graphics;
-real_image_container_c real_textures;
-real_image_container_c real_flats;
-real_image_container_c real_sprites;
+std::list<Image *> real_graphics;
+std::list<Image *> real_textures;
+std::list<Image *> real_flats;
+std::list<Image *> real_sprites;
 
-const image_c *skyflatimage;
+const Image *skyflatimage;
 
-static const image_c *dummy_sprite;
-static const image_c *dummy_skin;
-static const image_c *dummy_hom[2];
+static const Image *dummy_sprite;
+static const Image *dummy_skin;
+static const Image *dummy_hom[2];
 
 // image cache (actually a ring structure)
-static std::list<cached_image_t *> image_cache;
-
-// tiny ring helpers
-static inline void InsertAtTail(cached_image_t *rc)
-{
-    image_cache.push_back(rc);
-
-#if 0 // OLD WAY
-	SYS_ASSERT(rc != &imagecachehead);
-
-	rc->prev =  imagecachehead.prev;
-	rc->next = &imagecachehead;
-
-	rc->prev->next = rc;
-	rc->next->prev = rc;
-#endif
-}
-static inline void Unlink(cached_image_t *rc)
-{
-    // FIXME: Unlink
-    (void)rc;
-#if 0
-	SYS_ASSERT(rc != &imagecachehead);
-
-	rc->prev->next = rc->next;
-	rc->next->prev = rc->prev;
-#endif
-}
+static std::list<CachedImage *> image_cache;
 
 //----------------------------------------------------------------------------
 //
 //  IMAGE CREATION
 //
 
-image_c::image_c()
-    : actual_w(0), actual_h(0), total_w(0), total_h(0), ratio_w(0.0), ratio_h(0.0), source_type(IMSRC_Dummy),
-      source_palette(-1), cache()
+Image::Image()
+    : actual_width_(0),
+      actual_height_(0),
+      total_width_(0),
+      total_height_(0),
+      width_ratio_(0.0),
+      height_ratio_(0.0),
+      source_type_(kImageSourceDummy),
+      source_palette_(-1),
+      cache_()
 {
-    name = "_UNINIT_";
+    name_ = "_UNINIT_";
 
-    memset(&source, 0, sizeof(source));
-    memset(&anim, 0, sizeof(anim));
+    memset(&source_, 0, sizeof(source_));
+    memset(&animation_, 0, sizeof(animation_));
 }
 
-image_c::~image_c()
-{
-    /* TODO: image_c destructor */
+Image::~Image()
+{ /* TODO: image_c destructor */
 }
 
-void W_ImageStoreBlurred(const image_c *image, float sigma)
+void ImageStoreBlurred(const Image *image, float sigma)
 {
     // const override
-    image_c *img = (image_c *)image;
-    if (!img->blurred_version)
+    Image *img = (Image *)image;
+    if (!img->blurred_version_)
     {
-        img->blurred_version                 = new image_c;
-        img->blurred_version->name           = std::string(img->name).append("_BLURRED");
-        img->blurred_version->actual_h       = img->actual_h;
-        img->blurred_version->actual_w       = img->actual_w;
-        img->blurred_version->is_empty       = img->is_empty;
-        img->blurred_version->is_font        = img->is_font;
-        img->blurred_version->liquid_type    = img->liquid_type;
-        img->blurred_version->offset_x       = img->offset_x;
-        img->blurred_version->offset_y       = img->offset_y;
-        img->blurred_version->opacity        = img->opacity;
-        img->blurred_version->ratio_h        = img->ratio_h;
-        img->blurred_version->ratio_w        = img->ratio_w;
-        img->blurred_version->scale_x        = img->scale_x;
-        img->blurred_version->scale_y        = img->scale_y;
-        img->blurred_version->source         = img->source;
-        img->blurred_version->source_palette = img->source_palette;
-        img->blurred_version->source_type    = img->source_type;
-        img->blurred_version->total_h        = img->total_h;
-        img->blurred_version->total_w        = img->total_w;
-        img->blurred_version->anim.cur       = img->blurred_version;
-        img->blurred_version->anim.next      = nullptr;
-        img->blurred_version->anim.count     = 0;
-        img->blurred_version->anim.speed     = 0;
-        img->blurred_version->blur_sigma     = sigma;
+        img->blurred_version_ = new Image;
+        img->blurred_version_->name_ =
+            std::string(img->name_).append("_BLURRED");
+        img->blurred_version_->actual_height_     = img->actual_height_;
+        img->blurred_version_->actual_width_      = img->actual_width_;
+        img->blurred_version_->is_empty_          = img->is_empty_;
+        img->blurred_version_->is_font_           = img->is_font_;
+        img->blurred_version_->liquid_type_       = img->liquid_type_;
+        img->blurred_version_->offset_x_          = img->offset_x_;
+        img->blurred_version_->offset_y_          = img->offset_y_;
+        img->blurred_version_->opacity_           = img->opacity_;
+        img->blurred_version_->height_ratio_      = img->height_ratio_;
+        img->blurred_version_->width_ratio_       = img->width_ratio_;
+        img->blurred_version_->scale_x_           = img->scale_x_;
+        img->blurred_version_->scale_y_           = img->scale_y_;
+        img->blurred_version_->source_            = img->source_;
+        img->blurred_version_->source_palette_    = img->source_palette_;
+        img->blurred_version_->source_type_       = img->source_type_;
+        img->blurred_version_->total_height_      = img->total_height_;
+        img->blurred_version_->total_width_       = img->total_width_;
+        img->blurred_version_->animation_.current = img->blurred_version_;
+        img->blurred_version_->animation_.next    = nullptr;
+        img->blurred_version_->animation_.count   = 0;
+        img->blurred_version_->animation_.speed   = 0;
+        img->blurred_version_->blur_sigma_        = sigma;
     }
 }
 
-static image_c *NewImage(int width, int height, int opacity = OPAC_Unknown)
+static Image *NewImage(int width, int height, int opacity = kOpacityUnknown)
 {
-    image_c *rim = new image_c;
+    Image *rim = new Image;
 
-    rim->actual_w = width;
-    rim->actual_h = height;
-    rim->total_w  = W_MakeValidSize(width);
-    rim->total_h  = W_MakeValidSize(height);
-    rim->ratio_w  = (float)width / (float)rim->total_w * 0.0625;
-    rim->ratio_h  = (float)height / (float)rim->total_h * 0.0625;
-    rim->offset_x = rim->offset_y = 0;
-    rim->scale_x = rim->scale_y = 1.0f;
-    rim->opacity                = opacity;
-    rim->is_empty               = false;
-    rim->is_font                = false;
+    rim->actual_width_  = width;
+    rim->actual_height_ = height;
+    rim->total_width_   = MakeValidTextureSize(width);
+    rim->total_height_  = MakeValidTextureSize(height);
+    rim->width_ratio_   = (float)width / (float)rim->total_width_ * 0.0625;
+    rim->height_ratio_  = (float)height / (float)rim->total_height_ * 0.0625;
+    rim->offset_x_ = rim->offset_y_ = 0;
+    rim->scale_x_ = rim->scale_y_ = 1.0f;
+    rim->opacity_                 = opacity;
+    rim->is_empty_                = false;
+    rim->is_font_                 = false;
 
     // set initial animation info
-    rim->anim.cur   = rim;
-    rim->anim.next  = nullptr;
-    rim->anim.count = rim->anim.speed = 0;
+    rim->animation_.current = rim;
+    rim->animation_.next    = nullptr;
+    rim->animation_.count = rim->animation_.speed = 0;
 
-    rim->liquid_type = LIQ_None;
+    rim->liquid_type_ = kLiquidImageNone;
 
-    rim->swirled_game_tic = 0;
+    rim->swirled_game_tic_ = 0;
 
     return rim;
 }
 
-static image_c *CreateDummyImage(const char *name, RGBAColor fg, RGBAColor bg)
+static Image *CreateDummyImage(const char *name, RGBAColor fg, RGBAColor bg)
 {
-    image_c *rim;
+    Image *rim;
 
-    rim = NewImage(DUMMY_X, DUMMY_Y, (bg == TRANS_PIXEL) ? OPAC_Masked : OPAC_Solid);
+    rim = NewImage(
+        kDummyImageSize, kDummyImageSize,
+        (bg == kTransparentPixelIndex) ? kOpacityMasked : kOpacitySolid);
 
-    rim->name = name;
+    rim->name_ = name;
 
-    rim->source_type    = IMSRC_Dummy;
-    rim->source_palette = -1;
+    rim->source_type_    = kImageSourceDummy;
+    rim->source_palette_ = -1;
 
-    rim->source.dummy.fg = fg;
-    rim->source.dummy.bg = bg;
+    rim->source_.dummy.fg = fg;
+    rim->source_.dummy.bg = bg;
 
     return rim;
 }
 
-image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *packfile_name,
-                            real_image_container_c &container, const image_c *replaces)
+Image *AddPackImageSmart(const char *name, ImageSource type,
+                         const char         *packfile_name,
+                         std::list<Image *> &container, const Image *replaces)
 {
     /* used for Graphics, Sprites and TX/HI stuff */
     epi::File *f = W_OpenPackFile(packfile_name);
@@ -367,29 +327,30 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
         delete f;
 
         // check for Heretic/Hexen images, which are raw 320x200
-        if (packfile_len == 320 * 200 && type == IMSRC_Graphic)
+        if (packfile_len == 320 * 200 && type == kImageSourceGraphic)
         {
             width  = 320;
             height = 200;
             solid  = true;
-            type   = IMSRC_Raw320x200;
+            type   = kImageSourceRawBlock;
         }
         // check for AUTOPAGE images, which are raw 320x158
-        else if (packfile_len == 320 * 158 && type == IMSRC_Graphic)
+        else if (packfile_len == 320 * 158 && type == kImageSourceGraphic)
         {
             width  = 320;
             height = 158;
             solid  = true;
-            type   = IMSRC_Raw320x200;
+            type   = kImageSourceRawBlock;
         }
         // check for flats
-        else if ((packfile_len == 64 * 64 || packfile_len == 64 * 65 || packfile_len == 64 * 128) &&
-                 type == IMSRC_Graphic)
+        else if ((packfile_len == 64 * 64 || packfile_len == 64 * 65 ||
+                  packfile_len == 64 * 128) &&
+                 type == kImageSourceGraphic)
         {
             width  = 64;
             height = 64;
             solid  = true;
-            type   = IMSRC_Flat;
+            type   = kImageSourceFlat;
         }
         else
         {
@@ -411,9 +372,10 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
 
         is_patch = true;
     }
-    else // PNG, TGA or JPEG
+    else  // PNG, TGA or JPEG
     {
-        if (!ImageGetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
+        if (!ImageGetInfo(f, &width, &height, &bpp) || width <= 0 ||
+            height <= 0)
         {
             LogWarning("Error scanning image in '%s'\n", packfile_name);
             return nullptr;
@@ -426,42 +388,46 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
     }
 
     // create new image
-    image_c *rim = NewImage(width, height, solid ? OPAC_Solid : OPAC_Unknown);
+    Image *rim =
+        NewImage(width, height, solid ? kOpacitySolid : kOpacityUnknown);
 
-    rim->offset_x = offset_x;
-    rim->offset_y = offset_y;
+    rim->offset_x_ = offset_x;
+    rim->offset_y_ = offset_y;
 
-    rim->name = name;
+    rim->name_ = name;
 
-    FlatDefinition *current_flatdef = flatdefs.Find(rim->name.c_str());
+    FlatDefinition *current_flatdef = flatdefs.Find(rim->name_.c_str());
 
     if (current_flatdef && !current_flatdef->liquid_.empty())
     {
         if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THIN") == 0)
-            rim->liquid_type = LIQ_Thin;
-        else if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THICK") == 0)
-            rim->liquid_type = LIQ_Thick;
+            rim->liquid_type_ = kLiquidImageThin;
+        else if (epi::StringCaseCompareASCII(current_flatdef->liquid_,
+                                             "THICK") == 0)
+            rim->liquid_type_ = kLiquidImageThick;
     }
 
-    rim->source_type                  = type;
-    int pn_len                        = strlen(packfile_name);
-    rim->source.graphic.packfile_name = (char *)calloc(pn_len + 1, 1);
-    epi::CStringCopyMax(rim->source.graphic.packfile_name, packfile_name, pn_len);
-    rim->source.graphic.is_patch = is_patch;
-    rim->source.graphic.user_defined =
-        false; // This should only get set to true with DDFIMAGE specified DOOM format images
-    // rim->source_palette = W_GetPaletteForLump(lump);
-    rim->source_palette = -1;
+    rim->source_type_                  = type;
+    int pn_len                         = strlen(packfile_name);
+    rim->source_.graphic.packfile_name = (char *)calloc(pn_len + 1, 1);
+    epi::CStringCopyMax(rim->source_.graphic.packfile_name, packfile_name,
+                        pn_len);
+    rim->source_.graphic.is_patch = is_patch;
+    rim->source_.graphic.user_defined =
+        false;  // This should only get set to true with DDFIMAGE specified DOOM
+                // format images
+    // rim->source_palette_ = W_GetPaletteForLump(lump);
+    rim->source_palette_ = -1;
 
     if (replaces)
     {
-        rim->scale_x = replaces->actual_w / (float)width;
-        rim->scale_y = replaces->actual_h / (float)height;
+        rim->scale_x_ = replaces->actual_width_ / (float)width;
+        rim->scale_y_ = replaces->actual_height_ / (float)height;
 
-        if (!is_patch && replaces->source_type == IMSRC_Sprite)
+        if (!is_patch && replaces->source_type_ == kImageSourceSprite)
         {
-            rim->offset_x = replaces->offset_x;
-            rim->offset_y = replaces->offset_y;
+            rim->offset_x_ = replaces->offset_x_;
+            rim->offset_y_ = replaces->offset_y_;
         }
     }
 
@@ -470,8 +436,9 @@ image_c *AddImage_SmartPack(const char *name, image_source_e type, const char *p
     return rim;
 }
 
-static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, real_image_container_c &container,
-                               const image_c *replaces = nullptr)
+static Image *AddImage_Smart(const char *name, ImageSource type, int lump,
+                             std::list<Image *> &container,
+                             const Image        *replaces = nullptr)
 {
     /* used for Graphics, Sprites and TX/HI stuff */
 
@@ -501,7 +468,8 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
         // close it
         delete f;
 
-        LogWarning("Unsupported image format in '%s' lump\n", W_GetLumpName(lump));
+        LogWarning("Unsupported image format in '%s' lump\n",
+                   W_GetLumpName(lump));
         return nullptr;
     }
     else if (fmt == kImageUnknown)
@@ -510,28 +478,30 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
         delete f;
 
         // check for Heretic/Hexen images, which are raw 320x200
-        if (lump_len == 320 * 200 && type == IMSRC_Graphic)
+        if (lump_len == 320 * 200 && type == kImageSourceGraphic)
         {
             width  = 320;
             height = 200;
             solid  = true;
-            type   = IMSRC_Raw320x200;
+            type   = kImageSourceRawBlock;
         }
         // check for AUTOPAGE images, which are raw 320x158
-        else if (lump_len == 320 * 158 && type == IMSRC_Graphic)
+        else if (lump_len == 320 * 158 && type == kImageSourceGraphic)
         {
             width  = 320;
             height = 158;
             solid  = true;
-            type   = IMSRC_Raw320x200;
+            type   = kImageSourceRawBlock;
         }
         // check for flats
-        else if ((lump_len == 64 * 64 || lump_len == 64 * 65 || lump_len == 64 * 128) && type == IMSRC_Graphic)
+        else if ((lump_len == 64 * 64 || lump_len == 64 * 65 ||
+                  lump_len == 64 * 128) &&
+                 type == kImageSourceGraphic)
         {
             width  = 64;
             height = 64;
             solid  = true;
-            type   = IMSRC_Flat;
+            type   = kImageSourceFlat;
         }
         else
         {
@@ -553,11 +523,13 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
 
         is_patch = true;
     }
-    else // PNG, TGA or JPEG
+    else  // PNG, TGA or JPEG
     {
-        if (!ImageGetInfo(f, &width, &height, &bpp) || width <= 0 || height <= 0)
+        if (!ImageGetInfo(f, &width, &height, &bpp) || width <= 0 ||
+            height <= 0)
         {
-            LogWarning("Error scanning image in '%s' lump\n", W_GetLumpName(lump));
+            LogWarning("Error scanning image in '%s' lump\n",
+                       W_GetLumpName(lump));
             return nullptr;
         }
 
@@ -568,39 +540,42 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
     }
 
     // create new image
-    image_c *rim = NewImage(width, height, solid ? OPAC_Solid : OPAC_Unknown);
+    Image *rim =
+        NewImage(width, height, solid ? kOpacitySolid : kOpacityUnknown);
 
-    rim->offset_x = offset_x;
-    rim->offset_y = offset_y;
+    rim->offset_x_ = offset_x;
+    rim->offset_y_ = offset_y;
 
-    rim->name = name;
+    rim->name_ = name;
 
-    FlatDefinition *current_flatdef = flatdefs.Find(rim->name.c_str());
+    FlatDefinition *current_flatdef = flatdefs.Find(rim->name_.c_str());
 
     if (current_flatdef && !current_flatdef->liquid_.empty())
     {
         if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THIN") == 0)
-            rim->liquid_type = LIQ_Thin;
-        else if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THICK") == 0)
-            rim->liquid_type = LIQ_Thick;
+            rim->liquid_type_ = kLiquidImageThin;
+        else if (epi::StringCaseCompareASCII(current_flatdef->liquid_,
+                                             "THICK") == 0)
+            rim->liquid_type_ = kLiquidImageThick;
     }
 
-    rim->source_type             = type;
-    rim->source.graphic.lump     = lump;
-    rim->source.graphic.is_patch = is_patch;
-    rim->source.graphic.user_defined =
-        false; // This should only get set to true with DDFIMAGE specified DOOM format images
-    rim->source_palette = W_GetPaletteForLump(lump);
+    rim->source_type_             = type;
+    rim->source_.graphic.lump     = lump;
+    rim->source_.graphic.is_patch = is_patch;
+    rim->source_.graphic.user_defined =
+        false;  // This should only get set to true with DDFIMAGE specified DOOM
+                // format images
+    rim->source_palette_ = W_GetPaletteForLump(lump);
 
     if (replaces)
     {
-        rim->scale_x = replaces->actual_w / (float)width;
-        rim->scale_y = replaces->actual_h / (float)height;
+        rim->scale_x_ = replaces->actual_width_ / (float)width;
+        rim->scale_y_ = replaces->actual_height_ / (float)height;
 
-        if (!is_patch && replaces->source_type == IMSRC_Sprite)
+        if (!is_patch && replaces->source_type_ == kImageSourceSprite)
         {
-            rim->offset_x = replaces->offset_x;
-            rim->offset_y = replaces->offset_y;
+            rim->offset_x_ = replaces->offset_x_;
+            rim->offset_y_ = replaces->offset_y_;
         }
     }
 
@@ -609,85 +584,84 @@ static image_c *AddImage_Smart(const char *name, image_source_e type, int lump, 
     return rim;
 }
 
-static image_c *AddImageTexture(const char *name, texturedef_t *tdef)
+static Image *AddImageTexture(const char *name, texturedef_t *tdef)
 {
-    image_c *rim;
+    Image *rim;
 
     rim = NewImage(tdef->width, tdef->height);
 
-    rim->name = name;
+    rim->name_ = name;
 
-    if (tdef->scale_x)
-        rim->scale_x = 8.0 / tdef->scale_x;
-    if (tdef->scale_y)
-        rim->scale_y = 8.0 / tdef->scale_y;
+    if (tdef->scale_x) rim->scale_x_ = 8.0 / tdef->scale_x;
+    if (tdef->scale_y) rim->scale_y_ = 8.0 / tdef->scale_y;
 
-    rim->source_type         = IMSRC_Texture;
-    rim->source.texture.tdef = tdef;
-    rim->source_palette      = tdef->palette_lump;
+    rim->source_type_         = kImageSourceTexture;
+    rim->source_.texture.tdef = tdef;
+    rim->source_palette_      = tdef->palette_lump;
 
     real_textures.push_back(rim);
 
     return rim;
 }
 
-static image_c *AddImageFlat(const char *name, int lump)
+static Image *AddImageFlat(const char *name, int lump)
 {
-    image_c *rim;
-    int      len, size;
+    Image *rim;
+    int    len, size;
 
     len = W_LumpLength(lump);
 
     switch (len)
     {
-    case 64 * 64:
-        size = 64;
-        break;
+        case 64 * 64:
+            size = 64;
+            break;
 
-    // support for odd-size Heretic flats
-    case 64 * 65:
-        size = 64;
-        break;
+        // support for odd-size Heretic flats
+        case 64 * 65:
+            size = 64;
+            break;
 
-    // support for odd-size Hexen flats
-    case 64 * 128:
-        size = 64;
-        break;
+        // support for odd-size Hexen flats
+        case 64 * 128:
+            size = 64;
+            break;
 
-    // -- EDGE feature: bigger than normal flats --
-    case 128 * 128:
-        size = 128;
-        break;
-    case 256 * 256:
-        size = 256;
-        break;
-    case 512 * 512:
-        size = 512;
-        break;
-    case 1024 * 1024:
-        size = 1024;
-        break;
+        // -- EDGE feature: bigger than normal flats --
+        case 128 * 128:
+            size = 128;
+            break;
+        case 256 * 256:
+            size = 256;
+            break;
+        case 512 * 512:
+            size = 512;
+            break;
+        case 1024 * 1024:
+            size = 1024;
+            break;
 
-    default:
-        return nullptr;
+        default:
+            return nullptr;
     }
 
-    rim = NewImage(size, size, OPAC_Solid);
+    rim = NewImage(size, size, kOpacitySolid);
 
-    rim->name = name;
+    rim->name_ = name;
 
-    rim->source_type      = IMSRC_Flat;
-    rim->source.flat.lump = lump;
-    rim->source_palette   = W_GetPaletteForLump(lump);
+    rim->source_type_      = kImageSourceFlat;
+    rim->source_.flat.lump = lump;
+    rim->source_palette_   = W_GetPaletteForLump(lump);
 
-    FlatDefinition *current_flatdef = flatdefs.Find(rim->name.c_str());
+    FlatDefinition *current_flatdef = flatdefs.Find(rim->name_.c_str());
 
     if (current_flatdef && !current_flatdef->liquid_.empty())
     {
         if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THIN") == 0)
-            rim->liquid_type = LIQ_Thin;
-        else if (epi::StringCaseCompareASCII(current_flatdef->liquid_, "THICK") == 0)
-            rim->liquid_type = LIQ_Thick;
+            rim->liquid_type_ = kLiquidImageThin;
+        else if (epi::StringCaseCompareASCII(current_flatdef->liquid_,
+                                             "THICK") == 0)
+            rim->liquid_type_ = kLiquidImageThick;
     }
 
     real_flats.push_back(rim);
@@ -695,53 +669,63 @@ static image_c *AddImageFlat(const char *name, int lump)
     return rim;
 }
 
-static image_c *AddImage_DOOM(ImageDefinition *def, bool user_defined = false)
+static Image *AddImage_DOOM(ImageDefinition *def, bool user_defined = false)
 {
     const char *name      = def->name_.c_str();
     const char *lump_name = def->info_.c_str();
 
-    image_c *rim = nullptr;
+    Image *rim = nullptr;
 
     if (def->type_ == kImageDataPackage)
     {
         switch (def->belong_)
         {
-        case kImageNamespaceGraphic:
-            rim = AddImage_SmartPack(name, IMSRC_Graphic, lump_name, real_graphics);
-            break;
-        case kImageNamespaceTexture:
-            rim = AddImage_SmartPack(name, IMSRC_Texture, lump_name, real_textures);
-            break;
-        case kImageNamespaceFlat:
-            rim = AddImage_SmartPack(name, IMSRC_Flat, lump_name, real_flats);
-            break;
-        case kImageNamespaceSprite:
-            rim = AddImage_SmartPack(name, IMSRC_Sprite, lump_name, real_sprites);
-            break;
+            case kImageNamespaceGraphic:
+                rim = AddPackImageSmart(name, kImageSourceGraphic, lump_name,
+                                        real_graphics);
+                break;
+            case kImageNamespaceTexture:
+                rim = AddPackImageSmart(name, kImageSourceTexture, lump_name,
+                                        real_textures);
+                break;
+            case kImageNamespaceFlat:
+                rim = AddPackImageSmart(name, kImageSourceFlat, lump_name,
+                                        real_flats);
+                break;
+            case kImageNamespaceSprite:
+                rim = AddPackImageSmart(name, kImageSourceSprite, lump_name,
+                                        real_sprites);
+                break;
 
-        default:
-            FatalError("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
+            default:
+                FatalError("INTERNAL ERROR: Bad belong value: %d\n",
+                           def->belong_);
         }
     }
     else
     {
         switch (def->belong_)
         {
-        case kImageNamespaceGraphic:
-            rim = AddImage_Smart(name, IMSRC_Graphic, W_GetNumForName(lump_name), real_graphics);
-            break;
-        case kImageNamespaceTexture:
-            rim = AddImage_Smart(name, IMSRC_Texture, W_GetNumForName(lump_name), real_textures);
-            break;
-        case kImageNamespaceFlat:
-            rim = AddImage_Smart(name, IMSRC_Flat, W_GetNumForName(lump_name), real_flats);
-            break;
-        case kImageNamespaceSprite:
-            rim = AddImage_Smart(name, IMSRC_Sprite, W_GetNumForName(lump_name), real_sprites);
-            break;
+            case kImageNamespaceGraphic:
+                rim = AddImage_Smart(name, kImageSourceGraphic,
+                                     W_GetNumForName(lump_name), real_graphics);
+                break;
+            case kImageNamespaceTexture:
+                rim = AddImage_Smart(name, kImageSourceTexture,
+                                     W_GetNumForName(lump_name), real_textures);
+                break;
+            case kImageNamespaceFlat:
+                rim = AddImage_Smart(name, kImageSourceFlat,
+                                     W_GetNumForName(lump_name), real_flats);
+                break;
+            case kImageNamespaceSprite:
+                rim = AddImage_Smart(name, kImageSourceSprite,
+                                     W_GetNumForName(lump_name), real_sprites);
+                break;
 
-        default:
-            FatalError("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
+            default:
+                FatalError("INTERNAL ERROR: Bad belong value: %d\n",
+                           def->belong_);
         }
     }
 
@@ -751,40 +735,40 @@ static image_c *AddImage_DOOM(ImageDefinition *def, bool user_defined = false)
         return nullptr;
     }
 
-    rim->offset_x += def->x_offset_;
-    rim->offset_y += def->y_offset_;
+    rim->offset_x_ += def->x_offset_;
+    rim->offset_y_ += def->y_offset_;
 
-    rim->scale_x = def->scale_ * def->aspect_;
-    rim->scale_y = def->scale_;
+    rim->scale_x_ = def->scale_ * def->aspect_;
+    rim->scale_y_ = def->scale_;
 
-    rim->is_font = def->is_font_;
+    rim->is_font_ = def->is_font_;
 
-    rim->hsv_rotation   = def->hsv_rotation_;
-    rim->hsv_saturation = def->hsv_saturation_;
-    rim->hsv_value      = def->hsv_value_;
-    rim->blur_sigma     = def->blur_factor_;
+    rim->hsv_rotation_   = def->hsv_rotation_;
+    rim->hsv_saturation_ = def->hsv_saturation_;
+    rim->hsv_value_      = def->hsv_value_;
+    rim->blur_sigma_     = def->blur_factor_;
 
-    rim->source.graphic.special = kImageSpecialNone;
+    rim->source_.graphic.special = kImageSpecialNone;
 
     if (user_defined)
     {
-        rim->source.graphic.user_defined = true;
-        rim->source.graphic.special      = def->special_;
+        rim->source_.graphic.user_defined = true;
+        rim->source_.graphic.special      = def->special_;
     }
 
     if (def->special_ & kImageSpecialCrosshair)
     {
-        float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f; // - WEAPONTOP;
-        rim->offset_y += int(dy / rim->scale_y);
+        float dy = (200.0f - rim->actual_height_ * rim->scale_y_) /
+                   2.0f;  // - WEAPONTOP;
+        rim->offset_y_ += int(dy / rim->scale_y_);
     }
 
-    if (def->special_ & kImageSpecialGrayscale)
-        rim->grayscale = true;
+    if (def->special_ & kImageSpecialGrayscale) rim->grayscale_ = true;
 
     return rim;
 }
 
-static image_c *AddImageUser(ImageDefinition *def)
+static Image *AddImageUser(ImageDefinition *def)
 {
     int  width = 0, height = 0, bpp = 0;
     bool solid = false;
@@ -794,136 +778,139 @@ static image_c *AddImageUser(ImageDefinition *def)
 
     switch (def->type_)
     {
-    case kImageDataColor:
-        width  = 8;
-        height = 8;
-        bpp    = 3;
-        solid  = true;
+        case kImageDataColor:
+            width  = 8;
+            height = 8;
+            bpp    = 3;
+            solid  = true;
+            break;
+
+        case kImageDataLump:
+        case kImageDataFile:
+        case kImageDataPackage:
+        {
+            const char *filename = def->info_.c_str();
+
+            epi::File *f = OpenUserFileOrLump(def);
+            if (f == nullptr)
+            {
+                LogWarning("Unable to open image %s: %s\n",
+                           (def->type_ == kImageDataLump) ? "lump" : "file",
+                           filename);
+                return nullptr;
+            }
+
+            int file_size = f->GetLength();
+
+            // determine format and size information.
+            // for FILE and PACK get format from filename, but note that when
+            // it is wrong (like a PNG called "foo.jpeg"), it can still work.
+            ImageFormat fmt = kImageUnknown;
+
+            if (def->type_ == kImageDataLump)
+            {
+                uint8_t header[32];
+                memset(header, 255, sizeof(header));
+
+                f->Read(header, sizeof(header));
+                f->Seek(0, epi::File::kSeekpointStart);
+
+                int header_len = HMM_MIN((int)sizeof(header), file_size);
+                fmt = ImageDetectFormat(header, header_len, file_size);
+            }
+            else
+                fmt = ImageFormatFromFilename(def->info_);
+
+            // when a lump uses DOOM patch format, use the other method.
+            // for lumps, assume kImageUnknown is a mis-detection of DOOM patch
+            // and hope for the best.
+            if (fmt == kImageDoom || fmt == kImageUnknown)
+            {
+                delete f;  // close file
+
+                if (fmt == kImageDoom) return AddImage_DOOM(def, true);
+
+                LogWarning("Unknown image format in: %s\n", filename);
+                return nullptr;
+            }
+
+            if (fmt == kImageOther)
+            {
+                delete f;
+                LogWarning("Unsupported image format in: %s\n", filename);
+                return nullptr;
+            }
+
+            if (!ImageGetInfo(f, &width, &height, &bpp))
+            {
+                delete f;
+                LogWarning("Error occurred scanning image: %s\n", filename);
+                return nullptr;
+            }
+
+            // close it
+            delete f;
+
+            solid = (bpp == 3);
+        }
         break;
 
-    case kImageDataLump:
-    case kImageDataFile:
-    case kImageDataPackage: {
-        const char *filename = def->info_.c_str();
-
-        epi::File *f = OpenUserFileOrLump(def);
-        if (f == nullptr)
-        {
-            LogWarning("Unable to open image %s: %s\n", (def->type_ == kImageDataLump) ? "lump" : "file", filename);
-            return nullptr;
-        }
-
-        int file_size = f->GetLength();
-
-        // determine format and size information.
-        // for FILE and PACK get format from filename, but note that when
-        // it is wrong (like a PNG called "foo.jpeg"), it can still work.
-        ImageFormat fmt = kImageUnknown;
-
-        if (def->type_ == kImageDataLump)
-        {
-            uint8_t header[32];
-            memset(header, 255, sizeof(header));
-
-            f->Read(header, sizeof(header));
-            f->Seek(0, epi::File::kSeekpointStart);
-
-            int header_len = HMM_MIN((int)sizeof(header), file_size);
-            fmt            = ImageDetectFormat(header, header_len, file_size);
-        }
-        else
-            fmt = ImageFormatFromFilename(def->info_);
-
-        // when a lump uses DOOM patch format, use the other method.
-        // for lumps, assume kImageUnknown is a mis-detection of DOOM patch
-        // and hope for the best.
-        if (fmt == kImageDoom || fmt == kImageUnknown)
-        {
-            delete f; // close file
-
-            if (fmt == kImageDoom)
-                return AddImage_DOOM(def, true);
-
-            LogWarning("Unknown image format in: %s\n", filename);
-            return nullptr;
-        }
-
-        if (fmt == kImageOther)
-        {
-            delete f;
-            LogWarning("Unsupported image format in: %s\n", filename);
-            return nullptr;
-        }
-
-        if (!ImageGetInfo(f, &width, &height, &bpp))
-        {
-            delete f;
-            LogWarning("Error occurred scanning image: %s\n", filename);
-            return nullptr;
-        }
-
-        // close it
-        delete f;
-
-        solid = (bpp == 3);
-    }
-    break;
-
-    default:
-        FatalError("AddImageUser: Coding error, unknown type %d\n", def->type_);
-        return nullptr; /* NOT REACHED */
+        default:
+            FatalError("AddImageUser: Coding error, unknown type %d\n",
+                       def->type_);
+            return nullptr; /* NOT REACHED */
     }
 
-    image_c *rim = NewImage(width, height, solid ? OPAC_Solid : OPAC_Unknown);
+    Image *rim =
+        NewImage(width, height, solid ? kOpacitySolid : kOpacityUnknown);
 
-    rim->name = def->name_;
+    rim->name_ = def->name_;
 
-    rim->offset_x = def->x_offset_;
-    rim->offset_y = def->y_offset_;
+    rim->offset_x_ = def->x_offset_;
+    rim->offset_y_ = def->y_offset_;
 
-    rim->scale_x = def->scale_ * def->aspect_;
-    rim->scale_y = def->scale_;
+    rim->scale_x_ = def->scale_ * def->aspect_;
+    rim->scale_y_ = def->scale_;
 
-    rim->source_type     = IMSRC_User;
-    rim->source.user.def = def;
+    rim->source_type_     = kImageSourceUser;
+    rim->source_.user.def = def;
 
-    rim->is_font = def->is_font_;
+    rim->is_font_ = def->is_font_;
 
-    rim->hsv_rotation   = def->hsv_rotation_;
-    rim->hsv_saturation = def->hsv_saturation_;
-    rim->hsv_value      = def->hsv_value_;
-    rim->blur_sigma     = def->blur_factor_;
+    rim->hsv_rotation_   = def->hsv_rotation_;
+    rim->hsv_saturation_ = def->hsv_saturation_;
+    rim->hsv_value_      = def->hsv_value_;
+    rim->blur_sigma_     = def->blur_factor_;
 
     if (def->special_ & kImageSpecialCrosshair)
     {
-        float dy = (200.0f - rim->actual_h * rim->scale_y) / 2.0f; // - WEAPONTOP;
-        rim->offset_y += int(dy / rim->scale_y);
+        float dy = (200.0f - rim->actual_height_ * rim->scale_y_) /
+                   2.0f;  // - WEAPONTOP;
+        rim->offset_y_ += int(dy / rim->scale_y_);
     }
 
-    if (def->special_ & kImageSpecialGrayscale)
-        rim->grayscale = true;
+    if (def->special_ & kImageSpecialGrayscale) rim->grayscale_ = true;
 
     switch (def->belong_)
     {
-    case kImageNamespaceGraphic:
-        real_graphics.push_back(rim);
-        break;
-    case kImageNamespaceTexture:
-        real_textures.push_back(rim);
-        break;
-    case kImageNamespaceFlat:
-        real_flats.push_back(rim);
-        break;
-    case kImageNamespaceSprite:
-        real_sprites.push_back(rim);
-        break;
+        case kImageNamespaceGraphic:
+            real_graphics.push_back(rim);
+            break;
+        case kImageNamespaceTexture:
+            real_textures.push_back(rim);
+            break;
+        case kImageNamespaceFlat:
+            real_flats.push_back(rim);
+            break;
+        case kImageNamespaceSprite:
+            real_sprites.push_back(rim);
+            break;
 
-    default:
-        FatalError("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
+        default:
+            FatalError("INTERNAL ERROR: Bad belong value: %d\n", def->belong_);
     }
 
-    if (def->special_ & kImageSpecialPrecache)
-        W_ImagePreCache(rim);
+    if (def->special_ & kImageSpecialPrecache) ImagePrecache(rim);
 
     return rim;
 }
@@ -936,7 +923,7 @@ static image_c *AddImageUser(ImageDefinition *def)
 // NOTE: should only be called once, as it assumes none of the flats
 // in the list have names colliding with existing flat images.
 //
-void W_ImageCreateFlats(std::vector<int> &lumps)
+void CreateFlats(std::vector<int> &lumps)
 {
     for (size_t i = 0; i < lumps.size(); i++)
     {
@@ -957,7 +944,7 @@ void W_ImageCreateFlats(std::vector<int> &lumps)
 // textures in the list have names colliding with existing texture
 // images.
 //
-void W_ImageCreateTextures(struct texturedef_s **defs, int number)
+void CreateTextures(struct texturedef_s **defs, int number)
 {
     int i;
 
@@ -965,8 +952,7 @@ void W_ImageCreateTextures(struct texturedef_s **defs, int number)
 
     for (i = 0; i < number; i++)
     {
-        if (defs[i] == nullptr)
-            continue;
+        if (defs[i] == nullptr) continue;
 
         AddImageTexture(defs[i]->name, defs[i]);
     }
@@ -980,50 +966,54 @@ void W_ImageCreateTextures(struct texturedef_s **defs, int number)
 // NOTE: it is assumed that each new sprite is unique i.e. the name
 // does not collide with any existing sprite image.
 //
-const image_c *W_ImageCreateSprite(const char *name, int lump, bool is_weapon)
+const Image *CreateSprite(const char *name, int lump, bool is_weapon)
 {
     SYS_ASSERT(lump >= 0);
 
-    image_c *rim = AddImage_Smart(name, IMSRC_Sprite, lump, real_sprites);
-    if (!rim)
-        return nullptr;
+    Image *rim = AddImage_Smart(name, kImageSourceSprite, lump, real_sprites);
+    if (!rim) return nullptr;
 
     // adjust sprite offsets so that (0,0) is normal
     if (is_weapon)
     {
-        rim->offset_x += (320.0f / 2.0f - rim->actual_w / 2.0f); // loss of accuracy
-        rim->offset_y += (200.0f - 32.0f - rim->actual_h);
+        rim->offset_x_ +=
+            (320.0f / 2.0f - rim->actual_width_ / 2.0f);  // loss of accuracy
+        rim->offset_y_ += (200.0f - 32.0f - rim->actual_height_);
     }
     else
     {
-        // rim->offset_x -= rim->actual_w / 2;   // loss of accuracy
-        rim->offset_x -= ((float)rim->actual_w) / 2.0f; // Lobo 2023: dancing eye fix
-        rim->offset_y -= rim->actual_h;
+        // rim->offset_x_ -= rim->actual_width_ / 2;   // loss of accuracy
+        rim->offset_x_ -=
+            ((float)rim->actual_width_) / 2.0f;  // Lobo 2023: dancing eye fix
+        rim->offset_y_ -= rim->actual_height_;
     }
 
     return rim;
 }
 
-const image_c *W_ImageCreatePackSprite(std::string packname, pack_file_c *pack, bool is_weapon)
+const Image *CreatePackSprite(std::string packname, pack_file_c *pack,
+                              bool is_weapon)
 {
     SYS_ASSERT(pack);
 
-    image_c *rim = AddImage_SmartPack(epi::GetStem(packname).c_str(), IMSRC_Sprite, packname.c_str(),
-                                      real_sprites);
-    if (!rim)
-        return nullptr;
+    Image *rim =
+        AddPackImageSmart(epi::GetStem(packname).c_str(), kImageSourceSprite,
+                          packname.c_str(), real_sprites);
+    if (!rim) return nullptr;
 
     // adjust sprite offsets so that (0,0) is normal
     if (is_weapon)
     {
-        rim->offset_x += (320.0f / 2.0f - rim->actual_w / 2.0f); // loss of accuracy
-        rim->offset_y += (200.0f - 32.0f - rim->actual_h);
+        rim->offset_x_ +=
+            (320.0f / 2.0f - rim->actual_width_ / 2.0f);  // loss of accuracy
+        rim->offset_y_ += (200.0f - 32.0f - rim->actual_height_);
     }
     else
     {
-        // rim->offset_x -= rim->actual_w / 2;   // loss of accuracy
-        rim->offset_x -= ((float)rim->actual_w) / 2.0f; // Lobo 2023: dancing eye fix
-        rim->offset_y -= rim->actual_h;
+        // rim->offset_x_ -= rim->actual_width_ / 2;   // loss of accuracy
+        rim->offset_x_ -=
+            ((float)rim->actual_width_) / 2.0f;  // Lobo 2023: dancing eye fix
+        rim->offset_y_ -= rim->actual_height_;
     }
 
     return rim;
@@ -1032,72 +1022,57 @@ const image_c *W_ImageCreatePackSprite(std::string packname, pack_file_c *pack, 
 //
 // Add the images defined in IMAGES.DDF.
 //
-void W_ImageCreateUser(void)
+void CreateUserImages(void)
 {
     LogPrint("Adding DDFIMAGE definitions...\n");
 
     for (auto def : imagedefs)
     {
-        if (def == nullptr)
-            continue;
+        if (def == nullptr) continue;
 
-        if (def->belong_ != kImageNamespacePatch)
-            AddImageUser(def);
+        if (def->belong_ != kImageNamespacePatch) AddImageUser(def);
     }
-
-#if 0
-	LogDebug("Textures -----------------------------\n");
-	do_DebugDump(real_textures);
-
-	LogDebug("Flats ------------------------------\n");
-	do_DebugDump(real_flats);
-
-	LogDebug("Sprites ------------------------------\n");
-	do_DebugDump(real_sprites);
-
-	LogDebug("Graphics ------------------------------\n");
-	do_DebugDump(real_graphics);
-#endif
 }
 
-void W_ImageAddTX(int lump, const char *name, bool hires)
+void ImageAddTxHx(int lump, const char *name, bool hires)
 {
     if (hires)
     {
-        const image_c *rim = W_ImageDoLookup(real_textures, name, -2);
-        if (rim && rim->source_type != IMSRC_User)
+        const Image *rim = ImageContainerLookup(real_textures, name, -2);
+        if (rim && rim->source_type_ != kImageSourceUser)
         {
-            AddImage_Smart(name, IMSRC_TX_HI, lump, real_textures, rim);
+            AddImage_Smart(name, kImageSourceTxHi, lump, real_textures, rim);
             return;
         }
 
-        rim = W_ImageDoLookup(real_flats, name, -2);
-        if (rim && rim->source_type != IMSRC_User)
+        rim = ImageContainerLookup(real_flats, name, -2);
+        if (rim && rim->source_type_ != kImageSourceUser)
         {
-            AddImage_Smart(name, IMSRC_TX_HI, lump, real_flats, rim);
+            AddImage_Smart(name, kImageSourceTxHi, lump, real_flats, rim);
             return;
         }
 
-        rim = W_ImageDoLookup(real_sprites, name, -2);
-        if (rim && rim->source_type != IMSRC_User)
+        rim = ImageContainerLookup(real_sprites, name, -2);
+        if (rim && rim->source_type_ != kImageSourceUser)
         {
-            AddImage_Smart(name, IMSRC_TX_HI, lump, real_sprites, rim);
+            AddImage_Smart(name, kImageSourceTxHi, lump, real_sprites, rim);
             return;
         }
 
         // we do it this way to force the original graphic to be loaded
-        rim = W_ImageLookup(name, kImageNamespaceGraphic, ILF_Exact | ILF_Null);
+        rim = ImageLookup(name, kImageNamespaceGraphic,
+                          kImageLookupExact | kImageLookupNull);
 
-        if (rim && rim->source_type != IMSRC_User)
+        if (rim && rim->source_type_ != kImageSourceUser)
         {
-            AddImage_Smart(name, IMSRC_TX_HI, lump, real_graphics, rim);
+            AddImage_Smart(name, kImageSourceTxHi, lump, real_graphics, rim);
             return;
         }
 
-        LogWarning("HIRES replacement '%s' has no counterpart.\n", name);
+        LogDebug("HIRES replacement '%s' has no counterpart.\n", name);
     }
 
-    AddImage_Smart(name, IMSRC_TX_HI, lump, real_textures);
+    AddImage_Smart(name, kImageSourceTxHi, lump, real_textures);
 }
 
 //
@@ -1106,52 +1081,43 @@ void W_ImageAddTX(int lump, const char *name, bool hires)
 //
 // Use delete[] to free the returned array.
 //
-const image_c **W_ImageGetUserSprites(int *count)
+const Image **GetUserSprites(int *count)
 {
     // count number of user sprites
     (*count) = 0;
 
-    real_image_container_c::iterator it;
+    std::list<Image *>::iterator it;
 
     for (it = real_sprites.begin(); it != real_sprites.end(); it++)
     {
-        image_c *rim = *it;
+        Image *rim = *it;
 
-        if (rim->source_type == IMSRC_User || rim->source.graphic.user_defined)
+        if (rim->source_type_ == kImageSourceUser ||
+            rim->source_.graphic.user_defined)
             (*count) += 1;
     }
 
     if (*count == 0)
     {
-        LogDebug("W_ImageGetUserSprites(count = %d)\n", *count);
+        LogDebug("GetUserSprites(count = %d)\n", *count);
         return nullptr;
     }
 
-    const image_c **array = new const image_c *[*count];
-    int             pos   = 0;
+    const Image **array = new const Image *[*count];
+    int           pos   = 0;
 
     for (it = real_sprites.begin(); it != real_sprites.end(); it++)
     {
-        image_c *rim = *it;
+        Image *rim = *it;
 
-        if (rim->source_type == IMSRC_User || rim->source.graphic.user_defined)
+        if (rim->source_type_ == kImageSourceUser ||
+            rim->source_.graphic.user_defined)
             array[pos++] = rim;
     }
 
-#define CMP(a, b) (strcmp(W_ImageGetName(a), W_ImageGetName(b)) < 0)
-    QSORT(const image_c *, array, (*count), CUTOFF);
+#define CMP(a, b) (strcmp(a->name_.c_str(), b->name_.c_str()) < 0)
+    QSORT(const Image *, array, (*count), CUTOFF);
 #undef CMP
-
-#if 0 // DEBUGGING
-	LogDebug("W_ImageGetUserSprites(count = %d)\n", *count);
-	LogDebug("{\n");
-
-	for (pos = 0; pos < *count; pos++)
-		LogDebug("   %p = [%s] %dx%d\n", array[pos], W_ImageGetName(array[pos]),
-			array[pos]->actual_w, array[pos]->actual_h);
-		
-	LogDebug("}\n");
-#endif
 
     return array;
 }
@@ -1162,106 +1128,101 @@ const image_c **W_ImageGetUserSprites(int *count)
 //
 
 // TODO: make methods of image_c class
-static bool IM_ShouldClamp(const image_c *rim)
+static bool IM_ShouldClamp(const Image *rim)
 {
-    switch (rim->source_type)
+    switch (rim->source_type_)
     {
-    case IMSRC_Graphic:
-    case IMSRC_Raw320x200:
-    case IMSRC_Sprite:
-        return true;
-
-    case IMSRC_User:
-        switch (rim->source.user.def->belong_)
-        {
-        case kImageNamespaceGraphic:
-        case kImageNamespaceSprite:
+        case kImageSourceGraphic:
+        case kImageSourceRawBlock:
+        case kImageSourceSprite:
             return true;
+
+        case kImageSourceUser:
+            switch (rim->source_.user.def->belong_)
+            {
+                case kImageNamespaceGraphic:
+                case kImageNamespaceSprite:
+                    return true;
+
+                default:
+                    return false;
+            }
 
         default:
             return false;
-        }
-
-    default:
-        return false;
     }
 }
 
-static bool IM_ShouldMipmap(image_c *rim)
+static bool IM_ShouldMipmap(Image *rim)
 {
     // the "SKY" check here is a hack...
-    if (epi::StringPrefixCaseCompareASCII(rim->name, "SKY") == 0)
-        return false;
+    if (epi::StringPrefixCaseCompareASCII(rim->name_, "SKY") == 0) return false;
 
-    switch (rim->source_type)
+    switch (rim->source_type_)
     {
-    case IMSRC_Texture:
-    case IMSRC_Flat:
-    case IMSRC_TX_HI:
-        return true;
-
-    case IMSRC_User:
-        switch (rim->source.user.def->belong_)
-        {
-        case kImageNamespaceTexture:
-        case kImageNamespaceFlat:
+        case kImageSourceTexture:
+        case kImageSourceFlat:
+        case kImageSourceTxHi:
             return true;
+
+        case kImageSourceUser:
+            switch (rim->source_.user.def->belong_)
+            {
+                case kImageNamespaceTexture:
+                case kImageNamespaceFlat:
+                    return true;
+
+                default:
+                    return false;
+            }
 
         default:
             return false;
-        }
-
-    default:
-        return false;
     }
 }
 
-static bool IM_ShouldSmooth(image_c *rim)
+static bool IM_ShouldSmooth(Image *rim)
 {
-    if (rim->blur_sigma > 0.0f)
-        return true;
+    if (rim->blur_sigma_ > 0.0f) return true;
 
-    return var_smoothing ? true : false;
+    return image_smoothing ? true : false;
 }
 
-static bool IM_ShouldHQ2X(image_c *rim)
+static bool IM_ShouldHQ2X(Image *rim)
 {
-    // Note: no need to check IMSRC_User, since those images are
+    // Note: no need to check kImageSourceUser, since those images are
     //       always PNG or JPEG (etc) and never palettised, hence
     //       the Hq2x scaling would never apply.
 
-    if (hq2x_scaling == 0)
-        return false;
+    if (hq2x_scaling == 0) return false;
 
-    if (hq2x_scaling >= 3)
-        return true;
+    if (hq2x_scaling >= 3) return true;
 
-    switch (rim->source_type)
+    switch (rim->source_type_)
     {
-    case IMSRC_Graphic:
-    case IMSRC_Raw320x200:
-        // UI elements
-        return true;
+        case kImageSourceGraphic:
+        case kImageSourceRawBlock:
+            // UI elements
+            return true;
 #if 0
-		case IMSRC_Texture:
+		case kImageSourceTexture:
 			// the "SKY" check here is a hack...
-			if (epi::StringPrefixCaseCompareASCII(rim->name, "SKY") == 0)
+			if (epi::StringPrefixCaseCompareASCII(rim->name_, "SKY") == 0)
 				return true;
 			break;
 #endif
-    case IMSRC_Sprite:
-        if (hq2x_scaling >= 2)
-            return true;
-        break;
+        case kImageSourceSprite:
+            if (hq2x_scaling >= 2) return true;
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return false;
 }
 
-static int IM_PixelLimit(image_c *rim)
+static int IM_PixelLimit(Image *rim)
 {
     if (detail_level == 0)
         return (1 << 18);
@@ -1271,7 +1232,7 @@ static int IM_PixelLimit(image_c *rim)
         return (1 << 22);
 }
 
-static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
+static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
 {
     bool clamp  = IM_ShouldClamp(rim);
     bool mip    = IM_ShouldMipmap(rim);
@@ -1279,39 +1240,38 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
 
     int max_pix = IM_PixelLimit(rim);
 
-    if (rim->source_type == IMSRC_User)
+    if (rim->source_type_ == kImageSourceUser)
     {
-        if (rim->source.user.def->special_ & kImageSpecialClamp)
-            clamp = true;
+        if (rim->source_.user.def->special_ & kImageSpecialClamp) clamp = true;
 
-        if (rim->source.user.def->special_ & kImageSpecialMip)
+        if (rim->source_.user.def->special_ & kImageSpecialMip)
             mip = true;
-        else if (rim->source.user.def->special_ & kImageSpecialNoMip)
+        else if (rim->source_.user.def->special_ & kImageSpecialNoMip)
             mip = false;
 
-        if (rim->source.user.def->special_ & kImageSpecialSmooth)
+        if (rim->source_.user.def->special_ & kImageSpecialSmooth)
             smooth = true;
-        else if (rim->source.user.def->special_ & kImageSpecialNoSmooth)
+        else if (rim->source_.user.def->special_ & kImageSpecialNoSmooth)
             smooth = false;
     }
-    else if (rim->source_type == IMSRC_Graphic && rim->source.graphic.user_defined)
+    else if (rim->source_type_ == kImageSourceGraphic &&
+             rim->source_.graphic.user_defined)
     {
-        if (rim->source.graphic.special & kImageSpecialClamp)
-            clamp = true;
+        if (rim->source_.graphic.special & kImageSpecialClamp) clamp = true;
 
-        if (rim->source.graphic.special & kImageSpecialMip)
+        if (rim->source_.graphic.special & kImageSpecialMip)
             mip = true;
-        else if (rim->source.graphic.special & kImageSpecialNoMip)
+        else if (rim->source_.graphic.special & kImageSpecialNoMip)
             mip = false;
 
-        if (rim->source.graphic.special & kImageSpecialSmooth)
+        if (rim->source_.graphic.special & kImageSpecialSmooth)
             smooth = true;
-        else if (rim->source.graphic.special & kImageSpecialNoSmooth)
+        else if (rim->source_.graphic.special & kImageSpecialNoSmooth)
             smooth = false;
     }
 
     const uint8_t *what_palette    = (const uint8_t *)&playpal_data[0];
-    bool        what_pal_cached = false;
+    bool           what_pal_cached = false;
 
     static uint8_t trans_pal[256 * 3];
 
@@ -1321,44 +1281,47 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
         // the translation table itself would not match the other palette,
         // and so we would still end up with messed up colours.
 
-        R_TranslatePalette(trans_pal, what_palette, trans);
+        TranslatePalette(trans_pal, what_palette, trans);
         what_palette = trans_pal;
     }
-    else if (rim->source_palette >= 0)
+    else if (rim->source_palette_ >= 0)
     {
-        what_palette    = (const uint8_t *)W_LoadLump(rim->source_palette);
+        what_palette    = (const uint8_t *)W_LoadLump(rim->source_palette_);
         what_pal_cached = true;
     }
 
     ImageData *tmp_img = ReadAsEpiBlock(rim);
 
-    if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
+    if (rim->liquid_type_ > kLiquidImageNone &&
+        (swirling_flats == kLiquidSwirlSmmu ||
+         swirling_flats == kLiquidSwirlSmmuSlosh))
     {
-        rim->swirled_game_tic = hud_tic / (double_framerate.d_? 2 : 1);
-        tmp_img->Swirl(rim->swirled_game_tic,
-                       rim->liquid_type); // Using leveltime disabled swirl for intermission screens
+        rim->swirled_game_tic_ = hud_tic / (double_framerate.d_ ? 2 : 1);
+        tmp_img->Swirl(rim->swirled_game_tic_,
+                       rim->liquid_type_);  // Using leveltime disabled swirl
+                                            // for intermission screens
     }
 
-    if (rim->opacity == OPAC_Unknown)
-        rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
+    if (rim->opacity_ == kOpacityUnknown)
+        rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
 
     if ((tmp_img->depth_ == 1) && IM_ShouldHQ2X(rim))
     {
-        bool solid = (rim->opacity == OPAC_Solid);
+        bool solid = (rim->opacity_ == kOpacitySolid);
 
-        Hq2xPaletteSetup(what_palette, solid ? -1 : TRANS_PIXEL);
+        Hq2xPaletteSetup(what_palette, solid ? -1 : kTransparentPixelIndex);
 
         ImageData *scaled_img = ImageHq2x(tmp_img, solid, false /* invert */);
 
-        if (rim->is_font)
+        if (rim->is_font_)
         {
             scaled_img->RemoveBackground();
-            rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
+            rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
         }
 
-        if (rim->blur_sigma > 0.0f)
+        if (rim->blur_sigma_ > 0.0f)
         {
-            ImageData *blurred_img = ImageBlur(scaled_img, rim->blur_sigma);
+            ImageData *blurred_img = ImageBlur(scaled_img, rim->blur_sigma_);
             delete scaled_img;
             scaled_img = blurred_img;
         }
@@ -1368,17 +1331,18 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
     }
     else if (tmp_img->depth_ == 1)
     {
-        ImageData *rgb_img = R_PalettisedToRGB(tmp_img, what_palette, rim->opacity);
+        ImageData *rgb_img =
+            RgbFromPalettised(tmp_img, what_palette, rim->opacity_);
 
-        if (rim->is_font)
+        if (rim->is_font_)
         {
             rgb_img->RemoveBackground();
-            rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
+            rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
         }
 
-        if (rim->blur_sigma > 0.0f)
+        if (rim->blur_sigma_ > 0.0f)
         {
-            ImageData *blurred_img = ImageBlur(rgb_img, rim->blur_sigma);
+            ImageData *blurred_img = ImageBlur(rgb_img, rim->blur_sigma_);
             delete rgb_img;
             rgb_img = blurred_img;
         }
@@ -1388,81 +1352,41 @@ static GLuint LoadImageOGL(image_c *rim, const Colormap *trans, bool do_whiten)
     }
     else if (tmp_img->depth_ >= 3)
     {
-        if (rim->is_font)
+        if (rim->is_font_)
         {
             tmp_img->RemoveBackground();
-            rim->opacity = R_DetermineOpacity(tmp_img, &rim->is_empty);
+            rim->opacity_ = DetermineOpacity(tmp_img, &rim->is_empty_);
         }
-        if (rim->blur_sigma > 0.0f)
+        if (rim->blur_sigma_ > 0.0f)
         {
-            ImageData *blurred_img = ImageBlur(tmp_img, rim->blur_sigma);
+            ImageData *blurred_img = ImageBlur(tmp_img, rim->blur_sigma_);
             delete tmp_img;
             tmp_img = blurred_img;
         }
         if (trans != nullptr)
-            R_PaletteRemapRGBA(tmp_img, what_palette, (const uint8_t *)&playpal_data[0]);
+            PaletteRemapRgba(tmp_img, what_palette,
+                             (const uint8_t *)&playpal_data[0]);
     }
 
-    if (rim->hsv_rotation || rim->hsv_saturation > -1 || rim->hsv_value)
-        tmp_img->SetHsv(rim->hsv_rotation, rim->hsv_saturation, rim->hsv_value);
+    if (rim->hsv_rotation_ || rim->hsv_saturation_ > -1 || rim->hsv_value_)
+        tmp_img->SetHsv(rim->hsv_rotation_, rim->hsv_saturation_,
+                        rim->hsv_value_);
 
-    if (do_whiten)
-        tmp_img->Whiten();
+    if (do_whiten) tmp_img->Whiten();
 
-    GLuint tex_id = R_UploadTexture(tmp_img,
-                                    (clamp ? UPL_Clamp : 0) | (mip ? UPL_MipMap : 0) | (smooth ? UPL_Smooth : 0) |
-                                        ((rim->opacity == OPAC_Masked) ? UPL_Thresh : 0),
-                                    max_pix);
+    GLuint tex_id = RendererUploadTexture(
+        tmp_img,
+        (clamp ? kUploadClamp : 0) | (mip ? kUploadMipMap : 0) |
+            (smooth ? kUploadSmooth : 0) |
+            ((rim->opacity_ == kOpacityMasked) ? kUploadThresh : 0),
+        max_pix);
 
     delete tmp_img;
 
-    if (what_pal_cached)
-        delete[] what_palette;
+    if (what_pal_cached) delete[] what_palette;
 
     return tex_id;
 }
-
-#if 0
-static
-void UnloadImageOGL(cached_image_t *rc, image_c *rim)
-{
-	glDeleteTextures(1, &rc->tex_id);
-
-	for (unsigned int i = 0; i < rim->cache.size(); i++)
-	{
-		if (rim->cache[i] == rc)
-		{
-			rim->cache[i] = nullptr;
-			return;
-		}
-	}
-
-	FatalError("INTERNAL ERROR: UnloadImageOGL: no such RC in cache !\n");
-}
-
-
-//
-// UnloadImage
-//
-// Unloads a cached image from the cache list and frees all resources.
-// Mainly just a switch to more specialised image unloaders.
-//
-static void UnloadImage(cached_image_t *rc)
-{
-	image_c *rim = rc->parent;
-
-	SYS_ASSERT(rc);
-	SYS_ASSERT(rc != &imagecachehead);
-	SYS_ASSERT(rim);
-
-	// unlink from the cache list
-	Unlink(rc);
-
-	UnloadImageOGL(rc, rim);
-
-	delete rc;
-}
-#endif
 
 //----------------------------------------------------------------------------
 //  IMAGE LOOKUP
@@ -1471,24 +1395,22 @@ static void UnloadImage(cached_image_t *rc)
 //
 // BackupTexture
 //
-static const image_c *BackupTexture(const char *tex_name, int flags)
+static const Image *BackupTexture(const char *tex_name, int flags)
 {
-    const image_c *rim;
+    const Image *rim;
 
-    if (!(flags & ILF_Exact))
+    if (!(flags & kImageLookupExact))
     {
         // backup plan: try a flat with the same name
-        rim = W_ImageDoLookup(real_flats, tex_name);
-        if (rim)
-            return rim;
+        rim = ImageContainerLookup(real_flats, tex_name);
+        if (rim) return rim;
 
         // backup backup plan: try a graphic with the same name
-        rim = W_ImageDoLookup(real_graphics, tex_name);
-        if (rim)
-            return rim;
+        rim = ImageContainerLookup(real_graphics, tex_name);
+        if (rim) return rim;
 
-        // backup backup backup plan: see if it's a graphic in the P/PP_START P/PP_END namespace
-        // and make/return an image if valid
+        // backup backup backup plan: see if it's a graphic in the P/PP_START
+        // P/PP_END namespace and make/return an image if valid
         int checkfile = W_CheckFileNumForName(tex_name);
         int checklump = W_CheckNumForName(tex_name);
         if (checkfile > -1 && checklump > -1)
@@ -1497,20 +1419,19 @@ static const image_c *BackupTexture(const char *tex_name, int flags)
             {
                 if (patch_lump == checklump)
                 {
-                    rim = AddImage_Smart(tex_name, IMSRC_Graphic, patch_lump, real_graphics);
-                    if (rim)
-                        return rim;
+                    rim = AddImage_Smart(tex_name, kImageSourceGraphic,
+                                         patch_lump, real_graphics);
+                    if (rim) return rim;
                 }
             }
         }
     }
 
-    if (flags & ILF_Null)
-        return nullptr;
+    if (flags & kImageLookupNull) return nullptr;
 
     PrintWarningOrError("Unknown texture found in level: '%s'\n", tex_name);
 
-    image_c *dummy;
+    Image *dummy;
 
     if (epi::StringPrefixCaseCompareASCII(tex_name, "SKY") == 0)
         dummy = CreateDummyImage(tex_name, 0x0000AA, 0x55AADD);
@@ -1522,7 +1443,7 @@ static const image_c *BackupTexture(const char *tex_name, int flags)
     return dummy;
 }
 
-void W_MakeEdgeTex()
+void CreateFallbackTexture()
 {
     real_textures.push_back(CreateDummyImage("EDGETEX", 0xAA5511, 0x663300));
 }
@@ -1531,44 +1452,41 @@ void W_MakeEdgeTex()
 // BackupFlat
 //
 
-static const image_c *BackupFlat(const char *flat_name, int flags)
+static const Image *BackupFlat(const char *flat_name, int flags)
 {
-    const image_c *rim;
+    const Image *rim;
 
     // backup plan 1: if lump exists and is right size, add it.
-    if (!(flags & ILF_NoNew))
+    if (!(flags & kImageLookupNoNew))
     {
         int i = W_CheckNumForName(flat_name);
 
         if (i >= 0)
         {
             rim = AddImageFlat(flat_name, i);
-            if (rim)
-                return rim;
+            if (rim) return rim;
         }
     }
 
     // backup plan 2: Texture with the same name ?
-    if (!(flags & ILF_Exact))
+    if (!(flags & kImageLookupExact))
     {
-        rim = W_ImageDoLookup(real_textures, flat_name);
-        if (rim)
-            return rim;
+        rim = ImageContainerLookup(real_textures, flat_name);
+        if (rim) return rim;
     }
 
-    if (flags & ILF_Null)
-        return nullptr;
+    if (flags & kImageLookupNull) return nullptr;
 
     PrintWarningOrError("Unknown flat found in level: '%s'\n", flat_name);
 
-    image_c *dummy = CreateDummyImage(flat_name, 0x11AA11, 0x115511);
+    Image *dummy = CreateDummyImage(flat_name, 0x11AA11, 0x115511);
 
     // keep dummy flat so that future lookups will succeed
     real_flats.push_back(dummy);
     return dummy;
 }
 
-void W_MakeEdgeFlat()
+void CreateFallbackFlat()
 {
     real_flats.push_back(CreateDummyImage("EDGEFLAT", 0x11AA11, 0x115511));
 }
@@ -1576,138 +1494,133 @@ void W_MakeEdgeFlat()
 //
 // BackupGraphic
 //
-static const image_c *BackupGraphic(const char *gfx_name, int flags)
+static const Image *BackupGraphic(const char *gfx_name, int flags)
 {
-    const image_c *rim;
+    const Image *rim;
 
     // backup plan 1: look for sprites and heretic-background
-    if ((flags & (ILF_Exact | ILF_Font)) == 0)
+    if ((flags & (kImageLookupExact | kImageLookupFont)) == 0)
     {
-        rim = W_ImageDoLookup(real_graphics, gfx_name, IMSRC_Raw320x200);
-        if (rim)
-            return rim;
+        rim =
+            ImageContainerLookup(real_graphics, gfx_name, kImageSourceRawBlock);
+        if (rim) return rim;
 
-        rim = W_ImageDoLookup(real_sprites, gfx_name);
-        if (rim)
-            return rim;
+        rim = ImageContainerLookup(real_sprites, gfx_name);
+        if (rim) return rim;
     }
 
     // not already loaded ?  Check if lump exists in wad, if so add it.
-    if (!(flags & ILF_NoNew))
+    if (!(flags & kImageLookupNoNew))
     {
         int i = W_CheckNumForName_GFX(gfx_name);
 
         if (i >= 0)
         {
-            rim = AddImage_Smart(gfx_name, IMSRC_Graphic, i, real_graphics);
-            if (rim)
-                return rim;
+            rim =
+                AddImage_Smart(gfx_name, kImageSourceGraphic, i, real_graphics);
+            if (rim) return rim;
         }
     }
 
-    if (flags & ILF_Null)
-        return nullptr;
+    if (flags & kImageLookupNull) return nullptr;
 
     PrintDebugOrError("Unknown graphic: '%s'\n", gfx_name);
 
-    image_c *dummy;
+    Image *dummy;
 
-    if (flags & ILF_Font)
-        dummy = CreateDummyImage(gfx_name, 0xFFFFFF, TRANS_PIXEL);
+    if (flags & kImageLookupFont)
+        dummy = CreateDummyImage(gfx_name, 0xFFFFFF, kTransparentPixelIndex);
     else
-        dummy = CreateDummyImage(gfx_name, 0xFF0000, TRANS_PIXEL);
+        dummy = CreateDummyImage(gfx_name, 0xFF0000, kTransparentPixelIndex);
 
     // keep dummy graphic so that future lookups will succeed
     real_graphics.push_back(dummy);
     return dummy;
 }
 
-static const image_c *BackupSprite(const char *spr_name, int flags)
+static const Image *BackupSprite(const char *spr_name, int flags)
 {
-    if (flags & ILF_Null)
-        return nullptr;
+    if (flags & kImageLookupNull) return nullptr;
 
-    return W_ImageForDummySprite();
+    return ImageForDummySprite();
 }
 
-const image_c *W_ImageLookup(const char *name, ImageNamespace type, int flags)
+const Image *ImageLookup(const char *name, ImageNamespace type, int flags)
 {
     //
     // Note: search must be case insensitive.
     //
 
     // "NoTexture" marker.
-    if (!name || !name[0] || name[0] == '-')
-        return nullptr;
+    if (!name || !name[0] || name[0] == '-') return nullptr;
 
     // "Sky" marker.
-    if (type == kImageNamespaceFlat && (epi::StringCaseCompareASCII(name, "F_SKY1") == 0 || epi::StringCaseCompareASCII(name, "F_SKY") == 0))
+    if (type == kImageNamespaceFlat &&
+        (epi::StringCaseCompareASCII(name, "F_SKY1") == 0 ||
+         epi::StringCaseCompareASCII(name, "F_SKY") == 0))
     {
         return skyflatimage;
     }
 
     // compatibility hack (first texture in IWAD is a dummy)
-    if (type == kImageNamespaceTexture && ((epi::StringCaseCompareASCII(name, "AASTINKY") == 0) || (epi::StringCaseCompareASCII(name, "AASHITTY") == 0) ||
-                                (epi::StringCaseCompareASCII(name, "BADPATCH") == 0) || (epi::StringCaseCompareASCII(name, "ABADONE") == 0)))
+    if (type == kImageNamespaceTexture &&
+        ((epi::StringCaseCompareASCII(name, "AASTINKY") == 0) ||
+         (epi::StringCaseCompareASCII(name, "AASHITTY") == 0) ||
+         (epi::StringCaseCompareASCII(name, "BADPATCH") == 0) ||
+         (epi::StringCaseCompareASCII(name, "ABADONE") == 0)))
     {
         return nullptr;
     }
 
-    const image_c *rim;
+    const Image *rim;
 
     if (type == kImageNamespaceTexture)
     {
-        rim = W_ImageDoLookup(real_textures, name);
+        rim = ImageContainerLookup(real_textures, name);
         return rim ? rim : BackupTexture(name, flags);
     }
     if (type == kImageNamespaceFlat)
     {
-        rim = W_ImageDoLookup(real_flats, name);
+        rim = ImageContainerLookup(real_flats, name);
         return rim ? rim : BackupFlat(name, flags);
     }
     if (type == kImageNamespaceSprite)
     {
-        rim = W_ImageDoLookup(real_sprites, name);
+        rim = ImageContainerLookup(real_sprites, name);
         return rim ? rim : BackupSprite(name, flags);
     }
 
     /* kImageNamespaceGraphic */
 
-    rim = W_ImageDoLookup(real_graphics, name);
+    rim = ImageContainerLookup(real_graphics, name);
     return rim ? rim : BackupGraphic(name, flags);
 }
 
-const image_c *W_ImageForDummySprite(void)
+const Image *ImageForDummySprite(void) { return dummy_sprite; }
+
+const Image *ImageForDummySkin(void) { return dummy_skin; }
+
+const Image *ImageForHomDetect(void)
 {
-    return dummy_sprite;
+    return dummy_hom[(render_frame_count & 0x10) ? 1 : 0];
 }
 
-const image_c *W_ImageForDummySkin(void)
-{
-    return dummy_skin;
-}
-
-const image_c *W_ImageForHOMDetect(void)
-{
-    return dummy_hom[(framecount & 0x10) ? 1 : 0];
-}
-
-const image_c *W_ImageForFogWall(RGBAColor fog_color)
+const Image *ImageForFogWall(RGBAColor fog_color)
 {
     std::string fogname = epi::StringFormat("FOGWALL_%d", fog_color);
-    image_c    *fogwall = (image_c *)W_ImageLookup(fogname.c_str(), kImageNamespaceGraphic, ILF_Null);
-    if (fogwall)
-        return fogwall;
+    Image      *fogwall = (Image *)ImageLookup(
+        fogname.c_str(), kImageNamespaceGraphic, kImageLookupNull);
+    if (fogwall) return fogwall;
     ImageDefinition *fogdef = new ImageDefinition;
-    fogdef->colour_     = fog_color;
-    fogdef->name_       = fogname;
-    fogdef->type_       = kImageDataColor;
-    fogdef->belong_     = kImageNamespaceGraphic;
-    fogwall            = AddImageUser(fogdef);
+    fogdef->colour_         = fog_color;
+    fogdef->name_           = fogname;
+    fogdef->type_           = kImageDataColor;
+    fogdef->belong_         = kImageNamespaceGraphic;
+    fogwall                 = AddImageUser(fogdef);
     return fogwall;
 }
 
-const image_c *W_ImageParseSaveString(char type, const char *name)
+const Image *ImageParseSaveString(char type, const char *name)
 {
     // Used by the savegame code.
 
@@ -1719,29 +1632,29 @@ const image_c *W_ImageParseSaveString(char type, const char *name)
 
     switch (type)
     {
-    case 'K':
-        return skyflatimage;
+        case 'K':
+            return skyflatimage;
 
-    case 'F':
-        return W_ImageLookup(name, kImageNamespaceFlat);
+        case 'F':
+            return ImageLookup(name, kImageNamespaceFlat);
 
-    case 'P':
-        return W_ImageLookup(name, kImageNamespaceGraphic);
+        case 'P':
+            return ImageLookup(name, kImageNamespaceGraphic);
 
-    case 'S':
-        return W_ImageLookup(name, kImageNamespaceSprite);
+        case 'S':
+            return ImageLookup(name, kImageNamespaceSprite);
 
-    default:
-        LogWarning("W_ImageParseSaveString: unknown type '%c'\n", type);
-        /* FALL THROUGH */
+        default:
+            LogWarning("ImageParseSaveString: unknown type '%c'\n", type);
+            /* FALL THROUGH */
 
-    case 'd': /* dummy */
-    case 'T':
-        return W_ImageLookup(name, kImageNamespaceTexture);
+        case 'd': /* dummy */
+        case 'T':
+            return ImageLookup(name, kImageNamespaceTexture);
     }
 }
 
-void W_ImageMakeSaveString(const image_c *image, char *type, char *namebuf)
+void ImageMakeSaveString(const Image *image, char *type, char *namebuf)
 {
     // Used by the savegame code
 
@@ -1752,68 +1665,59 @@ void W_ImageMakeSaveString(const image_c *image, char *type, char *namebuf)
         return;
     }
 
-    const image_c *rim = (const image_c *)image;
+    const Image *rim = (const Image *)image;
 
-    strcpy(namebuf, rim->name.c_str());
+    strcpy(namebuf, rim->name_.c_str());
 
     /* handle User images (convert to a more general type) */
-    if (rim->source_type == IMSRC_User)
+    if (rim->source_type_ == kImageSourceUser)
     {
-        switch (rim->source.user.def->belong_)
+        switch (rim->source_.user.def->belong_)
         {
-        case kImageNamespaceTexture:
-            (*type) = 'T';
-            return;
-        case kImageNamespaceFlat:
-            (*type) = 'F';
-            return;
-        case kImageNamespaceSprite:
-            (*type) = 'S';
-            return;
+            case kImageNamespaceTexture:
+                (*type) = 'T';
+                return;
+            case kImageNamespaceFlat:
+                (*type) = 'F';
+                return;
+            case kImageNamespaceSprite:
+                (*type) = 'S';
+                return;
 
-        default: /* kImageNamespaceGraphic */
-            (*type) = 'P';
-            return;
+            default: /* kImageNamespaceGraphic */
+                (*type) = 'P';
+                return;
         }
     }
 
-    switch (rim->source_type)
+    switch (rim->source_type_)
     {
-    case IMSRC_Raw320x200:
-    case IMSRC_Graphic:
-        (*type) = 'P';
-        return;
+        case kImageSourceRawBlock:
+        case kImageSourceGraphic:
+            (*type) = 'P';
+            return;
 
-    case IMSRC_TX_HI:
-    case IMSRC_Texture:
-        (*type) = 'T';
-        return;
+        case kImageSourceTxHi:
+        case kImageSourceTexture:
+            (*type) = 'T';
+            return;
 
-    case IMSRC_Flat:
-        (*type) = 'F';
-        return;
+        case kImageSourceFlat:
+            (*type) = 'F';
+            return;
 
-    case IMSRC_Sprite:
-        (*type) = 'S';
-        return;
+        case kImageSourceSprite:
+            (*type) = 'S';
+            return;
 
-    case IMSRC_Dummy:
-        (*type) = 'd';
-        return;
+        case kImageSourceDummy:
+            (*type) = 'd';
+            return;
 
-    default:
-        FatalError("W_ImageMakeSaveString: bad type %d\n", rim->source_type);
-        break;
+        default:
+            FatalError("ImageMakeSaveString: bad type %d\n", rim->source_type_);
+            break;
     }
-}
-
-const char *W_ImageGetName(const image_c *image)
-{
-    const image_c *rim;
-
-    rim = (const image_c *)image;
-
-    return rim->name.c_str();
 }
 
 //----------------------------------------------------------------------------
@@ -1821,17 +1725,18 @@ const char *W_ImageGetName(const image_c *image)
 //  IMAGE USAGE
 //
 
-static cached_image_t *ImageCacheOGL(image_c *rim, const Colormap *trans, bool do_whiten)
+static CachedImage *ImageCacheOGL(Image *rim, const Colormap *trans,
+                                  bool do_whiten)
 {
     // check if image + translation is already cached
 
     int free_slot = -1;
 
-    cached_image_t *rc = nullptr;
+    CachedImage *rc = nullptr;
 
-    for (int i = 0; i < (int)rim->cache.size(); i++)
+    for (int i = 0; i < (int)rim->cache_.size(); i++)
     {
-        rc = rim->cache[i];
+        rc = rim->cache_[i];
 
         if (!rc)
         {
@@ -1839,15 +1744,13 @@ static cached_image_t *ImageCacheOGL(image_c *rim, const Colormap *trans, bool d
             continue;
         }
 
-        if (do_whiten && rc->is_whitened)
-            break;
+        if (do_whiten && rc->is_whitened) break;
 
-        if (rc->trans_map == trans)
+        if (rc->translation_map == trans)
         {
             if (do_whiten)
             {
-                if (rc->is_whitened)
-                    break;
+                if (rc->is_whitened) break;
             }
             else if (!rc->is_whitened)
                 break;
@@ -1859,40 +1762,43 @@ static cached_image_t *ImageCacheOGL(image_c *rim, const Colormap *trans, bool d
     if (!rc)
     {
         // add entry into cache
-        rc = new cached_image_t;
+        rc = new CachedImage;
 
-        rc->parent      = rim;
-        rc->trans_map   = trans;
-        rc->hue         = kRGBANoValue;
-        rc->tex_id      = 0;
-        rc->is_whitened = do_whiten ? true : false;
+        rc->parent          = rim;
+        rc->translation_map = trans;
+        rc->hue             = kRGBANoValue;
+        rc->texture_id      = 0;
+        rc->is_whitened     = do_whiten ? true : false;
 
-        InsertAtTail(rc);
+        image_cache.push_back(rc);
 
         if (free_slot >= 0)
-            rim->cache[free_slot] = rc;
+            rim->cache_[free_slot] = rc;
         else
-            rim->cache.push_back(rc);
+            rim->cache_.push_back(rc);
     }
 
     SYS_ASSERT(rc);
 
-    if (rim->liquid_type > LIQ_None && (swirling_flats == SWIRL_SMMU || swirling_flats == SWIRL_SMMUSWIRL))
+    if (rim->liquid_type_ > kLiquidImageNone &&
+        (swirling_flats == kLiquidSwirlSmmu ||
+         swirling_flats == kLiquidSwirlSmmuSlosh))
     {
-        if (!erraticism_active && !time_stop_active && rim->swirled_game_tic != hud_tic / (double_framerate.d_? 2 : 1))
+        if (!erraticism_active && !time_stop_active &&
+            rim->swirled_game_tic_ != hud_tic / (double_framerate.d_ ? 2 : 1))
         {
-            if (rc->tex_id != 0)
+            if (rc->texture_id != 0)
             {
-                glDeleteTextures(1, &rc->tex_id);
-                rc->tex_id = 0;
+                glDeleteTextures(1, &rc->texture_id);
+                rc->texture_id = 0;
             }
         }
     }
 
-    if (rc->tex_id == 0)
+    if (rc->texture_id == 0)
     {
         // load image into cache
-        rc->tex_id = LoadImageOGL(rim, trans, do_whiten);
+        rc->texture_id = LoadImageOGL(rim, trans, do_whiten);
     }
 
     return rc;
@@ -1902,61 +1808,48 @@ static cached_image_t *ImageCacheOGL(image_c *rim, const Colormap *trans, bool d
 // The top-level routine for caching in an image.  Mainly just a
 // switch to more specialised routines.
 //
-GLuint W_ImageCache(const image_c *image, bool anim, const Colormap *trans, bool do_whiten)
+GLuint ImageCache(const Image *image, bool anim, const Colormap *trans,
+                  bool do_whiten)
 {
     // Intentional Const Override
-    image_c *rim = (image_c *)image;
+    Image *rim = (Image *)image;
 
     // handle animations
     if (anim)
     {
-        if (rim->liquid_type == LIQ_None || swirling_flats == SWIRL_Vanilla)
-            rim = rim->anim.cur;
+        if (rim->liquid_type_ == kLiquidImageNone ||
+            swirling_flats == kLiquidSwirlVanilla)
+            rim = rim->animation_.current;
     }
 
-    if (rim->grayscale)
-        do_whiten = true;
+    if (rim->grayscale_) do_whiten = true;
 
-    cached_image_t *rc = ImageCacheOGL(rim, trans, do_whiten);
+    CachedImage *rc = ImageCacheOGL(rim, trans, do_whiten);
 
     SYS_ASSERT(rc->parent);
 
-    return rc->tex_id;
+    return rc->texture_id;
 }
 
-#if 0
-RGBAColor W_ImageGetHue(const image_c *img)
+void ImagePrecache(const Image *image)
 {
-	SYS_ASSERT(c);
-
-	// Intentional Const Override
-	cached_image_t *rc = ((cached_image_t *) c) - 1;
-
-	SYS_ASSERT(rc->parent);
-
-	return rc->hue;
-}
-#endif
-
-void W_ImagePreCache(const image_c *image)
-{
-    W_ImageCache(image, false);
+    ImageCache(image, false);
 
     // Intentional Const Override
-    image_c *rim = (image_c *)image;
+    Image *rim = (Image *)image;
 
     // pre-cache alternative images for switches too
-    if (rim->name.size() >= 4 &&
-        (epi::StringPrefixCaseCompareASCII(rim->name, "SW1") == 0 || epi::StringPrefixCaseCompareASCII(rim->name, "SW2") == 0))
+    if (rim->name_.size() >= 4 &&
+        (epi::StringPrefixCaseCompareASCII(rim->name_, "SW1") == 0 ||
+         epi::StringPrefixCaseCompareASCII(rim->name_, "SW2") == 0))
     {
-        std::string alt_name = rim->name;
+        std::string alt_name = rim->name_;
 
         alt_name[2] = (alt_name[2] == '1') ? '2' : '1';
 
-        image_c *alt = W_ImageDoLookup(real_textures, alt_name.c_str());
+        Image *alt = ImageContainerLookup(real_textures, alt_name.c_str());
 
-        if (alt)
-            W_ImageCache(alt, false);
+        if (alt) ImageCache(alt, false);
     }
 }
 
@@ -1964,8 +1857,9 @@ void W_ImagePreCache(const image_c *image)
 
 static void W_CreateDummyImages(void)
 {
-    dummy_sprite = CreateDummyImage("DUMMY_SPRITE", 0xFFFF00, TRANS_PIXEL);
-    dummy_skin   = CreateDummyImage("DUMMY_SKIN", 0xFF77FF, 0x993399);
+    dummy_sprite =
+        CreateDummyImage("DUMMY_SPRITE", 0xFFFF00, kTransparentPixelIndex);
+    dummy_skin = CreateDummyImage("DUMMY_SKIN", 0xFF77FF, 0x993399);
 
     skyflatimage = CreateDummyImage("DUMMY_SKY", 0x0000AA, 0x55AADD);
 
@@ -1975,23 +1869,23 @@ static void W_CreateDummyImages(void)
     // make the dummy sprite easier to see
     {
         // Intentional Const Override
-        image_c *dsp = (image_c *)dummy_sprite;
+        Image *dsp = (Image *)dummy_sprite;
 
-        dsp->scale_x = 3.0f;
-        dsp->scale_y = 3.0f;
+        dsp->scale_x_ = 3.0f;
+        dsp->scale_y_ = 3.0f;
     }
 }
 
 //
 // Initialises the image system.
 //
-bool W_InitImages(void)
+bool InitializeImages(void)
 {
     // check options
     if (ArgumentFind("nosmoothing") > 0)
-        var_smoothing = 0;
+        image_smoothing = 0;
     else if (ArgumentFind("smoothing") > 0)
-        var_smoothing = 1;
+        image_smoothing = 1;
 
     if (ArgumentFind("hqscale") > 0 || ArgumentFind("hqall") > 0)
         hq2x_scaling = 3;
@@ -2006,7 +1900,7 @@ bool W_InitImages(void)
 //
 // Animate all the images.
 //
-void W_UpdateImageAnims(void)
+void AnimationTicker(void)
 {
     do_Animate(real_graphics);
     if (game_state < GS_LEVEL)
@@ -2021,19 +1915,19 @@ void W_UpdateImageAnims(void)
     }
 }
 
-void W_DeleteAllImages(void)
+void DeleteAllImages(void)
 {
-    std::list<cached_image_t *>::iterator CI;
+    std::list<CachedImage *>::iterator CI;
 
     for (CI = image_cache.begin(); CI != image_cache.end(); CI++)
     {
-        cached_image_t *rc = *CI;
+        CachedImage *rc = *CI;
         SYS_ASSERT(rc);
 
-        if (rc->tex_id != 0)
+        if (rc->texture_id != 0)
         {
-            glDeleteTextures(1, &rc->tex_id);
-            rc->tex_id = 0;
+            glDeleteTextures(1, &rc->texture_id);
+            rc->texture_id = 0;
         }
     }
 
@@ -2042,17 +1936,17 @@ void W_DeleteAllImages(void)
 }
 
 //
-// W_AnimateImageSet
+// AnimateImageSet
 //
 // Sets up the images so they will animate properly.  Array is
 // allowed to contain nullptr entries.
 //
 // NOTE: modifies the input array of images.
 //
-void W_AnimateImageSet(const image_c **images, int number, int speed)
+void AnimateImageSet(const Image **images, int number, int speed)
 {
-    int      i, total;
-    image_c *rim, *other;
+    int    i, total;
+    Image *rim, *other;
 
     SYS_ASSERT(images);
     SYS_ASSERT(speed > 0);
@@ -2061,53 +1955,49 @@ void W_AnimateImageSet(const image_c **images, int number, int speed)
     for (i = 0, total = 0; i < number; i++)
     {
         // Intentional Const Override
-        rim = (image_c *)images[i];
+        rim = (Image *)images[i];
 
-        if (!rim)
-            continue;
+        if (!rim) continue;
 
-        if (rim->anim.speed > 0)
+        if (rim->animation_.speed > 0)
         {
-            // Make new image but keep it out of the lookup list ? - Dasho
-            // I don't think image_c class has a CopyDetail function...is it worth it for this one use?
-            image_c *dupe_image        = new image_c;
-            dupe_image->name           = rim->name;
-            dupe_image->actual_h       = rim->actual_h;
-            dupe_image->actual_w       = rim->actual_w;
-            dupe_image->cache          = rim->cache;
-            dupe_image->is_empty       = rim->is_empty;
-            dupe_image->is_font        = rim->is_font;
-            dupe_image->liquid_type    = rim->liquid_type;
-            dupe_image->offset_x       = rim->offset_x;
-            dupe_image->offset_y       = rim->offset_y;
-            dupe_image->opacity        = rim->opacity;
-            dupe_image->ratio_h        = rim->ratio_h;
-            dupe_image->ratio_w        = rim->ratio_w;
-            dupe_image->scale_x        = rim->scale_x;
-            dupe_image->scale_y        = rim->scale_y;
-            dupe_image->source         = rim->source;
-            dupe_image->source_palette = rim->source_palette;
-            dupe_image->source_type    = rim->source_type;
-            dupe_image->total_h        = rim->total_h;
-            dupe_image->total_w        = rim->total_w;
-            rim                        = dupe_image;
+            Image *dupe_image           = new Image;
+            dupe_image->name_           = rim->name_;
+            dupe_image->actual_height_  = rim->actual_height_;
+            dupe_image->actual_width_   = rim->actual_width_;
+            dupe_image->cache_          = rim->cache_;
+            dupe_image->is_empty_       = rim->is_empty_;
+            dupe_image->is_font_        = rim->is_font_;
+            dupe_image->liquid_type_    = rim->liquid_type_;
+            dupe_image->offset_x_       = rim->offset_x_;
+            dupe_image->offset_y_       = rim->offset_y_;
+            dupe_image->opacity_        = rim->opacity_;
+            dupe_image->height_ratio_   = rim->height_ratio_;
+            dupe_image->width_ratio_    = rim->width_ratio_;
+            dupe_image->scale_x_        = rim->scale_x_;
+            dupe_image->scale_y_        = rim->scale_y_;
+            dupe_image->source_         = rim->source_;
+            dupe_image->source_palette_ = rim->source_palette_;
+            dupe_image->source_type_    = rim->source_type_;
+            dupe_image->total_height_   = rim->total_height_;
+            dupe_image->total_width_    = rim->total_width_;
+            rim                         = dupe_image;
         }
 
         images[total++] = rim;
     }
 
     // anything left to animate ?
-    if (total < 2)
-        return;
+    if (total < 2) return;
 
     for (i = 0; i < total; i++)
     {
         // Intentional Const Override
-        rim   = (image_c *)images[i];
-        other = (image_c *)images[(i + 1) % total];
+        rim   = (Image *)images[i];
+        other = (Image *)images[(i + 1) % total];
 
-        rim->anim.next  = other;
-        rim->anim.speed = rim->anim.count = speed;
+        rim->animation_.next  = other;
+        rim->animation_.speed = rim->animation_.count = speed;
     }
 }
 

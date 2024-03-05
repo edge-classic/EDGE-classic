@@ -82,11 +82,11 @@ int key_gamma_toggle;
 
 extern bool EventMatchesKey(int keyvar, int key);
 
-extern ConsoleVariable v_secbright;
+extern ConsoleVariable sector_brightness_correction;
 
-extern unsigned int R_UploadTexture(ImageData *img, int flags, int max_pix);
+extern unsigned int RendererUploadTexture(ImageData *img, int flags, int max_pix);
 
-extern const image_c *menu_backdrop;
+extern const Image *menu_backdrop;
 
 //
 // defaulted values
@@ -127,20 +127,20 @@ SoundEffect *sound_effect_swtchx;
 //
 //  IMAGES USED
 //
-static const image_c *therm_l;
-static const image_c *therm_m;
-static const image_c *therm_r;
-static const image_c *therm_o;
+static const Image *therm_l;
+static const Image *therm_m;
+static const Image *therm_r;
+static const Image *therm_o;
 
-static const image_c *menu_load_game;
-static const image_c *menu_save_game;
-static const image_c *menu_sound_volume;
-static const image_c *menu_doom;
-static const image_c *menu_new_game;
-static const image_c *menu_skill;
-static const image_c *menu_episode;
-static image_c       *menu_skull[2];
-static const image_c *menu_read_this[2];
+static const Image *menu_load_game;
+static const Image *menu_save_game;
+static const Image *menu_sound_volume;
+static const Image *menu_doom;
+static const Image *menu_new_game;
+static const Image *menu_skill;
+static const Image *menu_episode;
+static Image       *menu_skull[2];
+static const Image *menu_read_this[2];
 
 static Style *menu_default_style;
 static Style *main_menu_style;
@@ -214,7 +214,7 @@ struct MenuItem
 
     // image for menu entry
     char           patch_name[10] = {0};
-    const image_c *image          = nullptr;
+    const Image *image          = nullptr;
 
     // choice = menu item #.
     // if status = 2, choice can be kSliderLeft or kSliderRight
@@ -583,7 +583,7 @@ void MenuReadSaveStrings(void)
                 if (save_extended_information_slots[i].save_image_data)
                 {
                     save_extended_information_slots[i].save_texture_id =
-                        R_UploadTexture(
+                        RendererUploadTexture(
                             save_extended_information_slots[i].save_image_data,
                             2, (1 << 30));
                     save_extended_information_slots[i].save_image_page =
@@ -625,10 +625,10 @@ void MenuReadSaveStrings(void)
     }
 }
 
-int CenterMenuImage(const image_c *img)
+int CenterMenuImage(const Image *img)
 {
     float CenterX = 160;
-    CenterX -= IM_WIDTH(img) / 2;
+    CenterX -= img->ScaledWidthActual() / 2;
 
     return CenterX;
 }
@@ -636,13 +636,13 @@ int CenterMenuImage(const image_c *img)
 //
 // Center an image applying any SCALE and X_OFFSET from
 // styles.ddf
-int CenterMenuImage2(Style *style, int text_type, const image_c *img)
+int CenterMenuImage2(Style *style, int text_type, const Image *img)
 {
     float CenterX  = 160;
     float txtscale = style->definition_->text_[text_type].scale_;
     float gfxWidth = 0;
 
-    gfxWidth = IM_WIDTH(img) * txtscale;
+    gfxWidth = img->ScaledWidthActual() * txtscale;
     CenterX -= gfxWidth / 2;
     CenterX += style->definition_->text_[text_type].x_offset_;
 
@@ -729,7 +729,7 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style,
     LineHeight = style->fonts_[text_type]->NominalHeight() * txtscale;
 
     const Colormap *colmap = style->definition_->text_[text_type].colmap_;
-    RGBAColor       col    = V_GetFontColor(colmap);
+    RGBAColor       col    = GetFontColor(colmap);
     // HudThinBox(x - 5, y - 5, x + 95, y + 50, col);
     HudThinBox(x - 5, y - 5, x + 95, y + 115, col);
 
@@ -800,7 +800,7 @@ static void MenuDrawSaveLoadCommon(int row, int row2, Style *style,
             (style->definition_->text_[text_type].y_offset_ +
              style->definition_->entry_spacing_ + 114) -
                 y,
-            info->save_image_data, info->save_texture_id, OPAC_Solid);
+            info->save_image_data, info->save_texture_id, kOpacitySolid);
     }
 }
 
@@ -845,7 +845,7 @@ void MenuDrawLoad(void)
     TempY += style->definition_->text_[fontType].y_offset_;
     TempY += style->definition_->entry_spacing_;
 
-    RGBAColor col = V_GetFontColor(style->definition_->text_[fontType].colmap_);
+    RGBAColor col = GetFontColor(style->definition_->text_[fontType].colmap_);
     HudThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
     // 2. draw the save games
@@ -971,7 +971,7 @@ void MenuDrawSave(void)
     TempY += style->definition_->text_[fontType].y_offset_;
     TempY += style->definition_->entry_spacing_;
 
-    RGBAColor col = V_GetFontColor(style->definition_->text_[fontType].colmap_);
+    RGBAColor col = GetFontColor(style->definition_->text_[fontType].colmap_);
     HudThinBox(TempX - 5, TempY - 5, TempX + 175, TempY + 115, col);
 
     // 2. draw the save games
@@ -1227,7 +1227,7 @@ void MenuDrawReadThis2(void) { HudDrawImageTitleWS(menu_read_this[1]); }
 void MenuDrawMainMenu(void)
 {
     float CenterX = 0;
-    if (menu_doom->offset_x != 0.0f)  // Only auto-center if no Xoffset
+    if (menu_doom->offset_x_ != 0.0f)  // Only auto-center if no Xoffset
         CenterX = MainMenuDefinition
                       .x;  // cannot get away from the damn hardcoded value
     else
@@ -1285,15 +1285,15 @@ void MenuDrawNewGame(void)
     else
     {
         const Colormap *colmap = style->definition_->text_[fontType].colmap_;
-        if (menu_new_game->offset_x != 0.0f)  // Only auto-center if no Xoffset
+        if (menu_new_game->offset_x_ != 0.0f)  // Only auto-center if no Xoffset
             x = MainMenuDefinition
                     .x;  // cannot get away from the damn hardcoded value
         else
             x = CenterMenuImage2(style, fontType, menu_new_game);
 
         HudStretchImage(x, 14 + style->definition_->text_[fontType].y_offset_,
-                        IM_WIDTH(menu_new_game) * txtscale,
-                        IM_HEIGHT(menu_new_game) * txtscale, menu_new_game, 0.0,
+                        menu_new_game->ScaledWidthActual() * txtscale,
+                        menu_new_game->ScaledHeightActual() * txtscale, menu_new_game, 0.0,
                         0.0, colmap);
 
         // HudDrawImage(x + style->definition_->text[fontType].x_offset,
@@ -1309,15 +1309,15 @@ void MenuDrawNewGame(void)
         if (style->definition_->entry_alignment_ ==
             StyleDefinition::kAlignmentCenter)
         {
-            if (menu_skill->offset_x != 0.0f)  // Only auto-center if no Xoffset
+            if (menu_skill->offset_x_ != 0.0f)  // Only auto-center if no Xoffset
                 x = 54;  // cannot get away from the damn hardcoded value
             else
                 x = CenterMenuImage2(style, fontType, menu_skill);
         }
         colmap = style->definition_->text_[fontType].colmap_;
         HudStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_,
-                        IM_WIDTH(menu_skill) * txtscale,
-                        IM_HEIGHT(menu_skill) * txtscale, menu_skill, 0.0, 0.0,
+                        menu_skill->ScaledWidthActual() * txtscale,
+                        menu_skill->ScaledHeightActual() * txtscale, menu_skill, 0.0, 0.0,
                         colmap);
 
         // HudDrawImage(x + style->definition_->text[fontType].x_offset,
@@ -1368,7 +1368,7 @@ static void CreateEpisodeMenu(void)
         if (EpisodeMenu[e].patch_name[0])
         {
             if (!EpisodeMenu[e].image)
-                EpisodeMenu[e].image = W_ImageLookup(EpisodeMenu[e].patch_name);
+                EpisodeMenu[e].image = ImageLookup(EpisodeMenu[e].patch_name);
         }
 
         e++;
@@ -1428,7 +1428,7 @@ void MenuDrawEpisode(void)
         if (style->definition_->entry_alignment_ ==
             StyleDefinition::kAlignmentCenter)
         {
-            if (menu_episode->offset_x !=
+            if (menu_episode->offset_x_ !=
                 0.0f)    // Only auto-center if no Xoffset
                 x = 54;  // cannot get away from the damn hardcoded value
             else
@@ -1437,8 +1437,8 @@ void MenuDrawEpisode(void)
 
         const Colormap *colmap = style->definition_->text_[fontType].colmap_;
         HudStretchImage(x, 38 + style->definition_->text_[fontType].y_offset_,
-                        IM_WIDTH(menu_episode) * txtscale,
-                        IM_HEIGHT(menu_episode) * txtscale, menu_episode, 0.0,
+                        menu_episode->ScaledWidthActual() * txtscale,
+                        menu_episode->ScaledHeightActual() * txtscale, menu_episode, 0.0,
                         0.0, colmap);
 
         // HudDrawImage(x + episode_style->definition_->text[fontType].x_offset,
@@ -1787,7 +1787,7 @@ void MenuDrawSlider(int x, int y, float slider_position, float increment,
                 ->text_[StyleDefinition::kTextSectionAlternate]
                 .colmap_;
 
-        if (colmap) slider_color = V_GetFontColor(colmap);
+        if (colmap) slider_color = GetFontColor(colmap);
 
         HudThinBox(
             x,
@@ -1836,21 +1836,21 @@ void MenuDrawSlider(int x, int y, float slider_position, float increment,
 
         int i = 0;
 
-        HudStretchImage(x, y, step + 1, IM_HEIGHT(therm_l) / div, therm_l, 0.0,
+        HudStretchImage(x, y, step + 1, therm_l->ScaledHeightActual() / div, therm_l, 0.0,
                         0.0);
 
         for (x += step; i < (50 / step); i++, x += step)
         {
-            HudStretchImage(x, y, step + 1, IM_HEIGHT(therm_m) / div, therm_m,
+            HudStretchImage(x, y, step + 1, therm_m->ScaledHeightActual() / div, therm_m,
                             0.0, 0.0);
         }
 
-        HudStretchImage(x, y, step + 1, IM_HEIGHT(therm_r) / div, therm_r, 0.0,
+        HudStretchImage(x, y, step + 1, therm_r->ScaledHeightActual() / div, therm_r, 0.0,
                         0.0);
 
         HudStretchImage(
             basex + ((slider_position - min) / increment) * scale_step + 1, y,
-            step + 1, IM_HEIGHT(therm_o) / div, therm_o, 0.0, 0.0);
+            step + 1, therm_o->ScaledHeightActual() / div, therm_o, 0.0, 0.0);
 
         if (!actual_val.empty())
             HudWriteText(opt_style, StyleDefinition::kTextSectionAlternate,
@@ -2189,15 +2189,15 @@ bool MenuResponder(InputEvent *ev)
 
             case KEYD_GAMMATOGGLE:  // gamma toggle
 
-                v_secbright.d_++;
-                if (v_secbright.d_ > 10) v_secbright.d_ = 0;
+                sector_brightness_correction.d_++;
+                if (sector_brightness_correction.d_ > 10) sector_brightness_correction.d_ = 0;
 
-                v_secbright = v_secbright.d_;
+                sector_brightness_correction = sector_brightness_correction.d_;
 
                 std::string msg =
                     "Sector Brightness ";  // TODO: Make language entry - Dasho
 
-                switch (v_secbright.d_)
+                switch (sector_brightness_correction.d_)
                 {
                     case 0:
                     case 1:
@@ -2205,7 +2205,7 @@ bool MenuResponder(InputEvent *ev)
                     case 3:
                     case 4:
                         msg.append("-");
-                        msg.append(std::to_string((5 - v_secbright.d_) * 10));
+                        msg.append(std::to_string((5 - sector_brightness_correction.d_) * 10));
                         break;
                     case 5:
                         msg.append("Default");
@@ -2216,7 +2216,7 @@ bool MenuResponder(InputEvent *ev)
                     case 9:
                     case 10:
                         msg.append("+");
-                        msg.append(std::to_string((5 - v_secbright.d_) * -10));
+                        msg.append(std::to_string((5 - sector_brightness_correction.d_) * -10));
                         break;
                     default:
                         msg.clear();
@@ -2438,7 +2438,7 @@ static void DrawMessage(void)
                 .colmap_)
         {
             HudSetTextColor(
-                V_GetFontColor(exit_style->definition_
+                GetFontColor(exit_style->definition_
                                    ->text_[StyleDefinition::kTextSectionText]
                                    .colmap_));
         }
@@ -2570,11 +2570,11 @@ void MenuDrawCursor(Style *style, bool graphical_item)
     //-------------------------------------------------------------
     // 1. First up, do we want a graphical cursor or a text one?
     //-------------------------------------------------------------
-    image_c *cursor;
+    Image *cursor;
     if (style->definition_->cursor_.cursor_string_ != "")
         cursor = nullptr;
     else if (style->definition_->cursor_.alt_cursor_ != "")
-        cursor = (image_c *)W_ImageLookup(
+        cursor = (Image *)ImageLookup(
             style->definition_->cursor_.alt_cursor_.c_str());
     else
         cursor = menu_skull[0];
@@ -2603,15 +2603,15 @@ void MenuDrawCursor(Style *style, bool graphical_item)
     }
     else  // We're going graphical cursor
     {
-        old_offset_x     = cursor->offset_x;
-        old_offset_y     = cursor->offset_y;
-        cursor->offset_x = 0;
-        cursor->offset_y = 0;
+        old_offset_x     = cursor->offset_x_;
+        old_offset_y     = cursor->offset_y_;
+        cursor->offset_x_ = 0;
+        cursor->offset_y_ = 0;
 
         if (style->definition_->cursor_.force_offsets_)
         {
-            cursor->offset_x += old_offset_x;
-            cursor->offset_y += old_offset_y;
+            cursor->offset_x_ += old_offset_x;
+            cursor->offset_y_ += old_offset_y;
         }
 
         if (graphical_item == false)
@@ -2628,14 +2628,14 @@ void MenuDrawCursor(Style *style, bool graphical_item)
                           txtscale;
             }
         }
-        TempScale = ShortestLine / IM_HEIGHT(cursor);
-        TempWidth = IM_WIDTH(cursor) * TempScale;
+        TempScale = ShortestLine / cursor->ScaledHeightActual();
+        TempWidth = cursor->ScaledWidthActual() * TempScale;
         if (!style->definition_->cursor_.scaling_)
         {
             current_menu->menu_items[item_on].y -=
-                (IM_HEIGHT(cursor) - ShortestLine) / 2;
-            ShortestLine = IM_HEIGHT(cursor);
-            TempWidth    = IM_WIDTH(cursor);
+                (cursor->ScaledHeightActual() - ShortestLine) / 2;
+            ShortestLine = cursor->ScaledHeightActual();
+            TempWidth    = cursor->ScaledWidthActual();
         }
     }
 
@@ -2653,7 +2653,7 @@ void MenuDrawCursor(Style *style, bool graphical_item)
                         ->StringWidth(current_menu->menu_items[item_on].name) *
                     txtscale;
             else
-                txtWidth = IM_WIDTH(current_menu->menu_items[item_on].image) *
+                txtWidth = current_menu->menu_items[item_on].image->ScaledWidthActual() *
                            txtscale;
 
             TempX =
@@ -2664,16 +2664,16 @@ void MenuDrawCursor(Style *style, bool graphical_item)
             TempY = current_menu->menu_items[item_on].y + y_shift;
             if (graphical_item == true)
             {
-                TempX -= (current_menu->menu_items[item_on].image->offset_x *
+                TempX -= (current_menu->menu_items[item_on].image->offset_x_ *
                           txtscale) *
                          2;
-                TempY -= (current_menu->menu_items[item_on].image->offset_y *
+                TempY -= (current_menu->menu_items[item_on].image->offset_y_ *
                           txtscale);
             }
             if (graphical_cursor == true)
             {
-                TempX -= (cursor->offset_x * txtscale);
-                TempY -= (cursor->offset_y * txtscale);
+                TempX -= (cursor->offset_x_ * txtscale);
+                TempY -= (cursor->offset_y_ * txtscale);
             }
 
             if (graphical_cursor == true)
@@ -2693,16 +2693,16 @@ void MenuDrawCursor(Style *style, bool graphical_item)
             TempY = current_menu->menu_items[item_on].y + y_shift;
             if (graphical_item == true)
             {
-                TempX -= (current_menu->menu_items[item_on].image->offset_x *
+                TempX -= (current_menu->menu_items[item_on].image->offset_x_ *
                           txtscale) *
                          2;
-                TempY -= (current_menu->menu_items[item_on].image->offset_y *
+                TempY -= (current_menu->menu_items[item_on].image->offset_y_ *
                           txtscale);
             }
             if (graphical_cursor == true)
             {
-                TempX -= (cursor->offset_x * txtscale);
-                TempY -= (cursor->offset_y * txtscale);
+                TempX -= (cursor->offset_x_ * txtscale);
+                TempY -= (cursor->offset_y_ * txtscale);
             }
 
             if (graphical_cursor == true)
@@ -2724,16 +2724,16 @@ void MenuDrawCursor(Style *style, bool graphical_item)
 
             if (graphical_item == true)
             {
-                TempX -= (current_menu->menu_items[item_on].image->offset_x *
+                TempX -= (current_menu->menu_items[item_on].image->offset_x_ *
                           txtscale) *
                          2;
-                TempY -= (current_menu->menu_items[item_on].image->offset_y *
+                TempY -= (current_menu->menu_items[item_on].image->offset_y_ *
                           txtscale);
             }
             if (graphical_cursor == true)
             {
-                TempX -= (cursor->offset_x * txtscale);
-                TempY -= (cursor->offset_y * txtscale);
+                TempX -= (cursor->offset_x_ * txtscale);
+                TempY -= (cursor->offset_y_ * txtscale);
             }
 
             if (graphical_cursor == true)
@@ -2753,23 +2753,23 @@ void MenuDrawCursor(Style *style, bool graphical_item)
                         ->StringWidth(current_menu->menu_items[item_on].name) *
                     txtscale;
             else
-                txtWidth = IM_WIDTH(current_menu->menu_items[item_on].image) *
+                txtWidth = current_menu->menu_items[item_on].image->ScaledWidthActual() *
                            txtscale;
 
             TempX = current_menu->menu_items[item_on].x + txtWidth + TempSpacer;
             TempY = current_menu->menu_items[item_on].y + y_shift;
             if (graphical_item == true)
             {
-                TempX -= (current_menu->menu_items[item_on].image->offset_x *
+                TempX -= (current_menu->menu_items[item_on].image->offset_x_ *
                           txtscale) *
                          2;
-                TempY -= (current_menu->menu_items[item_on].image->offset_y *
+                TempY -= (current_menu->menu_items[item_on].image->offset_y_ *
                           txtscale);
             }
             if (graphical_cursor == true)
             {
-                TempX -= (cursor->offset_x * txtscale);
-                TempY -= (cursor->offset_y * txtscale);
+                TempX -= (cursor->offset_x_ * txtscale);
+                TempY -= (cursor->offset_y_ * txtscale);
             }
             if (graphical_cursor == true)
             {
@@ -2794,11 +2794,11 @@ void MenuDrawCursor(Style *style, bool graphical_item)
             TempY = current_menu->menu_items[item_on].y + y_shift;
             if (graphical_item == true)
             {
-                TempY -= (current_menu->menu_items[item_on].image->offset_y *
+                TempY -= (current_menu->menu_items[item_on].image->offset_y_ *
                           txtscale);
             }
-            TempX -= (cursor->offset_x * txtscale);
-            TempY -= (cursor->offset_y * txtscale);
+            TempX -= (cursor->offset_x_ * txtscale);
+            TempY -= (cursor->offset_y_ * txtscale);
 
             if (style->definition_->cursor_.border_)
                 HudStretchImage(current_menu->menu_items[item_on].x, TempY,
@@ -2816,7 +2816,7 @@ void MenuDrawCursor(Style *style, bool graphical_item)
             TempY = current_menu->menu_items[item_on].y + y_shift;
             if (graphical_item == true)
             {
-                TempY -= (current_menu->menu_items[item_on].image->offset_y *
+                TempY -= (current_menu->menu_items[item_on].image->offset_y_ *
                           txtscale);
             }
             HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
@@ -2837,7 +2837,7 @@ void MenuDrawCursor(Style *style, bool graphical_item)
                         ->StringWidth(current_menu->menu_items[item_on].name) *
                     txtscale;
             else
-                txtWidth = IM_WIDTH(current_menu->menu_items[item_on].image) *
+                txtWidth = current_menu->menu_items[item_on].image->ScaledWidthActual() *
                            txtscale;
 
             TempX = current_menu->menu_items[item_on].x + txtWidth + TempSpacer;
@@ -2850,15 +2850,15 @@ void MenuDrawCursor(Style *style, bool graphical_item)
         if (graphical_item == true)
         {
             TempX -=
-                (current_menu->menu_items[item_on].image->offset_x * txtscale) *
+                (current_menu->menu_items[item_on].image->offset_x_ * txtscale) *
                 2;
             TempY -=
-                (current_menu->menu_items[item_on].image->offset_y * txtscale);
+                (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
         }
         if (graphical_cursor == true)
         {
-            TempX -= (cursor->offset_x * txtscale);
-            TempY -= (cursor->offset_y * txtscale);
+            TempX -= (cursor->offset_x_ * txtscale);
+            TempY -= (cursor->offset_y_ * txtscale);
         }
 
         if (graphical_cursor == true)
@@ -2877,27 +2877,20 @@ void MenuDrawCursor(Style *style, bool graphical_item)
         if (graphical_item == true)
         {
             TempX -=
-                (current_menu->menu_items[item_on].image->offset_x * txtscale) *
+                (current_menu->menu_items[item_on].image->offset_x_ * txtscale) *
                 2;
             TempY -=
-                (current_menu->menu_items[item_on].image->offset_y * txtscale);
+                (current_menu->menu_items[item_on].image->offset_y_ * txtscale);
         }
         if (graphical_cursor == true)
         {
-            TempX -= (cursor->offset_x * txtscale);
-            TempY -= (cursor->offset_y * txtscale);
+            TempX -= (cursor->offset_x_ * txtscale);
+            TempY -= (cursor->offset_y_ * txtscale);
         }
         if (graphical_cursor == true)
         {
             HudStretchImage(TempX, TempY, TempWidth, ShortestLine, cursor, 0.0,
                             0.0, colmap);
-            /*
-            char mbuffer[200];
-            sprintf(mbuffer, "CX%d MX%d", TempX,
-            current_menu->menu_items[item_on].x);
-            HudWriteText(style,StyleDefinition::kTextSectionText, 10, 185,
-            mbuffer, 0.7f);
-            */
         }
         else
             HudWriteText(style, StyleDefinition::kTextSectionText, TempX, TempY,
@@ -2906,8 +2899,8 @@ void MenuDrawCursor(Style *style, bool graphical_item)
 
     if (graphical_cursor == true)
     {
-        cursor->offset_x = old_offset_x;
-        cursor->offset_y = old_offset_y;
+        cursor->offset_x_ = old_offset_x;
+        cursor->offset_y_ = old_offset_y;
     }
     HudSetAlpha(old_alpha);
 }
@@ -2988,14 +2981,14 @@ void MenuDrawItems(Style *style, bool graphical_item)
             if (!current_menu->menu_items[i].patch_name[0]) continue;
             if (!current_menu->menu_items[i].image)
                 current_menu->menu_items[i].image =
-                    W_ImageLookup(current_menu->menu_items[i].patch_name);
+                    ImageLookup(current_menu->menu_items[i].patch_name);
 
-            const image_c *image = current_menu->menu_items[i].image;
+            const Image *image = current_menu->menu_items[i].image;
 
-            current_menu->menu_items[i].height = IM_HEIGHT(image) * txtscale;
-            current_menu->menu_items[i].width  = IM_WIDTH(image) * txtscale;
+            current_menu->menu_items[i].height = image->ScaledHeightActual() * txtscale;
+            current_menu->menu_items[i].width  = image->ScaledWidthActual() * txtscale;
 
-            if (!image->is_empty)
+            if (!image->is_empty_)
             {
                 if (current_menu->menu_items[i].height < ShortestLine)
                     ShortestLine = current_menu->menu_items[i].height;
@@ -3010,14 +3003,14 @@ void MenuDrawItems(Style *style, bool graphical_item)
                         style, StyleDefinition::kTextSectionText, image);
                 else
                     current_menu->menu_items[i].x =
-                        x + (image->offset_x * txtscale) +
+                        x + (image->offset_x_ * txtscale) +
                         style->definition_->x_offset_ +
                         style->definition_
                             ->text_[StyleDefinition::kTextSectionText]
                             .x_offset_;
 
                 current_menu->menu_items[i].y =
-                    y - image->offset_y + style->definition_->y_offset_ +
+                    y - image->offset_y_ + style->definition_->y_offset_ +
                     style->definition_->text_[StyleDefinition::kTextSectionText]
                         .y_offset_;
                 y += current_menu->menu_items[i].height +
@@ -3030,7 +3023,7 @@ void MenuDrawItems(Style *style, bool graphical_item)
                 y += 15 + style->definition_->entry_spacing_;
             }
         }
-        if (ShortestLine == 10000.0f && TallestLine == 0.0f)
+        if (AlmostEquals(ShortestLine, 10000.0f) && AlmostEquals(TallestLine, 0.0f))
         {
             ShortestLine = 20.0f;
             TallestLine  = 20.0f;
@@ -3107,7 +3100,7 @@ void MenuDrawItems(Style *style, bool graphical_item)
 
             // HudStretchImage() will apply image.offset_x again so subtract it
             // first
-            TempX -= (current_menu->menu_items[j].image->offset_x * txtscale);
+            TempX -= (current_menu->menu_items[j].image->offset_x_ * txtscale);
             HudStretchImage(TempX, current_menu->menu_items[j].y,
                             current_menu->menu_items[j].width,
                             current_menu->menu_items[j].height,
@@ -3133,13 +3126,13 @@ void MenuDrawer(void)
     {
         if (r_titlescaling.d_)  // Fill Border
         {
-            if (!menu_backdrop->blurred_version)
+            if (!menu_backdrop->blurred_version_)
             {
-                W_ImageStoreBlurred(menu_backdrop, 0.75f);
-                menu_backdrop->blurred_version->grayscale = true;
+                ImageStoreBlurred(menu_backdrop, 0.75f);
+                menu_backdrop->blurred_version_->grayscale_ = true;
             }
             HudStretchImage(-320, -200, 960, 600,
-                            menu_backdrop->blurred_version, 0, 0);
+                            menu_backdrop->blurred_version_, 0, 0);
         }
         else
             HudSolidBox(-320, -200, 960, 600, 0);
@@ -3295,19 +3288,19 @@ void MenuInitialize(void)
     SkillMenu[4].name = language["MenuDifficulty5"];
 
     // lookup required images
-    therm_l = W_ImageLookup("M_THERML");
-    therm_m = W_ImageLookup("M_THERMM");
-    therm_r = W_ImageLookup("M_THERMR");
-    therm_o = W_ImageLookup("M_THERMO");
+    therm_l = ImageLookup("M_THERML");
+    therm_m = ImageLookup("M_THERMM");
+    therm_r = ImageLookup("M_THERMR");
+    therm_o = ImageLookup("M_THERMO");
 
-    menu_load_game    = W_ImageLookup("M_LOADG");
-    menu_save_game    = W_ImageLookup("M_SAVEG");
-    menu_sound_volume = W_ImageLookup("M_SVOL");
-    menu_new_game     = W_ImageLookup("M_NEWG");
-    menu_skill        = W_ImageLookup("M_SKILL");
-    menu_episode      = W_ImageLookup("M_EPISOD");
-    menu_skull[0]     = (image_c *)W_ImageLookup("M_SKULL1");
-    menu_skull[1]     = (image_c *)W_ImageLookup("M_SKULL2");
+    menu_load_game    = ImageLookup("M_LOADG");
+    menu_save_game    = ImageLookup("M_SAVEG");
+    menu_sound_volume = ImageLookup("M_SVOL");
+    menu_new_game     = ImageLookup("M_NEWG");
+    menu_skill        = ImageLookup("M_SKILL");
+    menu_episode      = ImageLookup("M_EPISOD");
+    menu_skull[0]     = (Image *)ImageLookup("M_SKULL1");
+    menu_skull[1]     = (Image *)ImageLookup("M_SKULL2");
 
     // Check for custom menu graphics in pwads:
     // If we have them then use them instead of our
@@ -3336,7 +3329,7 @@ void MenuInitialize(void)
     LogDebug("custom_MenuEpisode =%d \n", custom_MenuEpisode);
     LogDebug("custom_MenuDifficulty =%d \n", custom_MenuDifficulty);
 
-    menu_doom = W_ImageLookup("M_DOOM");
+    menu_doom = ImageLookup("M_DOOM");
 
     // Here we could catch other version dependencies,
     //  like HELP1/2, and four episodes.
@@ -3347,8 +3340,8 @@ void MenuInitialize(void)
 
     if (W_IsLumpInAnyWad("HELP"))  // doom2
     {
-        menu_read_this[0] = W_ImageLookup("HELP");
-        menu_read_this[1] = W_ImageLookup(
+        menu_read_this[0] = ImageLookup("HELP");
+        menu_read_this[1] = ImageLookup(
             "CREDIT");  // Unnecessary since we won't see it anyway...
         MainMenu[kMainMenuReadThis] = MainMenu[kMainMenuQuitDoom];
         MainMenuDefinition.total_items--;
@@ -3361,11 +3354,11 @@ void MenuInitialize(void)
     }
     else  // doom or shareware doom
     {
-        menu_read_this[0] = W_ImageLookup("HELP1");
+        menu_read_this[0] = ImageLookup("HELP1");
         if (W_IsLumpInAnyWad("HELP2"))
-            menu_read_this[1] = W_ImageLookup("HELP2");  // Shareware doom
+            menu_read_this[1] = ImageLookup("HELP2");  // Shareware doom
         else
-            menu_read_this[1] = W_ImageLookup("CREDIT");  // Full doom
+            menu_read_this[1] = ImageLookup("CREDIT");  // Full doom
     }
 
     // Lobo 2022: Use new sfx definitions so we don't have to share names with

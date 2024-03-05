@@ -16,89 +16,85 @@
 //
 //----------------------------------------------------------------------------
 
-
-#include "i_defs_gl.h"
-
 #include "g_game.h"
-#include "r_misc.h"
-#include "r_gldefs.h"
-#include "r_units.h"
+#include "i_defs_gl.h"
 #include "r_colormap.h"
 #include "r_draw.h"
-#include "r_modes.h"
+#include "r_gldefs.h"
 #include "r_image.h"
+#include "r_misc.h"
+#include "r_modes.h"
+#include "r_units.h"
 #include "str_compare.h"
-#define DEBUG 0
 
 // implementation limits
 
-int glmax_lights;
-int glmax_clip_planes;
-int glmax_tex_size;
-int glmax_tex_units;
+static int maximum_lights;
+static int maximum_clip_planes;
+static int maximum_texture_units;
+int maximum_texture_size;
 
-EDGE_DEFINE_CONSOLE_VARIABLE(r_nearclip, "4", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(r_farclip, "64000", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE(r_culling, "0", kConsoleVariableFlagArchive)
-EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(r_culldist, "3000", kConsoleVariableFlagArchive, 1000.0f, 16000.0f)
-EDGE_DEFINE_CONSOLE_VARIABLE(r_cullfog, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(renderer_near_clip, "4",
+                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(renderer_far_clip, "64000",
+                             kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(draw_culling, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(r_culldist, "3000",
+                                     kConsoleVariableFlagArchive, 1000.0f,
+                                     16000.0f)
+EDGE_DEFINE_CONSOLE_VARIABLE(cull_fog_color, "0", kConsoleVariableFlagArchive)
 
 //
-// RGL_SetupMatrices2D
+// RendererSetupMatrices2D
 //
 // Setup the GL matrices for drawing 2D stuff.
 //
-void RGL_SetupMatrices2D(void)
+void RendererSetupMatrices2D(void)
 {
-    glViewport(0, 0, SCREENWIDTH, SCREENHEIGHT);
+    glViewport(0, 0, current_screen_width, current_screen_height);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0.0f, (float)SCREENWIDTH, 0.0f, (float)SCREENHEIGHT, -1.0f, 1.0f);
+    glOrtho(0.0f, (float)current_screen_width, 0.0f,
+            (float)current_screen_height, -1.0f, 1.0f);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-    // turn off lighting stuff
-    glDisable(GL_LIGHTING);
-    glDisable(GL_COLOR_MATERIAL);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 //
-// RGL_SetupMatricesWorld2D
+// RendererSetupMatricesWorld2D
 //
-// Setup the GL matrices for drawing 2D stuff within the "world" rendered by HudRenderWorld
+// Setup the GL matrices for drawing 2D stuff within the "world" rendered by
+// HudRenderWorld
 //
-void RGL_SetupMatricesWorld2D(void)
+void RendererSetupMatricesWorld2D(void)
 {
-    glViewport(viewwindow_x, viewwindow_y, viewwindow_w, viewwindow_h);
+    glViewport(view_window_x, view_window_y, view_window_width, view_window_height);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho((float)viewwindow_x, (float)viewwindow_w, (float)viewwindow_y, (float)viewwindow_h, -1.0f, 1.0f);
+    glOrtho((float)view_window_x, (float)view_window_width, (float)view_window_y,
+            (float)view_window_height, -1.0f, 1.0f);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-    // turn off lighting stuff
-    glDisable(GL_LIGHTING);
-    glDisable(GL_COLOR_MATERIAL);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 //
-// RGL_SetupMatrices3D
+// RendererSetupMatrices3d
 //
 // Setup the GL matrices for drawing 3D stuff.
 //
-void RGL_SetupMatrices3D(void)
+void RendererSetupMatrices3d(void)
 {
     GLfloat ambient[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-    glViewport(viewwindow_x, viewwindow_y, viewwindow_w, viewwindow_h);
+    glViewport(view_window_x, view_window_y, view_window_width, view_window_height);
 
     // calculate perspective matrix
 
@@ -106,37 +102,20 @@ void RGL_SetupMatrices3D(void)
 
     glLoadIdentity();
 
-    glFrustum(-view_x_slope * r_nearclip.f_, view_x_slope * r_nearclip.f_, -view_y_slope * r_nearclip.f_,
-              view_y_slope * r_nearclip.f_, r_nearclip.f_, r_farclip.f_);
+    glFrustum(-view_x_slope * renderer_near_clip.f_,
+              view_x_slope * renderer_near_clip.f_,
+              -view_y_slope * renderer_near_clip.f_,
+              view_y_slope * renderer_near_clip.f_, renderer_near_clip.f_,
+              renderer_far_clip.f_);
 
     // calculate look-at matrix
 
     glMatrixMode(GL_MODELVIEW);
 
     glLoadIdentity();
-    glRotatef(270.0f - epi::DegreesFromBAM(viewvertangle), 1.0f, 0.0f, 0.0f);
-    glRotatef(90.0f - epi::DegreesFromBAM(viewangle), 0.0f, 0.0f, 1.0f);
-    glTranslatef(-viewx, -viewy, -viewz);
-
-    // turn on lighting.  Some drivers (e.g. TNT2) don't work properly
-    // without it.
-    if (r_colorlighting.d_)
-    {
-        glEnable(GL_LIGHTING);
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-    }
-    else
-        glDisable(GL_LIGHTING);
-
-    if (r_colormaterial.d_)
-    {
-        glEnable(GL_COLOR_MATERIAL);
-        glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-    }
-    else
-        glDisable(GL_COLOR_MATERIAL);
-
-    /* glBlendFunc(GL_SRC_ALPHA, GL_ONE);  // Additive lighting */
+    glRotatef(270.0f - epi::DegreesFromBAM(view_vertical_angle), 1.0f, 0.0f, 0.0f);
+    glRotatef(90.0f - epi::DegreesFromBAM(view_angle), 0.0f, 0.0f, 1.0f);
+    glTranslatef(-view_x, -view_y, -view_z);
 }
 
 static inline const char *SafeStr(const void *s)
@@ -145,13 +124,12 @@ static inline const char *SafeStr(const void *s)
 }
 
 //
-// RGL_CheckExtensions
+// RendererCheckExtensions
 //
 // Based on code by Bruce Lewis.
 //
-void RGL_CheckExtensions(void)
+void RendererCheckExtensions(void)
 {
-
     // -ACB- 2004/08/11 Made local: these are not yet used elsewhere
     std::string glstr_version(SafeStr(glGetString(GL_VERSION)));
     std::string glstr_renderer(SafeStr(glGetString(GL_RENDERER)));
@@ -172,19 +150,21 @@ void RGL_CheckExtensions(void)
 
 #ifndef EDGE_GL_ES2
     if (!GLAD_GL_VERSION_1_5)
-        FatalError("OpenGL supported version below minimum! (Requires OpenGL 1.5).\n");
+        FatalError(
+            "OpenGL supported version below minimum! (Requires OpenGL 1.5).\n");
 #endif
 }
 
 //
-// RGL_SoftInit
+// RendererSoftInit
 //
 // All the stuff that can be re-initialised multiple times.
 //
-void RGL_SoftInit(void)
+void RendererSoftInit(void)
 {
     glDisable(GL_BLEND);
     glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_SCISSOR_TEST);
@@ -211,13 +191,13 @@ void RGL_SoftInit(void)
 }
 
 //
-// RGL_Init
+// RendererInit
 //
-void RGL_Init(void)
+void RendererInit(void)
 {
     LogPrint("OpenGL: Initialising...\n");
 
-    RGL_CheckExtensions();
+    RendererCheckExtensions();
 
     // read implementation limits
     {
@@ -231,23 +211,21 @@ void RGL_Init(void)
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_tex_size);
         glGetIntegerv(GL_MAX_TEXTURE_UNITS, &max_tex_units);
 
-        glmax_lights      = max_lights;
-        glmax_clip_planes = max_clip_planes;
-        glmax_tex_size    = max_tex_size;
-        glmax_tex_units   = max_tex_units;
+        maximum_lights         = max_lights;
+        maximum_clip_planes    = max_clip_planes;
+        maximum_texture_size = max_tex_size;
+        maximum_texture_units      = max_tex_units;
     }
 
-    LogPrint("OpenGL: Lights: %d  Clips: %d  Tex: %d  Units: %d\n", glmax_lights, glmax_clip_planes, glmax_tex_size,
-             glmax_tex_units);
+    LogPrint("OpenGL: Lights: %d  Clips: %d  Tex: %d  Units: %d\n",
+             maximum_lights, maximum_clip_planes, maximum_texture_size,
+             maximum_texture_units);
 
-    RGL_SoftInit();
+    RendererSoftInit();
 
-    R2_InitUtil();
+    RendererInitialize();
 
-    // initialise unit system
-    RGL_InitUnits();
-
-    RGL_SetupMatrices2D();
+    RendererSetupMatrices2D();
 }
 
 //--- editor settings ---

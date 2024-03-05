@@ -32,7 +32,6 @@
 #include "main.h"
 #include "p_local.h"
 #include "p_mobj.h"
-#include "r_bsp.h"
 #include "r_defs.h"
 #include "r_misc.h"
 #include "r_state.h"
@@ -40,6 +39,8 @@
 
 extern MapObject *FindTeleportMan(int tag, const MapObjectDefinition *info);
 extern Line *p_FindTeleportLine(int tag, Line *original);
+
+extern unsigned int root_node;
 
 class big_item_c
 {
@@ -376,7 +377,7 @@ static void BotNavigateCreateLinks()
             auto p1 = area.get_middle();
             auto p2 = nav_areas[dest_id].get_middle();
 
-            float length = R_PointToDist(p1.x, p1.y, p2.x, p2.y);
+            float length = RendererPointToDistance(p1.x, p1.y, p2.x, p2.y);
 
             // determine if a manual door, a lift, or a teleporter
             int flags   = BotNavigateCheckDoorOrLift(seg);
@@ -457,7 +458,7 @@ static float BotNavigateEstimateH(const Subsector *cur_sub)
     int  id = (int)(cur_sub - level_subsectors);
     auto p  = nav_areas[id].get_middle();
 
-    float dist = R_PointToDist(p.x, p.y, nav_finish_mid.x, nav_finish_mid.y);
+    float dist = RendererPointToDistance(p.x, p.y, nav_finish_mid.x, nav_finish_mid.y);
     float time = dist / RUNNING_SPEED;
 
     // over-estimate, to account for height changes, obstacles etc
@@ -608,8 +609,8 @@ BotPath *BotNavigateFindPath(const Position *start, const Position *finish,
     SYS_ASSERT(start);
     SYS_ASSERT(finish);
 
-    Subsector *start_sub  = R_PointInSubsector(start->x, start->y);
-    Subsector *finish_sub = R_PointInSubsector(finish->x, finish->y);
+    Subsector *start_sub  = RendererPointInSubsector(start->x, start->y);
+    Subsector *finish_sub = RendererPointInSubsector(finish->x, finish->y);
 
     int start_id  = (int)(start_sub - level_subsectors);
     int finish_id = (int)(finish_sub - level_subsectors);
@@ -679,7 +680,7 @@ static void BotNavigateItemsInSubsector(Subsector *sub, DeathBot *bot,
         float score = bot->EvalItem(mo);
         if (score < 0) continue;
 
-        float dist = R_PointToDist(pos.x, pos.y, mo->x, mo->y);
+        float dist = RendererPointToDistance(pos.x, pos.y, mo->x, mo->y);
         if (dist > radius) continue;
 
         // very close things get a boost
@@ -705,7 +706,7 @@ BotPath *BotNavigateFindThing(DeathBot *bot, float radius, MapObject *&best)
 
     Position pos{bot->pl_->mo->x, bot->pl_->mo->y, bot->pl_->mo->z};
 
-    Subsector *start    = R_PointInSubsector(pos.x, pos.y);
+    Subsector *start    = RendererPointInSubsector(pos.x, pos.y);
     int          start_id = (int)(start - level_subsectors);
 
     // the best thing so far...
@@ -856,7 +857,7 @@ BAMAngle BotPath::CurrentAngle() const
     Position src  = nodes_.at(along_ - 1).pos;
     Position dest = nodes_.at(along_ + 0).pos;
 
-    return R_PointToAngle(src.x, src.y, dest.x, dest.y);
+    return RendererPointToAngle(src.x, src.y, dest.x, dest.y);
 }
 
 bool BotPath::ReachedDestination(const Position *pos) const

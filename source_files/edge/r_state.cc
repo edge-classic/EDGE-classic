@@ -1,9 +1,9 @@
 
 #include "r_state.h"
 
-static gl_state_c state;
+static RenderState state;
 
-gl_state_c* RGL_GetState()
+RenderState *RendererGetState()
 {
     return &state;
 }

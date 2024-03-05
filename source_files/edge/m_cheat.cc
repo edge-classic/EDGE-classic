@@ -199,11 +199,6 @@ bool CheatResponder(InputEvent *ev)
     // no cheating in bot deathmatch or if disallowed in levels.ddf
     if (!level_flags.cheats || deathmatch) return false;
 
-#if 0  //!!!! TEMP DISABLED, NETWORK DEBUGGING
-	if (netgame)
-		return false;
-#endif
-
     // 'dqd' cheat for toggleable god mode
     if (CheatCheckSequence(&cheat_god, key))
     {
@@ -318,9 +313,9 @@ bool CheatResponder(InputEvent *ev)
     }
     else if (CheatCheckSequence(&cheat_hall_of_mirrors, key))
     {
-        debug_hom = debug_hom.d_ ? 0 : 1;
+        debug_hall_of_mirrors = debug_hall_of_mirrors.d_ ? 0 : 1;
 
-        if (debug_hom.d_)
+        if (debug_hall_of_mirrors.d_)
             ConsoleMessageLDF("HomDetectOn");
         else
             ConsoleMessageLDF("HomDetectOff");
@@ -342,14 +337,6 @@ bool CheatResponder(InputEvent *ev)
             ConsoleMessageLDF("BeholdUsed");
         }
     }
-
-#if 0  // -AJA- eh ?
-       // 'behold' power-up menu
-	if (CheatCheckSequence(&cheat_powerup[9], key))
-	{
-		ConsoleMessageLDF("BeholdNote");
-	}
-#endif
 
     // 'give#' power-up cheats
     for (i = 0; i < 10; i++)

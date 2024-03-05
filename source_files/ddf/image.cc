@@ -25,6 +25,7 @@
 
 #include "filesystem.h"
 #include "local.h"
+#include "sokol_color.h"
 
 static ImageDefinition *dynamic_image;
 

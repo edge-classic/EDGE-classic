@@ -40,10 +40,10 @@ void InitializeSwitchList(void)
     // only called at game initialization.
     for (SwitchDefinition *sw : switchdefs)
     {
-        sw->cache_.image[0] = W_ImageLookup(sw->on_name_.c_str(),
-                                            kImageNamespaceTexture, ILF_Null);
-        sw->cache_.image[1] = W_ImageLookup(sw->off_name_.c_str(),
-                                            kImageNamespaceTexture, ILF_Null);
+        sw->cache_.image[0] = ImageLookup(sw->on_name_.c_str(),
+                                            kImageNamespaceTexture, kImageLookupNull);
+        sw->cache_.image[1] = ImageLookup(sw->off_name_.c_str(),
+                                            kImageNamespaceTexture, kImageLookupNull);
     }
 }
 
@@ -51,7 +51,7 @@ void InitializeSwitchList(void)
 // Start a button counting down till it turns off.
 //
 static void StartButton(SwitchDefinition *sw, Line *line, ButtonPosition w,
-                        const image_c *image)
+                        const Image *image)
 {
     // See if button is already pressed
     if (ButtonIsPressed(line)) return;

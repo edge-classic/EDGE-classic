@@ -94,7 +94,7 @@ static ConfigurationDefault defaults[] = {
     // -ES- 1998/11/28 Save fade settings
     {kConfigInteger, "reduce_flash", &reduce_flash, 0},
     {kConfigInteger, "invuln_fx", &invulnerability_effect, CFGDEF_INVUL_FX},
-    {kConfigEnum, "wipe_method", &wipe_method, CFGDEF_kScreenWipeMETHOD},
+    {kConfigEnum, "wipe_method", &wipe_method, CFGDEF_WIPE_METHOD},
     {kConfigBoolean, "rotate_map", &rotate_map, CFGDEF_ROTATEMAP},
     {kConfigBoolean, "respawnsetting", &global_flags.res_respawn,
      CFGDEF_RES_RESPAWN},

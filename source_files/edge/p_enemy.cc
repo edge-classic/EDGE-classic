@@ -523,7 +523,7 @@ static void SpawnDeathMissile(MapObject *source, float x, float y, float z)
 
     th = P_MobjCreateObject(x, y, z, info);
     if (th->info_->seesound_)
-        S_StartFX(th->info_->seesound_, P_MobjGetSfxCategory(th), th);
+        StartSoundEffect(th->info_->seesound_, P_MobjGetSfxCategory(th), th);
 
     th->SetRealSource(source);
 
@@ -555,7 +555,7 @@ void P_ActBrainScream(MapObject *bossbrain)
     }
 
     if (bossbrain->info_->deathsound_)
-        S_StartFX(bossbrain->info_->deathsound_,
+        StartSoundEffect(bossbrain->info_->deathsound_,
                   P_MobjGetSfxCategory(bossbrain), bossbrain);
 }
 
@@ -657,7 +657,7 @@ void P_ActPlayerScream(MapObject *mo)
         sound = sfxdefs.GetEffect("PDIEHI");
     }
 
-    S_StartFX(sound, P_MobjGetSfxCategory(mo), mo);
+    StartSoundEffect(sound, P_MobjGetSfxCategory(mo), mo);
 }
 
 //--- editor settings ---

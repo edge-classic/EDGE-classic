@@ -119,7 +119,7 @@ extern ConsoleVariable m_language;
 extern ConsoleVariable crosshair_style;
 extern ConsoleVariable crosshair_color;
 extern ConsoleVariable crosshair_size;
-extern ConsoleVariable s_genmidi;
+extern ConsoleVariable opl_instrument_bank;
 extern ConsoleVariable midi_soundfont;
 extern ConsoleVariable r_overlay;
 extern ConsoleVariable erraticism;
@@ -335,7 +335,7 @@ static Style *options_menu_default_style;
 static void OptionMenuChangeMixChan(int              key_pressed,
                                     ConsoleVariable *console_variable)
 {
-    S_ChangeChannelNum();
+    UpdateSoundCategoryLimits();
 }
 
 static int OptionMenuGetCurrentSwitchValue(OptionMenuItem *item)
@@ -596,12 +596,12 @@ static OptionMenuDefinition analogue_optmenu = {
 // -AJA- 2007/03/14 Added new sound menu
 //
 static OptionMenuItem soundoptions[] = {
-    {kOptionMenuItemTypeSlider, "Sound Volume", nullptr, 0, &sfx_volume.f_,
-     OptionMenuUpdateConsoleVariableFromFloat, nullptr, &sfx_volume, 0.05f,
+    {kOptionMenuItemTypeSlider, "Sound Volume", nullptr, 0, &sound_effect_volume.f_,
+     OptionMenuUpdateConsoleVariableFromFloat, nullptr, &sound_effect_volume, 0.05f,
      0.0f, 1.0f, "%0.2f"},
     {kOptionMenuItemTypeSlider, "Movie/Music Volume", nullptr, 0,
-     &mus_volume.f_, OptionMenuUpdateConsoleVariableFromFloat, nullptr,
-     &mus_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
+     &music_volume.f_, OptionMenuUpdateConsoleVariableFromFloat, nullptr,
+     &music_volume, 0.05f, 0.0f, 1.0f, "%0.2f"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Stereo", "Off/On/Swapped", 3,
      &var_sound_stereo, nullptr, "NeedRestart"},
@@ -613,15 +613,15 @@ static OptionMenuItem soundoptions[] = {
     {kOptionMenuItemTypeFunction, "Opal Instrument Bank", nullptr, 0, nullptr,
      OptionMenuChangeOplInstrumentBank, nullptr},
     {kOptionMenuItemTypeBoolean, "PC Speaker Mode", YesNo, 2,
-     &var_pc_speaker_mode, OptionMenuChangePCSpeakerMode,
+     &pc_speaker_mode, OptionMenuChangePCSpeakerMode,
      "Music will be Off while this is enabled"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeBoolean, "Dynamic Reverb", YesNo, 2, &dynamic_reverb,
      nullptr, nullptr},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
     {kOptionMenuItemTypeSwitch, "Mix Channels", "32/64/96/128/160/192/224/256",
-     8, &var_mix_channels, OptionMenuChangeMixChan, nullptr},
-    {kOptionMenuItemTypeBoolean, "Precache SFX", YesNo, 2, &var_cache_sfx,
+     8, &sound_mixing_channels, OptionMenuChangeMixChan, nullptr},
+    {kOptionMenuItemTypeBoolean, "Precache SFX", YesNo, 2, &precache_sound_effects,
      nullptr, "NeedRestart"},
     {kOptionMenuItemTypePlain, "", nullptr, 0, nullptr, nullptr, nullptr},
 };
@@ -641,11 +641,11 @@ static OptionMenuDefinition sound_optmenu = {
 //
 //
 static OptionMenuItem f4soundoptions[] = {
-    {kOptionMenuItemTypeSlider, "Sound Volume", nullptr, 0, &sfx_volume.f_,
-     OptionMenuUpdateConsoleVariableFromFloat, nullptr, &sfx_volume, 0.05f,
+    {kOptionMenuItemTypeSlider, "Sound Volume", nullptr, 0, &sound_effect_volume.f_,
+     OptionMenuUpdateConsoleVariableFromFloat, nullptr, &sound_effect_volume, 0.05f,
      0.0f, 1.0f, "%0.2f"},
-    {kOptionMenuItemTypeSlider, "Music Volume", nullptr, 0, &mus_volume.f_,
-     OptionMenuUpdateConsoleVariableFromFloat, nullptr, &mus_volume, 0.05f,
+    {kOptionMenuItemTypeSlider, "Music Volume", nullptr, 0, &music_volume.f_,
+     OptionMenuUpdateConsoleVariableFromFloat, nullptr, &music_volume, 0.05f,
      0.0f, 1.0f, "%0.2f"},
 };
 
@@ -1319,8 +1319,8 @@ void OptionMenuDrawer()
             TEXTscale = style->definition_->text_[fontType].scale_;
             HudWriteText(
                 style, fontType, (current_menu->menu_center) + 15, curry,
-                s_genmidi.s_.empty() ? "Default"
-                                     : epi::GetStem(s_genmidi.s_).c_str());
+                opl_instrument_bank.s_.empty() ? "Default"
+                                     : epi::GetStem(opl_instrument_bank.s_).c_str());
         }
 
         // -ACB- 1998/07/15 Menu Cursor is colour indexed.
@@ -1558,7 +1558,7 @@ static void KeyMenu_Next()
 
     current_menu = all_key_menus[current_key_menu];
 
-    S_StartFX(sound_effect_pstop);
+    StartSoundEffect(sound_effect_pstop);
 }
 
 static void KeyMenu_Prev()
@@ -1569,7 +1569,7 @@ static void KeyMenu_Prev()
 
     current_menu = all_key_menus[current_key_menu];
 
-    S_StartFX(sound_effect_pstop);
+    StartSoundEffect(sound_effect_pstop);
 }
 
 //
@@ -1653,7 +1653,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
                 current_item = current_menu->items + current_menu->pos;
             } while (current_item->type == 0);
 
-            S_StartFX(sound_effect_pstop);
+            StartSoundEffect(sound_effect_pstop);
             return true;
         }
 
@@ -1685,7 +1685,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
                 current_item = current_menu->items + current_menu->pos;
             } while (current_item->type == 0);
 
-            S_StartFX(sound_effect_pstop);
+            StartSoundEffect(sound_effect_pstop);
             return true;
         }
 
@@ -1710,7 +1710,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
                 current_item = current_menu->items + current_menu->pos;
             } while (current_item->type == 0);
 
-            S_StartFX(sound_effect_pstop);
+            StartSoundEffect(sound_effect_pstop);
             return true;
         }
 
@@ -1742,7 +1742,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
                 current_item = current_menu->items + current_menu->pos;
             } while (current_item->type == 0);
 
-            S_StartFX(sound_effect_pstop);
+            StartSoundEffect(sound_effect_pstop);
             return true;
         }
 
@@ -1768,7 +1768,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
 
                     *boolptr = !(*boolptr);
 
-                    S_StartFX(sound_effect_pistol);
+                    StartSoundEffect(sound_effect_pistol);
 
                     if (current_item->routine != nullptr)
                         current_item->routine(
@@ -1785,7 +1785,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
 
                     if (*val_ptr < 0) *val_ptr = current_item->total_types - 1;
 
-                    S_StartFX(sound_effect_pistol);
+                    StartSoundEffect(sound_effect_pistol);
 
                     if (current_item->routine != nullptr)
                         current_item->routine(
@@ -1800,7 +1800,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
                         current_item->routine(
                             ch, current_item->console_variable_to_change);
 
-                    S_StartFX(sound_effect_pistol);
+                    StartSoundEffect(sound_effect_pistol);
                     return true;
                 }
 
@@ -1815,7 +1815,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
                     {
                         *val_ptr = *val_ptr - current_item->increment;
 
-                        S_StartFX(sound_effect_stnmov);
+                        StartSoundEffect(sound_effect_stnmov);
                     }
 
                     if (current_item->routine != nullptr)
@@ -1855,7 +1855,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
 
                     *boolptr = !(*boolptr);
 
-                    S_StartFX(sound_effect_pistol);
+                    StartSoundEffect(sound_effect_pistol);
 
                     if (current_item->routine != nullptr)
                         current_item->routine(
@@ -1872,7 +1872,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
 
                     if (*val_ptr >= current_item->total_types) *val_ptr = 0;
 
-                    S_StartFX(sound_effect_pistol);
+                    StartSoundEffect(sound_effect_pistol);
 
                     if (current_item->routine != nullptr)
                         current_item->routine(
@@ -1887,7 +1887,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
                         current_item->routine(
                             ch, current_item->console_variable_to_change);
 
-                    S_StartFX(sound_effect_pistol);
+                    StartSoundEffect(sound_effect_pistol);
                     return true;
                 }
 
@@ -1902,7 +1902,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
                     {
                         *val_ptr = *val_ptr + current_item->increment;
 
-                        S_StartFX(sound_effect_stnmov);
+                        StartSoundEffect(sound_effect_stnmov);
                     }
 
                     if (current_item->routine != nullptr)
@@ -1945,7 +1945,7 @@ bool OptionMenuResponder(InputEvent *ev, int ch)
                 current_menu = &main_optmenu;
                 current_item = current_menu->items + current_menu->pos;
             }
-            S_StartFX(sound_effect_swtchx);
+            StartSoundEffect(sound_effect_swtchx);
             return true;
         }
     }
@@ -2299,8 +2299,8 @@ static void OptionMenuChangePCSpeakerMode(int              key_pressed,
                                           ConsoleVariable *console_variable)
 {
     // Clear SFX cache and restart music
-    S_StopAllFX();
-    S_CacheClearAll();
+    StopAllSoundEffects();
+    SoundCacheClearAll();
     OptionMenuChangeMidiPlayer(0);
 }
 
@@ -2353,9 +2353,9 @@ static void OptionMenuChangeMidiPlayer(int              key_pressed,
         (playing && (playing->type_ == kDDFMusicIMF280 ||
                      playing->type_ == kDDFMusicIMF560 ||
                      playing->type_ == kDDFMusicIMF700)))
-        S_RestartOPL();
+        RestartOpal();
     else
-        S_RestartFluid();
+        RestartFluid();
 }
 
 //
@@ -2404,7 +2404,7 @@ static void OptionMenuChangeSoundfont(int              key_pressed,
 
     // update console_variable
     midi_soundfont = available_soundfonts.at(sf_pos);
-    S_RestartFluid();
+    RestartFluid();
 }
 
 //
@@ -2417,7 +2417,7 @@ static void OptionMenuChangeOplInstrumentBank(int              key_pressed,
     int op2_pos = -1;
     for (int i = 0; i < (int)available_opl_banks.size(); i++)
     {
-        if (epi::StringCaseCompareASCII(s_genmidi.s_,
+        if (epi::StringCaseCompareASCII(opl_instrument_bank.s_,
                                         available_opl_banks.at(i)) == 0)
         {
             op2_pos = i;
@@ -2431,7 +2431,7 @@ static void OptionMenuChangeOplInstrumentBank(int              key_pressed,
             "OptionMenuChangeOplInstrumentBank: Could not read list of "
             "available GENMIDIs. "
             "Falling back to default!\n");
-        s_genmidi.s_ = "";
+        opl_instrument_bank.s_ = "";
         return;
     }
 
@@ -2451,8 +2451,8 @@ static void OptionMenuChangeOplInstrumentBank(int              key_pressed,
     }
 
     // update console_variable
-    s_genmidi = available_opl_banks.at(op2_pos);
-    S_RestartOPL();
+    opl_instrument_bank = available_opl_banks.at(op2_pos);
+    RestartOpal();
 }
 
 //

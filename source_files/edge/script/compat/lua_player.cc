@@ -1053,7 +1053,7 @@ static int PL_play_footstep(lua_State *L)
     else
     {
         // Probably need to add check to see if the sfx is valid - Dasho
-        S_StartFX(current_flatdef->footstep_);
+        StartSoundEffect(current_flatdef->footstep_);
         lua_pushboolean(L, 1);
     }
 

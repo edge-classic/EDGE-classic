@@ -198,7 +198,7 @@ void RAD_DisplayTips(void)
         if (current->playsound)
         {
             // SFX_FIXME: Use new form
-            S_StartFX(sfxdefs.GetEffect("TINK"));
+            StartSoundEffect(sfxdefs.GetEffect("TINK"));
             current->playsound = false;
         }
 
@@ -654,7 +654,7 @@ void RAD_ActPlaySound(rad_trigger_t *R, void *param)
     int flags = 0;
 
     if (ambient->kind == PSOUND_BossMan)
-        flags |= FX_Boss;
+        flags |= kSoundEffectBoss;
 
     // Ambient sound
     R->sound_effects_origin.x = ambient->x;
@@ -668,24 +668,24 @@ void RAD_ActPlaySound(rad_trigger_t *R, void *param)
     if (ambient->kind == PSOUND_BossMan)
     { // Lobo: want BOSSMAN to sound from the player
         player_t *player = GetWhoDunnit(R);
-        S_StartFX(ambient->sfx, SNCAT_Player, player->mo);
+        StartSoundEffect(ambient->sfx, kCategoryPlayer, player->mo);
     }
     else
     {
-        S_StartFX(ambient->sfx, SNCAT_Level, &R->sound_effects_origin, flags);
+        StartSoundEffect(ambient->sfx, kCategoryLevel, &R->sound_effects_origin, flags);
     }
 }
 
 void RAD_ActKillSound(rad_trigger_t *R, void *param)
 {
-    S_StopFX(&R->sound_effects_origin);
+    StopSoundEffect(&R->sound_effects_origin);
 }
 
 void RAD_ActChangeMusic(rad_trigger_t *R, void *param)
 {
     s_music_t *music = (s_music_t *)param;
 
-    S_ChangeMusic(music->playnum, music->looping);
+    ChangeMusic(music->playnum, music->looping);
 }
 
 void RAD_ActPlayMovie(rad_trigger_t *R, void *param)

@@ -955,7 +955,7 @@ void E_AdvanceTitle(void)
 
         // found one !!
         if (title_pic == 0 && g->titlemusic_ > 0)
-            S_ChangeMusic(g->titlemusic_, false);
+            ChangeMusic(g->titlemusic_, false);
 
         title_countdown = g->titletics_ * (double_framerate.d_ ? 2 : 1);
         return;
@@ -1973,18 +1973,18 @@ static void InitDDF(void)
 
 void E_EngineShutdown(void)
 {
-    S_StopMusic();
+    StopMusic();
 
     // Pause to allow sounds to finish
     for (int loop = 0; loop < 30; loop++)
     {
-        S_SoundTicker();
+        SoundTicker();
         SleepForMilliseconds(50);
     }
 
     LevelShutdown();
 
-    S_Shutdown();
+    SoundShutdown();
     RendererShutdown();
     NetworkShutdown();
 }
@@ -2058,7 +2058,7 @@ static void E_Startup(void)
     ShowNotice();
 
     SV_MainInit();
-    S_PrecacheSounds();
+    PrecacheSounds();
     W_InitSprites();
     W_ProcessTX_HI();
     W_InitModels();
@@ -2069,7 +2069,7 @@ static void E_Startup(void)
     MapInitialize();
     InitializeSwitchList();
     W_InitPicAnims();
-    S_Init();
+    SoundInitialize();
     NetworkInitialize();
     CheatInitialize();
     if (LUA_UseLuaHud())
@@ -2271,8 +2271,8 @@ void E_Tick(void)
         // user interface stuff (skull anim, etc)
         ConsoleTicker();
         MenuTicker();
-        S_SoundTicker();
-        S_MusicTicker();
+        SoundTicker();
+        MusicTicker();
 
         // process mouse and keyboard events
         NetworkUpdate();

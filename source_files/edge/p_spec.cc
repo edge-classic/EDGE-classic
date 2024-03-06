@@ -1316,7 +1316,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special,
     if (line && thing && thing->player_ &&
         (special->special_flags_ & kLineSpecialMustReach) && !can_reach)
     {
-        S_StartFX(thing->info_->noway_sound_, P_MobjGetSfxCategory(thing),
+        StartSoundEffect(thing->info_->noway_sound_, P_MobjGetSfxCategory(thing),
                   thing);
 
         return false;
@@ -1417,7 +1417,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special,
                                             special->failedmessage_.c_str());
 
                 if (special->failed_sfx_)
-                    S_StartFX(special->failed_sfx_, SNCAT_Level, thing);
+                    StartSoundEffect(special->failed_sfx_, kCategoryLevel, thing);
 
                 return false;
             }
@@ -1666,7 +1666,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special,
 
     if (special->music_)
     {
-        S_ChangeMusic(special->music_, true);
+        ChangeMusic(special->music_, true);
         texSwitch = true;
     }
 
@@ -1674,12 +1674,12 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special,
     {
         if (line)
         {
-            S_StartFX(special->activate_sfx_, SNCAT_Level,
+            StartSoundEffect(special->activate_sfx_, kCategoryLevel,
                       &line->front_sector->sound_effects_origin);
         }
         else if (thing)
         {
-            S_StartFX(special->activate_sfx_, P_MobjGetSfxCategory(thing),
+            StartSoundEffect(special->activate_sfx_, P_MobjGetSfxCategory(thing),
                       thing);
         }
 
@@ -1821,7 +1821,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
         player->swimming = true;
         *swim_special    = special;
         if (special->special_flags_ & kSectorFlagSubmergedSFX)
-            submerged_sfx = true;
+            submerged_sound_effects = true;
     }
 
     if ((special->special_flags_ & kSectorFlagSwimming) &&
@@ -1831,7 +1831,7 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
         P_HitLiquidFloor(player->mo);
     }
 
-    if (special->special_flags_ & kSectorFlagVacuumSFX) vacuum_sfx = true;
+    if (special->special_flags_ & kSectorFlagVacuumSFX) vacuum_sound_effects = true;
 
     if (special->special_flags_ & kSectorFlagReverbSFX)
     {
@@ -1905,8 +1905,8 @@ static inline void PlayerInProperties(player_t *player, float bz, float tz,
             ConsoleImportantMessageLDF(
                 "FoundSecret");  // Lobo: get text from language.ddf
 
-            S_StartFX(player->mo->info_->secretsound_, SNCAT_UI, player->mo);
-            // S_StartFX(player->mo->info_->secretsound_,
+            StartSoundEffect(player->mo->info_->secretsound_, kCategoryUi, player->mo);
+            // StartSoundEffect(player->mo->info_->secretsound_,
             //		P_MobjGetSfxCategory(player->mo), player->mo);
         }
 
@@ -2004,7 +2004,7 @@ void PlayerInSpecialSector(player_t *player, Sector *sec, bool should_choke)
         {
             if (player->mo->info_->gasp_sound_)
             {
-                S_StartFX(player->mo->info_->gasp_sound_,
+                StartSoundEffect(player->mo->info_->gasp_sound_,
                           P_MobjGetSfxCategory(player->mo), player->mo);
             }
         }
@@ -2019,8 +2019,8 @@ void PlayerInSpecialSector(player_t *player, Sector *sec, bool should_choke)
 
         if (player->splashwait == 0 && swim_special->splash_sfx_)
         {
-            // S_StartFX(swim_special->splash_sfx, SNCAT_UI, player->mo);
-            S_StartFX(swim_special->splash_sfx_,
+            // StartSoundEffect(swim_special->splash_sfx, kCategoryUi, player->mo);
+            StartSoundEffect(swim_special->splash_sfx_,
                       P_MobjGetSfxCategory(player->mo), player->mo);
 
             P_HitLiquidFloor(player->mo);

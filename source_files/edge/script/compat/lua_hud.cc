@@ -698,7 +698,7 @@ static int HD_play_sound(lua_State *L)
     SoundEffect *fx = sfxdefs.GetEffect(name);
 
     if (fx)
-        S_StartFX(fx);
+        StartSoundEffect(fx);
     else
         LogWarning("hud.play_sound: unknown sfx '%s'\n", name);
 

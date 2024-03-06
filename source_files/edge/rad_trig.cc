@@ -675,7 +675,7 @@ static void DoRemoveTrigger(rad_trigger_t *trig)
     else
         active_triggers = trig->next;
 
-    S_StopFX(&trig->sound_effects_origin);
+    StopSoundEffect(&trig->sound_effects_origin);
 
     delete trig;
 }

@@ -18,20 +18,17 @@
 //
 // -ACB- 2004/08/18 Written
 //
-#ifndef __MP3PLAYER_H__
-#define __MP3PLAYER_H__
+
+#pragma once
 
 #include "s_music.h"
-
-#include "sound_data.h"
+#include "snd_data.h"
 
 /* FUNCTIONS */
 
-AbstractMusicPlayer *S_PlayMP3Music(uint8_t *data, int length, bool looping);
+AbstractMusicPlayer *PlayMp3Music(uint8_t *data, int length, bool looping);
 
-bool S_LoadMP3Sound(sound_data_c *buf, const uint8_t *data, int length);
-
-#endif /* __MP3PLAYER_H__ */
+bool LoadMp3Sound(SoundData *buf, const uint8_t *data, int length);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

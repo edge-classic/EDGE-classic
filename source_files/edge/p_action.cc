@@ -65,7 +65,7 @@ static int AttackSfxCat(const MapObject *mo)
 {
     int category = P_MobjGetSfxCategory(mo);
 
-    if (category == SNCAT_Player) return SNCAT_Weapon;
+    if (category == kCategoryPlayer) return kCategoryWeapon;
 
     return category;
 }
@@ -74,7 +74,7 @@ static int SfxFlags(const MapObjectDefinition *info)
 {
     int flags = 0;
 
-    if (info->extended_flags_ & kExtendedFlagAlwaysLoud) flags |= FX_Boss;
+    if (info->extended_flags_ & kExtendedFlagAlwaysLoud) flags |= kSoundEffectBoss;
 
     return flags;
 }
@@ -468,7 +468,7 @@ void BringCorpseToLife(MapObject *corpse)
     }
 
     if (info->overkill_sound_)
-        S_StartFX(info->overkill_sound_, P_MobjGetSfxCategory(corpse), corpse);
+        StartSoundEffect(info->overkill_sound_, P_MobjGetSfxCategory(corpse), corpse);
 
     if (info->raise_state_)
         P_SetMobjState(corpse, info->raise_state_);
@@ -801,8 +801,8 @@ void P_ActPlaySound(MapObject *mo)
         return;
     }
 
-    // S_StartFX(sound, P_MobjGetSfxCategory(mo), mo, SfxFlags(mo->info_));
-    S_StartFX(sound, P_MobjGetSfxCategory(mo), mo);
+    // StartSoundEffect(sound, P_MobjGetSfxCategory(mo), mo, SfxFlags(mo->info_));
+    StartSoundEffect(sound, P_MobjGetSfxCategory(mo), mo);
 }
 
 // Same as above but always loud
@@ -823,16 +823,16 @@ void P_ActPlaySoundBoss(MapObject *mo)
     }
 
     int flags = 0;
-    flags |= FX_Boss;
+    flags |= kSoundEffectBoss;
 
-    S_StartFX(sound, P_MobjGetSfxCategory(mo), mo, flags);
+    StartSoundEffect(sound, P_MobjGetSfxCategory(mo), mo, flags);
 }
 
 void P_ActKillSound(MapObject *mo)
 {
     // Kill any current sounds from this thing.
 
-    S_StopFX(mo);
+    StopSoundEffect(mo);
 }
 
 void P_ActMakeAmbientSound(MapObject *mo)
@@ -841,7 +841,7 @@ void P_ActMakeAmbientSound(MapObject *mo)
     // in seesound_ to be generated.
 
     if (mo->info_->seesound_)
-        S_StartFX(mo->info_->seesound_, P_MobjGetSfxCategory(mo), mo);
+        StartSoundEffect(mo->info_->seesound_, P_MobjGetSfxCategory(mo), mo);
     else
         LogDebug("%s has no ambient sound\n", mo->info_->name_.c_str());
 }
@@ -856,7 +856,7 @@ void P_ActMakeAmbientSoundRandom(MapObject *mo)
     if (mo->info_->seesound_)
     {
         if (RandomByte() < 50)
-            S_StartFX(mo->info_->seesound_, P_MobjGetSfxCategory(mo), mo);
+            StartSoundEffect(mo->info_->seesound_, P_MobjGetSfxCategory(mo), mo);
     }
     else
         LogDebug("%s has no ambient sound\n", mo->info_->name_.c_str());
@@ -870,7 +870,7 @@ void P_ActMakeActiveSound(MapObject *mo)
     // -KM- 1999/01/31
 
     if (mo->info_->activesound_)
-        S_StartFX(mo->info_->activesound_, P_MobjGetSfxCategory(mo), mo);
+        StartSoundEffect(mo->info_->activesound_, P_MobjGetSfxCategory(mo), mo);
     else
         LogDebug("%s has no ambient sound\n", mo->info_->name_.c_str());
 }
@@ -885,7 +885,7 @@ void P_ActMakeDyingSound(MapObject *mo)
     SoundEffect *sound = mo->info_->deathsound_;
 
     if (sound)
-        S_StartFX(sound, P_MobjGetSfxCategory(mo), mo, SfxFlags(mo->info_));
+        StartSoundEffect(sound, P_MobjGetSfxCategory(mo), mo, SfxFlags(mo->info_));
     else
         LogDebug("%s has no death sound\n", mo->info_->name_.c_str());
 }
@@ -895,7 +895,7 @@ void P_ActMakePainSound(MapObject *mo)
     // Ow!! it hurts!
 
     if (mo->info_->painsound_)
-        S_StartFX(mo->info_->painsound_, P_MobjGetSfxCategory(mo), mo,
+        StartSoundEffect(mo->info_->painsound_, P_MobjGetSfxCategory(mo), mo,
                   SfxFlags(mo->info_));
     else
         LogDebug("%s has no pain sound\n", mo->info_->name_.c_str());
@@ -904,7 +904,7 @@ void P_ActMakePainSound(MapObject *mo)
 void P_ActMakeOverKillSound(MapObject *mo)
 {
     if (mo->info_->overkill_sound_)
-        S_StartFX(mo->info_->overkill_sound_, P_MobjGetSfxCategory(mo), mo,
+        StartSoundEffect(mo->info_->overkill_sound_, P_MobjGetSfxCategory(mo), mo,
                   SfxFlags(mo->info_));
     else
         LogDebug("%s has no overkill sound\n", mo->info_->name_.c_str());
@@ -923,7 +923,7 @@ void P_ActMakeCloseAttemptSound(MapObject *mo)
     SoundEffect *sound = mo->info_->closecombat_->initsound_;
 
     if (sound)
-        S_StartFX(sound, P_MobjGetSfxCategory(mo), mo);
+        StartSoundEffect(sound, P_MobjGetSfxCategory(mo), mo);
     else
         LogDebug("%s has no close combat attempt sound\n",
                  mo->info_->name_.c_str());
@@ -942,7 +942,7 @@ void P_ActMakeRangeAttemptSound(MapObject *mo)
     SoundEffect *sound = mo->info_->rangeattack_->initsound_;
 
     if (sound)
-        S_StartFX(sound, P_MobjGetSfxCategory(mo), mo);
+        StartSoundEffect(sound, P_MobjGetSfxCategory(mo), mo);
     else
         LogDebug("%s has no range attack attempt sound\n",
                  mo->info_->name_.c_str());
@@ -1148,10 +1148,10 @@ static MapObject *DoLaunchProjectile(MapObject *source, float tx, float ty,
         int flags    = SfxFlags(projectile->info_);
 
         MapObject *sfx_source = projectile;
-        if (category == SNCAT_Player || category == SNCAT_Weapon)
+        if (category == kCategoryPlayer || category == kCategoryWeapon)
             sfx_source = source;
 
-        S_StartFX(projectile->info_->seesound_, category, sfx_source, flags);
+        StartSoundEffect(projectile->info_->seesound_, category, sfx_source, flags);
     }
 
     angle = RendererPointToAngle(projx, projy, tx, ty);
@@ -1464,7 +1464,7 @@ int P_MissileContact(MapObject *object, MapObject *target)
         object->tunnel_hash_[0] = object->tunnel_hash_[1];
         object->tunnel_hash_[1] = hash;
         if (object->info_->rip_sound_)
-            S_StartFX(object->info_->rip_sound_, SNCAT_Object, object, 0);
+            StartSoundEffect(object->info_->rip_sound_, kCategoryObject, object, 0);
     }
 
     if (source)
@@ -1861,7 +1861,7 @@ static void ShotAttack(MapObject *mo)
     else
         P_AimLineAttack(mo, objangle, range, &objslope);
 
-    if (attack->sound_) S_StartFX(attack->sound_, AttackSfxCat(mo), mo);
+    if (attack->sound_) StartSoundEffect(attack->sound_, AttackSfxCat(mo), mo);
 
     // -AJA- 1999/09/10: apply the attack's angle offsets.
     objangle -= attack->angle_offset_;
@@ -1965,7 +1965,7 @@ static void DoMeleeAttack(MapObject *mo)
         return;
     }
 
-    if (attack->sound_) S_StartFX(attack->sound_, AttackSfxCat(mo), mo);
+    if (attack->sound_) StartSoundEffect(attack->sound_, AttackSfxCat(mo), mo);
 
     float slope;
 
@@ -2019,7 +2019,7 @@ void P_ActTrackerFollow(MapObject *tracker)
 void P_ActTrackerActive(MapObject *tracker)
 {
     if (tracker->info_->activesound_)
-        S_StartFX(tracker->info_->activesound_, P_MobjGetSfxCategory(tracker),
+        StartSoundEffect(tracker->info_->activesound_, P_MobjGetSfxCategory(tracker),
                   tracker);
 
     P_ActTrackerFollow(tracker);
@@ -2035,7 +2035,7 @@ void P_ActTrackerActive(MapObject *tracker)
 void P_ActTrackerStart(MapObject *tracker)
 {
     if (tracker->info_->seesound_)
-        S_StartFX(tracker->info_->seesound_, P_MobjGetSfxCategory(tracker),
+        StartSoundEffect(tracker->info_->seesound_, P_MobjGetSfxCategory(tracker),
                   tracker);
 
     P_ActTrackerFollow(tracker);
@@ -2101,7 +2101,7 @@ void P_ActEffectTracker(MapObject *object)
     }
 
     if (attack->sound_)
-        S_StartFX(attack->sound_, P_MobjGetSfxCategory(object), object);
+        StartSoundEffect(attack->sound_, P_MobjGetSfxCategory(object), object);
 
     angle   = object->angle_;
     tracker = object->tracer_;
@@ -2169,7 +2169,7 @@ void P_ActPsychicEffect(MapObject *object)
     }
 
     if (attack->sound_)
-        S_StartFX(attack->sound_, P_MobjGetSfxCategory(object), object);
+        StartSoundEffect(attack->sound_, P_MobjGetSfxCategory(object), object);
 
     DAMAGE_COMPUTE(damage, &attack->damage_);
 
@@ -2292,7 +2292,7 @@ static void ObjectSpawning(MapObject *parent, BAMAngle angle)
         return;
     }
 
-    if (attack->sound_) S_StartFX(attack->sound_, AttackSfxCat(parent), parent);
+    if (attack->sound_) StartSoundEffect(attack->sound_, AttackSfxCat(parent), parent);
 
     // If the object cannot move from its position, remove it or kill it.
     if (!TryMove(child, child->x, child->y))
@@ -2393,7 +2393,7 @@ static void SkullFlyAssault(MapObject *object)
 
     SoundEffect *sound = object->current_attack_->initsound_;
 
-    if (sound) S_StartFX(sound, P_MobjGetSfxCategory(object), object);
+    if (sound) StartSoundEffect(sound, P_MobjGetSfxCategory(object), object);
 
     object->flags_ |= kMapObjectFlagSkullFly;
 
@@ -2440,7 +2440,7 @@ void P_SlammedIntoObject(MapObject *object, MapObject *target)
         }
 
         SoundEffect *sound = object->current_attack_->sound_;
-        if (sound) S_StartFX(sound, P_MobjGetSfxCategory(object), object);
+        if (sound) StartSoundEffect(sound, P_MobjGetSfxCategory(object), object);
     }
 
     object->flags_ &= ~kMapObjectFlagSkullFly;
@@ -3108,7 +3108,7 @@ static bool CreateAggression(MapObject *mo)
                  other->info_->name_.c_str());
 
         if (mo->info_->seesound_)
-            S_StartFX(mo->info_->seesound_, P_MobjGetSfxCategory(mo), mo,
+            StartSoundEffect(mo->info_->seesound_, P_MobjGetSfxCategory(mo), mo,
                       SfxFlags(mo->info_));
 
         if (mo->info_->chase_state_)
@@ -3182,7 +3182,7 @@ void P_ActStandardLook(MapObject *object)
 
     if (object->info_->seesound_)
     {
-        S_StartFX(object->info_->seesound_, P_MobjGetSfxCategory(object),
+        StartSoundEffect(object->info_->seesound_, P_MobjGetSfxCategory(object),
                   object, SfxFlags(object->info_));
     }
 
@@ -3214,7 +3214,7 @@ void P_ActPlayerSupportLook(MapObject *object)
 
         if (object->info_->seesound_)
         {
-            S_StartFX(object->info_->seesound_, P_MobjGetSfxCategory(object),
+            StartSoundEffect(object->info_->seesound_, P_MobjGetSfxCategory(object),
                       object, SfxFlags(object->info_));
         }
     }
@@ -3358,7 +3358,7 @@ void P_ActStandardChase(MapObject *object)
     if (object->info_->melee_state_ &&
         DecideMeleeAttack(object, object->info_->closecombat_))
     {
-        if (sound) S_StartFX(sound, P_MobjGetSfxCategory(object), object);
+        if (sound) StartSoundEffect(sound, P_MobjGetSfxCategory(object), object);
 
         if (object->info_->melee_state_)
             P_SetMobjStateDeferred(object, object->info_->melee_state_, 0);
@@ -3395,7 +3395,7 @@ void P_ActStandardChase(MapObject *object)
 
     // make active sound
     if (object->info_->activesound_ && RandomByte() < 3)
-        S_StartFX(object->info_->activesound_, P_MobjGetSfxCategory(object),
+        StartSoundEffect(object->info_->activesound_, P_MobjGetSfxCategory(object),
                   object);
 }
 
@@ -3460,7 +3460,7 @@ void P_ActWalkSoundChase(MapObject *object)
         return;
     }
 
-    S_StartFX(object->info_->walksound_, P_MobjGetSfxCategory(object), object);
+    StartSoundEffect(object->info_->walksound_, P_MobjGetSfxCategory(object), object);
     P_ActStandardChase(object);
 }
 

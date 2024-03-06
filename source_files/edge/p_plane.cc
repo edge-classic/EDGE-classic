@@ -163,7 +163,7 @@ static void MakeMovingSound(bool *started_var, SoundEffect *sfx, Position *pos)
     if (!*started_var ||
         (def->looping_ && (level_time_elapsed % RELOOP_TICKS) == 0))
     {
-        S_StartFX(sfx, SNCAT_Level, pos);
+        StartSoundEffect(sfx, kCategoryLevel, pos);
 
         *started_var = true;
     }
@@ -348,7 +348,7 @@ static bool MovePlane(PlaneMover *plane)
                 if (!AlmostEquals(plane->destination_height,
                                   plane->start_height))
                 {
-                    S_StartFX(plane->type->sfxstop_, SNCAT_Level,
+                    StartSoundEffect(plane->type->sfxstop_, kCategoryLevel,
                               &plane->sector->sound_effects_origin);
                 }
 
@@ -440,7 +440,7 @@ static bool MovePlane(PlaneMover *plane)
 
                 if (dir)
                 {
-                    S_StartFX(plane->type->sfxstart_, SNCAT_Level,
+                    StartSoundEffect(plane->type->sfxstart_, kCategoryLevel,
                               &plane->sector->sound_effects_origin);
                 }
 
@@ -467,7 +467,7 @@ static bool MovePlane(PlaneMover *plane)
                 if (!AlmostEquals(plane->destination_height,
                                   plane->start_height))
                 {
-                    S_StartFX(plane->type->sfxstop_, SNCAT_Level,
+                    StartSoundEffect(plane->type->sfxstop_, kCategoryLevel,
                               &plane->sector->sound_effects_origin);
                 }
 
@@ -812,7 +812,7 @@ static PlaneMover *P_SetupSectorAction(Sector                   *sector,
     if (def->sfxstart_ &&
         !AlmostEquals(plane->destination_height, plane->start_height))
     {
-        S_StartFX(def->sfxstart_, SNCAT_Level, &sector->sound_effects_origin);
+        StartSoundEffect(def->sfxstart_, kCategoryLevel, &sector->sound_effects_origin);
     }
 
     // change to surrounding
@@ -1087,7 +1087,7 @@ bool RunManualPlaneMover(Line *line, MapObject *thing,
 
             if (newdir != olddir)
             {
-                S_StartFX(def->sfxstart_, SNCAT_Level, &sec->sound_effects_origin);
+                StartSoundEffect(def->sfxstart_, kCategoryLevel, &sec->sound_effects_origin);
 
                 pmov->sound_effect_started = !thing->player_;
                 return true;
@@ -1262,7 +1262,7 @@ static bool MoveSlider(SlidingDoorMover *smov)
             {
                 if (SliderCanClose(smov->line))
                 {
-                    S_StartFX(smov->info->sfx_start_, SNCAT_Level,
+                    StartSoundEffect(smov->info->sfx_start_, kCategoryLevel,
                               &sec->sound_effects_origin);
 
                     smov->sound_effect_started = false;
@@ -1288,7 +1288,7 @@ static bool MoveSlider(SlidingDoorMover *smov)
 
             if (smov->opening >= smov->target)
             {
-                S_StartFX(smov->info->sfx_stop_, SNCAT_Level, &sec->sound_effects_origin);
+                StartSoundEffect(smov->info->sfx_stop_, kCategoryLevel, &sec->sound_effects_origin);
 
                 smov->opening   = smov->target;
                 smov->direction = kPlaneDirectionWait;
@@ -1326,7 +1326,7 @@ static bool MoveSlider(SlidingDoorMover *smov)
 
                 if (smov->opening <= 0.0f)
                 {
-                    S_StartFX(smov->info->sfx_stop_, SNCAT_Level,
+                    StartSoundEffect(smov->info->sfx_stop_, kCategoryLevel,
                               &sec->sound_effects_origin);
 
                     return true;  // REMOVE ME
@@ -1344,7 +1344,7 @@ static bool MoveSlider(SlidingDoorMover *smov)
 
                 if (smov->opening >= smov->target)
                 {
-                    S_StartFX(smov->info->sfx_stop_, SNCAT_Level,
+                    StartSoundEffect(smov->info->sfx_stop_, kCategoryLevel,
                               &sec->sound_effects_origin);
 
                     smov->opening   = smov->target;
@@ -1433,8 +1433,8 @@ bool RunSlidingDoor(Line *door, Line *act_line, MapObject *thing,
     // Going forward, I think it's better just to use SFX_OPEN and SFX_CLOSE
     // and quietly forget about SFX_START.
 
-    // S_StartFX(special->s.sfx_start, SNCAT_Level, &sec->sound_effects_origin);
-    S_StartFX(special->s_.sfx_open_, SNCAT_Level, &sec->sound_effects_origin);
+    // StartSoundEffect(special->s.sfx_start, kCategoryLevel, &sec->sound_effects_origin);
+    StartSoundEffect(special->s_.sfx_open_, kCategoryLevel, &sec->sound_effects_origin);
 
     return true;
 }

@@ -23,33 +23,21 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __S_CACHE_H__
-#define __S_CACHE_H__
+#pragma once
 
-#include "sound_data.h"
+#include "snd_data.h"
 
 class SoundEffectDefinition;
 
-void S_CacheInit(void);
-// setup the sound cache system.
-
-void S_CacheClearAll(void);
+void SoundCacheClearAll(void);
 // clear all sounds from the cache.
 // Must be called if the audio system parameters (sample_bits,
 // stereoness) are changed.
 
-sound_data_c *S_CacheLoad(SoundEffectDefinition *def);
+SoundData *SoundCacheLoad(SoundEffectDefinition *def);
 // load a sound into the cache.  If the sound has already
 // been loaded, then it is simply returned (increasing the
 // reference count).  Returns nullptr if the lump doesn't exist.
-
-void S_CacheRelease(sound_data_c *data);
-// we are finished with this data.  The cache system may
-// free the memory when the number of references drops to 0.
-// Typically though the sound is kept, as it will likely
-// be needed again shortly.
-
-#endif /* __S_CACHE_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

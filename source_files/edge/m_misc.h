@@ -72,8 +72,8 @@ extern bool save_screenshot_valid;
 extern bool show_obituaries;
 extern int  var_midi_player;
 extern int  var_sound_stereo;
-extern int  var_mix_channels;
-extern bool var_cache_sfx;
+extern int  sound_mixing_channels;
+extern bool precache_sound_effects;
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

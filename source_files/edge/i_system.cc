@@ -50,7 +50,7 @@ void SystemStartup(void)
 {
     StartupGraphics();  // SDL requires this to be called first
     StartupControl();
-    StartupSound();
+    StartupAudio();
 }
 
 void CloseProgram(int exitnum) { exit(exitnum); }
@@ -171,7 +171,7 @@ void SystemShutdown(void)
     // make sure audio is unlocked (e.g. FatalError occurred)
     UnlockAudio();
 
-    ShutdownSound();
+    SoundShutdown();
     ShutdownControl();
     ShutdownGraphics();
 

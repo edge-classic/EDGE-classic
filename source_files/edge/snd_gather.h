@@ -16,30 +16,29 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __EPI_SOUND_GATHER_H__
-#define __EPI_SOUND_GATHER_H__
+#pragma once
 
 #include <vector>
 
-#include "sound_data.h"
+#include "snd_data.h"
 
 // private stuff
-class gather_chunk_c;
+class GatherChunk;
 
-class sound_gather_c
+class SoundGatherer
 {
-  private:
-    std::vector<gather_chunk_c *> chunks;
+   private:
+    std::vector<GatherChunk *> chunks_;
 
-    int total_samples;
+    int total_samples_;
 
-    gather_chunk_c *request;
+    GatherChunk *request_;
 
-  public:
-    sound_gather_c();
-    ~sound_gather_c();
+   public:
+    SoundGatherer();
+    ~SoundGatherer();
 
-    int16_t *MakeChunk(int max_samples, bool _stereo);
+    int16_t *MakeChunk(int max_samples, bool stereo);
     // prepare to add a chunk of sound samples.  Returns a buffer
     // containing the number of samples (* 2 for stereo) which the
     // user can fill up.
@@ -54,20 +53,18 @@ class sound_gather_c
     // get rid of current chunk (because it wasn't needed, e.g.
     // the sound file you were reading hit EOF).
 
-    bool Finalise(sound_data_c *buf, bool want_stereo);
+    bool Finalise(SoundData *buf, bool want_stereo);
     // take all the stored sound data and transfer it to the
-    // sound_data_c object, making it all contiguous, and
+    // SoundData object, making it all contiguous, and
     // converting from/to stereoness where needed.
     //
     // Returns false (failure) if total samples was zero,
     // otherwise returns true (success).
 
-  private:
-    void TransferMono(gather_chunk_c *chunk, sound_data_c *buf, int pos);
-    void TransferStereo(gather_chunk_c *chunk, sound_data_c *buf, int pos);
+   private:
+    void TransferMono(GatherChunk *chunk, SoundData *buf, int pos);
+    void TransferStereo(GatherChunk *chunk, SoundData *buf, int pos);
 };
-
-#endif /* __EPI_SOUND_GATHER_H__ */
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

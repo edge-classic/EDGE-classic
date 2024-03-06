@@ -154,7 +154,7 @@ static void M_ChangeMusicCheat(const char *string)
 
     if (!entry_num) return;
 
-    S_ChangeMusic(entry_num, true);
+    ChangeMusic(entry_num, true);
     ConsoleMessageLDF("MusChange");
 }
 

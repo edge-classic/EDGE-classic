@@ -435,7 +435,7 @@ static void ResurrectRespawn(MapObject *mobj)
 
     // Resurrect monster
     if (info->overkill_sound_)
-        S_StartFX(info->overkill_sound_, P_MobjGetSfxCategory(mobj), mobj);
+        StartSoundEffect(info->overkill_sound_, P_MobjGetSfxCategory(mobj), mobj);
 
     P_SetMobjState(mobj, info->raise_state_);
 
@@ -603,7 +603,7 @@ void P_MobjExplodeMissile(MapObject *mo)
     mo->extended_flags_ &= ~(kExtendedFlagBounce | kExtendedFlagUsable);
 
     if (mo->info_->deathsound_)
-        S_StartFX(mo->info_->deathsound_, SNCAT_Object, mo);
+        StartSoundEffect(mo->info_->deathsound_, kCategoryObject, mo);
 
     // mobjdef used -ACB- 1998/08/06
     P_SetMobjStateDeferred(mo, mo->info_->death_state_,
@@ -1186,14 +1186,14 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
                 {
                     if (!(mo->player_->cheats & CF_GODMODE) &&
                         mo->player_->powers[kPowerTypeInvulnerable] < 1)
-                        S_StartFX(mo->info_->fallpain_sound_,
+                        StartSoundEffect(mo->info_->fallpain_sound_,
                                   P_MobjGetSfxCategory(mo), mo);
                     else
-                        S_StartFX(mo->info_->oof_sound_,
+                        StartSoundEffect(mo->info_->oof_sound_,
                                   P_MobjGetSfxCategory(mo), mo);
                 }
                 else
-                    S_StartFX(mo->info_->oof_sound_, P_MobjGetSfxCategory(mo),
+                    StartSoundEffect(mo->info_->oof_sound_, P_MobjGetSfxCategory(mo),
                               mo);
 
                 P_HitLiquidFloor(mo);
@@ -1308,7 +1308,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
                 !fly_or_swim)
             {
                 mo->player_->deltaviewheight = zmove / 8.0f;
-                S_StartFX(mo->info_->oof_sound_, P_MobjGetSfxCategory(mo), mo);
+                StartSoundEffect(mo->info_->oof_sound_, P_MobjGetSfxCategory(mo), mo);
             }
             if (mo->info_->maxfall_ > 0 && gravity < 0 &&
                 mo->momentum_.Z > hurt_momz && (!mo->player_ || !fly_or_swim))
@@ -1676,7 +1676,7 @@ static void DeleteMobj(MapObject *mo)
     // Sound might still be playing, so use remove the
     // link between object and effect.
 
-    S_StopFX(mo);
+    StopSoundEffect(mo);
 
     if (mo->dynamic_light_.shader) delete mo->dynamic_light_.shader;
 
@@ -2149,7 +2149,7 @@ bool P_HitLiquidFloor(MapObject *thing)
             P_SpawnDebris(thing->x, thing->y, thing->z, angle,
                           current_flatdef->impactobject_);
 
-            S_StartFX(current_flatdef->footstep_, P_MobjGetSfxCategory(thing),
+            StartSoundEffect(current_flatdef->footstep_, P_MobjGetSfxCategory(thing),
                       thing);
         }
         if (current_flatdef->liquid_.empty()) { return false; }
@@ -2421,15 +2421,15 @@ int P_MobjGetSfxCategory(const MapObject *mo)
 {
     if (mo->player_)
     {
-        if (mo->player_ == players[displayplayer]) return SNCAT_Player;
+        if (mo->player_ == players[displayplayer]) return kCategoryPlayer;
 
-        return SNCAT_Opponent;
+        return kCategoryOpponent;
     }
     else
     {
-        if (mo->extended_flags_ & kExtendedFlagMonster) return SNCAT_Monster;
+        if (mo->extended_flags_ & kExtendedFlagMonster) return kCategoryMonster;
 
-        return SNCAT_Object;
+        return kCategoryObject;
     }
 }
 

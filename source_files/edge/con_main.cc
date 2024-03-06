@@ -293,7 +293,7 @@ int ConsoleCommandPlaySound(char **argv, int argc)
 
     sfx = sfxdefs.GetEffect(argv[1], false);
     if (!sfx) { ConsolePrint("No such sound: %s\n", argv[1]); }
-    else { S_StartFX(sfx, SNCAT_UI); }
+    else { StartSoundEffect(sfx, kCategoryUi); }
 
     return 0;
 }

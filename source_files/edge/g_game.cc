@@ -142,7 +142,7 @@ void LoadLevel_Bits(void)
         FatalError("GameDoLoadLevel: No Current Map selected");
 
 #ifdef EDGE_WEB
-    S_PauseAudioDevice();
+    PauseAudioDevice();
 #endif
 
     // Set the sky map.
@@ -260,7 +260,7 @@ void LoadLevel_Bits(void)
     EventClearInput();
 
 #ifdef EDGE_WEB
-    S_ResumeAudioDevice();
+    ResumeAudioDevice();
 #endif
 
     paused = false;
@@ -330,7 +330,7 @@ bool GameResponder(InputEvent *ev)
         if (ev->type == kInputEventKeyDown)
         {
             MenuStartControlPanel();
-            S_StartFX(sound_effect_swtchn, SNCAT_UI);
+            StartSoundEffect(sound_effect_swtchn, kCategoryUi);
             return true;
         }
 
@@ -354,19 +354,19 @@ bool GameResponder(InputEvent *ev)
 
         if (paused)
         {
-            S_PauseMusic();
-            S_PauseSound();
+            PauseMusic();
+            PauseSound();
             GrabCursor(false);
         }
         else
         {
-            S_ResumeMusic();
-            S_ResumeSound();
+            ResumeMusic();
+            ResumeSound();
             GrabCursor(true);
         }
 
         // explicit as probably killed the initial effect
-        S_StartFX(sound_effect_swtchn, SNCAT_UI);
+        StartSoundEffect(sound_effect_swtchn, kCategoryUi);
         return true;
     }
 
@@ -900,7 +900,7 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
     }
 
 #ifdef EDGE_WEB
-    S_PauseAudioDevice();
+    PauseAudioDevice();
 #endif
 
     saveglobals_t *globs = SV_NewGLOB();
@@ -957,7 +957,7 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
     epi::SyncFilesystem();
 
 #ifdef EDGE_WEB
-    S_ResumeAudioDevice();
+    ResumeAudioDevice();
 #endif
 
     return true;  // OK
@@ -1161,8 +1161,8 @@ static void InitNew(NewGameParameters &params)
     if (paused)
     {
         paused = false;
-        S_ResumeMusic();  // -ACB- 1999/10/07 New Music API
-        S_ResumeSound();
+        ResumeMusic();  // -ACB- 1999/10/07 New Music API
+        ResumeSound();
     }
 
     current_map       = params.map_;
@@ -1228,7 +1228,7 @@ static void GameDoEndGame(void)
 
     SetPalette(kPaletteNormal, 0);
 
-    S_StopMusic();
+    StopMusic();
 
     E_PickLoadingScreen();
 

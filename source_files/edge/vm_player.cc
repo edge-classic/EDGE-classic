@@ -1018,7 +1018,7 @@ static void PL_play_footstep(coal::vm_c *vm, int argc)
     else
     {
         // Probably need to add check to see if the sfx is valid - Dasho
-        S_StartFX(current_flatdef->footstep_);
+        StartSoundEffect(current_flatdef->footstep_);
         vm->ReturnFloat(1);
     }
 }

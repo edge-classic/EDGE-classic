@@ -375,7 +375,7 @@ void DestroyAllAmbientSounds(void)
 
         active_ambients.pop_front();
 
-        S_StopFX(&amb->sector->sound_effects_origin);
+        StopSoundEffect(&amb->sector->sound_effects_origin);
 
         delete amb;
     }
@@ -395,7 +395,7 @@ void RunAmbientSounds(void)
         {
             amb->count = SECSFX_TIME;
 
-            S_StartFX(amb->sfx, SNCAT_Level, &amb->sector->sound_effects_origin);
+            StartSoundEffect(amb->sfx, kCategoryLevel, &amb->sector->sound_effects_origin);
         }
     }
 }

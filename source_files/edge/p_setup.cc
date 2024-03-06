@@ -3456,7 +3456,7 @@ static void P_RemoveSectorStuff(void)
         FreeSectorTouchNodes(level_sectors + i);
 
         // Might still be playing a sound.
-        S_StopFX(&level_sectors[i].sound_effects_origin);
+        StopSoundEffect(&level_sectors[i].sound_effects_origin);
     }
 }
 
@@ -3474,7 +3474,7 @@ void ShutdownLevel(void)
 
     P_RemoveSectorStuff();
 
-    S_StopLevelFX();
+    StopLevelSoundEffects();
 
     DestroyAllForces();
     DestroyAllLights();
@@ -3692,11 +3692,11 @@ void LevelSetup(void)
     if (precache) W_PrecacheLevel();
 
     // setup categories based on game mode (SP/COOP/DM)
-    S_ChangeChannelNum();
+    UpdateSoundCategoryLimits();
 
     // FIXME: cache sounds (esp. for player)
 
-    S_ChangeMusic(current_map->music_, true);  // start level music
+    ChangeMusic(current_map->music_, true);  // start level music
 
     level_active = true;
 }

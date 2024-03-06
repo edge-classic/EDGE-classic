@@ -47,11 +47,11 @@ static constexpr uint8_t kMaximumPlayerSpriteLoop = 10;
 
 static void BobWeapon(player_t *p, WeaponDefinition *info);
 
-static sound_category_e WeaponSoundEffectCategory(player_t *p)
+static SoundCategory WeaponSoundEffectCategory(player_t *p)
 {
-    if (p == players[consoleplayer]) return SNCAT_Weapon;
+    if (p == players[consoleplayer]) return kCategoryWeapon;
 
-    return SNCAT_Opponent;
+    return kCategoryOpponent;
 }
 
 static void SetPlayerSprite(player_t *p, int position, int stnum,
@@ -445,7 +445,7 @@ static void BringUpWeapon(player_t *p)
     }
 
     if (info->start_)
-        S_StartFX(info->start_, WeaponSoundEffectCategory(p), p->mo);
+        StartSoundEffect(info->start_, WeaponSoundEffectCategory(p), p->mo);
 
     SetPlayerSpriteDeferred(p, kPlayerSpriteWeapon, info->up_state_);
     SetPlayerSprite(p, kPlayerSpriteFlash, 0);
@@ -909,7 +909,7 @@ void A_WeaponReady(MapObject *mo)
         (psp->state == &states[info->ready_state_] ||
          (info->empty_state_ && psp->state == &states[info->empty_state_])))
     {
-        S_StartFX(info->idle_, WeaponSoundEffectCategory(p), mo);
+        StartSoundEffect(info->idle_, WeaponSoundEffectCategory(p), mo);
     }
 
     bool fire_0 = ButtonDown(p, 0);
@@ -1432,14 +1432,14 @@ static void DoWeaponShoot(MapObject *mo, int ATK)
 
     if (mo->target_)
     {
-        if (info->hit_) S_StartFX(info->hit_, WeaponSoundEffectCategory(p), mo);
+        if (info->hit_) StartSoundEffect(info->hit_, WeaponSoundEffectCategory(p), mo);
 
         if (info->feedback_) mo->flags_ |= kMapObjectFlagJustAttacked;
     }
     else
     {
         if (info->engaged_)
-            S_StartFX(info->engaged_, WeaponSoundEffectCategory(p), mo);
+            StartSoundEffect(info->engaged_, WeaponSoundEffectCategory(p), mo);
     }
 
     // show the player making the shot/attack...
@@ -1517,34 +1517,34 @@ void A_WeaponPlaySound(MapObject *mo)
         return;
     }
 
-    S_StartFX(sound, WeaponSoundEffectCategory(p), mo);
+    StartSoundEffect(sound, WeaponSoundEffectCategory(p), mo);
 }
 
 void A_WeaponKillSound(MapObject *mo)
 {
     // kill any current sound from this weapon
 
-    S_StopFX(mo);
+    StopSoundEffect(mo);
 }
 
 void A_SFXWeapon1(MapObject *mo)
 {
     player_t *p = mo->player_;
-    S_StartFX(p->weapons[p->ready_wp].info->sound1_,
+    StartSoundEffect(p->weapons[p->ready_wp].info->sound1_,
               WeaponSoundEffectCategory(p), mo);
 }
 
 void A_SFXWeapon2(MapObject *mo)
 {
     player_t *p = mo->player_;
-    S_StartFX(p->weapons[p->ready_wp].info->sound2_,
+    StartSoundEffect(p->weapons[p->ready_wp].info->sound2_,
               WeaponSoundEffectCategory(p), mo);
 }
 
 void A_SFXWeapon3(MapObject *mo)
 {
     player_t *p = mo->player_;
-    S_StartFX(p->weapons[p->ready_wp].info->sound3_,
+    StartSoundEffect(p->weapons[p->ready_wp].info->sound3_,
               WeaponSoundEffectCategory(p), mo);
 }
 

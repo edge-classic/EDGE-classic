@@ -100,9 +100,9 @@ set (EDGE_SOURCE_FILES
   sv_mobj.cc
   sv_play.cc
   sv_save.cc
-  sound_data.cc
-  sound_gather.cc
-  sound_types.cc
+  snd_data.cc
+  snd_gather.cc
+  snd_types.cc
   w_files.cc
   w_flat.cc
   w_model.cc

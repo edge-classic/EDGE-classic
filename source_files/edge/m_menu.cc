@@ -472,7 +472,7 @@ void MenuLoadSavePage(int choice)
             break;
     }
 
-    S_StartFX(sound_effect_swtchn);
+    StartSoundEffect(sound_effect_swtchn);
     MenuReadSaveStrings();
 }
 
@@ -1146,7 +1146,7 @@ static void QuickSaveResponse(int ch)
     if (ch == 'y' || ch == KEYD_GP_A || ch == KEYD_MOUSE1)
     {
         M_DoSave(quicksave_page, quicksave_slot);
-        S_StartFX(sound_effect_swtchx);
+        StartSoundEffect(sound_effect_swtchx);
     }
 }
 
@@ -1154,7 +1154,7 @@ void MenuQuickSave(void)
 {
     if (game_state != GS_LEVEL)
     {
-        S_StartFX(sound_effect_oof);
+        StartSoundEffect(sound_effect_oof);
         return;
     }
 
@@ -1188,7 +1188,7 @@ static void QuickLoadResponse(int ch)
         MenuLoadSelect(quicksave_slot);
 
         save_page = tempsavepage;
-        S_StartFX(sound_effect_swtchx);
+        StartSoundEffect(sound_effect_swtchx);
     }
 }
 
@@ -1601,7 +1601,7 @@ void MenuEndGame(int choice, ConsoleVariable *cvar)
 {
     if (game_state != GS_LEVEL)
     {
-        S_StartFX(sound_effect_oof);
+        StartSoundEffect(sound_effect_oof);
         return;
     }
 
@@ -1657,7 +1657,7 @@ static void QuitResponse(int ch)
                 sprintf(sound, "DS%s", language[refname]);
                 if (W_CheckNumForName(sound) != -1)
                 {
-                    S_StartFX(sfxdefs.GetEffect(language[refname]));
+                    StartSoundEffect(sfxdefs.GetEffect(language[refname]));
                     break;
                 }
                 i = (i + 1) % numsounds;
@@ -1951,7 +1951,7 @@ bool MenuResponder(InputEvent *ev)
 
         if (message_key_routine) (*message_key_routine)(ch);
 
-        S_StartFX(sound_effect_swtchx);
+        StartSoundEffect(sound_effect_swtchx);
         return true;
     }
     else if (message_mode == 2)
@@ -1967,7 +1967,7 @@ bool MenuResponder(InputEvent *ev)
             input_string.clear();
 
             MenuClear();
-            S_StartFX(sound_effect_swtchx);
+            StartSoundEffect(sound_effect_swtchx);
             return true;
         }
 
@@ -1982,7 +1982,7 @@ bool MenuResponder(InputEvent *ev)
             input_string.clear();
 
             MenuClear();
-            S_StartFX(sound_effect_swtchx);
+            StartSoundEffect(sound_effect_swtchx);
             return true;
         }
 
@@ -2114,7 +2114,7 @@ bool MenuResponder(InputEvent *ev)
 
                 screen_hud = (screen_hud - 1 + NUMHUD) % NUMHUD;
 
-                S_StartFX(sound_effect_stnmov);
+                StartSoundEffect(sound_effect_stnmov);
                 return true;
 
             case KEYD_EQUALS:  // Screen size up
@@ -2123,26 +2123,26 @@ bool MenuResponder(InputEvent *ev)
 
                 screen_hud = (screen_hud + 1) % NUMHUD;
 
-                S_StartFX(sound_effect_stnmov);
+                StartSoundEffect(sound_effect_stnmov);
                 return true;
 
             case KEYD_SAVEGAME:  // Save
 
                 MenuStartControlPanel();
-                S_StartFX(sound_effect_swtchn);
+                StartSoundEffect(sound_effect_swtchn);
                 MenuSaveGame(0);
                 return true;
 
             case KEYD_LOADGAME:  // Load
 
                 MenuStartControlPanel();
-                S_StartFX(sound_effect_swtchn);
+                StartSoundEffect(sound_effect_swtchn);
                 MenuLoadGame(0);
                 return true;
 
             case KEYD_SOUNDCONTROLS:  // Sound Volume
 
-                S_StartFX(sound_effect_swtchn);
+                StartSoundEffect(sound_effect_swtchn);
                 MenuStartControlPanel();
                 MenuF4SoundOptions(0);
                 return true;
@@ -2152,38 +2152,38 @@ bool MenuResponder(InputEvent *ev)
                 // -KM- 1998/07/31 F5 now loads MainMenuOptions menu, detail is
                 // obsolete.
 
-                S_StartFX(sound_effect_swtchn);
+                StartSoundEffect(sound_effect_swtchn);
                 MenuStartControlPanel();
                 MenuOptions(1);
                 return true;
 
             case KEYD_QUICKSAVE:  // Quicksave
 
-                S_StartFX(sound_effect_swtchn);
+                StartSoundEffect(sound_effect_swtchn);
                 MenuQuickSave();
                 return true;
 
             case KEYD_ENDGAME:  // End game
 
-                S_StartFX(sound_effect_swtchn);
+                StartSoundEffect(sound_effect_swtchn);
                 MenuEndGame(0);
                 return true;
 
             case KEYD_MESSAGETOGGLE:  // Toggle messages
 
                 MenuChangeMessages(0);
-                S_StartFX(sound_effect_swtchn);
+                StartSoundEffect(sound_effect_swtchn);
                 return true;
 
             case KEYD_QUICKLOAD:  // Quickload
 
-                S_StartFX(sound_effect_swtchn);
+                StartSoundEffect(sound_effect_swtchn);
                 MenuQuickLoad();
                 return true;
 
             case KEYD_QUITEDGE:  // Quit DOOM
 
-                S_StartFX(sound_effect_swtchn);
+                StartSoundEffect(sound_effect_swtchn);
                 MenuQuitEdge(0);
                 return true;
 
@@ -2234,7 +2234,7 @@ bool MenuResponder(InputEvent *ev)
         if (ch == KEYD_ESCAPE || ch == KEYD_GP_START)
         {
             MenuStartControlPanel();
-            S_StartFX(sound_effect_swtchn);
+            StartSoundEffect(sound_effect_swtchn);
             return true;
         }
         return false;
@@ -2250,7 +2250,7 @@ bool MenuResponder(InputEvent *ev)
                     if (current_menu->menu_items[item_on].select_function &&
                         current_menu->menu_items[item_on].status == 2)
                     {
-                        S_StartFX(sound_effect_stnmov);
+                        StartSoundEffect(sound_effect_stnmov);
                         // 98-7-10 KM Use new defines
                         (*current_menu->menu_items[item_on].select_function)(
                             kSliderRight);
@@ -2262,7 +2262,7 @@ bool MenuResponder(InputEvent *ev)
                 }
                 else
                     item_on++;
-                S_StartFX(sound_effect_pstop);
+                StartSoundEffect(sound_effect_pstop);
             } while (current_menu->menu_items[item_on].status == -1);
             return true;
 
@@ -2273,7 +2273,7 @@ bool MenuResponder(InputEvent *ev)
                     if (current_menu->menu_items[item_on].select_function &&
                         current_menu->menu_items[item_on].status == 2)
                     {
-                        S_StartFX(sound_effect_stnmov);
+                        StartSoundEffect(sound_effect_stnmov);
                         // 98-7-10 KM Use new defines
                         (*current_menu->menu_items[item_on].select_function)(
                             kSliderLeft);
@@ -2285,7 +2285,7 @@ bool MenuResponder(InputEvent *ev)
                 }
                 else
                     item_on--;
-                S_StartFX(sound_effect_pstop);
+                StartSoundEffect(sound_effect_pstop);
             } while (current_menu->menu_items[item_on].status == -1);
             return true;
 
@@ -2296,7 +2296,7 @@ bool MenuResponder(InputEvent *ev)
                     item_on = 0;
                 else
                     item_on++;
-                S_StartFX(sound_effect_pstop);
+                StartSoundEffect(sound_effect_pstop);
             } while (current_menu->menu_items[item_on].status == -1);
             return true;
 
@@ -2307,7 +2307,7 @@ bool MenuResponder(InputEvent *ev)
                     item_on = current_menu->total_items - 1;
                 else
                     item_on--;
-                S_StartFX(sound_effect_pstop);
+                StartSoundEffect(sound_effect_pstop);
             } while (current_menu->menu_items[item_on].status == -1);
             return true;
 
@@ -2317,7 +2317,7 @@ bool MenuResponder(InputEvent *ev)
             if (current_menu->menu_items[item_on].select_function &&
                 current_menu->menu_items[item_on].status == 2)
             {
-                S_StartFX(sound_effect_stnmov);
+                StartSoundEffect(sound_effect_stnmov);
                 // 98-7-10 KM Use new defines
                 (*current_menu->menu_items[item_on].select_function)(
                     kSliderLeft);
@@ -2330,7 +2330,7 @@ bool MenuResponder(InputEvent *ev)
             if (current_menu->menu_items[item_on].select_function &&
                 current_menu->menu_items[item_on].status == 2)
             {
-                S_StartFX(sound_effect_stnmov);
+                StartSoundEffect(sound_effect_stnmov);
                 // 98-7-10 KM Use new defines
                 (*current_menu->menu_items[item_on].select_function)(
                     kSliderRight);
@@ -2345,7 +2345,7 @@ bool MenuResponder(InputEvent *ev)
             {
                 current_menu->last_on = item_on;
                 (*current_menu->menu_items[item_on].select_function)(item_on);
-                S_StartFX(sound_effect_pistol);
+                StartSoundEffect(sound_effect_pistol);
             }
             return true;
 
@@ -2355,7 +2355,7 @@ bool MenuResponder(InputEvent *ev)
         case KEYD_GP_START:
             current_menu->last_on = item_on;
             MenuClear();
-            S_StartFX(sound_effect_swtchx);
+            StartSoundEffect(sound_effect_swtchx);
             return true;
 
         case KEYD_BACKSPACE:
@@ -2365,7 +2365,7 @@ bool MenuResponder(InputEvent *ev)
             {
                 current_menu = current_menu->previous_menu;
                 item_on      = current_menu->last_on;
-                S_StartFX(sound_effect_swtchn);
+                StartSoundEffect(sound_effect_swtchn);
             }
             return true;
 
@@ -2374,14 +2374,14 @@ bool MenuResponder(InputEvent *ev)
                 if (current_menu->menu_items[i].alpha_key == ch)
                 {
                     item_on = i;
-                    S_StartFX(sound_effect_pstop);
+                    StartSoundEffect(sound_effect_pstop);
                     return true;
                 }
             for (i = 0; i <= item_on; i++)
                 if (current_menu->menu_items[i].alpha_key == ch)
                 {
                     item_on = i;
-                    S_StartFX(sound_effect_pstop);
+                    StartSoundEffect(sound_effect_pstop);
                     return true;
                 }
             break;

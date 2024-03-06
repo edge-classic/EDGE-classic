@@ -70,10 +70,10 @@
 bool save_screenshot_valid = false;
 
 extern ConsoleVariable midi_soundfont;
-extern bool            var_pc_speaker_mode;
+extern bool            pc_speaker_mode;
 int                    var_midi_player  = 0;
 int                    var_sound_stereo = 0;
-int                    var_mix_channels = 0;
+int                    sound_mixing_channels = 0;
 
 static bool done_first_init = false;
 
@@ -84,10 +84,10 @@ static ConfigurationDefault defaults[] = {
     {kConfigInteger, "displaymode", &current_window_mode, CFGDEF_DISPLAYMODE},
 
     {kConfigInteger, "sound_stereo", &var_sound_stereo, CFGDEF_SOUND_STEREO},
-    {kConfigBoolean, "pc_speaker_mode", &var_pc_speaker_mode, 0},
+    {kConfigBoolean, "pc_speaker_mode", &pc_speaker_mode, 0},
     {kConfigInteger, "midi_player", &var_midi_player, 0},
     {kConfigBoolean, "dynamic_reverb", &dynamic_reverb, 0},
-    {kConfigInteger, "mix_channels", &var_mix_channels, CFGDEF_MIX_CHANNELS},
+    {kConfigInteger, "mix_channels", &sound_mixing_channels, CFGDEF_MIX_CHANNELS},
 
     {kConfigInteger, "show_messages", &show_messages, CFGDEF_SHOWMESSAGES},
 
@@ -144,7 +144,7 @@ static ConfigurationDefault defaults[] = {
     // -------------------- VARS --------------------
 
     {kConfigBoolean, "show_obituaries", &show_obituaries, 1},
-    {kConfigBoolean, "var_cache_sfx", &var_cache_sfx, 1},
+    {kConfigBoolean, "precache_sound_effects", &precache_sound_effects, 1},
 
     // -------------------- KEYS --------------------
 

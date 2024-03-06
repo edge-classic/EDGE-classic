@@ -18,20 +18,15 @@
 //
 // -ACB- 2004/08/18 Written
 //
-#ifndef __OGGPLAYER_H__
-#define __OGGPLAYER_H__
+
+#pragma once
 
 #include "s_music.h"
+#include "snd_data.h"
 
-#include "sound_data.h"
+AbstractMusicPlayer *PlayOggMusic(uint8_t *data, int length, bool looping);
 
-/* FUNCTIONS */
-
-AbstractMusicPlayer *S_PlayOGGMusic(uint8_t *data, int length, bool looping);
-
-bool S_LoadOGGSound(sound_data_c *buf, const uint8_t *data, int length);
-
-#endif /* __OGGPLAYER_H__ */
+bool LoadOggSound(SoundData *buf, const uint8_t *data, int length);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

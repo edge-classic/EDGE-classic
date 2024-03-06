@@ -744,7 +744,7 @@ static void HD_play_sound(coal::vm_c *vm, int argc)
     SoundEffect *fx = sfxdefs.GetEffect(name);
 
     if (fx)
-        S_StartFX(fx);
+        StartSoundEffect(fx);
     else
         LogWarning("hud.play_sound: unknown sfx '%s'\n", name);
 }

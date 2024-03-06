@@ -53,7 +53,7 @@ void FatalError(const char *error, ...);
 
 // The opposite of the SystemStartup routine.  This will shutdown
 // everything running in the platform code, by calling the other
-// termination functions (ShutdownSound, ShutdownMusic,
+// termination functions (SoundShutdown, ShutdownMusic,
 // ShutdownGraphics and ShutdownControl), and doing anything else
 // the platform code needs to (e.g. freeing all other resources).
 void SystemShutdown(void);
@@ -149,12 +149,12 @@ extern bool no_sound;
 // otherwise false if something went wrong (NOTE: you must set no_sound
 // to false when it fails).   The main code never calls this function,
 // it should be called by SystemStartup().
-void StartupSound(void);
+void StartupAudio(void);
 
 // Shuts down the sound system.  This is the companion function to
 // StartupSound().  This must be called by SystemShutdown(), the
 // main code never calls this function.
-void ShutdownSound(void);
+void AudioShutdown(void);
 
 // wrappers around the SDL functions of the same name,
 // however UnlockAudio() may be called at any time,

@@ -1049,14 +1049,14 @@ static void UpdateDeathmatchStats(void)
             deathmatch_totals[i] = players[p]->totalfrags;
         }
 
-        S_StartFX(gd->done_);
+        StartSoundEffect(gd->done_);
         deathmatch_state = 4;
     }
 
     switch (deathmatch_state)
     {
         case 2:
-            if (!(background_count & 3)) S_StartFX(gd->percent_);
+            if (!(background_count & 3)) StartSoundEffect(gd->percent_);
 
             stillticking = false;
             for (int i = 0; i < kNumberOfPlayersShown; i++)
@@ -1079,7 +1079,7 @@ static void UpdateDeathmatchStats(void)
 
             if (!stillticking)
             {
-                S_StartFX(gd->done_);
+                StartSoundEffect(gd->done_);
                 deathmatch_state++;
             }
             break;
@@ -1087,7 +1087,7 @@ static void UpdateDeathmatchStats(void)
         case 4:
             if (accelerate_stage)
             {
-                S_StartFX(gd->accel_snd_);
+                StartSoundEffect(gd->accel_snd_);
 
                 // Skip next loc on no map -ACB- 2004/06/27
                 if (!world_intermission.total_map_positions_ ||
@@ -1237,14 +1237,14 @@ static void UpdateCoopStats(void)
             }
         }
 
-        S_StartFX(gd->done_);
+        StartSoundEffect(gd->done_);
         state_ticker_count = 10;
     }
 
     switch (state_ticker_count)
     {
         case 2:
-            if (!(background_count & 3)) S_StartFX(gd->percent_);
+            if (!(background_count & 3)) StartSoundEffect(gd->percent_);
 
             stillticking = false;
 
@@ -1266,13 +1266,13 @@ static void UpdateCoopStats(void)
 
             if (!stillticking)
             {
-                S_StartFX(gd->done_);
+                StartSoundEffect(gd->done_);
                 state_ticker_count++;
             }
             break;
 
         case 4:
-            if (!(background_count & 3)) S_StartFX(gd->percent_);
+            if (!(background_count & 3)) StartSoundEffect(gd->percent_);
 
             stillticking = false;
 
@@ -1293,13 +1293,13 @@ static void UpdateCoopStats(void)
 
             if (!stillticking)
             {
-                S_StartFX(gd->done_);
+                StartSoundEffect(gd->done_);
                 state_ticker_count++;
             }
             break;
 
         case 6:
-            if (!(background_count & 3)) S_StartFX(gd->percent_);
+            if (!(background_count & 3)) StartSoundEffect(gd->percent_);
 
             stillticking = false;
 
@@ -1321,13 +1321,13 @@ static void UpdateCoopStats(void)
 
             if (!stillticking)
             {
-                S_StartFX(gd->done_);
+                StartSoundEffect(gd->done_);
                 state_ticker_count += 1 + 2 * !do_frags;
             }
             break;
 
         case 8:
-            if (!(background_count & 3)) S_StartFX(gd->percent_);
+            if (!(background_count & 3)) StartSoundEffect(gd->percent_);
 
             stillticking = false;
 
@@ -1350,7 +1350,7 @@ static void UpdateCoopStats(void)
 
             if (!stillticking)
             {
-                S_StartFX(gd->frag_snd_);
+                StartSoundEffect(gd->frag_snd_);
                 state_ticker_count++;
             }
             break;
@@ -1358,7 +1358,7 @@ static void UpdateCoopStats(void)
         case 10:
             if (accelerate_stage)
             {
-                S_StartFX(gd->next_map_);
+                StartSoundEffect(gd->next_map_);
 
                 // Skip next loc on no map -ACB- 2004/06/27
                 if (!world_intermission.total_map_positions_ ||
@@ -1474,7 +1474,7 @@ static void UpdateSinglePlayerStats(void)
             (con_plyr->secretcount * 100) / intermission_stats.secrets;
         count_time = con_plyr->leveltime / kTicRate;
         count_par  = intermission_stats.par_time / kTicRate;
-        S_StartFX(gd->done_);
+        StartSoundEffect(gd->done_);
         single_player_state = kSinglePlayerStateEnd;
     }
 
@@ -1482,14 +1482,14 @@ static void UpdateSinglePlayerStats(void)
     {
         count_kills[0] += 2;
 
-        if (!(background_count & 3)) S_StartFX(gd->percent_);
+        if (!(background_count & 3)) StartSoundEffect(gd->percent_);
 
         if (count_kills[0] >=
             (con_plyr->killcount * 100) / intermission_stats.kills)
         {
             count_kills[0] =
                 (con_plyr->killcount * 100) / intermission_stats.kills;
-            S_StartFX(gd->done_);
+            StartSoundEffect(gd->done_);
             single_player_state++;
         }
     }
@@ -1497,14 +1497,14 @@ static void UpdateSinglePlayerStats(void)
     {
         count_items[0] += 2;
 
-        if (!(background_count & 3)) S_StartFX(gd->percent_);
+        if (!(background_count & 3)) StartSoundEffect(gd->percent_);
 
         if (count_items[0] >=
             (con_plyr->itemcount * 100) / intermission_stats.items)
         {
             count_items[0] =
                 (con_plyr->itemcount * 100) / intermission_stats.items;
-            S_StartFX(gd->done_);
+            StartSoundEffect(gd->done_);
             single_player_state++;
         }
     }
@@ -1512,21 +1512,21 @@ static void UpdateSinglePlayerStats(void)
     {
         count_secrets[0] += 2;
 
-        if (!(background_count & 3)) S_StartFX(gd->percent_);
+        if (!(background_count & 3)) StartSoundEffect(gd->percent_);
 
         if (count_secrets[0] >=
             (con_plyr->secretcount * 100) / intermission_stats.secrets)
         {
             count_secrets[0] =
                 (con_plyr->secretcount * 100) / intermission_stats.secrets;
-            S_StartFX(gd->done_);
+            StartSoundEffect(gd->done_);
             single_player_state++;
         }
     }
 
     else if (single_player_state == kSinglePlayerStateTime)
     {
-        if (!(background_count & 3)) S_StartFX(gd->percent_);
+        if (!(background_count & 3)) StartSoundEffect(gd->percent_);
 
         count_time += 3;
 
@@ -1541,7 +1541,7 @@ static void UpdateSinglePlayerStats(void)
 
             if (count_time >= con_plyr->leveltime / kTicRate)
             {
-                S_StartFX(gd->done_);
+                StartSoundEffect(gd->done_);
                 single_player_state++;
             }
         }
@@ -1550,7 +1550,7 @@ static void UpdateSinglePlayerStats(void)
     {
         if (accelerate_stage)
         {
-            S_StartFX(gd->next_map_);
+            StartSoundEffect(gd->next_map_);
 
             // Skip next loc on no map -ACB- 2004/06/27
             if (!world_intermission.total_map_positions_ ||
@@ -1771,7 +1771,7 @@ void IntermissionTicker(void)
     if (background_count == 1)
     {
         // intermission music
-        S_ChangeMusic(intermission_stats.current_level->episode_->music_, true);
+        ChangeMusic(intermission_stats.current_level->episode_->music_, true);
     }
 
     if (IntermissionCheckForAccelerate()) accelerate_stage = true;

@@ -157,7 +157,7 @@ void ChangeSwitchTexture(Line *line, bool useAgain, LineSpecial specials,
                 if (!noSound && sw->on_sfx_)
                 {
                     SYS_ASSERT(sound_effects_origin);
-                    S_StartFX(sw->on_sfx_, SNCAT_Level, sound_effects_origin);
+                    StartSoundEffect(sw->on_sfx_, kCategoryLevel, sound_effects_origin);
                     noSound = true;
                 }
 
@@ -234,7 +234,7 @@ void UpdateButtons(void)
 
             if (b->off_sound)
             {
-                S_StartFX(b->off_sound, SNCAT_Level,
+                StartSoundEffect(b->off_sound, kCategoryLevel,
                           &b->line->front_sector->sound_effects_origin);
             }
 

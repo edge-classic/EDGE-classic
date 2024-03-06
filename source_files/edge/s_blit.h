@@ -23,116 +23,109 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __S_BLIT__
-#define __S_BLIT__
+#pragma once
 
 #include "con_var.h"
-
-#include "sound_data.h"
-
+#include "snd_data.h"
 #include "types.h"
 
 // Forward declarations
 class SoundEffectDefinition;
 struct Position;
 
-// We use a 22.10 fixed point for sound offsets.  It's a reasonable
-// compromise between longest sound and accumulated round-off error.
-typedef unsigned long fixed22_t;
-
-typedef enum
+enum ChannelState
 {
-    CHAN_Empty    = 0,
-    CHAN_Playing  = 1,
-    CHAN_Finished = 2
-} chan_state_e;
+    kChannelEmpty    = 0,
+    kChannelPlaying  = 1,
+    kChannelFinished = 2
+};
 
 // channel info
-class mix_channel_c
+class SoundChannel
 {
-  public:
-    int state; // CHAN_xxx
+   public:
+    int state_;  // CHAN_xxx
 
-    sound_data_c *data;
+    SoundData *data_;
 
-    int         category;
-    SoundEffectDefinition   *def;
-    Position *pos;
+    int                    category_;
+    SoundEffectDefinition *definition_;
+    Position              *position_;
 
-    fixed22_t offset;
-    fixed22_t length;
-    fixed22_t delta;
+    // We use a 22.10 fixed point for sound offsets.  It's a reasonable
+    // compromise between longest sound and accumulated round-off error.
+    uint32_t offset_;
+    uint32_t length_;
+    uint32_t delta_;
 
-    int volume_L; // mixing volume
-    int volume_R;
+    int volume_left_;  // mixing volume
+    int volume_right_;
 
-    bool loop; // will loop *one* more time
-    bool boss;
+    bool loop_;  // will loop *one* more time
+    bool boss_;
 
-  public:
-    mix_channel_c();
-    ~mix_channel_c();
+   public:
+    SoundChannel();
+    ~SoundChannel();
 
     void ComputeDelta();
     void ComputeVolume();
     void ComputeMusicVolume();
 };
 
-extern ConsoleVariable sfx_volume;
+extern ConsoleVariable sound_effect_volume;
 
-extern mix_channel_c *mix_chan[];
-extern int            num_chan;
+extern SoundChannel *mix_channels[];
+extern int           total_channels;
 
-extern bool  vacuum_sfx;
-extern bool  submerged_sfx;
+extern bool  vacuum_sound_effects;
+extern bool  submerged_sound_effects;
 extern bool  outdoor_reverb;
 extern bool  dynamic_reverb;
 extern bool  ddf_reverb;
-extern int   ddf_reverb_type; // 0 = None, 1 = Reverb, 2 = Echo
+extern int   ddf_reverb_type;  // 0 = None, 1 = Reverb, 2 = Echo
 extern int   ddf_reverb_ratio;
 extern int   ddf_reverb_delay;
-extern float mus_player_gain;
+extern float music_player_gain;
 
-void S_InitChannels(int total);
-void S_FreeChannels(void);
+void SoundInitializeChannels(int total);
+void SoundFreeChannels(void);
 
-void S_KillChannel(int k);
-void S_ReallocChannels(int total);
+void SoundKillChannel(int k);
+void SoundReallocateChannels(int total);
 
-void S_MixAllChannels(void *stream, int len);
+void SoundMixAllChannels(void *stream, int len);
 // mix all active channels into the output stream.
 // 'len' is the number of samples (for stereo: pairs)
 // to mix into the stream.
 
-void S_UpdateSounds(Position *listener, BAMAngle angle);
+void UpdateSounds(Position *listener, BAMAngle angle);
 
 //-------- API for Synthesised MUSIC --------------------
 
-void S_QueueInit(void);
+void SoundQueueInitialize(void);
 // initialise the queueing system.
 
-void S_QueueShutdown(void);
+void SoundQueueShutdown(void);
 // finalise the queuing system, stopping all playback.
 // The data from all the buffers will be freed.
 
-void S_QueueStop(void);
+void SoundQueueStop(void);
 // stop the currently playing queue.  All playing buffers
 // are moved into the free list.
 
-sound_data_c *S_QueueGetFreeBuffer(int samples, int buf_mode);
+SoundData *SoundQueueGetFreeBuffer(int samples, int buf_mode);
 // returns the next unused (or finished) buffer, or nullptr
-// if there are none.  The data_L/data_R fields will be
+// if there are none.  The data_left_/data_right_ fields will be
 // updated to ensure they hold the requested number of
 // samples and conform to the wanted buffer mode.
 
-void S_QueueAddBuffer(sound_data_c *buf, int freq);
+void SoundQueueAddBuffer(SoundData *buf, int freq);
 // add a new buffer to be end of the queue.
 
-void S_QueueReturnBuffer(sound_data_c *buf);
+void SoundQueueReturnBuffer(SoundData *buf);
 // if something goes wrong and you cannot add the buffer,
 // then this call will return the buffer to the free list.
-
-#endif // __S_BLIT__
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

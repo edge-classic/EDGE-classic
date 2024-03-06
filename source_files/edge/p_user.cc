@@ -210,9 +210,9 @@ static void CalcHeight(player_t *player, bool extra_tic)
         {
             int sfx_cat;
 
-            if (player == players[consoleplayer]) { sfx_cat = SNCAT_Player; }
-            else { sfx_cat = SNCAT_Opponent; }
-            S_StartFX(player->mo->info_->falling_sound_, sfx_cat, player->mo);
+            if (player == players[consoleplayer]) { sfx_cat = kCategoryPlayer; }
+            else { sfx_cat = kCategoryOpponent; }
+            StartSoundEffect(player->mo->info_->falling_sound_, sfx_cat, player->mo);
         }
 
     // don't apply bobbing when jumping, but have a smooth
@@ -248,11 +248,11 @@ void P_PlayerJump(player_t *pl, float dz, int wait)
         int sfx_cat;
 
         if (pl == players[consoleplayer])
-            sfx_cat = SNCAT_Player;
+            sfx_cat = kCategoryPlayer;
         else
-            sfx_cat = SNCAT_Opponent;
+            sfx_cat = kCategoryOpponent;
 
-        S_StartFX(pl->mo->info_->jump_sound_, sfx_cat, pl->mo);
+        StartSoundEffect(pl->mo->info_->jump_sound_, sfx_cat, pl->mo);
     }
 }
 
@@ -378,24 +378,24 @@ static void MovePlayer(player_t *player, bool extra_tic)
         int sfx_cat;
 
         if (player == players[consoleplayer])
-            sfx_cat = SNCAT_Player;
+            sfx_cat = kCategoryPlayer;
         else
-            sfx_cat = SNCAT_Opponent;
+            sfx_cat = kCategoryOpponent;
 
         if (player->powers[kPowerTypeJetpack] <= (5 * kTicRate))
         {
             if ((level_time_elapsed & 10) == 0)
-                S_StartFX(sfx_jpflow, sfx_cat, player->mo);  // fuel low
+                StartSoundEffect(sfx_jpflow, sfx_cat, player->mo);  // fuel low
         }
         else if (cmd->upward_move > 0)
-            S_StartFX(sfx_jprise, sfx_cat, player->mo);
+            StartSoundEffect(sfx_jprise, sfx_cat, player->mo);
         else if (cmd->upward_move < 0)
-            S_StartFX(sfx_jpdown, sfx_cat, player->mo);
+            StartSoundEffect(sfx_jpdown, sfx_cat, player->mo);
         else if (cmd->forward_move || cmd->side_move)
-            S_StartFX((onground ? sfx_jpidle : sfx_jpmove), sfx_cat,
+            StartSoundEffect((onground ? sfx_jpidle : sfx_jpmove), sfx_cat,
                       player->mo);
         else
-            S_StartFX(sfx_jpidle, sfx_cat, player->mo);
+            StartSoundEffect(sfx_jpidle, sfx_cat, player->mo);
     }
 
     if (player->mo->state_ == &states[player->mo->info_->idle_state_])
@@ -816,8 +816,8 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
 
     // Reset environmental FX in case player has left sector in which they apply
     // - Dasho
-    vacuum_sfx       = false;
-    submerged_sfx    = false;
+    vacuum_sound_effects       = false;
+    submerged_sound_effects    = false;
     outdoor_reverb   = false;
     ddf_reverb       = false;
     ddf_reverb_type  = 0;

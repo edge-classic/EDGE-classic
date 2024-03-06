@@ -57,7 +57,7 @@ void SoundFillCallback(void *udata, Uint8 *stream, int len)
 {
     (void)udata;
     SDL_memset(stream, 0, len);
-    S_MixAllChannels(stream, len);
+    SoundMixAllChannels(stream, len);
 }
 
 static bool TryOpenSound(int want_freq, bool want_stereo)
@@ -84,7 +84,7 @@ static bool TryOpenSound(int want_freq, bool want_stereo)
     return false;
 }
 
-void StartupSound(void)
+void StartupAudio(void)
 {
     if (no_sound) return;
 
@@ -185,11 +185,11 @@ void StartupSound(void)
     return;
 }
 
-void ShutdownSound(void)
+void AudioShutdown(void)
 {
     if (no_sound) return;
 
-    S_Shutdown();
+    SoundShutdown();
 
     no_sound = true;
 
@@ -289,9 +289,9 @@ void StartupMusic(void)
         }
     }
 
-    if (!S_StartupFluid()) fluid_disabled = true;
+    if (!StartupFluid()) fluid_disabled = true;
 
-    if (!S_StartupOPL()) opl_disabled = true;
+    if (!StartupOpal()) opl_disabled = true;
 
     return;
 }

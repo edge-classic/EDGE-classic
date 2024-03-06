@@ -148,7 +148,7 @@ static void DoStartFinale(void)
     {
         case kFinaleStageText:
             finale_text = language[finale->text_];
-            S_ChangeMusic(finale->music_, true);
+            ChangeMusic(finale->music_, true);
             break;
 
         case kFinaleStageMovie:
@@ -162,13 +162,13 @@ static void DoStartFinale(void)
 
         case kFinaleStageBunny:
             if (current_map->episode_)
-                S_ChangeMusic(current_map->episode_->special_music_, true);
+                ChangeMusic(current_map->episode_->special_music_, true);
             break;
 
         case kFinaleStageCast:
             CastInitNew(2);
             if (current_map->episode_)
-                S_ChangeMusic(current_map->episode_->special_music_, true);
+                ChangeMusic(current_map->episode_->special_music_, true);
             break;
 
         default:
@@ -522,7 +522,7 @@ static void CAST_RangeAttack(const AttackDefinition *range)
     }
     else if (range->atk_mobj_) { sfx = range->atk_mobj_->seesound_; }
 
-    S_StartFX(sfx);
+    StartSoundEffect(sfx);
 }
 
 static void CastPerformAction(void)
@@ -570,7 +570,7 @@ static void CastPerformAction(void)
         sfx = cast_order->walksound_;
     }
 
-    S_StartFX(sfx);
+    StartSoundEffect(sfx);
 }
 
 static void CastInitNew(int num)
@@ -613,7 +613,7 @@ static void CastTicker(void)
     {
         CastInitNew(cast_order->castorder_ + 1);
 
-        if (cast_order->seesound_) S_StartFX(cast_order->seesound_);
+        if (cast_order->seesound_) StartSoundEffect(cast_order->seesound_);
 
         return;
     }
@@ -652,7 +652,7 @@ static void CastTicker(void)
             cast_attacking = true;
             CastSetState(st);
 
-            if (cast_order->attacksound_) S_StartFX(cast_order->attacksound_);
+            if (cast_order->attacksound_) StartSoundEffect(cast_order->attacksound_);
         }
     }
 
@@ -688,7 +688,7 @@ static void CastSkip(void)
     cast_frames    = 0;
     cast_attacking = false;
 
-    if (cast_order->deathsound_) S_StartFX(cast_order->deathsound_);
+    if (cast_order->deathsound_) StartSoundEffect(cast_order->deathsound_);
 }
 
 //
@@ -863,7 +863,7 @@ static void BunnyScroll(void)
 
     if (stage > laststage)
     {
-        S_StartFX(sound_effect_pistol);
+        StartSoundEffect(sound_effect_pistol);
         laststage = stage;
     }
 

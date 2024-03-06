@@ -567,7 +567,7 @@ bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
         if (host_position == (HOST_OPTIONS - 1))
         {
             HostAccept();
-            S_StartFX(sound_effect_pistol);
+            StartSoundEffect(sound_effect_pistol);
             return true;
         }
     }
@@ -575,13 +575,13 @@ bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
     if (ch == KEYD_DOWNARROW || ch == KEYD_WHEEL_DN || ch == KEYD_GP_DOWN)
     {
         host_position = (host_position + 1) % HOST_OPTIONS;
-        S_StartFX(sound_effect_pstop);
+        StartSoundEffect(sound_effect_pstop);
         return true;
     }
     else if (ch == KEYD_UPARROW || ch == KEYD_WHEEL_UP || ch == KEYD_GP_UP)
     {
         host_position = (host_position + HOST_OPTIONS - 1) % HOST_OPTIONS;
-        S_StartFX(sound_effect_pstop);
+        StartSoundEffect(sound_effect_pstop);
         return true;
     }
 
@@ -590,7 +590,7 @@ bool OptionMenuNetworkHostResponder(InputEvent *ev, int ch)
         ch == KEYD_MOUSE1)
     {
         HostChangeOption(host_position, ch);
-        S_StartFX(sound_effect_stnmov);
+        StartSoundEffect(sound_effect_stnmov);
         return true;
     }
 
@@ -663,7 +663,7 @@ void OptionMenuDrawPlayerList(void)
 
 static void ListAccept()
 {
-    S_StartFX(sound_effect_pistol);
+    StartSoundEffect(sound_effect_pistol);
 
     network_game_menu_on = 0;
     MenuClear();
@@ -738,7 +738,7 @@ bool NetworkGameResponder(InputEvent *ev, int ch)
             network_game_menu_on = 0;
             MenuClear();
 
-            S_StartFX(sound_effect_pistol);
+            StartSoundEffect(sound_effect_pistol);
             return true;
         }
     }

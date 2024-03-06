@@ -865,11 +865,11 @@ void TouchSpecialThing(MapObject *special, MapObject *toucher)
             int sfx_cat;
 
             if (info.player == players[consoleplayer])
-                sfx_cat = SNCAT_Player;
+                sfx_cat = kCategoryPlayer;
             else
-                sfx_cat = SNCAT_Opponent;
+                sfx_cat = kCategoryOpponent;
 
-            S_StartFX(sound, sfx_cat, info.player->mo);
+            StartSoundEffect(sound, sfx_cat, info.player->mo);
         }
 
         if (info.new_weapon >= 0 || info.new_ammo >= 0)

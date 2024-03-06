@@ -61,11 +61,11 @@ static bool MovieSetupAudioStream(int rate)
 
     plm_set_audio_lead_time(decoder, (double)1024 / (double)rate);
 
-    S_PauseMusic();
+    PauseMusic();
     // Need to flush Queue to keep movie audio/video from desyncing initially (I
     // think) - Dasho
-    S_QueueStop();
-    S_QueueInit();
+    SoundQueueStop();
+    SoundQueueInitialize();
 
     return true;
 }
@@ -79,17 +79,17 @@ void MovieAudioCallback(plm_t *mpeg, plm_samples_t *samples, void *user)
     int avail = SDL_AudioStreamAvailable(movie_audio_stream);
     if (avail)
     {
-        sound_data_c *movie_buf = S_QueueGetFreeBuffer(
-            avail / 2, sound_device_stereo ? SBUF_Interleaved : SBUF_Mono);
+        SoundData *movie_buf = SoundQueueGetFreeBuffer(
+            avail / 2, sound_device_stereo ? kMixInterleaved : kMixMono);
         if (movie_buf)
         {
-            movie_buf->length = SDL_AudioStreamGet(movie_audio_stream,
-                                                   movie_buf->data_L, avail) /
+            movie_buf->length_ = SDL_AudioStreamGet(movie_audio_stream,
+                                                   movie_buf->data_left_, avail) /
                                 (sound_device_stereo ? 4 : 2);
-            if (movie_buf->length > 0)
-                S_QueueAddBuffer(movie_buf, sound_device_frequency);
+            if (movie_buf->length_ > 0)
+                SoundQueueAddBuffer(movie_buf, sound_device_frequency);
             else
-                S_QueueReturnBuffer(movie_buf);
+                SoundQueueReturnBuffer(movie_buf);
         }
     }
 }
@@ -446,6 +446,6 @@ void PlayMovie(const std::string &name)
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     FinishFrame();
-    S_ResumeMusic();
+    ResumeMusic();
     return;
 }

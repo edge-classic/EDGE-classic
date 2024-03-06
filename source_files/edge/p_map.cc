@@ -2681,7 +2681,7 @@ static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
         if (ld->gap_number == 0 || use_upper <= use_lower)
         {
             // can't use through a wall
-            S_StartFX(use_thing->info_->noway_sound_,
+            StartSoundEffect(use_thing->info_->noway_sound_,
                       P_MobjGetSfxCategory(use_thing), use_thing);
             return false;
         }

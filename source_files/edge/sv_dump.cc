@@ -235,7 +235,7 @@ void SV_DumpSaveGame(int slot)
     char marker[6];
     int  version;
 
-    std::string fn(G_FileNameFromSlot(slot));
+    std::string fn(SV_FileName(SV_SlotName(slot), "head"));
 
     LogDebug("DUMPING SAVE GAME: %d  FILE: %s\n", slot, fn.c_str());
 

@@ -159,7 +159,7 @@ savestruct_t sv_struct_side = {
 
 savearray_t sv_array_side = {
     nullptr,            // link in list
-    "level_sides",         // array name
+    "sides",         // array name
     &sv_struct_side, // array type
     true,            // define_me
     true,            // allow_hub
@@ -184,7 +184,7 @@ static Line sv_dummy_line;
 static savefield_t sv_fields_line[] = {
     SF(flags, "flags", 1, SVT_INT, SR_GetInt, SR_PutInt), SF(tag, "tag", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(count, "count", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(side, "side", 1, SVT_INDEX("level_sides"), SR_SideGetSide, SR_SidePutSide),
+    SF(side, "side", 1, SVT_INDEX("sides"), SR_SideGetSide, SR_SidePutSide),
     SF(special, "special", 1, SVT_STRING, SR_LineGetSpecial, SR_LinePutSpecial),
     SF(slide_door, "slide_door", 1, SVT_STRING, SR_LineGetSpecial, SR_LinePutSpecial),
     SF(old_stored, "old_stored", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
@@ -211,7 +211,7 @@ savestruct_t sv_struct_line = {
 
 savearray_t sv_array_line = {
     nullptr,            // link in list
-    "level_lines",         // array name
+    "lines",         // array name
     &sv_struct_line, // array type
     true,            // define_me
     true,            // allow_hub
@@ -274,9 +274,9 @@ static Extrafloor sv_dummy_exfloor;
 #define SV_F_BASE sv_dummy_exfloor
 
 static savefield_t sv_fields_exfloor[] = {
-    SF(higher, "higher", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(lower, "lower", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(sector, "sector", 1, SVT_INDEX("level_sectors"), SR_SectorGetSector, SR_SectorPutSector),
+    SF(higher, "higher", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(lower, "lower", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(sector, "sector", 1, SVT_INDEX("sectors"), SR_SectorGetSector, SR_SectorPutSector),
 
     SF(top_height, "top_h", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
     SF(bottom_height, "bottom_h", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
@@ -284,8 +284,8 @@ static savefield_t sv_fields_exfloor[] = {
     SF(bottom, "bottom", 1, SVT_STRING, SR_LevelGetSurfPtr, SR_LevelPutSurfPtr),
 
     SF(properties, "p", 1, SVT_STRING, SR_SectorGetPropRef, SR_SectorPutPropRef),
-    SF(extrafloor_line, "extrafloor_line", 1, SVT_INDEX("level_lines"), SR_LineGetLine, SR_LinePutLine),
-    SF(control_sector_next, "control_sector_next", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(extrafloor_line, "ef_line", 1, SVT_INDEX("lines"), SR_LineGetLine, SR_LinePutLine),
+    SF(control_sector_next, "ctrl_next", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
 
     // NOT HERE:
     //   - sector: can be regenerated.
@@ -307,7 +307,7 @@ savestruct_t sv_struct_exfloor = {
 
 savearray_t sv_array_exfloor = {
     nullptr,               // link in list
-    "level_extrafloors",      // array name
+    "extrafloors",      // array name
     &sv_struct_exfloor, // array type
     true,               // define_me
     true,               // allow_hub
@@ -332,19 +332,19 @@ static Sector sv_dummy_sector;
 static savefield_t sv_fields_sector[] = {
     SF(floor, "floor", 1, SVT_STRUCT("surface_t"), SR_LevelGetSurface, SR_LevelPutSurface),
     SF(ceiling, "ceil", 1, SVT_STRUCT("surface_t"), SR_LevelGetSurface, SR_LevelPutSurface),
-    SF(floor_height, "floor_height", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), SF(ceiling_height, "ceiling_height", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(floor_height, "f_h", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), SF(ceiling_height, "c_h", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
 
     SF(properties, "props", 1, SVT_STRUCT("region_properties_t"), SR_SectorGetProps, SR_SectorPutProps),
     SF(active_properties, "p", 1, SVT_STRING, SR_SectorGetPropRef, SR_SectorPutPropRef),
 
-    SF(extrafloor_used, "extrafloor_used", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(control_floors, "control_floors", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(extrafloor_used, "exfloor_used", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    SF(control_floors, "control_floors", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
     SF(sound_player, "sound_player", 1, SVT_INT, SR_GetInt, SR_PutInt),
 
-    SF(bottom_extrafloor, "bottom_extrafloor", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(top_extrafloor, "top_extrafloor", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(bottom_liquid, "bottom_liquid", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
-    SF(top_liquid, "top_liquid", 1, SVT_INDEX("level_extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(bottom_extrafloor, "bottom_ef", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(top_extrafloor, "top_ef", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(bottom_liquid, "bottom_liq", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
+    SF(top_liquid, "top_liq", 1, SVT_INDEX("extrafloors"), SR_SectorGetEF, SR_SectorPutEF),
     SF(old_stored, "old_stored", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
 
     // NOT HERE:
@@ -368,7 +368,7 @@ savestruct_t sv_struct_sector = {
 
 savearray_t sv_array_sector = {
     nullptr,              // link in list
-    "level_sectors",         // array name
+    "sectors",         // array name
     &sv_struct_sector, // array type
     true,              // define_me
     true,              // allow_hub

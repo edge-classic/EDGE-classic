@@ -219,7 +219,7 @@ static savefield_t sv_fields_iteminque[] = {
 
 savestruct_t sv_struct_iteminque = {
     nullptr,                // link in list
-    "RespawnQueueItem",       // structure name
+    "iteminque_t",       // structure name
     "itmq",              // start marker
     sv_fields_iteminque, // field descriptions
     SVDUMMY,             // dummy base
@@ -231,7 +231,7 @@ savestruct_t sv_struct_iteminque = {
 
 savearray_t sv_array_iteminque = {
     nullptr,                 // link in list
-    "respawn_queue_head",        // array name
+    "itemquehead",        // array name
     &sv_struct_iteminque, // array type
     true,                 // define_me
     true,                 // allow_hub

@@ -85,7 +85,7 @@ static savefield_t sv_fields_player[] = {
     SF(playerflags, "playerflags", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(playername[0], "playername", 1, SVT_STRING, SR_PlayerGetName, SR_PlayerPutName),
     SF(mo, "mo", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(view_z, "view_z", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
+    SF(view_z, "viewz", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
     SF(viewheight, "viewheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
     SF(deltaviewheight, "deltaviewheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
     SF(std_viewheight, "std_viewheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),

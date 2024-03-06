@@ -108,7 +108,7 @@ static Button sv_dummy_button;
 
 #define SV_F_BASE sv_dummy_button
 
-static savefield_t sv_fields_button[] = {SF(line, "line", 1, SVT_INDEX("level_lines"), SR_LineGetLine, SR_LinePutLine),
+static savefield_t sv_fields_button[] = {SF(line, "line", 1, SVT_INDEX("lines"), SR_LineGetLine, SR_LinePutLine),
                                          SF(where, "where", 1, SVT_ENUM, SR_GetEnum, SR_PutEnum),
                                          SF(button_image, "bimage", 1, SVT_STRING, SR_LevelGetImage, SR_LevelPutImage),
                                          SF(button_timer, "btimer", 1, SVT_INT, SR_GetInt, SR_PutInt),
@@ -155,7 +155,7 @@ static LightSpecial sv_dummy_light;
 
 static savefield_t sv_fields_light[] = {
     SF(type, "type", 1, SVT_STRING, SR_LightGetType, SR_LightPutType),
-    SF(sector, "sector", 1, SVT_INDEX("level_sectors"), SR_SectorGetSector, SR_SectorPutSector),
+    SF(sector, "sector", 1, SVT_INDEX("sectors"), SR_SectorGetSector, SR_SectorPutSector),
     SF(count, "count", 1, SVT_INT, SR_GetInt, SR_PutInt), SF(minimum_light, "minlight", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(maximum_light, "maxlight", 1, SVT_INT, SR_GetInt, SR_PutInt),
     SF(direction, "direction", 1, SVT_INT, SR_GetInt, SR_PutInt),
@@ -326,7 +326,7 @@ static PlaneMover sv_dummy_plane_move;
 
 static savefield_t sv_fields_plane_move[] = {
     SF(type, "type", 1, SVT_STRING, SR_PlaneMoveGetType, SR_PlaneMovePutType),
-    SF(sector, "sector", 1, SVT_INDEX("level_sectors"), SR_SectorGetSector, SR_SectorPutSector),
+    SF(sector, "sector", 1, SVT_INDEX("sectors"), SR_SectorGetSector, SR_SectorPutSector),
 
     SF(is_ceiling, "is_ceiling", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
     SF(is_elevator, "is_elevator", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
@@ -385,7 +385,7 @@ static SlidingDoorMover sv_dummy_slider_move;
 
 static savefield_t sv_fields_slider_move[] = {
     SF(info, "info", 1, SVT_STRING, SR_SliderGetInfo, SR_SliderPutInfo),
-    SF(line, "line", 1, SVT_INDEX("level_lines"), SR_LineGetLine, SR_LinePutLine),
+    SF(line, "line", 1, SVT_INDEX("lines"), SR_LineGetLine, SR_LinePutLine),
 
     SF(opening, "opening", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
     SF(target, "target", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),

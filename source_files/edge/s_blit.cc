@@ -206,7 +206,7 @@ static void MixMono(mix_channel_c *chan, int *dest, int pairs)
     else
     {
 
-        if (!chan->data->is_sfx || chan->category == SNCAT_UI)
+        if (!chan->data->is_sfx || chan->category == SNCAT_UI || chan->data->current_mix == SFX_None)
             src_L = chan->data->data_L;
         else
             src_L = chan->data->fx_data_L;
@@ -243,7 +243,7 @@ static void MixStereo(mix_channel_c *chan, int *dest, int pairs)
     }
     else
     {
-        if (!chan->data->is_sfx || chan->category == SNCAT_UI)
+        if (!chan->data->is_sfx || chan->category == SNCAT_UI || chan->data->current_mix == SFX_None)
         {
             src_L = chan->data->data_L;
             src_R = chan->data->data_R;
@@ -286,7 +286,7 @@ static void MixInterleaved(mix_channel_c *chan, int *dest, int pairs)
         src_L = chan->data->data_L;
     else
     {
-        if (!chan->data->is_sfx || chan->category == SNCAT_UI)
+        if (!chan->data->is_sfx || chan->category == SNCAT_UI || chan->data->current_mix == SFX_None)
             src_L = chan->data->data_L;
         else
             src_L = chan->data->fx_data_L;

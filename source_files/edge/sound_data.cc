@@ -497,36 +497,9 @@ void sound_data_c::Mix_Reverb(bool dynamic_reverb, float room_area, bool outdoor
             }
         }
     }
-    else // Just copy the original sound to the buffer - Dasho
+    else // Just use the original buffer - Dasho
     {
-        switch (mode)
-        {
-        case SBUF_Mono:
-            if (!fx_data_L)
-                fx_data_L = new int16_t[length];
-            fx_data_R = fx_data_L;
-            memcpy(fx_data_L, data_L, length * sizeof(int16_t));
-            current_mix = SFX_None;
-            break;
-
-        case SBUF_Stereo:
-            if (!fx_data_L)
-                fx_data_L = new int16_t[length];
-            if (!fx_data_R)
-                fx_data_R = new int16_t[length];
-            memcpy(fx_data_L, data_L, length * sizeof(int16_t));
-            memcpy(fx_data_R, data_R, length * sizeof(int16_t));
-            current_mix = SFX_None;
-            break;
-
-        case SBUF_Interleaved:
-            if (!fx_data_L)
-                fx_data_L = new int16_t[length * 2];
-            fx_data_R = fx_data_L;
-            memcpy(fx_data_L, data_L, length * 2 * sizeof(int16_t));
-            current_mix = SFX_None;
-            break;
-        }
+        current_mix = SFX_None;
     }
 }
 

@@ -16,43 +16,33 @@
 //
 //------------------------------------------------------------------------
 
-
-
+#include "AlmostEquals.h"
 #include "coal.h"
-
-#include "types.h"
-
-#include "vm_coal.h"
-#include "p_local.h"
-#include "p_mobj.h"
-#include "r_state.h"
-
 #include "dm_state.h"
 #include "e_main.h"
-#include "g_game.h"
-
 #include "e_player.h"
-#include "hu_font.h"
+#include "f_interm.h"  //Lobo: need this to get access to intermission_stats
+#include "flat.h"      // DDFFLAT - Dasho
+#include "g_game.h"
 #include "hu_draw.h"
+#include "hu_font.h"
+#include "p_local.h"
+#include "p_mobj.h"
+#include "r_image.h"
 #include "r_misc.h"
 #include "r_modes.h"
-#include "r_image.h"
 #include "r_sky.h"
-
-#include "f_interm.h" //Lobo: need this to get access to intermission_stats
-#include "rad_trig.h" //Lobo: need this to access RTS
-
-#include <charconv>
-
-#include "flat.h"    // DDFFLAT - Dasho
-#include "s_sound.h" // play_footstep() - Dasho
-
-#include "AlmostEquals.h"
+#include "r_state.h"
+#include "rad_trig.h"  //Lobo: need this to access RTS
+#include "s_sound.h"   // play_footstep() - Dasho
+#include "types.h"
+#include "vm_coal.h"
 
 extern coal::vm_c *ui_vm;
 
-extern void VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value);
-extern void VM_CallFunction(coal::vm_c *vm, const char *name);
+extern void CoalSetFloat(coal::vm_c *vm, const char *mod_name,
+                         const char *var_name, double value);
+extern void CoalCallFunction(coal::vm_c *vm, const char *name);
 
 player_t *ui_player_who = nullptr;
 
@@ -74,7 +64,8 @@ static void PL_set_who(coal::vm_c *vm, int argc)
     int index = (int)*vm->AccessParam(0);
 
     if (index < 0 || index >= numplayers)
-        FatalError("player.set_who: bad index value: %d (numplayers=%d)\n", index, numplayers);
+        FatalError("player.set_who: bad index value: %d (numplayers=%d)\n",
+                   index, numplayers);
 
     if (index == 0)
     {
@@ -86,8 +77,7 @@ static void PL_set_who(coal::vm_c *vm, int argc)
 
     for (; index > 1; index--)
     {
-        do
-        {
+        do {
             who = (who + 1) % MAXPLAYERS;
         } while (players[who] == nullptr);
     }
@@ -128,10 +118,8 @@ static void PL_get_angle(coal::vm_c *vm, int argc)
 {
     float value = epi::DegreesFromBAM(ui_player_who->mo->angle_);
 
-    if (value > 360.0f)
-        value -= 360.0f;
-    if (value < 0)
-        value += 360.0f;
+    if (value > 360.0f) value -= 360.0f;
+    if (value < 0) value += 360.0f;
 
     vm->ReturnFloat(value);
 }
@@ -142,8 +130,7 @@ static void PL_get_mlook(coal::vm_c *vm, int argc)
 {
     float value = epi::DegreesFromBAM(ui_player_who->mo->vertical_angle_);
 
-    if (value > 180.0f)
-        value -= 360.0f;
+    if (value > 180.0f) value -= 360.0f;
 
     vm->ReturnFloat(value);
 }
@@ -154,8 +141,7 @@ static void PL_health(coal::vm_c *vm, int argc)
 {
     float h = ui_player_who->health * 100 / ui_player_who->mo->spawn_health_;
 
-    if (h < 98)
-        h += 0.99f;
+    if (h < 98) h += 0.99f;
 
     vm->ReturnFloat(floor(h));
 }
@@ -173,8 +159,7 @@ static void PL_armor(coal::vm_c *vm, int argc)
     // vm->ReturnFloat(floor(ui_player_who->armours[kind] + 0.99));
 
     float a = ui_player_who->armours[kind];
-    if (a < 98)
-        a += 0.99f;
+    if (a < 98) a += 0.99f;
 
     vm->ReturnFloat(floor(a));
 }
@@ -186,8 +171,7 @@ static void PL_total_armor(coal::vm_c *vm, int argc)
     // vm->ReturnFloat(floor(ui_player_who->totalarmour + 0.99));
 
     float a = ui_player_who->totalarmour;
-    if (a < 98)
-        a += 0.99f;
+    if (a < 98) a += 0.99f;
 
     vm->ReturnFloat(floor(a));
 }
@@ -214,7 +198,9 @@ static void PL_on_ground(coal::vm_c *vm, int argc)
     if (ui_player_who->mo->subsector_->sector->extrafloor_used == 0)
     {
         // on the edge above water/lava/etc? Handles edge walker case
-        if (!AlmostEquals(ui_player_who->mo->floor_z_, ui_player_who->mo->subsector_->sector->floor_height) &&
+        if (!AlmostEquals(
+                ui_player_who->mo->floor_z_,
+                ui_player_who->mo->subsector_->sector->floor_height) &&
             !ui_player_who->mo->subsector_->sector->floor_vertex_slope)
             vm->ReturnFloat(0);
         else
@@ -253,14 +239,16 @@ static void PL_is_jumping(coal::vm_c *vm, int argc)
 //
 static void PL_is_crouching(coal::vm_c *vm, int argc)
 {
-    vm->ReturnFloat((ui_player_who->mo->extended_flags_ & kExtendedFlagCrouching) ? 1 : 0);
+    vm->ReturnFloat(
+        (ui_player_who->mo->extended_flags_ & kExtendedFlagCrouching) ? 1 : 0);
 }
 
 // player.is_attacking()
 //
 static void PL_is_attacking(coal::vm_c *vm, int argc)
 {
-    vm->ReturnFloat((ui_player_who->attackdown[0] || ui_player_who->attackdown[1]) ? 1 : 0);
+    vm->ReturnFloat(
+        (ui_player_who->attackdown[0] || ui_player_who->attackdown[1]) ? 1 : 0);
 }
 
 // player.is_rampaging()
@@ -322,7 +310,8 @@ static void PL_air_in_lungs(coal::vm_c *vm, int argc)
         return;
     }
 
-    float value = ui_player_who->air_in_lungs * 100.0f / ui_player_who->mo->info_->lung_capacity_;
+    float value = ui_player_who->air_in_lungs * 100.0f /
+                  ui_player_who->mo->info_->lung_capacity_;
 
     value = HMM_Clamp(0.0f, value, 100.0f);
 
@@ -378,8 +367,7 @@ static void PL_power_left(coal::vm_c *vm, int argc)
 
     float value = ui_player_who->powers[power];
 
-    if (value > 0)
-        value /= kTicRate;
+    if (value > 0) value /= kTicRate;
 
     vm->ReturnFloat(value);
 }
@@ -422,7 +410,8 @@ static void PL_has_weapon(coal::vm_c *vm, int argc)
     {
         PlayerWeapon *pw = &ui_player_who->weapons[j];
 
-        if (pw->owned && !(pw->flags & kPlayerWeaponRemoving) && DDF_CompareName(name, pw->info->name_.c_str()) == 0)
+        if (pw->owned && !(pw->flags & kPlayerWeaponRemoving) &&
+            DDF_CompareName(name, pw->info->name_.c_str()) == 0)
         {
             vm->ReturnFloat(1);
             return;
@@ -448,12 +437,14 @@ static void PL_cur_weapon(coal::vm_c *vm, int argc)
         return;
     }
 
-    WeaponDefinition *info = ui_player_who->weapons[ui_player_who->ready_wp].info;
+    WeaponDefinition *info =
+        ui_player_who->weapons[ui_player_who->ready_wp].info;
 
     vm->ReturnString(info->name_.c_str());
 }
 
-static void COAL_SetPlayerSprite(player_t *p, int position, int stnum, WeaponDefinition *info = nullptr)
+static void COAL_SetPlayerSprite(player_t *p, int position, int stnum,
+                                 WeaponDefinition *info = nullptr)
 {
     PlayerSprite *psp = &p->psprites[position];
 
@@ -471,16 +462,17 @@ static void COAL_SetPlayerSprite(player_t *p, int position, int stnum, WeaponDef
 
         if (st->label)
         {
-            int new_state = DDF_StateFindLabel(info->state_grp_, st->label, true /* quiet */);
-            if (new_state != 0)
-                stnum = new_state;
+            int new_state = DDF_StateFindLabel(info->state_grp_, st->label,
+                                               true /* quiet */);
+            if (new_state != 0) stnum = new_state;
         }
     }
 
     State *st = &states[stnum];
 
     // model interpolation stuff
-    if (psp->state && (st->flags & kStateFrameFlagModel) && (psp->state->flags & kStateFrameFlagModel) &&
+    if (psp->state && (st->flags & kStateFrameFlagModel) &&
+        (psp->state->flags & kStateFrameFlagModel) &&
         (st->sprite == psp->state->sprite) && st->tics > 1)
     {
         p->weapon_last_frame = psp->state->frame;
@@ -496,8 +488,7 @@ static void COAL_SetPlayerSprite(player_t *p, int position, int stnum, WeaponDef
 
     p->action_psp = position;
 
-    if (st->action)
-        (*st->action)(p->mo);
+    if (st->action) (*st->action)(p->mo);
 }
 
 //
@@ -539,11 +530,13 @@ static void PL_weapon_state(coal::vm_c *vm, int argc)
         return;
     }
 
-    // WeaponDefinition *info = ui_player_who->weapons[ui_player_who->ready_wp].info;
+    // WeaponDefinition *info =
+    // ui_player_who->weapons[ui_player_who->ready_wp].info;
     WeaponDefinition *oldWep = weapondefs.Lookup(weapon_name);
     if (!oldWep)
     {
-        FatalError("player.weapon_state: Unknown weapon name '%s'.\n", weapon_name);
+        FatalError("player.weapon_state: Unknown weapon name '%s'.\n",
+                   weapon_name);
     }
 
     int pw_index;
@@ -551,27 +544,29 @@ static void PL_weapon_state(coal::vm_c *vm, int argc)
     // see if player owns this kind of weapon
     for (pw_index = 0; pw_index < kMaximumWeapons; pw_index++)
     {
-        if (!ui_player_who->weapons[pw_index].owned)
-            continue;
+        if (!ui_player_who->weapons[pw_index].owned) continue;
 
-        if (ui_player_who->weapons[pw_index].info == oldWep)
-            break;
+        if (ui_player_who->weapons[pw_index].info == oldWep) break;
     }
 
-    if (pw_index == kMaximumWeapons) // we dont have the weapon
+    if (pw_index == kMaximumWeapons)  // we dont have the weapon
     {
         vm->ReturnFloat(0);
         return;
     }
 
-    ui_player_who->ready_wp = (weapon_selection_e)pw_index; // insta-switch to it
+    ui_player_who->ready_wp =
+        (weapon_selection_e)pw_index;  // insta-switch to it
 
-    int state = DDF_StateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
+    int state =
+        DDF_StateFindLabel(oldWep->state_grp_, weapon_state, true /* quiet */);
     if (state == 0)
-        FatalError("player.weapon_state: frame '%s' in [%s] not found!\n", weapon_state, weapon_name);
+        FatalError("player.weapon_state: frame '%s' in [%s] not found!\n",
+                   weapon_state, weapon_name);
     // state += 1;
 
-    COAL_SetPlayerSpriteDeferred(ui_player_who, kPlayerSpriteWeapon, state); // refresh the sprite
+    COAL_SetPlayerSpriteDeferred(ui_player_who, kPlayerSpriteWeapon,
+                                 state);  // refresh the sprite
 
     vm->ReturnFloat(1);
 }
@@ -679,7 +674,10 @@ static void PL_set_counter(coal::vm_c *vm, int argc)
         FatalError("player.set_counter: target amount cannot be negative!\n");
 
     if (amt > ui_player_who->counters[cntr].max)
-        FatalError("player.set_counter: target amount %d exceeds limit for counter number %d\n", amt, cntr);
+        FatalError(
+            "player.set_counter: target amount %d exceeds limit for counter "
+            "number %d\n",
+            amt, cntr);
 
     ui_player_who->counters[cntr].num = amt;
 }
@@ -706,8 +704,7 @@ static void PL_main_ammo(coal::vm_c *vm, int argc)
             {
                 value = ui_player_who->ammo[pw->info->ammo_[0]].num;
 
-                if (pw->info->clip_size_[0] > 0)
-                    value += pw->clip_size[0];
+                if (pw->info->clip_size_[0] > 0) value += pw->clip_size[0];
             }
         }
     }
@@ -817,8 +814,7 @@ static void PL_clip_is_shared(coal::vm_c *vm, int argc)
     {
         PlayerWeapon *pw = &ui_player_who->weapons[ui_player_who->ready_wp];
 
-        if (pw->info->shared_clip_)
-            value = 1;
+        if (pw->info->shared_clip_) value = 1;
     }
 
     vm->ReturnFloat(value);
@@ -837,7 +833,8 @@ static void PL_hurt_by(coal::vm_c *vm, int argc)
     // getting hurt because of your own damn stupidity
     if (ui_player_who->attacker == ui_player_who->mo)
         vm->ReturnString("self");
-    else if (ui_player_who->attacker && (ui_player_who->attacker->side_ & ui_player_who->mo->side_))
+    else if (ui_player_who->attacker &&
+             (ui_player_who->attacker->side_ & ui_player_who->mo->side_))
         vm->ReturnString("friend");
     else if (ui_player_who->attacker)
         vm->ReturnString("enemy");
@@ -849,7 +846,8 @@ static void PL_hurt_by(coal::vm_c *vm, int argc)
 //
 static void PL_hurt_mon(coal::vm_c *vm, int argc)
 {
-    if (ui_player_who->damagecount > 0 && ui_player_who->attacker && ui_player_who->attacker != ui_player_who->mo)
+    if (ui_player_who->damagecount > 0 && ui_player_who->attacker &&
+        ui_player_who->attacker != ui_player_who->mo)
     {
         vm->ReturnString(ui_player_who->attacker->info_->name_.c_str());
         return;
@@ -876,16 +874,12 @@ static void PL_hurt_dir(coal::vm_c *vm, int argc)
         MapObject *badguy = ui_player_who->attacker;
         MapObject *pmo    = ui_player_who->mo;
 
-        BAMAngle diff = RendererPointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) - pmo->angle_;
+        BAMAngle diff =
+            RendererPointToAngle(pmo->x, pmo->y, badguy->x, badguy->y) -
+            pmo->angle_;
 
-        if (diff >= kBAMAngle45 && diff <= kBAMAngle135)
-        {
-            dir = -1;
-        }
-        else if (diff >= kBAMAngle225 && diff <= kBAMAngle315)
-        {
-            dir = +1;
-        }
+        if (diff >= kBAMAngle45 && diff <= kBAMAngle135) { dir = -1; }
+        else if (diff >= kBAMAngle225 && diff <= kBAMAngle315) { dir = +1; }
     }
 
     vm->ReturnFloat(dir);
@@ -902,15 +896,14 @@ static void PL_hurt_angle(coal::vm_c *vm, int argc)
         MapObject *badguy = ui_player_who->attacker;
         MapObject *pmo    = ui_player_who->mo;
 
-        BAMAngle real_a = RendererPointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
+        BAMAngle real_a =
+            RendererPointToAngle(pmo->x, pmo->y, badguy->x, badguy->y);
 
         value = epi::DegreesFromBAM(real_a);
 
-        if (value > 360.0f)
-            value -= 360.0f;
+        if (value > 360.0f) value -= 360.0f;
 
-        if (value < 0)
-            value += 360.0f;
+        if (value < 0) value += 360.0f;
     }
 
     vm->ReturnFloat(value);
@@ -965,14 +958,16 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
     // If no 3D floors, just return the flat
     if (ui_player_who->mo->subsector_->sector->extrafloor_used == 0)
     {
-        vm->ReturnString(ui_player_who->mo->subsector_->sector->floor.image->name_.c_str());
+        vm->ReturnString(
+            ui_player_who->mo->subsector_->sector->floor.image->name_.c_str());
     }
     else
     {
-        // Start from the lowest exfloor and check if the player is standing on it, then return the control sector's
-        // flat
-        float         player_floor_height = ui_player_who->mo->floor_z_;
-        Extrafloor *floor_checker       = ui_player_who->mo->subsector_->sector->bottom_extrafloor;
+        // Start from the lowest exfloor and check if the player is standing on
+        // it, then return the control sector's flat
+        float       player_floor_height = ui_player_who->mo->floor_z_;
+        Extrafloor *floor_checker =
+            ui_player_who->mo->subsector_->sector->bottom_extrafloor;
         for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
         {
             if (player_floor_height + 1 > ef->top_height)
@@ -982,7 +977,8 @@ static void PL_floor_flat(coal::vm_c *vm, int argc)
             }
         }
         // Fallback if nothing else satisfies these conditions
-        vm->ReturnString(ui_player_who->mo->subsector_->sector->floor.image->name_.c_str());
+        vm->ReturnString(
+            ui_player_who->mo->subsector_->sector->floor.image->name_.c_str());
     }
 }
 
@@ -999,8 +995,7 @@ static void PL_sector_tag(coal::vm_c *vm, int argc)
 static void PL_play_footstep(coal::vm_c *vm, int argc)
 {
     const char *flat = vm->AccessParamString(0);
-    if (!flat)
-        FatalError("player.play_footstep: No flat name given!\n");
+    if (!flat) FatalError("player.play_footstep: No flat name given!\n");
 
     FlatDefinition *current_flatdef = flatdefs.Find(flat);
 
@@ -1064,19 +1059,20 @@ static void PL_rts_enable_tagged(coal::vm_c *vm, int argc)
 {
     std::string name = vm->AccessParamString(0);
 
-    if (!name.empty())
-        RAD_EnableByTag(nullptr, name.c_str(), false);
+    if (!name.empty()) RAD_EnableByTag(nullptr, name.c_str(), false);
 }
 
 // AuxStringReplaceAll("Our_String", std::string("_"), std::string(" "));
 //
-static std::string AuxStringReplaceAll(std::string str, const std::string &from, const std::string &to)
+static std::string AuxStringReplaceAll(std::string str, const std::string &from,
+                                       const std::string &to)
 {
     size_t start_pos = 0;
     while ((start_pos = str.find(from, start_pos)) != std::string::npos)
     {
         str.replace(start_pos, from.length(), to);
-        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+        start_pos +=
+            to.length();  // Handles case where 'to' is a substring of 'from'
     }
     return str;
 }
@@ -1088,7 +1084,7 @@ static std::string GetMobjBenefits(MapObject *obj, bool KillBenefits = false)
     std::string temp_string;
     temp_string.clear();
     Benefit *list;
-    int        temp_num = 0;
+    int      temp_num = 0;
 
     if (KillBenefits)
         list = obj->info_->kill_benefits_;
@@ -1099,58 +1095,58 @@ static std::string GetMobjBenefits(MapObject *obj, bool KillBenefits = false)
     {
         switch (list->type)
         {
-        case kBenefitTypeWeapon:
-            // If it's a weapon all bets are off: we'll want to parse
-            // it differently, not here.
-            temp_string = "WEAPON=1";
-            break;
+            case kBenefitTypeWeapon:
+                // If it's a weapon all bets are off: we'll want to parse
+                // it differently, not here.
+                temp_string = "WEAPON=1";
+                break;
 
-        case kBenefitTypeAmmo:
-            temp_string += "AMMO";
-            if ((list->sub.type + 1) < 10)
-                temp_string += "0";
-            temp_string += std::to_string((int)list->sub.type + 1);
-            temp_string += "=" + std::to_string((int)list->amount);
-            break;
+            case kBenefitTypeAmmo:
+                temp_string += "AMMO";
+                if ((list->sub.type + 1) < 10) temp_string += "0";
+                temp_string += std::to_string((int)list->sub.type + 1);
+                temp_string += "=" + std::to_string((int)list->amount);
+                break;
 
-        case kBenefitTypeHealth: // only benefit without a sub.type so just give it 01
-            temp_string += "HEALTH01=" + std::to_string((int)list->amount);
-            break;
+            case kBenefitTypeHealth:  // only benefit without a sub.type so just
+                                      // give it 01
+                temp_string += "HEALTH01=" + std::to_string((int)list->amount);
+                break;
 
-        case kBenefitTypeArmour:
-            temp_string += "ARMOUR" + std::to_string((int)list->sub.type + 1);
-            temp_string += "=" + std::to_string((int)list->amount);
-            break;
+            case kBenefitTypeArmour:
+                temp_string +=
+                    "ARMOUR" + std::to_string((int)list->sub.type + 1);
+                temp_string += "=" + std::to_string((int)list->amount);
+                break;
 
-        case kBenefitTypeInventory:
-            temp_string += "INVENTORY";
-            if ((list->sub.type + 1) < 10)
-                temp_string += "0";
-            temp_string += std::to_string((int)list->sub.type + 1);
-            temp_string += "=" + std::to_string((int)list->amount);
-            break;
+            case kBenefitTypeInventory:
+                temp_string += "INVENTORY";
+                if ((list->sub.type + 1) < 10) temp_string += "0";
+                temp_string += std::to_string((int)list->sub.type + 1);
+                temp_string += "=" + std::to_string((int)list->amount);
+                break;
 
-        case kBenefitTypeCounter:
-            temp_string += "COUNTER";
-            if ((list->sub.type + 1) < 10)
-                temp_string += "0";
-            temp_string += std::to_string((int)list->sub.type + 1);
-            temp_string += "=" + std::to_string((int)list->amount);
-            break;
+            case kBenefitTypeCounter:
+                temp_string += "COUNTER";
+                if ((list->sub.type + 1) < 10) temp_string += "0";
+                temp_string += std::to_string((int)list->sub.type + 1);
+                temp_string += "=" + std::to_string((int)list->amount);
+                break;
 
-        case kBenefitTypeKey:
-            temp_string += "KEY";
-            temp_num = log2((int)list->sub.type);
-            temp_num++;
-            temp_string += std::to_string(temp_num);
-            break;
+            case kBenefitTypeKey:
+                temp_string += "KEY";
+                temp_num = log2((int)list->sub.type);
+                temp_num++;
+                temp_string += std::to_string(temp_num);
+                break;
 
-        case kBenefitTypePowerup:
-            temp_string += "POWERUP" + std::to_string((int)list->sub.type + 1);
-            break;
+            case kBenefitTypePowerup:
+                temp_string +=
+                    "POWERUP" + std::to_string((int)list->sub.type + 1);
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
     return temp_string;
@@ -1166,83 +1162,74 @@ static std::string GetQueryInfoFromMobj(MapObject *obj, int whatinfo)
 
     switch (whatinfo)
     {
-    case 1: // name
-        if (obj)
-        {
-            // try CAST_TITLE first
-            temp_string = language[obj->info_->cast_title_];
-
-            if (temp_string.empty()) // fallback to DDFTHING entry name
+        case 1:  // name
+            if (obj)
             {
-                temp_string = obj->info_->name_;
-                temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
+                // try CAST_TITLE first
+                temp_string = language[obj->info_->cast_title_];
+
+                if (temp_string.empty())  // fallback to DDFTHING entry name
+                {
+                    temp_string = obj->info_->name_;
+                    temp_string = AuxStringReplaceAll(
+                        temp_string, std::string("_"), std::string(" "));
+                }
             }
-        }
-        break;
+            break;
 
-    case 2: // current health
-        if (obj)
-        {
-            temp_num    = obj->health_;
-            temp_string = std::to_string(temp_num);
-        }
-        break;
+        case 2:  // current health
+            if (obj)
+            {
+                temp_num    = obj->health_;
+                temp_string = std::to_string(temp_num);
+            }
+            break;
 
-    case 3: // spawn health
-        if (obj)
-        {
-            temp_num    = obj->spawn_health_;
-            temp_string = std::to_string(temp_num);
-        }
-        break;
+        case 3:  // spawn health
+            if (obj)
+            {
+                temp_num    = obj->spawn_health_;
+                temp_string = std::to_string(temp_num);
+            }
+            break;
 
-    case 4: // pickup_benefits
-        if (obj)
-        {
-            temp_string = GetMobjBenefits(obj, false);
-        }
-        break;
+        case 4:  // pickup_benefits
+            if (obj) { temp_string = GetMobjBenefits(obj, false); }
+            break;
 
-    case 5: // kill_benefits
-        if (obj)
-        {
-            temp_string = GetMobjBenefits(obj, true);
-        }
-        break;
+        case 5:  // kill_benefits
+            if (obj) { temp_string = GetMobjBenefits(obj, true); }
+            break;
     }
 
-    if (temp_string.empty())
-        return ("");
+    if (temp_string.empty()) return ("");
 
     return (temp_string.c_str());
 }
 
 // GetQueryInfoFromWeapon(mobj, whatinfo, [secattackinfo])
 //
-static std::string GetQueryInfoFromWeapon(MapObject *obj, int whatinfo, bool secattackinfo = false)
+static std::string GetQueryInfoFromWeapon(MapObject *obj, int whatinfo,
+                                          bool secattackinfo = false)
 {
     int         temp_num = 0;
     std::string temp_string;
     temp_string.clear();
 
-    if (!obj->info_->pickup_benefits_)
-        return "";
-    if (!obj->info_->pickup_benefits_->sub.weap)
-        return "";
-    if (obj->info_->pickup_benefits_->type != kBenefitTypeWeapon)
-        return "";
+    if (!obj->info_->pickup_benefits_) return "";
+    if (!obj->info_->pickup_benefits_->sub.weap) return "";
+    if (obj->info_->pickup_benefits_->type != kBenefitTypeWeapon) return "";
 
     WeaponDefinition *objWep = obj->info_->pickup_benefits_->sub.weap;
-    if (!objWep)
-        return "";
+    if (!objWep) return "";
 
-    int attacknum = 0; // default to primary attack
-    if (secattackinfo)
-        attacknum = 1;
+    int attacknum = 0;  // default to primary attack
+    if (secattackinfo) attacknum = 1;
 
     AttackDefinition *objAtck = objWep->attack_[attacknum];
     if (!objAtck && whatinfo > 2)
-        return ""; // no attack to get info about (only should happen with secondary attacks)
+        return "";  // no attack to get info about (only should happen with
+                    // secondary attacks)
 
     const DamageClass *damtype;
 
@@ -1250,58 +1237,58 @@ static std::string GetQueryInfoFromWeapon(MapObject *obj, int whatinfo, bool sec
 
     switch (whatinfo)
     {
-    case 1: // name
-        temp_string = objWep->name_;
-        temp_string = AuxStringReplaceAll(temp_string, std::string("_"), std::string(" "));
-        break;
+        case 1:  // name
+            temp_string = objWep->name_;
+            temp_string = AuxStringReplaceAll(temp_string, std::string("_"),
+                                              std::string(" "));
+            break;
 
-    case 2: // ZOOM_FACTOR
-        temp_num2   = 90.0f / objWep->zoom_fov_;
-        temp_string = std::to_string(temp_num2);
-        break;
+        case 2:  // ZOOM_FACTOR
+            temp_num2   = 90.0f / objWep->zoom_fov_;
+            temp_string = std::to_string(temp_num2);
+            break;
 
-    case 3: // AMMOTYPE
-        temp_num    = (objWep->ammo_[attacknum]) + 1;
-        temp_string = std::to_string(temp_num);
-        break;
+        case 3:  // AMMOTYPE
+            temp_num    = (objWep->ammo_[attacknum]) + 1;
+            temp_string = std::to_string(temp_num);
+            break;
 
-    case 4: // AMMOPERSHOT
-        temp_num    = objWep->ammopershot_[attacknum];
-        temp_string = std::to_string(temp_num);
-        break;
+        case 4:  // AMMOPERSHOT
+            temp_num    = objWep->ammopershot_[attacknum];
+            temp_string = std::to_string(temp_num);
+            break;
 
-    case 5: // CLIPSIZE
-        temp_num    = objWep->clip_size_[attacknum];
-        temp_string = std::to_string(temp_num);
-        break;
+        case 5:  // CLIPSIZE
+            temp_num    = objWep->clip_size_[attacknum];
+            temp_string = std::to_string(temp_num);
+            break;
 
-    case 6: // DAMAGE Nominal
-        damtype     = &objAtck->damage_;
-        temp_num    = damtype->nominal_;
-        temp_string = std::to_string(temp_num);
-        break;
+        case 6:  // DAMAGE Nominal
+            damtype     = &objAtck->damage_;
+            temp_num    = damtype->nominal_;
+            temp_string = std::to_string(temp_num);
+            break;
 
-    case 7: // DAMAGE Max
-        damtype     = &objAtck->damage_;
-        temp_num    = damtype->linear_max_;
-        temp_string = std::to_string(temp_num);
-        break;
+        case 7:  // DAMAGE Max
+            damtype     = &objAtck->damage_;
+            temp_num    = damtype->linear_max_;
+            temp_string = std::to_string(temp_num);
+            break;
 
-    case 8: // Range
-        temp_num    = objAtck->range_;
-        temp_string = std::to_string(temp_num);
-        break;
+        case 8:  // Range
+            temp_num    = objAtck->range_;
+            temp_string = std::to_string(temp_num);
+            break;
 
-    case 9: // AUTOMATIC
-        if (objWep->autofire_[attacknum])
-            temp_string = "1";
-        else
-            temp_string = "0";
-        break;
+        case 9:  // AUTOMATIC
+            if (objWep->autofire_[attacknum])
+                temp_string = "1";
+            else
+                temp_string = "0";
+            break;
     }
 
-    if (temp_string.empty())
-        return ("");
+    if (temp_string.empty()) return ("");
 
     return (temp_string.c_str());
 }
@@ -1331,7 +1318,8 @@ static void PL_query_object(coal::vm_c *vm, int argc)
     if (whatinfo < 1 || whatinfo > 5)
         FatalError("player.query_object: bad whatInfo number: %d\n", whatinfo);
 
-    MapObject *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle_, maxdistance);
+    MapObject *obj = GetMapTargetAimInfo(
+        ui_player_who->mo, ui_player_who->mo->angle_, maxdistance);
     if (!obj)
     {
         vm->ReturnString("");
@@ -1353,7 +1341,6 @@ static void PL_query_object(coal::vm_c *vm, int argc)
 //
 static void MO_query_tagged(coal::vm_c *vm, int argc)
 {
-
     if (argc != 2)
         FatalError("mapobject.query_tagged: wrong number of arguments given\n");
 
@@ -1403,8 +1390,7 @@ static void MO_count(coal::vm_c *vm, int argc)
 
     for (mo = map_object_list_head; mo; mo = mo->next_)
     {
-        if (mo->info_->number_ == thingid && mo->health_ > 0)
-            thingcount++;
+        if (mo->info_->number_ == thingid && mo->health_ > 0) thingcount++;
     }
 
     vm->ReturnFloat(thingcount);
@@ -1432,16 +1418,17 @@ static void PL_query_weapon(coal::vm_c *vm, int argc)
     else
         whatinfo = (int)*whati;
 
-    if (secattack)
-        secattackinfo = (int)*secattack;
+    if (secattack) secattackinfo = (int)*secattack;
 
     if (whatinfo < 1 || whatinfo > 9)
         FatalError("player.query_weapon: bad whatInfo number: %d\n", whatinfo);
 
     if (secattackinfo < 0 || secattackinfo > 1)
-        FatalError("player.query_weapon: bad secAttackInfo number: %d\n", whatinfo);
+        FatalError("player.query_weapon: bad secAttackInfo number: %d\n",
+                   whatinfo);
 
-    MapObject *obj = GetMapTargetAimInfo(ui_player_who->mo, ui_player_who->mo->angle_, maxdistance);
+    MapObject *obj = GetMapTargetAimInfo(
+        ui_player_who->mo, ui_player_who->mo->angle_, maxdistance);
     if (!obj)
     {
         vm->ReturnString("");
@@ -1466,7 +1453,8 @@ static void PL_query_weapon(coal::vm_c *vm, int argc)
 // Lobo: May 2023
 static void PL_sector_light(coal::vm_c *vm, int argc)
 {
-    vm->ReturnFloat(ui_player_who->mo->subsector_->sector->properties.light_level);
+    vm->ReturnFloat(
+        ui_player_who->mo->subsector_->sector->properties.light_level);
 }
 
 // player.sector_floor_height()
@@ -1480,11 +1468,13 @@ static void PL_sector_floor_height(coal::vm_c *vm, int argc)
     }
     else
     {
-        // Start from the lowest exfloor and check if the player is standing on it,
+        // Start from the lowest exfloor and check if the player is standing on
+        // it,
         //  then return the control sector floor height
-        float         CurrentFloor        = 0;
-        float         player_floor_height = ui_player_who->mo->floor_z_;
-        Extrafloor *floor_checker       = ui_player_who->mo->subsector_->sector->bottom_extrafloor;
+        float       CurrentFloor        = 0;
+        float       player_floor_height = ui_player_who->mo->floor_z_;
+        Extrafloor *floor_checker =
+            ui_player_who->mo->subsector_->sector->bottom_extrafloor;
         for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
         {
             if (CurrentFloor > ef->top_height)
@@ -1513,11 +1503,13 @@ static void PL_sector_ceiling_height(coal::vm_c *vm, int argc)
     }
     else
     {
-        // Start from the lowest exfloor and check if the player is standing on it,
+        // Start from the lowest exfloor and check if the player is standing on
+        // it,
         //   then return the control sector ceiling height
-        float         HighestCeiling      = 0;
-        float         player_floor_height = ui_player_who->mo->floor_z_;
-        Extrafloor *floor_checker       = ui_player_who->mo->subsector_->sector->bottom_extrafloor;
+        float       HighestCeiling      = 0;
+        float       player_floor_height = ui_player_who->mo->floor_z_;
+        Extrafloor *floor_checker =
+            ui_player_who->mo->subsector_->sector->bottom_extrafloor;
         for (Extrafloor *ef = floor_checker; ef; ef = ef->higher)
         {
             if (player_floor_height + 1 > ef->top_height)
@@ -1541,7 +1533,8 @@ static void PL_is_outside(coal::vm_c *vm, int argc)
 {
     // Doesn't account for extrafloors by design. Reasoning is that usually
     //  extrafloors will be platforms, not roofs...
-    if (ui_player_who->mo->subsector_->sector->ceiling.image != skyflatimage) // is it outdoors?
+    if (ui_player_who->mo->subsector_->sector->ceiling.image !=
+        skyflatimage)  // is it outdoors?
         vm->ReturnFloat(0);
     else
         vm->ReturnFloat(1);
@@ -1549,7 +1542,7 @@ static void PL_is_outside(coal::vm_c *vm, int argc)
 
 //------------------------------------------------------------------------
 
-void VM_RegisterPlaysim()
+void CoalRegisterPlaysim()
 {
     ui_vm->AddNativeFunction("player.num_players", PL_num_players);
     ui_vm->AddNativeFunction("player.set_who", PL_set_who);
@@ -1632,8 +1625,10 @@ void VM_RegisterPlaysim()
     ui_vm->AddNativeFunction("player.weapon_state", PL_weapon_state);
 
     ui_vm->AddNativeFunction("player.sector_light", PL_sector_light);
-    ui_vm->AddNativeFunction("player.sector_floor_height", PL_sector_floor_height);
-    ui_vm->AddNativeFunction("player.sector_ceiling_height", PL_sector_ceiling_height);
+    ui_vm->AddNativeFunction("player.sector_floor_height",
+                             PL_sector_floor_height);
+    ui_vm->AddNativeFunction("player.sector_ceiling_height",
+                             PL_sector_ceiling_height);
     ui_vm->AddNativeFunction("player.is_outside", PL_is_outside);
 }
 

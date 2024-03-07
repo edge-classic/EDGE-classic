@@ -40,7 +40,7 @@
 #include "vm_coal.h"  // for coal::vm_c
 
 extern coal::vm_c *ui_vm;
-extern void        VM_SetFloat(coal::vm_c *vm, const char *mod_name,
+extern void        CoalSetFloat(coal::vm_c *vm, const char *mod_name,
                                const char *var_name, double value);
 
 // only true if packets are exchanged with a server
@@ -162,11 +162,11 @@ void NetworkGrabTicCommands(void)
 
         memcpy(&p->cmd, p->in_cmds + buf, sizeof(EventTicCommand));
     }
-    if (LUA_UseLuaHud())
-        LUA_SetFloat(LUA_GetGlobalVM(), "sys", "gametic",
+    if (LuaUseLuaHud())
+        LuaSetFloat(LuaGetGlobalVM(), "sys", "gametic",
                      game_tic / (double_framerate.d_ ? 2 : 1));
     else
-        VM_SetFloat(ui_vm, "sys", "gametic",
+        CoalSetFloat(ui_vm, "sys", "gametic",
                     game_tic / (double_framerate.d_ ? 2 : 1));
 
     game_tic++;

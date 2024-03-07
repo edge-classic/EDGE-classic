@@ -1027,7 +1027,7 @@ static void ProcessCoalInWad(data_file_c *df)
     {
         int lump = wad->coal_huds;
 
-        VM_SetCoalDetected(true);
+        SetCoalDetected(true);
 
         std::string data   = W_LoadString(lump);
         std::string source = W_GetLumpName(lump);
@@ -1035,7 +1035,7 @@ static void ProcessCoalInWad(data_file_c *df)
         source += " in ";
         source += bare_filename;
 
-        VM_AddScript(0, data, source);
+        CoalAddScript(0, data, source);
     }
 }
 
@@ -1049,7 +1049,7 @@ static void ProcessLuaInWad(data_file_c *df)
     {
         int lump = wad->lua_huds;       
 
-        LUA_SetLuaHudDetected(true);
+        LuaSetLuaHudDetected(true);
 
         std::string data   = W_LoadString(lump);
         std::string source = W_GetLumpName(lump);
@@ -1057,7 +1057,7 @@ static void ProcessLuaInWad(data_file_c *df)
         source += " in ";
         source += bare_filename;
 
-        LUA_AddScript(data, source);
+        LuaAddScript(data, source);
     }
 }
 

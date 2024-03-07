@@ -59,7 +59,7 @@
 #include "w_sprite.h"
 
 extern coal::vm_c *ui_vm;
-extern double      VM_GetFloat(coal::vm_c *vm, const char *mod_name,
+extern double      CoalGetFloat(coal::vm_c *vm, const char *mod_name,
                                const char *var_name);
 
 extern bool erraticism_active;
@@ -213,19 +213,19 @@ static void RendererDrawPSprite(PlayerSprite *psp, int which, player_t *player,
     float ty1 =
         -psp->screen_y + image->ScaledOffsetY() - ((h - image->ScaledHeightActual()) * 0.5f);
 
-    if (LUA_UseLuaHud())
+    if (LuaUseLuaHud())
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
         if ((state->flags & kStateFrameFlagWeapon) && (player->ready_wp >= 0))
             ty1 +=
-                LUA_GetFloat(LUA_GetGlobalVM(), "hud", "universal_y_adjust") +
+                LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") +
                 player->weapons[player->ready_wp].info->y_adjust_;
     }
     else
     {
         // Lobo 2022: Apply sprite Y offset, mainly for Heretic weapons.
         if ((state->flags & kStateFrameFlagWeapon) && (player->ready_wp >= 0))
-            ty1 += VM_GetFloat(ui_vm, "hud", "universal_y_adjust") +
+            ty1 += CoalGetFloat(ui_vm, "hud", "universal_y_adjust") +
                    player->weapons[player->ready_wp].info->y_adjust_;
     }
 
@@ -649,14 +649,14 @@ void RendererDrawWeaponModel(player_t *p)
 
     float bias = 0.0f;
 
-    if (LUA_UseLuaHud())
+    if (LuaUseLuaHud())
     {
-        bias = LUA_GetFloat(LUA_GetGlobalVM(), "hud", "universal_y_adjust") +
+        bias = LuaGetFloat(LuaGetGlobalVM(), "hud", "universal_y_adjust") +
                p->weapons[p->ready_wp].info->y_adjust_;
     }
     else
     {
-        bias = VM_GetFloat(ui_vm, "hud", "universal_y_adjust") +
+        bias = CoalGetFloat(ui_vm, "hud", "universal_y_adjust") +
                p->weapons[p->ready_wp].info->y_adjust_;
     }
 

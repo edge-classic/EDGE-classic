@@ -16,31 +16,29 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __VM_COAL_H__
-#define __VM_COAL_H__
+#pragma once
+
+#include <string>
 
 // Detects COAL in a pwad or epk
-bool VM_GetCoalDetected();
-void VM_SetCoalDetected(bool detected);
+bool GetCoalDetected();
+void SetCoalDetected(bool detected);
 
-void VMenuInitializeCoal();
-void VM_QuitCoal();
+void CoalInitialize();
 
-void VM_AddScript(int type, std::string &data, const std::string &source);
-void VM_LoadScripts();
+void CoalAddScript(int type, std::string &data, const std::string &source);
+void CoalLoadScripts();
 
-void VM_RegisterHud();
-void VM_RegisterPlaysim();
+void CoalRegisterHud();
+void CoalRegisterPlaysim();
 
 // HUD stuff
-void VM_NewGame(void);
-void VM_LoadGame(void);
-void VM_SaveGame(void);
-void VM_BeginLevel(void);
-void VM_EndLevel(void);
-void VM_RunHud(void);
-
-#endif // __VM_COAL_H__
+void CoalNewGame(void);
+void CoalLoadGame(void);
+void CoalSaveGame(void);
+void CoalBeginLevel(void);
+void CoalEndLevel(void);
+void CoalRunHud(void);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

@@ -298,7 +298,7 @@ void GameDoLoadLevel(void)
 
             SpawnInitialPlayers();
 
-            // Need to investigate if VM_BeginLevel() needs to go here too now -
+            // Need to investigate if CoalBeginLevel() needs to go here too now -
             // Dasho
 
             GameRemoveOldAvatars();
@@ -311,10 +311,10 @@ void GameDoLoadLevel(void)
     LoadLevel_Bits();
 
     SpawnInitialPlayers();
-    if (LUA_UseLuaHud())
-        LUA_BeginLevel();
+    if (LuaUseLuaHud())
+        LuaBeginLevel();
     else
-        VM_BeginLevel();
+        CoalBeginLevel();
 }
 
 //
@@ -866,10 +866,10 @@ static void GameDoLoadGame(void)
 
     SetPalette(kPaletteNormal, 0);
 
-    if (LUA_UseLuaHud())
-        LUA_LoadGame();
+    if (LuaUseLuaHud())
+        LuaLoadGame();
     else
-        VM_LoadGame();
+        CoalLoadGame();
 }
 
 //
@@ -965,10 +965,10 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
 
 static void GameDoSaveGame(void)
 {
-    if (LUA_UseLuaHud())
-        LUA_SaveGame();
+    if (LuaUseLuaHud())
+        LuaSaveGame();
     else
-        VM_SaveGame();
+        CoalSaveGame();
 
     std::string fn(SV_FileName("current", "head"));
 
@@ -1103,10 +1103,10 @@ static void GameDoNewGame(void)
     delete defer_params;
     defer_params = nullptr;
 
-    if (LUA_UseLuaHud())
-        LUA_NewGame();
+    if (LuaUseLuaHud())
+        LuaNewGame();
     else
-        VM_NewGame();
+        CoalNewGame();
 
     // -AJA- 2003/10/09: support for pre-level briefing screen on first map.
     //       FIXME: kludgy. All this game logic desperately needs rethinking.

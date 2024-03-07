@@ -710,7 +710,7 @@ static void ProcessCoalAPIInPack(pack_file_c *pack)
                 const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
                 std::string data((const char *)raw_data);
                 delete[] raw_data;
-                VM_AddScript(0, data, source);
+                CoalAddScript(0, data, source);
                 return; // Should only be present once
             }
         }
@@ -740,14 +740,14 @@ static void ProcessCoalHUDInPack(pack_file_c *pack)
             {
                 if (epi::StringPrefixCaseCompareASCII(bare_filename, "edge_defs") != 0)
                 {
-                    VM_SetCoalDetected(true);
+                    SetCoalDetected(true);
                 }
 
                 int         length   = -1;
                 const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
                 std::string data((const char *)raw_data);
                 delete[] raw_data;
-                VM_AddScript(0, data, source);
+                CoalAddScript(0, data, source);
                 return; // Should only be present once
             }
         }
@@ -775,7 +775,7 @@ static void ProcessLuaAPIInPack(pack_file_c *pack)
                 const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
                 std::string data((const char *)raw_data);
                 delete[] raw_data;
-                LUA_AddScript(data, source);
+                LuaAddScript(data, source);
                 return; // Should only be present once
             }
         }
@@ -802,14 +802,14 @@ static void ProcessLuaHUDInPack(pack_file_c *pack)
             {
                 if (epi::StringPrefixCaseCompareASCII(bare_filename, "edge_defs") != 0)
                 {
-                    LUA_SetLuaHudDetected(true);
+                    LuaSetLuaHudDetected(true);
                 }
 
                 int         length   = -1;
                 const uint8_t *raw_data = pack->LoadEntry(dir, entry, length);
                 std::string data((const char *)raw_data);
                 delete[] raw_data;
-                LUA_AddScript(data, source);
+                LuaAddScript(data, source);
                 return; // Should only be present once
             }
         }

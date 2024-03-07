@@ -603,10 +603,10 @@ void E_Display(void)
         case GS_LEVEL:
             PaletteTicker();
 
-            if (LUA_UseLuaHud())
-                LUA_RunHud();
+            if (LuaUseLuaHud())
+                LuaRunHud();
             else
-                VM_RunHud();
+                CoalRunHud();
 
             if (need_save_screenshot)
             {
@@ -1983,7 +1983,6 @@ void E_EngineShutdown(void)
     }
 
     LevelShutdown();
-
     SoundShutdown();
     RendererShutdown();
     NetworkShutdown();
@@ -2072,15 +2071,15 @@ static void E_Startup(void)
     SoundInitialize();
     NetworkInitialize();
     CheatInitialize();
-    if (LUA_UseLuaHud())
+    if (LuaUseLuaHud())
     {
-        LUA_Init();
-        LUA_LoadScripts();
+        LuaInit();
+        LuaLoadScripts();
     }
     else
     {
-        VMenuInitializeCoal();
-        VM_LoadScripts();
+        CoalInitialize();
+        CoalLoadScripts();
     }
 }
 

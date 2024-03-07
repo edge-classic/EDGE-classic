@@ -45,7 +45,7 @@
 #include "vm_coal.h"
 
 extern coal::vm_c *ui_vm;
-extern void        VM_SetVector(coal::vm_c *vm, const char *mod_name,
+extern void        CoalSetVector(coal::vm_c *vm, const char *mod_name,
                                 const char *var_name, double val_1, double val_2,
                                 double val_3);
 
@@ -864,9 +864,9 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
     player->actiondown[1] =
         (cmd->extended_buttons & kExtendedButtonCodeAction2) ? true : false;
 
-    if (LUA_UseLuaHud())
-        LUA_SetVector3(
-            LUA_GetGlobalVM(), "player", "inventory_event_handler",
+    if (LuaUseLuaHud())
+        LuaSetVector3(
+            LuaGetGlobalVM(), "player", "inventory_event_handler",
             HMM_Vec3{
                 {cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious
                      ? 1.0f
@@ -877,7 +877,7 @@ bool P_PlayerThink(player_t *player, bool extra_tic)
                      ? 1.0f
                      : 0.0f}});
     else
-        VM_SetVector(
+        CoalSetVector(
             ui_vm, "player", "inventory_event_handler",
             cmd->extended_buttons & kExtendedButtonCodeInventoryPrevious ? 1
                                                                          : 0,

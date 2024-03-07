@@ -16,36 +16,32 @@
 //
 //----------------------------------------------------------------------------
 
+#include "vm_coal.h"
 
+#include <stdarg.h>
 
 #include "coal.h"
-#include <stdarg.h>
-#include "file.h"
-#include "filesystem.h"
-
-#include "main.h"
-
-#include "vm_coal.h"
 #include "dm_state.h"
 #include "e_main.h"
-#include "g_game.h"
-#include "version.h"
-
 #include "e_player.h"
-#include "hu_font.h"
+#include "file.h"
+#include "filesystem.h"
+#include "g_game.h"
 #include "hu_draw.h"
-#include "r_modes.h"
-#include "w_wad.h"
-
+#include "hu_font.h"
 #include "m_random.h"
+#include "main.h"
 #include "n_network.h"
+#include "r_modes.h"
+#include "version.h"
+#include "w_wad.h"
 
 extern ConsoleVariable double_framerate;
 
 // user interface VM
 coal::vm_c *ui_vm = nullptr;
 
-void VM_Printer(const char *msg, ...)
+void CoalPrinter(const char *msg, ...)
 {
     static char buffer[1024];
 
@@ -60,76 +56,89 @@ void VM_Printer(const char *msg, ...)
     LogPrint("COAL: %s", buffer);
 }
 
-// VM_GetFloat/VM_GetString/VM_GetVector usage:
-// mod_name = nullptr to search global scope or a module name such as "hud", "math", etc
-// var_name = Variable name, without the module prefix, i.e. "custom_stbar" instead of "hud.custom_stbar"
+// CoalGetFloat/CoalGetString/CoalGetVector usage:
+// mod_name = nullptr to search global scope or a module name such as "hud",
+// "math", etc var_name = Variable name, without the module prefix, i.e.
+// "custom_stbar" instead of "hud.custom_stbar"
 
-double VM_GetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name)
+double CoalGetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name)
 {
     return vm->GetFloat(mod_name, var_name);
 }
 
-const char *VM_GetString(coal::vm_c *vm, const char *mod_name, const char *var_name)
+const char *CoalGetString(coal::vm_c *vm, const char *mod_name,
+                          const char *var_name)
 {
     return vm->GetString(mod_name, var_name);
 }
 
-double *VM_GetVector(coal::vm_c *vm, const char *mod_name, const char *var_name)
+double *CoalGetVector(coal::vm_c *vm, const char *mod_name,
+                      const char *var_name)
 {
     return vm->GetVector(mod_name, var_name);
 }
 
-double VM_GetVectorX(coal::vm_c *vm, const char *mod_name, const char *var_name)
+double CoalGetVectorX(coal::vm_c *vm, const char *mod_name,
+                      const char *var_name)
 {
     return vm->GetVectorX(mod_name, var_name);
 }
 
-double VM_GetVectorY(coal::vm_c *vm, const char *mod_name, const char *var_name)
+double CoalGetVectorY(coal::vm_c *vm, const char *mod_name,
+                      const char *var_name)
 {
     return vm->GetVectorY(mod_name, var_name);
 }
 
-double VM_GetVectorZ(coal::vm_c *vm, const char *mod_name, const char *var_name)
+double CoalGetVectorZ(coal::vm_c *vm, const char *mod_name,
+                      const char *var_name)
 {
     return vm->GetVectorZ(mod_name, var_name);
 }
 
-// VM_SetFloat/VM_SetString/VM_SetVector usage:
-// mod_name = nullptr to search global scope or a module name such as "hud", "math", etc
-// var_name = Variable name, without the module prefix, i.e. "custom_stbar" instead of "hud.custom_stbar"
-// value = Whatever is appropriate. SetString should allow a nullptr string as this may be desired
+// CoalSetFloat/CoalSetString/CoalSetVector usage:
+// mod_name = nullptr to search global scope or a module name such as "hud",
+// "math", etc var_name = Variable name, without the module prefix, i.e.
+// "custom_stbar" instead of "hud.custom_stbar" value = Whatever is appropriate.
+// SetString should allow a nullptr string as this may be desired
 
-void VM_SetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name, double value)
+void CoalSetFloat(coal::vm_c *vm, const char *mod_name, const char *var_name,
+                  double value)
 {
     vm->SetFloat(mod_name, var_name, value);
 }
 
-void VM_SetString(coal::vm_c *vm, const char *mod_name, const char *var_name, const char *value)
+void CoalSetString(coal::vm_c *vm, const char *mod_name, const char *var_name,
+                   const char *value)
 {
     vm->SetString(mod_name, var_name, value);
 }
 
-void VM_SetVector(coal::vm_c *vm, const char *mod_name, const char *var_name, double val_1, double val_2, double val_3)
+void CoalSetVector(coal::vm_c *vm, const char *mod_name, const char *var_name,
+                   double val_1, double val_2, double val_3)
 {
     vm->SetVector(mod_name, var_name, val_1, val_2, val_3);
 }
 
-void VM_SetVectorX(coal::vm_c *vm, const char *mod_name, const char *var_name, double val)
+void CoalSetVectorX(coal::vm_c *vm, const char *mod_name, const char *var_name,
+                    double val)
 {
     vm->SetVectorX(mod_name, var_name, val);
 }
 
-void VM_SetVectorY(coal::vm_c *vm, const char *mod_name, const char *var_name, double val)
+void CoalSetVectorY(coal::vm_c *vm, const char *mod_name, const char *var_name,
+                    double val)
 {
     vm->SetVectorY(mod_name, var_name, val);
 }
 
-void VM_SetVectorZ(coal::vm_c *vm, const char *mod_name, const char *var_name, double val)
+void CoalSetVectorZ(coal::vm_c *vm, const char *mod_name, const char *var_name,
+                    double val)
 {
     vm->SetVectorZ(mod_name, var_name, val);
 }
 
-void VM_CallFunction(coal::vm_c *vm, const char *name)
+void CoalCallFunction(coal::vm_c *vm, const char *name)
 {
     int func = vm->FindFunction(name);
 
@@ -305,8 +314,7 @@ static void MATH_log(coal::vm_c *vm, int argc)
 
     double val = *vm->AccessParam(0);
 
-    if (val <= 0)
-        FatalError("math.log: illegal input: %g\n", val);
+    if (val <= 0) FatalError("math.log: illegal input: %g\n", val);
 
     vm->ReturnFloat(log(val));
 }
@@ -358,15 +366,11 @@ static void STRINGS_sub(coal::vm_c *vm, int argc)
     int len   = strlen(s);
 
     // negative values are relative to END of the string (-1 = last character)
-    if (start < 0)
-        start += len + 1;
-    if (end < 0)
-        end += len + 1;
+    if (start < 0) start += len + 1;
+    if (end < 0) end += len + 1;
 
-    if (start < 1)
-        start = 1;
-    if (end > len)
-        end = len;
+    if (start < 1) start = 1;
+    if (end > len) end = len;
 
     if (end < start)
     {
@@ -396,7 +400,7 @@ static void STRINGS_tonumber(coal::vm_c *vm, int argc)
     vm->ReturnFloat(atof(s));
 }
 
-void VM_RegisterBASE(coal::vm_c *vm)
+void CoalRegisterBASE(coal::vm_c *vm)
 {
     // SYSTEM
     vm->AddNativeFunction("sys.error", SYS_error);
@@ -432,87 +436,73 @@ void VM_RegisterBASE(coal::vm_c *vm)
 
 //------------------------------------------------------------------------
 
-class pending_coal_script_c
+struct PendingCoalScript
 {
-  public:
     int         type   = 0;
     std::string data   = "";
     std::string source = "";
 };
 
-static std::vector<pending_coal_script_c> unread_scripts;
+static std::vector<PendingCoalScript> unread_scripts;
 
-void VMenuInitializeCoal()
+void CoalInitialize()
 {
     E_ProgressMessage("Starting COAL VM...");
 
     ui_vm = coal::CreateVM();
 
-    ui_vm->SetPrinter(VM_Printer);
+    ui_vm->SetPrinter(CoalPrinter);
 
-    VM_RegisterBASE(ui_vm);
-    VM_RegisterHud();
-    VM_RegisterPlaysim();
+    CoalRegisterBASE(ui_vm);
+    CoalRegisterHud();
+    CoalRegisterPlaysim();
 }
 
-void VM_QuitCoal()
+void CoalAddScript(int type, std::string &data, const std::string &source)
 {
-    unread_scripts.clear();
-
-    if (ui_vm)
-    {
-        delete ui_vm;
-        ui_vm = nullptr;
-    }
-}
-
-void VM_AddScript(int type, std::string &data, const std::string &source)
-{
-    unread_scripts.push_back(pending_coal_script_c{type, "", source});
+    unread_scripts.push_back(PendingCoalScript{type, "", source});
 
     // transfer the caller's data
     unread_scripts.back().data.swap(data);
 }
 
-void VM_LoadScripts()
+void CoalLoadScripts()
 {
-    for (auto &info : unread_scripts)
+    for (PendingCoalScript &info : unread_scripts)
     {
         const char *name = info.source.c_str();
-        char       *data = (char *)info.data.c_str(); // FIXME make param to CompileFile be a std::string&
+        char       *data =
+            (char *)info.data
+                .c_str();  // FIXME make param to CompileFile be a std::string&
 
         LogPrint("Compiling: %s\n", name);
 
         if (!ui_vm->CompileFile(data, name))
-            FatalError("Errors compiling %s\nPlease see debug.txt for details.", name);
+            FatalError("Errors compiling %s\nPlease see debug.txt for details.",
+                       name);
     }
 
     unread_scripts.clear();
 
-    VM_SetFloat(ui_vm, "sys", "gametic", game_tic / (double_framerate.d_? 2 : 1));
+    CoalSetFloat(ui_vm, "sys", "gametic",
+                 game_tic / (double_framerate.d_ ? 2 : 1));
 
     if (W_IsLumpInPwad("STBAR"))
     {
-        VM_SetFloat(ui_vm, "hud", "custom_stbar", 1);
+        CoalSetFloat(ui_vm, "hud", "custom_stbar", 1);
     }
 }
 
 static bool coal_detected = false;
-void VM_SetCoalDetected(bool detected)
+void        SetCoalDetected(bool detected)
 {
     // check whether redundant call, once enabled stays enabled
-    if (coal_detected)
-    {
-        return;
-    }
+    if (coal_detected) { return; }
 
-    coal_detected = detected;    
+    coal_detected = detected;
 }
 
-bool VM_GetCoalDetected()
-{
-    return coal_detected;
-}
+bool GetCoalDetected() { return coal_detected; }
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

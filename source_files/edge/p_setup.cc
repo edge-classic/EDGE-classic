@@ -143,7 +143,7 @@ static void GetMusinfoTracksForLevel(void)
         return;
     int      raw_length = 0;
     uint8_t *raw_musinfo =
-        W_OpenPackOrLumpInMemory("MUSINFO", {".txt"}, &raw_length);
+        OpenPackOrLumpInMemory("MUSINFO", {".txt"}, &raw_length);
     if (!raw_musinfo) return;
     std::string musinfo;
     musinfo.resize(raw_length);
@@ -275,13 +275,13 @@ static void LoadVertexes(int lump)
     const raw_vertex_t *ml;
     vertex_t           *li;
 
-    if (!W_VerifyLumpName(lump, "VERTEXES"))
+    if (!VerifyLump(lump, "VERTEXES"))
         FatalError("Bad WAD: level %s missing VERTEXES.\n",
                    current_map->lump_.c_str());
 
     // Determine number of lumps:
     //  total lump length / vertex record length.
-    total_level_vertexes = W_LumpLength(lump) / sizeof(raw_vertex_t);
+    total_level_vertexes = GetLumpLength(lump) / sizeof(raw_vertex_t);
 
     if (total_level_vertexes == 0)
         FatalError("Bad WAD: level %s contains 0 vertexes.\n",
@@ -290,7 +290,7 @@ static void LoadVertexes(int lump)
     level_vertexes = new vertex_t[total_level_vertexes];
 
     // Load data into cache.
-    data = W_LoadLump(lump);
+    data = LoadLumpIntoMemory(lump);
 
     ml = (const raw_vertex_t *)data;
     li = level_vertexes;
@@ -380,17 +380,17 @@ static void LoadSectors(int lump)
     const raw_sector_t *ms;
     Sector           *ss;
 
-    if (!W_VerifyLumpName(lump, "SECTORS"))
+    if (!VerifyLump(lump, "SECTORS"))
     {
         // Check if SECTORS is immediately after
         // THINGS/LINEDEFS/SIDEDEFS/VERTEXES
         lump -= 3;
-        if (!W_VerifyLumpName(lump, "SECTORS"))
+        if (!VerifyLump(lump, "SECTORS"))
             FatalError("Bad WAD: level %s missing SECTORS.\n",
                        current_map->lump_.c_str());
     }
 
-    total_level_sectors = W_LumpLength(lump) / sizeof(raw_sector_t);
+    total_level_sectors = GetLumpLength(lump) / sizeof(raw_sector_t);
 
     if (total_level_sectors == 0)
         FatalError("Bad WAD: level %s contains 0 sectors.\n",
@@ -399,10 +399,10 @@ static void LoadSectors(int lump)
     level_sectors = new Sector[total_level_sectors];
     Z_Clear(level_sectors, Sector, total_level_sectors);
 
-    data = W_LoadLump(lump);
-    map_sectors_crc.AddBlock((const uint8_t *)data, W_LumpLength(lump));
+    data = LoadLumpIntoMemory(lump);
+    map_sectors_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
 
-    CheckDoom2Map05Bug((uint8_t *)data, W_LumpLength(lump));  // Lobo: 2023
+    CheckDoom2Map05Bug((uint8_t *)data, GetLumpLength(lump));  // Lobo: 2023
 
     ms = (const raw_sector_t *)data;
     ss = level_sectors;
@@ -676,20 +676,20 @@ static void LoadThings(int lump)
     const raw_thing_t         *mt;
     const MapObjectDefinition *objtype;
 
-    if (!W_VerifyLumpName(lump, "THINGS"))
+    if (!VerifyLump(lump, "THINGS"))
         FatalError("Bad WAD: level %s missing THINGS.\n",
                    current_map->lump_.c_str());
 
-    total_map_things = W_LumpLength(lump) / sizeof(raw_thing_t);
+    total_map_things = GetLumpLength(lump) / sizeof(raw_thing_t);
 
     if (total_map_things == 0)
         FatalError("Bad WAD: level %s contains 0 things.\n",
                    current_map->lump_.c_str());
 
-    data = W_LoadLump(lump);
-    map_things_crc.AddBlock((const uint8_t *)data, W_LumpLength(lump));
+    data = LoadLumpIntoMemory(lump);
+    map_things_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
 
-    CheckEvilutionBug((uint8_t *)data, W_LumpLength(lump));
+    CheckEvilutionBug((uint8_t *)data, GetLumpLength(lump));
 
     // -AJA- 2004/11/04: check the options in all things to see whether
     // we can use new option flags or not.  Same old wads put 1 bits in
@@ -807,18 +807,18 @@ static void LoadHexenThings(int lump)
     const raw_hexen_thing_t   *mt;
     const MapObjectDefinition *objtype;
 
-    if (!W_VerifyLumpName(lump, "THINGS"))
+    if (!VerifyLump(lump, "THINGS"))
         FatalError("Bad WAD: level %s missing THINGS.\n",
                    current_map->lump_.c_str());
 
-    total_map_things = W_LumpLength(lump) / sizeof(raw_hexen_thing_t);
+    total_map_things = GetLumpLength(lump) / sizeof(raw_hexen_thing_t);
 
     if (total_map_things == 0)
         FatalError("Bad WAD: level %s contains 0 things.\n",
                    current_map->lump_.c_str());
 
-    data = W_LoadLump(lump);
-    map_things_crc.AddBlock((const uint8_t *)data, W_LumpLength(lump));
+    data = LoadLumpIntoMemory(lump);
+    map_things_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
 
     mt = (const raw_hexen_thing_t *)data;
     for (i = 0; i < total_map_things; i++, mt++)
@@ -931,11 +931,11 @@ static void LoadLineDefs(int lump)
     //       the CHANGE_TEX command in RTS, etc, and also to implement
     //       "wall tiles" properly.
 
-    if (!W_VerifyLumpName(lump, "LINEDEFS"))
+    if (!VerifyLump(lump, "LINEDEFS"))
         FatalError("Bad WAD: level %s missing LINEDEFS.\n",
                    current_map->lump_.c_str());
 
-    total_level_lines = W_LumpLength(lump) / sizeof(raw_linedef_t);
+    total_level_lines = GetLumpLength(lump) / sizeof(raw_linedef_t);
 
     if (total_level_lines == 0)
         FatalError("Bad WAD: level %s contains 0 linedefs.\n",
@@ -947,8 +947,8 @@ static void LoadLineDefs(int lump)
 
     temp_line_sides = new int[total_level_lines * 2];
 
-    const uint8_t *data = W_LoadLump(lump);
-    map_lines_crc.AddBlock((const uint8_t *)data, W_LumpLength(lump));
+    const uint8_t *data = LoadLumpIntoMemory(lump);
+    map_lines_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
 
     Line              *ld  = level_lines;
     const raw_linedef_t *mld = (const raw_linedef_t *)data;
@@ -1017,11 +1017,11 @@ static void LoadHexenLineDefs(int lump)
 {
     // -AJA- 2001/08/04: wrote this, based on the Hexen specs.
 
-    if (!W_VerifyLumpName(lump, "LINEDEFS"))
+    if (!VerifyLump(lump, "LINEDEFS"))
         FatalError("Bad WAD: level %s missing LINEDEFS.\n",
                    current_map->lump_.c_str());
 
-    total_level_lines = W_LumpLength(lump) / sizeof(raw_hexen_linedef_t);
+    total_level_lines = GetLumpLength(lump) / sizeof(raw_hexen_linedef_t);
 
     if (total_level_lines == 0)
         FatalError("Bad WAD: level %s contains 0 linedefs.\n",
@@ -1033,8 +1033,8 @@ static void LoadHexenLineDefs(int lump)
 
     temp_line_sides = new int[total_level_lines * 2];
 
-    const uint8_t *data = W_LoadLump(lump);
-    map_lines_crc.AddBlock((const uint8_t *)data, W_LumpLength(lump));
+    const uint8_t *data = LoadLumpIntoMemory(lump);
+    map_lines_crc.AddBlock((const uint8_t *)data, GetLumpLength(lump));
 
     Line                    *ld  = level_lines;
     const raw_hexen_linedef_t *mld = (const raw_hexen_linedef_t *)data;
@@ -1170,8 +1170,8 @@ static void LoadXGL3Nodes(int lumpnum)
 
     LogDebug("LoadXGL3Nodes:\n");
 
-    xglen   = W_LumpLength(lumpnum);
-    xgldata = (uint8_t *)W_LoadLump(lumpnum);
+    xglen   = GetLumpLength(lumpnum);
+    xgldata = (uint8_t *)LoadLumpIntoMemory(lumpnum);
     if (!xgldata) FatalError("LoadXGL3Nodes: Couldn't load lump\n");
 
     if (xglen < 12)
@@ -2727,11 +2727,11 @@ static void LoadSideDefs(int lump)
 
     int nummapsides;
 
-    if (!W_VerifyLumpName(lump, "SIDEDEFS"))
+    if (!VerifyLump(lump, "SIDEDEFS"))
         FatalError("Bad WAD: level %s missing SIDEDEFS.\n",
                    current_map->lump_.c_str());
 
-    nummapsides = W_LumpLength(lump) / sizeof(raw_sidedef_t);
+    nummapsides = GetLumpLength(lump) / sizeof(raw_sidedef_t);
 
     if (nummapsides == 0)
         FatalError("Bad WAD: level %s contains 0 sidedefs.\n",
@@ -2741,7 +2741,7 @@ static void LoadSideDefs(int lump)
 
     Z_Clear(level_sides, Side, total_level_sides);
 
-    data = W_LoadLump(lump);
+    data = LoadLumpIntoMemory(lump);
     msd  = (const raw_sidedef_t *)data;
 
     sd = level_sides;
@@ -3544,12 +3544,12 @@ void LevelSetup(void)
     seen_monsters.clear();
 
     // get lump for map header e.g. MAP01
-    int lumpnum = W_CheckNumForName_MAP(current_map->lump_.c_str());
+    int lumpnum = CheckMapLumpNumberForName(current_map->lump_.c_str());
     if (lumpnum < 0)
         FatalError("No such level: %s\n", current_map->lump_.c_str());
 
     // get lump for XGL3 nodes from an XWA file
-    int xgl_lump = W_CheckNumForName_XGL(current_map->lump_.c_str());
+    int xgl_lump = CheckXglLumpNumberForName(current_map->lump_.c_str());
 
     // ignore XGL nodes if it occurs _before_ the normal level marker.
     // [ something has gone horribly wrong if this happens! ]
@@ -3559,12 +3559,12 @@ void LevelSetup(void)
     if (xgl_lump < 0) FatalError("Internal error: missing XGL nodes.\n");
 
     // -CW- 2017/01/29: check for UDMF map lump
-    if (W_VerifyLumpName(lumpnum + 1, "TEXTMAP"))
+    if (VerifyLump(lumpnum + 1, "TEXTMAP"))
     {
         udmf_level          = true;
         udmf_lump_number    = lumpnum + 1;
         int      raw_length = 0;
-        uint8_t *raw_udmf   = W_LoadLump(udmf_lump_number, &raw_length);
+        uint8_t *raw_udmf   = LoadLumpIntoMemory(udmf_lump_number, &raw_length);
         udmf_lump.clear();
         udmf_lump.resize(raw_length);
         memcpy(udmf_lump.data(), raw_udmf, raw_length);
@@ -3602,8 +3602,8 @@ void LevelSetup(void)
         // check if the level is for Hexen
         hexen_level = false;
 
-        if (W_VerifyLump(lumpnum + ML_BEHAVIOR) &&
-            W_VerifyLumpName(lumpnum + ML_BEHAVIOR, "BEHAVIOR"))
+        if (IsLumpIndexValid(lumpnum + ML_BEHAVIOR) &&
+            VerifyLump(lumpnum + ML_BEHAVIOR, "BEHAVIOR"))
         {
             LogDebug("Detected Hexen level.\n");
             hexen_level = true;
@@ -3689,7 +3689,7 @@ void LevelSetup(void)
     RendererUpdateSkyBoxTextures();
 
     // preload graphics
-    if (precache) W_PrecacheLevel();
+    if (precache) PrecacheLevelGraphics();
 
     // setup categories based on game mode (SP/COOP/DM)
     UpdateSoundCategoryLimits();

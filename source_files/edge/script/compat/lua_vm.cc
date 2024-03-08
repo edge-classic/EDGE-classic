@@ -34,7 +34,7 @@ static int LuaPackLoader(lua_State *L)
     std::string pack_name;
     LuaGetRequirePackPath(name, pack_name);
 
-    epi::File *file = W_OpenPackFile(pack_name);
+    epi::File *file = OpenFileFromPack(pack_name);
 
     if (!file)
     {
@@ -57,7 +57,7 @@ static int LuaPackSearcher(lua_State *L)
     std::string pack_name;
     LuaGetRequirePackPath(name, pack_name);
 
-    if (W_CheckPackForName(pack_name) == -1)
+    if (CheckPackFilesForName(pack_name) == -1)
     {
         FatalError("LUA: Unable to load file %s", pack_name.c_str());
         return 0;

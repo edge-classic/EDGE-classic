@@ -23,80 +23,80 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __W_FILES__
-#define __W_FILES__
-#include <vector>
-#include "dm_defs.h"
+#pragma once
+
 #include <string>
-// EPI
+#include <vector>
+
+#include "dm_defs.h"
 #include "file.h"
 
-typedef enum
+enum FileKind
 {
-    FLKIND_IWad = 0, // iwad file
-    FLKIND_PWad,     // normal .wad file
-    FLKIND_EWad,     // edge wad, priority loading
-    FLKIND_XWad,     // ajbsp node wad
+    kFileKindIWad = 0,  // iwad file
+    kFileKindPWad,      // normal .wad file
+    kFileKindEWad,      // edge wad, priority loading
+    kFileKindXWad,      // ajbsp node wad
 
-    FLKIND_Folder,   // a folder somewhere
-    FLKIND_EFolder,  // edge folder, priority loading
-    FLKIND_EPK,      // edge package (.epk)
-    FLKIND_EEPK,     // edge epks, priority loading (same extension as epk)
-    FLKIND_PackWAD,  // WADs within pack files; should only be used for maps
-    FLKIND_IPK,      // standalone game EPK (same extension as epk)
-    FLKIND_IFolder,  // standalone game folder
-    FLKIND_IPackWAD, // IWADs within pack files :/
+    kFileKindFolder,    // a folder somewhere
+    kFileKindEFolder,   // edge folder, priority loading
+    kFileKindEpk,       // edge package (.epk)
+    kFileKindEEpk,      // edge epks, priority loading (same extension as epk)
+    kFileKindPackWad,   // WADs within pack files; should only be used for maps
+    kFileKindIpk,       // standalone game EPK (same extension as epk)
+    kFileKindIFolder,   // standalone game folder
+    kFileKindIPackWad,  // IWADs within pack files :/
 
-    FLKIND_DDF, // .ddf or .ldf file
-    FLKIND_RTS, // .rts script  file
-    FLKIND_Deh  // .deh or .bex file
-} filekind_e;
-
-class wad_file_c;
-class pack_file_c;
-
-class data_file_c
-{
-  public:
-    // full name of file
-    std::string name;
-
-    // type of file (FLKIND_XXX)
-    filekind_e kind;
-
-    // file object   [ TODO review when active ]
-    epi::File *file;
-
-    // for FLKIND_IWad, PWad, EWad, GWad.
-    wad_file_c *wad;
-
-    // for FLKIND_PK3
-    pack_file_c *pack;
-
-  public:
-    data_file_c(std::string _name, filekind_e _kind);
-    ~data_file_c();
+    kFileKindDdf,      // .ddf or .ldf file
+    kFileKindRts,      // .rts script  file
+    kFileKindDehacked  // .deh or .bex file
 };
 
-extern std::vector<data_file_c *> data_files;
+class WadFile;
+class PackFile;
 
-size_t W_AddFilename(std::string file, filekind_e kind);
-int    W_GetNumFiles();
-void   W_ShowFiles();
+class DataFile
+{
+   public:
+    // full name of file
+    std::string name_;
 
-void   W_ProcessMultipleFiles();
-size_t W_AddPending(std::string file, filekind_e kind);
-void   ProcessFile(data_file_c *df);
+    // type of file (kFileKindXXX)
+    FileKind kind_;
 
-epi::File *W_OpenPackFile(const std::string &name);
+    // file object   [ TODO review when active ]
+    epi::File *file_;
 
-void W_DoPackSubstitutions(void);
+    // for kFileKindIWad, PWad, EWad, XWad.
+    WadFile *wad_;
 
-uint8_t *W_OpenPackOrLumpInMemory(const std::string &name, const std::vector<std::string> &extensions, int *length);
+    // for kFileKindEpk
+    PackFile *pack_;
 
-int W_CheckPackForName(const std::string &name);
+   public:
+    DataFile(std::string name, FileKind kind);
+    ~DataFile();
+};
 
-#endif // __W_FILES__
+extern std::vector<DataFile *> data_files;
+
+size_t AddDataFile(std::string file, FileKind kind);
+int    GetTotalFiles();
+void   ShowLoadedFiles();
+
+void   ProcessMultipleFiles();
+size_t AddPendingFile(std::string file, FileKind kind);
+void   ProcessFile(DataFile *df);
+
+epi::File *OpenFileFromPack(const std::string &name);
+
+void DoPackSubstitutions(void);
+
+uint8_t *OpenPackOrLumpInMemory(const std::string              &name,
+                                const std::vector<std::string> &extensions,
+                                int                            *length);
+
+int CheckPackFilesForName(const std::string &name);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

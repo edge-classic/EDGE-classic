@@ -127,10 +127,10 @@ void PlayMovie(const std::string &name)
     uint8_t *bytes  = nullptr;
 
     if (movie->type_ == kMovieDataLump)
-        bytes = W_LoadLump(movie->info_.c_str(), &length);
+        bytes = LoadLumpIntoMemory(movie->info_.c_str(), &length);
     else
     {
-        epi::File *mf = W_OpenPackFile(movie->info_.c_str());
+        epi::File *mf = OpenFileFromPack(movie->info_.c_str());
         if (mf)
         {
             bytes  = mf->LoadIntoMemory();

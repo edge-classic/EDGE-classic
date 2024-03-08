@@ -124,7 +124,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
     {
         if (epi::GetExtension(def->pc_speaker_sound_).empty())
         {
-            F = W_OpenPackFile(def->pc_speaker_sound_);
+            F = OpenFileFromPack(def->pc_speaker_sound_);
             if (!F)
             {
                 std::string open_name = epi::PathAppendIfNotAbsolute(
@@ -143,7 +143,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
         else  // Assume bare name is a lump reference
         {
             int lump = -1;
-            lump     = W_CheckNumForName(def->pc_speaker_sound_.c_str());
+            lump     = CheckLumpNumberForName(def->pc_speaker_sound_.c_str());
             if (lump < 0)
             {
                 // Just write a debug message for SFX lumps; this prevents spam
@@ -152,7 +152,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
                                   def->pc_speaker_sound_.c_str());
                 return false;
             }
-            F = W_OpenLump(lump);
+            F = LoadLumpAsFile(lump);
             SYS_ASSERT(F);
         }
     }
@@ -160,7 +160,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
     {
         if (def->pack_name_ != "")
         {
-            F = W_OpenPackFile(def->pack_name_);
+            F = OpenFileFromPack(def->pack_name_);
             if (!F)
             {
                 PrintDebugOrError("SFX Loader: Missing sound in EPK: '%s'\n",
@@ -187,7 +187,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
         else
         {
             int lump = -1;
-            lump     = W_CheckNumForName(def->lump_name_.c_str());
+            lump     = CheckLumpNumberForName(def->lump_name_.c_str());
             if (lump < 0)
             {
                 // Just write a debug message for SFX lumps; this prevents spam
@@ -196,7 +196,7 @@ static bool DoCacheLoad(SoundEffectDefinition *def, SoundData *buf)
                                   def->lump_name_.c_str());
                 return false;
             }
-            F = W_OpenLump(lump);
+            F = LoadLumpAsFile(lump);
             SYS_ASSERT(F);
         }
     }

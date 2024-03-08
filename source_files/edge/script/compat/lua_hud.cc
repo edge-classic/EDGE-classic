@@ -692,7 +692,7 @@ static int HD_get_average_color(lua_State *L)
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette_);
+        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = RgbFromPalettised(
         ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     RGBAColor col = tmp_img_data->AverageColor(from_x, to_x, from_y, to_y);
@@ -717,7 +717,7 @@ static int HD_get_lightest_color(lua_State *L)
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette_);
+        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = RgbFromPalettised(
         ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     RGBAColor col = tmp_img_data->LightestColor(from_x, to_x, from_y, to_y);
@@ -741,7 +741,7 @@ static int HD_get_darkest_color(lua_State *L)
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette_);
+        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = RgbFromPalettised(
         ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     RGBAColor col = tmp_img_data->DarkestColor(from_x, to_x, from_y, to_y);
@@ -765,7 +765,7 @@ static int HD_get_average_hue(lua_State *L)
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette_);
+        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = RgbFromPalettised(
         ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     uint8_t temp_rgb[3];
@@ -788,7 +788,7 @@ static int HD_get_average_top_border_color(lua_State *L)
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette_);
+        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = RgbFromPalettised(
         ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     RGBAColor col = tmp_img_data->AverageColor(0, tmp_img_c->actual_width_,
@@ -809,7 +809,7 @@ static int HD_get_average_bottom_border_color(lua_State *L)
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     const Image   *tmp_img_c    = ImageLookup(name, kImageNamespaceGraphic, 0);
     if (tmp_img_c->source_palette_ >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(tmp_img_c->source_palette_);
+        what_palette = (const uint8_t *)LoadLumpIntoMemory(tmp_img_c->source_palette_);
     ImageData *tmp_img_data = RgbFromPalettised(
         ReadAsEpiBlock((Image *)tmp_img_c), what_palette, tmp_img_c->opacity_);
     RGBAColor col =

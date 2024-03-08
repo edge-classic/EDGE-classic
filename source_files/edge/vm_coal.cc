@@ -487,7 +487,7 @@ void CoalLoadScripts()
     CoalSetFloat(ui_vm, "sys", "gametic",
                  game_tic / (double_framerate.d_ ? 2 : 1));
 
-    if (W_IsLumpInPwad("STBAR"))
+    if (IsLumpInPwad("STBAR"))
     {
         CoalSetFloat(ui_vm, "hud", "custom_stbar", 1);
     }

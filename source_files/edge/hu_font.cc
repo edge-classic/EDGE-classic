@@ -375,10 +375,10 @@ void Font::LoadFontTTF()
 
             if (!epi::GetExtension(definition_->truetype_name_)
                      .empty())  // check for pack file
-                F = W_OpenPackFile(definition_->truetype_name_);
+                F = OpenFileFromPack(definition_->truetype_name_);
             else
-                F = W_OpenLump(
-                    W_CheckNumForName(definition_->truetype_name_.c_str()));
+                F = LoadLumpAsFile(
+                    CheckLumpNumberForName(definition_->truetype_name_.c_str()));
 
             if (!F)
                 FatalError("LoadFontTTF: '%s' not found for font %s.\n",

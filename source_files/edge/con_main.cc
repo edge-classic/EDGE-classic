@@ -116,7 +116,7 @@ int ConsoleCommandReadme(char **argv, int argc)
     // Check well known readme filenames
     for (auto name : readme_names)
     {
-        readme_file = W_OpenPackFile(name);
+        readme_file = OpenFileFromPack(name);
         if (readme_file) break;
     }
 
@@ -126,9 +126,9 @@ int ConsoleCommandReadme(char **argv, int argc)
         // pack in the load order
         for (int i = data_files.size() - 1; i > 0; i--)
         {
-            std::string readme_check = data_files[i]->name;
+            std::string readme_check = data_files[i]->name_;
             epi::ReplaceExtension(readme_check, ".txt");
-            readme_file = W_OpenPackFile(readme_check);
+            readme_file = OpenFileFromPack(readme_check);
             if (readme_file) break;
         }
     }
@@ -136,10 +136,10 @@ int ConsoleCommandReadme(char **argv, int argc)
     // Check for WADINFO or README lumps
     if (!readme_file)
     {
-        if (W_IsLumpInAnyWad("WADINFO"))
-            readme_file = W_OpenLump("WADINFO");
-        else if (W_IsLumpInAnyWad("README"))
-            readme_file = W_OpenLump("README");
+        if (IsLumpInAnyWad("WADINFO"))
+            readme_file = LoadLumpAsFile("WADINFO");
+        else if (IsLumpInAnyWad("README"))
+            readme_file = LoadLumpAsFile("README");
     }
 
     // Check for an EDGEGAME lump or file and print (if it has text; these
@@ -148,13 +148,13 @@ int ConsoleCommandReadme(char **argv, int argc)
     {
         // Datafile at index 1 should always be either the IWAD or standalone
         // EPK
-        if (data_files[1]->wad)
+        if (data_files[1]->wad_)
         {
-            if (W_IsLumpInAnyWad("EDGEGAME"))
-                readme_file = W_OpenLump("EDGEGAME");
+            if (IsLumpInAnyWad("EDGEGAME"))
+                readme_file = LoadLumpAsFile("EDGEGAME");
         }
         else
-            readme_file = W_OpenPackFile("EDGEGAME.txt");
+            readme_file = OpenFileFromPack("EDGEGAME.txt");
     }
 
     if (!readme_file)
@@ -258,13 +258,13 @@ int ConsoleCommandCrc(char **argv, int argc)
 
     for (int i = 1; i < argc; i++)
     {
-        int lump = W_CheckNumForName(argv[i]);
+        int lump = CheckLumpNumberForName(argv[i]);
 
         if (lump == -1) { ConsolePrint("No such lump: %s\n", argv[i]); }
         else
         {
             int      length;
-            uint8_t *data = (uint8_t *)W_LoadLump(lump, &length);
+            uint8_t *data = (uint8_t *)LoadLumpIntoMemory(lump, &length);
 
             epi::CRC32 result;
 
@@ -307,7 +307,7 @@ int ConsoleCommandResetVars(char **argv, int argc)
 
 int ConsoleCommandShowFiles(char **argv, int argc)
 {
-    W_ShowFiles();
+    ShowLoadedFiles();
     return 0;
 }
 
@@ -334,7 +334,7 @@ int ConsoleCommandShowLumps(char **argv, int argc)
         }
     }
 
-    W_ShowLumps(for_file, match);
+    ShowLoadedLumps(for_file, match);
     return 0;
 }
 

@@ -650,7 +650,7 @@ void P_ActPlayerScream(MapObject *mo)
 
     sound = mo->info_->deathsound_;
 
-    if ((mo->health_ < -50) && (W_IsLumpInAnyWad("DSPDIEHI")))
+    if ((mo->health_ < -50) && (IsLumpInAnyWad("DSPDIEHI")))
     {
         // if the player dies and unclipped health is < -50%...
 

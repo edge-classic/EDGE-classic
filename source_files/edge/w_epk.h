@@ -16,47 +16,42 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef __W_EPK__
-#define __W_EPK__
+#pragma once
 
-#include "dm_defs.h"
+class DataFile;
 
-// EPI
-#include "file.h"
+class PackFile;
 
-class data_file_c;
+epi::File *PackOpenFile(PackFile *pack, const std::string &name);
 
-class pack_file_c;
+epi::File *PackOpenMatch(PackFile *pack, const std::string &name,
+                          const std::vector<std::string> &extensions);
 
-epi::File *Pack_FileOpen(pack_file_c *pack, const std::string &name);
+// Equivalent to IsLumpInPwad....doesn't care or check filetype itself
+int PackFindStem(PackFile *pack, const std::string &name);
 
-epi::File *Pack_OpenMatch(pack_file_c *pack, const std::string &name, const std::vector<std::string> &extensions);
-
-// Equivalent to W_IsLumpInPwad....doesn't care or check filetype itself
-int Pack_FindStem(pack_file_c *pack, const std::string &name);
-
-// Checks if exact filename is found in a pack; used to help load order determination
-bool Pack_FindFile(pack_file_c *pack, const std::string &name);
+// Checks if exact filename is found in a pack; used to help load order
+// determination
+bool PackFindFile(PackFile *pack, const std::string &name);
 
 // Check images/sound/etc that may override WAD-oriented lumps or definitions
-void Pack_ProcessSubstitutions(pack_file_c *pack, int pack_index);
+void PackProcessSubstitutions(PackFile *pack, int pack_index);
 
 // Process /hires folder contents
-void Pack_ProcessHiresSubstitutions(pack_file_c *pack, int pack_index);
+void PackProcessHiresSubstitutions(PackFile *pack, int pack_index);
 
-// Check /sprites directory for sprites to automatically add during W_InitSprites
-std::vector<std::string> Pack_GetSpriteList(pack_file_c *pack);
+// Check /sprites directory for sprites to automatically add during
+// InitializeSprites
+std::vector<std::string> PackGetSpriteList(PackFile *pack);
 
 // Only populate the pack directory; used for ad-hoc folder/EPK checks
-void Pack_PopulateOnly(data_file_c *df);
+void PackPopulateOnly(DataFile *df);
 
 // Check pack for valid IWADs. Return associated game_checker index if found
-int Pack_CheckForIWADs(data_file_c *df);
+int PackCheckForIwads(DataFile *df);
 
 // Populate pack directory and process appropriate files (COAL, DDF, etc)
-void Pack_ProcessAll(data_file_c *df, size_t file_index);
-
-#endif /* __W_PK3__ */
+void PackProcessAll(DataFile *df, size_t file_index);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

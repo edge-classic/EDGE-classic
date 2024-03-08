@@ -93,7 +93,7 @@ bool StartupOpal(void)
 
     if (opl_instrument_bank.s_ == "GENMIDI")
     {
-        data = W_OpenPackOrLumpInMemory("GENMIDI", {".op2"}, &length);
+        data = OpenPackOrLumpInMemory("GENMIDI", {".op2"}, &length);
         if (!data)
         {
             LogDebug("no GENMIDI lump !\n");

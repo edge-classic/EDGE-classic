@@ -531,8 +531,8 @@ MapDefinition *MapDefinitionContainer::Lookup(const char *refname)
     //  levels.ddf entry.
 
     // 1. check if the actual map lump exists
-    if (W_CheckNumForName(refname) >= 0 &&
-        W_GetKindForLump(W_CheckNumForName(refname)) == 3)  // LMKIND_Marker
+    if (CheckLumpNumberForName(refname) >= 0 &&
+        GetKindForLump(CheckLumpNumberForName(refname)) == 3)  // kLumpMarker
     {
         // 2. make a levels.ddf entry
         MapDefinition *temp_level;

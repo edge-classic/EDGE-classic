@@ -34,7 +34,7 @@
 #include "r_state.h"
 #include "w_epk.h"
 
-struct texturedef_s;
+struct TextureDefinition;
 
 // the transparent pixel value we use
 constexpr uint8_t kTransparentPixelIndex = 247;
@@ -135,7 +135,7 @@ class Image
         // case kImageSourceTexture:
         struct
         {
-            struct texturedef_s *tdef;
+            struct TextureDefinition *tdef;
         } texture;
 
         // case kImageSourceDummy:
@@ -247,9 +247,9 @@ void AnimationTicker(void);
 void DeleteAllImages(void);
 
 void         CreateFlats(std::vector<int> &lumps);
-void         CreateTextures(struct texturedef_s **defs, int number);
+void         CreateTextures(struct TextureDefinition **defs, int number);
 const Image *CreateSprite(const char *name, int lump, bool is_weapon);
-const Image *CreatePackSprite(std::string packname, pack_file_c *pack,
+const Image *CreatePackSprite(std::string packname, PackFile *pack,
                               bool is_weapon);
 void         CreateUserImages(void);
 void         ImageAddTxHx(int lump, const char *name, bool hires);

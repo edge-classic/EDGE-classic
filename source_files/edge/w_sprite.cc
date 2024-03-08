@@ -28,59 +28,54 @@
 // -AJA- 1999/07/12: Now uses colmap.ddf.
 //
 
+#include "w_sprite.h"
 
+#include <algorithm>  // sort
 
-// EPI
-#include "endianess.h"
-#include "filesystem.h"
-#include "str_util.h"
-#include "str_compare.h"
+#include "dm_data.h"  // patch_t
 #include "e_main.h"
 #include "e_search.h"
+#include "endianess.h"
+#include "filesystem.h"
+#include "p_local.h"  // map_object_list_head
 #include "r_image.h"
 #include "r_things.h"
-#include "w_sprite.h"
-#include "w_files.h"
+#include "str_compare.h"
+#include "str_util.h"
 #include "w_epk.h"
+#include "w_files.h"
 #include "w_wad.h"
-
-#include "p_local.h" // map_object_list_head
-
-#include "dm_data.h" // patch_t
-
-#include <algorithm> // sort
 
 //
 // A sprite definition: a number of animation frames.
 //
-class spritedef_c
+class SpriteDefinition
 {
-  public:
+   public:
     // four letter sprite name (e.g. "TROO").
-    std::string name;
+    std::string name_;
 
     // total number of frames.  Zero for missing sprites.
-    int numframes;
+    int total_frames_;
 
     // sprite frames.
-    spriteframe_c *frames;
+    SpriteFrame *frames_;
 
-  public:
-    spritedef_c(std::string _name) : numframes(0), frames(nullptr)
+   public:
+    SpriteDefinition(std::string name) : total_frames_(0), frames_(nullptr)
     {
-        name = _name;
+        name_ = name;
     }
 
-    ~spritedef_c()
+    ~SpriteDefinition()
     {
         // TODO: free the frames
     }
 
     bool HasWeapon() const
     {
-        for (int i = 0; i < numframes; i++)
-            if (frames[i].is_weapon)
-                return true;
+        for (int i = 0; i < total_frames_; i++)
+            if (frames_[i].is_weapon_) return true;
 
         return false;
     }
@@ -97,78 +92,74 @@ class spritedef_c
 //
 
 // Sprite definitions
-static spritedef_c **sprites;
-static int           numsprites = 0;
+static SpriteDefinition **sprites;
+static int                sprite_count = 0;
 
 // Sorted map of sprite defs.  Only used during initialisation.
-static spritedef_c **sprite_map = nullptr;
-static int           sprite_map_len;
+static SpriteDefinition **sprite_map = nullptr;
+static int                sprite_map_length;
 
 //
 // SPRITE LOADING FUNCTIONS
 //
 
-static spriteframe_c *WhatFrame(spritedef_c *def, const char *name, int pos)
+static SpriteFrame *WhatFrame(SpriteDefinition *def, const char *name, int pos)
 {
     char frame_ch = name[pos];
 
     int index;
 
-    if ('A' <= frame_ch && frame_ch <= 'Z')
-    {
-        index = (frame_ch - 'A');
-    }
+    if ('A' <= frame_ch && frame_ch <= 'Z') { index = (frame_ch - 'A'); }
     else
         switch (frame_ch)
         {
-        case '[':
-            index = 26;
-            break;
-        case '\\':
-            index = 27;
-            break;
-        case ']':
-            index = 28;
-            break;
-        case '^':
-            index = 29;
-            break;
-        case '_':
-            index = 30;
-            break;
+            case '[':
+                index = 26;
+                break;
+            case '\\':
+                index = 27;
+                break;
+            case ']':
+                index = 28;
+                break;
+            case '^':
+                index = 29;
+                break;
+            case '_':
+                index = 30;
+                break;
 
-        default:
-            LogWarning("Sprite lump %s has illegal frame.\n", name);
-            return nullptr;
+            default:
+                LogWarning("Sprite lump %s has illegal frame.\n", name);
+                return nullptr;
         }
 
     SYS_ASSERT(index >= 0);
 
     // ignore frames larger than what is used in DDF
-    if (index >= def->numframes)
-        return nullptr;
+    if (index >= def->total_frames_) return nullptr;
 
-    return &def->frames[index];
+    return &def->frames_[index];
 }
 
-static void SetExtendedRots(spriteframe_c *frame)
+static void SetExtendedRots(SpriteFrame *frame)
 {
-    frame->rots = 16;
+    frame->rotations_ = 16;
 
     for (int i = 7; i >= 1; i--)
     {
-        frame->images[2 * i] = frame->images[i];
-        frame->flip[2 * i]   = frame->flip[i];
+        frame->images_[2 * i] = frame->images_[i];
+        frame->flip_[2 * i]   = frame->flip_[i];
     }
 
     for (int k = 1; k <= 15; k += 2)
     {
-        frame->images[k] = nullptr;
-        frame->flip[k]   = 0;
+        frame->images_[k] = nullptr;
+        frame->flip_[k]   = 0;
     }
 }
 
-static int WhatRot(spriteframe_c *frame, const char *name, int pos)
+static int WhatRot(SpriteFrame *frame, const char *name, int pos)
 {
     char rot_ch = name[pos];
 
@@ -186,115 +177,107 @@ static int WhatRot(spriteframe_c *frame, const char *name, int pos)
         return -1;
     }
 
-    if (frame->rots == 0)
-        frame->rots = 1;
+    if (frame->rotations_ == 0) frame->rotations_ = 1;
 
-    if (rot >= 1 && frame->rots == 1)
-        frame->rots = 8;
+    if (rot >= 1 && frame->rotations_ == 1) frame->rotations_ = 8;
 
-    if (rot >= 9 && frame->rots != 16)
-        SetExtendedRots(frame);
+    if (rot >= 9 && frame->rotations_ != 16) SetExtendedRots(frame);
 
-    switch (frame->rots)
+    switch (frame->rotations_)
     {
-    case 1:
-        return 0;
+        case 1:
+            return 0;
 
-    case 8:
-        return rot - 1;
+        case 8:
+            return rot - 1;
 
-    case 16:
-        if (rot >= 9)
-            return 1 + (rot - 9) * 2;
-        else
-            return 0 + (rot - 1) * 2;
+        case 16:
+            if (rot >= 9)
+                return 1 + (rot - 9) * 2;
+            else
+                return 0 + (rot - 1) * 2;
 
-    default:
-        FatalError("INTERNAL ERROR: frame->rots = %d\n", frame->rots);
-        return -1; /* NOT REACHED */
+        default:
+            FatalError("INTERNAL ERROR: frame->rotations_ = %d\n",
+                       frame->rotations_);
+            return -1; /* NOT REACHED */
     }
 }
 
-static void InstallSpriteLump(spritedef_c *def, int lump, const char *lumpname, int pos, uint8_t flip)
+static void InstallSpriteLump(SpriteDefinition *def, int lump,
+                              const char *lumpname, int pos, uint8_t flip)
 {
-    spriteframe_c *frame = WhatFrame(def, lumpname, pos);
-    if (!frame)
-        return;
+    SpriteFrame *frame = WhatFrame(def, lumpname, pos);
+    if (!frame) return;
 
     // don't disturb any frames already loaded
-    if (frame->finished)
-        return;
+    if (frame->finished_) return;
 
     int rot = WhatRot(frame, lumpname, pos + 1);
-    if (rot < 0)
-        return;
+    if (rot < 0) return;
 
     SYS_ASSERT(0 <= rot && rot < 16);
 
-    if (frame->images[rot])
+    if (frame->images_[rot])
     {
         // LogWarning("Sprite %s has two lumps mapped to it (frame %c).\n",
         // lumpname, lumpname[pos]);
         return;
     }
 
-    frame->images[rot] = CreateSprite(lumpname, lump, frame->is_weapon);
+    frame->images_[rot] = CreateSprite(lumpname, lump, frame->is_weapon_);
 
-    frame->flip[rot] = flip;
+    frame->flip_[rot] = flip;
 }
 
-static void InstallSpritePack(spritedef_c *def, pack_file_c *pack, std::string spritebase, std::string packname,
+static void InstallSpritePack(SpriteDefinition *def, PackFile *pack,
+                              std::string spritebase, std::string packname,
                               int pos, uint8_t flip)
 {
-    spriteframe_c *frame = WhatFrame(def, spritebase.c_str(), pos);
-    if (!frame)
-        return;
+    SpriteFrame *frame = WhatFrame(def, spritebase.c_str(), pos);
+    if (!frame) return;
 
     // don't disturb any frames already loaded
-    if (frame->finished)
-        return;
+    if (frame->finished_) return;
 
     int rot = WhatRot(frame, spritebase.c_str(), pos + 1);
-    if (rot < 0)
-        return;
+    if (rot < 0) return;
 
     SYS_ASSERT(0 <= rot && rot < 16);
 
-    if (frame->images[rot])
+    if (frame->images_[rot])
     {
         // LogWarning("Sprite %s has two lumps mapped to it (frame %c).\n",
         // lumpname, lumpname[pos]);
         return;
     }
 
-    frame->images[rot] = CreatePackSprite(packname, pack, frame->is_weapon);
+    frame->images_[rot] = CreatePackSprite(packname, pack, frame->is_weapon_);
 
-    frame->flip[rot] = flip;
+    frame->flip_[rot] = flip;
 }
 
-static void InstallSpriteImage(spritedef_c *def, const Image *img, const char *img_name, int pos, uint8_t flip)
+static void InstallSpriteImage(SpriteDefinition *def, const Image *img,
+                               const char *img_name, int pos, uint8_t flip)
 {
-    spriteframe_c *frame = WhatFrame(def, img_name, pos);
-    if (!frame)
-        return;
+    SpriteFrame *frame = WhatFrame(def, img_name, pos);
+    if (!frame) return;
 
     // don't disturb any frames already loaded
-    if (frame->finished)
-        return;
+    if (frame->finished_) return;
 
     int rot = WhatRot(frame, img_name, pos + 1);
-    if (rot < 0)
-        return;
+    if (rot < 0) return;
 
-    if (frame->images[rot])
+    if (frame->images_[rot])
     {
         // LogWarning("Sprite %s has two images mapped to it (frame %c)\n",
         // img_name, img_name[pos]);
         return;
     }
 
-    frame->images[rot] = img;
-    frame->flip[rot]   = flip;
+    frame->images_[rot] = img;
+    frame->flip_[rot]   = flip;
 }
 
 //
@@ -302,15 +285,13 @@ static void InstallSpriteImage(spritedef_c *def, const Image *img, const char *i
 //
 static void FillSpriteFrames(int file)
 {
-    if (data_files[file]->wad)
+    if (data_files[file]->wad_)
     {
-        std::vector<int> *lumps = W_GetSpriteList(file);
-        if (lumps == nullptr)
-            return;
+        std::vector<int> *lumps = GetSpriteListForWad(file);
+        if (lumps == nullptr) return;
 
         int lumpnum = (int)lumps->size();
-        if (lumpnum == 0)
-            return;
+        if (lumpnum == 0) return;
 
         // check all lumps for prefixes matching the ones in the sprite
         // list.  Both lists have already been sorted to make this as fast
@@ -318,21 +299,23 @@ static void FillSpriteFrames(int file)
 
         int S = 0, L = 0;
 
-        for (; S < sprite_map_len; S++)
+        for (; S < sprite_map_length; S++)
         {
-            std::string sprname = sprite_map[S]->name;
+            std::string sprname = sprite_map[S]->name_;
             size_t      spr_len = sprname.size();
             for (; L < lumpnum; L++)
             {
-                const char *lumpname = W_GetLumpName((*lumps)[L]);
+                const char *lumpname = GetLumpNameFromIndex((*lumps)[L]);
 
-                if (strlen(lumpname) != spr_len + 2 && strlen(lumpname) != spr_len + 4)
+                if (strlen(lumpname) != spr_len + 2 &&
+                    strlen(lumpname) != spr_len + 4)
                 {
                     continue;
                 }
 
                 // ignore model skins
-                if (strlen(lumpname) == spr_len + 4 && lumpname[spr_len] == 'S' && lumpname[spr_len + 1] == 'K' &&
+                if (strlen(lumpname) == spr_len + 4 &&
+                    lumpname[spr_len] == 'S' && lumpname[spr_len + 1] == 'K' &&
                     lumpname[spr_len + 2] == 'N')
                 {
                     continue;
@@ -342,52 +325,62 @@ static void FillSpriteFrames(int file)
                     continue;
 
                 // we have a match
-                InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, spr_len, 0);
+                InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, spr_len,
+                                  0);
 
                 if (strlen(lumpname) == spr_len + 4)
-                    InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname, spr_len + 2, 1);
+                    InstallSpriteLump(sprite_map[S], (*lumps)[L], lumpname,
+                                      spr_len + 2, 1);
             }
             L = 0;
         }
     }
-    else if (data_files[file]->pack)
+    else if (data_files[file]->pack_)
     {
-        std::vector<std::string> packsprites = Pack_GetSpriteList(data_files[file]->pack);
+        std::vector<std::string> packsprites =
+            PackGetSpriteList(data_files[file]->pack_);
         if (!packsprites.empty())
         {
             std::sort(packsprites.begin(), packsprites.end());
 
             size_t S = 0, L = 0;
 
-            for (; S < (size_t)sprite_map_len; S++)
+            for (; S < (size_t)sprite_map_length; S++)
             {
-                std::string sprname = sprite_map[S]->name;
+                std::string sprname = sprite_map[S]->name_;
                 size_t      spr_len = sprname.size();
                 for (; L < packsprites.size(); L++)
                 {
                     std::string spritebase;
-                    epi::TextureNameFromFilename(spritebase, epi::GetStem(packsprites[L]));
+                    epi::TextureNameFromFilename(spritebase,
+                                                 epi::GetStem(packsprites[L]));
 
-                    if (spritebase.size() != spr_len + 2 && spritebase.size() != spr_len + 4)
+                    if (spritebase.size() != spr_len + 2 &&
+                        spritebase.size() != spr_len + 4)
                     {
                         continue;
                     }
 
                     // ignore model skins
-                    if (spritebase.size() == spr_len + 4 && spritebase[spr_len] == 'S' &&
-                        spritebase[spr_len + 1] == 'K' && spritebase[spr_len + 2] == 'N')
+                    if (spritebase.size() == spr_len + 4 &&
+                        spritebase[spr_len] == 'S' &&
+                        spritebase[spr_len + 1] == 'K' &&
+                        spritebase[spr_len + 2] == 'N')
                     {
                         continue;
                     }
 
-                    if (epi::StringCompareMax(sprname, spritebase, spr_len) != 0)
+                    if (epi::StringCompareMax(sprname, spritebase, spr_len) !=
+                        0)
                         continue;
 
                     // we have a match
-                    InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L], spr_len, 0);
+                    InstallSpritePack(sprite_map[S], data_files[file]->pack_,
+                                      spritebase, packsprites[L], spr_len, 0);
 
                     if (spritebase.size() == spr_len + 4)
-                        InstallSpritePack(sprite_map[S], data_files[file]->pack, spritebase, packsprites[L],
+                        InstallSpritePack(sprite_map[S], data_files[file]->pack_,
+                                          spritebase, packsprites[L],
                                           spr_len + 2, 1);
                 }
                 L = 0;
@@ -403,32 +396,32 @@ static void FillSpriteFrames(int file)
 //
 static void FillSpriteFramesUser()
 {
-    int             img_num;
+    int           img_num;
     const Image **images = GetUserSprites(&img_num);
 
-    if (img_num == 0)
-        return;
+    if (img_num == 0) return;
 
     SYS_ASSERT(images);
 
     int S = 0, L = 0;
 
-    for (; S < sprite_map_len; S++)
+    for (; S < sprite_map_length; S++)
     {
-        std::string sprname = sprite_map[S]->name;
+        std::string sprname = sprite_map[S]->name_;
         size_t      spr_len = sprname.size();
         for (; L < img_num; L++)
         {
             const char *img_name = images[L]->name_.c_str();
 
-            if (strlen(img_name) != spr_len + 2 && strlen(img_name) != spr_len + 4)
+            if (strlen(img_name) != spr_len + 2 &&
+                strlen(img_name) != spr_len + 4)
             {
                 continue;
             }
 
             // ignore model skins
-            if (strlen(img_name) == spr_len + 4 && img_name[spr_len] == 'S' && img_name[spr_len + 1] == 'K' &&
-                img_name[spr_len + 2] == 'N')
+            if (strlen(img_name) == spr_len + 4 && img_name[spr_len] == 'S' &&
+                img_name[spr_len + 1] == 'K' && img_name[spr_len + 2] == 'N')
             {
                 continue;
             }
@@ -444,31 +437,39 @@ static void FillSpriteFramesUser()
                 Image     *change_img   = (Image *)images[L];
                 epi::File *offset_check = nullptr;
                 if (images[L]->source_.graphic.packfile_name)
-                    offset_check = W_OpenPackFile(images[L]->source_.graphic.packfile_name);
+                    offset_check = OpenFileFromPack(
+                        images[L]->source_.graphic.packfile_name);
                 else
-                    offset_check = W_OpenLump(images[L]->source_.graphic.lump);
+                    offset_check = LoadLumpAsFile(images[L]->source_.graphic.lump);
 
                 if (!offset_check)
-                    FatalError("FillSpriteFramesUser: Error loading %s!\n", images[L]->name_.c_str());
+                    FatalError("FillSpriteFramesUser: Error loading %s!\n",
+                               images[L]->name_.c_str());
 
                 uint8_t header[32];
                 memset(header, 255, sizeof(header));
                 offset_check->Read(header, sizeof(header));
                 delete offset_check;
 
-                const patch_t *pat   = (patch_t *)header;
+                const patch_t *pat    = (patch_t *)header;
                 change_img->offset_x_ = AlignedLittleEndianS16(pat->leftoffset);
                 change_img->offset_y_ = AlignedLittleEndianS16(pat->topoffset);
                 // adjust sprite offsets so that (0,0) is normal
                 if (sprite_map[S]->HasWeapon())
                 {
-                    change_img->offset_x_ += (320.0f / 2.0f - change_img->actual_width_ / 2.0f); // loss of accuracy
-                    change_img->offset_y_ += (200.0f - 32.0f - change_img->actual_height_);
+                    change_img->offset_x_ +=
+                        (320.0f / 2.0f -
+                         change_img->actual_width_ / 2.0f);  // loss of accuracy
+                    change_img->offset_y_ +=
+                        (200.0f - 32.0f - change_img->actual_height_);
                 }
                 else
                 {
-                    // rim->offset_x_ -= rim->actual_width_ / 2;   // loss of accuracy
-                    change_img->offset_x_ -= ((float)change_img->actual_width_) / 2.0f; // Lobo 2023: dancing eye fix
+                    // rim->offset_x_ -= rim->actual_width_ / 2;   // loss of
+                    // accuracy
+                    change_img->offset_x_ -=
+                        ((float)change_img->actual_width_) /
+                        2.0f;  // Lobo 2023: dancing eye fix
                     change_img->offset_y_ -= change_img->actual_height_;
                 }
             }
@@ -477,7 +478,8 @@ static void FillSpriteFramesUser()
             InstallSpriteImage(sprite_map[S], images[L], img_name, spr_len, 0);
 
             if (strlen(img_name) == spr_len + 4)
-                InstallSpriteImage(sprite_map[S], images[L], img_name, spr_len + 2, 1);
+                InstallSpriteImage(sprite_map[S], images[L], img_name,
+                                   spr_len + 2, 1);
         }
         L = 0;
     }
@@ -489,18 +491,18 @@ static void MarkCompletedFrames(void)
 {
     int src, dst;
 
-    for (src = dst = 0; src < sprite_map_len; src++)
+    for (src = dst = 0; src < sprite_map_length; src++)
     {
-        spritedef_c *def = sprite_map[src];
+        SpriteDefinition *def = sprite_map[src];
 
         int finish_num = 0;
 
-        for (int f = 0; f < def->numframes; f++)
+        for (int f = 0; f < def->total_frames_; f++)
         {
-            char           frame_ch = 'A' + f;
-            spriteframe_c *frame    = def->frames + f;
+            char         frame_ch = 'A' + f;
+            SpriteFrame *frame    = def->frames_ + f;
 
-            if (frame->finished)
+            if (frame->finished_)
             {
                 finish_num++;
                 continue;
@@ -509,63 +511,63 @@ static void MarkCompletedFrames(void)
             int rot_count = 0;
 
             // check if all image pointers are nullptr
-            for (int i = 0; i < frame->rots; i++)
-                rot_count += frame->images[i] ? 1 : 0;
+            for (int i = 0; i < frame->rotations_; i++)
+                rot_count += frame->images_[i] ? 1 : 0;
 
-            if (rot_count == 0)
-                continue;
+            if (rot_count == 0) continue;
 
-            frame->finished = 1;
+            frame->finished_ = 1;
             finish_num++;
 
-            if (rot_count < frame->rots)
+            if (rot_count < frame->rotations_)
             {
-                LogWarning("Sprite %s:%c is missing rotations (%d of %d).\n", def->name.c_str(), frame_ch,
-                          frame->rots - rot_count, frame->rots);
+                LogWarning("Sprite %s:%c is missing rotations (%d of %d).\n",
+                           def->name_.c_str(), frame_ch,
+                           frame->rotations_ - rot_count, frame->rotations_);
 
                 // try to fix cases where some dumbass used A1 instead of A0
-                if (rot_count == 1 && !frame->is_weapon)
-                    frame->rots = 1;
+                if (rot_count == 1 && !frame->is_weapon_) frame->rotations_ = 1;
             }
         }
 
         // remove complete sprites from sprite_map
-        if (finish_num == def->numframes)
-            continue;
+        if (finish_num == def->total_frames_) continue;
 
         sprite_map[dst++] = def;
     }
 
-    sprite_map_len = dst;
+    sprite_map_length = dst;
 }
 
 // show warnings for missing patches
-static void CheckSpriteFrames(spritedef_c *def)
+static void CheckSpriteFrames(SpriteDefinition *def)
 {
     int missing = 0;
 
-    for (int i = 0; i < def->numframes; i++)
-        if (!def->frames[i].finished)
+    for (int i = 0; i < def->total_frames_; i++)
+        if (!def->frames_[i].finished_)
         {
-            LogDebug("Frame %d/%d in sprite %s is not finished\n", 1 + i, def->numframes, def->name.c_str());
+            LogDebug("Frame %d/%d in sprite %s is not finished\n", 1 + i,
+                     def->total_frames_, def->name_.c_str());
             missing++;
         }
 
-    if (missing > 0 && missing < def->numframes)
-        LogWarning("Missing %d frames in sprite: %s\n", missing, def->name.c_str());
+    if (missing > 0 && missing < def->total_frames_)
+        LogWarning("Missing %d frames in sprite: %s\n", missing,
+                   def->name_.c_str());
 
     // free some memory for completely missing sprites
-    if (missing == def->numframes)
+    if (missing == def->total_frames_)
     {
-        delete[] def->frames;
+        delete[] def->frames_;
 
-        def->numframes = 0;
-        def->frames    = nullptr;
+        def->total_frames_ = 0;
+        def->frames_       = nullptr;
     }
 }
 
 //
-// W_InitSprites
+// InitializeSprites
 //
 // Use the sprite lists in the WAD (S_START..S_END) to flesh out the
 // known sprite definitions (global `sprites' array, created while
@@ -575,29 +577,26 @@ static void CheckSpriteFrames(spritedef_c *def)
 //
 // -AJA- 2001/02/01: rewrote this stuff.
 //
-void W_InitSprites(void)
+void InitializeSprites(void)
 {
-    numsprites = (int)ddf_sprite_names.size();
+    sprite_count = (int)ddf_sprite_names.size();
 
-    if (numsprites <= 1)
-        FatalError("Missing sprite definitions !!\n");
+    if (sprite_count <= 1) FatalError("Missing sprite definitions !!\n");
 
     E_ProgressMessage("Finding sprite patches...");
 
-    LogPrint("W_InitSprites: Finding sprite patches\n");
+    LogPrint("InitializeSprites: Finding sprite patches\n");
 
     // 1. Allocate sprite definitions (ignore nullptr sprite, #0)
 
-    sprites           = new spritedef_c *[numsprites];
+    sprites    = new SpriteDefinition *[sprite_count];
     sprites[0] = nullptr;
 
-    for (int i = 1; i < numsprites; i++)
+    for (int i = 1; i < sprite_count; i++)
     {
         std::string name = ddf_sprite_names[i];
 
-        // SYS_ASSERT(strlen(name) == 4);
-
-        sprites[i] = new spritedef_c(name);
+        sprites[i] = new SpriteDefinition(name);
     }
 
     // 2. Scan the state table, count frames
@@ -606,27 +605,25 @@ void W_InitSprites(void)
     {
         State *st = &states[stnum];
 
-        if (st->flags & kStateFrameFlagModel)
-            continue;
+        if (st->flags & kStateFrameFlagModel) continue;
 
-        if (st->sprite == 0)
-            continue;
+        if (st->sprite == 0) continue;
 
-        spritedef_c *def = sprites[st->sprite];
+        SpriteDefinition *def = sprites[st->sprite];
 
-        if (def->numframes < st->frame + 1)
-            def->numframes = st->frame + 1;
+        if (def->total_frames_ < st->frame + 1)
+            def->total_frames_ = st->frame + 1;
     }
 
     // 3. Allocate frames
 
-    for (int k = 1; k < numsprites; k++)
+    for (int k = 1; k < sprite_count; k++)
     {
-        spritedef_c *def = sprites[k];
+        SpriteDefinition *def = sprites[k];
 
-        SYS_ASSERT(def->numframes > 0);
+        SYS_ASSERT(def->total_frames_ > 0);
 
-        def->frames = new spriteframe_c[def->numframes];
+        def->frames_ = new SpriteFrame[def->total_frames_];
     }
 
     // 4. Mark weapon frames
@@ -635,30 +632,27 @@ void W_InitSprites(void)
     {
         State *st = &states[st_kk];
 
-        if (st->flags & kStateFrameFlagModel)
-            continue;
+        if (st->flags & kStateFrameFlagModel) continue;
 
-        if (st->sprite == 0)
-            continue;
+        if (st->sprite == 0) continue;
 
-        spritedef_c *def = sprites[st->sprite];
+        SpriteDefinition *def = sprites[st->sprite];
 
         if (st->flags & kStateFrameFlagWeapon)
-            def->frames[st->frame].is_weapon = true;
+            def->frames_[st->frame].is_weapon_ = true;
     }
 
     // 5. Fill in frames using wad lumps + images.ddf
 
     // create a sorted list (ignore nullptr entry, #0)
-    sprite_map_len = numsprites - 1;
+    sprite_map_length = sprite_count - 1;
 
-    sprite_map = new spritedef_c *[sprite_map_len];
+    sprite_map = new SpriteDefinition *[sprite_map_length];
 
-    for (int n = 0; n < sprite_map_len; n++)
-        sprite_map[n] = sprites[n + 1];
+    for (int n = 0; n < sprite_map_length; n++) sprite_map[n] = sprites[n + 1];
 
-#define CMP(a, b) (epi::StringCompare(a->name, b->name) < 0)
-    QSORT(spritedef_c *, sprite_map, sprite_map_len, CUTOFF);
+#define CMP(a, b) (epi::StringCompare(a->name_, b->name_) < 0)
+    QSORT(SpriteDefinition *, sprite_map, sprite_map_length, CUTOFF);
 #undef CMP
 
     // iterate over each file.  Order is important, we must go from
@@ -667,27 +661,23 @@ void W_InitSprites(void)
     //
     // NOTE WELL: override granularity is single frames.
 
-    int numfiles = W_GetNumFiles();
+    int numfiles = GetTotalFiles();
 
     FillSpriteFramesUser();
 
-    for (int file = numfiles - 1; file >= 0; file--)
-    {
-        FillSpriteFrames(file);
-    }
+    for (int file = numfiles - 1; file >= 0; file--) { FillSpriteFrames(file); }
 
     MarkCompletedFrames();
 
     // 6. Perform checks and free stuff
 
-    for (int j = 1; j < numsprites; j++)
-        CheckSpriteFrames(sprites[j]);
+    for (int j = 1; j < sprite_count; j++) CheckSpriteFrames(sprites[j]);
 
     delete[] sprite_map;
     sprite_map = nullptr;
 }
 
-bool W_CheckSpritesExist(const std::vector<StateRange> &group)
+bool CheckSpritesExist(const std::vector<StateRange> &group)
 {
     for (int g = 0; g < (int)group.size(); g++)
     {
@@ -695,11 +685,9 @@ bool W_CheckSpritesExist(const std::vector<StateRange> &group)
 
         for (int i = range.first; i <= range.last; i++)
         {
-            if (states[i].sprite == 0)
-                continue;
+            if (states[i].sprite == 0) continue;
 
-            if (sprites[states[i].sprite]->frames)
-                return true;
+            if (sprites[states[i].sprite]->frames_) return true;
 
             // -AJA- only check one per group.  It _should_ check them all,
             //       however this maintains compatibility.
@@ -710,77 +698,71 @@ bool W_CheckSpritesExist(const std::vector<StateRange> &group)
     return false;
 }
 
-spriteframe_c *W_GetSpriteFrame(int spr_num, int framenum)
+SpriteFrame *GetSpriteFrame(int spr_num, int framenum)
 {
     // spr_num comes from the 'sprite' field of State, and
     // is also an index into ddf_sprite_names vector.
 
     SYS_ASSERT(spr_num > 0);
-    SYS_ASSERT(spr_num < numsprites);
+    SYS_ASSERT(spr_num < sprite_count);
     SYS_ASSERT(framenum >= 0);
 
-    spritedef_c *def = sprites[spr_num];
+    SpriteDefinition *def = sprites[spr_num];
 
-    if (framenum >= def->numframes)
-        return nullptr;
+    if (framenum >= def->total_frames_) return nullptr;
 
-    spriteframe_c *frame = &def->frames[framenum];
+    SpriteFrame *frame = &def->frames_[framenum];
 
-    if (!frame || !frame->finished)
-        return nullptr;
+    if (!frame || !frame->finished_) return nullptr;
 
     return frame;
 }
 
-void W_PrecacheSprites(void)
+void PrecacheSprites(void)
 {
-    SYS_ASSERT(numsprites > 1);
+    SYS_ASSERT(sprite_count > 1);
 
-    uint8_t *sprite_present = new uint8_t[numsprites];
-    memset(sprite_present, 0, numsprites);
+    uint8_t *sprite_present = new uint8_t[sprite_count];
+    memset(sprite_present, 0, sprite_count);
 
     for (MapObject *mo = map_object_list_head; mo; mo = mo->next_)
     {
         SYS_ASSERT(mo->state_);
 
-        if (mo->state_->sprite < 1 || mo->state_->sprite >= numsprites)
+        if (mo->state_->sprite < 1 || mo->state_->sprite >= sprite_count)
             continue;
 
         sprite_present[mo->state_->sprite] = 1;
     }
 
-    for (int i = 1; i < numsprites; i++) // ignore 0
+    for (int i = 1; i < sprite_count; i++)  // ignore 0
     {
-        spritedef_c *def = sprites[i];
+        SpriteDefinition *def = sprites[i];
 
         const Image *cur_image;
-        const Image *last_image = nullptr; // an optimisation
+        const Image *last_image = nullptr;  // an optimisation
 
-        if (def->numframes == 0)
-            continue;
+        if (def->total_frames_ == 0) continue;
 
         // Note: all weapon sprites are pre-cached
 
-        if (!(sprite_present[i] || def->HasWeapon()))
-            continue;
+        if (!(sprite_present[i] || def->HasWeapon())) continue;
 
         /* Lobo 2022: info overload. Shut up.
                 LogDebug("Precaching sprite: %s\n", def->name);
         */
 
-        SYS_ASSERT(def->frames);
+        SYS_ASSERT(def->frames_);
 
-        for (int fr = 0; fr < def->numframes; fr++)
+        for (int fr = 0; fr < def->total_frames_; fr++)
         {
-            if (!def->frames[fr].finished)
-                continue;
+            if (!def->frames_[fr].finished_) continue;
 
             for (int rot = 0; rot < 16; rot++)
             {
-                cur_image = def->frames[fr].images[rot];
+                cur_image = def->frames_[fr].images_[rot];
 
-                if (cur_image == nullptr || cur_image == last_image)
-                    continue;
+                if (cur_image == nullptr || cur_image == last_image) continue;
 
                 ImagePrecache(cur_image);
 

@@ -102,7 +102,7 @@ void ChangeMusic(int entry_number, bool loop)
 
         case kDDFMusicDataPackage:
         {
-            F = W_OpenPackFile(play->info_);
+            F = OpenFileFromPack(play->info_);
             if (!F)
             {
                 LogWarning("ChangeMusic: PK3 entry '%s' not found.\n",
@@ -114,7 +114,7 @@ void ChangeMusic(int entry_number, bool loop)
 
         case kDDFMusicDataLump:
         {
-            int lump = W_CheckNumForName(play->info_.c_str());
+            int lump = CheckLumpNumberForName(play->info_.c_str());
             if (lump < 0)
             {
                 LogWarning("ChangeMusic: LUMP '%s' not found.\n",
@@ -122,7 +122,7 @@ void ChangeMusic(int entry_number, bool loop)
                 return;
             }
 
-            F = W_OpenLump(lump);
+            F = LoadLumpAsFile(lump);
             break;
         }
 

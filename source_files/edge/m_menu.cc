@@ -1347,7 +1347,7 @@ static void CreateEpisodeMenu(void)
 
         if (g->firstmap_.empty()) continue;
 
-        if (W_CheckNumForName(g->firstmap_.c_str()) == -1) continue;
+        if (CheckLumpNumberForName(g->firstmap_.c_str()) == -1) continue;
 
         EpisodeMenu[e].status          = 1;
         EpisodeMenu[e].select_function = MenuEpisode;
@@ -1655,7 +1655,7 @@ static void QuitResponse(int ch)
             do {
                 sprintf(refname, "QuitSnd%d", i + 1);
                 sprintf(sound, "DS%s", language[refname]);
-                if (W_CheckNumForName(sound) != -1)
+                if (CheckLumpNumberForName(sound) != -1)
                 {
                     StartSoundEffect(sfxdefs.GetEffect(language[refname]));
                     break;
@@ -3305,25 +3305,25 @@ void MenuInitialize(void)
     // Check for custom menu graphics in pwads:
     // If we have them then use them instead of our
     //  text-based ones.
-    if (W_IsLumpInPwad("M_NEWG")) custom_MenuMain = true;
+    if (IsLumpInPwad("M_NEWG")) custom_MenuMain = true;
 
-    if (W_IsLumpInPwad("M_LOADG")) custom_MenuMain = true;
+    if (IsLumpInPwad("M_LOADG")) custom_MenuMain = true;
 
-    if (W_IsLumpInPwad("M_SAVEG")) custom_MenuMain = true;
+    if (IsLumpInPwad("M_SAVEG")) custom_MenuMain = true;
 
-    if (W_IsLumpInPwad("M_EPISOD")) custom_MenuEpisode = true;
+    if (IsLumpInPwad("M_EPISOD")) custom_MenuEpisode = true;
 
-    if (W_IsLumpInPwad("M_EPI1")) custom_MenuEpisode = true;
+    if (IsLumpInPwad("M_EPI1")) custom_MenuEpisode = true;
 
-    if (W_IsLumpInPwad("M_EPI2")) custom_MenuEpisode = true;
+    if (IsLumpInPwad("M_EPI2")) custom_MenuEpisode = true;
 
-    if (W_IsLumpInPwad("M_EPI3")) custom_MenuEpisode = true;
+    if (IsLumpInPwad("M_EPI3")) custom_MenuEpisode = true;
 
-    if (W_IsLumpInPwad("M_EPI4")) custom_MenuEpisode = true;
+    if (IsLumpInPwad("M_EPI4")) custom_MenuEpisode = true;
 
-    if (W_IsLumpInPwad("M_JKILL")) custom_MenuDifficulty = true;
+    if (IsLumpInPwad("M_JKILL")) custom_MenuDifficulty = true;
 
-    if (W_IsLumpInPwad("M_NMARE")) custom_MenuDifficulty = true;
+    if (IsLumpInPwad("M_NMARE")) custom_MenuDifficulty = true;
 
     LogDebug("custom_MenuMain =%d \n", custom_MenuMain);
     LogDebug("custom_MenuEpisode =%d \n", custom_MenuEpisode);
@@ -3333,12 +3333,12 @@ void MenuInitialize(void)
 
     // Here we could catch other version dependencies,
     //  like HELP1/2, and four episodes.
-    //    if (W_CheckNumForName("M_EPI4") < 0)
+    //    if (CheckLumpNumberForName("M_EPI4") < 0)
     //      EpisodeMenuDefinition.total_items -= 2;
-    //    else if (W_CheckNumForName("M_EPI5") < 0)
+    //    else if (CheckLumpNumberForName("M_EPI5") < 0)
     //      EpisodeMenuDefinition.total_items--;
 
-    if (W_IsLumpInAnyWad("HELP"))  // doom2
+    if (IsLumpInAnyWad("HELP"))  // doom2
     {
         menu_read_this[0] = ImageLookup("HELP");
         menu_read_this[1] = ImageLookup(
@@ -3355,7 +3355,7 @@ void MenuInitialize(void)
     else  // doom or shareware doom
     {
         menu_read_this[0] = ImageLookup("HELP1");
-        if (W_IsLumpInAnyWad("HELP2"))
+        if (IsLumpInAnyWad("HELP2"))
             menu_read_this[1] = ImageLookup("HELP2");  // Shareware doom
         else
             menu_read_this[1] = ImageLookup("CREDIT");  // Full doom

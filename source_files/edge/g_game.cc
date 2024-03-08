@@ -1080,7 +1080,7 @@ void GameDeferredNewGame(NewGameParameters &params)
 
 bool GameMapExists(const MapDefinition *map)
 {
-    return (W_CheckNumForName(map->lump_.c_str()) >= 0);
+    return (CheckLumpNumberForName(map->lump_.c_str()) >= 0);
 }
 
 //

@@ -159,7 +159,7 @@ static ImageData *ReadFlatAsEpiBlock(Image *rim)
     img->Clear(playpal_black);
 
     // read in pixels
-    const uint8_t *src = (const uint8_t *)W_LoadLump(rim->source_.flat.lump);
+    const uint8_t *src = (const uint8_t *)LoadLumpIntoMemory(rim->source_.flat.lump);
 
     for (int y = 0; y < h; y++)
         for (int x = 0; x < w; x++)
@@ -199,7 +199,7 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
 {
     SYS_ASSERT(rim->source_type_ == kImageSourceTexture);
 
-    texturedef_t *tdef = rim->source_.texture.tdef;
+    TextureDefinition *tdef = rim->source_.texture.tdef;
     SYS_ASSERT(tdef);
 
     int tw = rim->total_width_;
@@ -220,17 +220,17 @@ static ImageData *ReadTextureAsEpiBlock(Image *rim)
         img->Clear(kTransparentPixelIndex);
 
     int         i;
-    texpatch_t *patch;
+    TexturePatch *patch;
 
     // Composite the columns into the block.
-    for (i = 0, patch = tdef->patches; i < tdef->patchcount; i++, patch++)
+    for (i = 0, patch = tdef->patches; i < tdef->patch_count; i++, patch++)
     {
-        const patch_t *realpatch = (const patch_t *)W_LoadLump(patch->patch);
+        const patch_t *realpatch = (const patch_t *)LoadLumpIntoMemory(patch->patch);
 
-        int realsize = W_LumpLength(patch->patch);
+        int realsize = GetLumpLength(patch->patch);
 
-        int x1 = patch->originx;
-        int y1 = patch->originy;
+        int x1 = patch->origin_x;
+        int y1 = patch->origin_y;
         int x2 = x1 + AlignedLittleEndianS16(realpatch->width);
 
         int x = HMM_MAX(0, x1);
@@ -287,9 +287,9 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
         epi::File *f;
 
         if (packfile_name)
-            f = W_OpenPackFile(packfile_name);
+            f = OpenFileFromPack(packfile_name);
         else
-            f = W_OpenLump(lump);
+            f = LoadLumpAsFile(lump);
 
         ImageData *img = ImageLoad(f);
 
@@ -298,7 +298,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
 
         if (!img)
             FatalError("Error loading image in lump: %s\n",
-                       packfile_name ? packfile_name : W_GetLumpName(lump));
+                       packfile_name ? packfile_name : GetLumpNameFromIndex(lump));
 
         return img;
     }
@@ -326,7 +326,7 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
 
     if (packfile_name)
     {
-        epi::File *f = W_OpenPackFile(packfile_name);
+        epi::File *f = OpenFileFromPack(packfile_name);
         if (f)
         {
             realpatch = (const patch_t *)f->LoadIntoMemory();
@@ -339,8 +339,8 @@ static ImageData *ReadPatchAsEpiBlock(Image *rim)
     }
     else
     {
-        realpatch = (const patch_t *)W_LoadLump(lump);
-        realsize  = W_LumpLength(lump);
+        realpatch = (const patch_t *)LoadLumpIntoMemory(lump);
+        realsize  = GetLumpLength(lump);
     }
 
     SYS_ASSERT(realpatch);
@@ -453,14 +453,14 @@ epi::File *OpenUserFileOrLump(ImageDefinition *def)
         }
 
         case kImageDataPackage:
-            return W_OpenPackFile(def->info_);
+            return OpenFileFromPack(def->info_);
 
         case kImageDataLump:
         {
-            int lump = W_CheckNumForName(def->info_.c_str());
+            int lump = CheckLumpNumberForName(def->info_.c_str());
             if (lump < 0) return nullptr;
 
-            return W_OpenLump(lump);
+            return LoadLumpAsFile(lump);
         }
 
         default:

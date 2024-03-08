@@ -106,7 +106,7 @@ void InitializePalette(void)
     int t, i;
 
     int            pal_length = 0;
-    const uint8_t *pal        = (const uint8_t *)W_OpenPackOrLumpInMemory(
+    const uint8_t *pal        = (const uint8_t *)OpenPackOrLumpInMemory(
         "PLAYPAL", {".pal"}, &pal_length);
 
     if (!pal) FatalError("InitializePalette: Error opening PLAYPAL!\n");
@@ -179,14 +179,14 @@ static void LoadColourmap(const Colormap *colm)
 
     if (colm->pack_name_ != "")
     {
-        epi::File *f = W_OpenPackFile(colm->pack_name_);
+        epi::File *f = OpenFileFromPack(colm->pack_name_);
         if (f == nullptr)
             FatalError("No such colormap file: %s\n", colm->pack_name_.c_str());
         size = f->GetLength();
         data = f->LoadIntoMemory();
         delete f;  // close file
     }
-    else { data = W_LoadLump(colm->lump_name_.c_str(), &size); }
+    else { data = LoadLumpIntoMemory(colm->lump_name_.c_str(), &size); }
 
     if ((colm->start_ + colm->length_) * 256 > size)
     {

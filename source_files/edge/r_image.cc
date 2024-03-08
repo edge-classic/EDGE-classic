@@ -293,7 +293,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type,
                          std::list<Image *> &container, const Image *replaces)
 {
     /* used for Graphics, Sprites and TX/HI stuff */
-    epi::File *f = W_OpenPackFile(packfile_name);
+    epi::File *f = OpenFileFromPack(packfile_name);
     SYS_ASSERT(f);
     int packfile_len = f->GetLength();
 
@@ -416,7 +416,7 @@ Image *AddPackImageSmart(const char *name, ImageSource type,
     rim->source_.graphic.user_defined =
         false;  // This should only get set to true with DDFIMAGE specified DOOM
                 // format images
-    // rim->source_palette_ = W_GetPaletteForLump(lump);
+    // rim->source_palette_ = GetPaletteForLump(lump);
     rim->source_palette_ = -1;
 
     if (replaces)
@@ -442,9 +442,9 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump,
 {
     /* used for Graphics, Sprites and TX/HI stuff */
 
-    int lump_len = W_LumpLength(lump);
+    int lump_len = GetLumpLength(lump);
 
-    epi::File *f = W_OpenLump(lump);
+    epi::File *f = LoadLumpAsFile(lump);
     SYS_ASSERT(f);
 
     // determine format and size information
@@ -469,7 +469,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump,
         delete f;
 
         LogWarning("Unsupported image format in '%s' lump\n",
-                   W_GetLumpName(lump));
+                   GetLumpNameFromIndex(lump));
         return nullptr;
     }
     else if (fmt == kImageUnknown)
@@ -529,7 +529,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump,
             height <= 0)
         {
             LogWarning("Error scanning image in '%s' lump\n",
-                       W_GetLumpName(lump));
+                       GetLumpNameFromIndex(lump));
             return nullptr;
         }
 
@@ -565,7 +565,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump,
     rim->source_.graphic.user_defined =
         false;  // This should only get set to true with DDFIMAGE specified DOOM
                 // format images
-    rim->source_palette_ = W_GetPaletteForLump(lump);
+    rim->source_palette_ = GetPaletteForLump(lump);
 
     if (replaces)
     {
@@ -584,7 +584,7 @@ static Image *AddImage_Smart(const char *name, ImageSource type, int lump,
     return rim;
 }
 
-static Image *AddImageTexture(const char *name, texturedef_t *tdef)
+static Image *AddImageTexture(const char *name, TextureDefinition *tdef)
 {
     Image *rim;
 
@@ -609,7 +609,7 @@ static Image *AddImageFlat(const char *name, int lump)
     Image *rim;
     int    len, size;
 
-    len = W_LumpLength(lump);
+    len = GetLumpLength(lump);
 
     switch (len)
     {
@@ -651,7 +651,7 @@ static Image *AddImageFlat(const char *name, int lump)
 
     rim->source_type_      = kImageSourceFlat;
     rim->source_.flat.lump = lump;
-    rim->source_palette_   = W_GetPaletteForLump(lump);
+    rim->source_palette_   = GetPaletteForLump(lump);
 
     FlatDefinition *current_flatdef = flatdefs.Find(rim->name_.c_str());
 
@@ -708,19 +708,19 @@ static Image *AddImage_DOOM(ImageDefinition *def, bool user_defined = false)
         {
             case kImageNamespaceGraphic:
                 rim = AddImage_Smart(name, kImageSourceGraphic,
-                                     W_GetNumForName(lump_name), real_graphics);
+                                     GetLumpNumberForName(lump_name), real_graphics);
                 break;
             case kImageNamespaceTexture:
                 rim = AddImage_Smart(name, kImageSourceTexture,
-                                     W_GetNumForName(lump_name), real_textures);
+                                     GetLumpNumberForName(lump_name), real_textures);
                 break;
             case kImageNamespaceFlat:
                 rim = AddImage_Smart(name, kImageSourceFlat,
-                                     W_GetNumForName(lump_name), real_flats);
+                                     GetLumpNumberForName(lump_name), real_flats);
                 break;
             case kImageNamespaceSprite:
                 rim = AddImage_Smart(name, kImageSourceSprite,
-                                     W_GetNumForName(lump_name), real_sprites);
+                                     GetLumpNumberForName(lump_name), real_sprites);
                 break;
 
             default:
@@ -929,7 +929,7 @@ void CreateFlats(std::vector<int> &lumps)
     {
         if (lumps[i] >= 0)
         {
-            const char *name = W_GetLumpName(lumps[i]);
+            const char *name = GetLumpNameFromIndex(lumps[i]);
             AddImageFlat(name, lumps[i]);
         }
     }
@@ -944,7 +944,7 @@ void CreateFlats(std::vector<int> &lumps)
 // textures in the list have names colliding with existing texture
 // images.
 //
-void CreateTextures(struct texturedef_s **defs, int number)
+void CreateTextures(struct TextureDefinition **defs, int number)
 {
     int i;
 
@@ -991,7 +991,7 @@ const Image *CreateSprite(const char *name, int lump, bool is_weapon)
     return rim;
 }
 
-const Image *CreatePackSprite(std::string packname, pack_file_c *pack,
+const Image *CreatePackSprite(std::string packname, PackFile *pack,
                               bool is_weapon)
 {
     SYS_ASSERT(pack);
@@ -1286,7 +1286,7 @@ static GLuint LoadImageOGL(Image *rim, const Colormap *trans, bool do_whiten)
     }
     else if (rim->source_palette_ >= 0)
     {
-        what_palette    = (const uint8_t *)W_LoadLump(rim->source_palette_);
+        what_palette    = (const uint8_t *)LoadLumpIntoMemory(rim->source_palette_);
         what_pal_cached = true;
     }
 
@@ -1411,11 +1411,11 @@ static const Image *BackupTexture(const char *tex_name, int flags)
 
         // backup backup backup plan: see if it's a graphic in the P/PP_START
         // P/PP_END namespace and make/return an image if valid
-        int checkfile = W_CheckFileNumForName(tex_name);
-        int checklump = W_CheckNumForName(tex_name);
+        int checkfile = CheckDataFileIndexForName(tex_name);
+        int checklump = CheckLumpNumberForName(tex_name);
         if (checkfile > -1 && checklump > -1)
         {
-            for (auto patch_lump : *W_GetPatchList(checkfile))
+            for (auto patch_lump : *GetPatchListForWad(checkfile))
             {
                 if (patch_lump == checklump)
                 {
@@ -1459,7 +1459,7 @@ static const Image *BackupFlat(const char *flat_name, int flags)
     // backup plan 1: if lump exists and is right size, add it.
     if (!(flags & kImageLookupNoNew))
     {
-        int i = W_CheckNumForName(flat_name);
+        int i = CheckLumpNumberForName(flat_name);
 
         if (i >= 0)
         {
@@ -1512,7 +1512,7 @@ static const Image *BackupGraphic(const char *gfx_name, int flags)
     // not already loaded ?  Check if lump exists in wad, if so add it.
     if (!(flags & kImageLookupNoNew))
     {
-        int i = W_CheckNumForName_GFX(gfx_name);
+        int i = CheckGraphicLumpNumberForName(gfx_name);
 
         if (i >= 0)
         {

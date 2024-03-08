@@ -878,7 +878,7 @@ int RendererUpdateSkyBoxTextures(void)
     // If we do nothing, our EWAD skybox will be used for all maps.
     // So we need to disable it if we have a pwad that contains it's
     // own sky.
-    if (W_LoboDisableSkybox(sky_image->name_.c_str()))
+    if (DisableStockSkybox(sky_image->name_.c_str()))
     {
         info->face[kSkyboxNorth] = nullptr;
         // LogPrint("Skybox turned OFF\n");
@@ -887,7 +887,7 @@ int RendererUpdateSkyBoxTextures(void)
     // Set colors for culling fog and faux skybox caps - Dasho
     const uint8_t *what_palette = (const uint8_t *)&playpal_data[0];
     if (sky_image->source_palette_ >= 0)
-        what_palette = (const uint8_t *)W_LoadLump(sky_image->source_palette_);
+        what_palette = (const uint8_t *)LoadLumpIntoMemory(sky_image->source_palette_);
     ImageData *tmp_img_data = RgbFromPalettised(
         ReadAsEpiBlock((Image *)sky_image), what_palette, sky_image->opacity_);
     culling_fog_color = sg_make_color_1i(tmp_img_data->AverageColor(

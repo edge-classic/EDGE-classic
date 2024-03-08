@@ -609,13 +609,13 @@ void RendererDrawWeaponModel(player_t *p)
 
     WeaponDefinition *w = p->weapons[p->ready_wp].info;
 
-    modeldef_c *md = W_GetModel(psp->state->sprite);
+    ModelDefinition *md = GetModel(psp->state->sprite);
 
     int skin_num = p->weapons[p->ready_wp].model_skin;
 
-    const Image *skin_img = md->skins[skin_num];
+    const Image *skin_img = md->skins_[skin_num];
 
-    if (!skin_img && md->md2_model) { skin_img = ImageForDummySkin(); }
+    if (!skin_img && md->md2_model_) { skin_img = ImageForDummySkin(); }
 
     float x = view_x + view_right.X * psp->screen_x / 8.0;
     float y = view_y + view_right.Y * psp->screen_x / 8.0;
@@ -663,13 +663,13 @@ void RendererDrawWeaponModel(player_t *p)
     bias /= 5;
     bias += w->model_bias_;
 
-    if (md->md2_model)
-        Md2RenderModel(md->md2_model, skin_img, true, last_frame,
+    if (md->md2_model_)
+        Md2RenderModel(md->md2_model_, skin_img, true, last_frame,
                         psp->state->frame, lerp, x, y, z, p->mo, view_properties,
                         1.0f /* scale */, w->model_aspect_, bias,
                         w->model_rotate_);
-    else if (md->mdl_model)
-        MdlRenderModel(md->mdl_model, skin_img, true, last_frame,
+    else if (md->mdl_model_)
+        MdlRenderModel(md->mdl_model_, skin_img, true, last_frame,
                         psp->state->frame, lerp, x, y, z, p->mo, view_properties,
                         1.0f /* scale */, w->model_aspect_, bias,
                         w->model_rotate_);
@@ -703,8 +703,8 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my,
 
     if (mo->state_->sprite == 0) return nullptr;
 
-    spriteframe_c *frame =
-        W_GetSpriteFrame(mo->state_->sprite, mo->state_->frame);
+    SpriteFrame *frame =
+        GetSpriteFrame(mo->state_->sprite, mo->state_->frame);
 
     if (!frame)
     {
@@ -715,7 +715,7 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my,
 
     int rot = 0;
 
-    if (frame->rots >= 8)
+    if (frame->rotations_ >= 8)
     {
         BAMAngle ang = mo->angle_;
 
@@ -727,7 +727,7 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my,
 
         if (MirrorReflective()) ang = (BAMAngle)0 - ang;
 
-        if (frame->rots == 16)
+        if (frame->rotations_ == 16)
             rot = (ang + (kBAMAngle45 / 4)) >> (kBAMAngleBits - 4);
         else
             rot = (ang + (kBAMAngle45 / 2)) >> (kBAMAngleBits - 3);
@@ -735,18 +735,18 @@ static const Image *RendererGetThingSprite2(MapObject *mo, float mx, float my,
 
     SYS_ASSERT(0 <= rot && rot < 16);
 
-    (*flip) = frame->flip[rot] ? true : false;
+    (*flip) = frame->flip_[rot] ? true : false;
 
     if (MirrorReflective()) (*flip) = !(*flip);
 
-    if (!frame->images[rot])
+    if (!frame->images_[rot])
     {
         // show dummy sprite for missing rotation
         (*flip) = false;
         return ImageForDummySprite();
     }
 
-    return frame->images[rot];
+    return frame->images_[rot];
 }
 
 const Image *RendererGetOtherSprite(int spritenum, int framenum, bool *flip)
@@ -755,17 +755,17 @@ const Image *RendererGetOtherSprite(int spritenum, int framenum, bool *flip)
 
     if (spritenum == 0) return nullptr;
 
-    spriteframe_c *frame = W_GetSpriteFrame(spritenum, framenum);
+    SpriteFrame *frame = GetSpriteFrame(spritenum, framenum);
 
-    if (!frame || !frame->images[0])
+    if (!frame || !frame->images_[0])
     {
         (*flip) = false;
         return ImageForDummySprite();
     }
 
-    *flip = frame->flip[0] ? true : false;
+    *flip = frame->flip_[0] ? true : false;
 
-    return frame->images[0];
+    return frame->images_[0];
 }
 
 static void RendererClipSpriteVertically(DrawSubsector *dsub, DrawThing *dthing)
@@ -1019,11 +1019,11 @@ static void RendererDrawModel(DrawThing *dthing)
 
     MapObject *mo = dthing->map_object;
 
-    modeldef_c *md = W_GetModel(mo->state_->sprite);
+    ModelDefinition *md = GetModel(mo->state_->sprite);
 
-    const Image *skin_img = md->skins[mo->model_skin_];
+    const Image *skin_img = md->skins_[mo->model_skin_];
 
-    if (!skin_img && md->md2_model)
+    if (!skin_img && md->md2_model_)
     {
         // LogDebug("Render model: no skin %d\n", mo->model_skin);
         skin_img = ImageForDummySkin();
@@ -1064,14 +1064,14 @@ static void RendererDrawModel(DrawThing *dthing)
         lerp = HMM_Clamp(0, lerp, 1);
     }
 
-    if (md->md2_model)
-        Md2RenderModel(md->md2_model, skin_img, false, last_frame,
+    if (md->md2_model_)
+        Md2RenderModel(md->md2_model_, skin_img, false, last_frame,
                         mo->state_->frame, lerp, dthing->map_x, dthing->map_y,
                         z, mo, mo->region_properties_, mo->model_scale_,
                         mo->model_aspect_, mo->info_->model_bias_,
                         mo->info_->model_rotate_);
-    else if (md->mdl_model)
-        MdlRenderModel(md->mdl_model, skin_img, false, last_frame,
+    else if (md->mdl_model_)
+        MdlRenderModel(md->mdl_model_, skin_img, false, last_frame,
                         mo->state_->frame, lerp, dthing->map_x, dthing->map_y,
                         z, mo, mo->region_properties_, mo->model_scale_,
                         mo->model_aspect_, mo->info_->model_bias_,

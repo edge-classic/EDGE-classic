@@ -49,7 +49,7 @@ void LuaLoadScripts()
         if (results) { lua_pop(global_lua_state, results); }
     }
 
-    if (W_IsLumpInPwad("STBAR"))
+    if (IsLumpInPwad("STBAR"))
     {
         LuaSetBoolean(global_lua_state, "hud", "custom_stbar", true);
     }

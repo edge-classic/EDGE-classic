@@ -32,7 +32,7 @@
 
 static int luaopen_debugger(lua_State *lua){
 
-    epi::File *file = W_OpenPackFile("scripts/lua/core/debugger.lua");
+    epi::File *file = OpenFileFromPack("scripts/lua/core/debugger.lua");
 
     SYS_ASSERT(file);
 

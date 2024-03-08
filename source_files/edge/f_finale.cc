@@ -759,20 +759,20 @@ static void CastDrawer(void)
 
     if (cast_state->flags & kStateFrameFlagModel)
     {
-        modeldef_c *md = W_GetModel(cast_state->sprite);
+        ModelDefinition *md = GetModel(cast_state->sprite);
 
-        const Image *skin_img = md->skins[cast_order->model_skin_];
+        const Image *skin_img = md->skins_[cast_order->model_skin_];
 
         if (!skin_img) skin_img = ImageForDummySkin();
 
         glClear(GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
-        if (md->md2_model)
-            Md2RenderModel2d(md->md2_model, skin_img, cast_state->frame,
+        if (md->md2_model_)
+            Md2RenderModel2d(md->md2_model_, skin_img, cast_state->frame,
                                pos_x, pos_y, scale_x, scale_y, cast_order);
-        else if (md->mdl_model)
-            MdlRenderModel2d(md->mdl_model, skin_img, cast_state->frame,
+        else if (md->mdl_model_)
+            MdlRenderModel2d(md->mdl_model_, skin_img, cast_state->frame,
                                pos_x, pos_y, scale_x, scale_y, cast_order);
 
         glDisable(GL_DEPTH_TEST);

@@ -28,34 +28,14 @@
 //  by name.
 //
 
-#ifndef __W_TEXTURE__
-#define __W_TEXTURE__
+#pragma once
 
-#include "r_defs.h"
-#include "r_state.h"
+#include <stdint.h>
 
-// Texture cache reference structure, returned by the texture cache system.
-// The actual structure is private.
-typedef uint8_t cached_tex_t;
-
-// Retrieve column data.
-const uint8_t *W_GetColumn(int col, const cached_tex_t *t);
-
-// Standard cache functions. Call W_CacheTextureNum when you first need
-// the lump, and release it with DoneWithTexture.
-const cached_tex_t *W_CacheTextureNum(int texnum);
-void                W_DoneWithTexture(const cached_tex_t *t);
-
-void W_PreCacheTextureNum(int texnum);
-
-// Called by MapObjectTicker for switches and animations,
-// returns the texture number for the texture name.
-int W_TextureNumForName(const char *name);
-int W_CheckTextureNumForName(const char *name);
-
-void        W_InitTextures(void);
-int         W_FindTextureSequence(const char *start, const char *end, int *s_offset, int *e_offset);
-const char *W_TextureNameInSet(int set, int offset);
+void InitializeTextures(void);
+int  FindTextureSequence(const char *start, const char *end, int *s_offset,
+                         int *e_offset);
+const char *TextureNameInSet(int set, int offset);
 
 //
 // Graphics:
@@ -74,18 +54,18 @@ const char *W_TextureNameInSet(int set, int offset);
 // Note: Block origin (always UL), which has already accounted
 // for the internal origin of the patch.
 //
-typedef struct
+struct TexturePatch
 {
-    int originx;
-    int originy;
-    int patch; // lump number
-} texpatch_t;
+    int origin_x;
+    int origin_y;
+    int patch;  // lump number
+};
 
 //
-// A texturedef_t describes a rectangular texture, which is composed of
+// A TextureDefinition describes a rectangular texture, which is composed of
 // one or more mappatch_t structures that arrange graphic patches.
 //
-typedef struct texturedef_s
+struct TextureDefinition
 {
     // Keep name for switch changing, etc.  Zero terminated.
     char name[10];
@@ -102,15 +82,13 @@ typedef struct texturedef_s
 
     int palette_lump;
 
-    unsigned short *columnofs;
+    unsigned short *column_offset;
 
     // All the patches[patchcount] are drawn back to front into the
     // cached texture.
-    short      patchcount;
-    texpatch_t patches[1];
-} texturedef_t;
-
-#endif // __W_TEXTURE__
+    short        patch_count;
+    TexturePatch patches[1];
+};
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

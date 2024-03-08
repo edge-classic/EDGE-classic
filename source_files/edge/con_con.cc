@@ -1720,10 +1720,10 @@ void ConsolePrintEndoom()
     int      length = 0;
     uint8_t *data   = nullptr;
 
-    data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
-    if (!data) data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
-    if (!data) data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
-    if (!data) data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
+    data = OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
+    if (!data) data = OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
+    if (!data) data = OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
+    if (!data) data = OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
     if (!data)
     {
         ConsolePrint("ConsolePrintEndoom: No ENDOOM screen found!\n");
@@ -1762,10 +1762,10 @@ void ConsoleCreateQuitScreen()
     int      length = 0;
     uint8_t *data   = nullptr;
 
-    data = W_OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
-    if (!data) data = W_OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
-    if (!data) data = W_OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
-    if (!data) data = W_OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
+    data = OpenPackOrLumpInMemory("ENDOOM", {".bin"}, &length);
+    if (!data) data = OpenPackOrLumpInMemory("ENDTEXT", {".bin"}, &length);
+    if (!data) data = OpenPackOrLumpInMemory("ENDBOOM", {".bin"}, &length);
+    if (!data) data = OpenPackOrLumpInMemory("ENDSTRF", {".bin"}, &length);
     if (!data)
     {
         ConsolePrint("No ENDOOM screen found for this WAD!\n");

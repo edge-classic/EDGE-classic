@@ -404,7 +404,7 @@ static void DrawLevelFinished(void)
     // If we have a custom mapname graphic e.g.CWILVxx then use that
     if (level_names[0])
     {
-        if (W_IsLumpInPwad(level_names[0]->name_.c_str()))
+        if (IsLumpInPwad(level_names[0]->name_.c_str()))
         {
             w1 = level_names[0]->ScaledWidthActual();
             h1 = level_names[0]->ScaledHeightActual();
@@ -489,7 +489,7 @@ static void DrawLevelFinished(void)
 
     HudSetAlignment(0, -1);  // center it
     // If we have a custom Finished graphic e.g.WIF then use that
-    if (W_IsLumpInPwad(finished->name_.c_str()))
+    if (IsLumpInPwad(finished->name_.c_str()))
     {
         w1 = finished->ScaledWidthActual();
         h1 = finished->ScaledHeightActual();
@@ -581,7 +581,7 @@ static void DrawEnteringLevel(void)
     HudSetAlignment(0, -1);  // center it
 
     // If we have a custom Entering graphic e.g.WIENTER then use that
-    if (W_IsLumpInPwad(entering->name_.c_str()))
+    if (IsLumpInPwad(entering->name_.c_str()))
     {
         w1 = entering->ScaledWidthActual();
         h1 = entering->ScaledHeightActual();
@@ -621,7 +621,7 @@ static void DrawEnteringLevel(void)
     // If we have a custom mapname graphic e.g.CWILVxx then use that
     if (level_names[1])
     {
-        if (W_IsLumpInPwad(level_names[1]->name_.c_str()))
+        if (IsLumpInPwad(level_names[1]->name_.c_str()))
         {
             w1 = level_names[1]->ScaledWidthActual();
             h1 = level_names[1]->ScaledHeightActual();
@@ -785,7 +785,7 @@ static float TimeWidth(int t, bool drawText = false)
         if (t > 3599)
         {
             // "sucks"
-            if ((sucks) && (W_IsLumpInPwad(sucks->name_.c_str())))
+            if ((sucks) && (IsLumpInPwad(sucks->name_.c_str())))
                 return sucks->ScaledWidthActual();
             else
                 return single_player_intermission_style
@@ -864,7 +864,7 @@ static void DrawTime(float x, float y, int t, bool drawText = false)
         if (t > 3599)
         {
             // "sucks"
-            if ((sucks) && (W_IsLumpInPwad(sucks->name_.c_str())))
+            if ((sucks) && (IsLumpInPwad(sucks->name_.c_str())))
                 HudDrawImage(x, y, sucks);
             else
                 HudWriteText(single_player_intermission_style,
@@ -1580,7 +1580,7 @@ static void DrawSinglePlayerStats(void)
     bool drawTextBased = true;
     if (kills != nullptr)
     {
-        if (W_IsLumpInPwad(kills->name_.c_str()))
+        if (IsLumpInPwad(kills->name_.c_str()))
             drawTextBased = false;
         else
             drawTextBased = true;
@@ -1628,7 +1628,7 @@ static void DrawSinglePlayerStats(void)
         s = s + "%";
     }
 
-    if ((items) && (W_IsLumpInPwad(items->name_.c_str())))
+    if ((items) && (IsLumpInPwad(items->name_.c_str())))
     {
         HudDrawImage(kSinglePlayerStateStatsX, kSinglePlayerStateStatsY + lh,
                       items);
@@ -1661,7 +1661,7 @@ static void DrawSinglePlayerStats(void)
     }
 
     if ((single_player_secret) &&
-        (W_IsLumpInPwad(single_player_secret->name_.c_str())))
+        (IsLumpInPwad(single_player_secret->name_.c_str())))
     {
         HudDrawImage(kSinglePlayerStateStatsX,
                       kSinglePlayerStateStatsY + 2 * lh, single_player_secret);
@@ -1685,7 +1685,7 @@ static void DrawSinglePlayerStats(void)
                          kSinglePlayerStateStatsY + 2 * lh, s.c_str());
     }
 
-    if ((time_image) && (W_IsLumpInPwad(time_image->name_.c_str())))
+    if ((time_image) && (IsLumpInPwad(time_image->name_.c_str())))
     {
         HudDrawImage(kSinglePlayerStateTimeX, kSinglePlayerStateTimeY,
                       time_image);
@@ -1704,7 +1704,7 @@ static void DrawSinglePlayerStats(void)
     // -KM- 1998/11/25 Removed episode check. Replaced with partime check
     if (intermission_stats.par_time)
     {
-        if ((par) && (W_IsLumpInPwad(par->name_.c_str())))
+        if ((par) && (IsLumpInPwad(par->name_.c_str())))
         {
             HudDrawImage(170, kSinglePlayerStateTimeY, par);
             DrawTime(320 - kSinglePlayerStateTimeX - TimeWidth(count_par),

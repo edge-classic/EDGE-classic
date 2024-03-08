@@ -22,6 +22,7 @@
 #include "e_main.h"
 #include "epi_sdl.h"  // needed for proper SDL main linkage
 #include "filesystem.h"
+#include "i_system.h"
 #include "i_video.h"
 #include "m_argv.h"
 #include "m_menu.h"

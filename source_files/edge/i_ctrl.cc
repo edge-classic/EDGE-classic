@@ -585,10 +585,10 @@ void ActiveEventProcess(SDL_Event *sdl_ev)
             {
                 printf("SDL window resize event %i %i\n", sdl_ev->window.data1,
                        sdl_ev->window.data2);
-                SCREENWIDTH  = sdl_ev->window.data1;
-                SCREENHEIGHT = sdl_ev->window.data2;
-                SCREENBITS   = 24;
-                DISPLAYMODE  = 0;
+                current_screen_width  = sdl_ev->window.data1;
+                current_screen_height = sdl_ev->window.data2;
+                current_screen_depth   = 24;
+                current_window_mode  = 0;
                 DeterminePixelAspect();
             }
 #endif

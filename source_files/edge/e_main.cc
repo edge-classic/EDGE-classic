@@ -233,7 +233,7 @@ class startup_progress_c
             if (r_titlescaling.d_)  // Fill Border
             {
                 if (!loading_image->blurred_version_)
-                    ImageStoreBlurred(loading_image, 0.75f);
+                    ImageStoreBlurred(loading_image);
                 HudStretchImage(-320, -200, 960, 600,
                                 loading_image->blurred_version_, 0, 0);
             }
@@ -729,7 +729,7 @@ static void E_TitleDrawer(void)
         if (r_titlescaling.d_)  // Fill Border
         {
             if (!title_image->blurred_version_)
-                ImageStoreBlurred(title_image, 0.75f);
+                ImageStoreBlurred(title_image);
             HudStretchImage(-320, -200, 960, 600, title_image->blurred_version_,
                             0, 0);
         }

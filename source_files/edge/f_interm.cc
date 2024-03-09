@@ -381,7 +381,7 @@ static void DrawLevelFinished(void)
             if (r_titlescaling.d_)  // Fill Border
             {
                 if (!leaving_background_image->blurred_version_)
-                    ImageStoreBlurred(leaving_background_image, 0.75f);
+                    ImageStoreBlurred(leaving_background_image);
                 HudStretchImage(-320, -200, 960, 600,
                                  leaving_background_image->blurred_version_, 0,
                                  0);
@@ -560,7 +560,7 @@ static void DrawEnteringLevel(void)
             if (r_titlescaling.d_)  // Fill Border
             {
                 if (!entering_background_image->blurred_version_)
-                    ImageStoreBlurred(entering_background_image, 0.75f);
+                    ImageStoreBlurred(entering_background_image);
                 HudStretchImage(-320, -200, 960, 600,
                                  entering_background_image->blurred_version_, 0,
                                  0);
@@ -1838,7 +1838,7 @@ void IntermissionDrawer(void)
                 if (r_titlescaling.d_)  // Fill Border
                 {
                     if (!background_image->blurred_version_)
-                        ImageStoreBlurred(background_image, 0.75f);
+                        ImageStoreBlurred(background_image);
                     HudStretchImage(-320, -200, 960, 600,
                                      background_image->blurred_version_, 0, 0);
                 }

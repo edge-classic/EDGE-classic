@@ -101,7 +101,6 @@ class Image
     int hsv_saturation_ = -1;
     int hsv_value_      = 0;
 
-    // blurring test
     Image *blurred_version_ = nullptr;
     float  blur_sigma_      = 0.0f;
 
@@ -269,8 +268,7 @@ const Image **GetUserSprites(int *count);
 int MakeValidTextureSize(int value);
 
 // Store a duplicate version of the image_c with smoothing forced
-// (this may expand to accommodate proper blur algorithms)
-void ImageStoreBlurred(const Image *image, float sigma);
+void ImageStoreBlurred(const Image *image);
 
 enum ImageSource
 {

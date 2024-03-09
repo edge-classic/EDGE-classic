@@ -207,7 +207,7 @@ Image::~Image()
 { /* TODO: image_c destructor */
 }
 
-void ImageStoreBlurred(const Image *image, float sigma)
+void ImageStoreBlurred(const Image *image)
 {
     // const override
     Image *img = (Image *)image;
@@ -237,7 +237,14 @@ void ImageStoreBlurred(const Image *image, float sigma)
         img->blurred_version_->animation_.next    = nullptr;
         img->blurred_version_->animation_.count   = 0;
         img->blurred_version_->animation_.speed   = 0;
-        img->blurred_version_->blur_sigma_        = sigma;
+        if (img->blur_sigma_ > 0.0f)
+        {
+            img->blurred_version_->blur_sigma_        = img->blur_sigma_;
+        }
+        else
+        {
+            img->blurred_version_->blur_sigma_ = -1.0f;
+        }
     }
 }
 
@@ -1183,7 +1190,7 @@ static bool IM_ShouldMipmap(Image *rim)
 
 static bool IM_ShouldSmooth(Image *rim)
 {
-    if (rim->blur_sigma_ > 0.0f) return true;
+    if (!AlmostEquals(rim->blur_sigma_, 0.0f)) return true;
 
     return image_smoothing ? true : false;
 }

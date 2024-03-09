@@ -3128,7 +3128,7 @@ void MenuDrawer(void)
         {
             if (!menu_backdrop->blurred_version_)
             {
-                ImageStoreBlurred(menu_backdrop, 0.75f);
+                ImageStoreBlurred(menu_backdrop);
                 menu_backdrop->blurred_version_->grayscale_ = true;
             }
             HudStretchImage(-320, -200, 960, 600,

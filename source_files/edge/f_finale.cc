@@ -379,7 +379,7 @@ static void TextWrite(void)
             if (r_titlescaling.d_)  // Fill Border
             {
                 if (!finale_text_background->blurred_version_)
-                    ImageStoreBlurred(finale_text_background, 0.75f);
+                    ImageStoreBlurred(finale_text_background);
                 HudStretchImage(-320, -200, 960, 600,
                                  finale_text_background->blurred_version_, 0, 0);
             }
@@ -706,7 +706,7 @@ static void CastDrawer(void)
         image = ImageLookup("BOSSBACK");
         if (r_titlescaling.d_)  // Fill Border
         {
-            if (!image->blurred_version_) ImageStoreBlurred(image, 0.75f);
+            if (!image->blurred_version_) ImageStoreBlurred(image);
             HudStretchImage(-320, -200, 960, 600, image->blurred_version_, 0,
                              0);
         }
@@ -898,7 +898,7 @@ void FinaleDrawer(void)
                                   .c_str());
             if (r_titlescaling.d_)  // Fill Border
             {
-                if (!image->blurred_version_) ImageStoreBlurred(image, 0.75f);
+                if (!image->blurred_version_) ImageStoreBlurred(image);
                 HudStretchImage(-320, -200, 960, 600, image->blurred_version_,
                                  0, 0);
             }

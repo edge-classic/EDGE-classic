@@ -280,14 +280,14 @@ void GameDoLoadLevel(void)
 {
     HudStart();
 
-    if (current_hub_tag == 0) SV_ClearSlot("current");
+    if (current_hub_tag == 0) SaveClearSlot("current");
 
     if (current_hub_tag > 0)
     {
         // HUB system: check for loading a previously visited map
-        const char *mapname = SV_MapName(current_map);
+        const char *mapname = SaveMapName(current_map);
 
-        std::string fn(SV_FileName("current", mapname));
+        std::string fn(SaveFilename("current", mapname));
 
         if (epi::TestFileAccess(fn))
         {
@@ -685,9 +685,9 @@ static void GameDoCompleted(void)
                 // when we return to this level.
                 GameMarkPlayerAvatars();
 
-                const char *mapname = SV_MapName(current_map);
+                const char *mapname = SaveMapName(current_map);
 
-                std::string fn(SV_FileName("current", mapname));
+                std::string fn(SaveFilename("current", mapname));
 
                 if (!GameSaveGameToFile(fn, "__HUB_SAVE__"))
                     FatalError("SAVE-HUB failed with filename: %s\n", fn.c_str());
@@ -727,7 +727,7 @@ void GameDeferredLoadGame(int slot)
 
 static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 {
-    if (!SV_OpenReadFile(filename))
+    if (!SaveFileOpenRead(filename))
     {
         LogPrint("LOAD-GAME: cannot open %s\n", filename.c_str());
         return false;
@@ -735,16 +735,16 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
 
     int version;
 
-    if (!SV_VerifyHeader(&version) || !SV_VerifyContents())
+    if (!SaveFileVerifyHeader(&version) || !SaveFileVerifyContents())
     {
         LogPrint("LOAD-GAME: Savegame is corrupt !\n");
-        SV_CloseReadFile();
+        SaveFileCloseRead();
         return false;
     }
 
-    SV_BeginLoad(is_hub);
+    BeginSaveGameLoad(is_hub);
 
-    saveglobals_t *globs = SV_LoadGLOB();
+    SaveGlobals *globs = SaveGlobalsLoad();
 
     if (!globs) FatalError("LOAD-GAME: Bad savegame file (no GLOB)\n");
 
@@ -799,7 +799,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
         globs->mapthing.count != total_map_things ||
         globs->mapthing.crc != map_things_crc.GetCRC())
     {
-        SV_CloseReadFile();
+        SaveFileCloseRead();
 
         FatalError("LOAD-GAME: Level data does not match !  Check WADs\n");
     }
@@ -820,7 +820,7 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
     // clear line/sector lookup caches
     DDF_BoomClearGenTypes();
 
-    if (SV_LoadEverything() && SV_GetError() == 0)
+    if (LoadAllSaveChunks() && SaveGetError() == 0)
     { /* all went well */
     }
     else
@@ -831,10 +831,10 @@ static bool GameLoadGameFromFile(std::string filename, bool is_hub)
         FatalError("Bad Save Game !\n");
     }
 
-    SV_FreeGLOB(globs);
+    SaveGlobalsFree(globs);
 
-    SV_FinishLoad();
-    SV_CloseReadFile();
+    FinishSaveGameLoad();
+    SaveFileCloseRead();
 
     return true;  // OK
 }
@@ -849,13 +849,13 @@ static void GameDoLoadGame(void)
 {
     E_ForceWipe();
 
-    const char *dir_name = SV_SlotName(defer_load_slot);
+    const char *dir_name = SaveSlotName(defer_load_slot);
     LogDebug("GameDoLoadGame : %s\n", dir_name);
 
-    SV_ClearSlot("current");
-    SV_CopySlot(dir_name, "current");
+    SaveClearSlot("current");
+    SaveCopySlot(dir_name, "current");
 
-    std::string fn(SV_FileName("current", "head"));
+    std::string fn(SaveFilename("current", "head"));
 
     if (!GameLoadGameFromFile(fn))
     {
@@ -893,7 +893,7 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
 
     epi::FileDelete(filename);
 
-    if (!SV_OpenWriteFile(filename, 0xEC))
+    if (!SaveFileOpenWrite(filename, 0xEC))
     {
         LogPrint("Unable to create savegame file: %s\n", filename.c_str());
         return false; /* NOT REACHED */
@@ -903,17 +903,17 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
     PauseAudioDevice();
 #endif
 
-    saveglobals_t *globs = SV_NewGLOB();
+    SaveGlobals *globs = SaveGlobalsNew();
 
     // --- fill in global structure ---
 
     // globs->game  = SV_DupString(game_base.c_str());
-    globs->game      = SV_DupString(current_map->episode_name_.c_str());
-    globs->level     = SV_DupString(current_map->name_.c_str());
+    globs->game      = SaveChunkCopyString(current_map->episode_name_.c_str());
+    globs->level     = SaveChunkCopyString(current_map->name_.c_str());
     globs->flags     = level_flags;
     globs->hub_tag   = current_hub_tag;
     globs->hub_first = current_hub_first
-                           ? SV_DupString(current_hub_first->name_.c_str())
+                           ? SaveChunkCopyString(current_hub_first->name_.c_str())
                            : nullptr;
 
     globs->skill    = game_skill;
@@ -934,8 +934,8 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
     time(&cur_time);
     strftime(timebuf, 99, "%H:%M  %Y-%m-%d", localtime(&cur_time));
 
-    globs->description = SV_DupString(description);
-    globs->desc_date   = SV_DupString(timebuf);
+    globs->description = SaveChunkCopyString(description);
+    globs->desc_date   = SaveChunkCopyString(timebuf);
 
     globs->mapsector.count = total_level_sectors;
     globs->mapsector.crc   = map_sectors_crc.GetCRC();
@@ -944,15 +944,15 @@ static bool GameSaveGameToFile(std::string filename, const char *description)
     globs->mapthing.count  = total_map_things;
     globs->mapthing.crc    = map_things_crc.GetCRC();
 
-    SV_BeginSave();
+    BeginSaveGameSave();
 
-    SV_SaveGLOB(globs);
-    SV_SaveEverything();
+    SaveGlobalsSave(globs);
+    SaveAllSaveChunks();
 
-    SV_FreeGLOB(globs);
+    SaveGlobalsFree(globs);
 
-    SV_FinishSave();
-    SV_CloseWriteFile();
+    FinishSaveGameSave();
+    SaveFileCloseWrite();
 
     epi::SyncFilesystem();
 
@@ -970,14 +970,14 @@ static void GameDoSaveGame(void)
     else
         CoalSaveGame();
 
-    std::string fn(SV_FileName("current", "head"));
+    std::string fn(SaveFilename("current", "head"));
 
     if (GameSaveGameToFile(fn, defer_save_description))
     {
-        const char *dir_name = SV_SlotName(defer_save_slot);
+        const char *dir_name = SaveSlotName(defer_save_slot);
 
-        SV_ClearSlot(dir_name);
-        SV_CopySlot("current", dir_name);
+        SaveClearSlot(dir_name);
+        SaveCopySlot("current", dir_name);
 
         ConsolePrint("%s", language["GameSaved"]);
     }
@@ -1093,7 +1093,7 @@ static void GameDoNewGame(void)
 
     E_ForceWipe();
 
-    SV_ClearSlot("current");
+    SaveClearSlot("current");
     quicksave_slot = -1;
 
     InitNew(*defer_params);
@@ -1215,7 +1215,7 @@ static void GameDoEndGame(void)
 
     DestroyAllPlayers();
 
-    SV_ClearSlot("current");
+    SaveClearSlot("current");
 
     if (game_state == GS_LEVEL)
     {

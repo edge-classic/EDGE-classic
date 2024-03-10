@@ -1076,7 +1076,7 @@ void InitDirectories(void)
 
     if (!epi::IsDirectory(save_dir)) epi::MakeDirectory(save_dir);
 
-    SV_ClearSlot("current");
+    SaveClearSlot("current");
 
     // screenshot directory
     shot_dir = epi::PathAppend(home_directory, kScreenshotDirectory);
@@ -2056,7 +2056,7 @@ static void E_Startup(void)
     BuildXglNodes();
     ShowNotice();
 
-    SV_MainInit();
+    SaveSystemInitialize();
     PrecacheSounds();
     InitializeSprites();
    ProcessTxHiNamespaces();

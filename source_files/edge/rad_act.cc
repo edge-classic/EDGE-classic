@@ -105,7 +105,7 @@ void RAD_ResetTips(void)
     {
         drawtip_t *current = tip_slots + i;
 
-        SV_FreeString(current->tip_text);
+        SaveChunkFreeString(current->tip_text);
     }
 
     RAD_InitTips();
@@ -130,12 +130,12 @@ static void SendTip(rad_trigger_t *R, s_tip_t *tip, int slot)
 
     current->delay = tip->display_time;
 
-    SV_FreeString(current->tip_text);
+    SaveChunkFreeString(current->tip_text);
 
     if (tip->tip_ldf)
-        current->tip_text = SV_DupString(language[tip->tip_ldf]);
+        current->tip_text = SaveChunkCopyString(language[tip->tip_ldf]);
     else if (tip->tip_text)
-        current->tip_text = SV_DupString(tip->tip_text);
+        current->tip_text = SaveChunkCopyString(tip->tip_text);
     else
         current->tip_text = nullptr;
 
@@ -1077,9 +1077,9 @@ void RAD_ActMenuStyle(rad_trigger_t *R, void *param)
 {
     s_menu_style_t *mm = (s_menu_style_t *)param;
 
-    SV_FreeString(R->menu_style_name);
+    SaveChunkFreeString(R->menu_style_name);
 
-    R->menu_style_name = SV_DupString(mm->style);
+    R->menu_style_name = SaveChunkCopyString(mm->style);
 }
 
 void RAD_ActJumpOn(rad_trigger_t *R, void *param)

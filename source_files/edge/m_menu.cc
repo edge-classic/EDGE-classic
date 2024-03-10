@@ -485,7 +485,7 @@ void MenuReadSaveStrings(void)
 {
     int i, version;
 
-    saveglobals_t *globs;
+    SaveGlobals *globs;
 
     for (i = 0; i < kTotalSaveSlots; i++)
     {
@@ -501,25 +501,25 @@ void MenuReadSaveStrings(void)
         save_extended_information_slots[i].game_name[0]   = 0;
 
         int         slot = save_page * kTotalSaveSlots + i;
-        std::string fn(SV_FileName(SV_SlotName(slot), "head"));
+        std::string fn(SaveFilename(SaveSlotName(slot), "head"));
 
-        if (!SV_OpenReadFile(fn))
+        if (!SaveFileOpenRead(fn))
         {
             save_extended_information_slots[i].empty   = true;
             save_extended_information_slots[i].corrupt = false;
             continue;
         }
 
-        if (!SV_VerifyHeader(&version))
+        if (!SaveFileVerifyHeader(&version))
         {
-            SV_CloseReadFile();
+            SaveFileCloseRead();
             continue;
         }
 
-        globs = SV_LoadGLOB();
+        globs = SaveGlobalsLoad();
 
         // close file now -- we only need the globals
-        SV_CloseReadFile();
+        SaveFileCloseRead();
 
         if (!globs) continue;
 
@@ -527,7 +527,7 @@ void MenuReadSaveStrings(void)
 
         if (!globs->game || !globs->level || !globs->description)
         {
-            SV_FreeGLOB(globs);
+            SaveGlobalsFree(globs);
             continue;
         }
 
@@ -548,7 +548,7 @@ void MenuReadSaveStrings(void)
         save_extended_information_slots[i].skill        = globs->skill;
         save_extended_information_slots[i].network_game = globs->netgame;
 
-        SV_FreeGLOB(globs);
+        SaveGlobalsFree(globs);
 
         epi::ReplaceExtension(fn, ".replace");
         if (epi::FileExists(fn))

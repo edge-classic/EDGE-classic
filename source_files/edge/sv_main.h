@@ -32,10 +32,7 @@
 //     loaded from the savegame file.
 //
 
-#ifndef __SV_MAIN_H__
-#define __SV_MAIN_H__
-
-
+#pragma once
 
 #include "dm_defs.h"
 #include "e_player.h"
@@ -48,81 +45,33 @@ class MapDefinition;
 // STRUCTURE TABLE STUFF
 //
 
-typedef enum
+enum SaveFieldKind
 {
-    SFKIND_Invalid = 0, // invalid values can be helpful
-    SFKIND_Numeric,
-    SFKIND_Index,
-    SFKIND_String,
-    SFKIND_Struct
-} savefieldkind_e;
+    kSaveFieldInvalid = 0,  // invalid values can be helpful
+    kSaveFieldNumeric,
+    kSaveFieldIndex,
+    kSaveFieldString,
+    kSaveFieldStruct
+};
 
-typedef struct
+struct SaveFieldType
 {
     // basic kind of field (for SDEF chunk)
-    savefieldkind_e kind;
+    SaveFieldKind kind;
 
-    // number of bytes for SFKIND_Numeric (1, 2, 4 or 8)
+    // number of bytes for kSaveFieldNumeric (1, 2, 4 or 8)
     int size;
 
-    // name of structure for SFKIND_Struct, or name of array
-    // for SFKIND_Index.
+    // name of structure for kSaveFieldStruct, or name of array
+    // for kSaveFieldIndex.
     const char *name;
-} savefieldtype_t;
-
-#define SVT_INVALID                                                                                                    \
-    {                                                                                                                  \
-        SFKIND_Invalid, 0, nullptr                                                                                        \
-    }
-
-#define SVT_INT                                                                                                        \
-    {                                                                                                                  \
-        SFKIND_Numeric, 4, nullptr                                                                                        \
-    }
-#define SVT_SHORT                                                                                                      \
-    {                                                                                                                  \
-        SFKIND_Numeric, 2, nullptr                                                                                        \
-    }
-#define SVT_BYTE                                                                                                       \
-    {                                                                                                                  \
-        SFKIND_Numeric, 1, nullptr                                                                                        \
-    }
-#define SVT_FLOAT                                                                                                      \
-    {                                                                                                                  \
-        SFKIND_Numeric, 4, nullptr                                                                                        \
-    }
-#define SVT_VEC2                                                                                                       \
-    {                                                                                                                  \
-        SFKIND_Numeric, 8, nullptr                                                                                        \
-    }
-#define SVT_VEC3                                                                                                       \
-    {                                                                                                                  \
-        SFKIND_Numeric, 12, nullptr                                                                                       \
-    }
-#define SVT_INDEX(name)                                                                                                \
-    {                                                                                                                  \
-        SFKIND_Index, 4, name                                                                                          \
-    }
-#define SVT_STRING                                                                                                     \
-    {                                                                                                                  \
-        SFKIND_String, 0, nullptr                                                                                         \
-    }
-#define SVT_STRUCT(name)                                                                                               \
-    {                                                                                                                  \
-        SFKIND_Struct, 0, name                                                                                         \
-    }
-
-#define SVT_ANGLE   SVT_INT
-#define SVT_BOOLEAN SVT_INT
-#define SVT_ENUM    SVT_INT
-#define SVT_RGBCOL  SVT_INT
-#define SVT_PERCENT SVT_FLOAT
+};
 
 // This describes a single field
-typedef struct savefieldtype_s
+struct SaveField
 {
-    // offset of field in structure (actually a ptr into dummy struct)
-    const char *offset_p;
+    // offset of field in structure
+    size_t pointer_offset;
 
     // name of field in savegame system
     const char *field_name;
@@ -131,10 +80,10 @@ typedef struct savefieldtype_s
     int count;
 
     // field type information
-    savefieldtype_t type;
+    SaveFieldType type;
 
     // get & put routines.  The extra parameter depends on the type, for
-    // SFKIND_Struct it is the name of the structure, for SFKIND_Index
+    // kSaveFieldStruct it is the name of the structure, for kSaveFieldIndex
     // it is the name of the array.  When `field_put' is nullptr, then this
     // field is not saved into the output SDEF chunk.
     bool (*field_get)(void *storage, int index, void *extra);
@@ -142,28 +91,14 @@ typedef struct savefieldtype_s
 
     // for loaded info, this points to the known version of the field,
     // otherwise nullptr if the loaded field is unknown.
-    struct savefieldtype_s *known_field;
-} savefield_t;
-
-// NOTE: requires SV_F_BASE to be defined as the dummy struct
-
-#define SVFIELD(field, fname, fnum, ftype, getter, putter)                                                             \
-    {                                                                                                                  \
-        (const char *)&SV_F_BASE.field, fname, fnum, ftype, getter, putter, nullptr                                       \
-    }
-
-#define SVFIELD_END                                                                                                    \
-    {                                                                                                                  \
-        0, nullptr, 0, SVT_INVALID, nullptr, nullptr, nullptr                                                                      \
-    }
-
-#define SVDUMMY ((const char *)&SV_F_BASE)
+    SaveField *known_field;
+};
 
 // This describes a single structure
-typedef struct savestruct_s
+struct SaveStruct
 {
     // link in list of structure definitions
-    struct savestruct_s *next;
+    SaveStruct *next;
 
     // structure name (for SDEF/ADEF chunks)
     const char *struct_name;
@@ -172,10 +107,7 @@ typedef struct savestruct_s
     const char *marker;
 
     // array of field definitions
-    savefield_t *fields;
-
-    // address of dummy struct (used to compute field offsets)
-    const char *dummy_base;
+    SaveField *fields;
 
     // this must be true to put the definition into the savegame file.
     // Allows compatibility structures that are read-only.
@@ -184,21 +116,21 @@ typedef struct savestruct_s
     // only used when loading.  For loaded info, this refers to the
     // known struct of the same name (or nullptr if none).  For known info,
     // this points to the loaded info (or nullptr if absent).
-    struct savestruct_s *counterpart;
-} savestruct_t;
+    SaveStruct *counterpart;
+};
 
 // This describes a single array
-typedef struct savearray_s
+struct SaveArray
 {
     // link in list of array definitions
-    struct savearray_s *next;
+    SaveArray *next;
 
     // array name (for ADEF and STOR chunks)
     const char *array_name;
 
     // array type.  For loaded info, this points to the loaded
     // structure.  Never nullptr.
-    savestruct_t *sdef;
+    SaveStruct *sdef;
 
     // this must be true to put the definition into the savegame file.
     // Allows compatibility arrays that are read-only.
@@ -218,71 +150,54 @@ typedef struct savearray_s
     // only used when loading.  For loaded info, this refers to the
     // known array (or nullptr if none).  For known info, this points to
     // the loaded info (or nullptr if absent).
-    struct savearray_s *counterpart;
+    SaveArray *counterpart;
 
     // number of elements to be loaded.
     int loaded_size;
-} savearray_t;
+};
 
 //
 //  COMMON GET ROUTINES
 //
 //  Note the `SR_' prefix.
 //
-bool SR_GetByte(void *storage, int index, void *extra);
-bool SR_GetShort(void *storage, int index, void *extra);
-bool SR_GetInt(void *storage, int index, void *extra);
-
-bool SR_GetAngle(void *storage, int index, void *extra);
-bool SR_GetFloat(void *storage, int index, void *extra);
-bool SR_GetBoolean(void *storage, int index, void *extra);
-
-bool SR_GetVec2(void *storage, int index, void *extra);
-bool SR_GetVec3(void *storage, int index, void *extra);
-bool SR_GetFloatFromInt(void *storage, int index, void *extra);
-bool SR_GetAngleFromSlope(void *storage, int index, void *extra);
-
-#define SR_GetEnum    SR_GetInt
-#define SR_GetRGB     SR_GetInt
-#define SR_GetPercent SR_GetFloat
+bool SaveGameGetInteger(void *storage, int index, void *extra);
+bool SaveGameGetAngle(void *storage, int index, void *extra);
+bool SaveGameGetFloat(void *storage, int index, void *extra);
+bool SaveGameGetBoolean(void *storage, int index, void *extra);
+bool SaveGameGetVec2(void *storage, int index, void *extra);
+bool SaveGameGetVec3(void *storage, int index, void *extra);
+bool SaveGameGetAngleFromSlope(void *storage, int index, void *extra);
 
 //
 //  COMMON PUT ROUTINES
 //
 //  Note the `SR_' prefix.
 //
-void SR_PutByte(void *storage, int index, void *extra);
-void SR_PutShort(void *storage, int index, void *extra);
-void SR_PutInt(void *storage, int index, void *extra);
-
-void SR_PutAngle(void *storage, int index, void *extra);
-void SR_PutFloat(void *storage, int index, void *extra);
-void SR_PutBoolean(void *storage, int index, void *extra);
-
-void SR_PutVec2(void *storage, int index, void *extra);
-void SR_PutVec3(void *storage, int index, void *extra);
-void SR_PutAngleToSlope(void *storage, int index, void *extra);
-
-#define SR_PutEnum    SR_PutInt
-#define SR_PutRGB     SR_PutInt
-#define SR_PutPercent SR_PutFloat
+void SaveGamePutInteger(void *storage, int index, void *extra);
+void SaveGamePutAngle(void *storage, int index, void *extra);
+void SaveGamePutFloat(void *storage, int index, void *extra);
+void SaveGamePutBoolean(void *storage, int index, void *extra);
+void SaveGamePutVec2(void *storage, int index, void *extra);
+void SaveGamePutVec3(void *storage, int index, void *extra);
+void SaveGamePutAngleToSlope(void *storage, int index, void *extra);
 
 //
 //  GLOBAL STUFF
 //
 
-typedef struct crc_check_s
+struct CrcCheck
 {
     // number of items
     int count;
 
     // CRC computed over all the items
     uint32_t crc;
-} crc_check_t;
+};
 
 // this structure contains everything for the top-level [GLOB] chunk.
 // Strings are copies and need to be freed.
-typedef struct
+struct SaveGlobals
 {
     // [IVAR] stuff:
 
@@ -303,23 +218,23 @@ typedef struct
     int skill;
     int netgame;
 
-    const Image *sky_image; // -AJA- added 2003/12/19
+    const Image *sky_image;  // -AJA- added 2003/12/19
 
     const char *description;
     const char *desc_date;
 
-    crc_check_t mapsector;
-    crc_check_t mapline;
-    crc_check_t mapthing;
+    CrcCheck mapsector;
+    CrcCheck mapline;
+    CrcCheck mapthing;
 
-    crc_check_t rscript;
-    crc_check_t ddfatk;
-    crc_check_t ddfgame;
-    crc_check_t ddflevl;
-    crc_check_t ddfline;
-    crc_check_t ddfsect;
-    crc_check_t ddfmobj;
-    crc_check_t ddfweap;
+    CrcCheck rscript;
+    CrcCheck ddfatk;
+    CrcCheck ddfgame;
+    CrcCheck ddflevl;
+    CrcCheck ddfline;
+    CrcCheck ddfsect;
+    CrcCheck ddfmobj;
+    CrcCheck ddfweap;
 
     // [WADS] info
     int          wad_num;
@@ -327,47 +242,41 @@ typedef struct
 
     // [PLYR] info, for DEMO FILES only!
     void *players[MAXPLAYERS];
-} saveglobals_t;
+};
 
-saveglobals_t *SV_NewGLOB(void);
-saveglobals_t *SV_LoadGLOB(void);
-void           SV_SaveGLOB(saveglobals_t *globs);
-void           SV_FreeGLOB(saveglobals_t *globs);
+SaveGlobals *SaveGlobalsNew(void);
+SaveGlobals *SaveGlobalsLoad(void);
+void         SaveGlobalsSave(SaveGlobals *globs);
+void         SaveGlobalsFree(SaveGlobals *globs);
 
 //
 //  ADMININISTRATION
 //
 
-void SV_MainInit(void);
+void SaveSystemInitialize(void);
 
-savestruct_t *SV_MainLookupStruct(const char *name);
-savearray_t  *SV_MainLookupArray(const char *name);
+SaveStruct *SaveStructLookup(const char *name);
+SaveArray  *SaveArrayLookup(const char *name);
 
-void SV_BeginLoad(bool is_hub);
-void SV_FinishLoad(void);
+void BeginSaveGameLoad(bool is_hub);
+void FinishSaveGameLoad(void);
 
-bool SV_LoadStruct(void *base, savestruct_t *info);
-bool SV_LoadEverything(void);
+bool SaveGameStructLoad(void *base, SaveStruct *info);
+bool LoadAllSaveChunks(void);
 
-void SV_BeginSave(void);
-void SV_FinishSave(void);
+void BeginSaveGameSave(void);
+void FinishSaveGameSave(void);
 
-void SV_SaveStruct(void *base, savestruct_t *info);
-void SV_SaveEverything(void);
+void SaveGameStructSave(void *base, SaveStruct *info);
+void SaveAllSaveChunks(void);
 
-const char *SV_SlotName(int slot);
-const char *SV_MapName(const MapDefinition *map);
+const char *SaveSlotName(int slot);
+const char *SaveMapName(const MapDefinition *map);
 
-std::string SV_FileName(const char *slot_name, const char *map_name);
+std::string SaveFilename(const char *slot_name, const char *map_name);
 
-void SV_ClearSlot(const char *slot_name);
-void SV_CopySlot(const char *src_name, const char *dest_name);
-
-//
-//  DEBUGGING
-//
-
-void SV_DumpSaveGame(int slot);
+void SaveClearSlot(const char *slot_name);
+void SaveCopySlot(const char *src_name, const char *dest_name);
 
 //
 //  EXTERNAL DEFS
@@ -375,37 +284,35 @@ void SV_DumpSaveGame(int slot);
 
 extern void *sv_current_elem;
 
-extern savestruct_t *sv_known_structs;
-extern savearray_t  *sv_known_arrays;
+extern SaveStruct *sv_known_structs;
+extern SaveArray  *sv_known_arrays;
 
-bool SR_MobjGetMobj(void *storage, int index, void *extra);
-void SR_MobjPutMobj(void *storage, int index, void *extra);
+bool SaveGameGetMapObject(void *storage, int index, void *extra);
+void SaveGamePutMapObject(void *storage, int index, void *extra);
 
-int   SV_MobjFindElem(MapObject *elem);
-void *SV_MobjGetElem(int index);
+int   SaveGameMapObjectGetIndex(MapObject *elem);
+void *SaveGameMapObjectFindByIndex(int index);
 
-int   SV_PlayerFindElem(player_t *elem);
-void *SV_PlayerGetElem(int index);
+int   SaveGamePlayerGetIndex(player_t *elem);
+void *SaveGamePlayerFindByIndex(int index);
 
-bool SR_LevelGetImage(void *storage, int index, void *extra);
-void SR_LevelPutImage(void *storage, int index, void *extra);
+bool SaveGameLevelGetImage(void *storage, int index, void *extra);
+void SaveGameLevelPutImage(void *storage, int index, void *extra);
 
-bool SR_LevelGetColmap(void *storage, int index, void *extra);
-void SR_LevelPutColmap(void *storage, int index, void *extra);
+bool SaveGameLevelGetColormap(void *storage, int index, void *extra);
+void SaveGameLevelPutColormap(void *storage, int index, void *extra);
 
-bool SR_LineGetLine(void *storage, int index, void *extra);
-void SR_LinePutLine(void *storage, int index, void *extra);
+bool SaveGameGetLine(void *storage, int index, void *extra);
+void SaveGamePutLine(void *storage, int index, void *extra);
 
-bool SR_SectorGetSector(void *storage, int index, void *extra);
-void SR_SectorPutSector(void *storage, int index, void *extra);
+bool SaveGameGetSector(void *storage, int index, void *extra);
+void SaveGamePutSector(void *storage, int index, void *extra);
 
-bool SR_SectorGetEF(void *storage, int index, void *extra);
-void SR_SectorPutEF(void *storage, int index, void *extra);
+bool SaveGameSectorGetExtrafloor(void *storage, int index, void *extra);
+void SaveGameSectorPutExtrafloor(void *storage, int index, void *extra);
 
-bool SR_TriggerGetScript(void *storage, int index, void *extra);
-void SR_TriggerPutScript(void *storage, int index, void *extra);
-
-#endif /*__SV_MAIN_H__*/
+bool SaveGameGetTriggerScript(void *storage, int index, void *extra);
+void SaveGamePutTriggerScript(void *storage, int index, void *extra);
 
 //--- editor settings ---
 // vi:ts=4:sw=4:noexpandtab

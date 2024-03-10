@@ -27,111 +27,474 @@
 
 #include <string.h>
 
-
-
 #include "p_setup.h"
-#include "sv_chunk.h"
-#include "sv_main.h"
 #include "str_compare.h"
 #include "str_util.h"
-#undef SF
-#define SF SVFIELD
+#include "sv_chunk.h"
+#include "sv_main.h"
 
 // forward decls.
-int   SV_MobjCountElems(void);
-int   SV_MobjFindElem(MapObject *elem);
-void *SV_MobjGetElem(int index);
-void  SV_MobjCreateElems(int num_elems);
-void  SV_MobjFinaliseElems(void);
+int   SaveGameMapObjectCountElems(void);
+int   SaveGameMapObjectGetIndex(MapObject *elem);
+void *SaveGameMapObjectFindByIndex(int index);
+void  SaveGameMapObjectCreateElems(int num_elems);
+void  SaveGameMapObjectFinaliseElems(void);
 
 int   SV_ItemqCountElems(void);
-int   SV_ItemqFindElem(RespawnQueueItem *elem);
-void *SV_ItemqGetElem(int index);
+int   SV_ItemqGetIndex(RespawnQueueItem *elem);
+void *SV_ItemqFindByIndex(int index);
 void  SV_ItemqCreateElems(int num_elems);
 void  SV_ItemqFinaliseElems(void);
 
-bool SR_MobjGetPlayer(void *storage, int index, void *extra);
-bool SR_MobjGetMobj(void *storage, int index, void *extra);
-bool SR_MobjGetType(void *storage, int index, void *extra);
-bool SR_MobjGetState(void *storage, int index, void *extra);
-bool SR_MobjGetSpawnPoint(void *storage, int index, void *extra);
-bool SR_MobjGetAttack(void *storage, int index, void *extra);
-bool SR_MobjGetWUDs(void *storage, int index, void *extra);
+bool SaveGameMapObjectGetPlayer(void *storage, int index, void *extra);
+bool SaveGameGetMapObject(void *storage, int index, void *extra);
+bool SaveGameMapObjectGetType(void *storage, int index, void *extra);
+bool SaveGameMapObjectGetState(void *storage, int index, void *extra);
+bool SaveGameMapObjectGetSpawnPoint(void *storage, int index, void *extra);
+bool SaveGameMapObjectGetAttack(void *storage, int index, void *extra);
+bool SaveGameMapObjectGetWUDs(void *storage, int index, void *extra);
 
-void SR_MobjPutPlayer(void *storage, int index, void *extra);
-void SR_MobjPutMobj(void *storage, int index, void *extra);
-void SR_MobjPutType(void *storage, int index, void *extra);
-void SR_MobjPutState(void *storage, int index, void *extra);
-void SR_MobjPutSpawnPoint(void *storage, int index, void *extra);
-void SR_MobjPutAttack(void *storage, int index, void *extra);
-void SR_MobjPutWUDs(void *storage, int index, void *extra);
+void SaveGameMapObjectPutPlayer(void *storage, int index, void *extra);
+void SaveGamePutMapObject(void *storage, int index, void *extra);
+void SaveGameMapObjectPutType(void *storage, int index, void *extra);
+void SaveGameMapObjectPutState(void *storage, int index, void *extra);
+void SaveGameMapObjectPutSpawnPoint(void *storage, int index, void *extra);
+void SaveGameMapObjectPutAttack(void *storage, int index, void *extra);
+void SaveGameMapObjectPutWUDs(void *storage, int index, void *extra);
 
 //----------------------------------------------------------------------------
 //
 //  MOBJ STRUCTURE AND ARRAY
 //
-static MapObject sv_dummy_mobj;
 
-#define SV_F_BASE sv_dummy_mobj
-
-static savefield_t sv_fields_mobj[] = {
-    SF(x, "x", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), SF(y, "y", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(z, "z", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), SF(angle_, "angle", 1, SVT_ANGLE, SR_GetAngle, SR_PutAngle),
-    SF(floor_z_, "floorz", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(ceiling_z_, "ceilingz", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(dropoff_z_, "dropoffz", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(radius_, "radius", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(height_, "height", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), 
-    SF(scale_, "scale", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(aspect_, "aspect", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(alpha_, "alpha", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(momentum_, "mom", 1, SVT_VEC3, SR_GetVec3, SR_PutVec3),
-    SF(health_, "health", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(spawn_health_, "spawnhealth", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(speed_, "speed", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat), SF(fuse_, "fuse", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(morph_timeout_, "morphtimeout", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(pre_become_, "preBecome", 1, SVT_STRING, SR_MobjGetType, SR_MobjPutType),
-    SF(info_, "info", 1, SVT_STRING, SR_MobjGetType, SR_MobjPutType),
-    SF(state_, "state", 1, SVT_STRING, SR_MobjGetState, SR_MobjPutState),
-    SF(next_state_, "next_state", 1, SVT_STRING, SR_MobjGetState, SR_MobjPutState),
-    SF(tics_, "tics", 1, SVT_INT, SR_GetInt, SR_PutInt), SF(flags_, "flags", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(extended_flags_, "extendedflags", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(hyper_flags_, "hyperflags", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(move_direction_, "movedir", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(move_count_, "movecount", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(reaction_time_, "reactiontime", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(threshold_, "threshold", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(model_skin_, "model_skin", 1, SVT_INT, SR_GetInt, SR_PutInt), 
-    SF(model_scale_, "model_scale", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(model_aspect_, "model_aspect", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(tag_, "tag", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(wait_until_dead_tags_, "wud_tags", 1, SVT_STRING, SR_MobjGetWUDs, SR_MobjPutWUDs),
-    SF(side_, "side", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(player_, "player", 1, SVT_INDEX("players"), SR_MobjGetPlayer, SR_MobjPutPlayer),
-    SF(spawnpoint_, "spawnpoint", 1, SVT_STRUCT("spawnpoint_t"), SR_MobjGetSpawnPoint, SR_MobjPutSpawnPoint),
-    SF(original_height_, "origheight", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(visibility_, "visibility", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(target_visibility_, "vis_target", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(pain_chance_, "painchance", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(vertical_angle_, "vertangle", 1, SVT_FLOAT, SR_GetAngleFromSlope, SR_PutAngleToSlope),
-    SF(spread_count_, "spreadcount", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(current_attack_, "currentattack", 1, SVT_STRING, SR_MobjGetAttack, SR_MobjPutAttack),
-    SF(source_, "source", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(target_, "target", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(tracer_, "tracer", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(support_object_, "supportobj", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(above_object_, "above_mo", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(below_object_, "below_mo", 1, SVT_INDEX("mobjs"), SR_MobjGetMobj, SR_MobjPutMobj),
-    SF(ride_delta_x_, "ride_dx", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(ride_delta_y_, "ride_dy", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(on_ladder_, "on_ladder", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(path_trigger_, "path_trigger", 1, SVT_STRING, SR_TriggerGetScript, SR_TriggerPutScript),
-    SF(dynamic_light_.r, "dlight_qty", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(dynamic_light_.target, "dlight_target", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(dynamic_light_.color, "dlight_color", 1, SVT_RGBCOL, SR_GetRGB, SR_PutRGB),
-    SF(shot_count_, "shot_count", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(last_heard_, "lastheard", 1, SVT_INT, SR_GetInt, SR_PutInt),
-    SF(is_voodoo_, "is_voodoo", 1, SVT_BOOLEAN, SR_GetBoolean, SR_PutBoolean),
+static SaveField sv_fields_mobj[] = {
+    {offsetof(MapObject, x),
+     "x",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, y),
+     "y",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, z),
+     "z",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, angle_),
+     "angle",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetAngle,
+     SaveGamePutAngle,
+     nullptr},
+    {offsetof(MapObject, floor_z_),
+     "floorz",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, ceiling_z_),
+     "ceilingz",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, dropoff_z_),
+     "dropoffz",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, radius_),
+     "radius",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, height_),
+     "height",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, scale_),
+     "scale",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, aspect_),
+     "aspect",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, alpha_),
+     "alpha",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, momentum_),
+     "mom",
+     1,
+     {kSaveFieldNumeric, 12, nullptr},
+     SaveGameGetVec3,
+     SaveGamePutVec3,
+     nullptr},
+    {offsetof(MapObject, health_),
+     "health",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, spawn_health_),
+     "spawnhealth",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, speed_),
+     "speed",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, fuse_),
+     "fuse",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, morph_timeout_),
+     "morphtimeout",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, pre_become_),
+     "preBecome",
+     1,
+     {kSaveFieldString, 0, nullptr},
+     SaveGameMapObjectGetType,
+     SaveGameMapObjectPutType,
+     nullptr},
+    {offsetof(MapObject, info_),
+     "info",
+     1,
+     {kSaveFieldString, 0, nullptr},
+     SaveGameMapObjectGetType,
+     SaveGameMapObjectPutType,
+     nullptr},
+    {offsetof(MapObject, state_),
+     "state",
+     1,
+     {kSaveFieldString, 0, nullptr},
+     SaveGameMapObjectGetState,
+     SaveGameMapObjectPutState,
+     nullptr},
+    {offsetof(MapObject, next_state_),
+     "next_state",
+     1,
+     {kSaveFieldString, 0, nullptr},
+     SaveGameMapObjectGetState,
+     SaveGameMapObjectPutState,
+     nullptr},
+    {offsetof(MapObject, tics_),
+     "tics",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, flags_),
+     "flags",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, extended_flags_),
+     "extendedflags",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, hyper_flags_),
+     "hyperflags",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, move_direction_),
+     "movedir",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, move_count_),
+     "movecount",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, reaction_time_),
+     "reactiontime",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, threshold_),
+     "threshold",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, model_skin_),
+     "model_skin",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, model_scale_),
+     "model_scale",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, model_aspect_),
+     "model_aspect",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, tag_),
+     "tag",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, wait_until_dead_tags_),
+     "wud_tags",
+     1,
+     {kSaveFieldString, 0, nullptr},
+     SaveGameMapObjectGetWUDs,
+     SaveGameMapObjectPutWUDs,
+     nullptr},
+    {offsetof(MapObject, side_),
+     "side",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, player_),
+     "player",
+     1,
+     {kSaveFieldIndex, 4, "players"},
+     SaveGameMapObjectGetPlayer,
+     SaveGameMapObjectPutPlayer,
+     nullptr},
+    {offsetof(MapObject, spawnpoint_),
+     "spawnpoint",
+     1,
+     {kSaveFieldStruct, 0, "spawnpoint_t"},
+     SaveGameMapObjectGetSpawnPoint,
+     SaveGameMapObjectPutSpawnPoint,
+     nullptr},
+    {offsetof(MapObject, original_height_),
+     "origheight",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, visibility_),
+     "visibility",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, target_visibility_),
+     "vis_target",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, pain_chance_),
+     "painchance",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, vertical_angle_),
+     "vertangle",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetAngleFromSlope,
+     SaveGamePutAngleToSlope,
+     nullptr},
+    {offsetof(MapObject, spread_count_),
+     "spreadcount",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, current_attack_),
+     "currentattack",
+     1,
+     {kSaveFieldString, 0, nullptr},
+     SaveGameMapObjectGetAttack,
+     SaveGameMapObjectPutAttack,
+     nullptr},
+    {offsetof(MapObject, source_),
+     "source",
+     1,
+     {kSaveFieldIndex, 4, "mobjs"},
+     SaveGameGetMapObject,
+     SaveGamePutMapObject,
+     nullptr},
+    {offsetof(MapObject, target_),
+     "target",
+     1,
+     {kSaveFieldIndex, 4, "mobjs"},
+     SaveGameGetMapObject,
+     SaveGamePutMapObject,
+     nullptr},
+    {offsetof(MapObject, tracer_),
+     "tracer",
+     1,
+     {kSaveFieldIndex, 4, "mobjs"},
+     SaveGameGetMapObject,
+     SaveGamePutMapObject,
+     nullptr},
+    {offsetof(MapObject, support_object_),
+     "supportobj",
+     1,
+     {kSaveFieldIndex, 4, "mobjs"},
+     SaveGameGetMapObject,
+     SaveGamePutMapObject,
+     nullptr},
+    {offsetof(MapObject, above_object_),
+     "above_mo",
+     1,
+     {kSaveFieldIndex, 4, "mobjs"},
+     SaveGameGetMapObject,
+     SaveGamePutMapObject,
+     nullptr},
+    {offsetof(MapObject, below_object_),
+     "below_mo",
+     1,
+     {kSaveFieldIndex, 4, "mobjs"},
+     SaveGameGetMapObject,
+     SaveGamePutMapObject,
+     nullptr},
+    {offsetof(MapObject, ride_delta_x_),
+     "ride_dx",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, ride_delta_y_),
+     "ride_dy",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, on_ladder_),
+     "on_ladder",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, path_trigger_),
+     "path_trigger",
+     1,
+     {kSaveFieldString, 0, nullptr},
+     SaveGameGetTriggerScript,
+     SaveGamePutTriggerScript,
+     nullptr},
+    {offsetof(MapObject, dynamic_light_.r),
+     "dlight_qty",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, dynamic_light_.target),
+     "dlight_target",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(MapObject, dynamic_light_.color),
+     "dlight_color",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, shot_count_),
+     "shot_count",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, last_heard_),
+     "lastheard",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
+    {offsetof(MapObject, is_voodoo_),
+     "is_voodoo",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetBoolean,
+     SaveGamePutBoolean,
+     nullptr},
     // NOT HERE:
     //   subsector & region: these are regenerated.
     //   next,prev,snext,sprev,bnext,bprev: links are regenerated.
@@ -139,142 +502,197 @@ static savefield_t sv_fields_mobj[] = {
     //   lastlookup: being reset to zero won't hurt.
     //   ...
 
-    SVFIELD_END};
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
-savestruct_t sv_struct_mobj = {
-    nullptr,           // link in list
-    "mobj_t",       // structure name
-    "mobj",         // start marker
-    sv_fields_mobj, // field descriptions
-    SVDUMMY,        // dummy base
-    true,           // define_me
-    nullptr            // pointer to known struct
+SaveStruct sv_struct_mobj = {
+    nullptr,         // link in list
+    "mobj_t",        // structure name
+    "mobj",          // start marker
+    sv_fields_mobj,  // field descriptions
+    true,            // define_me
+    nullptr          // pointer to known struct
 };
 
-#undef SV_F_BASE
+SaveArray sv_array_mobj = {
+    nullptr,          // link in list
+    "mobjs",          // array name
+    &sv_struct_mobj,  // array type
+    true,             // define_me
+    true,             // allow_hub
 
-savearray_t sv_array_mobj = {
-    nullptr,            // link in list
-    "mobjs",         // array name
-    &sv_struct_mobj, // array type
-    true,            // define_me
-    true,            // allow_hub
+    SaveGameMapObjectCountElems,     // count routine
+    SaveGameMapObjectFindByIndex,    // index routine
+    SaveGameMapObjectCreateElems,    // creation routine
+    SaveGameMapObjectFinaliseElems,  // finalisation routine
 
-    SV_MobjCountElems,    // count routine
-    SV_MobjGetElem,       // index routine
-    SV_MobjCreateElems,   // creation routine
-    SV_MobjFinaliseElems, // finalisation routine
-
-    nullptr, // pointer to known array
-    0     // loaded size
+    nullptr,  // pointer to known array
+    0         // loaded size
 };
 
 //----------------------------------------------------------------------------
 //
 //  SPAWNPOINT STRUCTURE
 //
-static SpawnPoint sv_dummy_spawnpoint;
 
-#define SV_F_BASE sv_dummy_spawnpoint
+static SaveField sv_fields_spawnpoint[] = {
+    {offsetof(SpawnPoint, x),
+     "x",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(SpawnPoint, y),
+     "y",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(SpawnPoint, z),
+     "z",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetFloat,
+     SaveGamePutFloat,
+     nullptr},
+    {offsetof(SpawnPoint, angle),
+     "angle",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetAngle,
+     SaveGamePutAngle,
+     nullptr},
+    {offsetof(SpawnPoint, vertical_angle),
+     "slope",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetAngleFromSlope,
+     SaveGamePutAngleToSlope,
+     nullptr},
+    {offsetof(SpawnPoint, info),
+     "info",
+     1,
+     {kSaveFieldString, 0, nullptr},
+     SaveGameMapObjectGetType,
+     SaveGameMapObjectPutType,
+     nullptr},
+    {offsetof(SpawnPoint, flags),
+     "flags",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
 
-static savefield_t sv_fields_spawnpoint[] = {
-    SF(x, "x", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(y, "y", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(z, "z", 1, SVT_FLOAT, SR_GetFloat, SR_PutFloat),
-    SF(angle, "angle", 1, SVT_ANGLE, SR_GetAngle, SR_PutAngle),
-    SF(vertical_angle, "slope", 1, SVT_FLOAT, SR_GetAngleFromSlope, SR_PutAngleToSlope),
-    SF(info, "info", 1, SVT_STRING, SR_MobjGetType, SR_MobjPutType),
-    SF(flags, "flags", 1, SVT_INT, SR_GetInt, SR_PutInt),
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
-    SVFIELD_END};
-
-savestruct_t sv_struct_spawnpoint = {
-    nullptr,                 // link in list
-    "spawnpoint_t",       // structure name
-    "spwn",               // start marker
-    sv_fields_spawnpoint, // field descriptions
-    SVDUMMY,              // dummy base
-    true,                 // define_me
-    nullptr                  // pointer to known struct
+SaveStruct sv_struct_spawnpoint = {
+    nullptr,               // link in list
+    "spawnpoint_t",        // structure name
+    "spwn",                // start marker
+    sv_fields_spawnpoint,  // field descriptions
+    true,                  // define_me
+    nullptr                // pointer to known struct
 };
-
-#undef SV_F_BASE
 
 //----------------------------------------------------------------------------
 //
 //  ITEMINQUE STRUCTURE AND ARRAY
 //
-static RespawnQueueItem sv_dummy_iteminque;
 
-#define SV_F_BASE sv_dummy_iteminque
-
-static savefield_t sv_fields_iteminque[] = {
-    SF(spawnpoint, "spawnpoint", 1, SVT_STRUCT("spawnpoint_t"), SR_MobjGetSpawnPoint, SR_MobjPutSpawnPoint),
-    SF(time, "time", 1, SVT_INT, SR_GetInt, SR_PutInt),
+static SaveField sv_fields_iteminque[] = {
+    {offsetof(RespawnQueueItem, spawnpoint),
+     "spawnpoint",
+     1,
+     {kSaveFieldStruct, 0, "spawnpoint_t"},
+     SaveGameMapObjectGetSpawnPoint,
+     SaveGameMapObjectPutSpawnPoint,
+     nullptr},
+    {offsetof(RespawnQueueItem, time),
+     "time",
+     1,
+     {kSaveFieldNumeric, 4, nullptr},
+     SaveGameGetInteger,
+     SaveGamePutInteger,
+     nullptr},
 
     // NOT HERE:
     //   next,prev: links are regenerated.
 
-    SVFIELD_END};
+    {0,
+     nullptr,
+     0,
+     {kSaveFieldInvalid, 0, nullptr},
+     nullptr,
+     nullptr,
+     nullptr}};
 
-savestruct_t sv_struct_iteminque = {
-    nullptr,                // link in list
-    "iteminque_t",       // structure name
-    "itmq",              // start marker
-    sv_fields_iteminque, // field descriptions
-    SVDUMMY,             // dummy base
-    true,                // define_me
-    nullptr                 // pointer to known struct
+SaveStruct sv_struct_iteminque = {
+    nullptr,              // link in list
+    "iteminque_t",        // structure name
+    "itmq",               // start marker
+    sv_fields_iteminque,  // field descriptions
+    true,                 // define_me
+    nullptr               // pointer to known struct
 };
 
-#undef SV_F_BASE
+SaveArray sv_array_iteminque = {
+    nullptr,               // link in list
+    "itemquehead",         // array name
+    &sv_struct_iteminque,  // array type
+    true,                  // define_me
+    true,                  // allow_hub
 
-savearray_t sv_array_iteminque = {
-    nullptr,                 // link in list
-    "itemquehead",        // array name
-    &sv_struct_iteminque, // array type
-    true,                 // define_me
-    true,                 // allow_hub
+    SV_ItemqCountElems,     // count routine
+    SV_ItemqFindByIndex,    // index routine
+    SV_ItemqCreateElems,    // creation routine
+    SV_ItemqFinaliseElems,  // finalisation routine
 
-    SV_ItemqCountElems,    // count routine
-    SV_ItemqGetElem,       // index routine
-    SV_ItemqCreateElems,   // creation routine
-    SV_ItemqFinaliseElems, // finalisation routine
-
-    nullptr, // pointer to known array
-    0     // loaded size
+    nullptr,  // pointer to known array
+    0         // loaded size
 };
 
 //----------------------------------------------------------------------------
 
 //
-// SV_MobjCountElems
+// SaveGameMapObjectCountElems
 //
-int SV_MobjCountElems(void)
+int SaveGameMapObjectCountElems(void)
 {
     MapObject *cur;
-    int     count = 0;
+    int        count = 0;
 
-    for (cur = map_object_list_head; cur; cur = cur->next_)
-        count++;
+    for (cur = map_object_list_head; cur; cur = cur->next_) count++;
 
     return count;
 }
 
 //
-// SV_MobjGetElem
+// SaveGameMapObjectFindByIndex
 //
 // The index here starts at 0.
 //
-void *SV_MobjGetElem(int index)
+void *SaveGameMapObjectFindByIndex(int index)
 {
     MapObject *cur;
 
     for (cur = map_object_list_head; cur && index > 0; cur = cur->next_)
         index--;
 
-    if (!cur)
-        FatalError("LOADGAME: Invalid Mobj: %d\n", index);
+    if (!cur) FatalError("LOADGAME: Invalid Mobj: %d\n", index);
 
     SYS_ASSERT(index == 0);
 
@@ -282,29 +700,28 @@ void *SV_MobjGetElem(int index)
 }
 
 //
-// SV_MobjFindElem
+// SaveGameMapObjectGetIndex
 //
 // Returns the index number (starts at 0 here).
 //
-int SV_MobjFindElem(MapObject *elem)
+int SaveGameMapObjectGetIndex(MapObject *elem)
 {
     MapObject *cur;
-    int     index;
+    int        index;
 
-    for (cur = map_object_list_head, index = 0; cur && cur != elem; cur = cur->next_)
+    for (cur = map_object_list_head, index = 0; cur && cur != elem;
+         cur = cur->next_)
         index++;
 
-    if (!cur)
-        FatalError("LOADGAME: No such MobjPtr: %p\n", elem);
+    if (!cur) FatalError("LOADGAME: No such MobjPtr: %p\n", elem);
 
     return index;
 }
 
-void SV_MobjCreateElems(int num_elems)
+void SaveGameMapObjectCreateElems(int num_elems)
 {
     // free existing mobjs
-    if (map_object_list_head)
-        P_RemoveAllMobjs(true);
+    if (map_object_list_head) P_RemoveAllMobjs(true);
 
     SYS_ASSERT(map_object_list_head == nullptr);
 
@@ -312,11 +729,10 @@ void SV_MobjCreateElems(int num_elems)
     {
         MapObject *cur = new MapObject;
 
-        cur->next_ = map_object_list_head;
+        cur->next_     = map_object_list_head;
         cur->previous_ = nullptr;
 
-        if (map_object_list_head)
-            map_object_list_head->previous_ = cur;
+        if (map_object_list_head) map_object_list_head->previous_ = cur;
 
         map_object_list_head = cur;
 
@@ -329,31 +745,23 @@ void SV_MobjCreateElems(int num_elems)
     }
 }
 
-void SV_MobjFinaliseElems(void)
+void SaveGameMapObjectFinaliseElems(void)
 {
     for (MapObject *mo = map_object_list_head; mo != nullptr; mo = mo->next_)
     {
-        if (mo->info_ == nullptr)
-            mo->info_ = mobjtypes.Lookup(0); // template
+        if (mo->info_ == nullptr) mo->info_ = mobjtypes.Lookup(0);  // template
 
         // do not link zombie objects into the blockmap
-        if (!mo->IsRemoved())
-            SetThingPosition(mo);
+        if (!mo->IsRemoved()) SetThingPosition(mo);
 
         // handle reference counts
 
-        if (mo->tracer_)
-            mo->tracer_->reference_count_++;
-        if (mo->source_)
-            mo->source_->reference_count_++;
-        if (mo->target_)
-            mo->target_->reference_count_++;
-        if (mo->support_object_)
-            mo->support_object_->reference_count_++;
-        if (mo->above_object_)
-            mo->above_object_->reference_count_++;
-        if (mo->below_object_)
-            mo->below_object_->reference_count_++;
+        if (mo->tracer_) mo->tracer_->reference_count_++;
+        if (mo->source_) mo->source_->reference_count_++;
+        if (mo->target_) mo->target_->reference_count_++;
+        if (mo->support_object_) mo->support_object_->reference_count_++;
+        if (mo->above_object_) mo->above_object_->reference_count_++;
+        if (mo->below_object_) mo->below_object_->reference_count_++;
 
         // sanity checks
 
@@ -372,48 +780,45 @@ void SV_MobjFinaliseElems(void)
 int SV_ItemqCountElems(void)
 {
     RespawnQueueItem *cur;
-    int          count = 0;
+    int               count = 0;
 
-    for (cur = respawn_queue_head; cur; cur = cur->next)
-        count++;
+    for (cur = respawn_queue_head; cur; cur = cur->next) count++;
 
     return count;
 }
 
 //
-// SV_ItemqGetElem
+// SV_ItemqFindByIndex
 //
 // The index value starts at 0.
 //
-void *SV_ItemqGetElem(int index)
+void *SV_ItemqFindByIndex(int index)
 {
     RespawnQueueItem *cur;
 
-    for (cur = respawn_queue_head; cur && index > 0; cur = cur->next)
-        index--;
+    for (cur = respawn_queue_head; cur && index > 0; cur = cur->next) index--;
 
-    if (!cur)
-        FatalError("LOADGAME: Invalid ItemInQue: %d\n", index);
+    if (!cur) FatalError("LOADGAME: Invalid ItemInQue: %d\n", index);
 
     SYS_ASSERT(index == 0);
     return cur;
 }
 
 //
-// SV_ItemqFindElem
+// SV_ItemqGetIndex
 //
 // Returns the index number (starts at 0 here).
 //
-int SV_ItemqFindElem(RespawnQueueItem *elem)
+int SV_ItemqGetIndex(RespawnQueueItem *elem)
 {
     RespawnQueueItem *cur;
-    int          index;
+    int               index;
 
-    for (cur = respawn_queue_head, index = 0; cur && cur != elem; cur = cur->next)
+    for (cur = respawn_queue_head, index = 0; cur && cur != elem;
+         cur = cur->next)
         index++;
 
-    if (!cur)
-        FatalError("LOADGAME: No such ItemInQue ptr: %p\n", elem);
+    if (!cur) FatalError("LOADGAME: No such ItemInQue ptr: %p\n", elem);
 
     return index;
 }
@@ -431,11 +836,10 @@ void SV_ItemqCreateElems(int num_elems)
     {
         RespawnQueueItem *cur = new RespawnQueueItem;
 
-        cur->next = respawn_queue_head;
+        cur->next     = respawn_queue_head;
         cur->previous = nullptr;
 
-        if (respawn_queue_head)
-            respawn_queue_head->previous = cur;
+        if (respawn_queue_head) respawn_queue_head->previous = cur;
 
         respawn_queue_head = cur;
 
@@ -455,13 +859,11 @@ void SV_ItemqFinaliseElems(void)
     {
         next = cur->next;
 
-        if (cur->spawnpoint.info)
-            continue;
+        if (cur->spawnpoint.info) continue;
 
         LogWarning("LOADGAME: discarding empty ItemInQue\n");
 
-        if (next)
-            next->previous = cur->previous;
+        if (next) next->previous = cur->previous;
 
         if (cur->previous)
             cur->previous->next = next;
@@ -474,50 +876,53 @@ void SV_ItemqFinaliseElems(void)
 
 //----------------------------------------------------------------------------
 
-bool SR_MobjGetPlayer(void *storage, int index, void *extra)
+bool SaveGameMapObjectGetPlayer(void *storage, int index, void *extra)
 {
     player_t **dest = (player_t **)storage + index;
 
-    int swizzle = SV_GetInt();
+    int swizzle = SaveChunkGetInteger();
 
-    *dest = (swizzle == 0) ? nullptr : (player_t *)SV_PlayerGetElem(swizzle - 1);
+    *dest = (swizzle == 0) ? nullptr
+                           : (player_t *)SaveGamePlayerFindByIndex(swizzle - 1);
     return true;
 }
 
-void SR_MobjPutPlayer(void *storage, int index, void *extra)
+void SaveGameMapObjectPutPlayer(void *storage, int index, void *extra)
 {
     player_t *elem = ((player_t **)storage)[index];
 
-    int swizzle = (elem == nullptr) ? 0 : SV_PlayerFindElem(elem) + 1;
+    int swizzle = (elem == nullptr) ? 0 : SaveGamePlayerGetIndex(elem) + 1;
 
-    SV_PutInt(swizzle);
+    SaveChunkPutInteger(swizzle);
 }
 
-bool SR_MobjGetMobj(void *storage, int index, void *extra)
+bool SaveGameGetMapObject(void *storage, int index, void *extra)
 {
     MapObject **dest = (MapObject **)storage + index;
 
-    int swizzle = SV_GetInt();
+    int swizzle = SaveChunkGetInteger();
 
-    *dest = (swizzle == 0) ? nullptr : (MapObject *)SV_MobjGetElem(swizzle - 1);
+    *dest = (swizzle == 0)
+                ? nullptr
+                : (MapObject *)SaveGameMapObjectFindByIndex(swizzle - 1);
     return true;
 }
 
-void SR_MobjPutMobj(void *storage, int index, void *extra)
+void SaveGamePutMapObject(void *storage, int index, void *extra)
 {
     MapObject *elem = ((MapObject **)storage)[index];
 
     int swizzle;
 
-    swizzle = (elem == nullptr) ? 0 : SV_MobjFindElem(elem) + 1;
-    SV_PutInt(swizzle);
+    swizzle = (elem == nullptr) ? 0 : SaveGameMapObjectGetIndex(elem) + 1;
+    SaveChunkPutInteger(swizzle);
 }
 
-bool SR_MobjGetType(void *storage, int index, void *extra)
+bool SaveGameMapObjectGetType(void *storage, int index, void *extra)
 {
     MapObjectDefinition **dest = (MapObjectDefinition **)storage + index;
 
-    const char *name = SV_GetString();
+    const char *name = SaveChunkGetString();
 
     if (!name)
     {
@@ -530,8 +935,7 @@ bool SR_MobjGetType(void *storage, int index, void *extra)
     {
         const AttackDefinition *atk = atkdefs.Lookup(name + 4);
 
-        if (atk)
-            *dest = (MapObjectDefinition *)atk->atk_mobj_;
+        if (atk) *dest = (MapObjectDefinition *)atk->atk_mobj_;
     }
     else
         *dest = (MapObjectDefinition *)mobjtypes.Lookup(name);
@@ -542,61 +946,62 @@ bool SR_MobjGetType(void *storage, int index, void *extra)
         LogWarning("LOADGAME: no such thing type '%s'\n", name);
     }
 
-    SV_FreeString(name);
+    SaveChunkFreeString(name);
     return true;
 }
 
-void SR_MobjPutType(void *storage, int index, void *extra)
+void SaveGameMapObjectPutType(void *storage, int index, void *extra)
 {
     MapObjectDefinition *info = ((MapObjectDefinition **)storage)[index];
 
-    SV_PutString((info == nullptr) ? nullptr : info->name_.c_str());
+    SaveChunkPutString((info == nullptr) ? nullptr : info->name_.c_str());
 }
 
-bool SR_MobjGetSpawnPoint(void *storage, int index, void *extra)
+bool SaveGameMapObjectGetSpawnPoint(void *storage, int index, void *extra)
 {
     SpawnPoint *dest = (SpawnPoint *)storage + index;
 
     if (sv_struct_spawnpoint.counterpart)
-        return SV_LoadStruct(dest, sv_struct_spawnpoint.counterpart);
+        return SaveGameStructLoad(dest, sv_struct_spawnpoint.counterpart);
 
-    return true; // presumably
+    return true;  // presumably
 }
 
-void SR_MobjPutSpawnPoint(void *storage, int index, void *extra)
+void SaveGameMapObjectPutSpawnPoint(void *storage, int index, void *extra)
 {
     SpawnPoint *src = (SpawnPoint *)storage + index;
 
-    SV_SaveStruct(src, &sv_struct_spawnpoint);
+    SaveGameStructSave(src, &sv_struct_spawnpoint);
 }
 
-bool SR_MobjGetAttack(void *storage, int index, void *extra)
+bool SaveGameMapObjectGetAttack(void *storage, int index, void *extra)
 {
     AttackDefinition **dest = (AttackDefinition **)storage + index;
 
-    const char *name = SV_GetString();
+    const char *name = SaveChunkGetString();
 
     // Intentional Const Override
-    *dest = (name == nullptr) ? nullptr : (AttackDefinition *)atkdefs.Lookup(name);
+    *dest =
+        (name == nullptr) ? nullptr : (AttackDefinition *)atkdefs.Lookup(name);
 
-    SV_FreeString(name);
+    SaveChunkFreeString(name);
     return true;
 }
 
-void SR_MobjPutAttack(void *storage, int index, void *extra)
+void SaveGameMapObjectPutAttack(void *storage, int index, void *extra)
 {
     AttackDefinition *info = ((AttackDefinition **)storage)[index];
 
-    SV_PutString((info == nullptr) ? nullptr : info->name_.c_str());
+    SaveChunkPutString((info == nullptr) ? nullptr : info->name_.c_str());
 }
 
-bool SR_MobjGetWUDs(void *storage, int index, void *extra)
+bool SaveGameMapObjectGetWUDs(void *storage, int index, void *extra)
 {
     std::string *dest = (std::string *)storage;
 
     SYS_ASSERT(index == 0);
 
-    const char *tags = SV_GetString();
+    const char *tags = SaveChunkGetString();
 
     if (tags)
     {
@@ -606,26 +1011,26 @@ bool SR_MobjGetWUDs(void *storage, int index, void *extra)
     else
         *dest = "";
 
-    SV_FreeString(tags);
+    SaveChunkFreeString(tags);
 
     return true;
 }
 
-void SR_MobjPutWUDs(void *storage, int index, void *extra)
+void SaveGameMapObjectPutWUDs(void *storage, int index, void *extra)
 {
     std::string *src = (std::string *)storage;
 
     SYS_ASSERT(index == 0);
 
-    SV_PutString(src->empty() ? nullptr : src->c_str());
+    SaveChunkPutString(src->empty() ? nullptr : src->c_str());
 }
 
 //----------------------------------------------------------------------------
 
 //
-// SR_MobjGetState
+// SaveGameMapObjectGetState
 //
-bool SR_MobjGetState(void *storage, int index, void *extra)
+bool SaveGameMapObjectGetState(void *storage, int index, void *extra)
 {
     State **dest = (State **)storage + index;
 
@@ -633,13 +1038,13 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
     char *base_p, *off_p;
     int   base, offset;
 
-    const char       *swizzle;
-    const MapObject     *mo = (MapObject *)sv_current_elem;
+    const char                *swizzle;
+    const MapObject           *mo = (MapObject *)sv_current_elem;
     const MapObjectDefinition *actual;
 
     SYS_ASSERT(mo);
 
-    swizzle = SV_GetString();
+    swizzle = SaveChunkGetString();
 
     if (!swizzle || !mo->info_)
     {
@@ -648,7 +1053,7 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
     }
 
     epi::CStringCopyMax(buffer, swizzle, 256 - 1);
-    SV_FreeString(swizzle);
+    SaveChunkFreeString(swizzle);
 
     // separate string at `:' characters
 
@@ -674,7 +1079,8 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
         // Do we care about those in the disabled group?
         actual = mobjtypes.Lookup(buffer);
         if (!actual)
-            FatalError("LOADGAME: no such thing %s for state %s:%s\n", buffer, base_p, off_p);
+            FatalError("LOADGAME: no such thing %s for state %s:%s\n", buffer,
+                       base_p, off_p);
     }
 
     // find base state
@@ -705,7 +1111,7 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
 }
 
 //
-// SR_MobjPutState
+// SaveGameMapObjectPutState
 //
 // The format of the string is:
 //
@@ -726,7 +1132,7 @@ bool SR_MobjGetState(void *storage, int index, void *extra)
 // Typical example: a new item, monster or weapon gets added to our
 // DDF files causing all state numbers to be shifted upwards.
 //
-void SR_MobjPutState(void *storage, int index, void *extra)
+void SaveGameMapObjectPutState(void *storage, int index, void *extra)
 {
     State *S = ((State **)storage)[index];
 
@@ -734,22 +1140,23 @@ void SR_MobjPutState(void *storage, int index, void *extra)
 
     int s_num, base;
 
-    const MapObject     *mo = (MapObject *)sv_current_elem;
+    const MapObject           *mo = (MapObject *)sv_current_elem;
     const MapObjectDefinition *actual;
 
     SYS_ASSERT(mo);
 
     if (S == nullptr || !mo->info_)
     {
-        SV_PutString(nullptr);
+        SaveChunkPutString(nullptr);
         return;
     }
 
     // object has no states ?
     if (mo->info_->state_grp_.empty())
     {
-        LogWarning("SAVEGAME: object [%s] has no states !!\n", mo->info_->name_.c_str());
-        SV_PutString(nullptr);
+        LogWarning("SAVEGAME: object [%s] has no states !!\n",
+                   mo->info_->name_.c_str());
+        SaveChunkPutString(nullptr);
         return;
     }
 
@@ -758,7 +1165,8 @@ void SR_MobjPutState(void *storage, int index, void *extra)
 
     if (s_num < 0 || s_num >= num_states)
     {
-        LogWarning("SAVEGAME: object [%s] is in invalid state %d\n", mo->info_->name_.c_str(), s_num);
+        LogWarning("SAVEGAME: object [%s] is in invalid state %d\n",
+                   mo->info_->name_.c_str(), s_num);
 
         if (mo->info_->idle_state_)
             s_num = mo->info_->idle_state_;
@@ -768,7 +1176,7 @@ void SR_MobjPutState(void *storage, int index, void *extra)
             s_num = mo->info_->meander_state_;
         else
         {
-            SV_PutString("*:*:1");
+            SaveChunkPutString("*:*:1");
             return;
         }
     }
@@ -778,7 +1186,8 @@ void SR_MobjPutState(void *storage, int index, void *extra)
 
     if (!DDF_StateGroupHasState(actual->state_grp_, s_num))
     {
-        LogWarning("SAVEGAME: object [%s] is in AWOL state %d\n", mo->info_->name_.c_str(), s_num);
+        LogWarning("SAVEGAME: object [%s] is in AWOL state %d\n",
+                   mo->info_->name_.c_str(), s_num);
 
         bool state_found = false;
 
@@ -797,14 +1206,14 @@ void SR_MobjPutState(void *storage, int index, void *extra)
         if (!state_found)
         {
             LogWarning("-- ARGH: state %d cannot be found !!\n", s_num);
-            SV_PutString("*:*:1");
+            SaveChunkPutString("*:*:1");
             return;
         }
 
         if (actual->name_.empty())
         {
             LogWarning("-- OOPS: state %d found in unnamed object !!\n", s_num);
-            SV_PutString("*:*:1");
+            SaveChunkPutString("*:*:1");
             return;
         }
     }
@@ -812,15 +1221,17 @@ void SR_MobjPutState(void *storage, int index, void *extra)
     // find the nearest base state
     base = s_num;
 
-    while (!states[base].label && DDF_StateGroupHasState(actual->state_grp_, base - 1))
+    while (!states[base].label &&
+           DDF_StateGroupHasState(actual->state_grp_, base - 1))
     {
         base--;
     }
 
-    sprintf(swizzle, "%s:%s:%d", (actual == mo->info_) ? "*" : actual->name_.c_str(),
+    sprintf(swizzle, "%s:%s:%d",
+            (actual == mo->info_) ? "*" : actual->name_.c_str(),
             states[base].label ? states[base].label : "*", 1 + s_num - base);
 
-    SV_PutString(swizzle);
+    SaveChunkPutString(swizzle);
 }
 
 //--- editor settings ---

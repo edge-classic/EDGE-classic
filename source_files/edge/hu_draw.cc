@@ -410,6 +410,8 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
         else  // patch font
         {
             glEnable(GL_ALPHA_TEST);
+            if (!(alpha < 0.11f || image->opacity_ == kOpacityComplex))
+                glAlphaFunc(GL_GREATER, alpha * 0.66f);
             glEnable(GL_BLEND);
             glEnable(GL_TEXTURE_2D);
             if ((image_smoothing &&
@@ -448,6 +450,9 @@ void HudRawImage(float hx1, float hy1, float hx2, float hy2,
         glVertex2f(hx1, hy2);
         glEnd();
         glDisable(GL_TEXTURE_2D);
+        glDisable(GL_ALPHA_TEST);
+        glDisable(GL_BLEND);
+        glAlphaFunc(GL_GREATER, 0);
         return;
     }
 

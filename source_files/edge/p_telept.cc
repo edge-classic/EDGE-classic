@@ -301,13 +301,13 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
 
         if (def->inspawnobj_)
         {
-            fog = P_MobjCreateObject(oldx, oldy, oldz, def->inspawnobj_);
+            fog = CreateMapObject(oldx, oldy, oldz, def->inspawnobj_);
 
             // never use this object as a teleport destination
             fog->extended_flags_ |= kExtendedFlagNeverTarget;
 
             if (fog->info_->chase_state_)
-                P_SetMobjStateDeferred(fog, fog->info_->chase_state_, 0);
+                MapObjectSetStateDeferred(fog, fog->info_->chase_state_, 0);
         }
 
         if (def->outspawnobj_)
@@ -318,7 +318,7 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
             //
             // -ES- 1998/10/29 When fading, we don't want to see the fog.
             //
-            fog = P_MobjCreateObject(new_x + 20.0f * epi::BAMCos(thing->angle_),
+            fog = CreateMapObject(new_x + 20.0f * epi::BAMCos(thing->angle_),
                                      new_y + 20.0f * epi::BAMSin(thing->angle_),
                                      new_z, def->outspawnobj_);
 
@@ -326,7 +326,7 @@ bool TeleportMapObject(Line *line, int tag, MapObject *thing,
             fog->extended_flags_ |= kExtendedFlagNeverTarget;
 
             if (fog->info_->chase_state_)
-                P_SetMobjStateDeferred(fog, fog->info_->chase_state_, 0);
+                MapObjectSetStateDeferred(fog, fog->info_->chase_state_, 0);
 
             if (player == players[display_player] && reduce_flash)
             {

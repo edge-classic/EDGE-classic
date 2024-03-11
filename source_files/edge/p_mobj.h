@@ -147,8 +147,8 @@ enum DirectionType
 
 struct SpawnPoint
 {
-    // location on the map.  `z' can take the special values ONFLOORZ
-    // and ONCEILINGZ.
+    // location on the map.  `z' can take the special values kOnFloorZ
+    // and kOnCeilingZ.
     float x, y, z;
 
     // direction thing faces

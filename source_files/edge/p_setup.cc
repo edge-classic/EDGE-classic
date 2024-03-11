@@ -491,7 +491,7 @@ static void LoadSectors(int lump)
         int type = AlignedLittleEndianS16(ms->special);
 
         ss->properties.type    = HMM_MAX(0, type);
-        ss->properties.special = P_LookupSectorType(ss->properties.type);
+        ss->properties.special = LookupSectorType(ss->properties.type);
 
         ss->extrafloor_maximum = 0;
 
@@ -661,7 +661,7 @@ static MapObject *SpawnMapThing(const MapObjectDefinition *info, float x,
 
     // spawn it now !
     // Use MobjCreateObject -ACB- 1998/08/06
-    MapObject *mo = P_MobjCreateObject(x, y, z, info);
+    MapObject *mo = CreateMapObject(x, y, z, info);
 
     mo->angle_      = angle;
     mo->spawnpoint_ = point;
@@ -996,7 +996,7 @@ static void LoadLineDefs(int lump)
             ld->flags &= ~(MLF_PassThru | MLF_BlockGrounded | MLF_BlockPlayers);
 
         ld->special =
-            P_LookupLineType(HMM_MAX(0, AlignedLittleEndianS16(mld->special)));
+            LookupLineType(HMM_MAX(0, AlignedLittleEndianS16(mld->special)));
 
         if (ld->special && ld->special->type_ == kLineTriggerWalkable)
             ld->flags |= MLF_PassThru;
@@ -1802,7 +1802,7 @@ static void LoadUDMFSectors()
 
             // convert negative types to zero
             ss->properties.type    = HMM_MAX(0, type);
-            ss->properties.special = P_LookupSectorType(ss->properties.type);
+            ss->properties.special = LookupSectorType(ss->properties.type);
 
             ss->extrafloor_maximum = 0;
 
@@ -2299,7 +2299,7 @@ static void LoadUDMFLineDefs()
             ld->vertex_1 = &level_vertexes[v1];
             ld->vertex_2 = &level_vertexes[v2];
 
-            ld->special = P_LookupLineType(HMM_MAX(0, special));
+            ld->special = LookupLineType(HMM_MAX(0, special));
 
             if (ld->special && ld->special->type_ == kLineTriggerWalkable)
                 ld->flags |= MLF_PassThru;
@@ -3547,7 +3547,7 @@ void ShutdownLevel(void)
 
     level_active = false;
 
-    P_RemoveItemsInQue();
+    ClearRespawnQueue();
 
     P_RemoveSectorStuff();
 
@@ -3603,7 +3603,7 @@ void ShutdownLevel(void)
 
     DestroyBlockmap();
 
-    P_RemoveAllMobjs(false);
+    RemoveAllMapObjects(false);
 }
 
 void LevelSetup(void)
@@ -3788,7 +3788,7 @@ void PlayerStateInit(void)
     ClearPlayerStarts();
 }
 
-LineType *P_LookupLineType(int num)
+LineType *LookupLineType(int num)
 {
     if (num <= 0) return nullptr;
 
@@ -3804,7 +3804,7 @@ LineType *P_LookupLineType(int num)
     return linetypes.Lookup(0);  // template line
 }
 
-SectorType *P_LookupSectorType(int num)
+SectorType *LookupSectorType(int num)
 {
     if (num <= 0) return nullptr;
 

@@ -45,6 +45,11 @@ extern ConsoleVariable erraticism;
 
 static constexpr uint8_t kMaximumPlayerSpriteLoop = 10;
 
+static constexpr float kWeaponSwapSpeed = 6.0f;
+static constexpr uint8_t kWeaponBottom = 128;
+static constexpr uint8_t kWeaponTop = 32;
+static constexpr uint8_t kGrinTime = (kTicRate * 2);
+
 static void BobWeapon(Player *p, WeaponDefinition *info);
 
 static SoundCategory WeaponSoundEffectCategory(Player *p)
@@ -364,7 +369,7 @@ static void GotoReloadState(Player *p, int ATK)
 
     // if player has reload states, use 'em baby
     if (p->map_object_->info_->reload_state_)
-        P_SetMobjStateDeferred(p->map_object_, p->map_object_->info_->reload_state_, 0);
+        MapObjectSetStateDeferred(p->map_object_, p->map_object_->info_->reload_state_, 0);
 }
 
 //
@@ -404,7 +409,7 @@ static void BringUpWeapon(Player *p)
     p->ready_weapon_ = sel;
 
     p->pending_weapon_                             = KWeaponSelectionNoChange;
-    p->player_sprites_[kPlayerSpriteWeapon].screen_y = WEAPONBOTTOM - WEAPONTOP;
+    p->player_sprites_[kPlayerSpriteWeapon].screen_y = kWeaponBottom - kWeaponTop;
 
     p->remember_attack_state_[0]   = -1;
     p->remember_attack_state_[1]   = -1;
@@ -647,7 +652,7 @@ void SelectNewWeapon(Player *p, int priority, AmmunitionType ammo)
 void TrySwitchNewWeapon(Player *p, int new_weap, AmmunitionType new_ammo)
 {
     // be cheeky... :-)
-    if (new_weap >= 0) p->grin_count_ = GRIN_TIME;
+    if (new_weap >= 0) p->grin_count_ = kGrinTime;
 
     if (p->pending_weapon_ != KWeaponSelectionNoChange) return;
 
@@ -1243,13 +1248,13 @@ void A_Lower(MapObject *mo)
 
     if (p->zoom_field_of_view_ > 0) p->zoom_field_of_view_ = 0;
 
-    psp->screen_y += LOWERSPEED;
+    psp->screen_y += kWeaponSwapSpeed;
 
     // Is already down.
     if (!(info->specials_[0] & WeaponFlagAnimated))
-        if (psp->screen_y < WEAPONBOTTOM - WEAPONTOP) return;
+        if (psp->screen_y < kWeaponBottom - kWeaponTop) return;
 
-    psp->screen_y = WEAPONBOTTOM - WEAPONTOP;
+    psp->screen_y = kWeaponBottom - kWeaponTop;
 
     // Player is dead, don't bring weapon back up.
     if (p->player_state_ == kPlayerDead || p->health_ <= 0)
@@ -1294,7 +1299,7 @@ void A_Raise(MapObject *mo)
 
     WeaponDefinition *info = p->weapons_[p->ready_weapon_].info;
 
-    psp->screen_y -= RAISESPEED;
+    psp->screen_y -= kWeaponSwapSpeed;
 
     if (psp->screen_y > 0) return;
 
@@ -1331,7 +1336,7 @@ void A_TargetJump(MapObject *mo)
 
     if (!attack) return;
 
-    MapObject *obj = P_MapTargetAutoAim(mo, mo->angle_, attack->range_, true);
+    MapObject *obj = MapTargetAutoAim(mo, mo->angle_, attack->range_, true);
 
     if (!obj) return;
 
@@ -1351,7 +1356,7 @@ void A_FriendJump(MapObject *mo)
 
     if (!attack) return;
 
-    MapObject *obj = P_MapTargetAutoAim(mo, mo->angle_, attack->range_, true);
+    MapObject *obj = MapTargetAutoAim(mo, mo->angle_, attack->range_, true);
 
     if (!obj) return;
 
@@ -1422,7 +1427,7 @@ static void DoWeaponShoot(MapObject *mo, int ATK)
         SYS_ASSERT(p->ammo_[ammo].count >= 0);
     }
 
-    P_PlayerAttack(mo, attack);
+    PlayerAttack(mo, attack);
 
     if (level_flags.kicking && ATK == 0 && !erraticism.d_)
     {
@@ -1446,11 +1451,11 @@ static void DoWeaponShoot(MapObject *mo, int ATK)
     if (attack && attack->attackstyle_ == kAttackStyleCloseCombat &&
         mo->info_->melee_state_)
     {
-        P_SetMobjStateDeferred(mo, mo->info_->melee_state_, 0);
+        MapObjectSetStateDeferred(mo, mo->info_->melee_state_, 0);
     }
     else if (mo->info_->missile_state_)
     {
-        P_SetMobjStateDeferred(mo, mo->info_->missile_state_, 0);
+        MapObjectSetStateDeferred(mo, mo->info_->missile_state_, 0);
     }
 
     ATK = ATK_orig;
@@ -1496,7 +1501,7 @@ void A_WeaponEject(MapObject *mo)
         FatalError("Weapon [%s] missing attack for EJECT action.\n",
                    info->name_.c_str());
 
-    P_PlayerAttack(mo, attack);
+    PlayerAttack(mo, attack);
 }
 
 void A_WeaponPlaySound(MapObject *mo)
@@ -1713,7 +1718,7 @@ void A_WeaponUnzoom(MapObject *mo)
 }
 
 // Handle potential New clip size being smaller than old
-void P_FixWeaponClip(Player *p, int slot)
+void FixWeaponClip(Player *p, int slot)
 {
     WeaponDefinition *info = p->weapons_[slot].info;
 
@@ -1779,7 +1784,7 @@ void A_WeaponBecome(MapObject *mo)
     SetPlayerSpriteDeferred(p, kPlayerSpriteWeapon,
                             state);  // refresh the sprite
 
-    P_FixWeaponClip(p,
+    FixWeaponClip(p,
                     p->ready_weapon_);  // handle the potential clip_size difference
 
     UpdateAvailWeapons(p);

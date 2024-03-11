@@ -166,7 +166,7 @@ void P_ActNoiseAlert(MapObject *actor)
 // Move in the current direction,
 // returns false if the move is blocked.
 //
-bool P_Move(MapObject *actor, bool path)
+bool DoMove(MapObject *actor, bool path)
 {
     HMM_Vec3 orig_pos{{actor->x, actor->y, actor->z}};
 
@@ -244,7 +244,7 @@ bool P_Move(MapObject *actor, bool path)
         if (actor->z > actor->floor_z_)
         {
             actor->z = actor->floor_z_;
-            P_HitLiquidFloor(actor);
+            HitLiquidFloor(actor);
         }
         else
             actor->z = actor->floor_z_;
@@ -274,7 +274,7 @@ bool P_Move(MapObject *actor, bool path)
 //
 static bool TryWalk(MapObject *actor)
 {
-    if (!P_Move(actor, false)) return false;
+    if (!DoMove(actor, false)) return false;
 
     actor->move_count_ = RandomByteDeterministic() & 15;
 
@@ -435,7 +435,7 @@ void NewChaseDir(MapObject *object)
 //
 // Returns true if a player is targeted.
 //
-bool P_LookForPlayers(MapObject *actor, BAMAngle range)
+bool LookForPlayers(MapObject *actor, BAMAngle range)
 {
     int       c;
     int       stop;
@@ -477,12 +477,12 @@ bool P_LookForPlayers(MapObject *actor, BAMAngle range)
                 dist = ApproximateDistance(player->map_object_->x - actor->x,
                                            player->map_object_->y - actor->y);
 
-                if (dist > MELEERANGE) continue;
+                if (dist > kMeleeRange) continue;
             }
         }
 
         // out of sight ?
-        if (!P_CheckSight(actor, player->map_object_)) continue;
+        if (!CheckSight(actor, player->map_object_)) continue;
 
         actor->SetTarget(player->map_object_);
         return true;
@@ -495,7 +495,7 @@ bool P_LookForPlayers(MapObject *actor, BAMAngle range)
 //   BOSS-BRAIN HANDLING
 //
 
-MapObject *P_LookForShootSpot(const MapObjectDefinition *spot_type)
+MapObject *LookForShootSpot(const MapObjectDefinition *spot_type)
 {
     // -AJA- 2022: changed this to find all spots matching the wanted type,
     //             and return a random one.  Since brain spits occur seldomly
@@ -521,9 +521,9 @@ static void SpawnDeathMissile(MapObject *source, float x, float y, float z)
 
     info = mobjtypes.Lookup("BRAIN_DEATH_MISSILE");
 
-    th = P_MobjCreateObject(x, y, z, info);
+    th = CreateMapObject(x, y, z, info);
     if (th->info_->seesound_)
-        StartSoundEffect(th->info_->seesound_, P_MobjGetSfxCategory(th), th);
+        StartSoundEffect(th->info_->seesound_, GetSoundEffectCategory(th), th);
 
     th->SetRealSource(source);
 
@@ -556,7 +556,7 @@ void P_ActBrainScream(MapObject *bossbrain)
 
     if (bossbrain->info_->deathsound_)
         StartSoundEffect(bossbrain->info_->deathsound_,
-                  P_MobjGetSfxCategory(bossbrain), bossbrain);
+                  GetSoundEffectCategory(bossbrain), bossbrain);
 }
 
 void P_ActBrainMissileExplode(MapObject *mo)
@@ -630,14 +630,14 @@ void P_ActCubeSpawn(MapObject *cube)
     else
         type = mobjtypes.Lookup("BARON_OF_HELL");
 
-    newmobj = P_MobjCreateObject(targ->x, targ->y, targ->z, type);
+    newmobj = CreateMapObject(targ->x, targ->y, targ->z, type);
 
-    if (P_LookForPlayers(newmobj, kBAMAngle180))
+    if (LookForPlayers(newmobj, kBAMAngle180))
     {
         if (newmobj->info_->chase_state_)
-            P_SetMobjState(newmobj, newmobj->info_->chase_state_);
+            MapObjectSetState(newmobj, newmobj->info_->chase_state_);
         else
-            P_SetMobjState(newmobj, newmobj->info_->spawn_state_);
+            MapObjectSetState(newmobj, newmobj->info_->spawn_state_);
     }
 
     // telefrag anything in this spot
@@ -657,7 +657,7 @@ void P_ActPlayerScream(MapObject *mo)
         sound = sfxdefs.GetEffect("PDIEHI");
     }
 
-    StartSoundEffect(sound, P_MobjGetSfxCategory(mo), mo);
+    StartSoundEffect(sound, GetSoundEffectCategory(mo), mo);
 }
 
 //--- editor settings ---

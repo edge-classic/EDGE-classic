@@ -411,7 +411,7 @@ static bool CheckSightSameSubsector(MapObject *src, MapObject *dest)
     return false;
 }
 
-bool P_CheckSight(MapObject *src, MapObject *dest)
+bool CheckSight(MapObject *src, MapObject *dest)
 {
     // -ACB- 1998/07/20 t2 is Invisible, t1 cannot possibly see it.
     if (AlmostEquals(dest->visibility_, 0.0f)) return false;
@@ -516,8 +516,8 @@ bool P_CheckSight(MapObject *src, MapObject *dest)
     if (sight_check.saw_vertex_slopes)
     {
         float objslope;
-        P_AimLineAttack(src, sight_check.angle, 64000, &objslope);
-        P_LineAttack(src, sight_check.angle, 64000, objslope, 0, nullptr,
+        AimLineAttack(src, sight_check.angle, 64000, &objslope);
+        LineAttack(src, sight_check.angle, 64000, objslope, 0, nullptr,
                      nullptr);
         bool slope_sight_good = dest->slope_sight_hit_;
         if (slope_sight_good)
@@ -634,7 +634,7 @@ bool CheckSightToPoint(MapObject *src, float x, float y, float z)
 // don't resurrect monsters that are completely out of view in another
 // vertical region.  Returns true if sight possible, false otherwise.
 //
-bool P_CheckSightApproxVert(MapObject *src, MapObject *dest)
+bool QuickVerticalSightCheck(MapObject *src, MapObject *dest)
 {
     SYS_ASSERT(src->info_);
 

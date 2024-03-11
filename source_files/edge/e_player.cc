@@ -101,7 +101,7 @@ void GameAddBodyToQueue(MapObject *mo)
         MapObject *rotten = body_queue[body_queue_size % kMaximumBodies];
         rotten->reference_count_--;
 
-        P_RemoveMobj(rotten);
+        RemoveMapObject(rotten);
     }
 
     // prevent accidental re-use
@@ -261,7 +261,7 @@ static bool GameCheckSpot(Player *player, const SpawnPoint *point)
     // (temp fix for teleport effect)
     x += 20 * epi::BAMCos(point->angle);
     y += 20 * epi::BAMSin(point->angle);
-    P_MobjCreateObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
+    CreateMapObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
 
     P_SpawnPlayer(player, point, false);
     return true;  // OK
@@ -353,10 +353,10 @@ static void P_SpawnPlayer(Player *p, const SpawnPoint *point, bool is_hub)
     {
         p->Reborn();
 
-        P_GiveInitialBenefits(p, info);
+        GiveInitialBenefits(p, info);
     }
 
-    MapObject *mobj = P_MobjCreateObject(point->x, point->y, point->z, info);
+    MapObject *mobj = CreateMapObject(point->x, point->y, point->z, info);
 
     mobj->angle_          = point->angle;
     mobj->vertical_angle_ = point->vertical_angle;
@@ -424,7 +424,7 @@ static void P_SpawnVoodooDoll(Player *p, const SpawnPoint *point)
     LogDebug("* P_SpawnVoodooDoll %d @ %1.0f,%1.0f\n", p->player_number_ + 1,
              point->x, point->y);
 
-    MapObject *mobj = P_MobjCreateObject(point->x, point->y, point->z, info);
+    MapObject *mobj = CreateMapObject(point->x, point->y, point->z, info);
 
     mobj->angle_          = point->angle;
     mobj->vertical_angle_ = point->vertical_angle;
@@ -563,7 +563,7 @@ void SpawnHelper(int player_number_)
     const MapObjectDefinition *info = mobjtypes.Lookup(888);
     if (info == nullptr) return;
 
-    MapObject *mo = P_MobjCreateObject(point->x, point->y, point->z, info);
+    MapObject *mo = CreateMapObject(point->x, point->y, point->z, info);
 
     mo->angle_      = point->angle;
     mo->spawnpoint_ = *point;
@@ -886,7 +886,7 @@ void RemoveOldAvatars(void)
         {
             LogDebug("Removing old avatar: %p\n", mo);
 
-            P_RemoveMobj(mo);
+            RemoveMapObject(mo);
         }
     }
 }

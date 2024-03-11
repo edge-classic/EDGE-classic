@@ -1501,10 +1501,10 @@ void RunActivePlanes(void)
                         if (special_ref->sector_effect_ &
                             kSectorEffectTypePushThings)
                         {
-                            sec->properties.old_push.Y += BOOM_CARRY_FACTOR * sy;
-                            sec->properties.push.Y += BOOM_CARRY_FACTOR * sy;
-                            sec->properties.old_push.X += BOOM_CARRY_FACTOR * sx;
-                            sec->properties.push.X += BOOM_CARRY_FACTOR * sx;
+                            sec->properties.old_push.Y += kBoomCarryFactor * sy;
+                            sec->properties.push.Y += kBoomCarryFactor * sy;
+                            sec->properties.old_push.X += kBoomCarryFactor * sx;
+                            sec->properties.push.X += kBoomCarryFactor * sx;
                         }
                         if (special_ref->sector_effect_ &
                             kSectorEffectTypeScrollFloor)

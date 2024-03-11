@@ -721,7 +721,7 @@ int SaveGameMapObjectGetIndex(MapObject *elem)
 void SaveGameMapObjectCreateElems(int num_elems)
 {
     // free existing mobjs
-    if (map_object_list_head) P_RemoveAllMobjs(true);
+    if (map_object_list_head) RemoveAllMapObjects(true);
 
     SYS_ASSERT(map_object_list_head == nullptr);
 
@@ -828,7 +828,7 @@ int SV_ItemqGetIndex(RespawnQueueItem *elem)
 //
 void SV_ItemqCreateElems(int num_elems)
 {
-    P_RemoveItemsInQue();
+    ClearRespawnQueue();
 
     respawn_queue_head = nullptr;
 

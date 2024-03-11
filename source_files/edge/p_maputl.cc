@@ -548,7 +548,7 @@ int FindThingGap(VerticalGap *gaps, int gap_num, float z1, float z2)
 //
 // Determine the initial floorz and ceilingz that a thing placed at a
 // particular Z would have.  Returns the nominal Z height.  Some special
-// values of Z are recognised: ONFLOORZ & ONCEILINGZ.
+// values of Z are recognised: kOnFloorZ & kOnCeilingZ.
 //
 float ComputeThingGap(MapObject *thing, Sector *sec, float z, float *f,
                       float *c, float floor_slope_z, float ceiling_slope_z)
@@ -558,9 +558,9 @@ float ComputeThingGap(MapObject *thing, Sector *sec, float z, float *f,
 
     temp_num = GapConstruct(temp_gaps, sec, thing, floor_slope_z, ceiling_slope_z);
 
-    if (AlmostEquals(z, ONFLOORZ)) z = sec->floor_height;
+    if (AlmostEquals(z, kOnFloorZ)) z = sec->floor_height;
 
-    if (AlmostEquals(z, ONCEILINGZ)) z = sec->ceiling_height - thing->height_;
+    if (AlmostEquals(z, kOnCeilingZ)) z = sec->ceiling_height - thing->height_;
 
     temp_num = FindThingGap(temp_gaps, temp_num, z, z + thing->height_);
 
@@ -679,13 +679,13 @@ void DumpExtraFloors(const sector_t *sec)
 //
 // Check if a solid extrafloor fits.
 //
-exfloor_fit_e CheckExtrafloorFit(Sector *sec, float z1, float z2)
+ExtrafloorFit CheckExtrafloorFit(Sector *sec, float z1, float z2)
 {
     Extrafloor *ef;
 
-    if (z2 > sec->ceiling_height) return EXFIT_StuckInCeiling;
+    if (z2 > sec->ceiling_height) return kFitStuckInCeiling;
 
-    if (z1 < sec->floor_height) return EXFIT_StuckInFloor;
+    if (z1 < sec->floor_height) return kFitStuckInFloor;
 
     for (ef = sec->bottom_extrafloor; ef && ef->higher; ef = ef->higher)
     {
@@ -695,10 +695,10 @@ exfloor_fit_e CheckExtrafloorFit(Sector *sec, float z1, float z2)
         SYS_ASSERT(top >= bottom);
 
         // here is another solid extrafloor, check for overlap
-        if (z2 > bottom && z1 < top) return EXFIT_StuckInExtraFloor;
+        if (z2 > bottom && z1 < top) return kFitStuckInExtraFloor;
     }
 
-    return EXFIT_Ok;
+    return kFitOk;
 }
 
 void AddExtraFloor(Sector *sec, Line *line)
@@ -710,7 +710,7 @@ void AddExtraFloor(Sector *sec, Line *line)
     Extrafloor *newbie, *cur;
 
     bool          liquid;
-    exfloor_fit_e errcode;
+    ExtrafloorFit errcode;
 
     SYS_ASSERT(line->special);
     SYS_ASSERT(line->special->ef_.type_ & kExtraFloorTypePresent);
@@ -805,16 +805,16 @@ void AddExtraFloor(Sector *sec, Line *line)
 
     switch (errcode)
     {
-        case EXFIT_Ok:
+        case kFitOk:
             break;
 
-        case EXFIT_StuckInCeiling:
+        case kFitStuckInCeiling:
             LogWarning(
                 "Extrafloor with z range of %1.0f / %1.0f is stuck "
                 "in sector #%d's ceiling.\n",
                 newbie->bottom_height, newbie->top_height, (int)(sec - level_sectors));
 
-        case EXFIT_StuckInFloor:
+        case kFitStuckInFloor:
             LogWarning(
                 "Extrafloor with z range of %1.0f / %1.0f is stuck "
                 "in sector #%d's floor.\n",

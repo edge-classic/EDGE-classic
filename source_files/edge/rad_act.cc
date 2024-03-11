@@ -395,20 +395,20 @@ void RAD_ActSpawnThing(rad_trigger_t *R, void *param)
 
     if (t->spawn_effect)
     {
-        mo = P_MobjCreateObject(t->x, t->y, t->z, minfo->respawneffect_);
+        mo = CreateMapObject(t->x, t->y, t->z, minfo->respawneffect_);
     }
 
-    mo = P_MobjCreateObject(t->x, t->y, t->z, minfo);
+    mo = CreateMapObject(t->x, t->y, t->z, minfo);
 
     // -ACB- 1998/07/10 New Check, so that spawned mobj's don't
     //                  spawn somewhere where they should not.
     if (!CheckAbsolutePosition(mo, mo->x, mo->y, mo->z))
     {
-        P_RemoveMobj(mo);
+        RemoveMapObject(mo);
         return;
     }
 
-    P_SetMobjDirAndSpeed(mo, t->angle, t->slope, 0);
+    MapObjectSetDirectionAndSpeed(mo, t->angle, t->slope, 0);
 
     mo->tag_ = t->tag;
 
@@ -613,10 +613,10 @@ void RAD_ActThingEvent(rad_trigger_t *R, void *param)
         if (!RAD_WithinRadius(mo, R->info))
             continue;
 
-        int state = P_MobjFindLabel(mo, tev->label);
+        int state = MapObjectFindLabel(mo, tev->label);
 
         if (state)
-            P_SetMobjStateDeferred(mo, state + tev->offset, 0);
+            MapObjectSetStateDeferred(mo, state + tev->offset, 0);
     }
 }
 
@@ -660,7 +660,7 @@ void RAD_ActPlaySound(rad_trigger_t *R, void *param)
     R->sound_effects_origin.x = ambient->x;
     R->sound_effects_origin.y = ambient->y;
 
-    if (AlmostEquals(ambient->z, ONFLOORZ))
+    if (AlmostEquals(ambient->z, kOnFloorZ))
         R->sound_effects_origin.z = RendererPointInSubsector(ambient->x, ambient->y)->sector->floor_height;
     else
         R->sound_effects_origin.z = ambient->z;
@@ -1190,7 +1190,7 @@ void RAD_ActSwitchWeapon(rad_trigger_t *R, void *param)
 
     if (weap)
     {
-        P_PlayerSwitchWeapon(player, weap);
+        PlayerSwitchWeapon(player, weap);
     }
 }
 
@@ -1222,12 +1222,12 @@ void RAD_ActTeleportToStart(rad_trigger_t *R, void *param)
     MapObject *fog;
     x += 20 * epi::BAMCos(point->angle);
     y += 20 * epi::BAMSin(point->angle);
-    fog = P_MobjCreateObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
+    fog = CreateMapObject(x, y, z, mobjtypes.Lookup("TELEPORT_FLASH"));
     // never use this object as a teleport destination
     fog->extended_flags_ |= kExtendedFlagNeverTarget;
 
     if (fog->info_->chase_state_)
-        P_SetMobjStateDeferred(fog, fog->info_->chase_state_, 0);
+        MapObjectSetStateDeferred(fog, fog->info_->chase_state_, 0);
 
     // 4. Teleport him
     //  Don't get stuck spawned in things: telefrag them.
@@ -1334,7 +1334,7 @@ void RAD_ActReplaceWeapon(rad_trigger_t *R, void *param)
     {
         RAD_SetPlayerSpriteDeferred(p, kPlayerSpriteWeapon, p->weapons_[p->ready_weapon_].info->ready_state_);
 
-        P_FixWeaponClip(p, p->ready_weapon_); // handle the potential clip_size difference
+        FixWeaponClip(p, p->ready_weapon_); // handle the potential clip_size difference
         UpdateAvailWeapons(p);
     }
 }
@@ -1432,11 +1432,11 @@ void P_ActReplace(MapObject *mo, const MapObjectDefinition *newThing)
     }
     // SetThingPosition(mo);
 
-    int state = P_MobjFindLabel(mo, "IDLE"); // nothing fancy, always default to idle
+    int state = MapObjectFindLabel(mo, "IDLE"); // nothing fancy, always default to idle
     if (state == 0)
         FatalError("RTS REPLACE_THING: frame '%s' in [%s] not found!\n", "IDLE", mo->info_->name_.c_str());
 
-    P_SetMobjStateDeferred(mo, state, 0);
+    MapObjectSetStateDeferred(mo, state, 0);
 }
 
 // Replace one thing with another.

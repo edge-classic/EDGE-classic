@@ -103,7 +103,7 @@ typedef struct s_jump_on_s
 // SpawnThing Function
 typedef struct s_thing_s
 {
-    // spawn coordinates.  z can be ONFLOORZ or ONCEILINGZ.
+    // spawn coordinates.  z can be kOnFloorZ or kOnCeilingZ.
     float x = 0;
     float y = 0;
     float z = 0;
@@ -197,7 +197,7 @@ typedef struct s_sound_s
 {
     int kind = 0;
 
-    // sound location.  z can be ONFLOORZ.
+    // sound location.  z can be kOnFloorZ.
     float x = 0;
     float y = 0;
     float z = 0;

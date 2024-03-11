@@ -564,7 +564,7 @@ static void P_SpawnLineEffectDebris(Line *TheLine, const LineType *special)
     // calculate midpoint
     midx = (TheLine->vertex_1->X + TheLine->vertex_2->X) / 2;
     midy = (TheLine->vertex_1->Y + TheLine->vertex_2->Y) / 2;
-    midz = ONFLOORZ;
+    midz = kOnFloorZ;
 
     float dx = RandomByteDeterministic() * info->radius_ / 255.0f;
     float dy = RandomByteDeterministic() * info->radius_ / 255.0f;
@@ -573,7 +573,7 @@ static void P_SpawnLineEffectDebris(Line *TheLine, const LineType *special)
     midx += dx + info->radius_;
     midy += dy + info->radius_;
 
-    P_SpawnDebris(midx, midy, midz, 0 + kBAMAngle180, info);
+    SpawnDebris(midx, midy, midz, 0 + kBAMAngle180, info);
 
     midx = (TheLine->vertex_1->X + TheLine->vertex_2->X) / 2;
     midy = (TheLine->vertex_1->Y + TheLine->vertex_2->Y) / 2;
@@ -582,7 +582,7 @@ static void P_SpawnLineEffectDebris(Line *TheLine, const LineType *special)
     midx -= dx + info->radius_;
     midy -= dy + info->radius_;
 
-    P_SpawnDebris(midx, midy, midz, 0 + kBAMAngle180, info);
+    SpawnDebris(midx, midy, midz, 0 + kBAMAngle180, info);
 }
 
 //
@@ -835,8 +835,8 @@ static void SectorEffect(Sector *target, Line *source,
             }
             if (special->sector_effect_ & kSectorEffectTypePushThings)
             {
-                anim.push.X += source->delta_x / 32.0f * BOOM_CARRY_FACTOR;
-                anim.push.Y += source->delta_y / 32.0f * BOOM_CARRY_FACTOR;
+                anim.push.X += source->delta_x / 32.0f * kBoomCarryFactor;
+                anim.push.Y += source->delta_y / 32.0f * kBoomCarryFactor;
             }
         }
         else
@@ -1316,7 +1316,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special,
     if (line && thing && thing->player_ &&
         (special->special_flags_ & kLineSpecialMustReach) && !can_reach)
     {
-        StartSoundEffect(thing->info_->noway_sound_, P_MobjGetSfxCategory(thing),
+        StartSoundEffect(thing->info_->noway_sound_, GetSoundEffectCategory(thing),
                   thing);
 
         return false;
@@ -1679,7 +1679,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special,
         }
         else if (thing)
         {
-            StartSoundEffect(special->activate_sfx_, P_MobjGetSfxCategory(thing),
+            StartSoundEffect(special->activate_sfx_, GetSoundEffectCategory(thing),
                       thing);
         }
 
@@ -1700,7 +1700,7 @@ static bool P_ActivateSpecialLine(Line *line, const LineType *special,
         {
             line->special = (special->newtrignum_ <= 0)
                                 ? nullptr
-                                : P_LookupLineType(special->newtrignum_);
+                                : LookupLineType(special->newtrignum_);
         }
 
         ChangeSwitchTexture(line, line->special && (special->newtrignum_ == 0),
@@ -1748,7 +1748,7 @@ bool UseSpecialLine(MapObject *thing, Line *line, int side, float open_bottom,
                     float open_top)
 {
     int can_reach = (thing->z < open_top) &&
-                    (thing->z + thing->height_ + USE_Z_RANGE >= open_bottom);
+                    (thing->z + thing->height_ + kUseZRange >= open_bottom);
 
     return P_ActivateSpecialLine(line, line->special, line->tag, side, thing,
                                  kLineTriggerPushable, can_reach, 0);
@@ -1763,7 +1763,7 @@ bool UseSpecialLine(MapObject *thing, Line *line, int side, float open_bottom,
 void RemoteActivation(MapObject *thing, int typenum, int tag, int side,
                       LineTrigger method)
 {
-    const LineType *spec = P_LookupLineType(typenum);
+    const LineType *spec = LookupLineType(typenum);
 
     P_ActivateSpecialLine(nullptr, spec, tag, side, thing, method, 1,
                           (thing == nullptr));
@@ -1801,7 +1801,7 @@ static inline void PlayerInProperties(Player *player, float bz, float tz,
             (level_time_elapsed %
              (1 + player->map_object_->info_->choke_damage_.delay_)) == 0)
         {
-            DAMAGE_COMPUTE(damage, &player->map_object_->info_->choke_damage_);
+            EDGE_DAMAGE_COMPUTE(damage, &player->map_object_->info_->choke_damage_);
 
             if (damage)
                 DamageMapObject(player->map_object_, nullptr, nullptr, damage,
@@ -1828,7 +1828,7 @@ static inline void PlayerInProperties(Player *player, float bz, float tz,
         player->map_object_->z >= floor_height && player->map_object_->z <= ceiling_height)
     {
         player->wet_feet_ = true;
-        P_HitLiquidFloor(player->map_object_);
+        HitLiquidFloor(player->map_object_);
     }
 
     if (special->special_flags_ & kSectorFlagVacuumSFX) vacuum_sound_effects = true;
@@ -1889,7 +1889,7 @@ static inline void PlayerInProperties(Player *player, float bz, float tz,
 
     if (factor > 0 && (level_time_elapsed % (1 + special->damage_.delay_)) == 0)
     {
-        DAMAGE_COMPUTE(damage, &special->damage_);
+        EDGE_DAMAGE_COMPUTE(damage, &special->damage_);
 
         if (damage || special->damage_.instakill_)
             DamageMapObject(player->map_object_, nullptr, nullptr, damage * factor,
@@ -2005,7 +2005,7 @@ void PlayerInSpecialSector(Player *player, Sector *sec, bool should_choke)
             if (player->map_object_->info_->gasp_sound_)
             {
                 StartSoundEffect(player->map_object_->info_->gasp_sound_,
-                          P_MobjGetSfxCategory(player->map_object_), player->map_object_);
+                          GetSoundEffectCategory(player->map_object_), player->map_object_);
             }
         }
 
@@ -2021,9 +2021,9 @@ void PlayerInSpecialSector(Player *player, Sector *sec, bool should_choke)
         {
             // StartSoundEffect(swim_special->splash_sfx, kCategoryUi, player->map_object_);
             StartSoundEffect(swim_special->splash_sfx_,
-                      P_MobjGetSfxCategory(player->map_object_), player->map_object_);
+                      GetSoundEffectCategory(player->map_object_), player->map_object_);
 
-            P_HitLiquidFloor(player->map_object_);
+            HitLiquidFloor(player->map_object_);
         }
     }
     else if (was_swimming && !player->swimming_)
@@ -2497,8 +2497,8 @@ void UpdateSpecials(bool extra_tic)
             }
             if (special_ref->sector_effect_ & kSectorEffectTypePushThings)
             {
-                sec->properties.net_push.Y += BOOM_CARRY_FACTOR * sy;
-                sec->properties.net_push.X += BOOM_CARRY_FACTOR * sx;
+                sec->properties.net_push.Y += kBoomCarryFactor * sy;
+                sec->properties.net_push.X += kBoomCarryFactor * sx;
             }
             if (special_ref->sector_effect_ & kSectorEffectTypeScrollFloor)
             {
@@ -2888,7 +2888,7 @@ void SectorChangeSpecial(Sector *sec, int new_type)
 {
     sec->properties.type = HMM_MAX(0, new_type);
 
-    sec->properties.special = P_LookupSectorType(sec->properties.type);
+    sec->properties.special = LookupSectorType(sec->properties.type);
 }
 
 //--- editor settings ---

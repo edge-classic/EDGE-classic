@@ -623,10 +623,10 @@ bool RAD_CheckReachedTrigger(MapObject *thing)
 
     if (scr->path_event_label)
     {
-        int state = P_MobjFindLabel(thing, scr->path_event_label);
+        int state = MapObjectFindLabel(thing, scr->path_event_label);
 
         if (state)
-            P_SetMobjStateDeferred(thing, state + scr->path_event_offset, 0);
+            MapObjectSetStateDeferred(thing, state + scr->path_event_offset, 0);
     }
 
     if (scr->next_path_total == 0)

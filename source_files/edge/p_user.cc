@@ -59,6 +59,8 @@ float room_area;
 
 static constexpr float   kMaximumBob       = 16.0f;
 static constexpr uint8_t kZoomAngleDivisor = 4;
+static constexpr BAMAngle kMouseLookLimit = 0x53333355; // 75 degrees
+static constexpr float kCrouchSlowdown = 0.5f;
 
 static SoundEffect *sfx_jpidle;
 static SoundEffect *sfx_jpmove;
@@ -232,15 +234,15 @@ static void CalcHeight(Player *player, bool extra_tic)
     player->view_z_ = player->view_height_ + bob_z;
 }
 
-void P_PlayerJump(Player *pl, float dz, int wait)
+void PlayerJump(Player *pl, float dz, int wait)
 {
     pl->map_object_->momentum_.Z += dz;
 
     if (pl->jump_wait_ < wait) pl->jump_wait_ = wait;
 
     // enter the JUMP states (if present)
-    int jump_st = P_MobjFindLabel(pl->map_object_, "JUMP");
-    if (jump_st != 0) P_SetMobjStateDeferred(pl->map_object_, jump_st, 0);
+    int jump_st = MapObjectFindLabel(pl->map_object_, "JUMP");
+    if (jump_st != 0) MapObjectSetStateDeferred(pl->map_object_, jump_st, 0);
 
     // -AJA- 1999/09/11: New JUMP_SOUND for ddf.
     if (pl->map_object_->info_->jump_sound_)
@@ -296,10 +298,10 @@ static void MovePlayer(Player *player, bool extra_tic)
         BAMAngle V =
             player->map_object_->vertical_angle_ + (BAMAngle)(cmd->mouselook_turn << 16);
 
-        if (V < kBAMAngle180 && V > MLOOK_LIMIT)
-            V = MLOOK_LIMIT;
-        else if (V >= kBAMAngle180 && V < (kBAMAngle360 - MLOOK_LIMIT))
-            V = (kBAMAngle360 - MLOOK_LIMIT);
+        if (V < kBAMAngle180 && V > kMouseLookLimit)
+            V = kMouseLookLimit;
+        else if (V >= kBAMAngle180 && V < (kBAMAngle360 - kMouseLookLimit))
+            V = (kBAMAngle360 - kMouseLookLimit);
 
         player->map_object_->vertical_angle_ = V;
     }
@@ -326,7 +328,7 @@ static void MovePlayer(Player *player, bool extra_tic)
     if (!(onladder || swimming || flying)) base_z_speed /= 16.0f;
 
     // move slower when crouching
-    if (crouching) base_xy_speed *= CROUCH_SLOWDOWN;
+    if (crouching) base_xy_speed *= kCrouchSlowdown;
 
     dx = epi::BAMCos(player->map_object_->angle_);
     dy = epi::BAMSin(player->map_object_->angle_);
@@ -405,7 +407,7 @@ static void MovePlayer(Player *player, bool extra_tic)
         {
             // enter the CHASE (i.e. walking) states
             if (player->map_object_->info_->chase_state_)
-                P_SetMobjStateDeferred(player->map_object_,
+                MapObjectSetStateDeferred(player->map_object_,
                                        player->map_object_->info_->chase_state_, 0);
         }
     }
@@ -423,7 +425,7 @@ static void MovePlayer(Player *player, bool extra_tic)
             if (!jumping && !crouching && !swimming && !flying && onground &&
                 !onladder)
             {
-                P_PlayerJump(player,
+                PlayerJump(player,
                              player->map_object_->info_->jumpheight_ /
                                  (double_framerate.d_ ? 1.25f : 1.4f),
                              player->map_object_->info_->jump_delay_);
@@ -673,7 +675,7 @@ void ConsolePlayerBuilder(const Player *pl, void *data,
     dest->player_index = pl->player_number_;
 }
 
-bool P_PlayerSwitchWeapon(Player *player, WeaponDefinition *choice)
+bool PlayerSwitchWeapon(Player *player, WeaponDefinition *choice)
 {
     int pw_index;
 
@@ -720,7 +722,7 @@ void P_DumpMobjsTemp(void)
     LogWarning("END OF MOBJs\n");
 }
 
-bool P_PlayerThink(Player *player, bool extra_tic)
+bool PlayerThink(Player *player, bool extra_tic)
 {
     EventTicCommand *cmd = &player->command_;
 
@@ -853,7 +855,7 @@ bool P_PlayerThink(Player *player, bool extra_tic)
     {
         if (!player->use_button_down_)
         {
-            P_UseLines(player);
+            UseLines(player);
             player->use_button_down_ = true;
         }
     }
@@ -957,7 +959,7 @@ bool P_PlayerThink(Player *player, bool extra_tic)
     return should_think;
 }
 
-void P_CreatePlayer(int pnum, bool is_bot)
+void CreatePlayer(int pnum, bool is_bot)
 {
     SYS_ASSERT(0 <= pnum && pnum < kMaximumPlayers);
     SYS_ASSERT(players[pnum] == nullptr);
@@ -1211,7 +1213,7 @@ bool RemoveWeapon(Player *player, WeaponDefinition *info)
     return true;
 }
 
-void P_GiveInitialBenefits(Player *p, const MapObjectDefinition *info)
+void GiveInitialBenefits(Player *p, const MapObjectDefinition *info)
 {
     // Give the player the initial benefits when they start a game
     // (or restart after dying).  Sets up: ammo, ammo-limits, health,

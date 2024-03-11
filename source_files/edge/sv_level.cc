@@ -1189,7 +1189,7 @@ bool SaveGameLineGetSpecial(void *storage, int index, void *extra)
     if (str[0] != ':')
         FatalError("SaveGameLineGetSpecial: invalid special `%s'\n", str);
 
-    (*dest) = P_LookupLineType(strtol(str + 1, nullptr, 0));
+    (*dest) = LookupLineType(strtol(str + 1, nullptr, 0));
 
     SaveChunkFreeString(str);
     return true;
@@ -1232,7 +1232,7 @@ bool SaveGameSectorGetSpecial(void *storage, int index, void *extra)
     if (str[0] != ':')
         FatalError("SaveGameSectorGetSpecial: invalid special `%s'\n", str);
 
-    (*dest) = P_LookupSectorType(strtol(str + 1, nullptr, 0));
+    (*dest) = LookupSectorType(strtol(str + 1, nullptr, 0));
 
     SaveChunkFreeString(str);
     return true;

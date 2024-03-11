@@ -80,6 +80,10 @@ static constexpr float kOofSpeed =
 
 static constexpr uint8_t kMaxThinkLoop = 8;
 
+static constexpr float kMaximumMove = 200.0f;
+static constexpr float kStepMove = 16.0f;
+static constexpr uint8_t kRespawnDelay = (kTicRate / 2);
+
 extern ConsoleVariable double_framerate;
 
 EDGE_DEFINE_CONSOLE_VARIABLE(distance_cull_thinkers, "0",
@@ -189,7 +193,7 @@ static void EnterBounceStates(MapObject *mo)
 
     mo->extended_flags_ |= kExtendedFlagJustBounced;
 
-    P_SetMobjState(mo, mo->info_->bounce_state_);
+    MapObjectSetState(mo, mo->info_->bounce_state_);
 }
 
 //
@@ -359,16 +363,16 @@ static void TeleportRespawn(MapObject *mobj)
 
     // temp fix for teleport flash...
     if (info->respawneffect_)
-        P_MobjCreateObject(mobj->x, mobj->y, mobj->z, info->respawneffect_);
+        CreateMapObject(mobj->x, mobj->y, mobj->z, info->respawneffect_);
 
     // spawn a teleport fog at the new spot...
 
     // temp fix for teleport flash...
-    if (info->respawneffect_) P_MobjCreateObject(x, y, z, info->respawneffect_);
+    if (info->respawneffect_) CreateMapObject(x, y, z, info->respawneffect_);
 
     // spawn it, inheriting attributes from deceased one
     // -ACB- 1998/08/06 Create Object
-    new_mo = P_MobjCreateObject(x, y, z, info);
+    new_mo = CreateMapObject(x, y, z, info);
 
     new_mo->spawnpoint_     = mobj->spawnpoint_;
     new_mo->angle_          = mobj->spawnpoint_.angle;
@@ -378,10 +382,10 @@ static void TeleportRespawn(MapObject *mobj)
     if (mobj->spawnpoint_.flags & kMapObjectFlagAmbush)
         new_mo->flags_ |= kMapObjectFlagAmbush;
 
-    new_mo->reaction_time_ = RESPAWN_DELAY;
+    new_mo->reaction_time_ = kRespawnDelay;
 
     // remove the old monster.
-    P_RemoveMobj(mobj);
+    RemoveMapObject(mobj);
 }
 
 //
@@ -435,9 +439,9 @@ static void ResurrectRespawn(MapObject *mobj)
 
     // Resurrect monster
     if (info->overkill_sound_)
-        StartSoundEffect(info->overkill_sound_, P_MobjGetSfxCategory(mobj), mobj);
+        StartSoundEffect(info->overkill_sound_, GetSoundEffectCategory(mobj), mobj);
 
-    P_SetMobjState(mobj, info->raise_state_);
+    MapObjectSetState(mobj, info->raise_state_);
 
     SYS_ASSERT(!mobj->IsRemoved());
 
@@ -462,7 +466,7 @@ static void ResurrectRespawn(MapObject *mobj)
     if (mobj->spawnpoint_.flags & kMapObjectFlagAmbush)
         mobj->flags_ |= kMapObjectFlagAmbush;
 
-    mobj->reaction_time_ = RESPAWN_DELAY;
+    mobj->reaction_time_ = kRespawnDelay;
     return;
 }
 
@@ -471,14 +475,14 @@ static void ResurrectRespawn(MapObject *mobj)
 //
 // Returns true if the mobj is still present.
 //
-bool P_SetMobjState(MapObject *mobj, int state)
+bool MapObjectSetState(MapObject *mobj, int state)
 {
     // ignore removed objects
     if (mobj->IsRemoved()) return false;
 
     if (state == 0)
     {
-        P_RemoveMobj(mobj);
+        RemoveMapObject(mobj);
         return false;
     }
 
@@ -511,7 +515,7 @@ bool P_SetMobjState2(MapObject *mobj, int state)
 
     if (mobj->IsRemoved()) return false;
 
-    if (state == 0) return P_SetMobjState(mobj, state);
+    if (state == 0) return MapObjectSetState(mobj, state);
 
     SYS_ASSERT(!mobj->info_->state_grp_.empty());
 
@@ -522,13 +526,13 @@ bool P_SetMobjState2(MapObject *mobj, int state)
 
         if (st->label)
         {
-            int new_state = P_MobjFindLabel(mobj, st->label);
+            int new_state = MapObjectFindLabel(mobj, st->label);
 
             if (new_state != 0) state = new_state;
         }
     }
 
-    return P_SetMobjState(mobj, state);
+    return MapObjectSetState(mobj, state);
 }
 
 //
@@ -543,7 +547,7 @@ bool P_SetMobjState2(MapObject *mobj, int state)
 //
 // -AJA- 1999/09/12: written.
 //
-bool P_SetMobjStateDeferred(MapObject *mo, int stnum, int tic_skip)
+bool MapObjectSetStateDeferred(MapObject *mo, int stnum, int tic_skip)
 {
     // ignore removed objects
     if (mo->IsRemoved() || !mo->next_state_) return false;
@@ -568,7 +572,7 @@ bool P_SetMobjStateDeferred(MapObject *mo, int stnum, int tic_skip)
 // Look for the given label in the mobj's states.  Returns the state
 // number if found, otherwise 0.
 //
-int P_MobjFindLabel(MapObject *mobj, const char *label)
+int MapObjectFindLabel(MapObject *mobj, const char *label)
 {
     return DDF_StateFindLabel(mobj->info_->state_grp_, label, true /* quiet */);
 }
@@ -576,7 +580,7 @@ int P_MobjFindLabel(MapObject *mobj, const char *label)
 //
 // P_SetMobjDirAndSpeed
 //
-void P_SetMobjDirAndSpeed(MapObject *mo, BAMAngle angle, float slope,
+void MapObjectSetDirectionAndSpeed(MapObject *mo, BAMAngle angle, float slope,
                           float speed)
 {
     mo->angle_          = angle;
@@ -595,7 +599,7 @@ void P_SetMobjDirAndSpeed(MapObject *mo, BAMAngle angle, float slope,
 // -AJA- 1999/09/12: Now uses P_SetMobjStateDeferred, since this
 //       routine can be called by TryMove/CheckRelativeThingCallback.
 //
-void P_MobjExplodeMissile(MapObject *mo)
+void ExplodeMissile(MapObject *mo)
 {
     mo->momentum_.X = mo->momentum_.Y = mo->momentum_.Z = 0;
 
@@ -606,7 +610,7 @@ void P_MobjExplodeMissile(MapObject *mo)
         StartSoundEffect(mo->info_->deathsound_, kCategoryObject, mo);
 
     // mobjdef used -ACB- 1998/08/06
-    P_SetMobjStateDeferred(mo, mo->info_->death_state_,
+    MapObjectSetStateDeferred(mo, mo->info_->death_state_,
                            RandomByteDeterministic() & 3);
 }
 
@@ -717,7 +721,7 @@ static inline void AddRegionProperties(const MapObject *mo, float bz, float tz,
 // Only used for players for now (too expensive to be used by
 // everything).
 //
-void P_CalcFullProperties(const MapObject *mo, RegionProperties *new_p)
+void CalculateFullRegionProperties(const MapObject *mo, RegionProperties *new_p)
 {
     Sector *sector = mo->subsector_->sector;
 
@@ -796,16 +800,16 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props,
     float absx, absy;
     float maxstep;
 
-    if (fabs(mo->momentum_.X) > MAXMOVE)
+    if (fabs(mo->momentum_.X) > kMaximumMove)
     {
-        float factor = MAXMOVE / fabs(mo->momentum_.X);
+        float factor = kMaximumMove / fabs(mo->momentum_.X);
         mo->momentum_.X *= factor;
         mo->momentum_.Y *= factor;
     }
 
-    if (fabs(mo->momentum_.Y) > MAXMOVE)
+    if (fabs(mo->momentum_.Y) > kMaximumMove)
     {
-        float factor = MAXMOVE / fabs(mo->momentum_.Y);
+        float factor = kMaximumMove / fabs(mo->momentum_.Y);
         mo->momentum_.X *= factor;
         mo->momentum_.Y *= factor;
     }
@@ -836,10 +840,10 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props,
     //  the move into steps of max half radius for collision purposes.
 
     // Use half radius as max step, if not exceptionally small.
-    if (mo->radius_ > STEPMOVE)
+    if (mo->radius_ > kStepMove)
         maxstep = mo->radius_ / 2;
     else
-        maxstep = STEPMOVE / 2;
+        maxstep = kStepMove / 2;
 
     // precalculate these two, they are used frequently
     absx = (float)fabs(xmove);
@@ -949,11 +953,11 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props,
 
                     if (tempspecial->type_ == kLineTriggerShootable)
                     {
-                        P_UnblockLineEffectDebris(block_line, tempspecial);
+                        UnblockLineEffectDebris(block_line, tempspecial);
                         if (tempspecial->effectobject_)
                         {
                             DebrisThing = tempspecial->effectobject_;
-                            P_SpawnDebris(mo->x, mo->y, mo->z,
+                            SpawnDebris(mo->x, mo->y, mo->z,
                                           mo->angle_ + kBAMAngle180,
                                           DebrisThing);
                         }
@@ -984,14 +988,14 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props,
                 if (mo->z < ground_h - 20.5f &&
                     mo->z > ground_h - mo->height_ * 1.4)
                 {
-                    P_PlayerJump(mo->player_, mo->info_->jumpheight_,
+                    PlayerJump(mo->player_, mo->info_->jumpheight_,
                                  2 * kTicRate);
                 }
             }
 
             if (mo->info_->flags_ & kMapObjectFlagSlide)
             {
-                P_SlideMove(mo, ptryx, ptryy);
+                SlideMove(mo, ptryx, ptryy);
             }
             else if (mo->extended_flags_ & kExtendedFlagBounce)
             {
@@ -1001,9 +1005,9 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props,
                 if (!block_line)
                 {
                     if (map_object_hit_sky)
-                        P_MobjRemoveMissile(mo);
+                        RemoveMissile(mo);
                     else
-                        P_MobjExplodeMissile(mo);
+                        ExplodeMissile(mo);
 
                     return;
                 }
@@ -1014,9 +1018,9 @@ static void P_XYMovement(MapObject *mo, const RegionProperties *props,
             else if (mo->flags_ & kMapObjectFlagMissile)
             {
                 if (map_object_hit_sky)
-                    P_MobjRemoveMissile(mo);  // New Procedure -ACB- 1998/07/30
+                    RemoveMissile(mo);  // New Procedure -ACB- 1998/07/30
                 else
-                    P_MobjExplodeMissile(mo);
+                    ExplodeMissile(mo);
 
                 return;
             }
@@ -1187,16 +1191,16 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
                     if (!(mo->player_->cheats_ & kCheatingGodMode) &&
                         mo->player_->powers_[kPowerTypeInvulnerable] < 1)
                         StartSoundEffect(mo->info_->fallpain_sound_,
-                                  P_MobjGetSfxCategory(mo), mo);
+                                  GetSoundEffectCategory(mo), mo);
                     else
                         StartSoundEffect(mo->info_->oof_sound_,
-                                  P_MobjGetSfxCategory(mo), mo);
+                                  GetSoundEffectCategory(mo), mo);
                 }
                 else
-                    StartSoundEffect(mo->info_->oof_sound_, P_MobjGetSfxCategory(mo),
+                    StartSoundEffect(mo->info_->oof_sound_, GetSoundEffectCategory(mo),
                               mo);
 
-                P_HitLiquidFloor(mo);
+                HitLiquidFloor(mo);
             }
             // -KM- 1998/12/16 If bigger than max fall, take damage.
             if (mo->info_->maxfall_ > 0 && gravity > 0 &&
@@ -1228,7 +1232,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
 
         if (mo->z - mo->momentum_.Z > mo->floor_z_)
         {  // Spawn splashes, etc.
-            P_HitLiquidFloor(mo);
+            HitLiquidFloor(mo);
         }
 
         mo->z = mo->floor_z_;
@@ -1247,7 +1251,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
                 (mo->below_object_->flags_ & kMapObjectFlagShootable) &&
                 (mo->source_ != mo->below_object_))
             {
-                if (P_MissileContact(mo, mo->below_object_) < 0 ||
+                if (MissileContact(mo, mo->below_object_) < 0 ||
                     (mo->extended_flags_ & kExtendedFlagTunnel))
                     return;
             }
@@ -1256,12 +1260,12 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
             if (EDGE_IMAGE_IS_SKY(mo->subsector_->sector->floor) &&
                 mo->subsector_->sector->floor_height >= mo->floor_z_)
             {
-                P_MobjRemoveMissile(mo);
+                RemoveMissile(mo);
             }
             else
             {
                 if (!(mo->extended_flags_ & kExtendedFlagBounce))
-                    P_MobjExplodeMissile(mo);
+                    ExplodeMissile(mo);
             }
             return;
         }
@@ -1308,7 +1312,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
                 !fly_or_swim)
             {
                 mo->player_->delta_view_height_ = zmove / 8.0f;
-                StartSoundEffect(mo->info_->oof_sound_, P_MobjGetSfxCategory(mo), mo);
+                StartSoundEffect(mo->info_->oof_sound_, GetSoundEffectCategory(mo), mo);
             }
             if (mo->info_->maxfall_ > 0 && gravity < 0 &&
                 mo->momentum_.Z > hurt_momz && (!mo->player_ || !fly_or_swim))
@@ -1347,7 +1351,7 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
                 (mo->above_object_->flags_ & kMapObjectFlagShootable) &&
                 (mo->source_ != mo->above_object_))
             {
-                if (P_MissileContact(mo, mo->above_object_) < 0 ||
+                if (MissileContact(mo, mo->above_object_) < 0 ||
                     (mo->extended_flags_ & kExtendedFlagTunnel))
                     return;
             }
@@ -1356,12 +1360,12 @@ static void P_ZMovement(MapObject *mo, const RegionProperties *props,
             if (EDGE_IMAGE_IS_SKY(mo->subsector_->sector->ceiling) &&
                 mo->subsector_->sector->ceiling_height <= mo->ceiling_z_)
             {
-                P_MobjRemoveMissile(mo);
+                RemoveMissile(mo);
             }
             else
             {
                 if (!(mo->extended_flags_ & kExtendedFlagBounce))
-                    P_MobjExplodeMissile(mo);
+                    ExplodeMissile(mo);
             }
             return;
         }
@@ -1460,7 +1464,7 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
             mobj->flags_ &= ~kMapObjectFlagSkullFly;
             mobj->momentum_.X = mobj->momentum_.Y = mobj->momentum_.Z = 0;
 
-            P_SetMobjState(mobj, mobj->info_->idle_state_);
+            MapObjectSetState(mobj, mobj->info_->idle_state_);
 
             if (mobj->IsRemoved()) return;
         }
@@ -1472,7 +1476,7 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
 
     if (mobj->player_)
     {
-        P_CalcFullProperties(mobj, &player_props);
+        CalculateFullRegionProperties(mobj, &player_props);
 
         if (!extra_tic || !double_framerate.d_)
         {
@@ -1565,7 +1569,7 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
 
     if (mobj->fuse_ >= 0)
     {
-        if (!--mobj->fuse_) P_MobjExplodeMissile(mobj);
+        if (!--mobj->fuse_) ExplodeMissile(mobj);
 
         if (mobj->IsRemoved()) return;
     }
@@ -1575,7 +1579,7 @@ static void P_MobjThinker(MapObject *mobj, bool extra_tic)
     if (mobj->health_ > 0 && mobj->morph_timeout_ >= 0)
     {
         if (!--mobj->morph_timeout_)
-            P_SetMobjState(mobj, mobj->info_->morph_state_);
+            MapObjectSetState(mobj, mobj->info_->morph_state_);
 
         if (mobj->IsRemoved()) return;
     }
@@ -1751,7 +1755,7 @@ void MapObject::SetRealSource(MapObject *ref)
     SetSource(ref);
 }
 
-void ClearAllStaleRefs(void)
+void ClearAllStaleReferences(void)
 {
     for (MapObject *mo = map_object_list_head; mo != nullptr; mo = mo->next_)
     {
@@ -1813,7 +1817,7 @@ static void RemoveMobjFromList(MapObject *mo)
 // the item-respawn-que, so it gets respawned if needed; The respawning
 // only happens if items_respawn is set or the deathmatch mode is altdeath.
 //
-void P_RemoveMobj(MapObject *mo)
+void RemoveMapObject(MapObject *mo)
 {
     for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
     {
@@ -1868,7 +1872,7 @@ void P_RemoveMobj(MapObject *mo)
     // mo->morphtimeout = kTicRate * 5; //maybe we need this?
 }
 
-void P_RemoveAllMobjs(bool loading)
+void RemoveAllMapObjects(bool loading)
 {
     while (map_object_list_head != nullptr)
     {
@@ -1883,7 +1887,7 @@ void P_RemoveAllMobjs(bool loading)
     }
 }
 
-void P_RemoveItemsInQue(void)
+void ClearRespawnQueue(void)
 {
     while (respawn_queue_head != nullptr)
     {
@@ -1900,7 +1904,7 @@ void P_RemoveItemsInQue(void)
 // Cycle through all mobjs and let them think.
 // Also handles removed objects which have no more references.
 //
-void RunMobjThinkers(bool extra_tic)
+void RunMapObjectThinkers(bool extra_tic)
 {
     MapObject *mo;
     MapObject *next;
@@ -1989,7 +1993,7 @@ void RunMobjThinkers(bool extra_tic)
 //
 // P_SpawnDebris
 //
-void P_SpawnDebris(float x, float y, float z, BAMAngle angle,
+void SpawnDebris(float x, float y, float z, BAMAngle angle,
                    const MapObjectDefinition *debris)
 {
     // if (!level_flags.have_extra && (splash->extended_flags_ &
@@ -1997,8 +2001,8 @@ void P_SpawnDebris(float x, float y, float z, BAMAngle angle,
     // kExtendedFlagExtra)) return; //Optional extra
     MapObject *th;
 
-    th = P_MobjCreateObject(x, y, z, debris);
-    P_SetMobjDirAndSpeed(th, angle, 2.0f, 0.25f);
+    th = CreateMapObject(x, y, z, debris);
+    MapObjectSetDirectionAndSpeed(th, angle, 2.0f, 0.25f);
 
     th->tics_ -= RandomByteDeterministic() & 3;
 
@@ -2008,7 +2012,7 @@ void P_SpawnDebris(float x, float y, float z, BAMAngle angle,
 //
 // P_SpawnPuff
 //
-void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff,
+void SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff,
                  BAMAngle angle)
 {
     MapObject *th;
@@ -2016,7 +2020,7 @@ void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff,
     z += (float)RandomByteSkewToZeroDeterministic() / 80.0f;
 
     // -ACB- 1998/08/06 Specials table for non-negotiables....
-    th = P_MobjCreateObject(x, y, z, puff);
+    th = CreateMapObject(x, y, z, puff);
 
     // -AJA- 1999/07/14: DDF-itised.
     th->momentum_.Z = puff->float_speed_;
@@ -2035,7 +2039,7 @@ void P_SpawnPuff(float x, float y, float z, const MapObjectDefinition *puff,
 // -KM- 1998/11/25 Made more violent. :-)
 // -KM- 1999/01/31 Different blood objects for different mobjs.
 //
-void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle,
+void SpawnBlood(float x, float y, float z, float damage, BAMAngle angle,
                   const MapObjectDefinition *blood)
 {
     int        num;
@@ -2055,9 +2059,9 @@ void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle,
         angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() *
                             (int)(kBAMAngle1 / 2));
 
-        th = P_MobjCreateObject(x, y, z, blood);
+        th = CreateMapObject(x, y, z, blood);
 
-        P_SetMobjDirAndSpeed(th, angle, ((float)num + 12.0f) / 6.0f,
+        MapObjectSetDirectionAndSpeed(th, angle, ((float)num + 12.0f) / 6.0f,
                              (float)num / 4.0f);
 
         th->tics_ -= RandomByteDeterministic() & 3;
@@ -2065,10 +2069,10 @@ void P_SpawnBlood(float x, float y, float z, float damage, BAMAngle angle,
         if (th->tics_ < 1) th->tics_ = 1;
 
         if (damage <= 12 && th->state_ && th->next_state_)
-            P_SetMobjState(th, th->next_state_ - states);
+            MapObjectSetState(th, th->next_state_ - states);
 
         if (damage <= 8 && th->state_ && th->next_state_)
-            P_SetMobjState(th, th->next_state_ - states);
+            MapObjectSetState(th, th->next_state_ - states);
     }
 }
 
@@ -2122,7 +2126,7 @@ FlatDefinition *P_IsThingOnLiquidFloor(MapObject *thing)
 //
 //---------------------------------------------------------------------------
 
-bool P_HitLiquidFloor(MapObject *thing)
+bool HitLiquidFloor(MapObject *thing)
 {
     if (thing->flags_ & kMapObjectFlagFloat) return false;
 
@@ -2146,10 +2150,10 @@ bool P_HitLiquidFloor(MapObject *thing)
             angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() *
                                 (int)(kBAMAngle1 / 2));
 
-            P_SpawnDebris(thing->x, thing->y, thing->z, angle,
+            SpawnDebris(thing->x, thing->y, thing->z, angle,
                           current_flatdef->impactobject_);
 
-            StartSoundEffect(current_flatdef->footstep_, P_MobjGetSfxCategory(thing),
+            StartSoundEffect(current_flatdef->footstep_, GetSoundEffectCategory(thing),
                       thing);
         }
         if (current_flatdef->liquid_.empty()) { return false; }
@@ -2169,7 +2173,7 @@ bool P_HitLiquidFloor(MapObject *thing)
 // -ACB- 1998/07/30 Procedure written.
 // -KM- 1999/01/31 Custom respawn fog.
 //
-void P_MobjItemRespawn(void)
+void ItemRespawn(void)
 {
     // only respawn items in deathmatch or forced by level flags
     if (!(deathmatch >= 2 || level_flags.items_respawn)) return;
@@ -2205,10 +2209,10 @@ void P_MobjItemRespawn(void)
 
         // spawn a teleport fog at the new spot
         SYS_ASSERT(objtype->respawneffect_);
-        P_MobjCreateObject(x, y, z, objtype->respawneffect_);
+        CreateMapObject(x, y, z, objtype->respawneffect_);
 
         // -ACB- 1998/08/06 Use MobjCreateObject
-        mo = P_MobjCreateObject(x, y, z, objtype);
+        mo = CreateMapObject(x, y, z, objtype);
 
         mo->angle_          = cur->spawnpoint.angle;
         mo->vertical_angle_ = cur->spawnpoint.vertical_angle;
@@ -2244,9 +2248,9 @@ void P_MobjItemRespawn(void)
 // -AJA- 1999/09/15: Functionality subsumed by DoRemoveMobj.
 // -ES- 1999/10/24 Removal Queue.
 //
-void P_MobjRemoveMissile(MapObject *missile)
+void RemoveMissile(MapObject *missile)
 {
-    P_RemoveMobj(missile);
+    RemoveMapObject(missile);
 
     missile->momentum_.X = missile->momentum_.Y = missile->momentum_.Z = 0;
 
@@ -2258,12 +2262,12 @@ void P_MobjRemoveMissile(MapObject *missile)
 // P_MobjCreateObject
 //
 // Creates a Map Object (MOBJ) at the specified location, with the
-// specified type (given by DDF).  The special z values ONFLOORZ and
-// ONCEILINGZ are recognised and handled appropriately.
+// specified type (given by DDF).  The special z values kOnFloorZ and
+// kOnCeilingZ are recognised and handled appropriately.
 //
 // -ACB- 1998/08/02 Procedure written.
 //
-MapObject *P_MobjCreateObject(float x, float y, float z,
+MapObject *CreateMapObject(float x, float y, float z,
                               const MapObjectDefinition *info)
 {
     MapObject *mobj = new MapObject;
@@ -2417,7 +2421,7 @@ MapObject *P_MobjCreateObject(float x, float y, float z,
 //
 // Returns the sound category for an object.
 //
-int P_MobjGetSfxCategory(const MapObject *mo)
+int GetSoundEffectCategory(const MapObject *mo)
 {
     if (mo->player_)
     {

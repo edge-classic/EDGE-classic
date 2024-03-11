@@ -39,7 +39,7 @@ void BeginSaveGameSave(void)
 {
     LogDebug("SV_BeginSave...\n");
 
-    ClearAllStaleRefs();
+    ClearAllStaleReferences();
 }
 
 void FinishSaveGameSave(void) { LogDebug("SV_FinishSave...\n"); }

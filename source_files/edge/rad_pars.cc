@@ -1495,7 +1495,7 @@ static void RAD_ParseSpawnThing(param_set_t &pars)
     t->y = this_rad->y;
 
     if (this_rad->rad_z < 0)
-        t->z = ONFLOORZ;
+        t->z = kOnFloorZ;
     else
         t->z = this_rad->z - this_rad->rad_z;
 
@@ -1580,7 +1580,7 @@ static void RAD_ParsePlaySound(param_set_t &pars)
 
     t->x = this_rad->x;
     t->y = this_rad->y;
-    t->z = (this_rad->rad_z < 0) ? ONFLOORZ : this_rad->z;
+    t->z = (this_rad->rad_z < 0) ? kOnFloorZ : this_rad->z;
 
     if (pars.size() >= 4)
     {

@@ -66,7 +66,7 @@ void MapObjectTicker(bool extra_tic)
 
     if (erraticism.d_)
     {
-        bool keep_thinking = P_PlayerThink(players[console_player], extra_tic);
+        bool keep_thinking = PlayerThink(players[console_player], extra_tic);
 
         if (!keep_thinking)
         {
@@ -77,19 +77,19 @@ void MapObjectTicker(bool extra_tic)
         for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
         {
             if (players[pnum] && players[pnum] != players[console_player])
-                P_PlayerThink(players[pnum], extra_tic);
+                PlayerThink(players[pnum], extra_tic);
         }
     }
     else
     {
         for (int pnum = 0; pnum < kMaximumPlayers; pnum++)
-            if (players[pnum]) P_PlayerThink(players[pnum], extra_tic);
+            if (players[pnum]) PlayerThink(players[pnum], extra_tic);
     }
 
     if (!extra_tic || !double_framerate.d_) RAD_RunTriggers();
 
     RunForces(extra_tic);
-    RunMobjThinkers(extra_tic);
+    RunMapObjectThinkers(extra_tic);
 
     if (!extra_tic || !double_framerate.d_) RunLights();
 
@@ -102,7 +102,7 @@ void MapObjectTicker(bool extra_tic)
 
     if (extra_tic && double_framerate.d_) return;
 
-    P_MobjItemRespawn();
+    ItemRespawn();
 
     // for par times
     level_time_elapsed++;

@@ -1140,12 +1140,12 @@ bool SR_LightGetType(void *storage, int index, void *extra)
 
     if (str[0] == 'S')
     {
-        const SectorType *special = P_LookupSectorType(number);
+        const SectorType *special = LookupSectorType(number);
         (*dest)                   = &special->l_;
     }
     else if (str[0] == 'L')
     {
-        const LineType *special = P_LookupLineType(number);
+        const LineType *special = LookupLineType(number);
         (*dest)                 = &special->l_;
     }
     else
@@ -1439,12 +1439,12 @@ bool SR_PlaneMoveGetType(void *storage, int index, void *extra)
 
     if (str[0] == 'S')
     {
-        const SectorType *special = P_LookupSectorType(number);
+        const SectorType *special = LookupSectorType(number);
         (*dest)                   = is_ceil ? &special->c_ : &special->f_;
     }
     else if (str[0] == 'L')
     {
-        const LineType *special = P_LookupLineType(number);
+        const LineType *special = LookupLineType(number);
         (*dest)                 = is_ceil ? &special->c_ : &special->f_;
     }
     else if (str[0] == 'D')
@@ -1559,7 +1559,7 @@ bool SR_SliderGetInfo(void *storage, int index, void *extra)
     if (str[0] != ':')
         FatalError("SR_SliderGetInfo: invalid special `%s'\n", str);
 
-    const LineType *ld_type = P_LookupLineType(strtol(str + 1, nullptr, 0));
+    const LineType *ld_type = LookupLineType(strtol(str + 1, nullptr, 0));
 
     (*dest) = &ld_type->s_;
 

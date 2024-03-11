@@ -1130,7 +1130,7 @@ static void InitNew(NewGameParameters &params)
     {
         if (params.players_[pnum] == kPlayerFlagNoPlayer) continue;
 
-        P_CreatePlayer(pnum, (params.players_[pnum] & kPlayerFlagBot) ? true : false);
+        CreatePlayer(pnum, (params.players_[pnum] & kPlayerFlagBot) ? true : false);
 
         if (console_player < 0 && !(params.players_[pnum] & kPlayerFlagBot) &&
             !(params.players_[pnum] & kPlayerFlagNetwork))

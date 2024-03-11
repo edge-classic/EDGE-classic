@@ -43,6 +43,11 @@ static constexpr uint8_t kBonusLimit      = 100;
 static constexpr uint8_t kDamageAddMinimum = 3;
 static constexpr uint8_t kDamageLimit      = 100;
 
+// follow a player exlusively for 3 seconds
+static constexpr uint8_t kBaseThreshold = 100;
+
+static constexpr float kDeathViewHeight = 6.0f;
+
 bool show_obituaries = true;
 
 extern ConsoleVariable gore_level;
@@ -750,7 +755,7 @@ static void RunPickupEffects(Player *player, MapObject *special,
         switch (list->type_)
         {
             case kPickupEffectTypeSwitchWeapon:
-                P_PlayerSwitchWeapon(player, list->sub_.weap);
+                PlayerSwitchWeapon(player, list->sub_.weap);
                 break;
 
             case kPickupEffectTypeKeepPowerup:
@@ -1073,7 +1078,7 @@ void KillMapObject(MapObject *source, MapObject *target,
         target->flags_ &= ~kMapObjectFlagSolid;
         target->player_->player_state_ = kPlayerDead;
         target->player_->standard_view_height_ =
-            HMM_MIN(DEATHVIEWHEIGHT, target->height_ / 3);
+            HMM_MIN(kDeathViewHeight, target->height_ / 3);
         target->player_->actual_speed_ = 0;
 
         DropWeapon(target->player_);
@@ -1097,13 +1102,13 @@ void KillMapObject(MapObject *source, MapObject *target,
 
     if (weak_spot)
     {
-        state = P_MobjFindLabel(target, "WEAKDEATH");
+        state = MapObjectFindLabel(target, "WEAKDEATH");
         if (state == 0) overkill = true;
     }
 
     if (state == 0 && overkill && damtype && damtype->overkill_.label_ != "")
     {
-        state = P_MobjFindLabel(target, damtype->overkill_.label_.c_str());
+        state = MapObjectFindLabel(target, damtype->overkill_.label_.c_str());
         if (state != 0) state += damtype->overkill_.offset_;
     }
 
@@ -1112,7 +1117,7 @@ void KillMapObject(MapObject *source, MapObject *target,
 
     if (state == 0 && damtype && damtype->death_.label_ != "")
     {
-        state = P_MobjFindLabel(target, damtype->death_.label_.c_str());
+        state = MapObjectFindLabel(target, damtype->death_.label_.c_str());
         if (state != 0) state += damtype->death_.offset_;
     }
 
@@ -1128,22 +1133,22 @@ void KillMapObject(MapObject *source, MapObject *target,
         if (!nofog)
         {
             MapObject *fog =
-                P_MobjCreateObject(target->x, target->y, target->z,
+                CreateMapObject(target->x, target->y, target->z,
                                    mobjtypes.Lookup("TELEPORT_FLASH"));
             if (fog && fog->info_->chase_state_)
-                P_SetMobjStateDeferred(fog, fog->info_->chase_state_, 0);
+                MapObjectSetStateDeferred(fog, fog->info_->chase_state_, 0);
         }
     }
 
     if (target->hyper_flags_ & kHyperFlagDehackedCompatibility)
     {
-        P_SetMobjState(target, state);
+        MapObjectSetState(target, state);
         target->tics_ -= RandomByteDeterministic() & 3;
         if (target->tics_ < 1) target->tics_ = 1;
     }
     else
     {
-        P_SetMobjStateDeferred(target, state, RandomByteDeterministic() & 3);
+        MapObjectSetStateDeferred(target, state, RandomByteDeterministic() & 3);
     }
 
     // Drop stuff. This determines the kind of object spawned
@@ -1152,7 +1157,7 @@ void KillMapObject(MapObject *source, MapObject *target,
     if (item)
     {
         MapObject *mo =
-            P_MobjCreateObject(target->x, target->y, target->floor_z_, item);
+            CreateMapObject(target->x, target->y, target->floor_z_, item);
 
         // -ES- 1998/07/18 nullptr check to prevent crashing
         if (mo) mo->flags_ |= kMapObjectFlagDropped;
@@ -1615,17 +1620,17 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
 
         int state = 0;
 
-        if (weak_spot) state = P_MobjFindLabel(target, "WEAKPAIN");
+        if (weak_spot) state = MapObjectFindLabel(target, "WEAKPAIN");
 
         if (state == 0 && damtype && damtype->pain_.label_ != "")
         {
-            state = P_MobjFindLabel(target, damtype->pain_.label_.c_str());
+            state = MapObjectFindLabel(target, damtype->pain_.label_.c_str());
             if (state != 0) state += damtype->pain_.offset_;
         }
 
         if (state == 0) state = target->info_->pain_state_;
 
-        if (state != 0) P_SetMobjStateDeferred(target, state, 0);
+        if (state != 0) MapObjectSetStateDeferred(target, state, 0);
     }
 
     // we're awake now...
@@ -1643,12 +1648,12 @@ void DamageMapObject(MapObject *target, MapObject *inflictor, MapObject *source,
     {
         // if not intent on another player, chase after this one
         target->SetTarget(source);
-        target->threshold_ = BASETHRESHOLD;
+        target->threshold_ = kBaseThreshold;
 
         if (target->state_ == &states[target->info_->idle_state_] &&
             target->info_->chase_state_)
         {
-            P_SetMobjStateDeferred(target, target->info_->chase_state_, 0);
+            MapObjectSetStateDeferred(target, target->info_->chase_state_, 0);
         }
     }
 }

@@ -191,7 +191,7 @@ EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(r_overlay, "0",
 EDGE_DEFINE_CONSOLE_VARIABLE_CLAMPED(r_titlescaling, "0",
                                      kConsoleVariableFlagArchive, 0, 1)
 
-EDGE_DEFINE_CONSOLE_VARIABLE(g_aggression, "0", kConsoleVariableFlagArchive)
+EDGE_DEFINE_CONSOLE_VARIABLE(force_infighting, "0", kConsoleVariableFlagArchive)
 
 EDGE_DEFINE_CONSOLE_VARIABLE(ddf_strict, "0", kConsoleVariableFlagArchive)
 EDGE_DEFINE_CONSOLE_VARIABLE(ddf_lax, "0", kConsoleVariableFlagArchive)
@@ -415,7 +415,7 @@ static void SetGlobalVars(void)
     ArgumentCheckBooleanParameter("automap_keydoor_blink",
                                   &automap_keydoor_blink, false);
 
-    if (ArgumentFind("infight") > 0) g_aggression = 1;
+    if (ArgumentFind("infight") > 0) force_infighting = 1;
 
     if (ArgumentFind("dlights") > 0)
         use_dynamic_lights = 1;
@@ -2061,7 +2061,6 @@ static void E_Startup(void)
     MenuInitialize();
     RendererStartup();
     PlayerStateInit();
-    MapInitialize();
     InitializeSwitchList();
     InitializeAnimations();
     SoundInitialize();

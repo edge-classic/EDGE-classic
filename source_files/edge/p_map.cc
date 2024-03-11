@@ -121,7 +121,7 @@ float float_destination_z;
 // keep track of special lines as they are hit,
 // but don't process them until the move is proven valid
 
-linelist_c special_lines_hit;  // List of special lines that have been hit
+std::vector<Line *> special_lines_hit;  // List of special lines that have been hit
 
 struct ShootAttempt
 {
@@ -308,9 +308,9 @@ static bool CheckAbsoluteLineCallback(Line *ld, void *data)
     // does the thing fit in one of the line gaps ?
     for (int i = 0; i < ld->gap_number; i++)
     {
-        // -AJA- FIXME: this ONFLOORZ stuff is a DIRTY HACK!
-        if (AlmostEquals(move_check.z, ONFLOORZ) ||
-            AlmostEquals(move_check.z, ONCEILINGZ))
+        // -AJA- FIXME: this kOnFloorZ stuff is a DIRTY HACK!
+        if (AlmostEquals(move_check.z, kOnFloorZ) ||
+            AlmostEquals(move_check.z, kOnCeilingZ))
         {
             if (move_check.mover->height_ <= (ld->gaps[i].ceiling - ld->gaps[i].floor))
                 return true;
@@ -343,9 +343,9 @@ static bool CheckAbsoluteThingCallback(MapObject *thing, void *data)
         fabs(thing->y - move_check.y) >= blockdist)
         return true;  // no we missed this thing
 
-    // -AJA- FIXME: this ONFLOORZ stuff is a DIRTY HACK!
-    if (!AlmostEquals(move_check.z, ONFLOORZ) &&
-        !AlmostEquals(move_check.z, ONCEILINGZ))
+    // -AJA- FIXME: this kOnFloorZ stuff is a DIRTY HACK!
+    if (!AlmostEquals(move_check.z, kOnFloorZ) &&
+        !AlmostEquals(move_check.z, kOnCeilingZ))
     {
         // -KM- 1998/9/19 True 3d gameplay checks.
         if ((move_check.flags & kMapObjectFlagMissile) ||
@@ -381,7 +381,7 @@ static bool CheckAbsoluteThingCallback(MapObject *thing, void *data)
         // thing isn't shootable, return depending on if the thing is solid.
         if (!(thing->flags_ & kMapObjectFlagShootable)) return !solid;
 
-        if (P_MissileContact(move_check.mover, thing) < 0) return true;
+        if (MissileContact(move_check.mover, thing) < 0) return true;
 
         return (move_check.extended_flags & kExtendedFlagTunnel) ? true : false;
     }
@@ -950,7 +950,7 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
 
     if ((move_check.flags & kMapObjectFlagSkullFly) && solid)
     {
-        P_SlammedIntoObject(move_check.mover, thing);
+        SlammedIntoObject(move_check.mover, thing);
 
         // stop moving
         return false;
@@ -978,7 +978,7 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
         // thing isn't shootable, return depending on if the thing is solid.
         if (!(thing->flags_ & kMapObjectFlagShootable)) return !solid;
 
-        if (P_MissileContact(move_check.mover, thing) < 0) return true;
+        if (MissileContact(move_check.mover, thing) < 0) return true;
 
         return (move_check.extended_flags & kExtendedFlagTunnel) ? true : false;
     }
@@ -996,7 +996,7 @@ static bool CheckRelativeThingCallback(MapObject *thing, void *data)
         (move_check.flags & kMapObjectFlagSolid) &&
         !(thing->extended_flags_ & kExtendedFlagUsable))
     {
-        P_TouchyContact(thing, move_check.mover);
+        TouchyContact(thing, move_check.mover);
         return !solid;
     }
 
@@ -1435,7 +1435,7 @@ static bool PTR_SlideTraverse(PathIntercept *in, void *dataptr)
 //
 // -ACB- 1998/07/28 This is NO LONGER a kludgy mess; removed goto rubbish.
 //
-void P_SlideMove(MapObject *mo, float x, float y)
+void SlideMove(MapObject *mo, float x, float y)
 {
     slide_map_object = mo;
 
@@ -1751,7 +1751,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                 {
                     sx -= trace.delta_x * 6.0f / shoot_check.range;
                     sy -= trace.delta_y * 6.0f / shoot_check.range;
-                    P_SpawnPuff(sx, sy, z, shoot_check.puff,
+                    SpawnPuff(sx, sy, z, shoot_check.puff,
                                 shoot_check.angle + kBAMAngle180);
                 }
                 return false;
@@ -1772,7 +1772,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                         {
                             sx -= trace.delta_x * 6.0f / shoot_check.range;
                             sy -= trace.delta_y * 6.0f / shoot_check.range;
-                            P_SpawnPuff(sx, sy, z, shoot_check.puff,
+                            SpawnPuff(sx, sy, z, shoot_check.puff,
                                         shoot_check.angle + kBAMAngle180);
                         }
                         return false;
@@ -1787,7 +1787,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                             {{sy, z}}))
                     {
                         if (shoot_check.puff)
-                            P_SpawnPuff(sx, sy, z, shoot_check.puff,
+                            SpawnPuff(sx, sy, z, shoot_check.puff,
                                         shoot_check.angle + kBAMAngle180);
                         return false;
                     }
@@ -1829,7 +1829,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                 {
                     sx -= trace.delta_x * 6.0f / shoot_check.range;
                     sy -= trace.delta_y * 6.0f / shoot_check.range;
-                    P_SpawnPuff(sx, sy, z, shoot_check.puff,
+                    SpawnPuff(sx, sy, z, shoot_check.puff,
                                 shoot_check.angle + kBAMAngle180);
                 }
                 return false;
@@ -1850,7 +1850,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                         {
                             sx -= trace.delta_x * 6.0f / shoot_check.range;
                             sy -= trace.delta_y * 6.0f / shoot_check.range;
-                            P_SpawnPuff(sx, sy, z, shoot_check.puff,
+                            SpawnPuff(sx, sy, z, shoot_check.puff,
                                         shoot_check.angle + kBAMAngle180);
                         }
                         return false;
@@ -1865,7 +1865,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                             {{sy, z}}))
                     {
                         if (shoot_check.puff)
-                            P_SpawnPuff(sx, sy, z, shoot_check.puff,
+                            SpawnPuff(sx, sy, z, shoot_check.puff,
                                         shoot_check.angle + kBAMAngle180);
                         return false;
                     }
@@ -1906,7 +1906,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                                  ShootTraverseCallback))
                 {
                     if (shoot_check.puff)
-                        P_SpawnPuff(shoota.X, shoota.Y, shoota.Z,
+                        SpawnPuff(shoota.X, shoota.Y, shoota.Z,
                                     shoot_check.puff,
                                     shoot_check.angle + kBAMAngle180);
                     return false;
@@ -1931,7 +1931,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                                      ShootTraverseCallback))
                     {
                         if (shoot_check.puff)
-                            P_SpawnPuff(shoota.X, shoota.Y, shoota.Z,
+                            SpawnPuff(shoota.X, shoota.Y, shoota.Z,
                                         shoot_check.puff,
                                         shoot_check.angle + kBAMAngle180);
                         return false;
@@ -1963,7 +1963,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                                  ShootTraverseCallback))
                 {
                     if (shoot_check.puff)
-                        P_SpawnPuff(shoota.X, shoota.Y, shoota.Z,
+                        SpawnPuff(shoota.X, shoota.Y, shoota.Z,
                                     shoot_check.puff,
                                     shoot_check.angle + kBAMAngle180);
                     return false;
@@ -2031,7 +2031,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
                 angle += (BAMAngle)(RandomByteSkewToZeroDeterministic() *
                                     (int)(kBAMAngle1 / 2));
 
-                P_SpawnDebris(x, y, z, angle, current_flatdef->impactobject_);
+                SpawnDebris(x, y, z, angle, current_flatdef->impactobject_);
                 // don't go any farther
                 return false;
             }
@@ -2040,7 +2040,7 @@ static inline bool ShootCheckGap(float sx, float sy, float z, float floor_height
 
     // Spawn bullet puff
     if (shoot_check.puff)
-        P_SpawnPuff(x, y, z, shoot_check.puff,
+        SpawnPuff(x, y, z, shoot_check.puff,
                     shoot_check.angle + kBAMAngle180);
 
     // don't go any farther
@@ -2103,7 +2103,7 @@ bool ReplaceMidTexFromPart(Line *TheLine, ScrollingPart parts)
 //
 // Lobo:2021 Unblock and remove texture from our special debris linetype.
 //
-void P_UnblockLineEffectDebris(Line *TheLine, const LineType *special)
+void UnblockLineEffectDebris(Line *TheLine, const LineType *special)
 {
     if (!TheLine) { return; }
 
@@ -2291,7 +2291,7 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
 
         // Spawn bullet puffs.
         if (shoot_check.puff)
-            P_SpawnPuff(x, y, z, shoot_check.puff,
+            SpawnPuff(x, y, z, shoot_check.puff,
                         shoot_check.angle + kBAMAngle180);
 
         // Lobo:2022
@@ -2307,9 +2307,9 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
 
             if (info && tempspecial->type_ == kLineTriggerShootable)
             {
-                P_SpawnDebris(x, y, z, shoot_check.angle + kBAMAngle180, info);
+                SpawnDebris(x, y, z, shoot_check.angle + kBAMAngle180, info);
             }
-            P_UnblockLineEffectDebris(ld, tempspecial);
+            UnblockLineEffectDebris(ld, tempspecial);
         }
 
         // don't go any farther
@@ -2363,7 +2363,7 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
 
     if (mo->flags_ & kMapObjectFlagShootable)
     {
-        int what = P_BulletContact(shoot_check.source, mo, shoot_check.damage,
+        int what = BulletContact(shoot_check.source, mo, shoot_check.damage,
                                    shoot_check.damage_type, x, y, z);
 
         // bullets pass through?
@@ -2375,13 +2375,13 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
     if (use_blood)
     {
         if (mo->info_->blood_ != nullptr)
-            P_SpawnBlood(x, y, z, shoot_check.damage, shoot_check.angle,
+            SpawnBlood(x, y, z, shoot_check.damage, shoot_check.angle,
                          mo->info_->blood_);
     }
     else
     {
         if (shoot_check.puff)
-            P_SpawnPuff(x, y, z, shoot_check.puff,
+            SpawnPuff(x, y, z, shoot_check.puff,
                         shoot_check.angle + kBAMAngle180);
     }
 
@@ -2389,7 +2389,7 @@ static bool ShootTraverseCallback(PathIntercept *in, void *dataptr)
     return false;
 }
 
-MapObject *P_AimLineAttack(MapObject *t1, BAMAngle angle, float distance,
+MapObject *AimLineAttack(MapObject *t1, BAMAngle angle, float distance,
                            float *slope)
 {
     float x2 = t1->x + distance * epi::BAMCos(angle);
@@ -2429,7 +2429,7 @@ MapObject *P_AimLineAttack(MapObject *t1, BAMAngle angle, float distance,
     return aim_check.target;
 }
 
-void P_LineAttack(MapObject *t1, BAMAngle angle, float distance, float slope,
+void LineAttack(MapObject *t1, BAMAngle angle, float distance, float slope,
                   float damage, const DamageClass *damtype,
                   const MapObjectDefinition *puff)
 {
@@ -2466,7 +2466,7 @@ void P_LineAttack(MapObject *t1, BAMAngle angle, float distance, float slope,
 //
 // -AJA- 2005/02/07: Rewrote the DUMMYMOBJ stuff.
 //
-void P_TargetTheory(MapObject *source, MapObject *target, float *x, float *y,
+void TargetTheory(MapObject *source, MapObject *target, float *x, float *y,
                     float *z)
 {
     if (target)
@@ -2484,9 +2484,9 @@ void P_TargetTheory(MapObject *source, MapObject *target, float *x, float *y,
         else
             start_z = source->z + source->height_ / 2 + 8;
 
-        (*x) = source->x + MISSILERANGE * epi::BAMCos(source->angle_);
-        (*y) = source->y + MISSILERANGE * epi::BAMSin(source->angle_);
-        (*z) = start_z + MISSILERANGE * epi::BAMTan(source->vertical_angle_);
+        (*x) = source->x + kMissileRange * epi::BAMCos(source->angle_);
+        (*y) = source->y + kMissileRange * epi::BAMSin(source->angle_);
+        (*z) = start_z + kMissileRange * epi::BAMTan(source->vertical_angle_);
     }
 }
 
@@ -2612,7 +2612,7 @@ MapObject *DoMapTargetAutoAim(MapObject *source, BAMAngle angle, float distance,
     return aim_check.target;
 }
 
-MapObject *P_MapTargetAutoAim(MapObject *source, BAMAngle angle, float distance,
+MapObject *MapTargetAutoAim(MapObject *source, BAMAngle angle, float distance,
                               bool force_aim)
 {
     MapObject *target = DoMapTargetAutoAim(source, angle, distance, force_aim);
@@ -2653,7 +2653,7 @@ static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
             !mo->info_->touch_state_)
             return true;
 
-        if (!P_UseThing(use_thing, mo, use_lower, use_upper)) return true;
+        if (!UseThing(use_thing, mo, use_lower, use_upper)) return true;
 
         // don't go any farther (thing was usable)
         return false;
@@ -2682,7 +2682,7 @@ static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
         {
             // can't use through a wall
             StartSoundEffect(use_thing->info_->noway_sound_,
-                      P_MobjGetSfxCategory(use_thing), use_thing);
+                      GetSoundEffectCategory(use_thing), use_thing);
             return false;
         }
 
@@ -2713,7 +2713,7 @@ static bool PTR_UseTraverse(PathIntercept *in, void *dataptr)
 //
 // Looks for special lines in front of the player to activate.
 //
-void P_UseLines(Player *player)
+void UseLines(Player *player)
 {
     int   angle;
     float x1;
@@ -2729,8 +2729,8 @@ void P_UseLines(Player *player)
 
     x1 = player->map_object_->x;
     y1 = player->map_object_->y;
-    x2 = x1 + USERANGE * epi::BAMCos(angle);
-    y2 = y1 + USERANGE * epi::BAMSin(angle);
+    x2 = x1 + kUseRange * epi::BAMCos(angle);
+    y2 = y1 + kUseRange * epi::BAMSin(angle);
 
     PathTraverse(x1, y1, x2, y2, kPathAddLines | kPathAddThings,
                  PTR_UseTraverse);
@@ -2829,7 +2829,7 @@ static bool RadiusAttackCallback(MapObject *thing, void *data)
     SYS_ASSERT(radius_attack_check.range > 0);
     dist = (radius_attack_check.range - dist) / radius_attack_check.range;
 
-    if (P_CheckSight(radius_attack_check.spot, thing))
+    if (CheckSight(radius_attack_check.spot, thing))
     {
         if (radius_attack_check.thrust)
             ThrustMapObject(thing, radius_attack_check.spot,
@@ -2892,7 +2892,7 @@ static bool ChangeSectorCallback(MapObject *thing, bool widening)
     // dropped items get removed by a falling ceiling
     if (thing->flags_ & kMapObjectFlagDropped)
     {
-        P_RemoveMobj(thing);
+        RemoveMapObject(thing);
         return true;
     }
 
@@ -2905,7 +2905,7 @@ static bool ChangeSectorCallback(MapObject *thing, bool widening)
         {
             thing->extended_flags_ |= kExtendedFlagGibbed;
             // P_SetMobjStateDeferred(thing, thing->info->gib_state_, 0);
-            P_SetMobjState(thing, thing->info_->gib_state_);
+            MapObjectSetState(thing, thing->info_->gib_state_);
         }
 
         if (thing->player_)
@@ -2942,7 +2942,7 @@ static bool ChangeSectorCallback(MapObject *thing, bool widening)
         // spray blood in a random direction
         if (gore_level.d_ < 2)
         {
-            mo = P_MobjCreateObject(thing->x, thing->y, MapObjectMidZ(thing),
+            mo = CreateMapObject(thing->x, thing->y, MapObjectMidZ(thing),
                                     thing->info_->blood_);
 
             mo->momentum_.X = (float)(RandomByte() - 128) / 4.0f;
@@ -3242,7 +3242,7 @@ static bool CorpseCheckCallback(MapObject *thing, void *data)
         return true;  // not actually touching
 
     // -AJA- don't raise corpses blocked by extrafloors
-    if (!P_CheckSightApproxVert(raiser_try_object, thing)) return true;
+    if (!QuickVerticalSightCheck(raiser_try_object, thing)) return true;
 
     // -AJA- don't raise players unless on their side
     if (thing->player_ &&
@@ -3434,19 +3434,6 @@ bool MapCheckBlockingLine(MapObject *thing, MapObject *spawnthing)
     }
 
     return false;
-}
-
-//
-// MapInitialize
-//
-void MapInitialize(void)
-{
-    for (Line *s : special_lines_hit)
-    {
-        delete s;
-        s = nullptr;
-    }
-    special_lines_hit.clear();
 }
 
 //--- editor settings ---

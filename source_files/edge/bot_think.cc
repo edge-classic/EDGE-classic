@@ -390,7 +390,7 @@ bool DeathBot::IsEnemyVisible(MapObject *enemy)
     // require slope to not be excessive, e.g. caged imps in MAP13
     if (slope > 1.0f) return false;
 
-    return P_CheckSight(pl_->map_object_, enemy);
+    return CheckSight(pl_->map_object_, enemy);
 }
 
 void DeathBot::LookForEnemies(float radius)
@@ -830,7 +830,7 @@ void DeathBot::ThinkHelp()
 
     if (dist < check_dist && fabs(pl_->map_object_->z - pos.z) <= 24.0)
     {
-        cur_near = P_CheckSight(pl_->map_object_, leader);
+        cur_near = CheckSight(pl_->map_object_, leader);
     }
 
     if (near_leader_ != cur_near)
@@ -1125,7 +1125,7 @@ void DeathBot::ThinkOpenDoor()
 
             if (diff > kBAMAngle180) diff = kBAMAngle360 - diff;
 
-            if (diff < kBAMAngle5 && dist < (USERANGE - 16))
+            if (diff < kBAMAngle5 && dist < (kUseRange - 16))
             {
                 door_stage_ = kBotOpenDoorTaskUse;
                 door_time_  = kTicRate * 5;
@@ -1191,7 +1191,7 @@ void DeathBot::ThinkUseLift()
 
             if (diff > kBAMAngle180) diff = kBAMAngle360 - diff;
 
-            if (diff < kBAMAngle5 && dist < (USERANGE - 16))
+            if (diff < kBAMAngle5 && dist < (kUseRange - 16))
             {
                 lift_stage_ = kBotUseLiftTaskUse;
                 lift_time_  = kTicRate * 5;
